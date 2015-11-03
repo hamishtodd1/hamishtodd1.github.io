@@ -145,7 +145,7 @@ function init() {
 		texture_loader.load(
 			'adenovirus256.jpg', //"http://icons.iconarchive.com/icons/aha-soft/torrent/256/virus-icon.png", 
 			function(texture) {
-				console.log("yo");
+				console.log("hey");
 				
 				var backgroundtexture_material = new THREE.MeshBasicMaterial({
 					map: texture
@@ -159,12 +159,10 @@ function init() {
 						 texturewidth/2,-textureheight/2,texturedist,
 						-texturewidth/2,-textureheight/2,texturedist]);
 				var backgroundtexture_triangle_vertices = new Uint32Array([0,2,1, 0,3,2]);		
-//				backgroundtexture_geometry = new THREE.BufferGeometry();
-//				backgroundtexture_geometry.setIndex(new THREE.BufferAttribute( backgroundtexture_triangle_vertices, 1 ) );
-//				backgroundtexture_geometry.addAttribute( 'position', new THREE.BufferAttribute( backgroundtexture_vertices_numbers, 3 ) );
-				var backgroundtexture_geometry = new THREE.CubeGeometry( 10, 10, 10);
+				backgroundtexture_geometry = new THREE.BufferGeometry();
+				backgroundtexture_geometry.setIndex(new THREE.BufferAttribute( backgroundtexture_triangle_vertices, 1 ) );
+				backgroundtexture_geometry.addAttribute( 'position', new THREE.BufferAttribute( backgroundtexture_vertices_numbers, 3 ) );
 				backgroundtexture = new THREE.Mesh( backgroundtexture_geometry, backgroundtexture_material );
-				backgroundtexture.position.z = -10;
 				
 				if(MODE == CK_MODE)
 					scene.add(backgroundtexture);
