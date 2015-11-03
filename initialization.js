@@ -141,6 +141,11 @@ function init() {
 	
 	//-------------stuff that goes in the scene
 	{
+		var backgroundtexture_file = THREE.ImageUtils.loadTexture( 'adenovirus256.jpg', undefined, function ( tex1 ) {
+		    var i2 = THREE.ImageUtils.loadTexture('adenovirus256.jpg', undefined, function ( tex2 ) {});
+		});
+		console.log(backgroundtexture_file );
+		backgroundtexture_file.needsUpdate = true;
 		var backgroundtexture_material = new THREE.MeshBasicMaterial({
 			//map: backgroundtexture_file,
 //			color:0x000000,
@@ -159,8 +164,7 @@ function init() {
 		backgroundtexture_geometry.setIndex(new THREE.BufferAttribute( backgroundtexture_triangle_vertices, 1 ) );
 		backgroundtexture_geometry.addAttribute( 'position', new THREE.BufferAttribute( backgroundtexture_vertices_numbers, 3 ) );
 		backgroundtexture = new THREE.Mesh( backgroundtexture_geometry, backgroundtexture_material );
-		backgroundtexture.material.map.image.src = 'adenovirus256.jpg';
-		console.log("rueu")
+		console.log("fuasfd")
 		
 		var surfacematerial = new THREE.MeshBasicMaterial({
 			color: 0x00ffff,
