@@ -141,7 +141,8 @@ function init() {
 	
 	//-------------stuff that goes in the scene
 	{
-		var backgroundtexture_file = THREE.ImageUtils.loadTexture( "./adenovirus256.jpg" );
+		var backgroundtexture_file = THREE.ImageUtils.loadTexture( './adenovirus256.jpg' );
+		console.log(backgroundtexture_file );
 		backgroundtexture_file.needsUpdate = true;
 		var backgroundtexture_material = new THREE.MeshBasicMaterial({
 			map: backgroundtexture_file,
@@ -161,7 +162,7 @@ function init() {
 		backgroundtexture_geometry.setIndex(new THREE.BufferAttribute( backgroundtexture_triangle_vertices, 1 ) );
 		backgroundtexture_geometry.addAttribute( 'position', new THREE.BufferAttribute( backgroundtexture_vertices_numbers, 3 ) );
 		backgroundtexture = new THREE.Mesh( backgroundtexture_geometry, backgroundtexture_material );
-		console.log("asfdfdsa")
+		console.log("dfhdsa")
 		
 		var surfacematerial = new THREE.MeshBasicMaterial({
 			color: 0x00ffff,
