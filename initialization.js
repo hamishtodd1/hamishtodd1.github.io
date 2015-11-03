@@ -141,7 +141,7 @@ function init() {
 	
 	//-------------stuff that goes in the scene
 	{
-		var backgroundtexture_material = new THREE.MeshPhongMaterial({
+		var backgroundtexture_material = new THREE.MeshBasicMaterial({
 			map: THREE.ImageUtils.loadTexture( "adenovirus256.jpg" ),
 //			color:0x000000,
 //			side:	THREE.DoubleSide
@@ -160,7 +160,7 @@ function init() {
 		backgroundtexture_geometry.addAttribute( 'position', new THREE.BufferAttribute( backgroundtexture_vertices_numbers, 3 ) );
 		backgroundtexture = new THREE.Mesh( backgroundtexture_geometry, backgroundtexture_material );
 		backgroundtexture.needsUpdate = true;
-		console.log("woo")
+		console.log("waa")
 		
 		var surfacematerial = new THREE.MeshBasicMaterial({
 			color: 0x00ffff,
