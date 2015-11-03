@@ -142,7 +142,7 @@ function init() {
 	//-------------stuff that goes in the scene
 	{
 		var backgroundtexture_material = new THREE.MeshPhongMaterial({
-			map: THREE.ImageUtils.loadTexture( "adenovirus256.jpg" ),
+			map: THREE.ImageUtils.loadTexture( "adenovirus256.jpeg" ),
 //			color:0x000000,
 //			side:	THREE.DoubleSide
 		});
@@ -159,6 +159,7 @@ function init() {
 		backgroundtexture_geometry.setIndex(new THREE.BufferAttribute( backgroundtexture_triangle_vertices, 1 ) );
 		backgroundtexture_geometry.addAttribute( 'position', new THREE.BufferAttribute( backgroundtexture_vertices_numbers, 3 ) );
 		backgroundtexture = new THREE.Mesh( backgroundtexture_geometry, backgroundtexture_material );
+		backgroundtexture.needsUpdate = true;
 		
 		var surfacematerial = new THREE.MeshBasicMaterial({
 			color: 0x00ffff,
