@@ -158,8 +158,8 @@ function init() {
 				backgroundtexture = new THREE.Mesh( backgroundtexture_geometry, backgroundtexture_material );
 				backgroundtexture.position.z = -10;
 				
-				if(MODE == CK_MODE)
-					scene.add(backgroundtexture);
+//				if(MODE == CK_MODE)
+//					scene.add(backgroundtexture);
 				
 				console.log(texture);
 			},
