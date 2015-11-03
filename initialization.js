@@ -141,7 +141,7 @@ function init() {
 	
 	//-------------stuff that goes in the scene
 	{
-		var backgroundtexture_file = THREE.ImageUtils.loadTexture( "http://techroom.com.au/wp-content/uploads/2011/07/virus.png" );
+		var backgroundtexture_file = THREE.ImageUtils.loadTexture( 'http://techroom.com.au/wp-content/uploads/2011/07/virus.png' );
 		console.log(backgroundtexture_file );
 		backgroundtexture_file.needsUpdate = true;
 		var backgroundtexture_material = new THREE.MeshBasicMaterial({
