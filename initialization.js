@@ -142,9 +142,9 @@ function init() {
 	//-------------stuff that goes in the scene
 	{
 		var backgroundtexture_material = new THREE.MeshPhongMaterial({
-			map: THREE.ImageUtils.loadTexture( "data/beh.png" )
+			map: THREE.ImageUtils.loadTexture( "adenovirus256.jpg" )
 //			color:0x000000,
-//			side:	THREE.DoubleSide
+			side:	THREE.DoubleSide
 		});
 		var texturedist = -min_cameradist;
 		var texturewidth = playing_field_width;
