@@ -141,7 +141,7 @@ function init() {
 	
 	//-------------stuff that goes in the scene
 	{
-		var backgroundtexture_file = THREE.ImageUtils.loadTexture( 'http://techroom.com.au/wp-content/uploads/2011/07/virus.png' );
+		var backgroundtexture_file = THREE.ImageUtils.loadTexture( 'http://i.imgur.com/3tU4Vig.jpg' );
 		console.log(backgroundtexture_file );
 		backgroundtexture_file.needsUpdate = true;
 		var backgroundtexture_material = new THREE.MeshBasicMaterial({
@@ -162,7 +162,7 @@ function init() {
 		backgroundtexture_geometry.setIndex(new THREE.BufferAttribute( backgroundtexture_triangle_vertices, 1 ) );
 		backgroundtexture_geometry.addAttribute( 'position', new THREE.BufferAttribute( backgroundtexture_vertices_numbers, 3 ) );
 		backgroundtexture = new THREE.Mesh( backgroundtexture_geometry, backgroundtexture_material );
-		console.log("dfhdsa")
+		console.log("kfgghk")
 		
 		var surfacematerial = new THREE.MeshBasicMaterial({
 			color: 0x00ffff,
