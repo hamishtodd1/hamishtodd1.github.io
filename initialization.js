@@ -166,6 +166,8 @@ function init() {
 				
 				if(MODE == CK_MODE)
 					scene.add(backgroundtexture);
+				
+				console.log(texture);
 			},
 			function ( xhr ) {},
 			function ( xhr ) {
