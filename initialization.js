@@ -143,9 +143,8 @@ function init() {
 	
 	//-------------stuff that goes in the scene
 	{
-		backgroundtexture_file = THREE.ImageUtils.loadTexture( "adenovirus256.jpg" );
-		var backgroundtexture_material = new THREE.MeshBasicMaterial({
-			map: backgroundtexture_file
+		var backgroundtexture_material = new THREE.MeshPhongMaterial({
+			map: THREE.ImageUtils.loadTexture( "adenovirus256.jpg" )
 //			color:0x000000,
 //			side:	THREE.DoubleSide
 		});
