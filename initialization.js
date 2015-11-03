@@ -143,11 +143,11 @@ function init() {
 	
 	//-------------stuff that goes in the scene
 	{
-//		backgroundtexture_file = THREE.ImageUtils.loadTexture( "adenovirus256.jpg" );
+		backgroundtexture_file = THREE.ImageUtils.loadTexture( "adenovirus256.jpg" );
 		var backgroundtexture_material = new THREE.MeshBasicMaterial({
-			//map: backgroundtexture_file
-			color:0x000000,
-			side:	THREE.DoubleSide
+			map: backgroundtexture_file
+//			color:0x000000,
+//			side:	THREE.DoubleSide
 		});
 		var texturedist = -min_cameradist;
 		var texturewidth = playing_field_width;
@@ -157,7 +157,7 @@ function init() {
 				 texturewidth/2, textureheight/2,texturedist,
 				 texturewidth/2,-textureheight/2,texturedist,
 				-texturewidth/2,-textureheight/2,texturedist]);
-		var backgroundtexture_triangle_vertices = new Uint32Array([0,1,2, 0,2,3]);		
+		var backgroundtexture_triangle_vertices = new Uint32Array([0,2,1, 0,3,2]);		
 		backgroundtexture_geometry = new THREE.BufferGeometry();
 		backgroundtexture_geometry.setIndex(new THREE.BufferAttribute( backgroundtexture_triangle_vertices, 1 ) );
 		backgroundtexture_geometry.addAttribute( 'position', new THREE.BufferAttribute( backgroundtexture_vertices_numbers, 3 ) );
