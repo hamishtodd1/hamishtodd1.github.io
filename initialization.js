@@ -160,6 +160,7 @@ function init() {
 		backgroundtexture_geometry.addAttribute( 'position', new THREE.BufferAttribute( backgroundtexture_vertices_numbers, 3 ) );
 		backgroundtexture = new THREE.Mesh( backgroundtexture_geometry, backgroundtexture_material );
 		backgroundtexture.needsUpdate = true;
+		console.log("woo")
 		
 		var surfacematerial = new THREE.MeshBasicMaterial({
 			color: 0x00ffff,
