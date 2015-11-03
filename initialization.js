@@ -143,21 +143,23 @@ function init() {
 	
 	//-------------stuff that goes in the scene
 	{
-		backgroundtexture_file = THREE.ImageUtils.loadTexture( "adenovirus256.jpg" );
+//		backgroundtexture_file = THREE.ImageUtils.loadTexture( "adenovirus256.jpg" );
 		var backgroundtexture_material = new THREE.MeshBasicMaterial({
-			map: backgroundtexture_file
+			//map: backgroundtexture_file
+			color:0x000000,
+			side:	THREE.DoubleSide
 		});
 		var texturedist = -min_cameradist;
-		var texturewidth = playing_field_width * 2;
+		var texturewidth = playing_field_width;
 		var textureheight = texturewidth; //currently we have a square texture
 		var backgroundtexture_vertices_numbers = new Float32Array( [
 		        -texturewidth/2, textureheight/2,texturedist,
 				 texturewidth/2, textureheight/2,texturedist,
 				 texturewidth/2,-textureheight/2,texturedist,
 				-texturewidth/2,-textureheight/2,texturedist]);
-		var backgroundtexture_triangle_vertices = new Uint32Array([0,1,2,0, 0,2,3,0]);		
+		var backgroundtexture_triangle_vertices = new Uint32Array([0,1,2, 0,2,3]);		
 		backgroundtexture_geometry = new THREE.BufferGeometry();
-		backgroundtexture_geometry.addAttribute( 'index', new THREE.BufferAttribute( backgroundtexture_triangle_vertices, 1 ) );
+		backgroundtexture_geometry.setIndex(new THREE.BufferAttribute( backgroundtexture_triangle_vertices, 1 ) );
 		backgroundtexture_geometry.addAttribute( 'position', new THREE.BufferAttribute( backgroundtexture_vertices_numbers, 3 ) );
 		backgroundtexture = new THREE.Mesh( backgroundtexture_geometry, backgroundtexture_material );
 		
@@ -170,7 +172,7 @@ function init() {
 		surface_vertices = new THREE.BufferAttribute( surface_vertices_numbers, 3 ); //note the 3 means 3 numbers to a vector, not three vectors to a triangle
 		
 		surface_geometry = new THREE.BufferGeometry();
-		surface_geometry.addAttribute( 'index', new THREE.BufferAttribute( net_triangle_vertex_indices, 1 ) );
+		surface_geometry.setIndex(new THREE.BufferAttribute( net_triangle_vertex_indices, 1 ) );
 		surface_geometry.addAttribute( 'position', surface_vertices );
 
 		surface = new THREE.Mesh( surface_geometry, surfacematerial );
@@ -187,7 +189,7 @@ function init() {
 		
 		flatnet_geometry = new THREE.BufferGeometry();
 		flatnet_geometry.addAttribute( 'position', flatnet_vertices );
-		flatnet_geometry.addAttribute( 'index', new THREE.BufferAttribute( net_triangle_vertex_indices, 1 ) );
+		flatnet_geometry.setIndex(new THREE.BufferAttribute( net_triangle_vertex_indices, 1 ) );
 
 		flatnet = new THREE.Mesh( flatnet_geometry, surfacematerial );
 		
@@ -205,7 +207,7 @@ function init() {
 			put_tube_in_buffer(0,0,0,1,1,1, varyingsurface_edges_default_radius, cylinder_vertices_numbers);
 			
 			var varyingsurface_cylinders_geometry = new THREE.BufferGeometry();
-			varyingsurface_cylinders_geometry.addAttribute( 'index', new THREE.BufferAttribute( cylinder_triangle_indices, 1 ) );
+			varyingsurface_cylinders_geometry.setIndex(new THREE.BufferAttribute( cylinder_triangle_indices, 1 ) );
 			varyingsurface_cylinders_geometry.addAttribute( 'position', new THREE.BufferAttribute( cylinder_vertices_numbers, 3 ) );
 			
 			varyingsurface_cylinders[i] = new THREE.Mesh( varyingsurface_cylinders_geometry, varyingsurface_edgesmaterial );
@@ -291,7 +293,7 @@ function init() {
 			put_tube_in_buffer(0,0,0,1,1,1, surfperimeter_default_radius, cylinder_vertices_numbers);
 			
 			var surfperimeter_cylinders_geometry = new THREE.BufferGeometry();
-			surfperimeter_cylinders_geometry.addAttribute( 'index', new THREE.BufferAttribute( cylinder_triangle_indices, 1 ) );
+			surfperimeter_cylinders_geometry.setIndex(new THREE.BufferAttribute( cylinder_triangle_indices, 1 ) );
 			surfperimeter_cylinders_geometry.addAttribute( 'position', new THREE.BufferAttribute( cylinder_vertices_numbers, 3 ) );
 			
 			surfperimeter_cylinders[i] = new THREE.Mesh( surfperimeter_cylinders_geometry, surfperimeter_cylindersmaterial );
@@ -301,7 +303,7 @@ function init() {
 			put_tube_in_buffer(0,0,0,1,1,1, surfperimeter_default_radius, cylinder_vertices_numbers);
 			
 			var blast_cylinders_geometry = new THREE.BufferGeometry();
-			blast_cylinders_geometry.addAttribute( 'index', new THREE.BufferAttribute( cylinder_triangle_indices, 1 ) );
+			blast_cylinders_geometry.setIndex(new THREE.BufferAttribute( cylinder_triangle_indices, 1 ) );
 			blast_cylinders_geometry.addAttribute( 'position', new THREE.BufferAttribute( cylinder_vertices_numbers, 3 ) );
 			
 			blast_cylinders[i] = new THREE.Mesh( blast_cylinders_geometry, blastcylindersmaterial );
