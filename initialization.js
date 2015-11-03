@@ -113,7 +113,6 @@ function init() {
 		line_index_pairs[i*6 + 4] = net_triangle_vertex_indices[i*3 + 2];
 		line_index_pairs[i*6 + 5] = net_triangle_vertex_indices[i*3 + 0];
 	}
-	console.log(cylinder_triangle_indices.length/3);
 	for( var i = 0; i < cylinder_triangle_indices.length / 3 / 2; i++){
 		cylinder_triangle_indices[i*6+0] = (i*2);
 		cylinder_triangle_indices[i*6+1] = (i*2+2)%(cylinder_triangle_indices.length/3);
@@ -123,7 +122,6 @@ function init() {
 		cylinder_triangle_indices[i*6+4] = (i*2+3)%(cylinder_triangle_indices.length/3);
 		cylinder_triangle_indices[i*6+5] = (i*2+1);
 	}
-	console.log(cylinder_triangle_indices)
 	for( var i = 0; i < 2; i++){
 		//hopefully this is clockwise
 		prism_triangle_indices[i*6+0] = (i*2);
@@ -144,7 +142,7 @@ function init() {
 	//-------------stuff that goes in the scene
 	{
 		var backgroundtexture_material = new THREE.MeshPhongMaterial({
-			map: THREE.ImageUtils.loadTexture( "data/adenovirus256.jpg" )
+			map: THREE.ImageUtils.loadTexture( "data/beh.png" )
 //			color:0x000000,
 //			side:	THREE.DoubleSide
 		});
