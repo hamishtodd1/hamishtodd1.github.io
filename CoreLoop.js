@@ -75,7 +75,7 @@ function render() {
 	
 	//setTimeout( function() { requestAnimationFrame( render );}, 100 );
 	requestAnimationFrame( render );
-//	renderer.render( scene, camera );
+	renderer.render( scene, camera );
 }
 
 init();

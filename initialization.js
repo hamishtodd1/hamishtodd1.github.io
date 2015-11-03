@@ -141,26 +141,36 @@ function init() {
 	
 	//-------------stuff that goes in the scene
 	{
-		var backgroundtexture_file = THREE.TextureLoader( 'adenovirus256.jpg', {}, function() { console.log("yo");renderer.render(scene, camera);});
-		var backgroundtexture_material = new THREE.MeshBasicMaterial({
-			map: backgroundtexture_file,
-//			color:0x000000,
-			side:	THREE.DoubleSide
-		});
-		var texturedist = -min_cameradist;
-		var texturewidth = playing_field_width;
-		var textureheight = texturewidth; //currently we have a square texture
-		var backgroundtexture_vertices_numbers = new Float32Array( [
-		        -texturewidth/2, textureheight/2,texturedist,
-				 texturewidth/2, textureheight/2,texturedist,
-				 texturewidth/2,-textureheight/2,texturedist,
-				-texturewidth/2,-textureheight/2,texturedist]);
-		var backgroundtexture_triangle_vertices = new Uint32Array([0,2,1, 0,3,2]);		
-		backgroundtexture_geometry = new THREE.BufferGeometry();
-		backgroundtexture_geometry.setIndex(new THREE.BufferAttribute( backgroundtexture_triangle_vertices, 1 ) );
-		backgroundtexture_geometry.addAttribute( 'position', new THREE.BufferAttribute( backgroundtexture_vertices_numbers, 3 ) );
-		backgroundtexture = new THREE.Mesh( backgroundtexture_geometry, backgroundtexture_material );
-		console.log("weastwed")
+		var texture_loader = new THREE.TextureLoader();
+		texture_loader.load(
+			'adenovirus256.jpg', 
+			function(texture) {
+				console.log("yo");
+				
+				var backgroundtexture_material = new THREE.MeshBasicMaterial({
+					map: texture
+				});
+				var texturedist = -min_cameradist;
+				var texturewidth = playing_field_width;
+				var textureheight = texturewidth; //currently we have a square texture
+				var backgroundtexture_vertices_numbers = new Float32Array( [
+				        -texturewidth/2, textureheight/2,texturedist,
+						 texturewidth/2, textureheight/2,texturedist,
+						 texturewidth/2,-textureheight/2,texturedist,
+						-texturewidth/2,-textureheight/2,texturedist]);
+				var backgroundtexture_triangle_vertices = new Uint32Array([0,2,1, 0,3,2]);		
+				backgroundtexture_geometry = new THREE.BufferGeometry();
+				backgroundtexture_geometry.setIndex(new THREE.BufferAttribute( backgroundtexture_triangle_vertices, 1 ) );
+				backgroundtexture_geometry.addAttribute( 'position', new THREE.BufferAttribute( backgroundtexture_vertices_numbers, 3 ) );
+				backgroundtexture = new THREE.Mesh( backgroundtexture_geometry, backgroundtexture_material );
+				renderer.render(scene, camera);
+			},
+			function ( xhr ) {},
+			function ( xhr ) {
+				console.log( 'texture loading error' );
+			});
+		
+		console.log("yuastwed")
 		
 		var surfacematerial = new THREE.MeshBasicMaterial({
 			color: 0x00ffff,
