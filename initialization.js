@@ -143,7 +143,7 @@ function init() {
 	{
 		var texture_loader = new THREE.TextureLoader();
 		texture_loader.load(
-			'adenovirus256.jpg', 
+			"http://icons.iconarchive.com/icons/aha-soft/torrent/256/virus-icon.png", 
 			function(texture) {
 				console.log("yo");
 				
