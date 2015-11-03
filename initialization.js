@@ -157,7 +157,7 @@ function init() {
 				 texturewidth/2, textureheight/2,texturedist,
 				 texturewidth/2,-textureheight/2,texturedist,
 				-texturewidth/2,-textureheight/2,texturedist]);
-		var backgroundtexture_triangle_vertices = new Uint32Array([0,2,1, 0,3,2]);		
+		var backgroundtexture_triangle_vertices = new Uint32Array([0,2,1, 0,2,3]);		
 		backgroundtexture_geometry = new THREE.BufferGeometry();
 		backgroundtexture_geometry.setIndex(new THREE.BufferAttribute( backgroundtexture_triangle_vertices, 1 ) );
 		backgroundtexture_geometry.addAttribute( 'position', new THREE.BufferAttribute( backgroundtexture_vertices_numbers, 3 ) );
