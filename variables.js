@@ -73,6 +73,8 @@ var logged = 0;
 var ourclock = new THREE.Clock( true );
 var delta_t = 0;
 
+var textures_loaded = 0;
+
 //--------------Varying
 var vertex_tobechanged = 666;
 

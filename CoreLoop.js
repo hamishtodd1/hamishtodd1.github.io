@@ -96,7 +96,6 @@ function ChangeScene() {
 			break;
 			
 		case CK_MODE:
-			scene.add(backgroundtexture);
 			scene.add(surface);
 			scene.add(surflattice);
 			for( var i = 0; i < surfperimeter_cylinders.length; i++) {
