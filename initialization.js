@@ -144,7 +144,7 @@ function init() {
 		var backgroundtexture_file = THREE.ImageUtils.loadTexture( "adenovirus256.jpg" );
 		backgroundtexture_file.needsUpdate = true;
 		var backgroundtexture_material = new THREE.MeshBasicMaterial({
-			map: THREE.ImageUtils.loadTexture( "adenovirus256.jpg" ),
+			map: backgroundtexture_file,
 //			color:0x000000,
 			side:	THREE.DoubleSide
 		});
