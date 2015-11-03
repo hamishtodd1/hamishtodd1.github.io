@@ -31,7 +31,7 @@ var scene = new THREE.Scene();
 var renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize( window_width, window_height );
 renderer.setClearColor( 0xffffff, 1);
-//document.body.appendChild( renderer.domElement );
+document.body.appendChild( renderer.domElement );
 
 //----------------Static
 var FLATNET = 0;
