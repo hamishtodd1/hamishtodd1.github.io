@@ -141,6 +141,7 @@ function init() {
 	
 	//-------------stuff that goes in the scene
 	{
+		THREE.ImageUtils.crossOrigin = '';
 		var backgroundtexture_file = THREE.ImageUtils.loadTexture( 'http://i.imgur.com/3tU4Vig.jpg' );
 		console.log(backgroundtexture_file );
 		backgroundtexture_file.needsUpdate = true;
