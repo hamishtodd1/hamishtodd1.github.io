@@ -153,16 +153,10 @@ function init() {
 				var texturedist = -min_cameradist;
 				var texturewidth = playing_field_width;
 				var textureheight = texturewidth; //currently we have a square texture
-				var backgroundtexture_vertices_numbers = new Float32Array( [
-				        -texturewidth/2, textureheight/2,texturedist,
-						 texturewidth/2, textureheight/2,texturedist,
-						 texturewidth/2,-textureheight/2,texturedist,
-						-texturewidth/2,-textureheight/2,texturedist]);
-				var backgroundtexture_triangle_vertices = new Uint32Array([0,2,1, 0,3,2]);		
-				backgroundtexture_geometry = new THREE.BufferGeometry();
-				backgroundtexture_geometry.setIndex(new THREE.BufferAttribute( backgroundtexture_triangle_vertices, 1 ) );
-				backgroundtexture_geometry.addAttribute( 'position', new THREE.BufferAttribute( backgroundtexture_vertices_numbers, 3 ) );
+	
+				backgroundtexture_geometry = new THREE.CubeGeometry( texturewidth, textureheight, 0);
 				backgroundtexture = new THREE.Mesh( backgroundtexture_geometry, backgroundtexture_material );
+				backgroundtexture.position.z = -10;
 				
 				if(MODE == CK_MODE)
 					scene.add(backgroundtexture);
@@ -173,8 +167,6 @@ function init() {
 			function ( xhr ) {
 				console.log( 'texture loading error' );
 			});
-		
-		console.log("yuastwed")
 		
 		var surfacematerial = new THREE.MeshBasicMaterial({
 			color: 0x00ffff,
