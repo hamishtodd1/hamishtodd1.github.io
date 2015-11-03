@@ -144,7 +144,7 @@ function init() {
 		var backgroundtexture_material = new THREE.MeshBasicMaterial({
 			map: THREE.ImageUtils.loadTexture( "adenovirus256.jpg" ),
 //			color:0x000000,
-//			side:	THREE.DoubleSide
+			side:	THREE.DoubleSide
 		});
 		var texturedist = -min_cameradist;
 		var texturewidth = playing_field_width;
