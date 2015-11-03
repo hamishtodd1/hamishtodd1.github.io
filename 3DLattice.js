@@ -9,6 +9,8 @@
  * Remove the lines and faces from the sides of the shapes that you can't see. This is trivial, just need a separate material
  * The most worthwhile deletions would be what you can't see when the stars are in
  * 
+ * changing transparency doesn't seem to help, so no tricks to be done with the final fadeout
+ * 
  * the random walk: forces are ionic and hydrogen bonds vs electrostatics
  */
 
@@ -78,15 +80,25 @@ function update_3DLattice() {
 		 * Ahh fuck it, you don't need this. Certainly not for a while
 		 */
 		
-		
-		for(var i = 0; i < golden_rhombohedra.length; i++)
+		var new_QC_atom_index = 0;
+		for(var i = 0; i < golden_rhombohedra.length; i++) {
 			for(var j = 0; j<golden_rhombohedra[i].geometry.attributes.position.length/3; j++){
-				QC_atoms[i* (golden_rhombohedra[i].geometry.attributes.position.length/3)+j].position.set(
+				QC_atoms[new_QC_atom_index].position.set(
 						golden_rhombohedra[i].geometry.attributes.position.array[j*3+0],
 						golden_rhombohedra[i].geometry.attributes.position.array[j*3+1],
 						golden_rhombohedra[i].geometry.attributes.position.array[j*3+2]);
-				golden_rhombohedra[i].localToWorld(QC_atoms[i* (golden_rhombohedra[i].geometry.attributes.position.length/3)+j].position);
+				golden_rhombohedra[i].localToWorld(QC_atoms[new_QC_atom_index].position);
+				
+				new_QC_atom_index++;
+				for(var k = 0; k < new_QC_atom_index-1; k++){
+					if(QC_atoms[new_QC_atom_index-1].position.distanceTo(QC_atoms[k].position) < 0.5 ){ //if there's one anywhere near you, we want to overwrite you.
+						new_QC_atom_index--;
+						break;
+					}		
+				}
 			}
+		}
+		console.log(new_QC_atom_index);
 		for(var i = 0; i < goldenicos.length; i++)
 			quasiatoms[1][i].position.copy(goldenicos[i].position);
 		for(var i = 0; i < golden_triacontahedra.length; i++)
@@ -582,7 +594,6 @@ function init_cubicLattice_stuff() {
 	   		orient_piece(virtual_icosahedron_vertices[i], icosahedron_edge, goldenicos[i]);
 	   	}
 	   	
-	   	//same position as the golden stars
 	   	ico_stars[0] = new THREE.Object3D();
 		var ico_star_edgesmaterial = shapes_edgesmaterial.clone();
 		for(var j = 0; j < goldenicos.length; j++) {

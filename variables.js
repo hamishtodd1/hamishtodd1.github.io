@@ -13,7 +13,7 @@ var CUBIC_LATTICE_MODE = 3;
 var QC_SPHERE_MODE = 4;
 var IRREGULAR_MODE = 5; //so we're going to have a button below the thing
 	
-var MODE = 3;
+var MODE = 2;
 
 //--------------Technologically fundamental
 var playing_field_width = 7*HS3;
