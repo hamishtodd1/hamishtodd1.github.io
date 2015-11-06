@@ -6,11 +6,11 @@ function UpdateCamera() {
 //		cameradist -= 0.08;
 
 	if(MODE == CUBIC_LATTICE_MODE){
-		camera.position.setLength(min_cameradist * 4.5);
+		camera.position.z = min_cameradist * 4.5;
 		camera.updateProjectionMatrix();
 	}
 	else{
-		camera.z = min_cameradist;
+		camera.position.z = min_cameradist;
 		camera.updateProjectionMatrix();
 	}
 	

@@ -8,6 +8,45 @@ function point_to_the_right_of_line_vecs(ourpoint, line_top, line_bottom) {
 		return true;
 }
 
+function difference_between_angles(angle1, angle2){
+	//this would be worthwhile
+}
+
+function vec2_crossprod(a,b){
+	return a.x*b.y-a.y*b.x;
+}
+
+function line_line_intersection(startpointA,startpointB,endpointA,endpointB){
+	var lineA = endpointA.clone();
+	lineA.sub(startpointA);
+	var lineB = endpointB.clone();
+	lineB.sub(startpointB);
+	return line_line_intersection_vecs(startpointA,startpointB,lineA,lineB);
+}
+function line_line_intersection_vecs(p,q,r,s) {
+	var r_cross_s = vec2_crossprod(r,s);
+	if(r_cross_s === 0)
+		return 0;
+	
+	var r_over_r_cross_s = r.clone();
+	r_over_r_cross_s.multiplyScalar(1/r_cross_s);
+	var s_over_r_cross_s = s.clone();
+	s_over_r_cross_s.multiplyScalar(1/r_cross_s);
+	
+	var p_to_q = q.clone();
+	p_to_q.sub(p);
+	
+	var u = vec2_crossprod(p_to_q,r_over_r_cross_s);
+	var t = vec2_crossprod(p_to_q,s_over_r_cross_s);
+	
+	if( 0 < u && u < 1 && 0 < t && t < 1 ){
+		var answer = p.clone();
+		answer.addScaledVector(r, t);
+		return answer;
+	}
+	else return 0;
+}
+
 function deduce_most_of_surface(openness, vertices_numbers) {
 	for( var i = 3; i < 22; i++) {
 		var theta = minimum_angles[i] + openness * (TAU/2 - minimum_angles[i]);

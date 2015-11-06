@@ -141,32 +141,32 @@ function init() {
 	
 	//-------------stuff that goes in the scene
 	{
-		var texture_loader = new THREE.TextureLoader();
-		texture_loader.load(
-			'adenovirus256.jpg', //"http://icons.iconarchive.com/icons/aha-soft/torrent/256/virus-icon.png", 
-			function(texture) {
-				console.log("hey");
-				
-				var backgroundtexture_material = new THREE.MeshBasicMaterial({
-					map: texture
-				});
-				var texturedist = -min_cameradist;
-				var texturewidth = playing_field_width;
-				var textureheight = texturewidth; //currently we have a square texture
-	
-				backgroundtexture_geometry = new THREE.CubeGeometry( texturewidth, textureheight, 0);
-				backgroundtexture = new THREE.Mesh( backgroundtexture_geometry, backgroundtexture_material );
-				backgroundtexture.position.z = -10;
-				
-//				if(MODE == CK_MODE)
-//					scene.add(backgroundtexture);
-				
-				console.log(texture);
-			},
-			function ( xhr ) {},
-			function ( xhr ) {
-				console.log( 'texture loading error' );
-			});
+//		var texture_loader = new THREE.TextureLoader();
+//		texture_loader.load(
+//				'adenovirus256.jpg', //"http://icons.iconarchive.com/icons/aha-soft/torrent/256/virus-icon.png", 
+//				function(texture) {
+//					console.log("hey");
+//					
+//					var backgroundtexture_material = new THREE.MeshBasicMaterial({
+//						map: texture
+//					});
+//					var texturedist = -min_cameradist;
+//					var texturewidth = playing_field_width;
+//					var textureheight = texturewidth; //currently we have a square texture
+//		
+//					backgroundtexture_geometry = new THREE.CubeGeometry( texturewidth, textureheight, 0);
+//					backgroundtexture = new THREE.Mesh( backgroundtexture_geometry, backgroundtexture_material );
+//					backgroundtexture.position.z = -10;
+//					
+//					if(MODE == CK_MODE)
+//						scene.add(backgroundtexture);
+//					
+//					console.log(texture);
+//				},
+//				function ( xhr ) {},
+//				function ( xhr ) {
+//					console.log( 'texture loading error' );
+//				});
 		
 		var surfacematerial = new THREE.MeshBasicMaterial({
 			color: 0x00ffff,
@@ -326,9 +326,36 @@ function init() {
 		circle = new THREE.Mesh( new THREE.CircleGeometry( radius ), material3 );
 		circle.position.z = 0.1;
 		
+		var forwardbutton_geometry = new THREE.Geometry();
+		forwardbutton_geometry.vertices.push(
+				new THREE.Vector3( -0.2, 0.2, 0 ),
+				new THREE.Vector3( 0.2,  0, 0 ),
+				new THREE.Vector3( -0.2, -0.2, 0 )
+			);
+		forwardbutton_geometry.faces.push( new THREE.Face3( 0, 2, 1 ) );
+		forwardbutton = new THREE.Mesh( forwardbutton_geometry, new THREE.MeshBasicMaterial({color: 0x0000ff}) );
+		forwardbutton.position.x += 2.8;
+		forwardbutton.position.y -= 2.8;
+		var backwardbutton_geometry = new THREE.Geometry();
+		backwardbutton_geometry.vertices.push(
+				new THREE.Vector3( 0.2, 0.2, 0 ),
+				new THREE.Vector3( 0.2, -0.2, 0 ),
+				new THREE.Vector3( -0.2,  0, 0 )
+			);
+		backwardbutton_geometry.faces.push( new THREE.Face3( 0, 2, 1 ) );
+		backwardbutton = new THREE.Mesh( backwardbutton_geometry, new THREE.MeshBasicMaterial({color: 0x0000ff}) );
+		backwardbutton.position.x -= 2.8;
+		backwardbutton.position.y -= 2.8;
+		
 		Button = new THREE.Mesh( new THREE.CircleGeometry( 0.3 ), new THREE.MeshBasicMaterial({color: 0x00ff00}) );
 		Button.position.x += 1.5;
 		Button.position.y -= 1.5;
+		
+		var indicatorblobmaterial = new THREE.MeshBasicMaterial({color: 0xf0f00f});
+		for( var i = 0; i<indicatorblobs.length; i++){
+			indicatorblobs[i] = new THREE.Mesh(new THREE.SphereGeometry(0.2,8,4), indicatorblobmaterial );
+			indicatorblobs[i].position.set(100,100,100);
+		}
 	}
 	
 	CK_deduce_surface(capsidopenness, surface_vertices);
@@ -638,5 +665,5 @@ function init() {
 	ourclock.getDelta();
 	
 	//must be kept at bottom
-	ChangeScene();
+	ChangeScene(MODE);
 }

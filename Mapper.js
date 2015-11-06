@@ -1,8 +1,5 @@
-/* Ok so you should probably actually be scaling and rotating the net and the lattice stays in place.
- * The lattice maybe stays where it is all the time.
- * No protein gets cut up, they merely overlap?
+/* No protein gets cut up, they merely overlap?
  * And you should have the translational net for the irreg
- * 
  */ 
 
 function Update_net_variables() {

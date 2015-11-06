@@ -1,6 +1,4 @@
 /*
- * What we're planning is 20 rhomohedra, then 12 icosahedra, then 20 triacontahedra,
- * then 20*12=240 rhombohedra. Maybe just get them in as hexecontahedra
  * Then 5x12=60 icosahedra, then (sigh, violation) 20 triacontahedra AND 12 icosahedra. Then perhaps 20*30 = 360 rhombohedra
  * 
  * So maybe things should scale a little, or indeed indefinitely
@@ -33,6 +31,42 @@ function sphere_array_rotate(shape_array, MovementAxis,movementangle,quaternion)
 	for(var i = 0; i < shape_array.length; i++){		
 		shape_array[i].position.applyQuaternion(quaternion);
 	}	
+}
+
+function attempt_quasiatom_addition_and_return_next_index(ourposition, lowest_unused_index ){
+	QC_atoms.geometry.attributes.position.setXYZ(lowest_unused_index, ourposition.x, ourposition.y, ourposition.z);
+	
+	for(var k = 0; k < lowest_unused_index; k++){
+		var separationX = QC_atoms.geometry.attributes.position.array[k*3+0] - ourposition.x;
+		var separationY = QC_atoms.geometry.attributes.position.array[k*3+1] - ourposition.y;
+		var separationZ = QC_atoms.geometry.attributes.position.array[k*3+2] - ourposition.z;
+		
+		if(separationX*separationX+separationY*separationY+separationZ*separationZ < 0.5 ){ //if there's one anywhere near you, we want to overwrite you.
+			return lowest_unused_index;
+		}		
+	}
+	
+	var wavelength = ourposition.lengthSq();
+	wavelength /= 10.9; //apparently as large as we get
+	wavelength *= (781-380);
+	wavelength += 380;
+	if((wavelength >= 380) && (wavelength<440)){
+        QC_atoms.geometry.attributes.color.setXYZ(lowest_unused_index,	-(wavelength - 440) / (440 - 380),	0,	1);
+    }else if((wavelength >= 440) && (wavelength<490)){
+        QC_atoms.geometry.attributes.color.setXYZ(lowest_unused_index,	0,	(wavelength - 440) / (490 - 440),	1);
+    }else if((wavelength >= 490) && (wavelength<510)){
+        QC_atoms.geometry.attributes.color.setXYZ(lowest_unused_index,	0,	1,	-(wavelength - 510) / (510 - 490));
+    }else if((wavelength >= 510) && (wavelength<580)){
+        QC_atoms.geometry.attributes.color.setXYZ(lowest_unused_index,	(wavelength - 510) / (580 - 510),	1,	0);
+    }else if((wavelength >= 580) && (wavelength<645)){
+        QC_atoms.geometry.attributes.color.setXYZ(lowest_unused_index,	1,	-(wavelength - 645) / (645 - 580),	0);
+    }else if((wavelength >= 645) && (wavelength<781)){
+    	QC_atoms.geometry.attributes.color.setXYZ(lowest_unused_index,	1,	0,	0);
+    }else{
+    	QC_atoms.geometry.attributes.color.setXYZ(lowest_unused_index,	0,	0,	0);
+    };
+		
+	return lowest_unused_index + 1; //quasiatom successfully installed!
 }
 
 function update_3DLattice() {
@@ -80,47 +114,49 @@ function update_3DLattice() {
 		 * Ahh fuck it, you don't need this. Certainly not for a while
 		 */
 		
-		var new_QC_atom_index = 0;
+		var lowest_unused_index = 0;
 		for(var i = 0; i < golden_rhombohedra.length; i++) {
 			for(var j = 0; j<golden_rhombohedra[i].geometry.attributes.position.length/3; j++){
-				QC_atoms[new_QC_atom_index].position.set(
+				var new_position = new THREE.Vector3(
 						golden_rhombohedra[i].geometry.attributes.position.array[j*3+0],
 						golden_rhombohedra[i].geometry.attributes.position.array[j*3+1],
 						golden_rhombohedra[i].geometry.attributes.position.array[j*3+2]);
-				golden_rhombohedra[i].localToWorld(QC_atoms[new_QC_atom_index].position);
+				golden_rhombohedra[i].localToWorld(new_position);
 				
-				new_QC_atom_index++;
-				for(var k = 0; k < new_QC_atom_index-1; k++){
-					if(QC_atoms[new_QC_atom_index-1].position.distanceTo(QC_atoms[k].position) < 0.5 ){ //if there's one anywhere near you, we want to overwrite you.
-						new_QC_atom_index--;
-						break;
-					}		
-				}
+				lowest_unused_index = attempt_quasiatom_addition_and_return_next_index(new_position, lowest_unused_index );
 			}
 		}
-		console.log(new_QC_atom_index);
-		for(var i = 0; i < goldenicos.length; i++)
-			quasiatoms[1][i].position.copy(goldenicos[i].position);
-		for(var i = 0; i < golden_triacontahedra.length; i++)
-			quasiatoms[2][i].position.copy(golden_triacontahedra[i].position);
-		for(var i = 0; i < golden_stars.length; i++)
-			quasiatoms[3][i].position.copy(golden_stars[i].position);
-		
-//		for(var i = 0; i<quasiatoms.length; i++)
-//			for(var j = 0; j < quasiatoms[i].length; j++)
-//				scene.add(quasiatoms[i][j]);
-		for(var i = 0; i<QC_atoms.length; i++)
-			scene.add(QC_atoms[i]);
+		for(var i = 0; i < goldenicos.length; i++) {
+			for(var j = 0; j<goldenicos[i].geometry.attributes.position.length/3; j++){
+				var new_position = new THREE.Vector3(
+						goldenicos[i].geometry.attributes.position.array[j*3+0],
+						goldenicos[i].geometry.attributes.position.array[j*3+1],
+						goldenicos[i].geometry.attributes.position.array[j*3+2]);
+				goldenicos[i].localToWorld(new_position);
+				
+				lowest_unused_index = attempt_quasiatom_addition_and_return_next_index(new_position, lowest_unused_index );
+			}
+		}
+//		for(var i = 0; i < golden_triacontahedra.length; i++) {
+//			for(var j = 0; j<golden_triacontahedra[i].geometry.attributes.position.length/3; j++){
+//				var new_position = new THREE.Vector3(
+//						golden_triacontahedra[i].geometry.attributes.position.array[j*3+0],
+//						golden_triacontahedra[i].geometry.attributes.position.array[j*3+1],
+//						golden_triacontahedra[i].geometry.attributes.position.array[j*3+2]);
+//				golden_triacontahedra[i].localToWorld(new_position);
+//				
+//				lowest_unused_index = attempt_quasiatom_addition_and_return_next_index(new_position, lowest_unused_index );
+//			}
+//		}
+		scene.add(QC_atoms);
 	}
 	if(animation_progress < allshape_fadeout_start_time && previous_animation_progress >= allshape_fadeout_start_time){
 		for(var i = 0; i<quasiatoms.length; i++)
 			for(var j = 0; j < quasiatoms[i].length; j++)
 				scene.remove(quasiatoms[i][j]);
 		
-		for(var i = 0; i<QC_atoms.length; i++)
-			scene.remove(QC_atoms[i]);
+		scene.remove(QC_atoms);
 	}
-	logged = 1
 	
 	var shape_accel = 160;
 	
@@ -158,12 +194,13 @@ function update_3DLattice() {
 		rotate_every_shape_in_array(golden_stars, MovementAxis, MovementAngle,extraquaternion);
 		rotate_every_shape_in_array(ico_stars, MovementAxis, MovementAngle,extraquaternion);
 		
-		sphere_array_rotate(quasiatoms[0], MovementAxis, MovementAngle,extraquaternion);
-		sphere_array_rotate(quasiatoms[1], MovementAxis, MovementAngle,extraquaternion);
-		sphere_array_rotate(quasiatoms[2], MovementAxis, MovementAngle,extraquaternion);
-		sphere_array_rotate(quasiatoms[3], MovementAxis, MovementAngle,extraquaternion);
-		
-		sphere_array_rotate(QC_atoms, MovementAxis, MovementAngle,extraquaternion);
+		var atoms_axis = MovementAxis.clone();
+		QC_atoms.updateMatrixWorld();
+		QC_atoms.worldToLocal(atoms_axis);
+		atoms_axis.normalize();
+		var atoms_quaternion = new THREE.Quaternion();
+		atoms_quaternion.setFromAxisAngle( atoms_axis, MovementAngle );
+		QC_atoms.quaternion.multiply(atoms_quaternion);
 	}
 }
 
@@ -231,8 +268,12 @@ function init_cubicLattice_stuff() {
 	for(var i = 0; i < quasiatoms[3].length; i++)
 		quasiatoms[3][i] = new THREE.Mesh( (new THREE.BufferGeometry).fromGeometry(new THREE.SphereGeometry(quasiatom_radius,8,4)),new THREE.MeshBasicMaterial({color: 0xD56252}));
 	
-	for(var i = 0; i < QC_atoms.length; i++)
-		QC_atoms[i] = new THREE.Mesh( (new THREE.BufferGeometry).fromGeometry(new THREE.SphereGeometry(quasiatom_radius,8,4)),new THREE.MeshBasicMaterial({color: 0xD56252}));
+	var number_of_QC_atoms = 177;
+	var QC_atoms_geometry = new THREE.BufferGeometry();
+	QC_atoms_geometry.addAttribute( 'position', new THREE.BufferAttribute(new Float32Array(number_of_QC_atoms * 3), 3) );
+	QC_atoms_geometry.addAttribute( 'color', new THREE.BufferAttribute(new Float32Array(number_of_QC_atoms * 3), 3) );
+	QC_atoms = new THREE.Points( QC_atoms_geometry,new THREE.PointCloudMaterial({size: 0.4,vertexColors: THREE.VertexColors}));
+	QC_atoms.scale.set(2,2,2);
 	
 	var virtual_dodecahedron_vertices = Array(20);
 	virtual_dodecahedron_vertices[0] = new THREE.Vector3(1,-1,1);
