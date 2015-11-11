@@ -80,7 +80,7 @@ picture_properties[27] = {};picture_properties[27].x = 0; 				picture_properties
 picture_properties[28] = {};picture_properties[28].x = one_third_out;	picture_properties[28].y = 0; 					picture_properties[28].YtoX = 1;	picture_properties[28].widt=1.5*boxwidth;picture_properties[28].name = "slides/crystal.png";
 picture_properties[29] = {};picture_properties[29].x = -one_third_out;	picture_properties[29].y = 0; 					picture_properties[29].YtoX = 1;	picture_properties[29].widt = boxwidth;	picture_properties[29].name = "slides/pariacoto.png";
 
-picture_properties[30] = {};picture_properties[30].x = -3.76; 			picture_properties[30].y = 2.76;					picture_properties[30].YtoX = 0.5;	picture_properties[30].widt =boxwidth/2;picture_properties[30].name = "slides/logo.png";
+picture_properties[30] = {};picture_properties[30].x = -3.76; 			picture_properties[30].y = 2.76;				picture_properties[30].YtoX = 0.5;	picture_properties[30].widt =boxwidth/2;picture_properties[30].name = "slides/logo.png";
 picture_properties[31] = {};picture_properties[31].x = 0; 				picture_properties[31].y = 0.3;					picture_properties[31].YtoX = 0.5;	picture_properties[31].widt = 11.1;		picture_properties[31].name = "slides/Opening slide.png";
 
 //--------------Technologically fundamental

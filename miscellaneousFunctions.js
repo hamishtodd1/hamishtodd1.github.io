@@ -16,10 +16,14 @@ function loadpic(i) {
 	texture_loader.load(
 		picture_properties[i].name, //they need to be powers of 2!
 		function(texture) {
-			picture_objects[i] = new THREE.Mesh(new THREE.CubeGeometry( picture_properties[i].widt, picture_properties[i].widt * picture_properties[i].YtoX, 0), 
+			var hackmultiplier = 1;
+			if(i==26||i==27||i==28||i==29)
+				hackmultiplier = 4.5;
+				
+			picture_objects[i] = new THREE.Mesh(new THREE.CubeGeometry( hackmultiplier * picture_properties[i].widt, hackmultiplier * picture_properties[i].widt * picture_properties[i].YtoX, 0), 
 					 							new THREE.MeshBasicMaterial({map: texture}) );
-			picture_objects[i].position.x = picture_properties[i].x - 1.66; //increase or decrease this to center pic 1
-			picture_objects[i].position.y = picture_properties[i].y;
+			picture_objects[i].position.x = hackmultiplier * (picture_properties[i].x - 1.66); //increase or decrease this to center pic 1
+			picture_objects[i].position.y = hackmultiplier * picture_properties[i].y;
 			console.log(i);
 
 			if(i < picture_properties.length-1 )
