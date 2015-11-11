@@ -146,11 +146,12 @@ function init() {
 			texture_loader.load(
 				"slides/14 - Copy (" + i + ").png", //they need to be powers of 2!
 				function(texture,i) {
-					picture_objects[i] = new THREE.Mesh( new THREE.CubeGeometry( playing_field_width / 2, playing_field_width / 4, 0), 
+					picture_objects[lowest_unused_slideindex ] = new THREE.Mesh( new THREE.CubeGeometry( playing_field_width / 2, playing_field_width / 4, 0), 
 														 new THREE.MeshBasicMaterial({map: texture}) );
-					console.log(i);
-					scene.add(picture_objects[i]);
-					picture_objects[i].position.x = -2.5+i*0.2;
+					console.log(lowest_unused_slideindex );
+					scene.add(picture_objects[lowest_unused_slideindex ]);
+					picture_objects[lowest_unused_slideindex ].position.x = -2.5+lowest_unused_slideindex *0.2;
+					lowest_unused_slideindex++;
 				},
 				function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );});
 		}
