@@ -43,7 +43,7 @@ var picture_objects = Array(num_pictures);
 var picture_properties = Array(num_pictures);
 var one_third_out = 2.63;
 var vertical_separation = one_third_out / 1.84;
-var OQO = 5; //one quarter out
+var OQO = 2.87; //one quarter out
 var boxwidth = 2.4;
 picture_properties[0] = {};	picture_properties[0].x = one_third_out; 	picture_properties[0].y = vertical_separation; 	picture_properties[0].YtoX = 1;		picture_properties[0].widt = boxwidth;	picture_properties[0].name = "slides/STMV.png";
 picture_properties[1] = {};	picture_properties[1].x = 0; 				picture_properties[1].y = vertical_separation; 	picture_properties[1].YtoX = 1;		picture_properties[1].widt = boxwidth;	picture_properties[1].name = "slides/caulio.png";
