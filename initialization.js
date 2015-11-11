@@ -142,7 +142,6 @@ function init() {
 	//-------------stuff that goes in the scene
 	{
 		var texture_loader = new THREE.TextureLoader();
-		console.log(ourstring,ourcatstring);
 		texture_loader.load(
 			'adenovirus' + 256 + '.jpg',
 			function(texture) {
