@@ -148,8 +148,8 @@ function init() {
 				function(texture,i) {
 					picture_objects[lowest_unused_picindex ] = new THREE.Mesh(	new THREE.CubeGeometry( playing_field_width / 2, playing_field_width / 2 * picture_properties[lowest_unused_picindex].YtoX, 0), 
 							 													new THREE.MeshBasicMaterial({map: texture}) );
-					picture_objects[lowest_unused_picindex ].position.x = picture_properties[lowest_unused_picindex].x - 2; //increase or decrease this to center pic 1
-					picture_objects[lowest_unused_picindex ].position.y = picture_properties[lowest_unused_picindex].y;
+					picture_objects[lowest_unused_picindex ].position.x = 0; //increase or decrease this to center pic 1
+					picture_objects[lowest_unused_picindex ].position.y = 0;
 					console.log(lowest_unused_picindex);
 					if(lowest_unused_picindex == picture_properties.length-1){
 						console.log("done");
