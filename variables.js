@@ -37,6 +37,7 @@ pictures_in_slide[13] = new Uint16Array([24,25,26]);
 pictures_in_slide[14] = new Uint16Array([24]);
 pictures_in_slide[15] = new Uint16Array([25]);
 var picture_objects = Array(25);
+var lowest_unused_slideindex = 0;
 
 
 //--------------Technologically fundamental
