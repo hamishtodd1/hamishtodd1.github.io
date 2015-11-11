@@ -43,7 +43,7 @@ var picture_objects = Array(num_pictures);
 var picture_properties = Array(num_pictures);
 var one_third_out = 2.63;
 var vertical_separation = one_third_out / 1.98;
-var OQO = 2.87; //one quarter out
+var OQO = 2.34; //one quarter out
 var boxwidth = 2.3;
 var smallwidt = 1.82;
 picture_properties[0] = {};	picture_properties[0].x = one_third_out; 	picture_properties[0].y = vertical_separation; 	picture_properties[0].YtoX = 1;		picture_properties[0].widt = boxwidth;	picture_properties[0].name = "slides/STMV.png";
