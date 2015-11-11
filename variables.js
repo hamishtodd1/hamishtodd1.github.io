@@ -33,10 +33,9 @@ pictures_in_slide[8] = new Uint16Array([17]);
 pictures_in_slide[9] = new Uint16Array([18,19,20,21,22,23]);
 pictures_in_slide[10] = new Uint16Array([20,21,22,23]);
 pictures_in_slide[11] = new Uint16Array([21,25,24]);
-pictures_in_slide[12] = new Uint16Array([25,26,27]);
-pictures_in_slide[13] = new Uint16Array([26,27,28]);
-pictures_in_slide[14] = new Uint16Array([26]);
-pictures_in_slide[15] = new Uint16Array([29]);
+pictures_in_slide[12] = new Uint16Array([26,27,28]);
+pictures_in_slide[13] = new Uint16Array([26]);
+pictures_in_slide[14] = new Uint16Array([29]);
 
 var num_pictures = 32;
 var picture_objects = Array(num_pictures);
