@@ -150,8 +150,8 @@ function init() {
 							 													new THREE.MeshBasicMaterial({map: texture}) );
 					picture_objects[lowest_unused_picindex ].position.x = picture_properties[lowest_unused_picindex].x - 2; //increase or decrease this to center pic 1
 					picture_objects[lowest_unused_picindex ].position.y = picture_properties[lowest_unused_picindex].y;
-					lowest_unused_picindex++;
 					scene.add(picture_objects[lowest_unused_picindex ]);
+					lowest_unused_picindex++;
 				},
 				function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );}
 			);
