@@ -152,8 +152,10 @@ function init() {
 					picture_objects[lowest_unused_picindex ].position.y = picture_properties[lowest_unused_picindex].y;
 					lowest_unused_picindex++;
 					console.log(lowest_unused_picindex);
-					if(lowest_unused_picindex == picture_properties.length-1)
+					if(lowest_unused_picindex == picture_properties.length-1){
+						scene.add(picture_objects[31]);
 						render();
+					}
 				},
 				function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );}
 			);
