@@ -63,8 +63,8 @@ picture_properties[12] = {};picture_properties[12].x = OQO *-1.5;		picture_prope
 picture_properties[13] = {};picture_properties[13].x = OQO *-0.5;		picture_properties[13].y = 0; 					picture_properties[13].YtoX = 2;	picture_properties[13].widt = smallwidt;picture_properties[13].name = "slides/long virus.png";
 picture_properties[14] = {};picture_properties[14].x = OQO * 0.5;		picture_properties[14].y = 0; 					picture_properties[14].YtoX = 2;	picture_properties[14].widt = smallwidt;picture_properties[14].name = "slides/HIV EM.png";
 picture_properties[15] = {};picture_properties[15].x = OQO * 1.5;		picture_properties[15].y = 0; 					picture_properties[15].YtoX = 2;	picture_properties[15].widt = smallwidt;picture_properties[15].name = "slides/HIV model.png";
-picture_properties[16] = {};picture_properties[16].x = OQO *-0.8;		picture_properties[16].y = 0; 					picture_properties[16].YtoX = 1;	picture_properties[16].widt=1.5*boxwidth;picture_properties[16].name = "slides/cube net.png";
-picture_properties[17] = {};picture_properties[17].x = OQO *-0.8;		picture_properties[17].y = 0;					picture_properties[17].YtoX = 2;	picture_properties[17].widt = boxwidth;	picture_properties[17].name = "slides/angular defect proteins.png";
+picture_properties[16] = {};picture_properties[16].x = OQO *-1.3;		picture_properties[16].y = 0; 					picture_properties[16].YtoX = 1;	picture_properties[16].widt=1.5*boxwidth;picture_properties[16].name = "slides/cube net.png";
+picture_properties[17] = {};picture_properties[17].x = OQO *-1.3;		picture_properties[17].y = 0;					picture_properties[17].YtoX = 2;	picture_properties[17].widt = boxwidth;	picture_properties[17].name = "slides/angular defect proteins.png";
 
 picture_properties[18] = {};picture_properties[18].x = one_third_out;	picture_properties[18].y = vertical_separation; picture_properties[18].YtoX = 0.25;	picture_properties[18].widt =2*boxwidth;picture_properties[18].name = "slides/the rule.png";
 picture_properties[19] = {};picture_properties[19].x = one_third_out;	picture_properties[19].y =-vertical_separation; picture_properties[19].YtoX = 0.5;	picture_properties[19].widt =2*boxwidth;picture_properties[19].name = "slides/HPV EM.png";
@@ -76,9 +76,9 @@ picture_properties[23] = {};picture_properties[23].x = OQO *-0.5;		picture_prope
 picture_properties[24] = {};picture_properties[24].x = OQO *-1.5;		picture_properties[24].y = 0;					picture_properties[24].YtoX = 2;	picture_properties[24].widt = smallwidt;picture_properties[24].name = "slides/Reidun.png";
 picture_properties[25] = {};picture_properties[25].x = OQO *-0.5;		picture_properties[25].y =-vertical_separation; picture_properties[25].YtoX = 1;	picture_properties[25].widt = smallwidt;picture_properties[25].name = "slides/LA lines.png";
 
-picture_properties[26] = {};picture_properties[26].x = -one_third_out;	picture_properties[26].y = 0; 					picture_properties[26].YtoX = 1;	picture_properties[26].widt = boxwidth;	picture_properties[26].name = "slides/diffraction.png";
-picture_properties[27] = {};picture_properties[27].x = 0; 				picture_properties[27].y = 0; 					picture_properties[27].YtoX = 2;	picture_properties[27].widt = boxwidth;	picture_properties[27].name = "slides/more crystals.png";
-picture_properties[28] = {};picture_properties[28].x = one_third_out;	picture_properties[28].y = 0; 					picture_properties[28].YtoX = 1;	picture_properties[28].widt = boxwidth;	picture_properties[28].name = "slides/crystal.png";
+picture_properties[26] = {};picture_properties[26].x = -one_third_out;	picture_properties[26].y = 0; 					picture_properties[26].YtoX = 1;	picture_properties[26].widt=1.5*boxwidth;picture_properties[26].name = "slides/diffraction.png";
+picture_properties[27] = {};picture_properties[27].x = 0; 				picture_properties[27].y = 0; 					picture_properties[27].YtoX = 2;	picture_properties[27].widt=0.7*boxwidth;picture_properties[27].name = "slides/more crystals.png";
+picture_properties[28] = {};picture_properties[28].x = one_third_out;	picture_properties[28].y = 0; 					picture_properties[28].YtoX = 1;	picture_properties[28].widt=1.5*boxwidth;picture_properties[28].name = "slides/crystal.png";
 picture_properties[29] = {};picture_properties[29].x = -one_third_out;	picture_properties[29].y = 0; 					picture_properties[29].YtoX = 1;	picture_properties[29].widt = boxwidth;	picture_properties[29].name = "slides/pariacoto.png";
 
 picture_properties[30] = {};picture_properties[30].x = -5.8; 			picture_properties[30].y = 2.8;					picture_properties[30].YtoX = 0.5;	picture_properties[30].widt = boxwidth;	picture_properties[30].name = "slides/logo.png";
