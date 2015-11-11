@@ -141,7 +141,6 @@ function init() {
 	
 	//-------------stuff that goes in the scene
 	{
-		var texture_loader = new THREE.TextureLoader();
 		loadpic(0); //does it all
 		
 		var surfacematerial = new THREE.MeshBasicMaterial({
