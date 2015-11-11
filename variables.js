@@ -40,7 +40,6 @@ pictures_in_slide[15] = new Uint16Array([29]);
 
 var num_pictures = 32;
 var picture_objects = Array(num_pictures);
-var lowest_unused_picindex = 0;
 var picture_properties = Array(num_pictures);
 var one_third_out = 2;
 var vertical_separation = one_third_out / 2;

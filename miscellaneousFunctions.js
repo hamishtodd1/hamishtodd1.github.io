@@ -18,8 +18,8 @@ function loadpic(i) {
 		function(texture) {
 			picture_objects[i] = new THREE.Mesh(new THREE.CubeGeometry( playing_field_width / 2, playing_field_width / 2 * picture_properties[i].YtoX, 0), 
 					 							new THREE.MeshBasicMaterial({map: texture}) );
-			picture_objects[i].position.x = picture_properties[lowest_unused_picindex].x - 2; //increase or decrease this to center pic 1
-			picture_objects[i].position.y = picture_properties[lowest_unused_picindex].y;
+			picture_objects[i].position.x = picture_properties[i].x - 2; //increase or decrease this to center pic 1
+			picture_objects[i].position.y = picture_properties[i].y;
 			console.log(i);
 
 			if(i < picture_properties.length-1 )
@@ -27,7 +27,6 @@ function loadpic(i) {
 			else {
 				console.log("done");
 				scene.add(picture_objects[i]);
-				render();
 			}
 		},
 		function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );}
