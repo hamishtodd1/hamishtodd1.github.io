@@ -1,7 +1,11 @@
 document.addEventListener( 'mousedown', onDocumentMouseDown, false);
 document.addEventListener( 'mouseup', onDocumentMouseUp, false);
-window.addEventListener( 'mousemove', onMouseMove, false );
+document.addEventListener( 'mousemove', onDocumentMouseMove, false ); //window?
+document.addEventListener( 'touchstart', onDocumentMouseDown, false );
+document.addEventListener( 'touchmove', onDocumentTouchMove, false );
+document.addEventListener( 'touchend', onDocumentMouseUp, false );
 
+//remember there can be weirdness for multiple fingers, so make sure any crazy series of inputs are interpretable
 function onDocumentMouseDown(event) {
 	event.preventDefault();
 	InputObject.isMouseDown = true;
@@ -12,10 +16,16 @@ function onDocumentMouseUp(event) {
 	//minimum amount of time so that people don't hammer the screen?
 }
 
-function onMouseMove( event ) {
+function onDocumentMouseMove( event ) {
 	event.preventDefault();
 	InputObject.mousex = event.clientX;
 	InputObject.mousey = event.clientY;
+}
+
+function onDocumentTouchMove( event ) {
+	event.preventDefault();
+	InputObject.mousex = event.changedTouches[0].clientX; //only looking at the first one. TODO multi-touch!
+	InputObject.mousey = event.changedTouches[0].clientY;
 }
 
 function update_mouseblob(){

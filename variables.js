@@ -13,10 +13,34 @@ var IRREGULAR_MODE = 3;
 var QC_SPHERE_MODE = 4;
 var CUBIC_LATTICE_MODE = 5;
 	
-var MODE = 2;
+var MODE = 0;
+
+var slidenumber = 0;
+
+var slide_scenes = new Uint16Array([0,0,2,2,0,3,3,3,0,4,4,4,0,5,5,5,0]);
+var num_slides = 15;
+var pictures_in_slide = Array(num_slides);
+pictures_in_slide[0] = new Uint16Array([0,1,2,3,4,5]);
+pictures_in_slide[1] = new Uint16Array([0,1,2,3,4,5]);
+pictures_in_slide[2] = new Uint16Array([1,2,3,4]);
+pictures_in_slide[3] = new Uint16Array([2,3]);
+pictures_in_slide[4] = new Uint16Array([6,7]);
+pictures_in_slide[5] = new Uint16Array([8,9,10,11]);
+pictures_in_slide[6] = new Uint16Array([8]);
+pictures_in_slide[7] = new Uint16Array([12]);
+pictures_in_slide[8] = new Uint16Array([13]);
+pictures_in_slide[9] = new Uint16Array([14,15,16,17,18]);
+pictures_in_slide[10] = new Uint16Array([15,16,17,18]);
+pictures_in_slide[11] = new Uint16Array([16,19,20]);
+pictures_in_slide[12] = new Uint16Array([21,22,23]);
+pictures_in_slide[13] = new Uint16Array([24,25,26]);
+pictures_in_slide[14] = new Uint16Array([24]);
+pictures_in_slide[15] = new Uint16Array([25]);
+var picture_objects = Array(25);
+
 
 //--------------Technologically fundamental
-var playing_field_width = 7*HS3;
+var playing_field_width = 7*HS3*2; //7*HS3;
 var playing_field_height = 6;
 var window_height = 600; //100 pixels per unit
 var window_width = window_height * playing_field_width / playing_field_height;
@@ -44,7 +68,7 @@ var net_warnings = 0;
 var z_central_axis = new THREE.Vector3(0,0,1);
 
 var surfperimeter_default_radius = 0.02;
-var varyingsurface_edges_default_radius = 0.012;
+var varyingsurface_edges_default_radius = 0.0075;
 
 //Not including the central vertex
 //mimivirus needs exactly 100. Try and work out how many a human can distinguish though
@@ -52,7 +76,7 @@ var varyingsurface_edges_default_radius = 0.012;
 //it might be a lot better as a circle. And with a max T number of 49, to show the interesting ambiguity. That means a radius of 7*sqrt(7)
 //What'd be great would be every position corresponding to a valid virus
 var number_of_hexagon_rings = 14;
-var lattice_scalefactor = playing_field_width / 2 / number_of_hexagon_rings; //TODO there is a more intuitive representation of this (maybe all of it)
+var lattice_scalefactor = 7*HS3 / 2 / number_of_hexagon_rings; //TODO there is a more intuitive representation of this (maybe all of it)
 var number_of_lattice_points = 1 + 3 * number_of_hexagon_rings*(number_of_hexagon_rings+1);
 
 //in the limited environment we will end up with (and might do well to be going with) a circle of existence for lattice pts is prb. best
@@ -95,7 +119,7 @@ var dodeca_faceflatness = 0;
 var dodeca_angle = 0;
 var dodeca_triangle_vertex_indices;
 var back_hider;
-var quasilattice_default_vertices = Array(18*5);
+var quasilattice_default_vertices = Array(7*5);
 var quasilattice_pairs = Array(29*5*2);
 var cutout_vector0; //these lie on the lattice
 var cutout_vector1;
@@ -106,7 +130,10 @@ var quasicutout_intermediate_vertices = Array(quasilattice_default_vertices.leng
 var quasicutouts_vertices_components = Array(quasilattice_default_vertices.length*2 * 2 );
 var quasicutout_line_pairs = new Uint16Array(quasilattice_default_vertices.length*2 * 2 * 2); //TODO work out how many there should be in here really.
 var quasicutouts = Array(60);
-var stable_points = Array(1); //soon
+var stable_points = Array(345);
+var lowest_unused_stablepoint = 0;
+var quasiquasilattice;
+var stablepointslattice;
 
 var golden_rhombohedra = Array(20);
 var goldenicos = Array(12);

@@ -12,6 +12,60 @@ function difference_between_angles(angle1, angle2){
 	//this would be worthwhile
 }
 
+function deduce_stable_points_from_fanning_vertex(fanning_vertex_start, lattice_vertex_index, spoke_to_side_angle){
+	var fanning_vertex_length = fanning_vertex_start.length();
+	var hand = 1;
+	if(fanning_vertex_length < 0.6)
+		hand = 0;
+	if(fanning_vertex_length > 0.7)
+		hand = 2;
+	
+	for(var j = 0; j < 10; j++){
+		var fanning_vertex = fanning_vertex_start.clone();
+		fanning_vertex.applyAxisAngle(z_central_axis, j * TAU / 10);
+		
+		var potential_stable_point = fanning_vertex.clone();
+		potential_stable_point.add(quasilattice_default_vertices[lattice_vertex_index]);
+		
+		potential_stable_point_spoke = potential_stable_point.clone();
+		potential_stable_point_spoke.negate();
+		
+		var latticevertex_for_stablepoint = fanning_vertex.clone();
+		latticevertex_for_stablepoint.negate();
+		var in_ness_angle = potential_stable_point_spoke.angleTo(latticevertex_for_stablepoint);
+		if(lattice_vertex_index == 0 && hand == 0 && j == 0 )
+			console.log(in_ness_angle,spoke_to_side_angle - 0.00001, potential_stable_point_spoke, latticevertex_for_stablepoint );
+		if( in_ness_angle > spoke_to_side_angle + 0.00001 )
+			continue; //the point we originate from wouldn't be in the face
+		
+		var confirmed_stablepoint = 1;
+		
+		//gotta check what points WOULD be in the face IF we snapped to this point.
+		for(var k = 0; k < quasilattice_default_vertices.length; k++) {
+			if(k==lattice_vertex_index)
+				continue;
+			var k_dist_to_potentialpoint = quasilattice_default_vertices[k].distanceTo(potential_stable_point);
+			if( 0.00001 < k_dist_to_potentialpoint && k_dist_to_potentialpoint < fanning_vertex_length + 0.00001){ //points on points ARE allowed in.
+				var point_relative_to_corner = quasilattice_default_vertices[k].clone();
+				point_relative_to_corner.sub(potential_stable_point);
+				
+				in_ness_angle = point_relative_to_corner.angleTo(potential_stable_point_spoke);
+				
+				if( in_ness_angle < spoke_to_side_angle + 0.00001 ){
+					confirmed_stablepoint = 0;
+					break;
+				}
+			}
+		}
+		
+		if(confirmed_stablepoint){
+			stable_points[lowest_unused_stablepoint].copy(potential_stable_point);
+//			console.log(j,hand);
+			lowest_unused_stablepoint++;
+		}
+	}
+}
+
 function vec2_crossprod(a,b){
 	return a.x*b.y-a.y*b.x;
 }

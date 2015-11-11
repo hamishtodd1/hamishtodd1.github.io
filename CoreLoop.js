@@ -41,7 +41,10 @@ function check_arrows(){
 		forwardbutton.material.color.g = 1;
 		
 		if(isMouseDown && !isMouseDown_previously){
-			ChangeScene(MODE+1);
+			if(slide_scenes[slidenumber] != MODE)
+				ChangeScene(slide_scenes[slidenumber]);
+			
+			ChangeSlide(slidenumber+1);
 		}
 	}
 	else{
@@ -57,13 +60,27 @@ function check_arrows(){
 		backwardbutton.material.color.g = 1;
 		
 		if(isMouseDown && !isMouseDown_previously){
-			ChangeScene(MODE-1);
+			if(slide_scenes[slidenumber] != MODE)
+				ChangeScene(slide_scenes[slidenumber]);
+			
+			ChangeSlide(slidenumber-1);
 		}
 	}
 	else{
 		backwardbutton.material.color.b = 1;
 		backwardbutton.material.color.g = 0;
 	}
+}
+
+function ChangeSlide(new_slide){
+//	for(var i = 0; i<pictures_in_slide[slidenumber].length; i++){
+//		scene.remove(picture_objects[pictures_in_slide[slidenumber][i]]);
+//	}
+//	for(var i = 0; i<pictures_in_slide[new_slide].length; i++){
+//		scene.add(picture_objects[pictures_in_slide[new_slide][i]]);
+//	}
+	
+	slidenumber = new_slide;
 }
 
 function UpdateWorld() {
@@ -126,17 +143,17 @@ render();
 
 //eventually we'll add some trigger to this that makes it reasonable to call every frame
 function ChangeScene(new_mode) {
+	if(MODE==CUBIC_LATTICE_MODE){
+		forwardbutton.position.multiplyScalar(1/4.5);
+		backwardbutton.position.multiplyScalar(1/4.5);
+		forwardbutton.scale.set(1,1,1);
+		backwardbutton.scale.set(1,1,1);
+	}
 	if(new_mode==CUBIC_LATTICE_MODE){
 		forwardbutton.position.multiplyScalar(4.5);
 		backwardbutton.position.multiplyScalar(4.5);
 		forwardbutton.scale.set(4.5,4.5,4.5);
 		backwardbutton.scale.set(4.5,4.5,4.5);
-	}
-	else if(MODE==CUBIC_LATTICE_MODE){
-		forwardbutton.position.multiplyScalar(1/4.5);
-		backwardbutton.position.multiplyScalar(1/4.5);
-		forwardbutton.scale.set(1,1,1);
-		backwardbutton.scale.set(1,1,1);
 	}
 	
 	MODE = new_mode;
@@ -189,6 +206,8 @@ function ChangeScene(new_mode) {
 				scene.add(quasicutouts[i]);
 			scene.add(dodeca);
 			scene.add(back_hider);
+//			scene.add(quasiquasilattice);
+//			scene.add(stablepointslattice);
 			break;
 		
 		case CUBIC_LATTICE_MODE:
