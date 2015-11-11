@@ -18,7 +18,7 @@ function loadpic(i) {
 		function(texture) {
 			picture_objects[i] = new THREE.Mesh(new THREE.CubeGeometry( picture_properties[i].widt, picture_properties[i].widt * picture_properties[i].YtoX, 0), 
 					 							new THREE.MeshBasicMaterial({map: texture}) );
-			picture_objects[i].position.x = picture_properties[i].x - 1.677; //increase or decrease this to center pic 1
+			picture_objects[i].position.x = picture_properties[i].x - 1.66; //increase or decrease this to center pic 1
 			picture_objects[i].position.y = picture_properties[i].y;
 			console.log(i);
 
