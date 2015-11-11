@@ -144,7 +144,7 @@ function init() {
 		var texture_loader = new THREE.TextureLoader();
 		for(var i = 0; i<picture_objects.length; i++){
 			texture_loader.load(
-				"slides\14 - Copy (" + i + ").png", //they need to be powers of 2!
+				"slides/14 - Copy (" + i + ").png", //they need to be powers of 2!
 				function(texture) {
 					picture_objects[i] = new THREE.Mesh( new THREE.CubeGeometry( playing_field_width / 2, playing_field_width / 4, 0), 
 														 new THREE.MeshBasicMaterial({map: texture}) );
