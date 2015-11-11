@@ -66,7 +66,7 @@ picture_properties[15] = {};picture_properties[15].x = OQO * 1.5;		picture_prope
 picture_properties[16] = {};picture_properties[16].x = OQO *-0.8;		picture_properties[16].y = 0; 					picture_properties[16].YtoX = 1;	picture_properties[16].widt=1.5*boxwidth;picture_properties[16].name = "slides/cube net.png";
 picture_properties[17] = {};picture_properties[17].x = OQO *-0.8;		picture_properties[17].y = 0;					picture_properties[17].YtoX = 2;	picture_properties[17].widt = boxwidth;	picture_properties[17].name = "slides/angular defect proteins.png";
 
-picture_properties[18] = {};picture_properties[18].x = one_third_out;	picture_properties[18].y = vertical_separation; picture_properties[18].YtoX = 0.25;	picture_properties[18].widt = boxwidth;	picture_properties[18].name = "slides/the rule.png";
+picture_properties[18] = {};picture_properties[18].x = one_third_out;	picture_properties[18].y = vertical_separation; picture_properties[18].YtoX = 0.25;	picture_properties[18].widt =2*boxwidth;picture_properties[18].name = "slides/the rule.png";
 picture_properties[19] = {};picture_properties[19].x = one_third_out;	picture_properties[19].y =-vertical_separation; picture_properties[19].YtoX = 0.5;	picture_properties[19].widt =2*boxwidth;picture_properties[19].name = "slides/HPV EM.png";
 picture_properties[20] = {};picture_properties[20].x = OQO *-1.5;		picture_properties[20].y = vertical_separation; picture_properties[20].YtoX = 1;	picture_properties[20].widt = smallwidt;picture_properties[20].name = "slides/STMV nice.jpg";
 picture_properties[21] = {};picture_properties[21].x = OQO *-0.5;		picture_properties[21].y = vertical_separation; picture_properties[21].YtoX = 1;	picture_properties[21].widt = smallwidt;picture_properties[21].name = "slides/LA model.png";
