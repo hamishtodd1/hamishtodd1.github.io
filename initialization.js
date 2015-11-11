@@ -143,15 +143,12 @@ function init() {
 	{
 		var texture_loader = new THREE.TextureLoader();
 		texture_loader.load(
-				'adenovirus256.jpg',
-				function(texture) {
-					picture_objects[0] = new THREE.Mesh( new THREE.CubeGeometry( playing_field_width / 2, playing_field_width / 2, 0), 
-							new THREE.MeshBasicMaterial({map: texture}) );
-					
-					scene.add(picture_objects[0]);
-				},
-				function ( xhr ) {},
-				function ( xhr ) {console.log( 'texture loading error' );});
+			"adenovirus" + 256 + ".jpg",
+			function(texture) {
+				picture_objects[0] = new THREE.Mesh( new THREE.CubeGeometry( playing_field_width / 2, playing_field_width / 2, 0), 
+						new THREE.MeshBasicMaterial({map: texture}) );
+			},
+			function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );});
 		
 		var surfacematerial = new THREE.MeshBasicMaterial({
 			color: 0x00ffff,
