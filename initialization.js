@@ -148,10 +148,9 @@ function init() {
 				function(texture,i) {
 					picture_objects[lowest_unused_slideindex ] = new THREE.Mesh( new THREE.CubeGeometry( playing_field_width / 2, playing_field_width / 4, 0), 
 														 new THREE.MeshBasicMaterial({map: texture}) );
-					console.log(texture.width,texture.height );
 					scene.add(picture_objects[lowest_unused_slideindex ]);
-					picture_objects[lowest_unused_slideindex ].position.x = picture_properties[i].x;
-					picture_objects[lowest_unused_slideindex ].position.y = picture_properties[i].y;
+					picture_objects[lowest_unused_slideindex ].position.x = picture_properties[lowest_unused_slideindex].x;
+					picture_objects[lowest_unused_slideindex ].position.y = picture_properties[lowest_unused_slideindex].y;
 					lowest_unused_slideindex++;
 				},
 				function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );});
