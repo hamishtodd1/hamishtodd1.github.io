@@ -141,7 +141,7 @@ function render() {
 }
 
 init();
-
+render();
 
 //eventually we'll add some trigger to this that makes it reasonable to call every frame
 function ChangeScene(new_mode) {
