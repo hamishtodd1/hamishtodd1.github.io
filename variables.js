@@ -20,6 +20,7 @@ var slidenumber = 0;
 var slide_scenes = new Uint16Array([0,0,2,2,0,3,3,3,0,4,4,4,0,5,5,5,0]);
 var num_slides = 15;
 var pictures_in_slide = Array(num_slides);
+var num_pictures = 25;
 pictures_in_slide[0] = new Uint16Array([0,1,2,3,4,5]);
 pictures_in_slide[1] = new Uint16Array([0,1,2,3,4,5]);
 pictures_in_slide[2] = new Uint16Array([1,2,3,4]);
@@ -36,9 +37,11 @@ pictures_in_slide[12] = new Uint16Array([21,22,23]);
 pictures_in_slide[13] = new Uint16Array([24,25,26]);
 pictures_in_slide[14] = new Uint16Array([24]);
 pictures_in_slide[15] = new Uint16Array([25]);
-var picture_objects = Array(25);
+var picture_objects = Array(num_pictures);
 var lowest_unused_slideindex = 0;
-
+var picture_properties = Array(num_pictures);
+picture_properties[0] = {};
+picture_properties[0].x = 0; picture_properties[0].y = 0; picture_properties[0].name = "slides/14 - Copy (0).png";
 
 //--------------Technologically fundamental
 var playing_field_width = 7*HS3*2; //7*HS3;
