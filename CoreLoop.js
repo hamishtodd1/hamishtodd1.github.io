@@ -75,9 +75,11 @@ function check_arrows(){
 }
 
 function ChangeSlide(new_slide){
-	//everything's been removed already
+	if(MODE==0){
+		for(var i = 0; i<pictures_in_slide[slidenumber].length; i++){
+			scene.remove(picture_objects[pictures_in_slide[slidenumber][i]]);
+	}
 	for(var i = 0; i<pictures_in_slide[new_slide].length; i++){
-		console.log(picture_objects[pictures_in_slide[new_slide][i]]);
 		scene.add(picture_objects[pictures_in_slide[new_slide][i]]);
 	}
 	if(new_slide != 0 ) scene.add(picture_objects[30]);
