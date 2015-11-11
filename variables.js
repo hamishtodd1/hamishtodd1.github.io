@@ -45,7 +45,7 @@ var one_third_out = 2;
 var vertical_separation = one_third_out / 1.25;
 var OQO = 0.6; //one quarter out
 var boxwidth = 2.4;
-picture_properties[0] = {};	picture_properties[0].x = one_third_out; 	picture_properties[0].y = vertical_separation; 	picture_properties[0].YtoX = 1;		picture_properties[0].widt = 9;	picture_properties[0].name = "slides/STMV.png";
+picture_properties[0] = {};	picture_properties[0].x = one_third_out; 	picture_properties[0].y = vertical_separation; 	picture_properties[0].YtoX = 1;		picture_properties[0].widt = boxwidth;	picture_properties[0].name = "slides/STMV.png";
 picture_properties[1] = {};	picture_properties[1].x = 0; 				picture_properties[1].y = vertical_separation; 	picture_properties[1].YtoX = 1;		picture_properties[1].widt = boxwidth;	picture_properties[1].name = "slides/caulio.png";
 picture_properties[2] = {};	picture_properties[2].x = -one_third_out; 	picture_properties[2].y = vertical_separation; 	picture_properties[2].YtoX = 1;		picture_properties[2].widt = boxwidth;	picture_properties[2].name = "slides/cowpea.png";
 picture_properties[3] = {};	picture_properties[3].x = -one_third_out; 	picture_properties[3].y =-vertical_separation; 	picture_properties[3].YtoX = 1;		picture_properties[3].widt = boxwidth;	picture_properties[3].name = "slides/herpes.png";
@@ -81,7 +81,7 @@ picture_properties[28] = {};picture_properties[28].x = one_third_out;	picture_pr
 picture_properties[29] = {};picture_properties[29].x = -one_third_out;	picture_properties[29].y = 0; 					picture_properties[29].YtoX = 1;	picture_properties[29].widt = boxwidth;	picture_properties[29].name = "slides/pariacoto.png";
 
 picture_properties[30] = {};picture_properties[30].x = -5.8; 			picture_properties[30].y = 2.8;					picture_properties[30].YtoX = 0.5;	picture_properties[30].widt = boxwidth;	picture_properties[30].name = "slides/logo.png";
-picture_properties[31] = {};picture_properties[31].x = 0; 				picture_properties[31].y = 0;					picture_properties[31].YtoX = 0.5;	picture_properties[31].widt = boxwidth;	picture_properties[31].name = "slides/Opening slide.png";
+picture_properties[31] = {};picture_properties[31].x = 0; 				picture_properties[31].y = 0;					picture_properties[31].YtoX = 0.5;	picture_properties[31].widt = 9;	picture_properties[31].name = "slides/Opening slide.png";
 
 //--------------Technologically fundamental
 var playing_field_width = 7*HS3*2; //7*HS3;
