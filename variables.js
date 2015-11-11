@@ -42,7 +42,7 @@ var num_pictures = 32;
 var picture_objects = Array(num_pictures);
 var picture_properties = Array(num_pictures);
 var one_third_out = 2.63;
-var vertical_separation = one_third_out / 1.57;
+var vertical_separation = one_third_out / 1.84;
 var OQO = 5; //one quarter out
 var boxwidth = 2.4;
 picture_properties[0] = {};	picture_properties[0].x = one_third_out; 	picture_properties[0].y = vertical_separation; 	picture_properties[0].YtoX = 1;		picture_properties[0].widt = boxwidth;	picture_properties[0].name = "slides/STMV.png";
@@ -81,7 +81,7 @@ picture_properties[28] = {};picture_properties[28].x = one_third_out;	picture_pr
 picture_properties[29] = {};picture_properties[29].x = -one_third_out;	picture_properties[29].y = 0; 					picture_properties[29].YtoX = 1;	picture_properties[29].widt = boxwidth;	picture_properties[29].name = "slides/pariacoto.png";
 
 picture_properties[30] = {};picture_properties[30].x = -5.8; 			picture_properties[30].y = 2.8;					picture_properties[30].YtoX = 0.5;	picture_properties[30].widt = boxwidth;	picture_properties[30].name = "slides/logo.png";
-picture_properties[31] = {};picture_properties[31].x = 0; 				picture_properties[31].y = 0;					picture_properties[31].YtoX = 0.5;	picture_properties[31].widt = 11.8;		picture_properties[31].name = "slides/Opening slide.png";
+picture_properties[31] = {};picture_properties[31].x = 0; 				picture_properties[31].y = 0;					picture_properties[31].YtoX = 0.5;	picture_properties[31].widt = 11.1;		picture_properties[31].name = "slides/Opening slide.png";
 
 //--------------Technologically fundamental
 var playing_field_width = 7*HS3*2; //7*HS3;
