@@ -151,6 +151,8 @@ function init() {
 					picture_objects[lowest_unused_picindex ].position.x = picture_properties[lowest_unused_picindex].x - 2; //increase or decrease this to center pic 1
 					picture_objects[lowest_unused_picindex ].position.y = picture_properties[lowest_unused_picindex].y;
 					scene.add(picture_objects[lowest_unused_picindex ]);
+					if(lowest_unused_picindex!=0)
+						scene.remove(picture_objects[lowest_unused_picindex-1]);
 					lowest_unused_picindex++;
 				},
 				function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );}
