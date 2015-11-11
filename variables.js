@@ -44,7 +44,7 @@ var picture_properties = Array(num_pictures);
 var one_third_out = 2;
 var vertical_separation = one_third_out / 2;
 var OQO = 0.6; //one quarter out
-var boxwidth = 3;
+var boxwidth = 2.2;
 picture_properties[0] = {};	picture_properties[0].x = one_third_out; 	picture_properties[0].y = vertical_separation; 	picture_properties[0].YtoX = 1;		picture_properties[0].widt = boxwidth;	picture_properties[0].name = "slides/STMV.png";
 picture_properties[1] = {};	picture_properties[1].x = 0; 				picture_properties[1].y = vertical_separation; 	picture_properties[1].YtoX = 1;		picture_properties[1].widt = boxwidth;	picture_properties[1].name = "slides/caulio.png";
 picture_properties[2] = {};	picture_properties[2].x = -one_third_out; 	picture_properties[2].y = vertical_separation; 	picture_properties[2].YtoX = 1;		picture_properties[2].widt = boxwidth;	picture_properties[2].name = "slides/cowpea.png";
