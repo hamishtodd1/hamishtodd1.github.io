@@ -148,8 +148,9 @@ function init() {
 				function(texture) {
 					picture_objects[i] = new THREE.Mesh( new THREE.CubeGeometry( playing_field_width / 2, playing_field_width / 4, 0), 
 														 new THREE.MeshBasicMaterial({map: texture}) );
+					console.log(i);
 					scene.add(picture_objects[i]);
-					picture_objects[i].position.x = 2.5+i*0.2;
+					picture_objects[i].position.x = -2.5+i*0.2;
 				},
 				function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );});
 		}
