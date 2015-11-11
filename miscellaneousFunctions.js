@@ -27,6 +27,7 @@ function loadpic(i) {
 			else {
 				console.log("done");
 				scene.add(picture_objects[i]);
+				render();
 			}
 		},
 		function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );}
