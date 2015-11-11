@@ -73,12 +73,13 @@ function check_arrows(){
 }
 
 function ChangeSlide(new_slide){
-//	for(var i = 0; i<pictures_in_slide[slidenumber].length; i++){
-//		scene.remove(picture_objects[pictures_in_slide[slidenumber][i]]);
-//	}
-//	for(var i = 0; i<pictures_in_slide[new_slide].length; i++){
-//		scene.add(picture_objects[pictures_in_slide[new_slide][i]]);
-//	}
+	for(var i = 0; i<pictures_in_slide[slidenumber].length; i++){
+		scene.remove(picture_objects[pictures_in_slide[slidenumber][i]]);
+	}
+	for(var i = 0; i<pictures_in_slide[new_slide].length; i++){
+		scene.add(picture_objects[pictures_in_slide[new_slide][i]]);
+	}
+	scene.add(picture_objects[30]);
 	
 	slidenumber = new_slide;
 }

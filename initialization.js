@@ -142,18 +142,18 @@ function init() {
 	//-------------stuff that goes in the scene
 	{
 		var texture_loader = new THREE.TextureLoader();
-		for(var i = 0; i<1; i++){
+		for(var i = 0; i<picture_properties.length; i++){
 			texture_loader.load(
 				picture_properties[i].name, //they need to be powers of 2!
 				function(texture,i) {
 					picture_objects[lowest_unused_slideindex ] = new THREE.Mesh( new THREE.CubeGeometry( playing_field_width / 2, playing_field_width / 4, 0), 
 														 new THREE.MeshBasicMaterial({map: texture}) );
-					scene.add(picture_objects[lowest_unused_slideindex ]);
-					picture_objects[lowest_unused_slideindex ].position.x = picture_properties[lowest_unused_slideindex].x;
+					picture_objects[lowest_unused_slideindex ].position.x = picture_properties[lowest_unused_slideindex].x - 2; //increase or decrease this to center pic 1
 					picture_objects[lowest_unused_slideindex ].position.y = picture_properties[lowest_unused_slideindex].y;
 					lowest_unused_slideindex++;
 				},
-				function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );});
+				function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );}
+			);
 		}
 		
 		var surfacematerial = new THREE.MeshBasicMaterial({

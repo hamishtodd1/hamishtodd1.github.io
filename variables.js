@@ -20,28 +20,67 @@ var slidenumber = 0;
 var slide_scenes = new Uint16Array([0,0,2,2,0,3,3,3,0,4,4,4,0,5,5,5,0]);
 var num_slides = 15;
 var pictures_in_slide = Array(num_slides);
-var num_pictures = 25;
-pictures_in_slide[0] = new Uint16Array([0,1,2,3,4,5]);
+pictures_in_slide[0] = new Uint16Array([31]);
 pictures_in_slide[1] = new Uint16Array([0,1,2,3,4,5]);
-pictures_in_slide[2] = new Uint16Array([1,2,3,4]);
-pictures_in_slide[3] = new Uint16Array([2,3]);
-pictures_in_slide[4] = new Uint16Array([6,7]);
-pictures_in_slide[5] = new Uint16Array([8,9,10,11]);
-pictures_in_slide[6] = new Uint16Array([8]);
-pictures_in_slide[7] = new Uint16Array([12]);
-pictures_in_slide[8] = new Uint16Array([13]);
-pictures_in_slide[9] = new Uint16Array([14,15,16,17,18]);
-pictures_in_slide[10] = new Uint16Array([15,16,17,18]);
-pictures_in_slide[11] = new Uint16Array([16,19,20]);
-pictures_in_slide[12] = new Uint16Array([21,22,23]);
-pictures_in_slide[13] = new Uint16Array([24,25,26]);
-pictures_in_slide[14] = new Uint16Array([24]);
-pictures_in_slide[15] = new Uint16Array([25]);
+pictures_in_slide[2] = new Uint16Array([6,7,8,9]);
+pictures_in_slide[3] = new Uint16Array([7,8]);
+pictures_in_slide[4] = new Uint16Array([10,11]);
+pictures_in_slide[5] = new Uint16Array([12,13,14,15]);
+pictures_in_slide[6] = new Uint16Array([12]);
+pictures_in_slide[7] = new Uint16Array([16]);
+pictures_in_slide[8] = new Uint16Array([17]);
+pictures_in_slide[9] = new Uint16Array([18,19,20,21,22,23]);
+pictures_in_slide[10] = new Uint16Array([20,21,22,23]);
+pictures_in_slide[11] = new Uint16Array([21,25,24]);
+pictures_in_slide[12] = new Uint16Array([25,26,27]);
+pictures_in_slide[13] = new Uint16Array([26,27,28]);
+pictures_in_slide[14] = new Uint16Array([26]);
+pictures_in_slide[15] = new Uint16Array([29]);
+
+var num_pictures = 32;
 var picture_objects = Array(num_pictures);
 var lowest_unused_slideindex = 0;
 var picture_properties = Array(num_pictures);
-picture_properties[0] = {};
-picture_properties[0].x = 0; picture_properties[0].y = 0; picture_properties[0].name = "slides/14 - Copy (0).png";
+var one_third_out = 2;
+var vertical_separation = one_third_out / 2;
+var OQO = 0.6; //one quarter out
+picture_properties[0] = {};	picture_properties[0].x = one_third_out; 	picture_properties[0].y = vertical_separation; 	picture_properties[0].name = "slides/STMV.png";
+picture_properties[1] = {};	picture_properties[1].x = 0; 				picture_properties[1].y = vertical_separation; 	picture_properties[1].name = "slides/caulio.png";
+picture_properties[2] = {};	picture_properties[2].x = -one_third_out; 	picture_properties[2].y = vertical_separation; 	picture_properties[2].name = "slides/cowpea.png";
+picture_properties[3] = {};	picture_properties[3].x = -one_third_out; 	picture_properties[3].y =-vertical_separation; 	picture_properties[3].name = "slides/herpes.png";
+picture_properties[4] = {};	picture_properties[4].x = 0; 				picture_properties[4].y =-vertical_separation; 	picture_properties[4].name = "slides/phyco.png";
+picture_properties[5] = {};	picture_properties[5].x = one_third_out; 	picture_properties[5].y =-vertical_separation; 	picture_properties[5].name = "slides/mimi.png";
+picture_properties[6] = {};	picture_properties[6].x = 0; 				picture_properties[6].y = vertical_separation; 	picture_properties[6].name = "slides/caulio spots.png";
+picture_properties[7] = {};	picture_properties[7].x = -one_third_out; 	picture_properties[7].y = vertical_separation; 	picture_properties[7].name = "slides/cowpea spots.png";
+picture_properties[8] = {};	picture_properties[8].x = -one_third_out; 	picture_properties[8].y =-vertical_separation; 	picture_properties[8].name = "slides/herpes spots.png";
+picture_properties[9] = {};	picture_properties[9].x = 0; 				picture_properties[9].y =-vertical_separation; 	picture_properties[9].name = "slides/phyco spots.png";
+picture_properties[10] = {};picture_properties[10].x = -one_third_out;	picture_properties[10].y = vertical_separation;	picture_properties[10].name = "slides/rhino.png";
+picture_properties[11] = {};picture_properties[11].x = -one_third_out;	picture_properties[11].y =-vertical_separation; picture_properties[11].name = "slides/largevirus.png";
+
+picture_properties[12] = {};picture_properties[12].x = OQO *-1.5;		picture_properties[12].y = 0; 					picture_properties[12].name = "slides/T4.png";
+picture_properties[13] = {};picture_properties[13].x = OQO *-0.5;		picture_properties[13].y = 0; 					picture_properties[13].name = "slides/long virus.png";
+picture_properties[14] = {};picture_properties[14].x = OQO * 0.5;		picture_properties[14].y = 0; 					picture_properties[14].name = "slides/HIV EM.png";
+picture_properties[15] = {};picture_properties[15].x = OQO * 1.5;		picture_properties[15].y = 0; 					picture_properties[15].name = "slides/HIV model.png";
+picture_properties[16] = {};picture_properties[16].x = -one_third_out;	picture_properties[16].y = 0; 					picture_properties[16].name = "slides/cube net.png";
+picture_properties[17] = {};picture_properties[17].x = -one_third_out;	picture_properties[17].y = 0;					picture_properties[17].name = "slides/angular defect proteins.png";
+
+picture_properties[18] = {};picture_properties[18].x = one_third_out;	picture_properties[18].y = vertical_separation; picture_properties[18].name = "slides/the rule.png";
+picture_properties[19] = {};picture_properties[19].x = one_third_out;	picture_properties[19].y =-vertical_separation; picture_properties[19].name = "slides/HPV EM.png";
+picture_properties[20] = {};picture_properties[20].x = OQO *-1.5;		picture_properties[20].y = vertical_separation; picture_properties[20].name = "slides/STMV nice.jpg";
+picture_properties[21] = {};picture_properties[21].x = OQO *-0.5;		picture_properties[21].y = vertical_separation; picture_properties[21].name = "slides/LA model.png";
+picture_properties[22] = {};picture_properties[22].x = OQO *-1.5;		picture_properties[22].y =-vertical_separation; picture_properties[22].name = "slides/dengue model.png";
+picture_properties[23] = {};picture_properties[23].x = OQO *-0.5;		picture_properties[23].y =-vertical_separation; picture_properties[23].name = "slides/HPV model.png";
+
+picture_properties[24] = {};picture_properties[24].x = OQO *-1.5;		picture_properties[24].y = 0;					picture_properties[24].name = "slides/Reidun.png";
+picture_properties[25] = {};picture_properties[25].x = OQO *-0.5;		picture_properties[25].y =-vertical_separation; picture_properties[25].name = "slides/LA lines.png";
+
+picture_properties[26] = {};picture_properties[26].x = -one_third_out;	picture_properties[26].y = 0; 					picture_properties[26].name = "slides/diffraction.png";
+picture_properties[27] = {};picture_properties[27].x = 0; 				picture_properties[27].y = 0; 					picture_properties[27].name = "slides/more crystals.png";
+picture_properties[28] = {};picture_properties[28].x = one_third_out;	picture_properties[28].y = 0; 					picture_properties[28].name = "slides/crystal.png";
+picture_properties[29] = {};picture_properties[29].x = -one_third_out;	picture_properties[29].y = 0; 					picture_properties[29].name = "slides/pariacoto.png";
+
+picture_properties[30] = {};picture_properties[30].x = -5.8; 			picture_properties[30].y = 2.8;					picture_properties[30].name = "slides/logo.png";
+picture_properties[31] = {};picture_properties[31].x = 0; 				picture_properties[31].y = 0;					picture_properties[31].name = "slides/Opening slide.png";
 
 //--------------Technologically fundamental
 var playing_field_width = 7*HS3*2; //7*HS3;
