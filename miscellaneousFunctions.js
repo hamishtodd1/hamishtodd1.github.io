@@ -12,6 +12,28 @@ function difference_between_angles(angle1, angle2){
 	//this would be worthwhile
 }
 
+function loadpic(i) {
+	texture_loader.load(
+		picture_properties[i].name, //they need to be powers of 2!
+		function(texture) {
+			picture_objects[i] = new THREE.Mesh(new THREE.CubeGeometry( playing_field_width / 2, playing_field_width / 2 * picture_properties[i].YtoX, 0), 
+					 							new THREE.MeshBasicMaterial({map: texture}) );
+			picture_objects[i].position.x = picture_properties[lowest_unused_picindex].x - 2; //increase or decrease this to center pic 1
+			picture_objects[i].position.y = picture_properties[lowest_unused_picindex].y;
+			console.log(i);
+
+			if(i < picture_properties.length-1 )
+				loadpic(i+1);
+			else {
+				console.log("done");
+				scene.add(picture_objects[i]);
+				render();
+			}
+		},
+		function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );}
+	);
+}
+
 function deduce_stable_points_from_fanning_vertex(fanning_vertex_start, lattice_vertex_index, spoke_to_side_angle){
 	var fanning_vertex_length = fanning_vertex_start.length();
 	var hand = 1;
