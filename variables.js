@@ -45,6 +45,7 @@ var one_third_out = 2.63;
 var vertical_separation = one_third_out / 1.98;
 var OQO = 2.87; //one quarter out
 var boxwidth = 2.3;
+var smallwidt = 1.82;
 picture_properties[0] = {};	picture_properties[0].x = one_third_out; 	picture_properties[0].y = vertical_separation; 	picture_properties[0].YtoX = 1;		picture_properties[0].widt = boxwidth;	picture_properties[0].name = "slides/STMV.png";
 picture_properties[1] = {};	picture_properties[1].x = 0; 				picture_properties[1].y = vertical_separation; 	picture_properties[1].YtoX = 1;		picture_properties[1].widt = boxwidth;	picture_properties[1].name = "slides/caulio.png";
 picture_properties[2] = {};	picture_properties[2].x = -one_third_out; 	picture_properties[2].y = vertical_separation; 	picture_properties[2].YtoX = 1;		picture_properties[2].widt = boxwidth;	picture_properties[2].name = "slides/cowpea.png";
@@ -58,12 +59,12 @@ picture_properties[9] = {};	picture_properties[9].x = 0; 				picture_properties[
 picture_properties[10] = {};picture_properties[10].x = -one_third_out;	picture_properties[10].y = vertical_separation;	picture_properties[10].YtoX = 1;	picture_properties[10].widt = boxwidth;	picture_properties[10].name = "slides/rhino.png";
 picture_properties[11] = {};picture_properties[11].x = -one_third_out;	picture_properties[11].y =-vertical_separation; picture_properties[11].YtoX = 1;	picture_properties[11].widt = boxwidth;	picture_properties[11].name = "slides/largevirus.png";
 
-picture_properties[12] = {};picture_properties[12].x = OQO *-1.5;		picture_properties[12].y = 0; 					picture_properties[12].YtoX = 2;	picture_properties[12].widt = boxwidth;	picture_properties[12].name = "slides/T4.png";
-picture_properties[13] = {};picture_properties[13].x = OQO *-0.5;		picture_properties[13].y = 0; 					picture_properties[13].YtoX = 2;	picture_properties[13].widt = boxwidth;	picture_properties[13].name = "slides/long virus.png";
-picture_properties[14] = {};picture_properties[14].x = OQO * 0.5;		picture_properties[14].y = 0; 					picture_properties[14].YtoX = 2;	picture_properties[14].widt = boxwidth;	picture_properties[14].name = "slides/HIV EM.png";
-picture_properties[15] = {};picture_properties[15].x = OQO * 1.5;		picture_properties[15].y = 0; 					picture_properties[15].YtoX = 2;	picture_properties[15].widt = boxwidth;	picture_properties[15].name = "slides/HIV model.png";
-picture_properties[16] = {};picture_properties[16].x = -one_third_out;	picture_properties[16].y = 0; 					picture_properties[16].YtoX = 1;	picture_properties[16].widt = boxwidth;	picture_properties[16].name = "slides/cube net.png";
-picture_properties[17] = {};picture_properties[17].x = -one_third_out;	picture_properties[17].y = 0;					picture_properties[17].YtoX = 2;	picture_properties[17].widt = boxwidth;	picture_properties[17].name = "slides/angular defect proteins.png";
+picture_properties[12] = {};picture_properties[12].x = OQO *-1.5;		picture_properties[12].y = 0; 					picture_properties[12].YtoX = 2;	picture_properties[12].widt = smallwidt;picture_properties[12].name = "slides/T4.png";
+picture_properties[13] = {};picture_properties[13].x = OQO *-0.5;		picture_properties[13].y = 0; 					picture_properties[13].YtoX = 2;	picture_properties[13].widt = smallwidt;picture_properties[13].name = "slides/long virus.png";
+picture_properties[14] = {};picture_properties[14].x = OQO * 0.5;		picture_properties[14].y = 0; 					picture_properties[14].YtoX = 2;	picture_properties[14].widt = smallwidt;picture_properties[14].name = "slides/HIV EM.png";
+picture_properties[15] = {};picture_properties[15].x = OQO * 1.5;		picture_properties[15].y = 0; 					picture_properties[15].YtoX = 2;	picture_properties[15].widt = smallwidt;picture_properties[15].name = "slides/HIV model.png";
+picture_properties[16] = {};picture_properties[16].x = OQO *-0.5;		picture_properties[16].y = 0; 					picture_properties[16].YtoX = 1;	picture_properties[16].widt =2*boxwidth;picture_properties[16].name = "slides/cube net.png";
+picture_properties[17] = {};picture_properties[17].x = OQO *-0.5;		picture_properties[17].y = 0;					picture_properties[17].YtoX = 2;	picture_properties[17].widt = boxwidth;	picture_properties[17].name = "slides/angular defect proteins.png";
 
 picture_properties[18] = {};picture_properties[18].x = one_third_out;	picture_properties[18].y = vertical_separation; picture_properties[18].YtoX = 0.25;	picture_properties[18].widt = boxwidth;	picture_properties[18].name = "slides/the rule.png";
 picture_properties[19] = {};picture_properties[19].x = one_third_out;	picture_properties[19].y =-vertical_separation; picture_properties[19].YtoX = 0.5;	picture_properties[19].widt = boxwidth;	picture_properties[19].name = "slides/HPV EM.png";
