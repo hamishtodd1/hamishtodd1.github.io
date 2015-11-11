@@ -142,9 +142,11 @@ function init() {
 	//-------------stuff that goes in the scene
 	{
 		var texture_loader = new THREE.TextureLoader();
-		var ourstring = "adenovirus" + 256 + ".jpg";
+		var ourstring = 'adenovirus256.jpg';
+		var ourcatstring = 'adenovirus' + 256 + '.jpg';
+		console.log(ourstring,ourcatstring);
 		texture_loader.load(
-			ourstring,
+			'adenovirus256.jpg',
 			function(texture) {
 				picture_objects[0] = new THREE.Mesh( new THREE.CubeGeometry( playing_field_width / 4, playing_field_width / 4, 0), 
 						new THREE.MeshBasicMaterial({map: texture}) );
