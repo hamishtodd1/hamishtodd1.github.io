@@ -68,13 +68,13 @@ picture_properties[17] = {};picture_properties[17].x = OQO *-0.8;		picture_prope
 
 picture_properties[18] = {};picture_properties[18].x = one_third_out;	picture_properties[18].y = vertical_separation; picture_properties[18].YtoX = 0.25;	picture_properties[18].widt = boxwidth;	picture_properties[18].name = "slides/the rule.png";
 picture_properties[19] = {};picture_properties[19].x = one_third_out;	picture_properties[19].y =-vertical_separation; picture_properties[19].YtoX = 0.5;	picture_properties[19].widt =2*boxwidth;picture_properties[19].name = "slides/HPV EM.png";
-picture_properties[20] = {};picture_properties[20].x = OQO *-1.5;		picture_properties[20].y = vertical_separation; picture_properties[20].YtoX = 1;	picture_properties[20].widt = boxwidth;	picture_properties[20].name = "slides/STMV nice.jpg";
-picture_properties[21] = {};picture_properties[21].x = OQO *-0.5;		picture_properties[21].y = vertical_separation; picture_properties[21].YtoX = 1;	picture_properties[21].widt = boxwidth;	picture_properties[21].name = "slides/LA model.png";
-picture_properties[22] = {};picture_properties[22].x = OQO *-1.5;		picture_properties[22].y =-vertical_separation; picture_properties[22].YtoX = 1;	picture_properties[22].widt = boxwidth;	picture_properties[22].name = "slides/dengue model.png";
-picture_properties[23] = {};picture_properties[23].x = OQO *-0.5;		picture_properties[23].y =-vertical_separation; picture_properties[23].YtoX = 1;	picture_properties[23].widt = boxwidth;	picture_properties[23].name = "slides/HPV model.png";
+picture_properties[20] = {};picture_properties[20].x = OQO *-1.5;		picture_properties[20].y = vertical_separation; picture_properties[20].YtoX = 1;	picture_properties[20].widt = smallwidt;picture_properties[20].name = "slides/STMV nice.jpg";
+picture_properties[21] = {};picture_properties[21].x = OQO *-0.5;		picture_properties[21].y = vertical_separation; picture_properties[21].YtoX = 1;	picture_properties[21].widt = smallwidt;picture_properties[21].name = "slides/LA model.png";
+picture_properties[22] = {};picture_properties[22].x = OQO *-1.5;		picture_properties[22].y =-vertical_separation; picture_properties[22].YtoX = 1;	picture_properties[22].widt = smallwidt;picture_properties[22].name = "slides/dengue model.png";
+picture_properties[23] = {};picture_properties[23].x = OQO *-0.5;		picture_properties[23].y =-vertical_separation; picture_properties[23].YtoX = 1;	picture_properties[23].widt = smallwidt;picture_properties[23].name = "slides/HPV model.png";
 
-picture_properties[24] = {};picture_properties[24].x = OQO *-1.5;		picture_properties[24].y = 0;					picture_properties[24].YtoX = 2;	picture_properties[24].widt = boxwidth;	picture_properties[24].name = "slides/Reidun.png";
-picture_properties[25] = {};picture_properties[25].x = OQO *-0.5;		picture_properties[25].y =-vertical_separation; picture_properties[25].YtoX = 1;	picture_properties[25].widt = boxwidth;	picture_properties[25].name = "slides/LA lines.png";
+picture_properties[24] = {};picture_properties[24].x = OQO *-1.5;		picture_properties[24].y = 0;					picture_properties[24].YtoX = 2;	picture_properties[24].widt = smallwidt;picture_properties[24].name = "slides/Reidun.png";
+picture_properties[25] = {};picture_properties[25].x = OQO *-0.5;		picture_properties[25].y =-vertical_separation; picture_properties[25].YtoX = 1;	picture_properties[25].widt = smallwidt;picture_properties[25].name = "slides/LA lines.png";
 
 picture_properties[26] = {};picture_properties[26].x = -one_third_out;	picture_properties[26].y = 0; 					picture_properties[26].YtoX = 1;	picture_properties[26].widt = boxwidth;	picture_properties[26].name = "slides/diffraction.png";
 picture_properties[27] = {};picture_properties[27].x = 0; 				picture_properties[27].y = 0; 					picture_properties[27].YtoX = 2;	picture_properties[27].widt = boxwidth;	picture_properties[27].name = "slides/more crystals.png";
