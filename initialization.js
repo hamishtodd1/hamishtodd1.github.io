@@ -146,7 +146,7 @@ function init() {
 			texture_loader.load(
 				picture_properties[i].name, //they need to be powers of 2!
 				function(texture,i) {
-					picture_objects[lowest_unused_picindex ] = new THREE.Mesh( new THREE.CubeGeometry( playing_field_width / 2, playing_field_width / 4, 0), 
+					picture_objects[lowest_unused_picindex ] = new THREE.Mesh( new THREE.CubeGeometry( playing_field_width / 2, playing_field_width / 2 * picture_properties[lowest_unused_picindex].YtoX, 0), 
 							 new THREE.MeshBasicMaterial({map: texture}) );
 					picture_objects[lowest_unused_picindex ].position.x = picture_properties[lowest_unused_picindex].x - 2; //increase or decrease this to center pic 1
 					picture_objects[lowest_unused_picindex ].position.y = picture_properties[lowest_unused_picindex].y;
