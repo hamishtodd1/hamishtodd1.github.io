@@ -142,10 +142,11 @@ function init() {
 	//-------------stuff that goes in the scene
 	{
 		var texture_loader = new THREE.TextureLoader();
+		var ourstring = "adenovirus" + 256 + ".jpg";
 		texture_loader.load(
-			"adenovirus" + 256 + ".jpg",
+			ourstring,
 			function(texture) {
-				picture_objects[0] = new THREE.Mesh( new THREE.CubeGeometry( playing_field_width / 2, playing_field_width / 2, 0), 
+				picture_objects[0] = new THREE.Mesh( new THREE.CubeGeometry( playing_field_width / 4, playing_field_width / 4, 0), 
 						new THREE.MeshBasicMaterial({map: texture}) );
 			},
 			function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );});
