@@ -153,6 +153,7 @@ function init() {
 					lowest_unused_picindex++;
 					console.log(lowest_unused_picindex);
 					if(lowest_unused_picindex == picture_properties.length-1){
+						console.log("done");
 						scene.add(picture_objects[31]);
 						render();
 					}
