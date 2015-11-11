@@ -16,6 +16,7 @@ function loadpic(i) {
 	texture_loader.load(
 		picture_properties[i].name, //they need to be powers of 2!
 		function(texture) {
+			console.log(picture_properties[i].YtoX);
 			picture_objects[i] = new THREE.Mesh(new THREE.CubeGeometry( playing_field_width / 2, playing_field_width / 2, 0), 
 					 							new THREE.MeshBasicMaterial({map: texture}) );
 			picture_objects[i].position.x = picture_properties[i].x - 2; //increase or decrease this to center pic 1
