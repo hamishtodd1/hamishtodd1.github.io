@@ -41,10 +41,11 @@ function check_arrows(){
 		forwardbutton.material.color.g = 1;
 		
 		if(isMouseDown && !isMouseDown_previously){
-			if(slide_scenes[slidenumber] != MODE)
-				ChangeScene(slide_scenes[slidenumber]);
+			if(slide_scenes[slidenumber+1] != MODE)
+				ChangeScene(slide_scenes[slidenumber+1]);
 			
 			ChangeSlide(slidenumber+1);
+			console.log(slidenumber, MODE);
 		}
 	}
 	else{
@@ -60,10 +61,11 @@ function check_arrows(){
 		backwardbutton.material.color.g = 1;
 		
 		if(isMouseDown && !isMouseDown_previously){
-			if(slide_scenes[slidenumber] != MODE)
-				ChangeScene(slide_scenes[slidenumber]);
+			if(slide_scenes[slidenumber-1] != MODE)
+				ChangeScene(slide_scenes[slidenumber-1]);
 			
 			ChangeSlide(slidenumber-1);
+			console.log(slidenumber, MODE);
 		}
 	}
 	else{
@@ -73,9 +75,7 @@ function check_arrows(){
 }
 
 function ChangeSlide(new_slide){
-	for(var i = 0; i<pictures_in_slide[slidenumber].length; i++){
-		scene.remove(picture_objects[pictures_in_slide[slidenumber][i]]);
-	}
+	//everything's been removed already
 	for(var i = 0; i<pictures_in_slide[new_slide].length; i++){
 		scene.add(picture_objects[pictures_in_slide[new_slide][i]]);
 	}
