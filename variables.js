@@ -18,7 +18,7 @@ var MODE = 0;
 var slidenumber = 0;
 
 var texture_loader = new THREE.TextureLoader();
-var slide_scenes = new Uint16Array([0,0,0,2,2,0,3,3,3,0,4,4,0,5,5]);
+var slide_scenes = new Uint16Array([0,0,0,2,2,0,3,3,3,0,4,4,5,5,5]);
 var num_slides = 15;
 var pictures_in_slide = Array(num_slides);
 pictures_in_slide[0] = new Uint16Array([31]);

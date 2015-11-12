@@ -5,7 +5,7 @@ function UpdateCamera() {
 //	else
 //		cameradist -= 0.08;
 
-	if(MODE == CUBIC_LATTICE_MODE || slidenumber > 11){
+	if(MODE == CUBIC_LATTICE_MODE ){
 		camera.position.z = min_cameradist * 4.5;
 		camera.updateProjectionMatrix();
 	}

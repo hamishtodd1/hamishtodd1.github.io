@@ -82,6 +82,9 @@ function ChangeSlide(new_slide){
 	}
 	if(new_slide != 0 ) scene.add(picture_objects[30]);
 	
+	if(new_slide == 12)
+		picture_objects[30].position.multiplyScalar(4.5);
+	
 	slidenumber = new_slide;
 }
 
