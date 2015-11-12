@@ -13,78 +13,10 @@ var IRREGULAR_MODE = 3;
 var QC_SPHERE_MODE = 4;
 var CUBIC_LATTICE_MODE = 5;
 	
-var MODE = 0;
-
-var slidenumber = 0;
-
-var texture_loader = new THREE.TextureLoader();
-var slide_scenes = new Uint16Array([0,0,0,2,2,0,3,3,3,0,4,4,5,5,5]);
-var num_slides = 15;
-var pictures_in_slide = Array(num_slides);
-pictures_in_slide[0] = new Uint16Array([31]);
-pictures_in_slide[1] = new Uint16Array([0,1,2,3,4,5]);
-pictures_in_slide[2] = new Uint16Array([6,7,8,9]);
-pictures_in_slide[3] = new Uint16Array([7,8]);
-pictures_in_slide[4] = new Uint16Array([10,11]);
-pictures_in_slide[5] = new Uint16Array([12,13,14,15]);
-pictures_in_slide[6] = new Uint16Array([12]);
-pictures_in_slide[7] = new Uint16Array([16]);
-pictures_in_slide[8] = new Uint16Array([17]);
-pictures_in_slide[9] = new Uint16Array([18,19,20,21,22,23]);
-pictures_in_slide[10] = new Uint16Array([20,21,22,23]);
-pictures_in_slide[11] = new Uint16Array([21,25,24]);
-pictures_in_slide[12] = new Uint16Array([26,27,28]);
-pictures_in_slide[13] = new Uint16Array([26]);
-pictures_in_slide[14] = new Uint16Array([29]);
-
-var num_pictures = 32;
-var picture_objects = Array(num_pictures);
-var picture_properties = Array(num_pictures);
-var one_third_out = 2.63;
-var vertical_separation = one_third_out / 2.05;
-var OQO = 2.21; //one quarter out
-var boxwidth = 2.3;
-var smallwidt = 2;
-picture_properties[0] = {};	picture_properties[0].x = one_third_out; 	picture_properties[0].y = vertical_separation; 	picture_properties[0].YtoX = 1;		picture_properties[0].widt = boxwidth;	picture_properties[0].name = "slides/STMV.png";
-picture_properties[1] = {};	picture_properties[1].x = 0; 				picture_properties[1].y = vertical_separation; 	picture_properties[1].YtoX = 1;		picture_properties[1].widt = boxwidth;	picture_properties[1].name = "slides/caulio.png";
-picture_properties[2] = {};	picture_properties[2].x = -one_third_out; 	picture_properties[2].y = vertical_separation; 	picture_properties[2].YtoX = 1;		picture_properties[2].widt = boxwidth;	picture_properties[2].name = "slides/cowpea.png";
-picture_properties[3] = {};	picture_properties[3].x = -one_third_out; 	picture_properties[3].y =-vertical_separation; 	picture_properties[3].YtoX = 1;		picture_properties[3].widt = boxwidth;	picture_properties[3].name = "slides/herpes.png";
-picture_properties[4] = {};	picture_properties[4].x = 0; 				picture_properties[4].y =-vertical_separation; 	picture_properties[4].YtoX = 1;		picture_properties[4].widt = boxwidth;	picture_properties[4].name = "slides/phyco.png";
-picture_properties[5] = {};	picture_properties[5].x = one_third_out; 	picture_properties[5].y =-vertical_separation; 	picture_properties[5].YtoX = 1;		picture_properties[5].widt = boxwidth;	picture_properties[5].name = "slides/mimi.png";
-picture_properties[6] = {};	picture_properties[6].x = 0; 				picture_properties[6].y = vertical_separation; 	picture_properties[6].YtoX = 1;		picture_properties[6].widt = boxwidth;	picture_properties[6].name = "slides/caulio spots.png";
-picture_properties[7] = {};	picture_properties[7].x = -one_third_out; 	picture_properties[7].y = vertical_separation; 	picture_properties[7].YtoX = 1;		picture_properties[7].widt = boxwidth;	picture_properties[7].name = "slides/cowpea spots.png";
-picture_properties[8] = {};	picture_properties[8].x = -one_third_out; 	picture_properties[8].y =-vertical_separation; 	picture_properties[8].YtoX = 1;		picture_properties[8].widt = boxwidth;	picture_properties[8].name = "slides/herpes spots.png";
-picture_properties[9] = {};	picture_properties[9].x = 0; 				picture_properties[9].y =-vertical_separation; 	picture_properties[9].YtoX = 1;		picture_properties[9].widt = boxwidth;	picture_properties[9].name = "slides/phyco spots.png";
-picture_properties[10] = {};picture_properties[10].x = -one_third_out;	picture_properties[10].y = vertical_separation;	picture_properties[10].YtoX = 1;	picture_properties[10].widt = boxwidth;	picture_properties[10].name = "slides/rhino.png";
-picture_properties[11] = {};picture_properties[11].x = -one_third_out;	picture_properties[11].y =-vertical_separation; picture_properties[11].YtoX = 1;	picture_properties[11].widt = boxwidth;	picture_properties[11].name = "slides/largevirus.png";
-
-picture_properties[12] = {};picture_properties[12].x = OQO *-1.5;		picture_properties[12].y = 0; 					picture_properties[12].YtoX = 2;	picture_properties[12].widt = smallwidt;picture_properties[12].name = "slides/T4.png";
-picture_properties[13] = {};picture_properties[13].x = OQO *-0.5;		picture_properties[13].y = 0; 					picture_properties[13].YtoX = 2;	picture_properties[13].widt = smallwidt;picture_properties[13].name = "slides/long virus.png";
-picture_properties[14] = {};picture_properties[14].x = OQO * 0.5;		picture_properties[14].y = 0; 					picture_properties[14].YtoX = 2;	picture_properties[14].widt = smallwidt;picture_properties[14].name = "slides/HIV EM.png";
-picture_properties[15] = {};picture_properties[15].x = OQO * 1.5;		picture_properties[15].y = 0; 					picture_properties[15].YtoX = 2;	picture_properties[15].widt = smallwidt;picture_properties[15].name = "slides/HIV model.png";
-picture_properties[16] = {};picture_properties[16].x = OQO *-1.12;		picture_properties[16].y = 0; 					picture_properties[16].YtoX = 1;	picture_properties[16].widt=1.5*boxwidth;picture_properties[16].name = "slides/cube net.png";
-picture_properties[17] = {};picture_properties[17].x = OQO *-1.12;		picture_properties[17].y = 0;					picture_properties[17].YtoX = 2;	picture_properties[17].widt = boxwidth;	picture_properties[17].name = "slides/angular defect proteins.png";
-
-picture_properties[18] = {};picture_properties[18].x = one_third_out;	picture_properties[18].y = vertical_separation; picture_properties[18].YtoX = 0.25;	picture_properties[18].widt =2*boxwidth;picture_properties[18].name = "slides/the rule.png";
-picture_properties[19] = {};picture_properties[19].x = one_third_out;	picture_properties[19].y =-vertical_separation; picture_properties[19].YtoX = 0.5;	picture_properties[19].widt =2*boxwidth;picture_properties[19].name = "slides/HPV EM.png";
-picture_properties[20] = {};picture_properties[20].x = OQO *-1.5;		picture_properties[20].y = vertical_separation; picture_properties[20].YtoX = 1;	picture_properties[20].widt = smallwidt;picture_properties[20].name = "slides/STMV nice.jpg";
-picture_properties[21] = {};picture_properties[21].x = OQO *-0.5;		picture_properties[21].y = vertical_separation; picture_properties[21].YtoX = 1;	picture_properties[21].widt = smallwidt;picture_properties[21].name = "slides/LA model.png";
-picture_properties[22] = {};picture_properties[22].x = OQO *-1.5;		picture_properties[22].y =-vertical_separation; picture_properties[22].YtoX = 1;	picture_properties[22].widt = smallwidt;picture_properties[22].name = "slides/dengue model.png";
-picture_properties[23] = {};picture_properties[23].x = OQO *-0.5;		picture_properties[23].y =-vertical_separation; picture_properties[23].YtoX = 1;	picture_properties[23].widt = smallwidt;picture_properties[23].name = "slides/HPV model.png";
-
-picture_properties[24] = {};picture_properties[24].x = OQO *-1.5;		picture_properties[24].y = 0;					picture_properties[24].YtoX = 2;	picture_properties[24].widt = smallwidt;picture_properties[24].name = "slides/Reidun.png";
-picture_properties[25] = {};picture_properties[25].x = OQO *-0.5;		picture_properties[25].y =-vertical_separation; picture_properties[25].YtoX = 1;	picture_properties[25].widt = smallwidt;picture_properties[25].name = "slides/LA lines.png";
-
-picture_properties[26] = {};picture_properties[26].x = -one_third_out;	picture_properties[26].y = 0; 					picture_properties[26].YtoX = 1;	picture_properties[26].widt=1.5*boxwidth;picture_properties[26].name = "slides/diffraction.png";
-picture_properties[27] = {};picture_properties[27].x = 0; 				picture_properties[27].y = 0; 					picture_properties[27].YtoX = 2;	picture_properties[27].widt=0.7*boxwidth;picture_properties[27].name = "slides/more crystals.png";
-picture_properties[28] = {};picture_properties[28].x = one_third_out;	picture_properties[28].y = 0; 					picture_properties[28].YtoX = 1;	picture_properties[28].widt=1.5*boxwidth;picture_properties[28].name = "slides/crystal.png";
-picture_properties[29] = {};picture_properties[29].x = -one_third_out;	picture_properties[29].y = 0; 					picture_properties[29].YtoX = 1;	picture_properties[29].widt=1.5*boxwidth;picture_properties[29].name = "slides/pariacoto.png";
-
-picture_properties[30] = {};picture_properties[30].x = -3.76; 			picture_properties[30].y = 2.76;				picture_properties[30].YtoX = 0.5;	picture_properties[30].widt =boxwidth/2;picture_properties[30].name = "slides/logo.png";
-picture_properties[31] = {};picture_properties[31].x = 0; 				picture_properties[31].y = 0.3;					picture_properties[31].YtoX = 0.5;	picture_properties[31].widt = 11.1;		picture_properties[31].name = "slides/Opening slide.png";
+var MODE = 4;
 
 //--------------Technologically fundamental
-var playing_field_width = 7*HS3*2; //7*HS3;
+var playing_field_width = 7*HS3;
 var playing_field_height = 6;
 var window_height = 600; //100 pixels per unit
 var window_width = window_height * playing_field_width / playing_field_height;
@@ -100,6 +32,7 @@ var renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize( window_width, window_height );
 renderer.setClearColor( 0xffffff, 1);
 document.body.appendChild( renderer.domElement );
+var ytplayer = document.getElementById("movie_player");
 
 //----------------Static
 var FLATNET = 0;
@@ -112,7 +45,7 @@ var net_warnings = 0;
 var z_central_axis = new THREE.Vector3(0,0,1);
 
 var surfperimeter_default_radius = 0.02;
-var varyingsurface_edges_default_radius = 0.0075;
+var varyingsurface_edges_default_radius = 0.012;
 
 //Not including the central vertex
 //mimivirus needs exactly 100. Try and work out how many a human can distinguish though
@@ -120,7 +53,7 @@ var varyingsurface_edges_default_radius = 0.0075;
 //it might be a lot better as a circle. And with a max T number of 49, to show the interesting ambiguity. That means a radius of 7*sqrt(7)
 //What'd be great would be every position corresponding to a valid virus
 var number_of_hexagon_rings = 14;
-var lattice_scalefactor = 7*HS3 / 2 / number_of_hexagon_rings; //TODO there is a more intuitive representation of this (maybe all of it)
+var lattice_scalefactor = playing_field_width / 2 / number_of_hexagon_rings; //TODO there is a more intuitive representation of this (maybe all of it)
 var number_of_lattice_points = 1 + 3 * number_of_hexagon_rings*(number_of_hexagon_rings+1);
 
 //in the limited environment we will end up with (and might do well to be going with) a circle of existence for lattice pts is prb. best

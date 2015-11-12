@@ -58,4 +58,8 @@ function ReadInput() {
 	
 	isMouseDown_previously = isMouseDown;
 	isMouseDown = InputObject.isMouseDown;
+	
+	var secondsthroughvid = ytplayer.getCurrentTime();
+	if(secondsthroughvid > 3 && MODE != CK_MODE)
+		function ChangeScene(CK_MODE);
 }

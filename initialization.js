@@ -141,7 +141,32 @@ function init() {
 	
 	//-------------stuff that goes in the scene
 	{
-		loadpic(0); //does it all
+//		var texture_loader = new THREE.TextureLoader();
+//		texture_loader.load(
+//				'adenovirus256.jpg', //"http://icons.iconarchive.com/icons/aha-soft/torrent/256/virus-icon.png", 
+//				function(texture) {
+//					console.log("hey");
+//					
+//					var backgroundtexture_material = new THREE.MeshBasicMaterial({
+//						map: texture
+//					});
+//					var texturedist = -min_cameradist;
+//					var texturewidth = playing_field_width;
+//					var textureheight = texturewidth; //currently we have a square texture
+//		
+//					backgroundtexture_geometry = new THREE.CubeGeometry( texturewidth, textureheight, 0);
+//					backgroundtexture = new THREE.Mesh( backgroundtexture_geometry, backgroundtexture_material );
+//					backgroundtexture.position.z = -10;
+//					
+//					if(MODE == CK_MODE)
+//						scene.add(backgroundtexture);
+//					
+//					console.log(texture);
+//				},
+//				function ( xhr ) {},
+//				function ( xhr ) {
+//					console.log( 'texture loading error' );
+//				});
 		
 		var surfacematerial = new THREE.MeshBasicMaterial({
 			color: 0x00ffff,
@@ -309,7 +334,7 @@ function init() {
 			);
 		forwardbutton_geometry.faces.push( new THREE.Face3( 0, 2, 1 ) );
 		forwardbutton = new THREE.Mesh( forwardbutton_geometry, new THREE.MeshBasicMaterial({color: 0x0000ff}) );
-		forwardbutton.position.x += 2.5; // 2.8;
+		forwardbutton.position.x += 2.8;
 		forwardbutton.position.y -= 2.8;
 		var backwardbutton_geometry = new THREE.Geometry();
 		backwardbutton_geometry.vertices.push(
@@ -319,7 +344,7 @@ function init() {
 			);
 		backwardbutton_geometry.faces.push( new THREE.Face3( 0, 2, 1 ) );
 		backwardbutton = new THREE.Mesh( backwardbutton_geometry, new THREE.MeshBasicMaterial({color: 0x0000ff}) );
-		backwardbutton.position.x -= 5.8;
+		backwardbutton.position.x -= 2.8;
 		backwardbutton.position.y -= 2.8;
 		
 		Button = new THREE.Mesh( new THREE.CircleGeometry( 0.3 ), new THREE.MeshBasicMaterial({color: 0x00ff00}) );

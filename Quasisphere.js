@@ -14,8 +14,6 @@
  * Shouldn't there be one allowing for the fat rhomb and pentagon to rest on the top? Or that simple one allowing bowties? 
  * 
  * points on the corners should be in.
- * 
- * Don't want any of those positions where there are no connections
  */
 
 /*
@@ -192,7 +190,7 @@ function MoveQuasiLattice(){
 		}
 		//TODO the fucking tau = 0 thing
 		
-		cutout_vector0.copy(stable_points[closest_stable_point_index]);
+		cutout_vector0.copy(stable_points[closest_stable_point_index]); //maybe minus, you know
 		cutout_vector1.copy(stable_points[closest_stable_point_index]);
 		cutout_vector1.applyAxisAngle(z_central_axis, -TAU/5);
 	}
@@ -518,7 +516,8 @@ function initialize_QS_stuff() {
  	 	}
 	}
  	
- 	back_hider = new THREE.Mesh( new THREE.PlaneBufferGeometry( playing_field_width * 2,playing_field_width * 2 ), new THREE.MeshBasicMaterial({color: 0xffffff}) );
+ 	var materialf = new THREE.MeshBasicMaterial({color: 0xffff00});
+	back_hider = new THREE.Mesh( new THREE.PlaneBufferGeometry( playing_field_width * 2,playing_field_width * 2 ), materialf );
 	back_hider.position.z = -0.01;
  	
  	var materialy = new THREE.LineBasicMaterial({
