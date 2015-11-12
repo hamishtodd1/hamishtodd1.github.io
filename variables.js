@@ -32,7 +32,7 @@ var renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize( window_width, window_height );
 renderer.setClearColor( 0xffffff, 1);
 document.body.appendChild( renderer.domElement );
-//var ytplayer = document.getElementById("movie_player");
+var ytplayer = document.getElementById("movie_player");
 
 //----------------Static
 var FLATNET = 0;
