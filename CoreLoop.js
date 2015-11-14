@@ -128,15 +128,15 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 function onYouTubeIframeAPIReady(){
 	console.log("it's a-coming!");
-	new YT.Player('player', {
-		videoId:'lDMaeDoSNvM',
-		height: 360,
-		width: 480
-//		playerVars:{
-//			autoplay: 1,
-//			controls: 0
-//		}
-	});
+//	new YT.Player('player', {
+//		videoId:'lDMaeDoSNvM',
+//		height: 360,
+//		width: 480
+////		playerVars:{
+////			autoplay: 1,
+////			controls: 0
+////		}
+//	});
 }
 function onPlayerReady(event) {
 	event.target.playVideo();
