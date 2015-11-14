@@ -59,7 +59,7 @@ function ReadInput() {
 	isMouseDown_previously = isMouseDown;
 	isMouseDown = InputObject.isMouseDown;
 	
-	var ytplayer = document.getElementById("movie_player");
+//	var ytplayer = document.getElementById("movie_player");
 	var secondsthroughvid = ytplayer.getCurrentTime();
 	if(secondsthroughvid > 3 && MODE != CK_MODE)
 		console.log("woo");
