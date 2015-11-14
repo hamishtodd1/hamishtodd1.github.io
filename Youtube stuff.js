@@ -15,8 +15,8 @@ function onYouTubeIframeAPIReady(){
 		width: 480,
 	    events: {
 	        'onReady': onPlayerReady
-	    }
-		playerVars:{
+	    },
+		playerVars: {
 			autoplay: 1,
 			controls: 0
 		}
