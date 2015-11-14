@@ -121,8 +121,19 @@ function render() {
 	renderer.render( scene, camera );
 }
 
-init();
-render();
+function OnYoutubePlayerReady(){
+	new YT.Player('player', {
+		videoId:'lDMaeDoSNvM',
+		height: 360,
+		width: 480,
+		playerVars:{
+			autoplay: 1,
+			controls: 0
+		}
+	});
+	init();
+	render();
+}
 
 //eventually we'll add some trigger to this that makes it reasonable to call every frame
 function ChangeScene(new_mode) {
