@@ -121,6 +121,11 @@ function render() {
 	renderer.render( scene, camera );
 }
 
+var tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+var firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
 function onYouTubeIframeAPIReady(){
 	console.log("it's a-coming!");
 	new YT.Player('player', {
