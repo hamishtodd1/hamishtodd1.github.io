@@ -134,7 +134,7 @@ function onPlayerReady(event) {
 
 function onYouTubeIframeAPIReady(){
 	console.log("it's a-coming!");
-	new YT.Player('player', {
+	ytplayer = new YT.Player('player', {
 		videoId:'lDMaeDoSNvM',
 		height: 360,
 		width: 480,
