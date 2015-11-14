@@ -26,3 +26,7 @@ function onYouTubeIframeAPIReady(){
 		}
 	});
 }
+
+function get_time(){
+	ytplayer.getCurrentTime();
+}
