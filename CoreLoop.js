@@ -121,20 +121,23 @@ function render() {
 	renderer.render( scene, camera );
 }
 
-//window.onYouTubeIframeAPIReady = function(){
-//	console.log("it's a-coming!");
-//	new YT.Player('ytplayer', {
-////		videoId:'lDMaeDoSNvM',
-////		height: 360,
-////		width: 480,
-////		playerVars:{
-////			autoplay: 1,
-////			controls: 0
-////		}
-//	});
-//	init();
-//	render();
-//}
+function onYouTubeIframeAPIReady = function(){
+	console.log("it's a-coming!");
+	new YT.Player('player', {
+		videoId:'lDMaeDoSNvM',
+		height: 360,
+		width: 480
+//		playerVars:{
+//			autoplay: 1,
+//			controls: 0
+//		}
+	});
+}
+function onPlayerReady(event) {
+	event.target.playVideo();
+	init();
+	render();
+}
 
 //eventually we'll add some trigger to this that makes it reasonable to call every frame
 function ChangeScene(new_mode) {
