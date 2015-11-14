@@ -122,15 +122,15 @@ function render() {
 }
 
 function onYouTubeIframeAPIReady(){
-	new YT.Player('ytplayer', {
-//		videoId:'lDMaeDoSNvM',
-//		height: 360,
-//		width: 480,
-//		playerVars:{
-//			autoplay: 1,
-//			controls: 0
-//		}
-	});
+//	new YT.Player('ytplayer', {
+////		videoId:'lDMaeDoSNvM',
+////		height: 360,
+////		width: 480,
+////		playerVars:{
+////			autoplay: 1,
+////			controls: 0
+////		}
+//	});
 	init();
 	render();
 }
