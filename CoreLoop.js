@@ -121,7 +121,7 @@ function render() {
 	renderer.render( scene, camera );
 }
 
-function onYouTubeIframeAPIReady(){
+//function onYouTubeIframeAPIReady(){
 //	new YT.Player('ytplayer', {
 ////		videoId:'lDMaeDoSNvM',
 ////		height: 360,
@@ -133,7 +133,7 @@ function onYouTubeIframeAPIReady(){
 //	});
 	init();
 	render();
-}
+//}
 
 //eventually we'll add some trigger to this that makes it reasonable to call every frame
 function ChangeScene(new_mode) {
