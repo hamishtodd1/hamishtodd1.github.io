@@ -121,34 +121,6 @@ function render() {
 	renderer.render( scene, camera );
 }
 
-var tag = document.createElement('script');
-tag.src = "https://www.youtube.com/iframe_api";
-var firstScriptTag = document.getElementsByTagName('script')[0];
-firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-function onPlayerReady(event) {
-	event.target.playVideo();
-	init();
-	render();
-}
-
-function onYouTubeIframeAPIReady(){
-	console.log("it's a-coming!");
-	ytplayer = new YT.Player('player', {
-		videoId:'lDMaeDoSNvM',
-		height: 360,
-		width: 480,
-	    events: {
-	        'onReady': onPlayerReady
-	    }
-//		playerVars:{
-//			autoplay: 1,
-//			controls: 0
-//		}
-	});
-}
-
-
 //eventually we'll add some trigger to this that makes it reasonable to call every frame
 function ChangeScene(new_mode) {
 	if(new_mode==CUBIC_LATTICE_MODE){
