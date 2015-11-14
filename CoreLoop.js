@@ -122,7 +122,7 @@ function render() {
 }
 
 function onYouTubeIframeAPIReady(){
-	new YT.Player('player', {
+	new YT.Player('ytplayer', {
 		videoId:'lDMaeDoSNvM',
 		height: 360,
 		width: 480,
