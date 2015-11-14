@@ -121,7 +121,7 @@ function render() {
 	renderer.render( scene, camera );
 }
 
-window.onYouTubeIframeAPIReady(){
+window.onYouTubeIframeAPIReady = function(){
 	new YT.Player('ytplayer', {
 //		videoId:'lDMaeDoSNvM',
 //		height: 360,
