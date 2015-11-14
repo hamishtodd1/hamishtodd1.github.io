@@ -126,6 +126,12 @@ tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
+function onPlayerReady(event) {
+	event.target.playVideo();
+	init();
+	render();
+}
+
 function onYouTubeIframeAPIReady(){
 	console.log("it's a-coming!");
 	new YT.Player('player', {
@@ -142,11 +148,7 @@ function onYouTubeIframeAPIReady(){
 //		}
 	});
 }
-function onPlayerReady(event) {
-	event.target.playVideo();
-	init();
-	render();
-}
+
 
 //eventually we'll add some trigger to this that makes it reasonable to call every frame
 function ChangeScene(new_mode) {
