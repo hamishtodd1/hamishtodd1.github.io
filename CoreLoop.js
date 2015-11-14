@@ -122,6 +122,7 @@ function render() {
 }
 
 window.onYouTubeIframeAPIReady = function(){
+	console.log("it's a-coming!");
 	new YT.Player('ytplayer', {
 //		videoId:'lDMaeDoSNvM',
 //		height: 360,
