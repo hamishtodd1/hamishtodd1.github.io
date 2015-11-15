@@ -28,6 +28,7 @@
  */
 
 function check_arrows(){
+	//would kind of like to return if they're not in the scene
 	var ourscalar;
 	if(MODE==CUBIC_LATTICE_MODE)
 		ourscalar = 4.5;
