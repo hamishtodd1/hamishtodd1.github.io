@@ -4,6 +4,7 @@ var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 function onPlayerReady(event) {
+	console.log("begin")
 	init();
 	render();
 }
@@ -32,5 +33,6 @@ function onYouTubeIframeAPIReady(){
 }
 
 function get_time(){
+	console.log(ytplayer)
 	ytplayer.getCurrentTime();
 }
