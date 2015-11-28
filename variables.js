@@ -14,7 +14,7 @@ var IRREGULAR_MODE = 4;
 var QC_SPHERE_MODE = 5;
 var CUBIC_LATTICE_MODE = 6;
 	
-var MODE = QC_SPHERE_MODE;
+var MODE = 0;
 
 var section_finishing_time = new Uint16Array([3,7,14,18,22,25,32]);
 
