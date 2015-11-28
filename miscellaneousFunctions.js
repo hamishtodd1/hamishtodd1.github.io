@@ -103,28 +103,14 @@ function line_line_intersection_vecs(p,q,r,s) {
 
 function deduce_most_of_surface(openness, vertices_numbers) {
 	for( var i = 3; i < 22; i++) {
-		var theta = minimum_angles[i] + openness * (TAU/2 - minimum_angles[i]);
-		
 		var a_index = vertices_derivations[i][0];
 		var b_index = vertices_derivations[i][1];
 		var c_index = vertices_derivations[i][2];
-		
-		var a = new THREE.Vector3( //this is our origin
-			vertices_numbers.array[a_index * 3 + 0],
-			vertices_numbers.array[a_index * 3 + 1],
-			vertices_numbers.array[a_index * 3 + 2]);	
 			
 		var a_net = new THREE.Vector3( //this is our origin
 			flatnet_vertices.array[a_index * 3 + 0],
 			flatnet_vertices.array[a_index * 3 + 1],
 			0);	
-		
-		var crossbar_unit = new THREE.Vector3(
-			vertices_numbers.array[b_index * 3 + 0],
-			vertices_numbers.array[b_index * 3 + 1],
-			vertices_numbers.array[b_index * 3 + 2]);
-		crossbar_unit.sub(a);			
-		crossbar_unit.normalize();
 		
 		var net_crossbar_unit = new THREE.Vector3(
 			flatnet_vertices.array[b_index*3+0],
@@ -138,51 +124,70 @@ function deduce_most_of_surface(openness, vertices_numbers) {
 			flatnet_vertices.array[i*3+1],
 			0);
 		d_net.sub(a_net);
-		var d_hinge_origin_length = d_net.length() * get_cos( d_net, net_crossbar_unit);	
-		
-		var d_hinge_origin = new THREE.Vector3(
-			crossbar_unit.x * d_hinge_origin_length,
-			crossbar_unit.y * d_hinge_origin_length,
-			crossbar_unit.z * d_hinge_origin_length);
-			
-		var d_hinge_origin_net = new THREE.Vector3(
-			net_crossbar_unit.x * d_hinge_origin_length,
-			net_crossbar_unit.y * d_hinge_origin_length,
-			net_crossbar_unit.z * d_hinge_origin_length);
-			
+		var d_hinge_origin_length = d_net.length() * get_cos( d_net, net_crossbar_unit);
 		var d_hinge_net = d_net.clone();
+		var d_hinge_origin_net = new THREE.Vector3(
+				net_crossbar_unit.x * d_hinge_origin_length,
+				net_crossbar_unit.y * d_hinge_origin_length,
+				net_crossbar_unit.z * d_hinge_origin_length);
 		d_hinge_net.sub( d_hinge_origin_net );
-
+		
+		var a = new THREE.Vector3(
+			vertices_numbers.array[a_index * 3 + 0],
+			vertices_numbers.array[a_index * 3 + 1],
+			vertices_numbers.array[a_index * 3 + 2]);	
+		var b = new THREE.Vector3(
+			vertices_numbers.array[b_index * 3 + 0],
+			vertices_numbers.array[b_index * 3 + 1],
+			vertices_numbers.array[b_index * 3 + 2]);
 		var c = new THREE.Vector3(
 			vertices_numbers.array[c_index * 3 + 0],
 			vertices_numbers.array[c_index * 3 + 1],
 			vertices_numbers.array[c_index * 3 + 2]);
-		c.sub(a);
-		var c_hinge_origin_length = c.length() * get_cos(crossbar_unit, c);		
-		var c_hinge_origin = new THREE.Vector3(
-			crossbar_unit.x * c_hinge_origin_length,
-			crossbar_unit.y * c_hinge_origin_length,
-			crossbar_unit.z * c_hinge_origin_length);
-			
-		var c_hinge_unit = new THREE.Vector3();
-		c_hinge_unit.subVectors( c, c_hinge_origin);
-		c_hinge_unit.normalize();
-		var c_hinge_component = c_hinge_unit.clone();
-		c_hinge_component.multiplyScalar( Math.cos(theta) * d_hinge_net.length());
-			
-		var downward_vector_unit = new THREE.Vector3();		
-		downward_vector_unit.crossVectors(crossbar_unit, c);
-		downward_vector_unit.normalize();
-		var downward_component = downward_vector_unit.clone();
-		downward_component.multiplyScalar(Math.sin(theta) * d_hinge_net.length());
 		
-		var d = new THREE.Vector3();
-		d.addVectors(downward_component, c_hinge_component);
-		d.add( d_hinge_origin );
-		d.add( a );
+		var bend_angle = minimum_angles[i] + openness * (TAU/2 - minimum_angles[i]);
+		
+		var d = bent_down_quad_corner(a,b,c,bend_angle,d_hinge_origin_length, d_hinge_net.length());
 		
 		vertices_numbers.setXYZ(i, d.x,d.y,d.z);
 	}
+}
+
+function bent_down_quad_corner(a,b,c,theta,d_hinge_origin_length, d_hinge_length) {
+	var crossbar_unit = b.clone();
+	crossbar_unit.sub(a);			
+	crossbar_unit.normalize();
+	
+	var d_hinge_origin = new THREE.Vector3(
+		crossbar_unit.x * d_hinge_origin_length,
+		crossbar_unit.y * d_hinge_origin_length,
+		crossbar_unit.z * d_hinge_origin_length);
+
+	c.sub(a);
+	var c_hinge_origin_length = c.length() * get_cos(crossbar_unit, c);		
+	var c_hinge_origin = new THREE.Vector3(
+		crossbar_unit.x * c_hinge_origin_length,
+		crossbar_unit.y * c_hinge_origin_length,
+		crossbar_unit.z * c_hinge_origin_length);
+		
+	var c_hinge_unit = new THREE.Vector3();
+	c_hinge_unit.subVectors( c, c_hinge_origin);
+	c_hinge_unit.normalize();
+	var forward_component = c_hinge_unit.clone();
+	forward_component.multiplyScalar( Math.cos(theta) * d_hinge_length);
+		
+	var downward_vector_unit = new THREE.Vector3();		
+	downward_vector_unit.crossVectors(crossbar_unit, c);
+	downward_vector_unit.normalize();
+	var downward_component = downward_vector_unit.clone();
+	downward_component.multiplyScalar(Math.sin(theta) * d_hinge_length);
+	
+	var d = new THREE.Vector3();
+	d.addVectors(downward_component, forward_component);
+	d.add( d_hinge_origin );
+	d.add( a );
+	
+	return d;
 }
 
 function put_tube_in_buffer(A,B, mybuffer, radius ) {
@@ -267,6 +272,31 @@ function point_in_triangle( ourpointx,ourpointy,
 	return false;
 }
 
+function point_in_inflated_triangle( 
+		ourpointx,ourpointy,
+		cornerAx, cornerAy,cornerBx, cornerBy, cornerCx,cornerCy, 
+		clockwise,
+		inflation){
+	if(inflation === undefined)
+		inflation = 0.00000000000000057; //tuned so that we get the central pentagon near HPV, but no bands near STMV.
+	
+	var center = new THREE.Vector2();
+	center.x = ( cornerAx + cornerBx + cornerCx ) / 3;
+	center.y = ( cornerAy + cornerBy + cornerCy ) / 3;
+	
+	var IcornerAx = (cornerAx - center.x) * (1+inflation) + center.x;
+	var IcornerAy = (cornerAy - center.y) * (1+inflation) + center.y;
+	var IcornerBx = (cornerBx - center.x) * (1+inflation) + center.x;
+	var IcornerBy = (cornerBy - center.y) * (1+inflation) + center.y;
+	var IcornerCx = (cornerCx - center.x) * (1+inflation) + center.x;
+	var IcornerCy = (cornerCy - center.y) * (1+inflation) + center.y;
+	
+	return point_in_triangle(
+			ourpointx,ourpointy,
+			IcornerAx, IcornerAy,IcornerBx, IcornerBy, IcornerCx,IcornerCy, 
+			clockwise);
+}
+
 //put them in in cross-product order and your fingers, going from the first vector to the second, will be going along the angle this returns the sin of
 function get_sin_Vector2(side1, side2)
 {
@@ -349,11 +379,12 @@ function vector_from_bearing( rootvector, length, angle, cos, sin) {
 function tetrahedron_top(P1,P2,P3, r1,r2,r3) {
 	P3.sub(P1);
 	P2.sub(P1);
-	var P3_P2_angle = Math.acos(P3.dot(P2)/P2.length()/P3.length());
+	var cos_P3_P2_angle = P3.dot(P2)/P2.length()/P3.length();
+	var sin_P3_P2_angle = Math.sqrt(1-cos_P3_P2_angle*cos_P3_P2_angle);
 	
 	var P1_t = new THREE.Vector3(0,0,0);
 	var P2_t = new THREE.Vector3(P2.length(),0,0);
-	var P3_t = new THREE.Vector3(P3.length() * Math.cos(P3_P2_angle), P3.length() * Math.sin(P3_P2_angle),0);
+	var P3_t = new THREE.Vector3(P3.length() * cos_P3_P2_angle, P3.length() * sin_P3_P2_angle,0);
 	
 	var cp_t = new THREE.Vector3(0,0,0);
 	cp_t.x = ( r1*r1 - r2*r2 + P2_t.x * P2_t.x ) / ( 2 * P2_t.x );

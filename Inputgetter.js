@@ -60,7 +60,8 @@ function ReadInput() {
 	isMouseDown = InputObject.isMouseDown;
 	
 	var secondsthroughvid = get_time();
-	if(secondsthroughvid > 3 && MODE != CK_MODE)
-		console.log("woo");
-//		function ChangeScene(CK_MODE);
+	for(var i = 0; i < section_finishing_time.length; i++) {//or whichever mode is last
+		if(secondsthroughvid < section_finishing_time[i] && MODE != i)
+			ChangeScene(i);
+	}
 }

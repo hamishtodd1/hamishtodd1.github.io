@@ -1,5 +1,9 @@
-/* No protein gets cut up, they merely overlap?
- * And you should have the translational net for the irreg
+/* 
+ * Protein triangles: get the integer positions of their CENTERS, doing something (if you're not already doing it) whereby each appears in one unt precisely one face.
+ * Then stitching up is probably a bit hard. It can't be that difficult to "fold" it in place.
+ * You find the places on the triangle's edges where the face edge intersects
+ * do the bent quad thing, a and b are those intersections, c is the opposing corner of the face triangle
+ * the length from a to the tip is the hypotenuse, get_cos_rule with the lengths to get d_hinge_origin_length, pythagorean theorem to get the hinge length
  */ 
 
 function Update_net_variables() {

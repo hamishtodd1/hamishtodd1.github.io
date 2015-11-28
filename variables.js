@@ -6,14 +6,17 @@ var PHI = (Math.sqrt(5) + 1) / 2;
 var TAU = Math.PI * 2;
 
 //--------------Structurally fundamental
-var STATIC_PROTEIN_MODE = 0;
-var STATIC_DNA_MODE = 1; 
-var CK_MODE = 2;
-var IRREGULAR_MODE = 3;
-var QC_SPHERE_MODE = 4;
-var CUBIC_LATTICE_MODE = 5;
+var NOTHING_MODE = 0;
+var STATIC_PROTEIN_MODE = 1;
+var STATIC_DNA_MODE = 2; 
+var CK_MODE = 3;
+var IRREGULAR_MODE = 4;
+var QC_SPHERE_MODE = 5;
+var CUBIC_LATTICE_MODE = 6;
 	
-var MODE = 4;
+var MODE = QC_SPHERE_MODE;
+
+var section_finishing_time = new Uint16Array([3,7,14,18,22,25,32]);
 
 //--------------Technologically fundamental
 var playing_field_width = 7*HS3;
@@ -111,6 +114,10 @@ var stable_points = Array(345);
 var lowest_unused_stablepoint = 0;
 var quasiquasilattice;
 var stablepointslattice;
+var nearby_quasicutouts;
+var stitchup;
+var stitchup_line_pairs = new Uint16Array(1000);
+var set_stable_point = 32;
 
 var golden_rhombohedra = Array(20);
 var goldenicos = Array(12);
