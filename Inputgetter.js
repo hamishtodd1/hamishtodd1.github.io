@@ -60,8 +60,8 @@ function ReadInput() {
 	isMouseDown = InputObject.isMouseDown;
 	
 	var secondsthroughvid = get_time();
-	for(var i = 0; i < section_finishing_time.length; i++) {//or whichever mode is last
-		if(secondsthroughvid < section_finishing_time[i] && MODE != i)
+	for(var i = 0; i < section_finishing_time.length /*or whichever mode is last*/; i++) {
+		if( section_finishing_time[i-1] <= secondsthroughvid && secondsthroughvid < section_finishing_time[i] && MODE != i)
 			ChangeScene(i);
 	}
 }
