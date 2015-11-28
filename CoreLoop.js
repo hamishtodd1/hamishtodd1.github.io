@@ -93,8 +93,6 @@ function ChangeScene(new_mode) {
 		backwardbutton.scale.set(1,1,1);
 	}
 	
-	console.log("changing scene")
-	
 	MODE = new_mode;
 	
 	for( var i = scene.children.length - 1; i >= 0; i--){

@@ -4,8 +4,6 @@ var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 function onPlayerReady(event) {
-	console.log("begin")
-	console.log(ytplayer)
 	init();
 	render();
 }
