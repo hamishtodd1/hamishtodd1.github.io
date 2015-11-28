@@ -60,7 +60,7 @@ function ReadInput() {
 	isMouseDown = InputObject.isMouseDown;
 	
 	var secondsthroughvid = get_time();
-	console.log(secondsthroughvid) 
+//	console.log(secondsthroughvid) 
 	for(var i = 0; i < section_finishing_time.length /*or whichever mode is last*/; i++) {
 		if( section_finishing_time[i-1] <= secondsthroughvid && secondsthroughvid < section_finishing_time[i] && MODE != i)
 			ChangeScene(i);
