@@ -16,8 +16,6 @@ var CUBIC_LATTICE_MODE = 6;
 	
 var MODE = 0;
 
-var section_finishing_time = new Uint16Array([-1,-1,0,18,22,25,32]); //first three were 3,7,14.
-
 //--------------Technologically fundamental
 var playing_field_width = 7*HS3;
 var playing_field_height = 6;
