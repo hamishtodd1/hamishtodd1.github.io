@@ -49,8 +49,9 @@ function react_to_video(){
 			ChangeScene(i);
 	}
 	for(var i = 0; i < pausing_times.length /*or whichever mode is last*/; i++) {
-		if( secondsthroughvid == pausing_times[i] ){
+		if( pausing_times[i] <= secondsthroughvid && secondsthroughvid < pausing_times[i] + 1 ){
 			ytplayer.pauseVideo();
+			console.log("paused?")
 			pausing_times.splice(i);
 		}
 	}
