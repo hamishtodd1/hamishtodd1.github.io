@@ -97,6 +97,10 @@ function ChangeScene(new_mode) {
 		
 		case STATIC_DNA_MODE:
 			camera.toOrthographic();
+			for(var i = 0; i<bocavirus_proteins.length; i++)
+				scene.add(bocavirus_proteins[i]);
+			for(var i = 0; i< lights.length; i++)
+				scene.add( lights[i] );
 			scene.add(DNA_cage);
 			break;
 			
