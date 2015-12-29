@@ -41,11 +41,18 @@ function react_to_video(){
 	 * with both QC and DNA, if the player goes into any other section, we should reset their coords
 	 */
 	var section_finishing_time = new Uint16Array([34,182,300,553,743,914,99999999999]); //first three were 3,7,14.
+	var pausing_times = new Uint16Array([6,9]);
 	
 	var secondsthroughvid = ytplayer.getCurrentTime();
 	for(var i = 0; i < section_finishing_time.length /*or whichever mode is last*/; i++) {
 		if( section_finishing_time[i-1] <= secondsthroughvid && secondsthroughvid < section_finishing_time[i] && MODE != i)
 			ChangeScene(i);
+	}
+	for(var i = 0; i < section_finishing_time.length /*or whichever mode is last*/; i++) {
+		if( secondsthroughvid == pausing_times[i] ){
+			ytplayer.pauseVideo();
+			pausing_times.splice(i);
+		}
 	}
 	
 	var crystalformation_time = 1028;
