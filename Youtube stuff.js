@@ -4,6 +4,7 @@ var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 function onPlayerReady(event) {
+	MODE = 0;
 	init();
 	render();
 }
@@ -39,7 +40,7 @@ function react_to_video(){
 	 * 
 	 * with both QC and DNA, if the player goes into any other section, we should reset their coords
 	 */
-	var section_finishing_time = new Uint16Array([35,182,300,553,743,914,99999999999]); //first three were 3,7,14.
+	var section_finishing_time = new Uint16Array([34,182,300,553,743,914,99999999999]); //first three were 3,7,14.
 	
 	var secondsthroughvid = ytplayer.getCurrentTime();
 	for(var i = 0; i < section_finishing_time.length /*or whichever mode is last*/; i++) {

@@ -1,6 +1,8 @@
 function update_bocavirus() {
 	//if you're on DNA_CAGE_MODE then we unfold, if you're on STATIC_PROTEIN_MODE we fold.
 	
+	//Potential speedup: merge proteins
+	
 	if(isMouseDown) {
 		bocavirus_MovementAngle = Mouse_delta.length() / 3;
 		bocavirus_MovementAxis.set(-Mouse_delta.y, Mouse_delta.x, 0);
@@ -38,6 +40,12 @@ function update_bocavirus() {
 			for(var j = 0; j<3; j++)
 				bocavirus_vertices[i*3+j].add(extension_vector);
 		}		
+	}
+	else if(MODE==STATIC_PROTEIN_MODE){
+		capsidopenness=0;
+		for(var i = 0; i<bocavirus_proteins.length; i++){
+			bocavirus_proteins[i].material.opacity = 1;
+		}
 	}
 	
 	for(var i = 0; i<bocavirus_proteins.length; i++){
