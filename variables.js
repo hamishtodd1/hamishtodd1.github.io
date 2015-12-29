@@ -14,7 +14,7 @@ var IRREGULAR_MODE = 4;
 var QC_SPHERE_MODE = 5;
 var CUBIC_LATTICE_MODE = 6;
 	
-var MODE = 0;
+var MODE = 6;
 
 //--------------Technologically fundamental
 var playing_field_width = 7*HS3;
@@ -24,8 +24,8 @@ var window_width = window_height * playing_field_width / playing_field_height;
 var min_cameradist = 10; //get any closer and the perspective is weird
 var vertical_fov = 2 * Math.atan(playing_field_height/(2*min_cameradist));
 
-var camera = new THREE.PerspectiveCamera( vertical_fov * 360 / TAU, window_width / window_height, 0.1, 1000 );
-//var camera = new THREE.OrthographicCamera( playing_field_width / -2, playing_field_width / 2, playing_field_height / 2, playing_field_height / -2, 0.1, 1000 );
+var camera = new THREE.CombinedCamera(playing_field_width, playing_field_height, vertical_fov * 360 / TAU, 0.1, 1000, 0.1, 1000);
+//var camera = new THREE.PerspectiveCamera( vertical_fov * 360 / TAU, window_width / window_height, 0.1, 1000 );
 camera.position.z = MODE == CUBIC_LATTICE_MODE ? 3*min_cameradist : min_cameradist;
 
 var scene = new THREE.Scene();
@@ -117,6 +117,18 @@ var stitchup;
 var stitchup_line_pairs = new Uint16Array(1000);
 var set_stable_point = 32;
 
+//------------3D penrose stuff
+
+var Quasi_meshes = Array(5);
+var meshes_original_numbers = Array(5);
+var outlines_original_numbers = Array(5);
+var Quasi_outlines = Array(5);
+var prism_triangle_indices = new Uint16Array([0, 2, 1, 2, 3, 1, 2, 4, 3, 4, 5, 3]);
+var normalized_virtualdodeca_vertices = Array(20);
+var normalized_virtualico_vertices = Array(20);
+
+//------------no longer 3D penrose stuff
+
 var golden_rhombohedra = Array(20);
 var goldenicos = Array(12);
 var golden_triacontahedra = Array(20);
@@ -187,8 +199,6 @@ var vertices_derivations;
 var minimum_angles = new Array(22); //between these two, we derive the polyhedron and surface
 
 var circle;
-var forwardbutton;
-var backwardbutton;
 var Button;
 
 var varyingsurface_cylinders = Array(41);
@@ -224,3 +234,16 @@ var raycaster = new THREE.Raycaster();
 var MousePosition = new THREE.Vector2(0,0);
 var OldMousePosition = new THREE.Vector2(0,0);
 var Mouse_delta = new THREE.Vector2(0,0);
+
+//----bocavirus stuff
+var master_protein = new THREE.Mesh( new THREE.BufferGeometry(), new THREE.MeshLambertMaterial({color:0xf0f00f, transparent:true}) );
+var atom_vertices_components;
+var bocavirus_vertices = Array(20*3);
+var initial_bocavirus_vertices = Array(20*3);
+var bocavirus_proteins = Array(20);
+var lights = [];
+
+var DNA_cage;
+
+var bocavirus_MovementAngle = 0;
+var bocavirus_MovementAxis = new THREE.Vector3(1,0,0);

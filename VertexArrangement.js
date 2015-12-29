@@ -2,6 +2,9 @@
  * Todo:
  * -check under what circumstances angular defects are ok
  * -translational net, you can't move the top or bottom vertex
+ * 
+ * 
+ * So we could have them change color if the configuration is unrealizable
  */
 
 function update_movementzone() {
@@ -55,11 +58,7 @@ function update_movementzone() {
 	//create line, check which line segments it cuts
 	//it should cut at least, and maybe most, two line segments, so the points on the ends that it cuts off can go to make the new corners.
 	//check all points to see if they're to the right of the line. If not, move them to one of the new corners
-	//no, you can't predict it like that, when you slice off a corner you increase the number of corners in that area by 1. vertices won't be in order.
-	
-	
-	
-	//LEEEEEET's just turn off everything except keeping identified edge lengths the same and see what happens
+	//no, you can't predict it like that, when you slice off a corner you increase the number of corners in that area by 1. vertices won't be in order.	
 }
 
 

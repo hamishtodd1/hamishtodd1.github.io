@@ -112,7 +112,7 @@ function CK_deduce_surface(openness, vertices_numbers){
 		deduce_first_triangle(openness, vertices_numbers, 2.5 * triangle_projected_angle - TAU/3);
 	}
 	
-	deduce_most_of_surface(openness, vertices_numbers);
+	deduce_most_of_surface_regular(openness, vertices_numbers); //to use the flatnet all you need to do is take away the _regular
 }
 
 function ziplocation(a1,a2,b1,b2,zipwidth){

@@ -33,7 +33,7 @@ function onYouTubeIframeAPIReady(){
 }
 
 function react_to_video(){
-	/* FINISHING
+	/* Note that it is *finishing* time
 	 * the second one is the time that we want the break-apart to BEGIN
 	 * the opening of the QC is also when that animation will begin
 	 * 
@@ -45,5 +45,14 @@ function react_to_video(){
 	for(var i = 0; i < section_finishing_time.length /*or whichever mode is last*/; i++) {
 		if( section_finishing_time[i-1] <= secondsthroughvid && secondsthroughvid < section_finishing_time[i] && MODE != i)
 			ChangeScene(i);
+	}
+	
+	var crystalformation_time = 1028;
+	if( secondsthroughvid == crystalformation_time){
+		/*
+		 * We're going to need a function to be updating it of course. Could be this one.
+		 * 
+		 * TODO: enable pausing, at some point
+		 */
 	}
 }

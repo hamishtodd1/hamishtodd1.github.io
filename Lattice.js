@@ -39,44 +39,6 @@ function updatelattice() {
 		flatlattice_vertices.array[i*3+0] = vertex_destinationX;
 		flatlattice_vertices.array[i*3+1] = vertex_destinationY;
 		flatlattice_vertices.array[i*3+2] = 0;
-		
-//		var destination_distance = Math.pow(vertex_destinationX - MousePosition.x, 2) + Math.pow(vertex_destinationY - MousePosition.y, 2) + Math.pow(vertex_destinationZ, 2);
-//		destination_distance = Math.sqrt(destination_distance);
-//		
-//		flatlattice_vertices.array[i*3+0] += delta_t * flatlattice_vertices_velocities[i*3+0];
-//		flatlattice_vertices.array[i*3+1] += delta_t * flatlattice_vertices_velocities[i*3+1];
-//		flatlattice_vertices.array[i*3+2] += delta_t * flatlattice_vertices_velocities[i*3+2];
-//	
-//		var accel = get_accel(i, vertex_destinationX, vertex_destinationY,vertex_destinationZ,destination_distance);
-//		
-//		flatlattice_vertices.array[i*3+0] += delta_t * delta_t * accel.x / 2;
-//		flatlattice_vertices.array[i*3+1] += delta_t * delta_t * accel.y / 2;
-//		flatlattice_vertices.array[i*3+2] += delta_t * delta_t * accel.z / 2;
-//		
-//		var intermediate_velocityX = flatlattice_vertices_velocities[i*3+0] + delta_t * accel.x / 2;
-//		var intermediate_velocityY = flatlattice_vertices_velocities[i*3+1] + delta_t * accel.y / 2;
-//		var intermediate_velocityZ = flatlattice_vertices_velocities[i*3+2] + delta_t * accel.z / 2;
-//		
-//		flatlattice_vertices_velocities[i*3+0] = intermediate_velocityX + delta_t / 2 * accel.x;
-//		flatlattice_vertices_velocities[i*3+1] = intermediate_velocityY + delta_t / 2 * accel.y;
-//		flatlattice_vertices_velocities[i*3+2] = intermediate_velocityZ + delta_t / 2 * accel.z;
-//		
-//		accel.copy( get_accel(i, vertex_destinationX, vertex_destinationY, vertex_destinationZ,destination_distance) );
-//		
-//		flatlattice_vertices_velocities[i*3+0] = intermediate_velocityX + delta_t * accel.x / 2;
-//		flatlattice_vertices_velocities[i*3+1] = intermediate_velocityY + delta_t * accel.y / 2;
-//		flatlattice_vertices_velocities[i*3+2] = intermediate_velocityZ + delta_t * accel.z / 2;
-//		
-//		var speed = Math.pow(flatlattice_vertices_velocities[i*3+0]*flatlattice_vertices_velocities[i*3+0]
-//							+flatlattice_vertices_velocities[i*3+1]*flatlattice_vertices_velocities[i*3+1]
-//							+flatlattice_vertices_velocities[i*3+2]*flatlattice_vertices_velocities[i*3+2], 0.5);
-//		if(speed > maxspeed ) {
-//			//flatlattice_vertices_velocities[i*3+0] *= maxspeed/speed;
-//			speed = maxspeed;
-//		}
-//		lattice_colors[i*3+1] = speed/maxspeed;		
-		
-		//it's more like you want to limit how far away they get from their neighbours, pretty hard
 	}
 	
 	flatlattice.geometry.attributes.position.needsUpdate = true;
@@ -172,12 +134,7 @@ function Map_lattice() {
 	//potential optimisation: break out of the loop when you're past a certain radius. That only helps small capsids though.
 	//potential optimisation: just put one in each net triangle and extrapolate
 	for(var i = 0; i < number_of_lattice_points; i++) {
-		var triangle;
-//		if(capsidopenness == 1) //one may prefer this
-//			triangle = locate_in_net(flatlattice_vertices.array[i*3+0],flatlattice_vertices.array[i*3+1]);
-//		else
-			triangle = locate_in_squarelattice_net(squarelattice_vertices[i*2+0],squarelattice_vertices[i*2+1]);
-			
+		var triangle = locate_in_squarelattice_net(i);
 		
 		if( triangle !== 666 && capsidopenness != 1) {
 			var mappedpoint = map_from_lattice_to_surface(
@@ -209,6 +166,106 @@ function Map_lattice() {
 	
 	surflattice.geometry.attributes.position.needsUpdate = true;
 	surflattice.geometry.attributes.color.needsUpdate = true;
+	
+	//what'll you do if this takes fucking ages?
+//	for(var i = 0; i < protein_lattice.length; i++){
+//		var net_status = 0;
+//		if(latticevertex_nettriangle[ protein_vertex_indices[i][0] ] === 666 ) net_status++;
+//		if(latticevertex_nettriangle[ protein_vertex_indices[i][1] ] === 666 ) net_status++;
+//		if(latticevertex_nettriangle[ protein_vertex_indices[i][2] ] === 666 ) net_status++;
+//		
+//		var corner1 = new THREE.Vector3();
+//		var corner2 = new THREE.Vector3();
+//		var corner3 = new THREE.Vector3();
+//		
+//		if(net_status === 0){ //fully on the capsid
+//			corner1.set(surflattice_vertices.array[ protein_vertex_indices[i][0]*3+0 ],surflattice_vertices.array[ protein_vertex_indices[i][0]*3+1 ],surflattice_vertices.array[ protein_vertex_indices[i][0]*3+2 ]);
+//			corner2.set(surflattice_vertices.array[ protein_vertex_indices[i][0]*3+0 ],surflattice_vertices.array[ protein_vertex_indices[i][0]*3+1 ],surflattice_vertices.array[ protein_vertex_indices[i][0]*3+2 ]);
+//			corner3.set(surflattice_vertices.array[ protein_vertex_indices[i][0]*3+0 ],surflattice_vertices.array[ protein_vertex_indices[i][0]*3+1 ],surflattice_vertices.array[ protein_vertex_indices[i][0]*3+2 ]);
+//		}
+//		else if(net_status === 2 || net_status === 3) { //3 or 2 vertices not on the capsid
+//			corner1.set(lattice_scalefactor*flatlattice_default_vertices[ protein_vertex_indices[i][0]*3+0 ],lattice_scalefactor*flatlattice_default_vertices[ protein_vertex_indices[i][0]*3+1 ],0);
+//			corner2.set(lattice_scalefactor*flatlattice_default_vertices[ protein_vertex_indices[i][1]*3+0 ],lattice_scalefactor*flatlattice_default_vertices[ protein_vertex_indices[i][1]*3+1 ],0);
+//			corner3.set(lattice_scalefactor*flatlattice_default_vertices[ protein_vertex_indices[i][2]*3+0 ],lattice_scalefactor*flatlattice_default_vertices[ protein_vertex_indices[i][2]*3+1 ],0);
+//		}
+//		else if(net_status === 1){ //bending time
+//			for(var j = 0; j < 3; j++){//j will be the protein vertex outside the net
+//				if(latticevertex_nettriangle[ protein_vertex_indices[i][j] ]===666){
+//					//note these are vector2's
+//					var protein_exterior_corner = new THREE.Vector2(flatlattice_vertices.array[ [ protein_vertex_indices[i][(j+2)%3] ] * 3 + 0 ],flatlattice_vertices.array[ [ protein_vertex_indices[i][(j+2)%3] ] * 3 + 1 ]);
+//					var protein_corner1 = new THREE.Vector2(flatlattice_vertices.array[ [ protein_vertex_indices[i][(j+2)%3] ] * 3 + 0 ],flatlattice_vertices.array[ [ protein_vertex_indices[i][(j+2)%3] ] * 3 + 1 ]);
+//					var protein_corner2 = new THREE.Vector2(flatlattice_vertices.array[ [ protein_vertex_indices[i][(j+1)%3] ] * 3 + 0 ],flatlattice_vertices.array[ [ protein_vertex_indices[i][(j+1)%3] ] * 3 + 1 ]);
+//					
+//					//we're going to assume both of the interior vertices are in here. There may be exceptions to that 
+//					var containing_nettriangle = latticevertex_nettriangle[ protein_vertex_indices[i][(j+2)%3] ] *3+k];
+//					var other_containing_nettriangle = latticevertex_nettriangle[ protein_vertex_indices[i][(j+1)%3] ] *3+k];
+//					if( containing_nettriangle != other_containing_nettriangle ){
+//						console.log("error: two vertices in different net triangles connected to one outside the net");
+//						return;
+//					}
+//					
+//					for(var k = 0; k < 3; k++){
+//						var net_edge_start_index = net_triangle_vertex_indices[containing_nettriangle*3+k];
+//						var net_edge_end_index = net_triangle_vertex_indices[containing_nettriangle*3+k];
+//						var net_edge_start = new THREE.Vector2(flatnet_vertices.array[net_edge_start_index * 3 + 0], flatnet_vertices.array[net_edge_start_index * 3 + 1]);
+//						var  net_edge_end  = new THREE.Vector2(flatnet_vertices.array[ net_edge_end_index  * 3 + 0], flatnet_vertices.array[ net_edge_end_index  * 3 + 1]);
+//						
+//						var intersection_a = line_line_intersection_from_numbers( protein_corner1, net_edge_start, protein_exterior_corner, net_edge_end);
+//						if(intersection_a !=0) {
+//							var intersection_b = line_line_intersection(protein_corner2, net_edge_start, protein_exterior_corner, net_edge_end);
+//							if(intersection_b !=0){
+//								//here you turn something 2D into something 3D
+//								var net_edge_2D = net_edge_end.clone();
+//								net_edge_2D.sub(net_edge_start);
+//								
+//								var a_on_edge = intersection_a.clone();
+//								a_on_edge.sub(net_edge_start);
+//								var a_edge_proportion = Math.sqrt(a_on_edge.lengthSq() / net_edge_2D.lengthSq());
+//								var b_on_edge = intersection_b.clone();
+//								b_on_edge.sub(net_edge_start);
+//								var b_edge_proportion = Math.sqrt(b_on_edge.lengthSq() / net_edge_2D.lengthSq());
+//								
+//								var surface_cornerA = new THREE.Vector3(
+//										surface_vertices.array[ net_edge_start_index * 3 + 0],
+//										surface_vertices.array[ net_edge_start_index * 3 + 1],
+//										surface_vertices.array[ net_edge_start_index * 3 + 2]);
+//								var surface_edge = new THREE.Vector3(
+//										surface_vertices.array[ net_edge_end_index * 3 + 0],
+//										surface_vertices.array[ net_edge_end_index * 3 + 1],
+//										surface_vertices.array[ net_edge_end_index * 3 + 2]);
+//								surface_edge.sub(surface_cornerA);
+//								
+//								var a_surface = surface_edge.clone();
+//								var b_surface = surface_edge.clone();
+//								a_surface.multiplyScalar(a_edge_proportion);
+//								b_surface.multiplyScalar(b_edge_proportion);
+//								a_surface.add(surface_cornerA);
+//								b_surface.add(surface_cornerA);
+//								
+//								var net_opposite_corner_index = net_triangle_vertex_indices[containing_nettriangle*3+(k+2)%3];
+//								var c_surface = new THREE.Vector3(surface_vertices.array[ net_opposite_corner_index * 3 + 0],surface_vertices.array[ net_opposite_corner_index * 3 + 1],surface_vertices.array[ net_opposite_corner_index * 3 + 2]);
+//								
+//								
+//								var d = bent_down_quad_corner(a_surface,b_surface,c_surface,
+//											theta,d_hinge_origin_length, d_hinge_length);
+//
+//								corner1.copy(d);
+//								corner2.set(surflattice_vertices.array[ protein_vertex_indices[i][(j+1)%3]*3+0 ],surflattice_vertices.array[ protein_vertex_indices[i][(j+1)%3]*3+1 ],surflattice_vertices.array[ protein_vertex_indices[i][(j+1)%3]*3+2 ]);
+//								corner3.set(surflattice_vertices.array[ protein_vertex_indices[i][(j+2)%3]*3+0 ],surflattice_vertices.array[ protein_vertex_indices[i][(j+2)%3]*3+1 ],surflattice_vertices.array[ protein_vertex_indices[i][(j+2)%3]*3+2 ]);
+//							}
+//							
+//							break;
+//							//IF you don't want proteins overlapping we could have only some of the net triangles able to have protein corners poking off
+//						}
+//					}
+//					
+//					break;
+//				}
+//			}
+//		}
+//		
+//		//here, we anchor.
+//	}
 }
 
 //vertex *destination*. Not vertex, which may be interesting.
