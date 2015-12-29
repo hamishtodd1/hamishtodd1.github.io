@@ -41,7 +41,7 @@ function react_to_video(){
 	 * with both QC and DNA, if the player goes into any other section, we should reset their coords
 	 */
 	var section_finishing_time = new Uint16Array([34,182,300,553,743,914,99999999999]); //first three were 3,7,14.
-	var pausing_times = new Uint16Array([6,9]);
+	var pausing_times = new Uint16Array([54,213,326,555,752,944]);
 	
 	var secondsthroughvid = ytplayer.getCurrentTime();
 	for(var i = 0; i < section_finishing_time.length /*or whichever mode is last*/; i++) {
@@ -51,8 +51,8 @@ function react_to_video(){
 	for(var i = 0; i < pausing_times.length /*or whichever mode is last*/; i++) {
 		if( pausing_times[i] <= secondsthroughvid && secondsthroughvid < pausing_times[i] + 1 ){
 			ytplayer.pauseVideo();
-			console.log("paused?")
-			pausing_times.splice(i);
+			console.log("paused?");
+			pausing_times[i] = -1; //won't need that again
 		}
 	}
 	
