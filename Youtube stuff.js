@@ -18,7 +18,7 @@ function onYouTubeIframeAPIReady(){
 	ytplayer = new YT.Player('player', {
 		videoId:'Xa_m6yggMdU',
 		height: window_height,
-		width: window_height / 9 * 16,//9:16 is probably pushing it too far, but you should try it
+		width: window_height / 3 * 4,//9:16 is probably pushing it too far, but you should try it
 		events: {
 	        'onReady': onPlayerReady
 	    },
