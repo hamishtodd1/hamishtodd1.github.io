@@ -34,6 +34,8 @@ function onYouTubeIframeAPIReady(){
 	});
 }
 
+var section_finishing_time = Array(29,177,295,548,738,909,99999999999);
+var pausing_times = Array(36,185,321,550,747,939);
 function react_to_video(){
 	/* Note that it is *finishing* time
 	 * the second one is the time that we want the break-apart to BEGIN
@@ -43,15 +45,12 @@ function react_to_video(){
 	 */
 //	var section_finishing_time = new Uint16Array([34,182,300,553,743,914,99999999999]);
 //	var pausing_times = new Uint16Array([54,213,326,555,752,944]);
-	var section_finishing_time = Array(29,177,295,548,738,909,99999999999);
-	var pausing_times = Array(36,185,321,550,747,939);
 	
 	var secondsthroughvid = ytplayer.getCurrentTime();
 	for(var i = 0; i < section_finishing_time.length /*or whichever mode is last*/; i++) {
 		if( section_finishing_time[i-1] <= secondsthroughvid && secondsthroughvid < section_finishing_time[i] && MODE != i)
 			ChangeScene(i);
 	}
-	console.log(pausing_times);
 	for(var i = 0; i < pausing_times.length /*or whichever mode is last*/; i++) {
 		if( pausing_times[i] <= secondsthroughvid && secondsthroughvid < pausing_times[i] + 1 ){
 			pausing_times[i] = -1; //won't need that again
