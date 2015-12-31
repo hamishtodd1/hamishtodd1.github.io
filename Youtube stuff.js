@@ -51,10 +51,10 @@ function react_to_video(){
 		if( section_finishing_time[i-1] <= secondsthroughvid && secondsthroughvid < section_finishing_time[i] && MODE != i)
 			ChangeScene(i);
 	}
+	console.log(pausing_times);
 	for(var i = 0; i < pausing_times.length /*or whichever mode is last*/; i++) {
 		if( pausing_times[i] <= secondsthroughvid && secondsthroughvid < pausing_times[i] + 1 ){
 			pausing_times[i] = -1; //won't need that again
-			console.log(pausing_times);
 			ytplayer.pauseVideo();
 		}
 	}
