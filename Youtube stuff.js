@@ -43,8 +43,8 @@ function react_to_video(){
 	 */
 //	var section_finishing_time = new Uint16Array([34,182,300,553,743,914,99999999999]);
 //	var pausing_times = new Uint16Array([54,213,326,555,752,944]);
-	var section_finishing_time = Array([29,177,295,548,738,909,99999999999]);
-	var pausing_times = Array([36,185,321,550,747,939]);
+	var section_finishing_time = Array(29,177,295,548,738,909,99999999999);
+	var pausing_times = Array(36,185,321,550,747,939);
 	
 	var secondsthroughvid = ytplayer.getCurrentTime();
 	for(var i = 0; i < section_finishing_time.length /*or whichever mode is last*/; i++) {
