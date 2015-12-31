@@ -141,7 +141,6 @@ function ChangeScene(new_mode) {
 			camera.toPerspective(); //TODO maybe not, to give feeling of diffraction. Perspective may help you understand though. How about it shifts when mouse isn't down?
 			scene.add(slider);
 			scene.add(progress_bar);
-			scene.add(Quasi_meshes[0]);
 			break;
 	}
 }

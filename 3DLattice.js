@@ -26,20 +26,6 @@
  * 
  */
 
-function rotate_every_shape_in_array(shape_array, MovementAxis,movementangle,quaternion){
-	for(var i = 0; i < shape_array.length; i++){		
-		shape_array[i].position.applyQuaternion(quaternion);
-		
-		var myaxis = MovementAxis.clone();
-		shape_array[i].updateMatrixWorld();
-		myaxis.add(shape_array[i].position);
-		shape_array[i].worldToLocal(myaxis);
-		var myquaternion = new THREE.Quaternion();
-		myquaternion.setFromAxisAngle( myaxis, movementangle );
-		shape_array[i].quaternion.multiply(myquaternion);
-		shape_array[i].updateMatrixWorld();
-	}	
-}
 
 function rotate_layer(index,MovementAxis,movementangle){
 	var myaxis = MovementAxis.clone();
@@ -63,7 +49,8 @@ function sphere_array_rotate(shape_array, MovementAxis,movementangle,quaternion)
 }
 
 function attempt_quasiatom_addition_and_return_next_index(ourposition, lowest_unused_index ){
-	QC_atoms.geometry.attributes.position.setXYZ(lowest_unused_index, ourposition.x, ourposition.y, ourposition.z);
+	var multfactor = 1.147;
+	QC_atoms.geometry.attributes.position.setXYZ(lowest_unused_index, ourposition.x * multfactor, ourposition.y * multfactor, ourposition.z * multfactor );
 	
 	for(var k = 0; k < lowest_unused_index; k++){
 		var separationX = QC_atoms.geometry.attributes.position.array[k*3+0] - ourposition.x;
@@ -178,29 +165,21 @@ function update_3DLattice() {
 	
 	var shape_accel = 160;
 	
-	var rhombohedra_final_position = 1.2;
 	update_shape_layer(rhombohedra_startfadein_time, rhombohedra_convergence_time, allshape_fadeout_start_time, icosahedra_convergence_time, Quasi_meshes[0], meshes_original_numbers[0], 0 );
 	update_shape_layer(rhombohedra_startfadein_time, rhombohedra_convergence_time, allshape_fadeout_start_time, icosahedra_convergence_time, Quasi_outlines[0], outlines_original_numbers[0], 0 );
 	
-	var icosahedra_final_position = (PHI-1/2) + 1;
 	update_shape_layer(rhombohedra_convergence_time, icosahedra_convergence_time, allshape_fadeout_start_time, star_convergence_time, Quasi_meshes[1], meshes_original_numbers[1], 1 );
 	update_shape_layer(rhombohedra_convergence_time, icosahedra_convergence_time, allshape_fadeout_start_time, star_convergence_time, Quasi_outlines[1], outlines_original_numbers[1], 1 );
 	
-	var triacontahedra_final_position = rhombohedron_h*3+Math.sqrt(3/10*(5+Math.sqrt(5))); 
-	update_shape(shape_accel, icosahedra_convergence_time, triacontahedra_convergence_time, triacontahedra_final_position, golden_triacontahedra, allshape_fadeout_start_time, 1 );
-//	update_shape_layer(icosahedra_convergence_time, triacontahedra_convergence_time, allshape_fadeout_start_time, 1, Quasi_meshes[2], meshes_original_numbers[2], 0 );
-//	update_shape_layer(icosahedra_convergence_time, triacontahedra_convergence_time, allshape_fadeout_start_time, 1, Quasi_outlines[2], outlines_original_numbers[2], 0 );
+	update_shape_layer(icosahedra_convergence_time, triacontahedra_convergence_time, allshape_fadeout_start_time, 1, Quasi_meshes[2], meshes_original_numbers[2], 0 );
+	update_shape_layer(icosahedra_convergence_time, triacontahedra_convergence_time, allshape_fadeout_start_time, 1, Quasi_outlines[2], outlines_original_numbers[2], 0 );
 	
-	var star_finishfadein_time = triacontahedra_convergence_time + (star_convergence_time - triacontahedra_convergence_time ) / 4;
-	var star_bunch_time = triacontahedra_convergence_time + (star_convergence_time - triacontahedra_convergence_time ) * 0.5;
-	var star_final_position = icosahedra_final_position * 2;
-	update_shape_bunch(shape_accel, triacontahedra_convergence_time, star_convergence_time, star_final_position, golden_stars, allshape_fadeout_start_time, ico_star_convergence_time,
-		rhombohedra_final_position, star_finishfadein_time, star_bunch_time );
+	var star_bunch_time = triacontahedra_convergence_time + (star_convergence_time - triacontahedra_convergence_time ) * 0.5;	
+	update_shape_bunch_layer(triacontahedra_convergence_time, star_convergence_time, allshape_fadeout_start_time, ico_star_convergence_time, star_bunch_time, Quasi_meshes[3], meshes_original_numbers[3], 0 );
+	update_shape_bunch_layer(triacontahedra_convergence_time, star_convergence_time, allshape_fadeout_start_time, ico_star_convergence_time, star_bunch_time, Quasi_outlines[3], outlines_original_numbers[3], 0 );
 	
-	var ico_star_final_position = star_final_position;
-	var ico_star_finishfadein_time = ico_star_startfadein_time + (ico_star_convergence_time - ico_star_startfadein_time) /  2;
-	update_shape_bunch(shape_accel, ico_star_startfadein_time, ico_star_convergence_time, ico_star_final_position, ico_stars, allshape_fadeout_start_time, 1,
-		icosahedra_final_position, ico_star_finishfadein_time, ico_star_convergence_time);
+	update_shape_bunch_layer(ico_star_startfadein_time, ico_star_convergence_time, allshape_fadeout_start_time, 1, ico_star_convergence_time, Quasi_meshes[4], meshes_original_numbers[4], 1 );
+	update_shape_bunch_layer(ico_star_startfadein_time, ico_star_convergence_time, allshape_fadeout_start_time, 1, ico_star_convergence_time, Quasi_outlines[4], outlines_original_numbers[4], 1 );
 	
 	
 	if(isMouseDown && !slider_grabbed ) {
@@ -213,6 +192,8 @@ function update_3DLattice() {
 		rotate_layer(0,MovementAxis, MovementAngle);
 		rotate_layer(1,MovementAxis, MovementAngle);
 		rotate_layer(2,MovementAxis, MovementAngle);
+		rotate_layer(3,MovementAxis, MovementAngle);
+		rotate_layer(4,MovementAxis, MovementAngle);
 		
 		var atoms_axis = MovementAxis.clone();
 		QC_atoms.updateMatrixWorld();
@@ -266,6 +247,9 @@ function orient_piece(vector_to_point_down, vector_to_line_up_with, myobject){
 }
 
 function init_cubicLattice_stuff() {
+	for(var i = 0; i< 12; i++)
+		icosahedra_directions[i] = new Uint16Array([0,0,0, 0,0,0,]);
+	
 	progress_bar = new THREE.Mesh( new THREE.BoxGeometry( 16, 0.6, 0 ), new THREE.MeshBasicMaterial({color: 0xBBBBBB}) );
 	progress_bar.position.y = -12;
 	slider = new THREE.Mesh( new THREE.CircleGeometry( 0.8 ), new THREE.MeshBasicMaterial({color: 0x888888}) );
@@ -445,27 +429,6 @@ function init_cubicLattice_stuff() {
 			golden_rhombohedra[i].position.setLength(1.2);
 			golden_rhombohedra[i].updateMatrixWorld();
 		}
-		
-		put_into_two_objects(0,golden_rhombohedra);
-		
-		golden_stars[0] = new THREE.Object3D();
-		var golden_star_edgesmaterial = shapes_edgesmaterial.clone();
-		for(var j = 0; j < golden_rhombohedra.length; j++) {
-			var myrhomb = golden_rhombohedra[j].clone();
-			myrhomb.material = star_material;
-			for(k = 0; k < myrhomb.children.length; k++)
-				myrhomb.children[k].material = golden_star_edgesmaterial;
-			myrhomb.position.setLength(1.2);
-			myrhomb.updateMatrixWorld();
-			
-			THREE.SceneUtils.attach(myrhomb, scene, golden_stars[0]);
-		}
-		for(var i = 1; i<golden_stars.length; i++)
-			golden_stars[i] = golden_stars[0].clone();
-		for(var i = 0; i<golden_stars.length; i++){
-			golden_stars[i].position.copy(normalized_virtualico_vertices[i]);
-	   		golden_stars[i].position.multiplyScalar(10);
-		}
 	}
 	
 	var p = 2*((1+Math.sqrt(5))/Math.sqrt(10+2*Math.sqrt(5)));
@@ -575,12 +538,6 @@ function init_cubicLattice_stuff() {
 			golden_triacontahedra[i].position.setLength(triacontahedra_final_position);
 			golden_triacontahedra[i].updateMatrixWorld();
 		}
-		
-		put_into_two_objects(2,golden_triacontahedra);
-		
-//		var virtual_dodeca_rotation_axis = new THREE.Vector3(0,0,-1);
-//		for(var i = 0; i<normalized_virtualdodeca_vertices.length; i++)
-//			normalized_virtualdodeca_vertices[i].applyAxisAngle(virtual_dodeca_rotation_axis, -TAU / 4);
 	}
 	
 	{
@@ -662,13 +619,38 @@ function init_cubicLattice_stuff() {
 	   		goldenicos[i].position.setLength(icosahedra_final_position);
 	   		goldenicos[i].updateMatrixWorld();
 	   	}
-	   	
-	   	put_into_two_objects(1,goldenicos);
-	   	
+	}
+	
+	{
+		golden_stars[0] = new THREE.Object3D();
+		var golden_star_edgesmaterial = shapes_edgesmaterial.clone();
+		for(var j = 0; j < golden_rhombohedra.length; j++) {
+			var myrhomb = golden_rhombohedra[j].clone();
+			myrhomb.material = star_material;
+			for(k = 0; k < myrhomb.children.length; k++)
+				myrhomb.children[k].material = golden_star_edgesmaterial;
+			myrhomb.position.setLength(1.2); 
+			myrhomb.updateMatrixWorld();
+			
+			THREE.SceneUtils.attach(myrhomb, scene, golden_stars[0]);
+		}
+		for(var i = 1; i<golden_stars.length; i++)
+			golden_stars[i] = golden_stars[0].clone();
+		var star_final_position = icosahedra_final_position * 2;
+		for(var i = 0; i<golden_stars.length; i++){
+			golden_stars[i].position.copy(normalized_virtualico_vertices[i]);
+	   		golden_stars[i].position.setLength(star_final_position);
+	   		golden_stars[i].updateMatrixWorld();
+	   		for(var j = 0; j<golden_stars[i].children.length; j++)
+	   			golden_stars[i].children[j].updateMatrixWorld();
+		}
+	}
+	
+	{
 	   	ico_stars[0] = new THREE.Object3D();
 		var ico_star_edgesmaterial = shapes_edgesmaterial.clone();
 		for(var j = 0; j < goldenicos.length; j++) {
-			if(j > 5)continue; //or 6 others
+			if(j > 5) continue; //or 6 others
 			var myico = goldenicos[j].clone();
 			myico.material = ico_star_material;
 			for(k = 0; k < myico.children.length; k++)
@@ -678,6 +660,7 @@ function init_cubicLattice_stuff() {
 			
 			THREE.SceneUtils.attach(myico, scene, ico_stars[0]);
 		}
+		var ico_star_final_position = star_final_position;
 		for(var i = 0; i<ico_stars.length; i++){
 			if(i!=0){
 				ico_stars[i] = ico_stars[0].clone();
@@ -695,9 +678,171 @@ function init_cubicLattice_stuff() {
 				}
 				ico_stars[i].rotateOnAxis(myrotation_axis,-myrotation_angle);
 			}
-	   		
+			
 			ico_stars[i].position.copy(normalized_virtualico_vertices[i]);
-	   		ico_stars[i].position.multiplyScalar(10);
+	   		ico_stars[i].position.setLength(ico_star_final_position);
+	   		ico_stars[i].updateMatrixWorld();
+	   		for(var j = 0; j<ico_stars[i].children.length; j++)
+	   			ico_stars[i].children[j].updateMatrixWorld();
+		}
+	}
+	
+	for(var i = 0; i < 12; i++){
+		icosahedra_directions[i][0] = i;
+		for(var j = 1; j < 6; j++){
+			icosahedra_directions[i][j] = j;
+			
+			if(i==11){
+				if(j==1) icosahedra_directions[i][j] = 6;
+				if(j==2) icosahedra_directions[i][j] = 10;
+				if(j==3) icosahedra_directions[i][j] = 9;
+				if(j==4) icosahedra_directions[i][j] = 8;
+				if(j==5) icosahedra_directions[i][j] = 7;
+			}
+			if(i==1){
+				if(j==1) icosahedra_directions[i][j] = 6;
+				if(j==2) icosahedra_directions[i][j] = 7;
+				if(j==3) icosahedra_directions[i][j] = 2;
+				if(j==4) icosahedra_directions[i][j] = 0;
+				if(j==5) icosahedra_directions[i][j] = 5;
+			}
+			if(i==2){
+				if(j==1) icosahedra_directions[i][j] = 1;
+				if(j==2) icosahedra_directions[i][j] = 7;
+				if(j==3) icosahedra_directions[i][j] = 8;
+				if(j==4) icosahedra_directions[i][j] = 3;
+				if(j==5) icosahedra_directions[i][j] = 0;
+			}
+			if(i==3){
+				if(j==1) icosahedra_directions[i][j] = 0;
+				if(j==2) icosahedra_directions[i][j] = 2;
+				if(j==3) icosahedra_directions[i][j] = 8;
+				if(j==4) icosahedra_directions[i][j] = 9;
+				if(j==5) icosahedra_directions[i][j] = 4;
+			}
+			if(i==4){
+				if(j==1) icosahedra_directions[i][j] = 5;
+				if(j==2) icosahedra_directions[i][j] = 0;
+				if(j==3) icosahedra_directions[i][j] = 3;
+				if(j==4) icosahedra_directions[i][j] = 9;
+				if(j==5) icosahedra_directions[i][j] = 10;
+			}
+			if(i==5){
+				if(j==1) icosahedra_directions[i][j] = 6;
+				if(j==2) icosahedra_directions[i][j] = 1;
+				if(j==3) icosahedra_directions[i][j] = 0;
+				if(j==4) icosahedra_directions[i][j] = 4;
+				if(j==5) icosahedra_directions[i][j] = 10;
+			}
+			if(i==9){
+				if(j==2) icosahedra_directions[i][j] = 3;
+				if(j==3) icosahedra_directions[i][j] = 8;
+				if(j==4) icosahedra_directions[i][j] = 11;
+				if(j==5) icosahedra_directions[i][j] = 10;
+				if(j==1) icosahedra_directions[i][j] = 4;
+			}
+			if(i==6){
+				if(j==1) icosahedra_directions[i][j] = 11;
+				if(j==2) icosahedra_directions[i][j] = 7;
+				if(j==3) icosahedra_directions[i][j] = 1;
+				if(j==4) icosahedra_directions[i][j] = 5;
+				if(j==5) icosahedra_directions[i][j] = 10;
+			}
+			if(i==7){
+				if(j==1) icosahedra_directions[i][j] = 6;
+				if(j==2) icosahedra_directions[i][j] = 11;
+				if(j==3) icosahedra_directions[i][j] = 8;
+				if(j==4) icosahedra_directions[i][j] = 2;
+				if(j==5) icosahedra_directions[i][j] = 1;
+			}
+			if(i==8){
+				if(j==5) icosahedra_directions[i][j] = 3;
+				if(j==1) icosahedra_directions[i][j] = 2;
+				if(j==2) icosahedra_directions[i][j] = 7;
+				if(j==3) icosahedra_directions[i][j] = 11;
+				if(j==4) icosahedra_directions[i][j] = 9;
+			}
+			if(i==10){
+				if(j==5) icosahedra_directions[i][j] = 11;
+				if(j==1) icosahedra_directions[i][j] = 6;
+				if(j==2) icosahedra_directions[i][j] = 5;
+				if(j==3) icosahedra_directions[i][j] = 4;
+				if(j==4) icosahedra_directions[i][j] = 9;
+			}
+			
+		}
+	}
+	
+	//not doing this in order causes bullshit alpha bugs.
+	put_into_two_objects(0,golden_rhombohedra);
+   	put_into_two_objects(1,goldenicos);
+   	put_into_two_objects(2,golden_triacontahedra);
+   	put_bunch_into_two_objects(3,golden_stars);
+   	put_bunch_into_two_objects(4,ico_stars);
+}
+
+//shape_array -> shape_bunch_array[0]
+//shape_array[i] -> shape_bunch_array[0].children[i] - those are the shapes. Their children are their edges.
+//shape_array.length -> num_shapes
+function put_bunch_into_two_objects(index,shape_bunch_array){
+	var num_triangle_indices = shape_bunch_array[0].children[0].geometry.index.array.length;
+	var num_edges = shape_bunch_array[0].children[0].children.length;
+	var num_vertices = shape_bunch_array[0].children[0].geometry.attributes.position.array.length/3;
+	var num_shapes = shape_bunch_array.length * shape_bunch_array[0].children.length;
+	
+	Quasi_meshes[index] = new THREE.Mesh( new THREE.BufferGeometry(), shape_bunch_array[0].children[0].material.clone() );	
+	Quasi_meshes[index].geometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array(num_shapes * num_vertices * 3), 3 ) );
+	Quasi_meshes[index].geometry.addAttribute( 'index', new THREE.BufferAttribute( new Uint16Array(num_triangle_indices*num_shapes), 1 ) );
+	meshes_original_numbers[index] = new Float32Array(num_shapes * num_vertices * 3);
+	
+	Quasi_outlines[index] = new THREE.Mesh(new THREE.BufferGeometry(), shape_bunch_array[0].children[0].children[0].material.clone() );
+	Quasi_outlines[index].geometry.addAttribute('position',new THREE.BufferAttribute( new Float32Array(num_shapes*num_edges*6*3), 3 ));
+	Quasi_outlines[index].geometry.addAttribute('index',new THREE.BufferAttribute(new Uint16Array(num_shapes*num_edges*12), 1));
+	outlines_original_numbers[index] = new Float32Array(num_shapes * num_edges * 6 * 3);
+	
+	for(var h = 0; h < shape_bunch_array.length; h++){
+		for(var i = 0; i<shape_bunch_array[h].children.length; i++){
+			var shape_index = h * shape_bunch_array[h].children.length + i;
+			for(var j = 0; j<num_vertices; j++){
+				var vertindex = shape_index * num_vertices + j;
+				var absolute_vertex = new THREE.Vector3(
+					shape_bunch_array[h].children[i].geometry.attributes.position.array[j*3+0],
+					shape_bunch_array[h].children[i].geometry.attributes.position.array[j*3+1],
+					shape_bunch_array[h].children[i].geometry.attributes.position.array[j*3+2]);
+				var oldAV = absolute_vertex.clone();
+				shape_bunch_array[h].children[i].localToWorld(absolute_vertex);
+				Quasi_meshes[index].geometry.attributes.position.array[vertindex*3+0] = absolute_vertex.x;
+				Quasi_meshes[index].geometry.attributes.position.array[vertindex*3+1] = absolute_vertex.y;
+				Quasi_meshes[index].geometry.attributes.position.array[vertindex*3+2] = absolute_vertex.z;
+				meshes_original_numbers[index][vertindex*3+0] = absolute_vertex.x;
+				meshes_original_numbers[index][vertindex*3+1] = absolute_vertex.y;
+				meshes_original_numbers[index][vertindex*3+2] = absolute_vertex.z;
+			}
+			for(var j = 0; j < num_triangle_indices; j++){
+				Quasi_meshes[index].geometry.index.array[shape_index*num_triangle_indices + j] = shape_bunch_array[h].children[i].geometry.index.array[j] + shape_index * num_vertices;
+			}
+			
+			for(var j = 0; j < num_edges; j++){
+				for(var k = 0; k < 6; k++){
+					var edge_vertex_index = (shape_index*num_edges+j)*6+k;
+					var absolute_vertex = new THREE.Vector3(
+							shape_bunch_array[h].children[i].children[j].geometry.attributes.position.array[k*3+0],
+							shape_bunch_array[h].children[i].children[j].geometry.attributes.position.array[k*3+1],
+							shape_bunch_array[h].children[i].children[j].geometry.attributes.position.array[k*3+2]);
+					shape_bunch_array[h].children[i].localToWorld(absolute_vertex);
+					Quasi_outlines[index].geometry.attributes.position.array[edge_vertex_index*3+0] = absolute_vertex.x;
+					Quasi_outlines[index].geometry.attributes.position.array[edge_vertex_index*3+1] = absolute_vertex.y;
+					Quasi_outlines[index].geometry.attributes.position.array[edge_vertex_index*3+2] = absolute_vertex.z;
+					outlines_original_numbers[index][edge_vertex_index*3+0] = absolute_vertex.x;
+					outlines_original_numbers[index][edge_vertex_index*3+1] = absolute_vertex.y;
+					outlines_original_numbers[index][edge_vertex_index*3+2] = absolute_vertex.z;
+				}
+
+				for(var k = 0; k < 12; k++){
+					var edge_index = shape_index * num_edges + j; 
+					Quasi_outlines[index].geometry.index.array[edge_index*12 + k] = prism_triangle_indices[k] + edge_index*6;
+				}
+			}
 		}
 	}
 }
@@ -755,9 +900,6 @@ function put_into_two_objects(index,shape_array){
 			}
 		}
 	}
-//	if(index){
-//		console.log(Quasi_meshes[index].geometry.attributes.position.array,shape_array[1].geometry.attributes.position.array);
-//	}
 }
 
 //long axis points down long diagonal, short axis from the center to a vertex. Short axis we think of as y, long as z.
@@ -801,45 +943,6 @@ function fill_buffer_with_rhombohedron(long_axis, short_axis,array, starting_ind
 		array[starting_index+i*3+1] = vectors[i].y;
 		array[starting_index+i*3+2] = vectors[i].z;
 	}
-}
-
-function update_shape(accel, start_fadein_time, convergence_time, final_position, shape_array, start_fadeout_time, removal_time ){
-	if(	start_fadein_time <= animation_progress && animation_progress <= removal_time ){
-		if(	previous_animation_progress < start_fadein_time || removal_time < previous_animation_progress ) {
-			for(var i = 0; i < shape_array.length; i++) {
-				scene.add(shape_array[i]);
-			}
-		}
-	} else {
-		if(	start_fadein_time <= previous_animation_progress && previous_animation_progress <= removal_time ) {
-			for(var i = 0; i < shape_array.length; i++) {
-				scene.remove(shape_array[i]);
-			}
-		}
-		return;
-	}
-	
-	var finish_fadein_time = (convergence_time + start_fadein_time ) / 2;
-	
-	var dist = accel * (animation_progress-convergence_time) * (animation_progress-convergence_time);
-	if(animation_progress >= convergence_time)
-		dist = 0;
-	dist += final_position;
-	for(var i = 0; i < shape_array.length; i++) {
-		shape_array[i].position.setLength(dist);
-		shape_array[i].updateMatrixWorld();
-	}
-	
-	var our_opacity = 0;
-	if( finish_fadein_time < animation_progress && animation_progress < start_fadeout_time)
-		our_opacity = 1;
-	if( start_fadein_time < animation_progress && animation_progress < finish_fadein_time )
-		our_opacity = (animation_progress - start_fadein_time) / (finish_fadein_time-start_fadein_time);
-	if( start_fadeout_time < animation_progress && animation_progress < 1 )
-		our_opacity = 1 - (animation_progress - start_fadeout_time ) / (1 - start_fadeout_time);
-	
-	shape_array[0].material.opacity = our_opacity;
-	shape_array[0].children[0].material.opacity = our_opacity;
 }
  
 function update_shape_layer(start_fadein_time, convergence_time, start_fadeout_time, removal_time, ourmesh, original_vertices_numbers, icosahedron_vertices_style ){
@@ -895,54 +998,76 @@ function update_shape_layer(start_fadein_time, convergence_time, start_fadeout_t
 	if( start_fadeout_time < animation_progress && animation_progress < 1 )
 		our_opacity = 1 - (animation_progress - start_fadeout_time ) / (1 - start_fadeout_time);
 	
-	ourmesh.material.opacity = our_opacity;
-	if(vertices_in_shape > 40 && logged == 0){
-		console.log(ourmesh.material);
-		logged = 1;
-	}
-	if(vertices_in_shape > 300){
-		if(logged!=2)
-			console.log(ourmesh.material);
-		logged = 2;
-	}	
+	ourmesh.material.opacity = our_opacity;	
 }
 
-function update_shape_bunch(accel, start_fadein_time, convergence_time, final_position, shape_bunch, start_fadeout_time, removal_time,
-							bunch_position, finish_fadein_time, bunch_time ){
+function update_shape_bunch_layer(start_fadein_time, convergence_time, start_fadeout_time, removal_time, bunch_time, ourmesh, original_vertices_numbers, icosahedra ){
+	var vertices_in_shape_bunch = ourmesh.geometry.attributes.position.array.length / 3;
+	vertices_in_shape_bunch /= 12;
+	var bunch_size = 0;
+	if( icosahedra )
+		bunch_size = 6;
+	else
+		bunch_size = 20;
+	var vertices_in_shape = vertices_in_shape_bunch / bunch_size;
+	
 	if(	start_fadein_time <= animation_progress && animation_progress <= removal_time ){
 		if(	previous_animation_progress < start_fadein_time || removal_time < previous_animation_progress ) {
-			for(var i = 0; i < shape_bunch.length; i++) {
-				scene.add(shape_bunch[i]);
-			}
+			scene.add(ourmesh);
 		}
 	} else {
 		if(	start_fadein_time <= previous_animation_progress && previous_animation_progress <= removal_time ) {
-			for(var i = 0; i < shape_bunch.length; i++) {
-				scene.remove(shape_bunch[i]);
-			}
+			scene.remove(ourmesh);
 		}
 		return;
 	}
 	
+	var finish_fadein_time = (convergence_time + start_fadein_time ) / 2;
+	
+	//change 160 if you like - formerly known as "shape_accel"
+	var accel = 160;
 	var dist = accel * (animation_progress-convergence_time) * (animation_progress-convergence_time);
 	if(animation_progress >= convergence_time)
 		dist = 0;
-	dist += final_position;
-	for(var i = 0; i < golden_stars.length; i++) {
-		shape_bunch[i].position.setLength(dist);
-		shape_bunch[i].updateMatrixWorld();
+	
+	for(var i = 0; i < 12; i++) {
+		for( var j = 0; j < vertices_in_shape_bunch; j++){
+			var vertindex = i * vertices_in_shape_bunch + j;
+			ourmesh.geometry.attributes.position.array[vertindex * 3 + 0 ] = original_vertices_numbers[vertindex * 3 + 0 ] + normalized_virtualico_vertices[i].x * dist;
+			ourmesh.geometry.attributes.position.array[vertindex * 3 + 1 ] = original_vertices_numbers[vertindex * 3 + 1 ] + normalized_virtualico_vertices[i].y * dist;
+			ourmesh.geometry.attributes.position.array[vertindex * 3 + 2 ] = original_vertices_numbers[vertindex * 3 + 2 ] + normalized_virtualico_vertices[i].z * dist;
+		}
 	}
 	
 	var bunch_dist = 0.5 * accel * (animation_progress-bunch_time) * (animation_progress-bunch_time);
 	if(animation_progress >= bunch_time)
 		bunch_dist = 0;
-	bunch_dist += bunch_position;
-	for(var i = 0; i< shape_bunch.length; i++) {
-		for(var j = 0; j< shape_bunch[i].children.length; j++){
-			shape_bunch[i].children[j].position.setLength(bunch_dist);
-			shape_bunch[i].children[j].updateMatrixWorld();
+	
+	
+	for(var h = 0; h < 12; h++){
+		for(var i = 0; i<bunch_size; i++){
+			for(var j = 0; j < vertices_in_shape; j++){
+				var vertindex = h * vertices_in_shape_bunch + i * vertices_in_shape + j;
+				if(!icosahedra){
+					ourmesh.geometry.attributes.position.array[vertindex * 3 + 0 ] += normalized_virtualdodeca_vertices[i].x * bunch_dist;
+					ourmesh.geometry.attributes.position.array[vertindex * 3 + 1 ] += normalized_virtualdodeca_vertices[i].y * bunch_dist;
+					ourmesh.geometry.attributes.position.array[vertindex * 3 + 2 ] += normalized_virtualdodeca_vertices[i].z * bunch_dist;
+				}
+				else {
+					//may well have to be smarter about the virtualico vertex that is used. Maybe check angle of them against angle of bunch position and discard
+					ourmesh.geometry.attributes.position.array[vertindex * 3 + 0 ] += normalized_virtualico_vertices[ icosahedra_directions[h][i] ].x * bunch_dist;
+					ourmesh.geometry.attributes.position.array[vertindex * 3 + 1 ] += normalized_virtualico_vertices[ icosahedra_directions[h][i] ].y * bunch_dist;
+					ourmesh.geometry.attributes.position.array[vertindex * 3 + 2 ] += normalized_virtualico_vertices[ icosahedra_directions[h][i] ].z * bunch_dist;
+				}
+				
+//				if(h != 0)
+//					{ourmesh.geometry.attributes.position.array[vertindex * 3 + 0 ] = 0; ourmesh.geometry.attributes.position.array[vertindex * 3 + 1 ] = 0; ourmesh.geometry.attributes.position.array[vertindex * 3 + 2 ] = 0;}
+//				if(i > 1)
+//					{ourmesh.geometry.attributes.position.array[vertindex * 3 + 0 ] = 0; ourmesh.geometry.attributes.position.array[vertindex * 3 + 1 ] = 0; ourmesh.geometry.attributes.position.array[vertindex * 3 + 2 ] = 0;}
+			}
 		}
 	}
+	ourmesh.geometry.attributes.position.needsUpdate = true;
 	
 	var our_opacity = 0;
 	if( finish_fadein_time < animation_progress && animation_progress < start_fadeout_time)
@@ -952,8 +1077,7 @@ function update_shape_bunch(accel, start_fadein_time, convergence_time, final_po
 	if( start_fadeout_time < animation_progress && animation_progress < 1 )
 		our_opacity = 1 - (animation_progress - start_fadeout_time ) / (1 - start_fadeout_time);
 	
-	shape_bunch[0].children[0].material.opacity = our_opacity;
-	shape_bunch[0].children[0].children[0].material.opacity = our_opacity;
+	ourmesh.material.opacity = our_opacity;	
 }
 
 function assign_triaconta_vertices(initialX,initialY,initial_index, height, array){

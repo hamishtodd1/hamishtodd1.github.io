@@ -127,6 +127,9 @@ var prism_triangle_indices = new Uint16Array([0, 2, 1, 2, 3, 1, 2, 4, 3, 4, 5, 3
 var normalized_virtualdodeca_vertices = Array(20);
 var normalized_virtualico_vertices = Array(20);
 
+var icosahedra_directions = Array(12);
+
+
 //------------no longer 3D penrose stuff
 
 var golden_rhombohedra = Array(20);

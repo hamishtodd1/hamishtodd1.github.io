@@ -13,12 +13,13 @@ function onPlayerReady(event) {
  * lDMaeDoSNvM: test video
  * 8JndSqOn9ac: Robin video
  * Xa_m6yggMdU: V2 video
+ * D_DkCTT8azI: V2 resized
  */
 function onYouTubeIframeAPIReady(){
 	ytplayer = new YT.Player('player', {
-		videoId:'Xa_m6yggMdU',
+		videoId:'D_DkCTT8azI',
 		height: window_height,
-		width: window_height / 3 * 4,//9:16 is probably pushing it too far, but you should try it
+		width: window_height / 9 * 16,//9:16 is probably pushing it too far, but you should try it
 		events: {
 	        'onReady': onPlayerReady
 	    },
@@ -40,8 +41,10 @@ function react_to_video(){
 	 * 
 	 * with both QC and DNA, if the player goes into any other section, we should reset their coords
 	 */
-	var section_finishing_time = new Uint16Array([34,182,300,553,743,914,99999999999]); //first three were 3,7,14.
-	var pausing_times = new Uint16Array([54,213,326,555,752,944]);
+//	var section_finishing_time = new Uint16Array([34,182,300,553,743,914,99999999999]);
+//	var pausing_times = new Uint16Array([54,213,326,555,752,944]);
+	var section_finishing_time = new Uint16Array([31,179,297,550,740,911,99999999999]);
+	var pausing_times = new Uint16Array([51,210,323,552,749,941]);
 	
 	var secondsthroughvid = ytplayer.getCurrentTime();
 	for(var i = 0; i < section_finishing_time.length /*or whichever mode is last*/; i++) {

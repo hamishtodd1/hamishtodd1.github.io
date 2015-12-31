@@ -21,7 +21,13 @@ function update_bocavirus() {
 		initial_bocavirus_vertices[i].applyAxisAngle(bocavirus_MovementAxis,bocavirus_MovementAngle);
 		bocavirus_vertices[i].copy(initial_bocavirus_vertices[i]);
 	}
-	if(MODE == STATIC_DNA_MODE){
+	if(MODE==STATIC_PROTEIN_MODE){
+		capsidopenness=0;
+		for(var i = 0; i<bocavirus_proteins.length; i++){
+			bocavirus_proteins[i].material.opacity = 1;
+		}
+	}
+	else if(MODE == STATIC_DNA_MODE){
 		capsidopenness+=0.0115;
 		if(capsidopenness > 1)
 			capsidopenness = 1;
@@ -40,12 +46,6 @@ function update_bocavirus() {
 			for(var j = 0; j<3; j++)
 				bocavirus_vertices[i*3+j].add(extension_vector);
 		}		
-	}
-	else if(MODE==STATIC_PROTEIN_MODE){
-		capsidopenness=0;
-		for(var i = 0; i<bocavirus_proteins.length; i++){
-			bocavirus_proteins[i].material.opacity = 1;
-		}
 	}
 	
 	for(var i = 0; i<bocavirus_proteins.length; i++){
