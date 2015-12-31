@@ -19,7 +19,7 @@ function onYouTubeIframeAPIReady(){
 	ytplayer = new YT.Player('player', {
 		videoId:'D_DkCTT8azI',
 		height: window_height,
-		width: window_height / 9 * 16,//9:16 is probably pushing it too far, but you should try it
+		width: window_height / 3 * 4,//9:16 is probably pushing it too far, but you should try it
 		events: {
 	        'onReady': onPlayerReady
 	    },
@@ -43,8 +43,8 @@ function react_to_video(){
 	 */
 //	var section_finishing_time = new Uint16Array([34,182,300,553,743,914,99999999999]);
 //	var pausing_times = new Uint16Array([54,213,326,555,752,944]);
-	var section_finishing_time = new Uint16Array([31,179,297,550,740,911,99999999999]);
-	var pausing_times = new Uint16Array([51,210,323,552,749,941]);
+	var section_finishing_time = new Uint16Array([29,177,295,548,738,909,99999999999]);
+	var pausing_times = new Uint16Array([37,185,321,550,747,939]);
 	
 	var secondsthroughvid = ytplayer.getCurrentTime();
 	for(var i = 0; i < section_finishing_time.length /*or whichever mode is last*/; i++) {
@@ -53,9 +53,10 @@ function react_to_video(){
 	}
 	for(var i = 0; i < pausing_times.length /*or whichever mode is last*/; i++) {
 		if( pausing_times[i] <= secondsthroughvid && secondsthroughvid < pausing_times[i] + 1 ){
+			pausing_times[i] = -1; //won't need that again
+			console.log(pausing_times);
 			ytplayer.pauseVideo();
 			console.log("paused?");
-			pausing_times[i] = -1; //won't need that again
 		}
 	}
 	
