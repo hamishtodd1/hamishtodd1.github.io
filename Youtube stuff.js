@@ -3,6 +3,54 @@ tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
+var section_finishing_time = Array(29,177,295,548,738,909,99999999999);
+var pausing_times = Array(35,185,321,550,747,939);
+var secondsthroughvid = 0;
+function react_to_video(){
+	/* Note that it is *finishing* time
+	 * the second one is the time that we want the break-apart to BEGIN
+	 * the opening of the QC is also when that animation will begin
+	 * 
+	 * with both QC and DNA, if the player goes into any other section, we should reset their coords
+	 */
+//	var section_finishing_time = new Uint16Array([34,182,300,553,743,914,99999999999]);
+//	var pausing_times = new Uint16Array([54,213,326,555,752,944]);
+	
+	var timeupdate = ytplayer.getCurrentTime();
+	if(timeupdate != Math.floor(secondsthroughvid) ){
+		var discrepancy = timeupdate - Math.floor(secondsthroughvid);
+		if(discrepancy == 1) //a very normal update
+			secondsthroughvid = timeupdate;
+		else if(discrepancy > 1 ) //either our framerate is completely hopeless or they skipped ahead
+			secondsthroughvid = timeupdate;
+		else if(discrepancy == -1) //we've gone a full second ahead, so maybe they've paused or our delta_t's are more than the sum of their parts. Hopefully they'll catch up
+			secondsthroughvid = Math.floor(secondsthroughvid);
+		else if(discrepancy < -1) //they've gone back, we should follow
+			secondsthroughvid = timeupdate;
+		//if it's 0 then things are as normal
+	}
+	secondsthroughvid += delta_t;
+	console.log(secondsthroughvid);
+		
+	for(var i = 0; i < section_finishing_time.length /*or whichever mode is last*/; i++) {
+		if( section_finishing_time[i-1] <= secondsthroughvid && secondsthroughvid < section_finishing_time[i] && MODE != i)
+			ChangeScene(i);
+	}
+	for(var i = 0; i < pausing_times.length /*or whichever mode is last*/; i++) {
+		if( pausing_times[i] <= secondsthroughvid && secondsthroughvid < pausing_times[i] + 1 ){
+			pausing_times[i] = -1; //won't need that again
+			ytplayer.pauseVideo();
+		}
+	}
+	
+	var crystalformation_time = 1028;
+	if( secondsthroughvid == crystalformation_time){
+		/*
+		 * We're going to need a function to be updating it of course. Could be this one.
+		 */
+	}
+}
+
 function onPlayerReady(event) {
 	MODE = 0;
 	init();
@@ -32,38 +80,4 @@ function onYouTubeIframeAPIReady(){
 			modestbranding: 1,
 		}
 	});
-}
-
-var section_finishing_time = Array(29,177,295,548,738,909,99999999999);
-var pausing_times = Array(36,185,321,550,747,939);
-function react_to_video(){
-	/* Note that it is *finishing* time
-	 * the second one is the time that we want the break-apart to BEGIN
-	 * the opening of the QC is also when that animation will begin
-	 * 
-	 * with both QC and DNA, if the player goes into any other section, we should reset their coords
-	 */
-//	var section_finishing_time = new Uint16Array([34,182,300,553,743,914,99999999999]);
-//	var pausing_times = new Uint16Array([54,213,326,555,752,944]);
-	
-	var secondsthroughvid = ytplayer.getCurrentTime();
-	for(var i = 0; i < section_finishing_time.length /*or whichever mode is last*/; i++) {
-		if( section_finishing_time[i-1] <= secondsthroughvid && secondsthroughvid < section_finishing_time[i] && MODE != i)
-			ChangeScene(i);
-	}
-	for(var i = 0; i < pausing_times.length /*or whichever mode is last*/; i++) {
-		if( pausing_times[i] <= secondsthroughvid && secondsthroughvid < pausing_times[i] + 1 ){
-			pausing_times[i] = -1; //won't need that again
-			ytplayer.pauseVideo();
-		}
-	}
-	
-	var crystalformation_time = 1028;
-	if( secondsthroughvid == crystalformation_time){
-		/*
-		 * We're going to need a function to be updating it of course. Could be this one.
-		 * 
-		 * TODO: enable pausing, at some point
-		 */
-	}
 }
