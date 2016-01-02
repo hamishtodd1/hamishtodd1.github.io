@@ -369,49 +369,15 @@ function HandleVertexRearrangement() {
 	
 	
 	
-	for(var i = 0; i< radii.length; i++)
-		radii[i] = 100;
-	for(var i = 0; i< net_triangle_vertex_indices.length / 3; i++) {
-		for(var j = 0; j < 3; j++){
-			var a_index = polyhedron_index(net_triangle_vertex_indices[i*3 + j]);
-			var b_index = polyhedron_index(net_triangle_vertex_indices[i*3 + (j+1)%3]);
-			
-			polyhedron_edge_length[a_index][b_index] = Math.sqrt( Math.pow(flatnet_vertices.array[3*net_triangle_vertex_indices[i*3 + j]]-flatnet_vertices.array[3*net_triangle_vertex_indices[i*3 + (j+1)%3]],2)
-																+ Math.pow(flatnet_vertices.array[3*net_triangle_vertex_indices[i*3 + j]+1]-flatnet_vertices.array[3*net_triangle_vertex_indices[i*3 + (j+1)%3]+1],2) );
-			polyhedron_edge_length[b_index][a_index] = polyhedron_edge_length[a_index][b_index]; 
-		}
-	}
-	
-	if(!correct_minimum_angles()){ //we'd rather not have this dependence, you should be able to predict what won't work and put correct_minimum_angles in coreloop.
+	//Everything that could go wrong. TODO remove this on release. You should be able to predict what won't work and put correct_minimum_angles, and resetter, in coreloop.
+	if(!correct_edge_lengths()|| !correct_defects() || !correct_minimum_angles() ){
 		for( var i = 0; i < 66; i++)
 			flatnet_vertices.array[i] = net_log[i];
 		correct_minimum_angles();
 	}
-	
-	//TODO remove this on release
-	for(var i = 0; i < 20; i++){
-		var angular_defect = TAU;
-		for(var j = 0; j < 5; j++){
-			angular_defect -= corner_angle_from_indices(V_triangle_indices[0][i][j], V_vertex_indices[0][i][3*j+2]);
-		}
-		if(Math.abs(angular_defect-TAU/6) > 0.01 ){
-			console.log("angular defect at vertex " + i + " off by:" )
-			console.log(angular_defect-TAU/6);
-		}
-		
-		for(var j = 0; j < 5; j++){
-			var central_vertex1_index = V_vertex_indices[0][i][3*j+2];
-			var central_vertex2_index = V_vertex_indices[0][i][(3*(j+1))%15+2];
-			var outer_vertex1_index = V_vertex_indices[0][i][3*j+1];
-			var outer_vertex2_index = V_vertex_indices[0][i][(3*(j+1))%15+0];
-			var central_vertex1 = new THREE.Vector3(flatnet_vertices.array[central_vertex1_index*3+0],flatnet_vertices.array[central_vertex1_index*3+1],flatnet_vertices.array[central_vertex1_index*3+2]);
-			var central_vertex2 = new THREE.Vector3(flatnet_vertices.array[central_vertex2_index*3+0],flatnet_vertices.array[central_vertex2_index*3+1],flatnet_vertices.array[central_vertex2_index*3+2]);
-			var outer_vertex1 = new THREE.Vector3(flatnet_vertices.array[outer_vertex1_index*3+0],flatnet_vertices.array[outer_vertex1_index*3+1],flatnet_vertices.array[outer_vertex1_index*3+2]);
-			var outer_vertex2 = new THREE.Vector3(flatnet_vertices.array[outer_vertex2_index*3+0],flatnet_vertices.array[outer_vertex2_index*3+1],flatnet_vertices.array[outer_vertex2_index*3+2]);
-			var length_difference = Math.abs(outer_vertex1.distanceTo(central_vertex1) - outer_vertex2.distanceTo(central_vertex2) );
-			if(length_difference > 0.01)
-				console.log("edge length discrepency", length_difference);
-		}
+	for(var j = 0; j < minimum_angles.length; j++){
+		if(isNaN(minimum_angles[j]))
+			console.log("REALLY SHOULDN'T COME TO THIS");
 	}
 	
 	//now we need the "height" of the capsid

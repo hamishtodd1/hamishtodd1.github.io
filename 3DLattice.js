@@ -1,30 +1,17 @@
 /*
- * Random walk:
- * -starting with the atom in the final position, generate a trajectory of it, just an array of vector positions
- * -little vibration at first, then it pops out
- * -confine it to a sphere. Make it move in random directions with a 
- * 
- * How to manage it state-wise? Could have it be triggered if the time is precisely equal to a certain number.
- * Might want to ensure that it is seen from the right angle? Could rotate lattice in a way that leaves it unchanged.
- * 
- * Then 5x12=60 icosahedra, then (sigh, violation) 20 triacontahedra AND 12 icosahedra. Then perhaps 20*30 = 360 rhombohedra
+ * Might be nice to have points on sharp corners only? Most shapes combine them though
  * 
  * So maybe things should scale a little, or indeed indefinitely
- * You can perhaps turn it on one axis which also makes it generate
  * 
- * Remove the lines and faces from the sides of the shapes that you can't see. This is trivial, just need a separate material
- * The most worthwhile deletions would be what you can't see when the stars are in
+ * Speedup: Remove the lines and faces from the sides of the shapes that you can't see. This is trivial, just need a separate material
  * 
- * changing transparency doesn't seem to help, so no tricks to be done with the final fadeout
+ * Ok probably what we want here is a set of points that can very convincingly be laid on pariacoto, and which plausibly derive from the tiling that you have, maybe one layer more or less.
  * 
+ * In the meantime a point that ends up on a fivefold corner will be quite alright
  * 
- * So each layer is one object, necessarily, because alpha.
- * We're not changing the positions of the meshes, modify everything directly, so will be using "icosahedron_geometry_in_buffer" a lot.
- * Probably a separate mesh for the outlines, so no need to worry about colors.
- * 
- * We put everything in place, save that as "default" positions, then add shit on.
- * 
+ * But do you want something about merging points together?
  */
+
 
 
 function rotate_layer(index,MovementAxis,movementangle){
@@ -85,6 +72,34 @@ function attempt_quasiatom_addition_and_return_next_index(ourposition, lowest_un
 	return lowest_unused_index + 1; //quasiatom successfully installed!
 }
 
+function update_animationprogress(){
+	previous_animation_progress = animation_progress;
+
+	if(isMouseDown ){
+		var AbsoluteBarLeft = progress_bar.geometry.vertices[0].clone();
+		AbsoluteBarLeft.add(progress_bar.geometry.vertices[1]);
+		AbsoluteBarLeft.multiplyScalar(0.5);
+		AbsoluteBarLeft.add(progress_bar.position);
+		var AbsoluteBarRight = progress_bar.geometry.vertices[2].clone();
+		AbsoluteBarRight.add(progress_bar.geometry.vertices[3]);
+		AbsoluteBarRight.multiplyScalar(0.5);
+		AbsoluteBarRight.add(progress_bar.position);
+		
+		if( !isMouseDown_previously && minimum_distance(AbsoluteBarRight,AbsoluteBarLeft,circle.geometry.vertices[0]) <= 0.8 ) 
+			slider_grabbed = true;
+	}
+	else slider_grabbed = false;
+	if(slider_grabbed){
+		slider.position.x = circle.geometry.vertices[0].x;
+		if(slider.position.x > progress_bar.geometry.vertices[0].x)
+			slider.position.x = progress_bar.geometry.vertices[0].x;
+		if(slider.position.x < progress_bar.geometry.vertices[3].x)
+			slider.position.x = progress_bar.geometry.vertices[3].x;
+		
+		animation_progress = ( slider.position.x - progress_bar.geometry.vertices[3].x ) / (progress_bar.geometry.vertices[0].x - progress_bar.geometry.vertices[3].x);
+	}
+}
+
 function update_3DLattice() {
 	var rhombohedra_startfadein_time = 0.0001; //arbitrarily low number, just here so it can start itself
 	var rhombohedra_convergence_time = 1/6;
@@ -97,64 +112,13 @@ function update_3DLattice() {
 	var ico_star_startfadein_time = star_convergence_time;
 	var ico_star_convergence_time = 5/6;
 	var allshape_fadeout_start_time = ico_star_convergence_time;
-	
-	previous_animation_progress = animation_progress;
-	
-	if(	isMouseDown && !isMouseDown_previously && circle.geometry.vertices[0].distanceTo(slider.position) <= 0.8 )
-		slider_grabbed = true;
-	if(!isMouseDown )
-		slider_grabbed = false;
-	if(slider_grabbed){
-		slider.position.x = circle.geometry.vertices[0].x;
-		if(slider.position.x > progress_bar.geometry.vertices[0].x)
-			slider.position.x = progress_bar.geometry.vertices[0].x;
-		if(slider.position.x < progress_bar.geometry.vertices[3].x)
-			slider.position.x = progress_bar.geometry.vertices[3].x;
-		
-		animation_progress = ( slider.position.x - progress_bar.geometry.vertices[3].x ) / (progress_bar.geometry.vertices[0].x - progress_bar.geometry.vertices[3].x);
-	}
+	var star_bunch_time = triacontahedra_convergence_time + (star_convergence_time - triacontahedra_convergence_time ) * 0.5;
 	
 	if(animation_progress >= allshape_fadeout_start_time && previous_animation_progress < allshape_fadeout_start_time){
-		//so you're putting points on vertices of all the icosahedra, except not duplicates...
-		//there are vertices that connect:
-		/*	5 rhombohedra, 1 icosahedron
-		 * 	2 icosahedra, 2 rhomhohedra
-		 * 	3 icosahedra, 1 triacontahedra
-		 * 	icosahedra, stars
-		 * 	stars, triacontahedra
-		 * 
-		 * The icosas, the triacontas, the 
-		 * 
-		 * you can get the triacontahedra-only ones withjust the virtual dodecahedron vertices with setlength phi + triacontahedra final position
-		 * 
-		 * Ahh fuck it, you don't need this. Certainly not for a while
-		 */
-		
-		var lowest_unused_index = 0;
-		for(var i = 0; i < golden_rhombohedra.length; i++) {
-			for(var j = 0; j<golden_rhombohedra[i].geometry.attributes.position.length/3; j++){
-				var new_position = new THREE.Vector3(
-						golden_rhombohedra[i].geometry.attributes.position.array[j*3+0],
-						golden_rhombohedra[i].geometry.attributes.position.array[j*3+1],
-						golden_rhombohedra[i].geometry.attributes.position.array[j*3+2]);
-				golden_rhombohedra[i].localToWorld(new_position);
-				
-				lowest_unused_index = attempt_quasiatom_addition_and_return_next_index(new_position, lowest_unused_index );
-			}
-		}
-		for(var i = 0; i < goldenicos.length; i++) {
-			for(var j = 0; j<goldenicos[i].geometry.attributes.position.length/3; j++){
-				var new_position = new THREE.Vector3(
-						goldenicos[i].geometry.attributes.position.array[j*3+0],
-						goldenicos[i].geometry.attributes.position.array[j*3+1],
-						goldenicos[i].geometry.attributes.position.array[j*3+2]);
-				goldenicos[i].localToWorld(new_position);
-				
-				lowest_unused_index = attempt_quasiatom_addition_and_return_next_index(new_position, lowest_unused_index );
-			}
-		}
 		scene.add(QC_atoms);
 	}
+	
+	
 	if(animation_progress < allshape_fadeout_start_time && previous_animation_progress >= allshape_fadeout_start_time){
 		for(var i = 0; i<quasiatoms.length; i++)
 			for(var j = 0; j < quasiatoms[i].length; j++)
@@ -162,8 +126,6 @@ function update_3DLattice() {
 		
 		scene.remove(QC_atoms);
 	}
-	
-	var shape_accel = 160;
 	
 	update_shape_layer(rhombohedra_startfadein_time, rhombohedra_convergence_time, allshape_fadeout_start_time, icosahedra_convergence_time, Quasi_meshes[0], meshes_original_numbers[0], 0 );
 	update_shape_layer(rhombohedra_startfadein_time, rhombohedra_convergence_time, allshape_fadeout_start_time, icosahedra_convergence_time, Quasi_outlines[0], outlines_original_numbers[0], 0 );
@@ -174,7 +136,6 @@ function update_3DLattice() {
 	update_shape_layer(icosahedra_convergence_time, triacontahedra_convergence_time, allshape_fadeout_start_time, 1, Quasi_meshes[2], meshes_original_numbers[2], 0 );
 	update_shape_layer(icosahedra_convergence_time, triacontahedra_convergence_time, allshape_fadeout_start_time, 1, Quasi_outlines[2], outlines_original_numbers[2], 0 );
 	
-	var star_bunch_time = triacontahedra_convergence_time + (star_convergence_time - triacontahedra_convergence_time ) * 0.5;	
 	update_shape_bunch_layer(triacontahedra_convergence_time, star_convergence_time, allshape_fadeout_start_time, ico_star_convergence_time, star_bunch_time, Quasi_meshes[3], meshes_original_numbers[3], 0 );
 	update_shape_bunch_layer(triacontahedra_convergence_time, star_convergence_time, allshape_fadeout_start_time, ico_star_convergence_time, star_bunch_time, Quasi_outlines[3], outlines_original_numbers[3], 0 );
 	
@@ -186,23 +147,25 @@ function update_3DLattice() {
 		var MovementAxis = new THREE.Vector3(-Mouse_delta.y, Mouse_delta.x, 0);
 		MovementAxis.normalize();
 		var MovementAngle = Mouse_delta.length() / 3;
-		var extraquaternion = new THREE.Quaternion();
-		extraquaternion.setFromAxisAngle( MovementAxis, MovementAngle );
 		
-		rotate_layer(0,MovementAxis, MovementAngle);
-		rotate_layer(1,MovementAxis, MovementAngle);
-		rotate_layer(2,MovementAxis, MovementAngle);
-		rotate_layer(3,MovementAxis, MovementAngle);
-		rotate_layer(4,MovementAxis, MovementAngle);
-		
-		var atoms_axis = MovementAxis.clone();
-		QC_atoms.updateMatrixWorld();
-		QC_atoms.worldToLocal(atoms_axis);
-		atoms_axis.normalize();
-		var atoms_quaternion = new THREE.Quaternion();
-		atoms_quaternion.setFromAxisAngle( atoms_axis, MovementAngle );
-		QC_atoms.quaternion.multiply(atoms_quaternion);
+		rotate_3DPenrose_entirety(MovementAxis,MovementAngle);
 	}
+}
+
+function rotate_3DPenrose_entirety(MovementAxis,MovementAngle){
+	rotate_layer(0,MovementAxis, MovementAngle);
+	rotate_layer(1,MovementAxis, MovementAngle);
+	rotate_layer(2,MovementAxis, MovementAngle);
+	rotate_layer(3,MovementAxis, MovementAngle);
+	rotate_layer(4,MovementAxis, MovementAngle);
+	
+	var atoms_axis = MovementAxis.clone();
+	QC_atoms.updateMatrixWorld();
+	QC_atoms.worldToLocal(atoms_axis);
+	atoms_axis.normalize();
+	var atoms_quaternion = new THREE.Quaternion();
+	atoms_quaternion.setFromAxisAngle( atoms_axis, MovementAngle );
+	QC_atoms.quaternion.multiply(atoms_quaternion);
 }
 
 function clamp(val, minval){
@@ -779,6 +742,31 @@ function init_cubicLattice_stuff() {
    	put_into_two_objects(2,golden_triacontahedra);
    	put_bunch_into_two_objects(3,golden_stars);
    	put_bunch_into_two_objects(4,ico_stars);
+   	
+   	//QC_atoms
+   	var lowest_unused_index = 0;
+	for(var i = 0; i < golden_rhombohedra.length; i++) {
+		for(var j = 0; j<golden_rhombohedra[i].geometry.attributes.position.length/3; j++){
+			var new_position = new THREE.Vector3(
+					golden_rhombohedra[i].geometry.attributes.position.array[j*3+0],
+					golden_rhombohedra[i].geometry.attributes.position.array[j*3+1],
+					golden_rhombohedra[i].geometry.attributes.position.array[j*3+2]);
+			golden_rhombohedra[i].localToWorld(new_position);
+			
+			lowest_unused_index = attempt_quasiatom_addition_and_return_next_index(new_position, lowest_unused_index );
+		}
+	}
+	for(var i = 0; i < goldenicos.length; i++) {
+		for(var j = 0; j<goldenicos[i].geometry.attributes.position.length/3; j++){
+			var new_position = new THREE.Vector3(
+					goldenicos[i].geometry.attributes.position.array[j*3+0],
+					goldenicos[i].geometry.attributes.position.array[j*3+1],
+					goldenicos[i].geometry.attributes.position.array[j*3+2]);
+			goldenicos[i].localToWorld(new_position);
+			
+			lowest_unused_index = attempt_quasiatom_addition_and_return_next_index(new_position, lowest_unused_index );
+		}
+	}
 }
 
 //shape_array -> shape_bunch_array[0]
@@ -1039,10 +1027,14 @@ function update_shape_bunch_layer(start_fadein_time, convergence_time, start_fad
 		}
 	}
 	
-	var bunch_dist = 0.5 * accel * (animation_progress-bunch_time) * (animation_progress-bunch_time);
+	var bunch_accel;
+	if(icosahedra)
+		bunch_accel = accel;
+	else
+		bunch_accel = accel * 2;
+	var bunch_dist = 0.5 * bunch_accel * (animation_progress-bunch_time) * (animation_progress-bunch_time);
 	if(animation_progress >= bunch_time)
-		bunch_dist = 0;
-	
+		bunch_dist = 0;	
 	
 	for(var h = 0; h < 12; h++){
 		for(var i = 0; i<bunch_size; i++){

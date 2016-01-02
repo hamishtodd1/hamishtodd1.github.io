@@ -13,8 +13,9 @@ var CK_MODE = 3;
 var IRREGULAR_MODE = 4;
 var QC_SPHERE_MODE = 5;
 var CUBIC_LATTICE_MODE = 6;
+var FINAL_FORMATION_MODE = 7;
 	
-var MODE = 6;
+var MODE = 7;
 
 //--------------Technologically fundamental
 var playing_field_width = 7*HS3;
@@ -118,7 +119,6 @@ var stitchup_line_pairs = new Uint16Array(1000);
 var set_stable_point = 32;
 
 //------------3D penrose stuff
-
 var Quasi_meshes = Array(5);
 var meshes_original_numbers = Array(5);
 var outlines_original_numbers = Array(5);
@@ -129,8 +129,6 @@ var normalized_virtualico_vertices = Array(20);
 
 var icosahedra_directions = Array(12);
 
-
-//------------no longer 3D penrose stuff
 
 var golden_rhombohedra = Array(20);
 var goldenicos = Array(12);
@@ -144,6 +142,13 @@ var slider;
 var slider_grabbed = false;
 var quasiatoms = Array(4);
 var QC_atoms = Array(2000);
+var outermost_QCatom_indices = Array(0,0,0,	0,0,0,	0,0,0,	0,0,0);
+
+//-----------formationatom stuff
+
+var formation_animation_numbers;
+
+//-----------no longer formation atom stuff
 
 var flatnet;
 var flatnet_vertices_numbers;

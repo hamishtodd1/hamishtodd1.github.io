@@ -12,6 +12,27 @@ function difference_between_angles(angle1, angle2){
 	//this would be worthwhile
 }
 
+//v and w are ends of a line segment, p is a point and we wish to know its dist from the line
+function minimum_distance(v0, w0, p0) {
+	var w = new THREE.Vector2(w0.x,w0.y);
+	var v = new THREE.Vector2(v0.x,v0.y);
+	var p = new THREE.Vector2(p0.x,p0.y);
+	
+	var l2 = v.distanceTo(w);  // i.e. |w-v|^2 -  avoid a sqrt
+	l2 = l2 * l2;
+	if (l2 == 0.0) return p.distanceTo(v);   // v == w case
+	var VtoP = v.clone();
+	VtoP.sub(p);
+	var VtoW = w.clone();
+	VtoW.sub(v);
+	var t = -VtoP.dot(VtoW) / l2;
+	if (t < 0.0) return p.distanceTo(v);       // Beyond the 'v' end of the segment
+	else if (t > 1.0) return p.distanceTo(w);  // Beyond the 'w' end of the segment
+	var projection =v.clone();
+	projection.addScaledVector(VtoW,t);  // Projection falls on the segment
+	return p.distanceTo(projection);
+}
+
 function deduce_stable_points_from_fanning_vertex(fanning_vertex_start, lattice_vertex_index, spoke_to_side_angle){
 	var fanning_vertex_length = fanning_vertex_start.length();
 	var hand = 1;

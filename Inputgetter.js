@@ -37,7 +37,7 @@ function update_mouseblob(){
 	}
 	
 	var cursorposition = new THREE.Vector2(MousePosition.x,MousePosition.y);
-	if(MODE==CUBIC_LATTICE_MODE)
+	if(MODE==CUBIC_LATTICE_MODE || MODE == FINAL_FORMATION_MODE)
 		cursorposition.multiplyScalar(4.5);
 	for(var i = 0; i < circle.geometry.vertices.length; i++) {
 		circle.geometry.vertices[i].x = cursorposition.x + Xdists_from_center[i];

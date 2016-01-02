@@ -664,6 +664,7 @@ function init() {
 //	init_static_capsid();
 	init_DNA_cage();
 	init_static_capsid();
+//	initialize_formation_atom();
 	
 	//------------------need this so there's something in there for the first frame
 	ourclock.getDelta();

@@ -1,20 +1,50 @@
+//So what's actually happenning is that we're seeing the surface
 function correct_defects() {
+	var wiggleroom = 0.00001;
 	for( var corner = 0; corner < 22; corner++) {
+		var corners_added = 0;
 		var angular_defect = 0;
 		for( var triangle = 0; triangle < 20; triangle++) {
 			for(var triangle_corner = 0; triangle_corner < 3; triangle_corner++) {
 				actual_index = net_triangle_vertex_indices[ triangle * 3 + triangle_corner];
 				if( vertex_identifications[corner][actual_index] !== 0) {
+					var corner_angle = corner_angle_from_indices(triangle, actual_index);
+					if(corner_angle < 0.0006){
+						if(net_warnings)console.log("Error: Small angle");
+						return 0;
+					}
 					angular_defect += corner_angle_from_indices(triangle, actual_index);
+					corners_added++;
 				}
 			}
 		}
 		
-		var wiggleroom = 0.00001;
 		if( Math.abs( angular_defect - TAU * 5/6 ) > wiggleroom ) {
 			var error = angular_defect - TAU * 5/6;
-			if(net_warnings) console.log( "Warning: defect at net vertex " + corner + " off by " + error);
+			if(net_warnings)console.log( "Error: defect off by " + error);
 			return 0;
+		}
+	}
+	return 1;
+}
+
+function correct_edge_lengths(){
+	for(var i = 0; i < 20; i++){
+		for(var j = 0; j < 5; j++){
+			var central_vertex1_index = V_vertex_indices[0][i][3*j+2];
+			var central_vertex2_index = V_vertex_indices[0][i][(3*(j+1))%15+2];
+			var outer_vertex1_index = V_vertex_indices[0][i][3*j+1];
+			var outer_vertex2_index = V_vertex_indices[0][i][(3*(j+1))%15+0];
+			var central_vertex1 = new THREE.Vector3(flatnet_vertices.array[central_vertex1_index*3+0],flatnet_vertices.array[central_vertex1_index*3+1],flatnet_vertices.array[central_vertex1_index*3+2]);
+			var central_vertex2 = new THREE.Vector3(flatnet_vertices.array[central_vertex2_index*3+0],flatnet_vertices.array[central_vertex2_index*3+1],flatnet_vertices.array[central_vertex2_index*3+2]);
+			var outer_vertex1 = new THREE.Vector3(flatnet_vertices.array[outer_vertex1_index*3+0],flatnet_vertices.array[outer_vertex1_index*3+1],flatnet_vertices.array[outer_vertex1_index*3+2]);
+			var outer_vertex2 = new THREE.Vector3(flatnet_vertices.array[outer_vertex2_index*3+0],flatnet_vertices.array[outer_vertex2_index*3+1],flatnet_vertices.array[outer_vertex2_index*3+2]);
+			var length_difference = Math.abs(outer_vertex1.distanceTo(central_vertex1) - outer_vertex2.distanceTo(central_vertex2) );
+			if(length_difference > 0.01){
+				if(net_warnings)console.log("Error: edge length discrepency");
+//				console.log(length_difference);
+				return 0;
+			}
 		}
 	}
 	return 1;
@@ -77,7 +107,7 @@ function compare_polyhedron_with_net() {
 			discrepancy_percentage = Math.floor(discrepancy_percentage * 10) / 10;
 			var wiggleroom = 1;
 			if( discrepancy_percentage > wiggleroom ) {
-				console.log("angle " + a_index + "-" + b_index + "-" + c_index + " off by " + discrepancy_percentage + "%" );			
+				if(net_warnings)console.log("angle " + a_index + "-" + b_index + "-" + c_index + " off by " + discrepancy_percentage + "%" );			
 				all_ok = false;
 			}
 				
@@ -90,7 +120,7 @@ function compare_polyhedron_with_net() {
 			discrepancy_percentage = Math.floor(discrepancy_percentage * 10) / 10;
 			var wiggleroom = 1;
 			if( discrepancy_percentage > wiggleroom ) {
-				console.log("edge " + a_index + "->" + b_index + " off by " + discrepancy_percentage +"%" );
+				if(net_warnings)console.log("edge " + a_index + "->" + b_index + " off by " + discrepancy_percentage +"%" );
 				all_ok = false;
 			}
 			

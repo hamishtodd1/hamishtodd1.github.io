@@ -5,9 +5,20 @@ function UpdateCamera() {
 //	else
 //		cameradist -= 0.08;
 
-	if(MODE == CUBIC_LATTICE_MODE){
-		camera.position.z = min_cameradist * 4.5;
+	if(MODE == CUBIC_LATTICE_MODE || MODE == FINAL_FORMATION_MODE){
+		//We could make it shift from perspective to orthographic when the mouse is down, to mimic diffraction, or would that be too complex? If you're going to do it, mention it in the text.
+		
+		var CLScale = 4.5;
+		camera.position.z = min_cameradist * CLScale;
+		camera.cameraO.left =-playing_field_width / 2 * CLScale;
+		camera.cameraO.right = playing_field_width / 2 * CLScale;
+		camera.cameraO.top = playing_field_height / 2 * CLScale;
+		camera.cameraO.bottom =-playing_field_height / 2 * CLScale;
+		
 		camera.updateProjectionMatrix();
+		
+		if(!logged)console.log(camera);
+		logged = 1;
 	}
 	else{
 		camera.position.z = min_cameradist;

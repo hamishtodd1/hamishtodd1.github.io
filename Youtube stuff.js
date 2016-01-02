@@ -28,6 +28,7 @@ function react_to_video(){
 		else if(discrepancy < -1) //they've gone back, we should follow
 			secondsthroughvid = timeupdate;
 		//if it's 0 then things are as normal
+		//there are much better ways of checking for a pause but this is not hugely important
 	}
 	secondsthroughvid += delta_t;
 	console.log(secondsthroughvid);

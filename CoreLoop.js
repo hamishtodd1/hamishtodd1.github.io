@@ -34,8 +34,11 @@ function UpdateWorld() {
 			logged = 1;
 			break;
 			
-		case CUBIC_LATTICE_MODE:
-			update_3DLattice();
+		case IRREGULAR_MODE:
+			CheckButton();
+			HandleVertexRearrangement();
+			update_varyingsurface();
+			//correct_minimum_angles();
 			break;
 			
 		case QC_SPHERE_MODE:
@@ -44,12 +47,14 @@ function UpdateWorld() {
 			Map_To_Quasisphere();
 			break;
 			
-		case IRREGULAR_MODE:
-			CheckButton();
-			HandleVertexRearrangement();
-			update_varyingsurface();
-			//correct_minimum_angles();
+		case CUBIC_LATTICE_MODE:
+			update_animationprogress();
+			update_3DLattice();
 			break;
+			
+		case FINAL_FORMATION_MODE:
+			update_3DLattice();
+//			update_formation_atom();
 	}
 }
 
@@ -62,7 +67,8 @@ function render() {
 	UpdateWorld();
 	UpdateCamera();
 	
-	//setTimeout( function() { requestAnimationFrame( render );}, 100 );
+//	if(delta_t < 1 / 60 )
+//		setTimeout( function() { requestAnimationFrame( render ); }, 100 );
 	requestAnimationFrame( render );
 	renderer.render( scene, camera );
 }
@@ -138,9 +144,14 @@ function ChangeScene(new_mode) {
 			break;
 		
 		case CUBIC_LATTICE_MODE:
-			camera.toPerspective(); //TODO maybe not, to give feeling of diffraction. Perspective may help you understand though. How about it shifts when mouse isn't down?
+			camera.toOrthographic();
 			scene.add(slider);
 			scene.add(progress_bar);
+			break;
+			
+		case FINAL_FORMATION_MODE:
+			camera.toPerspective();
+			animation_progress = 1;
 			break;
 	}
 }

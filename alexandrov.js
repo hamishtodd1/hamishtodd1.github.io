@@ -11,24 +11,36 @@
 //Perhaps find some way to relate the angle that is used to epsilon and openness in a way that makes it so they're strictly decreasing?
 //or, only write to those dihedral angles that are less than what they were in the previous frame (which may be dependent on openness)
 
+function reset_net(){
+	for(var i = 0; i< radii.length; i++)
+		radii[i] = 100;
+	for(var i = 0; i< net_triangle_vertex_indices.length / 3; i++) {
+		for(var j = 0; j < 3; j++){
+			var a_index = polyhedron_index(net_triangle_vertex_indices[i*3 + j]);
+			var b_index = polyhedron_index(net_triangle_vertex_indices[i*3 + (j+1)%3]);
+			
+			polyhedron_edge_length[a_index][b_index] = Math.sqrt( Math.pow(flatnet_vertices.array[3*net_triangle_vertex_indices[i*3 + j]]-flatnet_vertices.array[3*net_triangle_vertex_indices[i*3 + (j+1)%3]],2)
+																+ Math.pow(flatnet_vertices.array[3*net_triangle_vertex_indices[i*3 + j]+1]-flatnet_vertices.array[3*net_triangle_vertex_indices[i*3 + (j+1)%3]+1],2) );
+			polyhedron_edge_length[b_index][a_index] = polyhedron_edge_length[a_index][b_index]; 
+		}
+	}
+}
 
 function correct_minimum_angles() {
-	var stepsizemax = 0.75;
-	var stepsize = stepsizemax;
-	
 	var this_all_takes_place_in_one_frame = true;
-//	if( this_all_takes_place_in_one_frame && InputObject.isMouseDown)
-//		return 1;
 	
-	//curvatures is a 12D vector with curvatures_i coming from r. Get its length to zero!
+	if(this_all_takes_place_in_one_frame) reset_net();
+	else console.log( "No, you need to reset the net");
+	
+	var stepsizemax = 0.75;
+	var stepsize = stepsizemax;	
+	var epsilon = 0.0025; //subjectively chosen
+	var found_concave_edge = 0;
+	var steps = 0;
+	
+	//curvatures is a 12D vector with curvatures[i] coming from vertex (i.e. radius) i. Get its length to zero!
 	var curvatures_current = get_curvatures(radii);	//get this to zero!
 	var curvatures_current_quadrance = quadrance(curvatures_current);
-	
-	var epsilon = 0.0025; //subjectively chosen
-	
-	var found_concave_edge = 0;
-	
-	var steps = 0;
 	
 	while( curvatures_current_quadrance > epsilon)  {
 		var curvatures_intended = Array(curvatures_current.length);
@@ -62,7 +74,7 @@ function correct_minimum_angles() {
 					curvatures_current_quadrance = quadrance(curvatures_current);
 					
 					if(found_concave_edge != 0){
-						console.log("Resolved concave edge. " + found_concave_edge + " step reduction(s)");
+						if(net_warnings)console.log("Resolved concave edge. " + found_concave_edge + " step reduction(s)");
 					}
 					found_concave_edge = 0;
 					
@@ -81,13 +93,13 @@ function correct_minimum_angles() {
 		}
 		
 		if(found_concave_edge > 2){
-			console.log("Quitting alexandrov. Unresolved concave edge, tried " + found_concave_edge + " step reductions")
+			if(net_warnings)console.log("Quitting Al. Concave edge after " + found_concave_edge + " step reductions")
 			return 0;
 		}
 		
 		steps++;
 		if(steps > 1500){
-			console.log("Quitting alexandrov. More than " + steps + " steps");
+			if(net_warnings)console.log("Quitting Al. More than " + steps + " steps");
 			return 0;
 		}
 	}
@@ -96,6 +108,11 @@ function correct_minimum_angles() {
 		minimum_angles[i] = get_polyhedron_dihedral_angle_from_indices( polyhedron_index( vertices_derivations[i][0] ),
 																		polyhedron_index( vertices_derivations[i][1] ), 
 																		radii);
+		
+		if(isNaN(minimum_angles[i])){
+			if(net_warnings)console.log("bad minimum angle!")
+			return 0;
+		}	
 	}
 	
 	return 1;
