@@ -31,7 +31,6 @@ function react_to_video(){
 		//there are much better ways of checking for a pause but this is not hugely important
 	}
 	secondsthroughvid += delta_t;
-	console.log(secondsthroughvid);
 		
 	for(var i = 0; i < section_finishing_time.length /*or whichever mode is last*/; i++) {
 		if( section_finishing_time[i-1] <= secondsthroughvid && secondsthroughvid < section_finishing_time[i] && MODE != i)
