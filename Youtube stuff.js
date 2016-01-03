@@ -3,8 +3,8 @@ tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-var section_finishing_time = Array(29,177,295,548,738,909,99999999999);
-var pausing_times = Array(35,185,321,550,747,939);
+var section_finishing_time = Array(29,177,295,548,738,909,animation_beginning_second,99999999999);
+var pausing_times = Array(36,185,321,550,747,939);
 var secondsthroughvid = 0;
 function react_to_video(){
 	/* Note that it is *finishing* time
@@ -41,13 +41,6 @@ function react_to_video(){
 			pausing_times[i] = -1; //won't need that again
 			ytplayer.pauseVideo();
 		}
-	}
-	
-	var crystalformation_time = 1028;
-	if( secondsthroughvid == crystalformation_time){
-		/*
-		 * We're going to need a function to be updating it of course. Could be this one.
-		 */
 	}
 }
 

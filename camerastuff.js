@@ -16,9 +16,6 @@ function UpdateCamera() {
 		camera.cameraO.bottom =-playing_field_height / 2 * CLScale;
 		
 		camera.updateProjectionMatrix();
-		
-		if(!logged)console.log(camera);
-		logged = 1;
 	}
 	else{
 		camera.position.z = min_cameradist;

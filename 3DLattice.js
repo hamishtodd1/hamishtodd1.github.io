@@ -119,11 +119,7 @@ function update_3DLattice() {
 	}
 	
 	
-	if(animation_progress < allshape_fadeout_start_time && previous_animation_progress >= allshape_fadeout_start_time){
-		for(var i = 0; i<quasiatoms.length; i++)
-			for(var j = 0; j < quasiatoms[i].length; j++)
-				scene.remove(quasiatoms[i][j]);
-		
+	if(animation_progress < allshape_fadeout_start_time && previous_animation_progress >= allshape_fadeout_start_time){		
 		scene.remove(QC_atoms);
 	}
 	
@@ -211,7 +207,7 @@ function orient_piece(vector_to_point_down, vector_to_line_up_with, myobject){
 
 function init_cubicLattice_stuff() {
 	for(var i = 0; i< 12; i++)
-		icosahedra_directions[i] = new Uint16Array([0,0,0, 0,0,0,]);
+		icosahedra_directions[i] = new Uint16Array([0,0,0, 0,0,0, ]);
 	
 	progress_bar = new THREE.Mesh( new THREE.BoxGeometry( 16, 0.6, 0 ), new THREE.MeshBasicMaterial({color: 0xBBBBBB}) );
 	progress_bar.position.y = -12;
@@ -219,22 +215,7 @@ function init_cubicLattice_stuff() {
 	slider.position.x = progress_bar.geometry.vertices[3].x;
 	slider.position.y = progress_bar.position.y;
 	slider.position.z = 0.01;
-	
-	var quasiatom_radius = 0.12;
-	//var quasiatom_material = new THREE.MeshBasicMaterial({color: 0x00FFFF});
-	quasiatoms[0] = Array(golden_rhombohedra.length);
-	quasiatoms[1] = Array(goldenicos.length);
-	quasiatoms[2] = Array(golden_triacontahedra.length);
-	quasiatoms[3] = Array(golden_stars.length);
-	for(var i = 0; i < quasiatoms[0].length; i++)
-		quasiatoms[0][i] = new THREE.Mesh( (new THREE.BufferGeometry).fromGeometry(new THREE.SphereGeometry(quasiatom_radius,8,4)),new THREE.MeshBasicMaterial({color: 0xD56252}));
-	for(var i = 0; i < quasiatoms[1].length; i++)
-		quasiatoms[1][i] = new THREE.Mesh( (new THREE.BufferGeometry).fromGeometry(new THREE.SphereGeometry(quasiatom_radius,8,4)),new THREE.MeshBasicMaterial({color: 0x6ADEFF}));
-	for(var i = 0; i < quasiatoms[2].length; i++)
-		quasiatoms[2][i] = new THREE.Mesh( (new THREE.BufferGeometry).fromGeometry(new THREE.SphereGeometry(quasiatom_radius,8,4)),new THREE.MeshBasicMaterial({color: 0xAC83FF}));
-	for(var i = 0; i < quasiatoms[3].length; i++)
-		quasiatoms[3][i] = new THREE.Mesh( (new THREE.BufferGeometry).fromGeometry(new THREE.SphereGeometry(quasiatom_radius,8,4)),new THREE.MeshBasicMaterial({color: 0xD56252}));
-	
+
 	var number_of_QC_atoms = 177;
 	var QC_atoms_geometry = new THREE.BufferGeometry();
 	QC_atoms_geometry.addAttribute( 'position', new THREE.BufferAttribute(new Float32Array(number_of_QC_atoms * 3), 3) );

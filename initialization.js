@@ -661,10 +661,9 @@ function init() {
 	init_cubicLattice_stuff();
 	initialize_QS_stuff();	
 	initialize_protein();
-//	init_static_capsid();
 	init_DNA_cage();
 	init_static_capsid();
-//	initialize_formation_atom();
+	initialize_formation_atom();
 	
 	//------------------need this so there's something in there for the first frame
 	ourclock.getDelta();

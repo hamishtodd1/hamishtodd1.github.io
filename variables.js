@@ -140,13 +140,12 @@ var previous_animation_progress = animation_progress;
 var progress_bar;
 var slider;
 var slider_grabbed = false;
-var quasiatoms = Array(4);
-var QC_atoms = Array(2000);
-var outermost_QCatom_indices = Array(0,0,0,	0,0,0,	0,0,0,	0,0,0);
 
 //-----------formationatom stuff
-
-var formation_animation_numbers;
+var QC_atoms = Array(2000);
+var outermost_QCatom_indices = Array(0,0,0,	0,0,0,	0,0,0,	0,0,0);
+var animation_beginning_second = 17*60+3; //or whatever
+var formation_animation_numbers = new Float32Array(23 * 60 * 3);
 
 //-----------no longer formation atom stuff
 

@@ -54,7 +54,7 @@ function UpdateWorld() {
 			
 		case FINAL_FORMATION_MODE:
 			update_3DLattice();
-//			update_formation_atom();
+			update_formation_atom();
 	}
 }
 
@@ -98,7 +98,6 @@ function ChangeScene(new_mode) {
 				scene.add(bocavirus_proteins[i]);
 			for(var i = 0; i< lights.length; i++)
 				scene.add( lights[i] );
-			scene.add(DNA_cage);
 			break;
 		
 		case STATIC_DNA_MODE:
