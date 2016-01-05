@@ -27,11 +27,10 @@ function UpdateWorld() {
 			UpdateCapsid();
 			update_surfperimeter();
 			
-			HandleLatticeMovement();
+			HandleNetMovement();
 			Update_net_variables();
 			
 			Map_lattice();
-			logged = 1;
 			break;
 			
 		case IRREGULAR_MODE:

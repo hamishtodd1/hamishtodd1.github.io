@@ -1,30 +1,5 @@
 //Optimization for many things to do with lattice: just work on one one-sixth slice
 
-//might things actually be better if the net got smaller?
-
-var inverse_vertex_mass = 150; //really just a constant that accel is multiplied by
-var dampingconstant = 0.05;
-var distunit = 10;
-//the above are tuned
-var minaccel = 0.00001; //prevents round-off errors when lattice is still
-
-function get_accel(index,vertex_destinationX,vertex_destinationY,vertex_destinationZ,distance ) {
-	var accel = new THREE.Vector3(	vertex_destinationX - flatlattice_vertices.array[index*3+0],
-									vertex_destinationY - flatlattice_vertices.array[index*3+1],
-									vertex_destinationZ - flatlattice_vertices.array[index*3+2]);
-	
-	accel.x -= dampingconstant * flatlattice_vertices_velocities[index*3+0];
-	accel.y -= dampingconstant * flatlattice_vertices_velocities[index*3+1];
-	accel.z -= dampingconstant * flatlattice_vertices_velocities[index*3+2];
-	
-	//TODO we do something potentially complex with distance. It should probably have something to do with the pivot too
-	//For time being, normalize then inverse square
-	distance /= distunit;
-	distance += 1; //because if distance is zero we want no impact
-	
-	accel.multiplyScalar(inverse_vertex_mass/Math.pow(distance,2));
-	return accel;
-}
 
 var maxspeed = 34;
 function updatelattice() {
@@ -45,7 +20,7 @@ function updatelattice() {
 }
 
 //you could move the net. There again, the lattice has to move on the screen, so.
-function HandleLatticeMovement() {
+function HandleNetMovement() {
 	if( isMouseDown){
 		LatticeGrabbed = true;
 		
@@ -136,7 +111,7 @@ function Map_lattice() {
 	for(var i = 0; i < number_of_lattice_points; i++) {
 		var triangle = locate_in_squarelattice_net(i);
 		
-		if( triangle !== 666 && capsidopenness != 1) {
+		if( capsidopenness != 1 && triangle !== 666 ) {
 			var mappedpoint = map_from_lattice_to_surface(
 				flatlattice_vertices.array[ i*3+0 ], flatlattice_vertices.array[ i*3+1 ],
 				triangle);
@@ -147,20 +122,27 @@ function Map_lattice() {
 			lattice_colors[i*3+1] = 0;
 			lattice_colors[i*3+2] = 0;
 		}
-		else if( triangle !== 666 && capsidopenness == 1) {
-			//extra on the z so they can appear above the perimeter
-			surflattice_vertices.setXYZ(i, lattice_scalefactor*flatlattice_default_vertices[ i*3+0 ],lattice_scalefactor*flatlattice_default_vertices[ i*3+1 ],0.03);
+		else if(triangle != 666 && capsidopenness == 1 ) {
+			surflattice_vertices.setXYZ(i, lattice_scalefactor*flatlattice_default_vertices[ i*3+0 ],lattice_scalefactor*flatlattice_default_vertices[ i*3+1 ],0.01);
 			
 			lattice_colors[i*3+0] = 1;
 			lattice_colors[i*3+1] = 0;
 			lattice_colors[i*3+2] = 0;
 		}
+		else if( triangle !== 666 && capsidopenness == 1) {
+			//extra on the z so they can appear above the perimeter
+			surflattice_vertices.setXYZ(i, lattice_scalefactor*flatlattice_default_vertices[ i*3+0 ],lattice_scalefactor*flatlattice_default_vertices[ i*3+1 ],0.01);
+			
+			lattice_colors[i*3+0] = 1;
+			lattice_colors[i*3+1] = 0.7;
+			lattice_colors[i*3+2] = 0.7;
+		}
 		else {
 			surflattice_vertices.setXYZ(i, lattice_scalefactor*flatlattice_default_vertices[ i*3+0 ],lattice_scalefactor*flatlattice_default_vertices[ i*3+1 ],0);
 			
 			lattice_colors[i*3+0] = 1;
-			lattice_colors[i*3+1] = 0.5;
-			lattice_colors[i*3+2] = 0;
+			lattice_colors[i*3+1] = 0.7;
+			lattice_colors[i*3+2] = 0.7;
 		}
 	}
 	
