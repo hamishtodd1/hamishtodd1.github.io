@@ -4,7 +4,7 @@ var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 var section_finishing_time = Array(29,177,295,548,738,909,animation_beginning_second,99999999999);
-var pausing_times = Array(36,185,321,550,747,939);
+var pausing_times = Array(37,185,321,550,747,939);
 var secondsthroughvid = 0;
 function react_to_video(){
 	/* Note that it is *finishing* time
