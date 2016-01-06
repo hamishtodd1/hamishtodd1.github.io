@@ -19,41 +19,54 @@ function updatelattice() {
 	flatlattice.geometry.attributes.position.needsUpdate = true;
 }
 
-//you could move the net. There again, the lattice has to move on the screen, so.
+//ok so maybe you should only be able to scale or angle one at a time
 function HandleNetMovement() {
 	if( isMouseDown){
-		LatticeGrabbed = true;
-		
-		var MouseAngle = Math.atan2( (MousePosition.x - flatlattice_center.x), (MousePosition.y - flatlattice_center.y) );
-		if(MousePosition.x - flatlattice_center.x === 0 && MousePosition.y - flatlattice_center.y === 0)
-			MouseAngle = 0; //well, undefined
-		
-		var OldMouseAngle = Math.atan2( (OldMousePosition.x - flatlattice_center.x), (OldMousePosition.y - flatlattice_center.y) );
-		if(OldMousePosition.x - flatlattice_center.x === 0 && OldMousePosition.y - flatlattice_center.y === 0)
-			OldMouseAngle = 0;
-		
-		//speed up opening. TODO Sensetive enough so you know it happens, not so sensetive that touchscreens don't see slow opening
-		//if(Math.abs(OldMouseAngle - MouseAngle) > 0.08) capsidopeningspeed += 0.0045;
-		
-		//TODO remember where the original point the player clicked is, that's what you want to be moving. Currently that point is forgotten, in a sense, if the scale limit is hit
-		
-		var maxLatticeAngleChange = 0.5;
-		var LatticeAngleChange = MouseAngle - OldMouseAngle;
-		LatticeAngle += LatticeAngleChange;
-		
 		var Mousedist = MousePosition.distanceTo(flatlattice_center);
 		var OldMousedist = OldMousePosition.distanceTo(flatlattice_center); //unless the center is going to change?
 		
-		var LatticeScaleChange = OldMousedist / Mousedist;
-		
-		var min_lattice_scale_given_angle = get_min_lattice_scale(LatticeAngle);
-		LatticeScale *= LatticeScaleChange;
-		if(LatticeScale < min_lattice_scale_given_angle  ) //10/3 * HS3 / number_of_hexagon_rings)
-			LatticeScale = min_lattice_scale_given_angle ; //10/3 * HS3 / number_of_hexagon_rings;
-		if(LatticeScale > 1)
-			LatticeScale = 1;
-		//you could have a more sophisticated upper limit, a flower or something that keeps things more valid
-		//however, it raises the possibility of people not realizing they can go to one, which'd be awful
+		var active_radius = 0.18;
+		if(Mousedist > active_radius && OldMousedist > active_radius && Mouse_delta.lengthSq() != 0 ){
+			LatticeGrabbed = true;
+			
+			var oldmouse_to_center = new THREE.Vector3(flatlattice_center.x - OldMousePosition.x,flatlattice_center.y - OldMousePosition.y,0);
+			var oldmouse_to_newmouse = new THREE.Vector3(MousePosition.x - OldMousePosition.x,MousePosition.y - OldMousePosition.y,0);
+			var ourangle = oldmouse_to_center.angleTo(oldmouse_to_newmouse);
+			if(Math.abs(ourangle) < TAU / 8 || Math.abs(ourangle) > TAU / 8 * 3 ){
+				var LatticeScaleChange = OldMousedist / Mousedist;
+				var max_lattice_scale_change = 0.08;
+				if(LatticeScaleChange != 1)
+					console.log(LatticeScaleChange );
+					
+				
+				var min_lattice_scale_given_angle = get_min_lattice_scale(LatticeAngle);
+				LatticeScale *= LatticeScaleChange;
+				if(LatticeScale < min_lattice_scale_given_angle  ) //10/3 * HS3 / number_of_hexagon_rings)
+					LatticeScale = min_lattice_scale_given_angle ; //10/3 * HS3 / number_of_hexagon_rings;
+				if(LatticeScale > 1)
+					LatticeScale = 1;
+				//you could have a more sophisticated upper limit, a flower or something that keeps things more valid
+				//however, it raises the possibility of people not realizing they can go to one, which'd be awful
+			}
+			else {
+				var MouseAngle = Math.atan2( (MousePosition.x - flatlattice_center.x), (MousePosition.y - flatlattice_center.y) );
+				if(MousePosition.x - flatlattice_center.x === 0 && MousePosition.y - flatlattice_center.y === 0)
+					MouseAngle = 0; //well, undefined
+				
+				var OldMouseAngle = Math.atan2( (OldMousePosition.x - flatlattice_center.x), (OldMousePosition.y - flatlattice_center.y) );
+				if(OldMousePosition.x - flatlattice_center.x === 0 && OldMousePosition.y - flatlattice_center.y === 0)
+					OldMouseAngle = 0;
+				
+				//speed up opening. TODO Sensetive enough so you know it happens, not so sensetive that touchscreens don't see slow opening
+				//if(Math.abs(OldMouseAngle - MouseAngle) > 0.08) capsidopeningspeed += 0.0045;
+				
+				//TODO remember where the original point the player clicked is, that's what you want to be moving. Currently that point is forgotten, in a sense, if the scale limit is hit
+				
+				var maxLatticeAngleChange = 0.07;
+				var LatticeAngleChange = MouseAngle - OldMouseAngle;
+				LatticeAngle += LatticeAngleChange;
+			}
+		}
 	} else {
 		LatticeGrabbed = false;
 

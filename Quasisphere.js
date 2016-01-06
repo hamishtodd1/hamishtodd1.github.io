@@ -28,8 +28,8 @@
 function UpdateQuasiSurface(){
 	var atanphi = Math.atan(PHI);
 	
-	var dodeca_openingspeed = 0.018;
-	var dodeca_squashingspeed = 0.018;
+	var dodeca_openingspeed = 0.029;
+	var dodeca_squashingspeed = 0.022;
 	if(isMouseDown) {
 		if(dodeca_angle === 0 || dodeca_angle === 2*atanphi-TAU/2 ) dodeca_openness += dodeca_openingspeed;
 		dodeca_faceflatness += dodeca_squashingspeed; //should really be determined by the difference between dodeca_angle and 0 or
@@ -126,25 +126,31 @@ function MoveQuasiLattice(){
 	if( isMouseDown) {
 		var Mousedist = MousePosition.length();
 		var OldMousedist = OldMousePosition.length(); //unless the center is going to change?
-//		if( Mousedist < HS3 * 10/3) //we don't do anything if you're too far from the actual demo TODO replace
-		{ 
-			cutout_vector0_player.multiplyScalar(OldMousedist / Mousedist);
-			cutout_vector1_player.multiplyScalar(OldMousedist / Mousedist);
+		if(Mousedist > 0.47){
+			var scalefactor = OldMousedist / Mousedist;
+			scalefactor = (scalefactor - 1) * 0.685 +1; //0.685 is the drag
+			
+			cutout_vector0_player.multiplyScalar(scalefactor);
+			cutout_vector1_player.multiplyScalar(scalefactor);
 			var veclength = cutout_vector0_player.length();
 			
 			var maxlength = 3.48; //3.48 to make it exact
 			if(veclength > maxlength) {
-				cutout_vector0_player.setLength(maxlength);
-				cutout_vector1_player.setLength(maxlength);
+				veclength -= 0.028;
+				if(veclength < maxlength)
+					veclength = maxlength;
 				
-				veclength = maxlength;
+				cutout_vector0_player.setLength(veclength);
+				cutout_vector1_player.setLength(veclength);
 			}
 			var minlength = 1.313;
 			if(veclength < minlength) {
-				cutout_vector0_player.setLength(minlength);
-				cutout_vector1_player.setLength(minlength);
+				veclength += 0.02;
+				if(veclength > minlength)
+					veclength = minlength;
 				
-				veclength = minlength;
+				cutout_vector0_player.setLength(veclength);
+				cutout_vector1_player.setLength(veclength);
 			}
 			
 			var MouseAngle = Math.atan2(MousePosition.y, MousePosition.x );
