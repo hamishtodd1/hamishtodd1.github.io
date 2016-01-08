@@ -150,6 +150,7 @@ function ChangeScene(new_mode) {
 		case FINAL_FORMATION_MODE:
 			camera.toPerspective();
 			animation_progress = 1;
+			scene.add(QC_atoms);
 			break;
 	}
 }
