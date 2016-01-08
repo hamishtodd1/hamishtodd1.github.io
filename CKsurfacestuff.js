@@ -19,7 +19,6 @@ function UpdateCapsid() {
 	
 	surface_vertices.needsUpdate = true;
 	
-	
 	//when player clicks, it rotates so an axis points at them, then opens. Could be a nice anticipation, like the foot-stamp - make edges glow, or have particles from around it get sucked in
 	
 	var normalturningspeed = TAU/5/2; //this is the amount you want to do in a second

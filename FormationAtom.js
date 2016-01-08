@@ -54,9 +54,9 @@ function initialize_formation_atom(){
 		newposition.set(0,0,0);
 		var iterations = 0;
 		while(!check_requirements(newposition,i)){
-			get_random_movementvector(newposition);
+			get_random_movementvector(newposition, i);
 			if(i < 300)
-				newposition.setLength(0.0001);
+				newposition.setLength(0.003*Math.pow(i,1/3));
 			newposition.x += formation_animation_numbers[(i-1)*3+0];
 			newposition.y += formation_animation_numbers[(i-1)*3+1];
 			newposition.z += formation_animation_numbers[(i-1)*3+2];
@@ -78,10 +78,10 @@ function check_requirements(position, place){
 		return 0;
 	if(position.lengthSq() > 15.6 )
 		return 0;
-//	var sqdist_from_end = (position.x - formation_animation_numbers[0]) * (position.x - formation_animation_numbers[0]) +
-//						(position.y - formation_animation_numbers[1]) * (position.y - formation_animation_numbers[1]) +
-//						(position.z - formation_animation_numbers[2]) * (position.z - formation_animation_numbers[2]);
-//	if( sqdist_from_end < last_sqdist_from_end - 0.02)
+//	var dist_from_end = Math.sqrt( 	(position.x - formation_animation_numbers[0]) * (position.x - formation_animation_numbers[0]) +
+//									(position.y - formation_animation_numbers[1]) * (position.y - formation_animation_numbers[1]) +
+//									(position.z - formation_animation_numbers[2]) * (position.z - formation_animation_numbers[2]) );
+//	if( dist_from_end < place * 0.01)
 //		return 0;
 	
 	/*
@@ -92,7 +92,7 @@ function check_requirements(position, place){
 	return 1;
 }
 
-function get_random_movementvector(MovementVector){
+function get_random_movementvector(MovementVector, place){
 	var minMovement = 0.01;
 	var maxMovement = 0.45;
 	var randLength = minMovement + Math.random() * (maxMovement - minMovement);
@@ -129,7 +129,7 @@ function update_formation_atom(){
 	var nearest_frame = (secondsthroughvid - animation_beginning_second);
 	nearest_frame *= 60;
 	nearest_frame = Math.round(nearest_frame);
-	nearest_frame = formation_animation_numbers.length / 3 - nearest_frame;
+//	nearest_frame = formation_animation_numbers.length / 3 - nearest_frame;
 	
 	if( 0 <= nearest_frame && nearest_frame < formation_animation_numbers.length / 3 ) { 
 		QC_atoms.geometry.attributes.position.setXYZ(outermost_QCatom_indices[1], 

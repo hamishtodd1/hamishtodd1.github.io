@@ -24,12 +24,12 @@ function UpdateWorld() {
 			break;
 			
 		case CK_MODE:
+			HandleNetMovement();
+			
 			UpdateCapsid();
 			update_surfperimeter();
-			
-			HandleNetMovement();
-			Update_net_variables();
-			
+
+			Update_net_variables();			
 			Map_lattice();
 			break;
 			
@@ -80,7 +80,7 @@ function ChangeScene(new_mode) {
 		var obj = scene.children[i];
 		scene.remove(obj);
 	}
-	scene.add( circle );
+//	scene.add( circle );
 	
 //	if(showdebugstuff){
 //		for(var i = 0; i<indicatorblobs.length; i++)

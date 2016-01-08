@@ -4,6 +4,7 @@
 var HS3 = Math.sqrt(3)/2;
 var PHI = (Math.sqrt(5) + 1) / 2;
 var TAU = Math.PI * 2;
+var icosahedron_dihedral_angle = Math.acos(-Math.sqrt(5) / 3);
 
 //--------------Structurally fundamental
 var NOTHING_MODE = 0;
@@ -15,7 +16,7 @@ var QC_SPHERE_MODE = 5;
 var CUBIC_LATTICE_MODE = 6;
 var FINAL_FORMATION_MODE = 7;
 	
-var MODE = 5;
+var MODE = 7;
 
 //--------------Technologically fundamental
 var playing_field_width = 7*HS3;
@@ -50,11 +51,12 @@ var surfperimeter_default_radius = 0.02;
 var varyingsurface_edges_default_radius = 0.012;
 
 //Not including the central vertex
-//mimivirus needs exactly 100. Try and work out how many a human can distinguish though
-//you need 40 for phyconaviridae, which is pushing distinguishability
-//it might be a lot better as a circle. And with a max T number of 49, to show the interesting ambiguity. That means a radius of 7*sqrt(7)
-//What'd be great would be every position corresponding to a valid virus
-var number_of_hexagon_rings = 14;
+//Max T number of 49, to show the interesting ambiguity. That means a radius of 7*sqrt(7), anything larger than that isn't in there
+//21 rings are needed for that, but some points can be hidden
+//Maybe it should be a circle? intuitive connection. But that might make the edges look crap with the proteins. You could have a white plane with a circular cutout obscuring only parts of the proteins
+//for time being we are making a nice, understandable number for irreg snapping
+var number_of_hexagon_rings = 11;
+var number_of_proteins_in_lattice = number_of_hexagon_rings * number_of_hexagon_rings * 6;
 var lattice_scalefactor = playing_field_width / 2 / number_of_hexagon_rings; //TODO there is a more intuitive representation of this (maybe all of it)
 var number_of_lattice_points = 1 + 3 * number_of_hexagon_rings*(number_of_hexagon_rings+1);
 
@@ -63,6 +65,7 @@ var number_of_lattice_points = 1 + 3 * number_of_hexagon_rings*(number_of_hexago
 //----------------Initialized, then static
 var squarelattice_vertices = Array(number_of_lattice_points*2);
 var flatlattice_default_vertices = Array(number_of_lattice_points*3);
+var latticevertex_nettriangle = new Uint16Array(number_of_lattice_points);
 
 var backgroundtexture;
 
@@ -119,6 +122,8 @@ var stitchup_line_pairs = new Uint16Array(1000);
 var set_stable_point = 32;
 
 //------------3D penrose stuff
+var animation_playing_automatically = true;
+
 var Quasi_meshes = Array(5);
 var meshes_original_numbers = Array(5);
 var outlines_original_numbers = Array(5);
@@ -198,7 +203,7 @@ var surflattice_vertices_numbers = new Float32Array(3 * number_of_lattice_points
 var surflattice_vertices;
 var surflattice_geometry;
 
-var LatticeScale = 0.25; //10/3 * HS3 / number_of_hexagon_rings;
+var LatticeScale = 1/3; //10/3 * HS3 / number_of_hexagon_rings;
 var LatticeAngle = 0; //TAU/12;
 var LatticeGrabbed = false;
 
@@ -210,6 +215,7 @@ var Button;
 
 var varyingsurface_cylinders = Array(41);
 var varyingsurface_spheres = Array(22);
+var irreghighlight_progresses = Array(22);
 var varyingsurface_openmode = false;
 
 var vertex_identifications = new Array();
@@ -242,7 +248,11 @@ var MousePosition = new THREE.Vector2(0,0);
 var OldMousePosition = new THREE.Vector2(0,0);
 var Mouse_delta = new THREE.Vector2(0,0);
 
-//----bocavirus stuff
+//----protein and bocavirus stuff
+var proteinlattice;
+var protein_vertex_indices = Array(number_of_proteins_in_lattice);
+
+var number_of_vertices_in_protein;
 var master_protein = new THREE.Mesh( new THREE.BufferGeometry(), new THREE.MeshLambertMaterial({color:0xf0f00f, transparent:true}) );
 var atom_vertices_components;
 var bocavirus_vertices = Array(20*3);

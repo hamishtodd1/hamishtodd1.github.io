@@ -1,3 +1,12 @@
+function fix_protein_to_anchors_vecs(desired_corner0,desired_corner1,desired_corner2, myprotein)
+{
+	fix_protein_to_anchors(
+			desired_corner0.x,desired_corner0.y,desired_corner0.z,
+			desired_corner1.x,desired_corner1.y,desired_corner1.z,
+			desired_corner2.x,desired_corner2.y,desired_corner2.z,
+			myprotein);
+}
+
 //this function won't alter the passed vectors
 function fix_protein_to_anchors(
 		desired_corner0x,desired_corner0y,desired_corner0z,
@@ -22,9 +31,29 @@ function fix_protein_to_anchors(
     myprotein.geometry.attributes.position.needsUpdate = true;
 }
 
-function fix_protein_to_anchors_vecs(desired_corner0,desired_corner1,desired_corner2, myprotein)
+//this function won't alter the passed vectors
+function fix_meshprotein_to_anchors(
+		desired_corner0x,desired_corner0y,desired_corner0z,
+		desired_corner1x,desired_corner1y,desired_corner1z,
+		desired_corner2x,desired_corner2y,desired_corner2z,
+		proteinindex)
 {
-	fix_protein_to_anchors(
+	var basis_vec1 = new THREE.Vector3(desired_corner1x - desired_corner0x,desired_corner1y - desired_corner0y,desired_corner1z - desired_corner0z);
+	var basis_vec2 = new THREE.Vector3(desired_corner2x - desired_corner0x,desired_corner2y - desired_corner0y,desired_corner2z - desired_corner0z);
+	var basis_vec0 = new THREE.Vector3();
+	//not normalizing (or anything like normalizing) this causes a kind of distortion in "z", but that is probably ok
+	basis_vec0.crossVectors(basis_vec1, basis_vec2);
+	
+	for(var i = 0; i < master_protein.geometry.attributes.position.array.length / 3; i++) {
+		proteinlattice.geometry.attributes.position.array[(number_of_vertices_in_protein * proteinindex + i )*3+0] = atom_vertices_components[i*3+0] * basis_vec0.x + atom_vertices_components[i*3+1] * basis_vec1.x + atom_vertices_components[i*3+2] * basis_vec2.x + desired_corner0x;
+		proteinlattice.geometry.attributes.position.array[(number_of_vertices_in_protein * proteinindex + i )*3+1] = atom_vertices_components[i*3+0] * basis_vec0.y + atom_vertices_components[i*3+1] * basis_vec1.y + atom_vertices_components[i*3+2] * basis_vec2.y + desired_corner0y;
+		proteinlattice.geometry.attributes.position.array[(number_of_vertices_in_protein * proteinindex + i )*3+2] = atom_vertices_components[i*3+0] * basis_vec0.z + atom_vertices_components[i*3+1] * basis_vec1.z + atom_vertices_components[i*3+2] * basis_vec2.z + desired_corner0z;
+	}
+}
+
+function fix_meshprotein_to_anchors_vecs(desired_corner0,desired_corner1,desired_corner2, myprotein)
+{
+	fix_meshprotein_to_anchors(
 			desired_corner0.x,desired_corner0.y,desired_corner0.z,
 			desired_corner1.x,desired_corner1.y,desired_corner1.z,
 			desired_corner2.x,desired_corner2.y,desired_corner2.z,
@@ -32,6 +61,8 @@ function fix_protein_to_anchors_vecs(desired_corner0,desired_corner1,desired_cor
 }
 
 function initialize_protein(){
+	number_of_vertices_in_protein = protein_vertices_numbers.length / 3;
+	
 	for(var i = 0; i < protein_vertices_numbers.length; i++){
 		protein_vertices_numbers[i] /= 32; 
 	}
@@ -112,4 +143,54 @@ function initialize_protein(){
 		atom_vertices_components[i*3+1] = master_protein.geometry.attributes.position.array[i*3+0] * conversion_matrix.elements[1] + master_protein.geometry.attributes.position.array[i*3+1] * conversion_matrix.elements[4] + master_protein.geometry.attributes.position.array[i*3+2] * conversion_matrix.elements[7];
 		atom_vertices_components[i*3+2] = master_protein.geometry.attributes.position.array[i*3+0] * conversion_matrix.elements[2] + master_protein.geometry.attributes.position.array[i*3+1] * conversion_matrix.elements[5] + master_protein.geometry.attributes.position.array[i*3+2] * conversion_matrix.elements[8];
 	}
+	
+	proteinlattice = new THREE.Mesh( new THREE.BufferGeometry(), master_protein.material.clone());
+	proteinlattice.geometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array(protein_vertices_numbers.length * number_of_proteins_in_lattice), 3 ) );
+	proteinlattice.geometry.addAttribute( 'index', new THREE.BufferAttribute( new Uint16Array(coarse_protein_triangle_indices.length * number_of_proteins_in_lattice ), 1 ) );
+	for(var i = 0; i < number_of_proteins_in_lattice; i++){
+		for(var j = 0; j < coarse_protein_triangle_indices.length; j++){
+			proteinlattice.geometry.index[i*coarse_protein_triangle_indices.length + j] = coarse_protein_triangle_indices[j] + number_of_vertices_in_protein * i; 
+		}
+	}
+	
+	for(var i = 0; i < protein_vertex_indices.length; i++){
+		protein_vertex_indices[i] = new Uint16Array(3);
+	}
+	var rightmost_index = 0;
+	var lowest_unused_protein_index = 0;
+	for(var layer = 0; layer < number_of_hexagon_rings; layer++){
+		var original_slicelayer_rightmostindex = rightmost_index;
+		for(var slice = 0; slice < 6; slice++){
+			var nextslicelayer_rightmostindex = original_slicelayer_rightmostindex + 6 * layer + slice * (layer+1); //this is fine
+			if(layer == 0) nextslicelayer_rightmostindex += 1;
+			for(var tri = 0; tri <= layer; tri++){	
+				protein_vertex_indices[lowest_unused_protein_index][0] = rightmost_index + tri;
+				protein_vertex_indices[lowest_unused_protein_index][1] = nextslicelayer_rightmostindex + tri;
+				protein_vertex_indices[lowest_unused_protein_index][2] = nextslicelayer_rightmostindex + tri + 1;
+				
+				if(tri == layer && slice == 5){//it connects back to the first
+					protein_vertex_indices[lowest_unused_protein_index][0] -= layer * 6;
+					protein_vertex_indices[lowest_unused_protein_index][2] -= (layer+1) * 6;
+				}
+				lowest_unused_protein_index++;
+
+				if(tri != layer ){
+					protein_vertex_indices[lowest_unused_protein_index][0] = rightmost_index + tri;
+					protein_vertex_indices[lowest_unused_protein_index][1] = nextslicelayer_rightmostindex + tri + 1;
+					protein_vertex_indices[lowest_unused_protein_index][2] = rightmost_index + tri + 1;
+					
+					if(tri == layer-1 && slice == 5) protein_vertex_indices[lowest_unused_protein_index][2] -= layer * 6; //it connects back to the first
+					
+					lowest_unused_protein_index++;
+				}
+//				if(layer<4)console.log(tri,lowest_unused_protein_index);
+				
+			}
+			console.log(layer,slice,rightmost_index);
+			rightmost_index += layer;
+		}
+		if(layer == 0)rightmost_index++;
+	}
+	for(var i = 0; i < 30; i++)
+		console.log(protein_vertex_indices[i]);
 }

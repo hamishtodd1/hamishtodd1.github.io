@@ -124,7 +124,7 @@ function update_varyingsurface() {
 			
 			varyingsurface.worldToLocal(MovementAxis);
 			var extraquaternion = new THREE.Quaternion();
-			extraquaternion.setFromAxisAngle( MovementAxis, Mouse_delta.length() / 3 );
+			extraquaternion.setFromAxisAngle( MovementAxis, Mouse_delta.length() );
 			
 			varyingsurface.quaternion.multiply(extraquaternion);
 			for( var i = 0; i < varyingsurface_cylinders.length; i++)
@@ -181,11 +181,26 @@ function update_varyingsurface() {
 		put_tube_in_buffer(A,B, varyingsurface_cylinders[surfperimeter_line_index_pairs.length / 2 + i].geometry.attributes.position.array, varyingsurface_edges_default_radius);
 		varyingsurface_cylinders[surfperimeter_line_index_pairs.length / 2 + i].geometry.attributes.position.needsUpdate = true;
 	}
-	var sphereopacity = capsidopenness == 0 ? 0 : capsidopenness * Math.cos((ourclock.elapsedTime - ourclock.startTime)*4); 
+	
+	for(var i = 0; i<irreghighlight_progresses.length; i++) {
+		if( (i == 0 || i % 4 == 1) && i != 1)
+			continue;
+		
+		irreghighlight_progresses[i] += delta_t;
+		if(irreghighlight_progresses[i] > 1 )
+			irreghighlight_progresses[i] = 0;
+		
+//		var sphereopacity = capsidopenness == 0 ? 0 : capsidopenness * Math.cos((ourclock.elapsedTime - ourclock.startTime)*4);
+		
+		if(capsidopenness == 1)
+			varyingsurface_spheres[i].material.opacity = 1;
+		else
+			varyingsurface_spheres[i].material.opacity = 0;
+	}
+	
 	for(var i = 0; i<varyingsurface_spheres.length; i++){
 		varyingsurface_spheres[i].position.set(varyingsurface.geometry.attributes.position.array[i*3+0],varyingsurface.geometry.attributes.position.array[i*3+1],varyingsurface.geometry.attributes.position.array[i*3+2]);
 		varyingsurface.localToWorld(varyingsurface_spheres[i].position);
-		varyingsurface_spheres[i].material.opacity = sphereopacity;
 	}
 
 	varyingsurface.geometry.attributes.position.needsUpdate = true;

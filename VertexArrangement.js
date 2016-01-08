@@ -1,10 +1,10 @@
 /*
  * Todo:
- * -check under what circumstances angular defects are ok
- * -translational net, you can't move the top or bottom vertex
- * 
- * 
+ * -check under what precise circumstances angular defects are ok
  * So we could have them change color if the configuration is unrealizable
+ * -no influence upon CK?
+ * -label the button
+ * -change associations?
  */
 
 function update_movementzone() {
@@ -243,10 +243,23 @@ function HandleVertexRearrangement() {
 		if( vertex_tobechanged !== 666) {
 			movement_vector.x = (MousePosition.x-flatnet.position.x) - flatnet_vertices.array[vertex_tobechanged * 3 + 0];
 			movement_vector.y = MousePosition.y - flatnet_vertices.array[vertex_tobechanged * 3 + 1];
+			
+			if( !( (i == 0 || i % 4 == 1) && i != 1) ){
+				varyingsurface_spheres[vertex_tobechanged].material.color.r = 0;
+				varyingsurface_spheres[vertex_tobechanged].material.color.g = 0;
+				varyingsurface_spheres[vertex_tobechanged].material.color.b = 1;
+			}
 		}
 	}
 	else {
 		vertex_tobechanged = 666;
+		for(var i = 0; i <varyingsurface_spheres.length; i++){
+			if( !( (i == 0 || i % 4 == 1) && i != 1) ){
+				varyingsurface_spheres[i].material.color.r = 0;
+				varyingsurface_spheres[i].material.color.g = 1;
+				varyingsurface_spheres[i].material.color.b = 0;
+			}
+		}
 	}
 	
 	if( vertex_tobechanged === 666 || (movement_vector.x === 0 && movement_vector.y === 0) )
@@ -374,10 +387,9 @@ function HandleVertexRearrangement() {
 		for( var i = 0; i < 66; i++)
 			flatnet_vertices.array[i] = net_log[i];
 		correct_minimum_angles();
-	}
-	for(var j = 0; j < minimum_angles.length; j++){
-		if(isNaN(minimum_angles[j]))
-			console.log("REALLY SHOULDN'T COME TO THIS");
+		varyingsurface_spheres[vertex_tobechanged].material.color.r = 1;
+		varyingsurface_spheres[vertex_tobechanged].material.color.g = 0;
+		varyingsurface_spheres[vertex_tobechanged].material.color.b = 0;
 	}
 	
 	//now we need the "height" of the capsid

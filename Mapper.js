@@ -1,15 +1,3 @@
-/* 
- * Protein triangles: get the integer positions of their CENTERS, doing something (if you're not already doing it) whereby each appears in precisely one face.
- * for a square triangle with vertices at 0,0, 1,0 and 0,1, the center is at 1/3, 1/3 
- * Then stitching up is probably a bit hard. It can't be that difficult to "fold" it in place.
- * You find the places on the triangle's edges where the face edge intersects
- * do the bent quad thing, a and b are those intersections, c is the opposing corner of the face triangle
- * the length from a to the tip is the hypotenuse, get_cos_rule with the lengths to get d_hinge_origin_length, pythagorean theorem to get the hinge length
- * So that gives you the precise location of all three points, then stick a triangular protein in there.
- * 
- * Approach
- */ 
-
 function Update_net_variables() {
 	var old_net_vertices_closest_lattice_vertex = Array(net_vertices_closest_lattice_vertex.length);
 	for(var i = 0; i<net_vertices_closest_lattice_vertex.length; i++)

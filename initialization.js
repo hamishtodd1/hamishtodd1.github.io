@@ -203,7 +203,7 @@ function init() {
 			side:	THREE.DoubleSide
 		});
 		var spherehandles_material = new THREE.MeshBasicMaterial({
-			color:	0xff0000,
+			color:	0x0000ff,
 			side:	THREE.DoubleSide,
 			transparent: true
 		});
@@ -217,11 +217,33 @@ function init() {
 			
 			varyingsurface_cylinders[i] = new THREE.Mesh( varyingsurface_cylinders_geometry, varyingsurface_edgesmaterial );
 		}
+		
+		for(var i = 0; i < irreghighlight_progresses .length; i++)
+			irreghighlight_progresses[i] = Math.random();
+		console.log(irreghighlight_progresses);
+		var irreghighlight_geometry = new THREE.Geometry();
+		var original_irreghighlight_vertex = new THREE.Vector3(0,varyingsurface_edges_default_radius * 4,0);
+		for(var i = 0; i < 12; i++){
+			var newvert = original_irreghighlight_vertex.clone();
+			newvert.applyAxisAngle(z_central_axis,TAU/12*i);
+			irreghighlight_geometry.vertices.push(newvert);
+			
+			var newvert2 = newvert.clone();
+			newvert2.multiplyScalar(0.7);
+			irreghighlight_geometry.vertices.push(newvert2);
+		}
+		for(var i = 0; i < 11; i++){
+			irreghighlight_geometry.faces.push(new THREE.Face3(i*2,i*2+3,i*2+1));
+			irreghighlight_geometry.faces.push(new THREE.Face3(i*2,i*2+2,i*2+3));
+		}
+		irreghighlight_geometry.faces.push(new THREE.Face3(22,1,23));
+		irreghighlight_geometry.faces.push(new THREE.Face3(22,0,1));
+		
 		for(var i = 0; i<varyingsurface_spheres.length;i++){
 			if( (i == 0 || i % 4 == 1) && i != 1)
 				varyingsurface_spheres[i] = new THREE.Mesh( (new THREE.BufferGeometry).fromGeometry(new THREE.SphereGeometry(varyingsurface_edges_default_radius,8,4)),varyingsurface_edgesmaterial);
 			else
-				varyingsurface_spheres[i] = new THREE.Mesh( (new THREE.BufferGeometry).fromGeometry(new THREE.SphereGeometry(varyingsurface_edges_default_radius * 3,8,4)),spherehandles_material);
+				varyingsurface_spheres[i] = new THREE.Mesh( (new THREE.BufferGeometry).fromGeometry(new THREE.SphereGeometry(varyingsurface_edges_default_radius*4.5,8,4)),spherehandles_material.clone());
 		}
 		varyingsurface = new THREE.Mesh( flatnet_geometry.clone(), surfacematerial );
 		

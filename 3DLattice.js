@@ -89,15 +89,22 @@ function update_animationprogress(){
 			slider_grabbed = true;
 	}
 	else slider_grabbed = false;
+	
 	if(slider_grabbed){
-		slider.position.x = circle.geometry.vertices[0].x;
-		if(slider.position.x > progress_bar.geometry.vertices[0].x)
-			slider.position.x = progress_bar.geometry.vertices[0].x;
-		if(slider.position.x < progress_bar.geometry.vertices[3].x)
-			slider.position.x = progress_bar.geometry.vertices[3].x;
+		animation_playing_automatically = false;
 		
-		animation_progress = ( slider.position.x - progress_bar.geometry.vertices[3].x ) / (progress_bar.geometry.vertices[0].x - progress_bar.geometry.vertices[3].x);
+		slider.position.x = circle.geometry.vertices[0].x;
 	}
+	
+	if(animation_playing_automatically)
+		slider.position.x += 0.02;
+	
+	if(slider.position.x > progress_bar.geometry.vertices[0].x)
+		slider.position.x = progress_bar.geometry.vertices[0].x;
+	if(slider.position.x < progress_bar.geometry.vertices[3].x)
+		slider.position.x = progress_bar.geometry.vertices[3].x;
+	
+	animation_progress = ( slider.position.x - progress_bar.geometry.vertices[3].x ) / (progress_bar.geometry.vertices[0].x - progress_bar.geometry.vertices[3].x);
 }
 
 function update_3DLattice() {
