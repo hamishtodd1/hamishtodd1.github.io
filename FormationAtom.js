@@ -129,7 +129,7 @@ function update_formation_atom(){
 	var nearest_frame = (secondsthroughvid - animation_beginning_second);
 	nearest_frame *= 60;
 	nearest_frame = Math.round(nearest_frame);
-//	nearest_frame = formation_animation_numbers.length / 3 - nearest_frame;
+	nearest_frame = formation_animation_numbers.length / 3 - nearest_frame;
 	
 	if( 0 <= nearest_frame && nearest_frame < formation_animation_numbers.length / 3 ) { 
 		QC_atoms.geometry.attributes.position.setXYZ(outermost_QCatom_indices[1], 
