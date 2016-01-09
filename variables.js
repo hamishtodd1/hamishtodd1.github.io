@@ -16,7 +16,7 @@ var QC_SPHERE_MODE = 5;
 var CUBIC_LATTICE_MODE = 6;
 var FINAL_FORMATION_MODE = 7;
 	
-var MODE = 7;
+var MODE = 3;
 
 //--------------Technologically fundamental
 var playing_field_width = 7*HS3;
@@ -68,6 +68,7 @@ var flatlattice_default_vertices = Array(number_of_lattice_points*3);
 var latticevertex_nettriangle = new Uint16Array(number_of_lattice_points);
 
 var backgroundtexture;
+var picture_objects = Array(8);
 
 var net_triangle_vertex_indices;
 var line_index_pairs = new Uint16Array(60 * 2);

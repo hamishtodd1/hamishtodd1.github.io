@@ -103,6 +103,7 @@ function HandleNetMovement() {
 		LatticeScale += full_scale_addition*speed_towards_fix;
 	}
 	updatelattice();
+	console.log(LatticeScale);
 }
 
 function get_min_lattice_scale(ourangle) {
