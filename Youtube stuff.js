@@ -32,7 +32,7 @@ function loadpic(i) {
 			var mywidth = 3;
 			if(picture_loaded<7){
 				picture_objects[picture_loaded] = new THREE.Mesh(new THREE.CubeGeometry(mywidth , mywidth , 0),new THREE.MeshBasicMaterial({map: texture}) );
-				picture_objects[picture_loaded].position.x = -playing_field_width / 2 - 3;
+				picture_objects[picture_loaded].position.x = -playing_field_width / 2 - 0.5;
 			}
 			else{
 				picture_objects[picture_loaded] = new THREE.Mesh(new THREE.CubeGeometry(playing_field_width, playing_field_width, 0),new THREE.MeshBasicMaterial({map: texture}) );

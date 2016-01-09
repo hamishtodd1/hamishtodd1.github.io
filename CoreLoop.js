@@ -118,6 +118,7 @@ function ChangeScene(new_mode) {
 			}
 			for( var i = 0; i < blast_cylinders.length; i++)
 				scene.add(blast_cylinders[i]);
+			put_picture_in_place();
 			break;
 			
 		case IRREGULAR_MODE:
