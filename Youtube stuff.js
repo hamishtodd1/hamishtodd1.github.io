@@ -35,7 +35,7 @@ function loadpic(i) {
 			
 			console.log(i);
 
-			pictures_imported[picture_uploaded] = 1;
+			pictures_imported[i] = 1;
 			for( var i = 0; i < pictures_imported.length; i++)
 				if(pictures_imported[i] != 1 )
 					return;
