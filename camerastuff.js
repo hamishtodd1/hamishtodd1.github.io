@@ -22,6 +22,24 @@ function UpdateCamera() {
 		camera.updateProjectionMatrix();
 	}
 	
+	if(MODE == CK_MODE){
+		var movementspeed = 0.03
+		if(!isMouseDown){
+			camera.position.x -= movementspeed;
+			
+			var comparing_position = -2;
+			if(camera.position.x < comparing_position)
+				camera.position.x = comparing_position;
+		}
+		else {
+			camera.position.x += movementspeed;
+			
+			if(camera.position.x > 0)
+				camera.position.x = 0;
+		}
+	}
+	
+	
 	//vertical_fov = 2 * Math.atan(playing_field_height/(2*camera.position.z));
 	//camera.fov = vertical_fov * 360 / TAU;
 	camera.updateMatrix();
