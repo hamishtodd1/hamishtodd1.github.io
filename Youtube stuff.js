@@ -23,15 +23,17 @@ picture_properties[6] = {};	picture_properties[6].YtoX = 1;		picture_properties[
 picture_properties[7] = {};	picture_properties[7].YtoX = 1;		picture_properties[7].widt = 512;	picture_properties[7].name = "Data/warning.png";
 
 function loadpic(i) {
+	console.log(i);
 	texture_loader.load(
 		picture_properties[i].name,
 		function(texture) {
+			var mywidth = 3;
 			if(i<7)
-				picture_objects[i] = new THREE.Mesh(new THREE.CubeGeometry(3, 3, 0),new THREE.MeshBasicMaterial({map: texture}) );
+				picture_objects[i] = new THREE.Mesh(new THREE.CubeGeometry(mywidth , mywidth , 0),new THREE.MeshBasicMaterial({map: texture}) );
 			else
 				picture_objects[i] = new THREE.Mesh(new THREE.CubeGeometry(playing_field_width, playing_field_width, 0),new THREE.MeshBasicMaterial({map: texture}) );
-			//and their position?
-			picture_objects[i].position.x = -playing_field_width - 
+			//so they're offscreen by default
+			picture_objects[i].position.x = -playing_field_width / 2 - mywidth / 2;
 			
 			console.log(i);
 
