@@ -26,8 +26,10 @@ function loadpic(i) {
 	texture_loader.load(
 		picture_properties[i].name,
 		function(texture) {
-			picture_objects[i] = new THREE.Mesh(new THREE.CubeGeometry(picture_properties[i].widt, picture_properties[i].hite, 0), 
-					 							new THREE.MeshBasicMaterial({map: texture}) );
+			if(i<7)
+				picture_objects[i] = new THREE.Mesh(new THREE.CubeGeometry(3, 3, 0),new THREE.MeshBasicMaterial({map: texture}) );
+			else
+				picture_objects[i] = new THREE.Mesh(new THREE.CubeGeometry(playing_field_width, playing_field_width, 0),new THREE.MeshBasicMaterial({map: texture}) );
 			//and their position?
 			picture_objects[i].position.x = -playing_field_width - 
 			
