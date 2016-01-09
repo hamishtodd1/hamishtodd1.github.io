@@ -37,16 +37,17 @@ function loadpic(i) {
 			
 			console.log(i);
 
-			pictures_imported[i] = 1;
-			for( var i = 0; i < pictures_imported.length; i++)
-				if(pictures_imported[i] != 1 )
-					return;
-			
-			//if all the pictures have been imported, we're ready to rock!
-			MODE = 0;
-			init();
-			scene.add(picture_objects[7]);
-			render();
+			if(i < picture_properties.length-1 )
+				loadpic(i+1);
+			else {
+				console.log("done");
+
+				//ready to rock!
+				MODE = 0;
+				init();
+				scene.add(picture_objects[7]);
+				render();
+			}
 		},
 		function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );}
 	);
@@ -92,8 +93,7 @@ function react_to_video(){
 
 function onPlayerReady(event) {
 	//start importing all pictures
-	for(var i = 0; i<pictures_imported.length; i++)
-		loadpic(i);
+	loadpic(0);
 }
 
 /* _MF2DVU8oB0: tall video
