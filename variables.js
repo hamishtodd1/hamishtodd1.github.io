@@ -205,7 +205,7 @@ var surflattice_vertices_numbers = new Float32Array(3 * number_of_lattice_points
 var surflattice_vertices;
 var surflattice_geometry;
 
-var LatticeScale = 1/3; //10/3 * HS3 / number_of_hexagon_rings;
+var LatticeScale = 1;//1/3 nice size //10/3 * HS3 / number_of_hexagon_rings; maybe the largest?
 var LatticeAngle = 0; //TAU/12;
 var LatticeGrabbed = false;
 
