@@ -26,7 +26,7 @@ function loadpic(i) {
 	console.log(i);
 	texture_loader.load(
 		picture_properties[i].name,
-		function(texture) {
+		function(texture,i) {
 			var mywidth = 3;
 			if(i<7)
 				picture_objects[i] = new THREE.Mesh(new THREE.CubeGeometry(mywidth , mywidth , 0),new THREE.MeshBasicMaterial({map: texture}) );
