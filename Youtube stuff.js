@@ -22,23 +22,26 @@ picture_properties[5] = {};	picture_properties[5].YtoX = 1;		picture_properties[
 picture_properties[6] = {};	picture_properties[6].YtoX = 1;		picture_properties[6].widt = 512;	picture_properties[6].name = "Data/13 - RV.png";
 picture_properties[7] = {};	picture_properties[7].YtoX = 1;		picture_properties[7].widt = 512;	picture_properties[7].name = "Data/warning.png";
 
+var picture_loaded = 0;
+
 function loadpic(i) {
 	console.log(i);
 	texture_loader.load(
 		picture_properties[i].name,
-		function(texture,i) {
+		function(texture) {
 			var mywidth = 3;
-			if(i<7)
-				picture_objects[i] = new THREE.Mesh(new THREE.CubeGeometry(mywidth , mywidth , 0),new THREE.MeshBasicMaterial({map: texture}) );
+			if(picture_loaded<7)
+				picture_objects[picture_loaded] = new THREE.Mesh(new THREE.CubeGeometry(mywidth , mywidth , 0),new THREE.MeshBasicMaterial({map: texture}) );
 			else
-				picture_objects[i] = new THREE.Mesh(new THREE.CubeGeometry(playing_field_width, playing_field_width, 0),new THREE.MeshBasicMaterial({map: texture}) );
+				picture_objects[picture_loaded] = new THREE.Mesh(new THREE.CubeGeometry(playing_field_width, playing_field_width, 0),new THREE.MeshBasicMaterial({map: texture}) );
 			//so they're offscreen by default
-			picture_objects[i].position.x = -playing_field_width / 2 - mywidth / 2;
+			picture_objects[picture_loaded].position.x = -playing_field_width / 2 - mywidth / 2;
 			
-			console.log(i);
+			console.log(picture_loaded);
+			picture_loaded++;
 
-			if(i < picture_properties.length-1 )
-				loadpic(i+1);
+			if(picture_loaded < picture_properties.length )
+				loadpic(picture_loaded);
 			else {
 				console.log("done");
 
