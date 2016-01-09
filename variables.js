@@ -69,6 +69,7 @@ var latticevertex_nettriangle = new Uint16Array(number_of_lattice_points);
 
 var backgroundtexture;
 var picture_objects = Array(8);
+var viruspicture_scales = Array(1,0.577,0.5,0.3779,1/3,0.28867,0.27735);
 
 var net_triangle_vertex_indices;
 var line_index_pairs = new Uint16Array(60 * 2);

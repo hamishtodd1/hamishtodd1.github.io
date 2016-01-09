@@ -103,7 +103,17 @@ function HandleNetMovement() {
 		LatticeScale += full_scale_addition*speed_towards_fix;
 	}
 	updatelattice();
-	console.log(LatticeScale);
+}
+
+function put_picture_in_place(){
+	for(var i = 0; i < picture_objects.length; i++){
+		scene.remove(picture_objects[i]);
+	}
+	var tolerance = 0.01;
+	for(var i = 0; i < viruspicture_scales.length; i++){
+		if(Math.abs(LatticeScale-viruspicture_scales[i]) < tolerance)
+			scene.add(picture_objects[i]);
+	}
 }
 
 function get_min_lattice_scale(ourangle) {
