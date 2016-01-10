@@ -6,7 +6,7 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 var pictures_imported = Array(0,0,0,0, 0,0,0,0);
 
 var section_finishing_time = Array(29,177,295,548,738,909,animation_beginning_second,99999999999);
-var pausing_times = Array(36.3,185,321.3,550,747.9,923);
+var pausing_times = Array(36.3,185,321.3,550,747.9,931);
 var secondsthroughvid = 0;
 
 var texture_loader = new THREE.TextureLoader();
