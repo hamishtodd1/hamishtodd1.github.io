@@ -92,6 +92,7 @@ function update_animationprogress(){
 	
 	if(slider_grabbed){
 		animation_playing_automatically = false;
+		theyknowyoucanslidetheslider = 1;
 		
 		slider.position.x = circle.geometry.vertices[0].x;
 	}
@@ -105,6 +106,14 @@ function update_animationprogress(){
 		slider.position.x = progress_bar.geometry.vertices[3].x;
 	
 	animation_progress = ( slider.position.x - progress_bar.geometry.vertices[3].x ) / (progress_bar.geometry.vertices[0].x - progress_bar.geometry.vertices[3].x);
+	
+	if(animation_progress == 1 && !theyknowyoucanslidetheslider){
+		var slider_radius = 0.66 + 0.17 * Math.cos((ourclock.elapsedTime - ourclock.startTime)*4);
+		for(var i = 1; i<slider.geometry.vertices.length;i++){
+			slider.geometry.vertices[i].setLength(slider_radius);
+		}
+		slider.geometry.verticesNeedUpdate = true;
+	}
 }
 
 function update_3DLattice() {

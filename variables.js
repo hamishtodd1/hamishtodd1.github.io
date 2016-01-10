@@ -16,7 +16,7 @@ var QC_SPHERE_MODE = 5;
 var CUBIC_LATTICE_MODE = 6;
 var FINAL_FORMATION_MODE = 7;
 	
-var MODE = 3;
+var MODE = 4;
 
 //--------------Technologically fundamental
 var playing_field_width = 7*HS3;
@@ -88,6 +88,9 @@ var indicatorblobs = Array(10);
 
 //--------------Varying
 var vertex_tobechanged = 666;
+
+var theyknowyoucanchangevertices = 0;
+var theyknowyoucanslidetheslider = 0;
 
 var capsidopenness = 0; //much depends on this, but we should have as few sharp changes as possible
 var capsidclock = 0;

@@ -17,7 +17,7 @@ function UpdateCapsid() {
 		capsidopeningspeed = 0;
 	}
 	
-	if(oldcapsidopenness != 0 && capsidopenness == 0)
+	if( (oldcapsidopenness != 0 && capsidopenness == 0) || (oldcapsidopenness == 0 && capsidopenness != 0 ) )
 		put_picture_in_place();
 	
 	CK_deduce_surface(capsidopenness, surface_vertices);

@@ -190,12 +190,15 @@ function update_varyingsurface() {
 		if(irreghighlight_progresses[i] > 1 )
 			irreghighlight_progresses[i] = 0;
 		
-//		var sphereopacity = capsidopenness == 0 ? 0 : capsidopenness * Math.cos((ourclock.elapsedTime - ourclock.startTime)*4);
+		if(capsidopenness == 1 ){
+			if(!theyknowyoucanchangevertices){
+				var sphereopacity = capsidopenness == 0 ? 0 : capsidopenness * Math.cos((ourclock.elapsedTime - ourclock.startTime)*4);
+				varyingsurface_spheres[i].material.opacity = sphereopacity; 
+			}
+			else varyingsurface_spheres[i].material.opacity = 1;
+		}
+		else varyingsurface_spheres[i].material.opacity = 0;
 		
-		if(capsidopenness == 1)
-			varyingsurface_spheres[i].material.opacity = 1;
-		else
-			varyingsurface_spheres[i].material.opacity = 0;
 	}
 	
 	for(var i = 0; i<varyingsurface_spheres.length; i++){

@@ -220,7 +220,6 @@ function init() {
 		
 		for(var i = 0; i < irreghighlight_progresses .length; i++)
 			irreghighlight_progresses[i] = Math.random();
-		console.log(irreghighlight_progresses);
 		var irreghighlight_geometry = new THREE.Geometry();
 		var original_irreghighlight_vertex = new THREE.Vector3(0,varyingsurface_edges_default_radius * 4,0);
 		for(var i = 0; i < 12; i++){

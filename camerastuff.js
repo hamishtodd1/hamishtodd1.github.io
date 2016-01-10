@@ -38,6 +38,10 @@ function UpdateCamera() {
 				camera.position.x = 0;
 		}
 	}
+	else {
+		camera.position.x = 0;
+		camera.updateProjectionMatrix();
+	}
 	
 	
 	//vertical_fov = 2 * Math.atan(playing_field_height/(2*camera.position.z));

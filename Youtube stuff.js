@@ -6,7 +6,7 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 var pictures_imported = Array(0,0,0,0, 0,0,0,0);
 
 var section_finishing_time = Array(29,177,295,548,738,909,animation_beginning_second,99999999999);
-var pausing_times = Array(37,185,321,550,747,939);
+var pausing_times = Array(36.3,185,321.3,550,747.9,900.4);
 var secondsthroughvid = 0;
 
 var texture_loader = new THREE.TextureLoader();
@@ -32,7 +32,8 @@ function loadpic(i) {
 			var mywidth = 3;
 			if(picture_loaded<7){
 				picture_objects[picture_loaded] = new THREE.Mesh(new THREE.CubeGeometry(mywidth , mywidth , 0),new THREE.MeshBasicMaterial({map: texture}) );
-				picture_objects[picture_loaded].position.x = -playing_field_width / 2 - 0.7;
+				picture_objects[picture_loaded].position.x = -playing_field_width / 2 - 0.6;
+				picture_objects[picture_loaded].position.z = 0.01;
 			}
 			else{
 				picture_objects[picture_loaded] = new THREE.Mesh(new THREE.CubeGeometry(playing_field_width, playing_field_width, 0),new THREE.MeshBasicMaterial({map: texture}) );

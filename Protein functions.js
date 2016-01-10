@@ -183,14 +183,9 @@ function initialize_protein(){
 					
 					lowest_unused_protein_index++;
 				}
-//				if(layer<4)console.log(tri,lowest_unused_protein_index);
-				
 			}
-			console.log(layer,slice,rightmost_index);
 			rightmost_index += layer;
 		}
 		if(layer == 0)rightmost_index++;
 	}
-	for(var i = 0; i < 30; i++)
-		console.log(protein_vertex_indices[i]);
 }

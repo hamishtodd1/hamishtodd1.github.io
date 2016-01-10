@@ -5,6 +5,7 @@
  * -no influence upon CK?
  * -label the button
  * -change associations?
+ * -a vertex gets as close as possible to your mouse if it can't get exactly there.
  */
 
 function update_movementzone() {
@@ -234,7 +235,7 @@ function HandleVertexRearrangement() {
 				}
 			}
 			
-			var maximum_quadrance_to_be_selected = 0.005;
+			var maximum_quadrance_to_be_selected = 0.0079;
 			if( lowest_quadrance_so_far < maximum_quadrance_to_be_selected) {
 				vertex_tobechanged = closest_vertex_so_far;
 			}
@@ -264,6 +265,8 @@ function HandleVertexRearrangement() {
 	
 	if( vertex_tobechanged === 666 || (movement_vector.x === 0 && movement_vector.y === 0) )
 		return;
+	
+	theyknowyoucanchangevertices = 1;
 	
 	//log the current positions
 	var net_log = new Array(66);
