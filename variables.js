@@ -29,6 +29,7 @@ var vertical_fov = 2 * Math.atan(playing_field_height/(2*min_cameradist));
 var camera = new THREE.CombinedCamera(playing_field_width, playing_field_height, vertical_fov * 360 / TAU, 0.1, 1000, 0.1, 1000);
 //var camera = new THREE.PerspectiveCamera( vertical_fov * 360 / TAU, window_width / window_height, 0.1, 1000 );
 camera.position.z = MODE == CUBIC_LATTICE_MODE ? 3*min_cameradist : min_cameradist;
+var camera_comparing_position = -2;
 
 var scene = new THREE.Scene();
 var renderer = new THREE.WebGLRenderer({ antialias: true });

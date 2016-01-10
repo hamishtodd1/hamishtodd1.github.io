@@ -27,9 +27,8 @@ function UpdateCamera() {
 		if(!isMouseDown){
 			camera.position.x -= movementspeed;
 			
-			var comparing_position = -2;
-			if(camera.position.x < comparing_position)
-				camera.position.x = comparing_position;
+			if(camera.position.x < camera_comparing_position)
+				camera.position.x = camera_comparing_position;
 		}
 		else {
 			camera.position.x += movementspeed;

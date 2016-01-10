@@ -24,6 +24,7 @@ function UpdateWorld() {
 			break;
 			
 		case CK_MODE:
+			camera.position.x = camera_comparing_position; 
 			HandleNetMovement();
 			
 			UpdateCapsid();

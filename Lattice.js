@@ -109,7 +109,7 @@ function put_picture_in_place(){
 	for(var i = 0; i < picture_objects.length; i++){
 		scene.remove(picture_objects[i]);
 	}
-	if(isMouseDown){
+	if(!isMouseDown){
 		var tolerance = 0.01;
 		for(var i = 0; i < viruspicture_scales.length; i++){
 			if(Math.abs(LatticeScale-viruspicture_scales[i]) < tolerance)
