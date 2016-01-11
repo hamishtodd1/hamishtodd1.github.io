@@ -236,7 +236,7 @@ function init_cubicLattice_stuff() {
 	var QC_atoms_geometry = new THREE.BufferGeometry();
 	QC_atoms_geometry.addAttribute( 'position', new THREE.BufferAttribute(new Float32Array(number_of_QC_atoms * 3), 3) );
 	QC_atoms_geometry.addAttribute( 'color', new THREE.BufferAttribute(new Float32Array(number_of_QC_atoms * 3), 3) );
-	QC_atoms = new THREE.Points( QC_atoms_geometry,new THREE.PointCloudMaterial({size: 0.4,vertexColors: THREE.VertexColors}));
+	QC_atoms = new THREE.Points( QC_atoms_geometry,new THREE.PointCloudMaterial({size: 0.62,vertexColors: THREE.VertexColors}));
 	QC_atoms.scale.set(2,2,2);
 	
 	normalized_virtualdodeca_vertices[0] = new THREE.Vector3(1,-1,1);

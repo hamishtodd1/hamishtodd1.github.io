@@ -1,9 +1,9 @@
 document.addEventListener( 'mousedown', onDocumentMouseDown, false);
 document.addEventListener( 'mouseup', onDocumentMouseUp, false);
 document.addEventListener( 'mousemove', onDocumentMouseMove, false ); //window?
-document.addEventListener( 'touchstart', onDocumentMouseDown, false );
-document.addEventListener( 'touchmove', onDocumentTouchMove, false );
-document.addEventListener( 'touchend', onDocumentMouseUp, false );
+//document.addEventListener( 'touchstart', onDocumentMouseDown, false );
+//document.addEventListener( 'touchmove', onDocumentTouchMove, false );
+//document.addEventListener( 'touchend', onDocumentMouseUp, false );
 
 //remember there can be weirdness for multiple fingers, so make sure any crazy series of inputs are interpretable
 function onDocumentMouseDown(event) {
@@ -22,11 +22,11 @@ function onDocumentMouseMove( event ) {
 	InputObject.mousey = event.clientY; // - renderer.domElement.offsetHeight + renderer.domElement.height; //the obvious thing to have is this, not sure what it'll do though!
 }
 
-function onDocumentTouchMove( event ) {
-	event.preventDefault();
-	InputObject.mousex = event.changedTouches[0].clientX; //only looking at the first one. TODO multi-touch!
-	InputObject.mousey = event.changedTouches[0].clientY;
-}
+//function onDocumentTouchMove( event ) {
+//	event.preventDefault();
+//	InputObject.mousex = event.changedTouches[0].clientX; //only looking at the first one. TODO multi-touch!
+//	InputObject.mousey = event.changedTouches[0].clientY;
+//}
 
 function update_mouseblob(){
 	var Xdists_from_center = Array(circle.geometry.vertices.length);
