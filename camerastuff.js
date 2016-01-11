@@ -1,10 +1,5 @@
 //not allowed to do anything with camera outside of here!
-function UpdateCamera() {
-//	if(InputObject.isMouseDown)
-//		cameradist += 0.08;
-//	else
-//		cameradist -= 0.08;
-
+function camera_changes_for_mode_switch(){
 	if(MODE == CUBIC_LATTICE_MODE || MODE == FINAL_FORMATION_MODE){
 		//We could make it shift from perspective to orthographic when the mouse is down, to mimic diffraction, or would that be too complex? If you're going to do it, mention it in the text.
 		
@@ -19,8 +14,25 @@ function UpdateCamera() {
 	}
 	else{
 		camera.position.z = min_cameradist;
+		camera.cameraO.left =-playing_field_width / 2;
+		camera.cameraO.right = playing_field_width / 2;
+		camera.cameraO.top = playing_field_height / 2;
+		camera.cameraO.bottom =-playing_field_height / 2;
 		camera.updateProjectionMatrix();
+		
+		//need to sort out those cameraO things too
 	}
+	
+	//this is for just in case we've just left CK
+	camera.position.x = 0;
+	camera.updateProjectionMatrix();
+}
+
+function UpdateCamera() {
+//	if(InputObject.isMouseDown)
+//		cameradist += 0.08;
+//	else
+//		cameradist -= 0.08;
 	
 	if(MODE == CK_MODE){
 		var max_camera_movementspeed = 0.044;
@@ -44,10 +56,6 @@ function UpdateCamera() {
 			camera.position.x = 0;
 			camera_movementspeed = 0;
 		}
-	}
-	else {
-		camera.position.x = 0;
-		camera.updateProjectionMatrix();
 	}
 	
 	

@@ -87,6 +87,8 @@ function ChangeScene(new_mode) {
 //			scene.add(indicatorblobs[i]);
 //	}
 	
+	camera_changes_for_mode_switch();
+	
 	//this is the one variable that seems to be conserved; at least if it isn't, then make it so.
 	capsidopenness = 0;
 	
