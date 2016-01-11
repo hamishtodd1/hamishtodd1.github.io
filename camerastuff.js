@@ -23,18 +23,26 @@ function UpdateCamera() {
 	}
 	
 	if(MODE == CK_MODE){
-		var movementspeed = 0.03
+		var max_camera_movementspeed = 0.044;
+		var camera_acceleration = 0.0007;
 		if(!isMouseDown){
-			camera.position.x -= movementspeed;
-			
-			if(camera.position.x < camera_comparing_position)
-				camera.position.x = camera_comparing_position;
+			camera_movementspeed -= camera_acceleration;
+			if( camera_movementspeed < -max_camera_movementspeed)
+				camera_movementspeed = -max_camera_movementspeed;
 		}
 		else {
-			camera.position.x += movementspeed;
-			
-			if(camera.position.x > 0)
-				camera.position.x = 0;
+			camera_movementspeed += camera_acceleration;
+			if( camera_movementspeed > max_camera_movementspeed)
+				camera_movementspeed = max_camera_movementspeed;
+		}
+		camera.position.x += camera_movementspeed;
+		if(camera.position.x < camera_comparing_position){
+			camera.position.x = camera_comparing_position;
+			camera_movementspeed = 0;
+		}
+		if(camera.position.x > 0){
+			camera.position.x = 0;
+			camera_movementspeed = 0;
 		}
 	}
 	else {

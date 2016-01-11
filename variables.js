@@ -16,7 +16,7 @@ var QC_SPHERE_MODE = 5;
 var CUBIC_LATTICE_MODE = 6;
 var FINAL_FORMATION_MODE = 7;
 	
-var MODE = 4;
+var MODE = 3;
 
 //--------------Technologically fundamental
 var playing_field_width = 7*HS3;
@@ -29,7 +29,7 @@ var vertical_fov = 2 * Math.atan(playing_field_height/(2*min_cameradist));
 var camera = new THREE.CombinedCamera(playing_field_width, playing_field_height, vertical_fov * 360 / TAU, 0.1, 1000, 0.1, 1000);
 //var camera = new THREE.PerspectiveCamera( vertical_fov * 360 / TAU, window_width / window_height, 0.1, 1000 );
 camera.position.z = MODE == CUBIC_LATTICE_MODE ? 3*min_cameradist : min_cameradist;
-var camera_comparing_position = -2;
+var camera_comparing_position = -1.56;
 
 var scene = new THREE.Scene();
 var renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -71,6 +71,7 @@ var latticevertex_nettriangle = new Uint16Array(number_of_lattice_points);
 var backgroundtexture;
 var picture_objects = Array(8);
 var viruspicture_scales = Array(1,0.577,0.5,0.3779,1/3,0.28867,0.27735);
+var camera_movementspeed = 0;
 
 var net_triangle_vertex_indices;
 var line_index_pairs = new Uint16Array(60 * 2);
