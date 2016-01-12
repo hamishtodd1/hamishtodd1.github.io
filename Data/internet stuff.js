@@ -108,10 +108,11 @@ function onPlayerReady(event) {
  * 8JndSqOn9ac: Robin video
  * Xa_m6yggMdU: V2 video
  * D_DkCTT8azI: V2 resized
+ * 7JlMIJKTUVc: final v2
  */
 function onYouTubeIframeAPIReady(){
 	ytplayer = new YT.Player('player', {
-		videoId:'D_DkCTT8azI',
+		videoId:'7JlMIJKTUVc',
 		height: window_height,
 		width: window_height / 3 * 4,//9:16 is probably pushing it too far, but you should try it
 		events: {
