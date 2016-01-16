@@ -19,7 +19,7 @@ function onDocumentMouseUp(event) {
 function onDocumentMouseMove( event ) {
 	event.preventDefault();
 	InputObject.mousex = event.clientX - renderer.domElement.offsetLeft;
-	InputObject.mousey = event.clientY; // - renderer.domElement.offsetHeight + renderer.domElement.height; //the obvious thing to have is this, not sure what it'll do though!
+	InputObject.mousey = event.clientY - renderer.domElement.offsetTop;
 }
 
 //function onDocumentTouchMove( event ) {
