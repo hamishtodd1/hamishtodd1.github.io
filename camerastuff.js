@@ -37,7 +37,7 @@ function UpdateCamera() {
 	if(MODE == CK_MODE){
 		var max_camera_movementspeed = 0.044;
 		var camera_acceleration = 0.0007;
-		if(!isMouseDown){
+		if(capsidopenness == 0){
 			camera_movementspeed -= camera_acceleration;
 			if( camera_movementspeed < -max_camera_movementspeed)
 				camera_movementspeed = -max_camera_movementspeed;
