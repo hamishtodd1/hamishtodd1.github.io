@@ -90,7 +90,7 @@ function initialize_protein(){
 	for(var i = coarse_protein_triangle_indices.length * 2 / 3; i<coarse_protein_triangle_indices.length; i++){
 		coarse_protein_triangle_indices[i] += protein_vertices_numbers.length / 3 / 3 * 2;
 	}
-	master_protein.geometry.addAttribute( 'index', new THREE.BufferAttribute( coarse_protein_triangle_indices, 1 ) );
+	master_protein.geometry.setIndex( new THREE.BufferAttribute( coarse_protein_triangle_indices, 1 ) );
 	master_protein.geometry.computeFaceNormals();
 	master_protein.geometry.computeVertexNormals();
 	
@@ -146,7 +146,7 @@ function initialize_protein(){
 	
 	proteinlattice = new THREE.Mesh( new THREE.BufferGeometry(), master_protein.material.clone());
 	proteinlattice.geometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array(protein_vertices_numbers.length * number_of_proteins_in_lattice), 3 ) );
-	proteinlattice.geometry.addAttribute( 'index', new THREE.BufferAttribute( new Uint16Array(coarse_protein_triangle_indices.length * number_of_proteins_in_lattice ), 1 ) );
+	proteinlattice.geometry.setIndex( new THREE.BufferAttribute( new Uint16Array(coarse_protein_triangle_indices.length * number_of_proteins_in_lattice ), 1 ) );
 	for(var i = 0; i < number_of_proteins_in_lattice; i++){
 		for(var j = 0; j < coarse_protein_triangle_indices.length; j++){
 			proteinlattice.geometry.index[i*coarse_protein_triangle_indices.length + j] = coarse_protein_triangle_indices[j] + number_of_vertices_in_protein * i; 

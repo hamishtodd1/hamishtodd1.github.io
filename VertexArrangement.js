@@ -1,11 +1,22 @@
 /*
  * Todo:
  * -check under what precise circumstances angular defects are ok
- * So we could have them change color if the configuration is unrealizable
  * -no influence upon CK?
  * -label the button
  * -change associations?
  * -a vertex gets as close as possible to your mouse if it can't get exactly there.
+ * 
+ * if the player has clicked on the button 8 times,  the capsid appears?
+ * 
+ * New associations:
+ * -what we want is the ability to make anything, easily
+ * -the triangles are changed 8 at a time. 3 of which we think of as "getting fucked up".
+ * -Then, probably, design the net according to that rather than the other way around
+ * 
+ * So REALLY it should open differently depending on what vertex you want to change, 
+ * Maybe choose based on whichever edge is facing you? Translational net, centered on the chosen edge
+ * Auto close and open if player tries to grab a top vertex
+ * Associations are changed based on the edge you're looking directly at. Which is highlighted.
  */
 
 function update_movementzone() {
@@ -193,31 +204,6 @@ function move_vertices(vertex_tobechanged, starting_movement_vector, initial_cha
 	flatnet_vertices.needsUpdate = true;
 }
 
-function corner_angle_from_indices(triangle_index, corner_vertex_index) {
-	var cornerAindex = 666, cornerBindex = 666;
-	for( var i = 0; i < 3; i++) {
-		if( corner_vertex_index === net_triangle_vertex_indices[ triangle_index * 3 + i ]) {
-			cornerAindex = net_triangle_vertex_indices[ triangle_index * 3 + (i+1)%3 ];
-			cornerBindex = net_triangle_vertex_indices[ triangle_index * 3 + (i+2)%3 ];			
-			break;
-		}
-		
-		if( i === 2 ) {
-			console.log("error: request was made for a triangle-angle at a corner that the triangle does not have");
-			return 0;
-		}
-	}
-	
-	sideA = new THREE.Vector2(
-		flatnet_vertices.array[ 0 + 3 * cornerAindex ] - flatnet_vertices.array[ 0 + 3 * corner_vertex_index ],
-		flatnet_vertices.array[ 1 + 3 * cornerAindex ] - flatnet_vertices.array[ 1 + 3 * corner_vertex_index ] );
-	sideB = new THREE.Vector2(
-		flatnet_vertices.array[ 0 + 3 * cornerBindex ] - flatnet_vertices.array[ 0 + 3 * corner_vertex_index ],
-		flatnet_vertices.array[ 1 + 3 * cornerBindex ] - flatnet_vertices.array[ 1 + 3 * corner_vertex_index ] );
-		
-	return Math.acos(get_cos( sideA, sideB) );
-}
-
 function HandleVertexRearrangement() {
 	var movement_vector = new THREE.Vector2(0,0);
 	if( isMouseDown ) {
@@ -263,8 +249,12 @@ function HandleVertexRearrangement() {
 		}
 	}
 	
-	if( vertex_tobechanged === 666 || (movement_vector.x === 0 && movement_vector.y === 0) )
+	if( vertex_tobechanged === 666 || (movement_vector.x === 0 && movement_vector.y === 0) ){
+		irreg_rope.geometry.vertices[0].set(0,0,0.01);
+		irreg_rope.geometry.vertices[1].set(0,0,0.01);
+		irreg_rope.geometry.verticesNeedUpdate = true;
 		return;
+	}
 	
 	theyknowyoucanchangevertices = 1;
 	
@@ -386,7 +376,9 @@ function HandleVertexRearrangement() {
 	
 	
 	//Everything that could go wrong. TODO remove this on release. You should be able to predict what won't work and put correct_minimum_angles, and resetter, in coreloop.
-	if(!correct_edge_lengths()|| !correct_defects() || !correct_minimum_angles() ){
+	if(	!check_triangle_inversion() || !correct_minimum_angles()
+//		|| !check_edge_lengths() || !check_defects() //these are only worth using if you suspect the above has not done its job
+	  ){
 		for( var i = 0; i < 66; i++)
 			flatnet_vertices.array[i] = net_log[i];
 		correct_minimum_angles();

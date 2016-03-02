@@ -1,3 +1,22 @@
+/*
+ * TODO
+ * make lattice circular (just add a few fake points)
+ * colors
+ * make lattice points little spheres
+ * more comfortable system for showing the pictures. You probably need 3 anyway, along the top or whatever: EM (always b&w)->EM+points->just points
+ */
+function put_picture_in_place(){
+	for(var i = 0; i < picture_objects.length; i++){
+		scene.remove(picture_objects[i]);
+	}
+	
+	var tolerance = 0.01;
+	for(var i = 0; i < viruspicture_scales.length; i++){
+		if(Math.abs(LatticeScale-viruspicture_scales[i]) < tolerance)
+			scene.add(picture_objects[i]);
+	}
+}
+
 function UpdateCapsid() {
 	var oldcapsidopenness = capsidopenness;
 	
@@ -17,8 +36,10 @@ function UpdateCapsid() {
 		capsidopeningspeed = 0;
 	}
 	
-	if( (oldcapsidopenness != 0 && capsidopenness == 0) || (oldcapsidopenness == 0 && capsidopenness != 0 ) )
+//	if( (oldcapsidopenness != 0 && capsidopenness == 0) || (oldcapsidopenness == 0 && capsidopenness != 0 ) )
 		put_picture_in_place();
+	for(var i = 0; i < picture_objects.length; i++)
+		picture_objects[i].material.opacity = 1 - capsidopenness;
 	
 	CK_deduce_surface(capsidopenness, surface_vertices);
 	
@@ -74,7 +95,7 @@ function deduce_first_triangle(openness, vertices_numbers, rotation) {
 	vertices_numbers.setXYZ(0, 0, 0, origin_height);
 	
 	var p = Math.atan(PHI) + capsidopenness * (TAU/4 - Math.atan(PHI));
-	var v = new THREE.Vector3( Math.sin(p)*polyhedron_edge_length[0][1], 0, -Math.cos(p)*polyhedron_edge_length[0][1]);
+	var v = new THREE.Vector3( Math.sin(p), 0, -Math.cos(p));
 	v.setY(-Math.sin(rotation)*v.x);
 	v.setX( Math.cos(rotation)*v.x);
 	
@@ -92,11 +113,11 @@ function deduce_first_triangle(openness, vertices_numbers, rotation) {
 	
 	var top_origin = v.clone();
 	top_origin.normalize();
-	var cos_first_triangle_angle = get_cos_rule(polyhedron_edge_length[1][3],polyhedron_edge_length[0][3],polyhedron_edge_length[1][0]);
-	var top_origin_length = cos_first_triangle_angle * polyhedron_edge_length[0][3];
+	var cos_first_triangle_angle = get_cos_rule(1,1,1);
+	var top_origin_length = cos_first_triangle_angle;
 	top_origin.multiplyScalar(top_origin_length);
 	
-	var base_to_top_length = Math.sqrt(polyhedron_edge_length[0][3]*polyhedron_edge_length[0][3]-top_origin_length*top_origin_length);
+	var base_to_top_length = Math.sqrt(1-top_origin_length*top_origin_length);
 	var top = base_to_top_unit_vector.clone();
 	top.multiplyScalar(base_to_top_length);
 	top.add(top_origin);

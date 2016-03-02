@@ -12,6 +12,27 @@ function difference_between_angles(angle1, angle2){
 	//this would be worthwhile
 }
 
+function Square(a){
+	return a*a;
+}
+
+function two_way_reduce(num, destnum,reduction_speed){
+	if(num > destnum){
+		num -= reduction_speed;
+		if(num < destnum){
+			num = destnum;
+		}
+	}
+	else{
+		num += reduction_speed;
+		if(num > destnum){
+			num = destnum;
+		}
+	}
+	
+	return num;
+}
+
 //v and w are ends of a line segment, p is a point and we wish to know its dist from the line
 function minimum_distance(v0, w0, p0) {
 	var w = new THREE.Vector2(w0.x,w0.y);
@@ -63,7 +84,7 @@ function deduce_stable_points_from_fanning_vertex(fanning_vertex_start, lattice_
 		
 		//gotta check what points WOULD be in the face IF we snapped to this point.
 		for(var k = 0; k < quasilattice_default_vertices.length; k++) {
-			if(k==lattice_vertex_index)
+			if(k==lattice_vertex_index || k%8==7 || k == quasilattice_default_vertices.length-1)
 				continue;
 			var k_dist_to_potentialpoint = quasilattice_default_vertices[k].distanceTo(potential_stable_point);
 			if( 0.00001 < k_dist_to_potentialpoint && k_dist_to_potentialpoint < fanning_vertex_length + 0.00001){ //points on points ARE allowed in.
@@ -342,7 +363,8 @@ function point_in_inflated_triangle(
 		clockwise,
 		inflation){
 	if(inflation === undefined)
-		inflation = 0.00000000000000057; //tuned so that we get the central pentagon near HPV, but no bands near STMV.
+		inflation = 0.00000000000000078;
+	//0.00000000000000057 - we get the central pentagon near HPV, but no bands near STMV. But we also fuck up ONE of the three-pents meeting ones
 	
 	var center = new THREE.Vector2();
 	center.x = ( cornerAx + cornerBx + cornerCx ) / 3;

@@ -1,5 +1,23 @@
-//So what's actually happenning is that we're seeing the surface
-function correct_defects() {
+function check_triangle_inversion(){
+	for(var i = 0; i < 20; i++){
+		var cornerAindex = net_triangle_vertex_indices[ i * 3 + 0 ];
+		var cornerBindex = net_triangle_vertex_indices[ i * 3 + 1 ];
+		var cornerCindex = net_triangle_vertex_indices[ i * 3 + 2 ];
+		
+		if( point_to_the_right_of_line(	
+				flatnet_vertices.array[ 0 + 3 * cornerAindex ],flatnet_vertices.array[ 1 + 3 * cornerAindex ],
+				flatnet_vertices.array[ 0 + 3 * cornerBindex ],flatnet_vertices.array[ 1 + 3 * cornerBindex ],
+				flatnet_vertices.array[ 0 + 3 * cornerCindex ],flatnet_vertices.array[ 1 + 3 * cornerCindex ]
+			)){
+			console.log("triangle inverted");
+			return 0;
+		}
+	}
+	
+	return 1;
+}
+
+function check_defects() {
 	var wiggleroom = 0.00001;
 	for( var corner = 0; corner < 22; corner++) {
 		var corners_added = 0;
@@ -28,7 +46,32 @@ function correct_defects() {
 	return 1;
 }
 
-function correct_edge_lengths(){
+function corner_angle_from_indices(triangle_index, corner_vertex_index) {
+	var cornerAindex = 666, cornerBindex = 666;
+	for( var i = 0; i < 3; i++) {
+		if( corner_vertex_index === net_triangle_vertex_indices[ triangle_index * 3 + i ]) {
+			cornerAindex = net_triangle_vertex_indices[ triangle_index * 3 + (i+1)%3 ];
+			cornerBindex = net_triangle_vertex_indices[ triangle_index * 3 + (i+2)%3 ];			
+			break;
+		}
+		
+		if( i === 2 ) {
+			console.error("request was made for a triangle-angle at a corner that the triangle does not have");
+			return 0;
+		}
+	}
+	
+	sideA = new THREE.Vector2(
+		flatnet_vertices.array[ 0 + 3 * cornerAindex ] - flatnet_vertices.array[ 0 + 3 * corner_vertex_index ],
+		flatnet_vertices.array[ 1 + 3 * cornerAindex ] - flatnet_vertices.array[ 1 + 3 * corner_vertex_index ] );
+	sideB = new THREE.Vector2(
+		flatnet_vertices.array[ 0 + 3 * cornerBindex ] - flatnet_vertices.array[ 0 + 3 * corner_vertex_index ],
+		flatnet_vertices.array[ 1 + 3 * cornerBindex ] - flatnet_vertices.array[ 1 + 3 * corner_vertex_index ] );
+		
+	return Math.acos(get_cos( sideA, sideB) );
+}
+
+function check_edge_lengths(){
 	for(var i = 0; i < 20; i++){
 		for(var j = 0; j < 5; j++){
 			var central_vertex1_index = V_vertex_indices[0][i][3*j+2];

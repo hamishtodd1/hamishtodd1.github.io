@@ -32,7 +32,7 @@ function loadpic(i) {
 			var mywidth = 3;
 			if(picture_loaded<7){
 				var myscale = 2;
-				picture_objects[picture_loaded] = new THREE.Mesh(new THREE.CubeGeometry(mywidth , mywidth , 0),new THREE.MeshBasicMaterial({map: texture}) );
+				picture_objects[picture_loaded] = new THREE.Mesh(new THREE.CubeGeometry(mywidth , mywidth , 0),new THREE.MeshBasicMaterial({map: texture, transparent:true}) );
 				picture_objects[picture_loaded].position.x = -playing_field_width / 2;
 				picture_objects[picture_loaded].position.z = 0.01;
 			}
@@ -51,7 +51,7 @@ function loadpic(i) {
 
 				//ready to rock!
 				MODE = 0;
-				init();
+				init(); //TODO call this before you start loading the pictures
 				scene.add(picture_objects[7]);
 				render();
 			}

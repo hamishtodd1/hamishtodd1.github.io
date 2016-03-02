@@ -16,7 +16,7 @@ var QC_SPHERE_MODE = 5;
 var CUBIC_LATTICE_MODE = 6;
 var FINAL_FORMATION_MODE = 7;
 	
-var MODE = 3;
+var MODE = 6;
 
 //--------------Technologically fundamental
 var playing_field_width = 7*HS3;
@@ -108,25 +108,29 @@ var dodeca_faceflatness = 0;
 var dodeca_angle = 0;
 var dodeca_triangle_vertex_indices;
 var back_hider;
-var quasilattice_default_vertices = Array(7*5);
-var quasilattice_pairs = Array(29*5*2);
+var quasilattice_default_vertices = Array(8*5+1);
 var cutout_vector0; //these lie on the lattice
 var cutout_vector1;
 var cutout_vector0_player;
 var cutout_vector1_player;
 var quasi_shear_matrix = Array(4);
-var quasicutout_intermediate_vertices = Array(quasilattice_default_vertices.length*2 * 2);
-var quasicutouts_vertices_components = Array(quasilattice_default_vertices.length*2 * 2 );
-var quasicutout_line_pairs = new Uint16Array(quasilattice_default_vertices.length*2 * 2 * 2); //TODO work out how many there should be in here really.
+var quasicutout_intermediate_vertices = Array(quasilattice_default_vertices.length* 2 );
+var quasicutouts_vertices_components = Array(quasilattice_default_vertices.length * 2 * 3 );
+var quasicutout_line_pairs = new Uint16Array(quasilattice_default_vertices.length * 2 * 2 * 2); //TODO work out how many there should be in here really.
 var quasicutouts = Array(60);
+var quasicutout_meshes;
 var stable_points = Array(345);
+var triangleindices_for_stablepoints = Array(stable_points.length);
 var lowest_unused_stablepoint = 0;
 var quasiquasilattice;
 var stablepointslattice;
 var nearby_quasicutouts;
 var stitchup;
 var stitchup_line_pairs = new Uint16Array(1000);
-var set_stable_point = 32;
+var set_stable_point = 666;
+var Guide_quasilattice;
+var stable_point_of_meshes_currently_in_scene = 666;
+var modulated_CSP;
 
 //------------3D penrose stuff
 var animation_playing_automatically = true;
@@ -155,6 +159,7 @@ var slider_grabbed = false;
 
 //-----------formationatom stuff
 var QC_atoms = Array(2000);
+var QCatom_positions;
 var outermost_QCatom_indices = Array(0,0,0,	0,0,0,	0,0,0,	0,0,0);
 var animation_beginning_second = 17*60+3; //or whatever
 var formation_animation_numbers = new Float32Array(23 * 60 * 3);
@@ -192,6 +197,7 @@ var shear_matrix = new Array(20);
 
 //initial values chosen rather randomly. Potential speedup by decreasing this? Does algorithm ever increase them? Probably easy to work out a better bound.
 var radii = new Float32Array([100,100,100, 100,100,100, 100,100,100, 100,100,100]);
+var alexandrov_triangle_vertex_indices = new Uint16Array( 3 * 20);
 var polyhedron_edge_length;
 
 var lattice_colors = new Float32Array(number_of_lattice_points * 3);
@@ -223,6 +229,7 @@ var Button;
 var varyingsurface_cylinders = Array(41);
 var varyingsurface_spheres = Array(22);
 var irreghighlight_progresses = Array(22);
+var irreg_rope;
 var varyingsurface_openmode = false;
 
 var vertex_identifications = new Array();

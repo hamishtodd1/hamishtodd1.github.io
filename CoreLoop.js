@@ -1,10 +1,9 @@
 /*	
  * Long term To Do
- *  -implement protein models
- *  -faces on quasisphere
- *  -implement database
- *  -wobbly DNA (?)
- *  -overhaul irreg
+ *  -everything listed in CKsurfacestuff, bocavirus, alexandrov, quasisphere
+ *  -get new form of video in (?)
+ *  -your tuned round-off error compensators might be different on different CPUs.
+ *  -get a person with a sense of color to look at everything
  *  
  *  -make it feel good
  *  -test
@@ -31,6 +30,8 @@ function UpdateWorld() {
 
 			Update_net_variables();			
 			Map_lattice();
+			if(logged==2)console.log(surface);
+			logged++;
 			break;
 			
 		case IRREGULAR_MODE:
@@ -54,6 +55,7 @@ function UpdateWorld() {
 		case FINAL_FORMATION_MODE:
 			update_3DLattice();
 			update_formation_atom();
+			update_Pariacoto();
 	}
 }
 
@@ -94,7 +96,6 @@ function ChangeScene(new_mode) {
 	
 	switch(MODE){
 		case STATIC_PROTEIN_MODE:
-			camera.toOrthographic();
 			for(var i = 0; i<bocavirus_proteins.length; i++)
 				scene.add(bocavirus_proteins[i]);
 			for(var i = 0; i< lights.length; i++)
@@ -102,7 +103,6 @@ function ChangeScene(new_mode) {
 			break;
 		
 		case STATIC_DNA_MODE:
-			camera.toOrthographic();
 			for(var i = 0; i<bocavirus_proteins.length; i++)
 				scene.add(bocavirus_proteins[i]);
 			for(var i = 0; i< lights.length; i++)
@@ -111,8 +111,6 @@ function ChangeScene(new_mode) {
 			break;
 			
 		case CK_MODE:
-			camera.position.x = camera_comparing_position;
-			camera.toPerspective();
 			scene.add(surface);
 			scene.add(surflattice);
 			for( var i = 0; i < surfperimeter_cylinders.length; i++) {
@@ -125,7 +123,6 @@ function ChangeScene(new_mode) {
 			break;
 			
 		case IRREGULAR_MODE:
-			camera.toPerspective();
 			scene.add(varyingsurface);
 			scene.add(Button);
 			for( var i = 0; i < varyingsurface_cylinders.length; i++)
@@ -135,26 +132,28 @@ function ChangeScene(new_mode) {
 			break;
 			
 		case QC_SPHERE_MODE:
-			camera.toPerspective();
-			for( var i = 0; i < quasicutouts.length; i++)
-				scene.add(quasicutouts[i]);
+//			for( var i = 0; i < quasicutouts.length; i++)
+//				scene.add(quasicutouts[i]);
 			scene.add(dodeca);
-			scene.add(back_hider);
-			scene.add(stitchup);
+//			scene.add(back_hider);
+//			scene.add(stitchup);
+			scene.add(Guide_quasilattice);
 //			scene.add(quasiquasilattice);
 //			scene.add(stablepointslattice);
 			break;
 		
 		case CUBIC_LATTICE_MODE:
-			camera.toOrthographic();
 			scene.add(slider);
 			scene.add(progress_bar);
 			break;
 			
 		case FINAL_FORMATION_MODE:
-			camera.toPerspective();
 			animation_progress = 1;
+			for(var i = 0; i< lights.length; i++)
+				scene.add( lights[i] );
 			scene.add(QC_atoms);
+			for(var i = 0; i< Paria_models.length; i++)
+				scene.add(Paria_models[i]);
 			break;
 	}
 }

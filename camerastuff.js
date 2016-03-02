@@ -1,8 +1,7 @@
 //not allowed to do anything with camera outside of here!
 function camera_changes_for_mode_switch(){
-	if(MODE == CUBIC_LATTICE_MODE || MODE == FINAL_FORMATION_MODE){
+	if(MODE == CUBIC_LATTICE_MODE || MODE=== FINAL_FORMATION_MODE ){
 		//We could make it shift from perspective to orthographic when the mouse is down, to mimic diffraction, or would that be too complex? If you're going to do it, mention it in the text.
-		
 		var CLScale = 4.5;
 		camera.position.z = min_cameradist * CLScale;
 		camera.cameraO.left =-playing_field_width / 2 * CLScale;
@@ -10,6 +9,10 @@ function camera_changes_for_mode_switch(){
 		camera.cameraO.top = playing_field_height / 2 * CLScale;
 		camera.cameraO.bottom =-playing_field_height / 2 * CLScale;
 		
+		camera.updateProjectionMatrix();
+	}
+	else if( MODE == QC_SPHERE_MODE){
+		//WARNING: THERE IS STUFF THAT HAPPENS IN UPDATEQUASILATTICE
 		camera.updateProjectionMatrix();
 	}
 	else{
@@ -21,6 +24,31 @@ function camera_changes_for_mode_switch(){
 		camera.updateProjectionMatrix();
 		
 		//need to sort out those cameraO things too
+	}
+	
+	switch(MODE){
+		case STATIC_PROTEIN_MODE:
+			camera.toOrthographic();
+			break;
+		case STATIC_DNA_MODE:
+			camera.toOrthographic();
+			break;
+		case CK_MODE:
+			camera.position.x = camera_comparing_position;
+			camera.toPerspective();
+			break;
+		case IRREGULAR_MODE:
+			camera.toPerspective();
+			break;
+		case QC_SPHERE_MODE:
+			camera.toPerspective();
+			break;
+		case CUBIC_LATTICE_MODE:
+			camera.toOrthographic();
+			break;
+		case FINAL_FORMATION_MODE:
+			camera.toOrthographic();
+			break;
 	}
 	
 	//this is for just in case we've just left CK
@@ -35,28 +63,41 @@ function UpdateCamera() {
 //		cameradist -= 0.08;
 	
 	if(MODE == CK_MODE){
-		var max_camera_movementspeed = 0.044;
-		var camera_acceleration = 0.0007;
-		if(capsidopenness == 0){
-			camera_movementspeed -= camera_acceleration;
-			if( camera_movementspeed < -max_camera_movementspeed)
-				camera_movementspeed = -max_camera_movementspeed;
-		}
-		else {
-			camera_movementspeed += camera_acceleration;
-			if( camera_movementspeed > max_camera_movementspeed)
-				camera_movementspeed = max_camera_movementspeed;
-		}
-		camera.position.x += camera_movementspeed;
-		if(camera.position.x < camera_comparing_position){
-			camera.position.x = camera_comparing_position;
-			camera_movementspeed = 0;
-		}
-		if(camera.position.x > 0){
-			camera.position.x = 0;
-			camera_movementspeed = 0;
-		}
+//		var max_camera_movementspeed = 0.044;
+//		var camera_acceleration = 0.0007;
+//		if(capsidopenness == 0){
+//			camera_movementspeed -= camera_acceleration;
+//			if( camera_movementspeed < -max_camera_movementspeed)
+//				camera_movementspeed = -max_camera_movementspeed;
+//		}
+//		else {
+//			camera_movementspeed += camera_acceleration;
+//			if( camera_movementspeed > max_camera_movementspeed)
+//				camera_movementspeed = max_camera_movementspeed;
+//		}
+//		camera.position.x += camera_movementspeed;
+//		if(camera.position.x < camera_comparing_position){
+//			camera.position.x = camera_comparing_position;
+//			camera_movementspeed = 0;
+//		}
+//		if(camera.position.x > 0){
+//			camera.position.x = 0;
+//			camera_movementspeed = 0;
+//		}
 	}
+//	if(MODE=== FINAL_FORMATION_MODE){
+//		var oldFMScale = camera.position.z / min_cameradist;
+//		var Scaledelta = 0.03;
+//		var FinalScale = 2.1;
+//		var FMScale = two_way_reduce(oldFMScale, FinalScale,Scaledelta);
+//		camera.position.z = min_cameradist * FMScale;
+//		camera.cameraO.left =-playing_field_width / 2 * FMScale;
+//		camera.cameraO.right = playing_field_width / 2 * FMScale;
+//		camera.cameraO.top = playing_field_height / 2 * FMScale;
+//		camera.cameraO.bottom =-playing_field_height / 2 * FMScale;
+//		
+//		camera.updateProjectionMatrix();
+//	}
 	
 	
 	//vertical_fov = 2 * Math.atan(playing_field_height/(2*camera.position.z));
@@ -66,6 +107,7 @@ function UpdateCamera() {
 	
 	//watch the videos again when in need of inspiration
 	
+	//probably a little shake whenever new shapes come in on the quasisphere, and a flash on them too
 	//it should follow the mouse a little bit. Finger?
 	//take distance of mouse from center of screen, square root that, and move the camera towards the mouse by a multiple of that amount
 	//maybe have screenshake "energy"? like things can cause it to vibrate until it stops.

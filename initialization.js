@@ -1,4 +1,21 @@
 function init() {
+	init_CK_and_irreg();
+	init_cubicLattice_stuff();
+	initialize_QS_stuff();	
+	initialize_protein();
+	init_DNA_cage();
+	init_static_capsid();
+	initialize_formation_atom();
+	init_pariacoto();
+	
+	//------------------need this so there's something in there for the first frame
+	ourclock.getDelta();
+	
+	//must be kept at bottom
+	ChangeScene(MODE);
+}
+
+function init_CK_and_irreg(){
 	vertices_derivations = new Array(
 		[666,666,666],
 		[666,666,666],
@@ -87,21 +104,16 @@ function init() {
 		20,19,18,
 		19,20,21]);
 	
+	for(var i = 0; i < net_triangle_vertex_indices.length; i++)
+		alexandrov_triangle_vertex_indices[i] = polyhedron_index(net_triangle_vertex_indices[i]);
+	
 	polyhedron_edge_length = Array(12);
 	for(var i = 0; i< polyhedron_edge_length.length; i++) {
 		polyhedron_edge_length[i] = new Float32Array(12);
-		for(var j = 0; j < polyhedron_edge_length[i].length; j++)
-			polyhedron_edge_length[i][j] = 666; //not an actual edge
-	}		
-	for(var i = 0; i< net_triangle_vertex_indices.length / 3; i++) {
-		for(var j = 0; j < 3; j++){
-			var a_index = polyhedron_index(net_triangle_vertex_indices[i*3 + j]);
-			var b_index = polyhedron_index(net_triangle_vertex_indices[i*3 + (j+1)%3]);
-
-			polyhedron_edge_length[a_index][b_index] = 1;
-			polyhedron_edge_length[b_index][a_index] = 1; 
-		}
 	}
+	
+	irreg_rope = new THREE.Line(new THREE.Geometry, new THREE.LineBasicMaterial({color: 0x000000}));
+	irreg_rope.geometry.vertices.push(new THREE.Vector3(0,0,0),new THREE.Vector3(100,0,0.01));
 	
 	for( var i = 0; i < 20; i++ ) {
 		line_index_pairs[i*6 + 0] = net_triangle_vertex_indices[i*3 + 0];
@@ -141,32 +153,32 @@ function init() {
 	
 	//-------------stuff that goes in the scene
 	{
-//		var texture_loader = new THREE.TextureLoader();
-//		texture_loader.load(
-//				'adenovirus256.jpg', //"http://icons.iconarchive.com/icons/aha-soft/torrent/256/virus-icon.png", 
-//				function(texture) {
-//					console.log("hey");
-//					
-//					var backgroundtexture_material = new THREE.MeshBasicMaterial({
-//						map: texture
+//			var texture_loader = new THREE.TextureLoader();
+//			texture_loader.load(
+//					'adenovirus256.jpg', //"http://icons.iconarchive.com/icons/aha-soft/torrent/256/virus-icon.png", 
+//					function(texture) {
+//						console.log("hey");
+//						
+//						var backgroundtexture_material = new THREE.MeshBasicMaterial({
+//							map: texture
+//						});
+//						var texturedist = -min_cameradist;
+//						var texturewidth = playing_field_width;
+//						var textureheight = texturewidth; //currently we have a square texture
+//			
+//						backgroundtexture_geometry = new THREE.CubeGeometry( texturewidth, textureheight, 0);
+//						backgroundtexture = new THREE.Mesh( backgroundtexture_geometry, backgroundtexture_material );
+//						backgroundtexture.position.z = -10;
+//						
+//						if(MODE == CK_MODE)
+//							scene.add(backgroundtexture);
+//						
+//						console.log(texture);
+//					},
+//					function ( xhr ) {},
+//					function ( xhr ) {
+//						console.log( 'texture loading error' );
 //					});
-//					var texturedist = -min_cameradist;
-//					var texturewidth = playing_field_width;
-//					var textureheight = texturewidth; //currently we have a square texture
-//		
-//					backgroundtexture_geometry = new THREE.CubeGeometry( texturewidth, textureheight, 0);
-//					backgroundtexture = new THREE.Mesh( backgroundtexture_geometry, backgroundtexture_material );
-//					backgroundtexture.position.z = -10;
-//					
-//					if(MODE == CK_MODE)
-//						scene.add(backgroundtexture);
-//					
-//					console.log(texture);
-//				},
-//				function ( xhr ) {},
-//				function ( xhr ) {
-//					console.log( 'texture loading error' );
-//				});
 		
 		var surfacematerial = new THREE.MeshBasicMaterial({
 			color: 0x00ffff,
@@ -246,7 +258,7 @@ function init() {
 		}
 		varyingsurface = new THREE.Mesh( flatnet_geometry.clone(), surfacematerial );
 		
-		var flatlatticematerial = new THREE.PointCloudMaterial({
+		var flatlatticematerial = new THREE.PointsMaterial({
 			size: 0.09,
 			vertexColors: THREE.VertexColors
 		});
@@ -262,7 +274,7 @@ function init() {
 		flatlattice_geometry.addAttribute( 'position', flatlattice_vertices );
 		flatlattice_geometry.addAttribute( 'color', new THREE.BufferAttribute(lattice_colors, 3) );
 
-		flatlattice = new THREE.PointCloud( flatlattice_geometry, flatlatticematerial );
+		flatlattice = new THREE.Points( flatlattice_geometry, flatlatticematerial );
 		flatlattice.position.x = flatlattice_center.x;
 		//scene.add(flatlattice);
 		
@@ -272,7 +284,7 @@ function init() {
 		surflattice_geometry.addAttribute( 'position', surflattice_vertices );
 		surflattice_geometry.addAttribute( 'color', new THREE.BufferAttribute(lattice_colors, 3) );
 
-		surflattice = new THREE.PointCloud( surflattice_geometry, flatlatticematerial );
+		surflattice = new THREE.Points( surflattice_geometry, flatlatticematerial );
 		
 		
 		
@@ -678,17 +690,4 @@ function init() {
 			shear_matrix[i] = new Array(4);
 		Update_net_variables();
 	}
-	
-	init_cubicLattice_stuff();
-	initialize_QS_stuff();	
-	initialize_protein();
-	init_DNA_cage();
-	init_static_capsid();
-	initialize_formation_atom();
-	
-	//------------------need this so there's something in there for the first frame
-	ourclock.getDelta();
-	
-	//must be kept at bottom
-	ChangeScene(MODE);
 }

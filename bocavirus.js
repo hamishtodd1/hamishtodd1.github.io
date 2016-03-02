@@ -1,3 +1,14 @@
+/*
+ * TODO
+ * -colors
+ * -very minor jitter (?) on DNA and maybe protein
+ */
+
+/*
+ * To make DNA springy, you put some vertices in the corners, and for every vertex, see which two they are closest to, and that's the edge
+ * then get the length down the line connecting those two vertices, and its angle from the line point straight out of the center perpendicularly
+ */
+
 function update_bocavirus() {
 	//if you're on DNA_CAGE_MODE then we unfold, if you're on STATIC_PROTEIN_MODE we fold.
 	
@@ -109,7 +120,7 @@ function init_static_capsid() {
 }
 
 function init_DNA_cage(){
-	DNA_cage = new THREE.Line( new THREE.BufferGeometry(), new THREE.LineBasicMaterial({color: 0xf0f00f,vertexColors: THREE.VertexColors}), THREE.LinePieces);
+	DNA_cage = new THREE.LineSegments( new THREE.BufferGeometry(), new THREE.LineBasicMaterial({color: 0xf0f00f,vertexColors: THREE.VertexColors}), THREE.LineSegmentsPieces);
 	 
 	var avg = new THREE.Vector3();
 	for(var i = 0; i<DNA_vertices_numbers.length / 3; i++){
@@ -232,7 +243,7 @@ function init_DNA_cage(){
 		}
 	}
 	DNA_cage.geometry.addAttribute( 'color', new THREE.BufferAttribute(DNA_colors, 3) );
-	DNA_cage.geometry.addAttribute( 'index', new THREE.BufferAttribute( DNA_line_pairs, 1 ) );
+	DNA_cage.geometry.setIndex( new THREE.BufferAttribute( DNA_line_pairs, 1 ) );
 	
 	//because it ain't perfect
 	DNA_cage.quaternion.set(-0.0028151799901586245, -0.03798590756432208, -0.09772936010824641, 0.9944838448969249);

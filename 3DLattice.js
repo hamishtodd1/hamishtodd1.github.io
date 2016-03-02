@@ -1,17 +1,6 @@
 /*
- * Might be nice to have points on sharp corners only? Most shapes combine them though
- * 
- * So maybe things should scale a little, or indeed indefinitely
- * 
  * Speedup: Remove the lines and faces from the sides of the shapes that you can't see. This is trivial, just need a separate material
- * 
- * Ok probably what we want here is a set of points that can very convincingly be laid on pariacoto, and which plausibly derive from the tiling that you have, maybe one layer more or less.
- * 
- * In the meantime a point that ends up on a fivefold corner will be quite alright
- * 
- * But do you want something about merging points together?
  */
-
 
 
 function rotate_layer(index,MovementAxis,movementangle){
@@ -33,43 +22,6 @@ function sphere_array_rotate(shape_array, MovementAxis,movementangle,quaternion)
 	for(var i = 0; i < shape_array.length; i++){		
 		shape_array[i].position.applyQuaternion(quaternion);
 	}	
-}
-
-function attempt_quasiatom_addition_and_return_next_index(ourposition, lowest_unused_index ){
-	var multfactor = 1.147;
-	QC_atoms.geometry.attributes.position.setXYZ(lowest_unused_index, ourposition.x * multfactor, ourposition.y * multfactor, ourposition.z * multfactor );
-	
-	for(var k = 0; k < lowest_unused_index; k++){
-		var separationX = QC_atoms.geometry.attributes.position.array[k*3+0] - ourposition.x;
-		var separationY = QC_atoms.geometry.attributes.position.array[k*3+1] - ourposition.y;
-		var separationZ = QC_atoms.geometry.attributes.position.array[k*3+2] - ourposition.z;
-		
-		if(separationX*separationX+separationY*separationY+separationZ*separationZ < 0.5 ){ //if there's one anywhere near you, we want to overwrite you.
-			return lowest_unused_index;
-		}		
-	}
-	
-	var wavelength = ourposition.lengthSq();
-	wavelength /= 10.9; //apparently as large as we get
-	wavelength *= (781-380);
-	wavelength += 380;
-	if((wavelength >= 380) && (wavelength<440)){
-        QC_atoms.geometry.attributes.color.setXYZ(lowest_unused_index,	-(wavelength - 440) / (440 - 380),	0,	1);
-    }else if((wavelength >= 440) && (wavelength<490)){
-        QC_atoms.geometry.attributes.color.setXYZ(lowest_unused_index,	0,	(wavelength - 440) / (490 - 440),	1);
-    }else if((wavelength >= 490) && (wavelength<510)){
-        QC_atoms.geometry.attributes.color.setXYZ(lowest_unused_index,	0,	1,	-(wavelength - 510) / (510 - 490));
-    }else if((wavelength >= 510) && (wavelength<580)){
-        QC_atoms.geometry.attributes.color.setXYZ(lowest_unused_index,	(wavelength - 510) / (580 - 510),	1,	0);
-    }else if((wavelength >= 580) && (wavelength<645)){
-        QC_atoms.geometry.attributes.color.setXYZ(lowest_unused_index,	1,	-(wavelength - 645) / (645 - 580),	0);
-    }else if((wavelength >= 645) && (wavelength<781)){
-    	QC_atoms.geometry.attributes.color.setXYZ(lowest_unused_index,	1,	0,	0);
-    }else{
-    	QC_atoms.geometry.attributes.color.setXYZ(lowest_unused_index,	0,	0,	0);
-    };
-		
-	return lowest_unused_index + 1; //quasiatom successfully installed!
 }
 
 function update_animationprogress(){
@@ -134,7 +86,6 @@ function update_3DLattice() {
 		scene.add(QC_atoms);
 	}
 	
-	
 	if(animation_progress < allshape_fadeout_start_time && previous_animation_progress >= allshape_fadeout_start_time){		
 		scene.remove(QC_atoms);
 	}
@@ -148,8 +99,9 @@ function update_3DLattice() {
 	update_shape_layer(icosahedra_convergence_time, triacontahedra_convergence_time, allshape_fadeout_start_time, 1, Quasi_meshes[2], meshes_original_numbers[2], 0 );
 	update_shape_layer(icosahedra_convergence_time, triacontahedra_convergence_time, allshape_fadeout_start_time, 1, Quasi_outlines[2], outlines_original_numbers[2], 0 );
 	
-	update_shape_bunch_layer(triacontahedra_convergence_time, star_convergence_time, allshape_fadeout_start_time, ico_star_convergence_time, star_bunch_time, Quasi_meshes[3], meshes_original_numbers[3], 0 );
-	update_shape_bunch_layer(triacontahedra_convergence_time, star_convergence_time, allshape_fadeout_start_time, ico_star_convergence_time, star_bunch_time, Quasi_outlines[3], outlines_original_numbers[3], 0 );
+	//you can change the 1 in here back to ico_star_convergence_time if you like
+	update_shape_bunch_layer(triacontahedra_convergence_time, star_convergence_time, allshape_fadeout_start_time, 1, star_bunch_time, Quasi_meshes[3], meshes_original_numbers[3], 0 );
+	update_shape_bunch_layer(triacontahedra_convergence_time, star_convergence_time, allshape_fadeout_start_time, 1, star_bunch_time, Quasi_outlines[3], outlines_original_numbers[3], 0 );
 	
 	update_shape_bunch_layer(ico_star_startfadein_time, ico_star_convergence_time, allshape_fadeout_start_time, 1, ico_star_convergence_time, Quasi_meshes[4], meshes_original_numbers[4], 1 );
 	update_shape_bunch_layer(ico_star_startfadein_time, ico_star_convergence_time, allshape_fadeout_start_time, 1, ico_star_convergence_time, Quasi_outlines[4], outlines_original_numbers[4], 1 );
@@ -158,18 +110,17 @@ function update_3DLattice() {
 	if(isMouseDown && !slider_grabbed ) {
 		var MovementAxis = new THREE.Vector3(-Mouse_delta.y, Mouse_delta.x, 0);
 		MovementAxis.normalize();
-		var MovementAngle = Mouse_delta.length() / 3;
+		var MovementAngle = Mouse_delta.length();
 		
 		rotate_3DPenrose_entirety(MovementAxis,MovementAngle);
 	}
 }
 
 function rotate_3DPenrose_entirety(MovementAxis,MovementAngle){
-	rotate_layer(0,MovementAxis, MovementAngle);
-	rotate_layer(1,MovementAxis, MovementAngle);
-	rotate_layer(2,MovementAxis, MovementAngle);
-	rotate_layer(3,MovementAxis, MovementAngle);
-	rotate_layer(4,MovementAxis, MovementAngle);
+	for(var i = 0; i < 5; i++)
+		rotate_layer(i,MovementAxis, MovementAngle);
+	for(var i = 0; i < Paria_models.length; i++)
+		rotate_Parialayer(i,MovementAxis,MovementAngle);
 	
 	var atoms_axis = MovementAxis.clone();
 	QC_atoms.updateMatrixWorld();
@@ -232,13 +183,6 @@ function init_cubicLattice_stuff() {
 	slider.position.y = progress_bar.position.y;
 	slider.position.z = 0.01;
 
-	var number_of_QC_atoms = 177;
-	var QC_atoms_geometry = new THREE.BufferGeometry();
-	QC_atoms_geometry.addAttribute( 'position', new THREE.BufferAttribute(new Float32Array(number_of_QC_atoms * 3), 3) );
-	QC_atoms_geometry.addAttribute( 'color', new THREE.BufferAttribute(new Float32Array(number_of_QC_atoms * 3), 3) );
-	QC_atoms = new THREE.Points( QC_atoms_geometry,new THREE.PointCloudMaterial({size: 0.62,vertexColors: THREE.VertexColors}));
-	QC_atoms.scale.set(2,2,2);
-	
 	normalized_virtualdodeca_vertices[0] = new THREE.Vector3(1,-1,1);
 	normalized_virtualdodeca_vertices[1] = new THREE.Vector3(0,-1/PHI, PHI);
 	normalized_virtualdodeca_vertices[2] = new THREE.Vector3(-1,-1,1);
@@ -253,7 +197,7 @@ function init_cubicLattice_stuff() {
 	normalized_virtualdodeca_vertices[11] = new THREE.Vector3(0, 1/PHI, PHI);
 	normalized_virtualdodeca_vertices[12] = new THREE.Vector3(1,1,1);
 	normalized_virtualdodeca_vertices[13] = new THREE.Vector3( PHI,0, 1/PHI);
-	normalized_virtualdodeca_vertices[14] = new THREE.Vector3( PHI,0,-1/PHI); //problem with triacontahedra...
+	normalized_virtualdodeca_vertices[14] = new THREE.Vector3( PHI,0,-1/PHI);
 	normalized_virtualdodeca_vertices[15] = new THREE.Vector3(1,-1,-1);
 	normalized_virtualdodeca_vertices[16] = new THREE.Vector3(0,-1/PHI,-PHI);
 	normalized_virtualdodeca_vertices[17] = new THREE.Vector3(-1,-1,-1);
@@ -353,7 +297,7 @@ function init_cubicLattice_stuff() {
 		for( var i = 0; i < golden_rhombohedra.length; i++) { 
 			golden_rhombohedra[i] = new THREE.Mesh( new THREE.BufferGeometry(), rhombohedron_material );
 			golden_rhombohedra[i].geometry.addAttribute( 'position', new THREE.BufferAttribute( rhombohedron_vertices_numbers, 3 ) );
-			golden_rhombohedra[i].geometry.addAttribute( 'index', new THREE.BufferAttribute( rhombohedron_face_triangles, 1 ) );
+			golden_rhombohedra[i].geometry.setIndex( new THREE.BufferAttribute( rhombohedron_face_triangles, 1 ) );
 			golden_rhombohedra[i].updateMatrixWorld();
 			
 			for( var j = 0; j < 12; j++) {
@@ -376,7 +320,7 @@ function init_cubicLattice_stuff() {
 						mycylinder_vertices_numbers, peak);
 				
 				var mycylinder_geometry = new THREE.BufferGeometry();
-				mycylinder_geometry.addAttribute( 'index', new THREE.BufferAttribute( prism_triangle_indices, 1 ) );
+				mycylinder_geometry.setIndex( new THREE.BufferAttribute( prism_triangle_indices, 1 ) );
 				mycylinder_geometry.addAttribute( 'position', new THREE.BufferAttribute( mycylinder_vertices_numbers, 3 ) );
 				
 				mycylinder = new THREE.Mesh( mycylinder_geometry, golden_rhombohedra_edgematerial );
@@ -456,7 +400,7 @@ function init_cubicLattice_stuff() {
 		for( var i = 0; i < golden_triacontahedra.length; i++) { 
 			golden_triacontahedra[i] = new THREE.Mesh( new THREE.BufferGeometry(), triacontahedron_material );
 			golden_triacontahedra[i].geometry.addAttribute( 'position', new THREE.BufferAttribute( triacontahedron_vertices_numbers, 3 ) );
-			golden_triacontahedra[i].geometry.addAttribute( 'index', new THREE.BufferAttribute( triacontahedron_face_indices, 1 ) );
+			golden_triacontahedra[i].geometry.setIndex( new THREE.BufferAttribute( triacontahedron_face_indices, 1 ) );
 			
 			for( var j = 0; j < 60; j++) {
 				var mycylinder_vertices_numbers = new Float32Array(16*3);
@@ -478,7 +422,7 @@ function init_cubicLattice_stuff() {
 						mycylinder_vertices_numbers, peak);
 				
 				var mycylinder_geometry = new THREE.BufferGeometry();
-				mycylinder_geometry.addAttribute( 'index', new THREE.BufferAttribute( cylinder_triangle_indices, 1 ) );
+				mycylinder_geometry.setIndex( new THREE.BufferAttribute( cylinder_triangle_indices, 1 ) );
 				mycylinder_geometry.addAttribute( 'position', new THREE.BufferAttribute( mycylinder_vertices_numbers, 3 ) );
 				
 				mycylinder = new THREE.Mesh( mycylinder_geometry, golden_triacontahedra_edgematerial );
@@ -538,7 +482,7 @@ function init_cubicLattice_stuff() {
 	   	for( var i = 0; i < goldenicos.length; i++) { 
 	   		goldenicos[i] = new THREE.Mesh( new THREE.BufferGeometry(), goldenico_material );
 	   		goldenicos[i].geometry.addAttribute( 'position', new THREE.BufferAttribute( goldenico_vertices_numbers, 3 ) );
-	   		goldenicos[i].geometry.addAttribute( 'index', new THREE.BufferAttribute( goldenico_face_indices, 1 ) );
+	   		goldenicos[i].geometry.setIndex( new THREE.BufferAttribute( goldenico_face_indices, 1 ) );
 	   		
 	   		for( var j = 0; j < 40; j++) {
 				var mycylinder_vertices_numbers = new Float32Array(16*3);
@@ -560,7 +504,7 @@ function init_cubicLattice_stuff() {
 						mycylinder_vertices_numbers, peak);
 				
 				var mycylinder_geometry = new THREE.BufferGeometry();
-				mycylinder_geometry.addAttribute( 'index', new THREE.BufferAttribute( cylinder_triangle_indices, 1 ) );
+				mycylinder_geometry.setIndex( new THREE.BufferAttribute( cylinder_triangle_indices, 1 ) );
 				mycylinder_geometry.addAttribute( 'position', new THREE.BufferAttribute( mycylinder_vertices_numbers, 3 ) );
 				
 				mycylinder = new THREE.Mesh( mycylinder_geometry, goldenicos_edgematerial );
@@ -740,30 +684,44 @@ function init_cubicLattice_stuff() {
    	put_bunch_into_two_objects(3,golden_stars);
    	put_bunch_into_two_objects(4,ico_stars);
    	
+   	//hack to get rid of what we put in. Speed up opportunity: don't put them in.
+   	for(var i = 0; i < Quasi_meshes[4].geometry.index.array.length / 12 / 6; i++){
+   		//for every twelfth of this array, the first sixth of it needs setting to zero
+		for(var j = 0; j < 12; j++ ){
+			Quasi_meshes[4].geometry.index.array[ j * Quasi_meshes[4].geometry.index.array.length / 12 + i] = 0;
+		}
+   	}
+   	for(var i = 0; i < Quasi_outlines[4].geometry.index.array.length / 12 / 6; i++){
+		for(var j = 0; j < 12; j++ ){
+			Quasi_outlines[4].geometry.index.array[ j * Quasi_outlines[4].geometry.index.array.length / 12 + i] = 0;
+		}
+   	}
+   	
    	//QC_atoms
-   	var lowest_unused_index = 0;
-	for(var i = 0; i < golden_rhombohedra.length; i++) {
-		for(var j = 0; j<golden_rhombohedra[i].geometry.attributes.position.length/3; j++){
-			var new_position = new THREE.Vector3(
-					golden_rhombohedra[i].geometry.attributes.position.array[j*3+0],
-					golden_rhombohedra[i].geometry.attributes.position.array[j*3+1],
-					golden_rhombohedra[i].geometry.attributes.position.array[j*3+2]);
-			golden_rhombohedra[i].localToWorld(new_position);
-			
-			lowest_unused_index = attempt_quasiatom_addition_and_return_next_index(new_position, lowest_unused_index );
-		}
-	}
-	for(var i = 0; i < goldenicos.length; i++) {
-		for(var j = 0; j<goldenicos[i].geometry.attributes.position.length/3; j++){
-			var new_position = new THREE.Vector3(
-					goldenicos[i].geometry.attributes.position.array[j*3+0],
-					goldenicos[i].geometry.attributes.position.array[j*3+1],
-					goldenicos[i].geometry.attributes.position.array[j*3+2]);
-			goldenicos[i].localToWorld(new_position);
-			
-			lowest_unused_index = attempt_quasiatom_addition_and_return_next_index(new_position, lowest_unused_index );
-		}
-	}
+   	generate_QCatom_locations();
+//   	var lowest_unused_index = 0;
+//	for(var i = 0; i < golden_rhombohedra.length; i++) {
+//		for(var j = 0; j<golden_rhombohedra[i].geometry.attributes.position.array.length/3; j++){
+//			var new_position = new THREE.Vector3(
+//					golden_rhombohedra[i].geometry.attributes.position.array[j*3+0],
+//					golden_rhombohedra[i].geometry.attributes.position.array[j*3+1],
+//					golden_rhombohedra[i].geometry.attributes.position.array[j*3+2]);
+//			golden_rhombohedra[i].localToWorld(new_position);
+//			
+//			lowest_unused_index = attempt_quasiatom_addition_and_return_next_index(new_position, lowest_unused_index );
+//		}
+//	}
+//	for(var i = 0; i < goldenicos.length; i++) {
+//		for(var j = 0; j<goldenicos[i].geometry.attributes.position.array.length/3; j++){
+//			var new_position = new THREE.Vector3(
+//					goldenicos[i].geometry.attributes.position.array[j*3+0],
+//					goldenicos[i].geometry.attributes.position.array[j*3+1],
+//					goldenicos[i].geometry.attributes.position.array[j*3+2]);
+//			goldenicos[i].localToWorld(new_position);
+//			
+//			lowest_unused_index = attempt_quasiatom_addition_and_return_next_index(new_position, lowest_unused_index );
+//		}
+//	}
 }
 
 //shape_array -> shape_bunch_array[0]
@@ -777,12 +735,12 @@ function put_bunch_into_two_objects(index,shape_bunch_array){
 	
 	Quasi_meshes[index] = new THREE.Mesh( new THREE.BufferGeometry(), shape_bunch_array[0].children[0].material.clone() );	
 	Quasi_meshes[index].geometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array(num_shapes * num_vertices * 3), 3 ) );
-	Quasi_meshes[index].geometry.addAttribute( 'index', new THREE.BufferAttribute( new Uint16Array(num_triangle_indices*num_shapes), 1 ) );
+	Quasi_meshes[index].geometry.setIndex( new THREE.BufferAttribute( new Uint16Array(num_triangle_indices*num_shapes), 1 ) );
 	meshes_original_numbers[index] = new Float32Array(num_shapes * num_vertices * 3);
 	
 	Quasi_outlines[index] = new THREE.Mesh(new THREE.BufferGeometry(), shape_bunch_array[0].children[0].children[0].material.clone() );
 	Quasi_outlines[index].geometry.addAttribute('position',new THREE.BufferAttribute( new Float32Array(num_shapes*num_edges*6*3), 3 ));
-	Quasi_outlines[index].geometry.addAttribute('index',new THREE.BufferAttribute(new Uint16Array(num_shapes*num_edges*12), 1));
+	Quasi_outlines[index].geometry.setIndex(new THREE.BufferAttribute(new Uint16Array(num_shapes*num_edges*12), 1));
 	outlines_original_numbers[index] = new Float32Array(num_shapes * num_edges * 6 * 3);
 	
 	for(var h = 0; h < shape_bunch_array.length; h++){
@@ -839,12 +797,12 @@ function put_into_two_objects(index,shape_array){
 	
 	Quasi_meshes[index] = new THREE.Mesh( new THREE.BufferGeometry(), shape_array[0].material.clone() );	
 	Quasi_meshes[index].geometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array(shape_array.length * num_vertices * 3), 3 ) );
-	Quasi_meshes[index].geometry.addAttribute( 'index', new THREE.BufferAttribute( new Uint16Array(num_triangle_indices*shape_array.length), 1 ) );
+	Quasi_meshes[index].geometry.setIndex( new THREE.BufferAttribute( new Uint16Array(num_triangle_indices*shape_array.length), 1 ) );
 	meshes_original_numbers[index] = new Float32Array(shape_array.length * num_vertices * 3);
 	
 	Quasi_outlines[index] = new THREE.Mesh(new THREE.BufferGeometry(), shape_array[0].children[0].material.clone() );
 	Quasi_outlines[index].geometry.addAttribute('position',new THREE.BufferAttribute( new Float32Array(shape_array.length*num_edges*6*3), 3 ));
-	Quasi_outlines[index].geometry.addAttribute('index',new THREE.BufferAttribute(new Uint16Array(shape_array.length*num_edges*12), 1));
+	Quasi_outlines[index].geometry.setIndex(new THREE.BufferAttribute(new Uint16Array(shape_array.length*num_edges*12), 1));
 	outlines_original_numbers[index] = new Float32Array(shape_array.length*num_edges*6*3);
 	
 	for(var i = 0; i<shape_array.length; i++){
