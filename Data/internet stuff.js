@@ -33,7 +33,9 @@ function loadpic(i) {
 			if(picture_loaded<7){
 				var myscale = 2;
 				picture_objects[picture_loaded] = new THREE.Mesh(new THREE.CubeGeometry(mywidth , mywidth , 0),new THREE.MeshBasicMaterial({map: texture, transparent:true}) );
-				picture_objects[picture_loaded].position.x = -playing_field_width / 2;
+
+				picture_objects[picture_loaded].position.x = -playing_field_width / 2 + 1.2;
+				picture_objects[picture_loaded].position.y = playing_field_width / 2 - 1.2;
 				picture_objects[picture_loaded].position.z = 0.01;
 			}
 			else{
