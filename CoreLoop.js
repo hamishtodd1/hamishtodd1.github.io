@@ -33,7 +33,7 @@ function UpdateWorld() {
 			
 		case IRREGULAR_MODE:
 			CheckButton(0);
-			CheckButton(1);
+//			CheckButton(1);
 			manipulate_vertices();
 			update_varyingsurface();
 			//correct_minimum_angles();
@@ -124,7 +124,7 @@ function ChangeScene(new_mode) {
 			scene.add(manipulation_surface);
 //			scene.add(varyingsurface);
 			scene.add(Button[0]);
-			scene.add(Button[1]);
+//			scene.add(Button[1]);
 			for( var i = 0; i < varyingsurface_cylinders.length; i++)
 				scene.add(varyingsurface_cylinders[i]);
 			for( var i = 0; i < varyingsurface_spheres.length; i++)
