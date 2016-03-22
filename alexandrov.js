@@ -107,7 +107,7 @@ function correct_minimum_angles(vertices_buffer_array) {
 	
 	var stepsizemax = 0.75;
 	var stepsize = stepsizemax;	
-	var epsilon = 0.001; //about the minimum to close HIV. Can make it lower.
+	var epsilon = 0.0001; //about the minimum to close HIV. Can make it lower.
 	var steps = 0;
 	
 	//curvatures is a 12D vector with curvatures[i] coming from vertex (i.e. radius) i
