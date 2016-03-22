@@ -1,18 +1,46 @@
-//could limit edge lengths to a minimum size, like jeez, that breaks the angular defects
-//it would be a size minimum based on the size of the longest edge, like you can't be less than about a twentieth of its length - that seems to hold for HIV.
+/* 
+ * You do want that "drag against the limit of triangle" thing, because people randomly moving it around do make it go places fast
+ */
 
-//TODO You could graph number of step size reductions over a run. Major tweakables are stepsizemax, initial radii, and newton solver accuracy.
-
-//TODO frame-stagger. Notes on that:
-//Possibly, the only thing that is important in terms of preserving the illusion is that the angles be strictly decreasing.
-//Perhaps find some way to relate the angle that is used to epsilon and openness in a way that makes it so they're strictly decreasing?
-//or, only write to those dihedral angles that are less than what they were in the previous frame (which may be dependent on openness)
-//It's taking on the order of 300 steps. That can almost certainly be reduced by tweaking what you can tweak. But you can't have one step per frame if it's too many.
-
-/*
+/*  Newest plan:
+ * 
+ * Maybe we should have one exploration point to the left, one to the right? 
+ * 
+ * Hey, was it able to converge for every non flipper?
+ * 
+ * Note that you don't move that far in a given frame. So the first time you move out of the zone, you are probably close, no shape weirdness. It's just after that
+ * 
+ * When you press the button, it switches in the REAL surface
+ * 
+ * How about you jump towards it in previously-decided-on-size steps, based on. You know what the straight line would be.
+ * 
+ * Since the vertex will be springing back and forth, you probably have quite a few evaluations. Though as soon as the button is pressed or another vertex is grabbed, you're done
+ * 
+ * 
  * Plan:
  * Player can move vertex all they like, but when they let go it snaps to the closest lattice vertex that works
  * When it is determined as being vertex_tobechanged, we start putting together a list of potential snap-to lattice vertices
+ * 
+ * Alternative:
+ * for the vertex you're holding, have "last_good_position" and call the player's position the "desired_position"
+ * if its desired_position is good, that becomes last_good_position.
+ * if its desired_position is bad
+ *   compromise_position = ( desired_position + last_good_position ) / 2;
+ * Then in the next frame
+ *   if compromise_position is good,
+ *   	last_good_position = compromise_position
+ *   	compromise_position = ( compromise_position + desired_position ) / 2;
+ *   else
+ *   	compromise_position = ( compromise_position + last_good_position ) / 2;
+ *   
+ * These things can be weird 2D shapes though. What if there's a 
+ *   
+ * When the vertex isn't held, it goes slowly-ish back to last_good_position. Probably good to have it be springy, like it can overshoot, but be attracted back
+ * So probably
+ *   
+ * Like, this is analysis. May want to ask someone about that, although what can you do without a derivative?
+ * 
+ * this doesn't stagger so well
  */
 
 /*
@@ -38,157 +66,286 @@
  * Simplicity is more important than completeness. It was never a good idea to try to implement that unfold-differently thing.
  * 
  * Many of these options would be made easier by speeding up the algorithm, which you need to do anyway.
+ * 
+ * could limit edge lengths to a minimum size, like jeez, that breaks the angular defects
+ * it would be a size minimum based on the size of the longest edge, like you can't be less than about a twentieth of its length - that seems to hold for HIV.
  */
 
+/*	TODO frame-stagger. Notes on that:
+	Possibly, the only thing that is important in terms of preserving the illusion is that the angles be strictly decreasing.
+	Perhaps find some way to relate the angle that is used to epsilon and openness in a way that makes it so they're strictly decreasing?
+	or, only write to those dihedral angles that are less than what they were in the previous frame (which may be dependent on openness)
+	It's taking on the order of 300 steps. That can almost certainly be reduced by tweaking what you can tweak. But you can't have one step per frame if it's too many.
+*/
+
+//TODO You could graph number of step size reductions over a run. Major tweakables are stepsizemax, initial radii, and newton solver accuracy.
 
 
-function polyhedron_index(i) {
-	if(i<2)	   return i; //the two in the central crack
-	if(i===16) return 10;
-	if(i===18) return 1;
-	if(i===20) return 2;
-	
-	if( i % 4 === 2) return (i+4) / 2;
-	if( i % 4 === 3) return (i+1) / 2;
-	if( i % 4 === 0) return (i+4) / 2;
-	if( i % 4 === 1) return 11;
-}
-
-function correct_minimum_angles() {
+//returns true if the minimum angles ended up getting modified
+function correct_minimum_angles(vertices_buffer_array) {
 	/*
 	 * So you actually need to first check whether the triangulation is delaunay. Yo, that might be enough to make sure the algorithm always converges
 	 * The thing that is seen may become convex.
 	 */
+	var highlight_endings = 1;
 	
-	var this_all_takes_place_in_one_frame = true;
+	reset_net(vertices_buffer_array);
 	
-	if(this_all_takes_place_in_one_frame) reset_net();
-	else console.log( "No, you need to reset the net");
+	var old_ATVIs = new Uint16Array(alexandrov_triangle_vertex_indices.length);
+	var old_PELs = Array(polyhedron_edge_length.length);
+	for(var i = 0; i < old_ATVIs.length; i++)
+		old_ATVIs[i] = alexandrov_triangle_vertex_indices[i];
+	for(var i = 0; i < polyhedron_edge_length.length; i++){
+		old_PELs[i] = new Float32Array(polyhedron_edge_length[i].length);
+		for(var j = 0; j < polyhedron_edge_length[i].length; j++)
+			old_PELs[i][j] = polyhedron_edge_length[i][j];
+	}
+	
+	var flipped_last_iteration = delaunay_triangulate();
+	
+	var total_flips = 0;
 	
 	var stepsizemax = 0.75;
 	var stepsize = stepsizemax;	
-	var epsilon = 0.0025; //subjectively chosen
+	var epsilon = 0.001; //about the minimum to close HIV. Can make it lower.
 	var steps = 0;
 	
-	//curvatures is a 12D vector with curvatures[i] coming from vertex (i.e. radius) i. Get its length to zero!
-	var curvatures_current = get_curvatures(radii,0);	//get this to zero!
+	//curvatures is a 12D vector with curvatures[i] coming from vertex (i.e. radius) i
+	var curvatures_current = get_curvatures(radii,0);	//get the length of this to zero!
 	//there may still be places that aren't using the alexandrov triangle array
 	var curvatures_current_quadrance = quadrance(curvatures_current);
+	var curvatures_intended = Array(curvatures_current.length);
+	
+	var num_reductions = 0;
 	
 	while( curvatures_current_quadrance > epsilon)  {
-		var curvatures_intended = Array(curvatures_current.length);
 		for( var i = 0; i < curvatures_current.length; i++)
 			curvatures_intended[i] = (1 - stepsize) * curvatures_current[i];
 
 		var radii_intended = newton_solve(curvatures_intended); //we get radii_intended : curvatures(radii_intended) === curvatures_intended	
 		
+		//what's happenning is that the step is getting reduced a lot, then these flips may come about
+		//what you can latch onto is the strange fact that reducing the step size INCREASES flips
+		//Probably if you can't do it in 5 step size reductions, you can't do it.
+		
+		//NEW PLAN: View the output of stefan's program doing it?
+		//really, either things should end in "concave" or they should end in victory, and so long as you have anything
+		//else you've not implemented the algorithm and it's not a surprise that you can't do this one example
+		
+		//Given that there are flips that go well and none of them have so many reductions, your newton solver probably needs to be able to deal with more
+		
 		if( radii_intended !== 666 ) { //it worked!
-			var concave_edges = Array();
+			var flips_to_perform = Array();
+			
 			for( var i = 0; i < radii_intended.length; i++) {
 				for(var j = i+1; j < radii_intended.length; j++) {
 					if( polyhedron_edge_length[i][j] === 666)
 						continue;
 					
-					var angle = get_polyhedron_dihedral_angle_from_indices(i,j, radii_intended,0);
+					var angle = get_polyhedron_dihedral_angle_from_indices(i,j, radii_intended);
 					
 					if(angle >= Math.PI ) {
-						concave_edges.push(i);
-						concave_edges.push(j);
+						flips_to_perform.push(i);
+						flips_to_perform.push(j);
 					}
 				}
 			}
 			
-			if(concave_edges.length == 0) { //hooray, we took a step size the correct amount and can progress
-				for( var i = 0; i < curvatures_current.length; i++)
+			if(flips_to_perform.length > 0) {
+//				console.log("	FLIPS ", flips_to_perform.length / 2); //we appear to be flipping back and forth
+				total_flips += flips_to_perform.length / 2;
+				
+				for(var i = 0; i < polyhedron_edge_length.length; i++)
+					for(var j = 0; j < polyhedron_edge_length[i].length; j++)
+						old_PELs[i][j] = polyhedron_edge_length[i][j];
+				for(var i = 0; i < old_ATVIs.length; i++)
+					old_ATVIs[i] = alexandrov_triangle_vertex_indices[i];
+				
+//				for(var i = 0; i < polyhedron_edge_length.length; i++)
+//					for(var j = 0; j < polyhedron_edge_length[i].length; j++)
+//						console.log( polyhedron_edge_length[i][j]);
+				
+				for( var i = 0; i < flips_to_perform.length / 2; i++){
+//					console.log(flips_to_perform[i*2+0],flips_to_perform[i*2+1]);
+					var ourindices = get_diamond_indices(flips_to_perform[i*2+0],flips_to_perform[i*2+1]);
+					flip(ourindices);
+//					console.log("flipped in algorithm")
+				}
+				
+				flipped_last_iteration = 1;
+			}
+			else { //hooray, we took a step size the correct amount and can progress
+				for( var i = 0; i < radii.length; i++)
 					radii[i] = radii_intended[i];
 				
-				if(this_all_takes_place_in_one_frame) {
-					curvatures_current = get_curvatures(radii,0);
-					curvatures_current_quadrance = quadrance(curvatures_current);
-					
-					stepsize = stepsizemax;
-				}
-				else break; //we only want one step
+				curvatures_current = get_curvatures(radii,0);
+				curvatures_current_quadrance = quadrance(curvatures_current);
+				
+				stepsize = stepsizemax;
+				
+				//check how many it really is
+//				if( num_reductions > 5 ) console.error("HEY! We DID progress after " + num_reductions + " reductions")
+				
+//				console.log("progress");
+				
+				num_reductions = 0;
+				
+				flipped_last_iteration = 0;
 			}
-			else {//unsolvable, concave edges
-				console.log("found " + concave_edges.length + " concave edge(s)");
+		}
+		else {
+			if( flipped_last_iteration ){
+//				console.log("	DON'T WORRY, rolling back" );
+				for(var i = 0; i < polyhedron_edge_length.length; i++)
+					for(var j = 0; j < polyhedron_edge_length[i].length; j++)
+						polyhedron_edge_length[i][j] = old_PELs[i][j];
+				for(var i = 0; i < alexandrov_triangle_vertex_indices.length; i++)
+					alexandrov_triangle_vertex_indices[i] = old_ATVIs[i];
+			}
+			
+			flipped_last_iteration = 0;
+			
+			//clear flips_to_perform here, and somewhere else
+			//if it is soluble, you clear, so probably just after the if != 666
+//			console.log("reducing step");
+			stepsize = stepsize*stepsize;
+			
+			num_reductions++;
+			if(num_reductions > 5){
+				if(highlight_endings){
+//					console.error("NOOOOOO! Quitting Al after " + num_reductions + " reductions");
+//					console.log(manipulation_surface.geometry.attributes.position.array);
+				}
+//				else
+//					console.log("Quitting Al after " + num_reductions + " reductions");
 				return 0;
 			}
 		}
-		else
-			stepsize = stepsize*stepsize;
 		
 		steps++;
-		if(steps > 1500){
-			if(net_warnings)console.log("Quitting Al. More than " + steps + " steps");
+		if(steps > 1000){ //limited by your patience at the moment, who's to say they wouldn't get there?
+//			if(highlight_endings){
+//				console.error("NOOOOOO! Quitting Al after " + steps + " steps");
+//				console.log(manipulation_surface.geometry.attributes.position.array);
+//			}
+//			else
+//				console.log("Quitting Al after " + steps + " steps");
 			return 0;
 		}
 	}
 	
-//	if(steps === 0)console.error("no algorithm, bad curvature probably")
+	for(var i = 0; i< net_triangle_vertex_indices.length / 3; i++) {
+		for(var j = 0; j < 3; j++){
+			var a_index = polyhedron_index(net_triangle_vertex_indices[i*3 + j]);
+			var b_index = polyhedron_index(net_triangle_vertex_indices[i*3 + (j+1)%3]);
+			
+			if( polyhedron_edge_length[a_index][b_index] === 666 || 
+				polyhedron_edge_length[b_index][a_index] === 666 ){
+//				if(highlight_endings) 
+//					console.error("concave! though hey, at least it worked"); //flipped combinatorics, didn't flip back
+//				else
+//					console.log("concave! though hey, at least it worked"); 
+				/*
+				 * Could see about drawing a perimeter by dotting all the places where minimum angles are close to pi, see what that tells you
+				 */
+				return 0;
+			}
+		}
+	}
 
 	for(var i = 2; i < minimum_angles.length; i++) {
-		//we will need to make this function give us the choice of the visible or virtual combinatorics
 		minimum_angles[i] = get_polyhedron_dihedral_angle_from_indices( polyhedron_index( vertices_derivations[i][0] ),
 																		polyhedron_index( vertices_derivations[i][1] ), 
-																		radii,1);
+																		radii);
+		
+//		if( Math.PI - minimum_angles[i] < 0.01)
+//			console.log("you're about to get convex!");
 	}
+	
+	if(total_flips != 0){
+//		if(highlight_endings) 
+//			console.log("success, and it involved " + total_flips + " flips");
+//		else
+//			console.error("success, and it involved " + total_flips + " flips");
+		total_flips = 0;
+	}
+//	else if(highlight_endings)
+//		console.error("success");
+//	else
+//		console.log("success");
 	
 	return 1;
 }
 
-//this gets us the radii such that curvature = curvatures_intended
+//this can get us the radii such that curvature = curvatures_intended
 function newton_solve(final_curvatures_intended) {
+	var newton_warnings = 0;
+	
 	var radii_guess = Array(12);
 	for( var i = 0; i < 12; i++)
 		radii_guess[i] = radii[i];
 	
 	var jacobian;
 	var delta_radii;
-	var desired_jacobianmultiplication_output = get_curvatures(radii_guess,0); //This is the result of the function at the next place we intend to call it at it.
+	var desired_jacobianmultiplication_output = get_curvatures(radii_guess,1); //This is the result of the function at the next place we intend to call it at it.
+	if(desired_jacobianmultiplication_output === 666 ){
+		if(newton_warnings) console.log("  newton: instantly bad")
+		return 666;
+	}
 	for( var i = 0; i < 12; i++)
 		desired_jacobianmultiplication_output[i] = final_curvatures_intended[i] - desired_jacobianmultiplication_output[i]; //make sure the destination is zero.
 	
 	var iterations = 0;
 	var impossibility_alert = 0;
-	var epsilon = 0.01; //it converges quadratically so you can be greedier?
+	var epsilon = 0.00001; //it converges quadratically so you can be greedy. This is minimum to avoid a certain flip-and-flip-back. Stefan uses 1E-10!
+	
+	var hadanegative = 0;
 	
 	do {
 		jacobian = get_Jacobian(radii_guess);
 		
 		delta_radii = numeric.solve(jacobian, desired_jacobianmultiplication_output);
 		
-		for( var i = 0; i < 12; i++)
+		for( var i = 0; i < 12; i++){
 			radii_guess[i] += delta_radii[i];
-		//if(!logged)console.log(quadrance(radii_guess));
+			if(radii_guess[i] < 0)
+				hadanegative = 1;
+		}
 		
+		//triangle inequalities
 		for(var i = 0; i < 12; i++){
 			for(var j = 0; j < 12; j++){
 				if(polyhedron_edge_length[i][j] === 666 ) continue;
-				
-				//triangle inequalities
-				if(	radii_guess[i] + radii_guess[j] < polyhedron_edge_length[i][j] ||
-					radii_guess[j] + polyhedron_edge_length[i][j] < radii_guess[i] ||
-					polyhedron_edge_length[i][j] + radii_guess[i] < radii_guess[j]
-				  )
+				if(	Math.abs(radii_guess[i]) + Math.abs(radii_guess[j]) < polyhedron_edge_length[i][j] ||
+					Math.abs(radii_guess[j]) + polyhedron_edge_length[i][j] < Math.abs(radii_guess[i]) ||
+					polyhedron_edge_length[i][j] + Math.abs(radii_guess[i]) < Math.abs(radii_guess[j])
+				  ){
+					if(newton_warnings) console.error("  newton: triangle inequality violated after " + iterations + " iterations");
+					
+					//mu- minus numbers??????? Does that ever happen with ones that succeed? Check stefan's source, he might be abs()ing them
 					return 666;
+				}
 			}
 		}
 		
 		desired_jacobianmultiplication_output = get_curvatures(radii_guess,1);
-		if(desired_jacobianmultiplication_output === 666 )
+		if(desired_jacobianmultiplication_output === 666 ){
+			if(newton_warnings) console.log("  newton: went bad naturally")
 			return 666;
+		}
 		
 		for( var i = 0; i < 12; i++)
 			desired_jacobianmultiplication_output[i] = final_curvatures_intended[i] - desired_jacobianmultiplication_output[i];
 		
 		iterations++;
 		if(iterations >= 20 ) {
-			console.log("newton failed to converge after 20 iterations");
+			if(newton_warnings) console.log("  newton: failed to converge after 20 iterations"); //Works for Stefan
 			return 666;
 		}
-	} while( quadrance(desired_jacobianmultiplication_output) > epsilon && iterations < 20);
+		
+	} while( quadrance(desired_jacobianmultiplication_output) > epsilon && iterations < 20); //and, perhaps, radii_guess[i] < radii[i]. This would deal with "flip and flip back"
 
+//	if(hadanegative)console.error( "success after negative!")
 	return radii_guess;
 }
 
@@ -205,8 +362,8 @@ function get_Jacobian(input_radii){
 				continue;
 			}
 			
-			var cos_alpha_ij_or_ji = get_cos_tetrahedron_dihedral_angle_from_indices(i,j,0, input_radii,0);
-			var cos_alpha_ji_or_ij = get_cos_tetrahedron_dihedral_angle_from_indices(i,j,1, input_radii,0);
+			var cos_alpha_ij_or_ji = get_cos_tetrahedron_dihedral_angle_from_indices(i,j,0, input_radii);
+			var cos_alpha_ji_or_ij = get_cos_tetrahedron_dihedral_angle_from_indices(i,j,1, input_radii);
 			var cot_alpha_ij_or_ji = cos_alpha_ij_or_ji / Math.sqrt( 1 - cos_alpha_ij_or_ji*cos_alpha_ij_or_ji ); //speedup opportunity: one-line this.
 			var cot_alpha_ji_or_ij = cos_alpha_ji_or_ij / Math.sqrt( 1 - cos_alpha_ji_or_ij*cos_alpha_ji_or_ij );
 
@@ -228,22 +385,19 @@ function get_Jacobian(input_radii){
 	return jacobian;
 }
 
-function print_ATVIs(){
-	for(var i = 0; i <20; i++)
-		console.log(alexandrov_triangle_vertex_indices[i*3+0],
-					alexandrov_triangle_vertex_indices[i*3+1],
-					alexandrov_triangle_vertex_indices[i*3+2]);
-}
+
 
 //curvature is like angular defect, but of dihedral angles around a radius.
+//TODO so you have screwed this thing up in some way. Just copypaste back from the old alexandrov, it's fine, though finish what you started
 function get_curvatures(input_radii, failure_is_acceptable) {
 	var curvature_array = new Float32Array([-TAU,-TAU,-TAU,-TAU,-TAU,-TAU,-TAU,-TAU,-TAU,-TAU,-TAU,-TAU]);
 	for( var i = 0; i < 12; i++) {
+//		var report_array = Array(5);
 		for( var j = 0; j < 12; j++) {
 			if(polyhedron_edge_length[i][j] === 666 )
 				continue;
 			
-			var k = get_third_corner(i,j,0); //doesn't matter if you get the clockwise or anti clockwise one
+			var k = get_third_corner(i,j,0); //for i,j we get the anticlockwise one, then j,i we get the (from this point of view) clockwise one
 			
 			var cos_gamma_ijk = get_cos_rule(polyhedron_edge_length[j][k],polyhedron_edge_length[i][j], polyhedron_edge_length[k][i]);
 			var cos_rho_ij = get_cos_rule(input_radii[j], polyhedron_edge_length[i][j], input_radii[i]);
@@ -252,17 +406,23 @@ function get_curvatures(input_radii, failure_is_acceptable) {
 
 			var cos_omega_ijk = ( cos_gamma_ijk - cos_rho_ij * cos_rho_ik ) / sin_rho_ij_TIMES_sin_rho_ik;
 			
-			curvature_array[i] += Math.acos(cos_omega_ijk);
+			if( -1.001 < cos_omega_ijk && cos_omega_ijk < -1)
+				curvature_array[i] += Math.PI;
+			else if( cos_omega_ijk < 1) //and if slightly more than 1, we're adding 0.
+				curvature_array[i] += Math.acos(cos_omega_ijk);
+//			if( cos_omega_ijk < -1.001 || 1.001 < cos_omega_ijk  )
+//				{report_array[0] = cos_gamma_ijk; report_array[1] = cos_rho_ij; report_array[2] = cos_rho_ik; report_array[3] = sin_rho_ij_TIMES_sin_rho_ik; report_array[4] = cos_omega_ijk;}
 			
-			if(!failure_is_acceptable && isNaN(Math.acos(cos_omega_ijk))){
+			if(!failure_is_acceptable && isNaN(Math.acos(cos_omega_ijk))){ //TODO remove from final thing
 				if(cos_gamma_ijk < -1 || 1 < cos_gamma_ijk){
 						if( polyhedron_edge_length[j][k] > polyhedron_edge_length[i][j] + polyhedron_edge_length[k][i]
 						 || polyhedron_edge_length[j][i] > polyhedron_edge_length[k][j] + polyhedron_edge_length[k][i]
 						 || polyhedron_edge_length[i][k] > polyhedron_edge_length[k][j] + polyhedron_edge_length[j][i] ){
-							console.log("triangle inequality violated");
+							console.error("triangle inequality violated");
 							console.log(polyhedron_edge_length[j][k], polyhedron_edge_length[i][j], polyhedron_edge_length[k][i])
 							console.log(i,j,k)
 							print_ATVIs();
+							console.log(flatnet_vertices.array)
 						}
 				}
 				if(cos_rho_ij < -1 || 1 < cos_rho_ij)
@@ -276,82 +436,25 @@ function get_curvatures(input_radii, failure_is_acceptable) {
 			}
 		}
 		if(isNaN(curvature_array[i])) {
-			if(!failure_is_acceptable) 
-				console.error("crazy curvature");
+			if(!failure_is_acceptable) {
+				//this is probably just a "don't allow this" situation
+//				console.error("crazy curvature");
+//				print_ATVIs();
+//				console.log(curvature_array)
+//				for(var i = 0; i < polyhedron_edge_length.length; i++)
+//					console.log(polyhedron_edge_length[i])
+			}
 			return 666;
 		}
 		curvature_array[i] *= -1;
 	}
-	//currently the question is "what's giving us NaN curvatures?"
 	return curvature_array;
 }
 
-function get_third_corner(corner1,corner2,clockwise){
-	for(var i = 0; i<20; i++){
-		for(var j = 0; j < 3; j++){
-			if(!clockwise){
-				if(	alexandrov_triangle_vertex_indices[i*3+(0+j)%3] === corner1 &&
-					alexandrov_triangle_vertex_indices[i*3+(1+j)%3] === corner2 
-				  ){
-					if(	polyhedron_edge_length[corner1][corner2]===666 )
-						console.log(1,2);
-					if(	polyhedron_edge_length[corner1][alexandrov_triangle_vertex_indices[i*3+(2+j)%3]] === 666)
-						console.log(1,3);
-					if(	polyhedron_edge_length[alexandrov_triangle_vertex_indices[i*3+(2+j)%3]][corner2] ===666)
-						console.log(3,2);
-					return alexandrov_triangle_vertex_indices[i*3+(2+j)%3];
-				}	
-			}
-			else {
-				if(	alexandrov_triangle_vertex_indices[i*3+(0+j)%3] === corner2 &&
-					alexandrov_triangle_vertex_indices[i*3+(1+j)%3] === corner1 
-				  ){
-					if(	polyhedron_edge_length[corner1][corner2]===666 )
-						console.log(1,2);
-					if(	polyhedron_edge_length[corner1][alexandrov_triangle_vertex_indices[i*3+(2+j)%3]] === 666)
-						console.log(1,3);
-					if(	polyhedron_edge_length[alexandrov_triangle_vertex_indices[i*3+(2+j)%3]][corner2] ===666)
-						console.log(3,2);
-					return alexandrov_triangle_vertex_indices[i*3+(2+j)%3];
-				}
-			}	
-		}
-	}
-	console.error("couldn't find third corner",corner1,corner2);
-	for(var i = 0; i<20; i++)
-		console.log(alexandrov_triangle_vertex_indices[i*3+0],alexandrov_triangle_vertex_indices[i*3+1],alexandrov_triangle_vertex_indices[i*3+2]);
-}
-
-//we need to make this function (and the polyhedron dihedral angle) able to use either visible or virtual combinatorics.
-function get_cos_tetrahedron_dihedral_angle_from_indices(i,j,use_first_corner_hit,input_radii, visible_combinatorics) {
+function get_cos_tetrahedron_dihedral_angle_from_indices(i,j,clockwise,input_radii) {
 	var k = 666;
 
-	//we need that k that is clockwise of j, for some triangle
-	if(!visible_combinatorics){
-		k = get_third_corner(i,j,use_first_corner_hit); //you always call this function with clockwise and anticlockwise
-	}
-	else{
-		if(use_first_corner_hit){ //doesn't matter which you get so long as you get both
-			for(var a = 0; a < net_triangle_vertex_indices.length; a+=3){
-				if( polyhedron_index( net_triangle_vertex_indices[ a ] ) === i && polyhedron_index( net_triangle_vertex_indices[a+1] ) === j)
-					{k = polyhedron_index( net_triangle_vertex_indices[a+2] ); break;}
-				if( polyhedron_index( net_triangle_vertex_indices[a+1] ) === i && polyhedron_index( net_triangle_vertex_indices[a+2] ) === j)
-					{k = polyhedron_index( net_triangle_vertex_indices[ a ] ); break;}
-				if( polyhedron_index( net_triangle_vertex_indices[a+2] ) === i && polyhedron_index( net_triangle_vertex_indices[ a ] ) === j)
-					{k = polyhedron_index( net_triangle_vertex_indices[a+1] ); break;}
-			}
-		}
-		else {
-			for(var a = 0; a < net_triangle_vertex_indices.length; a+=3){
-				if( polyhedron_index( net_triangle_vertex_indices[ a ] ) === j && polyhedron_index( net_triangle_vertex_indices[a+1] ) === i)
-					{k = polyhedron_index( net_triangle_vertex_indices[a+2] ); break;}
-				if( polyhedron_index( net_triangle_vertex_indices[a+1] ) === j && polyhedron_index( net_triangle_vertex_indices[a+2] ) === i)
-					{k = polyhedron_index( net_triangle_vertex_indices[ a ] ); break;}
-				if( polyhedron_index( net_triangle_vertex_indices[a+2] ) === j && polyhedron_index( net_triangle_vertex_indices[ a ] ) === i)
-					{k = polyhedron_index( net_triangle_vertex_indices[a+1] ); break;}
-			}
-		}
-	}
+	k = get_third_corner(i,j,clockwise); //you always call this function with both 0 and 1 in there
 	if( k === 666 ) {
 		//this should really not happen unless this function is given i,j not on an edge.
 		console.error("requested dihedral angle from nonexistant tetrahedron connecting polyhedron vertices " + i + " and " + j);
@@ -366,9 +469,9 @@ function get_cos_tetrahedron_dihedral_angle_from_indices(i,j,use_first_corner_hi
 	return (cos_rho_ik - cos_gamma_ijk * cos_rho_ij)/sin_rho_ij_TIMES_sin_gamma_ijk;
 }
 
-function get_polyhedron_dihedral_angle_from_indices(i,j, input_radii,visible_combinatorics){
-	return Math.acos(get_cos_tetrahedron_dihedral_angle_from_indices(i,j,0, input_radii,visible_combinatorics) ) 
-		 + Math.acos(get_cos_tetrahedron_dihedral_angle_from_indices(i,j,1, input_radii,visible_combinatorics) );
+function get_polyhedron_dihedral_angle_from_indices(i,j, input_radii){
+	return Math.acos(get_cos_tetrahedron_dihedral_angle_from_indices(i,j,0, input_radii) ) 
+		 + Math.acos(get_cos_tetrahedron_dihedral_angle_from_indices(i,j,1, input_radii) );
 }
 
 function quadrance(vector_values) {
@@ -378,191 +481,4 @@ function quadrance(vector_values) {
 		result += vector_values[i] * vector_values[i];
 	
 	return result;
-}
-
-
-function reset_net(){
-	for(var i = 0; i< radii.length; i++)
-		radii[i] = 100;
-	for(var i = 0; i < polyhedron_edge_length.length; i++)
-		for(var j = 0; j < polyhedron_edge_length[i].length; j++)
-			polyhedron_edge_length[i][j] = 666;
-	for(var i = 0; i< net_triangle_vertex_indices.length / 3; i++) {
-		for(var j = 0; j < 3; j++){
-			var a_index = polyhedron_index(net_triangle_vertex_indices[i*3 + j]);
-			var b_index = polyhedron_index(net_triangle_vertex_indices[i*3 + (j+1)%3]);
-			
-			polyhedron_edge_length[a_index][b_index] = Math.sqrt( Square(flatnet_vertices.array[3*net_triangle_vertex_indices[i*3 + j]  ]-flatnet_vertices.array[3*net_triangle_vertex_indices[i*3 + (j+1)%3]  ])
-																+ Square(flatnet_vertices.array[3*net_triangle_vertex_indices[i*3 + j]+1]-flatnet_vertices.array[3*net_triangle_vertex_indices[i*3 + (j+1)%3]+1]) );
-			polyhedron_edge_length[b_index][a_index] = polyhedron_edge_length[a_index][b_index]; 
-		}
-	}
-	for(var i = 0; i < net_triangle_vertex_indices.length; i++)
-		alexandrov_triangle_vertex_indices[i] = polyhedron_index(net_triangle_vertex_indices[i]);
-	
-	//Create the delaunay triangulation
-	
-//	var S = Array(0);
-//	var Markings = Array(polyhedron_edge_length.length);
-//	for(var i = 0; i < Markings.length; i++){
-//		Markings[i] = Array(Markings.length);
-//		for(var j = 0; j < Markings[i].length; j++)
-//			Markings[i][j] = 1;
-//	}
-//	for(var i = 0; i<polyhedron_edge_length.length; i++){
-//		for(var j = i+1; j <polyhedron_edge_length.length; j++){
-//			if(polyhedron_edge_length[i][j] !== 666)
-//				S.push(Array(i,j));
-//		}
-//	}
-//	
-////	console.log("S: ")
-////	for(var i = 0; i < S.length; i++)
-////		console.log(S[i]);
-//	var flips = 0;
-//	while( S.length > 0 ){
-//		var ouredge = S.pop();
-//		Markings[ouredge[0]][ouredge[1]] = 0;
-//		
-//		var ourindices = get_diamond_indices(ouredge[0],ouredge[1]);
-//		
-//		var old_edgelen = polyhedron_edge_length[ourindices[0]][ourindices[1]];
-//		var l_a = polyhedron_edge_length[ourindices[0]][ourindices[2]];
-//		var l_b = polyhedron_edge_length[ourindices[1]][ourindices[2]];
-//		var l_c = polyhedron_edge_length[ourindices[0]][ourindices[3]];
-//		var l_d = polyhedron_edge_length[ourindices[1]][ourindices[3]];
-//		
-//		var angle2 = Math.acos( get_cos_rule(l_a, l_b, old_edgelen) );
-//		var angle3 = Math.acos( get_cos_rule(l_c, l_d, old_edgelen) );
-//		
-//		if(angle2+angle3 > Math.PI){
-//			flip(ourindices, l_a,l_b,l_c,l_d, old_edgelen);			
-//			flips++;
-//			
-//			for(var i = 0; i<4; i++){
-//				var index1 = ourindices[i];
-//				var index2;
-//				if(i < 2)
-//					index2 = ourindices[i + 2];
-//				else
-//					index2 = ourindices[3 - i];
-//				if(!Markings[index1][index2]){
-//					Markings[index1][index2] = 1;
-//					S.push(Array(index1,index2));
-//				}
-//			}
-//		}
-//	}
-//	if(flips>0)
-//		console.log("had " + flips + " flips");
-}
-
-function get_diamond_indices(topcorner,bottomcorner){
-	var ourindices = Array(4);
-	ourindices[0] = topcorner;
-	ourindices[1] = bottomcorner;
-	ourindices[2] = get_third_corner(topcorner,bottomcorner,0);
-	ourindices[3] = get_third_corner(topcorner,bottomcorner,1); //it shouldn't matter which way around
-	return ourindices;
-}
-
-function get_cos_of_summed_acoses(cos1,cos2){
-	return cos1*cos2-Math.sqrt(1-cos1*cos1)*Math.sqrt(1-cos2*cos2);
-}
-
-//Get some numbers to test this with.
-function flip(ourindices, l_a,l_b,l_c,l_d, old_edgelen){
-	var violations = check_triangle_inequalities(0);
-	
-	var cosalpha = get_cos_of_summed_acoses(get_cos_rule(l_b,l_a,old_edgelen),get_cos_rule(l_d,l_c,old_edgelen) );
-	var cosalpha2 = get_cos_of_summed_acoses(get_cos_rule(l_a,l_b,old_edgelen),get_cos_rule(l_c,l_d,old_edgelen) );
-	
-	var newlength = Math.sqrt( l_a*l_a + l_d*l_d - 2*l_b*l_c * cosalpha );
-	var newlength2 =Math.sqrt( l_b*l_b + l_c*l_c - 2*l_a*l_d * cosalpha2 );
-	console.log("compare", newlength, newlength2) //shouldn't these be the same?
-	
-	var experiment_length1 = Math.sqrt( l_b*l_b + l_d*l_d - 2*l_b*l_d * cosalpha );
-	
-	var cosbeta = get_cos_of_summed_acoses(get_cos_rule(l_a,l_b,old_edgelen),get_cos_rule(l_c,l_d,old_edgelen) );
-	console.log(cosbeta, Math.cos(Math.acos(get_cos_rule(l_c,l_d,old_edgelen) )+Math.acos(get_cos_rule(l_a,l_b,old_edgelen) ) ) )
-	
-	console.log("tau?",Math.acos(get_cos_rule(old_edgelen,l_c,l_d) )+Math.acos(get_cos_rule(old_edgelen,l_a,l_b) )
-			+Math.acos(cosalpha)+Math.acos(get_cos_rule(l_c,l_d,old_edgelen) )+Math.acos(get_cos_rule(l_a,l_b,old_edgelen) ))
-	console.log(Math.acos(get_cos_rule(l_c,l_d,old_edgelen) )+Math.acos(get_cos_rule(l_d,l_c,old_edgelen) )+Math.acos(get_cos_rule(old_edgelen,l_c,l_d) ))
-	console.log(Math.acos(get_cos_rule(l_a,l_b,old_edgelen) )+Math.acos(get_cos_rule(l_b,l_a,old_edgelen) )+Math.acos(get_cos_rule(old_edgelen,l_a,l_b) ))
-	var experiment_length2 = Math.sqrt( l_c*l_c + l_a*l_a - 2*l_c*l_a * cosbeta );
-	if(Math.abs(experiment_length1-experiment_length2) > 0.001) //it is possible that because of the cos/acosing, these two ARE different
-		console.error("different lengths to swap to ", experiment_length1,experiment_length2, "newlength",newlength )
-	
-	console.log("lengths involved", l_a,l_b,l_c,l_d, old_edgelen);
-	
-	if(newlength > l_a+l_c )
-		console.log("baa")
-	if(newlength > l_d+l_b )
-		console.log("bee");
-	
-	polyhedron_edge_length[ourindices[0]][ourindices[1]] = 666;
-	polyhedron_edge_length[ourindices[1]][ourindices[0]] = 666;
-	
-	polyhedron_edge_length[ourindices[2]][ourindices[3]] = newlength;
-	polyhedron_edge_length[ourindices[3]][ourindices[2]] = newlength;
-	
-	console.log("old triangle: ",ourindices[0],ourindices[2],ourindices[1]);
-	console.log("old triangle: ",ourindices[0],ourindices[1],ourindices[3]);
-	console.log("new triangle: ",ourindices[0],ourindices[2],ourindices[3]);
-	console.log("new triangle: ",ourindices[2],ourindices[1],ourindices[3]);
-	print_ATVIs();
-	
-	//our two old triangles will have been ourindices[0 then 1 then 2 ] and ourindices[0 then 3 then 1]
-	//we want to change them to ourindices[0 then 3 then 2] and ourindices[2 then 3 then 1]
-	
-	var num_triangles_swapped = 0;
-	for(var i = 0; i < 20; i++){
-		for(var j = 0; j < 3; j++){
-			if( alexandrov_triangle_vertex_indices[i*3+(j+0)%3] === ourindices[0] &&
-				alexandrov_triangle_vertex_indices[i*3+(j+1)%3] === ourindices[1] &&
-				alexandrov_triangle_vertex_indices[i*3+(j+2)%3] === ourindices[2] 
-			 ){
-				alexandrov_triangle_vertex_indices[i*3+(j+1)%3] = ourindices[3];
-				num_triangles_swapped++;
-			}
-			else if( alexandrov_triangle_vertex_indices[i*3+(j+0)%3] === ourindices[0] &&
-					alexandrov_triangle_vertex_indices[i*3+(j+1)%3] === ourindices[3] &&
-					alexandrov_triangle_vertex_indices[i*3+(j+2)%3] === ourindices[1] 
-			 ){
-				alexandrov_triangle_vertex_indices[i*3+(j+0)%3] = ourindices[2];
-				num_triangles_swapped++;
-			}
-		} 
-	}
-	if(num_triangles_swapped != 2)
-		console.error("only found " + num_triangles_swapped + " triangles to swap");
-	
-	if(check_triangle_inequalities(1) > violations){
-		console.log("triangle inequality NOW violated")
-	}
-}
-
-function check_triangle_inequalities(print_violations){
-	var num_violations = 0;
-	
-	for(var i = 0; i < 20; i++){
-		var ind0 = alexandrov_triangle_vertex_indices[i*3+0];
-		var ind1 = alexandrov_triangle_vertex_indices[i*3+1];
-		var ind2 = alexandrov_triangle_vertex_indices[i*3+2];
-		
-		if( polyhedron_edge_length[ind0][ind1] > polyhedron_edge_length[ind1][ind2] + polyhedron_edge_length[ind2][ind0] ){
-			num_violations++;
-			if(print_violations)console.log(ind0,ind1,ind2)
-		}
-		if( polyhedron_edge_length[ind1][ind2] > polyhedron_edge_length[ind2][ind0] + polyhedron_edge_length[ind0][ind1] ){
-			num_violations++;
-			if(print_violations)console.log(ind0,ind1,ind2);
-		}
-		if( polyhedron_edge_length[ind2][ind0] > polyhedron_edge_length[ind0][ind1] + polyhedron_edge_length[ind1][ind2] ){
-			num_violations++;
-			if(print_violations)console.log(ind0,ind1,ind2)
-		}
-	}
-	return num_violations;
 }

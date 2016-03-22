@@ -1,9 +1,14 @@
 /*
  * TODO
- * make lattice circular (just add a few fake points)
  * colors
  * make lattice points little spheres
- * more comfortable system for showing the pictures. You probably need 3 anyway, along the top or whatever: EM (always b&w)->EM+points->just points
+ * more comfortable system for showing the pictures. 
+ * 	-you probably need 3 anyway, along the top or whatever: EM (always b&w)->EM+points->just points
+ *  -or picture could move to the corner where there's no arms
+ * Some spherical projection lol. I mean it is a nice visual effect. Maybe make it semi icosahedral, QS semi dodecahedral
+ * Could make the virus pictures 3D? urgh, maybe in VR
+ * 
+ * Could have a solid circle (might be better as a dodecagon so you can see it spin), out of which the surface is "cut"
  */
 function put_picture_in_place(){
 	for(var i = 0; i < picture_objects.length; i++){

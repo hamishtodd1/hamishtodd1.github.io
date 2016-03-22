@@ -128,16 +128,16 @@ function Map_lattice() {
 					flatlattice_vertices.array[ i*3+0 ], flatlattice_vertices.array[ i*3+1 ],
 					latticevertex_nettriangle[i] );
 			if(capsidopenness != 1) 
-				surflattice_vertices.setXYZ(i, mappedpoint.x, mappedpoint.y, mappedpoint.z );
+				surflattice_geometry.attributes.position.setXYZ(i, mappedpoint.x, mappedpoint.y, mappedpoint.z );
 			else //just as normal with extra z to appear above the edges
-				surflattice_vertices.setXYZ(i, mappedpoint.x, mappedpoint.y, mappedpoint.z + 0.01 );
+				surflattice_geometry.attributes.position.setXYZ(i, mappedpoint.x, mappedpoint.y, mappedpoint.z + 0.01 );
 			
 			lattice_colors[i*3+0] = 1;
 			lattice_colors[i*3+1] = 0;
 			lattice_colors[i*3+2] = 0;
 		}
 		else {
-			surflattice_vertices.setXYZ(i, lattice_scalefactor*flatlattice_default_vertices[ i*3+0 ],lattice_scalefactor*flatlattice_default_vertices[ i*3+1 ],0);
+			surflattice_geometry.attributes.position.setXYZ(i, lattice_scalefactor*flatlattice_default_vertices[ i*3+0 ],lattice_scalefactor*flatlattice_default_vertices[ i*3+1 ],0);
 			
 			lattice_colors[i*3+0] = 1;
 			lattice_colors[i*3+1] = 0.682;
@@ -173,9 +173,9 @@ function Map_lattice() {
 			corner3 = new THREE.Vector3(lattice_scalefactor*flatlattice_default_vertices[ protein_vertex_indices[i][2]*3+0 ],lattice_scalefactor*flatlattice_default_vertices[ protein_vertex_indices[i][2]*3+1 ],0);
 //		}
 //		else if(net_status === 0){ //fully on the capsid
-//			corner1 = new THREE.Vector3(surflattice_vertices.array[ protein_vertex_indices[i][0]*3+0 ],surflattice_vertices.array[ protein_vertex_indices[i][0]*3+1 ],surflattice_vertices.array[ protein_vertex_indices[i][0]*3+2 ]);
-//			corner2 = new THREE.Vector3(surflattice_vertices.array[ protein_vertex_indices[i][1]*3+0 ],surflattice_vertices.array[ protein_vertex_indices[i][1]*3+1 ],surflattice_vertices.array[ protein_vertex_indices[i][1]*3+2 ]);
-//			corner3 = new THREE.Vector3(surflattice_vertices.array[ protein_vertex_indices[i][2]*3+0 ],surflattice_vertices.array[ protein_vertex_indices[i][2]*3+1 ],surflattice_vertices.array[ protein_vertex_indices[i][2]*3+2 ]); 
+//			corner1 = new THREE.Vector3(surflattice_geometry.attributes.position.array[ protein_vertex_indices[i][0]*3+0 ],surflattice_geometry.attributes.position.array[ protein_vertex_indices[i][0]*3+1 ],surflattice_geometry.attributes.position.array[ protein_vertex_indices[i][0]*3+2 ]);
+//			corner2 = new THREE.Vector3(surflattice_geometry.attributes.position.array[ protein_vertex_indices[i][1]*3+0 ],surflattice_geometry.attributes.position.array[ protein_vertex_indices[i][1]*3+1 ],surflattice_geometry.attributes.position.array[ protein_vertex_indices[i][1]*3+2 ]);
+//			corner3 = new THREE.Vector3(surflattice_geometry.attributes.position.array[ protein_vertex_indices[i][2]*3+0 ],surflattice_geometry.attributes.position.array[ protein_vertex_indices[i][2]*3+1 ],surflattice_geometry.attributes.position.array[ protein_vertex_indices[i][2]*3+2 ]); 
 //		}
 //		else if(net_status === 1){ //bending time. TODO IF you don't want proteins overlapping we could have only some of the net triangles able to have protein corners poking off
 //			var protein_vertex_outside_net;
@@ -259,8 +259,8 @@ function Map_lattice() {
 //
 //			corner1 = bent_down_quad_corner(a_surface,b_surface,c_surface,
 //					icosahedron_dihedral_angle,d_hinge_origin_length, d_hinge_length);
-//			corner2 = new THREE.Vector3(surflattice_vertices.array[ protein_vertex_indices[i][(protein_vertex_outside_net+1)%3]*3+0 ],surflattice_vertices.array[ protein_vertex_indices[i][(protein_vertex_outside_net+1)%3]*3+1 ],surflattice_vertices.array[ protein_vertex_indices[i][(protein_vertex_outside_net+1)%3]*3+2 ]);
-//			corner3 = new THREE.Vector3(surflattice_vertices.array[ protein_vertex_indices[i][(protein_vertex_outside_net+2)%3]*3+0 ],surflattice_vertices.array[ protein_vertex_indices[i][(protein_vertex_outside_net+2)%3]*3+1 ],surflattice_vertices.array[ protein_vertex_indices[i][(protein_vertex_outside_net+2)%3]*3+2 ]);
+//			corner2 = new THREE.Vector3(surflattice_geometry.attributes.position.array[ protein_vertex_indices[i][(protein_vertex_outside_net+1)%3]*3+0 ],surflattice_geometry.attributes.position.array[ protein_vertex_indices[i][(protein_vertex_outside_net+1)%3]*3+1 ],surflattice_geometry.attributes.position.array[ protein_vertex_indices[i][(protein_vertex_outside_net+1)%3]*3+2 ]);
+//			corner3 = new THREE.Vector3(surflattice_geometry.attributes.position.array[ protein_vertex_indices[i][(protein_vertex_outside_net+2)%3]*3+0 ],surflattice_geometry.attributes.position.array[ protein_vertex_indices[i][(protein_vertex_outside_net+2)%3]*3+1 ],surflattice_geometry.attributes.position.array[ protein_vertex_indices[i][(protein_vertex_outside_net+2)%3]*3+2 ]);
 //			
 //			//should have a minimum angle in there. Net_edge_start_index and net_edge_end_index are shared between two triangles. Whichever of those two it is.
 //		}

@@ -48,7 +48,7 @@ function init_CK_and_irreg(){
 	var default_minimum_angle = 2 * Math.atan(PHI/(PHI-1));
 	for( var i = 0; i < 22; i++ )
 		minimum_angles[i] = default_minimum_angle;
-		
+	
 	flatnet_vertices_numbers = new Float32Array([
 		0,0,0,
 		HS3,-0.5,0,
@@ -78,6 +78,45 @@ function init_CK_and_irreg(){
 		0,-2,0,
 		-HS3,-2.5,0]);
 	
+	setvirus_flatnet_vertices[0] = new Float32Array(66);
+	for(var i = 0; i < setvirus_flatnet_vertices.length; i++)
+		setvirus_flatnet_vertices[0][i] = flatnet_vertices_numbers[i];
+	
+	var S3 = Math.sqrt(3);
+	setvirus_flatnet_vertices[1] = new Float32Array([
+ 		0,0,0,
+ 		S3,-1,0,
+ 		
+ 		S3, 1, 0,
+ 		2*S3, 0,0,
+ 		4.5*S3,3.5,0,
+ 		5*S3,3,0,
+ 		
+ 		0,2,0,
+ 		1.5*S3,7.5,0,
+ 		S3,8,0,
+ 		1.5*S3,8.5,0,
+ 		
+ 		-S3,1,0,
+ 		-2.5*S3,6.5,0,
+ 		-3*S3,6,0,
+ 		-3*S3,7,0,
+ 		
+ 		-S3,-1,0,
+ 		-4.5*S3,0.5,0,
+ 		-4.5*S3,-0.5,0,
+ 		-5*S3,0,0,
+ 		
+ 		0,-2,0,
+ 		-3*S3,-6,0,
+ 		0,-4,0,
+ 		-3*S3,-7,0
+//0, 0, 0, 1.3727848529815674, -0.33573848009109497, 0, 0.8660253882408142, 0.5, 0, 1.620924949645996, -0.5209970474243164, 0, 1.7320507764816284, 1, 0, 2.598076105117798, 0.5, 0, 0, 1, 0, 0.8660253882408142, 1.5, 0, 0, 2, 0, 0.8660253882408142, 2.5, 0, -0.8660253882408142, 0.5, 0, -0.8660253882408142, 1.5, 0, -1.7320507764816284, 1, 0, -1.7320507764816284, 2, 0, -0.8660253882408142, -0.5, 0, -1.7320507764816284, 0, 0, -1.7320507764816284, -1, 0, -2.598076105117798, -0.5, 0, 0.43557775020599365, -1.3444443941116333, 0, -0.8660253882408142, -1.5, 0, 0.1253116875886917, -1.492771029472351, 0, -0.8660253882408142, -2.5, 0
+ 		]);
+	
+	for(var i = 0; i < setvirus_flatnet_vertices[1].length; i++)
+		setvirus_flatnet_vertices[1][i] *= 0.25;
+		
 	net_triangle_vertex_indices = new Uint32Array([
 		2,1,0,
 		1,2,3,
@@ -258,6 +297,9 @@ function init_CK_and_irreg(){
 		}
 		varyingsurface = new THREE.Mesh( flatnet_geometry.clone(), surfacematerial );
 		
+		manipulation_surface = new THREE.Mesh( varyingsurface.geometry.clone(), surfacematerial );
+//		filler_points
+		
 		var flatlatticematerial = new THREE.PointsMaterial({
 			size: 0.09,
 			vertexColors: THREE.VertexColors
@@ -279,9 +321,8 @@ function init_CK_and_irreg(){
 		//scene.add(flatlattice);
 		
 		
-		surflattice_vertices = new THREE.BufferAttribute( surflattice_vertices_numbers, 3 );		
 		surflattice_geometry = new THREE.BufferGeometry();
-		surflattice_geometry.addAttribute( 'position', surflattice_vertices );
+		surflattice_geometry.addAttribute( 'position', new THREE.BufferAttribute( surflattice_vertices_numbers, 3 ) );
 		surflattice_geometry.addAttribute( 'color', new THREE.BufferAttribute(lattice_colors, 3) );
 
 		surflattice = new THREE.Points( surflattice_geometry, flatlatticematerial );
@@ -380,9 +421,14 @@ function init_CK_and_irreg(){
 		backwardbutton.position.x -= 2.8;
 		backwardbutton.position.y -= 2.8;
 		
-		Button = new THREE.Mesh( new THREE.CircleGeometry( 0.3 ), new THREE.MeshBasicMaterial({color: 0x00ff00}) );
-		Button.position.x += 1.5;
-		Button.position.y -= 1.5;
+		for(var i = 0; i< Button.length; i++){
+			Button[i] = new THREE.Mesh( new THREE.CircleGeometry( 0.3 ), new THREE.MeshBasicMaterial({color: 0x00ff00}) );
+			Button[i].ourboolean = 0;
+		}
+		Button[0].position.x = 1.5;
+		Button[0].position.y =-1.5;
+		Button[1].position.x =-1.5;
+		Button[1].position.y =-1.5;
 		
 		var indicatorblobmaterial = new THREE.MeshBasicMaterial({color: 0xf0f00f});
 		for( var i = 0; i<indicatorblobs.length; i++){
@@ -645,7 +691,7 @@ function init_CK_and_irreg(){
 		square_lattice_generator[5] = new THREE.Vector2(0,1);		//TL
 		
 		flatlattice_default_vertices[0] = 0; flatlattice_default_vertices[1] = 0; flatlattice_default_vertices[2] = 0;
-		surflattice_vertices.setXYZ(0, 0,0,0);
+		surflattice_geometry.attributes.position.setXYZ(0, 0,0,0);
 		flatlattice_vertices_velocities[0*3+0] = 0; flatlattice_vertices_velocities[0*3+1] = 0; flatlattice_vertices_velocities[0*3+2] = 0;
 		squarelattice_vertices[0] = 0;squarelattice_vertices[1] = 0;
 		var index = 1;	
@@ -661,15 +707,20 @@ function init_CK_and_irreg(){
 					var ourpoint = lattice_generator[(slice + 2)%6].clone();
 					ourpoint.multiplyScalar(length_along);				
 					ourpoint.add(slice_rightmost_point );
+					if( ourpoint.lengthSq() > 92.5)
+						ourpoint.set(666,666,666);
 					//if(ourpoint.length() > number_of_hexagon_rings * HS3 )
 						//continue;
 					
-					var ourpointsquare = square_lattice_generator[(slice + 2)%6].clone();
-					ourpointsquare.multiplyScalar(length_along);				
-					ourpointsquare.add(square_slice_rightmost_point );
+					var ourpointsquare = new THREE.Vector3();
+					if(ourpoint.x !== 666){
+						ourpointsquare.copy(square_lattice_generator[(slice + 2)%6]);
+						ourpointsquare.multiplyScalar(length_along);				
+						ourpointsquare.add(square_slice_rightmost_point );
+					}
 					
 					flatlattice_default_vertices[index*3+0] = ourpoint.x; flatlattice_default_vertices[index*3+1] = ourpoint.y; flatlattice_default_vertices[index*3+2] = (1-capsidopenness) * camera.position.z * 1.5;
-					surflattice_vertices.setXYZ(index, 0,0,0);
+					surflattice_geometry.attributes.position.setXYZ(index, 0,0,0);
 					squarelattice_vertices[index*2+0] = ourpointsquare.x; squarelattice_vertices[index*2+1] = ourpointsquare.y;
 					flatlattice_vertices_velocities[index*3+0] = 0; flatlattice_vertices_velocities[index*3+1] = 0; flatlattice_vertices_velocities[index*3+2] = 0;
 					

@@ -16,7 +16,7 @@ var QC_SPHERE_MODE = 5;
 var CUBIC_LATTICE_MODE = 6;
 var FINAL_FORMATION_MODE = 7;
 	
-var MODE = 6;
+var MODE = 4;
 
 //--------------Technologically fundamental
 var playing_field_width = 7*HS3;
@@ -44,7 +44,7 @@ var SURFACE = 1;
 var POLYHEDRON = 2;
 
 var showdebugstuff = 1;
-var net_warnings = 0;
+var net_warnings = 1;
 
 var z_central_axis = new THREE.Vector3(0,0,1);
 
@@ -100,6 +100,7 @@ var capsidopeningspeed = 0;
 
 var surfaceangle = 0.63;
 
+//-----QS
 var dodeca;
 var dodeca_vertices_numbers = new Float32Array(47 * 3);
 var dodeca_geometry;
@@ -173,6 +174,8 @@ var flatnet_geometry;
 
 var varyingsurface;
 var varyingsurface_orientingradius = new Float32Array([0.95,0.95,0.95]);
+var manipulation_surface;
+var filler_points;
 
 var surface;
 var surface_vertices_numbers = new Float32Array(22*3);
@@ -224,13 +227,19 @@ var vertices_derivations;
 var minimum_angles = new Array(22); //between these two, we derive the polyhedron and surface
 
 var circle;
-var Button;
+
+//-----------------------Buttons
+var VARYINGSURFACE_OPENMODE_BUTTON = 0;
+var BOCAVIRUS_BUTTON = 1;
+var T4_BUTTON = 2;
+var Button = Array(2);
+var setvirus_flatnet_vertices = Array(4);
+
+//---------------------------buttons no more
 
 var varyingsurface_cylinders = Array(41);
 var varyingsurface_spheres = Array(22);
 var irreghighlight_progresses = Array(22);
-var irreg_rope;
-var varyingsurface_openmode = false;
 
 var vertex_identifications = new Array();
 var W_triangle_indices = new Array();

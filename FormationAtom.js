@@ -63,7 +63,7 @@ function initialize_formation_atom(){
 //			newposition.z -= 0.00001;
 			iterations++;
 			if(iterations >10){
-				console.log("10 tries");
+//				console.log("10 tries");
 				break;
 			}
 		}

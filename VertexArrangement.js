@@ -1,10 +1,8 @@
 /*
  * Todo:
  * -check under what precise circumstances angular defects are ok
- * -no influence upon CK?
  * -label the button
  * -change associations?
- * -a vertex gets as close as possible to your mouse if it can't get exactly there.
  * 
  * if the player has clicked on the button 8 times,  the capsid appears?
  * 
@@ -19,73 +17,18 @@
  * Associations are changed based on the edge you're looking directly at. Which is highlighted.
  */
 
-function update_movementzone() {
-	//we have an array of 20 points, paired in 10 line segments.
-	
-	//jiminy, you might have to put limitations on relating to the associated vertex as well
-	
-	//you're going to have to rotate the whole thing to stick on to the edge that is stuck in place.
-	
-	var max_movementzone = Array(20); //
-	
-	//we get the V diagram stuff, our basis
-	for( var i = 0; i<10; i++) {
-		V_index = i + Math.floor(i/2); //want it so that there are no numbers congruent to 2 mod 3 in there, so we're on the outside.
-		vertex_index = V_vertex_indices[CORE][vertex_tobechanged][V_index];
-		
-		max_movementzone[ i * 2 + 0 ] = flatnet_vertices.array[vertex_index * 3 + 0];
-		max_movementzone[ i * 2 + 1 ] = flatnet_vertices.array[vertex_index * 3 + 1];
-	}
-	
-	var line_is_fixed = Array(10);
-	for(var i = 0; i < 10; i++)
-		line_is_fixed[i] = 0;
-	
-	for( var i = 0; i < 5; i++) {
-		var this_side = new THREE.Vector2(	max_movementzone[(i)*4+2 + 0] - max_movementzone[i*4 + 0],
-											max_movementzone[(i)*4+2 + 1] - max_movementzone[i*4 + 1]);
-		var next_side = new THREE.Vector2(	max_movementzone[(i+1)*4+2 + 0] - max_movementzone[i*4 + 0],
-											max_movementzone[(i)*4+2 + 1] - max_movementzone[i*4 + 1]);
-										
-		var mintheta = ( V_angles[vertex_tobechanged][i] - polyhedron_angle ) / 2;
-										
-		var line_point1 = new THREE.Vector2( max_movementzone[i*4+2 + 0], max_movementzone[i*4+2 + 1] );		
-		var line_point2 = vector_from_bearing(ourside, 1, mintheta);
-		
-		//intersect it with the polygon. If it doesn't intersect the polygon put the points on the same point
-		
-		ourside.negate();
-		
-		var line_point1 = new THREE.Vector2( max_movementzone[i*4 + 0], max_movementzone[i*4 + 1] );		
-		var line_point2 = vector_from_bearing(ourside, 1, someothertheta);
-	}
-	
-	//gamefeel idea: if you pull far on the vertex and it's against the wall of the movementzone, the whole net will be pulled slightly in the direction you pull
-	//also make it vibrate maybe
-	
-	//initialize them to the positions of the points on the net surrounding the vertex
-	//Hmm, or rather, to the places they would be if the net weren't split up
-	
-	
-	//create line, check which line segments it cuts
-	//it should cut at least, and maybe most, two line segments, so the points on the ends that it cuts off can go to make the new corners.
-	//check all points to see if they're to the right of the line. If not, move them to one of the new corners
-	//no, you can't predict it like that, when you slice off a corner you increase the number of corners in that area by 1. vertices won't be in order.	
-}
-
-
 function move_vertices(vertex_tobechanged, starting_movement_vector, initial_changed_vertex)
 {
 	var V_angles_subtraction = Array(0,0,0,0);
 	if(initial_changed_vertex === vertex_tobechanged) {
-		V_angles_subtraction[0] = corner_angle_from_indices( W_triangle_indices[initial_changed_vertex][ 5 ], W_vertex_indices[initial_changed_vertex][11] );
-		V_angles_subtraction[3] = corner_angle_from_indices( W_triangle_indices[initial_changed_vertex][ 3 ], W_vertex_indices[initial_changed_vertex][6] );
+		V_angles_subtraction[0] = corner_angle_from_indices( W_triangle_indices[initial_changed_vertex][ 5 ], W_vertex_indices[initial_changed_vertex][11],manipulation_surface.geometry.attributes.position.array );
+		V_angles_subtraction[3] = corner_angle_from_indices( W_triangle_indices[initial_changed_vertex][ 3 ], W_vertex_indices[initial_changed_vertex][6], manipulation_surface.geometry.attributes.position.array );
 		
 		Vmode = CORE;
 	}
 	else {
-		V_angles_subtraction[0]= corner_angle_from_indices( W_triangle_indices[initial_changed_vertex][ 2 ], W_vertex_indices[initial_changed_vertex][5] );
-		V_angles_subtraction[3] = corner_angle_from_indices( W_triangle_indices[initial_changed_vertex][ 0 ], W_vertex_indices[initial_changed_vertex][0] );
+		V_angles_subtraction[0]= corner_angle_from_indices( W_triangle_indices[initial_changed_vertex][ 2 ], W_vertex_indices[initial_changed_vertex][5], manipulation_surface.geometry.attributes.position.array );
+		V_angles_subtraction[3] = corner_angle_from_indices( W_triangle_indices[initial_changed_vertex][ 0 ], W_vertex_indices[initial_changed_vertex][0],manipulation_surface.geometry.attributes.position.array );
 		
 		Vmode = ASSOCIATED;
 	}
@@ -101,8 +44,8 @@ function move_vertices(vertex_tobechanged, starting_movement_vector, initial_cha
 		V_angles[vertex_tobechanged][i] = TAU * 5/6 - W_surrounding_angles[W_index] - V_angles_subtraction[i];
 	}
 	
-	flatnet_vertices.array[vertex_tobechanged * 3 + 0 ] += starting_movement_vector.x;
-	flatnet_vertices.array[vertex_tobechanged * 3 + 1 ] += starting_movement_vector.y;
+	manipulation_surface.geometry.attributes.position.array[vertex_tobechanged * 3 + 0 ] += starting_movement_vector.x;
+	manipulation_surface.geometry.attributes.position.array[vertex_tobechanged * 3 + 1 ] += starting_movement_vector.y;
 	
 	var triangle_done = [0,0,0,0,0];
 	
@@ -154,27 +97,27 @@ function move_vertices(vertex_tobechanged, starting_movement_vector, initial_cha
 		}
 		
 		var vertex_to_use = new THREE.Vector2(
-			flatnet_vertices.array[vertex_to_use_index * 3 + 0 ],
-			flatnet_vertices.array[vertex_to_use_index * 3 + 1 ] );
+			manipulation_surface.geometry.attributes.position.array[vertex_to_use_index * 3 + 0 ],
+			manipulation_surface.geometry.attributes.position.array[vertex_to_use_index * 3 + 1 ] );
 		var vertex_to_fix = new THREE.Vector2(
-			flatnet_vertices.array[vertex_to_fix_index * 3 + 0 ],
-			flatnet_vertices.array[vertex_to_fix_index * 3 + 1 ] );		
+			manipulation_surface.geometry.attributes.position.array[vertex_to_fix_index * 3 + 0 ],
+			manipulation_surface.geometry.attributes.position.array[vertex_to_fix_index * 3 + 1 ] );		
 		
 		var outside_vertex_to_use = new THREE.Vector2(
-			flatnet_vertices.array[outside_vertex_to_use_index * 3 + 0 ],
-			flatnet_vertices.array[outside_vertex_to_use_index * 3 + 1 ]);
+			manipulation_surface.geometry.attributes.position.array[outside_vertex_to_use_index * 3 + 0 ],
+			manipulation_surface.geometry.attributes.position.array[outside_vertex_to_use_index * 3 + 1 ]);
 		var outside_vertex_to_fix = new THREE.Vector2(
-			flatnet_vertices.array[outside_vertex_to_fix_index * 3 + 0 ],
-			flatnet_vertices.array[outside_vertex_to_fix_index * 3 + 1 ]);
+			manipulation_surface.geometry.attributes.position.array[outside_vertex_to_fix_index * 3 + 0 ],
+			manipulation_surface.geometry.attributes.position.array[outside_vertex_to_fix_index * 3 + 1 ]);
 		var outside_vertex_opposing = new THREE.Vector2(
-			flatnet_vertices.array[outside_vertex_opposing_index * 3 + 0 ],
-			flatnet_vertices.array[outside_vertex_opposing_index * 3 + 1 ]);
+			manipulation_surface.geometry.attributes.position.array[outside_vertex_opposing_index * 3 + 0 ],
+			manipulation_surface.geometry.attributes.position.array[outside_vertex_opposing_index * 3 + 1 ]);
 			
 		var identified_edge_to_use = new THREE.Vector2();
 		
 		identified_edge_to_use.subVectors(outside_vertex_to_use, vertex_to_use);
 		
-		var angle_to_use = corner_angle_from_indices( V_triangle_indices[Vmode][initial_changed_vertex][ triangle_to_use ], outside_vertex_to_use_index );
+		var angle_to_use = corner_angle_from_indices( V_triangle_indices[Vmode][initial_changed_vertex][ triangle_to_use ], outside_vertex_to_use_index,manipulation_surface.geometry.attributes.position.array );
 		var imposed_angle;
 		if( triangle_to_fix > triangle_to_use )
 			imposed_angle = angle_to_use - V_angles[vertex_tobechanged][ triangle_to_use ];
@@ -187,8 +130,8 @@ function move_vertices(vertex_tobechanged, starting_movement_vector, initial_cha
 		var final_edge = vector_from_bearing(triangle_tofix_side, identified_edge_to_use.length(), imposed_angle );
 		final_edge.add(outside_vertex_to_fix);		
 		
-		flatnet_vertices.array[vertex_to_fix_index * 3 + 0 ] = final_edge.x;
-		flatnet_vertices.array[vertex_to_fix_index * 3 + 1 ] = final_edge.y;
+		manipulation_surface.geometry.attributes.position.array[vertex_to_fix_index * 3 + 0 ] = final_edge.x;
+		manipulation_surface.geometry.attributes.position.array[vertex_to_fix_index * 3 + 1 ] = final_edge.y;
 		
 		triangle_done[triangle_to_fix] = 1;
 		for( var i = 0; i < 5; i++ ) {
@@ -201,10 +144,15 @@ function move_vertices(vertex_tobechanged, starting_movement_vector, initial_cha
 		}
 	}
 	
-	flatnet_vertices.needsUpdate = true;
+	manipulation_surface.geometry.attributes.position.needsUpdate = true;
 }
 
-function HandleVertexRearrangement() {
+function settle_manipulationsurface_and_flatnet() {
+	for( var i = 0; i < flatnet_vertices.array.length; i++)
+		manipulation_surface.geometry.attributes.position.array[i] = flatnet_vertices.array[i];
+}
+
+function manipulate_vertices() {
 	var movement_vector = new THREE.Vector2(0,0);
 	if( isMouseDown ) {
 		if( vertex_tobechanged === 666 && capsidopenness === 1) {
@@ -213,8 +161,8 @@ function HandleVertexRearrangement() {
 			for( var i = 0; i < 22; i++) {
 				if(i==0||i==5||i==9||i==13||i==17||i==21)
 					continue;
-				var quadrance = (flatnet_vertices.array[i*3+0] - (MousePosition.x-flatnet.position.x)) * (flatnet_vertices.array[i*3+0] - (MousePosition.x-flatnet.position.x))
-								+ (flatnet_vertices.array[i*3+1] - MousePosition.y) * (flatnet_vertices.array[i*3+1] - MousePosition.y);
+				var quadrance = (manipulation_surface.geometry.attributes.position.array[i*3+0] - (MousePosition.x-flatnet.position.x)) * (manipulation_surface.geometry.attributes.position.array[i*3+0] - (MousePosition.x-flatnet.position.x))
+								+ (manipulation_surface.geometry.attributes.position.array[i*3+1] - MousePosition.y) * (manipulation_surface.geometry.attributes.position.array[i*3+1] - MousePosition.y);
 				if( quadrance < lowest_quadrance_so_far) {
 					lowest_quadrance_so_far = quadrance;
 					closest_vertex_so_far = i;
@@ -224,12 +172,14 @@ function HandleVertexRearrangement() {
 			var maximum_quadrance_to_be_selected = 0.0079;
 			if( lowest_quadrance_so_far < maximum_quadrance_to_be_selected) {
 				vertex_tobechanged = closest_vertex_so_far;
+				
+				settle_manipulationsurface_and_flatnet();
 			}
 		}
 		
 		if( vertex_tobechanged !== 666) {
-			movement_vector.x = (MousePosition.x-flatnet.position.x) - flatnet_vertices.array[vertex_tobechanged * 3 + 0];
-			movement_vector.y = MousePosition.y - flatnet_vertices.array[vertex_tobechanged * 3 + 1];
+			movement_vector.x = (MousePosition.x-flatnet.position.x) - manipulation_surface.geometry.attributes.position.array[vertex_tobechanged * 3 + 0];
+			movement_vector.y = MousePosition.y - manipulation_surface.geometry.attributes.position.array[vertex_tobechanged * 3 + 1];
 			
 			if( !( (i == 0 || i % 4 == 1) && i != 1) ){
 				varyingsurface_spheres[vertex_tobechanged].material.color.r = 0;
@@ -247,12 +197,33 @@ function HandleVertexRearrangement() {
 				varyingsurface_spheres[i].material.color.b = 0;
 			}
 		}
+		
+		//manipulation_surface wants to adjust itself to become the flatnet
+		for(var i = 0; i < flatnet_vertices.array.length / 3; i++){
+			var displacement_vector = new THREE.Vector3(
+					flatnet_vertices.array[i*3+0] - manipulation_surface.geometry.attributes.position.array[i*3+0],
+					flatnet_vertices.array[i*3+1] - manipulation_surface.geometry.attributes.position.array[i*3+1],
+					flatnet_vertices.array[i*3+2] - manipulation_surface.geometry.attributes.position.array[i*3+2]);
+			if(displacement_vector.lengthSq() > 0.0001 ) {
+				//if you want it to wiggle into place it needs remembered momentum
+				displacement_vector.setLength(0.02);
+				
+				manipulation_surface.geometry.attributes.position.array[i*3+0] += displacement_vector.x;
+				manipulation_surface.geometry.attributes.position.array[i*3+1] += displacement_vector.y;
+				manipulation_surface.geometry.attributes.position.array[i*3+2] += displacement_vector.z;
+				
+				manipulation_surface.geometry.attributes.position.needsUpdate = true;
+				
+				//you also want the minimum_angles to get there at the same rate. adjust the correction function to take an array, and pass it a "to be gotten to" one
+				
+				//Why only manipulation surface? Why not have the other surface slowly move to it too? Would allow a closed capsid to morph
+			}
+		}
 	}
 	
 	if( vertex_tobechanged === 666 || (movement_vector.x === 0 && movement_vector.y === 0) ){
-		irreg_rope.geometry.vertices[0].set(0,0,0.01);
-		irreg_rope.geometry.vertices[1].set(0,0,0.01);
-		irreg_rope.geometry.verticesNeedUpdate = true;
+		//TODO attempt to correct flatnet.
+		//Need to remember an index and a desired_location from the correct_minimum_angles at the end of the last frame where things were unsuccessfully moved
 		return;
 	}
 	
@@ -261,7 +232,7 @@ function HandleVertexRearrangement() {
 	//log the current positions
 	var net_log = new Array(66);
 	for( var i = 0; i < 66; i++)
-		net_log[i] = flatnet_vertices.array[i];
+		net_log[i] = manipulation_surface.geometry.attributes.position.array[i];
 	
 	//preparation: get the angles surrounding the corners of the stitched-up W, which will remain constant
 	for( var corner = 0; corner < 6; corner++ ) {
@@ -287,7 +258,7 @@ function HandleVertexRearrangement() {
 			}
 			
 			if( in_V_diagram && !in_W_diagram ) {
-				W_surrounding_angles[corner] += corner_angle_from_indices(triangle, subtracting_vertex_index);
+				W_surrounding_angles[corner] += corner_angle_from_indices(triangle, subtracting_vertex_index, manipulation_surface.geometry.attributes.position.array);
 			}
 		}
 	}
@@ -304,11 +275,11 @@ function HandleVertexRearrangement() {
 		var corner2index = W_vertex_indices[vertex_tobechanged][ i * 2 + 1 ];
 		
 		var corner1 = new THREE.Vector2( 
-			flatnet_vertices.array[     3 * corner1index ],
-			flatnet_vertices.array[ 1 + 3 * corner1index ] );
+			manipulation_surface.geometry.attributes.position.array[     3 * corner1index ],
+			manipulation_surface.geometry.attributes.position.array[ 1 + 3 * corner1index ] );
 		var corner2 = new THREE.Vector2( 
-			flatnet_vertices.array[     3 * corner2index ],
-			flatnet_vertices.array[ 1 + 3 * corner2index ] );
+			manipulation_surface.geometry.attributes.position.array[     3 * corner2index ],
+			manipulation_surface.geometry.attributes.position.array[ 1 + 3 * corner2index ] );
 			
 		var side_Vector = corner2.clone();
 		side_Vector.sub(corner1);
@@ -345,8 +316,8 @@ function HandleVertexRearrangement() {
 	}
 	
 	var left_defect = new THREE.Vector2(
-		flatnet_vertices.array[ 3 * vertex_tobechanged_home_index + 0 ],
-		flatnet_vertices.array[ 3 * vertex_tobechanged_home_index + 1 ] );
+		manipulation_surface.geometry.attributes.position.array[ 3 * vertex_tobechanged_home_index + 0 ],
+		manipulation_surface.geometry.attributes.position.array[ 3 * vertex_tobechanged_home_index + 1 ] );
 	left_defect.sub(origin_absolute);
 	
 	var nonexistant_corner = new THREE.Vector2(
@@ -368,35 +339,43 @@ function HandleVertexRearrangement() {
 	var right_defect_index = W_vertex_indices[vertex_tobechanged][ RIGHT_DEFECT ];
 	
 	var imposed_movement_vector = new THREE.Vector2(
-		right_defect_absolute.x - flatnet_vertices.array[right_defect_index * 3 + 0 ],
-		right_defect_absolute.y - flatnet_vertices.array[right_defect_index * 3 + 1 ]);
+		right_defect_absolute.x - manipulation_surface.geometry.attributes.position.array[right_defect_index * 3 + 0 ],
+		right_defect_absolute.y - manipulation_surface.geometry.attributes.position.array[right_defect_index * 3 + 1 ]);
 		
 	move_vertices(right_defect_index, imposed_movement_vector, vertex_tobechanged);
 	
 	
+	/* 	i.e. every frame a function is called that deals with the problem of "vertex desired location" and the fact that manipulation_surface.geometry.attributes.position isn't there
+	 * 	varyingsurface has the folded up nature to it as well
+	 * 	when we've tweaked the algorithm, 5 evaluations should be ok?
+	 */
 	
-	//Everything that could go wrong. TODO remove this on release. You should be able to predict what won't work and put correct_minimum_angles, and resetter, in coreloop.
-	if(	!check_triangle_inversion() || !correct_minimum_angles()
-//		|| !check_edge_lengths() || !check_defects() //these are only worth using if you suspect the above has not done its job
-	  ){
+	if(	!check_triangle_inversion() /*|| !check_edge_lengths(manipulation_surface.geometry.attributes.position.array) || !check_defects(manipulation_surface.geometry.attributes.position.array) extra checks only worth using if you suspect the above has not done its job*/ ) {
 		for( var i = 0; i < 66; i++)
-			flatnet_vertices.array[i] = net_log[i];
-		correct_minimum_angles();
-		varyingsurface_spheres[vertex_tobechanged].material.color.r = 1;
-		varyingsurface_spheres[vertex_tobechanged].material.color.g = 0;
-		varyingsurface_spheres[vertex_tobechanged].material.color.b = 0;
+			manipulation_surface.geometry.attributes.position.array[i] = net_log[i];
 	}
-	
-	//now we need the "height" of the capsid
-	for(var i = 0; i<9; i++)
-		varyingsurface.geometry.attributes.position.array[i] = flatnet_vertices.array[i];	
-	deduce_most_of_surface(0, varyingsurface.geometry.attributes.position);
-	var central_vertex = new THREE.Vector3(varyingsurface.geometry.attributes.position.array[0],varyingsurface.geometry.attributes.position.array[1],varyingsurface.geometry.attributes.position.array[2]);
-	var center_3D = new THREE.Vector3(varyingsurface.geometry.attributes.position.array[13*3+0],varyingsurface.geometry.attributes.position.array[13*3+1],varyingsurface.geometry.attributes.position.array[13*3+2]);
-	center_3D.sub(central_vertex);
-	center_3D.multiplyScalar(0.5);
-	varyingsurface_orientingradius[0] = center_3D.length();
-	center_3D.add(central_vertex);
-	varyingsurface_orientingradius[1] = center_3D.distanceTo(new THREE.Vector3(varyingsurface.geometry.attributes.position.array[1*3+0],varyingsurface.geometry.attributes.position.array[1*3+1],varyingsurface.geometry.attributes.position.array[1*3+2]) );
-	varyingsurface_orientingradius[2] = center_3D.distanceTo(new THREE.Vector3(varyingsurface.geometry.attributes.position.array[2*3+0],varyingsurface.geometry.attributes.position.array[2*3+1],varyingsurface.geometry.attributes.position.array[2*3+2]) );
+	else{
+		if(	correct_minimum_angles(manipulation_surface.geometry.attributes.position.array) ) { //Maybe you should be able to predict what won't work and put correct_minimum_angles, and resetter, in coreloop.
+			for( var i = 0; i < 66; i++)
+				flatnet_vertices.array[i] = manipulation_surface.geometry.attributes.position.array[i];
+				
+			//now we need the "height" of the capsid
+			for(var i = 0; i<9; i++)
+				varyingsurface.geometry.attributes.position.array[i] = manipulation_surface.geometry.attributes.position.array[i];	
+			deduce_most_of_surface(0, varyingsurface.geometry.attributes.position);
+			var central_vertex = new THREE.Vector3(varyingsurface.geometry.attributes.position.array[0],varyingsurface.geometry.attributes.position.array[1],varyingsurface.geometry.attributes.position.array[2]);
+			var center_3D = new THREE.Vector3(varyingsurface.geometry.attributes.position.array[13*3+0],varyingsurface.geometry.attributes.position.array[13*3+1],varyingsurface.geometry.attributes.position.array[13*3+2]);
+			center_3D.sub(central_vertex);
+			center_3D.multiplyScalar(0.5);
+			varyingsurface_orientingradius[0] = center_3D.length();
+			center_3D.add(central_vertex);
+			varyingsurface_orientingradius[1] = center_3D.distanceTo(new THREE.Vector3(varyingsurface.geometry.attributes.position.array[1*3+0],varyingsurface.geometry.attributes.position.array[1*3+1],varyingsurface.geometry.attributes.position.array[1*3+2]) );
+			varyingsurface_orientingradius[2] = center_3D.distanceTo(new THREE.Vector3(varyingsurface.geometry.attributes.position.array[2*3+0],varyingsurface.geometry.attributes.position.array[2*3+1],varyingsurface.geometry.attributes.position.array[2*3+2]) );
+		}
+		else {
+			varyingsurface_spheres[vertex_tobechanged].material.color.r = 1;
+			varyingsurface_spheres[vertex_tobechanged].material.color.g = 0;
+			varyingsurface_spheres[vertex_tobechanged].material.color.b = 0;
+		}
+	}
 }

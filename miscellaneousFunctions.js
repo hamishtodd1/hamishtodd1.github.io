@@ -428,7 +428,10 @@ function get_vector(index, vertex_array) {
 //a is the length of the side that is opposite the desired angle
 function get_cos_rule(a,b,c)
 {
-	return (b*b + c*c - a*a) / (2*b*c);
+	var result = (b*b + c*c - a*a) / (2*b*c);
+	if(result > 1) //the sum of two of the sides are close to being the third side
+		result = 1;
+	return result;
 }
 
 //COUNTER CLOCKWISE
@@ -476,7 +479,7 @@ function tetrahedron_top(P1,P2,P3, r1,r2,r3) {
 	cp_t.x = ( r1*r1 - r2*r2 + P2_t.x * P2_t.x ) / ( 2 * P2_t.x );
 	cp_t.y = ( r1*r1 - r3*r3 + P3_t.x * P3_t.x + P3_t.y * P3_t.y ) / ( P3_t.y * 2 ) - ( P3_t.x / P3_t.y ) * cp_t.x;
 	if(r1*r1 - cp_t.x*cp_t.x - cp_t.y*cp_t.y < 0) {
-		//console.log("Impossible tetrahedron");
+		console.log("Impossible tetrahedron");
 		return false;			
 	}
 	cp_t.z = Math.sqrt(r1*r1 - cp_t.x*cp_t.x - cp_t.y*cp_t.y);

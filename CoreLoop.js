@@ -6,13 +6,12 @@
  *  -get a person with a sense of color to look at everything
  *  
  *  -make it feel good
- *  -test
- *  -iterate
+ *  	-reduce latency
+ *  	-all the effects in camerastuff
  */
 
 function UpdateWorld() {
 	update_mouseblob();
-	
 	switch(MODE){
 		case STATIC_PROTEIN_MODE:
 			update_bocavirus();
@@ -30,13 +29,12 @@ function UpdateWorld() {
 
 			Update_net_variables();			
 			Map_lattice();
-			if(logged==2)console.log(surface);
-			logged++;
 			break;
 			
 		case IRREGULAR_MODE:
-			CheckButton();
-			HandleVertexRearrangement();
+			CheckButton(0);
+			CheckButton(1);
+			manipulate_vertices();
 			update_varyingsurface();
 			//correct_minimum_angles();
 			break;
@@ -123,8 +121,10 @@ function ChangeScene(new_mode) {
 			break;
 			
 		case IRREGULAR_MODE:
-			scene.add(varyingsurface);
-			scene.add(Button);
+			scene.add(manipulation_surface);
+//			scene.add(varyingsurface);
+			scene.add(Button[0]);
+			scene.add(Button[1]);
 			for( var i = 0; i < varyingsurface_cylinders.length; i++)
 				scene.add(varyingsurface_cylinders[i]);
 			for( var i = 0; i < varyingsurface_spheres.length; i++)
@@ -132,11 +132,7 @@ function ChangeScene(new_mode) {
 			break;
 			
 		case QC_SPHERE_MODE:
-//			for( var i = 0; i < quasicutouts.length; i++)
-//				scene.add(quasicutouts[i]);
 			scene.add(dodeca);
-//			scene.add(back_hider);
-//			scene.add(stitchup);
 			scene.add(Guide_quasilattice);
 //			scene.add(quasiquasilattice);
 //			scene.add(stablepointslattice);
