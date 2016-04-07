@@ -18,7 +18,7 @@ function put_picture_in_place(){
 	var tolerance = 0.01;
 	for(var i = 0; i < viruspicture_scales.length; i++){
 		if(Math.abs(LatticeScale-viruspicture_scales[i]) < tolerance)
-			scene.add(picture_objects[i]);
+			scene.add(picture_objects[i+1]);
 	}
 }
 

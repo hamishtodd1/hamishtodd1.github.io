@@ -297,6 +297,7 @@ function put_tube_in_buffer(A,B, mybuffer, radius ) {
 }
 
 //we're not going to treat this like it is performance sensetive
+//then this goes with prism_triangle_indices
 function put_unbased_triangularprism_in_buffer(A,B,mybuffer,peak, startingindex){
 	if(startingindex === undefined)
 		startingindex = 0;
@@ -305,9 +306,9 @@ function put_unbased_triangularprism_in_buffer(A,B,mybuffer,peak, startingindex)
 	A_to_B.normalize();
 	peak.applyAxisAngle(A_to_B, -TAU/3);
 	for( var i = 0; i < 3; i++) {
-		mybuffer[ startingindex + i*2 * 3 + 0] = A.x + peak.x;
-		mybuffer[ startingindex + i*2 * 3 + 1] = A.y + peak.y;
-		mybuffer[ startingindex + i*2 * 3 + 2] = A.z + peak.z;
+		mybuffer[ startingindex + (i*2+0) * 3 + 0] = A.x + peak.x;
+		mybuffer[ startingindex + (i*2+0) * 3 + 1] = A.y + peak.y;
+		mybuffer[ startingindex + (i*2+0) * 3 + 2] = A.z + peak.z;
 		
 		mybuffer[ startingindex + (i*2+1) * 3 + 0] = B.x + peak.x;
 		mybuffer[ startingindex + (i*2+1) * 3 + 1] = B.y + peak.y;

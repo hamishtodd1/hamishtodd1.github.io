@@ -16,7 +16,7 @@ var QC_SPHERE_MODE = 5;
 var CUBIC_LATTICE_MODE = 6;
 var FINAL_FORMATION_MODE = 7;
 	
-var MODE = 4;
+var MODE = 3;
 
 //--------------Technologically fundamental
 var playing_field_width = 7*HS3;
@@ -37,6 +37,11 @@ renderer.setSize( window_width, window_height );
 renderer.setClearColor( 0xffffff, 1);
 document.body.appendChild( renderer.domElement );
 var ytplayer;
+
+var INITIALIZED = 0;
+var PICTURES_LOADED = 0;
+
+THREE.TextureLoader.prototype.crossOrigin = '';
 
 //----------------Static
 var FLATNET = 0;
@@ -69,7 +74,6 @@ var flatlattice_default_vertices = Array(number_of_lattice_points*3);
 var latticevertex_nettriangle = new Uint16Array(number_of_lattice_points);
 
 var backgroundtexture;
-var picture_objects = Array(8);
 var viruspicture_scales = Array(1,0.577,0.5,0.3779,1/3,0.28867,0.27735);
 var camera_movementspeed = 0;
 
@@ -119,19 +123,18 @@ var quasicutout_intermediate_vertices = Array(quasilattice_default_vertices.leng
 var quasicutouts_vertices_components = Array(quasilattice_default_vertices.length * 2 * 3 );
 var quasicutout_line_pairs = new Uint16Array(quasilattice_default_vertices.length * 2 * 2 * 2); //TODO work out how many there should be in here really.
 var quasicutouts = Array(60);
-var quasicutout_meshes;
+var quasicutout_meshes; //TODO MASSIVE speedup opportunity: merge
 var stable_points = Array(345);
 var triangleindices_for_stablepoints = Array(stable_points.length);
 var lowest_unused_stablepoint = 0;
 var quasiquasilattice;
 var stablepointslattice;
 var nearby_quasicutouts;
-var stitchup;
-var stitchup_line_pairs = new Uint16Array(1000);
 var set_stable_point = 666;
 var Guide_quasilattice;
 var stable_point_of_meshes_currently_in_scene = 666;
 var modulated_CSP;
+var NUM_QS_VERTICES_FOR_EDGES = 180; //reserved for edges. Must be divisible by 6
 
 //------------3D penrose stuff
 var animation_playing_automatically = true;

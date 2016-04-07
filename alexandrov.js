@@ -6,8 +6,6 @@
  * 
  * Maybe we should have one exploration point to the left, one to the right? 
  * 
- * Hey, was it able to converge for every non flipper?
- * 
  * Note that you don't move that far in a given frame. So the first time you move out of the zone, you are probably close, no shape weirdness. It's just after that
  * 
  * When you press the button, it switches in the REAL surface
@@ -16,70 +14,33 @@
  * 
  * Since the vertex will be springing back and forth, you probably have quite a few evaluations. Though as soon as the button is pressed or another vertex is grabbed, you're done
  * 
- * 
- * Plan:
- * Player can move vertex all they like, but when they let go it snaps to the closest lattice vertex that works
- * When it is determined as being vertex_tobechanged, we start putting together a list of potential snap-to lattice vertices
- * 
- * Alternative:
- * for the vertex you're holding, have "last_good_position" and call the player's position the "desired_position"
- * if its desired_position is good, that becomes last_good_position.
- * if its desired_position is bad
- *   compromise_position = ( desired_position + last_good_position ) / 2;
- * Then in the next frame
- *   if compromise_position is good,
- *   	last_good_position = compromise_position
- *   	compromise_position = ( compromise_position + desired_position ) / 2;
- *   else
- *   	compromise_position = ( compromise_position + last_good_position ) / 2;
- *   
- * These things can be weird 2D shapes though. What if there's a 
- *   
  * When the vertex isn't held, it goes slowly-ish back to last_good_position. Probably good to have it be springy, like it can overshoot, but be attracted back
- * So probably
  *   
- * Like, this is analysis. May want to ask someone about that, although what can you do without a derivative?
- * 
- * this doesn't stagger so well
  */
 
 /*
- * (other) Compromise possibilities.
- * 
- * Can you put extra edges in when they press the fold button?
- * Can you squash the edge lengths on the surface when capsid is closed? Probably it wouldn't be contracted that much, the  
- * 
- * Shall we at least see about whether it's true that they can SOMETIMES flip back? It's a fuck of a time investment
- * Would it be hard to check that the combinatorics are what they were?
+ * How to deal with concave areas:
  * 
  * Can you make anything of the fact that if you're close to a place where you're about to flip, one of the minimum angles will be pi?
  * 
- * Could: Say p1 worked and player is now at p2. Try p2. If it doesn't work, next frame move to (p1+p2)/2
- * 
- * Could have the algorithm run a bunch of times on a patch to profile where you can and can't go without flips, from there get an idea of stuff
  * Could have a triangle surrounding your cursor, one corner pointing in the last direction you went in. Work out whether you can go on the corners, flatten a corner if not
  * 		Go no further than to-one-corner
  * 
- * Could just have it break, elegantly! When an edge wants to be flipped, quarantine the four vertices around it and try to run the algorithm as best you can with the others
- * 
  * Don't forget that for non-nerds it is just a cute little toy.
- * Simplicity is more important than completeness. It was never a good idea to try to implement that unfold-differently thing.
  * 
- * Many of these options would be made easier by speeding up the algorithm, which you need to do anyway.
+ * Simplicity is more important than completeness. It was never a good idea to try to implement that unfold-differently thing.
  * 
  * could limit edge lengths to a minimum size, like jeez, that breaks the angular defects
  * it would be a size minimum based on the size of the longest edge, like you can't be less than about a twentieth of its length - that seems to hold for HIV.
  */
 
-/*	TODO frame-stagger. Notes on that:
-	Possibly, the only thing that is important in terms of preserving the illusion is that the angles be strictly decreasing.
-	Perhaps find some way to relate the angle that is used to epsilon and openness in a way that makes it so they're strictly decreasing?
-	or, only write to those dihedral angles that are less than what they were in the previous frame (which may be dependent on openness)
-	It's taking on the order of 300 steps. That can almost certainly be reduced by tweaking what you can tweak. But you can't have one step per frame if it's too many.
-*/
-
 //TODO You could graph number of step size reductions over a run. Major tweakables are stepsizemax, initial radii, and newton solver accuracy.
 
+//Maybe some of them require quite different starting radii? If so you could try it with different starters
+
+//is non convergence still related to flipping?
+
+var alexandrov_inspection_mode = 0;
 
 //returns true if the minimum angles ended up getting modified
 function correct_minimum_angles(vertices_buffer_array) {
@@ -124,15 +85,7 @@ function correct_minimum_angles(vertices_buffer_array) {
 
 		var radii_intended = newton_solve(curvatures_intended); //we get radii_intended : curvatures(radii_intended) === curvatures_intended	
 		
-		//what's happenning is that the step is getting reduced a lot, then these flips may come about
-		//what you can latch onto is the strange fact that reducing the step size INCREASES flips
-		//Probably if you can't do it in 5 step size reductions, you can't do it.
-		
-		//NEW PLAN: View the output of stefan's program doing it?
-		//really, either things should end in "concave" or they should end in victory, and so long as you have anything
-		//else you've not implemented the algorithm and it's not a surprise that you can't do this one example
-		
-		//Given that there are flips that go well and none of them have so many reductions, your newton solver probably needs to be able to deal with more
+		//speedup opportunity: there are several early warning signs that it is time to flip back
 		
 		if( radii_intended !== 666 ) { //it worked!
 			var flips_to_perform = Array();
@@ -152,7 +105,7 @@ function correct_minimum_angles(vertices_buffer_array) {
 			}
 			
 			if(flips_to_perform.length > 0) {
-//				console.log("	FLIPS ", flips_to_perform.length / 2); //we appear to be flipping back and forth
+				if(alexandrov_inspection_mode) console.log("	FLIPS ", flips_to_perform.length / 2); //we appear to be flipping back and forth
 				total_flips += flips_to_perform.length / 2;
 				
 				for(var i = 0; i < polyhedron_edge_length.length; i++)
@@ -161,15 +114,9 @@ function correct_minimum_angles(vertices_buffer_array) {
 				for(var i = 0; i < old_ATVIs.length; i++)
 					old_ATVIs[i] = alexandrov_triangle_vertex_indices[i];
 				
-//				for(var i = 0; i < polyhedron_edge_length.length; i++)
-//					for(var j = 0; j < polyhedron_edge_length[i].length; j++)
-//						console.log( polyhedron_edge_length[i][j]);
-				
 				for( var i = 0; i < flips_to_perform.length / 2; i++){
-//					console.log(flips_to_perform[i*2+0],flips_to_perform[i*2+1]);
 					var ourindices = get_diamond_indices(flips_to_perform[i*2+0],flips_to_perform[i*2+1]);
 					flip(ourindices);
-//					console.log("flipped in algorithm")
 				}
 				
 				flipped_last_iteration = 1;
@@ -184,9 +131,7 @@ function correct_minimum_angles(vertices_buffer_array) {
 				stepsize = stepsizemax;
 				
 				//check how many it really is
-//				if( num_reductions > 5 ) console.error("HEY! We DID progress after " + num_reductions + " reductions")
-				
-//				console.log("progress");
+				if( num_reductions > 5 ) console.error("HEY! We DID progress after " + num_reductions + " reductions");
 				
 				num_reductions = 0;
 				
@@ -195,7 +140,8 @@ function correct_minimum_angles(vertices_buffer_array) {
 		}
 		else {
 			if( flipped_last_iteration ){
-//				console.log("	DON'T WORRY, rolling back" );
+				if(alexandrov_inspection_mode)
+					console.log("	DON'T WORRY, rolling back" );
 				for(var i = 0; i < polyhedron_edge_length.length; i++)
 					for(var j = 0; j < polyhedron_edge_length[i].length; j++)
 						polyhedron_edge_length[i][j] = old_PELs[i][j];
@@ -207,29 +153,24 @@ function correct_minimum_angles(vertices_buffer_array) {
 			
 			//clear flips_to_perform here, and somewhere else
 			//if it is soluble, you clear, so probably just after the if != 666
-//			console.log("reducing step");
 			stepsize = stepsize*stepsize;
 			
 			num_reductions++;
 			if(num_reductions > 5){
-				if(highlight_endings){
-//					console.error("NOOOOOO! Quitting Al after " + num_reductions + " reductions");
-//					console.log(manipulation_surface.geometry.attributes.position.array);
+				if(alexandrov_inspection_mode){
+					console.error("NOOOOOO! Quitting Al after " + num_reductions + " reductions");
+					console.log(manipulation_surface.geometry.attributes.position.array);
 				}
-//				else
-//					console.log("Quitting Al after " + num_reductions + " reductions");
 				return 0;
 			}
 		}
 		
 		steps++;
 		if(steps > 1000){ //limited by your patience at the moment, who's to say they wouldn't get there?
-//			if(highlight_endings){
-//				console.error("NOOOOOO! Quitting Al after " + steps + " steps");
-//				console.log(manipulation_surface.geometry.attributes.position.array);
-//			}
-//			else
-//				console.log("Quitting Al after " + steps + " steps");
+			if(alexandrov_inspection_mode){
+				console.error("NOOOOOO! Quitting Al after " + steps + " steps");
+				console.log(manipulation_surface.geometry.attributes.position.array);
+			}
 			return 0;
 		}
 	}
@@ -241,10 +182,8 @@ function correct_minimum_angles(vertices_buffer_array) {
 			
 			if( polyhedron_edge_length[a_index][b_index] === 666 || 
 				polyhedron_edge_length[b_index][a_index] === 666 ){
-//				if(highlight_endings) 
-//					console.error("concave! though hey, at least it worked"); //flipped combinatorics, didn't flip back
-//				else
-//					console.log("concave! though hey, at least it worked"); 
+				if(alexandrov_inspection_mode) 
+					console.error("concave! though hey, at least it worked"); //flipped combinatorics, didn't flip back
 				/*
 				 * Could see about drawing a perimeter by dotting all the places where minimum angles are close to pi, see what that tells you
 				 */
@@ -263,16 +202,12 @@ function correct_minimum_angles(vertices_buffer_array) {
 	}
 	
 	if(total_flips != 0){
-//		if(highlight_endings) 
-//			console.log("success, and it involved " + total_flips + " flips");
-//		else
-//			console.error("success, and it involved " + total_flips + " flips");
+		if(alexandrov_inspection_mode) 
+			console.error("success, and it involved " + total_flips + " flips");
 		total_flips = 0;
 	}
-//	else if(highlight_endings)
-//		console.error("success");
-//	else
-//		console.log("success");
+	else if(alexandrov_inspection_mode)
+		console.error("success");
 	
 	return 1;
 }
@@ -289,7 +224,7 @@ function newton_solve(final_curvatures_intended) {
 	var delta_radii;
 	var desired_jacobianmultiplication_output = get_curvatures(radii_guess,1); //This is the result of the function at the next place we intend to call it at it.
 	if(desired_jacobianmultiplication_output === 666 ){
-		if(newton_warnings) console.log("  newton: instantly bad")
+		if(newton_warnings) console.log("  newton: instantly bad");
 		return 666;
 	}
 	for( var i = 0; i < 12; i++)
@@ -413,36 +348,32 @@ function get_curvatures(input_radii, failure_is_acceptable) {
 //			if( cos_omega_ijk < -1.001 || 1.001 < cos_omega_ijk  )
 //				{report_array[0] = cos_gamma_ijk; report_array[1] = cos_rho_ij; report_array[2] = cos_rho_ik; report_array[3] = sin_rho_ij_TIMES_sin_rho_ik; report_array[4] = cos_omega_ijk;}
 			
-			if(!failure_is_acceptable && isNaN(Math.acos(cos_omega_ijk))){ //TODO remove from final thing
-				if(cos_gamma_ijk < -1 || 1 < cos_gamma_ijk){
-						if( polyhedron_edge_length[j][k] > polyhedron_edge_length[i][j] + polyhedron_edge_length[k][i]
-						 || polyhedron_edge_length[j][i] > polyhedron_edge_length[k][j] + polyhedron_edge_length[k][i]
-						 || polyhedron_edge_length[i][k] > polyhedron_edge_length[k][j] + polyhedron_edge_length[j][i] ){
-							console.error("triangle inequality violated");
-							console.log(polyhedron_edge_length[j][k], polyhedron_edge_length[i][j], polyhedron_edge_length[k][i])
-							console.log(i,j,k)
-							print_ATVIs();
-							console.log(flatnet_vertices.array)
-						}
-				}
-				if(cos_rho_ij < -1 || 1 < cos_rho_ij)
-					console.log("cos_rho_ij")
-				if(cos_rho_ik < -1 || 1 < cos_rho_ik){
-					console.log(polyhedron_edge_length[i][k]);
-					console.log("cos_rho_ik")
-				}
-				if(sin_rho_ij_TIMES_sin_rho_ik < -1 || 1 < sin_rho_ij_TIMES_sin_rho_ik)
-					console.log("sin_rho_ij_TIMES_sin_rho_ik");
-			}
+//			if(!failure_is_acceptable && isNaN(Math.acos(cos_omega_ijk))){ //TODO remove from final thing
+//				if(cos_gamma_ijk < -1 || 1 < cos_gamma_ijk){
+//						if( polyhedron_edge_length[j][k] > polyhedron_edge_length[i][j] + polyhedron_edge_length[k][i]
+//						 || polyhedron_edge_length[j][i] > polyhedron_edge_length[k][j] + polyhedron_edge_length[k][i]
+//						 || polyhedron_edge_length[i][k] > polyhedron_edge_length[k][j] + polyhedron_edge_length[j][i] ){
+//							console.error("triangle inequality violated");
+//							console.log(polyhedron_edge_length[j][k], polyhedron_edge_length[i][j], polyhedron_edge_length[k][i])
+//							console.log(i,j,k)
+//							print_ATVIs();
+//							console.log(flatnet_vertices.array)
+//						}
+//				}
+//				if(cos_rho_ij < -1 || 1 < cos_rho_ij)
+//					console.log("cos_rho_ij")
+//				if(cos_rho_ik < -1 || 1 < cos_rho_ik){
+//					console.log(polyhedron_edge_length[i][k]);
+//					console.log("cos_rho_ik")
+//				}
+//				if(sin_rho_ij_TIMES_sin_rho_ik < -1 || 1 < sin_rho_ij_TIMES_sin_rho_ik)
+//					console.log("sin_rho_ij_TIMES_sin_rho_ik");
+//			}
 		}
 		if(isNaN(curvature_array[i])) {
 			if(!failure_is_acceptable) {
 				//this is probably just a "don't allow this" situation
-//				console.error("crazy curvature");
-//				print_ATVIs();
-//				console.log(curvature_array)
-//				for(var i = 0; i < polyhedron_edge_length.length; i++)
-//					console.log(polyhedron_edge_length[i])
+				console.error("crazy curvature");
 			}
 			return 666;
 		}

@@ -4,8 +4,8 @@ function check_ATVIs_against_PELs(ATVIs, PELs){
 			var index1 = ATVIs[i*3+j];
 			var index2 = ATVIs[i*3+(j+1)%3];
 			
-//			if(PELs[index1][index2] === 666 )
-//				console.error("DISAGREEMENT", index1,index2);
+			if(PELs[index1][index2] === 666 )
+				console.error("DISAGREEMENT", index1,index2);
 		}
 	}
 }
@@ -18,31 +18,14 @@ function flip(ourindices){
 	var l_c = polyhedron_edge_length[ourindices[0]][ourindices[3]];
 	var l_d = polyhedron_edge_length[ourindices[1]][ourindices[3]];
 	
-//	for(var i = 0; i < ourindices.length; i++)
-//		for(var j = i+1; j < ourindices.length; j++)
-//			if(ourindices[i]==ourindices[j])
-//				console.log("crazy indices! ", ourindices)
-	
-	var violations = check_triangle_inequalities(0);
-	
 	var cosalpha  = get_cos_of_summed_acoses(get_cos_rule(l_b,l_a,old_edgelen),get_cos_rule(l_d,l_c,old_edgelen) );
 	var newlength = Math.sqrt( l_a*l_a + l_c*l_c - 2*l_a*l_c * cosalpha );
-	
-//	var cosalpha2 = get_cos_of_summed_acoses(get_cos_rule(l_a,l_b,old_edgelen),get_cos_rule(l_c,l_d,old_edgelen) );
-//	var newlength2 =Math.sqrt( l_b*l_b + l_d*l_d - 2*l_b*l_d * cosalpha2 );
-//	console.log("compare", newlength, newlength2) //shouldn't these be the same?
 	
 	polyhedron_edge_length[ourindices[0]][ourindices[1]] = 666;
 	polyhedron_edge_length[ourindices[1]][ourindices[0]] = 666;
 	
 	polyhedron_edge_length[ourindices[2]][ourindices[3]] = newlength;
 	polyhedron_edge_length[ourindices[3]][ourindices[2]] = newlength;
-	
-//	console.log("old triangle: ",ourindices[0],ourindices[2],ourindices[1]);
-//	console.log("old triangle: ",ourindices[0],ourindices[1],ourindices[3]);
-//	console.log("new triangle: ",ourindices[0],ourindices[2],ourindices[3]);
-//	console.log("new triangle: ",ourindices[2],ourindices[1],ourindices[3]);
-//	print_ATVIs();
 	
 	//want to change	ourindices[0 then 2 then 1 ] to	[0 then 2 then 3 ]
 	//and 				ourindices[0 then 1 then 3 ] to [2 then 1 then 3]
@@ -55,7 +38,6 @@ function flip(ourindices){
 				alexandrov_triangle_vertex_indices[i*3+(j+2)%3] === ourindices[1] 
 			 ){
 				alexandrov_triangle_vertex_indices[i*3+(j+2)%3] = ourindices[3];
-				{}//console.log("new triangle: ",ourindices[0],ourindices[2],ourindices[3]);
 				num_triangles_swapped++;
 			}
 			else
@@ -64,7 +46,6 @@ function flip(ourindices){
 				alexandrov_triangle_vertex_indices[i*3+(j+2)%3] === ourindices[3] 
 			 ){
 				alexandrov_triangle_vertex_indices[i*3+(j+0)%3] = ourindices[2];
-				{}//console.log("new triangle: ",ourindices[2],ourindices[1],ourindices[3]);
 				num_triangles_swapped++;
 			}
 		} 
@@ -104,10 +85,6 @@ function flip(ourindices){
 //			}		
 //		}
 //	}
-	
-//	if(check_triangle_inequalities(1) > violations){
-//		console.log("triangle inequality NOW violated")
-//	}
 }
 
 //	  0                0
@@ -119,8 +96,6 @@ function get_diamond_indices(topcorner,bottomcorner){
 	ourindices[1] = bottomcorner;
 	ourindices[2] = get_third_corner(topcorner,bottomcorner,1);
 	ourindices[3] = get_third_corner(topcorner,bottomcorner,0);
-//	if(ourindices[2] === ourindices[3])
-//		console.log("crazy identical indices on a diamond")
 	return ourindices;
 }
 
@@ -131,12 +106,6 @@ function get_third_corner(corner1,corner2,clockwise){
 				if(	alexandrov_triangle_vertex_indices[i*3+(0+j)%3] === corner1 &&
 					alexandrov_triangle_vertex_indices[i*3+(1+j)%3] === corner2 
 				  ){
-//					if(	polyhedron_edge_length[corner1][corner2]===666 )
-//						console.log(1,2);
-//					if(	polyhedron_edge_length[corner1][alexandrov_triangle_vertex_indices[i*3+(2+j)%3]] === 666)
-//						console.log(1,3);
-//					if(	polyhedron_edge_length[alexandrov_triangle_vertex_indices[i*3+(2+j)%3]][corner2] ===666)
-//						console.log(3,2);
 					return alexandrov_triangle_vertex_indices[i*3+(2+j)%3];
 				}	
 			}
@@ -144,12 +113,6 @@ function get_third_corner(corner1,corner2,clockwise){
 				if(	alexandrov_triangle_vertex_indices[i*3+(0+j)%3] === corner2 &&
 					alexandrov_triangle_vertex_indices[i*3+(1+j)%3] === corner1 
 				  ){
-//					if(	polyhedron_edge_length[corner1][corner2]===666 )
-//						console.log(1,2);
-//					if(	polyhedron_edge_length[corner1][alexandrov_triangle_vertex_indices[i*3+(2+j)%3]] === 666)
-//						console.log(1,3);
-//					if(	polyhedron_edge_length[alexandrov_triangle_vertex_indices[i*3+(2+j)%3]][corner2] ===666)
-//						console.log(3,2);
 					return alexandrov_triangle_vertex_indices[i*3+(2+j)%3];
 				}
 			}	
@@ -193,9 +156,6 @@ function delaunay_triangulate() {
 		}
 	}
 	
-//	console.log("S: ")
-//	for(var i = 0; i < S.length; i++)
-//		console.log(S[i]);
 	var flips = 0;
 	while( S.length > 0 ){
 		var ouredge = S.pop();
@@ -229,7 +189,6 @@ function delaunay_triangulate() {
 					S.push(Array(ourindices[index1],ourindices[index2]));
 				}
 			}
-//			console.log("flipped in prep")
 		}
 	}
 	
@@ -252,10 +211,10 @@ function polyhedron_index(i) {
 }
 
 function print_ATVIs(){
-//	for(var i = 0; i <20; i++)
-//		console.log(alexandrov_triangle_vertex_indices[i*3+0],
-//					alexandrov_triangle_vertex_indices[i*3+1],
-//					alexandrov_triangle_vertex_indices[i*3+2]);
+	for(var i = 0; i <20; i++)
+		console.log(alexandrov_triangle_vertex_indices[i*3+0],
+					alexandrov_triangle_vertex_indices[i*3+1],
+					alexandrov_triangle_vertex_indices[i*3+2]);
 }
 
 function check_triangle_inequalities(print_violations){

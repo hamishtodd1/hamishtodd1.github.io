@@ -20,8 +20,6 @@ function Map_To_Quasisphere() {
 			else
 				continue;
 		}
-
-		//TODO take out the stitchup and line stuff
 		
 		quasicutout_intermediate_vertices[lowest_unused_vertex].copy(quasilattice_default_vertices[i]);
 		quasicutout_intermediate_vertices[lowest_unused_vertex].applyAxisAngle(z_central_axis,-TAU/5); //rotates you to the left
@@ -152,7 +150,6 @@ function Map_To_Quasisphere() {
 		
 		for( var vertex_index = 0; vertex_index < lowest_unused_vertex; vertex_index++) {
 			var ourvertex;
-			//the dodeca_faceflatness thing here is about, with just the one face, those points outside it, which should be on the neo stitchup
 			if( vertex_index % 2 === 1 && i < nearby_quasicutouts.length){
 				if(nearby_quasicutouts[i][((vertex_index % 6)-1)/2] === 666)
 					ourvertex = get_vertex_position(quasicutouts_vertices_components[vertex_index],basis_vectors[i],ourcenters[i],radius);
@@ -168,35 +165,11 @@ function Map_To_Quasisphere() {
 			quasicutouts[i].geometry.attributes.position.array[vertex_index*3+0] = ourvertex.x;
 			quasicutouts[i].geometry.attributes.position.array[vertex_index*3+1] = ourvertex.y;
 			quasicutouts[i].geometry.attributes.position.array[vertex_index*3+2] = ourvertex.z;
-			
-			stitchup.geometry.attributes.position.array[lowest_unused_vertex * i * 3 + vertex_index*3+0] = ourvertex.x;
-			stitchup.geometry.attributes.position.array[lowest_unused_vertex * i * 3 + vertex_index*3+1] = ourvertex.y;
-			stitchup.geometry.attributes.position.array[lowest_unused_vertex * i * 3 + vertex_index*3+2] = ourvertex.z;
 		}
 		
 		quasicutouts[i].geometry.attributes.position.needsUpdate = true;
 		quasicutouts[i].geometry.index.needsUpdate = true;
 	}
-	
-	//The indices in stitchup of vertex i are i+num_stitchup_vertices_in_one_quasicutout*x for x = 0,1...
-	var lowest_unused_stitchup_edgepair = 0;
-	for(var i = 0; i < 55; i++){ //one quasicutout at a time
-		if((i % 11 > 2 && i % 11 != 5) && dodeca_openness != 0)
-			continue;
-		for(var j = 0; j < index_index_triangle_triplets.length; j++){
-			var quasicutout_containing_index2 = nearby_quasicutouts[i][ index_index_triangle_triplets[j][2] ];
-			if(quasicutout_containing_index2 === 666 )
-				continue; //not in the picture
-			stitchup_line_pairs[ lowest_unused_stitchup_edgepair*2 ] = index_index_triangle_triplets[j][0] + lowest_unused_vertex * i;
-			stitchup_line_pairs[lowest_unused_stitchup_edgepair*2+1] = index_index_triangle_triplets[j][1] + lowest_unused_vertex * quasicutout_containing_index2;
-//			if(!logged)console.log(index_index_triangle_triplets[j][2],quasicutout_containing_index2);
-			lowest_unused_stitchup_edgepair++;
-		}
-	}
-	for(var i = lowest_unused_stitchup_edgepair*2; i < stitchup_line_pairs.length; i++)
-		stitchup_line_pairs[i] = 0;
-	stitchup.geometry.attributes.position.needsUpdate = true;
-	stitchup.geometry.index.needsUpdate = true;
 	
 	if(stable_point_of_meshes_currently_in_scene !== 666){
 		for(var i = 0; i < quasicutouts.length; i++){
@@ -209,15 +182,182 @@ function Map_To_Quasisphere() {
 		}
 	}
 	
-	/* So now we need to go through all the triangles
-	 * And draw rectangles between their adjacent points
-	 * Soooo, for every face edge there are two extra points that need to be put down, both a certain w from the extremities.
-	 * Make sure to spherically project them too, prevent z-fighting!
-	 * So for face f, the indices of the extra points, to be worked out in the mapper, on edge e, will be O + f * 6 + e * 2 + 0 and O + f * 6 + e * 2 + 1
-	 * Where O is the offset, the number of vertices that are in the real corners, which you can find out by looking at that first face's largest index
-	 * Therefore by default, we will connect the actual face corners to those corners. Not hard to set up more indices after the face-generating code.
-	 * How many points will there need to be in quasicutout_meshes? largest_no_of_points + no_of_faces_on_that_mesh * 6 OR largest_no_of_faces * 6 + no_of_points_on_that_mesh
+	var lowest_unused_quasicutout_mesh_vertex = quasicutout_meshes[stable_point_of_meshes_currently_in_scene][0].geometry.vertices.length - NUM_QS_VERTICES_FOR_EDGES;
+	
+//	var EdgesToBeAdded = Array(); //two vertex indices and a triangle index per edge
+//	var NullTriangles = Array();
+//	var edgeradius = 0.1;
+//	
+//	for(var i = 0; i < quasicutout_meshes[stable_point_of_meshes_currently_in_scene][0].geometry.faces.length; i++){
+//		var ourfaceindices = new Uint16Array([
+//		    quasicutout_meshes[stable_point_of_meshes_currently_in_scene][0].geometry.faces[i].a,
+//		    quasicutout_meshes[stable_point_of_meshes_currently_in_scene][0].geometry.faces[i].b,
+//		    quasicutout_meshes[stable_point_of_meshes_currently_in_scene][0].geometry.faces[i].c]); //replace ourfaceindices with all that if you want
+//		
+//		if(ourfaceindices[0] === 0 && ourfaceindices[1] === 0 && ourfaceindices[2] === 0)
+//			NullTriangles.push(i);
+//		else {
+//			for(var j = 0; j < 3; j++){
+//				var v1 = ourfaceindices[j];
+//				var v2 = ourfaceindices[( j+1 ) % 3];
+//				
+//				var foundpartner = 0;
+//				
+//				//get the other shape that posesses this edge
+//				for(var k = 0; k < EdgesToBeAdded.length / 3; k++){
+//					if( (v1 === EdgesToBeAdded[k*2+0] && v2 === EdgesToBeAdded[k*2+1])
+//					 || (v2 === EdgesToBeAdded[k*2+0] && v1 === EdgesToBeAdded[k*2+1]) ){
+//						if(!triangle_in_same_shape(i, EdgesToBeAdded[k*2+2] ) ) {
+//							var startingvertex,endingvertex;
+//							if( v1 % 2 + v2 % 2 !== 2 ){
+//								if( v1 % 2 === 0 && v2 % 2 === 0 ){
+//									startingvertex = quasicutout_meshes[stable_point_of_meshes_currently_in_scene][0].geometry.vertices[v1];
+//									endingvertex = quasicutout_meshes[stable_point_of_meshes_currently_in_scene][0].geometry.vertices[v2];
+//								}
+//								else {
+//									var startingvertexindex;
+//									if( v1 % 2 === 1){
+//										startingvertexindex = v2;
+//										endingvertexindex = v1;
+//									}
+//									else {
+//										startingvertexindex = v1;
+//										endingvertexindex = v2;
+//									}
+//									
+//									startingvertex=quasicutout_meshes[stable_point_of_meshes_currently_in_scene][0].geometry.vertices[startingvertexindex];
+//									endingvertex = quasicutout_meshes[stable_point_of_meshes_currently_in_scene][0].geometry.vertices[endingvertexindex];
+//									
+//									endingvertex.lerp(startingvertex, dodeca_faceflatness);
+//								}
+//								
+//								var ourpeak = new THREE.Vector3();
+//								ourpeak.addVectors(startingvertex,endingvertex);
+//								ourpeak.setLength(edgeradius);
+//								
+//								var StartToEndNorm = endingvertex.clone();
+//								StartToEndNorm.sub(startingvertex);
+//								StartToEndNorm.normalize();
+//								
+//								ourpeak.applyAxisAngle(StartToEndNorm, -TAU/3); //speedup opportunity, be a bit smarter. Also this might be the wrong direction
+//								for( var c = 0; c < 3; c++) {
+//									//need to work out which vertices
+//									quasicutout_meshes[stable_point_of_meshes_currently_in_scene][0].geometry.vertices[lowest_unused_quasicutout_mesh_vertex].copy(startingvertex);
+//									quasicutout_meshes[stable_point_of_meshes_currently_in_scene][0].geometry.vertices[lowest_unused_quasicutout_mesh_vertex].add(ourpeak);
+//									lowest_unused_quasicutout_mesh_vertex++;
+//									
+//									quasicutout_meshes[stable_point_of_meshes_currently_in_scene][0].geometry.vertices[lowest_unused_quasicutout_mesh_vertex].copy(endingvertex);
+//									quasicutout_meshes[stable_point_of_meshes_currently_in_scene][0].geometry.vertices[lowest_unused_quasicutout_mesh_vertex].add(ourpeak);
+//									lowest_unused_quasicutout_mesh_vertex++;
+//									ourpeak.applyAxisAngle(StartToEndNorm, TAU/3);
+//								}
+//							}
+//						}
+//						
+//						EdgesToBeAdded.splice(k*2,3);
+//						
+//						foundpartner = 1;
+//						break; //we found the shape sharing edge
+//					}
+//				}
+//				
+//				//never found the shape sharing edge, this is either our first time on the edge or it's our "outline"
+//				if(foundpartner === 0){
+//					EdgesToBeAdded.push(v1);
+//					EdgesToBeAdded.push(v2);
+//					EdgesToBeAdded.push(i);
+//				}
+////				console.log(EdgesToBeAdded.length);
+//			}
+//		}
+//	}
+	
+//	for(var i = 0; i < EdgesToBeAdded.length / 3; i++){
+//		if(EdgesToBeAdded[i*3+2] === 0 )
+//			continue; //central pentagon
+//		
+//		var shape_cut = 0;
+//		
+//		for( var j = 0; j < NullTriangles.length; j++){
+//	    	if( triangle_in_same_shape(NullTriangles[j], EdgesToBeAdded[i*3+2]) ){
+//	    		shape_cut = 1;
+//	    		
+//	    		break; //the shape we're in has been cut, so at least ONE of the sides of this triangle should NOT get an edge, therefore let's not give it any 
+//		    	//Though it may still be the case that THIS side should =( will probably need to work out which.
+//	    		//But there are situations in which you should hold back on the line drawing, such as the pointed hexagon 
+//	    	}
+//		}
+//	      
+//    	if( shape_cut === 0 )
+//    		new_vertices_in_quasicutout += 6;
+//      		//So this shape IS completed within the quasicutout - so we DEFINITELY SHOULD draw a growing line. There's other situations for this too though
+//    		//unless it's that pointy hexagon for example :/ eg we are probably going to have an array. Not a big deal
+//	}
+	
+//	for(var i = lowest_unused_quasicutout_mesh_vertex; i < quasicutout_meshes[stable_point_of_meshes_currently_in_scene][0].geometry.vertices.length; i++){
+//		quasicutout_meshes[stable_point_of_meshes_currently_in_scene][0].geometry.vertices[i].set(0,0,0);
+//	}
+	
+	//the prism_triangle_indices thing is easy, you just need to put a load into every quasicutout mesh.
+	
+	/* Number of points needed in quasicutout_meshes?
+	 * You want to use put_unbased_triangularprism_in_buffer and prism_triangle_indices
+	 * 
+	 * We have arrays: EdgesToBeAdded and NullTriangles
+	 * So we have a for loop going through the triangles in a mesh.
+	 *   if all three indices are 0, put the triangle's index in NullTriangles
+	 *   else, go through each vertex pair on that triangle
+	 *     For each, check if it's in EdgesToBeAdded already
+	 *       If not, add it: index, index, then triangle index
+	 *       If so, check if it is in the same shape as this triangle
+	 *         If so, they're one shape, so don't add this edge (still maybe though?)
+	 *         If not, check whether either of the indices are odd
+	 *           If so, we're drawing a growing edge (a line going from the even-numbered one partway to the odd-numbered. 1-faceflatness is the partway)
+	 *           If not, regular edge.
+	 *           There may be other cases where we don't draw an edge at all, for example an edge that sits directly on the two-fold axis will have two growers this way.
+	 *       Then remove that edge from the array
+	 *       
+	 * All non-duplicate edges, i.e. what's left in the array...
+	 * We're not sure if we want an edge on them, because it may or may not be a shape that is completed by its opposite partner
+	 * May need to work it out offline. Start by assuming that they don't need ANY extra, but this probably won't work
+	 * 
+	 * One thing you could do would be look at the category of shape and if it's an incomplete category (i.e. there's half a thin rhomb) don't touch it, otherwise do
+	 *   If you have that drawing lines on the non-ordinary shapes, you could easily disable them by pretend-drawing an extra triangle to "finish" that shape
+	 * 
+	 * 
+	 * The conflict: 
+	 *   want like shapes to be like colors
+	 *	 want shapes to not change color when mouse is held down (could easily hide more of them though)
+	 *   and want neighbours to be different colors (tho not that much)
+	 * 
 	 */
+}
+
+function triangle_in_same_shape(triangle, othertriangle){
+	if( 9 <= triangle && triangle <= 13 &&
+		9 <= othertriangle && othertriangle <= 13 && 
+		othertriangle != triangle )
+		return 1;
+	
+	var partnerindex;
+	
+	if(triangle < 9 ){
+		if(triangle %2 === 1)
+			partnerindex = triangle + 1;
+		else
+			partnerindex = triangle - 1;
+	}
+	else if( triangle > 13){
+		if(triangle % 2 === 0)
+			partnerindex = triangle + 1;
+		else
+			partnerindex = triangle - 1;
+	}
+	
+	if(othertriangle === partnerindex)
+		return 1;
+	
+	return 0;
 }
 
 function get_vertex_position(local_vertices_components,basis_vectors,ourcenter,radius){
@@ -230,7 +370,7 @@ function get_vertex_position(local_vertices_components,basis_vectors,ourcenter,r
 	}
 	
 	//spherically project. TODO ~30-fold opportunity, store lengths or something?
-	if( dodeca_faceflatness < 0.999 ) { //randomly chosen number
+	if( dodeca_faceflatness != 1 ) {
 		ourvertex.sub(ourcenter);
 		
 		var radius_ratio;

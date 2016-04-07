@@ -1,3 +1,5 @@
+//The argument for donuts on the vertices is pretty strong http://jvi.asm.org/content/82/21/10341/F4.expansion.html
+
 function Update_net_variables() {
 	var old_net_vertices_closest_lattice_vertex = Array(net_vertices_closest_lattice_vertex.length);
 	for(var i = 0; i<net_vertices_closest_lattice_vertex.length; i++)

@@ -1,5 +1,9 @@
+//You still got problems with camera
+
 //not allowed to do anything with camera outside of here!
 function camera_changes_for_mode_switch(){
+	camera.quaternion.set(0,0,0,1);
+	
 	if(MODE == CUBIC_LATTICE_MODE || MODE=== FINAL_FORMATION_MODE ){
 		//We could make it shift from perspective to orthographic when the mouse is down, to mimic diffraction, or would that be too complex? If you're going to do it, mention it in the text.
 		var CLScale = 4.5;
@@ -105,10 +109,11 @@ function UpdateCamera() {
 	camera.updateMatrix();
 	camera.updateMatrixWorld();
 	
-	//watch the videos again when in need of inspiration
+	//watch the vlambeer / juice it or lose it videos again when in need of inspiration
+	//weird visual touches will improve it too, like Bret's tiny shadows.
 	
-	//probably a little shake whenever new shapes come in on the quasisphere, and a flash on them too
-	//it should follow the mouse a little bit. Finger?
+	//make it so that the irreg ico precisely replaces the CK ico.
+	//things should be drawn towards the mouse a little bit. Finger?
 	//take distance of mouse from center of screen, square root that, and move the camera towards the mouse by a multiple of that amount
 	//maybe have screenshake "energy"? like things can cause it to vibrate until it stops.
 	//think of it as a wooden peg maybe, that is basically rigid, but can be twanged in any direction

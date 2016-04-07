@@ -11,8 +11,8 @@ function init() {
 	//------------------need this so there's something in there for the first frame
 	ourclock.getDelta();
 	
-	//must be kept at bottom
-	ChangeScene(MODE);
+	INITIALIZED = 1;
+	attempt_launch();
 }
 
 function init_CK_and_irreg(){

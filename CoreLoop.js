@@ -4,10 +4,13 @@
  *  -get new form of video in (?)
  *  -your tuned round-off error compensators might be different on different CPUs.
  *  -get a person with a sense of color to look at everything
+ *  -sure you want things to be rotating in the way they are? Quasisphere, and perhaps CK as well, might feel better with buttons
  *  
  *  -make it feel good
  *  	-reduce latency
  *  	-all the effects in camerastuff
+ *  	-test on different setups
+ *  	-make work in different resolutions
  */
 
 function UpdateWorld() {
@@ -29,11 +32,16 @@ function UpdateWorld() {
 
 			Update_net_variables();			
 			Map_lattice();
+			
+			Update_picture(1);
+			if(!logged)
+				console.log(camera.quaternion);
+			logged = 1;
 			break;
 			
 		case IRREGULAR_MODE:
 			CheckButton(0);
-//			CheckButton(1);
+			CheckButton(1);
 			manipulate_vertices();
 			update_varyingsurface();
 			//correct_minimum_angles();
@@ -124,7 +132,7 @@ function ChangeScene(new_mode) {
 			scene.add(manipulation_surface);
 //			scene.add(varyingsurface);
 			scene.add(Button[0]);
-//			scene.add(Button[1]);
+			scene.add(Button[1]);
 			for( var i = 0; i < varyingsurface_cylinders.length; i++)
 				scene.add(varyingsurface_cylinders[i]);
 			for( var i = 0; i < varyingsurface_spheres.length; i++)
