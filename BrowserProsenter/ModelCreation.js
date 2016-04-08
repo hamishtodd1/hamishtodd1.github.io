@@ -42,7 +42,7 @@ function Set_up_first_model( geometryAtoms ) {
 	
 	ModelZero = new THREE.Object3D();
 	//note that "children.push" instead of "add" will make it a child, but the child won't have a parent!
-//	ModelZero.add( Create_sphere_representation_mesh( geometryAtoms ) );
+	ModelZero.add( Create_sphere_representation_mesh( geometryAtoms ) );
 	ModelZero.add( Create_trace_representation_mesh( geometryAtoms ) );
 //	ModelZero.add( Create_ribbon_representation_mesh( geometryAtoms ) );
 	
