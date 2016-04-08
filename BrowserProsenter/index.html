@@ -1,0 +1,45 @@
+<html>
+	<head>
+		<title>Protein viewer</title>
+		<style>
+			body { margin: 0; }
+		</style>
+	</head>
+	<body>
+		<!--these two scripts are purely for the ripped-off setup-->
+		<script type="x-shader/x-vertex" id="vertexShader">
+			varying vec3 vWorldPosition;
+			void main() {
+				vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
+				vWorldPosition = worldPosition.xyz;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="fragmentShader">
+			uniform vec3 topColor;
+			uniform vec3 bottomColor;
+			uniform float offset;
+			uniform float exponent;
+			varying vec3 vWorldPosition;
+			void main() {
+				float h = normalize( vWorldPosition + offset ).y;
+				gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( max( h , 0.0), exponent ), 0.0 ) ), 1.0 );
+			}
+		</script>
+		
+		<script src="three.min.js"></script>
+		<script src="PDBLoader.js"></script>
+		
+		<script src="RibbonRepresentation.js"></script>
+		<script src="MiscFunctions.js"></script>
+		
+		<script src="ModelCreation.js"></script>
+		<script src="MiscRepresentations.js"></script>
+		
+		<script src="Variables.js"></script>
+		<script src="Initialization.js"></script>
+		<script src="CoreLoop.js"></script>
+	</body>
+</html>
+
+<!--webglviewer is "appended" in init-->
