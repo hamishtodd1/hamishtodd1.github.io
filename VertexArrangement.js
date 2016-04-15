@@ -349,6 +349,7 @@ function manipulate_vertices() {
 	 * 	varyingsurface has the folded up nature to it as well
 	 * 	when we've tweaked the algorithm, 5 evaluations should be ok?
 	 */
+	console.log("ye")
 	
 	if(	!check_triangle_inversion() /*|| !check_edge_lengths(manipulation_surface.geometry.attributes.position.array) || !check_defects(manipulation_surface.geometry.attributes.position.array) extra checks only worth using if you suspect the above has not done its job*/ ) {
 		for( var i = 0; i < 66; i++)
@@ -358,6 +359,8 @@ function manipulate_vertices() {
 		if(	correct_minimum_angles(manipulation_surface.geometry.attributes.position.array) ) { //Maybe you should be able to predict what won't work and put correct_minimum_angles, and resetter, in coreloop.
 			for( var i = 0; i < 66; i++)
 				flatnet_vertices.array[i] = manipulation_surface.geometry.attributes.position.array[i];
+			
+			
 				
 			//now we need the "height" of the capsid
 			for(var i = 0; i<9; i++)
