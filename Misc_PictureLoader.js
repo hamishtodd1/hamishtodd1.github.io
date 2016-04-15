@@ -182,6 +182,8 @@ function Update_picture(index){
 				picture_objects[index].enabled = 1;
 				picture_objects[index].TimeThroughMovement = 0;
 				
+				//TODO get the whatever in the right position, and they will be enabled.
+				
 				if( 12 <= index && index < 16){
 					for(var i = 0; i < flatnet_vertices.array.length; i++)
 						flatnet_vertices.array[i] = setvirus_flatnet_vertices[index-12][i];
@@ -192,6 +194,14 @@ function Update_picture(index){
 					if( index === 5){ LatticeScale = 0.5; LatticeAngle = 0; }
 					if( index === 6){ LatticeScale=0.3779; LatticeAngle =0.714; }
 					if( index === 7){ LatticeScale = 1/3; LatticeAngle = 0.5236; }
+				}
+				else if(8 <= index && index < 12){
+					if(index === 8){cutout_vector0.set(-0.5,1.2139220723547204,0); 				cutout_vector1.set(1,0.85065080835204,0); }
+					if(index === 9){cutout_vector0.set( 0.309016994374947,1.801707324647194,0); cutout_vector1.set(1.809016994374948,0.2628655560595675,0); }
+					if(index ===10){cutout_vector0.set(1.809016994374948, 1.4384360606445132,0);cutout_vector1.set(1.9270509831248428, 1.2759762125280603,0); }
+					if(index ===11){cutout_vector0.set(0,3.47930636894770,0); 					cutout_vector1.set(3.309016994374948, 1.075164796641833,0); }
+					
+					cutout_vector0_player.copy(cutout_vector0);cutout_vector1_player.copy(cutout_vector1);
 				}
 			}
 		}
