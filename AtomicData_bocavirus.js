@@ -2,11 +2,17 @@
  * TODO
  * -colors
  * -very minor jitter (?) on DNA and maybe protein
+ * 
+ * -lights
+ * 
+ * "twelve sides" glow. 4 groups of 3, around tetrahedral axes.
+ * "clusters of five", same glow for the three clusters nearest the camera
  */
 
 /*
- * To make DNA springy, you put some vertices in the corners, and for every vertex, see which two they are closest to, and that's the edge
- * then get the length down the line connecting those two vertices, and its angle from the line point straight out of the center perpendicularly
+ * Springy DNA:
+ * for every strand, basis vectors at both their ends, plus another basis vector that is the cross product of those basis vectors
+ * When the player rotates, it gives momentum to the dodeca vertices. They're trapped in a narrow cone. 
  */
 
 function update_bocavirus() {

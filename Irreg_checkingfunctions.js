@@ -1,15 +1,15 @@
-function check_triangle_inversion(){
+function check_triangle_inversion(verticesarray, description_string){
 	for(var i = 0; i < 20; i++){
 		var cornerAindex = net_triangle_vertex_indices[ i * 3 + 0 ];
 		var cornerBindex = net_triangle_vertex_indices[ i * 3 + 1 ];
 		var cornerCindex = net_triangle_vertex_indices[ i * 3 + 2 ];
 		
 		if( point_to_the_right_of_line(	
-				manipulation_surface.geometry.attributes.position.array[ 0 + 3 * cornerAindex ],manipulation_surface.geometry.attributes.position.array[ 1 + 3 * cornerAindex ],
-				manipulation_surface.geometry.attributes.position.array[ 0 + 3 * cornerBindex ],manipulation_surface.geometry.attributes.position.array[ 1 + 3 * cornerBindex ],
-				manipulation_surface.geometry.attributes.position.array[ 0 + 3 * cornerCindex ],manipulation_surface.geometry.attributes.position.array[ 1 + 3 * cornerCindex ]
+				verticesarray[ 0 + 3 * cornerAindex ],verticesarray[ 1 + 3 * cornerAindex ],
+				verticesarray[ 0 + 3 * cornerBindex ],verticesarray[ 1 + 3 * cornerBindex ],
+				verticesarray[ 0 + 3 * cornerCindex ],verticesarray[ 1 + 3 * cornerCindex ]
 			)){
-			console.log("triangle inverted");
+			console.log(description_string, " triangle inverted");
 			return 0;
 		}
 	}
@@ -26,12 +26,12 @@ function check_defects(coords_array) {
 			for(var triangle_corner = 0; triangle_corner < 3; triangle_corner++) {
 				actual_index = net_triangle_vertex_indices[ triangle * 3 + triangle_corner];
 				if( vertex_identifications[corner][actual_index] !== 0) {
-					var corner_angle = corner_angle_from_indices(triangle, actual_index);
+					var corner_angle = corner_angle_from_indices(triangle, actual_index,coords_array);
 					if(corner_angle < 0.0006){
 						if(net_warnings)console.log("Error: Small angle");
 						return 0;
 					}
-					angular_defect += corner_angle_from_indices(triangle, actual_index);
+					angular_defect += corner_angle_from_indices(triangle, actual_index,coords_array);
 					corners_added++;
 				}
 			}
@@ -62,11 +62,11 @@ function corner_angle_from_indices(triangle_index, corner_vertex_index,coords_ar
 	}
 	
 	sideA = new THREE.Vector2(
-		flatnet_vertices.array[ 0 + 3 * cornerAindex ] - flatnet_vertices.array[ 0 + 3 * corner_vertex_index ],
-		flatnet_vertices.array[ 1 + 3 * cornerAindex ] - flatnet_vertices.array[ 1 + 3 * corner_vertex_index ] );
+		coords_array[ 0 + 3 * cornerAindex ] - coords_array[ 0 + 3 * corner_vertex_index ],
+		coords_array[ 1 + 3 * cornerAindex ] - coords_array[ 1 + 3 * corner_vertex_index ] );
 	sideB = new THREE.Vector2(
-		flatnet_vertices.array[ 0 + 3 * cornerBindex ] - flatnet_vertices.array[ 0 + 3 * corner_vertex_index ],
-		flatnet_vertices.array[ 1 + 3 * cornerBindex ] - flatnet_vertices.array[ 1 + 3 * corner_vertex_index ] );
+		coords_array[ 0 + 3 * cornerBindex ] - coords_array[ 0 + 3 * corner_vertex_index ],
+		coords_array[ 1 + 3 * cornerBindex ] - coords_array[ 1 + 3 * corner_vertex_index ] );
 		
 	return Math.acos(get_cos( sideA, sideB) );
 }

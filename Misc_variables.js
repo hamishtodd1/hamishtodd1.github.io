@@ -16,7 +16,7 @@ var QC_SPHERE_MODE = 5;
 var CUBIC_LATTICE_MODE = 6;
 var FINAL_FORMATION_MODE = 7;
 	
-var MODE = 5;
+var MODE = 4;
 
 //--------------Technologically fundamental
 var playing_field_width = 7*HS3;

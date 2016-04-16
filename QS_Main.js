@@ -19,13 +19,13 @@
  * 
  */
 
-/* Edges means optimization. Couldn't use buffers because of the faces... But maybe you could use a buffer just for the edges?
- * 
- * You couldn't do the face buffer because alpha. Buuut, you could have a separate copy of the thing. You need a great big refactor anyway. Eventually!
- * 
- * There is also the "smoosh them all together" strategy
- * 
- * And you can reduce the number of extra vertices required by half. You could probably work out all the edge positions using the triangles
+//Bug in web version: quasisphere didn't appear initially
+//Make pentagons flash when you say "based on pentagonal symmetry"
+//separate out scaling and rotation like on CK
+
+//HMMMM COULD JUST HAVE BLOCKERS AROUND THE PENTAGON. When you fade back, is there any way for them to continue obscure, but not obscure the parts that are fading in?
+
+/* And you can reduce the number of extra vertices required by half. You could probably work out all the edge positions using the triangles
  * 
  * You don't need to deduce the dodecahedron any more...
  */
@@ -156,6 +156,9 @@ function MoveQuasiLattice(){
 		{
 			var scalefactor = Mousedist / OldMousedist;
 			scalefactor = (scalefactor - 1) * 0.685 +1; //0.685 is the drag
+			
+			if(scalefactor !== 1 )
+				Disable_pictures();
 			
 			cutout_vector0_player.multiplyScalar(scalefactor);
 			cutout_vector1_player.multiplyScalar(scalefactor);

@@ -153,6 +153,8 @@ function settle_manipulationsurface_and_flatnet() {
 }
 
 function manipulate_vertices() {
+	check_triangle_inversion(flatnet_vertices.array, "real");
+	
 	var movement_vector = new THREE.Vector2(0,0);
 	if( isMouseDown ) {
 		if( vertex_tobechanged === 666 && capsidopenness === 1) {
@@ -199,6 +201,7 @@ function manipulate_vertices() {
 		}
 		
 		//manipulation_surface wants to adjust itself to become the flatnet
+		//TODO give them momentum
 		for(var i = 0; i < flatnet_vertices.array.length / 3; i++){
 			var displacement_vector = new THREE.Vector3(
 					flatnet_vertices.array[i*3+0] - manipulation_surface.geometry.attributes.position.array[i*3+0],
@@ -350,36 +353,37 @@ function manipulate_vertices() {
 	 * 	when we've tweaked the algorithm, 5 evaluations should be ok?
 	 */
 	
-	if(	!check_triangle_inversion() /*|| !check_edge_lengths(manipulation_surface.geometry.attributes.position.array) || !check_defects(manipulation_surface.geometry.attributes.position.array) extra checks only worth using if you suspect the above has not done its job*/ ) {
-		for( var i = 0; i < 66; i++)
-			manipulation_surface.geometry.attributes.position.array[i] = net_log[i];
+	if(	!check_triangle_inversion(manipulation_surface.geometry.attributes.position.array, "manip")
+			|| !correct_minimum_angles(manipulation_surface.geometry.attributes.position.array )
+			//extra checks only worth using if you suspect the above has not done its job
+//			|| !check_edge_lengths(flatnet_vertices.array) || !check_defects(manipulation_surface.geometry.attributes.position.array) 
+			) {
+		varyingsurface_spheres[vertex_tobechanged].material.color.r = 1;
+		varyingsurface_spheres[vertex_tobechanged].material.color.g = 0;
+		varyingsurface_spheres[vertex_tobechanged].material.color.b = 0;
+		//you can do this if you like, though having it move back may be nicer?
+//		for( var i = 0; i < 66; i++)
+//			manipulation_surface.geometry.attributes.position.array[i] = net_log[i];
 	}
-	else{
-		if(	correct_minimum_angles(manipulation_surface.geometry.attributes.position.array) ) { //Maybe you should be able to predict what won't work and put correct_minimum_angles, and resetter, in coreloop.
-			for( var i = 0; i < 66; i++)
-				flatnet_vertices.array[i] = manipulation_surface.geometry.attributes.position.array[i];
+	else { //Maybe you should be able to predict what won't work and put correct_minimum_angles, and resetter, in coreloop.
+		for( var i = 0; i < 66; i++)
+			flatnet_vertices.array[i] = manipulation_surface.geometry.attributes.position.array[i];
+		
+		Disable_pictures();
+		
+//			console.log(flatnet_vertices.array);
 			
-			Disable_pictures();
-			
-			console.log(flatnet_vertices.array);
-				
-			//now we need the "height" of the capsid
-			for(var i = 0; i<9; i++)
-				varyingsurface.geometry.attributes.position.array[i] = manipulation_surface.geometry.attributes.position.array[i];	
-			deduce_most_of_surface(0, varyingsurface.geometry.attributes.position);
-			var central_vertex = new THREE.Vector3(varyingsurface.geometry.attributes.position.array[0],varyingsurface.geometry.attributes.position.array[1],varyingsurface.geometry.attributes.position.array[2]);
-			var center_3D = new THREE.Vector3(varyingsurface.geometry.attributes.position.array[13*3+0],varyingsurface.geometry.attributes.position.array[13*3+1],varyingsurface.geometry.attributes.position.array[13*3+2]);
-			center_3D.sub(central_vertex);
-			center_3D.multiplyScalar(0.5);
-			varyingsurface_orientingradius[0] = center_3D.length();
-			center_3D.add(central_vertex);
-			varyingsurface_orientingradius[1] = center_3D.distanceTo(new THREE.Vector3(varyingsurface.geometry.attributes.position.array[1*3+0],varyingsurface.geometry.attributes.position.array[1*3+1],varyingsurface.geometry.attributes.position.array[1*3+2]) );
-			varyingsurface_orientingradius[2] = center_3D.distanceTo(new THREE.Vector3(varyingsurface.geometry.attributes.position.array[2*3+0],varyingsurface.geometry.attributes.position.array[2*3+1],varyingsurface.geometry.attributes.position.array[2*3+2]) );
-		}
-		else {
-			varyingsurface_spheres[vertex_tobechanged].material.color.r = 1;
-			varyingsurface_spheres[vertex_tobechanged].material.color.g = 0;
-			varyingsurface_spheres[vertex_tobechanged].material.color.b = 0;
-		}
+		//now we need the "height" of the capsid
+		for(var i = 0; i<9; i++)
+			varyingsurface.geometry.attributes.position.array[i] = manipulation_surface.geometry.attributes.position.array[i];	
+		deduce_most_of_surface(0, varyingsurface.geometry.attributes.position);
+		var central_vertex = new THREE.Vector3(varyingsurface.geometry.attributes.position.array[0],varyingsurface.geometry.attributes.position.array[1],varyingsurface.geometry.attributes.position.array[2]);
+		var center_3D = new THREE.Vector3(varyingsurface.geometry.attributes.position.array[13*3+0],varyingsurface.geometry.attributes.position.array[13*3+1],varyingsurface.geometry.attributes.position.array[13*3+2]);
+		center_3D.sub(central_vertex);
+		center_3D.multiplyScalar(0.5);
+		varyingsurface_orientingradius[0] = center_3D.length();
+		center_3D.add(central_vertex);
+		varyingsurface_orientingradius[1] = center_3D.distanceTo(new THREE.Vector3(varyingsurface.geometry.attributes.position.array[1*3+0],varyingsurface.geometry.attributes.position.array[1*3+1],varyingsurface.geometry.attributes.position.array[1*3+2]) );
+		varyingsurface_orientingradius[2] = center_3D.distanceTo(new THREE.Vector3(varyingsurface.geometry.attributes.position.array[2*3+0],varyingsurface.geometry.attributes.position.array[2*3+1],varyingsurface.geometry.attributes.position.array[2*3+2]) );
 	}
 }
