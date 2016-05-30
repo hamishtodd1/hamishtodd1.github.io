@@ -52,11 +52,11 @@ function pre_download_init()
 	set_vector_field();
 	
 	//maybe it should actually be blue for resistant, red for sick, yellow for normal?
-	loadtexture_initially('http://hamishtodd1.github.io/SysmicFiles/Absent.png', 0);
-	loadtexture_initially('http://hamishtodd1.github.io/SysmicFiles/Susceptible.png', 1);
-	loadtexture_initially('http://hamishtodd1.github.io/SysmicFiles/Sick.png', 2);
-	loadtexture_initially('http://hamishtodd1.github.io/SysmicFiles/Resistant.png', 3);
-	loadtexture_initially('http://hamishtodd1.github.io/SysmicFiles/Dead.png', 4);
+	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/Data/Absent.png', 0);
+	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/Data/Susceptible.png', 1);
+	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/Data/Sick.png', 2);
+	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/Data/Resistant.png', 3);
+	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/Data/Dead.png', 4);
 	
 	EMOJII_SUSCEPTIBLE = 1;
 	EMOJII_SICK = 2;
@@ -74,7 +74,7 @@ function loadtexture_initially(linkstring, picindex)
 			attempt_launch();
 		},
 		function ( xhr ) {}, function ( xhr ) {
-			console.log( 'texture loading error, switch to using the other code in this function' );
+			console.log( 'texture loading error' );
 		}
 	);
 }
