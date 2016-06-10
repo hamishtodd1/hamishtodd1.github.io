@@ -72,6 +72,7 @@ document.addEventListener( 'keydown', function(event)
 	
 	if(event.keyCode === 65 )
 	{
+		scene.remove(picture_objects[pictoshow-1]);
 		scene.add(picture_objects[pictoshow]);
 		pictoshow++;
 	}
