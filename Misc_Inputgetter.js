@@ -66,7 +66,7 @@ function ReadInput() {
 document.addEventListener( 'keydown', function(event)
 {
 	//65, 83, 68, 70, 71. A: HIV appears. S: switch to irreg. D: switch appears. F: pics pop up. G: gaps flash
-	
+	console.log(event.keyCode)
 	
 	if(event.keyCode === 65 )
 	{
