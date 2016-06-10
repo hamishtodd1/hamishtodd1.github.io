@@ -93,7 +93,7 @@ document.addEventListener( 'keydown', function(event)
 		scene.add(Button[0]);
 	}
 	
-	if(event.keyCode === 70 )
+	if(event.keyCode === 71 )
 	{
 		for(var i = 12; i < 16; i++)
 			scene.add(picture_objects[i]);
