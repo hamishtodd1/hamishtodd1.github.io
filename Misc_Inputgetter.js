@@ -84,6 +84,12 @@ document.addEventListener( 'keydown', function(event)
 	
 	if(event.keyCode === 68 )
 	{
+		ytplayer.playVideo();
+		
+	}
+	
+	if(event.keyCode === 70 )
+	{
 		scene.add(Button[0]);
 	}
 	
@@ -91,11 +97,6 @@ document.addEventListener( 'keydown', function(event)
 	{
 		for(var i = 12; i < 16; i++)
 			scene.add(picture_objects[i]);
-	}
-	
-	if(event.keyCode === 71 )
-	{
-		
 	}
 	
 }, false );
