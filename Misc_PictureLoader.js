@@ -77,8 +77,8 @@ function loadpics(){
 	
 	picture_objects[12].name = "http://hamishtodd1.github.io/Data/T4 file.png";
 	picture_objects[13].name = "http://hamishtodd1.github.io/Data/Phi29 file.png";
-	picture_objects[14].name = "http://hamishtodd1.github.io/Data/HIV file.png";
-	picture_objects[15].name = "http://hamishtodd1.github.io/Data/Herpes file.png";
+	picture_objects[14].name = "http://hamishtodd1.github.io/Data/Herpes file.png";
+	picture_objects[15].name = "http://hamishtodd1.github.io/Data/HIV file.png";
 	
 	for(var i = 1; i < picture_objects.length; i++){ //all except the first
 		picture_objects[i].enabled = 0; //switch to 1 when clicked, switch all to 0 when player changes anything

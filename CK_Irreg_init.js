@@ -87,7 +87,7 @@ function init_CK_and_irreg(){
 	]);
 	//HIV
 	var S3 = Math.sqrt(3);
-	setvirus_flatnet_vertices[2] = new Float32Array([
+	setvirus_flatnet_vertices[3] = new Float32Array([
  		0,0,0,
  		S3,-1,0,
  		
@@ -119,9 +119,9 @@ function init_CK_and_irreg(){
 	for(var i = 0; i < setvirus_flatnet_vertices[2].length; i++)
 		setvirus_flatnet_vertices[2][i] *= 0.3;
 	//Herpes
-	setvirus_flatnet_vertices[3] = new Float32Array(66);
-	for(var i = 0; i < setvirus_flatnet_vertices[3].length; i++)
-		setvirus_flatnet_vertices[3][i] = flatnet_vertices_numbers[i];
+	setvirus_flatnet_vertices[2] = new Float32Array(66);
+	for(var i = 0; i < flatnet_vertices_numbers.length; i++)
+		setvirus_flatnet_vertices[2][i] = flatnet_vertices_numbers[i];
 		
 	net_triangle_vertex_indices = new Uint32Array([
 		2,1,0,
