@@ -61,3 +61,37 @@ function ReadInput() {
 	
 	react_to_video();
 }
+
+//keyboard crap. Currently using "preventdefault" then "return" on everything you use, there's probably a better way
+document.addEventListener( 'keydown', function(event)
+{
+	//65, 83, 68, 70, 71. A: HIV appears. S: switch to irreg. D: switch appears. F: pics pop up. G: gaps flash
+	
+	
+	if(event.keyCode === 65 )
+	{
+		scene.add(picture_objects[0]);
+	}
+	
+	if(event.keyCode === 83 )
+	{
+		ChangeScene(IRREGULAR_MODE);
+	}
+	
+	if(event.keyCode === 68 )
+	{
+		scene.add(Button[0]);
+	}
+	
+	if(event.keyCode === 70 )
+	{
+		for(var i = 12; i < 16; i++)
+			scene.add(picture_objects[i]);
+	}
+	
+	if(event.keyCode === 71 )
+	{
+		
+	}
+	
+}, false );

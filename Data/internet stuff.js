@@ -35,8 +35,8 @@ function react_to_video(){
 	secondsthroughvid += delta_t;
 		
 	for(var i = 0; i < section_finishing_time.length /*or whichever mode is last*/; i++) {
-		if( section_finishing_time[i-1] <= secondsthroughvid && secondsthroughvid < section_finishing_time[i] && MODE != i)
-			ChangeScene(i);
+//		if( section_finishing_time[i-1] <= secondsthroughvid && secondsthroughvid < section_finishing_time[i] && MODE != i)
+//			ChangeScene(i);
 	}
 	for(var i = 0; i < pausing_times.length /*or whichever mode is last*/; i++) {
 		if( pausing_times[i] <= secondsthroughvid && secondsthroughvid < pausing_times[i] + 1 ){
@@ -84,6 +84,6 @@ function attempt_launch(){
 	
 	MODE = 0;
 	ChangeScene(MODE);
-	scene.add(picture_objects[0]);
+//	scene.add(picture_objects[0]);
 	render();
 }
