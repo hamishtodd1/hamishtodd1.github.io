@@ -82,7 +82,7 @@ document.addEventListener( 'keydown', function(event)
 		ChangeScene(IRREGULAR_MODE);
 	}
 	
-	if(event.keyCode === 68 )
+	if(event.keyCode === 68 ) //D
 	{
 		ytplayer.playVideo();
 		
@@ -95,6 +95,7 @@ document.addEventListener( 'keydown', function(event)
 	
 	if(event.keyCode === 71 )
 	{
+		ytplayer.playVideo();
 		for(var i = 12; i < 16; i++)
 			scene.add(picture_objects[i]);
 	}
