@@ -116,8 +116,8 @@ function init_CK_and_irreg(){
  		0,-4,0,
  		-3*S3,-7,0
  		]);
-	for(var i = 0; i < setvirus_flatnet_vertices[2].length; i++)
-		setvirus_flatnet_vertices[2][i] *= 0.3;
+	for(var i = 0; i < setvirus_flatnet_vertices[3].length; i++)
+		setvirus_flatnet_vertices[3][i] *= 0.3;
 	//Herpes
 	setvirus_flatnet_vertices[2] = new Float32Array(66);
 	for(var i = 0; i < flatnet_vertices_numbers.length; i++)
