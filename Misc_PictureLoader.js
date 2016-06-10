@@ -43,7 +43,7 @@ var pictures_loaded = 0;
 function loadpics(){
 	for(var i = 0; i < picture_objects.length; i++){
 		var ourwidth, ourheight;
-		if(i === 0){
+		if(i < 5){
 			ourwidth = playing_field_width;
 			ourheight = playing_field_width;
 		} else if( i < 3){
@@ -61,11 +61,11 @@ function loadpics(){
 	
 	picture_objects[0].name = "http://hamishtodd1.github.io/Data/warning.png";
 	
-	picture_objects[1].name = "http://hamishtodd1.github.io/Data/1 - BV.jpg";
-	picture_objects[2].name = "http://hamishtodd1.github.io/Data/9 - N4.gif";
-	picture_objects[3].name = "http://hamishtodd1.github.io/Data/13 - RV.png";
+	picture_objects[1].name = "http://hamishtodd1.github.io/Data/HIVscreencap.png";
+	picture_objects[2].name = "http://hamishtodd1.github.io/Data/Bonobos.jpg";
+	picture_objects[3].name = "http://hamishtodd1.github.io/Data/TRIM5.png";	
+	picture_objects[4].name = "http://hamishtodd1.github.io/Data/HIV variety.png";
 	
-	picture_objects[4].name = "http://hamishtodd1.github.io/Data/3 - PV.png";
 	picture_objects[5].name = "http://hamishtodd1.github.io/Data/4 - SFV.png";
 	picture_objects[6].name = "http://hamishtodd1.github.io/Data/7 - CV.png"; //better to claim it's p2? Actually it's HPV :(
 	picture_objects[7].name = "http://hamishtodd1.github.io/Data/12 - RVFV.png";
@@ -80,7 +80,7 @@ function loadpics(){
 	picture_objects[14].name = "http://hamishtodd1.github.io/Data/Herpes file.png";
 	picture_objects[15].name = "http://hamishtodd1.github.io/Data/HIV file.png";
 	
-	for(var i = 1; i < picture_objects.length; i++){ //all except the first
+	for(var i = 5; i < picture_objects.length; i++){ //all except the first
 		picture_objects[i].enabled = 0; //switch to 1 when clicked, switch all to 0 when player changes anything
 		picture_objects[i].TimeThroughMovement = 100; //start at a place where you're settled
 		

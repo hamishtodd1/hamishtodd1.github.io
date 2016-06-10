@@ -62,6 +62,8 @@ function ReadInput() {
 	react_to_video();
 }
 
+var pictoshow = 1;
+
 //keyboard crap. Currently using "preventdefault" then "return" on everything you use, there's probably a better way
 document.addEventListener( 'keydown', function(event)
 {
@@ -70,7 +72,8 @@ document.addEventListener( 'keydown', function(event)
 	
 	if(event.keyCode === 65 )
 	{
-		scene.add(picture_objects[0]);
+		scene.add(picture_objects[pictoshow]);
+		pictoshow++;
 	}
 	
 	if(event.keyCode === 83 )
