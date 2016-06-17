@@ -131,14 +131,12 @@ function ChangeScene(new_mode) {
 		case IRREGULAR_MODE:
 			scene.add(manipulation_surface);
 //			scene.add(varyingsurface);
-			scene.add(Button[0]);
 			for( var i = 0; i < varyingsurface_cylinders.length; i++)
 				scene.add(varyingsurface_cylinders[i]);
 			for( var i = 0; i < varyingsurface_spheres.length; i++)
 				scene.add(varyingsurface_spheres[i]);
 			
-			for(var i = 12; i < 16; i++)
-				scene.add(picture_objects[i]);
+			
 			break;
 			
 		case QC_SPHERE_MODE:

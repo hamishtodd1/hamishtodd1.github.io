@@ -4,8 +4,8 @@ tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-var section_finishing_time = Array(29,177,295,548,738,909,animation_beginning_second,99999999999);
-var pausing_times = Array(36.3,185,321.3,550,747.9,931);
+var section_finishing_time = Array(6000,6000,6000,6000,6000,6000,animation_beginning_second,99999999999);
+var pausing_times = Array(62,75,321.3,550,747.9,931);
 var secondsthroughvid = 0;
 
 function react_to_video(){
@@ -35,8 +35,8 @@ function react_to_video(){
 	secondsthroughvid += delta_t;
 		
 	for(var i = 0; i < section_finishing_time.length /*or whichever mode is last*/; i++) {
-		if( section_finishing_time[i-1] <= secondsthroughvid && secondsthroughvid < section_finishing_time[i] && MODE != i)
-			ChangeScene(i);
+//		if( section_finishing_time[i-1] <= secondsthroughvid && secondsthroughvid < section_finishing_time[i] && MODE != i)
+//			ChangeScene(i);
 	}
 	for(var i = 0; i < pausing_times.length /*or whichever mode is last*/; i++) {
 		if( pausing_times[i] <= secondsthroughvid && secondsthroughvid < pausing_times[i] + 1 ){
@@ -58,10 +58,11 @@ function onPlayerReady(event) {
  * Xa_m6yggMdU: V2 video
  * D_DkCTT8azI: V2 resized
  * 7JlMIJKTUVc: final v2
+ * N5StSZEnoQs: SOWN excerpt
  */
 function onYouTubeIframeAPIReady(){
 	ytplayer = new YT.Player('player', {
-		videoId:'7JlMIJKTUVc',
+		videoId:'N5StSZEnoQs',
 		height: window_height,
 		width: window_height / 3 * 4,//9:16 is probably pushing it too far, but you should try it
 		events: {
@@ -84,6 +85,6 @@ function attempt_launch(){
 	
 	MODE = 0;
 	ChangeScene(MODE);
-	scene.add(picture_objects[0]);
+//	scene.add(picture_objects[0]);
 	render();
 }

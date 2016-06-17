@@ -61,3 +61,43 @@ function ReadInput() {
 	
 	react_to_video();
 }
+
+var pictoshow = 1;
+
+//keyboard crap. Currently using "preventdefault" then "return" on everything you use, there's probably a better way
+document.addEventListener( 'keydown', function(event)
+{
+	//65, 83, 68, 70, 71. A: HIV appears. S: switch to irreg. D: switch appears. F: pics pop up. G: gaps flash
+	console.log(event.keyCode)
+	
+	if(event.keyCode === 65 )
+	{
+		scene.remove(picture_objects[pictoshow-1]);
+		scene.add(picture_objects[pictoshow]);
+		pictoshow++;
+	}
+	
+	if(event.keyCode === 83 )
+	{
+		ChangeScene(IRREGULAR_MODE);
+	}
+	
+	if(event.keyCode === 68 ) //D
+	{
+		ytplayer.playVideo();
+		
+	}
+	
+	if(event.keyCode === 70 )
+	{
+		scene.add(Button[0]);
+	}
+	
+	if(event.keyCode === 71 )
+	{
+		ytplayer.playVideo();
+		for(var i = 12; i < 16; i++)
+			scene.add(picture_objects[i]);
+	}
+	
+}, false );
