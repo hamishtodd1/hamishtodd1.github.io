@@ -59,6 +59,7 @@ function ReadInput() {
 	isMouseDown_previously = isMouseDown;
 	isMouseDown = InputObject.isMouseDown;
 	
+	console.log("hey")
 	react_to_video();
 }
 
