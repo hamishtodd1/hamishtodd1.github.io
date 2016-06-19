@@ -34,8 +34,10 @@ function react_to_video(){
 	}
 	secondsthroughvid += delta_t;
 	
-	var newwidth = window_width * (1-secondsthroughvid/6); 
+	var newwidth = window_width * (1-secondsthroughvid/6);
+	if(newwidth < 0) newwidth = 0;
 	renderer.setSize( newwidth, window_height );
+	console.log(newwidth)
 		
 	for(var i = 0; i < section_finishing_time.length /*or whichever mode is last*/; i++) {
 //		if( section_finishing_time[i-1] <= secondsthroughvid && secondsthroughvid < section_finishing_time[i] && MODE != i)
