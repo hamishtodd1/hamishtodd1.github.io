@@ -33,6 +33,9 @@ function react_to_video(){
 		//there are much better ways of checking for a pause but this is not hugely important
 	}
 	secondsthroughvid += delta_t;
+	
+	var newwidth = window_width * (1-secondsthroughvid/6); 
+	renderer.setSize( newwidth, window_height );
 		
 	for(var i = 0; i < section_finishing_time.length /*or whichever mode is last*/; i++) {
 //		if( section_finishing_time[i-1] <= secondsthroughvid && secondsthroughvid < section_finishing_time[i] && MODE != i)
