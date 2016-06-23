@@ -55,9 +55,9 @@ function update_ourobject()
 	OurObject.velocity.add(OurObject.acceleration);
 	
 //	if( OurObject.velocity.length() > displacementFromDest.length() )
-//		OurObject.position.copy(PointOfFocus);
+		OurObject.position.copy(PointOfFocus);
 //	else
-		OurObject.position.add(OurObject.velocity);
+//		OurObject.position.add(OurObject.velocity);
 	
 	//there's a sphere, centered on you
 	//we will change the position of the protein based on where you are looking
