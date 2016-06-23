@@ -2,6 +2,8 @@ function UpdateWorld(Models,Hands)
 {	
 	update_ourobject();
 	update_loadingsign();
+	
+	Camera.rotateOnAxis(Central_Z_axis, 0.003);
 }
 
 function Render() {

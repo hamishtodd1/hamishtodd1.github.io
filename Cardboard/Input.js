@@ -4,7 +4,7 @@
 
 function ReadInput()
 {	
-	Camera.position.set(0,0,0); //we're doing this to simulate a cardboard.
+//	Camera.position.set(0,0,0); //we're doing this to simulate a cardboard.
 	
 	PointOfFocus.set(0,0,-1);
 	Camera.localToWorld(PointOfFocus);
@@ -18,6 +18,9 @@ document.addEventListener('deviceorientation', function setOrientationControls(e
 	if (!e.alpha) {
 		return;
 	}
+	
+	var sphere = new THREE.Mesh( new THREE.SphereGeometry( 0.3, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
+	OurObject.add( sphere );
 
 	OurOrientationControls = new THREE.DeviceOrientationControls(Camera, true);
 	OurOrientationControls.connect();
@@ -35,6 +38,13 @@ document.addEventListener( 'mousedown', function(event)
 
 	THREEx.FullScreen.request(Renderer.domElement);
 }, false );
+
+document.addEventListener('touchstart', function(e)
+{
+	event.preventDefault();
+	
+	THREEx.FullScreen.request(Renderer.domElement);
+}, false)
 
 window.addEventListener( 'resize', function(event)
 {
