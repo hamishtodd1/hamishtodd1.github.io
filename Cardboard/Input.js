@@ -3,23 +3,44 @@
 
 
 function ReadInput()
-{
-	if(typeof OurVRControls !== 'undefined')
-		OurVRControls.update();
-	
+{	
 	Camera.position.set(0,0,0); //we're doing this to simulate a cardboard.
 	
 	PointOfFocus.set(0,0,-1);
 	Camera.localToWorld(PointOfFocus);
 	
-//	appauling_hacky_model_loader();
+	appauling_hacky_model_loader();
 }
 
+
+//Our preferred controls via DeviceOrientation
+document.addEventListener('deviceorientation', function setOrientationControls(e) {
+	if (!e.alpha) {
+		return;
+	}
+
+	OurOrientationControls = new THREE.DeviceOrientationControls(Camera, true);
+	OurOrientationControls.connect();
+	OurOrientationControls.update();
+
+	document.removeEventListener('deviceorientation', setOrientationControls, true);
+}, true);
+
+//less hacky but still shit
 document.addEventListener( 'mousedown', function(event) 
 {
 	event.preventDefault();
 	
-	placeholder_interpret_ngl();
+//	placeholder_interpret_ngl();
+
+	THREEx.FullScreen.request(Renderer.domElement);
+}, false );
+
+window.addEventListener( 'resize', function(event)
+{
+	Renderer.setSize( window.innerWidth, window.innerHeight );
+	Camera.aspect = Renderer.domElement.width / Renderer.domElement.height;
+	Camera.updateProjectionMatrix();
 }, false );
 
 document.addEventListener( 'keydown', function(event)

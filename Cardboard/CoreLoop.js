@@ -15,5 +15,5 @@ function Render() {
 	requestAnimationFrame( function(){
 		Render();
 	} );
-	OurVREffect.render( Scene, Camera ); //will be fine if VR is not enabled
+	OurStereoEffect.render( Scene, Camera ); //will be fine if VR is not enabled
 }

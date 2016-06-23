@@ -11,7 +11,7 @@ function Initialize()
 		function ( xhr ) { console.error( "couldn't load font" ); }
 	);
 	
-	var Renderer = new THREE.WebGLRenderer({ antialias: true }); //antialiasing would be nice and we're only aiming for 30fps
+	Renderer = new THREE.WebGLRenderer({ antialias: true }); //antialiasing would be nice and we're only aiming for 30fps
 	Renderer.setClearColor( 0x101010 );
 	Renderer.setPixelRatio( window.devicePixelRatio );
 	Renderer.setSize( window.innerWidth, window.innerHeight );
@@ -32,19 +32,7 @@ function Initialize()
 	Camera.position.set(0,0,0.6); //initial state subject to change! you may not want them on the floor. Owlchemy talked about this
 	Camera.lookAt(new THREE.Vector3());
 	
-	OurVREffect = new THREE.VREffect( Renderer );
-	
-	//compatibility is a MASSIVE thing, can all be done here.
-	if ( WEBVR.isLatestAvailable() === false ){
-//		document.body.appendChild( WEBVR.getMessage() );
-	}
-	else
-	{
-		//This is where the split could get more fundamental. Many things to take into account: it may be a google cardboard.
-		OurVRControls = new THREE.VRControls( Camera,Renderer.domElement );
-		if ( WEBVR.isAvailable() === true )
-			document.body.appendChild( WEBVR.getButton( OurVREffect ) );
-	}
+	OurStereoEffect = new THREE.StereoEffect( Renderer );
 	
 	Add_stuff_from_demo();
 	

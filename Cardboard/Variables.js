@@ -27,6 +27,8 @@ stage = new NGL.Stage();
 var PointOfFocus = new THREE.Vector3(); //where the user is looking
 
 /*
+ * Don't rush it out with a bad fov or whatever
+ * 
  * you probably want a floor
  * 
  * Coooooould look into basic collaboration with GearVR. Two people in there could talk to one another, they could have a cursor that's just on the protein

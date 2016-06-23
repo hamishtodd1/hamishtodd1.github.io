@@ -4,19 +4,15 @@ function get_NGL_protein()
 	//Trp-Cage Miniprotein Construct TC5b, 20 residues: 1l2y. Rubisco: 1rcx. Insulin: 4ins
 	var testproteinlink = "http://files.rcsb.org/download/4ins.pdb";
 	var testobjlink = "http://threejs.org/examples/obj/male02/male02.obj";
-	
-	console.log("waa")
-	
+		
 	var xhr = new XMLHttpRequest();
 	xhr.open( "GET", "http://files.rcsb.org/download/4ins.pdb", true );
 	xhr.addEventListener( 'load', function( event ){
 		var blob = new Blob( [ xhr.response ], { type: 'application/octet-binary'} );
 		
-		console.log("woo")
 		stage.loadFile( blob, {
 				ext: "pdb", defaultRepresentation: true
 		} ).then( function( o ){
-			console.log("wee")
 			o.addRepresentation( "surface" );
 			console.log(o.reprList);
 			loose_surface = o.reprList[3].repr;
@@ -40,13 +36,16 @@ function appauling_hacky_model_loader()
 	if( frames_since_last_unsuccessful_poll_of_model === -1)
 		return;
 	
-	if( frames_since_last_poll_of_model < 20 )
+	if( frames_since_last_unsuccessful_poll_of_model < 20 )
 	{
-		frames_since_last_poll_of_model++;
+		frames_since_last_unsuccessful_poll_of_model++;
 		return;
 	}
 	
-	frames_since_last_poll_of_model = 0;
+	frames_since_last_unsuccessful_poll_of_model = 0;
+	
+	if(typeof loose_surface.bufferList[0] === 'undefined')
+		return;
 	
 	if( loose_surface.bufferList[0].geometry.attributes.position.array.length !== previous_position_length )
 	{
@@ -67,7 +66,7 @@ function appauling_hacky_model_loader()
 		return;
 	}
 	
-	//you'll have trouble if there is actually a point
+	//you'll have trouble if there is actually a point where it becomes stable
 	
 	//model is stable
 	placeholder_interpret_ngl();
