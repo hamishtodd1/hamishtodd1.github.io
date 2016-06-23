@@ -9,25 +9,10 @@ function ReadInput()
 	PointOfFocus.set(0,0,-1);
 	Camera.localToWorld(PointOfFocus);
 	
-//	appauling_hacky_model_loader();
-}
-
-
-//Our preferred controls via DeviceOrientation
-window.addEventListener('deviceorientation', function setOrientationControls(e) {
-	if (!e.alpha) {
-		return;
-	}
-	
-//	var sphere = new THREE.Mesh( new THREE.SphereGeometry( 0.3, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
-//	OurObject.add( sphere );
-
-	OurOrientationControls = new THREE.DeviceOrientationControls(Camera, true);
-	OurOrientationControls.connect();
 	OurOrientationControls.update();
-
-	window.removeEventListener('deviceorientation', setOrientationControls, true);
-}, true);
+	
+	appauling_hacky_model_loader();
+}
 
 //less hacky but still shit
 document.addEventListener( 'mousedown', function(event) 

@@ -31,6 +31,8 @@ function Initialize()
 	Camera.position.set(0,0,0.6); //initial state subject to change! you may not want them on the floor. Owlchemy talked about this
 	Camera.lookAt(new THREE.Vector3());
 	
+	OurOrientationControls = new THREE.DeviceOrientationControls(Camera);
+	
 	OurStereoEffect = new THREE.StereoEffect( Renderer );
 	
 	Add_stuff_from_demo();
