@@ -19,8 +19,8 @@ window.addEventListener('deviceorientation', function setOrientationControls(e) 
 		return;
 	}
 	
-	var sphere = new THREE.Mesh( new THREE.SphereGeometry( 0.3, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
-	OurObject.add( sphere );
+//	var sphere = new THREE.Mesh( new THREE.SphereGeometry( 0.3, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
+//	OurObject.add( sphere );
 
 	OurOrientationControls = new THREE.DeviceOrientationControls(Camera, true);
 	OurOrientationControls.connect();
