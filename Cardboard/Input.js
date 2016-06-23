@@ -9,12 +9,12 @@ function ReadInput()
 	PointOfFocus.set(0,0,-1);
 	Camera.localToWorld(PointOfFocus);
 	
-	appauling_hacky_model_loader();
+//	appauling_hacky_model_loader();
 }
 
 
 //Our preferred controls via DeviceOrientation
-document.addEventListener('deviceorientation', function setOrientationControls(e) {
+window.addEventListener('deviceorientation', function setOrientationControls(e) {
 	if (!e.alpha) {
 		return;
 	}
@@ -26,7 +26,7 @@ document.addEventListener('deviceorientation', function setOrientationControls(e
 	OurOrientationControls.connect();
 	OurOrientationControls.update();
 
-	document.removeEventListener('deviceorientation', setOrientationControls, true);
+	window.removeEventListener('deviceorientation', setOrientationControls, true);
 }, true);
 
 //less hacky but still shit

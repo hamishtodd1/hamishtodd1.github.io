@@ -11,12 +11,11 @@ function Initialize()
 		function ( xhr ) { console.error( "couldn't load font" ); }
 	);
 	
-	Renderer = new THREE.WebGLRenderer({ antialias: true }); //antialiasing would be nice and we're only aiming for 30fps
+	Renderer = new THREE.WebGLRenderer({  }); //antialiasing would be nice and we're only aiming for 30fps
 	Renderer.setClearColor( 0x101010 );
 	Renderer.setPixelRatio( window.devicePixelRatio );
 	Renderer.setSize( window.innerWidth, window.innerHeight );
 	Renderer.sortObjects = false;
-	Renderer.shadowMap.enabled = true;
 	Renderer.shadowMap.cullFace = THREE.CullFaceBack;
 	document.body.appendChild( Renderer.domElement );
 	
