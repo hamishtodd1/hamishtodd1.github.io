@@ -1,6 +1,6 @@
 function UpdateWorld(Models,Hands)
 {	
-	update_ourobject();
+	update_ourobject_position();
 	update_loadingsign();
 }
 

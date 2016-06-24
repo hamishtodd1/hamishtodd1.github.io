@@ -34,7 +34,6 @@ THREEx.FullScreen.activated	= function()
 */
 THREEx.FullScreen.request	= function(element)
 {
-	console.log("noo")
 	element	= element	|| document.body;
 	if( this._hasWebkitFullScreen ){
 		element.webkitRequestFullScreen();

@@ -80,7 +80,7 @@ function placeholder_interpret_ngl()
 //			console.log(loose_surface);
 	var ProteinGeometry = loose_surface.bufferList[0].geometry;
 	
-	var ourcopy = new THREE.Mesh( new THREE.BufferGeometry(),
+	ourcopy = new THREE.Mesh( new THREE.BufferGeometry(),
 				  new THREE.MeshPhongMaterial({side: THREE.DoubleSide /* temp */ }) );
 	
 	ourcopy.geometry.addAttribute( 'position', 
@@ -93,13 +93,23 @@ function placeholder_interpret_ngl()
 	var num_NaNs =  0;
 	for(var i = 0; i < ProteinGeometry.attributes.position.array.length; i++)
 		if( isNaN( ProteinGeometry.attributes.position.array[i] ))
+		{
 			num_NaNs++; //you get this with some proteins
+			
+			//patch it up
+			if(i >= 3)
+				ProteinGeometry.attributes.position.array[i] = ProteinGeometry.attributes.position.array[i-3];
+			else
+				ProteinGeometry.attributes.position.array[i] = ProteinGeometry.attributes.position.array[i+3];
+		}
 	if(num_NaNs)console.log("NaNs: ", num_NaNs);
 	
 	var ourscale = 0.03;
 	ourcopy.scale.set(ourscale,ourscale,ourscale);
-	OurObject.add(ourcopy);
-	OurObject.remove(LoadingSign);
+	
+	if(Protein.children.length !== 0)
+		Protein.remove(Protein.children[0]); //hopefully they got the message about going fullscreen, though TODO what if their phone is a supercomputer? 
+	Protein.add(ourcopy);
 	
 	//then need to scale it so that it is of a reasonable size
 }

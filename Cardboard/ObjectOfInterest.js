@@ -7,9 +7,15 @@ function init_OurObject()
 	OurObject.velocity = new THREE.Vector3();
 	OurObject.acceleration = new THREE.Vector3();
 	
-	//loading sign stuff
-	LoadingSign = new THREE.Mesh(
-		new THREE.TextGeometry("Loading...",{size: 5 * 0.02, height: 0.01, font: gentilis}),
+	Scene.add(OurObject);
+}
+
+function create_and_center_and_orient_text( ourstring )
+{
+	var signsize = 0.1;
+	
+	var OurSign = new THREE.Mesh(
+		new THREE.TextGeometry(ourstring,{size: signsize, height: signsize / 10, font: gentilis}),
 		new THREE.MeshPhongMaterial( {
 			color: 0x156289,
 			emissive: 0x072534,
@@ -17,30 +23,23 @@ function init_OurObject()
 		}) );
 	
 	var TextCenter = new THREE.Vector3();
-	for ( var i = 0, l = LoadingSign.geometry.vertices.length; i < l; i ++ ){
-		TextCenter.add( LoadingSign.geometry.vertices[ i ] );
+	for ( var i = 0, l = OurSign.geometry.vertices.length; i < l; i ++ ){
+		TextCenter.add( OurSign.geometry.vertices[ i ] );
 	}
-	TextCenter.multiplyScalar( 1 / LoadingSign.geometry.vertices.length );
-	for ( var i = 0, l = LoadingSign.geometry.vertices.length; i < l; i ++ ){
-		LoadingSign.geometry.vertices[ i ].sub(TextCenter)
+	TextCenter.multiplyScalar( 1 / OurSign.geometry.vertices.length );
+	for ( var i = 0, l = OurSign.geometry.vertices.length; i < l; i ++ ){
+		OurSign.geometry.vertices[ i ].sub(TextCenter)
 	}
 	
-	LoadingSign.throb_parameter = 0;
+	OurSign.position.copy(PointOfFocus);
+	OurSign.lookAt(Camera.position); //it *begins* by looking at them, so they can read it. Except for how devicecontrols resets it...
+	OurSign.position.set(0,0,0);
 	
-	LoadingSign.position.copy(PointOfFocus);
-	LoadingSign.lookAt(Camera.position); //it *begins* by looking at them, so they can read it
-	LoadingSign.position.set(0,0,0);
-	
-	OurObject.add(LoadingSign);
-	
-	//what if the protein comes before the loading sign? Pretty unlikely...
+	return OurSign;
 }
 
-function update_ourobject()
-{
-	if( typeof LoadingSign === 'undefined') //kinda hacky
-		return;
-	
+function update_ourobject_position()
+{	
 	var displacementFromDest = PointOfFocus.clone();
 	displacementFromDest.sub(OurObject.position);
 	
@@ -55,6 +54,7 @@ function update_ourobject()
 	OurObject.velocity.add(OurObject.acceleration);
 	
 //	if( OurObject.velocity.length() > displacementFromDest.length() )
+
 		OurObject.position.copy(PointOfFocus);
 //	else
 //		OurObject.position.add(OurObject.velocity);
@@ -78,5 +78,5 @@ function update_loadingsign()
 	
 //	LoadingSign.lookAt(Camera.position); //could do this, but you don't intend to do that with the protein, so it may be bad for the mental model
 	
-	//maybe change the number of dots after the string and glow a bit?
+	//maybe change the number of dots after the string? Glow a bit?
 }

@@ -4,32 +4,42 @@
 
 function ReadInput()
 {	
-//	Camera.position.set(0,0,0); //we're doing this to simulate a cardboard.
+//	OurOrientationControls.update();
 	
-	PointOfFocus.set(0,0,-1);
-	Camera.localToWorld(PointOfFocus);
-	
-	OurOrientationControls.update();
+	update_PointOfFocus();
 	
 	appauling_hacky_model_loader();
 }
 
-//less hacky but still shit
-document.addEventListener( 'mousedown', function(event) 
+function update_PointOfFocus()
+{
+	PointOfFocus.set(0,0,-1);
+	Camera.localToWorld(PointOfFocus);
+	/*
+	 * Could try to smooth it.
+	 * But your phone is probably unusually bad
+	 * Disadvantage: people might want to do the movement that your phone simulates
+	 * 
+	 * var OldPointOfFocus = PointOfFocus.clone();
+	PointOfFocus.set(0,0,-1);
+	Camera.localToWorld(PointOfFocus);
+	if(PointOfFocus.angleTo(OldPointOfFocus) > TAU / 100 ) //revert to make it smooth
+		PointOfFocus.copy(OldPointOfFocus);
+	 */
+}
+
+document.addEventListener( 'mousedown', go_fullscreen_and_init_object, false );
+document.addEventListener('touchstart', go_fullscreen_and_init_object, false );
+function go_fullscreen_and_init_object(event) 
 {
 	event.preventDefault();
 	
-//	placeholder_interpret_ngl();
-
 	THREEx.FullScreen.request(Renderer.domElement);
-}, false );
-
-document.addEventListener('touchstart', function(e)
-{
-	event.preventDefault();
 	
-	THREEx.FullScreen.request(Renderer.domElement);
-}, false)
+	if( OurObject.children.length !== 0 )
+		OurObject.remove(OurObject.children[0]); //the fullscreen sign
+	OurObject.add(Protein);
+}
 
 window.addEventListener( 'resize', function(event)
 {

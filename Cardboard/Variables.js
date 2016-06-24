@@ -22,7 +22,11 @@ var OurVRControls;
 
 var OurObject = new THREE.Object3D();
 
-stage = new NGL.Stage();
+var Protein = new THREE.Object3D();
+
+var stage = new NGL.Stage();
+
+var TestSphere = new THREE.Mesh( new THREE.SphereGeometry( 0.3, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
 
 var PointOfFocus = new THREE.Vector3(); //where the user is looking
 
