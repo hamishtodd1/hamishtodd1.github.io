@@ -4,7 +4,7 @@
 
 function ReadInput()
 {	
-//	OurOrientationControls.update();
+	OurOrientationControls.update();
 	
 	update_PointOfFocus();
 	
