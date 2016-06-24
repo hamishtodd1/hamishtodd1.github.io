@@ -104,7 +104,7 @@ function placeholder_interpret_ngl()
 		}
 	if(num_NaNs)console.log("NaNs: ", num_NaNs);
 	
-	var ourscale = 0.03;
+	var ourscale = 0.02;
 	ourcopy.scale.set(ourscale,ourscale,ourscale);
 	
 	if(Protein.children.length !== 0)

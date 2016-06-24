@@ -33,9 +33,6 @@ function Initialize()
 			{
 				var FullScreenSign = create_and_center_and_orient_text( "Touch for fullscreen" );
 				OurObject.add(FullScreenSign);
-//				OurObject.position.z -= 10;
-				console.log(OurObject.position)
-				console.log(Scene)
 			}
 		},
 		function ( xhr ) {}, //progression function
