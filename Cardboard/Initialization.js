@@ -22,6 +22,8 @@ function Initialize()
 		function ( reponse ) {
 			gentilis = reponse;
 			
+			Camera.lookAt(new THREE.Vector3(0,0,1));
+			
 			if(Protein.children.length === 0) //if the protein isn't loaded yet you need something to show
 			{
 				LoadingSign = create_and_center_and_orient_text( "Loading..." );	

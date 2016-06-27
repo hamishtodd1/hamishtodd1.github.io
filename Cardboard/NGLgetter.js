@@ -104,7 +104,10 @@ function placeholder_interpret_ngl()
 		}
 	if(num_NaNs)console.log("NaNs: ", num_NaNs);
 	
-	var ourscale = 0.006;
+	ourcopy.geometry.computeBoundingSphere();
+	console.log(ourcopy.geometry.boundingSphere);
+	
+	var ourscale = 0.0004 * ourcopy.geometry.boundingSphere.radius;
 	ourcopy.scale.set(ourscale,ourscale,ourscale);
 	
 	if(Protein.children.length !== 0)
