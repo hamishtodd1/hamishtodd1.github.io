@@ -50,17 +50,23 @@ function Initialize()
 	get_NGL_protein();
 	
 	var OurTextureLoader = new THREE.TextureLoader();
+	OurTextureLoader.crossOrigin = true;
 	OurTextureLoader.load(
 		"http://hamishtodd1.github.io/Cardboard/Floor.png",
 		function(texture) {
-			var floorwidth = 10;
+			texture.magFilter = THREE.NearestFilter;
+			texture.minFilter = THREE.LinearMipMapLinearFilter;
+			
+			var floorwidth = 1000;
 			var FloorTile = new THREE.Mesh(
 					new THREE.CubeGeometry(floorwidth, floorwidth, 0),
-					new THREE.MeshBasicMaterial({ transparent:true}) );
+					new THREE.MeshBasicMaterial({}) );
 			
 			FloorTile.material.map = texture;
 			
 			FloorTile.position.y = -1;
+			
+			FloorTile.lookAt(new THREE.Vector3())
 
 			Scene.add(FloorTile);
 		},
