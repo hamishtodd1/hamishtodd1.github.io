@@ -77,7 +77,7 @@ function update_signs()
 //		LoadingSign.scale.set(ThrobScale, ThrobScale, ThrobScale);
 		
 		var relCameraPosition = Camera.position.clone();
-		LoadingSign.worldToLocal(relCameraPosition);
+		OurObject.worldToLocal(relCameraPosition);
 		LoadingSign.lookAt(relCameraPosition); //maybe better for the mental model to make it the same as the protein?
 		
 		//maybe change the number of dots after the string? Glow a bit?
@@ -85,8 +85,9 @@ function update_signs()
 	
 	if( typeof FullScreenSign !== 'undefined')
 	{
-		var relCameraPosition = Camera.position.clone();
-		FullScreenSign.worldToLocal(relCameraPosition);
+		var relCameraPosition = new THREE.Vector3();
+		OurObject.worldToLocal(relCameraPosition);
+		console.log(relCameraPosition)
 		FullScreenSign.lookAt(relCameraPosition);		
 	}
 }
