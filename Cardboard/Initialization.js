@@ -50,7 +50,7 @@ function Initialize()
 	get_NGL_protein();
 	
 	var OurTextureLoader = new THREE.TextureLoader();
-	texture_loader.load(
+	OurTextureLoader.load(
 		"http://hamishtodd1.github.io/Cardboard/Floor.png",
 		function(texture) {
 			var floorwidth = 10;

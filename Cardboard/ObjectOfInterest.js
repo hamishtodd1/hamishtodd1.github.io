@@ -75,18 +75,17 @@ function update_signs()
 //		var ThrobScale = ( 1 + 0.07 * Math.sin(LoadingSign.throb_parameter) );
 //		LoadingSign.scale.set(ThrobScale, ThrobScale, ThrobScale);
 		
+		//maybe change the number of dots after the string? Glow a bit?
+		
 		var relCameraPosition = Camera.position.clone();
 		OurObject.worldToLocal(relCameraPosition);
 		LoadingSign.lookAt(relCameraPosition); //maybe better for the mental model to make it the same as the protein?
-		
-		//maybe change the number of dots after the string? Glow a bit?
 	}
 	
 	if( typeof FullScreenSign !== 'undefined')
 	{
 		var relCameraPosition = Camera.position.clone();
 		OurObject.worldToLocal(relCameraPosition);
-		console.log(relCameraPosition)
 		FullScreenSign.lookAt(relCameraPosition);		
 	}
 }
