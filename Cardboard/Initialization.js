@@ -55,7 +55,6 @@ function Initialize()
 		"http://hamishtodd1.github.io/Cardboard/Floor.png",
 		function(texture) {
 			texture.magFilter = THREE.NearestFilter;
-			texture.minFilter = THREE.LinearMipMapLinearFilter;
 			
 			var floorwidth = 1000;
 			var FloorTile = new THREE.Mesh(
