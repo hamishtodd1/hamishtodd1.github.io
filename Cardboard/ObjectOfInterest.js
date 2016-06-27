@@ -1,5 +1,5 @@
 var LoadingSign;
-var OurSign;
+var FullScreenSign;
 
 function init_OurObject()
 {
@@ -15,7 +15,7 @@ function create_and_center_and_orient_text( ourstring )
 {
 	var signsize = 0.1;
 	
-	OurSign = new THREE.Mesh(
+	FullScreenSign = new THREE.Mesh(
 		new THREE.TextGeometry(ourstring,{size: signsize, height: signsize / 10, font: gentilis}),
 		new THREE.MeshPhongMaterial( {
 			color: 0x156289,
@@ -24,19 +24,19 @@ function create_and_center_and_orient_text( ourstring )
 		}) );
 	
 	var TextCenter = new THREE.Vector3();
-	for ( var i = 0, l = OurSign.geometry.vertices.length; i < l; i ++ ){
-		TextCenter.add( OurSign.geometry.vertices[ i ] );
+	for ( var i = 0, l = FullScreenSign.geometry.vertices.length; i < l; i ++ ){
+		TextCenter.add( FullScreenSign.geometry.vertices[ i ] );
 	}
-	TextCenter.multiplyScalar( 1 / OurSign.geometry.vertices.length );
-	for ( var i = 0, l = OurSign.geometry.vertices.length; i < l; i ++ ){
-		OurSign.geometry.vertices[ i ].sub(TextCenter)
+	TextCenter.multiplyScalar( 1 / FullScreenSign.geometry.vertices.length );
+	for ( var i = 0, l = FullScreenSign.geometry.vertices.length; i < l; i ++ ){
+		FullScreenSign.geometry.vertices[ i ].sub(TextCenter)
 	}
 	
-	OurSign.position.copy(PointOfFocus);
-	OurSign.lookAt(Camera.position); //it *begins* by looking at them, so they can read it. Except for how devicecontrols resets it...
-	OurSign.position.set(0,0,0);
+	FullScreenSign.position.copy(PointOfFocus);
+	FullScreenSign.lookAt(Camera.position); //it *begins* by looking at them, so they can read it. Except for how devicecontrols resets it...
+	FullScreenSign.position.set(0,0,0);
 	
-	return OurSign;
+	return FullScreenSign;
 }
 
 function update_ourobject_position()
@@ -76,13 +76,17 @@ function update_signs()
 		var OurScale = ( 1 + 0.07 * Math.sin(LoadingSign.throb_parameter) );
 //		LoadingSign.scale.set(OurScale, OurScale, OurScale);
 		
-		LoadingSign.lookAt(Camera.position); //could do this, but you don't intend to do that with the protein, so it may be bad for the mental model
+		var relCameraPosition = Camera.position.clone();
+		LoadingSign.worldToLocal(relCameraPosition);
+		LoadingSign.lookAt(relCameraPosition); //could do this, but you don't intend to do that with the protein, so it may be bad for the mental model
 		
 		//maybe change the number of dots after the string? Glow a bit?
 	}
 	
-	if( typeof OurSign !== 'undefined')
+	if( typeof FullScreenSign !== 'undefined')
 	{
-		OurSign.lookAt(Camera.position);
+		var relCameraPosition = Camera.position.clone();
+		FullScreenSign.worldToLocal(relCameraPosition);
+		FullScreenSign.lookAt(Camera.position);		
 	}
 }
