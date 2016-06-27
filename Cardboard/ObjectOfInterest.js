@@ -15,7 +15,7 @@ function create_and_center_and_orient_text( ourstring )
 {
 	var signsize = 0.1;
 	
-	FullScreenSign = new THREE.Mesh(
+	OurSign = new THREE.Mesh(
 		new THREE.TextGeometry(ourstring,{size: signsize, height: signsize / 10, font: gentilis}),
 		new THREE.MeshPhongMaterial( {
 			color: 0x156289,
@@ -24,19 +24,19 @@ function create_and_center_and_orient_text( ourstring )
 		}) );
 	
 	var TextCenter = new THREE.Vector3();
-	for ( var i = 0, l = FullScreenSign.geometry.vertices.length; i < l; i ++ ){
-		TextCenter.add( FullScreenSign.geometry.vertices[ i ] );
+	for ( var i = 0, l = OurSign.geometry.vertices.length; i < l; i ++ ){
+		TextCenter.add( OurSign.geometry.vertices[ i ] );
 	}
-	TextCenter.multiplyScalar( 1 / FullScreenSign.geometry.vertices.length );
-	for ( var i = 0, l = FullScreenSign.geometry.vertices.length; i < l; i ++ ){
-		FullScreenSign.geometry.vertices[ i ].sub(TextCenter)
+	TextCenter.multiplyScalar( 1 / OurSign.geometry.vertices.length );
+	for ( var i = 0, l = OurSign.geometry.vertices.length; i < l; i ++ ){
+		OurSign.geometry.vertices[ i ].sub(TextCenter)
 	}
 	
-	FullScreenSign.position.copy(PointOfFocus);
-	FullScreenSign.lookAt(Camera.position); //it *begins* by looking at them, so they can read it. Except for how devicecontrols resets it...
-	FullScreenSign.position.set(0,0,0);
+	OurSign.position.copy(PointOfFocus);
+	OurSign.lookAt(Camera.position); //it *begins* by looking at them, so they can read it. Except for how devicecontrols resets it...
+	OurSign.position.set(0,0,0);
 	
-	return FullScreenSign;
+	return OurSign;
 }
 
 function update_ourobject_position()
@@ -73,12 +73,12 @@ function update_signs()
 		while( LoadingSign.throb_parameter > TAU )
 			LoadingSign.throb_parameter -= TAU;
 		
-		var OurScale = ( 1 + 0.07 * Math.sin(LoadingSign.throb_parameter) );
-//		LoadingSign.scale.set(OurScale, OurScale, OurScale);
+		var ThrobScale = ( 1 + 0.07 * Math.sin(LoadingSign.throb_parameter) );
+//		LoadingSign.scale.set(ThrobScale, ThrobScale, ThrobScale);
 		
 		var relCameraPosition = Camera.position.clone();
 		LoadingSign.worldToLocal(relCameraPosition);
-		LoadingSign.lookAt(relCameraPosition); //could do this, but you don't intend to do that with the protein, so it may be bad for the mental model
+		LoadingSign.lookAt(relCameraPosition); //maybe better for the mental model to make it the same as the protein?
 		
 		//maybe change the number of dots after the string? Glow a bit?
 	}

@@ -17,7 +17,7 @@ function update_PointOfFocus()
 	Camera.localToWorld(PointOfFocus);
 	/*
 	 * Could try to smooth it.
-	 * But your phone is probably unusually bad
+	 * But your phone is probably unusually bad so it won't affect many
 	 * Disadvantage: people might want to do the movement that your phone simulates
 	 * 
 	 * var OldPointOfFocus = PointOfFocus.clone();
@@ -36,8 +36,7 @@ function go_fullscreen_and_init_object(event)
 	
 	THREEx.FullScreen.request(Renderer.domElement);
 	
-	if( OurObject.children.length !== 0 )
-		OurObject.remove(OurObject.children[0]); //the fullscreen sign
+	OurObject.remove(FullScreenSign);
 	OurObject.add(Protein);
 }
 

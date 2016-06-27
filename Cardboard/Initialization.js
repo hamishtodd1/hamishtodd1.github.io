@@ -33,7 +33,7 @@ function Initialize()
 			
 			if( !THREEx.FullScreen.activated() )
 			{
-				var FullScreenSign = create_and_center_and_orient_text( "Touch for fullscreen" );
+				FullScreenSign = create_and_center_and_orient_text( "Touch for fullscreen" );
 				OurObject.add(FullScreenSign);
 			}
 		},
