@@ -87,6 +87,6 @@ function update_signs()
 	{
 		var relCameraPosition = Camera.position.clone();
 		FullScreenSign.worldToLocal(relCameraPosition);
-		FullScreenSign.lookAt(Camera.position);		
+		FullScreenSign.lookAt(relCameraPosition);		
 	}
 }
