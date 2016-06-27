@@ -69,11 +69,10 @@ function update_signs()
 {
 	if( typeof LoadingSign !== 'undefined')
 	{
-		LoadingSign.throb_parameter += 0.05;
-		while( LoadingSign.throb_parameter > TAU )
-			LoadingSign.throb_parameter -= TAU;
-		
-		var ThrobScale = ( 1 + 0.07 * Math.sin(LoadingSign.throb_parameter) );
+//		LoadingSign.throb_parameter += 0.05;
+//		while( LoadingSign.throb_parameter > TAU )
+//			LoadingSign.throb_parameter -= TAU;
+//		var ThrobScale = ( 1 + 0.07 * Math.sin(LoadingSign.throb_parameter) );
 //		LoadingSign.scale.set(ThrobScale, ThrobScale, ThrobScale);
 		
 		var relCameraPosition = Camera.position.clone();
@@ -85,7 +84,7 @@ function update_signs()
 	
 	if( typeof FullScreenSign !== 'undefined')
 	{
-		var relCameraPosition = new THREE.Vector3();
+		var relCameraPosition = Camera.position.clone();
 		OurObject.worldToLocal(relCameraPosition);
 		console.log(relCameraPosition)
 		FullScreenSign.lookAt(relCameraPosition);		
