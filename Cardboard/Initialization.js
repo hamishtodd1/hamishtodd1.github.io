@@ -49,5 +49,23 @@ function Initialize()
 	
 	get_NGL_protein();
 	
+	var OurTextureLoader = new THREE.TextureLoader();
+	texture_loader.load(
+		"http://hamishtodd1.github.io/Cardboard/Floor.png",
+		function(texture) {
+			var floorwidth = 10;
+			var FloorTile = new THREE.Mesh(
+					new THREE.CubeGeometry(floorwidth, floorwidth, 0),
+					new THREE.MeshBasicMaterial({ transparent:true}) );
+			
+			FloorTile.material.map = texture;
+			
+			FloorTile.position.y = -1;
+
+			Scene.add(FloorTile);
+		},
+		function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );}
+	);
+	
 	Render();
 }

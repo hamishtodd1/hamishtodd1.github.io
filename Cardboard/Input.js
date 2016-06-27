@@ -34,6 +34,9 @@ function go_fullscreen_and_init_object(event)
 {
 	event.preventDefault();
 	
+	if( THREEx.FullScreen.activated() )
+		return;
+	
 	THREEx.FullScreen.request(Renderer.domElement);
 	
 	OurObject.remove(FullScreenSign);
