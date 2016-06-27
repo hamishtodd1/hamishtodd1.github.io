@@ -106,6 +106,10 @@ function placeholder_interpret_ngl()
 	
 	ourcopy.geometry.computeBoundingSphere();
 	console.log(ourcopy.geometry.boundingSphere);
+	var center_coords = ourcopy.geometry.boundingSphere.center.toArray();
+	
+	for(var i = 0, il = ProteinGeometry.attributes.position.array.length; i < il; i++)
+		ProteinGeometry.attributes.position.array[i] -= center_coords[i%3];
 	
 	var ourscale = 0.0004 * ourcopy.geometry.boundingSphere.radius;
 	ourcopy.scale.set(ourscale,ourscale,ourscale);
