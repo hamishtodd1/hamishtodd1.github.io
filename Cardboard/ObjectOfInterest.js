@@ -1,4 +1,5 @@
 var LoadingSign;
+var OurSign;
 
 function init_OurObject()
 {
@@ -14,7 +15,7 @@ function create_and_center_and_orient_text( ourstring )
 {
 	var signsize = 0.1;
 	
-	var OurSign = new THREE.Mesh(
+	OurSign = new THREE.Mesh(
 		new THREE.TextGeometry(ourstring,{size: signsize, height: signsize / 10, font: gentilis}),
 		new THREE.MeshPhongMaterial( {
 			color: 0x156289,
@@ -64,19 +65,24 @@ function update_ourobject_position()
 	//it will "catch up", maybe bounce back and forth a bit. Destination is a set distance from you, on a sphere, but it can go through the sphere, allowing you to fly through.
 }
 
-function update_loadingsign()
+function update_signs()
 {
-	if( typeof LoadingSign === 'undefined')
-		return;
+	if( typeof LoadingSign !== 'undefined')
+	{
+		LoadingSign.throb_parameter += 0.05;
+		while( LoadingSign.throb_parameter > TAU )
+			LoadingSign.throb_parameter -= TAU;
+		
+		var OurScale = ( 1 + 0.07 * Math.sin(LoadingSign.throb_parameter) );
+//		LoadingSign.scale.set(OurScale, OurScale, OurScale);
+		
+		LoadingSign.lookAt(Camera.position); //could do this, but you don't intend to do that with the protein, so it may be bad for the mental model
+		
+		//maybe change the number of dots after the string? Glow a bit?
+	}
 	
-	LoadingSign.throb_parameter += 0.05;
-	while( LoadingSign.throb_parameter > TAU )
-		LoadingSign.throb_parameter -= TAU;
-	
-	var OurScale = ( 1 + 0.07 * Math.sin(LoadingSign.throb_parameter) );
-//	LoadingSign.scale.set(OurScale, OurScale, OurScale);
-	
-//	LoadingSign.lookAt(Camera.position); //could do this, but you don't intend to do that with the protein, so it may be bad for the mental model
-	
-	//maybe change the number of dots after the string? Glow a bit?
+	if( typeof OurSign !== 'undefined')
+	{
+		OurSign.lookAt(Camera.position);
+	}
 }
