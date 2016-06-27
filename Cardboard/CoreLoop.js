@@ -1,7 +1,7 @@
 function UpdateWorld(Models,Hands)
 {	
 	update_ourobject_position();
-	update_loadingsign();
+	update_signs();
 }
 
 function Render() {
