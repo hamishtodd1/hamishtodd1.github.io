@@ -2,26 +2,18 @@ function initVideo()
 {	
 	// create the video element
 	video = document.createElement( 'video' );
-	video.src = "sintel.mp4"; //http://hamishtodd1.github.io/
+	video.src = "http://hamishtodd1.github.io/Sysmic/sintel.mp4"; //http://hamishtodd1.github.io/
 	video.crossOrigin = "anonymous";
 	
-	 video.id = 'video';
-	 video.type = ' video/ogg; codecs="theora, vorbis" ';
+//	 video.id = 'video';
+//	 video.type = ' video/ogg; codecs="theora, vorbis" ';
 	
 	video.load(); // must call after setting/changing source
-//	video.play();
-	
-	// alternative method -- 
-	// create DIV in HTML:
-	// <video id="myVideo" autoplay style="display:none">
-	//		<source src="videos/sintel.ogv" type='video/ogg; codecs="theora, vorbis"'>
-	// </video>
-	// and set JS variable:
-	// video = document.getElementById( 'myVideo' );
+	video.play();
 	
 	var videoImage = document.createElement( 'canvas' );
-	videoImage.width = 720;
-	videoImage.height = 306;
+	videoImage.width = 480;
+	videoImage.height = 204;
 
 	videoImageContext = videoImage.getContext( '2d' );
 	// background color if no video present
@@ -35,12 +27,10 @@ function initVideo()
 	var movieMaterial = new THREE.MeshBasicMaterial( { map: videoTexture, overdraw: true, side:THREE.DoubleSide } );
 	// the geometry on which the movie will be displayed;
 	// 		movie image will be scaled to fit these dimensions.
-	var movieGeometry = new THREE.PlaneGeometry( VIEWBOX_WIDTH,VIEWBOX_HEIGHT,4, 4 );
+	var movieGeometry = new THREE.PlaneGeometry( VIEWBOX_WIDTH/2,VIEWBOX_HEIGHT/2,4, 4 );
 	var movieScreen = new THREE.Mesh( movieGeometry, movieMaterial );
 	movieScreen.position.set(0,0,0);
 	Scene.add(movieScreen);
-	
-	
 }
 
 //
@@ -61,4 +51,5 @@ function initVideo()
 //	if ( keyboard.pressed("r") ) // rewind video
 //		video.currentTime = 0;
 //}
-
+	
+	
