@@ -58,34 +58,6 @@ function update_graph()
 				displayed_faces[i*GRAPH_HEIGHT_IN_FACES+j].material.opacity = faceopacity;
 		}
 	}
-	
-	
-	//---------Moving the whole graph into place
-	var frames_for_movement = 1;
-	
-	if(!Camera.position.equals(FOURBOX_CAMERAPOSITION))
-	{
-		var movementvec = FOURBOX_CAMERAPOSITION.clone();
-		movementvec.multiplyScalar(1 / frames_for_movement);
-		Camera.position.add(movementvec);
-		
-		Camera.position.clamp(new THREE.Vector3(), FOURBOX_CAMERAPOSITION)
-	}
-	
-	if(Camera.position.y !== 0)
-	{
-		Graph.angle_from_y_axis += TAU / 4 / frames_for_movement;
-		if(Graph.angle_from_y_axis > TAU / 4)
-			Graph.angle_from_y_axis = TAU / 4;
-	}
-	else
-	{
-		Graph.angle_from_y_axis = 0;
-	}
-	
-	Graph.position.set(-VIEWBOX_WIDTH - VIEWBOX_SPACING, 0, 0);
-	Graph.position.applyAxisAngle(new THREE.Vector3(0,0,-1), Graph.angle_from_y_axis);
-	Graph.position.y *= ( VIEWBOX_HEIGHT + VIEWBOX_SPACING ) / ( VIEWBOX_WIDTH + VIEWBOX_SPACING );
 }
 
 function reset_graph()
@@ -157,4 +129,6 @@ function init_graph()
 	
 	//horizontal positions and textures
 	reset_graph();
+	
+	Graph.position.set(0,VIEWBOX_HEIGHT + VIEWBOX_SPACING,0);
 }

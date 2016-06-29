@@ -1,6 +1,6 @@
 /*
  * with the arrows, probably the thing to do is to work out the length of the longest arrow, then scale all to make that one reasonable
- * Ideally it should tell you where the point would go next if it was there given delta_t
+ * No, ideally it should tell you where the point would go next if it was there given delta_t
  * And if that looks unreasonable, then your parameters are unreasonable
  */
 
@@ -215,25 +215,6 @@ function update_Phasezone()
 		if(Phaseline_currentsegment === PHASELINE_SEGMENTS)
 			Phaseline_currentsegment = 0;
 	}
-}
-
-//there's a max too but placeholder
-function GetNextInfected(OurInfected)
-{
-	OurInfected += Infectiousness;
-	if(OurInfected < 0)
-		OurInfected = 0;
-	
-	return OurInfected;
-}
-
-function GetNextResistant(OurResistant)
-{
-	OurResistant += RecoveryTime;
-	if(OurResistant < 0)
-		OurResistant = 0;
-	
-	return OurResistant;
 }
 
 function get_phasezone_position(ourInfected, ourResistant)

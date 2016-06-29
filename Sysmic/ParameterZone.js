@@ -3,6 +3,8 @@
 var ParameterZone;
 var ParameterControlCursor;
 
+var SliderShape;
+
 var MAX_Infectiousness = 5; //or whatever
 var MAX_RecoveryTime = 5;
 var MIN_Infectiousness = -MAX_Infectiousness; //or whatever
@@ -19,12 +21,19 @@ function init_parameterzone()
 	ParameterControlCursor = new THREE.Mesh( 
 			new THREE.CircleGeometry( 0.08, 32 ), 
 			new THREE.MeshBasicMaterial( { color: 0xAAAAFF } ) );
+	ParameterControlCursor.position.z = 0.01;
 	ParameterZone.add(ParameterControlCursor);
 	
 	update_Infectiousness_and_RecoveryTime();
 	
 	ParameterZone.position.x = (VIEWBOX_WIDTH + VIEWBOX_SPACING);
 	Scene.add(ParameterZone)
+	
+	SliderShape = new THREE.Mesh( 
+			new THREE.CubeGeometry(VIEWBOX_WIDTH * 0.986, VIEWBOX_HEIGHT / 55, 0),
+			new THREE.MeshBasicMaterial( { color: 0xAAAAAA } ) );
+	SliderShape.position.z = ParameterControlCursor.position.z / 5;
+	ParameterZone.add(SliderShape);
 	
 	ParameterControlCursor.grabbed = 0;
 	
@@ -37,6 +46,8 @@ function init_parameterzone()
 	
 	Infectiousness = MAX_Infectiousness * proportionalposition.y;
 	RecoveryTime = MAX_RecoveryTime * proportionalposition.x; //because we think of time as going to the right
+	
+	ParameterZone.slidermode = 1;
 }
 
 function update_parameterzone()
@@ -58,7 +69,15 @@ function update_parameterzone()
 	{
 		ParameterControlCursor.position.copy(ParameterSpaceMousePosition);
 		
-		update_Infectiousness_and_RecoveryTime()
+		if(ParameterZone.slidermode)
+		{
+			ParameterControlCursor.position.y = 0; //confined to slider
+			//also might want to have a specific infectiousness level here.
+		}
+
+		reset_CA();
+		
+		update_Infectiousness_and_RecoveryTime();
 		
 		//Do viruses drastically change parameters while infecting a population?
 		//Probably no, so you should comment this out, taking away the line, and even clear the graph. But it's fun!
@@ -68,6 +87,11 @@ function update_parameterzone()
 		//also reset vector field
 		set_vector_field();
 	}
+	
+	if(ParameterZone.slidermode)
+		SliderShape.visible = true;
+	else
+		SliderShape.visible = false;
 }
 
 function update_Infectiousness_and_RecoveryTime()

@@ -42,3 +42,37 @@ document.addEventListener( 'mouseup', function(event)
 	
 	InputObject.isMouseDown = 0;
 }, false );
+
+//not document? ok, whatever
+window.addEventListener( 'resize', Resize, false );
+
+function Resize() 
+{	
+	var min_height = (VIEWBOX_HEIGHT + VIEWBOX_SPACING ) * 2;
+	var corresponding_width = min_height / window.innerHeight * window.innerWidth;
+	var min_width = (VIEWBOX_WIDTH + VIEWBOX_SPACING ) * 2;
+	
+	//the part of the plane z = 0 that the camera can see
+	var playing_field_width;
+	var playing_field_height;
+
+	if( min_width > corresponding_width)
+	{
+		playing_field_width = min_width;
+		playing_field_height = min_width / window.innerWidth * window.innerHeight;
+	}
+	else
+	{
+		playing_field_height = min_height; //world units
+		playing_field_width = min_height / window.innerHeight * window.innerWidth;
+	}
+
+	
+	var vertical_fov = 2 * Math.atan( (playing_field_height/2) / cameradist );
+	
+	Camera.fov = vertical_fov * 360 / TAU;
+	
+	Camera.aspect = window.innerWidth / window.innerHeight;
+	Camera.updateProjectionMatrix();
+	Renderer.setSize( window.innerWidth, window.innerHeight );
+}

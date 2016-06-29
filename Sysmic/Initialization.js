@@ -14,15 +14,17 @@ function pre_download_init()
 	
 	Scene = new THREE.Scene();
 	
-	Camera = new THREE.PerspectiveCamera( vertical_fov * 360 / TAU,
+	Camera = new THREE.PerspectiveCamera( 1, //placeholder
 			Renderer.domElement.width / Renderer.domElement.height, //window.innerWidth / window.innerHeight,
 			0.001, 700);
+	
+	Resize();
 	
 	Scene.add(Camera)
 	
 	Camera.position.set(0,0,cameradist); //should be three viewboxes wide, two tall
 	
-//	initVideo();
+	initVideo();
 	
 	boundingbox = new THREE.Object3D();
 	boundingbox.add( new THREE.Mesh(
@@ -51,16 +53,21 @@ function pre_download_init()
 	init_Phasezone();
 	set_vector_field();
 	
+	init_story();
+	
+	Camera.position.copy(FOURBOX_CAMERAPOSITION);
+	
 	//maybe it should actually be blue for resistant, red for sick, yellow for normal?
 	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/Data/Absent.png', 0);
-	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/Data/Susceptible.png', 1);
+	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/Data/Resistant.png', 1);
 	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/Data/Sick.png', 2);
-	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/Data/Resistant.png', 3);
+	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/Data/Susceptible.png', 3);
 	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/Data/Dead.png', 4);
 	
 	EMOJII_SUSCEPTIBLE = 1;
 	EMOJII_SICK = 2;
 	EMOJII_RESISTANT = 3;
+	EMOJII_DEAD = 4;
 }
 
 function loadtexture_initially(linkstring, picindex)
@@ -94,5 +101,7 @@ function attempt_launch()
 
 function post_download_init()
 {
+	//because textures
 	init_graph();
+	init_Comiczone();
 }

@@ -18,13 +18,7 @@ var VIEWBOX_HEIGHT = 3;
 var VIEWBOX_WIDTH = 4;
 var VIEWBOX_SPACING = 0.2;
 
-var playing_field_width = VIEWBOX_WIDTH * 3 + VIEWBOX_SPACING * 3; //world units
-var playing_field_height = playing_field_width / window.innerWidth * window.innerHeight;
-var cameradist = 10; //get any closer and the perspective is weird
-var vertical_fov = 2 * Math.atan( (playing_field_height/2) / cameradist );
-
 //---------Static. At least in some sense.
-
 var gentilis;
 
 var Renderer;
@@ -44,10 +38,13 @@ var videoImageContext;
 var EMOJII_SICK;
 var EMOJII_SUSCEPTIBLE;
 var EMOJII_RESISTANT;
+var EMOJII_DEAD;
 
 var boundingbox_additional_width = 0.016;
 
 var emojiitextures = Array(5);
+
+var cameradist = 10;
 
 //TODO work out a cameradist that would give us a precise vertical position
 var FOURBOX_CAMERAPOSITION = new THREE.Vector3((VIEWBOX_WIDTH + VIEWBOX_SPACING)/ 2,(VIEWBOX_HEIGHT + VIEWBOX_SPACING)/ 2, cameradist);

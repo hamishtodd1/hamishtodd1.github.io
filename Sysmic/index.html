@@ -17,28 +17,12 @@
 		</style>
 	</head>
 	<body>
-		<!--these two scripts are purely for the ripped-off setup-->
-		<script type="x-shader/x-vertex" id="vertexShader">
-			varying vec3 vWorldPosition;
-			void main() {
-				vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
-				vWorldPosition = worldPosition.xyz;
-				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-			}
-		</script>
-		<script type="x-shader/x-fragment" id="fragmentShader">
-			uniform vec3 topColor;
-			uniform vec3 bottomColor;
-			uniform float offset;
-			uniform float exponent;
-			varying vec3 vWorldPosition;
-			void main() {
-				float h = normalize( vWorldPosition + offset ).y;
-				gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( max( h , 0.0), exponent ), 0.0 ) ), 1.0 );
-			}
-		</script>
+		<video id="video" autoplay style="display:none">
+			<source src="sintel.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+			<source src="sintel.ogv" type='video/ogg; codecs="theora, vorbis"'>
+		</video>
 		
-		<script src="three.min.js"></script>		
+		<script src="three.min.js"></script>	
 		<script src="VideoStuff.js"></script>
 		
 		<script src="Variables.js"></script>
@@ -47,8 +31,11 @@
 		<script src="Input.js"></script>
 		
 		<script src="Graph.js"></script>
+		<script src="Comic.js"></script>
+		<script src="Story.js"></script>
 		<script src="ParameterZone.js"></script>
 		<script src="PhaseZone.js"></script>
+		<script src="Simulation.js"></script>
 		
 		<script src="Initialization.js"></script>
 		<script src="CoreLoop.js"></script>

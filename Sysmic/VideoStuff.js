@@ -2,11 +2,14 @@ function initVideo()
 {	
 	// create the video element
 	video = document.createElement( 'video' );
-	// video.id = 'video';
-	// video.type = ' video/ogg; codecs="theora, vorbis" ';
-	video.src = "sintel.ogv"; //http://hamishtodd1.github.io/
+	video.src = "sintel.mp4"; //http://hamishtodd1.github.io/
+	video.crossOrigin = "anonymous";
+	
+	 video.id = 'video';
+	 video.type = ' video/ogg; codecs="theora, vorbis" ';
+	
 	video.load(); // must call after setting/changing source
-	video.play();
+//	video.play();
 	
 	// alternative method -- 
 	// create DIV in HTML:
@@ -32,10 +35,12 @@ function initVideo()
 	var movieMaterial = new THREE.MeshBasicMaterial( { map: videoTexture, overdraw: true, side:THREE.DoubleSide } );
 	// the geometry on which the movie will be displayed;
 	// 		movie image will be scaled to fit these dimensions.
-	var movieGeometry = new THREE.PlaneGeometry( 12,5,4, 4 );
+	var movieGeometry = new THREE.PlaneGeometry( VIEWBOX_WIDTH,VIEWBOX_HEIGHT,4, 4 );
 	var movieScreen = new THREE.Mesh( movieGeometry, movieMaterial );
 	movieScreen.position.set(0,0,0);
 	Scene.add(movieScreen);
+	
+	
 }
 
 //
