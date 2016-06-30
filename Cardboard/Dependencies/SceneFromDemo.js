@@ -33,16 +33,16 @@ function Add_stuff_from_demo(){
 
 	// GROUND
 
-	var groundGeo = new THREE.PlaneBufferGeometry( 1000, 1000 );
-	var groundMat = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x050505 } );
-	groundMat.color.setHSL( 0.095, 1, 0.75 );
-
-	var ground = new THREE.Mesh( groundGeo, groundMat );
-	ground.rotation.x = -Math.PI/2;
-	ground.position.y = -33;
-	Scene.add( ground );
-
-	ground.receiveShadow = true;
+//	var groundGeo = new THREE.PlaneBufferGeometry( 1000, 1000 );
+//	var groundMat = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x050505 } );
+//	groundMat.color.setHSL( 0.095, 1, 0.75 );
+//
+//	var ground = new THREE.Mesh( groundGeo, groundMat );
+//	ground.rotation.x = -Math.PI/2;
+//	ground.position.y = -33;
+//	Scene.add( ground );
+//
+//	ground.receiveShadow = true;
 
 	// SKYDOME
 

@@ -10,6 +10,8 @@ function Initialize()
 	
 	Scene = new THREE.Scene();
 	
+	console.error(stage)
+	
 	//Camera will be added to the scene when the user is set up
 	Camera = new THREE.PerspectiveCamera( 70,
 			Renderer.domElement.width / Renderer.domElement.height, //window.innerWidth / window.innerHeight,

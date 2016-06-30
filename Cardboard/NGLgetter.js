@@ -14,8 +14,8 @@ function get_NGL_protein()
 				ext: "pdb", defaultRepresentation: true
 		} ).then( function( o ){
 			o.addRepresentation( "surface" );
-			console.log(o.reprList);
 			loose_surface = o.reprList[3].repr;
+			console.log(loose_surface)
 			
 			//we would like to know when it has finished making its representation and call the code currently in input			
 		} );
@@ -47,6 +47,11 @@ function appauling_hacky_model_loader()
 	if(typeof loose_surface.bufferList[0] === 'undefined')
 		return;
 	
+	console.log("GOT THROUGH")
+	placeholder_interpret_ngl();
+	
+	frames_since_last_unsuccessful_poll_of_model = -1;
+	
 	if( loose_surface.bufferList[0].geometry.attributes.position.array.length !== previous_position_length )
 	{
 		if( typeof loose_surface.bufferList[0].geometry.attributes.normal.array.length !== 'undefined' )
@@ -69,9 +74,7 @@ function appauling_hacky_model_loader()
 	//you'll have trouble if there is actually a point where it becomes stable
 	
 	//model is stable
-	placeholder_interpret_ngl();
 	
-	frames_since_last_unsuccessful_poll_of_model = -1;
 }
 
 function placeholder_interpret_ngl()
