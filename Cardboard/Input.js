@@ -7,8 +7,6 @@ function ReadInput()
 	OurOrientationControls.update();
 	
 	update_PointOfFocus();
-	
-	appauling_hacky_model_loader();
 }
 
 function update_PointOfFocus()
