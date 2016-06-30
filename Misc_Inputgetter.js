@@ -1,27 +1,49 @@
-document.addEventListener( 'mousedown', onDocumentMouseDown, false);
-document.addEventListener( 'mouseup', onDocumentMouseUp, false);
-document.addEventListener( 'mousemove', onDocumentMouseMove, false ); //window?
+/*
+ * TODO
+ * Touchscreen controls
+ * Mouse should be projected, shouldn't have dependency on playing field width (but should have dependency on window)
+ * 
+ * Video should probably just stay to the right, and camera movements should be implemented in the shoot
+ * There are things like the footage of sufferers and the polymerase which we want in there too. Separate video.
+ * May also "manually" change something, for a bit of fun. Good candidate would be the quasisphere for zika virus. But how to take account of the current shape?
+ */
+
 //document.addEventListener( 'touchstart', onDocumentMouseDown, false );
 //document.addEventListener( 'touchmove', onDocumentTouchMove, false );
 //document.addEventListener( 'touchend', onDocumentMouseUp, false );
 
-//remember there can be weirdness for multiple fingers, so make sure any crazy series of inputs are interpretable
-function onDocumentMouseDown(event) {
+//this is called once a frame and must be the only thing that addresses Inputobject, lest functions get different impressions of inputs.
+//this function shouldn't actually *do* anything with the data, it's only to be read elsewhere.
+function ReadInput() {
+	OldMousePosition.copy( MousePosition );
+	MousePosition.x = (InputObject.mousex-window_width/2) * (playing_field_width / window_width);
+	MousePosition.y = -(InputObject.mousey-window_height/2) * (playing_field_height / window_height);
+	
+	Mouse_delta.set( MousePosition.x - OldMousePosition.x, MousePosition.y - OldMousePosition.y);
+	
+	isMouseDown_previously = isMouseDown;
+	isMouseDown = InputObject.isMouseDown;
+	
+	react_to_video();
+}
+
+document.addEventListener( 'mousedown', function(event) {
 	event.preventDefault();
 	InputObject.isMouseDown = true;
-}
-function onDocumentMouseUp(event) {
+}, false);
+document.addEventListener( 'mouseup', 	function(event) {
 	event.preventDefault();
 	InputObject.isMouseDown = false;
 	//minimum amount of time so that people don't hammer the screen?
-}
+}, false);
 
-function onDocumentMouseMove( event ) {
+document.addEventListener( 'mousemove', function(event) {
 	event.preventDefault();
 	InputObject.mousex = event.clientX - renderer.domElement.offsetLeft;
 	InputObject.mousey = event.clientY - renderer.domElement.offsetTop;
-}
+}, false ); //window?
 
+//remember there can be weirdness for multiple fingers, so make sure any crazy series of inputs are interpretable
 //function onDocumentTouchMove( event ) {
 //	event.preventDefault();
 //	InputObject.mousex = event.changedTouches[0].clientX; //only looking at the first one. TODO multi-touch!
@@ -37,8 +59,6 @@ function update_mouseblob(){
 	}
 	
 	var cursorposition = new THREE.Vector2(MousePosition.x,MousePosition.y);
-	if(MODE==CUBIC_LATTICE_MODE || MODE == FINAL_FORMATION_MODE)
-		cursorposition.multiplyScalar(4.5);
 	for(var i = 0; i < circle.geometry.vertices.length; i++) {
 		circle.geometry.vertices[i].x = cursorposition.x + Xdists_from_center[i];
 		circle.geometry.vertices[i].y = cursorposition.y + Ydists_from_center[i];
@@ -46,59 +66,3 @@ function update_mouseblob(){
 	
 	circle.geometry.verticesNeedUpdate = true;
 }
-
-//this is called once a frame and must be the only thing that addresses Inputobject, lest functions get different impressions of inputs.
-//this function shouldn't actually *do* anything with the data, it's only to be read elsewhere.
-function ReadInput() {
-	OldMousePosition.copy( MousePosition );
-	MousePosition.x = (InputObject.mousex-window_width/2) * (playing_field_width / window_width);
-	MousePosition.y = -(InputObject.mousey-window_height/2) * (playing_field_height / window_height);
-	
-	Mouse_delta.set( MousePosition.x - OldMousePosition.x, MousePosition.y - OldMousePosition.y);
-	
-	isMouseDown_previously = isMouseDown;
-	isMouseDown = InputObject.isMouseDown;
-	
-	console.log("hey")
-	react_to_video();
-}
-
-var pictoshow = 1;
-
-//keyboard crap. Currently using "preventdefault" then "return" on everything you use, there's probably a better way
-document.addEventListener( 'keydown', function(event)
-{
-	//65, 83, 68, 70, 71. A: HIV appears. S: switch to irreg. D: switch appears. F: pics pop up. G: gaps flash
-	console.log(event.keyCode)
-	
-	if(event.keyCode === 65 )
-	{
-		scene.remove(picture_objects[pictoshow-1]);
-		scene.add(picture_objects[pictoshow]);
-		pictoshow++;
-	}
-	
-	if(event.keyCode === 83 )
-	{
-		ChangeScene(IRREGULAR_MODE);
-	}
-	
-	if(event.keyCode === 68 ) //D
-	{
-		ytplayer.playVideo();
-		
-	}
-	
-	if(event.keyCode === 70 )
-	{
-		scene.add(Button[0]);
-	}
-	
-	if(event.keyCode === 71 )
-	{
-		ytplayer.playVideo();
-		for(var i = 12; i < 16; i++)
-			scene.add(picture_objects[i]);
-	}
-	
-}, false );

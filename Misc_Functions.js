@@ -1,12 +1,30 @@
-//aka ourpoint and ourline_top are lines originating from ourline_bottom and we wish to know which line is clockwise of other
-function point_to_the_right_of_line_vecs(ourpoint, line_top, line_bottom) {
-	//Say you have two 2D vectors p and q with same origin. p will be "clockwise of" q if z-component of cross product is positive
-	if( 	(ourpoint.x-line_bottom.x) * (line_top.y-line_bottom.y)
-		  <=(ourpoint.y-line_bottom.y) * (line_top.x-line_bottom.x)
-	  ) return false;
-	else
-		return true;
+//TODO: use this on surface opening
+//tells you how far along you are, as a proportion
+function move_smooth(time_final, time_current){
+	if(time_current >= time_final)
+		return 1;
+	else if(time_current < 0)
+		return 0;
+	
+	var startaccel = 6 / ( time_final * time_final );
+	return startaccel * time_current * time_current * ( 1 / 2 - time_current / 3 / time_final );
 }
+
+function move_smooth_vectors(startposition,finalposition,time_final, time_current){
+	if(time_current >= time_final)
+		return finalposition;
+	else if(time_current < 0)
+		return startposition;
+	
+	var whole_movement_vector = new THREE.Vector3();
+	whole_movement_vector.subVectors(finalposition,startposition);
+	var current_position = whole_movement_vector.clone();
+	current_position.multiplyScalar( move_smooth(time_final, time_current) );
+	current_position.add(startposition);
+	return current_position;
+}
+
+
 
 function difference_between_angles(angle1, angle2){
 	//this would be worthwhile
@@ -14,6 +32,13 @@ function difference_between_angles(angle1, angle2){
 
 function Square(a){
 	return a*a;
+}
+
+//top left, top right, bottom left, bottom right
+function apply2Dmatrix(Matrix, vector){
+	var oldX = vector.x;
+	vector.x = Matrix[0] * vector.x + Matrix[1] * vector.y;
+	vector.y = Matrix[2] * oldX		+ Matrix[3] * vector.y;
 }
 
 function two_way_reduce(num, destnum,reduction_speed){
@@ -101,6 +126,7 @@ function deduce_stable_points_from_fanning_vertex(fanning_vertex_start, lattice_
 		}
 		
 		if(confirmed_stablepoint){
+			console.log(lowest_unused_stablepoint)
 			stable_points[lowest_unused_stablepoint].copy(potential_stable_point);
 //			console.log(j,hand);
 			lowest_unused_stablepoint++;
@@ -119,15 +145,16 @@ function line_line_intersection(startpointA,startpointB,endpointA,endpointB){
 	lineB.sub(startpointB);
 	return line_line_intersection_vecs(startpointA,startpointB,lineA,lineB);
 }
+//p connected to r, q connected to s.
 function line_line_intersection_vecs(p,q,r,s) {
-	var r_cross_s = vec2_crossprod(r,s);
+	var r_cross_s = vec2_crossprod(r,s); //it's a scalar, representing z.
 	if(r_cross_s === 0)
 		return 0;
 	
 	var r_over_r_cross_s = r.clone();
-	r_over_r_cross_s.multiplyScalar(1/r_cross_s);
+//	r_over_r_cross_s.multiplyScalar(1/r_cross_s);
 	var s_over_r_cross_s = s.clone();
-	s_over_r_cross_s.multiplyScalar(1/r_cross_s);
+//	s_over_r_cross_s.multiplyScalar(1/r_cross_s);
 	
 	var p_to_q = q.clone();
 	p_to_q.sub(p);
@@ -135,9 +162,14 @@ function line_line_intersection_vecs(p,q,r,s) {
 	var u = vec2_crossprod(p_to_q,r_over_r_cross_s);
 	var t = vec2_crossprod(p_to_q,s_over_r_cross_s);
 	
-	if( 0 < u && u < 1 
-	 && 0 < t && t < 1 ){
+	u /= r_cross_s;
+	t /= r_cross_s;
+	
+//	if(!logged)console.log(u,t)
+	if( 0 <= u && u <= 1 
+	 && 0 <= t && t <= 1 ){
 		var answer = p.clone();
+//		if(!logged)console.log(answer, r, t)
 		answer.addScaledVector(r, t);
 		return answer;
 	}
@@ -327,6 +359,25 @@ function point_to_the_right_of_line(ourpointx,ourpointy,
 	else return 2; //on the line
 }
 
+//aka ourpoint and ourline_top are lines originating from ourline_bottom and we wish to know which line is clockwise of other
+function point_to_the_right_of_line_vecs(ourpoint, line_top, line_bottom) {
+	//Say you have two 2D vectors p and q with same origin. p will be "clockwise of" q if z-component of cross product is positive
+	if( 	(ourpoint.x-line_bottom.x) * (line_top.y-line_bottom.y)
+		  <=(ourpoint.y-line_bottom.y) * (line_top.x-line_bottom.x)
+	  ) return 0;
+	else
+		return 1;
+}
+
+function point_in_triangle_vecs(ourpointx,ourpointy,
+							cornerA,cornerB,cornerC, 
+							clockwise)
+{
+	return point_in_triangle( ourpointx,ourpointy,
+			cornerA.x, cornerA.y,cornerB.x, cornerB.y, cornerC.x,cornerC.y, 
+			clockwise);
+}
+
 //if it's on the line segments, it's in
 function point_in_triangle( ourpointx,ourpointy,
 							cornerAx, cornerAy,cornerBx, cornerBy, cornerCx,cornerCy, 
@@ -355,6 +406,18 @@ function point_in_triangle( ourpointx,ourpointy,
 			&&	point_to_the_right_of_line(ourpointx, ourpointy, cornerBx, cornerBy, cornerAx, cornerAy) != 0
 			) return true;
 	}
+	return false;
+}
+
+function point_on_triangle_boundaries(ourpointx,ourpointy,
+		cornerA,cornerB,cornerC, 
+		clockwise)
+{
+	if( 2 === point_to_the_right_of_line(ourpointx, ourpointy, cornerA.x, cornerA.y, cornerB.x, cornerB.y) ||
+		2 === point_to_the_right_of_line(ourpointx, ourpointy, cornerB.x, cornerB.y, cornerC.x, cornerC.y) ||
+		2 === point_to_the_right_of_line(ourpointx, ourpointy, cornerC.x, cornerC.y, cornerA.x, cornerA.y))
+		return true;
+		
 	return false;
 }
 
@@ -435,7 +498,6 @@ function get_cos_rule(a,b,c)
 	return result;
 }
 
-//COUNTER CLOCKWISE
 function rotate_vector2_counterclock( myvector, angle)
 {
 	var costheta = Math.cos(angle);
@@ -465,7 +527,6 @@ function vector_from_bearing( rootvector, length, angle, cos, sin) {
 	}
 }
 
-//never know, it might come in handy
 function tetrahedron_top(P1,P2,P3, r1,r2,r3) {
 	P3.sub(P1);
 	P2.sub(P1);

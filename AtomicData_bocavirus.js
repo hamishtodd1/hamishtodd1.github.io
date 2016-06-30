@@ -2,6 +2,12 @@
  * TODO
  * -colors
  * -very minor jitter (?) on DNA and maybe protein
+ * -pentagon caps, not triangle.
+ * 
+ * -lots of pictures
+-bocavirus zooms out
+-bocavirus colors change
+-bocavirus pentamers flash
  * 
  * -lights
  * 
@@ -10,7 +16,7 @@
  */
 
 /*
- * Springy DNA:
+ * Springy DNA - really worth doing, the first interactive thing they see
  * for every strand, basis vectors at both their ends, plus another basis vector that is the cross product of those basis vectors
  * When the player rotates, it gives momentum to the dodeca vertices. They're trapped in a narrow cone. 
  */

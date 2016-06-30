@@ -1,6 +1,4 @@
-/* 
- * You do want that "drag against the limit of triangle" thing, because people randomly moving it around do make it go places fast
- */
+
 
 /*  Newest plan:
  * 
@@ -40,7 +38,9 @@
 
 //is non convergence still related to flipping?
 
-var alexandrov_inspection_mode = 0;
+var alexandrov_inspection_mode = 1;
+
+var crazy_flip = 0;
 
 //returns true if the minimum angles ended up getting modified
 function correct_minimum_angles(vertices_buffer_array) {
@@ -68,7 +68,7 @@ function correct_minimum_angles(vertices_buffer_array) {
 	
 	var stepsizemax = 0.75;
 	var stepsize = stepsizemax;	
-	var epsilon = 0.0001; //about the minimum to close HIV. Can make it lower.
+	var epsilon = 0.00005; //about the minimum to close HIV. Can make it lower.
 	var steps = 0;
 	
 	//curvatures is a 12D vector with curvatures[i] coming from vertex (i.e. radius) i
@@ -83,11 +83,21 @@ function correct_minimum_angles(vertices_buffer_array) {
 		for( var i = 0; i < curvatures_current.length; i++)
 			curvatures_intended[i] = (1 - stepsize) * curvatures_current[i];
 
-		var radii_intended = newton_solve(curvatures_intended); //we get radii_intended : curvatures(radii_intended) === curvatures_intended	
+		var radii_intended;
+		var solve_worked;
+		
+		if(crazy_flip){ //don't bother trying
+			solve_worked = 0;
+			crazy_flip = 0;
+		}
+		else{
+			radii_intended = newton_solve(curvatures_intended); //we get radii_intended : curvatures(radii_intended) === curvatures_intended
+			solve_worked = radii_intended === 666 ? 0 : 1;
+		}
 		
 		//speedup opportunity: there are several early warning signs that it is time to flip back
 		
-		if( radii_intended !== 666 ) { //it worked!
+		if( solve_worked ) {
 			var flips_to_perform = Array();
 			
 			for( var i = 0; i < radii_intended.length; i++) {
@@ -105,7 +115,7 @@ function correct_minimum_angles(vertices_buffer_array) {
 			}
 			
 			if(flips_to_perform.length > 0) {
-				if(alexandrov_inspection_mode) console.log("	FLIPS ", flips_to_perform.length / 2); //we appear to be flipping back and forth
+				if(alexandrov_inspection_mode) console.log("	FLIPS ", flips_to_perform.length / 2);
 				total_flips += flips_to_perform.length / 2;
 				
 				for(var i = 0; i < polyhedron_edge_length.length; i++)
@@ -117,7 +127,13 @@ function correct_minimum_angles(vertices_buffer_array) {
 				for( var i = 0; i < flips_to_perform.length / 2; i++){
 					var ourindices = get_diamond_indices(flips_to_perform[i*2+0],flips_to_perform[i*2+1]);
 					flip(ourindices);
+					
+					if( crazy_flip )
+						break;
 				}
+				//sooo, there are several steps that request a ridiculous number of flips. And in a row. Not an unheard of number, but maybe inspect them
+				//shouldn't there be some logic about adjacent edges not being flipped?
+				//should this really "go through"?
 				
 				flipped_last_iteration = 1;
 			}
@@ -139,6 +155,7 @@ function correct_minimum_angles(vertices_buffer_array) {
 			}
 		}
 		else {
+			
 			if( flipped_last_iteration ){
 				if(alexandrov_inspection_mode)
 					console.log("	DON'T WORRY, rolling back" );
@@ -174,6 +191,7 @@ function correct_minimum_angles(vertices_buffer_array) {
 			return 0;
 		}
 	}
+	
 	
 	for(var i = 0; i< net_triangle_vertex_indices.length / 3; i++) {
 		for(var j = 0; j < 3; j++){
@@ -373,7 +391,7 @@ function get_curvatures(input_radii, failure_is_acceptable) {
 		if(isNaN(curvature_array[i])) {
 			if(!failure_is_acceptable) {
 				//this is probably just a "don't allow this" situation
-				console.error("crazy curvature");
+				if(net_warnings)console.error("crazy curvature");
 			}
 			return 666;
 		}

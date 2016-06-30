@@ -1,6 +1,5 @@
-function Map_To_Quasisphere() {
-	var one_quasicutout_vertices = quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices.length / 60;
-	
+function Map_To_Quasisphere() 
+{
 	var lowest_unused_vertex = 0;
 	
 	var axis = new THREE.Vector3(0,0,-1);
@@ -47,69 +46,12 @@ function Map_To_Quasisphere() {
 		lowest_unused_vertex++;
 	}
 	
-	var lowest_unused_edgepair = 0;
-	
-	var index_index_triangle_triplets = Array();
-	
 	var left_triangle_mirrored_top = new THREE.Vector3();
 	left_triangle_mirrored_top.addVectors(cutout_vector1, left_triangle_cutout_vector);
 	var right_triangle_mirrored_top = new THREE.Vector3();
 	right_triangle_mirrored_top.addVectors(right_triangle_cutout_vector, cutout_vector0);
 	var center_triangle_mirrored_top = new THREE.Vector3();
 	center_triangle_mirrored_top.addVectors(cutout_vector1, cutout_vector0);
-	
-	var interior_wiggleroom = 0.000000000000003; //...00018 is an important minimum!
-	var num_that_got_through = 0;
-	for( var i = 0; i < lowest_unused_vertex; i++) {
-		//TODO so should we have inflation everywhere?
-		if( !point_in_inflated_triangle( quasicutout_intermediate_vertices[i].x, quasicutout_intermediate_vertices[i].y,
-				0, 0, cutout_vector0.x, cutout_vector0.y, cutout_vector1.x, cutout_vector1.y, 
-				true) )
-			continue;
-		num_that_got_through++;
-		
-		for( var j = 0; j < lowest_unused_vertex; j++) {
-			var edgelength_minus_1 = quasicutout_intermediate_vertices[i].distanceTo(quasicutout_intermediate_vertices[j]) - 1;
-			if( Math.abs( edgelength_minus_1 ) < interior_wiggleroom )
-			{
-				var inrighttriangle = point_in_inflated_triangle(	quasicutout_intermediate_vertices[j].x, quasicutout_intermediate_vertices[j].y,
-						0, 0, right_triangle_cutout_vector.x, right_triangle_cutout_vector.y, cutout_vector0.x, cutout_vector0.y, 
-						true);
-				var inactualtriangle = point_in_inflated_triangle(	quasicutout_intermediate_vertices[j].x, quasicutout_intermediate_vertices[j].y,
-						0, 0, cutout_vector0.x, cutout_vector0.y, cutout_vector1.x, cutout_vector1.y, 
-						true);
-				var inlefttriangle =  point_in_inflated_triangle(	quasicutout_intermediate_vertices[j].x, quasicutout_intermediate_vertices[j].y,
-						0, 0, cutout_vector1.x, cutout_vector1.y, left_triangle_cutout_vector.x, left_triangle_cutout_vector.y, 
-						true);
-				
-				if( inactualtriangle || inlefttriangle || inrighttriangle ) {
-					quasicutout_line_pairs[ lowest_unused_edgepair*2 ] = i;
-					quasicutout_line_pairs[lowest_unused_edgepair*2+1] = j;
-					lowest_unused_edgepair++;
-				}
-				else{
-					var mytriangle = ((j%6)-1)/2;
-					if((point_in_triangle(	quasicutout_intermediate_vertices[j].x, quasicutout_intermediate_vertices[j].y,
-						cutout_vector1.x, cutout_vector1.y, left_triangle_mirrored_top.x, left_triangle_mirrored_top.y, left_triangle_cutout_vector.x, left_triangle_cutout_vector.y, 
-						true) && mytriangle == 0 )
-					 ||(point_in_triangle(	quasicutout_intermediate_vertices[j].x, quasicutout_intermediate_vertices[j].y,
-						cutout_vector0.x, cutout_vector0.y, center_triangle_mirrored_top.x, center_triangle_mirrored_top.y, cutout_vector1.x, cutout_vector1.y, 
-						true) && mytriangle == 1 )
-					 ||(point_in_triangle(	quasicutout_intermediate_vertices[j].x, quasicutout_intermediate_vertices[j].y,
-						right_triangle_cutout_vector.x, right_triangle_cutout_vector.y, right_triangle_mirrored_top.x, right_triangle_mirrored_top.y, cutout_vector0.x, cutout_vector0.y, 
-						true) && mytriangle == 2 )
-					   ) {
-						var j_equivalent = j-j%6+2;
-						index_index_triangle_triplets.push(Array(i,j_equivalent,mytriangle));
-						//TODO you don't really want ones on the very edge like on HPV, gives lots of nasty crossing lines when it's open
-						//deflating the above by a negative amount gets rid of some but not all 
-					}
-				}
-			}
-		}
-	}
-	for(var i = lowest_unused_edgepair*2; i < quasicutout_line_pairs.length; i++)
-		quasicutout_line_pairs[i] = 0;
 	
 	//Speedup opportunity: we could do a pass of "check there aren't duplicate pairs, or unconnected points. And maybe not interior ones with only one edge attached either"
 	
@@ -146,6 +88,8 @@ function Map_To_Quasisphere() {
 		if(i===0) radius = Math.sqrt(basis_vectors[i][0].lengthSq() + ourcenter_veclength * ourcenter_veclength );
 	}
 	
+	var one_quasicutout_vertices = quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices.length / 60;
+	
 	for(var i = 0; i < 60; i++){
 		for( var vertex_index = 0; vertex_index < lowest_unused_vertex; vertex_index++) {
 			if( vertex_index % 2 === 1 && i < nearby_quasicutouts.length){
@@ -168,146 +112,118 @@ function Map_To_Quasisphere() {
 		quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.verticesNeedUpdate = true;
 	}
 	
-//	var lowest_unused_quasicutout_mesh_vertex = one_quasicutout_vertices - NUM_QS_VERTICES_FOR_EDGES;
-//	
-//	var EdgesToBeAdded = Array(); //two vertex indices and a triangle index per edge. Check the max lengths and initialize this with that
-//	var NullTriangles = Array();
-//	var edgeradius = 0.05;
-//	
-//	
-//	for(var i = 0; i < quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.faces.length / 60; i++){
-//		var ourfaceindices = new Uint16Array([
-//		    quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.faces[i].a,
-//		    quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.faces[i].b,
-//		    quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.faces[i].c]); //replace ourfaceindices with all that if you want
-//		
-//		if(ourfaceindices[0] === 0 && ourfaceindices[1] === 0 && ourfaceindices[2] === 0)
-//			NullTriangles.push(i);
-//		else {
-//			for(var j = 0; j < 3; j++){
-//				var v1 = ourfaceindices[j];
-//				var v2 = ourfaceindices[( j+1 ) % 3];
-//				
-//				var foundpartner = 0;
-//				
-//				//get the other shape that posesses this edge
-//				for(var k = 0; k < EdgesToBeAdded.length / 3; k++){
-//					if( (v1 === EdgesToBeAdded[k*3+0] && v2 === EdgesToBeAdded[k*3+1])
-//					 || (v2 === EdgesToBeAdded[k*3+0] && v1 === EdgesToBeAdded[k*3+1]) ){
-//						if(!triangle_in_same_shape(i, EdgesToBeAdded[k*3+2] ) ) {
-//							if( v1 % 2 + v2 % 2 !== 2 ){ //if they were both odd this would be an edge outside of our quasicutout
-//								//We have an edge to draw
-//								//TODO the edges only exist inside the pentagon. It is hard for people to get it otherwise
-//								var startingvertex,endingvertex;
-//								if( v1 % 2 === 0 && v2 % 2 === 0 ){
-//									startingvertex = quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[v1].clone();
-//									endingvertex = quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[v2].clone();
-//								}
-//								else {
-//									var startingvertexindex,endingvertexindex;
-//									if( v1 % 2 === 1){
-//										startingvertexindex = v2;
-//										endingvertexindex = v1;
-//									}
-//									else {
-//										startingvertexindex = v1;
-//										endingvertexindex = v2;
-//									}
-//									
-////									console.log(ourfaceindices,startingvertexindex,endingvertexindex)
-//									console.log(i,startingvertex=quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices.length)
-//									startingvertex=quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[startingvertexindex].clone();
-//									endingvertex = quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[endingvertexindex].clone();
-//									
-//									endingvertex.lerp(startingvertex, dodeca_faceflatness);
-//								}
-//								
-//								var ourpeak = new THREE.Vector3();
-//								ourpeak.addVectors(startingvertex,endingvertex);
-//								ourpeak.setLength(edgeradius);
-//								
-//								var StartToEndNorm = endingvertex.clone();
-//								StartToEndNorm.sub(startingvertex);
-//								StartToEndNorm.normalize();
-//								
-//								ourpeak.applyAxisAngle(StartToEndNorm, -TAU/3); //speedup opportunity, be a bit smarter to get rid of this. Also this might be the wrong direction
-//								for( var c = 0; c < 3; c++) {
-//									//this only seemed to be happenning for mesh 0?
-//									quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[lowest_unused_quasicutout_mesh_vertex].copy(startingvertex);
-//									quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[lowest_unused_quasicutout_mesh_vertex].add(ourpeak);
-//									lowest_unused_quasicutout_mesh_vertex++;
-//									
-//									quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[lowest_unused_quasicutout_mesh_vertex].copy(endingvertex);
-//									quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[lowest_unused_quasicutout_mesh_vertex].add(ourpeak);
-//									lowest_unused_quasicutout_mesh_vertex++;
-//									ourpeak.applyAxisAngle(StartToEndNorm, TAU/3);
-//								}
-//							}
-//						}
-//						
-//						EdgesToBeAdded.splice(k*3,3);
-//						
-//						foundpartner = 1;
-//						break; //we found the shape sharing edge
-//					}
-//				}
-//				
-//				//never found the shape sharing edge. This is either our first time on the edge, or it's our "outline"
-//				if(foundpartner === 0){
-//					console.log(v1,v2,i)
-//					EdgesToBeAdded.push(v1);
-//					EdgesToBeAdded.push(v2);
-//					EdgesToBeAdded.push(i);
-//				}
-////				console.log(EdgesToBeAdded.length);
-//			}
-//		}
-//	}
+	//----------------Edge stuff
+	//smaller ones get smaller edges because they're further away. Could make orthographic
+	//really the silly holes and jutty ness show you need a different kind of edge. Rectangles, with end centers on the vertices
+	//both these arrays can have initialized lengths
+	var EdgesToBeAdded = Array(); //two vertex indices and a triangle index per edge. Check the max lengths and initialize this with that
+	var NullTriangles = Array();
 	
-//	for(var i = 0; i < EdgesToBeAdded.length / 3; i++){
-//		if(EdgesToBeAdded[i*3+2] === 0 )
-//			continue; //central pentagon
-//		
-//		var shape_cut = 0;
-//		
-//		for( var j = 0; j < NullTriangles.length; j++){
-//	    	if( triangle_in_same_shape(NullTriangles[j], EdgesToBeAdded[i*3+2]) ){
-//	    		shape_cut = 1;
-//	    		
-//	    		break; //the shape we're in has been cut, so at least ONE of the sides of this triangle should NOT get an edge, therefore let's not give it any 
-//		    	//Though it may still be the case that THIS side should =( will probably need to work out which.
-//	    		//But there are situations in which you should hold back on the line drawing, such as the pointed hexagon 
-//	    	}
-//		}
-//	      
-//    	if( shape_cut === 0 )
-//    		new_vertices_in_quasicutout += 6;
-//      		//So this shape IS completed within the quasicutout - so we DEFINITELY SHOULD draw a growing line. There's other situations for this too though
-//    		//unless it's that pointy hexagon for example :/ eg we are probably going to have an array. Not a big deal
-//	}
+	var lowest_prism_vertex = one_quasicutout_vertices - NUM_QUASICUTOUT_EDGES * 6;
 	
-//	for(var i = lowest_unused_quasicutout_mesh_vertex; i < quasicutout_meshes[stable_point_of_meshes_currently_in_scene][0].geometry.vertices.length; i++){
-//		quasicutout_meshes[stable_point_of_meshes_currently_in_scene][0].geometry.vertices[i].set(0,0,0);
-//	}
+	var ourprism = 0;
 	
-	//the prism_triangle_indices thing is easy, you just need to put a load into every quasicutout mesh.
+//	if(!isMouseDown && isMouseDown_previously)logged = 0;
+//	else logged = 1;
 	
-	/* Number of points needed in quasicutout_meshes?
-	 * You want to use put_unbased_triangularprism_in_buffer and prism_triangle_indices
+	//for each triangle that is part of a face. We work out what sort of face using the system from init.
+	for(var i = 0; i < quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.faces.length / 60 - NUM_QUASICUTOUT_EDGES * 4; i++)
+	{
+		var ourfaceindices = new Uint16Array([
+		    quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.faces[i].a,
+		    quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.faces[i].b,
+		    quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.faces[i].c]); //replace ourfaceindices with all that if you want
+		
+		var edge_needs_drawing = 0;
+		
+		if(ourfaceindices[0] === 0 && ourfaceindices[1] === 0 && ourfaceindices[2] === 0)
+			NullTriangles.push(i);
+		else {
+			for(var j = 0; j < 3; j++) //sides of the triangle
+			{
+				var v1 = ourfaceindices[j];
+				var v2 = ourfaceindices[( j+1 ) % 3];
+				
+				var ETBAindex = 6666;
+				
+				//get the other shape that posesses this triangle side
+				for(var k = 0; k < EdgesToBeAdded.length / 3; k++)
+				{
+					if( (v1 === EdgesToBeAdded[k*3+0] && v2 === EdgesToBeAdded[k*3+1])
+					 || (v2 === EdgesToBeAdded[k*3+0] && v1 === EdgesToBeAdded[k*3+1]) )
+					{
+						ETBAindex = k;
+						break;
+					}
+				}
+				
+				if(ETBAindex === 6666)
+				{
+					//never found the triangle sharing the side. This is either our first time on the edge, or it's our "outline", which is handled below
+					EdgesToBeAdded.push(v1);
+					EdgesToBeAdded.push(v2);
+					EdgesToBeAdded.push(i);
+				}
+				else
+				{
+					if( !triangle_in_same_shape(i, EdgesToBeAdded[ETBAindex*3+2] ) //if they're in the same shape they don't need an edge between them. WARNING maybe not
+//						&& ( v1 % 2 === 0 && v2 % 2 === 0 ) ) //right now only looking at those fully in
+						&& ( v1 % 2 + v2 % 2 !== 2 ) ) //if they were both odd this would be an edge outside of our quasicutout, to be handled by another
+					{
+						put_edge_in_quasicutouts(ourprism, one_quasicutout_vertices, lowest_prism_vertex, v1,v2);
+						ourprism++;
+					}
+					
+					//Got what we needed from here. Maybe faster without this though
+					EdgesToBeAdded.splice(ETBAindex*3,3);
+				}
+			}
+		}
+	}
+	
+	//TODO color changes are needed and then the above should be changed too
+	
+	for(var i = 0; i < EdgesToBeAdded.length / 3; i++)
+	{
+		var draw_edge = 1;
+		
+		if( EdgesToBeAdded[i*3+2] === 0  ) //central pentagon, add "&& !something" to this
+			draw_edge = 0;
+		
+		for(var j = 0; j < Forced_edges[stable_point_of_meshes_currently_in_scene].length; j++)
+			if(Forced_edges[stable_point_of_meshes_currently_in_scene][j] === EdgesToBeAdded[i*3+2])
+				draw_edge = 0;
+		
+		if((stable_point_of_meshes_currently_in_scene === 7 && EdgesToBeAdded[i*3+2] === 2 
+				&& ( EdgesToBeAdded[i*3+0] === 16 && EdgesToBeAdded[i*3+1] ===  4 ) )
+		|| (stable_point_of_meshes_currently_in_scene === 11 && EdgesToBeAdded[i*3+2] === 10 
+				&& ( EdgesToBeAdded[i*3+0] === 26 && EdgesToBeAdded[i*3+1] === 46 ) ||
+				   ( EdgesToBeAdded[i*3+0] === 47 && EdgesToBeAdded[i*3+1] === 28 ) )
+		|| (stable_point_of_meshes_currently_in_scene === 20 && EdgesToBeAdded[i*3+2] === 6 
+				&& ( EdgesToBeAdded[i*3+0] === 8  && EdgesToBeAdded[i*3+1] === 20 ) ) )
+		{
+			draw_edge = 0;
+		}
+		//stable point 20 is a problem
+	      
+    	if( draw_edge === 1 )
+    	{
+    		put_edge_in_quasicutouts(ourprism, one_quasicutout_vertices, lowest_prism_vertex, EdgesToBeAdded[i*3+0], EdgesToBeAdded[i*3+1]);
+			ourprism++;
+    	}
+  		//So this shape IS completed within the quasicutout - so we DEFINITELY SHOULD draw a line. There's other situations for this too though
+		//Need to make sure that shapes that get built into bigger shapes are of a multiple color
+	}
+	if(stable_point_of_meshes_currently_in_scene === 20)
+		logged = 1;
+	
+	quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.verticesNeedUpdate = true;
+	
+	/* You can tell from the color what kind of thing it's in. You won't have an incomplete fat rhomb
 	 * 
-	 * We have arrays: EdgesToBeAdded and NullTriangles
-	 * So we have a for loop going through the triangles in a mesh.
-	 *   if all three indices are 0, put the triangle's index in NullTriangles
-	 *   else, go through each vertex pair on that triangle
-	 *     For each, check if it's in EdgesToBeAdded already
-	 *       If not, add it: index, index, then triangle index
-	 *       If so, check if it is in the same shape as this triangle
-	 *         If so, they're one shape, so don't add this edge (still maybe though?)
-	 *         If not, check whether either of the indices are odd
-	 *           If so, we're drawing a growing edge (a line going from the even-numbered one partway to the odd-numbered. 1-faceflatness is the partway)
-	 *           If not, regular edge.
-	 *           There may be other cases where we don't draw an edge at all, for example an edge that sits directly on the two-fold axis will have two growers this way.
-	 *       Then remove that edge from the array
+	 * NO PROBABLY NOT: Easiest way is almost certainly an array. For each stable point, a set of triangles (the EdgesToBeAdded[i*3+2]) and the vertices of the edges on which you want an edge
+	 * 
+	 * Number of points needed in quasicutout_meshes?
 	 *       
 	 * All non-duplicate edges, i.e. what's left in the array...
 	 * We're not sure if we want an edge on them, because it may or may not be a shape that is completed by its opposite partner
@@ -316,16 +232,51 @@ function Map_To_Quasisphere() {
 	 * One thing you could do would be look at the category of shape and if it's an incomplete category (i.e. there's half a thin rhomb) don't touch it, otherwise do
 	 *   If you have that drawing lines on the non-ordinary shapes, you could easily disable them by pretend-drawing an extra triangle to "finish" that shape
 	 * 
-	 * 
 	 * The conflict: 
-	 *   want like shapes to be like colors
+	 *   want like shapes to be like colors (could give up on this in the name of expediency. Same color on HPV, not otherwise)
+	 *   Could change to black and white when flattened
 	 *	 want shapes to not change color when mouse is held down (could easily hide more of them though)
-	 *   and want neighbours to be different colors (tho not that much)
-	 * 
+	 *	 could have the "default" colors, probably the HPV stable point, and then fade to whatever one it is
 	 */
 }
 
-function triangle_in_same_shape(triangle, othertriangle){
+function put_edge_in_quasicutouts(ourprism, one_quasicutout_vertices, lowest_prism_vertex, v1,v2)
+{
+	var ourpeak = new THREE.Vector3();
+	var StartToEndNorm = new THREE.Vector3();
+	var StartingVertex_AdjacentVertex_index;
+	
+	for(var q = 0; q < 60; q++)
+	{
+		//We have an edge to draw
+		var startingvertex = quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[one_quasicutout_vertices * q + v1];
+		var endingvertex   = quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[one_quasicutout_vertices * q + v2];
+		
+		ourpeak.addVectors(startingvertex,endingvertex); //is it still the same distance from the origin when "flat"?
+		ourpeak.multiplyScalar(0.01);
+		
+		StartToEndNorm.copy(endingvertex );
+		StartToEndNorm.sub(startingvertex);
+		StartToEndNorm.normalize();
+		
+		ourpeak.applyAxisAngle(StartToEndNorm,-TAU/3); //speedup opportunity, be a bit smarter to get rid of this. Also this might be the wrong direction
+		for( var c = 0; c < 3; c++) {
+			StartingVertex_AdjacentVertex_index = one_quasicutout_vertices * q + lowest_prism_vertex + ourprism * 6 + c * 2;
+			
+			quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[StartingVertex_AdjacentVertex_index + 0].copy(startingvertex);
+			quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[StartingVertex_AdjacentVertex_index + 0].add(ourpeak);
+			
+			quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[StartingVertex_AdjacentVertex_index + 1].copy(endingvertex);
+			quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[StartingVertex_AdjacentVertex_index + 1].add(ourpeak);
+			
+			ourpeak.applyAxisAngle(StartToEndNorm, TAU/3);
+		}
+	}
+}
+
+function triangle_in_same_shape(triangle, othertriangle)
+{
+//	return 0;
 	if( 9 <= triangle && triangle <= 13 &&
 		9 <= othertriangle && othertriangle <= 13 && 
 		othertriangle != triangle )

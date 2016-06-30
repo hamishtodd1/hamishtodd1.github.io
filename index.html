@@ -1,3 +1,6 @@
+<!--todo: turn this all into something that can be embedded on someone else's site-->
+<!--todo: so you could havea bunch of video textures, that's simpler for looping those parts anyway. Probably even simpler than youtube. You will have to make your own playback bar tho-->
+
 <html>
 	<head>
 		<title>WIP; please do *not* share this webpage</title>
@@ -22,17 +25,7 @@
 		<script src="AtomicData_bocavirus.js"></script>
 		<script src="AtomicData_proteinfunctions.js"></script>
 		
-		<script src="Data/PariacotoDNAsVertices.js"></script>
-		<script src="Data/PariacotoDNAsFaces.js"></script>
-		<script src="Data/PariacotoPsVertices.js"></script>
-		<script src="Data/PariacotoPsFaces.js"></script>
-		<script src="Data/PariacotoDsVertices.js"></script>
-		<script src="Data/PariacotoDsFaces.js"></script>
-		<script src="Data/PariacotoLsVertices.js"></script>
-		<script src="Data/PariacotoLsFaces.js"></script>
-		
-		<script src="AtomicData_Pariacoto.js"></script>
-		
+		<script src="CK_MappingFunctions.js"></script>
 		<script src="CK_Mapper.js"></script>
 		<script src="CK_lattice.js"></script>
 		<script src="CK_Irreg_init.js"></script>
@@ -46,16 +39,16 @@
 		<script src="QS_init.js"></script>
 		<script src="QS_Mapper.js"></script>
 		
-		<script src="AtomicData_3DLattice.js"></script>
-		<script src="AtomicData_PointArrayGenerator.js"></script>
-		<script src="AtomicData_FormationAtom.js"></script>
 		<script src="Misc_Inputgetter.js"></script>
 		
 		<script src="Irreg_alexandrov.js"></script>
 		<script src="Irreg_alexandrovflipper.js"></script>
 		<script src="Misc_camerastuff.js"></script>
 		<script src="Misc_CoreLoop.js"></script>
-		<script src="Misc_PictureLoader.js"></script>
+		<script src="Misc_Pictures.js"></script>
+		<script src="Misc_init.js"></script>
 		<script src="Data/internet stuff.js"></script>
+		
+		<script> loadpics(); init(); </script>
 	</body>
 </html>

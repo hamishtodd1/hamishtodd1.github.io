@@ -9,7 +9,7 @@ function check_triangle_inversion(verticesarray, description_string){
 				verticesarray[ 0 + 3 * cornerBindex ],verticesarray[ 1 + 3 * cornerBindex ],
 				verticesarray[ 0 + 3 * cornerCindex ],verticesarray[ 1 + 3 * cornerCindex ]
 			)){
-			console.log(description_string, " triangle inverted");
+			if(net_warnings)console.log(description_string, " triangle inverted");
 			return 0;
 		}
 	}

@@ -58,7 +58,6 @@ function flip(ourindices){
 //				var crossindices = get_diamond_indices(i,j);
 //				if(polyhedron_edge_length[crossindices[2] ] [ crossindices[3] ] !== 666 )
 //					console.log("crossing!", crossindices); //expect these to be reported in pairs
-//				//surely only possible if there is more than one triangle
 //			}
 //		}
 //	}
@@ -87,9 +86,11 @@ function flip(ourindices){
 //	}
 }
 
-//	  0                0
-//3	  |   2   ->   3-------2
-//	  1                1
+//	  0          0
+//	 /|\        / \
+//	3 | 2  ->  3---2
+//	 \|/        \ /
+//	  1          1
 function get_diamond_indices(topcorner,bottomcorner){
 	var ourindices = Array(4);
 	ourindices[0] = topcorner;
@@ -118,8 +119,15 @@ function get_third_corner(corner1,corner2,clockwise){
 			}	
 		}
 	}
-	console.error("couldn't find third corner",corner1,corner2);
-	print_ATVIs();
+	
+	if(net_warnings)
+	{
+		console.error("couldn't find third corner",corner1,corner2);
+		print_ATVIs();
+	}
+	
+	crazy_flip = 1;
+	return 0; //have to return something otherwise there'll be an error
 }
 
 function reset_net(vertices_buffer_array){

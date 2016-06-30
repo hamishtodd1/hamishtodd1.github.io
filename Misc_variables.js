@@ -13,33 +13,30 @@ var STATIC_DNA_MODE = 2;
 var CK_MODE = 3;
 var IRREGULAR_MODE = 4;
 var QC_SPHERE_MODE = 5;
-var CUBIC_LATTICE_MODE = 6;
-var FINAL_FORMATION_MODE = 7;
 	
-var MODE = 4;
+var MODE = 3;
 
 //--------------Technologically fundamental
 var playing_field_width = 7*HS3;
-var playing_field_height = 6;
-var window_height = 540;
-var window_width = window_height * playing_field_width / playing_field_height;
+var playing_field_height = 6 * playing_field_width / (7*HS3);
 var min_cameradist = 10; //get any closer and the perspective is weird
 var vertical_fov = 2 * Math.atan(playing_field_height/(2*min_cameradist));
 
 var camera = new THREE.CombinedCamera(playing_field_width, playing_field_height, vertical_fov * 360 / TAU, 0.1, 1000, 0.1, 1000);
-//var camera = new THREE.PerspectiveCamera( vertical_fov * 360 / TAU, window_width / window_height, 0.1, 1000 );
-camera.position.z = MODE == CUBIC_LATTICE_MODE ? 3*min_cameradist : min_cameradist;
-var camera_comparing_position = -1.56;
-
 var scene = new THREE.Scene();
+
+var window_height = 540;
+var window_width = window_height * playing_field_width / playing_field_height;
 var renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize( window_width, window_height );
 renderer.setClearColor( 0xffffff, 1);
 document.body.appendChild( renderer.domElement );
+console.log(renderer.domElement )
 var ytplayer;
 
 var INITIALIZED = 0;
 var PICTURES_LOADED = 0;
+var YOUTUBE_READY = 0;
 
 THREE.TextureLoader.prototype.crossOrigin = '';
 
@@ -63,15 +60,14 @@ var varyingsurface_edges_default_radius = 0.012;
 //for time being we are making a nice, understandable number for irreg snapping
 var number_of_hexagon_rings = 11;
 var number_of_proteins_in_lattice = number_of_hexagon_rings * number_of_hexagon_rings * 6;
-var lattice_scalefactor = playing_field_width / 2 / number_of_hexagon_rings; //TODO there is a more intuitive representation of this (maybe all of it)
+var Lattice_ring_density_factor = playing_field_width / 2 / number_of_hexagon_rings; //TODO there is a more intuitive representation of this (maybe all of it)
 var number_of_lattice_points = 1 + 3 * number_of_hexagon_rings*(number_of_hexagon_rings+1);
 
 //in the limited environment we will end up with (and might do well to be going with) a circle of existence for lattice pts is prb. best
 
 //----------------Initialized, then static
-var squarelattice_vertices = Array(number_of_lattice_points*2);
+var squarelattice_vertices = Array(number_of_lattice_points);
 var flatlattice_default_vertices = Array(number_of_lattice_points*3);
-var latticevertex_nettriangle = new Uint16Array(number_of_lattice_points);
 
 var backgroundtexture;
 var viruspicture_scales = Array(1,0.577,0.5,0.3779,1/3,0.28867,0.27735);
@@ -108,7 +104,6 @@ var surfaceangle = 0.63;
 var dodeca;
 var dodeca_vertices_numbers = new Float32Array(47 * 3);
 var dodeca_geometry;
-var dodeca_openness = 0;
 var dodeca_faceflatness = 0;
 var dodeca_angle = 0;
 var dodeca_triangle_vertex_indices;
@@ -121,7 +116,6 @@ var cutout_vector1_player;
 var quasi_shear_matrix = Array(4);
 var quasicutout_intermediate_vertices = Array(quasilattice_default_vertices.length* 2 );
 var quasicutouts_vertices_components = Array(quasilattice_default_vertices.length * 2 * 3 );
-var quasicutout_line_pairs = new Uint16Array(quasilattice_default_vertices.length * 2 * 2 * 2); //TODO work out how many there should be in here really.
 var quasicutout_meshes; //TODO MASSIVE speedup opportunity: merge
 var stable_points = Array(345);
 var triangleindices_for_stablepoints = Array(stable_points.length);
@@ -130,10 +124,13 @@ var quasiquasilattice;
 var stablepointslattice;
 var nearby_quasicutouts;
 var set_stable_point = 666;
-var Guide_quasilattice;
 var stable_point_of_meshes_currently_in_scene = 666;
 var modulated_CSP;
-var NUM_QS_VERTICES_FOR_EDGES = 180; //reserved for edges. Must be divisible by 6
+var Forced_edges;
+
+//Potential edges in a quasicutout (so sixty of them in a whole mesh), many will just have their vertices put at 0. Dunno how many there should be?
+//Our first indication was that you needed 144 extras, we're being safe. Can reduce duplications to reduce this by a half.
+var NUM_QUASICUTOUT_EDGES = 30; 
 
 //------------3D penrose stuff
 var animation_playing_automatically = true;
@@ -160,12 +157,6 @@ var progress_bar;
 var slider;
 var slider_grabbed = false;
 
-//-----------formationatom stuff
-var QC_atoms = Array(2000);
-var QCatom_positions;
-var outermost_QCatom_indices = Array(0,0,0,	0,0,0,	0,0,0,	0,0,0);
-var animation_beginning_second = 17*60+3; //or whatever
-var formation_animation_numbers = new Float32Array(23 * 60 * 3);
 
 //-----------no longer formation atom stuff
 
@@ -173,6 +164,8 @@ var flatnet;
 var flatnet_vertices_numbers;
 var flatnet_vertices;
 var flatnet_geometry;
+
+var rounded_net = new THREE.BufferAttribute( new Float32Array(22*3), 3 );
 
 var varyingsurface;
 var varyingsurface_orientingradius = new Float32Array([0.95,0.95,0.95]);
@@ -199,6 +192,10 @@ var groovepoints = Array(
 
 var surface_triangle_side_unit_vectors = new Array();
 var shear_matrix = new Array(20);
+//top left, top right, bottom left, bottom right
+var SquareToHexMatrix = new Float32Array([-1 / Math.sqrt(3) / 2 /100, -1 / Math.sqrt(3) / 2 /100,1/2 /100, -1 / 2 /100]);
+//for(var i = 0; i < 4; i++)
+//	SquareToHexMatrix[i] *= Lattice_ring_density_factor;
 
 //initial values chosen rather randomly. Potential speedup by decreasing this? Does algorithm ever increase them? Probably easy to work out a better bound.
 var radii = new Float32Array([100,100,100, 100,100,100, 100,100,100, 100,100,100]);
@@ -212,9 +209,13 @@ var flatlattice_vertices;
 var flatlattice_geometry;
 var flatlattice_center = new THREE.Vector2(0,0);
 var flatlattice_vertices_numbers = new Float32Array(3 * number_of_lattice_points);
-var flatlattice_vertices_velocities = new Float32Array(3 * number_of_lattice_points);
+
+var HexagonLattice;
+var squarelattice_hexagonvertices;
 
 var net_vertices_closest_lattice_vertex = Array(22);
+var ProblemClosests;
+var triangle_adjacent_triangles;
 
 var surflattice;
 var surflattice_vertices_numbers = new Float32Array(3 * number_of_lattice_points);
@@ -230,11 +231,15 @@ var minimum_angles = new Array(22); //between these two, we derive the polyhedro
 
 var circle;
 
+var IsRoundedVertex;
+var IsProblemVertex;
+var problemArrays;
+var solutionArrays;
+
 //-----------------------Buttons
 var VARYINGSURFACE_OPENMODE_BUTTON = 0;
 var BOCAVIRUS_BUTTON = 1;
 var T4_BUTTON = 2;
-var Button = Array(1);
 var setvirus_flatnet_vertices = Array(4);
 
 //---------------------------buttons no more

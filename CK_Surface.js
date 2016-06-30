@@ -1,33 +1,23 @@
 /*
  * TODO
  * colors
- * Get more viruses with donuts on them
- * Yo, at least they'll never be on the fucking corners!
- * so lattice points are donuts, with lines, which requires that old mess... perhaps...
- * Some spherical projection lol. I mean it is a nice visual effect. Maybe make it semi icosahedral, QS semi dodecahedral
- * Could make the virus pictures 3D? urgh, maybe in VR
- * 
- * Could have a solid circle (might be better as a dodecagon so you can see it spin), out of which the surface is "cut"
+ * change angles of mouse movement such that rotation is slightly more probable than it currently is
+ * get rid of weird flash
+ * some alpha for the boundaries of the circle
+ * click on lattice, little flash and explosion. Bigger flash when they let go
+ * remove flatlattice crap
+ * Maybe take a few frames to snap it, THEN let it start closing
  */
-function put_picture_in_place(){
-	for(var i = 0; i < picture_objects.length; i++){
-		scene.remove(picture_objects[i]);
-	}
-	
-	var tolerance = 0.01;
-	for(var i = 0; i < viruspicture_scales.length; i++){
-		if(Math.abs(LatticeScale-viruspicture_scales[i]) < tolerance)
-			scene.add(picture_objects[i+1]);
-	}
-}
 
 function UpdateCapsid() {
 	var oldcapsidopenness = capsidopenness;
 	
-	if(isMouseDown)
-		capsidopeningspeed = 0.018;
+	var magnitudespeed = 0.018;
+	
+	if( isMouseDown )
+		capsidopeningspeed = magnitudespeed;
 	else
-		capsidopeningspeed = -0.018;
+		capsidopeningspeed = -magnitudespeed;
 	
 	capsidopenness += capsidopeningspeed;
 	
@@ -41,7 +31,7 @@ function UpdateCapsid() {
 	}
 	
 //	if( (oldcapsidopenness != 0 && capsidopenness == 0) || (oldcapsidopenness == 0 && capsidopenness != 0 ) )
-	for(var i = 0; i < picture_objects.length; i++)
+	for(var i = 1; i < 8; i++)
 		picture_objects[i].material.opacity = 1 - capsidopenness;
 	
 	CK_deduce_surface(capsidopenness, surface_vertices);
@@ -86,7 +76,7 @@ function UpdateCapsid() {
 		var d = get_vector(i, SURFACE);
 		d.applyAxisAngle(idle_axis, surfaceangle);
 		d.applyAxisAngle(central_axis, -LatticeAngle);
-		d.multiplyScalar(lattice_scalefactor/LatticeScale);
+		d.multiplyScalar(Lattice_ring_density_factor/LatticeScale);
 		surface_vertices.setXYZ(i, d.x,d.y,d.z);
 	}
 }
@@ -221,7 +211,7 @@ function update_surfperimeter() {
 			change_radius(surfperimeter_spheres[i], surfperimeterradius);
 			surfperimeter_spheres[i].position.copy(A);
 			
-			put_tube_in_buffer(A,B, surfperimeter_cylinders[i].geometry.attributes.position.array, surfperimeterradius/LatticeScale*lattice_scalefactor);
+			put_tube_in_buffer(A,B, surfperimeter_cylinders[i].geometry.attributes.position.array, surfperimeterradius/LatticeScale*Lattice_ring_density_factor);
 		}
 	}
 	

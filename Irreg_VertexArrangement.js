@@ -1,20 +1,19 @@
 /*
  * Todo:
  * -check under what precise circumstances angular defects are ok
+ * -make folding code better so it can do more
  * -label the button
- * -change associations?
+ * -make things fade in in a certain order that suggests its operation
+ * -transition to clicked virus is smooth even if capsid is closed
  * 
  * if the player has clicked on the button 8 times,  the capsid appears?
  * 
- * New associations:
- * -what we want is the ability to make anything, easily
- * -the triangles are changed 8 at a time. 3 of which we think of as "getting fucked up".
- * -Then, probably, design the net according to that rather than the other way around
- * 
- * So REALLY it should open differently depending on what vertex you want to change, 
- * Maybe choose based on whichever edge is facing you? Translational net, centered on the chosen edge
- * Auto close and open if player tries to grab a top vertex
- * Associations are changed based on the edge you're looking directly at. Which is highlighted.
+ * Slideyness:
+ * -could watch Casey's stuff
+ * -big problem is that you have to take account of the associated vertices too.
+ * -it's something like "find the closest point to your mouse position in a polygon" - that's a solved problem
+ * -It's a polygon bounded (at least) by a few edges you know. But then also this crazy curve you don't. It may not be that crazy
+ * -you can proooobably work it out mathematically. List the angular constraints and the formulae
  */
 
 function move_vertices(vertex_tobechanged, starting_movement_vector, initial_changed_vertex)
@@ -353,37 +352,40 @@ function manipulate_vertices() {
 	 * 	when we've tweaked the algorithm, 5 evaluations should be ok?
 	 */
 	
-	if(	!check_triangle_inversion(manipulation_surface.geometry.attributes.position.array, "manip")
-			|| !correct_minimum_angles(manipulation_surface.geometry.attributes.position.array )
+	
+	if( !check_triangle_inversion(manipulation_surface.geometry.attributes.position.array, "manip")
 			//extra checks only worth using if you suspect the above has not done its job
 //			|| !check_edge_lengths(flatnet_vertices.array) || !check_defects(manipulation_surface.geometry.attributes.position.array) 
-			) {
-		varyingsurface_spheres[vertex_tobechanged].material.color.r = 1;
-		varyingsurface_spheres[vertex_tobechanged].material.color.g = 0;
-		varyingsurface_spheres[vertex_tobechanged].material.color.b = 0;
-		//you can do this if you like, though having it move back may be nicer?
-//		for( var i = 0; i < 66; i++)
-//			manipulation_surface.geometry.attributes.position.array[i] = net_log[i];
+			) 
+	{
+		for( var i = 0; i < 66; i++)
+			manipulation_surface.geometry.attributes.position.array[i] = net_log[i];
 	}
 	else { //Maybe you should be able to predict what won't work and put correct_minimum_angles, and resetter, in coreloop.
-		for( var i = 0; i < 66; i++)
-			flatnet_vertices.array[i] = manipulation_surface.geometry.attributes.position.array[i];
-		
-		Disable_pictures();
-		
-//			console.log(flatnet_vertices.array);
+		if( correct_minimum_angles(manipulation_surface.geometry.attributes.position.array ) )
+		{
+			for( var i = 0; i < 66; i++)
+				flatnet_vertices.array[i] = manipulation_surface.geometry.attributes.position.array[i];
 			
-		//now we need the "height" of the capsid
-		for(var i = 0; i<9; i++)
-			varyingsurface.geometry.attributes.position.array[i] = manipulation_surface.geometry.attributes.position.array[i];	
-		deduce_most_of_surface(0, varyingsurface.geometry.attributes.position);
-		var central_vertex = new THREE.Vector3(varyingsurface.geometry.attributes.position.array[0],varyingsurface.geometry.attributes.position.array[1],varyingsurface.geometry.attributes.position.array[2]);
-		var center_3D = new THREE.Vector3(varyingsurface.geometry.attributes.position.array[13*3+0],varyingsurface.geometry.attributes.position.array[13*3+1],varyingsurface.geometry.attributes.position.array[13*3+2]);
-		center_3D.sub(central_vertex);
-		center_3D.multiplyScalar(0.5);
-		varyingsurface_orientingradius[0] = center_3D.length();
-		center_3D.add(central_vertex);
-		varyingsurface_orientingradius[1] = center_3D.distanceTo(new THREE.Vector3(varyingsurface.geometry.attributes.position.array[1*3+0],varyingsurface.geometry.attributes.position.array[1*3+1],varyingsurface.geometry.attributes.position.array[1*3+2]) );
-		varyingsurface_orientingradius[2] = center_3D.distanceTo(new THREE.Vector3(varyingsurface.geometry.attributes.position.array[2*3+0],varyingsurface.geometry.attributes.position.array[2*3+1],varyingsurface.geometry.attributes.position.array[2*3+2]) );
+			Disable_pictures();
+				
+			//now we need the "height" of the capsid
+			for(var i = 0; i<9; i++)
+				varyingsurface.geometry.attributes.position.array[i] = manipulation_surface.geometry.attributes.position.array[i];	
+			deduce_most_of_surface(0, varyingsurface.geometry.attributes.position);
+			var central_vertex = new THREE.Vector3(varyingsurface.geometry.attributes.position.array[0],varyingsurface.geometry.attributes.position.array[1],varyingsurface.geometry.attributes.position.array[2]);
+			var center_3D = new THREE.Vector3(varyingsurface.geometry.attributes.position.array[13*3+0],varyingsurface.geometry.attributes.position.array[13*3+1],varyingsurface.geometry.attributes.position.array[13*3+2]);
+			center_3D.sub(central_vertex);
+			center_3D.multiplyScalar(0.5);
+			varyingsurface_orientingradius[0] = center_3D.length();
+			center_3D.add(central_vertex);
+			varyingsurface_orientingradius[1] = center_3D.distanceTo(new THREE.Vector3(varyingsurface.geometry.attributes.position.array[1*3+0],varyingsurface.geometry.attributes.position.array[1*3+1],varyingsurface.geometry.attributes.position.array[1*3+2]) );
+			varyingsurface_orientingradius[2] = center_3D.distanceTo(new THREE.Vector3(varyingsurface.geometry.attributes.position.array[2*3+0],varyingsurface.geometry.attributes.position.array[2*3+1],varyingsurface.geometry.attributes.position.array[2*3+2]) );
+		}
+		else{
+			varyingsurface_spheres[vertex_tobechanged].material.color.r = 1;
+			varyingsurface_spheres[vertex_tobechanged].material.color.g = 0;
+			varyingsurface_spheres[vertex_tobechanged].material.color.b = 0;
+		}
 	}
 }

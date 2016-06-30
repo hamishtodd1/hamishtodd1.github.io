@@ -73,44 +73,35 @@ function irreg_deduce_surface(openness ){
 	deduce_most_of_surface(openness, varyingsurface.geometry.attributes.position);
 }
 
-function CheckButton(index) {
-	var mouse_dist_from_buttoncenter = Math.sqrt( (Button[index].position.x-MousePosition.x) * (Button[index].position.x-MousePosition.x) + (Button[index].position.y-MousePosition.y) * (Button[index].position.y-MousePosition.y) );  
-	if( mouse_dist_from_buttoncenter < 0.3){
-		if(isMouseDown){
-			Button[index].scale.x = 0.8;
-			Button[index].scale.y = 0.8;
-			Button[index].scale.z = 0.8;
+function CheckIrregButton(){
+	//The button should be big when the thing is open and small when it's not. You don't need that texture and it might confuse. Make it glow and flash
+	//or maybe it should be a jointed line itself?
+	//TODO change this if button size changes
+//	console.log()
+	if(isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(picture_objects[17].position) < 0.3 ){
+		var squashed_size = 0.9;
+		picture_objects[17].scale.set(squashed_size,squashed_size,squashed_size);
+		picture_objects[18].scale.set(squashed_size,squashed_size,squashed_size);
+	}
+	if(!isMouseDown && picture_objects[17].scale.x < 1){
+		if(picture_objects[17].capsidopen){
+			settle_manipulationsurface_and_flatnet();
+			picture_objects[17].capsidopen = 0;
+			scene.remove(picture_objects[17]);
+			scene.add(picture_objects[18]);
 		}
-		
-		if( !isMouseDown && isMouseDown_previously ){ //they might not necessarily have been over the button in the previous frame, but whatever
-			if(Button[index].ourboolean === true){
-				Button[index].ourboolean = false;
-			} else {
-				Button[index].ourboolean = true;
-				if(index==VARYINGSURFACE_OPENMODE_BUTTON)
-					settle_manipulationsurface_and_flatnet();
-			}
+		else {
+			picture_objects[17].capsidopen = 1;
+			scene.remove(picture_objects[18]);
+			scene.add(picture_objects[17]);
 		}
-	}
-
-	if(!isMouseDown || mouse_dist_from_buttoncenter >= 0.3 ){
-		Button[index].scale.x = 1;
-		Button[index].scale.y = 1;
-		Button[index].scale.z = 1;
-	}
-	
-	if(Button[index].ourboolean){
-		Button[index].material.color.r = 0;
-		Button[index].material.color.g = 1;
-	}
-	else{
-		Button[index].material.color.r = 1;
-		Button[index].material.color.g = 0;
+		picture_objects[17].scale.set(1,1,1);
+		picture_objects[18].scale.set(1,1,1);
 	}
 }
 
 function update_varyingsurface() {
-	if(Button[VARYINGSURFACE_OPENMODE_BUTTON].ourboolean)
+	if(picture_objects[17].capsidopen)
 		capsidopeningspeed = 0.018;
 	else
 		capsidopeningspeed = -0.018;
@@ -239,9 +230,17 @@ function update_varyingsurface() {
 		if(capsidopenness == 1 ){
 			if(!theyknowyoucanchangevertices){
 				var sphereopacity = capsidopenness == 0 ? 0 : capsidopenness * Math.cos((ourclock.elapsedTime - ourclock.startTime)*4);
-				varyingsurface_spheres[i].material.opacity = sphereopacity; 
+				varyingsurface_spheres[i].material.opacity = 1;
+				for(var j = 0; j < varyingsurface_spheres[i].geometry.vertices.length; j++)
+					varyingsurface_spheres[i].geometry.vertices[j].setLength(0.1 * sphereopacity);
+				varyingsurface_spheres[i].geometry.verticesNeedUpdate = true;
 			}
-			else varyingsurface_spheres[i].material.opacity = 1;
+			else {
+				for(var j = 0; j < varyingsurface_spheres[i].geometry.vertices.length; j++)
+					varyingsurface_spheres[i].geometry.vertices[j].setLength(0.05);
+				varyingsurface_spheres[i].geometry.verticesNeedUpdate = true;
+				varyingsurface_spheres[i].material.opacity = 1;
+			}
 		}
 		else varyingsurface_spheres[i].material.opacity = 0;
 		

@@ -1,20 +1,3 @@
-function init() {
-	init_CK_and_irreg();
-	init_cubicLattice_stuff();
-	initialize_QS_stuff();	
-	initialize_protein();
-	init_DNA_cage();
-	init_static_capsid();
-	initialize_formation_atom();
-	init_pariacoto();
-	
-	//------------------need this so there's something in there for the first frame
-	ourclock.getDelta();
-	
-	INITIALIZED = 1;
-	attempt_launch();
-}
-
 function init_CK_and_irreg(){
 	vertices_derivations = new Array(
 		[666,666,666],
@@ -78,6 +61,9 @@ function init_CK_and_irreg(){
 		0,-2,0,
 		-HS3,-2.5,0]);
 	
+	//a test case
+	//0, 0, 0, 0.5055593848228455, -0.3021232783794403, 0, 0.5911332964897156, 0.3222222328186035, 0, 1.044405460357666, 0.01323286909610033, 0, 2.2832748889923096, 1.100820779800415, 0, 2.598076343536377, 0.8999999761581421, 0, -0.008866691030561924, 0.644444465637207, 0, 0.7629072666168213, 2.1769635677337646, 0, 0.485552579164505, 2.3700923919677734, 0, 0.7794228196144104, 2.549999952316284, 0, -0.786644458770752, 0.4555555582046509, 0, -1.2561057806015015, 1.9354549646377563, 0, -1.5600461959838867, 1.4909697771072388, 0, -1.5588456392288208, 2.0999999046325684, 0, -0.9199777841567993, -0.5666666626930237, 0, -2.070040464401245, 0.3034752309322357, 0, -1.9071744680404663, -0.36338236927986145, 0, -2.598076343536377, 0, 0, -0.008866691030561924, -0.5888888835906982, 0, -1.5895979404449463, -1.3199701309204102, 0, -0.0051744794473052025, -1.213233232498169, 0, -1.5588456392288208, -2.0999999046325684, 0
+	
 	//Phi29, T4 TODO
 	setvirus_flatnet_vertices[0] = new Float32Array([
 0, 0, 0, 0.6843200325965881, -0.392500638961792, 0, 0.6800221800804138, 0.41111111640930176, 0, 1.9160001277923584, 0.10361196100711823, 0, 1.9020333290100098, 0.883360743522644, 0, 2.598076105117798, 0.5, 0, 0.0022444201167672873, 0.7777777910232544, 0, 0.882046639919281, 1.7055288553237915, 0, 0.19132769107818604, 2.1130542755126953, 0, 0.8660253882408142, 2.5, 0, -0.6644222736358643, 0.4000000059604645, 0, -1.059597134590149, 1.609167456626892, 0, -1.7462496757507324, 1.2245951890945435, 0, -1.7320507764816284, 2, 0, -0.6644222736358643, -0.3888888955116272, 0, -1.9194563627243042, -0.12459423393011093, 0, -1.9290770292282104, -0.8809624314308167, 0, -2.598076105117798, -0.5, 0, 0.0022444201167672873, -0.7888888716697693, 0, -0.870602011680603, -1.7301485538482666, 0, -0.18394945561885834, -2.103611946105957, 0, -0.8660253882408142, -2.5, 0
@@ -87,7 +73,7 @@ function init_CK_and_irreg(){
 	]);
 	//HIV
 	var S3 = Math.sqrt(3);
-	setvirus_flatnet_vertices[3] = new Float32Array([
+	setvirus_flatnet_vertices[2] = new Float32Array([
  		0,0,0,
  		S3,-1,0,
  		
@@ -116,12 +102,12 @@ function init_CK_and_irreg(){
  		0,-4,0,
  		-3*S3,-7,0
  		]);
-	for(var i = 0; i < setvirus_flatnet_vertices[3].length; i++)
-		setvirus_flatnet_vertices[3][i] *= 0.3;
+	for(var i = 0; i < setvirus_flatnet_vertices[2].length; i++)
+		setvirus_flatnet_vertices[2][i] *= 0.3;
 	//Herpes
-	setvirus_flatnet_vertices[2] = new Float32Array(66);
-	for(var i = 0; i < flatnet_vertices_numbers.length; i++)
-		setvirus_flatnet_vertices[2][i] = flatnet_vertices_numbers[i];
+	setvirus_flatnet_vertices[3] = new Float32Array(66);
+	for(var i = 0; i < setvirus_flatnet_vertices[3].length; i++)
+		setvirus_flatnet_vertices[3][i] = flatnet_vertices_numbers[i];
 		
 	net_triangle_vertex_indices = new Uint32Array([
 		2,1,0,
@@ -197,41 +183,14 @@ function init_CK_and_irreg(){
 	}
 	
 	//-------------stuff that goes in the scene
-	{
-//			var texture_loader = new THREE.TextureLoader();
-//			texture_loader.load(
-//					'adenovirus256.jpg', //"http://icons.iconarchive.com/icons/aha-soft/torrent/256/virus-icon.png", 
-//					function(texture) {
-//						console.log("hey");
-//						
-//						var backgroundtexture_material = new THREE.MeshBasicMaterial({
-//							map: texture
-//						});
-//						var texturedist = -min_cameradist;
-//						var texturewidth = playing_field_width;
-//						var textureheight = texturewidth; //currently we have a square texture
-//			
-//						backgroundtexture_geometry = new THREE.CubeGeometry( texturewidth, textureheight, 0);
-//						backgroundtexture = new THREE.Mesh( backgroundtexture_geometry, backgroundtexture_material );
-//						backgroundtexture.position.z = -10;
-//						
-//						if(MODE == CK_MODE)
-//							scene.add(backgroundtexture);
-//						
-//						console.log(texture);
-//					},
-//					function ( xhr ) {},
-//					function ( xhr ) {
-//						console.log( 'texture loading error' );
-//					});
-		
+	{		
 		var surfacematerial = new THREE.MeshBasicMaterial({
 			color: 0x00ffff,
 			side:	THREE.DoubleSide,
 			shading: THREE.FlatShading //TODO add light source or whatever you need
 		});
 		
-		surface_vertices = new THREE.BufferAttribute( surface_vertices_numbers, 3 ); //note the 3 means 3 numbers to a vector, not three vectors to a triangle
+		surface_vertices = new THREE.BufferAttribute( surface_vertices_numbers, 3 );
 		
 		surface_geometry = new THREE.BufferGeometry();
 		surface_geometry.setIndex(new THREE.BufferAttribute( net_triangle_vertex_indices, 1 ) );
@@ -297,9 +256,9 @@ function init_CK_and_irreg(){
 		
 		for(var i = 0; i<varyingsurface_spheres.length;i++){
 			if( (i == 0 || i % 4 == 1) && i != 1)
-				varyingsurface_spheres[i] = new THREE.Mesh( (new THREE.BufferGeometry).fromGeometry(new THREE.SphereGeometry(varyingsurface_edges_default_radius,8,4)),varyingsurface_edgesmaterial);
+				varyingsurface_spheres[i] = new THREE.Mesh( new THREE.SphereGeometry(varyingsurface_edges_default_radius,  8,4),varyingsurface_edgesmaterial);
 			else
-				varyingsurface_spheres[i] = new THREE.Mesh( (new THREE.BufferGeometry).fromGeometry(new THREE.SphereGeometry(varyingsurface_edges_default_radius*4.5,8,4)),spherehandles_material.clone());
+				varyingsurface_spheres[i] = new THREE.Mesh( new THREE.SphereGeometry(varyingsurface_edges_default_radius*7,8,4),spherehandles_material.clone());
 		}
 		varyingsurface = new THREE.Mesh( flatnet_geometry.clone(), surfacematerial );
 		
@@ -426,13 +385,6 @@ function init_CK_and_irreg(){
 		backwardbutton = new THREE.Mesh( backwardbutton_geometry, new THREE.MeshBasicMaterial({color: 0x0000ff}) );
 		backwardbutton.position.x -= 2.8;
 		backwardbutton.position.y -= 2.8;
-		
-		for(var i = 0; i< Button.length; i++){
-			Button[i] = new THREE.Mesh( new THREE.CircleGeometry( 0.3 ), new THREE.MeshBasicMaterial({color: 0x00ff00}) );
-			Button[i].ourboolean = 0;
-		}
-		Button[0].position.x = 1.9;
-		Button[0].position.y =-0.7;
 		
 		var indicatorblobmaterial = new THREE.MeshBasicMaterial({color: 0xf0f00f});
 		for( var i = 0; i<indicatorblobs.length; i++){
@@ -676,73 +628,151 @@ function init_CK_and_irreg(){
 		[17,	18,19,	19,19,	19,18,666],
 		[1,		2,3,	3,3,	3,666,18],
 		[21,	19,3,	7,5,	9,21,20]);
+	
+	IsRoundedVertex = new Uint16Array(number_of_lattice_points);
+	IsProblemVertex = new Uint16Array(number_of_lattice_points);
+	ProblemClosests = Array(12);
+	ProblemClosests[0] = new Uint16Array([0, 16, 14, 31, 51, 80, 12, 28, 47, 75, 10, 25, 43, 70, 8, 22, 39, 65, 18, 19, 59, 90]);
+	ProblemClosests[1] = new Uint16Array([0, 14, 12, 28, 47, 75, 10, 25, 43, 70, 8, 22, 39, 65, 18, 19, 59, 90, 16, 34, 55, 85]);
+	ProblemClosests[2] = new Uint16Array([0, 12, 10, 25, 43, 70, 8, 22, 39, 65, 18, 19, 59, 90, 16, 34, 55, 85, 14, 31, 51, 80]);
+	ProblemClosests[3] = new Uint16Array([0, 10, 8, 22, 39, 65, 18, 19, 59, 90, 16, 34, 55, 85, 14, 31, 51, 80, 12, 28, 47, 75]);
+	ProblemClosests[4] = new Uint16Array([0, 8, 18, 19, 59, 90, 16, 34, 55, 85, 14, 31, 51, 80, 12, 28, 47, 75, 10, 25, 43, 70]);
+	ProblemClosests[5] = new Uint16Array([0, 18, 16, 34, 55, 85, 14, 31, 51, 80, 12, 28, 47, 75, 10, 25, 43, 70, 8, 22, 39, 65]);
+	
+	ProblemClosests[ 6] = new Uint16Array([0, 55, 51, 115, 197, 309, 47, 109, 189, 299, 43, 103, 181, 289, 39, 97, 173, 279, 59, 91, 213, 329]);
+	ProblemClosests[ 7] = new Uint16Array([0, 51, 47, 109, 189, 299, 43, 103, 181, 289, 39, 97, 173, 279, 59, 91, 213, 329, 55, 121, 205, 319]);
+	ProblemClosests[ 8] = new Uint16Array([0, 47, 43, 103, 181, 289, 39, 97, 173, 279, 59, 91, 213, 329, 55, 121, 205, 319, 51, 115, 197, 309]);
+	ProblemClosests[ 9] = new Uint16Array([0, 43, 39, 97, 173, 279, 59, 91, 213, 329, 55, 121, 205, 319, 51, 115, 197, 309, 47, 109, 189, 299]);
+	ProblemClosests[10] = new Uint16Array([0, 39, 59, 91, 213, 329, 55, 121, 205, 319, 51, 115, 197, 309, 47, 109, 189, 299, 43, 103, 181, 289]);
+	ProblemClosests[11] = new Uint16Array([0, 59, 55, 121, 205, 319, 51, 115, 197, 309, 47, 109, 189, 299, 43, 103, 181, 289, 39, 97, 173, 279]);
+	
+	//speedup opportunity there are probably a bunch of places you could use this
+	triangle_adjacent_triangles = Array(20);
+	for(var i = 0; i < triangle_adjacent_triangles.length; i++)
+	{
+		triangle_adjacent_triangles[i] = new Uint16Array(3);
+		
+		for(var ic = 0; ic < 3; ic++)
+		{
+			triangle_adjacent_triangles[i][ic] = 666;
+			
+			for(var j = 0; j < 20; j++)
+			{
+				if(j === i) continue;
+				
+				for(var jc = 0; jc < 3; jc++)
+				{
+					if(( net_triangle_vertex_indices[i*3+   ic   ] === net_triangle_vertex_indices[j*3+   jc   ] &&
+						 net_triangle_vertex_indices[i*3+(ic+1)%3] === net_triangle_vertex_indices[j*3+(jc+1)%3] ) ||
+					   ( net_triangle_vertex_indices[i*3+   ic   ] === net_triangle_vertex_indices[j*3+(jc+1)%3] &&
+						 net_triangle_vertex_indices[i*3+(ic+1)%3] === net_triangle_vertex_indices[j*3+   jc   ] ) )
+					{
+						triangle_adjacent_triangles[i][ic] = j;
+						break;
+					}
+				}
+			}
+		}
+	}
+	console.log(triangle_adjacent_triangles);
 		
 	{
-		var lattice_generator = Array(6);
-		lattice_generator[0] = new THREE.Vector2(0,1);			//up
-		lattice_generator[1] = new THREE.Vector2(HS3,0.5);		//TR
-		lattice_generator[2] = new THREE.Vector2(HS3,-0.5);		//BR
-		lattice_generator[3] = new THREE.Vector2(0,-1);			//down
-		lattice_generator[4] = new THREE.Vector2(-HS3,-0.5);	//BL
-		lattice_generator[5] = new THREE.Vector2(-HS3,0.5);		//TL
+		HexagonLattice = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({vertexColors:THREE.FaceColors}));
+		squarelattice_hexagonvertices = Array(6 * 2 * number_of_lattice_points); //only 2 points per corner
+		for(var i = 0; i < squarelattice_hexagonvertices.length; i++ )
+			squarelattice_hexagonvertices[i] = new THREE.Vector3();
+		
+		HexagonLattice.geometry.vertices = Array(6 * 12 * number_of_lattice_points); //12 points per side, 6 sides per hexagon
+		for(var i = 0; i < HexagonLattice.geometry.vertices.length; i++)
+			HexagonLattice.geometry.vertices[i] = new THREE.Vector3();
+		
+		HexagonLattice.geometry.faces = Array(number_of_lattice_points * 6 * 4); //4 faces per side, 6 sides per hexagon
+		
+		for(var hexagon_i = 0; hexagon_i < number_of_lattice_points; hexagon_i++){
+			for(var side_i = 0; side_i < 6; side_i++){
+				for(var tri_i = 0; tri_i < 4; tri_i++){
+					var triangleindex = hexagon_i * 6 * 4 + side_i * 4 + tri_i;
+					HexagonLattice.geometry.faces[hexagon_i * 6 * 4 + side_i * 4 + tri_i] = new THREE.Face3(
+							triangleindex * 3 + 0,
+							triangleindex * 3 + 1,
+							triangleindex * 3 + 2,
+							new THREE.Vector3(1,0,0),//Face normal; unused
+							new THREE.Color( 0xff0000 )
+						);
+				}
+			}
+		}
+		
+		//not sure what this was supposed to do
+//		HexagonLattice.scale.x = LatticeScale;
+//		HexagonLattice.scale.y = LatticeScale;
 		
 		var square_lattice_generator = Array(6);
-		square_lattice_generator[0] = new THREE.Vector2(1,1);		//up
-		square_lattice_generator[1] = new THREE.Vector2(1,0);		//TR
-		square_lattice_generator[2] = new THREE.Vector2(0,-1);		//BR
-		square_lattice_generator[3] = new THREE.Vector2(-1,-1);	//down
-		square_lattice_generator[4] = new THREE.Vector2(-1,0);		//BL
-		square_lattice_generator[5] = new THREE.Vector2(0,1);		//TL
+		square_lattice_generator[0] = new THREE.Vector3(-1,  1,0);		//up
+		square_lattice_generator[1] = new THREE.Vector3(1,  2,0);		//TR
+		square_lattice_generator[2] = new THREE.Vector3(2,  1,0);		//BR
+		square_lattice_generator[3] = new THREE.Vector3(1,-1,0);		//down
+		square_lattice_generator[4] = new THREE.Vector3(-1,-2,0);		//BL
+		square_lattice_generator[5] = new THREE.Vector3(-2,-1,0);		//TL
 		
-		flatlattice_default_vertices[0] = 0; flatlattice_default_vertices[1] = 0; flatlattice_default_vertices[2] = 0;
-		surflattice_geometry.attributes.position.setXYZ(0, 0,0,0);
-		flatlattice_vertices_velocities[0*3+0] = 0; flatlattice_vertices_velocities[0*3+1] = 0; flatlattice_vertices_velocities[0*3+2] = 0;
-		squarelattice_vertices[0] = 0;squarelattice_vertices[1] = 0;
-		var index = 1;	
-		for(var hexagon_ring = 1; hexagon_ring < number_of_hexagon_rings+1; hexagon_ring++) {
-			for( var slice = 0; slice < 6; slice++) {
-				var slice_rightmost_point = lattice_generator[slice].clone();
-				slice_rightmost_point.multiplyScalar(hexagon_ring);
-				
+		//because integer lattice
+		for(var i = 0; i < square_lattice_generator.length; i++)
+			square_lattice_generator[i].multiplyScalar(100);
+		
+		var hexagon_generator = Array(6);
+		hexagon_generator[0] = new THREE.Vector3(1,  1,0);		//up
+		hexagon_generator[1] = new THREE.Vector3(1,  0,0);		//TR
+		hexagon_generator[2] = new THREE.Vector3(0, -1,0);		//BR
+		hexagon_generator[3] = new THREE.Vector3(-1,-1,0);		//down
+		hexagon_generator[4] = new THREE.Vector3(-1, 0,0);		//BL
+		hexagon_generator[5] = new THREE.Vector3(0,  1,0);		//TL
+		
+		var hexagon_major_Scalar = 83; //will get divided by 100.
+		var hexagon_minor_Scalar = 61;
+		
+		
+
+		var index = 0;
+		var lowest_unused_HL_vertex = 0;
+		for(var hexagon_ring = 0; hexagon_ring < number_of_hexagon_rings+1; hexagon_ring++) {
+			for( var slice = 0; slice < 6 && !(hexagon_ring === 0 && slice > 0); slice++) {
 				var square_slice_rightmost_point = square_lattice_generator[slice].clone();
 				square_slice_rightmost_point.multiplyScalar(hexagon_ring);
 				
-				for( var length_along = 0; length_along < hexagon_ring; length_along++) {
-					var ourpoint = lattice_generator[(slice + 2)%6].clone();
-					ourpoint.multiplyScalar(length_along);				
-					ourpoint.add(slice_rightmost_point );
-					if( ourpoint.lengthSq() > 92.5)
-						ourpoint.set(666,666,666);
-					//if(ourpoint.length() > number_of_hexagon_rings * HS3 )
-						//continue;
+				for( var length_along = 0; length_along < hexagon_ring || (hexagon_ring === 0 && length_along === 0); length_along++) {
+					var ourpointsquare = square_lattice_generator[(slice + 2)%6].clone();
+					ourpointsquare.multiplyScalar(length_along);				
+					ourpointsquare.add(square_slice_rightmost_point );
+					squarelattice_vertices[index] = ourpointsquare.clone();
 					
-					var ourpointsquare = new THREE.Vector3();
-					if(ourpoint.x !== 666){
-						ourpointsquare.copy(square_lattice_generator[(slice + 2)%6]);
-						ourpointsquare.multiplyScalar(length_along);				
-						ourpointsquare.add(square_slice_rightmost_point );
-					}
+					var ourpoint = ourpointsquare.clone();
+					apply2Dmatrix(SquareToHexMatrix,ourpoint);
 					
-					flatlattice_default_vertices[index*3+0] = ourpoint.x; flatlattice_default_vertices[index*3+1] = ourpoint.y; flatlattice_default_vertices[index*3+2] = (1-capsidopenness) * camera.position.z * 1.5;
+					flatlattice_default_vertices[index*3+0] = ourpoint.x; flatlattice_default_vertices[index*3+1] = ourpoint.y; flatlattice_default_vertices[index*3+2] = 0;
 					surflattice_geometry.attributes.position.setXYZ(index, 0,0,0);
-					squarelattice_vertices[index*2+0] = ourpointsquare.x; squarelattice_vertices[index*2+1] = ourpointsquare.y;
-					flatlattice_vertices_velocities[index*3+0] = 0; flatlattice_vertices_velocities[index*3+1] = 0; flatlattice_vertices_velocities[index*3+2] = 0;
+					squarelattice_vertices[index] = ourpointsquare.clone();
+					
+					for(var i = 0; i < 6; i++){
+						insert_squareHexagon_corner(lowest_unused_HL_vertex,hexagon_generator[i],hexagon_major_Scalar,ourpointsquare);
+						lowest_unused_HL_vertex++;
+						
+						insert_squareHexagon_corner(lowest_unused_HL_vertex,hexagon_generator[i],hexagon_minor_Scalar,ourpointsquare);
+						lowest_unused_HL_vertex++;
+					}
 					
 					index++;
 				}
 			}
 		}
 		
-		var costheta = Math.cos(LatticeAngle);
-		var sintheta = Math.sin(LatticeAngle);
-		for(var i = 0; i < number_of_lattice_points; i++) {
-			flatlattice_vertices.setXYZ(i, 	(flatlattice_default_vertices[i*3+0] * costheta - flatlattice_default_vertices[i*3+1] * sintheta) * LatticeScale,
-											(flatlattice_default_vertices[i*3+0] * sintheta + flatlattice_default_vertices[i*3+1] * costheta) * LatticeScale,
-											(1-capsidopenness) * camera.position.z * 1.5);
-		}
-		
 		for(var i = 0; i<20; i++)
 			shear_matrix[i] = new Array(4);
 		Update_net_variables();
 	}
+}
+
+function insert_squareHexagon_corner(ourindex,ourgenerator,ourScalar,hexagoncenter){
+	squarelattice_hexagonvertices[ourindex].copy(ourgenerator);
+	squarelattice_hexagonvertices[ourindex].multiplyScalar(ourScalar);
+	squarelattice_hexagonvertices[ourindex].add(hexagoncenter);
 }

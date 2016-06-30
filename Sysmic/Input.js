@@ -46,6 +46,7 @@ document.addEventListener( 'mouseup', function(event)
 //not document? ok, whatever
 window.addEventListener( 'resize', Resize, false );
 
+
 function Resize() 
 {	
 	var min_height = (VIEWBOX_HEIGHT + VIEWBOX_SPACING ) * 2;
