@@ -18,7 +18,6 @@ function init_Phasezone()
 {
 	PhaseZone = new THREE.Object3D();
 	PhaseZone.position.set( VIEWBOX_WIDTH + VIEWBOX_SPACING, VIEWBOX_HEIGHT + VIEWBOX_SPACING, 0);
-	Scene.add(PhaseZone);
 	
 	//-----Bounding box stuff
 	var boundingtri_additional_width = 0.016;

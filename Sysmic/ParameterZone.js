@@ -27,7 +27,6 @@ function init_parameterzone()
 	update_Infectiousness_and_RecoveryTime();
 	
 	ParameterZone.position.x = (VIEWBOX_WIDTH + VIEWBOX_SPACING);
-	Scene.add(ParameterZone)
 	
 	SliderShape = new THREE.Mesh( 
 			new THREE.CubeGeometry(VIEWBOX_WIDTH * 0.986, VIEWBOX_HEIGHT / 55, 0),

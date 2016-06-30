@@ -27,7 +27,7 @@ function initVideo()
 	var movieMaterial = new THREE.MeshBasicMaterial( { map: videoTexture, overdraw: true, side:THREE.DoubleSide } );
 	// the geometry on which the movie will be displayed;
 	// 		movie image will be scaled to fit these dimensions.
-	var movieGeometry = new THREE.PlaneGeometry( VIEWBOX_WIDTH/2,VIEWBOX_HEIGHT/2,4, 4 );
+	var movieGeometry = new THREE.PlaneGeometry( VIEWBOX_WIDTH,VIEWBOX_HEIGHT,4, 4 );
 	var movieScreen = new THREE.Mesh( movieGeometry, movieMaterial );
 	movieScreen.position.set(0,0,0);
 	Scene.add(movieScreen);

@@ -110,7 +110,6 @@ function init_graph()
 	var faceindex;
 	
 	Graph = new THREE.Object3D();
-	Scene.add(Graph);
 	Graph.angle_from_y_axis = 0; 
 	Graph.add(boundingbox.clone());
 	
