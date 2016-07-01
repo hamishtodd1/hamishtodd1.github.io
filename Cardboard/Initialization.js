@@ -10,8 +10,6 @@ function Initialize()
 	
 	Scene = new THREE.Scene();
 	
-	console.error(stage)
-	
 	//Camera will be added to the scene when the user is set up
 	Camera = new THREE.PerspectiveCamera( 70,
 			Renderer.domElement.width / Renderer.domElement.height, //window.innerWidth / window.innerHeight,
@@ -36,7 +34,7 @@ function Initialize()
 			if( !THREEx.FullScreen.activated() )
 			{
 				FullScreenSign = create_and_center_and_orient_text( "Touch for fullscreen" );
-				OurObject.add(FullScreenSign);
+				OurObject.add(Protein); //when showing ribbon, go back to OurObject.add(FullScreenSign);
 			}
 		},
 		function ( xhr ) {}, //progression function

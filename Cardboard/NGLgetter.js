@@ -13,9 +13,9 @@ function get_NGL_protein()
 		stage.loadFile( blob, {
 				ext: "pdb", defaultRepresentation: true
 		} ).then( function( o ){
-			o.addRepresentation( "surface" );
+			o.addRepresentation( "ribbon" );
 			loose_surface = o.reprList[3].repr;			
-			stage.tasks.onZeroOnce( placeholder_interpret_ngl_surface );
+			stage.tasks.onZeroOnce( placeholder_interpret_ngl_ribbon );
 			
 			//we would like to know when it has finished making its representation and call the code currently in input			
 		} );
@@ -24,14 +24,58 @@ function get_NGL_protein()
 	xhr.send( null );
 }
 
+function placeholder_interpret_ngl_ribbon()
+{
+	//if it's surface then you need loose_surface.bufferList[0].group.children[0].children[0].geometry
+	
+	console.log(loose_surface)
+	
+	var ProteinGeometry = loose_surface.bufferList[3].geometry;
+	
+	var ourcopy = new THREE.Mesh( new THREE.BufferGeometry(),
+				  new THREE.MeshBasicMaterial({side: THREE.DoubleSide /* temp */ }) );
+	
+	ourcopy.geometry.addAttribute( 'position', 
+			new THREE.BufferAttribute( ProteinGeometry.attributes.position.array, 3 ) );
+	ourcopy.geometry.addAttribute( 'normal', 
+			new THREE.BufferAttribute( ProteinGeometry.attributes.normal.array, 3 ) );
+	ourcopy.geometry.setIndex(
+			new THREE.BufferAttribute( ProteinGeometry.index.array, 1 ) );
+	
+	ourcopy.geometry.computeBoundingSphere();
+//	var center_coords = ourcopy.geometry.boundingSphere.center.toArray();
+//	
+//	for(var i = 0, il = ProteinGeometry.attributes.position.array.length; i < il; i++)
+//		ProteinGeometry.attributes.position.array[i] -= center_coords[i%3];
+	
+	var ourscale = 0.0004 * ourcopy.geometry.boundingSphere.radius;
+	ourcopy.scale.set(ourscale,ourscale,ourscale);
+	
+//	var ourtriangle = new THREE.Mesh( new THREE.Geometry(),
+//			  new THREE.MeshBasicMaterial({side: THREE.DoubleSide /* temp */ }) );
+//	console.log(ourtriangle.geometry)
+//	
+//	ourtriangle.geometry.vertices.push(
+//		new THREE.Vector3( ourcopy.geometry.attributes.position.array[0], ourcopy.geometry.attributes.position.array[1], ourcopy.geometry.attributes.position.array[2] ),
+//		new THREE.Vector3(ourcopy.geometry.attributes.position.array[300],  ourcopy.geometry.attributes.position.array[301], ourcopy.geometry.attributes.position.array[302] ),
+//		new THREE.Vector3( ourcopy.geometry.attributes.position.array[900],  ourcopy.geometry.attributes.position.array[901], ourcopy.geometry.attributes.position.array[902] )
+//	);
+//	ourtriangle.geometry.faces.push( new THREE.Face3( 0, 1, 2 ) );
+	
+	console.log(ourcopy)
+	
+	if(Protein.children.length !== 0)
+		Protein.remove(Protein.children[0]);
+	Protein.add(ourtriangle);
+}
+
 function placeholder_interpret_ngl_surface()
 {
 	//if it's surface then you need loose_surface.bufferList[0].group.children[0].children[0].geometry
-//			console.log(loose_surface);
 	var ProteinGeometry = loose_surface.bufferList[0].geometry;
 	
-	ourcopy = new THREE.Mesh( new THREE.BufferGeometry(),
-				  new THREE.MeshPhongMaterial({side: THREE.DoubleSide /* temp */ }) );
+	var ourcopy = new THREE.Mesh( new THREE.BufferGeometry(),
+				  new THREE.MeshPhongMaterial() );
 	
 	ourcopy.geometry.addAttribute( 'position', 
 			new THREE.BufferAttribute( ProteinGeometry.attributes.position.array, 3 ) );
@@ -57,7 +101,6 @@ function placeholder_interpret_ngl_surface()
 	if(num_NaNs)console.log("NaNs in surface: ", num_NaNs);
 	
 	ourcopy.geometry.computeBoundingSphere();
-	console.log(ourcopy.geometry.boundingSphere);
 	var center_coords = ourcopy.geometry.boundingSphere.center.toArray();
 	
 	for(var i = 0, il = ProteinGeometry.attributes.position.array.length; i < il; i++)
@@ -67,8 +110,6 @@ function placeholder_interpret_ngl_surface()
 	ourcopy.scale.set(ourscale,ourscale,ourscale);
 	
 	if(Protein.children.length !== 0)
-		Protein.remove(Protein.children[0]); //hopefully they got the message about going fullscreen, though TODO what if their phone is a supercomputer? 
+		Protein.remove(Protein.children[0]); 
 	Protein.add(ourcopy);
-	
-	//then need to scale it so that it is of a reasonable size
 }
