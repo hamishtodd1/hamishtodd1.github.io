@@ -31,7 +31,6 @@ var renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize( window_width, window_height );
 renderer.setClearColor( 0xffffff, 1);
 document.body.appendChild( renderer.domElement );
-console.log(renderer.domElement )
 var ytplayer;
 
 var INITIALIZED = 0;
@@ -45,7 +44,7 @@ var FLATNET = 0;
 var SURFACE = 1;
 var POLYHEDRON = 2;
 
-var showdebugstuff = 1;
+var showdebugstuff = 0;
 var net_warnings = 1;
 
 var z_central_axis = new THREE.Vector3(0,0,1);
@@ -133,8 +132,6 @@ var Forced_edges;
 var NUM_QUASICUTOUT_EDGES = 30; 
 
 //------------3D penrose stuff
-var animation_playing_automatically = true;
-
 var Quasi_meshes = Array(5);
 var meshes_original_numbers = Array(5);
 var outlines_original_numbers = Array(5);
@@ -145,17 +142,6 @@ var normalized_virtualico_vertices = Array(20);
 
 var icosahedra_directions = Array(12);
 
-
-var golden_rhombohedra = Array(20);
-var goldenicos = Array(12);
-var golden_triacontahedra = Array(20);
-var golden_stars = Array(12);
-var ico_stars = Array(12);
-var animation_progress = 0;
-var previous_animation_progress = animation_progress; 
-var progress_bar;
-var slider;
-var slider_grabbed = false;
 
 
 //-----------no longer formation atom stuff
@@ -229,7 +215,6 @@ var LatticeGrabbed = false;
 var vertices_derivations;
 var minimum_angles = new Array(22); //between these two, we derive the polyhedron and surface
 
-var circle;
 
 var IsRoundedVertex;
 var IsProblemVertex;
@@ -237,9 +222,6 @@ var problemArrays;
 var solutionArrays;
 
 //-----------------------Buttons
-var VARYINGSURFACE_OPENMODE_BUTTON = 0;
-var BOCAVIRUS_BUTTON = 1;
-var T4_BUTTON = 2;
 var setvirus_flatnet_vertices = Array(4);
 
 //---------------------------buttons no more

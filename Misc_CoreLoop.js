@@ -104,7 +104,6 @@ function ChangeScene(new_mode) {
 		var obj = scene.children[i];
 		scene.remove(obj);
 	}
-//	scene.add( circle );
 	
 //	if(showdebugstuff){
 //		for(var i = 0; i<indicatorblobs.length; i++)

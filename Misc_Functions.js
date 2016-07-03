@@ -126,7 +126,6 @@ function deduce_stable_points_from_fanning_vertex(fanning_vertex_start, lattice_
 		}
 		
 		if(confirmed_stablepoint){
-			console.log(lowest_unused_stablepoint)
 			stable_points[lowest_unused_stablepoint].copy(potential_stable_point);
 //			console.log(j,hand);
 			lowest_unused_stablepoint++;
