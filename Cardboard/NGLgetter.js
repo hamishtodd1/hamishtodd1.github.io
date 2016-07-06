@@ -13,7 +13,7 @@ function get_NGL_protein()
 		stage.loadFile( blob, {
 				ext: "pdb", defaultRepresentation: true
 		} ).then( function( o ){
-			var rep_name = "ribbon";
+			var rep_name = "surface";
 			o.addRepresentation( rep_name );
 			loose_surface = o.reprList[3].repr;
 			if( rep_name === "surface")
