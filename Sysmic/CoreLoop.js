@@ -14,14 +14,9 @@ function UpdateWorld()
 	if(count > 15)
 		count = 0;
 	
-	Update_story();
-	
-	if( typeof video !== 'undefined' && video.readyState === video.HAVE_ENOUGH_DATA)
-	{
-		videoImageContext.drawImage( video, 0, 0 );
-		if ( videoTexture ) 
-			videoTexture.needsUpdate = true;
-	}
+	//should these be the same?
+	Update_story();	
+	update_video();
 }
 
 function Render() 

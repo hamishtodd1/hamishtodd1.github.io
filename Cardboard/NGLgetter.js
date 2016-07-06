@@ -13,9 +13,13 @@ function get_NGL_protein()
 		stage.loadFile( blob, {
 				ext: "pdb", defaultRepresentation: true
 		} ).then( function( o ){
-			o.addRepresentation( "ribbon" );
-			loose_surface = o.reprList[3].repr;			
-			stage.tasks.onZeroOnce( placeholder_interpret_ngl_ribbon );
+			var rep_name = "ribbon";
+			o.addRepresentation( rep_name );
+			loose_surface = o.reprList[3].repr;
+			if( rep_name === "surface")
+				stage.tasks.onZeroOnce( placeholder_interpret_ngl_surface );
+			if( rep_name === "ribbon")
+				stage.tasks.onZeroOnce( placeholder_interpret_ngl_ribbon );
 			
 			//we would like to know when it has finished making its representation and call the code currently in input			
 		} );

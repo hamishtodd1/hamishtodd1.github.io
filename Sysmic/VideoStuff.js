@@ -2,7 +2,7 @@ function initVideo()
 {	
 	// create the video element
 	video = document.createElement( 'video' );
-	video.src = "http://hamishtodd1.github.io/Sysmic/sintel.mp4"; //http://hamishtodd1.github.io/
+	video.src = "http://hamishtodd1.github.io/Sysmic/Data/dfwe.mp4";
 	video.crossOrigin = "anonymous";
 	
 //	 video.id = 'video';
@@ -13,7 +13,7 @@ function initVideo()
 	
 	var videoImage = document.createElement( 'canvas' );
 	videoImage.width = 480;
-	videoImage.height = 204;
+	videoImage.height = 360;
 
 	videoImageContext = videoImage.getContext( '2d' );
 	// background color if no video present
@@ -24,13 +24,26 @@ function initVideo()
 	videoTexture.minFilter = THREE.LinearFilter;
 	videoTexture.magFilter = THREE.LinearFilter;
 	
-	var movieMaterial = new THREE.MeshBasicMaterial( { map: videoTexture, overdraw: true, side:THREE.DoubleSide } );
-	// the geometry on which the movie will be displayed;
-	// 		movie image will be scaled to fit these dimensions.
-	var movieGeometry = new THREE.PlaneGeometry( VIEWBOX_WIDTH,VIEWBOX_HEIGHT,4, 4 );
-	var movieScreen = new THREE.Mesh( movieGeometry, movieMaterial );
+	movieScreen = new THREE.Mesh( 
+			new THREE.PlaneGeometry( VIEWBOX_WIDTH,VIEWBOX_HEIGHT ),
+			new THREE.MeshBasicMaterial( { map: videoTexture, overdraw: true, side:THREE.DoubleSide } ) );
 	movieScreen.position.set(0,0,0);
-	Scene.add(movieScreen);
+
+	movieScreen.add(boundingbox.clone());
+}
+
+function update_video()
+{
+	if( typeof video !== 'undefined' && video.readyState === video.HAVE_ENOUGH_DATA)
+	{
+		videoImageContext.drawImage( video, 0, 0 );
+		if ( videoTexture ) 
+			videoTexture.needsUpdate = true;
+	}
+	
+	//video.pause();
+	//video.play();
+	//video.paused
 }
 
 //
