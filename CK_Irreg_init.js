@@ -674,7 +674,6 @@ function init_CK_and_irreg(){
 			}
 		}
 	}
-	console.log(triangle_adjacent_triangles);
 		
 	{
 		HexagonLattice = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({vertexColors:THREE.FaceColors}));

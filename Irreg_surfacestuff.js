@@ -78,30 +78,30 @@ function CheckIrregButton(){
 	//or maybe it should be a jointed line itself?
 	//TODO change this if button size changes
 //	console.log()
-	if(isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(picture_objects[17].position) < 0.3 ){
+	if(isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButtonClosed.position) < 0.3 ){
 		var squashed_size = 0.9;
-		picture_objects[17].scale.set(squashed_size,squashed_size,squashed_size);
-		picture_objects[18].scale.set(squashed_size,squashed_size,squashed_size);
+		IrregButtonClosed.scale.set(squashed_size,squashed_size,squashed_size);
+		IrregButtonOpen.scale.set(squashed_size,squashed_size,squashed_size);
 	}
-	if(!isMouseDown && picture_objects[17].scale.x < 1){
-		if(picture_objects[17].capsidopen){
+	if(!isMouseDown && IrregButtonClosed.scale.x < 1){
+		if(IrregButtonClosed.capsidopen){
 			settle_manipulationsurface_and_flatnet();
-			picture_objects[17].capsidopen = 0;
-			scene.remove(picture_objects[17]);
-			scene.add(picture_objects[18]);
+			IrregButtonClosed.capsidopen = 0;
+			scene.remove(IrregButtonClosed);
+			scene.add(IrregButtonOpen);
 		}
 		else {
-			picture_objects[17].capsidopen = 1;
-			scene.remove(picture_objects[18]);
-			scene.add(picture_objects[17]);
+			IrregButtonClosed.capsidopen = 1;
+			scene.remove(IrregButtonOpen);
+			scene.add(IrregButtonClosed);
 		}
-		picture_objects[17].scale.set(1,1,1);
-		picture_objects[18].scale.set(1,1,1);
+		IrregButtonClosed.scale.set(1,1,1);
+		IrregButtonOpen.scale.set(1,1,1);
 	}
 }
 
 function update_varyingsurface() {
-	if(picture_objects[17].capsidopen)
+	if(IrregButtonClosed.capsidopen)
 		capsidopeningspeed = 0.018;
 	else
 		capsidopeningspeed = -0.018;

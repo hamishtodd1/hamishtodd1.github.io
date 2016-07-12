@@ -1,17 +1,14 @@
 //not allowed to do anything with camera outside of here! Including read from its position!
 function camera_changes_for_mode_switch(){
 	camera.position.z = min_cameradist;
-	camera.cameraO.left =-playing_field_width / 2;
-	camera.cameraO.right = playing_field_width / 2;
-	camera.cameraO.top = playing_field_height / 2;
-	camera.cameraO.bottom =-playing_field_height / 2;
+	camera.cameraO.left =-playing_field_dimension / 2;
+	camera.cameraO.right = playing_field_dimension / 2;
+	camera.cameraO.top = playing_field_dimension / 2;
+	camera.cameraO.bottom =-playing_field_dimension / 2;
 	camera.updateProjectionMatrix();
 	
 	switch(MODE){
-		case STATIC_PROTEIN_MODE:
-			camera.toOrthographic();
-			break;
-		case STATIC_DNA_MODE:
+		case BOCAVIRUS_MODE:
 			camera.toOrthographic();
 			break;
 		case CK_MODE:

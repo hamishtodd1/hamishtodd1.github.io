@@ -16,8 +16,8 @@
 //this function shouldn't actually *do* anything with the data, it's only to be read elsewhere.
 function ReadInput() {
 	OldMousePosition.copy( MousePosition );
-	MousePosition.x = (InputObject.mousex-window_width/2) * (playing_field_width / window_width);
-	MousePosition.y = -(InputObject.mousey-window_height/2) * (playing_field_height / window_height);
+	MousePosition.x = (InputObject.mousex-window_width/2) * (playing_field_dimension / window_width);
+	MousePosition.y = -(InputObject.mousey-window_height/2) * (playing_field_dimension / window_height);
 	
 	Mouse_delta.set( MousePosition.x - OldMousePosition.x, MousePosition.y - OldMousePosition.y);
 	

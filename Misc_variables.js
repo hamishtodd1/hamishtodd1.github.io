@@ -8,25 +8,25 @@ var icosahedron_dihedral_angle = Math.acos(-Math.sqrt(5) / 3);
 
 //--------------Structurally fundamental
 var NOTHING_MODE = 0;
-var STATIC_PROTEIN_MODE = 1;
-var STATIC_DNA_MODE = 2; 
-var CK_MODE = 3;
-var IRREGULAR_MODE = 4;
-var QC_SPHERE_MODE = 5;
+var BOCAVIRUS_MODE = 1; 
+var CK_MODE = 2;
+var IRREGULAR_MODE = 3;
+var QC_SPHERE_MODE = 4;
+var ENDING_MODE = 5;
 	
-var MODE = 3;
+var MODE = IRREGULAR_MODE;
 
 //--------------Technologically fundamental
-var playing_field_width = 7*HS3;
-var playing_field_height = 6 * playing_field_width / (7*HS3);
+var playing_field_dimension = 7*HS3; //used to be that height was 6.
 var min_cameradist = 10; //get any closer and the perspective is weird
-var vertical_fov = 2 * Math.atan(playing_field_height/(2*min_cameradist));
+var vertical_fov = 2 * Math.atan(playing_field_dimension/(2*min_cameradist));
+//is camera z ever really changed?
 
-var camera = new THREE.CombinedCamera(playing_field_width, playing_field_height, vertical_fov * 360 / TAU, 0.1, 1000, 0.1, 1000);
+var camera = new THREE.CombinedCamera(playing_field_dimension, playing_field_dimension, vertical_fov * 360 / TAU, 0.1, 1000, 0.1, 1000);
 var scene = new THREE.Scene();
 
 var window_height = 540;
-var window_width = window_height * playing_field_width / playing_field_height;
+var window_width = window_height;
 var renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize( window_width, window_height );
 renderer.setClearColor( 0xffffff, 1);
@@ -44,7 +44,7 @@ var FLATNET = 0;
 var SURFACE = 1;
 var POLYHEDRON = 2;
 
-var showdebugstuff = 0;
+var showdebugstuff = 1;
 var net_warnings = 1;
 
 var z_central_axis = new THREE.Vector3(0,0,1);
@@ -59,7 +59,7 @@ var varyingsurface_edges_default_radius = 0.012;
 //for time being we are making a nice, understandable number for irreg snapping
 var number_of_hexagon_rings = 11;
 var number_of_proteins_in_lattice = number_of_hexagon_rings * number_of_hexagon_rings * 6;
-var Lattice_ring_density_factor = playing_field_width / 2 / number_of_hexagon_rings; //TODO there is a more intuitive representation of this (maybe all of it)
+var Lattice_ring_density_factor = playing_field_dimension / 2 / number_of_hexagon_rings; //TODO there is a more intuitive representation of this (maybe all of it)
 var number_of_lattice_points = 1 + 3 * number_of_hexagon_rings*(number_of_hexagon_rings+1);
 
 //in the limited environment we will end up with (and might do well to be going with) a circle of existence for lattice pts is prb. best
@@ -138,7 +138,6 @@ var outlines_original_numbers = Array(5);
 var Quasi_outlines = Array(5);
 var prism_triangle_indices = new Uint16Array([0, 2, 1, 2, 3, 1, 2, 4, 3, 4, 5, 3]);
 var normalized_virtualdodeca_vertices = Array(20);
-var normalized_virtualico_vertices = Array(20);
 
 var icosahedra_directions = Array(12);
 
@@ -261,11 +260,18 @@ var OldMousePosition = new THREE.Vector2(0,0);
 var Mouse_delta = new THREE.Vector2(0,0);
 
 //----protein and bocavirus stuff
-var proteinlattice;
+var neo_bocavirus_proteins = Array(60);
+
 var protein_vertex_indices = Array(number_of_proteins_in_lattice);
 
 var number_of_vertices_in_protein;
-var master_protein = new THREE.Mesh( new THREE.BufferGeometry(), new THREE.MeshLambertMaterial({color:0xf0f00f, transparent:true}) );
+var master_protein;
+var capsomer_protein_indices = Array(12);
+var capsomer_groups = [[0,6,9],[5,2,11],[1,4,8],[3,10,7]]; 
+	//0,6,9
+	//5,2,11
+	//1,4,8
+	//3,10,7
 var atom_vertices_components;
 var bocavirus_vertices = Array(20*3);
 var initial_bocavirus_vertices = Array(20*3);

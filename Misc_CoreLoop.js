@@ -41,12 +41,8 @@
 
 function UpdateWorld() {
 	update_mouseblob();
-	switch(MODE){
-		case STATIC_PROTEIN_MODE:
-			update_bocavirus();
-			break;
-		
-		case STATIC_DNA_MODE:
+	switch(MODE){		
+		case BOCAVIRUS_MODE:
 			update_bocavirus();
 			break;
 			
@@ -97,18 +93,21 @@ function render() {
 }
 
 //eventually we'll add some trigger to this that makes it reasonable to call every frame
-function ChangeScene(new_mode) {	
+//should probably not have scene.add or scene.remove anywhere outside this. It probably doesn't affect performance
+function ChangeScene(new_mode) {
+	//don't go changing this outside of here.
 	MODE = new_mode;
 	
+	//everyone out
 	for( var i = scene.children.length - 1; i >= 0; i--){
 		var obj = scene.children[i];
 		scene.remove(obj);
 	}
 	
-//	if(showdebugstuff){
-//		for(var i = 0; i<indicatorblobs.length; i++)
-//			scene.add(indicatorblobs[i]);
-//	}
+	if(showdebugstuff){
+		for(var i = 0; i<indicatorblobs.length; i++)
+			scene.add(indicatorblobs[i]);
+	}
 	
 	camera_changes_for_mode_switch();
 	
@@ -116,23 +115,18 @@ function ChangeScene(new_mode) {
 	capsidopenness = 0;
 	
 	switch(MODE){
-		case STATIC_PROTEIN_MODE:
-			for(var i = 0; i<bocavirus_proteins.length; i++)
-				scene.add(bocavirus_proteins[i]);
-			for(var i = 0; i< lights.length; i++)
-				scene.add( lights[i] );
-			break;
-		
-		case STATIC_DNA_MODE:
-			for(var i = 0; i<bocavirus_proteins.length; i++)
-				scene.add(bocavirus_proteins[i]);
+		case BOCAVIRUS_MODE:
+			for(var i = 0; i < neo_bocavirus_proteins.length; i++)
+				scene.add(neo_bocavirus_proteins[i])
+//			for(var i = 0; i<bocavirus_proteins.length; i++)
+//				scene.add(bocavirus_proteins[i]);
 			for(var i = 0; i< lights.length; i++)
 				scene.add( lights[i] );
 			scene.add(DNA_cage);
 			break;
 			
 		case CK_MODE:
-			scene.add(picture_objects[16]);
+//			scene.add(clickable_viruses[16]);
 			scene.add(HexagonLattice);
 			scene.add(surface);
 //			scene.add(surflattice);
@@ -144,7 +138,7 @@ function ChangeScene(new_mode) {
 //				scene.add(blast_cylinders[i]);
 			
 			for(var i = 4; i < 8; i++)
-				scene.add(picture_objects[i]);
+				scene.add(clickable_viruses[i]);
 			break;
 			
 		case IRREGULAR_MODE:
@@ -157,13 +151,13 @@ function ChangeScene(new_mode) {
 				scene.add(varyingsurface_spheres[i]);
 			
 			for(var i = 12; i < 16; i++)
-				scene.add(picture_objects[i]);
-			scene.add(picture_objects[18]);
+				scene.add(clickable_viruses[i]);
+			scene.add(IrregButtonOpen);
 			break;
 			
 		case QC_SPHERE_MODE:
 			for(var i = 8; i < 12; i++)
-				scene.add(picture_objects[i]);
+				scene.add(clickable_viruses[i]);
 			scene.add(dodeca);
 			if(stable_point_of_meshes_currently_in_scene !== 666) //if it is equal to this, it has yet to be derived from the cutout vectors
 				scene.add(quasicutout_meshes[stable_point_of_meshes_currently_in_scene]);

@@ -31,8 +31,8 @@ function UpdateCapsid() {
 	}
 	
 //	if( (oldcapsidopenness != 0 && capsidopenness == 0) || (oldcapsidopenness == 0 && capsidopenness != 0 ) )
-	for(var i = 1; i < 8; i++)
-		picture_objects[i].material.opacity = 1 - capsidopenness;
+//	for(var i = 1; i < 8; i++)
+//		picture_objects[i].material.opacity = 1 - capsidopenness;
 	
 	CK_deduce_surface(capsidopenness, surface_vertices);
 	
