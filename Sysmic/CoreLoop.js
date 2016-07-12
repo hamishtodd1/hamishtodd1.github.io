@@ -1,22 +1,17 @@
 //A live fish
 
-var count = 0;
 
 function UpdateWorld()
 {	
+	//should these be the same?
+	Update_story();	
+	update_video();
+	
 	update_parameterzone();
 	update_Phasezone();
 	update_graph();
 	
-	if(count === 0)
-		update_Cellular_Automaton();
-	count++;
-	if(count > 15)
-		count = 0;
-	
-	//should these be the same?
-	Update_story();	
-	update_video();
+	update_Cellular_Automaton(  );
 }
 
 function Render() 

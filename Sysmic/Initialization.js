@@ -37,12 +37,6 @@ function pre_download_init()
 	boundingbox.children[0].position.z =-0.01;
 	boundingbox.children[1].position.z =-0.01;
 	
-	initVideo();
-	init_story();
-	init_parameterzone();
-	init_Phasezone();
-	set_vector_field();
-	
 	Camera.position.copy(FOURBOX_CAMERAPOSITION);
 	
 	//maybe it should actually be blue for resistant, red for sick, yellow for normal?
@@ -56,6 +50,12 @@ function pre_download_init()
 	EMOJII_SICK = 2;
 	EMOJII_RESISTANT = 3;
 	EMOJII_DEAD = 4;
+	
+	initVideo();
+	init_story();
+	init_parameterzone();
+	init_Phasezone();
+	set_vector_field();
 }
 
 function loadtexture_initially(linkstring, picindex)

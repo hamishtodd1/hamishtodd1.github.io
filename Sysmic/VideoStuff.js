@@ -26,7 +26,7 @@ function initVideo()
 	
 	movieScreen = new THREE.Mesh( 
 			new THREE.PlaneGeometry( VIEWBOX_WIDTH,VIEWBOX_HEIGHT ),
-			new THREE.MeshBasicMaterial( { map: videoTexture, overdraw: true, side:THREE.DoubleSide } ) );
+			new THREE.MeshBasicMaterial( { /*map: videoTexture,*/ overdraw: true, side:THREE.DoubleSide } ) );
 	movieScreen.position.set(0,0,0);
 
 	movieScreen.add(boundingbox.clone());
