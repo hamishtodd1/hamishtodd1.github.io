@@ -18,8 +18,6 @@ var automaton_faces = Array(num_automaton_faces);
 var automaton_face_status = new Uint8Array(num_automaton_faces);
 var automaton_faces_sickness_counts = new Uint32Array(num_automaton_faces);
 
-var automaton = new THREE.Object3D();
-
 function init_Comiczone()
 {	
 	ComicFace = new THREE.Mesh(
@@ -41,7 +39,7 @@ function init_Comiczone()
 		{
 			automaton_faces[i*automaton_width+j] = new THREE.Mesh(
 					new THREE.CubeGeometry(face_width, face_width, 0),
-					new THREE.MeshBasicMaterial({transparent: true}) );
+					new THREE.MeshBasicMaterial({transparent: true, map: emojiitextures[ 1 ]}) ); //yo for some reason you REALLY need this here otherwise they don't appear
 			
 			automaton_faces[i*automaton_width+j].position.set(
 					-VIEWBOX_HEIGHT / 2 + i * face_width + face_width / 2,
@@ -50,10 +48,6 @@ function init_Comiczone()
 //			ComicZone.add( automaton_faces[i*automaton_width+j] );
 		}
 	}
-	
-	for(var i = 0; i < automaton_width; i++)
-		for(var j = 0; j < automaton_width; j++)
-			automaton.add( automaton_faces[i*automaton_width+j] );
 	
 	reset_CA();
 	
@@ -112,17 +106,20 @@ function reset_CA( setting )
 
 var count = 0;
 
-function update_Cellular_Automaton(  )
+var default_CA_Infectiousness = 0.06;
+var default_CA_RecoveryTime = 10;
+var CA_Infectiousness = default_CA_Infectiousness;
+var CA_RecoveryTime = default_CA_RecoveryTime;
+
+function update_Cellular_Automaton()
 {
 	count++;
-	var change_period = 15; //TODO needs to take delta_t into account really :X 
+	var change_period = 12; //TODO needs to take delta_t into account really :X 
 	if(count > change_period)
 		count = 0;
 	if(count !== change_period)
 		return;
 	
-	var CA_Infectiousness = 0.06;
-	var CA_RecoveryTime = 10;
 	probability_of_dying = 0.02; //we tune this so no need to think too hard
 	
 	if(Story_states[Storypage].AutomatonRunning)

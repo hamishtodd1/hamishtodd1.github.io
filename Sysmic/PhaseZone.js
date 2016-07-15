@@ -116,8 +116,6 @@ function init_Phasezone()
 			
 			PhaseZoneArrows[lowest_unused_arrow].position.set(i_position,j_position,0); //and then never changed
 			
-			PhaseZone.add( PhaseZoneArrows[lowest_unused_arrow] );
-			
 			lowest_unused_arrow++;
 		}
 	}
@@ -192,13 +190,15 @@ function update_Phasezone()
 	}
 	else
 	{
-		var PotentialInfected = GetNextInfected(Infected);
-		var PotentialResistant = GetNextResistant(Resistant);
-		if(PotentialInfected + PotentialResistant <= Population)
+		var newState = GetNextState( Population - Infected - Resistant, Infected,Resistant );
+		var newStatePopulation = newState.x + newState.y + newState.z;
+		if( Math.abs( newStatePopulation - Population ) > 0.001 )
 		{
-			Infected = PotentialInfected;
-			Resistant = PotentialResistant;
+			Infected = newState.y;
+			Resistant = newState.z;
 		}
+		else
+			console.error("population exceeded!", newState)
 			
 		
 		PhaseControlCursor.position.copy(get_phasezone_position(Infected,Resistant) );

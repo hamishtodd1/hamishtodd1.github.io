@@ -9,9 +9,11 @@ function UpdateWorld()
 	
 	update_parameterzone();
 	update_Phasezone();
+	if( !Story_states[Storypage].GraphMoving )
+		reset_graph();
 	update_graph();
 	
-	update_Cellular_Automaton(  );
+	update_Cellular_Automaton();
 }
 
 function Render() 

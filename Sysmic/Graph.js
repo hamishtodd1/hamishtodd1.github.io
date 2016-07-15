@@ -16,7 +16,7 @@
  */
 
 //measured in faces
-var GRAPH_HEIGHT_IN_FACES = 36; //a square number, for the grid
+var GRAPH_HEIGHT_IN_FACES = 36;
 var face_width = VIEWBOX_HEIGHT / GRAPH_HEIGHT_IN_FACES;
 var GRAPH_USED_WIDTH_IN_FACES = Math.round( VIEWBOX_WIDTH / face_width );
 
@@ -26,8 +26,7 @@ var Graph;
 
 function update_graph()
 {
-	//
-	if( !PhaseControlCursor.grabbed )
+	if( !PhaseControlCursor.grabbed ) //or if it's being manually changed
 	{
 		var faceopacity;
 		var fade_in_dist = face_width * 1.6;

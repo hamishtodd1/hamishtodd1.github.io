@@ -2,18 +2,18 @@ function initVideo()
 {	
 	// create the video element
 	video = document.createElement( 'video' );
-	video.src = "http://hamishtodd1.github.io/Sysmic/Data/dfwe.mp4";
+	video.src = "http://hamishtodd1.github.io/Sysmic/Data/Movie_0002.mp4";
 	video.crossOrigin = "anonymous";
 	
-//	 video.id = 'video';
-//	 video.type = ' video/ogg; codecs="theora, vorbis" ';
+	 video.id = 'video';
+	 video.type = ' video/mp4; codecs="theora, vorbis" ';
 	
 	video.load(); // must call after setting/changing source
 	video.play();
 	
 	var videoImage = document.createElement( 'canvas' );
-	videoImage.width = 480;
-	videoImage.height = 360;
+	videoImage.width = 640;
+	videoImage.height = 480;
 
 	videoImageContext = videoImage.getContext( '2d' );
 	// background color if no video present
@@ -26,10 +26,12 @@ function initVideo()
 	
 	movieScreen = new THREE.Mesh( 
 			new THREE.PlaneGeometry( VIEWBOX_WIDTH,VIEWBOX_HEIGHT ),
-			new THREE.MeshBasicMaterial( { /*map: videoTexture,*/ overdraw: true, side:THREE.DoubleSide } ) );
+			new THREE.MeshBasicMaterial( { map: videoTexture, overdraw: true, side:THREE.DoubleSide } ) );
 	movieScreen.position.set(0,0,0);
 
 	movieScreen.add(boundingbox.clone());
+	
+	Scene.add(movieScreen);
 }
 
 function update_video()
@@ -39,6 +41,23 @@ function update_video()
 		videoImageContext.drawImage( video, 0, 0 );
 		if ( videoTexture ) 
 			videoTexture.needsUpdate = true;
+	}
+	
+	if( Math.abs(MousePosition.x) < VIEWBOX_WIDTH / 2
+		&& Math.abs(MousePosition.y) < VIEWBOX_HEIGHT / 2 
+		&& isMouseDown && !isMouseDown_previously)
+	{
+		if( video.paused )
+			video.play();
+		else
+		{
+			//TODO get rid of this
+			if( MousePosition.x > 0 )
+				video.currentTime = 381.5;
+			else
+				video.pause();
+		}
+			
 	}
 	
 	//video.pause();
