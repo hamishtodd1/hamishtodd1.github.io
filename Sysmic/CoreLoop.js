@@ -1,27 +1,19 @@
 //A live fish
 
-var count = 0;
 
 function UpdateWorld()
 {	
+	//should these be the same?
+	Update_story();	
+	update_video();
+	
 	update_parameterzone();
 	update_Phasezone();
+	if( !Story_states[Storypage].GraphMoving )
+		reset_graph();
 	update_graph();
 	
-	if(count === 0)
-		update_Cellular_Automaton();
-	count++;
-	if(count > 15)
-		count = 0;
-	
-	Update_story();
-	
-	if( typeof video !== 'undefined' && video.readyState === video.HAVE_ENOUGH_DATA)
-	{
-		videoImageContext.drawImage( video, 0, 0 );
-		if ( videoTexture ) 
-			videoTexture.needsUpdate = true;
-	}
+	update_Cellular_Automaton();
 }
 
 function Render() 

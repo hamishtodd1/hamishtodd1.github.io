@@ -2,18 +2,18 @@ function initVideo()
 {	
 	// create the video element
 	video = document.createElement( 'video' );
-	video.src = "http://hamishtodd1.github.io/Sysmic/sintel.mp4"; //http://hamishtodd1.github.io/
+	video.src = "http://hamishtodd1.github.io/Sysmic/Data/Movie_0002.mp4";
 	video.crossOrigin = "anonymous";
 	
-//	 video.id = 'video';
-//	 video.type = ' video/ogg; codecs="theora, vorbis" ';
+	 video.id = 'video';
+	 video.type = ' video/mp4; codecs="theora, vorbis" ';
 	
 	video.load(); // must call after setting/changing source
 	video.play();
 	
 	var videoImage = document.createElement( 'canvas' );
-	videoImage.width = 480;
-	videoImage.height = 204;
+	videoImage.width = 640;
+	videoImage.height = 480;
 
 	videoImageContext = videoImage.getContext( '2d' );
 	// background color if no video present
@@ -24,13 +24,45 @@ function initVideo()
 	videoTexture.minFilter = THREE.LinearFilter;
 	videoTexture.magFilter = THREE.LinearFilter;
 	
-	var movieMaterial = new THREE.MeshBasicMaterial( { map: videoTexture, overdraw: true, side:THREE.DoubleSide } );
-	// the geometry on which the movie will be displayed;
-	// 		movie image will be scaled to fit these dimensions.
-	var movieGeometry = new THREE.PlaneGeometry( VIEWBOX_WIDTH,VIEWBOX_HEIGHT,4, 4 );
-	var movieScreen = new THREE.Mesh( movieGeometry, movieMaterial );
+	movieScreen = new THREE.Mesh( 
+			new THREE.PlaneGeometry( VIEWBOX_WIDTH,VIEWBOX_HEIGHT ),
+			new THREE.MeshBasicMaterial( { map: videoTexture, overdraw: true, side:THREE.DoubleSide } ) );
 	movieScreen.position.set(0,0,0);
+
+	movieScreen.add(boundingbox.clone());
+	
 	Scene.add(movieScreen);
+}
+
+function update_video()
+{
+	if( typeof video !== 'undefined' && video.readyState === video.HAVE_ENOUGH_DATA)
+	{
+		videoImageContext.drawImage( video, 0, 0 );
+		if ( videoTexture ) 
+			videoTexture.needsUpdate = true;
+	}
+	
+	if( Math.abs(MousePosition.x) < VIEWBOX_WIDTH / 2
+		&& Math.abs(MousePosition.y) < VIEWBOX_HEIGHT / 2 
+		&& isMouseDown && !isMouseDown_previously)
+	{
+		if( video.paused )
+			video.play();
+		else
+		{
+			//TODO get rid of this
+			if( MousePosition.x > 0 )
+				video.currentTime = 381.5;
+			else
+				video.pause();
+		}
+			
+	}
+	
+	//video.pause();
+	//video.play();
+	//video.paused
 }
 
 //

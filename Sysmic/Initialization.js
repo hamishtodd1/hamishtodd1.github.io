@@ -8,8 +8,7 @@ function pre_download_init()
 	Renderer.setSize( window.innerWidth, window.innerHeight );
 	Renderer.sortObjects = false;
 	Renderer.shadowMap.enabled = true;
-	Renderer.shadowMap.cullFace = THREE.CullFaceBack;
-	
+	Renderer.shadowMap.cullFace = THREE.CullFaceBack;	
 	document.body.appendChild( Renderer.domElement );
 	
 	Scene = new THREE.Scene();
@@ -23,8 +22,6 @@ function pre_download_init()
 	Scene.add(Camera)
 	
 	Camera.position.set(0,0,cameradist); //should be three viewboxes wide, two tall
-	
-	initVideo();
 	
 	boundingbox = new THREE.Object3D();
 	boundingbox.add( new THREE.Mesh(
@@ -40,21 +37,6 @@ function pre_download_init()
 	boundingbox.children[0].position.z =-0.01;
 	boundingbox.children[1].position.z =-0.01;
 	
-//	var OurFontLoader = new THREE.FontLoader();
-//	OurFontLoader.load( "gentilis.js", 
-//		function ( response ) {
-//			gentilis = response;
-//		},
-//		function ( xhr ) {}, //progression function
-//		function ( xhr ) { console.error( "couldn't load font" ); }
-//	);
-	
-	init_parameterzone();
-	init_Phasezone();
-	set_vector_field();
-	
-	init_story();
-	
 	Camera.position.copy(FOURBOX_CAMERAPOSITION);
 	
 	//maybe it should actually be blue for resistant, red for sick, yellow for normal?
@@ -68,6 +50,12 @@ function pre_download_init()
 	EMOJII_SICK = 2;
 	EMOJII_RESISTANT = 3;
 	EMOJII_DEAD = 4;
+	
+	initVideo();
+	init_story();
+	init_parameterzone();
+	init_Phasezone();
+	set_vector_field();
 }
 
 function loadtexture_initially(linkstring, picindex)

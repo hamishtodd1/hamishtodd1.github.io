@@ -7,8 +7,8 @@ var SliderShape;
 
 var MAX_Infectiousness = 5; //or whatever
 var MAX_RecoveryTime = 5;
-var MIN_Infectiousness = -MAX_Infectiousness; //or whatever
-var MIN_RecoveryTime = -MAX_RecoveryTime;
+var MIN_Infectiousness = 0.001; //or whatever
+var MIN_RecoveryTime = 0.001;
 
 //no, the best thing to do is have the point stay with you, but be as close as possible to your finger!
 
@@ -36,15 +36,7 @@ function init_parameterzone()
 	
 	ParameterControlCursor.grabbed = 0;
 	
-	var proportionalposition = ParameterControlCursor.position.clone();
-//	proportionalposition.x += VIEWBOX_WIDTH / 2; //it's fun to experiment with them being negative
-//	proportionalposition.y += VIEWBOX_HEIGHT/ 2;
-	
-	proportionalposition.x /= VIEWBOX_WIDTH / 2;
-	proportionalposition.y /= VIEWBOX_HEIGHT / 2;
-	
-	Infectiousness = MAX_Infectiousness * proportionalposition.y;
-	RecoveryTime = MAX_RecoveryTime * proportionalposition.x; //because we think of time as going to the right
+	update_Infectiousness_and_RecoveryTime()
 	
 	ParameterZone.slidermode = 1;
 }
@@ -74,8 +66,7 @@ function update_parameterzone()
 			//also might want to have a specific infectiousness level here.
 		}
 
-		reset_CA();
-		
+		reset_CA(1); //one sick
 		update_Infectiousness_and_RecoveryTime();
 		
 		//Do viruses drastically change parameters while infecting a population?
@@ -113,6 +104,8 @@ function update_Infectiousness_and_RecoveryTime()
 	
 	Infectiousness =MIN_Infectiousness+ (MAX_Infectiousness - MIN_Infectiousness ) * proportionalposition.y;
 	RecoveryTime = 	MIN_RecoveryTime  + (MAX_RecoveryTime   - MIN_RecoveryTime   ) * proportionalposition.x; //because we think of time as going to the right
+	CA_Infectiousness = proportionalposition.y * default_CA_Infectiousness * 2;
+	CA_RecoveryTime   = proportionalposition.x * default_CA_RecoveryTime * 2;
 	
 	proportionalposition.x *= VIEWBOX_WIDTH;
 	proportionalposition.y *= VIEWBOX_HEIGHT;
@@ -130,9 +123,10 @@ function set_vector_field()
 	for(var i = 0; i < PhaseZoneArrows.length; i++)
 	{
 		var our_represented_state = get_specified_state(PhaseZoneArrows[i].position);
-		where_youd_go.copy(get_phasezone_position(
-				GetNextInfected(our_represented_state.specifiedInfected),
-				GetNextResistant(our_represented_state.specifiedResistant) ) );
+		where_youd_go.copy( PhaseZoneArrows[i].position );
+//		where_youd_go.copy(get_phasezone_position(
+//				GetNextInfected(our_represented_state.specifiedInfected),
+//				GetNextResistant(our_represented_state.specifiedResistant) ) );
 		
 		set_arrow(where_youd_go,PhaseZoneArrows[i]);
 		

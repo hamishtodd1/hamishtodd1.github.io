@@ -34,6 +34,7 @@ var MousePosition = new THREE.Vector3();
 var video;
 var videoTexture;
 var videoImageContext;
+var movieScreen;
 
 var EMOJII_SICK;
 var EMOJII_SUSCEPTIBLE;
