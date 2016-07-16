@@ -41,7 +41,7 @@ function react_to_video()
 		var jolt_size = potential_new_STV - (our_CurrentTime + probable_time_elapsed_in_video);
 		rolling_sum += jolt_size;
 		num_samples_taken++;
-		console.log( rolling_sum / num_samples_taken );
+//		console.log( rolling_sum / num_samples_taken );
 		
 		if( potential_new_STV > our_CurrentTime || potential_new_STV < our_CurrentTime - 1 ) //we don't want to step back, unless maybe the player has!
 			our_CurrentTime = potential_new_STV;
@@ -49,8 +49,7 @@ function react_to_video()
 		last_timeupdate = timeupdate;
 	}
 	
-	//ytplayer.pauseVideo();
-	//ytplayer.seekTo();
+	Update_story();
 }
 
 function onYouTubeIframeAPIReady()
