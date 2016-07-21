@@ -46,6 +46,10 @@ function pre_download_init()
 	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/Data/Susceptible.png', 3);
 	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/Data/Dead.png', 4);
 	
+	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/FacesLabel.png', 5);
+	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/RecoveryTimeLabel.png', 6);
+	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/InfectiousnessLabel.png', 7);
+	
 	EMOJII_SUSCEPTIBLE = 1;
 	EMOJII_SICK = 2;
 	EMOJII_RESISTANT = 3;
@@ -65,7 +69,7 @@ function loadtexture_initially(linkstring, picindex)
 	mytextureloader.load(
 		linkstring,
 		function(texture) {
-			emojiitextures[picindex] = texture;
+			ourtextures[picindex] = texture;
 			attempt_launch();
 		},
 		function ( xhr ) {}, function ( xhr ) {
@@ -76,8 +80,8 @@ function loadtexture_initially(linkstring, picindex)
 
 function attempt_launch()
 {
-	for(var i = 0; i < emojiitextures.length; i++)
-		if(typeof emojiitextures[i] === 'undefined')
+	for(var i = 0; i < ourtextures.length; i++)
+		if(typeof ourtextures[i] === 'undefined')
 			return;
 //	if(typeof gentilis === 'undefined')
 //		return;
@@ -92,4 +96,21 @@ function post_download_init()
 	//because textures
 	init_graph();
 	init_Comiczone();
+	
+	FacesLabelMesh = new THREE.Mesh(
+		new THREE.CubeGeometry(VIEWBOX_WIDTH * 0.8, VIEWBOX_WIDTH * 0.8, 0),
+		new THREE.MeshBasicMaterial({transparent: true, map: ourtextures[ 5 ]}) );
+	RecoveryTimeLabelMesh = new THREE.Mesh(
+		new THREE.CubeGeometry(VIEWBOX_WIDTH * 0.2, VIEWBOX_WIDTH * 0.2, 0),
+		new THREE.MeshBasicMaterial({transparent: true, map: ourtextures[ 6 ]}) );
+	InfectiousnessLabelMesh = new THREE.Mesh(
+		new THREE.CubeGeometry(VIEWBOX_WIDTH * 0.2, VIEWBOX_WIDTH * 0.2, 0),
+		new THREE.MeshBasicMaterial({transparent: true, map: ourtextures[ 7 ]}) );
+	
+	FacesLabelMesh.position.z = -0.02;
+	FacesLabelMesh.position.y = -VIEWBOX_HEIGHT / 2 - VIEWBOX_HEIGHT * 0.034;
+	RecoveryTimeLabelMesh.position.z = -0.02;
+	RecoveryTimeLabelMesh.position.y = -VIEWBOX_HEIGHT / 2 - VIEWBOX_HEIGHT * 0.034;
+	InfectiousnessLabelMesh.position.z = -0.02;
+	InfectiousnessLabelMesh.position.x =-VIEWBOX_WIDTH / 2 - VIEWBOX_HEIGHT * 0.039;
 }

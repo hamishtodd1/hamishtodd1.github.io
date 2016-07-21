@@ -243,13 +243,14 @@ function quadrance_between_DNA_points(index1,index2){
 	return dX*dX + dY*dY + dZ*dZ;
 }
 
-var EggCell_width = 120;
+var EggCell_radius = 120;
+var EggCell_initialposition = new THREE.Vector3( EggCell_radius + playing_field_dimension,0,0);
 
 function init_bocavirus_stuff()
 {
-	EggCell = new THREE.Mesh(new THREE.PlaneGeometry(EggCell_width,EggCell_width),
+	EggCell = new THREE.Mesh(new THREE.PlaneGeometry(EggCell_radius * 2,EggCell_radius * 2),
 			new THREE.MeshBasicMaterial({map:random_textures[3], transparent: true} ) );
-	EggCell.position.x = EggCell_width / 2 + playing_field_dimension;
+	EggCell.position.copy(EggCell_initialposition);
 	
 	var normalized_virtualico_vertices = Array(12);
 	normalized_virtualico_vertices[0] = new THREE.Vector3(0, 	1, 	PHI);

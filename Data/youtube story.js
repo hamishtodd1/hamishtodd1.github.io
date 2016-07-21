@@ -66,26 +66,20 @@ function Update_story()
 	
 	/*
 	 * List of things:
-	 * -capsomer fadeout and flash are time-dependent
+	 * -you do need to bring in the arrow into CK and QS too
+	 * -trigger the closing of the surface and the appearance of the button
 	 * -virus gets small and egg is next to it
 	 * -virus goes into egg?
-	 * -dodecahedron faces flash?
-	 * 
-	 * -trigger the closing of the surface and the appearance of the button
-	 * 
+	 * -auto-unpause with triggers
+	 * -names beneath viruses
 	 * -canvas shrinks away?
 	 * 
-	 * -QS edges and vertices flash?
 	 * -dodeca can appear on QS?
-	 * 
-	 * -you do need to bring in the arrow into CK and QS too
-	 * -more objects in CK
-	 *
-	 * todo: 
-	 * -auto-unpause with triggers
-	 * -"absorb"
+	 * -QS edges and vertices flash?
+	 * -greenhouse etc in CK
 	 * -DNA mimics what you do?
 	 * -QS points and edges flash?
+	 * -dodecahedron faces flash?
 	 * 
 	 */
 	
@@ -113,7 +107,7 @@ function init_story()
 		
 		slide_number: -1,
 		
-		skip_ahead_to: -1,
+		skip_ahead_to: -1, //alternatively just edit the video
 		
 		offer_virus_selection: 0,
 		

@@ -38,8 +38,12 @@ function Update_story()
 			pausetimer = 0;
 	}
 		
-	
-		
+	if(Story_states[Storypage].FacesLabelled)
+		ComicZone.add(FacesLabelMesh);
+	if(Story_states[Storypage].RecoveryLabelled)
+		ParameterZone.add(RecoveryTimeLabelMesh);
+	if(Story_states[Storypage].InfectiousnessLabelled)
+		ParameterZone.add(InfectiousnessLabelMesh);
 		
 	if(Story_states[Storypage].ComicPresent)
 		Scene.add(ComicZone);
@@ -87,7 +91,7 @@ function Update_story()
 	if( Story_states[Storypage].Resistant !== -1 )
 		Resistant = Story_states[Storypage].Resistant;
 	
-	ComicFace.material.map = emojiitextures[Story_states[Storypage].ComicFace];
+	ComicFace.material.map = ourtextures[Story_states[Storypage].ComicFace];
 	if(Story_states[Storypage].ComicFace === 0)
 		ComicFace.visible = false;
 	else
@@ -108,6 +112,10 @@ function init_story()
 		Automaton_people_die: 0,
 		Automaton_enforced_state: 0,
 		
+		FacesLabelled: 0,
+		RecoveryLabelled: 0,
+		InfectiousnessLabelled: 0,
+		
 		GraphPresent: 0,
 		GraphMoving: 0,
 		
@@ -123,7 +131,6 @@ function init_story()
 		Pause_on_start: 0,
 		TimeTilUnpause: 0,
 		
-		slidermode: 1,
 		startingtime: 0});
 	
 	
@@ -159,6 +166,7 @@ function init_story()
 	newstate.ComicFace = 0;
 	newstate.AutomatonPresent = 1;
 	newstate.AutomatonRunning = 0;
+	newstate.FacesLabelled = 1;
 	newstate.startingtime = 54;
 	Story_states.push(newstate);
 
@@ -248,6 +256,7 @@ function init_story()
 	newstate.startingtime = 202; //click on me when
 	newstate.Pause_on_start = 1;
 	newstate.TimeTilUnpause = 30;
+	newstate.RecoveryLabelled = 1;
 	Story_states.push(newstate);
 	
 	//exists purely to make a pause happen without changing the state from the previous one
@@ -265,6 +274,7 @@ function init_story()
 	newstate = default_clone_story_state();
 	newstate.slidermode = 0;
 	newstate.startingtime = 236;
+	newstate.InfectiousnessLabelled = 1;
 	Story_states.push(newstate);
 	
 	//another simulate then "click on me"

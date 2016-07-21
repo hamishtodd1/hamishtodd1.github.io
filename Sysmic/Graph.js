@@ -72,7 +72,7 @@ function reset_graph()
 		{
 			displayed_faces[i*GRAPH_HEIGHT_IN_FACES+j].position.x = displayed_faces[j].position.x - i * face_width;
 			
-			displayed_faces[i*GRAPH_HEIGHT_IN_FACES+j].material.map = emojiitextures[0]; //absent
+			displayed_faces[i*GRAPH_HEIGHT_IN_FACES+j].material.map = ourtextures[0]; //absent
 		}
 	}
 }
@@ -91,15 +91,15 @@ function set_column(column)
 		//going up from the bottom
 		if( j < individual_sick_faces )
 		{
-			displayed_faces[column*GRAPH_HEIGHT_IN_FACES+j].material.map = emojiitextures[EMOJII_SICK];
+			displayed_faces[column*GRAPH_HEIGHT_IN_FACES+j].material.map = ourtextures[EMOJII_SICK];
 		}
 		else if( j >= GRAPH_HEIGHT_IN_FACES - individual_resistant_faces )
 		{
-			displayed_faces[column*GRAPH_HEIGHT_IN_FACES+j].material.map = emojiitextures[EMOJII_RESISTANT];
+			displayed_faces[column*GRAPH_HEIGHT_IN_FACES+j].material.map = ourtextures[EMOJII_RESISTANT];
 		}
 		else
 		{
-			displayed_faces[column*GRAPH_HEIGHT_IN_FACES+j].material.map = emojiitextures[EMOJII_SUSCEPTIBLE];
+			displayed_faces[column*GRAPH_HEIGHT_IN_FACES+j].material.map = ourtextures[EMOJII_SUSCEPTIBLE];
 		}
 	}
 }

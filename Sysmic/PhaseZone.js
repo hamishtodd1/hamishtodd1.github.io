@@ -192,13 +192,11 @@ function update_Phasezone()
 	{
 		var newState = GetNextState( Population - Infected - Resistant, Infected,Resistant );
 		var newStatePopulation = newState.x + newState.y + newState.z;
+		
+		Infected = newState.y;
+		Resistant = newState.z;
 		if( Math.abs( newStatePopulation - Population ) > 0.001 )
-		{
-			Infected = newState.y;
-			Resistant = newState.z;
-		}
-		else
-			console.error("population exceeded!", newState)
+			console.error("population changed by", newStatePopulation - Population)
 			
 		
 		PhaseControlCursor.position.copy(get_phasezone_position(Infected,Resistant) );

@@ -39,7 +39,7 @@ function init_Comiczone()
 		{
 			automaton_faces[i*automaton_width+j] = new THREE.Mesh(
 					new THREE.CubeGeometry(face_width, face_width, 0),
-					new THREE.MeshBasicMaterial({transparent: true, map: emojiitextures[ 1 ]}) ); //yo for some reason you REALLY need this here otherwise they don't appear
+					new THREE.MeshBasicMaterial({transparent: true, map: ourtextures[ 1 ]}) ); //yo for some reason you REALLY need this here otherwise they don't appear
 			
 			automaton_faces[i*automaton_width+j].position.set(
 					-VIEWBOX_HEIGHT / 2 + i * face_width + face_width / 2,
@@ -184,5 +184,5 @@ function update_Cellular_Automaton()
 	}
 	
 	for(var i = 0; i < automaton_faces.length; i++)
-		automaton_faces[ i ].material.map = emojiitextures[ automaton_face_status[i] ];
+		automaton_faces[ i ].material.map = ourtextures[ automaton_face_status[i] ];
 }

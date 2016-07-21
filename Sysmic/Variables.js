@@ -43,7 +43,7 @@ var EMOJII_DEAD;
 
 var boundingbox_additional_width = 0.016;
 
-var emojiitextures = Array(5);
+var ourtextures = Array(5);
 
 var cameradist = 10;
 

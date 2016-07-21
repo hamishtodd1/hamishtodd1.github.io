@@ -53,6 +53,7 @@ function update_video()
 		{
 			//TODO get rid of this
 			if( MousePosition.x > 0 )
+//				video.currentTime += 100;
 				video.currentTime = 381.5;
 			else
 				video.pause();

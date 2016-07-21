@@ -5,8 +5,8 @@ var ParameterControlCursor;
 
 var SliderShape;
 
-var MAX_Infectiousness = 5; //or whatever
-var MAX_RecoveryTime = 5;
+var MAX_Infectiousness = 0.05; //or whatever
+var MAX_RecoveryTime = 0.05;
 var MIN_Infectiousness = 0.001; //or whatever
 var MIN_RecoveryTime = 0.001;
 
