@@ -252,6 +252,10 @@ function init_bocavirus_stuff()
 			new THREE.MeshBasicMaterial({map:random_textures[3], transparent: true} ) );
 	EggCell.position.copy(EggCell_initialposition);
 	
+	Transcriptase = new THREE.Mesh(new THREE.PlaneGeometry(playing_field_dimension,playing_field_dimension),
+			new THREE.MeshBasicMaterial({map:random_textures[4]} ) );
+	Transcriptase.position.x = playing_field_dimension;
+	
 	var normalized_virtualico_vertices = Array(12);
 	normalized_virtualico_vertices[0] = new THREE.Vector3(0, 	1, 	PHI);
 	normalized_virtualico_vertices[1] = new THREE.Vector3( PHI,	0, 	1);

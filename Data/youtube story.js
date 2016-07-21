@@ -1,31 +1,44 @@
 /*
- * Todo
- * Get video in
- * whole great big list of pages
+ * 
+ * Would be nice for the player to be able to mess around with time but still have it work. You want them to be able to come back
  * 
  * Programming the triggers: make sure there’s no interdependence. 
  * Stuff can happen, but it’s a miniscule little thing that has no bearing on the deeper system beneath it
+ * 
+ * 
  */
 
 var Storypage = -1; //set to a silly number initially so we know that the first page will be triggered.
 var Story_states = [];
+var used_up_pause = 0;
 
 function Update_story()
 {	
-	//could just give a million pause tokens, but this is pretty simple.
-	if( Storypage !== -1 && Story_states[Storypage].prevent_playing )
-		if(ytplayer.getPlayerState() === 1)// 1 means playing,not allowed (although maybe some people like to have order designated for them?)
-			ytplayer.pauseVideo();
-	
-	//if you're about to finish a state that wants to be paused. Number at the end is how close you want to be
-	if( Storypage !== -1 && Storypage < Story_states.length - 1 
-		&& Story_states[Storypage].pause_tokens > 0 && Story_states[Storypage + 1].startingtime - our_CurrentTime < 0.05 )
+	//first part of this function is all based on current state, which you don't have at the very start
+	if(Storypage !== -1)
 	{
-		ytplayer.pauseVideo();
-		Story_states[Storypage].pause_tokens--;
-		return;
+		//could just give a million pause tokens, but this is pretty simple.
+		if( Story_states[Storypage].prevent_playing )
+			if(ytplayer.getPlayerState() === 1)// 1 means playing,not allowed (although maybe some people like to have order designated for them?)
+				ytplayer.pauseVideo();
+		
+		//if you're about to finish a state that wants to be paused. Number at the end is how close you want to be
+		if( Storypage < Story_states.length - 1 
+			&& Story_states[Storypage].pause_at_end === 1 && !used_up_pause && Story_states[Storypage + 1].startingtime - our_CurrentTime < 0.05 )
+		{
+			ytplayer.pauseVideo();
+			used_up_pause = 1;
+			return;
+		}
+		
+		//it
+		if( Story_states[Storypage].unpause_on_vertex_knowledge && theyknowyoucanchangevertices && !isMouseDown )
+			IrregButton.capsidopen = 0;
+		if( Story_states[Storypage].unpause_on_vertex_knowledge && capsidopenness === 0 )
+			ytplayer.playVideo();
 	}
 	
+	//potentially change state, and only continue with this function if there's state to be changed	
 	for(var i = 0; i < Story_states.length; i++)
 	{
 		//if you're on the nose of the state's startingtime, you're in that state
@@ -35,10 +48,11 @@ function Update_story()
 			if( Storypage === i ) //nothing need be done
 				return;
 			
-			Storypage = i; //we change this now. The below may look confusing but it protects us in the case where the user is seeking.
+			Storypage = i;
 			
-			if( Storypage > 0 && Story_states[Storypage - 1].pause_tokens === 1 )
+			if( Storypage > 0 && Story_states[Storypage - 1].pause_at_end === 1 && !used_up_pause )
 				console.error("previous state had a pause that we didn't use");
+			used_up_pause = 0; //reset with every page turned
 			
 			if( Story_states[Storypage].skip_ahead_to !== -1 ) //want to catch the state immediately
 			{
@@ -59,7 +73,20 @@ function Update_story()
 		VisibleSlide.material.map = slide_textures[ Story_states[Storypage].slide_number ];
 		VisibleSlide.material.needsUpdate = true;
 	}
-		
+	
+	if( Story_states[Storypage].irreg_open === 1 )
+		IrregButton.capsidopen = 1;
+	if( Story_states[Storypage].irreg_button_invisible )
+		IrregButton.visible = false;
+	else
+		IrregButton.visible = true;
+	//we're going to force ourselves into the situation we expect
+	if( Story_states[Storypage].unpause_on_vertex_knowledge )
+	{
+		theyknowyoucanchangevertices = 0; //suuuuure about doing that?
+		if(capsidopenness === 0 )
+			capsidopenness += 0.0001;
+	}
 
 	//ytplayer.pauseVideo();
 	//ytplayer.seekTo();
@@ -67,13 +94,14 @@ function Update_story()
 	/*
 	 * List of things:
 	 * -you do need to bring in the arrow into CK and QS too
-	 * -trigger the closing of the surface and the appearance of the button
-	 * -virus gets small and egg is next to it
-	 * -virus goes into egg?
-	 * -auto-unpause with triggers
+	 * -auto-unpause with triggers (bocavirus)
+	 * CK less flexible
 	 * -names beneath viruses
-	 * -canvas shrinks away?
 	 * 
+	 * Snap
+	 * Line up Hepatitis?
+	 * 
+	 * -canvas shrinks away?
 	 * -dodeca can appear on QS?
 	 * -QS edges and vertices flash?
 	 * -greenhouse etc in CK
@@ -102,21 +130,25 @@ function init_story()
 		
 		MODE: SLIDE_MODE,
 		
-		pause_tokens: 0, //at end because when you unpause it's usually a new thought
+		pause_at_end: 0, //at end because when you unpause it's usually a new thought
 		unpause_after: -1,
 		
 		slide_number: -1,
 		
-		skip_ahead_to: -1, //alternatively just edit the video
+		skip_ahead_to: -1, //alternatively just edit the video. Don't skip back, we ascend through the states
 		
 		offer_virus_selection: 0,
+		
+		irreg_open: -1,
+		irreg_button_invisible: 0,
+		unpause_on_vertex_knowledge: 0,
 		
 		prevent_playing: 0 //could also use this to stop them from continuing if they haven't rotated bocavirus etc
 	});
 	
 	ns = default_clone_story_state(1);
 	ns.startingtime = 0.1; //zika virus
-	ns.skip_ahead_to = 146;//skips to wherever you like.
+//	ns.skip_ahead_to = 418;//skips to wherever you like. Change the location of the button!
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1);
@@ -131,7 +163,7 @@ function init_story()
 	ns = default_clone_story_state(0);
 	ns.startingtime = 34.5; //bocavirus appears, then pause
 	ns.MODE = BOCAVIRUS_MODE;
-	ns.pause_tokens = 1;
+	ns.pause_at_end = 1; //TODO unpause on rotation, i.e. handle the assurance.
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
@@ -226,7 +258,7 @@ function init_story()
 	
 	ns = default_clone_story_state(0);
 	ns.startingtime = 195; //proteins dissolve, then (pause)
-	ns.pause_tokens = 1;
+	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
 	//----
@@ -300,31 +332,41 @@ function init_story()
 	ns = default_clone_story_state(0);
 	ns.startingtime = 405.8; //irreg appears TODO sort out this
 	ns.MODE = IRREGULAR_MODE;
+	ns.irreg_button_invisible = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
-	ns.startingtime = 412.3; //open irreg then (pause)
-	ns.pause_tokens = 1;
+	ns.startingtime = 412.1; //open irreg then (pause)
+	ns.irreg_open = 1;
+	ns.pause_at_end = 1;
+	ns.irreg_button_invisible = 1;
+	ns.unpause_on_vertex_knowledge = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
-	ns.startingtime = 415.95; //bring in switch
+	ns.startingtime = 415.95; //try changing it further using...
+	ns.irreg_button_invisible = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
-	ns.startingtime = 418.6; //try making this virus (pause)
-	ns.pause_tokens = 1;
+	ns.startingtime = 418.6; //...this switch. Try making this virus, then (pause)
+	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
 	ns.startingtime = 427.65; //other viruses come in then (pause)
 	ns.offer_virus_selection = 1;
-	ns.pause_tokens = 1;
+	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
 	ns.startingtime = 439.3; //stuff about model
 	ns.offer_virus_selection = 1;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0);
+	ns.startingtime = 474.5; //open
+	ns.irreg_open = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
@@ -341,12 +383,12 @@ function init_story()
 	ns = default_clone_story_state(0);
 	ns.startingtime = 508.2; //bring in CK then (pause)
 	ns.MODE = CK_MODE;
-	ns.pause_tokens = 1;
+	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
 	ns.startingtime = 512.8; //suggest the rotation and making cauliomaviridae then (pause)
-	ns.pause_tokens = 1;
+	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
@@ -381,7 +423,7 @@ function init_story()
 	ns = default_clone_story_state(0);
 	ns.startingtime = 613.6; //pics appear in CK then (pause)
 	ns.offer_virus_selection = 1;
-	ns.pause_tokens = 1;
+	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
@@ -398,7 +440,7 @@ function init_story()
 	ns = default_clone_story_state(0);
 	ns.startingtime = 635.8; //QS, Try it out, (pause)
 	ns.MODE = QC_SPHERE_MODE;
-	ns.pause_tokens = 1;
+	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
@@ -411,7 +453,7 @@ function init_story()
 
 	ns = default_clone_story_state(0);
 	ns.startingtime = 648.5; //edges flash then try making HPV (pause)
-	ns.pause_tokens = 1;
+	ns.pause_at_end = 1;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
@@ -455,14 +497,18 @@ function init_story()
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = 715.8; //The shrine's pattern, back to Darb e inside
+	ns.startingtime = 715.8; //Back to Darb e inside
 	ns.slide_number = 28;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = 731.3; //QS back
+	ns.startingtime = 731.3; //QS back. Compare it with this pattern, then (pause)
 	ns.MODE = QC_SPHERE_MODE;
-	ns.pause_tokens = 1;
+	ns.pause_at_end = 1;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0);
+	ns.startingtime = 739; //QS back
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
@@ -566,10 +612,14 @@ function default_clone_story_state( shows_a_slide )
 	
 	new_story_state.prevent_playing = 0;
 	
-	new_story_state.pause_tokens = 0;
+	new_story_state.pause_at_end = 0;
 	new_story_state.unpause_after = -1;
 	
 	new_story_state.startingtime += default_page_duration;
+	
+	new_story_state.irreg_open = -1;
+	new_story_state.irreg_button_invisible = 0;
+	new_story_state.unpause_on_vertex_knowledge = 0;
 	
 	return new_story_state;
 }

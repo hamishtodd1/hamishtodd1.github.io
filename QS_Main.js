@@ -1,4 +1,6 @@
-/* TODO
+/* MAJOR bug flickering back and forth!
+ * 
+ * TODO
  * Every quasicutout has a set of lines that "grow" over to its partner.
  * Hopefully you can deduce which ones based on the shapes.
  * For every edge the numbers are worked out in realtime
@@ -268,8 +270,8 @@ function MoveQuasiLattice(){
 	quasicutout_meshes[stable_point_of_meshes_currently_in_scene].quaternion.copy(compensatory_quaternion);
 	dodeca.quaternion.copy(compensatory_quaternion);
 	
-	//the 10 part used to be camera.z
-	var contrived_dist = 10 - 20 / cutout_vector0_displayed.length() - 0.5*Math.sqrt(5/2+11/10*Math.sqrt(5));
+	//TODO, you may not understand this
+	var contrived_dist = camera.position.z - 20 / cutout_vector0_displayed.length() - 0.5*Math.sqrt(5/2+11/10*Math.sqrt(5));
 	dodeca.position.z = contrived_dist;
 	quasicutout_meshes[stable_point_of_meshes_currently_in_scene].position.z = contrived_dist;
 }

@@ -78,30 +78,31 @@ function CheckIrregButton(){
 	//or maybe it should be a jointed line itself?
 	//TODO change this if button size changes
 //	console.log()
-	if(isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButtonClosed.position) < 0.3 ){
+	
+	if(!IrregButton.visible)
+		return;
+	
+	if(isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) < 0.3 ){
 		var squashed_size = 0.9;
-		IrregButtonClosed.scale.set(squashed_size,squashed_size,squashed_size);
-		IrregButtonOpen.scale.set(squashed_size,squashed_size,squashed_size);
+		IrregButton.scale.set(squashed_size,squashed_size,squashed_size);
 	}
-	if(!isMouseDown && IrregButtonClosed.scale.x < 1){
-		if(IrregButtonClosed.capsidopen){
+	if(!isMouseDown && IrregButton.scale.x < 1){
+		if(IrregButton.capsidopen)
+		{
 			settle_manipulationsurface_and_flatnet();
-			IrregButtonClosed.capsidopen = 0;
-			scene.remove(IrregButtonClosed);
-			scene.add(IrregButtonOpen);
+			IrregButton.capsidopen = 0;
 		}
-		else {
-			IrregButtonClosed.capsidopen = 1;
-			scene.remove(IrregButtonOpen);
-			scene.add(IrregButtonClosed);
-		}
-		IrregButtonClosed.scale.set(1,1,1);
-		IrregButtonOpen.scale.set(1,1,1);
+		else
+			IrregButton.capsidopen = 1;
+		
+		IrregButton.scale.set(1,1,1);
 	}
+	
+	IrregButton.material.map = random_textures[1 + IrregButton.capsidopen];
 }
 
 function update_varyingsurface() {
-	if(IrregButtonClosed.capsidopen)
+	if(IrregButton.capsidopen)
 		capsidopeningspeed = 0.018;
 	else
 		capsidopeningspeed = -0.018;

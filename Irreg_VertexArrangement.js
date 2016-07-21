@@ -229,7 +229,8 @@ function manipulate_vertices() {
 		return;
 	}
 	
-	theyknowyoucanchangevertices = 1;
+	if( Story_states[Storypage].unpause_on_vertex_knowledge && !MousePosition.equals(OldMousePosition) ) //might be that they sort of swooped in, but eh
+		theyknowyoucanchangevertices = 1; //there is a good argument for not letting them unpause. They might just click and think that's it
 	
 	//log the current positions
 	var net_log = new Array(66);
@@ -367,7 +368,7 @@ function manipulate_vertices() {
 			for( var i = 0; i < 66; i++)
 				flatnet_vertices.array[i] = manipulation_surface.geometry.attributes.position.array[i];
 			
-			Disable_pictures();
+			Disable_virus_pictures();
 				
 			//now we need the "height" of the capsid
 			for(var i = 0; i<9; i++)

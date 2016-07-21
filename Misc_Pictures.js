@@ -1,26 +1,3 @@
-/* "Playing field width/height" appears in here, and we want to get rid of that.
- * It just means the area that the camera can see on the plane z = 0.
- * Actually we certainly don't want dependence on window size. State a size for the window. Give a certain number of pixels.
- * Orthographic projection may simplify you walking around.
- * 
- * 
- * Rift Valley Fever (big one) - 12
- * may want to aim to have the t=1 CK arrangment look like the QS version
- * 
- * QS
- * How about layering konevtsova's spots on them? 
- * Would you need the density maps? Those are nice. Could fade to a density map and put "x-ray" underneath. Hopefully you saved those nice maps on work computer :(
- * Could get the viruses into chimera and color them yourself trying to suggest the quasilattice shapes
- * Or you could just say in the video "the proteins on these viruses sit at the corners of the shapes, and connected corners are connected proteins"
- * 
- * So we have bocavirus on all of them? Four each is nice.
- * 
- * TODO they highlight somehow when mouse is over them
- * TODO start before everything is completely loaded?
- * 
- * When do they pop up? When you get them? When you've been playing a while?
- */
-
 var texture_loader = new THREE.TextureLoader(); //only one?
 var clickable_viruses = Array(16);
 
@@ -68,6 +45,7 @@ function load_AV_stuff()
 	random_texture_urls[1] = "http://hamishtodd1.github.io/Data/Misc textures/open.png";
 	random_texture_urls[2] = "http://hamishtodd1.github.io/Data/Misc textures/close.png";
 	random_texture_urls[3] = "http://hamishtodd1.github.io/Data/Misc textures/Egg cell hawaiireedlab.png";
+	random_texture_urls[4] = "http://hamishtodd1.github.io/Data/Misc textures/Transcriptase.png"; //TODO extend the DNA
 	
 	//slides
 	slide_texture_urls[0] = "http://hamishtodd1.github.io/Data/Slides/Zika victim.png";
@@ -180,15 +158,11 @@ function bind_pictures()
 	CKHider = new THREE.Mesh( new THREE.CubeGeometry(6.93513143351, 6.93513143351, 0),
 		new THREE.MeshBasicMaterial( { transparent:true, map: random_textures[0] } ) );
 	
-	IrregButtonOpen = new THREE.Mesh( new THREE.CubeGeometry(0.6, 0.6, 0),
-		new THREE.MeshBasicMaterial( { transparent:true, map: random_textures[1] } ) );
-	IrregButtonClosed = new THREE.Mesh( new THREE.CubeGeometry(0.6, 0.6, 0),
-		new THREE.MeshBasicMaterial( { transparent:true, map: random_textures[2] } ) );
+	IrregButton = new THREE.Mesh( new THREE.CubeGeometry(0.6, 0.6, 0),
+			new THREE.MeshBasicMaterial( { transparent:true, map: random_textures[1] } ) ); //and can change to [2]
 	
-	IrregButtonOpen.position.set(1.9,-0.7,0.0001);
-	IrregButtonOpen.capsidopen = 0;
-	IrregButtonClosed.position.set(1.9,-0.7,0.0001);
-	IrregButtonClosed.capsidopen = 0;
+	IrregButton.position.set(1.9,-0.7,0.0001);
+	IrregButton.capsidopen = 0;
 	
 	//first slide
 	VisibleSlide = new THREE.Mesh( new THREE.CubeGeometry(playing_field_dimension, playing_field_dimension, 0),

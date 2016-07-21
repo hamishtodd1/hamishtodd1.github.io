@@ -136,6 +136,7 @@ function ChangeScene(new_mode) {
 				scene.add( lights[i] );
 			scene.add(DNA_cage);
 			scene.add(EggCell);
+			scene.add(Transcriptase);
 			break;
 			
 		case CK_MODE:
@@ -161,7 +162,7 @@ function ChangeScene(new_mode) {
 			for( var i = 0; i < varyingsurface_spheres.length; i++)
 				scene.add(varyingsurface_spheres[i]);
 			
-			scene.add(IrregButtonOpen);
+			scene.add(IrregButton);
 			break;
 			
 		case QC_SPHERE_MODE:
