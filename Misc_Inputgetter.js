@@ -49,20 +49,3 @@ document.addEventListener( 'mousemove', function(event) {
 //	InputObject.mousex = event.changedTouches[0].clientX; //only looking at the first one. TODO multi-touch!
 //	InputObject.mousey = event.changedTouches[0].clientY;
 //}
-
-function update_mouseblob(){
-	var Xdists_from_center = Array(circle.geometry.vertices.length);
-	var Ydists_from_center = Array(circle.geometry.vertices.length);
-	for(var i = 0; i < circle.geometry.vertices.length; i++) {
-		Xdists_from_center[i] = circle.geometry.vertices[i].x - circle.geometry.vertices[0].x;
-		Ydists_from_center[i] = circle.geometry.vertices[i].y - circle.geometry.vertices[0].y;
-	}
-	
-	var cursorposition = new THREE.Vector2(MousePosition.x,MousePosition.y);
-	for(var i = 0; i < circle.geometry.vertices.length; i++) {
-		circle.geometry.vertices[i].x = cursorposition.x + Xdists_from_center[i];
-		circle.geometry.vertices[i].y = cursorposition.y + Ydists_from_center[i];
-	}
-	
-	circle.geometry.verticesNeedUpdate = true;
-}

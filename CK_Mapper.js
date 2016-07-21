@@ -1,5 +1,11 @@
 function Map_lattice() {
-//	camera.position.z = 2;
+	var hexamers_color = new THREE.Color( 97 / 256, 138 / 256, 67 / 256 );
+	var final_pentamers_color = new THREE.Color( 185 / 256, 72 / 256, 148 / 256 );
+	var pentamers_color = new THREE.Color( 
+			hexamers_color.r + (1-capsidopenness) * ( final_pentamers_color.r - hexamers_color.r ),
+			hexamers_color.g + (1-capsidopenness) * ( final_pentamers_color.g - hexamers_color.g ),
+			hexamers_color.b + (1-capsidopenness) * ( final_pentamers_color.b - hexamers_color.b ) );
+
 	var LatticeRotationAndScaleMatrix = new Float32Array([ 
            //divided by density factor because mapfromlatticetosurface. Change this when rid off points.
   		 LatticeScale * Math.cos(LatticeAngle),
@@ -52,7 +58,7 @@ function Map_lattice() {
 	for(var i = 0; i < number_of_lattice_points; i++)
 	{
 		for(var tri_i = 0; tri_i < 4 * 6; tri_i++ )
-			HexagonLattice.geometry.faces[i * 4 * 6 + tri_i].color.setRGB(1,0,0);
+			HexagonLattice.geometry.faces[i * 4 * 6 + tri_i].color.copy(hexamers_color);
 	}
 	HexagonLattice.geometry.colorsNeedUpdate = true;
 	
@@ -124,13 +130,13 @@ function Map_lattice() {
 			{
 				if( hexcorner_nettriangles[ ( side_i * 2 + 0 ) % 12 ] !== 666 )
 				{
-					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 0 ].color.setRGB(capsidopenness,0,1-capsidopenness);
-					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 1 ].color.setRGB(capsidopenness,0,1-capsidopenness);
+					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 0 ].color.copy(pentamers_color);
+					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 1 ].color.copy(pentamers_color);
 				}
 				if( hexcorner_nettriangles[ ( side_i * 2 + 3 ) % 12 ] !== 666 )
 				{
-					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 2 ].color.setRGB(capsidopenness,0,1-capsidopenness);
-					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 3 ].color.setRGB(capsidopenness,0,1-capsidopenness);
+					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 2 ].color.copy(pentamers_color);
+					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 3 ].color.copy(pentamers_color);
 				}
 			}
 			

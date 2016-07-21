@@ -7,18 +7,19 @@ var TAU = Math.PI * 2;
 var icosahedron_dihedral_angle = Math.acos(-Math.sqrt(5) / 3);
 
 //--------------Structurally fundamental
-var NOTHING_MODE = 0;
+var SLIDE_MODE = 0;
 var BOCAVIRUS_MODE = 1; 
 var CK_MODE = 2;
 var IRREGULAR_MODE = 3;
 var QC_SPHERE_MODE = 4;
 var ENDING_MODE = 5;
+var TREE_MODE = 6;
 	
-var MODE = IRREGULAR_MODE;
+var MODE = TREE_MODE;
 
 //--------------Technologically fundamental
 var playing_field_dimension = 7*HS3; //used to be that height was 6.
-var min_cameradist = 10; //get any closer and the perspective is weird
+var min_cameradist = 20; //get any closer and the perspective is weird
 var vertical_fov = 2 * Math.atan(playing_field_dimension/(2*min_cameradist));
 //is camera z ever really changed?
 
@@ -260,6 +261,7 @@ var OldMousePosition = new THREE.Vector2(0,0);
 var Mouse_delta = new THREE.Vector2(0,0);
 
 //----protein and bocavirus stuff
+var EggCell;
 var neo_bocavirus_proteins = Array(60);
 
 var protein_vertex_indices = Array(number_of_proteins_in_lattice);

@@ -3,6 +3,7 @@
  * Hopefully you can deduce which ones based on the shapes.
  * For every edge the numbers are worked out in realtime
  * When virus is clicked, move to that state slowly
+ * Probably wouldn't be that hard to flatten the pentagons
  * 
  * easier on the spherical projection?
  * 
@@ -134,7 +135,7 @@ function MoveQuasiLattice(){
 				scalefactor = (scalefactor - 1) * 0.685 +1; //0.685 is the drag
 				
 				if(scalefactor !== 1 )
-					Disable_pictures();
+					Disable_virus_pictures();
 				
 				cutout_vector0_player.multiplyScalar(scalefactor);
 				cutout_vector1_player.multiplyScalar(scalefactor);

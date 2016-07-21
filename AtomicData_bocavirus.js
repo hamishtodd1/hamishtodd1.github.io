@@ -20,10 +20,10 @@
 var flash_colors;
 
 function update_bocavirus() {
-	//if you're on DNA_CAGE_MODE then we unfold, if you're on STATIC_PROTEIN_MODE we fold.
+	//--------Story stuff
 	
-	//Potential speedup: merge proteins
 	
+	//-------Rotation
 	if(isMouseDown) {
 		bocavirus_MovementAngle = Mouse_delta.length() / 3;
 		bocavirus_MovementAxis.set(-Mouse_delta.y, Mouse_delta.x, 0);
@@ -46,34 +46,36 @@ function update_bocavirus() {
 		neo_bocavirus_proteins[i].updateMatrixWorld();
 	}
 
-	//transparency stuff
-//	var fade_starting_time = 10;
-//	var time_taken_for_fade = 8;
-//	var proportion_through = ( our_CurrentTime - fade_starting_time ) / time_taken_for_fade;
-//	if(proportion_through < 0)
-//		proportion_through = 0;
-//	if(proportion_through > 1)
-//		proportion_through = 1;
-//	proportion_through *= 4;
-//	for(var i = 0; i < capsomer_groups.length; i++)
-//	{
-//		var ouralpha = 1 - (proportion_through - i);
-//		if( ouralpha > 1)
-//			ouralpha = 1;
-//		if( ouralpha < 0)
-//			ouralpha = 0;
-//		
-//		for(var j = 0; j < capsomer_groups[i].length; j++)
-//		{
-//			var ourcapsomer = capsomer_groups[i][j];
-//			for(var k = 0; k < capsomer_protein_indices[ ourcapsomer ].length; k++ )
-//			{
-//				neo_bocavirus_proteins[ capsomer_protein_indices[ourcapsomer][k] ].material.opacity = ouralpha;
-//			}
-//		}
-//	}
+	//-------transparency stuff
+	var fade_starting_time = 195;
+	var time_taken_for_fade = 8;
+	var proportion_through = ( our_CurrentTime - fade_starting_time ) / time_taken_for_fade;
+	if(proportion_through < 0)
+		proportion_through = 0;
+	if(proportion_through > 1)
+		proportion_through = 1;
+	proportion_through *= 4;
+	for(var i = 0; i < capsomer_groups.length; i++)
+	{
+		var ouralpha = 1 - (proportion_through - i);
+		if( ouralpha > 1)
+			ouralpha = 1;
+		if( ouralpha < 0)
+			ouralpha = 0;
+		
+		for(var j = 0; j < capsomer_groups[i].length; j++)
+		{
+			var ourcapsomer = capsomer_groups[i][j];
+			for(var k = 0; k < capsomer_protein_indices[ ourcapsomer ].length; k++ )
+			{
+				neo_bocavirus_proteins[ capsomer_protein_indices[ourcapsomer][k] ].material.opacity = ouralpha;
+			}
+		}
+	}
 
-	var flash_time = 0.4;
+	//-------Fadeout
+	//it takes a while. Could instead do them in fours. The two at the top and bottom, two on the left and right, two on the front and back
+	var flash_time = 80.9;
 	var fadeto_time = 0.66;
 	var colored_time = 0.1;
 	var fadeback_time = fadeto_time;
@@ -241,8 +243,14 @@ function quadrance_between_DNA_points(index1,index2){
 	return dX*dX + dY*dY + dZ*dZ;
 }
 
-function initialize_protein()
+var EggCell_width = 120;
+
+function init_bocavirus_stuff()
 {
+	EggCell = new THREE.Mesh(new THREE.PlaneGeometry(EggCell_width,EggCell_width),
+			new THREE.MeshBasicMaterial({map:random_textures[3], transparent: true} ) );
+	EggCell.position.x = EggCell_width / 2 + playing_field_dimension;
+	
 	var normalized_virtualico_vertices = Array(12);
 	normalized_virtualico_vertices[0] = new THREE.Vector3(0, 	1, 	PHI);
 	normalized_virtualico_vertices[1] = new THREE.Vector3( PHI,	0, 	1);

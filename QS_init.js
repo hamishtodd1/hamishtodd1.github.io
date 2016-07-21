@@ -269,13 +269,13 @@ function initialize_QS_stuff() {
 	var color_selection = Array(num_quasi_mesh_triangles); //actually much less because some triangles are in quads
 	for(var i = 0; i < color_selection.length; i++){
 		if(i==2 || i==4 || i==6 || i==8)
-			color_selection[i] = new THREE.Color(color_selection[i-1].r, color_selection[i-1].g, color_selection[i-1].b );
+			color_selection[i] = color_selection[i-1];
 		else if( 9 <= i && i <= 13)
-			color_selection[i] = new THREE.Color(color_selection[0].r, color_selection[0].g, color_selection[0].b );
+			color_selection[i] = color_selection[0];
 		else if( i === 14 || i === 15 )
-			color_selection[i] = new THREE.Color(color_selection[1].r, color_selection[1].g, color_selection[1].b );
+			color_selection[i] = color_selection[1];
 		else if( i === 16 || i === 17 )
-			color_selection[i] = new THREE.Color(color_selection[3].r, color_selection[3].g, color_selection[3].b );
+			color_selection[i] = color_selection[3];
 //		"mimic BPV pic" mode
 //		else if( i === 0 )
 //			color_selection[i] = new THREE.Color(21/256, 21/256, 21/256 );
@@ -287,6 +287,16 @@ function initialize_QS_stuff() {
 //			color_selection[i] = new THREE.Color(51/256,51/256,51/256 );
 //		else if( i === 5)
 //			color_selection[i] = new THREE.Color(66/256,66/256,66/256 );
+		else if( i === 0 )
+			color_selection[i] = new THREE.Color( 1,0.5,0.5 );
+		else if( i === 1 )
+			color_selection[i] = new THREE.Color( 0.5,0.5,1 );
+		else if( i === 3 )
+			color_selection[i] = new THREE.Color( 192/256,0.5,0.5 );
+//		else if( i === 5 ) //random shape. Shares an edge with all the existing colors
+//			color_selection[i] = new THREE.Color( 1,0.5,0.5 );
+//		else if( i === 7 ) //defect
+//			color_selection[i] = new THREE.Color( 192/256,0.5,0.5 );
 		else
 			color_selection[i] = new THREE.Color(Math.random(), Math.random(), Math.random() );
 	}

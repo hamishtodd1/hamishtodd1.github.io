@@ -16,6 +16,7 @@
  * So we have bocavirus on all of them? Four each is nice.
  * 
  * TODO they highlight somehow when mouse is over them
+ * TODO start before everything is completely loaded?
  * 
  * When do they pop up? When you get them? When you've been playing a while?
  */
@@ -42,33 +43,81 @@ function load_AV_stuff()
 	var slide_texture_urls = Array();
 	
 	//-----clickable viruses
-	virus_texture_urls[0] = "http://hamishtodd1.github.io/Data/1 - BV.jpg"; //to be turned into golfball.jpg or whatever
-	virus_texture_urls[1] = "http://hamishtodd1.github.io/Data/1 - BV.jpg";
-	virus_texture_urls[2] = "http://hamishtodd1.github.io/Data/9 - N4.gif";
-	virus_texture_urls[3] = "http://hamishtodd1.github.io/Data/13 - RV.png";
+	virus_texture_urls[0] = "http://hamishtodd1.github.io/Data/ClickableViruses/1 - BV.jpg"; //to be turned into golfball.jpg or whatever
+	virus_texture_urls[1] = "http://hamishtodd1.github.io/Data/ClickableViruses/1 - BV.jpg";
+	virus_texture_urls[2] = "http://hamishtodd1.github.io/Data/ClickableViruses/9 - N4.gif";
+	virus_texture_urls[3] = "http://hamishtodd1.github.io/Data/ClickableViruses/13 - RV.png";
 	
-	virus_texture_urls[4] = "http://hamishtodd1.github.io/Data/3 - PV.png";
-	virus_texture_urls[5] = "http://hamishtodd1.github.io/Data/4 - SFV.png";
-	virus_texture_urls[6] = "http://hamishtodd1.github.io/Data/7 - CV.png";
-	virus_texture_urls[7] = "http://hamishtodd1.github.io/Data/12 - RVFV.png";
+	virus_texture_urls[4] = "http://hamishtodd1.github.io/Data/ClickableViruses/3 - PV.png";
+	virus_texture_urls[5] = "http://hamishtodd1.github.io/Data/ClickableViruses/4 - SFV.png";
+	virus_texture_urls[6] = "http://hamishtodd1.github.io/Data/ClickableViruses/7 - CV.png";
+	virus_texture_urls[7] = "http://hamishtodd1.github.io/Data/ClickableViruses/12 - RVFV.png";
 	
-	virus_texture_urls[ 8] = "http://hamishtodd1.github.io/Data/Bocavirus file.png";
-	virus_texture_urls[ 9] = "http://hamishtodd1.github.io/Data/Bluetongue file.png";
-	virus_texture_urls[10] = "http://hamishtodd1.github.io/Data/Zika file.png";
-	virus_texture_urls[11] = "http://hamishtodd1.github.io/Data/HPV file.png";
+	virus_texture_urls[ 8] = "http://hamishtodd1.github.io/Data/ClickableViruses/Bocavirus file.png";
+	virus_texture_urls[ 9] = "http://hamishtodd1.github.io/Data/ClickableViruses/Bluetongue file.png";
+	virus_texture_urls[10] = "http://hamishtodd1.github.io/Data/ClickableViruses/Zika file.png";
+	virus_texture_urls[11] = "http://hamishtodd1.github.io/Data/ClickableViruses/HPV file.png";
 	
-	virus_texture_urls[12] = "http://hamishtodd1.github.io/Data/T4 file.png";
-	virus_texture_urls[13] = "http://hamishtodd1.github.io/Data/Phi29 file.png";
-	virus_texture_urls[14] = "http://hamishtodd1.github.io/Data/HIV file.png";
-	virus_texture_urls[15] = "http://hamishtodd1.github.io/Data/Herpes file.png";
+	virus_texture_urls[12] = "http://hamishtodd1.github.io/Data/ClickableViruses/T4 file.png";
+	virus_texture_urls[13] = "http://hamishtodd1.github.io/Data/ClickableViruses/Phi29 file.png";
+	virus_texture_urls[14] = "http://hamishtodd1.github.io/Data/ClickableViruses/HIV file.png";
+	virus_texture_urls[15] = "http://hamishtodd1.github.io/Data/ClickableViruses/Herpes file.png";
 	
 	//the other things and their widths
-	random_texture_urls[0] = "http://hamishtodd1.github.io/Data/CKhider.png";
-	random_texture_urls[1] = "http://hamishtodd1.github.io/Data/open.png";
-	random_texture_urls[2] = "http://hamishtodd1.github.io/Data/close.png";
+	random_texture_urls[0] = "http://hamishtodd1.github.io/Data/Misc textures/CKhider.png";
+	random_texture_urls[1] = "http://hamishtodd1.github.io/Data/Misc textures/open.png";
+	random_texture_urls[2] = "http://hamishtodd1.github.io/Data/Misc textures/close.png";
+	random_texture_urls[3] = "http://hamishtodd1.github.io/Data/Misc textures/Egg cell hawaiireedlab.png";
 	
 	//slides
-	slide_texture_urls[0] = "http://hamishtodd1.github.io/Data/warning.png"; //playing field wide
+	slide_texture_urls[0] = "http://hamishtodd1.github.io/Data/Slides/Zika victim.png";
+	slide_texture_urls[1] = "http://hamishtodd1.github.io/Data/Slides/HIV victim.png";
+	slide_texture_urls[2] = "http://hamishtodd1.github.io/Data/Slides/Dad.jpg";
+	
+	slide_texture_urls[3] = "http://hamishtodd1.github.io/Data/Slides/Golfball.png";
+	slide_texture_urls[4] = "http://hamishtodd1.github.io/Data/Slides/Golfball_virus.png";
+	slide_texture_urls[5] = "http://hamishtodd1.github.io/Data/Slides/Origami.jpg";
+	slide_texture_urls[6] = "http://hamishtodd1.github.io/Data/Slides/Origami_virus.png";
+	slide_texture_urls[7] = "http://hamishtodd1.github.io/Data/Slides/Darb e above entrance.jpg";
+	slide_texture_urls[8] = "http://hamishtodd1.github.io/Data/Slides/HPV xray.png";
+
+	slide_texture_urls[9] = "http://hamishtodd1.github.io/Data/Slides/Protein example.png";
+	slide_texture_urls[10] = "http://hamishtodd1.github.io/Data/Slides/Random protein.png";
+	slide_texture_urls[11] = "http://hamishtodd1.github.io/Data/Slides/MC1R.png";
+	slide_texture_urls[12] = "http://hamishtodd1.github.io/Data/Slides/Polymerase and trascriptase.png";
+	
+	slide_texture_urls[13] = "http://hamishtodd1.github.io/Data/Slides/Cell with proteins.png";
+	slide_texture_urls[14] = "http://hamishtodd1.github.io/Data/Slides/Cell full of viruses.jpg";
+	slide_texture_urls[15] = "http://hamishtodd1.github.io/Data/Slides/Cell lysis.jpg";
+
+	slide_texture_urls[16] = "http://hamishtodd1.github.io/Data/Slides/HIV.png";
+	slide_texture_urls[17] = "http://hamishtodd1.github.io/Data/Slides/Bonobos.jpg";
+	slide_texture_urls[18] = "http://hamishtodd1.github.io/Data/Slides/HIV variety.png";
+
+	slide_texture_urls[19] = "http://hamishtodd1.github.io/Data/Slides/Semliki.png";
+	slide_texture_urls[20] = "http://hamishtodd1.github.io/Data/Slides/Greenhouse.jpg";
+	slide_texture_urls[21] = "http://hamishtodd1.github.io/Data/Slides/Gamma ray detector.jpg";
+	slide_texture_urls[22] = "http://hamishtodd1.github.io/Data/Slides/Bucky.png";
+	slide_texture_urls[23] = "http://hamishtodd1.github.io/Data/Slides/Hair and baskets.png";
+	slide_texture_urls[24] = "http://hamishtodd1.github.io/Data/Slides/First pic of virus.jpg";
+	
+	slide_texture_urls[25] = "http://hamishtodd1.github.io/Data/Slides/Zika Virus.jpg";
+	slide_texture_urls[26] = "http://hamishtodd1.github.io/Data/Slides/Darb e outside.jpg";
+	slide_texture_urls[27] = "http://hamishtodd1.github.io/Data/Slides/Darb e above entrance.jpg";
+	slide_texture_urls[28] = "http://hamishtodd1.github.io/Data/Slides/Darb e inside.jpg";
+	slide_texture_urls[29] = "http://hamishtodd1.github.io/Data/Slides/Pattern triangular.jpg";
+	slide_texture_urls[30] = "http://hamishtodd1.github.io/Data/Slides/Pattern square.png";
+	slide_texture_urls[31] = "http://hamishtodd1.github.io/Data/Slides/Pattern hexagonal.jpg";
+	slide_texture_urls[32] = "http://hamishtodd1.github.io/Data/Slides/Pentagons.png";
+	slide_texture_urls[33] = "http://hamishtodd1.github.io/Data/Slides/Pattern pentagonal.png";
+	
+	slide_texture_urls[34] = "http://hamishtodd1.github.io/Data/Slides/Irreg.png";
+	slide_texture_urls[35] = "http://hamishtodd1.github.io/Data/Slides/Origami geodesic.png";
+	slide_texture_urls[36] = "http://hamishtodd1.github.io/Data/Slides/Very dodecahedral virus.png";
+	slide_texture_urls[37] = "http://hamishtodd1.github.io/Data/Slides/golden spiral.png";
+	slide_texture_urls[38] = "http://hamishtodd1.github.io/Data/Slides/Mona Lisa.jpg";
+	slide_texture_urls[39] = "http://hamishtodd1.github.io/Data/Slides/Measles virus.png";
+	
 	
 	virus_textures = Array(virus_texture_urls.length);
 	random_textures = Array(random_texture_urls.length);
@@ -123,41 +172,9 @@ function loadpic(url, type, index) {
 
 function bind_pictures()
 {
-	//------Clickable viruses
-	//TODO later add their names as meshes to them as children
-	var picturepanel_width = playing_field_dimension;
-	var y_of_picturepanel_bottom = -0.5 * playing_field_dimension;
-	
-	for(var i = 0; i < clickable_viruses.length; i++){
-		clickable_viruses[i] = new THREE.Mesh(
-			new THREE.CubeGeometry(picturepanel_width / 4, picturepanel_width / 4, 0),
-			new THREE.MeshBasicMaterial( { transparent:true
-//					, depthTest: false, depthWrite: false, transparent: true //trying to put them on top stuff
-				} ) );
-		
-		//clickable_viruses[i].renderOrder = 0;
-	}
-	
-	for(var i = 1; i < clickable_viruses.length; i++){
-		clickable_viruses[i].enabled = 0; //switch to 1 when clicked, switch all to 0 when player changes anything
-		clickable_viruses[i].TimeThroughMovement = 100; //start at a place where you're settled
-		
-		clickable_viruses[i].default_position = new THREE.Vector3(0,0,0.01);
-		clickable_viruses[ i ].default_position.x = -3/8 * picturepanel_width;
-		clickable_viruses[ i ].default_position.x += (i%4) * picturepanel_width / 4;
-		clickable_viruses[ i ].default_position.y = y_of_picturepanel_bottom + 0.5 * picturepanel_width / 4; //they are in the frame, right?
-		if( 11 < i && i < 16 ) //needs to be in front of the surface
-			clickable_viruses[ i ].default_position.z *= -1;
-		
-		clickable_viruses[i].enabled_position = clickable_viruses[i].default_position.clone();
-		clickable_viruses[i].enabled_position.y += 0.4; //maybe too much
-		clickable_viruses[i].position.copy(clickable_viruses[i].default_position);
-	}
-	
-	for(var i = 0; i < clickable_viruses.length; i++)
-	{
-		clickable_viruses[i].material.map = virus_textures[i];
-	}
+	init_clickable_viruses();
+	init_tree();
+	init_bocavirus_stuff(); //it needs the egg cell pic
 	
 	//-----other
 	CKHider = new THREE.Mesh( new THREE.CubeGeometry(6.93513143351, 6.93513143351, 0),
@@ -175,98 +192,10 @@ function bind_pictures()
 	
 	//first slide
 	VisibleSlide = new THREE.Mesh( new THREE.CubeGeometry(playing_field_dimension, playing_field_dimension, 0),
-		new THREE.MeshBasicMaterial( { transparent:true, map: slide_textures[0] } ) );
-		
+		new THREE.MeshBasicMaterial( { transparent:true } ) );
+	
+	
 	//----Ready
 	PICTURES_LOADED = 1;
 	attempt_launch();
-}
-
-function Update_pictures_in_scene(){
-	for(var i = 0; i < clickable_viruses.length; i++){
-		if( scene.getObjectById(clickable_viruses[i].id) !== undefined )
-			Update_virus_picture(i);
-	}
-}
-
-function Disable_virus_pictures(){
-	for(var i = 1; i < 16; i++){
-		if(clickable_viruses[i].enabled === 1){
-			clickable_viruses[i].enabled = 0;
-			clickable_viruses[i].TimeThroughMovement = 0;
-		}
-	}
-}
-
-function Update_virus_picture(index){
-	scene.add(VisibleSlide);
-	var MouseRelative = MousePosition.clone();
-	MouseRelative.sub(clickable_viruses[index].position);
-	/*
-	 * Bluetongue is 8, boca is 2, zika is 9, hpv is 7.
-	 */
-	
-	if( isMouseDown && !isMouseDown_previously ){
-		var ClickWasInPicture = 0;
-		if( Math.abs(MouseRelative.x) < clickable_viruses[index].geometry.vertices[0].x &&
-		    Math.abs(MouseRelative.y) < clickable_viruses[index].geometry.vertices[0].y )
-			ClickWasInPicture = 1;
-		
-		if(clickable_viruses[index].enabled == 0){
-			if( ClickWasInPicture ){
-				Disable_virus_pictures();
-				
-				clickable_viruses[index].enabled = 1;
-				clickable_viruses[index].TimeThroughMovement = 0;
-				
-				if( 12 <= index && index < 16){
-					for(var i = 0; i < flatnet_vertices.array.length; i++)
-						flatnet_vertices.array[i] = setvirus_flatnet_vertices[index-12][i];
-					correct_minimum_angles(flatnet_vertices.array);
-				}
-				else if( 4 <= index && index < 8){
-					if( index === 4){ LatticeScale=0.577; LatticeAngle = 0.5236; }
-					if( index === 5){ LatticeScale = 0.5; LatticeAngle = 0; }
-					if( index === 6){ LatticeScale=0.3779; LatticeAngle =0.714; }
-					if( index === 7){ LatticeScale = 1/3; LatticeAngle = 0.5236; }
-				}
-				else if(8 <= index && index < 12){
-					if(index === 8){cutout_vector0.set(-0.5,1.2139220723547204,0); 				cutout_vector1.set(1,0.85065080835204,0); }
-					if(index === 9){cutout_vector0.set( 0.309016994374947,1.801707324647194,0); cutout_vector1.set(1.809016994374948,0.2628655560595675,0); }
-					if(index ===10){cutout_vector0.set(1.809016994374948, 1.4384360606445132,0);cutout_vector1.set(1.9270509831248428, 1.2759762125280603,0); }
-					if(index ===11){cutout_vector0.set(0,3.47930636894770,0); 					cutout_vector1.set(3.309016994374948, 1.075164796641833,0); }
-					
-					cutout_vector0_player.copy(cutout_vector0);cutout_vector1_player.copy(cutout_vector1);
-				}
-			}
-		}
-	}
-	else if( clickable_viruses[index].enabled === 0 && !isMouseDown && //pics can also be turned on by us being in the right place
-	   ((stable_point_of_meshes_currently_in_scene === 2 && index === 8) ||
-		(stable_point_of_meshes_currently_in_scene === 8 && index === 9) ||
-		(stable_point_of_meshes_currently_in_scene === 9 && index === 10)||
-		(stable_point_of_meshes_currently_in_scene === 7 && index === 11)) )
-	{
-		Disable_pictures();
-		clickable_viruses[index].enabled = 1;
-		clickable_viruses[index].TimeThroughMovement = 0;
-	}
-	//TODO more of those
-	
-	clickable_viruses[index].TimeThroughMovement += delta_t;	
-	var MovementTime = 0.65; //tweakable
-	if(clickable_viruses[index].enabled){
-		clickable_viruses[index].position.copy( move_smooth_vectors(
-				clickable_viruses[index].default_position,
-				clickable_viruses[index].enabled_position,
-				MovementTime,
-				clickable_viruses[index].TimeThroughMovement) );
-	}
-	else{
-		clickable_viruses[index].position.copy( move_smooth_vectors(
-				clickable_viruses[index].enabled_position,
-				clickable_viruses[index].default_position,
-				MovementTime,
-				clickable_viruses[index].TimeThroughMovement) );
-	}
 }

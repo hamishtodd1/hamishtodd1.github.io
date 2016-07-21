@@ -49,7 +49,7 @@ function react_to_video()
 		last_timeupdate = timeupdate;
 	}
 	
-//	Update_story();
+	Update_story();
 }
 
 function onYouTubeIframeAPIReady()

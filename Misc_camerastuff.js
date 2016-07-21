@@ -1,33 +1,5 @@
 //not allowed to do anything with camera outside of here! Including read from its position!
-function camera_changes_for_mode_switch(){
-	camera.position.z = min_cameradist;
-	camera.cameraO.left =-playing_field_dimension / 2;
-	camera.cameraO.right = playing_field_dimension / 2;
-	camera.cameraO.top = playing_field_dimension / 2;
-	camera.cameraO.bottom =-playing_field_dimension / 2;
-	camera.updateProjectionMatrix();
-	
-	switch(MODE){
-		case BOCAVIRUS_MODE:
-			camera.toOrthographic();
-			break;
-		case CK_MODE:
-			camera.toPerspective();
-			break;
-		case IRREGULAR_MODE:
-			camera.toPerspective();
-			break;
-		case QC_SPHERE_MODE:
-			camera.toPerspective();
-			break;
-	}
-	
-	//was trying to get pictures on top
-//	if(MODE === QC_SPHERE_MODE)
-//		renderer.sortObjects = false;
-//	else
-//		renderer.sortObjects = true;
-}
+//you don't need it to be a combined camera any more
 
 function UpdateCamera() 
 {
@@ -35,6 +7,43 @@ function UpdateCamera()
 	//camera.fov = vertical_fov * 360 / TAU;
 	camera.updateMatrix();
 	camera.updateMatrixWorld();
+	
+	var camera_default_position = new THREE.Vector3(0,0,min_cameradist);
+	
+	if(MODE === BOCAVIRUS_MODE)
+	{
+		var camera_move_duration = 3.5;
+		
+		var rightmost_visible_x = EggCell.position.x + EggCell_width / 2;
+		var leftmost_visible_x = -playing_field_dimension / 2;
+		var CEPx = ( rightmost_visible_x + leftmost_visible_x ) / 2;
+		var CEPz = ( rightmost_visible_x - leftmost_visible_x ) / 2 / Math.tan( camera.fov / 360 * TAU / 2 );
+		var Cell_encompassing_position = new THREE.Vector3( CEPx, 0, CEPz );
+		
+		var in_cell_position = Cell_encompassing_position.clone();
+		in_cell_position.z *= 0.3; //probably closer
+		
+		var bocavirus_in_cell_x = 2 * (EggCell.position.x - EggCell_width / 2);
+		
+		var slightly_in_cell_position = new THREE.Vector3( bocavirus_in_cell_x,0,min_cameradist);
+		
+		
+		
+		var pullback_start_time = 146;
+		if( pullback_start_time - 0.03 < our_CurrentTime && our_CurrentTime < pullback_start_time + camera_move_duration + 0.03)
+			camera.position.copy( move_smooth_vectors(camera_default_position, Cell_encompassing_position, camera_move_duration, our_CurrentTime - pullback_start_time) );
+		
+		var zoomin_start_time = 150;
+		if( zoomin_start_time - 0.03 < our_CurrentTime && our_CurrentTime < zoomin_start_time + camera_move_duration + 0.03)
+			camera.position.copy( move_smooth_vectors(Cell_encompassing_position, camera_default_position, camera_move_duration, our_CurrentTime - zoomin_start_time) );
+		
+		//you're going to zoom in on the cell and it is going to fade out
+		//you're going to zoom out from the cell and it will fade back
+		//bocavirus will go into it (on "viruses can be absorbed into cells too")
+		//zoom in (on "if bocavirus gets into a cell")
+	}
+	else
+		camera.position.copy( camera_default_position );
 	
 	//watch the vlambeer / juice it or lose it videos again when in need of inspiration
 	//weird visual touches will improve it too, like Bret's tiny shadows. Shadows/shininess in general... could try to detect speed... :(
@@ -69,4 +78,12 @@ function UpdateCamera()
 	
 	//can you think of a way to engineer a situation where you really DON'T want to click on certain vertices? Would be interesting for a bit
 	
+}
+
+function camera_changes_for_mode_switch(){	
+	//was trying to get pictures on top
+//	if(MODE === QC_SPHERE_MODE)
+//		renderer.sortObjects = false;
+//	else
+//		renderer.sortObjects = true;
 }

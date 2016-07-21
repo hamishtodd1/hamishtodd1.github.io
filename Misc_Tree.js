@@ -5,9 +5,11 @@
 You need a "selector". Get a UI person to design it for you. Until then have a big blue ball behind them
 
 Should the user be able to select the same virus again?
-* 
-     bocavirus
-    _____|____________________________
+
+You should zoom in and out on the tree to navigate :)
+
+      bocavirus											Cell?
+    ______|___________________________
    |                |                 |
   HIV           Hepatitis           Zika
   _|__       _______|_______       ___|__
@@ -24,77 +26,120 @@ Need sound effects here, if nowhere else
 
 */
 
-var Zika_visible = 0;
-var Measles_visible = 0;
+var Chapters_visible = Array(1,1,0,0);
+var Chapters_completed = Array(0,0,0,0); //or in other words "chapter complete"
 
-var Zika_children_visible = 0;
-var hepatitis_children_visible = 0;
-var HIV_children_visible = 0;
+var Virus_chapter_icons = Array(4);
 
-var chapter_highlighted = 0;
+var Chapter_start_times = Array(360,492,621.8,745);
 
 //everything you decide about this is temporary, but: dark blue circle, quite transparent
-var chapter_highlight;
+var Chapter_highlighter;
+
+var IconDimension = playing_field_dimension * 0.48;
+
+var player_has_never_hovered = 1;
+
+function add_tree_stuff_to_scene()
+{
+	if(Chapters_completed[1])
+		Chapters_visible[2] = 1;
+	
+	if(	Chapters_completed[0] === 1 && 
+		Chapters_completed[2] === 1)
+		Chapters_visible[3] = 1;
+	
+	for(var i = 0; i < Virus_chapter_icons.length; i++ )
+	{
+		if( Chapters_visible[i] )
+			scene.add(Virus_chapter_icons[i]);
+		
+		if( Chapters_completed[i] )
+		{
+			Virus_chapter_icons[i].material.opacity = 0.3;
+			//also put children here
+		}
+	}
+	
+	scene.add(Chapter_highlighter);
+}
 
 function init_tree()
 {
-	//You should probably "generate" the tree in case you want to change things. Just a bunch of plane geometries
+	//You should probably "generate" the tree in case you want to change things. Just a bunch of plane geometries.
 
-	//create the highlighter
+	Chapter_highlighter = new THREE.Mesh( 
+			new THREE.CircleGeometry( IconDimension / 2, 32 ), 
+			new THREE.MeshBasicMaterial( { transparent: true, opacity: 0.3, color: 0x0000ff } ) );
+	Chapter_highlighter.position.z = 0.01;
+	Chapter_highlighter.position.y = playing_field_dimension;
 	
-	//create the virus pictures and their labels
-	//create the hiders
+	Virus_chapter_icons[0] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[16], transparent: true}) );
+	Virus_chapter_icons[1] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[19], transparent: true}) );
+	Virus_chapter_icons[2] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[25], transparent: true}) );
+	Virus_chapter_icons[3] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[39], transparent: true}) );
+	
+	var IconHorizontalDistfromCenter = playing_field_dimension * 0.25;
+	Virus_chapter_icons[0].position.set(-IconHorizontalDistfromCenter, IconHorizontalDistfromCenter, 0 );
+	Virus_chapter_icons[1].position.set( IconHorizontalDistfromCenter, IconHorizontalDistfromCenter, 0 );
+	Virus_chapter_icons[2].position.set(-IconHorizontalDistfromCenter,-IconHorizontalDistfromCenter, 0 );
+	Virus_chapter_icons[3].position.set( IconHorizontalDistfromCenter,-IconHorizontalDistfromCenter, 0 );
+	
+	//urrrrrgh you need descriptions.
 }
 
 //maybe this should be called before anything in the loop
 function update_tree()
-{
-	for(var i = 0; i < Virus_chapter_selectors.length; i++ )
+{	
+	var highlight_dest = Chapter_highlighter.position.clone();
+	
+	//for each you do, first check if it's in the scene
+	for(var i = 0; i < Virus_chapter_icons.length; i++ )
 	{
-		//for the time being, you can't repeat chapters. If you want to, we need to make a "back button"
-		//you might also need to make bocavirus clickable
-		if((i === CK_MODE && hepatitis_children_visible )
-		||( i === IRREGULAR_MODE_MODE && HIV_children_visible )
-		||( i === QS_MODE && ( Zika_children_visible || !Zika_visible ) )
-		||( i === ENDING_MODE && !Measles_visible ) 
-		||  i === NOTHING_MODE )
+		if( scene.getObjectById(Virus_chapter_icons[i].id) === undefined )
+			continue;
+		
+		//for the time being, you can't repeat chapters. If you want to, we need to make a "back button", sooo... yeah, almost certainly fuck it
+		//if repeats are allowed, should have bocavirus.
+		if( Chapters_completed[i] )
 			continue;
 			
-		//mouse distance from their centers
-		if( MousePosition.distanceTo(Virus_chapter_selectors[i].position) )
-		{			
-			chapter_highlighted = i;
+		if( MousePosition.distanceTo(Virus_chapter_icons[i].position) < IconDimension / 2 ) //the radius, we're modelling them as circles
+		{
+			//player has officially hovered
+			highlight_dest.set( Virus_chapter_icons[i].position.x, Virus_chapter_icons[i].position.y, 0.01 );
 			
+			if(player_has_never_hovered)
+			{
+				Chapter_highlighter.visible = true;
+				Chapter_highlighter.position.copy(highlight_dest);
+				player_has_never_hovered = 0;
+			}
+			
+			//and have they clicked?
 			if(isMouseDown && !isMouseDown_previously)
 			{
-				if(chapter_highlighted === CK_MODE )
-					hepatitis_children_visible = 1;
-				if(chapter_highlighted === IRREGULAR_MODE )
-					HIV_children_visible = 1;
-				if(chapter_highlighted === QS_MODE )
-					Zika_children_visible = 1;
+				console.log(Chapter_start_times[i])
 				
-				//maybe it should be as simple as changing the time of the video and letting everything react up to that?
-				
+				//skip to it being there, don't want to come back here and see it moving weirdly
+				Chapter_highlighter.position.copy(highlight_dest);
+				Chapters_completed[i] = 1;
+				ytplayer.seekTo(Chapter_start_times[i]);
+				ytplayer.playVideo();
 			}
 		}
 	}
-	//note: video must be paused in tree mode, even if they try to unpause it!
 	
-	//what is it that triggers a change to the visibility variables?
-	
-	var highlight_displacement_from_dest = Virus_chapter_selectors[chapter_highlighted].position.clone();
-	highlight_displacement_from_dest.sub( chapter_highlight.position );
-	var highlight_movement_speed = 0.05;
+	var highlight_displacement_from_dest = highlight_dest.clone();
+	highlight_displacement_from_dest.sub( Chapter_highlighter.position );
+	var highlight_movement_speed = 0.2;
 	if(highlight_displacement_from_dest.length() < highlight_movement_speed )
-		chapter_highlight.position.copy( Virus_chapter_selectors[chapter_highlighted].position );
+		Chapter_highlighter.position.copy( highlight_dest );
 	else
 	{
 		highlight_displacement_from_dest.setLength(highlight_movement_speed);
-		chapter_highlight.position.add( highlight_displacement_from_dest );
+		Chapter_highlighter.position.add( highlight_displacement_from_dest );
 	}
-
-	if(Zika_children_visible)
-		//move the blocker out of the way
-		//or maybe the blocker should fade out?
+	
+	//also here you will have stuff about moving blockers out of the way etc
 }
