@@ -20,14 +20,14 @@
 var flash_colors;
 
 function update_bocavirus() {
-	//--------Story stuff
-	
-	
 	//-------Rotation
 	if(isMouseDown) {
 		bocavirus_MovementAngle = Mouse_delta.length() / 3;
 		bocavirus_MovementAxis.set(-Mouse_delta.y, Mouse_delta.x, 0);
 		bocavirus_MovementAxis.normalize();
+		
+		if( !Mouse_delta.equals( new THREE.Vector3() ) )
+			theyknowyoucanrotate = 1;
 	}
 	else {
 		bocavirus_MovementAngle *= 0.93;
@@ -47,7 +47,7 @@ function update_bocavirus() {
 	}
 
 	//-------transparency stuff
-	var fade_starting_time = 195;
+	var fade_starting_time = 152;
 	var time_taken_for_fade = 8;
 	var proportion_through = ( our_CurrentTime - fade_starting_time ) / time_taken_for_fade;
 	if(proportion_through < 0)

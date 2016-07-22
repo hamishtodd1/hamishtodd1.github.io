@@ -15,13 +15,17 @@ function UpdateCamera()
 	{
 		var movement_duration = 3.5;
 		
-		var pullback_start_time = 146;
-		var cell_move_time = 150;
-		var zoomin_start_time = 155;
+		var pullback_start_time = 142.8;
+		var cell_move_time = 145.6;
+		var zoomin_start_time = 149.8;
 		var cell_fadeout_start_time = zoomin_start_time + movement_duration / 2;
-		var Transcriptase_ogling_time = 160;
-		var second_pullback_start_time = 165;
-		var whole_thing_finish_time = 200;
+		var Transcriptase_ogling_time = 169.5;
+		var second_pullback_start_time = 179.4;
+		var whole_thing_finish_time = 197;
+		
+		
+		
+		
 		
 		if( our_CurrentTime < pullback_start_time || cell_fadeout_start_time + movement_duration < our_CurrentTime)
 			EggCell.visible = false;
