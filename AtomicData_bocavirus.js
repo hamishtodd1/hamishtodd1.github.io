@@ -73,9 +73,9 @@ function update_bocavirus() {
 		}
 	}
 
-	//-------Fadeout
+	//-------Colors
 	//it takes a while. Could instead do them in fours. The two at the top and bottom, two on the left and right, two on the front and back
-	var flash_time = 80.9;
+	var flash_time = 76.6;
 	var fadeto_time = 0.66;
 	var colored_time = 0.1;
 	var fadeback_time = fadeto_time;

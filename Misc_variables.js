@@ -15,7 +15,7 @@ var QC_SPHERE_MODE = 4;
 var ENDING_MODE = 5;
 var TREE_MODE = 6;
 	
-var MODE = TREE_MODE;
+var MODE = 4;
 
 //--------------Technologically fundamental
 var playing_field_dimension = 7*HS3; //used to be that height was 6.

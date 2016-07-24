@@ -31,7 +31,7 @@ var Chapters_completed = Array(0,0,0,0); //or in other words "chapter complete"
 
 var Virus_chapter_icons = Array(4);
 
-var Chapter_start_times = Array(360,492,621.8,745);
+var Chapter_start_times = Array(4);
 
 //everything you decide about this is temporary, but: dark blue circle, quite transparent
 var Chapter_highlighter;
@@ -74,10 +74,10 @@ function init_tree()
 	Chapter_highlighter.position.z = 0.01;
 	Chapter_highlighter.position.y = playing_field_dimension;
 	
-	Virus_chapter_icons[0] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[16], transparent: true}) );
-	Virus_chapter_icons[1] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[19], transparent: true}) );
-	Virus_chapter_icons[2] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[25], transparent: true}) );
-	Virus_chapter_icons[3] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[39], transparent: true}) );
+	Virus_chapter_icons[0] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[12], transparent: true}) );
+	Virus_chapter_icons[1] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[15], transparent: true}) );
+	Virus_chapter_icons[2] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[21], transparent: true}) );
+	Virus_chapter_icons[3] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[35], transparent: true}) );
 	
 	var IconHorizontalDistfromCenter = playing_field_dimension * 0.25;
 	Virus_chapter_icons[0].position.set(-IconHorizontalDistfromCenter, IconHorizontalDistfromCenter, 0 );

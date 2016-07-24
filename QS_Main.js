@@ -1,30 +1,31 @@
 /* MAJOR bug flickering back and forth!
  * 
- * TODO
- * Every quasicutout has a set of lines that "grow" over to its partner.
- * Hopefully you can deduce which ones based on the shapes.
- * For every edge the numbers are worked out in realtime
+ * New rule, camera moves, sphere doesn't scale at all
+ * 
+ * 
+ * 
+ * Is there some way you could change the way you spherically project so that the fat rhombs on the smallest ones aren't so squashed?
+ * Easier on the spherical projection generally?
+ * The ones where you inserted something aren't so hot either. Could have special cases.
+ * 
+ * Could have more density maps.
+ * 
+ * Fix that problem where you can't change while the deflation is occurring. Might be you start within that small non-responsive part?
+ * 
  * When virus is clicked, move to that state slowly
  * Probably wouldn't be that hard to flatten the pentagons
  * 
- * easier on the spherical projection?
  * 
- * Is there some way you could change the way you spherically project so that the fat rhombs on the smallest ones aren't so squashed?
- * The ones where you inserted something aren't so hot either. Could have special cases.
- * 
- * There are a few more pics like HPV, there was some pdf you saved. Or google "density map" virus, there are one or two
- * Might be hard to have a nice transition to them, so could just flash or something
- * 
- * There may still be things happenning that you don't need
- * 
- * Fix that problem where you can't change while the deflation is occurring. Might be you start within that small non-responsive part?
+ * old todo. Might go back to a vision like the one you had before:
+ * Every quasicutout has a set of lines that "grow" over to its partner.
+ * Hopefully you can deduce which ones based on the shapes.
+ * For every edge the numbers are worked out in realtime
+ * Could have blockers around the pentagon. When you fade back, is there any way for them to continue obscure, but not obscure the parts that are fading in?
  */
 
-//Make pentagons flash when you say "based on pentagonal symmetry"
-
-//Could have blockers around the pentagon. When you fade back, is there any way for them to continue obscure, but not obscure the parts that are fading in?
-
-/* And you can reduce the number of extra vertices required by half. You could probably work out all the edge positions using the triangles
+/* You can reduce the number of extra vertices required by half. You could probably work out all the edge positions using the triangles
+ * 
+ * There may still be things happenning that you don't need
  * 
  * You don't need to deduce the dodecahedron any more...
  */
@@ -51,12 +52,7 @@ function UpdateQuasiSurface(){
 	if(dodeca.material.opacity === 0)
 		scene.remove(dodeca);
 	else
-		scene.add(dodeca)
-//	var quasicutout_opacity = 1 - dodeca.material.opacity;
-//	
-//	if(stable_point_of_meshes_currently_in_scene !== 666){
-//		quasicutout_meshes[stable_point_of_meshes_currently_in_scene].material.materials[1].opacity = quasicutout_opacity;
-//	}
+		scene.add(dodeca);
 	
 	deduce_dodecahedron(0);
 	
@@ -69,8 +65,10 @@ function UpdateQuasiSurface(){
 		}
 		else {
 			var dist_from_desired_angle = 666;
-			if( atanphi - TAU/4 < dodeca_angle && dodeca_angle < atanphi ) dist_from_desired_angle = Math.abs(dodeca_angle);
-			else dist_from_desired_angle = Math.abs(dodeca_angle - (atanphi - TAU/4));
+			if( atanphi - TAU/4 < dodeca_angle && dodeca_angle < atanphi ) 
+				dist_from_desired_angle = Math.abs(dodeca_angle);
+			else 
+				dist_from_desired_angle = Math.abs(dodeca_angle - (atanphi - TAU/4));
 			
 			if( atanphi-TAU/2 < dodeca_angle && dodeca_angle < 2*atanphi-TAU/2 )
 				dodeca_angle += normalturningspeed * 1.45;

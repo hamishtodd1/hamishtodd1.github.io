@@ -139,6 +139,7 @@ function init_story()
 		
 		slide_number: -1,
 		
+		//TODO use this on, for example, transition from part 1 to 2
 		skip_ahead_to: -1, //alternatively just edit the video. Don't skip back, we ascend through the states
 		
 		offer_virus_selection: 0,
@@ -190,13 +191,13 @@ function init_story()
 	ns.startingtime = 76.7; //Flash
 	Story_states.push(ns);
 	
-	//----
+	//-------TODO the designs comparison should look around the tree
 //	ns = default_clone_story_state(0);
 //	ns.startingtime = 93.7; //pause again?
 //	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1);
-	ns.startingtime = 104.8; //golf balls
+	ns.startingtime = 104.8; //golf balls TODO footballs
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
@@ -204,7 +205,7 @@ function init_story()
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1);
-	ns.startingtime = 107.7; //origami, nanotube and phi29
+	ns.startingtime = 107.7; //origami is weak, should take something more useful. Greenhouse is the other thing you mention
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
@@ -278,6 +279,7 @@ function init_story()
 	//-----------IRREG BEGINS
 	ns = default_clone_story_state(1);
 	ns.startingtime = 302.9; //irreg begins, HIV shown
+	Chapter_start_times[0] = ns.startingtime;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1);
@@ -325,11 +327,13 @@ function init_story()
 	
 	ns = default_clone_story_state(0);
 	ns.startingtime = 417.3; //open, prove me wrong
+	ns.offer_virus_selection = 1;
 	ns.irreg_open = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
 	ns.startingtime = 429.8; //tree
+	ns.offer_virus_selection = 1;
 	ns.MODE = TREE_MODE;
 	ns.prevent_playing = 1;
 	Story_states.push(ns);
@@ -337,6 +341,7 @@ function init_story()
 	//------CK BEGINS
 	ns = default_clone_story_state(1);
 	ns.startingtime = 434.6; //start of CK - hepatitis TODO line up CK with it
+	Chapter_start_times[1] = ns.startingtime;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
@@ -394,6 +399,7 @@ function init_story()
 	//----------QS BEGINS!!!!!
 	ns = default_clone_story_state(1);
 	ns.startingtime = 565; //zika virus
+	Chapter_start_times[2] = ns.startingtime;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
@@ -403,21 +409,21 @@ function init_story()
 	Story_states.push(ns);
 	
 	//YO DARB E IMAM IS FINE BUT YOU MESSED UP SOME OF THE BELOW
-	ns = default_clone_story_state(0);
+	ns = default_clone_story_state(0); //the proteins go on the corners
 	ns.startingtime = 581.5;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = 612.2; //corners flash
+	ns.startingtime = 589.4; //corners flash
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = ; //edges flash then try making HPV (pause)
+	ns.startingtime = 591.3; //edges flash then try making HPV (pause) You know it'll only be through trial and error :(
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = 669.4; //just QS
+	ns.startingtime = 612.2; //just QS
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
@@ -425,11 +431,11 @@ function init_story()
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
-	ns.startingtime = 684.7; //above its entrance
+	ns.startingtime = 628.1; //above its entrance
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
-	ns.startingtime = 690; //more inside (2?)
+	ns.startingtime = 632.7; //more inside (2?)
 	Story_states.push(ns);
 
 //	ns = default_clone_story_state(0);
@@ -437,100 +443,101 @@ function init_story()
 //	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
-	ns.startingtime = 699.5; //triangles
+	ns.startingtime = 643.5; //triangles
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1);
-	ns.startingtime = 701.5; //squares
+	ns.startingtime = 644.4; //squares
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1);
-	ns.startingtime = 702.2; //hexagons
+	ns.startingtime = 645.1; //hexagons
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
-	ns.startingtime = 703.6; //pentagons don't fit together
+	ns.startingtime = 646.5; //pentagons don't fit together
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
-	ns.startingtime = 708.6; //unsatisfying pattern
+	ns.startingtime = 653.4; //unsatisfying pattern
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = 715.8; //Back to Darb e inside
-	ns.slide_number = 28;
+	ns.startingtime = 658.9; //Back to Darb e inside
+	ns.slide_number = 24;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = 731.3; //QS back. Compare it with this pattern, then (pause)
+	ns.startingtime = 676.25; //QS back. Compare it with this pattern, then (pause)
 	ns.MODE = QC_SPHERE_MODE;
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = 739; //QS back
+	ns.startingtime = 682.5; //QS back
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
-	ns.startingtime = 741;
+	ns.startingtime = 683.3;
 	ns.MODE = TREE_MODE;
 	ns.prevent_playing = 1;
 	Story_states.push(ns);
 
 	//------ENDING BEGINS!!!!
 	ns = default_clone_story_state(0);
-	ns.startingtime = 745; //Start of end (the three models)
+	ns.startingtime = 687.7; //Start of end - keep the tree?
+	Chapter_start_times[3] = ns.startingtime;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
-	ns.startingtime = 750.1; //irreg
+	ns.startingtime = 693; //irreg
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
-	ns.startingtime = 810; //origami is a good analogy
+	ns.startingtime = 795.6; //origami is a good analogy
 	Story_states.push(ns);
 
 	//maaaassive gap
 	ns = default_clone_story_state(1);
-	ns.startingtime = 862.8; //super dodecahedral virus
+	ns.startingtime = 805.7; //super dodecahedral virus
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = 895.8; //Bucky
+	ns.startingtime = 838.9; //Bucky
+	ns.slide_number = 18;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0);
+	ns.startingtime = 840.8; //back to religious art
 	ns.slide_number = 22;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = 898; //back to religious art
-	ns.slide_number = 26;
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(0);
-	ns.startingtime = 900.3; //back to Semliki
-	ns.slide_number = 19;
+	ns.startingtime = 843.4; //back to Semliki
+	ns.slide_number = 15;
 	Story_states.push(ns);
 
 	//------dark side
 	ns = default_clone_story_state(1);
-	ns.startingtime = 906.9; //Golden spiral
+	ns.startingtime = 849.6; //Golden spiral
 	console.log(ns.slide_number)
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
-	ns.startingtime = 915.7; //mona lisa
+	ns.startingtime = 859.3; //mona lisa
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = 924.9; //back to oldest picture of a virus
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(1);
-	ns.startingtime = 937.3; //measles
+	ns.startingtime = 867.8; //back to oldest picture of a virus
 	ns.slide_number = 24;
 	Story_states.push(ns);
 
+	ns = default_clone_story_state(1);
+	ns.startingtime = 880.2; //measles
+	Story_states.push(ns);
+
 	ns = default_clone_story_state(0);
-	ns.startingtime = 947.2; //canvas retract
+	ns.startingtime = 890; //canvas retract
 	ns.MODE = SLIDE_MODE;
 	Story_states.push(ns);
 	

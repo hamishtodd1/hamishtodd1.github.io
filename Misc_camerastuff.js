@@ -13,7 +13,7 @@ function UpdateCamera()
 	
 	if(MODE === BOCAVIRUS_MODE)
 	{
-		var movement_duration = 3.5;
+		var movement_duration = 2;
 		
 		var pullback_start_time = 142.8;
 		var cell_move_time = 145.6;
