@@ -11,11 +11,11 @@
 var Storypage = -1; //set to a silly number initially so we know that the first page will be triggered.
 var Story_states = [];
 var used_up_pause = 0;
+var unpause_timer = 0;
+var reused_slide_indices = [];
 
 function Update_story()
-{
-	console.log(our_CurrentTime);
-	
+{	
 	//first part of this function is all based on current state, which you don't have at the very start
 	if(Storypage !== -1)
 	{
@@ -24,22 +24,42 @@ function Update_story()
 			if(ytplayer.getPlayerState() === 1)// 1 means playing,not allowed (although maybe some people like to have order designated for them?)
 				ytplayer.pauseVideo();
 		
-		//if you're about to finish a state that wants to be paused. Number at the end is how close you want to be
-		if( Storypage < Story_states.length - 1 
-			&& Story_states[Storypage].pause_at_end === 1 && !used_up_pause && Story_states[Storypage + 1].startingtime - our_CurrentTime < 0.05 )
-		{
-			ytplayer.pauseVideo();
-			used_up_pause = 1;
-			return;
-		}
-		
 		if( Story_states[Storypage].unpause_on_vertex_knowledge && theyknowyoucanchangevertices && !isMouseDown )
 			IrregButton.capsidopen = 0;
 		if( Story_states[Storypage].unpause_on_vertex_knowledge && capsidopenness === 0 )
 			ytplayer.playVideo();
 		
-		if( Story_states[Storypage].unpause_on_rotation_knowledge && theyknowyoucanrotate && !isMouseDown )
+		if( Story_states[Storypage].skip_on_rotation_knowledge && rotation_understanding >= 3 && !isMouseDown )
+		{
+			ytplayer.seekTo( 49 );
+			our_CurrentTime = 49;
 			ytplayer.playVideo();
+		}
+		
+		if( Story_states[Storypage].unpause_after !== -1)
+		{
+			unpause_timer += delta_t;
+			if( unpause_timer >= Story_states[Storypage].unpause_after )
+			{
+				unpause_timer = 0;
+				ytplayer.playVideo();
+			}
+		}
+		
+		console.log(Story_states[Storypage].pause_at_end)
+		//if you're about to move on from a state that wants to be paused
+		if( Story_states[Storypage].pause_at_end === 1 )
+		{
+			
+			if( !used_up_pause && Story_states[Storypage + 1].startingtime < our_CurrentTime && our_CurrentTime < Story_states[Storypage + 2].startingtime )
+			{
+				ytplayer.pauseVideo();
+				used_up_pause = 1;
+				return;
+			}
+			if( ytplayer.getPlayerState() === 2 ) //we don't allow continuing
+				return;
+		}
 	}
 	
 	//potentially change state, and only continue with this function if there's state to be changed	
@@ -115,6 +135,7 @@ function Update_story()
 	 * 
 	 */
 	
+	//TODO doesn't happen if you skip there
 	if(Story_states[Storypage].offer_virus_selection)
 		add_virus_selection_to_scene();
 	else
@@ -148,14 +169,16 @@ function init_story()
 		irreg_button_invisible: 0,
 		unpause_on_vertex_knowledge: 0,
 		
-		unpause_on_rotation_knowledge: 0,
+		CK_scale_only: 0,
+		
+		skip_on_rotation_knowledge: 0,
 		
 		prevent_playing: 0 //could also use this to stop them from continuing if they haven't rotated bocavirus etc
 	});
 	
 	ns = default_clone_story_state(1);
 	ns.startingtime = 0.1; //zika virus
-//	ns.skip_ahead_to = 30;//skips to wherever you like. Change the location of the button!
+//	ns.skip_ahead_to = 455.5;//skips to wherever you like. Change the location of the button!
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1);
@@ -171,15 +194,17 @@ function init_story()
 	ns.startingtime = 34.5; //bocavirus appears, then pause
 	ns.MODE = BOCAVIRUS_MODE;
 	ns.pause_at_end = 1; //TODO handle the assurance.
-	ns.unpause_on_rotation_knowledge = 1;
+	ns.skip_on_rotation_knowledge = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
-	ns.startingtime = 40.2;
+	ns.startingtime = 40.2; //we sort of just want to skip this part
+	ns.skip_ahead_to = 49;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
 	ns.startingtime = 41.6; //assurance occurs
+	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
 	//----
@@ -221,18 +246,20 @@ function init_story()
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = 135.6; //end of part 1. TODO skip ahead
+	ns.startingtime = 135.6; //end of part 1
+	ns.skip_ahead_to = 140.6;
 	Story_states.push(ns);
 	
 	//----Part 2. Much will happen, in another function
 	ns = default_clone_story_state(0);
-	ns.startingtime = 140.5; //beginning of part 2. TODO an auto unpause for this
+	ns.startingtime = 140.6; //beginning of part 2
 	ns.MODE = BOCAVIRUS_MODE;
 	ns.pause_at_end = 1;
+	ns.unpause_after = 9.5;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
-	ns.startingtime = 163.5; //you'll need to unpause me manually
+	ns.startingtime = 163.6; //you'll need to unpause me manually
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
@@ -241,11 +268,11 @@ function init_story()
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1);
-	ns.startingtime = 194.6; //cell with fluourescence
+	ns.startingtime = 196.1; //cell with fluourescence
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
-	ns.startingtime = 202; //back to DNA. DNA mimics what you do?
+	ns.startingtime = 220.3; //back to DNA. DNA mimics what you do?
 	ns.MODE = BOCAVIRUS_MODE;
 	Story_states.push(ns);
 	
@@ -279,7 +306,7 @@ function init_story()
 	//-----------IRREG BEGINS
 	ns = default_clone_story_state(1);
 	ns.startingtime = 302.9; //irreg begins, HIV shown
-	Chapter_start_times[0] = ns.startingtime;
+	Chapter_start_times[0] = ns.startingtime + 0.01;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1);
@@ -329,6 +356,7 @@ function init_story()
 	ns.startingtime = 417.3; //open, prove me wrong
 	ns.offer_virus_selection = 1;
 	ns.irreg_open = 1;
+	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
@@ -341,13 +369,14 @@ function init_story()
 	//------CK BEGINS
 	ns = default_clone_story_state(1);
 	ns.startingtime = 434.6; //start of CK - hepatitis TODO line up CK with it
-	Chapter_start_times[1] = ns.startingtime;
+	Chapter_start_times[1] = ns.startingtime + 0.01;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
-	ns.startingtime = 434.6 + 5; //bring in CK then (pause)
+	ns.startingtime = 445.7; //bring in CK then (pause)
 	ns.MODE = CK_MODE;
 	ns.pause_at_end = 1;
+	ns.CK_scale_only = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
@@ -372,7 +401,7 @@ function init_story()
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1);
-	ns.startingtime = 533.7; //earlier sources
+	ns.startingtime = 531.5; //earlier sources
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1);
@@ -399,7 +428,7 @@ function init_story()
 	//----------QS BEGINS!!!!!
 	ns = default_clone_story_state(1);
 	ns.startingtime = 565; //zika virus
-	Chapter_start_times[2] = ns.startingtime;
+	Chapter_start_times[2] = ns.startingtime + 0.01;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
@@ -408,7 +437,6 @@ function init_story()
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
-	//YO DARB E IMAM IS FINE BUT YOU MESSED UP SOME OF THE BELOW
 	ns = default_clone_story_state(0); //the proteins go on the corners
 	ns.startingtime = 581.5;
 	Story_states.push(ns);
@@ -437,10 +465,10 @@ function init_story()
 	ns = default_clone_story_state(1);
 	ns.startingtime = 632.7; //more inside (2?)
 	Story_states.push(ns);
-
-//	ns = default_clone_story_state(0);
-//	ns.startingtime = 693.7; //freeze the video (?) on whichever pic you've finished with
-//	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1);
+	ns.startingtime = 638.3; //pentagons added
+	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
 	ns.startingtime = 643.5; //triangles
@@ -459,16 +487,16 @@ function init_story()
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
-	ns.startingtime = 653.4; //unsatisfying pattern
+	ns.startingtime = 652.6; //unsatisfying pattern
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
 	ns.startingtime = 658.9; //Back to Darb e inside
-	ns.slide_number = 24;
+	ns.slide_number = reused_slide_indices[0];
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = 676.25; //QS back. Compare it with this pattern, then (pause)
+	ns.startingtime = 674.7; //QS back. Compare it with this pattern, then (pause)
 	ns.MODE = QC_SPHERE_MODE;
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
@@ -486,20 +514,21 @@ function init_story()
 	//------ENDING BEGINS!!!!
 	ns = default_clone_story_state(0);
 	ns.startingtime = 687.7; //Start of end - keep the tree?
-	Chapter_start_times[3] = ns.startingtime;
+	Chapter_start_times[3] = ns.startingtime + 0.01;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1);
+	ns = default_clone_story_state(0);
 	ns.startingtime = 693; //irreg
+	ns.MODE = IRREGULAR_MODE;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
-	ns.startingtime = 795.6; //origami is a good analogy
+	ns.startingtime = 752.7; //origami is a good analogy
 	Story_states.push(ns);
 
 	//maaaassive gap
 	ns = default_clone_story_state(1);
-	ns.startingtime = 805.7; //super dodecahedral virus
+	ns.startingtime = 795.6; //super dodecahedral virus
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
@@ -520,7 +549,6 @@ function init_story()
 	//------dark side
 	ns = default_clone_story_state(1);
 	ns.startingtime = 849.6; //Golden spiral
-	console.log(ns.slide_number)
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
@@ -529,7 +557,7 @@ function init_story()
 
 	ns = default_clone_story_state(0);
 	ns.startingtime = 867.8; //back to oldest picture of a virus
-	ns.slide_number = 24;
+	ns.slide_number = 20;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
@@ -588,7 +616,11 @@ function default_clone_story_state( shows_a_slide )
 	new_story_state.irreg_button_invisible = 0;
 	new_story_state.unpause_on_vertex_knowledge = 0;
 	
-	new_story_state.unpause_on_rotation_knowledge = 0;
+	new_story_state.skip_ahead_to = -1;
+	
+	new_story_state.skip_on_rotation_knowledge = 0;
+	
+	new_story_state.CK_scale_only = 0;
 	
 	return new_story_state;
 }

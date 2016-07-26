@@ -46,6 +46,12 @@ function load_AV_stuff()
 	random_texture_urls[2] = "http://hamishtodd1.github.io/Data/Misc textures/close.png";
 	random_texture_urls[3] = "http://hamishtodd1.github.io/Data/Misc textures/Egg cell hawaiireedlab.png";
 	random_texture_urls[4] = "http://hamishtodd1.github.io/Data/Misc textures/Transcriptase.png"; //TODO extend the DNA
+	random_texture_urls[5] = "http://hamishtodd1.github.io/Data/Misc textures/Grabbable Arrow.png";
+	
+	random_texture_urls[6] = "http://hamishtodd1.github.io/Data/Misc textures/HIV_name.png";
+	random_texture_urls[7] = "http://hamishtodd1.github.io/Data/Misc textures/Hepa_name.png";
+	random_texture_urls[8] = "http://hamishtodd1.github.io/Data/Misc textures/Zika_name.png";
+	random_texture_urls[9] = "http://hamishtodd1.github.io/Data/Misc textures/Measles_name.png";
 	
 	//slides
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Zika victim.png");
@@ -56,7 +62,7 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Golfball_virus.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Origami.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Origami_virus.png");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e above entrance.jpg");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/shah nematollah vali shrine.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV xray.png");
 	
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Cell with proteins.png");
@@ -78,19 +84,30 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e outside.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e above entrance.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e inside.jpg");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e pentagons.jpg"); //next thing is to test (tree and final reused slides) without this extra slide
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern triangular.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern square.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern hexagonal.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pentagons.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern pentagonal.png");
 	
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Irreg.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Origami geodesic.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Very dodecahedral virus.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/golden spiral.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Mona Lisa.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Measles virus.png");
 	
+	//if you change the above, you probably need to change these
+	reused_slide_indices[0] = 24;
+	reused_slide_indices[1] = 18;
+	reused_slide_indices[2] = 22;
+	reused_slide_indices[3] = 15;
+	reused_slide_indices[4] = 20;
+
+	reused_slide_indices[5] = 12;
+	reused_slide_indices[6] = 15;
+	reused_slide_indices[7] = 21;
+	reused_slide_indices[8] = 34;
 	
 	virus_textures = Array(virus_texture_urls.length);
 	random_textures = Array(random_texture_urls.length);
@@ -156,8 +173,10 @@ function bind_pictures()
 	IrregButton = new THREE.Mesh( new THREE.CubeGeometry(0.6, 0.6, 0),
 			new THREE.MeshBasicMaterial( { transparent:true, map: random_textures[1] } ) ); //and can change to [2]
 	
-	IrregButton.position.set(1.9,-0.7,0.0001);
+	IrregButton.position.set(-playing_field_dimension / 2 + 0.4,-1.4,0.0001);
 	IrregButton.capsidopen = 0;
+
+	GrabbableArrow.material.map = random_textures[5];
 	
 	//first slide
 	VisibleSlide = new THREE.Mesh( new THREE.CubeGeometry(playing_field_dimension, playing_field_dimension, 0),

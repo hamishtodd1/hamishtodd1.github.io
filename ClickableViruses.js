@@ -8,7 +8,7 @@ function add_virus_selection_to_scene()
 			break;
 			
 		case IRREGULAR_MODE:
-			for(var i = 12; i < 16; i++)
+			for(var i = 12; i < 15; i++)
 				scene.add(clickable_viruses[i]);
 			break;
 			
@@ -45,7 +45,10 @@ function init_clickable_viruses()
 		clickable_viruses[ i ].default_position.x += (i%4) * picturepanel_width / 4;
 		clickable_viruses[ i ].default_position.y = y_of_picturepanel_bottom + 0.5 * picturepanel_width / 4; //they are in the frame, right?
 		if( 11 < i && i < 16 ) //needs to be in front of the surface
+		{
 			clickable_viruses[ i ].default_position.z *= -1;
+			clickable_viruses[ i ].default_position.x += picturepanel_width / 8;
+		}
 		
 		clickable_viruses[i].enabled_position = clickable_viruses[i].default_position.clone();
 		clickable_viruses[i].enabled_position.y += 0.4; //maybe too much

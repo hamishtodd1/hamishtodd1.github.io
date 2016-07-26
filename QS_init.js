@@ -1,4 +1,14 @@
-function initialize_QS_stuff() {
+function initialize_QS_stuff()
+{
+	var GrabbableArrowDimension = 0.44;
+	GrabbableArrow = new THREE.Mesh( new THREE.PlaneGeometry( GrabbableArrowDimension, GrabbableArrowDimension ),
+									 new THREE.MeshBasicMaterial({ depthWrite: false, depthTest: false } ) );
+	GrabbableArrow.dimension = GrabbableArrowDimension;
+	GrabbableArrow.grabbed = 0;
+	GrabbableArrow.renderOrder = 1; //yay, works
+	GrabbableArrow.position.set(playing_field_dimension * 0.5 / 2, -playing_field_dimension * 0.5 / 2, 0);
+	//Reeeeeeeally need it always-on-top
+	
 	cutout_vector0 = new THREE.Vector3(0,0.5/Math.sin(TAU/10),0);
 	cutout_vector1 = new THREE.Vector3(PHI/2,0.5/Math.sin(TAU/10)-Math.cos(3/20*TAU),0);
 	cutout_vector0_player = cutout_vector0.clone();
@@ -14,11 +24,6 @@ function initialize_QS_stuff() {
  		transparent: true
  	});
  	
- 	var materialy = new THREE.LineBasicMaterial({
- 		color: 0x00ffff,
- 		transparent: true,
- 		opacity: 0.5
- 	});
  	var dodeca_line_pairs = new Uint16Array([
  	    2,1,	1,11,	11,20,	20,29,	29,2,
 // 	    2,4,	4,5,	5,6,	6,1,
@@ -103,10 +108,17 @@ function initialize_QS_stuff() {
  		[666,8,47]
  	);
  	
- 	dodeca_geometry = new THREE.BufferGeometry();
- 	dodeca_geometry.addAttribute( 'position', new THREE.BufferAttribute( dodeca_vertices_numbers, 3 ) );
- 	dodeca_geometry.setIndex( new THREE.BufferAttribute( dodeca_line_pairs, 1 ) );
- 	dodeca = new THREE.LineSegments( dodeca_geometry, materialy, THREE.LineSegmentsPieces );
+ 	dodeca = new THREE.Mesh(new THREE.Geometry(),new THREE.MeshBasicMaterial);
+// 	dodeca = new THREE.LineSegments( new THREE.Geometry(), new THREE.LineBasicMaterial({
+// 		color: 0x00ffff,
+// 		transparent: true,
+// 		opacity: 0.5}), THREE.LineSegmentsPieces );
+// 	dodeca.visible = false;
+ 	dodeca.geometry.faces.push(new THREE.Face3(0,0,0));
+ 	for(var i = 0; i < 47; i++)
+ 		dodeca.geometry.vertices.push(new THREE.Vector3());
+ 	//if you want to bring dodeca back you need to work out how to redo this
+// 	dodeca.geometry.setIndex( new THREE.BufferAttribute( dodeca_line_pairs, 1 ) );
  	
  	var axis = new THREE.Vector3(0,0,-1);
 	var pentagon = Array(5);
@@ -172,7 +184,7 @@ function initialize_QS_stuff() {
 	for(var i = 0; i < stable_points.length; i++)
 		stable_points[i] = new THREE.Vector3();
 	
-//	console.log(lowest_unused_stablepoint)
+//	var lowest_unused_stablepoint = 0;
 //	for(var ourvertex = 0; ourvertex < 7; ourvertex++){
 //		//quasilattice_default_vertices.length; i++){
 //		var stablepoint_first_recording = lowest_unused_stablepoint;

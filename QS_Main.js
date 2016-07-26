@@ -1,22 +1,24 @@
 /* MAJOR bug flickering back and forth!
  * 
+ * Patch up the bloody holes
+ * 
  * New rule, camera moves, sphere doesn't scale at all
  * 
+ * Change colors, you've not adjusted to the fact that they are allowed to jump around. There's a brown hexagon and pink fat rhombs
  * 
- * 
- * Is there some way you could change the way you spherically project so that the fat rhombs on the smallest ones aren't so squashed?
  * Easier on the spherical projection generally?
  * The ones where you inserted something aren't so hot either. Could have special cases.
  * 
  * Could have more density maps.
  * 
  * Fix that problem where you can't change while the deflation is occurring. Might be you start within that small non-responsive part?
+ * Actually it seems to sometimes just not respond to a held down mouse
  * 
  * When virus is clicked, move to that state slowly
  * Probably wouldn't be that hard to flatten the pentagons
  * 
  * 
- * old todo. Might go back to a vision like the one you had before:
+ * old todo. For if you go back to a vision like the one you had before:
  * Every quasicutout has a set of lines that "grow" over to its partner.
  * Hopefully you can deduce which ones based on the shapes.
  * For every edge the numbers are worked out in realtime
@@ -27,99 +29,128 @@
  * 
  * There may still be things happenning that you don't need
  * 
- * You don't need to deduce the dodecahedron any more...
  */
 
-function UpdateQuasiSurface(){
-	var atanphi = Math.atan(PHI);
+function UpdateGrabbableArrow()
+{
+	//TODO sort this out
+//	var GrabbableArrowFlattened = GrabbableArrow.position.clone()
+//	GrabbableArrowFlattened.z = 0;
+//	var skewangle = GrabbableArrowFlattened.angleTo(new THREE.Vector3(1,0,0) );
+//	GrabbableArrow.quaternion.setFromAxisAngle(z_central_axis, -skewangle);
 	
-	var dodeca_openingspeed = 0.029;
-	var dodeca_squashingspeed = 0.022;
-	if(isMouseDown) {
-		if(dodeca_angle === 0 || dodeca_angle === 2*atanphi-TAU/2 ) 
-		dodeca_faceflatness += dodeca_squashingspeed; //should really be determined by the difference between dodeca_angle and 0 or
+	var MouseRelativeToArrow = MousePosition.clone();
+	MouseRelativeToArrow.z = camera.position.z - min_cameradist;
+	MouseRelativeToArrow.sub( GrabbableArrow.position );
+	MouseRelativeToArrow.z = 0;
+	if(isMouseDown && !isMouseDown_previously && MouseRelativeToArrow.length() < GrabbableArrow.dimension / 2 )
+		GrabbableArrow.grabbed = 1;
+		
+	if(!isMouseDown)
+		GrabbableArrow.grabbed = 0;
+	
+	if( GrabbableArrow.grabbed )
+	{
+		GrabbableArrow.position.copy( MousePosition );
+		
+		if( GrabbableArrow.position.x > playing_field_dimension / 2 )
+			GrabbableArrow.position.x = playing_field_dimension / 2;
+		if( GrabbableArrow.position.x <-playing_field_dimension / 2 )
+			GrabbableArrow.position.x =-playing_field_dimension / 2;
+		if( GrabbableArrow.position.y > playing_field_dimension / 2 )
+			GrabbableArrow.position.y = playing_field_dimension / 2;
+		if( GrabbableArrow.position.y <-playing_field_dimension / 2 )
+			GrabbableArrow.position.y =-playing_field_dimension / 2;
+	}
+	
+	GrabbableArrow.position.z = camera.position.z - min_cameradist;
+	
+	var arrow_mindist;
+	if( MODE === QC_SPHERE_MODE )
+		arrow_mindist = dodeca.geometry.vertices[1].length();
+	if( MODE === CK_MODE )
+		arrow_mindist = 0.5;
+	var height_holder = GrabbableArrow.position.z;
+	GrabbableArrow.position.z = 0;
+	if( GrabbableArrow.position.length() < arrow_mindist )
+		GrabbableArrow.position.setLength( arrow_mindist );
+	if( MODE === CK_MODE && GrabbableArrow.position.length() > 2.7 )
+		GrabbableArrow.position.setLength( 2.7 );
+	GrabbableArrow.position.z = height_holder;
+}
+
+function UpdateQuasiSurface()
+{
+	//-------Rotation
+	if(isMouseDown && !GrabbableArrow.grabbed) {
+		QS_rotationangle = Mouse_delta.length() / 2.5;
+		
+		QS_rotationaxis.set(-Mouse_delta.y, Mouse_delta.x, 0);
+		dodeca.worldToLocal(QS_rotationaxis);
+		QS_rotationaxis.normalize();
 	}
 	else {
-		dodeca_faceflatness -= dodeca_squashingspeed;
+		QS_rotationangle *= 0.93;
 	}
+	
+	dodeca.rotateOnAxis(QS_rotationaxis,QS_rotationangle);
+	dodeca.updateMatrixWorld();
+	
+	//avoid the back face showing
+	{
+		var forwardvector = new THREE.Vector3(0,0,1);
+		dodeca.worldToLocal( forwardvector );
+		
+		var face_centers_indices = Array(3,7,12,16,21,25,30,34,38,42);
+		var closest_angle = dodeca.geometry.vertices[ 0 ].angleTo( forwardvector );
+		var closest_index = 0;
+		
+		//0 is the one you swap with
+		for(var i = 0; i < face_centers_indices.length; i++)
+		{
+			var potential_angle = dodeca.geometry.vertices[ face_centers_indices[i] ].angleTo( forwardvector );
+			if( potential_angle < closest_angle )
+			{
+				closest_angle = potential_angle;
+				closest_index = face_centers_indices[i];
+			}
+		}
+		
+		if(closest_index !== 0 )
+		{
+			var swap_axis = dodeca.geometry.vertices[ closest_index ].clone();
+			swap_axis.add( dodeca.geometry.vertices[ 0 ] );
+			swap_axis.normalize();
+			dodeca.rotateOnAxis( swap_axis, Math.PI );
+		}
+	}
+	
+	//TODO to help hide the problem. 
+	//maybe take the vector of the closest pentagon face to the actual front and rotationg so that you swap with the one that should be there
+	//
+//	var dodeca_indicator_direction = new THREE.Vector3(0,0,1);
+//	dodeca.localToWorld(dodeca_indicator_direction);
+	
+	//-----inflation
+	var dodeca_squashingspeed = 0.022;
+	if(GrabbableArrow.grabbed)
+		dodeca_faceflatness += dodeca_squashingspeed;
+	else
+		dodeca_faceflatness -= dodeca_squashingspeed;
 	
 	if(dodeca_faceflatness > 1)
 		dodeca_faceflatness = 1;
 	if(dodeca_faceflatness < 0)
 		dodeca_faceflatness = 0;
 	
-	dodeca.material.opacity = 0;
-	if(dodeca.material.opacity === 0)
-		scene.remove(dodeca);
-	else
-		scene.add(dodeca);
-	
-	deduce_dodecahedron(0);
-	
-	{
-		var normalturningspeed = TAU/5/2; //this is the amount you want to do in a second
-		normalturningspeed *= delta_t;
-		
-		if( !isMouseDown && dodeca_faceflatness === 0) {
-			dodeca_angle += normalturningspeed;
-		}
-		else {
-			var dist_from_desired_angle = 666;
-			if( atanphi - TAU/4 < dodeca_angle && dodeca_angle < atanphi ) 
-				dist_from_desired_angle = Math.abs(dodeca_angle);
-			else 
-				dist_from_desired_angle = Math.abs(dodeca_angle - (atanphi - TAU/4));
-			
-			if( atanphi-TAU/2 < dodeca_angle && dodeca_angle < 2*atanphi-TAU/2 )
-				dodeca_angle += normalturningspeed * 1.45;
-			if( 2*atanphi-TAU/2 < dodeca_angle && dodeca_angle < atanphi - TAU/4 )
-				dodeca_angle -= normalturningspeed * 1.45;
-			if( atanphi - TAU/4 < dodeca_angle && dodeca_angle < 0 )
-				dodeca_angle += normalturningspeed * 1.45;
-			if( 0 < dodeca_angle && dodeca_angle < atanphi )
-				dodeca_angle -= normalturningspeed * 1.45;
-			
-			if( Math.abs(dodeca_angle) < normalturningspeed * 1.45 )
-				dodeca_angle = 0;
-			if( Math.abs(dodeca_angle - (2*atanphi-TAU/2) )  < normalturningspeed * 1.45 )
-				dodeca_angle = 2*atanphi-TAU/2;
-		}
-		
-		//we turn you upside-down if you're far off-center
-		if( dodeca_angle > atanphi)
-			dodeca_angle -= TAU/2;
-		
-		var inverted = 0;
-		if(dodeca_angle < atanphi - TAU/4) {
-			for( var i = 0; i < dodeca_vertices_numbers.length / 3; i++) {
-				dodeca_vertices_numbers[i*3+0] *= -1;
-				dodeca_vertices_numbers[i*3+1] *= -1;
-			}
-			inverted = 1;
-		}
-		
-		var axis = new THREE.Vector3( 	(dodeca_vertices_numbers[5*3+0] + dodeca_vertices_numbers[6*3+0]) / 2,
-										(dodeca_vertices_numbers[5*3+1] + dodeca_vertices_numbers[6*3+1]) / 2,
-										(dodeca_vertices_numbers[5*3+2] + dodeca_vertices_numbers[6*3+2]) / 2);
-		axis.normalize();
-		
-		for( var i = 0; i < dodeca_vertices_numbers.length / 3; i++){
-			var d = new THREE.Vector3(dodeca_vertices_numbers[i*3+0],dodeca_vertices_numbers[i*3+1],dodeca_vertices_numbers[i*3+2]);
-			if(!inverted)
-				d.applyAxisAngle(axis, dodeca_angle);
-			else d.applyAxisAngle(axis, 2*atanphi - dodeca_angle - TAU/2 );
-			dodeca_vertices_numbers[i*3+0] = d.x;
-			dodeca_vertices_numbers[i*3+1] = d.y;
-			dodeca_vertices_numbers[i*3+2] = d.z;
-		}
-	}
-	
-	dodeca.geometry.attributes.position.needsUpdate = true;
+//	deduce_dodecahedron(0);
 }
 
-function MoveQuasiLattice(){
+function MoveQuasiLattice()
+{
+	//somewhere in here is the "ignoring input while inflating" bug
 	//might do rotation whatevers here
-	if( isMouseDown ) {
+	if( GrabbableArrow.grabbed ) {
 		var Mousedist = MousePosition.length();
 		var OldMousedist = OldMousePosition.length(); //unless the center is going to change?
 		{
@@ -175,7 +206,7 @@ function MoveQuasiLattice(){
 				var LatticeAngleChange = OldMouseAngle - MouseAngle;
 				
 				var QuasiLatticeAngle = Math.atan2(cutout_vector0_player.y, cutout_vector0_player.x);
-				var newQuasiLatticeAngle = QuasiLatticeAngle - LatticeAngleChange;
+				var newQuasiLatticeAngle = QuasiLatticeAngle + LatticeAngleChange;
 
 				cutout_vector0_player.x = veclength * Math.cos(newQuasiLatticeAngle);
 				cutout_vector0_player.y = veclength * Math.sin(newQuasiLatticeAngle);
@@ -189,7 +220,7 @@ function MoveQuasiLattice(){
 	var closest_stable_point_index = 666;
 	for( var i = 0; i < stable_points.length; i++){
 		if( i < 2)
-			continue; //you can have them back, but they are distorted
+			continue; //These are the two distorted ones. They don't look so different from 0 so nobody will want them
 		if(	stable_points[i].distanceTo(cutout_vector0_player) < closest_stable_point_dist ) //so you sort of need to make sure that the one in the array is as low as possible
 		{
 			closest_stable_point_index = i;
@@ -230,8 +261,6 @@ function MoveQuasiLattice(){
 	cutout_vector1.copy(cutout_vector0);
 	cutout_vector1.applyAxisAngle(z_central_axis, -TAU/5);
 	
-//	console.log("current stable point: " + set_stable_point);
-	
 	var interpolation_factor = 1 - dodeca_faceflatness;
 	if(interpolation_factor == 1){ //if they've allowed it to expand, it's now officially snapped
 		cutout_vector0_player.copy(cutout_vector0);
@@ -248,46 +277,31 @@ function MoveQuasiLattice(){
 	quasi_shear_matrix[2] = cutout_vector0_displayed.y /-factor;
 	quasi_shear_matrix[3] = cutout_vector0_displayed.x / factor;
 	
-	//bug is that when you move, the faces seem to be switched to in one frame, THEN the vertices go.
-	//have you got the twisted around version?
-	
-//	console.log() //was gonna show cutout vectors
-	
 	//we want to remove the one that was previously in there, and add
-	if(stable_point_of_meshes_currently_in_scene != modulated_CSP ){
+	if( stable_point_of_meshes_currently_in_scene != modulated_CSP ){
 		dodeca_faceflatness = 1; //skip to the faces being gone
 		if(stable_point_of_meshes_currently_in_scene !== 666 )
-			scene.remove(quasicutout_meshes[stable_point_of_meshes_currently_in_scene]);
-		scene.add(quasicutout_meshes[modulated_CSP]);
+			dodeca.remove(quasicutout_meshes[stable_point_of_meshes_currently_in_scene]);
+		dodeca.add(quasicutout_meshes[modulated_CSP]);
 		
 		stable_point_of_meshes_currently_in_scene = modulated_CSP;
 	}
 	
-	var compensatory_quaternion = new THREE.Quaternion();
-	compensatory_quaternion.setFromAxisAngle(z_central_axis,Math.atan2(cutout_vector0_displayed.y,cutout_vector0_displayed.x) - 0.9424777960769378);
-	quasicutout_meshes[stable_point_of_meshes_currently_in_scene].quaternion.copy(compensatory_quaternion);
-	dodeca.quaternion.copy(compensatory_quaternion);
+	//This will rotate the dodeca to make it look as much as possible like the pattern - if it's oriented correctly
+//	dodeca.quaternion.setFromAxisAngle(z_central_axis,Math.atan2(cutout_vector0_displayed.y,cutout_vector0_displayed.x) - 0.9424777960769378);
 	
-	//TODO, you may not understand this
-	var contrived_dist = camera.position.z - 20 / cutout_vector0_displayed.length() - 0.5*Math.sqrt(5/2+11/10*Math.sqrt(5));
-	dodeca.position.z = contrived_dist;
-	quasicutout_meshes[stable_point_of_meshes_currently_in_scene].position.z = contrived_dist;
+	//TODO, you may not understand this. Actually you should be moving the camera.
+	//note you are keeping the fov constant, so in some sense the size of the playing field changes
+	var contrived_dist = 30 / cutout_vector0_displayed.length() + 0.5*Math.sqrt(5/2+11/10*Math.sqrt(5)); //pretty sure this is the z coord of a face-down dodecahedron's center
+	camera.position.z = contrived_dist;
 }
 
 function deduce_dodecahedron(openness) {	
 	var elevation = 0.5*Math.sqrt(5/2+11/10*Math.sqrt(5));
 	
-	dodeca_vertices_numbers[0*3+0] = 0;
-	dodeca_vertices_numbers[0*3+1] = 0;
-	dodeca_vertices_numbers[0*3+2] = elevation;
-	
-	dodeca_vertices_numbers[1*3+0] = 0;
-	dodeca_vertices_numbers[1*3+1] = 0.5/Math.sin(TAU/10);
-	dodeca_vertices_numbers[1*3+2] = elevation;
-	
-	dodeca_vertices_numbers[2*3+0] = PHI/2;
-	dodeca_vertices_numbers[2*3+1] = 0.5/Math.sin(TAU/10) - Math.cos(3/20*TAU);
-	dodeca_vertices_numbers[2*3+2] = elevation;
+	dodeca.geometry.vertices[0].set(0,0,elevation);
+	dodeca.geometry.vertices[1].set(0,0.5/Math.sin(TAU/10),elevation);
+	dodeca.geometry.vertices[2].set(PHI/2,0.5/Math.sin(TAU/10) - Math.cos(3/20*TAU),elevation);
 	
 	var dihedral_angle = 2 * Math.atan(PHI);
 	for( var i = 3; i < 46; i++) {
@@ -302,22 +316,13 @@ function deduce_dodecahedron(openness) {
 		var b_index = dodeca_derivations[i][1];
 		var c_index = dodeca_derivations[i][2];
 		
-		var a = new THREE.Vector3( //this is our origin
-			dodeca_vertices_numbers[a_index * 3 + 0],
-			dodeca_vertices_numbers[a_index * 3 + 1],
-			dodeca_vertices_numbers[a_index * 3 + 2]);
+		var a = dodeca.geometry.vertices[a_index].clone(); //this is our origin
 		
-		var crossbar_unit = new THREE.Vector3(
-			dodeca_vertices_numbers[b_index * 3 + 0],
-			dodeca_vertices_numbers[b_index * 3 + 1],
-			dodeca_vertices_numbers[b_index * 3 + 2]);
+		var crossbar_unit = dodeca.geometry.vertices[b_index].clone();
 		crossbar_unit.sub(a);			
 		crossbar_unit.normalize();
 	
-		var c = new THREE.Vector3(
-			dodeca_vertices_numbers[c_index * 3 + 0],
-			dodeca_vertices_numbers[c_index * 3 + 1],
-			dodeca_vertices_numbers[c_index * 3 + 2]);
+		var c = dodeca.geometry.vertices[c_index].clone();
 		c.sub(a);
 		var hinge_origin_length = c.length() * get_cos(crossbar_unit, c);		
 		var hinge_origin = new THREE.Vector3(
@@ -337,19 +342,13 @@ function deduce_dodecahedron(openness) {
 		var downward_component = downward_vector_unit.clone();
 		downward_component.multiplyScalar(Math.sin(theta) * hinge_length);
 		
-		var d = new THREE.Vector3();
-		d.addVectors(downward_component, hinge_component);
-		d.add( hinge_origin );
-		d.add( a );
-		
-		dodeca_vertices_numbers[i*3+0] = d.x;
-		dodeca_vertices_numbers[i*3+1] = d.y;
-		dodeca_vertices_numbers[i*3+2] = d.z;
+		dodeca.geometry.vertices[i].addVectors(downward_component, hinge_component);
+		dodeca.geometry.vertices[i].add( hinge_origin );
+		dodeca.geometry.vertices[i].add( a );
 	}
 	
-	dodeca_vertices_numbers[46*3+0] = -dodeca_vertices_numbers[0];
-	dodeca_vertices_numbers[46*3+1] = -dodeca_vertices_numbers[1];
-	dodeca_vertices_numbers[46*3+2] = -dodeca_vertices_numbers[2];
+	dodeca.geometry.vertices[46].copy(dodeca.geometry.vertices[0]);
+	dodeca.geometry.vertices[46].negate();
 }
 
 function remove_stable_point_and_its_rotations(unwanted_index){

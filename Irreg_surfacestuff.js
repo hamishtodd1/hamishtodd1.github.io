@@ -132,7 +132,7 @@ function update_varyingsurface() {
 	//we rotate by a quaternion if user moves
 	if(capsidopenness == 0 ){
 		//we do mouse movement thing
-		if( isMouseDown) {			
+		if( isMouseDown && IrregButton.scale.x === 1 ) {			
 			var MovementAxis = new THREE.Vector3(-Mouse_delta.y, Mouse_delta.x, 0);
 			MovementAxis.normalize();
 			

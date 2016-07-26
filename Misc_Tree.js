@@ -30,6 +30,7 @@ var Chapters_visible = Array(1,1,0,0);
 var Chapters_completed = Array(0,0,0,0); //or in other words "chapter complete"
 
 var Virus_chapter_icons = Array(4);
+var Virus_chapter_names = Array(4);
 
 var Chapter_start_times = Array(4);
 
@@ -52,7 +53,10 @@ function add_tree_stuff_to_scene()
 	for(var i = 0; i < Virus_chapter_icons.length; i++ )
 	{
 		if( Chapters_visible[i] )
+		{
 			scene.add(Virus_chapter_icons[i]);
+			scene.add(Virus_chapter_names[i]);
+		}
 		
 		if( Chapters_completed[i] )
 		{
@@ -74,16 +78,31 @@ function init_tree()
 	Chapter_highlighter.position.z = 0.01;
 	Chapter_highlighter.position.y = playing_field_dimension;
 	
-	Virus_chapter_icons[0] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[12], transparent: true}) );
-	Virus_chapter_icons[1] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[15], transparent: true}) );
-	Virus_chapter_icons[2] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[21], transparent: true}) );
-	Virus_chapter_icons[3] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[35], transparent: true}) );
+	Virus_chapter_icons[0] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[reused_slide_indices[5]], transparent: true}) );
+	Virus_chapter_icons[1] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[reused_slide_indices[6]], transparent: true}) );
+	Virus_chapter_icons[2] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[reused_slide_indices[7]], transparent: true}) );
+	Virus_chapter_icons[3] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[reused_slide_indices[8]], transparent: true}) );
 	
 	var IconHorizontalDistfromCenter = playing_field_dimension * 0.25;
 	Virus_chapter_icons[0].position.set(-IconHorizontalDistfromCenter, IconHorizontalDistfromCenter, 0 );
 	Virus_chapter_icons[1].position.set( IconHorizontalDistfromCenter, IconHorizontalDistfromCenter, 0 );
 	Virus_chapter_icons[2].position.set(-IconHorizontalDistfromCenter,-IconHorizontalDistfromCenter, 0 );
 	Virus_chapter_icons[3].position.set( IconHorizontalDistfromCenter,-IconHorizontalDistfromCenter, 0 );
+	
+	var name_dimension = IconDimension / 3;
+	for(var i = 0; i < 4; i++)
+	{
+		Virus_chapter_names[i] = new THREE.Mesh( new THREE.CubeGeometry(name_dimension, name_dimension, 0),
+				  new THREE.MeshBasicMaterial( { map: random_textures[6+i] } ) );
+		Virus_chapter_names[i].position.copy( Virus_chapter_icons[i].position );
+		Virus_chapter_names[i].position.x -= IconDimension / 2;
+		Virus_chapter_names[i].position.x += name_dimension / 2;
+		Virus_chapter_names[i].position.y -= IconDimension / 2;
+		Virus_chapter_names[i].position.y += name_dimension / 2;
+		Virus_chapter_names[i].position.z += 0.01;
+	}
+		
+	
 	
 	//urrrrrgh you need descriptions.
 }

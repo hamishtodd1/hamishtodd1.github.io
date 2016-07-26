@@ -13,7 +13,7 @@ function updatelattice() {
 }
 
 function HandleNetMovement() {
-	if( isMouseDown){
+	if( GrabbableArrow.grabbed ){
 		var Mousedist = MousePosition.distanceTo(flatlattice_center);
 		var OldMousedist = OldMousePosition.distanceTo(flatlattice_center); //unless the center is going to change?
 		
@@ -42,7 +42,7 @@ function HandleNetMovement() {
 			}
 			
 			//if you didn't change scale (or if your change was ineffectual) we'll change angle.
-			if( oldLatticeScale == LatticeScale) {
+			if( oldLatticeScale == LatticeScale && !Story_states[Storypage].CK_scale_only ) {
 				var MouseAngle = Math.atan2( (MousePosition.x - flatlattice_center.x), (MousePosition.y - flatlattice_center.y) );
 				if(MousePosition.x - flatlattice_center.x === 0 && MousePosition.y - flatlattice_center.y === 0)
 					MouseAngle = 0; //well, undefined

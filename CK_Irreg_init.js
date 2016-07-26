@@ -190,7 +190,7 @@ function init_CK_and_irreg(){
 			shading: THREE.FlatShading //TODO add light source or whatever you need
 		});
 		
-		surface_vertices = new THREE.BufferAttribute( surface_vertices_numbers, 3 );
+		surface_vertices = new THREE.BufferAttribute( new Float32Array(22*3), 3 );
 		
 		surface_geometry = new THREE.BufferGeometry();
 		surface_geometry.setIndex(new THREE.BufferAttribute( net_triangle_vertex_indices, 1 ) );

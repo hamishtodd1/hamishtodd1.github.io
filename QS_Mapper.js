@@ -2,16 +2,14 @@ function Map_To_Quasisphere()
 {
 	var lowest_unused_vertex = 0;
 	
-	var axis = new THREE.Vector3(0,0,-1);
 	var left_triangle_cutout_vector = new THREE.Vector3(cutout_vector1.x, cutout_vector1.y, 0);
 	left_triangle_cutout_vector.applyAxisAngle(z_central_axis, -TAU/5);
 	
 	var right_triangle_cutout_vector = new THREE.Vector3(cutout_vector0.x, cutout_vector0.y, 0);
 	right_triangle_cutout_vector.applyAxisAngle(z_central_axis, TAU/5);
 	
-	//TODO round off errors may mean things on the triangle edge are not in the triangle
-	//TODO seriously, at least the top right might be that
-	for( var i = 0; i < quasilattice_default_vertices.length; i++ ) {
+	for( var i = 0; i < quasilattice_default_vertices.length; i++ )
+	{
 		if( !point_in_inflated_triangle(	quasilattice_default_vertices[i].x, quasilattice_default_vertices[i].y,
 				0, 0, cutout_vector0.x, cutout_vector0.y, cutout_vector1.x, cutout_vector1.y, 
 				true) ) {
@@ -55,7 +53,8 @@ function Map_To_Quasisphere()
 	
 	//Speedup opportunity: we could do a pass of "check there aren't duplicate pairs, or unconnected points. And maybe not interior ones with only one edge attached either"
 	
-	var ourcenter_veclength = 0.5 * Math.tan(Math.atan(PHI) + dodeca_faceflatness*(TAU/4 - Math.atan(PHI))) / Math.tan(TAU/10);
+	//0 was faceflatness
+	var ourcenter_veclength = 0.5 * Math.tan(Math.atan(PHI) + 0*(TAU/4 - Math.atan(PHI))) / Math.tan(TAU/10);
 	var basis_vectors = Array(dodeca_triangle_vertex_indices.length);
 	var ourcenters = Array(dodeca_triangle_vertex_indices.length);
 	var radius;
@@ -66,18 +65,11 @@ function Map_To_Quasisphere()
 		var topindex = dodeca_triangle_vertex_indices[i][2];
 		
 		basis_vectors[i] = Array(3);
-		basis_vectors[i][0] = new THREE.Vector3(
-			dodeca_vertices_numbers[rightindex*3+0] - dodeca_vertices_numbers[topindex*3+0],
-			dodeca_vertices_numbers[rightindex*3+1] - dodeca_vertices_numbers[topindex*3+1],
-			dodeca_vertices_numbers[rightindex*3+2] - dodeca_vertices_numbers[topindex*3+2] );
-		basis_vectors[i][1] = new THREE.Vector3(
-			dodeca_vertices_numbers[leftindex*3+0] - dodeca_vertices_numbers[topindex*3+0],
-			dodeca_vertices_numbers[leftindex*3+1] - dodeca_vertices_numbers[topindex*3+1],
-			dodeca_vertices_numbers[leftindex*3+2] - dodeca_vertices_numbers[topindex*3+2] );
-		basis_vectors[i][2] = new THREE.Vector3( //the one that gets them onto the face
-			dodeca_vertices_numbers[topindex*3+0],
-			dodeca_vertices_numbers[topindex*3+1],
-			dodeca_vertices_numbers[topindex*3+2]);
+		basis_vectors[i][0] = dodeca.geometry.vertices[rightindex].clone();
+		basis_vectors[i][0].sub(dodeca.geometry.vertices[topindex]);
+		basis_vectors[i][1] = dodeca.geometry.vertices[leftindex].clone();
+		basis_vectors[i][1].sub(dodeca.geometry.vertices[topindex]);
+		basis_vectors[i][2] = dodeca.geometry.vertices[topindex].clone(); //the one that gets them onto the face
 		
 		var downward_vector = basis_vectors[i][0].clone();
 		downward_vector.cross(basis_vectors[i][1]);
@@ -219,25 +211,7 @@ function Map_To_Quasisphere()
 	
 	quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.verticesNeedUpdate = true;
 	
-	/* You can tell from the color what kind of thing it's in. You won't have an incomplete fat rhomb
-	 * 
-	 * NO PROBABLY NOT: Easiest way is almost certainly an array. For each stable point, a set of triangles (the EdgesToBeAdded[i*3+2]) and the vertices of the edges on which you want an edge
-	 * 
-	 * Number of points needed in quasicutout_meshes?
-	 *       
-	 * All non-duplicate edges, i.e. what's left in the array...
-	 * We're not sure if we want an edge on them, because it may or may not be a shape that is completed by its opposite partner
-	 * May need to work it out offline. Start by assuming that they don't need ANY extra, but this probably won't work
-	 * 
-	 * One thing you could do would be look at the category of shape and if it's an incomplete category (i.e. there's half a thin rhomb) don't touch it, otherwise do
-	 *   If you have that drawing lines on the non-ordinary shapes, you could easily disable them by pretend-drawing an extra triangle to "finish" that shape
-	 * 
-	 * The conflict: 
-	 *   want like shapes to be like colors (could give up on this in the name of expediency. Same color on HPV, not otherwise)
-	 *   Could change to black and white when flattened
-	 *	 want shapes to not change color when mouse is held down (could easily hide more of them though)
-	 *	 could have the "default" colors, probably the HPV stable point, and then fade to whatever one it is
-	 */
+	//used to be a massive comment here about design!
 }
 
 function put_edge_in_quasicutouts(ourprism, one_quasicutout_vertices, lowest_prism_vertex, v1,v2)
@@ -253,7 +227,7 @@ function put_edge_in_quasicutouts(ourprism, one_quasicutout_vertices, lowest_pri
 		var endingvertex   = quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[one_quasicutout_vertices * q + v2];
 		
 		ourpeak.addVectors(startingvertex,endingvertex); //is it still the same distance from the origin when "flat"?
-		ourpeak.multiplyScalar(0.01);
+		ourpeak.setLength( camera.position.z / 650);
 		
 		StartToEndNorm.copy(endingvertex );
 		StartToEndNorm.sub(startingvertex);
@@ -313,7 +287,8 @@ function get_vertex_position(local_vertices_components,basis_vectors,ourcenter,r
 	}
 	
 	//spherically project. TODO ~30-fold opportunity, store lengths or something?
-	if( dodeca_faceflatness != 1 ) {
+	if( dodeca_faceflatness != 1 )
+	{
 		ourvertex.sub(ourcenter);
 		
 		var radius_ratio;

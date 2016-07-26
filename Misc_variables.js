@@ -93,40 +93,42 @@ var vertex_tobechanged = 666;
 
 //there's an argument for the flashing being a story state controlled thing
 var theyknowyoucanchangevertices = 0;
-var theyknowyoucanrotate = 0;
+var rotation_understanding = 0; //increased when they let go or when they rotate. We ask for two rotations
 
 var capsidopenness = 0; //much depends on this, but we should have as few sharp changes as possible
 var capsidclock = 0;
 var capsidopeningspeed = 0;
 
-var surfaceangle = 0.63;
+var surfaceangle = 0;
+var surface_rotationaxis = new THREE.Vector3();
+var surface_userquaternion = new THREE.Quaternion();
 
 //-----QS
-var dodeca;
-var dodeca_vertices_numbers = new Float32Array(47 * 3);
-var dodeca_geometry;
+var QS_rotationaxis = new THREE.Vector3(1,0,0);
+var QS_rotationangle = 0;
+
+var GrabbableArrow;
+var dodeca; //a very static, barely-used object
 var dodeca_faceflatness = 0;
-var dodeca_angle = 0;
 var dodeca_triangle_vertex_indices;
-var back_hider;
 var quasilattice_default_vertices = Array(8*5+1);
+
 var cutout_vector0; //these lie on the lattice
 var cutout_vector1;
-var cutout_vector0_player;
+var cutout_vector0_player; //what the user inputs. And then what is actually used is worked out
 var cutout_vector1_player;
-var quasi_shear_matrix = Array(4);
+
+var quasi_shear_matrix = Array(4); //able to take the coordinates on the lattice and turn them into things that 
 var quasicutout_intermediate_vertices = Array(quasilattice_default_vertices.length* 2 );
 var quasicutouts_vertices_components = Array(quasilattice_default_vertices.length * 2 * 3 );
 var quasicutout_meshes; //TODO MASSIVE speedup opportunity: merge
+
 var stable_points = Array(345);
 var triangleindices_for_stablepoints = Array(stable_points.length);
 var lowest_unused_stablepoint = 0;
-var quasiquasilattice;
-var stablepointslattice;
 var nearby_quasicutouts;
 var set_stable_point = 666;
 var stable_point_of_meshes_currently_in_scene = 666;
-var modulated_CSP;
 var Forced_edges;
 
 //Potential edges in a quasicutout (so sixty of them in a whole mesh), many will just have their vertices put at 0. Dunno how many there should be?
@@ -160,7 +162,6 @@ var manipulation_surface;
 var filler_points;
 
 var surface;
-var surface_vertices_numbers = new Float32Array(22*3);
 var surface_vertices;
 var surface_geometry;
 
@@ -209,7 +210,7 @@ var surflattice_vertices_numbers = new Float32Array(3 * number_of_lattice_points
 var surflattice_vertices;
 var surflattice_geometry;
 
-var LatticeScale = 1;//1/3 nice size //10/3 * HS3 / number_of_hexagon_rings; maybe the largest?
+var LatticeScale = 0.5;//1/3 nice size //10/3 * HS3 / number_of_hexagon_rings; maybe the largest?
 var LatticeAngle = 0; //TAU/12;
 var LatticeGrabbed = false;
 

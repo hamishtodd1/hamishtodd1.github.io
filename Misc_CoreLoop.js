@@ -1,5 +1,6 @@
 /*	
  * Long term To Do
+ * 	-you're not able to do profound in tone, only (maybe) in ideas.
  *  -everything listed in CKsurfacestuff, bocavirus, alexandrov, quasisphere
  *  -get new form of video in (?)
  *  -get a person with a sense of color to look at everything
@@ -49,6 +50,7 @@ function UpdateWorld() {
 			break;
 			
 		case CK_MODE:
+			UpdateGrabbableArrow();
 			HandleNetMovement();
 			
 			UpdateCapsid();
@@ -68,6 +70,7 @@ function UpdateWorld() {
 			
 		case QC_SPHERE_MODE:
 			UpdateQuasiSurface();
+			UpdateGrabbableArrow();
 			MoveQuasiLattice();
 			Map_To_Quasisphere();
 			break;
@@ -129,9 +132,7 @@ function ChangeScene(new_mode) {
 	
 		case BOCAVIRUS_MODE:
 			for(var i = 0; i < neo_bocavirus_proteins.length; i++)
-				scene.add(neo_bocavirus_proteins[i])
-//			for(var i = 0; i<bocavirus_proteins.length; i++)
-//				scene.add(bocavirus_proteins[i]);
+				scene.add(neo_bocavirus_proteins[i]);
 			for(var i = 0; i< lights.length; i++)
 				scene.add( lights[i] );
 			scene.add(DNA_cage);
@@ -150,27 +151,24 @@ function ChangeScene(new_mode) {
 			}
 //			for( var i = 0; i < blast_cylinders.length; i++)
 //				scene.add(blast_cylinders[i]);
-			
+			scene.add(GrabbableArrow);
 			break;
 			
 		case IRREGULAR_MODE:
 			scene.add(manipulation_surface);
 //			scene.add(varyingsurface);
-//			scene.add(Button[0]);
 			for( var i = 0; i < varyingsurface_cylinders.length; i++)
 				scene.add(varyingsurface_cylinders[i]);
 			for( var i = 0; i < varyingsurface_spheres.length; i++)
 				scene.add(varyingsurface_spheres[i]);
-			
 			scene.add(IrregButton);
 			break;
 			
 		case QC_SPHERE_MODE:
 			scene.add(dodeca);
 			if(stable_point_of_meshes_currently_in_scene !== 666) //if it is equal to this, it has yet to be derived from the cutout vectors
-				scene.add(quasicutout_meshes[stable_point_of_meshes_currently_in_scene]);
-//			scene.add(quasiquasilattice);
-//			scene.add(stablepointslattice);
+				dodeca.add(quasicutout_meshes[stable_point_of_meshes_currently_in_scene]);
+			scene.add(GrabbableArrow);
 			break;
 			
 		case TREE_MODE:
