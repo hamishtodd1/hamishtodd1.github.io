@@ -185,7 +185,7 @@ function init_CK_and_irreg(){
 	//-------------stuff that goes in the scene
 	{		
 		var surfacematerial = new THREE.MeshBasicMaterial({
-			color: 0x00ffff,
+			color: 0x1EFCF3,
 			side:	THREE.DoubleSide,
 			shading: THREE.FlatShading //TODO add light source or whatever you need
 		});
@@ -393,7 +393,7 @@ function init_CK_and_irreg(){
 		}
 	}
 	
-	CK_deduce_surface(capsidopenness, surface_vertices);
+	CK_deduce_surface(capsidopenness);
 	for( var i = 0; i < 20; i++) {
 		surface_triangle_side_unit_vectors[i] = new Array(2);
 		surface_triangle_side_unit_vectors[i][0] = new THREE.Vector3();

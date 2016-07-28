@@ -51,7 +51,10 @@ function UpdateGrabbableArrow()
 	
 	if( GrabbableArrow.grabbed )
 	{
-		GrabbableArrow.position.copy( MousePosition );
+		if( !Story_states[Storypage].CK_scale_only )
+			GrabbableArrow.position.copy( MousePosition );
+		else
+			GrabbableArrow.position.setLength( MousePosition.length() );
 		
 		if( GrabbableArrow.position.x > playing_field_dimension / 2 )
 			GrabbableArrow.position.x = playing_field_dimension / 2;
@@ -67,7 +70,7 @@ function UpdateGrabbableArrow()
 	
 	var arrow_mindist;
 	if( MODE === QC_SPHERE_MODE )
-		arrow_mindist = dodeca.geometry.vertices[1].length();
+		arrow_mindist = 0.9;
 	if( MODE === CK_MODE )
 		arrow_mindist = 0.5;
 	var height_holder = GrabbableArrow.position.z;
@@ -77,6 +80,19 @@ function UpdateGrabbableArrow()
 	if( MODE === CK_MODE && GrabbableArrow.position.length() > 2.7 )
 		GrabbableArrow.position.setLength( 2.7 );
 	GrabbableArrow.position.z = height_holder;
+	
+	var highlight_start_time = 452;
+	var sizechange_time = 0.45;
+	var mov_vector = new THREE.Vector3();
+	if( highlight_start_time <= our_CurrentTime )
+	{
+		if( our_CurrentTime <= highlight_start_time + sizechange_time )
+			mov_vector.set( -0.02,0.02,0);
+		else if( our_CurrentTime <= highlight_start_time + sizechange_time * 2 )
+			mov_vector.set( 0.02,-0.02,0);
+	}
+  
+	GrabbableArrow.position.add(mov_vector);
 }
 
 function UpdateQuasiSurface()
@@ -184,8 +200,8 @@ function MoveQuasiLattice()
 				}
 				var minlength = 1.313;
 				if(veclength < minlength) {
-					veclength += 0.02;
-					if(veclength > minlength)
+//					veclength += 0.02;
+//					if(veclength > minlength)
 						veclength = minlength;
 				}
 				cutout_vector0_player.setLength(veclength);

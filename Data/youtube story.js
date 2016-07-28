@@ -19,7 +19,6 @@ function Update_story()
 	//first part of this function is all based on current state, which you don't have at the very start
 	if(Storypage !== -1)
 	{
-		//could just give a million pause tokens, but this is pretty simple.
 		if( Story_states[Storypage].prevent_playing )
 			if(ytplayer.getPlayerState() === 1)// 1 means playing,not allowed (although maybe some people like to have order designated for them?)
 				ytplayer.pauseVideo();
@@ -27,7 +26,10 @@ function Update_story()
 		if( Story_states[Storypage].unpause_on_vertex_knowledge && theyknowyoucanchangevertices && !isMouseDown )
 			IrregButton.capsidopen = 0;
 		if( Story_states[Storypage].unpause_on_vertex_knowledge && capsidopenness === 0 )
+		{
 			ytplayer.playVideo();
+			console.log("unpausing on vertex knowledge");
+		}			
 		
 		if( Story_states[Storypage].skip_on_rotation_knowledge && rotation_understanding >= 3 && !isMouseDown )
 		{
@@ -42,23 +44,26 @@ function Update_story()
 			if( unpause_timer >= Story_states[Storypage].unpause_after )
 			{
 				unpause_timer = 0;
+				console.log("unpause after read?");
 				ytplayer.playVideo();
 			}
 		}
 		
-		console.log(Story_states[Storypage].pause_at_end)
 		//if you're about to move on from a state that wants to be paused
-		if( Story_states[Storypage].pause_at_end === 1 )
+		if( Story_states[Storypage].pause_at_end === 1 && Story_states[Storypage + 1].startingtime < our_CurrentTime && our_CurrentTime < Story_states[Storypage + 2].startingtime )
 		{
-			
-			if( !used_up_pause && Story_states[Storypage + 1].startingtime < our_CurrentTime && our_CurrentTime < Story_states[Storypage + 2].startingtime )
+			if( ytplayer.getPlayerState() === 2 ) //if you're paused, we don't let you past here
 			{
-				ytplayer.pauseVideo();
 				used_up_pause = 1;
 				return;
 			}
-			if( ytplayer.getPlayerState() === 2 ) //we don't allow continuing
+			
+			//we want to move on iff you've had the pause and you're no longer paused (i.e. the player paused you)
+			if( !used_up_pause )
+			{
+				ytplayer.pauseVideo(); //this has a delayed reaction, we will continue asking for a pause until it has paused!
 				return;
+			}
 		}
 	}
 	
@@ -72,10 +77,11 @@ function Update_story()
 			if( Storypage === i ) //nothing need be done
 				return;
 			
+			if( Storypage > 0 && i === Storypage + 1 && Story_states[Storypage - 1].pause_at_end === 1 && !used_up_pause )
+				console.error("we're moving to the next state without having used a pause!");
+			
 			Storypage = i;
 			
-			if( Storypage > 0 && Story_states[Storypage - 1].pause_at_end === 1 && !used_up_pause )
-				console.error("previous state had a pause that we didn't use");
 			used_up_pause = 0; //reset with every page turned
 			
 			if( Story_states[Storypage].skip_ahead_to !== -1 ) //want to catch the state immediately
@@ -98,8 +104,9 @@ function Update_story()
 		VisibleSlide.material.needsUpdate = true;
 	}
 	
-	if( Story_states[Storypage].irreg_open === 1 )
-		IrregButton.capsidopen = 1;
+	if( Story_states[Storypage].irreg_open !== -1 )
+		IrregButton.capsidopen = Story_states[Storypage].irreg_open;
+	
 	if( Story_states[Storypage].irreg_button_invisible )
 		IrregButton.visible = false;
 	else
@@ -111,9 +118,6 @@ function Update_story()
 		if(capsidopenness === 0 )
 			capsidopenness += 0.0001;
 	}
-
-	//ytplayer.pauseVideo();
-	//ytplayer.seekTo();
 	
 	/*
 	 * List of things:
@@ -156,7 +160,7 @@ function init_story()
 		MODE: SLIDE_MODE,
 		
 		pause_at_end: 0, //at end because when you unpause it's usually a new thought
-		unpause_after: -1,
+		unpause_after: -1, //but you only want it to unpause if it's the pause that YOU'VE done :P
 		
 		slide_number: -1,
 		
@@ -178,7 +182,7 @@ function init_story()
 	
 	ns = default_clone_story_state(1);
 	ns.startingtime = 0.1; //zika virus
-//	ns.skip_ahead_to = 455.5;//skips to wherever you like. Change the location of the button!
+//	ns.skip_ahead_to = 455.5;//skips to wherever you like 585 is QS, 455.5 is CK
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1);
@@ -226,7 +230,7 @@ function init_story()
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
-	ns.startingtime = 106.25; //that look like viruses
+	ns.startingtime = 106.2; //that look like viruses
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1);
@@ -306,7 +310,7 @@ function init_story()
 	//-----------IRREG BEGINS
 	ns = default_clone_story_state(1);
 	ns.startingtime = 302.9; //irreg begins, HIV shown
-	Chapter_start_times[0] = ns.startingtime + 0.01;
+	Chapter_start_times[0] = ns.startingtime;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1);
@@ -369,7 +373,7 @@ function init_story()
 	//------CK BEGINS
 	ns = default_clone_story_state(1);
 	ns.startingtime = 434.6; //start of CK - hepatitis TODO line up CK with it
-	Chapter_start_times[1] = ns.startingtime + 0.01;
+	Chapter_start_times[1] = ns.startingtime;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
@@ -428,7 +432,7 @@ function init_story()
 	//----------QS BEGINS!!!!!
 	ns = default_clone_story_state(1);
 	ns.startingtime = 565; //zika virus
-	Chapter_start_times[2] = ns.startingtime + 0.01;
+	Chapter_start_times[2] = ns.startingtime + 0.05;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
@@ -513,13 +517,21 @@ function init_story()
 
 	//------ENDING BEGINS!!!!
 	ns = default_clone_story_state(0);
-	ns.startingtime = 687.7; //Start of end - keep the tree?
-	Chapter_start_times[3] = ns.startingtime + 0.01;
+	ns.startingtime = 687.7; //Start of end - keep the tree
+	Chapter_start_times[3] = ns.startingtime;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
 	ns.startingtime = 693; //irreg
 	ns.MODE = IRREGULAR_MODE;
+	ns.irreg_open = 1;
+	ns.irreg_button_invisible = 1;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0);
+	ns.startingtime = 702.8;
+	ns.irreg_open = 0;
+	ns.irreg_button_invisible = 1;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);

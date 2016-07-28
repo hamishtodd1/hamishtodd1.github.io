@@ -107,7 +107,7 @@ function load_AV_stuff()
 	reused_slide_indices[5] = 12;
 	reused_slide_indices[6] = 15;
 	reused_slide_indices[7] = 21;
-	reused_slide_indices[8] = 34;
+	reused_slide_indices[8] = 35;
 	
 	virus_textures = Array(virus_texture_urls.length);
 	random_textures = Array(random_texture_urls.length);

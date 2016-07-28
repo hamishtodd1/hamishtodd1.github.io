@@ -2,7 +2,7 @@
  * TODO
  * colors
  * change angles of mouse movement such that rotation is slightly more probable than it currently is
- * get rid of weird flash
+ * get rid of weird flash. Probably occurring because you have some special case for keeping the hexagons visible when openness is 1
  * some alpha for the boundaries of the circle
  * click on lattice, little flash and explosion. Bigger flash when they let go
  * remove flatlattice crap
@@ -12,7 +12,7 @@
 function UpdateCapsid() {
 	var oldcapsidopenness = capsidopenness;
 	
-	var magnitudespeed = 0.018;
+	var magnitudespeed = 0.03;
 	
 	if( GrabbableArrow.grabbed )
 		capsidopeningspeed = magnitudespeed;

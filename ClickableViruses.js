@@ -101,12 +101,24 @@ function Update_virus_picture(index){
 					for(var i = 0; i < flatnet_vertices.array.length; i++)
 						flatnet_vertices.array[i] = setvirus_flatnet_vertices[index-12][i];
 					correct_minimum_angles(flatnet_vertices.array);
+					
+					varyingsurface.quaternion.set(-0.6578069578152893, 0.0342665347729774, -0.021255836146900412, 0.7521063756267157);
+					for( var i = 0; i < varyingsurface_cylinders.length; i++)
+						varyingsurface_cylinders[i].quaternion.copy(varyingsurface.quaternion);
+					for( var i = 0; i < varyingsurface_spheres.length; i++)
+						varyingsurface_spheres[i].quaternion.copy(varyingsurface.quaternion);
+					capsidopenness = 0;
+					IrregButton.capsidopen = 0;
 				}
 				else if( 4 <= index && index < 8){
-					if( index === 4){ LatticeScale=0.577; LatticeAngle = 0.5236; }
-					if( index === 5){ LatticeScale = 0.5; LatticeAngle = 0; }
-					if( index === 6){ LatticeScale=0.3779; LatticeAngle =0.714; }
-					if( index === 7){ LatticeScale = 1/3; LatticeAngle = 0.5236; }
+					//set colors too
+					if( index === 4){ LatticeScale=0.577; LatticeAngle = 0.5236; surface.quaternion.set(-0.27913862156621866,-0.008697986583808425,-0.0009914485321027323, 0.9602109101699025); }
+					if( index === 5){ LatticeScale = 0.5; LatticeAngle = 0;		 surface.quaternion.set( 0.28108625833954903, -0.018889054648123092, 0.04124498016240475, 0.9586097071272512); }
+					if( index === 6){ LatticeScale=0.3779; LatticeAngle =0.714;	 surface.quaternion.set(-0.2534081693372068, 0.027135037557069655, 0.0840263953918781, 0.9633211065513979); }
+					if( index === 7){ LatticeScale = 1/3; LatticeAngle = 0.5236; surface.quaternion.set(-0.27913862156621866,-0.008697986583808425,-0.0009914485321027323, 0.9602109101699025); }
+					
+					for(var i = 0; i < surfperimeter_cylinders.length; i++ )
+						surfperimeter_cylinders[i].quaternion.copy(surface.quaternion);
 				}
 				else if(8 <= index && index < 12){
 					if(index === 8){cutout_vector0.set(-0.5,1.2139220723547204,0); 				cutout_vector1.set(1,0.85065080835204,0); }

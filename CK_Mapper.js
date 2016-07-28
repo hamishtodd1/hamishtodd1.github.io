@@ -1,6 +1,6 @@
 function Map_lattice() {
-	var hexamers_color = new THREE.Color( 97 / 256, 138 / 256, 67 / 256 );
-	var final_pentamers_color = new THREE.Color( 185 / 256, 72 / 256, 148 / 256 );
+	var hexamers_color = new THREE.Color( 0 / 256, 97 / 256, 245 / 256 );
+	var final_pentamers_color = new THREE.Color( 0 / 256, 13 / 256, 194 / 256 );
 	var pentamers_color = new THREE.Color( 
 			hexamers_color.r + (1-capsidopenness) * ( final_pentamers_color.r - hexamers_color.r ),
 			hexamers_color.g + (1-capsidopenness) * ( final_pentamers_color.g - hexamers_color.g ),

@@ -143,7 +143,7 @@ function update_bocavirus() {
 	//it takes a while. Could instead do them in fours. The two at the top and bottom, two on the left and right, two on the front and back
 	var flash_time = 76.6;
 	var fadeto_time = 0.66;
-	var colored_time = 0.1;
+	var colored_time = 3.8;
 	var fadeback_time = fadeto_time;
 	var coloredness;
 	if(our_CurrentTime < flash_time )
@@ -309,7 +309,7 @@ function quadrance_between_DNA_points(index1,index2){
 	return dX*dX + dY*dY + dZ*dZ;
 }
 
-var EggCell_radius = 120;
+var EggCell_radius = 50;
 var EggCell_initialposition = new THREE.Vector3( EggCell_radius + playing_field_dimension,0,0);
 
 function init_bocavirus_stuff()

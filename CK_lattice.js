@@ -12,8 +12,10 @@ function updatelattice() {
 	flatlattice.geometry.attributes.position.needsUpdate = true;
 }
 
-function HandleNetMovement() {
-	if( GrabbableArrow.grabbed ){
+function HandleNetMovement()
+{
+	if( GrabbableArrow.grabbed )
+	{
 		var Mousedist = MousePosition.distanceTo(flatlattice_center);
 		var OldMousedist = OldMousePosition.distanceTo(flatlattice_center); //unless the center is going to change?
 		
@@ -66,7 +68,7 @@ function HandleNetMovement() {
 
 		var centralaxis = new THREE.Vector3(0, 0, 1);
 		
-		var firstnetvertex = new THREE.Vector3(flatnet_vertices.array[ 3 ],flatnet_vertices.array[ 4 ],0);
+		var firstnetvertex = new THREE.Vector3(setvirus_flatnet_vertices[3][3],setvirus_flatnet_vertices[3][ 4 ],0);
 		firstnetvertex.multiplyScalar(1/LatticeScale);
 		firstnetvertex.applyAxisAngle(centralaxis,-LatticeAngle);
 		
