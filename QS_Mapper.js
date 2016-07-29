@@ -287,14 +287,14 @@ function get_vertex_position(local_vertices_components,basis_vectors,ourcenter,r
 	}
 	
 	//spherically project. TODO ~30-fold opportunity, store lengths or something?
-	if( dodeca_faceflatness != 1 )
+//	if( dodeca_faceflatness != 1 )
 	{
 		ourvertex.sub(ourcenter);
 		
 		var radius_ratio;
 		var max_lengthening = radius / ourvertex.length(); //this is how much you would lengthen it by if surface was closed
 		radius_ratio = 1 - max_lengthening;
-		radius_ratio *= dodeca_faceflatness;
+		radius_ratio *= 0; //aka faceflatness
 		radius_ratio += max_lengthening;
 		
 		ourvertex.multiplyScalar(radius_ratio);

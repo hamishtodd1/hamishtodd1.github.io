@@ -132,13 +132,13 @@ function update_varyingsurface() {
 	//we rotate by a quaternion if user moves
 	if(capsidopenness == 0 ){
 		//we do mouse movement thing
-		if( isMouseDown && IrregButton.scale.x === 1 ) {			
+		if( IrregButton.scale.x === 1 ) {			
 			var MovementAxis = new THREE.Vector3(-Mouse_delta.y, Mouse_delta.x, 0);
 			MovementAxis.normalize();
 			
 			varyingsurface.worldToLocal(MovementAxis);
 			var extraquaternion = new THREE.Quaternion();
-			extraquaternion.setFromAxisAngle( MovementAxis, Mouse_delta.length() );
+			extraquaternion.setFromAxisAngle( MovementAxis, Mouse_delta.length() * 1.2 );
 			
 			varyingsurface.quaternion.multiply(extraquaternion);
 			for( var i = 0; i < varyingsurface_cylinders.length; i++)

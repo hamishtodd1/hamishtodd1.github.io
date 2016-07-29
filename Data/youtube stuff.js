@@ -80,3 +80,29 @@ function onYouTubeIframeAPIReady()
 	 * Mw8oZFAsx1c: v3 with abstracted viruses
 	 */
 }
+
+function loadpic(url, type, index) {
+	texture_loader.load(
+			url,
+		function(texture) {
+			if(type === 0)
+				virus_textures[index] = texture;
+			if(type === 1)
+				random_textures[index] = texture;
+			if(type === 2)
+				slide_textures[index] = texture;
+			
+			pictures_loaded++;
+
+			if(pictures_loaded === virus_textures.length + random_textures.length + slide_textures.length ) {
+				bind_pictures();
+			}
+		},
+		function ( xhr ) {}, function ( xhr ) {
+			console.log( 'texture loading error, switch to using the other code in this function' );
+		}
+	);
+}
+
+load_AV_stuff();
+init();

@@ -3,6 +3,7 @@ function initialize_QS_stuff()
 	var GrabbableArrowDimension = 0.44;
 	GrabbableArrow = new THREE.Mesh( new THREE.PlaneGeometry( GrabbableArrowDimension, GrabbableArrowDimension ),
 									 new THREE.MeshBasicMaterial({ depthWrite: false, depthTest: false } ) );
+	console.log(GrabbableArrow)
 	GrabbableArrow.dimension = GrabbableArrowDimension;
 	GrabbableArrow.grabbed = 0;
 	GrabbableArrow.renderOrder = 1; //yay, works

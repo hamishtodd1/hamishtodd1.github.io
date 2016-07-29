@@ -35,8 +35,9 @@ function UpdateCapsid() {
 	surface_vertices.needsUpdate = true;
 	
 	//-------Rotation
-	if(isMouseDown && !GrabbableArrow.grabbed) {
-		surfaceangle = Mouse_delta.length() / 2.5;
+	if( !GrabbableArrow.grabbed ) 
+	{
+		surfaceangle = Mouse_delta.length() / 2.3;
 		
 		surface_rotationaxis.set(-Mouse_delta.y, Mouse_delta.x, 0);
 		surface.worldToLocal(surface_rotationaxis);

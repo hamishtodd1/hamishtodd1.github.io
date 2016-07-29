@@ -1,5 +1,10 @@
 /* MAJOR bug flickering back and forth!
  * 
+ * Ones that look crap:
+ * -HPV: need to stick a singularity-colored triangle in one place and two fat-rhomb-colored triangles between the fat rhomb
+ * -18
+ * -11, three pents at a corner and across edges: need to have that singularity be the actual corner, and need a triangle bridging the gap in the pentagons
+ * 
  * Patch up the bloody holes
  * 
  * New rule, camera moves, sphere doesn't scale at all
@@ -98,7 +103,8 @@ function UpdateGrabbableArrow()
 function UpdateQuasiSurface()
 {
 	//-------Rotation
-	if(isMouseDown && !GrabbableArrow.grabbed) {
+	//TODO saw it vibrate weirdly once?
+	if(!GrabbableArrow.grabbed) {
 		QS_rotationangle = Mouse_delta.length() / 2.5;
 		
 		QS_rotationaxis.set(-Mouse_delta.y, Mouse_delta.x, 0);
@@ -236,15 +242,18 @@ function MoveQuasiLattice()
 	var closest_stable_point_index = 666;
 	for( var i = 0; i < stable_points.length; i++){
 		if( i < 2)
-			continue; //These are the two distorted ones. They don't look so different from 0 so nobody will want them
+			continue; //These are the two distorted ones. They don't look so different from 0 so nobody will want them. Er, don't they have copies?
 		if(	stable_points[i].distanceTo(cutout_vector0_player) < closest_stable_point_dist ) //so you sort of need to make sure that the one in the array is as low as possible
 		{
 			closest_stable_point_index = i;
 			closest_stable_point_dist = stable_points[i].distanceTo(cutout_vector0_player);
+			
+			//you should be able to work out, here, how much to rotate cutout_vector0_player to get it close
 		}
 	}
 	
 	var modulated_CSP = closest_stable_point_index % (stable_points.length / 5);
+	console.log(closest_stable_point_index) //or maybe it's because
 	var closest_i = 666;
 	var closest_dist = 1000;
 	var testcutout = new THREE.Vector3();
@@ -258,6 +267,7 @@ function MoveQuasiLattice()
 			closest_dist = testcutout.distanceTo(stable_points[modulated_CSP]);
 		}
 	}
+	//this changes their location such that a different modulated_CSP is close! You need to do something such that it is not changed.
 	cutout_vector0_player.applyAxisAngle(z_central_axis, closest_i * TAU/5);
 	cutout_vector1_player.copy(cutout_vector0_player);
 	cutout_vector1_player.applyAxisAngle(z_central_axis, -TAU/5);

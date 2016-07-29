@@ -1,5 +1,7 @@
 //you ought to make it so that no chapter's objects are referenced in any other chapter's functions
 
+//one plan: Jeff Roberts might like ZMH. internship at RAD game tools where you become a better programmer and learn about running a business
+
 //--------------Mathematically fundamental
 var HS3 = Math.sqrt(3)/2;
 var PHI = (Math.sqrt(5) + 1) / 2;
@@ -15,7 +17,7 @@ var QC_SPHERE_MODE = 4;
 var ENDING_MODE = 5;
 var TREE_MODE = 6;
 	
-var MODE = 4;
+var MODE = 2;
 
 //--------------Technologically fundamental
 var playing_field_dimension = 7*HS3; //used to be that height was 6.

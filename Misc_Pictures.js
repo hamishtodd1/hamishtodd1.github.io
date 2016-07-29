@@ -110,7 +110,7 @@ function load_AV_stuff()
 	reused_slide_indices[8] = 35;
 	
 	virus_textures = Array(virus_texture_urls.length);
-	random_textures = Array(random_texture_urls.length);
+	random_textures =Array(random_texture_urls.length);
 	slide_textures = Array(slide_texture_urls.length);
 	
 	for(var i = 0; i < virus_texture_urls.length; i++ )
@@ -129,36 +129,7 @@ function load_AV_stuff()
 	}
 }
 
-function loadpic(url, type, index) {
-	//these lines are for if you have no internet
-//	clickable_viruses[i].material.color = 0x000000;
-//	pictures_loaded++;
-//	if(pictures_loaded === clickable_viruses.length ) {
-//		PICTURES_LOADED = 1;
-//		attempt_launch();
-//	}
-	
-	texture_loader.load(
-			url,
-		function(texture) {
-			if(type === 0)
-				virus_textures[index] = texture;
-			if(type === 1)
-				random_textures[index] = texture;
-			if(type === 2)
-				slide_textures[index] = texture;
-			
-			pictures_loaded++;
 
-			if(pictures_loaded === virus_textures.length + random_textures.length + slide_textures.length ) {
-				bind_pictures();
-			}
-		},
-		function ( xhr ) {}, function ( xhr ) {
-			console.log( 'texture loading error, switch to using the other code in this function' );
-		}
-	);
-}
 
 function bind_pictures()
 {
@@ -176,8 +147,11 @@ function bind_pictures()
 	IrregButton.position.set(-playing_field_dimension / 2 + 0.4,-1.4,0.0001);
 	IrregButton.capsidopen = 0;
 
-	GrabbableArrow.material.map = random_textures[5];
-	
+	if(typeof random_textures[5] !== 'undefined')
+		GrabbableArrow.material.map = random_textures[5];
+	else
+		GrabbableArrow.material.color = new THREE.Color(0,0,0);
+		
 	//first slide
 	VisibleSlide = new THREE.Mesh( new THREE.CubeGeometry(playing_field_dimension, playing_field_dimension, 0),
 		new THREE.MeshBasicMaterial( { transparent:true } ) );
