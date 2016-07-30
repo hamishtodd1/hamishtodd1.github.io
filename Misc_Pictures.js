@@ -12,6 +12,7 @@ var virus_textures;
 var random_textures;
 var slide_textures;
 
+
 function load_AV_stuff()
 {
 	//TODO put the numbers in here
