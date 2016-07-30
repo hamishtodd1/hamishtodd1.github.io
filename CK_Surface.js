@@ -7,6 +7,9 @@
  * click on lattice, little flash and explosion. Bigger flash when they let go
  * remove flatlattice crap
  * Maybe take a few frames to snap it, THEN let it start closing
+ * 
+ * It does require training, it is a bit weird. Not everyone gets that letting go changes it.
+ * Could show the capsid closed, then open,
  */
 
 function UpdateCapsid() {
@@ -45,6 +48,7 @@ function UpdateCapsid() {
 	}
 	else
 		surfaceangle *= 0.93;
+	//TODO swap it around so it doesn't have to rotate that much when opening
 	
 	surface.rotateOnAxis(surface_rotationaxis,surfaceangle);
 	for(var i = 0; i < surfperimeter_cylinders.length; i++ )
@@ -59,6 +63,7 @@ function UpdateCapsid() {
 		var interpolationfactor = 0.03 + 0.97 * Math.pow(capsidopenness,10); //may want to massively reduce this power
 		
 		surface.quaternion.slerp(base_quaternion, interpolationfactor); //if capsidopenness = 1 we want it to be entirely the base quaternion, i.e. t = 1
+		surface.updateMatrixWorld();
 		for(var i = 0; i < surfperimeter_cylinders.length; i++ )
 			surfperimeter_cylinders[i].quaternion.slerp(base_quaternion, interpolationfactor);
 	}

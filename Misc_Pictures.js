@@ -129,8 +129,6 @@ function load_AV_stuff()
 	}
 }
 
-
-
 function bind_pictures()
 {
 	init_clickable_viruses();

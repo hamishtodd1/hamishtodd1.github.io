@@ -1,3 +1,5 @@
+//ok we have a bug because the lattice is not precisely on the surface
+
 function Map_lattice() {
 	var hexamers_color = new THREE.Color( 0 / 256, 187 / 256, 253 / 256 );
 	var final_pentamers_color = new THREE.Color( 0 / 256, 13 / 256, 194 / 256 );
@@ -489,8 +491,8 @@ function Map_lattice() {
 					latticevertex_nettriangle );
 			if(capsidopenness != 1) 
 				surflattice_geometry.attributes.position.setXYZ(i, mappedpoint.x, mappedpoint.y, mappedpoint.z );
-			else //just as normal with extra z to appear above the edges
-				surflattice_geometry.attributes.position.setXYZ(i, mappedpoint.x, mappedpoint.y, mappedpoint.z + 0.01 );
+//			else //just as normal with extra z to appear above the edges
+//				surflattice_geometry.attributes.position.setXYZ(i, mappedpoint.x, mappedpoint.y, mappedpoint.z + 0.01 );
 			
 			lattice_colors[i*3+0] = 1;
 			lattice_colors[i*3+1] = 0;
@@ -508,86 +510,6 @@ function Map_lattice() {
 		}
 	}
 	
-	
-	
-//	
-//	
-//	var edgecorner_nettriangles = new Uint16Array(4);
-//	
-//	for(var i = 0; i < number_of_lattice_points; i++) {
-//		//these should be separate from the vertices that you map!
-//		for(var j = 0; j < 4; j++)
-//			edgecorner_nettriangles[j] = locate_in_squarelattice_net(squarelattice_hexagonvertices[ SOMETHING ]);
-//		
-		
-//	}
-//	
-//	
-//	
-//	var hexcorner_nettriangles = new Uint16Array(12);
-//	
-//	for(var i = 0; i < number_of_lattice_points; i++) { //for each hexagon
-//		for(var j = 0; j < 12; j++){
-//			hexcorner_nettriangles[j] = locate_in_squarelattice_net(squarelattice_hexagonvertices[ i*6*6 + j * 3 ]);
-//		}
-//		
-//		
-//		
-//		for(var j = 0; j < 12; j++){ //for each edge, inner or outer, of that hexagon
-//			var edge_startpoint_index = i*3*12 + j * 3;
-//			
-//			map_hex_point(edge_startpoint_index, hexcorner_nettriangles[j],LatticeRotationAndScaleMatrix);
-//			
-//			if(	hexcorner_nettriangles[ j ] === hexcorner_nettriangles[(j+2)%12])
-//			{
-//				map_hex_point(edge_startpoint_index + 1, hexcorner_nettriangles[j],LatticeRotationAndScaleMatrix);
-//				map_hex_point(edge_startpoint_index + 2, hexcorner_nettriangles[j],LatticeRotationAndScaleMatrix);
-//			}
-//			else{
-//				var triangle_for_side_intersection = hexcorner_nettriangles[j] === 666 ? hexcorner_nettriangles[(j+2)%12] : hexcorner_nettriangles[j];
-//				var edge_endpoint_index = i*3*12 + ((j+2)%12) * 3;
-//				
-//				for(var k = 0; k < 3; k++){
-//					var intersectionpoint = line_line_intersection(
-//							squarelatticevertex_rounded_triangle_vertex(triangle_for_side_intersection, k),
-//							squarelattice_hexagonvertices[edge_startpoint_index],
-//							squarelatticevertex_rounded_triangle_vertex(triangle_for_side_intersection, (k+1)%3),
-//							squarelattice_hexagonvertices[edge_endpoint_index  ]);
-//					
-//					if(intersectionpoint === 0)
-//						continue;
-//					
-//					map_mid_edge_points(LatticeRotationAndScaleMatrix,
-//							intersectionpoint,
-//							edge_startpoint_index + 1,
-//							hexcorner_nettriangles[   j   ]);
-//					
-//					var newintersectionpoint;
-//					
-//					//if they're both in triangles, they might be separated triangles, so we need a second intersection
-//					if(hexcorner_nettriangles[(j+2)%12] !== 666)
-//						triangle_for_side_intersection = hexcorner_nettriangles[(j+2)%12];
-//					for(var m = 0; m < 3; m++){
-//						newintersectionpoint = line_line_intersection(
-//								squarelatticevertex_rounded_triangle_vertex(triangle_for_side_intersection, m),
-//								squarelattice_hexagonvertices[edge_startpoint_index],
-//								squarelatticevertex_rounded_triangle_vertex(triangle_for_side_intersection,(m+1)%3),
-//								squarelattice_hexagonvertices[edge_endpoint_index  ] );
-//						
-//						if(newintersectionpoint !== 0)								
-//							break;
-//						else if(m === 2)
-//							console.error("no intersection");
-//					}
-//					
-//					map_mid_edge_points(LatticeRotationAndScaleMatrix,
-//							intersectionpoint,
-//							edge_startpoint_index + 2,
-//							hexcorner_nettriangles[(j+2)%12]);
-//				}
-//			}
-//		}
-//	}
 	
 	surflattice.geometry.attributes.position.needsUpdate = true;
 	surflattice.geometry.attributes.color.needsUpdate = true;

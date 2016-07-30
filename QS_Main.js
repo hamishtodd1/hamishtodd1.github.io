@@ -2,8 +2,8 @@
  * 
  * Ones that look crap:
  * -HPV: need to stick a singularity-colored triangle in one place and two fat-rhomb-colored triangles between the fat rhomb
- * -18
- * -11, three pents at a corner and across edges: need to have that singularity be the actual corner, and need a triangle bridging the gap in the pentagons
+ * -18, three pents at a corner. Stick singularity colors in the gap
+ * -11, three pents at a corner. In addition to the above, you put a pentagon-colored triangle in there, done.
  * 
  * Patch up the bloody holes
  * 
@@ -75,7 +75,7 @@ function UpdateGrabbableArrow()
 	
 	var arrow_mindist;
 	if( MODE === QC_SPHERE_MODE )
-		arrow_mindist = 0.9;
+		arrow_mindist = 0;
 	if( MODE === CK_MODE )
 		arrow_mindist = 0.5;
 	var height_holder = GrabbableArrow.position.z;
@@ -241,7 +241,7 @@ function MoveQuasiLattice()
 	var closest_stable_point_dist = 666;
 	var closest_stable_point_index = 666;
 	for( var i = 0; i < stable_points.length; i++){
-		if( i < 2)
+		if( i % one_fifth_stablepoints < 2)
 			continue; //These are the two distorted ones. They don't look so different from 0 so nobody will want them. Er, don't they have copies?
 		if(	stable_points[i].distanceTo(cutout_vector0_player) < closest_stable_point_dist ) //so you sort of need to make sure that the one in the array is as low as possible
 		{

@@ -55,7 +55,7 @@ function react_to_video()
 function onYouTubeIframeAPIReady()
 {
 	ytplayer = new YT.Player('player', {
-		videoId:'OnI38yeHC3Q',
+		videoId:'YJ7ROqawZNI',
 		height: window_height,
 		width: window_height,
 		events: { 'onReady': function() { YOUTUBE_READY = 1; attempt_launch(); } },
@@ -77,7 +77,7 @@ function onYouTubeIframeAPIReady()
 	 * N5StSZEnoQs: SOWN excerpt
 	 * FfhbOvtlNds: v3 video
 	 * jzKpAqNWzaM: v3 with summarized cell
-	 * OnI38yeHC3Q: v3 with abstracted viruses
+	 * YJ7ROqawZNI: v3 with abstracted viruses
 	 */
 }
 

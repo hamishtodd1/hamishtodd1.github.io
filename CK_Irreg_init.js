@@ -197,9 +197,9 @@ function init_CK_and_irreg(){
 		surface_geometry.addAttribute( 'position', surface_vertices );
 
 		surface = new THREE.Mesh( surface_geometry, surfacematerial );
-		surface.scale.x = 0.995;
-		surface.scale.y = 0.995;
-		surface.scale.z = 0.995;
+//		surface.scale.x = 0.995;
+//		surface.scale.y = 0.995;
+//		surface.scale.z = 0.995;
 		
 		var material1 = new THREE.LineBasicMaterial({
 			color: 0x0000ff
@@ -676,7 +676,13 @@ function init_CK_and_irreg(){
 	}
 		
 	{
-		HexagonLattice = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({vertexColors:THREE.FaceColors}));
+		HexagonLattice = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({vertexColors:THREE.FaceColors,
+	        polygonOffset: true,
+	        polygonOffsetFactor: -1.0, //adding this stuff to get it imposed on the surface. There is this silly 0.995 solution you've used, get rid of that
+	        polygonOffsetUnits: -4.0
+//	        depthWrite: false, depthTest: false
+	        }));
+//	    HexagonLattice.renderOrder = 1; //yay, works
 		squarelattice_hexagonvertices = Array(6 * 2 * number_of_lattice_points); //only 2 points per corner
 		for(var i = 0; i < squarelattice_hexagonvertices.length; i++ )
 			squarelattice_hexagonvertices[i] = new THREE.Vector3();

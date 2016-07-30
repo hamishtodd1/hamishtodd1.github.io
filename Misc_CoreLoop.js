@@ -134,7 +134,7 @@ function ChangeScene(new_mode) {
 			break;
 			
 		case CK_MODE:
-			scene.add(CKHider);
+//			scene.add(CKHider);
 			scene.add(HexagonLattice);
 			scene.add(surface);
 //			scene.add(surflattice);

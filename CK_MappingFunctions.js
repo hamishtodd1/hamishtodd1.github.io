@@ -116,13 +116,12 @@ function map_from_lattice_to_surface(vec, net_triangle_index) {
 	side1_component.multiplyScalar(Lattice_ring_density_factor/LatticeScale);
 	
 	vec.addVectors(side0_component,side1_component);
-	//we expect that this is the problem. It was fine before this was introduced
 	var stickon_vector = new THREE.Vector3(
 		surface_vertices.array[(net_triangle_index+2) * 3 + 0],
 		surface_vertices.array[(net_triangle_index+2) * 3 + 1],
 		surface_vertices.array[(net_triangle_index+2) * 3 + 2] );
 	surface.localToWorld( stickon_vector );
-	stickon_vector.multiplyScalar(1/0.995)
+//	stickon_vector.multiplyScalar(1/0.995);
 	
 	vec.add( stickon_vector );
 	
