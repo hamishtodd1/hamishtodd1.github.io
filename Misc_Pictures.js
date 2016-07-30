@@ -137,7 +137,10 @@ function bind_pictures()
 	
 	//-----other
 	CKHider = new THREE.Mesh( new THREE.CubeGeometry(6.93513143351, 6.93513143351, 0),
-		new THREE.MeshBasicMaterial( { transparent:true, map: random_textures[0] } ) );
+		new THREE.MeshBasicMaterial( { transparent:true, map: random_textures[0],
+	        polygonOffset: true,
+	        polygonOffsetFactor: -2.0, //on top
+	        polygonOffsetUnits: -5.0 } ) );
 	
 	IrregButton = new THREE.Mesh( new THREE.CubeGeometry(0.6, 0.6, 0),
 			new THREE.MeshBasicMaterial( { transparent:true, map: random_textures[1] } ) ); //and can change to [2]

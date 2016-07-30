@@ -1,14 +1,5 @@
 function initialize_QS_stuff()
-{
-	var GrabbableArrowDimension = 0.44;
-	GrabbableArrow = new THREE.Mesh( new THREE.PlaneGeometry( GrabbableArrowDimension, GrabbableArrowDimension ),
-									 new THREE.MeshBasicMaterial({ depthWrite: false, depthTest: false } ) );
-	GrabbableArrow.renderOrder = 1; //yay, works
-	GrabbableArrow.dimension = GrabbableArrowDimension;
-	GrabbableArrow.grabbed = 0;
-	GrabbableArrow.position.set(playing_field_dimension * 0.5 / 2, -playing_field_dimension * 0.5 / 2, 0);
-	//Reeeeeeeally need it always-on-top
-	
+{	
 	cutout_vector0 = new THREE.Vector3(0,0.5/Math.sin(TAU/10),0);
 	cutout_vector1 = new THREE.Vector3(PHI/2,0.5/Math.sin(TAU/10)-Math.cos(3/20*TAU),0);
 	cutout_vector0_player = cutout_vector0.clone();

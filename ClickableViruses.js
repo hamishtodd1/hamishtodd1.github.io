@@ -29,11 +29,11 @@ function init_clickable_viruses()
 	for(var i = 0; i < clickable_viruses.length; i++){
 		clickable_viruses[i] = new THREE.Mesh(
 			new THREE.CubeGeometry(picturepanel_width / 4, picturepanel_width / 4, 0),
-			new THREE.MeshBasicMaterial( { transparent:true
-//					, depthTest: false, depthWrite: false, transparent: true //trying to put them on top stuff
+			new THREE.MeshBasicMaterial( { transparent:true,
+		        polygonOffset: true,
+		        polygonOffsetFactor: -2.0, //on top
+		        polygonOffsetUnits: -6.0
 				} ) );
-		
-		//clickable_viruses[i].renderOrder = 0;
 	}
 	
 	for(var i = 1; i < clickable_viruses.length; i++){

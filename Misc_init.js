@@ -1,6 +1,7 @@
 function init() {
 	init_CK_and_irreg();
 	initialize_QS_stuff();
+	init_Grabbable_Arrow();
 	init_DNA_cage();
 	init_story();
 	

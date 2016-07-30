@@ -1,4 +1,5 @@
 /*
+ * Ones that are appearing for the first time deffo need to fade in
 * You could have all the ones that are possible in each model come out of them. 
 * 		Make sure that once they're there, clicking on that model again highlights the whole group
 
