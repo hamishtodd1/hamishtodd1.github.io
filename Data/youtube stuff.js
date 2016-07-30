@@ -60,7 +60,7 @@ function onYouTubeIframeAPIReady()
 		width: window_height,
 		events: { 'onReady': function() { YOUTUBE_READY = 1; attempt_launch(); } },
 		playerVars: {
-			autoplay: 1,
+			autoplay: 0,
 			fs: 0,
 			rel: 0,
 			showinfo: 0,
