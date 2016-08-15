@@ -839,8 +839,9 @@ function initialize_QS_stuff()
 	midpoint.applyAxisAngle(axis, TAU/5);
 	cutout_vector1.copy(midpoint);
 	
-	cutout_vector0.copy(stable_points[0]);
-	cutout_vector1.copy(stable_points[0]);	
+	//we're setting it to zika
+	cutout_vector0.copy(stable_points[9]);
+	cutout_vector1.copy(stable_points[9]);	
 	cutout_vector1.applyAxisAngle(z_central_axis, -TAU/5);
 	/* 
 	 * 

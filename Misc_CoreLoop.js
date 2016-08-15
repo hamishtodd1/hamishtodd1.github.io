@@ -19,6 +19,10 @@
  *  -no increase in ontological parsimony since you have the button for irreg anyway.
  *  -the problem with them all following your mouse is that you can't turn them around completely.
  *  
+ *  -bear in mind that people can move the mouse extremely fucking fast, they take points VERY far on irreg, and scale back and forth very fast on CK
+ *  -and might not let go of the mouse
+ *  -
+ *  
  *  You still have interaction between irreg and CK, what the hell!
  *  
  *  
@@ -43,7 +47,8 @@ function UpdateWorld() {
 			break;
 			
 		case CK_MODE:
-			UpdateGrabbableArrow();
+			CheckIrregButton();
+			
 			HandleNetMovement();
 			
 			UpdateCapsid();
@@ -134,7 +139,9 @@ function ChangeScene(new_mode) {
 			break;
 			
 		case CK_MODE:
-			scene.add(CKHider); //can remove this if you have no internet
+			scene.add(IrregButton);
+			
+//			scene.add(CKHider); //can remove this if you have no internet
 			scene.add(HexagonLattice);
 			scene.add(surface);
 //			scene.add(surflattice);
@@ -144,7 +151,7 @@ function ChangeScene(new_mode) {
 			}
 //			for( var i = 0; i < blast_cylinders.length; i++)
 //				scene.add(blast_cylinders[i]);
-			scene.add(GrabbableArrow);
+//			scene.add(GrabbableArrow);
 			break;
 			
 		case IRREGULAR_MODE:

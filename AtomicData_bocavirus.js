@@ -18,21 +18,22 @@
  */
 
 var flash_colors;
+var flash_time = 76.6;
+var unflash_time = 3.8;
+
+//camera
+var movement_duration = 2.2;
+var pullback_start_time = 142.8;
+var cell_move_time = 145.6;
+var zoomin_start_time = 149.8;
+var cell_fadeout_start_time = zoomin_start_time + movement_duration / 2;
+var fade_starting_time = 152;
+var Transcriptase_ogling_time = 169.5;
+var second_pullback_start_time = 179.4;
+var whole_thing_finish_time = 197;
 
 function update_bocavirus() {
-	//-------Story stuff
-	var movement_duration = 2.2;
-	
-	var pullback_start_time = 142.8;
-	var cell_move_time = 145.6;
-	var zoomin_start_time = 149.8;
-	var cell_fadeout_start_time = zoomin_start_time + movement_duration / 2;
-	var Transcriptase_ogling_time = 169.5;
-	var second_pullback_start_time = 179.4;
-	var whole_thing_finish_time = 197;
-	
-	
-	
+	//-------camera Story stuff
 	if( our_CurrentTime < pullback_start_time || cell_fadeout_start_time + movement_duration < our_CurrentTime)
 		EggCell.visible = false;
 	else
@@ -113,7 +114,6 @@ function update_bocavirus() {
 	}
 
 	//-------transparency stuff
-	var fade_starting_time = 152;
 	var time_taken_for_fade = 8;
 	var proportion_through = ( our_CurrentTime - fade_starting_time ) / time_taken_for_fade;
 	if(proportion_through < 0)
@@ -141,19 +141,17 @@ function update_bocavirus() {
 
 	//-------Colors
 	//it takes a while. Could instead do them in fours. The two at the top and bottom, two on the left and right, two on the front and back
-	var flash_time = 76.6;
 	var fadeto_time = 0.66;
-	var colored_time = 3.8;
 	var fadeback_time = fadeto_time;
 	var coloredness;
 	if(our_CurrentTime < flash_time )
 		coloredness = 0;
 	else if( our_CurrentTime < flash_time + fadeto_time )
 		coloredness = (our_CurrentTime - flash_time) / fadeto_time;
-	else if( our_CurrentTime < flash_time + fadeto_time + colored_time )
+	else if( our_CurrentTime < unflash_time )
 		coloredness = 1;
-	else if( our_CurrentTime < flash_time + fadeto_time + colored_time + fadeback_time )
-		coloredness = 1 - (our_CurrentTime - (flash_time + fadeto_time + colored_time) ) / fadeback_time;
+	else if( our_CurrentTime < unflash_time + fadeback_time )
+		coloredness = 1 - ( our_CurrentTime - unflash_time ) / fadeback_time;
 	else
 		coloredness = 0;
 	var default_r = 1;

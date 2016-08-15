@@ -1,4 +1,4 @@
-/* MAJOR bug flickering back and forth!
+/* bug where it seems to vibrate?
  * 
  * Ones that look crap:
  * -HPV: need to stick a singularity-colored triangle in one place and two fat-rhomb-colored triangles between the fat rhomb
@@ -10,6 +10,10 @@
  * New rule, camera moves, sphere doesn't scale at all
  * 
  * Change colors, you've not adjusted to the fact that they are allowed to jump around. There's a brown hexagon and pink fat rhombs
+ * 
+ * Probably best to let Grabbable arrow go all the way to the middle and have the scale be: 
+ * minimum + GrabbableArrow.position.length / max_GA_position * (maximum - minimum)
+ * Take the mouse outside the zone and you're still holding it, but screw you if you think it makes a difference. 
  * 
  * Easier on the spherical projection generally?
  * The ones where you inserted something aren't so hot either. Could have special cases.

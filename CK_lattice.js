@@ -14,7 +14,7 @@ function updatelattice() {
 
 function HandleNetMovement()
 {
-	if( GrabbableArrow.grabbed )
+	if( capsidopenness === 1 && isMouseDown )
 	{
 		var Mousedist = MousePosition.distanceTo(flatlattice_center);
 		var OldMousedist = OldMousePosition.distanceTo(flatlattice_center); //unless the center is going to change?
@@ -63,7 +63,7 @@ function HandleNetMovement()
 				LatticeAngle += LatticeAngleChange;
 			}
 		}
-	} else {
+	} else { //this is where snapping takes place. Can put in the contingency on the button here
 		LatticeGrabbed = false;
 
 		var centralaxis = new THREE.Vector3(0, 0, 1);
@@ -87,7 +87,7 @@ function HandleNetMovement()
 			angleaugmentation = close_latticevertex.angleTo(firstnetvertex);
 			if(point_to_the_right_of_line(	close_latticevertex.x,close_latticevertex.y,
 											firstnetvertex.x,firstnetvertex.y, 0,0) ===0 )
-				angleaugmentation*=-1;
+				angleaugmentation *= -1;
 			
 			min_lattice_scale_given_angle = get_min_lattice_scale(LatticeAngle+angleaugmentation);
 			
