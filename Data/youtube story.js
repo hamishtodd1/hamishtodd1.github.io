@@ -783,8 +783,7 @@ function init_story()
 	var Tomoko_slide = ns.slide_number;
 	Story_states.push(ns);
 	
-	//TODO very dodecahedral virus in here
-	ns = default_clone_story_state(0);
+	ns = default_clone_story_state(1);
 	ns.startingtime = 17*60+17.6;
 	Story_states.push(ns);
 	
@@ -810,7 +809,7 @@ function init_story()
 
 	ns = default_clone_story_state(0);
 	ns.startingtime = 18*60+13; //islamic artist
-	ns.slide_number = HIV_slide;
+	ns.slide_number = islamic_dome_index;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
@@ -836,9 +835,9 @@ function init_story()
 	ns.startingtime = 19*60+9.8; //nautilus
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1);
-	ns.startingtime = 19*60+12; //combined
-	Story_states.push(ns);
+//	ns = default_clone_story_state(1);
+//	ns.startingtime = 19*60+12; //combined
+//	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
 	ns.startingtime = 19*60+26; //first virus picture
@@ -851,7 +850,7 @@ function init_story()
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = 20*60+18; //back to measles
+	ns.startingtime = 20*60+17.6; //back to measles
 	ns.slide_number = Measles_slide;
 	Story_states.push(ns);
 
@@ -868,15 +867,17 @@ function init_story()
 	ns = default_clone_story_state(0);
 	ns.startingtime = 20*60+42.4; //irreg
 	ns.MODE = IRREGULAR_MODE;
+	ns.irreg_button_invisible = 1;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
 	ns.startingtime = 20*60+49; //CK
 	ns.MODE = CK_MODE;
+	ns.irreg_button_invisible = 1;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = 21*60+9; //dodecahedron
+	ns.startingtime = 21*60+5; //dodecahedron
 	ns.MODE = BOCAVIRUS_MODE;
 	Story_states.push(ns);
 	
