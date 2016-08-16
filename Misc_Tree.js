@@ -86,10 +86,10 @@ function init_tree()
 	Virus_chapter_icons[3] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[reused_slide_indices[8]], transparent: true}) );
 	
 	var IconHorizontalDistfromCenter = playing_field_dimension * 0.25;
-	Virus_chapter_icons[0].position.set(-IconHorizontalDistfromCenter, IconHorizontalDistfromCenter, 0 );
-	Virus_chapter_icons[1].position.set( IconHorizontalDistfromCenter, IconHorizontalDistfromCenter, 0 );
-	Virus_chapter_icons[2].position.set(-IconHorizontalDistfromCenter,-IconHorizontalDistfromCenter, 0 );
-	Virus_chapter_icons[3].position.set( IconHorizontalDistfromCenter,-IconHorizontalDistfromCenter, 0 );
+	Virus_chapter_icons[0].position.set(-IconHorizontalDistfromCenter, IconHorizontalDistfromCenter, 0 ); //HIV
+	Virus_chapter_icons[1].position.set( IconHorizontalDistfromCenter, IconHorizontalDistfromCenter, 0 ); //polio
+	Virus_chapter_icons[2].position.set(-IconHorizontalDistfromCenter,-IconHorizontalDistfromCenter, 0 ); //Zika
+	Virus_chapter_icons[3].position.set( IconHorizontalDistfromCenter,-IconHorizontalDistfromCenter, 0 ); //Measles
 	
 	var name_dimension = IconDimension / 3;
 	for(var i = 0; i < 4; i++)
