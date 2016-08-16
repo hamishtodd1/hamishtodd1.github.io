@@ -73,13 +73,13 @@ function load_AV_stuff()
 	
 	//----QS
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Zika Virus.jpg");
+	reused_slide_indices[7] = slide_texture_urls.length - 1;
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV non xray.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV xray.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV blobs.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV connections.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern triangular.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern square.png");
-	
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e modified.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e above entrance.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e inside.jpg");
@@ -88,6 +88,7 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern pentagonal.png");
 
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HIV.png");
+	reused_slide_indices[5] = slide_texture_urls.length - 1; 
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HIV variety.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Rhesus.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/trim5.png");
@@ -98,7 +99,9 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/book excerpt.png");
 	
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Polio.png");
+	reused_slide_indices[6] = slide_texture_urls.length - 1;
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/polio hepatitis comparison.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/RVF.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/hexagon.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/hexagon2.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/hexagon3.png");
@@ -112,25 +115,12 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Tomoko Fuse.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Very dodecahedral virus.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Measles virus.png");
+	reused_slide_indices[8] = slide_texture_urls.length - 1;
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/all together.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/golden spiral.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/nautilus.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/nautilus with spiral.jpg");
-	
-	
-	
-	
-//	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Semliki.png");
-//	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Greenhouse.jpg");
-//	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Gamma ray detector.jpg");
-//	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Bucky.png");
-//	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Hair and baskets.png");
-//	
-//	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Origami geodesic.png");
-//	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Very dodecahedral virus.png");
-//	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/golden spiral.png");
-//	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Mona Lisa.jpg");
-//	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Measles virus.png");
+
 	
 	//if you change the above, you probably need to change these
 	reused_slide_indices[0] = 24;
@@ -138,11 +128,6 @@ function load_AV_stuff()
 	reused_slide_indices[2] = 22;
 	reused_slide_indices[3] = 15;
 	reused_slide_indices[4] = 20;
-
-	reused_slide_indices[5] = 12; //HIV
-	reused_slide_indices[6] = 15; //polio
-	reused_slide_indices[7] = 21; //zika
-	reused_slide_indices[8] = 35; //measles
 	
 	virus_textures = Array(virus_texture_urls.length);
 	random_textures =Array(random_texture_urls.length);

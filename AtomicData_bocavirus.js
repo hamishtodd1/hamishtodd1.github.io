@@ -30,7 +30,7 @@ var cell_fadeout_start_time = zoomin_start_time + movement_duration / 2;
 var fade_starting_time = 152;
 var Transcriptase_ogling_time = 169.5;
 var second_pullback_start_time = 179.4;
-var whole_thing_finish_time = 197;
+var whole_thing_finish_time = 203.3;
 
 function update_bocavirus() {
 	//-------camera Story stuff

@@ -44,7 +44,7 @@ var player_has_never_hovered = 1;
 
 function add_tree_stuff_to_scene()
 {
-	if( Chapters_completed[0] && Chapters_completed[1] )
+	if( Chapters_completed[0] || Chapters_completed[1] )
 		Chapters_visible[2] = 1;
 	
 	if(	Chapters_completed[0] === 1 && 

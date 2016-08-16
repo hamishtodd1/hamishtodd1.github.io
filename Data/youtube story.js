@@ -34,16 +34,16 @@ function Update_story()
 			console.log("unpausing on vertex knowledge");
 		}
 		
-		if( Story_states[Storypage].unpause_on_hepatitis_scale && LatticeScale >= 0.28867512192027667 )
+		if( Story_states[Storypage].unpause_on_hepatitis_scale && LatticeScale <= 0.28867512192027667 && ytplayer.getPlayerState() === 2 )
 		{
+			//what if they get it before you've paused?
 			LatticeScale = 0.28867512192027667;
 			ytplayer.playVideo();
 		}
 		
-		if( Story_states[Storypage].skip_on_rotation_knowledge && rotation_understanding >= 3 && !isMouseDown )
+		if( Story_states[Storypage].unpause_on_rotation_knowledge && rotation_understanding >= 2 && !isMouseDown )
 		{
-			ytplayer.seekTo( rotation_knowledge_time );
-			our_CurrentTime = rotation_knowledge_time;
+			rotation_understanding = 0;
 			ytplayer.playVideo();
 		}
 		
@@ -197,7 +197,7 @@ function init_story()
 		
 		CK_scale_only: 0,
 		
-		skip_on_rotation_knowledge: 0,
+		unpause_on_rotation_knowledge: 0,
 		
 		enforced_cutout_vector0_player: new THREE.Vector3(-1,0,0),
 		
@@ -206,7 +206,7 @@ function init_story()
 	
 	ns = default_clone_story_state(1);
 	ns.startingtime = 0.1;
-//	ns.go_to_time = 455.5; //skips to wherever you like 585 is QS, 455.5 is CK
+	ns.go_to_time = 570; //skips to wherever you like 560 is HIV demo, 455.5 is CK
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1);
@@ -224,13 +224,12 @@ function init_story()
 	ns.MODE = BOCAVIRUS_MODE;
 	ns.pause_at_end = 1; //TODO handle the assurance.
 //	ns.unpause_after = 9.5; //want to 
-	ns.skip_on_rotation_knowledge = 1;
+	ns.unpause_on_rotation_knowledge = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
-	ns.startingtime = 42.2; //Until we want more responsiveness we skip this part
+	ns.startingtime = 42.2; //You looking at the camera
 	ns.go_to_time = 50;
-	rotation_knowledge_time = ns.go_to_time;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
@@ -238,7 +237,6 @@ function init_story()
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
-	//----
 	ns = default_clone_story_state(0);
 	ns.startingtime = 50; //pneumonia
 	Story_states.push(ns);
@@ -247,6 +245,7 @@ function init_story()
 	ns.startingtime = 65.8; //Flash, then pause
 	ns.pause_at_end = 1;
 	flash_time = ns.startingtime;
+	ns.unpause_on_rotation_knowledge = 1;
 	Story_states.push(ns);
 	
 	//TODO they need to be able to unpause again
@@ -402,7 +401,7 @@ function init_story()
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
-	ns.startingtime = 357; //HPV blobs
+	ns.startingtime = 358; //HPV blobs
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
@@ -549,7 +548,8 @@ function init_story()
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
-	ns.startingtime = 606.6; //hiv in model(?)
+	ns.startingtime = 606.6; //hiv in model(?) TODO
+	ns.irreg_open = 1;
 	ns.MODE = IRREGULAR_MODE;
 	Story_states.push(ns);
 	
@@ -569,7 +569,8 @@ function init_story()
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
-	ns.startingtime = 634.6; //show the representation 
+	ns.startingtime = 634.6; //show the representation TODO
+	ns.irreg_open = 0; 
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
@@ -603,10 +604,11 @@ function init_story()
 
 	ns = default_clone_story_state(0);
 	ns.startingtime = 60*11+30; //bad angles, close
+	ns.irreg_open = 0;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1);
-	ns.startingtime = 60*12+4; //christmas
+	ns.startingtime = 60*11+51; //christmas
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1);
@@ -624,10 +626,11 @@ function init_story()
 	
 	ns = default_clone_story_state(0);
 	ns.startingtime = 60*12+25; //closes again
+	ns.irreg_open = 0;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
-	ns.startingtime = 60*12+31; //tree, or time to skip back to tree
+	ns.startingtime = 60*12+31.6; //tree, or time to skip back to tree
 	ns.MODE = TREE_MODE;
 	ns.prevent_playing = 1;
 	Story_states.push(ns);
@@ -653,24 +656,32 @@ function init_story()
 	ns = default_clone_story_state(0);
 	ns.startingtime = 60*13+16; //polio in model, no lattice
 	ns.MODE = CK_MODE;
+	ns.irreg_button_invisible = 1;
+	ns.irreg_open = 0;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
 	ns.startingtime = 60*13+24; //open it up
+	ns.irreg_open = 1;
+	ns.irreg_button_invisible = 1;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
 	ns.startingtime = 60*13+28; //lattice appears
 	ns.pause_at_end = 1;
+	ns.irreg_button_invisible = 1;
 	ns.unpause_on_hepatitis_scale = 1;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = 60*13+36.8; //They've gotten to hepatitis, let me stop you there
+	ns.startingtime = 60*13+36.8; //They've gotten to rift valley fever, let me stop you there
+	ns.irreg_button_invisible = 1;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = 60*13+44; //close it up TODO
+	ns.startingtime = 60*13+44; //close it up
+	ns.irreg_open = 0;
+	ns.irreg_button_invisible = 1;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
@@ -681,6 +692,7 @@ function init_story()
 	ns.startingtime = 60*13+59; //back to model
 	ns.CK_scale_only = 0;
 	ns.MODE = CK_MODE;
+	ns.pause_at_end = 1;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
@@ -702,11 +714,15 @@ function init_story()
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
+	ns.startingtime = 60*14+28; //hexagons can be made of pieces
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1);
 	ns.startingtime = 60*14+31; //hexagons tile  
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = 60*14+40; //model contains pentagons
+	ns.startingtime = 60*14+36; //model contains pentagons
 	ns.MODE = CK_MODE;
 	Story_states.push(ns);
 
@@ -744,6 +760,7 @@ function init_story()
 	ns = default_clone_story_state(0);
 	ns.startingtime = 60*16 + 4; //here's a few viruses you can see in it
 	ns.offer_virus_selection = 1;
+	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0);
@@ -915,7 +932,9 @@ function default_clone_story_state( shows_a_slide )
 	//make it unused
 	new_story_state.enforced_cutout_vector0_player = new THREE.Vector3(-1,0,0);
 	
-	new_story_state.skip_on_rotation_knowledge = 0;
+	new_story_state.unpause_on_rotation_knowledge = 0;
+	
+	new_story_state.irreg_open = -1;
 	
 	new_story_state.unpause_on_hepatitis_scale = 0;
 	
