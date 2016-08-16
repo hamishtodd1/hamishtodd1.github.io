@@ -103,10 +103,6 @@ function init_tree()
 		Virus_chapter_names[i].position.y += name_dimension / 2;
 		Virus_chapter_names[i].position.z += 0.01;
 	}
-		
-	
-	
-	//urrrrrgh you need descriptions.
 }
 
 //maybe this should be called before anything in the loop

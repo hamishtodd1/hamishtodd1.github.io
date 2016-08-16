@@ -93,6 +93,31 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/trim5.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/very cone shaped HIV.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Origami_virus.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Lucky.jpg");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/book.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/book excerpt.png");
+	
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Polio.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/polio hepatitis comparison.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/hexagon.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/hexagon2.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/hexagon3.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Geodesic example 1.jpg");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/geodesic building.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Bucky.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/basket.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/hair.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/First pic of virus.jpg");
+	
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Tomoko Fuse.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Very dodecahedral virus.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Measles virus.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/all together.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/golden spiral.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/nautilus.jpg");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/nautilus with spiral.jpg");
+	
+	
 	
 	
 //	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Semliki.png");
@@ -100,7 +125,6 @@ function load_AV_stuff()
 //	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Gamma ray detector.jpg");
 //	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Bucky.png");
 //	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Hair and baskets.png");
-//	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/First pic of virus.jpg");
 //	
 //	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Origami geodesic.png");
 //	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Very dodecahedral virus.png");
