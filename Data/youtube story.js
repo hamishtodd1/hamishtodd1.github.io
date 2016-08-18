@@ -5,7 +5,7 @@
  * Programming the triggers: make sure there’s no interdependence. 
  * Stuff can happen, but it’s a miniscule little thing that has no bearing on the deeper system beneath it
  * 
- * 
+ * One deep bug is the fact that if they tab away and don't pause, the program isn't running so it can't be paused
  */
 
 var Storypage = -1; //set to a silly number initially so we know that the first page will be triggered.
@@ -14,6 +14,7 @@ var used_up_pause = 0;
 var unpause_timer = 0;
 var rotation_knowledge_time;
 var reused_slide_indices = Array();
+var lattice_fadein_time;
 
 function Update_story()
 {
@@ -106,6 +107,22 @@ function Update_story()
 			console.error("no story state found for current time")
 	}
 	
+	surface.material.color.copy( Story_states[i].CK_surface_color );
+	
+	if( Story_states[Storypage].enforced_CK_quaternion.x !== 5 )
+	{
+		surface.quaternion.copy( Story_states[Storypage].enforced_CK_quaternion );
+		for(var i = 0; i < surfperimeter_cylinders.length; i++ )
+			surfperimeter_cylinders[i].quaternion.copy( Story_states[Storypage].enforced_CK_quaternion );
+	}
+	
+	if( Story_states[Storypage].enforced_irreg_state !== -1 )
+	{
+		for(var i = 0; i < flatnet_vertices.array.length; i++)
+			flatnet_vertices.array[i] = setvirus_flatnet_vertices[Story_states[Storypage].enforced_irreg_state][i];
+		correct_minimum_angles(flatnet_vertices.array);
+	}
+	
 	//slide can be a video too maybe
 	if(Story_states[Storypage].slide_number !== -1 )
 	{
@@ -189,6 +206,14 @@ function init_story()
 		
 		offer_virus_selection: 0,
 		
+		enforced_irreg_state: -1,
+		
+		enforced_CK_quaternion: new THREE.Quaternion(5,5,5,5),
+		
+		CK_surface_color: new THREE.Color( 0.11764705882352941, 0.9882352941176471, 0.9529411764705882 ),
+		pentamers_color: new THREE.Color( 147/255,0,8/255 ),
+		hexamers_color: new THREE.Color( 208/255,58/255,59/255 ),
+		
 		irreg_open: -1,
 		irreg_button_invisible: 0,
 		unpause_on_vertex_knowledge: 0,
@@ -206,7 +231,7 @@ function init_story()
 	
 	ns = default_clone_story_state(1);
 	ns.startingtime = 0.1;
-	ns.go_to_time = 570; //skips to wherever you like 560 is HIV demo, 455.5 is CK
+//	ns.go_to_time = 570; //skips to wherever you like 560 is HIV demo, 455.5 is CK
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1);
@@ -549,7 +574,8 @@ function init_story()
 	
 	ns = default_clone_story_state(0);
 	ns.startingtime = 606.6; //hiv in model(?) TODO
-	ns.irreg_open = 1;
+	ns.enforced_irreg_state = 2;
+	ns.irreg_open = 0;
 	ns.MODE = IRREGULAR_MODE;
 	Story_states.push(ns);
 	
@@ -570,6 +596,7 @@ function init_story()
 	
 	ns = default_clone_story_state(0);
 	ns.startingtime = 634.6; //show the representation TODO
+	ns.enforced_irreg_state = 1;
 	ns.irreg_open = 0; 
 	Story_states.push(ns);
 	
@@ -648,20 +675,21 @@ function init_story()
 	ns.startingtime = 60*12+58.1; //hep B comparison
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0);
-	ns.startingtime = 60*13+11; //back to polio to introduce model
-	ns.slide_number = polio_slide;
+	ns = default_clone_story_state(1);
+	ns.startingtime = 60*13+11; //small polio to introduce model
 	Story_states.push(ns);
-
+	
 	ns = default_clone_story_state(0);
 	ns.startingtime = 60*13+16; //polio in model, no lattice
 	ns.MODE = CK_MODE;
+	ns.CK_surface_color = new THREE.Color( 0.89411764705, 0.9725490196, 0.53725490196 );
+	ns.enforced_CK_quaternion.set( -0.26994323284634125, -0.0024107795577928506, -0.000379635156398864, 0.9628731458813965 );
 	ns.irreg_button_invisible = 1;
 	ns.irreg_open = 0;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = 60*13+24; //open it up
+	ns.startingtime = 60*13+23.1; //open it up
 	ns.irreg_open = 1;
 	ns.irreg_button_invisible = 1;
 	Story_states.push(ns);
@@ -669,28 +697,32 @@ function init_story()
 	ns = default_clone_story_state(0);
 	ns.startingtime = 60*13+28; //lattice appears
 	ns.pause_at_end = 1;
+	lattice_fadein_time = ns.startingtime;
 	ns.irreg_button_invisible = 1;
 	ns.unpause_on_hepatitis_scale = 1;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = 60*13+36.8; //They've gotten to rift valley fever, let me stop you there
+	ns.startingtime = 60*13+36.3; //They've gotten to rift valley fever, let me stop you there
 	ns.irreg_button_invisible = 1;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
 	ns.startingtime = 60*13+44; //close it up
 	ns.irreg_open = 0;
+	ns.CK_scale_only = 0;
 	ns.irreg_button_invisible = 1;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1);
 	ns.startingtime = 60*13+51; //rift valley fever
+	ns.CK_surface_color = new THREE.Color( 0.11764705882352941, 0.9882352941176471, 0.9529411764705882 );
+	ns.pentamers_color = new THREE.Color( 0 / 256, 13 / 256, 194 / 256 ),
+	ns.hexamers_color = new THREE.Color( 0 / 256, 187 / 256, 253 / 256 ),
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0);
-	ns.startingtime = 60*13+59; //back to model
-	ns.CK_scale_only = 0;
+	ns.startingtime = 60*13+56; //back to model
 	ns.MODE = CK_MODE;
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
@@ -938,6 +970,10 @@ function default_clone_story_state( shows_a_slide )
 	new_story_state.irreg_open = -1;
 	
 	new_story_state.unpause_on_hepatitis_scale = 0;
+	
+	new_story_state.enforced_irreg_state = -1;
+	
+	new_story_state.enforced_CK_quaternion = new THREE.Quaternion(5,5,5,5);
 	
 	return new_story_state;
 }

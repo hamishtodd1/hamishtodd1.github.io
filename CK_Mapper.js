@@ -1,12 +1,36 @@
 //ok we have a bug because the lattice is not precisely on the surface
 
 function Map_lattice() {
-	var hexamers_color = new THREE.Color( 0 / 256, 187 / 256, 253 / 256 );
-	var final_pentamers_color = new THREE.Color( 0 / 256, 13 / 256, 194 / 256 );
+	var surface_hexamers_color = Story_states[Storypage].hexamers_color.clone();
+	var final_pentamers_color = Story_states[Storypage].pentamers_color.clone();
+	
+	
 	var pentamers_color = new THREE.Color( 
-			hexamers_color.r + (1-capsidopenness) * ( final_pentamers_color.r - hexamers_color.r ),
-			hexamers_color.g + (1-capsidopenness) * ( final_pentamers_color.g - hexamers_color.g ),
-			hexamers_color.b + (1-capsidopenness) * ( final_pentamers_color.b - hexamers_color.b ) );
+			surface_hexamers_color.r + (1-capsidopenness) * ( final_pentamers_color.r - surface_hexamers_color.r ),
+			surface_hexamers_color.g + (1-capsidopenness) * ( final_pentamers_color.g - surface_hexamers_color.g ),
+			surface_hexamers_color.b + (1-capsidopenness) * ( final_pentamers_color.b - surface_hexamers_color.b ) );
+	
+	//this is all crap about that one part where we explain things
+	{
+		var non_surface_hexamers_color = surface_hexamers_color.clone();
+		
+		var lattice_fadein_duration = 2;
+		var lattice_opacity = 1;
+		if( our_CurrentTime < lattice_fadein_time )
+			lattice_opacity = 0;
+		else if( our_CurrentTime < lattice_fadein_time + lattice_fadein_duration )
+			lattice_opacity = ( our_CurrentTime - lattice_fadein_time ) / lattice_fadein_duration;
+		//otherwise it's 1.
+		non_surface_hexamers_color.lerp( new THREE.Color(1,1,1), 1-lattice_opacity );
+		//hack, you have this in the mapper because it uses lattice_opacity
+		var surface_elevation = 0;
+		if( lattice_opacity === 0 )
+			surface_elevation = 3 * (1-capsidopenness);
+		
+		surface.position.z = surface_elevation;
+		for(var i = 0; i < surfperimeter_cylinders.length; i++ )
+			surfperimeter_cylinders[i].position.z = surface_elevation;
+	}
 
 	var LatticeRotationAndScaleMatrix = new Float32Array([ 
            //divided by density factor because mapfromlatticetosurface. Change this when rid off points.
@@ -60,7 +84,7 @@ function Map_lattice() {
 	for(var i = 0; i < number_of_lattice_points; i++)
 	{
 		for(var tri_i = 0; tri_i < 4 * 6; tri_i++ )
-			HexagonLattice.geometry.faces[i * 4 * 6 + tri_i].color.copy(hexamers_color);
+			HexagonLattice.geometry.faces[i * 4 * 6 + tri_i].color.copy(non_surface_hexamers_color);
 	}
 	HexagonLattice.geometry.colorsNeedUpdate = true;
 	
@@ -141,8 +165,19 @@ function Map_lattice() {
 					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 3 ].color.copy(pentamers_color);
 				}
 			}
-			
-			//if you ever fancy making it better again, some of the glitches probably occur because
+			else
+			{
+				if( hexcorner_nettriangles[ ( side_i * 2 + 0 ) % 12 ] !== 666 )
+				{
+					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 0 ].color.copy(surface_hexamers_color);
+					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 1 ].color.copy(surface_hexamers_color);
+				}
+				if( hexcorner_nettriangles[ ( side_i * 2 + 3 ) % 12 ] !== 666 )
+				{
+					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 2 ].color.copy(surface_hexamers_color);
+					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 3 ].color.copy(surface_hexamers_color);
+				}
+			}
 			
 			//------------possibilities begin here
 			

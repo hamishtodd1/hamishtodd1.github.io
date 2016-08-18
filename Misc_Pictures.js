@@ -101,6 +101,7 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Polio.png");
 	reused_slide_indices[6] = slide_texture_urls.length - 1;
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/polio hepatitis comparison.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Polio small.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/RVF.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/hexagon.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/hexagon2.png");
@@ -164,6 +165,8 @@ function bind_pictures()
 	
 	IrregButton = new THREE.Mesh( new THREE.CubeGeometry(0.6, 0.6, 0),
 			new THREE.MeshBasicMaterial( { transparent:true, map: random_textures[1] } ) ); //and can change to [2]
+	IrregButton.pulsing = 1;
+	IrregButton.pulse = 0;
 	
 	IrregButton.position.set(-playing_field_dimension / 2 + 0.4,-1.4,0.002);
 	IrregButton.capsidopen = 0;

@@ -55,7 +55,7 @@ function react_to_video()
 function onYouTubeIframeAPIReady()
 {
 	ytplayer = new YT.Player('player', {
-		videoId:'KG6ftfd7ybw',
+		videoId:'i5zjFIZYmr0',
 		height: window_height,
 		width: window_height,
 		events: { 'onReady': function() { YOUTUBE_READY = 1; attempt_launch(); } },
@@ -73,7 +73,7 @@ function onYouTubeIframeAPIReady()
 	 * 7JlMIJKTUVc: v2
 	 * N5StSZEnoQs: SOWN excerpt
 	 * YJ7ROqawZNI: v3
-	 * KG6ftfd7ybw: v4
+	 * i5zjFIZYmr0: v4
 	 */
 }
 

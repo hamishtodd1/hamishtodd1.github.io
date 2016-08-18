@@ -21,9 +21,8 @@
  *  
  *  -bear in mind that people can move the mouse extremely fucking fast, they take points VERY far on irreg, and scale back and forth very fast on CK
  *  -and might not let go of the mouse
- *  -
+ *  -don't humiliate yourself: if the canvas isn't running, halt the video
  *  
- *  You still have interaction between irreg and CK, what the hell!
  *  
  *  
  *  -make it feel good
@@ -168,7 +167,7 @@ function ChangeScene(new_mode) {
 			scene.add(dodeca);
 			if(stable_point_of_meshes_currently_in_scene !== 666) //if it is equal to this, it has yet to be derived from the cutout vectors
 				dodeca.add(quasicutout_meshes[stable_point_of_meshes_currently_in_scene]);
-			scene.add(GrabbableArrow);
+//			scene.add(GrabbableArrow);
 			break;
 			
 		case TREE_MODE:

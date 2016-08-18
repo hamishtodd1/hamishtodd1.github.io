@@ -85,8 +85,10 @@ function CheckIrregButton(){
 	if(isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) < 0.3 ){
 		var squashed_size = 0.9;
 		IrregButton.scale.set(squashed_size,squashed_size,squashed_size);
+		
+		IrregButton.pulsing = 0;
 	}
-	if(!isMouseDown && IrregButton.scale.x < 1){
+	if(!isMouseDown && (IrregButton.scale.x < 1 && !IrregButton.pulsing ) ){
 		if(IrregButton.capsidopen)
 		{
 			settle_manipulationsurface_and_flatnet();
@@ -98,7 +100,15 @@ function CheckIrregButton(){
 		IrregButton.scale.set(1,1,1);
 	}
 	
-	IrregButton.material.map = random_textures[1 + IrregButton.capsidopen];
+	if( IrregButton.pulsing ) 
+	{
+		IrregButton.pulse += 0.1
+		var buttonscale = 1 + 0.26 * Math.sin(IrregButton.pulse);
+		IrregButton.scale.set(buttonscale,buttonscale,buttonscale);
+//		IrregButton.material.color.r = buttonscale;
+	}
+	
+	IrregButton.material.map = random_textures[ 1 + IrregButton.capsidopen ];
 }
 
 function update_varyingsurface() {

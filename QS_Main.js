@@ -46,7 +46,7 @@ function UpdateQuasiSurface()
 {
 	//-------Rotation
 	//TODO saw it vibrate weirdly once?
-	if(!GrabbableArrow.grabbed) {
+	if(!isMouseDown) {
 		QS_rotationangle = Mouse_delta.length() / 2.5;
 		
 		QS_rotationaxis.set(-Mouse_delta.y, Mouse_delta.x, 0);
@@ -97,7 +97,7 @@ function UpdateQuasiSurface()
 	
 	//-----inflation
 	var dodeca_squashingspeed = 0.022;
-	if(GrabbableArrow.grabbed)
+	if(isMouseDown)
 		dodeca_faceflatness += dodeca_squashingspeed;
 	else
 		dodeca_faceflatness -= dodeca_squashingspeed;
@@ -114,7 +114,7 @@ function MoveQuasiLattice()
 {
 	//somewhere in here is the "ignoring input while inflating" bug
 	//might do rotation whatevers here
-	if( GrabbableArrow.grabbed ) {
+	if( isMouseDown ) {
 		var Mousedist = MousePosition.length();
 		var OldMousedist = OldMousePosition.length(); //unless the center is going to change?
 		{
