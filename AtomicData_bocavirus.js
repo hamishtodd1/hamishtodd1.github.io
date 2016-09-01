@@ -144,7 +144,7 @@ function update_bocavirus() {
 	var fadeto_time = 0.66;
 	var fadeback_time = fadeto_time;
 	var coloredness;
-	if(our_CurrentTime < flash_time )
+	if( our_CurrentTime < flash_time )
 		coloredness = 0;
 	else if( our_CurrentTime < flash_time + fadeto_time )
 		coloredness = (our_CurrentTime - flash_time) / fadeto_time;

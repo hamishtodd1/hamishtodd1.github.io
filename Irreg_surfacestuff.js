@@ -19,6 +19,8 @@ function irreg_deduce_surface(openness ){
 	var vertex1 = new THREE.Vector3(flatnet_vertices.array[1*3+0],flatnet_vertices.array[1*3+1],flatnet_vertices.array[1*3+2]);
 	var vertex2 = new THREE.Vector3(flatnet_vertices.array[2*3+0],flatnet_vertices.array[2*3+1],flatnet_vertices.array[2*3+2]);
 	
+	console.log(vertex0,vertex1,vertex2)
+	
 	var flatnet_midgap = vertex1.clone();
 	flatnet_midgap.applyAxisAngle(central_rotationaxis, -TAU/12 );
 	

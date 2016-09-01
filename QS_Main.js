@@ -1,13 +1,10 @@
 /* bug where it seems to vibrate?
  * 
  * Ones that look crap:
- * -HPV: need to stick a singularity-colored triangle in one place and two fat-rhomb-colored triangles between the fat rhomb
+ * -HPV: need to stick a singularity-colored triangle in one place and a fat-rhomb-colored triangles between the fat rhomb
  * -18, three pents at a corner. Stick singularity colors in the gap
  * -11, three pents at a corner. In addition to the above, you put a pentagon-colored triangle in there, done.
- * 
- * Patch up the bloody holes
- * 
- * New rule, camera moves, sphere doesn't scale at all
+ * -alternatively for all of them you have the corner of the dodeca as a point
  * 
  * Change colors, you've not adjusted to the fact that they are allowed to jump around. There's a brown hexagon and pink fat rhombs
  * 
@@ -15,23 +12,10 @@
  * minimum + GrabbableArrow.position.length / max_GA_position * (maximum - minimum)
  * Take the mouse outside the zone and you're still holding it, but screw you if you think it makes a difference. 
  * 
- * Easier on the spherical projection generally?
- * The ones where you inserted something aren't so hot either. Could have special cases.
- * 
- * Could have more density maps.
- * 
  * Fix that problem where you can't change while the deflation is occurring. Might be you start within that small non-responsive part?
  * Actually it seems to sometimes just not respond to a held down mouse
  * 
- * When virus is clicked, move to that state slowly
  * Probably wouldn't be that hard to flatten the pentagons
- * 
- * 
- * old todo. For if you go back to a vision like the one you had before:
- * Every quasicutout has a set of lines that "grow" over to its partner.
- * Hopefully you can deduce which ones based on the shapes.
- * For every edge the numbers are worked out in realtime
- * Could have blockers around the pentagon. When you fade back, is there any way for them to continue obscure, but not obscure the parts that are fading in?
  */
 
 /* You can reduce the number of extra vertices required by half. You could probably work out all the edge positions using the triangles
