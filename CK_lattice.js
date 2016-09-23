@@ -14,7 +14,7 @@ function updatelattice() {
 
 function HandleNetMovement()
 {
-	if( GrabbableArrow.grabbed )
+	if( capsidopenness === 1 && isMouseDown )
 	{
 		var Mousedist = MousePosition.distanceTo(flatlattice_center);
 		var OldMousedist = OldMousePosition.distanceTo(flatlattice_center); //unless the center is going to change?
@@ -63,42 +63,43 @@ function HandleNetMovement()
 				LatticeAngle += LatticeAngleChange;
 			}
 		}
-	} else {
+	} else { //this is where snapping takes place. Can put in the contingency on the button here
 		LatticeGrabbed = false;
-
-		var centralaxis = new THREE.Vector3(0, 0, 1);
 		
-		var firstnetvertex = new THREE.Vector3(setvirus_flatnet_vertices[3][3],setvirus_flatnet_vertices[3][ 4 ],0);
-		firstnetvertex.multiplyScalar(1/LatticeScale);
-		firstnetvertex.applyAxisAngle(centralaxis,-LatticeAngle);
-		
-		var closestlatticevertices_indices = indices_of_closest_default_lattice_vertices(firstnetvertex.x,firstnetvertex.y); //TODO you don't want a lattice vertex not on the visible lattice.
-		
-		var scaleaugmentation;
-		var angleaugmentation;
-		var min_lattice_scale_given_angle; //do you need to initialize them in order for the while to work?
-		var ourchoice = 0;
-		
-		do {
-			var close_latticevertex = new THREE.Vector3(flatlattice_default_vertices[closestlatticevertices_indices[ourchoice]*3+0],flatlattice_default_vertices[closestlatticevertices_indices[ourchoice]*3+1],0);
+		if(!Story_states[Storypage].CK_scale_only)
+		{
+			var firstnetvertex = new THREE.Vector3(setvirus_flatnet_vertices[3][3],setvirus_flatnet_vertices[3][ 4 ],0);
+			firstnetvertex.multiplyScalar(1/LatticeScale);
+			firstnetvertex.applyAxisAngle(z_central_axis,-LatticeAngle);
 			
-			//how much you WOULD augment to snap the net straight there
-			scaleaugmentation = firstnetvertex.length()/close_latticevertex.length();
-			angleaugmentation = close_latticevertex.angleTo(firstnetvertex);
-			if(point_to_the_right_of_line(	close_latticevertex.x,close_latticevertex.y,
-											firstnetvertex.x,firstnetvertex.y, 0,0) ===0 )
-				angleaugmentation*=-1;
+			var closestlatticevertices_indices = indices_of_closest_default_lattice_vertices(firstnetvertex.x,firstnetvertex.y); //TODO you don't want a lattice vertex not on the visible lattice.
 			
-			min_lattice_scale_given_angle = get_min_lattice_scale(LatticeAngle+angleaugmentation);
+			var scaleaugmentation;
+			var angleaugmentation;
+			var min_lattice_scale_given_angle; //do you need to initialize them in order for the while to work?
+			var ourchoice = 0;
 			
-			var full_scale_addition = LatticeScale * scaleaugmentation - LatticeScale;
-			
-			ourchoice++;
-		} while(LatticeScale + full_scale_addition < min_lattice_scale_given_angle - 0.000001 && ourchoice < 7)
-			
-		var speed_towards_fix = 0.03 + 0.97 * Math.pow((1-capsidopenness), 10); //sure this won't change which one you're heading for?
-		LatticeAngle += angleaugmentation*speed_towards_fix;
-		LatticeScale += full_scale_addition*speed_towards_fix;
+			do {
+				var close_latticevertex = new THREE.Vector3(flatlattice_default_vertices[closestlatticevertices_indices[ourchoice]*3+0],flatlattice_default_vertices[closestlatticevertices_indices[ourchoice]*3+1],0);
+				
+				//how much you WOULD augment to snap the net straight there
+				scaleaugmentation = firstnetvertex.length()/close_latticevertex.length();
+				angleaugmentation = close_latticevertex.angleTo(firstnetvertex);
+				if(point_to_the_right_of_line(	close_latticevertex.x,close_latticevertex.y,
+												firstnetvertex.x,firstnetvertex.y, 0,0) ===0 )
+					angleaugmentation *= -1;
+				
+				min_lattice_scale_given_angle = get_min_lattice_scale(LatticeAngle+angleaugmentation);
+				
+				var full_scale_addition = LatticeScale * scaleaugmentation - LatticeScale;
+				
+				ourchoice++;
+			} while(LatticeScale + full_scale_addition < min_lattice_scale_given_angle - 0.000001 && ourchoice < 7)
+				
+			var speed_towards_fix = 0.03 + 0.97 * Math.pow((1-capsidopenness), 10); //sure this won't change which one you're heading for?
+			LatticeAngle += angleaugmentation*speed_towards_fix;
+			LatticeScale += full_scale_addition*speed_towards_fix;
+		}
 	}
 	updatelattice();
 }

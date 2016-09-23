@@ -5,6 +5,7 @@
  * -label the button
  * -make things fade in in a certain order that suggests its operation
  * -transition to clicked virus is smooth even if capsid is closed
+ * -red highlight should flash
  * 
  * if the player has clicked on the button 8 times,  the capsid appears?
  * 

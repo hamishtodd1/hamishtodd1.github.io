@@ -5,17 +5,21 @@
  * Programming the triggers: make sure there’s no interdependence. 
  * Stuff can happen, but it’s a miniscule little thing that has no bearing on the deeper system beneath it
  * 
- * 
+ * One deep bug is the fact that if they tab away and don't pause, the program isn't running so it can't be paused
  */
 
 var Storypage = -1; //set to a silly number initially so we know that the first page will be triggered.
 var Story_states = [];
 var used_up_pause = 0;
 var unpause_timer = 0;
-var reused_slide_indices = [];
+var rotation_knowledge_time;
+var reused_slide_indices = Array();
+var lattice_fadein_time;
 
 function Update_story()
-{	
+{
+	console.log( our_CurrentTime );
+	
 	//first part of this function is all based on current state, which you don't have at the very start
 	if(Storypage !== -1)
 	{
@@ -29,12 +33,18 @@ function Update_story()
 		{
 			ytplayer.playVideo();
 			console.log("unpausing on vertex knowledge");
-		}			
+		}
 		
-		if( Story_states[Storypage].skip_on_rotation_knowledge && rotation_understanding >= 3 && !isMouseDown )
+		if( Story_states[Storypage].unpause_on_hepatitis_scale && LatticeScale <= 0.28867512192027667 && ytplayer.getPlayerState() === 2 )
 		{
-			ytplayer.seekTo( 49 );
-			our_CurrentTime = 49;
+			//what if they get it before you've paused?
+			LatticeScale = 0.28867512192027667;
+			ytplayer.playVideo();
+		}
+		
+		if( Story_states[Storypage].unpause_on_rotation_knowledge && rotation_understanding >= 2 && !isMouseDown )
+		{
+			rotation_understanding = 0;
 			ytplayer.playVideo();
 		}
 		
@@ -84,10 +94,10 @@ function Update_story()
 			
 			used_up_pause = 0; //reset with every page turned
 			
-			if( Story_states[Storypage].skip_ahead_to !== -1 ) //want to catch the state immediately
+			if( Story_states[Storypage].go_to_time !== -1 ) //want to catch the state immediately
 			{
-				ytplayer.seekTo( Story_states[Storypage].skip_ahead_to );
-				our_CurrentTime =Story_states[Storypage].skip_ahead_to;
+				ytplayer.seekTo( Story_states[Storypage].go_to_time );
+				our_CurrentTime =Story_states[Storypage].go_to_time;
 			}
 			else
 				break;
@@ -97,12 +107,35 @@ function Update_story()
 			console.error("no story state found for current time")
 	}
 	
+	surface.material.color.copy( Story_states[i].CK_surface_color );
+	
+	if( Story_states[Storypage].enforced_CK_quaternion.x !== 5 )
+	{
+		surface.quaternion.copy( Story_states[Storypage].enforced_CK_quaternion );
+		for(var i = 0; i < surfperimeter_cylinders.length; i++ )
+			surfperimeter_cylinders[i].quaternion.copy( Story_states[Storypage].enforced_CK_quaternion );
+	}
+	
+	if( Story_states[Storypage].enforced_irreg_state !== -1 )
+	{
+		for(var i = 0; i < flatnet_vertices.array.length; i++)
+			flatnet_vertices.array[i] = setvirus_flatnet_vertices[Story_states[Storypage].enforced_irreg_state][i];
+		correct_minimum_angles(flatnet_vertices.array);
+	}
+	
 	//slide can be a video too maybe
 	if(Story_states[Storypage].slide_number !== -1 )
 	{
 		VisibleSlide.material.map = slide_textures[ Story_states[Storypage].slide_number ];
 		VisibleSlide.material.needsUpdate = true;
 	}
+	//slide mode should really be an exceptional thing here
+	if( Story_states[Storypage].MODE !== MODE )
+		ChangeScene(Story_states[Storypage].MODE );
+	
+	//If we've just ticked forward then of course we should be playing anyway, but if we just started a new chapter, having been on the tree, we might be paused
+	if( !Story_states[Storypage].prevent_playing )
+		ytplayer.playVideo();
 	
 	if( Story_states[Storypage].irreg_open !== -1 )
 		IrregButton.capsidopen = Story_states[Storypage].irreg_open;
@@ -117,6 +150,13 @@ function Update_story()
 		theyknowyoucanchangevertices = 0; //suuuuure about doing that?
 		if(capsidopenness === 0 )
 			capsidopenness += 0.0001;
+	}
+	
+	console.log(Story_states[Storypage].enforced_cutout_vector0_player.x)
+	if( Story_states[Storypage].enforced_cutout_vector0_player.x !== -1 ) //note to self: you're screwed if you'd like it to be -1.
+	{
+		cutout_vector0_player.copy( Story_states[Storypage].enforced_cutout_vector0_player );
+		console.log( cutout_vector0_player );
 	}
 	
 	/*
@@ -145,9 +185,6 @@ function Update_story()
 	else
 		for( var i = 0; i < clickable_viruses.length; i++ )
 			scene.remove(clickable_viruses[i]);
-	
-	if( Story_states[Storypage].MODE !== MODE )
-		ChangeScene(Story_states[Storypage].MODE );
 }
 
 function init_story()
@@ -165,421 +202,588 @@ function init_story()
 		slide_number: -1,
 		
 		//TODO use this on, for example, transition from part 1 to 2
-		skip_ahead_to: -1, //alternatively just edit the video. Don't skip back, we ascend through the states
+		go_to_time: -1, //alternatively just edit the video. Don't skip back, we ascend through the states
 		
 		offer_virus_selection: 0,
+		
+		enforced_irreg_state: -1,
+		
+		enforced_CK_quaternion: new THREE.Quaternion(5,5,5,5),
+		
+		CK_surface_color: new THREE.Color( 0.11764705882352941, 0.9882352941176471, 0.9529411764705882 ),
+		pentamers_color: new THREE.Color( 147/255,0,8/255 ),
+		hexamers_color: new THREE.Color( 208/255,58/255,59/255 ),
 		
 		irreg_open: -1,
 		irreg_button_invisible: 0,
 		unpause_on_vertex_knowledge: 0,
 		
+		unpause_on_hepatitis_scale: 0,
+		
 		CK_scale_only: 0,
 		
-		skip_on_rotation_knowledge: 0,
+		unpause_on_rotation_knowledge: 0,
+		
+		enforced_cutout_vector0_player: new THREE.Vector3(-1,0,0),
 		
 		prevent_playing: 0 //could also use this to stop them from continuing if they haven't rotated bocavirus etc
 	});
 	
-	ns = default_clone_story_state(1);
-	ns.startingtime = 0.1; //zika virus
-//	ns.skip_ahead_to = 455.5;//skips to wherever you like 585 is QS, 455.5 is CK
+	ns = default_clone_story_state(1,0.1);
+//	ns.go_to_time = 570; //skips to wherever you like 560 is HIV demo, 455.5 is CK
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1);
-	ns.startingtime = 9.8; //hiv
+	ns = default_clone_story_state(1,11); //hiv
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1);
-	ns.startingtime = 19.4; //measles
+	ns = default_clone_story_state(1,21); //measles
+	var Dad_slide = ns.slide_number;
 	Story_states.push(ns);
 	
 	//---paragraph 2
-	ns = default_clone_story_state(0);
-	ns.startingtime = 34.5; //bocavirus appears, then pause
+	ns = default_clone_story_state(0,34.5); //bocavirus appears, then pause
 	ns.MODE = BOCAVIRUS_MODE;
 	ns.pause_at_end = 1; //TODO handle the assurance.
-	ns.skip_on_rotation_knowledge = 1;
+//	ns.unpause_after = 9.5; //want to 
+	ns.unpause_on_rotation_knowledge = 1;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 40.2; //we sort of just want to skip this part
-	ns.skip_ahead_to = 49;
+	ns = default_clone_story_state(0,42.2); //You looking at the camera
+	ns.go_to_time = 50;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 41.6; //assurance occurs
+	ns = default_clone_story_state(0,43.4); //assurance occurs, the previous part is just you looking at the camera
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
-	//----
-	ns = default_clone_story_state(0);
-	ns.startingtime = 49; //pneumonia
+	ns = default_clone_story_state(0,50); //pneumonia
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 76.7; //Flash
+	ns = default_clone_story_state(0,65.8); //Flash, then pause
+	ns.pause_at_end = 1;
+	flash_time = ns.startingtime;
+	ns.unpause_on_rotation_knowledge = 1;
+	Story_states.push(ns);
+	
+	//TODO they need to be able to unpause again
+	
+	ns = default_clone_story_state(1,77); //other viruses
 	Story_states.push(ns);
 	
 	//-------TODO the designs comparison should look around the tree
-//	ns = default_clone_story_state(0);
-//	ns.startingtime = 93.7; //pause again?
-//	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1);
-	ns.startingtime = 104.8; //golf balls TODO footballs
+	ns = default_clone_story_state(1,97); //golf balls  
+	unflash_time = ns.startingtime;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1);
-	ns.startingtime = 106.2; //that look like viruses
+	ns = default_clone_story_state(1,99); //that look like viruses
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1);
-	ns.startingtime = 107.7; //origami is weak, should take something more useful. Greenhouse is the other thing you mention
+	ns = default_clone_story_state(1,101); //todo buildings
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1);
-	ns.startingtime = 109.7; //that look like viruses
+	ns = default_clone_story_state(1,103); //that look like viruses
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1);
-	ns.startingtime = 112.2; //religious art
+	ns = default_clone_story_state(1,106); //religious art
+	var islamic_dome_index = ns.slide_number;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1);
-	ns.startingtime = 114.8; //that look like viruses (HPV)
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(0);
-	ns.startingtime = 135.6; //end of part 1
-	ns.skip_ahead_to = 140.6;
+	ns = default_clone_story_state(1,109); //that look like viruses (HPV)
 	Story_states.push(ns);
 	
-	//----Part 2. Much will happen, in another function
-	ns = default_clone_story_state(0);
-	ns.startingtime = 140.6; //beginning of part 2
+	
+	
+	//----Part 2
+	ns = default_clone_story_state(0,124); //beginning of part 2, back to boca
 	ns.MODE = BOCAVIRUS_MODE;
+	Story_states.push(ns);
+	
+//	var movement_duration = 2.2;
+//	var pullback_start_time = 142.8;
+//	var cell_move_time = 145.6;
+//	var zoomin_start_time = 149.8;
+//	var cell_fadeout_start_time = zoomin_start_time + movement_duration / 2;
+//	var fade_starting_time = 152;
+//	var Transcriptase_ogling_time = 169.5;
+//	var second_pullback_start_time = 179.4;
+//	var whole_thing_finish_time = 197;
+
+	ns = default_clone_story_state(0,127); //camera pulls back
+	pullback_start_time = ns.startingtime;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,139); //absorb
+	cell_move_time = ns.startingtime;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,146); //zoom in
+	zoomin_start_time = ns.startingtime;
+	cell_fadeout_start_time = zoomin_start_time + movement_duration / 2;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,149.5); //break up
+	fade_starting_time = ns.startingtime;
 	ns.pause_at_end = 1;
 	ns.unpause_after = 9.5;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 163.6; //you'll need to unpause me manually
+	ns = default_clone_story_state(0,162.8); //you'll need to unpause me manually
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 168.15; //further description of cell
+	ns = default_clone_story_state(0,168.4); //transcriptase
+	Transcriptase_ogling_time = ns.startingtime;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1);
-	ns.startingtime = 196.1; //cell with fluourescence
+	ns = default_clone_story_state(0,179); //comparison to virus
+	second_pullback_start_time = ns.startingtime;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 220.3; //back to DNA. DNA mimics what you do?
+	ns = default_clone_story_state(1,201); //cell with fluourescence
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,211); //back to DNA. DNA mimics what you do?
 	ns.MODE = BOCAVIRUS_MODE;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1);
-	ns.startingtime = 254.8; //cell full of viruses
+	ns = default_clone_story_state(1,291); //cell full of viruses
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1);
-	ns.startingtime = 259.3; //lysis
+	ns = default_clone_story_state(1,296.8); //lysis
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 265.8; //back to DNA
+	ns = default_clone_story_state(0,302.7); //back to DNA
 	ns.MODE = BOCAVIRUS_MODE;
 	Story_states.push(ns);
 	
-//	ns = default_clone_story_state(0);
-//	ns.startingtime = 276.2; //twelve pentagons flash?
+//	ns = default_clone_story_state(0,276.2); //twelve pentagons flash? Proteins come back? 
 //	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 289.4; //Tree
+	ns = default_clone_story_state(0,310); //Tree
 	ns.MODE = TREE_MODE;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 298; //pause on here until they click
+	ns = default_clone_story_state(0,328);
+	ns.prevent_playing = 1; //pause on here until they click
+	Story_states.push(ns);
+	
+	//might need an assurance? Especially if they click on you
+	
+	//----------QS BEGINS!!!!!
+	ns = default_clone_story_state(1,329); //zika virus
+	var zika_slide = ns.slide_number; 
+	Chapter_start_times[2] = ns.startingtime + 0.05;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,337); //QS, Try it out, (pause)
+	ns.MODE = QC_SPHERE_MODE;
+	ns.pause_at_end = 1;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,343); //may not seem like a virus
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,347.2); //HPV
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,354); //HPV xray
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,358); //HPV blobs
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,368.4); //HPV connections
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,375.5); //back to model
+	ns.pause_at_end = 1;
+	ns.MODE = QC_SPHERE_MODE;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,379); //pause to play around with it
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,6*60+26.3); //islamic holy building
+	ns.slide_number = islamic_dome_index;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,6*60+31); //covered with patterns(triangle)
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,6*60+35); //square
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,6*60+38); //darb e imam shrine
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,6*60+45); //above entrance
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,411.3); //inside
+	var inside_darb_e_pic_index = ns.slide_number;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,6*60+58); //inside with pentagons
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,7*60+4); //just pentagons
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,7*60+12); //rubbish pattern
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,7*60+19.9); //back to shrine
+	ns.slide_number = inside_darb_e_pic_index;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,7*60 + 49); //back to model
+	ns.pause_at_end = 1;
+	ns.MODE = QC_SPHERE_MODE;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,479.8); //here's where things will change when you have the pic in the vid
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,8*60 + 16.8); //HPV in the model
+	ns.enforced_cutout_vector0_player.set(0, 3.479306368947708, 0);
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,8*60 + 32); //smaller HPV (zika)
+	ns.enforced_cutout_vector0_player.set(1.809016994374948, 1.4384360606445132, 0);
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,8*60 + 55); //pic of zika
+	ns.slide_number = zika_slide;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,537.9);
+	var second_tree_advice_time = ns.startingtime; 
+	//and come here after first chapter...
+	ns.MODE = TREE_MODE;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,542);
 	ns.prevent_playing = 1;
 	Story_states.push(ns);
 	
 	//-----------IRREG BEGINS
-	ns = default_clone_story_state(1);
-	ns.startingtime = 302.9; //irreg begins, HIV shown
+	ns = default_clone_story_state(1,9*60 + 2.8); //irreg begins, HIV shown
 	Chapter_start_times[0] = ns.startingtime;
+	var HIV_slide = ns.slide_number;
 	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1);
-	ns.startingtime = 321.7; //monkeys. then picture of a molecule?
+
+	ns = default_clone_story_state(1,561.2); //different HIVs
+	var different_HIVs_index = ns.slide_number; 
 	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1);
-	ns.startingtime = 338.7; //different HIVs
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 348.3; //irreg appears
+
+	ns = default_clone_story_state(0,568.7); //irreg appears
 	ns.MODE = IRREGULAR_MODE;
 	ns.irreg_button_invisible = 1;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 354.7; //open irreg then (pause)
+	ns = default_clone_story_state(0,575.1); //open irreg then (pause)
 	ns.irreg_open = 1;
 	ns.pause_at_end = 1;
 	ns.irreg_button_invisible = 1;
 	ns.unpause_on_vertex_knowledge = 1;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 358.6; //try changing it further using...
-	ns.irreg_button_invisible = 1;
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 361.7; //...this switch. Try making this virus, then (pause)
+	ns = default_clone_story_state(0,578.3); //just to make button appear
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 370.5; //other viruses come in then (pause)
-	ns.offer_virus_selection = 1;
+	ns = default_clone_story_state(0,578.5); //prompt to click button (skip for time being)
+	ns.go_to_time = 582.5;
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 382.1; //stuff about model
-	ns.offer_virus_selection = 1;
+	ns = default_clone_story_state(1,582.5); //monkeys
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 417.3; //open, prove me wrong
-	ns.offer_virus_selection = 1;
+	ns = default_clone_story_state(1,588); //have a protein
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,597.6); //very small (cone shaped hiv)
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,606.6); //hiv in model(?) TODO
+	ns.enforced_irreg_state = 2;
+	ns.irreg_open = 0;
+	ns.MODE = IRREGULAR_MODE;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,614.6); //might want to make these
+	ns.slide_number = different_HIVs_index;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,623.9); //potato virus
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,630.5); //let them make it
+	ns.pause_at_end = 1;
+	ns.MODE = IRREGULAR_MODE;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,634.6); //show the representation TODO
+	ns.enforced_irreg_state = 1;
+	ns.irreg_open = 0; 
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,643.8); //we've noticed that when you open them out
 	ns.irreg_open = 1;
-	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 429.8; //tree
+	ns = default_clone_story_state(0,646); //highlight cuts
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,663); //offer viruses
 	ns.offer_virus_selection = 1;
+	ns.pause_at_end = 1;
+	ns.irreg_open = 1;
+	Story_states.push(ns);
+	
+	//angle indicators come in? Could be now, "prove me wrong", or it could be earlier.
+	
+	ns = default_clone_story_state(0,60*11 + 14.5); //story begins
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,60*11+18.5); //open it out
+	ns.irreg_open = 1;
+	Story_states.push(ns);
+	
+	//move corner around, close up badly
+
+	ns = default_clone_story_state(0,60*11+30); //bad angles, close
+	ns.irreg_open = 0;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,60*11+51); //christmas
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,60*12+7); //book
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,60*12+13); //book excerpt
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,60*12+21); //back to model
+	ns.MODE = IRREGULAR_MODE;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,60*12+25); //closes again
+	ns.irreg_open = 0;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,60*12+31.6); //tree, or time to skip back to tree
 	ns.MODE = TREE_MODE;
 	ns.prevent_playing = 1;
 	Story_states.push(ns);
+	
 	
 	//------CK BEGINS
-	ns = default_clone_story_state(1);
-	ns.startingtime = 434.6; //start of CK - hepatitis TODO line up CK with it
+	ns = default_clone_story_state(1,60*12+32.2); //polio
 	Chapter_start_times[1] = ns.startingtime;
+//	ns.CK_scale_only = 1; //this may be a remanant from what you needed in a previous version
+	var polio_slide = ns.slide_number;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 445.7; //bring in CK then (pause)
+	ns = default_clone_story_state(1,60*12+58.1); //hep B comparison
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,60*13+11); //small polio to introduce model
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,60*13+16); //polio in model, no lattice
+	ns.MODE = CK_MODE;
+	ns.CK_surface_color = new THREE.Color( 0.89411764705, 0.9725490196, 0.53725490196 );
+	ns.enforced_CK_quaternion.set( -0.26994323284634125, -0.0024107795577928506, -0.000379635156398864, 0.9628731458813965 );
+	ns.irreg_button_invisible = 1;
+	ns.irreg_open = 0;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,60*13+23.1); //open it up
+	ns.irreg_open = 1;
+	ns.irreg_button_invisible = 1;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,60*13+28); //lattice appears
+	ns.pause_at_end = 1;
+	lattice_fadein_time = ns.startingtime;
+	ns.irreg_button_invisible = 1;
+	ns.unpause_on_hepatitis_scale = 1;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,60*13+36.3); //They've gotten to rift valley fever, let me stop you there
+	ns.irreg_button_invisible = 1;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,60*13+44); //close it up
+	ns.irreg_open = 0;
+	ns.CK_scale_only = 0;
+	ns.irreg_button_invisible = 1;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,60*13+51); //rift valley fever
+	ns.CK_surface_color = new THREE.Color( 0.11764705882352941, 0.9882352941176471, 0.9529411764705882 );
+	ns.pentamers_color = new THREE.Color( 0 / 256, 13 / 256, 194 / 256 ),
+	ns.hexamers_color = new THREE.Color( 0 / 256, 187 / 256, 253 / 256 ),
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,60*13+56); //back to model
 	ns.MODE = CK_MODE;
 	ns.pause_at_end = 1;
-	ns.CK_scale_only = 1;
 	Story_states.push(ns);
-	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 455.6; //suggest the rotation and making cauliomaviridae then (pause)
+
+	ns = default_clone_story_state(0,60*14+6); //tell them to rotate TODO
+	ns.go_to_time = 60*14+9;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,60*14+9); //try making this virus
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
-	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 473.5; //chat about golf ball
+
+	ns = default_clone_story_state(0,60*14+19); //they look this way because of symmetry
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,60*14+24.5); //hexagons are symmetrical
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,60*14+28); //hexagons can be made of pieces
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,60*14+31); //hexagons tile  
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,60*14+36); //model contains pentagons
+	ns.MODE = CK_MODE;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,60*15+2); //geodesic example
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,60*15+8); //geodesic building
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,60*15+12); //Bucky
+	var bucky_slide = ns.slide_number;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,60*15+25); //thai basket
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,60*15+29.8); //hairstyle
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1);
-	ns.startingtime = 497.2; //greenhouse
+	ns = default_clone_story_state(1,60*15+36.7); //first virus
+	var first_virus_slide = ns.slide_number;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1);
-	ns.startingtime = 510; //other CK example. May want, say, electroncephalogram for the "so were these designs inspired?"
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1);
-	ns.startingtime = 524.6; //Bucky
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1);
-	ns.startingtime = 531.5; //earlier sources
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1);
-	ns.startingtime = 535.5; //first image of a virus
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 545.7; //back to CK
+	ns = default_clone_story_state(0,60*15+53.8); //this is what he sent them
 	ns.MODE = CK_MODE;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 555.1; //pics appear in CK then (pause)
+	ns = default_clone_story_state(0,60*16 + 4); //here's a few viruses you can see in it
 	ns.offer_virus_selection = 1;
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 560; //tree
-	ns.MODE = TREE_MODE;
-	ns.prevent_playing = 1;
-	Story_states.push(ns);
-	
-	//----------QS BEGINS!!!!!
-	ns = default_clone_story_state(1);
-	ns.startingtime = 565; //zika virus
-	Chapter_start_times[2] = ns.startingtime + 0.05;
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(0);
-	ns.startingtime = 578.4; //QS, Try it out, (pause)
-	ns.MODE = QC_SPHERE_MODE;
-	ns.pause_at_end = 1;
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(0); //the proteins go on the corners
-	ns.startingtime = 581.5;
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(0);
-	ns.startingtime = 589.4; //corners flash
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(0);
-	ns.startingtime = 591.3; //edges flash then try making HPV (pause) You know it'll only be through trial and error :(
-	ns.pause_at_end = 1;
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(0);
-	ns.startingtime = 612.2; //just QS
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(1);
-	ns.startingtime = 622.3; //darb e imam shrine
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(1);
-	ns.startingtime = 628.1; //above its entrance
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(1);
-	ns.startingtime = 632.7; //more inside (2?)
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1);
-	ns.startingtime = 638.3; //pentagons added
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(1);
-	ns.startingtime = 643.5; //triangles
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1);
-	ns.startingtime = 644.4; //squares
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1);
-	ns.startingtime = 645.1; //hexagons
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(1);
-	ns.startingtime = 646.5; //pentagons don't fit together
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(1);
-	ns.startingtime = 652.6; //unsatisfying pattern
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(0);
-	ns.startingtime = 658.9; //Back to Darb e inside
-	ns.slide_number = reused_slide_indices[0];
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(0);
-	ns.startingtime = 674.7; //QS back. Compare it with this pattern, then (pause)
-	ns.MODE = QC_SPHERE_MODE;
-	ns.pause_at_end = 1;
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(0);
-	ns.startingtime = 682.5; //QS back
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 683.3;
+	ns = default_clone_story_state(0,60*16 + 10); //back to tree
+	ns.offer_virus_selection = 1;
 	ns.MODE = TREE_MODE;
 	ns.prevent_playing = 1;
 	Story_states.push(ns);
 
 	//------ENDING BEGINS!!!!
-	ns = default_clone_story_state(0);
-	ns.startingtime = 687.7; //Start of end - keep the tree
+	//no canvas?
+	//15:35
+	ns = default_clone_story_state(0,16*60+11); //Start of end
+	ns.MODE = TREE_MODE;
 	Chapter_start_times[3] = ns.startingtime;
 	Story_states.push(ns);
-
-	ns = default_clone_story_state(0);
-	ns.startingtime = 693; //irreg
-	ns.MODE = IRREGULAR_MODE;
-	ns.irreg_open = 1;
-	ns.irreg_button_invisible = 1;
+	
+	ns = default_clone_story_state(1,17*60+7); //Tomoko Fuse
+	var Tomoko_slide = ns.slide_number;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0);
-	ns.startingtime = 702.8;
-	ns.irreg_open = 0;
+	ns = default_clone_story_state(1,17*60+17.6);
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,18*60+4); //why an architect
+	ns.slide_number = bucky_slide;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,18*60+6); //can help with polio
+	ns.slide_number = polio_slide;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,18*60+8); //an origamist
+	ns.slide_number = Tomoko_slide;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,18*60+10); //HIV
+	ns.slide_number = HIV_slide;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,18*60+13); //islamic artist
+	ns.slide_number = islamic_dome_index;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,18*60+17); //zika
+	ns.slide_number = zika_slide;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,18*60+19.7); //measles
+	var Measles_slide = ns.slide_number;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,18*60+45); //all models
+	var all_models_slide = ns.slide_number; 
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,19*60+5); //golden spiral
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,19*60+9.8); //nautilus
+	Story_states.push(ns);
+
+//	ns = default_clone_story_state(1,19*60+12); //combined
+//	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,19*60+26); //first virus picture
+	ns.slide_number = first_virus_slide;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,19*60+34); //Dad
+	ns.slide_number = Dad_slide;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,20*60+17.6); //back to measles
+	ns.slide_number = Measles_slide;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,20*60+31); //virus patterns
+	ns.slide_number = all_models_slide;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,20*60+34); //QS
+	ns.MODE = QC_SPHERE_MODE;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,20*60+42.4); //irreg
+	ns.MODE = IRREGULAR_MODE;
 	ns.irreg_button_invisible = 1;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1);
-	ns.startingtime = 752.7; //origami is a good analogy
+	ns = default_clone_story_state(0,20*60+49); //CK
+	ns.MODE = CK_MODE;
+	ns.irreg_button_invisible = 1;
 	Story_states.push(ns);
 
-	//maaaassive gap
-	ns = default_clone_story_state(1);
-	ns.startingtime = 795.6; //super dodecahedral virus
+	ns = default_clone_story_state(0,21*60+5); //dodecahedron
+	ns.MODE = BOCAVIRUS_MODE;
 	Story_states.push(ns);
-
-	ns = default_clone_story_state(0);
-	ns.startingtime = 838.9; //Bucky
-	ns.slide_number = 18;
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(0);
-	ns.startingtime = 840.8; //back to religious art
-	ns.slide_number = 22;
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(0);
-	ns.startingtime = 843.4; //back to Semliki
-	ns.slide_number = 15;
-	Story_states.push(ns);
-
-	//------dark side
-	ns = default_clone_story_state(1);
-	ns.startingtime = 849.6; //Golden spiral
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(1);
-	ns.startingtime = 859.3; //mona lisa
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(0);
-	ns.startingtime = 867.8; //back to oldest picture of a virus
-	ns.slide_number = 20;
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(1);
-	ns.startingtime = 880.2; //measles
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(0);
-	ns.startingtime = 890; //canvas retract
-	ns.MODE = SLIDE_MODE;
-	Story_states.push(ns);
+	
+	
 	
 	
 	
@@ -595,7 +799,7 @@ function init_story()
 
 var next_slide = 0;
 //clone the previous state and give it a different time
-function default_clone_story_state( shows_a_slide )
+function default_clone_story_state( shows_a_slide, ST )
 {
 	var default_page_duration = 1.2;
 	
@@ -615,7 +819,7 @@ function default_clone_story_state( shows_a_slide )
 	
 	new_story_state.offer_virus_selection = 0; //in general
 	
-	new_story_state.skip_ahead_to = -1;
+	new_story_state.go_to_time = -1;
 	
 	new_story_state.prevent_playing = 0;
 	
@@ -628,124 +832,20 @@ function default_clone_story_state( shows_a_slide )
 	new_story_state.irreg_button_invisible = 0;
 	new_story_state.unpause_on_vertex_knowledge = 0;
 	
-	new_story_state.skip_ahead_to = -1;
+	//make it unused
+	new_story_state.enforced_cutout_vector0_player = new THREE.Vector3(-1,0,0);
 	
-	new_story_state.skip_on_rotation_knowledge = 0;
+	new_story_state.unpause_on_rotation_knowledge = 0;
 	
-	new_story_state.CK_scale_only = 0;
+	new_story_state.irreg_open = -1;
+	
+	new_story_state.unpause_on_hepatitis_scale = 0;
+	
+	new_story_state.enforced_irreg_state = -1;
+	
+	new_story_state.enforced_CK_quaternion = new THREE.Quaternion(5,5,5,5);
+	
+	new_story_state.startingtime = ST;
 	
 	return new_story_state;
 }
-
-/*
- * 0
- * 9.8
- * 19.4
- * 
- * 34.5 bocavirus appears
- * 41.6 pause to let them rotate
- * 45.8 assurance
- * 
- * 53.1 Pneumonia
- * 80.9 Flash
- * 
- * 93.7 pause again
- *    Also show zika measles hiv hepatitis 
- * 108.9 golf balls
- * 111.8 origami
- * 115.9 religious art
- * 
- * 139.5 end of part 1
- * 144.5 beginning of part 2
- * 146 start shrinking
- * 163.6 zoom in on cell 
- * 171 polymerase
- * 174 random protein
- * 177 MC1R
- * 
- * 186.5 fade back to viruses
- * 188.8 absorb (?)
- * 192.8 zoom in on bocavirus
- * 195 proteins dissolve
- * 
- * 210.4 (pause) then "you'll need to unpause me manually" 
- * 
- * 215 (pause) then polymerase and transcriptase
- * 229.7 back to boca
- * 237 back to enzymes
- * 253.2 cell with fluourescence
- * 
- * 287.2 back to DNA. DNA mimics what you do?
- * 
- * 311.6 cell full of viruses
- * 316.4 lysis
- * 
- * 325.5 back to DNA
- * 
- * 333.1 twelve pentagons flash?
- * 
- * 340.2 Tree
- * 350.5 Tree clickable
- * 357 pause on here until they click
- * 
- * 360 irreg begins
- * 
- * 378.3 monkeys
- * picture of a molecule?
- * 396.9 different HIVs
- * 
- * 405.8 irreg appears
- * 412.3 open irreg
- * 415.95 (pause) then try changing it again using
- * 418.6 switch appears
- * 427.65 (pause) then other viruses come in
- * 
- * 439.3 (pause)
- * 
- * 487 pause on this white
- * 
- * 492 start of CK - hepatitis
- * 508.2 replace (lined up!) with CK
- * 512.8 (pause)
- * 530.6 pause
- * 
- * 553.6 greenhouse
- * 566.5 other CK examples
- * 
- * 583.4 Bucky
- * 588.6 earlier sources
- * 592.8 first image of a virus
- * 603.1 back to CK
- * 613.8 pics appear in CK
- * 621.6(pause) let player play
- * 621.7(pause again) tree
- * 
- * 621.8 zika virus
- * 635.8 QS
- * 646.5 corners flash?
- * 648.5 edges flash?
- * 669.4 (pause) just QS
- * 
- * 679.4 Whichever shrine you use
- * 684.7 above its entrance
- * 690 more inside (2?) 
- * 693.7 freeze on whichever pic you've finished with
- * 699.5 patterns made of squares and triangles
- * 703.6 pentagons don't fit together
- * 708.6 unsatisfying pattern
- * 715.8 The shrine's pattern
- * 731.3 QS back
- * 
- * 745 Start of end (the three models)
- * 750.1 irreg
- * 855.4 phi29 next to the nanotube
- * 862.9 super dodecahedral virus
- * 895.8 Bucky
- * 898 islamic art
- * 900.3 HPV x-ray
- * 906.9 Golden spiral
- * 915.7 some crappy example, mona lisa maybe
- * 924.9 back to oldest picture of a virus
- * 937.3 measles
- * 947.2 canvas retracts
- */

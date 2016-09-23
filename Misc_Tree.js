@@ -44,10 +44,11 @@ var player_has_never_hovered = 1;
 
 function add_tree_stuff_to_scene()
 {
-	if(Chapters_completed[1])
+	if( Chapters_completed[0] || Chapters_completed[1] )
 		Chapters_visible[2] = 1;
 	
 	if(	Chapters_completed[0] === 1 && 
+		Chapters_completed[1] === 1 && 
 		Chapters_completed[2] === 1)
 		Chapters_visible[3] = 1;
 	
@@ -85,10 +86,10 @@ function init_tree()
 	Virus_chapter_icons[3] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[reused_slide_indices[8]], transparent: true}) );
 	
 	var IconHorizontalDistfromCenter = playing_field_dimension * 0.25;
-	Virus_chapter_icons[0].position.set(-IconHorizontalDistfromCenter, IconHorizontalDistfromCenter, 0 );
-	Virus_chapter_icons[1].position.set( IconHorizontalDistfromCenter, IconHorizontalDistfromCenter, 0 );
-	Virus_chapter_icons[2].position.set(-IconHorizontalDistfromCenter,-IconHorizontalDistfromCenter, 0 );
-	Virus_chapter_icons[3].position.set( IconHorizontalDistfromCenter,-IconHorizontalDistfromCenter, 0 );
+	Virus_chapter_icons[0].position.set(-IconHorizontalDistfromCenter, IconHorizontalDistfromCenter, 0 ); //HIV
+	Virus_chapter_icons[1].position.set( IconHorizontalDistfromCenter, IconHorizontalDistfromCenter, 0 ); //polio
+	Virus_chapter_icons[2].position.set(-IconHorizontalDistfromCenter,-IconHorizontalDistfromCenter, 0 ); //Zika
+	Virus_chapter_icons[3].position.set( IconHorizontalDistfromCenter,-IconHorizontalDistfromCenter, 0 ); //Measles
 	
 	var name_dimension = IconDimension / 3;
 	for(var i = 0; i < 4; i++)
@@ -102,10 +103,6 @@ function init_tree()
 		Virus_chapter_names[i].position.y += name_dimension / 2;
 		Virus_chapter_names[i].position.z += 0.01;
 	}
-		
-	
-	
-	//urrrrrgh you need descriptions.
 }
 
 //maybe this should be called before anything in the loop
@@ -145,7 +142,6 @@ function update_tree()
 				Chapter_highlighter.position.copy(highlight_dest);
 				Chapters_completed[i] = 1;
 				ytplayer.seekTo(Chapter_start_times[i]);
-				ytplayer.playVideo();
 			}
 		}
 	}

@@ -17,7 +17,7 @@ var QC_SPHERE_MODE = 4;
 var ENDING_MODE = 5;
 var TREE_MODE = 6;
 	
-var MODE = 2;
+var MODE = 4;
 
 //--------------Technologically fundamental
 var playing_field_dimension = 7*HS3; //used to be that height was 6.
@@ -212,8 +212,8 @@ var surflattice_vertices_numbers = new Float32Array(3 * number_of_lattice_points
 var surflattice_vertices;
 var surflattice_geometry;
 
-var LatticeScale = 0.5;//1/3 nice size //10/3 * HS3 / number_of_hexagon_rings; maybe the largest?
-var LatticeAngle = 0; //TAU/12;
+var LatticeScale = 0.557735024;//1/3 nice size //10/3 * HS3 / number_of_hexagon_rings; maybe the largest?
+var LatticeAngle = 0.523598783; //TAU/12;
 var LatticeGrabbed = false;
 
 var vertices_derivations;

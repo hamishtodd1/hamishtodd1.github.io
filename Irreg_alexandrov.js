@@ -1,5 +1,3 @@
-
-
 /*  Newest plan:
  * 
  * Maybe we should have one exploration point to the left, one to the right? 
@@ -20,6 +18,7 @@
  * How to deal with concave areas:
  * 
  * Can you make anything of the fact that if you're close to a place where you're about to flip, one of the minimum angles will be pi?
+ * That assumes that concavity is your only reason not to converge. This would need to be checked
  * 
  * Could have a triangle surrounding your cursor, one corner pointing in the last direction you went in. Work out whether you can go on the corners, flatten a corner if not
  * 		Go no further than to-one-corner
@@ -38,7 +37,9 @@
 
 //is non convergence still related to flipping?
 
-var alexandrov_inspection_mode = 1;
+//the edges are disappearing probably because of that find_random_orthogonal_vector thing failing if y1 = y2
+
+var alexandrov_inspection_mode = 0;
 
 var crazy_flip = 0;
 

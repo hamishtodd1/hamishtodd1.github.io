@@ -59,44 +59,69 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HIV victim.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Dad.jpg");
 	
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Golfball.png");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Golfball_virus.png");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Origami.jpg");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Origami_virus.png");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/shah nematollah vali shrine.jpg");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV xray.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Opening selection.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Opening selection 1a.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Opening selection 1.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Opening selection 2a.jpg");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Opening selection 2.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Opening selection 3a.jpg");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Opening selection 3.png");
 	
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Cell with proteins.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Cell full of viruses.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Cell lysis.jpg");
-
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HIV.png");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Bonobos.jpg");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HIV variety.png");
-
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Semliki.png");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Greenhouse.jpg");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Gamma ray detector.jpg");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Bucky.png");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Hair and baskets.png");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/First pic of virus.jpg");
 	
+	//----QS
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Zika Virus.jpg");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e outside.jpg");
+	reused_slide_indices[7] = slide_texture_urls.length - 1;
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV non xray.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV xray.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV blobs.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV connections.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern triangular.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern square.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e modified.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e above entrance.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e inside.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e pentagons.jpg"); //next thing is to test (tree and final reused slides) without this extra slide
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern triangular.jpg");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern square.png");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern hexagonal.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pentagons.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern pentagonal.png");
+
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HIV.png");
+	reused_slide_indices[5] = slide_texture_urls.length - 1; 
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HIV variety.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Rhesus.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/trim5.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/very cone shaped HIV.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Origami_virus.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Lucky.jpg");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/book.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/book excerpt.png");
 	
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Origami geodesic.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Polio.png");
+	reused_slide_indices[6] = slide_texture_urls.length - 1;
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/polio hepatitis comparison.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Polio small.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/RVF.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/hexagon.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/hexagon2.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/hexagon3.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Geodesic example 1.jpg");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/geodesic building.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Bucky.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/basket.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/hair.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/First pic of virus.jpg");
+	
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Tomoko Fuse.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Very dodecahedral virus.png");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/golden spiral.png");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Mona Lisa.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Measles virus.png");
+	reused_slide_indices[8] = slide_texture_urls.length - 1;
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/all together.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/golden spiral.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/nautilus.jpg");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/nautilus with spiral.jpg");
+
 	
 	//if you change the above, you probably need to change these
 	reused_slide_indices[0] = 24;
@@ -104,11 +129,6 @@ function load_AV_stuff()
 	reused_slide_indices[2] = 22;
 	reused_slide_indices[3] = 15;
 	reused_slide_indices[4] = 20;
-
-	reused_slide_indices[5] = 12;
-	reused_slide_indices[6] = 15;
-	reused_slide_indices[7] = 21;
-	reused_slide_indices[8] = 35;
 	
 	virus_textures = Array(virus_texture_urls.length);
 	random_textures =Array(random_texture_urls.length);
@@ -145,8 +165,10 @@ function bind_pictures()
 	
 	IrregButton = new THREE.Mesh( new THREE.CubeGeometry(0.6, 0.6, 0),
 			new THREE.MeshBasicMaterial( { transparent:true, map: random_textures[1] } ) ); //and can change to [2]
+	IrregButton.pulsing = 1;
+	IrregButton.pulse = 0;
 	
-	IrregButton.position.set(-playing_field_dimension / 2 + 0.4,-1.4,0.0001);
+	IrregButton.position.set(-playing_field_dimension / 2 + 0.4,-1.4,0.002);
 	IrregButton.capsidopen = 0;
 
 	if(typeof random_textures[5] !== 'undefined')

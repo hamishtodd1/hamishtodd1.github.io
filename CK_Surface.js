@@ -1,5 +1,13 @@
 /*
  * TODO
+ * Ok so we're making a "close" button. Demonstrate it before showing hexagon lattice. It snaps(?), it closes, it inflates. It deflates, it opens.
+ * So should you have irreg first? Snapping and projecting do make CK a little more complex
+ * 
+ * Size limits: don't have them when they're interacting, even if they make it colossal. Bring it back when they let go, but don't snap it. It just feels overcomplicated.
+ * QS still has size limits but that's because of pattern limitation and the fact that it stays shut. It gets the GrabbableArrow too.
+ * 
+ * How about the CK "curiosity" is that you get pentagons out of a pattern of hexagons? Gives them an opportunity to notice the irreg connection
+ * 
  * colors
  * change angles of mouse movement such that rotation is slightly more probable than it currently is
  * get rid of weird flash. Probably occurring because you have some special case for keeping the hexagons visible when openness is 1
@@ -8,18 +16,24 @@
  * remove flatlattice crap
  * Maybe take a few frames to snap it, THEN let it start closing
  * 
+ * Have black edges inside the net too
+ * 
  * When it closes up, could have it close up in the position that all the viruses are in.
  * 
  * It does require training, it is a bit weird. Not everyone gets that letting go changes it.
  * Could show the capsid closed, then open,
+ * 
+ * Could have a combination for snapping: when they make it MASSIVE or tiny, it automatically goes back when they let go
+ * But it's when they press the button that it snapes properly.
+ * Reasoning is that the size thing they'll see why, and it will look weird to have it go far like that when they press the button.
  */
 
 function UpdateCapsid() {
 	var oldcapsidopenness = capsidopenness;
 	
-	var magnitudespeed = 0.03;
+	var magnitudespeed = 0.012;
 	
-	if( GrabbableArrow.grabbed )
+	if( IrregButton.capsidopen )
 		capsidopeningspeed = magnitudespeed;
 	else
 		capsidopeningspeed = -magnitudespeed;
@@ -42,7 +56,7 @@ function UpdateCapsid() {
 	//-------Rotation. If you're open you see nothing because the quaternion is slerped to the open_quaternion
 	if(capsidopenness === 0)
 	{
-		if( !GrabbableArrow.grabbed ) 
+		if( !IrregButton.capsidopen ) 
 		{
 			surfaceangle = Mouse_delta.length() / 2.3;
 			
@@ -63,7 +77,7 @@ function UpdateCapsid() {
 	}
 	
 	//when you're opening, move towards this certain quaternion
-	if( GrabbableArrow.grabbed )
+	if( IrregButton.capsidopen )
 	{
 		var open_quaternion = new THREE.Quaternion(0,0,0,1);
 		var interpolationfactor = 0.03 + 0.97 * Math.pow(capsidopenness,10); //may want to massively reduce this power

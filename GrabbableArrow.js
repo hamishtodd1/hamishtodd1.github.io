@@ -1,3 +1,7 @@
+/*
+ * We'll have the button in here too. Should have an animated pair of lines opening and closing dependent on capsidopenness on it.
+ */
+
 function UpdateGrabbableArrow()
 {
 	//TODO sort this out
