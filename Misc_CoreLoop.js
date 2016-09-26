@@ -1,5 +1,6 @@
 /*	
  * Long term To Do
+ *  -The angles in irreg can be wedges with a curve, cheese pieces. Give them a little bit of space from the angles themselves
  * 	-everything listed in CKsurfacestuff, bocavirus, alexandrov, quasisphere
  *  -get a person with a sense of color to look at everything
  *  -lighting on everything?
