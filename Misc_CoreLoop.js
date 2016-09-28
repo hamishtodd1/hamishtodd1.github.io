@@ -1,7 +1,7 @@
 /*	
  * Long term To Do
  *  -The angles in irreg can be wedges with a curve, cheese pieces. Give them a little bit of space from the angles themselves
- * 	-everything listed in CKsurfacestuff, bocavirus, alexandrov, quasisphere
+ * 	-everything listed in CKsurfacestuff, bocavirus, alexandrov, quasisphere, youtube stuff
  *  -get a person with a sense of color to look at everything
  *  -lighting on everything?
  *  -no 666s, you don't want pearl-clutchers. Easiest is change it to 665, -1?
@@ -23,7 +23,7 @@
  *  
  *  
  *  -make it feel good
- *  	-optimize
+ *  	-optimize http://www.w3schools.com/js/js_performance.asp
  *  		-reduce latency?
  *  		-loops should not evaluate array lengths every time
  *  		-could generate some things once, then not again

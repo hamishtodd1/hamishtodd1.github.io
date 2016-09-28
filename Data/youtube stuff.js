@@ -1,7 +1,10 @@
 /*
  * The rule is: the pure version has all the capabilities. This file, and maybe others, is where things become organized.
  * 
- * Flash 10 is required, TODO check for that
+ * TODO
+ * Flash 10 etc is required,  check for that
+ * Switch between multiple videos so they don't see the time!
+ * 
  * 
  * NO INTERDEPENDENCE. You can have dependence on time, nothing else, no variables that need updating.
  * 
