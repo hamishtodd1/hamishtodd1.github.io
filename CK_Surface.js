@@ -6,6 +6,8 @@
  * Size limits: don't have them when they're interacting, even if they make it colossal. Bring it back when they let go, but don't snap it. It just feels overcomplicated.
  * QS still has size limits but that's because of pattern limitation and the fact that it stays shut. It gets the GrabbableArrow too.
  * 
+ * Couldn't you cut a football out of a football-like pattern? Such a neat idea
+ * 
  * How about the CK "curiosity" is that you get pentagons out of a pattern of hexagons? Gives them an opportunity to notice the irreg connection
  * 
  * colors

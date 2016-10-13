@@ -19,6 +19,7 @@
  *  -bear in mind that people can move the mouse extremely fucking fast, they take points VERY far on irreg, and scale back and forth very fast on CK
  *  -and might not let go of the mouse
  *  -don't humiliate yourself: if the canvas isn't running, halt the video
+ *  -make sure a good picture appears when shared on facebook and twitter
  *  
  *  
  *  

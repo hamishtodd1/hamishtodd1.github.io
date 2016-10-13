@@ -7,7 +7,11 @@
  * -transition to clicked virus is smooth even if capsid is closed
  * -red highlight should flash
  * 
+ * To avoid triangle inversion, recast the whole thing in terms of that one vertex at the top center of the W. Work out how the triangle bounds constrain it
+ * 
  * if the player has clicked on the button 8 times,  the capsid appears?
+ * 
+ * While moving vertices back in place, you can sort of check for convergence "for free"
  * 
  * Slideyness:
  * -could watch Casey's stuff

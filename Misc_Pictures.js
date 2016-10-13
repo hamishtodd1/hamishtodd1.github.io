@@ -1,4 +1,4 @@
-var texture_loader = new THREE.TextureLoader(); //only one?
+var texture_loader = new THREE.TextureLoader(); //only one? TODO
 var clickable_viruses = Array(16);
 
 var CKHider;
