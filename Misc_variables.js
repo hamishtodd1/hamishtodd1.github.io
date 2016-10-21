@@ -17,7 +17,7 @@ var QC_SPHERE_MODE = 4;
 var ENDING_MODE = 5;
 var TREE_MODE = 6;
 	
-var MODE = 4;
+var MODE = 0;
 
 //--------------Technologically fundamental
 var playing_field_dimension = 7*HS3; //used to be that height was 6.
@@ -104,6 +104,8 @@ var capsidopeningspeed = 0;
 var surfaceangle = 0;
 var surface_rotationaxis = new THREE.Vector3();
 var surface_userquaternion = new THREE.Quaternion();
+
+var demonstration_hexagons = Array(2);
 
 //-----QS
 var QS_rotationaxis = new THREE.Vector3(1,0,0);
@@ -192,6 +194,8 @@ var radii = new Float32Array([100,100,100, 100,100,100, 100,100,100, 100,100,100
 var alexandrov_triangle_vertex_indices = new Uint16Array( 3 * 20);
 var polyhedron_edge_length;
 
+var wedges;
+
 var lattice_colors = new Float32Array(number_of_lattice_points * 3);
 
 var flatlattice;
@@ -234,6 +238,8 @@ var varyingsurface_cylinders = Array(41);
 var varyingsurface_spheres = Array(22);
 var irreghighlight_progresses = Array(22);
 
+var wedges_assigned_vertices;
+
 var vertex_identifications = new Array();
 var W_triangle_indices = new Array();
 var W_vertex_indices = new Array();
@@ -267,7 +273,9 @@ var Mouse_delta = new THREE.Vector2(0,0);
 //----protein and bocavirus stuff
 var EggCell;
 var Transcriptase;
-var neo_bocavirus_proteins = Array(60);
+var neo_bocavirus_proteins = Array(60 + 4);
+var reproduced_proteins = Array(8);
+var neo_bocavirus;
 
 var protein_vertex_indices = Array(number_of_proteins_in_lattice);
 

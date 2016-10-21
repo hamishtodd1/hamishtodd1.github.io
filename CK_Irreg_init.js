@@ -1,4 +1,68 @@
 function init_CK_and_irreg(){
+	wedges_assigned_vertices = new Uint16Array([
+	                            		0, 1,
+	                            		2, 7,
+	                            		6, 11,
+	                            		10, 15,
+	                            		14, 19 ]);
+	
+	//make wedges. glue their positive x vector to the side of what you want
+	var master_wedge = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0x000000, transparent: true}));
+	var num_arc_segments = 16;
+	var wedge_radius = 0.35;
+	var outline_width = 0.03;
+	var outside_vec = new THREE.Vector3(wedge_radius,0,0);
+	var inside_vec = new THREE.Vector3(wedge_radius - outline_width,0,0);
+	
+	master_wedge.geometry.vertices.push(outside_vec.clone() );
+	master_wedge.geometry.vertices.push( inside_vec.clone() );	
+	for(var i = 0; i < num_arc_segments; i++ )
+	{
+		outside_vec.applyAxisAngle(z_central_axis, -TAU / 6 / num_arc_segments);
+		inside_vec.applyAxisAngle(z_central_axis, -TAU / 6 / num_arc_segments);
+		master_wedge.geometry.vertices.push(outside_vec.clone() );
+		master_wedge.geometry.vertices.push( inside_vec.clone() );
+		
+		master_wedge.geometry.faces.push(new THREE.Face3(i*2+0,i*2+3,i*2+2));
+		master_wedge.geometry.faces.push(new THREE.Face3(i*2+0,i*2+1,i*2+3));
+	}
+	
+	var extras_index = master_wedge.geometry.vertices.length;
+	
+	master_wedge.geometry.vertices.push( new THREE.Vector3() );
+	
+	var inside_corner = new THREE.Vector3(outline_width,0,0);
+	inside_corner.multiplyScalar(2);
+	inside_corner.applyAxisAngle(z_central_axis, -TAU / 12 );
+	master_wedge.geometry.vertices.push( inside_corner );
+	
+	var start_corner = master_wedge.geometry.vertices[1].clone();
+	start_corner.y -= outline_width;
+	master_wedge.geometry.vertices.push( start_corner );
+	
+	var end_corner = master_wedge.geometry.vertices[1].clone();
+	end_corner.y += outline_width;
+	end_corner.applyAxisAngle(z_central_axis, -TAU / 6 );
+	master_wedge.geometry.vertices.push( end_corner );
+	
+	//central, inside corner, start, end 
+	master_wedge.geometry.faces.push(new THREE.Face3( extras_index + 0,extras_index + 1,1));
+	master_wedge.geometry.faces.push(new THREE.Face3( extras_index + 1,extras_index + 2,1));
+	
+	master_wedge.geometry.faces.push(new THREE.Face3( extras_index + 0, extras_index - 1, extras_index + 3 ));
+	master_wedge.geometry.faces.push(new THREE.Face3( extras_index + 0, extras_index + 3, extras_index + 1 ));
+	
+	//little gap
+	var offset = master_wedge.geometry.vertices[ extras_index + 1 ].clone();
+	offset.multiplyScalar(1);
+	
+	for(var i = 0; i < master_wedge.geometry.vertices.length; i++ )
+		master_wedge.geometry.vertices[i].add( offset );
+	
+	wedges = Array(5);
+	for(var i = 0; i < wedges.length; i++ )
+		wedges[i] = master_wedge.clone();
+	
 	vertices_derivations = new Array(
 		[666,666,666],
 		[666,666,666],

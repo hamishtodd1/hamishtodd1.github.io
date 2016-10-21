@@ -1,5 +1,23 @@
 function initialize_QS_stuff()
 {	
+	QS_center = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0x000000, transparent: true, opacity:0}));
+	var starting_triangle_vertices = Array(3);
+	starting_triangle_vertices[0] = new THREE.Vector3(0,0.05,0);
+	starting_triangle_vertices[1] = new THREE.Vector3( 0.073,-0.3,0);
+	starting_triangle_vertices[2] = new THREE.Vector3(-0.073,-0.3,0);
+	for(var i = 0; i < 5; i++)
+	{
+		for(var j = 0; j < 3; j++)
+			QS_center.geometry.vertices.push(starting_triangle_vertices[j].clone());
+		
+		QS_center.geometry.vertices[i*3+0].applyAxisAngle(z_central_axis, TAU / 5 * i);
+		QS_center.geometry.vertices[i*3+1].applyAxisAngle(z_central_axis, TAU / 5 * i);
+		QS_center.geometry.vertices[i*3+2].applyAxisAngle(z_central_axis, TAU / 5 * i);
+		
+		QS_center.geometry.faces.push( new THREE.Face3(i*3+0,i*3+2,i*3+1) );
+	}
+	QS_center.scale.set(0.13,0.13,0.13);
+	
 	cutout_vector0 = new THREE.Vector3(0,0.5/Math.sin(TAU/10),0);
 	cutout_vector1 = new THREE.Vector3(PHI/2,0.5/Math.sin(TAU/10)-Math.cos(3/20*TAU),0);
 	cutout_vector0_player = cutout_vector0.clone();

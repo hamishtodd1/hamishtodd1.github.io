@@ -1,6 +1,22 @@
-/*	
+/*
+ * TODO for IGF
+ * Integrate new video
+ * Lots of TODOs in story
+ * put in music
+ * irreg doesn't have to go all the way to the state you want it in
+ * Need to make a little video
+7:54 - 8:12 
+10:45
+14:35 + 15:21
+Make use of the "now you can choose the next virus" clip
+ * Fading pics. Probably the thing to do is to specify "fading chapters"
+ * Make QS colors same as pic
+ * The tree?
+ * irreg wedges and other cues? "emphasize its corners"
+ * irreg limits?
+ * 	
  * Long term To Do
- *  -The angles in irreg can be wedges with a curve, cheese pieces. Give them a little bit of space from the angles themselves
+ *  -why is everything meshbasicmaterial?
  * 	-everything listed in CKsurfacestuff, bocavirus, alexandrov, quasisphere, youtube stuff
  *  -get a person with a sense of color to look at everything
  *  -lighting on everything?
@@ -10,6 +26,7 @@
  *  -watch people a lot and tweak the zooming and rotating code, just because it is simple doesn't mean that it is good
  *  -button should be an animated line.
  *  -If webgl doesn’t load (or etc), recommend a different browser or refreshing the page
+ *  -all objects floating in space with a shadow?
  *  
  *  -people on touchscreens can do without QS rotating. Pose it like HPV. Then the button is this simple thing that just opens and closes. That is a complex thing and you don't want to be making it harder with other stuff like having to hold it and be in a different state or anything
  *  
@@ -61,6 +78,12 @@ function UpdateWorld() {
 			manipulate_vertices();
 			update_varyingsurface();
 			//correct_minimum_angles();
+			if(capsidopenness === 1)
+				for(var i = 0; i < wedges.length; i++)
+					wedges[i].material.opacity = 1;
+			else
+				for(var i = 0; i < wedges.length; i++)
+					wedges[i].material.opacity = 0;
 			break;
 			
 		case QC_SPHERE_MODE:
@@ -68,10 +91,15 @@ function UpdateWorld() {
 			UpdateGrabbableArrow();
 			MoveQuasiLattice();
 			Map_To_Quasisphere();
+			update_QS_center();
 			break;
 			
 		case TREE_MODE:
 			update_tree();
+			break;
+			
+		case SLIDE_MODE:
+			update_hexagon_demo();
 			break;
 	}
 	
@@ -123,16 +151,18 @@ function ChangeScene(new_mode) {
 	{
 		case SLIDE_MODE:
 			scene.add(VisibleSlide);
+			for( var i = 0; i < demonstration_hexagons.length; i++ )
+				scene.add(demonstration_hexagons[i]);
 			break;
 	
 		case BOCAVIRUS_MODE:
-			for(var i = 0; i < neo_bocavirus_proteins.length; i++)
+			for(var i = 0; i <neo_bocavirus_proteins.length; i++)
 				scene.add(neo_bocavirus_proteins[i]);
 			for(var i = 0; i< lights.length; i++)
 				scene.add( lights[i] );
-			scene.add(DNA_cage);
+			for(var i = 0; i< reproduced_proteins.length; i++)
+				scene.add( reproduced_proteins[i] );
 			scene.add(EggCell);
-			scene.add(Transcriptase);
 			break;
 			
 		case CK_MODE:
@@ -158,6 +188,8 @@ function ChangeScene(new_mode) {
 				scene.add(varyingsurface_cylinders[i]);
 			for( var i = 0; i < varyingsurface_spheres.length; i++)
 				scene.add(varyingsurface_spheres[i]);
+			for( var i = 0; i < wedges.length; i++ )
+				scene.add( wedges[i] );
 			scene.add(IrregButton);
 			break;
 			
@@ -165,6 +197,7 @@ function ChangeScene(new_mode) {
 			scene.add(dodeca);
 			if(stable_point_of_meshes_currently_in_scene !== 666) //if it is equal to this, it has yet to be derived from the cutout vectors
 				dodeca.add(quasicutout_meshes[stable_point_of_meshes_currently_in_scene]);
+			scene.add(QS_center);
 //			scene.add(GrabbableArrow);
 			break;
 			

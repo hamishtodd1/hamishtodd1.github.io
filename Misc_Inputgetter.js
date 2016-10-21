@@ -27,6 +27,7 @@ function ReadInput() {
 	react_to_video();
 }
 
+
 document.addEventListener( 'mousedown', function(event) {
 	event.preventDefault();
 	InputObject.isMouseDown = true;

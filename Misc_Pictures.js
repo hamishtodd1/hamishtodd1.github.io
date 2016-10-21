@@ -12,7 +12,6 @@ var virus_textures;
 var random_textures;
 var slide_textures;
 
-
 function load_AV_stuff()
 {
 	//TODO put the numbers in here
@@ -78,8 +77,9 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV xray.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV blobs.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV connections.png");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern triangular.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV abstract.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern square.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern triangular.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e modified.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e above entrance.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e inside.jpg");
@@ -91,15 +91,18 @@ function load_AV_stuff()
 	reused_slide_indices[5] = slide_texture_urls.length - 1; 
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HIV variety.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Rhesus.png");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/trim5.png");
+//	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/trim5.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/very cone shaped HIV.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Origami_virus.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/PHi29 abstract.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Lucky.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/book.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/book excerpt.png");
 	
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Polio.png");
 	reused_slide_indices[6] = slide_texture_urls.length - 1;
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/polio rhinovirus comparison.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/polio hep A comparison.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/polio hepatitis comparison.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Polio small.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/RVF.png");
@@ -117,11 +120,11 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Very dodecahedral virus.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Measles virus.png");
 	reused_slide_indices[8] = slide_texture_urls.length - 1;
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/all together.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/golden spiral.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/nautilus.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/nautilus with spiral.jpg");
-
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/all together.png");
+	
 	
 	//if you change the above, you probably need to change these
 	reused_slide_indices[0] = 24;
@@ -163,8 +166,8 @@ function bind_pictures()
 	        polygonOffsetFactor: -2.0, //on top
 	        polygonOffsetUnits: -5.0 } ) );
 	
-	IrregButton = new THREE.Mesh( new THREE.CubeGeometry(0.6, 0.6, 0),
-			new THREE.MeshBasicMaterial( { transparent:true, map: random_textures[1] } ) ); //and can change to [2]
+	IrregButton = new THREE.Mesh( new THREE.CircleGeometry(0.6),
+			new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ); //and can change to [2]
 	IrregButton.pulsing = 1;
 	IrregButton.pulse = 0;
 	
