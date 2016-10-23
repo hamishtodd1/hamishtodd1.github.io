@@ -16,11 +16,12 @@ var rotation_knowledge_time;
 var reused_slide_indices = Array();
 var lattice_fadein_time;
 
-var minimum_angle_crapifier = 1;
-
 function Update_story()
 {
-	console.log( our_CurrentTime );
+//	console.log( our_CurrentTime );
+	
+	if(our_CurrentTime >= 21*60+16)
+		EndingMusic.play();
 	
 	//first part of this function is all based on current state, which you don't have at the very start
 	if(Storypage !== -1)
@@ -41,7 +42,7 @@ function Update_story()
 			wedges[i].visible = Story_states[Storypage].wedges_visible;
 		
 		if(Story_states[Storypage].close_up_badly)
-			minimum_angle_crapifier = 0.7;
+			minimum_angle_crapifier = 0.88;
 		else
 			minimum_angle_crapifier = 1;
 		
@@ -266,7 +267,7 @@ function init_story()
 	ns.unpause_on_rotation_knowledge = 1;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,47); //bocavirus infects us
+	ns = default_clone_story_state(0,46.85); //bocavirus infects us
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,62.3); //color
@@ -275,13 +276,13 @@ function init_story()
 	ns.unpause_after = 9;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,72.7); //click me when you want to continue
+	ns = default_clone_story_state(0,72.77); //click me when you want to continue
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
 	//-------TODO the designs comparison should look around the tree
 	
-	ns = default_clone_story_state(1,77.6); //other viruses  
+	ns = default_clone_story_state(1,77.45); //other viruses  
 	unflash_time = ns.startingtime;
 	Story_states.push(ns);
 	
@@ -495,7 +496,7 @@ function init_story()
 	ns = default_clone_story_state(1,617.9); //very small (cone shaped hiv)
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,622.1); //hiv in model(?) TODO
+	ns = default_clone_story_state(0,622.1); //hiv in model
 	ns.irreg_button_invisible = 1;
 	ns.enforced_irreg_state = 2;
 	ns.irreg_open = 1;
@@ -514,7 +515,8 @@ function init_story()
 	ns = default_clone_story_state(1,648.8); //potato virus
 	Story_states.push(ns);
 	
-	//TODO corners emphasize
+	ns = default_clone_story_state(1,652); //emphasize corners
+	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,654); //abstract virus
 	Story_states.push(ns);
@@ -525,7 +527,7 @@ function init_story()
 	ns.MODE = IRREGULAR_MODE;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,664); //show the representation TODO
+	ns = default_clone_story_state(0,664); //show the representation
 	ns.enforced_irreg_state = 1;
 	ns.irreg_open = 0; 
 	Story_states.push(ns);
@@ -537,16 +539,17 @@ function init_story()
 	ns = default_clone_story_state(0,675); //highlight cuts
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,679); //wedges appear TODO
+	ns = default_clone_story_state(0,679); //wedges appear
 	ns.irreg_open = 1;
 	ns.wedges_visible = true;
 	Story_states.push(ns);
 	
-	//686 "move those corners around"
+	//686 "move those corners around" TODO
 	
-	//TODO show T4 before bringing in its state
+	ns = default_clone_story_state(1,693); //T4
+	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,693); //T4
+	ns = default_clone_story_state(0,695); //T4 in model. Want it oriented too really
 	ns.enforced_irreg_state = 0;
 	ns.irreg_open = 0;
 	ns.pause_at_end = 1;
@@ -563,7 +566,7 @@ function init_story()
 	
 	//move corner around, close up badly
 
-	ns = default_clone_story_state(0,715.6); //TODO bad angles, close
+	ns = default_clone_story_state(0,715.6); //bad angles, close
 	ns.close_up_badly = 1;
 	ns.irreg_open = 0;
 	Story_states.push(ns);
@@ -651,7 +654,7 @@ function init_story()
 	ns = default_clone_story_state(0,864); //Now let us say that...
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,867.2); //we set it to precisely this size TODO!!!
+	ns = default_clone_story_state(0,867.2); //we set it to precisely this size
 	ns.CK_scale = 0.28867512192027667;
 	Story_states.push(ns);
 
@@ -688,11 +691,17 @@ function init_story()
 	ns = default_clone_story_state(1,905.9); //hexagons tile  
 	Story_states.push(ns);
 
-	//TODO pentagon in demo 
-	
 	ns = default_clone_story_state(0,914.5); //back to model, pentagons flash?
 	ns.MODE = CK_MODE;
 	ns.pause_at_end = 1;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,917); //pentagon flash
+	ns.pentamers_color = new THREE.Color( 0 / 256, 13 / 256, 194 / 256 ),
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,919); //pentagon flash
+	ns.pentamers_color = new THREE.Color( 1, 0, 0 ),
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1,930.3); //this is where we'd pause
@@ -701,7 +710,7 @@ function init_story()
 	ns = default_clone_story_state(1,941.1); //ball
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,958.3); //geodesic building
+	ns = default_clone_story_state(1,956.2); //geodesic building
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1,961.4); //Bucky
@@ -711,7 +720,7 @@ function init_story()
 	ns = default_clone_story_state(1,967.7); //thai basket
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,972); //hairstyle
+	ns = default_clone_story_state(1,970.8); //hairstyle
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,976.6); //first virus
