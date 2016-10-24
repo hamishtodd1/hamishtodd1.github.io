@@ -166,7 +166,7 @@ function manipulate_vertices() {
 				}
 			}
 			
-			var maximum_quadrance_to_be_selected = 0.0079;
+			var maximum_quadrance_to_be_selected = 0.012;
 			if( lowest_quadrance_so_far < maximum_quadrance_to_be_selected) {
 				vertex_tobechanged = closest_vertex_so_far;
 				
@@ -204,7 +204,7 @@ function manipulate_vertices() {
 					flatnet_vertices.array[i*3+2] - manipulation_surface.geometry.attributes.position.array[i*3+2]);
 			if(displacement_vector.lengthSq() > 0.0001 ) {
 				//if you want it to wiggle into place it needs remembered momentum
-				displacement_vector.setLength(0.02);
+				displacement_vector.setLength(0.02 * delta_t / 0.016);
 				
 				manipulation_surface.geometry.attributes.position.array[i*3+0] += displacement_vector.x;
 				manipulation_surface.geometry.attributes.position.array[i*3+1] += displacement_vector.y;
@@ -385,8 +385,6 @@ function manipulate_vertices() {
 			varyingsurface_spheres[vertex_tobechanged].material.color.b = 0;
 		}
 	}
-	
-	update_wedges();
 }
 
 function update_wedges()
@@ -401,15 +399,32 @@ function update_wedges()
 		wedges[i].updateMatrixWorld();
 		wedges[i].localToWorld( current_x_axis );
 		
-		wedges[i].position.set( 
-				flatnet_vertices.array[ wedges_assigned_vertices[i*2+0] * 3 + 0 ],
-				flatnet_vertices.array[ wedges_assigned_vertices[i*2+0] * 3 + 1 ],
+		if( isMouseDown )
+		{
+			wedges[i].position.set( 
+					manipulation_surface.geometry.attributes.position.array[ wedges_assigned_vertices[i*2+0] * 3 + 0 ],
+					manipulation_surface.geometry.attributes.position.array[ wedges_assigned_vertices[i*2+0] * 3 + 1 ],
+					0 );
+			
+			intended_x_axis.set(
+				manipulation_surface.geometry.attributes.position.array[ wedges_assigned_vertices[i*2+1] * 3 + 0 ],
+				manipulation_surface.geometry.attributes.position.array[ wedges_assigned_vertices[i*2+1] * 3 + 1 ],
 				0 );
+		}
+		else
+		{
+			wedges[i].position.set( 
+					flatnet_vertices.array[ wedges_assigned_vertices[i*2+0] * 3 + 0 ],
+					flatnet_vertices.array[ wedges_assigned_vertices[i*2+0] * 3 + 1 ],
+					0 );
+			
+			intended_x_axis.set(
+				flatnet_vertices.array[ wedges_assigned_vertices[i*2+1] * 3 + 0 ],
+				flatnet_vertices.array[ wedges_assigned_vertices[i*2+1] * 3 + 1 ],
+				0 );
+		}
 		
-		intended_x_axis.set(
-			flatnet_vertices.array[ wedges_assigned_vertices[i*2+1] * 3 + 0 ],
-			flatnet_vertices.array[ wedges_assigned_vertices[i*2+1] * 3 + 1 ],
-			0 );
+		
 		intended_x_axis.sub( wedges[i].position );
 		
 		wedgeaxis.crossVectors( intended_x_axis, current_x_axis );
@@ -420,4 +435,12 @@ function update_wedges()
 		
 		//next do the little center for QS. Is there a TrapeziumGeometry for the blades?
 	}
+	
+	var start_fadein_capsidopenness = 0.8;
+	if( capsidopenness > start_fadein_capsidopenness )
+		for(var i = 0; i < wedges.length; i++)
+			wedges[i].material.opacity = ( capsidopenness - start_fadein_capsidopenness ) / (1-start_fadein_capsidopenness);
+	else
+		for(var i = 0; i < wedges.length; i++)
+			wedges[i].material.opacity = 0;
 }

@@ -1,22 +1,41 @@
 /*
  * TODO for IGF
- * Integrate new video
+ * The deadline, in our time, is 8am tomorrow. Might do well to upload a video just in case
+ * 
  * Lots of TODOs in story
- * put in music
  * irreg doesn't have to go all the way to the state you want it in
- * Need to make a little video
-7:54 - 8:12 
-10:45
-14:35 + 15:21
-Make use of the "now you can choose the next virus" clip
- * Fading pics. Probably the thing to do is to specify "fading chapters"
- * Make QS colors same as pic
- * The tree?
- * irreg wedges and other cues? "emphasize its corners"
- * irreg limits?
+ * 
+ * Hopefully can get pictures and pauses in vdub too
+ * You're going to get a video on left and on right, both 428x428, giving 480p
+ * For each pair of clips, put their AVS into virtualdub; the last frame of the shorter one will pause
+ * then that into vdub to get white bars on top
+ * Then import them into WMM for the fades
+ * 
+ * "what's happenning here is that polio's proteins..."
+ * "We can see polio's pattern as one part of a larger pattern" 
+ * 
+ * Fade between all of these; they're all said while noodling around:
+ * "This is bocavirus, and I invite you to reach out and rotate it for yourself"
+ * CK "there are thousands and thousands [...] to see the results"
+ * CK "if you feel like challenging yourself, here's a virus to try constructing" [while you press the button to open and close it]
+ * QS "This model was discovered only very recently, but..." [and have the dome]
+ * Irreg "In fact we have found out that HIV CHANGES its shape... we have this" [the button is on the screen] you rotate it a bit and then open. Fade.
+ * Irreg [with pics on your side of the video] "Here's another very symmetrical virus, and if we emphasize its corners then we get this shape for it, and this is something that can be made in the model"
+ * 
+ * irreg limits? That is a major barrier to game-like enjoyment
+ * Test
+ * The wedges follow to
+ * The tree? Certainly, all the chapter selects must work
+ * Make use of the "now you can choose the next virus" clip
+ * Pentagons in your hexagon demo?
+ * Integrate the hexagon demo
+ * Fading pics. Probably the thing to do is to specify actual chapters that consist of a fade?
+ * re-orient closed-up HIV
  * 	
  * Long term To Do
+ *  -break up all the chapters into separate videos
  *  -why is everything meshbasicmaterial?
+ *  -is the usefulness of the models not coming through?
  * 	-everything listed in CKsurfacestuff, bocavirus, alexandrov, quasisphere, youtube stuff
  *  -get a person with a sense of color to look at everything
  *  -lighting on everything?
@@ -78,12 +97,7 @@ function UpdateWorld() {
 			manipulate_vertices();
 			update_varyingsurface();
 			//correct_minimum_angles();
-			if(capsidopenness === 1)
-				for(var i = 0; i < wedges.length; i++)
-					wedges[i].material.opacity = 1;
-			else
-				for(var i = 0; i < wedges.length; i++)
-					wedges[i].material.opacity = 0;
+			update_wedges();
 			break;
 			
 		case QC_SPHERE_MODE:
@@ -104,7 +118,7 @@ function UpdateWorld() {
 	}
 	
 	//this only does anything if it needs to
-	Update_pictures_in_scene();
+//	Update_pictures_in_scene();
 }
 
 function render() {
@@ -153,6 +167,7 @@ function ChangeScene(new_mode) {
 			scene.add(VisibleSlide);
 			for( var i = 0; i < demonstration_hexagons.length; i++ )
 				scene.add(demonstration_hexagons[i]);
+			scene.add( EndingMusic );
 			break;
 	
 		case BOCAVIRUS_MODE:

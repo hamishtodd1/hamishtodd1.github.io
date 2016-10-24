@@ -84,8 +84,8 @@ function CheckIrregButton(){
 	if(!IrregButton.visible)
 		return;
 	
-	if(isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) < 0.3 ){
-		var squashed_size = 0.9;
+	if(isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) < IrregButton.radius ){
+		var squashed_size = 0.925;
 		IrregButton.scale.set(squashed_size,squashed_size,squashed_size);
 		
 		IrregButton.pulsing = 0;
@@ -105,12 +105,13 @@ function CheckIrregButton(){
 	if( IrregButton.pulsing ) 
 	{
 		IrregButton.pulse += 0.1
-		var buttonscale = 1 + 0.26 * Math.sin(IrregButton.pulse);
+		var buttonscale = 1 + 0.2 * Math.sin(IrregButton.pulse);
 		IrregButton.scale.set(buttonscale,buttonscale,buttonscale);
 //		IrregButton.material.color.r = buttonscale;
 	}
 	
-	IrregButton.material.map = random_textures[ 1 + IrregButton.capsidopen ];
+	IrregButton.children[3].rotation.z =-TAU / 4 * (1-capsidopenness);
+	IrregButton.children[4].rotation.z = TAU / 4 * (1-capsidopenness);
 }
 
 function update_varyingsurface() {
@@ -118,6 +119,8 @@ function update_varyingsurface() {
 		capsidopeningspeed = 0.018;
 	else
 		capsidopeningspeed = -0.018;
+	
+	capsidopeningspeed *= delta_t / 0.016;
 	
 	capsidopenness += capsidopeningspeed;
 	

@@ -1,4 +1,34 @@
 function init_CK_and_irreg(){
+	IrregButton = new THREE.Object3D();
+	IrregButton.radius = 0.37;
+	var button_line_width = 0.04;
+	IrregButton.add( new THREE.Mesh( new THREE.CircleGeometry(IrregButton.radius,64),
+			new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
+	IrregButton.add( new THREE.Mesh( new THREE.CircleGeometry(IrregButton.radius - button_line_width,64),
+			new THREE.MeshBasicMaterial( { transparent:true, color: 0xffffff } ) ) );
+	IrregButton.children[1].position.z += 0.0001;
+	IrregButton.add( new THREE.Mesh( new THREE.CircleGeometry(button_line_width / 2,64),
+			new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
+	IrregButton.children[2].position.z += 0.0002;
+	
+	IrregButton.add( new THREE.Mesh( new THREE.PlaneGeometry( (IrregButton.radius - button_line_width * 2 ) * 2,button_line_width),
+			new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
+	IrregButton.children[3].position.z += 0.0003;
+	IrregButton.children[3].geometry.vertices[0].x = 0;
+	IrregButton.children[3].geometry.vertices[2].x = 0;
+	
+	IrregButton.add( new THREE.Mesh( new THREE.PlaneGeometry( (IrregButton.radius - button_line_width * 2 ) * 2,button_line_width),
+			new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
+	IrregButton.children[4].position.z += 0.0003;
+	IrregButton.children[4].geometry.vertices[1].x = 0;
+	IrregButton.children[4].geometry.vertices[3].x = 0;
+	
+	IrregButton.pulsing = 1;
+	IrregButton.pulse = 0;
+	
+	IrregButton.position.set(-playing_field_dimension / 2 + 0.45,-1.4,0.002);
+	IrregButton.capsidopen = 0;
+	
 	wedges_assigned_vertices = new Uint16Array([
 	                            		0, 1,
 	                            		2, 7,
@@ -505,27 +535,6 @@ function init_CK_and_irreg(){
 
 		circle = new THREE.Mesh( new THREE.CircleGeometry( radius ), material3 );
 		circle.position.z = 0.1;
-		
-		var forwardbutton_geometry = new THREE.Geometry();
-		forwardbutton_geometry.vertices.push(
-				new THREE.Vector3( -0.2, 0.2, 0 ),
-				new THREE.Vector3( 0.2,  0, 0 ),
-				new THREE.Vector3( -0.2, -0.2, 0 )
-			);
-		forwardbutton_geometry.faces.push( new THREE.Face3( 0, 2, 1 ) );
-		forwardbutton = new THREE.Mesh( forwardbutton_geometry, new THREE.MeshBasicMaterial({color: 0x0000ff}) );
-		forwardbutton.position.x += 2.8;
-		forwardbutton.position.y -= 2.8;
-		var backwardbutton_geometry = new THREE.Geometry();
-		backwardbutton_geometry.vertices.push(
-				new THREE.Vector3( 0.2, 0.2, 0 ),
-				new THREE.Vector3( 0.2, -0.2, 0 ),
-				new THREE.Vector3( -0.2,  0, 0 )
-			);
-		backwardbutton_geometry.faces.push( new THREE.Face3( 0, 2, 1 ) );
-		backwardbutton = new THREE.Mesh( backwardbutton_geometry, new THREE.MeshBasicMaterial({color: 0x0000ff}) );
-		backwardbutton.position.x -= 2.8;
-		backwardbutton.position.y -= 2.8;
 		
 		var indicatorblobmaterial = new THREE.MeshBasicMaterial({color: 0xf0f00f});
 		for( var i = 0; i<indicatorblobs.length; i++){

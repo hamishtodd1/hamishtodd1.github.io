@@ -19,6 +19,13 @@ function load_AV_stuff()
 	var random_texture_urls = Array();
 	var slide_texture_urls = Array();
 	
+	var audioListener = new THREE.AudioListener();
+	camera.add( audioListener );
+	EndingMusic = new THREE.Audio( audioListener );
+	EndingMusic.load(
+		'http://hamishtodd1.github.io/Data/Rustavi Choir - Tsmindao Ghmerto (Holy God).ogg'
+	);
+	
 	//-----clickable viruses
 	virus_texture_urls[0] = "http://hamishtodd1.github.io/Data/ClickableViruses/1 - BV.jpg"; //to be turned into golfball.jpg or whatever
 	virus_texture_urls[1] = "http://hamishtodd1.github.io/Data/ClickableViruses/1 - BV.jpg";
@@ -94,10 +101,12 @@ function load_AV_stuff()
 //	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/trim5.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/very cone shaped HIV.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Origami_virus.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/PHi29 corners.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/PHi29 abstract.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/T4.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Lucky.jpg");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/book.png");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/book excerpt.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/book.jpg");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/book excerpt.jpg");
 	
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Polio.png");
 	reused_slide_indices[6] = slide_texture_urls.length - 1;
@@ -110,6 +119,7 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/hexagon2.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/hexagon3.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Geodesic example 1.jpg");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Football.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/geodesic building.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Bucky.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/basket.png");
@@ -117,7 +127,6 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/First pic of virus.jpg");
 	
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Tomoko Fuse.png");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Very dodecahedral virus.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Measles virus.png");
 	reused_slide_indices[8] = slide_texture_urls.length - 1;
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/golden spiral.png");
@@ -165,14 +174,6 @@ function bind_pictures()
 	        polygonOffset: true,
 	        polygonOffsetFactor: -2.0, //on top
 	        polygonOffsetUnits: -5.0 } ) );
-	
-	IrregButton = new THREE.Mesh( new THREE.CircleGeometry(0.6),
-			new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ); //and can change to [2]
-	IrregButton.pulsing = 1;
-	IrregButton.pulse = 0;
-	
-	IrregButton.position.set(-playing_field_dimension / 2 + 0.4,-1.4,0.002);
-	IrregButton.capsidopen = 0;
 
 	if(typeof random_textures[5] !== 'undefined')
 		GrabbableArrow.material.map = random_textures[5];

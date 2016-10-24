@@ -33,7 +33,7 @@
 function UpdateCapsid() {
 	var oldcapsidopenness = capsidopenness;
 	
-	var magnitudespeed = 0.012;
+	var magnitudespeed = 0.012 * delta_t / 0.016;
 	
 	if( IrregButton.capsidopen )
 		capsidopeningspeed = magnitudespeed;

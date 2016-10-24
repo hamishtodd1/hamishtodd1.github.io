@@ -80,7 +80,7 @@ function UpdateQuasiSurface()
 //	dodeca.localToWorld(dodeca_indicator_direction);
 	
 	//-----inflation
-	var dodeca_squashingspeed = 0.022;
+	var dodeca_squashingspeed = 0.022 * delta_t / 0.016;
 	if(isMouseDown)
 		dodeca_faceflatness += dodeca_squashingspeed;
 	else
@@ -98,7 +98,7 @@ function update_QS_center()
 {
 	QS_center.position.z = camera.position.z - 6;
 	
-	var opacitychangerate = 0.035;
+	var opacitychangerate = 0.035 * delta_t / 0.016;
 	if(isMouseDown)
 	{
 		QS_center.material.opacity += opacitychangerate;

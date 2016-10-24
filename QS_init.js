@@ -305,10 +305,10 @@ function initialize_QS_stuff()
 			color_selection[i] = new THREE.Color( 192/256,0.5,0.5 );
 //		else if( i === 5 ) //random shape. Shares an edge with all the existing colors
 //			color_selection[i] = new THREE.Color( 1,0.5,0.5 );
-//		else if( i === 7 ) //defect
-//			color_selection[i] = new THREE.Color( 192/256,0.5,0.5 );
+		else if( i === 7 ) //defect
+			color_selection[i] = new THREE.Color( 7/256,244/256,69/256 );
 		else
-			color_selection[i] = new THREE.Color(Math.random(), Math.random(), Math.random() );
+			color_selection[i] = new THREE.Color(250/256, 214/256, 14 /256 );
 	}
 	//Note these are shapes on the FLAT lattice. The shapes on the sphere change, and it's not nice to see these change (you could hide them though)
 	//0 is inner pentagon

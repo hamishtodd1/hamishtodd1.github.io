@@ -17,7 +17,7 @@ var QC_SPHERE_MODE = 4;
 var ENDING_MODE = 5;
 var TREE_MODE = 6;
 	
-var MODE = 0;
+var MODE = 3;
 
 //--------------Technologically fundamental
 var playing_field_dimension = 7*HS3; //used to be that height was 6.
@@ -165,6 +165,8 @@ var varyingsurface_orientingradius = new Float32Array([0.95,0.95,0.95]);
 var manipulation_surface;
 var filler_points;
 
+var minimum_angle_crapifier = 1;
+
 var surface;
 var surface_vertices;
 var surface_geometry;
@@ -274,7 +276,7 @@ var Mouse_delta = new THREE.Vector2(0,0);
 var EggCell;
 var Transcriptase;
 var neo_bocavirus_proteins = Array(60 + 4);
-var reproduced_proteins = Array(8);
+var reproduced_proteins = Array(24);
 var neo_bocavirus;
 
 var protein_vertex_indices = Array(number_of_proteins_in_lattice);

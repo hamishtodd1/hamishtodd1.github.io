@@ -20,8 +20,9 @@ function Update_story()
 {
 //	console.log( our_CurrentTime );
 	
-	if(our_CurrentTime >= 21*60+16)
-		EndingMusic.play();
+	if(our_CurrentTime >= 21*60+14)
+		if( !EndingMusic.isPlaying)
+			EndingMusic.play();
 	
 	//first part of this function is all based on current state, which you don't have at the very start
 	if(Storypage !== -1)
@@ -42,7 +43,7 @@ function Update_story()
 			wedges[i].visible = Story_states[Storypage].wedges_visible;
 		
 		if(Story_states[Storypage].close_up_badly)
-			minimum_angle_crapifier = 0.88;
+			minimum_angle_crapifier = 0.975;
 		else
 			minimum_angle_crapifier = 1;
 		
@@ -693,15 +694,15 @@ function init_story()
 
 	ns = default_clone_story_state(0,914.5); //back to model, pentagons flash?
 	ns.MODE = CK_MODE;
-	ns.pause_at_end = 1;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,917); //pentagon flash
-	ns.pentamers_color = new THREE.Color( 0 / 256, 13 / 256, 194 / 256 ),
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(1,919); //pentagon flash
+	ns = default_clone_story_state(0,917); //pentagon flash
 	ns.pentamers_color = new THREE.Color( 1, 0, 0 ),
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,919); //pentagon flash back
+	ns.pentamers_color = new THREE.Color( 0 / 256, 13 / 256, 194 / 256 ),
+	ns.pause_at_end = 1;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1,930.3); //this is where we'd pause

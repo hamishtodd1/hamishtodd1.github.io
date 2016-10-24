@@ -101,7 +101,7 @@ function update_bocavirus() {
 	else if( our_CurrentTime < unflash_time + fadeback_time )
 		coloredness = 1 - ( our_CurrentTime - unflash_time ) / fadeback_time;
 	else
-		coloredness = 0;
+		coloredness = 1;
 	var default_r = 1;
 	var default_g = 1;
 	var default_b = 0;
@@ -164,11 +164,21 @@ function update_bocavirus() {
 			neo_bocavirus_proteins[destination_assignments[i]].position.sub( neo_bocavirus_proteins[destination_assignments[i]].actual_location );
 			neo_bocavirus_proteins[destination_assignments[i]].position.multiplyScalar(point_along);
 		}
-		for(var i = 60; i < neo_bocavirus_proteins.length; i++)
-		{
-			neo_bocavirus_proteins[i].position.copy(boca_piece_destinations[i]);
-			neo_bocavirus_proteins[i].position.sub( neo_bocavirus_proteins[i].actual_location );
-		}
+	}
+	for(var i = 60; i < neo_bocavirus_proteins.length; i++)
+	{
+		neo_bocavirus_proteins[i].position.copy(boca_piece_destinations[i]);
+		neo_bocavirus_proteins[i].position.sub( neo_bocavirus_proteins[i].actual_location );
+	}
+	
+	var start_reproducing_time = 161;
+	
+	for(var i = 0; i < reproduced_proteins.length; i++)
+	{
+		if( our_CurrentTime - start_reproducing_time > i * 0.8 )
+			reproduced_proteins[i].visible = true;
+		else
+			reproduced_proteins[i].visible = false;
 	}
 }
 
@@ -410,7 +420,7 @@ function init_bocavirus_stuff()
 		reproduced_proteins[i].position.x = Math.random() * spayed_circle_radius * 4 - spayed_circle_radius * 2;
 		reproduced_proteins[i].position.y = Math.random() * spayed_circle_radius * 4 - spayed_circle_radius * 2;
 		
-		reproduced_proteins[i].position.x += spayed_circle_radius * 2
+		reproduced_proteins[i].position.x += spayed_circle_radius * 2.8;
 	}
 }
 
