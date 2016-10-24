@@ -7,7 +7,7 @@
  * 
  * Hopefully can get pictures and pauses in vdub too
  * You're going to get a video on left and on right, both 428x428, giving 480p
- * For each pair of clips, put their AVS into virtualdub; the last frame of the shorter one will pause
+ * For each pair of clips, put their AVS into virtualdub; the last frame of the shorter one will pause 
  * then that into vdub to get white bars on top
  * Then import them into WMM for the fades
  * 

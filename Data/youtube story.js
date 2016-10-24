@@ -43,7 +43,7 @@ function Update_story()
 			wedges[i].visible = Story_states[Storypage].wedges_visible;
 		
 		if(Story_states[Storypage].close_up_badly)
-			minimum_angle_crapifier = 0.975;
+			minimum_angle_crapifier = 0.965;
 		else
 			minimum_angle_crapifier = 1;
 		
@@ -165,11 +165,9 @@ function Update_story()
 			capsidopenness += 0.0001;
 	}
 	
-	console.log(Story_states[Storypage].enforced_cutout_vector0_player.x)
 	if( Story_states[Storypage].enforced_cutout_vector0_player.x !== -1 ) //note to self: you're screwed if you'd like it to be -1.
 	{
 		cutout_vector0_player.copy( Story_states[Storypage].enforced_cutout_vector0_player );
-		console.log( cutout_vector0_player );
 	}
 	
 	/*
@@ -363,7 +361,7 @@ function init_story()
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,343.3); //may not seem like a virus
+	ns = default_clone_story_state(0,343.1); //may not seem like a virus
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1,350.3); //HPV
@@ -372,7 +370,7 @@ function init_story()
 	ns = default_clone_story_state(1,357.6); //HPV xray
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,363.7); //HPV blobs
+	ns = default_clone_story_state(1,363.1); //HPV blobs
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1,375.5); //HPV connections

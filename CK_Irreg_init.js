@@ -6,20 +6,20 @@ function init_CK_and_irreg(){
 			new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
 	IrregButton.add( new THREE.Mesh( new THREE.CircleGeometry(IrregButton.radius - button_line_width,64),
 			new THREE.MeshBasicMaterial( { transparent:true, color: 0xffffff } ) ) );
-	IrregButton.children[1].position.z += 0.0001;
+	IrregButton.children[1].position.z += 0.001;
 	IrregButton.add( new THREE.Mesh( new THREE.CircleGeometry(button_line_width / 2,64),
 			new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
-	IrregButton.children[2].position.z += 0.0002;
+	IrregButton.children[2].position.z += 0.002;
 	
 	IrregButton.add( new THREE.Mesh( new THREE.PlaneGeometry( (IrregButton.radius - button_line_width * 2 ) * 2,button_line_width),
 			new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
-	IrregButton.children[3].position.z += 0.0003;
+	IrregButton.children[3].position.z += 0.003;
 	IrregButton.children[3].geometry.vertices[0].x = 0;
 	IrregButton.children[3].geometry.vertices[2].x = 0;
 	
 	IrregButton.add( new THREE.Mesh( new THREE.PlaneGeometry( (IrregButton.radius - button_line_width * 2 ) * 2,button_line_width),
 			new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
-	IrregButton.children[4].position.z += 0.0003;
+	IrregButton.children[4].position.z += 0.003;
 	IrregButton.children[4].geometry.vertices[1].x = 0;
 	IrregButton.children[4].geometry.vertices[3].x = 0;
 	
