@@ -20,39 +20,42 @@ function Update_story()
 {
 //	console.log( our_CurrentTime );
 	
+	//if you skip to a time, then the thing might not be in the state to demonstrate precisely what you want. And that is ok.
+	
 	if(our_CurrentTime >= 21*60+14)
 		if( !EndingMusic.isPlaying)
 			EndingMusic.play();
 	
-	//first part of this function is all based on current state, which you don't have at the very start
-	if(Storypage !== -1)
+	if(Storypage !== -1) //first part of this function is all based on current state, which you don't have at the very start
 	{
+		if( Story_states[Storypage].enforced_irreg_quaternion.x !== 5 && IrregButton.capsidopen === 0 ) //we want you either going towards closed or closed
+		{
+			//we want the user to
+			var flat_quat = new THREE.Quaternion();
+			THREE.Quaternion.slerp( Story_states[Storypage].enforced_irreg_quaternion, flat_quat, varyingsurface.quaternion, capsidopenness );
+			for( var i = 0; i < varyingsurface_cylinders.length; i++)
+				varyingsurface_cylinders[i].quaternion.copy(varyingsurface.quaternion);
+			for( var i = 0; i < varyingsurface_spheres.length; i++)
+				varyingsurface_spheres[i].quaternion.copy(varyingsurface.quaternion);
+			
+			if(capsidopenness === 0) //if you've done your job in this situation, we don't need you anymore.
+				Story_states[Storypage].enforced_irreg_quaternion.set(5,5,5,5);
+			
+			varyingsurface.updateMatrixWorld();
+			
+			//still have problems: the jerk into place of the initial thing, the fact that it doesn't seem to work for phi29
+		}
+		
+		
 		if( Story_states[Storypage].prevent_playing )
 			if(ytplayer.getPlayerState() === 1)// 1 means playing,not allowed (although maybe some people like to have order designated for them?)
 				ytplayer.pauseVideo();
 		
 		if( Story_states[Storypage].unpause_on_vertex_knowledge && theyknowyoucanchangevertices && !isMouseDown )
 			IrregButton.capsidopen = 0;
+		
 		if( Story_states[Storypage].unpause_on_vertex_knowledge && capsidopenness === 0 )
-		{
 			ytplayer.playVideo();
-			console.log("unpausing on vertex knowledge");
-		}
-		
-		for(var i = 0; i < wedges.length; i++)
-			wedges[i].visible = Story_states[Storypage].wedges_visible;
-		
-		if(Story_states[Storypage].close_up_badly)
-			minimum_angle_crapifier = 0.965;
-		else
-			minimum_angle_crapifier = 1;
-		
-		if( Story_states[Storypage].CK_scale !== 666 )
-		{
-			//what if they get it before you've paused?
-			LatticeScale = Story_states[Storypage].CK_scale;
-			ytplayer.playVideo();
-		}
 		
 		if( Story_states[Storypage].unpause_on_rotation_knowledge && rotation_understanding >= 2 && !isMouseDown )
 		{
@@ -119,7 +122,20 @@ function Update_story()
 			console.error("no story state found for current time, which is ", our_CurrentTime)
 	}
 	
+	//everything below here only happens once, at the start of the chapter.
+	
 	surface.material.color.copy( Story_states[i].CK_surface_color );
+	
+	if( Story_states[Storypage].CK_scale !== 666 )
+		LatticeScale = Story_states[Storypage].CK_scale;
+	
+	if(Story_states[Storypage].close_up_badly)
+		minimum_angle_crapifier = 0.965;
+	else
+		minimum_angle_crapifier = 1;
+	
+	for(var i = 0; i < wedges.length; i++)
+		wedges[i].visible = Story_states[Storypage].wedges_visible;
 	
 	if( Story_states[Storypage].enforced_CK_quaternion.x !== 5 )
 	{
@@ -221,6 +237,7 @@ function init_story()
 		enforced_irreg_state: -1,
 		
 		enforced_CK_quaternion: new THREE.Quaternion(5,5,5,5),
+		enforced_irreg_quaternion: new THREE.Quaternion(5,5,5,5),
 		
 		CK_surface_color: new THREE.Color( 0.11764705882352941, 0.9882352941176471, 0.9529411764705882 ),
 		pentamers_color: new THREE.Color( 147/255,0,8/255 ),
@@ -469,16 +486,23 @@ function init_story()
 	
 	ns = default_clone_story_state(0,585.3); //open irreg then (pause)
 	ns.irreg_open = 1;
+	ns.enforced_irreg_quaternion.set( -0.7096985308398929, 0.0742111650138679, 0.07616885252857324, 0.6964330580574571 );
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,586); //this is here so we can enforce quaternion during wrap-up during pause
 	ns.pause_at_end = 1;
 	ns.unpause_on_vertex_knowledge = 1;
+	ns.enforced_irreg_quaternion.set( -0.7096985308398929, 0.0742111650138679, 0.07616885252857324, 0.6964330580574571 );
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,590.2); //advice which we skip for now TODO
 	ns.go_to_time = 596 + 0.0001;
 	ns.pause_at_end = 1;
+	ns.enforced_irreg_quaternion.set( -0.7096985308398929, 0.0742111650138679, 0.07616885252857324, 0.6964330580574571 );
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,596); //And we have a new shape!
+	ns.enforced_irreg_quaternion.set( -0.7096985308398929, 0.0742111650138679, 0.07616885252857324, 0.6964330580574571 );
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,600.9); //button appears
@@ -495,17 +519,22 @@ function init_story()
 	ns = default_clone_story_state(1,617.9); //very small (cone shaped hiv)
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,622.1); //hiv in model
+	ns = default_clone_story_state(0,622.1); //back to model
 	ns.irreg_button_invisible = 1;
-	ns.enforced_irreg_state = 2;
+	ns.enforced_irreg_state = 3;
 	ns.irreg_open = 1;
 	ns.MODE = IRREGULAR_MODE;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,630.8); //HIV wraps up
-	ns.irreg_open = 0;
+	ns = default_clone_story_state(0,626.9); //hiv in model
+	ns.enforced_irreg_state = 2;
 	Story_states.push(ns);
 	
+	ns = default_clone_story_state(0,630.8); //HIV wraps up
+	ns.irreg_open = 0;
+	ns.enforced_irreg_quaternion.set( 0.2883296622430378,0.5933277134685048,0.7161749190910397,-0.22786337334508228 );
+	Story_states.push(ns);
+
 	ns = default_clone_story_state(0,642.1); //other modellers might want to make these
 	ns.slide_number = different_HIVs_index;
 	ns.irreg_button_invisible = 0;
@@ -528,6 +557,7 @@ function init_story()
 	
 	ns = default_clone_story_state(0,664); //show the representation
 	ns.enforced_irreg_state = 1;
+	ns.enforced_irreg_quaternion.set( -0.6708576855670457,0.08188608649696437,0.0028127601848788432,0.7370459427973053 ); 
 	ns.irreg_open = 0; 
 	Story_states.push(ns);
 	
@@ -548,11 +578,17 @@ function init_story()
 	ns = default_clone_story_state(1,693); //T4
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,695); //T4 in model. Want it oriented too really
+	ns = default_clone_story_state(0,695); //T4 in model
+	ns.enforced_irreg_quaternion.set( -0.5216554828631857,-0.40506237503583453,-0.44657300762976543,0.603632817711505 );
 	ns.enforced_irreg_state = 0;
 	ns.irreg_open = 0;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,699.8); //open up
+	ns.irreg_open = 1;
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
+	
 	
 	ns = default_clone_story_state(0,701.8); //story begins
 	ns.irreg_button_invisible = 1;
@@ -563,10 +599,11 @@ function init_story()
 	ns.irreg_open = 1;
 	Story_states.push(ns);
 	
-	//move corner around, close up badly
+	//move corner around
 
 	ns = default_clone_story_state(0,715.6); //bad angles, close
 	ns.close_up_badly = 1;
+	ns.enforced_irreg_quaternion.set( -0.5839517316049366,0.5941792835098294,0.12788438772275565,0.5381421164961689 );
 	ns.irreg_open = 0;
 	Story_states.push(ns);
 	
@@ -884,6 +921,7 @@ function default_clone_story_state( shows_a_slide, ST )
 	new_story_state.enforced_irreg_state = -1;
 	
 	new_story_state.enforced_CK_quaternion = new THREE.Quaternion(5,5,5,5);
+	new_story_state.enforced_irreg_quaternion = new THREE.Quaternion(5,5,5,5);
 	
 	new_story_state.startingtime = ST;
 	

@@ -5,32 +5,16 @@
  * Lots of TODOs in story
  * irreg doesn't have to go all the way to the state you want it in
  * 
- * Hopefully can get pictures and pauses in vdub too
- * You're going to get a video on left and on right, both 428x428, giving 480p
- * For each pair of clips, put their AVS into virtualdub; the last frame of the shorter one will pause 
- * then that into vdub to get white bars on top
- * Then import them into WMM for the fades
- * 
- * "what's happenning here is that polio's proteins..."
- * "We can see polio's pattern as one part of a larger pattern" 
- * 
- * Fade between all of these; they're all said while noodling around:
- * "This is bocavirus, and I invite you to reach out and rotate it for yourself"
- * CK "there are thousands and thousands [...] to see the results"
- * CK "if you feel like challenging yourself, here's a virus to try constructing" [while you press the button to open and close it]
- * QS "This model was discovered only very recently, but..." [and have the dome]
- * Irreg "In fact we have found out that HIV CHANGES its shape... we have this" [the button is on the screen] you rotate it a bit and then open. Fade.
- * Irreg [with pics on your side of the video] "Here's another very symmetrical virus, and if we emphasize its corners then we get this shape for it, and this is something that can be made in the model"
  * 
  * irreg limits? That is a major barrier to game-like enjoyment
- * Test
- * The wedges follow to
+ * cuts flash
  * The tree? Certainly, all the chapter selects must work
  * Make use of the "now you can choose the next virus" clip
  * Pentagons in your hexagon demo?
  * Integrate the hexagon demo
  * Fading pics. Probably the thing to do is to specify actual chapters that consist of a fade?
  * re-orient closed-up HIV
+ * Test
  * 	
  * Long term To Do
  *  -break up all the chapters into separate videos
