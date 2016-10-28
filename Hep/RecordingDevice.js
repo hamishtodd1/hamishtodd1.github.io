@@ -129,9 +129,12 @@ RecordingDevice.update = function(Models,Users, Images)
 		{	
 			Models[i].position.copy( RecordingDevice.States[ animation_bottom_state_number ].object_positions[i] );
 			Models[i].position.lerp( RecordingDevice.States[animation_bottom_state_number+1].object_positions[i], inter_state_amt );
-			Models[i].quaternion.copy(  RecordingDevice.States[ animation_bottom_state_number ].object_quaternions[i] );
-			Models[i].quaternion.slerp( RecordingDevice.States[animation_bottom_state_number+1].object_quaternions[i], inter_state_amt );
+			
+			Models[i].quaternion.copy(  Camera.quaternion );
+//			Models[i].quaternion.slerp( RecordingDevice.States[animation_bottom_state_number+1].object_quaternions[i], inter_state_amt );
 		}
+		
+		//we're going to do the "head quaternion rotates stuff"
 		
 		for( var i = 0; i < Images.length; i++)
 		{

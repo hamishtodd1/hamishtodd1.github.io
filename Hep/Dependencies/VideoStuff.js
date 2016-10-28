@@ -3,7 +3,7 @@ function initVideo()
 	// create the video element
 	video = document.createElement( 'video' );
 	video.src = "http://hamishtodd1.github.io/BrowserProsenter/Data/hepatitis pics/vid.ogv";
-	video.crossOrigin = "anonymous";
+//	video.crossOrigin = "anonymous";
 	
 	video.id = 'video';
 	video.type = 'video/ogg; codecs="theora, vorbis" ';
@@ -11,6 +11,7 @@ function initVideo()
 	
 	video.load(); // must call after setting/changing source
 	video.play();
+	
 //	video.currentTime = 24;
 	
 	// alternative method -- 
