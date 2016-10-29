@@ -93,7 +93,6 @@ function CheckIrregButton(){
 	if(!isMouseDown && (IrregButton.scale.x < 1 && !IrregButton.pulsing ) ){
 		if(IrregButton.capsidopen)
 		{
-			settle_manipulationsurface_and_flatnet();
 			IrregButton.capsidopen = 0;
 		}
 		else
@@ -119,6 +118,26 @@ function update_varyingsurface() {
 		capsidopeningspeed = 0.018;
 	else
 		capsidopeningspeed = -0.018;
+	
+	var irreg_flash = 0;
+	var flash_increase_length = 0.7;
+	var irreg_unflash_time = irreg_flash_time + 5.3;
+	if(our_CurrentTime > irreg_flash_time && our_CurrentTime < irreg_flash_time + flash_increase_length )
+		irreg_flash = ( our_CurrentTime - irreg_flash_time ) / flash_increase_length;
+	else if(our_CurrentTime > irreg_flash_time && our_CurrentTime < irreg_unflash_time )
+		irreg_flash = 1;
+	else if(our_CurrentTime > irreg_unflash_time && our_CurrentTime < irreg_unflash_time + flash_increase_length )
+		irreg_flash = 1 - ( our_CurrentTime - irreg_unflash_time ) / flash_increase_length;
+	if( irreg_flash > 1 )
+		irreg_flash = 1;
+	if( irreg_flash < 0 )
+		irreg_flash = 0;
+	for( var i = 4; i < 20; i++)
+		if( i % 4 === 0 || i % 4 === 1)
+			varyingsurface_cylinders[i].material.color.setRGB(irreg_flash,0,0);
+	varyingsurface_cylinders[0].material.color.setRGB(	irreg_flash,0,0);
+	varyingsurface_cylinders[21].material.color.setRGB(	irreg_flash,0,0);
+		
 	
 	capsidopeningspeed *= delta_t / 0.016;
 	
@@ -161,24 +180,35 @@ function update_varyingsurface() {
 			extraquaternion.setFromAxisAngle( MovementAxis, Mouse_delta.length() * 1.2 );
 			
 			varyingsurface.quaternion.multiply(extraquaternion);
-			for( var i = 0; i < varyingsurface_cylinders.length; i++)
-				varyingsurface_cylinders[i].quaternion.multiply(extraquaternion);
-			for( var i = 0; i < varyingsurface_spheres.length; i++)
-				varyingsurface_spheres[i].quaternion.multiply(extraquaternion);
-			
-			varyingsurface.updateMatrixWorld();
 		}
 	}
 	else {
-		var base_quaternion = new THREE.Quaternion(0,0,0,1);
-		var interpolationfactor = 0.03 + 0.97 * Math.pow(capsidopenness,10); //may want to massively reduce this power
+		var destination_quaternion = varyingsurface.quaternion.clone();
+		var interpolationfactor = 1;
+		if( IrregButton.capsidopen )
+		{
+			destination_quaternion.set(0,0,0,1);
+			//if capsidopenness = 1 we want it to be entirely the base quaternion, i.e. t = 1
+			
+			//TODO there is an equation to be solved that will bring you closer to it by
+			interpolationfactor = 0.03 + 0.97 * Math.pow(capsidopenness,10); //may want to massively reduce this power
+		}
+		else if( capsidopenness !== 0 ) //if you're *in the process of* closing
+		{
+			destination_quaternion.setFromAxisAngle(new THREE.Vector3(1,0,0),-TAU / 4);
+			interpolationfactor = 0.03 + 0.97 * Math.pow(1-capsidopenness,10); //may want to massively reduce this power
+		}
+			
+		varyingsurface.quaternion.slerp(destination_quaternion, interpolationfactor);
 		
-		varyingsurface.quaternion.slerp(base_quaternion, interpolationfactor); //if capsidopenness = 1 we want it to be entirely the base quaternion, i.e. t = 1
-		for( var i = 0; i < varyingsurface_cylinders.length; i++)
-			varyingsurface_cylinders[i].quaternion.slerp(base_quaternion, interpolationfactor);
-		for( var i = 0; i < varyingsurface_spheres.length; i++)
-			varyingsurface_spheres[i].quaternion.slerp(base_quaternion, interpolationfactor);
+		//mouse movement has put it into whatever situation it is. The above gets it back in time for complete openness. Going back the other way, it doesn't change
 	}
+	
+	varyingsurface.updateMatrixWorld();
+	for( var i = 0; i < varyingsurface_cylinders.length; i++)
+		varyingsurface_cylinders[i].quaternion.copy(varyingsurface.quaternion);
+	for( var i = 0; i < varyingsurface_spheres.length; i++)
+		varyingsurface_spheres[i].quaternion.copy(varyingsurface.quaternion);
 	
 	for(var i = 0; i < surfperimeter_line_index_pairs.length / 2; i++) {
 		var Aindex = surfperimeter_line_index_pairs[i*2];

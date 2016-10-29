@@ -1,7 +1,5 @@
 /*
  * TODO for IGF
- * The deadline, in our time, is 8am tomorrow. Might do well to upload a video just in case
- * 
  * Lots of TODOs in story
  * irreg doesn't have to go all the way to the state you want it in
  * 

@@ -11,8 +11,6 @@ function UpdateWorld(Models,Hands)
 {
 	UpdateHands(Models,Hands);
 	
-	console.log("yo")
-	
 	if( typeof video !== 'undefined' && video.readyState === video.HAVE_ENOUGH_DATA)
 	{
 		if( video.paused)

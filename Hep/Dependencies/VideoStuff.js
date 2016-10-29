@@ -2,15 +2,15 @@ function initVideo()
 {	
 	// create the video element
 	video = document.createElement( 'video' );
-	video.src = "http://hamishtodd1.github.io/BrowserProsenter/Data/hepatitis pics/vid.ogv";
-//	video.crossOrigin = "anonymous";
+	video.src = "http://hamishtodd1.github.io/Hep/Data/vid.ogv";
+	video.crossOrigin = "anonymous";
 	
 	video.id = 'video';
 	video.type = 'video/ogg; codecs="theora, vorbis" ';
 //	video.loop = true;
 	
 	video.load(); // must call after setting/changing source
-	video.play();
+//	video.play();
 	
 //	video.currentTime = 24;
 	

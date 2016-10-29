@@ -93,6 +93,8 @@ var indicatorblobs = Array(10);
 //--------------Varying
 var vertex_tobechanged = 666;
 
+var irreg_flash_time = 0;
+
 //there's an argument for the flashing being a story state controlled thing
 var theyknowyoucanchangevertices = 0;
 var rotation_understanding = 0; //increased when they let go or when they rotate. We ask for two rotations

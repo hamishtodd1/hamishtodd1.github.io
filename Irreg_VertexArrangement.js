@@ -145,6 +145,7 @@ function move_vertices(vertex_tobechanged, starting_movement_vector, initial_cha
 function settle_manipulationsurface_and_flatnet() {
 	for( var i = 0; i < flatnet_vertices.array.length; i++)
 		manipulation_surface.geometry.attributes.position.array[i] = flatnet_vertices.array[i];
+	manipulation_surface.geometry.attributes.position.needsUpdate = true;
 }
 
 function manipulate_vertices() {
@@ -197,26 +198,31 @@ function manipulate_vertices() {
 		
 		//manipulation_surface wants to adjust itself to become the flatnet
 		//TODO give them momentum
-		for(var i = 0; i < flatnet_vertices.array.length / 3; i++){
-			var displacement_vector = new THREE.Vector3(
-					flatnet_vertices.array[i*3+0] - manipulation_surface.geometry.attributes.position.array[i*3+0],
-					flatnet_vertices.array[i*3+1] - manipulation_surface.geometry.attributes.position.array[i*3+1],
-					flatnet_vertices.array[i*3+2] - manipulation_surface.geometry.attributes.position.array[i*3+2]);
-			if(displacement_vector.lengthSq() > 0.0001 ) {
-				//if you want it to wiggle into place it needs remembered momentum
-				displacement_vector.setLength(0.02 * delta_t / 0.016);
-				
-				manipulation_surface.geometry.attributes.position.array[i*3+0] += displacement_vector.x;
-				manipulation_surface.geometry.attributes.position.array[i*3+1] += displacement_vector.y;
-				manipulation_surface.geometry.attributes.position.array[i*3+2] += displacement_vector.z;
-				
-				manipulation_surface.geometry.attributes.position.needsUpdate = true;
-				
-				//you also want the minimum_angles to get there at the same rate. adjust the correction function to take an array, and pass it a "to be gotten to" one
-				
-				//Why only manipulation surface? Why not have the other surface slowly move to it too? Would allow a closed capsid to morph
+		if( capsidopenness === 1 )
+		{
+			for(var i = 0; i < flatnet_vertices.array.length / 3; i++){
+				var displacement_vector = new THREE.Vector3(
+						flatnet_vertices.array[i*3+0] - manipulation_surface.geometry.attributes.position.array[i*3+0],
+						flatnet_vertices.array[i*3+1] - manipulation_surface.geometry.attributes.position.array[i*3+1],
+						flatnet_vertices.array[i*3+2] - manipulation_surface.geometry.attributes.position.array[i*3+2]);
+				if(displacement_vector.lengthSq() > 0.0001 ) {
+					//if you want it to wiggle into place it needs remembered momentum
+					displacement_vector.setLength(0.02 * delta_t / 0.016);
+					
+					manipulation_surface.geometry.attributes.position.array[i*3+0] += displacement_vector.x;
+					manipulation_surface.geometry.attributes.position.array[i*3+1] += displacement_vector.y;
+					manipulation_surface.geometry.attributes.position.array[i*3+2] += displacement_vector.z;
+					
+					manipulation_surface.geometry.attributes.position.needsUpdate = true;
+					
+					//you also want the minimum_angles to get there at the same rate. adjust the correction function to take an array, and pass it a "to be gotten to" one
+					
+					//Why only manipulation surface? Why not have the other surface slowly move to it too? Would allow a closed capsid to morph
+				}
 			}
 		}
+		else
+			settle_manipulationsurface_and_flatnet();
 	}
 	
 	if( vertex_tobechanged === 666 || (movement_vector.x === 0 && movement_vector.y === 0) ){
