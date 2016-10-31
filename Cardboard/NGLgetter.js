@@ -2,7 +2,7 @@ var loose_surface;
 function get_NGL_protein()
 {
 	//Trp-Cage Miniprotein Construct TC5b, 20 residues: 1l2y. Rubisco: 1rcx. Insulin: 4ins
-	var testproteinlink = "http://files.rcsb.org/download/1QGT.pdb";
+	var testproteinlink = "http://files.rcsb.org/download/4ins.pdb";
 	var testobjlink = "http://threejs.org/examples/obj/male02/male02.obj";
 		
 	var xhr = new XMLHttpRequest();
