@@ -1,10 +1,9 @@
-//var placeholderprotein = new THREE.Mesh( new THREE.BoxGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( {color: 0x00ff00} ) );
-//placeholderprotein.position.set(0,0,3);
-
-
 function ReadInput()
 {	
-	OurOrientationControls.update();
+	if(isMobileOrTablet)
+		OurOrientationControls.update();
+	else
+		Camera.rotation.x += TAU / 60;
 	
 	update_PointOfFocus();
 }
@@ -47,19 +46,3 @@ window.addEventListener( 'resize', function(event)
 	Camera.aspect = Renderer.domElement.width / Renderer.domElement.height;
 	Camera.updateProjectionMatrix();
 }, false );
-
-document.addEventListener( 'keydown', function(event)
-{
-	if(event.keyCode === 190 )
-	{
-		event.preventDefault();
-		VRMODE = 1; //once you're in I guess you're not coming out!
-		OurVREffect.setFullScreen( true );
-		
-		//bug if we do this earlier(?)
-		for(var i = 0; i < 6; i++)
-			OurVREffect.scale *= 0.66666666;
-		
-		return;
-	}
-});
