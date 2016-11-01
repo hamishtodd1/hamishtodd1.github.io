@@ -1,4 +1,4 @@
-//ok we have a bug because the lattice is not precisely on the surface
+//bug if you're on the scale-only part :( could rotate it a bit...
 
 function Map_lattice() {
 	var surface_hexamers_color = Story_states[Storypage].hexamers_color.clone();
@@ -12,8 +12,6 @@ function Map_lattice() {
 	
 	//this is all crap about that one part where we explain things
 	{
-		var non_surface_hexamers_color = surface_hexamers_color.clone();
-		
 		var lattice_fadein_duration = 2;
 		var lattice_opacity = 1;
 		if( our_CurrentTime < lattice_fadein_time )
@@ -21,15 +19,12 @@ function Map_lattice() {
 		else if( our_CurrentTime < lattice_fadein_time + lattice_fadein_duration )
 			lattice_opacity = ( our_CurrentTime - lattice_fadein_time ) / lattice_fadein_duration;
 		//otherwise it's 1.
-		non_surface_hexamers_color.lerp( new THREE.Color(1,1,1), 1-lattice_opacity );
-		//hack, you have this in the mapper because it uses lattice_opacity
-		var surface_elevation = 0;
-		if( lattice_opacity === 0 )
-			surface_elevation = 3 * (1-capsidopenness);
 		
-		surface.position.z = surface_elevation;
-		for(var i = 0; i < surfperimeter_cylinders.length; i++ )
-			surfperimeter_cylinders[i].position.z = surface_elevation;
+		var non_surface_hexamers_color = surface_hexamers_color.clone();
+		non_surface_hexamers_color.lerp( new THREE.Color(1,1,1), 1-lattice_opacity );
+		var non_surface_hexamers_multiplier = Lattice_ring_density_factor; //have this by default because mapfromlatticetosurface has the effect of multiplying by density factor
+		if(lattice_opacity === 0)
+			non_surface_hexamers_multiplier = 0; //send them all to zero
 	}
 
 	var LatticeRotationAndScaleMatrix = new Float32Array([ 
@@ -46,12 +41,12 @@ function Map_lattice() {
 	var hexagonlattice_index = 0;
 	
 	var intersections = Array(4);
-	for(var i = 0; i < intersections.length; i++)
+	for(var i = 0, il = intersections.length; i < il; i++)
 		intersections[i] = new THREE.Vector3();
 	
 	got_a_problem = 0;
-	for(var j = 0; j < ProblemClosests.length; j++){
-		for(var i = 0; i < net_vertices_closest_lattice_vertex.length; i++)
+	for(var j = 0, jl = ProblemClosests.length; j < jl; j++){
+		for(var i = 0, il = net_vertices_closest_lattice_vertex.length; i < il; i++)
 		{
 			if(i === 0)
 				continue;
@@ -72,7 +67,7 @@ function Map_lattice() {
 		IsRoundedVertex[i] = 0;
 		IsProblemVertex[i] = 0;
 	}
-	for(var j = 0; j < net_vertices_closest_lattice_vertex.length; j++){
+	for(var j = 0, jl = net_vertices_closest_lattice_vertex.length; j < jl; j++){
 		IsRoundedVertex[net_vertices_closest_lattice_vertex[j]] = 1;
 		if( got_a_problem &&
 			(j === 0 || (j % 4 === 2 && j !== 18) || j % 4 === 3 ) ) //also none at all if it's not one of the problem LatticeScales. Don't use latticescale to measure that though
@@ -91,7 +86,7 @@ function Map_lattice() {
 	var potential_nettriangles = new Uint16Array(8); //each of the four points can be in 2 nettriangles
 
 	var chipped_side_vertices = Array(6);
-	for(var i = 0; i < chipped_side_vertices.length; i++)
+	for(var i = 0, il = chipped_side_vertices.length; i < il; i++)
 		chipped_side_vertices[i] = new THREE.Vector3();
 	
 	var indices_clockwise_on_edge_from_pariahvertex = Array(4);
@@ -106,7 +101,7 @@ function Map_lattice() {
 	{		
 		var hexagon_first_squarelatticevertex_index = hexagon_i*12;
 		
-		for(var i = 0; i < hexcorner_nettriangles.length; i++){
+		for(var i = 0, il = hexcorner_nettriangles.length; i < il; i++){
 			hexcorner_nettriangles[i] =
 				locate_in_squarelattice_net(squarelattice_hexagonvertices[hexagon_first_squarelatticevertex_index + i]);
 			//speedup opportunity: map the points here, too.
@@ -116,7 +111,7 @@ function Map_lattice() {
 		{
 			if(IsProblemVertex[hexagon_i]) //we're more precise, because they might all be on edges
 			{
-				for(var i = 0; i < potential_nettriangles.length; i++)
+				for(var i = 0, il = potential_nettriangles.length; i < il; i++)
 					potential_nettriangles[i] = 667;
 				
 				for(var i = 0; i < 4; i++){
@@ -125,7 +120,7 @@ function Map_lattice() {
 				}
 				
 				var foundit = 0;
-				for(var i = 0; i < potential_nettriangles.length; i++)
+				for(var i = 0, il = potential_nettriangles.length; i < il; i++)
 				{
 					if(potential_nettriangles[i] === 667)
 						continue;
@@ -266,14 +261,14 @@ function Map_lattice() {
 						if(is_an_intersection){
 							map_hex_point(intersections[corner], 
 									hexcorner_nettriangles[ ( side_i * 2 + corner ) % 12],
-									hexagonlattice_index, LatticeRotationAndScaleMatrix);
+									hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier);
 						}
 						else{
 							corner = ( side_i * 2 + corner ) % 12;
 							
 							map_hex_point(squarelattice_hexagonvertices[hexagon_first_squarelatticevertex_index+corner], 
 									hexcorner_nettriangles[ corner],
-									hexagonlattice_index, LatticeRotationAndScaleMatrix);
+									hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier);
 						}
 						
 						hexagonlattice_index++;
@@ -309,7 +304,7 @@ function Map_lattice() {
 						
 						map_hex_point(squarelattice_hexagonvertices[hexagon_first_squarelatticevertex_index+corner], 
 								hexcorner_nettriangles[ corner],
-								hexagonlattice_index, LatticeRotationAndScaleMatrix);
+								hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier);
 						
 						hexagonlattice_index++;
 					}
@@ -388,14 +383,14 @@ function Map_lattice() {
 						if(is_an_intersection){
 							map_hex_point(intersections[corner], 
 									hexcorner_nettriangles[ ( side_i * 2 + corner ) % 12],
-									hexagonlattice_index, LatticeRotationAndScaleMatrix);
+									hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier);
 						}
 						else{
 							corner = ( side_i * 2 + corner ) % 12;
 							
 							map_hex_point(squarelattice_hexagonvertices[hexagon_first_squarelatticevertex_index+corner], 
 									hexcorner_nettriangles[ corner],
-									hexagonlattice_index, LatticeRotationAndScaleMatrix);
+									hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier);
 						}
 						
 						hexagonlattice_index++;
@@ -422,7 +417,7 @@ function Map_lattice() {
 				
 				var regular_index_place = 0;
 				if(!logged) console.log( hexagon_first_squarelatticevertex_index)
-				for(var i = 0; i < chipped_side_vertices.length; i++){
+				for(var i = 0, il = chipped_side_vertices.length; i < il; i++){
 					if(i === 1 || i === 5)
 						continue;
 					
@@ -433,7 +428,7 @@ function Map_lattice() {
 					regular_index_place++;
 				}
 				
-				for(var i = 0; i < chipped_side_vertices.length; i++){
+				for(var i = 0, il = chipped_side_vertices.length; i < il; i++){
 					if(i !== 1 && i !== 5)
 						continue;
 					
@@ -501,11 +496,11 @@ function Map_lattice() {
 						if( tri_i === 0 ) //chipped triangle
 							map_hex_point(chipped_side_vertices[chipped_vertex], 
 								edgecorner_nettriangles[pariahvertex],
-								hexagonlattice_index, LatticeRotationAndScaleMatrix);
+								hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier);
 						else
 							map_hex_point(chipped_side_vertices[chipped_vertex], 
 								edgecorner_nettriangles[ (pariahvertex+1) % 4],
-								hexagonlattice_index, LatticeRotationAndScaleMatrix);
+								hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier);
 						
 						hexagonlattice_index++;
 					}

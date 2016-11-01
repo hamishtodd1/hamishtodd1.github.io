@@ -1,4 +1,4 @@
-function map_hex_point(squarelattice_position, nettriangle, hexagonlattice_index, LatticeRotationAndScaleMatrix)
+function map_hex_point(squarelattice_position, nettriangle, hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier)
 {	
 	HexagonLattice.geometry.vertices[hexagonlattice_index].copy(squarelattice_position);
 	
@@ -6,8 +6,7 @@ function map_hex_point(squarelattice_position, nettriangle, hexagonlattice_index
 			HexagonLattice.geometry.vertices[hexagonlattice_index] );
 		
 	if( nettriangle === 666){
-		//because mapfromlatticetosurface has the effect of multiplying by density factor
-		HexagonLattice.geometry.vertices[hexagonlattice_index].multiplyScalar(Lattice_ring_density_factor);
+		HexagonLattice.geometry.vertices[hexagonlattice_index].multiplyScalar(non_surface_hexamers_multiplier);
 		return;
 	}
 	
@@ -20,7 +19,7 @@ var rounded_net = new THREE.BufferAttribute( new Float32Array(22*3), 3 );
 
 function Update_net_variables() {
 	var old_net_vertices_closest_lattice_vertex = Array(net_vertices_closest_lattice_vertex.length);
-	for(var i = 0; i < net_vertices_closest_lattice_vertex.length; i++)
+	for(var i = 0, il = net_vertices_closest_lattice_vertex.length; i < il; i++)
 		old_net_vertices_closest_lattice_vertex[i] = net_vertices_closest_lattice_vertex[i];
 	
 	//we're integrating this. Need to apply transformation to first vertex, get nearest, use that as the first vertex.
@@ -47,11 +46,11 @@ function Update_net_variables() {
 	}
 	
 	//speedup opportunity: this part only exists for one situation, where LatticeScale is very low and such. Could be more specific
-	for(var i = 0; i<net_triangle_vertex_indices.length / 3; i++){
+	for(var i = 0, il = net_triangle_vertex_indices.length / 3; i < il; i++){
 		if(		net_vertices_closest_lattice_vertex[net_triangle_vertex_indices[i*3+0]] == net_vertices_closest_lattice_vertex[net_triangle_vertex_indices[i*3+1]]
 			 || net_vertices_closest_lattice_vertex[net_triangle_vertex_indices[i*3+0]] == net_vertices_closest_lattice_vertex[net_triangle_vertex_indices[i*3+2]]
 			 || net_vertices_closest_lattice_vertex[net_triangle_vertex_indices[i*3+1]] == net_vertices_closest_lattice_vertex[net_triangle_vertex_indices[i*3+2]] ) {
-			for(var i = 0; i<net_vertices_closest_lattice_vertex.length; i++)
+			for(var i = 0, il = net_vertices_closest_lattice_vertex.length; i < il; i++)
 				net_vertices_closest_lattice_vertex[i] = old_net_vertices_closest_lattice_vertex[i];
 			break;
 		}
@@ -146,7 +145,7 @@ function locate_in_net() {
 }
 
 function locate_in_squarelattice_net(vec) {
-	for(var i = 0; i < net_triangle_vertex_indices.length / 3; i++ ) {
+	for(var i = 0, il = net_triangle_vertex_indices.length / 3; i < il; i++ ) {
 		if( point_in_triangle_vecs(
 				vec.x,vec.y,
 				squarelatticevertex_rounded_triangle_vertex(i, 0),
@@ -168,7 +167,7 @@ function triangle_bordering_exterior(ourtriangle)
 
 function double_locate_in_squarelattice_net(vec, ourArray, startingindex) {
 	var num_found_so_far = 0;
-	for(var i = 0; i < net_triangle_vertex_indices.length / 3; i++ ) {
+	for(var i = 0, il = net_triangle_vertex_indices.length / 3; i < il; i++ ) {
 		if( point_in_triangle_vecs(
 				vec.x,vec.y,
 				squarelatticevertex_rounded_triangle_vertex(i, 0),

@@ -1,32 +1,24 @@
 /*
  * TODO
- * Ok so we're making a "close" button. Demonstrate it before showing hexagon lattice. It snaps(?), it closes, it inflates. It deflates, it opens.
- * So should you have irreg first? Snapping and projecting do make CK a little more complex
+ * Snap before close
  * 
  * Size limits: don't have them when they're interacting, even if they make it colossal. Bring it back when they let go, but don't snap it. It just feels overcomplicated.
- * QS still has size limits but that's because of pattern limitation and the fact that it stays shut. It gets the GrabbableArrow too.
  * 
  * Couldn't you cut a football out of a football-like pattern? Such a neat idea
  * 
  * How about the CK "curiosity" is that you get pentagons out of a pattern of hexagons? Gives them an opportunity to notice the irreg connection
  * 
- * colors
  * change angles of mouse movement such that rotation is slightly more probable than it currently is
- * get rid of weird flash. Probably occurring because you have some special case for keeping the hexagons visible when openness is 1
  * some alpha for the boundaries of the circle
  * click on lattice, little flash and explosion. Bigger flash when they let go
  * remove flatlattice crap
- * Maybe take a few frames to snap it, THEN let it start closing
  * 
  * Have black edges inside the net too
  * 
  * When it closes up, could have it close up in the position that all the viruses are in.
  * 
- * It does require training, it is a bit weird. Not everyone gets that letting go changes it.
- * Could show the capsid closed, then open,
- * 
- * Could have a combination for snapping: when they make it MASSIVE or tiny, it automatically goes back when they let go
- * But it's when they press the button that it snapes properly.
+ *  Could have a combination for snapping: when they make it MASSIVE or tiny, it automatically goes back when they let go
+ * But it's when they press the button that it snaps properly.
  * Reasoning is that the size thing they'll see why, and it will look weird to have it go far like that when they press the button.
  */
 
@@ -68,11 +60,18 @@ function UpdateCapsid() {
 		}
 		else
 			surfaceangle *= 0.93;
+		
+		var CK_showoff_rotation_duration = 0.9;
+		if( CK_showoff_time <= our_CurrentTime && our_CurrentTime <= CK_showoff_time + CK_showoff_rotation_duration )
+			surface.rotateOnAxis(new THREE.Vector3(0,1,0),delta_t * 2.2);
+		if( CK_showoff_time + CK_showoff_rotation_duration + 0.2 <= our_CurrentTime && our_CurrentTime <= CK_showoff_time + CK_showoff_rotation_duration*2 + 0.2 )
+			surface.rotateOnAxis(new THREE.Vector3(1,0,0),delta_t * 2.2); 
+		
 		//TODO swap it around so it doesn't have to rotate that much when opening
 		
 		surface.rotateOnAxis(surface_rotationaxis,surfaceangle);
 		for(var i = 0; i < surfperimeter_cylinders.length; i++ )
-			surfperimeter_cylinders[i].rotateOnAxis(surface_rotationaxis,surfaceangle);
+			surfperimeter_cylinders[i].quaternion.copy(surface.quaternion);
 		surface.updateMatrixWorld();
 		for(var i = 0; i < surfperimeter_cylinders.length; i++ )
 			surfperimeter_cylinders[i].updateMatrixWorld()
@@ -114,6 +113,7 @@ function UpdateCapsid() {
 		for(var i = 0; i < surfperimeter_cylinders.length; i++ )
 			surfperimeter_cylinders[i].quaternion.slerp(closed_quaternion, interpolationfactor);
 	}
+	
 
 	surface.updateMatrixWorld();
 	

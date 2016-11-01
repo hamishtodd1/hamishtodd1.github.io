@@ -165,7 +165,7 @@ function ChangeScene(new_mode) {
 		case CK_MODE:
 			scene.add(IrregButton);
 			
-//			scene.add(CKHider); //can remove this if you have no internet
+			scene.add(CKHider); //can remove this if you have no internet
 			scene.add(HexagonLattice);
 			scene.add(surface);
 //			scene.add(surflattice);

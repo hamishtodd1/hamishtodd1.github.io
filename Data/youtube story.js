@@ -660,6 +660,7 @@ function init_story()
 	ns.MODE = CK_MODE;
 	ns.CK_surface_color = new THREE.Color( 0.89411764705, 0.9725490196, 0.53725490196 );
 	ns.enforced_CK_quaternion.set( -0.26994323284634125, -0.0024107795577928506, -0.000379635156398864, 0.9628731458813965 );
+	//it's more than just this which is locking the surface in place
 	ns.irreg_button_invisible = 1;
 	ns.irreg_open = 0;
 	Story_states.push(ns);
@@ -669,10 +670,11 @@ function init_story()
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,832.3); //back to model
+	ns.enforced_CK_quaternion.set( -0.26994323284634125, -0.0024107795577928506, -0.000379635156398864, 0.9628731458813965 );
 	ns.MODE = CK_MODE;
 	Story_states.push(ns);
 	
-	//838.4 polio shape turns a bit TODO
+	CK_showoff_time = 838.4; //polio shape turns a bit
 
 	ns = default_clone_story_state(0,843); //open it up
 	ns.irreg_open = 1;

@@ -94,6 +94,7 @@ var indicatorblobs = Array(10);
 var vertex_tobechanged = 666;
 
 var irreg_flash_time = 0;
+var CK_showoff_time = 0; //more like 13:57
 
 //there's an argument for the flashing being a story state controlled thing
 var theyknowyoucanchangevertices = 0;
