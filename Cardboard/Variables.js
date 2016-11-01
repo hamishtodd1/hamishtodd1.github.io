@@ -11,6 +11,8 @@ var delta_t = 0;
 var logged = 0;
 var debugging = 0;
 
+var isMobileOrTablet = false;
+
 //Static. At least in some sense.
 var gentilis;
 

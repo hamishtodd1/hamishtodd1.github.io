@@ -2,8 +2,6 @@ function ReadInput()
 {	
 	if(isMobileOrTablet)
 		OurOrientationControls.update();
-	else
-		Camera.rotation.x += TAU / 60;
 	
 	update_PointOfFocus();
 }
@@ -45,4 +43,28 @@ window.addEventListener( 'resize', function(event)
 	Renderer.setSize( window.innerWidth, window.innerHeight );
 	Camera.aspect = Renderer.domElement.width / Renderer.domElement.height;
 	Camera.updateProjectionMatrix();
+}, false );
+
+document.addEventListener( 'keydown', function(event)
+{
+	if(event.keyCode === 37 )
+	{
+		event.preventDefault();
+		VRMODE = 1; //once you're in I guess you're not coming out!
+		OurVREffect.setFullScreen( true );
+		
+		//bug if we do this earlier(?)
+		for(var i = 0; i < 6; i++)
+			OurVREffect.scale *= 0.66666666;
+		
+		return;
+	}
+});
+
+document.addEventListener( 'mousemove', function(event) {
+	if(!isMobileOrTablet)
+	{
+		Camera.rotation.y = (event.clientX - Renderer.domElement.offsetLeft) / Renderer.domElement.offsetWidth  * TAU;
+		Camera.rotation.x = ( (event.clientY - Renderer.domElement.offsetTop ) / Renderer.domElement.offsetHeight * TAU / 2 - TAU / 4 )  * 0.4;
+	} 
 }, false );
