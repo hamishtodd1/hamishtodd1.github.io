@@ -1,8 +1,7 @@
 function ReadInput()
 {	
-	OurOrientationControls.update();
-	Camera.rotation.x = 0;
-//	console.log("oo")
+	if(isMobileOrTablet)
+		OurOrientationControls.update();
 }
 
 document.addEventListener( 'mousedown', go_fullscreen, false );
@@ -22,4 +21,12 @@ window.addEventListener( 'resize', function(event)
 	Renderer.setSize( window.innerWidth, window.innerHeight );
 	Camera.aspect = Renderer.domElement.width / Renderer.domElement.height; //shouldn't there be a division by 2?
 	Camera.updateProjectionMatrix();
+}, false );
+
+document.addEventListener( 'mousemove', function(event) {
+	if(!isMobileOrTablet)
+	{
+		Camera.rotation.y = (event.clientX - Renderer.domElement.offsetLeft) / Renderer.domElement.offsetWidth  * TAU - TAU / 4;
+		Camera.rotation.x = ( (event.clientY - Renderer.domElement.offsetTop ) / Renderer.domElement.offsetHeight * TAU / 2 - TAU / 4 )  * 0.4;
+	} 
 }, false );

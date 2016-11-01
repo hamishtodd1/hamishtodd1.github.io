@@ -16,6 +16,8 @@ var debugging = 0;
 
 THREE.TextureLoader.prototype.crossOrigin = '';
 
+var isMobileOrTablet = false;
+
 var gentilis;
 
 var Scene;
@@ -33,8 +35,6 @@ var VRMODE = 0;
 var video;
 var videoTexture;
 var videoImageContext;
-
-stage = new NGL.Stage();
 
 //get rid of the distortion already
 

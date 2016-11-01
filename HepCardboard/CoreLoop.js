@@ -33,7 +33,10 @@ function Render(Models,Users, ControllerModel) {
 	requestAnimationFrame( function(){
 		Render(Models,Users,ControllerModel);
 	} );
-	OurStereoEffect.render( Scene, Camera ); //will be fine if VR is not enabled
+	if(isMobileOrTablet)
+		OurStereoEffect.render( Scene, Camera ); //will be fine if VR is not enabled
+	else
+		Renderer.render( Scene, Camera ); //will be fine if VR is not enabled
 }
 
 init();
