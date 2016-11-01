@@ -2,7 +2,7 @@ function initVideo()
 {	
 	// create the video element
 	video = document.createElement( 'video' );
-	video.src = "http://hamishtodd1.github.io/Hep/Data/vid.ogv";
+	video.src = "http://hamishtodd1.github.io/HepCardboard/Data/vid.ogv";
 	video.crossOrigin = "anonymous";
 	
 	video.id = 'video';
