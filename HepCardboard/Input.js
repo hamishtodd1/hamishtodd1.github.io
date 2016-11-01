@@ -2,6 +2,7 @@ function ReadInput()
 {	
 	OurOrientationControls.update();
 	Camera.rotation.x = 0;
+//	console.log("oo")
 }
 
 document.addEventListener( 'mousedown', go_fullscreen, false );
