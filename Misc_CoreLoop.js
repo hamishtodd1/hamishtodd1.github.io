@@ -5,7 +5,6 @@
  * 
  * 
  * irreg limits? That is a major barrier to game-like enjoyment
- * cuts flash
  * The tree? Certainly, all the chapter selects must work
  * Make use of the "now you can choose the next virus" clip
  * Pentagons in your hexagon demo?
@@ -94,7 +93,7 @@ function UpdateWorld() {
 			update_tree();
 			break;
 			
-		case SLIDE_MODE:
+		case HEXAGON_MODE:
 			update_hexagon_demo();
 			break;
 	}
@@ -147,8 +146,6 @@ function ChangeScene(new_mode) {
 	{
 		case SLIDE_MODE:
 			scene.add(VisibleSlide);
-			for( var i = 0; i < demonstration_hexagons.length; i++ )
-				scene.add(demonstration_hexagons[i]);
 			scene.add( EndingMusic );
 			break;
 	
@@ -200,5 +197,10 @@ function ChangeScene(new_mode) {
 			
 		case TREE_MODE:
 			add_tree_stuff_to_scene();
+			break;
+			
+		case HEXAGON_MODE:
+			for(var i = 0; i < demonstration_hexagons.length; i++)
+				scene.add(demonstration_hexagons[i]);
 	}
 }

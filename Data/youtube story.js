@@ -143,8 +143,8 @@ function Update_story()
 	{
 		for(var i = 0; i < flatnet_vertices.array.length; i++)
 			flatnet_vertices.array[i] = setvirus_flatnet_vertices[Story_states[Storypage].enforced_irreg_state][i];
-		for(var i = 0; i < flatnet_vertices.array.length; i++)
-			flatnet_vertices.array[i] = setvirus_flatnet_vertices[Story_states[Storypage].enforced_irreg_state][i];
+		if(Story_states[Storypage-1].MODE !== IRREGULAR_MODE) //we're flicking back - no need to see transition
+			settle_manipulationsurface_and_flatnet(); 
 		update_wedges();
 		correct_minimum_angles(flatnet_vertices.array);
 	}
@@ -163,12 +163,12 @@ function Update_story()
 	if( !Story_states[Storypage].prevent_playing )
 		ytplayer.playVideo();
 	
-	if( Story_states[Storypage].irreg_open !== -1 )
-		IrregButton.capsidopen = Story_states[Storypage].irreg_open;
+	if( Story_states[Storypage].capsid_open !== -1 )
+		IrregButton.capsidopen = Story_states[Storypage].capsid_open;
 	
-	if( Story_states[Storypage].irreg_open_immediately !== -1 )
+	if( Story_states[Storypage].capsid_open_immediately !== -1 )
 	{
-		IrregButton.capsidopen = Story_states[Storypage].irreg_open_immediately;
+		IrregButton.capsidopen = Story_states[Storypage].capsid_open_immediately;
 		capsidopenness = IrregButton.capsidopen;
 	}
 	
@@ -246,7 +246,7 @@ function init_story()
 		pentamers_color: new THREE.Color( 147/255,0,8/255 ),
 		hexamers_color: new THREE.Color( 208/255,58/255,59/255 ),
 		
-		irreg_open: -1,
+		capsid_open: -1,
 		irreg_button_invisible: 0,
 		unpause_on_vertex_knowledge: 0,
 		
@@ -292,7 +292,7 @@ function init_story()
 	ns = default_clone_story_state(0,62.3); //color
 	ns.pause_at_end = 1;
 	flash_time = ns.startingtime;
-	ns.unpause_after = 9;
+	ns.unpause_after = 7.7;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,72.77); //click me when you want to continue
@@ -436,7 +436,7 @@ function init_story()
 	ns = default_clone_story_state(1,451.5); //rubbish pattern
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,460.3); //back to shrine
+	ns = default_clone_story_state(0,459.4); //back to shrine
 	ns.slide_number = inside_darb_e_pic_index;
 	Story_states.push(ns);
 
@@ -488,7 +488,7 @@ function init_story()
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,585.3); //open irreg then (pause)
-	ns.irreg_open = 1;
+	ns.capsid_open = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,586); //this is here so we can enforce quaternion during wrap-up during pause
@@ -523,7 +523,7 @@ function init_story()
 	ns = default_clone_story_state(0,622.1); //back to model
 	ns.irreg_button_invisible = 1;
 	ns.enforced_irreg_state = 3;
-	ns.irreg_open_immediately = 1;
+	ns.capsid_open_immediately = 1;
 	ns.MODE = IRREGULAR_MODE;
 	Story_states.push(ns);
 	
@@ -532,7 +532,7 @@ function init_story()
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,630.8); //HIV wraps up
-	ns.irreg_open = 0;
+	ns.capsid_open = 0;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,642.1); //other modellers might want to make these
@@ -558,12 +558,12 @@ function init_story()
 	ns = default_clone_story_state(0,664); //show the representation
 	ns.enforced_irreg_state = 1;
 	ns.enforced_irreg_quaternion.set( -0.6708576855670457,0.08188608649696437,0.0028127601848788432,0.7370459427973053 ); 
-	ns.irreg_open_immediately = 0; 
+	ns.capsid_open_immediately = 0; 
 	ns.irreg_button_invisible = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,672); //we've noticed that when you open them out
-	ns.irreg_open = 1;
+	ns.capsid_open = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,674.2); //highlight cuts
@@ -571,7 +571,7 @@ function init_story()
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,678); //wedges appear
-	ns.irreg_open = 1;
+	ns.capsid_open = 1;
 	ns.wedges_visible = true;
 	Story_states.push(ns);
 	
@@ -584,11 +584,11 @@ function init_story()
 	ns.irreg_button_invisible = 0;
 	ns.enforced_irreg_quaternion.set( -0.5216554828631857,-0.40506237503583453,-0.44657300762976543,0.603632817711505 );
 	ns.enforced_irreg_state = 0;
-	ns.irreg_open_immediately = 0;
+	ns.capsid_open_immediately = 0;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,699.8); //before we move on (open up)
-	ns.irreg_open = 1;
+	ns.capsid_open = 1;
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
@@ -599,14 +599,14 @@ function init_story()
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,705.6); //open it out
-	ns.irreg_open = 1;
+	ns.capsid_open = 1;
 	Story_states.push(ns);
 	
 	//move corner around
 
 	ns = default_clone_story_state(0,715.6); //bad angles, close
 	ns.close_up_badly = 1;
-	ns.irreg_open = 0;
+	ns.capsid_open = 0;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,735.7); //close up properly
@@ -624,11 +624,11 @@ function init_story()
 	
 	ns = default_clone_story_state(0,762.1); //back to model
 	ns.MODE = IRREGULAR_MODE;
-	ns.irreg_open_immediately = 1;
+	ns.capsid_open_immediately = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,766.9); //closes again
-	ns.irreg_open = 0;
+	ns.capsid_open = 0;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,775.9); //tree, or time to skip back to tree
@@ -662,7 +662,7 @@ function init_story()
 	ns.enforced_CK_quaternion.set( -0.26994323284634125, -0.0024107795577928506, -0.000379635156398864, 0.9628731458813965 );
 	//it's more than just this which is locking the surface in place
 	ns.irreg_button_invisible = 1;
-	ns.irreg_open = 0;
+	ns.capsid_open = 0;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,829.8); //back to small polio
@@ -677,7 +677,7 @@ function init_story()
 	CK_showoff_time = 838.4; //polio shape turns a bit
 
 	ns = default_clone_story_state(0,843); //open it up
-	ns.irreg_open = 1;
+	ns.capsid_open = 1;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,850.55); //lattice appears
@@ -692,6 +692,9 @@ function init_story()
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,864); //Now let us say that...
+	ns.CK_surface_color = new THREE.Color( 0.11764705882352941, 0.9882352941176471, 0.9529411764705882 );
+	ns.pentamers_color = new THREE.Color( 0 / 256, 13 / 256, 194 / 256 ),
+	ns.hexamers_color = new THREE.Color( 0 / 256, 187 / 256, 253 / 256 ),
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,867.2); //we set it to precisely this size
@@ -699,7 +702,7 @@ function init_story()
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,870.1); //wrap it up
-	ns.irreg_open = 0;
+	ns.capsid_open = 0;
 	ns.CK_scale_only = 0;
 	Story_states.push(ns);
 
@@ -709,9 +712,10 @@ function init_story()
 	ns = default_clone_story_state(0,879); //back to model
 	ns.MODE = CK_MODE;
 	ns.enforced_CK_quaternion.set( -0.21316178390455967, -0.4028820735877156, 0.385522836480786, 0.8022594538028792 );
-	ns.CK_surface_color = new THREE.Color( 0.11764705882352941, 0.9882352941176471, 0.9529411764705882 );
-	ns.pentamers_color = new THREE.Color( 0 / 256, 13 / 256, 194 / 256 ),
-	ns.hexamers_color = new THREE.Color( 0 / 256, 187 / 256, 253 / 256 ),
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,883.8); //bring in button
+	ns.capsid_open = 1;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,889.5); //bring in button
@@ -722,17 +726,21 @@ function init_story()
 	ns = default_clone_story_state(0,893.7); //the reason they look this way
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,899.6); //hexagons are symmetrical TODO
+	ns = default_clone_story_state(0,897.6); //hexagons are symmetrical TODO
+	ns.MODE = HEXAGON_MODE;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,903); //hexagons can be made of pieces
+	ns = default_clone_story_state(0,902.6); //hexagons can be made of pieces
+	Hexagon_explosion_start_time = ns.startingtime;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,905.9); //hexagons tile  
+	ns = default_clone_story_state(0,905.9); //hexagons tile
+	hex_first_movement_start_time = ns.startingtime;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,914.5); //back to model, pentagons flash?
+	ns = default_clone_story_state(0,911.6); //back to model. Or could have pentagons in demonstration?
 	ns.MODE = CK_MODE;
+	ns.capsid_open = 0;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,917); //pentagon flash
@@ -908,8 +916,8 @@ function default_clone_story_state( shows_a_slide, ST )
 	
 	new_story_state.startingtime += default_page_duration;
 	
-	new_story_state.irreg_open = -1;
-	new_story_state.irreg_open_immediately = -1;
+	new_story_state.capsid_open = -1;
+	new_story_state.capsid_open_immediately = -1;
 	new_story_state.unpause_on_vertex_knowledge = 0;
 	
 	new_story_state.CK_scale = 666;

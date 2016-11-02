@@ -10,7 +10,7 @@ function initVideo()
 //	video.loop = true;
 	
 	video.load(); // must call after setting/changing source
-	video.play();
+//	video.play();
 	
 //	video.currentTime = 24;
 	

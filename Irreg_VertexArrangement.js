@@ -6,6 +6,7 @@
  * -make things fade in in a certain order that suggests its operation
  * -transition to clicked virus is smooth even if capsid is closed
  * -red highlight should flash
+ * -Change HIV's state so that the wrap-up makes more sense (big scissors on the exceptional crack)
  * 
  * To avoid triangle inversion, recast the whole thing in terms of that one vertex at the top center of the W. Work out how the triangle bounds constrain it
  * 

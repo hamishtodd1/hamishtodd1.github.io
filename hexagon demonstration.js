@@ -1,22 +1,14 @@
-var artificial_time = 0;
-
 function update_hexagon_demo()
 {
+	var segments_explodedness = 0;
 	
+	var plosion_duration = 0.8;
+	var implosion_start_time = Hexagon_explosion_start_time + plosion_duration;
 	
-	
-	artificial_time += delta_t;
-	
-	var segments_explodedness;
-	
-	var explosion_start_time = 0;
-	var plosion_duration = 1;
-	var implosion_start_time = explosion_start_time + plosion_duration;
-	
-	if( explosion_start_time <= artificial_time && artificial_time <= explosion_start_time + plosion_duration )
-		segments_explodedness = move_smooth(plosion_duration, artificial_time - explosion_start_time);
-	else if( implosion_start_time <= artificial_time && artificial_time <= implosion_start_time + plosion_duration )
-		segments_explodedness = 1 - move_smooth(plosion_duration, artificial_time - implosion_start_time );
+	if( Hexagon_explosion_start_time <= our_CurrentTime && our_CurrentTime <= Hexagon_explosion_start_time + plosion_duration )
+		segments_explodedness = move_smooth(plosion_duration, our_CurrentTime - Hexagon_explosion_start_time);
+	else if( implosion_start_time <= our_CurrentTime && our_CurrentTime <= implosion_start_time + plosion_duration )
+		segments_explodedness = 1 - move_smooth(plosion_duration, our_CurrentTime - implosion_start_time );
 	
 //	console.log(demonstration_hexagons[0].children[0].children[0].geometry.vertices[2])
 	for(var i = 0; i < demonstration_hexagons[0].children.length; i++)
@@ -28,10 +20,10 @@ function update_hexagon_demo()
 		demonstration_hexagons[0].children[i].position.z = 0.1;
 	}
 	
-	var hex_start_fadein = 2;
+	var hex_start_fadein = implosion_start_time + plosion_duration + 0.2;
 	var hex_fadein_duration = 1;
 	
-	var hex_alpha = ( artificial_time - hex_start_fadein ) / hex_fadein_duration;
+	var hex_alpha = ( our_CurrentTime - hex_start_fadein ) * 1.5 / hex_fadein_duration;
 	if( hex_alpha < 0)
 		hex_alpha = 0;
 	if( hex_alpha > 1)
@@ -43,29 +35,27 @@ function update_hexagon_demo()
 		demonstration_hexagons[1].children[i].children[1].material.opacity = hex_alpha;
 	}
 
-	var first_movement_start_time = 4;
-	var first_movement_duration = 1;
-	var second_movement_start_time = 6;
-	var second_movement_duration = 1;
+	var first_movement_duration = 0.8;
+	var second_movement_start_time = hex_first_movement_start_time + first_movement_duration + 0.35;
+	var second_movement_duration = first_movement_duration;
 	
-	if( artificial_time <= second_movement_start_time )
+	if( our_CurrentTime <= second_movement_start_time )
 	{
-		var aroundness = move_smooth(first_movement_duration, artificial_time - first_movement_start_time );
+		var aroundness = move_smooth(first_movement_duration, our_CurrentTime - hex_first_movement_start_time );
 		demonstration_hexagons[1].position.copy( demonstration_hexagons[1].children[0].children[1].geometry.vertices[1] );
 		demonstration_hexagons[1].position.multiplyScalar(-2.06);
 		demonstration_hexagons[1].position.y *= -1;
 		
 		demonstration_hexagons[1].position.applyAxisAngle(z_central_axis,TAU / 6 * aroundness );
 	}
-	else if( second_movement_start_time <= artificial_time )
+	else if( second_movement_start_time <= our_CurrentTime )
 	{
-		var aroundness = move_smooth(second_movement_duration, artificial_time - second_movement_start_time );
+		var aroundness = move_smooth(second_movement_duration, our_CurrentTime - second_movement_start_time );
 		demonstration_hexagons[1].position.copy( demonstration_hexagons[1].children[0].children[1].geometry.vertices[1] );
 		demonstration_hexagons[1].position.multiplyScalar(-2.06);
 		
 		demonstration_hexagons[1].position.applyAxisAngle(z_central_axis,TAU / 6 * aroundness );
 	}
-		
 }
 
 function init_hexagon_demo()
@@ -121,7 +111,4 @@ function init_hexagon_demo()
 	demonstration_hexagons[1].position.copy( hexagon_segment.children[1].geometry.vertices[1] );
 	demonstration_hexagons[1].position.multiplyScalar(2.06);
 	demonstration_hexagons[1].position.x *= -1;
-	
-	for(var i = 0; i < demonstration_hexagons.length; i++)
-		demonstration_hexagons[i].visible = false;
 }

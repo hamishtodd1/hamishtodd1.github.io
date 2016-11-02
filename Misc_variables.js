@@ -16,6 +16,7 @@ var IRREGULAR_MODE = 3;
 var QC_SPHERE_MODE = 4;
 var ENDING_MODE = 5;
 var TREE_MODE = 6;
+var HEXAGON_MODE = 7;
 	
 var MODE = 3;
 
@@ -95,6 +96,7 @@ var vertex_tobechanged = 666;
 
 var irreg_flash_time = 0;
 var CK_showoff_time = 0; //more like 13:57
+var Hexagon_explosion_start_time = 0;
 
 //there's an argument for the flashing being a story state controlled thing
 var theyknowyoucanchangevertices = 0;
