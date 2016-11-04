@@ -10,6 +10,8 @@ function go_fullscreen(event)
 {
 	event.preventDefault();
 	
+	video.play();
+	
 	if( THREEx.FullScreen.activated() )
 		return;
 	

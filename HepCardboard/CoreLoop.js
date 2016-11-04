@@ -10,7 +10,8 @@
 function UpdateWorld(Models,Hands)
 {
 	if( typeof video !== 'undefined' && video.readyState === video.HAVE_ENOUGH_DATA)
-	{	
+	{
+		console.log("might be ready");
 		videoImageContext.drawImage( video, 0, 0 );
 		if ( videoTexture ) 
 			videoTexture.needsUpdate = true;
