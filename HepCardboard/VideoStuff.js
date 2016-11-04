@@ -2,15 +2,15 @@ function initVideo()
 {	
 	// create the video element
 	video = document.createElement( 'video' );
-	video.src = "http://hamishtodd1.github.io/HepCardboard/Data/vid.ogv";
+	video.src = "http://hamishtodd1.github.io/HepCardboard/Data/vid.mp4";
 	video.crossOrigin = "anonymous";
 	
 	video.id = 'video';
-	video.type = 'video/ogg; codecs="theora, vorbis" ';
+//	video.type = 'video/ogg; codecs="theora, vorbis" ';
 //	video.loop = true;
 	
 	video.load(); // must call after setting/changing source
-//	video.play();
+	video.play();
 	
 //	video.currentTime = 24;
 	
