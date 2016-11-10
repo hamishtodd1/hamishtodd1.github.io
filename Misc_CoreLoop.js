@@ -1,36 +1,28 @@
 /*
- * TODO for IGF
+ * TODO
  * Lots of TODOs in story
- * irreg doesn't have to go all the way to the state you want it in
- * 
  * 
  * irreg limits? That is a major barrier to game-like enjoyment
- * The tree? Certainly, all the chapter selects must work
+ * The tree?
  * Make use of the "now you can choose the next virus" clip
- * Pentagons in your hexagon demo?
- * Integrate the hexagon demo
  * Fading pics. Probably the thing to do is to specify actual chapters that consist of a fade?
- * re-orient closed-up HIV
  * Test
  * 	
  * Long term To Do
  *  -break up all the chapters into separate videos
- *  -why is everything meshbasicmaterial?
  *  -is the usefulness of the models not coming through?
  * 	-everything listed in CKsurfacestuff, bocavirus, alexandrov, quasisphere, youtube stuff
- *  -get a person with a sense of color to look at everything
- *  -lighting on everything?
+ *  -get a person with a sense of color to look at everything - Ario?
  *  -no 666s, you don't want pearl-clutchers. Easiest is change it to 665, -1?
- *  -Framerate independence, and maybe the detection of speed that makes things nicer or simpler
+ *  -Test with a low framerate to see what it's like and chase down remaining framerate dependence
  *  -loading screen. You may need to stagger inits.
  *  -watch people a lot and tweak the zooming and rotating code, just because it is simple doesn't mean that it is good
- *  -button should be an animated line.
  *  -If webgl doesn’t load (or etc), recommend a different browser or refreshing the page
- *  -all objects floating in space with a shadow?
+ *  -all objects floating in space with a shadow/lighting? Something other than meshbasicmaterial?
+ *  -Pentagons in your hexagon demo? Pentagon demo? Needs polish too
  *  
- *  -people on touchscreens can do without QS rotating. Pose it like HPV. Then the button is this simple thing that just opens and closes. That is a complex thing and you don't want to be making it harder with other stuff like having to hold it and be in a different state or anything
+ *  -people on touchscreens : pose qs like HPV. Then the button is this simple thing that just opens and closes. That is a complex thing and you don't want to be making it harder with other stuff like having to hold it and be in a different state or anything
  *  
- *  -change the way they follow your mouse?
  *  -bifuricate for the touchscreen
  *  
  *  -bear in mind that people can move the mouse extremely fucking fast, they take points VERY far on irreg, and scale back and forth very fast on CK
@@ -49,6 +41,7 @@
  *  	-all the effects in camerastuff
  *  	-test on different setups
  *  	-make work in different resolutions/respond to resize.
+ *  	-mouse position
  */
 
 function UpdateWorld() {
@@ -124,7 +117,6 @@ function render() {
 function ChangeScene(new_mode) {
 	//don't go changing this outside of here.
 	MODE = new_mode;
-	
 	
 	//everyone out
 	for( var i = scene.children.length - 1; i >= 0; i--){

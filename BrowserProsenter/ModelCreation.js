@@ -8,25 +8,8 @@
  * -whole weblink ending with ".obj"
  * -name of protein. Get a table with conversion to serial number
  */
-function Load_model() {
-	
-	//Trp-Cage Miniprotein Construct TC5b, 20 residues: http://files.rcsb.org/download/1L2Y.pdb
-	var OurPDBLoader = new THREE.PDBLoader();	
-	OurPDBLoader.load('http://files.rcsb.org/download/1RLC.pdb',
-		function( geometryAtoms, geometryBonds, json ){
-			Set_up_first_model(geometryAtoms);
-			Render();
-		},
-		// Function called when download progresses
-		function ( xhr ) {},
-		// Function called when download errors
-		function ( xhr ) {
-			console.error( "didn't load PDB" );
-		}
-	);
-}
 
-function Set_up_first_model( geometryAtoms ) {
+function Create_first_model( geometryAtoms ) {
 	var AveragePosition = new THREE.Vector3();
 	var Num_backbone_atoms = 0;
 	for(var i = 0; i < geometryAtoms.vertices.length; i++){
@@ -40,18 +23,21 @@ function Set_up_first_model( geometryAtoms ) {
 		geometryAtoms.vertices[i].sub(AveragePosition);
 	}
 	
-	ModelZero = new THREE.Object3D();
+	ReturnedModel = new THREE.Object3D();
 	//note that "children.push" instead of "add" will make it a child, but the child won't have a parent!
-	ModelZero.add( Create_sphere_representation_mesh( geometryAtoms ) );
-	ModelZero.add( Create_trace_representation_mesh( geometryAtoms ) );
+	ReturnedModel.add( Create_sphere_representation_mesh( geometryAtoms ) );
+	ReturnedModel.add( Create_trace_representation_mesh( geometryAtoms ) );
 //	ModelZero.add( Create_ribbon_representation_mesh( geometryAtoms ) );
 	
-	Scene.add(ModelZero);
+	for(var i = 0; i < 7; i++) //hack because units
+		ReturnedModel.scale.multiplyScalar(0.5);
+	
+	return ReturnedModel;
 }
 
 function IsBackBone(atomID){
-	if(atomID === "ca"
-//		|| atomID === "n" || atomID === "c"
+	if( atomID === "ca"
+	 || atomID === "n" || atomID === "c"
 			)
 		return true;
 	else

@@ -24,7 +24,6 @@ var MODE = 3;
 var playing_field_dimension = 7*HS3; //used to be that height was 6.
 var min_cameradist = 20; //get any closer and the perspective is weird
 var vertical_fov = 2 * Math.atan(playing_field_dimension/(2*min_cameradist));
-//is camera z ever really changed?
 
 var camera = new THREE.CombinedCamera(playing_field_dimension, playing_field_dimension, vertical_fov * 360 / TAU, 0.1, 1000, 0.1, 1000);
 var scene = new THREE.Scene();

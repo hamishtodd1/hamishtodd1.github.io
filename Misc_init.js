@@ -5,9 +5,6 @@ function init() {
 	init_Grabbable_Arrow();
 	init_story();
 	
-	//------------------need this so there's something in there for the first frame
-	ourclock.getDelta();
-	
 	INITIALIZED = 1;
 	attempt_launch();
 }
@@ -18,5 +15,9 @@ function attempt_launch()
 		return;
 	
 	ChangeScene(MODE);
+	
+	//------------------need this so there's something in there for the first frame
+	ourclock.getDelta();
+//	ytplayer.seekTo( 311 );
 	render();
 }

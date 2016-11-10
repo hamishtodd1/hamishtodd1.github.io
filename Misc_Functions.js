@@ -303,6 +303,17 @@ function bent_down_quad_corner(a,b,c,theta,d_hinge_origin_length, d_hinge_length
 	return d;
 }
 
+function Random_perp_vector(OurVector){
+	var PerpVector = new THREE.Vector3();
+	
+	if( OurVector.equals(Central_Z_axis))
+		PerpVector.crossVectors(OurVector, Central_Z_axis);
+	else
+		PerpVector.crossVectors(OurVector, Central_Y_axis);
+	
+	return PerpVector;
+}
+
 function put_tube_in_buffer(A,B, mybuffer, radius ) {
 	if(radius==undefined)
 		radius = 0.02; 

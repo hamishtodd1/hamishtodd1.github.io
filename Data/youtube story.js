@@ -24,7 +24,7 @@ function Update_story()
 	
 	//if you skip to a time, then the thing might not be in the state to demonstrate precisely what you want. And that is ok.
 	
-	if(our_CurrentTime >= 21*60+14)
+	if(our_CurrentTime >= 21*60+16)
 		if( !EndingMusic.isPlaying)
 			EndingMusic.play();
 	
@@ -153,7 +153,7 @@ function Update_story()
 	if(Story_states[Storypage].slide_number !== -1 )
 	{
 		VisibleSlide.material.map = slide_textures[ Story_states[Storypage].slide_number ];
-		VisibleSlide.material.needsUpdate = true;
+		VisibleSlide.material.needsUpdate = true; //doesn't get there fast enough
 	}
 	//slide mode should really be an exceptional thing here
 	if( Story_states[Storypage].MODE !== MODE )
@@ -281,6 +281,7 @@ function init_story()
 	//---paragraph 2
 	ns = default_clone_story_state(0,35.9); //bocavirus appears, then pause
 	ns.MODE = BOCAVIRUS_MODE;
+	Chapter_start_times[0] = ns.startingtime;
 	ns.pause_at_end = 1; //TODO handle the assurance.
 //	ns.unpause_after = 9.5; //want to 
 	ns.unpause_on_rotation_knowledge = 1;
@@ -355,11 +356,10 @@ function init_story()
 	ns = default_clone_story_state(1,287.4); //lysis
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,294.5); //back to boca
-	ns.MODE = BOCAVIRUS_MODE;
+	ns = default_clone_story_state(1,294.5); //picture of boca
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,311.7); //Tree
+	ns = default_clone_story_state(0,309.4); //Tree
 	ns.MODE = TREE_MODE;
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
@@ -373,7 +373,7 @@ function init_story()
 	//----------QS BEGINS!!!!!
 	ns = default_clone_story_state(1,326.85); //zika virus
 	var zika_slide = ns.slide_number; 
-	Chapter_start_times[2] = ns.startingtime + 0.05;
+	Chapter_start_times[3] = ns.startingtime + 0.05;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,338.1); //QS, Try it out, (pause)
@@ -390,7 +390,7 @@ function init_story()
 	ns = default_clone_story_state(1,357.6); //HPV xray
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,363.1); //HPV blobs
+	ns = default_clone_story_state(1,361.2); //HPV blobs
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1,375.5); //HPV connections
@@ -474,7 +474,7 @@ function init_story()
 	
 	//-----------IRREG BEGINS
 	ns = default_clone_story_state(1,558.45); //irreg begins, HIV shown
-	Chapter_start_times[0] = ns.startingtime;
+	Chapter_start_times[2] = ns.startingtime;
 	var HIV_slide = ns.slide_number;
 	Story_states.push(ns);
 
@@ -789,9 +789,9 @@ function init_story()
 	//------ENDING BEGINS!!!!
 	//no canvas?
 	//15:35
-	ns = default_clone_story_state(0,1001.25); //Start of end
-	ns.MODE = TREE_MODE;
-	Chapter_start_times[3] = ns.startingtime;
+	ns = default_clone_story_state(1,1001.25); //Start of end
+	Chapter_start_times[4] = ns.startingtime;
+	var Measles_slide = ns.slide_number;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,1012.9); //Tomoko Fuse
@@ -826,8 +826,8 @@ function init_story()
 	ns.slide_number = zika_slide;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,1123.8); //measles
-	var Measles_slide = ns.slide_number;
+	ns = default_clone_story_state(0,1123.8); //measles
+	ns.slide_number = Measles_slide;
 	Story_states.push(ns);
 
 //	ns = default_clone_story_state(1,18*60+45); //all models
@@ -849,6 +849,10 @@ function init_story()
 
 	ns = default_clone_story_state(0,1170.9); //Dad
 	ns.slide_number = Dad_slide;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,1200.5); //back to measles
+	ns.slide_number = Measles_slide;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,1224.7); //back to measles

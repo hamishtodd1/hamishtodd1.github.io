@@ -1,8 +1,19 @@
 <html>
 	<head>
-		<title>Protein viewer</title>
+		<title>Protein Viewer</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
-			body { margin: 0; }
+			body {
+				font-family: Monospace;
+				background-color: #101010;
+				color: #fff;
+				margin: 0px;
+				overflow: hidden;
+			}
+			a {
+				color: #f00;
+			}
 		</style>
 	</head>
 	<body>
@@ -27,17 +38,36 @@
 			}
 		</script>
 		
-		<script src="three.min.js"></script>
-		<script src="PDBLoader.js"></script>
+
+		<script src="/socket.io/socket.io.js"></script>
+		
+		<script src="Dependencies/ngl.js"></script>
+		
+		<script src="Dependencies/three.min.js"></script>
+		<script src="Dependencies/PDBLoader.js"></script>
+		<script src="Dependencies/MTLLoader.js"></script>
+		<script src="Dependencies/OBJLoader.js"></script>
+		<script src="Dependencies/SceneFromDemo.js"></script>
+		
+		<script src="Dependencies/WebVR.js"></script>
+		<script src="Dependencies/VREffect.js"></script>
+		<script src="Dependencies/VRControls.js"></script>
+		
+		<script src="Dependencies/VideoStuff.js"></script>
+		
+		<script src="Variables.js"></script>
 		
 		<script src="RibbonRepresentation.js"></script>
 		<script src="MiscFunctions.js"></script>
+		<script src="Input.js"></script>
+		<script src="UserFunctions.js"></script>
+		<script src="Hands.js"></script>
 		
 		<script src="ModelCreation.js"></script>
 		<script src="MiscRepresentations.js"></script>
 		
-		<script src="Variables.js"></script>
 		<script src="Initialization.js"></script>
+		<script src="DownloadStuff.js"></script>
 		<script src="CoreLoop.js"></script>
 	</body>
 </html>

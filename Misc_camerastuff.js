@@ -5,6 +5,8 @@ var camera_default_position = new THREE.Vector3(0,0,min_cameradist);
 	
 function UpdateCamera() 
 {
+//	console.log(camera.position.z); //does it only change during bocavirus? How about QS?
+	
 	//vertical_fov = 2 * Math.atan(playing_field_height/(2*camera.position.z));
 	//camera.fov = vertical_fov * 360 / TAU;
 	camera.updateMatrix();

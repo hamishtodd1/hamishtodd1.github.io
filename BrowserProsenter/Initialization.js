@@ -1,4 +1,25 @@
-function Init(){
+
+
+var loose_surface;
+
+//the first init
+socket.on('OnConnect_Message', function(msg)
+{
+	Master = msg.Master;
+	if(msg.Master)
+		console.log("Master");
+	else
+		console.log("Not master");
+	
+	var Renderer = new THREE.WebGLRenderer({ antialias: true }); //antialiasing would be nice and we're only aiming for 30fps
+	Renderer.setClearColor( 0x101010 );
+	Renderer.setPixelRatio( window.devicePixelRatio );
+	Renderer.setSize( window.innerWidth, window.innerHeight );
+	Renderer.sortObjects = false;
+	Renderer.shadowMap.enabled = true;
+	Renderer.shadowMap.cullFace = THREE.CullFaceBack;
+	document.body.appendChild( Renderer.domElement );
+		
 //	var HORIZONTAL_FOV_OCULUS = 110;
 	var HORIZONTAL_FOV_VIVE = 110;
 //	var HORIZONTAL_FOV_GEAR = 110;
@@ -22,97 +43,104 @@ function Init(){
 	 * StarVR: 210
 	 * 
 	 */
-	Renderer = new THREE.WebGLRenderer({ antialias: true }); //antialiasing would be nice and we're only aiming for 30fps
-	Renderer.setSize(EYE_PIXELS_HORIZONTAL_VIVE,EYE_PIXELS_VERTICAL_VIVE,0);
-	Renderer.shadowMap.enabled = true;
-	Renderer.shadowMap.cullFace = THREE.CullFaceBack;
-	
-	document.body.appendChild( Renderer.domElement );
 	
 	Scene = new THREE.Scene();
-	Camera = new THREE.PerspectiveCamera(VERTICAL_FOV_VIVE, 
+	
+	//Camera will be added to the scene when the user is set up
+	Camera = new THREE.PerspectiveCamera( 90, //VERTICAL_FOV_VIVE, //mrdoob says 70. They seem to change it anyway...
 			Renderer.domElement.width / Renderer.domElement.height, //window.innerWidth / window.innerHeight,
 			0.001, 700);
 	
-	Camera.position.set(0,0,30); //initial state subject to change! you may not want them on the floor. Owlchemy talked about this
+	Camera.position.copy(INITIAL_CAMERA_POSITION); //initial state subject to change! you may not want them on the floor. Owlchemy talked about this
+	var fireplaceangle = msg.Master ? 0 : Math.PI; //called so because they're seated around it
+	Camera.position.applyAxisAngle(Central_Y_axis,fireplaceangle);
+	Camera.lookAt(new THREE.Vector3());
 	
-	Scene.add(Camera);
+	OurVREffect = new THREE.VREffect( Renderer );
+	console.log(Camera.fov)
+	
+	if ( WEBVR.isLatestAvailable() === false ){
+//		document.body.appendChild( WEBVR.getMessage() );
+	}
+	else
+	{
+		//This is where the split could get more fundamental. Many things to take into account: it may be a google cardboard.
+		OurVRControls = new THREE.VRControls( Camera,Renderer.domElement );
+		if ( WEBVR.isAvailable() === true )
+			document.body.appendChild( WEBVR.getButton( OurVREffect ) );
+	}
 	
 	Add_stuff_from_demo();
+//	initVideo();
 	
-	Load_model();
+	//us. We'll be added to the user array soon, in the way everyone else is.
+	//This is also the place where the user object is defined
+	InputObject.UserData.push({
+		CameraPosition: new THREE.Vector3(),
+		CameraQuaternion: new THREE.Quaternion(),
+		
+		HandPosition: new THREE.Vector3(0,-10000,0), //By default it's offscreen.
+		HandQuaternion: new THREE.Quaternion(),
+		
+		Gripping: 0,
+		ID: msg.ID
+	});
+	
+	get_NGL_protein();
+	
+	//you can add other things to this
+	var PreInitChecklist = {
+		Downloads: Array()
+	};
+	Download_initial_stuff(PreInitChecklist);
+});
+
+function PostDownloadInit(OurLoadedThings)
+{		 
+	var ControllerModel = OurLoadedThings[0].children[0];
+	
+	//"grippable objects"
+	var Models = Array();
+	Loadpdb("1l2y", Models);
+	
+	var Users = Array();
+	
+	Render(Models, Users, ControllerModel);
 }
 
-function Add_stuff_from_demo(){
-	Scene.fog = new THREE.Fog( 0xffffff, 1, 600 );
-	Scene.fog.color.setHSL( 0.6, 0, 1 );
-	
-	// LIGHTS
-
-	hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.6 );
-	hemiLight.color.setHSL( 0.6, 1, 0.6 );
-	hemiLight.groundColor.setHSL( 0.095, 1, 0.75 );
-	hemiLight.position.set( 0, 500, 0 );
-	Scene.add( hemiLight );
-
-	//
-
-	dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
-	dirLight.color.setHSL( 0.1, 1, 0.95 );
-	dirLight.position.set( -1, 1.75, 1 );
-	dirLight.position.multiplyScalar( 50 );
-	Scene.add( dirLight );
-
-	dirLight.castShadow = true;
-
-	dirLight.shadow.mapSize.width = 2048;
-	dirLight.shadow.mapSize.height = 2048;
-
-	var d = 50;
-
-	dirLight.shadow.camera.left = -d;
-	dirLight.shadow.camera.right = d;
-	dirLight.shadow.camera.top = d;
-	dirLight.shadow.camera.bottom = -d;
-
-	dirLight.shadow.camera.far = 3500;
-	dirLight.shadow.bias = -0.0001;
-	//dirLight.shadowCameraVisible = true;
-
-	// GROUND
-
-	var groundGeo = new THREE.PlaneBufferGeometry( 10000, 10000 );
-	var groundMat = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x050505 } );
-	groundMat.color.setHSL( 0.095, 1, 0.75 );
-
-	var ground = new THREE.Mesh( groundGeo, groundMat );
-	ground.rotation.x = -Math.PI/2;
-	ground.position.y = -33;
-	Scene.add( ground );
-
-	ground.receiveShadow = true;
-
-	// SKYDOME
-
-	var vertexShader = document.getElementById( 'vertexShader' ).textContent;
-	var fragmentShader = document.getElementById( 'fragmentShader' ).textContent;
-	var uniforms = {
-		topColor: 	 { type: "c", value: new THREE.Color( 0x0077ff ) },
-		bottomColor: { type: "c", value: new THREE.Color( 0xffffff ) },
-		offset:		 { type: "f", value: 33 },
-		exponent:	 { type: "f", value: 0.6 }
-	};
-	uniforms.topColor.value.copy( hemiLight.color );
-
-	Scene.fog.color.copy( uniforms.bottomColor.value );
-
-	var skyGeo = new THREE.SphereGeometry( 600, 32, 15 );
-	var skyMat = new THREE.ShaderMaterial( { 
-		vertexShader: vertexShader, 
-		fragmentShader: fragmentShader, 
-		uniforms: uniforms, 
-		side: THREE.BackSide } );
-
-	var sky = new THREE.Mesh( skyGeo, skyMat );
-	Scene.add( sky );
+function get_NGL_protein()
+{
+	var xhr = new XMLHttpRequest();
+	xhr.open( "GET", "http://mmtf.rcsb.org/v0.2/full/1l2y", true );
+	xhr.addEventListener( 'load', function( event ){
+		var blob = new Blob( [ xhr.response ], { type: 'application/octet-binary'} );
+		
+//		stage.loadFile( blob, {
+//				ext: "pdb", defaultRepresentation: true
+//		} ).then( function( o ){
+//			var rep_name = "surface";
+//			o.addRepresentation( rep_name );
+//			console.log(o)
+//			loose_surface = o.reprList[ o.reprList.length - 1 ].repr;
+//			if( rep_name === "surface")
+//				stage.tasks.onZeroOnce( placeholder_interpret_ngl );
+////			if( rep_name === "ribbon")
+////				stage.tasks.onZeroOnce( placeholder_interpret_ngl_ribbon );
+//			
+//			//we would like to know when it has finished making its representation and call the code currently in input			
+//		} );
+		
+		stage.loadFile( blob, {
+				ext: "mmtf", defaultRepresentation: true
+		} ).then( function( o ){
+			o.addRepresentation( "surface" );
+			console.log(o.reprList);
+			loose_surface = o.reprList[3].repr;
+//			stage.tasks.onZeroOnce( placeholder_interpret_ngl );
+			
+			//we would like to know when it has finished making its representation and call the code currently in input			
+		} );
+	} );
+	xhr.responseType = "arraybuffer";
+	xhr.send( null );
 }
