@@ -1,7 +1,3 @@
-
-
-var loose_surface;
-
 //the first init
 socket.on('OnConnect_Message', function(msg)
 {
@@ -86,32 +82,38 @@ socket.on('OnConnect_Message', function(msg)
 		ID: msg.ID
 	});
 	
-	get_NGL_protein();
-	
 	//you can add other things to this
 	var PreInitChecklist = {
 		Downloads: Array()
 	};
-	Download_initial_stuff(PreInitChecklist);
-});
-
-function PostDownloadInit(OurLoadedThings)
-{		 
-	var ControllerModel = OurLoadedThings[0].children[0];
+	
+	var ControllerModel = new THREE.Mesh(new THREE.Geometry, new THREE.MeshPhongMaterial({color:0x000000})); //material thing needed?
+	var OurOBJLoader = new THREE.OBJLoader();
+	OurOBJLoader.load( "http://hamishtodd1.github.io/BrowserProsenter/Data/vr_controller_vive_1_5.obj",
+		function ( object ) { ControllerModel.geometry = object.geometry; ControllerModel.material = object.material; },
+		function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); }
+	);
+	
+	var OurFontLoader = new THREE.FontLoader();
+	OurFontLoader.load(  "gentilis.js", 
+		function ( reponse ) { gentilis = reponse; },
+		function ( xhr ) {},
+		function ( xhr ) { console.error( "couldn't load font" ); }
+	);
 	
 	//"grippable objects"
 	var Models = Array();
-	Loadpdb("1l2y", Models);
+	Loadpdb("1L2Y", Models);
 	
 	var Users = Array();
 	
-	Render(Models, Users, ControllerModel);
-}
+	Render(Models, Users, ControllerModel); // you have to list everything that goes in there? How about a while loop
+});
 
 function get_NGL_protein()
 {
 	var xhr = new XMLHttpRequest();
-	xhr.open( "GET", "http://mmtf.rcsb.org/v0.2/full/1l2y", true );
+	xhr.open( "GET", "http://mmtf.rcsb.org/v0.2/full/1L2Y", true );
 	xhr.addEventListener( 'load', function( event ){
 		var blob = new Blob( [ xhr.response ], { type: 'application/octet-binary'} );
 		

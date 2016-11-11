@@ -37,6 +37,9 @@ var videoImageContext;
 
 stage = new NGL.Stage();
 
+//----variables that "get picked up", quite hacky
+var loose_surface;
+
 //get rid of the distortion already
 
 //We have a "protein of interest" that the non-VR folks are looking at. When the VRer picks up a new one, their focus snaps to that
