@@ -34,9 +34,10 @@ function HandleNetMovement()
 				var max_lattice_scale_change = 0.08;
 				
 				var min_lattice_scale_given_angle = get_min_lattice_scale(LatticeAngle);
+				min_lattice_scale_given_angle /= Math.sqrt(7);
 				LatticeScale *= LatticeScaleChange;
 				if(LatticeScale < min_lattice_scale_given_angle  ) //10/3 * HS3 / number_of_hexagon_rings)
-					LatticeScale = min_lattice_scale_given_angle ; //10/3 * HS3 / number_of_hexagon_rings;
+					LatticeScale = min_lattice_scale_given_angle; //10/3 * HS3 / number_of_hexagon_rings;
 				if(LatticeScale > 1)
 					LatticeScale = 1;
 				
@@ -76,7 +77,7 @@ function HandleNetMovement()
 			
 			var scaleaugmentation;
 			var angleaugmentation;
-			var min_lattice_scale_given_angle; //do you need to initialize them in order for the while to work?
+			var min_lattice_scale_given_angle;
 			var ourchoice = 0;
 			
 			do {
@@ -143,6 +144,9 @@ function indices_of_closest_default_lattice_vertices(x,y) {
 	//speedup opportunity: only go through a sixth of them
 	//speedup opportunity: discard those whose quadrance from the center of the lattice is larger than that of the closest one
 	for( var i = 0; i < number_of_lattice_points; i++) {
+		if(i > 60) //scale would be less than the 0.27735 limit
+			continue;
+		
 		var quadrance = (x-flatlattice_default_vertices[i*3 + 0])*(x-flatlattice_default_vertices[i*3 + 0]) + 
 						(y-flatlattice_default_vertices[i*3 + 1])*(y-flatlattice_default_vertices[i*3 + 1]);
 		

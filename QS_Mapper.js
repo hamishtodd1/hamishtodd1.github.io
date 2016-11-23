@@ -250,7 +250,6 @@ function put_edge_in_quasicutouts(ourprism, one_quasicutout_vertices, lowest_pri
 
 function triangle_in_same_shape(triangle, othertriangle)
 {
-//	return 0;
 	if( 9 <= triangle && triangle <= 13 &&
 		9 <= othertriangle && othertriangle <= 13 && 
 		othertriangle != triangle )

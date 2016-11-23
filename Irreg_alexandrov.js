@@ -74,6 +74,8 @@ function correct_minimum_angles(vertices_buffer_array) {
 	
 	//curvatures is a 12D vector with curvatures[i] coming from vertex (i.e. radius) i
 	var curvatures_current = get_curvatures(radii,0);	//get the length of this to zero!
+	if(curvatures_current === 666)
+		return 0;
 	//there may still be places that aren't using the alexandrov triangle array
 	var curvatures_current_quadrance = quadrance(curvatures_current);
 	var curvatures_intended = Array(curvatures_current.length);

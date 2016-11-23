@@ -14,8 +14,6 @@
  * 
  * Fix that problem where you can't change while the deflation is occurring. Might be you start within that small non-responsive part?
  * Actually it seems to sometimes just not respond to a held down mouse
- * 
- * Probably wouldn't be that hard to flatten the pentagons
  */
 
 /* You can reduce the number of extra vertices required by half. You could probably work out all the edge positions using the triangles
@@ -97,6 +95,7 @@ function UpdateQuasiSurface()
 function update_QS_center()
 {
 	QS_center.position.z = camera.position.z - 6;
+	QS_measuring_stick.position.z = QS_center.position.z;
 	
 	var opacitychangerate = 0.035 * delta_t / 0.016;
 	if(isMouseDown)
@@ -106,9 +105,22 @@ function update_QS_center()
 			QS_center.material.opacity = 1;
 	}
 	else {
-		QS_center.material.opacity -= 0.02;
+		QS_center.material.opacity -= opacitychangerate;
 		if(QS_center.material.opacity < 0)
 			QS_center.material.opacity = 0;
+	}
+	
+	for(var i = 0; i < QS_measuring_stick.children.length; i++)
+		QS_measuring_stick.children[i].material.opacity = QS_center.material.opacity;
+	
+	QS_measuring_stick.rotation.copy(QS_center.rotation);
+	if(isMouseDown)
+	{
+		QS_measuring_stick.scale.y = MousePosition.length() * 0.013;
+		QS_measuring_stick.scale.x = QS_measuring_stick.scale.y / 2;
+		
+		QS_measuring_stick.rotation.z = Math.atan2(MousePosition.y,MousePosition.x) + TAU / 4;
+		QS_center.rotation.z = QS_measuring_stick.rotation.z;
 	}
 }
 
@@ -170,7 +182,6 @@ function MoveQuasiLattice()
 					OldMouseAngle = 0;
 				
 				var LatticeAngleChange = OldMouseAngle - MouseAngle;
-				QS_center.rotation.z -= LatticeAngleChange;
 				
 				var QuasiLatticeAngle = Math.atan2(cutout_vector0_player.y, cutout_vector0_player.x);
 				var newQuasiLatticeAngle = QuasiLatticeAngle + LatticeAngleChange;

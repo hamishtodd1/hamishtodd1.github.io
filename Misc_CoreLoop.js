@@ -1,14 +1,23 @@
 /*
  * TODO
- * Lots of TODOs in story
+ * Make it feel good, eg irreg limits and QS not-breaking-apart and limits and line to center, and then send to Ben
+ * The irreg spot should pop off the corner
+ * 
+ * Maybe worth sending to Amit as well before rerecord
  * 
  * irreg limits? That is a major barrier to game-like enjoyment
- * The tree?
  * Make use of the "now you can choose the next virus" clip
  * Fading pics. Probably the thing to do is to specify actual chapters that consist of a fade?
  * Test
+ * 
+ * flick to polio on football
+ * virus bucky comparison
+ * 
+ * Play test it with Stephen Lingham
+ * Get the new pics in so that you can think about them in advance of rerecord. And the re-prompts
  * 	
  * Long term To Do
+ *  Mouse doesn't flick things to the wrong quaternion when you come into the frame from the video
  *  -break up all the chapters into separate videos
  *  -is the usefulness of the models not coming through?
  * 	-everything listed in CKsurfacestuff, bocavirus, alexandrov, quasisphere, youtube stuff
@@ -184,6 +193,7 @@ function ChangeScene(new_mode) {
 			if(stable_point_of_meshes_currently_in_scene !== 666) //if it is equal to this, it has yet to be derived from the cutout vectors
 				dodeca.add(quasicutout_meshes[stable_point_of_meshes_currently_in_scene]);
 			scene.add(QS_center);
+			scene.add(QS_measuring_stick);
 //			scene.add(GrabbableArrow);
 			break;
 			

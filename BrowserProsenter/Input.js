@@ -1,16 +1,18 @@
-//hack, get rid of this
-var ChangeRepresentation = 0;
+/*
+ * Forget about "master"
+ * Just: if someone is a VR headset, they broadcast controller and camera position.
+ * You will almost certainly need a "viewport square", because people are used to their FOV being huge - that's the psychological thing that has been happenning. Put in VR journal?
+ * If you connect with a browser and there's no VRMODE thing broadcasting, put a sign up
+ */
 
 //"get position data from other users" and "get our controller data" might be very different abstractions
 var InputObject = { //only allowed to use this in this file and maybe in initialization
-	UserDisconnect: "",
 	UserData: Array(), //maybe the coming values should be properties of the objects? There are probably best practices...
 	
 	ModelPositions: Array(),
 	ModelQuaternions: Array(),
 	ModelsReSynched: 0,
 	
-	UserOrbitRequest: new THREE.Vector3(), //vector2, but we may want to cross product
 	UserString: "",
 	UserPressedEnter: 0,
 	
@@ -18,83 +20,31 @@ var InputObject = { //only allowed to use this in this file and maybe in initial
 	clientY: 0
 };
 
-function UpdateVRCameraPosition()
-{
-	var oldCameraPosition = Camera.position.clone();
-	OurVRControls.update();
-	if(!Camera.position.equals(oldCameraPosition))
-	{
-		//if that changed anything, we need to process it
-		console.log("yesss")
-		Camera.position.add(INITIAL_CAMERA_POSITION);
-	}
-}
-
-function ReadInput(Users, ControllerModel,Models)
+InputObject.readInput = function(Users, ControllerModel,Models) //the purpose of this is to update everything
 {
 	//eventually this will do everything that the mouse event listeners and the first "User.getinput" currently does
 	if(VRMODE)
-		UpdateVRCameraPosition();
-	
-	handle_Connects_and_Disconnects(Users,ControllerModel,Models);
-	
-	//orbit stuff. GearVR stuff will be very comparable. WARNING, uncomment this and you have problems with camera being picked up!
-	if(!VRMODE)
 	{
-		var FocussedModelPosition = new THREE.Vector3();
-		
-		var CameraRelativeToModelZero = Camera.position.clone();
-		CameraRelativeToModelZero.sub(FocussedModelPosition); //Models[0].position
-		
-		var CameraLongtitude = Math.atan2(CameraRelativeToModelZero.z, CameraRelativeToModelZero.x);
-		CameraLongtitude += InputObject.UserOrbitRequest.x * 0.01;
-		
-		var CameraLatitude = Math.atan2(CameraRelativeToModelZero.y, Math.sqrt(
-				CameraRelativeToModelZero.z * CameraRelativeToModelZero.z + 
-				CameraRelativeToModelZero.x * CameraRelativeToModelZero.x ));
-		CameraLatitude += InputObject.UserOrbitRequest.y * 0.0077;
-		
-		var polerepulsion = 0.01;
-		if(Math.abs(CameraLatitude) + polerepulsion > TAU / 4 )
-		{
-			if( CameraLatitude > 0 )
-				CameraLatitude = TAU / 4 - polerepulsion;
-			else
-				CameraLatitude =-TAU / 4 + polerepulsion;
-		}
-		
-		Camera.position.set(
-			CameraRelativeToModelZero.length() * Math.cos(CameraLatitude) * Math.cos(CameraLongtitude),
-			CameraRelativeToModelZero.length() * Math.sin(CameraLatitude),
-			CameraRelativeToModelZero.length() * Math.cos(CameraLatitude) * Math.sin(CameraLongtitude) );
-		Camera.position.add(FocussedModelPosition);
-		Camera.lookAt(FocussedModelPosition);
-		
-		InputObject.UserOrbitRequest.set(0,0,0);
-				//don't let them get up to the pole
+		var oldCameraPosition = Camera.position.clone();
+		OurVRControls.update();
 	}
 	
-	if( ChangeRepresentation === 1 )
-	{
-		placeholder_interpret_ngl(Models);
-		ChangeRepresentation = 0;
-	}
-
-	if( InputObject.UserPressedEnter === 1 || InputObject.theydownloaded !== "" )
+	if( this.UserPressedEnter === 1 || this.theydownloaded !== "" )
 	{
 		var NewProteinString;
-		//pretty damn unlikely that they should both take place at once
-		if( InputObject.UserPressedEnter === 1 )
+		//pretty damn unlikely that two users downloaded something on the same frame
+		//note that this means that a person in VR can use the computer of a spectator to get themselves a protein, if they're on google cardboard
+		if( this.UserPressedEnter === 1 )
 		{
-			NewProteinString = InputObject.UserString;
-			socket.emit('wedownloaded', InputObject.UserString );
+			NewProteinString = this.UserString;
+			socket.emit('wedownloaded', this.UserString );
 			ChangeUserString("");
-			InputObject.UserPressedEnter = 0;
+			this.UserPressedEnter = 0;
 		}
 		else
 		{
-			NewProteinString = InputObject.theydownloaded;
-			InputObject.theydownloaded = "";
+			NewProteinString = this.theydownloaded;
+			this.theydownloaded = "";
 		}
 		
 		for( var i = 0; i < FamousProteins.length / 2; i++ )
@@ -106,35 +56,28 @@ function ReadInput(Users, ControllerModel,Models)
 				Loadpdb( "http://files.rcsb.org/download/" + NewProteinString + ".pdb", Models);
 		}
 	}
-	//press . to make it surface
 	
-	for(var i = 0; i < Users.length; i++)
-		Users[i].GetInput();
+	GetVRInput();
 	
-	for(var i = 1; i < Users.length; i++)
+	if(VRMODE) //including google cardboard
 	{
-		if(Users[i].CameraObject.position.distanceTo(Camera.position) < 0.07)
-			Users[i].CameraObject.visible = false;
-		else
-			Users[i].CameraObject.visible = true;
+		socket.emit('UserStateUpdate', this.UserData[0] );
+		EmitModelStates(Models);
+		
+		//TODO camera position and orientation
 	}
-	
-	if(InputObject.ModelsReSynched && Models.length === InputObject.ModelPositions.length ) //will be destroyed by the possibility of deleting models
+	else
 	{
 		for(var i = 0; i < Models.length; i++)
 		{
-			Models[i].position.copy(InputObject.ModelPositions[i]);
-			Models[i].quaternion.copy(InputObject.ModelQuaternions[i]);
+			Models[i].position.copy(this.ModelPositions[i]);
+			Models[i].quaternion.copy(this.ModelQuaternions[i]);
 		}
-		
-		InputObject.ModelsReSynched = 0;
 	}
-	
-	socket.emit('UserStateUpdate', InputObject.UserData[0] ); //we could emit it with every control change?
 }
 
 //keyboard crap. Currently using "preventdefault" then "return" on everything you use, there's probably a better way
-document.addEventListener( 'keydown', function(event)
+InputObject.readfromkeyboard = function(event)
 {	
 	//arrow keys
 	if( 37 <= event.keyCode && event.keyCode <= 40)
@@ -162,19 +105,10 @@ document.addEventListener( 'keydown', function(event)
 //		return;
 	}
 	
-	//hash - change representation
-	if( event.keyCode === 222 )
-	{
-		ChangeRepresentation = 1;
-		console.log("Sending")
-		socket.emit('ChangeRepresentation', 5 );
-	}
-	
 	if(event.keyCode === 190 )
 	{
 		event.preventDefault();
-		VRMODE = 1; //once you're in I guess you're not coming out!
-		OurVREffect.setFullScreen( true );
+		OurVREffect.setFullScreen( true );		
 		
 		//bug if we do this earlier(?)
 		for(var i = 0; i < 6; i++)
@@ -198,7 +132,6 @@ document.addEventListener( 'keydown', function(event)
 	
 	//symbols
 	{
-		var keycodeArray = "0123456789abcdefghijklmnopqrstuvwxyz";
 		var arrayposition;
 		if( 48 <= event.keyCode && event.keyCode <= 57 )
 			arrayposition = event.keyCode - 48;
@@ -211,11 +144,11 @@ document.addEventListener( 'keydown', function(event)
 			ChangeUserString(InputObject.UserString + keycodeArray[arrayposition]);
 			return;
 		}
-	}
-	
-}, false );
+	}	
+}
+document.addEventListener( 'keydown', InputObject.readfromkeyboard(event), false );
 
-function ChangeUserString(newstring)
+InputObject.ChangeUserString = function(newstring)
 {
 	InputObject.UserString = newstring;
 	
@@ -252,7 +185,7 @@ function ChangeUserString(newstring)
 	Scene.add(TextMesh);
 }
 
-document.addEventListener( 'mousemove', function(event)
+InputObject.updatemouseposition = function(event)
 {
 	event.preventDefault();
 	
@@ -278,72 +211,10 @@ document.addEventListener( 'mousemove', function(event)
 	finalposition.add( dir.multiplyScalar( distance ) );
 	
 //	InputObject.UserData[0].HandPosition.copy(finalposition);
-}, false );
-
-
-document.addEventListener( 'mousedown', function(event) 
-{
-	event.preventDefault();
-	
-	InputObject.UserData[0].Gripping = 1;
-}, false );
-
-function placeholder_interpret_ngl(Models)
-{
-	var ProteinGeometry = loose_surface.bufferList[0].geometry;
-	
-	var ourcopy = new THREE.Mesh( new THREE.BufferGeometry(),
-				  new THREE.MeshPhongMaterial() );
-	
-	ourcopy.geometry.addAttribute( 'position', 
-			new THREE.BufferAttribute( ProteinGeometry.attributes.position.array, 3 ) );
-	ourcopy.geometry.addAttribute( 'normal', 
-			new THREE.BufferAttribute( ProteinGeometry.attributes.normal.array, 3 ) );
-	ourcopy.geometry.setIndex(
-			new THREE.BufferAttribute( ProteinGeometry.index.array, 1 ) );
-	
-	var num_NaNs =  0;
-	for(var i = 0; i < ProteinGeometry.attributes.position.array.length; i++)
-	{
-		if( isNaN( ProteinGeometry.attributes.position.array[i] ))
-		{
-			num_NaNs++;
-			
-			//patch it up
-			if(i >= 3)
-				ProteinGeometry.attributes.position.array[i] = ProteinGeometry.attributes.position.array[i-3];
-			else
-				ProteinGeometry.attributes.position.array[i] = ProteinGeometry.attributes.position.array[i+3];
-		}
-	}
-	if(num_NaNs)console.log("NaNs in surface: ", num_NaNs);
-	
-	ourcopy.geometry.computeBoundingSphere();
-	var center_coords = ourcopy.geometry.boundingSphere.center.toArray();
-	
-	for(var i = 0, il = ProteinGeometry.attributes.position.array.length; i < il; i++)
-		ProteinGeometry.attributes.position.array[i] -= center_coords[i%3];
-	
-	var ourscale = 0.0005 * ourcopy.geometry.boundingSphere.radius / Models[0].scale.x;
-	ourcopy.scale.set(ourscale,ourscale,ourscale);
-	ourcopy.position.x -= 1.9;
-	ourcopy.position.y += 2.1;
-	ourcopy.position.z += 0;
-
-	console.log(Models)
-	Models[0].add(ourcopy);
 }
+document.addEventListener( 'mousemove', InputObject.updatemouseposition(event), false );
 
-document.addEventListener( 'mouseup', function(event) 
-{
-	event.preventDefault();
-	
-	InputObject.UserData[0].Gripping = 0;
-}, false );
-
-//bug: will need to think about deleted models somehow. InputObject's arrays have an uncertain length which maybe needs updating?
-
-socket.on('ModelsReSync', function(msg)
+InputObject.sync_model_states = function(msg)
 {
 	if(msg.ModelPositions.length > InputObject.ModelPositions.length)
 	{
@@ -361,17 +232,26 @@ socket.on('ModelsReSync', function(msg)
 	}
 	
 	InputObject.ModelsReSynched = 1;
-});
+}
+socket.on('ModelsReSync', InputObject.sync_model_states(msg));
 
 socket.on('theydownloaded', function(msg)
 {
 	InputObject.theydownloaded = msg;
 });
-socket.on('ChangeRepresentation', function(msg)
+
+//hmm, really?
+document.addEventListener( 'mousedown', function(event) 
 {
-	console.log("received")
-	ChangeRepresentation = 1;
-});
+	event.preventDefault();	
+	InputObject.UserData[0].Gripping = 1;
+}, false );
+
+document.addEventListener( 'mouseup', function(event) 
+{
+	event.preventDefault();	
+	InputObject.UserData[0].Gripping = 0;
+}, false );
 
 var FamousProteins = Array(
 		"rubisco", "1rcx",

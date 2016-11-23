@@ -18,6 +18,17 @@ function initialize_QS_stuff()
 	}
 	QS_center.scale.set(0.13,0.13,0.13);
 	
+	QS_measuring_stick = new THREE.Object3D();
+	QS_measuring_stick.scale.set(0.03,0.03,0.03);
+	var num_measuringstick_dashes = 12;
+	for(var i = 0; i < num_measuringstick_dashes; i++)
+	{
+		QS_measuring_stick.add(new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({color:0x000000, transparent: true, opacity:0})));
+		QS_measuring_stick.children[i].position.y = -0.5 - 2 * i;
+	}
+	QS_measuring_stick.add(new THREE.Mesh(new THREE.CircleGeometry(0.5), new THREE.MeshBasicMaterial({color:0x000000, transparent: true, opacity:0})));
+	QS_measuring_stick.children[QS_measuring_stick.children.length - 1].position.y = -1 - 2 * (num_measuringstick_dashes - 1); 
+	
 	cutout_vector0 = new THREE.Vector3(0,0.5/Math.sin(TAU/10),0);
 	cutout_vector1 = new THREE.Vector3(PHI/2,0.5/Math.sin(TAU/10)-Math.cos(3/20*TAU),0);
 	cutout_vector0_player = cutout_vector0.clone();
@@ -466,18 +477,18 @@ function initialize_QS_stuff()
 					if(k===2){	indexA = 2;			indexB = 16;	indexC = 4;		}
 					
 					if(k===3){	indexA = 20;		indexB = 26;	indexC = 0;		}
-					if(k===4){	indexA = 16;		indexB = 2;		indexC = 28;		}
+					if(k===4){	indexA = 16;		indexB = 2;		indexC = 28;	}
 					*/
 				} else if(i===6){
-					if(k===0){	indexA = 4;			indexB = 36;	indexC = 2;			}
+					if(k===0){	indexA = 4;			indexB = 36;	indexC = 2;		}
 					
 					if(k===1){	indexA = 12;		indexB = 20;	indexC = 0;		}
-					if(k===2){	indexA = 2;			indexB = 16;	indexC = 4;			}
+					if(k===2){	indexA = 2;			indexB = 16;	indexC = 4;		}
 					
 					if(k===3){	indexA = 20;		indexB = 26;	indexC = 0;		}
 					if(k===4){	indexA = 16;		indexB = 2;		indexC = 28;	}
 					
-					if(k===16){	indexA = 20;		indexB = 6;		indexC = 26;		}
+					if(k===16){	indexA = 20;		indexB = 6;		indexC = 26;	}
 					if(k===17){	indexA = 9;			indexB = 26;	indexC = 6;		}
 					
 					if(k===7){	indexA = 9;			indexB =  6;	indexC = 7;		}
@@ -485,7 +496,8 @@ function initialize_QS_stuff()
 					if(k===9){	indexA = 22;		indexB = 14;	indexC = 26;	}
 					if(k===10){	indexA = 22;		indexB = 26;	indexC =  8;	}
 					if(k===11){	indexA = 26;		indexB = 27;	indexC =  8;	}
-				} else if(i===7){ //this requires third fat rhomb
+				} else if(i===7){ //this requires third fat rhomb 
+					//it's almost certainly a fool's errand to try to find the vertices you need
 					if(k===0){	indexA = 2;			indexB = 60;	indexC = 0;			}
 					
 					if(k===1){	indexA = 12;		indexB = 20;	indexC = 0;		}
@@ -497,14 +509,15 @@ function initialize_QS_stuff()
 					if(k===5){	indexA = 18;		indexB = 30;	indexC = 24;		}
 					if(k===6){	indexA = 30;		indexB = 18;	indexC = 54;		}
 					
-					if(k===8){	indexA = 34;		indexB = 58;	indexC = 59;		}
 					if(k===7){	indexA = 58;		indexB = 57;	indexC = 59;		}
+					if(k===8){	indexA = 30;		indexB = 31;	indexC = 32;		} //you might need another in the defect
 
 					if(k===9){	indexA = 12;		indexB = 36;	indexC = 56;	}
 					if(k===10){	indexA = 12;		indexB = 24;	indexC = 36;		}
 					if(k===11){	indexA = 12;		indexB = 56;	indexC = 20;		}
 					
 					if(k===16){	indexA = 36;		indexB = 24;	indexC = 30;		}
+					if(k===17){	indexA = 32;		indexB = 33;	indexC = 38;		} //only appears when pulled on
 				} else if(i===8){
 					if(k===0){	indexA = 6;			indexB = 8;		indexC = 12;		}
 					
@@ -546,8 +559,11 @@ function initialize_QS_stuff()
 					if(k===3){	indexA = 2;			indexB = 22;	indexC = 16;		}
 					if(k===4){	indexA = 12;		indexB = 18;	indexC = 24;		}
 					
+					if(k===7){	indexA = 45;		indexB = 47;	indexC = 46;	}
+					if(k===8){	indexA = 45;		indexB = 46;	indexC = 21;	}
+					
 					if(k===9){	indexA = 26;		indexB = 22;	indexC = 14;	}
-					if(k===10){	indexA = 26;		indexB = 46;	indexC = 22;	}
+					if(k===10){	indexA = 26;		indexB = 46;	indexC = 22;	} 
 					
 					if(k===11){	indexA = 28;		indexB = 22;	indexC = 47;	}
 				} else if(i===12){
@@ -640,6 +656,9 @@ function initialize_QS_stuff()
 					
 					if(k===3){	indexA = 12;		indexB = 0;		indexC = 6;		}
 					if(k===4){	indexA = 24;		indexB = 6;		indexC = 0;		}
+					
+					if(k===8){	indexA = 15;		indexB = 18;	indexC = 21;	}
+					if(k===7){	indexA = 18;		indexB = 19;	indexC = 21;	}
 					
 					if(k===17){	indexA = 8;			indexB = 15;	indexC = 14;		} //change the number of this
 //					if(k===18){	indexA = 9;			indexB = 14;	indexC = 15;		} //change the number of this
@@ -848,8 +867,8 @@ function initialize_QS_stuff()
 	cutout_vector1.copy(midpoint);
 	
 	//we're setting it to zika
-	cutout_vector0.copy(stable_points[9]);
-	cutout_vector1.copy(stable_points[9]);	
+	cutout_vector0.copy(stable_points[11]);
+	cutout_vector1.copy(stable_points[11]);	
 	cutout_vector1.applyAxisAngle(z_central_axis, -TAU/5);
 	/* 
 	 * 

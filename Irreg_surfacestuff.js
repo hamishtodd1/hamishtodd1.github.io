@@ -28,6 +28,7 @@ function irreg_deduce_surface(openness ){
 			vertex0, vertex1, vertex2,
 			varyingsurface_orientingradius[0],varyingsurface_orientingradius[1],varyingsurface_orientingradius[2]);
 	if(center.z>0) center.z *= -1;
+	//TODO make it so there is a catch for the possibility that center isn't a vector
 	var desired_center_location = new THREE.Vector3(0,0,-center.length());
 	
 	var first_rotationaxis = center.clone();
@@ -76,8 +77,7 @@ function irreg_deduce_surface(openness ){
 }
 
 function CheckIrregButton(){
-	//The button should be big when the thing is open and small when it's not. You don't need that texture and it might confuse. Make it glow and flash
-	//or maybe it should be a jointed line itself?
+	//maybe it should flash/glow, not scale?
 	//TODO change this if button size changes
 //	console.log()
 	
@@ -214,6 +214,12 @@ function update_varyingsurface() {
 		var Aindex = surfperimeter_line_index_pairs[i*2];
 		var Bindex = surfperimeter_line_index_pairs[i*2+1];
 		
+		surfperimeter_spheres[i].position.set(
+				flatnet_vertices.array[surfperimeter_line_index_pairs[i*2]*3+0],
+				flatnet_vertices.array[surfperimeter_line_index_pairs[i*2]*3+1],
+				flatnet_vertices.array[surfperimeter_line_index_pairs[i*2]*3+2]
+		);
+		
 		if(capsidopenness === 1 ){
 			A = new THREE.Vector3(
 					manipulation_surface.geometry.attributes.position.array[Aindex*3+0],
@@ -234,8 +240,6 @@ function update_varyingsurface() {
 					varyingsurface.geometry.attributes.position.array[Bindex*3+1],
 					varyingsurface.geometry.attributes.position.array[Bindex*3+2]);
 		}
-		
-		surfperimeter_spheres[i].position.copy(A);
 		
 		put_tube_in_buffer(A,B, varyingsurface_cylinders[i].geometry.attributes.position.array, varyingsurface_edges_default_radius);
 		varyingsurface_cylinders[i].geometry.attributes.position.needsUpdate = true;

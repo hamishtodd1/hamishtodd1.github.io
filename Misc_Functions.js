@@ -306,10 +306,10 @@ function bent_down_quad_corner(a,b,c,theta,d_hinge_origin_length, d_hinge_length
 function Random_perp_vector(OurVector){
 	var PerpVector = new THREE.Vector3();
 	
-	if( OurVector.equals(Central_Z_axis))
-		PerpVector.crossVectors(OurVector, Central_Z_axis);
+	if( OurVector.equals(z_central_axis))
+		PerpVector.crossVectors(OurVector, y_central_axis);
 	else
-		PerpVector.crossVectors(OurVector, Central_Y_axis);
+		PerpVector.crossVectors(OurVector, z_central_axis);
 	
 	return PerpVector;
 }
@@ -319,9 +319,9 @@ function put_tube_in_buffer(A,B, mybuffer, radius ) {
 		radius = 0.02; 
 	
 	var A_to_B = new THREE.Vector3(B.x-A.x, B.y-A.y, B.z-A.z);
-	var perp = new THREE.Vector3(A_to_B.y*A_to_B.y+A_to_B.z*A_to_B.z,   A_to_B.y*-A_to_B.x,  A_to_B.z*-A_to_B.x);
-	perp.normalize();
 	A_to_B.normalize();
+	var perp = Random_perp_vector(A_to_B);
+	perp.normalize(); 
 	for( var i = 0; i < mybuffer.length/3/2; i++) {
 		var theta = i * TAU/(mybuffer.length/3/2);
 		var radiuscomponent = perp.clone();
@@ -386,6 +386,27 @@ function point_in_triangle_vecs(ourpointx,ourpointy,
 	return point_in_triangle( ourpointx,ourpointy,
 			cornerA.x, cornerA.y,cornerB.x, cornerB.y, cornerC.x,cornerC.y, 
 			clockwise);
+}
+
+function t_along_line_of_closest_point(px,py,ax,ay,bx,by)
+{	
+	var a_to_pX = px - ax;
+	var a_to_pY = py - ay;
+	
+	var a_to_bX = bx - ax;
+	var a_to_bY = by - ay;
+	
+	var a_to_b_quadrance = a_to_bX*a_to_bX + a_to_bY*a_to_bY;
+	
+	var a_to_b_dot_a_to_p = a_to_pX*a_to_bX + a_to_pY*a_to_bY;
+	
+	return a_to_b_dot_a_to_p / a_to_b_quadrance;
+	
+//	if( t > 1)
+//	if( t < 0)
+//	
+//	ax + a_to_bX * t;
+//	ay + a_to_bY * t;
 }
 
 //if it's on the line segments, it's in
@@ -465,7 +486,11 @@ function get_sin_Vector2(side1, side2)
 
 function get_cos(side1, side2)
 {
-	return side1.dot( side2 ) / side1.length() / side2.length();
+	var suspected_cos = side1.dot( side2 ) / side1.length() / side2.length();
+	if(suspected_cos > 1)
+		return 1; //fucking round-off
+	else
+		return suspected_cos;
 }
 
 function get_angle(side1, side2) {

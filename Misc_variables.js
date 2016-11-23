@@ -7,6 +7,8 @@ var HS3 = Math.sqrt(3)/2;
 var PHI = (Math.sqrt(5) + 1) / 2;
 var TAU = Math.PI * 2;
 var icosahedron_dihedral_angle = Math.acos(-Math.sqrt(5) / 3);
+var z_central_axis = new THREE.Vector3(0,0,1);
+var y_central_axis = new THREE.Vector3(0,1,0); //mother of god this was previously 0,0,1
 
 //--------------Structurally fundamental
 var SLIDE_MODE = 0;
@@ -48,9 +50,7 @@ var SURFACE = 1;
 var POLYHEDRON = 2;
 
 var showdebugstuff = 1;
-var net_warnings = 1;
-
-var z_central_axis = new THREE.Vector3(0,0,1);
+var net_warnings = 0;
 
 var surfperimeter_default_radius = 0.02;
 var varyingsurface_edges_default_radius = 0.012;
@@ -114,6 +114,8 @@ var demonstration_hexagons = Array(2);
 //-----QS
 var QS_rotationaxis = new THREE.Vector3(1,0,0);
 var QS_rotationangle = 0;
+
+var QS_measuring_stick;
 
 var GrabbableArrow;
 var dodeca; //a very static, barely-used object

@@ -178,6 +178,9 @@ function bind_pictures()
 	        polygonOffset: true,
 	        polygonOffsetFactor: -2.0, //on top
 	        polygonOffsetUnits: -5.0 } ) );
+	
+	CKHider.position.z = 0.06;
+	IrregButton.position.z = 0.07;
 
 	if(typeof random_textures[5] !== 'undefined')
 		GrabbableArrow.material.map = random_textures[5];
