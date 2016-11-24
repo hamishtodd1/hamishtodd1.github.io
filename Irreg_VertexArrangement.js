@@ -326,7 +326,7 @@ function manipulate_vertices()
 		 * Then do the curve thing, which is deffo possible just from looking at the first one. Resist the urge to check for triangle inversion, it tells you nothing without the associated mvmt
 		 */
 		
-		var vertex_moved = false;
+		var vertex_failed_to_move_when_it_should_have = false;
 		var squashingtriangles_indices = Array(3);
 		squashingtriangles_indices[0] = Array(3);
 		squashingtriangles_indices[1] = Array(3);
@@ -338,6 +338,8 @@ function manipulate_vertices()
 			
 			if( check_single_triangle_inversion(triangle, manipulation_surface.geometry.attributes.position.array ) )
 			{
+				vertex_failed_to_move_when_it_should_have = true;
+				
 				squashingtriangles_indices[i][0] = 666; //the changer
 				squashingtriangles_indices[i][1] = 666; //"A"
 				squashingtriangles_indices[i][2] = 666; //"B"
@@ -374,51 +376,59 @@ function manipulate_vertices()
 							
 							move_vertices(squashingtriangles_indices[i][0], squashed_back_position, squashingtriangles_indices[i][0]);
 							
-							vertex_moved = true;
+							vertex_failed_to_move_when_it_should_have = false;
 						}
 						
 						break; //we got the right corner
 					}
 				}
+				
+				if(!vertex_failed_to_move_when_it_should_have)
+					break;
 			}
-			
-			if(vertex_moved)
-				break;
 		}
 		
-		if( !vertex_moved && (
+		if( vertex_failed_to_move_when_it_should_have && (
 			squashingtriangles_indices[0][0] !== 'undefined' || 
 			squashingtriangles_indices[1][0] !== 'undefined' || 
 			squashingtriangles_indices[2][0] !== 'undefined' ) ) //triangle inversions that can only be resolved with some corner situation
 		{
+//			console.log(t_array);
+			//multiple t values to latch onto? It looks like two of them were happenning!
 			for( var i = 0; i < t_array.length; i++)
 			{
+				//the situation is that a or whatever is greater than 1 or less than 0 or whatever but it DOES need to be projected, the other triangle isn't inverted
 				if( i > 0 && t_array[i - 1] < 0 && t_array[i] > 1)
 				{
+					console.log("normal")
 					var corner_position = new THREE.Vector2(
 							manipulation_surface.geometry.attributes.position.array[squashingtriangles_indices[i][2] * 3 + 0],
 							manipulation_surface.geometry.attributes.position.array[squashingtriangles_indices[i][2] * 3 + 1] );
 					
 					move_vertices(squashingtriangles_indices[i][0], corner_position, squashingtriangles_indices[i][0]);
 				}
-				else if( t_array[i] > 1 && typeof t_array[i + 1] === 'undefined' )
+				else if( i < 2 && t_array[i] < 0 && typeof t_array[i + 1] === 'undefined' )
 				{
-					var corner_position = new THREE.Vector2(
-							manipulation_surface.geometry.attributes.position.array[squashingtriangles_indices[i][2] * 3 + 0],
-							manipulation_surface.geometry.attributes.position.array[squashingtriangles_indices[i][2] * 3 + 1] );
-					
-					move_vertices(squashingtriangles_indices[i][0], corner_position, squashingtriangles_indices[i][0]);
-				}
-				else if( t_array[i] < 1 && typeof t_array[i - 1] === 'undefined' )
-				{
+					console.log("i + 1")
 					var corner_position = new THREE.Vector2(
 							manipulation_surface.geometry.attributes.position.array[squashingtriangles_indices[i][1] * 3 + 0],
 							manipulation_surface.geometry.attributes.position.array[squashingtriangles_indices[i][1] * 3 + 1] );
 					
 					move_vertices(squashingtriangles_indices[i][0], corner_position, squashingtriangles_indices[i][0]);
 				}
+				else if( i > 0 && t_array[i] > 1 && typeof t_array[i - 1] === 'undefined' )
+				{
+					console.log("i - 1")
+					var corner_position = new THREE.Vector2(
+							manipulation_surface.geometry.attributes.position.array[squashingtriangles_indices[i][2] * 3 + 0],
+							manipulation_surface.geometry.attributes.position.array[squashingtriangles_indices[i][2] * 3 + 1] );
+					
+					move_vertices(squashingtriangles_indices[i][0], corner_position, squashingtriangles_indices[i][0]);
+				}
 			}
+			console.log("done")
 		}
+		else console.log(" ")
 	}
 	
 	var vertex_tobechanged_home_index = 666; //the version of vertex_tobechanged that is in the first triangle
