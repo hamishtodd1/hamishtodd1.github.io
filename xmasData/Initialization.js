@@ -115,92 +115,129 @@ function init_octospiral(arm_width, num_steps_inward)
 function init_xmasData()
 {
 	var xmasRep = new THREE.Object3D();
-	//Call it one "data ribbon". The number of vertices it has is n * 2. Number of faces = ( n - 1 ) * 2
+	Protein.add(xmasRep);
 	
 	var loader = new THREE.XHRLoader();
 	loader.crossOrigin = '';
 	loader.load( "http://hamishtodd1.github.io/xmasData/raw_data.txt", function ( raw_data ) 
 	{
-		var eachline = raw_data.split(/\n/);
-		var data_points = Array(eachline.length);
-		
-		for(var i = 0; i < eachline.length; i++)
-		{
-			var nums = eachline[i].split(",");
-			data_points[i] = nums[1];
-		}
-		console.log(data_points)
-		
-		var base_radius = 0.1;
+		var num_variables_plotted = 2;
+		var lines_array = raw_data.split(/\n/);
+
+		var base_radius = 0.1; //very subjective and maybe not even a good idea
 		var data_scaling = 0.08;
-		var num_points_per_period = 16;
+		var num_points_per_period = 16; //maybe listed somewhere in the file?
 		
 		var wind_height = base_radius / 3 * 2;
-		var step_height = wind_height / num_points_per_period; //distance between "adjacent" points
-		var ribbon_width = wind_height / 2; //not precisely "width", but you know
-		var total_height = data_points.length * step_height;
+		var step_height = wind_height / num_points_per_period; //vertical distance between "adjacent" points
+		var ribbon_width = wind_height / (num_variables_plotted+1); //not precisely "width", but you know
+		var total_height = (lines_array.length + 1) * step_height;
 		
 		var base_cylinder = new THREE.Mesh(new THREE.CylinderGeometry(base_radius, base_radius, total_height, num_points_per_period), new THREE.MeshPhongMaterial({color:0x888888}));
-		var ribbon = new THREE.Mesh(new THREE.Geometry, new THREE.MeshPhongMaterial({color:0xff0000, side:THREE.DoubleSide}));
-		ribbon.position.y = -total_height / 2;
+		xmasRep.add(base_cylinder); //cylinder is centered in y btw
 		
-		function give_ribbon_vertices(i)
+		for(var variable_index = 0; variable_index < num_variables_plotted; variable_index++)
 		{
-			var newreadout = new THREE.Vector3(
-					(base_radius + data_points[i] * data_scaling) * Math.cos( -TAU / num_points_per_period * i),
-					i * step_height,
-					(base_radius + data_points[i] * data_scaling) * Math.sin( -TAU / num_points_per_period * i)
-			);
+			var data_points = Array(lines_array.length);
 			
-			var top_ribbon_edge = newreadout.clone();
-			top_ribbon_edge.y += ribbon_width;
+			for(var i = 0; i < lines_array.length; i++)
+			{
+				var nums = lines_array[i].split(",");
+				data_points[i] = nums[ variable_index + 1];
+			}
 			
-			ribbon.geometry.vertices.push(newreadout);
-			ribbon.geometry.vertices.push(top_ribbon_edge);
+			//maybe there should also be struts coming out? Or markers for time of day? Certainly there should be a clock on top
+			var ribbon = new THREE.Mesh(new THREE.Geometry, new THREE.MeshPhongMaterial({color:0x000000, side:THREE.DoubleSide, 
+				transparent: true, opacity: 1
+				}));
+			switch(variable_index)
+			{
+			case 0:
+				ribbon.material.color.r = 1;
+				break;
+			case 1:
+				ribbon.material.color.r = 1;
+				ribbon.material.color.g = 102/255;
+				break;
+			case 2:
+				ribbon.material.color.r = 1;
+				ribbon.material.color.g = 238/255;
+				break;
+			case 3:
+				ribbon.material.color.g = 1;
+				break;
+			case 4:
+				ribbon.material.color.g = 153/255;
+				ribbon.material.color.b = 1;
+				break;
+			case 5:
+				ribbon.material.color.r = 68/255;
+				ribbon.material.color.b = 1;
+				break;
+			case 6:
+				ribbon.material.color.r = 153/255;
+				ribbon.material.color.b = 1;
+				break; //would you really want more?
+			}
+			
+			function give_ribbon_vertices(i)
+			{
+				var newreadout = new THREE.Vector3(
+						(base_radius + data_points[i] * data_scaling) * Math.cos( -TAU / num_points_per_period * i),
+						i * step_height,
+						(base_radius + data_points[i] * data_scaling) * Math.sin( -TAU / num_points_per_period * i)
+				);
+				
+				var top_ribbon_edge = newreadout.clone();
+				top_ribbon_edge.y += ribbon_width;
+				
+				ribbon.geometry.vertices.push(newreadout);
+				ribbon.geometry.vertices.push(top_ribbon_edge);
+			}
+			
+			give_ribbon_vertices(0);
+			ribbon.geometry.vertices.push(ribbon.geometry.vertices[0].clone());
+			ribbon.geometry.vertices[2].x = 0;
+			ribbon.geometry.vertices[2].z = 0;
+			ribbon.geometry.vertices.push(ribbon.geometry.vertices[1].clone());
+			ribbon.geometry.vertices[3].x = 0;
+			ribbon.geometry.vertices[3].z = 0;
+			
+			for(var i = 1; i < data_points.length; i++)
+			{
+				give_ribbon_vertices(i);
+				
+				var newnum = ribbon.geometry.vertices.length;
+				
+				var ribbon_center_bottom = ribbon.geometry.vertices[newnum - 6].clone();
+				ribbon_center_bottom.lerp(ribbon.geometry.vertices[newnum - 2],0.5);
+				ribbon_center_bottom.x = 0;
+				ribbon_center_bottom.z = 0;
+				ribbon.geometry.vertices.push(ribbon_center_bottom);
+				var ribbon_center_top = ribbon.geometry.vertices[newnum - 5].clone();
+				ribbon_center_top.lerp(ribbon.geometry.vertices[newnum - 1],0.5);
+				ribbon_center_top.x = 0;
+				ribbon_center_top.z = 0;
+				ribbon.geometry.vertices.push(ribbon_center_top);
+				
+				newnum = ribbon.geometry.vertices.length;
+				
+				ribbon.geometry.faces.push(new THREE.Face3(newnum-8,newnum-7,newnum-4)); //the outside
+				ribbon.geometry.faces.push(new THREE.Face3(newnum-7,newnum-3,newnum-4));
+				
+				ribbon.geometry.faces.push(new THREE.Face3(newnum-7,newnum-3,newnum-1)); //the top and bottom of the "slice"
+				ribbon.geometry.faces.push(new THREE.Face3(newnum-8,newnum-4,newnum-2));
+				
+				ribbon.geometry.faces.push(new THREE.Face3(newnum-5,newnum-7,newnum-1)); //connection to previous slice
+				ribbon.geometry.faces.push(new THREE.Face3(newnum-2,newnum-8,newnum-6));
+			}
+			ribbon.geometry.computeFaceNormals();
+
+			ribbon.position.y = -total_height / 2;
+			ribbon.position.y += ribbon_width * variable_index;
+			
+			xmasRep.add(ribbon);
 		}
-		
-		give_ribbon_vertices(0);
-		ribbon.geometry.vertices.push(ribbon.geometry.vertices[0].clone());
-		ribbon.geometry.vertices[2].x = 0;
-		ribbon.geometry.vertices[2].z = 0;
-		ribbon.geometry.vertices.push(ribbon.geometry.vertices[1].clone());
-		ribbon.geometry.vertices[3].x = 0;
-		ribbon.geometry.vertices[3].z = 0;
-		
-		for(var i = 1; i < data_points.length; i++)
-		{
-			give_ribbon_vertices(i);
-			
-			var newnum = ribbon.geometry.vertices.length;
-			
-			var ribbon_center_bottom = ribbon.geometry.vertices[newnum - 6].clone();
-			ribbon_center_bottom.lerp(ribbon.geometry.vertices[newnum - 2],0.5);
-			ribbon_center_bottom.x = 0;
-			ribbon_center_bottom.z = 0;
-			ribbon.geometry.vertices.push(ribbon_center_bottom);
-			var ribbon_center_top = ribbon.geometry.vertices[newnum - 5].clone();
-			ribbon_center_top.lerp(ribbon.geometry.vertices[newnum - 1],0.5);
-			ribbon_center_top.x = 0;
-			ribbon_center_top.z = 0;
-			ribbon.geometry.vertices.push(ribbon_center_top);
-			
-			newnum = ribbon.geometry.vertices.length;
-			
-			ribbon.geometry.faces.push(new THREE.Face3(newnum-8,newnum-7,newnum-4)); //the outside
-			ribbon.geometry.faces.push(new THREE.Face3(newnum-7,newnum-3,newnum-4));
-			
-			ribbon.geometry.faces.push(new THREE.Face3(newnum-7,newnum-3,newnum-1)); //the top and bottom of the "slice"
-			ribbon.geometry.faces.push(new THREE.Face3(newnum-8,newnum-4,newnum-2));
-			
-			ribbon.geometry.faces.push(new THREE.Face3(newnum-5,newnum-7,newnum-1)); //connection to previous slice
-			ribbon.geometry.faces.push(new THREE.Face3(newnum-2,newnum-8,newnum-6));
-		}
-		ribbon.geometry.computeFaceNormals();
-		
-		xmasRep.add(base_cylinder);
-		xmasRep.add(ribbon);
-		
-		Protein.add(xmasRep)
 	}, function(xhr){}, function(xhr){} );
 }
 
