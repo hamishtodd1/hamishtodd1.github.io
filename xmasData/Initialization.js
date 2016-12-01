@@ -143,12 +143,15 @@ function init_xmasData()
 			for(var i = 0; i < lines_array.length; i++)
 			{
 				var nums = lines_array[i].split(",");
-				data_points[i] = nums[ variable_index + 1];
+				if(variable_index === 0)
+					data_points[i] = nums[1];
+				else
+					data_points[i] = nums[nums.length - 1];
 			}
 			
 			//maybe there should also be struts coming out? Or markers for time of day? Certainly there should be a clock on top
 			var ribbon = new THREE.Mesh(new THREE.Geometry, new THREE.MeshPhongMaterial({color:0x000000, side:THREE.DoubleSide, 
-				transparent: true, opacity: 1
+				transparent: true, opacity: 0.6
 				}));
 			switch(variable_index)
 			{
@@ -156,8 +159,8 @@ function init_xmasData()
 				ribbon.material.color.r = 1;
 				break;
 			case 1:
-				ribbon.material.color.r = 1;
-				ribbon.material.color.g = 102/255;
+				ribbon.material.color.b = 1;
+//				ribbon.material.color.g = 102/255;
 				break;
 			case 2:
 				ribbon.material.color.r = 1;
