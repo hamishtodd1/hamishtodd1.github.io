@@ -1,60 +1,124 @@
 /*
- * TODO
- * Make it feel good, eg irreg limits and QS not-breaking-apart and limits and line to center, and then send to Ben
- * The irreg spot should pop off the corner
- * 
- * Maybe worth sending to Amit as well before rerecord
- * 
- * irreg limits? That is a major barrier to game-like enjoyment
- * Make use of the "now you can choose the next virus" clip
+ * TODO before rerecord
+ * "These are some other viruses" - have their similarities appear on them? Could bring in disco ball, radio dome, gazebo/tent, dymaxion map at bottom
+ * New pics. Correct sizes. It is bad that 512px wide texture gets stretched to whatever it is.
+ * Make use of the "now you can choose the next virus" clip and repeats
+ * URGH AND YOU PROBABLY NEED A RE-PROMPT FOR UNPAUSING YOU
  * Fading pics. Probably the thing to do is to specify actual chapters that consist of a fade?
- * Test
- * 
- * flick to polio on football
- * virus bucky comparison
+ * CK pentagons flashing like sirens
+ * Pentagon in CK demo and qs. Ehhhhh...
+ * Contra the work you did, it is probably better to have the tiny HIV triangles in the middle - the point of a cone is that the point is together already
+ * touch
+ *
+ * Make a nice, new, big bit of origami with a flap somewhere
  * 
  * Play test it with Stephen Lingham
- * Get the new pics in so that you can think about them in advance of rerecord. And the re-prompts
- * 	
- * Long term To Do
- *  Mouse doesn't flick things to the wrong quaternion when you come into the frame from the video
- *  -break up all the chapters into separate videos
- *  -is the usefulness of the models not coming through?
- * 	-everything listed in CKsurfacestuff, bocavirus, alexandrov, quasisphere, youtube stuff
- *  -get a person with a sense of color to look at everything - Ario?
- *  -no 666s, you don't want pearl-clutchers. Easiest is change it to 665, -1?
+ * 
+ * Train:
+ * -pentagons in demo
+ * -optimize
+ * -Mouse doesn't flick things to the wrong quaternion when you come into the frame from the video
+ *  	Something like: if you're near the side, it resets
+ * -all objects floating in space with a shadow/lighting? Something other than meshbasicmaterial?
+ * -no 666s, you don't want pearl-clutchers. Easiest is change it to 665, -1, 999?
+ * -EVERYTHING listed in CKsurfacestuff, bocavirus, quasisphere, youtube stuff. There isn't much.
+ * -make work in different resolutions/respond to resize. Snap to 720/1080?
+ *  	-mouse position does not respond to resize
  *  -Test with a low framerate to see what it's like and chase down remaining framerate dependence
- *  -loading screen. You may need to stagger inits.
+ *  
+ * TODO long term
+ * 	-virus pieces wobble with cell
+ *  -loading screen. You may need to stagger inits
+ *  -break up all the chapters into separate videos WHEN INTEGRATING NEW VIDEO
+ *  -get a person with a sense of color to look at everything, including the pics of HPV, polio and hepatitis - Ario?
  *  -watch people a lot and tweak the zooming and rotating code, just because it is simple doesn't mean that it is good
  *  -If webgl doesn’t load (or etc), recommend a different browser or refreshing the page
- *  -all objects floating in space with a shadow/lighting? Something other than meshbasicmaterial?
- *  -Pentagons in your hexagon demo? Pentagon demo? Needs polish too
+ *  -slight change to cues for "boca"
+ *  -bifuricate for the touchscreen. Put QS in correct orientation so it looks like HPV
+ *  -proteins don't appear in nucleus?
  *  
- *  -people on touchscreens : pose qs like HPV. Then the button is this simple thing that just opens and closes. That is a complex thing and you don't want to be making it harder with other stuff like having to hold it and be in a different state or anything
- *  
- *  -bifuricate for the touchscreen
- *  
- *  -bear in mind that people can move the mouse extremely fucking fast, they take points VERY far on irreg, and scale back and forth very fast on CK
- *  -and might not let go of the mouse
  *  -don't humiliate yourself: if the canvas isn't running, halt the video
  *  -make sure a good picture appears when shared on facebook and twitter
- *  
- *  
- *  
  *  -make it feel good
  *  	-optimize http://www.w3schools.com/js/js_performance.asp
- *  		-reduce latency?
- *  		-loops should not evaluate array lengths every time
+ *  		-loops should not evaluate array lengths every time. Unless the length is changing
+ *  		-profile
  *  		-could generate some things once, then not again
  *  		-search for missing "console.log"s, those are old debug things and may have wasteful ifs.
  *  	-all the effects in camerastuff
- *  	-test on different setups
- *  	-make work in different resolutions/respond to resize.
- *  	-mouse position
+ *  -test on different setups IT DIDN'T WORK ON JOHAN'S MAC
+ *  
+ *  -upload static version to youtube and link to that if page doesn't load
+ *  
+ *  Change to another domain? ;_;
+ *  
+ *  ------------With color taste person
+ * Better viruses on all
+ * QS colors, CK colors, irreg and button colors
+ * Highlight the pentagons and hexagons on polio and hepatitis B when you say it (just make pics with different colors and fade) 
+ * Location of lights in boca
+ * Writing underneath viruses
+ * 
+ * How to make nice pics of viruses: 
+ * chimera, 
+ * clear out the crap. 
+ * multiscale models, resolution 0 (i.e. surfaces)
+ * if you want to color a chain, select one copy of it and click copies in the multiscale models window
+ * actions>color>all options>tools>surface color>radius>get color person to choose
  */
 
-function UpdateWorld() {
-	circle.position.copy(MousePosition);
+var performance_checker = {
+		frame_start_time: 0,
+		sample_start_time: 0,
+		sample_duration: 0,
+		frame_duration: 0,
+		last_sample_index: 0,
+		
+		samples: new Float32Array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+};
+performance_checker.get_samples_avg = function()
+{
+	var avg = 0;
+	for(var i = 0, il = this.samples.length; i < il; i++)
+		avg += this.samples[i];
+	return avg / this.samples.length;
+}
+performance_checker.report_samples_avg = function()
+{
+	console.log( "sample average: ", performance_checker.get_samples_avg() );
+}
+performance_checker.report = function()
+{
+//	console.log(sample_duration / frame_duration);
+}
+performance_checker.begin_frame = function()
+{
+	this.frame_duration = 0;
+	this.sample_duration = 0;
+	this.frame_start_time = ourclock.getElapsedTime();
+}
+performance_checker.end_frame = function()
+{
+	this.frame_duration = ourclock.getElapsedTime() - this.frame_start_time;
+	this.report();
+}
+performance_checker.begin_sample = function()
+{
+	this.sample_start_time = ourclock.getElapsedTime();
+}
+performance_checker.end_sample = function()
+{
+	this.sample_duration = ourclock.getElapsedTime() - this.sample_start_time;
+	this.samples[ this.last_sample_index ] = this.sample_duration;
+	this.last_sample_index++;
+	if( this.last_sample_index > this.samples.length )
+		this.last_sample_index = 0;
+	this.report_samples_avg();
+}
+
+function UpdateWorld()
+{
+//	performance_checker.begin_frame();
 	
 	switch(MODE)
 	{	
@@ -70,13 +134,13 @@ function UpdateWorld() {
 			UpdateCapsid();
 			update_surfperimeter();
 
-			Update_net_variables();			
-			Map_lattice();
+			Update_net_variables();	
+			if( LatticeScale > 0.2) //min for one of the capsids we do. Minus a little grace
+				Map_lattice();
 			break;
 			
 		case IRREGULAR_MODE:
 			CheckIrregButton();
-			Update_pictures_in_scene();
 			manipulate_vertices();
 			update_varyingsurface();
 			//correct_minimum_angles();
@@ -100,12 +164,12 @@ function UpdateWorld() {
 			break;
 	}
 	
-	//this only does anything if it needs to
-//	Update_pictures_in_scene();
+//	performance_checker.end_frame();
 }
 
 function render() {
 	delta_t = ourclock.getDelta();
+//	console.log(delta_t)
 //	if(delta_t > 0.1) delta_t = 0.1;
 	//delta_t = 0.01;
 	
@@ -158,6 +222,7 @@ function ChangeScene(new_mode) {
 			for(var i = 0; i< reproduced_proteins.length; i++)
 				scene.add( reproduced_proteins[i] );
 			scene.add(EggCell);
+			scene.add(Cornucopia);
 			break;
 			
 		case CK_MODE:

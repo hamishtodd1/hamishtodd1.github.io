@@ -1,3 +1,7 @@
+//maybe the hexagon should be brought out of the lattice? Urgh would require us to execute all of this in CK mode
+
+var hex_first_movement_start_time = 4;
+
 function update_hexagon_demo()
 {
 	var segments_explodedness = 0;

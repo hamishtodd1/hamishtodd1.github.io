@@ -1,11 +1,6 @@
 /*
  * TODO
  * 
- * -put 12 extra proteins in, one at each dodeca face
- * -put them at their actual centers
- * -find 72 points in a disc at random positions that aren't too close together.
- * -Send them to those. But by what paths? Must be decided at runtime. Iterate through each point and choose the closest protein that hasn't already been chosen
- * 
  * -reposition lights
  * -cell shading?
  * 
@@ -21,6 +16,10 @@ var flash_time = 0;
 var unflash_time = 0;
 
 var movement_duration = 0;
+
+var cornucopia_start_time = 77.45;
+var cornucopia_end_time = 101.1 - movement_duration;
+
 var pullback_start_time = 0;
 var cell_move_time = 0;
 var boca_explosion_start_time = 0;
@@ -36,6 +35,8 @@ function update_bocavirus() {
 	
 	var cell_eaten_bocavirus_position = new THREE.Vector3( EggCell_initialposition.x - ( EggCell_initialposition.x - EggCell_radius ) * 2, 0, 0);
 	EggCell.position.copy( move_smooth_vectors( EggCell_initialposition, cell_eaten_bocavirus_position, movement_duration, our_CurrentTime - cell_move_time ) );
+	EggCell.scale.x = 1 + 0.04 * Math.sin(our_CurrentTime);
+	EggCell.scale.y = 1 + 0.04 * Math.cos(our_CurrentTime);
 	
 	var rightmost_visible_x = EggCell_initialposition.x + EggCell_radius;
 	var leftmost_visible_x = cell_eaten_bocavirus_position.x - EggCell_radius;
@@ -43,7 +44,19 @@ function update_bocavirus() {
 	var CEPz = ( rightmost_visible_x - leftmost_visible_x ) / 2 / Math.tan( camera.fov / 360 * TAU / 2 );
 	var Cell_virus_visible_position = new THREE.Vector3( CEPx, 0, CEPz );
 	
-	if( our_CurrentTime < pullback_start_time + movement_duration )
+	//TODO put pic in there, and it zooms out
+	if( our_CurrentTime < cornucopia_end_time + movement_duration )
+		Cornucopia.visible = true;
+	else
+		Cornucopia.visible = false;
+	
+	var cornucopia_camera_position = camera_default_position.clone();
+	cornucopia_camera_position.z *= 3;
+	if( our_CurrentTime < cornucopia_start_time + movement_duration )
+		camera.position.copy( move_smooth_vectors(camera_default_position, cornucopia_camera_position, movement_duration, our_CurrentTime - cornucopia_start_time) );
+	else if( our_CurrentTime < cornucopia_end_time )
+		camera.position.copy(cornucopia_camera_position);
+	else if( our_CurrentTime < pullback_start_time + movement_duration )
 		camera.position.copy( move_smooth_vectors(camera_default_position, Cell_virus_visible_position, movement_duration, our_CurrentTime - pullback_start_time) );
 	else if( our_CurrentTime < whole_thing_finish_time )
 		camera.position.copy(Cell_virus_visible_position);
@@ -363,6 +376,11 @@ function init_bocavirus_stuff()
 	EggCell = new THREE.Mesh(new THREE.PlaneGeometry(EggCell_radius * 2,EggCell_radius * 2),
 			new THREE.MeshBasicMaterial({map:random_textures[3], transparent: true} ) );
 	EggCell.position.copy(EggCell_initialposition);
+	
+	Cornucopia = new THREE.Mesh(new THREE.PlaneGeometry(playing_field_dimension*3,playing_field_dimension*3),
+			new THREE.MeshBasicMaterial({map:random_textures[11]} ) );
+	Cornucopia.position.z = -0.01;
+	Cornucopia.visible = false;
 	
 	{
 		lights[0] = new THREE.PointLight( 0xffffff, 0.6 );

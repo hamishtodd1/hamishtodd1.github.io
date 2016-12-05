@@ -17,6 +17,7 @@ var unpause_timer = 0;
 var rotation_knowledge_time;
 var reused_slide_indices = Array();
 var lattice_fadein_time;
+var cutout_vector0_interpolatingfrom = new THREE.Vector3();
 
 function Update_story()
 {
@@ -73,6 +74,17 @@ function Update_story()
 				return;
 			}
 		}
+		
+		if( Story_states[Storypage].enforced_cutout_vector0_player.x !== -1 ) //note to self: you're screwed if you'd like it to be -1 as that is the "default"!
+		{
+			var lerpedness = (our_CurrentTime - Story_states[Storypage].startingtime) / 0.8; //pic of pills!
+			if(lerpedness < 0)
+				lerpedness = 0;
+			if(lerpedness>1)
+				lerpedness = 1;
+			
+			cutout_vector0_player.lerpVectors(cutout_vector0_interpolatingfrom, Story_states[Storypage].enforced_cutout_vector0_player, lerpedness );
+		}
 	}
 	
 	//potentially change state, and only continue with this function if there's state to be changed	
@@ -84,9 +96,6 @@ function Update_story()
 		{
 			if( Storypage === i ) //nothing need be done
 				return;
-			
-			if( Storypage > 0 && i === Storypage + 1 && Story_states[Storypage - 1].pause_at_end === 1 && !used_up_pause )
-				console.error("we're moving to the next state without having used a pause!");
 			
 			Storypage = i;
 			
@@ -107,6 +116,9 @@ function Update_story()
 	
 	//everything below here only happens once, at the start of the chapter.
 	
+	if( Story_states[Storypage].enforced_cutout_vector0_player.x !== -1 ) //note to self: you're screwed if you'd like it to be -1 as that is the "default"!
+		cutout_vector0_interpolatingfrom.copy(cutout_vector0_player); //could choose it based on proximity to the destination modulo TAU / 5
+	
 	surface.material.color.copy( Story_states[i].CK_surface_color );
 	
 	//only want this for sudden transitions, not wrapups - that is handled automatically.
@@ -123,6 +135,8 @@ function Update_story()
 	
 	if( Story_states[Storypage].CK_scale !== 666 )
 		LatticeScale = Story_states[Storypage].CK_scale;
+	if( Story_states[Storypage].CK_angle !== 666 )
+		LatticeScale = Story_states[Storypage].CK_angle;
 	
 	if(Story_states[Storypage].close_up_badly)
 		minimum_angle_crapifier = 0.965;
@@ -182,11 +196,6 @@ function Update_story()
 		theyknowyoucanchangevertices = 0; //suuuuure about doing that?
 		if(capsidopenness === 0 )
 			capsidopenness += 0.0001;
-	}
-	
-	if( Story_states[Storypage].enforced_cutout_vector0_player.x !== -1 ) //note to self: you're screwed if you'd like it to be -1.
-	{
-		cutout_vector0_player.copy( Story_states[Storypage].enforced_cutout_vector0_player );
 	}
 	
 	/*
@@ -259,6 +268,7 @@ function init_story()
 		wedges_visible: false,
 		
 		CK_scale: 666,
+		CK_angle: 666,
 		
 		unpause_on_rotation_knowledge: 0,
 		
@@ -302,13 +312,15 @@ function init_story()
 	
 	//-------TODO the designs comparison should look around the tree
 	
-	ns = default_clone_story_state(1,77.45); //other viruses  
-	unflash_time = ns.startingtime;
+	ns = default_clone_story_state(0,77.45); //other viruses
+	cornucopia_start_time = ns.startingtime;
 	Story_states.push(ns);
 	
 	//TODO picture of "ourselves", maybe assembling a dome
 	
 	ns = default_clone_story_state(1,101.1); //golf balls
+	unflash_time = ns.startingtime;
+	cornucopia_end_time = ns.startingtime;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1,103); //that look like viruses
@@ -335,7 +347,7 @@ function init_story()
 	Story_states.push(ns);
 	
 	movement_duration = 2.2;
-	pullback_start_time = 136.2;
+	pullback_start_time = 133.9;
 	cell_move_time = 147.2;
 	boca_explosion_start_time = 152.2;
 	whole_thing_finish_time = 160;
@@ -404,7 +416,7 @@ function init_story()
 	ns.MODE = QC_SPHERE_MODE;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,392.2); //pause to play around with it
+	ns = default_clone_story_state(0,392.2); //pause (at the beginning of this state) to play around with it
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,402.1); //islamic holy building
@@ -451,6 +463,13 @@ function init_story()
 	ns = default_clone_story_state(0,506.6); //HPV in the model
 	ns.enforced_cutout_vector0_player.set(0, 3.479306368947708, 0);
 	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,510.4); //drug
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,514.3); //back
+	ns.MODE = QC_SPHERE_MODE;
+	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,521.7); //smaller HPV (zika)
 	ns.enforced_cutout_vector0_player.set(1.809016994374948, 1.4384360606445132, 0);
@@ -484,6 +503,7 @@ function init_story()
 
 	ns = default_clone_story_state(0,578.8); //irreg appears
 	ns.MODE = IRREGULAR_MODE;
+	ns.capsid_open_immediately = 0;
 	ns.irreg_button_invisible = 1;
 	Story_states.push(ns);
 	
@@ -699,6 +719,7 @@ function init_story()
 	
 	ns = default_clone_story_state(0,867.2); //we set it to precisely this size
 	ns.CK_scale = 0.28867512192027667;
+	ns.CK_angle = -0.523598777118614;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,870.1); //wrap it up
@@ -756,6 +777,15 @@ function init_story()
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1,941.1); //ball
+	var football_slide = ns.slide_number;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,946.5); //compare to polio
+	ns.slide_number = polio_slide;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,952.1); //compare to polio
+	ns.slide_number = football_slide;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1,956.2); //geodesic building
@@ -774,10 +804,13 @@ function init_story()
 	ns = default_clone_story_state(1,976.6); //first virus
 	var first_virus_slide = ns.slide_number;
 	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,984.7); //hairstyle
+	Story_states.push(ns);
 	
 	//TODO a dome and a virus side by side or whatever
 	
-	ns = default_clone_story_state(0,990.3); //back to model
+	ns = default_clone_story_state(0,990.2); //back to model
 	ns.MODE = CK_MODE;
 	Story_states.push(ns);
 	
@@ -925,6 +958,7 @@ function default_clone_story_state( shows_a_slide, ST )
 	new_story_state.unpause_on_vertex_knowledge = 0;
 	
 	new_story_state.CK_scale = 666;
+	new_story_state.CK_angle = 666;
 	
 	//make it unused
 	new_story_state.enforced_cutout_vector0_player = new THREE.Vector3(-1,0,0);

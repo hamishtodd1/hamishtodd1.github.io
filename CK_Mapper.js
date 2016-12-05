@@ -4,7 +4,6 @@ function Map_lattice() {
 	var surface_hexamers_color = Story_states[Storypage].hexamers_color.clone();
 	var final_pentamers_color = Story_states[Storypage].pentamers_color.clone();
 	
-	
 	var pentamers_color = new THREE.Color( 
 			surface_hexamers_color.r + (1-capsidopenness) * ( final_pentamers_color.r - surface_hexamers_color.r ),
 			surface_hexamers_color.g + (1-capsidopenness) * ( final_pentamers_color.g - surface_hexamers_color.g ),
@@ -44,7 +43,7 @@ function Map_lattice() {
 	for(var i = 0, il = intersections.length; i < il; i++)
 		intersections[i] = new THREE.Vector3();
 	
-	got_a_problem = 0;
+	var got_a_problem = 0;
 	for(var j = 0, jl = ProblemClosests.length; j < jl; j++){
 		for(var i = 0, il = net_vertices_closest_lattice_vertex.length; i < il; i++)
 		{
@@ -73,8 +72,6 @@ function Map_lattice() {
 			(j === 0 || (j % 4 === 2 && j !== 18) || j % 4 === 3 ) ) //also none at all if it's not one of the problem LatticeScales. Don't use latticescale to measure that though
 			IsProblemVertex[net_vertices_closest_lattice_vertex[j]] = 1;
 	}
-
-	logged = 1;
 
 	for(var i = 0; i < number_of_lattice_points; i++)
 	{
@@ -416,13 +413,11 @@ function Map_lattice() {
 				}
 				
 				var regular_index_place = 0;
-				if(!logged) console.log( hexagon_first_squarelatticevertex_index)
 				for(var i = 0, il = chipped_side_vertices.length; i < il; i++){
 					if(i === 1 || i === 5)
 						continue;
 					
 					var hexagonvertexindex = (side_i * 2 + indices_clockwise_on_edge_from_pariahvertex[pariahvertex][regular_index_place]) % 12;
-					if(!logged)console.log(hexagonvertexindex)
 					chipped_side_vertices[i].copy( squarelattice_hexagonvertices[hexagon_first_squarelatticevertex_index + hexagonvertexindex] );
 					
 					regular_index_place++;

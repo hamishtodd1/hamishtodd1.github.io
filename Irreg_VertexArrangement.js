@@ -1,10 +1,11 @@
 /*
  * Todo:
+ * -line up initial state with your very icosahedral virus and spin it a bit 
+ * -"move corner around"
  * -make folding code better so it can do more
  * -better handling of random algorithm failures
  * -red highlight should flash
- * -bug where it turns back to blue
- * -Change HIV's state so that the wrap-up makes more sense (big scissors on the exceptional crack)
+ * -Change HIV's state so that the wrap-up makes more sense (big scissors on the exceptional crack)? If you have the "bouquet" comparison in there
  * -better sync with video, let them gravitate to the right place
  * 
  * While moving vertices back in place, you can sort of check for convergence "for free"
@@ -304,21 +305,15 @@ function manipulate_vertices()
 		if( i === 5 ) finalside_absolute = side_Vector.clone(); //absolute in the sense of it being a side
 		if( i === 5 ) ultimate_vector_absolute = corner2.clone();
 	}
-	//console.log(ultimate_vector); //the first arm is fine, at least
 	
 	move_vertices(vertex_tobechanged, changed_position, vertex_tobechanged);
 	
-	//gonna try imposing the quadrilateral limits here.
-	//Can we do the curve limit here too? Yes, should be able to, as you can get c from only one.
-	//Might even want to do it first as it may project you onto a point outside quadrilateral. That would be bad
+	//Maybe curve limit should be first? It may project you onto a point outside quadrilateral. That would be bad
 	{
 		//go around the three, check triangle inversion, if inverted, check t,
-		//if it's the first and t = 0 or 0 < t < 1 use it. else check next, that's just 
-		//curve could be incoporated well if you can turn it into a 0 < t < 1
-		var t_array = []; //3 for now
+		var t_array = [];
 		
 		/*
-		 * TODO
 		 * You might not need to do the same for the associated vertex, because it will snap back anyway! but if you do need to:
 		 * 	The same thing for the associated vertex
 		 * 	And correct this one back if associated vertex was moved (hopefully by just turning the code the other way around)
@@ -485,9 +480,6 @@ function manipulate_vertices()
 	/* Problem case for vertices rather randomly turning blue
 	 * 0,0,0,0.8660253882408142,-0.5,0,0.8660253882408142,0.5,0,1.7320507764816284,0,0,1.7320507764816284,1,0,2.598076105117798,0.5,0,0,1,0,0.8660253882408142,1.5,0,0,2,0,0.8660253882408142,2.5,0,-0.8325027227401733,1.4806456565856934,0,-0.8660253882408142,1.5,0,-2.0363824367523193,0.8304470777511597,0,-1.7320507764816284,2,0,-1.122625470161438,-0.2806563675403595,0,-1.4330477714538574,-0.17878232896327972,0,-1.7937079668045044,-1.3318945169448853,0,-2.598076105117798,-0.5,0,0,-1,0,-0.5477675795555115,-1.3874495029449463,0,0,-2,0,-0.8660253882408142,-2.5,0,
 	 * 
-	 * The inner ones are ok, others not so much.
-	 * Plus being very aggressive with inner ones can lead to crash of the "center.length is not a function" variety
-	 * 
 	 * If you're going to snap back anyway, you don't need to do the other vertex's limitations. Hopefully it's only a bug with this one
 	 */
 	
@@ -505,48 +497,30 @@ function manipulate_vertices()
 	
 	move_vertices(right_defect_index, right_defect_absolute, vertex_tobechanged);
 	
-	
-	/* 	i.e. every frame a function is called that deals with the problem of "vertex desired location" and the fact that manipulation_surface.geometry.attributes.position isn't there
-	 * 	varyingsurface has the folded up nature to it as well
-	 * 	when we've tweaked the algorithm, 5 evaluations should be ok?
-	 */
-	
-	
-//	if( !check_triangle_inversions(manipulation_surface.geometry.attributes.position.array, "manip")
-//			//extra checks only worth using if you suspect the above has not done its job
-////			|| !check_edge_lengths(flatnet_vertices.array) || !check_defects(manipulation_surface.geometry.attributes.position.array) 
-//			) 
-//	{
-//		for( var i = 0; i < 66; i++)
-//			manipulation_surface.geometry.attributes.position.array[i] = net_log[i];
-//	}
-//	else
+	if( correct_minimum_angles(manipulation_surface.geometry.attributes.position.array ) )
 	{
-		if( correct_minimum_angles(manipulation_surface.geometry.attributes.position.array ) )
-		{
-			for( var i = 0; i < 66; i++)
-				flatnet_vertices.array[i] = manipulation_surface.geometry.attributes.position.array[i];
+		for( var i = 0; i < 66; i++)
+			flatnet_vertices.array[i] = manipulation_surface.geometry.attributes.position.array[i];
+		
+		Disable_virus_pictures();
 			
-			Disable_virus_pictures();
-				
-			//now we need the "height" of the capsid
-			for(var i = 0; i<9; i++)
-				varyingsurface.geometry.attributes.position.array[i] = manipulation_surface.geometry.attributes.position.array[i];	
-			deduce_most_of_surface(0, varyingsurface.geometry.attributes.position);
-			var central_vertex = new THREE.Vector3(varyingsurface.geometry.attributes.position.array[0],varyingsurface.geometry.attributes.position.array[1],varyingsurface.geometry.attributes.position.array[2]);
-			var center_3D = new THREE.Vector3(varyingsurface.geometry.attributes.position.array[13*3+0],varyingsurface.geometry.attributes.position.array[13*3+1],varyingsurface.geometry.attributes.position.array[13*3+2]);
-			center_3D.sub(central_vertex);
-			center_3D.multiplyScalar(0.5);
-			varyingsurface_orientingradius[0] = center_3D.length();
-			center_3D.add(central_vertex);
-			varyingsurface_orientingradius[1] = center_3D.distanceTo(new THREE.Vector3(varyingsurface.geometry.attributes.position.array[1*3+0],varyingsurface.geometry.attributes.position.array[1*3+1],varyingsurface.geometry.attributes.position.array[1*3+2]) );
-			varyingsurface_orientingradius[2] = center_3D.distanceTo(new THREE.Vector3(varyingsurface.geometry.attributes.position.array[2*3+0],varyingsurface.geometry.attributes.position.array[2*3+1],varyingsurface.geometry.attributes.position.array[2*3+2]) );
-		}
-		else{
-			varyingsurface_spheres[vertex_tobechanged].material.color.r = 1;
-			varyingsurface_spheres[vertex_tobechanged].material.color.g = 0;
-			varyingsurface_spheres[vertex_tobechanged].material.color.b = 0;
-		}
+		//now we need the "height" of the capsid
+		for(var i = 0; i<9; i++)
+			varyingsurface.geometry.attributes.position.array[i] = manipulation_surface.geometry.attributes.position.array[i];	
+		deduce_most_of_surface(0, varyingsurface.geometry.attributes.position);
+		var central_vertex = new THREE.Vector3(varyingsurface.geometry.attributes.position.array[0],varyingsurface.geometry.attributes.position.array[1],varyingsurface.geometry.attributes.position.array[2]);
+		var center_3D = new THREE.Vector3(varyingsurface.geometry.attributes.position.array[13*3+0],varyingsurface.geometry.attributes.position.array[13*3+1],varyingsurface.geometry.attributes.position.array[13*3+2]);
+		center_3D.sub(central_vertex);
+		center_3D.multiplyScalar(0.5);
+		varyingsurface_orientingradius[0] = center_3D.length();
+		center_3D.add(central_vertex);
+		varyingsurface_orientingradius[1] = center_3D.distanceTo(new THREE.Vector3(varyingsurface.geometry.attributes.position.array[1*3+0],varyingsurface.geometry.attributes.position.array[1*3+1],varyingsurface.geometry.attributes.position.array[1*3+2]) );
+		varyingsurface_orientingradius[2] = center_3D.distanceTo(new THREE.Vector3(varyingsurface.geometry.attributes.position.array[2*3+0],varyingsurface.geometry.attributes.position.array[2*3+1],varyingsurface.geometry.attributes.position.array[2*3+2]) );
+	}
+	else{
+		varyingsurface_spheres[vertex_tobechanged].material.color.r = 1;
+		varyingsurface_spheres[vertex_tobechanged].material.color.g = 0;
+		varyingsurface_spheres[vertex_tobechanged].material.color.b = 0;
 	}
 }
 

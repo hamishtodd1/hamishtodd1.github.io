@@ -10,6 +10,14 @@ function Loadpdb(linkstring, Models)
 			function ( geometryAtoms, geometryBonds, json ) {
 				Models.push( Create_first_model( geometryAtoms ) );
 				
+				InputObject.ModelPositions.push( Models[Models.length - 1].position.clone() );
+				InputObject.ModelQuaternions.push( Models[Models.length - 1].quaternion.clone() );
+				
+				InputObject.ModelPositions[0].z = -0.3;
+				Models[0].position.z = -0.3;
+				
+				console.log(Models)
+				
 				Collisionbox_and_sceneaddition( Models[Models.length - 1] );
 			},
 			function ( xhr ) {}, //progression function

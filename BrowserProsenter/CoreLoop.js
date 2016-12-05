@@ -16,16 +16,16 @@ function UpdateWorld(Models,Hands)
 //	}
 }
 
-function Render( Models, Users, Downloads) {
+function Render( Models, Controllers) {
 	delta_t = ourclock.getDelta();
 //	if(delta_t > 0.1) delta_t = 0.1;
 	
-	InputObject.readInput(Users, Downloads.ControllerModel,Models);
-	UpdateWorld(Models, Users);
+	InputObject.processInput( Models );
+	UpdateWorld(Models, Controllers);
 	
 	//setTimeout( function() { requestAnimationFrame( render );}, 100 ); //debugging only
 	requestAnimationFrame( function(){
-		Render(Models,Users,ControllerModel);
+		Render(Models,Controllers);
 	} );
 	OurVREffect.render( Scene, Camera ); //will be fine if VR is not enabled
 }

@@ -448,11 +448,9 @@ function init_CK_and_irreg(){
 
 		flatlattice_vertices = new THREE.BufferAttribute( flatlattice_vertices_numbers, 3 );
 		
-		flatlattice_geometry = new THREE.BufferGeometry();
-		flatlattice_geometry.addAttribute( 'position', flatlattice_vertices );
-		flatlattice_geometry.addAttribute( 'color', new THREE.BufferAttribute(lattice_colors, 3) );
-
-		flatlattice = new THREE.Points( flatlattice_geometry, flatlatticematerial );
+		flatlattice = new THREE.Points( new THREE.BufferGeometry(), flatlatticematerial );
+		flatlattice.geometry.addAttribute( 'position', flatlattice_vertices );
+		flatlattice.geometry.addAttribute( 'color', new THREE.BufferAttribute(lattice_colors, 3) );
 		flatlattice.position.x = flatlattice_center.x;
 		//scene.add(flatlattice);
 		
@@ -532,9 +530,6 @@ function init_CK_and_irreg(){
 		});
 
 		var radius = 0.08;
-
-		circle = new THREE.Mesh( new THREE.CircleGeometry( radius ), material3 );
-		circle.position.z = 0.1;
 		
 		var indicatorblobmaterial = new THREE.MeshBasicMaterial({color: 0xf0f00f});
 		for( var i = 0; i<indicatorblobs.length; i++){

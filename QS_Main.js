@@ -1,22 +1,19 @@
-/* bug where it seems to vibrate?
- * 
- * Ones that look crap:
- * -HPV: need to stick a singularity-colored triangle in one place and a fat-rhomb-colored triangles between the fat rhomb
+/* Ones that still don't look great when stretched
+ * -HPV, 7: need to stick a singularity-colored triangle in one place and a fat-rhomb-colored triangles between the fat rhomb
  * -18, three pents at a corner. Stick singularity colors in the gap
  * -11, three pents at a corner. In addition to the above, you put a pentagon-colored triangle in there, done.
  * -alternatively for all of them you have the corner of the dodeca as a point
  * 
- * Change colors, you've not adjusted to the fact that they are allowed to jump around. There's a brown hexagon and pink fat rhombs
+ * -you could totally have it be flat shaded
  * 
  * Probably best to let Grabbable arrow go all the way to the middle and have the scale be: 
  * minimum + GrabbableArrow.position.length / max_GA_position * (maximum - minimum)
  * Take the mouse outside the zone and you're still holding it, but screw you if you think it makes a difference. 
  * 
- * Fix that problem where you can't change while the deflation is occurring. Might be you start within that small non-responsive part?
- * Actually it seems to sometimes just not respond to a held down mouse
  */
 
-/* You can reduce the number of extra vertices required by half. You could probably work out all the edge positions using the triangles
+/* Speedups:
+ * You can reduce the number of extra vertices required by half. You could probably work out all the edge positions using the triangles
  * 
  * There may still be things happenning that you don't need
  * 
@@ -229,12 +226,12 @@ function MoveQuasiLattice()
 	
 	if( set_stable_point !== 666 )
 	{
-		if(!isMouseDown && isMouseDown_previously){
-			set_stable_point++;
-			if(set_stable_point >= stable_points.length / 5)
-				set_stable_point = 0;
-			console.log(set_stable_point);
-		}
+//		if(!isMouseDown && isMouseDown_previously){
+//			set_stable_point++;
+//			if(set_stable_point >= stable_points.length / 5)
+//				set_stable_point = 0;
+//			console.log(set_stable_point);
+//		}
 		modulated_CSP = set_stable_point;
 	}
 	

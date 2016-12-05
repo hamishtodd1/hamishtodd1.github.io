@@ -21,7 +21,6 @@ function EmitModelStates(Models, Controllers)
 	socket.emit('ModelsReSync', {ModelPositions,ModelQuaternions,ControllerPositions,ControllerQuaternions});
 }
 
-//becomes a function associated with the Users
 function GetVRInput()
 {
 	if( VRMODE )
@@ -31,11 +30,13 @@ function GetVRInput()
 		var worldspacePosition = new THREE.Vector3();
 		Camera.localToWorld(worldspacePosition);
 		
+		console.log(worldspacePosition)
+		
 		var worldspaceQuaternion = new THREE.Quaternion();
 		worldspaceQuaternion.setFromRotationMatrix(new THREE.Matrix4().extractRotation(Camera.matrixWorld));
 		
-		copyvec(  InputObject.UserData[i].CameraPosition,	worldspacePosition);
-		copyquat( InputObject.UserData[i].CameraQuaternion,	worldspaceQuaternion);
+		copyvec(  Camera.position,	worldspacePosition); 
+		copyquat( Camera.quaternion,worldspaceQuaternion); //What the fuck?
 		
 		if( VRMODE ) //hands
 		{
@@ -82,49 +83,17 @@ function GetVRInput()
 
 socket.on('UserStateUpdate', function(msg)
 {
-	//note that this will not happen if InputObject.UserData.length === 0. i.e. first user will be us.
-	for(var i = 0; i < InputObject.UserData.length; i++ ) {
-		if(msg.ID === InputObject.UserData[i].ID ) {
-			copyvec(	InputObject.UserData[i].CameraPosition, 	msg.CameraPosition);
-			copyquat(	InputObject.UserData[i].CameraQuaternion, 	msg.CameraQuaternion);
-			copyvec(	InputObject.UserData[i].HandPosition,		msg.HandPosition);
-			copyquat(	InputObject.UserData[i].HandQuaternion,		msg.HandQuaternion);
-			InputObject.UserData[i].Gripping = msg.Gripping;
-			
-			break;
-		}
-		
-		if(i === InputObject.UserData.length - 1){
-			//Couldn't find our user. So, new user
-			InputObject.UserData.push(msg);
-		}
-	}
+	//waiting for the getinput function to be called doesn't seem all that important since you're a spectator
+	copyvec(	Camera.position, 	msg.CameraPosition );
+	copyquat(	Camera.quaternion, 	msg.CameraQuaternion );
+	copyvec(	InputObject.HandPositions[0],		msg.HandPosition);
+	copyquat(	InputObject.HandQuaternions[0],		msg.HandQuaternion);
 });
 
 socket.on('UserDisconnected', function(msg)
 {
 	if(InputObject.UserDisconnect !== ""){
-		var textGeo = new THREE.TextGeometry( "TWO USERS DISCONNECTED SIMULTANEOUSLY!!!", {
-
-			font: font,
-
-			size: size,
-			height: height,
-			curveSegments: curveSegments,
-
-			bevelThickness: bevelThickness,
-			bevelSize: bevelSize,
-			bevelEnabled: bevelEnabled,
-
-			material: 0,
-			extrudeMaterial: 1
-
-		});
-		var mat = new THREE.MultiMaterial( [
-			new THREE.MeshPhongMaterial( { color: 0xffffff, shading: THREE.FlatShading } ), // front
-			new THREE.MeshPhongMaterial( { color: 0xffffff, shading: THREE.SmoothShading } ) // side
-		] );
-		Scene.add(new THREE.Mesh(textGeo,mat));
+		console.error("TWO USERS DISCONNECTED SIMULTANEOUSLY!!!")
 	}
 		
 	InputObject.UserDisconnect = msg;

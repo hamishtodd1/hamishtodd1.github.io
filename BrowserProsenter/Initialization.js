@@ -1,12 +1,6 @@
 //the first init
 socket.on('OnConnect_Message', function(msg)
-{
-	Master = msg.Master;
-	if(msg.Master)
-		console.log("Master");
-	else
-		console.log("Not master");
-	
+{	
 	var Renderer = new THREE.WebGLRenderer({ antialias: true }); //antialiasing would be nice and we're only aiming for 30fps
 	Renderer.setClearColor( 0x101010 );
 	Renderer.setPixelRatio( window.devicePixelRatio );
@@ -106,6 +100,8 @@ socket.on('OnConnect_Message', function(msg)
 			var Controllers = Array(2);
 			Controllers[0] = new THREE.Mesh(object.children[0].geometry, new THREE.MeshPhongMaterial({color:0x000000}));
 			Controllers[1] = new THREE.Mesh(object.children[0].geometry, new THREE.MeshPhongMaterial({color:0x000000}));
+			Controllers[0].Gripping = 0;
+			Controllers[1].Gripping = 0;
 		
 			Render(Models, Controllers); // you have to list everything that goes in there? How about a while loop. 
 		},

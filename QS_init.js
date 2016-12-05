@@ -295,7 +295,6 @@ function initialize_QS_stuff()
 //	remove_stable_point_and_its_rotations(5); //ugly
 	remove_stable_point_and_its_rotations(3); //ugly
 	
-	//TODO change the color of the random rhombus to the color of the wide rhombus, once you have edges in
 	quasicutout_meshes = Array(stable_points.length / 5);
 	var num_quasi_mesh_triangles = 18;
 	var color_selection = Array(num_quasi_mesh_triangles); //actually much less because some triangles are in quads
@@ -565,7 +564,9 @@ function initialize_QS_stuff()
 					if(k===9){	indexA = 26;		indexB = 22;	indexC = 14;	}
 					if(k===10){	indexA = 26;		indexB = 46;	indexC = 22;	} 
 					
-					if(k===11){	indexA = 28;		indexB = 22;	indexC = 47;	}
+					if(k===11){	indexA = 27;		indexB = 21;	indexC = 46;	}
+					
+					if(k===12){	indexA = 27;		indexB = 46;	indexC = 26;	}
 				} else if(i===12){
 					if(k===0){	indexA = 6;			indexB = 8; 	indexC = 30;	}
 					
@@ -866,9 +867,9 @@ function initialize_QS_stuff()
 	midpoint.applyAxisAngle(axis, TAU/5);
 	cutout_vector1.copy(midpoint);
 	
-	//we're setting it to zika
-	cutout_vector0.copy(stable_points[11]);
-	cutout_vector1.copy(stable_points[11]);	
+	//INITIAL STATE
+	cutout_vector0.copy(stable_points[15]);
+	cutout_vector1.copy(cutout_vector0);	
 	cutout_vector1.applyAxisAngle(z_central_axis, -TAU/5);
 	/* 
 	 * 

@@ -17,15 +17,17 @@ var InputObject = { //only allowed to use this in this file and maybe in initial
 	UserPressedEnter: 0,
 	
 	clientX: 0,
-	clientY: 0
+	clientY: 0,
+	
+	HandPositions: Array(new THREE.Vector3(),new THREE.Vector3()),
+	HandQuaternions: Array(new THREE.Quaternion(),new THREE.Quaternion()),
 };
 
-InputObject.readInput = function(Users, ControllerModel,Models) //the purpose of this is to update everything
+InputObject.processInput = function(Models) //the purpose of this is to update everything
 {
 	//eventually this will do everything that the mouse event listeners and the first "User.getinput" currently does
 	if(VRMODE)
 	{
-		var oldCameraPosition = Camera.position.clone();
 		OurVRControls.update();
 	}
 	
@@ -57,28 +59,26 @@ InputObject.readInput = function(Users, ControllerModel,Models) //the purpose of
 		}
 	}
 	
-	GetVRInput();
-	
 	if(VRMODE) //including google cardboard
 	{
-		socket.emit('UserStateUpdate', this.UserData[0] );
-		EmitModelStates(Models);
+		GetVRInput(); //TODO camera position and orientation. Er, what was that?
 		
-		//TODO camera position and orientation
+		socket.emit('UserStateUpdate', this.UserData[0] );
+//		EmitModelStates(Models);
 	}
 	else
 	{
 		for(var i = 0; i < Models.length; i++)
 		{
-			Models[i].position.copy(this.ModelPositions[i]);
+			Models[i].position.copy(this.ModelPositions[i]); 
 			Models[i].quaternion.copy(this.ModelQuaternions[i]);
 		}
 	}
 }
 
-//keyboard crap. Currently using "preventdefault" then "return" on everything you use, there's probably a better way
+//keyboard crap. Have to use "preventdefault" within ifs, otherwise certain things you'd like to do are prevented
 InputObject.readfromkeyboard = function(event)
-{	
+{
 	//arrow keys
 	if( 37 <= event.keyCode && event.keyCode <= 40)
 	{
@@ -146,7 +146,7 @@ InputObject.readfromkeyboard = function(event)
 		}
 	}	
 }
-document.addEventListener( 'keydown', InputObject.readfromkeyboard(event), false );
+document.addEventListener( 'keydown', InputObject.readfromkeyboard, false );
 
 InputObject.ChangeUserString = function(newstring)
 {
@@ -191,12 +191,6 @@ InputObject.updatemouseposition = function(event)
 	
 	if(delta_t === 0) return; //so we get no errors before beginning
 	
-	if(InputObject.UserData[0].Gripping) //and only if you're not in VR
-	{
-		InputObject.UserOrbitRequest.x = event.clientX - InputObject.clientX;
-		InputObject.UserOrbitRequest.y = event.clientY - InputObject.clientY;
-	}
-	
 	InputObject.clientX = event.clientX;
 	InputObject.clientY = event.clientY;
 	
@@ -212,7 +206,7 @@ InputObject.updatemouseposition = function(event)
 	
 //	InputObject.UserData[0].HandPosition.copy(finalposition);
 }
-document.addEventListener( 'mousemove', InputObject.updatemouseposition(event), false );
+document.addEventListener( 'mousemove', InputObject.updatemouseposition, false );
 
 InputObject.sync_model_states = function(msg)
 {
@@ -233,7 +227,7 @@ InputObject.sync_model_states = function(msg)
 	
 	InputObject.ModelsReSynched = 1;
 }
-socket.on('ModelsReSync', InputObject.sync_model_states(msg));
+socket.on('ModelsReSync', InputObject.sync_model_states);
 
 socket.on('theydownloaded', function(msg)
 {

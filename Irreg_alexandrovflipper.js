@@ -11,14 +11,17 @@ function check_ATVIs_against_PELs(ATVIs, PELs){
 }
 
 //Get some numbers to test this with.
-function flip(ourindices){
+function flip(ourindices)
+{
 	var old_edgelen = polyhedron_edge_length[ourindices[0]][ourindices[1]];
 	var l_a = polyhedron_edge_length[ourindices[0]][ourindices[2]];
 	var l_b = polyhedron_edge_length[ourindices[1]][ourindices[2]];
 	var l_c = polyhedron_edge_length[ourindices[0]][ourindices[3]];
 	var l_d = polyhedron_edge_length[ourindices[1]][ourindices[3]];
 	
+	//might want to come back to this, it's dubious! the same function caused silliness with tetrahedron dihedral angle
 	var cosalpha  = get_cos_of_summed_acoses(get_cos_rule(l_b,l_a,old_edgelen),get_cos_rule(l_d,l_c,old_edgelen) );
+//	var cosalpha  = Math.cos(Math.acos(get_cos_rule(l_b,l_a,old_edgelen) ) + Math.acos(get_cos_rule(l_d,l_c,old_edgelen) ) ); //something like this
 	var newlength = Math.sqrt( l_a*l_a + l_c*l_c - 2*l_a*l_c * cosalpha );
 	
 	polyhedron_edge_length[ourindices[0]][ourindices[1]] = 666;
@@ -131,12 +134,13 @@ function get_third_corner(corner1,corner2,clockwise){
 }
 
 function reset_net(vertices_buffer_array){
-	for(var i = 0; i< radii.length; i++)
+	var default_radii = 50; //tweaking this doesn't seem to change convergence rate
+	for(var i = 0, il = radii.length; i< il; i++)
 		radii[i] = 50;
-	for(var i = 0; i < polyhedron_edge_length.length; i++)
-		for(var j = 0; j < polyhedron_edge_length[i].length; j++)
+	for(var i = 0, il = polyhedron_edge_length.length; i < il; i++)
+		for(var j = 0, jl = polyhedron_edge_length[i].length; j < jl; j++)
 			polyhedron_edge_length[i][j] = 666;
-	for(var i = 0; i< net_triangle_vertex_indices.length / 3; i++) {
+	for(var i = 0, il = net_triangle_vertex_indices.length / 3; i < il; i++) {
 		for(var j = 0; j < 3; j++){
 			var a_index = polyhedron_index(net_triangle_vertex_indices[i*3 + j]);
 			var b_index = polyhedron_index(net_triangle_vertex_indices[i*3 + (j+1)%3]);
@@ -146,17 +150,17 @@ function reset_net(vertices_buffer_array){
 			polyhedron_edge_length[b_index][a_index] = polyhedron_edge_length[a_index][b_index]; 
 		}
 	}
-	for(var i = 0; i < net_triangle_vertex_indices.length; i++)
+	for(var i = 0, il = net_triangle_vertex_indices.length; i < il; i++)
 		alexandrov_triangle_vertex_indices[i] = polyhedron_index(net_triangle_vertex_indices[i]);
 }
 
 function delaunay_triangulate() {
 	var S = Array(0);
 	var Markings = Array(polyhedron_edge_length.length);
-	for(var i = 0; i < polyhedron_edge_length.length; i++)
+	for(var i = 0, il = polyhedron_edge_length.length; i < il; i++)
 		Markings[i] = Array(polyhedron_edge_length.length);
-	for(var i = 0; i<polyhedron_edge_length.length; i++){
-		for(var j = i+1; j <polyhedron_edge_length.length; j++){
+	for(var i = 0, il = polyhedron_edge_length.length; i < il; i++){
+		for(var j = i+1, jl = polyhedron_edge_length.length; j < jl; j++){
 			if(polyhedron_edge_length[i][j] !== 666){
 				S.push(Array(i,j));
 				Markings[i][j] = 1; //i always less than j
@@ -250,5 +254,5 @@ function check_triangle_inequalities(print_violations){
 }
 
 function get_cos_of_summed_acoses(cos1,cos2){
-	return cos1*cos2-Math.sqrt(1-cos1*cos1)*Math.sqrt(1-cos2*cos2);
+	return cos1*cos2-Math.sqrt( (1-cos1*cos1)*(1-cos2*cos2) );
 }

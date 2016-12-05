@@ -139,7 +139,7 @@ function init_cardioid(thickness)
 		cardioid.add( cardioid_hemispheres[i] );
 	}
 	
-//	cardioid.rotation.x = -TAU / 4;
+	cardioid.rotation.x = -TAU / 4;
 	Protein.add(cardioid);
 }
 

@@ -128,7 +128,7 @@ function init_xmasData()
 		var data_scaling = 0.08;
 		var num_points_per_period = 16; //maybe listed somewhere in the file?
 		
-		var wind_height = base_radius / 3 * 2;
+		var wind_height = base_radius * 1.5;
 		var step_height = wind_height / num_points_per_period; //vertical distance between "adjacent" points
 		var ribbon_width = wind_height / (num_variables_plotted+1); //not precisely "width", but you know
 		var total_height = (lines_array.length + 1) * step_height;

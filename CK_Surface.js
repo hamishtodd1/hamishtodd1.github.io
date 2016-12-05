@@ -1,15 +1,11 @@
 /*
  * TODO
- * Snap before close
- * 
- * Size limits: don't have them when they're interacting, even if they make it colossal. Bring it back when they let go, but don't snap it. It just feels overcomplicated.
- * 
- * Couldn't you cut a football out of a football-like pattern? Such a neat idea
+ * Snap only before close, except for when they make it colossal 
  * 
  * How about the CK "curiosity" is that you get pentagons out of a pattern of hexagons? Gives them an opportunity to notice the irreg connection
  * 
  * change angles of mouse movement such that rotation is slightly more probable than it currently is
- * some alpha for the boundaries of the circle
+ * some alpha for the boundaries of the circle? Probably not, no great way to do it! Could have a bunch of rings with alpha increasing inward
  * click on lattice, little flash and explosion. Bigger flash when they let go
  * remove flatlattice crap
  * 

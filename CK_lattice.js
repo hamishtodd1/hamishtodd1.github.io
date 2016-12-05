@@ -1,4 +1,4 @@
-//Speedup opportunity: this
+//Speedup opportunity: this. Profile it, it may be a huge thing
 function updatelattice() {
 	var costheta = Math.cos(LatticeAngle);
 	var sintheta = Math.sin(LatticeAngle);
@@ -45,7 +45,10 @@ function HandleNetMovement()
 			}
 			
 			//if you didn't change scale (or if your change was ineffectual) we'll change angle.
-			if( oldLatticeScale == LatticeScale && !Story_states[Storypage].CK_scale_only ) {
+			if( oldLatticeScale == LatticeScale
+//					&& !Story_states[Storypage].CK_scale_only //we're trying without this. Scale-only is SO boring that people think they're missing something, like why have it?
+					)
+			{
 				var MouseAngle = Math.atan2( (MousePosition.x - flatlattice_center.x), (MousePosition.y - flatlattice_center.y) );
 				if(MousePosition.x - flatlattice_center.x === 0 && MousePosition.y - flatlattice_center.y === 0)
 					MouseAngle = 0; //well, undefined
@@ -67,7 +70,7 @@ function HandleNetMovement()
 	} else { //this is where snapping takes place. Can put in the contingency on the button here
 		LatticeGrabbed = false;
 		
-		if(!Story_states[Storypage].CK_scale_only)
+//		if(!Story_states[Storypage].CK_scale_only) //but the MASSIVE appearance must snap back even in scale only
 		{
 			var firstnetvertex = new THREE.Vector3(setvirus_flatnet_vertices[3][3],setvirus_flatnet_vertices[3][ 4 ],0);
 			firstnetvertex.multiplyScalar(1/LatticeScale);

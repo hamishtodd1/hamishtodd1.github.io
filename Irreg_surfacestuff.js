@@ -304,8 +304,20 @@ function update_varyingsurface() {
 	for(var i = 0; i<varyingsurface_spheres.length; i++){
 		if(capsidopenness !== 1 )
 			varyingsurface_spheres[i].position.set(varyingsurface.geometry.attributes.position.array[i*3+0],varyingsurface.geometry.attributes.position.array[i*3+1],varyingsurface.geometry.attributes.position.array[i*3+2]);
-		else
-			varyingsurface_spheres[i].position.set(manipulation_surface.geometry.attributes.position.array[i*3+0],manipulation_surface.geometry.attributes.position.array[i*3+1],manipulation_surface.geometry.attributes.position.array[i*3+2]);
+		else //actually it needs to be manipulation surface, unless
+		{
+			if(i === vertex_tobechanged)
+			{
+//				varyingsurface_spheres[i].position.set(flatnet_vertices.array[i*3+0],flatnet_vertices.array[i*3+1],flatnet_vertices.array[i*3+2]);
+				varyingsurface_spheres[i].position.set(MousePosition.x,MousePosition.y,0);
+			}
+			else
+			//change to mouse's position?
+				varyingsurface_spheres[i].position.set(
+						manipulation_surface.geometry.attributes.position.array[i*3+0],
+						manipulation_surface.geometry.attributes.position.array[i*3+1],
+						manipulation_surface.geometry.attributes.position.array[i*3+2]);
+		}
 		varyingsurface.localToWorld(varyingsurface_spheres[i].position);
 	}
 
