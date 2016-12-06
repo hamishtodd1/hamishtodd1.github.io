@@ -1,8 +1,12 @@
 /*
  * TODO before rerecord
- * "These are some other viruses" - have their similarities appear on them? Could bring in disco ball, radio dome, gazebo/tent, dymaxion map at bottom
+ * "These are some other viruses" - have their similarities appear on them? 
+ * 	Could bring in disco ball, radio dome, gazebo/tent, dymaxion map at bottom, golf ball islamic art and greenhouse obv, origami
  * New pics. Correct sizes. It is bad that 512px wide texture gets stretched to whatever it is.
  * Make use of the "now you can choose the next virus" clip and repeats
+ * 		Loop back over every button press advice
+ * 		And maybe also "try proving me wrong" and stuff like that...
+ * 		Er, that doesn't sound great though, there's an argument for people taking things at their own pace. Maybe only a few prompts, one each on irreg and ck
  * URGH AND YOU PROBABLY NEED A RE-PROMPT FOR UNPAUSING YOU
  * Fading pics. Probably the thing to do is to specify actual chapters that consist of a fade?
  * CK pentagons flashing like sirens
@@ -44,7 +48,7 @@
  *  		-loops should not evaluate array lengths every time. Unless the length is changing
  *  		-profile
  *  		-could generate some things once, then not again
- *  		-search for missing "console.log"s, those are old debug things and may have wasteful ifs.
+ *  		-search for missing "console.log"s, those are old debug things and may have wasteful ifs, alexandrov is chock-a-block
  *  	-all the effects in camerastuff
  *  -test on different setups IT DIDN'T WORK ON JOHAN'S MAC
  *  
@@ -134,9 +138,11 @@ function UpdateWorld()
 			UpdateCapsid();
 			update_surfperimeter();
 
-			Update_net_variables();	
+			Update_net_variables();
+//			performance_checker.begin_sample();
 			if( LatticeScale > 0.2) //min for one of the capsids we do. Minus a little grace
 				Map_lattice();
+//			performance_checker.end_sample();
 			break;
 			
 		case IRREGULAR_MODE:

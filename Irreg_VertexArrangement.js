@@ -497,7 +497,8 @@ function manipulate_vertices()
 	
 	move_vertices(right_defect_index, right_defect_absolute, vertex_tobechanged);
 	
-	if( correct_minimum_angles(manipulation_surface.geometry.attributes.position.array ) )
+//	performance_checker.begin_sample();
+	if( AO.correct_minimum_angles(manipulation_surface.geometry.attributes.position.array ) )
 	{
 		for( var i = 0; i < 66; i++)
 			flatnet_vertices.array[i] = manipulation_surface.geometry.attributes.position.array[i];
@@ -522,6 +523,7 @@ function manipulate_vertices()
 		varyingsurface_spheres[vertex_tobechanged].material.color.g = 0;
 		varyingsurface_spheres[vertex_tobechanged].material.color.b = 0;
 	}
+//	performance_checker.end_sample();
 }
 
 function update_wedges()

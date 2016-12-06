@@ -306,16 +306,23 @@ function init_CK_and_irreg(){
 		20,19,18,
 		19,20,21]);
 	
+	AO.alexandrov_triangle_vertex_indices = new Uint16Array( 3 * 20);
 	for(var i = 0; i < net_triangle_vertex_indices.length; i++)
-		alexandrov_triangle_vertex_indices[i] = polyhedron_index(net_triangle_vertex_indices[i]);
-	
-	polyhedron_edge_length = Array(12);
-	for(var i = 0; i< polyhedron_edge_length.length; i++) {
-		polyhedron_edge_length[i] = new Float32Array(12);
+		AO.alexandrov_triangle_vertex_indices[i] = AO.polyhedron_index(net_triangle_vertex_indices[i]);
+	AO.polyhedron_edge_length = Array(12);
+	for(var i = 0; i< AO.polyhedron_edge_length.length; i++) {
+		AO.polyhedron_edge_length[i] = new Float32Array(12);
 	}
-	
-	irreg_rope = new THREE.Line(new THREE.Geometry, new THREE.LineBasicMaterial({color: 0x000000}));
-	irreg_rope.geometry.vertices.push(new THREE.Vector3(0,0,0),new THREE.Vector3(100,0,0.01));
+
+	//initial values chosen rather randomly. Potential speedup by decreasing this? Does algorithm ever increase them? Probably easy to work out a better bound.
+	AO.radii = new Float32Array([100,100,100, 100,100,100, 100,100,100, 100,100,100]);
+	AO.radii_guess = new Float32Array([100,100,100, 100,100,100, 100,100,100, 100,100,100]);
+	AO.radii_guess.cos_rho = Array(12);
+	for(var i = 0; i < 12; i++)
+		AO.radii_guess.cos_rho[i] = new Float32Array(12);
+	AO.radii.cos_rho = Array(12);
+	for(var i = 0; i < 12; i++)
+		AO.radii.cos_rho[i] = new Float32Array(12);
 	
 	for( var i = 0; i < 20; i++ ) {
 		line_index_pairs[i*6 + 0] = net_triangle_vertex_indices[i*3 + 0];

@@ -30,7 +30,7 @@ function GetVRInput()
 		var worldspacePosition = new THREE.Vector3();
 		Camera.localToWorld(worldspacePosition);
 		
-		console.log(worldspacePosition)
+//		console.log(worldspacePosition)
 		
 		var worldspaceQuaternion = new THREE.Quaternion();
 		worldspaceQuaternion.setFromRotationMatrix(new THREE.Matrix4().extractRotation(Camera.matrixWorld));

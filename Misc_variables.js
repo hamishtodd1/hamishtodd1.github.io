@@ -197,20 +197,12 @@ var SquareToHexMatrix = new Float32Array([-1 / Math.sqrt(3) / 2 /100, -1 / Math.
 //for(var i = 0; i < 4; i++)
 //	SquareToHexMatrix[i] *= Lattice_ring_density_factor;
 
-//initial values chosen rather randomly. Potential speedup by decreasing this? Does algorithm ever increase them? Probably easy to work out a better bound.
-var radii = new Float32Array([100,100,100, 100,100,100, 100,100,100, 100,100,100]);
-var radii_guess = new Float32Array([100,100,100, 100,100,100, 100,100,100, 100,100,100]);
-radii_guess.cos_rho = Array(12);
-for(var i = 0; i < 12; i++)
-	radii_guess.cos_rho[i] = new Float32Array(12);
-radii.cos_rho = Array(12);
-for(var i = 0; i < 12; i++)
-	radii.cos_rho[i] = new Float32Array(12);
-
-var alexandrov_triangle_vertex_indices = new Uint16Array( 3 * 20);
-var polyhedron_edge_length;
+//--------------------Alexandrov Object
+var AO = {};
 
 var wedges;
+
+//----------back to CK
 
 var lattice_colors = new Float32Array(number_of_lattice_points * 3);
 

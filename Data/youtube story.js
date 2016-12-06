@@ -136,7 +136,7 @@ function Update_story()
 	if( Story_states[Storypage].CK_scale !== 666 )
 		LatticeScale = Story_states[Storypage].CK_scale;
 	if( Story_states[Storypage].CK_angle !== 666 )
-		LatticeScale = Story_states[Storypage].CK_angle;
+		LatticeAngle = Story_states[Storypage].CK_angle;
 	
 	if(Story_states[Storypage].close_up_badly)
 		minimum_angle_crapifier = 0.965;
@@ -516,13 +516,13 @@ function init_story()
 	ns.unpause_on_vertex_knowledge = 1;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,590.2); //advice which we skip for now TODO
-	ns.go_to_time = 596 + 0.0001;
+	ns = default_clone_story_state(0,590.2); //advice. If they move, we auto-unpause, go to irreg_firstnewshape_story_state. The others are not quite the same, we don't auto-unpause
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,596); //And we have a new shape!
 	ns.enforced_irreg_quaternion.set( -0.7096985308398929, 0.0742111650138679, 0.07616885252857324, 0.6964330580574571 );
+	irreg_firstnewshape_story_state = Story_states.length;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,600.9); //button appears
@@ -719,7 +719,7 @@ function init_story()
 	
 	ns = default_clone_story_state(0,867.2); //we set it to precisely this size
 	ns.CK_scale = 0.28867512192027667;
-	ns.CK_angle = -0.523598777118614;
+	ns.CK_angle = 5.75958653833226;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,870.1); //wrap it up

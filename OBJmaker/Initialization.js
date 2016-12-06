@@ -80,6 +80,19 @@ function Initialize()
 	Render();
 }
 
+function init_halffuncube()
+{
+	/*
+	 * Three 1x1x3 cuboids for three of the edges
+	 * Six of same but sliced... in some way! heights on the edges: 1.5, 2.5, 1.5, 0.5 - we believe
+	 * Though hey, they need to be hollow 
+	 * 
+	 * Wouldn't be that hard to craft it. Or even sonobe unit it
+	 * 
+	 * Could have one with one hole in it, one with three?
+	 */
+}
+
 function init_cardioid(thickness)
 {
 	/*
