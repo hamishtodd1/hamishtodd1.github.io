@@ -514,7 +514,6 @@ function init_story()
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1,581.7); //very icosahedron
-	var different_HIVs_index = ns.slide_number; 
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,585); //back
