@@ -104,6 +104,7 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HIV.png");
 	reused_slide_indices[6] = slide_texture_urls.length - 1; 
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HIV variety.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/very icosahedral.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Rhesus.png");
 //	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/trim5.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/very cone shaped HIV.png");

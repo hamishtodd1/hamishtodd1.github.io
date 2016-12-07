@@ -27,5 +27,8 @@ function Render( Models, Controllers) {
 	requestAnimationFrame( function(){
 		Render(Models,Controllers);
 	} );
-	OurVREffect.render( Scene, Camera ); //will be fine if VR is not enabled
+	if(VRMODE)
+		OurVREffect.render( Scene, Camera ); //will be fine if VR is not enabled
+	else
+		Renderer.render( Scene, Camera );
 }

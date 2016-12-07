@@ -15,8 +15,6 @@ function map_hex_point(squarelattice_position, nettriangle, hexagonlattice_index
 	map_from_lattice_to_surface( HexagonLattice.geometry.vertices[hexagonlattice_index], nettriangle );
 }
 
-var rounded_net = new THREE.BufferAttribute( new Float32Array(22*3), 3 );
-
 function Update_net_variables() {
 	var old_net_vertices_closest_lattice_vertex = Array(net_vertices_closest_lattice_vertex.length);
 	for(var i = 0, il = net_vertices_closest_lattice_vertex.length; i < il; i++)

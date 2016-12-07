@@ -97,6 +97,10 @@ function init_cardioid(thickness)
 {
 	/*
 	 * A hole through the middle would be nice but maybe too hard. And it would look like a bum aroumd your neck. She could glue her own chain onto it or whatever
+	 * 
+	 * Improvements: given that you can't see the lines disappear into the singularity (unless they're different colors!), probably centering_mode should be true
+	 * 
+	 * You could also make the thickness proportional to the radius - the small ones are supported by the large ones
 	 */
 	
 	var radius_segments = 128;

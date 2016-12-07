@@ -68,8 +68,6 @@ var number_of_lattice_points = 1 + 3 * number_of_hexagon_rings*(number_of_hexago
 //in the limited environment we will end up with (and might do well to be going with) a circle of existence for lattice pts is prb. best
 
 //----------------Initialized, then static
-var squarelattice_vertices = Array(number_of_lattice_points);
-var flatlattice_default_vertices = Array(number_of_lattice_points*3);
 
 var backgroundtexture;
 var viruspicture_scales = Array(1,0.577,0.5,0.3779,1/3,0.28867,0.27735);
@@ -156,13 +154,9 @@ var normalized_virtualdodeca_vertices = Array(20);
 var icosahedra_directions = Array(12);
 
 
-
-//-----------no longer formation atom stuff
-
-var flatnet;
-var flatnet_vertices_numbers;
-var flatnet_vertices;
-var flatnet_geometry;
+//-----------no longer 3D penrose stuff
+var squarelattice_vertices = Array(number_of_lattice_points);
+var flatlattice_default_vertices = Array(number_of_lattice_points*3);
 
 var rounded_net = new THREE.BufferAttribute( new Float32Array(22*3), 3 );
 
@@ -201,6 +195,11 @@ var SquareToHexMatrix = new Float32Array([-1 / Math.sqrt(3) / 2 /100, -1 / Math.
 var AO = {};
 
 var wedges;
+
+var flatnet;
+var flatnet_vertices_numbers;
+var flatnet_vertices;
+var flatnet_geometry;
 
 //----------back to CK
 

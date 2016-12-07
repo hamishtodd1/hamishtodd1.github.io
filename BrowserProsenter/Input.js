@@ -7,8 +7,6 @@
 
 //"get position data from other users" and "get our controller data" might be very different abstractions
 var InputObject = { //only allowed to use this in this file and maybe in initialization
-	UserData: Array(), //maybe the coming values should be properties of the objects? There are probably best practices...
-	
 	ModelPositions: Array(),
 	ModelQuaternions: Array(),
 	ModelsReSynched: 0,
@@ -24,13 +22,7 @@ var InputObject = { //only allowed to use this in this file and maybe in initial
 };
 
 InputObject.processInput = function(Models) //the purpose of this is to update everything
-{
-	//eventually this will do everything that the mouse event listeners and the first "User.getinput" currently does
-	if(VRMODE)
-	{
-		OurVRControls.update();
-	}
-	
+{	
 	if( this.UserPressedEnter === 1 || this.theydownloaded !== "" )
 	{
 		var NewProteinString;
@@ -59,11 +51,13 @@ InputObject.processInput = function(Models) //the purpose of this is to update e
 		}
 	}
 	
-	if(VRMODE) //including google cardboard
+	if(VRMODE) //including google cardboard TODO
 	{
-		GetVRInput(); //TODO camera position and orientation. Er, what was that?
+		OurVRControls.update();
 		
-		socket.emit('UserStateUpdate', this.UserData[0] );
+		GetVRInput();
+		
+//		socket.emit('UserStateUpdate', ); //NEED TO PUT SOMETHING IN HERE
 //		EmitModelStates(Models);
 	}
 	else
@@ -76,81 +70,9 @@ InputObject.processInput = function(Models) //the purpose of this is to update e
 	}
 }
 
-//keyboard crap. Have to use "preventdefault" within ifs, otherwise certain things you'd like to do are prevented
-InputObject.readfromkeyboard = function(event)
-{
-	//arrow keys
-	if( 37 <= event.keyCode && event.keyCode <= 40)
-	{
-//		if(event.keyCode === 38)
-//			Scene.scale.multiplyScalar(0.5);
-//		if(event.keyCode === 40)
-//			Scene.scale.multiplyScalar(2);
-		
-		//tank controls
-//		var movingspeed = 0.8;
-//		var turningspeed = 0.05;
-//		
-//		var forwardvector = Camera.getWorldDirection();
-//		forwardvector.setLength(movingspeed);
-//		
-//		if(event.keyCode === 37)
-//			Camera.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(Central_Y_axis, turningspeed));
-//		if(event.keyCode === 38)
-//			Camera.position.add(forwardvector);
-//		if(event.keyCode === 39)
-//			Camera.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(Central_Y_axis,-turningspeed));
-//		if(event.keyCode === 40)
-//			Camera.position.sub(forwardvector);
-//		return;
-	}
-	
-	if(event.keyCode === 190 )
-	{
-		event.preventDefault();
-		OurVREffect.setFullScreen( true );		
-		
-		//bug if we do this earlier(?)
-		for(var i = 0; i < 6; i++)
-			OurVREffect.scale *= 0.66666666;
-		
-		return;
-	}
-	
-	if(event.keyCode === 13) //enter
-	{
-		event.preventDefault();
-		InputObject.UserPressedEnter = 1;
-		return;
-	}
-	if(event.keyCode === 8) //backspace
-	{
-		event.preventDefault();
-		ChangeUserString( InputObject.UserString.slice(0, InputObject.UserString.length - 1) );
-		return;
-	}
-	
-	//symbols
-	{
-		var arrayposition;
-		if( 48 <= event.keyCode && event.keyCode <= 57 )
-			arrayposition = event.keyCode - 48;
-		if( 65 <= event.keyCode && event.keyCode <= 90 )
-			arrayposition = event.keyCode - 55;
-		
-		if(typeof arrayposition != 'undefined')
-		{
-//			event.preventDefault(); //want to be able to ctrl+shift+j
-			ChangeUserString(InputObject.UserString + keycodeArray[arrayposition]);
-			return;
-		}
-	}	
-}
-document.addEventListener( 'keydown', InputObject.readfromkeyboard, false );
-
 InputObject.ChangeUserString = function(newstring)
 {
-	InputObject.UserString = newstring;
+	this.UserString = newstring;
 	
 	//remove the previous string that was in there
 	for(var i = 0; i < Scene.children.length; i++)
@@ -185,14 +107,87 @@ InputObject.ChangeUserString = function(newstring)
 	Scene.add(TextMesh);
 }
 
+//keyboard crap. Have to use "preventdefault" within ifs, otherwise certain things you'd like to do are prevented
+InputObject.readfromkeyboard = function(event)
+{
+	//arrow keys
+	if( 37 <= event.keyCode && event.keyCode <= 40)
+	{
+//		if(event.keyCode === 38)
+//			Scene.scale.multiplyScalar(0.5);
+//		if(event.keyCode === 40)
+//			Scene.scale.multiplyScalar(2);
+		
+		//tank controls
+//		var movingspeed = 0.8;
+//		var turningspeed = 0.05;
+//		
+//		var forwardvector = Camera.getWorldDirection();
+//		forwardvector.setLength(movingspeed);
+//		
+//		if(event.keyCode === 37)
+//			Camera.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(Central_Y_axis, turningspeed));
+//		if(event.keyCode === 38)
+//			Camera.position.add(forwardvector);
+//		if(event.keyCode === 39)
+//			Camera.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(Central_Y_axis,-turningspeed));
+//		if(event.keyCode === 40)
+//			Camera.position.sub(forwardvector);
+//		return;
+	}
+	
+	if(event.keyCode === 190 )
+	{
+		event.preventDefault();
+		OurVREffect.setFullScreen( true );
+		
+		//bug if we do this earlier(?)
+		console.log(OurVREffect.scale);
+		OurVREffect.scale = 0; //you'd think this would put your eyes in the same place but it doesn't
+		
+		return;
+	}
+	
+	if(event.keyCode === 13) //enter
+	{
+		event.preventDefault();
+		this.UserPressedEnter = 1;
+		return;
+	}
+	if(event.keyCode === 8) //backspace
+	{
+		event.preventDefault();
+		this.ChangeUserString( this.UserString.slice(0, this.UserString.length - 1) );
+		return;
+	}
+	
+	//symbols
+	{
+		var arrayposition;
+		if( 48 <= event.keyCode && event.keyCode <= 57 )
+			arrayposition = event.keyCode - 48;
+		if( 65 <= event.keyCode && event.keyCode <= 90 )
+			arrayposition = event.keyCode - 55;
+		
+		if(typeof arrayposition != 'undefined')
+		{
+//			event.preventDefault(); //want to be able to ctrl+shift+j
+			this.ChangeUserString(this.UserString + keycodeArray[arrayposition]);
+			return;
+		}
+	}	
+}
+document.addEventListener( 'keydown', InputObject.readfromkeyboard, false );
+
+
 InputObject.updatemouseposition = function(event)
 {
 	event.preventDefault();
 	
 	if(delta_t === 0) return; //so we get no errors before beginning
 	
-	InputObject.clientX = event.clientX;
-	InputObject.clientY = event.clientY;
+	this.clientX = event.clientX;
+	this.clientY = event.clientY;
 	
 	var vector = new THREE.Vector3(
 		  ( event.clientX / window.innerWidth ) * 2 - 1,
@@ -204,49 +199,37 @@ InputObject.updatemouseposition = function(event)
 	var finalposition = Camera.position.clone();
 	finalposition.add( dir.multiplyScalar( distance ) );
 	
-//	InputObject.UserData[0].HandPosition.copy(finalposition);
+//	this.UserData[0].HandPosition.copy(finalposition);
 }
 document.addEventListener( 'mousemove', InputObject.updatemouseposition, false );
 
 InputObject.sync_model_states = function(msg)
 {
-	if(msg.ModelPositions.length > InputObject.ModelPositions.length)
+	if(msg.ModelPositions.length > this.ModelPositions.length)
 	{
-		for(var i = InputObject.ModelPositions.length; i < msg.ModelPositions.length; i++)
+		for(var i = this.ModelPositions.length; i < msg.ModelPositions.length; i++)
 		{
-			InputObject.ModelPositions[i] = new THREE.Vector3();
-			InputObject.ModelQuaternions[i] = new THREE.Quaternion();
+			this.ModelPositions[i] = new THREE.Vector3();
+			this.ModelQuaternions[i] = new THREE.Quaternion();
 		}
 	}
 	
 	for(var i = 0; i < msg.ModelPositions.length; i++)
 	{
-		copyvec(InputObject.ModelPositions[i], msg.ModelPositions[i]);
-		copyquat(InputObject.ModelQuaternions[i], msg.ModelQuaternions[i]);
+		copyvec(this.ModelPositions[i], msg.ModelPositions[i]);
+		copyquat(this.ModelQuaternions[i], msg.ModelQuaternions[i]);
 	}
 	
-	InputObject.ModelsReSynched = 1;
+	this.ModelsReSynched = 1;
 }
 socket.on('ModelsReSync', InputObject.sync_model_states);
 
 socket.on('theydownloaded', function(msg)
 {
-	InputObject.theydownloaded = msg;
+	this.theydownloaded = msg;
 });
 
-//hmm, really?
-document.addEventListener( 'mousedown', function(event) 
-{
-	event.preventDefault();	
-	InputObject.UserData[0].Gripping = 1;
-}, false );
-
-document.addEventListener( 'mouseup', function(event) 
-{
-	event.preventDefault();	
-	InputObject.UserData[0].Gripping = 0;
-}, false );
-
+//TODO wanna remove spaces and reduce to lower case before checking this
 var FamousProteins = Array(
 		"rubisco", "1rcx",
 		"keratin", "3TNU",

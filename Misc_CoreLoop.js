@@ -1,5 +1,9 @@
 /*
  * TODO before rerecord
+ * Pics and the hexagons and pentagon demo
+ * 
+ * Full screen crap, if you double click then jesus
+ * 
  * "These are some other viruses" - have their similarities appear on them? 
  * 	Could bring in disco ball, radio dome, gazebo/tent, dymaxion map at bottom, golf ball islamic art and greenhouse obv, origami
  * New pics. Correct sizes. It is bad that 512px wide texture gets stretched to whatever it is.
@@ -12,6 +16,7 @@
  * CK pentagons flashing like sirens
  * Pentagon in CK demo and qs. Ehhhhh...
  * Contra the work you did, it is probably better to have the tiny HIV triangles in the middle - the point of a cone is that the point is together already
+ * 
  * touch
  *
  * Make a nice, new, big bit of origami with a flap somewhere

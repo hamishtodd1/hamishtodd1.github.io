@@ -43,34 +43,24 @@ socket.on('OnConnect_Message', function(msg)
 	
 	Scene.add(Camera);
 	
-	OurVREffect = new THREE.VREffect( Renderer );
-	
 	if ( WEBVR.isLatestAvailable() === false ){
+		VRMODE = 0;
 		//A cardboard user still counts as a lecturer. Nobody will want to spectate as cardboard, that will be vomit-inducing
 	}
 	else
 	{
+		OurVREffect = new THREE.VREffect( Renderer );
 		OurVRControls = new THREE.VRControls( Camera,Renderer.domElement );
+		
 		if ( WEBVR.isAvailable() === true )
-			document.body.appendChild( WEBVR.getButton( OurVREffect ) );
+			document.body.appendChild( WEBVR.getButton( OurVREffect ) );		
+		
 		VRMODE = 1; //OR GOOGLE CARDBOARD TODO
+		//TODO why wait for a button press?
 	}
 	
 	Add_stuff_from_demo();
 //	initVideo();
-	
-	//This is the place where the user object is defined
-	//Will be added to the user array soon, in the way everyone else is.
-	InputObject.UserData.push({
-		CameraPosition: new THREE.Vector3(),
-		CameraQuaternion: new THREE.Quaternion(),
-		
-		HandPosition: new THREE.Vector3(0,-10000,0), //By default it's offscreen.
-		HandQuaternion: new THREE.Quaternion(),
-		
-		Gripping: 0,
-		ID: msg.ID
-	});
 	
 	//you can add other things to this
 	var PreInitChecklist = {

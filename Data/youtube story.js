@@ -39,7 +39,11 @@ function Update_story()
 			IrregButton.capsidopen = 0;
 		
 		if( Story_states[Storypage].unpause_on_vertex_knowledge && capsidopenness === 0 )
+		{
+			ytplayer.seekTo( vertex_knowledge_time );
 			ytplayer.playVideo();
+			//and loop back if they don't?
+		}	
 		
 		if( Story_states[Storypage].unpause_on_rotation_knowledge && rotation_understanding >= 2 && !isMouseDown )
 		{
@@ -160,7 +164,7 @@ function Update_story()
 		if(Story_states[Storypage-1].MODE !== IRREGULAR_MODE) //we're flicking back - no need to see transition
 			settle_manipulationsurface_and_flatnet(); 
 		update_wedges();
-		correct_minimum_angles(flatnet_vertices.array);
+		AO.correct_minimum_angles(flatnet_vertices.array);
 	}
 	
 	//slide can be a video too maybe
@@ -502,9 +506,20 @@ function init_story()
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,578.8); //irreg appears
+	ns.enforced_irreg_quaternion.set( 
+			-0.4744018551980526,0.024453317552284186,0.045298357905429784, 0.878802010589646 );
 	ns.MODE = IRREGULAR_MODE;
 	ns.capsid_open_immediately = 0;
 	ns.irreg_button_invisible = 1;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,581.7); //very icosahedron
+	var different_HIVs_index = ns.slide_number; 
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,585); //back
+	ns.enforced_irreg_quaternion.set( -0.4744018551980526,0.024453317552284186,0.045298357905429784, 0.878802010589646 );
+	ns.MODE = IRREGULAR_MODE;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,585.3); //open irreg then (pause)
@@ -518,9 +533,11 @@ function init_story()
 	
 	ns = default_clone_story_state(0,590.2); //advice. If they move, we auto-unpause, go to irreg_firstnewshape_story_state. The others are not quite the same, we don't auto-unpause
 	ns.pause_at_end = 1;
+	ns.unpause_on_vertex_knowledge = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,596); //And we have a new shape!
+	vertex_knowledge_time = ns.startingtime;
 	ns.enforced_irreg_quaternion.set( -0.7096985308398929, 0.0742111650138679, 0.07616885252857324, 0.6964330580574571 );
 	irreg_firstnewshape_story_state = Story_states.length;
 	Story_states.push(ns);
@@ -908,6 +925,26 @@ function init_story()
 
 	ns = default_clone_story_state(0,1262.1); //dodecahedron
 	ns.MODE = BOCAVIRUS_MODE;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,1276.7);
+	ns.slide_number = polio_slide;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,1286.7);
+	ns.slide_number = HIV_slide;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,1296.7);
+	ns.slide_number = Measles_slide;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,1306.7);
+	ns.slide_number = zika_slide;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,1316.7);
+	ns.slide_number = first_virus_slide;
 	Story_states.push(ns);
 	
 	
