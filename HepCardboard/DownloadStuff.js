@@ -4,10 +4,10 @@ function Download_initial_stuff(PreInitChecklist) {
 	var testobjlink = "http://threejs.org/examples/obj/male02/male02.obj"; //TODO don't waste their bandwidth
 	
 	var OurLoadedThingsLinks = Array();
-	OurLoadedThingsLinks[0] = "http://hamishtodd1.github.io/BrowserProsenter/Data/vr_controller_vive_1_5.obj";
-	OurLoadedThingsLinks[1] = "http://hamishtodd1.github.io/BrowserProsenter/Data/antibody.obj";
-	OurLoadedThingsLinks[2] = "http://hamishtodd1.github.io/BrowserProsenter/Data/vaccine.obj";
-	OurLoadedThingsLinks[3] = "http://hamishtodd1.github.io/BrowserProsenter/Data/hep.obj";
+	OurLoadedThingsLinks[0] = "http://hamishtodd1.github.io/HepCardboard/Data/vr_controller_vive_1_5.obj";
+	OurLoadedThingsLinks[1] = "http://hamishtodd1.github.io/HepCardboard/Data/antibody.obj";
+	OurLoadedThingsLinks[2] = "http://hamishtodd1.github.io/HepCardboard/Data/vaccine.obj";
+	OurLoadedThingsLinks[3] = "http://hamishtodd1.github.io/HepCardboard/Data/hep.obj";
 	
 //	OurLoadedThingsLinks[3] = "http://hamishtodd1.github.io/BrowserProsenter/Data/Protein A.obj";
 //	OurLoadedThingsLinks[4] = "http://hamishtodd1.github.io/BrowserProsenter/Data/Protein B.obj";

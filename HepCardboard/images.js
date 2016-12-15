@@ -7,10 +7,10 @@ background_image.position.z = INITIAL_CAMERA_POSITION.z * 2 + 0.01;
 var texture_loader = new THREE.TextureLoader();
 
 var image_urls = Array();
-image_urls.push( "http://hamishtodd1.github.io/BrowserProsenter/Data/hepatitis pics/Hepatitis victim.png" );
-image_urls.push( "http://hamishtodd1.github.io/BrowserProsenter/Data/hepatitis pics/Murrays.png" );
-image_urls.push( "http://hamishtodd1.github.io/BrowserProsenter/Data/hepatitis pics/vaccine administered.jpg" );
-image_urls.push( "http://hamishtodd1.github.io/BrowserProsenter/Data/hepatitis pics/yeast.png" );
+image_urls.push( "http://hamishtodd1.github.io/HepCardboard/Data/Hepatitis victim.png" );
+image_urls.push( "http://hamishtodd1.github.io/HepCardboard/Data/Murrays.png" );
+image_urls.push( "http://hamishtodd1.github.io/HepCardboard/Data/vaccine administered.jpg" );
+image_urls.push( "http://hamishtodd1.github.io/HepCardboard/Data/yeast.png" );
 
 function set_up_pictures()
 {
