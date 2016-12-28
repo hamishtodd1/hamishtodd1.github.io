@@ -9,34 +9,10 @@ socket.on('OnConnect_Message', function(msg)
 	Renderer.shadowMap.enabled = true;
 	Renderer.shadowMap.cullFace = THREE.CullFaceBack;
 	document.body.appendChild( Renderer.domElement );
-		
-//	var HORIZONTAL_FOV_OCULUS = 110;
-	var HORIZONTAL_FOV_VIVE = 110;
-//	var HORIZONTAL_FOV_GEAR = 110;
-//	var HORIZONTAL_FOV_STAR = 110;
-//	
-//	var ASPECT_OCULUS = 
-	var EYE_PIXELS_HORIZONTAL_VIVE = 1080;
-	var EYE_PIXELS_VERTICAL_VIVE = 1200;
-	var EYE_ASPECT_VIVE = EYE_PIXELS_HORIZONTAL_VIVE/EYE_PIXELS_VERTICAL_VIVE;
-	
-	var VERTICAL_FOV_VIVE = HORIZONTAL_FOV_VIVE / EYE_ASPECT_VIVE;
-	
-	/* Scratch the below, probably, it's vertical that you input.
-	 * 
-	 * Horizontal FOV (subject to update):
-	 * 
-	 * Oculus: 110
-	 * Vive: 110
-	 * GearVR: 96
-	 * Google Cardboard: 90
-	 * StarVR: 210
-	 * 
-	 */
 	
 	Scene = new THREE.Scene();
 	
-	//Camera will be added to the scene when the user is set up
+	//FOV depends on whether you're talking VR
 	Camera = new THREE.PerspectiveCamera( 90, //VERTICAL_FOV_VIVE, //mrdoob says 70. They seem to change it anyway...
 			Renderer.domElement.width / Renderer.domElement.height, //window.innerWidth / window.innerHeight,
 			0.001, 700);
@@ -50,14 +26,24 @@ socket.on('OnConnect_Message', function(msg)
 	else
 	{
 		OurVREffect = new THREE.VREffect( Renderer );
-		OurVRControls = new THREE.VRControls( Camera,Renderer.domElement );
+		OurVRControls = new THREE.VRControls( Camera );
 		
 		if ( WEBVR.isAvailable() === true )
-			document.body.appendChild( WEBVR.getButton( OurVREffect ) );		
+			document.body.appendChild( WEBVR.getButton( OurVREffect ) );
 		
 		VRMODE = 1; //OR GOOGLE CARDBOARD TODO
 		//TODO why wait for a button press?
 	}
+	
+	var audioListener = new THREE.AudioListener();
+	Camera.add( audioListener );
+	indicatorsound = new THREE.Audio( audioListener );
+	indicatorsound.load(
+		'http://hamishtodd1.github.io/BrowserProsenter/Data/SineSound.wav'
+	);
+	indicatorsound.autoplay = true;
+	indicatorsound.setLoop(true);
+	
 	
 	Add_stuff_from_demo();
 //	initVideo();
@@ -79,6 +65,7 @@ socket.on('OnConnect_Message', function(msg)
 	
 	//Trp-Cage Miniprotein Construct TC5b, 20 residues: 1l2y. Rubisco: 1rcx. Insulin: 4ins
 	Loadpdb("1L2Y", Models);
+	Loadpdb("1L2Y", Models);
 	
 	var OurOBJLoader = new THREE.OBJLoader();
 	OurOBJLoader.load( "http://hamishtodd1.github.io/BrowserProsenter/Data/vr_controller_vive_1_5.obj",
@@ -93,7 +80,7 @@ socket.on('OnConnect_Message', function(msg)
 			Controllers[0].Gripping = 0;
 			Controllers[1].Gripping = 0;
 		
-			Render(Models, Controllers); // you have to list everything that goes in there? How about a while loop. 
+			Render(Models, Controllers, indicatorsound); // you have to list everything that goes in there? How about a while loop. 
 		},
 		function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); }
 	);

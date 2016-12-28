@@ -274,27 +274,15 @@ function update_varyingsurface() {
 		varyingsurface_cylinders[surfperimeter_line_index_pairs.length / 2 + i].geometry.attributes.position.needsUpdate = true;
 	}
 	
-	for(var i = 0; i<irreghighlight_progresses.length; i++) {
+	for(var i = 0; i < varyingsurface_spheres.length; i++) {
 		if( (i == 0 || i % 4 == 1) && i != 1)
 			continue;
 		
-		irreghighlight_progresses[i] += delta_t;
-		if(irreghighlight_progresses[i] > 1 )
-			irreghighlight_progresses[i] = 0;
-		
 		if(capsidopenness == 1 ){
+			varyingsurface_spheres[i].material.opacity = 1;
 			if(!theyknowyoucanchangevertices){
-				var sphereopacity = capsidopenness == 0 ? 0 : capsidopenness * Math.cos((ourclock.elapsedTime - ourclock.startTime)*4);
-				varyingsurface_spheres[i].material.opacity = 1;
-				for(var j = 0; j < varyingsurface_spheres[i].geometry.vertices.length; j++)
-					varyingsurface_spheres[i].geometry.vertices[j].setLength(0.1 * sphereopacity);
-				varyingsurface_spheres[i].geometry.verticesNeedUpdate = true;
-			}
-			else {
-				for(var j = 0; j < varyingsurface_spheres[i].geometry.vertices.length; j++)
-					varyingsurface_spheres[i].geometry.vertices[j].setLength(0.05);
-				varyingsurface_spheres[i].geometry.verticesNeedUpdate = true;
-				varyingsurface_spheres[i].material.opacity = 1;
+				var spherescale = capsidopenness == 0 ? 0 : capsidopenness * Math.cos((ourclock.elapsedTime - ourclock.startTime)*4);
+				varyingsurface_spheres[i].scale.set(0.1 * spherescale,0.1 * spherescale,0.1 * spherescale);
 			}
 		}
 		else varyingsurface_spheres[i].material.opacity = 0;

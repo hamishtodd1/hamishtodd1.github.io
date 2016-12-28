@@ -17,24 +17,10 @@ app.get('/', function(req, res){
 io.on('connection', function(socket){
 	//these are called when it happens
 	console.log("User connected: ", socket.id)
-		io.to(socket.id).emit('OnConnect_Message', {ID:socket.id});
+	io.to(socket.id).emit('OnConnect_Message', {ID:socket.id});
 	
-	socket.broadcast.on('UserStateUpdate', function(msg){
-		socket.broadcast.emit('UserStateUpdate', msg);
-	});
-	
-	socket.broadcast.on('wedownloaded', function(msg){
-		socket.broadcast.emit('theydownloaded', msg);
-	});
-	
-	socket.broadcast.on('ChangeRepresentation', function(msg){
-		console.log("broadcasting")
-		socket.broadcast.emit('ChangeRepresentation', msg);
-	});
-	
-	socket.broadcast.on('ModelsReSync', function(msg){
-		socket.broadcast.emit('ModelsReSync', msg);
-	});
+	socket.broadcast.on('CameraStateUpdate', function(msg){ socket.broadcast.emit('CameraStateUpdate', msg); });
+	socket.broadcast.on('ModelStateUpdate',  function(msg){ socket.broadcast.emit('ModelStateUpdate',  msg); });
 	
 	socket.on('disconnect', function () {
 		console.log("User disconnected");

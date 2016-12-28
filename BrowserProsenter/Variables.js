@@ -46,6 +46,8 @@ var loose_surface;
 
 //get rid of the distortion already
 
+//each person logging in sends their viewport, you're looking at the smallest width by the smallest height
+
 /*
  * there should be a texture with the link of the page on it, on the wall across from the camera
  * You should try and get a super short url, then think of an acronym to go with it.

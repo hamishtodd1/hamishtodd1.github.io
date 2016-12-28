@@ -1,18 +1,17 @@
 /*
- * Forget about "master"
- * Just: if someone is a VR headset, they broadcast controller and camera position.
  * You will almost certainly need a "viewport square", because people are used to their FOV being huge - that's the psychological thing that has been happenning. Put in VR journal?
  * If you connect with a browser and there's no VRMODE thing broadcasting, put a sign up
  */
 
 //"get position data from other users" and "get our controller data" might be very different abstractions
-var InputObject = { //only allowed to use this in this file and maybe in initialization
+var InputObject = { 
+	//"private variables"
 	ModelPositions: Array(),
 	ModelQuaternions: Array(),
 	ModelsReSynched: 0,
 	
 	UserString: "",
-	UserPressedEnter: 0,
+	proteinRequested: 0,
 	
 	clientX: 0,
 	clientY: 0,
@@ -23,17 +22,17 @@ var InputObject = { //only allowed to use this in this file and maybe in initial
 
 InputObject.processInput = function(Models) //the purpose of this is to update everything
 {	
-	if( this.UserPressedEnter === 1 || this.theydownloaded !== "" )
+	if( this.proteinRequested === 1 || this.theydownloaded !== "" )
 	{
 		var NewProteinString;
 		//pretty damn unlikely that two users downloaded something on the same frame
 		//note that this means that a person in VR can use the computer of a spectator to get themselves a protein, if they're on google cardboard
-		if( this.UserPressedEnter === 1 )
+		if( this.proteinRequested === 1 )
 		{
 			NewProteinString = this.UserString;
 			socket.emit('wedownloaded', this.UserString );
 			ChangeUserString("");
-			this.UserPressedEnter = 0;
+			this.proteinRequested = 0;
 		}
 		else
 		{
@@ -57,8 +56,16 @@ InputObject.processInput = function(Models) //the purpose of this is to update e
 		
 		GetVRInput();
 		
-//		socket.emit('UserStateUpdate', ); //NEED TO PUT SOMETHING IN HERE
-//		EmitModelStates(Models);
+		for(var i = 0; i < Models.length; i++)
+		{
+			this.ModelPositions[i].copy(Models[i].position);
+			this.ModelQuaternions[i].copy(Models[i].quaternion);
+		}
+		socket.emit('ModelStateUpdate', { positions:this.ModelPositions, quaternions:this.ModelQuaternions });
+		
+		socket.emit('CameraStateUpdate', {position:Camera.position.clone(), quaternion:Camera.quaternion.clone()});
+		
+		//also the controller
 	}
 	else
 	{
@@ -151,7 +158,13 @@ InputObject.readfromkeyboard = function(event)
 	if(event.keyCode === 13) //enter
 	{
 		event.preventDefault();
-		this.UserPressedEnter = 1;
+		
+		
+		indicatorsound.source.stop();
+		indicatorsound.playbackRate *= 2;
+		indicatorsound.play();
+		
+//		this.proteinRequested = 1;
 		return;
 	}
 	if(event.keyCode === 8) //backspace
@@ -172,7 +185,7 @@ InputObject.readfromkeyboard = function(event)
 		if(typeof arrayposition != 'undefined')
 		{
 //			event.preventDefault(); //want to be able to ctrl+shift+j
-			this.ChangeUserString(this.UserString + keycodeArray[arrayposition]);
+			this.ChangeUserString(this.UserString + keycodeArray[arrayposition]); //this might get called before the above is compiled, ignore warning
 			return;
 		}
 	}	

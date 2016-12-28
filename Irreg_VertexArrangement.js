@@ -181,12 +181,17 @@ function manipulate_vertices()
 				varyingsurface_spheres[vertex_tobechanged].material.color.r = 0;
 				varyingsurface_spheres[vertex_tobechanged].material.color.g = 0;
 				varyingsurface_spheres[vertex_tobechanged].material.color.b = 1;
+				
+				//if it's blue then it's normal size
+				varyingsurface_spheres[vertex_tobechanged].scale.set(0.05,0.05,0.05);
 			}
 		}
 	}
 	else {
+		if(vertex_tobechanged !== 666) //it was something previously
+			varyingsurface_spheres[vertex_tobechanged].scale.set(0.05,0.05,0.05);
 		vertex_tobechanged = 666;
-		for(var i = 0; i <varyingsurface_spheres.length; i++){
+		for(var i = 0; i < varyingsurface_spheres.length; i++){
 			if( !( (i == 0 || i % 4 == 1) && i != 1) ){
 				varyingsurface_spheres[i].material.color.r = 0;
 				varyingsurface_spheres[i].material.color.g = 1;
@@ -216,8 +221,6 @@ function manipulate_vertices()
 					manipulation_surface.geometry.attributes.position.needsUpdate = true;
 					
 					//you also want the minimum_angles to get there at the same rate. adjust the correction function to take an array, and pass it a "to be gotten to" one
-					
-					//Why only manipulation surface? Why not have the other surface slowly move to it too? Would allow a closed capsid to morph
 				}
 			}
 		}
@@ -231,8 +234,12 @@ function manipulate_vertices()
 		return;
 	}
 	
-	if( Story_states[Storypage].unpause_on_vertex_knowledge && !MousePosition.equals(OldMousePosition) ) //might be that they sort of swooped in, but eh
+	if( Story_states[Storypage].unpause_on_vertex_knowledge && !MousePosition.equals(OldMousePosition) && !theyknowyoucanchangevertices ) //might be that they sort of swooped in, but eh
+	{
 		theyknowyoucanchangevertices = 1; //there is a good argument for not letting them unpause. They might just click and think that's it
+		for(var i = 0; i < varyingsurface_spheres.length; i++)
+			varyingsurface_spheres[i].scale.set(0.05,0.05,0.05);
+	}
 	
 	//log the current positions
 	var net_log = new Array(66);
@@ -477,12 +484,6 @@ function manipulate_vertices()
 		}
 	}
 	
-	/* Problem case for vertices rather randomly turning blue
-	 * 0,0,0,0.8660253882408142,-0.5,0,0.8660253882408142,0.5,0,1.7320507764816284,0,0,1.7320507764816284,1,0,2.598076105117798,0.5,0,0,1,0,0.8660253882408142,1.5,0,0,2,0,0.8660253882408142,2.5,0,-0.8325027227401733,1.4806456565856934,0,-0.8660253882408142,1.5,0,-2.0363824367523193,0.8304470777511597,0,-1.7320507764816284,2,0,-1.122625470161438,-0.2806563675403595,0,-1.4330477714538574,-0.17878232896327972,0,-1.7937079668045044,-1.3318945169448853,0,-2.598076105117798,-0.5,0,0,-1,0,-0.5477675795555115,-1.3874495029449463,0,0,-2,0,-0.8660253882408142,-2.5,0,
-	 * 
-	 * If you're going to snap back anyway, you don't need to do the other vertex's limitations. Hopefully it's only a bug with this one
-	 */
-	
 	right_defect.add(nonexistant_corner);
 	
 	right_defect.sub(ultimate_vector);
@@ -522,6 +523,10 @@ function manipulate_vertices()
 		varyingsurface_spheres[vertex_tobechanged].material.color.r = 1;
 		varyingsurface_spheres[vertex_tobechanged].material.color.g = 0;
 		varyingsurface_spheres[vertex_tobechanged].material.color.b = 0;
+		
+		var spherescale = 0.1 * Math.cos((ourclock.elapsedTime - ourclock.startTime)*10);
+		
+		varyingsurface_spheres[vertex_tobechanged].scale.set(spherescale,spherescale,spherescale);
 	}
 //	performance_checker.end_sample();
 }

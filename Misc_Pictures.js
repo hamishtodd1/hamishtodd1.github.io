@@ -94,6 +94,7 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern square.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern triangular.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e modified.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e highlighted.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e above entrance.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e inside.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e pentagons.jpg"); //next thing is to test (tree and final reused slides) without this extra slide
@@ -118,8 +119,8 @@ function load_AV_stuff()
 	
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Polio.png");
 	reused_slide_indices[5] = slide_texture_urls.length - 1;
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/polio rhinovirus comparison.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/polio hep A comparison.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/polio rhinovirus comparison.png");
 	//TODO zooming in and out to these pics, and getting better ones (chimera?). We would like either hep A or rhino to show pentagons and hexagons
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/polio hepatitis comparison.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Polio small.png");

@@ -4,10 +4,13 @@ function Map_lattice() {
 	var surface_hexamers_color = Story_states[Storypage].hexamers_color.clone();
 	var final_pentamers_color = Story_states[Storypage].pentamers_color.clone();
 	
-	var pentamers_color = new THREE.Color( 
-			surface_hexamers_color.r + (1-capsidopenness) * ( final_pentamers_color.r - surface_hexamers_color.r ),
-			surface_hexamers_color.g + (1-capsidopenness) * ( final_pentamers_color.g - surface_hexamers_color.g ),
-			surface_hexamers_color.b + (1-capsidopenness) * ( final_pentamers_color.b - surface_hexamers_color.b ) );
+	var pentamers_color_adder = 1;
+	if(LatticeGrabbed)
+		pentamers_color_adder = 0;
+	var pentamers_color = new THREE.Color( /*we're trying something new*/
+			surface_hexamers_color.r + /*(1-capsidopenness) */ pentamers_color_adder * ( final_pentamers_color.r - surface_hexamers_color.r ),
+			surface_hexamers_color.g + /*(1-capsidopenness) */ pentamers_color_adder * ( final_pentamers_color.g - surface_hexamers_color.g ),
+			surface_hexamers_color.b + /*(1-capsidopenness) */ pentamers_color_adder * ( final_pentamers_color.b - surface_hexamers_color.b ) );
 	
 	//this is all crap about that one part where we explain things
 	{

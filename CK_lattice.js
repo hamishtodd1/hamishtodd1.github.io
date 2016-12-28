@@ -117,7 +117,7 @@ function get_min_lattice_scale(ourangle) {
 //	while(virtual_angle< -TAU/12) virtual_angle += TAU/6;
 //	while(virtual_angle > TAU/12) virtual_angle -= TAU/6;
 //	return min_lattice_scale / HS3 * Math.cos(virtual_angle);
-	return 0.27735;
+	return 0.25;
 }
 
 //vertex *destination*. Not vertex, which may be interesting.

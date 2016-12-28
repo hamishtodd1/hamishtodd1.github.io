@@ -140,8 +140,10 @@ function Create_trace_representation_mesh(geometryAtoms){
 
 function Create_sphere_representation_mesh(geometryAtoms){	
 	var MyGeometry = new THREE.Geometry();	
-	var SphereRadius = 0.4;
-	var TemplateAtomGeometry = new THREE.IcosahedronGeometry( 0.4,1 );
+	var SphereRadius = 0.8;
+	var TemplateAtomGeometry = new THREE.IcosahedronGeometry( SphereRadius,1 );
+	
+	//could put the trace on top of the atoms visually
 	
 	MyGeometry.vertices = Array(geometryAtoms.vertices.length * TemplateAtomGeometry.vertices.length);
 	MyGeometry.faces 	= Array(geometryAtoms.vertices.length * TemplateAtomGeometry.faces.length);

@@ -243,7 +243,6 @@ var setvirus_flatnet_vertices = Array(4);
 
 var varyingsurface_cylinders = Array(41);
 var varyingsurface_spheres = Array(22);
-var irreghighlight_progresses = Array(22);
 
 var wedges_assigned_vertices;
 

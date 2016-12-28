@@ -1,8 +1,22 @@
 //A live fish
 
-function UpdateWorld(Models,Hands)
+//TODO for RI
+/*
+ * Spectation
+ * viewport
+ * slides
+ * Things disappearing and reappearing when you press a button
+ * All on the server
+ * Lighting for the lattice
+ * Scaling, why not?
+ * Interpolation between two crystals
+ * 
+ * A fuckload of objects
+ */
+
+function UpdateWorld(Models,Hands, indicatorsound)
 {
-	UpdateHands(Models,Hands);
+	UpdateHands(Models,Hands, indicatorsound);
 	
 	if(debugging)
 		for(var i = 0; i < Models.length; i++)
@@ -16,16 +30,16 @@ function UpdateWorld(Models,Hands)
 //	}
 }
 
-function Render( Models, Controllers) {
+function Render( Models, Controllers, indicatorsound) {
 	delta_t = ourclock.getDelta();
 //	if(delta_t > 0.1) delta_t = 0.1;
 	
 	InputObject.processInput( Models );
-	UpdateWorld(Models, Controllers);
+	UpdateWorld(Models, Controllers, indicatorsound);
 	
 	//setTimeout( function() { requestAnimationFrame( render );}, 100 ); //debugging only
 	requestAnimationFrame( function(){
-		Render(Models,Controllers);
+		Render(Models,Controllers, indicatorsound);
 	} );
 	if(VRMODE)
 		OurVREffect.render( Scene, Camera ); //will be fine if VR is not enabled

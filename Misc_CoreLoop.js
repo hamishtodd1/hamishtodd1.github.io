@@ -1,8 +1,17 @@
 /*
  * TODO before rerecord
  * Pics and the hexagons and pentagon demo
+ * Make a nice, new, big bit of origami with a flap somewhere
+ * vertex wiggle in irreg
+ * irreg trying different configurations for algorithm
+ * camera moves around on pictures like the cornucopia and the polio comparison. Go back to cornucopia for last sentence of that paragraph
+ * CK quaternion to get to RVF
+ * boca quaternion responds to moving the assembly toy
+ * models go haywire at the end
+ * The entirety of the irreg story - decrease size of one of the outer vertices etc
  * 
- * Full screen crap, if you double click then jesus
+ * Show the closed irreg capsid when you're trying to make phi29? ;_;
+ * 
  * 
  * "These are some other viruses" - have their similarities appear on them? 
  * 	Could bring in disco ball, radio dome, gazebo/tent, dymaxion map at bottom, golf ball islamic art and greenhouse obv, origami
@@ -18,14 +27,10 @@
  * Contra the work you did, it is probably better to have the tiny HIV triangles in the middle - the point of a cone is that the point is together already
  * 
  * touch
- *
- * Make a nice, new, big bit of origami with a flap somewhere
  * 
- * Play test it with Stephen Lingham
  * 
- * Train:
+ * No internet:
  * -pentagons in demo
- * -optimize
  * -Mouse doesn't flick things to the wrong quaternion when you come into the frame from the video
  *  	Something like: if you're near the side, it resets
  * -all objects floating in space with a shadow/lighting? Something other than meshbasicmaterial?
@@ -36,15 +41,24 @@
  *  -Test with a low framerate to see what it's like and chase down remaining framerate dependence
  *  
  * TODO long term
+ * -minify?
+ *  Zika should be of a size you can fade the model to at the end of it
+ * 	Bug: full screen crap, if you double click then jesus
+ * 	Put a cookie in their computer so it goes to the tree if they pause? Maybe YouTube timestamp?
+ * 	-the button flashes until you have opened AND closed it, with a change between
+ * 	-You know... you can scale those picture meshes
+ * 	-cite pictures
  * 	-virus pieces wobble with cell
  *  -loading screen. You may need to stagger inits
  *  -break up all the chapters into separate videos WHEN INTEGRATING NEW VIDEO
+ *  -space out the video and canvas a bit
  *  -get a person with a sense of color to look at everything, including the pics of HPV, polio and hepatitis - Ario?
  *  -watch people a lot and tweak the zooming and rotating code, just because it is simple doesn't mean that it is good
  *  -If webgl doesn’t load (or etc), recommend a different browser or refreshing the page
  *  -slight change to cues for "boca"
  *  -bifuricate for the touchscreen. Put QS in correct orientation so it looks like HPV
  *  -proteins don't appear in nucleus?
+ *  -tree selector fades in and no sticky out bits
  *  
  *  -don't humiliate yourself: if the canvas isn't running, halt the video
  *  -make sure a good picture appears when shared on facebook and twitter

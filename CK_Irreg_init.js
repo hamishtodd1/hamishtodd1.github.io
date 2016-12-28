@@ -275,11 +275,23 @@ function init_CK_and_irreg(){
  		]);
 	for(var i = 0; i < setvirus_flatnet_vertices[2].length; i++)
 		setvirus_flatnet_vertices[2][i] *= 0.3;
-	//Herpes
+	//"Herpes", icosahedrally symmetric
 	setvirus_flatnet_vertices[3] = new Float32Array(66);
 	for(var i = 0; i < setvirus_flatnet_vertices[3].length; i++)
 		setvirus_flatnet_vertices[3][i] = flatnet_vertices_numbers[i];
-		
+	
+	//corrected angular defect of the below
+	setvirus_flatnet_vertices[5] = new Float32Array([0, 0, 0, 0.7085662484169006, -0.40909090638160706, 0, 0.7085662484169006, 0.40909090638160706, 0, 1.889509916305542, 0, 0, 1.889509916305542, 0.8181818127632141, 0, 2.598076105117798, 0.40909090638160706, 0, 2.220446049250313e-16, 0.8181818127632141, 0, 0.944754958152771, 1.6363636255264282, 0, 0.23618873953819275, 2.045454502105713, 0, 0.944754958152771, 2.454545497894287, 0, -0.7085662484169006, 0.40909090638160706, 0, -0.944754958152771, 1.6363636255264282, 0, -1.6533212661743164, 1.2272727489471436, 0, -1.6533212661743164, 2.045454502105713, 0, -1.0552680492401123, -0.8082903623580933, 0, -1.889509916305542, 2.3139823094288294e-16, 0, -1.370442509651184, -0.9188345670700073, 0, -2.598076105117798, -0.40909090638160706, 0, -3.885780586188048e-16, -0.8181818127632141, 0, -1.1171211004257202, -1.1365118026733398, 0, -0.23618873953819275, -2.045454502105713, 0, -0.944754958152771, -2.454545497894287, 0]);
+	//demonstration, improper angular defect
+	setvirus_flatnet_vertices[4] = new Float32Array(66);
+	for(var i = 0; i < setvirus_flatnet_vertices[4].length; i++)
+		setvirus_flatnet_vertices[4][i] = setvirus_flatnet_vertices[1][i]; //it's phi29 but...
+	console.log(setvirus_flatnet_vertices[4][14*3+0]);
+	setvirus_flatnet_vertices[4][14*3+0] = setvirus_flatnet_vertices[5][14*3+0]; //...with a movement
+	setvirus_flatnet_vertices[4][14*3+1] = setvirus_flatnet_vertices[5][14*3+1];
+	setvirus_flatnet_vertices[4][14*3+2] = setvirus_flatnet_vertices[5][14*3+2];
+	console.log(setvirus_flatnet_vertices[4][14*3+0]);
+	
 	net_triangle_vertex_indices = new Uint32Array([
 		2,1,0,
 		1,2,3,
@@ -412,8 +424,6 @@ function init_CK_and_irreg(){
 			varyingsurface_cylinders[i] = new THREE.Mesh( varyingsurface_cylinders_geometry, varyingsurface_edgesmaterial.clone() );
 		}
 		
-		for(var i = 0; i < irreghighlight_progresses .length; i++)
-			irreghighlight_progresses[i] = Math.random();
 		var irreghighlight_geometry = new THREE.Geometry();
 		var original_irreghighlight_vertex = new THREE.Vector3(0,varyingsurface_edges_default_radius * 4,0);
 		for(var i = 0; i < 12; i++){
@@ -434,9 +444,9 @@ function init_CK_and_irreg(){
 		
 		for(var i = 0; i<varyingsurface_spheres.length;i++){
 			if( (i == 0 || i % 4 == 1) && i != 1)
-				varyingsurface_spheres[i] = new THREE.Mesh( new THREE.SphereGeometry(varyingsurface_edges_default_radius,  8,4),varyingsurface_edgesmaterial);
+				varyingsurface_spheres[i] = new THREE.Mesh( new THREE.SphereGeometry(0.0000000001,  8,4),varyingsurface_edgesmaterial);
 			else
-				varyingsurface_spheres[i] = new THREE.Mesh( new THREE.SphereGeometry(varyingsurface_edges_default_radius*7,8,4),spherehandles_material.clone());
+				varyingsurface_spheres[i] = new THREE.Mesh( new THREE.SphereGeometry(1,8,4),spherehandles_material.clone());
 		}
 		varyingsurface = new THREE.Mesh( flatnet_geometry.clone(), surfacematerial );
 		

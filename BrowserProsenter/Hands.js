@@ -1,4 +1,4 @@
-function UpdateHands(Models,Controllers)
+function UpdateHands(Models,Controllers, indicatorsound)
 {	
 	for(var i = 0; i < Controllers.length; i++)
 	{
@@ -66,4 +66,13 @@ function point_in_BoxHelper(ourpoint,boxgeometryarray){
 		minZ <= ourpoint.z && ourpoint.z <= maxZ )
 		return 1;
 	else return 0;
+}
+
+function bend_protein()
+{
+	//every protein gets this function
+	for(var i = 0, il = this.CAs.length; i < il; i++)
+	{
+		//most basic version: you grab the 
+	}
 }

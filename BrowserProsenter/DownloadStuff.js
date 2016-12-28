@@ -10,15 +10,21 @@ function Loadpdb(linkstring, Models)
 			function ( geometryAtoms, geometryBonds, json ) {
 				Models.push( Create_first_model( geometryAtoms ) );
 				
-				InputObject.ModelPositions.push( Models[Models.length - 1].position.clone() );
-				InputObject.ModelQuaternions.push( Models[Models.length - 1].quaternion.clone() );
+				var thisModelIndex = Models.length - 1;
 				
-				InputObject.ModelPositions[0].z = -0.3;
-				Models[0].position.z = -0.3;
+				InputObject.ModelPositions.push( Models[thisModelIndex].position.clone() );
+				InputObject.ModelQuaternions.push( Models[thisModelIndex].quaternion.clone() );
 				
-				console.log(Models)
+				InputObject.ModelPositions[thisModelIndex].z = -0.3;
+				Models[thisModelIndex].position.z = -0.3;
+				var initial_model_spacing = 0.4;
+				Models[thisModelIndex].position.x = thisModelIndex * initial_model_spacing;
 				
-				Collisionbox_and_sceneaddition( Models[Models.length - 1] );
+				console.log(Models[thisModelIndex].children[0].geometry.merge);
+				
+				Scene.add( Models[thisModelIndex]);
+				
+				Make_collisionbox( Models[thisModelIndex] );
 			},
 			function ( xhr ) {}, //progression function
 			function ( xhr ) { console.error( "couldn't load PDB" ); }
@@ -26,10 +32,8 @@ function Loadpdb(linkstring, Models)
 	}
 }
 
-function Collisionbox_and_sceneaddition(Model)
+function Make_collisionbox(Model)
 {
-	Scene.add( Model);
-	
 	Model.children[0].BoundingBoxAppearance = new THREE.BoxHelper(Model.children[0]);
 	if(debugging)
 		Model.children[0].BoundingBoxAppearance.visible = true;
@@ -37,81 +41,4 @@ function Collisionbox_and_sceneaddition(Model)
 		Model.children[0].BoundingBoxAppearance.visible = false;
 	
 	Scene.add( Model.children[0].BoundingBoxAppearance );
-}
-
-function Loadfont_initially(linkstring,ThisIndex,OurLoadedThings, PreInitChecklist)
-{
-	var OurFontLoader = new THREE.FontLoader();
-	OurFontLoader.load(  linkstring, 
-		function ( reponse ) {
-			gentilis = reponse;
-			PreInitChecklist.Downloads[ThisIndex] = 1;
-			AttemptFinalInit(OurLoadedThings,PreInitChecklist);
-		},
-		function ( xhr ) {}, //progression function
-		function ( xhr ) { console.error( "couldn't load font" ); }
-	);
-}
-
-//separated these out so that "ThisIndex" becomes call-by-parameter
-function Loadpdb_initially(linkstring,ThisIndex,OurLoadedThings, PreInitChecklist)
-{
-	var OurPDBLoader = new THREE.PDBLoader(); //or are you supposed to create these on the fly?
-	
-	OurPDBLoader.load(linkstring,
-		function ( geometryAtoms, geometryBonds, json ) {
-			OurLoadedThings[ThisIndex] = Create_first_model( geometryAtoms );
-			PreInitChecklist.Downloads[ThisIndex] = 1;
-			AttemptFinalInit(OurLoadedThings,PreInitChecklist);
-		},
-		function ( xhr ) {}, //progression function
-		function ( xhr ) { console.error( "couldn't load PDB" ); }
-	);
-}
-function Loadobj_initially(linkstring,ThisIndex,OurLoadedThings, PreInitChecklist)
-{
-	var OurOBJLoader = new THREE.OBJLoader();
-	
-	OurOBJLoader.load(linkstring,
-		function ( object ) {
-			OurLoadedThings[ThisIndex] = object;
-			PreInitChecklist.Downloads[ThisIndex] = 1;
-			AttemptFinalInit(OurLoadedThings,PreInitChecklist);
-		},
-		function ( xhr ) {}, //progression function
-		function ( xhr ) { console.error( "couldn't load OBJ" ); }
-	);
-}
-
-function LoadOBJ(linkstring)
-{
-	var OurOBJLoader = new THREE.OBJLoader();
-	
-	OurOBJLoader.load(linkstring,
-		function ( object ) {
-			OurLoadedThings[ThisIndex] = object;
-			PreInitChecklist.Downloads[ThisIndex] = 1;
-			AttemptFinalInit(OurLoadedThings,PreInitChecklist);
-		},
-		function ( xhr ) {}, //progression function
-		function ( xhr ) { console.error( "couldn't load OBJ" ); }
-	);
-}
-
-function Loadpic_initially(linkstring,ThisIndex,OurLoadedThings, PreInitChecklist)
-{
-	var OurPicLoader = new THREE.TextureLoader();
-	OurPicLoader.crossOrigin = '';
-	OurPicLoader.load(linkstring,
-		function ( texture ) {		
-			OurLoadedThings[ThisIndex] = new THREE.Mesh(
-					new THREE.CubeGeometry(0.83, 0.83, 0),
-					new THREE.MeshBasicMaterial({map: texture}) );
-			
-			PreInitChecklist.Downloads[ThisIndex] = 1;
-			AttemptFinalInit(OurLoadedThings,PreInitChecklist);
-		},
-		function ( xhr ) {}, //progression function
-		function ( xhr ) { console.error( "couldn't load pic" ); }
-	);
 }

@@ -24,7 +24,7 @@ function ReadInput() {
 	isMouseDown_previously = isMouseDown;
 	isMouseDown = InputObject.isMouseDown;
 	
-	react_to_video();
+	react_to_video();	
 }
 
 

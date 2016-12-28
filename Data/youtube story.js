@@ -142,10 +142,7 @@ function Update_story()
 	if( Story_states[Storypage].CK_angle !== 666 )
 		LatticeAngle = Story_states[Storypage].CK_angle;
 	
-	if(Story_states[Storypage].close_up_badly)
-		minimum_angle_crapifier = 0.965;
-	else
-		minimum_angle_crapifier = 1;
+	minimum_angle_crapifier = Story_states[Storypage].minimum_angle_crapifier;
 	
 	for(var i = 0; i < wedges.length; i++)
 		wedges[i].visible = Story_states[Storypage].wedges_visible;
@@ -240,7 +237,7 @@ function init_story()
 		MODE: SLIDE_MODE,
 		
 		pause_at_end: 0, //at end because when you unpause it's usually a new thought
-		unpause_after: -1, //but you only want it to unpause if it's the pause that YOU'VE done :P
+		unpause_after: -1, //but you only want it to unpause if it's the pause that YOU'VE done :P Currently
 		
 		slide_number: -1,
 		
@@ -267,7 +264,7 @@ function init_story()
 		
 		CK_scale_only: 0,
 		
-		close_up_badly: 0,
+		minimum_angle_crapifier: 1,
 		
 		wedges_visible: false,
 		
@@ -436,7 +433,10 @@ function init_story()
 	ns = default_clone_story_state(1,416); //darb e imam shrine
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,423.05); //above entrance
+	ns = default_clone_story_state(1,422.4); //look here
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,424.8); //above entrance
 	var inside_darb_e_pic_index = ns.slide_number;
 	Story_states.push(ns);
 	
@@ -516,12 +516,12 @@ function init_story()
 	ns = default_clone_story_state(1,581.7); //very icosahedron
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,585); //back
+	ns = default_clone_story_state(0,584.3); //back
 	ns.enforced_irreg_quaternion.set( -0.4744018551980526,0.024453317552284186,0.045298357905429784, 0.878802010589646 );
 	ns.MODE = IRREGULAR_MODE;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,585.3); //open irreg then (pause)
+	ns = default_clone_story_state(0,585.6); //open irreg then (pause)
 	ns.capsid_open = 1;
 	Story_states.push(ns);
 	
@@ -611,7 +611,13 @@ function init_story()
 	ns.wedges_visible = true;
 	Story_states.push(ns);
 	
-	//686 "move those corners around" TODO
+	ns = default_clone_story_state(0,686); //move a single corner... undefined behaviour?
+	ns.enforced_irreg_state = 4;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,691); //correct
+	ns.enforced_irreg_state = 5;
+	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,693); //T4
 	Story_states.push(ns);
@@ -641,12 +647,11 @@ function init_story()
 	//move corner around
 
 	ns = default_clone_story_state(0,715.6); //bad angles, close
-	ns.close_up_badly = 1;
+	ns.minimum_angle_crapifier = 0.965;
 	ns.capsid_open = 0;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,735.7); //close up properly
-	ns.close_up_badly = 0;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,744.7); //christmas
@@ -719,8 +724,8 @@ function init_story()
 	ns = default_clone_story_state(0,850.55); //lattice appears
 	ns.pause_at_end = 1;
 	lattice_fadein_time = ns.startingtime;
-	ns.unpause_on_hepatitis_scale = 1;
 	ns.CK_scale_only = 1;
+	ns.unpause_after = 16;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,857.2); //advice TODO
@@ -992,6 +997,8 @@ function default_clone_story_state( shows_a_slide, ST )
 	new_story_state.capsid_open = -1;
 	new_story_state.capsid_open_immediately = -1;
 	new_story_state.unpause_on_vertex_knowledge = 0;
+	
+	new_story_state.minimum_angle_crapifier = 1;
 	
 	new_story_state.CK_scale = 666;
 	new_story_state.CK_angle = 666;
