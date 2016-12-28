@@ -144,7 +144,7 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/golden spiral.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/nautilus.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/nautilus with spiral.jpg");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/all together.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Opening selection 1a.png");
 	
 	//if you change the above, you probably need to change these
 	reused_slide_indices[0] = 24;
