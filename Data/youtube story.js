@@ -753,7 +753,6 @@ function init_story()
 
 	ns = default_clone_story_state(0,879); //back to model
 	ns.MODE = CK_MODE;
-	ns.enforced_CK_quaternion.set( -0.21316178390455967, -0.4028820735877156, 0.385522836480786, 0.8022594538028792 );
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,883.8); //bring in button

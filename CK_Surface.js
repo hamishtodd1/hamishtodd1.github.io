@@ -103,6 +103,8 @@ function UpdateCapsid() {
 			closed_quaternion.set(0.2985449012177967, -0.00111538304141928, -0.017842511786579, 0.95422813972900);
 		if( Math.abs( truncated_latticeAngle - (-0.33347318 + TAU) ) < 0.1 )
 			closed_quaternion.set(0.28726102554023203, 0.0337422051876268, -0.1236943313920196, 0.94923246845866);
+		if( Math.abs( truncated_latticeAngle - 5.759586523431099 ) < 0.01 )
+			closed_quaternion.set( -0.2469491793013429,0.012844628513737317,0.090510425971704,0.9647066814069217);
 		var interpolationfactor = 0.03 + 0.97 * Math.pow(1-capsidopenness,10); //may want to massively reduce this power
 		
 		surface.quaternion.slerp(closed_quaternion, interpolationfactor);
