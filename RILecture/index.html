@@ -1,0 +1,87 @@
+<html>
+	<head>
+		<title>Protein Viewer</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				font-family: Monospace;
+				background-color: #101010;
+				color: #fff;
+				margin: 0px;
+				overflow: hidden;
+			}
+			a {
+				color: #f00;
+			}
+		</style>
+	</head>
+	<body>
+		<!--these two scripts are purely for the ripped-off setup-->
+		<script type="x-shader/x-vertex" id="vertexShader">
+			varying vec3 vWorldPosition;
+			void main() {
+				vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
+				vWorldPosition = worldPosition.xyz;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="fragmentShader">
+			uniform vec3 topColor;
+			uniform vec3 bottomColor;
+			uniform float offset;
+			uniform float exponent;
+			varying vec3 vWorldPosition;
+			void main() {
+				float h = normalize( vWorldPosition + offset ).y;
+				gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( max( h , 0.0), exponent ), 0.0 ) ), 1.0 );
+			}
+		</script>
+		
+		<!----><script src="Dependencies/ngl.js"></script>
+		
+		<script src="Dependencies/three.min.js"></script>
+		<script src="Dependencies/SceneFromDemo.js"></script>
+		<script src="Dependencies/THREEx.FullScreen.js"></script>
+				
+		<script src="Dependencies/StereoEffect.js"></script>
+		<script src="Dependencies/DeviceOrientationControls.js"></script>
+		<script src="Dependencies/OBJLoader.js"></script>
+		<script src="Dependencies/OBJExporter.js"></script>
+		<script src="Dependencies/fileSaver.js"></script>
+		
+		<script src="Data/Virus model data/PariacotoDNAsVertices.js"></script>
+		<script src="Data/Virus model data/PariacotoDNAsFaces.js"></script>
+		<script src="Data/Virus model data/PariacotoPsVertices.js"></script>
+		<script src="Data/Virus model data/PariacotoPsFaces.js"></script>
+		<script src="Data/Virus model data/PariacotoDsVertices.js"></script>
+		<script src="Data/Virus model data/PariacotoDsFaces.js"></script>
+		<script src="Data/Virus model data/PariacotoLsVertices.js"></script>
+		<script src="Data/Virus model data/PariacotoLsFaces.js"></script>
+		
+		<script src="Data/CCMV Processing/CCMVVertexNumbers.js"></script>
+		<script src="Variables.js"></script>
+		
+		<script src="Input.js"></script>
+		
+		<script src="RILectureObjects/virusModels.js"></script>
+		<script src="RILectureObjects/honeycombs.js"></script>
+		<script src="RILectureObjects/goldenLattice.js"></script>
+		<script src="RILectureObjects/fish.js"></script>
+		<script src="RILectureObjects/cubePuzzles.js"></script>
+		<script src="RILectureObjects/axesAndAffectedShapes.js"></script>
+		<script src="RILectureObjects/atomSimulation.js"></script>
+		<script src="RILectureObjects/2DQC.js"></script>
+		
+		<script src="Initialization.js"></script>
+		<script src="ObjectOfInterest.js"></script>
+		<script src="CoreLoop.js"></script>
+		
+		<script>
+			Initialize();
+		</script>
+		
+	</body>
+</html>
+
+<!--webglviewer is "appended" in init-->
