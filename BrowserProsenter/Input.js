@@ -20,7 +20,7 @@ var InputObject = {
 	HandQuaternions: Array(new THREE.Quaternion(),new THREE.Quaternion()),
 };
 
-InputObject.processInput = function(Models) //the purpose of this is to update everything
+InputObject.processInput = function(Models,Controllers) //the purpose of this is to update everything
 {	
 	if( this.proteinRequested === 1 || this.theydownloaded !== "" )
 	{
@@ -54,7 +54,7 @@ InputObject.processInput = function(Models) //the purpose of this is to update e
 	{
 		OurVRControls.update();
 		
-		GetVRInput();
+//		GetVRInput(Controllers);
 		
 		for(var i = 0; i < Models.length; i++)
 		{

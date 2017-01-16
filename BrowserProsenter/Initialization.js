@@ -80,6 +80,7 @@ socket.on('OnConnect_Message', function(msg)
 			Controllers[0].Gripping = 0;
 			Controllers[1].Gripping = 0;
 		
+			console.log(Controllers)
 			Render(Models, Controllers, indicatorsound); // you have to list everything that goes in there? How about a while loop. 
 		},
 		function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); }

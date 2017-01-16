@@ -21,25 +21,23 @@ function EmitModelStates(Models, Controllers)
 	socket.emit('ModelsReSync', {ModelPositions,ModelQuaternions,ControllerPositions,ControllerQuaternions});
 }
 
-function GetVRInput()
+function GetVRInput(Controllers)
 {
 	var gamepads = navigator.getGamepads();
 	
-	for(var k = 0; k < gamepads.length; ++k)
-	{					
+	if(gamepads.length>1)console.error(gamepads.length, " controllers???")
+	for(var k = 0; k < gamepads.length && k < 2; ++k)
+	{		
 		if (gamepads[k] && gamepads[k].pose) //because some are undefined
 		{
-			this.Controller.position.x = gamepads[k].pose.position[0];
-			this.Controller.position.y = gamepads[k].pose.position[1];
-			this.Controller.position.z = gamepads[k].pose.position[2];
+			Controllers[k].position.x = gamepads[k].pose.position[0];
+			Controllers[k].position.y = gamepads[k].pose.position[1];
+			Controllers[k].position.z = gamepads[k].pose.position[2];
 			
-			//pretty hacky solution to relative position problem
-			this.Controller.position.add(INITIAL_CAMERA_POSITION);
-			
-			this.Controller.quaternion.x = gamepads[k].pose.orientation[0];
-			this.Controller.quaternion.y = gamepads[k].pose.orientation[1];
-			this.Controller.quaternion.z = gamepads[k].pose.orientation[2];
-			this.Controller.quaternion.w = gamepads[k].pose.orientation[3];
+			Controllers[k].quaternion.x = gamepads[k].pose.orientation[0];
+			Controllers[k].quaternion.y = gamepads[k].pose.orientation[1];
+			Controllers[k].quaternion.z = gamepads[k].pose.orientation[2];
+			Controllers[k].quaternion.w = gamepads[k].pose.orientation[3];
 		      
 			//a very primitive way to work out grippingness. If any button on any gamepad is pushed.
 			for (var j = 0; j < gamepads[k].buttons.length; ++j)
@@ -53,11 +51,6 @@ function GetVRInput()
 				if( j === gamepads[k].buttons.length - 1)
 					this.Gripping = 0;
 			}
-			
-			//TODO deffo a bit weird to have this one go in the opposite direction. Certainly introduces latency
-			copyvec( InputObject.UserData[i].HandPosition,	this.Controller.position);
-			copyquat(InputObject.UserData[i].HandQuaternion,this.Controller.quaternion);
-			InputObject.UserData[i].Gripping = this.Gripping;
 		}
 	}
 }

@@ -34,7 +34,8 @@ function Render( Models, Controllers, indicatorsound) {
 	delta_t = ourclock.getDelta();
 //	if(delta_t > 0.1) delta_t = 0.1;
 	
-	InputObject.processInput( Models );
+	
+	InputObject.processInput( Models,Controllers );
 	UpdateWorld(Models, Controllers, indicatorsound);
 	
 	//setTimeout( function() { requestAnimationFrame( render );}, 100 ); //debugging only
