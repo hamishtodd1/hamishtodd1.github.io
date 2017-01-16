@@ -210,16 +210,6 @@ THREE.VREffect = function( renderer, onError ) {
 
 	};
 
-	this.submitFrame = function() {
-
-		if ( vrDisplay !== undefined && scope.isPresenting ) {
-
-			vrDisplay.submitFrame();
-
-		}
-
-	};
-
 	this.autoSubmitFrame = true;
 
 	// render
@@ -380,7 +370,11 @@ THREE.VREffect = function( renderer, onError ) {
 
 			if ( scope.autoSubmitFrame ) {
 
-				scope.submitFrame();
+				if ( vrDisplay !== undefined && scope.isPresenting ) {
+
+					vrDisplay.submitFrame();
+
+				}
 
 			}
 
