@@ -59,8 +59,8 @@ function Initialize()
 //		qcTablet.init();
 //		init_cubes();
 //		init_extruding_polyhedra_and_house();
-		init_golden_lattice();
-//		initCCMV();
+//		init_golden_lattice();
+		initCCMV();
 //		initHoneycombs();
 //		initFishUniverse();
 //		initSolidVirusModels();
