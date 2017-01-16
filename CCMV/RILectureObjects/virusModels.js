@@ -134,7 +134,6 @@ function initCCMV()
 	
 	CCMV.update = function()
 	{
-		console.log(this.conformation)
 		this.conformation += this.conformationChangeSpeed;
 		if( this.conformation > 1 )
 		{
