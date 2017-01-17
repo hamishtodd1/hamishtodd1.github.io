@@ -19,21 +19,16 @@ socket.on('OnConnect_Message', function(msg)
 	
 	Scene.add(Camera);
 	
-	if ( WEBVR.isLatestAvailable() === false ){
-		VRMODE = 0;
-		//A cardboard user still counts as a lecturer. Nobody will want to spectate as cardboard, that will be vomit-inducing
-	}
-	else
+	VRMODE = 0;
+	OurVREffect = new THREE.VREffect( Renderer );
+	OurVRControls = new THREE.VRControls( Camera );
+	
+	if ( WEBVR.isAvailable() === true )
 	{
-		OurVREffect = new THREE.VREffect( Renderer );
-		OurVRControls = new THREE.VRControls( Camera );
-		
-		if ( WEBVR.isAvailable() === true )
-			document.body.appendChild( WEBVR.getButton( OurVREffect ) );
-		
-		VRMODE = 1; //OR GOOGLE CARDBOARD TODO
-		//TODO why wait for a button press?
+		document.body.appendChild( WEBVR.getButton( OurVREffect ) );
+		VRMODE = 1; //OR GOOGLE CARDBOARD TODO, nobody wants to spectate as cardboard
 	}
+	//TODO why wait for a button press?
 	
 	var audioListener = new THREE.AudioListener();
 	Camera.add( audioListener );
@@ -69,10 +64,7 @@ socket.on('OnConnect_Message', function(msg)
 	
 	var OurOBJLoader = new THREE.OBJLoader();
 	OurOBJLoader.load( "http://hamishtodd1.github.io/BrowserProsenter/Data/vr_controller_vive_1_5.obj",
-		function ( object ) { 
-//			ControllerModel.geometry = object.geometry; 
-//			ControllerModel.material = object.material;
-			var Downloads = {};
+		function ( object ) {
 			
 			var Controllers = Array(2);
 			Controllers[0] = new THREE.Mesh(object.children[0].geometry, new THREE.MeshPhongMaterial({color:0x000000}));
@@ -80,8 +72,7 @@ socket.on('OnConnect_Message', function(msg)
 			Controllers[0].Gripping = 0;
 			Controllers[1].Gripping = 0;
 		
-			console.log(Controllers)
-			Render(Models, Controllers, indicatorsound); // you have to list everything that goes in there? How about a while loop. 
+			Render(Models, Controllers, indicatorsound);
 		},
 		function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); }
 	);

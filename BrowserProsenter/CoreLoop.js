@@ -39,11 +39,8 @@ function Render( Models, Controllers, indicatorsound) {
 	UpdateWorld(Models, Controllers, indicatorsound);
 	
 	//setTimeout( function() { requestAnimationFrame( render );}, 100 ); //debugging only
-	requestAnimationFrame( function(){
+	OurVREffect.requestAnimationFrame( function(){
+		OurVREffect.render( Scene, Camera );
 		Render(Models,Controllers, indicatorsound);
 	} );
-	if(VRMODE)
-		OurVREffect.render( Scene, Camera ); //will be fine if VR is not enabled
-	else
-		Renderer.render( Scene, Camera );
 }
