@@ -35,7 +35,6 @@ function init_cubes()
 	single_sliced_cube.geometry.vertices.push(new THREE.Vector3(0,0,0)); //"bottom"
 	correct_vertices(single_sliced_cube.geometry);
 	single_sliced_cube.geometry.computeFaceNormals();
-//	Protein.add(single_sliced_cube);
 	
 	var cube_corner_slice = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshPhongMaterial({color:0xFFFF88}));
 	cube_corner_slice.geometry.vertices.push(new THREE.Vector3(-1,1,-1));
@@ -163,5 +162,122 @@ function init_cubes()
 	three_hole_cube.scale.set(0.4,0.4,0.4);
 	
 	//then try making it with just normal cubes and see which ones need to be dealt with
-	Protein.add(three_hole_cube)
+	function makePuzzle(cubeHalf)
+	{
+		Protein.add(cubeHalf);
+		cubeHalf.material.color.r = 0;
+		var otherHalf = cubeHalf.clone();
+		var cornerAxis = new THREE.Vector3(1,-1,1)
+		cornerAxis.normalize();
+		myPlane = new THREE.Mesh(new THREE.PlaneGeometry(0.7,0.7), new THREE.MeshBasicMaterial({transparent:true, opacity: 0.5, color: 0x57007F, side: THREE.DoubleSide}));
+		Protein.add(otherHalf);
+		var newRearUp = (new THREE.Vector3(1,1,1)).angleTo(new THREE.Vector3(0,1,0));
+		otherHalf.rotateOnAxis(new THREE.Vector3(-1/Math.sqrt(2),0,1/Math.sqrt(2)), -newRearUp );
+		var edgeAxis = new THREE.Vector3(-0.5,-1,-0.5)
+		edgeAxis.normalize()
+		otherHalf.rotateOnAxis(cornerAxis,TAU / 6);
+		otherHalf.rotateOnAxis(edgeAxis,TAU / 2);
+		cubeHalf.rotateOnAxis(new THREE.Vector3(-1/Math.sqrt(2),0,1/Math.sqrt(2)), -newRearUp );
+		myPlane.rotation.x = TAU / 4;
+		Protein.add(myPlane);
+	}
+	
+	//the light puzze
+	{
+//		var pentagonRadius = 0.1;
+//		var shadowHeight = pentagonRadius * 19;
+//		var shadowBottomRadius = pentagonRadius * 4;
+//		var shadowVolume = new THREE.Mesh(new THREE.CylinderGeometry(pentagonRadius, shadowBottomRadius, shadowHeight, 5,1,false,TAU/2), new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.4}));
+//		shadowVolume.position.z = -shadowHeight/2-0.001;
+//		shadowVolume.rotation.x = TAU / 4;
+//		//this is at the origin
+//		var pentagon = new THREE.Mesh(new THREE.ConeGeometry(pentagonRadius,pentagonRadius/3,5, TAU/4), new THREE.MeshPhongMaterial({side:THREE.DoubleSide}));
+//		pentagon.rotation.x = TAU/4;
+//		pentagon.rotation.y = TAU/5*1.5;
+//		pentagon.position.z = pentagonRadius/6;
+//		var ourLight = new THREE.DirectionalLight( 0xffffff, 1 );
+//		ourLight.color.setHSL( 0.1, 1, 0.95 );
+//		var radiusGradient = ( shadowBottomRadius - pentagonRadius ) / shadowHeight;
+//		ourLight.position.z = -pentagonRadius / radiusGradient;
+//			//at 0, r = pentagonRadius, at shadowHeight it = 
+//		Protein.add( ourLight );
+//		var shadowPlane = new THREE.Mesh(new THREE.CylinderGeometry(pentagonRadius*7,pentagonRadius*7,pentagonRadius*9,62,1,true,TAU/4*3,TAU/4), new THREE.MeshPhongMaterial({color: 0x57007F, side: THREE.DoubleSide}));
+//		shadowPlane.position.z = -shadowHeight*0.8;
+//		shadowPlane.position.y -= 0.3;
+//		shadowPlane.rotation.z = -TAU / 4;
+//		Protein.add(shadowVolume, shadowPlane,pentagon);
+		
+//		Renderer.setClearColor(0xFFFFFF)
+		Scene.remove(Scene.children[4])
+//		Scene.remove(Scene.children[3])
+	}
+	
+	var loader = new THREE.OBJLoader();
+	loader.load(
+		'http://hamishtodd1.github.io/RILecture/Data/Tree.obj',
+		function ( TreeOBJ ) {
+			var tree = TreeOBJ.children[0];
+			var treeScale = 0.002;
+			tree.scale.set(treeScale,treeScale,treeScale )
+			tree.position.set(-0.047,-0.5,0)
+			tree.rotation.z = -0.04;
+			
+			var horizontalPlane = new THREE.Mesh(new THREE.PlaneGeometry(0.28,0.28), new THREE.MeshBasicMaterial({transparent:true, opacity: 0.5, color: 0x57007F, side: THREE.DoubleSide}));
+			var diagonalPlane = horizontalPlane.clone();
+			var verticalPlane = horizontalPlane.clone();
+			
+			horizontalPlane.rotation.x = 1.57;
+			horizontalPlane.position.y -= 0.44;
+			
+			verticalPlane.rotation.set(0,1.57,0)
+			verticalPlane.position.set(0.02,-0.15,0)
+			
+			diagonalPlane.rotation.set(1.57,-0.563,0)
+			diagonalPlane.position.set(0.02,-0.34,0)
+			
+//			Protein.add(tree);
+//			Protein.add(horizontalPlane);
+//			Protein.add(verticalPlane);
+//			Protein.add(diagonalPlane);
+		}
+	);
+	loader.load(
+		'http://hamishtodd1.github.io/RILecture/Data/banana.obj',
+		function ( bananaOBJ ) {
+			var banana = bananaOBJ.children[0];
+			banana.material = new THREE.MeshBasicMaterial({color: 0xDBB94C, side: THREE.DoubleSide})
+			for(var i = 0, il = banana.geometry.attributes.position.array.length; i<il; i++) 
+				banana.geometry.attributes.position.array[i] *=0.1;
+			banana.position.set(-2.55,0,1.79)
+//			Protein.add(banana)
+			
+			var slicePlane = new THREE.Mesh(new THREE.PlaneGeometry(0.28,0.28), new THREE.MeshBasicMaterial({transparent:true, opacity: 0.5, color: 0x57007F, side: THREE.DoubleSide}));
+//			Protein.add(slicePlane);
+		}
+	);
+	loader.load(
+			'http://hamishtodd1.github.io/RILecture/Data/clebsch.obj',
+			function ( clebschOBJ ) {
+				var clebsch = clebschOBJ.children[0];
+				clebsch.material.color.b = 0;
+				var newRearUp = (new THREE.Vector3(1,1,1)).angleTo(new THREE.Vector3(0,1,0));
+				var clebschMatrix = (new THREE.Matrix4()).makeRotationAxis ( new THREE.Vector3(1/Math.sqrt(2),0,1/Math.sqrt(2)), -newRearUp );
+				clebsch.geometry.applyMatrix(clebschMatrix);
+				for(var i = 0, il = clebsch.geometry.attributes.position.array.length; i<il; i++) 
+					clebsch.geometry.attributes.position.array[i] *=0.1;
+				var cutoff = -0.58;
+				for(var i = 0, il = clebsch.geometry.attributes.position.array.length/3; i<il; i++)
+				{
+					clebsch.geometry.attributes.position.array[i*3+1] *= 5;
+					
+					if( clebsch.geometry.attributes.position.array[i*3+1] < cutoff )
+						clebsch.geometry.attributes.position.array[i*3+1] = cutoff;
+				}	
+				Protein.add(clebsch)
+				
+				slicePlane = new THREE.Mesh(new THREE.PlaneGeometry(0.28,0.28), new THREE.MeshBasicMaterial({transparent:true, opacity: 0.5, color: 0x57007F, side: THREE.DoubleSide}));
+				Protein.add(slicePlane);
+			}
+		);
+	
 }

@@ -342,7 +342,7 @@ function init_axes()
 		//no, do xkcd's global warming thing
 	}
 	
-	Protein.add(axis3D);
+//	Protein.add(axis3D); //arrow keys change longtitude and latitude of axis
 }
 
 function axis_update()
