@@ -46,49 +46,6 @@ window.addEventListener( 'resize', function(event)
 	Camera.updateProjectionMatrix();
 }, false );
 
-document.addEventListener( 'keydown', function(event)
-{
-	if(event.keyCode === 37 )
-	{
-		event.preventDefault();
-		VRMODE = 1; //once you're in I guess you're not coming out!
-		OurVREffect.setFullScreen( true );
-		
-		//bug if we do this earlier(?)
-		for(var i = 0; i < 6; i++)
-			OurVREffect.scale *= 0.66666666;
-		
-		return;
-	}
-	
-	var sortachange = 0.01;
-	if(event.keyCode === 81 )
-	{
-		var sorta = new THREE.Vector3(default_rightvector.x,default_rightvector.y,0,0);
-		sorta.applyAxisAngle(Central_Z_axis, sortachange);
-		default_rightvector.set(sorta.x,sorta.y,0,0);
-	}
-	if(event.keyCode === 87 )
-	{
-		var sorta = new THREE.Vector3(default_rightvector.x,default_rightvector.y,0,0);
-		sorta.applyAxisAngle(Central_Z_axis, -sortachange);
-		default_rightvector.set(sorta.x,sorta.y,0,0);
-	}
-	if(event.keyCode === 81 )
-	{
-		Camera.rotateOnAxis()
-		var sorta = new THREE.Vector3(default_rightvector.x,default_rightvector.y,0,0);
-		sorta.applyAxisAngle(Central_Z_axis, sortachange);
-		default_rightvector.set(sorta.x,sorta.y,0,0);
-	}
-	if(event.keyCode === 87 )
-	{
-		var sorta = new THREE.Vector3(default_rightvector.x,default_rightvector.y,0,0);
-		sorta.applyAxisAngle(Central_Z_axis, -sortachange);
-		default_rightvector.set(sorta.x,sorta.y,0,0);
-	}
-});
-
 document.addEventListener( 'mousemove', function(event) {
 	if(!isMobileOrTablet)
 	{

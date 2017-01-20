@@ -7,11 +7,6 @@
  * slides
  * Things disappearing and reappearing when you press a button
  * All on the server
- * Lighting for the lattice
- * Scaling, why not?
- * Interpolation between two crystals
- * 
- * A fuckload of objects
  */
 
 function UpdateWorld(Models,Hands, indicatorsound)
@@ -33,9 +28,9 @@ function UpdateWorld(Models,Hands, indicatorsound)
 function Render( Models, Controllers, indicatorsound) {
 	delta_t = ourclock.getDelta();
 //	if(delta_t > 0.1) delta_t = 0.1;
-	
-	
-	InputObject.processInput( Models,Controllers );
+
+	//window events, VR positions, and the lecturer
+	inputObject.updateFromAsynchronousInput( Models,Controllers );
 	UpdateWorld(Models, Controllers, indicatorsound);
 	
 	//setTimeout( function() { requestAnimationFrame( render );}, 100 ); //debugging only

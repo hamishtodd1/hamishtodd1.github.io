@@ -18,8 +18,9 @@ function initHoneycombs()
 		base_RD.geometry.merge(extra_pyramid, extra_pyramid_matrix ); //might need another argument?
 	}
 	
+	//You also need to put these base shapes into the scene
 	var base_octa = new THREE.Mesh(new THREE.OctahedronGeometry(1), new THREE.MeshPhongMaterial({shading: THREE.FlatShading}));
-	var base_l_tet = new THREE.Mesh( new THREE.TetrahedronGeometry( Math.sqrt(3) / 2 ), new THREE.MeshPhongMaterial({shading: THREE.FlatShading, color: 0xFF0000}));
+	var base_l_tet = new THREE.Mesh( new THREE.TetrahedronGeometry( Math.sqrt(3) / 2 ), new THREE.MeshPhongMaterial({shading: THREE.FlatShading, color: 0x47837B}));
 	var base_r_tet = base_l_tet.clone();
 	base_r_tet.rotateOnAxis(yAxis, TAU / 4);
 	

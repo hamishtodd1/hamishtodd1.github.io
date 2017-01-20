@@ -1,17 +1,7 @@
 function UpdateHands(Models,Controllers, indicatorsound)
-{	
-	for(var i = 0; i < Controllers.length; i++)
-	{
-		if(Controllers[i].Gripping){
-//			Controllers[i].material.color.g = 1;
-//			Controllers[i].scale.set(0.8,0.8,0.8);
-		}
-		else {
-//			Controllers[i].material.color.g = 0;
-//			Controllers[i].scale.set(1,1,1);
-		}
-	}
-	
+{
+//	if(Controllers[0].geometry.boundingSphere)
+//		console.log(Controllers[0].geometry.boundingSphere.center)
 	if(VRMODE) for(var i = 0; i < Controllers.length; i++)
 	{
 		if(Controllers[i].Gripping)
@@ -68,11 +58,17 @@ function point_in_BoxHelper(ourpoint,boxgeometryarray){
 	else return 0;
 }
 
-function bend_protein()
+function protein_overlap(proteinA, proteinB)
 {
-	//every protein gets this function
-	for(var i = 0, il = this.CAs.length; i < il; i++)
+	var totalOverlap = 0;
+	for(var i = 0, il = proteinA.atomPositions.length; i < il; i++)
 	{
-		//most basic version: you grab the 
+		for(var j = 0, jl = proteinB.atomPositions.length; j < jl; j++)
+		{
+			var dist = proteinA.atomPositions[i].distanceTo(proteinB.atomPositions[j]);
+			var overlap = /* some cubic function */ dist;
+			totalOverlap += overlap;
+		}
 	}
+	return overlap;
 }

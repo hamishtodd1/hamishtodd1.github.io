@@ -135,8 +135,6 @@ function init_cylinder(ourGeometry, cylinder_sides, num_added)
 	}
 }
 
-
-
 //you need to make sure that the vertices are given in the same order as the extrusion in the poly array function.
 //from what we have in poly arrays, this simply means the vectors lined up around a center
 function extrude(ourGeometry, axis_vectors, edgelen, extrusion_level, first_vertex, num_vertices_to_change)
@@ -177,7 +175,7 @@ function init_axes()
 	var axisLength = 1;
 	var axisRadius = axisLength * 0.01;
 	var base_axis = new THREE.CylinderGeometry(axisRadius,axisRadius, axisLength, 32,1,true);
-	console.log(base_axis)
+
 	var up_arrow = new THREE.ConeGeometry(axisRadius * 2, axisLength / 12, 32);
 	for(var i = 0; i < up_arrow.vertices.length; i++)
 		up_arrow.vertices[i].y += axisLength / 2;
@@ -216,19 +214,19 @@ function init_axes()
 		axis_set.children[axis_index].localToWorld(axis_set.children[axis_index + 1].position);
 	}
 	
-	function getBasis()
+	function getBasisVector(index)
 	{
-		var axis_vectors = Array();
-		for(var i = 0; i < this.children.length; i++)
-		{
-			if( this.children[i].type !== "CylinderGeometry" )
-				continue;
-			var basisVector = new THREE.Vector3(0,1,0);
-			this.children[i*2].updateMatrixWorld();
-			this.children[i*2].localToWorld(basisVector);
-			axis_vectors.push(basisVector);
-			//assumes the order is x, y, z, etc.
-		}
+		basisVector = new THREE.Vector3(0,1,0);
+		this.children[index*2].updateMatrix();
+		basisVector.applyMatrix4(this.children[index*2].matrix);
+		return basisVector;
+	}
+	function getallBasisVectors(expectedNum)
+	{
+		var axis_vectors = Array(expectedNum);
+		for(var i = 0; i < expectedNum; i++)
+			axis_vectors[i] = this.getBasisVector(i);
+		//you could check if it was a cylinder
 		return axis_vectors;
 	}
 		
@@ -242,7 +240,21 @@ function init_axes()
 	add_axis( axis3D, 0,0 );
 	add_axis( axis3D, 0, TAU / 4 );
 	add_axis( axis3D, TAU / 4,-TAU / 4 );
-	axis3D.update = axis_update;
+	
+	axis3D.getBasisVector = getBasisVector;
+	axis3D.xAxisDestination = axis3D.getBasisVector(1);
+	axis3D.ordinaryUpdate = axis_update;
+	axis3D.update = function()
+	{
+		var currentxAxis = this.getBasisVector(1);
+		var alterationAxis = (currentxAxis.clone()).cross(this.xAxisDestination);
+		alterationAxis.applyMatrix4( new THREE.Matrix4().getInverse(this.children[2].matrix) );
+		alterationAxis.normalize();
+		var alterationAngle = currentxAxis.angleTo(this.xAxisDestination);
+		this.children[2].rotateOnAxis(alterationAxis,alterationAngle);
+		
+		this.ordinaryUpdate();
+	}
 	
 	var adjacent_square_corner_angle = 2*Math.atan(1/Math.sqrt(2));
 	add_axis( axis4D, 0,0 );
@@ -312,7 +324,7 @@ function init_axes()
 		//placeholder idea is two ingredients in a cake
 		plottedSurface.geometry.computeFaceNormals();
 		plottedSurface.geometry.computeVertexNormals();
-		axis3D.add(plottedSurface);
+//		axis3D.add(plottedSurface);
 		
 		function addPlayer(nameString, number)
 		{
@@ -342,8 +354,39 @@ function init_axes()
 		//no, do xkcd's global warming thing
 	}
 	
-//	Protein.add(axis3D); //arrow keys change longtitude and latitude of axis
+//	Protein.add(axis3D);
 }
+document.addEventListener( 'keydown', function(event)
+{
+	var latitudeAxis = axis3D.xAxisDestination.clone();
+	latitudeAxis.cross(yAxis);
+	latitudeAxis.normalize();
+	var rotationAmount = 0.01;
+	if(event.keyCode === 37) //left
+		axis3D.xAxisDestination.applyAxisAngle(yAxis, -rotationAmount);
+	if(event.keyCode === 38) //up
+		axis3D.xAxisDestination.applyAxisAngle(latitudeAxis, rotationAmount);
+	if(event.keyCode === 39) //right
+		axis3D.xAxisDestination.applyAxisAngle(yAxis, rotationAmount);
+	if(event.keyCode === 40) //down
+		axis3D.xAxisDestination.applyAxisAngle(latitudeAxis,-rotationAmount);
+	
+	ms2Data.updateMatrix();
+	var realX = xAxis.clone();
+	realX.applyMatrix4(ms2Data.matrix)
+	realX.normalize();
+	var realY = yAxis.clone();
+	realY.applyMatrix4(ms2Data.matrix)
+	realY.normalize();
+	if(event.keyCode === 37) //left
+		ms2Data.rotateOnAxis(realY, -rotationAmount);
+	if(event.keyCode === 38) //up
+		ms2Data.rotateOnAxis(realX, rotationAmount);
+	if(event.keyCode === 39) //right
+		ms2Data.rotateOnAxis(realY, rotationAmount);
+	if(event.keyCode === 40) //down
+		ms2Data.rotateOnAxis(realX,-rotationAmount);
+}, false );
 
 function axis_update()
 {
@@ -352,7 +395,11 @@ function axis_update()
 	this.worldToLocal(welookat);
 	for(var i = 0; i < this.children.length; i++)
 		if( this.children[i].geometry.type === "TextGeometry" )
+		{
+			this.children[i].position.set(0,1,0)
+			this.children[i-1].localToWorld(this.children[i].position);
 			this.children[i].lookAt(welookat);
+		}
 }
 
 function Random_perp_vector(OurVector){

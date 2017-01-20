@@ -41,78 +41,171 @@ function initSolidVirusModels()
 		}
 	);
 	
-	loader.load("http://hamishtodd1.github.io/HepCardboard/Data/hep.obj",
-		function ( hepOBJ ) {
-			var hep = hepOBJ.children[0];
-			hep.material.shading = THREE.SmoothShading;
-			console.log(hep.material)
-			var hep_center = new THREE.Vector3(60.5, 59, 74);
-			hep_center.multiplyScalar(1 / 0.7);
-			hep.updateMatrixWorld();
-			hep.worldToLocal(hep_center);
-			for(var i = 0, il = hep.geometry.attributes.position.array.length / 3; i < il; i++)
-			{
-				hep.geometry.attributes.position.array[i*3+0] -= hep_center.x;
-				hep.geometry.attributes.position.array[i*3+1] -= hep_center.y;
-				hep.geometry.attributes.position.array[i*3+2] -= hep_center.z;
-			}
-			
-			//and then we may wish to get rid of everything above a certain radius
-			
-			hep.material.vertexColors = THREE.VertexColors;
+//	loader.load("http://hamishtodd1.github.io/HepCardboard/Data/hep.obj",
+//		function ( hepOBJ ) {
+//			var hep = hepOBJ.children[0];
+//			hep.material.shading = THREE.SmoothShading;
+//			console.log(hep.material)
+//			var hep_center = new THREE.Vector3(60.5, 59, 74);
+//			hep_center.multiplyScalar(1 / 0.7);
+//			hep.updateMatrixWorld();
+//			hep.worldToLocal(hep_center);
+//			for(var i = 0, il = hep.geometry.attributes.position.array.length / 3; i < il; i++)
+//			{
+//				hep.geometry.attributes.position.array[i*3+0] -= hep_center.x;
+//				hep.geometry.attributes.position.array[i*3+1] -= hep_center.y;
+//				hep.geometry.attributes.position.array[i*3+2] -= hep_center.z;
+//			}
+//			
+//			//and then we may wish to get rid of everything above a certain radius
+//			
+//			hep.material.vertexColors = THREE.VertexColors;
+//		
+//			var hep_vertexcolors = new Float32Array( hep.geometry.attributes.position.array.length );
+//			hep.geometry.addAttribute('color', new THREE.BufferAttribute(hep_vertexcolors, 3));
+//			
+//			for(var i = 0, il = hep.geometry.attributes.position.array.length; i < il; i++)
+//				hep.geometry.attributes.position.array[i] *= 0.007;
+//			
+//			hep.geometry.computeFaceNormals();
+//			hep.geometry.computeVertexNormals();
+//			
+//			var layer_boundaries = [0.19,0.104,0.065,0.049,0.0203,0.01];//disordered membrane, golf ball, protrusions, corners, thing, inner corners
+//			var radius = 0;
+//			var blueishR = 62 / 256;
+//			var blueishG = 108 / 256;
+//			var blueishB = 210 / 256;
+//			var blueishRincrement = ( 1 - blueishR ) / layer_boundaries.length;
+//			var blueishGincrement = ( 1 - blueishG ) / layer_boundaries.length;
+//			var blueishBincrement = ( 1 - blueishB ) / layer_boundaries.length;
+//			var j = 0;
+//			
+//			for(var i = 0, il = hep.geometry.attributes.position.array.length / 3; i < il; i++)
+//			{
+//				radius = 
+//				  hep.geometry.attributes.position.array[i*3+0] * hep.geometry.attributes.position.array[i*3+0]
+//				+ hep.geometry.attributes.position.array[i*3+1] * hep.geometry.attributes.position.array[i*3+1] 
+//				+ hep.geometry.attributes.position.array[i*3+2] * hep.geometry.attributes.position.array[i*3+2];
+//				
+//				for( j = 0; j < 6; j++)
+//				{
+//					if( radius > layer_boundaries[j] )
+//					{
+//						hep.geometry.attributes.color.array[i*3+0] = blueishR + blueishRincrement * j;
+//						hep.geometry.attributes.color.array[i*3+1] = blueishG + blueishGincrement;
+//						hep.geometry.attributes.color.array[i*3+2] = blueishB + blueishBincrement;
+//						
+//						break;
+//					}
+//				}
+//				if( 0.01 > radius || radius > 0.19)
+//				{
+//					hep.geometry.attributes.position.array[i*3+0] = 0;
+//					hep.geometry.attributes.position.array[i*3+1] = 0;
+//					hep.geometry.attributes.position.array[i*3+2] = 0;
+//				}
+//			}
+//			
+//			var hepScale = 1;
+//			hep.scale.set(hepScale,hepScale,hepScale)
+////			Protein.add(hep); //we'd prefer MS2. Also you can make this obj smaller
+//		},
+//		function ( xhr ) {}, //progression function
+//		function ( xhr ) { console.error( "couldn't load OBJ" ); }
+//	);
+	
+	var tamiflu = new THREE.Object3D();
+	loadXYZ( "http://hamishtodd1.github.io/RILecture/Data/tamiflu.xyz", tamiflu, 3 );
+	Protein.add(tamiflu)
+	
+	//MS2. TODO this is a usable xyz loader
+	{
+		var MS2 = new THREE.Object3D();
+		loadXYZ( "http://hamishtodd1.github.io/RILecture/Data/Virus model data/MS2 model.xyz", MS2, 3 );
 		
-			var hep_vertexcolors = new Float32Array( hep.geometry.attributes.position.array.length );
-			hep.geometry.addAttribute('color', new THREE.BufferAttribute(hep_vertexcolors, 3));
-			
-			for(var i = 0, il = hep.geometry.attributes.position.array.length; i < il; i++)
-				hep.geometry.attributes.position.array[i] *= 0.007;
-			
-			hep.geometry.computeFaceNormals();
-			hep.geometry.computeVertexNormals();
-			
-			var layer_boundaries = [0.19,0.104,0.065,0.049,0.0203,0.01];//disordered membrane, golf ball, protrusions, corners, thing, inner corners
-			var radius = 0;
-			var blueishR = 62 / 256;
-			var blueishG = 108 / 256;
-			var blueishB = 210 / 256;
-			var blueishRincrement = ( 1 - blueishR ) / layer_boundaries.length;
-			var blueishGincrement = ( 1 - blueishG ) / layer_boundaries.length;
-			var blueishBincrement = ( 1 - blueishB ) / layer_boundaries.length;
-			var j = 0;
-			
-			for(var i = 0, il = hep.geometry.attributes.position.array.length / 3; i < il; i++)
+		loader.load("http://hamishtodd1.github.io/RILecture/Data/Virus model data/MS2 icosahedrally averaged.obj",
+			function ( ms2OBJ ) 
 			{
-				radius = 
-				  hep.geometry.attributes.position.array[i*3+0] * hep.geometry.attributes.position.array[i*3+0]
-				+ hep.geometry.attributes.position.array[i*3+1] * hep.geometry.attributes.position.array[i*3+1] 
-				+ hep.geometry.attributes.position.array[i*3+2] * hep.geometry.attributes.position.array[i*3+2];
-				
-				for( j = 0; j < 6; j++)
+				ms2Data = ms2OBJ.children[1];
+				ms2Data.geometry.center();
+				for(var i = 0, il = ms2Data.geometry.attributes.position.array.length / 3; i < il; i++)
 				{
-					if( radius > layer_boundaries[j] )
+					var dist = 
+						ms2Data.geometry.attributes.position.array[i*3+0] *
+						ms2Data.geometry.attributes.position.array[i*3+0] +
+						ms2Data.geometry.attributes.position.array[i*3+1] *
+						ms2Data.geometry.attributes.position.array[i*3+1] +
+						ms2Data.geometry.attributes.position.array[i*3+2] *
+						ms2Data.geometry.attributes.position.array[i*3+2];
+					
+					if(dist > 28000)
 					{
-						hep.geometry.attributes.color.array[i*3+0] = blueishR + blueishRincrement * j;
-						hep.geometry.attributes.color.array[i*3+1] = blueishG + blueishGincrement;
-						hep.geometry.attributes.color.array[i*3+2] = blueishB + blueishBincrement;
-						
-						break;
+						ms2Data.geometry.attributes.position.array[i*3+0] = 0;
+						ms2Data.geometry.attributes.position.array[i*3+0] = 0;
+						ms2Data.geometry.attributes.position.array[i*3+1] = 0;
+						ms2Data.geometry.attributes.position.array[i*3+1] = 0;
+						ms2Data.geometry.attributes.position.array[i*3+2] = 0;
+						ms2Data.geometry.attributes.position.array[i*3+2] = 0;
 					}
 				}
-				if( 0.01 > radius || radius > 0.19)
-				{
-					hep.geometry.attributes.position.array[i*3+0] = 0;
-					hep.geometry.attributes.position.array[i*3+1] = 0;
-					hep.geometry.attributes.position.array[i*3+2] = 0;
-				}
+				ms2Data.geometry.center();
+				MS2.add( ms2Data );
+				var ms2Scale = 0.0035;
+				MS2.scale.set(ms2Scale,ms2Scale,ms2Scale);
+				//TODO align
+			},
+			function ( xhr ) {}, //progression function
+			function ( xhr ) { console.error( "couldn't load OBJ" ); }
+		);
+	}
+}
+
+function loadXYZ(linkString, objectToAddTo, atomRadius )
+{
+	var xyzLoader = new THREE.XHRLoader();
+	xyzLoader.setPath( this.path );
+	xyzLoader.load( linkString , function ( xyzFile ) 
+	{
+		var sphereGeometryTemplate = (new THREE.BufferGeometry()).fromGeometry(new THREE.IcosahedronGeometry(atomRadius,1));
+		var verticesInSphere = sphereGeometryTemplate.attributes.position.array.length / 3;
+
+		var lines = xyzFile.split( '\n' );
+		var geometriesIndexedByColor = {};
+		var atomTypeString = "CHNOSTFGP"
+		for(var i = 0; i < atomTypeString.length; i++)
+		{
+			geometriesIndexedByColor[ atomTypeString[i] ] = new THREE.BufferGeometry();
+			geometriesIndexedByColor[ atomTypeString[i] ].totalSpheres = 0;
+			geometriesIndexedByColor[ atomTypeString[i] ].spheresSoFar = 0;
+		}
+		
+		for( var i = 0, il = lines.length; i < il; i++ )
+			geometriesIndexedByColor[ lines[i][0] ].totalSpheres++;
+		for(var i = 0; i < atomTypeString.length; i++)
+			geometriesIndexedByColor[ atomTypeString[i] ].addAttribute( 'position', new THREE.BufferAttribute( 
+				new Float32Array( geometriesIndexedByColor[ atomTypeString[i] ].totalSpheres * verticesInSphere * 3 ), 3 ) );
+		
+		for ( var i = 0, il = lines.length; i < il; i++ )
+		{
+			var newSphereGeometry = sphereGeometryTemplate.clone();
+			var components = lines[i].split(" ");
+			var locationX = parseFloat(components[1]);
+			var locationY = parseFloat(components[2]);
+			var locationZ = parseFloat(components[3]);
+			for(var j = 0; j < verticesInSphere; j++)
+			{
+				newSphereGeometry.attributes.position.array[j*3+0] += locationX;
+				newSphereGeometry.attributes.position.array[j*3+1] += locationY;
+				newSphereGeometry.attributes.position.array[j*3+2] += locationZ;
 			}
+			var bufferOffset = verticesInSphere * geometriesIndexedByColor[ components[0] ].spheresSoFar;
 			
-			var hepScale = 1;
-			hep.scale.set(hepScale,hepScale,hepScale)
-			Protein.add(hep); //we'd prefer MS2. Also you can make this obj smaller
-		},
-		function ( xhr ) {}, //progression function
-		function ( xhr ) { console.error( "couldn't load OBJ" ); }
-	);
+			geometriesIndexedByColor[ components[0] ].merge( newSphereGeometry, bufferOffset );
+			geometriesIndexedByColor[ components[0] ].spheresSoFar++;
+		}
+		for( color in geometriesIndexedByColor)
+			objectToAddTo.add(new THREE.Mesh( geometriesIndexedByColor[ color ] ));
+	}, function(xhr){}, function(xhr){} );
 }
 
 function initCCMV()
@@ -226,3 +319,4 @@ function dist_along_tria_edge(triaconta_minorvertex_radius,desired_r){
 	else
 		console.error("no positive solution?");
 }
+

@@ -57,13 +57,13 @@ function Initialize()
 		init_axes();
 		init_poly_arrays();
 //		qcTablet.init();
-		init_cubes();
+//		init_cubes();
 //		init_extruding_polyhedra_and_house();
 //		init_golden_lattice();
 //		initCCMV();
 //		initHoneycombs();
 //		initFishUniverse();
-//		initSolidVirusModels();
+		initSolidVirusModels();
 //		init_atoms();
 
 		Render();

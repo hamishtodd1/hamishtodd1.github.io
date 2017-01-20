@@ -10,17 +10,14 @@ app.get('/', function(req, res){
 	res.sendFile(__dirname + '/index.html');
 });
 
-//hey is it possible that things seem far away because of inter pupilary distance?
-
 //pretty freaking crazy: as soon as user's address bar autocompletes to the address, apparently that's a connection?
 //that is a problem because they register as separate connections but one of them DOESN'T DISCONNECT RAAAARGH
 io.on('connection', function(socket){
-	//these are called when it happens
 	console.log("User connected: ", socket.id)
 	io.to(socket.id).emit('OnConnect_Message', {ID:socket.id});
 	
-	socket.broadcast.on('CameraStateUpdate', function(msg){ socket.broadcast.emit('CameraStateUpdate', msg); });
-	socket.broadcast.on('ModelStateUpdate',  function(msg){ socket.broadcast.emit('ModelStateUpdate',  msg); });
+	socket.broadcast.on('ModelsControllersCameraUpdate', function(msg){ socket.broadcast.emit('ModelsControllersCameraUpdate', msg); });
+	socket.broadcast.on('screenIndicator', function(msg){ socket.broadcast.emit('screenIndicator', msg); });
 	
 	socket.on('disconnect', function () {
 		console.log("User disconnected");

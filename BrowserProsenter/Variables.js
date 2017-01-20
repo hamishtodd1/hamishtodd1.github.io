@@ -17,12 +17,10 @@ var debugging = 0;
 
 //Static or initialized and then static
 var keycodeArray = "0123456789abcdefghijklmnopqrstuvwxyz";
-
 var socket = io();
-
 var gentilis;
-
 var VRMODE = 0;
+var RIGHT_CONTROLLER_INDEX = 0;
 
 //var INITIAL_CAMERA_POSITION = new THREE.Vector3(0,0,0.6);
 
