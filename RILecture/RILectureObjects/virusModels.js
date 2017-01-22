@@ -115,8 +115,8 @@ function initSolidVirusModels()
 //	);
 	
 	var tamiflu = new THREE.Object3D();
-	loadXYZ( "http://hamishtodd1.github.io/RILecture/Data/tamiflu.xyz", tamiflu, 3 );
-	Protein.add(tamiflu)
+	loadXYZ( "http://hamishtodd1.github.io/RILecture/Data/tamiflu.xyz", tamiflu, 1 );
+	tamiflu.scale.multiplyScalar(0.1)
 	
 	//MS2. TODO this is a usable xyz loader
 	{
@@ -168,66 +168,168 @@ function loadXYZ(linkString, objectToAddTo, atomRadius )
 	{
 		var sphereGeometryTemplate = (new THREE.BufferGeometry()).fromGeometry(new THREE.IcosahedronGeometry(atomRadius,1));
 		var verticesInSphere = sphereGeometryTemplate.attributes.position.array.length / 3;
+		
 
 		var lines = xyzFile.split( '\n' );
 		var geometriesIndexedByColor = {};
-		var atomTypeString = "CHNOSTFGP"
-		for(var i = 0; i < atomTypeString.length; i++)
-		{
-			geometriesIndexedByColor[ atomTypeString[i] ] = new THREE.BufferGeometry();
-			geometriesIndexedByColor[ atomTypeString[i] ].totalSpheres = 0;
-			geometriesIndexedByColor[ atomTypeString[i] ].spheresSoFar = 0;
-		}
 		
 		for( var i = 0, il = lines.length; i < il; i++ )
-			geometriesIndexedByColor[ lines[i][0] ].totalSpheres++;
-		for(var i = 0; i < atomTypeString.length; i++)
-			geometriesIndexedByColor[ atomTypeString[i] ].addAttribute( 'position', new THREE.BufferAttribute( 
-				new Float32Array( geometriesIndexedByColor[ atomTypeString[i] ].totalSpheres * verticesInSphere * 3 ), 3 ) );
+		{
+			if( typeof geometriesIndexedByColor[ lines[i][0] ] !== 'undefined')
+				geometriesIndexedByColor[ lines[i][0] ].totalSpheres++;
+			else
+			{
+				geometriesIndexedByColor[ lines[i][0] ] = new THREE.BufferGeometry();
+				geometriesIndexedByColor[ lines[i][0] ].totalSpheres = 1;
+				geometriesIndexedByColor[ lines[i][0] ].spheresSoFar = 0;
+			}
+		}
+			
+		for( var color in geometriesIndexedByColor)
+		{
+			geometriesIndexedByColor[ color ].addAttribute( 'position', new THREE.BufferAttribute( 
+					new Float32Array( geometriesIndexedByColor[ color ].totalSpheres * verticesInSphere * 3 ), 3 ) );
+			geometriesIndexedByColor[ color ].addAttribute( 'normal', new THREE.BufferAttribute( 
+					new Float32Array( geometriesIndexedByColor[ color ].totalSpheres * verticesInSphere * 3 ), 3 ) );
+		}
 		
 		for ( var i = 0, il = lines.length; i < il; i++ )
 		{
-			var newSphereGeometry = sphereGeometryTemplate.clone();
 			var components = lines[i].split(" ");
 			var locationX = parseFloat(components[1]);
 			var locationY = parseFloat(components[2]);
 			var locationZ = parseFloat(components[3]);
+			
+			var bufferOffset = verticesInSphere * geometriesIndexedByColor[ components[0] ].spheresSoFar * 3;
+			
 			for(var j = 0; j < verticesInSphere; j++)
 			{
-				newSphereGeometry.attributes.position.array[j*3+0] += locationX;
-				newSphereGeometry.attributes.position.array[j*3+1] += locationY;
-				newSphereGeometry.attributes.position.array[j*3+2] += locationZ;
+				geometriesIndexedByColor[ components[0] ].attributes.position.array[bufferOffset+j*3+0] = sphereGeometryTemplate.attributes.position.array[j*3+0] + locationX;
+				geometriesIndexedByColor[ components[0] ].attributes.position.array[bufferOffset+j*3+1] = sphereGeometryTemplate.attributes.position.array[j*3+1] + locationY;
+				geometriesIndexedByColor[ components[0] ].attributes.position.array[bufferOffset+j*3+2] = sphereGeometryTemplate.attributes.position.array[j*3+2] + locationZ;
+
+				geometriesIndexedByColor[ components[0] ].attributes.normal.array[bufferOffset+j*3+0] = sphereGeometryTemplate.attributes.normal.array[j*3+0];
+				geometriesIndexedByColor[ components[0] ].attributes.normal.array[bufferOffset+j*3+1] = sphereGeometryTemplate.attributes.normal.array[j*3+1];
+				geometriesIndexedByColor[ components[0] ].attributes.normal.array[bufferOffset+j*3+2] = sphereGeometryTemplate.attributes.normal.array[j*3+2];
 			}
-			var bufferOffset = verticesInSphere * geometriesIndexedByColor[ components[0] ].spheresSoFar;
-			
-			geometriesIndexedByColor[ components[0] ].merge( newSphereGeometry, bufferOffset );
 			geometriesIndexedByColor[ components[0] ].spheresSoFar++;
 		}
-		for( color in geometriesIndexedByColor)
-			objectToAddTo.add(new THREE.Mesh( geometriesIndexedByColor[ color ] ));
-	}, function(xhr){}, function(xhr){} );
+
+		for( var color in geometriesIndexedByColor)
+		{
+			objectToAddTo.add(new THREE.Mesh( geometriesIndexedByColor[ color ], new THREE.MeshPhongMaterial({color: new THREE.Color(Math.random(),Math.random(),Math.random()), shading: THREE.SmoothShading}) ));
+			if( color === "C")
+				objectToAddTo.children[objectToAddTo.children.length-1].material.color = new THREE.Color( 0x121212 );
+			if( color === "O")
+				objectToAddTo.children[objectToAddTo.children.length-1].material.color = new THREE.Color( 0xDD342D );
+			if( color === "N")
+				objectToAddTo.children[objectToAddTo.children.length-1].material.color = new THREE.Color( 0x59B8E4 );
+			if( color === "H")
+				objectToAddTo.children[objectToAddTo.children.length-1].material.color = new THREE.Color( 0xFFFFFF );
+		}
+	}, function(xhr){}, function(xhr){console.log("couldn't load xyz")} );
+}
+
+function loadGiuliana(linkString, objectToAddTo, atomRadius, cutoutRadius)
+{
+	var giulianaLoader = new THREE.XHRLoader();
+	giulianaLoader.setPath( this.path );
+	giulianaLoader.load( linkString, function ( giulianaFile ) 
+	{
+		var sphereGeometryTemplate = (new THREE.BufferGeometry()).fromGeometry(new THREE.IcosahedronGeometry(atomRadius,1));
+		var verticesInSphere = sphereGeometryTemplate.attributes.position.array.length / 3;		
+		var lines = giulianaFile.split( '\n' );
+		
+		var layerGeometries = Array();
+		
+		var modelPoints = Array(lines.length);
+		for(var i = 0, il = lines.length; i < il; i++)
+		{
+			var components = lines[i].split("	");
+			var modelPoint = new THREE.Vector3(
+					parseFloat(components[0]),
+					parseFloat(components[1]),
+					parseFloat(components[2]) );
+			if(modelPoint.length() < cutoutRadius )
+			{
+				console.log("skipping")
+				continue;
+			}
+			var foundLayer = 0;
+			for( var j = 0; j < layerGeometries.length; j++)
+			{
+				if( Math.abs( layerGeometries[j].characteristicRadius - modelPoint.length() ) < 0.0001 )
+				{
+					layerGeometries[j].points.push(modelPoint);
+					foundLayer = 1;
+					break;
+				}
+			}
+			if( !foundLayer )
+			{
+				layerGeometries.push(new THREE.BufferGeometry());
+				layerGeometries[layerGeometries.length-1].characteristicRadius = modelPoint.length();
+				layerGeometries[layerGeometries.length-1].points = [];
+				layerGeometries[layerGeometries.length-1].points.push(modelPoint);
+			}
+		}
+		
+		for( var i = 0; i < layerGeometries.length; i++)
+		{
+			layerGeometries[i].addAttribute( 'position', new THREE.BufferAttribute( 
+					new Float32Array( layerGeometries[i].points.length * verticesInSphere * 3 ), 3 ) );
+			layerGeometries[i].addAttribute( 'normal', new THREE.BufferAttribute( 
+					new Float32Array( layerGeometries[i].points.length * verticesInSphere * 3 ), 3 ) );
+			
+			for(var j = 0; j < layerGeometries[i].points.length; j++ )
+			{
+				for(var k = 0; k < verticesInSphere; k++)
+				{
+					var bufferOffset = verticesInSphere * j * 3;
+					layerGeometries[i].attributes.position.array[bufferOffset+k*3+0] = sphereGeometryTemplate.attributes.position.array[k*3+0] + layerGeometries[i].points[j].x;
+					layerGeometries[i].attributes.position.array[bufferOffset+k*3+1] = sphereGeometryTemplate.attributes.position.array[k*3+1] + layerGeometries[i].points[j].y;
+					layerGeometries[i].attributes.position.array[bufferOffset+k*3+2] = sphereGeometryTemplate.attributes.position.array[k*3+2] + layerGeometries[i].points[j].z;
+
+					layerGeometries[i].attributes.normal.array[bufferOffset+k*3+0] = sphereGeometryTemplate.attributes.normal.array[k*3+0];
+					layerGeometries[i].attributes.normal.array[bufferOffset+k*3+1] = sphereGeometryTemplate.attributes.normal.array[k*3+1];
+					layerGeometries[i].attributes.normal.array[bufferOffset+k*3+2] = sphereGeometryTemplate.attributes.normal.array[k*3+2];
+				}
+			}
+			objectToAddTo.add(new THREE.Mesh( layerGeometries[i], 
+					new THREE.MeshPhongMaterial({color: new THREE.Color(Math.random(),Math.random(),Math.random()), shading: THREE.SmoothShading}) ));
+		}
+	}, function(xhr){}, function(xhr){console.log("couldn't load xyz")} );
 }
 
 function initCCMV()
 {
-	CCMV = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({color:0x000000}));
-	CCMV.geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(defaultCCMVCAPositions.length), 3));
-	var CCMVScale = 0.003;
-	CCMV.scale.set(CCMVScale,CCMVScale,CCMVScale);
+	var CCMV = new THREE.Object3D();
+	
+	CCMVcapsid = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({color:0xFF0000}));
+	CCMVcapsid.geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(defaultCCMVCAPositions.length), 3));
+	CCMVcapsid.scale.setScalar(0.003);
 	
 	CCMV.conformation = 0;
 	CCMV.conformationChangeSpeed = 0.0034;
-	
-	if( defaultCCMVCAPositions.length !== swollenCCMVCAPositions.length )
-		console.log("atoms not lined up!");
-	
 	CCMV.conformationDifference = new Float32Array(defaultCCMVCAPositions.length);
 	for(var i = 0, il = defaultCCMVCAPositions.length; i < il; i++)
 		CCMV.conformationDifference[i] = swollenCCMVCAPositions[i] - defaultCCMVCAPositions[i];
 	
+	CCMV.add(CCMVcapsid);
+	
+	var defaultModel = new THREE.Object3D();
+	var swollenModel = new THREE.Object3D();
+	//these cutoffs (the last parameter) might be wrong
+	loadGiuliana("http://hamishtodd1.github.io/RILecture/Data/Virus model data/pointarray2751.txt", swollenModel, 0.28, 4 );
+	loadGiuliana("http://hamishtodd1.github.io/RILecture/Data/Virus model data/pointarray1044.txt", defaultModel, 0.28, 6.2);
+	swollenModel.scale.setScalar(0.04);
+	defaultModel.scale.setScalar(0.04);
+	swollenModel.rotation.y = TAU / 4;
+	defaultModel.rotation.y = TAU / 4;
+	CCMV.add(swollenModel);
+	
 	CCMV.update = function()
 	{
-		console.log(this.conformation)
 		this.conformation += this.conformationChangeSpeed;
 		if( this.conformation > 1 )
 		{
@@ -240,15 +342,11 @@ function initCCMV()
 			this.conformationChangeSpeed *= -1;
 		}
 		
-		//here's where you miiight need a shader
-		for(var i = 0, il = CCMV.geometry.attributes.position.array.length; i < il; i++)
-			this.geometry.attributes.position.array[i] = defaultCCMVCAPositions[i] + this.conformation * this.conformationDifference[i];
-		this.geometry.attributes.position.needsUpdate = true;
+		for( var i = 0, il = this.children[0].geometry.attributes.position.array.length; i < il; i++)
+			this.children[0].geometry.attributes.position.array[i] = defaultCCMVCAPositions[i] + this.conformation * this.conformationDifference[i];
+		this.children[0].geometry.attributes.position.needsUpdate = true;
 	}
-	
 	CCMV.update();
-	
-	//ok it looks fine but is it fine? Are the atoms in the same order?
 	
 	Protein.add(CCMV);
 }

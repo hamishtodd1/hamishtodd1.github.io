@@ -41,9 +41,6 @@ icoVerticesNormalized[8] = new THREE.Vector3(-1,	-PHI,0);
 icoVerticesNormalized[9] = new THREE.Vector3(-PHI,	0,	-1);
 icoVerticesNormalized[10] = new THREE.Vector3(0, 	1,	-PHI);
 icoVerticesNormalized[11] = new THREE.Vector3(0,	-1,	-PHI);
-for( var i = 0; i < 12; i++ )
-	icoVerticesNormalized[i].normalize();
-var nearby_IVs = Array(icoVerticesNormalized.length);
 
 var dodVerticesNormalized = Array(20);
 dodVerticesNormalized[0] = new THREE.Vector3( 1/PHI,0, PHI);
@@ -70,9 +67,9 @@ dodVerticesNormalized[16] = new THREE.Vector3(-1, 1, 1);
 dodVerticesNormalized[17] = new THREE.Vector3(-1,-1, 1);
 dodVerticesNormalized[18] = new THREE.Vector3(-1, 1,-1);
 dodVerticesNormalized[19] = new THREE.Vector3(-1,-1,-1);
-for( var i = 0; i < dodVerticesNormalized.length; i++ )
-	dodVerticesNormalized[i].normalize();
+var nearby_IVs = Array(icoVerticesNormalized.length);
 var dodNearbyIVs = Array(dodVerticesNormalized.length);
+
 
 function shape(stemPosition, basis)
 {
@@ -174,6 +171,7 @@ function generate_lattice(startingShape, numSubstitutions)
 			}
 		}
 	}
+	//could have some rhombs and gicos, that's a nice one to see. Look for other examples of nice matchups
 	
 	
 	for(var i = 0; i < numSubstitutions; i++)
@@ -833,40 +831,13 @@ function addTria(centerPosition, edgelen, trias)
 	trias[newIndex].basis[5] = icoVerticesNormalized[ 11 ]; //speedup opportunity: they're all the same, no need for array
 }
 
-//if it's in proximity to an axis and you activate the axis, it is affected by it
-//you don't need to do the interior ones... save 32 vertices for tria, 10 for ico, 2 for dod. But trias are rare
-//but we're talking about vertices that have no faces attached here, they don't necessarily have a performance cost so shut up
-function update_extruding_polyhedron(axis_vectors, extrusion_level)
-{
-	if( typeof extrusion_level === 'undefined')
-		extrusion_level = axis_vectors.length;
-	extrude( this.children[0].geometry, axis_vectors, this.edgelen, extrusion_level );
-	var num_added = 0;
-	for(var i = 0; i < 64; i++ )
-	{
-		var flipper = 1;
-		for(var j = 0; j < 6; j++)
-		{
-			var partner = i ^ flipper;
-			flipper *= 2;
-			if( partner > i )
-				continue;
-		
-			insert_cylindernumbers(
-					this.children[0].geometry.vertices[ i ],
-					this.children[0].geometry.vertices[ partner ],
-					this.children[1].geometry.vertices, 
-					this.cylinder_sides, this.cylinder_sides * 2 * num_added, this.cylinder_radius );
-			
-			num_added++;
-		}
-	}
-	this.children[1].geometry.verticesNeedUpdate = true;
-	this.children[1].geometry.computeVertexNormals();
-}
-
 function init_poly_arrays()
 {	
+	for( var i = 0; i < 12; i++ )
+		icoVerticesNormalized[i].normalize();
+	for( var i = 0; i < dodVerticesNormalized.length; i++ )
+		dodVerticesNormalized[i].normalize();
+	
 	var rhomheightgetter = icoVerticesNormalized[0].clone();
 	rhomheightgetter.add(icoVerticesNormalized[1]);
 	rhomheightgetter.add(icoVerticesNormalized[5]);

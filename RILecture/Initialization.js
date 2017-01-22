@@ -5,7 +5,6 @@ function Initialize()
 	Renderer.setPixelRatio( window.devicePixelRatio );
 	Renderer.setSize( window.innerWidth, window.innerHeight );
 	Renderer.sortObjects = false;
-	Renderer.shadowMap.cullFace = THREE.CullFaceBack;
 	document.body.appendChild( Renderer.domElement );
 	
 	Scene = new THREE.Scene();
@@ -61,10 +60,14 @@ function Initialize()
 //		init_extruding_polyhedra_and_house();
 //		init_golden_lattice();
 //		initCCMV();
+//		initSolidVirusModels();
 //		initHoneycombs();
 //		initFishUniverse();
-		initSolidVirusModels();
 //		init_atoms();
+		
+		var symmetryDemonstration = new THREE.Object3D();
+		symmetryDemonstration.init = initSymmetryDemonstration;
+		symmetryDemonstration.init();
 
 		Render();
 	}

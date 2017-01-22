@@ -19,26 +19,35 @@ function init_extruding_polyhedra_and_house()
 	loader.load(
 		'http://hamishtodd1.github.io/RILecture/Data/editedHouse.obj',
 		function ( houseOBJ ) {
-			
-			var house = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshPhongMaterial({shading: THREE.FlatShading, color:0xFF0000, side: THREE.DoubleSide}));
+			var house = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshPhongMaterial({side: THREE.DoubleSide}));
+			house.castShadow = true;
+			house.receiveShadow = true;
 			house.geometry.fromBufferGeometry(houseOBJ.children[0].geometry);
-			
 			house.originalVerticesNumbers = houseOBJ.children[0].geometry.attributes.position.array;
-			
-			house.scale.set( 0.01,0.01,0.01 );
+			house.scale.multiplyScalar( 0.006 );
+			house.virtualRotation = new THREE.Matrix4();
 			
 			house.update = function()
 			{
 				var finalMatrix = new THREE.Matrix4();
-				/* the house's rotation matrix,
-				 * a matrix made out of the three vectors from the axis
-				 * then the problem is that you'd like it to not actually be rotated by your hand movements, so the inverse of the rotation matrix. Seems weird but is there anything more elegant?
-				 * But does the hand necessarily interface with the things it is holding through matrices?
-				 */
-//				house.rotateOnAxis(yAxis, TAU / 60); //test
-				house.updateMatrixWorld();
-				var houseRotation = new THREE.Matrix4().extractRotation(house.matrixWorld);
-				finalMatrix.getInverse(houseRotation);
+				
+//				house.rotateOnAxis(yAxis, TAU / 600); //test meant to simulate the rotation we'll apply. Hopefully no jerking ;_;
+				house.updateMatrix();
+				house.virtualRotation.multiply(new THREE.Matrix4().extractRotation(house.matrix));
+				house.rotation.set(0,0,0); //we don't want to see the rotation we've applied, we want that applied to the points
+				house.updateMatrix();
+				
+				var basis = getallBasisVectors( axis3D);
+				var basisMatrix = new THREE.Matrix4();
+				for(var i = 0; i < 3; i++)
+				{
+					var column = i === 2 ? 2 : 1-i; //x and y are reversed
+					basisMatrix.elements[0+i*4] = basis[column].x;
+					basisMatrix.elements[1+i*4] = basis[column].y;
+					basisMatrix.elements[2+i*4] = basis[column].z;
+				}
+				finalMatrix.copy( basisMatrix );
+				finalMatrix.multiply(house.virtualRotation); //would have thought it'd be the other way around but w/e
 				
 				for(var i = 0, il = this.geometry.vertices.length; i < il; i++)
 				{
@@ -53,21 +62,14 @@ function init_extruding_polyhedra_and_house()
 				this.geometry.verticesNeedUpdate = true;
 			}
 			
-			Protein.add( house );
+//			Protein.add( house );
 		}
 	);
 	
-//	var initial_extrusion_level = 5; //but it will always have the resources for the whole thing
-//	var axis_vectors = Array(initial_extrusion_level);
-//	for(var i = 0; i < initial_extrusion_level; i++)
-//	{
-//		axis_vectors[i] = new THREE.Vector3(0,1,0);
-//		axis6D.children[i*2].updateMatrixWorld();
-//		axis6D.children[i*2].localToWorld(axis_vectors[i]);
-//	}
-//	var EP = create_extruding_polyhedron(axis_vectors, true);
-//	EP.children[0].visible = false; //skeletal
-//	Protein.add(EP);
+	var axis_vectors = getallBasisVectors(axis3D);
+	var EP = create_extruding_polyhedron(axis_vectors, true);
+	EP.children[0].visible = false; //skeletal
+	Protein.add(EP);
 }
 
 function create_extruding_polyhedron(axis_vectors)
@@ -104,7 +106,6 @@ function create_extruding_polyhedron(axis_vectors)
 		Volume.geometry.vertices.push( new THREE.Vector3() );
 	EP.update = update_extruding_polyhedron;
 	EP.update(axis_vectors);
-	EP.update = function(){};
 	
 	for(var i = 0; i < goldenFaces[ axis_vectors.length - 3 ].length; i++ )
 		Volume.geometry.faces.push( goldenFaces[ axis_vectors.length - 3 ][i] );
@@ -113,6 +114,47 @@ function create_extruding_polyhedron(axis_vectors)
 	var EPscale = 0.16;
 	EP.scale.set(EPscale,EPscale,EPscale);
 	return EP;
+}
+
+//if it's in proximity to an axis and you activate the axis, it is affected by it
+//you don't need to do the interior ones... save 32 vertices for tria, 10 for ico, 2 for dod. But trias are rare
+//but we're talking about vertices that have no faces attached here, they don't necessarily have a performance cost so shut up
+function update_extruding_polyhedron(axis_vectors, extrusion_level)
+{
+	if( typeof axis_vectors === 'undefined' )
+	{
+		var axis_vectors;
+		for(var i = 0; i < Protein.children.length; i++)
+			if( Protein.children[ i ].type === "axis") //also a proximity thing
+				axis_vectors = getallBasisVectors(Protein.children[ i ] );
+	}
+	
+	if( typeof extrusion_level === 'undefined')
+		extrusion_level = axis_vectors.length;
+	
+	extrude( this.children[0].geometry, axis_vectors, this.edgelen, extrusion_level );
+	var num_added = 0;
+	for(var i = 0; i < 64; i++ )
+	{
+		var flipper = 1;
+		for(var j = 0; j < 6; j++)
+		{
+			var partner = i ^ flipper;
+			flipper *= 2;
+			if( partner > i )
+				continue;
+		
+			insert_cylindernumbers(
+					this.children[0].geometry.vertices[ i ],
+					this.children[0].geometry.vertices[ partner ],
+					this.children[1].geometry.vertices, 
+					this.cylinder_sides, this.cylinder_sides * 2 * num_added, this.cylinder_radius );
+			
+			num_added++;
+		}
+	}
+	this.children[1].geometry.verticesNeedUpdate = true;
+	this.children[1].geometry.computeVertexNormals();
 }
 
 function init_cylinder(ourGeometry, cylinder_sides, num_added)
@@ -172,6 +214,12 @@ function extrude(ourGeometry, axis_vectors, edgelen, extrusion_level, first_vert
 
 function init_axes()
 {
+	axis1D.type = "axis";
+	axis2D.type = "axis";
+	axis3D.type = "axis";
+	axis4D.type = "axis";
+	axis6D.type = "axis";
+		
 	var axisLength = 1;
 	var axisRadius = axisLength * 0.01;
 	var base_axis = new THREE.CylinderGeometry(axisRadius,axisRadius, axisLength, 32,1,true);
@@ -198,6 +246,7 @@ function init_axes()
 		if(axis_index === 10){ axis_color = 0x0000FF; labelstring = "  v"; }
 		
 		axis_set.add( new THREE.Mesh( base_axis.clone(), new THREE.MeshPhongMaterial({ color: axis_color }) ) );
+		axis_set.children[axis_index].geometry.type = "axisGeometry"
 		axis_set.children[axis_index].rotateOnAxis(yAxis, Y_rotation);
 		axis_set.children[axis_index].rotateOnAxis(zAxis,-Z_rotation);
 		
@@ -208,27 +257,13 @@ function init_axes()
 			labelGeometry = new THREE.BoxGeometry( axisLength / 13,axisLength / 13, axisLength / 80 );
 		axis_set.add( new THREE.Mesh(
 				labelGeometry,
-				new THREE.MeshPhongMaterial( { color: axis_color,  shading: THREE.FlatShading } ) ) );
+				new THREE.MeshPhongMaterial( { color: 0x888888,  shading: THREE.FlatShading } ) ) );
 		axis_set.children[axis_index].updateMatrixWorld();
 		axis_set.children[axis_index + 1].position.y = axisLength / 2;
 		axis_set.children[axis_index].localToWorld(axis_set.children[axis_index + 1].position);
 	}
 	
-	function getBasisVector(index)
-	{
-		basisVector = new THREE.Vector3(0,1,0);
-		this.children[index*2].updateMatrix();
-		basisVector.applyMatrix4(this.children[index*2].matrix);
-		return basisVector;
-	}
-	function getallBasisVectors(expectedNum)
-	{
-		var axis_vectors = Array(expectedNum);
-		for(var i = 0; i < expectedNum; i++)
-			axis_vectors[i] = this.getBasisVector(i);
-		//you could check if it was a cylinder
-		return axis_vectors;
-	}
+	
 		
 	add_axis( axis1D, 0,0 );
 	axis1D.update = axis_update;
@@ -241,12 +276,11 @@ function init_axes()
 	add_axis( axis3D, 0, TAU / 4 );
 	add_axis( axis3D, TAU / 4,-TAU / 4 );
 	
-	axis3D.getBasisVector = getBasisVector;
-	axis3D.xAxisDestination = axis3D.getBasisVector(1);
+	axis3D.xAxisDestination = getBasisVector(axis3D,1);
 	axis3D.ordinaryUpdate = axis_update;
 	axis3D.update = function()
 	{
-		var currentxAxis = this.getBasisVector(1);
+		var currentxAxis = getBasisVector(this, 1);
 		var alterationAxis = (currentxAxis.clone()).cross(this.xAxisDestination);
 		alterationAxis.applyMatrix4( new THREE.Matrix4().getInverse(this.children[2].matrix) );
 		alterationAxis.normalize();
@@ -356,6 +390,32 @@ function init_axes()
 	
 //	Protein.add(axis3D);
 }
+
+function getallBasisVectors(axis)
+{
+	var axis_vectors = [];
+	for(var i = 0; i < axis.children.length; i++)
+	{
+		if( typeof axis.children[i].geometry !== 'undefined' && 
+				axis.children[i].geometry.type === "axisGeometry")
+		{
+			axis_vectors.push( new THREE.Vector3(0,1,0) );
+			axis.children[i].updateMatrix();
+			axis_vectors[axis_vectors.length-1].applyMatrix4(axis.children[i].matrix);
+			axis_vectors[axis_vectors.length-1].normalize();
+		}
+	}
+	return axis_vectors;
+}
+
+function getBasisVector(axis, index)
+{
+	var basisVector = new THREE.Vector3(0,1,0);
+	axis.children[index*2].updateMatrix();
+	basisVector.applyMatrix4(axis.children[index*2].matrix);
+	return basisVector;
+}
+
 document.addEventListener( 'keydown', function(event)
 {
 	var latitudeAxis = axis3D.xAxisDestination.clone();
@@ -371,21 +431,22 @@ document.addEventListener( 'keydown', function(event)
 	if(event.keyCode === 40) //down
 		axis3D.xAxisDestination.applyAxisAngle(latitudeAxis,-rotationAmount);
 	
-	ms2Data.updateMatrix();
-	var realX = xAxis.clone();
-	realX.applyMatrix4(ms2Data.matrix)
-	realX.normalize();
-	var realY = yAxis.clone();
-	realY.applyMatrix4(ms2Data.matrix)
-	realY.normalize();
-	if(event.keyCode === 37) //left
-		ms2Data.rotateOnAxis(realY, -rotationAmount);
-	if(event.keyCode === 38) //up
-		ms2Data.rotateOnAxis(realX, rotationAmount);
-	if(event.keyCode === 39) //right
-		ms2Data.rotateOnAxis(realY, rotationAmount);
-	if(event.keyCode === 40) //down
-		ms2Data.rotateOnAxis(realX,-rotationAmount);
+	//MS2 crap
+//	ms2Data.updateMatrix();
+//	var realX = xAxis.clone();
+//	realX.applyMatrix4(ms2Data.matrix)
+//	realX.normalize();
+//	var realY = yAxis.clone();
+//	realY.applyMatrix4(ms2Data.matrix)
+//	realY.normalize();
+//	if(event.keyCode === 37) //left
+//		ms2Data.rotateOnAxis(realY, -rotationAmount);
+//	if(event.keyCode === 38) //up
+//		ms2Data.rotateOnAxis(realX, rotationAmount);
+//	if(event.keyCode === 39) //right
+//		ms2Data.rotateOnAxis(realY, rotationAmount);
+//	if(event.keyCode === 40) //down
+//		ms2Data.rotateOnAxis(realX,-rotationAmount);
 }, false );
 
 function axis_update()

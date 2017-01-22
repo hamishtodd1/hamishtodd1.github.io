@@ -1,71 +1,140 @@
 /* Points of rotational, arrows of translational, lines of mirror
  * Your idea was diamonds. No points of > 2 degrees of rotational symmetry is the problem
  */
-function initSymmetryDemonstration()
+
+initSymmetryDemonstration = function()
 {
-	//you could make it out of lines, that would deffo mean you could see what was behind it
+	this.mode = "nothing";
+
+	var symbolMaterial = new THREE.MeshBasicMaterial({ transparent:true });
 	
-	//the line of reflection
-	morphedPattern.reflectionSymbol = new THREE.Object3D();
-	morphedPattern.reflectionSymbol.scale.set(0.03,0.03,0.03);
-	var num_measuringstick_dashes = 12;
-	for(var i = 0; i < num_measuringstick_dashes; i++)
+	this.translationalSymbol = new THREE.Mesh( new THREE.PlaneGeometry(1, 1), symbolMaterial );
+	this.translationalSymbol.rotation.z = TAU/4;
+	var translationLength = 0.19;//tweak further
+	this.translationalSymbol.scale.setScalar(translationLength);
+	this.translationalSymbol.position.y = translationLength/2;
+	this.translationalSymbol.position.z = 0.001;
+	loadpic("http://hamishtodd1.github.io/RILecture/Data/symmetryDemonstration/translationalSymbol.png", this.translationalSymbol.material);
+	
+	this.rotationalSymbol = new THREE.Mesh( new THREE.PlaneGeometry(1, 1), symbolMaterial );
+	loadpic("http://hamishtodd1.github.io/RILecture/Data/symmetryDemonstration/threefoldRotational.png", this.rotationalSymbol.material);
+	this.rotationalSymbol.position.z = 0.001;
+	this.rotationalSymbol.scale.setScalar(translationLength);
+	
+	this.reflectionalSymbol = new THREE.Mesh( new THREE.PlaneGeometry(1, 1), symbolMaterial );
+	loadpic("http://hamishtodd1.github.io/RILecture/Data/symmetryDemonstration/reflectionalSymbol.png", this.reflectionalSymbol.material);
+	this.reflectionalSymbol.position.z = 0.001;
+
+	this.morphablePattern = new THREE.Mesh( new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({transparent:true, opacity:1, side:THREE.DoubleSide}) );
+	loadpic("http://hamishtodd1.github.io/RILecture/Data/symmetryDemonstration/morphablePattern.png", this.morphablePattern.material);
+	this.add( this.morphablePattern );
+	
+	this.underneathPattern = this.morphablePattern.clone();
+	this.underneathPattern.position.z = -0.0001;
+	this.underneathPattern.visible = false;
+	this.add( this.underneathPattern );
+	
+	this.controllerWeAreGrabbedBy = "not grabbed";
+	this.positionWhereMeshWasGrabbed = new THREE.Vector3(0,0,0);
+	
+//	this.update = function()
+//	{
+//		if( this.controllerWeAreGrabbedBy !== "not grabbed" )
+//		{
+//			if( !this.controllerWeAreGrabbedBy.Gripping )
+//				this.controllerWeAreGrabbedBy = "not grabbed";
+//			else
+//			{
+//				var destinationForPWMWG = controllerWeAreGrabbedBy.position.clone();
+//				destinationForPWMWG.z = 0;
+//				
+//				if(this.mode === "translation" )
+//				{
+//					this.morphablePattern.position.y = destinationForPWMWG.y - this.positionWhereMeshWasGrabbed.y;
+//					if( this.position.y > this.translationSymbol.scale.y ) //YO THE SYMBOL NEEDS TO BE A 1 LONG MESH THAT IS SCALED
+//						this.position.y = this.translationSymbol.scale.y;
+//					if( this.position.y < 0 )
+//						this.position.y = 0;
+//				}	
+//				else if(this.mode === "rotation" )
+//				{
+//					this.morphablePattern.rotation.z = this.positionWhereMeshWasGrabbed.angleTo( destinationForPWMWG ); //minus?
+//					if( this.rotation.z > TAU)
+//						this.rotation.z = TAU;
+////					if( this.rotation.z < 0)
+////						this.rotation.z = 0;
+//				}
+//				else if( this.mode === "reflection" )
+//				{
+//					this.morphablePattern.scale.x = destinationForPWMWG.x / this.positionWhereMeshWasGrabbed.x;
+//					if( this.scale.x >  1 )
+//						this.scale.x =  1;
+//					if( this.scale.x < -1 )
+//						this.scale.x = -1;
+//				}
+//			}
+//		}
+//		else
+//		{
+//			for(var i = 0; i < 2; i++)
+//			{
+//				if( Controllers[i].position.distanceTo( this.morphablePattern.geometry.boundingSphere.center ) < this.morphablePattern.geometry.boundingSphere.radius )
+//				{
+//					this.controllerWeAreGrabbedBy = Controllers[i];
+//					this.positionWhereMeshWasGrabbed = Controllers[i].position.clone();
+//					this.morphablePattern.updateMatrixWorld();
+//					this.morphablePattern.worldToLocal(this.positionWhereMeshWasGrabbed );
+//					this.positionWhereMeshWasGrabbed.z = 0;
+//				}
+//			}
+//		}
+//	}
+	
+	this.changeMode = function(newMode)
 	{
-		morphedPattern.reflectionSymbol.add(new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({color:0x000000})));
-		morphedPattern.reflectionSymbol.children[i].position.y = -0.5 - 2 * i;
-	}
-	
-	morphedPattern.changeMode( "rotation" );
-	
-	morphedPattern.grabbedPosition = new THREE.Vector3(1,1,0);
-	
-	morphedPattern.update = function()
-	{
-		var grabbedPositionAsCurrentlySeen = grabbedPosition.clone();
-		this.updateMatrixWorld();
-		this.localToWorld(grabbedPositionAsCurrentlySeen);
-		
+		this.mode = newMode;
 		if(this.mode === "translation" )
 		{
-			this.position.x += grabbedPositionAsCurrentlySeen.x - currentHandLocation.x;
-			if( this.position.x > this.translationSymbol.scale.x ) //YO THE SYMBOL NEEDS TO BE A 1 LONG MESH THAT IS SCALED
-				this.position.x = this.translationSymbol.scale.x;
-			if( this.position.x < 0 )
-				this.position.x = 0;
-		}	
-		else if(this.mode === "rotation" )
-		{
-			var currentHandLocationInPlane = currentHandLocation.clone();
-			currentHandLocationInPlane.z = 0;
-			this.rotation.z = grabbedPositionAsCurrentlySeen.angleTo(currentHandLocationInPlane);
-				
-			if( this.rotation.z > TAU * 2 / 3)
-				this.rotation.z = TAU * 2 / 3;
-			if( this.rotation.z < 0)
-				this.rotation.z = 0;
+			if(this.children.length > 2)
+				this.remove(this.children[2]);
+			this.add(this.translationalSymbol);
 		}
-		else if(this.mode === "reflection" )
+		if(this.mode === "rotation" )
 		{
-			
+			if(this.children.length > 2)
+				this.remove(this.children[2]);
+			this.add(this.rotationalSymbol);
 		}
+		if(this.mode === "reflection" )
+		{
+			if(this.children.length > 2)
+				this.remove(this.children[2]);
+			this.add(this.reflectionalSymbol);
+		}
+		if(this.mode === "nothing" )
+		{
+			this.remove(this.children[2]);
+		}
+//		this.morphablePattern.position.set(0,0,0);
+//		this.morphablePattern.scale.set(1,1,1);
+//		this.morphablePattern.rotation.set(0,0,0);
 	}
+	this.changeMode("reflection")
 	
-	morphedPattern.changeMode = function(newMode)
-	{
-		if(newMode === "translation" )
-		{
-			Scene.add(morphedPattern.translationSymbol);
+	Protein.add(this)
+}
+
+function loadpic(url, materialToMapTo) {
+	var texture_loader = new THREE.TextureLoader();
+	texture_loader.crossOrigin = true;
+	texture_loader.load(
+			url,
+		function(texture) {			
+			materialToMapTo.map = texture;
+			materialToMapTo.needsUpdate = true;
+		},
+		function ( xhr ) {}, function ( xhr ) {
+			console.log( 'texture loading error' );
 		}
-		if(newMode === "rotation" )
-		{
-			Scene.add(morphedPattern.rotationSymbol);
-		}
-		if(newMode === "reflection" )
-		{
-			Scene.add(morphedPattern.reflectionSymbol);
-		}
-		morphedPattern.
-		//you add those objects to the scene so that they can be moved around. Ideally that affects how much the thing can change but eh
-		this.mode = newMode;
-	}
+	);
 }
