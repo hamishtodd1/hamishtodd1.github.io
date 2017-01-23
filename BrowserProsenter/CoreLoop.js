@@ -11,7 +11,7 @@
 
 function UpdateWorld(Models,Hands, indicatorsound)
 {
-	UpdateHands(Models,Hands, indicatorsound);
+//	UpdateHands(Models,Hands, indicatorsound);
 	
 	if(debugging)
 		for(var i = 0; i < Models.length; i++)

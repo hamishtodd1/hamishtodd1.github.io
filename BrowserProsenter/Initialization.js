@@ -2,7 +2,7 @@
 socket.on('OnConnect_Message', function(msg)
 {	
 	var Renderer = new THREE.WebGLRenderer({ antialias: true }); //antialiasing would be nice and we're only aiming for 30fps
-	Renderer.setClearColor( 0x101010 );
+	Renderer.setClearColor( 0xACDFFC );
 	Renderer.setPixelRatio( window.devicePixelRatio );
 	Renderer.setSize( window.innerWidth, window.innerHeight );
 	Renderer.sortObjects = false;
@@ -61,7 +61,7 @@ socket.on('OnConnect_Message', function(msg)
 	var Controllers = Array(2);
 	for(var i = 0; i < 2; i++)
 	{
-		Controllers[ i ] = new THREE.Mesh( new THREE.Geometry(), new THREE.MeshPhongMaterial({color:0x000000}));
+		Controllers[ i ] = new THREE.Object3D();
 		Controllers[ i ].Gripping = 0;
 		Scene.add( Controllers[ i ] );
 	}
@@ -79,12 +79,21 @@ socket.on('OnConnect_Message', function(msg)
 	OurOBJLoader.load( handModelLink,
 		function ( object ) 
 		{
-			Controllers[ RIGHT_CONTROLLER_INDEX ].geometry = object.children[0].geometry;
-			Controllers[ RIGHT_CONTROLLER_INDEX ].scale.x *= -1;
-			Controllers[ RIGHT_CONTROLLER_INDEX ].material.side = THREE.BackSide;
-			Controllers[1-RIGHT_CONTROLLER_INDEX].geometry = object.children[0].geometry;
+			Controllers[ LEFT_CONTROLLER_INDEX ].add(new THREE.Mesh( object.children[0].geometry, new THREE.MeshPhongMaterial({color:0x000000}) ) )
+			Controllers[ LEFT_CONTROLLER_INDEX ].children[0].position.y += 0.043;
+			Controllers[ LEFT_CONTROLLER_INDEX ].children[0].position.z -= 0.036;
+			Controllers[ LEFT_CONTROLLER_INDEX ].children[0].rotation.x += 0.5;
+			
+			Controllers[1-LEFT_CONTROLLER_INDEX].add(new THREE.Mesh( object.children[0].geometry, new THREE.MeshPhongMaterial({color:0x000000}) ) )
+			Controllers[1-LEFT_CONTROLLER_INDEX].children[0].position.y += 0.043;
+			Controllers[1-LEFT_CONTROLLER_INDEX].children[0].position.z -= 0.036;
+			Controllers[1-LEFT_CONTROLLER_INDEX].children[0].rotation.x += 0.5;
+			Controllers[1-LEFT_CONTROLLER_INDEX].scale.x *= -1;
+			Controllers[1-LEFT_CONTROLLER_INDEX].children[0].material.side = THREE.BackSide;
 		},
 		function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); } );
+	
+	
 	
 	Render(Models, Controllers, indicatorsound);
 });

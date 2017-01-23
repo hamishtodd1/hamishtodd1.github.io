@@ -14,7 +14,7 @@ var inputObject = {
 	clientX: 0,
 	clientY: 0,
 	
-	controllerStates: [
+	controllerStates: [ //or hey you could send them the matrix, numnuts
 	    { position: new THREE.Vector3(), quaternion: new THREE.Quaternion() },
 		{ position: new THREE.Vector3(), quaternion: new THREE.Quaternion() } ],
 
@@ -58,6 +58,11 @@ inputObject.updateFromAsynchronousInput = function(Models,Controllers) //the pur
 		 */
 		OurVRControls.update();
 		
+		Controllers[0].updateMatrix();
+		Controllers[1].updateMatrix();
+		var formerPositions = Array(Controllers[0].position.clone(), Controllers[1].position.clone());
+		var formerQuaternions = Array(Controllers[0].quaternion.clone(), Controllers[1].quaternion.clone());
+		
 		//"Controllers" are updated synchronously and are the data you use
 		var gamepads = navigator.getGamepads();
 	    var riftGripButton = 2;
@@ -69,7 +74,7 @@ inputObject.updateFromAsynchronousInput = function(Models,Controllers) //the pur
 			if (gamepads[k] && gamepads[k].id === "Oculus Touch (Right)") //because some are undefined
 				affectedControllerIndex = RIGHT_CONTROLLER_INDEX;
 			if (gamepads[k] && gamepads[k].id === "Oculus Touch (Left)")
-				affectedControllerIndex = 1-RIGHT_CONTROLLER_INDEX;
+				affectedControllerIndex = LEFT_CONTROLLER_INDEX;
 			if(affectedControllerIndex === 666)
 				continue;
 			
@@ -87,6 +92,41 @@ inputObject.updateFromAsynchronousInput = function(Models,Controllers) //the pur
 				Controllers[affectedControllerIndex].Gripping = 0;
 		}
 		//if there hasn't been controller data, the controllers will just hang around
+		
+		for(var i = 0; i < Controllers.length; i++)
+		{
+			if( !Controllers[i].Gripping )
+				Controllers[i].heldObject = null;
+			else if( Controllers[i].heldObject === null )
+			{
+				var controllerRadius = Controllers[i].children[0].geometry.boundingSphere.radius;
+				for(var j = 0; j < Models.length; j++)
+				{
+					var modelRadius;
+					if(typeof Models[j].geometry !== 'undefined')
+						modelRadius = Models[j].geometry.boundingSphere.radius * Models[j].scale.x;
+					else
+						modelRadius = Models[j].children[0].geometry.boundingSphere.radius * Models[j].scale.x * Models[j].children[0].scale.x;
+					if( Controllers[i].position.distanceTo( Models[j].position ) < modelRadius + controllerRadius )
+					{
+						Controllers[i].heldObject = Models[j];
+						break; //so the one further up in the array gets it
+					}
+				}
+			}
+
+			if( Controllers[i].heldObject !== null )
+			{
+				Controllers[i].heldObject.position.sub(formerPositions[i]);
+				var invFormer = formerQuaternions[i].clone();
+				invFormer.inverse();
+				Controllers[i].heldObject.quaternion.premultiply( invFormer );
+				Controllers[i].heldObject.position.applyQuaternion( invFormer );
+				Controllers[i].heldObject.position.applyQuaternion( Controllers[i].quaternion );
+				Controllers[i].heldObject.position.add( Controllers[i].position );
+				Controllers[i].heldObject.quaternion.premultiply( Controllers[i].quaternion );
+			}
+		}
 		
 		for(var i = 0; i < Models.length; i++)
 			copyPositionAndQuaternion(this.modelStates[i], Models[i]);

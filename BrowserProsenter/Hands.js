@@ -2,28 +2,25 @@ function UpdateHands(Models,Controllers, indicatorsound)
 {
 //	if(Controllers[0].geometry.boundingSphere)
 //		console.log(Controllers[0].geometry.boundingSphere.center)
-	if(VRMODE) for(var i = 0; i < Controllers.length; i++)
-	{
-		if(Controllers[i].Gripping)
-		{			
-			for(var j = 0; j < Models.length; j++)
-			{
-				if( point_in_BoxHelper(Controllers[i].position,
-						Models[j].children[0].BoundingBoxAppearance.geometry.attributes.position.array) )
-				{
-					AttemptPickup(Controllers[i], Models[j]);
-				}
-			}
-		}
-		else{
-			Controllers[i].updateMatrixWorld();
-			for(var j = 0; j < Controllers[i].children.length; j++)
-			{
-				Controllers[i].children[j].updateMatrixWorld();
-				THREE.SceneUtils.detach(Controllers[i].children[j], Controllers[i], Scene);
-			}
-		}
-	}
+//	if(VRMODE) for(var i = 0; i < Controllers.length; i++)
+//	{
+//		if( Controllers[i].Gripping && Controllers[i].heldObject === null )
+//		{
+//			var controllerRadius = Controllers[i].children[0].geometry.boundingSphere.radius;
+//			for(var j = 0; j < Models.length; j++)
+//			{
+//				var modelRadius = Models[j].geometry.boundingSphere.radius; //might be one of its children
+//				if( Controllers[i].position.distanceTo( Models[j].position ) < modelRadius + controllerRadius )
+//					Controllers[i].heldObject = true;
+//			}
+//		}
+//		else{
+//			Controllers[i].heldObject = true;
+//			
+//			//to apply the hand's movement to an object, multiply the inverse of the hand's previous matrix by the new
+//			//then multiply the object's matrix by that.
+//		}
+//	}
 }
 
 function AttemptPickup(UserController, GrabbableObject)

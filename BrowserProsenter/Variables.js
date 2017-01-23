@@ -21,6 +21,7 @@ var socket = io();
 var gentilis;
 var VRMODE = 0;
 var RIGHT_CONTROLLER_INDEX = 0;
+var LEFT_CONTROLLER_INDEX = 1-RIGHT_CONTROLLER_INDEX;
 
 //var INITIAL_CAMERA_POSITION = new THREE.Vector3(0,0,0.6);
 
