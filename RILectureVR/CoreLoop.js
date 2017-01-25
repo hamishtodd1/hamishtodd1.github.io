@@ -1,21 +1,14 @@
 //A live fish
 
 //TODO for RI
-/*
- * Spectation
- * viewport
- * slides
- * Things disappearing and reappearing when you press a button
- * All on the server
- */
 
-function UpdateWorld(Models,Hands, indicatorsound)
+function UpdateWorld(holdables,Hands, indicatorsound)
 {
-//	UpdateHands(Models,Hands, indicatorsound);
+//	UpdateHands(holdables,Hands, indicatorsound);
 	
 	if(debugging)
-		for(var i = 0; i < Models.length; i++)
-			Models[i].children[0].BoundingBoxAppearance.update(Models[i]);
+		for(var i = 0; i < holdables.length; i++)
+			holdables[i].children[0].BoundingBoxAppearance.update(holdables[i]);
 	
 //	if( typeof video !== 'undefined' && video.readyState === video.HAVE_ENOUGH_DATA)
 //	{
@@ -25,17 +18,20 @@ function UpdateWorld(Models,Hands, indicatorsound)
 //	}
 }
 
-function Render( Models, Controllers, indicatorsound) {
+function Render( holdables, Controllers, presentation ) {
 	delta_t = ourclock.getDelta();
 //	if(delta_t > 0.1) delta_t = 0.1;
 
 	//window events, VR positions, and the lecturer
-	inputObject.updateFromAsynchronousInput( Models,Controllers );
-	UpdateWorld(Models, Controllers, indicatorsound);
+	inputObject.updateFromAsynchronousInput( 
+			holdables,
+			presentation.pages[ presentation.currentPageIndex ].holdablesInScene,
+			Controllers );
+	UpdateWorld(holdables, Controllers );
 	
 	//setTimeout( function() { requestAnimationFrame( render );}, 100 ); //debugging only
 	OurVREffect.requestAnimationFrame( function(){
 		OurVREffect.render( Scene, Camera );
-		Render(Models,Controllers, indicatorsound);
+		Render(holdables, Controllers, presentation );
 	} );
 }

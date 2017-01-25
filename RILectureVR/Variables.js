@@ -4,9 +4,10 @@
 //-----Mathematical constants
 var TAU = Math.PI * 2;
 var PHI = (1+Math.sqrt(5)) / 2;
-var Central_Z_axis = new THREE.Vector3(0,0,1); //also used as a placeholder normal
-var Central_Y_axis = new THREE.Vector3(0,1,0);
-var Central_X_axis = new THREE.Vector3(1,0,0);
+var HS3 = Math.sqrt(3)/2;
+var zAxis = new THREE.Vector3(0,0,1); //also used as a placeholder normal
+var yAxis = new THREE.Vector3(0,1,0);
+var xAxis = new THREE.Vector3(1,0,0);
 var zero_vector = new THREE.Vector3();
 
 //-----Fundamental, varying
@@ -31,7 +32,6 @@ var OurVRControls;
 //Other
 var Scene;
 var Camera;
-var stage = new NGL.Stage();
 
 var video;
 var videoTexture;

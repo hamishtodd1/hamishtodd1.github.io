@@ -39,7 +39,7 @@ function Add_stuff_from_demo(){
 
 	var ground = new THREE.Mesh( groundGeo, groundMat );
 	ground.rotation.x = -Math.PI/2;
-	ground.position.y = -2;
+	ground.position.y = -1.4;
 	Scene.add( ground );
 
 //	ground.receiveShadow = true;

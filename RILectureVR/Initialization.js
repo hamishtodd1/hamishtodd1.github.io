@@ -23,7 +23,7 @@ socket.on('OnConnect_Message', function(msg)
 			Renderer.domElement.width / Renderer.domElement.height, //window.innerWidth / window.innerHeight,
 			0.001, 700);
 	spectatorScreenIndicator = new THREE.Line(new THREE.Geometry());
-	for(var i = 0; i < 4; i++)
+	for(var i = 0; i < 5; i++)
 		spectatorScreenIndicator.geometry.vertices.push(new THREE.Vector3());
 	spectatorScreenIndicator.visible = false;
 	Camera.add( spectatorScreenIndicator );
@@ -33,15 +33,6 @@ socket.on('OnConnect_Message', function(msg)
 	OurVREffect = new THREE.VREffect( Renderer );
 	OurVRControls = new THREE.VRControls( Camera );
 	
-	var audioListener = new THREE.AudioListener();
-//	Camera.add( audioListener );
-	indicatorsound = new THREE.Audio( audioListener );
-//	indicatorsound.load(
-//		'http://hamishtodd1.github.io/BrowserProsenter/Data/SineSound.wav'
-//	);
-//	indicatorsound.autoplay = true;
-//	indicatorsound.setLoop(true);
-	
 	Add_stuff_from_demo();
 	
 	var OurFontLoader = new THREE.FontLoader();
@@ -50,13 +41,6 @@ socket.on('OnConnect_Message', function(msg)
 		function ( xhr ) {},
 		function ( xhr ) { console.error( "couldn't load font" ); }
 	);
-	
-	//"grippable objects"
-	var Models = Array();
-	
-	//Rubisco: 1rcx. Insulin: 4ins. Trp-Cage Miniprotein Construct TC5b, 20 residues: 1l2y
-	putModelInScene("1L2Y", Models);
-	putModelInScene("1L2Y", Models);
 	
 	var Controllers = Array(2);
 	for(var i = 0; i < 2; i++)
@@ -71,65 +55,79 @@ socket.on('OnConnect_Message', function(msg)
 		//actually people might want to spectate in google cardboard
 		//you just need to move the hands to be in the right position relative to wherever they're looking
 		document.body.appendChild( WEBVR.getButton( OurVREffect ) );
+		
 		spectatorScreenIndicator.visible = true;
 		spectatorScreenIndicator.frustumCulled = false;
+		
 		handModelLink = "http://hamishtodd1.github.io/BrowserProsenter/Data/external_controller01_left.obj"
 	}
 	var OurOBJLoader = new THREE.OBJLoader();
 	OurOBJLoader.load( handModelLink,
 		function ( object ) 
 		{
-			Controllers[ LEFT_CONTROLLER_INDEX ].add(new THREE.Mesh( object.children[0].geometry, new THREE.MeshPhongMaterial({color:0x000000}) ) )
-			Controllers[ LEFT_CONTROLLER_INDEX ].children[0].position.y += 0.043;
-			Controllers[ LEFT_CONTROLLER_INDEX ].children[0].position.z -= 0.036;
-			Controllers[ LEFT_CONTROLLER_INDEX ].children[0].rotation.x += 0.5;
-			
-			Controllers[1-LEFT_CONTROLLER_INDEX].add(new THREE.Mesh( object.children[0].geometry, new THREE.MeshPhongMaterial({color:0x000000}) ) )
-			Controllers[1-LEFT_CONTROLLER_INDEX].children[0].position.y += 0.043;
-			Controllers[1-LEFT_CONTROLLER_INDEX].children[0].position.z -= 0.036;
-			Controllers[1-LEFT_CONTROLLER_INDEX].children[0].rotation.x += 0.5;
-			Controllers[1-LEFT_CONTROLLER_INDEX].scale.x *= -1;
-			Controllers[1-LEFT_CONTROLLER_INDEX].children[0].material.side = THREE.BackSide;
+			if ( WEBVR.isAvailable() === true )
+			{
+				console.log("yo")
+				Controllers[ LEFT_CONTROLLER_INDEX ].add(new THREE.Mesh( object.children[0].geometry, new THREE.MeshPhongMaterial({color:0x000000}) ) )
+				Controllers[ LEFT_CONTROLLER_INDEX ].children[0].position.y += 0.043;
+				Controllers[ LEFT_CONTROLLER_INDEX ].children[0].position.z -= 0.036;
+				Controllers[ LEFT_CONTROLLER_INDEX ].children[0].rotation.x += 0.5;
+				
+				Controllers[1-LEFT_CONTROLLER_INDEX].add(new THREE.Mesh( object.children[0].geometry, new THREE.MeshPhongMaterial({color:0x000000}) ) )
+				Controllers[1-LEFT_CONTROLLER_INDEX].children[0].position.y += 0.043;
+				Controllers[1-LEFT_CONTROLLER_INDEX].children[0].position.z -= 0.036;
+				Controllers[1-LEFT_CONTROLLER_INDEX].children[0].rotation.x += 0.5;
+				Controllers[1-LEFT_CONTROLLER_INDEX].scale.x *= -1;
+				Controllers[1-LEFT_CONTROLLER_INDEX].children[0].material.side = THREE.BackSide;
+			}
+			else{				
+				object.children[0].scale.setScalar( 0.0006 );
+				object.children[0].rotation.y = TAU/2;
+				object.children[0].rotation.z =-1;
+				object.children[0].geometry.center();
+				
+				Controllers[ LEFT_CONTROLLER_INDEX ].add( object.children[0].clone() );
+				
+				Controllers[1-LEFT_CONTROLLER_INDEX ].add( object.children[0].clone() );
+				Controllers[1-LEFT_CONTROLLER_INDEX ].scale.x *= -1;
+				Controllers[1-LEFT_CONTROLLER_INDEX ].children[0].material = Controllers[ LEFT_CONTROLLER_INDEX ].children[0].material.clone();
+				Controllers[1-LEFT_CONTROLLER_INDEX ].children[0].material.side = THREE.BackSide;
+				Controllers[1-LEFT_CONTROLLER_INDEX ].children[0].material.needsUpdate = true;
+			}
 		},
 		function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); } );
 	
+	var presentation = { holdables: {} };
 	
-	
-	Render(Models, Controllers, indicatorsound);
-});
-
-function putModelInScene(linkstring, Models)
-{
-	if(linkstring.length === 4)
+	//"grippable objects"
+	presentation.createNewHoldable = function( holdableName )
 	{
-		var OurPDBLoader = new THREE.PDBLoader();
-		
-		linkstring = "http://files.rcsb.org/download/" + linkstring + ".pdb"
-		
-		OurPDBLoader.load(linkstring,
-			function ( geometryAtoms, geometryBonds, json ) {
-				Models.push( Create_first_model( geometryAtoms ) ); //they're just objects in the array
-				
-				var thisModelIndex = Models.length - 1;
-				
-				Models[thisModelIndex].position.z = -0.3;
-				var initial_model_spacing = 0.4;
-				Models[thisModelIndex].position.x = thisModelIndex * initial_model_spacing;
-				
-				inputObject.modelStates[thisModelIndex] = {
-						position: Models[thisModelIndex].position.clone(), 
-						quaternion: Models[thisModelIndex].quaternion.clone()
-					};
-				
-				Scene.add( Models[thisModelIndex]);
-				
-				Make_collisionbox( Models[thisModelIndex] );
-			},
-			function ( xhr ) {}, //progression function
-			function ( xhr ) { console.error( "couldn't load PDB" ); }
-		);
+		this.holdables[holdableName] = new THREE.Object3D();
+		this.holdables[holdableName].rotateable = true;
+		inputObject.holdableStates[holdableName] = {
+			position: this.holdables[holdableName].position.clone(), //TODO no clones, one less copy to make, same for controllers
+			quaternion: this.holdables[holdableName].quaternion.clone()
+		};
+		return this.holdables[holdableName];
 	}
-}
+	
+	init_axes();
+	init_poly_arrays();
+//	qcTablet.init();
+//	init_cubes();
+//	init_extruding_polyhedra_and_house();
+//	init_golden_lattice();
+//	initCCMV();
+	initSolidVirusModels( presentation );
+//	initHoneycombs();
+//	initFishUniverse();
+//	init_atoms();
+	initSymmetryDemonstration( presentation );
+	
+	initPresentation( presentation );
+
+	Render( presentation.holdables, Controllers, presentation );
+});
 
 function Make_collisionbox(Model)
 {

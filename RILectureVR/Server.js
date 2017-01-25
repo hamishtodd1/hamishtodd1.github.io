@@ -16,7 +16,7 @@ io.on('connection', function(socket){
 	console.log("User connected: ", socket.id)
 	io.to(socket.id).emit('OnConnect_Message', {ID:socket.id});
 	
-	socket.broadcast.on('ModelsControllersCameraUpdate', function(msg){ socket.broadcast.emit('ModelsControllersCameraUpdate', msg); });
+	socket.broadcast.on('holdablesControllersCameraUpdate', function(msg){ socket.broadcast.emit('holdablesControllersCameraUpdate', msg); });
 	socket.broadcast.on('screenIndicator', function(msg){ socket.broadcast.emit('screenIndicator', msg); });
 });
 

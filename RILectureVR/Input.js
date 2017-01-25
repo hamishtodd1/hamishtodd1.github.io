@@ -6,7 +6,7 @@
 //"get position data from other users" and "get our controller data" might be very different abstractions
 var inputObject = { 
 	//"private variables"
-	modelStates: Array(),
+	holdableStates: {},
 	
 	userString: "",
 	proteinRequested: 0,
@@ -21,36 +21,8 @@ var inputObject = {
 	cameraState: {position: new THREE.Vector3(), quaternion: new THREE.Quaternion()}
 };
 
-inputObject.updateFromAsynchronousInput = function(Models,Controllers) //the purpose of this is to update everything
-{	
-	if( this.proteinRequested === 1 || this.theydownloaded !== "" )
-	{
-		var NewProteinString;
-		//pretty damn unlikely that two users downloaded something on the same frame
-		//note that this means that a person in VR can use the computer of a spectator to get themselves a protein, if they're on google cardboard
-		if( this.proteinRequested === 1 )
-		{
-			NewProteinString = this.userString;
-			socket.emit('wedownloaded', this.userString );
-			ChangeuserString("");
-			this.proteinRequested = 0;
-		}
-		else
-		{
-			NewProteinString = this.theydownloaded;
-			this.theydownloaded = "";
-		}
-		
-		for( var i = 0; i < FamousProteins.length / 2; i++ )
-		{
-			if( NewProteinString === FamousProteins[i*2] )
-				putModelInScene( "http://files.rcsb.org/download/" + FamousProteins[i*2+1] + ".pdb", Models);
-			
-			if( i === FamousProteins.length - 1 ) //what if it's not a protein?
-				putModelInScene( "http://files.rcsb.org/download/" + NewProteinString + ".pdb", Models);
-		}
-	}
-	
+inputObject.updateFromAsynchronousInput = function(holdables, holdablesInScene, Controllers ) //the purpose of this is to update everything
+{
 	if(VRMODE) //including google cardboard TODO
 	{
 		/* OurVRControls is external. TODO replace it so you understand it. Later.
@@ -100,16 +72,42 @@ inputObject.updateFromAsynchronousInput = function(Models,Controllers) //the pur
 			else if( Controllers[i].heldObject === null )
 			{
 				var controllerRadius = Controllers[i].children[0].geometry.boundingSphere.radius;
-				for(var j = 0; j < Models.length; j++)
+				for( var j = 0; j < holdablesInScene.length; j++ )
 				{
-					var modelRadius;
-					if(typeof Models[j].geometry !== 'undefined')
-						modelRadius = Models[j].geometry.boundingSphere.radius * Models[j].scale.x;
-					else
-						modelRadius = Models[j].children[0].geometry.boundingSphere.radius * Models[j].scale.x * Models[j].children[0].scale.x;
-					if( Controllers[i].position.distanceTo( Models[j].position ) < modelRadius + controllerRadius )
+					var modelRadius = holdablesInScene[j].scale.x;
+					var holdableGeometry;
+					
+					if(typeof holdablesInScene[j].geometry !== 'undefined')
+						holdableGeometry = holdablesInScene[j].geometry;
+					else if(typeof holdablesInScene[j].children[0] !== 'undefined')
 					{
-						Controllers[i].heldObject = Models[j];
+						if(typeof holdablesInScene[j].children[0].geometry !== 'undefined')
+						{
+							modelRadius *= holdablesInScene[j].children[0].scale.x;
+							holdableGeometry = holdablesInScene[j].children[0].geometry;
+						}
+						else if( typeof holdablesInScene[j].children[0].children[0] !== 'undefined' )
+							if(  typeof holdablesInScene[j].children[0].children[0].geometry !== 'undefined')
+							{
+								modelRadius *= holdablesInScene[j].children[0].children[0].scale.x;
+								holdableGeometry = holdablesInScene[j].children[0].children[0].geometry;
+							}
+					} 
+					else
+					{
+						console.log("holdable with no geometry?")
+						continue; //we give up, can't find a model in here, you're not getting picked up
+					}
+					
+					console.log(holdablesInScene)
+					
+					if( holdableGeometry.boundingSphere === null)
+						holdableGeometry.computeBoundingSphere();
+					modelRadius *= holdableGeometry.boundingSphere.radius;
+					
+					if( Controllers[i].position.distanceTo( holdablesInScene[j].position ) < modelRadius + controllerRadius )
+					{
+						Controllers[i].heldObject = holdablesInScene[j];
 						break; //so the one further up in the array gets it
 					}
 				}
@@ -117,31 +115,39 @@ inputObject.updateFromAsynchronousInput = function(Models,Controllers) //the pur
 
 			if( Controllers[i].heldObject !== null )
 			{
-				Controllers[i].heldObject.position.sub(formerPositions[i]);
 				var invFormer = formerQuaternions[i].clone();
 				invFormer.inverse();
-				Controllers[i].heldObject.quaternion.premultiply( invFormer );
+				
+				Controllers[i].heldObject.position.sub(formerPositions[i]);
 				Controllers[i].heldObject.position.applyQuaternion( invFormer );
 				Controllers[i].heldObject.position.applyQuaternion( Controllers[i].quaternion );
 				Controllers[i].heldObject.position.add( Controllers[i].position );
-				Controllers[i].heldObject.quaternion.premultiply( Controllers[i].quaternion );
+				
+				if( Controllers[i].heldObject.rotateable )
+				{
+					Controllers[i].heldObject.quaternion.premultiply( invFormer );
+					Controllers[i].heldObject.quaternion.premultiply( Controllers[i].quaternion );
+				}
 			}
 		}
 		
-		for(var i = 0; i < Models.length; i++)
-			copyPositionAndQuaternion(this.modelStates[i], Models[i]);
-		for(var i = 0; i < 2; i++)
-			copyPositionAndQuaternion(this.controllerStates[i], Controllers[i]);
-		copyPositionAndQuaternion(this.cameraState, Camera);
-		
-		socket.emit('ModelsControllersCameraUpdate', this );
+		{
+			//seems like five lines too much code, but we want to keep this part synchronous
+			for( var i in holdables )
+				copyPositionAndQuaternion( this.holdableStates[i], holdables[i] );
+			for(var i = 0; i < 2; i++)
+				copyPositionAndQuaternion( this.controllerStates[i], Controllers[i] );
+			copyPositionAndQuaternion( this.cameraState, Camera );
+			socket.emit('holdablesControllersCameraUpdate', this );
+		}
 	}
 	else
 	{
 		//could have this be asynchronous as spectator is simple, 
 		//but the spectator only updates every frame anyway
-		for(var i = 0; i < Models.length; i++)
-			copyPositionAndQuaternion(Models[i], this.modelStates[i]);
+		
+		for(var i in holdables )
+			copyPositionAndQuaternion(holdables[i], this.holdableStates[i]);
 		copyPositionAndQuaternion(Camera, this.cameraState);
 		for(var i = 0; i < 2; i++)
 			copyPositionAndQuaternion(Controllers[i], this.controllerStates[i]);
@@ -153,12 +159,12 @@ inputObject.updateFromAsynchronousInput = function(Models,Controllers) //the pur
 			var intersectionPartner = i < 2 ? i + 2 : 3 - i;
 			var frustumCorner = cameraFrustum.planes[i].normal.clone();
 			frustumCorner.cross( cameraFrustum.planes[ intersectionPartner ].normal );
-			screenCornerCoords[i*3+0] = frustumCorner.x;
-			screenCornerCoords[i*3+1] = frustumCorner.y;
-			screenCornerCoords[i*3+2] = frustumCorner.z;
+			frustumCorner.multiplyScalar(0.005); //If you change the frustum culler or whatever then this changes :X
+			var cornerIndex = i % 3 ? i : 3-i;
+			screenCornerCoords[cornerIndex*3+0] = frustumCorner.x;
+			screenCornerCoords[cornerIndex*3+1] = frustumCorner.y;
+			screenCornerCoords[cornerIndex*3+2] = frustumCorner.z;
 		}
-		//Try tilting, try resizing window
-		//then you probably just need to add the camera position :o
 		socket.emit( 'screenIndicator', screenCornerCoords );
 	}
 }
@@ -173,32 +179,20 @@ socket.on('screenIndicator', function(spectatorScreenCornerCoords)
 			spectatorScreenCornerCoords[i*3+2]
 			);
 	}
+	Camera.children[0].geometry.vertices[4].set( //loop back
+			spectatorScreenCornerCoords[0],
+			spectatorScreenCornerCoords[1],
+			spectatorScreenCornerCoords[2]
+			);
 	Camera.children[0].geometry.verticesNeedUpdate = true;
 });
 
-socket.on('ModelsControllersCameraUpdate', function(lecturerInputObject)
+socket.on('holdablesControllersCameraUpdate', function(lecturerInputObject)
 {
-	if(lecturerInputObject.modelStates.length > inputObject.modelStates.length)
-	{
-		//TODO plus way more, who knows what's in there
-		//there again if someone is spectating it should all be ready really
-		for(var i = inputObject.modelStates.length; i < lecturerInputObject.modelStates.length; i++)
-		{
-			inputObject.modelStates[i] = {
-				position: new THREE.Vector3(), 
-				quaternion: new THREE.Quaternion()
-			};
-		}
-	}
-	
-	for(var i = 0; i < inputObject.modelStates.length; i++)
-		copyPositionAndQuaternion(inputObject.modelStates[i], lecturerInputObject.modelStates[i]);
+	console.log("receiving")
+	for(var i in inputObject.holdableStates )
+		copyPositionAndQuaternion(inputObject.holdableStates[i], lecturerInputObject.holdableStates[i]);
 	copyPositionAndQuaternion(inputObject.cameraState, lecturerInputObject.cameraState);
-	if(!logged)
-	{
-		console.log(inputObject.cameraState, lecturerInputObject.cameraState)
-		logged = 1;
-	}
 	for(var i = 0; i < 2; i++)
 		copyPositionAndQuaternion(inputObject.controllerStates[i], lecturerInputObject.controllerStates[i]);
 });
@@ -212,32 +206,6 @@ function copyPositionAndQuaternion(copyToObject, copyFromObject)
 //keyboard crap. Have to use "preventdefault" within ifs, otherwise certain things you'd like to do are prevented
 document.addEventListener( 'keydown', function(event)
 {
-	//arrow keys
-	if( 37 <= event.keyCode && event.keyCode <= 40)
-	{
-//		if(event.keyCode === 38)
-//			Scene.scale.multiplyScalar(0.5);
-//		if(event.keyCode === 40)
-//			Scene.scale.multiplyScalar(2);
-		
-		//tank controls
-//		var movingspeed = 0.8;
-//		var turningspeed = 0.05;
-//		
-//		var forwardvector = Camera.getWorldDirection();
-//		forwardvector.setLength(movingspeed);
-//		
-//		if(event.keyCode === 37)
-//			Camera.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(Central_Y_axis, turningspeed));
-//		if(event.keyCode === 38)
-//			Camera.position.add(forwardvector);
-//		if(event.keyCode === 39)
-//			Camera.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(Central_Y_axis,-turningspeed));
-//		if(event.keyCode === 40)
-//			Camera.position.sub(forwardvector);
-//		return;
-	}
-	
 	if(event.keyCode === 190 && WEBVR.isAvailable() === true)
 	{
 		event.preventDefault();
@@ -246,45 +214,10 @@ document.addEventListener( 'keydown', function(event)
 		VRMODE = 1; //OR GOOGLE CARDBOARD TODO, nobody wants to spectate as cardboard
 		
 		//bug if we do this earlier(?)
-		OurVREffect.scale = 0; //you'd think this would put your eyes in the same place but it doesn't
+		OurVREffect.scale = 0;
 		
 		return;
 	}
-	
-	if(event.keyCode === 13) //enter
-	{
-		event.preventDefault();
-		
-		
-		indicatorsound.source.stop();
-		indicatorsound.playbackRate *= 2;
-		indicatorsound.play();
-		
-//		inputObject.proteinRequested = 1;
-		return;
-	}
-	if(event.keyCode === 8) //backspace
-	{
-		event.preventDefault();
-		inputObject.ChangeuserString( inputObject.userString.slice(0, inputObject.userString.length - 1) );
-		return;
-	}
-	
-	//symbols
-	{
-		var arrayposition;
-		if( 48 <= event.keyCode && event.keyCode <= 57 )
-			arrayposition = event.keyCode - 48;
-		if( 65 <= event.keyCode && event.keyCode <= 90 )
-			arrayposition = event.keyCode - 55;
-		
-		if(typeof arrayposition != 'undefined')
-		{
-//			event.preventDefault(); //want to be able to ctrl+shift+j
-			inputObject.ChangeuserString(inputObject.userString + keycodeArray[arrayposition]); //this might get called before the above is compiled, ignore warning
-			return;
-		}
-	}	
 }, false );
 
 
