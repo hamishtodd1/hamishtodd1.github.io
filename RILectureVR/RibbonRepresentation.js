@@ -1,9 +1,6 @@
-function Insert_ribbon_representation_mesh(MyGeometry,geometryAtoms,CylinderSides,Num_vertices_between_CAs){
-	//first, try giving the length between the CAs as the length of the normal vectors
-		
+function Insert_ribbon_representation_mesh(MyGeometry,cAPositions,CylinderSides,Num_vertices_between_CAs)
+{
 	var TraceRadius = 0.2;
-	
-	var BondVectorNorm = new THREE.Vector3();
 	
 	var PP_index = 0;
 	var ActivePositions = Array(3);
@@ -13,25 +10,15 @@ function Insert_ribbon_representation_mesh(MyGeometry,geometryAtoms,CylinderSide
 	var BezierLengths = 0;
 	
 	{
-		var gotPP0 = 0;
-		for(var i = 0; i < geometryAtoms.atomIDs.length; i++){
-			if(IsBackBone(geometryAtoms.atomIDs[i] ) ){
-				if(!gotPP0){
-					ActivePositions[0].copy(geometryAtoms.vertices[i]);
-					gotPP0 = 1;
-				} else {
-					ActivePositions[1].copy(geometryAtoms.vertices[i]);
-					break;
-				}
-			}
-		}
+		ActivePositions[0].copy(cAPositions[0]);
+		ActivePositions[1].copy(cAPositions[1]);
 		
 		var LeftArm = ActivePositions[1].clone();
 		LeftArm.sub(ActivePositions[0]);
 		BezierLengths = LeftArm.length(); 
 		LeftArm.normalize();
 		
-		var TickVector = Random_perp_vector(LeftArm);
+		var TickVector = Random_perp_vector(LeftArm); //HEY THERE'S ONE HERE
 		TickVector.setLength(TraceRadius);
 		
 		for(var j = 0; j < CylinderSides; j++) {
@@ -45,49 +32,23 @@ function Insert_ribbon_representation_mesh(MyGeometry,geometryAtoms,CylinderSide
 	}
 	
 	var PlaneNormal = new THREE.Vector3();
-	var BezNormal = new THREE.Vector3();
-	var CurrBezReverseNormal = new THREE.Vector3();
 	var VertexBundleIndex = 0;
 	
-	for(var i = 0; i < geometryAtoms.atomIDs.length; i++){
-		if(IsBackBone(geometryAtoms.atomIDs[i] ) ){
-			ActivePositions[0].copy(ActivePositions[1]);
-			ActivePositions[1].copy(ActivePositions[2]);
-			ActivePositions[2].copy(geometryAtoms.vertices[i]);
+	for(var i = 0; i < cAPositions.length; i++){
+		ActivePositions[0].copy(ActivePositions[1]);
+		ActivePositions[1].copy(ActivePositions[2]);
+		ActivePositions[2].copy(cAPositions[i]);
+		
+		if( 2 <= PP_index ){
+			VertexBundleIndex = (PP_index - 1) * Num_vertices_between_CAs * CylinderSides;
 			
-			if( 2 <= PP_index ){
-				VertexBundleIndex = (PP_index - 1) * Num_vertices_between_CAs * CylinderSides;
-				
-				Insert_PlaneNormal_and_turnvertices(MyGeometry, ActivePositions, VertexBundleIndex, PlaneNormal);
-				
-//				for(var j = 0; j < CylinderSides; j++)
-//					MyGeometry.vertices[(PP_index - 1) * CylinderSides + j].copy(ActivePositions[1]);
-				
-				CurrBezReverseNormal.copy(PlaneNormal);
-				CurrBezReverseNormal.negate();
-				CurrBezReverseNormal.add(ActivePositions[3]);
-				
-				var InterpolationCurve = new THREE.CubicBezierCurve3(
-						ActivePositions[0],
-						PrevBezNormal,
-						CurrBezReverseNormal,
-						ActivePositions[1]
-					);
-				
-				for(var i = 0; i < Num_vertices_between_CAs; i++){
-							InterpolationCurve.getPoint(i / Num_vertices_between_CAs);
-							InterpolationCurve.getTangent(i/Num_vertices_between_CAs);
-					
-							Insert_PlaneNormal_and_turnvertices(MyGeometry, ActivePositions, PrevVertexBundleIndex, PlaneNormal);
-				}
-				
-				PrevBezNormal.copy(PlaneNormal);
-				PrevBezNormal.setLength(BezierLengths);
-				PrevBezNormal.add(ActivePositions[1]);
-			}
+			Insert_PlaneNormal_and_turnvertices(MyGeometry, ActivePositions, VertexBundleIndex, PlaneNormal);
 			
-			PP_index++;
+			for(var i = 0; i < Num_vertices_between_CAs; i++)
+				Insert_PlaneNormal_and_turnvertices(MyGeometry, ActivePositions, PrevVertexBundleIndex, PlaneNormal);
 		}
+		
+		PP_index++;
 	}
 	
 	//last one

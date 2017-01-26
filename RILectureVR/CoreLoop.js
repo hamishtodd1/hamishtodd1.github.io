@@ -2,13 +2,12 @@
 
 //TODO for RI
 
-function UpdateWorld(holdables,Hands, indicatorsound)
+function UpdateWorld(holdables, presentation)
 {
-//	UpdateHands(holdables,Hands, indicatorsound);
-	
-	if(debugging)
-		for(var i = 0; i < holdables.length; i++)
-			holdables[i].children[0].BoundingBoxAppearance.update(holdables[i]);
+	//For the sake of replication, can you make it so that the only contingency in updates is on the position and quaternion of things?
+	for(var i = 0, il = presentation.pages[presentation.currentPageIndex].holdablesInScene.length; i < il; i++)
+		if( typeof presentation.pages[presentation.currentPageIndex].holdablesInScene[i].update !== 'undefined' )
+			presentation.pages[presentation.currentPageIndex].holdablesInScene[i].update();
 	
 //	if( typeof video !== 'undefined' && video.readyState === video.HAVE_ENOUGH_DATA)
 //	{
@@ -26,8 +25,9 @@ function Render( holdables, Controllers, presentation ) {
 	inputObject.updateFromAsynchronousInput( 
 			holdables,
 			presentation.pages[ presentation.currentPageIndex ].holdablesInScene,
+			presentation,
 			Controllers );
-	UpdateWorld(holdables, Controllers );
+	UpdateWorld(holdables, presentation );
 	
 	//setTimeout( function() { requestAnimationFrame( render );}, 100 ); //debugging only
 	OurVREffect.requestAnimationFrame( function(){

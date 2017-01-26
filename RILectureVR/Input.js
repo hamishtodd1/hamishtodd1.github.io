@@ -21,7 +21,7 @@ var inputObject = {
 	cameraState: {position: new THREE.Vector3(), quaternion: new THREE.Quaternion()}
 };
 
-inputObject.updateFromAsynchronousInput = function(holdables, holdablesInScene, Controllers ) //the purpose of this is to update everything
+inputObject.updateFromAsynchronousInput = function(holdables, holdablesInScene, presentation, Controllers ) //the purpose of this is to update everything
 {
 	if(VRMODE) //including google cardboard TODO
 	{
@@ -38,7 +38,8 @@ inputObject.updateFromAsynchronousInput = function(holdables, holdablesInScene, 
 		//"Controllers" are updated synchronously and are the data you use
 		var gamepads = navigator.getGamepads();
 	    var riftGripButton = 2;
-	    var riftNextButton = 1;
+	    var riftChangePageButton = 1;
+	    var requestButton = 3;
 	    //pushing the thumbstick in is 0, the two buttons are 3 and 4
 		for(var k = 0; k < 2 && k < gamepads.length; ++k)
 		{
@@ -62,15 +63,48 @@ inputObject.updateFromAsynchronousInput = function(holdables, holdablesInScene, 
 				Controllers[affectedControllerIndex].Gripping = 1;
 			else
 				Controllers[affectedControllerIndex].Gripping = 0;
+			
+			if( affectedControllerIndex === RIGHT_CONTROLLER_INDEX )
+			{
+				if( gamepads[k].buttons[riftChangePageButton].value > 0.97 )
+				{
+					if( !presentation.alreadyMovedSlideForward )
+					{
+						presentation.changePage( 1 );
+						socket.emit('pageChange', presentation.currentPageIndex );
+						presentation.alreadyMovedSlideForward = 1;
+					}
+				}
+				else presentation.alreadyMovedSlideForward = 0;
+			}
+			else{
+				if( gamepads[k].buttons[riftChangePageButton].value > 0.97 )
+				{
+					if( !presentation.alreadyMovedSlideBackward )
+					{
+						presentation.changePage( -1 );
+						socket.emit('pageChange', presentation.currentPageIndex );
+						presentation.alreadyMovedSlideBackward = 1;
+					}
+				}
+				else presentation.alreadyMovedSlideBackward = 0;
+			}
 		}
 		//if there hasn't been controller data, the controllers will just hang around
 		
 		for(var i = 0; i < Controllers.length; i++)
 		{
 			if( !Controllers[i].Gripping )
-				Controllers[i].heldObject = null;
+			{
+				if( Controllers[i].heldObject !== null )
+				{
+					Controllers[i].heldObject.controllerWeAreGrabbedBy = null;
+					Controllers[i].heldObject = null;
+				}
+			}
 			else if( Controllers[i].heldObject === null )
 			{
+				var potentialGrabs = [];
 				var controllerRadius = Controllers[i].children[0].geometry.boundingSphere.radius;
 				for( var j = 0; j < holdablesInScene.length; j++ )
 				{
@@ -96,20 +130,25 @@ inputObject.updateFromAsynchronousInput = function(holdables, holdablesInScene, 
 					else
 					{
 						console.log("holdable with no geometry?")
-						continue; //we give up, can't find a model in here, you're not getting picked up
+						continue;
 					}
-					
-					console.log(holdablesInScene)
 					
 					if( holdableGeometry.boundingSphere === null)
 						holdableGeometry.computeBoundingSphere();
 					modelRadius *= holdableGeometry.boundingSphere.radius;
 					
 					if( Controllers[i].position.distanceTo( holdablesInScene[j].position ) < modelRadius + controllerRadius )
-					{
-						Controllers[i].heldObject = holdablesInScene[j];
-						break; //so the one further up in the array gets it
-					}
+						potentialGrabs.push(j);
+				}
+				
+				if( potentialGrabs.length)
+				{
+					var finalGrab = 0; //we start by assuming it's the first
+					for(var j = 1; j < potentialGrabs.length; j++)
+						if( Controllers[i].position.distanceTo( holdablesInScene[ potentialGrabs[j] ].position ) < Controllers[i].position.distanceTo( holdablesInScene[ potentialGrabs[finalGrab] ].position ) )
+							finalGrab = j;
+					Controllers[i].heldObject = holdablesInScene[ potentialGrabs[finalGrab] ];
+					holdablesInScene[ potentialGrabs[finalGrab] ].controllerWeAreGrabbedBy = Controllers[i];
 				}
 			}
 
@@ -118,10 +157,13 @@ inputObject.updateFromAsynchronousInput = function(holdables, holdablesInScene, 
 				var invFormer = formerQuaternions[i].clone();
 				invFormer.inverse();
 				
-				Controllers[i].heldObject.position.sub(formerPositions[i]);
-				Controllers[i].heldObject.position.applyQuaternion( invFormer );
-				Controllers[i].heldObject.position.applyQuaternion( Controllers[i].quaternion );
-				Controllers[i].heldObject.position.add( Controllers[i].position );
+				if( Controllers[i].heldObject.movable )
+				{
+					Controllers[i].heldObject.position.sub(formerPositions[i]);
+					Controllers[i].heldObject.position.applyQuaternion( invFormer );
+					Controllers[i].heldObject.position.applyQuaternion( Controllers[i].quaternion );
+					Controllers[i].heldObject.position.add( Controllers[i].position );
+				}
 				
 				if( Controllers[i].heldObject.rotateable )
 				{
@@ -165,6 +207,8 @@ inputObject.updateFromAsynchronousInput = function(holdables, holdablesInScene, 
 			screenCornerCoords[cornerIndex*3+1] = frustumCorner.y;
 			screenCornerCoords[cornerIndex*3+2] = frustumCorner.z;
 		}
+		Camera.children[1].scale.setScalar(Math.abs( screenCornerCoords[0*3+1] - screenCornerCoords[3*3+1] ) );
+		Camera.children[1].position.z = screenCornerCoords[2];
 		socket.emit( 'screenIndicator', screenCornerCoords );
 	}
 }
@@ -185,11 +229,13 @@ socket.on('screenIndicator', function(spectatorScreenCornerCoords)
 			spectatorScreenCornerCoords[2]
 			);
 	Camera.children[0].geometry.verticesNeedUpdate = true;
+	
+	Camera.children[1].scale.setScalar(Math.abs( spectatorScreenCornerCoords[0*3+1] - spectatorScreenCornerCoords[3*3+1] ) );
+	Camera.children[1].position.z = spectatorScreenCornerCoords[2] - 0.00001;
 });
 
 socket.on('holdablesControllersCameraUpdate', function(lecturerInputObject)
 {
-	console.log("receiving")
 	for(var i in inputObject.holdableStates )
 		copyPositionAndQuaternion(inputObject.holdableStates[i], lecturerInputObject.holdableStates[i]);
 	copyPositionAndQuaternion(inputObject.cameraState, lecturerInputObject.cameraState);

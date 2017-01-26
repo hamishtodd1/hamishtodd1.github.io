@@ -23,6 +23,7 @@ socket.on('OnConnect_Message', function(msg)
 			Renderer.domElement.width / Renderer.domElement.height, //window.innerWidth / window.innerHeight,
 			0.001, 700);
 	spectatorScreenIndicator = new THREE.Line(new THREE.Geometry());
+	spectatorScreenIndicator.material.color.set(0,0,0)
 	for(var i = 0; i < 5; i++)
 		spectatorScreenIndicator.geometry.vertices.push(new THREE.Vector3());
 	spectatorScreenIndicator.visible = false;
@@ -35,18 +36,12 @@ socket.on('OnConnect_Message', function(msg)
 	
 	Add_stuff_from_demo();
 	
-	var OurFontLoader = new THREE.FontLoader();
-	OurFontLoader.load(  "gentilis.js", 
-		function ( reponse ) { gentilis = reponse; },
-		function ( xhr ) {},
-		function ( xhr ) { console.error( "couldn't load font" ); }
-	);
-	
 	var Controllers = Array(2);
 	for(var i = 0; i < 2; i++)
 	{
 		Controllers[ i ] = new THREE.Object3D();
 		Controllers[ i ].Gripping = 0;
+		Controllers[ i ].heldObject = null;
 		Scene.add( Controllers[ i ] );
 	}
 	var handModelLink = "http://hamishtodd1.github.io/BrowserProsenter/Data/glove.obj"
@@ -67,18 +62,20 @@ socket.on('OnConnect_Message', function(msg)
 		{
 			if ( WEBVR.isAvailable() === true )
 			{
-				console.log("yo")
 				Controllers[ LEFT_CONTROLLER_INDEX ].add(new THREE.Mesh( object.children[0].geometry, new THREE.MeshPhongMaterial({color:0x000000}) ) )
-				Controllers[ LEFT_CONTROLLER_INDEX ].children[0].position.y += 0.043;
-				Controllers[ LEFT_CONTROLLER_INDEX ].children[0].position.z -= 0.036;
+				Controllers[ LEFT_CONTROLLER_INDEX ].children[0].position.y += 0.035;
+				Controllers[ LEFT_CONTROLLER_INDEX ].children[0].position.z -= 0.04;
 				Controllers[ LEFT_CONTROLLER_INDEX ].children[0].rotation.x += 0.5;
+				Controllers[ LEFT_CONTROLLER_INDEX ].add(new THREE.Mesh( new THREE.SphereGeometry(0.01) ) )
 				
 				Controllers[1-LEFT_CONTROLLER_INDEX].add(new THREE.Mesh( object.children[0].geometry, new THREE.MeshPhongMaterial({color:0x000000}) ) )
-				Controllers[1-LEFT_CONTROLLER_INDEX].children[0].position.y += 0.043;
-				Controllers[1-LEFT_CONTROLLER_INDEX].children[0].position.z -= 0.036;
+				Controllers[1-LEFT_CONTROLLER_INDEX].children[0].position.y += 0.035;
+				Controllers[1-LEFT_CONTROLLER_INDEX].children[0].position.z -= 0.04;
 				Controllers[1-LEFT_CONTROLLER_INDEX].children[0].rotation.x += 0.5;
 				Controllers[1-LEFT_CONTROLLER_INDEX].scale.x *= -1;
 				Controllers[1-LEFT_CONTROLLER_INDEX].children[0].material.side = THREE.BackSide;
+				Controllers[1-LEFT_CONTROLLER_INDEX].add(new THREE.Mesh( new THREE.SphereGeometry(0.01) ) )
+				Controllers[1-LEFT_CONTROLLER_INDEX].children[1].material.side = THREE.BackSide;
 			}
 			else{				
 				object.children[0].scale.setScalar( 0.0006 );
@@ -97,36 +94,54 @@ socket.on('OnConnect_Message', function(msg)
 		},
 		function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); } );
 	
-	var presentation = { holdables: {} };
-	
-	//"grippable objects"
-	presentation.createNewHoldable = function( holdableName )
-	{
-		this.holdables[holdableName] = new THREE.Object3D();
-		this.holdables[holdableName].rotateable = true;
-		inputObject.holdableStates[holdableName] = {
-			position: this.holdables[holdableName].position.clone(), //TODO no clones, one less copy to make, same for controllers
-			quaternion: this.holdables[holdableName].quaternion.clone()
-		};
-		return this.holdables[holdableName];
-	}
-	
-	init_axes();
-	init_poly_arrays();
-//	qcTablet.init();
-//	init_cubes();
-//	init_extruding_polyhedra_and_house();
-//	init_golden_lattice();
-//	initCCMV();
-	initSolidVirusModels( presentation );
-//	initHoneycombs();
-//	initFishUniverse();
-//	init_atoms();
-	initSymmetryDemonstration( presentation );
-	
-	initPresentation( presentation );
+	var OurFontLoader = new THREE.FontLoader();
+	OurFontLoader.load(  "gentilis.js", function ( reponse ) 
+		{
+			gentilis = reponse;
+			
+			var presentation = { holdables: {}, pictureHolder: new THREE.Object3D() };
+			presentation.pictureHolder.position.z = -1;
+			Camera.add( presentation.pictureHolder );
+			
+			//"grippable objects"
+			presentation.createNewHoldable = function( holdableName, holdable )
+			{
+				if( typeof holdable === 'undefined')
+					this.holdables[holdableName] = new THREE.Object3D();
+				else
+					this.holdables[holdableName] = holdable;
+				this.holdables[holdableName].rotateable = true;
+				this.holdables[holdableName].movable = true;
+				this.holdables[holdableName].controllerWeAreGrabbedBy = null;
+				inputObject.holdableStates[holdableName] = {
+					position: this.holdables[holdableName].position.clone(), //TODO no clones, one less copy to make, same for controllers
+					quaternion: this.holdables[holdableName].quaternion.clone()
+				};
+				return this.holdables[holdableName];
+			}
+			
+			init_axes(presentation);
+//			qcTablet.init();
+//			init_cubes( presentation );
+			init_extruding_polyhedra_and_house( presentation );
+//			init_goldenLattice(presentation);
+//			initCCMV( presentation );
+//			initSolidVirusModels( presentation );
+//			initHoneycombs( presentation );
+//			initFishUniverse( presentation, Controllers[ LEFT_CONTROLLER_INDEX ]);
+//			init_atoms( presentation ); //fuck this
+			initSymmetryDemonstration( presentation );
+			
+			//Still to do: CCMV representation, axis "factories"
+			//is it reproducing? Slides
+			
+			initPresentation( presentation );
 
-	Render( presentation.holdables, Controllers, presentation );
+			Render( presentation.holdables, Controllers, presentation );
+		},
+		function ( xhr ) {},
+		function ( xhr ) { console.error( "couldn't load font" ); }
+	);
 });
 
 function Make_collisionbox(Model)

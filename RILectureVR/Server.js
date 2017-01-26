@@ -18,6 +18,7 @@ io.on('connection', function(socket){
 	
 	socket.broadcast.on('holdablesControllersCameraUpdate', function(msg){ socket.broadcast.emit('holdablesControllersCameraUpdate', msg); });
 	socket.broadcast.on('screenIndicator', function(msg){ socket.broadcast.emit('screenIndicator', msg); });
+	socket.broadcast.on('pageChange', function(msg){ socket.broadcast.emit('pageChange', msg); });
 });
 
 http.listen(3000, function(){ //3000 for local, 8000 for proper. Might need a sudo
