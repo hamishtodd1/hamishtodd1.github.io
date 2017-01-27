@@ -4,9 +4,9 @@ function UpdateWorld(Models,Hands)
 	
 //	if( typeof attractedAtom !== 'undefined' )
 //		attractedAtom.update();
-	for(var i = 0, il = Protein.children.length; i < il; i++)
-		if( typeof Protein.children[i].update !== 'undefined' )
-			Protein.children[i].update();
+	for(var i = 0, il = OurObject.children.length; i < il; i++)
+		if( typeof OurObject.children[i].update !== 'undefined' )
+			OurObject.children[i].update();
 	//we're heading towards a sense of core loop just being if(thing in scene), thing.update();
 }
 

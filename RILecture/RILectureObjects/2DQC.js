@@ -21,7 +21,7 @@ qcTablet.init = function()
 	
 	this.scale.set(0.08,0.08,0.08);
 	
-	Protein.add(this);
+	OurObject.add(this);
 	console.log("a")
 }
 
@@ -38,8 +38,8 @@ qcTablet.update = function()
 	papermatrix.multiplyScalar(0.5);
 	
 	var whereWeLook = Camera.position.clone();
-//	Protein.updateMatrixWorld();
-	Protein.worldToLocal(whereWeLook);
+//	OurObject.updateMatrixWorld();
+	OurObject.worldToLocal(whereWeLook);
 	this.lookAt(whereWeLook);
 //	this.rotation.x = Camera.rotation.x;
 //	this.rotation.y = Camera.rotation.y;

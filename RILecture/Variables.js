@@ -27,8 +27,6 @@ var OurVRControls;
 
 var OurObject = new THREE.Object3D();
 
-var Protein = new THREE.Object3D();
-
 var PointOfFocus = new THREE.Vector3(); //where the user is looking
 
 

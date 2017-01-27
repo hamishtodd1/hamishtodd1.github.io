@@ -99,7 +99,7 @@ function init_golden_lattice()
 	
 	var lattice_scale = 0.09;
 	golden_lattice.scale.set( lattice_scale, lattice_scale, lattice_scale );
-	Protein.add(golden_lattice);
+	OurObject.add(golden_lattice);
 }
 
 function generate_lattice(startingShape, numSubstitutions)

@@ -2,13 +2,11 @@
  * Your idea was diamonds. No points of > 2 degrees of rotational symmetry is the problem
  */
 
-initSymmetryDemonstration = function()
+function initSymmetryDemonstration()
 {
 	this.mode = "nothing";
-
-	var symbolMaterial = new THREE.MeshBasicMaterial({ transparent:true });
 	
-	this.translationalSymbol = new THREE.Mesh( new THREE.PlaneGeometry(1, 1), symbolMaterial );
+	this.translationalSymbol = new THREE.Mesh( new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ transparent:true }) );
 	this.translationalSymbol.rotation.z = TAU/4;
 	var translationLength = 0.19;//tweak further
 	this.translationalSymbol.scale.setScalar(translationLength);
@@ -16,12 +14,12 @@ initSymmetryDemonstration = function()
 	this.translationalSymbol.position.z = 0.001;
 	loadpic("http://hamishtodd1.github.io/RILecture/Data/symmetryDemonstration/translationalSymbol.png", this.translationalSymbol.material);
 	
-	this.rotationalSymbol = new THREE.Mesh( new THREE.PlaneGeometry(1, 1), symbolMaterial );
+	this.rotationalSymbol = new THREE.Mesh( new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ transparent:true }) );
 	loadpic("http://hamishtodd1.github.io/RILecture/Data/symmetryDemonstration/threefoldRotational.png", this.rotationalSymbol.material);
 	this.rotationalSymbol.position.z = 0.001;
 	this.rotationalSymbol.scale.setScalar(translationLength);
 	
-	this.reflectionalSymbol = new THREE.Mesh( new THREE.PlaneGeometry(1, 1), symbolMaterial );
+	this.reflectionalSymbol = new THREE.Mesh( new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ transparent:true }) );
 	loadpic("http://hamishtodd1.github.io/RILecture/Data/symmetryDemonstration/reflectionalSymbol.png", this.reflectionalSymbol.material);
 	this.reflectionalSymbol.position.z = 0.001;
 
@@ -119,22 +117,6 @@ initSymmetryDemonstration = function()
 //		this.morphablePattern.scale.set(1,1,1);
 //		this.morphablePattern.rotation.set(0,0,0);
 	}
-	this.changeMode("reflection")
-	
-	Protein.add(this)
+	this.changeMode("rotation")
 }
 
-function loadpic(url, materialToMapTo) {
-	var texture_loader = new THREE.TextureLoader();
-	texture_loader.crossOrigin = true;
-	texture_loader.load(
-			url,
-		function(texture) {			
-			materialToMapTo.map = texture;
-			materialToMapTo.needsUpdate = true;
-		},
-		function ( xhr ) {}, function ( xhr ) {
-			console.log( 'texture loading error' );
-		}
-	);
-}

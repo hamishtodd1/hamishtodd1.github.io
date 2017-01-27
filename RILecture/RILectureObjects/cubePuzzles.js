@@ -164,13 +164,13 @@ function init_cubes()
 	//then try making it with just normal cubes and see which ones need to be dealt with
 	function makePuzzle(cubeHalf)
 	{
-		Protein.add(cubeHalf);
+		OurObject.add(cubeHalf);
 		cubeHalf.material.color.r = 0;
 		var otherHalf = cubeHalf.clone();
 		var cornerAxis = new THREE.Vector3(1,-1,1)
 		cornerAxis.normalize();
 		myPlane = new THREE.Mesh(new THREE.PlaneGeometry(0.7,0.7), new THREE.MeshBasicMaterial({transparent:true, opacity: 0.5, color: 0x57007F, side: THREE.DoubleSide}));
-		Protein.add(otherHalf);
+		OurObject.add(otherHalf);
 		var newRearUp = (new THREE.Vector3(1,1,1)).angleTo(new THREE.Vector3(0,1,0));
 		otherHalf.rotateOnAxis(new THREE.Vector3(-1/Math.sqrt(2),0,1/Math.sqrt(2)), -newRearUp );
 		var edgeAxis = new THREE.Vector3(-0.5,-1,-0.5)
@@ -179,7 +179,7 @@ function init_cubes()
 		otherHalf.rotateOnAxis(edgeAxis,TAU / 2);
 		cubeHalf.rotateOnAxis(new THREE.Vector3(-1/Math.sqrt(2),0,1/Math.sqrt(2)), -newRearUp );
 		myPlane.rotation.x = TAU / 4;
-		Protein.add(myPlane);
+		OurObject.add(myPlane);
 	}
 	
 	//the light puzze
@@ -200,12 +200,12 @@ function init_cubes()
 //		var radiusGradient = ( shadowBottomRadius - pentagonRadius ) / shadowHeight;
 //		ourLight.position.z = -pentagonRadius / radiusGradient;
 //			//at 0, r = pentagonRadius, at shadowHeight it = 
-//		Protein.add( ourLight );
+//		OurObject.add( ourLight );
 //		var shadowPlane = new THREE.Mesh(new THREE.CylinderGeometry(pentagonRadius*7,pentagonRadius*7,pentagonRadius*9,62,1,true,TAU/4*3,TAU/4), new THREE.MeshPhongMaterial({color: 0x57007F, side: THREE.DoubleSide}));
 //		shadowPlane.position.z = -shadowHeight*0.8;
 //		shadowPlane.position.y -= 0.3;
 //		shadowPlane.rotation.z = -TAU / 4;
-//		Protein.add(shadowVolume, shadowPlane,pentagon);
+//		OurObject.add(shadowVolume, shadowPlane,pentagon);
 		
 //		Renderer.setClearColor(0xFFFFFF)
 		Scene.remove(Scene.children[4])
@@ -235,10 +235,10 @@ function init_cubes()
 			diagonalPlane.rotation.set(1.57,-0.563,0)
 			diagonalPlane.position.set(0.02,-0.34,0)
 			
-//			Protein.add(tree);
-//			Protein.add(horizontalPlane);
-//			Protein.add(verticalPlane);
-//			Protein.add(diagonalPlane);
+//			OurObject.add(tree);
+//			OurObject.add(horizontalPlane);
+//			OurObject.add(verticalPlane);
+//			OurObject.add(diagonalPlane);
 		}
 	);
 	loader.load(
@@ -249,35 +249,35 @@ function init_cubes()
 			for(var i = 0, il = banana.geometry.attributes.position.array.length; i<il; i++) 
 				banana.geometry.attributes.position.array[i] *=0.1;
 			banana.position.set(-2.55,0,1.79)
-//			Protein.add(banana)
+//			OurObject.add(banana)
 			
 			var slicePlane = new THREE.Mesh(new THREE.PlaneGeometry(0.28,0.28), new THREE.MeshBasicMaterial({transparent:true, opacity: 0.5, color: 0x57007F, side: THREE.DoubleSide}));
-//			Protein.add(slicePlane);
+//			OurObject.add(slicePlane);
 		}
 	);
 	loader.load(
-			'http://hamishtodd1.github.io/RILecture/Data/clebsch.obj',
-			function ( clebschOBJ ) {
-				var clebsch = clebschOBJ.children[0];
-				clebsch.material.color.b = 0;
-				var newRearUp = (new THREE.Vector3(1,1,1)).angleTo(new THREE.Vector3(0,1,0));
-				var clebschMatrix = (new THREE.Matrix4()).makeRotationAxis ( new THREE.Vector3(1/Math.sqrt(2),0,1/Math.sqrt(2)), -newRearUp );
-				clebsch.geometry.applyMatrix(clebschMatrix);
-				for(var i = 0, il = clebsch.geometry.attributes.position.array.length; i<il; i++) 
-					clebsch.geometry.attributes.position.array[i] *=0.1;
-				var cutoff = -0.58;
-				for(var i = 0, il = clebsch.geometry.attributes.position.array.length/3; i<il; i++)
-				{
-					clebsch.geometry.attributes.position.array[i*3+1] *= 5;
-					
-					if( clebsch.geometry.attributes.position.array[i*3+1] < cutoff )
-						clebsch.geometry.attributes.position.array[i*3+1] = cutoff;
-				}	
-				Protein.add(clebsch)
+		'http://hamishtodd1.github.io/RILecture/Data/clebsch.obj',
+		function ( clebschOBJ ) {
+			var clebsch = clebschOBJ.children[0];
+			clebsch.material.color.b = 0;
+			var newRearUp = (new THREE.Vector3(1,1,1)).angleTo(new THREE.Vector3(0,1,0));
+			var clebschMatrix = (new THREE.Matrix4()).makeRotationAxis ( new THREE.Vector3(1/Math.sqrt(2),0,1/Math.sqrt(2)), -newRearUp );
+			clebsch.geometry.applyMatrix(clebschMatrix);
+			for(var i = 0, il = clebsch.geometry.attributes.position.array.length; i<il; i++) 
+				clebsch.geometry.attributes.position.array[i] *=0.1;
+			var cutoff = -0.58;
+			for(var i = 0, il = clebsch.geometry.attributes.position.array.length/3; i<il; i++)
+			{
+				clebsch.geometry.attributes.position.array[i*3+1] *= 5;
 				
-				slicePlane = new THREE.Mesh(new THREE.PlaneGeometry(0.28,0.28), new THREE.MeshBasicMaterial({transparent:true, opacity: 0.5, color: 0x57007F, side: THREE.DoubleSide}));
-				Protein.add(slicePlane);
-			}
-		);
+				if( clebsch.geometry.attributes.position.array[i*3+1] < cutoff )
+					clebsch.geometry.attributes.position.array[i*3+1] = cutoff;
+			}	
+			OurObject.add(clebsch)
+			
+			slicePlane = new THREE.Mesh(new THREE.PlaneGeometry(0.28,0.28), new THREE.MeshBasicMaterial({transparent:true, opacity: 0.5, color: 0x57007F, side: THREE.DoubleSide}));
+			OurObject.add(slicePlane);
+		}
+	);
 	
 }

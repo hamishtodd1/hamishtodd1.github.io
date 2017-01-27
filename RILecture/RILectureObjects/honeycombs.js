@@ -108,7 +108,7 @@ function initHoneycombs()
 	latticeShadow.position.y =-cube_edgelen * cubes_wide * cubicLatticeScale;
 	atomic_cubic_lattice.update = function()
 	{
-		Protein.updateMatrixWorld();
+		OurObject.updateMatrixWorld();
 		for(var i = 0, il = latticeShadow.children.length; i < il; i++ )
 		{
 			latticeShadow.children[i].position.copy( atomic_cubic_lattice.children[i].position );
@@ -118,12 +118,12 @@ function initHoneycombs()
 		}
 	}
 	
-//	Protein.add( atomic_cubic_lattice );
-//	Protein.add( latticeShadow );
-//	Protein.add(cubic_lattice);
+//	OurObject.add( atomic_cubic_lattice );
+//	OurObject.add( latticeShadow );
+//	OurObject.add(cubic_lattice);
 	
 	var rhombicDodecaScale = 0.02;
 	RD_honeycomb.scale.set(rhombicDodecaScale,rhombicDodecaScale,rhombicDodecaScale);
 	octa_honeycomb.scale.set(rhombicDodecaScale*2,rhombicDodecaScale*2,rhombicDodecaScale*2);
-	Protein.add(octa_honeycomb);
+	OurObject.add(octa_honeycomb);
 }

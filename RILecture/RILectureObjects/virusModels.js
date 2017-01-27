@@ -37,7 +37,7 @@ function initSolidVirusModels()
 		function ( zika ) {
 			var zikaScale = 0.001;
 			zika.scale.set(zikaScale,zikaScale,zikaScale)
-//			Protein.add( zika );
+//			OurObject.add( zika );
 		}
 	);
 	
@@ -108,7 +108,7 @@ function initSolidVirusModels()
 //			
 //			var hepScale = 1;
 //			hep.scale.set(hepScale,hepScale,hepScale)
-////			Protein.add(hep); //we'd prefer MS2. Also you can make this obj smaller
+////			OurObject.add(hep); //we'd prefer MS2. Also you can make this obj smaller
 //		},
 //		function ( xhr ) {}, //progression function
 //		function ( xhr ) { console.error( "couldn't load OBJ" ); }
@@ -348,7 +348,7 @@ function initCCMV()
 	}
 	CCMV.update();
 	
-	Protein.add(CCMV);
+	OurObject.add(CCMV);
 }
 
 function create_QC_atoms(){

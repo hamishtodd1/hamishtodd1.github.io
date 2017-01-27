@@ -24,21 +24,6 @@ function update_PointOfFocus()
 	 */
 }
 
-//document.addEventListener( 'mousedown', go_fullscreen_and_init_object, false );
-document.addEventListener('touchstart', go_fullscreen_and_init_object, false );
-function go_fullscreen_and_init_object(event) 
-{
-	event.preventDefault();
-	
-	if( THREEx.FullScreen.activated() )
-		return;
-	
-	THREEx.FullScreen.request(Renderer.domElement);
-	
-	OurObject.remove(FullScreenSign);
-	OurObject.add(Protein);
-}
-
 window.addEventListener( 'resize', function(event)
 {
 	Renderer.setSize( window.innerWidth, window.innerHeight );

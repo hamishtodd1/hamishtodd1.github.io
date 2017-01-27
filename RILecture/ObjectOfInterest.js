@@ -5,9 +5,6 @@ function init_OurObject()
 {
 	OurObject.position.copy(PointOfFocus);
 	
-	OurObject.velocity = new THREE.Vector3();
-	OurObject.acceleration = new THREE.Vector3();
-	
 	Scene.add(OurObject);
 }
 
@@ -48,14 +45,6 @@ function update_signs()
 {
 	if( typeof LoadingSign !== 'undefined')
 	{
-//		LoadingSign.throb_parameter += 0.05;
-//		while( LoadingSign.throb_parameter > TAU )
-//			LoadingSign.throb_parameter -= TAU;
-//		var ThrobScale = ( 1 + 0.07 * Math.sin(LoadingSign.throb_parameter) );
-//		LoadingSign.scale.set(ThrobScale, ThrobScale, ThrobScale);
-		
-		//maybe change the number of dots after the string? Glow a bit?
-		
 		var relCameraPosition = Camera.position.clone();
 		OurObject.worldToLocal(relCameraPosition);
 		LoadingSign.lookAt(relCameraPosition); //maybe better for the mental model to make it the same as the protein?

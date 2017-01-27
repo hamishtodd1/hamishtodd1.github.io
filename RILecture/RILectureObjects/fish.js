@@ -50,14 +50,10 @@ function initFishUniverse()
 			fish.children[1].material.needsUpdate = true;
 		}
 	);
-	Protein.add(fishUniverse);
+	OurObject.add(fishUniverse);
 	
-	fishUniverse.update = function()
+	fishUniverse.update = function(Controllers)
 	{
-		/*
-		 * TODO: moves and rotates with your left hand - or maybe just when you're holding some button down?
-		 * but it's limited to being inside the universe
-		 */
 		var focusPosition = new THREE.Vector3(0,0,0);
 		fish.updateMatrix();
 		fishEye.updateMatrix();
@@ -71,5 +67,8 @@ function initFishUniverse()
 		fishPupil.position.applyMatrix4(invEye);
 		fishPupil.position.setLength(pupilRadius);
 		fishPupil.position.y = 0;
+		
+//		fish.position.copy(Controllers[RIGHT_HAND].position); //maybe just when a button is pressed?
+//		fish.position.z = 0;
 	}
 }
