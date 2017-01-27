@@ -64,6 +64,11 @@ inputObject.updateFromAsynchronousInput = function(holdables, holdablesInScene, 
 			else
 				Controllers[affectedControllerIndex].Gripping = 0;
 			
+			if( gamepads[k].buttons[requestButton].pressed)
+				Controllers[affectedControllerIndex].requesting = 1;
+			else
+				Controllers[affectedControllerIndex].requesting = 0;
+			
 			if( affectedControllerIndex === RIGHT_CONTROLLER_INDEX )
 			{
 				if( gamepads[k].buttons[riftChangePageButton].value > 0.97 )

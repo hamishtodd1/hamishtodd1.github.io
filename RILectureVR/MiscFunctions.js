@@ -56,7 +56,7 @@ function loadpic(url, materialToMapTo) {
 			materialToMapTo.needsUpdate = true;
 		},
 		function ( xhr ) {}, function ( xhr ) {
-			console.log( 'texture loading error' );
+			console.log( 'texture loading error: ' + url );
 		}
 	);
 }

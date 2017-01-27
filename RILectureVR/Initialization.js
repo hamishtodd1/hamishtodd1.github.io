@@ -121,19 +121,56 @@ socket.on('OnConnect_Message', function(msg)
 			}
 			
 			init_axes(presentation);
+			
 //			qcTablet.init();
-//			init_cubes( presentation );
+//			init_atoms( presentation ); //fuck this
+			
+			init_cubes( presentation );
 			init_extruding_polyhedra_and_house( presentation );
 //			init_goldenLattice(presentation);
-//			initCCMV( presentation );
-//			initSolidVirusModels( presentation );
-//			initHoneycombs( presentation );
-//			initFishUniverse( presentation, Controllers[ LEFT_CONTROLLER_INDEX ]);
-//			init_atoms( presentation ); //fuck this
+			initCCMV( presentation );
+			initSolidVirusModels( presentation );
+			initHoneycombs( presentation );
+			initFishUniverse( presentation, Controllers[ LEFT_CONTROLLER_INDEX ]);
 			initSymmetryDemonstration( presentation );
 			
-			//Still to do: CCMV representation, axis "factories"
-			//is it reproducing? Slides
+			//Still to do:
+			//control over extrusion - starting EL and button
+			//volume for EPs
+			//Resetting axes for each slide?
+			//Switching adornments on and off
+			//extrusion starting value as property in page
+			//jigsaw puzzle at the beginning, reduce the edge sizes
+			//REPRODUCTION
+			//get the tree in there
+			//color in zika
+			//Bring back the slciing thing when talking about fish, could have the three holer
+			
+			//Show the shadows on the fish surface
+			//and give it a shadow volume, why not? just some cylinders
+			
+			//introduce the fish earlier
+			//make its world a bit transparent, show it the tree
+			
+			
+			//connection between three holed cube slice and shadow and symmetrical squashing?
+			//change color of cubicLattice
+			//lamp
+			//RD and TET Oct lattices have their things *fade* out
+			
+			//Probably you could do the tree thing!
+			//Annuluses and cylinders without tops, doublesided meshbasicmaterial, maybe a texture around the outside, and a further clipping plane
+			
+			//fix bug in symmetry demonstration
+			//you want a bunch of them associated with the 6D axis but they stop
+			//a lamp for shadow
+			//symmetry demonstration behind
+			//Probably need to lay things in front of you better
+			//new ep with volume (changes color?)
+			//extrusion speeds up if you request again
+			//crystal formation video, diffraction video. MRI video?
+			//CCMV representation, Tamiflu
+			//MTL for house...
 			
 			initPresentation( presentation );
 
