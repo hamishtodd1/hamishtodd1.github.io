@@ -1,15 +1,18 @@
-<!--todo: turn this all into something that can be embedded on someone else's site-->
+<!--So, this needs to be quite sophisticated. Reacts to window resize. Whatever padding above is necessary-->
+<!--A gradient or something in the background too, not pure white-->
 
 <html>
 	<head>
 		<title>WIP, DO NOT SHARE! Zika Measles HIV, an interactive documentary</title>
-		<style>
-			body { margin: 0; }
-			canvas { style="border: none;" }
-		</style>
 	</head>
-	<body  style="display: flex; justify-content: center; align-items: center;">
-		<div id="player"></div>
+	<body style="width:1080px; height:540px; position:absolute; top:50%; left:50%; margin:-270px 0 0 -540px;">
+		<span style="display: flex; border: none; justify-content: center;">
+			<div id="player"></div>
+			<div style="border: none;" id="canvasID"></div>
+		</span>
+		<span style="text-align: center">
+			<p>This page is a work in progress, please do not share it</p>
+		</span>
 		
 		<script src="Outside_numeric.js"></script>
 		<script src="three.min.js"></script>

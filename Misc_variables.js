@@ -33,9 +33,11 @@ var scene = new THREE.Scene();
 var window_height = 540;
 var window_width = window_height;
 var renderer = new THREE.WebGLRenderer({ antialias: true });
+var targetDIV = document.getElementById("canvasID");
+targetDIV.appendChild( renderer.domElement );
+
 renderer.setSize( window_width, window_height );
 renderer.setClearColor( 0xffffff, 1);
-document.body.appendChild( renderer.domElement );
 var ytplayer;
 
 var INITIALIZED = 0;
