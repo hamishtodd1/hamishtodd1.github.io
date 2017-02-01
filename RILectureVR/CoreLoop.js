@@ -17,7 +17,7 @@ function UpdateWorld(holdables, presentation)
 //	}
 }
 
-function Render( holdables, Controllers, presentation ) {
+function Render( holdables, Controllers, presentation, transferredObjectData ) {
 	delta_t = ourclock.getDelta();
 //	if(delta_t > 0.1) delta_t = 0.1;
 
@@ -26,12 +26,13 @@ function Render( holdables, Controllers, presentation ) {
 			holdables,
 			presentation.pages[ presentation.currentPageIndex ].holdablesInScene,
 			presentation,
-			Controllers );
+			Controllers,
+			transferredObjectData);
 	UpdateWorld(holdables, presentation );
 	
 	//setTimeout( function() { requestAnimationFrame( render );}, 100 ); //debugging only
 	OurVREffect.requestAnimationFrame( function(){
 		OurVREffect.render( Scene, Camera );
-		Render(holdables, Controllers, presentation );
+		Render(holdables, Controllers, presentation, transferredObjectData );
 	} );
 }

@@ -1,9 +1,6 @@
-function Insert_ribbon_representation_mesh(MyGeometry,geometryAtoms,CylinderSides,Num_vertices_between_CAs){
-	//first, try giving the length between the CAs as the length of the normal vectors
-		
+function Insert_ribbon_representation_mesh(MyGeometry,geometryAtoms,CylinderSides,Num_vertices_between_CAs)
+{
 	var TraceRadius = 0.2;
-	
-	var BondVectorNorm = new THREE.Vector3();
 	
 	var PP_index = 0;
 	var ActivePositions = Array(3);

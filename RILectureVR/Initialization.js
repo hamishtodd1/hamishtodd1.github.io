@@ -94,6 +94,9 @@ socket.on('OnConnect_Message', function(msg)
 		},
 		function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); } );
 	
+	var transferredObjectData = {};
+	transferredObjectData.thingsWithCopy = {};	
+	
 	var OurFontLoader = new THREE.FontLoader();
 	OurFontLoader.load(  "gentilis.js", function ( reponse ) 
 		{
@@ -127,54 +130,59 @@ socket.on('OnConnect_Message', function(msg)
 			
 			init_cubes( presentation );
 			init_extruding_polyhedra_and_house( presentation );
-//			init_goldenLattice(presentation);
-			initCCMV( presentation );
+			init_goldenLattice(presentation);
+//			initCCMV( presentation );
 			initSolidVirusModels( presentation );
 			initHoneycombs( presentation );
-			initFishUniverse( presentation, Controllers[ LEFT_CONTROLLER_INDEX ]);
-			initSymmetryDemonstration( presentation );
+			initFishUniverse( presentation, Controllers[ LEFT_CONTROLLER_INDEX ], transferredObjectData );
+			initSymmetryDemonstration( presentation, transferredObjectData );
 			
 			//Still to do:
-			//control over extrusion - starting EL and button
-			//volume for EPs
-			//Resetting axes for each slide?
-			//Switching adornments on and off
-			//extrusion starting value as property in page
-			//jigsaw puzzle at the beginning, reduce the edge sizes
-			//REPRODUCTION
-			//get the tree in there
-			//color in zika
-			//Bring back the slciing thing when talking about fish, could have the three holer
+			//VIDEOS
+			//RD honeycomb points
+			//comment out all "cue" slides
+			//cubic lattice thing. Make the load of cubes. 
+			//fish sees shadow
+			//torch
 			
-			//Show the shadows on the fish surface
-			//and give it a shadow volume, why not? just some cylinders
-			
-			//introduce the fish earlier
-			//make its world a bit transparent, show it the tree
-			
-			
-			//connection between three holed cube slice and shadow and symmetrical squashing?
-			//change color of cubicLattice
-			//lamp
-			//RD and TET Oct lattices have their things *fade* out
+			//you want a bunch of them associated with the 6D axis but some of them stop. Extrude all at the same time
+			//Spheres in rhombic dod lattice?
+			//CCMV representation, Tamiflu
 			
 			//Probably you could do the tree thing!
 			//Annuluses and cylinders without tops, doublesided meshbasicmaterial, maybe a texture around the outside, and a further clipping plane
 			
-			//fix bug in symmetry demonstration
-			//you want a bunch of them associated with the 6D axis but they stop
-			//a lamp for shadow
-			//symmetry demonstration behind
+			//fish eyeball follows other object in scene
+			//color in zika
+
+			//give it a shadow volume, just some cylinders			
+			//connection between three holed cube slice and shadow and symmetrical squashing?
+			//change color of cubicLattice
+			
+			//atoms come back?
 			//Probably need to lay things in front of you better
-			//new ep with volume (changes color?)
 			//extrusion speeds up if you request again
-			//crystal formation video, diffraction video. MRI video?
-			//CCMV representation, Tamiflu
 			//MTL for house...
 			
 			initPresentation( presentation );
+			
+			socket.on('objectPropertiesUpdate', function(theirTransferredObjectData) //far down so that it's got everything
+			{
+				if(!VRMODE)
+				{
+					for(var i in transferredObjectData.thingsWithCopy )
+						transferredObjectData.thingsWithCopy[i].copy( theirTransferredObjectData.thingsWithCopy[i] );
+				}
+			});
+			socket.on('extrude', function()
+			{
+				//note that it is possible for extrusionLevel to become desynchronized
+				for( var j = 0; j < presentation.pages[ presentation.currentPageIndex ].holdablesInScene.length; j++ )
+					if( presentation.pages[ presentation.currentPageIndex ].holdablesInScene[j].extrusionInProgress !== 'undefined')
+						presentation.pages[ presentation.currentPageIndex ].holdablesInScene[j].extrusionInProgress = true;
+			});
 
-			Render( presentation.holdables, Controllers, presentation );
+			Render( presentation.holdables, Controllers, presentation, transferredObjectData );
 		},
 		function ( xhr ) {},
 		function ( xhr ) { console.error( "couldn't load font" ); }

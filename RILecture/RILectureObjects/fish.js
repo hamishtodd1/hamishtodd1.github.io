@@ -2,11 +2,12 @@
  * No need to grab the fish, just keep the hand that moves it offscreen
  */
 
-function initFishUniverse()
+function initFishUniverse( presentation, Controller )
 {
 	var fishUniverse = new THREE.Object3D();
 	var universeWidth = 1;
-	var backdrop = new THREE.Mesh(new THREE.PlaneGeometry(universeWidth,universeWidth/16*9), new THREE.MeshBasicMaterial({color:0xFFFFFF, side:THREE.DoubleSide}) );
+	var universeHeight = universeWidth/16*9;
+	var backdrop = new THREE.Mesh(new THREE.PlaneGeometry(universeWidth,universeHeight), new THREE.MeshBasicMaterial({color:0xFFFFFF, side:THREE.DoubleSide}) );
 	fishUniverse.add(backdrop);
 	
 	var fish = new THREE.Object3D();
@@ -30,13 +31,20 @@ function initFishUniverse()
 	fish.add(fishEye);
 	fishUniverse.add(fish);
 	
+	var updateoctagon = function()
+	{
+		this.position.z = fishUniverse.position.z + 0.0001;
+		this.rotation.x = TAU / 4;
+		this.rotation.z = 0;
+	}
+	
+	var octagons = Array(3);
+	
 	for(var i = 0; i < 3; i++)
 	{
-		var Octagon = new THREE.Mesh(new THREE.CylinderGeometry(fishLength / 2,fishLength / 2, fish.children[0].position.z * 4, 8, 1, false, TAU / 16), new THREE.MeshBasicMaterial({ color:0xFF6A00 }));
-		Octagon.rotation.x = TAU / 4;
-		Octagon.position.x = i * fishLength;
-		//outline for them
-		fishUniverse.add(Octagon);
+		octagons[i] = new THREE.Mesh(new THREE.CylinderGeometry(fishLength / 2,fishLength / 2, fish.children[0].position.z * 4, 8, 1, false, TAU / 16), new THREE.MeshBasicMaterial({ color:0xFF6A00 }));
+		octagons[i].update = updateoctagon;
+		presentation.createNewHoldable("octagon" + i.toString(), octagons[i] );
 	}
 	
 	var OurTextureLoader = new THREE.TextureLoader();
@@ -50,10 +58,18 @@ function initFishUniverse()
 			fish.children[1].material.needsUpdate = true;
 		}
 	);
-	OurObject.add(fishUniverse);
 	
-	fishUniverse.update = function(Controllers)
+	presentation.createNewHoldable("fishUniverse", fishUniverse);
+	fishUniverse.movable = false;
+	fishUniverse.rotateable = false; //objects in this situation probably shouldn't be in that array, they just "distract"!
+	fishUniverse.reset = function()
 	{
+		this.position.copy(0,0,-0.2); 
+	}
+	
+	
+	fishUniverse.update = function()
+	{	
 		var focusPosition = new THREE.Vector3(0,0,0);
 		fish.updateMatrix();
 		fishEye.updateMatrix();
@@ -62,13 +78,26 @@ function initFishUniverse()
 		invFish.getInverse(fish.matrix);
 		invEye.getInverse(fishEye.matrix);
 		
+		//could control the eye with the joystick?
+		
 		fishPupil.position.copy(focusPosition);
 		fishPupil.position.applyMatrix4(invFish);
 		fishPupil.position.applyMatrix4(invEye);
 		fishPupil.position.setLength(pupilRadius);
 		fishPupil.position.y = 0;
 		
-//		fish.position.copy(Controllers[RIGHT_HAND].position); //maybe just when a button is pressed?
-//		fish.position.z = 0;
+		fish.position.copy(Controller.position);
+		fish.position.z = 0;
+		var fishRadiusScalar = 0.6;
+		if( fish.position.x < -universeWidth/2 * fishRadiusScalar)
+			fish.position.x = -universeWidth / 2 * fishRadiusScalar;
+		if( fish.position.x > universeWidth/2 * fishRadiusScalar)
+			fish.position.x = universeWidth / 2 * fishRadiusScalar;
+		if( fish.position.y < -universeHeight/2 * fishRadiusScalar)
+			fish.position.y = -universeHeight / 2 * fishRadiusScalar;
+		if( fish.position.y > universeHeight/2 * fishRadiusScalar)
+			fish.position.y = universeHeight / 2 * fishRadiusScalar;
+		
+		fish.rotation.z = Controller.rotation.z;
 	}
 }

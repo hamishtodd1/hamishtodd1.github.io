@@ -78,7 +78,7 @@ function shape(stemPosition, basis)
 	this.ignore = false;
 }
 
-function init_golden_lattice()
+function init_goldenLattice( presentation )
 {
 	/*
 	 * The next optimization would be to, 
@@ -88,18 +88,37 @@ function init_golden_lattice()
 	 *  Hmm... dodes only exist inside shapes
 	 */
 	
-	var preMakeTime = ourclock.getElapsedTime();
-	var golden_lattice = generate_lattice(3, 2);
-	console.log("Total time: ", ourclock.getElapsedTime() - preMakeTime );
+	var goldenLattice = generate_lattice(3, 2);
+	goldenLattice.scale.setScalar( 0.09 );
+	presentation.createNewHoldable( "goldenLattice", goldenLattice );
 	
-	//fuck, 30MB download created from ONE substitution
-//	var exporter = new THREE.OBJExporter();
-//	var blob = new Blob([exporter.parse( golden_lattice )], {type: "text/plain;charset=utf-8"});
-//	saveAs(blob, "goldenLattice.obj");
+	var looseShapeScale = 0.03;
+	for(var i = 0; i < 3; i++)
+	{
+		var looseRhom = generate_lattice(0, 0);
+		looseRhom.scale.setScalar( looseShapeScale );
+		presentation.createNewHoldable( "looseRhom" + i.toString(), looseRhom );
+	}
 	
-	var lattice_scale = 0.09;
-	golden_lattice.scale.set( lattice_scale, lattice_scale, lattice_scale );
-	OurObject.add(golden_lattice);
+	var looseDode = generate_lattice(1, 0);
+	looseDode.scale.setScalar( looseShapeScale );
+	presentation.createNewHoldable( "looseDode", looseDode );
+	
+	var looseGico = generate_lattice(2, 0);
+	looseGico.scale.setScalar( looseShapeScale );
+	presentation.createNewHoldable( "looseGico", looseGico );
+	
+	var looseTria = generate_lattice(3, 0);
+	looseTria.scale.setScalar( looseShapeScale );
+	presentation.createNewHoldable( "looseTria", looseTria );
+	
+	var star = generate_lattice(4, 0);
+	star.scale.setScalar( looseShapeScale );
+	presentation.createNewHoldable( "star", star );
+	
+	var adornedTria = generate_lattice(5, 0);
+	adornedTria.scale.setScalar( looseShapeScale );
+	presentation.createNewHoldable( "adornedTria", adornedTria );
 }
 
 function generate_lattice(startingShape, numSubstitutions)
@@ -218,13 +237,13 @@ function generate_lattice(startingShape, numSubstitutions)
 			removeDuplicateShapes(levels[i+1], false);
 	}
 	
-	var golden_lattice = new THREE.Object3D();
+	var goldenLattice = new THREE.Object3D();
 	
 	var preMeshTime = ourclock.getElapsedTime();
-	add_meshes(levels[ numSubstitutions ], golden_lattice);
+	add_meshes(levels[ numSubstitutions ], goldenLattice);
 	console.log("Making meshes took: ", ourclock.getElapsedTime() - preMeshTime );
 	
-	return golden_lattice;
+	return goldenLattice;
 }
 
 function removeDuplicateShapes(level, reduce)
@@ -235,6 +254,8 @@ function removeDuplicateShapes(level, reduce)
 	var radiusSq = radius*radius;
 	var cavityRadius = radius - 0.5;
 	var cavityRadiusSq = cavityRadius * cavityRadius;
+	var coreRadius = cavityRadius / 8;
+	var coreRadiusSq = coreRadius * coreRadius;
 	for(var i = 0; i < level.shapes.length; i++)
 	{
 		var shapePositions = Array(level.shapes[i].length);
@@ -252,7 +273,7 @@ function removeDuplicateShapes(level, reduce)
 			if( level.shapes[i][j].ignore )
 				continue; //we've already eliminated all shapes with this position.
 			var lengthSq = shapePositions[j].lengthSq();
-			if( reduce && ( lengthSq < cavityRadiusSq || radiusSq < lengthSq ) )
+			if( reduce && ( (lengthSq > coreRadiusSq && lengthSq < cavityRadiusSq ) || radiusSq < lengthSq ) )
 				level.shapes[i][j].ignore = true;
 			else for(var k = j+1, kl = level.shapes[i].length; k < kl; k++)
 			{
@@ -267,24 +288,24 @@ function removeDuplicateShapes(level, reduce)
 	console.log("removed ", num_removed, " shapes out of ", level.shapes[0].length+level.shapes[1].length+level.shapes[2].length+level.shapes[3].length, " and it took ", ourclock.getDelta());
 }
 
-function add_meshes(level, golden_lattice)
+function add_meshes(level, goldenLattice)
 {
 	for(var i = 0; i < 4; i++)
 	{
 		var shapeGeometry = make_mesh_of_shapeArray(level.shapes[i], level.edgelen );
 		var shapesVolume = new THREE.Mesh( shapeGeometry, new THREE.MeshPhongMaterial( { color: golden_colors[i], shading: THREE.FlatShading } ) );
 
-		golden_lattice.add( shapesVolume );
+		goldenLattice.add( shapesVolume );
 	}
 	
 	var cylinder_sides = 5;
 	var cylinder_radius = 0.07 * level.edgelen;
 	
-	if(golden_lattice.children.length > 4) console.error("yo we might be about to make the outline wrongly")
+	if(goldenLattice.children.length > 4) console.error("yo we might be about to make the outline wrongly")
 	
 	var numElements = 0; //both vertices and faces
 	for(var i = 0; i < 4; i++ )
-		numElements += golden_lattice.children[i].geometry.faces.length * 2 * cylinder_sides * 2;
+		numElements += goldenLattice.children[i].geometry.faces.length * 2 * cylinder_sides * 2;
 	
 	var outlineGeometry = new THREE.BufferGeometry();
 	outlineGeometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( numElements * 3 ), 3 ) );
@@ -295,7 +316,7 @@ function add_meshes(level, golden_lattice)
 	var A_to_B = new THREE.Vector3();
 	for(var i = 0; i < 4; i++)
 	{
-		var volumeGeometry = golden_lattice.children[i].geometry;
+		var volumeGeometry = goldenLattice.children[i].geometry;
 		for(var j = 0, jl = volumeGeometry.faces.length * 2; j < jl; j++)
 		{
 			var face_index = (j-j%2)/2;
@@ -342,7 +363,7 @@ function add_meshes(level, golden_lattice)
 		}
 	}
 	var shapesOutline = new THREE.Mesh( outlineGeometry, new THREE.MeshBasicMaterial({ color: 0x000000 }) );
-	golden_lattice.add( shapesOutline );
+	goldenLattice.add( shapesOutline );
 }
 
 function make_mesh_of_shapeArray(shapes, edgelen)
@@ -831,7 +852,7 @@ function addTria(centerPosition, edgelen, trias)
 	trias[newIndex].basis[5] = icoVerticesNormalized[ 11 ]; //speedup opportunity: they're all the same, no need for array
 }
 
-function init_poly_arrays()
+function init_poly_arrays( presentation, axis1D, axis2D, axis3D, axis4D, axis6D )
 {	
 	for( var i = 0; i < 12; i++ )
 		icoVerticesNormalized[i].normalize();

@@ -16,8 +16,8 @@
 //this function shouldn't actually *do* anything with the data, it's only to be read elsewhere.
 function ReadInput() {
 	OldMousePosition.copy( MousePosition );
-	MousePosition.x = (InputObject.mousex-window_width/2) * (playing_field_dimension / window_width);
-	MousePosition.y = -(InputObject.mousey-window_height/2) * (playing_field_dimension / window_height);
+	MousePosition.x = InputObject.mousex;
+	MousePosition.y = InputObject.mousey;
 	
 	Mouse_delta.set( MousePosition.x - OldMousePosition.x, MousePosition.y - OldMousePosition.y);
 	
@@ -40,8 +40,11 @@ document.addEventListener( 'mouseup', 	function(event) {
 
 document.addEventListener( 'mousemove', function(event) {
 	event.preventDefault();
-	InputObject.mousex = event.clientX - renderer.domElement.offsetLeft;
-	InputObject.mousey = event.clientY - renderer.domElement.offsetTop;
+	InputObject.mousex = event.clientX - window.innerWidth / 2 - renderer.domElement.offsetLeft / 2;
+	InputObject.mousey = -(event.clientY - window.innerHeight / 2 - renderer.domElement.offsetTop / 2);
+	InputObject.mousex *= playing_field_dimension / renderer.domElement.width;
+	InputObject.mousey *= playing_field_dimension / renderer.domElement.height;
+	console.log(InputObject.mousey)
 }, false ); //window?
 
 //remember there can be weirdness for multiple fingers, so make sure any crazy series of inputs are interpretable

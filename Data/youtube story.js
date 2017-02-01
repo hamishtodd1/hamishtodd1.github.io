@@ -1,5 +1,4 @@
-/*
- * 
+/* 
  * Would be nice for the player to be able to mess around with time but still have it work. You want them to be able to come back
  * 
  * insane things can happen if the user goes to another tab and leaves it playing

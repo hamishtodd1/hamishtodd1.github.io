@@ -5,16 +5,13 @@ var axis4D = new THREE.Object3D();
 var axis6D = new THREE.Object3D();
 
 /* TODO
- * Things extrude one axis at a time, in proximity
+ * Things extrude one axis at a time, on button press in proximity
  * That axis changes color
  * The edges that are currently extruding are a different color
+ * You can take things off the axis
  * You can put things on the axis. Move it around and it changes how it's flattened?
  * You can grab an axis and move it
  * maybe wait until extrusion is full before putting in new edges
- * 
- * You want axes to be able to create EPs. need a toggle for whether it's a factory. 
- * If it's a factory, it keeps making them so long as there isn't one nearby. Little pauses between extrusions
- * And they're extruded more whenever they're brought anywhere near the thing
  */
 function init_extruding_polyhedra_and_house()
 {
@@ -65,14 +62,14 @@ function init_extruding_polyhedra_and_house()
 				this.geometry.verticesNeedUpdate = true;
 			}
 			
-//			OurObject.add( house );
+//			Protein.add( house );
 		}
 	);
 	
 	var axis_vectors = getallBasisVectors(axis3D);
 	var EP = create_extruding_polyhedron(axis_vectors, true);
 	EP.children[0].visible = false; //skeletal
-	OurObject.add(EP);
+	Protein.add(EP);
 }
 
 function create_extruding_polyhedron(axis_vectors)
@@ -127,9 +124,9 @@ function update_extruding_polyhedron(axis_vectors, extrusion_level)
 	if( typeof axis_vectors === 'undefined' )
 	{
 		var axis_vectors;
-		for(var i = 0; i < OurObject.children.length; i++)
-			if( OurObject.children[ i ].type === "axis") //also a proximity thing
-				axis_vectors = getallBasisVectors(OurObject.children[ i ] );
+		for(var i = 0; i < Protein.children.length; i++)
+			if( Protein.children[ i ].type === "axis") //also a proximity thing
+				axis_vectors = getallBasisVectors(Protein.children[ i ] );
 	}
 	
 	if( typeof extrusion_level === 'undefined')
@@ -275,29 +272,20 @@ function init_axes()
 	add_axis( axis2D, 0, TAU / 4 );
 	axis2D.update = axis_update;
 
-	
-	
-	var alterAxis = function(axisNum, destination)
-	{
-		var currentAxis = getBasisVector(this, axisNum);
-		var alterationAxis = (currentAxis.clone()).cross(destination);
-		alterationAxis.applyMatrix4( new THREE.Matrix4().getInverse(this.children[axisNum*2].matrix) );
-		alterationAxis.normalize();
-		var alterationAngle = currentAxis.angleTo(destination);
-		this.children[axisNum*2].rotateOnAxis(alterationAxis,alterationAngle);
-	}
-	
 	add_axis( axis3D, 0,0 );
 	add_axis( axis3D, 0, TAU / 4 );
 	add_axis( axis3D, TAU / 4,-TAU / 4 );
+	
 	axis3D.xAxisDestination = getBasisVector(axis3D,1);
-	axis3D.zAxisDestination = getBasisVector(axis3D,2);
-	axis3D.alterAxis = alterAxis;
 	axis3D.ordinaryUpdate = axis_update;
 	axis3D.update = function()
 	{
-		this.alterAxis(1, this.xAxisDestination);
-		this.alterAxis(2, this.zAxisDestination);
+		var currentxAxis = getBasisVector(this, 1);
+		var alterationAxis = (currentxAxis.clone()).cross(this.xAxisDestination);
+		alterationAxis.applyMatrix4( new THREE.Matrix4().getInverse(this.children[2].matrix) );
+		alterationAxis.normalize();
+		var alterationAngle = currentxAxis.angleTo(this.xAxisDestination);
+		this.children[2].rotateOnAxis(alterationAxis,alterationAngle);
 		
 		this.ordinaryUpdate();
 	}
@@ -306,19 +294,7 @@ function init_axes()
 	add_axis( axis4D, 0,0 );
 	for(var i = 0; i < 3; i++)
 		add_axis( axis4D, i * TAU / 3, adjacent_square_corner_angle );
-	axis4D.xAxisDestination = getBasisVector(axis4D,1);
-	axis4D.zAxisDestination = getBasisVector(axis4D,2);
-	axis4D.wAxisDestination = getBasisVector(axis4D,3);
-	axis4D.ordinaryUpdate = axis_update;
-	axis4D.alterAxis = alterAxis;
-	axis4D.update = function()
-	{
-		this.alterAxis(1, this.xAxisDestination);
-		this.alterAxis(2, this.zAxisDestination);
-		this.alterAxis(3, this.wAxisDestination);
-		
-		this.ordinaryUpdate();
-	}
+	axis4D.update = axis_update;
 	
 	var adjacent_ico_corner_angle = 2*Math.atan(1/PHI);
 	for(var i = 0; i < 5; i++)
@@ -412,7 +388,7 @@ function init_axes()
 		//no, do xkcd's global warming thing
 	}
 	
-//	OurObject.add(axis3D);
+//	Protein.add(axis3D);
 }
 
 function getallBasisVectors(axis)
@@ -440,30 +416,20 @@ function getBasisVector(axis, index)
 	return basisVector;
 }
 
-function changeBasis(vectorToBeChanged, leftNumber, upNumber, rightNumber, downNumber)
-{
-	var latitudeAxis = vectorToBeChanged.clone();
-	latitudeAxis.cross( yAxis );
-	latitudeAxis.normalize();
-	var rotationAmount = 0.01;
-	if(event.keyCode === leftNumber)
-		vectorToBeChanged.applyAxisAngle(yAxis, -rotationAmount);
-	if(event.keyCode === upNumber)
-		vectorToBeChanged.applyAxisAngle(latitudeAxis, rotationAmount);
-	if(event.keyCode === rightNumber)
-		vectorToBeChanged.applyAxisAngle(yAxis, rotationAmount);
-	if(event.keyCode === downNumber)
-		vectorToBeChanged.applyAxisAngle(latitudeAxis,-rotationAmount);
-}
-
 document.addEventListener( 'keydown', function(event)
 {
-	changeBasis(axis3D.xAxisDestination, 37,38,39,40);
-	changeBasis(axis3D.zAxisDestination, 65,87,68,83);
-	
-	changeBasis(axis4D.xAxisDestination, 37,38,39,40);
-	changeBasis(axis4D.zAxisDestination, 65,87,68,83);
-	changeBasis(axis4D.wAxisDestination, 70,84,72,71);
+	var latitudeAxis = axis3D.xAxisDestination.clone();
+	latitudeAxis.cross(yAxis);
+	latitudeAxis.normalize();
+	var rotationAmount = 0.01;
+	if(event.keyCode === 37) //left
+		axis3D.xAxisDestination.applyAxisAngle(yAxis, -rotationAmount);
+	if(event.keyCode === 38) //up
+		axis3D.xAxisDestination.applyAxisAngle(latitudeAxis, rotationAmount);
+	if(event.keyCode === 39) //right
+		axis3D.xAxisDestination.applyAxisAngle(yAxis, rotationAmount);
+	if(event.keyCode === 40) //down
+		axis3D.xAxisDestination.applyAxisAngle(latitudeAxis,-rotationAmount);
 	
 	//MS2 crap
 //	ms2Data.updateMatrix();
@@ -618,7 +584,7 @@ function init_hexacross()
 //			for(var i = 0; i < object.children.length; i++)
 //				merged.geometry.merge(object.children[i].geometry, object.children[i].matrix);
 //				
-//			OurObject.add(merged); 
+//			Protein.add(merged); 
 //		},
 //		function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); }
 //	);
@@ -632,5 +598,5 @@ function init_hexacross()
 	merged.rotateOnAxis(new THREE.Vector3(1,0,0), (90-138.19/2)/360 * TAU );
 	merged.scale.set(4,4,4);
 	//could turn it on it on its side. Turn by 90 - 138.19/2 assuming it's sitting on an edge
-//	OurObject.add(merged);
+//	Protein.add(merged);
 }

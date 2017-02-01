@@ -27,24 +27,50 @@ function Initialize()
 	
 	function finishInit()
 	{
-		var presentation = {};
+		var presentation = { holdables: {}, pictureHolder: new THREE.Object3D() };
+		presentation.pictureHolder.position.z = -1;
+		Camera.add( presentation.pictureHolder );
 		
-		init_axes();
-		init_poly_arrays();
-//		qcTablet.init();
-//		init_cubes();
-//		init_extruding_polyhedra_and_house();
-//		init_golden_lattice();
-//		initCCMV();
-//		initSolidVirusModels();
-//		initHoneycombs();
-//		initFishUniverse();
-//		init_atoms();
+		//"grippable objects"
+		presentation.createNewHoldable = function( holdableName, holdable )
+		{
+			if( typeof holdable === 'undefined')
+				this.holdables[holdableName] = new THREE.Object3D();
+			else
+				this.holdables[holdableName] = holdable;
+			this.holdables[holdableName].rotateable = true;
+			this.holdables[holdableName].movable = true;
+			this.holdables[holdableName].controllerWeAreGrabbedBy = null;
+			return this.holdables[holdableName];
+		}
 		
-		presentation.symmetryDemonstration = new THREE.Object3D();
-		initSymmetryDemonstration.call( presentation.symmetryDemonstration );
+		//make yourself fly? At least goldenLattice moves around with arrows
+		//house extrusion i.e. updating, and updating of EPs
+		//you need the axes alongside the shapes
+		//need to bring over the code that lets you extrude the golden shapes
+		//record all that shit
+		//so you probably need git reset hard
 		
-		initPresentation(presentation);
+		//What you already have 
+		//you need the shadow thing
+		//the tree
+		//you need the cube things
+		//show the graphs 1 by 1 with adornments
+		
+		
+		
+		
+		
+		init_axes(presentation);
+		
+		init_cubes( presentation );
+		init_extruding_polyhedra_and_house( presentation );
+		init_goldenLattice(presentation);
+		initSolidVirusModels( presentation );
+		initHoneycombs( presentation );
+		initSymmetryDemonstration( presentation );
+
+		initPresentation( presentation );
 
 		Render();
 	}

@@ -21,7 +21,7 @@ var inputObject = {
 	cameraState: {position: new THREE.Vector3(), quaternion: new THREE.Quaternion()}
 };
 
-inputObject.updateFromAsynchronousInput = function(holdables, holdablesInScene, presentation, Controllers ) //the purpose of this is to update everything
+inputObject.updateFromAsynchronousInput = function(holdables, holdablesInScene, presentation, Controllers, transferredObjectData ) //the purpose of this is to update everything
 {
 	if(VRMODE) //including google cardboard TODO
 	{
@@ -65,13 +65,16 @@ inputObject.updateFromAsynchronousInput = function(holdables, holdablesInScene, 
 				Controllers[affectedControllerIndex].Gripping = 0;
 			
 			if( gamepads[k].buttons[requestButton].pressed)
-				Controllers[affectedControllerIndex].requesting = 1;
-			else
-				Controllers[affectedControllerIndex].requesting = 0;
+			{
+				for( var j = 0; j < holdablesInScene.length; j++ )
+					if(holdablesInScene[j].extrusionInProgress !== 'undefined')
+						holdablesInScene[j].extrusionInProgress = true;
+				socket.emit('extrude' );
+			}
 			
 			if( affectedControllerIndex === RIGHT_CONTROLLER_INDEX )
 			{
-				if( gamepads[k].buttons[riftChangePageButton].value > 0.97 )
+				if( gamepads[k].buttons[riftChangePageButton].value > 0.93 )
 				{
 					if( !presentation.alreadyMovedSlideForward )
 					{
@@ -186,6 +189,7 @@ inputObject.updateFromAsynchronousInput = function(holdables, holdablesInScene, 
 				copyPositionAndQuaternion( this.controllerStates[i], Controllers[i] );
 			copyPositionAndQuaternion( this.cameraState, Camera );
 			socket.emit('holdablesControllersCameraUpdate', this );
+			socket.emit('objectPropertiesUpdate', transferredObjectData );
 		}
 	}
 	else
@@ -235,8 +239,11 @@ socket.on('screenIndicator', function(spectatorScreenCornerCoords)
 			);
 	Camera.children[0].geometry.verticesNeedUpdate = true;
 	
-	Camera.children[1].scale.setScalar(Math.abs( spectatorScreenCornerCoords[0*3+1] - spectatorScreenCornerCoords[3*3+1] ) );
-	Camera.children[1].position.z = spectatorScreenCornerCoords[2] - 0.00001;
+	if(typeof Camera.children[1] !== 'undefined')
+	{
+		Camera.children[1].scale.setScalar(Math.abs( spectatorScreenCornerCoords[0*3+1] - spectatorScreenCornerCoords[3*3+1] ) );
+		Camera.children[1].position.z = spectatorScreenCornerCoords[2] - 0.00001;
+	}
 });
 
 socket.on('holdablesControllersCameraUpdate', function(lecturerInputObject)

@@ -2,121 +2,133 @@
  * Your idea was diamonds. No points of > 2 degrees of rotational symmetry is the problem
  */
 
-function initSymmetryDemonstration()
+function initSymmetryDemonstration(presentation )
 {
-	this.mode = "nothing";
+	var s = presentation.createNewHoldable("symmetryDemonstration");
 	
-	this.translationalSymbol = new THREE.Mesh( new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ transparent:true }) );
-	this.translationalSymbol.rotation.z = TAU/4;
+	s.mode = "nothing";
+	
+	s.translationalSymbol = new THREE.Mesh( new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ transparent:true }) );
+	s.translationalSymbol.rotation.z = TAU/4;
 	var translationLength = 0.19;//tweak further
-	this.translationalSymbol.scale.setScalar(translationLength);
-	this.translationalSymbol.position.y = translationLength/2;
-	this.translationalSymbol.position.z = 0.001;
-	loadpic("http://hamishtodd1.github.io/RILecture/Data/symmetryDemonstration/translationalSymbol.png", this.translationalSymbol.material);
+	s.translationalSymbol.scale.setScalar(translationLength/2);
+	s.translationalSymbol.position.y = translationLength/4;
+	s.translationalSymbol.position.z = 0.001;
+	loadpic("http://hamishtodd1.github.io/RILecture/Data/symmetryDemonstration/translationalSymbol.png", s.translationalSymbol.material);
 	
-	this.rotationalSymbol = new THREE.Mesh( new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ transparent:true }) );
-	loadpic("http://hamishtodd1.github.io/RILecture/Data/symmetryDemonstration/threefoldRotational.png", this.rotationalSymbol.material);
-	this.rotationalSymbol.position.z = 0.001;
-	this.rotationalSymbol.scale.setScalar(translationLength);
+	s.rotationalSymbol = new THREE.Mesh( new THREE.PlaneGeometry(0.5,0.5), new THREE.MeshBasicMaterial({ transparent:true }) );
+	loadpic("http://hamishtodd1.github.io/RILecture/Data/symmetryDemonstration/threefoldRotational.png", s.rotationalSymbol.material);
+	s.rotationalSymbol.position.z = 0.001;
+	s.rotationalSymbol.scale.setScalar(translationLength);
 	
-	this.reflectionalSymbol = new THREE.Mesh( new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ transparent:true }) );
-	loadpic("http://hamishtodd1.github.io/RILecture/Data/symmetryDemonstration/reflectionalSymbol.png", this.reflectionalSymbol.material);
-	this.reflectionalSymbol.position.z = 0.001;
+	s.reflectionalSymbol = new THREE.Mesh( new THREE.PlaneGeometry(0.5,0.5), new THREE.MeshBasicMaterial({ transparent:true }) );
+	loadpic("http://hamishtodd1.github.io/RILecture/Data/symmetryDemonstration/reflectionalSymbol.png", s.reflectionalSymbol.material);
+	s.reflectionalSymbol.position.x += 0.001;
+	s.reflectionalSymbol.position.z = 0.001;
 
-	this.morphablePattern = new THREE.Mesh( new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({transparent:true, opacity:1, side:THREE.DoubleSide}) );
-	loadpic("http://hamishtodd1.github.io/RILecture/Data/symmetryDemonstration/morphablePattern.png", this.morphablePattern.material);
-	this.add( this.morphablePattern );
+	s.morphablePattern = new THREE.Mesh( new THREE.PlaneGeometry(0.5,0.5), new THREE.MeshBasicMaterial({transparent:true, opacity:0.5, side:THREE.DoubleSide}) );
+	loadpic("http://hamishtodd1.github.io/RILecture/Data/symmetryDemonstration/morphablePattern.png", s.morphablePattern.material);
+	s.add( s.morphablePattern );
 	
-	this.underneathPattern = this.morphablePattern.clone();
-	this.underneathPattern.position.z = -0.0001;
-	this.underneathPattern.visible = false;
-	this.add( this.underneathPattern );
+	s.underneathPattern = new THREE.Mesh( new THREE.PlaneGeometry(0.5,0.5), new THREE.MeshBasicMaterial({side:THREE.DoubleSide}) );
+	loadpic("http://hamishtodd1.github.io/RILecture/Data/symmetryDemonstration/morphablePattern.png", s.underneathPattern.material);
+	s.underneathPattern.position.z = -0.0001;
+	s.add( s.underneathPattern );
 	
-	this.controllerWeAreGrabbedBy = "not grabbed";
-	this.positionWhereMeshWasGrabbed = new THREE.Vector3(0,0,0);
+	s.positionWhereMeshWasGrabbed = new THREE.Vector3(0,0,0);
 	
-//	this.update = function()
-//	{
-//		if( this.controllerWeAreGrabbedBy !== "not grabbed" )
-//		{
-//			if( !this.controllerWeAreGrabbedBy.Gripping )
-//				this.controllerWeAreGrabbedBy = "not grabbed";
-//			else
-//			{
-//				var destinationForPWMWG = controllerWeAreGrabbedBy.position.clone();
-//				destinationForPWMWG.z = 0;
-//				
-//				if(this.mode === "translation" )
-//				{
-//					this.morphablePattern.position.y = destinationForPWMWG.y - this.positionWhereMeshWasGrabbed.y;
-//					if( this.position.y > this.translationSymbol.scale.y ) //YO THE SYMBOL NEEDS TO BE A 1 LONG MESH THAT IS SCALED
-//						this.position.y = this.translationSymbol.scale.y;
-//					if( this.position.y < 0 )
-//						this.position.y = 0;
-//				}	
-//				else if(this.mode === "rotation" )
-//				{
-//					this.morphablePattern.rotation.z = this.positionWhereMeshWasGrabbed.angleTo( destinationForPWMWG ); //minus?
-//					if( this.rotation.z > TAU)
-//						this.rotation.z = TAU;
-////					if( this.rotation.z < 0)
-////						this.rotation.z = 0;
-//				}
-//				else if( this.mode === "reflection" )
-//				{
-//					this.morphablePattern.scale.x = destinationForPWMWG.x / this.positionWhereMeshWasGrabbed.x;
-//					if( this.scale.x >  1 )
-//						this.scale.x =  1;
-//					if( this.scale.x < -1 )
-//						this.scale.x = -1;
-//				}
-//			}
-//		}
-//		else
-//		{
-//			for(var i = 0; i < 2; i++)
-//			{
-//				if( Controllers[i].position.distanceTo( this.morphablePattern.geometry.boundingSphere.center ) < this.morphablePattern.geometry.boundingSphere.radius )
-//				{
-//					this.controllerWeAreGrabbedBy = Controllers[i];
-//					this.positionWhereMeshWasGrabbed = Controllers[i].position.clone();
-//					this.morphablePattern.updateMatrixWorld();
-//					this.morphablePattern.worldToLocal(this.positionWhereMeshWasGrabbed );
-//					this.positionWhereMeshWasGrabbed.z = 0;
-//				}
-//			}
-//		}
-//	}
+	s.rotateable = false;
+	s.movable = false;
 	
-	this.changeMode = function(newMode)
+	s.grabbedPreviously = false;
+	
+	s.update = function()
 	{
-		this.mode = newMode;
-		if(this.mode === "translation" )
+		if( s.controllerWeAreGrabbedBy === null )
+			s.grabbedPreviously = false;
+		else
 		{
-			if(this.children.length > 2)
-				this.remove(this.children[2]);
-			this.add(this.translationalSymbol);
+			if( !s.grabbedPreviously )
+			{
+				s.grabbedPreviously = true;
+				
+				s.positionWhereMeshWasGrabbed.copy( s.controllerWeAreGrabbedBy.position );
+				s.morphablePattern.updateMatrixWorld();
+				s.morphablePattern.worldToLocal(s.positionWhereMeshWasGrabbed );
+				s.positionWhereMeshWasGrabbed.z = 0;
+			}
+			
+			var destinationForPWMWG = s.controllerWeAreGrabbedBy.position.clone();
+			destinationForPWMWG.z = 0;
+			
+			if(s.mode === "translation" )
+			{
+				s.morphablePattern.position.y = destinationForPWMWG.y - s.positionWhereMeshWasGrabbed.y;
+				if( s.morphablePattern.position.y > s.translationalSymbol.scale.y ) //YO THE SYMBOL NEEDS TO BE A 1 LONG MESH THAT IS SCALED
+					s.morphablePattern.position.y = s.translationalSymbol.scale.y;
+				if( s.morphablePattern.position.y < 0 )
+					s.morphablePattern.position.y = 0;
+			}	
+			else if(s.mode === "rotation" )
+			{
+				var crossProd = s.positionWhereMeshWasGrabbed.clone().cross( destinationForPWMWG );
+				if( crossProd.z < 0 )
+				{
+					s.morphablePattern.rotation.z = -s.positionWhereMeshWasGrabbed.angleTo( destinationForPWMWG ); //minus?
+					if( s.morphablePattern.rotation.z < -TAU / 3 )
+						s.morphablePattern.rotation.z = -TAU / 3;
+//					if( s.rotation.z < 0)
+//						s.rotation.z = 0;
+				}
+			}
+			//TODO a second rotation?
+			else if( s.mode === "reflection" )
+			{
+				s.morphablePattern.scale.x = destinationForPWMWG.x / s.positionWhereMeshWasGrabbed.x;
+				if( s.morphablePattern.scale.x >  1 )
+					s.morphablePattern.scale.x =  1;
+				if( s.morphablePattern.scale.x < -1 )
+					s.morphablePattern.scale.x = -1;
+			}
 		}
-		if(this.mode === "rotation" )
-		{
-			if(this.children.length > 2)
-				this.remove(this.children[2]);
-			this.add(this.rotationalSymbol);
-		}
-		if(this.mode === "reflection" )
-		{
-			if(this.children.length > 2)
-				this.remove(this.children[2]);
-			this.add(this.reflectionalSymbol);
-		}
-		if(this.mode === "nothing" )
-		{
-			this.remove(this.children[2]);
-		}
-//		this.morphablePattern.position.set(0,0,0);
-//		this.morphablePattern.scale.set(1,1,1);
-//		this.morphablePattern.rotation.set(0,0,0);
 	}
-	this.changeMode("rotation")
+	
+	s.reset = function()
+	{
+		s.morphablePattern.position.set( 0,0,0 );
+		s.morphablePattern.rotation.set( 0,0,0 );
+		s.morphablePattern.scale.set( 1,1,1 );
+	}
+	
+	s.changeMode = function(newMode)
+	{
+		s.mode = newMode;
+		if(s.mode === "translation" )
+		{
+			if(s.children.length > 2)
+				s.remove(s.children[2]);
+			s.add(s.translationalSymbol);
+		}
+		if(s.mode === "rotation" )
+		{
+			if(s.children.length > 2)
+				s.remove(s.children[2]);
+			s.add(s.rotationalSymbol);
+		}
+		if(s.mode === "reflection" )
+		{
+			if(s.children.length > 2)
+				s.remove(s.children[2]);
+			s.add(s.reflectionalSymbol);
+		}
+		if(s.mode === "nothing" )
+		{
+			s.remove(s.children[2]);
+		}
+//		s.morphablePattern.position.set(0,0,0);
+//		s.morphablePattern.scale.set(1,1,1);
+//		s.morphablePattern.rotation.set(0,0,0);
+	}
+	s.changeMode("rotation")
 }
 

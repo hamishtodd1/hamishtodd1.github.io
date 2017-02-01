@@ -18,10 +18,6 @@ io.on('connection', function(socket){
 	
 	socket.broadcast.on('ModelsControllersCameraUpdate', function(msg){ socket.broadcast.emit('ModelsControllersCameraUpdate', msg); });
 	socket.broadcast.on('screenIndicator', function(msg){ socket.broadcast.emit('screenIndicator', msg); });
-	
-	socket.on('disconnect', function () {
-		console.log("User disconnected");
-	});
 });
 
 http.listen(3000, function(){ //3000 for local, 8000 for proper. Might need a sudo

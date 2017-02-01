@@ -1,4 +1,4 @@
-function init_cubes()
+function init_cubes(presentation)
 {
 	var cube_edgelen = 0.3;
 	//we stack a bunch with normal cubes and get the whole thing
@@ -162,15 +162,15 @@ function init_cubes()
 	three_hole_cube.scale.set(0.4,0.4,0.4);
 	
 	//then try making it with just normal cubes and see which ones need to be dealt with
-	function makePuzzle(cubeHalf)
+	function makePuzzle(cubeHalf, objectToAddTo)
 	{
-		OurObject.add(cubeHalf);
+		objectToAddTo.add(cubeHalf);
 		cubeHalf.material.color.r = 0;
 		var otherHalf = cubeHalf.clone();
 		var cornerAxis = new THREE.Vector3(1,-1,1)
 		cornerAxis.normalize();
 		myPlane = new THREE.Mesh(new THREE.PlaneGeometry(0.7,0.7), new THREE.MeshBasicMaterial({transparent:true, opacity: 0.5, color: 0x57007F, side: THREE.DoubleSide}));
-		OurObject.add(otherHalf);
+		objectToAddTo.add(otherHalf);
 		var newRearUp = (new THREE.Vector3(1,1,1)).angleTo(new THREE.Vector3(0,1,0));
 		otherHalf.rotateOnAxis(new THREE.Vector3(-1/Math.sqrt(2),0,1/Math.sqrt(2)), -newRearUp );
 		var edgeAxis = new THREE.Vector3(-0.5,-1,-0.5)
@@ -179,10 +179,26 @@ function init_cubes()
 		otherHalf.rotateOnAxis(edgeAxis,TAU / 2);
 		cubeHalf.rotateOnAxis(new THREE.Vector3(-1/Math.sqrt(2),0,1/Math.sqrt(2)), -newRearUp );
 		myPlane.rotation.x = TAU / 4;
-		OurObject.add(myPlane);
+		objectToAddTo.add(myPlane);
 	}
 	
-	//the light puzze
+	var full3hole = presentation.createNewHoldable("full3hole");
+	full3hole.scale.multiplyScalar(0.2);
+	makePuzzle(three_hole_cube, full3hole);
+	
+	var fullNoHole = presentation.createNewHoldable("fullNoHole");
+	fullNoHole.scale.multiplyScalar(0.2);
+	makePuzzle(single_sliced_cube, fullNoHole);
+	
+	var half3hole = presentation.createNewHoldable("half3hole");
+	half3hole.scale.multiplyScalar(0.2);
+	half3hole.add(three_hole_cube.clone());
+	
+	var halfNoHole = presentation.createNewHoldable("halfNoHole");
+	halfNoHole.scale.multiplyScalar(0.2);
+	halfNoHole.add(single_sliced_cube.clone() );
+	
+	//the light puzzle
 	{
 //		var pentagonRadius = 0.1;
 //		var shadowHeight = pentagonRadius * 19;
@@ -208,15 +224,17 @@ function init_cubes()
 //		OurObject.add(shadowVolume, shadowPlane,pentagon);
 		
 //		Renderer.setClearColor(0xFFFFFF)
-		Scene.remove(Scene.children[4])
+//		Scene.remove(Scene.children[4])
 //		Scene.remove(Scene.children[3])
 	}
 	
+	var treePuzzle = presentation.createNewHoldable( "treePuzzle" );
 	var loader = new THREE.OBJLoader();
 	loader.load(
 		'http://hamishtodd1.github.io/RILecture/Data/Tree.obj',
 		function ( TreeOBJ ) {
 			var tree = TreeOBJ.children[0];
+			tree.material.color.set(0x78533F)
 			var treeScale = 0.002;
 			tree.scale.set(treeScale,treeScale,treeScale )
 			tree.position.set(-0.047,-0.5,0)
@@ -233,51 +251,51 @@ function init_cubes()
 			verticalPlane.position.set(0.02,-0.15,0)
 			
 			diagonalPlane.rotation.set(1.57,-0.563,0)
-			diagonalPlane.position.set(0.02,-0.34,0)
+			diagonalPlane.position.set(0.02,-0.34,0);
 			
-//			OurObject.add(tree);
-//			OurObject.add(horizontalPlane);
-//			OurObject.add(verticalPlane);
-//			OurObject.add(diagonalPlane);
+			treePuzzle.add(tree);
+			treePuzzle.add(horizontalPlane);
+			treePuzzle.add(verticalPlane);
+			treePuzzle.add(diagonalPlane);
 		}
 	);
-	loader.load(
-		'http://hamishtodd1.github.io/RILecture/Data/banana.obj',
-		function ( bananaOBJ ) {
-			var banana = bananaOBJ.children[0];
-			banana.material = new THREE.MeshBasicMaterial({color: 0xDBB94C, side: THREE.DoubleSide})
-			for(var i = 0, il = banana.geometry.attributes.position.array.length; i<il; i++) 
-				banana.geometry.attributes.position.array[i] *=0.1;
-			banana.position.set(-2.55,0,1.79)
-//			OurObject.add(banana)
-			
-			var slicePlane = new THREE.Mesh(new THREE.PlaneGeometry(0.28,0.28), new THREE.MeshBasicMaterial({transparent:true, opacity: 0.5, color: 0x57007F, side: THREE.DoubleSide}));
+//	loader.load(
+//		'http://hamishtodd1.github.io/RILecture/Data/banana.obj',
+//		function ( bananaOBJ ) {
+//			var banana = bananaOBJ.children[0];
+//			banana.material = new THREE.MeshBasicMaterial({color: 0xDBB94C, side: THREE.DoubleSide})
+//			for(var i = 0, il = banana.geometry.attributes.position.array.length; i<il; i++) 
+//				banana.geometry.attributes.position.array[i] *=0.1;
+//			banana.position.set(-2.55,0,1.79)
+////			OurObject.add(banana)
+//			
+//			var slicePlane = new THREE.Mesh(new THREE.PlaneGeometry(0.28,0.28), new THREE.MeshBasicMaterial({transparent:true, opacity: 0.5, color: 0x57007F, side: THREE.DoubleSide}));
+////			OurObject.add(slicePlane);
+//		}
+//	);
+//	loader.load(
+//		'http://hamishtodd1.github.io/RILecture/Data/clebsch.obj',
+//		function ( clebschOBJ ) {
+//			var clebsch = clebschOBJ.children[0];
+//			clebsch.material.color.b = 0;
+//			var newRearUp = (new THREE.Vector3(1,1,1)).angleTo(new THREE.Vector3(0,1,0));
+//			var clebschMatrix = (new THREE.Matrix4()).makeRotationAxis ( new THREE.Vector3(1/Math.sqrt(2),0,1/Math.sqrt(2)), -newRearUp );
+//			clebsch.geometry.applyMatrix(clebschMatrix);
+//			for(var i = 0, il = clebsch.geometry.attributes.position.array.length; i<il; i++) 
+//				clebsch.geometry.attributes.position.array[i] *=0.1;
+//			var cutoff = -0.58;
+//			for(var i = 0, il = clebsch.geometry.attributes.position.array.length/3; i<il; i++)
+//			{
+//				clebsch.geometry.attributes.position.array[i*3+1] *= 5;
+//				
+//				if( clebsch.geometry.attributes.position.array[i*3+1] < cutoff )
+//					clebsch.geometry.attributes.position.array[i*3+1] = cutoff;
+//			}	
+//			OurObject.add(clebsch)
+//			
+//			slicePlane = new THREE.Mesh(new THREE.PlaneGeometry(0.28,0.28), new THREE.MeshBasicMaterial({transparent:true, opacity: 0.5, color: 0x57007F, side: THREE.DoubleSide}));
 //			OurObject.add(slicePlane);
-		}
-	);
-	loader.load(
-		'http://hamishtodd1.github.io/RILecture/Data/clebsch.obj',
-		function ( clebschOBJ ) {
-			var clebsch = clebschOBJ.children[0];
-			clebsch.material.color.b = 0;
-			var newRearUp = (new THREE.Vector3(1,1,1)).angleTo(new THREE.Vector3(0,1,0));
-			var clebschMatrix = (new THREE.Matrix4()).makeRotationAxis ( new THREE.Vector3(1/Math.sqrt(2),0,1/Math.sqrt(2)), -newRearUp );
-			clebsch.geometry.applyMatrix(clebschMatrix);
-			for(var i = 0, il = clebsch.geometry.attributes.position.array.length; i<il; i++) 
-				clebsch.geometry.attributes.position.array[i] *=0.1;
-			var cutoff = -0.58;
-			for(var i = 0, il = clebsch.geometry.attributes.position.array.length/3; i<il; i++)
-			{
-				clebsch.geometry.attributes.position.array[i*3+1] *= 5;
-				
-				if( clebsch.geometry.attributes.position.array[i*3+1] < cutoff )
-					clebsch.geometry.attributes.position.array[i*3+1] = cutoff;
-			}	
-			OurObject.add(clebsch)
-			
-			slicePlane = new THREE.Mesh(new THREE.PlaneGeometry(0.28,0.28), new THREE.MeshBasicMaterial({transparent:true, opacity: 0.5, color: 0x57007F, side: THREE.DoubleSide}));
-			OurObject.add(slicePlane);
-		}
-	);
+//		}
+//	);
 	
 }

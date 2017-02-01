@@ -1,12 +1,13 @@
-function initHoneycombs()
+function initHoneycombs( presentation )
 {
-	var octa_honeycomb = new THREE.Object3D();
+	var octaHoneycomb = new THREE.Object3D();
 	
-	var base_RD = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshPhongMaterial({shading: THREE.FlatShading}));
-	var RD_honeycomb = new THREE.Object3D();
+	var baseRD = new THREE.Mesh(new THREE.Geometry(),new THREE.MeshPhongMaterial({shading: THREE.FlatShading, color: 0xa3dfFF, transparent: true, opacity:1}));
+//	var RDmat = new THREE.MeshPhongMaterial({shading: THREE.FlatShading, color: 0xa3dfFF, transparent: true, opacity:1});
+	var RDhoneycomb = new THREE.Object3D();
 	//we're imagining one with "cube" corners at (1,1,1)
 	for(var i = 0; i < 6; i++) {
-		var extra_pyramid = new THREE.ConeGeometry(Math.sqrt(2),1,4,1,true,TAU / 8); //the last one is theta start, which might be TAU / 8
+		var extra_pyramid = new THREE.ConeGeometry(Math.sqrt(2),1,4,1,true,TAU / 8);
 		for(var j = 0; j < extra_pyramid.vertices.length; j++)
 			extra_pyramid.vertices[j].y += 1.5;
 		var extra_pyramid_matrix = new THREE.Matrix4();
@@ -15,17 +16,13 @@ function initHoneycombs()
 		if(i===3) extra_pyramid_matrix.makeRotationAxis(xAxis,-TAU / 4);
 		if(i===4) extra_pyramid_matrix.makeRotationAxis(zAxis,-TAU / 4);
 		if(i===5) extra_pyramid_matrix.makeRotationAxis(xAxis, TAU / 2);
-		base_RD.geometry.merge(extra_pyramid, extra_pyramid_matrix ); //might need another argument?
+		baseRD.geometry.merge(extra_pyramid, extra_pyramid_matrix ); //might need another argument?
 	}
-	
-	//You also need to put these base shapes into the scene
-	var base_octa = new THREE.Mesh(new THREE.OctahedronGeometry(1), new THREE.MeshPhongMaterial({shading: THREE.FlatShading}));
-	var base_l_tet = new THREE.Mesh( new THREE.TetrahedronGeometry( Math.sqrt(3) / 2 ), new THREE.MeshPhongMaterial({shading: THREE.FlatShading, color: 0x47837B}));
-	var base_r_tet = base_l_tet.clone();
-	base_r_tet.rotateOnAxis(yAxis, TAU / 4);
-	
-	var lattice_width = 6;
-	var spacing = 1.22;
+	baseRD.geometry.computeFaceNormals();
+	baseRD.geometry.computeVertexNormals();
+		
+	var lattice_width = 3;
+	var spacing = 1.08;
 	
 	for(var i = -lattice_width; i < lattice_width; i++) {
 	for(var j = -lattice_width; j < lattice_width; j++) {
@@ -35,48 +32,59 @@ function initHoneycombs()
 				)
 			continue;
 		
-		var new_RD = base_RD.clone();
+		var new_RD = new THREE.Mesh(new THREE.Geometry(),new THREE.MeshPhongMaterial({shading: THREE.FlatShading, color: 0xa3dfFF, transparent: true, opacity:1}));
+		new_RD.geometry.copy(baseRD.geometry);
 		new_RD.position.set(i * spacing * 2,j * spacing * 2,k * spacing * 2);
-		RD_honeycomb.add( new_RD );
+		RDhoneycomb.add( new_RD );
 		
-		var new_octa = base_octa.clone();
+		var new_octa = new THREE.Mesh(new THREE.OctahedronGeometry(1), new THREE.MeshPhongMaterial({shading: THREE.FlatShading, transparent:true, opacity:1}));
 		new_octa.position.set(i * spacing,j * spacing,k * spacing);
-		octa_honeycomb.add( new_octa );
+		octaHoneycomb.add( new_octa );
 		
-		var new_l_tet = base_l_tet.clone();
+		var new_l_tet = new THREE.Mesh( new THREE.TetrahedronGeometry( Math.sqrt(3) / 2 ), new THREE.MeshPhongMaterial({shading: THREE.FlatShading, color: 0x47837B, transparent:true, opacity:1}));
 		new_l_tet.position.set(i * spacing + spacing * -0.5,j * spacing + spacing * -0.5,k * spacing + spacing * 0.5);
-		octa_honeycomb.add( new_l_tet );
+		octaHoneycomb.add( new_l_tet );
 		
-		var new_r_tet = base_r_tet.clone();
+		var new_r_tet = new THREE.Mesh( new THREE.TetrahedronGeometry( Math.sqrt(3) / 2 ), new THREE.MeshPhongMaterial({shading: THREE.FlatShading, color: 0x47837B, transparent:true, opacity:1}));
+		new_r_tet.rotateOnAxis(yAxis, TAU / 4);
 		new_r_tet.position.set(i * spacing + spacing * -0.5,j * spacing + spacing * 0.5,k * spacing + spacing * 0.5);
-		octa_honeycomb.add( new_r_tet );
+		octaHoneycomb.add( new_r_tet );
 	}
 	}
 	}
 	
-	octa_honeycomb.update = function()
+	var updateDisappearingHoneycomb = function()
 	{
-		octa_honeycomb.updateMatrixWorld();
-		for(var i = 0, il = octa_honeycomb.children.length; i < il; i++)
+		this.updateMatrixWorld();
+		for(var i = 0, il = this.children.length; i < il; i++)
 		{
-			var abs_position = octa_honeycomb.children[i].position.clone();
-			octa_honeycomb.localToWorld(abs_position);
-			if( abs_position.y > -0.2 )
-				octa_honeycomb.children[i].visible = false;
+			var abs_position = this.children[i].position.clone();
+			this.localToWorld(abs_position);
+			var hiddenY = -0.07;
+			var visibleY = -0.08;
+			if( abs_position.y > hiddenY )
+				this.children[i].material.opacity = 0;
+			if( abs_position.y < visibleY )
+				this.children[i].material.opacity = 1;
 			else
-				octa_honeycomb.children[i].visible = true;
+				this.children[i].material.opacity = 1 - ( abs_position.y - visibleY ) / ( hiddenY - visibleY );
 		}
 	}
 	
-	var cubic_lattice = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshPhongMaterial({shading: THREE.FlatShading}));
-	var atomic_cubic_lattice = new THREE.Object3D();
+	octaHoneycomb.update = updateDisappearingHoneycomb;
+	RDhoneycomb.update = updateDisappearingHoneycomb;
+	presentation.createNewHoldable("octaHoneycomb",octaHoneycomb);
+	presentation.createNewHoldable("RDhoneycomb",RDhoneycomb);
+	
+	var cubicLattice = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshPhongMaterial({shading: THREE.FlatShading}));
+	var atomicCubicLattice = new THREE.Object3D();
 	var latticeShadow = new THREE.Object3D();
 	var cubes_wide = 9;
-	var cube_edgelen = 0.3;
-	var cubicLatticeScale = 0.3;
-	var cube_spacing = cube_edgelen * 1.1;
+	var cube_edgelen = 0.2;
+	var cubicLatticeScale = 0.06;
+	var cube_spacing = cube_edgelen * 1.4;
 	var atomTemplate = new THREE.Mesh(new THREE.SphereGeometry(cube_edgelen/5), new THREE.MeshPhongMaterial({}));
-	var shadowTemplate = new THREE.Mesh(new THREE.CircleGeometry(cube_edgelen/5*cubicLatticeScale, 14), new THREE.MeshBasicMaterial({color:0x000000}));
+	var shadowTemplate = new THREE.Mesh(new THREE.CircleGeometry(cube_edgelen/5, 14), new THREE.MeshBasicMaterial({color:0x000000}));
 	for(var i = 0; i < shadowTemplate.geometry.vertices.length; i++)
 	{
 		shadowTemplate.geometry.vertices[i].z =-shadowTemplate.geometry.vertices[i].y;
@@ -91,39 +99,51 @@ function initHoneycombs()
 						(i- (cubes_wide-1) / 2) * cube_spacing,
 						(j- (cubes_wide-1) / 2) * cube_spacing,
 						(k- (cubes_wide-1) / 2) * cube_spacing );
-				atomic_cubic_lattice.add(cubicAtom);
+				atomicCubicLattice.add(cubicAtom);
 				var atomShadow = new THREE.Mesh( shadowTemplate.geometry, shadowTemplate.material );
 				latticeShadow.add( atomShadow );
 				
 				var newcube_geo = new THREE.BoxGeometry(cube_edgelen,cube_edgelen,cube_edgelen);
 				var newcube_mat = new THREE.Matrix4();
 				newcube_mat.setPosition( cubicAtom.position );
-				cubic_lattice.geometry.merge(newcube_geo, newcube_mat);
+				cubicLattice.geometry.merge(newcube_geo, newcube_mat);
 			}
-	cubic_lattice.geometry.mergeVertices();
+	cubicLattice.geometry.mergeVertices();
 	
-	cubic_lattice.scale.set(cubicLatticeScale,cubicLatticeScale,cubicLatticeScale);
-	atomic_cubic_lattice.scale.set(cubicLatticeScale,cubicLatticeScale,cubicLatticeScale);
-//	latticeShadow.scale.set(cubicLatticeScale*cubicLatticeScale,cubicLatticeScale*cubicLatticeScale,cubicLatticeScale*cubicLatticeScale);
-	latticeShadow.position.y =-cube_edgelen * cubes_wide * cubicLatticeScale;
-	atomic_cubic_lattice.update = function()
+	cubicLattice.scale.setScalar( cubicLatticeScale );
+	atomicCubicLattice.scale.setScalar( cubicLatticeScale );
+	latticeShadow.scale.setScalar(cubicLatticeScale);
+	
+	atomicCubicLattice.update = function()
 	{
-		OurObject.updateMatrixWorld();
+		atomicCubicLattice.updateMatrix();
+		var rotationMatrix = new THREE.Matrix4().extractRotation( atomicCubicLattice.matrix );
 		for(var i = 0, il = latticeShadow.children.length; i < il; i++ )
 		{
-			latticeShadow.children[i].position.copy( atomic_cubic_lattice.children[i].position );
-			latticeShadow.children[i].position.applyMatrix4(atomic_cubic_lattice.matrix);
+			latticeShadow.children[i].position.copy( atomicCubicLattice.children[i].position );
+			latticeShadow.children[i].position.applyMatrix4(rotationMatrix);
 			latticeShadow.children[i].position.y = 0;
 			//speedup opportunity: single geometry
 		}
+		latticeShadow.position.copy(atomicCubicLattice.position);
+		latticeShadow.position.y = -1.3;
 	}
 	
-//	OurObject.add( atomic_cubic_lattice );
-//	OurObject.add( latticeShadow );
-//	OurObject.add(cubic_lattice);
+	presentation.createNewHoldable("atomicCubicLattice",atomicCubicLattice);
+	presentation.createNewHoldable("latticeShadow",latticeShadow);
+	presentation.createNewHoldable("cubicLattice",cubicLattice);
+	
+	var baseOcta = new THREE.Mesh(new THREE.OctahedronGeometry(1), new THREE.MeshPhongMaterial({shading: THREE.FlatShading}));
+	var baseLTet = new THREE.Mesh( new THREE.TetrahedronGeometry( Math.sqrt(3) / 2 ), new THREE.MeshPhongMaterial({shading: THREE.FlatShading, color: 0x47837B, transparent:true, opacity:1}));
+	
+	presentation.createNewHoldable("baseRD", baseRD);
+	presentation.createNewHoldable("baseLTet", baseLTet);
+	presentation.createNewHoldable("baseOcta", baseOcta);
 	
 	var rhombicDodecaScale = 0.02;
-	RD_honeycomb.scale.set(rhombicDodecaScale,rhombicDodecaScale,rhombicDodecaScale);
-	octa_honeycomb.scale.set(rhombicDodecaScale*2,rhombicDodecaScale*2,rhombicDodecaScale*2);
-	OurObject.add(octa_honeycomb);
+	RDhoneycomb.scale.setScalar(rhombicDodecaScale);
+	octaHoneycomb.scale.setScalar( rhombicDodecaScale*2);
+	baseRD.scale.setScalar( rhombicDodecaScale);
+	baseLTet.scale.setScalar( rhombicDodecaScale*2);
+	baseOcta.scale.setScalar( rhombicDodecaScale*2);
 }

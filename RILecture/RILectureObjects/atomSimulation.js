@@ -1,9 +1,9 @@
-function init_atoms()
+function init_atoms( presentation )
 {
-	var atomRadius = 0.07;
+	var atomRadius = 0.03;
 	var bondLength = atomRadius * 3; //i.e. place where potential is zero
-	//todo: local
-	attractedAtom = new THREE.Mesh(new THREE.SphereGeometry(atomRadius,32,32), new THREE.MeshPhongMaterial({color:0xFF0000}) );
+
+	var attractedAtom = new THREE.Mesh(new THREE.SphereGeometry(atomRadius,32,32), new THREE.MeshPhongMaterial({color:0xFF0000}) );
 	
 	attractedAtom.velocity = new THREE.Vector3();
 	attractedAtom.partnerAtoms = Array();
@@ -29,20 +29,18 @@ function init_atoms()
 		acceleration.multiplyScalar(forceScalar);
 		this.velocity.add(acceleration);
 		this.position.add(this.velocity);
-		/* Thoughts:
-		 * Could use a better integrator. Actually shouldn't there be a differential equation solvable in closed form?
-		 * there's something about time and accuracy bundled up in "forceScalar". It is technically 1/mass, but not clear what sense it makes to think of it that way
-		 * Your movement of the neighbourhood atoms represents a discontinuous, i.e. infinite force, change. Or you could say "over the last delta_t it moved continuously"
-		 * Unfortunate that forceScalar is in part compensating for a bad solver
-		 * DON'T THINK TOO HARD THE ONLY PURPOSE OF THIS IS TO DEMONSTRATE THE BOND LENGTH THING
-		 */
+//		/* Thoughts:
+//		 * Could use a better integrator. Actually shouldn't there be a differential equation solvable in closed form?
+//		 * there's something about time and accuracy bundled up in "forceScalar". It is technically 1/mass, but not clear what sense it makes to think of it that way
+//		 * Your movement of the neighbourhood atoms represents a discontinuous, i.e. infinite force, change. Or you could say "over the last delta_t it moved continuously"
+//		 * Unfortunate that forceScalar is in part compensating for a bad solver
+//		 * DON'T THINK TOO HARD THE ONLY PURPOSE OF THIS IS TO DEMONSTRATE THE BOND LENGTH THING
+//		 */
 	}
 	
 	//------Readying the others
 	var holdingAtom = attractedAtom.clone();
 	holdingAtom.add( new THREE.Mesh(new THREE.SphereGeometry(bondLength,32,32), new THREE.MeshPhongMaterial({color:0xFF0000, transparent: true, opacity: 0.1}) ) );
-	holdingAtom.position.x = atomRadius * 2;
-	holdingAtom.position.z = -1;
 	
 	var atomCage = new THREE.Object3D();
 	atomCage.position.x = 0;
@@ -64,34 +62,21 @@ function init_atoms()
 	}
 	
 	//readying the scene
-	Scene.add(attractedAtom);
-	var justTheOne = false;
+	var justTheOne = true;
 	if( justTheOne )
 	{
-		Scene.add(holdingAtom);
-		attractedAtom.position.copy(holdingAtom.position);
+		attractedAtom.position.copy( holdingAtom.position );
 		attractedAtom.position.x -= bondLength;
 		attractedAtom.partnerAtoms.push(holdingAtom);
 	}
 	else
 	{
-		Scene.add(atomCage);
 		attractedAtom.position.copy(atomCage.position);
 		for(var i = 0; i < atomCage.children.length; i++)
 			attractedAtom.partnerAtoms.push( atomCage.children[i] );
 	}
 	
-	//TODO get rid of this
-	previousMousePosition = new THREE.Vector3(0,0,0);
-	document.addEventListener( 'mousemove', function(event) {
-		if(previousMousePosition.equals(THREE.zeroVector))
-			previousMousePosition.set(event.clientX, event.clientY, 0);
-		var mouseMovement = new THREE.Vector3(event.clientX-previousMousePosition.x,-event.clientY+previousMousePosition.y, 0);
-		mouseMovement.multiplyScalar(0.001);
-		if( justTheOne )
-			holdingAtom.position.add(mouseMovement);
-		else
-			atomCage.position.add(mouseMovement);
-		previousMousePosition.set(event.clientX,event.clientY, 0);
-	}, false );
+	presentation.createNewHoldable( "holdingAtom", holdingAtom );
+	presentation.createNewHoldable( "attractedAtom", attractedAtom );
+	presentation.createNewHoldable( "atomCage", atomCage );
 }
