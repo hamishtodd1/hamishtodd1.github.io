@@ -1,59 +1,74 @@
-function initVideo()
-{	
-	// create the video element
-	video = document.createElement( 'video' );
-	// video.id = 'video';
-	// video.type = ' video/ogg; codecs="theora, vorbis" ';
-	video.src = "sintel.ogv"; //http://hamishtodd1.github.io/
-	video.load(); // must call after setting/changing source
-	video.play();
+function initVideos( presentation )
+{
+	var videosInfo = [];
+	videosInfo.push( {
+		fileName: "diffraction_rotating",
+		actualName: "diffraction",
+		pixelsWide: 1920,
+		pixelsTall: 1080
+	});
+	videosInfo.push( {
+		fileName: "Crystal_Structure_and_the_Laws_of_Thermodynamics",
+		actualName: "crystalGrowth",
+		pixelsWide: 1920,
+		pixelsTall: 1080
+	});
+	videosInfo.push( {
+		fileName: "Microscopic_Time-Lapse_of_Growing_Snowflake_-_Vyac",
+		actualName: "snowflakeGrowth",
+		pixelsWide: 1280,
+		pixelsTall: 720
+	});
+	videosInfo.push( {
+		fileName: "Sagittal-T2-of-the-Brain-_from-Imaging-Anatomy-of-the-Human-Brain_",
+		actualName: "mri",
+		pixelsWide: 720,
+		pixelsTall: 720
+	});
 	
-	// alternative method -- 
-	// create DIV in HTML:
-	// <video id="myVideo" autoplay style="display:none">
-	//		<source src="videos/sintel.ogv" type='video/ogg; codecs="theora, vorbis"'>
-	// </video>
-	// and set JS variable:
-	// video = document.getElementById( 'myVideo' );
+	var updateVideo = function()
+	{
+		if( this.documentElement.readyState === this.documentElement.HAVE_ENOUGH_DATA )
+		{
+			if( this.documentElement.paused )
+				this.documentElement.play();
+			
+			this.imageContext.drawImage( this.documentElement, 0, 0 );
+			if ( this.material.map ) 
+				this.material.map.needsUpdate = true;			
+		}
+	}
 	
-	var videoImage = document.createElement( 'canvas' );
-	videoImage.width = 720;
-	videoImage.height = 306;
+	var screenWidth = 0.5;
+	for( var i = 0; i < videosInfo.length; i++ )
+	{
+		var video = new THREE.Mesh( //movie image will be scaled to fit these dimensions.
+				new THREE.PlaneGeometry( screenWidth, screenWidth / videosInfo[i].pixelsWide * videosInfo[i].pixelsTall ),
+				new THREE.MeshBasicMaterial( { overdraw: true, side:THREE.DoubleSide } ) );
+		
+		video.documentElement = document.createElement( "video" );
+		// video.type = ' video/ogg; codecs="theora, vorbis" ';
+		video.documentElement.src = "http://hamishtodd1.github.io/RILecture/Data/Slides/" + videosInfo[i].fileName + ".ogv";
+		video.documentElement.loop = true;
+//		video.documentElement.muted = true;
+		video.documentElement.setAttribute('crossorigin', 'anonymous');
+		
+		video.documentElement.load(); //AFTER setting source
+		
+		var videoImage = document.createElement( "canvas" );
+		videoImage.width = videosInfo[i].width;
+		videoImage.height = videosInfo[i].height;
 
-	videoImageContext = videoImage.getContext( '2d' );
-	// background color if no video present
-	videoImageContext.fillStyle = '#000000';
-	videoImageContext.fillRect( 0, 0, videoImage.width, videoImage.height );
+		video.imageContext = videoImage.getContext( '2d' );
+		video.imageContext.fillStyle = '#000000';
+		video.imageContext.fillRect( 0, 0, videoImage.width, videoImage.height );
 
-	videoTexture = new THREE.Texture( videoImage );
-	videoTexture.minFilter = THREE.LinearFilter;
-	videoTexture.magFilter = THREE.LinearFilter;
-	
-	var movieMaterial = new THREE.MeshBasicMaterial( { map: videoTexture, overdraw: true, side:THREE.DoubleSide } );
-	// the geometry on which the movie will be displayed;
-	// 		movie image will be scaled to fit these dimensions.
-	var movieGeometry = new THREE.PlaneGeometry( 12,5,4, 4 );
-	var movieScreen = new THREE.Mesh( movieGeometry, movieMaterial );
-	movieScreen.position.set(0,0,0);
-	Scene.add(movieScreen);
+		video.material.map = new THREE.Texture( videoImage );
+		video.material.map.minFilter = THREE.LinearFilter;
+		video.material.map.magFilter = THREE.LinearFilter;
+		
+		video.update = updateVideo;
+		
+		presentation.createNewHoldable( videosInfo[i].actualName + "Video", video );
+	}
 }
-
-//
-//function update()
-//{
-//	if ( keyboard.pressed("p") )
-//		video.play();
-//		
-//	if ( keyboard.pressed("space") )
-//		video.pause();
-//
-//	if ( keyboard.pressed("s") ) // stop video
-//	{
-//		video.pause();
-//		video.currentTime = 0;
-//	}
-//	
-//	if ( keyboard.pressed("r") ) // rewind video
-//		video.currentTime = 0;
-//}
-

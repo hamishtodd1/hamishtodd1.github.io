@@ -95,7 +95,7 @@ socket.on('OnConnect_Message', function(msg)
 		function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); } );
 	
 	var transferredObjectData = {};
-	transferredObjectData.thingsWithCopy = {};	
+	transferredObjectData.thingsWithCopy = {};
 	
 	var OurFontLoader = new THREE.FontLoader();
 	OurFontLoader.load(  "gentilis.js", function ( reponse ) 
@@ -128,6 +128,7 @@ socket.on('OnConnect_Message', function(msg)
 //			qcTablet.init();
 //			init_atoms( presentation ); //fuck this
 			
+			initVideos( presentation );
 			init_cubes( presentation );
 			init_extruding_polyhedra_and_house( presentation );
 			init_goldenLattice(presentation);
@@ -140,13 +141,12 @@ socket.on('OnConnect_Message', function(msg)
 			//Still to do:
 			//VIDEOS
 			//RD honeycomb points
-			//comment out all "cue" slides
-			//cubic lattice thing. Make the load of cubes. 
-			//fish sees shadow
+			//cubic lattice thing. Make the load of cubes. i+j+k < whole cube edge length. Faces different colors
+			//can have axes at a default setting in a slide
+			//fish sees shadow.
 			//torch
 			
 			//you want a bunch of them associated with the 6D axis but some of them stop. Extrude all at the same time
-			//Spheres in rhombic dod lattice?
 			//CCMV representation, Tamiflu
 			
 			//Probably you could do the tree thing!
@@ -156,7 +156,6 @@ socket.on('OnConnect_Message', function(msg)
 			//color in zika
 
 			//give it a shadow volume, just some cylinders			
-			//connection between three holed cube slice and shadow and symmetrical squashing?
 			//change color of cubicLattice
 			
 			//atoms come back?
