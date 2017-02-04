@@ -20,6 +20,7 @@ io.on('connection', function(socket){
 	socket.broadcast.on('screenIndicator', function(msg){ socket.broadcast.emit('screenIndicator', msg); });
 	socket.broadcast.on('pageChange', function(msg){ socket.broadcast.emit('pageChange', msg); });
 	socket.broadcast.on('objectPropertiesUpdate', function(msg){ socket.broadcast.emit('objectPropertiesUpdate', msg); });
+	socket.broadcast.on('cameraPlaneChange', function(msg){ socket.broadcast.emit('cameraPlaneChange', msg); });
 	socket.broadcast.on('extrude', function(msg){ socket.broadcast.emit('extrude'); });
 });
 

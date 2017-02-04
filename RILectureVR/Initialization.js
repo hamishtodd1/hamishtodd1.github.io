@@ -10,8 +10,7 @@ socket.on('OnConnect_Message', function(msg)
 	Renderer.shadowMap.cullFace = THREE.CullFaceBack;
 	document.body.appendChild( Renderer.domElement );
 	window.addEventListener( 'resize', function(){
-		console.log("resizing")
-	    Renderer.setSize( window.innerWidth, window.innerHeight );
+		Renderer.setSize( window.innerWidth, window.innerHeight );
 	    Camera.aspect = window.innerWidth / window.innerHeight;
 	    Camera.updateProjectionMatrix();
 	}, false );
@@ -139,18 +138,15 @@ socket.on('OnConnect_Message', function(msg)
 			initSymmetryDemonstration( presentation, transferredObjectData );
 			
 			//Still to do:
-			//VIDEOS
-			//RD honeycomb points
-			//cubic lattice thing. Make the load of cubes. i+j+k < whole cube edge length. Faces different colors
-			//can have axes at a default setting in a slide
-			//fish sees shadow.
-			//torch
+			//can have axes at a default setting in a slide. Snowflake setting
+			//go through it to check whether EPs have volume correctly
+			
+			//grabbers move with axes
+			
+			//two extra slides
 			
 			//you want a bunch of them associated with the 6D axis but some of them stop. Extrude all at the same time
 			//CCMV representation, Tamiflu
-			
-			//Probably you could do the tree thing!
-			//Annuluses and cylinders without tops, doublesided meshbasicmaterial, maybe a texture around the outside, and a further clipping plane
 			
 			//fish eyeball follows other object in scene
 			//color in zika

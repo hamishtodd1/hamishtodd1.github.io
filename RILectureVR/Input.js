@@ -72,6 +72,23 @@ inputObject.updateFromAsynchronousInput = function(holdables, holdablesInScene, 
 				socket.emit('extrude' );
 			}
 			
+			if(gamepads[k].axes[1] < 0.9)
+			{
+				Camera.near += 0.001;
+
+				Camera.updateProjectionMatrix();
+				socket.emit( 'cameraPlaneChange', Camera.near );
+			}
+			if(gamepads[k].axes[1] > -0.9)
+			{
+				Camera.near -= 0.001;
+				Camera.updateProjectionMatrix();
+				if(Camera.near < 0.001)
+					Camera.near = 0.001;
+				socket.emit( 'cameraPlaneChange', Camera.near );
+			}
+				
+			
 			if( affectedControllerIndex === RIGHT_CONTROLLER_INDEX )
 			{
 				if( gamepads[k].buttons[riftChangePageButton].value > 0.93 )
@@ -246,6 +263,12 @@ socket.on('screenIndicator', function(spectatorScreenCornerCoords)
 	}
 });
 
+socket.on('cameraPlaneChange', function(msg)
+{
+	Camera.near = msg;
+	Camera.updateProjectionMatrix();
+});
+
 socket.on('holdablesControllersCameraUpdate', function(lecturerInputObject)
 {
 	for(var i in inputObject.holdableStates )
@@ -306,18 +329,6 @@ socket.on('theydownloaded', function(msg)
 {
 	this.theydownloaded = msg;
 });
-
-//TODO wanna remove spaces and reduce to lower case before checking this
-var FamousProteins = Array(
-		"rubisco", "1rcx",
-		"keratin", "3TNU",
-		"actin", "1RFQ",
-		"myosin", "1W7J",
-		"collagen", "1BKV",
-		"integrin", "1rcx",
-		"insulin", "4ins",
-		"histone", "1AOI",
-		"ferritin", "1FHA");
 
 inputObject.ChangeuserString = function(newstring)
 {

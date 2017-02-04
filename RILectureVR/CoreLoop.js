@@ -9,12 +9,7 @@ function UpdateWorld(holdables, presentation)
 		if( typeof presentation.pages[presentation.currentPageIndex].holdablesInScene[i].update !== 'undefined' )
 			presentation.pages[presentation.currentPageIndex].holdablesInScene[i].update();
 	
-//	if( typeof video !== 'undefined' && video.readyState === video.HAVE_ENOUGH_DATA)
-//	{
-//		videoImageContext.drawImage( video, 0, 0 );
-//		if ( videoTexture ) 
-//			videoTexture.needsUpdate = true;
-//	}
+	
 }
 
 function Render( holdables, Controllers, presentation, transferredObjectData ) {
