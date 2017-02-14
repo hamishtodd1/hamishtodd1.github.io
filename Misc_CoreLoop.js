@@ -1,7 +1,7 @@
 /*
  * TODO before rerecord
- * Pics and the hexagons and pentagon demo
  * Make a nice, new, big bit of origami with a flap somewhere
+ * Remake origami dodecahedron?
  * vertex wiggle in irreg
  * irreg trying different configurations for algorithm
  * camera moves around on pictures like the cornucopia and the polio comparison. Go back to cornucopia for last sentence of that paragraph
@@ -12,6 +12,9 @@
  * 
  * Show the closed irreg capsid when you're trying to make phi29? ;_;
  * 
+ * Camera closer on beginning of CK?
+ * 
+ * The irreg grabbers want outlines
  * 
  * "These are some other viruses" - have their similarities appear on them? 
  * 	Could bring in disco ball, radio dome, gazebo/tent, dymaxion map at bottom, golf ball islamic art and greenhouse obv, origami
@@ -236,7 +239,8 @@ function ChangeScene(new_mode) {
 	{
 		case SLIDE_MODE:
 			scene.add(VisibleSlide);
-			scene.add( EndingMusic );
+			scene.add( Sounds.endingMusic );
+			scene.add( Sounds.enlarge );
 			break;
 	
 		case BOCAVIRUS_MODE:
@@ -261,6 +265,7 @@ function ChangeScene(new_mode) {
 //				scene.add(surfperimeter_spheres[i]);
 				scene.add(surfperimeter_cylinders[i]);
 			}
+			scene.add( Sounds.enlarge );
 //			for( var i = 0; i < blast_cylinders.length; i++)
 //				scene.add(blast_cylinders[i]);
 //			scene.add(GrabbableArrow);

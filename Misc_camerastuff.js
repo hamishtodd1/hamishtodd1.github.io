@@ -18,6 +18,7 @@ function UpdateCamera()
 	//things fade in, that's not so hard, just have a white surface that changes alpha
 	
 	//A lot of these might not necessarily be good ideas, since the player only spends small amounts of time on the demos :/
+	
 	//things should be drawn towards the mouse a little bit. No need for that if you're rotating Finger?
 	//take distance of mouse from center of screen, square root that, and move the camera towards the mouse by a multiple of that amount
 	//maybe have screenshake "energy"? like things can cause it to vibrate until it stops.
@@ -36,7 +37,6 @@ function UpdateCamera()
 	//give the net a flashy rim, that points ust come in through. Make it look like the capsid "cracks" open
 	//don't just shake, sway
 	//an invisible lamp on your mouse that impacts the surfaces you touch
-	//Ask Ben before working on ANYTHING
 	
 	
 

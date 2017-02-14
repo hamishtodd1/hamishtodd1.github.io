@@ -22,6 +22,8 @@ var HEXAGON_MODE = 7;
 	
 var MODE = 3;
 
+var backgroundColor = 0x7E7E7E;
+
 //--------------Technologically fundamental
 var playing_field_dimension = 7*HS3; //used to be that height was 6.
 var min_cameradist = 20; //get any closer and the perspective is weird

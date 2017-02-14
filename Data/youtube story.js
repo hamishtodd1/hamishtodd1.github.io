@@ -25,8 +25,8 @@ function Update_story()
 	//if you skip to a time, then the thing might not be in the state to demonstrate precisely what you want. And that is ok.
 	
 	if(our_CurrentTime >= 21*60+16)
-		if( !EndingMusic.isPlaying)
-			EndingMusic.play();
+		if( !Sounds.endingMusic.isPlaying)
+			Sounds.endingMusic.play();
 	
 	if(Storypage !== -1) //first part of this function is all based on current state, which you don't have at the very start
 	{

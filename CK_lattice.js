@@ -36,6 +36,10 @@ function HandleNetMovement()
 				var min_lattice_scale_given_angle = get_min_lattice_scale(LatticeAngle);
 				min_lattice_scale_given_angle /= Math.sqrt(7);
 				LatticeScale *= LatticeScaleChange;
+				
+				if( !Sounds.enlarge.isPlaying)
+					Sounds.enlarge.play();
+				
 				if(LatticeScale < min_lattice_scale_given_angle  ) //10/3 * HS3 / number_of_hexagon_rings)
 					LatticeScale = min_lattice_scale_given_angle; //10/3 * HS3 / number_of_hexagon_rings;
 				if(LatticeScale > 1)

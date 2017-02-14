@@ -19,13 +19,6 @@ function load_AV_stuff()
 	var random_texture_urls = Array();
 	var slide_texture_urls = Array();
 	
-	var audioListener = new THREE.AudioListener();
-	camera.add( audioListener );
-	EndingMusic = new THREE.Audio( audioListener );
-	EndingMusic.load(
-		'http://hamishtodd1.github.io/Data/Rustavi Choir - Tsmindao Ghmerto (Holy God).ogg'
-	);
-	
 	//-----clickable viruses
 	virus_texture_urls[0] = "http://hamishtodd1.github.io/Data/ClickableViruses/1 - BV.jpg"; //to be turned into golfball.jpg or whatever
 	virus_texture_urls[1] = "http://hamishtodd1.github.io/Data/ClickableViruses/1 - BV.jpg";
@@ -170,6 +163,20 @@ function load_AV_stuff()
 		if( last_three_letters === "png" || last_three_letters === "gif" || last_three_letters === "jpg" )
 			loadpic(slide_texture_urls[i], 2, i);
 		else console.log( "unrecognized format", last_three_letters);
+	}
+	
+	//---------SOUND
+	var audioListener = new THREE.AudioListener();
+	camera.add( audioListener );
+	Sounds = {};
+	var soundInfoArray = [
+	                      "endingMusic", "Rustavi Choir - Tsmindao Ghmerto (Holy God).ogg",
+	                      "enlarge", "enlarge.wav"];
+	for(var i = 0; i < soundInfoArray.length / 2; i++)
+	{
+		Sounds[soundInfoArray[i*2]] = new THREE.Audio( audioListener ).load(
+				'http://hamishtodd1.github.io/Data/Sounds/' + soundInfoArray[i*2+1]
+		);
 	}
 }
 
