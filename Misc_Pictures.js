@@ -171,12 +171,28 @@ function load_AV_stuff()
 	Sounds = {};
 	var soundInfoArray = [
 	                      "endingMusic", "Rustavi Choir - Tsmindao Ghmerto (Holy God).ogg",
-	                      "enlarge", "enlarge.wav"];
+	                      "enlarge", "enlarge",
+	                      "ensmall", "ensmall",
+	                      "pop1", "pop1 260614__kwahmah-02__pop",
+	                      "pop2", "pop2 34460__anbo__pop-lo-normal",
+	                      "pop3", "pop3 268822__kwahmah-02__woodblock",
+	                      "pop4", "pop4 25880__acclivity__fingerplop4",
+	                      "grab", "irreg grab 323740__reitanna__mouth-pop2",
+	                      "snap", "irreg snap 70105__timbre__tin-can-ping-scale",
+	                      "open and close", "wobble",
+	                      ];
 	for(var i = 0; i < soundInfoArray.length / 2; i++)
 	{
+		//default file type
+		if( soundInfoArray[i*2+1][soundInfoArray[i*2+1].length-4] !== "." )
+			soundInfoArray[i*2+1] += ".wav";
 		Sounds[soundInfoArray[i*2]] = new THREE.Audio( audioListener ).load(
 				'http://hamishtodd1.github.io/Data/Sounds/' + soundInfoArray[i*2+1]
 		);
+		camera.add( Sounds[soundInfoArray[i*2]] );
+		
+		//ok so you've just added this thing about attaching them to camera, need to test that
+		//also this business about the CK hexagon fill-in
 	}
 }
 

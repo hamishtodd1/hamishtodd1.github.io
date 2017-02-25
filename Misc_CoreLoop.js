@@ -1,96 +1,95 @@
-/*
- * TODO before rerecord
- * Make a nice, new, big bit of origami with a flap somewhere
- * Remake origami dodecahedron?
- * vertex wiggle in irreg
+/* EGW TODO
+ * Sound effects - enlarging, opening and closing, button pressing, QS popping, irreg grabbing, irreg moving?
+ * Some nice material?
+ * Shadows? 
+ * Copy the lights they have on the threejs material demos
+ * a "floor" for the shadow
+ * The irreg grabbers want outlines
+ * Fill in CK hexagons?
+ *	 would have to change the viruses you show
+ * Camera zooms in and out on CK (this could be after new version)
+ * Separate version, Pictures on the side
+ * 
+ * Cel-shaded erythrovirus
+ * Get an illustrator
+ * ------------With illustrator
+ * Hire them to illustrate the cell, that is their job description
+	They illustrate it in a way that is compatible with the other kinds of pics you know you'll have
+ * Better viruses on all (maybe CK things are shut)
+ * QS colors, CK colors, irreg and button colors
+ * Highlight the pentagons and hexagons on polio and hepatitis B when you say it (just make pics with different colors and fade) 
+ * Location of lights in boca
+ * Writing underneath viruses
+ * How to make nice pics of viruses: 
+ * 	Chimera
+ * 	clear out the things you don't want 
+ * 	multiscale models, resolution 0 (i.e. surfaces)
+ * 	if you want to color a chain, select one copy of it and click copies in the multiscale models window
+ * 	actions>color>all options>tools>surface color>radius>get color person to choose
+ * 
+ * -------------Further "animating" (and probably miscellaneous things)
+ * Lots of stuff moving around. It creates dynamism, have that whenever you can
+		Fade to virus pictures at end of all chapters
+ * 		Zoom in on darb e pattern
+ * 		Yes, this is better with VR stuff! Think about it in the moment, tighter creative loop, easier
+ *		"These are images of some other viruses" is a series of 8 that fade in
  * irreg trying different configurations for algorithm
- * camera moves around on pictures like the cornucopia and the polio comparison. Go back to cornucopia for last sentence of that paragraph
- * CK quaternion to get to RVF
  * boca quaternion responds to moving the assembly toy
  * models go haywire at the end
- * The entirety of the irreg story - decrease size of one of the outer vertices etc
- * 
  * Show the closed irreg capsid when you're trying to make phi29? ;_;
- * 
- * Camera closer on beginning of CK?
- * 
- * The irreg grabbers want outlines
- * 
- * "These are some other viruses" - have their similarities appear on them? 
- * 	Could bring in disco ball, radio dome, gazebo/tent, dymaxion map at bottom, golf ball islamic art and greenhouse obv, origami
- * New pics. Correct sizes. It is bad that 512px wide texture gets stretched to whatever it is.
- * Make use of the "now you can choose the next virus" clip and repeats
- * 		Loop back over every button press advice
- * 		And maybe also "try proving me wrong" and stuff like that...
- * 		Er, that doesn't sound great though, there's an argument for people taking things at their own pace. Maybe only a few prompts, one each on irreg and ck
- * URGH AND YOU PROBABLY NEED A RE-PROMPT FOR UNPAUSING YOU
- * Fading pics. Probably the thing to do is to specify actual chapters that consist of a fade?
- * CK pentagons flashing like sirens
- * Pentagon in CK demo and qs. Ehhhhh...
- * Contra the work you did, it is probably better to have the tiny HIV triangles in the middle - the point of a cone is that the point is together already
- * 
- * touch
- * 
- * 
- * No internet:
- * -pentagons in demo
- * -Mouse doesn't flick things to the wrong quaternion when you come into the frame from the video
- *  	Something like: if you're near the side, it resets
- * -all objects floating in space with a shadow/lighting? Something other than meshbasicmaterial?
- * -no 666s, you don't want pearl-clutchers. Easiest is change it to 665, -1, 999?
- * -EVERYTHING listed in CKsurfacestuff, bocavirus, quasisphere, youtube stuff. There isn't much.
- * -make work in different resolutions/respond to resize. Snap to 720/1080?
- *  	-mouse position does not respond to resize
- *  -Test with a low framerate to see what it's like and chase down remaining framerate dependence
- *  
- * TODO long term
- * -minify?
- *  Zika should be of a size you can fade the model to at the end of it
- * 	Bug: full screen crap, if you double click then jesus
- * 	Put a cookie in their computer so it goes to the tree if they pause? Maybe YouTube timestamp?
+ * Camera closer on beginning of CK
+ * Bug: full screen youtube crap, if you double click then jesus. Prevent fullscreen?
  * 	-the button flashes until you have opened AND closed it, with a change between
- * 	-You know... you can scale those picture meshes
  * 	-cite pictures
- * 	-virus pieces wobble with cell
  *  -loading screen. You may need to stagger inits
  *  -break up all the chapters into separate videos WHEN INTEGRATING NEW VIDEO
  *  -space out the video and canvas a bit
  *  -get a person with a sense of color to look at everything, including the pics of HPV, polio and hepatitis - Ario?
  *  -watch people a lot and tweak the zooming and rotating code, just because it is simple doesn't mean that it is good
- *  -If webgl doesn’t load (or etc), recommend a different browser or refreshing the page
+ *  -If webgl doesnï¿½t load (or etc), recommend a different browser or refreshing the page
  *  -slight change to cues for "boca"
  *  -bifuricate for the touchscreen. Put QS in correct orientation so it looks like HPV
  *  -proteins don't appear in nucleus?
  *  -tree selector fades in and no sticky out bits
+ *  -all the effects in camerastuff
+ * Could bring in disco ball, radio dome, gazebo/tent, dymaxion map at bottom, golf ball islamic art and greenhouse obv, origami
+ * New pics. Correct sizes and give them a border, then resize in the scene.
+ * Make use of the "now you can choose the next virus" clip and repeats
+ * 		Loop back over every button press advice
+ * Fading pics. Probably the thing to do is to specify actual chapters that consist of a fade?
+ * CK pentagons flashing like sirens
+ * Solid hexagons and pentagons?
+ * Touch
+ * Loading screen
+ * 
+ * 
+ * ----------------No internet:
+ * -pentagons in demo
+ * -Mouse doesn't flick things to the wrong quaternion when you come into the frame from the video
+ *  	Something like: if the new mouse position is on that side, set both old mouse position and new mouse position to that
+ * -no 666s, you don't want pearl-clutchers. Easiest is change it to 665, -1, 999?
+ * -everything listed in CKsurfacestuff, bocavirus, quasisphere, youtube stuff. There isn't much.
+ * -make it work in different resolutions/respond to resize. Snap to 480/720/1080
+ *  	-mouse position responds to resize?
+ * -Test with a low framerate to see what it's like and chase down remaining framerate dependence
  *  
- *  -don't humiliate yourself: if the canvas isn't running, halt the video
+ *  
+ * --------Technical
+ *	Optimize loading
+	-minify?
+ *  -if the canvas isn't running, halt the video
+ *  -upload static version to youtube and link to that if page doesn't load
  *  -make sure a good picture appears when shared on facebook and twitter
  *  -make it feel good
  *  	-optimize http://www.w3schools.com/js/js_performance.asp
- *  		-loops should not evaluate array lengths every time. Unless the length is changing
  *  		-profile
  *  		-could generate some things once, then not again
  *  		-search for missing "console.log"s, those are old debug things and may have wasteful ifs, alexandrov is chock-a-block
- *  	-all the effects in camerastuff
- *  -test on different setups IT DIDN'T WORK ON JOHAN'S MAC
- *  
- *  -upload static version to youtube and link to that if page doesn't load
- *  
- *  Change to another domain? ;_;
- *  
- *  ------------With color taste person
- * Better viruses on all
- * QS colors, CK colors, irreg and button colors
- * Highlight the pentagons and hexagons on polio and hepatitis B when you say it (just make pics with different colors and fade) 
- * Location of lights in boca
- * Writing underneath viruses
+ *  -test on different setups
+		-Johan's Mac
+		-Reidun's computer (probably just webgl)
+ *  -Change to another domain / mask it?
  * 
- * How to make nice pics of viruses: 
- * chimera, 
- * clear out the crap. 
- * multiscale models, resolution 0 (i.e. surfaces)
- * if you want to color a chain, select one copy of it and click copies in the multiscale models window
- * actions>color>all options>tools>surface color>radius>get color person to choose
  */
 
 var performance_checker = {
@@ -239,8 +238,6 @@ function ChangeScene(new_mode) {
 	{
 		case SLIDE_MODE:
 			scene.add(VisibleSlide);
-			scene.add( Sounds.endingMusic );
-			scene.add( Sounds.enlarge );
 			break;
 	
 		case BOCAVIRUS_MODE:
@@ -265,7 +262,6 @@ function ChangeScene(new_mode) {
 //				scene.add(surfperimeter_spheres[i]);
 				scene.add(surfperimeter_cylinders[i]);
 			}
-			scene.add( Sounds.enlarge );
 //			for( var i = 0; i < blast_cylinders.length; i++)
 //				scene.add(blast_cylinders[i]);
 //			scene.add(GrabbableArrow);

@@ -1,5 +1,3 @@
-//bug if you're on the scale-only part :( could rotate it a bit...
-
 function Map_lattice() {
 	var surface_hexamers_color = Story_states[Storypage].hexamers_color.clone();
 	var final_pentamers_color = Story_states[Storypage].pentamers_color.clone();
@@ -12,7 +10,7 @@ function Map_lattice() {
 			surface_hexamers_color.g + /*(1-capsidopenness) */ pentamers_color_adder * ( final_pentamers_color.g - surface_hexamers_color.g ),
 			surface_hexamers_color.b + /*(1-capsidopenness) */ pentamers_color_adder * ( final_pentamers_color.b - surface_hexamers_color.b ) );
 	
-	//this is all crap about that one part where we explain things
+	//the part where we explain things
 	{
 		var lattice_fadein_duration = 2;
 		var lattice_opacity = 1;
@@ -26,7 +24,7 @@ function Map_lattice() {
 		non_surface_hexamers_color.lerp( new THREE.Color(1,1,1), 1-lattice_opacity );
 		var non_surface_hexamers_multiplier = Lattice_ring_density_factor; //have this by default because mapfromlatticetosurface has the effect of multiplying by density factor
 		if(lattice_opacity === 0)
-			non_surface_hexamers_multiplier = 0; //send them all to zero
+			non_surface_hexamers_multiplier = 0;
 	}
 
 	var LatticeRotationAndScaleMatrix = new Float32Array([ 
@@ -229,7 +227,7 @@ function Map_lattice() {
 //						HexagonLattice.geometry.faces[i * 4 * 6 + tri_i].color.setRGB(capsidopenness,0,1-capsidopenness);
 //					else
 //						HexagonLattice.geometry.faces[i * 4 * 6 + tri_i].color.setRGB(1,0,0);
-					
+
 					for(var corner_i = 0; corner_i < 3; corner_i++)
 					{
 						var is_an_intersection = 0;
@@ -506,9 +504,7 @@ function Map_lattice() {
 			}
 		}
 	}
-		
-		
-	//potential optimisation: break out of the loop when you're past a certain radius. That only helps small capsids though.
+
 	//potential optimisation: just put one in each net triangle and extrapolate
 	for(var i = 0; i < number_of_lattice_points; i++) {
 		var latticevertex_nettriangle = locate_in_squarelattice_net(squarelattice_vertices[i]);

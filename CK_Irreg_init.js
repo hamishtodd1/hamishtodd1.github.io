@@ -1,33 +1,37 @@
-function init_CK_and_irreg(){
-	IrregButton = new THREE.Object3D();
-	IrregButton.radius = 0.37;
-	var button_line_width = 0.04;
-	IrregButton.add( new THREE.Mesh( new THREE.CircleGeometry(IrregButton.radius,64),
-			new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
-	IrregButton.add( new THREE.Mesh( new THREE.CircleGeometry(IrregButton.radius - button_line_width,64),
-			new THREE.MeshBasicMaterial( { transparent:true, color: 0xffffff } ) ) );
-	IrregButton.children[1].position.z += 0.001;
-	IrregButton.add( new THREE.Mesh( new THREE.CircleGeometry(button_line_width / 2,64),
-			new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
-	IrregButton.children[2].position.z += 0.002;
-	
-	IrregButton.add( new THREE.Mesh( new THREE.PlaneGeometry( (IrregButton.radius - button_line_width * 2 ) * 2,button_line_width),
-			new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
-	IrregButton.children[3].position.z += 0.003;
-	IrregButton.children[3].geometry.vertices[0].x = 0;
-	IrregButton.children[3].geometry.vertices[2].x = 0;
-	
-	IrregButton.add( new THREE.Mesh( new THREE.PlaneGeometry( (IrregButton.radius - button_line_width * 2 ) * 2,button_line_width),
-			new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
-	IrregButton.children[4].position.z += 0.003;
-	IrregButton.children[4].geometry.vertices[1].x = 0;
-	IrregButton.children[4].geometry.vertices[3].x = 0;
-	
-	IrregButton.pulsing = 1;
-	IrregButton.pulse = 0;
-	
-	IrregButton.position.set(-playing_field_dimension / 2 + 0.45,-1.4,0.002);
-	IrregButton.capsidopen = 0;
+function init_CK_and_irreg()
+{
+	//--------------Button shit
+	{		
+		IrregButton = new THREE.Object3D();
+		IrregButton.radius = 0.37;
+		var button_line_width = 0.04;
+		IrregButton.add( new THREE.Mesh( new THREE.CircleGeometry(IrregButton.radius,64),
+				new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
+		IrregButton.add( new THREE.Mesh( new THREE.CircleGeometry(IrregButton.radius - button_line_width,64),
+				new THREE.MeshBasicMaterial( { transparent:true, color: 0xffffff } ) ) );
+		IrregButton.children[1].position.z += 0.001;
+		IrregButton.add( new THREE.Mesh( new THREE.CircleGeometry(button_line_width / 2,64),
+				new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
+		IrregButton.children[2].position.z += 0.002;
+		
+		IrregButton.add( new THREE.Mesh( new THREE.PlaneGeometry( (IrregButton.radius - button_line_width * 2 ) * 2,button_line_width),
+				new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
+		IrregButton.children[3].position.z += 0.003;
+		IrregButton.children[3].geometry.vertices[0].x = 0;
+		IrregButton.children[3].geometry.vertices[2].x = 0;
+		
+		IrregButton.add( new THREE.Mesh( new THREE.PlaneGeometry( (IrregButton.radius - button_line_width * 2 ) * 2,button_line_width),
+				new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
+		IrregButton.children[4].position.z += 0.003;
+		IrregButton.children[4].geometry.vertices[1].x = 0;
+		IrregButton.children[4].geometry.vertices[3].x = 0;
+		
+		IrregButton.pulsing = 1;
+		IrregButton.pulse = 0;
+		
+		IrregButton.position.set(-playing_field_dimension / 2 + 0.45,-1.4,0.002);
+		IrregButton.capsidopen = 0;
+	}
 	
 	wedges_assigned_vertices = new Uint16Array([
 	                            		0, 1,
@@ -442,16 +446,19 @@ function init_CK_and_irreg(){
 		irreghighlight_geometry.faces.push(new THREE.Face3(22,1,23));
 		irreghighlight_geometry.faces.push(new THREE.Face3(22,0,1));
 		
-		for(var i = 0; i<varyingsurface_spheres.length;i++){
+		for(var i = 0; i<varyingsurface_spheres.length;i++)
+		{
+			//SOME OUTLINES GO HERE. Spheres, hah
+			
 			if( (i == 0 || i % 4 == 1) && i != 1)
-				varyingsurface_spheres[i] = new THREE.Mesh( new THREE.SphereGeometry(0.0000000001,  8,4),varyingsurface_edgesmaterial);
+				varyingsurface_spheres[i] = new THREE.Mesh( new THREE.SphereGeometry(0.0000000001, 8,4),varyingsurface_edgesmaterial);
 			else
 				varyingsurface_spheres[i] = new THREE.Mesh( new THREE.SphereGeometry(1,8,4),spherehandles_material.clone());
 		}
+		
 		varyingsurface = new THREE.Mesh( flatnet_geometry.clone(), surfacematerial );
 		
 		manipulation_surface = new THREE.Mesh( varyingsurface.geometry.clone(), surfacematerial );
-//		filler_points
 		
 		var flatlatticematerial = new THREE.PointsMaterial({
 			size: 0.09,
@@ -477,7 +484,6 @@ function init_CK_and_irreg(){
 		surflattice_geometry.addAttribute( 'color', new THREE.BufferAttribute(lattice_colors, 3) );
 
 		surflattice = new THREE.Points( surflattice_geometry, flatlatticematerial );
-		
 		
 		
 		
@@ -528,7 +534,8 @@ function init_CK_and_irreg(){
 			
 			surfperimeter_cylinders[i] = new THREE.Mesh( surfperimeter_cylinders_geometry, surfperimeter_cylindersmaterial );
 		}
-		for( var i = 0; i < blast_cylinders.length; i++) {			
+		for( var i = 0; i < blast_cylinders.length; i++)
+		{			
 			var cylinder_vertices_numbers = new Float32Array(16*3);
 			put_tube_in_buffer(0,0,0,1,1,1, surfperimeter_default_radius, cylinder_vertices_numbers);
 			
@@ -537,7 +544,6 @@ function init_CK_and_irreg(){
 			blast_cylinders_geometry.addAttribute( 'position', new THREE.BufferAttribute( cylinder_vertices_numbers, 3 ) );
 			
 			blast_cylinders[i] = new THREE.Mesh( blast_cylinders_geometry, blastcylindersmaterial );
-			
 		}
 		
 		
@@ -895,7 +901,7 @@ function init_CK_and_irreg(){
 		hexagon_generator[5] = new THREE.Vector3(0,  1,0);		//TL
 		
 		var hexagon_major_Scalar = 83; //will get divided by 100.
-		var hexagon_minor_Scalar = 61;
+		var hexagon_minor_Scalar = 0.0001; //TRY SETTING THIS TO ZERO
 		
 		
 
