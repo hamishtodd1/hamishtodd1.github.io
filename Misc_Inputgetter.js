@@ -44,6 +44,8 @@ document.addEventListener( 'mousemove', function(event) {
 	InputObject.mousey = -(event.clientY - window.innerHeight / 2 - renderer.domElement.offsetTop / 2);
 	InputObject.mousex *= playing_field_dimension / renderer.domElement.width;
 	InputObject.mousey *= playing_field_dimension / renderer.domElement.height;
+	InputObject.mousex += camera.position.x;
+	InputObject.mousey += camera.position.y;
 }, false ); //window?
 
 //remember there can be weirdness for multiple fingers, so make sure any crazy series of inputs are interpretable

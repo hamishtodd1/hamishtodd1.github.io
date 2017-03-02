@@ -1,17 +1,17 @@
 /* EGW TODO
- * Sound effects - enlarging, opening and closing, button pressing, QS popping, irreg grabbing, irreg moving?
- * Some nice material?
- * Shadows? 
- * Copy the lights they have on the threejs material demos
- * a "floor" for the shadow
- * The irreg grabbers want outlines
- * Fill in CK hexagons?
- *	 would have to change the viruses you show
+ * Some nice material? Needs to have normals updated
+ * Shadows on irreg; a "floor" for the shadow
+ * Screen shake on QS? Need that for the sound effect to make sense
+ * 
  * Camera zooms in and out on CK (this could be after new version)
  * Separate version, Pictures on the side
+ * The irreg grabbers want outlines
  * 
+ * -------------Before illustrator
  * Cel-shaded erythrovirus
- * Get an illustrator
+ * shadow for irreg
+ * Put things on corners of irreg and QS?
+ * Round the edges of the corners on CK
  * ------------With illustrator
  * Hire them to illustrate the cell, that is their job description
 	They illustrate it in a way that is compatible with the other kinds of pics you know you'll have
@@ -20,6 +20,7 @@
  * Highlight the pentagons and hexagons on polio and hepatitis B when you say it (just make pics with different colors and fade) 
  * Location of lights in boca
  * Writing underneath viruses
+ * 2XFC or 1F15 for T=3. Wait what about cowpea?  for Not very straight lines but that might be ok if it's consistent across others
  * How to make nice pics of viruses: 
  * 	Chimera
  * 	clear out the things you don't want 
@@ -38,6 +39,7 @@
  * models go haywire at the end
  * Show the closed irreg capsid when you're trying to make phi29? ;_;
  * Camera closer on beginning of CK
+ * better music? https://www.youtube.com/watch?v=NnfpsvS2AA8
  * Bug: full screen youtube crap, if you double click then jesus. Prevent fullscreen?
  * 	-the button flashes until you have opened AND closed it, with a change between
  * 	-cite pictures

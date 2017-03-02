@@ -395,10 +395,6 @@ function init_CK_and_irreg()
 //		surface.scale.y = 0.995;
 //		surface.scale.z = 0.995;
 		
-		var material1 = new THREE.LineBasicMaterial({
-			color: 0x0000ff
-		});
-		
 		//so the flatnet will no longer be flat. At some stable point, change its names.
 		flatnet_vertices = new THREE.BufferAttribute( flatnet_vertices_numbers, 3 );
 		
@@ -547,10 +543,6 @@ function init_CK_and_irreg()
 		}
 		
 		
-		
-		var material3 = new THREE.MeshBasicMaterial({
-			color: 0xff00ff
-		});
 
 		var radius = 0.08;
 		

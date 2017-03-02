@@ -14,6 +14,9 @@ function updatelattice() {
 
 function HandleNetMovement()
 {
+	if(isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) >= IrregButton.radius && !Sounds.grab.isPlaying )
+		Sounds.grab.play();
+	
 	if( capsidopenness === 1 && isMouseDown )
 	{
 		var Mousedist = MousePosition.distanceTo(flatlattice_center);
@@ -21,6 +24,7 @@ function HandleNetMovement()
 		
 		var active_radius = 0.18;
 		if(Mousedist > active_radius && OldMousedist > active_radius && Mouse_delta.lengthSq() != 0 ){
+			
 			LatticeGrabbed = true;
 			
 			var oldmouse_to_center = new THREE.Vector3(flatlattice_center.x - OldMousePosition.x,flatlattice_center.y - OldMousePosition.y,0);
@@ -41,15 +45,15 @@ function HandleNetMovement()
 				{
 					if(LatticeScale > 1)
 						LatticeScale = 1;
-					else if( !Sounds.enlarge.isPlaying )
-						Sounds.enlarge.play();
+					else if( !Sounds.ensmall.isPlaying)
+						Sounds.ensmall.play();
 				}
 				if( LatticeScaleChange < 1 )
 				{
 					if(LatticeScale < min_lattice_scale_given_angle  ) //10/3 * HS3 / number_of_hexagon_rings)
 						LatticeScale = min_lattice_scale_given_angle; //10/3 * HS3 / number_of_hexagon_rings;
-					else if( !Sounds.ensmall.isPlaying)
-						Sounds.ensmall.play();
+					else if( !Sounds.enlarge.isPlaying )
+						Sounds.enlarge.play();
 				}
 				
 				//TODO checks of this kind should really apply to the automatic stuff too, i.e. this should be moved down.

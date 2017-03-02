@@ -1,12 +1,10 @@
 /* 
- * Would be nice for the player to be able to mess around with time but still have it work. You want them to be able to come back
- * 
- * insane things can happen if the user goes to another tab and leaves it playing
- * 
- * Programming the triggers: make sure there’s no interdependence. 
- * Stuff can happen, but it’s a miniscule little thing that has no bearing on the deeper system beneath it
+ * Programming the triggers: make sure thereï¿½s no interdependence. 
+ * Stuff can happen, but itï¿½s a miniscule little thing that has no bearing on the deeper system beneath it
  * 
  * One deep bug is the fact that if they tab away and don't pause, the program isn't running so it can't be paused
+ * 
+ * Would be nice for the player to be able to mess around with time but still have it work. You want them to be able to come back
  */
 
 var Storypage = -1; //set to a silly number initially so we know that the first page will be triggered.
@@ -30,6 +28,11 @@ function Update_story()
 	
 	if(Storypage !== -1) //first part of this function is all based on current state, which you don't have at the very start
 	{
+		if(Story_states[Storypage].slide_number !== -1 && slideObjects[ Story_states[Storypage].slide_number ].material.opacity < 1 )
+		{
+			slideObjects[ Story_states[Storypage].slide_number ].material.opacity += 0.02;
+		}	
+		
 		if( Story_states[Storypage].prevent_playing )
 			if(ytplayer.getPlayerState() === 1)// 1 means playing,not allowed (although maybe some people like to have order designated for them?)
 				ytplayer.pauseVideo();
@@ -163,15 +166,17 @@ function Update_story()
 		AO.correct_minimum_angles(flatnet_vertices.array);
 	}
 	
-	//slide can be a video too maybe
-	if(Story_states[Storypage].slide_number !== -1 )
-	{
-		VisibleSlide.material.map = slide_textures[ Story_states[Storypage].slide_number ];
-		VisibleSlide.material.needsUpdate = true; //doesn't get there fast enough
-	}
-	//slide mode should really be an exceptional thing here
 	if( Story_states[Storypage].MODE !== MODE )
 		ChangeScene(Story_states[Storypage].MODE );
+
+	if(Story_states[Storypage].slide_number !== -1 )
+	{
+		scene.add( slideObjects[ Story_states[Storypage].slide_number ] );
+		if( Storypage > 0 && Story_states[Storypage-1].slide_number !== -1) {
+			slideObjects[ Story_states[Storypage].slide_number ].position.z = slideObjects[ Story_states[Storypage-1].slide_number ].position.z + 0.001;
+			slideObjects[ Story_states[Storypage].slide_number ].material.opacity = 0;
+		}
+	}
 	
 	//If we've just ticked forward then of course we should be playing anyway, but if we just started a new chapter, having been on the tree, we might be paused
 	if( !Story_states[Storypage].prevent_playing )

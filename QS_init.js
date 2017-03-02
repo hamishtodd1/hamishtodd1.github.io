@@ -38,11 +38,6 @@ function initialize_QS_stuff()
 		quasicutout_intermediate_vertices[i] = new THREE.Vector3(0,0,0);	
 	for(var i = 0; i < quasicutouts_vertices_components.length; i++)
 		quasicutouts_vertices_components[i] = new Array(0,0,1);
-
-	var materialx = new THREE.LineBasicMaterial({
- 		color: 0x0000ff,
- 		transparent: true
- 	});
  	
  	var dodeca_line_pairs = new Uint16Array([
  	    2,1,	1,11,	11,20,	20,29,	29,2,

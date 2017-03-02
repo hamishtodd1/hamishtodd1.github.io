@@ -36,6 +36,9 @@ function UpdateQuasiSurface()
 		QS_rotationangle *= 0.93;
 	}
 	
+	if(isMouseDown && !isMouseDown_previously && !Sounds.grab.isPlaying )
+		Sounds.grab.play();
+	
 	dodeca.rotateOnAxis(QS_rotationaxis,QS_rotationangle);
 	dodeca.updateMatrixWorld();
 	
@@ -261,6 +264,12 @@ function MoveQuasiLattice()
 		if(stable_point_of_meshes_currently_in_scene !== 666 )
 			dodeca.remove(quasicutout_meshes[stable_point_of_meshes_currently_in_scene]);
 		dodeca.add(quasicutout_meshes[modulated_CSP]);
+		
+		//a random pop
+//		var playedPop = "pop" + Math.ceil(Math.random()*4).toString();;
+//		console.log(playedPop);
+//		if( !Sounds[ playedPop ].isPlaying )
+//			Sounds[ playedPop ].play();
 		
 		stable_point_of_meshes_currently_in_scene = modulated_CSP;
 	}

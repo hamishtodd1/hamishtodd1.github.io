@@ -2,7 +2,6 @@ var texture_loader = new THREE.TextureLoader(); //only one? TODO
 var clickable_viruses = Array(16);
 
 var CKHider;
-var VisibleSlide;
 var IrregButtonOpen;
 var IrregButtonClosed;
 
@@ -11,6 +10,7 @@ var pictures_loaded = 0;
 var virus_textures;
 var random_textures;
 var slide_textures;
+var slideObjects;
 
 function load_AV_stuff()
 {
@@ -149,6 +149,7 @@ function load_AV_stuff()
 	virus_textures = Array(virus_texture_urls.length);
 	random_textures =Array(random_texture_urls.length);
 	slide_textures = Array(slide_texture_urls.length);
+	slideObjects = Array(slide_texture_urls.length);
 	
 	for(var i = 0; i < virus_texture_urls.length; i++ )
 		loadpic(virus_texture_urls[i], 0, i);
@@ -179,7 +180,8 @@ function load_AV_stuff()
 	                      "pop4", "pop4 25880__acclivity__fingerplop4",
 	                      "grab", "irreg grab 323740__reitanna__mouth-pop2",
 	                      "snap", "irreg snap 70105__timbre__tin-can-ping-scale",
-	                      "open and close", "wobble",
+	                      "openAndClose", "wobble",
+	                      "button", "button press round_pop_click2"
 	                      ];
 	for(var i = 0; i < soundInfoArray.length / 2; i++)
 	{
@@ -190,10 +192,9 @@ function load_AV_stuff()
 				'http://hamishtodd1.github.io/Data/Sounds/' + soundInfoArray[i*2+1]
 		);
 		camera.add( Sounds[soundInfoArray[i*2]] );
-		
-		//ok so you've just added this thing about attaching them to camera, need to test that
-		//also this business about the CK hexagon fill-in
 	}
+	Sounds.enlarge.setVolume(3);
+	Sounds.ensmall.setVolume(3);
 }
 
 function bind_pictures()
@@ -220,6 +221,10 @@ function bind_pictures()
 	//first slide
 	VisibleSlide = new THREE.Mesh( new THREE.CubeGeometry(playing_field_dimension, playing_field_dimension, 0),
 		new THREE.MeshBasicMaterial( { transparent:true } ) );
+	
+	for(var i = 0; i < slideObjects.length; i++ )
+		slideObjects[i] = new THREE.Mesh( new THREE.CubeGeometry(playing_field_dimension, playing_field_dimension, 0),
+			new THREE.MeshBasicMaterial( { transparent:true, map: slide_textures[ i ] } ) );
 	
 	
 	//----Ready

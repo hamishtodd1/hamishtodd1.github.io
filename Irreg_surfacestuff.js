@@ -86,7 +86,9 @@ function CheckIrregButton(){
 	
 	if(isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) < IrregButton.radius ){
 		var squashed_size = 0.925;
-		IrregButton.scale.set(squashed_size,squashed_size,squashed_size);
+		IrregButton.scale.setScalar(squashed_size);
+
+		Sounds.button.play();
 		
 		IrregButton.pulsing = 0;
 	}

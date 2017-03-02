@@ -168,7 +168,9 @@ function manipulate_vertices()
 			var maximum_quadrance_to_be_selected = 0.012;
 			if( lowest_quadrance_so_far < maximum_quadrance_to_be_selected) {
 				vertex_tobechanged = closest_vertex_so_far;
-				Sounds.grab.play();
+
+				if(!Sounds.grab.isPlaying)
+					Sounds.grab.play();
 				
 				settle_manipulationsurface_and_flatnet();
 			}
