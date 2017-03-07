@@ -33,7 +33,19 @@ function Update_story()
 			slideObjects[ Story_states[Storypage].slide_number ].material.opacity += 0.02;
 		}
 		
-//		if(Story_states[Storypage].cameraCloseup)
+		if(Story_states[Storypage].cameraCloseup)
+		{
+			camera.position.z = 5.5;
+		}
+		else
+		{
+			camera.position.z += 0.2;
+			if( camera.position.z > min_cameradist)
+				camera.position.z = min_cameradist;
+		}
+		camera.position.x = camera.position.z * -playing_field_dimension/min_cameradist/2;
+		slideObjects[ 0 ].position.x = camera.position.x * 2;
+//		slideObjects[ 1 ].position.x = camera.position.x * 2;
 		
 		if( Story_states[Storypage].unpause_on_vertex_knowledge && theyknowyoucanchangevertices && !isMouseDown )
 			IrregButton.capsidopen = 0;	

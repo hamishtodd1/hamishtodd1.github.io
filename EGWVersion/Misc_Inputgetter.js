@@ -32,8 +32,8 @@ document.addEventListener( 'keydown', function(event)
 	//arrow keys
 	if(event.keyCode === 39)
 		our_CurrentTime += 3;
-	if(event.keyCode === 37)
-		our_CurrentTime -= 3;
+//	if(event.keyCode === 37)
+//		our_CurrentTime -= 3;
 }, false );
 
 document.addEventListener( 'mousedown', function(event) {
