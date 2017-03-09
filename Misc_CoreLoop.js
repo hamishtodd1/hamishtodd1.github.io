@@ -1,17 +1,13 @@
-/* EGW TODO
+/* 
  * Some nice material? Needs to have normals updated
  * Shadows on irreg; a "floor" for the shadow
  * Screen shake on QS? Need that for the sound effect to make sense
- * 
- * Camera zooms in and out on CK (this could be after new version)
- * Separate version, Pictures on the side
  * The irreg grabbers want outlines
  * 
  * -------------Before illustrator
  * Cel-shaded erythrovirus
  * shadow for irreg
- * Put things on corners of irreg and QS?
- * Round the edges of the corners on CK
+ * fix lights
  * ------------With illustrator
  * Hire them to illustrate the cell, that is their job description
 	They illustrate it in a way that is compatible with the other kinds of pics you know you'll have
@@ -21,6 +17,8 @@
  * Location of lights in boca
  * Writing underneath viruses
  * 2XFC or 1F15 for T=3. Wait what about cowpea?  for Not very straight lines but that might be ok if it's consistent across others
+ * Put things on corners of irreg and QS?
+ * Round the edges of the corners on CK? Ehhh, it's about looking like the viruses man
  * How to make nice pics of viruses: 
  * 	Chimera
  * 	clear out the things you don't want 

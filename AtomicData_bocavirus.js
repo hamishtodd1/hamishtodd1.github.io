@@ -252,14 +252,29 @@ function init_bocavirus_stuff()
 	master_protein.worldToLocal(tempaxis);
 	master_protein.rotateOnAxis(tempaxis, TAU / 5);
 	master_protein.updateMatrixWorld();
+	master_protein.geometry.computeFaceNormals();
+	master_protein.geometry.computeVertexNormals();
+	
+	var master_protein_outline_geometry = master_protein.geometry.clone();
+	console.log(master_protein_outline_geometry)
+//	for(var i = 0, il = master_protein_outline_geometry.attributes.normal.array.length; i < il; i++)
+//		master_protein_outline_geometry.attributes.normal.array[i] *= -1;
+	
+	var outlineScale = 1.3;
+	for(var i = 0, il = master_protein_outline_geometry.attributes.position.array.length / 3; i < il; i++ )
+	{
+		master_protein_outline_geometry.attributes.position.array[i*3+0] = ( master_protein_outline_geometry.attributes.position.array[i*3+0] - actual_protein_location.x ) * outlineScale + actual_protein_location.x;
+		master_protein_outline_geometry.attributes.position.array[i*3+1] = ( master_protein_outline_geometry.attributes.position.array[i*3+1] - actual_protein_location.y ) * outlineScale + actual_protein_location.y;
+		master_protein_outline_geometry.attributes.position.array[i*3+2] = ( master_protein_outline_geometry.attributes.position.array[i*3+2] - actual_protein_location.z ) * outlineScale + actual_protein_location.z;
+	}
 	
 	for(var i = 0; i < neo_bocavirus_proteins.length; i++)
 	{
 		neo_bocavirus_proteins[i] = new THREE.Mesh( master_protein.geometry.clone(), master_protein.material.clone() );
+		neo_bocavirus_proteins[i].add( new THREE.Mesh( master_protein_outline_geometry.clone(), new THREE.MeshBasicMaterial({color:0x000000, side:THREE.BackSide}) ) );
+		
 		neo_bocavirus_proteins[i].rotation.copy(master_protein.rotation)
 		neo_bocavirus_proteins[i].updateMatrixWorld();
-		neo_bocavirus_proteins[i].geometry.computeFaceNormals();
-		neo_bocavirus_proteins[i].geometry.computeVertexNormals();
 		
 		neo_bocavirus_proteins[i].actual_location = new THREE.Vector3();
 		neo_bocavirus_proteins[i].update_actual_location = update_actual_location;
