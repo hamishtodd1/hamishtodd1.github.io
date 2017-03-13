@@ -19,6 +19,7 @@ var QC_SPHERE_MODE = 4;
 var ENDING_MODE = 5;
 var TREE_MODE = 6;
 var HEXAGON_MODE = 7;
+var LOADING_MODE = 8;
 	
 var MODE = 3;
 
@@ -131,7 +132,6 @@ var QS_rotationangle = 0;
 
 var QS_measuring_stick;
 
-var GrabbableArrow;
 var dodeca; //a very static, barely-used object
 var dodeca_faceflatness = 0;
 var dodeca_triangle_vertex_indices;

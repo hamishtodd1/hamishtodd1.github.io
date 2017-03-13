@@ -110,7 +110,7 @@ function Map_lattice() {
 			if(IsProblemVertex[hexagon_i]) //we're more precise, because they might all be on edges
 			{
 				for(var i = 0, il = potential_nettriangles.length; i < il; i++)
-					potential_nettriangles[i] = 667;
+					potential_nettriangles[i] = 1000;
 				
 				for(var i = 0; i < 4; i++){
 					double_locate_in_squarelattice_net(squarelattice_hexagonvertices[hexagon_first_squarelatticevertex_index + (side_i * 2 + i) % 12],
@@ -120,7 +120,7 @@ function Map_lattice() {
 				var foundit = 0;
 				for(var i = 0, il = potential_nettriangles.length; i < il; i++)
 				{
-					if(potential_nettriangles[i] === 667)
+					if(potential_nettriangles[i] === 1000)
 						continue;
 					for( var j = 0; j < 4; j++)
 					{

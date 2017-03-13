@@ -29,9 +29,16 @@ function init_CK_and_irreg()
 		IrregButton.pulsing = 1;
 		IrregButton.pulse = 0;
 		
-		IrregButton.position.set(-playing_field_dimension / 2 + 0.45,-1.4,0.002);
+		IrregButton.position.set(-playing_field_dimension / 2 + 0.45,-1.4,0.07); //or 0.002?
 		IrregButton.capsidopen = 0;
 	}
+	
+	CKHider = new THREE.Mesh( new THREE.CubeGeometry(6.93513143351, 6.93513143351, 0),
+			new THREE.MeshBasicMaterial( { transparent:true,
+		        polygonOffset: true,
+		        polygonOffsetFactor: -2.0, //on top
+		        polygonOffsetUnits: -5.0 } ) );
+	CKHider.position.z = 0.06;
 	
 	wedges_assigned_vertices = new Uint16Array([
 	                            		0, 1,
@@ -177,8 +184,6 @@ function init_CK_and_irreg()
 	T4_arm_points[1] = new THREE.Vector3(HS3*S13 + horizontal_arm_segment, -S13/2 + vertical_segment, 0 );
 	T4_arm_points[2] = new THREE.Vector3(HS3*S13 + horizontal_arm_segment,  S13/2 + vertical_segment, 0 );
 	T4_arm_points[3] = new THREE.Vector3( S3*S13 + horizontal_arm_segment,  		vertical_segment, 0 );
-	for(var i = 0; i < T4_arm_points.length; i++)
-		console.log(T4_arm_points[i])
 	
 	setvirus_flatnet_vertices[0] = new Float32Array([
 	    0, 0, 0,
@@ -290,11 +295,9 @@ function init_CK_and_irreg()
 	setvirus_flatnet_vertices[4] = new Float32Array(66);
 	for(var i = 0; i < setvirus_flatnet_vertices[4].length; i++)
 		setvirus_flatnet_vertices[4][i] = setvirus_flatnet_vertices[1][i]; //it's phi29 but...
-	console.log(setvirus_flatnet_vertices[4][14*3+0]);
 	setvirus_flatnet_vertices[4][14*3+0] = setvirus_flatnet_vertices[5][14*3+0]; //...with a movement
 	setvirus_flatnet_vertices[4][14*3+1] = setvirus_flatnet_vertices[5][14*3+1];
 	setvirus_flatnet_vertices[4][14*3+2] = setvirus_flatnet_vertices[5][14*3+2];
-	console.log(setvirus_flatnet_vertices[4][14*3+0]);
 	
 	net_triangle_vertex_indices = new Uint32Array([
 		2,1,0,
@@ -408,10 +411,11 @@ function init_CK_and_irreg()
 			color:	0x000000,
 			side:	THREE.DoubleSide
 		});
-		var spherehandles_material = new THREE.MeshBasicMaterial({
-			color:	0x0000ff,
+		var spherehandles_material = new THREE.MeshPhongMaterial({
+			color:	0xDAA520,
 			side:	THREE.DoubleSide,
-			transparent: true
+			transparent: true,
+			shininess: 100
 		});
 		for( var i = 0; i < varyingsurface_cylinders.length; i++) {
 			var cylinder_vertices_numbers = new Float32Array(16*3);
@@ -442,6 +446,8 @@ function init_CK_and_irreg()
 		irreghighlight_geometry.faces.push(new THREE.Face3(22,1,23));
 		irreghighlight_geometry.faces.push(new THREE.Face3(22,0,1));
 		
+		var spherehandles_outlineMaterial = new THREE.MeshBasicMaterial({color:0x000000, side:THREE.BackSid})
+		
 		for(var i = 0; i<varyingsurface_spheres.length;i++)
 		{
 			//SOME OUTLINES GO HERE. Spheres, hah
@@ -449,7 +455,10 @@ function init_CK_and_irreg()
 			if( (i == 0 || i % 4 == 1) && i != 1)
 				varyingsurface_spheres[i] = new THREE.Mesh( new THREE.SphereGeometry(0.0000000001, 8,4),varyingsurface_edgesmaterial);
 			else
-				varyingsurface_spheres[i] = new THREE.Mesh( new THREE.SphereGeometry(1,8,4),spherehandles_material.clone());
+			{
+				varyingsurface_spheres[i] = new THREE.Mesh( new THREE.SphereGeometry(1,16,16),spherehandles_material.clone());
+				varyingsurface_spheres[i].add( new THREE.Mesh( new THREE.SphereGeometry(1.23,16,8),spherehandles_outlineMaterial ) )
+			}	
 		}
 		
 		varyingsurface = new THREE.Mesh( flatnet_geometry.clone(), surfacematerial );

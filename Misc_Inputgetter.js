@@ -15,6 +15,8 @@
 //this is called once a frame and must be the only thing that addresses Inputobject, lest functions get different impressions of inputs.
 //this function shouldn't actually *do* anything with the data, it's only to be read elsewhere.
 function ReadInput() {
+	
+	
 	OldMousePosition.copy( MousePosition );
 	MousePosition.x = InputObject.mousex;
 	MousePosition.y = InputObject.mousey;

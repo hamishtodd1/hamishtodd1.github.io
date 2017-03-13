@@ -1,10 +1,9 @@
 /* 
  * Programming the triggers: make sure there�s no interdependence. 
- * Stuff can happen, but it�s a miniscule little thing that has no bearing on the deeper system beneath it
  * 
  * One deep bug is the fact that if they tab away and don't pause, the program isn't running so it can't be paused
  * 
- * Would be nice for the player to be able to mess around with time but still have it work. You want them to be able to come back
+ * Possible bug report from khan academy andy: CK to end!!!!
  */
 
 var Storypage = -1; //set to a silly number initially so we know that the first page will be triggered.
@@ -21,6 +20,8 @@ function Update_story()
 //	console.log( our_CurrentTime );
 	
 	//if you skip to a time, then the thing might not be in the state to demonstrate precisely what you want. And that is ok.
+	
+	
 	
 	if(our_CurrentTime >= 21*60+16)
 		if( !Sounds.endingMusic.isPlaying)
@@ -204,16 +205,10 @@ function Update_story()
 	}
 	
 	/*
-	 * List of things:
-	 * -you do need to bring in the arrow into CK and QS too
-	 * -auto-unpause with triggers (bocavirus)
-	 * CK less flexible
-	 * -names beneath viruses
 	 * 
 	 * Snap
 	 * Line up Hepatitis?
 	 * 
-	 * -canvas shrinks away?
 	 * -dodeca can appear on QS?
 	 * -QS edges and vertices flash?
 	 * -greenhouse etc in CK
@@ -222,13 +217,6 @@ function Update_story()
 	 * -dodecahedron faces flash?
 	 * 
 	 */
-	
-	//TODO doesn't happen if you skip there
-	if(Story_states[Storypage].offer_virus_selection)
-		add_virus_selection_to_scene();
-	else
-		for( var i = 0; i < clickable_viruses.length; i++ )
-			scene.remove(clickable_viruses[i]);
 }
 
 function init_story()
@@ -283,7 +271,7 @@ function init_story()
 	});
 	
 	ns = default_clone_story_state(1,0.1);
-	ns.go_to_time = 72.7; //skips to wherever you like 560 is HIV demo, 455.5 is CK
+//	ns.go_to_time = 72.7; //skips to wherever you like 560 is HIV demo, 455.5 is CK
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,12.2); //hiv

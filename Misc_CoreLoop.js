@@ -1,24 +1,28 @@
 /* 
- * Some nice material? Needs to have normals updated
- * Shadows on irreg; a "floor" for the shadow
- * Screen shake on QS? Need that for the sound effect to make sense
- * The irreg grabbers want outlines
+ * -----Monet
+ * Make a version she can download and replace sounds in the directory
+ * Screen shake on QS? Need that for the sound effect to make sense... discuss with Monet
  * 
  * -------------Before illustrator
- * Cel-shaded erythrovirus
- * shadow for irreg
- * fix lights
+ * Find a way to fill in the holes????
+ * Some nice material? Needs to have normals updated
+ * Shadows on irreg; a "floor" for the shadow
+ * Cel-shaded erythrovirus. solid colors erythrovirus? fix lights if not.
+ * The irreg grabbers want outlines
+ * Make sure you know the appropriate html if they suggest a gradient
  * ------------With illustrator
- * Hire them to illustrate the cell, that is their job description
+ * the tree! The names, etc
+ * Show Bret's EE.
+ * Hire them to illustrate the cell, that is their job description. Also a title/loading screen+loading animation?
 	They illustrate it in a way that is compatible with the other kinds of pics you know you'll have
  * Better viruses on all (maybe CK things are shut)
  * QS colors, CK colors, irreg and button colors
  * Highlight the pentagons and hexagons on polio and hepatitis B when you say it (just make pics with different colors and fade) 
- * Location of lights in boca
- * Writing underneath viruses
- * 2XFC or 1F15 for T=3. Wait what about cowpea?  for Not very straight lines but that might be ok if it's consistent across others
- * Put things on corners of irreg and QS?
- * Round the edges of the corners on CK? Ehhh, it's about looking like the viruses man
+ * 2XFC or 1F15 for T=3. Wait what about cowpea? Not very straight lines but that might be ok if it's consistent across others
+ * Put things on corners of irreg and QS? Golden shiny balls?
+ * Location of lights?
+ * Round the edges of the corners on CK? Solid interior? Ehhh, it's about looking like the viruses man
+ * space out the video and canvas a bit?
  * How to make nice pics of viruses: 
  * 	Chimera
  * 	clear out the things you don't want 
@@ -28,65 +32,62 @@
  * 
  * -------------Further "animating" (and probably miscellaneous things)
  * Lots of stuff moving around. It creates dynamism, have that whenever you can
-		Fade to virus pictures at end of all chapters
  * 		Zoom in on darb e pattern
- * 		Yes, this is better with VR stuff! Think about it in the moment, tighter creative loop, easier
  *		"These are images of some other viruses" is a series of 8 that fade in
- * irreg trying different configurations for algorithm
- * boca quaternion responds to moving the assembly toy
- * models go haywire at the end
- * Show the closed irreg capsid when you're trying to make phi29? ;_;
- * Camera closer on beginning of CK
+ * 		irreg trying different configurations for algorithm
+ * 		boca quaternion responds to moving the assembly toy
+ * 		models go haywire at the end
+ * 		Camera closer on beginning of CK
+ * 		change to cues for "boca"
+ * 		proteins don't appear in nucleus
+ * 
+ * ----Misc
  * better music? https://www.youtube.com/watch?v=NnfpsvS2AA8
  * Bug: full screen youtube crap, if you double click then jesus. Prevent fullscreen?
  * 	-the button flashes until you have opened AND closed it, with a change between
  * 	-cite pictures
  *  -loading screen. You may need to stagger inits
  *  -break up all the chapters into separate videos WHEN INTEGRATING NEW VIDEO
- *  -space out the video and canvas a bit
  *  -get a person with a sense of color to look at everything, including the pics of HPV, polio and hepatitis - Ario?
  *  -watch people a lot and tweak the zooming and rotating code, just because it is simple doesn't mean that it is good
- *  -If webgl doesn�t load (or etc), recommend a different browser or refreshing the page
- *  -slight change to cues for "boca"
- *  -bifuricate for the touchscreen. Put QS in correct orientation so it looks like HPV
- *  -proteins don't appear in nucleus?
+ *  -grab to rotate?
+ *  -If webgl doesn't load (or etc), recommend a different browser or refreshing the page
+ *  -touchscreen. 
+ *  -Put QS in correct orientation so it looks like HPV
  *  -tree selector fades in and no sticky out bits
  *  -all the effects in camerastuff
  * Could bring in disco ball, radio dome, gazebo/tent, dymaxion map at bottom, golf ball islamic art and greenhouse obv, origami
  * New pics. Correct sizes and give them a border, then resize in the scene.
  * Make use of the "now you can choose the next virus" clip and repeats
- * 		Loop back over every button press advice
- * Fading pics. Probably the thing to do is to specify actual chapters that consist of a fade?
+ * Loop back over every button press advice
  * CK pentagons flashing like sirens
- * Solid hexagons and pentagons?
- * Touch
  * Loading screen
  * 
  * 
  * ----------------No internet:
- * -pentagons in demo
  * -Mouse doesn't flick things to the wrong quaternion when you come into the frame from the video
  *  	Something like: if the new mouse position is on that side, set both old mouse position and new mouse position to that
- * -no 666s, you don't want pearl-clutchers. Easiest is change it to 665, -1, 999?
+ * -no 666s, it's already called "the beast" and god your old screen name. Yo, you have gotten rid of 667 now. Just try auto-replacing (apart from in actual numbers) and see what it breaks.
  * -everything listed in CKsurfacestuff, bocavirus, quasisphere, youtube stuff. There isn't much.
- * -make it work in different resolutions/respond to resize. Snap to 480/720/1080
- *  	-mouse position responds to resize?
+ * -make it work in different resolutions/respond to resize. Snap to 480/720/1080. Surely everyone's screen is more than 720px wide now?
  * -Test with a low framerate to see what it's like and chase down remaining framerate dependence
  *  
  *  
  * --------Technical
  *	Optimize loading
-	-minify?
- *  -if the canvas isn't running, halt the video
+ *	Custom domain
+ *  -if the canvas doesn't get going, no video
  *  -upload static version to youtube and link to that if page doesn't load
  *  -make sure a good picture appears when shared on facebook and twitter
  *  -make it feel good
  *  	-optimize http://www.w3schools.com/js/js_performance.asp
  *  		-profile
+ *  		-get rid of unused code
  *  		-could generate some things once, then not again
  *  		-search for missing "console.log"s, those are old debug things and may have wasteful ifs, alexandrov is chock-a-block
  *  -test on different setups
 		-Johan's Mac
+		-Monet's computers
 		-Reidun's computer (probably just webgl)
  *  -Change to another domain / mask it?
  * 
@@ -200,9 +201,12 @@ function render() {
 //	if(delta_t > 0.1) delta_t = 0.1;
 	//delta_t = 0.01;
 	
-	ReadInput();
-	UpdateWorld();
-	UpdateCamera();
+	if( PICTURES_LOADED && YOUTUBE_READY && INITIALIZED )
+	{
+		ReadInput();
+		UpdateWorld();
+		UpdateCamera();
+	}
 	
 //	if(logged ){
 ////		setTimeout( function() { requestAnimationFrame( render ); }, 1000 );
@@ -237,7 +241,7 @@ function ChangeScene(new_mode) {
 	switch(MODE) //probably you want to have a "mode advanced" variable which, on top of these, adds some stuff
 	{
 		case SLIDE_MODE:
-			scene.add(VisibleSlide);
+			//slide added automatically
 			break;
 	
 		case BOCAVIRUS_MODE:
@@ -276,6 +280,8 @@ function ChangeScene(new_mode) {
 				scene.add(varyingsurface_spheres[i]);
 			for( var i = 0; i < wedges.length; i++ )
 				scene.add( wedges[i] );
+			for(var i = 0; i< lights.length; i++)
+				scene.add( lights[i] );
 			scene.add(IrregButton);
 			break;
 			

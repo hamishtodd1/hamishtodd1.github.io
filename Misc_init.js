@@ -1,9 +1,22 @@
-function init() {
+function init() 
+{
+	scene.add(new THREE.Mesh(new THREE.PlaneGeometry(4,0.2), new THREE.MeshBasicMaterial({color:0xFF0000})));
+	scene.add(new THREE.Mesh(new THREE.PlaneGeometry(4.09,0.29), new THREE.MeshBasicMaterial({color:0xCCCCCC})));
+	scene.children[1].position.z = -0.001;
+	camera.position.z = min_cameradist;
+	render();
+
+	
+	//-----properly initializing
 	init_hexagon_demo();
 	init_CK_and_irreg();
 	initialize_QS_stuff();
 	init_Grabbable_Arrow();
 	init_story();
+	init_tree();
+	init_bocavirus_stuff();
+	
+	load_AV_stuff(); //TODO the above took 0.9 seconds on Rory's laptop
 	
 	INITIALIZED = 1;
 	attempt_launch();
@@ -11,13 +24,32 @@ function init() {
 
 function attempt_launch()
 {
-	if( !INITIALIZED || !PICTURES_LOADED || !YOUTUBE_READY )
+	if( !PICTURES_LOADED || !YOUTUBE_READY )
 		return;
 	
-	ChangeScene(MODE);
+	if( !INITIALIZED )
+	{
+		console.error("everything loaded but we didn't initialize?");
+		return;
+	}
 	
-	//------------------need this so there's something in there for the first frame
-	ourclock.getDelta();
-//	ytplayer.seekTo( 311 );
-	render();
+	/*
+	 * Don't worry about having the loading as a percentage - have it as a geometrical object.
+	 * Do load a canvas, because we should be checking for webgl first.
+	 * 
+	 * Could monet's computer be trying to download everything?
+	 * 
+	 * Buuuurt, the point is we want to stagger the pictures to when they're needed
+	 * 
+	 * There's an argument for only loading those of the current youtube video
+	 * 
+	 * Really you want the youtube stuff to begin coming in after you have a loading picture up
+	 * 
+	 * And what if it DID load webgl but it COULDN'T init the stuff? Unlikely really, but have a console.log
+	 * 
+	 * //above---bind_pictures---youtube_story
+	 */
+	
+//	ourclock.getDelta(); //need this so there's something in there for the first frame
+//	ytplayer.playVideo();
 }

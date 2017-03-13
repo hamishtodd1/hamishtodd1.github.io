@@ -2,7 +2,6 @@
  * TODO
  * 
  * -reposition lights
- * -cell shading?
  * 
  */
 
@@ -45,7 +44,7 @@ function update_bocavirus() {
 	var Cell_virus_visible_position = new THREE.Vector3( CEPx, 0, CEPz );
 	
 	//TODO put pic in there, and it zooms out
-	if( our_CurrentTime < cornucopia_end_time + movement_duration )
+	if( cornucopia_start_time < our_CurrentTime &&  our_CurrentTime < cornucopia_end_time + movement_duration )
 		Cornucopia.visible = true;
 	else
 		Cornucopia.visible = false;
@@ -256,11 +255,10 @@ function init_bocavirus_stuff()
 	master_protein.geometry.computeVertexNormals();
 	
 	var master_protein_outline_geometry = master_protein.geometry.clone();
-	console.log(master_protein_outline_geometry)
 //	for(var i = 0, il = master_protein_outline_geometry.attributes.normal.array.length; i < il; i++)
 //		master_protein_outline_geometry.attributes.normal.array[i] *= -1;
 	
-	var outlineScale = 1.3;
+	var outlineScale = 1.07;
 	for(var i = 0, il = master_protein_outline_geometry.attributes.position.array.length / 3; i < il; i++ )
 	{
 		master_protein_outline_geometry.attributes.position.array[i*3+0] = ( master_protein_outline_geometry.attributes.position.array[i*3+0] - actual_protein_location.x ) * outlineScale + actual_protein_location.x;
@@ -389,11 +387,11 @@ function init_bocavirus_stuff()
 	}
 	
 	EggCell = new THREE.Mesh(new THREE.PlaneGeometry(EggCell_radius * 2,EggCell_radius * 2),
-			new THREE.MeshBasicMaterial({map:random_textures[3], transparent: true} ) );
+			new THREE.MeshBasicMaterial({transparent: true} ) );
 	EggCell.position.copy(EggCell_initialposition);
 	
 	Cornucopia = new THREE.Mesh(new THREE.PlaneGeometry(playing_field_dimension*3,playing_field_dimension*3),
-			new THREE.MeshBasicMaterial({map:random_textures[11]} ) );
+			new THREE.MeshBasicMaterial() );
 	Cornucopia.position.z = -0.01;
 	Cornucopia.visible = false;
 	

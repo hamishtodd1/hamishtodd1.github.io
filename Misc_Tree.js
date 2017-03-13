@@ -89,17 +89,14 @@ function init_tree()
 	Chapter_highlighter.position.z = 0.01;
 	Chapter_highlighter.position.y = playing_field_dimension;
 	
-	Virus_chapter_icons[0] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[reused_slide_indices[9]], transparent: true}) );
-	Virus_chapter_icons[1] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[reused_slide_indices[5]], transparent: true}) );
-	Virus_chapter_icons[2] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[reused_slide_indices[6]], transparent: true}) );
-	Virus_chapter_icons[3] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[reused_slide_indices[7]], transparent: true}) );
-	Virus_chapter_icons[4] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({map: slide_textures[reused_slide_indices[8]], transparent: true}) );
+	for(var i = 0; i < 5; i++)
+		Virus_chapter_icons[i] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({transparent: true}) );
 	
 	var name_dimension = IconDimension / 3;
 	for(var i = 0; i < Virus_chapter_icons.length; i++)
-	{
+	{	
 		Virus_chapter_names[i] = new THREE.Mesh( new THREE.CubeGeometry(name_dimension, name_dimension, 0),
-				  new THREE.MeshBasicMaterial( { map: random_textures[6+i], transparent: true, opacity: 0 } ) );
+				  new THREE.MeshBasicMaterial( { transparent: true, opacity: 0 } ) );
 		
 		Virus_chapter_icons[i].add(Virus_chapter_names[i]);
 		
@@ -267,10 +264,6 @@ function update_tree()
 			if(isMouseDown && !isMouseDown_previously)
 			{
 				tree_zoomtowards = i;
-				
-				//need to do this because if we leave it to youtube_story to update this then there'll be a missed frame
-				VisibleSlide.material.map = Virus_chapter_icons[i].material.map;
-				VisibleSlide.material.needsUpdate = true;
 			}
 			
 			hovering = 1;
