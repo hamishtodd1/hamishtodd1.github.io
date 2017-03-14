@@ -143,9 +143,6 @@ function MoveQuasiLattice()
 				var scalefactor = Mousedist / OldMousedist;
 				scalefactor = (scalefactor - 1) * 0.685 +1; //0.685 is the drag
 				
-				if(scalefactor !== 1 )
-					Disable_virus_pictures();
-				
 				cutout_vector0_player.multiplyScalar(scalefactor);
 				cutout_vector1_player.multiplyScalar(scalefactor);
 				veclength = cutout_vector0_player.length();

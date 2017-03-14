@@ -506,8 +506,6 @@ function manipulate_vertices()
 	{
 		for( var i = 0; i < 66; i++)
 			flatnet_vertices.array[i] = manipulation_surface.geometry.attributes.position.array[i];
-		
-		Disable_virus_pictures();
 			
 		//now we need the "height" of the capsid
 		for(var i = 0; i<9; i++)

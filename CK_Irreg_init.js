@@ -178,7 +178,6 @@ function init_CK_and_irreg()
 	var T4_arm_points = Array(4);
 	var horizontal_arm_segment = 21/2 * Math.sqrt(3/13);
 	var vertical_segment = Math.sqrt(31) * 17 / (2*Math.sqrt(403) );
-	console.log(S13, HS3*S13, S13/2 );
 	
 	T4_arm_points[0] = new THREE.Vector3(HS3*S13, S13/2, 0 );
 	T4_arm_points[1] = new THREE.Vector3(HS3*S13 + horizontal_arm_segment, -S13/2 + vertical_segment, 0 );
