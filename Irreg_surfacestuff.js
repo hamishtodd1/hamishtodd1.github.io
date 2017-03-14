@@ -283,7 +283,7 @@ function update_varyingsurface() {
 		if(capsidopenness == 1 ){
 			varyingsurface_spheres[i].material.opacity = 1;
 			if(!theyknowyoucanchangevertices){
-				var spherescale = capsidopenness == 0 ? 0 : capsidopenness * Math.cos((ourclock.elapsedTime - ourclock.startTime)*4);
+				var spherescale = capsidopenness == 0 ? 0 : capsidopenness * (0.5+0.5*Math.cos((ourclock.elapsedTime - ourclock.startTime)*8));
 				varyingsurface_spheres[i].scale.set(0.1 * spherescale,0.1 * spherescale,0.1 * spherescale);
 			}
 		}

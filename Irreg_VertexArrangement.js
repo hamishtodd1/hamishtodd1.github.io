@@ -525,7 +525,7 @@ function manipulate_vertices()
 		varyingsurface_spheres[vertex_tobechanged].material.color.g = 0;
 		varyingsurface_spheres[vertex_tobechanged].material.color.b = 0;
 		
-		var spherescale = 0.1 * Math.cos((ourclock.elapsedTime - ourclock.startTime)*10);
+		var spherescale = 0.05 + 0.05 * Math.cos((ourclock.elapsedTime - ourclock.startTime)*10);
 		
 		varyingsurface_spheres[vertex_tobechanged].scale.set(spherescale,spherescale,spherescale);
 	}

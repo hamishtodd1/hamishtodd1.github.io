@@ -456,7 +456,7 @@ function init_CK_and_irreg()
 			else
 			{
 				varyingsurface_spheres[i] = new THREE.Mesh( new THREE.SphereGeometry(1,16,16),spherehandles_material.clone());
-				varyingsurface_spheres[i].add( new THREE.Mesh( new THREE.SphereGeometry(1.23,16,8),spherehandles_outlineMaterial ) )
+//				varyingsurface_spheres[i].add( new THREE.Mesh( new THREE.SphereGeometry(1.23,16,8),spherehandles_outlineMaterial ) )
 			}	
 		}
 		
