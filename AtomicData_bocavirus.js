@@ -3,6 +3,10 @@
  * 
  * -reposition lights
  * 
+ * -undulating a bit?
+ * 
+ * -Proteins coming in should be more noticeable
+ * 
  */
 
 var actual_protein_location;
@@ -49,18 +53,20 @@ function update_bocavirus() {
 	else
 		Cornucopia.visible = false;
 	
-	var cornucopia_camera_position = camera_default_position.clone();
+	var chap1camDefaultPosition = new THREE.Vector3(0,0,min_cameradist * 1.5);
+	
+	var cornucopia_camera_position = chap1camDefaultPosition.clone();
 	cornucopia_camera_position.z *= 3;
 	if( our_CurrentTime < cornucopia_start_time + movement_duration )
-		camera.position.copy( move_smooth_vectors(camera_default_position, cornucopia_camera_position, movement_duration, our_CurrentTime - cornucopia_start_time) );
+		camera.position.copy( move_smooth_vectors(chap1camDefaultPosition, cornucopia_camera_position, movement_duration, our_CurrentTime - cornucopia_start_time) );
 	else if( our_CurrentTime < cornucopia_end_time )
 		camera.position.copy(cornucopia_camera_position);
 	else if( our_CurrentTime < pullback_start_time + movement_duration )
-		camera.position.copy( move_smooth_vectors(camera_default_position, Cell_virus_visible_position, movement_duration, our_CurrentTime - pullback_start_time) );
+		camera.position.copy( move_smooth_vectors(chap1camDefaultPosition, Cell_virus_visible_position, movement_duration, our_CurrentTime - pullback_start_time) );
 	else if( our_CurrentTime < whole_thing_finish_time )
 		camera.position.copy(Cell_virus_visible_position);
 	else
-		camera.position.copy( camera_default_position );
+		camera.position.copy( chap1camDefaultPosition );
 	
 	//-------Rotation
 	if( boca_explosion_start_time > our_CurrentTime || our_CurrentTime > whole_thing_finish_time )
@@ -91,9 +97,6 @@ function update_bocavirus() {
 		}
 	}
 	
-	for(var i = 0; i < neo_bocavirus_proteins.length; i++ )
-		neo_bocavirus_proteins[i].update_actual_location();
-	
 	//something random for the inner ones
 	neo_bocavirus_proteins[60].quaternion.set(0.5000000020519008,0.8090169946743156,0.30901699027114626,0);
 	neo_bocavirus_proteins[61].quaternion.set(-0.8090169559438056,0.3090169674858798,0.49999996515151934,0);
@@ -117,7 +120,7 @@ function update_bocavirus() {
 	var default_r = 1;
 	var default_g = 1;
 	var default_b = 0;
-	for(var i = 0; i < neo_bocavirus_proteins.length; i++)
+	for(var i = 0; i < 60; i++)
 	{
 		var our_r = coloredness * flash_colors[i][0] + (1-coloredness) * default_r;
 		var our_g = coloredness * flash_colors[i][1] + (1-coloredness) * default_g;
@@ -208,7 +211,7 @@ var EggCell_initialposition = new THREE.Vector3( EggCell_radius + spayed_circle_
 
 function init_bocavirus_stuff()
 {
-	for(var i = 0; i < destination_assignments.length; i++)
+	for( var i = 0; i < destination_assignments.length; i++ )
 		destination_assignments[i] = 666;
 	
 	var normalized_virtualico_vertices = Array(12);
@@ -227,9 +230,28 @@ function init_bocavirus_stuff()
 	for(var i = 0; i < 12; i++)
 		normalized_virtualico_vertices[i].normalize();
 	
-	var master_protein = new THREE.Mesh( new THREE.BufferGeometry(), new THREE.MeshLambertMaterial({color:0xf0f00f}) );
-	master_protein.geometry.addAttribute( 'position', new THREE.BufferAttribute( Boca_vertices, 3 ) );
-	master_protein.geometry.setIndex( new THREE.BufferAttribute( Boca_faces, 1 ) );
+	var master_protein = new THREE.Mesh( new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({color:0xf0f00f}) );
+	
+	for(var i = 0; i < protein_vertices_numbers.length; i++){
+		protein_vertices_numbers[i] /= 32; 
+	}
+	
+	//TODO this is where it becomes about 5.
+	var point = new THREE.Vector3();
+	for(var i = 0; i < protein_vertices_numbers.length / 3; i++){
+		point.set(	protein_vertices_numbers[i*3+0],
+					protein_vertices_numbers[i*3+1],
+					protein_vertices_numbers[i*3+2]);
+		
+		
+	}
+	master_protein.geometry.addAttribute( 'position', new THREE.BufferAttribute( protein_vertices_numbers, 3 ) );
+	master_protein.geometry.setIndex( new THREE.BufferAttribute( coarse_protein_triangle_indices, 1 ) );
+	master_protein.geometry.computeFaceNormals();
+	master_protein.geometry.computeVertexNormals();
+	
+	stmvHider = new THREE.Mesh(new THREE.CircleBufferGeometry(2,32),new THREE.MeshBasicMaterial({color:0x000000}));
+	stmvHider.position.z = 0.001;
 	
 	actual_protein_location = new THREE.Vector3();
 	for(var i = 0, il = Boca_vertices.length / 3; i < il; i++ )
@@ -251,26 +273,31 @@ function init_bocavirus_stuff()
 	master_protein.worldToLocal(tempaxis);
 	master_protein.rotateOnAxis(tempaxis, TAU / 5);
 	master_protein.updateMatrixWorld();
-	master_protein.geometry.computeFaceNormals();
-	master_protein.geometry.computeVertexNormals();
+	
+	var twistAxis = actual_protein_location.clone().normalize();
+	master_protein.rotateOnAxis(twistAxis, 0.16);
+	master_protein.updateMatrixWorld();
 	
 	var master_protein_outline_geometry = master_protein.geometry.clone();
-//	for(var i = 0, il = master_protein_outline_geometry.attributes.normal.array.length; i < il; i++)
-//		master_protein_outline_geometry.attributes.normal.array[i] *= -1;
-	
-	var outlineScale = 1.07;
+	var middle_layer_geometry = master_protein.geometry.clone();
+	var outlineScale = 0.72;
+	var middleScale = outlineScale + 0.2;
 	for(var i = 0, il = master_protein_outline_geometry.attributes.position.array.length / 3; i < il; i++ )
 	{
 		master_protein_outline_geometry.attributes.position.array[i*3+0] = ( master_protein_outline_geometry.attributes.position.array[i*3+0] - actual_protein_location.x ) * outlineScale + actual_protein_location.x;
 		master_protein_outline_geometry.attributes.position.array[i*3+1] = ( master_protein_outline_geometry.attributes.position.array[i*3+1] - actual_protein_location.y ) * outlineScale + actual_protein_location.y;
 		master_protein_outline_geometry.attributes.position.array[i*3+2] = ( master_protein_outline_geometry.attributes.position.array[i*3+2] - actual_protein_location.z ) * outlineScale + actual_protein_location.z;
+		
+		middle_layer_geometry.attributes.position.array[i*3+0] = ( middle_layer_geometry.attributes.position.array[i*3+0] - actual_protein_location.x ) * middleScale + actual_protein_location.x;
+		middle_layer_geometry.attributes.position.array[i*3+1] = ( middle_layer_geometry.attributes.position.array[i*3+1] - actual_protein_location.y ) * middleScale + actual_protein_location.y;
+		middle_layer_geometry.attributes.position.array[i*3+2] = ( middle_layer_geometry.attributes.position.array[i*3+2] - actual_protein_location.z ) * middleScale + actual_protein_location.z;
 	}
 	
 	for(var i = 0; i < neo_bocavirus_proteins.length; i++)
 	{
-		neo_bocavirus_proteins[i] = new THREE.Mesh( master_protein.geometry.clone(), master_protein.material.clone() );
-		neo_bocavirus_proteins[i].add( new THREE.Mesh( master_protein_outline_geometry.clone(), new THREE.MeshBasicMaterial({color:0x000000, side:THREE.BackSide}) ) );
-		
+		neo_bocavirus_proteins[i] = new THREE.Mesh( master_protein_outline_geometry.clone(), master_protein.material.clone() );
+		neo_bocavirus_proteins[i].add( new THREE.Mesh( middle_layer_geometry.clone(), 	new THREE.MeshBasicMaterial({color:0x000000, side:THREE.BackSide}) ) );
+		neo_bocavirus_proteins[i].add( new THREE.Mesh( master_protein.geometry.clone(), new THREE.MeshBasicMaterial({color:0x000000, side:THREE.BackSide}) ) );
 		neo_bocavirus_proteins[i].rotation.copy(master_protein.rotation)
 		neo_bocavirus_proteins[i].updateMatrixWorld();
 		
@@ -278,13 +305,15 @@ function init_bocavirus_stuff()
 		neo_bocavirus_proteins[i].update_actual_location = update_actual_location;
 	}
 	
-	//the inner ones
-	for(var i = 60; i < neo_bocavirus_proteins.length; i++)
-	{
-		neo_bocavirus_proteins[i].position.sub(actual_protein_location);
-	}
-	
-	
+	/*
+	 * mirroring the protein
+	 * http://gamedev.stackexchange.com/questions/43615/how-can-i-reflect-a-point-with-respect-to-the-plane
+	 * points
+	 * -1,1,1
+	 * normalized_virtualico_vertices[0]
+	 * 0,0,0
+	 */
+		
 	
 	//----------Creating the group
 	//"1"
@@ -333,7 +362,7 @@ function init_bocavirus_stuff()
 		}
 	}
 	
-	flash_colors = Array(neo_bocavirus_proteins.length);
+	flash_colors = Array(60);
 	for(var i = 0; i < flash_colors.length; i++ )
 		flash_colors[i] = Array(3);
 	for(var i = 0; i < 15; i++)
@@ -376,14 +405,6 @@ function init_bocavirus_stuff()
 		flash_colors[i][0] = 0.75;
 		flash_colors[i][1] = 0.75;
 		flash_colors[i][2] = 1;
-	}
-	
-	for(var i = 60; i < neo_bocavirus_proteins.length; i++)
-	{
-		//however you color the others, for this you want a color that's clearly not one of the others, but doesn't stand out too crazily
-		flash_colors[i][0] = 94/255;
-		flash_colors[i][1] = 0;
-		flash_colors[i][2] = 0;
 	}
 	
 	EggCell = new THREE.Mesh(new THREE.PlaneGeometry(EggCell_radius * 2,EggCell_radius * 2),
