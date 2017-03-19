@@ -10,13 +10,10 @@
  * Lighting on CK, it is a weird shape to look at
  * The irreg grabbers want outlines
  * ------------With illustrator
- * send along tree pics, and david goodsell virus
- * the tree! The names, etc
  * Spacing apart of canvases, social media buttons.
 	They illustrate it in a way that is compatible with the other kinds of pics you know you'll have
  * Better viruses on all (maybe CK things are shut)
  * QS colors, CK colors, irreg and button colors
- * Yo, how should selector look on the tree?
  * Highlight the pentagons and hexagons on polio and hepatitis B when you say it (just make pics with different colors and fade) 
  * 2XFC or 1F15 for T=3. Wait what about cowpea? Not very straight lines but that might be ok if it's consistent across others
  * Put things on corners of irreg and QS? Golden shiny balls?

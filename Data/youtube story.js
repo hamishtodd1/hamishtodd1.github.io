@@ -825,6 +825,9 @@ function init_story()
 	
 	ns = default_clone_story_state(0,990.2); //back to model
 	ns.MODE = CK_MODE;
+	ns.CK_scale = 0.28867512192027667;
+	ns.CK_angle = 5.75958653833226;
+	ns.capsid_open = 0;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,1001.1); //back to tree
