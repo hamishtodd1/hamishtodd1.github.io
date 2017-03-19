@@ -405,6 +405,7 @@ function init_story()
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,386.8); //back to model
+	ns.enforced_cutout_vector0_player.set(1.809016994374948, 1.4384360606445132, 0); //zika... probably should be a smaller one
 	ns.pause_at_end = 1;
 	ns.MODE = QC_SPHERE_MODE;
 	Story_states.push(ns);

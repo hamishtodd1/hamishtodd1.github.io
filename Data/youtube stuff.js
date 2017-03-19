@@ -1,6 +1,4 @@
 /*
- * The rule is: the pure version has all the capabilities. This file, and maybe others, is where things become organized.
- * 
  * TODO
  * Flash 10 etc is required,  check for that
  * Switch between multiple videos so they don't see the time! 
@@ -9,7 +7,6 @@
  * Something like: the first takes you up to the end of the shaking demo. There's a clear break; if you've gotten this far, then hey, no need to lie to you
  * 
  * 
- * NO INTERDEPENDENCE. You can have dependence on time, nothing else, no variables that need updating.
  * 
  */
 
