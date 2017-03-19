@@ -142,6 +142,9 @@ function MoveQuasiLattice()
 			{
 				var scalefactor = Mousedist / OldMousedist;
 				scalefactor = (scalefactor - 1) * 0.685 +1; //0.685 is the drag
+				var maxScaleFactor = 1.07;
+				if(scalefactor > maxScaleFactor)
+					scalefactor = maxScaleFactor;
 				
 				cutout_vector0_player.multiplyScalar(scalefactor);
 				cutout_vector1_player.multiplyScalar(scalefactor);
@@ -179,6 +182,12 @@ function MoveQuasiLattice()
 					OldMouseAngle = 0;
 				
 				var LatticeAngleChange = OldMouseAngle - MouseAngle;
+				var maxLatticeAngleChange = TAU / 60;
+				if( Math.abs(LatticeAngleChange) > maxLatticeAngleChange )
+					if( LatticeAngleChange > 0 )
+						LatticeAngleChange = maxLatticeAngleChange;
+					else
+						LatticeAngleChange =-maxLatticeAngleChange;
 				
 				var QuasiLatticeAngle = Math.atan2(cutout_vector0_player.y, cutout_vector0_player.x);
 				var newQuasiLatticeAngle = QuasiLatticeAngle + LatticeAngleChange;

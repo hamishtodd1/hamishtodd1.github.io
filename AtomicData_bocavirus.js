@@ -3,7 +3,9 @@
  * 
  * -reposition lights
  * 
- * -undulating a bit?
+ * -undulating a bit? Subtle lengthenings of distance from center, dependent on color
+ * 
+ * When caught by cell it goes along with it better
  * 
  * -Proteins coming in should be more noticeable
  * 

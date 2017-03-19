@@ -8,15 +8,10 @@
  * May also "manually" change something, for a bit of fun. Good candidate would be the quasisphere for zika virus. But how to take account of the current shape?
  */
 
-//document.addEventListener( 'touchstart', onDocumentMouseDown, false );
-//document.addEventListener( 'touchmove', onDocumentTouchMove, false );
-//document.addEventListener( 'touchend', onDocumentMouseUp, false );
-
 //this is called once a frame and must be the only thing that addresses Inputobject, lest functions get different impressions of inputs.
 //this function shouldn't actually *do* anything with the data, it's only to be read elsewhere.
-function ReadInput() {
-	
-	
+function ReadInput()
+{
 	OldMousePosition.copy( MousePosition );
 	MousePosition.x = InputObject.mousex;
 	MousePosition.y = InputObject.mousey;
@@ -29,6 +24,16 @@ function ReadInput() {
 	react_to_video();	
 }
 
+window.addEventListener( 'resize', function(event)
+{
+	var newCanvasResolution = window.innerWidth / 2;
+//	var possibleResolutions = [1080]
+	//sooo, what to do if they have a colossal monitor? What should be the next steps up?
+	//The worst case scenario for 720 is 1439. That gap should be your max, proportionally
+//	Renderer.setSize( window.innerWidth, window.innerHeight );
+//	Camera.aspect = Renderer.domElement.width / Renderer.domElement.height;
+//	Camera.updateProjectionMatrix();
+}, false );
 
 document.addEventListener( 'mousedown', function(event) {
 	event.preventDefault();
@@ -37,7 +42,6 @@ document.addEventListener( 'mousedown', function(event) {
 document.addEventListener( 'mouseup', 	function(event) {
 	event.preventDefault();
 	InputObject.isMouseDown = false;
-	//minimum amount of time so that people don't hammer the screen?
 }, false);
 
 document.addEventListener( 'mousemove', function(event) {
@@ -49,6 +53,10 @@ document.addEventListener( 'mousemove', function(event) {
 	InputObject.mousex += camera.position.x;
 	InputObject.mousey += camera.position.y;
 }, false ); //window?
+
+//document.addEventListener( 'touchstart', onDocumentMouseDown, false );
+//document.addEventListener( 'touchmove', onDocumentTouchMove, false );
+//document.addEventListener( 'touchend', onDocumentMouseUp, false );
 
 //remember there can be weirdness for multiple fingers, so make sure any crazy series of inputs are interpretable
 //function onDocumentTouchMove( event ) {

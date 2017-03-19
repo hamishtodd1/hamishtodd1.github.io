@@ -405,6 +405,7 @@ function init_story()
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,386.8); //back to model
+	ns.enforced_cutout_vector0_player.set(1.809016994374948, 1.4384360606445132, 0); //zika... probably should be a smaller one
 	ns.pause_at_end = 1;
 	ns.MODE = QC_SPHERE_MODE;
 	Story_states.push(ns);
@@ -824,6 +825,9 @@ function init_story()
 	
 	ns = default_clone_story_state(0,990.2); //back to model
 	ns.MODE = CK_MODE;
+	ns.CK_scale = 0.28867512192027667;
+	ns.CK_angle = 5.75958653833226;
+	ns.capsid_open = 0;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,1001.1); //back to tree

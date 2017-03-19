@@ -250,10 +250,8 @@ function update_tree()
 		//for the time being, you can't repeat chapters. If you want to, we need to make a "back button", sooo... yeah, almost certainly fuck it
 		if( Chapters_completed[i] )
 			continue;
-			
-		var hack_icon_position = Virus_chapter_icons[i].position.clone();
-		hack_icon_position.y -= camera.position.y;
-		if( MousePosition.distanceTo(hack_icon_position) < IconDimension / 2 && ( Chapters_visible[3] === 0 || zika_introduction_animation >= 1 ) ) //the radius, we're modelling them as circles
+		
+		if( MousePosition.distanceTo(Virus_chapter_icons[i].position) < IconDimension / 2 && ( Chapters_visible[3] === 0 || zika_introduction_animation >= 1 ) ) //the radius, we're modelling them as circles
 		{
 			//player has officially hovered
 			Chapter_highlighter.position.set( Virus_chapter_icons[i].position.x, Virus_chapter_icons[i].position.y, 0.01 );

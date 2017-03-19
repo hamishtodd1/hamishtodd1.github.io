@@ -7,13 +7,10 @@
  * Find a way to fill in the holes????
  * Some nice material? Needs to have normals updated
  * Shadows on irreg; a "floor" for the shadow
- * Cel-shaded erythrovirus. solid colors erythrovirus? fix lights if not.
+ * Lighting on CK, it is a weird shape to look at
  * The irreg grabbers want outlines
- * Make sure you know the appropriate html if they suggest a gradient
  * ------------With illustrator
- * the tree! The names, etc
- * Show Bret's EE.
- * Hire them to illustrate the cell, that is their job description. Also a title/loading screen+loading animation?
+ * Spacing apart of canvases, social media buttons.
 	They illustrate it in a way that is compatible with the other kinds of pics you know you'll have
  * Better viruses on all (maybe CK things are shut)
  * QS colors, CK colors, irreg and button colors
@@ -30,7 +27,7 @@
  * 	if you want to color a chain, select one copy of it and click copies in the multiscale models window
  * 	actions>color>all options>tools>surface color>radius>get color person to choose
  * 
- * -------------Further "animating" (and probably miscellaneous things)
+ * -------------Further "animating"
  * Lots of stuff moving around. It creates dynamism, have that whenever you can
  * 		Zoom in on darb e pattern
  *		"These are images of some other viruses" is a series of 8 that fade in
@@ -38,8 +35,6 @@
  * 		boca quaternion responds to moving the assembly toy
  * 		models go haywire at the end
  * 		Camera closer on beginning of CK
- * 		change to cues for "boca"
- * 		proteins don't appear in nucleus
  * 
  * ----Misc
  * better music? https://www.youtube.com/watch?v=NnfpsvS2AA8
@@ -48,32 +43,28 @@
  * 	-cite pictures
  *  -loading screen. You may need to stagger inits
  *  -break up all the chapters into separate videos WHEN INTEGRATING NEW VIDEO
- *  -get a person with a sense of color to look at everything, including the pics of HPV, polio and hepatitis - Ario?
  *  -watch people a lot and tweak the zooming and rotating code, just because it is simple doesn't mean that it is good
- *  -grab to rotate?
  *  -If webgl doesn't load (or etc), recommend a different browser or refreshing the page
- *  -touchscreen. 
+ *  -touchscreen (test on Jessie's computer)
  *  -Put QS in correct orientation so it looks like HPV
- *  -tree selector fades in and no sticky out bits
  *  -all the effects in camerastuff
  * Could bring in disco ball, radio dome, gazebo/tent, dymaxion map at bottom, golf ball islamic art and greenhouse obv, origami
  * New pics. Correct sizes and give them a border, then resize in the scene.
  * Make use of the "now you can choose the next virus" clip and repeats
  * Loop back over every button press advice
  * CK pentagons flashing like sirens
- * Loading screen
- * 
- * 
- * ----------------No internet:
  * -Mouse doesn't flick things to the wrong quaternion when you come into the frame from the video
  *  	Something like: if the new mouse position is on that side, set both old mouse position and new mouse position to that
+ *  	Or if it's been dormant for a while, get ready to set old mouse position to new mouse position
  * -no 666s, it's already called "the beast" and god your old screen name. Yo, you have gotten rid of 667 now. Just try auto-replacing (apart from in actual numbers) and see what it breaks.
  * -everything listed in CKsurfacestuff, bocavirus, quasisphere, youtube stuff. There isn't much.
- * -make it work in different resolutions/respond to resize. Snap to 480/720/1080. Surely everyone's screen is more than 720px wide now?
  * -Test with a low framerate to see what it's like and chase down remaining framerate dependence
  *  
  *  
  * --------Technical
+ * -make it work in different resolutions/respond to resize. Snap to different resolutions
+ * force horizontal viewing http://stackoverflow.com/questions/14360581/force-landscape-orientation-mode
+ * Social media buttons. Only at end?
  *	Optimize loading
  *	Custom domain
  *  -if the canvas doesn't get going, no video
@@ -83,11 +74,11 @@
  *  	-optimize http://www.w3schools.com/js/js_performance.asp
  *  		-profile
  *  		-get rid of unused code
- *  		-could generate some things once, then not again
+ *  		-could generate some things once, then not again (weeel...)
  *  		-search for missing "console.log"s, those are old debug things and may have wasteful ifs, alexandrov is chock-a-block
  *  -test on different setups
 		-Johan's Mac
-		-Monet's computers
+		-Monet's computers. Tell github!
 		-Reidun's computer (probably just webgl)
  *  -Change to another domain / mask it?
  * 
