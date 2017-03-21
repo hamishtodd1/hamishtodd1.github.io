@@ -54,7 +54,7 @@ var Chapter_highlighter;
 var IconDimension = playing_field_dimension * 0.225;
 
 var tree_zoomedness = 1;
-var tree_zoomtowards = 666;
+var tree_zoomtowards = 999;
 
 function add_tree_stuff_to_scene()
 {
@@ -181,7 +181,7 @@ function update_tree()
 		}
 	}
 	
-	if( tree_zoomtowards === 666 ) //we've just come here
+	if( tree_zoomtowards === 999 ) //we've just come here
 	{
 		delay_timer += delta_t;
 		if(delay_timer > 1.8)
@@ -192,7 +192,7 @@ function update_tree()
 		}
 		
 		var camera_destination = new THREE.Vector3();
-		if( Story_states[Storypage-1].MODE === 666 )
+		if( Story_states[Storypage-1].MODE === 999 )
 			camera_destination.set( 0,0,min_cameradist );
 		else {
 			var previous_mode = 0;
@@ -233,7 +233,7 @@ function update_tree()
 			Chapter_highlighter.visible = false; //don't want it showing up next time
 			ytplayer.seekTo(Chapter_start_times[tree_zoomtowards]);
 			
-			tree_zoomtowards = 666;
+			tree_zoomtowards = 999;
 			
 			delay_timer = 0;
 		}

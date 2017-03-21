@@ -5,7 +5,7 @@ function map_hex_point(squarelattice_position, nettriangle, hexagonlattice_index
 	apply2Dmatrix( SquareToHexMatrix, 
 			HexagonLattice.geometry.vertices[hexagonlattice_index] );
 		
-	if( nettriangle === 666){
+	if( nettriangle === 999){
 		HexagonLattice.geometry.vertices[hexagonlattice_index].multiplyScalar(non_surface_hexamers_multiplier);
 		return;
 	}
@@ -97,7 +97,7 @@ function map_XY_from_lattice_to_surface(x,y, net_triangle_index) {
 }
 
 function map_from_lattice_to_surface(vec, net_triangle_index) {
-	//you could have an "if net_triangle_index === 666 return x y"?
+	//you could have an "if net_triangle_index === 999 return x y"?
 	vec.x -= setvirus_flatnet_vertices[3][(net_triangle_index+2)*3 + 0];
 	vec.y -= setvirus_flatnet_vertices[3][(net_triangle_index+2)*3 + 1];
 	
@@ -139,7 +139,7 @@ function locate_in_net() {
 			return i;
 	}
 	
-	return 666;
+	return 999;
 }
 
 function locate_in_squarelattice_net(vec) {
@@ -153,14 +153,14 @@ function locate_in_squarelattice_net(vec) {
 			return i;
 	}
 	
-	return 666;
+	return 999;
 }
 
 function triangle_bordering_exterior(ourtriangle)
 {
 	if( ourtriangle === 4 || ourtriangle === 8 || ourtriangle === 12 )
 		return false;
-	else return true; //and what if it's 666?
+	else return true; //and what if it's 999?
 }
 
 function double_locate_in_squarelattice_net(vec, ourArray, startingindex) {
@@ -188,16 +188,16 @@ function double_locate_in_squarelattice_net(vec, ourArray, startingindex) {
 				true ) 
 			)
 		{
-			ourArray[startingindex + num_found_so_far] = 666; 
+			ourArray[startingindex + num_found_so_far] = 999; 
 			num_found_so_far++;
 		}
 	}
 	
 	if(num_found_so_far === 0)
-		ourArray[startingindex + num_found_so_far] = 666;
+		ourArray[startingindex + num_found_so_far] = 999;
 	
 //	while(num_found_so_far < 2){ //if you're having this then there's no point in the check above 
-//		ourArray[startingindex + num_found_so_far] = 666;
+//		ourArray[startingindex + num_found_so_far] = 999;
 //		num_found_so_far++;
 //	}
 }

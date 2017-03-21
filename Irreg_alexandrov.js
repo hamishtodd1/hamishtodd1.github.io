@@ -40,7 +40,7 @@ AO.correct_minimum_angles = function(vertices_buffer_array)
 	
 	//curvatures is a 12D vector with curvatures[i] coming from vertex (i.e. radius) i
 	var curvatures_current = this.get_curvatures(this.radii,0);	//get the length of this to zero!
-	if(curvatures_current === 666)
+	if(curvatures_current === 999)
 		return 0;
 	//there may still be places that aren't using the alexandrov triangle array
 	var curvatures_current_quadrance = quadrance(curvatures_current);
@@ -72,7 +72,7 @@ AO.correct_minimum_angles = function(vertices_buffer_array)
 			
 			for( var i = 0, il = this.radii_guess.length; i < il; i++) {
 				for(var j = i+1, jl = this.radii_guess.length; j < jl; j++) {
-					if( this.polyhedron_edge_length[i][j] === 666)
+					if( this.polyhedron_edge_length[i][j] === 999)
 						continue;
 					
 					var angle = this.get_polyhedron_dihedral_angle_from_indices(i,j, this.radii_guess);
@@ -143,7 +143,7 @@ AO.correct_minimum_angles = function(vertices_buffer_array)
 			flipped_last_iteration = 0;
 			
 			//clear flips_to_perform here, and somewhere else
-			//if it is soluble, you clear, so probably just after the if != 666
+			//if it is soluble, you clear, so probably just after the if != 999
 			stepsize = stepsize*stepsize;
 			
 			num_reductions++;
@@ -173,8 +173,8 @@ AO.correct_minimum_angles = function(vertices_buffer_array)
 			var a_index = this.polyhedron_index(net_triangle_vertex_indices[i*3 + j]);
 			var b_index = this.polyhedron_index(net_triangle_vertex_indices[i*3 + (j+1)%3]);
 			
-			if( this.polyhedron_edge_length[a_index][b_index] === 666 || 
-				this.polyhedron_edge_length[b_index][a_index] === 666 ){
+			if( this.polyhedron_edge_length[a_index][b_index] === 999 || 
+				this.polyhedron_edge_length[b_index][a_index] === 999 ){
 				if(this.alexandrov_inspection_mode) 
 					console.error("concave! though hey, at least it worked"); //flipped combinatorics, didn't flip back. No, this is not usable
 				/*
@@ -209,7 +209,7 @@ AO.update_cos_rho = function(input_radii)
 {
 	for(var i = 0; i < 12; i++)
 		for(var j = 0; j < 12; j++)
-			if(this.polyhedron_edge_length[i][j] !== 666 ) //speedup opportunity : you could do it with all of them. Irrelevant ones just wouldn't be used. 7 extra though
+			if(this.polyhedron_edge_length[i][j] !== 999 ) //speedup opportunity : you could do it with all of them. Irrelevant ones just wouldn't be used. 7 extra though
 				input_radii.cos_rho[i][j] = get_cos_rule(input_radii[j], this.polyhedron_edge_length[i][j], input_radii[i]);
 }
 
@@ -225,7 +225,7 @@ AO.newton_solve = function(final_curvatures_intended)
 	var jacobian;
 	var delta_radii;
 	var desired_jacobianmultiplication_output = this.get_curvatures(this.radii_guess,1); //This is the result of the function at the next place we intend to call it at it.
-	if(desired_jacobianmultiplication_output === 666 ){
+	if(desired_jacobianmultiplication_output === 999 ){
 		if(newton_warnings) console.log("  newton: instantly bad");
 		return 0;
 	}
@@ -253,7 +253,7 @@ AO.newton_solve = function(final_curvatures_intended)
 		//triangle inequalities
 		for(var i = 0; i < 12; i++){
 			for(var j = 0; j < 12; j++){
-				if(this.polyhedron_edge_length[i][j] === 666 ) continue;
+				if(this.polyhedron_edge_length[i][j] === 999 ) continue;
 				if(	Math.abs(this.radii_guess[i]) + Math.abs(this.radii_guess[j]) < this.polyhedron_edge_length[i][j] ||
 					Math.abs(this.radii_guess[j]) + this.polyhedron_edge_length[i][j] < Math.abs(this.radii_guess[i]) ||
 					this.polyhedron_edge_length[i][j] + Math.abs(this.radii_guess[i]) < Math.abs(this.radii_guess[j])
@@ -267,7 +267,7 @@ AO.newton_solve = function(final_curvatures_intended)
 		}
 		
 		desired_jacobianmultiplication_output = this.get_curvatures(this.radii_guess,1);
-		if(desired_jacobianmultiplication_output === 666 ){
+		if(desired_jacobianmultiplication_output === 999 ){
 			if(newton_warnings) console.log("  newton: went bad naturally")
 			return 0;
 		}
@@ -297,7 +297,7 @@ AO.get_Jacobian = function (input_radii){
 		for( var j = 0; j < 12; j++){
 			if(i===j) continue;
 			
-			if( this.polyhedron_edge_length[i][j] === 666){
+			if( this.polyhedron_edge_length[i][j] === 999){
 				jacobian[i][j] = 0;
 				continue;
 			}
@@ -333,7 +333,7 @@ AO.get_curvatures = function(input_radii, failure_is_acceptable) {
 	{
 		for( var j = 0; j < 12; j++)
 		{
-			if(this.polyhedron_edge_length[i][j] === 666 )
+			if(this.polyhedron_edge_length[i][j] === 999 )
 				continue;
 			
 			var k = this.get_third_corner(i,j,0); //for i,j we get the anticlockwise one, then j,i we get the (from this point of view) clockwise one
@@ -354,7 +354,7 @@ AO.get_curvatures = function(input_radii, failure_is_acceptable) {
 				//this is probably just a "don't allow this" situation
 				if(net_warnings)console.error("crazy curvature");
 			}
-			return 666;
+			return 999;
 		}
 		curvature_array[i] *= -1;
 	}
@@ -362,10 +362,10 @@ AO.get_curvatures = function(input_radii, failure_is_acceptable) {
 }
 
 AO.get_cos_tetrahedron_dihedral_angle_from_indices = function(i,j,clockwise,input_radii) {
-	var k = 666;
+	var k = 999;
 
 	k = this.get_third_corner(i,j,clockwise); //you always call this function with both 0 and 1 in there
-	if( k === 666 ) {
+	if( k === 999 ) {
 		//this should really not happen unless this function is given i,j not on an edge.
 		console.error("requested dihedral angle from nonexistant tetrahedron connecting polyhedron vertices " + i + " and " + j);
 		return 0;

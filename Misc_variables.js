@@ -106,7 +106,7 @@ var textures_loaded = 0;
 var indicatorblobs = Array(10);
 
 //--------------Varying
-var vertex_tobechanged = 666;
+var vertex_tobechanged = 999;
 
 var irreg_flash_time = 0;
 var CK_showoff_time = 0; //more like 13:57
@@ -151,8 +151,8 @@ var stable_points = Array(345);
 var triangleindices_for_stablepoints = Array(stable_points.length);
 var lowest_unused_stablepoint = 0;
 var nearby_quasicutouts;
-var set_stable_point = 666;
-var stable_point_of_meshes_currently_in_scene = 666;
+var set_stable_point = 999;
+var stable_point_of_meshes_currently_in_scene = 999;
 var Forced_edges;
 
 //Potential edges in a quasicutout (so sixty of them in a whole mesh), many will just have their vertices put at 0. Dunno how many there should be?

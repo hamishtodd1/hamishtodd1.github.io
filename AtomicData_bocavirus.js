@@ -143,7 +143,7 @@ function update_bocavirus() {
 		boca_explodedness = 0;
 	if( boca_explodedness > 0 )
 	{
-		if(destination_assignments[0] === 666 )
+		if(destination_assignments[0] === 999 )
 		{
 			var protein_assigned = new Uint16Array(neo_bocavirus_proteins.length);
 			for(var i = 0; i < protein_assigned.length; i++)
@@ -173,7 +173,7 @@ function update_bocavirus() {
 	
 	var point_along = move_smooth(1, boca_explodedness);
 	
-	if(destination_assignments[0] !== 666 )
+	if(destination_assignments[0] !== 999 )
 	{
 		for(var i = 0; i < 60; i++ )
 		{
@@ -214,7 +214,7 @@ var EggCell_initialposition = new THREE.Vector3( EggCell_radius + spayed_circle_
 function init_bocavirus_stuff()
 {
 	for( var i = 0; i < destination_assignments.length; i++ )
-		destination_assignments[i] = 666;
+		destination_assignments[i] = 999;
 	
 	var normalized_virtualico_vertices = Array(12);
 	normalized_virtualico_vertices[0] = new THREE.Vector3(0, 	1, 	PHI);

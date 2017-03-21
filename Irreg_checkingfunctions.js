@@ -56,7 +56,7 @@ function check_defects(coords_array) {
 }
 
 function corner_angle_from_indices(triangle_index, corner_vertex_index,coords_array) {
-	var cornerAindex = 666, cornerBindex = 666;
+	var cornerAindex = 999, cornerBindex = 999;
 	for( var i = 0; i < 3; i++) {
 		if( corner_vertex_index === net_triangle_vertex_indices[ triangle_index * 3 + i ]) {
 			cornerAindex = net_triangle_vertex_indices[ triangle_index * 3 + (i+1)%3 ];

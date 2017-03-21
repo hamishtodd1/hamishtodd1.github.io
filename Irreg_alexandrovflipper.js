@@ -4,7 +4,7 @@ AO.check_ATVIs_against_PELs = function(ATVIs, PELs){
 			var index1 = ATVIs[i*3+j];
 			var index2 = ATVIs[i*3+(j+1)%3];
 			
-			if(PELs[index1][index2] === 666 )
+			if(PELs[index1][index2] === 999 )
 				console.error("DISAGREEMENT", index1,index2);
 		}
 	}
@@ -24,8 +24,8 @@ AO.flip = function(ourindices)
 //	var cosalpha  = Math.cos(Math.acos(get_cos_rule(l_b,l_a,old_edgelen) ) + Math.acos(get_cos_rule(l_d,l_c,old_edgelen) ) ); //something like this
 	var newlength = Math.sqrt( l_a*l_a + l_c*l_c - 2*l_a*l_c * cosalpha );
 	
-	this.polyhedron_edge_length[ourindices[0]][ourindices[1]] = 666;
-	this.polyhedron_edge_length[ourindices[1]][ourindices[0]] = 666;
+	this.polyhedron_edge_length[ourindices[0]][ourindices[1]] = 999;
+	this.polyhedron_edge_length[ourindices[1]][ourindices[0]] = 999;
 	
 	this.polyhedron_edge_length[ourindices[2]][ourindices[3]] = newlength;
 	this.polyhedron_edge_length[ourindices[3]][ourindices[2]] = newlength;
@@ -57,9 +57,9 @@ AO.flip = function(ourindices)
 	//so for every pair of triangles, we check for crossings
 //	for(var i = 0; i < 12; i++){
 //		for(var j = 0; j < 12; j++){
-//			if(this.polyhedron_edge_length[i][j] !== 666){
+//			if(this.polyhedron_edge_length[i][j] !== 999){
 //				var crossindices = get_diamond_indices(i,j);
-//				if(this.polyhedron_edge_length[crossindices[2] ] [ crossindices[3] ] !== 666 )
+//				if(this.polyhedron_edge_length[crossindices[2] ] [ crossindices[3] ] !== 999 )
 //					console.log("crossing!", crossindices); //expect these to be reported in pairs
 //			}
 //		}
@@ -139,7 +139,7 @@ AO.reset_net = function(vertices_buffer_array){
 		this.radii[i] = 50;
 	for(var i = 0, il = this.polyhedron_edge_length.length; i < il; i++)
 		for(var j = 0, jl = this.polyhedron_edge_length[i].length; j < jl; j++)
-			this.polyhedron_edge_length[i][j] = 666;
+			this.polyhedron_edge_length[i][j] = 999;
 	for(var i = 0, il = net_triangle_vertex_indices.length / 3; i < il; i++) {
 		for(var j = 0; j < 3; j++){
 			var a_index = this.polyhedron_index(net_triangle_vertex_indices[i*3 + j]);
@@ -161,7 +161,7 @@ AO.delaunay_triangulate = function() {
 		Markings[i] = Array(this.polyhedron_edge_length.length);
 	for(var i = 0, il = this.polyhedron_edge_length.length; i < il; i++){
 		for(var j = i+1, jl = this.polyhedron_edge_length.length; j < jl; j++){
-			if(this.polyhedron_edge_length[i][j] !== 666){
+			if(this.polyhedron_edge_length[i][j] !== 999){
 				S.push(Array(i,j));
 				Markings[i][j] = 1; //i always less than j
 			}

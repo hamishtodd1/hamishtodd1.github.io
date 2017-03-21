@@ -1,6 +1,4 @@
-/* 
- * -----Monet
- * Make a version she can download and replace sounds in the directory
+/*-----Monet
  * Screen shake on QS? Need that for the sound effect to make sense... discuss with Monet
  * 
  * -------------Before illustrator
@@ -11,15 +9,13 @@
  * The irreg grabbers want outlines
  * ------------With illustrator
  * Spacing apart of canvases, social media buttons.
-	They illustrate it in a way that is compatible with the other kinds of pics you know you'll have
  * Better viruses on all (maybe CK things are shut)
- * QS colors, CK colors, irreg and button colors
+ * Single unified color scheme
  * Highlight the pentagons and hexagons on polio and hepatitis B when you say it (just make pics with different colors and fade) 
  * 2XFC or 1F15 for T=3. Wait what about cowpea? Not very straight lines but that might be ok if it's consistent across others
  * Put things on corners of irreg and QS? Golden shiny balls?
  * Location of lights?
  * Round the edges of the corners on CK? Solid interior? Ehhh, it's about looking like the viruses man
- * space out the video and canvas a bit?
  * How to make nice pics of viruses: 
  * 	Chimera
  * 	clear out the things you don't want 
@@ -28,37 +24,31 @@
  * 	actions>color>all options>tools>surface color>radius>get color person to choose
  * 
  * -------------Further "animating"
- * Lots of stuff moving around. It creates dynamism, have that whenever you can
  * 		Zoom in on darb e pattern
  *		"These are images of some other viruses" is a series of 8 that fade in
  * 		irreg trying different configurations for algorithm
- * 		boca quaternion responds to moving the assembly toy
+ * 		things respond to your hand movements
  * 		models go haywire at the end
  * 		Camera closer on beginning of CK
+ * 		the button flashes until you have opened AND closed it, with a change between
  * 
  * ----Misc
- * better music? https://www.youtube.com/watch?v=NnfpsvS2AA8
- * Bug: full screen youtube crap, if you double click then jesus. Prevent fullscreen?
- * 	-the button flashes until you have opened AND closed it, with a change between
- * 	-cite pictures
- *  -loading screen. You may need to stagger inits
- *  -break up all the chapters into separate videos WHEN INTEGRATING NEW VIDEO
- *  -watch people a lot and tweak the zooming and rotating code, just because it is simple doesn't mean that it is good
  *  -If webgl doesn't load (or etc), recommend a different browser or refreshing the page
+ * -Mouse doesn't flick things to the wrong quaternion when you come into the frame from the video
+ *  -loading screen
+ *  -break up all the chapters into separate videos WHEN INTEGRATING NEW VIDEO
+ *  -tweak scale/rotate speed stuff
  *  -touchscreen (test on Jessie's computer)
- *  -Put QS in correct orientation so it looks like HPV
  *  -all the effects in camerastuff
- * Could bring in disco ball, radio dome, gazebo/tent, dymaxion map at bottom, golf ball islamic art and greenhouse obv, origami
+ * Could bring in disco ball, radio dome, gazebo/tent, dymaxion map at bottom, golf ball islamic art and greenhouse obv, origami.
+ * Show the crazy CK examples sequentially.
  * New pics. Correct sizes and give them a border, then resize in the scene.
  * Make use of the "now you can choose the next virus" clip and repeats
  * Loop back over every button press advice
  * CK pentagons flashing like sirens
- * -Mouse doesn't flick things to the wrong quaternion when you come into the frame from the video
  *  	Something like: if the new mouse position is on that side, set both old mouse position and new mouse position to that
  *  	Or if it's been dormant for a while, get ready to set old mouse position to new mouse position
- * -no 666s, it's already called "the beast" and god your old screen name. Yo, you have gotten rid of 667 now. Just try auto-replacing (apart from in actual numbers) and see what it breaks.
  * -everything listed in CKsurfacestuff, bocavirus, quasisphere, youtube stuff. There isn't much.
- * -Test with a low framerate to see what it's like and chase down remaining framerate dependence
  *  
  *  
  * --------Technical
@@ -74,13 +64,18 @@
  *  	-optimize http://www.w3schools.com/js/js_performance.asp
  *  		-profile
  *  		-get rid of unused code
- *  		-could generate some things once, then not again (weeel...)
+ *  		-could generate some things once, then not again (might make things worse)
  *  		-search for missing "console.log"s, those are old debug things and may have wasteful ifs, alexandrov is chock-a-block
  *  -test on different setups
 		-Johan's Mac
 		-Monet's computers. Tell github!
 		-Reidun's computer (probably just webgl)
  *  -Change to another domain / mask it?
+ * -Test with a low framerate to see what it's like and chase down remaining framerate dependence
+ *  
+ *  ---------Probably never to be solved
+ * 	-cite pictures
+ * Youtube fullscreen doubleclick problem
  * 
  */
 
@@ -279,7 +274,7 @@ function ChangeScene(new_mode) {
 			
 		case QC_SPHERE_MODE:
 			scene.add(dodeca);
-			if(stable_point_of_meshes_currently_in_scene !== 666) //if it is equal to this, it has yet to be derived from the cutout vectors
+			if(stable_point_of_meshes_currently_in_scene !== 999) //if it is equal to this, it has yet to be derived from the cutout vectors
 				dodeca.add(quasicutout_meshes[stable_point_of_meshes_currently_in_scene]);
 			scene.add(QS_center);
 			scene.add(QS_measuring_stick);

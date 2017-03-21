@@ -200,8 +200,8 @@ function MoveQuasiLattice()
 		}
 	}
 	
-	var closest_stable_point_dist = 666;
-	var closest_stable_point_index = 666;
+	var closest_stable_point_dist = 999;
+	var closest_stable_point_index = 999;
 	for( var i = 0; i < stable_points.length; i++){
 		if( i % one_fifth_stablepoints < 2)
 			continue; //These are the two distorted ones. They don't look so different from 0 so nobody will want them. Er, don't they have copies?
@@ -215,7 +215,7 @@ function MoveQuasiLattice()
 	}
 	
 	var modulated_CSP = closest_stable_point_index % (stable_points.length / 5);
-	var closest_i = 666;
+	var closest_i = 999;
 	var closest_dist = 1000;
 	var testcutout = new THREE.Vector3();
 	for(var i = 0; i < 5; i++)
@@ -233,7 +233,7 @@ function MoveQuasiLattice()
 	cutout_vector1_player.copy(cutout_vector0_player);
 	cutout_vector1_player.applyAxisAngle(z_central_axis, -TAU/5);
 	
-	if( set_stable_point !== 666 )
+	if( set_stable_point !== 999 )
 	{
 //		if(!isMouseDown && isMouseDown_previously){
 //			set_stable_point++;
@@ -267,7 +267,7 @@ function MoveQuasiLattice()
 	//we want to remove the one that was previously in there, and add
 	if( stable_point_of_meshes_currently_in_scene != modulated_CSP ){
 		dodeca_faceflatness = 1; //skip to the faces being gone
-		if(stable_point_of_meshes_currently_in_scene !== 666 )
+		if(stable_point_of_meshes_currently_in_scene !== 999 )
 			dodeca.remove(quasicutout_meshes[stable_point_of_meshes_currently_in_scene]);
 		dodeca.add(quasicutout_meshes[modulated_CSP]);
 		

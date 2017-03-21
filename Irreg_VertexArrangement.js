@@ -149,11 +149,11 @@ function settle_manipulationsurface_and_flatnet() {
 
 function manipulate_vertices()
 {
-	var changed_position = new THREE.Vector2(666,666);
+	var changed_position = new THREE.Vector2(999,999);
 	if( isMouseDown ) {
-		if( vertex_tobechanged === 666 && capsidopenness === 1) {
+		if( vertex_tobechanged === 999 && capsidopenness === 1) {
 			var lowest_quadrance_so_far = 10;
-			var closest_vertex_so_far = 666;
+			var closest_vertex_so_far = 999;
 			for( var i = 0; i < 22; i++) {
 				if(i==0||i==5||i==9||i==13||i==17||i==21)
 					continue;
@@ -176,7 +176,7 @@ function manipulate_vertices()
 			}
 		}
 		
-		if( vertex_tobechanged !== 666) {
+		if( vertex_tobechanged !== 999) {
 			changed_position.x = (MousePosition.x-flatnet.position.x); //yeesh, why is x changing but not y?
 			changed_position.y = MousePosition.y;
 			
@@ -191,9 +191,9 @@ function manipulate_vertices()
 		}
 	}
 	else {
-		if(vertex_tobechanged !== 666) //it was something previously
+		if(vertex_tobechanged !== 999) //it was something previously
 			varyingsurface_spheres[vertex_tobechanged].scale.set(0.05,0.05,0.05);
-		vertex_tobechanged = 666;
+		vertex_tobechanged = 999;
 		for(var i = 0; i < varyingsurface_spheres.length; i++){
 			if( !( (i == 0 || i % 4 == 1) && i != 1) ){
 				varyingsurface_spheres[i].material.color.r = 0;
@@ -231,7 +231,7 @@ function manipulate_vertices()
 			settle_manipulationsurface_and_flatnet();
 	}
 	
-	if( vertex_tobechanged === 666 || (changed_position.x === 666 && changed_position.y === 666) ){
+	if( vertex_tobechanged === 999 || (changed_position.x === 999 && changed_position.y === 999) ){
 		//TODO attempt to correct flatnet.
 		//Need to remember an index and a desired_location from the correct_minimum_angles at the end of the last frame where things were unsuccessfully moved
 		return;
@@ -345,9 +345,9 @@ function manipulate_vertices()
 			{
 				vertex_failed_to_move_when_it_should_have = true;
 				
-				squashingtriangles_indices[i][0] = 666; //the changer
-				squashingtriangles_indices[i][1] = 666; //"A"
-				squashingtriangles_indices[i][2] = 666; //"B"
+				squashingtriangles_indices[i][0] = 999; //the changer
+				squashingtriangles_indices[i][1] = 999; //"A"
+				squashingtriangles_indices[i][2] = 999; //"B"
 				
 				for( var j = 0; j < 3; j++)
 				{
@@ -430,7 +430,7 @@ function manipulate_vertices()
 		}
 	}
 	
-	var vertex_tobechanged_home_index = 666; //the version of vertex_tobechanged that is in the first triangle
+	var vertex_tobechanged_home_index = 999; //the version of vertex_tobechanged that is in the first triangle
 	for(var i = 0; i < 22; i++) {
 		if( vertex_identifications[vertex_tobechanged][i] ) {
 			for( var j = 0; j < 3; j++ ) {
