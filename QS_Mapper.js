@@ -85,7 +85,7 @@ function Map_To_Quasisphere()
 	for(var i = 0; i < 60; i++){
 		for( var vertex_index = 0; vertex_index < lowest_unused_vertex; vertex_index++) {
 			if( vertex_index % 2 === 1 && i < nearby_quasicutouts.length){
-				if(nearby_quasicutouts[i][((vertex_index % 6)-1)/2] === 666)
+				if(nearby_quasicutouts[i][((vertex_index % 6)-1)/2] === 999)
 					quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[one_quasicutout_vertices * i + vertex_index].copy(
 						get_vertex_position(quasicutouts_vertices_components[vertex_index],basis_vectors[i],ourcenters[i],radius) );
 				else
@@ -100,7 +100,7 @@ function Map_To_Quasisphere()
 		}
 	}
 	
-	if(stable_point_of_meshes_currently_in_scene !== 666){
+	if(stable_point_of_meshes_currently_in_scene !== 999){
 		quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.verticesNeedUpdate = true;
 	}
 	

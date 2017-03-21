@@ -147,12 +147,12 @@ function Map_lattice() {
 			
 			if(IsRoundedVertex[hexagon_i])
 			{
-				if( hexcorner_nettriangles[ ( side_i * 2 + 0 ) % 12 ] !== 666 )
+				if( hexcorner_nettriangles[ ( side_i * 2 + 0 ) % 12 ] !== 999 )
 				{
 					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 0 ].color.copy(pentamers_color);
 					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 1 ].color.copy(pentamers_color);
 				}
-				if( hexcorner_nettriangles[ ( side_i * 2 + 3 ) % 12 ] !== 666 )
+				if( hexcorner_nettriangles[ ( side_i * 2 + 3 ) % 12 ] !== 999 )
 				{
 					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 2 ].color.copy(pentamers_color);
 					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 3 ].color.copy(pentamers_color);
@@ -160,12 +160,12 @@ function Map_lattice() {
 			}
 			else
 			{
-				if( hexcorner_nettriangles[ ( side_i * 2 + 0 ) % 12 ] !== 666 )
+				if( hexcorner_nettriangles[ ( side_i * 2 + 0 ) % 12 ] !== 999 )
 				{
 					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 0 ].color.copy(surface_hexamers_color);
 					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 1 ].color.copy(surface_hexamers_color);
 				}
-				if( hexcorner_nettriangles[ ( side_i * 2 + 3 ) % 12 ] !== 666 )
+				if( hexcorner_nettriangles[ ( side_i * 2 + 3 ) % 12 ] !== 999 )
 				{
 					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 2 ].color.copy(surface_hexamers_color);
 					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 3 ].color.copy(surface_hexamers_color);
@@ -196,14 +196,14 @@ function Map_lattice() {
 					leftend = squarelattice_hexagonvertices[hexagon_first_squarelatticevertex_index + (side_i * 2 + leftend) % 12 ];
 					rightend= squarelattice_hexagonvertices[hexagon_first_squarelatticevertex_index + (side_i * 2 +rightend) % 12 ];
 					
-					var ourtriangle = edgecorner_nettriangles[i] === 666? edgecorner_nettriangles[(i+2)%4] : edgecorner_nettriangles[i];
+					var ourtriangle = edgecorner_nettriangles[i] === 999? edgecorner_nettriangles[(i+2)%4] : edgecorner_nettriangles[i];
 					
 					//going around this, you're actually caught by a line you don't want to intersect with
 					//ideally you want to go straight for the edge with one triangle on one side and one on the other
 					//keep this loop but for each edge check that it falls on both triangles
 					for(var k = 0; k < 3; k++) 
 					{
-						//speedup: also if you're 666, no need to get the intersection again
+						//speedup: also if you're 999, no need to get the intersection again
 						
 						var potentialintersection = line_line_intersection(
 								squarelatticevertex_rounded_triangle_vertex(ourtriangle, k),
@@ -328,11 +328,11 @@ function Map_lattice() {
 					topend   = squarelattice_hexagonvertices[hexagon_first_squarelatticevertex_index + (side_i * 2 + topend) % 12 ];
 					bottomend= squarelattice_hexagonvertices[hexagon_first_squarelatticevertex_index + (side_i * 2 +bottomend) % 12 ];
 					
-					var ourtriangle = edgecorner_nettriangles[i] === 666 ? edgecorner_nettriangles[(5-i)%4] : edgecorner_nettriangles[i];
+					var ourtriangle = edgecorner_nettriangles[i] === 999 ? edgecorner_nettriangles[(5-i)%4] : edgecorner_nettriangles[i];
 					
 					for(var k = 0; k < 3; k++)
 					{
-						//speedup: also if you're 666, no need to get the intersection again
+						//speedup: also if you're 999, no need to get the intersection again
 						var potentialintersection = line_line_intersection(
 								squarelatticevertex_rounded_triangle_vertex(ourtriangle, k),
 								topend,
@@ -400,7 +400,7 @@ function Map_lattice() {
 			{
 				//one vertex separated
 				
-				var pariahvertex = 666;
+				var pariahvertex = 999;
 				
 				for(var potential_pariah = 0; potential_pariah < 4; potential_pariah++){
 					for(var k = 0; k < 4; k++){
@@ -410,7 +410,7 @@ function Map_lattice() {
 						if(k === 3)
 							pariahvertex = potential_pariah;
 					}
-					if( potential_pariah === 3 && pariahvertex === 666 ) console.error("no pariahvertex found");
+					if( potential_pariah === 3 && pariahvertex === 999 ) console.error("no pariahvertex found");
 				}
 				
 				var regular_index_place = 0;
@@ -428,7 +428,7 @@ function Map_lattice() {
 					if(i !== 1 && i !== 5)
 						continue;
 					
-					var checktriangle = edgecorner_nettriangles[pariahvertex] === 666 ? 
+					var checktriangle = edgecorner_nettriangles[pariahvertex] === 999 ? 
 							edgecorner_nettriangles[(pariahvertex+1)%4] : edgecorner_nettriangles[pariahvertex];
 							
 //					if(!logged)console.log(edgecorner_nettriangles,
@@ -509,7 +509,7 @@ function Map_lattice() {
 	for(var i = 0; i < number_of_lattice_points; i++) {
 		var latticevertex_nettriangle = locate_in_squarelattice_net(squarelattice_vertices[i]);
 		
-		if( latticevertex_nettriangle !== 666 ) {
+		if( latticevertex_nettriangle !== 999 ) {
 			var mappedpoint = map_XY_from_lattice_to_surface(
 					flatlattice_vertices.array[ i*3+0 ], flatlattice_vertices.array[ i*3+1 ],
 					latticevertex_nettriangle );
