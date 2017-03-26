@@ -128,23 +128,24 @@ function initPresentation(presentation)
 	p.push( new page( slides.sunflowerAndWall ) );
 	p.push( new page( [h.looseRhom0, h.looseRhom1, h.looseGico,h.looseDode,h.looseTria] ) );//they fit together
 	p.push( new page( [h.star, h.adornedTria, h.looseGico, h.looseDode] ) );
-	p.push( new page( slides.virusVictims ) );
-	p.push( new page( slides.virusStructures ) );
-	p.push( new page( slides.zikaBaby ) );
-	p.push( new page( [ h.zika ] ) );
-	p.push( new page( slides.mainQC ) );
 	
-	p.push( new page( [h.symmetryDemonstration] ) );
-	p[ p.length-1 ].symmetryDemonstrationMode = "nothing";
-	p.push( new page( [h.symmetryDemonstration] ) );
-	p[ p.length-1 ].symmetryDemonstrationMode = "reflection";
-	p.push( new page( [h.symmetryDemonstration] ) );
-	p[ p.length-1 ].symmetryDemonstrationMode = "rotation";
-	p.push( new page( [h.symmetryDemonstration] ) );
-	p[ p.length-1 ].symmetryDemonstrationMode = "translation";
-	
-	p.push( new page( slides.symmetryExerciseCue ) );
-	p.push( new page( slides.lungsAndBuilding ) );
+//	p.push( new page( slides.virusVictims ) );
+//	p.push( new page( slides.virusStructures ) );
+//	p.push( new page( slides.zikaBaby ) );
+//	p.push( new page( [ h.zika ] ) );
+//	p.push( new page( slides.mainQC ) );
+//	
+//	p.push( new page( [h.symmetryDemonstration] ) );
+//	p[ p.length-1 ].symmetryDemonstrationMode = "nothing";
+//	p.push( new page( [h.symmetryDemonstration] ) );
+//	p[ p.length-1 ].symmetryDemonstrationMode = "reflection";
+//	p.push( new page( [h.symmetryDemonstration] ) );
+//	p[ p.length-1 ].symmetryDemonstrationMode = "rotation";
+//	p.push( new page( [h.symmetryDemonstration] ) );
+//	p[ p.length-1 ].symmetryDemonstrationMode = "translation";
+//	
+//	p.push( new page( slides.symmetryExerciseCue ) );
+//	p.push( new page( slides.lungsAndBuilding ) );
 	
 	p.push( new page( slides.lungsAndBuilding ) );
 	p.push( new page( slides.everyday3DPatterns ) );
@@ -241,13 +242,13 @@ function initPresentation(presentation)
 	
 	p.push( new page( slides.lesserQCs ) );
 	
-	p.push( new page( [ h.zika, h.looseTria ] ) );
-	p.push( new page( slides.zikaHazmat ) );
-	p.push( new page( [ h.pariaModel, h.pariaData ] ) );
-//	p.push( new page( [ h.CCMV, h.tamiflu ] ) );
-	p.push( new page( [ h.ms2Model, h.ms2Data ] ) );
-
-	p.push( new page( slides.allPhotos ) );
+//	p.push( new page( [ h.zika, h.looseTria ] ) );
+//	p.push( new page( slides.zikaHazmat ) );
+//	p.push( new page( [ h.pariaModel, h.pariaData ] ) );
+////	p.push( new page( [ h.CCMV, h.tamiflu ] ) );
+//	p.push( new page( [ h.ms2Model, h.ms2Data ] ) );
+//
+//	p.push( new page( slides.allPhotos ) );
 	
 	//--------------End Plan
 	

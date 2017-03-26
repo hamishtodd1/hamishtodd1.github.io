@@ -65,31 +65,47 @@ inputObject.updateFromAsynchronousInput = function(Models,Controllers) //the pur
 		
 		//"Controllers" are updated synchronously and are the data you use
 		var gamepads = navigator.getGamepads();
-	    var riftGripButton = 2;
-	    var riftNextButton = 1;
+	    
 	    //pushing the thumbstick in is 0, the two buttons are 3 and 4
 		for(var k = 0; k < 2 && k < gamepads.length; ++k)
-		{
+		{	
 			var affectedControllerIndex = 666;
 			if (gamepads[k] && gamepads[k].id === "Oculus Touch (Right)") //because some are undefined
 				affectedControllerIndex = RIGHT_CONTROLLER_INDEX;
 			if (gamepads[k] && gamepads[k].id === "Oculus Touch (Left)")
 				affectedControllerIndex = LEFT_CONTROLLER_INDEX;
+			if (gamepads[k] && gamepads[k].id === "OpenVR Gamepad" )
+			{
+				if(gamepads[k].index )
+					affectedControllerIndex = RIGHT_CONTROLLER_INDEX;
+				else
+					affectedControllerIndex = LEFT_CONTROLLER_INDEX;
+			}
+			
 			if(affectedControllerIndex === 666)
 				continue;
 			
-			Controllers[affectedControllerIndex].position.x = gamepads[k].pose.position[0];
-			Controllers[affectedControllerIndex].position.y = gamepads[k].pose.position[1];
-			Controllers[affectedControllerIndex].position.z = gamepads[k].pose.position[2];
-			Controllers[affectedControllerIndex].quaternion.x = gamepads[k].pose.orientation[0];
-			Controllers[affectedControllerIndex].quaternion.y = gamepads[k].pose.orientation[1];
-			Controllers[affectedControllerIndex].quaternion.z = gamepads[k].pose.orientation[2];
-			Controllers[affectedControllerIndex].quaternion.w = gamepads[k].pose.orientation[3];
+			if(gamepads[k].pose.position && gamepads[k].pose.orientation)
+			{
+				Controllers[affectedControllerIndex].position.x = gamepads[k].pose.position[0];
+				Controllers[affectedControllerIndex].position.y = gamepads[k].pose.position[1];
+				Controllers[affectedControllerIndex].position.z = gamepads[k].pose.position[2];
+				Controllers[affectedControllerIndex].quaternion.x = gamepads[k].pose.orientation[0];
+				Controllers[affectedControllerIndex].quaternion.y = gamepads[k].pose.orientation[1];
+				Controllers[affectedControllerIndex].quaternion.z = gamepads[k].pose.orientation[2];
+				Controllers[affectedControllerIndex].quaternion.w = gamepads[k].pose.orientation[3];
+			}
 			
-			if( gamepads[k].buttons[riftGripButton].pressed)
-				Controllers[affectedControllerIndex].Gripping = 1;
-			else
-				Controllers[affectedControllerIndex].Gripping = 0;
+			for(var i = 0; i < gamepads[k].buttons.length; i++)
+			{
+				if( gamepads[k].buttons[i].pressed)
+				{
+					Controllers[affectedControllerIndex].Gripping = 1;
+					break;
+				}
+				if(i === gamepads[k].buttons.length-1)
+					Controllers[affectedControllerIndex].Gripping = 0;
+			}
 		}
 		//if there hasn't been controller data, the controllers will just hang around
 		

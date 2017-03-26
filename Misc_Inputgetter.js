@@ -10,6 +10,8 @@
 
 //this is called once a frame and must be the only thing that addresses Inputobject, lest functions get different impressions of inputs.
 //this function shouldn't actually *do* anything with the data, it's only to be read elsewhere.
+var cursorIsHand = false;
+
 function ReadInput()
 {
 	OldMousePosition.copy( MousePosition );
@@ -20,6 +22,21 @@ function ReadInput()
 	
 	isMouseDown_previously = isMouseDown;
 	isMouseDown = InputObject.isMouseDown;
+	
+	if( cursorIsHand)
+	{
+		if(isMouseDown)
+			if( typeof InstallTrigger !== 'undefined' )
+				document.body.style.cursor = '-moz-grabbing';
+			else
+				document.body.style.cursor = '-webkit-grabbing';
+		else
+			if( typeof InstallTrigger !== 'undefined' )
+				document.body.style.cursor = '-moz-grab';
+			else
+				document.body.style.cursor = '-webkit-grab';
+	}
+	
 	
 	react_to_video();	
 }

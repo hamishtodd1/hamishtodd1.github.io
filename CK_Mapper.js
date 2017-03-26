@@ -316,7 +316,7 @@ function Map_lattice() {
 				for(var i = 0; i < 4; i++){ //intersection point
 					var topend;
 					var bottomend;
-					if(i % 2 === 0){
+					if( i < 2 ){
 						topend = 0;
 						bottomend= 1;
 					}

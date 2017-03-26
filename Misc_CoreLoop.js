@@ -1,4 +1,8 @@
-/*---------------Monet
+/*THERE IS A BUG THAT IS CAUSING MUCH TO BE SKIPPED
+ * 
+ * Audio doesn't work on IE, need to change method
+ * 
+ * ---------------Monet
  * Screen shake on QS? Need that for the sound effect to make sense... discuss with Monet
  * 
  * Some nice material? Needs to have normals updated
