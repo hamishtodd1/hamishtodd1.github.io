@@ -1,29 +1,26 @@
-/*-----Monet
+/*---------------Monet
  * Screen shake on QS? Need that for the sound effect to make sense... discuss with Monet
  * 
- * -------------Before illustrator
- * Find a way to fill in the holes????
  * Some nice material? Needs to have normals updated
  * Shadows on irreg; a "floor" for the shadow
  * Lighting on CK, it is a weird shape to look at
  * The irreg grabbers want outlines
- * ------------With illustrator
- * Spacing apart of canvases, social media buttons.
- * Better viruses on all (maybe CK things are shut)
- * Single unified color scheme
- * Highlight the pentagons and hexagons on polio and hepatitis B when you say it (just make pics with different colors and fade) 
+ * 
+ * ------------With Sheree
+ * Social media buttons, press page links, at bottom
  * 2XFC or 1F15 for T=3. Wait what about cowpea? Not very straight lines but that might be ok if it's consistent across others
  * Put things on corners of irreg and QS? Golden shiny balls?
- * Location of lights?
- * Round the edges of the corners on CK? Solid interior? Ehhh, it's about looking like the viruses man
- * How to make nice pics of viruses: 
+ * Round the edges of the corners on CK? Solid interior?
+ * 
+ * ------------How to make nice pics of viruses: 
  * 	Chimera
  * 	clear out the things you don't want 
  * 	multiscale models, resolution 0 (i.e. surfaces)
  * 	if you want to color a chain, select one copy of it and click copies in the multiscale models window
  * 	actions>color>all options>tools>surface color>radius>get color person to choose
  * 
- * -------------Further "animating"
+ * -------------Further "animating" (when final cut is in)
+ * 		Highlight the pentagons and hexagons on polio and hepatitis B when you say it (just make pics with different colors and fade) 
  * 		Zoom in on darb e pattern
  *		"These are images of some other viruses" is a series of 8 that fade in
  * 		irreg trying different configurations for algorithm
@@ -33,9 +30,7 @@
  * 		the button flashes until you have opened AND closed it, with a change between
  * 
  * ----Misc
- *  -If webgl doesn't load (or etc), recommend a different browser or refreshing the page
- * -Mouse doesn't flick things to the wrong quaternion when you come into the frame from the video
- *  -loading screen
+ *  -Location of lights
  *  -break up all the chapters into separate videos WHEN INTEGRATING NEW VIDEO
  *  -tweak scale/rotate speed stuff
  *  -touchscreen (test on Jessie's computer)
@@ -52,29 +47,21 @@
  *  
  *  
  * --------Technical
- * -make it work in different resolutions/respond to resize. Snap to different resolutions
- * force horizontal viewing http://stackoverflow.com/questions/14360581/force-landscape-orientation-mode
- * Social media buttons. Only at end?
- *	Optimize loading
+ * 	If webgl doesn't load (or etc), recommend a different browser... or refreshing the page
  *	Custom domain
- *  -if the canvas doesn't get going, no video
- *  -upload static version to youtube and link to that if page doesn't load
- *  -make sure a good picture appears when shared on facebook and twitter
- *  -make it feel good
- *  	-optimize http://www.w3schools.com/js/js_performance.asp
- *  		-profile
- *  		-get rid of unused code
- *  		-could generate some things once, then not again (might make things worse)
- *  		-search for missing "console.log"s, those are old debug things and may have wasteful ifs, alexandrov is chock-a-block
+ *  -prevent youtube playing until canvas is ready
+ *  -link to great big static version if page doesn't load
+ *  -make sure a good picture appears when shared on facebook and twitter. DEEPLY SUSPICIOUS: it gets the image on aboutme but not on recommendations.
+ *  -optimize http://www.w3schools.com/js/js_performance.asp
+ *  	-get rid of unused code
+ *  	-search for missing "console.log"s, those are old debug things and may have wasteful ifs, alexandrov is chock-a-block
  *  -test on different setups
 		-Johan's Mac
-		-Monet's computers. Tell github!
 		-Reidun's computer (probably just webgl)
- *  -Change to another domain / mask it?
- * -Test with a low framerate to see what it's like and chase down remaining framerate dependence
+ * 		-Test with a low framerate to see what it's like and chase down remaining framerate dependence
  *  
  *  ---------Probably never to be solved
- * 	-cite pictures
+ * 	-cite non-illustrated pictures
  * Youtube fullscreen doubleclick problem
  * 
  */

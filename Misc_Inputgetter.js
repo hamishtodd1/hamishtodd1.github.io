@@ -24,16 +24,64 @@ function ReadInput()
 	react_to_video();	
 }
 
-window.addEventListener( 'resize', function(event)
+function onWindowResizeExceptYoutube()
 {
-	var newCanvasResolution = window.innerWidth / 2;
-//	var possibleResolutions = [1080]
-	//sooo, what to do if they have a colossal monitor? What should be the next steps up?
-	//The worst case scenario for 720 is 1439. That gap should be your max, proportionally
-//	Renderer.setSize( window.innerWidth, window.innerHeight );
-//	Camera.aspect = Renderer.domElement.width / Renderer.domElement.height;
-//	Camera.updateProjectionMatrix();
-}, false );
+	var maxCanvasDimension = window.innerWidth / 2;
+	if( maxCanvasDimension > window.innerHeight ) 
+		maxCanvasDimension = window.innerHeight;
+	
+	var finalCanvasDimension = 240;
+	var possibleDimensions = [360,480,720,1080];
+	for(var i = 0; i < possibleDimensions.length; i++ )
+		if( maxCanvasDimension >= possibleDimensions[i] )
+			finalCanvasDimension = possibleDimensions[i];
+	if( maxCanvasDimension >= 1080 * 1.5 )
+	{
+		while( maxCanvasDimension >= finalCanvasDimension * 1.5 )
+			finalCanvasDimension = finalCanvasDimension * 1.5;
+	}
+	//on a >1080 monitor, you probably have to scale up the... picture of the youtube video, or however you put it. Try putting in 2160 or whatever.
+	//todo: test on that. Buuuut that can wait a long time, like whenever you see one. People could just resize the window? Hopefully that works?
+	
+	var spacing = 0;
+	var bodyWidth = spacing + finalCanvasDimension * 2;
+	var bodySideToCenter = bodyWidth / 2;
+	var bodyTopToCenter = finalCanvasDimension / 2;
+	document.body.style.width = bodyWidth.toString() + "px";
+	document.body.style.height = finalCanvasDimension.toString() + "px";
+	document.body.style.margin = "-" + bodyTopToCenter.toString() + "px 0 0 -" + bodySideToCenter.toString() + "px";
+	//eventually the body will have more shit. probably the above needs to be "container" or something.
+	
+	window_width = finalCanvasDimension;
+	window_height = window_width;
+	
+	renderer.setSize( window_width, window_height );
+	
+	return finalCanvasDimension;
+}
+onWindowResizeExceptYoutube();
+
+function onWindowResize()
+{
+	var finalCanvasDimension = onWindowResizeExceptYoutube();
+	
+	var qualityString = "";
+	if(finalCanvasDimension === 240)
+		qualityString += "small";
+	else if(finalCanvasDimension === 360)
+		qualityString += "medium";
+	else if(finalCanvasDimension === 480)
+		qualityString += "large";
+	else if(finalCanvasDimension === 720)
+		qualityString += "hd720";
+	else if(finalCanvasDimension >= 1080)
+		qualityString += "hd1080";
+	else qualityString += "default";
+	
+	ytplayer.setPlaybackQuality( qualityString ); //and if their connection is too slow, they have the cog
+	ytplayer.setSize(finalCanvasDimension,finalCanvasDimension);
+}		
+window.addEventListener( 'resize', onWindowResize, false );
 
 document.addEventListener( 'mousedown', function(event) {
 	event.preventDefault();

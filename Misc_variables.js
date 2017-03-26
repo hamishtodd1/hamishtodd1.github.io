@@ -45,7 +45,7 @@ var vertical_fov = 2 * Math.atan(playing_field_dimension/(2*min_cameradist));
 var camera = new THREE.CombinedCamera(playing_field_dimension, playing_field_dimension, vertical_fov * 360 / TAU, 0.1, 1000, 0.1, 1000);
 var scene = new THREE.Scene();
 
-var window_height = 540;
+var window_height = 360; //to begin with
 var window_width = window_height;
 var renderer = new THREE.WebGLRenderer({ antialias: true });
 var targetDIV = document.getElementById("canvasID");

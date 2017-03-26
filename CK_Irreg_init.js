@@ -901,7 +901,7 @@ function init_CK_and_irreg()
 		hexagon_generator[5] = new THREE.Vector3(0,  1,0);		//TL
 		
 		var hexagon_major_Scalar = 83; //will get divided by 100.
-		var hexagon_minor_Scalar = 63; //TRY SETTING THIS TO ZERO
+		var hexagon_minor_Scalar = 1; //TRY SETTING THIS TO ZERO
 		
 		
 

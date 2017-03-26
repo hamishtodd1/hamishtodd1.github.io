@@ -35,7 +35,7 @@ function Update_story()
 		}	
 		
 		if( Story_states[Storypage].prevent_playing )
-			if(ytplayer.getPlayerState() === 1)// 1 means playing,not allowed (although maybe some people like to have order designated for them?)
+			if(ytplayer.getPlayerState() === 1)// 1 means playing, not allowed (although maybe some people like to have order designated for them?)
 				ytplayer.pauseVideo();
 		
 		if( Story_states[Storypage].unpause_on_vertex_knowledge && theyknowyoucanchangevertices && !isMouseDown )
@@ -177,7 +177,11 @@ function Update_story()
 			slideObjects[ Story_states[Storypage].slide_number ].position.z = slideObjects[ Story_states[Storypage-1].slide_number ].position.z + 0.001;
 			slideObjects[ Story_states[Storypage].slide_number ].material.opacity = 0;
 		}
+		
+		document.body.style.cursor = ''; //there might be some other situations in which you want this.
 	}
+	else
+		document.body.style.cursor = '-webkit-grab';
 	
 	//If we've just ticked forward then of course we should be playing anyway, but if we just started a new chapter, having been on the tree, we might be paused
 	if( !Story_states[Storypage].prevent_playing )
@@ -271,7 +275,7 @@ function init_story()
 	});
 	
 	ns = default_clone_story_state(1,0.1);
-//	ns.go_to_time = 72.7; //skips to wherever you like 560 is HIV demo, 455.5 is CK
+	ns.go_to_time = 15*60+30; //skips to wherever you like 560 is HIV demo, 455.5 is CK
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,12.2); //hiv
