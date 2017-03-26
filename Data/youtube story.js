@@ -181,7 +181,7 @@ function Update_story()
 		document.body.style.cursor = ''; //there might be some other situations in which you want this.
 	}
 	else
-		document.body.style.cursor = '-webkit-grab';
+		document.body.style.cursor = '-webkit-grab'; //can also have "-webkit-grabbing"
 	
 	//If we've just ticked forward then of course we should be playing anyway, but if we just started a new chapter, having been on the tree, we might be paused
 	if( !Story_states[Storypage].prevent_playing )
