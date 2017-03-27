@@ -53,6 +53,7 @@
  * --------Technical
  * 	If webgl doesn't load (or etc), recommend a different browser... or refreshing the page
  *	Custom domain
+ *	Loading wise, would it be faster with more than one loader?
  *  -prevent youtube playing until canvas is ready
  *  -link to great big static version if page doesn't load
  *  -make sure a good picture appears when shared on facebook and twitter. DEEPLY SUSPICIOUS: it gets the image on aboutme but not on recommendations.
