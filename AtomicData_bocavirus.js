@@ -419,15 +419,21 @@ function init_bocavirus_stuff()
 	Cornucopia.visible = false;
 	
 	{
-		lights[0] = new THREE.PointLight( 0xffffff, 0.6 );
-		lights[1] = new THREE.PointLight( 0xffffff, 0.6 );
-		lights[2] = new THREE.PointLight( 0xffffff, 0.6 );
-		lights[3] = new THREE.PointLight( 0xffffff, 0.6 );
+		lights[0] = new THREE.PointLight( 0xffffff, 0.9 );
+		for(var i = 0; i < 5; i++)
+			lights[i] = lights[0].clone();
+		lights[5] = new THREE.AmbientLight( 0x000000 );
 		
-		lights[0].position.set( 0, 100, 30 );
-		lights[1].position.set( 100, 0, 30 );
-		lights[2].position.set( -100, 0, 30 );
-		lights[3].position.set( 0, -100, 30 );
+		var lightDist = 70;
+		for(var i = 0; i < 4; i++)
+		{
+			lights[i].position.z = lightDist;
+			if(i) lights[i].position.applyAxisAngle(y_central_axis, TAU / 4);
+			lights[i].position.applyAxisAngle(z_central_axis, TAU / 3 * i);
+			console.log(lights[i].position)
+		}
+		for(var i = 0; i < lights.length; i++)
+			lights[i].position.multiplyScalar(0.1);
 	}
 	
 	boca_piece_destinations = Array( neo_bocavirus_proteins.length );

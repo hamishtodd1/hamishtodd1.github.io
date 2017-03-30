@@ -357,8 +357,8 @@ function initialize_QS_stuff()
 	Forced_edges[22] = new Uint16Array([14,15, 7,8]);
 	
 	var QM_materials = Array(2);
-	QM_materials[0] = new THREE.MeshBasicMaterial({vertexColors:THREE.FaceColors});
-	QM_materials[1] = new THREE.MeshBasicMaterial({vertexColors:THREE.FaceColors});
+	QM_materials[0] = new THREE.MeshPhongMaterial({vertexColors:THREE.FaceColors, specular: 0x222222});
+	QM_materials[1] = new THREE.MeshPhongMaterial({vertexColors:THREE.FaceColors, specular: 0x222222}); //one of these
 	var ourmultimaterial = new THREE.MultiMaterial(QM_materials);
 	
 	var theirfaceindices = new Uint16Array(3);
