@@ -24,6 +24,10 @@
  * 	actions>color>all options>tools>surface color>radius>get color person to choose
  * 
  * -------------Further "animating" (when final cut is in)
+ * 		Golf balls that look like viruses, buildings that look like viruses - they all pile up
+ * 		zoom in on the monkey down to one of its cells? Arrrrrgh need illustration
+ * 		cell comes in and is same size as virus. They change size when you say so.
+ * 		the virus pieces pop in by increasing size from zero
  * 		Highlight the pentagons and hexagons on polio and hepatitis B when you say it (just make pics with different colors and fade) 
  * 		Zoom in on darb e pattern
  *		"These are images of some other viruses" is a series of 8 that fade in
@@ -34,6 +38,7 @@
  * 		the button flashes until you have opened AND closed it, with a change between
  * 
  * ----Misc
+ * 	-smoother open, not just linear
  *  -Location of lights
  *  -break up all the chapters into separate videos WHEN INTEGRATING NEW VIDEO
  *  -tweak scale/rotate speed stuff

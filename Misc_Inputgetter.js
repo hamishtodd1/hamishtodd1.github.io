@@ -11,12 +11,20 @@
 //this is called once a frame and must be the only thing that addresses Inputobject, lest functions get different impressions of inputs.
 //this function shouldn't actually *do* anything with the data, it's only to be read elsewhere.
 var cursorIsHand = false;
+var justLeftiFrame = false;
 
 function ReadInput()
 {
 	OldMousePosition.copy( MousePosition );
+	
 	MousePosition.x = InputObject.mousex;
 	MousePosition.y = InputObject.mousey;
+	
+	if( justLeftiFrame )
+	{
+		OldMousePosition.copy( MousePosition );
+		justLeftiFrame = 0;
+	}
 	
 	Mouse_delta.set( MousePosition.x - OldMousePosition.x, MousePosition.y - OldMousePosition.y);
 	
@@ -110,6 +118,7 @@ document.addEventListener( 'mouseup', 	function(event) {
 }, false);
 
 document.addEventListener( 'mousemove', function(event) {
+	console.log("mouseUpdated")
 	event.preventDefault();
 	InputObject.mousex = event.clientX - window.innerWidth / 2 - renderer.domElement.offsetLeft / 2;
 	InputObject.mousey = -(event.clientY - window.innerHeight / 2 - renderer.domElement.offsetTop / 2);
