@@ -67,6 +67,11 @@ function onYouTubeIframeAPIReady()
 				YOUTUBE_READY = 1;
 				ytplayer.seekTo( 0 );
 				ytplayer.pauseVideo();
+				
+				(document.getElementById("player")).addEventListener( 'mouseleave', function(event) {
+					justLeftiFrame = true;
+				}, false);
+				
 				attempt_launch(); 
 			} 
 		},
