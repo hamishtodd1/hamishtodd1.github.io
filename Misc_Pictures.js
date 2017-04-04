@@ -45,8 +45,6 @@ function load_AV_stuff()
 						loadpic(slide_texture_urls[i], 2, i);
 					
 					//---------SOUND
-					var audioListener = new THREE.AudioListener();
-					camera.add( audioListener );
 					Sounds = {};
 					var soundInfoArray = [
 					                      "endingMusic", "Rustavi Choir - Tsmindao Ghmerto (Holy God).ogg",
@@ -66,10 +64,7 @@ function load_AV_stuff()
 						//default file type
 						if( soundInfoArray[i*2+1][soundInfoArray[i*2+1].length-4] !== "." )
 							soundInfoArray[i*2+1] += ".wav";
-						Sounds[soundInfoArray[i*2]] = new THREE.Audio( audioListener ).load(
-								'http://hamishtodd1.github.io/Data/Sounds/' + soundInfoArray[i*2+1]
-						);
-						camera.add( Sounds[soundInfoArray[i*2]] );
+						Sounds[soundInfoArray[i*2]] = new Audio( "http://hamishtodd1.github.io/Data/Sounds/' + soundInfoArray[i*2+1]" );
 					}
 					Sounds.enlarge.setVolume(3);
 					Sounds.ensmall.setVolume(3);

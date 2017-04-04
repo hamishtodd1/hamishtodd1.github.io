@@ -3,10 +3,10 @@
  * Audio doesn't work on IE, need to change method
  * 
  * QS idea: set relevant face normals to be equal to each other
- * But how about the shapes that sit on dod edges?
+ * But how about the shapes that sit on dod edges? Well, there is a schema that lets you work out one from the other ;_;
  * 
  * ---------------Monet
- * Screen shake on QS? Need that for the sound effect to make sense... discuss with Monet
+ * Screen shake on QS?
  * 
  * Some nice material? Needs to have normals updated
  * Shadows on irreg; a "floor" for the shadow
@@ -29,12 +29,13 @@
  * -------------Further "animating" (when final cut is in)
  * 		Highlight the pentagons and hexagons on polio and hepatitis B when you say it (just make pics with different colors and fade) 
  * 		Zoom in on darb e pattern
- *		"These are images of some other viruses" is a series of 8 that fade in
+ *		"These are images of some other viruses". Sheree chooses composition, you animate
  * 		irreg trying different configurations for algorithm
  * 		things respond to your hand movements
  * 		models go haywire at the end
  * 		Camera closer on beginning of CK
  * 		the button flashes until you have opened AND closed it, with a change between
+ * 		The whole hepatitis thing. They all come in.
  * 
  * ----Misc
  *  -Location of lights
