@@ -98,11 +98,12 @@ function Map_To_Quasisphere()
 				quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[one_quasicutout_vertices * i + vertex_index].copy( 
 					get_vertex_position(quasicutouts_vertices_components[vertex_index],basis_vectors[i],ourcenters[i],radius) );
 		}
+		
+		//but un-project that one, using this, maybe
+//		quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.faces[0]
 	}
 	
-	if(stable_point_of_meshes_currently_in_scene !== 999){
-		quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.verticesNeedUpdate = true;
-	}
+	
 	
 	//----------------Edge stuff
 	//smaller ones get smaller edges because they're further away. Could make orthographic
@@ -209,7 +210,18 @@ function Map_To_Quasisphere()
 	if(stable_point_of_meshes_currently_in_scene === 20)
 		logged = 1;
 	
-	quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.verticesNeedUpdate = true;
+	if( stable_point_of_meshes_currently_in_scene !== 999 && 
+			typeof quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry._bufferGeometry !== 'undefined')
+	{
+		quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.computeFaceNormals(); //maybe don't need this
+		quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.computeVertexNormals();
+		
+//		for(var i = 0, il = quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry._bufferGeometry.attributes.normal.array.length; i<il; i++)
+//			quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry._bufferGeometry.attributes.normal.array[i] = 
+//				quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry._bufferGeometry.attributes.position.array[i] / radius;
+
+		quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.verticesNeedUpdate = true;
+	}
 	
 	//used to be a massive comment here about design!
 }

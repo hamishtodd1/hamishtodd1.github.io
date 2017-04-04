@@ -279,7 +279,7 @@ function init_story()
 	});
 	
 	ns = default_clone_story_state(1,0.1);
-//	ns.go_to_time = 15*60+30; //skips to wherever you like 560 is HIV demo, 455.5 is CK
+	ns.go_to_time = 5*60+42;//15*60+30; //skips to wherever you like 560 is HIV demo, 455.5 is CK
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,12.2); //hiv

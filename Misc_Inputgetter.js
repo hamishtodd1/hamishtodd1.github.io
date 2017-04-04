@@ -43,8 +43,9 @@ function ReadInput()
 				document.body.style.cursor = '-moz-grab';
 			else
 				document.body.style.cursor = '-webkit-grab';
+		
+//		console.log(document.body.style.cursor)
 	}
-	
 	
 	react_to_video();	
 }

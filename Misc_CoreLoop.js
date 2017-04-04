@@ -2,6 +2,9 @@
  * 
  * Audio doesn't work on IE, need to change method
  * 
+ * QS idea: set relevant face normals to be equal to each other
+ * But how about the shapes that sit on dod edges?
+ * 
  * ---------------Monet
  * Screen shake on QS? Need that for the sound effect to make sense... discuss with Monet
  * 
@@ -276,6 +279,8 @@ function ChangeScene(new_mode) {
 			scene.add(QS_center);
 			scene.add(QS_measuring_stick);
 //			scene.add(GrabbableArrow);
+			for(var i = 0; i< lights.length; i++)
+				scene.add( lights[i] );
 			break;
 			
 		case TREE_MODE:

@@ -25,17 +25,7 @@ var MODE = 3;
 
 var backgroundColor = 0x7E7E7E;
 
-var ourAmbientLight = new THREE.AmbientLight( 0x000000 );
 //with camera at z=30, fov 75, for an object about 20 wide
-
-var pointLights = [];
-pointLights[ 0 ] = new THREE.PointLight( 0xffffff, 1, 0 );
-pointLights[ 1 ] = new THREE.PointLight( 0xffffff, 1, 0 );
-pointLights[ 2 ] = new THREE.PointLight( 0xffffff, 1, 0 );
-
-pointLights[ 0 ].position.set( 0, 200, 0 );
-pointLights[ 1 ].position.set( 100, 200, 100 );
-pointLights[ 2 ].position.set( - 100, - 200, - 100 );
 
 //--------------Technologically fundamental
 var playing_field_dimension = 7*HS3; //used to be that height was 6.
