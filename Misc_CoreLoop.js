@@ -27,6 +27,7 @@
  * 	actions>color>all options>tools>surface color>radius>get color person to choose
  * 
  * -------------Further "animating" (when final cut is in)
+ * 		Flick between spherical projection and flat for "the patterns that appeared on these viruses"
  * 		Golf balls that look like viruses, buildings that look like viruses - they all pile up
  * 		zoom in on the monkey down to one of its cells? Arrrrrgh need illustration
  * 		cell comes in and is same size as virus. They change size when you say so.
@@ -41,6 +42,7 @@
  * 		the button flashes until you have opened AND closed it, with a change between
  * 
  * ----Misc
+ *  -measuring stick on CK, srsly
  * 	-smoother open, not just linear
  *  -Location of lights
  *  -break up all the chapters into separate videos WHEN INTEGRATING NEW VIDEO
