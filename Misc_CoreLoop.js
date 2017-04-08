@@ -1,23 +1,17 @@
-/*THERE IS A BUG THAT IS CAUSING MUCH TO BE SKIPPED
- * 
- * Audio doesn't work on IE, need to change method
- * 
+/* 
  * QS idea: set relevant face normals to be equal to each other
  * But how about the shapes that sit on dod edges? Well, there is a schema that lets you work out one from the other ;_;
+ * Or don't, it doesn't look that much better
  * 
- * ---------------Monet
  * Screen shake on QS?
- * 
- * Some nice material? Needs to have normals updated
- * Shadows on irreg; a "floor" for the shadow
- * Lighting on CK, it is a weird shape to look at
+ * Shadows on irreg; a "floor" for the shadow. Different lights.
+ * Shininess/Lighting on CK, it is a weird shape to look at
  * The irreg grabbers want outlines
+ * Depth material for QS?
  * 
  * ------------With Sheree
  * Social media buttons, press page links, at bottom
  * 2XFC or 1F15 for T=3. Wait what about cowpea? Not very straight lines but that might be ok if it's consistent across others
- * Put things on corners of irreg and QS? Golden shiny balls?
- * Round the edges of the corners on CK? Solid interior?
  * 
  * ------------How to make nice pics of viruses: 
  * 	Chimera
@@ -26,7 +20,7 @@
  * 	if you want to color a chain, select one copy of it and click copies in the multiscale models window
  * 	actions>color>all options>tools>surface color>radius>get color person to choose
  * 
- * -------------Further "animating" (when final cut is in)
+ * -------------When final cut is in
  * 		Golf balls that look like viruses, buildings that look like viruses - they all pile up
  * 		zoom in on the monkey down to one of its cells? Arrrrrgh need illustration
  * 		cell comes in and is same size as virus. They change size when you say so.
@@ -40,28 +34,24 @@
  * 		Camera closer on beginning of CK
  * 		the button flashes until you have opened AND closed it, with a change between
  * 		The whole hepatitis thing. They all come in.
+ * 		Repetitions of advice
+ * 		CK pentagons flashing like sirens
+ * 		Show the crazy CK examples sequentially.
+ * 
  * 
  * ----Misc
  * 	-smoother open, not just linear
- *  -Location of lights
- *  -break up all the chapters into separate videos WHEN INTEGRATING NEW VIDEO
  *  -tweak scale/rotate speed stuff
- *  -touchscreen (test on Jessie's computer)
  *  -all the effects in camerastuff
- * Could bring in disco ball, radio dome, gazebo/tent, dymaxion map at bottom, golf ball islamic art and greenhouse obv, origami.
- * Show the crazy CK examples sequentially.
- * New pics. Correct sizes and give them a border, then resize in the scene.
- * Make use of the "now you can choose the next virus" clip and repeats
- * Loop back over every button press advice
- * CK pentagons flashing like sirens
- *  	Something like: if the new mouse position is on that side, set both old mouse position and new mouse position to that
- *  	Or if it's been dormant for a while, get ready to set old mouse position to new mouse position
  * -everything listed in CKsurfacestuff, bocavirus, quasisphere, youtube stuff. There isn't much.
  *  
  *  
  * --------Technical
+ * touchscreen (test on Jessie's computer)
+ * Sounds in .mp3 or 4
+ * 	A bug may have caused things to be skipped. Hopefully that goes away with the new arrangement
  * 	If webgl doesn't load (or etc), recommend a different browser... or refreshing the page
- *	Custom domain
+ *	Custom domain. It won't need to be on Ed for ever; yes one day the link will stop working but that is maybe ok, just make sure people can google
  *	Loading wise, would it be faster with more than one loader?
  *  -prevent youtube playing until canvas is ready
  *  -link to great big static version if page doesn't load
@@ -256,7 +246,8 @@ function ChangeScene(new_mode) {
 			}
 //			for( var i = 0; i < blast_cylinders.length; i++)
 //				scene.add(blast_cylinders[i]);
-//			scene.add(GrabbableArrow);
+			for(var i = 0; i< lights.length; i++)
+				scene.add( lights[i] );
 			break;
 			
 		case IRREGULAR_MODE:
@@ -279,7 +270,6 @@ function ChangeScene(new_mode) {
 				dodeca.add(quasicutout_meshes[stable_point_of_meshes_currently_in_scene]);
 			scene.add(QS_center);
 			scene.add(QS_measuring_stick);
-//			scene.add(GrabbableArrow);
 			for(var i = 0; i< lights.length; i++)
 				scene.add( lights[i] );
 			break;
