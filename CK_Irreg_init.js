@@ -380,7 +380,7 @@ function init_CK_and_irreg()
 	
 	//-------------stuff that goes in the scene
 	{		
-		var surfacematerial = new THREE.MeshBasicMaterial({
+		var surfacematerial = new THREE.MeshPhongMaterial({
 			color: 0x1EFCF3,
 			side:	THREE.DoubleSide,
 			shading: THREE.FlatShading //TODO add light source or whatever you need
@@ -463,6 +463,8 @@ function init_CK_and_irreg()
 		varyingsurface = new THREE.Mesh( flatnet_geometry.clone(), surfacematerial );
 		
 		manipulation_surface = new THREE.Mesh( varyingsurface.geometry.clone(), surfacematerial );
+		manipulation_surface.geometry.computeFaceNormals();
+		manipulation_surface.geometry.computeVertexNormals();
 		
 		var flatlatticematerial = new THREE.PointsMaterial({
 			size: 0.09,

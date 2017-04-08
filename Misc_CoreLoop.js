@@ -21,6 +21,7 @@
  * 	actions>color>all options>tools>surface color>radius>get color person to choose
  * 
  * -------------When final cut is in
+		Flick between spherical projection and flat for "the patterns that appeared on these viruses"
  * 		Golf balls that look like viruses, buildings that look like viruses - they all pile up
  * 		zoom in on the monkey down to one of its cells? Arrrrrgh need illustration
  * 		cell comes in and is same size as virus. They change size when you say so.
@@ -40,6 +41,7 @@
  * 
  * 
  * ----Misc
+ *  -measuring stick on CK, srsly
  * 	-smoother open, not just linear
  *  -tweak scale/rotate speed stuff
  *  -all the effects in camerastuff

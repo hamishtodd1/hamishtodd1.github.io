@@ -64,10 +64,10 @@ function load_AV_stuff()
 						//default file type
 						if( soundInfoArray[i*2+1][soundInfoArray[i*2+1].length-4] !== "." )
 							soundInfoArray[i*2+1] += ".wav";
-						Sounds[soundInfoArray[i*2]] = new Audio( "http://hamishtodd1.github.io/Data/Sounds/' + soundInfoArray[i*2+1]" );
+						Sounds[soundInfoArray[i*2]] = new Audio( "http://hamishtodd1.github.io/Data/Sounds/" + soundInfoArray[i*2+1] );
 					}
-					Sounds.enlarge.setVolume(3);
-					Sounds.ensmall.setVolume(3);
+//					Sounds.enlarge.setVolume(3);
+//					Sounds.ensmall.setVolume(3);
 					
 					PICTURES_LOADED = 1; //this may create problems with skipping forward to places where you haven't loaded the pic yet
 					attempt_launch();

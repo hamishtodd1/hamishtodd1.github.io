@@ -43,8 +43,6 @@ function ReadInput()
 				document.body.style.cursor = '-moz-grab';
 			else
 				document.body.style.cursor = '-webkit-grab';
-		
-//		console.log(document.body.style.cursor)
 	}
 	
 	react_to_video();	
@@ -119,7 +117,6 @@ document.addEventListener( 'mouseup', 	function(event) {
 }, false);
 
 document.addEventListener( 'mousemove', function(event) {
-	console.log("mouseUpdated")
 	event.preventDefault();
 	InputObject.mousex = event.clientX - window.innerWidth / 2 - renderer.domElement.offsetLeft / 2;
 	InputObject.mousey = -(event.clientY - window.innerHeight / 2 - renderer.domElement.offsetTop / 2);

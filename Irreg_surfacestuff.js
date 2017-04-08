@@ -74,6 +74,9 @@ function irreg_deduce_surface(openness ){
 	varyingsurface.geometry.attributes.position.array[8] = vertex2.z;
 	
 	deduce_most_of_surface(openness, varyingsurface.geometry.attributes.position);
+	
+	varyingsurface.geometry.computeFaceNormals();
+	varyingsurface.geometry.computeVertexNormals();
 }
 
 function CheckIrregButton(){
@@ -179,7 +182,7 @@ function update_varyingsurface() {
 			
 			varyingsurface.worldToLocal(MovementAxis);
 			var extraquaternion = new THREE.Quaternion();
-			extraquaternion.setFromAxisAngle( MovementAxis, Mouse_delta.length() * 1.2 );
+			extraquaternion.setFromAxisAngle( MovementAxis, Mouse_delta.length() * 0.9 );
 			
 			varyingsurface.quaternion.multiply(extraquaternion);
 		}

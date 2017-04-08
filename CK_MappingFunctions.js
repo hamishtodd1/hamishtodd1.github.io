@@ -92,7 +92,7 @@ function Update_net_variables() {
 
 function map_XY_from_lattice_to_surface(x,y, net_triangle_index) {
 	var mappedpoint = new THREE.Vector3(x,y,0);
-	map_from_lattice_to_surface(mappedpoint, net_triangle_index);	
+	map_from_lattice_to_surface(mappedpoint, net_triangle_index);
 	return mappedpoint;
 }
 
@@ -122,6 +122,7 @@ function map_from_lattice_to_surface(vec, net_triangle_index) {
 	
 	vec.add( stickon_vector );
 	
+	//YO, SPHERICAL PROJECTION
 //	if(capsidopenness === 0 ) vec.setLength(1/LatticeScale);
 }
 
