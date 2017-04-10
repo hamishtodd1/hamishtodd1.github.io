@@ -419,7 +419,7 @@ function init_bocavirus_stuff()
 	Cornucopia.visible = false;
 	
 	{
-		lights[0] = new THREE.PointLight( 0xffffff, 0.9 );
+		lights[0] = new THREE.PointLight( 0xffffff, 0.9, 0 );
 		for(var i = 0; i < 5; i++)
 			lights[i] = lights[0].clone();
 		lights[5] = new THREE.AmbientLight( 0x000000 );

@@ -6,12 +6,12 @@
  * Screen shake on QS?
  * Shadows on irreg; a "floor" for the shadow. Different lights.
  * Shininess/Lighting on CK, it is a weird shape to look at
- * The irreg grabbers want outlines
  * Depth material for QS?
  * 
  * ------------With Sheree
  * Social media buttons, press page links, at bottom
  * 2XFC or 1F15 for T=3. Wait what about cowpea? Not very straight lines but that might be ok if it's consistent across others
+ * Go through demos with her and ask what colors should go where
  * 
  * ------------How to make nice pics of viruses: 
  * 	Chimera
@@ -49,6 +49,7 @@
  *  
  *  
  * --------Technical
+ * Bug found by Henry Segerman
  * touchscreen (test on Jessie's computer)
  * Sounds in .mp3 or 4
  * 	A bug may have caused things to be skipped. Hopefully that goes away with the new arrangement

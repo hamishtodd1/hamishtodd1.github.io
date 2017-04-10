@@ -134,8 +134,8 @@ function Update_story()
 		varyingsurface.quaternion.copy( Story_states[Storypage].enforced_irreg_quaternion );
 		for( var i = 0; i < varyingsurface_cylinders.length; i++)
 			varyingsurface_cylinders[i].quaternion.copy(Story_states[Storypage].enforced_irreg_quaternion );
-		for( var i = 0; i < varyingsurface_spheres.length; i++)
-			varyingsurface_spheres[i].quaternion.copy(Story_states[Storypage].enforced_irreg_quaternion );
+//		for( var i = 0; i < varyingsurface_spheres.length; i++)
+//			varyingsurface_spheres[i].quaternion.copy(Story_states[Storypage].enforced_irreg_quaternion );
 		
 		varyingsurface.updateMatrixWorld();
 	}

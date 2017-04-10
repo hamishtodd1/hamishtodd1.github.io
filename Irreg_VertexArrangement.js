@@ -1,9 +1,6 @@
 /*
  * Todo:
  * -line up initial state with your very icosahedral virus and spin it a bit 
- * -"move corner around"
- * -make folding code better so it can do more
- * -better handling of random algorithm failures
  * -red highlight should flash
  * -Change HIV's state so that the wrap-up makes more sense (big scissors on the exceptional crack)? If you have the "bouquet" comparison in there
  * -better sync with video, let them gravitate to the right place
@@ -149,6 +146,7 @@ function settle_manipulationsurface_and_flatnet() {
 
 function manipulate_vertices()
 {
+	notConverging = false;
 	var changed_position = new THREE.Vector2(999,999);
 	if( isMouseDown ) {
 		if( vertex_tobechanged === 999 && capsidopenness === 1) {
@@ -181,9 +179,9 @@ function manipulate_vertices()
 			changed_position.y = MousePosition.y;
 			
 			if( !( (i == 0 || i % 4 == 1) && i != 1) ){
-				varyingsurface_spheres[vertex_tobechanged].material.color.r = 0;
-				varyingsurface_spheres[vertex_tobechanged].material.color.g = 0;
-				varyingsurface_spheres[vertex_tobechanged].material.color.b = 1;
+				varyingsurface_spheres[vertex_tobechanged].children[0].material.color.r = 0;
+				varyingsurface_spheres[vertex_tobechanged].children[0].material.color.g = 0;
+				varyingsurface_spheres[vertex_tobechanged].children[0].material.color.b = 1;
 				
 				//if it's blue then it's normal size
 				varyingsurface_spheres[vertex_tobechanged].scale.set(0.05,0.05,0.05);
@@ -196,9 +194,9 @@ function manipulate_vertices()
 		vertex_tobechanged = 999;
 		for(var i = 0; i < varyingsurface_spheres.length; i++){
 			if( !( (i == 0 || i % 4 == 1) && i != 1) ){
-				varyingsurface_spheres[i].material.color.r = 0;
-				varyingsurface_spheres[i].material.color.g = 1;
-				varyingsurface_spheres[i].material.color.b = 0;
+				varyingsurface_spheres[i].children[0].material.color.r = 0;
+				varyingsurface_spheres[i].children[0].material.color.g = 1;
+				varyingsurface_spheres[i].children[0].material.color.b = 0;
 			}
 		}
 		
@@ -521,15 +519,24 @@ function manipulate_vertices()
 		varyingsurface_orientingradius[2] = center_3D.distanceTo(new THREE.Vector3(varyingsurface.geometry.attributes.position.array[2*3+0],varyingsurface.geometry.attributes.position.array[2*3+1],varyingsurface.geometry.attributes.position.array[2*3+2]) );
 	}
 	else{
-		varyingsurface_spheres[vertex_tobechanged].material.color.r = 1;
-		varyingsurface_spheres[vertex_tobechanged].material.color.g = 0;
-		varyingsurface_spheres[vertex_tobechanged].material.color.b = 0;
-		
-		var spherescale = 0.05 + 0.05 * Math.cos((ourclock.elapsedTime - ourclock.startTime)*10);
-		
-		varyingsurface_spheres[vertex_tobechanged].scale.set(spherescale,spherescale,spherescale);
+		notConverging = true;
+		varyingsurface_spheres[vertex_tobechanged].children[0].material.color.r = 1;
+		varyingsurface_spheres[vertex_tobechanged].children[0].material.color.g = 0;
+		varyingsurface_spheres[vertex_tobechanged].children[0].material.color.b = 0;
 	}
 //	performance_checker.end_sample();
+}
+
+function getVaryingSurfaceSphereScale(sphereIndex)
+{
+	var spherescale = capsidopenness;
+	if(!spherescale)
+		spherescale = 0.000000001;
+	if( !theyknowyoucanchangevertices )
+		spherescale *= (0.5+0.5*Math.cos((ourclock.elapsedTime - ourclock.startTime)*8))
+	if( sphereIndex === vertex_tobechanged && notConverging )
+		spherescale *= (0.5+0.5*Math.cos((ourclock.elapsedTime - ourclock.startTime)*13.5)) * 2; //if you're on a touchscreen then really this should be much bigger
+	return spherescale * maxVSSphereScale;
 }
 
 function update_wedges()

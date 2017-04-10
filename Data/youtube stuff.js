@@ -94,5 +94,8 @@ function onYouTubeIframeAPIReady()
 	 * bhIIPgM5E4Q: v4.5
 	 * qMyLxxHKags: rough cut 1
 	 * zFLcpmOi1Hw: rough cut 2
+	 * 
+	 * Zika https://youtu.be/O-9TFkwFovk
+	 * Measles https://youtu.be/kXo0vsDGOoc
 	 */
 }

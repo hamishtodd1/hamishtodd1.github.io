@@ -378,10 +378,14 @@ function init_CK_and_irreg()
 			V_angles[i][j] = TAU /3;
 	}
 	
+	notConverging = false;
+	maxVSSphereScale = 0.065;
+	
 	//-------------stuff that goes in the scene
 	{		
 		var surfacematerial = new THREE.MeshPhongMaterial({
 			color: 0x1EFCF3,
+			shininess: 100,
 			side:	THREE.DoubleSide,
 			shading: THREE.FlatShading //TODO add light source or whatever you need
 		});
@@ -410,12 +414,13 @@ function init_CK_and_irreg()
 			color:	0x000000,
 			side:	THREE.DoubleSide
 		});
-		var spherehandles_material = new THREE.MeshPhongMaterial({
+		var spherehandles_material = new THREE.MeshBasicMaterial({
 			color:	0xDAA520,
-			side:	THREE.DoubleSide,
+			side:	THREE.FrontSide,
 			transparent: true,
-			shininess: 100
 		});
+		var spherehandles_outlineMaterial = new THREE.MeshBasicMaterial({
+			color:0x000000})
 		for( var i = 0; i < varyingsurface_cylinders.length; i++) {
 			var cylinder_vertices_numbers = new Float32Array(16*3);
 			put_tube_in_buffer(0,0,0,1,1,1, varyingsurface_edges_default_radius, cylinder_vertices_numbers);
@@ -445,8 +450,6 @@ function init_CK_and_irreg()
 		irreghighlight_geometry.faces.push(new THREE.Face3(22,1,23));
 		irreghighlight_geometry.faces.push(new THREE.Face3(22,0,1));
 		
-		var spherehandles_outlineMaterial = new THREE.MeshBasicMaterial({color:0x000000, side:THREE.BackSid})
-		
 		for(var i = 0; i<varyingsurface_spheres.length;i++)
 		{
 			//SOME OUTLINES GO HERE. Spheres, hah
@@ -455,10 +458,17 @@ function init_CK_and_irreg()
 				varyingsurface_spheres[i] = new THREE.Mesh( new THREE.SphereGeometry(0.0000000001, 8,4),varyingsurface_edgesmaterial);
 			else
 			{
-				varyingsurface_spheres[i] = new THREE.Mesh( new THREE.SphereGeometry(1,16,16),spherehandles_material.clone());
-//				varyingsurface_spheres[i].add( new THREE.Mesh( new THREE.SphereGeometry(1.23,16,8),spherehandles_outlineMaterial ) )
+				varyingsurface_spheres[i] = new THREE.Object3D();
+				varyingsurface_spheres[i].add( new THREE.Mesh( new THREE.SphereGeometry(	1,16,16),spherehandles_material.clone()) );
+				varyingsurface_spheres[i].add( new THREE.Mesh( new THREE.CircleGeometry( 1.23,16),spherehandles_outlineMaterial ) )
+				varyingsurface_spheres[i].children[1].position.z = varyingsurface_spheres[i].children[0].position.z + 0.001;
+				varyingsurface_spheres[i].scale.setScalar( 0.000000000001 ); //don't want them to appear until their scale is set elsewhere
 			}	
 		}
+		
+		//urgh, it could well be that the lights look wrong because of the stupid absolute position thing
+		
+//		varyingsurface_spheres[0].quaternion.onChangeCallback = function(){console.error("here");};
 		
 		varyingsurface = new THREE.Mesh( flatnet_geometry.clone(), surfacematerial );
 		

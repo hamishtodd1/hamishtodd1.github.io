@@ -212,8 +212,9 @@ function update_varyingsurface() {
 	varyingsurface.updateMatrixWorld();
 	for( var i = 0; i < varyingsurface_cylinders.length; i++)
 		varyingsurface_cylinders[i].quaternion.copy(varyingsurface.quaternion);
-	for( var i = 0; i < varyingsurface_spheres.length; i++)
-		varyingsurface_spheres[i].quaternion.copy(varyingsurface.quaternion);
+//	for( var i = 0; i < varyingsurface_spheres.length; i++)
+//		varyingsurface_spheres[i].quaternion.copy(varyingsurface.quaternion);
+	
 	
 	for(var i = 0; i < surfperimeter_line_index_pairs.length / 2; i++) {
 		var Aindex = surfperimeter_line_index_pairs[i*2];
@@ -283,15 +284,7 @@ function update_varyingsurface() {
 		if( (i == 0 || i % 4 == 1) && i != 1)
 			continue;
 		
-		if(capsidopenness == 1 ){
-			varyingsurface_spheres[i].material.opacity = 1;
-			if(!theyknowyoucanchangevertices){
-				var spherescale = capsidopenness == 0 ? 0 : capsidopenness * (0.5+0.5*Math.cos((ourclock.elapsedTime - ourclock.startTime)*8));
-				varyingsurface_spheres[i].scale.set(0.1 * spherescale,0.1 * spherescale,0.1 * spherescale);
-			}
-		}
-		else varyingsurface_spheres[i].material.opacity = 0;
-		
+		varyingsurface_spheres[i].scale.setScalar( getVaryingSurfaceSphereScale(i) );
 	}
 	
 	for(var i = 0; i<varyingsurface_spheres.length; i++){

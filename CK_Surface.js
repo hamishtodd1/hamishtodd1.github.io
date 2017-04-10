@@ -2,6 +2,9 @@
  * TODO
  * Snap only before close, except for when they make it colossal 
  * 
+ * Lattice disappears when closed, except when you're doing the pentagon-noticing part
+ * Will have that "closing" sound effect but will probably also have a pop when it's shut.
+ * 
  * How about the CK "curiosity" is that you get pentagons out of a pattern of hexagons? Gives them an opportunity to notice the irreg connection
  * 
  * change angles of mouse movement such that rotation is slightly more probable than it currently is
