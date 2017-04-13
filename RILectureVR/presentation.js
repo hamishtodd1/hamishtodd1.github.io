@@ -121,6 +121,28 @@ function initPresentation(presentation)
 	}
 	
 	//--------------Begin Plan
+	/*
+	 * TODO May 13th
+	 * shapes snap together (what can you do with that?)
+	 * Transform any shape into a points version of it. All in the middle?
+	 * atoms are nice and blurry. A bunch of concentric semi spheres that point at the camera?
+	 * axis vectors snap thing into same place
+	 * new plan. Should have Reidun, and ideally the shaking
+	 * Patterns allow lots of atoms to be at the right distance, so they're stable
+	 * Maybe later, CCMV
+	 * Axis vectors affect point clouds.
+	 * House made of cubes
+	 * Can show squashing cloud of 3D points into something that looks just like its shadow
+	 * 
+	 * Try just having the points attached to the 4 basis vectors, before talking to Uwe
+	 * 
+	 * eh8 (arthur's seat), 9(main)
+	 * 
+	 * Send video out to:
+	 * 	your consultant
+	 * 	Reidun
+	 * 
+	 */
 	var h = presentation.holdables;
 	var p = presentation.pages;
 	

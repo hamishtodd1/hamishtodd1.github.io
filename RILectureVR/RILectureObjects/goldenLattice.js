@@ -1,15 +1,3 @@
-/*
- * A little video, by the 14th. No need for hands.
- * Golden ratio
- * Have one extrude
- * Show the substitutions
- * They fit together ever so nicely
- * Fill up the sky with one, just by scaling
- * These things also have connections to the structure of viruses like hepatitis, to crystals, and there's a small possibility that they are connected to Islamic art, but that's a story for another time
- * 
- * If you're improving on this someday: the basis shouldn't be normalized, it should just be the length of the edgelen
- */
-
 var goldenFaces = Array(4);
 var powers_of_2 = Array(1,2,4,8,16,32,64);
 var substitutionConstant = PHI*PHI*PHI;

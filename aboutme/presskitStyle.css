@@ -2,9 +2,8 @@ body {
 	padding: 15px 0;
 	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
 	font-size: 0.9em;
-	line-height:1.6em;
-	background: #eed7b9 url('http://www.gameovenstudios.com/images/flames.png') no-repeat bottom left;
-}
+	color:#444;	line-height:1.6em;
+	background-color:#FAFAFA;}
 
 img {
 	width: 100%;
