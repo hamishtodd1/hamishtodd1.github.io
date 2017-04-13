@@ -5,31 +5,32 @@
  * Lattice disappears when closed, except when you're doing the pentagon-noticing part
  * Will have that "closing" sound effect but will probably also have a pop when it's shut.
  * 
- * How about the CK "curiosity" is that you get pentagons out of a pattern of hexagons? Gives them an opportunity to notice the irreg connection
- * 
- * change angles of mouse movement such that rotation is slightly more probable than it currently is
- * some alpha for the boundaries of the circle? Probably not, no great way to do it! Could have a bunch of rings with alpha increasing inward
- * click on lattice, little flash and explosion. Bigger flash when they let go
- * remove flatlattice crap
- * 
- * Have black edges inside the net too
- * 
  * When it closes up, could have it close up in the position that all the viruses are in.
  * 
- *  Could have a combination for snapping: when they make it MASSIVE or tiny, it automatically goes back when they let go
- * But it's when they press the button that it snaps properly.
- * Reasoning is that the size thing they'll see why, and it will look weird to have it go far like that when they press the button.
  */
 
 function UpdateCapsid() {
 	var oldcapsidopenness = capsidopenness;
 	
-	var magnitudespeed = 0.012 * delta_t / 0.016;
+	var magnitudeAcceleration = 0.00079 * delta_t / 0.016;
 	
 	if( IrregButton.capsidopen )
-		capsidopeningspeed = magnitudespeed;
-	else
-		capsidopeningspeed = -magnitudespeed;
+	{
+		if(capsidopenness < 0.5)
+			capsidopeningspeed += magnitudeAcceleration;
+		else
+			capsidopeningspeed -= magnitudeAcceleration;
+		if( capsidopeningspeed < 0)
+			capsidopeningspeed = 0.001;
+	}
+	else {
+		if(capsidopenness > 0.5)
+			capsidopeningspeed -= magnitudeAcceleration;
+		else
+			capsidopeningspeed += magnitudeAcceleration;
+		if( capsidopeningspeed > 0)
+			capsidopeningspeed = -0.001;
+	}
 	
 	capsidopenness += capsidopeningspeed;
 	

@@ -1,9 +1,4 @@
-/* Ones that still don't look great when stretched
- * -HPV, 7: need to stick a singularity-colored triangle in one place and a fat-rhomb-colored triangles between the fat rhomb
- * -18, three pents at a corner. Stick singularity colors in the gap
- * -11, three pents at a corner. In addition to the above, you put a pentagon-colored triangle in there, done.
- * -alternatively for all of them you have the corner of the dodeca as a point
- * 
+/* 
  * -you could totally have it be flat shaded
  * 
  * Probably best to let Grabbable arrow go all the way to the middle and have the scale be: 

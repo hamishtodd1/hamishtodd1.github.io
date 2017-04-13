@@ -119,10 +119,6 @@ function CheckIrregButton(){
 }
 
 function update_varyingsurface() {
-	if(IrregButton.capsidopen)
-		capsidopeningspeed = 0.018;
-	else
-		capsidopeningspeed = -0.018;
 	
 	var irreg_flash = 0;
 	var flash_increase_length = 0.7;
@@ -144,7 +140,25 @@ function update_varyingsurface() {
 	varyingsurface_cylinders[21].material.color.setRGB(	irreg_flash,0,0);
 		
 	
-	capsidopeningspeed *= delta_t / 0.016;
+	var magnitudeAcceleration = 0.00079 * delta_t / 0.016;
+	
+	if( IrregButton.capsidopen )
+	{
+		if(capsidopenness < 0.5)
+			capsidopeningspeed += magnitudeAcceleration;
+		else
+			capsidopeningspeed -= magnitudeAcceleration;
+		if( capsidopeningspeed < 0)
+			capsidopeningspeed = 0.001;
+	}
+	else {
+		if(capsidopenness > 0.5)
+			capsidopeningspeed -= magnitudeAcceleration;
+		else
+			capsidopeningspeed += magnitudeAcceleration;
+		if( capsidopeningspeed > 0)
+			capsidopeningspeed = -0.001;
+	}
 	
 	capsidopenness += capsidopeningspeed;
 	

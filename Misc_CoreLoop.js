@@ -41,9 +41,6 @@
  * 
  * 
  * ----Misc
- *  -measuring stick on CK, srsly
- * 	-smoother open, not just linear
- *  -tweak scale/rotate speed stuff
  *  -all the effects in camerastuff
  * -everything listed in CKsurfacestuff, bocavirus, quasisphere, youtube stuff. There isn't much.
  *  
@@ -145,6 +142,7 @@ function UpdateWorld()
 			if( LatticeScale > 0.2) //min for one of the capsids we do. Minus a little grace
 				Map_lattice();
 //			performance_checker.end_sample();
+			update_QS_center();
 			break;
 			
 		case IRREGULAR_MODE:
@@ -251,6 +249,7 @@ function ChangeScene(new_mode) {
 //				scene.add(blast_cylinders[i]);
 			for(var i = 0; i< lights.length; i++)
 				scene.add( lights[i] );
+			scene.add(QS_measuring_stick);
 			break;
 			
 		case IRREGULAR_MODE:

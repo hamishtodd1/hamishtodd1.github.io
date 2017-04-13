@@ -33,7 +33,9 @@ function HandleNetMovement()
 			
 			var oldLatticeScale = LatticeScale;
 			
-			if(Math.abs(ourangle) < TAU / 8 || Math.abs(ourangle) > TAU / 8 * 3 ){
+			var areaForRotating = TAU / 32 * 11; //between a quarter and a half
+			
+			if(Math.abs(ourangle) < TAU / 4 - areaForRotating / 2 || Math.abs(ourangle) > TAU / 4 + areaForRotating / 2 ){
 				var LatticeScaleChange = OldMousedist / Mousedist;
 				var max_lattice_scale_change = 0.08;
 				
