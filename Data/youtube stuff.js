@@ -58,7 +58,7 @@ function onYouTubeIframeAPIReady()
 	{
 		width: window_width,
 	    height: window_height,
-	    videoId:'zFLcpmOi1Hw',
+	    videoId:'kXo0vsDGOoc',
 		events: 
 		{
 			'onReady': function() 
@@ -95,7 +95,7 @@ function onYouTubeIframeAPIReady()
 	 * qMyLxxHKags: rough cut 1
 	 * zFLcpmOi1Hw: rough cut 2
 	 * 
-	 * Zika https://youtu.be/O-9TFkwFovk
-	 * Measles https://youtu.be/kXo0vsDGOoc
+	 * Zika O-9TFkwFovk
+	 * Measles kXo0vsDGOoc
 	 */
 }

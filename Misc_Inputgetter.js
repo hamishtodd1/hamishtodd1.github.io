@@ -71,9 +71,15 @@ function onWindowResizeExceptYoutube()
 	var bodyWidth = spacing + finalCanvasDimension * 2;
 	var bodySideToCenter = bodyWidth / 2;
 	var bodyTopToCenter = finalCanvasDimension / 2;
-	document.body.style.width = bodyWidth.toString() + "px";
-	document.body.style.height = finalCanvasDimension.toString() + "px";
-	document.body.style.margin = "-" + bodyTopToCenter.toString() + "px 0 0 -" + bodySideToCenter.toString() + "px";
+	
+	var divHeight = finalCanvasDimension / 2 + window.innerHeight / 2;
+	var divWidth = finalCanvasDimension * 2;
+	
+	var playerAndCanvas = document.getElementById("playerAndCanvas");
+	
+	playerAndCanvas.style.width = divWidth.toString() + "px";
+	playerAndCanvas.style.height = divHeight.toString() + "px";
+	playerAndCanvas.style.margin = "-" + bodyTopToCenter.toString() + "px 0 0 -" + finalCanvasDimension.toString() + "px";
 	//eventually the body will have more shit. probably the above needs to be "container" or something.
 	
 	window_width = finalCanvasDimension;

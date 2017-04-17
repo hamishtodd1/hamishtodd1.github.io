@@ -1,6 +1,11 @@
-/* 
+/*
+ * 
+ * Images for Sheree
+ * Images for Diego
+ *  
  * QS idea: set relevant face normals to be equal to each other
  * But how about the shapes that sit on dod edges? Well, there is a schema that lets you work out one from the other ;_;
+ * Or you could say, for each face, which vertices it should average to get its normal
  * Or don't, it doesn't look that much better
  * 
  * Screen shake on QS?
@@ -8,17 +13,8 @@
  * Shininess/Lighting on CK, it is a weird shape to look at
  * Depth material for QS?
  * 
- * ------------With Sheree
- * Social media buttons, press page links, at bottom
- * 2XFC or 1F15 for T=3. Wait what about cowpea? Not very straight lines but that might be ok if it's consistent across others
- * Go through demos with her and ask what colors should go where
+ * Go through demos with Sheree and ask what colors should go where
  * 
- * ------------How to make nice pics of viruses: 
- * 	Chimera
- * 	clear out the things you don't want 
- * 	multiscale models, resolution 0 (i.e. surfaces)
- * 	if you want to color a chain, select one copy of it and click copies in the multiscale models window
- * 	actions>color>all options>tools>surface color>radius>get color person to choose
  * 
  * -------------When final cut is in
 		Flick between spherical projection and flat for "the patterns that appeared on these viruses"
@@ -27,7 +23,7 @@
  * 		cell comes in and is same size as virus. They change size when you say so.
  * 		the virus pieces pop in by increasing size from zero
  * 		Highlight the pentagons and hexagons on polio and hepatitis B when you say it (just make pics with different colors and fade) 
- * 		Zoom in on darb e pattern
+ * 		darb e pattern comes out of that place while fading? Ask Diego
  *		"These are images of some other viruses". Sheree chooses composition, you animate
  * 		irreg trying different configurations for algorithm
  * 		things respond to your hand movements
@@ -41,16 +37,17 @@
  * 
  * 
  * ----Misc
- *  -all the effects in camerastuff
+ * -all the effects in camerastuff
  * -everything listed in CKsurfacestuff, bocavirus, quasisphere, youtube stuff. There isn't much.
- *  
- *  
+ * 
+ * 
  * --------Technical
  * Bug found by Henry Segerman
  * touchscreen (test on Jessie's computer)
  * Sounds in .mp3 or 4
  * 	A bug may have caused things to be skipped. Hopefully that goes away with the new arrangement
  * 	If webgl doesn't load (or etc), recommend a different browser... or refreshing the page
+ * 	Ask Alice about SEO. Put search terms in some hidden text?
  *	Custom domain. It won't need to be on Ed for ever; yes one day the link will stop working but that is maybe ok, just make sure people can google
  *	Loading wise, would it be faster with more than one loader?
  *  -prevent youtube playing until canvas is ready
@@ -62,7 +59,6 @@
  *  -test on different setups
 		-Johan's Mac
 		-Reidun's computer (probably just webgl)
- * 		-Test with a low framerate to see what it's like and chase down remaining framerate dependence
  *  
  *  ---------Probably never to be solved
  * 	-cite non-illustrated pictures

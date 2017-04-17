@@ -5,14 +5,21 @@
 	<head>
 		<title>WIP, DO NOT SHARE! Zika Measles HIV, an interactive documentary</title>
 	</head>
-	<body style="width:720px; height:360px; position:absolute; top:50%; left:50%; margin:-180px 0 0 -360px; background-color:#FFFFFF">
-		<span style="display: flex;">
+	<body style="background-color:#FFFFFF">
+	<!--
+	think of the margin as a displacer, the way that we center it
+	the way it is here is not necessarily the way it's gonna be, we can't have logic here.
+	The thing we carry is: this div is centered, horizontally and vertically
+	-->
+		<div id="playerAndCanvas" style="width:720px; height:360px; position:absolute; top:50%; left:50%; margin:-180px 0 0 -360px; display: flex;">
 			<div id="player"></div>
 			<div id="canvasID"></div>
-		</span>
-		<span style="text-align: center">
-			<p>This page is a work in progress, please do not share it</p>
-		</span>
+		</div>
+		<div id="extras">
+			<span style="position:absolute; top:100%;">
+				<p>This page is a work in progress, please do not share it</p>
+			</span>
+		</div>
 	</body>
 </html>
 		
