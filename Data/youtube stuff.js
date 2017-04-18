@@ -54,11 +54,12 @@ function react_to_video()
 
 function onYouTubeIframeAPIReady()
 {
+	
 	ytplayer = new YT.Player('player', 
 	{
 		width: window_width,
 	    height: window_height,
-	    videoId:'kXo0vsDGOoc',
+	    videoId:'8JndSqOn9ac',
 		events: 
 		{
 			'onReady': function() 
@@ -85,6 +86,14 @@ function onYouTubeIframeAPIReady()
 		}
 	});
 	
+	ytplayer.chapter = 0;
+	ytplayer.chapterIDs = ['8JndSqOn9ac', '8GucPOjuR-I','8JndSqOn9ac','8JndSqOn9ac','8JndSqOn9ac'];
+	ytplayer.changeChapter = function( newChapterIndex )
+	{
+		this.chapter = newChapterIndex;
+		this.loadVideoById( this.chapterIDs[this.chapter]);
+	}
+	
 	/* _MF2DVU8oB0: tall video
 	 * 8JndSqOn9ac: v1 (Robin)
 	 * 7JlMIJKTUVc: v2
@@ -95,7 +104,7 @@ function onYouTubeIframeAPIReady()
 	 * qMyLxxHKags: rough cut 1
 	 * zFLcpmOi1Hw: rough cut 2
 	 * 
-	 * Zika O-9TFkwFovk
+	 * Zika 8GucPOjuR-I
 	 * Measles kXo0vsDGOoc
 	 */
 }
