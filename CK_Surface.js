@@ -3,10 +3,7 @@
  * Snap only before close, except for when they make it colossal 
  * 
  * Lattice disappears when closed, except when you're doing the pentagon-noticing part
- * Will have that "closing" sound effect but will probably also have a pop when it's shut.
- * 
- * When it closes up, could have it close up in the position that all the viruses are in.
- * 
+ * Will have that "closing" sound effect but will probably also have a pop when it's shut
  */
 
 function UpdateCapsid() {

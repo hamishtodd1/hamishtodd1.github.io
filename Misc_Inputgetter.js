@@ -31,19 +31,7 @@ function ReadInput()
 	isMouseDown_previously = isMouseDown;
 	isMouseDown = InputObject.isMouseDown;
 	
-	if( cursorIsHand)
-	{
-		if(isMouseDown)
-			if( typeof InstallTrigger !== 'undefined' )
-				document.body.style.cursor = '-moz-grabbing';
-			else
-				document.body.style.cursor = '-webkit-grabbing';
-		else
-			if( typeof InstallTrigger !== 'undefined' )
-				document.body.style.cursor = '-moz-grab';
-			else
-				document.body.style.cursor = '-webkit-grab';
-	}
+	
 	
 	react_to_video();	
 }
@@ -115,10 +103,12 @@ window.addEventListener( 'resize', onWindowResize, false );
 
 document.addEventListener( 'mousedown', function(event) {
 	event.preventDefault();
+	
 	InputObject.isMouseDown = true;
 }, false);
 document.addEventListener( 'mouseup', 	function(event) {
 	event.preventDefault();
+	
 	InputObject.isMouseDown = false;
 }, false);
 

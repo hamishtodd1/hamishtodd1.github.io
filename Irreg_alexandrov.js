@@ -1,12 +1,4 @@
-//previously there was stuff here about
-
-//previously there was stuff HERE about concavity
-
-//Speedup opportunity: you could graph number of step size reductions over a run. Major tweakables are stepsizemax, initial radii. You have the newton solver accuracy at a reasonable amt
-
-//There is a clear pattern to the step size reductions that could be taken advantage of. It might turn out that vital flips take place between reductions though.
-
-//Maybe some of them require quite different starting radii? If so you could try it with different starters
+//look into history for stuff about improving algorithm (concavity, running time)
 
 AO.alexandrov_inspection_mode = 0;
 
@@ -55,7 +47,7 @@ AO.correct_minimum_angles = function(vertices_buffer_array)
 		var solve_worked;
 		
 		if(this.crazy_flip){ //don't bother trying
-			console.log("crazy flip")
+//			console.log("crazy flip")
 			solve_worked = 0;
 			this.crazy_flip = 0;
 		}
@@ -367,7 +359,7 @@ AO.get_cos_tetrahedron_dihedral_angle_from_indices = function(i,j,clockwise,inpu
 	k = this.get_third_corner(i,j,clockwise); //you always call this function with both 0 and 1 in there
 	if( k === 999 ) {
 		//this should really not happen unless this function is given i,j not on an edge.
-		console.error("requested dihedral angle from nonexistant tetrahedron connecting polyhedron vertices " + i + " and " + j);
+//		console.error("requested dihedral angle from nonexistant tetrahedron connecting polyhedron vertices " + i + " and " + j);
 		return 0;
 	}
 	

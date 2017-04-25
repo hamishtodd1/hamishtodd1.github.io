@@ -8,7 +8,6 @@
 
 var Storypage = -1; //set to a silly number initially so we know that the first page will be triggered.
 var Story_states = [];
-var used_up_pause = 0;
 var unpause_timer = 0;
 var rotation_knowledge_time;
 var reused_slide_indices = Array();
@@ -29,9 +28,16 @@ function Update_story()
 	
 	if(Storypage !== -1) //first part of this function is all based on current state, which you don't have at the very start
 	{
-		if(Story_states[Storypage].slide_number !== -1 && slideObjects[ Story_states[Storypage].slide_number ].material.opacity < 1 )
+		if( Story_states[Storypage].slide_number !== -1 )
 		{
-			slideObjects[ Story_states[Storypage].slide_number ].material.opacity += 0.02;
+			if( Story_states[Storypage].fadePicture )
+			{
+				slideObjects[ Story_states[Storypage].slide_number ].material.opacity += 0.02;
+				if( slideObjects[ Story_states[Storypage].slide_number ].material.opacity > 1 )
+					slideObjects[ Story_states[Storypage].slide_number ].material.opacity = 1;
+			}	
+			else
+				slideObjects[ Story_states[Storypage].slide_number ].material.opacity = 1;
 		}	
 		
 		if( Story_states[Storypage].prevent_playing )
@@ -48,10 +54,20 @@ function Update_story()
 			//and loop back if they don't?
 		}	
 		
-		if( Story_states[Storypage].unpause_on_rotation_knowledge && rotation_understanding >= 2 && !isMouseDown )
-		{
-			rotation_understanding = 0;
+		if( Story_states[Storypage].unpauseOn() )
 			ytplayer.playVideo();
+		
+		if( Story_states[Storypage].loopBackTo !== -1 && ytplayer.getPlayerState() === 2 && !Story_states[Storypage].loopBackUnless() )
+		{
+			Story_states[Storypage].loopBackCountdown += delta_t;
+			if( Story_states[Storypage].loopBackCountdown > 5)
+			{
+				Story_states[Storypage].loopBackCountdown = 0;
+				ytplayer.seekTo( Story_states[Storypage].loopBackTo );
+				ytplayer.playVideo();
+				Story_states[Storypage].used_up_pause = false;
+				return;
+			}	
 		}
 		
 		if( Story_states[Storypage].unpause_after !== -1)
@@ -66,16 +82,17 @@ function Update_story()
 		}
 		
 		//if you're about to move on from a state that wants to be paused
-		if( Story_states[Storypage].pause_at_end === 1 && Story_states[Storypage + 1].startingtime < our_CurrentTime && our_CurrentTime < Story_states[Storypage + 2].startingtime )
+		if( Story_states[Storypage].pause_at_end === 1 && Story_states[Storypage + 1].startingtime < our_CurrentTime && 
+			(Storypage > Story_states.length-3 || our_CurrentTime < Story_states[Storypage + 2].startingtime ) )
 		{
 			if( ytplayer.getPlayerState() === 2 ) //if you're paused, we don't let you past here
 			{
-				used_up_pause = 1;
+				Story_states[Storypage].used_up_pause = true;
 				return;
 			}
 			
 			//we want to move on iff you've had the pause and you're no longer paused (i.e. the player paused you)
-			if( !used_up_pause )
+			if( !Story_states[Storypage].used_up_pause )
 			{
 				ytplayer.pauseVideo(); //this has a delayed reaction, we will continue asking for a pause until it has paused!
 				return;
@@ -105,8 +122,6 @@ function Update_story()
 				return;
 			
 			Storypage = i;
-			
-			used_up_pause = 0; //reset with every page turned
 			
 			if( Story_states[Storypage].go_to_time !== -1 ) //want to catch the state immediately
 			{
@@ -231,6 +246,9 @@ function init_story()
 {	
 	var ns; //new state
 	
+	function defaultUnpauseOn() {return false;}
+	function defaultLoopBackUnless() {return true;}
+	
 	Story_states.push({
 		startingtime: -1, //this is just the prototype state, not really used!
 		
@@ -262,7 +280,14 @@ function init_story()
 		
 		unpause_on_hepatitis_scale: 0,
 		
+		loopBackUnless: defaultLoopBackUnless,
+		loopBackTo: -1, //If you don't do the thing, or try to unpause, it will loop back
+		loopBackCountdown: 0,
+		used_up_pause: false,
+		
 		CK_scale_only: 0,
+		
+		fadePicture: false,
 		
 		chapter: 0,
 		
@@ -273,65 +298,110 @@ function init_story()
 		CK_scale: 666,
 		CK_angle: 666,
 		
-		unpause_on_rotation_knowledge: 0,
+		unpauseOn: defaultUnpauseOn,
 		
 		enforced_cutout_vector0_player: new THREE.Vector3(-1,0,0),
 		
 		prevent_playing: 0 //could also use this to stop them from continuing if they haven't rotated bocavirus etc
 	});
 	
-	ns = default_clone_story_state(1,0.1);
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1,1);
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1,2000);
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1,0);
-	ns.chapter = 1;
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1,1);
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1,2);
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1,2000);
-	Story_states.push(ns);
+	function default_clone_story_state( shows_a_slide, ST )
+	{
+		var default_page_duration = 1.2;
+		
+		var new_story_state = {};
+		
+		for(var propt in Story_states[Story_states.length - 1]){
+		    new_story_state[propt] = Story_states[Story_states.length - 1][propt];
+		}
+		
+		if( shows_a_slide === 1 )
+		{
+			new_story_state.slide_number = next_slide; //quite rare that you want to keep a slide
+			next_slide++;
+		}
+		else
+			new_story_state.slide_number = -1; //quite rare that you want to keep a slide
+		
+		new_story_state.offer_virus_selection = 0; //in general
+		
+		new_story_state.go_to_time = -1;
+		
+		new_story_state.prevent_playing = 0;
+		
+		new_story_state.pause_at_end = 0;
+		new_story_state.unpause_after = -1;
+		
+		new_story_state.startingtime += default_page_duration;
+		
+		new_story_state.capsid_open = -1;
+		new_story_state.capsid_open_immediately = -1;
+		new_story_state.unpause_on_vertex_knowledge = 0;
+		
+		new_story_state.minimum_angle_crapifier = 1;
+		
+		new_story_state.CK_scale = 666;
+		new_story_state.CK_angle = 666;
+		
+		//make it unused
+		new_story_state.enforced_cutout_vector0_player = new THREE.Vector3(-1,0,0);
+		
+		new_story_state.unpause_on_hepatitis_scale = 0;
+		
+		new_story_state.unpauseOn = defaultUnpauseOn;
+		new_story_state.loopBackUnless = defaultLoopBackUnless;
+		
+		new_story_state.enforced_irreg_state = -1;
+		
+		new_story_state.enforced_CK_quaternion = new THREE.Quaternion(5,5,5,5);
+		new_story_state.enforced_irreg_quaternion = new THREE.Quaternion(5,5,5,5);
+		
+		new_story_state.startingtime = ST;
+		
+		return new_story_state;
+	}
 	
 	//only by clicking on the tree do you change chapter
-	
-//	ns = default_clone_story_state(1,0.1);
+	ns = default_clone_story_state(1,0.1);
 //	ns.go_to_time = 560;//15*60+30; //skips to wherever you like 560 is HIV demo, 455.5 is CK
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(1,12.2); //hiv
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(1,21.6); //measles
-//	var Dad_slide = ns.slide_number;
-//	Story_states.push(ns);
-//	
-//	//---paragraph 2
-//	ns = default_clone_story_state(0,35.9); //bocavirus appears, then pause
-//	ns.MODE = BOCAVIRUS_MODE;
-//	Chapter_start_times[0] = ns.startingtime;
-//	ns.pause_at_end = 1; //TODO handle the assurance.
-////	ns.unpause_after = 9.5; //want to 
-//	ns.unpause_on_rotation_knowledge = 1;
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(0,46.85); //bocavirus infects us
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(0,62.3); //color
-//	ns.pause_at_end = 1;
-//	flash_time = ns.startingtime;
-//	ns.unpause_after = 7.7;
-//	Story_states.push(ns);
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,12.2); //hiv
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,21.6); //measles
+	var Dad_slide = ns.slide_number;
+	Story_states.push(ns);
+	
+	//---paragraph 2
+	ns = default_clone_story_state(0,40.6); //bocavirus appears, then pause
+	ns.MODE = BOCAVIRUS_MODE;
+	Chapter_start_times[0] = ns.startingtime;
+	ns.pause_at_end = 1; //TODO handle the assurance.
+	ns.loopBackTo = 43.9;
+	ns.unpauseOn = function() {if( rotation_understanding >= 2 && !isMouseDown ) return true; else return false;}
+	Story_states.push(ns);
+	
+//	pullback_start_time = ns.startingtime;
+	pullback_start_time = 1000;
+	pullback_start_time = 1000;
+	cell_move_time = 1000;
+	boca_explosion_start_time = 1000;
+	new_pieces_appearance_time = 1000;
+	start_reproducing_time = 1000;
+	whole_thing_finish_time = 2000;
+	
+	ns = default_clone_story_state(1,49.2); //bocavirus infects us
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,62.3); //color
+	ns.pause_at_end = 1;
+	ns.unpause_after = 7.7;
+	flash_time = ns.startingtime;
+	Story_states.push(ns);
+	
+	//pause after it unpauses - can still go back!
+	//you can't unpause
 //	
 //	ns = default_clone_story_state(0,72.77); //click me when you want to continue
 //	ns.pause_at_end = 1;
@@ -365,9 +435,9 @@ function init_story()
 //
 //	ns = default_clone_story_state(1,113); //that look like viruses (HPV)
 //	Story_states.push(ns);
-//	
-//	
-//	
+	
+	
+	
 //	//----Part 2
 //	ns = default_clone_story_state(0,127.9); //beginning of part 2, back to boca
 //	ns.MODE = BOCAVIRUS_MODE;
@@ -412,6 +482,7 @@ function init_story()
 //	//----------QS BEGINS!!!!!
 //	ns = default_clone_story_state(1,326.85); //zika virus
 //	var zika_slide = ns.slide_number; 
+//	ns.chapter = 1;
 //	Chapter_start_times[3] = ns.startingtime + 0.05;
 //	Story_states.push(ns);
 //
@@ -992,57 +1063,3 @@ function init_story()
 
 var next_slide = 0;
 //clone the previous state and give it a different time
-function default_clone_story_state( shows_a_slide, ST )
-{
-	var default_page_duration = 1.2;
-	
-	var new_story_state = {};
-	
-	for(var propt in Story_states[Story_states.length - 1]){
-	    new_story_state[propt] = Story_states[Story_states.length - 1][propt];
-	}
-	
-	if( shows_a_slide === 1 )
-	{
-		new_story_state.slide_number = next_slide; //quite rare that you want to keep a slide
-		next_slide++;
-	}
-	else
-		new_story_state.slide_number = -1; //quite rare that you want to keep a slide
-	
-	new_story_state.offer_virus_selection = 0; //in general
-	
-	new_story_state.go_to_time = -1;
-	
-	new_story_state.prevent_playing = 0;
-	
-	new_story_state.pause_at_end = 0;
-	new_story_state.unpause_after = -1;
-	
-	new_story_state.startingtime += default_page_duration;
-	
-	new_story_state.capsid_open = -1;
-	new_story_state.capsid_open_immediately = -1;
-	new_story_state.unpause_on_vertex_knowledge = 0;
-	
-	new_story_state.minimum_angle_crapifier = 1;
-	
-	new_story_state.CK_scale = 666;
-	new_story_state.CK_angle = 666;
-	
-	//make it unused
-	new_story_state.enforced_cutout_vector0_player = new THREE.Vector3(-1,0,0);
-	
-	new_story_state.unpause_on_rotation_knowledge = 0;
-	
-	new_story_state.unpause_on_hepatitis_scale = 0;
-	
-	new_story_state.enforced_irreg_state = -1;
-	
-	new_story_state.enforced_CK_quaternion = new THREE.Quaternion(5,5,5,5);
-	new_story_state.enforced_irreg_quaternion = new THREE.Quaternion(5,5,5,5);
-	
-	new_story_state.startingtime = ST;
-	
-	return new_story_state;
-}

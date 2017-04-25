@@ -1,12 +1,3 @@
-/*
- * TODO
- * Flash 10 etc is required,  check for that
- * The obvious thing would be all the chapters as different videos, but you don't *need* that, so no need to have it necessarily. Better parallel with the static version?
- * 
- * 
- * 
- */
-
 var tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -59,7 +50,7 @@ function onYouTubeIframeAPIReady()
 	{
 		width: window_width,
 	    height: window_height,
-	    videoId:'8JndSqOn9ac',
+	    videoId:'2a56CJ6J99w',
 		events: 
 		{
 			'onReady': function() 
@@ -87,7 +78,7 @@ function onYouTubeIframeAPIReady()
 	});
 	
 	ytplayer.chapter = 0;
-	ytplayer.chapterIDs = ['8JndSqOn9ac', '8GucPOjuR-I','8JndSqOn9ac','8JndSqOn9ac','8JndSqOn9ac'];
+	ytplayer.chapterIDs = ['2a56CJ6J99w', '8GucPOjuR-I','8JndSqOn9ac','8JndSqOn9ac','8JndSqOn9ac'];
 	ytplayer.changeChapter = function( newChapterIndex )
 	{
 		this.chapter = newChapterIndex;
@@ -106,5 +97,6 @@ function onYouTubeIframeAPIReady()
 	 * 
 	 * Zika 8GucPOjuR-I
 	 * Measles kXo0vsDGOoc
+	 * intro 2a56CJ6J99w
 	 */
 }

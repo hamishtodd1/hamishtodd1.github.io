@@ -1,17 +1,4 @@
-/*
- * TODO
- * 
- * -reposition lights
- * 
- * -undulating a bit? Subtle lengthenings of distance from center, dependent on color
- * 
- * When caught by cell it goes along with it better
- * 
- * -Proteins coming in should be more noticeable
- * 
- */
-
-var actual_protein_location;
+var proteinCenterOfMass;
 var boca_piece_destinations;
 
 var flash_colors;
@@ -20,16 +7,14 @@ var flash_colors;
 var flash_time = 0;
 var unflash_time = 0;
 
-var movement_duration = 0;
+var movement_duration = 1.5;
 
-var cornucopia_start_time = 77.45;
-var cornucopia_end_time = 101.1 - movement_duration;
-
-var pullback_start_time = 0;
-var cell_move_time = 0;
-var boca_explosion_start_time = 0;
-var new_pieces_appearance_time = 0;
-var whole_thing_finish_time = 0;
+var pullback_start_time = 3;
+var cell_move_time = 6;
+var boca_explosion_start_time = 9;
+var new_pieces_appearance_time = 12;
+var start_reproducing_time = 2;
+var whole_thing_finish_time = 2000;
 
 function update_bocavirus() {
 	//-------camera Story stuff
@@ -40,8 +25,8 @@ function update_bocavirus() {
 	
 	var cell_eaten_bocavirus_position = new THREE.Vector3( EggCell_initialposition.x - ( EggCell_initialposition.x - EggCell_radius ) * 2, 0, 0);
 	EggCell.position.copy( move_smooth_vectors( EggCell_initialposition, cell_eaten_bocavirus_position, movement_duration, our_CurrentTime - cell_move_time ) );
-	EggCell.scale.x = 1 + 0.04 * Math.sin(our_CurrentTime);
-	EggCell.scale.y = 1 + 0.04 * Math.cos(our_CurrentTime);
+	EggCell.scale.x = 1 + 0.04 * Math.sin(1.4* (our_CurrentTime-(cell_move_time+movement_duration)));
+	EggCell.scale.y = 1 + 0.04 * Math.sin(our_CurrentTime-(cell_move_time+movement_duration));
 	
 	var rightmost_visible_x = EggCell_initialposition.x + EggCell_radius;
 	var leftmost_visible_x = cell_eaten_bocavirus_position.x - EggCell_radius;
@@ -49,29 +34,20 @@ function update_bocavirus() {
 	var CEPz = ( rightmost_visible_x - leftmost_visible_x ) / 2 / Math.tan( camera.fov / 360 * TAU / 2 );
 	var Cell_virus_visible_position = new THREE.Vector3( CEPx, 0, CEPz );
 	
-	//TODO put pic in there, and it zooms out
-	if( cornucopia_start_time < our_CurrentTime &&  our_CurrentTime < cornucopia_end_time + movement_duration )
-		Cornucopia.visible = true;
-	else
-		Cornucopia.visible = false;
-	
 	var chap1camDefaultPosition = new THREE.Vector3(0,0,min_cameradist * 1.5);
 	
 	var cornucopia_camera_position = chap1camDefaultPosition.clone();
 	cornucopia_camera_position.z *= 3;
-	if( our_CurrentTime < cornucopia_start_time + movement_duration )
-		camera.position.copy( move_smooth_vectors(chap1camDefaultPosition, cornucopia_camera_position, movement_duration, our_CurrentTime - cornucopia_start_time) );
-	else if( our_CurrentTime < cornucopia_end_time )
-		camera.position.copy(cornucopia_camera_position);
-	else if( our_CurrentTime < pullback_start_time + movement_duration )
+	if( our_CurrentTime < pullback_start_time + movement_duration )
 		camera.position.copy( move_smooth_vectors(chap1camDefaultPosition, Cell_virus_visible_position, movement_duration, our_CurrentTime - pullback_start_time) );
 	else if( our_CurrentTime < whole_thing_finish_time )
 		camera.position.copy(Cell_virus_visible_position);
 	else
 		camera.position.copy( chap1camDefaultPosition );
 	
+	
 	//-------Rotation
-	if( boca_explosion_start_time > our_CurrentTime || our_CurrentTime > whole_thing_finish_time )
+	if( our_CurrentTime < cell_move_time + movement_duration || our_CurrentTime > whole_thing_finish_time )
 	{
 		if(isMouseDown) {
 			bocavirus_MovementAngle = Mouse_delta.length() / 3;
@@ -141,78 +117,89 @@ function update_bocavirus() {
 		boca_explodedness = 1;
 	if( our_CurrentTime > whole_thing_finish_time )
 		boca_explodedness = 0;
-	if( boca_explodedness > 0 )
-	{
-		if(destination_assignments[0] === 999 )
-		{
-			var protein_assigned = new Uint16Array(neo_bocavirus_proteins.length);
-			for(var i = 0; i < protein_assigned.length; i++)
-				protein_assigned[i] = 0;
-			
-			for(var i = 0; i < 60; i++ )
-			{
-				var closest_length = 1000;
-				for(var j = 0; j < 60; j++)
-				{
-					if(!protein_assigned[j])
-					{
-						if( neo_bocavirus_proteins[j].actual_location.distanceTo(boca_piece_destinations[i]) < closest_length)
-						{
-							destination_assignments[i] = j;
-							closest_length = neo_bocavirus_proteins[j].actual_location.distanceTo( boca_piece_destinations[i] );
-						}
-					}
-				}
-				protein_assigned[ destination_assignments[i] ] = 1;
-			}
-			
-			for(var i = 60; i < neo_bocavirus_proteins.length; i++ )
-				destination_assignments[i] = i;
-		}
-	}
+	if( cell_move_time + movement_duration < our_CurrentTime && our_CurrentTime < whole_thing_finish_time ) //at this time they get assigned (it has to be sensetive to the orientation of the thing)
+		stmvHider.visible = false;
+	else
+		stmvHider.visible = true;
 	
-	var point_along = move_smooth(1, boca_explodedness);
-	
-	if(destination_assignments[0] !== 999 )
+	if( our_CurrentTime < cell_move_time + movement_duration || whole_thing_finish_time < our_CurrentTime )
 	{
+		var phases = [Math.cos((ourclock.elapsedTime - ourclock.startTime)*5 + TAU / 2),
+		              Math.cos((ourclock.elapsedTime - ourclock.startTime)*3.5 + TAU / 3),
+		              Math.cos((ourclock.elapsedTime - ourclock.startTime)*4 + TAU / 4),
+		              Math.cos((ourclock.elapsedTime - ourclock.startTime)*4.5 + TAU / 5) ];
 		for(var i = 0; i < 60; i++ )
 		{
-			neo_bocavirus_proteins[destination_assignments[i]].position.copy(boca_piece_destinations[i]);
-			neo_bocavirus_proteins[destination_assignments[i]].position.sub( neo_bocavirus_proteins[destination_assignments[i]].actual_location );
-			neo_bocavirus_proteins[destination_assignments[i]].position.multiplyScalar(point_along);
+			neo_bocavirus_proteins[i].position.set(0,0,0);
+			neo_bocavirus_proteins[i].updateActualLocation();
+			var undulateVector = neo_bocavirus_proteins[i].actual_location.clone();
+			undulateVector.setLength( phases[Math.floor(i/15)] * 0.0168 );
+			neo_bocavirus_proteins[i].position.add( undulateVector );
 		}
 	}
-	for(var i = 60; i < neo_bocavirus_proteins.length; i++)
+	else
 	{
-		neo_bocavirus_proteins[i].position.copy(boca_piece_destinations[i]);
-		neo_bocavirus_proteins[i].position.sub( neo_bocavirus_proteins[i].actual_location );
+		var point_along = move_smooth(1, boca_explodedness);
+
+		EggCell.updateMatrixWorld();
+		if(destination_assignments[0] !== 999 )
+		{
+			for(var i = 0; i < 60; i++ )
+			{
+				neo_bocavirus_proteins[destination_assignments[i]].position.copy(boca_piece_destinations[i]);
+				neo_bocavirus_proteins[destination_assignments[i]].position.multiplyScalar(point_along);
+				
+				if( cell_move_time + movement_duration < our_CurrentTime && our_CurrentTime < whole_thing_finish_time )
+				{
+					neo_bocavirus_proteins[i].position.sub(EggCell.position);
+					EggCell.localToWorld(neo_bocavirus_proteins[i].position );
+				}
+				
+				neo_bocavirus_proteins[destination_assignments[i]].updateActualLocation();
+				var actualLocationContribution = ((neo_bocavirus_proteins[destination_assignments[i]].actual_location.clone()).sub(neo_bocavirus_proteins[destination_assignments[i]].position)).multiplyScalar(point_along);
+				neo_bocavirus_proteins[destination_assignments[i]].position.sub( actualLocationContribution );
+			}
+		}
 	}
-	
-	var start_reproducing_time = 161;
 	
 	for(var i = 0; i < reproduced_proteins.length; i++)
 	{
 		if( our_CurrentTime - start_reproducing_time > i * 0.8 )
-			reproduced_proteins[i].visible = true;
-		else
-			reproduced_proteins[i].visible = false;
+		{
+			var currentSize = reproduced_proteins[i].scale.x;
+			var newSize = currentSize + 0.03;
+			if(newSize > 1) newSize = 1;
+			reproduced_proteins[i].scale.setScalar(newSize);
+		}
 	}
-}
-
-function update_actual_location()
-{
-	this.actual_location.copy(actual_protein_location);
-	this.actual_location.applyQuaternion(this.quaternion);
 }
 
 var destination_assignments = Array(neo_bocavirus_proteins.length);
 
-var EggCell_radius = 50;
+var EggCell_radius = 30;
 var spayed_circle_radius = 10;
 var EggCell_initialposition = new THREE.Vector3( EggCell_radius + spayed_circle_radius * 1.1,0,0);
 
 function init_bocavirus_stuff()
 {
+	function changePosition(newPosition)
+	{
+		//want to put it in... the position that it would be in to have its actual_location at newPosition
+		this.position.copy(newPosition);
+		this.updateActualLocation();
+		this.position.sub(this.actual_location);
+		this.position.add(newPosition);
+		this.updateActualLocation();
+	}
+	
+
+	function updateActualLocation()
+	{
+		this.actual_location.copy(proteinCenterOfMass);
+		this.updateMatrix();
+		this.actual_location.applyMatrix4(this.matrix); //untested
+	}
+	
 	for( var i = 0; i < destination_assignments.length; i++ )
 		destination_assignments[i] = 999;
 	
@@ -238,46 +225,37 @@ function init_bocavirus_stuff()
 		protein_vertices_numbers[i] /= 32; 
 	}
 	
-	//TODO this is where it becomes about 5.
-	var point = new THREE.Vector3();
-	for(var i = 0; i < protein_vertices_numbers.length / 3; i++){
-		point.set(	protein_vertices_numbers[i*3+0],
-					protein_vertices_numbers[i*3+1],
-					protein_vertices_numbers[i*3+2]);
-		
-		
-	}
 	master_protein.geometry.addAttribute( 'position', new THREE.BufferAttribute( protein_vertices_numbers, 3 ) );
 	master_protein.geometry.setIndex( new THREE.BufferAttribute( coarse_protein_triangle_indices, 1 ) );
-	master_protein.geometry.computeFaceNormals();
-	master_protein.geometry.computeVertexNormals();
 	
 	stmvHider = new THREE.Mesh(new THREE.CircleBufferGeometry(2,32),new THREE.MeshBasicMaterial({color:0x000000}));
 	stmvHider.position.z = 0.001;
 	
-	actual_protein_location = new THREE.Vector3();
+	proteinCenterOfMass = new THREE.Vector3();
 	for(var i = 0, il = Boca_vertices.length / 3; i < il; i++ )
 	{
-		actual_protein_location.x += Boca_vertices[i*3+0];
-		actual_protein_location.y += Boca_vertices[i*3+1];
-		actual_protein_location.z += Boca_vertices[i*3+2];
+		proteinCenterOfMass.x += Boca_vertices[i*3+0];
+		proteinCenterOfMass.y += Boca_vertices[i*3+1];
+		proteinCenterOfMass.z += Boca_vertices[i*3+2];
 	}
 	
-	actual_protein_location.multiplyScalar( 3 / Boca_vertices.length );
+	proteinCenterOfMass.multiplyScalar( 3 / Boca_vertices.length );
 	
-	var threefold_axis = new THREE.Vector3(1,1,1);
-	threefold_axis.normalize();
-	var fivefold_axis = normalized_virtualico_vertices[0].clone();
+	//aligns it with the color transformations we're going to do
+	{
+		var threefold_axis = new THREE.Vector3(1,1,1);
+		threefold_axis.normalize();
+		var fivefold_axis = normalized_virtualico_vertices[0].clone();
+		master_protein.rotateOnAxis(threefold_axis, TAU / 3);
+		master_protein.updateMatrixWorld();
+		var tempaxis = fivefold_axis.clone();
+		master_protein.worldToLocal(tempaxis);
+		master_protein.rotateOnAxis(tempaxis, TAU / 5);
+		master_protein.updateMatrixWorld();
+	}
 	
-	master_protein.rotateOnAxis(threefold_axis, TAU / 3);
-	master_protein.updateMatrixWorld();
-	var tempaxis = fivefold_axis.clone();
-	master_protein.worldToLocal(tempaxis);
-	master_protein.rotateOnAxis(tempaxis, TAU / 5);
-	master_protein.updateMatrixWorld();
-	
-	var twistAxis = actual_protein_location.clone().normalize();
-	master_protein.rotateOnAxis(twistAxis, 0.16);
+	var twistAxis = proteinCenterOfMass.clone().normalize();
+	master_protein.rotateOnAxis(twistAxis, 0.16); //just making it simpler
 	master_protein.updateMatrixWorld();
 	
 	var master_protein_outline_geometry = master_protein.geometry.clone();
@@ -286,13 +264,13 @@ function init_bocavirus_stuff()
 	var middleScale = outlineScale + 0.2;
 	for(var i = 0, il = master_protein_outline_geometry.attributes.position.array.length / 3; i < il; i++ )
 	{
-		master_protein_outline_geometry.attributes.position.array[i*3+0] = ( master_protein_outline_geometry.attributes.position.array[i*3+0] - actual_protein_location.x ) * outlineScale + actual_protein_location.x;
-		master_protein_outline_geometry.attributes.position.array[i*3+1] = ( master_protein_outline_geometry.attributes.position.array[i*3+1] - actual_protein_location.y ) * outlineScale + actual_protein_location.y;
-		master_protein_outline_geometry.attributes.position.array[i*3+2] = ( master_protein_outline_geometry.attributes.position.array[i*3+2] - actual_protein_location.z ) * outlineScale + actual_protein_location.z;
+		master_protein_outline_geometry.attributes.position.array[i*3+0] = ( master_protein_outline_geometry.attributes.position.array[i*3+0] - proteinCenterOfMass.x ) * outlineScale + proteinCenterOfMass.x;
+		master_protein_outline_geometry.attributes.position.array[i*3+1] = ( master_protein_outline_geometry.attributes.position.array[i*3+1] - proteinCenterOfMass.y ) * outlineScale + proteinCenterOfMass.y;
+		master_protein_outline_geometry.attributes.position.array[i*3+2] = ( master_protein_outline_geometry.attributes.position.array[i*3+2] - proteinCenterOfMass.z ) * outlineScale + proteinCenterOfMass.z;
 		
-		middle_layer_geometry.attributes.position.array[i*3+0] = ( middle_layer_geometry.attributes.position.array[i*3+0] - actual_protein_location.x ) * middleScale + actual_protein_location.x;
-		middle_layer_geometry.attributes.position.array[i*3+1] = ( middle_layer_geometry.attributes.position.array[i*3+1] - actual_protein_location.y ) * middleScale + actual_protein_location.y;
-		middle_layer_geometry.attributes.position.array[i*3+2] = ( middle_layer_geometry.attributes.position.array[i*3+2] - actual_protein_location.z ) * middleScale + actual_protein_location.z;
+		middle_layer_geometry.attributes.position.array[i*3+0] = ( middle_layer_geometry.attributes.position.array[i*3+0] - proteinCenterOfMass.x ) * middleScale + proteinCenterOfMass.x;
+		middle_layer_geometry.attributes.position.array[i*3+1] = ( middle_layer_geometry.attributes.position.array[i*3+1] - proteinCenterOfMass.y ) * middleScale + proteinCenterOfMass.y;
+		middle_layer_geometry.attributes.position.array[i*3+2] = ( middle_layer_geometry.attributes.position.array[i*3+2] - proteinCenterOfMass.z ) * middleScale + proteinCenterOfMass.z;
 	}
 	
 	for(var i = 0; i < neo_bocavirus_proteins.length; i++)
@@ -304,18 +282,9 @@ function init_bocavirus_stuff()
 		neo_bocavirus_proteins[i].updateMatrixWorld();
 		
 		neo_bocavirus_proteins[i].actual_location = new THREE.Vector3();
-		neo_bocavirus_proteins[i].update_actual_location = update_actual_location;
-	}
-	
-	/*
-	 * mirroring the protein
-	 * http://gamedev.stackexchange.com/questions/43615/how-can-i-reflect-a-point-with-respect-to-the-plane
-	 * points
-	 * -1,1,1
-	 * normalized_virtualico_vertices[0]
-	 * 0,0,0
-	 */
-		
+		neo_bocavirus_proteins[i].updateActualLocation = updateActualLocation;
+		neo_bocavirus_proteins[i].changePosition = changePosition;
+	}	
 	
 	//----------Creating the group
 	//"1"
@@ -475,13 +444,44 @@ function init_bocavirus_stuff()
 		reproduced_proteins[i].geometry.computeVertexNormals();
 		
 		reproduced_proteins[i].actual_location = new THREE.Vector3();
-		reproduced_proteins[i].update_actual_location = update_actual_location;
+		reproduced_proteins[i].updateActualLocation = updateActualLocation;
+		reproduced_proteins[i].changePosition = changePosition;
 		
-		reproduced_proteins[i].position.x = Math.random() * spayed_circle_radius * 4 - spayed_circle_radius * 2;
-		reproduced_proteins[i].position.y = Math.random() * spayed_circle_radius * 4 - spayed_circle_radius * 2;
+		reproduced_proteins[i].scale.setScalar(0.00001);
 		
-		reproduced_proteins[i].position.x += spayed_circle_radius * 2.8;
+		var positionTheta = Math.random() * TAU;
+		reproduced_proteins[i].position.x = Math.random() * EggCell_radius * 0.9 * Math.sin(positionTheta);
+		reproduced_proteins[i].position.y = Math.random() * EggCell_radius * 0.9 * Math.cos(positionTheta);
 	}
+	
+	var protein_assigned = new Uint16Array(neo_bocavirus_proteins.length);
+	for(var i = 0; i < protein_assigned.length; i++)
+		protein_assigned[i] = 0;
+	
+//	for(var i = 0; i < 60; i++ )
+//	{
+//		neo_bocavirus_proteins[i].position.set(0,0,0);
+//		neo_bocavirus_proteins[i].updateActualLocation();
+//	}
+	
+	for(var i = 0; i < 60; i++ )
+	{	
+		var closest_length = 1000;
+		for(var j = 0; j < 60; j++)
+		{
+			if(!protein_assigned[j])
+			{
+				if( neo_bocavirus_proteins[j].actual_location.distanceTo(boca_piece_destinations[i]) < closest_length)
+				{
+					destination_assignments[i] = j;
+					closest_length = neo_bocavirus_proteins[j].actual_location.distanceTo( boca_piece_destinations[i] );
+				}
+			}
+		}
+		protein_assigned[ destination_assignments[i] ] = 1;
+	}
+	for(var i = 60; i < neo_bocavirus_proteins.length; i++ )
+		destination_assignments[i] = i;
 }
 
 //the seed index is which, in the group of five proteins in the "fundamental domain" like thing, this refers to

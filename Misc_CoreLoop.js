@@ -1,19 +1,18 @@
-/*
+/* ----Misc
+ * everything listed in CKsurfacestuff, quasisphere, vertexArrangement, camerastuff
  * 
- * Images for Sheree
+ * Sheree's cell illustration must be compatible with all others and must have a gap for the viruse
+ * Images for Sheree. Discuss with Sheree what should go beneath
+ * Go through demos with Sheree and ask what colors should go where
  * Images for Diego
  *  
- * QS idea: set relevant face normals to be equal to each other
- * But how about the shapes that sit on dod edges? Well, there is a schema that lets you work out one from the other ;_;
- * Or you could say, for each face, which vertices it should average to get its normal
- * Or don't, it doesn't look that much better
  * 
  * Screen shake on QS?
  * Shadows on irreg; a "floor" for the shadow. Different lights.
  * Shininess/Lighting on CK, it is a weird shape to look at
  * Depth material for QS?
  * 
- * Go through demos with Sheree and ask what colors should go where
+ * A "go to tree" button below the thing?
  * 
  * 
  * -------------When final cut is in
@@ -31,39 +30,34 @@
  * 		Camera closer on beginning of CK
  * 		the button flashes until you have opened AND closed it, with a change between
  * 		The whole hepatitis thing. They all come in.
- * 		Repetitions of advice
  * 		CK pentagons flashing like sirens
  * 		Show the crazy CK examples sequentially.
  * 
  * 
- * ----Misc
- * -all the effects in camerastuff
- * -everything listed in CKsurfacestuff, bocavirus, quasisphere, youtube stuff. There isn't much.
- * 
  * 
  * --------Technical
+ * Flash 10 etc is required,  check for that
  * Bug found by Henry Segerman
  * touchscreen (test on Jessie's computer)
  * Sounds in .mp3 or 4
- * 	A bug may have caused things to be skipped. Hopefully that goes away with the new arrangement
  * 	If webgl doesn't load (or etc), recommend a different browser... or refreshing the page
- * 	Ask Alice about SEO. Put search terms in some hidden text?
- *	Custom domain. It won't need to be on Ed for ever; yes one day the link will stop working but that is maybe ok, just make sure people can google
+ * 	Custom domain. It won't need to be on Ed for ever; yes one day the link will stop working but that is maybe ok, just make sure people can google
  *	Loading wise, would it be faster with more than one loader?
  *  -prevent youtube playing until canvas is ready
- *  -link to great big static version if page doesn't load
+ *  -link to great big static version if page doesn't work in some way
  *  -make sure a good picture appears when shared on facebook and twitter. DEEPLY SUSPICIOUS: it gets the image on aboutme but not on recommendations.
- *  -optimize http://www.w3schools.com/js/js_performance.asp
- *  	-get rid of unused code
- *  	-search for missing "console.log"s, those are old debug things and may have wasteful ifs, alexandrov is chock-a-block
  *  -test on different setups
 		-Johan's Mac
 		-Reidun's computer (probably just webgl)
  *  
  *  ---------Probably never to be solved
+ *  A bug may have caused things to be skipped. Hopefully that goes away with the new arrangement
  * 	-cite non-illustrated pictures
  * Youtube fullscreen doubleclick problem
- * 
+ * QS normals:
+ * 		For all triangles with an unmarked edge on a dod edge, set their face normals to the normalized midpoint of the two corners they have on that edge
+ * 		Then for all triangles in some shared shape, decide on a normal. Eg for the hexagon get it from that normal
+ * 		But this is for your next life. It does increase the processing required and meshBasicMaterial looks fine and anyway this is a sophisticated abstract shape
  */
 
 var performance_checker = {
@@ -224,7 +218,7 @@ function ChangeScene(new_mode) {
 			for(var i = 0; i< lights.length; i++)
 				scene.add( lights[i] );
 			for(var i = 0; i< reproduced_proteins.length; i++)
-				scene.add( reproduced_proteins[i] );
+				EggCell.add( reproduced_proteins[i] );
 			scene.add( stmvHider );
 			scene.add(EggCell);
 			scene.add(Cornucopia);

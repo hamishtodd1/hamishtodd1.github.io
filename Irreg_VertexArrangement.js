@@ -1,10 +1,7 @@
 /*
  * Todo:
- * -line up initial state with your very icosahedral virus and spin it a bit 
- * -red highlight should flash
- * -Change HIV's state so that the wrap-up makes more sense (big scissors on the exceptional crack)? If you have the "bouquet" comparison in there
+ * -line up initial state with your very icosahedral virus and spin it a bit
  * -better sync with video, let them gravitate to the right place
- * 
  * While moving vertices back in place, you can sort of check for convergence "for free"
  */
 

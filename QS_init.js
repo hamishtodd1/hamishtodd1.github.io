@@ -315,17 +315,20 @@ function initialize_QS_stuff()
 		else
 			color_selection[i] = new THREE.Color(250/256, 214/256, 14 /256 );
 	}
-	//Note these are shapes on the FLAT lattice. The shapes on the sphere change, and it's not nice to see these change (you could hide them though)
-	//0 is inner pentagon
-	//1, 2 are inner thin
-	//3, 4 are inner fat
-	//5, 6 is a rhombus of any kind you like
-	//7, 8 are topological defects
-	//9 - 13 is outer pentagon (12 and 13 are useless, speedup would be to remove them, as well as the invisible vertex)
-	//14, 15 is outer thin
-	//16, 17 is outer fat
-	//important: if you're only going to have one triangle of a shape, it must be the lower of the two
-	//This all goes by the flatshouldn't you have a random color shape for the hexagons
+	/*
+	 * Note these are shapes on the FLAT lattice. The shapes on the sphere change, and it's not nice to see these change (you could hide them though)
+	 * 0 is inner pentagon
+	 * 1, 2 are inner thin
+	 * 3, 4 are inner fat
+	 * 5, 6 is a rhombus of any kind you like
+	 * 7, 8 are topological defects
+	 * 9 - 13 is outer pentagon (12 and 13 are useless, speedup would be to remove them, as well as the invisible vertex)
+	 * 14, 15 is outer thin
+	 * 16, 17 is outer fat
+	 * important: if you're only going to have one triangle of a shape, it must be the lower of the two
+	 * This all goes by the flat
+	 * shouldn't you have a random color shape for the hexagons
+	 */
 	
 	var EdgesColor = new THREE.Color(0,0,0);
 	
@@ -762,14 +765,17 @@ function initialize_QS_stuff()
 					j * one_quasicutout_vertices + indexA,
 					j * one_quasicutout_vertices + indexB,
 					j * one_quasicutout_vertices + indexC,
- 					new THREE.Vector3(1,0,0), //Face normal; unused
+ 					new THREE.Vector3(1,0,0),
  					color_selection[k],
  					ourmaterialindex ) );
 			}
+
+			//if this is always the same then you can make it so that only that many's faces have their normals updated
+			console.log(quasicutout_meshes[i].geometry.faces.length);
 			
 			//this is the edges
 			for(var k = 0; k < NUM_QUASICUTOUT_EDGES * 6; k++)
-				quasicutout_meshes[i].geometry.vertices.push(new THREE.Vector3(0,0,0));
+				quasicutout_meshes[i].geometry.vertices.push(new THREE.Vector3());
 			
 			for(var k = 0; k < NUM_QUASICUTOUT_EDGES; k++)
 			{

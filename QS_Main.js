@@ -1,17 +1,8 @@
 /* 
- * -you could totally have it be flat shaded
- * 
- * Probably best to let Grabbable arrow go all the way to the middle and have the scale be: 
- * minimum + GrabbableArrow.position.length / max_GA_position * (maximum - minimum)
- * Take the mouse outside the zone and you're still holding it, but screw you if you think it makes a difference. 
- * 
- */
-
-/* Speedups:
- * You can reduce the number of extra vertices required by half. You could probably work out all the edge positions using the triangles
- * 
- * There may still be things happenning that you don't need
- * 
+ * Dealing with limitations:
+ * 	Probably best to let Grabbable arrow go all the way to the middle and have the scale be: 
+ * 	minimum + GrabbableArrow.position.length / max_GA_position * (maximum - minimum)
+ * 	Take the mouse outside the zone and you're still holding it, but screw you if you think it makes a difference. 
  */
 
 
@@ -65,12 +56,6 @@ function UpdateQuasiSurface()
 			dodeca.rotateOnAxis( swap_axis, Math.PI );
 		}
 	}
-	
-	//TODO to help hide the problem. 
-	//maybe take the vector of the closest pentagon face to the actual front and rotationg so that you swap with the one that should be there
-	//
-//	var dodeca_indicator_direction = new THREE.Vector3(0,0,1);
-//	dodeca.localToWorld(dodeca_indicator_direction);
 	
 	//-----inflation
 	var dodeca_squashingspeed = 0.022 * delta_t / 0.016;
@@ -267,10 +252,10 @@ function MoveQuasiLattice()
 		dodeca.add(quasicutout_meshes[modulated_CSP]);
 		
 		//a random pop
-//		var playedPop = "pop" + Math.ceil(Math.random()*4).toString();;
-//		console.log(playedPop);
-//		if( !Sounds[ playedPop ].isPlaying )
-//			Sounds[ playedPop ].play();
+		var playedPop = "pop" + Math.ceil(Math.random()*4).toString();;
+		console.log(playedPop);
+		if( !Sounds[ playedPop ].isPlaying )
+			Sounds[ playedPop ].play();
 		
 		stable_point_of_meshes_currently_in_scene = modulated_CSP;
 	}
