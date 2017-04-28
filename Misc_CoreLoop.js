@@ -1,5 +1,5 @@
-/* ----Misc
- * everything listed in CKsurfacestuff, quasisphere, vertexArrangement, camerastuff
+/* Do everything listed in camerastuff
+ * Sounds
  * 
  * Sheree's cell illustration must be compatible with all others and must have a gap for the viruse
  * Images for Sheree. Discuss with Sheree what should go beneath
@@ -7,17 +7,26 @@
  * Images for Diego
  *  
  * 
- * Screen shake on QS?
  * Shadows on irreg; a "floor" for the shadow. Different lights.
- * Shininess/Lighting on CK, it is a weird shape to look at
  * Depth material for QS?
  * 
- * A "go to tree" button below the thing?
+ * ------Below the thing
+ * Sheree must design
+ * 		A "go to tree" button
+ * 		Social media buttons
+ * 		Press kit
+ * 		Contact
+ * 		Information for teachers
+ * 		SEO terms; maybe transcript (i.e. script). Click to expand
+ * 		Maybe picture so the fucking thing appears
  * 
  * 
- * -------------When final cut is in
+ * -------------When final cut is in / video response stuff
+ * 		irreg: line up initial state with your very icosahedral virus and spin it a bit
 		Flick between spherical projection and flat for "the patterns that appeared on these viruses"
  * 		Golf balls that look like viruses, buildings that look like viruses - they all pile up
+ * 		Lattice disappears when closed, except when you're doing the pentagon-noticing part
+ * 		Will have that "closing" sound effect but will probably also have a pop when it's shut
  * 		zoom in on the monkey down to one of its cells? Arrrrrgh need illustration
  * 		cell comes in and is same size as virus. They change size when you say so.
  * 		the virus pieces pop in by increasing size from zero
@@ -31,19 +40,18 @@
  * 		the button flashes until you have opened AND closed it, with a change between
  * 		The whole hepatitis thing. They all come in.
  * 		CK pentagons flashing like sirens
+ * 		angle measurers fade in
  * 		Show the crazy CK examples sequentially.
  * 
  * 
  * 
  * --------Technical
  * Flash 10 etc is required,  check for that
- * Bug found by Henry Segerman
+ * Bug: CK can get stuck trying to close
  * touchscreen (test on Jessie's computer)
  * Sounds in .mp3 or 4
  * 	If webgl doesn't load (or etc), recommend a different browser... or refreshing the page
- * 	Custom domain. It won't need to be on Ed for ever; yes one day the link will stop working but that is maybe ok, just make sure people can google
  *	Loading wise, would it be faster with more than one loader?
- *  -prevent youtube playing until canvas is ready
  *  -link to great big static version if page doesn't work in some way
  *  -make sure a good picture appears when shared on facebook and twitter. DEEPLY SUSPICIOUS: it gets the image on aboutme but not on recommendations.
  *  -test on different setups
@@ -58,56 +66,9 @@
  * 		For all triangles with an unmarked edge on a dod edge, set their face normals to the normalized midpoint of the two corners they have on that edge
  * 		Then for all triangles in some shared shape, decide on a normal. Eg for the hexagon get it from that normal
  * 		But this is for your next life. It does increase the processing required and meshBasicMaterial looks fine and anyway this is a sophisticated abstract shape
+ * Irreg: While moving vertices back in place, you can sort of check for convergence "for free"
+ * 		This requires checking angular defects, but many things are based on whether vertex_tobechanged is defined
  */
-
-var performance_checker = {
-		frame_start_time: 0,
-		sample_start_time: 0,
-		sample_duration: 0,
-		frame_duration: 0,
-		last_sample_index: 0,
-		
-		samples: new Float32Array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
-};
-performance_checker.get_samples_avg = function()
-{
-	var avg = 0;
-	for(var i = 0, il = this.samples.length; i < il; i++)
-		avg += this.samples[i];
-	return avg / this.samples.length;
-}
-performance_checker.report_samples_avg = function()
-{
-	console.log( "sample average: ", performance_checker.get_samples_avg() );
-}
-performance_checker.report = function()
-{
-//	console.log(sample_duration / frame_duration);
-}
-performance_checker.begin_frame = function()
-{
-	this.frame_duration = 0;
-	this.sample_duration = 0;
-	this.frame_start_time = ourclock.getElapsedTime();
-}
-performance_checker.end_frame = function()
-{
-	this.frame_duration = ourclock.getElapsedTime() - this.frame_start_time;
-	this.report();
-}
-performance_checker.begin_sample = function()
-{
-	this.sample_start_time = ourclock.getElapsedTime();
-}
-performance_checker.end_sample = function()
-{
-	this.sample_duration = ourclock.getElapsedTime() - this.sample_start_time;
-	this.samples[ this.last_sample_index ] = this.sample_duration;
-	this.last_sample_index++;
-	if( this.last_sample_index > this.samples.length )
-		this.last_sample_index = 0;
-	this.report_samples_avg();
-}
 
 function UpdateWorld()
 {
@@ -262,8 +223,6 @@ function ChangeScene(new_mode) {
 				dodeca.add(quasicutout_meshes[stable_point_of_meshes_currently_in_scene]);
 			scene.add(QS_center);
 			scene.add(QS_measuring_stick);
-			for(var i = 0; i< lights.length; i++)
-				scene.add( lights[i] );
 			break;
 			
 		case TREE_MODE:

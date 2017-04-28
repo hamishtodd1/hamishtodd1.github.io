@@ -57,17 +57,17 @@ function Update_story()
 		if( Story_states[Storypage].unpauseOn() )
 			ytplayer.playVideo();
 		
-		if( Story_states[Storypage].loopBackTo !== -1 && ytplayer.getPlayerState() === 2 && !Story_states[Storypage].loopBackUnless() )
+		if( Story_states[Storypage].loopBackTo !== -1 && ytplayer.getPlayerState() === 2 && Story_states[Storypage].shouldWeLoopBack() )
 		{
 			Story_states[Storypage].loopBackCountdown += delta_t;
-			if( Story_states[Storypage].loopBackCountdown > 5)
+			if( Story_states[Storypage].loopBackCountdown > 7)
 			{
 				Story_states[Storypage].loopBackCountdown = 0;
 				ytplayer.seekTo( Story_states[Storypage].loopBackTo );
 				ytplayer.playVideo();
 				Story_states[Storypage].used_up_pause = false;
 				return;
-			}	
+			}
 		}
 		
 		if( Story_states[Storypage].unpause_after !== -1)
@@ -97,6 +97,17 @@ function Update_story()
 				ytplayer.pauseVideo(); //this has a delayed reaction, we will continue asking for a pause until it has paused!
 				return;
 			}
+		}
+		
+		//the player unpaused without doing what we wanted!
+		if( Story_states[Storypage].shouldWeLoopBack() && ytplayer.getPlayerState() === 1 && 
+			our_CurrentTime > Story_states[Storypage+1].startingtime && our_CurrentTime < Story_states[Storypage+1].startingtime + 0.1 )
+		{
+			Story_states[Storypage].loopBackCountdown = 0;
+			ytplayer.seekTo( Story_states[Storypage].loopBackTo );
+			ytplayer.playVideo();
+			Story_states[Storypage].used_up_pause = false;
+			return;
 		}
 		
 		if( Story_states[Storypage].enforced_cutout_vector0_player.x !== -1 ) //note to self: you're screwed if you'd like it to be -1 as that is the "default"!
@@ -247,7 +258,7 @@ function init_story()
 	var ns; //new state
 	
 	function defaultUnpauseOn() {return false;}
-	function defaultLoopBackUnless() {return true;}
+	function defaultshouldWeLoopBack() {return false;}
 	
 	Story_states.push({
 		startingtime: -1, //this is just the prototype state, not really used!
@@ -280,7 +291,7 @@ function init_story()
 		
 		unpause_on_hepatitis_scale: 0,
 		
-		loopBackUnless: defaultLoopBackUnless,
+		shouldWeLoopBack: defaultshouldWeLoopBack,
 		loopBackTo: -1, //If you don't do the thing, or try to unpause, it will loop back
 		loopBackCountdown: 0,
 		used_up_pause: false,
@@ -349,7 +360,8 @@ function init_story()
 		new_story_state.unpause_on_hepatitis_scale = 0;
 		
 		new_story_state.unpauseOn = defaultUnpauseOn;
-		new_story_state.loopBackUnless = defaultLoopBackUnless;
+		new_story_state.shouldWeLoopBack = defaultshouldWeLoopBack;
+		new_story_state.loopBackTo = -1;
 		
 		new_story_state.enforced_irreg_state = -1;
 		
@@ -379,6 +391,7 @@ function init_story()
 	Chapter_start_times[0] = ns.startingtime;
 	ns.pause_at_end = 1; //TODO handle the assurance.
 	ns.loopBackTo = 43.9;
+	ns.shouldWeLoopBack = function() {if( rotation_understanding === 0 ) return true; else return false }
 	ns.unpauseOn = function() {if( rotation_understanding >= 2 && !isMouseDown ) return true; else return false;}
 	Story_states.push(ns);
 	
@@ -391,10 +404,17 @@ function init_story()
 	start_reproducing_time = 1000;
 	whole_thing_finish_time = 2000;
 	
-	ns = default_clone_story_state(1,49.2); //bocavirus infects us
+	ns = default_clone_story_state(1,49.2); //harmless rash
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,62.3); //color
+	ns = default_clone_story_state(1,58); //miscarriage
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,63); //miscarriage
+	ns.MODE = BOCAVIRUS_MODE;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,70); //color
 	ns.pause_at_end = 1;
 	ns.unpause_after = 7.7;
 	flash_time = ns.startingtime;

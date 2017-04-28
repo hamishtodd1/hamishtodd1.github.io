@@ -11,6 +11,7 @@ function load_AV_stuff()
 	var picturesLoaded;
 	var introLoaded = false;
 	var percentageLoaded = 10; //youtube 5%, initializations 5%
+	var borderMultiplier = 1024 / 720;
 	
 	function loadpic(url, type, index) {
 		texture_loader.load(
@@ -25,7 +26,8 @@ function load_AV_stuff()
 				}
 				if(type === 2)
 				{
-					slideObjects[index] = new THREE.Mesh( new THREE.CubeGeometry(playing_field_dimension, playing_field_dimension, 0),
+					var width = bordered[index] ? playing_field_dimension * borderMultiplier : playing_field_dimension;
+					slideObjects[index] = new THREE.Mesh( new THREE.CubeGeometry(width,width, 0),
 							new THREE.MeshBasicMaterial( { transparent:true, map: texture } ) );
 					
 					picturesLoaded[ random_texture_urls.length + index] = 1;
@@ -111,9 +113,14 @@ function load_AV_stuff()
 	}
 	
 	//slides
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Zika victim.png");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HIV victim.png");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Dad.jpg");
+	var bordered = [];
+	
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Zika victim.png"); bordered.push(0);
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HIV victim.png"); bordered.push(0);
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Dad.jpg"); bordered.push(0);
+
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/slapped-cheek.jpg"); bordered.push(1);
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/pregnant.jpg"); bordered.push(1);
 	
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Opening selection 1a.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Opening selection 1.png");
@@ -189,6 +196,9 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/nautilus.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/nautilus with spiral.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Opening selection 1a.png");
+	
+	for(var i = bordered.length; i< slide_texture_urls.length; i++)
+		bordered[i] = 0;
 	
 	//if you change the above, you probably need to change these
 	reused_slide_indices[0] = 24;

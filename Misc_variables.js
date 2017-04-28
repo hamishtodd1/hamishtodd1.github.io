@@ -33,6 +33,7 @@ var min_cameradist = 20; //get any closer and the perspective is weird
 var vertical_fov = 2 * Math.atan(playing_field_dimension/(2*min_cameradist));
 
 var camera = new THREE.CombinedCamera(playing_field_dimension, playing_field_dimension, vertical_fov * 360 / TAU, 0.1, 1000, 0.1, 1000);
+camera.velocity = new THREE.Vector3();
 var scene = new THREE.Scene();
 
 var window_height = 360; //to begin with
@@ -156,6 +157,9 @@ var outlines_original_numbers = Array(5);
 var Quasi_outlines = Array(5);
 var prism_triangle_indices = new Uint16Array([0, 2, 1, 2, 3, 1, 2, 4, 3, 4, 5, 3]);
 var normalized_virtualdodeca_vertices = Array(20);
+
+var QSmouseLowerLimit = -1;
+var QSmouseUpperLimit = 999;
 
 var icosahedra_directions = Array(12);
 

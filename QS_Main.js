@@ -1,12 +1,3 @@
-/* 
- * Dealing with limitations:
- * 	Probably best to let Grabbable arrow go all the way to the middle and have the scale be: 
- * 	minimum + GrabbableArrow.position.length / max_GA_position * (maximum - minimum)
- * 	Take the mouse outside the zone and you're still holding it, but screw you if you think it makes a difference. 
- */
-
-
-
 function UpdateQuasiSurface()
 {
 	//-------Rotation
@@ -108,7 +99,12 @@ function MoveQuasiLattice()
 {
 	//somewhere in here is the "ignoring input while inflating" bug
 	//might do rotation whatevers here
-	if( isMouseDown ) {
+	if( !isMouseDown )
+	{
+		QSmouseLowerLimit = -1;
+		QSmouseUpperLimit = 999;
+	}
+	else {
 		var Mousedist = MousePosition.length();
 		var OldMousedist = OldMousePosition.length(); //unless the center is going to change?
 		{
@@ -120,7 +116,15 @@ function MoveQuasiLattice()
 			
 			if(Math.abs(ourangle) < TAU / 8 || Math.abs(ourangle) > TAU / 8 * 3 )
 			{
-				var scalefactor = Mousedist / OldMousedist;
+				console.log(Mousedist, QSmouseLowerLimit)
+				var scalefactor = 0;
+				if( Mousedist < QSmouseLowerLimit )
+					scalefactor = 1;
+				else if( Mousedist > QSmouseUpperLimit )
+					scalefactor = 1;
+				else
+					scalefactor = Mousedist / OldMousedist;
+				
 				scalefactor = (scalefactor - 1) * 0.685 +1; //0.685 is the drag
 				var maxScaleFactor = 1.07;
 				if(scalefactor > maxScaleFactor)
@@ -135,17 +139,23 @@ function MoveQuasiLattice()
 					veclength = hardmaxlength;
 				}
 				var softmaxlength = 3.53; // 3.48 is minimum but that makes it hard to get to HPV
-				if(veclength > softmaxlength) {
-					veclength -= 0.028;
-					if(veclength < softmaxlength)
-						veclength = softmaxlength;
+				if(veclength > softmaxlength)
+				{
+					veclength = softmaxlength;
+					
+					if( QSmouseUpperLimit === 999)
+						QSmouseUpperLimit = Mousedist;
 				}
+					
 				var minlength = 1.313;
-				if(veclength < minlength) {
-//					veclength += 0.02;
-//					if(veclength > minlength)
-						veclength = minlength;
+				if(veclength < minlength)
+				{
+					veclength = minlength;
+					
+					if( QSmouseLowerLimit === -1)
+						QSmouseLowerLimit = Mousedist;
 				}
+				
 				cutout_vector0_player.setLength(veclength);
 				cutout_vector1_player.setLength(veclength);
 			}

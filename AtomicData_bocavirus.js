@@ -399,7 +399,6 @@ function init_bocavirus_stuff()
 			lights[i].position.z = lightDist;
 			if(i) lights[i].position.applyAxisAngle(y_central_axis, TAU / 4);
 			lights[i].position.applyAxisAngle(z_central_axis, TAU / 3 * i);
-			console.log(lights[i].position)
 		}
 		for(var i = 0; i < lights.length; i++)
 			lights[i].position.multiplyScalar(0.1);

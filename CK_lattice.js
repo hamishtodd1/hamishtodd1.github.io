@@ -87,7 +87,7 @@ function HandleNetMovement()
 	} else { //this is where snapping takes place. Can put in the contingency on the button here
 		LatticeGrabbed = false;
 		
-//		if(!Story_states[Storypage].CK_scale_only) //but the MASSIVE appearance must snap back even in scale only
+		if( !IrregButton.capsidopen || LatticeScale < 0.2773500870617064 )
 		{
 			var firstnetvertex = new THREE.Vector3(setvirus_flatnet_vertices[3][3],setvirus_flatnet_vertices[3][ 4 ],0);
 			firstnetvertex.multiplyScalar(1/LatticeScale);

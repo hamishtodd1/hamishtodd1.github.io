@@ -1,11 +1,3 @@
-/*
- * TODO
- * Snap only before close, except for when they make it colossal 
- * 
- * Lattice disappears when closed, except when you're doing the pentagon-noticing part
- * Will have that "closing" sound effect but will probably also have a pop when it's shut
- */
-
 function UpdateCapsid() {
 	var oldcapsidopenness = capsidopenness;
 	

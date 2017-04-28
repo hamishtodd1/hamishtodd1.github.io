@@ -212,25 +212,7 @@ function Map_To_Quasisphere()
 	
 	if( stable_point_of_meshes_currently_in_scene !== 999 && 
 			typeof quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry._bufferGeometry !== 'undefined')
-	{
-		for(var i = 0, il = quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.faces.length; i < il; i++ )
-		{
-			quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.faces[i].normal.copy( 
-				quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[ quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.faces[i].b ] );
-			quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.faces[i].normal.add( 
-				quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[ quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.faces[i].c ] );
-			
-			//do you *have* to normalize?
-		}
-		quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.computeFaceNormals(); //maybe don't need this
-		quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.computeVertexNormals();
-		
-//		for(var i = 0, il = quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry._bufferGeometry.attributes.normal.array.length; i<il; i++)
-//			quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry._bufferGeometry.attributes.normal.array[i] = 
-//				quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry._bufferGeometry.attributes.position.array[i] / radius;
-
 		quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.verticesNeedUpdate = true;
-	}
 	
 	//used to be a massive comment here about design!
 }

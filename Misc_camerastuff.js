@@ -4,27 +4,52 @@ var camera_default_position = new THREE.Vector3(0,0,min_cameradist);
 	
 function UpdateCamera() 
 {
-	camera.updateMatrix();
-	camera.updateMatrixWorld();
+//	switch(MODE)
+//	{	
+//		case TREE_MODE: //NOTE THIS MAY BREAK THE CLICK DETECTION. Could do in tree code?
+//			var dampener = 200;
+//			camera.position.x = Math.sqrt(MousePosition.x) / dampener;
+//			camera.position.y = Math.sqrt(MousePosition.y) / dampener;
+//			break;
+//	}
+//	
+//	//we do it in this order because acceleration is what has been changed elswhere
+//	camera.velocity.add(camera.acceleration);
+//	camera.position.add(camera.velocity);
+//	camera.acceleration.copy(camera.position);
+//	camera.acceleration.z = 0;
+//	camera.acceleration.multiplyScalar(-0.1);
+//	
+//	camera.updateMatrix();
+//	camera.updateMatrixWorld();
 	
-	//things should be drawn towards the mouse a little bit. No need for that if you're rotating Finger?
-	//take distance of mouse from center of screen, square root that, and move the camera towards the mouse by a multiple of that amount
-	//maybe have screenshake "energy"? like things can cause it to vibrate until it stops.
-	//think of it as a wooden peg maybe, that is basically rigid, but can be twanged in any direction
-	//remember if you have any other objects in there, they have to shake too.
-	//Hey, aztez pulled the camera around by the side, you should too
-	//Should have one effect for rotation, another for scaling, both of which have intensity.
-	//objects could come in from top, camera could tilt up to see them
-	//little screenshakes for little things, big ones for big things
-	//Tree: could have the camera move over to focus on something that you hover your mouse over
-	//an invisible lamp on your mouse that impacts the surfaces you touch
+	
+	//Screenshake "momentum", things can cause it to vibrate until it stops.
+	
+	/*
+	 * Watch juice it or lose it again
+	 * 
+	 * Irreg
+	 * Slight vibration as it settles
+	 * camera moves in when you grab
+	 * grabber that you've grabbed should throb when you have them, and vibrate when you mouse over. Mouse should be a source of low-radius light.
+	 * 
+	 * CK
+	 * Scale up or rotate both cause shake. Fast = high energy, slow = low
+	 * intro: hexagon lattice comes out from a point? eg start the hider as a much smaller circle?
+	 * 
+	 * QS
+	 * Popping causes shake.
+	 * Grabbing and letting go causes zoom in and out
+	 * measuring stick vibrates
+	 * intro: scales up, from a point
+	 * 
+	 * Boca
+	 * Grabbing momentarily causes speedup to undulation
+	 * intro: proteins appear one by one
+	 */
 }
 
-function camera_changes_for_mode_switch(){	
-	//was trying to get pictures on top
-//	if(MODE === QC_SPHERE_MODE)
-//		renderer.sortObjects = false;
-//	else
-//		renderer.sortObjects = true;
+function camera_changes_for_mode_switch(){
 	camera.position.copy( camera_default_position );
 }

@@ -42,8 +42,8 @@ function onWindowResizeExceptYoutube()
 	if( maxCanvasDimension > window.innerHeight ) 
 		maxCanvasDimension = window.innerHeight;
 	
-	var finalCanvasDimension = 240;
-	var possibleDimensions = [360,480,720,1080];
+	var finalCanvasDimension = 144;
+	var possibleDimensions = [240,360,480,720,1080];
 	for(var i = 0; i < possibleDimensions.length; i++ )
 		if( maxCanvasDimension >= possibleDimensions[i] )
 			finalCanvasDimension = possibleDimensions[i];
@@ -52,8 +52,11 @@ function onWindowResizeExceptYoutube()
 		while( maxCanvasDimension >= finalCanvasDimension * 1.5 )
 			finalCanvasDimension = finalCanvasDimension * 1.5;
 	}
-	//on a >1080 monitor, you probably have to scale up the... picture of the youtube video, or however you put it. Try putting in 2160 or whatever.
-	//todo: test on that. Buuuut that can wait a long time, like whenever you see one. People could just resize the window? Hopefully that works?
+	/* on a >1080 monitor, you probably have to scale up the... picture of the youtube video, or however you put it. Try putting in 2160 or whatever.
+	 * todo: test on that. Buuuut that can wait a long time, like whenever you see one. People could just resize the window? Hopefully that works?
+	 * 
+	 * Siiiigh re dpi.
+	 */
 	
 	var spacing = 0;
 	var bodyWidth = spacing + finalCanvasDimension * 2;

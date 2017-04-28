@@ -1,10 +1,3 @@
-/*
- * Todo:
- * -line up initial state with your very icosahedral virus and spin it a bit
- * -better sync with video, let them gravitate to the right place
- * While moving vertices back in place, you can sort of check for convergence "for free"
- */
-
 function move_vertices(vertex_tobemoved, changed_position, initial_changed_vertex)
 {
 	var V_angles_subtraction = Array(0,0,0,0);

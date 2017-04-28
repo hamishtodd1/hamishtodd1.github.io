@@ -13,7 +13,7 @@ function Map_lattice() {
 	//the part where we explain things
 	{
 		var lattice_fadein_duration = 2;
-		var lattice_opacity = 1;
+		var lattice_opacity = capsidopenness;
 		if( our_CurrentTime < lattice_fadein_time )
 			lattice_opacity = 0;
 		else if( our_CurrentTime < lattice_fadein_time + lattice_fadein_duration )

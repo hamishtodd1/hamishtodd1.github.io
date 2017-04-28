@@ -360,8 +360,8 @@ function initialize_QS_stuff()
 	Forced_edges[22] = new Uint16Array([14,15, 7,8]);
 	
 	var QM_materials = Array(2);
-	QM_materials[0] = new THREE.MeshPhongMaterial({vertexColors:THREE.FaceColors, specular: 0x222222});
-	QM_materials[1] = new THREE.MeshPhongMaterial({vertexColors:THREE.FaceColors, specular: 0x222222}); //one of these
+	QM_materials[0] = new THREE.MeshBasicMaterial({vertexColors:THREE.FaceColors});
+	QM_materials[1] = new THREE.MeshBasicMaterial({vertexColors:THREE.FaceColors}); //one of these
 	var ourmultimaterial = new THREE.MultiMaterial(QM_materials);
 	
 	var theirfaceindices = new Uint16Array(3);
@@ -769,9 +769,6 @@ function initialize_QS_stuff()
  					color_selection[k],
  					ourmaterialindex ) );
 			}
-
-			//if this is always the same then you can make it so that only that many's faces have their normals updated
-			console.log(quasicutout_meshes[i].geometry.faces.length);
 			
 			//this is the edges
 			for(var k = 0; k < NUM_QUASICUTOUT_EDGES * 6; k++)
