@@ -529,64 +529,68 @@ function init_story()
 	ns.chapter = 1;
 	Chapter_start_times[3] = ns.startingtime + 0.05;
 	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,4.7); //bluetongue, or group
+	Story_states.push(ns);
 
-//	ns = default_clone_story_state(0,338.1); //QS, Try it out, (pause)
-//	ns.MODE = QC_SPHERE_MODE;
-//	ns.pause_at_end = 1;
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(0,343.1); //may not seem like a virus
-//	Story_states.push(ns);
-//
-//	ns = default_clone_story_state(1,350.3); //HPV
-//	Story_states.push(ns);
-//
-//	ns = default_clone_story_state(1,357.6); //HPV xray
-//	Story_states.push(ns);
-//
-//	ns = default_clone_story_state(1,361.2); //HPV blobs
-//	Story_states.push(ns);
-//
-//	ns = default_clone_story_state(1,375.5); //HPV connections
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(1,381.4); //HPV connections
-//	Story_states.push(ns);
-//
-//	ns = default_clone_story_state(0,386.8); //back to model
-//	ns.enforced_cutout_vector0_player.set(1.809016994374948, 1.4384360606445132, 0); //zika... probably should be a smaller one
-//	ns.pause_at_end = 1;
-//	ns.MODE = QC_SPHERE_MODE;
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(0,392.2); //pause (at the beginning of this state) to play around with it
-//	Story_states.push(ns);
-//
-//	ns = default_clone_story_state(0,402.1); //islamic holy building
-//	ns.slide_number = islamic_dome_index;
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(1,405); //covered with patterns(square)
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(1,412.8); //triangle
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(1,416); //darb e imam shrine
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(1,422.4); //look here
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(1,424.8); //above entrance
-//	var inside_darb_e_pic_index = ns.slide_number;
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(1,428); //inside
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(1,435.3); //inside with pentagons
-//	Story_states.push(ns);
+	ns = default_clone_story_state(0,9.4); //QS, Try it out, (pause)
+	ns.MODE = QC_SPHERE_MODE;
+//	10.4; //TODO loopbackto dependent on changed state
+	ns.pause_at_end = 1;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,14); //may not seem like a virus
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,19.5); //HPV
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,27.2); //HPV xray
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,30.1); //HPV blobs
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,44.5); //HPV connections
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,51.9); //HPV connections
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,58.2); //back to model, then make hpv
+	ns.enforced_cutout_vector0_player.set(1.809016994374948, 1.4384360606445132, 0); //zika... probably should be a smaller one
+	ns.pause_at_end = 1;
+	ns.MODE = QC_SPHERE_MODE;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,60.8); //model was made 800 years ago
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(1,69.5); //islamic holy building
+	ns.slide_number = islamic_dome_index;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,74.4); //covered with patterns(square)
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,81.3); //triangle
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,83.5); //darb e imam shrine
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,84.8); //look here
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,91.9); //above entrance
+	var inside_darb_e_pic_index = ns.slide_number;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,95.4); //inside
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,103.1); //inside with pentagons
+	Story_states.push(ns);
 //	
 //	ns = default_clone_story_state(1,437.8); //just pentagons
 //	Story_states.push(ns);

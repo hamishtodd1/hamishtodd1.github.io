@@ -143,11 +143,14 @@ function load_AV_stuff()
 	//----QS
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Zika Virus.jpg");
 	reused_slide_indices[7] = slide_texture_urls.length - 1;
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/bluetongue.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV non xray.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV xray.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV blobs.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV connections.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV abstract.png");
+
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/blue mosque theblacksea.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern square.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern triangular.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e modified.png");

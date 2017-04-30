@@ -20,8 +20,17 @@
  * 		SEO terms; maybe transcript (i.e. script). Click to expand
  * 		Maybe picture so the fucking thing appears
  * 
+ * ----Islamic stuff
+ * pentagon illustration
+ * pentagons appear around it
+ * 
+ * ----Cut
+ * "which felt awful... let down"
+ * "much smarter than western artists"
  * 
  * -------------When final cut is in / video response stuff
+ * 		The pattern for a "bring something in" animation appears to be: zoom out, move to make room, new ones move in
+ * 		Hmm, why shouldn't religious art use BTV?
  * 		irreg: line up initial state with your very icosahedral virus and spin it a bit
 		Flick between spherical projection and flat for "the patterns that appeared on these viruses"
  * 		Golf balls that look like viruses, buildings that look like viruses - they all pile up
