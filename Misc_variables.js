@@ -9,6 +9,7 @@ var TAU = Math.PI * 2;
 var icosahedron_dihedral_angle = Math.acos(-Math.sqrt(5) / 3);
 var z_central_axis = new THREE.Vector3(0,0,1);
 var y_central_axis = new THREE.Vector3(0,1,0); //mother of god this was previously 0,0,1
+THREE.zeroVector = new THREE.Vector3();
 
 //--------------Structurally fundamental
 var SLIDE_MODE = 0;
@@ -33,7 +34,7 @@ var min_cameradist = 20; //get any closer and the perspective is weird
 var vertical_fov = 2 * Math.atan(playing_field_dimension/(2*min_cameradist));
 
 var camera = new THREE.CombinedCamera(playing_field_dimension, playing_field_dimension, vertical_fov * 360 / TAU, 0.1, 1000, 0.1, 1000);
-camera.velocity = new THREE.Vector3();
+camera.directionalShake = new THREE.Vector3();
 var scene = new THREE.Scene();
 
 var window_height = 360; //to begin with

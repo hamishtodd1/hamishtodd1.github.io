@@ -12,7 +12,6 @@ var movement_duration = 1.5;
 var pullback_start_time = 3;
 var cell_move_time = 6;
 var boca_explosion_start_time = 9;
-var new_pieces_appearance_time = 12;
 var start_reproducing_time = 2;
 var whole_thing_finish_time = 2000;
 
@@ -32,6 +31,7 @@ function update_bocavirus() {
 	var leftmost_visible_x = cell_eaten_bocavirus_position.x - EggCell_radius;
 	var CEPx = ( rightmost_visible_x + leftmost_visible_x ) / 2;
 	var CEPz = ( rightmost_visible_x - leftmost_visible_x ) / 2 / Math.tan( camera.fov / 360 * TAU / 2 );
+//	console.log(( rightmost_visible_x - leftmost_visible_x ))
 	var Cell_virus_visible_position = new THREE.Vector3( CEPx, 0, CEPz );
 	
 	var chap1camDefaultPosition = new THREE.Vector3(0,0,min_cameradist * 1.5);

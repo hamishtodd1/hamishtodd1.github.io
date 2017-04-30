@@ -32,11 +32,10 @@ function ReadInput()
 	isMouseDown = InputObject.isMouseDown;
 	
 	
-	
 	react_to_video();	
 }
 
-function onWindowResizeExceptYoutube()
+function onWindowResizeExceptYoutube( canvasWidthOverHeight )
 {
 	var maxCanvasDimension = window.innerWidth / 2;
 	if( maxCanvasDimension > window.innerHeight ) 
@@ -55,36 +54,35 @@ function onWindowResizeExceptYoutube()
 	/* on a >1080 monitor, you probably have to scale up the... picture of the youtube video, or however you put it. Try putting in 2160 or whatever.
 	 * todo: test on that. Buuuut that can wait a long time, like whenever you see one. People could just resize the window? Hopefully that works?
 	 * 
-	 * Siiiigh re dpi.
+	 * Siiiigh re dpi. Jesus, 1.5?
 	 */
 	
 	var spacing = 0;
-	var bodyWidth = spacing + finalCanvasDimension * 2;
+	var bodyWidth = spacing + finalCanvasDimension + finalCanvasDimension * canvasWidthOverHeight;
 	var bodySideToCenter = bodyWidth / 2;
 	var bodyTopToCenter = finalCanvasDimension / 2;
 	
 	var divHeight = finalCanvasDimension / 2 + window.innerHeight / 2;
-	var divWidth = finalCanvasDimension * 2;
+	var divWidth = finalCanvasDimension + finalCanvasDimension * canvasWidthOverHeight;
 	
 	var playerAndCanvas = document.getElementById("playerAndCanvas");
 	
 	playerAndCanvas.style.width = divWidth.toString() + "px";
 	playerAndCanvas.style.height = divHeight.toString() + "px";
-	playerAndCanvas.style.margin = "-" + bodyTopToCenter.toString() + "px 0 0 -" + finalCanvasDimension.toString() + "px";
-	//eventually the body will have more shit. probably the above needs to be "container" or something.
+	playerAndCanvas.style.margin = "-" + bodyTopToCenter.toString() + "px 0 0 -" + bodySideToCenter.toString() + "px";
 	
-	window_width = finalCanvasDimension;
-	window_height = window_width;
+	window_width = finalCanvasDimension * canvasWidthOverHeight;
+	window_height = finalCanvasDimension;
 	
 	renderer.setSize( window_width, window_height );
 	
 	return finalCanvasDimension;
 }
-onWindowResizeExceptYoutube();
+onWindowResizeExceptYoutube(1);
 
 function onWindowResize()
 {
-	var finalCanvasDimension = onWindowResizeExceptYoutube();
+	var finalCanvasDimension = onWindowResizeExceptYoutube(1);
 	
 	var qualityString = "";
 	if(finalCanvasDimension === 240)
@@ -121,8 +119,10 @@ document.addEventListener( 'mousemove', function(event) {
 	InputObject.mousey = -(event.clientY - window.innerHeight / 2 - renderer.domElement.offsetTop / 2);
 	InputObject.mousex *= playing_field_dimension / renderer.domElement.width;
 	InputObject.mousey *= playing_field_dimension / renderer.domElement.height;
-	InputObject.mousex += camera.position.x;
-	InputObject.mousey += camera.position.y;
+	
+	//assumed to be zero because screenshake makes it annoying!
+//	InputObject.mousex += camera.position.x;
+//	InputObject.mousey += camera.position.y;
 }, false ); //window?
 
 //document.addEventListener( 'touchstart', onDocumentMouseDown, false );

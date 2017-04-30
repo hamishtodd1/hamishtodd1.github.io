@@ -230,7 +230,7 @@ function put_edge_in_quasicutouts(ourprism, one_quasicutout_vertices, lowest_pri
 		var endingvertex   = quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[one_quasicutout_vertices * q + v2];
 		
 		ourpeak.addVectors(startingvertex,endingvertex); //is it still the same distance from the origin when "flat"?
-		ourpeak.setLength( camera.position.z / 650);
+		ourpeak.setLength( camera.position.z * camera.fov / 10000 );
 		
 		StartToEndNorm.copy(endingvertex );
 		StartToEndNorm.sub(startingvertex);

@@ -18,7 +18,9 @@ function initNeoShapes()
 		 * Is there any other pattern that's nice when squashed down? You should try things, hell, you might even discover things.
 		 * You are concerned about the large number of separate objects. But is drawcalls really about separate objects?
 		 * 
-		 * 
+		 * http://www.steelpillow.com/polyhedra/five_sf/five.htm
+		 * when a shape is ready to snap, a "ghost" version of it appears in the prospective place. Letting go causes the snap
+		 * 14 gon in skin https://elifesciences.org/content/5/e19593
 		 * 
 		 * To the politicians: there is a really strong correlation between enjoying Martin Gardner puzzles and being a person able to contribute to society. 
 		 * 

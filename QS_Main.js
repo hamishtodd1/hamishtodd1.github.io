@@ -65,8 +65,8 @@ function UpdateQuasiSurface()
 
 function update_QS_center()
 {
-	QS_center.position.z = camera.position.z - 6;
-	QS_measuring_stick.position.z = QS_center.position.z;
+	QS_center.position.z = camera.position.z - 8;
+	QS_measuring_stick.position.copy( QS_center.position );
 	
 	var opacitychangerate = 0.035 * delta_t / 0.016;
 	if(isMouseDown)
@@ -81,18 +81,15 @@ function update_QS_center()
 			QS_center.material.opacity = 0;
 	}
 	
-	for(var i = 0; i < QS_measuring_stick.children.length; i++)
-		QS_measuring_stick.children[i].material.opacity = QS_center.material.opacity;
+	QS_measuring_stick.children[0].material.opacity = QS_center.material.opacity; 
 	
 	QS_measuring_stick.rotation.copy(QS_center.rotation);
-	if(isMouseDown)
-	{
-		QS_measuring_stick.scale.y = MousePosition.length() * 0.013;
-		QS_measuring_stick.scale.x = QS_measuring_stick.scale.y / 2;
-		
-		QS_measuring_stick.rotation.z = Math.atan2(MousePosition.y,MousePosition.x) + TAU / 4;
-		QS_center.rotation.z = QS_measuring_stick.rotation.z;
-	}
+	
+	QS_measuring_stick.scale.y = MousePosition.length() * 0.0233 * QS_center.material.opacity;
+	QS_measuring_stick.scale.x = QS_measuring_stick.scale.y / 2.5;
+	
+	QS_measuring_stick.rotation.z = Math.atan2(MousePosition.y,MousePosition.x) + TAU / 4;
+	QS_center.rotation.z = QS_measuring_stick.rotation.z;
 }
 
 function MoveQuasiLattice()
@@ -116,7 +113,6 @@ function MoveQuasiLattice()
 			
 			if(Math.abs(ourangle) < TAU / 8 || Math.abs(ourangle) > TAU / 8 * 3 )
 			{
-				console.log(Mousedist, QSmouseLowerLimit)
 				var scalefactor = 0;
 				if( Mousedist < QSmouseLowerLimit )
 					scalefactor = 1;
@@ -262,10 +258,14 @@ function MoveQuasiLattice()
 		dodeca.add(quasicutout_meshes[modulated_CSP]);
 		
 		//a random pop
-		var playedPop = "pop" + Math.ceil(Math.random()*4).toString();;
-		console.log(playedPop);
+		var playedPop = "pop" + Math.ceil(Math.random()*3).toString();;
+		
 		if( !Sounds[ playedPop ].isPlaying )
 			Sounds[ playedPop ].play();
+		
+		camera.directionalShake.copy(MousePosition);
+		camera.directionalShake.z = 0;
+		camera.directionalShake.setLength(0.01);
 		
 		stable_point_of_meshes_currently_in_scene = modulated_CSP;
 	}
@@ -276,7 +276,19 @@ function MoveQuasiLattice()
 	//TODO, you may not understand this. Actually you should be moving the camera.
 	//note you are keeping the fov constant, so in some sense the size of the playing field changes
 	var contrived_dist = 30 / cutout_vector0_displayed.length() + 0.5*Math.sqrt(5/2+11/10*Math.sqrt(5)); //pretty sure this is the z coord of a face-down dodecahedron's center
-	camera.position.z = contrived_dist;
+	var maxDist = contrived_dist * 2.5; //say
+	camera.position.z = contrived_dist + (maxDist-contrived_dist) * (1-QS_measuring_stick.children[0].material.opacity);
+	var staticDistFov = 10;
+	var modifyingDistFov = 23.721980146543366;
+	camera.fov = modifyingDistFov + (staticDistFov-modifyingDistFov) * (1-QS_measuring_stick.children[0].material.opacity);
+	camera.updateProjectionMatrix();
+	
+//	var quadraticAddition = 0.5;
+//	var maxQuadraticAddition = (1 + quadraticAddition) * (1 + quadraticAddition);
+//	var quadraticContribution = QS_measuring_stick.children[0].material.opacity + quadraticAddition;
+//	camera.position.z = contrived_dist + maxQuadraticAddition - quadraticContribution*quadraticContribution;
+	camera.updateMatrix();
+	camera.updateMatrixWorld();
 }
 
 function deduce_dodecahedron(openness) {	

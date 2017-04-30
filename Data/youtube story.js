@@ -52,17 +52,33 @@ function Update_story()
 			ytplayer.seekTo( vertex_knowledge_time );
 			ytplayer.playVideo();
 			//and loop back if they don't?
-		}	
+		}
+		
+		if( ( !Story_states[Storypage].rendererWidth && renderer.domElement.width !== 0 ) || ( Story_states[Storypage].rendererWidth && renderer.domElement.width !== renderer.domElement.height ) )
+		{
+			var newWidth = renderer.getSize().width / renderer.domElement.height;
+			if( !Story_states[Storypage].rendererWidth )
+				newWidth -= 0.1;
+			else
+				newWidth += 0.1;
+			
+			if(newWidth>1)
+				newWidth = 1;
+			else if(newWidth < 0 )
+				newWidth = 0;
+			
+			onWindowResizeExceptYoutube(newWidth);
+		}
 		
 		if( Story_states[Storypage].unpauseOn() )
 			ytplayer.playVideo();
 		
 		if( Story_states[Storypage].loopBackTo !== -1 && ytplayer.getPlayerState() === 2 && Story_states[Storypage].shouldWeLoopBack() )
 		{
-			Story_states[Storypage].loopBackCountdown += delta_t;
-			if( Story_states[Storypage].loopBackCountdown > 7)
+			Story_states[Storypage].loopBackCountdown -= delta_t;
+			if( Story_states[Storypage].loopBackCountdown < 0)
 			{
-				Story_states[Storypage].loopBackCountdown = 0;
+				Story_states[Storypage].loopBackCountdown = 25;
 				ytplayer.seekTo( Story_states[Storypage].loopBackTo );
 				ytplayer.playVideo();
 				Story_states[Storypage].used_up_pause = false;
@@ -70,13 +86,13 @@ function Update_story()
 			}
 		}
 		
-		if( Story_states[Storypage].unpause_after !== -1)
+		if( Story_states[Storypage].unpause_after !== -1 && ytplayer.getPlayerState() === 2)
 		{
 			unpause_timer += delta_t;
+			console.log(unpause_timer)
 			if( unpause_timer >= Story_states[Storypage].unpause_after )
 			{
 				unpause_timer = 0;
-				console.log("unpause after read?");
 				ytplayer.playVideo();
 			}
 		}
@@ -311,6 +327,8 @@ function init_story()
 		
 		unpauseOn: defaultUnpauseOn,
 		
+		rendererWidth: 1,
+		
 		enforced_cutout_vector0_player: new THREE.Vector3(-1,0,0),
 		
 		prevent_playing: 0 //could also use this to stop them from continuing if they haven't rotated bocavirus etc
@@ -365,6 +383,8 @@ function init_story()
 		
 		new_story_state.enforced_irreg_state = -1;
 		
+		new_story_state.rendererWidth = 1;
+		
 		new_story_state.enforced_CK_quaternion = new THREE.Quaternion(5,5,5,5);
 		new_story_state.enforced_irreg_quaternion = new THREE.Quaternion(5,5,5,5);
 		
@@ -375,7 +395,6 @@ function init_story()
 	
 	//only by clicking on the tree do you change chapter
 	ns = default_clone_story_state(1,0.1);
-//	ns.go_to_time = 560;//15*60+30; //skips to wherever you like 560 is HIV demo, 455.5 is CK
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,12.2); //hiv
@@ -391,26 +410,21 @@ function init_story()
 	Chapter_start_times[0] = ns.startingtime;
 	ns.pause_at_end = 1; //TODO handle the assurance.
 	ns.loopBackTo = 43.9;
+	ns.loopBackCountdown = 7;
 	ns.shouldWeLoopBack = function() {if( rotation_understanding === 0 ) return true; else return false }
 	ns.unpauseOn = function() {if( rotation_understanding >= 2 && !isMouseDown ) return true; else return false;}
 	Story_states.push(ns);
 	
-//	pullback_start_time = ns.startingtime;
-	pullback_start_time = 1000;
-	pullback_start_time = 1000;
-	cell_move_time = 1000;
-	boca_explosion_start_time = 1000;
-	new_pieces_appearance_time = 1000;
-	start_reproducing_time = 1000;
-	whole_thing_finish_time = 2000;
+	ns = default_clone_story_state(0,49.2); //unpause
+	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,49.2); //harmless rash
+	ns = default_clone_story_state(1,51.5); //harmless rash
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,58); //miscarriage
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,63); //miscarriage
+	ns = default_clone_story_state(0,63); //back
 	ns.MODE = BOCAVIRUS_MODE;
 	Story_states.push(ns);
 	
@@ -420,83 +434,91 @@ function init_story()
 	flash_time = ns.startingtime;
 	Story_states.push(ns);
 	
-	//pause after it unpauses - can still go back!
-	//you can't unpause
-//	
-//	ns = default_clone_story_state(0,72.77); //click me when you want to continue
-//	ns.pause_at_end = 1;
-//	Story_states.push(ns);
-//	
-//	//-------TODO the designs comparison should look around the tree
-//	
-//	ns = default_clone_story_state(0,77.45); //other viruses
-//	cornucopia_start_time = ns.startingtime + 0.5;
-//	Story_states.push(ns);
-//	
-//	//TODO picture of "ourselves", maybe assembling a dome
-//	
-//	ns = default_clone_story_state(1,101.1); //golf balls
-//	unflash_time = ns.startingtime;
-//	cornucopia_end_time = ns.startingtime;
-//	Story_states.push(ns);
-//
-//	ns = default_clone_story_state(1,103); //that look like viruses
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(1,104.6); //todo buildings
-//	Story_states.push(ns);
-//
-//	ns = default_clone_story_state(1,106.5); //that look like viruses
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(1,108.5); //religious art
-//	var islamic_dome_index = ns.slide_number;
-//	Story_states.push(ns);
-//
-//	ns = default_clone_story_state(1,113); //that look like viruses (HPV)
-//	Story_states.push(ns);
+	ns = default_clone_story_state(0,85.3); //unpause advice
+	ns.pause_at_end = 1;
+	Story_states.push(ns);
 	
+	ns = default_clone_story_state(0,90.3); //images
+	cornucopia_start_time = ns.startingtime + 0.5;
+	Story_states.push(ns);
 	
+	ns = default_clone_story_state(1,103.7); //humaaaans
+	Story_states.push(ns);
 	
-//	//----Part 2
-//	ns = default_clone_story_state(0,127.9); //beginning of part 2, back to boca
-//	ns.MODE = BOCAVIRUS_MODE;
-//	Story_states.push(ns);
-//	
-//	movement_duration = 2.2;
-//	pullback_start_time = 133.9;
-//	cell_move_time = 147.2;
-//	boca_explosion_start_time = 152.2;
-//	whole_thing_finish_time = 160;
-//	new_pieces_appearance_time = 162;
-//	
-//	ns = default_clone_story_state(1,182.3); //cell with fluourescence
-//	Story_states.push(ns);
-//
-//	whole_thing_finish_time = 188;
-//	
-//	ns = default_clone_story_state(0,193.1); //back to DNA. DNA mimics what you do?
-//	ns.MODE = BOCAVIRUS_MODE;
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(1,282.7); //cell full of viruses
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(1,287.4); //lysis
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(1,294.5); //picture of boca
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(0,309.4); //Tree
-//	ns.MODE = TREE_MODE;
-//	ns.pause_at_end = 1;
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(0,326.6);
-//	ns.prevent_playing = 1; //pause on here until they click
-//	Story_states.push(ns);
-//	
+	ns = default_clone_story_state(1,113.1); //golf ball
+	unflash_time = ns.startingtime;
+	cornucopia_end_time = ns.startingtime;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,115.7); //rota
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,117.6); //buildings
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,120.4); //phi29
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,123.5); //religious art
+	var islamic_dome_index = ns.slide_number;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,127.1); //HPV
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,140.5); //beginning of part 2, back to boca
+	ns.MODE = BOCAVIRUS_MODE;
+	Story_states.push(ns);
+	
+	pullback_start_time = 145;
+	cell_appears_time = 149.7;
+	cell_move_time = 156.8;
+	boca_explosion_start_time = 162.3;
+	boca_pieces_disappear_time = 165.6;
+	start_reproducing_time = 171;
+
+	ns = default_clone_story_state(1,182.9); //cell with fluourescence
+	Story_states.push(ns);
+
+	whole_thing_finish_time = 188;
+	
+	ns = default_clone_story_state(0,190); //back to boca
+	ns.MODE = BOCAVIRUS_MODE;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,194.2); //retract canvas
+	ns.rendererWidth = 0;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,236.9); //canvas comes out again
+	ns.rendererWidth = 1;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,238.4); //human
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,271.2); //cell full of viruses
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,276.9); //lysis
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,287.2); //picture of boca
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,294); //Tree
+	ns.MODE = TREE_MODE;
+	ns.pause_at_end = 1;
+	ns.loopBackTo = 302.8;
+	ns.loopBackCountdown = 8;
+	ns.shouldWeLoopBack = function() { return true;}
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,308.8);
+	ns.loopBackTo = 302.8;
+	ns.shouldWeLoopBack = function() { return true;}
+	Story_states.push(ns);
+	
 //	//might need an assurance? Especially if they click on you
 //	
 //	//----------QS BEGINS!!!!!
@@ -1070,6 +1092,13 @@ function init_story()
 //	ns = default_clone_story_state(0,1316.7);
 //	ns.slide_number = first_virus_slide;
 //	Story_states.push(ns);
+	
+
+	
+	ns = default_clone_story_state(0,10000); //color
+	Story_states.push(ns);
+	ns = default_clone_story_state(0,20000); //color
+	Story_states.push(ns);
 	
 
 	for(var i = 0; i < Story_states.length; i++ )

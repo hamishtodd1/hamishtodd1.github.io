@@ -230,8 +230,9 @@ function update_tree()
 		{
 			//skip to it being there, don't want to come back here and see it moving weirdly
 			Chapters_completed[tree_zoomtowards] = 1;
-			Chapter_highlighter.visible = false; //don't want it showing up next time
-			ytplayer.seekTo(Chapter_start_times[tree_zoomtowards]);
+			Chapter_highlighter.visible = false;
+			
+			ytplayer.changeChapter(tree_zoomtowards);
 			
 			tree_zoomtowards = 999;
 			

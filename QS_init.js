@@ -16,14 +16,15 @@ function initialize_QS_stuff()
 		
 		QS_center.geometry.faces.push( new THREE.Face3(i*3+0,i*3+2,i*3+1) );
 	}
-	QS_center.scale.set(0.13,0.13,0.13);
+	QS_center.scale.setScalar(0.13,0.13,0.13);
 	
 	QS_measuring_stick = new THREE.Object3D();
-	QS_measuring_stick.scale.set(0.03,0.03,0.03);
+	QS_measuring_stick.scale.setScalar(0.03,0.03,0.03);
 	var num_measuringstick_dashes = 12;
+	QS_measuring_stick.add( new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({color:0x000000, transparent: true, opacity:0})) );
 	for(var i = 0; i < num_measuringstick_dashes; i++)
 	{
-		QS_measuring_stick.add(new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({color:0x000000, transparent: true, opacity:0})));
+		if(i)QS_measuring_stick.add( QS_measuring_stick.children[0].clone() );
 		QS_measuring_stick.children[i].position.y = -0.5 - 2 * i;
 	}
 	QS_measuring_stick.add(new THREE.Mesh(new THREE.CircleGeometry(0.5), new THREE.MeshBasicMaterial({color:0x000000, transparent: true, opacity:0})));
