@@ -97,33 +97,35 @@ function Update_story()
 			}
 		}
 		
-		//if you're about to move on from a state that wants to be paused
-		if( Story_states[Storypage].pause_at_end === 1 && Story_states[Storypage + 1].startingtime < our_CurrentTime && 
-			(Storypage > Story_states.length-3 || our_CurrentTime < Story_states[Storypage + 2].startingtime ) )
+		//if you're about to move on from a state naturally
+		if( Story_states[Storypage + 1].startingtime < our_CurrentTime && our_CurrentTime < Story_states[Storypage + 1].startingtime + 0.2 )
 		{
-			if( ytplayer.getPlayerState() === 2 ) //if you're paused, we don't let you past here
+			if( Story_states[Storypage].pause_at_end === 1 )
 			{
-				Story_states[Storypage].used_up_pause = true;
-				return;
+				if( ytplayer.getPlayerState() === 2 ) //if you're paused, we don't let you past here
+				{
+					Story_states[Storypage].used_up_pause = true;
+					return;
+				}
+				
+				//we want to move on iff you've had the pause and you're no longer paused (i.e. the player paused you)
+				if( !Story_states[Storypage].used_up_pause )
+				{
+					ytplayer.pauseVideo(); //this has a delayed reaction, we will continue asking for a pause until it has paused!
+					return;
+				}
 			}
 			
-			//we want to move on iff you've had the pause and you're no longer paused (i.e. the player paused you)
-			if( !Story_states[Storypage].used_up_pause )
+			//the player unpaused without doing what we wanted!
+			if( Story_states[Storypage].shouldWeLoopBack() && ytplayer.getPlayerState() === 1 )
 			{
-				ytplayer.pauseVideo(); //this has a delayed reaction, we will continue asking for a pause until it has paused!
+				console.log("it's because we think they unpaused")
+				Story_states[Storypage].loopBackCountdown = 0;
+				ytplayer.seekTo( Story_states[Storypage].loopBackTo );
+				ytplayer.playVideo();
+				Story_states[Storypage].used_up_pause = false;
 				return;
 			}
-		}
-		
-		//the player unpaused without doing what we wanted!
-		if( Story_states[Storypage].shouldWeLoopBack() && ytplayer.getPlayerState() === 1 && 
-			our_CurrentTime > Story_states[Storypage+1].startingtime && our_CurrentTime < Story_states[Storypage+1].startingtime + 0.1 )
-		{
-			Story_states[Storypage].loopBackCountdown = 0;
-			ytplayer.seekTo( Story_states[Storypage].loopBackTo );
-			ytplayer.playVideo();
-			Story_states[Storypage].used_up_pause = false;
-			return;
 		}
 		
 		if( Story_states[Storypage].enforced_cutout_vector0_player.x !== -1 ) //note to self: you're screwed if you'd like it to be -1 as that is the "default"!
@@ -522,12 +524,12 @@ function init_story()
 //	//might need an assurance? Especially if they click on you
 //	
 //	//----------QS BEGINS!!!!!
-//	ns = default_clone_story_state(1,326.85); //zika virus
-//	var zika_slide = ns.slide_number; 
-//	ns.chapter = 1;
-//	Chapter_start_times[3] = ns.startingtime + 0.05;
-//	Story_states.push(ns);
-//
+	ns = default_clone_story_state(1,-0.1); //zika virus
+	var zika_slide = ns.slide_number; 
+	ns.chapter = 1;
+	Chapter_start_times[3] = ns.startingtime + 0.05;
+	Story_states.push(ns);
+
 //	ns = default_clone_story_state(0,338.1); //QS, Try it out, (pause)
 //	ns.MODE = QC_SPHERE_MODE;
 //	ns.pause_at_end = 1;

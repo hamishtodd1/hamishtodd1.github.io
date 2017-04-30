@@ -60,7 +60,9 @@ function onYouTubeIframeAPIReady()
 				ytplayer.seekTo( 0 );
 				ytplayer.pauseVideo();
 				
-				(document.getElementById("player")).addEventListener( 'mouseleave', function(event) {
+				var ourYT = document.getElementById('player');
+				ourYT.allowFullscreen = false;
+				ourYT.addEventListener( 'mouseleave', function(event) {
 					justLeftiFrame = true;
 				}, false);
 				
