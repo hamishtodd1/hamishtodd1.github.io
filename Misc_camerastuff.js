@@ -54,6 +54,17 @@ function UpdateCamera()
 		
 		camera.directionalShake.z += delta_t;
 	}
+	if( camera.randomShake != 0)
+	{
+		var shakeVector = new THREE.Vector3(Math.random() * randomShake,Math.random() * randomShake, 0 );
+
+		camera.position.x = camera.directionalShake.x * amplitude;
+		camera.position.y = camera.directionalShake.y * amplitude;
+		
+		camera.randomShake -= delta_t;
+		if(camera.randomShake < 0)
+			camera.randomShake = 0;
+	}
 	
 	camera.updateMatrix();
 	camera.updateMatrixWorld();

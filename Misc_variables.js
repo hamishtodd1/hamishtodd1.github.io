@@ -35,6 +35,7 @@ var vertical_fov = 2 * Math.atan(playing_field_dimension/(2*min_cameradist));
 
 var camera = new THREE.CombinedCamera(playing_field_dimension, playing_field_dimension, vertical_fov * 360 / TAU, 0.1, 1000, 0.1, 1000);
 camera.directionalShake = new THREE.Vector3();
+camera.randomShake = 0;
 var scene = new THREE.Scene();
 
 var window_height = 360; //to begin with
