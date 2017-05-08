@@ -81,12 +81,24 @@ function update_QS_center()
 			QS_center.material.opacity = 0;
 	}
 	
+	if(!Mouse_delta.equals(THREE.zeroVector))
+		QS_measuring_stick.children[0].material.color.b = 1;
+	else
+		QS_measuring_stick.children[0].material.color.b -= delta_t / 1.6;
+	if(QS_measuring_stick.children[0].material.color.b < 0)
+		QS_measuring_stick.children[0].material.color.b = 0;
+	QS_measuring_stick.children[0].material.color.r = QS_measuring_stick.children[0].material.color.b;
+	QS_measuring_stick.children[0].material.color.g = QS_measuring_stick.children[0].material.color.b;
+	
 	QS_measuring_stick.children[0].material.opacity = QS_center.material.opacity; 
 	
 	QS_measuring_stick.rotation.copy(QS_center.rotation);
 	
-	QS_measuring_stick.scale.y = MousePosition.length() * 0.0233 * QS_center.material.opacity;
-	QS_measuring_stick.scale.x = QS_measuring_stick.scale.y / 2.5;
+	if(MODE === CK_MODE)
+		QS_measuring_stick.scale.y = MousePosition.length() * Math.max(0.001, QS_center.material.opacity) * 0.0175; //last number chosen by inspection
+	else
+		QS_measuring_stick.scale.y = MousePosition.length() * Math.max(0.001, QS_center.material.opacity) * 0.0233; //last number chosen by inspection
+	QS_measuring_stick.scale.x = QS_measuring_stick.scale.y / 1.7;
 	
 	QS_measuring_stick.rotation.z = Math.atan2(MousePosition.y,MousePosition.x) + TAU / 4;
 	QS_center.rotation.z = QS_measuring_stick.rotation.z;
@@ -260,12 +272,11 @@ function MoveQuasiLattice()
 		//a random pop
 		var playedPop = "pop" + Math.ceil(Math.random()*3).toString();;
 		
-		if( !Sounds[ playedPop ].isPlaying )
+		if( !Sounds[ playedPop ].isPlaying && stable_point_of_meshes_currently_in_scene !== 999 )
 			Sounds[ playedPop ].play();
 		
 		camera.directionalShake.copy(MousePosition);
-		camera.directionalShake.z = 0;
-		camera.directionalShake.setLength(0.01);
+		camera.directionalShake.z = 0.1;
 		
 		stable_point_of_meshes_currently_in_scene = modulated_CSP;
 	}

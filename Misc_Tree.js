@@ -154,7 +154,7 @@ function update_tree()
 			}
 			else if(i===3)
 			{
-				zika_introduction_animation += 0.014;
+				zika_introduction_animation += 0.014 * delta_t / 0.016;
 				var moving_chapters_x = Virus_chapter_icons.icon_spacing / 2 + Virus_chapter_icons.icon_spacing / 2 * move_smooth(1, zika_introduction_animation);
 				Virus_chapter_icons[1].position.x =-moving_chapters_x;
 				Virus_chapter_icons[2].position.x = moving_chapters_x;

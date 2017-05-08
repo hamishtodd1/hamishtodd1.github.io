@@ -20,7 +20,9 @@ function initFishUniverse( presentation, Controller, transferredObjectData )
 	var fishEye = new THREE.Object3D();
 	var pupilRadius = fishLength / 40;
 	var fishPupil = new THREE.Mesh(new THREE.CylinderGeometry(pupilRadius, pupilRadius, fish.children[0].position.z * 6, 20), new THREE.MeshBasicMaterial({ color:0x000000 }));
-	fishEye.add(new THREE.Mesh(new THREE.CylinderGeometry(pupilRadius*2, pupilRadius*2, fish.children[0].position.z * 4, 20), new THREE.MeshBasicMaterial({ color:0xFFFFFF })));
+	var eyeWhite = new THREE.Mesh(new THREE.CylinderGeometry(pupilRadius*2, pupilRadius*2, fish.children[0].position.z * 4, 20), new THREE.MeshBasicMaterial({ color:0xFFFFFF }));
+	var blickCountdown = 0;
+	fishEye.add(eyeWhite);
 	fishEye.add(fishPupil);
 	fishEye.rotation.x = TAU / 4;
 	fishEye.position.x = 0.04 * fishLength / (universeWidth / 8);
@@ -94,6 +96,16 @@ function initFishUniverse( presentation, Controller, transferredObjectData )
 				fish.position.y = -universeHeight / 2 * fishRadiusScalar;
 			if( fish.position.y > universeHeight/2 * fishRadiusScalar)
 				fish.position.y = universeHeight / 2 * fishRadiusScalar;
+			
+			//untested
+//			if(Math.random() < 0.01)
+//			{
+//				eyeWhite.material.color.set(0,0,0);
+//				blickCountdown = 0.1;
+//			}
+//			blickCountdown -= delta_t;
+//			if( blickCountdown < 0 )
+//				eyeWhite.material.color.set(1,1,1);
 			
 			fish.rotation.z = Controller.rotation.z;
 		}

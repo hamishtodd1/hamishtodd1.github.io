@@ -1,27 +1,22 @@
+var capsidopennessParameter = capsidopenness;
+
 function UpdateCapsid() {
-	var oldcapsidopenness = capsidopenness;
-	
-	var magnitudeAcceleration = 0.00079 * delta_t / 0.016;
+	if(capsidopenness === 1 || capsidopenness === 0)
+		capsidopennessParameter = capsidopenness;
 	
 	if( IrregButton.capsidopen )
 	{
-		if(capsidopenness < 0.5)
-			capsidopeningspeed += magnitudeAcceleration;
-		else
-			capsidopeningspeed -= magnitudeAcceleration;
-		if( capsidopeningspeed < 0)
-			capsidopeningspeed = 0.001;
+		capsidopennessParameter += delta_t*0.9;
+		if(capsidopennessParameter>1)
+			capsidopennessParameter = 1;
 	}
 	else {
-		if(capsidopenness > 0.5)
-			capsidopeningspeed -= magnitudeAcceleration;
-		else
-			capsidopeningspeed += magnitudeAcceleration;
-		if( capsidopeningspeed > 0)
-			capsidopeningspeed = -0.001;
+		capsidopennessParameter -= delta_t*0.9;
+		if(capsidopennessParameter<0)
+			capsidopennessParameter = 0;
 	}
 	
-	capsidopenness += capsidopeningspeed;
+	capsidopenness = move_smooth(1, capsidopennessParameter);
 	
 	if(capsidopenness > 1) {
 		capsidopenness = 1;
@@ -51,6 +46,7 @@ function UpdateCapsid() {
 			surfaceangle *= 0.93;
 		
 		var CK_showoff_rotation_duration = 0.9;
+		CK_showoff_time = 5; //YO DELETE THIS
 		if( CK_showoff_time <= our_CurrentTime && our_CurrentTime <= CK_showoff_time + CK_showoff_rotation_duration )
 			surface.rotateOnAxis(new THREE.Vector3(0,1,0),delta_t * 2.2);
 		if( CK_showoff_time + CK_showoff_rotation_duration + 0.2 <= our_CurrentTime && our_CurrentTime <= CK_showoff_time + CK_showoff_rotation_duration*2 + 0.2 )
@@ -276,11 +272,9 @@ function change_radius(sphere, radius) {
 
 function update_surfperimeter() {
 	var surfperimeterradius = 0;
-	var proportion_of_opening_for_swell = 1;
-	if( capsidopenness < proportion_of_opening_for_swell )
-		surfperimeterradius = capsidopenness / proportion_of_opening_for_swell * surfperimeter_default_radius;
-	else
-		surfperimeterradius = surfperimeter_default_radius;
+	surfperimeterradius = surfperimeter_default_radius * (capsidopenness - 0.92) / (1-0.92);
+	if( surfperimeterradius < 0 )
+		surfperimeterradius = 0;
 	
 	var a1index, a2index, b1index, b2index;
 	var a1,a2,b1,b2;

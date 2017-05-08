@@ -36,6 +36,7 @@ var vertical_fov = 2 * Math.atan(playing_field_dimension/(2*min_cameradist));
 var camera = new THREE.CombinedCamera(playing_field_dimension, playing_field_dimension, vertical_fov * 360 / TAU, 0.1, 1000, 0.1, 1000);
 camera.directionalShake = new THREE.Vector3();
 camera.randomShake = 0;
+camera.directionalShakeContribution = new THREE.Vector3();
 var scene = new THREE.Scene();
 
 var window_height = 360; //to begin with
@@ -235,8 +236,8 @@ var surflattice_vertices_numbers = new Float32Array(3 * number_of_lattice_points
 var surflattice_vertices;
 var surflattice_geometry;
 
-var LatticeScale = 0.557735024;//1/3 nice size //10/3 * HS3 / number_of_hexagon_rings; maybe the largest?
-var LatticeAngle = 0.523598783; //TAU/12;
+var LatticeScale = 0.3779644678173249;//1/3 nice size //10/3 * HS3 / number_of_hexagon_rings; maybe the largest?
+var LatticeAngle = 0.33347313373527504; //TAU/12;
 var LatticeGrabbed = false;
 
 var vertices_derivations;

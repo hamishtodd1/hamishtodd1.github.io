@@ -6,6 +6,13 @@ var IrregButtonClosed;
 
 var slideObjects;
 
+/*
+ * you have to overhaul pretty much everything that currently controls their position
+ * 
+ * Problem with having multiple pictures visible together: if some of them have 1024 borders, they'll overlap :/ unless you avoid that
+ * So you need transparency there
+ */
+
 function load_AV_stuff()
 {
 	var picturesLoaded;
@@ -66,6 +73,8 @@ function load_AV_stuff()
 						if( soundInfoArray[i*2+1][soundInfoArray[i*2+1].length-4] !== "." )
 							soundInfoArray[i*2+1] += ".wav";
 						Sounds[soundInfoArray[i*2]] = new Audio( "http://hamishtodd1.github.io/Data/Sounds/" + soundInfoArray[i*2+1] );
+						
+						//TODO back to three audio, probably compatible!
 					}
 //					Sounds.enlarge.setVolume(3);
 //					Sounds.ensmall.setVolume(3);
@@ -128,7 +137,7 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Opening selection 2a.jpg"); bordered.push(0);
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Opening selection 2.png"); bordered.push(0);
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/shrine.jpg"); bordered.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Opening selection 3.png"); bordered.push(0);
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/bluetongue.jpg"); bordered.push(0);
 
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Cell with proteins.png"); bordered.push(0);
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/humans.jpg"); bordered.push(0);

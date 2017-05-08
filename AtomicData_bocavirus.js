@@ -10,6 +10,7 @@ var unflash_time = 0;
 var movement_duration = 1.5;
 
 var pullback_start_time = 3;
+var cell_appears_time = 4;
 var cell_move_time = 6;
 var boca_explosion_start_time = 9;
 var start_reproducing_time = 2;
@@ -23,9 +24,19 @@ function update_bocavirus() {
 		EggCell.visible = true;
 	
 	var cell_eaten_bocavirus_position = new THREE.Vector3( EggCell_initialposition.x - ( EggCell_initialposition.x - EggCell_radius ) * 2, 0, 0);
-	EggCell.position.copy( move_smooth_vectors( EggCell_initialposition, cell_eaten_bocavirus_position, movement_duration, our_CurrentTime - cell_move_time ) );
+	
 	EggCell.scale.x = 1 + 0.04 * Math.sin(1.4* (our_CurrentTime-(cell_move_time+movement_duration)));
 	EggCell.scale.y = 1 + 0.04 * Math.sin(our_CurrentTime-(cell_move_time+movement_duration));
+	
+	var eggCellPrevisiblePosition = EggCell_initialposition.clone();
+	eggCellPrevisiblePosition.x += EggCell_radius * 1;
+	
+	if( our_CurrentTime < cell_appears_time + movement_duration )
+		EggCell.position.copy( move_smooth_vectors(eggCellPrevisiblePosition, EggCell_initialposition, movement_duration, our_CurrentTime - cell_appears_time) );
+	else if( our_CurrentTime < whole_thing_finish_time )
+		EggCell.position.copy( move_smooth_vectors(EggCell_initialposition, cell_eaten_bocavirus_position, movement_duration, our_CurrentTime - cell_move_time) );
+	else
+		EggCell.position.copy( EggCell_initialposition );
 	
 	var rightmost_visible_x = EggCell_initialposition.x + EggCell_radius;
 	var leftmost_visible_x = cell_eaten_bocavirus_position.x - EggCell_radius;
@@ -35,13 +46,15 @@ function update_bocavirus() {
 	var Cell_virus_visible_position = new THREE.Vector3( CEPx, 0, CEPz );
 	
 	var chap1camDefaultPosition = new THREE.Vector3(0,0,min_cameradist * 1.5);
+	var pulledBackPosition = chap1camDefaultPosition.clone();
+	pulledBackPosition.z = Cell_virus_visible_position.z;
 	
 	var cornucopia_camera_position = chap1camDefaultPosition.clone();
 	cornucopia_camera_position.z *= 3;
-	if( our_CurrentTime < pullback_start_time + movement_duration )
-		camera.position.copy( move_smooth_vectors(chap1camDefaultPosition, Cell_virus_visible_position, movement_duration, our_CurrentTime - pullback_start_time) );
+	if( our_CurrentTime < cell_appears_time )
+		camera.position.copy( move_smooth_vectors(chap1camDefaultPosition, pulledBackPosition, movement_duration, our_CurrentTime - pullback_start_time) );
 	else if( our_CurrentTime < whole_thing_finish_time )
-		camera.position.copy(Cell_virus_visible_position);
+		camera.position.copy( move_smooth_vectors(pulledBackPosition, Cell_virus_visible_position, movement_duration, our_CurrentTime - cell_appears_time) );
 	else
 		camera.position.copy( chap1camDefaultPosition );
 	

@@ -2,20 +2,26 @@ function Map_lattice() {
 	var surface_hexamers_color = Story_states[Storypage].hexamers_color.clone();
 	var final_pentamers_color = Story_states[Storypage].pentamers_color.clone();
 	
+	var sphericality = Story_states[Storypage].sphericality;
+	if(capsidopenness )
+		sphericality = 0;
+	
 	var pentamers_color_adder = 1;
 	if(LatticeGrabbed)
 		pentamers_color_adder = 0;
 	var pentamers_color = new THREE.Color( /*we're trying something new*/
-			surface_hexamers_color.r + /*(1-capsidopenness) */ pentamers_color_adder * ( final_pentamers_color.r - surface_hexamers_color.r ),
-			surface_hexamers_color.g + /*(1-capsidopenness) */ pentamers_color_adder * ( final_pentamers_color.g - surface_hexamers_color.g ),
-			surface_hexamers_color.b + /*(1-capsidopenness) */ pentamers_color_adder * ( final_pentamers_color.b - surface_hexamers_color.b ) );
+			surface_hexamers_color.r + (1-capsidopenness) * pentamers_color_adder * ( final_pentamers_color.r - surface_hexamers_color.r ),
+			surface_hexamers_color.g + (1-capsidopenness) * pentamers_color_adder * ( final_pentamers_color.g - surface_hexamers_color.g ),
+			surface_hexamers_color.b + (1-capsidopenness) * pentamers_color_adder * ( final_pentamers_color.b - surface_hexamers_color.b ) );
 	
 	//the part where we explain things
 	{
 		var lattice_fadein_duration = 2;
-		var lattice_opacity = capsidopenness;
+		var lattice_opacity = capsidopenness; //we'd like to have this be capsidopenness but it is hiding a bug!
 		if( our_CurrentTime < lattice_fadein_time )
 			lattice_opacity = 0;
+		if( Story_states[Storypage].persistentLattice )
+			lattice_opacity = 1;
 		else if( our_CurrentTime < lattice_fadein_time + lattice_fadein_duration )
 			lattice_opacity = ( our_CurrentTime - lattice_fadein_time ) / lattice_fadein_duration;
 		//otherwise it's 1.
@@ -158,21 +164,9 @@ function Map_lattice() {
 					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 3 ].color.copy(pentamers_color);
 				}
 			}
-			else
-			{
-				if( hexcorner_nettriangles[ ( side_i * 2 + 0 ) % 12 ] !== 999 )
-				{
-					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 0 ].color.copy(surface_hexamers_color);
-					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 1 ].color.copy(surface_hexamers_color);
-				}
-				if( hexcorner_nettriangles[ ( side_i * 2 + 3 ) % 12 ] !== 999 )
-				{
-					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 2 ].color.copy(surface_hexamers_color);
-					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 3 ].color.copy(surface_hexamers_color);
-				}
-			}
 			
 			//------------possibilities begin here
+			var cornerChip = false;
 			
 			if(	edgecorner_nettriangles[0] === edgecorner_nettriangles[1] &&
 				edgecorner_nettriangles[2] === edgecorner_nettriangles[3] && 
@@ -259,14 +253,14 @@ function Map_lattice() {
 						if(is_an_intersection){
 							map_hex_point(intersections[corner], 
 									hexcorner_nettriangles[ ( side_i * 2 + corner ) % 12],
-									hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier);
+									hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier, sphericality);
 						}
 						else{
 							corner = ( side_i * 2 + corner ) % 12;
 							
 							map_hex_point(squarelattice_hexagonvertices[hexagon_first_squarelatticevertex_index+corner], 
 									hexcorner_nettriangles[ corner],
-									hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier);
+									hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier, sphericality);
 						}
 						
 						hexagonlattice_index++;
@@ -302,7 +296,7 @@ function Map_lattice() {
 						
 						map_hex_point(squarelattice_hexagonvertices[hexagon_first_squarelatticevertex_index+corner], 
 								hexcorner_nettriangles[ corner],
-								hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier);
+								hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier, sphericality);
 						
 						hexagonlattice_index++;
 					}
@@ -316,7 +310,7 @@ function Map_lattice() {
 				for(var i = 0; i < 4; i++){ //intersection point
 					var topend;
 					var bottomend;
-					if( i < 2 ){
+					if(i < 2){
 						topend = 0;
 						bottomend= 1;
 					}
@@ -380,25 +374,24 @@ function Map_lattice() {
 						
 						if(is_an_intersection){
 							map_hex_point(intersections[corner], 
-									hexcorner_nettriangles[ ( side_i * 2 + corner ) % 12],
-									hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier);
+									hexcorner_nettriangles[ ( side_i * 2 + corner ) % 12], //it's in this and the one below. So in a sense it's in corner_i
+									hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier, sphericality);
 						}
 						else{
 							corner = ( side_i * 2 + corner ) % 12;
 							
 							map_hex_point(squarelattice_hexagonvertices[hexagon_first_squarelatticevertex_index+corner], 
 									hexcorner_nettriangles[ corner],
-									hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier);
+									hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier, sphericality);
 						}
 						
 						hexagonlattice_index++;
 					}
 				}
 			}
-			
 			else
 			{
-				//one vertex separated
+				cornerChip = true;
 				
 				var pariahvertex = 999;
 				
@@ -458,18 +451,29 @@ function Map_lattice() {
 					}
 				}
 				
+				if( edgecorner_nettriangles[pariahvertex] !== 999 )
+					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 0 ].color.copy(surface_hexamers_color);
+				if( edgecorner_nettriangles[(pariahvertex+1) % 4] !== 999 )
+				{
+					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 1 ].color.copy(surface_hexamers_color);
+					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 2 ].color.copy(surface_hexamers_color);
+					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 3 ].color.copy(surface_hexamers_color);
+				}
+				
 				for(var tri_i = 0; tri_i < 4; tri_i++)
 				{
+					
 					for(var corner_i = 0; corner_i < 3; corner_i++)
 					{
 						var chipped_vertex;
-						if( tri_i === 0 ){
+						if( tri_i === 0 ){ //this can also be bad. It is always the chip
 							if(corner_i === 0 ) chipped_vertex = 0;
 							if(corner_i === 1 ) chipped_vertex = 5;
 							if(corner_i === 2 ) chipped_vertex = 1;
 						}
 						else 
-						if( tri_i === 1 ){
+						if( tri_i === 1 ){//this can be bad
+							
 							if(corner_i === 0 ) chipped_vertex = 3;
 							if(corner_i === 1 ) chipped_vertex = 1;
 							if(corner_i === 2 ) chipped_vertex = 5;
@@ -487,23 +491,42 @@ function Map_lattice() {
 							if(corner_i === 2 ) chipped_vertex = 5;
 						}
 						
-						//inspect tri's here next, they shouldn't be stretched from the lattice
+						
+						
+						//Problem is here, they're not going correctly
+						//again, it's being mapped fine, so it is for some tri_i
 						
 						if( tri_i === 0 ) //chipped triangle
 							map_hex_point(chipped_side_vertices[chipped_vertex], 
 								edgecorner_nettriangles[pariahvertex],
-								hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier);
+								hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier, sphericality);
 						else
 							map_hex_point(chipped_side_vertices[chipped_vertex], 
 								edgecorner_nettriangles[ (pariahvertex+1) % 4],
-								hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier);
+								hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier, sphericality);
 						
 						hexagonlattice_index++;
 					}
 				}
 			}
+			
+			if( cornerChip === false && !IsRoundedVertex[hexagon_i]) //we can use the default coloring scheme
+			{
+				if( hexcorner_nettriangles[ ( side_i * 2 + 0 ) % 12 ] !== 999 )
+				{
+					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 0 ].color.copy(surface_hexamers_color);
+					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 1 ].color.copy(surface_hexamers_color);
+				}
+				if( hexcorner_nettriangles[ ( side_i * 2 + 3 ) % 12 ] !== 999 )
+				{
+					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 2 ].color.copy(surface_hexamers_color);
+					HexagonLattice.geometry.faces[hexagon_i * 4 * 6 + side_i * 4 + 3 ].color.copy(surface_hexamers_color);
+				}
+			}
 		}
 	}
+	
+	var joltNeeded = false;
 
 	//potential optimisation: just put one in each net triangle and extrapolate
 	for(var i = 0; i < number_of_lattice_points; i++) {
@@ -512,15 +535,17 @@ function Map_lattice() {
 		if( latticevertex_nettriangle !== 999 ) {
 			var mappedpoint = map_XY_from_lattice_to_surface(
 					flatlattice_vertices.array[ i*3+0 ], flatlattice_vertices.array[ i*3+1 ],
-					latticevertex_nettriangle );
-			if(capsidopenness != 1) 
+					latticevertex_nettriangle, sphericality );
+			if( HexagonLattice.joltedness[i] === 0 )
+			{
+				joltNeeded = true;
+				HexagonLattice.joltedness[i] = 1;
+			}
+			
+			if(capsidopenness != 1) //TODO shouldn't this be further up?
 				surflattice_geometry.attributes.position.setXYZ(i, mappedpoint.x, mappedpoint.y, mappedpoint.z );
 //			else //just as normal with extra z to appear above the edges
 //				surflattice_geometry.attributes.position.setXYZ(i, mappedpoint.x, mappedpoint.y, mappedpoint.z + 0.01 );
-			
-			lattice_colors[i*3+0] = 1;
-			lattice_colors[i*3+1] = 0;
-			lattice_colors[i*3+2] = 0;
 		}
 		else 
 		{
@@ -528,12 +553,39 @@ function Map_lattice() {
 					Lattice_ring_density_factor*flatlattice_default_vertices[ i*3+0 ],
 					Lattice_ring_density_factor*flatlattice_default_vertices[ i*3+1 ],0);
 			
-			lattice_colors[i*3+0] = 1;
-			lattice_colors[i*3+1] = 0.682;
-			lattice_colors[i*3+2] = 0.682;
+			HexagonLattice.joltedness[i] = 0; //make it so that they can be set to 1 again
+		}
+		
+		if(capsidopenness === 1 && HexagonLattice.joltedness[i] > 0) //decrease til negative. Will only be made expandable again if it's made zero
+		{
+			for(var j = i*72, jl = (i+1)*72; j < jl; j++)
+			{
+				HexagonLattice.geometry.vertices[j].x -= surflattice_geometry.attributes.position.array[i*3+0];
+				HexagonLattice.geometry.vertices[j].y -= surflattice_geometry.attributes.position.array[i*3+1];
+				HexagonLattice.geometry.vertices[j].multiplyScalar( 1+HexagonLattice.joltedness[i]*0.15 );
+				HexagonLattice.geometry.vertices[j].x += surflattice_geometry.attributes.position.array[i*3+0];
+				HexagonLattice.geometry.vertices[j].y += surflattice_geometry.attributes.position.array[i*3+1];
+			}
+			
+			for(var j = 0; j < 24; j++)
+				HexagonLattice.geometry.faces[i * 24 + j].color.g = HexagonLattice.joltedness[i];
+			
+			HexagonLattice.joltedness[i] -= delta_t * 2;
 		}
 	}
 	
+	if(joltNeeded)
+	{
+		camera.directionalShake.x = MousePosition.x;
+		camera.directionalShake.y = MousePosition.y;
+		var mouseDeltaForMaxImpact = 0.6;
+		var timeForMinMouseDeltaImpact = 0.5;
+		camera.directionalShake.z = timeForMinMouseDeltaImpact - (Mouse_delta.length() / mouseDeltaForMaxImpact) * timeForMinMouseDeltaImpact;
+		if(camera.directionalShake.z < 0)
+			camera.directionalShake.z = 0;
+		
+		console.log(Mouse_delta.length())
+	}
 	
 	surflattice.geometry.attributes.position.needsUpdate = true;
 	surflattice.geometry.attributes.color.needsUpdate = true;

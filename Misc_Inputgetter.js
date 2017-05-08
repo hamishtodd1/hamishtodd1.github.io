@@ -120,9 +120,10 @@ document.addEventListener( 'mousemove', function(event) {
 	InputObject.mousex *= playing_field_dimension / renderer.domElement.width;
 	InputObject.mousey *= playing_field_dimension / renderer.domElement.height;
 	
-	//assumed to be zero because screenshake makes it annoying!
-//	InputObject.mousex += camera.position.x;
-//	InputObject.mousey += camera.position.y;
+	InputObject.mousex += camera.position.x;
+	InputObject.mousey += camera.position.y;
+	InputObject.mousex -= camera.directionalShakeContribution.x;
+	InputObject.mousey -= camera.directionalShakeContribution.y;
 }, false ); //window?
 
 //document.addEventListener( 'touchstart', onDocumentMouseDown, false );

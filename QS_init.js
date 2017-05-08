@@ -855,25 +855,10 @@ function initialize_QS_stuff()
 		}
 	}
 	
-	var midpoint = quasilattice_default_vertices[0].clone();
-	midpoint.lerp(quasilattice_default_vertices[2], 0.5);
-	var midpoint2 = midpoint.clone();
-	midpoint2.applyAxisAngle(axis, TAU/5);
-	midpoint.lerp(midpoint2, 0.5);
-	var additionallength = midpoint.distanceTo(midpoint2) * Math.tan(TAU/10);
-	midpoint.multiplyScalar(1+additionallength/midpoint.length());
-	cutout_vector0.copy(midpoint);
-	midpoint.applyAxisAngle(axis, TAU/5);
-	cutout_vector1.copy(midpoint);
-	
 	//INITIAL STATE
-	cutout_vector0.copy(stable_points[15]);
+	cutout_vector0.copy(stable_points[2]);
 	cutout_vector1.copy(cutout_vector0);	
 	cutout_vector1.applyAxisAngle(z_central_axis, -TAU/5);
-	/* 
-	 * 
-	 * 1.3090169943749475, -0.10040570794311371, 0.30901699437494745, -1.27597621252806 //so this one is bad. More thinking needed. For some rotations it fails, probably just round off errors
-	 */
 	cutout_vector0_player = cutout_vector0.clone();
 	cutout_vector1_player = cutout_vector1.clone();
 	

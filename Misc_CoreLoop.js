@@ -1,76 +1,80 @@
-/* Do everything listed in camerastuff
- * Sounds
+/* Deal with QS images
+ * Then images moving around
  * 
- * Sheree's cell illustration must be compatible with all others and must have a gap for the viruse
- * Images for Sheree. Discuss with Sheree what should go beneath
+ * camerastuff stuff
+ * -------Sounds
+ * Bumps
+	https://www.freesound.org/people/zerolagtime/sounds/245033/
+	https://www.freesound.org/people/chrillz3r/sounds/387973/
+ * Will have that "closing" sound effect but will probably also have a pop when it's shut
+ * 
+ * 
+ * Images for Sheree
  * Go through demos with Sheree and ask what colors should go where
- * Images for Diego
- *  
+ * Images for Diego. HPV fade to model, and phi29 to real thing
  * 
- * Shadows on irreg; a "floor" for the shadow. Different lights.
- * Depth material for QS?
+ * Youtube version, facebook version
  * 
  * ------Below the thing
  * Sheree must design
  * 		A "go to tree" button
  * 		Social media buttons
  * 		Press kit
+ * 		Your page
  * 		Contact
  * 		Information for teachers
- * 		SEO terms; maybe transcript (i.e. script). Click to expand
- * 		Maybe picture so the fucking thing appears
- * 
- * ----Islamic stuff
- * pentagon illustration
- * pentagons appear around it
+ * 		SEO terms: "more interactive teaching tools; more information on viruses; more information on mathematics in art"
+ * 		Maybe picture so the fucking things appears
+ * 		picture at the bottom, for style
+ * 		Picture that gets grabbed by facebook and twitter. Maybe make it really fucking small?
+ * 		Of course you want a motherfucking border
  * 
  * ----Cut
  * "which felt awful... let down"
  * "much smarter than western artists"
  * 
- * -------------When final cut is in / video response stuff
- * 		The pattern for a "bring something in" animation appears to be: zoom out, move to make room, new ones move in
- * 		Hmm, why shouldn't religious art use BTV?
+ * --------"pictures come in" parts. Make an engine! The pattern for a "bring something in" animation appears to be: zoom out, move to make room, new ones move in
+ * pentagon thing
+ * 		pentagons appear around it
+ * Golf balls that look like viruses, buildings that look like viruses - they all pile up
+ * move in from side, come down from top, all the time?
+ * Hepatitis
+ * HIV cure stuff
+ * darb e stuff?
+ * "These are images of some other viruses". Sheree chooses composition?
+ * zika, bluetongue, hpv
+ * Pentagons and more shapes
+ * 	 zoom in on the monkey down to one of its cells? Would need illustration 
+ * 	 darb e pattern comes out of that place while fading? Ask Diego
+ * 
+ * -------------Video response stuff (easy)
  * 		irreg: line up initial state with your very icosahedral virus and spin it a bit
-		Flick between spherical projection and flat for "the patterns that appeared on these viruses"
- * 		Golf balls that look like viruses, buildings that look like viruses - they all pile up
- * 		Lattice disappears when closed, except when you're doing the pentagon-noticing part
- * 		Will have that "closing" sound effect but will probably also have a pop when it's shut
- * 		zoom in on the monkey down to one of its cells? Arrrrrgh need illustration
- * 		cell comes in and is same size as virus. They change size when you say so.
- * 		the virus pieces pop in by increasing size from zero
- * 		Highlight the pentagons and hexagons on polio and hepatitis B when you say it (just make pics with different colors and fade) 
- * 		darb e pattern comes out of that place while fading? Ask Diego
- *		"These are images of some other viruses". Sheree chooses composition, you animate
- * 		irreg trying different configurations for algorithm
- * 		things respond to your hand movements
+ *		Highlight the pentagons and hexagons on polio and hepatitis B when you say it (just make pics with different colors and fade)
+ *		irreg trying different configurations for algorithm
  * 		models go haywire at the end
  * 		Camera closer on beginning of CK
  * 		the button flashes until you have opened AND closed it, with a change between
- * 		The whole hepatitis thing. They all come in.
- * 		CK pentagons flashing like sirens
- * 		angle measurers fade in
- * 		Show the crazy CK examples sequentially.
- * 
+ * 		CK pentagons flashing like sirens. Circles around them appear?
+ * 		Make difference between phi29 and t4 clearer by doing it with the flattened net
+ * 		Flick between spherical projection and flat for "the patterns that appeared on these viruses"
+ * 		Lattice disappears when closed, except when you're doing the pentagon-noticing part
  * 
  * 
  * --------Technical
- * Flash 10 etc is required,  check for that
- * Bug: CK can get stuck trying to close
+ * Get it on an amazon or google server
+ * Check for required things like flash 10. 
  * touchscreen (test on Jessie's computer)
  * Sounds in .mp3 or 4
  * 	If webgl doesn't load (or etc), recommend a different browser... or refreshing the page
- *	Loading wise, would it be faster with more than one loader?
- *  -link to great big static version if page doesn't work in some way
- *  -make sure a good picture appears when shared on facebook and twitter. DEEPLY SUSPICIOUS: it gets the image on aboutme but not on recommendations.
+ *	-link to great big static version if page doesn't work in some way
  *  -test on different setups
 		-Johan's Mac
 		-Reidun's computer (probably just webgl)
+	Something during qs appeared to make it want a state from 308 or something
  *  
  *  ---------Probably never to be solved
  *  A bug may have caused things to be skipped. Hopefully that goes away with the new arrangement
  * 	-cite non-illustrated pictures
- * Youtube fullscreen doubleclick problem
  * QS normals:
  * 		For all triangles with an unmarked edge on a dod edge, set their face normals to the normalized midpoint of the two corners they have on that edge
  * 		Then for all triangles in some shared shape, decide on a normal. Eg for the hexagon get it from that normal
@@ -199,14 +203,11 @@ function ChangeScene(new_mode) {
 			
 			scene.add(CKHider); //can remove this if you have no internet
 			scene.add(HexagonLattice);
-			scene.add(surface);
-//			scene.add(surflattice);
+//			scene.add(surface);
 			for( var i = 0; i < surfperimeter_cylinders.length; i++) {
 //				scene.add(surfperimeter_spheres[i]);
 				scene.add(surfperimeter_cylinders[i]);
 			}
-//			for( var i = 0; i < blast_cylinders.length; i++)
-//				scene.add(blast_cylinders[i]);
 			for(var i = 0; i< lights.length; i++)
 				scene.add( lights[i] );
 			scene.add(QS_measuring_stick);

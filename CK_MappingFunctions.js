@@ -1,4 +1,4 @@
-function map_hex_point(squarelattice_position, nettriangle, hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier)
+function map_hex_point(squarelattice_position, nettriangle, hexagonlattice_index, LatticeRotationAndScaleMatrix, non_surface_hexamers_multiplier, sphericality)
 {	
 	HexagonLattice.geometry.vertices[hexagonlattice_index].copy(squarelattice_position);
 	
@@ -12,7 +12,7 @@ function map_hex_point(squarelattice_position, nettriangle, hexagonlattice_index
 	
 	apply2Dmatrix(LatticeRotationAndScaleMatrix,
 			HexagonLattice.geometry.vertices[hexagonlattice_index]);
-	map_from_lattice_to_surface( HexagonLattice.geometry.vertices[hexagonlattice_index], nettriangle );
+	map_from_lattice_to_surface( HexagonLattice.geometry.vertices[hexagonlattice_index], nettriangle, sphericality );
 }
 
 function Update_net_variables() {
@@ -90,13 +90,13 @@ function Update_net_variables() {
 	}
 }
 
-function map_XY_from_lattice_to_surface(x,y, net_triangle_index) {
+function map_XY_from_lattice_to_surface(x,y, net_triangle_index, sphericality) {
 	var mappedpoint = new THREE.Vector3(x,y,0);
-	map_from_lattice_to_surface(mappedpoint, net_triangle_index);
+	map_from_lattice_to_surface(mappedpoint, net_triangle_index, sphericality);
 	return mappedpoint;
 }
 
-function map_from_lattice_to_surface(vec, net_triangle_index) {
+function map_from_lattice_to_surface(vec, net_triangle_index, sphericality) {
 	//you could have an "if net_triangle_index === 999 return x y"?
 	vec.x -= setvirus_flatnet_vertices[3][(net_triangle_index+2)*3 + 0];
 	vec.y -= setvirus_flatnet_vertices[3][(net_triangle_index+2)*3 + 1];
@@ -122,8 +122,7 @@ function map_from_lattice_to_surface(vec, net_triangle_index) {
 	
 	vec.add( stickon_vector );
 	
-	//YO, SPHERICAL PROJECTION
-//	if(capsidopenness === 0 ) vec.setLength(1/LatticeScale);
+	if( sphericality ) vec.setLength( 0.25/LatticeScale );
 }
 
 //obviously, much speedup opportunities

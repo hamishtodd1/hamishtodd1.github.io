@@ -862,6 +862,9 @@ function init_CK_and_irreg()
 	        polygonOffsetUnits: -4.0
 //	        depthWrite: false, depthTest: false
 	        }));
+		HexagonLattice.joltedness = Array(number_of_lattice_points);
+		for(var i = 0, il = HexagonLattice.joltedness.length; i < il; i++)
+			HexagonLattice.joltedness[i] = 0;
 //	    HexagonLattice.renderOrder = 1; //yay, works
 		squarelattice_hexagonvertices = Array(6 * 2 * number_of_lattice_points); //only 2 points per corner
 		for(var i = 0; i < squarelattice_hexagonvertices.length; i++ )
@@ -912,10 +915,14 @@ function init_CK_and_irreg()
 		hexagon_generator[4] = new THREE.Vector3(-1, 0,0);		//BL
 		hexagon_generator[5] = new THREE.Vector3(0,  1,0);		//TL
 		
-		var hexagon_major_Scalar = 83; //will get divided by 100.
-		var hexagon_minor_Scalar = 1; //TRY SETTING THIS TO ZERO
+		var hexagon_major_Scalar = 96; //will get divided by 100.
+		var hexagon_minor_Scalar = 1;
 		
-		
+		function insert_squareHexagon_corner(ourindex,ourgenerator,ourScalar,hexagoncenter){
+			squarelattice_hexagonvertices[ourindex].copy(ourgenerator);
+			squarelattice_hexagonvertices[ourindex].multiplyScalar(ourScalar);
+			squarelattice_hexagonvertices[ourindex].add(hexagoncenter);
+		}
 
 		var index = 0;
 		var lowest_unused_HL_vertex = 0;
@@ -954,10 +961,4 @@ function init_CK_and_irreg()
 			shear_matrix[i] = new Array(4);
 		Update_net_variables();
 	}
-}
-
-function insert_squareHexagon_corner(ourindex,ourgenerator,ourScalar,hexagoncenter){
-	squarelattice_hexagonvertices[ourindex].copy(ourgenerator);
-	squarelattice_hexagonvertices[ourindex].multiplyScalar(ourScalar);
-	squarelattice_hexagonvertices[ourindex].add(hexagoncenter);
 }
