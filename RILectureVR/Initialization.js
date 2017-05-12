@@ -125,7 +125,7 @@ socket.on('OnConnect_Message', function(msg)
 			init_axes(presentation);
 			
 //			qcTablet.init();
-//			init_atoms( presentation ); //fuck this
+			init_atoms( presentation );
 			
 			initVideos( presentation );
 			init_cubes( presentation );
@@ -136,6 +136,8 @@ socket.on('OnConnect_Message', function(msg)
 			initHoneycombs( presentation );
 			initFishUniverse( presentation, Controllers[ LEFT_CONTROLLER_INDEX ], transferredObjectData );
 			initSymmetryDemonstration( presentation, transferredObjectData );
+			
+//			initToys(presentation);
 			
 			//Still to do:
 			//can have axes at a default setting in a slide. Snowflake setting

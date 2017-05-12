@@ -60,3 +60,62 @@ function loadpic(url, materialToMapTo) {
 		}
 	);
 }
+
+function init_cylinder(ourGeometry, cylinder_sides, num_added)
+{
+	var firstVertexIndex = num_added * cylinder_sides * 2;
+	for(var i = 0; i < cylinder_sides; i++)
+	{
+		ourGeometry.vertices.push(new THREE.Vector3());
+		ourGeometry.vertices.push(new THREE.Vector3());
+		ourGeometry.faces.push( new THREE.Face3(
+			firstVertexIndex + i*2+1,
+			firstVertexIndex + i*2+0,
+			firstVertexIndex + (i*2+2) % (cylinder_sides*2)
+				) );
+		ourGeometry.faces.push( new THREE.Face3(
+			firstVertexIndex + i*2+1,
+			firstVertexIndex + (i*2+2) % (cylinder_sides*2),
+			firstVertexIndex + (i*2+3) % (cylinder_sides*2)
+				) );
+	}
+}
+
+function Random_perp_vector(OurVector){
+	var PerpVector = new THREE.Vector3();
+	
+	if( OurVector.equals(zAxis))
+		PerpVector.crossVectors(OurVector, yAxis);
+	else
+		PerpVector.crossVectors(OurVector, zAxis);
+	
+	return PerpVector;
+}
+function insert_cylindernumbers(A,B, vertices_array, cylinder_sides, cylinderIndex, radius ) {
+	var array_startpoint = cylinder_sides * 2 * cylinderIndex;
+	
+	var A_to_B = new THREE.Vector3(B.x-A.x, B.y-A.y, B.z-A.z);
+	A_to_B.normalize();
+	var perp = Random_perp_vector(A_to_B);
+	perp.normalize(); 
+	for( var i = 0; i < cylinder_sides; i++)
+	{
+		var radiuscomponent = perp.clone();
+		radiuscomponent.multiplyScalar(radius);
+		radiuscomponent.applyAxisAngle(A_to_B, i * TAU / cylinder_sides);
+		
+		vertices_array[array_startpoint + i*2 ].copy(radiuscomponent);
+		vertices_array[array_startpoint + i*2 ].add(A);
+		
+		vertices_array[array_startpoint + i*2+1 ].copy(radiuscomponent);
+		vertices_array[array_startpoint + i*2+1 ].add(B);
+	}
+}
+
+//assumes center is at 0,0,0
+function clockwise_on_polyhedronsurface(A,B,C)
+{
+	var ourcross = (new THREE.Vector3()).crossVectors( A, B );
+	var clockwise = ( ourcross.dot( C ) < 0 );
+	return clockwise;
+}

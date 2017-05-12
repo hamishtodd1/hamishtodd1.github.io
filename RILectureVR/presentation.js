@@ -103,6 +103,7 @@ function initPresentation(presentation)
 		this.symmetryDemonstrationMode = "nothing";
 
 		this.volumeVisible = false;
+		this.fishVisible = true;		
 		this.startingEL = {ep2D: 0, ep3D: 0, ep4D: 0, ep6D: 0};
 		
 //		this.whetherAxesAreFactories = [false,true, true, true, true]; //for now this is crap
@@ -122,21 +123,11 @@ function initPresentation(presentation)
 	
 	//--------------Begin Plan
 	/*
-	 * TODO May 13th
-	 * shapes snap together (what can you do with that?)
-	 * Transform any shape into a points version of it. All in the middle?
+	 * TODO
 	 * atoms are nice and blurry. A bunch of concentric semi spheres that point at the camera?
 	 * axis vectors snap thing into same place
-	 * new plan. Should have Reidun, and ideally the shaking
-	 * Patterns allow lots of atoms to be at the right distance, so they're stable
 	 * Maybe later, CCMV
-	 * Axis vectors affect point clouds.
-	 * House made of cubes
-	 * Can show squashing cloud of 3D points into something that looks just like its shadow
 	 * 
-	 * Try just having the points attached to the 4 basis vectors, before talking to Uwe
-	 * 
-	 * eh8 (arthur's seat), 9(main)
 	 * 
 	 * Send video out to:
 	 * 	your consultant
@@ -146,73 +137,56 @@ function initPresentation(presentation)
 	var h = presentation.holdables;
 	var p = presentation.pages;
 	
+//	p.push( new page( [h.tetToy] ) );
+	
+	p.push( new page([]) );
+	
 	p.push( new page( slides.sevenfoldPattern ) );
 	p.push( new page( slides.sunflowerAndWall ) );
-	p.push( new page( [h.looseRhom0, h.looseRhom1, h.looseGico,h.looseDode,h.looseTria] ) );//they fit together
-	p.push( new page( [h.star, h.adornedTria, h.looseGico, h.looseDode] ) );
-	
-//	p.push( new page( slides.virusVictims ) );
-//	p.push( new page( slides.virusStructures ) );
-//	p.push( new page( slides.zikaBaby ) );
-//	p.push( new page( [ h.zika ] ) );
-//	p.push( new page( slides.mainQC ) );
-//	
-//	p.push( new page( [h.symmetryDemonstration] ) );
-//	p[ p.length-1 ].symmetryDemonstrationMode = "nothing";
-//	p.push( new page( [h.symmetryDemonstration] ) );
-//	p[ p.length-1 ].symmetryDemonstrationMode = "reflection";
-//	p.push( new page( [h.symmetryDemonstration] ) );
-//	p[ p.length-1 ].symmetryDemonstrationMode = "rotation";
-//	p.push( new page( [h.symmetryDemonstration] ) );
-//	p[ p.length-1 ].symmetryDemonstrationMode = "translation";
-//	
-//	p.push( new page( slides.symmetryExerciseCue ) );
-//	p.push( new page( slides.lungsAndBuilding ) );
-	
-	p.push( new page( slides.lungsAndBuilding ) );
 	p.push( new page( slides.everyday3DPatterns ) );
+	p.push( new page( slides.lungsAndBuilding ) );
+	p.push( new page( slides.mainQC ) );
 	
 	p.push( new page( [ h.cubicLattice ] ) );
 	p.push( new page( [ h.octaHoneycomb, h.baseOcta, h.baseLTet ] ) );
 	p.push( new page( [ h.RDhoneycomb, h.baseRD ] ) );
 	
-	p.push( new page( [ h.fishUniverse ] ) );
-	p.push( new page( slides.marioBros ) );
-	p.push( new page( [ h.fishUniverse, h.octagon0 ] ) );
-	p.push( new page( [ h.fishUniverse, h.ep3D ] ) );
-	p[ p.length-1 ].volumeVisible = true;
-	p[ p.length-1 ].startingEL["ep3D"] = 3;
-	p.push( new page( [ h.fishUniverse, h.treePuzzle ] ) );
-	p.push( new page( [ h.fishUniverse, h.sliceableTree, h.treeSlicer ] ) );
-	p.push( new page( slides.tree ) );
-	p.push( new page( slides.orangeSlide ) );
-	p.push( new page( slides.slicingExerciseCue ) );
-	p.push( new page( [ h.fullNoHole ] ) );
+	p.push( new page( [h.looseRhom0, h.looseRhom1, h.looseGico,h.looseDode,h.looseTria] ) );//they fit together
+	p.push( new page( [h.star, h.adornedTria, h.looseGico, h.looseDode] ) );
 	
-	p.push( new page( slides.banana ) );
-	p.push( new page( slides.mri ) );
-	p.push( new page( [ h.mriVideo ] ) );
-	p.push( new page( [ h.fullNoHole ] ) );
-	p.push( new page( [ h.halfNoHole ] ) );
-	p.push( new page( [ h.full3hole ] ) );
-	p.push( new page( [ h.half3hole ] ) );
-
-	p.push( new page( slides.crystal2 ) );
 	p.push( new page( slides.crystal1 ) );
-	p.push( new page( [ h.cubicLattice ] ) );
 	p.push( new page( [ h.cubicLattice, h.atomicCubicLattice ] ) );
+	p.push( new page( slides.crystal2 ) );
+	p.push( new page( [ h.octaHoneycomb ] ) );
 	p.push( new page( [ h.snowflakeGrowthVideo ] ) );
 	p.push( new page( [ h.crystalGrowthVideo ] ) );
-	p.push( new page( [ h.fishUniverse, h.atomicCubicLattice, h.latticeShadow, h.torch ] ) );
-	p.push( new page( slides.diffractionImages ) );
+	p.push( new page( [ h.simulationVideo ] ) );
+	p.push( new page( [ h.holdingAtom, h.attractedAtom ] ) );
+	
 	p.push( new page( slides.diffractionMachine ) );
 	p.push( new page( [ h.diffractionVideo ] ) );
+	p.push( new page( slides.diffractionImages ) );
+	p.push( new page( [ h.fishUniverse, h.atomicCubicLattice, h.latticeShadow, h.torch ] ) );
+	p[ p.length-1 ].fishVisible = false;
 	
 	p.push( new page( slides.moreCrystals ) );
 	p.push( new page( slides.moreDiffraction ) );
 	
 	p.push( new page( slides.strangeSymmetryCrystals ) );
 	p.push( new page( slides.strangeSymmetryDiffraction ) );
+	
+	//in order to understand those things we're going to need to think about higher dimensional shapes
+	p.push( new page( [ h.fishUniverse ] ) );
+	p.push( new page( slides.marioBros ) );
+	p.push( new page( [ h.fishUniverse, h.octagon0 ] ) );
+	p.push( new page( [ h.fishUniverse, h.ep3D ] ) );
+	p[ p.length-1 ].volumeVisible = true;
+	p[ p.length-1 ].startingEL["ep3D"] = 3;
+	
+	//what is the 3D pattern that is inside a tree?
+	p.push( new page( [ h.fishUniverse, h.treePuzzle ] ) );
+	p.push( new page( slides.tree ) );
+	p.push( new page( [ h.fishUniverse, h.sliceableTree, h.treeSlicer ] ) );
 
 	p.push( new page( [ h.axis1D, h.axis2D, h.axis3D, h.axis4D, h.axis6D ] ) );
 	p[ p.length-1 ].adornmentsVisible = false;
@@ -227,21 +201,20 @@ function initPresentation(presentation)
 	p[ p.length-1 ].axis3DisSnowflake = true;
 	p.push( new page( [ h.fishUniverse, h.atomicCubicLattice, h.latticeShadow ] ) );
 
+	p.push( new page( [ h.fishUniverse, h.ep3D ] ) );
+	p[ p.length-1 ].volumeVisible = true;
+	p[ p.length-1 ].startingEL["ep3D"] = 3;
 	p.push( new page( [ h.fishUniverse, h.axis3D, h.ep3D, h.xAxisGrabber3D, h.zAxisGrabber3D ] ) );
 	p[ p.length-1 ].volumeVisible = false; //show them extrusion and squashing
 	p.push( new page( [ h.fishUniverse, h.house, h.axis3D, h.xAxisGrabber3D, h.zAxisGrabber3D ] ) );
 	
-	p.push( new page( slides.garnetCrystal ) );
-	p.push( new page( [ h.axis3D, h.xAxisGrabber3D, h.zAxisGrabber3D, h.axis4D ] ) ); //So if this is a 3D axis squashed down to 2D, what is this? 
-	p.push( new page( slides.orthogonalExercises ) );
-	p.push( new page( slides.garnetCrystal ) );
+	p.push( new page( [ h.axis3D, h.xAxisGrabber3D, h.zAxisGrabber3D, h.axis4D ] ) ); //So if this is a 3D axis squashed down to 2D, what is this?
 	p.push( new page( [ h.axis4D, h.ep4D ] ) );
 	p[ p.length-1 ].volumeVisible = false;
 	p.push( new page( [ h.ep4D, h.RDhoneycomb ] ) );
+	p.push( new page( slides.garnetCrystal ) );
 	p[ p.length-1 ].startingEL["ep4D"] = 4;
 	p[ p.length-1 ].volumeVisible = true;
-	
-	p.push( new page( slides.dimensionsExerciseCue ) );
 	
 	p.push( new page( slides.brilliantCut ) );
 	p.push( new page( slides.brilliantCutHighlighted ) );
@@ -251,7 +224,7 @@ function initPresentation(presentation)
 	p[ p.length-1 ].startingEL["ep4D"] = 4;
 	p[ p.length-1 ].volumeVisible = false; //whaaaat? Not working?
 
-	p.push( new page( [h.fishUniverse, ammannBeenkerPic] ) );
+	p.push( new page( [ammannBeenkerPic] ) );
 	
 	
 	
@@ -264,11 +237,19 @@ function initPresentation(presentation)
 	
 	p.push( new page( slides.lesserQCs ) );
 	
+	p.push( new page( [h.symmetryDemonstration] ) );
+	p[ p.length-1 ].symmetryDemonstrationMode = "nothing";
+	p.push( new page( [h.symmetryDemonstration] ) );
+	p[ p.length-1 ].symmetryDemonstrationMode = "reflection";
+	p.push( new page( [h.symmetryDemonstration] ) );
+	p[ p.length-1 ].symmetryDemonstrationMode = "rotation";
+	p.push( new page( [h.symmetryDemonstration] ) );
+	p[ p.length-1 ].symmetryDemonstrationMode = "translation";
+	
 //	p.push( new page( [ h.zika, h.looseTria ] ) );
-//	p.push( new page( slides.zikaHazmat ) );
-//	p.push( new page( [ h.pariaModel, h.pariaData ] ) );
+	p.push( new page( [ h.pariaModel, h.pariaData ] ) );
 ////	p.push( new page( [ h.CCMV, h.tamiflu ] ) );
-//	p.push( new page( [ h.ms2Model, h.ms2Data ] ) );
+	p.push( new page( [ h.ms2Model, h.ms2Data ] ) );
 //
 //	p.push( new page( slides.allPhotos ) );
 	
@@ -313,6 +294,8 @@ function initPresentation(presentation)
 		this.holdables.ep3D.children[0].visible = this.pages[this.currentPageIndex].volumeVisible;
 		this.holdables.ep4D.children[0].visible = this.pages[this.currentPageIndex].volumeVisible;
 		this.holdables.ep6D.children[0].visible = this.pages[this.currentPageIndex].volumeVisible;
+		
+		this.holdables.fishUniverse.children[1].visible = this.pages[this.currentPageIndex].fishVisible;
 		
 		this.holdables.ep2D.extrusionLevel = this.pages[this.currentPageIndex].startingEL["ep2D"];
 		this.holdables.ep3D.extrusionLevel = this.pages[this.currentPageIndex].startingEL["ep3D"];

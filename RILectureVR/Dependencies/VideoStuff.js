@@ -2,25 +2,31 @@ function initVideos(presentation)
 {	
 	var videosInfo = [];
 	videosInfo.push( {
-		fileName: "diffraction_rotating",
+		fileName: "/Data/Slides/diffraction_rotating",
 		actualName: "diffraction",
 		pixelsWide: 1920,
 		pixelsTall: 1080
 	});
 	videosInfo.push( {
-		fileName: "Sagittal-T2-of-the-Brain-_from-Imaging-Anatomy-of-the-Human-Brain_",
+		fileName: "/Data/Slides/Sagittal-T2-of-the-Brain-_from-Imaging-Anatomy-of-the-Human-Brain_",
 		actualName: "mri",
 		pixelsWide: 720,
 		pixelsTall: 720
 	});
 	videosInfo.push( {
-		fileName: "Crystal_Structure_and_the_Laws_of_Thermodynamics",
+		fileName: "/Data/Slides/Crystal_Structure_and_the_Laws_of_Thermodynamics",
 		actualName: "crystalGrowth",
 		pixelsWide: 1920,
 		pixelsTall: 1080
 	});
 	videosInfo.push( {
-		fileName: "Microscopic_Time-Lapse_of_Growing_Snowflake_-_Vyac",
+		fileName: "VR/Data/Slides/simulation",
+		actualName: "simulation",
+		pixelsWide: 604,
+		pixelsTall: 528
+	});
+	videosInfo.push( {
+		fileName: "/Data/Slides/Microscopic_Time-Lapse_of_Growing_Snowflake_-_Vyac",
 		actualName: "snowflakeGrowth",
 		pixelsWide: 1280,
 		pixelsTall: 720
@@ -36,7 +42,7 @@ function initVideos(presentation)
 		
 		// create the video element
 		videoMeshes[i].documentElement = document.createElement( 'video' );
-		videoMeshes[i].documentElement.src = "http://hamishtodd1.github.io/RILecture/Data/Slides/" + videosInfo[i].fileName + ".ogv";
+		videoMeshes[i].documentElement.src = "http://hamishtodd1.github.io/RILecture" + videosInfo[i].fileName + ".ogv";
 		videoMeshes[i].documentElement.setAttribute('crossorigin', 'anonymous');
 		videoMeshes[i].documentElement.load(); // must call after setting/changing source
 		videoMeshes[i].documentElement.loop = true;

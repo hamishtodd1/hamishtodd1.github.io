@@ -16,10 +16,11 @@ function init_atoms( presentation )
 			var forceDirection = this.partnerAtoms[i].getWorldPosition(); //presumably this is a clone of the position
 			forceDirection.sub(this.position);
 			var interAtomDistance = forceDirection.length();
-			forceDirection.normalize();
 			var forceStrength = 4 * potentialWellDepth * ( 
 					Math.pow( bondLength / interAtomDistance, 12) - //repulsive
 					Math.pow( bondLength / interAtomDistance, 6) ); //attractive
+
+			forceDirection.normalize();
 			var force = forceDirection.clone();
 			force.multiplyScalar(-forceStrength );
 			netForce.add(force);
@@ -29,6 +30,13 @@ function init_atoms( presentation )
 		acceleration.multiplyScalar(forceScalar);
 		this.velocity.add(acceleration);
 		this.position.add(this.velocity);
+		
+		var limit = 1.1;
+		if(this.position.length() > limit)
+		{
+			this.position.set(0,0,0)
+			this.velocity.set(0,0,0)
+		}
 //		/* Thoughts:
 //		 * Could use a better integrator. Actually shouldn't there be a differential equation solvable in closed form?
 //		 * there's something about time and accuracy bundled up in "forceScalar". It is technically 1/mass, but not clear what sense it makes to think of it that way
@@ -40,7 +48,8 @@ function init_atoms( presentation )
 	
 	//------Readying the others
 	var holdingAtom = attractedAtom.clone();
-	holdingAtom.add( new THREE.Mesh(new THREE.SphereGeometry(bondLength,32,32), new THREE.MeshPhongMaterial({color:0xFF0000, transparent: true, opacity: 0.1}) ) );
+	if ( WEBVR.isAvailable() === true )
+		holdingAtom.add( new THREE.Mesh(new THREE.SphereGeometry(bondLength,32,32), new THREE.MeshPhongMaterial({color:0xFF0000, transparent: true, opacity: 0.1}) ) );
 	
 	var atomCage = new THREE.Object3D();
 	atomCage.position.x = 0;
@@ -66,7 +75,7 @@ function init_atoms( presentation )
 	if( justTheOne )
 	{
 		attractedAtom.position.copy( holdingAtom.position );
-		attractedAtom.position.x -= bondLength;
+		attractedAtom.position.x -= bondLength / 2;
 		attractedAtom.partnerAtoms.push(holdingAtom);
 	}
 	else

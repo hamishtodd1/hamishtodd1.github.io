@@ -26,6 +26,13 @@ var LEFT_CONTROLLER_INDEX = 1-RIGHT_CONTROLLER_INDEX;
 
 //var INITIAL_CAMERA_POSITION = new THREE.Vector3(0,0,0.6);
 
+THREE.Face3.prototype.corner = function(index)
+{
+	if(index === 0) return this.a;
+	if(index === 1) return this.a;
+	if(index === 2) return this.a;
+}
+
 var OurVREffect;
 var OurVRControls;
 

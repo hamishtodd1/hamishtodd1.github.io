@@ -228,7 +228,7 @@ function create_extruding_polyhedron(axisToAssociate)//search for this function 
 						this.children[0].geometry.vertices[ i ],
 						this.children[0].geometry.vertices[ partner ],
 						this.children[1].geometry.vertices, 
-						this.cylinder_sides, this.cylinder_sides * 2 * num_added, this.cylinder_radius );
+						this.cylinder_sides, num_added, this.cylinder_radius );
 				
 				num_added++;
 			}
@@ -337,25 +337,7 @@ function create_extruding_polyhedron(axisToAssociate)//search for this function 
 
 
 
-function init_cylinder(ourGeometry, cylinder_sides, num_added)
-{
-	var firstVertexIndex = num_added * cylinder_sides * 2;
-	for(var i = 0; i < cylinder_sides; i++)
-	{
-		ourGeometry.vertices.push(new THREE.Vector3());
-		ourGeometry.vertices.push(new THREE.Vector3());
-		ourGeometry.faces.push( new THREE.Face3(
-			firstVertexIndex + i*2+1,
-			firstVertexIndex + i*2+0,
-			firstVertexIndex + (i*2+2) % (cylinder_sides*2)
-				) );
-		ourGeometry.faces.push( new THREE.Face3(
-			firstVertexIndex + i*2+1,
-			firstVertexIndex + (i*2+2) % (cylinder_sides*2),
-			firstVertexIndex + (i*2+3) % (cylinder_sides*2)
-				) );
-	}
-}
+
 
 //you need to make sure that the vertices are given in the same order as the extrusion in the poly array function.
 //from what we have in poly arrays, this simply means the vectors lined up around a center
@@ -707,42 +689,7 @@ function axis_update()
 	//it extrudes a level when you press a button on it
 }
 
-function Random_perp_vector(OurVector){
-	var PerpVector = new THREE.Vector3();
-	
-	if( OurVector.equals(zAxis))
-		PerpVector.crossVectors(OurVector, yAxis);
-	else
-		PerpVector.crossVectors(OurVector, zAxis);
-	
-	return PerpVector;
-}
-function insert_cylindernumbers(A,B, vertices_array, cylinder_sides, array_startpoint, radius ) {
-	var A_to_B = new THREE.Vector3(B.x-A.x, B.y-A.y, B.z-A.z);
-	A_to_B.normalize();
-	var perp = Random_perp_vector(A_to_B);
-	perp.normalize(); 
-	for( var i = 0; i < cylinder_sides; i++)
-	{
-		var radiuscomponent = perp.clone();
-		radiuscomponent.multiplyScalar(radius);
-		radiuscomponent.applyAxisAngle(A_to_B, i * TAU / cylinder_sides);
-		
-		vertices_array[array_startpoint + i*2 ].copy(radiuscomponent);
-		vertices_array[array_startpoint + i*2 ].add(A);
-		
-		vertices_array[array_startpoint + i*2+1 ].copy(radiuscomponent);
-		vertices_array[array_startpoint + i*2+1 ].add(B);
-	}
-}
 
-//assumes center is at 0,0,0
-function clockwise_on_polyhedronsurface(A,B,C)
-{
-	var ourcross = (new THREE.Vector3()).crossVectors( A, B );
-	var clockwise = ( ourcross.dot( C ) < 0 );
-	return clockwise;
-}
 
 function init_hexacross()
 {
