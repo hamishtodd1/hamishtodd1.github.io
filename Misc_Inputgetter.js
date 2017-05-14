@@ -133,7 +133,7 @@ document.addEventListener( 'touchmove', function( event ) {
 	event.preventDefault();
 	InputObject.mousex = event.changedTouches[0].clientX; //only looking at the first one. TODO multi-touch!
 	InputObject.mousey = event.changedTouches[0].clientY;
-}
+}, false );
 document.addEventListener( 'touchstart', function(event)
 {
 	event.preventDefault();
