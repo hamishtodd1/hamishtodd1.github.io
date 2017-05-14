@@ -131,8 +131,16 @@ document.addEventListener( 'mousemove', function(event) {
 //remember there can be weirdness for multiple fingers, so make sure any crazy series of inputs are interpretable
 document.addEventListener( 'touchmove', function( event ) {
 	event.preventDefault();
-	InputObject.mousex = event.changedTouches[0].clientX; //only looking at the first one. TODO multi-touch!
-	InputObject.mousey = event.changedTouches[0].clientY;
+	//only the first one. You could have multitouch, but, well...
+	InputObject.mousex = event.changedTouches[0].clientX - window.innerWidth / 2 - renderer.domElement.offsetLeft / 2;
+	InputObject.mousey = -(event.changedTouches[0].clientY - window.innerHeight / 2 - renderer.domElement.offsetTop / 2);
+	InputObject.mousex *= playing_field_dimension / renderer.domElement.width;
+	InputObject.mousey *= playing_field_dimension / renderer.domElement.height;
+	
+	InputObject.mousex += camera.position.x;
+	InputObject.mousey += camera.position.y;
+	InputObject.mousex -= camera.directionalShakeContribution.x;
+	InputObject.mousey -= camera.directionalShakeContribution.y;
 }, false );
 document.addEventListener( 'touchstart', function(event)
 {
