@@ -1,3 +1,7 @@
+/*
+ * May want to be able to hold down and press arrow keys too
+ */
+
 var pictureMovementDuration = 1.5;
 function updatePictureMovementEditor()
 {
@@ -110,6 +114,8 @@ function importPictureStates(statesArray)
 		for(var i = 0; i < statesArray.length; i++)
 			statesArray[i] = [0,0,0,1]; //scale often needs to be that 1024 thing
 	}
+	else if( slideObjects.length !== statesArray.length )
+		console.error("You're trying to load in an incorrect number of slide states!")
 	
 	for( var i = 0; i < slideObjects.length; i++ )
 	{

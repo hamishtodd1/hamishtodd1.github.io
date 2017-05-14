@@ -80,7 +80,7 @@ function onYouTubeIframeAPIReady()
 	});
 	
 	ytplayer.chapter = 0;
-	ytplayer.chapterIDs = ['2a56CJ6J99w', '8GucPOjuR-I','8JndSqOn9ac','8JndSqOn9ac','8JndSqOn9ac'];
+	ytplayer.chapterIDs = ['2a56CJ6J99w', 'bd3QdDBalds','2g_i7RTVAYE','8GucPOjuR-I','6iq3JNT7jAc']; //intro, polio, hiv, zika
 	ytplayer.changeChapter = function( newChapterIndex )
 	{
 		this.chapter = newChapterIndex;
@@ -97,9 +97,5 @@ function onYouTubeIframeAPIReady()
 	 * bhIIPgM5E4Q: v4.5
 	 * qMyLxxHKags: rough cut 1
 	 * zFLcpmOi1Hw: rough cut 2
-	 * 
-	 * Zika 8GucPOjuR-I
-	 * Measles kXo0vsDGOoc
-	 * intro 2a56CJ6J99w
 	 */
 }

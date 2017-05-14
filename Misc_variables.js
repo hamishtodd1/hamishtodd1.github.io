@@ -24,7 +24,7 @@ var LOADING_MODE = 8;
 	
 var MODE = 3;
 
-var backgroundColor = 0x7E7E7E;
+var backgroundColor = 0xFFFFFF;
 
 //with camera at z=30, fov 75, for an object about 20 wide
 
@@ -46,7 +46,7 @@ var targetDIV = document.getElementById("canvasID");
 targetDIV.appendChild( renderer.domElement );
 
 renderer.setSize( window_width, window_height );
-renderer.setClearColor( 0xffffff, 1);
+renderer.setClearColor( backgroundColor, 1);
 var ytplayer;
 
 var INITIALIZED = 0;

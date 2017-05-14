@@ -126,13 +126,21 @@ document.addEventListener( 'mousemove', function(event) {
 	InputObject.mousey -= camera.directionalShakeContribution.y;
 }, false ); //window?
 
-//document.addEventListener( 'touchstart', onDocumentMouseDown, false );
-//document.addEventListener( 'touchmove', onDocumentTouchMove, false );
-//document.addEventListener( 'touchend', onDocumentMouseUp, false );
+
 
 //remember there can be weirdness for multiple fingers, so make sure any crazy series of inputs are interpretable
-//function onDocumentTouchMove( event ) {
-//	event.preventDefault();
-//	InputObject.mousex = event.changedTouches[0].clientX; //only looking at the first one. TODO multi-touch!
-//	InputObject.mousey = event.changedTouches[0].clientY;
-//}
+document.addEventListener( 'touchmove', function( event ) {
+	event.preventDefault();
+	InputObject.mousex = event.changedTouches[0].clientX; //only looking at the first one. TODO multi-touch!
+	InputObject.mousey = event.changedTouches[0].clientY;
+}
+document.addEventListener( 'touchstart', function(event)
+{
+	event.preventDefault();
+	InputObject.isMouseDown = true;
+}, false );
+document.addEventListener( 'touchend', function(event)
+{
+	event.preventDefault();
+	InputObject.isMouseDown = false;
+}, false );
