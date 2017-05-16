@@ -58,7 +58,6 @@ function load_AV_stuff()
 					//---------SOUND
 					Sounds = {};
 					var soundInfoArray = [
-					                      "endingMusic", "Rustavi Choir - Tsmindao Ghmerto (Holy God).ogg",
 					                      "enlarge", "enlarge",
 					                      "ensmall", "ensmall",
 					                      "pop1", "pop1 260614__kwahmah-02__pop",
@@ -157,15 +156,15 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/polio rhinovirus comparison.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/polio hepatitis comparison.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Polio small.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/footy.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/RVF.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Geodesic example 1.jpg");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/footy.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/geodesic.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Bucky.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/basket.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/hair.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/First pic of virus.jpg");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/fly eye.jpg");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/fuller-DIY-sun-dome.jpg");
 
 	//HIV
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HIV.png");
@@ -192,7 +191,6 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV abstract.png");
 
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/islamic examples (2).jpg");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/blue mosque theblacksea.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/islamic examples (1).png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/islamic examples (1).jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/islamic examples (2).png");

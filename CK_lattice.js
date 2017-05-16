@@ -126,7 +126,6 @@ function HandleNetMovement()
 				
 				ourchoice++;
 			} while(LatticeScale + full_scale_addition < min_lattice_scale_given_angle - 0.000001 && ourchoice < 7)
-				console.log(min_lattice_scale_given_angle)
 				
 			var speed_towards_fix = 0.03 + 0.97 * Math.pow((1-capsidopenness), 10); //sure this won't change which one you're heading for?
 			LatticeAngle += angleaugmentation*speed_towards_fix;

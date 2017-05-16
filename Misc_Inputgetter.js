@@ -132,6 +132,7 @@ document.addEventListener( 'mousemove', function(event) {
 document.addEventListener( 'touchmove', function( event ) {
 	event.preventDefault();
 	//only the first one. You could have multitouch, but, well...
+	//TODO page scrolls when you hold it down
 	InputObject.mousex = event.changedTouches[0].clientX - window.innerWidth / 2 - renderer.domElement.offsetLeft / 2;
 	InputObject.mousey = -(event.changedTouches[0].clientY - window.innerHeight / 2 - renderer.domElement.offsetTop / 2);
 	InputObject.mousex *= playing_field_dimension / renderer.domElement.width;

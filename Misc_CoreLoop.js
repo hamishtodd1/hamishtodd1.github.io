@@ -1,8 +1,6 @@
 /* QS images
  * camerastuff stuff
- * -------Sounds
- * Will have that "closing" sound effect but will probably also have a pop when it's shut
- * 
+ * The QS comparison pic will be made by you, in the style of QS
  * 
  * ------Below the thing
  * Sheree must design
