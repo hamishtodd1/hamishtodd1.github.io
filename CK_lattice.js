@@ -77,9 +77,21 @@ function HandleNetMovement()
 				
 				//TODO remember where the original point the player clicked is, that's what you want to be moving. Currently that point is forgotten, in a sense, if the scale limit is hit
 				
-				var maxLatticeAngleChange = TAU / 12;
 				var LatticeAngleChange = MouseAngle - OldMouseAngle;
 				LatticeAngle += LatticeAngleChange;
+				if(LatticeAngleChange > 0 )
+				{
+					Sounds.rotateClockwise.currentTime = 0;
+	                Sounds.rotateClockwise.play();
+				}
+
+				if(LatticeAngleChange < 0 )
+				{
+					Sounds.rotateAntiClockwise.currentTime = 0;
+	                Sounds.rotateAntiClockwise.play();
+				}
+//				if(LatticeAngleChange < 0 && !Sounds.rotateAntiClockwise.isPlaying )
+//					Sounds.rotateAntiClockwise.play();
 			}
 		}
 	} else { //this is where snapping takes place. Can put in the contingency on the button here
@@ -114,7 +126,6 @@ function HandleNetMovement()
 				
 				ourchoice++;
 			} while(LatticeScale + full_scale_addition < min_lattice_scale_given_angle - 0.000001 && ourchoice < 7)
-				console.log(min_lattice_scale_given_angle)
 				
 			var speed_towards_fix = 0.03 + 0.97 * Math.pow((1-capsidopenness), 10); //sure this won't change which one you're heading for?
 			LatticeAngle += angleaugmentation*speed_towards_fix;

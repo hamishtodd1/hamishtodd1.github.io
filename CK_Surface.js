@@ -44,13 +44,7 @@ function UpdateCapsid() {
 		}
 		else
 			surfaceangle *= 0.93;
-		
-		var CK_showoff_rotation_duration = 0.9;
-		CK_showoff_time = 5; //YO DELETE THIS
-		if( CK_showoff_time <= our_CurrentTime && our_CurrentTime <= CK_showoff_time + CK_showoff_rotation_duration )
-			surface.rotateOnAxis(new THREE.Vector3(0,1,0),delta_t * 2.2);
-		if( CK_showoff_time + CK_showoff_rotation_duration + 0.2 <= our_CurrentTime && our_CurrentTime <= CK_showoff_time + CK_showoff_rotation_duration*2 + 0.2 )
-			surface.rotateOnAxis(new THREE.Vector3(1,0,0),delta_t * 2.2); 
+		 
 		
 		//TODO swap it around so it doesn't have to rotate that much when opening
 		

@@ -1,37 +1,23 @@
-/* Deal with QS images
- * Then images moving around
- * 
+/* QS images
  * camerastuff stuff
- * -------Sounds
- * Bumps
-	https://www.freesound.org/people/zerolagtime/sounds/245033/
-	https://www.freesound.org/people/chrillz3r/sounds/387973/
- * Will have that "closing" sound effect but will probably also have a pop when it's shut
- * 
- * 
- * Images for Sheree
- * Go through demos with Sheree and ask what colors should go where
- * Images for Diego. HPV fade to model, and phi29 to real thing
- * 
- * Youtube version, facebook version
+ * The QS comparison pic will be made by you, in the style of QS
  * 
  * ------Below the thing
  * Sheree must design
  * 		A "go to tree" button
  * 		Social media buttons
- * 		Press kit
- * 		Your page
- * 		Contact
- * 		Information for teachers
- * 		SEO terms: "more interactive teaching tools; more information on viruses; more information on mathematics in art"
- * 		Maybe picture so the fucking things appears
- * 		picture at the bottom, for style
- * 		Picture that gets grabbed by facebook and twitter. Maybe make it really fucking small?
- * 		Of course you want a motherfucking border
+ * 		Links: Press kit, your page, Information for teachers
+ * 		Press contact - bug reports
+ * 		Outside links (SEO terms!): "more interactive teaching tools; more information on viruses; more information on mathematics in art; more information on spherical patterns and geodesic domes"
+ * 		picture at the bottom, for style (and so that the fucking things appears)?
+ * 		Border
+ * 		animated gif at the bottom
  * 
- * ----Cut
+ * ----Diego
  * "which felt awful... let down"
  * "much smarter than western artists"
+ * Images for Diego. HPV fade to model via density map, and phi29 to real thing
+ * Youtube version, from which you edit facebook version
  * 
  * --------"pictures come in" parts. Make an engine! The pattern for a "bring something in" animation appears to be: zoom out, move to make room, new ones move in
  * pentagon thing
@@ -61,6 +47,8 @@
  * 
  * 
  * --------Technical
+ * Check it in a single browser... see about the memory...
+ * Bug: pictures can end up on top
  * Get it on an amazon or google server
  * Check for required things like flash 10. 
  * touchscreen (test on Jessie's computer)
@@ -73,6 +61,9 @@
 	Something during qs appeared to make it want a state from 308 or something
  *  
  *  ---------Probably never to be solved
+ *  Flicker on chapter start
+ *  Dodeca on "create lots of symmetry"
+ *  It would be nice to flatten CK's corners
  *  A bug may have caused things to be skipped. Hopefully that goes away with the new arrangement
  * 	-cite non-illustrated pictures
  * QS normals:
@@ -114,7 +105,6 @@ function UpdateWorld()
 			manipulate_vertices();
 			update_varyingsurface();
 			//correct_minimum_angles();
-			update_wedges();
 			break;
 			
 		case QC_SPHERE_MODE:
@@ -220,8 +210,6 @@ function ChangeScene(new_mode) {
 				scene.add(varyingsurface_cylinders[i]);
 			for( var i = 0; i < varyingsurface_spheres.length; i++)
 				scene.add(varyingsurface_spheres[i]);
-			for( var i = 0; i < wedges.length; i++ )
-				scene.add( wedges[i] );
 			for(var i = 0; i< lights.length; i++)
 				scene.add( lights[i] );
 			scene.add(IrregButton);
