@@ -187,6 +187,11 @@ function initPresentation(presentation)
 	p.push( new page( [ h.fishUniverse, h.treePuzzle ] ) );
 	p.push( new page( slides.tree ) );
 	p.push( new page( [ h.fishUniverse, h.sliceableTree, h.treeSlicer ] ) );
+	p.push( new page( [ h.mriVideo ] ) );
+	p.push( new page( [ h.fullNoHole ] ) );
+	p.push( new page( [ h.halfNoHole ] ) );
+	p.push( new page( [ h.full3hole ] ) );
+	p.push( new page( [ h.half3hole ] ) );
 
 	p.push( new page( [ h.axis1D, h.axis2D, h.axis3D, h.axis4D, h.axis6D ] ) );
 	p[ p.length-1 ].adornmentsVisible = false;
@@ -246,9 +251,9 @@ function initPresentation(presentation)
 	p.push( new page( [h.symmetryDemonstration] ) );
 	p[ p.length-1 ].symmetryDemonstrationMode = "translation";
 	
-//	p.push( new page( [ h.zika, h.looseTria ] ) );
+	p.push( new page( [ h.zika, h.looseTria ] ) );
 	p.push( new page( [ h.pariaModel, h.pariaData ] ) );
-////	p.push( new page( [ h.CCMV, h.tamiflu ] ) );
+//	p.push( new page( [ h.CCMV, h.tamiflu ] ) );
 	p.push( new page( [ h.ms2Model, h.ms2Data ] ) );
 //
 //	p.push( new page( slides.allPhotos ) );

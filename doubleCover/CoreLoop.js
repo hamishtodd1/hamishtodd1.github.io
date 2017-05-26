@@ -7,7 +7,9 @@ function Render() {
 	var displacementVector = new THREE.Vector3(0,0,-0.5);
 	camera.updateMatrixWorld();
 	camera.localToWorld(displacementVector);
-	doubleShape.position.copy(displacementVector)
+//	doubleShape.position.copy(displacementVector)
+//	RP2.position.copy(displacementVector)
+	doubleSphere.position.copy(displacementVector);
 	
 	requestAnimationFrame( function(){
 		Render();

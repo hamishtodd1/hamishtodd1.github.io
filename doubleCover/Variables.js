@@ -25,6 +25,17 @@ THREE.Quaternion.prototype.distanceTo = function(q2)
 	if (theta>Math.PI/2) theta = Math.PI - theta;
 	return theta;
 }
+THREE.Quaternion.prototype.fourDAngleTo = function(q2)
+{
+	return Math.acos(this.w*q2.w + this.x*q2.x + this.y*q2.y + this.z*q2.z);
+}
+THREE.Quaternion.prototype.negate = function()
+{
+	this.x *= -1;
+	this.y *= -1;
+	this.z *= -1;
+	this.w *= -1;
+}
 
 var TestSphere = new THREE.Mesh( new THREE.SphereGeometry( 0.3, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
 

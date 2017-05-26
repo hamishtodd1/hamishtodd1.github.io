@@ -259,6 +259,8 @@ function initToys(presentation)
 	 * 		half-cube pattern -> rhombille lattice, for the simple diamond-shaped crystal
 	 * 		golden shapes
 	 * 		Note: nothing with more than four vertices per face, eg no "interior" triangles needed
+	 * 
+	 * The way to present it: with two axes I can only have a 2D shape. With 3 I get 3D - but only if it's not in the plane
 	 */
 //	var cubeToy = new THREE.Object3D();
 //	var cubeVertices = [];
