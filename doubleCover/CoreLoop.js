@@ -16,7 +16,7 @@ function Render() {
 		var mouseMovementAxis = new THREE.Vector3( -mouseDelta.y, mouseDelta.x, 0);
 		mouseMovementAxis.normalize();
 		
-		var mouseMovementQuaternion = new THREE.Quaternion().setFromAxisAngle(mouseMovementAxis, mouseDelta.length() / 200 );
+		var mouseMovementQuaternion = new THREE.Quaternion().setFromAxisAngle(mouseMovementAxis, mouseDelta.length() / 80 );
 		
 		var spectatorDirection = initialDisplacementVector.clone();
 		spectatorDirection.negate();
