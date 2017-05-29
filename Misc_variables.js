@@ -178,8 +178,6 @@ var varyingsurface_orientingradius = new Float32Array([0.95,0.95,0.95]);
 var manipulation_surface;
 var filler_points;
 
-var minimum_angle_crapifier = 1;
-
 var surface;
 var surface_vertices;
 var surface_geometry;
@@ -236,8 +234,8 @@ var surflattice_vertices_numbers = new Float32Array(3 * number_of_lattice_points
 var surflattice_vertices;
 var surflattice_geometry;
 
-var LatticeScale = 0.3779644678173249;//1/3 nice size //10/3 * HS3 / number_of_hexagon_rings; maybe the largest?
-var LatticeAngle = 0.33347313373527504; //TAU/12;
+var LatticeScale = 0.5773502438405532;
+var LatticeAngle = -0.5235987753305861;
 var LatticeGrabbed = false;
 
 var vertices_derivations;

@@ -1,5 +1,7 @@
 var capsidopennessParameter = capsidopenness;
 
+var theyKnowYouCanAlter = false;
+
 function UpdateCapsid() {
 	if(capsidopenness === 1 || capsidopenness === 0)
 		capsidopennessParameter = capsidopenness;

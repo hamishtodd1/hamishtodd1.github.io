@@ -1,8 +1,67 @@
-/* QS images
+/* For 28th, for Diego:
+ * credits from Sheree
+ * in-video images, which means irreg lighting
+ * 		Islamic comparison
+ * 		HPV, HPV pattern via density map
+ * 		phi29, phi29 model. How about via the pentamers?
+ * 		HK97, HK97 pattern
+ * 
+ * ------Sheree:
+ * Illustration: Polio and hepatitis B with pentagons and hexagons different colors from normal
+ * 
+ * Schedule:
+ * technical stuff done:
+ * playtesting:
+ * pictures in:
+ * bug testing 23-30
+ * 
+ * QS images
  * camerastuff stuff
  * The QS comparison pic will be made by you, in the style of QS
  * 
- * ------Below the thing
+ * ----Diego
+ * Cut:
+ * 		"Ideally corners"
+ * 		"Useful thing to have in the model, you might have noticed"
+ * 		"which felt awful... let down"
+ * 		"much smarter than western artists"
+ * 		"One of the largest"
+ * Youtube version, from which you edit facebook version
+ * 		black borders on top and beneath
+ * 		1280x640
+ * 
+ * -------General
+ * Sound
+ * CK colors bugs
+ * 
+ * --------"pictures come in" parts. The pattern for a "bring something in" animation appears to be: zoom out, move to make room, new ones move in
+ * pentagon thing
+ * 		pentagons appear around it
+ * Golf balls that look like viruses, buildings that look like viruses - they all pile up
+ * move in from side, come down from top, all the time?
+ * Hepatitis
+ * darb e stuff?
+ * "These are images of some other viruses". Sheree chooses composition? Based on the tree?
+ * zika, bluetongue, hpv
+ * Pentagons and more shapes
+ * 	 zoom in on the monkey down to one of its cells? Would need illustration 
+ * 	 darb e pattern comes out of that place while fading? Ask Diego
+ * 
+ * -------------Video response stuff (easy)
+ * 		Stuff you've just added: camera closer on beginning of CK, pentamer color flash
+ * 
+ * 
+ * --------Technical
+ * Get it on an amazon or google server
+ * Make sure facebook image is grabbed
+ * touchscreen (test on Jessie's computer)
+ * Sounds in .mp3 or 4
+ * 	Check for required things like flash 10, webgl, link to video if page doesn't work in some way. Or recommend a different browser
+ *  Test on different setups
+		Johan's Mac
+	Something during qs appeared to make it want a state from 308 or something
+	
+----------Below the thing
  * Sheree must design
  * 		A "go to tree" button
  * 		Social media buttons
@@ -12,55 +71,11 @@
  * 		picture at the bottom, for style (and so that the fucking things appears)?
  * 		Border
  * 		animated gif at the bottom
- * 
- * ----Diego
- * "which felt awful... let down"
- * "much smarter than western artists"
- * Images for Diego. HPV fade to model via density map, and phi29 to real thing
- * Youtube version, from which you edit facebook version
- * 
- * --------"pictures come in" parts. Make an engine! The pattern for a "bring something in" animation appears to be: zoom out, move to make room, new ones move in
- * pentagon thing
- * 		pentagons appear around it
- * Golf balls that look like viruses, buildings that look like viruses - they all pile up
- * move in from side, come down from top, all the time?
- * Hepatitis
- * HIV cure stuff
- * darb e stuff?
- * "These are images of some other viruses". Sheree chooses composition?
- * zika, bluetongue, hpv
- * Pentagons and more shapes
- * 	 zoom in on the monkey down to one of its cells? Would need illustration 
- * 	 darb e pattern comes out of that place while fading? Ask Diego
- * 
- * -------------Video response stuff (easy)
- * 		irreg: line up initial state with your very icosahedral virus and spin it a bit
- *		Highlight the pentagons and hexagons on polio and hepatitis B when you say it (just make pics with different colors and fade)
- *		irreg trying different configurations for algorithm
- * 		models go haywire at the end
- * 		Camera closer on beginning of CK
- * 		the button flashes until you have opened AND closed it, with a change between
- * 		CK pentagons flashing like sirens. Circles around them appear?
- * 		Make difference between phi29 and t4 clearer by doing it with the flattened net
- * 		Flick between spherical projection and flat for "the patterns that appeared on these viruses"
- * 		Lattice disappears when closed, except when you're doing the pentagon-noticing part
- * 
- * 
- * --------Technical
- * Check it in a single browser... see about the memory...
- * Bug: pictures can end up on top
- * Get it on an amazon or google server
- * Check for required things like flash 10. 
- * touchscreen (test on Jessie's computer)
- * Sounds in .mp3 or 4
- * 	If webgl doesn't load (or etc), recommend a different browser... or refreshing the page
- *	-link to great big static version if page doesn't work in some way
- *  -test on different setups
-		-Johan's Mac
-		-Reidun's computer (probably just webgl)
-	Something during qs appeared to make it want a state from 308 or something
+ * Then you have to implement
  *  
  *  ---------Probably never to be solved
+ *  Make difference between phi29 and t4 clearer by doing it with the flattened net
+ *  QS shouldn't move when zooming in
  *  Flicker on chapter start
  *  Dodeca on "create lots of symmetry"
  *  It would be nice to flatten CK's corners

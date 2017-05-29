@@ -43,6 +43,7 @@ function HandleNetMovement()
 				min_lattice_scale_given_angle /= Math.sqrt(7);
 				
 				LatticeScale *= LatticeScaleChange;
+				theyKnowYouCanAlter = true;
 				if( LatticeScaleChange > 1 )
 				{
 					if(LatticeScale > 1)
@@ -79,6 +80,7 @@ function HandleNetMovement()
 				
 				var LatticeAngleChange = MouseAngle - OldMouseAngle;
 				LatticeAngle += LatticeAngleChange;
+				theyKnowYouCanAlter = true;
 				if(LatticeAngleChange > 0 )
 				{
 					Sounds.rotateClockwise.currentTime = 0;

@@ -36,7 +36,7 @@ Need sound effects here, if nowhere else
 
 */
 
-var Chapters_visible = Array(1,1,1,0,0);
+var Chapters_visible = Array(1,1,1,1,1);
 var Chapters_completed = Array(1,0,0,0,0); //first has been done by definition, for the time being at least
 
 var zika_introduction_animation = 0;

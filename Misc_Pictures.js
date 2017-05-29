@@ -86,7 +86,7 @@ function load_AV_stuff()
 				}
 			},
 			function ( xhr ) {}, function ( xhr ) {
-				console.error( "couldn't load texture ", index );
+				console.error( "couldn't load texture with url ", url );
 			}
 		);
 	}
@@ -145,6 +145,7 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/humans.jpg"); bordered.push(0);
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Cell full of viruses.jpg"); bordered.push(0);
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Cell lysis.jpg"); bordered.push(0);
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/infect other cells.png");
 	
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Misc textures/Boca_icon.png");
 	
@@ -157,10 +158,14 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/polio hepatitis comparison.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Polio small.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/footy.jpg");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/RVF.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/hepatitis.png");
+	
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Geodesic example 1.jpg");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Geodesic example 2.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Geodesic example 3.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/geodesic.jpg");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Bucky.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/mimivirus.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Buckminster.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/basket.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/hair.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/First pic of virus.jpg");
@@ -171,8 +176,11 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HIV variety.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/very icosahedral.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/monkey.jpg");
-//	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/trim5.png");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/very cone shaped HIV.png");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/trim5.jpg");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/drug.jpg");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/model1.jpg");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/model2.jpg");
+//	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/very cone shaped HIV.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Origami_virus.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/PHi29 corners.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/PHi29 abstract.png");
@@ -203,10 +211,11 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern pentagonal.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/drug.jpg");
 
+	//----Ending
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Measles virus.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Tomoko.jpg");
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/golden spiral.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/shell.jpg");
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/golden spiral.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/nautilus with spiral.jpg");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Opening selection 1a.png");
 	

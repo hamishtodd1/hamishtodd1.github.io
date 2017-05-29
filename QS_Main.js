@@ -272,7 +272,7 @@ function MoveQuasiLattice()
 		//a random pop
 		var playedPop = "pop" + Math.ceil(Math.random()*3).toString();;
 		
-		if( !Sounds[ playedPop ].isPlaying && stable_point_of_meshes_currently_in_scene !== 999 )
+		if( !Sounds[ playedPop ].isPlaying && stable_point_of_meshes_currently_in_scene !== 999 && ytplayer.getPlayerState() !== 1 )
 			Sounds[ playedPop ].play();
 		
 		camera.directionalShake.copy(MousePosition);

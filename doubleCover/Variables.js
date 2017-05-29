@@ -22,7 +22,6 @@ var camera;
 THREE.Quaternion.prototype.distanceTo = function(q2)
 {
 	var theta = Math.acos(this.w*q2.w + this.x*q2.x + this.y*q2.y + this.z*q2.z);
-	if (theta>Math.PI/2) theta = Math.PI - theta;
 	return theta;
 }
 THREE.Quaternion.prototype.fourDAngleTo = function(q2)

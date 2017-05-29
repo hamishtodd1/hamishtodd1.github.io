@@ -52,8 +52,6 @@ socket.on('OnConnect_Message', function(msg)
 		
 		spectatorScreenIndicator.visible = true;
 		spectatorScreenIndicator.frustumCulled = false;
-		
-		handModelLink = "http://hamishtodd1.github.io/BrowserProsenter/Data/external_controller01_left.obj"
 	}
 	var OurOBJLoader = new THREE.OBJLoader();
 	OurOBJLoader.load( handModelLink,

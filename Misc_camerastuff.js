@@ -1,6 +1,4 @@
 //you don't need it to be a combined camera any more
-
-var camera_default_position = new THREE.Vector3(0,0,min_cameradist);
 	
 function UpdateCamera() 
 {
@@ -89,7 +87,7 @@ function UpdateCamera()
 }
 
 function camera_changes_for_mode_switch(){
-	camera.position.copy( camera_default_position );
+	camera.position.set( 0,0,min_cameradist );
 	camera.fov = vertical_fov * 360 / TAU;
 	camera.updateProjectionMatrix();
 }
