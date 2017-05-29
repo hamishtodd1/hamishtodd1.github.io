@@ -146,9 +146,14 @@ function initRP2()
 			RP2.surface.geometry.faces[i].color.setRGB(0,0,1);
 	}
 	
-	RP2.spectatorDirection = new THREE.Vector3();
-	
 	RP2.add(RP2.surface);
+	
+	RP2.hider = new THREE.Mesh(new THREE.CylinderGeometry(0.1003,0.1003,0.014,circumferenceSegments), new THREE.MeshPhongMaterial({color:0x000000}));
+	RP2.hider.geometry.applyMatrix( (new THREE.Matrix4()).makeTranslation(0,0.007,0));
+	RP2.hider.geometry.applyMatrix( (new THREE.Matrix4()).makeRotationAxis(xAxis, TAU / 4));
+	RP2.add(RP2.hider);
+	
+	//maybe: you can look around and that lets you see the back. But it slowly turns back towards you
 
 	scene.add(RP2);
 }

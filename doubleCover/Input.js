@@ -87,15 +87,11 @@ document.addEventListener( 'keydown', function(event)
 		var positionChange = 0.07;
 		if(event.keyCode === 39)
 		{
-			spectatorPosition.sub(RP2.position);
-			spectatorPosition.applyAxisAngle(yAxis, positionChange);
-			spectatorPosition.add(RP2.position);
+			camera.rotation.y += positionChange;
 		}
 		if(event.keyCode === 37)
 		{
-			spectatorPosition.sub(RP2.position);
-			spectatorPosition.applyAxisAngle(yAxis, -positionChange);
-			spectatorPosition.add(RP2.position);
+			camera.rotation.y -= positionChange;
 		}
 	}	
 }, false );
