@@ -137,10 +137,13 @@ function update_bocavirus() {
 	
 	if( our_CurrentTime < cell_move_time + movement_duration || whole_thing_finish_time < our_CurrentTime )
 	{
-		var phases = [Math.cos((ourclock.elapsedTime - ourclock.startTime)*5 + TAU / 2),
-		              Math.cos((ourclock.elapsedTime - ourclock.startTime)*3.5 + TAU / 3),
-		              Math.cos((ourclock.elapsedTime - ourclock.startTime)*4 + TAU / 4),
-		              Math.cos((ourclock.elapsedTime - ourclock.startTime)*4.5 + TAU / 5) ];
+		var undulationMultiplier = 1;
+		if(isMouseDown)
+			undulationMultiplier = 3;
+		var phases = [Math.cos((ourclock.elapsedTime*undulationMultiplier - ourclock.startTime)*5 + TAU / 2),
+		              Math.cos((ourclock.elapsedTime*undulationMultiplier - ourclock.startTime)*3.5 + TAU / 3),
+		              Math.cos((ourclock.elapsedTime*undulationMultiplier - ourclock.startTime)*4 + TAU / 4),
+		              Math.cos((ourclock.elapsedTime*undulationMultiplier - ourclock.startTime)*4.5 + TAU / 5) ];
 		for(var i = 0; i < 60; i++ )
 		{
 			neo_bocavirus_proteins[i].position.set(0,0,0);

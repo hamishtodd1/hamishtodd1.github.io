@@ -19,62 +19,82 @@ window.addEventListener( 'resize', function(event)
 
 var previousMousePosition = new THREE.Vector2();
 
-document.addEventListener( 'mousemove', function(event) {
-	var mouseDelta = new THREE.Vector2( event.clientX - previousMousePosition.x, -(event.clientY - previousMousePosition.y) );
-	
-	var mouseMovementAxis = new THREE.Vector3( -mouseDelta.y, mouseDelta.x, 0);
-	
-	doubleSphere.spectatorDirection.copy(camera.position);
-	doubleSphere.spectatorDirection.sub(doubleSphere.position);
-	doubleSphere.spectatorDirection.normalize();
-	
-	for(var i = 0; i < doubleSphere.triangles.length; i++ )
-	{
-		var specificAxis = mouseMovementAxis.clone();
-		doubleSphere.triangles[i].updateMatrixWorld();
-		doubleSphere.triangles[i].worldToLocal(specificAxis);
-		specificAxis.normalize();
-
-		var mouseMovementQuaternion = new THREE.Quaternion().setFromAxisAngle(specificAxis, mouseDelta.length() / 200 );
-		
-		doubleSphere.triangles[i].quaternion.multiply(mouseMovementQuaternion);
-	}
-	
-	previousMousePosition.set(event.clientX, event.clientY);
-}, false );
-
 //document.addEventListener( 'mousemove', function(event) {
 //	var mouseDelta = new THREE.Vector2( event.clientX - previousMousePosition.x, -(event.clientY - previousMousePosition.y) );
-//	
 //	var mouseMovementAxis = new THREE.Vector3( -mouseDelta.y, mouseDelta.x, 0);
-//	mouseMovementAxis.normalize();
+//	var mouseMovementAmount = mouseDelta.length() / 200;
 //	
-//	var mouseMovementQuaternion = new THREE.Quaternion().setFromAxisAngle(mouseMovementAxis, mouseDelta.length() / 200 );
+//	var spectatorMouseMovementAxis = mouseMovementAxis.clone();
+//	spectatorMouseMovementAxis.applyQuaternion(doubleSphere.spectatorQuaternion);
+//	spectatorMouseMovementAxis.normalize();
+//	var spectatorMouseMovementQuaternion = new THREE.Quaternion().setFromAxisAngle(spectatorMouseMovementAxis, mouseMovementAmount );
+//	doubleSphere.spectatorQuaternion.multiply(spectatorMouseMovementQuaternion);
 //	
-//	RP2.spectatorDirection.copy(camera.position);
-//	RP2.spectatorDirection.sub(RP2.position);
-//	RP2.spectatorDirection.normalize();
+//	var visible = 0;
 //	
-//	for(var i = 0, il = RP2.surface.geometry.vertices.length; i < il; i++)
+//	for(var i = 0; i < doubleSphere.triangles.length; i++ )
 //	{
-//		var ourVertex = RP2.surface.geometry.vertices[i];
-//		ourVertex.applyQuaternion(mouseMovementQuaternion);
-//		
-//		if( ourVertex.angleTo(RP2.spectatorDirection) > TAU / 4 )
-//		{
-//			var correctionAxis = ourVertex.clone();
-//			correctionAxis.cross(RP2.spectatorDirection);
-//			correctionAxis.cross(ourVertex);
-//			correctionAxis.normalize();
-//			
-//			ourVertex.applyAxisAngle(correctionAxis, TAU / 2);
-//		}
-//	}
+//		var specificAxis = mouseMovementAxis.clone();
+//		doubleSphere.triangles[i].updateMatrixWorld();
+//		doubleSphere.triangles[i].worldToLocal(specificAxis);
+//		specificAxis.normalize();
 //
-//	RP2.surface.geometry.verticesNeedUpdate = true;
+//		var mouseMovementQuaternion = new THREE.Quaternion().setFromAxisAngle(specificAxis, mouseMovementAmount );
+//		
+//		doubleSphere.triangles[i].quaternion.multiply(mouseMovementQuaternion);
+//		
+//		/*
+//		 * Mkay, cylinder inside S3.
+//		 * It is the intersection of
+//		 * 		the hyper hemisphere (a solid ball) representing the neighbourhood of quaternions you want to see, eg the ones that are in the world
+//		 * 		and the solid donut that is the quaternions that you usually see at the front of whatever you look at
+//		 * Well so... it's ok to just exclude those outside the hyper hemisphere. The seeing stuff takes care of itslf
+//		 * things entering and leaving visibility is entering and leaving the hyper hemisphere. So you don't want to be looking at a triangle when it does that
+//		 * 		when it leaves, its partner enters on the opposite pole, eg it changes color
+//		 * 		Therefore: things are only allowed to enter from the sides of the cylinder, not from the caps, because the caps touch the top of that sphere
+//		 * 		As you move the cylinder nothing can come through the caps  
+//		 * The axis pointing towards you is the circle that the cylinder partly surrounds
+//		 * 
+//		 * 
+//		 * Sooo: flip if distanceTo is greater than 
+//		 */
+//		
+//		if( doubleSphere.triangles[i].quaternion.distanceTo(doubleSphere.spectatorQuaternion) < TAU / 4)
+//		{
+//			doubleSphere.triangles[i].visible = true;
+//			visible++;
+//		}
+//		else
+//			doubleSphere.triangles[i].visible = false;
+//	}
+//	
+//	console.log( visible / doubleSphere.triangles.length )
 //	
 //	previousMousePosition.set(event.clientX, event.clientY);
 //}, false );
+
+mouseDelta = new THREE.Vector2();
+document.addEventListener( 'mousemove', function(event) {
+	mouseDelta.set( event.clientX - previousMousePosition.x, -(event.clientY - previousMousePosition.y) );
+	previousMousePosition.set(event.clientX, event.clientY);
+}, false );
+
+document.addEventListener( 'keydown', function(event)
+{
+	//arrow keys
+	if( 37 <= event.keyCode && event.keyCode <= 40)
+	{
+		var positionChange = 0.07;
+		if(event.keyCode === 39)
+		{
+			camera.rotation.y += positionChange;
+		}
+		if(event.keyCode === 37)
+		{
+			camera.rotation.y -= positionChange;
+		}
+	}	
+}, false );
 
 //document.addEventListener( 'mousemove', function(event) {
 ////	if(!isMobileOrTablet)

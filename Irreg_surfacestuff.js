@@ -106,12 +106,25 @@ function CheckIrregButton(){
 		IrregButton.scale.set(1,1,1);
 	}
 	
+	if( isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) < IrregButton.radius && IrregButton.capsidopen === 1 )
+		theyKnowYouCanOpenAndClose = true; //well really you want it twice TODO
+	
 	if( IrregButton.pulsing ) 
 	{
-		IrregButton.pulse += 0.1
-		var buttonscale = 1 + 0.2 * Math.sin(IrregButton.pulse);
-		IrregButton.scale.set(buttonscale,buttonscale,buttonscale);
-//		IrregButton.material.color.r = buttonscale;
+		IrregButton.pulse += delta_t;
+		var buttonscale = 1;
+		var maxSwell = 0.65;
+		var startSwellTime = 4;
+		var stopSwellTime = startSwellTime + 0.5;
+		if( IrregButton.pulse < startSwellTime )
+			{}
+		else if( IrregButton.pulse < stopSwellTime )
+			buttonscale += (IrregButton.pulse - startSwellTime) * maxSwell;
+		else if( IrregButton.pulse < stopSwellTime + (stopSwellTime-startSwellTime) )
+			buttonscale += (stopSwellTime - startSwellTime - (IrregButton.pulse-stopSwellTime) ) * maxSwell;
+		else
+			IrregButton.pulse = 0;
+		IrregButton.scale.setScalar(buttonscale);
 	}
 	
 	IrregButton.children[3].rotation.z =-TAU / 4 * (1-capsidopenness);

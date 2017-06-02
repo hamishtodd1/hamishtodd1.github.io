@@ -220,7 +220,7 @@ function deduce_most_of_surface(openness, vertices_numbers) {
 			vertices_numbers.array[c_index * 3 + 1],
 			vertices_numbers.array[c_index * 3 + 2]);
 		
-		var bend_angle = minimum_angles[i] * minimum_angle_crapifier + openness * (TAU/2 - minimum_angles[i] * minimum_angle_crapifier);
+		var bend_angle = minimum_angles[i] * Story_states[Storypage].minimum_angle_crapifiers[i] + openness * (TAU/2 - minimum_angles[i] * Story_states[Storypage].minimum_angle_crapifiers[i]);
 		
 		var d = bent_down_quad_corner(a,b,c,bend_angle,d_hinge_origin_length, d_hinge_net.length());
 		
