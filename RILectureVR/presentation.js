@@ -12,7 +12,7 @@ function initPresentation(presentation)
 	var slideNames = [
 			"sevenfoldPattern", 
 			"sunflowerAndWall",
-			"",
+			"part1",
 			"virusVictims",
 			"virusStructures", 
 			"",
@@ -42,7 +42,7 @@ function initPresentation(presentation)
 			"moreCrystals",
 			"strangeSymmetryCrystals",
 			"strangeSymmetryDiffraction",
-			"lunchCue",
+			"part2",
 			"brilliantCut",
 			"brilliantCutHighlighted",
 			"octagonsExerciseCue",
@@ -65,8 +65,8 @@ function initPresentation(presentation)
 			"",
 			"lesserQCs",
 			"",
-			"",
-			"",
+			"reidun",
+			"reidunColleagues",
 			"allPhotos",
 			"rhombille",
 			"rhombille2",
@@ -129,9 +129,9 @@ function initPresentation(presentation)
 	 * Maybe later, CCMV
 	 * 
 	 * 
-	 * Send video out to:
-	 * 	your consultant
-	 * 	Reidun
+	 * Prompts reinserted
+	 * slicing returns
+	 * 
 	 * 
 	 */
 	var h = presentation.holdables;
@@ -145,6 +145,7 @@ function initPresentation(presentation)
 	p.push( new page( slides.sunflowerAndWall ) );
 	p.push( new page( slides.everyday3DPatterns ) );
 	p.push( new page( slides.lungsAndBuilding ) );
+	p.push( new page( slides.moreCrystals ) );
 	p.push( new page( slides.mainQC ) );
 	
 	p.push( new page( [ h.cubicLattice ] ) );
@@ -153,6 +154,16 @@ function initPresentation(presentation)
 	
 	p.push( new page( [h.looseRhom0, h.looseRhom1, h.looseGico,h.looseDode,h.looseTria] ) );//they fit together
 	p.push( new page( [h.star, h.adornedTria, h.looseGico, h.looseDode] ) );
+
+	p.push( new page( [h.symmetryDemonstration] ) );
+	p[ p.length-1 ].symmetryDemonstrationMode = "nothing";
+	p.push( new page( [h.symmetryDemonstration] ) );
+	p[ p.length-1 ].symmetryDemonstrationMode = "reflection";
+	p.push( new page( [h.symmetryDemonstration] ) );
+	p[ p.length-1 ].symmetryDemonstrationMode = "rotation";
+	p.push( new page( [h.symmetryDemonstration] ) );
+	p[ p.length-1 ].symmetryDemonstrationMode = "translation";
+	p.push( new page( slides.symmetryExerciseCue ) );
 	
 	p.push( new page( slides.crystal1 ) );
 	p.push( new page( [ h.cubicLattice, h.atomicCubicLattice ] ) );
@@ -164,8 +175,8 @@ function initPresentation(presentation)
 	p.push( new page( [ h.holdingAtom, h.attractedAtom ] ) );
 	
 	p.push( new page( slides.diffractionMachine ) );
-	p.push( new page( [ h.diffractionVideo ] ) );
 	p.push( new page( slides.diffractionImages ) );
+	p.push( new page( [ h.diffractionVideo ] ) );
 	p.push( new page( [ h.fishUniverse, h.atomicCubicLattice, h.latticeShadow, h.torch ] ) );
 	p[ p.length-1 ].fishVisible = false;
 	
@@ -180,13 +191,20 @@ function initPresentation(presentation)
 	p.push( new page( slides.marioBros ) );
 	p.push( new page( [ h.fishUniverse, h.octagon0 ] ) );
 	p.push( new page( [ h.fishUniverse, h.ep3D ] ) );
-	p[ p.length-1 ].volumeVisible = true;
-	p[ p.length-1 ].startingEL["ep3D"] = 3;
+		p[ p.length-1 ].volumeVisible = true;
+		p[ p.length-1 ].startingEL["ep3D"] = 3;
 	
-	//what is the 3D pattern that is inside a tree?
+	p.push( new page( slides.orangeSlide ) );
 	p.push( new page( [ h.fishUniverse, h.treePuzzle ] ) );
 	p.push( new page( slides.tree ) );
-	p.push( new page( [ h.fishUniverse, h.sliceableTree, h.treeSlicer ] ) );
+	p.push( new page( [ h.sliceableTree, h.treeSlicer ] ) );
+	p.push( new page( slides.slicingExerciseCue ) );
+	p.push( new page( [ h.fullNoHole ] ) );
+	p.push( new page( [ h.full3hole ] ) );
+	p.push( new page( slides.slicingExerciseCue ) );
+	
+	p.push( new page( slides.banana ) );
+	p.push( new page( slides.mri ) );
 	p.push( new page( [ h.mriVideo ] ) );
 	p.push( new page( [ h.fullNoHole ] ) );
 	p.push( new page( [ h.halfNoHole ] ) );
@@ -198,20 +216,19 @@ function initPresentation(presentation)
 	p.push( new page( [ h.axis1D, h.axis2D, h.axis3D, h.axis4D, h.axis6D ] ) );
 	p[ p.length-1 ].adornmentsVisible = true; //go back and forth
 
-	p.push( new page( slides.rhombille ) );
 	p.push( new page( slides.rhombille2 ) );
+	p.push( new page( slides.rhombille ) );
 	p.push( new page( [ h.squashableCubic, h.axis3D, h.xAxisGrabber3D, h.zAxisGrabber3D ] ) );
 	p[ p.length-1 ].axis3DisSnowflake = true;
 	p.push( new page( [ h.fishUniverse, h.squashableCubic, h.axis3D, h.xAxisGrabber3D, h.zAxisGrabber3D ] ) );
 	p[ p.length-1 ].axis3DisSnowflake = true;
 	p.push( new page( [ h.fishUniverse, h.atomicCubicLattice, h.latticeShadow ] ) );
 
-	p.push( new page( [ h.fishUniverse, h.ep3D ] ) );
-	p[ p.length-1 ].volumeVisible = true;
-	p[ p.length-1 ].startingEL["ep3D"] = 3;
 	p.push( new page( [ h.fishUniverse, h.axis3D, h.ep3D, h.xAxisGrabber3D, h.zAxisGrabber3D ] ) );
 	p[ p.length-1 ].volumeVisible = false; //show them extrusion and squashing
 	p.push( new page( [ h.fishUniverse, h.house, h.axis3D, h.xAxisGrabber3D, h.zAxisGrabber3D ] ) );
+	
+	p.push( new page( slides.orthogonalExercises ) );
 	
 	p.push( new page( [ h.axis3D, h.xAxisGrabber3D, h.zAxisGrabber3D, h.axis4D ] ) ); //So if this is a 3D axis squashed down to 2D, what is this?
 	p.push( new page( [ h.axis4D, h.ep4D ] ) );
@@ -227,11 +244,9 @@ function initPresentation(presentation)
 	p.push( new page( [ammannBeenkerPic] ) );
 	p.push( new page( [ h.axis4D, h.ep4D, h.xAxisGrabber4D, h.zAxisGrabber4D, h.wAxisGrabber4D ] ) );
 	p[ p.length-1 ].startingEL["ep4D"] = 4;
-	p[ p.length-1 ].volumeVisible = false; //whaaaat? Not working?
-
-	p.push( new page( [ammannBeenkerPic] ) );
+	p[ p.length-1 ].volumeVisible = false;
 	
-	
+	p.push( new page( slides.dimensionsExerciseCue ) );
 	
 	p.push( new page( slides.mainQC ) );
 	p.push( new page( [h.ep6D, h.axis6D ] ) );
@@ -242,21 +257,14 @@ function initPresentation(presentation)
 	
 	p.push( new page( slides.lesserQCs ) );
 	
-	p.push( new page( [h.symmetryDemonstration] ) );
-	p[ p.length-1 ].symmetryDemonstrationMode = "nothing";
-	p.push( new page( [h.symmetryDemonstration] ) );
-	p[ p.length-1 ].symmetryDemonstrationMode = "reflection";
-	p.push( new page( [h.symmetryDemonstration] ) );
-	p[ p.length-1 ].symmetryDemonstrationMode = "rotation";
-	p.push( new page( [h.symmetryDemonstration] ) );
-	p[ p.length-1 ].symmetryDemonstrationMode = "translation";
-	
 	p.push( new page( [ h.zika, h.looseTria ] ) );
 	p.push( new page( [ h.pariaModel, h.pariaData ] ) );
 //	p.push( new page( [ h.CCMV, h.tamiflu ] ) );
 	p.push( new page( [ h.ms2Model, h.ms2Data ] ) );
 //
 //	p.push( new page( slides.allPhotos ) );
+	p.push( new page( slides.reidun ) );
+	p.push( new page( slides.reidunColleagues ) );
 	
 	//--------------End Plan
 	

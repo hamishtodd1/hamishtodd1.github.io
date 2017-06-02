@@ -53,19 +53,18 @@ socket.on('OnConnect_Message', function(msg)
 		spectatorScreenIndicator.visible = true;
 		spectatorScreenIndicator.frustumCulled = false;
 		
-		handModelLink = "http://hamishtodd1.github.io/BrowserProsenter/Data/external_controller01_left.obj"
+//		handModelLink = "http://hamishtodd1.github.io/BrowserProsenter/Data/external_controller01_left.obj"
 	}
 	var OurOBJLoader = new THREE.OBJLoader();
 	OurOBJLoader.load( handModelLink,
 		function ( object ) 
 		{
-			if ( WEBVR.isAvailable() === true )
+			if ( handModelLink === "http://hamishtodd1.github.io/BrowserProsenter/Data/external_controller01_left.obj" )
 			{
 				Controllers[ LEFT_CONTROLLER_INDEX ].add(new THREE.Mesh( object.children[0].geometry, new THREE.MeshPhongMaterial({color:0x000000}) ) )
 				Controllers[ LEFT_CONTROLLER_INDEX ].children[0].position.y += 0.035;
 				Controllers[ LEFT_CONTROLLER_INDEX ].children[0].position.z -= 0.04;
 				Controllers[ LEFT_CONTROLLER_INDEX ].children[0].rotation.x += 0.5;
-				Controllers[ LEFT_CONTROLLER_INDEX ].add(new THREE.Mesh( new THREE.SphereGeometry(0.01) ) )
 				
 				Controllers[1-LEFT_CONTROLLER_INDEX].add(new THREE.Mesh( object.children[0].geometry, new THREE.MeshPhongMaterial({color:0x000000}) ) )
 				Controllers[1-LEFT_CONTROLLER_INDEX].children[0].position.y += 0.035;
@@ -73,11 +72,11 @@ socket.on('OnConnect_Message', function(msg)
 				Controllers[1-LEFT_CONTROLLER_INDEX].children[0].rotation.x += 0.5;
 				Controllers[1-LEFT_CONTROLLER_INDEX].scale.x *= -1;
 				Controllers[1-LEFT_CONTROLLER_INDEX].children[0].material.side = THREE.BackSide;
-				Controllers[1-LEFT_CONTROLLER_INDEX].add(new THREE.Mesh( new THREE.SphereGeometry(0.01) ) )
 				Controllers[1-LEFT_CONTROLLER_INDEX].children[1].material.side = THREE.BackSide;
 			}
-			else{				
-				object.children[0].scale.setScalar( 0.0006 );
+			else
+			{				
+				object.children[0].scale.setScalar( 0.00047 );
 				object.children[0].rotation.y = TAU/2;
 				object.children[0].rotation.z =-1;
 				object.children[0].geometry.center();
@@ -89,6 +88,12 @@ socket.on('OnConnect_Message', function(msg)
 				Controllers[1-LEFT_CONTROLLER_INDEX ].children[0].material = Controllers[ LEFT_CONTROLLER_INDEX ].children[0].material.clone();
 				Controllers[1-LEFT_CONTROLLER_INDEX ].children[0].material.side = THREE.BackSide;
 				Controllers[1-LEFT_CONTROLLER_INDEX ].children[0].material.needsUpdate = true;
+			}
+			
+			if( WEBVR.isAvailable() === true )
+			{
+				Controllers[ LEFT_CONTROLLER_INDEX ].add(new THREE.Mesh( new THREE.SphereGeometry(0.01) ) )
+				Controllers[1-LEFT_CONTROLLER_INDEX].add(new THREE.Mesh( new THREE.SphereGeometry(0.01) ) )
 			}
 		},
 		function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); } );
