@@ -4,7 +4,7 @@ function Render() {
 	if(isMobileOrTablet)
 		OurOrientationControls.update();
 	
-	var initialDisplacementVector = new THREE.Vector3(0,0,-0.5);
+	var initialDisplacementVector = new THREE.Vector3(0,0,-0.32);
 	var displacementVector = initialDisplacementVector.clone();
 	camera.updateMatrixWorld();
 	camera.localToWorld(displacementVector);

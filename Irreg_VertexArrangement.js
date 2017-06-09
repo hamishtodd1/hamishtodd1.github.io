@@ -225,9 +225,9 @@ function manipulate_vertices()
 		return;
 	}
 	
-	if( Story_states[Storypage].unpause_on_vertex_knowledge && !MousePosition.equals(OldMousePosition) && !theyknowyoucanchangevertices ) //might be that they sort of swooped in, but eh
+	if( !MousePosition.equals(OldMousePosition) && !theyknowyoucanchangevertices ) //might be that they sort of swooped in, but eh
 	{
-		theyknowyoucanchangevertices = 1; //there is a good argument for not letting them unpause. They might just click and think that's it
+		theyknowyoucanchangevertices = 1;
 		for(var i = 0; i < varyingsurface_spheres.length; i++)
 			varyingsurface_spheres[i].scale.set(0.05,0.05,0.05);
 	}

@@ -1,3 +1,5 @@
+var theyknowyoucanchangestate = false;
+
 function UpdateQuasiSurface()
 {
 	//-------Rotation
@@ -269,14 +271,19 @@ function MoveQuasiLattice()
 			dodeca.remove(quasicutout_meshes[stable_point_of_meshes_currently_in_scene]);
 		dodeca.add(quasicutout_meshes[modulated_CSP]);
 		
-		//a random pop
-		var playedPop = "pop" + Math.ceil(Math.random()*3).toString();;
-		
-		if( !Sounds[ playedPop ].isPlaying && stable_point_of_meshes_currently_in_scene !== 999 && ytplayer.getPlayerState() !== 1 )
-			Sounds[ playedPop ].play();
-		
-		camera.directionalShake.copy(MousePosition);
-		camera.directionalShake.z = 0.1;
+		if( stable_point_of_meshes_currently_in_scene !== 999 && ytplayer.getPlayerState() !== 1 ) //not our first time
+		{
+			//a random pop
+			var playedPop = "pop" + Math.ceil(Math.random()*3).toString();
+			
+			if( !Sounds[ playedPop ].isPlaying )
+				Sounds[ playedPop ].play();
+			
+			theyknowyoucanchangestate = true;
+			
+			camera.directionalShake.copy(MousePosition);
+			camera.directionalShake.z = 0.1;
+		}
 		
 		stable_point_of_meshes_currently_in_scene = modulated_CSP;
 	}

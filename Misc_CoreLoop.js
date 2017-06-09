@@ -1,23 +1,11 @@
-/* For 28th, for Diego:
- * credits from Sheree
- * in-video images, which means irreg lighting
- * 		Islamic comparison
- * 		HPV, HPV pattern via density map
- * 		phi29, phi29 model. How about via the pentamers?
- * 		HK97, HK97 pattern
- * 
- * ------Sheree:
- * Illustration: Polio and hepatitis B with pentagons and hexagons different colors from normal
- * 
- * Schedule:
- * technical stuff done:
- * playtesting:
- * pictures in:
- * bug testing 23-30
- * 
- * QS images
- * camerastuff stuff
- * The QS comparison pic will be made by you, in the style of QS
+/* By 13th:
+ * 		Colors chosen
+ * 		HPV, HPV pattern via density map (Sheree)
+ * 		phi29, phi29 model - irreg lighting. How about via the pentamers? (Sheree)
+ * 		"Hepatitis A"
+ * 		Credits (Sheree!)
+ * 			-> get all the sounds you need so you can put their makers in the credits
+ * 		Tree, ideally - and therefore all viruses
  * 
  * ----Diego
  * Cut:
@@ -26,40 +14,39 @@
  * 		"which felt awful... let down"
  * 		"much smarter than western artists"
  * 		"One of the largest"
+ * 		Soccer ball joke? We already tried that
+ * 		Fuck me, could cut out the part where you convince yourself. It may seem patronizing.
+ * hepatitis 29 seconds in - weird silence. And other places?
+ * 
  * Youtube version, from which you edit facebook version
- * 		black borders on top and beneath
- * 		1280x640
+ * 		1280x640 plus black borders on top and beneath
+ * 		Eg may need a 640x640 version
+ * 		And one long youtube version for if the page doesn't load?
+ * 		Titles:
+ * 			What does zika virus have in common with Islamic art?
+ * 			What does Hepatitis have in common with soccer balls?
+ * 			What does HIV have in common with origami?
+ * 			Each gets a pic of the virus side by side with the object
+ * 		How to film it?
+ * 
+ * 
+ * 		
  * 
  * -------General
- * Sound
- * CK colors bugs
+ * replace islamic examples
+ * Go through all your pictures and scan for copyright. Urgh. You don't want to be taken down
  * 
- * --------"pictures come in" parts. The pattern for a "bring something in" animation appears to be: zoom out, move to make room, new ones move in
- * pentagon thing
- * 		pentagons appear around it
- * Golf balls that look like viruses, buildings that look like viruses - they all pile up
- * move in from side, come down from top, all the time?
- * Hepatitis
- * darb e stuff?
- * "These are images of some other viruses". Sheree chooses composition? Based on the tree?
- * zika, bluetongue, hpv
- * Pentagons and more shapes
- * 	 zoom in on the monkey down to one of its cells? Would need illustration 
- * 	 darb e pattern comes out of that place while fading? Ask Diego
- * 
- * -------------Video response stuff (easy)
- * 		Stuff you've just added: camera closer on beginning of CK, pentamer color flash
+ * "These are images of some other viruses". Tree without branches
  * 
  * 
  * --------Technical
+ * Incorporate youtube loading into loading bar
  * Get it on an amazon or google server
- * Make sure facebook image is grabbed
  * touchscreen (test on Jessie's computer)
- * Sounds in .mp3 or 4
- * 	Check for required things like flash 10, webgl, link to video if page doesn't work in some way. Or recommend a different browser
- *  Test on different setups
+ * Check for required things like flash 10, webgl, link to video if page doesn't work in some way. Or recommend a different browser
+ * Test on different setups
 		Johan's Mac
-	Something during qs appeared to make it want a state from 308 or something
+		http://browsershots.org/
 	
 ----------Below the thing
  * Sheree must design
@@ -68,12 +55,12 @@
  * 		Links: Press kit, your page, Information for teachers
  * 		Press contact - bug reports
  * 		Outside links (SEO terms!): "more interactive teaching tools; more information on viruses; more information on mathematics in art; more information on spherical patterns and geodesic domes"
- * 		picture at the bottom, for style (and so that the fucking things appears)?
+ * 		picture at the bottom, for style? Animated gif from imgur collection
  * 		Border
- * 		animated gif at the bottom
- * Then you have to implement
  *  
  *  ---------Probably never to be solved
+ * Surface can still be weird about closing
+ *  Something during qs appeared to make it want a state from 308 or something
  *  Make difference between phi29 and t4 clearer by doing it with the flattened net
  *  QS shouldn't move when zooming in
  *  Flicker on chapter start
@@ -135,7 +122,7 @@ function UpdateWorld()
 			break;
 			
 		case HEXAGON_MODE:
-			update_hexagon_demo();
+			pentagonDemo.update();
 			break;
 	}
 	
@@ -243,7 +230,13 @@ function ChangeScene(new_mode) {
 			break;
 			
 		case HEXAGON_MODE:
-			for(var i = 0; i < demonstration_hexagons.length; i++)
-				scene.add(demonstration_hexagons[i]);
+			for(var i = 0; i < pentagonDemo.fullShapeArray.length; i++)
+				scene.add(pentagonDemo.fullShapeArray[i])
+			break;
+			
+		case CKPICS_MODE:
+			for( var virus in movingPictures)
+				scene.add( movingPictures[virus] );
+			break;
 	}
 }

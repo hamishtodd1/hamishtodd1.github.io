@@ -461,7 +461,7 @@ function init_CK_and_irreg()
 				varyingsurface_spheres[i] = new THREE.Object3D();
 				varyingsurface_spheres[i].add( new THREE.Mesh( new THREE.SphereGeometry(	1,16,16),spherehandles_material.clone()) );
 				varyingsurface_spheres[i].add( new THREE.Mesh( new THREE.CircleGeometry( 1.23,16),spherehandles_outlineMaterial ) )
-				varyingsurface_spheres[i].children[1].position.z = varyingsurface_spheres[i].children[0].position.z + 0.001;
+				varyingsurface_spheres[i].children[1].position.z = varyingsurface_spheres[i].children[0].position.z + 0.01;
 				varyingsurface_spheres[i].scale.setScalar( 0.000000000001 ); //don't want them to appear until their scale is set elsewhere
 			}	
 		}
@@ -864,7 +864,7 @@ function init_CK_and_irreg()
 	        }));
 		HexagonLattice.joltedness = Array(number_of_lattice_points);
 		for(var i = 0, il = HexagonLattice.joltedness.length; i < il; i++)
-			HexagonLattice.joltedness[i] = 0;
+			HexagonLattice.joltedness[i] = -0.0000000001;
 //	    HexagonLattice.renderOrder = 1; //yay, works
 		squarelattice_hexagonvertices = Array(6 * 2 * number_of_lattice_points); //only 2 points per corner
 		for(var i = 0; i < squarelattice_hexagonvertices.length; i++ )
