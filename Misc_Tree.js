@@ -44,8 +44,6 @@ var zika_introduction_animation = 0;
 var Virus_chapter_icons = Array(5);
 var Virus_chapter_names = Array(5);
 
-var Chapter_start_times = Array(5);
-
 var delay_timer = 0;
 
 //everything you decide about this is temporary, but: dark blue circle, quite transparent

@@ -75,7 +75,6 @@ function irreg_deduce_surface(openness ){
 	
 	deduce_most_of_surface(openness, varyingsurface.geometry.attributes.position);
 	
-	varyingsurface.geometry.computeFaceNormals();
 	varyingsurface.geometry.computeVertexNormals();
 }
 
@@ -202,17 +201,14 @@ function update_varyingsurface() {
 	
 	//we rotate by a quaternion if user moves
 	if(capsidopenness == 0 ){
-		//we do mouse movement thing
-		if( IrregButton.scale.x === 1 ) {			
-			var MovementAxis = new THREE.Vector3(-Mouse_delta.y, Mouse_delta.x, 0);
-			MovementAxis.normalize();
-			
-			varyingsurface.worldToLocal(MovementAxis);
-			var extraquaternion = new THREE.Quaternion();
-			extraquaternion.setFromAxisAngle( MovementAxis, Mouse_delta.length() * 0.9 );
-			
-			varyingsurface.quaternion.multiply(extraquaternion);
-		}
+		var MovementAxis = new THREE.Vector3(-Mouse_delta.y, Mouse_delta.x, 0);
+		MovementAxis.normalize();
+		
+		varyingsurface.worldToLocal(MovementAxis);
+		var extraquaternion = new THREE.Quaternion();
+		extraquaternion.setFromAxisAngle( MovementAxis, Mouse_delta.length() * 0.9 );
+		
+		varyingsurface.quaternion.multiply(extraquaternion);
 	}
 	else {
 		var destination_quaternion = varyingsurface.quaternion.clone();

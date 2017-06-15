@@ -1,48 +1,26 @@
-/* By 13th:
- * 		Colors chosen
- * 		HPV, HPV pattern via density map (Sheree)
- * 		phi29, phi29 model - irreg lighting. How about via the pentamers? (Sheree)
- * 		"Hepatitis A"
- * 		Credits (Sheree!)
- * 			-> get all the sounds you need so you can put their makers in the credits
- * 		Tree, ideally - and therefore all viruses
- * 
- * ----Diego
- * Cut:
- * 		"Ideally corners"
- * 		"Useful thing to have in the model, you might have noticed"
- * 		"which felt awful... let down"
- * 		"much smarter than western artists"
- * 		"One of the largest"
- * 		Soccer ball joke? We already tried that
- * 		Fuck me, could cut out the part where you convince yourself. It may seem patronizing.
- * hepatitis 29 seconds in - weird silence. And other places?
- * 
- * Youtube version, from which you edit facebook version
- * 		1280x640 plus black borders on top and beneath
+/* Youtube version, from which you edit facebook version
+ * 		Spacebar to play
+ * 		960x960 plus black borders on top and beneath
  * 		Eg may need a 640x640 version
- * 		And one long youtube version for if the page doesn't load?
- * 		Titles:
- * 			What does zika virus have in common with Islamic art?
- * 			What does Hepatitis have in common with soccer balls?
- * 			What does HIV have in common with origami?
- * 			Each gets a pic of the virus side by side with the object
+ * 		And one long youtube version. For if the page doesn't load?
+ * 			And on there normally, in case people steal? No, looks transparently clickbaity
+ * 		Titles, (virus, object) Each gets a pic of the virus side by side with the object
+ * 			Why do viruses have so much in common with human designs? (rota, golf ball)
+ * 			What does zika virus have in common with Islamic art? (zika, dome)
+ * 			What do Hepatitis viruses have in common with soccer balls? (hep a, soccer ball)
+ * 			What does HIV have in common with origami? (phi29, origami)
+ * 			And that's what viruses have in common with human designs (hmm, measles and super dodecahedral?)
  * 		How to film it?
+ * 			Work computer
+ * 			Fucking buy something
  * 
- * 
- * 		
  * 
  * -------General
- * replace islamic examples
+ * New button with animation
  * Go through all your pictures and scan for copyright. Urgh. You don't want to be taken down
- * 
- * "These are images of some other viruses". Tree without branches
- * 
- * 
- * --------Technical
- * Incorporate youtube loading into loading bar
+ * Tree shit
+ * Fucking playtest, on touch screen (clauds' ipad) and with mouse
  * Get it on an amazon or google server
- * touchscreen (test on Jessie's computer)
  * Check for required things like flash 10, webgl, link to video if page doesn't work in some way. Or recommend a different browser
  * Test on different setups
 		Johan's Mac
@@ -59,6 +37,7 @@
  * 		Border
  *  
  *  ---------Probably never to be solved
+ *  Incorporate youtube loading into loading bar
  * Surface can still be weird about closing
  *  Something during qs appeared to make it want a state from 308 or something
  *  Make difference between phi29 and t4 clearer by doing it with the flattened net
@@ -181,8 +160,6 @@ function ChangeScene(new_mode) {
 		case BOCAVIRUS_MODE:
 			for(var i = 0; i < 60; i++)
 				scene.add(neo_bocavirus_proteins[i]);
-			for(var i = 0; i< lights.length; i++)
-				scene.add( lights[i] );
 			for(var i = 0; i< reproduced_proteins.length; i++)
 				EggCell.add( reproduced_proteins[i] );
 			scene.add( stmvHider );
@@ -200,14 +177,10 @@ function ChangeScene(new_mode) {
 //				scene.add(surfperimeter_spheres[i]);
 				scene.add(surfperimeter_cylinders[i]);
 			}
-			for(var i = 0; i< lights.length; i++)
-				scene.add( lights[i] );
 			scene.add(QS_measuring_stick);
 			break;
 			
 		case IRREGULAR_MODE:
-			scene.add(manipulation_surface);
-//			scene.add(varyingsurface);
 			for( var i = 0; i < varyingsurface_cylinders.length; i++)
 				scene.add(varyingsurface_cylinders[i]);
 			for( var i = 0; i < varyingsurface_spheres.length; i++)

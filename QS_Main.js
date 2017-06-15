@@ -296,10 +296,16 @@ function MoveQuasiLattice()
 	var contrived_dist = 30 / cutout_vector0_displayed.length() + 0.5*Math.sqrt(5/2+11/10*Math.sqrt(5)); //pretty sure this is the z coord of a face-down dodecahedron's center
 	var maxDist = contrived_dist * 2.5; //say
 	camera.position.z = contrived_dist + (maxDist-contrived_dist) * (1-QS_measuring_stick.children[0].material.opacity);
+	
 	var staticDistFov = 10;
 	var modifyingDistFov = 23.721980146543366;
 	camera.fov = modifyingDistFov + (staticDistFov-modifyingDistFov) * (1-QS_measuring_stick.children[0].material.opacity);
 	camera.updateProjectionMatrix();
+	
+	/* 
+	 * fov = 2 * Math.atan( (radius+bitExtra) / distFromCenter ); - actual radius in Map_To_Quasisphere, taking into account scale
+	 * We need to find bitExtra such that this spits out ~10 when static and ~23.721980146543366 when modifying
+	 */
 	
 //	var quadraticAddition = 0.5;
 //	var maxQuadraticAddition = (1 + quadraticAddition) * (1 + quadraticAddition);

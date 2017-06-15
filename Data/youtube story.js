@@ -176,8 +176,6 @@ function Update_story()
 	if( Story_states[Storypage].enforced_cutout_vector0_player.x !== -1 ) //note to self: you're screwed if you'd like it to be -1 as that is the "default"!
 		cutout_vector0_interpolatingfrom.copy(cutout_vector0_player); //could choose it based on proximity to the destination modulo TAU / 5
 	
-	surface.material.color.copy( Story_states[Storypage].CK_surface_color );
-	
 	//only want this for sudden transitions, not wrapups - that is handled automatically.
 	if( Story_states[Storypage].enforced_irreg_quaternion.x !== 5 ) //we want you either going towards closed or closed
 	{
@@ -313,7 +311,6 @@ function init_story()
 		enforced_CK_quaternion: new THREE.Quaternion(5,5,5,5),
 		enforced_irreg_quaternion: new THREE.Quaternion(5,5,5,5),
 		
-		CK_surface_color: new THREE.Color( 0.11764705882352941, 0.9882352941176471, 0.9529411764705882 ),
 		pentamers_color: defaultPentamersColor.clone(),
 		hexamers_color: defaultHexamersColor.clone(),
 		
@@ -429,7 +426,8 @@ function init_story()
 //	Story_states.push(ns);
 	
 	//---------------Real thing
-	ns = default_clone_story_state(1,0);
+	
+	ns = default_clone_story_state(1,0.01);
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,12.2); //hiv
@@ -442,7 +440,6 @@ function init_story()
 	//---paragraph 2
 	ns = default_clone_story_state(0,40.6); //bocavirus appears, then pause
 	ns.MODE = BOCAVIRUS_MODE;
-	Chapter_start_times[0] = ns.startingtime;
 	ns.pause_at_end = 1; //TODO handle the assurance.
 	ns.loopBackTo = 43.9;
 	ns.loopBackCountdown = 7;
@@ -564,7 +561,6 @@ function init_story()
 	
 	//------CK BEGINS
 	ns = default_clone_story_state(1,0); //polio
-	Chapter_start_times[1] = ns.startingtime;
 	ns.chapter = 1;
 	var polio_slide = ns.slide_number;
 	ns.MODE = SLIDE_MODE;
@@ -649,7 +645,6 @@ function init_story()
 	ns = default_clone_story_state(0,48); //polio in model, no lattice
 	ns.MODE = CK_MODE;
 	ns.cameraZ = min_cameradist / 2;
-	ns.CK_surface_color = new THREE.Color( 0.89411764705, 0.9725490196, 0.53725490196 );
 	ns.enforced_CK_quaternion.set( -0.26994323284634125, -0.0024107795577928506, -0.000379635156398864, 0.9628731458813965 );
 	ns.irreg_button_invisible = 1;
 	ns.CK_scale = 0.5773502438405532;
@@ -714,7 +709,6 @@ function init_story()
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,106); //Now let us say that...
-//	ns.CK_surface_color = new THREE.Color( 0.11764705882352941, 0.9882352941176471, 0.9529411764705882 );
 //	ns.pentamers_color = new THREE.Color( 0 / 256, 13 / 256, 194 / 256 ),
 //	ns.hexamers_color = new THREE.Color( 0 / 256, 187 / 256, 253 / 256 ),
 	Story_states.push(ns);
@@ -1169,7 +1163,6 @@ function init_story()
 	ns.CKPicStates.push({virus:"bluetongue",x:playing_field_dimension, y:-playing_field_dimension});
 	ns.CKPicStates.push({virus:"hpv",x:-playing_field_dimension, y:-playing_field_dimension});
 	ns.CKPicScale = playing_field_dimension;
-	Chapter_start_times[3] = ns.startingtime + 0.05;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,4.7); //bluetongue, or group
@@ -1303,7 +1296,6 @@ function init_story()
 	
 	//------ENDING BEGINS!!!!
 	ns = default_clone_story_state(1,0); //Start of end
-	Chapter_start_times[4] = ns.startingtime;
 	var Measles_slide = ns.slide_number;
 	ns.MODE = SLIDE_MODE;
 	ns.chapter = 4;

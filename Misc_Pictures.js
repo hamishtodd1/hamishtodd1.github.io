@@ -235,7 +235,7 @@ function load_AV_stuff()
 //	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e highlighted.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e above entrance.jpg"); bordered.push(0);
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e inside.jpg"); bordered.push(0);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e sharp.jpg"); //next thing is to test (tree and final reused slides) without this extra slide
+	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/darb e sharp.jpg"); //next thing is to test (tree and final reused slides) without this extra slide
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pentagons.png"); bordered.push(0);
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Pattern pentagonal.png"); bordered.push(0);
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/drug.jpg"); bordered.push(0);

@@ -6,6 +6,8 @@
  * Video should probably just stay to the right, and camera movements should be implemented in the shoot
  * There are things like the footage of sufferers and the polymerase which we want in there too. Separate video.
  * May also "manually" change something, for a bit of fun. Good candidate would be the quasisphere for zika virus. But how to take account of the current shape?
+ * 
+ * For touchscreen: when you let go and come back down again, your mouse hasn't teleported over. It's exactly like the video area thing
  */
 
 //this is called once a frame and must be the only thing that addresses Inputobject, lest functions get different impressions of inputs.
@@ -151,5 +153,6 @@ document.addEventListener( 'touchstart', function(event)
 document.addEventListener( 'touchend', function(event)
 {
 	event.preventDefault();
+	OldMousePosition.copy( MousePosition );
 	InputObject.isMouseDown = false;
 }, false );
