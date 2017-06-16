@@ -293,11 +293,7 @@ function get_vertex_position(local_vertices_components,basis_vectors,ourcenter,r
 	{
 		ourvertex.sub(ourcenter);
 		
-		var radius_ratio;
-		var max_lengthening = radius / ourvertex.length(); //this is how much you would lengthen it by if surface was closed
-		radius_ratio = 1 - max_lengthening;
-		radius_ratio *= 0; //aka faceflatness
-		radius_ratio += max_lengthening;
+		var radius_ratio = radius / ourvertex.length();
 		
 		ourvertex.multiplyScalar(radius_ratio);
 		ourvertex.add(ourcenter);

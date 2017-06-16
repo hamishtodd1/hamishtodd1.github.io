@@ -75,7 +75,6 @@ function irreg_deduce_surface(openness ){
 	
 	deduce_most_of_surface(openness, varyingsurface.geometry.attributes.position);
 	
-	varyingsurface.geometry.computeFaceNormals();
 	varyingsurface.geometry.computeVertexNormals();
 }
 
@@ -146,11 +145,13 @@ function update_varyingsurface() {
 		irreg_flash = 1;
 	if( irreg_flash < 0 )
 		irreg_flash = 0;
+	
+	varyingsurface_cylinders[0].material.color.setRGB(	0.1568627450980392,0.26666666666666,0.3607843137254902);
+	varyingsurface_cylinders[0].material.color.r = 0.1568627450980392 + (1-0.1568627450980392)*irreg_flash;
 	for( var i = 4; i < 20; i++)
 		if( i % 4 === 0 || i % 4 === 1)
-			varyingsurface_cylinders[i].material.color.setRGB(irreg_flash,0,0);
-	varyingsurface_cylinders[0].material.color.setRGB(	irreg_flash,0,0);
-	varyingsurface_cylinders[21].material.color.setRGB(	irreg_flash,0,0);
+			varyingsurface_cylinders[i].material.color.copy( varyingsurface_cylinders[0].material.color );
+	varyingsurface_cylinders[21].material.color.copy( varyingsurface_cylinders[0].material.color );
 		
 	
 	var magnitudeAcceleration = 0.00079 * delta_t / 0.016;
@@ -202,17 +203,14 @@ function update_varyingsurface() {
 	
 	//we rotate by a quaternion if user moves
 	if(capsidopenness == 0 ){
-		//we do mouse movement thing
-		if( IrregButton.scale.x === 1 ) {			
-			var MovementAxis = new THREE.Vector3(-Mouse_delta.y, Mouse_delta.x, 0);
-			MovementAxis.normalize();
-			
-			varyingsurface.worldToLocal(MovementAxis);
-			var extraquaternion = new THREE.Quaternion();
-			extraquaternion.setFromAxisAngle( MovementAxis, Mouse_delta.length() * 0.9 );
-			
-			varyingsurface.quaternion.multiply(extraquaternion);
-		}
+		var MovementAxis = new THREE.Vector3(-Mouse_delta.y, Mouse_delta.x, 0);
+		MovementAxis.normalize();
+		
+		varyingsurface.worldToLocal(MovementAxis);
+		var extraquaternion = new THREE.Quaternion();
+		extraquaternion.setFromAxisAngle( MovementAxis, Mouse_delta.length() * 0.9 );
+		
+		varyingsurface.quaternion.multiply(extraquaternion);
 	}
 	else {
 		var destination_quaternion = varyingsurface.quaternion.clone();

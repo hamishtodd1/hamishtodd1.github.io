@@ -8,7 +8,7 @@ function init()
 
 	
 	//-----properly initializing
-	init_hexagon_demo();
+	pentagonDemo.init();
 	init_CK_and_irreg();
 	initialize_QS_stuff();
 	init_Grabbable_Arrow();

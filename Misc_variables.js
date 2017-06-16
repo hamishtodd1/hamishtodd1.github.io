@@ -21,6 +21,7 @@ var ENDING_MODE = 5;
 var TREE_MODE = 6;
 var HEXAGON_MODE = 7;
 var LOADING_MODE = 8;
+var CKPICS_MODE = 9;
 	
 var MODE = 3;
 

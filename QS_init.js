@@ -125,6 +125,12 @@ function initialize_QS_stuff()
  	);
  	
  	dodeca = new THREE.Mesh(new THREE.Geometry(),new THREE.MeshBasicMaterial);
+ 	dodeca.quaternion.set( //nice pose for touchscreen
+ 			-0.18925818997218433,
+ 		 	-0.03191667812850291,
+ 		 	-0.1469739296093246,
+ 		 	0.9703408304306739 );
+ 	
 // 	dodeca = new THREE.LineSegments( new THREE.Geometry(), new THREE.LineBasicMaterial({
 // 		color: 0x00ffff,
 // 		transparent: true,
@@ -304,17 +310,17 @@ function initialize_QS_stuff()
 		else if( i === 16 || i === 17 ) //alt fat
 			color_selection[i] = color_selection[3];
 		else if( i === 0 )
-			color_selection[i] = new THREE.Color( 1,0.5,0.5 );
+			color_selection[i] = new THREE.Color( 93/255, 167/255,223/255 );
 		else if( i === 1 ) //thin
-			color_selection[i] = new THREE.Color( 0.5,0.5,1 );
+			color_selection[i] = new THREE.Color( 72/255,116/255,160/255 );
 		else if( i === 3 ) //fat
-			color_selection[i] = new THREE.Color( 192/256,0.5,0.5 );
+			color_selection[i] = new THREE.Color( 167/255,199/255,222/255 );
 //		else if( i === 5 ) //random shape. Shares an edge with all the existing colors
 //			color_selection[i] = new THREE.Color( 1,0.5,0.5 );
 		else if( i === 7 ) //defect
-			color_selection[i] = new THREE.Color( 7/256,244/256,69/256 );
+			color_selection[i] = new THREE.Color( 216/256,244/256,254/256 );
 		else
-			color_selection[i] = new THREE.Color(250/256, 214/256, 14 /256 );
+			color_selection[i] = new THREE.Color(216/256,244/256,254/256 );
 	}
 	/*
 	 * Note these are shapes on the FLAT lattice. The shapes on the sphere change, and it's not nice to see these change (you could hide them though)
@@ -856,7 +862,7 @@ function initialize_QS_stuff()
 	}
 	
 	//INITIAL STATE
-	cutout_vector0.copy(stable_points[2]);
+	cutout_vector0.copy(stable_points[7]);
 	cutout_vector1.copy(cutout_vector0);	
 	cutout_vector1.applyAxisAngle(z_central_axis, -TAU/5);
 	cutout_vector0_player = cutout_vector0.clone();

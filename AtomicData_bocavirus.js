@@ -403,23 +403,6 @@ function init_bocavirus_stuff()
 	Cornucopia.position.z = -0.01;
 	Cornucopia.visible = false;
 	
-	{
-		lights[0] = new THREE.PointLight( 0xffffff, 0.9, 0 );
-		for(var i = 0; i < 5; i++)
-			lights[i] = lights[0].clone();
-		lights[5] = new THREE.AmbientLight( 0x000000 );
-		
-		var lightDist = 70;
-		for(var i = 0; i < 4; i++)
-		{
-			lights[i].position.z = lightDist;
-			if(i) lights[i].position.applyAxisAngle(y_central_axis, TAU / 4);
-			lights[i].position.applyAxisAngle(z_central_axis, TAU / 3 * i);
-		}
-		for(var i = 0; i < lights.length; i++)
-			lights[i].position.multiplyScalar(0.1);
-	}
-	
 	boca_piece_destinations = Array( neo_bocavirus_proteins.length );
 	
 	var too_close_to_others = 0;

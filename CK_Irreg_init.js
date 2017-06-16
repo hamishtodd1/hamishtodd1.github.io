@@ -1,5 +1,20 @@
 function init_CK_and_irreg()
 {
+	{
+		lights[0] = new THREE.AmbientLight( 0xffffff, 0.82 );
+		lights[1] = new THREE.PointLight( 0xffffff, 0.5 );
+		lights[1].position.set(1,0.5,1);
+		lights[1].position.setLength( 100 );
+		
+		var surfacematerial = new THREE.MeshPhongMaterial({
+			color: 0xE0B7A3,
+			shininess: 10,
+			side:	THREE.DoubleSide,
+			shading: THREE.FlatShading
+		});
+//		surfacematerial.color.multiplyScalar(0.66)
+	}
+	
 	//--------------Button shit
 	{		
 		IrregButton = new THREE.Object3D();
@@ -382,14 +397,7 @@ function init_CK_and_irreg()
 	maxVSSphereScale = 0.065;
 	
 	//-------------stuff that goes in the scene
-	{		
-		var surfacematerial = new THREE.MeshPhongMaterial({
-			color: 0x1EFCF3,
-			shininess: 100,
-			side:	THREE.DoubleSide,
-			shading: THREE.FlatShading //TODO add light source or whatever you need
-		});
-		
+	{	
 		surface_vertices = new THREE.BufferAttribute( new Float32Array(22*3), 3 );
 		
 		surface_geometry = new THREE.BufferGeometry();
@@ -411,16 +419,16 @@ function init_CK_and_irreg()
 		flatnet = new THREE.Mesh( flatnet_geometry, surfacematerial );
 		
 		var varyingsurface_edgesmaterial = new THREE.MeshBasicMaterial({
-			color:	0x000000,
+			color:	0x28445C,
 			side:	THREE.DoubleSide
 		});
 		var spherehandles_material = new THREE.MeshBasicMaterial({
-			color:	0xDAA520,
+			color:	0xA84E5A,
 			side:	THREE.FrontSide,
 			transparent: true,
 		});
 		var spherehandles_outlineMaterial = new THREE.MeshBasicMaterial({
-			color:0x000000})
+			color:0x28445C})
 		for( var i = 0; i < varyingsurface_cylinders.length; i++) {
 			var cylinder_vertices_numbers = new Float32Array(16*3);
 			put_tube_in_buffer(0,0,0,1,1,1, varyingsurface_edges_default_radius, cylinder_vertices_numbers);
@@ -461,7 +469,7 @@ function init_CK_and_irreg()
 				varyingsurface_spheres[i] = new THREE.Object3D();
 				varyingsurface_spheres[i].add( new THREE.Mesh( new THREE.SphereGeometry(	1,16,16),spherehandles_material.clone()) );
 				varyingsurface_spheres[i].add( new THREE.Mesh( new THREE.CircleGeometry( 1.23,16),spherehandles_outlineMaterial ) )
-				varyingsurface_spheres[i].children[1].position.z = varyingsurface_spheres[i].children[0].position.z + 0.001;
+				varyingsurface_spheres[i].children[1].position.z = varyingsurface_spheres[i].children[0].position.z + 0.01;
 				varyingsurface_spheres[i].scale.setScalar( 0.000000000001 ); //don't want them to appear until their scale is set elsewhere
 			}	
 		}
@@ -473,8 +481,6 @@ function init_CK_and_irreg()
 		varyingsurface = new THREE.Mesh( flatnet_geometry.clone(), surfacematerial );
 		
 		manipulation_surface = new THREE.Mesh( varyingsurface.geometry.clone(), surfacematerial );
-		manipulation_surface.geometry.computeFaceNormals();
-		manipulation_surface.geometry.computeVertexNormals();
 		
 		var flatlatticematerial = new THREE.PointsMaterial({
 			size: 0.09,
@@ -864,7 +870,7 @@ function init_CK_and_irreg()
 	        }));
 		HexagonLattice.joltedness = Array(number_of_lattice_points);
 		for(var i = 0, il = HexagonLattice.joltedness.length; i < il; i++)
-			HexagonLattice.joltedness[i] = 0;
+			HexagonLattice.joltedness[i] = -0.0000000001;
 //	    HexagonLattice.renderOrder = 1; //yay, works
 		squarelattice_hexagonvertices = Array(6 * 2 * number_of_lattice_points); //only 2 points per corner
 		for(var i = 0; i < squarelattice_hexagonvertices.length; i++ )
