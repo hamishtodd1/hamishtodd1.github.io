@@ -8,7 +8,7 @@ var SliderShape;
 var MAX_Infectiousness = 0.05; //or whatever
 var MAX_RecoveryTime = 0.05;
 var MIN_Infectiousness = 0.001; //or whatever
-var MIN_RecoveryTime = 0.001;
+var MIN_RecoveryTime = 0.00001;
 
 //no, the best thing to do is have the point stay with you, but be as close as possible to your finger!
 
@@ -114,22 +114,4 @@ function update_Infectiousness_and_RecoveryTime()
 	proportionalposition.y -= VIEWBOX_HEIGHT / 2;
 	
 	ParameterControlCursor.position.copy(proportionalposition);
-}
-
-function set_vector_field()
-{
-	var where_youd_go = new THREE.Vector3();
-	
-	for(var i = 0; i < PhaseZoneArrows.length; i++)
-	{
-		var our_represented_state = get_specified_state(PhaseZoneArrows[i].position);
-		where_youd_go.copy( PhaseZoneArrows[i].position );
-//		where_youd_go.copy(get_phasezone_position(
-//				GetNextInfected(our_represented_state.specifiedInfected),
-//				GetNextResistant(our_represented_state.specifiedResistant) ) );
-		
-		set_arrow(where_youd_go,PhaseZoneArrows[i]);
-		
-		PhaseZoneArrows[i].geometry.verticesNeedUpdate = true;
-	}
 }

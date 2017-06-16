@@ -9,10 +9,23 @@ var pausetimer = 0;
 function Update_story()
 {	
 	pausetimer += delta_t;
-	if( Storypage !== -1
-		&& Story_states[Storypage].TimeTilUnpause !== 0 
-		&& Story_states[Storypage].TimeTilUnpause < pausetimer )
-		video.play();
+	if( Storypage !== -1 )
+	{
+		if( Story_states[Storypage].TimeTilUnpause !== 0 
+			&& Story_states[Storypage].TimeTilUnpause < pausetimer )
+			video.play();
+		
+		if(Story_states[Storypage].Pause_on_start && !Story_states[Storypage].usedUpPause )
+		{
+			video.pause(); //doesn't work sometimes?
+			if( video.paused )
+			{
+				Story_states[Storypage].usedUpPause = true;
+				if(Story_states[Storypage].TimeTilUnpause)
+					pausetimer = 0;
+			}
+		}
+	}
 	
 	for(var i = 0; i < Story_states.length; i++)
 	{
@@ -20,7 +33,7 @@ function Update_story()
 		if(	Story_states[i].startingtime <= video.currentTime && 
 		  ( i === Story_states.length-1 || video.currentTime < Story_states[i+1].startingtime ) )
 		{
-			if( Storypage === i ) //nothing need be done
+			if( Storypage === i ) //don't do the below
 				return;
 			
 			Storypage = i;
@@ -31,12 +44,13 @@ function Update_story()
 			console.error("no story state found for current time")
 	}
 	
-	if(Story_states[Storypage].Pause_on_start)
-	{
-		video.pause();
-		if(Story_states[Storypage].TimeTilUnpause)
-			pausetimer = 0;
-	}
+	if( Story_states[Storypage].Infectiousness !== -1 )
+		Infectiousness = Story_states[Storypage].Infectiousness;
+	if( Story_states[Storypage].RecoveryTime !== -1 )
+		RecoveryTime = Story_states[Storypage].RecoveryTime;
+	
+	if( Story_states[Storypage].goToTime !== -1 )
+		video.currentTime = Story_states[Storypage].goToTime;
 		
 	if(Story_states[Storypage].FacesLabelled)
 		ComicZone.add(FacesLabelMesh);
@@ -71,8 +85,6 @@ function Update_story()
 			PhaseZone.add(PhaseZoneArrows[i])
 		else
 			PhaseZone.remove(PhaseZoneArrows[i]);
-	
-	
 	
 	if( Story_states[Storypage].Automaton_enforced_state !== 666)
 		reset_CA( Story_states[Storypage].Automaton_enforced_state );
@@ -122,6 +134,11 @@ function init_story()
 		Infected: -1,
 		Resistant: -1,
 		
+		Infectiousness: -1,
+		RecoveryTime: -1,
+		
+		goToTime: -1,
+		
 		ParameterZonePresent: 0,
 		slidermode: 1,
 		
@@ -131,7 +148,8 @@ function init_story()
 		Pause_on_start: 0,
 		TimeTilUnpause: 0,
 		
-		startingtime: 0});
+		startingtime: 0
+	});
 	
 	
 	//-------Paragraph 1
@@ -207,7 +225,7 @@ function init_story()
 	
 	newstate = default_clone_story_state();
 	newstate.ComicFace = EMOJII_DEAD; //a person can die
-	newstate.startingtime = 124;
+	newstate.startingtime = 123.6;
 	Story_states.push(newstate);
 	
 	newstate = default_clone_story_state();
@@ -277,6 +295,11 @@ function init_story()
 	newstate.InfectiousnessLabelled = 1;
 	Story_states.push(newstate);
 	
+	newstate = default_clone_story_state();
+	newstate.AutomatonRunning = 1;
+	newstate.startingtime = 237.6;
+	Story_states.push(newstate);
+	
 	//another simulate then "click on me"
 	newstate = default_clone_story_state();
 	newstate.AutomatonRunning = 1;
@@ -326,6 +349,16 @@ function init_story()
 		
 		Story_states.push(newstate);
 	}
+
+	newstate = default_clone_story_state(); //just let it run a bit in the column to show it's the same deal
+	newstate.startingtime = 286.5;
+	newstate.Pause_on_start = 1;
+	newstate.RecoveryTime = 0.011114064359734376;
+	newstate.Infectiousness = 0.036401530802873575;
+	newstate.TimeTilUnpause = 3.2;
+	newstate.Resistant = -1;
+	newstate.Infected = -1;
+	Story_states.push(newstate);
 	
 	newstate = default_clone_story_state();
 	newstate.Resistant = -1;
@@ -339,6 +372,10 @@ function init_story()
 	//Paragraph 7 "change the parameters again"
 	newstate = default_clone_story_state();
 	newstate.ParameterZonePresent = 1;
+	newstate.startingtime = 300.5;
+	Story_states.push(newstate);
+	
+	newstate = default_clone_story_state();
 	newstate.startingtime += 3;
 	newstate.Pause_on_start = 1;
 	newstate.startingtime = 305.6;
@@ -351,6 +388,7 @@ function init_story()
 
 	newstate = default_clone_story_state();
 	newstate.PhaseZonePresent = 1;
+	newstate.ParameterZonePresent = 0;
 	newstate.VectorFieldPresent = 0;
 	newstate.startingtime = 311;
 	Story_states.push(newstate);
@@ -363,7 +401,12 @@ function init_story()
 	//Paragraph 9 "vector field"
 	newstate = default_clone_story_state();
 	newstate.VectorFieldPresent = 1;
-	newstate.startingtime = 335.91;
+	newstate.startingtime = 338;
+	Story_states.push(newstate);
+
+	newstate = default_clone_story_state();
+	newstate.ParameterZonePresent = 1;
+	newstate.startingtime = 342.3;
 	Story_states.push(newstate);
 
 	newstate = default_clone_story_state();
@@ -374,6 +417,11 @@ function init_story()
 	//Paragraph 10 "bye"
 	newstate = default_clone_story_state();
 	newstate.startingtime = 350;
+	Story_states.push(newstate);
+	
+	newstate = default_clone_story_state();
+	newstate.startingtime = 361.6;
+	newstate.goToTime = 378.3;
 	Story_states.push(newstate);
 	
 	for(var i = 0; i < Story_states.length - 1; i++ )
@@ -401,6 +449,11 @@ function default_clone_story_state()
 	new_story_state.Pause_on_start = 0; //quite a rare thing to do
 	new_story_state.TimeTilUnpause = 0;
 	new_story_state.Automaton_enforced_state = 666; //we don't reset it every time
+
+	new_story_state.Infectiousness = -1;
+	new_story_state.RecoveryTime = -1;
+	
+	new_story_state.goToTime = -1;
 	
 	new_story_state.startingtime += default_interval;
 	

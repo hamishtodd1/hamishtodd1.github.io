@@ -5,6 +5,10 @@
  * Including whether the comic is visible
  * 
  * You push them all to that array
+ * 
+ * 
+ * Maaaaybe have them die before changing to susceptible
+ * Better model obv, including limits imposed by phase plot
  */
 
 var ComicZone;
@@ -113,16 +117,16 @@ var CA_RecoveryTime = default_CA_RecoveryTime;
 
 function update_Cellular_Automaton()
 {
-	count++;
-	var change_period = 12; //TODO needs to take delta_t into account really :X 
-	if(count > change_period)
-		count = 0;
-	if(count !== change_period)
+	count += delta_t;
+	var change_period = 0.3;
+	if(count < change_period)
 		return;
+	else
+		count = 0;
 	
 	probability_of_dying = 0.02; //we tune this so no need to think too hard
 	
-	if(Story_states[Storypage].AutomatonRunning)
+	if(Story_states[Storypage].AutomatonRunning && !isMouseDown)
 	{
 		var new_automaton_face_status = Array(automaton_face_status.length);
 		

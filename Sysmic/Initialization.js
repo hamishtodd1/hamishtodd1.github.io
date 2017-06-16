@@ -40,15 +40,15 @@ function pre_download_init()
 	Camera.position.copy(FOURBOX_CAMERAPOSITION);
 	
 	//maybe it should actually be blue for resistant, red for sick, yellow for normal?
-	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/Data/Absent.png', 0);
-	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/Data/Resistant.png', 1);
-	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/Data/Sick.png', 2);
-	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/Data/Susceptible.png', 3);
-	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/Data/Dead.png', 4);
+	loadtexture_initially('Data/Absent.png', 0);
+	loadtexture_initially('Data/Resistant.png', 1);
+	loadtexture_initially('Data/Sick.png', 2);
+	loadtexture_initially('Data/Susceptible.png', 3);
+	loadtexture_initially('Data/Dead.png', 4);
 	
-	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/FacesLabel.png', 5);
-	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/RecoveryTimeLabel.png', 6);
-	loadtexture_initially('http://hamishtodd1.github.io/Sysmic/InfectiousnessLabel.png', 7);
+	loadtexture_initially('Data/FacesLabel.png', 5);
+	loadtexture_initially('Data/RecoveryTimeLabel.png', 6);
+	loadtexture_initially('Data/InfectiousnessLabel.png', 7);
 	
 	EMOJII_SUSCEPTIBLE = 1;
 	EMOJII_SICK = 2;
@@ -100,17 +100,19 @@ function post_download_init()
 	FacesLabelMesh = new THREE.Mesh(
 		new THREE.CubeGeometry(VIEWBOX_WIDTH * 0.8, VIEWBOX_WIDTH * 0.8, 0),
 		new THREE.MeshBasicMaterial({transparent: true, map: ourtextures[ 5 ]}) );
+	
+	var axesLabelDimension = VIEWBOX_WIDTH * 0.14;
 	RecoveryTimeLabelMesh = new THREE.Mesh(
-		new THREE.CubeGeometry(VIEWBOX_WIDTH * 0.2, VIEWBOX_WIDTH * 0.2, 0),
+		new THREE.CubeGeometry(axesLabelDimension,axesLabelDimension, 0),
 		new THREE.MeshBasicMaterial({transparent: true, map: ourtextures[ 6 ]}) );
 	InfectiousnessLabelMesh = new THREE.Mesh(
-		new THREE.CubeGeometry(VIEWBOX_WIDTH * 0.2, VIEWBOX_WIDTH * 0.2, 0),
+		new THREE.CubeGeometry(axesLabelDimension,axesLabelDimension, 0),
 		new THREE.MeshBasicMaterial({transparent: true, map: ourtextures[ 7 ]}) );
 	
 	FacesLabelMesh.position.z = -0.02;
 	FacesLabelMesh.position.y = -VIEWBOX_HEIGHT / 2 - VIEWBOX_HEIGHT * 0.034;
 	RecoveryTimeLabelMesh.position.z = -0.02;
-	RecoveryTimeLabelMesh.position.y = -VIEWBOX_HEIGHT / 2 - VIEWBOX_HEIGHT * 0.034;
+	RecoveryTimeLabelMesh.position.y = -VIEWBOX_HEIGHT / 2 - VIEWBOX_HEIGHT * 0.028;
 	InfectiousnessLabelMesh.position.z = -0.02;
-	InfectiousnessLabelMesh.position.x =-VIEWBOX_WIDTH / 2 - VIEWBOX_HEIGHT * 0.039;
+	InfectiousnessLabelMesh.position.x =-VIEWBOX_WIDTH / 2 - VIEWBOX_HEIGHT * 0.02;
 }
