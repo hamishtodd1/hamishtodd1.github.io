@@ -16,15 +16,18 @@
  * 
  * 
  * -------General
+ * Sound
  * New button with animation
  * Go through all your pictures and scan for copyright. Urgh. You don't want to be taken down
  * Tree shit
- * Fucking playtest, on touch screen (clauds' ipad) and with mouse
  * Get it on an amazon or google server
  * Check for required things like flash 10, webgl, link to video if page doesn't work in some way. Or recommend a different browser
  * Test on different setups
 		Johan's Mac
 		http://browsershots.org/
+		
+Touch:
+	tree went wrong
 	
 ----------Below the thing
  * Sheree must design

@@ -219,8 +219,6 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/how-to-fold.jpg"); bordered.push(0);
 	
 	//----QS
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Zika Virus.jpg"); bordered.push(0);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/bluetongue.jpg"); bordered.push(0);
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV non xray.png"); bordered.push(0);
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV xray.png"); bordered.push(0);
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/HPV blobs.png"); bordered.push(0);
@@ -230,7 +228,7 @@ function load_AV_stuff()
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/islamic examples (2).jpg"); bordered.push(0);
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/islamic examples (1).png"); bordered.push(0);
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/islamic examples (1).jpg"); bordered.push(0);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/islamic examples (2).png"); bordered.push(0);
+//	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/islamic examples (2).png"); bordered.push(0);
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e modified.png"); bordered.push(0);
 //	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e highlighted.png");
 	slide_texture_urls.push( "http://hamishtodd1.github.io/Data/Slides/Darb e above entrance.jpg"); bordered.push(0);

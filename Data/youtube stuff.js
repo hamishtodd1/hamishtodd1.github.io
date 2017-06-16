@@ -86,7 +86,7 @@ function onYouTubeIframeAPIReady()
 		this.chapter = newChapterIndex;
 		this.loadVideoById( this.chapterIDs[this.chapter]);
 	}
-//	ytplayer.changeChapter(1);
+//	ytplayer.changeChapter(3);
 	
 	/* _MF2DVU8oB0: tall video
 	 * 8JndSqOn9ac: v1 (Robin)

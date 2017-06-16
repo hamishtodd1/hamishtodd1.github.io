@@ -891,7 +891,7 @@ function init_story()
 	var different_HIVs_index = ns.slide_number; 
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,17); //other uneven
+	ns = default_clone_story_state(1,17); //other uneven TODO probably want sheree illustrations instead of risk
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,18.8); //irreg appears
@@ -1212,29 +1212,21 @@ function init_story()
 	ns = default_clone_story_state(0,60.8); //model was made 800 years ago
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,69.5); //islamic art #1
+	ns = default_clone_story_state(0,69.5); //standard dome
 	ns.MODE = SLIDE_MODE;
 	ns.slide_number = islamic_dome_index;
 	ns.fadePicture = false;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,73); //islamic art #2
+	ns = default_clone_story_state(1,74.4); //islamic art. All just nice, you can zone out while listening to square and triangle
+	Story_states.push(ns);
+	ns = default_clone_story_state(1,78.9);
+	Story_states.push(ns);
+	ns = default_clone_story_state(1,82.3);
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,75.6); //islamic art #3
+	ns = default_clone_story_state(1,84.8); //darb e imam shrine
 	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1,77.7); //islamic art #4
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1,80.3); //islamic art #5
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1,83.5); //darb e imam shrine
-	Story_states.push(ns);
-	
-//	ns = default_clone_story_state(1,84.8); //red box
-//	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,91.9); //above entrance
 	Story_states.push(ns);
