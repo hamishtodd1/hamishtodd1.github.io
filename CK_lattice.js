@@ -14,8 +14,10 @@ function updatelattice() {
 
 function HandleNetMovement()
 {
-	if(isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) >= IrregButton.radius && !Sounds.grab.isPlaying )
-		Sounds.grab.play();
+	if(isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) >= IrregButton.radius && !Sounds.vertexGrabbed.isPlaying )
+		Sounds.vertexGrabbed.play();
+	if(!isMouseDown && isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) >= IrregButton.radius && !Sounds.vertexReleased.isPlaying )
+		Sounds.vertexReleased.play();
 	
 	if( capsidopenness === 1 && isMouseDown )
 	{
@@ -48,15 +50,15 @@ function HandleNetMovement()
 				{
 					if(LatticeScale > 1)
 						LatticeScale = 1;
-//					else if( !Sounds.ensmall.isPlaying)
-//						Sounds.ensmall.play();
+					else if( !Sounds.sizeDecreaseMedium.isPlaying)
+						Sounds.sizeDecreaseMedium.play();
 				}
 				if( LatticeScaleChange < 1 )
 				{
 					if(LatticeScale < min_lattice_scale_given_angle  ) //10/3 * HS3 / number_of_hexagon_rings)
 						LatticeScale = min_lattice_scale_given_angle; //10/3 * HS3 / number_of_hexagon_rings;
-//					else if( !Sounds.enlarge.isPlaying )
-//						Sounds.enlarge.play();
+					else if( !Sounds.sizeIncreaseMedium.isPlaying )
+						Sounds.sizeIncreaseMedium.play();
 				}
 			}
 			

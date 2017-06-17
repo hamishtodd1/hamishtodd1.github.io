@@ -10,22 +10,21 @@
  * 			What do Hepatitis viruses have in common with soccer balls? (hep a, soccer ball)
  * 			What does HIV have in common with origami? (phi29, origami)
  * 			And that's what viruses have in common with human designs (hmm, measles and super dodecahedral?)
- * 		How to film it?
- * 			Work computer
- * 			Fucking buy something
+ * 		Film with fraps on firefox. ~3GB per file
  * 
  * 
  * -------General
  * Sound
  * New button with animation
- * Go through all your pictures and scan for copyright. Urgh. You don't want to be taken down
- * Tree shit
+ * Tree
  * Get it on an amazon or google server
  * Check for required things like flash 10, webgl, link to video if page doesn't work in some way. Or recommend a different browser
  * Test on different setups
 		Johan's Mac
 		http://browsershots.org/
+   General bug testing
 		
+	Repetition trigger fired on use button?
 Touch:
 	tree went wrong
 	
@@ -41,8 +40,6 @@ Touch:
  *  
  *  ---------Probably never to be solved
  *  Incorporate youtube loading into loading bar
- * Surface can still be weird about closing
- *  Something during qs appeared to make it want a state from 308 or something
  *  Make difference between phi29 and t4 clearer by doing it with the flattened net
  *  QS shouldn't move when zooming in
  *  Flicker on chapter start

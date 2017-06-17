@@ -90,19 +90,28 @@ function CheckIrregButton(){
 		var squashed_size = 0.925;
 		IrregButton.scale.setScalar(squashed_size);
 
-		Sounds.button.play();
+		Sounds.buttonPressed.play();
 		
 		IrregButton.pulsing = 0;
 	}
-	if(!isMouseDown && (IrregButton.scale.x < 1 && !IrregButton.pulsing ) ){
+	if(!isMouseDown && (IrregButton.scale.x < 1 && !IrregButton.pulsing ) ) //released
+	{
+		Sounds.buttonReleased.play();
+		
 		if(IrregButton.capsidopen)
 		{
+			if( !Sounds.shapeClose.isPlaying )
+				Sounds.shapeClose.play();
 			IrregButton.capsidopen = 0;
 		}
 		else
+		{
+			if( !Sounds.shapeOpen.isPlaying )
+				Sounds.shapeOpen.play();
 			IrregButton.capsidopen = 1;
+		}
 		
-		IrregButton.scale.set(1,1,1);
+		IrregButton.scale.setScalar(1);
 	}
 	
 	if( isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) < IrregButton.radius && IrregButton.capsidopen === 1 )
@@ -153,28 +162,25 @@ function update_varyingsurface() {
 			varyingsurface_cylinders[i].material.color.copy( varyingsurface_cylinders[0].material.color );
 	varyingsurface_cylinders[21].material.color.copy( varyingsurface_cylinders[0].material.color );
 		
-	
-	var magnitudeAcceleration = 0.00079 * delta_t / 0.016;
-	
-	if( IrregButton.capsidopen )
+	//untested TODO
 	{
-		if(capsidopenness < 0.5)
-			capsidopeningspeed += magnitudeAcceleration;
-		else
-			capsidopeningspeed -= magnitudeAcceleration;
-		if( capsidopeningspeed < 0)
-			capsidopeningspeed = 0.001;
+		if(capsidopenness === 1 || capsidopenness === 0)
+			capsidopennessParameter = capsidopenness;
+		
+		if( IrregButton.capsidopen )
+		{
+			capsidopennessParameter += delta_t*0.9;
+			if(capsidopennessParameter>1)
+				capsidopennessParameter = 1;
+		}
+		else {
+			capsidopennessParameter -= delta_t*0.9;
+			if(capsidopennessParameter<0)
+				capsidopennessParameter = 0;
+		}
+		
+		capsidopenness = move_smooth(1, capsidopennessParameter);
 	}
-	else {
-		if(capsidopenness > 0.5)
-			capsidopeningspeed -= magnitudeAcceleration;
-		else
-			capsidopeningspeed += magnitudeAcceleration;
-		if( capsidopeningspeed > 0)
-			capsidopeningspeed = -0.001;
-	}
-	
-	capsidopenness += capsidopeningspeed;
 	
 	var wedgesopacity = (capsidopenness - 1 ) * 4 + 1;
 	if( wedgesopacity < 0 ) wedgesopacity = 1;

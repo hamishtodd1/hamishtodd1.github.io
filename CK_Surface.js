@@ -20,15 +20,6 @@ function UpdateCapsid() {
 	
 	capsidopenness = move_smooth(1, capsidopennessParameter);
 	
-	if(capsidopenness > 1) {
-		capsidopenness = 1;
-		capsidopeningspeed = 0;
-	}
-	if(capsidopenness < 0) {
-		capsidopenness = 0;
-		capsidopeningspeed = 0;
-	}
-	
 	CK_deduce_surface(capsidopenness, surface_vertices);
 	
 	surface_vertices.needsUpdate = true;

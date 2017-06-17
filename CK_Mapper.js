@@ -568,7 +568,8 @@ function Map_lattice() {
 			}
 			
 			for(var j = 0; j < 24; j++)
-				HexagonLattice.geometry.faces[i * 24 + j].color.g = HexagonLattice.joltedness[i];
+				HexagonLattice.geometry.faces[i * 24 + j].color.g = Story_states[Storypage].hexamers_color.g + HexagonLattice.joltedness[i] * 
+				( 1 - Story_states[Storypage].hexamers_color.g );
 			
 			HexagonLattice.joltedness[i] -= delta_t * 2;
 		}
@@ -583,8 +584,6 @@ function Map_lattice() {
 		camera.directionalShake.z = timeForMinMouseDeltaImpact - (Mouse_delta.length() / mouseDeltaForMaxImpact) * timeForMinMouseDeltaImpact;
 		if(camera.directionalShake.z < 0)
 			camera.directionalShake.z = 0;
-		
-		console.log(Mouse_delta.length())
 	}
 	
 	surflattice.geometry.attributes.position.needsUpdate = true;
