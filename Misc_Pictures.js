@@ -75,7 +75,7 @@ function load_AV_stuff()
 					                      "rotateAntiClockwise",
 					                      "rotateClockwise",
 					                      
-					                      "shapeSettles", //the worst
+					                      "shapeSettles", //the worst. Maybe use Monet's open or close?
 					                      
 					                      //got work to do
 					                      "sizeDecreaseLong",
@@ -88,12 +88,8 @@ function load_AV_stuff()
 					                      "sizeLimitLower",
 					                      "sizeLimitUpper",
 					                      
-					                      //fuck em
 					                      "shapeOpen",
 					                      "shapeClose",
-
-					                      "ensma",
-					                      "enlarge",
 					                      
 					                      "triangleEdgeBump",
 					                      "triangleEdgeSound",

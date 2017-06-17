@@ -46,19 +46,50 @@ function HandleNetMovement()
 				
 				LatticeScale *= LatticeScaleChange;
 				theyKnowYouCanAlter = true;
+				
+				//untested
 				if( LatticeScaleChange > 1 )
 				{
 					if(LatticeScale > 1)
+					{
 						LatticeScale = 1;
-					else if( !Sounds.sizeDecreaseMedium.isPlaying)
-						Sounds.sizeDecreaseMedium.play();
+						if( !Sounds.sizeLimitLower.isPlaying)
+							Sounds.sizeLimitLower.play();
+					}
+					else
+					{
+						if( Sounds.sizeDecreaseLong.volume !== Sounds.sizeDecreaseLong.defaultVolume )
+							Sounds.sizeDecreaseLong.volume = Sounds.sizeDecreaseLong.defaultVolume;
+						if( !Sounds.sizeDecreaseLong.isPlaying)
+							Sounds.sizeDecreaseLong.play();
+					}					
 				}
+				else
+				{
+					if( Sounds.sizeIncreaseLong.isPlaying )
+						Sounds.sizeIncreaseLong.volume -= delta_t * / 10; //go away in a tenth of a second
+				}
+				
 				if( LatticeScaleChange < 1 )
 				{
-					if(LatticeScale < min_lattice_scale_given_angle  ) //10/3 * HS3 / number_of_hexagon_rings)
-						LatticeScale = min_lattice_scale_given_angle; //10/3 * HS3 / number_of_hexagon_rings;
-					else if( !Sounds.sizeIncreaseMedium.isPlaying )
-						Sounds.sizeIncreaseMedium.play();
+					if(LatticeScale < min_lattice_scale_given_angle  )
+					{
+						LatticeScale = min_lattice_scale_given_angle;
+						if( !Sounds.sizeLimitUpper.isPlaying)
+							Sounds.sizeLimitUpper.play(); //these could be the wrong way around
+					}
+					else
+					{
+						if( Sounds.sizeIncreaseLong.volume !== Sounds.sizeIncreaseLong.defaultVolume )
+							Sounds.sizeIncreaseLong.volume = Sounds.sizeIncreaseLong.defaultVolume;
+						if( !Sounds.sizeIncreaseLong.isPlaying)
+							Sounds.sizeIncreaseLong.play();
+					}
+				}
+				else
+				{
+					if( Sounds.sizeDecreaseLong.isPlaying )
+						Sounds.sizeDecreaseLong.volume -= delta_t * / 10; //go away in a tenth of a second
 				}
 			}
 			
