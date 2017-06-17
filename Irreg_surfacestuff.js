@@ -135,8 +135,13 @@ function CheckIrregButton(){
 		IrregButton.scale.setScalar(buttonscale);
 	}
 	
-	IrregButton.children[3].rotation.z =-TAU / 4 * (1-capsidopenness);
-	IrregButton.children[4].rotation.z = TAU / 4 * (1-capsidopenness);
+	//Untested
+	{
+		IrregButton.logoFaces[0].quaternion.copy( IrregButton.logoFaces[0].closedQuaternion );
+		IrregButton.logoFaces[0].quaternion.slerp( IrregButton.logoFaces[0].openQuaternion, capsidopenness );
+		IrregButton.logoFaces[1].rotation.x = (1-capsidopenness) *-TAU / 4;
+		IrregButton.logoFaces[2].rotation.y = (1-capsidopenness) * TAU / 4; //or possibly the reverse
+	}
 }
 
 function update_varyingsurface() {
