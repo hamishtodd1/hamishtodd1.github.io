@@ -70,6 +70,14 @@ function init_CK_and_irreg()
 		IrregButton.logoFaces[0].closedQuaternion.multiply( new THREE.Quaternion().setFromAxisAngle( new THREE.Vector3(1,0,0), necessaryAngle ) );
 //		IrregButton.logoFaces[0].closedQuaternion.multiply( new THREE.Quaternion().setFromAxisAngle( new THREE.Vector3(1/Math.sqrt(2),-1/Math.sqrt(2),0), necessaryAngle ) );
 		
+		//outline
+		IrregButton.add( new THREE.Mesh( new THREE.CircleGeometry(IrregButton.radius,64),
+				new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
+		//inside
+		IrregButton.add( new THREE.Mesh( new THREE.CircleGeometry(IrregButton.radius - button_line_width,64),
+				new THREE.MeshBasicMaterial( { transparent:true, color: 0xffffff } ) ) );
+		IrregButton.children[ IrregButton.children.length-1 ].position.z += 0.001;
+		
 		IrregButton.pulsing = 1;
 		IrregButton.pulse = 0;
 		
