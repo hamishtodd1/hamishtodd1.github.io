@@ -63,8 +63,8 @@ function reset_graph()
 {
 	//first one is exceptional. It is set to the state you specify, and it does not fade in
 	set_column(0);
-	for(var j = 0; j < GRAPH_HEIGHT_IN_FACES; j++)
-		displayed_faces[j].material.opacity = 1;
+//	for(var j = 0; j < GRAPH_HEIGHT_IN_FACES; j++)
+//		displayed_faces[j].material.opacity = 1;
 	
 	for(var i = 1; i < GRAPH_USED_WIDTH_IN_FACES; i++)
 	{

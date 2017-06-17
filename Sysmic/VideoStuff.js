@@ -11,6 +11,8 @@ function initVideo()
 	video.load(); // must call after setting/changing source
 	video.play();
 	
+//	video.currentTime = 290; //don't worry about the first column
+	
 	var videoImage = document.createElement( 'canvas' );
 	videoImage.width = 640;
 	videoImage.height = 480;
@@ -47,42 +49,9 @@ function update_video()
 		&& Math.abs(MousePosition.y) < VIEWBOX_HEIGHT / 2 
 		&& isMouseDown && !isMouseDown_previously)
 	{
-		if( video.paused )
+		if( video.paused && !video.ended )
 			video.play();
 		else
-		{
-			//TODO get rid of this
-			if( MousePosition.x > 0 )
-//				video.currentTime += 100;
-				video.currentTime = 381.5;
-			else
-				video.pause();
-		}
-			
+			video.pause();
 	}
-	
-	//video.pause();
-	//video.play();
-	//video.paused
 }
-
-//
-//function update()
-//{
-//	if ( keyboard.pressed("p") )
-//		video.play();
-//		
-//	if ( keyboard.pressed("space") )
-//		video.pause();
-//
-//	if ( keyboard.pressed("s") ) // stop video
-//	{
-//		video.pause();
-//		video.currentTime = 0;
-//	}
-//	
-//	if ( keyboard.pressed("r") ) // rewind video
-//		video.currentTime = 0;
-//}
-	
-	

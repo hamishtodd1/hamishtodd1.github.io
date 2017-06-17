@@ -1,6 +1,3 @@
-//Avoid global state!
-//Avoid allocations during iteration!
-
 //-----Mathematical constants
 var TAU = Math.PI * 2;
 var PHI = (1+Math.sqrt(5)) / 2;
@@ -57,5 +54,3 @@ var RecoveryTime = 1; // 1 / Nu
 var Infected = 0;
 var Resistant = 0;
 var Population = 100;
-
-//progress triggers changes to the camera

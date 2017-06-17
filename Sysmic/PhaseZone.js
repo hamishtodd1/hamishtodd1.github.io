@@ -11,8 +11,28 @@ var basearrow;
 var PhaseZoneArrows;
 
 var PhaseLine;
-var PHASELINE_SEGMENTS = 400;
+var PHASELINE_SEGMENTS = 1000;
 var Phaseline_currentsegment = 0;
+
+function set_vector_field()
+{
+	var where_youd_go = new THREE.Vector3();
+	
+	for(var i = 0; i < PhaseZoneArrows.length; i++)
+	{
+		var our_represented_state = get_specified_state(PhaseZoneArrows[i].position);
+		
+		var state_youd_go = GetNextState( our_represented_state.specifiedInfected,our_represented_state.specifiedResistant );
+		where_youd_go.copy( get_phasezone_position( state_youd_go.y, state_youd_go.z) );
+		
+		
+//		where_youd_go.sub(PhaseZoneArrows[i].position).multiplyScalar(0.01).add(PhaseZoneArrows[i].position);
+		
+		set_arrow(where_youd_go,PhaseZoneArrows[i]);
+		
+		PhaseZoneArrows[i].geometry.verticesNeedUpdate = true;
+	}
+}
 
 function init_Phasezone()
 {
@@ -68,7 +88,7 @@ function init_Phasezone()
 	PhaseZoneArrows = Array();
 	
 	basearrow = new THREE.Mesh( new THREE.Geometry(), new THREE.MeshBasicMaterial({color: 0x000000}) );
-	var full_length = 1;
+	var full_length = 0.1;
 	var head_length = full_length / 3;
 	var head_width = head_length / (Math.sqrt(3) / 2); //equilateral triangle
 	var body_width = head_width / 2.8; //gotten heuristically
@@ -111,8 +131,7 @@ function init_Phasezone()
 			 )
 				continue;
 				
-			PhaseZoneArrows[lowest_unused_arrow] = basearrow.clone();
-			PhaseZoneArrows[lowest_unused_arrow].geometry = basearrow.geometry.clone();
+			PhaseZoneArrows[lowest_unused_arrow] = new THREE.Mesh( basearrow.geometry.clone(), basearrow.material.clone() );
 			
 			PhaseZoneArrows[lowest_unused_arrow].position.set(i_position,j_position,0); //and then never changed
 			
@@ -123,21 +142,28 @@ function init_Phasezone()
 	set_vector_field();
 }
 
-function set_arrow(pointtowards, ourarrow)
+function set_arrow(pointtowards, ourarrow) 
 {
-	var vectortobesetto = pointtowards.clone();
-	vectortobesetto.sub(ourarrow.position);
-
-	for(var k = 0; k < ourarrow.geometry.vertices.length; k++)
-	{
-		ourarrow.geometry.vertices[k].copy(basearrow.geometry.vertices[k]);
-		
-		var oldX = ourarrow.geometry.vertices[k].x;
-		var oldY = ourarrow.geometry.vertices[k].y;
-		ourarrow.geometry.vertices[k].x = vectortobesetto.y * oldX + vectortobesetto.x * oldY;
-		ourarrow.geometry.vertices[k].y =-vectortobesetto.x * oldX + vectortobesetto.y * oldY;
-	}
-	ourarrow.geometry.verticesNeedUpdate = true;
+	var vectortobesetto = new THREE.Vector2(
+			pointtowards.x - ourarrow.position.x,
+			pointtowards.y - ourarrow.position.y);
+	var vectorAngle = vectortobesetto.angle() - TAU / 4;
+	
+	while( vectorAngle > TAU )
+		vectorAngle -= TAU;
+	while( vectorAngle < 0 )
+		vectorAngle += TAU;
+	
+	ourarrow.rotation.z = vectorAngle;
+//	ourarrow.scale.setScalar( vectortobesetto.length() );
+	
+	//move point in phase space, its line shows the future
+	
+	var redness = vectortobesetto.lengthSq() * 100;
+	if(redness > 1)
+		redness = 1;
+	
+	ourarrow.material.color.setRGB( redness,0,1-redness );
 }
 
 function update_Phasezone()
@@ -159,23 +185,24 @@ function update_Phasezone()
 	{
 		SpecifiedState = get_specified_state(PhaseSpaceMousePosition);
 		
-		if(SpecifiedState.specifiedResistant + SpecifiedState.specifiedInfected > Population)
-			SpecifiedState.specifiedInfected = Population - SpecifiedState.specifiedResistant;
 		if(SpecifiedState.specifiedInfected < 0)
 			SpecifiedState.specifiedInfected = 0;
 		if(SpecifiedState.specifiedResistant < 0)
 			SpecifiedState.specifiedResistant = 0;
-		if(SpecifiedState.specifiedInfected > Population)
-			SpecifiedState.specifiedInfected = Population;
-		if(SpecifiedState.specifiedResistant > Population)
-			SpecifiedState.specifiedResistant = Population;
+		
+		if(SpecifiedState.specifiedResistant + SpecifiedState.specifiedInfected > Population)
+		{
+			var populationLine = new THREE.Line3(new THREE.Vector3(0,Population,0),new THREE.Vector3(Population,0,0));
+			var specifiedPoint = new THREE.Vector3(SpecifiedState.specifiedResistant,SpecifiedState.specifiedInfected,0);
+			var clampedPoint = populationLine.closestPointToPoint(specifiedPoint, true);
+			SpecifiedState.specifiedResistant = clampedPoint.x;
+			SpecifiedState.specifiedInfected = clampedPoint.y;
+		}
 		
 		PhaseControlCursor.position.copy(
 			get_phasezone_position(
 				SpecifiedState.specifiedInfected,
 				SpecifiedState.specifiedResistant) );
-
-		//or could do nearest_point_in_polygon thing
 		
 		for(var i = 0; i < PhaseLine.geometry.vertices.length; i++)
 			PhaseLine.geometry.vertices[i].copy(PhaseControlCursor.position);
@@ -190,18 +217,15 @@ function update_Phasezone()
 	}
 	else
 	{
-		var newState = GetNextState( Population - Infected - Resistant, Infected,Resistant );
-		var newStatePopulation = newState.x + newState.y + newState.z;
+		var newState = GetNextState( Infected,Resistant );
 		
 		Infected = newState.y;
 		Resistant = newState.z;
-		if( Math.abs( newStatePopulation - Population ) > 0.001 )
-			console.error("population changed by", newStatePopulation - Population)
-			
 		
-		PhaseControlCursor.position.copy(get_phasezone_position(Infected,Resistant) );
+		PhaseControlCursor.position.copy( get_phasezone_position(Infected,Resistant) );
 		
 		PhaseLine.geometry.vertices[Phaseline_currentsegment * 2 + 1].copy(PhaseControlCursor.position);
+		
 		if(Phaseline_currentsegment !== 0)
 			PhaseLine.geometry.vertices[Phaseline_currentsegment * 2 + 0].copy(PhaseLine.geometry.vertices[Phaseline_currentsegment * 2 - 1]);
 		else
