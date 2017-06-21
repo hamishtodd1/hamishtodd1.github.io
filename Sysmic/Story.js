@@ -131,8 +131,8 @@ function init_story()
 		GraphPresent: 0,
 		GraphMoving: 0,
 		
-		Infected: -1,
-		Resistant: -1,
+		Infected: 1,
+		Resistant: 0,
 		
 		Infectiousness: -1,
 		RecoveryTime: -1,
@@ -142,8 +142,8 @@ function init_story()
 		ParameterZonePresent: 0,
 		slidermode: 1,
 		
-		PhaseZonePresent: 0,
-		VectorFieldPresent: 0,
+		PhaseZonePresent: 1,
+		VectorFieldPresent: 1,
 		
 		Pause_on_start: 0,
 		TimeTilUnpause: 0,
@@ -151,6 +151,11 @@ function init_story()
 		startingtime: 0
 	});
 	
+	newstate = default_clone_story_state();
+	newstate.startingtime = 6.3;
+	newstate.PhaseZonePresent = 0;
+	newstate.VectorFieldPresent = 0;
+	Story_states.push(newstate);
 	
 	//-------Paragraph 1
 	newstate = default_clone_story_state();
