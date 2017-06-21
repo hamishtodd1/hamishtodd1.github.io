@@ -101,13 +101,27 @@ function CheckIrregButton(){
 		if(IrregButton.capsidopen)
 		{
 			if( !Sounds.shapeClose.isPlaying )
+			{
+				Sounds.shapeClose.volume = 1;
 				Sounds.shapeClose.play();
+			}
+			if( Sounds.shapeOpen.volume - volumeDecreaseAmt*2 >= 0)
+				Sounds.shapeOpen.volume -=volumeDecreaseAmt*2;
+			else
+				Sounds.shapeOpen.volume = 0;
 			IrregButton.capsidopen = 0;
 		}
 		else
 		{
 			if( !Sounds.shapeOpen.isPlaying )
+			{
+				Sounds.shapeOpen.volume = 1;
 				Sounds.shapeOpen.play();
+			}
+			if( Sounds.shapeClose.volume - volumeDecreaseAmt*2 >= 0)
+				Sounds.shapeClose.volume -=volumeDecreaseAmt*2;
+			else
+				Sounds.shapeClose.volume = 0;
 			IrregButton.capsidopen = 1;
 		}
 		

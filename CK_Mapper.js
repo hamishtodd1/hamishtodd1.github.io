@@ -571,7 +571,7 @@ function Map_lattice() {
 				HexagonLattice.geometry.faces[i * 24 + j].color.g = Story_states[Storypage].hexamers_color.g + HexagonLattice.joltedness[i] * 
 				( 1 - Story_states[Storypage].hexamers_color.g );
 			
-			HexagonLattice.joltedness[i] -= delta_t * 2;
+			HexagonLattice.joltedness[i] -= delta_t * 2; //doesn't always decrease?
 		}
 	}
 	

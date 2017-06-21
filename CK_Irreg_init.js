@@ -39,8 +39,9 @@ function init_CK_and_irreg()
 				new THREE.Vector3(faceWidth,0,0),
 				new THREE.Vector3(0,0,0),
 				new THREE.Vector3(0,faceWidth,0) );
-		squareGeometry.faces.push(new THREE.Face3(0,1,2),new THREE.Face(2,3,0) );
+		squareGeometry.faces.push(new THREE.Face3(0,1,2),new THREE.Face3(2,3,0) );
 		
+		IrregButton.logoFaces[0] = new THREE.Object3D();
 		IrregButton.logoFaces[0].add( new THREE.Mesh( squareGeometry,
 				new THREE.MeshBasicMaterial( { transparent: true, color: 0x000000 } ) ) );
 		IrregButton.logoFaces[0].add( notOutline = new THREE.Mesh( squareGeometry,
@@ -63,7 +64,7 @@ function init_CK_and_irreg()
 		IrregButton.logoFaces[0].rotation.z = 3 / 8 * TAU; //possibly minus
 		IrregButton.logoFaces[0].position.y = Math.sqrt(2) * faceWidth;
 		
-		IrregButton.logoFaces[0].openQuaternion = new THREE.Quaternion.setFromAxisAngle(new THREE.Vector3(0,0,1),TAU / 8);
+		IrregButton.logoFaces[0].openQuaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),TAU / 8);
 		IrregButton.logoFaces[0].closedQuaternion = IrregButton.logoFaces[0].openQuaternion.clone();
 		var necessaryAngle = new THREE.Vector3(1,1,0).angleTo(new THREE.Vector3(1,1,1));
 		//it's one of these, or their negative

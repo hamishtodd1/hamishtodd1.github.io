@@ -23,6 +23,8 @@
 		Johan's Mac
 		http://browsershots.org/
    General bug testing
+   Size snapping was bullshit, correct it to whatever Sheree gives
+   Switch CK inflation to being when you click the close button
 		
 	Repetition trigger fired on use button?
 Touch:

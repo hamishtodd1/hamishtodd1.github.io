@@ -8,12 +8,12 @@ function UpdateCapsid() {
 	
 	if( IrregButton.capsidopen )
 	{
-		capsidopennessParameter += delta_t*0.9;
+		capsidopennessParameter += delta_t*0.75;
 		if(capsidopennessParameter>1)
 			capsidopennessParameter = 1;
 	}
 	else {
-		capsidopennessParameter -= delta_t*0.9;
+		capsidopennessParameter -= delta_t*0.75;
 		if(capsidopennessParameter<0)
 			capsidopennessParameter = 0;
 	}

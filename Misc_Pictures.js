@@ -105,10 +105,18 @@ function load_AV_stuff()
 					Sounds.sizeDecreaseLong.volume = sizeVolume;
 					Sounds.sizeDecreaseMedium.volume = sizeVolume;
 					Sounds.sizeDecreaseShort.volume = sizeVolume;
+					
+					Sounds.sizeDecreaseLong.defaultVolume = sizeVolume;
+					Sounds.sizeDecreaseMedium.defaultVolume = sizeVolume;
+					Sounds.sizeDecreaseShort.defaultVolume = sizeVolume;
 
 					Sounds.sizeIncreaseLong.volume = sizeVolume;
 					Sounds.sizeIncreaseMedium.volume = sizeVolume;
 					Sounds.sizeIncreaseShort.volume = sizeVolume;
+
+					Sounds.sizeIncreaseLong.defaultVolume = sizeVolume;
+					Sounds.sizeIncreaseMedium.defaultVolume = sizeVolume;
+					Sounds.sizeIncreaseShort.defaultVolume = sizeVolume;
 					
 					PICTURES_LOADED = 1; //this may create problems with skipping forward to places where you haven't loaded the pic yet
 					attempt_launch();
