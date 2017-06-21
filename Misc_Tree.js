@@ -58,7 +58,6 @@ function add_tree_stuff_to_scene()
 {
 	if( Chapters_completed[1] || Chapters_completed[2] )
 		Chapters_visible[3] = 1;
-		
 	
 	if(	Chapters_completed[0] === 1 && 
 		Chapters_completed[1] === 1 && 
@@ -73,8 +72,18 @@ function add_tree_stuff_to_scene()
 	for(var i = 0; i < Virus_chapter_icons.length; i++ )
 		scene.add(Virus_chapter_icons[i]);
 	
-	for(var i = 0; i < Tree_lines.length; i++ )
-		scene.add(Tree_lines[i])
+//	for(var i = 0; i < treeBranches.length; i++)
+//		scene.add(treeBranches);
+	
+	/*
+	 * opacity of branches depends on whether the chapter associated with them is complete.
+	 * Sheree sends you tree, cut it up into branches associated to the different chapters.
+	 * exceptional branch: zika, which can come in when either is done
+	 * No need to position the hiders, just make them a pic with the same dimensions as the branches pictures
+	 * Take images of the virus chapters and make them look highlighted and fade to those on top of the non highlighted pictures
+	 * 
+	 * Aaaaaaand take a picture of it for the "images of some other viruses" preview
+	 */
 	
 	scene.add(Chapter_highlighter);
 }
@@ -106,24 +115,10 @@ function init_tree()
 	//somewhere between max and min
 	Virus_chapter_icons.icon_spacing = playing_field_dimension * 0.5 - IconDimension * 0.5 - name_dimension * 0.4;
 	Virus_chapter_icons[0].position.set(0, Virus_chapter_icons.icon_spacing, 0 ); //boca
-	Virus_chapter_icons[1].position.set(-Virus_chapter_icons.icon_spacing / 2, 0, 0 ); //Polio
-	Virus_chapter_icons[2].position.set( Virus_chapter_icons.icon_spacing / 2, 0, 0 ); //HIV
+	Virus_chapter_icons[1].position.set(-Virus_chapter_icons.icon_spacing, 0, 0 ); //Polio
+	Virus_chapter_icons[2].position.set( Virus_chapter_icons.icon_spacing, 0, 0 ); //HIV
 	Virus_chapter_icons[3].position.set(0, 0, 0 ); //Zika
 	Virus_chapter_icons[4].position.set(0, -Virus_chapter_icons.icon_spacing, 0 ); //Measles
-	
-	Tree_lines = Array(7);
-	for(var i = 0; i < 7; i++) //we give them that size so that we can think of the width of the horizontals as 1 and the height of the verticals as 1
-		Tree_lines[i] = new THREE.Mesh( new THREE.PlaneGeometry( 0.03,0.03 ), new THREE.MeshBasicMaterial({color:0x000000, transparent: true}) );
-	Tree_lines[0].scale.y = 5.5; //the heights of the little things
-	Tree_lines[2].scale.y = Tree_lines[0].scale.y;
-	Tree_lines[3].scale.y = Tree_lines[0].scale.y;
-	Tree_lines[5].scale.y = Tree_lines[0].scale.y;
-	Tree_lines[6].scale.y = Tree_lines[0].scale.y;
-	
-	Tree_lines[2].position.x = Virus_chapter_icons[1].position.x; //linearly goes from
-	
-	for(var j = 4; j < 7; j++)
-		Tree_lines[j].material.opacity = 0;
 }
 
 //maybe this should be called before anything in the loop
@@ -142,25 +137,6 @@ function update_tree()
 		}
 		else if(!Chapters_visible[i])
 			Virus_chapter_icons[i].material.opacity = 0;
-		else if( tree_zoomedness === 0 )
-		{
-			if(zika_introduction_animation > 1) //nothing fades in til this is done anyway
-			{
-				Virus_chapter_icons[i].material.opacity += 0.012;
-				if( Virus_chapter_icons[i].material.opacity > 1 )
-					Virus_chapter_icons[i].material.opacity = 1;
-			}
-			else if(i===3)
-			{
-				zika_introduction_animation += 0.014 * delta_t / 0.016;
-				var moving_chapters_x = Virus_chapter_icons.icon_spacing / 2 + Virus_chapter_icons.icon_spacing / 2 * move_smooth(1, zika_introduction_animation);
-				Virus_chapter_icons[1].position.x =-moving_chapters_x;
-				Virus_chapter_icons[2].position.x = moving_chapters_x;
-				
-				for(var j = 4; j < 7; j++)
-					Tree_lines[j].material.opacity = zika_introduction_animation;
-			}
-		}
 		Virus_chapter_icons[i].children[0].material.opacity = Virus_chapter_icons[i].material.opacity;
 	}
 	
@@ -224,7 +200,7 @@ function update_tree()
 		camera.position.lerp(all_encompassing_camera_position, move_smooth(1, 1-tree_zoomedness) );
 		
 		//and if you're there?
-		if( tree_zoomedness === 1 && ( Chapters_visible[3] === 0 || zika_introduction_animation >= 1 ) )
+		if( tree_zoomedness === 1 )
 		{
 			//skip to it being there, don't want to come back here and see it moving weirdly
 			Chapters_completed[tree_zoomtowards] = 1;
@@ -250,7 +226,7 @@ function update_tree()
 		if( Chapters_completed[i] )
 			continue;
 		
-		if( MousePosition.distanceTo(Virus_chapter_icons[i].position) < IconDimension / 2 && ( Chapters_visible[3] === 0 || zika_introduction_animation >= 1 ) ) //the radius, we're modelling them as circles
+		if( MousePosition.distanceTo(Virus_chapter_icons[i].position) < IconDimension / 2 ) //the radius, we're modelling them as circles
 		{
 			//player has officially hovered
 			Chapter_highlighter.position.set( Virus_chapter_icons[i].position.x, Virus_chapter_icons[i].position.y, 0.01 );
@@ -270,30 +246,4 @@ function update_tree()
 		Chapter_highlighter.visible = true;
 	else
 		Chapter_highlighter.visible = false;
-	
-	//brace across the top
-	Tree_lines[1].scale.x = Math.abs( Tree_lines[2].position.x - Tree_lines[3].position.x ) / 0.03;
-	Tree_lines[1].position.x = ( Tree_lines[2].position.x + Tree_lines[3].position.x ) / 2;
-	Tree_lines[1].position.y = ( Virus_chapter_icons[0].position.y + IconDimension / 2 + Virus_chapter_icons[1].position.y - IconDimension / 2 - IconDimension / 3 * 0.4 ) / 2;
-	
-	//coming out of boca
-	Tree_lines[0].position.y = Tree_lines[1].position.y + Tree_lines[0].scale.y * 0.03 / 2;
-	
-	//branches for HIV and the other branch
-	Tree_lines[2].position.y = Tree_lines[1].position.y - Tree_lines[0].scale.y * 0.03 / 2;
-	Tree_lines[3].position.y = Tree_lines[1].position.y - Tree_lines[0].scale.y * 0.03 / 2;
-	Tree_lines[3].position.x = Virus_chapter_icons[2].position.x;
-	
-	//the two coming out of 4
-	Tree_lines[5].position.x = Virus_chapter_icons[1].position.x;
-	Tree_lines[5].position.y = Virus_chapter_icons[1].position.y + IconDimension / 2 + Tree_lines[5].scale.y * 0.03 / 2;
-	Tree_lines[6].position.x = Tree_lines[2].position.x - (Virus_chapter_icons[1].position.x - Tree_lines[2].position.x);
-	Tree_lines[6].position.y = Virus_chapter_icons[3].position.y + IconDimension / 2 + Tree_lines[5].scale.y * 0.03 / 2;
-	
-	//brace for polio and zia
-	Tree_lines[4].scale.x = Math.abs( Tree_lines[5].position.x - Tree_lines[6].position.x ) / 0.03;
-	Tree_lines[4].position.x = ( Tree_lines[5].position.x + Tree_lines[6].position.x ) / 2;
-	Tree_lines[4].position.y = Tree_lines[2].position.y - (Tree_lines[1].position.y - Tree_lines[2].position.y);
-	
-	//might also be nice to have the split come from in the middle of the left branch. all three small branches start out half size and lengthen
 }

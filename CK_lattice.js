@@ -1,3 +1,5 @@
+var volumeDecreaseAmt = 0.05;
+
 //Speedup opportunity: this. Profile it, it may be a huge thing
 function updatelattice() {
 	var costheta = Math.cos(LatticeAngle);
@@ -12,10 +14,20 @@ function updatelattice() {
 	flatlattice.geometry.attributes.position.needsUpdate = true;
 }
 
+var framesSinceLatticeSizeDecrease = 0;
+var framesSinceLatticeSizeIncrease = 0;
+
 function HandleNetMovement()
 {
-	if(isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) >= IrregButton.radius && !Sounds.grab.isPlaying )
-		Sounds.grab.play();
+	if(isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) >= IrregButton.radius && !Sounds.vertexGrabbed.isPlaying )
+		Sounds.vertexGrabbed.play();
+	if(!isMouseDown && isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) >= IrregButton.radius && !Sounds.vertexReleased.isPlaying )
+		Sounds.vertexReleased.play();
+	
+	var LatticeScaleChange = 1;
+	
+	framesSinceLatticeSizeDecrease++;
+	framesSinceLatticeSizeIncrease++;
 	
 	if( capsidopenness === 1 && isMouseDown )
 	{
@@ -23,8 +35,9 @@ function HandleNetMovement()
 		var OldMousedist = OldMousePosition.distanceTo(flatlattice_center); //unless the center is going to change?
 		
 		var active_radius = 0.18;
-		if(Mousedist > active_radius && OldMousedist > active_radius && Mouse_delta.lengthSq() != 0 ){
-			
+		
+		if(Mousedist > active_radius && OldMousedist > active_radius && Mouse_delta.lengthSq() != 0 )
+		{	
 			LatticeGrabbed = true;
 			
 			var oldmouse_to_center = new THREE.Vector3(flatlattice_center.x - OldMousePosition.x,flatlattice_center.y - OldMousePosition.y,0);
@@ -36,7 +49,7 @@ function HandleNetMovement()
 			var areaForRotating = TAU / 32 * 11; //between a quarter and a half
 			
 			if(Math.abs(ourangle) < TAU / 4 - areaForRotating / 2 || Math.abs(ourangle) > TAU / 4 + areaForRotating / 2 ){
-				var LatticeScaleChange = OldMousedist / Mousedist;
+				LatticeScaleChange = OldMousedist / Mousedist;
 				var max_lattice_scale_change = 0.08;
 				
 				var min_lattice_scale_given_angle = get_min_lattice_scale(LatticeAngle);
@@ -44,19 +57,45 @@ function HandleNetMovement()
 				
 				LatticeScale *= LatticeScaleChange;
 				theyKnowYouCanAlter = true;
+				
 				if( LatticeScaleChange > 1 )
 				{
 					if(LatticeScale > 1)
+					{
 						LatticeScale = 1;
-//					else if( !Sounds.ensmall.isPlaying)
-//						Sounds.ensmall.play();
+						if( !Sounds.sizeLimitLower.isPlaying)
+							Sounds.sizeLimitLower.play();
+					}
+					else
+					{
+						framesSinceLatticeSizeDecrease = 0;
+						if( !Sounds.sizeDecreaseLong.isPlaying && !Sounds.sizeDecreaseLong.volume )
+						{
+							if( Sounds.sizeDecreaseLong.volume !== Sounds.sizeDecreaseLong.defaultVolume )
+								Sounds.sizeDecreaseLong.volume = Sounds.sizeDecreaseLong.defaultVolume;
+							Sounds.sizeDecreaseLong.play();
+						}
+					}					
 				}
+				
 				if( LatticeScaleChange < 1 )
 				{
-					if(LatticeScale < min_lattice_scale_given_angle  ) //10/3 * HS3 / number_of_hexagon_rings)
-						LatticeScale = min_lattice_scale_given_angle; //10/3 * HS3 / number_of_hexagon_rings;
-//					else if( !Sounds.enlarge.isPlaying )
-//						Sounds.enlarge.play();
+					if(LatticeScale < min_lattice_scale_given_angle  )
+					{
+						LatticeScale = min_lattice_scale_given_angle;
+						if( !Sounds.sizeLimitUpper.isPlaying)
+							Sounds.sizeLimitUpper.play(); //these could be the wrong way around
+					}
+					else
+					{
+						framesSinceLatticeSizeIncrease = 0;
+						if( !Sounds.sizeIncreaseLong.isPlaying && !Sounds.sizeIncreaseLong.volume)
+						{
+							if( Sounds.sizeIncreaseLong.volume !== Sounds.sizeIncreaseLong.defaultVolume )
+								Sounds.sizeIncreaseLong.volume = Sounds.sizeIncreaseLong.defaultVolume;
+							Sounds.sizeIncreaseLong.play();
+						}
+					}
 				}
 			}
 			
@@ -134,6 +173,24 @@ function HandleNetMovement()
 			LatticeScale += full_scale_addition*speed_towards_fix;
 		}
 	}
+	
+	if( framesSinceLatticeSizeIncrease > 4 )
+	{
+		//and don't let it play twice continuously
+		if( Sounds.sizeIncreaseLong.volume - volumeDecreaseAmt >= 0)
+			Sounds.sizeIncreaseLong.volume -=volumeDecreaseAmt;
+		else
+			Sounds.sizeIncreaseLong.volume = 0;
+	}
+	if( framesSinceLatticeSizeDecrease > 4 )
+	{	
+		if( Sounds.sizeDecreaseLong.volume - volumeDecreaseAmt >= 0)
+			Sounds.sizeDecreaseLong.volume -=volumeDecreaseAmt;
+		else
+			Sounds.sizeDecreaseLong.volume = 0;
+	}
+	else console.log("no decrease")
+	
 	updatelattice();
 }
 

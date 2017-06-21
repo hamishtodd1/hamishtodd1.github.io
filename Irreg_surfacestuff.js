@@ -90,19 +90,42 @@ function CheckIrregButton(){
 		var squashed_size = 0.925;
 		IrregButton.scale.setScalar(squashed_size);
 
-		Sounds.button.play();
+		Sounds.buttonPressed.play();
 		
 		IrregButton.pulsing = 0;
 	}
-	if(!isMouseDown && (IrregButton.scale.x < 1 && !IrregButton.pulsing ) ){
+	if(!isMouseDown && (IrregButton.scale.x < 1 && !IrregButton.pulsing ) ) //released
+	{
+		Sounds.buttonReleased.play();
+		
 		if(IrregButton.capsidopen)
 		{
+			if( !Sounds.shapeClose.isPlaying )
+			{
+				Sounds.shapeClose.volume = 1;
+				Sounds.shapeClose.play();
+			}
+			if( Sounds.shapeOpen.volume - volumeDecreaseAmt*2 >= 0)
+				Sounds.shapeOpen.volume -=volumeDecreaseAmt*2;
+			else
+				Sounds.shapeOpen.volume = 0;
 			IrregButton.capsidopen = 0;
 		}
 		else
+		{
+			if( !Sounds.shapeOpen.isPlaying )
+			{
+				Sounds.shapeOpen.volume = 1;
+				Sounds.shapeOpen.play();
+			}
+			if( Sounds.shapeClose.volume - volumeDecreaseAmt*2 >= 0)
+				Sounds.shapeClose.volume -=volumeDecreaseAmt*2;
+			else
+				Sounds.shapeClose.volume = 0;
 			IrregButton.capsidopen = 1;
+		}
 		
-		IrregButton.scale.set(1,1,1);
+		IrregButton.scale.setScalar(1);
 	}
 	
 	if( isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) < IrregButton.radius && IrregButton.capsidopen === 1 )
@@ -126,8 +149,13 @@ function CheckIrregButton(){
 		IrregButton.scale.setScalar(buttonscale);
 	}
 	
-	IrregButton.children[3].rotation.z =-TAU / 4 * (1-capsidopenness);
-	IrregButton.children[4].rotation.z = TAU / 4 * (1-capsidopenness);
+	//Untested
+	{
+		IrregButton.logoFaces[0].quaternion.copy( IrregButton.logoFaces[0].closedQuaternion );
+		IrregButton.logoFaces[0].quaternion.slerp( IrregButton.logoFaces[0].openQuaternion, capsidopenness );
+		IrregButton.logoFaces[1].rotation.x = (1-capsidopenness) *-TAU / 4;
+		IrregButton.logoFaces[2].rotation.y = (1-capsidopenness) * TAU / 4; //or possibly the reverse
+	}
 }
 
 function update_varyingsurface() {
@@ -153,28 +181,25 @@ function update_varyingsurface() {
 			varyingsurface_cylinders[i].material.color.copy( varyingsurface_cylinders[0].material.color );
 	varyingsurface_cylinders[21].material.color.copy( varyingsurface_cylinders[0].material.color );
 		
-	
-	var magnitudeAcceleration = 0.00079 * delta_t / 0.016;
-	
-	if( IrregButton.capsidopen )
+	//untested TODO
 	{
-		if(capsidopenness < 0.5)
-			capsidopeningspeed += magnitudeAcceleration;
-		else
-			capsidopeningspeed -= magnitudeAcceleration;
-		if( capsidopeningspeed < 0)
-			capsidopeningspeed = 0.001;
+		if(capsidopenness === 1 || capsidopenness === 0)
+			capsidopennessParameter = capsidopenness;
+		
+		if( IrregButton.capsidopen )
+		{
+			capsidopennessParameter += delta_t*0.9;
+			if(capsidopennessParameter>1)
+				capsidopennessParameter = 1;
+		}
+		else {
+			capsidopennessParameter -= delta_t*0.9;
+			if(capsidopennessParameter<0)
+				capsidopennessParameter = 0;
+		}
+		
+		capsidopenness = move_smooth(1, capsidopennessParameter);
 	}
-	else {
-		if(capsidopenness > 0.5)
-			capsidopeningspeed -= magnitudeAcceleration;
-		else
-			capsidopeningspeed += magnitudeAcceleration;
-		if( capsidopeningspeed > 0)
-			capsidopeningspeed = -0.001;
-	}
-	
-	capsidopenness += capsidopeningspeed;
 	
 	var wedgesopacity = (capsidopenness - 1 ) * 4 + 1;
 	if( wedgesopacity < 0 ) wedgesopacity = 1;

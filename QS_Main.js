@@ -114,8 +114,20 @@ function MoveQuasiLattice()
 	{
 		QSmouseLowerLimit = -1;
 		QSmouseUpperLimit = 999;
+		
+		if( isMouseDown_previously )
+		{
+			if(!Sounds.vertexReleased.isPlaying)
+				Sounds.vertexReleased.play();
+		}
 	}
 	else {
+		if(!isMouseDown_previously)
+		{
+			if(!Sounds.vertexGrabbed.isPlaying)
+				Sounds.vertexGrabbed.play();
+		}
+		
 		var Mousedist = MousePosition.length();
 		var OldMousedist = OldMousePosition.length(); //unless the center is going to change?
 		{
@@ -147,6 +159,8 @@ function MoveQuasiLattice()
 				var hardmaxlength = 4;
 				if(veclength > hardmaxlength) {
 					veclength = hardmaxlength;
+					if( !Sounds.sizeLimitUpper.isPlaying)
+						Sounds.sizeLimitUpper.play();
 				}
 				var softmaxlength = 3.53; // 3.48 is minimum but that makes it hard to get to HPV
 				if(veclength > softmaxlength)
@@ -164,6 +178,9 @@ function MoveQuasiLattice()
 					
 					if( QSmouseLowerLimit === -1)
 						QSmouseLowerLimit = Mousedist;
+					
+					if( !Sounds.sizeLimitLower.isPlaying)
+						Sounds.sizeLimitLower.play();
 				}
 				
 				cutout_vector0_player.setLength(veclength);

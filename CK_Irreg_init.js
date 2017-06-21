@@ -20,26 +20,64 @@ function init_CK_and_irreg()
 		IrregButton = new THREE.Object3D();
 		IrregButton.radius = 0.37;
 		var button_line_width = 0.04;
+		
+		/*
+		 * Ideally you'd like a shaded thing so it looks 3D. Add lights to CK
+		 * 
+		 * Either squares or triangles; three surrounding a point
+		 * 
+		 * It shouldn't be black
+		 * 
+		 * And by the way, functions that construct 3D shapes should be re-callable
+		 */
+		
+		IrregButton.logoFaces = Array(3);
+		var faceWidth = IrregButton.radius / 3;
+		var squareGeometry = new THREE.Geometry();
+		squareGeometry.vertices.push(
+				new THREE.Vector3(faceWidth,faceWidth,0), 
+				new THREE.Vector3(faceWidth,0,0),
+				new THREE.Vector3(0,0,0),
+				new THREE.Vector3(0,faceWidth,0) );
+		squareGeometry.faces.push(new THREE.Face3(0,1,2),new THREE.Face3(2,3,0) );
+		
+		IrregButton.logoFaces[0] = new THREE.Object3D();
+		IrregButton.logoFaces[0].add( new THREE.Mesh( squareGeometry,
+				new THREE.MeshBasicMaterial( { transparent: true, color: 0x000000 } ) ) );
+		IrregButton.logoFaces[0].add( notOutline = new THREE.Mesh( squareGeometry,
+				new THREE.MeshBasicMaterial( { transparent: true, color: 0xFFFFFF } ) ) );
+		IrregButton.logoFaces[0].children[1].position.z = 0.0001;
+		IrregButton.logoFaces[0].children[1].scale.setScalar( 0.9 );
+		
+		IrregButton.add(IrregButton.logoFaces[0]);
+		IrregButton.logoFaces[0].position.z = Math.sqrt(3) * faceWidth * 2/3;
+		
+		for(var i = 1; i < 3; i++)
+		{
+			IrregButton.logoFaces[i] = IrregButton.logoFaces[0].clone();
+			IrregButton.logoFaces[i].rotation.order = "ZYX";
+			IrregButton.logoFaces[0].add( IrregButton.logoFaces[i] );
+		}
+		IrregButton.logoFaces[1].rotation.z = TAU / 4;
+		IrregButton.logoFaces[2].rotation.z =-TAU / 4;
+		
+		IrregButton.logoFaces[0].rotation.z = 3 / 8 * TAU; //possibly minus
+		IrregButton.logoFaces[0].position.y = Math.sqrt(2) * faceWidth;
+		
+		IrregButton.logoFaces[0].openQuaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),TAU / 8);
+		IrregButton.logoFaces[0].closedQuaternion = IrregButton.logoFaces[0].openQuaternion.clone();
+		var necessaryAngle = new THREE.Vector3(1,1,0).angleTo(new THREE.Vector3(1,1,1));
+		//it's one of these, or their negative
+		IrregButton.logoFaces[0].closedQuaternion.multiply( new THREE.Quaternion().setFromAxisAngle( new THREE.Vector3(1,0,0), necessaryAngle ) );
+//		IrregButton.logoFaces[0].closedQuaternion.multiply( new THREE.Quaternion().setFromAxisAngle( new THREE.Vector3(1/Math.sqrt(2),-1/Math.sqrt(2),0), necessaryAngle ) );
+		
+		//outline
 		IrregButton.add( new THREE.Mesh( new THREE.CircleGeometry(IrregButton.radius,64),
 				new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
+		//inside
 		IrregButton.add( new THREE.Mesh( new THREE.CircleGeometry(IrregButton.radius - button_line_width,64),
 				new THREE.MeshBasicMaterial( { transparent:true, color: 0xffffff } ) ) );
-		IrregButton.children[1].position.z += 0.001;
-		IrregButton.add( new THREE.Mesh( new THREE.CircleGeometry(button_line_width / 2,64),
-				new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
-		IrregButton.children[2].position.z += 0.002;
-		
-		IrregButton.add( new THREE.Mesh( new THREE.PlaneGeometry( (IrregButton.radius - button_line_width * 2 ) * 2,button_line_width),
-				new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
-		IrregButton.children[3].position.z += 0.003;
-		IrregButton.children[3].geometry.vertices[0].x = 0;
-		IrregButton.children[3].geometry.vertices[2].x = 0;
-		
-		IrregButton.add( new THREE.Mesh( new THREE.PlaneGeometry( (IrregButton.radius - button_line_width * 2 ) * 2,button_line_width),
-				new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
-		IrregButton.children[4].position.z += 0.003;
-		IrregButton.children[4].geometry.vertices[1].x = 0;
-		IrregButton.children[4].geometry.vertices[3].x = 0;
+		IrregButton.children[ IrregButton.children.length-1 ].position.z += 0.001;
 		
 		IrregButton.pulsing = 1;
 		IrregButton.pulse = 0;

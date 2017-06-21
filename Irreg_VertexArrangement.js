@@ -157,8 +157,8 @@ function manipulate_vertices()
 			if( lowest_quadrance_so_far < maximum_quadrance_to_be_selected) {
 				vertex_tobechanged = closest_vertex_so_far;
 
-				if(!Sounds.grab.isPlaying)
-					Sounds.grab.play();
+				if(!Sounds.vertexGrabbed.isPlaying)
+					Sounds.vertexGrabbed.play();
 				
 				settle_manipulationsurface_and_flatnet();
 			}
@@ -180,7 +180,12 @@ function manipulate_vertices()
 	}
 	else {
 		if(vertex_tobechanged !== 999) //it was something previously
+		{
+			if(!Sounds.vertexReleased.isPlaying)
+				Sounds.vertexReleased.play();
 			varyingsurface_spheres[vertex_tobechanged].scale.set(0.05,0.05,0.05);
+		}
+			
 		vertex_tobechanged = 999;
 		for(var i = 0; i < varyingsurface_spheres.length; i++){
 			if( !( (i == 0 || i % 4 == 1) && i != 1) ){

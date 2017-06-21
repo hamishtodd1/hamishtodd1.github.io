@@ -285,8 +285,8 @@ function init_story()
 	for(var i = 0; i < default_minimum_angle_crapifiers.length; i++ )
 		default_minimum_angle_crapifiers[i] = 1;
 	
-	var defaultPentamersColor = new THREE.Color( 147/255,0,8/255 );
-	var defaultHexamersColor = new THREE.Color( 208/255,58/255,59/255 );
+	var defaultPentamersColor = new THREE.Color( 169/255,78/255,90/255 );
+	var defaultHexamersColor = new THREE.Color( 225/255,182/255,163/255 );
 	
 	Story_states.push({
 		startingtime: -1, //this is just the prototype state, not really used!
@@ -373,6 +373,9 @@ function init_story()
 		new_story_state.pentagonsFlashing = false;
 		
 		new_story_state.varyingsurfaceZRotation = false;
+
+		new_story_state.pentamers_color = defaultPentamersColor.clone(),
+		new_story_state.hexamers_color = defaultHexamersColor.clone(),
 		
 		new_story_state.startingtime += default_page_duration;
 		
