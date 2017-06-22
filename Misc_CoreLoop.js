@@ -15,7 +15,7 @@
  * 
  * -------General
  * Sound
- * New button with animation
+ * New button
  * Tree
  * Get it on an amazon or google server
  * Check for required things like flash 10, webgl, link to video if page doesn't work in some way. Or recommend a different browser
@@ -24,7 +24,7 @@
 		http://browsershots.org/
    General bug testing
    Size snapping was bullshit, correct it to whatever Sheree gives
-   Switch CK inflation to being when you click the close button
+   Switch CK hex inflation to being when you click the close button
 		
 	Repetition trigger fired on use button?
 Touch:
@@ -160,13 +160,16 @@ function ChangeScene(new_mode) {
 			break;
 	
 		case BOCAVIRUS_MODE:
-			for(var i = 0; i < 60; i++)
-				scene.add(neo_bocavirus_proteins[i]);
+//			for(var i = 0; i < 60; i++)
+//				scene.add(neo_bocavirus_proteins[i]);
 			for(var i = 0; i< reproduced_proteins.length; i++)
 				EggCell.add( reproduced_proteins[i] );
 			scene.add( stmvHider );
 			scene.add(EggCell);
 			scene.add(Cornucopia);
+
+			scene.add(IrregButton);
+			IrregButton.scale.setScalar(IrregButton.scale.x*3)
 			break;
 			
 		case CK_MODE:

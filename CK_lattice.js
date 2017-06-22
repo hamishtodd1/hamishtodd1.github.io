@@ -174,23 +174,6 @@ function HandleNetMovement()
 		}
 	}
 	
-	if( framesSinceLatticeSizeIncrease > 4 )
-	{
-		//and don't let it play twice continuously
-		if( Sounds.sizeIncreaseLong.volume - volumeDecreaseAmt >= 0)
-			Sounds.sizeIncreaseLong.volume -=volumeDecreaseAmt;
-		else
-			Sounds.sizeIncreaseLong.volume = 0;
-	}
-	if( framesSinceLatticeSizeDecrease > 4 )
-	{	
-		if( Sounds.sizeDecreaseLong.volume - volumeDecreaseAmt >= 0)
-			Sounds.sizeDecreaseLong.volume -=volumeDecreaseAmt;
-		else
-			Sounds.sizeDecreaseLong.volume = 0;
-	}
-	else console.log("no decrease")
-	
 	updatelattice();
 }
 
