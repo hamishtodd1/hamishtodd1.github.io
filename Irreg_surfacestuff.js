@@ -88,7 +88,7 @@ function CheckIrregButton(){
 	
 	if(isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) < IrregButton.radius ){
 		var squashed_size = 0.925;
-		IrregButton.scale.setScalar(squashed_size);
+		IrregButton.scale.set(squashed_size,squashed_size,IrregButton.scale.z);
 
 		Sounds.buttonPressed.play();
 		
@@ -125,7 +125,7 @@ function CheckIrregButton(){
 			IrregButton.capsidopen = 1;
 		}
 		
-		IrregButton.scale.setScalar(1);
+		IrregButton.scale.set(1,1,IrregButton.scale.z);
 	}
 	
 	if( isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) < IrregButton.radius && IrregButton.capsidopen === 1 )
@@ -146,15 +146,15 @@ function CheckIrregButton(){
 			buttonscale += (stopSwellTime - startSwellTime - (IrregButton.pulse-stopSwellTime) ) * maxSwell;
 		else
 			IrregButton.pulse = 0;
-		IrregButton.scale.setScalar(buttonscale);
+		IrregButton.scale.set(buttonscale,buttonscale, IrregButton.scale.z );
 	}
 	
 	//Untested
 	{
 		IrregButton.logoFaces[0].quaternion.copy( IrregButton.logoFaces[0].closedQuaternion );
 		IrregButton.logoFaces[0].quaternion.slerp( IrregButton.logoFaces[0].openQuaternion, capsidopenness );
-		IrregButton.logoFaces[1].rotation.x = (1-capsidopenness) *-TAU / 4;
-		IrregButton.logoFaces[2].rotation.y = (1-capsidopenness) * TAU / 4; //or possibly the reverse
+		IrregButton.logoFaces[1].rotation.x = (1-capsidopenness) *TAU / 4;
+		IrregButton.logoFaces[2].rotation.y = (1-capsidopenness) *-TAU / 4; //or possibly the reverse
 	}
 }
 
@@ -188,12 +188,12 @@ function update_varyingsurface() {
 		
 		if( IrregButton.capsidopen )
 		{
-			capsidopennessParameter += delta_t*0.9;
+			capsidopennessParameter += delta_t*1.3;
 			if(capsidopennessParameter>1)
 				capsidopennessParameter = 1;
 		}
 		else {
-			capsidopennessParameter -= delta_t*0.9;
+			capsidopennessParameter -= delta_t*1.3;
 			if(capsidopennessParameter<0)
 				capsidopennessParameter = 0;
 		}
@@ -205,15 +205,6 @@ function update_varyingsurface() {
 	if( wedgesopacity < 0 ) wedgesopacity = 1;
 	for( var i = 0; i < wedges.length; i++ )
 		wedges[i].material.opacity = wedgesopacity;
-	
-	if(capsidopenness > 1) {
-		capsidopenness = 1;
-		capsidopeningspeed = 0;
-	}
-	if(capsidopenness < 0) {
-		capsidopenness = 0;
-		capsidopeningspeed = 0;
-	}
 	
 	if( capsidopenness == 1){
 		scene.add(manipulation_surface);

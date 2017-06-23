@@ -15,9 +15,6 @@ function UpdateQuasiSurface()
 		QS_rotationangle *= 0.93;
 	}
 	
-	if(isMouseDown && !isMouseDown_previously && !Sounds.grab.isPlaying )
-		Sounds.grab.play();
-	
 	dodeca.rotateOnAxis(QS_rotationaxis,QS_rotationangle);
 	dodeca.updateMatrixWorld();
 	
@@ -70,14 +67,18 @@ function update_QS_center()
 	QS_center.position.z = camera.position.z - 8;
 	QS_measuring_stick.position.copy( QS_center.position );
 	
-	var opacitychangerate = 0.035 * delta_t / 0.016;
+	var opacitychangerate = 0.07 * delta_t / 0.016;
 	if(isMouseDown)
 	{
-		QS_center.material.opacity += opacitychangerate;
-		if(QS_center.material.opacity > 1)
-			QS_center.material.opacity = 1;
+		if( MODE !== CK_MODE || MousePosition.distanceTo(IrregButton.position) > IrregButton.radius )
+		{
+			QS_center.material.opacity += opacitychangerate;
+			if(QS_center.material.opacity > 1)
+				QS_center.material.opacity = 1;
+		}
 	}
-	else {
+	else 
+	{
 		QS_center.material.opacity -= opacitychangerate;
 		if(QS_center.material.opacity < 0)
 			QS_center.material.opacity = 0;
@@ -97,9 +98,9 @@ function update_QS_center()
 	QS_measuring_stick.rotation.copy(QS_center.rotation);
 	
 	if(MODE === CK_MODE)
-		QS_measuring_stick.scale.y = MousePosition.length() * Math.max(0.001, QS_center.material.opacity) * 0.0175; //last number chosen by inspection
+		QS_measuring_stick.scale.y = MousePosition.length() * 0.0175; //last number chosen by inspection
 	else
-		QS_measuring_stick.scale.y = MousePosition.length() * Math.max(0.001, QS_center.material.opacity) * 0.0233; //last number chosen by inspection
+		QS_measuring_stick.scale.y = MousePosition.length() * 0.0233; //last number chosen by inspection
 	QS_measuring_stick.scale.x = QS_measuring_stick.scale.y / 1.7;
 	
 	QS_measuring_stick.rotation.z = Math.atan2(MousePosition.y,MousePosition.x) + TAU / 4;
@@ -292,7 +293,7 @@ function MoveQuasiLattice()
 		{
 			//a random pop
 			var playedPop = "pop" + Math.ceil(Math.random()*3).toString();
-			
+			console.log(playedPop, Sounds[ playedPop ])
 			if( !Sounds[ playedPop ].isPlaying )
 				Sounds[ playedPop ].play();
 			

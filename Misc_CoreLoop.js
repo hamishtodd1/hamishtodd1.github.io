@@ -16,7 +16,7 @@
  * -------General
  * Loading screen: fade in btv faces one by one
  * Sound
- * New button with animation
+ * New button
  * Tree
  * Get it on an amazon or google server
  * Check for required things like flash 10, webgl, link to video if page doesn't work in some way. Or recommend a different browser
@@ -24,8 +24,9 @@
 		Johan's Mac
 		http://browsershots.org/
    General bug testing
-   Size snapping was bullshit, correct it to whatever Sheree gives
-   Switch CK inflation to being when you click the close button
+   Size snapping for the video and canvas was bullshit, correct it to whatever Sheree gives in her design
+   Switch CK hex inflation to being when you click the close button
+   So you've triggered a repetition... but you need pause again once it's done; bear in mind the player might have done the necessary thing
 		
 	Repetition trigger fired on use button?
 Touch:
