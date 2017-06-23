@@ -69,8 +69,8 @@ function load_AV_stuff()
 					                      "buttonReleased",
 					                      
 					                      "pop1",
+					                      "pop2",
 					                      "pop3",
-					                      "pop4",
 					                      
 					                      "rotateAntiClockwise",
 					                      "rotateClockwise",

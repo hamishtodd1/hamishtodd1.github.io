@@ -25,6 +25,7 @@ function HandleNetMovement()
 		Sounds.vertexReleased.play();
 	
 	var LatticeScaleChange = 1;
+	var LatticeAngleChange = 0;
 	
 	framesSinceLatticeSizeDecrease++;
 	framesSinceLatticeSizeIncrease++;
@@ -117,22 +118,9 @@ function HandleNetMovement()
 				
 				//TODO remember where the original point the player clicked is, that's what you want to be moving. Currently that point is forgotten, in a sense, if the scale limit is hit
 				
-				var LatticeAngleChange = MouseAngle - OldMouseAngle;
+				LatticeAngleChange = MouseAngle - OldMouseAngle;
 				LatticeAngle += LatticeAngleChange;
 				theyKnowYouCanAlter = true;
-				if(LatticeAngleChange > 0 )
-				{
-					Sounds.rotateClockwise.currentTime = 0;
-	                Sounds.rotateClockwise.play();
-				}
-
-				if(LatticeAngleChange < 0 )
-				{
-					Sounds.rotateAntiClockwise.currentTime = 0;
-	                Sounds.rotateAntiClockwise.play();
-				}
-//				if(LatticeAngleChange < 0 && !Sounds.rotateAntiClockwise.isPlaying )
-//					Sounds.rotateAntiClockwise.play();
 			}
 		}
 	} else { //this is where snapping takes place. Can put in the contingency on the button here
@@ -172,6 +160,16 @@ function HandleNetMovement()
 			LatticeAngle += angleaugmentation*speed_towards_fix;
 			LatticeScale += full_scale_addition*speed_towards_fix;
 		}
+	}
+	
+	if(LatticeAngleChange > 0 || LatticeScaleChange > 1 )
+	{
+		Sounds.rotateClockwise.play();
+	}
+
+	if(LatticeAngleChange < 0 || LatticeScaleChange < 1 )
+	{
+		Sounds.rotateAntiClockwise.play();
 	}
 	
 	updatelattice();

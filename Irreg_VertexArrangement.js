@@ -169,9 +169,7 @@ function manipulate_vertices()
 			changed_position.y = MousePosition.y;
 			
 			if( !( (i == 0 || i % 4 == 1) && i != 1) ){
-				varyingsurface_spheres[vertex_tobechanged].children[0].material.color.r = 0;
-				varyingsurface_spheres[vertex_tobechanged].children[0].material.color.g = 0;
-				varyingsurface_spheres[vertex_tobechanged].children[0].material.color.b = 1;
+				varyingsurface_spheres[vertex_tobechanged].children[0].material.color.setHex(0x7997B3);
 				
 				//if it's blue then it's normal size
 				varyingsurface_spheres[vertex_tobechanged].scale.set(0.05,0.05,0.05);
@@ -189,9 +187,7 @@ function manipulate_vertices()
 		vertex_tobechanged = 999;
 		for(var i = 0; i < varyingsurface_spheres.length; i++){
 			if( !( (i == 0 || i % 4 == 1) && i != 1) ){
-				varyingsurface_spheres[i].children[0].material.color.r = 0;
-				varyingsurface_spheres[i].children[0].material.color.g = 1;
-				varyingsurface_spheres[i].children[0].material.color.b = 0;
+				varyingsurface_spheres[i].children[0].material.color.setHex(0xA94D5A);
 			}
 		}
 		
@@ -515,9 +511,7 @@ function manipulate_vertices()
 	}
 	else{
 		notConverging = true;
-		varyingsurface_spheres[vertex_tobechanged].children[0].material.color.r = 1;
-		varyingsurface_spheres[vertex_tobechanged].children[0].material.color.g = 0;
-		varyingsurface_spheres[vertex_tobechanged].children[0].material.color.b = 0;
+		varyingsurface_spheres[vertex_tobechanged].children[0].material.color.setRGB(1,0,0);
 	}
 //	performance_checker.end_sample();
 }

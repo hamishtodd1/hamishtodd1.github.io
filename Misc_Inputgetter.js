@@ -33,6 +33,10 @@ function ReadInput()
 	isMouseDown_previously = isMouseDown;
 	isMouseDown = InputObject.isMouseDown;
 	
+	if(isMouseDown&& !isMouseDown_previously) //because touchscreen - you're not jumping from one place to another
+	{
+		OldMousePosition.copy( MousePosition );
+	}
 	
 	react_to_video();	
 }
@@ -153,6 +157,5 @@ document.addEventListener( 'touchstart', function(event)
 document.addEventListener( 'touchend', function(event)
 {
 	event.preventDefault();
-	OldMousePosition.copy( MousePosition );
 	InputObject.isMouseDown = false;
 }, false );

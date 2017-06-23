@@ -23,8 +23,9 @@
 		Johan's Mac
 		http://browsershots.org/
    General bug testing
-   Size snapping was bullshit, correct it to whatever Sheree gives
+   Size snapping for the video and canvas was bullshit, correct it to whatever Sheree gives in her design
    Switch CK hex inflation to being when you click the close button
+   So you've triggered a repetition... but you need pause again once it's done; bear in mind the player might have done the necessary thing
 		
 	Repetition trigger fired on use button?
 Touch:
@@ -160,16 +161,13 @@ function ChangeScene(new_mode) {
 			break;
 	
 		case BOCAVIRUS_MODE:
-//			for(var i = 0; i < 60; i++)
-//				scene.add(neo_bocavirus_proteins[i]);
+			for(var i = 0; i < 60; i++)
+				scene.add(neo_bocavirus_proteins[i]);
 			for(var i = 0; i< reproduced_proteins.length; i++)
 				EggCell.add( reproduced_proteins[i] );
 			scene.add( stmvHider );
 			scene.add(EggCell);
 			scene.add(Cornucopia);
-
-			scene.add(IrregButton);
-			IrregButton.scale.setScalar(IrregButton.scale.x*3)
 			break;
 			
 		case CK_MODE:

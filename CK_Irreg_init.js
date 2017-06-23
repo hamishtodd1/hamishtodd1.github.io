@@ -465,7 +465,7 @@ function init_CK_and_irreg()
 			color:	0x28445C,
 			side:	THREE.DoubleSide
 		});
-		var spherehandles_material = new THREE.MeshBasicMaterial({
+		var spherehandles_material = new THREE.MeshPhongMaterial({
 			color:	0xA84E5A,
 			side:	THREE.FrontSide,
 			transparent: true,

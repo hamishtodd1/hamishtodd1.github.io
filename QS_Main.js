@@ -15,9 +15,6 @@ function UpdateQuasiSurface()
 		QS_rotationangle *= 0.93;
 	}
 	
-	if(isMouseDown && !isMouseDown_previously && !Sounds.grab.isPlaying )
-		Sounds.grab.play();
-	
 	dodeca.rotateOnAxis(QS_rotationaxis,QS_rotationangle);
 	dodeca.updateMatrixWorld();
 	
@@ -73,11 +70,14 @@ function update_QS_center()
 	var opacitychangerate = 0.07 * delta_t / 0.016;
 	if(isMouseDown)
 	{
-		QS_center.material.opacity += opacitychangerate;
-		if(QS_center.material.opacity > 1)
-			QS_center.material.opacity = 1;
+		if( MODE !== CK_MODE || MousePosition.distanceTo(IrregButton.position) > IrregButton.radius )
+		{
+			QS_center.material.opacity += opacitychangerate;
+			if(QS_center.material.opacity > 1)
+				QS_center.material.opacity = 1;
+		}
 	}
-	else if( MousePosition.distanceTo(IrregButton.position) > IrregButton.radius ) 
+	else 
 	{
 		QS_center.material.opacity -= opacitychangerate;
 		if(QS_center.material.opacity < 0)
@@ -293,7 +293,7 @@ function MoveQuasiLattice()
 		{
 			//a random pop
 			var playedPop = "pop" + Math.ceil(Math.random()*3).toString();
-			
+			console.log(playedPop, Sounds[ playedPop ])
 			if( !Sounds[ playedPop ].isPlaying )
 				Sounds[ playedPop ].play();
 			

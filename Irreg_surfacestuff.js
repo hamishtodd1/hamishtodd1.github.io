@@ -188,12 +188,12 @@ function update_varyingsurface() {
 		
 		if( IrregButton.capsidopen )
 		{
-			capsidopennessParameter += delta_t*0.9;
+			capsidopennessParameter += delta_t*1.3;
 			if(capsidopennessParameter>1)
 				capsidopennessParameter = 1;
 		}
 		else {
-			capsidopennessParameter -= delta_t*0.9;
+			capsidopennessParameter -= delta_t*1.3;
 			if(capsidopennessParameter<0)
 				capsidopennessParameter = 0;
 		}
@@ -205,15 +205,6 @@ function update_varyingsurface() {
 	if( wedgesopacity < 0 ) wedgesopacity = 1;
 	for( var i = 0; i < wedges.length; i++ )
 		wedges[i].material.opacity = wedgesopacity;
-	
-	if(capsidopenness > 1) {
-		capsidopenness = 1;
-		capsidopeningspeed = 0;
-	}
-	if(capsidopenness < 0) {
-		capsidopenness = 0;
-		capsidopeningspeed = 0;
-	}
 	
 	if( capsidopenness == 1){
 		scene.add(manipulation_surface);
