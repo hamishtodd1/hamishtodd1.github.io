@@ -14,6 +14,7 @@
  * 
  * 
  * -------General
+ * Loading screen: fade in btv faces one by one
  * Sound
  * New button with animation
  * Tree

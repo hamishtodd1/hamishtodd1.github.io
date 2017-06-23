@@ -58,13 +58,13 @@ function initPresentation(presentation)
 			"",
 			"",
 			"",
-			"",
-			"",
+			"pans1",
+			"pans2",
 			"garnetCrystal", 
 			"mainQC",
 			"",
 			"lesserQCs",
-			"",
+			"dimensionsSolutions",
 			"reidun",
 			"reidunColleagues",
 			"allPhotos",
@@ -142,6 +142,7 @@ function initPresentation(presentation)
 	p.push( new page([]) );
 	
 	p.push( new page( slides.sevenfoldPattern ) );
+	p.push( new page( slides.part1 ) );
 	p.push( new page( slides.sunflowerAndWall ) );
 	p.push( new page( slides.everyday3DPatterns ) );
 	p.push( new page( slides.lungsAndBuilding ) );
@@ -211,6 +212,8 @@ function initPresentation(presentation)
 	p.push( new page( [ h.full3hole ] ) );
 	p.push( new page( [ h.half3hole ] ) );
 
+	p.push( new page( slides.part2 ) );
+
 	p.push( new page( [ h.axis1D, h.axis2D, h.axis3D, h.axis4D, h.axis6D ] ) );
 	p[ p.length-1 ].adornmentsVisible = false;
 	p.push( new page( [ h.axis1D, h.axis2D, h.axis3D, h.axis4D, h.axis6D ] ) );
@@ -246,8 +249,6 @@ function initPresentation(presentation)
 	p[ p.length-1 ].startingEL["ep4D"] = 4;
 	p[ p.length-1 ].volumeVisible = false;
 	
-	p.push( new page( slides.dimensionsExerciseCue ) );
-	
 	p.push( new page( slides.mainQC ) );
 	p.push( new page( [h.ep6D, h.axis6D ] ) );
 	p[ p.length-1 ].volumeVisible = true;
@@ -256,15 +257,25 @@ function initPresentation(presentation)
 	p.push( new page( [h.goldenLattice] ) );
 	
 	p.push( new page( slides.lesserQCs ) );
+	p.push( new page( slides.pans1 ) );
+	p.push( new page( slides.pans2 ) );
 	
+	p.push( new page( slides.dimensionsExerciseCue ) );
+	p.push( new page( slides.dimensionsSolutions ) );
+	
+	p.push( new page( slides.virusVictims ) );
+	p.push( new page( slides.virusStructures ) );
 	p.push( new page( [ h.zika, h.looseTria ] ) );
+	p.push( new page( slides.zikaHazmat ) );
 	p.push( new page( [ h.pariaModel, h.pariaData ] ) );
 //	p.push( new page( [ h.CCMV, h.tamiflu ] ) );
 	p.push( new page( [ h.ms2Model, h.ms2Data ] ) );
-//
-//	p.push( new page( slides.allPhotos ) );
+	
 	p.push( new page( slides.reidun ) );
 	p.push( new page( slides.reidunColleagues ) );
+	p.push( new page( [ h.fishUniverse, h.axis3D, h.ep3D, h.xAxisGrabber3D, h.zAxisGrabber3D ] ) );
+	p[ p.length-1 ].volumeVisible = false;
+	p[ p.length-1 ].startingEL["ep3D"] = 3;
 	
 	//--------------End Plan
 	
