@@ -102,7 +102,7 @@ function CheckIrregButton(){
 		{
 			if( !Sounds.shapeClose.isPlaying )
 			{
-				Sounds.shapeClose.volume = 1;
+				Sounds.shapeClose.volume = Sounds.shapeClose.defaultVolume;
 				Sounds.shapeClose.play();
 			}
 			if( Sounds.shapeOpen.volume - volumeDecreaseAmt*2 >= 0)
@@ -115,7 +115,7 @@ function CheckIrregButton(){
 		{
 			if( !Sounds.shapeOpen.isPlaying )
 			{
-				Sounds.shapeOpen.volume = 1;
+				Sounds.shapeOpen.volume = Sounds.shapeOpen.defaultVolume;
 				Sounds.shapeOpen.play();
 			}
 			if( Sounds.shapeClose.volume - volumeDecreaseAmt*2 >= 0)

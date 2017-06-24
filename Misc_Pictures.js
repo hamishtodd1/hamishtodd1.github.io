@@ -77,21 +77,12 @@ function load_AV_stuff()
 					                      
 					                      "shapeSettles", //the worst. Maybe use Monet's open or close?
 					                      
-					                      //got work to do
-					                      "sizeDecreaseLong",
-					                      "sizeDecreaseMedium",
-					                      "sizeDecreaseShort",
-					                      "sizeIncreaseLong",
-					                      "sizeIncreaseMedium",
-					                      "sizeIncreaseShort",
-					                      
 					                      "sizeLimitLower",
 					                      "sizeLimitUpper",
 					                      
 					                      "shapeOpen",
 					                      "shapeClose",
 					                      
-					                      "triangleEdgeBump",
 					                      "triangleEdgeSound",
 					                      
 					                      "vertexGrabbed",
@@ -101,22 +92,12 @@ function load_AV_stuff()
 					{
 						Sounds[soundInfoArray[i]] = new Audio( "Data/Sounds/" + soundInfoArray[i] + ".mp3" );
 					}
-					var sizeVolume = 0.4;
-					Sounds.sizeDecreaseLong.volume = sizeVolume;
-					Sounds.sizeDecreaseMedium.volume = sizeVolume;
-					Sounds.sizeDecreaseShort.volume = sizeVolume;
 					
-					Sounds.sizeDecreaseLong.defaultVolume = sizeVolume;
-					Sounds.sizeDecreaseMedium.defaultVolume = sizeVolume;
-					Sounds.sizeDecreaseShort.defaultVolume = sizeVolume;
-
-					Sounds.sizeIncreaseLong.volume = sizeVolume;
-					Sounds.sizeIncreaseMedium.volume = sizeVolume;
-					Sounds.sizeIncreaseShort.volume = sizeVolume;
-
-					Sounds.sizeIncreaseLong.defaultVolume = sizeVolume;
-					Sounds.sizeIncreaseMedium.defaultVolume = sizeVolume;
-					Sounds.sizeIncreaseShort.defaultVolume = sizeVolume;
+					var openCloseVolume = 0.2;
+					Sounds.shapeOpen.defaultVolume = openCloseVolume;
+					Sounds.shapeClose.defaultVolume = openCloseVolume;
+					Sounds.shapeOpen.volume = openCloseVolume;
+					Sounds.shapeClose.volume = openCloseVolume;
 					
 					PICTURES_LOADED = 1; //this may create problems with skipping forward to places where you haven't loaded the pic yet
 					attempt_launch();

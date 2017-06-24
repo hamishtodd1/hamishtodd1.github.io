@@ -30,6 +30,8 @@
 	Repetition trigger fired on use button?
 Touch:
 	tree went wrong
+	went to youtube, fffffffffffffffffffff
+	tablet but not phone. Phone is shite; it's ok for it to have anything at all. Jessie computer
 	
 ----------Below the thing
  * Sheree must design

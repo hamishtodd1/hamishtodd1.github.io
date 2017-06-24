@@ -118,8 +118,10 @@ function MoveQuasiLattice()
 		
 		if( isMouseDown_previously )
 		{
-			if(!Sounds.vertexReleased.isPlaying)
+			if( !Sounds.vertexReleased.isPlaying)
 				Sounds.vertexReleased.play();
+			if( !Sounds.shapeSettles.isPlaying )
+				Sounds.shapeSettles.play();
 		}
 	}
 	else {

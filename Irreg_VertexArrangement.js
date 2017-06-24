@@ -1,3 +1,5 @@
+var playingWithInversions = false;
+
 function move_vertices(vertex_tobemoved, changed_position, initial_changed_vertex)
 {
 	var V_angles_subtraction = Array(0,0,0,0);
@@ -153,7 +155,7 @@ function manipulate_vertices()
 				}
 			}
 			
-			var maximum_quadrance_to_be_selected = 0.012;
+			var maximum_quadrance_to_be_selected = 0.022;
 			if( lowest_quadrance_so_far < maximum_quadrance_to_be_selected) {
 				vertex_tobechanged = closest_vertex_so_far;
 
@@ -195,7 +197,7 @@ function manipulate_vertices()
 		//TODO give them momentum
 		if( capsidopenness === 1 )
 		{
-			var max_corner_mvmt = 0.02 * delta_t / 0.016;
+			var max_corner_mvmt = 0.01 * delta_t / 0.016;
 			for(var i = 0; i < flatnet_vertices.array.length / 3; i++){
 				var displacement_vector = new THREE.Vector3(
 						flatnet_vertices.array[i*3+0] - manipulation_surface.geometry.attributes.position.array[i*3+0],
@@ -209,6 +211,9 @@ function manipulate_vertices()
 					manipulation_surface.geometry.attributes.position.array[i*3+0] += displacement_vector.x;
 					manipulation_surface.geometry.attributes.position.array[i*3+1] += displacement_vector.y;
 					manipulation_surface.geometry.attributes.position.array[i*3+2] += displacement_vector.z;
+					
+					if( !Sounds.shapeSettles.isPlaying )
+						Sounds.shapeSettles.play();
 					
 					manipulation_surface.geometry.attributes.position.needsUpdate = true;
 					
@@ -326,12 +331,16 @@ function manipulate_vertices()
 		squashingtriangles_indices[1] = Array(3);
 		squashingtriangles_indices[2] = Array(3);
 		
+		var someTriangleInverted = false;
+		
 		for( var i = 0; i < 3; i++ ) //triangles we want
 		{
 			var triangle = V_triangle_indices[CORE][vertex_tobechanged][i+1];
 			
 			if( check_single_triangle_inversion(triangle, manipulation_surface.geometry.attributes.position.array ) )
 			{
+				someTriangleInverted = true;
+				
 				vertex_failed_to_move_when_it_should_have = true;
 				
 				squashingtriangles_indices[i][0] = 999; //the changer
@@ -370,6 +379,9 @@ function manipulate_vertices()
 							
 							move_vertices(squashingtriangles_indices[i][0], squashed_back_position, squashingtriangles_indices[i][0]);
 							
+							noInvertedTriangles = false;
+							
+							
 							vertex_failed_to_move_when_it_should_have = false;
 						}
 						
@@ -381,6 +393,8 @@ function manipulate_vertices()
 					break;
 			}
 		}
+		
+		
 		
 		if( vertex_failed_to_move_when_it_should_have && (
 			squashingtriangles_indices[0][0] !== 'undefined' || 
@@ -470,11 +484,23 @@ function manipulate_vertices()
 			
 			move_vertices(vertex_tobechanged_home_index, squashed_back_position, vertex_tobechanged_home_index);
 			
+			someTriangleInverted = true;
+			
 			right_defect.set(
 					0.5 * (ultimate_vector.x - nonexistant_corner.x) + HS3 * (ultimate_vector.y - nonexistant_corner.y),
 					0.5 * (ultimate_vector.y - nonexistant_corner.y) - HS3 * (ultimate_vector.x - nonexistant_corner.x));
 		}
 	}
+	
+	if(someTriangleInverted)
+	{
+		if(!playingWithInversions)
+		{
+			Sounds.bump.play();
+			playingWithInversions = true;
+		}	
+	}
+	else playingWithInversions = false;
 	
 	right_defect.add(nonexistant_corner);
 	
