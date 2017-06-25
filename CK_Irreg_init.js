@@ -106,7 +106,7 @@ function init_CK_and_irreg()
 	                            		14, 19 ]);
 	
 	//make wedges. glue their positive x vector to the side of what you want
-	var master_wedge = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0x000000, transparent: true, opacity: 0}));
+	var master_wedge = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0x385268, transparent: true, opacity: 0}));
 	var num_arc_segments = 16;
 	var wedge_radius = 0.35;
 	var outline_width = 0.03;

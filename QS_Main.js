@@ -133,6 +133,7 @@ function MoveQuasiLattice()
 		
 		var Mousedist = MousePosition.length();
 		var OldMousedist = OldMousePosition.length(); //unless the center is going to change?
+		
 		{
 			var oldmouse_to_center = new THREE.Vector3(0 - OldMousePosition.x,0 - OldMousePosition.y,0);
 			var oldmouse_to_newmouse = new THREE.Vector3(   MousePosition.x - OldMousePosition.x,     MousePosition.y - OldMousePosition.y,0);
@@ -184,6 +185,15 @@ function MoveQuasiLattice()
 					
 					if( !Sounds.sizeLimitLower.isPlaying)
 						Sounds.sizeLimitLower.play();
+				}
+				
+				if(veclength > cutout_vector0_player.length())
+				{
+					Sounds.rotateClockwise.play();
+				}
+				else
+				{
+					Sounds.rotateAntiClockwise.play();
 				}
 				
 				cutout_vector0_player.setLength(veclength);
@@ -295,7 +305,7 @@ function MoveQuasiLattice()
 		{
 			//a random pop
 			var playedPop = "pop" + Math.ceil(Math.random()*3).toString();
-			console.log(playedPop, Sounds[ playedPop ])
+			
 			if( !Sounds[ playedPop ].isPlaying )
 				Sounds[ playedPop ].play();
 			

@@ -74,6 +74,14 @@ function Update_story()
 			onWindowResizeExceptYoutube(newWidth);
 		}
 		
+		if( Story_states[Storypage].slerpIrregQuaternion.x !== 5 )
+		{
+			varyingsurface.quaternion.slerp( Story_states[Storypage].slerpIrregQuaternion,0.1 );
+			for( var i = 0; i < varyingsurface_cylinders.length; i++)
+				varyingsurface_cylinders[i].quaternion.copy( varyingsurface.quaternion );
+			varyingsurface.updateMatrixWorld();
+		}
+		
 		if( Story_states[Storypage].unpauseOn() )
 			ytplayer.playVideo();
 		
@@ -182,8 +190,6 @@ function Update_story()
 		varyingsurface.quaternion.copy( Story_states[Storypage].enforced_irreg_quaternion );
 		for( var i = 0; i < varyingsurface_cylinders.length; i++)
 			varyingsurface_cylinders[i].quaternion.copy(Story_states[Storypage].enforced_irreg_quaternion );
-//		for( var i = 0; i < varyingsurface_spheres.length; i++)
-//			varyingsurface_spheres[i].quaternion.copy(Story_states[Storypage].enforced_irreg_quaternion );
 		
 		varyingsurface.updateMatrixWorld();
 	}
@@ -204,6 +210,16 @@ function Update_story()
 			settle_manipulationsurface_and_flatnet(); 
 		update_wedges();
 		AO.correct_minimum_angles(flatnet_vertices.array);
+	}
+	
+	for(var i in movingPictures )
+	{
+		if(movingPictures[i].chapter === QC_SPHERE_MODE)
+			movingPictures[i].visible = Story_states[Storypage].qsPicsVisibility;
+		if(movingPictures[i].chapter === CK_MODE)
+			movingPictures[i].visible = Story_states[Storypage].hepPicsVisibility;
+		if(movingPictures[i].chapter === IRREGULAR_MODE)
+			movingPictures[i].visible = Story_states[Storypage].hivPicsVisibility;
 	}
 	
 	if( Story_states[Storypage].MODE !== MODE )
@@ -307,9 +323,13 @@ function init_story()
 		
 		CKPicStates: [],
 		CKPicScale: 1,
+		hepPicsVisibility: false,
+		qsPicsVisibility: false,
+		hivPicsVisibility: false,
 		
 		enforced_CK_quaternion: new THREE.Quaternion(5,5,5,5),
 		enforced_irreg_quaternion: new THREE.Quaternion(5,5,5,5),
+		slerpIrregQuaternion: new THREE.Quaternion(5,5,5,5),
 		
 		pentamers_color: defaultPentamersColor.clone(),
 		hexamers_color: defaultHexamersColor.clone(),
@@ -409,8 +429,9 @@ function init_story()
 		
 		new_story_state.rendererWidth = 1;
 		
-		new_story_state.enforced_CK_quaternion = new THREE.Quaternion(5,5,5,5);
-		new_story_state.enforced_irreg_quaternion = new THREE.Quaternion(5,5,5,5);
+		new_story_state.enforced_CK_quaternion = Story_states[0].enforced_CK_quaternion.clone();
+		new_story_state.enforced_irreg_quaternion = Story_states[0].enforced_irreg_quaternion.clone();
+		new_story_state.slerpIrregQuaternion = Story_states[0].slerpIrregQuaternion.clone();
 		
 		new_story_state.startingtime = ST;
 		
@@ -527,35 +548,36 @@ function init_story()
 	ns.rendererWidth = 0;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,236.9); //humans
+	ns = default_clone_story_state(1,229); //humans
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,238.4); //canvas comes out again
+	ns = default_clone_story_state(0,237.7); //canvas comes out again
 	ns.rendererWidth = 1;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,271.2); //cell full of viruses
+	ns = default_clone_story_state(1,264.5); //cell full of viruses
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,276.9); //lysis
+	ns = default_clone_story_state(1,269.3); //lysis
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,281.8); //spread to other cells
+	ns = default_clone_story_state(1,274.7); //spread to other cells
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,287.2); //picture of boca
+	ns = default_clone_story_state(1,279.6); //picture of boca
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,294); //Tree
+	ns = default_clone_story_state(0,287); //Tree
 	ns.MODE = TREE_MODE;
+	ns.CKPicScale = playing_field_dimension;
 	ns.pause_at_end = 1;
-	ns.loopBackTo = 302.8;
+	ns.loopBackTo = 296.06;
 	ns.loopBackCountdown = 8;
 	ns.playerHasLearned = function() { return false;}
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,308.8);
-	ns.loopBackTo = 302.8;
+	ns = default_clone_story_state(0,301.3);
+	ns.loopBackTo = 296.06;
 	ns.playerHasLearned = function() { return false;}
 	Story_states.push(ns);
 	
@@ -572,6 +594,10 @@ function init_story()
 	ns = default_clone_story_state(0,0.1);
 	ns.MODE = CKPICS_MODE;
 	var halfVerticalSeparation = 1;
+	ns.hepPicsVisibility = true;
+	ns.qsPicsVisibility = false;
+	ns.hivPicsVisibility = false;
+	ns.CKPicScale = playing_field_dimension;
 	ns.CKPicStates.push({virus:"hepA",x:0,y:0});
 	ns.CKPicStates.push({virus:"hepB",x:0,y:-playing_field_dimension});
 	ns.CKPicStates.push({virus:"aMimic1",x:-playing_field_dimension, y:halfVerticalSeparation});
@@ -581,30 +607,30 @@ function init_story()
 	ns.CKPicScale = 1;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,1);
+	ns = default_clone_story_state(0,6.2);
 	ns.CKPicScale *= 2;
 	ns.CKPicStates.push({virus:"hepA",x:0,y:halfVerticalSeparation});
 	ns.CKPicStates.push({virus:"hepB",x:0,y:-halfVerticalSeparation});
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,2);
+	ns = default_clone_story_state(0,13.4);
 	ns.CKPicStates.push({virus:"hepA",x:playing_field_dimension, y:halfVerticalSeparation});
 	ns.CKPicStates.push({virus:"hepB",x:playing_field_dimension, y:-halfVerticalSeparation});
 	ns.CKPicStates.push({virus:"aMimic1",x:0, y:halfVerticalSeparation});
 	ns.CKPicStates.push({virus:"aMimic2",x:0, y:-halfVerticalSeparation});
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,3);
+	ns = default_clone_story_state(0,18.9);
 	ns.CKPicStates.push({virus:"hepA",x:halfVerticalSeparation, y:halfVerticalSeparation});
 	ns.CKPicStates.push({virus:"aMimic1",x:-halfVerticalSeparation, y:halfVerticalSeparation});
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,4);
+	ns = default_clone_story_state(0,20.1);
 	ns.CKPicStates.push({virus:"hepB",x:halfVerticalSeparation, y:-halfVerticalSeparation});
 	ns.CKPicStates.push({virus:"aMimic2",x:-halfVerticalSeparation, y:-halfVerticalSeparation});
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,5);
+	ns = default_clone_story_state(0,21.9);
 	ns.CKPicStates.push({virus:"hepA",x:-playing_field_dimension, y:halfVerticalSeparation});
 	ns.CKPicStates.push({virus:"hepB",x:-playing_field_dimension, y:-halfVerticalSeparation});
 	ns.CKPicStates.push({virus:"aMimic1",x:-playing_field_dimension, y:halfVerticalSeparation});
@@ -613,26 +639,26 @@ function init_story()
 	ns.CKPicStates.push({virus:"bMimic2",x:0, y:-halfVerticalSeparation});
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,6.5);
+	ns = default_clone_story_state(0,29.4);
 	ns.CKPicStates.push({virus:"hepB",x:-halfVerticalSeparation, y:-halfVerticalSeparation});
 	ns.CKPicStates.push({virus:"bMimic2",x:halfVerticalSeparation, y:-halfVerticalSeparation});
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,7.5);
+	ns = default_clone_story_state(0,32.6);
 	ns.CKPicStates.push({virus:"hepA",x:0, y:halfVerticalSeparation});
 	ns.CKPicStates.push({virus:"hepB",x:0, y:-halfVerticalSeparation});
 	ns.CKPicStates.push({virus:"bMimic1",x:playing_field_dimension, y:halfVerticalSeparation});
 	ns.CKPicStates.push({virus:"bMimic2",x:playing_field_dimension, y:-halfVerticalSeparation});
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,8.5);
+	ns = default_clone_story_state(0,37.1);
 	ns.CKPicStates.push({virus:"aMimic1",x:-halfVerticalSeparation*2, y:halfVerticalSeparation});
 	ns.CKPicStates.push({virus:"aMimic2",x:-halfVerticalSeparation*2, y:-halfVerticalSeparation});
 	ns.CKPicStates.push({virus:"bMimic1",x:halfVerticalSeparation*2, y:halfVerticalSeparation});
 	ns.CKPicStates.push({virus:"bMimic2",x:halfVerticalSeparation*2, y:-halfVerticalSeparation});
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,9.5);
+	ns = default_clone_story_state(0,40.1);
 	ns.CKPicStates.push({virus:"aMimic1",x:-playing_field_dimension, y:halfVerticalSeparation});
 	ns.CKPicStates.push({virus:"aMimic2",x:-playing_field_dimension, y:-halfVerticalSeparation});
 	ns.CKPicStates.push({virus:"bMimic1",x:playing_field_dimension, y:halfVerticalSeparation});
@@ -874,6 +900,7 @@ function init_story()
 	
 	ns = default_clone_story_state(0,258.5); //back to tree
 	ns.MODE = TREE_MODE;
+	ns.CKPicScale = playing_field_dimension;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,267);
@@ -891,10 +918,26 @@ function init_story()
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1,12); //different HIVs
-	var different_HIVs_index = ns.slide_number; 
+	var different_HIVs_index = ns.slide_number;
+	ns.CKPicScale = playing_field_dimension; 
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,17); //other uneven TODO probably want sheree illustrations instead of risk
+	ns = default_clone_story_state(1,14); //It
+	ns.MODE = CKPICS_MODE;
+	ns.CKPicStates.push({virus:"hiv",x:0,y:0});
+	ns.CKPicStates.push({virus:"pp2",x:playing_field_dimension, y:-playing_field_dimension});
+	ns.CKPicStates.push({virus:"amv",x:-playing_field_dimension, y:-playing_field_dimension});
+	ns.hepPicsVisibility = false;
+	ns.qsPicsVisibility = false;
+	ns.hivPicsVisibility = true;
+	ns.CKPicScale = playing_field_dimension;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,17); //other uneven
+	ns.CKPicStates.push({virus:"hiv",x:0,y:halfVerticalSeparation});
+	ns.CKPicStates.push({virus:"pp2",x:halfVerticalSeparation, y:-halfVerticalSeparation});
+	ns.CKPicStates.push({virus:"amv",x:-halfVerticalSeparation, y:-halfVerticalSeparation});
+	ns.CKPicScale = playing_field_dimension * 0.28;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,18.8); //irreg appears
@@ -927,14 +970,21 @@ function init_story()
 	ns = default_clone_story_state(0,30.7); //this is here so we can enforce quaternion during wrap-up during pause. Er, what? Kinda guessing here
 	ns.pause_at_end = 1;
 	ns.loopBackTo = 33.14;
-	ns.playerHasLearned = function() { return theyknowyoucanchangevertices; }
+	var vertexKnowledgeCountdown = 0;
+	ns.playerHasLearned = function() 
+	{
+		if( theyknowyoucanchangevertices && !isMouseDown )
+			vertexKnowledgeCountdown += delta_t;
+		if( vertexKnowledgeCountdown < 1)
+			return false;
+		else return true;
+	}
 	ns.loopBackCountdown = 7;
 	ns.unpauseOn = function()
 	{
-		console.log()
-		if( theyknowyoucanchangevertices && !isMouseDown )
-			return true;
-		else return false;
+		if( vertexKnowledgeCountdown < 1)
+			return false;
+		else return true;
 	}
 	Story_states.push(ns);
 	
@@ -962,11 +1012,14 @@ function init_story()
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,48.8); //One major source
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,50.5); //HIV
 	ns.slide_number = HIV_slide;
 	ns.MODE = SLIDE_MODE;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,52.4); //monkeys
+	ns = default_clone_story_state(1,52.6); //monkeys
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,55.6); //trim5
@@ -983,21 +1036,29 @@ function init_story()
 	ns.fadePicture = true;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,77.3); //honesty
-	ns.go_to_time = 89.9;
+	ns = default_clone_story_state(1,79); //with trim5
+	ns.fadePicture = true;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,89.9); //phi29
+	ns = default_clone_story_state(1,82.1); //corners emphasized
+	ns.fadePicture = true;
+	Story_states.push(ns);
+	
+//	ns = default_clone_story_state(0,77.3); //honesty
+//	ns.go_to_time = 89.9;
+//	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,89.9); //t4
 	var phi29Slide = ns.slide_number;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,94.2); //phi29 corners
+	ns = default_clone_story_state(1,94.2); //t4 corners
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,95.6); //phi29 model
+	ns = default_clone_story_state(1,95.6); //t4 model
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,101.6); //let them make it
+	ns = default_clone_story_state(0,102.1); //let them make it
 	ns.pause_at_end = 1;
 	ns.enforced_irreg_state = 3;
 	ns.MODE = IRREGULAR_MODE;
@@ -1007,14 +1068,21 @@ function init_story()
 	ns.irreg_button_invisible = 1;
 	Story_states.push(ns);
 	
-//	ns = default_clone_story_state(0,110.9); //open up? TODO
-//	Story_states.push(ns);
-	
-	ns = default_clone_story_state(0,111.8); //mathematically exact version
-	ns.enforced_irreg_state = 1;
-	ns.enforced_irreg_quaternion.set( -0.6708576855670457,0.08188608649696437,0.0028127601848788432,0.7370459427973053 ); 
-	ns.capsid_open_immediately = 0;
+	ns = default_clone_story_state(0,112); //open up
+	ns.capsid_open = 1;
 	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,113); //mathematically exact
+	ns.enforced_irreg_state = 0;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,113.6); //version of it 
+	ns.capsid_open = 0;
+	Story_states.push(ns);
+
+//	ns = default_clone_story_state(0,113.9); //quaternion 
+//	ns.enforced_irreg_quaternion.set( -0.6708576855670457,0.08188608649696437,0.0028127601848788432,0.7370459427973053 );
+//	Story_states.push(ns);
 	
 //	ns = default_clone_story_state(0,117.1); //back to virus TODO, requires quaternion
 //	ns.slide_number = phi29Slide;
@@ -1028,136 +1096,126 @@ function init_story()
 	ns.capsid_open = 1;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,124.1); //highlight cuts
-	irreg_flash_time = ns.startingtime;
+	irreg_flash_time = 124.1; //highlight cuts
+
+	ns = default_clone_story_state(0,128.35); //wedges
+	ns.irreg_button_invisible = 1;
+	ns.wedgesOpacity = 1;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,128.7); //shit that lays it out for you, pointlessly
-	ns.go_to_time = 143.5;
+	ns = default_clone_story_state(1,129.4); //t4
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,143.4); //t4
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(0,146); //T4 in model
-	ns.irreg_button_invisible = 0;
+	ns = default_clone_story_state(0,131.3); //T4 TODO quaternion, fade
 	ns.enforced_irreg_quaternion.set( -0.5216554828631857,-0.40506237503583453,-0.44657300762976543,0.603632817711505 );
-	ns.enforced_irreg_state = 0;
+	ns.enforced_irreg_state = 1;
 	ns.capsid_open_immediately = 0;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,153.7); //try!
+	ns = default_clone_story_state(0,139.2); //try!
 	ns.capsid_open = 1;
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
-	
-	ns = default_clone_story_state(0,155.7); //story begins
+	ns = default_clone_story_state(0,141); //story begins
 	ns.irreg_button_invisible = 1;
 	ns.wedgesOpacity = 0;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,158.8); //open it out
-	ns.capsid_open = 1;
+	ns = default_clone_story_state(0,144); //this model
+	ns.enforced_irreg_state = 1;
 	Story_states.push(ns);
-
-//	ns = default_clone_story_state(0,160.8); //move corner
-//	Story_states.push(ns);
 	
-	var maxError = 0.2;
-
-	ns = default_clone_story_state(0,171.1); //bad angles, close
-	ns.minimum_angle_crapifiers = Array(22);
-	for(var i = 0; i < ns.minimum_angle_crapifiers.length; i++)
-		ns.minimum_angle_crapifiers[i] = 1 + (Math.random()-0.5) * 2 * maxError;
-	ns.capsid_open = 0;
+	ns = default_clone_story_state(0,146.3); //move
+	ns.enforced_irreg_state = 5;
 	Story_states.push(ns);
+	
+	function createTry(openTime, closeTime)
+	{
+		var maxError = 0.2;
+		
+		ns = default_clone_story_state(0,openTime); //open
+		ns.capsid_open = 1;
+		ns.minimum_angle_crapifiers = Story_states[Story_states.length-1].minimum_angle_crapifiers;
+		Story_states.push(ns);
 
-	ns = default_clone_story_state(0,175); //open
-	ns.capsid_open = 1;
-	ns.minimum_angle_crapifiers = Story_states[Story_states.length-1].minimum_angle_crapifiers;
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(0,176.5); //bad angles
-	ns.minimum_angle_crapifiers = Array(22);
-	for(var i = 0; i < ns.minimum_angle_crapifiers.length; i++)
-		ns.minimum_angle_crapifiers[i] = 1 + (Math.random()-0.5) * 2 * maxError;
-	ns.capsid_open = 0;
-	Story_states.push(ns);
-
-//	ns = default_clone_story_state(0,178); //open
-//	ns.capsid_open = 1;
-//	ns.minimum_angle_crapifiers = Story_states[Story_states.length-1].minimum_angle_crapifiers;
-//	Story_states.push(ns);
-//
-//	ns = default_clone_story_state(0,179.5); //bad angles
-//	ns.minimum_angle_crapifiers = Array(22);
-//	for(var i = 0; i < ns.minimum_angle_crapifiers.length; i++)
-//		ns.minimum_angle_crapifiers[i] = 1 + (Math.random()-0.5) * 2 * maxError;
-//	ns.capsid_open = 0;
-//	Story_states.push(ns);
-
-	ns = default_clone_story_state(0,179); //open
-	ns.capsid_open = 1;
+		ns = default_clone_story_state(0,closeTime); //bad angles
+		ns.minimum_angle_crapifiers = Array(22);
+		for(var i = 0; i < ns.minimum_angle_crapifiers.length; i++)
+			ns.minimum_angle_crapifiers[i] = 1 + (Math.random()-0.5) * 2 * maxError;
+		ns.capsid_open = 0;
+		Story_states.push(ns);
+	}
+	
+	createTry(156, 156.1);
+	createTry(160.7, 163.1); //calculating is extremely tricky
+	createTry(166.1, 167.15); //I spent months trying to do it
+	createTry(168.6, 169.9); //not one idea ever worked
+	createTry(171.45, 172.8); //eventually
+	createTry(174.8, 176.9); //awful, letting downs
+	createTry(179.5, 181.5); //however, lucky
+	
+	ns = default_clone_story_state(1,189.5); //christmas
 	ns.minimum_angle_crapifiers = Story_states[Story_states.length-1].minimum_angle_crapifiers;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,182.5); //bad angles
-	ns.minimum_angle_crapifiers = Array(22);
-	for(var i = 0; i < ns.minimum_angle_crapifiers.length; i++)
-		ns.minimum_angle_crapifiers[i] = 1 + (Math.random()-0.5) * 2 * maxError;
-	ns.capsid_open = 0;
-	Story_states.push(ns);
-
-	ns = default_clone_story_state(0,184); //open
-	ns.capsid_open = 1;
+	ns = default_clone_story_state(1,192.6); //book
 	ns.minimum_angle_crapifiers = Story_states[Story_states.length-1].minimum_angle_crapifiers;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,186 ); //save us the sob story
-	ns.go_to_time = 193.3;
+	ns = default_clone_story_state(1,199.3); //book excerpt
+	ns.minimum_angle_crapifiers = Story_states[Story_states.length-1].minimum_angle_crapifiers;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,196.1); //close up properly
-	ns.capsid_open = 0;
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1,204.5); //christmas
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1,207.6); //book
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1,213.8); //book excerpt
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(0,222.5); //back to model
+	ns = default_clone_story_state(0,204.5); //back to model
+	ns.minimum_angle_crapifiers = Story_states[Story_states.length-1].minimum_angle_crapifiers;
 	ns.MODE = IRREGULAR_MODE;
-	ns.enforced_irreg_state = 2;
-	ns.capsid_open_immediately = 1;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,226.4); //closes again
+	ns = default_clone_story_state(0,206); //open
+	ns.minimum_angle_crapifiers = Story_states[Story_states.length-1].minimum_angle_crapifiers;
+	ns.capsid_open = 1;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,208.2); //close, but nice!
 	ns.capsid_open = 0;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,234); //HIV
+	ns = default_clone_story_state(0,210.3); //and so
+	ns.capsid_open = 1;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,211.7); //that is now running
+	ns.enforced_irreg_state = 2;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,216.8); //turned out to be useful
+	ns.capsid_open = 0;
+	Story_states.push(ns); 
+	
+	ns = default_clone_story_state(0,217.8); //for modelling
+	ns.slerpIrregQuaternion = new THREE.Quaternion(0.03188565833112098,0.6631317324632653,-0.6989951948950309,0.2657918743001853);
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,219.8); //HIV
 	ns.slide_number = HIV_slide;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,236.7); //tree, or time to skip back to tree. TODO they don't have to see this?
+	ns = default_clone_story_state(0,221.7); //tree, or time to skip back to tree. TODO they don't have to see this?
 	ns.MODE = TREE_MODE;
+	ns.CKPicScale = playing_field_dimension;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,243.9); //stop
+	ns = default_clone_story_state(0,228.9); //stop
 	ns.prevent_playing = 1;
+	ns.CKPicScale = playing_field_dimension;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,500); //safety
 	ns.capsid_open = 0;
 	Story_states.push(ns);
 
-//	//----------QS BEGINS!!!!!
+//	//----------QS BEGINS
 	ns = default_clone_story_state(0,0); //zika virus
 	var zika_slide = ns.slide_number; 
 	ns.chapter = 3;
@@ -1165,10 +1223,13 @@ function init_story()
 	ns.CKPicStates.push({virus:"zika",x:0,y:0});
 	ns.CKPicStates.push({virus:"bluetongue",x:playing_field_dimension, y:-playing_field_dimension});
 	ns.CKPicStates.push({virus:"hpv",x:-playing_field_dimension, y:-playing_field_dimension});
+	ns.hepPicsVisibility = false;
+	ns.qsPicsVisibility = true;
+	ns.hivPicsVisibility = false;
 	ns.CKPicScale = playing_field_dimension;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,4.7); //bluetongue, or group
+	ns = default_clone_story_state(0,3.5); //bluetongue, or group
 	ns.CKPicStates.push({virus:"zika",x:0,y:halfVerticalSeparation});
 	ns.CKPicStates.push({virus:"bluetongue",x:halfVerticalSeparation, y:-halfVerticalSeparation});
 	ns.CKPicStates.push({virus:"hpv",x:-halfVerticalSeparation, y:-halfVerticalSeparation});
@@ -1182,107 +1243,108 @@ function init_story()
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,14); //may not seem like a virus
+	ns = default_clone_story_state(0,12.4); //may not seem like a virus
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,19.5); //HPV
-	var HPV_slide = ns.slide_number; 
+	ns = default_clone_story_state(1,17.9); //HPV
 	ns.MODE = SLIDE_MODE;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,27.2); //HPV xray
+	ns = default_clone_story_state(1,25.6); //HPV xray
 	ns.fadePicture = true;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,30.1); //HPV blobs
+	ns = default_clone_story_state(1,28.5); //HPV blobs
 	ns.fadePicture = true;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,44.5); //HPV connections
+	ns = default_clone_story_state(1,42.9); //HPV connections
 	ns.fadePicture = true;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,51.9); //colored
+	ns = default_clone_story_state(1,50.3); //colored
 	ns.fadePicture = true;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,58.2); //back to model, then make hpv
-	ns.enforced_cutout_vector0_player.set(1.809016994374948, 1.4384360606445132, 0); //zika... probably should be a smaller one
+	ns = default_clone_story_state(0,56.6); //back to model, then make hpv
+//	ns.enforced_cutout_vector0_player.set(1.809016994374948, 1.4384360606445132, 0); //zika... probably should be a smaller one
 	ns.pause_at_end = 1;
 	ns.MODE = QC_SPHERE_MODE;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,60.8); //model was made 800 years ago
+	ns = default_clone_story_state(0,59.2); //model was made 800 years ago
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,69.5); //standard dome
+	ns = default_clone_story_state(0,67.9); //standard dome
 	ns.MODE = SLIDE_MODE;
 	ns.slide_number = islamic_dome_index;
 	ns.fadePicture = false;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,74.4); //islamic art. All just nice, you can zone out while listening to square and triangle
+	ns = default_clone_story_state(1,72.8); //islamic art. All just nice, you can zone out while listening to square and triangle
 	Story_states.push(ns);
-	ns = default_clone_story_state(1,78.9);
+	ns = default_clone_story_state(1,77.3);
 	Story_states.push(ns);
-	ns = default_clone_story_state(1,82.3);
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(1,84.8); //darb e imam shrine
+	ns = default_clone_story_state(1,80.7);
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,91.9); //above entrance
+	ns = default_clone_story_state(1,83.2); //darb e imam shrine
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,95.4); //inside
+	ns = default_clone_story_state(1,90.3); //above entrance
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(1,93.8); //inside
 	var inside_darb_e_pic_index = ns.slide_number;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,103.1);
-	ns.MODE = HEXAGON_MODE;//QC_SPHERE_MODE IRREGULAR_MODE
+	ns = default_clone_story_state(0,101.5); //demo
+	ns.MODE = HEXAGON_MODE;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,136); //back to shrine
-	ns.slide_number = inside_darb_e_pic_index;
+	ns = default_clone_story_state(1,134.4); //back to shrine
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,143.9); //pause to play around and see resemblence
-	ns.go_to_time = 147.2;
+	ns = default_clone_story_state(0,143); //pause to play around and see resemblence
 	ns.pause_at_end = 1;
 	ns.MODE = QC_SPHERE_MODE;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,158.9); //so why do viruses use these patterns?
+	ns = default_clone_story_state(0,154.5); //so why do viruses use these patterns?
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,162.2); //HPV in model
+	ns = default_clone_story_state(0,158); //HPV in model
 	ns.enforced_cutout_vector0_player.set(0, 3.479306368947708, 0);
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,165.8); //drug
-	ns.slide_number = drugSlide;
+	ns = default_clone_story_state(1,161.4); //drug
 	ns.MODE = SLIDE_MODE;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,170); //but hpv can evolve
+	ns = default_clone_story_state(0,165.6); //hpv can evolve
 	ns.MODE = QC_SPHERE_MODE;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,174.6); //smaller HPV (zika)
+	ns = default_clone_story_state(0,170); //smaller HPV (zika)
+	ns.enforced_cutout_vector0_player.set(1.118033988749895, 2.389492576939667, 0);
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,189.8); //zika
 	ns.enforced_cutout_vector0_player.set(1.809016994374948, 1.4384360606445132, 0);
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,199.5); //pic of zika
+	ns = default_clone_story_state(0,192.2); //pic of zika
 	ns.MODE = SLIDE_MODE;
 	ns.slide_number = zika_slide;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,200.8);
+	ns = default_clone_story_state(0,196.5);
 	ns.pause_at_end = 1;
 	ns.MODE = TREE_MODE;
+	ns.CKPicScale = playing_field_dimension;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,202);
+	ns = default_clone_story_state(0,197.5);
 	ns.prevent_playing = 1;
 	Story_states.push(ns);
 	
@@ -1436,8 +1498,10 @@ function init_story()
 //			Story_states[i].MODE = SLIDE_MODE;
 	
 	for(var i = 0; i < Story_states.length - 1; i++ )
+	{
 		if( Story_states[i].chapter === Story_states[i+1].chapter && Story_states[i].startingtime >= Story_states[i+1].startingtime )
 			console.error("bad starting time:", Story_states[i+1].startingtime);
+	}
 }
 
 var next_slide = 0;

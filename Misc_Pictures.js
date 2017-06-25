@@ -19,7 +19,7 @@ function load_AV_stuff()
 {
 	var picturesLoaded;
 	var introLoaded = false;
-	var percentageLoaded = 10; //youtube 5%, initializations 5%
+	var percentageLoaded = 15; //youtube 10%, initializations 5%
 	var borderMultiplier = 1024 / 720;
 	
 	function loadpic(url, type, index) {
@@ -50,6 +50,10 @@ function load_AV_stuff()
 				if(!introLoaded)
 				{
 					percentageLoaded += 90 / (random_texture_urls.length + slidesInIntro);
+//					for(var i = 0; i < scene.children.length; i++)
+//					{
+//						scene.children[i].material.opacity = (percentageLoaded/100 - i/scene.children.length ) * scene.children.length;
+//					}
 					scene.children[0].scale.x = percentageLoaded / 100;
 					
 					for( var i = 0; i < random_texture_urls.length + slidesInIntro; i++ )
@@ -98,6 +102,7 @@ function load_AV_stuff()
 					Sounds.shapeClose.defaultVolume = openCloseVolume;
 					Sounds.shapeOpen.volume = openCloseVolume;
 					Sounds.shapeClose.volume = openCloseVolume;
+					Sounds.triangleEdgeSound.volume = 0.4;
 					
 					PICTURES_LOADED = 1; //this may create problems with skipping forward to places where you haven't loaded the pic yet
 					attempt_launch();
@@ -116,7 +121,7 @@ function load_AV_stuff()
 	//the other things and their widths
 	random_texture_urls.push( "Data/Misc textures/CKhider.png");
 	random_texture_urls.push( "Data/Misc textures/Egg cell hawaiireedlab.png");
-	random_texture_urls.push( "Data/Slides/Opening selection.png"); //better: have looooads more, incl. all the ones from later puzzles. They all pop in
+	random_texture_urls.push( "Data/Slides/Opening selection.png");
 	
 	random_texture_urls.push( "Data/Misc textures/Boca_name.png");
 	random_texture_urls.push( "Data/Misc textures/Hepa_name.png");
@@ -138,6 +143,10 @@ function load_AV_stuff()
 	random_texture_urls.push( "Data/Misc textures/sortaHepB.jpg");
 	random_texture_urls.push( "Data/Misc textures/hep b.jpg");
 
+	random_texture_urls.push( "Data/Slides/HIV.png");
+	random_texture_urls.push( "Data/Slides/amv.png");
+	random_texture_urls.push( "Data/Slides/pp2.jpg");
+
 	random_texture_urls.push( "Data/Slides/Zika Virus.jpg");
 	random_texture_urls.push( "Data/Slides/bluetongue.jpg");
 	random_texture_urls.push( "Data/Slides/HPV non xray.png");
@@ -154,17 +163,33 @@ function load_AV_stuff()
 	}
 	
 	movingPictures = {hepA:null,hepB:null,aMimic1:null,aMimic2:null,bMimic1:null,bMimic2:null,
+			hiv:null, amv:null, pp2:null,
 			zika:null,bluetongue:null, hpv:null};
 	var COSdimension = 1;
-	var randomTargetIndex = randomTargets.length-9;
+	var randomTargetIndex = randomTargets.length-12;
+	var virusNum = 0;
 	for( var virus in movingPictures)
 	{	
 		movingPictures[virus] = new THREE.Mesh( new THREE.CubeGeometry(COSdimension, COSdimension, 0),
 				  								new THREE.MeshBasicMaterial() );
+		
+		if( randomTargetIndex >= randomTargets.length-3 )
+			movingPictures[virus].chapter = QC_SPHERE_MODE;
+		else if( randomTargetIndex >= randomTargets.length-6 )
+			movingPictures[virus].chapter = IRREGULAR_MODE;
+		else
+			movingPictures[virus].chapter = CK_MODE;
+		
 //		movingPictures[i].position.y = playing_field_dimension / 2 + COSdimension / 2;
 		randomTargets[randomTargetIndex] = movingPictures[virus];
 		randomTargetIndex++;
 	}
+
+	movingPictures.bluetongue.position.set( playing_field_dimension, -playing_field_dimension,0 );
+	movingPictures.hpv.position.set( -playing_field_dimension, -playing_field_dimension,0 );
+	
+	movingPictures.amv.position.set( playing_field_dimension, -playing_field_dimension,0 );
+	movingPictures.pp2.position.set( -playing_field_dimension, -playing_field_dimension,0 );
 	
 	//slides
 	var bordered = [];
@@ -181,7 +206,7 @@ function load_AV_stuff()
 	slide_texture_urls.push( "Data/Slides/golf-ball.jpg"); bordered.push(1);
 	slide_texture_urls.push( "Data/Slides/Opening selection 1.png"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/Opening selection 2a.jpg"); bordered.push(0);
-	slide_texture_urls.push( "Data/Slides/Opening selection 2.png"); bordered.push(0);
+	slide_texture_urls.push( "Data/Slides/Zika Virus.jpg"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/shrine.jpg"); bordered.push(1);
 	slide_texture_urls.push( "Data/Slides/bluetongue.jpg"); bordered.push(0);
 
@@ -214,15 +239,15 @@ function load_AV_stuff()
 
 	//HIV
 	slide_texture_urls.push( "Data/Slides/HIV.png"); bordered.push(0);
-	slide_texture_urls.push( "Data/Slides/HIV variety.png"); bordered.push(0);
-	slide_texture_urls.push( "Data/Slides/otherUneven.jpg"); bordered.push(0);
+	slide_texture_urls.push( "Data/Slides/HIV variety.jpg"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/very icosahedral.png"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/monkey.jpg"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/trim5.jpg"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/drug.jpg"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/model1.jpg"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/model2.jpg"); bordered.push(0);
-//	slide_texture_urls.push( "Data/Slides/very cone shaped HIV.png");
+	slide_texture_urls.push( "Data/Slides/model2a.jpg"); bordered.push(0);
+	slide_texture_urls.push( "Data/Slides/model3a.jpg"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/Origami_virus.png"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/PHi29 corners.png"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/PHi29 abstract.png"); bordered.push(0);
@@ -247,8 +272,6 @@ function load_AV_stuff()
 	slide_texture_urls.push( "Data/Slides/Darb e above entrance.jpg"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/Darb e inside.jpg"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/darb e sharp.jpg"); //next thing is to test (tree and final reused slides) without this extra slide
-	slide_texture_urls.push( "Data/Slides/Pentagons.png"); bordered.push(0);
-	slide_texture_urls.push( "Data/Slides/Pattern pentagonal.png"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/drug.jpg"); bordered.push(0);
 
 	//----Ending

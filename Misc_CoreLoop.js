@@ -15,7 +15,7 @@
  * 
  * -------General
  * Loading screen: fade in btv faces one by one
- * Sound
+ * Print signs
  * New button
  * Tree
  * Get it on an amazon or google server
@@ -33,6 +33,8 @@ Touch:
 	tree went wrong
 	went to youtube, fffffffffffffffffffff
 	tablet but not phone. Phone is shite; it's ok for it to have anything at all. Jessie computer
+	Jessie's computer: it seemed to think it was a mouse
+		Or did it? You put the finger down, moved it, and it flicked. Even though it copies
 	
 ----------Below the thing
  * Sheree must design
@@ -91,6 +93,7 @@ function UpdateWorld()
 			CheckIrregButton();
 			manipulate_vertices();
 			update_varyingsurface();
+			update_wedges();
 			//correct_minimum_angles();
 			break;
 			
@@ -193,6 +196,8 @@ function ChangeScene(new_mode) {
 				scene.add(varyingsurface_spheres[i]);
 			for(var i = 0; i< lights.length; i++)
 				scene.add( lights[i] );
+			for(var i = 0; i < wedges.length; i++ )
+				scene.add(wedges[i]);
 			scene.add(IrregButton);
 			break;
 			

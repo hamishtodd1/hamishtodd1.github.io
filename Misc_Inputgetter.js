@@ -14,6 +14,7 @@
 //this function shouldn't actually *do* anything with the data, it's only to be read elsewhere.
 var cursorIsHand = false;
 var justLeftiFrame = false;
+var resetMouse = false;
 
 function ReadInput()
 {
@@ -33,9 +34,13 @@ function ReadInput()
 	isMouseDown_previously = isMouseDown;
 	isMouseDown = InputObject.isMouseDown;
 	
-	if(isMouseDown&& !isMouseDown_previously) //because touchscreen - you're not jumping from one place to another
+	if(isMouseDown && !isMouseDown_previously) //because touchscreen - you're not jumping from one place to another
+		resetMouse = true;
+	
+	if(resetMouse && !OldMousePosition.equals(MousePosition))
 	{
 		OldMousePosition.copy( MousePosition );
+		resetMouse = false; //test on jessie's computer
 	}
 	
 	react_to_video();	

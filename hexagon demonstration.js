@@ -3,7 +3,7 @@ pentagonDemo = {};
 pentagonDemo.init = function()
 {
 	var numStates = 8;
-	var edgeLen = 0.4;
+	var edgeLen = 0.4/42*30;
 	var numSymmetryCopies = 8;
 	
 	var decagonVertices = Array(10);
@@ -31,7 +31,7 @@ pentagonDemo.init = function()
 	
 	//The outlines are bigger versions of the things, behind them
 	var basePentagon = new THREE.Object3D();
-	basePentagon.shape = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0xfa45ff,side:THREE.DoubleSide}) );
+	basePentagon.shape = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0x5DA7DF,side:THREE.DoubleSide}) );
 	
 	basePentagon.shape.geometry.vertices = Array(5);
 	basePentagon.shape.geometry.vertices[0] = new THREE.Vector3(); //the top point
@@ -43,7 +43,7 @@ pentagonDemo.init = function()
 	basePentagon.shape.geometry.faces = [new THREE.Face3(0,1,2),new THREE.Face3(0,2,3),new THREE.Face3(0,3,4)];
 	
 	var baseHexagon = new THREE.Object3D();
-	baseHexagon.shape = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0x1010F0,side:THREE.DoubleSide}) );
+	baseHexagon.shape = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0xD7F3FD,side:THREE.DoubleSide}) );
 	baseHexagon.shape.geometry.vertices = Array(6);
 	baseHexagon.shape.geometry.vertices[0] = new THREE.Vector3();
 	for(var i = 1; i < 6; i++)
@@ -55,7 +55,7 @@ pentagonDemo.init = function()
 	baseHexagon.shape.geometry.faces = [ new THREE.Face3(0,1,2),new THREE.Face3(0,2,3),new THREE.Face3(0,3,4),new THREE.Face3(0,4,5) ];
 	
 	var baseThick = new THREE.Object3D();
-	baseThick.shape = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0xFF0000,side:THREE.DoubleSide}) );
+	baseThick.shape = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0xA7C7DE,side:THREE.DoubleSide}) );
 	baseThick.shape.geometry.vertices = Array(4);
 	baseThick.shape.geometry.vertices[0] = new THREE.Vector3();
 	for( var i = 1; i < 4; i++ )
@@ -67,7 +67,7 @@ pentagonDemo.init = function()
 	baseThick.shape.geometry.faces = [ new THREE.Face3(0,1,2),new THREE.Face3(0,2,3)];
 	
 	var baseThin = new THREE.Object3D();
-	baseThin.shape = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0xF0FF00,side:THREE.DoubleSide}) );
+	baseThin.shape = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0x4874A0,side:THREE.DoubleSide}) );
 	baseThin.shape.geometry.vertices = Array(4);
 	baseThin.shape.geometry.vertices[0] = new THREE.Vector3();
 	for( var i = 1; i < 4; i++ )
@@ -75,7 +75,6 @@ pentagonDemo.init = function()
 		baseThin.shape.geometry.vertices[i] = baseThin.shape.geometry.vertices[i-1].clone();
 		var decagonEdge = i < 3 ? 7+i : 3;
 		baseThin.shape.geometry.vertices[i].add( decagonEdges[ decagonEdge ] );
-		console.log(baseThin.shape.geometry.vertices[i])
 	}
 	baseThin.shape.geometry.faces = [ new THREE.Face3(0,1,2),new THREE.Face3(0,2,3)];
 	
@@ -350,7 +349,12 @@ pentagonDemo.init = function()
 
 pentagonDemo.update = function()
 {
-	var timePoints = [104,108,112,116,120,124,128]; //these are the times when it is in that state
+	; //Now pentagons
+	; //fit together
+	112.7; //little shapes
+	115.7; //pattern like this one
+	121.7; //shapes in the shrine's
+	var timePoints = [103,108,112.3,115.2,121.2,126.1,127.7, 129.6]; //these are the times when it is in that state
 	var shapeMovementTime = 1.4;
 	
 	for(var i = 0; i < timePoints.length-1; i++)

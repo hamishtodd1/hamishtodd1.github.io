@@ -45,12 +45,12 @@ function react_to_video()
 
 function onYouTubeIframeAPIReady()
 {
-	
+	var idArray = ['FCJawbntQVw', 'p5QJD719ans','gBqI7RxUjNk','hhZaebKU7OA','cWSEYzqSxnw']; //intro, polio, hiv, zika
 	ytplayer = new YT.Player('player', 
 	{
 		width: window_width,
 	    height: window_height,
-	    videoId:'2a56CJ6J99w',
+	    videoId:idArray[0],
 		events: 
 		{
 			'onReady': function() 
@@ -80,7 +80,7 @@ function onYouTubeIframeAPIReady()
 	});
 	
 	ytplayer.chapter = 0;
-	ytplayer.chapterIDs = ['2a56CJ6J99w', 'bd3QdDBalds','2g_i7RTVAYE','8GucPOjuR-I','6iq3JNT7jAc']; //intro, polio, hiv, zika
+	ytplayer.chapterIDs = idArray;
 	ytplayer.changeChapter = function( newChapterIndex )
 	{
 		this.chapter = newChapterIndex;
@@ -96,6 +96,7 @@ function onYouTubeIframeAPIReady()
 	 * bhIIPgM5E4Q: v4.5
 	 * qMyLxxHKags: rough cut 1
 	 * zFLcpmOi1Hw: rough cut 2
+	 * '2a56CJ6J99w', 'bd3QdDBalds','2g_i7RTVAYE','8GucPOjuR-I','6iq3JNT7jAc'
 	 * 
 	 * FCJawbntQVw
 	 * hhZaebKU7OA

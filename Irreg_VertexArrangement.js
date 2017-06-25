@@ -155,7 +155,7 @@ function manipulate_vertices()
 				}
 			}
 			
-			var maximum_quadrance_to_be_selected = 0.022;
+			var maximum_quadrance_to_be_selected = 0.025;
 			if( lowest_quadrance_so_far < maximum_quadrance_to_be_selected) {
 				vertex_tobechanged = closest_vertex_so_far;
 
@@ -500,7 +500,11 @@ function manipulate_vertices()
 			playingWithInversions = true;
 		}	
 	}
-	else playingWithInversions = false;
+	else{
+		playingWithInversions = false;
+		if( !OldMousePosition.equals(MousePosition) && !Sounds.triangleEdgeSound.isPlaying )
+			Sounds.triangleEdgeSound.play();
+	}
 	
 	right_defect.add(nonexistant_corner);
 	
@@ -603,11 +607,15 @@ function update_wedges()
 		//next do the little center for QS. Is there a TrapeziumGeometry for the blades?
 	}
 	
+	var wedgesopacity = wedges[0].material.opacity;
+	wedgesopacity -= (wedgesopacity - Story_states[Storypage].wedgesOpacity ) * 0.07;
+	
 	var start_fadein_capsidopenness = 0.8;
 	if( capsidopenness > start_fadein_capsidopenness )
-		for(var i = 0; i < wedges.length; i++)
-			wedges[i].material.opacity = ( capsidopenness - start_fadein_capsidopenness ) / (1-start_fadein_capsidopenness);
+		wedgesopacity *= ( capsidopenness - start_fadein_capsidopenness ) / (1-start_fadein_capsidopenness);
 	else
-		for(var i = 0; i < wedges.length; i++)
-			wedges[i].material.opacity = 0;
+		wedgesopacity *= 0;
+	
+	for( var i = 0; i < wedges.length; i++ )
+		wedges[i].material.opacity = wedgesopacity;
 }

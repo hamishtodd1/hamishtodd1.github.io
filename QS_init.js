@@ -862,7 +862,7 @@ function initialize_QS_stuff()
 	}
 	
 	//INITIAL STATE
-	cutout_vector0.copy(stable_points[7]);
+	cutout_vector0.copy(stable_points[8]);
 	cutout_vector1.copy(cutout_vector0);	
 	cutout_vector1.applyAxisAngle(z_central_axis, -TAU/5);
 	cutout_vector0_player = cutout_vector0.clone();
