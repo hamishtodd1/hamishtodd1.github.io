@@ -43,23 +43,6 @@ function Update_story()
 		else if( Story_states[Storypage].slide_number !== -1 )
 			slideObjects[ Story_states[Storypage].slide_number ].material.opacity = 1;
 			
-		if( Story_states[Storypage].slide_number !== -1 )
-		{
-			/*
-			 * Picture previously, picture now, we want to fade to the current one
-			 * No picture previously, picture now, we want to fade to it
-			 * Picture previously, no picture now, we want to fade from it
-			 */
-			if( Story_states[Storypage].fadePicture ) //this is next; you do need it
-			{
-				slideObjects[ Story_states[Storypage].slide_number ].material.opacity += 0.02;
-				if( slideObjects[ Story_states[Storypage].slide_number ].material.opacity > 1 )
-					slideObjects[ Story_states[Storypage].slide_number ].material.opacity = 1;
-			}	
-			else
-				
-		}	
-		
 		if( Story_states[Storypage].varyingsurfaceZRotation )
 		{
 			varyingsurface.rotation.z += delta_t;
@@ -1317,12 +1300,13 @@ function init_story()
 	ns.fadePicture = false;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,72.8); //islamic art. All just nice, you can zone out while listening to square and triangle
-	Story_states.push(ns);
-	ns = default_clone_story_state(1,77.3);
-	Story_states.push(ns);
-	ns = default_clone_story_state(1,80.7);
-	Story_states.push(ns);
+	var numIslamicExamples = 4;
+	for(var i = 0; i < numIslamicExamples; i++)
+	{
+		ns = default_clone_story_state(1, 67.9 + (i+1)*(83.2-67.9)/(numIslamicExamples+1) );
+		console.log(ns.startingtime)
+		Story_states.push(ns);
+	}
 	
 	ns = default_clone_story_state(1,83.2); //darb e imam shrine
 	Story_states.push(ns);

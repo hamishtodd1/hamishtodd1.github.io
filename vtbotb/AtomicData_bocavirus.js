@@ -249,15 +249,8 @@ function init_bocavirus_stuff()
 	stmvHider = new THREE.Mesh(new THREE.CircleBufferGeometry(2,32),new THREE.MeshBasicMaterial({color:outlineColor}));
 	stmvHider.position.z = 0.001;
 	
-	proteinCenterOfMass = new THREE.Vector3();
-	for(var i = 0, il = Boca_vertices.length / 3; i < il; i++ )
-	{
-		proteinCenterOfMass.x += Boca_vertices[i*3+0];
-		proteinCenterOfMass.y += Boca_vertices[i*3+1];
-		proteinCenterOfMass.z += Boca_vertices[i*3+2];
-	}
-	
-	proteinCenterOfMass.multiplyScalar( 3 / Boca_vertices.length );
+	proteinCenterOfMass = new THREE.Vector3(1.3454581225240554, 1.874681919007688, 1.1273784906024467);
+	//jesus mary and joseph, it was coming from the old vertices. Well, it works ><
 	
 	//aligns it with the color transformations we're going to do
 	{

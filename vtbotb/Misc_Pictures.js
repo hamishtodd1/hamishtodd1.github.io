@@ -263,10 +263,10 @@ function load_AV_stuff()
 	slide_texture_urls.push( "Data/Slides/HPV connections.png"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/HPV abstract.png"); bordered.push(0);
 
-	slide_texture_urls.push( "Data/Slides/islamic examples (2).jpg"); bordered.push(0);
-	slide_texture_urls.push( "Data/Slides/islamic examples (1).png"); bordered.push(0);
-	slide_texture_urls.push( "Data/Slides/islamic examples (1).jpg"); bordered.push(0);
-//	slide_texture_urls.push( "Data/Slides/islamic examples (2).png"); bordered.push(0);
+	slide_texture_urls.push( "Data/Slides/syr_0203.jpg"); bordered.push(0);
+	slide_texture_urls.push( "Data/Slides/tra_0114.jpg"); bordered.push(0);
+	slide_texture_urls.push( "Data/Slides/spa_1808.jpg"); bordered.push(0);
+	slide_texture_urls.push( "Data/Slides/spa_2220.jpg"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/Darb e modified.png"); bordered.push(0);
 //	slide_texture_urls.push( "Data/Slides/Darb e highlighted.png");
 	slide_texture_urls.push( "Data/Slides/Darb e above entrance.jpg"); bordered.push(0);
