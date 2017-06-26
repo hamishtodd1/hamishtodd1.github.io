@@ -108,9 +108,9 @@ function update_bocavirus() {
 		coloredness = 1 - ( our_CurrentTime - unflash_time ) / fadeback_time;
 	else
 		coloredness = 1;
-	var default_r = 1;
-	var default_g = 1;
-	var default_b = 0;
+	var default_r = 132/255;
+	var default_g = 149/255;
+	var default_b = 165/255;
 	for(var i = 0; i < 60; i++)
 	{
 		var our_r = coloredness * flash_colors[i][0] + (1-coloredness) * default_r;

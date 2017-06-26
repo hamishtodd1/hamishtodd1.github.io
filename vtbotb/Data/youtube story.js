@@ -20,8 +20,36 @@ function Update_story()
 {	
 	if(Storypage !== -1) //first part of this function is all based on current state, which you don't have at the very start
 	{
+		if( Story_states[Storypage].fadePicture )
+		{
+			var fadingMaterialSlide = null;
+			var opacityIncreaseSpeed = 0.02;
+			
+			if( Story_states[Storypage].slide_number !== -1 ) //fade in, this one
+			{
+				slideObjects[ Story_states[Storypage].slide_number ].material.opacity += 0.02;
+				if( slideObjects[ Story_states[Storypage].slide_number ].material.opacity > 1 )
+					slideObjects[ Story_states[Storypage].slide_number ].material.opacity = 1;
+				
+				//we also need our current one to be in front of the previous, fading out, slide
+			}
+			else //fade out, previous
+			{
+				slideObjects[ Story_states[Storypage-1].slide_number ].material.opacity -= 0.02;
+				if( slideObjects[ Story_states[Storypage-1].slide_number ].material.opacity < 0 )
+					slideObjects[ Story_states[Storypage-1].slide_number ].material.opacity = 0;
+			}
+		}
+		else if( Story_states[Storypage].slide_number !== -1 )
+			slideObjects[ Story_states[Storypage].slide_number ].material.opacity = 1;
+			
 		if( Story_states[Storypage].slide_number !== -1 )
 		{
+			/*
+			 * Picture previously, picture now, we want to fade to the current one
+			 * No picture previously, picture now, we want to fade to it
+			 * Picture previously, no picture now, we want to fade from it
+			 */
 			if( Story_states[Storypage].fadePicture ) //this is next; you do need it
 			{
 				slideObjects[ Story_states[Storypage].slide_number ].material.opacity += 0.02;
@@ -29,7 +57,7 @@ function Update_story()
 					slideObjects[ Story_states[Storypage].slide_number ].material.opacity = 1;
 			}	
 			else
-				slideObjects[ Story_states[Storypage].slide_number ].material.opacity = 1;
+				
 		}	
 		
 		if( Story_states[Storypage].varyingsurfaceZRotation )
@@ -462,7 +490,7 @@ function init_story()
 	Story_states.push(ns);
 	
 	//---paragraph 2
-	ns = default_clone_story_state(0,40.6); //bocavirus appears, then pause
+	ns = default_clone_story_state(0,39.7); //bocavirus appears, then pause
 	ns.MODE = BOCAVIRUS_MODE;
 	ns.pause_at_end = 1; //TODO handle the assurance.
 	ns.loopBackTo = 43.9;
