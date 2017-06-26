@@ -230,7 +230,7 @@ function load_AV_stuff()
 	slide_texture_urls.push( "Data/Slides/Geodesic example 2.png"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/Geodesic example 3.png"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/geodesic.jpg"); bordered.push(0);
-	slide_texture_urls.push( "Data/Slides/mimivirus.png"); bordered.push(0);
+	slide_texture_urls.push( "Data/Slides/mimi.jpg"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/Buckminster.jpg"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/basket.png"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/hair.jpg"); bordered.push(0);
@@ -240,7 +240,7 @@ function load_AV_stuff()
 	//HIV
 	slide_texture_urls.push( "Data/Slides/HIV.png"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/HIV variety.jpg"); bordered.push(0);
-	slide_texture_urls.push( "Data/Slides/very icosahedral.png"); bordered.push(0);
+	slide_texture_urls.push( "Data/Slides/mimi.jpg"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/monkey.jpg"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/trim5.jpg"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/drug.jpg"); bordered.push(0);

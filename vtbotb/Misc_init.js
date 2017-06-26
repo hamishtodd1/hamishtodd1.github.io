@@ -11,7 +11,6 @@ function init()
 	pentagonDemo.init();
 	init_CK_and_irreg();
 	initialize_QS_stuff();
-	init_Grabbable_Arrow();
 	init_story();
 	init_tree();
 	init_bocavirus_stuff();

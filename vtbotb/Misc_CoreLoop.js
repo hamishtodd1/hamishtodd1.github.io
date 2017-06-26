@@ -35,6 +35,30 @@ Touch:
 	tablet but not phone. Phone is shite; it's ok for it to have anything at all. Jessie computer
 	Jessie's computer: it seemed to think it was a mouse
 		Or did it? You put the finger down, moved it, and it flicked. Even though it copies
+		
+		"images of some other viruses" tree
+		reproduced virus proteins go in right places
+		"perfectly icosahedral, like this one"
+		sfx not on when video plays. Shape settles needs to be stoppable earl
+		
+		Got repetition of "you can do things with it"
+		And "and using this button", particularly
+		
+		need lots of fades
+		
+		No second "next virus" cue?
+		
+		Really important that tree icons light up
+		
+		Google analytics
+		
+		Islamic art examples
+		
+		You do want a pentagon mode
+		
+		Virus patterns
+		Virus beauty - sounds weird and you don't get .com
+		virusdocumentary - sounds dry
 	
 ----------Below the thing
  * Sheree must design
@@ -82,10 +106,8 @@ function UpdateWorld()
 			update_surfperimeter();
 
 			Update_net_variables();
-//			performance_checker.begin_sample();
 			if( LatticeScale > 0.2) //min for one of the capsids we do. Minus a little grace
 				Map_lattice();
-//			performance_checker.end_sample();
 			update_QS_center();
 			break;
 			
@@ -99,7 +121,6 @@ function UpdateWorld()
 			
 		case QC_SPHERE_MODE:
 			UpdateQuasiSurface();
-			UpdateGrabbableArrow();
 			MoveQuasiLattice();
 			Map_To_Quasisphere();
 			update_QS_center();
@@ -113,15 +134,10 @@ function UpdateWorld()
 			pentagonDemo.update();
 			break;
 	}
-	
-//	performance_checker.end_frame();
 }
 
 function render() {
 	delta_t = ourclock.getDelta();
-//	console.log(delta_t)
-//	if(delta_t > 0.1) delta_t = 0.1;
-	//delta_t = 0.01;
 	
 	if( PICTURES_LOADED && YOUTUBE_READY && INITIALIZED )
 	{
@@ -130,10 +146,6 @@ function render() {
 		UpdateCamera();
 	}
 	
-//	if(logged ){
-////		setTimeout( function() { requestAnimationFrame( render ); }, 1000 );
-//		logged = 0;
-//	}
 	requestAnimationFrame( render );
 	renderer.render( scene, camera );
 }

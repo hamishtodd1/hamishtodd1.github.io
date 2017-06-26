@@ -22,7 +22,7 @@ function Update_story()
 	{
 		if( Story_states[Storypage].slide_number !== -1 )
 		{
-			if( Story_states[Storypage].fadePicture )
+			if( Story_states[Storypage].fadePicture ) //this is next; you do need it
 			{
 				slideObjects[ Story_states[Storypage].slide_number ].material.opacity += 0.02;
 				if( slideObjects[ Story_states[Storypage].slide_number ].material.opacity > 1 )
@@ -507,6 +507,10 @@ function init_story()
 	cornucopia_end_time = ns.startingtime;
 	Story_states.push(ns);
 	
+	/*
+	 * Golf balls
+	 */
+	
 	ns = default_clone_story_state(1,115.7); //rota
 	var golfLikeVirusSlide = ns.slide_number;
 	Story_states.push(ns);
@@ -922,7 +926,7 @@ function init_story()
 	ns.CKPicScale = playing_field_dimension; 
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,14); //It
+	ns = default_clone_story_state(0,14); //It
 	ns.MODE = CKPICS_MODE;
 	ns.CKPicStates.push({virus:"hiv",x:0,y:0});
 	ns.CKPicStates.push({virus:"pp2",x:playing_field_dimension, y:-playing_field_dimension});
@@ -940,7 +944,7 @@ function init_story()
 	ns.CKPicScale = playing_field_dimension * 0.28;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,18.8); //irreg appears
+	ns = default_clone_story_state(0,19.8); //irreg appears
 //	ns.enforced_irreg_quaternion.set( -0.4744018551980526,0.024453317552284186,0.045298357905429784, 0.878802010589646 ); //symmetric style
 	ns.enforced_irreg_quaternion.set( -0.7071067811545948, 0, 0, 0.7071067812184761 );
 	ns.MODE = IRREGULAR_MODE;
@@ -952,14 +956,18 @@ function init_story()
 	ns.varyingsurfaceZRotation = true;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,24.9); //stop rotating
+	ns = default_clone_story_state(0,24.6); //stop rotating
+	ns.slerpIrregQuaternion.set( -0.1517462204461533, 0.4720398575641219, -0.1626009207873419, 0.8530606087290002 );
+	ns.fadePicture = true;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1,25.4); //very icosahedron
+	ns.fadePicture = true;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,29.8); //back
-	ns.enforced_irreg_quaternion.set( -0.7071067811545948, 0, 0, 0.7071067812184761 );
+	ns.fadePicture = true;
+	ns.enforced_irreg_quaternion.set( -0.1517462204461533, 0.4720398575641219, -0.1626009207873419, 0.8530606087290002 );
 	ns.MODE = IRREGULAR_MODE;
 	Story_states.push(ns);
 	
