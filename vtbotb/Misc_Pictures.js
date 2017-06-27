@@ -135,7 +135,14 @@ function load_AV_stuff()
 	random_texture_urls.push( "Data/Slides/Zika Virus.jpg");
 	random_texture_urls.push( "Data/Slides/Measles virus.png");
 	
-	//that one part
+	//moving pictures
+	random_texture_urls.push( "Data/Slides/golf-ball.jpg");
+	random_texture_urls.push( "Data/Slides/Opening selection 1.png");
+	random_texture_urls.push( "Data/Slides/Opening selection 2a.jpg");
+	random_texture_urls.push( "Data/Slides/Origami_virus.png");
+	random_texture_urls.push( "Data/Slides/shrine.jpg");
+	random_texture_urls.push( "Data/Slides/bluetongue.jpg");
+	
 	random_texture_urls.push( "Data/Misc textures/hep a.jpg");
 	random_texture_urls.push( "Data/Misc textures/Polio.jpg");
 	random_texture_urls.push( "Data/Misc textures/semliki.jpg");
@@ -162,26 +169,31 @@ function load_AV_stuff()
 		randomTargets[ 8+i] = Virus_chapter_icons[i];
 	}
 	
-	movingPictures = {hepA:null,hepB:null,aMimic1:null,aMimic2:null,bMimic1:null,bMimic2:null,
+	movingPictures = {
+			golf:null,golfVirus:null,building:null,buildingVirus:null,art:null,artVirus:null,
+			hepA:null,hepB:null,aMimic1:null,aMimic2:null,bMimic1:null,bMimic2:null,
 			hiv:null, amv:null, pp2:null,
 			zika:null,bluetongue:null, hpv:null};
-	var COSdimension = 1;
-	var randomTargetIndex = randomTargets.length-12;
-	var virusNum = 0;
-	for( var virus in movingPictures)
+	var randomTargetIndex = randomTargets.length-18;
+	for( var picture in movingPictures)
 	{	
-		movingPictures[virus] = new THREE.Mesh( new THREE.CubeGeometry(COSdimension, COSdimension, 0),
+		movingPictures[picture] = new THREE.Mesh( new THREE.CubeGeometry(1, 1, 0),
 				  								new THREE.MeshBasicMaterial() );
 		
 		if( randomTargetIndex >= randomTargets.length-3 )
-			movingPictures[virus].chapter = QC_SPHERE_MODE;
+			movingPictures[picture].chapter = QC_SPHERE_MODE;
 		else if( randomTargetIndex >= randomTargets.length-6 )
-			movingPictures[virus].chapter = IRREGULAR_MODE;
+			movingPictures[picture].chapter = IRREGULAR_MODE;
+		else if( randomTargetIndex >= randomTargets.length-12 )
+			movingPictures[picture].chapter = CK_MODE;
 		else
-			movingPictures[virus].chapter = CK_MODE;
+		{
+			movingPictures[picture].chapter = BOCAVIRUS_MODE;
+			if(randomTargetIndex!==randomTargets.length-18)//first one
+				movingPictures[picture].position.x = playing_field_dimension;
+		}
 		
-//		movingPictures[i].position.y = playing_field_dimension / 2 + COSdimension / 2;
-		randomTargets[randomTargetIndex] = movingPictures[virus];
+		randomTargets[randomTargetIndex] = movingPictures[picture];
 		randomTargetIndex++;
 	}
 
@@ -202,13 +214,6 @@ function load_AV_stuff()
 	slide_texture_urls.push( "Data/Slides/pregnant.jpg"); bordered.push(1);
 	
 	slide_texture_urls.push( "Data/Slides/humans.jpg"); bordered.push(0);
-	
-	slide_texture_urls.push( "Data/Slides/golf-ball.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/Opening selection 1.png"); bordered.push(0);
-	slide_texture_urls.push( "Data/Slides/Opening selection 2a.jpg"); bordered.push(0);
-	slide_texture_urls.push( "Data/Slides/Zika Virus.jpg"); bordered.push(0);
-	slide_texture_urls.push( "Data/Slides/shrine.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/bluetongue.jpg"); bordered.push(0);
 
 	slide_texture_urls.push( "Data/Slides/Cell with proteins.png"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/humans.jpg"); bordered.push(0);
@@ -263,6 +268,7 @@ function load_AV_stuff()
 	slide_texture_urls.push( "Data/Slides/HPV connections.png"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/HPV abstract.png"); bordered.push(0);
 
+	slide_texture_urls.push( "Data/Slides/shrine.jpg"); bordered.push(1);
 	slide_texture_urls.push( "Data/Slides/syr_0203.jpg"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/tra_0114.jpg"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/spa_1808.jpg"); bordered.push(0);

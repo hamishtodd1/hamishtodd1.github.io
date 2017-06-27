@@ -14,17 +14,19 @@
  * 
  * 
  * -------General
- * Loading screen: fade in btv faces one by one
- * Print signs
- * New button
- * Tree
+ * Sheree contingent
+	 * Loading screen: fade in btv faces one by one
+	 * New button
+	 * Size snapping for the video and canvas was bullshit, correct it to whatever Sheree gives in her design
+	 * Tree, "images of some other viruses"
  * Get it on an amazon or google server
  * Check for required things like flash 10, webgl, link to video if page doesn't work in some way. Or recommend a different browser
  * Test on different setups
 		Johan's Mac
 		http://browsershots.org/
    General bug testing
-   Size snapping for the video and canvas was bullshit, correct it to whatever Sheree gives in her design
+   analytics: whenever you start a chapter. Amazon analytics?
+   
    Switch CK hex inflation to being when you click the close button
    So you've triggered a repetition... but you need pause again once it's done; bear in mind the player might have done the necessary thing
 		
@@ -36,29 +38,17 @@ Touch:
 	Jessie's computer: it seemed to think it was a mouse
 		Or did it? You put the finger down, moved it, and it flicked. Even though it copies
 		
-		"images of some other viruses" tree
-		reproduced virus proteins go in right places
-		"perfectly icosahedral, like this one"
-		sfx not on when video plays. Shape settles needs to be stoppable earl
-		
-		Got repetition of "you can do things with it"
-		And "and using this button", particularly
-		
-		need lots of fades
-		
-		No second "next virus" cue?
-		
-		Really important that tree icons light up
-		
-		Google analytics
-		
-		Islamic art examples
-		
-		You do want a pentagon mode
-		
-		Virus patterns
-		Virus beauty - sounds weird and you don't get .com
-		virusdocumentary - sounds dry
+	reproduced virus proteins go in right places
+	sfx not on when video plays. Shape settles needs to be stoppable earl
+	
+	Got repetition of "you can do things with it"
+	And "and using this button", particularly annoying
+	
+	need lots of fades
+	
+	No second "next virus" cue?
+	
+	Really important that tree icons light up
 	
 ----------Below the thing
  * Sheree must design
