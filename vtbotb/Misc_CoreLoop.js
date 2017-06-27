@@ -1,21 +1,19 @@
 /* Youtube version, from which you edit facebook version
  * 		Spacebar to play
- * 		960x960 plus black borders on top and beneath
- * 		Eg may need a 640x640 version
- * 		And one long youtube version. For if the page doesn't load?
+ * 		And one long youtube version for if the page doesn't load?
  * 			And on there normally, in case people steal? No, looks transparently clickbaity
  * 		Titles, (virus, object) Each gets a pic of the virus side by side with the object
  * 			Why do viruses have so much in common with human designs? (rota, golf ball)
  * 			What does zika virus have in common with Islamic art? (zika, dome)
  * 			What do Hepatitis viruses have in common with soccer balls? (hep a, soccer ball)
  * 			What does HIV have in common with origami? (phi29, origami)
- * 			And that's what viruses have in common with human designs (hmm, measles and super dodecahedral?)
+ * 			And that's what viruses have in common with human designs (measles and super dodecahedral?)
  * 		Film with fraps on firefox. ~3GB per file
  * 
  * 
  * -------General
+ * Take a picture of yourself with VR
  * Loading screen: fade in btv faces one by one
- * Print signs
  * New button
  * Tree
  * Get it on an amazon or google server

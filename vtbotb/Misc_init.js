@@ -36,19 +36,8 @@ function attempt_launch()
 	 * Don't worry about having the loading as a percentage - have it as a geometrical object.
 	 * Do load a canvas, because we should be checking for webgl first.
 	 * 
-	 * Could monet's computer be trying to download everything?
-	 * 
-	 * Buuuurt, the point is we want to stagger the pictures to when they're needed
-	 * 
 	 * There's an argument for only loading those of the current youtube video
 	 * 
 	 * Really you want the youtube stuff to begin coming in after you have a loading picture up
-	 * 
-	 * And what if it DID load webgl but it COULDN'T init the stuff? Unlikely really, but have a console.log
-	 * 
-	 * //above---bind_pictures---youtube_story
 	 */
-	
-//	ourclock.getDelta(); //need this so there's something in there for the first frame
-//	ytplayer.playVideo();
 }
