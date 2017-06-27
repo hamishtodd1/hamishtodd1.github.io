@@ -231,6 +231,8 @@ function Update_story()
 			movingPictures[i].visible = Story_states[Storypage].hepPicsVisibility;
 		if(movingPictures[i].chapter === IRREGULAR_MODE)
 			movingPictures[i].visible = Story_states[Storypage].hivPicsVisibility;
+		if(movingPictures[i].chapter === BOCAVIRUS_MODE)
+			movingPictures[i].visible = Story_states[Storypage].introPicsVisibility;
 	}
 	
 	if( Story_states[Storypage].MODE !== MODE )
@@ -337,6 +339,7 @@ function init_story()
 		hepPicsVisibility: false,
 		qsPicsVisibility: false,
 		hivPicsVisibility: false,
+		introPicsVisibility:false,
 		
 		enforced_CK_quaternion: new THREE.Quaternion(5,5,5,5),
 		enforced_irreg_quaternion: new THREE.Quaternion(5,5,5,5),
@@ -510,34 +513,82 @@ function init_story()
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,103.7); //humaaaans
+	ns.CKPicScale = playing_field_dimension;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,113.1); //golf ball
-	var golfSlide = ns.slide_number;
+	ns = default_clone_story_state(0,113.1); //rota
 	unflash_time = ns.startingtime;
 	cornucopia_end_time = ns.startingtime;
+	ns.MODE = CKPICS_MODE;
+	ns.hepPicsVisibility = false;
+	ns.introPicsVisibility = true;
+	ns.qsPicsVisibility = false;
+	ns.hivPicsVisibility = false;
+	ns.CKPicScale = playing_field_dimension;
+	ns.CKPicStates.push({virus:"golf",x:0,y:0});
+	ns.CKPicStates.push({virus:"golfVirus",x:playing_field_dimension,y:0});
+	ns.CKPicStates.push({virus:"building",x:playing_field_dimension, y:0});
+	ns.CKPicStates.push({virus:"buildingVirus",x:playing_field_dimension, y:0});
+	ns.CKPicStates.push({virus:"art",x:playing_field_dimension, y:0});
+	ns.CKPicStates.push({virus:"artVirus",x:playing_field_dimension, y:0});
 	Story_states.push(ns);
 	
-	/*
-	 * Golf balls
-	 */
+	var standardSep = playing_field_dimension/4.2;
 	
-	ns = default_clone_story_state(1,115.7); //rota
-	var golfLikeVirusSlide = ns.slide_number;
+	ns = default_clone_story_state(0,115.7); //rota
+	ns.CKPicScale *= 0.5;
+	ns.CKPicStates.push({virus:"golf",x:-standardSep,y:0});
+	ns.CKPicStates.push({virus:"golfVirus",x:standardSep,y:0});
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,117.6); //buildings
+	ns = default_clone_story_state(0,117.6); //buildings
+	ns.CKPicScale = playing_field_dimension;
+	ns.CKPicStates.push({virus:"building",x:0,y:0});
+	ns.CKPicStates.push({virus:"golf",x:-playing_field_dimension*2,y:0});
+	ns.CKPicStates.push({virus:"golfVirus",x:-playing_field_dimension*2,y:0});
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,120.4); //phi29
+	ns = default_clone_story_state(0,120.4); //phi29
+	ns.CKPicScale *= 0.5;
+	ns.CKPicStates.push({virus:"building",x:-standardSep,y:0});
+	ns.CKPicStates.push({virus:"buildingVirus",x:standardSep,y:0});
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,123.5); //religious art
-	var islamic_dome_index = ns.slide_number;
+	ns = default_clone_story_state(0,123.5); //religious art
+	ns.CKPicScale = playing_field_dimension;
+	ns.CKPicStates.push({virus:"art",x:0,y:0});
+	ns.CKPicStates.push({virus:"building",x:-playing_field_dimension*2,y:0});
+	ns.CKPicStates.push({virus:"buildingVirus",x:-playing_field_dimension*2,y:0});
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,127.1); //HPV
+	ns = default_clone_story_state(0,127.1); //HPV
+	ns.CKPicScale *= 0.5;
+	ns.CKPicStates.push({virus:"art",x:-standardSep,y:0});
+	ns.CKPicStates.push({virus:"artVirus",x:standardSep,y:0});
 	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,130.5); //all together
+	ns.CKPicScale *= 0.8;
+	ns.CKPicStates.push({virus:"golf",x:-standardSep,y:standardSep*1.2});
+	ns.CKPicStates.push({virus:"golfVirus",x:standardSep,y:standardSep*1.2});
+	ns.CKPicStates.push({virus:"art",x:-standardSep, y:0});
+	ns.CKPicStates.push({virus:"artVirus",x:standardSep, y:0});
+	ns.CKPicStates.push({virus:"building",x:-standardSep, y:standardSep*-1.2});
+	ns.CKPicStates.push({virus:"buildingVirus",x:standardSep, y:standardSep*-1.2});
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,134.1);
+	ns.CKPicScale *= 1.4;
+	ns.CKPicStates.push({virus:"golf",x:0,y:standardSep*1.2});
+	ns.CKPicStates.push({virus:"golfVirus",x:playing_field_dimension,y:standardSep*1.2});
+	ns.CKPicStates.push({virus:"art",x:0, y:0});
+	ns.CKPicStates.push({virus:"artVirus",x:playing_field_dimension, y:0});
+	ns.CKPicStates.push({virus:"building",x:0, y:standardSep*-1.2});
+	ns.CKPicStates.push({virus:"buildingVirus",x:playing_field_dimension, y:standardSep*-1.2});
+	Story_states.push(ns);
+	
+	
+	
 
 	ns = default_clone_story_state(0,140.5); //beginning of part 2, back to boca
 	ns.MODE = BOCAVIRUS_MODE;
@@ -610,9 +661,9 @@ function init_story()
 	ns.MODE = CKPICS_MODE;
 	var halfVerticalSeparation = 1;
 	ns.hepPicsVisibility = true;
+	ns.introPicsVisibility = false;
 	ns.qsPicsVisibility = false;
 	ns.hivPicsVisibility = false;
-	ns.CKPicScale = playing_field_dimension;
 	ns.CKPicStates.push({virus:"hepA",x:0,y:0});
 	ns.CKPicStates.push({virus:"hepB",x:0,y:-playing_field_dimension});
 	ns.CKPicStates.push({virus:"aMimic1",x:-playing_field_dimension, y:halfVerticalSeparation});
@@ -943,6 +994,7 @@ function init_story()
 	ns.CKPicStates.push({virus:"pp2",x:playing_field_dimension, y:-playing_field_dimension});
 	ns.CKPicStates.push({virus:"amv",x:-playing_field_dimension, y:-playing_field_dimension});
 	ns.hepPicsVisibility = false;
+	ns.introPicsVisibility = false;
 	ns.qsPicsVisibility = false;
 	ns.hivPicsVisibility = true;
 	ns.CKPicScale = playing_field_dimension;
@@ -1243,6 +1295,7 @@ function init_story()
 	ns.CKPicStates.push({virus:"bluetongue",x:playing_field_dimension, y:-playing_field_dimension});
 	ns.CKPicStates.push({virus:"hpv",x:-playing_field_dimension, y:-playing_field_dimension});
 	ns.hepPicsVisibility = false;
+	ns.introPicsVisibility = false;
 	ns.qsPicsVisibility = true;
 	ns.hivPicsVisibility = false;
 	ns.CKPicScale = playing_field_dimension;
@@ -1294,8 +1347,9 @@ function init_story()
 	ns = default_clone_story_state(0,59.2); //model was made 800 years ago
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,67.9); //standard dome
+	ns = default_clone_story_state(1,67.9); //standard dome
 	ns.MODE = SLIDE_MODE;
+	var islamic_dome_index = ns.slide_number;
 	ns.slide_number = islamic_dome_index;
 	ns.fadePicture = false;
 	Story_states.push(ns);
@@ -1482,11 +1536,11 @@ function init_story()
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,263.3); //humans coming around to the same patterns, golf ball
-	ns.slide_number = golfSlide;
+	ns.slide_number = polio_slide;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,273.6); //golf ball virus
-	ns.slide_number = golfLikeVirusSlide;
+	ns.slide_number = Measles_slide;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,279); //credits viruses
