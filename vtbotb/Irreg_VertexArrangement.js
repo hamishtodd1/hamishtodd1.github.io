@@ -212,7 +212,7 @@ function manipulate_vertices()
 					manipulation_surface.geometry.attributes.position.array[i*3+1] += displacement_vector.y;
 					manipulation_surface.geometry.attributes.position.array[i*3+2] += displacement_vector.z;
 					
-					if( !Sounds.shapeSettles.isPlaying )
+					if( !Sounds.shapeSettles.isPlaying && ytplayer.getPlayerState() === 2 )
 						Sounds.shapeSettles.play();
 					
 					manipulation_surface.geometry.attributes.position.needsUpdate = true;

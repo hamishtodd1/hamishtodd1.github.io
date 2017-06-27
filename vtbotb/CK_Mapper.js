@@ -33,7 +33,7 @@ function Map_lattice() {
 			non_surface_hexamers_multiplier = 0;
 	}
 
-	var LatticeRotationAndScaleMatrix = new Float32Array([ 
+	var LatticeRotationAndScaleMatrix = new Float32Array([
            //divided by density factor because mapfromlatticetosurface. Change this when rid off points.
   		 LatticeScale * Math.cos(LatticeAngle),
   		-LatticeScale * Math.sin(LatticeAngle),
@@ -528,24 +528,27 @@ function Map_lattice() {
 	
 	var joltNeeded = false;
 
-	//potential optimisation: just put one in each net triangle and extrapolate
+	/*
+	 * So if one is now in that wasn't previously, all those in get jolted
+	 * For one to have previously not been in means that its joltedness is 0
+	 * So, go through them and if they're in set their joltedness to 1
+	 */
 	for(var i = 0; i < number_of_lattice_points; i++) {
 		var latticevertex_nettriangle = locate_in_squarelattice_net(squarelattice_vertices[i]);
 		
 		if( latticevertex_nettriangle !== 999 ) {
+			
 			var mappedpoint = map_XY_from_lattice_to_surface(
 					flatlattice_vertices.array[ i*3+0 ], flatlattice_vertices.array[ i*3+1 ],
 					latticevertex_nettriangle, sphericality );
 			if( HexagonLattice.joltedness[i] === 0 )
 			{
-				joltNeeded = true;
 				HexagonLattice.joltedness[i] = 1;
+				joltNeeded = true;
 			}
 			
-			if(capsidopenness != 1) //TODO shouldn't this be further up?
+			if(capsidopenness != 1)
 				surflattice_geometry.attributes.position.setXYZ(i, mappedpoint.x, mappedpoint.y, mappedpoint.z );
-//			else //just as normal with extra z to appear above the edges
-//				surflattice_geometry.attributes.position.setXYZ(i, mappedpoint.x, mappedpoint.y, mappedpoint.z + 0.01 );
 		}
 		else 
 		{
@@ -555,28 +558,45 @@ function Map_lattice() {
 			
 			HexagonLattice.joltedness[i] = 0; //make it so that they can be set to 1 again
 		}
-		
+	}
+	if(joltNeeded)
+	{
+		for(var i = 0; i < number_of_lattice_points; i++) {
+			if( HexagonLattice.joltedness[i] !== 0 )
+				HexagonLattice.joltedness[i] = 1;
+		}
+	}
+	for(var i = 0; i < number_of_lattice_points; i++) {
 		if(capsidopenness === 1 && HexagonLattice.joltedness[i] > 0) //decrease til negative. Will only be made expandable again if it's made zero
 		{
 			for(var j = i*72, jl = (i+1)*72; j < jl; j++)
 			{
 				HexagonLattice.geometry.vertices[j].x -= surflattice_geometry.attributes.position.array[i*3+0];
 				HexagonLattice.geometry.vertices[j].y -= surflattice_geometry.attributes.position.array[i*3+1];
-				HexagonLattice.geometry.vertices[j].multiplyScalar( 1+HexagonLattice.joltedness[i]*0.15 );
+				HexagonLattice.geometry.vertices[j].multiplyScalar( 1-HexagonLattice.joltedness[i]*0.3 );
 				HexagonLattice.geometry.vertices[j].x += surflattice_geometry.attributes.position.array[i*3+0];
 				HexagonLattice.geometry.vertices[j].y += surflattice_geometry.attributes.position.array[i*3+1];
 			}
 			
 			for(var j = 0; j < 24; j++)
-				HexagonLattice.geometry.faces[i * 24 + j].color.g = Story_states[Storypage].hexamers_color.g + HexagonLattice.joltedness[i] * 
-				( 1 - Story_states[Storypage].hexamers_color.g );
+			{
+				HexagonLattice.geometry.faces[i * 24 + j].color.r = Story_states[Storypage].hexamers_color.r + HexagonLattice.joltedness[i] *
+					( final_pentamers_color.r - HexagonLattice.geometry.faces[i * 24 + j].color.r );
+				HexagonLattice.geometry.faces[i * 24 + j].color.g = Story_states[Storypage].hexamers_color.g + HexagonLattice.joltedness[i] *
+					( final_pentamers_color.g - HexagonLattice.geometry.faces[i * 24 + j].color.g );
+				HexagonLattice.geometry.faces[i * 24 + j].color.b = Story_states[Storypage].hexamers_color.b + HexagonLattice.joltedness[i] *
+					( final_pentamers_color.b - HexagonLattice.geometry.faces[i * 24 + j].color.b );
+			}
 			
-			HexagonLattice.joltedness[i] -= delta_t * 2; //doesn't always decrease?
+			HexagonLattice.joltedness[i] -= delta_t * 1.45;
 		}
 	}
 	
 	if(joltNeeded)
 	{
+		if(ytplayer.getPlayerState() === 2 )
+			playRandomPop();
+		
 		camera.directionalShake.x = MousePosition.x;
 		camera.directionalShake.y = MousePosition.y;
 		var mouseDeltaForMaxImpact = 0.6;

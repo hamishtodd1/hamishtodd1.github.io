@@ -19,9 +19,9 @@ var framesSinceLatticeSizeIncrease = 0;
 
 function HandleNetMovement()
 {
-	if(isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) >= IrregButton.radius && !Sounds.vertexGrabbed.isPlaying )
+	if(!isMouseDown && isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) >= IrregButton.radius && !Sounds.vertexGrabbed.isPlaying )
 		Sounds.vertexGrabbed.play();
-	if(!isMouseDown && isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) >= IrregButton.radius && !Sounds.vertexReleased.isPlaying )
+	if(isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) >= IrregButton.radius && !Sounds.vertexReleased.isPlaying )
 		Sounds.vertexReleased.play();
 	
 	var LatticeScaleChange = 1;
@@ -66,17 +66,7 @@ function HandleNetMovement()
 						LatticeScale = 1;
 						if( !Sounds.sizeLimitLower.isPlaying)
 							Sounds.sizeLimitLower.play();
-					}
-					else
-					{
-						framesSinceLatticeSizeDecrease = 0;
-						if( !Sounds.sizeDecreaseLong.isPlaying && !Sounds.sizeDecreaseLong.volume )
-						{
-							if( Sounds.sizeDecreaseLong.volume !== Sounds.sizeDecreaseLong.defaultVolume )
-								Sounds.sizeDecreaseLong.volume = Sounds.sizeDecreaseLong.defaultVolume;
-							Sounds.sizeDecreaseLong.play();
-						}
-					}					
+					}				
 				}
 				
 				if( LatticeScaleChange < 1 )
@@ -85,17 +75,7 @@ function HandleNetMovement()
 					{
 						LatticeScale = min_lattice_scale_given_angle;
 						if( !Sounds.sizeLimitUpper.isPlaying)
-							Sounds.sizeLimitUpper.play(); //these could be the wrong way around
-					}
-					else
-					{
-						framesSinceLatticeSizeIncrease = 0;
-						if( !Sounds.sizeIncreaseLong.isPlaying && !Sounds.sizeIncreaseLong.volume)
-						{
-							if( Sounds.sizeIncreaseLong.volume !== Sounds.sizeIncreaseLong.defaultVolume )
-								Sounds.sizeIncreaseLong.volume = Sounds.sizeIncreaseLong.defaultVolume;
-							Sounds.sizeIncreaseLong.play();
-						}
+							Sounds.sizeLimitUpper.play();
 					}
 				}
 			}

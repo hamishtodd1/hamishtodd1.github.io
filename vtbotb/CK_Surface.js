@@ -268,10 +268,8 @@ function update_surfperimeter() {
 	a1 = new THREE.Vector3(0,0,0);
 	for( var i = 0; i < surfperimeter_cylinders.length; i++){
 		put_tube_in_buffer(a1,a1, surfperimeter_cylinders[i].geometry.attributes.position.array);
-		surfperimeter_spheres[i].position.copy(a1);
 		
 		surfperimeter_cylinders[i].geometry.attributes.position.needsUpdate = true;
-		surfperimeter_spheres[i].geometry.attributes.position.needsUpdate = true;
 	}
 	if(capsidopenness!=0) {
 		for(var i = 0; i < 22; i++) {
@@ -287,9 +285,6 @@ function update_surfperimeter() {
 					surface_vertices.array[Bindex*3+1],
 					surface_vertices.array[Bindex*3+2]);
 			
-			change_radius(surfperimeter_spheres[i], surfperimeterradius);
-			surfperimeter_spheres[i].position.copy(A);
-			
 			put_tube_in_buffer(A,B, surfperimeter_cylinders[i].geometry.attributes.position.array, surfperimeterradius/LatticeScale*Lattice_ring_density_factor);
 		}
 	}
@@ -302,8 +297,6 @@ function update_surfperimeter() {
 		var groove = Math.floor(grooveside / 2);
 		
 		if( blast_end > 3 || blast_location === 0 || capsidopeningspeed < 0 ){
-			put_tube_in_buffer(new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,0), blast_cylinders[grooveside].geometry.attributes.position.array, surfperimeter_default_radius);
-			blast_cylinders[grooveside].geometry.attributes.position.needsUpdate = true;
 			continue;
 		}
 		
@@ -344,10 +337,6 @@ function update_surfperimeter() {
 				blastflash_end.copy(a2);
 			if(blast_location - level < 0)
 				blastflash_beginning.copy(a1);
-					
-			put_tube_in_buffer(blastflash_beginning,blastflash_end, blast_cylinders[grooveside].geometry.attributes.position.array, surfperimeter_default_radius * 1.5);
-			
-			blast_cylinders[grooveside].geometry.attributes.position.needsUpdate = true;
 		}
 	}
 }

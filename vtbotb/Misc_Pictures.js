@@ -153,6 +153,7 @@ function load_AV_stuff()
 	random_texture_urls.push( "Data/Slides/HIV.png");
 	random_texture_urls.push( "Data/Slides/amv.png");
 	random_texture_urls.push( "Data/Slides/pp2.jpg");
+	random_texture_urls.push( "Data/Slides/uneven.png");
 
 	random_texture_urls.push( "Data/Slides/Zika Virus.jpg");
 	random_texture_urls.push( "Data/Slides/bluetongue.jpg");
@@ -172,24 +173,24 @@ function load_AV_stuff()
 	movingPictures = {
 			golf:null,golfVirus:null,building:null,buildingVirus:null,art:null,artVirus:null,
 			hepA:null,hepB:null,aMimic1:null,aMimic2:null,bMimic1:null,bMimic2:null,
-			hiv:null, amv:null, pp2:null,
+			hiv:null, amv:null, pp2:null,uneven:null,
 			zika:null,bluetongue:null, hpv:null};
-	var randomTargetIndex = randomTargets.length-18;
+	var randomTargetIndex = randomTargets.length-19;
 	for( var picture in movingPictures)
 	{	
 		movingPictures[picture] = new THREE.Mesh( new THREE.CubeGeometry(1, 1, 0),
-				  								new THREE.MeshBasicMaterial() );
+				  								new THREE.MeshBasicMaterial({transparent:true}) );
 		
 		if( randomTargetIndex >= randomTargets.length-3 )
 			movingPictures[picture].chapter = QC_SPHERE_MODE;
-		else if( randomTargetIndex >= randomTargets.length-6 )
+		else if( randomTargetIndex >= randomTargets.length-7 )
 			movingPictures[picture].chapter = IRREGULAR_MODE;
-		else if( randomTargetIndex >= randomTargets.length-12 )
+		else if( randomTargetIndex >= randomTargets.length-13 )
 			movingPictures[picture].chapter = CK_MODE;
 		else
 		{
 			movingPictures[picture].chapter = BOCAVIRUS_MODE;
-			if(randomTargetIndex!==randomTargets.length-18)//first one
+			if(randomTargetIndex!==randomTargets.length-19)//first one
 				movingPictures[picture].position.x = playing_field_dimension;
 		}
 		
@@ -202,6 +203,7 @@ function load_AV_stuff()
 	
 	movingPictures.amv.position.set( playing_field_dimension, -playing_field_dimension,0 );
 	movingPictures.pp2.position.set( -playing_field_dimension, -playing_field_dimension,0 );
+	movingPictures.uneven.position.set( 0, -playing_field_dimension,0.001 );
 	
 	//slides
 	var bordered = [];
@@ -277,8 +279,10 @@ function load_AV_stuff()
 //	slide_texture_urls.push( "Data/Slides/Darb e highlighted.png");
 	slide_texture_urls.push( "Data/Slides/Darb e above entrance.jpg"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/Darb e inside.jpg"); bordered.push(0);
+	slide_texture_urls.push( "Data/Slides/Darb e pentagons.jpg"); bordered.push(0);
 	slide_texture_urls.push( "Data/Slides/darb e sharp.jpg"); //next thing is to test (tree and final reused slides) without this extra slide
 	slide_texture_urls.push( "Data/Slides/drug.jpg"); bordered.push(0);
+	slide_texture_urls.push( "Data/Slides/Zika Virus.jpg");
 
 	//----Ending
 	slide_texture_urls.push( "Data/Slides/Measles virus.png");
@@ -286,7 +290,6 @@ function load_AV_stuff()
 	slide_texture_urls.push( "Data/Slides/shell.jpg");
 	slide_texture_urls.push( "Data/Slides/golden spiral.png");
 	slide_texture_urls.push( "Data/Slides/nautilus with spiral.jpg");
-	slide_texture_urls.push( "Data/Slides/Opening selection 1a.png");
 	
 	for(var i = bordered.length; i< slide_texture_urls.length; i++)
 		bordered[i] = 0;

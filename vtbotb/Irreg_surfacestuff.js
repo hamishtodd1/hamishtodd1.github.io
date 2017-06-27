@@ -98,6 +98,16 @@ function CheckIrregButton(){
 	{
 		Sounds.buttonReleased.play();
 		
+		{
+			camera.directionalShake.x = MousePosition.x;
+			camera.directionalShake.y = MousePosition.y;
+			var mouseDeltaForMaxImpact = 4;
+			var timeForMinMouseDeltaImpact = 0.5;
+			camera.directionalShake.z = timeForMinMouseDeltaImpact - (Mouse_delta.length() / mouseDeltaForMaxImpact) * timeForMinMouseDeltaImpact;
+			if(camera.directionalShake.z < 0)
+				camera.directionalShake.z = 0;
+		}
+		
 		if(IrregButton.capsidopen)
 		{
 			if( !Sounds.shapeClose.isPlaying )
@@ -250,12 +260,6 @@ function update_varyingsurface() {
 	for(var i = 0; i < surfperimeter_line_index_pairs.length / 2; i++) {
 		var Aindex = surfperimeter_line_index_pairs[i*2];
 		var Bindex = surfperimeter_line_index_pairs[i*2+1];
-		
-		surfperimeter_spheres[i].position.set(
-				flatnet_vertices.array[surfperimeter_line_index_pairs[i*2]*3+0],
-				flatnet_vertices.array[surfperimeter_line_index_pairs[i*2]*3+1],
-				flatnet_vertices.array[surfperimeter_line_index_pairs[i*2]*3+2]
-		);
 		
 		if(capsidopenness === 1 ){
 			A = new THREE.Vector3(

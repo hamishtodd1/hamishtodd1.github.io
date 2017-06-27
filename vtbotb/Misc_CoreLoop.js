@@ -12,42 +12,39 @@
  * 
  * 
  * -------General
+   So you've triggered a repetition... but you need pause again once it's done; bear in mind the player might have done the necessary thing
  * Take a picture of yourself with VR
+ * low framerate: can't change qs?
+	Borderings
+ * reproduced virus proteins go in right places
+	sfx not on when video plays. Shape settles needs to be stoppable earl
+	Got repetition of "you can do things with it"
+		And "and using this button", particularly annoying
+	need lots of fades
+	No second "next virus" cue?
  * Sheree contingent
 	 * Loading screen: fade in btv faces one by one
 	 * New button
 	 * Size snapping for the video and canvas was bullshit, correct it to whatever Sheree gives in her design
-	 * Tree, "images of some other viruses"
- * Get it on an amazon or google server
+	 * Tree
+			"images of some other viruses"
+			Really important that tree icons light up
+
+
  * Check for required things like flash 10, webgl, link to video if page doesn't work in some way. Or recommend a different browser
  * Test on different setups
 		Johan's Mac
 		http://browsershots.org/
    General bug testing
    analytics: whenever you start a chapter. Amazon analytics?
-   
-   Switch CK hex inflation to being when you click the close button
-   So you've triggered a repetition... but you need pause again once it's done; bear in mind the player might have done the necessary thing
 		
 	Repetition trigger fired on use button?
 Touch:
 	tree went wrong
 	went to youtube, fffffffffffffffffffff
-	tablet but not phone. Phone is shite; it's ok for it to have anything at all. Jessie computer
+	tablet but not phone. Phone is shite; it's just an advert for the desktop. Jessie computer
 	Jessie's computer: it seemed to think it was a mouse
 		Or did it? You put the finger down, moved it, and it flicked. Even though it copies
-		
-	reproduced virus proteins go in right places
-	sfx not on when video plays. Shape settles needs to be stoppable earl
-	
-	Got repetition of "you can do things with it"
-	And "and using this button", particularly annoying
-	
-	need lots of fades
-	
-	No second "next virus" cue?
-	
-	Really important that tree icons light up
 	
 ----------Below the thing
  * Sheree must design
@@ -61,18 +58,14 @@ Touch:
  *  
  *  ---------Probably never to be solved
  *  Incorporate youtube loading into loading bar
- *  Make difference between phi29 and t4 clearer by doing it with the flattened net
  *  QS shouldn't move when zooming in
  *  Flicker on chapter start
  *  Dodeca on "create lots of symmetry"
- *  It would be nice to flatten CK's corners
- *  A bug may have caused things to be skipped. Hopefully that goes away with the new arrangement
- * 	-cite non-illustrated pictures
- * QS normals:
+ * 	QS normals:
  * 		For all triangles with an unmarked edge on a dod edge, set their face normals to the normalized midpoint of the two corners they have on that edge
  * 		Then for all triangles in some shared shape, decide on a normal. Eg for the hexagon get it from that normal
  * 		But this is for your next life. It does increase the processing required and meshBasicMaterial looks fine and anyway this is a sophisticated abstract shape
- * Irreg: While moving vertices back in place, you can sort of check for convergence "for free"
+ * 	Irreg: While moving vertices back in place, you can sort of check for convergence "for free"
  * 		This requires checking angular defects, but many things are based on whether vertex_tobechanged is defined
  */
 
@@ -184,7 +177,6 @@ function ChangeScene(new_mode) {
 			scene.add(HexagonLattice);
 //			scene.add(surface);
 			for( var i = 0; i < surfperimeter_cylinders.length; i++) {
-//				scene.add(surfperimeter_spheres[i]);
 				scene.add(surfperimeter_cylinders[i]);
 			}
 			scene.add(QS_measuring_stick);

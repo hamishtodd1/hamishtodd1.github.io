@@ -349,13 +349,10 @@ pentagonDemo.init = function()
 
 pentagonDemo.update = function()
 {
-	; //Now pentagons
-	; //fit together
-	112.7; //little shapes
-	115.7; //pattern like this one
-	121.7; //shapes in the shrine's
-	var timePoints = [103,108,112.3,115.2,121.2,126.1,127.7, 129.6]; //these are the times when it is in that state
+	var timePoints = [102,108,112.3,115,121.2,126.1,127.7, 131]; //these are the times when it is in that state
 	var shapeMovementTime = 1.4;
+	for(var i = 0; i < timePoints.length-1; i++)
+		timePoints[i] += shapeMovementTime;
 	
 	for(var i = 0; i < timePoints.length-1; i++)
 	{

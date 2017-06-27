@@ -85,7 +85,7 @@ function update_QS_center()
 	}
 	
 	if(!Mouse_delta.equals(THREE.zeroVector))
-		QS_measuring_stick.children[0].material.color.b = 1;
+		QS_measuring_stick.children[0].material.color.b = 1; 
 	else
 		QS_measuring_stick.children[0].material.color.b -= delta_t / 1.6;
 	if(QS_measuring_stick.children[0].material.color.b < 0)
@@ -145,9 +145,17 @@ function MoveQuasiLattice()
 			{
 				var scalefactor = 0;
 				if( Mousedist < QSmouseLowerLimit )
+				{
 					scalefactor = 1;
+					if( Mousedist / OldMousedist < 1 && !Sounds.sizeLimitLower.isPlaying)
+						Sounds.sizeLimitLower.play();
+				}
 				else if( Mousedist > QSmouseUpperLimit )
+				{
 					scalefactor = 1;
+					if( Mousedist / OldMousedist > 1 && !Sounds.sizeLimitUpper.isPlaying)
+						Sounds.sizeLimitUpper.play();
+				}
 				else
 					scalefactor = Mousedist / OldMousedist;
 				
@@ -163,6 +171,7 @@ function MoveQuasiLattice()
 				var hardmaxlength = 4;
 				if(veclength > hardmaxlength) {
 					veclength = hardmaxlength;
+
 					if( !Sounds.sizeLimitUpper.isPlaying)
 						Sounds.sizeLimitUpper.play();
 				}
@@ -173,6 +182,9 @@ function MoveQuasiLattice()
 					
 					if( QSmouseUpperLimit === 999)
 						QSmouseUpperLimit = Mousedist;
+
+					if( !Sounds.sizeLimitUpper.isPlaying)
+						Sounds.sizeLimitUpper.play();
 				}
 					
 				var minlength = 1.313;
@@ -214,10 +226,13 @@ function MoveQuasiLattice()
 				var LatticeAngleChange = OldMouseAngle - MouseAngle;
 				var maxLatticeAngleChange = TAU / 60;
 				if( Math.abs(LatticeAngleChange) > maxLatticeAngleChange )
+				{
 					if( LatticeAngleChange > 0 )
 						LatticeAngleChange = maxLatticeAngleChange;
 					else
 						LatticeAngleChange =-maxLatticeAngleChange;
+				}
+					
 				
 				var QuasiLatticeAngle = Math.atan2(cutout_vector0_player.y, cutout_vector0_player.x);
 				var newQuasiLatticeAngle = QuasiLatticeAngle + LatticeAngleChange;
@@ -304,10 +319,7 @@ function MoveQuasiLattice()
 		if( stable_point_of_meshes_currently_in_scene !== 999 && ytplayer.getPlayerState() !== 1 ) //not our first time
 		{
 			//a random pop
-			var playedPop = "pop" + Math.ceil(Math.random()*3).toString();
-			
-			if( !Sounds[ playedPop ].isPlaying )
-				Sounds[ playedPop ].play();
+			playRandomPop();
 			
 			theyknowyoucanchangestate = true;
 			
@@ -343,6 +355,14 @@ function MoveQuasiLattice()
 //	camera.position.z = contrived_dist + maxQuadraticAddition - quadraticContribution*quadraticContribution;
 	camera.updateMatrix();
 	camera.updateMatrixWorld();
+}
+
+function playRandomPop()
+{
+	var playedPop = "pop" + Math.ceil(Math.random()*3).toString();
+	
+	if( !Sounds[ playedPop ].isPlaying )
+		Sounds[ playedPop ].play();
 }
 
 function deduce_dodecahedron(openness) {	

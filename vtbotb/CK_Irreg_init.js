@@ -347,7 +347,7 @@ function init_CK_and_irreg()
 		setvirus_flatnet_vertices[3][i] = flatnet_vertices_numbers[i];
 	
 	//corrected angular defect of the below
-	setvirus_flatnet_vertices[5] = new Float32Array([0, 0, 0, 0.7085662484169006, -0.40909090638160706, 0, 0.7085662484169006, 0.40909090638160706, 0, 1.889509916305542, 0, 0, 1.889509916305542, 0.8181818127632141, 0, 2.598076105117798, 0.40909090638160706, 0, 2.220446049250313e-16, 0.8181818127632141, 0, 0.944754958152771, 1.6363636255264282, 0, 0.23618873953819275, 2.045454502105713, 0, 0.944754958152771, 2.454545497894287, 0, -0.7085662484169006, 0.40909090638160706, 0, -0.944754958152771, 1.6363636255264282, 0, -1.6533212661743164, 1.2272727489471436, 0, -1.6533212661743164, 2.045454502105713, 0, -1.0552680492401123, -0.8082903623580933, 0, -1.889509916305542, 2.3139823094288294e-16, 0, -1.370442509651184, -0.9188345670700073, 0, -2.598076105117798, -0.40909090638160706, 0, -3.885780586188048e-16, -0.8181818127632141, 0, -1.1171211004257202, -1.1365118026733398, 0, -0.23618873953819275, -2.045454502105713, 0, -0.944754958152771, -2.454545497894287, 0]);
+	setvirus_flatnet_vertices[5] = new Float32Array([0, 0, 0, 0.8660253882408142, -0.5, 0, 0.8660253882408142, 0.5, 0, 1.7320507764816284, 0, 0, 1.7320507764816284, 1, 0, 2.598076105117798, 0.5, 0, 0, 1, 0, 0.8660253882408142, 1.5, 0, 0, 2, 0, 0.8660253882408142, 2.5, 0, -0.8660253882408142, 0.5, 0, -0.8660253882408142, 1.5, 0, -1.7320507764816284, 1, 0, -1.7320507764816284, 2, 0, -1.0272023677825928, -0.7746115922927856, 0, -1.7320507764816284, 0, 0, -1.4136414527893066, -1.002278208732605, 0, -2.598076105117798, -0.5, 0, 0, -1, 0, -1.0232568979263306, -1.2231104373931885, 0, 0, -2, 0, -0.8660253882408142, -2.5, 0]);
 	//demonstration, improper angular defect
 	setvirus_flatnet_vertices[4] = new Float32Array(66);
 	for(var i = 0; i < setvirus_flatnet_vertices[4].length; i++)
@@ -580,16 +580,10 @@ function init_CK_and_irreg()
 		
 		
 		var surfperimeter_cylindersmaterial = new THREE.MeshBasicMaterial({
-			color: 0x000000,
-			side:	THREE.DoubleSide
-		});
-		var blastcylindersmaterial = new THREE.MeshBasicMaterial({
-			color:	0xffffff,
-			side:	THREE.DoubleSide
+			color: 0x1F3952,
+			side:	THREE.DoubleSide 
 		});
 		for( var i = 0; i < surfperimeter_cylinders.length; i++) {
-			surfperimeter_spheres[i] = new THREE.Mesh( (new THREE.BufferGeometry).fromGeometry(new THREE.SphereGeometry(surfperimeter_default_radius,8,4)),blastcylindersmaterial);
-			
 			var cylinder_vertices_numbers = new Float32Array(16*3);
 			put_tube_in_buffer(0,0,0,1,1,1, surfperimeter_default_radius, cylinder_vertices_numbers);
 			
@@ -598,17 +592,6 @@ function init_CK_and_irreg()
 			surfperimeter_cylinders_geometry.addAttribute( 'position', new THREE.BufferAttribute( cylinder_vertices_numbers, 3 ) );
 			
 			surfperimeter_cylinders[i] = new THREE.Mesh( surfperimeter_cylinders_geometry, surfperimeter_cylindersmaterial );
-		}
-		for( var i = 0; i < blast_cylinders.length; i++)
-		{			
-			var cylinder_vertices_numbers = new Float32Array(16*3);
-			put_tube_in_buffer(0,0,0,1,1,1, surfperimeter_default_radius, cylinder_vertices_numbers);
-			
-			var blast_cylinders_geometry = new THREE.BufferGeometry();
-			blast_cylinders_geometry.setIndex(new THREE.BufferAttribute( cylinder_triangle_indices, 1 ) );
-			blast_cylinders_geometry.addAttribute( 'position', new THREE.BufferAttribute( cylinder_vertices_numbers, 3 ) );
-			
-			blast_cylinders[i] = new THREE.Mesh( blast_cylinders_geometry, blastcylindersmaterial );
 		}
 		
 		
