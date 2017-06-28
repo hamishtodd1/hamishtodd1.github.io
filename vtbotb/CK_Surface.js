@@ -60,65 +60,15 @@ function UpdateCapsid() {
 			surfperimeter_cylinders[i].quaternion.slerp(open_quaternion, interpolationfactor);
 	}
 	else if( capsidopenness !== 0 ) { //while you're closing, move towards this certain quaternion
-		//we'd like to have something about making it look like the picture, but there's an unfortunate dependence on which of the six states can give you CMV
 		var closed_quaternion = new THREE.Quaternion();
-		var truncated_latticeAngle = LatticeAngle;
-		while( truncated_latticeAngle < 0 )
-			truncated_latticeAngle += TAU;
-		while( truncated_latticeAngle > TAU )
-			truncated_latticeAngle -= TAU;
-		if( Math.abs( truncated_latticeAngle - 0.7137243 ) < 0.1 )
-			closed_quaternion.set(-0.253408169337206, 0.027135037557069655, 0.0840263953918781, 0.96332110655139);
-		if( Math.abs( truncated_latticeAngle - 1.76092194 ) < 0.1 )
-			closed_quaternion.set(-0.265881135161026, 0.001549389187642092, -0.020181975326924, 0.96379329175426);
-		if( Math.abs( truncated_latticeAngle - 2.808119463 ) < 0.1 )
-			closed_quaternion.set(-0.247214685644899, -0.02639585945717817, -0.124304951581996, 0.96059171181996);
-		if( Math.abs( truncated_latticeAngle - (-2.42786829 + TAU) ) < 0.1 )
-			closed_quaternion.set(0.3053824464601475, -0.03619975061311337, 0.0804235151960733, 0.94813669776729);
-		if( Math.abs( truncated_latticeAngle - (-1.38067069 + TAU) ) < 0.1 )
-			closed_quaternion.set(0.2985449012177967, -0.00111538304141928, -0.017842511786579, 0.95422813972900);
-		if( Math.abs( truncated_latticeAngle - (-0.33347318 + TAU) ) < 0.1 )
-			closed_quaternion.set(0.28726102554023203, 0.0337422051876268, -0.1236943313920196, 0.94923246845866);
-		if( Math.abs( truncated_latticeAngle - 5.759586523431099 ) < 0.01 )
-			closed_quaternion.set( -0.2469491793013429,0.012844628513737317,0.090510425971704,0.9647066814069217);
-		var interpolationfactor = 0.03 + 0.97 * Math.pow(1-capsidopenness,10); //may want to massively reduce this power
 		
 		surface.quaternion.slerp(closed_quaternion, interpolationfactor);
 		for(var i = 0; i < surfperimeter_cylinders.length; i++ )
-			surfperimeter_cylinders[i].quaternion.slerp(closed_quaternion, interpolationfactor);
+			surfperimeter_cylinders[i].quaternion.copy(surface.quaternion);
 	}
 	
 
 	surface.updateMatrixWorld();
-	
-	//avoid the back face showing
-//	{
-//		var forwardvector = new THREE.Vector3(0,0,1);
-//		surface.worldToLocal( forwardvector );
-//		
-//		var face_centers_indices = Array(3,7,12,16,21,25,30,34,38,42);
-//		var closest_angle = surface.geometry.vertices[ 0 ].angleTo( forwardvector );
-//		var closest_index = 0;
-//		
-//		//0 is the one you swap with
-//		for(var i = 0; i < face_centers_indices.length; i++)
-//		{
-//			var potential_angle = surface.geometry.vertices[ face_centers_indices[i] ].angleTo( forwardvector );
-//			if( potential_angle < closest_angle )
-//			{
-//				closest_angle = potential_angle;
-//				closest_index = face_centers_indices[i];
-//			}
-//		}
-//		
-//		if(closest_index !== 0 )
-//		{
-//			var swap_axis = surface.geometry.vertices[ closest_index ].clone();
-//			swap_axis.add( surface.geometry.vertices[ 0 ] );
-//			swap_axis.normalize();
-//			surface.rotateOnAxis( swap_axis, Math.PI );
-//		}
-//	}
 	
 	for( var i = 0; i < 22; i++){
 		var d = get_vector(i, SURFACE);

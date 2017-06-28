@@ -541,7 +541,7 @@ function Map_lattice() {
 			var mappedpoint = map_XY_from_lattice_to_surface(
 					flatlattice_vertices.array[ i*3+0 ], flatlattice_vertices.array[ i*3+1 ],
 					latticevertex_nettriangle, sphericality );
-			if( HexagonLattice.joltedness[i] === 0 )
+			if( HexagonLattice.joltedness[i] === 0 ) 
 			{
 				HexagonLattice.joltedness[i] = 1;
 				joltNeeded = true;

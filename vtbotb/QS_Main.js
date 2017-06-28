@@ -64,7 +64,10 @@ function UpdateQuasiSurface()
 
 function update_QS_center()
 {
-	QS_center.position.z = camera.position.z - 30;
+	if(MODE ===QC_SPHERE_MODE)
+		QS_center.position.z = camera.position.z - 30;
+	else
+		QS_center.position.z = camera.position.z - 8;
 	QS_measuring_stick.position.copy( QS_center.position );
 	
 	if(MODE ===QC_SPHERE_MODE)

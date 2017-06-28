@@ -61,7 +61,7 @@ function Update_story()
 			if( Story_states[Storypage-1].MODE !== CK_MODE )
 				LatticeScale = Story_states[Storypage].CK_scale;
 			else //needs to change gradually
-				LatticeScale = (Story_states[Storypage].CK_scale - LatticeScale ) * 0.1;
+				LatticeScale += (Story_states[Storypage].CK_scale - LatticeScale ) * 0.1;
 		}
 		if( Story_states[Storypage].CK_angle !== 999 )
 		{
@@ -109,6 +109,16 @@ function Update_story()
 			varyingsurface.updateMatrixWorld();
 		}
 		
+		if( Story_states[Storypage].enforced_CK_quaternion.x !== 5 )
+		{
+			if( Story_states[Storypage-1].MODE !== CK_MODE )
+				surface.quaternion.copy( Story_states[Storypage].enforced_CK_quaternion );
+			else
+				surface.quaternion.slerp( Story_states[Storypage].enforced_CK_quaternion, 0.1 );
+			for(var i = 0; i < surfperimeter_cylinders.length; i++ )
+				surfperimeter_cylinders[i].quaternion.copy( Story_states[Storypage].enforced_CK_quaternion );
+		}
+		
 		if( Story_states[Storypage].unpauseOn() )
 			ytplayer.playVideo();
 		
@@ -122,8 +132,14 @@ function Update_story()
 			}
 		}
 		
-		if( MODE !== TREE_MODE && MODE !== QC_SPHERE_MODE && MODE !== BOCAVIRUS_MODE ) //under these possibilities we might not want the default camera position
-			camera.position.z += ( Story_states[Storypage].cameraZ - camera.position.z ) * 0.1;
+		if( MODE === CK_MODE )
+		{
+			if(Story_states[Storypage - 1].MODE !== CK_MODE) //if we've just gone to this state, we don't want a zoom
+				camera.position.z = Story_states[Storypage].cameraZ;
+			else
+				camera.position.z += ( Story_states[Storypage].cameraZ - camera.position.z ) * 0.1;
+		}
+			
 		
 		//if you're about to move on from a state naturally
 		if( Story_states[Storypage + 1].startingtime < our_CurrentTime && our_CurrentTime < Story_states[Storypage + 1].startingtime + 0.2 )
@@ -222,13 +238,6 @@ function Update_story()
 			varyingsurface_cylinders[i].quaternion.copy(Story_states[Storypage].enforced_irreg_quaternion );
 		
 		varyingsurface.updateMatrixWorld();
-	}
-	
-	if( Story_states[Storypage].enforced_CK_quaternion.x !== 5 )
-	{
-		surface.quaternion.copy( Story_states[Storypage].enforced_CK_quaternion );
-		for(var i = 0; i < surfperimeter_cylinders.length; i++ )
-			surfperimeter_cylinders[i].quaternion.copy( Story_states[Storypage].enforced_CK_quaternion );
 	}
 	
 	if( Story_states[Storypage].enforced_irreg_state !== -1 )
@@ -749,25 +758,28 @@ function init_story()
 	ns.CKPicScale = playing_field_dimension;
 	Story_states.push(ns);
 	
+	var zoomedInDistance = min_cameradist / 4.6;
+
+	ns = default_clone_story_state(0,44.7); //small polio to introduce model. Above is the moving around stuff
+	ns.slide_number = hepASlide;
+	ns.cameraZ = zoomedInDistance;
+	Story_states.push(ns);
+	
+	//TODO smaller so you don't see pinpricks
+	
 	ns = default_clone_story_state(0,48); //polio in model, no lattice
 	ns.MODE = CK_MODE;
-	ns.cameraZ = min_cameradist / 2;
-	ns.enforced_CK_quaternion.set( -0.26994323284634125, -0.0024107795577928506, -0.000379635156398864, 0.9628731458813965 );
+	ns.fadePicture = true;
+	ns.cameraZ = zoomedInDistance;
+	ns.enforced_CK_quaternion.set( -0.5795583117792323,0.2592476704069174, 0.31482085241857005,0.7055427974575411 );
 	ns.irreg_button_invisible = 1;
 	ns.CK_scale = 0.5773502438405532;
 	ns.CK_angle = -0.5235987753305861;
 	ns.capsid_open = 0;
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(0,50); //back to model
-	ns.enforced_CK_quaternion.set( -0.26994323284634125, -0.0024107795577928506, -0.000379635156398864, 0.9628731458813965 );
-	ns.MODE = CK_MODE;
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(0,52); //back to model
-	ns.enforced_CK_quaternion.set( -0.26994323284634125, -0.0024107795577928506, -0.000379635156398864, 0.9628731458813965 );
-	ns.MODE = CK_MODE;
 	ns.pause_at_end = 1;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,50); //we're done with that enforced quaternion 
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,63.3); //you might recognize this pattern 
@@ -782,13 +794,17 @@ function init_story()
 	ns.hexamers_color.set(0.6,0.1,0.1); 
 	Story_states.push(ns);
 
+	ns = default_clone_story_state(0,70.7); //hexagons
+	ns.enforced_CK_quaternion.set( -0.5676121554735792, 0.39319587732878697, 0.6593917849494116, 0.2973481401944473 );
+	Story_states.push(ns);
+
 	ns = default_clone_story_state(1,71.7); //football
-//	ns.hexamers_color.copy(defaultHexamersColor);
-//	ns.hexamers_color = defaultHexamersColor.clone();
+	ns.fadePicture = true;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,76.6); //back
-	ns.enforced_CK_quaternion.set( -0.26994323284634125, -0.0024107795577928506, -0.000379635156398864, 0.9628731458813965 );
+	ns.fadePicture = true;
+	ns.enforced_CK_quaternion.set( -0.5676121554735792, 0.39319587732878697, 0.6593917849494116, 0.2973481401944473 );
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,84.6); //zoom out (at this time to distract from bad delivery

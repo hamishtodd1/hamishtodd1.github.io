@@ -61,7 +61,7 @@ Touch:
 function UpdateWorld()
 {
 //	performance_checker.begin_frame();
-	
+	console.log()
 	switch(MODE)
 	{	
 		case BOCAVIRUS_MODE:
@@ -70,16 +70,18 @@ function UpdateWorld()
 			
 		case CK_MODE:
 			CheckIrregButton();
-			
-			HandleNetMovement();
-			
-			UpdateCapsid();
-			update_surfperimeter();
 
+			HandleNetMovement();
+
+			UpdateCapsid();
+			
+			update_surfperimeter();
+			
 			Update_net_variables();
+			
 			if( LatticeScale > 0.2) //min for one of the capsids we do. Minus a little grace
 				Map_lattice();
-//			update_QS_center();
+			update_QS_center();
 			break;
 			
 		case IRREGULAR_MODE:
@@ -157,6 +159,8 @@ function ChangeScene(new_mode) {
 			break;
 			
 		case CK_MODE:
+			capsidopenness = 0;
+			
 			scene.add(IrregButton);
 			
 			scene.add(CKHider); //can remove this if you have no internet

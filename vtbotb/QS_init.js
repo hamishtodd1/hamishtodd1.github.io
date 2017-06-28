@@ -19,7 +19,7 @@ function initialize_QS_stuff()
 	QS_center.scale.setScalar(0.13,0.13,0.13);
 	
 	QS_measuring_stick = new THREE.Object3D();
-	QS_measuring_stick.scale.setScalar(0.03,0.03,0.03);
+	QS_measuring_stick.scale.setScalar(0.013,0.03,0.03);
 	var num_measuringstick_dashes = 12;
 	QS_measuring_stick.add( new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({color:0x000000, transparent: true, opacity:0})) );
 	for(var i = 0; i < num_measuringstick_dashes; i++)
