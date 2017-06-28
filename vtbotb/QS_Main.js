@@ -107,6 +107,7 @@ function update_QS_center()
 	QS_center.rotation.z = QS_measuring_stick.rotation.z;
 }
 
+var cutout_vector0_displayed = new THREE.Vector3();
 function MoveQuasiLattice()
 {
 	//somewhere in here is the "ignoring input while inflating" bug
@@ -299,7 +300,7 @@ function MoveQuasiLattice()
 		cutout_vector1_player.copy(cutout_vector1);
 	}
 	
-	var cutout_vector0_displayed = new THREE.Vector3();
+	cutout_vector0_displayed.set(0,0,0)
 	var cutout_vector1_displayed = new THREE.Vector3();
 	cutout_vector0_displayed.lerpVectors(cutout_vector0_player, cutout_vector0, interpolation_factor);
 	cutout_vector1_displayed.lerpVectors(cutout_vector1_player, cutout_vector1, interpolation_factor);
@@ -335,17 +336,18 @@ function MoveQuasiLattice()
 	
 	//TODO, you may not understand this. Actually you should be moving the camera.
 	//note you are keeping the fov constant, so in some sense the size of the playing field changes
-	var contrived_dist = 30 / cutout_vector0_displayed.length() + 0.5*Math.sqrt(5/2+11/10*Math.sqrt(5)); //pretty sure this is the z coord of a face-down dodecahedron's center
-	var maxDist = contrived_dist * 2.5; //say
-	camera.position.z = contrived_dist + (maxDist-contrived_dist) * (1-QS_measuring_stick.children[0].material.opacity);
-	
-	var staticDistFov = 10;
-	var modifyingDistFov = 23.721980146543366;
-	camera.fov = modifyingDistFov + (staticDistFov-modifyingDistFov) * (1-QS_measuring_stick.children[0].material.opacity);
+	var minDist = 11;
+	var maxDist = 63;
+	camera.position.z = minDist + (maxDist-minDist) * dodeca_faceflatness;
+	camera.fov = 2 * 360/TAU * Math.atan( 3 / (camera.position.z - dodeca.position.z) );
 	camera.updateProjectionMatrix();
+	camera.updateMatrix();
+	camera.updateMatrixWorld();
+	//does the radius of the thing change during the modifying/static transition? If not, your job is to keep the same amount of area in sight
+	
 	
 	/* 
-	 * fov = 2 * Math.atan( (radius+bitExtra) / distFromCenter ); - actual radius in Map_To_Quasisphere, taking into account scale
+	 * 
 	 * We need to find bitExtra such that this spits out ~10 when static and ~23.721980146543366 when modifying
 	 */
 	
@@ -353,8 +355,9 @@ function MoveQuasiLattice()
 //	var maxQuadraticAddition = (1 + quadraticAddition) * (1 + quadraticAddition);
 //	var quadraticContribution = QS_measuring_stick.children[0].material.opacity + quadraticAddition;
 //	camera.position.z = contrived_dist + maxQuadraticAddition - quadraticContribution*quadraticContribution;
-	camera.updateMatrix();
-	camera.updateMatrixWorld();
+	
+	
+	
 }
 
 function playRandomPop()

@@ -58,7 +58,6 @@ Touch:
  *  
  *  ---------Probably never to be solved
  *  Incorporate youtube loading into loading bar
- *  QS shouldn't move when zooming in
  *  Flicker on chapter start
  *  Dodeca on "create lots of symmetry"
  * 	QS normals:
@@ -198,8 +197,8 @@ function ChangeScene(new_mode) {
 			scene.add(dodeca);
 			if(stable_point_of_meshes_currently_in_scene !== 999) //if it is equal to this, it has yet to be derived from the cutout vectors
 				dodeca.add(quasicutout_meshes[stable_point_of_meshes_currently_in_scene]);
-			scene.add(QS_center);
-			scene.add(QS_measuring_stick);
+//			scene.add(QS_center);
+//			scene.add(QS_measuring_stick);
 			break;
 			
 		case TREE_MODE:

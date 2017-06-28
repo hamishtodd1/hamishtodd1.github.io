@@ -1,3 +1,5 @@
+var qsRadius;
+
 function Map_To_Quasisphere() 
 {
 	var lowest_unused_vertex = 0;
@@ -57,7 +59,6 @@ function Map_To_Quasisphere()
 	var ourcenter_veclength = 0.5 * Math.tan(Math.atan(PHI) + 0*(TAU/4 - Math.atan(PHI))) / Math.tan(TAU/10);
 	var basis_vectors = Array(dodeca_triangle_vertex_indices.length);
 	var ourcenters = Array(dodeca_triangle_vertex_indices.length);
-	var radius;
 	
 	for( var i = 0; i < dodeca_triangle_vertex_indices.length; i++) {
 		var rightindex = dodeca_triangle_vertex_indices[i][0];
@@ -77,7 +78,7 @@ function Map_To_Quasisphere()
 		ourcenters[i] = downward_vector.clone();		
 		ourcenters[i].multiplyScalar(ourcenter_veclength);
 		ourcenters[i].add(basis_vectors[i][2]);
-		if(i===0) radius = Math.sqrt(basis_vectors[i][0].lengthSq() + ourcenter_veclength * ourcenter_veclength );
+		if(i===0) qsRadius = cutout_vector0_displayed.length() / 1.6;
 	}
 	
 	var one_quasicutout_vertices = quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices.length / 60;
@@ -87,16 +88,16 @@ function Map_To_Quasisphere()
 			if( vertex_index % 2 === 1 && i < nearby_quasicutouts.length){
 				if(nearby_quasicutouts[i][((vertex_index % 6)-1)/2] === 999)
 					quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[one_quasicutout_vertices * i + vertex_index].copy(
-						get_vertex_position(quasicutouts_vertices_components[vertex_index],basis_vectors[i],ourcenters[i],radius) );
+						get_vertex_position(quasicutouts_vertices_components[vertex_index],basis_vectors[i],ourcenters[i],qsRadius) );
 				else
 					quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[one_quasicutout_vertices * i + vertex_index].copy( get_vertex_position(
 						quasicutouts_vertices_components[vertex_index - 1],
 						basis_vectors[nearby_quasicutouts[i][((vertex_index % 6)-1)/2]],
-						ourcenters[   nearby_quasicutouts[i][((vertex_index % 6)-1)/2]],radius) );
+						ourcenters[   nearby_quasicutouts[i][((vertex_index % 6)-1)/2]],qsRadius) );
 			}
 			else
 				quasicutout_meshes[stable_point_of_meshes_currently_in_scene].geometry.vertices[one_quasicutout_vertices * i + vertex_index].copy( 
-					get_vertex_position(quasicutouts_vertices_components[vertex_index],basis_vectors[i],ourcenters[i],radius) );
+					get_vertex_position(quasicutouts_vertices_components[vertex_index],basis_vectors[i],ourcenters[i],qsRadius) );
 		}
 		
 		//but un-project that one, using this, maybe
@@ -279,7 +280,7 @@ function triangle_in_same_shape(triangle, othertriangle)
 	return 0;
 }
 
-function get_vertex_position(local_vertices_components,basis_vectors,ourcenter,radius){
+function get_vertex_position(local_vertices_components,basis_vectors,ourcenter,qsRadius){
 	var ourvertex = new THREE.Vector3();
 	
 	for( var component = 0; component < basis_vectors.length; component++) {
@@ -293,9 +294,7 @@ function get_vertex_position(local_vertices_components,basis_vectors,ourcenter,r
 	{
 		ourvertex.sub(ourcenter);
 		
-		var radius_ratio = radius / ourvertex.length();
-		
-		ourvertex.multiplyScalar(radius_ratio);
+		ourvertex.setLength(qsRadius);
 		ourvertex.add(ourcenter);
 	}
 	
