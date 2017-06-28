@@ -24,7 +24,8 @@ function initialize_QS_stuff()
 	QS_measuring_stick.add( new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({color:0x000000, transparent: true, opacity:0})) );
 	for(var i = 0; i < num_measuringstick_dashes; i++)
 	{
-		if(i)QS_measuring_stick.add( QS_measuring_stick.children[0].clone() );
+		if(i)
+			QS_measuring_stick.add( QS_measuring_stick.children[0].clone() );
 		QS_measuring_stick.children[i].position.y = -0.5 - 2 * i;
 	}
 	QS_measuring_stick.add(new THREE.Mesh(new THREE.CircleGeometry(0.5), new THREE.MeshBasicMaterial({color:0x000000, transparent: true, opacity:0})));

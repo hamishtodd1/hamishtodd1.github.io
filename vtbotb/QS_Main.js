@@ -48,7 +48,7 @@ function UpdateQuasiSurface()
 	}
 	
 	//-----inflation
-	var dodeca_squashingspeed = 0.022 * delta_t / 0.016;
+	var dodeca_squashingspeed = 0.05 * delta_t / 0.016;
 	if(isMouseDown)
 		dodeca_faceflatness += dodeca_squashingspeed;
 	else
@@ -64,24 +64,31 @@ function UpdateQuasiSurface()
 
 function update_QS_center()
 {
-	QS_center.position.z = camera.position.z - 8;
+	QS_center.position.z = camera.position.z - 30;
 	QS_measuring_stick.position.copy( QS_center.position );
 	
-	var opacitychangerate = 0.07 * delta_t / 0.016;
-	if(isMouseDown)
+	if(MODE ===QC_SPHERE_MODE)
 	{
-		if( MODE !== CK_MODE || MousePosition.distanceTo(IrregButton.position) > IrregButton.radius )
+		var flatnessWhereCenterFadesIn = 0.9;
+		QS_center.material.opacity = dodeca_faceflatness < flatnessWhereCenterFadesIn ? 0 : 
+			(dodeca_faceflatness - flatnessWhereCenterFadesIn)/(1-flatnessWhereCenterFadesIn);
+	}
+	else
+	{
+		var opacitychangerate = 0.07 * delta_t / 0.016;
+		
+		if(isMouseDown && MousePosition.distanceTo(IrregButton.position) > IrregButton.radius )
 		{
 			QS_center.material.opacity += opacitychangerate;
 			if(QS_center.material.opacity > 1)
 				QS_center.material.opacity = 1;
 		}
-	}
-	else 
-	{
-		QS_center.material.opacity -= opacitychangerate;
-		if(QS_center.material.opacity < 0)
-			QS_center.material.opacity = 0;
+		else 
+		{
+			QS_center.material.opacity -= opacitychangerate;
+			if(QS_center.material.opacity < 0)
+				QS_center.material.opacity = 0;
+		}
 	}
 	
 	if(!Mouse_delta.equals(THREE.zeroVector))
@@ -101,7 +108,7 @@ function update_QS_center()
 		QS_measuring_stick.scale.y = MousePosition.length() * 0.0175; //last number chosen by inspection
 	else
 		QS_measuring_stick.scale.y = MousePosition.length() * 0.0233; //last number chosen by inspection
-	QS_measuring_stick.scale.x = QS_measuring_stick.scale.y / 1.7;
+//	QS_measuring_stick.scale.x = QS_measuring_stick.scale.y / 1.7;
 	
 	QS_measuring_stick.rotation.z = Math.atan2(MousePosition.y,MousePosition.x) + TAU / 4;
 	QS_center.rotation.z = QS_measuring_stick.rotation.z;
@@ -312,7 +319,6 @@ function MoveQuasiLattice()
 	
 	//we want to remove the one that was previously in there, and add
 	if( stable_point_of_meshes_currently_in_scene != modulated_CSP ){
-		dodeca_faceflatness = 1; //skip to the faces being gone
 		if(stable_point_of_meshes_currently_in_scene !== 999 )
 			dodeca.remove(quasicutout_meshes[stable_point_of_meshes_currently_in_scene]);
 		dodeca.add(quasicutout_meshes[modulated_CSP]);
@@ -331,33 +337,13 @@ function MoveQuasiLattice()
 		stable_point_of_meshes_currently_in_scene = modulated_CSP;
 	}
 	
-	//This will rotate the dodeca to make it look as much as possible like the pattern - if it's oriented correctly
-//	dodeca.quaternion.setFromAxisAngle(z_central_axis,Math.atan2(cutout_vector0_displayed.y,cutout_vector0_displayed.x) - 0.9424777960769378);
-	
-	//TODO, you may not understand this. Actually you should be moving the camera.
-	//note you are keeping the fov constant, so in some sense the size of the playing field changes
 	var minDist = 11;
-	var maxDist = 63;
+	var maxDist = 50;
 	camera.position.z = minDist + (maxDist-minDist) * dodeca_faceflatness;
 	camera.fov = 2 * 360/TAU * Math.atan( 3 / (camera.position.z - dodeca.position.z) );
 	camera.updateProjectionMatrix();
 	camera.updateMatrix();
 	camera.updateMatrixWorld();
-	//does the radius of the thing change during the modifying/static transition? If not, your job is to keep the same amount of area in sight
-	
-	
-	/* 
-	 * 
-	 * We need to find bitExtra such that this spits out ~10 when static and ~23.721980146543366 when modifying
-	 */
-	
-//	var quadraticAddition = 0.5;
-//	var maxQuadraticAddition = (1 + quadraticAddition) * (1 + quadraticAddition);
-//	var quadraticContribution = QS_measuring_stick.children[0].material.opacity + quadraticAddition;
-//	camera.position.z = contrived_dist + maxQuadraticAddition - quadraticContribution*quadraticContribution;
-	
-	
-	
 }
 
 function playRandomPop()

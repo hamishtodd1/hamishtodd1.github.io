@@ -30,7 +30,7 @@ function Update_net_variables() {
 		netvertex.applyAxisAngle(z_central_axis,-LatticeAngle);
 		
 		var rounded_index = index_of_closest_default_lattice_vertex(netvertex.x,netvertex.y);
-		netvertex.copy(squarelattice_vertices[ rounded_index ] );
+		netvertex.copy( squarelattice_vertices[ rounded_index ] );
 		apply2Dmatrix(SquareToHexMatrix,netvertex);
 		
 		rounded_net.array[ i*3+0 ] = netvertex.x;

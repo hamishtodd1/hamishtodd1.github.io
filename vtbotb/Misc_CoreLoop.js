@@ -32,13 +32,12 @@
 
 
  * Check for required things like flash 10, webgl, link to video if page doesn't work in some way. Or recommend a different browser
- * Test on different setups
-		Johan's Mac
-		http://browsershots.org/
+ * Different setups
    General bug testing
-   analytics: whenever you start a chapter. Amazon analytics?
+   analytics: whenever you start a chapter. Amazon analytics? Just another thing that can go wrong.
 		
 	Repetition trigger fired on use button?
+	
 Touch:
 	tree went wrong
 	went to youtube, fffffffffffffffffffff
@@ -46,15 +45,6 @@ Touch:
 	Jessie's computer: it seemed to think it was a mouse
 		Or did it? You put the finger down, moved it, and it flicked. Even though it copies
 	
-----------Below the thing
- * Sheree must design
- * 		A "go to tree" button
- * 		Social media buttons
- * 		Links: Press kit, your page, Information for teachers
- * 		Press contact - bug reports
- * 		Outside links (SEO terms!): "more interactive teaching tools; more information on viruses; more information on mathematics in art; more information on spherical patterns and geodesic domes"
- * 		picture at the bottom, for style? Animated gif from imgur collection
- * 		Border
  *  
  *  ---------Probably never to be solved
  *  Incorporate youtube loading into loading bar
@@ -89,7 +79,7 @@ function UpdateWorld()
 			Update_net_variables();
 			if( LatticeScale > 0.2) //min for one of the capsids we do. Minus a little grace
 				Map_lattice();
-			update_QS_center();
+//			update_QS_center();
 			break;
 			
 		case IRREGULAR_MODE:
@@ -150,9 +140,6 @@ function ChangeScene(new_mode) {
 	
 	camera_changes_for_mode_switch();
 	
-	//this is the one variable that seems to be conserved; at least if it isn't, then make it so. But thaaaaat is why you get weird jitters when you change mode!
-	capsidopenness = 0;
-	
 	switch(MODE) //probably you want to have a "mode advanced" variable which, on top of these, adds some stuff
 	{
 		case SLIDE_MODE:
@@ -197,8 +184,8 @@ function ChangeScene(new_mode) {
 			scene.add(dodeca);
 			if(stable_point_of_meshes_currently_in_scene !== 999) //if it is equal to this, it has yet to be derived from the cutout vectors
 				dodeca.add(quasicutout_meshes[stable_point_of_meshes_currently_in_scene]);
-//			scene.add(QS_center);
-//			scene.add(QS_measuring_stick);
+			scene.add(QS_center);
+			scene.add(QS_measuring_stick);
 			break;
 			
 		case TREE_MODE:
