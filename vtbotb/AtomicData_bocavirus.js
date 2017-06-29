@@ -360,9 +360,9 @@ function init_bocavirus_stuff()
 		flash_colors[i] = Array(3);
 	for(var i = 0; i < 15; i++)
 	{
-		flash_colors[i][0] = 41/255;
-		flash_colors[i][1] = 67/255;
-		flash_colors[i][2] = 92/255;
+		flash_colors[i][0] = 93/255;
+		flash_colors[i][1] = 167/255;
+		flash_colors[i][2] = 223/255;
 	}
 		
 	
@@ -373,9 +373,9 @@ function init_bocavirus_stuff()
 		neo_bocavirus_proteins[i].rotateOnAxis(specific_da, TAU / 2);
 		neo_bocavirus_proteins[i].updateMatrixWorld();
 		
-		flash_colors[i][0] = 121/255;
-		flash_colors[i][1] = 151/255;
-		flash_colors[i][2] = 179/255;
+		flash_colors[i][0] = 72/255;
+		flash_colors[i][1] = 116/255;
+		flash_colors[i][2] = 160/255;
 	}
 	for(var i = 30; i < 45; i++)
 	{
@@ -384,9 +384,9 @@ function init_bocavirus_stuff()
 		neo_bocavirus_proteins[i].rotateOnAxis(specific_da, TAU / 2);
 		neo_bocavirus_proteins[i].updateMatrixWorld();
 		
-		flash_colors[i][0] = 168/255;
-		flash_colors[i][1] = 78/255;
-		flash_colors[i][2] = 90/255;
+		flash_colors[i][0] = 167/255;
+		flash_colors[i][1] = 199/255;
+		flash_colors[i][2] = 222/255;
 	}
 	for(var i = 45; i < 60; i++)
 	{
@@ -395,9 +395,9 @@ function init_bocavirus_stuff()
 		neo_bocavirus_proteins[i].rotateOnAxis(specific_da, TAU / 2);
 		neo_bocavirus_proteins[i].updateMatrixWorld();
 		
-		flash_colors[i][0] = 163/255;
-		flash_colors[i][1] = 131/255;
-		flash_colors[i][2] = 106/255;
+		flash_colors[i][0] = 215/255;
+		flash_colors[i][1] = 243/255;
+		flash_colors[i][2] = 253/255;
 	}
 	
 	EggCell = new THREE.Mesh(new THREE.PlaneGeometry(EggCell_radius * 2,EggCell_radius * 2),

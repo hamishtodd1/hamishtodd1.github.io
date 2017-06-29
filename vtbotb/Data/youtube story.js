@@ -47,6 +47,14 @@ function Update_story()
 		}
 		else if( Story_states[Storypage].slide_number !== -1 )
 			slideObjects[ Story_states[Storypage].slide_number ].material.opacity = 1;
+		
+		if( Story_states[Storypage].slide_number !== -1 )
+		{
+			slideObjects[ Story_states[Storypage].slide_number ].position.z = camera.position.z - min_cameradist;
+			if( Storypage > 0 && Story_states[Storypage-1].slide_number !== -1) { //if there was a previous slide
+				slideObjects[ Story_states[Storypage].slide_number ].position.z = slideObjects[ Story_states[Storypage-1].slide_number ].position.z + 0.001;
+			}
+		}
 			
 		if( Story_states[Storypage].varyingsurfaceZRotation )
 		{
@@ -242,7 +250,6 @@ function Update_story()
 	
 	if( Story_states[Storypage].enforced_irreg_state !== -1 )
 	{
-		console.log( Story_states[Storypage].enforced_irreg_state );
 		for(var i = 0; i < flatnet_vertices.array.length; i++)
 			flatnet_vertices.array[i] = setvirus_flatnet_vertices[Story_states[Storypage].enforced_irreg_state][i];
 		if(Story_states[Storypage-1].MODE !== IRREGULAR_MODE) //we're flicking back - no need to see transition
@@ -287,14 +294,15 @@ function Update_story()
 			slideObjects[ Story_states[Storypage].slide_number ].position.z = slideObjects[ Story_states[Storypage-1].slide_number ].position.z + 0.001;
 			slideObjects[ Story_states[Storypage].slide_number ].material.opacity = 0;
 		}
-		
+	}
+	
+	if( Story_states[Storypage].slide_number !== -1 || Story_states[Storypage].MODE === HEXAGON_MODE || Story_states[Storypage].MODE === CKPICS_MODE )
+	{	
 		cursorIsHand = false;
-		document.body.style.cursor = ''; //there might be some other situations in which you want this.
 	}
 	else
 	{
 		cursorIsHand = true;
-		document.body.style.cursor = '-webkit-grab';
 	}
 	
 	//If we've just ticked forward then of course we should be playing anyway, but if we just started a new chapter, having been on the tree, we might be paused
@@ -642,10 +650,8 @@ function init_story()
 	ns.rendererWidth = 0;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,229); //humans
-	Story_states.push(ns);
-	
-	ns = default_clone_story_state(0,237.7); //canvas comes out again
+	ns = default_clone_story_state(1,237.25); //canvas comes out again
+	ns.MODE = SLIDE_MODE;
 	ns.rendererWidth = 1;
 	Story_states.push(ns);
 	
@@ -1018,7 +1024,7 @@ function init_story()
 	ns.CKPicScale = playing_field_dimension;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,17); //other uneven
+	ns = default_clone_story_state(0,16.85); //other uneven
 	ns.CKPicStates.push({virus:"hiv",x:0,y:playing_field_dimension/4});
 	ns.CKPicStates.push({virus:"pp2",x:playing_field_dimension/3.2, y:-playing_field_dimension/4.3});
 	ns.CKPicStates.push({virus:"amv",x:-playing_field_dimension/3.2, y:-playing_field_dimension/4.3});
@@ -1164,18 +1170,6 @@ function init_story()
 	ns = default_clone_story_state(0,113.6); //version of it 
 	ns.capsid_open = 0;
 	Story_states.push(ns);
-
-//	ns = default_clone_story_state(0,113.9); //quaternion 
-//	ns.enforced_irreg_quaternion.set( -0.6708576855670457,0.08188608649696437,0.0028127601848788432,0.7370459427973053 );
-//	Story_states.push(ns);
-	
-//	ns = default_clone_story_state(0,117.1); //back to virus TODO, requires quaternion
-//	ns.slide_number = phi29Slide;
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(0,119.6); //back to model
-//	ns.MODE = IRREGULAR_MODE;
-//	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,121.2); //we've noticed that when you open them out
 	ns.capsid_open = 1;
@@ -1397,6 +1391,20 @@ function init_story()
 	ns = default_clone_story_state(0,143); //pause to play around and see resemblence
 	ns.pause_at_end = 1;
 	ns.MODE = QC_SPHERE_MODE;
+	/*
+	 * If you want:
+	 * 
+		-0.949472494034682
+		_x
+		:
+		-0.0004717317015881722
+		_y
+		:
+		-0.0032047829278359827
+		_z
+		:
+		0.313833538531401
+	 */
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,154.5); //so why do viruses use these patterns?
@@ -1404,6 +1412,7 @@ function init_story()
 	
 	ns = default_clone_story_state(0,158); //HPV in model
 	ns.enforced_cutout_vector0_player.set(0, 3.479306368947708, 0);
+	//siiiigh, want it smooth really
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,161.4); //drug
@@ -1479,14 +1488,14 @@ function init_story()
 	ns.slide_number = zika_slide;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,130.3); //measles
+	ns = default_clone_story_state(0,128.5); //measles
 	ns.slide_number = Measles_slide;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,145.5); //real science is about real things
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,148.9); //we like our pretty patterns, golden spiral
+	ns = default_clone_story_state(1,150.7); //we like our pretty patterns, golden spiral
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1,154.7); //combined

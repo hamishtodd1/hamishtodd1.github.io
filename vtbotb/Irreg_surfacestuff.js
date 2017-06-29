@@ -174,7 +174,7 @@ function update_varyingsurface() {
 	var flashLength = 6;
 	
 	if(our_CurrentTime > irreg_flash_time && our_CurrentTime < irreg_flash_time + flashLength )
-		irreg_flash = Math.sin( (our_CurrentTime-irreg_flash_time) * 8 );
+		irreg_flash = Math.sin( (our_CurrentTime-irreg_flash_time) * 15 );
 	else
 		irreg_flash = 0;
 	

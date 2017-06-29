@@ -141,11 +141,6 @@ document.addEventListener( 'mousemove', function(event) {
 	InputObject.mousey -= camera.directionalShakeContribution.y;
 }, false ); //window?
 
-document.getElementById("treePic").addEventListener('click', function(event) {
-	console.log("tree clicked")
-	ytplayer.seekTo( 296.06 );
-});
-
 //remember there can be weirdness for multiple fingers, so make sure any crazy series of inputs are interpretable
 document.addEventListener( 'touchmove', function( event ) {
 	event.preventDefault();

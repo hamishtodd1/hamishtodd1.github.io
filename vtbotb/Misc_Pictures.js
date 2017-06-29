@@ -34,7 +34,9 @@ function load_AV_stuff()
 				}
 				if(type === 2)
 				{
-					var width = playing_field_dimension * bordered[index];
+					if( index === 4 )
+						console.log(playing_field_dimension * borderMultiplier[index]);
+					var width = playing_field_dimension * borderMultiplier[index];
 					
 					slideObjects[index] = new THREE.Mesh( new THREE.CubeGeometry(width,width, 0),
 							new THREE.MeshBasicMaterial( 
@@ -49,7 +51,7 @@ function load_AV_stuff()
 				
 				if(!introLoaded)
 				{
-					percentageLoaded += 90 / (random_texture_urls.length + slidesInIntro);
+					percentageLoaded += 85 / (random_texture_urls.length + slidesInIntro);
 //					for(var i = 0; i < scene.children.length; i++)
 //					{
 //						scene.children[i].material.opacity = (percentageLoaded/100 - i/scene.children.length ) * scene.children.length;
@@ -177,8 +179,11 @@ function load_AV_stuff()
 			zika:null,bluetongue:null, hpv:null};
 	var randomTargetIndex = randomTargets.length-19;
 	for( var picture in movingPictures)
-	{	
-		movingPictures[picture] = new THREE.Mesh( new THREE.CubeGeometry(1, 1, 0),
+	{
+		var picWidth = 1;
+		if( picture === "hpv" )
+			picWidth = 1024/808;
+		movingPictures[picture] = new THREE.Mesh( new THREE.CubeGeometry(picWidth,picWidth, 0),
 				  								new THREE.MeshBasicMaterial({transparent:true}) );
 		
 		if( randomTargetIndex >= randomTargets.length-3 )
@@ -207,96 +212,92 @@ function load_AV_stuff()
 	
 	//slides
 	var normalBorderMultiplier = 1024 / 720;
-	var bordered = [];
+	var borderMultiplier = [];
 	
-	slide_texture_urls.push( "Data/Slides/Zika victim.png"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/HIV.jpg"); bordered.push(normalBorderMultiplier);
-	slide_texture_urls.push( "Data/Slides/Dad.jpg"); bordered.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/Zika victim.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/HIV.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/Dad.jpg"); borderMultiplier.push(normalBorderMultiplier);
 
-	slide_texture_urls.push( "Data/Slides/slapped-cheek.jpg"); bordered.push(normalBorderMultiplier);
-	slide_texture_urls.push( "Data/Slides/pregnant.jpg"); bordered.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/slapped-cheek.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/pregnant.jpg"); borderMultiplier.push(normalBorderMultiplier);
 	
-	slide_texture_urls.push( "Data/Slides/humans.jpg"); bordered.push(1);
+	slide_texture_urls.push( "Data/Slides/humans.jpg"); borderMultiplier.push(1);
 
-	slide_texture_urls.push( "Data/Slides/Cell with proteins.png"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/humans.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/Cell full of viruses.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/Cell lysis.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/infect other cells.jpg"); bordered.push(1);
+	slide_texture_urls.push( "Data/Slides/Cell with proteins.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/skeleton.jpg"); borderMultiplier.push(0);
+	slide_texture_urls.push( "Data/Slides/Cell full of viruses.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/Cell lysis.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/infect other cells.jpg"); borderMultiplier.push(1);
 	
-	slide_texture_urls.push( "Data/Misc textures/Boca_icon.png"); bordered.push(1);
+	slide_texture_urls.push( "Data/Misc textures/Boca_icon.png"); borderMultiplier.push(1);
 	
 	var slidesInIntro = slide_texture_urls.length;
 	
 	//polio
-	slide_texture_urls.push( "Data/Misc textures/hep a.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/footy.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/hepatitis.png"); bordered.push(1);
+	slide_texture_urls.push( "Data/Misc textures/hep a.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/footy.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/hepatitis.png"); borderMultiplier.push(1);
 	
-	slide_texture_urls.push( "Data/Slides/Geodesic example 1.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/Geodesic example 2.png"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/Geodesic example 3.png"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/geodesic.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/mimi.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/Buckminster.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/basket.png"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/hair.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/First pic of virus.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/fuller-DIY-sun-dome.jpg"); bordered.push(1);
+	slide_texture_urls.push( "Data/Slides/Geodesic example 1.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/Geodesic example 2.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/Geodesic example 3.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/geodesic.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/mimi.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/Buckminster.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/basket.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/hair.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/First pic of virus.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/fuller-DIY-sun-dome.jpg"); borderMultiplier.push(1);
 
 	//HIV
-	slide_texture_urls.push( "Data/Slides/HIV.png"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/HIV variety.jpg"); bordered.push(1);
+	slide_texture_urls.push( "Data/Slides/HIV.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/HIV variety.jpg"); borderMultiplier.push(1);
 	
-	slide_texture_urls.push( "Data/Slides/mimi.jpg"); bordered.push(1);
+	slide_texture_urls.push( "Data/Slides/mimi.jpg"); borderMultiplier.push(1);
 	
-	slide_texture_urls.push( "Data/Slides/monkey.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/trim5.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/drug.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/model1.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/model2.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/model2a.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/model3a.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/Origami_virus.png"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/PHi29 corners.png"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/PHi29 abstract.png"); bordered.push(1);
+	slide_texture_urls.push( "Data/Slides/monkey.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/trim5.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/drug.jpg"); borderMultiplier.push(1); //TODO syringe
+	slide_texture_urls.push( "Data/Slides/model1.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/model2.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/model2a.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/model3a.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/Origami_virus.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/PHi29 corners.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/PHi29 abstract.png"); borderMultiplier.push(1);
 	
-	slide_texture_urls.push( "Data/Slides/T4.png"); bordered.push(1);
+	slide_texture_urls.push( "Data/Slides/T4.png"); borderMultiplier.push(1);
 	
-	slide_texture_urls.push( "Data/Slides/Lucky.jpg"); bordered.push(normalBorderMultiplier);
-	slide_texture_urls.push( "Data/Slides/book.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/how-to-fold.jpg"); bordered.push(1);
+	slide_texture_urls.push( "Data/Slides/Lucky.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/book.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/how-to-fold.jpg"); borderMultiplier.push(normalBorderMultiplier);
 	
 	//----QS
-	slide_texture_urls.push( "Data/Slides/HPV non xray.png"); bordered.push(0.7);
-	slide_texture_urls.push( "Data/Slides/HPV xray.png"); bordered.push(0.7);
-	slide_texture_urls.push( "Data/Slides/HPV blobs.png"); bordered.push(0.7);
-	slide_texture_urls.push( "Data/Slides/HPV connections.png"); bordered.push(0.7);
-	slide_texture_urls.push( "Data/Slides/HPV abstract.png"); bordered.push(0.7);
+	slide_texture_urls.push( "Data/Slides/HPV non xray.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/HPV xray.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/HPV blobs.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/HPV connections.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/HPV abstract.png"); borderMultiplier.push(808/619);
 
-	slide_texture_urls.push( "Data/Slides/shrine.jpg"); bordered.push(normalBorderMultiplier);
-	slide_texture_urls.push( "Data/Slides/syr_0203.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/tra_0114.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/spa_1808.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/spa_2220.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/Darb e modified.png"); bordered.push(1);
-//	slide_texture_urls.push( "Data/Slides/Darb e highlighted.png");
-	slide_texture_urls.push( "Data/Slides/Darb e above entrance.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/Darb e inside.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/Darb e pentagons.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/darb e sharp.jpg"); //next thing is to test (tree and final reused slides) without this extra slide
-	slide_texture_urls.push( "Data/Slides/drug.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/Zika Virus.jpg"); bordered.push(1);
+	slide_texture_urls.push( "Data/Slides/shrine.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/syr_0203.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/spa_1808.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/tra_0114.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/spa_2220.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/Darb e modified.png"); borderMultiplier.push(590/720);
+	slide_texture_urls.push( "Data/Slides/Darb e above entrance.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/Darb e inside.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/Darb e pentagons.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/darb e sharp.jpg"); borderMultiplier.push(1); //next thing is to test (tree and final reused slides) without this extra slide
+	slide_texture_urls.push( "Data/Slides/drug.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/Zika Virus.jpg"); borderMultiplier.push(1);
 
 	//----Ending
-	slide_texture_urls.push( "Data/Slides/Measles virus.png"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/Tomoko.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/shell.jpg"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/golden spiral.png"); bordered.push(1);
-	slide_texture_urls.push( "Data/Slides/nautilus with spiral.jpg"); bordered.push(1);
-	
-	for(var i = bordered.length; i< slide_texture_urls.length; i++)
-		bordered[i] = 0;
+	slide_texture_urls.push( "Data/Slides/Measles virus.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/Tomoko.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/shell.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/golden spiral.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/nautilus with spiral.jpg"); borderMultiplier.push(1);
 	
 	slideObjects = Array(slide_texture_urls.length);
 	

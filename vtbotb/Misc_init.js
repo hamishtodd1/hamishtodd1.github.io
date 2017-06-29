@@ -6,6 +6,17 @@ function init()
 	camera.position.z = min_cameradist;
 	render();
 
+	var treePic = document.getElementById("treePic");
+	treePic.addEventListener('click', function(event) {
+		event.preventDefault();
+		ytplayer.seekTo( 296.06 );
+	});
+	treePic.addEventListener('mouseleave', function(event) {
+		if(cursorIsHand)
+			document.body.style.cursor = '-webkit-grab';
+		else
+			document.body.style.cursor = '';
+	});
 	
 	//-----properly initializing
 	pentagonDemo.init();

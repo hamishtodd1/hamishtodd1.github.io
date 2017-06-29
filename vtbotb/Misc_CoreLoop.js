@@ -48,7 +48,7 @@ Touch:
  *  
  *  ---------Probably never to be solved
  *  Incorporate youtube loading into loading bar
- *  Flicker on chapter start
+ *  Flicker on chapter start. Could keep chapter start on the tree?
  *  Dodeca on "create lots of symmetry"
  * 	QS normals:
  * 		For all triangles with an unmarked edge on a dod edge, set their face normals to the normalized midpoint of the two corners they have on that edge
@@ -109,8 +109,23 @@ function UpdateWorld()
 	}
 }
 
+var everySoOftenTimer = 0;
+
 function render() {
 	delta_t = ourclock.getDelta();
+	
+	everySoOftenTimer += delta_t;
+	if( everySoOftenTimer > 1 )
+	{
+		everySoOftenTimer = 0;
+		
+		if( document.body.style.cursor === '' && cursorIsHand )
+		{
+			document.body.style.cursor = '-webkit-grab';
+		}
+		if( document.body.style.cursor === '-webkit-grab' && !cursorIsHand)
+			document.body.style.cursor = '';
+	}
 	
 	if( PICTURES_LOADED && YOUTUBE_READY && INITIALIZED )
 	{
@@ -133,11 +148,6 @@ function ChangeScene(new_mode) {
 	for( var i = scene.children.length - 1; i >= 0; i--){
 		var obj = scene.children[i];
 		scene.remove(obj);
-	}
-	
-	if(showdebugstuff){
-		for(var i = 0; i<indicatorblobs.length; i++)
-			scene.add(indicatorblobs[i]);
 	}
 	
 	camera_changes_for_mode_switch();
