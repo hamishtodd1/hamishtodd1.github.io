@@ -237,20 +237,22 @@ function init_bocavirus_stuff()
 	
 	var master_protein = new THREE.Mesh( new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({color:0x7997B3}) );
 	
-	for(var i = 0; i < protein_vertices_numbers.length; i++){
-		protein_vertices_numbers[i] /= 32; 
+	proteinCenterOfMass = new THREE.Vector3(0,0,0);
+	for(var i = 0,il=protein_vertices_numbers.length; i < il; i++){
+		protein_vertices_numbers[i] /= 32;
+		if(i%3===0)proteinCenterOfMass.x += protein_vertices_numbers[i];
+		if(i%3===1)proteinCenterOfMass.y += protein_vertices_numbers[i];
+		if(i%3===2)proteinCenterOfMass.z += protein_vertices_numbers[i];
 	}
+	proteinCenterOfMass.multiplyScalar(3/protein_vertices_numbers.length);
 	
 	master_protein.geometry.addAttribute( 'position', new THREE.BufferAttribute( protein_vertices_numbers, 3 ) );
 	master_protein.geometry.setIndex( new THREE.BufferAttribute( coarse_protein_triangle_indices, 1 ) );
 	
 	var outlineColor = 0x000000;
 	
-	stmvHider = new THREE.Mesh(new THREE.CircleBufferGeometry(2,32),new THREE.MeshBasicMaterial({color:outlineColor}));
+	stmvHider = new THREE.Mesh(new THREE.CircleBufferGeometry(2.2,32),new THREE.MeshBasicMaterial({color:outlineColor}));
 	stmvHider.position.z = 0.001;
-	
-	proteinCenterOfMass = new THREE.Vector3(1.3454581225240554, 1.874681919007688, 1.1273784906024467);
-	//jesus mary and joseph, it was coming from the old vertices. Well, it works ><
 	
 	//aligns it with the color transformations we're going to do
 	{
@@ -265,30 +267,39 @@ function init_bocavirus_stuff()
 		master_protein.updateMatrixWorld();
 	}
 	
+	//a way of avoiding intersections
 	var twistAxis = proteinCenterOfMass.clone().normalize();
 	master_protein.rotateOnAxis(twistAxis, 0.16); //just making it simpler
 	master_protein.updateMatrixWorld();
 	
-	var master_protein_outline_geometry = master_protein.geometry.clone();
-	var middle_layer_geometry = master_protein.geometry.clone();
-	var outlineScale = 0.72;
-	var middleScale = outlineScale + 0.2;
-	for(var i = 0, il = master_protein_outline_geometry.attributes.position.array.length / 3; i < il; i++ )
+	var bottomLayerGeometry = master_protein.geometry.clone();
+	var bottomScale = 0.72;
+	var top_layer_geometry = master_protein.geometry.clone();
+	var topScale = 0.84; //carefully tuned so none of them penetrate. You can make the colored part larger but you have to make the outline smaller
+	
+//	var middle_layer_geometry = master_protein.geometry.clone();
+//	var middleScale = (bottomScale + topScale)/2;
+	
+	for(var i = 0, il = bottomLayerGeometry.attributes.position.array.length / 3; i < il; i++ )
 	{
-		master_protein_outline_geometry.attributes.position.array[i*3+0] = ( master_protein_outline_geometry.attributes.position.array[i*3+0] - proteinCenterOfMass.x ) * outlineScale + proteinCenterOfMass.x;
-		master_protein_outline_geometry.attributes.position.array[i*3+1] = ( master_protein_outline_geometry.attributes.position.array[i*3+1] - proteinCenterOfMass.y ) * outlineScale + proteinCenterOfMass.y;
-		master_protein_outline_geometry.attributes.position.array[i*3+2] = ( master_protein_outline_geometry.attributes.position.array[i*3+2] - proteinCenterOfMass.z ) * outlineScale + proteinCenterOfMass.z;
+		bottomLayerGeometry.attributes.position.array[i*3+0] = 	( bottomLayerGeometry.attributes.position.array[i*3+0] 	- proteinCenterOfMass.x ) * bottomScale + proteinCenterOfMass.x;
+		bottomLayerGeometry.attributes.position.array[i*3+1] = 	( bottomLayerGeometry.attributes.position.array[i*3+1] 	- proteinCenterOfMass.y ) * bottomScale + proteinCenterOfMass.y;
+		bottomLayerGeometry.attributes.position.array[i*3+2] = 	( bottomLayerGeometry.attributes.position.array[i*3+2] 	- proteinCenterOfMass.z ) * bottomScale + proteinCenterOfMass.z;
 		
-		middle_layer_geometry.attributes.position.array[i*3+0] = ( middle_layer_geometry.attributes.position.array[i*3+0] - proteinCenterOfMass.x ) * middleScale + proteinCenterOfMass.x;
-		middle_layer_geometry.attributes.position.array[i*3+1] = ( middle_layer_geometry.attributes.position.array[i*3+1] - proteinCenterOfMass.y ) * middleScale + proteinCenterOfMass.y;
-		middle_layer_geometry.attributes.position.array[i*3+2] = ( middle_layer_geometry.attributes.position.array[i*3+2] - proteinCenterOfMass.z ) * middleScale + proteinCenterOfMass.z;
+//		middle_layer_geometry.attributes.position.array[i*3+0] = 			( middle_layer_geometry.attributes.position.array[i*3+0] 			- proteinCenterOfMass.x ) * middleScale + proteinCenterOfMass.x;
+//		middle_layer_geometry.attributes.position.array[i*3+1] = 			( middle_layer_geometry.attributes.position.array[i*3+1] 			- proteinCenterOfMass.y ) * middleScale + proteinCenterOfMass.y;
+//		middle_layer_geometry.attributes.position.array[i*3+2] = 			( middle_layer_geometry.attributes.position.array[i*3+2] 			- proteinCenterOfMass.z ) * middleScale + proteinCenterOfMass.z;
+		
+		top_layer_geometry.attributes.position.array[i*3+0] = 			( top_layer_geometry.attributes.position.array[i*3+0] 			- proteinCenterOfMass.x ) * topScale + proteinCenterOfMass.x;
+		top_layer_geometry.attributes.position.array[i*3+1] = 			( top_layer_geometry.attributes.position.array[i*3+1] 			- proteinCenterOfMass.y ) * topScale + proteinCenterOfMass.y;
+		top_layer_geometry.attributes.position.array[i*3+2] = 			( top_layer_geometry.attributes.position.array[i*3+2] 			- proteinCenterOfMass.z ) * topScale + proteinCenterOfMass.z;
 	}
 	
 	for(var i = 0; i < neo_bocavirus_proteins.length; i++)
 	{
-		neo_bocavirus_proteins[i] = new THREE.Mesh( master_protein_outline_geometry.clone(), master_protein.material.clone() );
-		neo_bocavirus_proteins[i].add( new THREE.Mesh( middle_layer_geometry.clone(), 	new THREE.MeshBasicMaterial({color:outlineColor, side:THREE.BackSide}) ) );
-		neo_bocavirus_proteins[i].add( new THREE.Mesh( master_protein.geometry.clone(), new THREE.MeshBasicMaterial({color:outlineColor, side:THREE.BackSide}) ) );
+		neo_bocavirus_proteins[i] = new THREE.Mesh( bottomLayerGeometry, master_protein.material.clone() );
+//		neo_bocavirus_proteins[i].add( new THREE.Mesh( middle_layer_geometry, 	new THREE.MeshBasicMaterial({color:outlineColor, side:THREE.BackSide}) ) );
+		neo_bocavirus_proteins[i].add( new THREE.Mesh( top_layer_geometry, new THREE.MeshBasicMaterial({color:outlineColor, side:THREE.BackSide}) ) );
 		neo_bocavirus_proteins[i].rotation.copy(master_protein.rotation)
 		neo_bocavirus_proteins[i].updateMatrixWorld();
 		
