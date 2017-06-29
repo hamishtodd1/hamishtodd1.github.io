@@ -948,7 +948,7 @@ function init_CK_and_irreg()
 		hexagon_generator[5] = new THREE.Vector3(0,  1,0);		//TL
 		
 		var hexagon_major_Scalar = 96; //will get divided by 100.
-		var hexagon_minor_Scalar = 1;
+		var hexagon_minor_Scalar = 0.01;
 		
 		function insert_squareHexagon_corner(ourindex,ourgenerator,ourScalar,hexagoncenter){
 			squarelattice_hexagonvertices[ourindex].copy(ourgenerator);

@@ -514,7 +514,7 @@ function init_story()
 	//---paragraph 2
 	ns = default_clone_story_state(0,39.7); //bocavirus appears, then pause
 	ns.MODE = BOCAVIRUS_MODE;
-	ns.pause_at_end = 1; //TODO handle the assurance.
+	ns.pause_at_end = 1;
 	ns.loopBackTo = 43.9;
 	ns.loopBackCountdown = 7;
 	ns.playerHasLearned = function() { if( rotation_understanding === 0 ) return false; else return true; }
@@ -771,8 +771,6 @@ function init_story()
 	ns.cameraZ = zoomedInDistance;
 	Story_states.push(ns);
 	
-	//TODO smaller so you don't see pinpricks
-	
 	ns = default_clone_story_state(0,48); //polio in model, no lattice
 	ns.MODE = CK_MODE;
 	ns.fadePicture = true;
@@ -782,22 +780,23 @@ function init_story()
 	ns.CK_scale = 0.5773502438405532;
 	ns.CK_angle = -0.5235987753305861;
 	ns.capsid_open = 0;
-	ns.pause_at_end = 1;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,50); //we're done with that enforced quaternion 
+	ns = default_clone_story_state(0,50); //we're done with that enforced quaternion
+	ns.pause_at_end = 1;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,63.3); //you might recognize this pattern 
 	Story_states.push(ns);
+	
+	var hexamerPentamerHighlightColor = new THREE.Color(0x799BB7);
 
 	ns = default_clone_story_state(0,68.9); //pentagons
-	ns.pentamers_color = new THREE.Color(0.2,0.1,0.8);
+	ns.pentamers_color.copy(hexamerPentamerHighlightColor);
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,69.7); //hexagons
-	ns.pentamers_color = defaultPentamersColor.clone();
-	ns.hexamers_color.set(0.6,0.1,0.1); 
+	ns.hexamers_color.copy(hexamerPentamerHighlightColor); 
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,70.7); //hexagons
@@ -888,25 +887,30 @@ function init_story()
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,156.8); //pentagons
-	ns.pentamers_color = new THREE.Color(0.2,0.1,0.8);
+	ns.pentamers_color.copy(hexamerPentamerHighlightColor);
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,157.7); //hexagons
-	ns.pentamers_color = defaultPentamersColor.clone();
-	ns.hexamers_color.set(0.6,0.1,0.1); 
+	ns.hexamers_color.copy(hexamerPentamerHighlightColor);
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,161.1); //spherical pattern
-	ns.hexamers_color = defaultHexamersColor.clone();
 	ns.capsid_open = 0;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,163.7); //"just hexagons". Hexagons flash
 	Story_states.push(ns);
-
-	ns = default_clone_story_state(0,166.1); //"need a few pentagons". Pentagons flash
-	ns.pentamers_color = new THREE.Color( 1, 0, 0 );
-	Story_states.push(ns);
+	
+	//"need a few pentagons"
+	var numPentFlashes = 5; //should be odd
+	for(var i = 0; i < numPentFlashes; i++)
+	{
+		var startTime = 166.1 + i * 0.9 / numPentFlashes;
+		ns = default_clone_story_state(0,startTime);
+		if(i%2===0)
+			ns.pentamers_color.copy(hexamerPentamerHighlightColor);
+		Story_states.push(ns);
+	}
 
 	ns = default_clone_story_state(0,167); //flash done
 	Story_states.push(ns);
@@ -1556,10 +1560,11 @@ function init_story()
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,259.2); //pentagons in same places
-	ns.pentamers_color = new THREE.Color( 1, 0, 0 );
+	ns.pentamers_color.copy(hexamerPentamerHighlightColor);
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,263.3); //humans coming around to the same patterns, golf ball
+	ns.MODE = IRREGULAR_MODE;
 	ns.slide_number = hepASlide;
 	Story_states.push(ns);
 	
