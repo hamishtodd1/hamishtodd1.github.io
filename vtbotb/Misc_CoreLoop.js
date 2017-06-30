@@ -9,34 +9,34 @@
  * 			What does HIV have in common with origami? (phi29, origami)
  * 			And that's what viruses have in common with human designs (measles and super dodecahedral?)
  * 		Film with fraps on firefox. ~3GB per file
+ * 		Can stop once you've got a still tree
  * 
  * 
  * -------General
-   So you've triggered a repetition... but you need pause again once it's done; bear in mind the player might have done the necessary thing
- * Take a picture of yourself with VR
- * low framerate: can't change qs?
-	Borderings
- * reproduced virus proteins go in right places
-	sfx not on when video plays. Shape settles needs to be stoppable earl
-	Got repetition of "you can do things with it"
-		And "and using this button", particularly annoying
-	need lots of fades
-	No second "next virus" cue?
- * Sheree contingent
-	 * Loading screen: fade in btv faces one by one
-	 * New button
-	 * Size snapping for the video and canvas was bullshit, correct it to whatever Sheree gives in her design
-	 * Tree
-			"images of some other viruses"
-			Really important that tree icons light up
-
-
+ * Tree
+		Really important that tree icons light up
+		Fade highlighted virus pictures on top
+		level select button
+		"images of some other viruses"
+ * Title
+ * Upload CK, adjust chapter starts
+ * Shape settles needs to be stoppable
+ * No second "next virus" cue?
+ * Loading screen
+ * Size snapping for the video and canvas was bullshit, correct it to whatever Sheree gives in her design
+ * New button
+ * reproduced virus proteins go in right places, "Digest the individual pieces"
+ * Another picture dance for the nautilus and spiral?
  * Check for required things like flash 10, webgl, link to video if page doesn't work in some way. Or recommend a different browser
- * Different setups
-   General bug testing
-   analytics: whenever you start a chapter. Amazon analytics? Just another thing that can go wrong.
+ * Push to the server
+ * Prompt bugs
+   
+   So you've triggered a repetition... but you need pause again once it's done; bear in mind the player might have done the necessary thing
+ * Take a picture of yourself with VR (tomorrow, when you record)
+
 		
 	Repetition trigger fired on use button?
+	
 	
 Touch:
 	tree went wrong
@@ -45,7 +45,6 @@ Touch:
 	Jessie's computer: it seemed to think it was a mouse
 		Or did it? You put the finger down, moved it, and it flicked. Even though it copies
 	
- *  
  *  ---------Probably never to be solved
  *  Incorporate youtube loading into loading bar
  *  Flicker on chapter start. Could keep chapter start on the tree?
@@ -162,7 +161,7 @@ function ChangeScene(new_mode) {
 			for(var i = 0; i < 60; i++)
 				scene.add(neo_bocavirus_proteins[i]);
 			for(var i = 0; i< reproduced_proteins.length; i++)
-				EggCell.add( reproduced_proteins[i] );
+				EggCell.children[0].add( reproduced_proteins[i] );
 			scene.add( stmvHider );
 			scene.add(EggCell);
 			scene.add(Cornucopia);

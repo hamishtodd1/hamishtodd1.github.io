@@ -25,8 +25,12 @@ function update_bocavirus() {
 	
 	var cell_eaten_bocavirus_position = new THREE.Vector3( EggCell_initialposition.x - ( EggCell_initialposition.x - EggCell_radius ) * 2, 0, 0);
 	
-	EggCell.scale.x = 1 + 0.04 * Math.sin(1.4* (our_CurrentTime-(cell_move_time+movement_duration)));
-	EggCell.scale.y = 1 + 0.04 * Math.sin(our_CurrentTime-(cell_move_time+movement_duration));
+	for(var i = 0; i < EggCell.children.length; i++)
+	{
+		var phaseAddition = i/EggCell.children.length * 3;
+		EggCell.children[i].scale.x = 1 + 0.04 * Math.sin(1.4* (our_CurrentTime-(cell_move_time+movement_duration+phaseAddition)));
+		EggCell.children[i].scale.y = 1 + 0.04 * Math.sin(		our_CurrentTime-(cell_move_time+movement_duration+phaseAddition));
+	}
 	
 	var eggCellPrevisiblePosition = EggCell_initialposition.clone();
 	eggCellPrevisiblePosition.x += EggCell_radius * 1;
@@ -108,9 +112,9 @@ function update_bocavirus() {
 		coloredness = 1 - ( our_CurrentTime - unflash_time ) / fadeback_time;
 	else
 		coloredness = 1;
-	var default_r = 168/255;
-	var default_g = 78/255;
-	var default_b = 90/255;
+	var default_r = 19/255;
+	var default_g = 167/255;
+	var default_b = 223/255;
 	for(var i = 0; i < 60; i++)
 	{
 		var our_r = coloredness * flash_colors[i][0] + (1-coloredness) * default_r;
@@ -139,7 +143,7 @@ function update_bocavirus() {
 	{
 		var point_along = move_smooth(1, boca_explodedness);
 
-		EggCell.updateMatrixWorld();
+		EggCell.children[0].updateMatrixWorld();
 		if(destination_assignments[0] !== 999 )
 		{
 			for(var i = 0; i < 60; i++ )
@@ -150,7 +154,7 @@ function update_bocavirus() {
 				if( cell_move_time + movement_duration < our_CurrentTime && our_CurrentTime < whole_thing_finish_time )
 				{
 					neo_bocavirus_proteins[i].position.sub(EggCell.position);
-					EggCell.localToWorld(neo_bocavirus_proteins[i].position );
+					EggCell.children[0].localToWorld(neo_bocavirus_proteins[i].position );
 				}
 				
 				neo_bocavirus_proteins[destination_assignments[i]].updateActualLocation();
@@ -400,8 +404,12 @@ function init_bocavirus_stuff()
 		flash_colors[i][2] = 253/255;
 	}
 	
-	EggCell = new THREE.Mesh(new THREE.PlaneGeometry(EggCell_radius * 2,EggCell_radius * 2),
-			new THREE.MeshBasicMaterial({transparent: true} ) );
+	EggCell = new THREE.Object3D();
+	for(var i = 0; i < 6; i++)
+	{
+		EggCell.add( new THREE.Mesh(new THREE.PlaneGeometry(EggCell_radius * 2,EggCell_radius * 2),
+				new THREE.MeshBasicMaterial({transparent: true} ) ) );
+	}
 	EggCell.position.copy(EggCell_initialposition);
 	
 	Cornucopia = new THREE.Mesh(new THREE.PlaneGeometry(playing_field_dimension*3,playing_field_dimension*3),
@@ -442,6 +450,7 @@ function init_bocavirus_stuff()
 	{
 		reproduced_proteins[i] = new THREE.Mesh( master_protein.geometry.clone(), master_protein.material.clone() );
 		reproduced_proteins[i].material.transparent = true;
+		reproduced_proteins[i].material.color.setHex(0xD7F3FD)
 		reproduced_proteins[i].rotation.copy(master_protein.rotation)
 		reproduced_proteins[i].updateMatrixWorld();
 		reproduced_proteins[i].geometry.computeFaceNormals();
@@ -462,12 +471,6 @@ function init_bocavirus_stuff()
 	for(var i = 0; i < protein_assigned.length; i++)
 		protein_assigned[i] = 0;
 	
-//	for(var i = 0; i < 60; i++ )
-//	{
-//		neo_bocavirus_proteins[i].position.set(0,0,0);
-//		neo_bocavirus_proteins[i].updateActualLocation();
-//	}
-	
 	for(var i = 0; i < 60; i++ )
 	{	
 		var closest_length = 1000;
@@ -485,7 +488,9 @@ function init_bocavirus_stuff()
 		protein_assigned[ destination_assignments[i] ] = 1;
 	}
 	for(var i = 60; i < neo_bocavirus_proteins.length; i++ )
+	{
 		destination_assignments[i] = i;
+	}	
 }
 
 //the seed index is which, in the group of five proteins in the "fundamental domain" like thing, this refers to

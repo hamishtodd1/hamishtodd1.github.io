@@ -45,7 +45,7 @@ function react_to_video()
 
 function onYouTubeIframeAPIReady()
 {
-	var idArray = ['FCJawbntQVw', 'bd3QdDBalds','gBqI7RxUjNk','hhZaebKU7OA','cWSEYzqSxnw']; //intro, polio, hiv, zika
+	var idArray = ['FCJawbntQVw', 'ruw8txSn8NM','gBqI7RxUjNk','hhZaebKU7OA','cWSEYzqSxnw']; //intro, polio, hiv, zika
 	ytplayer = new YT.Player('player', 
 	{
 		width: window_width,

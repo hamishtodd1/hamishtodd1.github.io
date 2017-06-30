@@ -121,6 +121,8 @@ document.addEventListener( 'mousedown', function(event) {
 	event.preventDefault();
 	
 	InputObject.isMouseDown = true;
+	
+	console.log(MousePosition)
 }, false);
 document.addEventListener( 'mouseup', 	function(event) {
 	event.preventDefault();
