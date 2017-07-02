@@ -50,34 +50,55 @@ function onWindowResizeExceptYoutube( canvasWidthOverHeight )
 {
 	document.getElementById("extras").style.margin = window.innerHeight.toString() + "px 0 0 0";
 	
-	var maxCanvasDimension = window.innerWidth / 2;
-	if( maxCanvasDimension > window.innerHeight ) 
-		maxCanvasDimension = window.innerHeight;
+	var maxCanvasDimension = window.innerHeight * (447/550); //chosen by inspection
+	if( maxCanvasDimension > document.body.clientWidth / 2 ) 
+		maxCanvasDimension = document.body.clientWidth / 2;
 	
-	var finalCanvasDimension = 144;
-	var possibleDimensions = [240,360,480,720,1080];
-	for(var i = 0; i < possibleDimensions.length; i++ )
-		if( maxCanvasDimension >= possibleDimensions[i] )
-			finalCanvasDimension = possibleDimensions[i];
-	if( maxCanvasDimension >= 1080 * 4/3 )
-		finalCanvasDimension = maxCanvasDimension;
+//	var finalCanvasDimension = 144;
+//	var possibleDimensions = [240,360,480,720,1080];
+//	for(var i = 0; i < possibleDimensions.length; i++ )
+//		if( maxCanvasDimension >= possibleDimensions[i] )
+//			finalCanvasDimension = possibleDimensions[i];
+//	if( maxCanvasDimension >= 1080 * 4/3 )
+//		finalCanvasDimension = maxCanvasDimension;
+	finalCanvasDimension = maxCanvasDimension;
 	
 	renderer.setSize( finalCanvasDimension * canvasWidthOverHeight, finalCanvasDimension );
+
+	{
+		var playerAndCanvas = document.getElementById("playerAndCanvas");
+		
+		playerAndCanvas.style.height = finalCanvasDimension.toString() + "px";
+		var divWidth = finalCanvasDimension + finalCanvasDimension * canvasWidthOverHeight;
+		playerAndCanvas.style.width = divWidth.toString() + "px";
+		
+		//putting the center in the center
+		var sideToCenter = divWidth / 2;
+		var topToCenter = finalCanvasDimension / 2;
+		playerAndCanvas.style.margin = "-" + topToCenter.toString() + "px 0 0 -" + sideToCenter.toString() + "px";
+		
+		var playerAndCanvasBottomToWindowBottom = ( window.innerHeight - finalCanvasDimension ) / 4;
+		var topToDivCenterPercentageOfWindowHeight = ( playerAndCanvasBottomToWindowBottom * 3 + finalCanvasDimension / 2 ) / window.innerHeight * 100;
+		playerAndCanvas.style.top = topToDivCenterPercentageOfWindowHeight.toString() + "%";
+	}
 	
-	var playerAndCanvas = document.getElementById("playerAndCanvas");
-	
-	playerAndCanvas.style.top = "50%";
-	var bottomToWindowBottom = (window.innerHeight-finalCanvasDimension)/2;
-	
-	var divHeight = finalCanvasDimension + bottomToWindowBottom;
-	playerAndCanvas.style.height = divHeight.toString() + "px";
-	var divWidth = finalCanvasDimension + finalCanvasDimension * canvasWidthOverHeight;
-	playerAndCanvas.style.width = divWidth.toString() + "px";
-	
-	//putting the center in the center
-	var sideToCenter = divWidth / 2;
-	var topToCenter = finalCanvasDimension / 2;
-	playerAndCanvas.style.margin = "-" + topToCenter.toString() + "px 0 0 -" + sideToCenter.toString() + "px";
+	{
+		var titleDiv = document.getElementById( "title" );
+		
+		var fontSizeOverFinalCanvasDimension = (484/893)/( (476/1200)/(30/480) ); //(484/893) is the titleWidth:divWidth proportion Sheree chose,30:480 is an observed fs/fcd
+		var fontSize = Math.round( fontSizeOverFinalCanvasDimension * finalCanvasDimension );
+		titleDiv.style.fontSize = fontSize.toString() + "px";
+		
+		var titleVeryTopToVeryBottomOverCanvasDimension = 45.5 / 600; //but
+		titleHalfHeight = Math.round(titleVeryTopToVeryBottomOverCanvasDimension * finalCanvasDimension / 2);
+		console.log(titleHalfHeight)
+		titleDiv.style.margin = "-" + titleHalfHeight.toString() + "px 0 0 0";
+		
+		//we'd like to assume its center is in its center
+		var topToTitleCenterPercentageOfWindowHeight = ( playerAndCanvasBottomToWindowBottom * 3 / 2 ) / window.innerHeight * 100; //appears to be fine
+		console.log(topToTitleCenterPercentageOfWindowHeight)
+		titleDiv.style.top = topToTitleCenterPercentageOfWindowHeight.toString() + "%";
+	}
 	
 	return finalCanvasDimension;
 }
