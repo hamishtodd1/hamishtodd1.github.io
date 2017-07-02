@@ -122,9 +122,11 @@ function init_tree()
 	
 	//somewhere between max and min
 	Virus_chapter_icons[0].position.set(-1.2275910098644418, 	-7.081533028015544, 0 ); //boca
+	Virus_chapter_icons[0].scale.setScalar( 1024/720*0.6 ); //boca
 	Virus_chapter_icons[1].position.set( 0.33847159531241794, -1.49927761278835, 0 ); //Polio
 	Virus_chapter_icons[2].position.set( -3.2, -3.8, 0 ); //HIV
 	Virus_chapter_icons[3].position.set(1.9045342004892776,		-3.469485406397948, 0 ); //Zika
+	Virus_chapter_icons[0].scale.setScalar( 1024/720 );
 	Virus_chapter_icons[4].position.set(2,		-7.081533028015544, 0 ); //Measles
 
 	for(var i = 0; i < Virus_chapter_icons.length; i++)

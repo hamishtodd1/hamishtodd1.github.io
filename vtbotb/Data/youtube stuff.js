@@ -45,11 +45,11 @@ function react_to_video()
 
 function onYouTubeIframeAPIReady()
 {
-	var idArray = ['FCJawbntQVw', 'ruw8txSn8NM','gBqI7RxUjNk','hhZaebKU7OA','cWSEYzqSxnw']; //intro, polio, hiv, zika
+	var idArray = ['FCJawbntQVw', 'ruw8txSn8NM','gBqI7RxUjNk','zNLVleB5cJ4','8hRsRlLPkCw']; //intro, polio, hiv, zika, measles
 	ytplayer = new YT.Player('player', 
 	{
-		width: window_width,
-	    height: window_height,
+		width: renderer.domElement.width,
+	    height: renderer.domElement.height,
 	    videoId:idArray[0],
 		events: 
 		{

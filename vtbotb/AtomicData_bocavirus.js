@@ -64,6 +64,10 @@ function update_bocavirus() {
 	
 	
 	//-------Rotation
+	if(isMouseDown && !isMouseDown_previously && !Sounds.vertexGrabbed.isPlaying)
+		Sounds.vertexGrabbed.play();
+	if(!isMouseDown && isMouseDown_previously && !Sounds.vertexReleased.isPlaying)
+		Sounds.vertexReleased.play();
 	if( our_CurrentTime < cell_move_time + movement_duration || our_CurrentTime > whole_thing_finish_time )
 	{
 		if(isMouseDown) {
@@ -196,7 +200,7 @@ function update_bocavirus() {
 
 var destination_assignments = Array(neo_bocavirus_proteins.length);
 
-var EggCell_radius = 30;
+var EggCell_radius = 26;
 var spayed_circle_radius = 10;
 var EggCell_initialposition = new THREE.Vector3( EggCell_radius + spayed_circle_radius * 1.1,0,0);
 

@@ -1,5 +1,4 @@
-<!--So, this needs to be quite sophisticated. Reacts to window resize. Changes youtube video resolution. This can be done by changing body properties in javascript-->
-<!--A gradient or something in the background too, not pure white-->
+<!--E8E9E8-->
 
 <html>
 	<head>
@@ -13,57 +12,88 @@
 		<meta property="og:image" content="http://hamishtodd1.github.io/aboutme/VR_example.jpg" />
 		<meta property="twitter:image" content="http://hamishtodd1.github.io/aboutme/VR_example.jpg" />
 		
+		<link href="https://fonts.googleapis.com/css?family=Zilla+Slab" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css?family=Noto+Sans" rel="stylesheet">
+		
 		<style>
 		body {
-			background-color:#E8E9E8;
+			background-color:#000000;
 			margin:auto;
 			line-height:1.6;
 			font-size:18px;
 			color:#444;
-		}
-		strong{
-			font-size:28px
+			font-family:'Noto Sans',serif;
 		}
 		</style>
 	</head>
 	
 	<body>
-	<!--
-	think of the margin as a displacer, the way that we center it
-	the way it is here is not necessarily the way it's gonna be, we can't have logic here.
-	The thing we carry is: this div is centered, horizontally and vertically
-	<link href="https://fonts.googleapis.com/css?family=Zilla+Slab" rel="stylesheet">
-		font-family: 'Zilla Slab', serif;
-	
-										| positions the div 				 | Positions the stuff within the div				  |-->
-		<div id="playerAndCanvas" style="position:absolute; top:50%; left:50%; margin:-180px 0 0 -360px; width:720px; height:360px; display: flex;">
+		
+		<div id="title" style="text-align:center;margin-top: 10px;">
+			<div style="display: inline-block;">
+				<span style="font-family:'Zilla Slab';font-size:30px;font-weight:bold;"> </span>
+			</div>
+		</div>
+		
+									<!--|positions the div center on the page| side-by-side -->
+		<div id="playerAndCanvas" style="position:absolute; left:50%;display: flex;">
 			<div id="player"></div>
 			<div id="canvasID"></div>
 		</div>
-		<div id="extras" style="text-align:center;margin-top: 360px;"><!--gets changed-->
+		
+		<div id="extras" style="text-align:center;">
 			<div style="display: inline-block;">
 				<!--"go to tree" button; make sure the picture's bigger than the widest text!-->
-				<div id="treePic" style="cursor:pointer;cursor:hand;padding:0pxmargin:0px"><img src="treeShot.jpg" style="width:100%;"></div>
+				<div id="treePic" style="cursor:pointer;cursor:hand;padding:0px;margin:0px"><img src="treeShot.jpg" style="width:100%;"></div>
+				
+				<span style="font-size:30px;"> </span></br>
 				
 				<!--Social media buttons-->
-				</br>
-				</br>
+				
+				<span style="font-size:0px;"> </span></br>
 				
 				<a href='http://hamishtodd1.github.io/personal/teachingResources.html'>Teaching resources</a></br>
-				<a href='http://hamishtodd1.github.io/personal/pressPage.html'>Press page</a>
-				</br>
-				</br>
+				<a href='http://hamishtodd1.github.io/personal/pressPage.html'>Press page</a></br>
+				<span style="font-size:30px;"> </span></br>
 				
 				Press contact / bug reports:</br>
-				<span style="unicode-bidi: bidi-override;direction: rtl;">ku.ca.de@ddoT.hsimaH</span>
-				</br>
+				<span style="unicode-bidi: bidi-override;direction: rtl;">ku.ca.de@ddoT.hsimaH</span></br>
+				<span style="font-size:30px;"> </span></br>
 				
-				<p><strong>More of this</strong></br>
+				<span style="font-family:'Zilla Slab';font-size:30px;font-weight:bold;">Additional Information</span></br>
 				<a href='http://hamishtodd1.github.io/'>Other things by Hamish Todd</a></br>
-				<a href='http://explorabl.es/'>Other "Explorable Explanations"</a></br>
+				<a href='http://explorabl.es/'>Other explorable explanations</a></br>
 				<a href='http://viralzone.expasy.org/'>More on viruses</a></br>
 				<a href='https://www.youtube.com/channel/UCTl0dASnxto6j2wlVs5Bs2Q/videos'>More on spherical patterns (geodesic domes etc)</a></br>
-				<a href='http://gallery.bridgesmathart.org/exhibitions'>More sciencey art</a></p>
+				<a href='http://gallery.bridgesmathart.org/exhibitions'>More sciencey art</a></br>
+				
+				Measles</br>
+				Erythrovirus</br>
+				
+				Zika Virus</br>
+				Human Papillomavirus</br>
+				Bluetongue Virus</br>
+				
+				HIV</br>
+				Carboxysome</br>
+				Bacteriophage T4</br>
+				Bacteriophage &Phi;29</br>
+				
+				Hepatitis A</br>
+				
+				Hepatitis B</br>
+				Semliki Forest Virus</br>
+				Sindbis Virus</br>
+				
+				Rotavirus</br>
+				Bacteriophage HK97</br>
+				Paramecium Bursaria</br>
+				Chlorella Virus</br>
+				
+				Polio</br>
+				Yellow Fever Virus</br>
+				Yellow Fever Virus</br>
+				Yellow Fever Virus</br>
 			</div>
 		</div>
 	</body>

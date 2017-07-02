@@ -40,13 +40,10 @@ camera.randomShake = 0;
 camera.directionalShakeContribution = new THREE.Vector3();
 var scene = new THREE.Scene();
 
-var window_height = 360; //to begin with
-var window_width = window_height;
 var renderer = new THREE.WebGLRenderer({ antialias: true });
 var targetDIV = document.getElementById("canvasID");
 targetDIV.appendChild( renderer.domElement );
 
-renderer.setSize( window_width, window_height );
 renderer.setClearColor( backgroundColor, 1);
 var ytplayer;
 
@@ -279,8 +276,8 @@ var CORE = 0;
 var ASSOCIATED = 1;
 
 var InputObject = {};
-InputObject.mousex = window_width/2+30;
-InputObject.mousey = window_height/2+30;
+InputObject.mousex = 0;
+InputObject.mousey = 0;
 InputObject.isMouseDown = false;
 
 var isMouseDown = false;

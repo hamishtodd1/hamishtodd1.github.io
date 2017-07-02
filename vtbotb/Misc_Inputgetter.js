@@ -48,48 +48,36 @@ function ReadInput()
 
 function onWindowResizeExceptYoutube( canvasWidthOverHeight )
 {
+	document.getElementById("extras").style.margin = window.innerHeight.toString() + "px 0 0 0";
+	
 	var maxCanvasDimension = window.innerWidth / 2;
 	if( maxCanvasDimension > window.innerHeight ) 
 		maxCanvasDimension = window.innerHeight;
-	
-	//a little thing
-	var extrasDiv = document.getElementById("extras");
-	extrasDiv.style.margin = window.innerHeight.toString() + "px 0 0 0";
 	
 	var finalCanvasDimension = 144;
 	var possibleDimensions = [240,360,480,720,1080];
 	for(var i = 0; i < possibleDimensions.length; i++ )
 		if( maxCanvasDimension >= possibleDimensions[i] )
 			finalCanvasDimension = possibleDimensions[i];
-	if( maxCanvasDimension >= 1080 * 1.5 )
-	{
-		while( maxCanvasDimension >= finalCanvasDimension * 1.5 )
-			finalCanvasDimension = finalCanvasDimension * 1.5;
-	}
-	/* on a >1080 monitor, you probably have to scale up the... picture of the youtube video, or however you put it. Try putting in 2160 or whatever.
-	 * todo: test on that. Buuuut that can wait a long time, like whenever you see one. People could just resize the window? Hopefully that works?
-	 * 
-	 * Siiiigh re dpi. Jesus, 1.5?
-	 */
+	if( maxCanvasDimension >= 1080 * 4/3 )
+		finalCanvasDimension = maxCanvasDimension;
 	
-	var spacing = 0;
-	var bodyWidth = spacing + finalCanvasDimension + finalCanvasDimension * canvasWidthOverHeight;
-	var bodySideToCenter = bodyWidth / 2;
-	var bodyTopToCenter = finalCanvasDimension / 2;
-	
-	var divHeight = finalCanvasDimension / 2 + window.innerHeight / 2;
-	var divWidth = finalCanvasDimension + finalCanvasDimension * canvasWidthOverHeight;
+	renderer.setSize( finalCanvasDimension * canvasWidthOverHeight, finalCanvasDimension );
 	
 	var playerAndCanvas = document.getElementById("playerAndCanvas");
 	
-	playerAndCanvas.style.width = divWidth.toString() + "px";
+	playerAndCanvas.style.top = "50%";
+	var bottomToWindowBottom = (window.innerHeight-finalCanvasDimension)/2;
+	
+	var divHeight = finalCanvasDimension + bottomToWindowBottom;
 	playerAndCanvas.style.height = divHeight.toString() + "px";
-	playerAndCanvas.style.margin = "-" + bodyTopToCenter.toString() + "px 0 0 -" + bodySideToCenter.toString() + "px";
+	var divWidth = finalCanvasDimension + finalCanvasDimension * canvasWidthOverHeight;
+	playerAndCanvas.style.width = divWidth.toString() + "px";
 	
-	window_width = finalCanvasDimension * canvasWidthOverHeight;
-	window_height = finalCanvasDimension;
-	
-	renderer.setSize( window_width, window_height );
+	//putting the center in the center
+	var sideToCenter = divWidth / 2;
+	var topToCenter = finalCanvasDimension / 2;
+	playerAndCanvas.style.margin = "-" + topToCenter.toString() + "px 0 0 -" + sideToCenter.toString() + "px";
 	
 	return finalCanvasDimension;
 }
@@ -99,20 +87,21 @@ function onWindowResize()
 {
 	var finalCanvasDimension = onWindowResizeExceptYoutube(1);
 	
-	var qualityString = "";
-	if(finalCanvasDimension === 240)
-		qualityString += "small";
-	else if(finalCanvasDimension === 360)
-		qualityString += "medium";
-	else if(finalCanvasDimension === 480)
-		qualityString += "large";
-	else if(finalCanvasDimension === 720)
-		qualityString += "hd720";
-	else if(finalCanvasDimension >= 1080)
-		qualityString += "hd1080";
-	else qualityString += "default";
+	//Hopefully youtube knows what to do (it didn't always listen anyway)
+//	var qualityString = "";
+//	if(finalCanvasDimension === 240)
+//		qualityString += "small";
+//	else if(finalCanvasDimension === 360)
+//		qualityString += "medium";
+//	else if(finalCanvasDimension === 480)
+//		qualityString += "large";
+//	else if(finalCanvasDimension === 720)
+//		qualityString += "hd720";
+//	else if(finalCanvasDimension >= 1080)
+//		qualityString += "hd1080";
+//	else qualityString += "default";
+//	ytplayer.setPlaybackQuality( qualityString ); //and if their connection is too slow, they have the cog
 	
-	ytplayer.setPlaybackQuality( qualityString ); //and if their connection is too slow, they have the cog
 	ytplayer.setSize(finalCanvasDimension,finalCanvasDimension);
 }		
 window.addEventListener( 'resize', onWindowResize, false );

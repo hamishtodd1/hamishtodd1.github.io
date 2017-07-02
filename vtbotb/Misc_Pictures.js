@@ -87,7 +87,7 @@ function load_AV_stuff()
 					                      ];
 					for(var i = 0; i < soundInfoArray.length; i++)
 					{
-						Sounds[soundInfoArray[i]] = new Audio( "http://hamishtodd1.github.io/vtbotb/Data/Sounds/" + soundInfoArray[i] + ".mp3" );
+						Sounds[soundInfoArray[i]] = new Audio( "Data/Sounds/" + soundInfoArray[i] + ".mp3" );
 					}
 					
 					var openCloseVolume = 0.2;
@@ -112,68 +112,72 @@ function load_AV_stuff()
 	var slide_texture_urls = Array();
 	
 	//the other things and their widths
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Misc textures/CKhider.png");
+	random_texture_urls.push( "Data/Misc textures/CKhider.png");
+	random_texture_urls.push( "Data/Misc textures/button.png");
 	
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Misc textures/cell/cell-1.jpg");
+	random_texture_urls.push( "Data/Misc textures/cell/cell-1.jpg"); //jpg!
 	var highestCellLayer = 6;
 	for(var i = 2; i <= highestCellLayer; i++)
-		random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Misc textures/cell/cell-" + i.toString() + ".png");
+		random_texture_urls.push( "Data/Misc textures/cell/cell-" + i.toString() + ".png");
 	
 	//Tree
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Misc textures/tree/Boca_name.png");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Misc textures/tree/Hepa_name.png");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Misc textures/tree/HIV_name.png");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Misc textures/tree/Zika_name.png");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Misc textures/tree/Measles_name.png");
+	random_texture_urls.push( "Data/Misc textures/tree/Boca_name.png");
+	random_texture_urls.push( "Data/Misc textures/tree/Hepa_name.png");
+	random_texture_urls.push( "Data/Misc textures/tree/HIV_name.png");
+	random_texture_urls.push( "Data/Misc textures/tree/Zika_name.png");
+	random_texture_urls.push( "Data/Misc textures/tree/Measles_name.png");
 	
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Misc textures/tree/Boca_icon.png");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/hepA.jpg");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/HIV.png");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/Zika Virus.jpg");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/measles.jpg");
+	random_texture_urls.push( "Data/Misc textures/tree/Boca_icon.png");
+	random_texture_urls.push( "Data/Slides/hepA.jpg");
+	random_texture_urls.push( "Data/Slides/HIV.png");
+	random_texture_urls.push( "Data/Slides/Zika Virus.jpg");
+	random_texture_urls.push( "Data/Slides/measles.jpg");
 	
 	for(var i = 0; i < treeBranches.length; i++)
-		random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Misc textures/tree/branches/"+i.toString()+".png");
+		random_texture_urls.push( "Data/Misc textures/tree/branches/"+i.toString()+".png");
 	
 	//moving pictures
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/golf-ball.jpg");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/rota.jpg");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/greenhouse.jpg");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/phi29.jpg");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/shrine.jpg");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/bluetongue.jpg");
+	random_texture_urls.push( "Data/Slides/golf-ball.jpg");
+	random_texture_urls.push( "Data/Slides/rota.jpg");
+	random_texture_urls.push( "Data/Slides/greenhouse.jpg");
+	random_texture_urls.push( "Data/Slides/phi29.jpg");
+	random_texture_urls.push( "Data/Slides/shrine.jpg");
+	random_texture_urls.push( "Data/Slides/bluetongue.jpg");
 	
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/hepA.jpg");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/hepB.jpg");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/hepAspikes.jpg");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/hepAdimples.jpg");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/hepBspikes.jpg");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/hepBdimples.jpg");
+	random_texture_urls.push( "Data/Slides/hepA.jpg");
+	random_texture_urls.push( "Data/Slides/hepB.jpg");
+	random_texture_urls.push( "Data/Slides/hepAspikes.jpg");
+	random_texture_urls.push( "Data/Slides/hepAdimples.jpg");
+	random_texture_urls.push( "Data/Slides/hepBspikes.jpg");
+	random_texture_urls.push( "Data/Slides/hepBdimples.jpg");
 
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/HIV.png");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/amv.png");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/pp2.jpg");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/uneven.png");
+	random_texture_urls.push( "Data/Slides/HIV.png");
+	random_texture_urls.push( "Data/Slides/amv.png");
+	random_texture_urls.push( "Data/Slides/pp2.jpg");
+	random_texture_urls.push( "Data/Slides/uneven.png");
 
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/Zika Virus.jpg");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/bluetongue.jpg");
-	random_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/HPV.jpg");
+	random_texture_urls.push( "Data/Slides/Zika Virus.jpg");
+	random_texture_urls.push( "Data/Slides/bluetongue.jpg");
+	random_texture_urls.push( "Data/Slides/HPV.jpg");
 	
 	
 	var randomTargets = Array(random_texture_urls.length);
+	
 	randomTargets[0] = CKHider;
+	randomTargets[1] = IrregButton.children[1];
+	
 	for(var i = 0; i < highestCellLayer; i++)
-		randomTargets[i+1] = EggCell.children[i];
+		randomTargets[i+2] = EggCell.children[i];
 	
 	for(var i = 0; i < Virus_chapter_icons.length; i++ )
 	{
-		randomTargets[ highestCellLayer+1+i] = Virus_chapter_names[i];
-		randomTargets[ highestCellLayer+6+i] = Virus_chapter_icons[i];
+		randomTargets[ highestCellLayer+2+i] = Virus_chapter_names[i];
+		randomTargets[ highestCellLayer+7+i] = Virus_chapter_icons[i];
 	}
 	
 	for(var i = 0; i < treeBranches.length; i++)
 	{
-		randomTargets[ 1+highestCellLayer+Virus_chapter_icons.length*2+i] = treeBranches[i];
+		randomTargets[ 2+highestCellLayer+Virus_chapter_icons.length*2+i] = treeBranches[i];
 	}
 	
 	movingPictures = {
@@ -220,97 +224,97 @@ function load_AV_stuff()
 	var normalBorderMultiplier = 1024 / 720;
 	var borderMultiplier = [];
 	
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/Zika victim.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/hiv victim.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/Dad.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/Zika victim.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/hiv victim.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/Dad.jpg"); borderMultiplier.push(normalBorderMultiplier);
 
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/slapped-cheek.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/pregnant.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/slapped-cheek.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/pregnant.jpg"); borderMultiplier.push(normalBorderMultiplier);
 
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/allViruses.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/humans.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/allViruses.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/humans.jpg"); borderMultiplier.push(normalBorderMultiplier);
 
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/Cell with proteins.png"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/femaleSkeleton.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/Cell full of viruses.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/Cell lysis.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/infect other cells.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/Cell with proteins.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/femaleSkeleton.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/Cell full of viruses.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/Cell lysis.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/infect other cells.jpg"); borderMultiplier.push(1);
 	
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Misc textures/tree/Boca_icon.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Misc textures/tree/Boca_icon.png"); borderMultiplier.push(normalBorderMultiplier*0.6);
 	
 	var slidesInIntro = slide_texture_urls.length;
 	
 	//polio
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/hepA.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/footy.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/hepA.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/footy.jpg"); borderMultiplier.push(normalBorderMultiplier);
 	
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/hepB.jpg"); borderMultiplier.push(0.3);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/hepA.jpg"); borderMultiplier.push(0.23);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/thousands.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/hepB.jpg"); borderMultiplier.push(0.25);
+	slide_texture_urls.push( "Data/Slides/hepA.jpg"); borderMultiplier.push(0.21);
+	slide_texture_urls.push( "Data/Slides/thousands.jpg"); borderMultiplier.push(1);
 	
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/sewing.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/zorb.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/lightSphere.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/gammaSphere.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/geodesic.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/chlorella.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/Buckminster.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/basket.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/hair.jpg"); borderMultiplier.push(normalBorderMultiplier);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/First pic of virus.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/fuller-DIY-sun-dome.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/sewing.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/zorb.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/lightSphere.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/gammaSphere.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/geodesic.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/chlorella.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/Buckminster.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/basket.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/hair.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/First pic of virus.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/fuller-DIY-sun-dome.jpg"); borderMultiplier.push(1);
 
 	//HIV
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/HIV.png"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/HIV variety.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/HIV.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/HIV variety.jpg"); borderMultiplier.push(1);
 	
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/mimi.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/mimi.jpg"); borderMultiplier.push(1/(807/512));
 	
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/monkey.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/trim5.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/syringe.jpg"); borderMultiplier.push(1); //TODO syringe
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/model1.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/model2.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/model2a.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/model3a.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/t4.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/t4corners.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/t4 shape.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/monkey.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/trim5.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/syringe.jpg"); borderMultiplier.push(normalBorderMultiplier); //TODO syringe
+	slide_texture_urls.push( "Data/Slides/model1.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/model2.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/model2a.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/model3a.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/t4.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/t4corners.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/t4 shape.jpg"); borderMultiplier.push(1);
 	
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/phi29.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/phi29.jpg"); borderMultiplier.push(1);
 	
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/Lucky.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/book.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/excerpt.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/Lucky.jpg"); borderMultiplier.push(512/720);
+	slide_texture_urls.push( "Data/Slides/book.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/excerpt.jpg"); borderMultiplier.push(normalBorderMultiplier);
 	
 	//----QS
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/HPV.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/HPV xray.png"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/HPV blobs.png"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/HPV connections.png"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/HPV abstract.png"); borderMultiplier.push(808/619);
+	slide_texture_urls.push( "Data/Slides/HPV.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/HPV xray.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/HPV blobs.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/HPV connections.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/HPV abstract.png"); borderMultiplier.push(808/619);
 
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/shrine.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/syr_0203.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/spa_1808.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/tra_0114.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/spa_2220.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/Darb e modified.png"); borderMultiplier.push(590/720);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/Darb e above entrance.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/Darb e inside.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/Darb e pentagons.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/darb e sharp.jpg"); borderMultiplier.push(1); //next thing is to test (tree and final reused slides) without this extra slide
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/drug.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/Zika Virus.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/shrine.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/spa_1808.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/tra_0114.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/syr_0203.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/spa_2220.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/Darb e modified.png"); borderMultiplier.push(590/720);
+	slide_texture_urls.push( "Data/Slides/Darb e above entrance.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/Darb e inside.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/Darb e pentagons.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/darb e sharp.jpg"); borderMultiplier.push(1); //next thing is to test (tree and final reused slides) without this extra slide
+	slide_texture_urls.push( "Data/Slides/drug.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/Zika Virus.jpg"); borderMultiplier.push(normalBorderMultiplier);
 
 	//----Ending
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/measles.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/Tomoko.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/boca.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/shell.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/golden spiral.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/nautilus with spiral.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "http://hamishtodd1.github.io/vtbotb/Data/Slides/HK97.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/measles.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/Tomoko.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/boca.jpg"); borderMultiplier.push( normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/shell.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/golden spiral.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/nautilus with spiral.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/hk97.jpg"); borderMultiplier.push(normalBorderMultiplier);
 	
 	slideObjects = Array(slide_texture_urls.length);
 	

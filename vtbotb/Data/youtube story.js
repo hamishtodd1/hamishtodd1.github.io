@@ -60,8 +60,14 @@ function Update_story()
 		{
 			varyingsurface.rotation.z += delta_t;
 			for( var i = 0; i < varyingsurface_cylinders.length; i++)
-				varyingsurface_cylinders[i].rotation.y += delta_t;
+				varyingsurface_cylinders[i].rotation.z += delta_t;
 			varyingsurface.updateMatrixWorld();
+		}
+		
+		if( Story_states[Storypage].surfaceZRotation )
+		{
+			surface.rotation.z += delta_t;
+			surface.updateMatrixWorld();
 		}
 		
 		if( Story_states[Storypage].CK_scale !== 999 )
@@ -396,6 +402,7 @@ function init_story()
 		used_up_pause: false,
 		
 		varyingsurfaceZRotation: false,
+		surfaceZRotation:false,
 		
 		fadePicture: false,
 		
@@ -444,6 +451,7 @@ function init_story()
 		new_story_state.pentagonsFlashing = false;
 		
 		new_story_state.varyingsurfaceZRotation = false;
+		new_story_state.surfaceZRotation = false;
 
 		new_story_state.pentamers_color = defaultPentamersColor.clone(),
 		new_story_state.hexamers_color = defaultHexamersColor.clone(),
@@ -791,20 +799,26 @@ function init_story()
 	ns = default_clone_story_state(0,63.3); //you might recognize this pattern 
 	Story_states.push(ns);
 	
-	var hexamerPentamerHighlightColor = new THREE.Color(0x000000);
+	var hexamerPentamerHighlightColor = new THREE.Color(0x2B455E);
 
 	ns = default_clone_story_state(0,68.9); //pentagons
 	ns.pentamers_color.copy(hexamerPentamerHighlightColor);
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,69.4); //unflash 
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,69.7); //hexagons
 	ns.hexamers_color.copy(hexamerPentamerHighlightColor); 
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,70.7); //hexagons
-	ns.enforced_CK_quaternion.set( -0.5676121554735792, 0.39319587732878697, 0.6593917849494116, 0.2973481401944473 );
+	ns = default_clone_story_state(0,70.2); //unflash 
 	Story_states.push(ns);
 
+	ns = default_clone_story_state(0,70.7); //position for ball
+	ns.enforced_CK_quaternion.set( -0.5676121554735792, 0.39319587732878697, 0.6593917849494116, 0.2973481401944473 );
+	Story_states.push(ns);
+	
 	ns = default_clone_story_state(1,71.7); //football
 	ns.fadePicture = true;
 	Story_states.push(ns);
@@ -840,12 +854,16 @@ function init_story()
 	ns.CK_scale = 0.5;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,110); //this orientation
+	ns = default_clone_story_state(0,110.6); //this orientation
 	ns.CK_angle = 0;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,113.5); //wrap it up
 	ns.capsid_open = 0;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,117.2); //position for hep B
+	ns.enforced_CK_quaternion.set( -0.4716767396188101, 0.6024940327573115, -0.10118578165427694, 0.635832864348344 );
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1,119.2); //hep B
@@ -869,19 +887,20 @@ function init_story()
 	ns.capsid_open = 0;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,129.5); //wrap up
-	ns.capsid_open = 0;
+	ns = default_clone_story_state(0,128.5); //position for hep A
+	ns.enforced_CK_quaternion.set( -0.39385087398805785, 0.8591868794637348, -0.2624847764288336, 0.19437370542162127 );
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,131.2); //back to model
+	ns = default_clone_story_state(1,129.4); //hep a. Not a repetition though because it's a different size
+	ns.MODE = SLIDE_MODE;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,132.2); //thousands
-	ns.MODE = SLIDE_MODE;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,138.6); //back
 	ns.MODE = CK_MODE;
+	ns.capsid_open_immediately = 0;
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,141.9); //bring in button
@@ -893,6 +912,7 @@ function init_story()
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,144.2); //the reason they look this way
+	ns.irreg_button_invisible = 1;
 	ns.capsid_open = 0;
 	Story_states.push(ns);
 	
@@ -924,24 +944,29 @@ function init_story()
 //	ns = default_clone_story_state(0,167); //flash done
 //	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,168.6); //play around with it
+	ns = default_clone_story_state(0,175); //play around with it
 	ns.capsid_open = 1;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,193.2); //closer resemblance to hk97
+	ns.MODE = SLIDE_MODE;
+	ns.hexamers_color.copy(new THREE.Color(0xA54D5B));
 	ns.pause_at_end = 1;
 //	ns.persistentLattice = true;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,193.2); //simple to assemble
+	ns = default_clone_story_state(1,195.7); //simple to assemble
 	ns.MODE = SLIDE_MODE;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,196.2); //example
+	ns = default_clone_story_state(1,199); //example
 	var football_slide = ns.slide_number;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,199.2); //geodesic example
+	ns = default_clone_story_state(1,201); //geodesic example
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,202.2); //geodesic example
+	ns = default_clone_story_state(1,203); //geodesic example
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1,205.9); //geodesic building
@@ -978,21 +1003,26 @@ function init_story()
 	ns.CK_scale = 0.2773500870617064;
 	ns.CK_angle = -0.24256388590718214;
 	ns.capsid_open_immediately = 0;
+	ns.surfaceZRotation = true;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,244.7); //pop
+	ns.surfaceZRotation = true;
 	ns.sphericality = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,245.7); //back
+	ns.surfaceZRotation = true;
 	ns.sphericality = 0;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,246.7); //pop
+	ns.surfaceZRotation = true;
 	ns.sphericality = 1;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,247.5); //back to normal for final polio
+	ns.surfaceZRotation = true;
 	ns.sphericality = 0;
 	ns.MODE = CK_MODE;
 	ns.CK_scale = 0.5773502438405532;
@@ -1040,7 +1070,7 @@ function init_story()
 	ns.CKPicScale = playing_field_dimension;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,16.85); //other uneven
+	ns = default_clone_story_state(0,16.65); //other uneven
 	ns.CKPicStates.push({virus:"hiv",x:0,y:playing_field_dimension/4});
 	ns.CKPicStates.push({virus:"pp2",x:playing_field_dimension/3.2, y:-playing_field_dimension/4.3});
 	ns.CKPicStates.push({virus:"amv",x:-playing_field_dimension/3.2, y:-playing_field_dimension/4.3});
@@ -1252,6 +1282,7 @@ function init_story()
 	
 	ns = default_clone_story_state(1,189.5); //christmas
 	ns.minimum_angle_crapifiers = Story_states[Story_states.length-1].minimum_angle_crapifiers;
+	ns.MODE = SLIDE_MODE;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,192.6); //book
@@ -1439,8 +1470,20 @@ function init_story()
 	ns.MODE = QC_SPHERE_MODE;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,170); //smaller HPV (zika)
+	ns = default_clone_story_state(0,170); //smaller HPV
 	ns.enforced_cutout_vector0_player.set(1.118033988749895, 2.389492576939667, 0);
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,180.3); //lots
+	ns.enforced_cutout_vector0_player.set( 1, 2.752763840942347, 0 );
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,180.9); //of different
+	ns.enforced_cutout_vector0_player.set( 1.5, 2.389492576939667, 0 );
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,181.6); //states
+	ns.enforced_cutout_vector0_player.set( 2.3090169943749475, 0.6261368200622472, 0 );
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,189.8); //zika
@@ -1516,11 +1559,11 @@ function init_story()
 	ns = default_clone_story_state(1,154.7); //combined
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,157.1); //measles
+	ns = default_clone_story_state(0,158.35); //measles
 	ns.slide_number = Measles_slide;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,164.7); //dad
+	ns = default_clone_story_state(0,164.1); //dad
 	ns.slide_number = Dad_slide;
 	Story_states.push(ns);
 
@@ -1531,9 +1574,6 @@ function init_story()
 	ns = default_clone_story_state(0,219.9); //lots of viruses
 //	ns.slide_number = Measles_slide;
 	Story_states.push(ns);
-	
-	//So, we're going to have the cornucopia again. You could have that be the tree, save time. That means a lot going on the tree
-	//You could take Sheree's tree design, space the rest of them in around it, and then zoom out and fade them in
 
 	ns = default_clone_story_state(0,231.8); //complexity
 	ns.MODE = IRREGULAR_MODE;
@@ -1559,20 +1599,20 @@ function init_story()
 	ns.irreg_button_invisible = 1;
 	Story_states.push(ns);
 
-//	ns = default_clone_story_state(0,252.2); //evolving
-//	ns.CK_scale = 0.5773502438405532;
-//	ns.CK_angle = -0.5235987753305861;
-//	Story_states.push(ns);
-//	
-//	ns = default_clone_story_state(0,253.7); //and evolving
-//	ns.CK_scale = 0.2773500870617064;
-//	ns.CK_angle = -0.24256388590718214;
-//	Story_states.push(ns);
-//
-//	ns = default_clone_story_state(0,255); //evolving
-//	ns.CK_scale = 0.5773502438405532;
-//	ns.CK_angle = -0.5235987753305861;
-//	Story_states.push(ns);
+	ns = default_clone_story_state(0,252.2); //evolving
+	ns.CK_scale = 0.5773502438405532;
+	ns.CK_angle = -0.5235987753305861;
+	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,253.7); //and evolving
+	ns.CK_scale = 0.2773500870617064;
+	ns.CK_angle = -0.24256388590718214;
+	Story_states.push(ns);
+
+	ns = default_clone_story_state(0,255); //evolving
+	ns.CK_scale = 0.5773502438405532;
+	ns.CK_angle = -0.5235987753305861;
+	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,257.6); //coming back
 	ns.capsid_open = 0;

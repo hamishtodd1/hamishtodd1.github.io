@@ -1,35 +1,45 @@
 /* Youtube version, from which you edit facebook version
  * 		Spacebar to play
+ * 		Mouse visible but get it out of the way
  * 		And one long youtube version for if the page doesn't load?
- * 			And on there normally, in case people steal? No, looks transparently clickbaity
  * 		Titles, (virus, object) Each gets a pic of the virus side by side with the object
  * 			Why do viruses have so much in common with human designs? (rota, golf ball)
  * 			What does zika virus have in common with Islamic art? (zika, dome)
  * 			What do Hepatitis viruses have in common with soccer balls? (hep a, soccer ball)
  * 			What does HIV have in common with origami? (phi29, origami)
  * 			And that's what viruses have in common with human designs (measles and super dodecahedral?)
- * 		Film with fraps on firefox. ~3GB per file
+ * 		Film with fraps on firefox. ~3GB per file. Stick them on your hardrive
  * 		Can stop once you've got a still tree
+ * 		Set resolution very high
+ * 		Tree: just make an image and stick it at the end
  * 
+ * ------For youtube version. In office at 8:45
+ * No flicker on cameraZ
+ * "A pattern like this one"
+ * slides resolution (all moving slides in high rez
+ * Shape settles needs to be stoppable
+ * New button
+ * reproduced virus proteins go in right places, "Digest the individual pieces"
+ * Another picture dance for the nautilus and spiral?
+ * smooth qs transitions?
+ * "images of some other viruses" and "the reason I wanted to show this to you" - i.e. full tree
  * 
  * -------General
+ * Veiny appearance when thingy CK first opens
  * Tree
 		Really important that tree icons light up
 		Fade highlighted virus pictures on top
 		level select button
 		"images of some other viruses"
  * Title
- * Upload CK, adjust chapter starts
- * Shape settles needs to be stoppable
  * No second "next virus" cue?
  * Loading screen
  * Size snapping for the video and canvas was bullshit, correct it to whatever Sheree gives in her design
- * New button
- * reproduced virus proteins go in right places, "Digest the individual pieces"
- * Another picture dance for the nautilus and spiral?
  * Check for required things like flash 10, webgl, link to video if page doesn't work in some way. Or recommend a different browser
  * Push to the server
  * Prompt bugs
+ * press page
+ * Rotate qs into place for "resemblance"
    
    So you've triggered a repetition... but you need pause again once it's done; bear in mind the player might have done the necessary thing
  * Take a picture of yourself with VR (tomorrow, when you record)

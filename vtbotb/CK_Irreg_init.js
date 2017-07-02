@@ -43,9 +43,9 @@ function init_CK_and_irreg()
 		
 		IrregButton.logoFaces[0] = new THREE.Object3D();
 		IrregButton.logoFaces[0].add( new THREE.Mesh( squareGeometry,
-				new THREE.MeshBasicMaterial( { transparent: true, color: 0x000000 } ) ) );
+				new THREE.MeshBasicMaterial( { transparent: true, color: 0x274257 } ) ) );
 		IrregButton.logoFaces[0].add( notOutline = new THREE.Mesh( squareGeometry,
-				new THREE.MeshBasicMaterial( { transparent: true, color: 0xFFFFFF } ) ) );
+				new THREE.MeshBasicMaterial( { transparent: true, color: 0x83A7C7 } ) ) );
 		IrregButton.logoFaces[0].children[1].position.z = 0.03 * faceWidth;
 		var squareOutlineWidth = 0.1 * faceWidth;
 		IrregButton.logoFaces[0].children[1].scale.setScalar( 1 - squareOutlineWidth/faceWidth * 2 );
@@ -71,22 +71,20 @@ function init_CK_and_irreg()
 		IrregButton.logoFaces[0].openQuaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),TAU / 8);
 		IrregButton.logoFaces[0].closedQuaternion = IrregButton.logoFaces[0].openQuaternion.clone();
 		var necessaryAngle = new THREE.Vector3(1,1,0).angleTo(new THREE.Vector3(1,1,1));
-		//it's one of these, or their negative
-//		IrregButton.logoFaces[0].closedQuaternion.multiply( new THREE.Quaternion().setFromAxisAngle( new THREE.Vector3(1,0,0), necessaryAngle ) );
 		IrregButton.logoFaces[0].closedQuaternion.multiply( new THREE.Quaternion().setFromAxisAngle( new THREE.Vector3(1/Math.sqrt(2),-1/Math.sqrt(2),0), TAU/4-necessaryAngle ) );
 		
-		//outline
-		IrregButton.add( new THREE.Mesh( new THREE.CircleGeometry(IrregButton.radius,64),
-				new THREE.MeshBasicMaterial( { transparent:true, color: 0x000000 } ) ) );
-		//inside
-		IrregButton.add( new THREE.Mesh( new THREE.CircleGeometry(IrregButton.radius - button_line_width,64),
-				new THREE.MeshBasicMaterial( { transparent:true, color: 0xffffff } ) ) );
+		var outlineProportion = 0.05;
+		IrregButton.add( new THREE.Mesh( new THREE.CubeGeometry(IrregButton.radius*(1-outlineProportion)*2,IrregButton.radius*(1-outlineProportion)*2,0),
+				new THREE.MeshBasicMaterial( { transparent:true } ) ) );
+		//outline 
+		IrregButton.add( new THREE.Mesh( new THREE.RingGeometry(IrregButton.radius*(1-outlineProportion-0.03),IrregButton.radius,64),
+				new THREE.MeshBasicMaterial( { transparent:true, color: 0x274257 } ) ) );
 		IrregButton.children[ IrregButton.children.length-1 ].position.z += 0.001;
 		
 		IrregButton.pulsing = 1;
 		IrregButton.pulse = 0;
 		
-		IrregButton.position.set(-playing_field_dimension / 2 + 0.45,-1.4,0.07); //or 0.002?
+		IrregButton.position.set(-2.5,-2.5,0.07); //or 0.002?
 		IrregButton.scale.z = 0.1;
 		IrregButton.capsidopen = 0;
 	}
