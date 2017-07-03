@@ -48,8 +48,6 @@ function ReadInput()
 
 function onWindowResizeExceptYoutube( canvasWidthOverHeight )
 {
-	document.getElementById("extras").style.margin = window.innerHeight.toString() + "px 0 0 0";
-	
 	var maxCanvasDimension = window.innerHeight * (447/550); //chosen by inspection
 	if( maxCanvasDimension > document.body.clientWidth / 2 ) 
 		maxCanvasDimension = document.body.clientWidth / 2;
@@ -88,16 +86,12 @@ function onWindowResizeExceptYoutube( canvasWidthOverHeight )
 		var fontSizeOverFinalCanvasDimension = (484/893)/( (476/1200)/(30/480) ); //(484/893) is the titleWidth:divWidth proportion Sheree chose,30:480 is an observed fs/fcd
 		var fontSize = Math.round( fontSizeOverFinalCanvasDimension * finalCanvasDimension );
 		titleDiv.style.fontSize = fontSize.toString() + "px";
-		
-		var titleVeryTopToVeryBottomOverCanvasDimension = 45.5 / 600; //but
-		titleHalfHeight = Math.round(titleVeryTopToVeryBottomOverCanvasDimension * finalCanvasDimension / 2);
-		console.log(titleHalfHeight)
-		titleDiv.style.margin = "-" + titleHalfHeight.toString() + "px 0 0 0";
-		
-		//we'd like to assume its center is in its center
-		var topToTitleCenterPercentageOfWindowHeight = ( playerAndCanvasBottomToWindowBottom * 3 / 2 ) / window.innerHeight * 100; //appears to be fine
-		console.log(topToTitleCenterPercentageOfWindowHeight)
-		titleDiv.style.top = topToTitleCenterPercentageOfWindowHeight.toString() + "%";
+	}
+	
+	{
+		var extras = document.getElementById("extras");
+		var halfExtrasWidth = extras.offsetWidth / 2;
+		extras.style.margin = "0 0 0 -" + halfExtrasWidth.toString() + "px";
 	}
 	
 	return finalCanvasDimension;
