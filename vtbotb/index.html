@@ -1,22 +1,41 @@
 <!--E8E9E8-->
 
 <html>
-	<head>
-		<title>Virus, the Beauty of the Beast</title>
-		<meta name="title" content="Virus, the Beauty of the Beast" />
-		
-		<meta name="description" content="An interactive documentary about viruses, and how humans have accidentally imitated them..." />
-		<meta property="twitter:description" content="An interactive documentary about viruses, and how humans have accidentally imitated them..." />
-		<meta property="og:description" content="An interactive documentary about viruses, and how humans have accidentally imitated them..." />
-		
-		<meta property="og:image" content="http://hamishtodd1.github.io/aboutme/VR_example.jpg" />
-		<meta property="twitter:image" content="http://hamishtodd1.github.io/aboutme/VR_example.jpg" />
-		
-		<link href="https://fonts.googleapis.com/css?family=Zilla+Slab" rel="stylesheet">
-		<link href="https://fonts.googleapis.com/css?family=Noto+Sans" rel="stylesheet">
-		<link href="https://fonts.googleapis.com/css?family=Noto+Sans" rel="stylesheet">
-		
-		<style>
+
+<head>
+	<title>Virus, the Beauty of the Beast</title>
+	<meta name="title" content="Virus, the Beauty of the Beast" />
+	<meta itemprop="name" content="Virus, the Beauty of the Beast">
+	<meta name="twitter:title" content="Virus, the Beauty of the Beast">
+	<meta property="og:site_name" content="Virus, the Beauty of the Beast">
+	<meta property="og:title" content="Virus, the Beauty of the Beast">
+	
+	<meta itemprop="description" content="An interactive documentary about viruses, and how humans have accidentally imitated them.">
+	<meta name="description" content="An interactive documentary about viruses, and how humans have accidentally imitated them." />
+	<meta property="twitter:description" content="An interactive documentary about viruses, and how humans have accidentally imitated them." />
+	<meta property="og:description" content="An interactive documentary about viruses, and how humans have accidentally imitated them." />
+	
+	<meta property="og:image" content="screenshot.png" />
+	<meta property="twitter:image" content="screenshot.png" />
+	<meta itemprop="image" content="screenshot.png">
+	<meta name="twitter:card" content="screenshot.png">
+	
+	<!-- miscellaneous -->
+	<meta name="twitter:creator" content="@hamish_todd">
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="http://viruspatterns.com">
+	
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+	<link rel="manifest" href="/manifest.json">
+	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+	
+	<link href="https://fonts.googleapis.com/css?family=Zilla+Slab" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Noto+Sans" rel="stylesheet">
+	<link href="Data/font-awesome.min.css" rel="stylesheet">
+	
+	<style>
 		body {
 			background-color:#E8E9E8;
 			margin:auto;
@@ -25,49 +44,77 @@
 			color:#29435A;
 			font-family:'Noto Sans',serif;
 		}
-		</style>
-	</head>
+		.subHeading {
+			font-family:'Zilla Slab';
+			font-size:30px;
+			font-weight:bold;
+		}
+		.spacing{
+			font-size: 24px;
+			color:#E8E9E8;
+		}
+		.socialMedia{
+			font-size:60px;
+			line-height:1;
+			color:#A84E5A;
+			text-decoration:none;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="title" ><!--just don't fucking touch it. They have to be dealt with in different ways, for no good reason-->
+		<center><span style="font-family:'Zilla Slab';font-weight:bold;">Virus, the Beauty of the Beast</span></center>
+	</div>
 	
-	<body>
-		<div id="title" >
-			<center><span style="font-family:'Zilla Slab';font-weight:bold;">Virus, the Beauty of the Beast</span></center>
-		</div>
+								<!--positions the div center on the page| side-by-side -->
+	<div id="playerAndCanvas" style="position:absolute; left:50%;display: flex;">
+		<div id="player"></div>
+		<div id="canvasID"></div>
+	</div>
+	
+	<div id="extras" style="position:absolute;left:50%;top:100%">
+		<center>
+		<!--the tree has to be the widest thing, so we can be sure of width. You can make it short though, and give it cream sides -->
+		<div id="goToTreeElement" style="cursor:pointer;cursor:hand;"><span class="subHeading"><u>Been here before? Click here to go to virus selection!</u></span></div>
+		<span class="spacing">a</span></br>
 		
-									<!--|positions the div center on the page| side-by-side -->
-		<div id="playerAndCanvas" style="position:absolute; left:50%;display: flex;">
-			<div id="player"></div>
-			<div id="canvasID"></div>
-		</div>
+		<span class="subHeading">Share:</span></br>
+			<a href="https://twitter.com/home?status=An%20interactive%20documentary%20about%20viruses!%20viruspatterns.com%20(via%20%40hamish_todd)"><span class="socialMedia"><i class="fa fa-twitter-square"></i></span></a>
+			
+			<a href="https://www.facebook.com/sharer/sharer.php?u=viruspatterns.com"><span class="socialMedia"><i class="fa fa-facebook-square"></i></span></a>
+			
+			<a href="https://plus.google.com/share?url=viruspatterns.com"><span class="socialMedia"><i class="fa fa-google-plus-square" aria-hidden="true"></i></span></a>
+			
+			<a href="https://twitter.com/home?status=An%20interactive%20documentary%20about%20viruses!%20viruspatterns.com%20(via%20%40hamish_todd)"><span class="socialMedia"><i class="fa fa-stumbleupon" aria-hidden="true"></i></span></a>
+			
+			<a href="https://twitter.com/home?status=An%20interactive%20documentary%20about%20viruses!%20viruspatterns.com%20(via%20%40hamish_todd)"><span class="socialMedia"><i class="fa fa-reddit" aria-hidden="true"></i></span></a>
+			
+			<a href="http://www.tumblr.com/share/link?url=http%3A%2F%2Fviruspatterns.com"><span class="socialMedia"><i class="fa fa-tumblr" aria-hidden="true"></i></span></a>
+			
+		</span></br>
+		<span class="spacing">a</span></br>
 		
-		<div id="extras" style="position:absolute;left:50%;top:100%">
-			<center>
-			<!--the tree has to be the widest thing, so we can be sure of width. You can make it short though, and give it cream sides -->
-			<div id="treePic" style="cursor:pointer;cursor:hand;width:160px"><img src="treeShot.jpg" style="width:100%;"></div>
-			
-			<span style="font-size:30px;"> </span></br>
-			
-			<!--Social media buttons-->
-			
-			<span style="font-size:0px;"> </span></br>
-			
-			<a href='http://hamishtodd1.github.io/personal/teachingResources.html'>Teaching resources</a></br>
-			<a href='http://hamishtodd1.github.io/personal/pressPage.html'>Press page</a></br>
-			<span style="font-size:30px;"> </span></br>
-			
-			Press contact / bug reports:</br>
-			<span style="unicode-bidi: bidi-override;direction: rtl;">ku.ca.de@ddoT.hsimaH</span></br>
-			<span style="font-size:30px;"> </span></br>
-			
-			<span style="font-family:'Zilla Slab';font-size:30px;font-weight:bold;">Additional Information</span></br>
-			<a href='http://hamishtodd1.github.io/'>Other things by Hamish Todd</a></br>
-			<a href='http://explorabl.es/'>Other explorable explanations</a></br>
-			<a href='http://viralzone.expasy.org/'>More on viruses</a></br>
-			<a href='https://www.youtube.com/channel/UCTl0dASnxto6j2wlVs5Bs2Q/videos'>More on spherical patterns (geodesic domes etc)</a></br>
-			<a href='http://gallery.bridgesmathart.org/exhibitions'>More sciencey art</a></br>
-			</center>
-		</div>
-	</body>
+		<span class="subHeading">Press information:</span></br>
+		<a href='http://hamishtodd1.github.io/personal/pressPage.html'>Presskit</a></br>
+		Contact: <span style="unicode-bidi: bidi-override;direction: rtl;"><strong>ku.ca.de@ddoT.hsimaH</strong></span></br>
+		Please send <strong>bug reports</strong> to this address too :)</br>
+		<span class="spacing">a</span></br>
+		
+		<span class="subHeading">Additional Information</span></br>
+		<a href='http://hamishtodd1.github.io/personal/teachingResources.html'>Teaching resources</a></br>
+		<a href='http://hamishtodd1.github.io/'>Other things by Hamish Todd</a></br>
+		<a href='http://explorabl.es/'>Other explorable explanations</a></br>
+		<a href='http://viralzone.expasy.org/'>More on viruses</a></br>
+		<a href='https://www.youtube.com/channel/UCTl0dASnxto6j2wlVs5Bs2Q/videos'>More on spherical patterns (geodesic domes etc)</a></br>
+		<a href='http://gallery.bridgesmathart.org/exhibitions'>More sciencey art</a></br>
+		</center>
+	</div>
+</body>
+	
 </html>
+
+<script src="Data/fonts/fontAwesome.js"></script>
 		
 <script src="Outside_numeric.js"></script>
 <script src="three.min.js"></script>

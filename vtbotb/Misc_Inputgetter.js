@@ -61,8 +61,6 @@ function onWindowResizeExceptYoutube( canvasWidthOverHeight )
 //		finalCanvasDimension = maxCanvasDimension;
 	finalCanvasDimension = maxCanvasDimension;
 	
-	renderer.setSize( finalCanvasDimension * canvasWidthOverHeight, finalCanvasDimension );
-
 	{
 		var playerAndCanvas = document.getElementById("playerAndCanvas");
 		
@@ -83,9 +81,11 @@ function onWindowResizeExceptYoutube( canvasWidthOverHeight )
 	{
 		var titleDiv = document.getElementById( "title" );
 		
-		var fontSizeOverFinalCanvasDimension = (484/893)/( (476/1200)/(30/480) ); //(484/893) is the titleWidth:divWidth proportion Sheree chose,30:480 is an observed fs/fcd
+		var fontSizeOverFinalCanvasDimension = 0.0854;
 		var fontSize = Math.round( fontSizeOverFinalCanvasDimension * finalCanvasDimension );
 		titleDiv.style.fontSize = fontSize.toString() + "px";
+		
+		titleDiv.style.lineHeight = 2.6 * playerAndCanvasBottomToWindowBottom / fontSize;
 	}
 	
 	{
@@ -93,6 +93,8 @@ function onWindowResizeExceptYoutube( canvasWidthOverHeight )
 		var halfExtrasWidth = extras.offsetWidth / 2;
 		extras.style.margin = "0 0 0 -" + halfExtrasWidth.toString() + "px";
 	}
+	
+	renderer.setSize( finalCanvasDimension * canvasWidthOverHeight, finalCanvasDimension );
 	
 	return finalCanvasDimension;
 }

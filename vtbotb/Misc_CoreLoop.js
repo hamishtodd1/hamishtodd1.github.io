@@ -25,6 +25,8 @@
  * "images of some other viruses" and "the reason I wanted to show this to you" - i.e. full tree
  * 
  * -------General
+ * go to tree button
+ * what made irreg crash?
  * Veiny appearance when thingy CK first opens
  * Tree
 		Really important that tree icons light up

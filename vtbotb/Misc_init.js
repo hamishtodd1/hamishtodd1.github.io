@@ -6,8 +6,9 @@ function init()
 	camera.position.z = min_cameradist;
 	render();
 
-	var treePic = document.getElementById("treePic");
+	var treePic = document.getElementById("goToTreeElement");
 	treePic.addEventListener('click', function(event) {
+		//this needs more work
 		event.preventDefault();
 		ytplayer.seekTo( 296.06 );
 	});
