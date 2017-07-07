@@ -1,5 +1,19 @@
 function initInit()
 {
+	var supportsWebGL = ( function () { try { return !! window.WebGLRenderingContext && !! document.createElement( 'canvas' ).getContext( 'experimental-webgl' ); } catch( e ) { return false; } } )();
+
+	if( !supportsWebGL )
+	{
+		var apologyImage = document.createElement("IMG");
+		apologyImage.setAttribute('src', 'apology.jpg');
+		apologyImage.setAttribute('height', renderer.domElement.width.toString() +'px');
+		apologyImage.setAttribute('width', renderer.domElement.width.toString() +'px');
+		
+		targetDIV.removeChild(renderer.domElement);
+		targetDIV.appendChild(apologyImage);
+		return;
+	}
+	
 	var btFaces = Array(8);
 	
 	function loadFace(i)
@@ -15,7 +29,6 @@ function initInit()
 					if(!btFaces[j].textureLoaded)
 						return;
 				}
-				console.log("gonna init")
 				init();
 			},
 			function ( xhr ) {}, function (  )
@@ -26,7 +39,7 @@ function initInit()
 	
 	for(var i = 0; i < btFaces.length; i++)
 	{
-		btFaces[i] = new THREE.Mesh(new THREE.PlaneGeometry(playing_field_dimension, playing_field_dimension), new THREE.MeshBasicMaterial({transparent:true,opacity:0}));
+		btFaces[i] = new THREE.Mesh(new THREE.PlaneGeometry(playing_field_dimension/2, playing_field_dimension/2), new THREE.MeshBasicMaterial({transparent:true,opacity:0}));
 		btFaces[i].textureLoaded = false;
 		
 		scene.add( btFaces[i] );

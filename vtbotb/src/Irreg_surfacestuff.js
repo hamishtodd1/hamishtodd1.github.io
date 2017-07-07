@@ -138,8 +138,8 @@ function CheckIrregButton(){
 		IrregButton.scale.set(1,1,IrregButton.scale.z);
 	}
 	
-	if( isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) < IrregButton.radius && IrregButton.capsidopen === 1 )
-		theyKnowYouCanOpenAndClose = true; //well really you want it twice TODO
+	if( isMouseDown && !isMouseDown_previously && MousePosition.distanceTo(IrregButton.position) < IrregButton.radius )
+		theyKnowYouCanOpenAndClose = true;
 	
 	if( IrregButton.pulsing ) 
 	{

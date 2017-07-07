@@ -292,7 +292,7 @@ var Mouse_delta = new THREE.Vector2(0,0);
 var EggCell;
 var Transcriptase;
 var neo_bocavirus_proteins = Array(60 + 4);
-var reproduced_proteins = Array(24);
+var reproduced_proteins = Array(14);
 var neo_bocavirus;
 
 var protein_vertex_indices = Array(number_of_proteins_in_lattice);

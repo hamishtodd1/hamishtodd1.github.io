@@ -449,6 +449,26 @@ function init_bocavirus_stuff()
 	boca_piece_destinations[62] = new THREE.Vector3(-center_few_radius,center_few_radius,0);
 	boca_piece_destinations[63] = new THREE.Vector3(-center_few_radius,-center_few_radius,0);
 	
+	var rpPositions = [
+			new THREE.Vector3(0,-11.9,0),
+			new THREE.Vector3(8,2.76,0),
+			new THREE.Vector3(-10.5,-19.7,0),
+			new THREE.Vector3(17.180197621916296, 11.30955744796198,0),
+			new THREE.Vector3(-14.607932149106873, 15.40033137013632,0),
+			
+			new THREE.Vector3(5.080356745290311, -10.292470489537159,0),
+			new THREE.Vector3(-0.1,19.4,0),
+			new THREE.Vector3(-20.97264603953411, -4.64231552675,0),
+			new THREE.Vector3(8.854115836977508, -7.854532536103758,0),
+			new THREE.Vector3(4.706960263530341, 11.606081319864234,0),
+			
+			new THREE.Vector3(20.318191179008444, -4.230280996777467, 0),
+			new THREE.Vector3(-4.781952601117331, 7.3719618689,0),
+			new THREE.Vector3(-14.534318401591644, 8.298928431069033,0),
+			new THREE.Vector3(3.5956206890328177, 20.41585589614,0),
+			new THREE.Vector3(-13.847488396507488, -12.792329,0)
+	                   ];
+	
 	//the extra ones
 	for(var i = 0; i < reproduced_proteins.length; i++)
 	{
@@ -466,9 +486,7 @@ function init_bocavirus_stuff()
 		
 		reproduced_proteins[i].scale.setScalar(0.00001);
 		
-		var positionTheta = Math.random() * TAU;
-		reproduced_proteins[i].position.x = Math.random() * EggCell_radius * 0.9 * Math.sin(positionTheta);
-		reproduced_proteins[i].position.y = Math.random() * EggCell_radius * 0.9 * Math.cos(positionTheta);
+		reproduced_proteins[i].position.copy(rpPositions[i]);
 	}
 	
 	var protein_assigned = new Uint16Array(neo_bocavirus_proteins.length);

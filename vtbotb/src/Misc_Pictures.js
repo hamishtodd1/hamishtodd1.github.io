@@ -43,7 +43,6 @@ function load_AV_stuff()
 				if(!introLoaded)
 				{
 					percentageLoaded += 85 / (random_texture_urls.length + slidesInIntro);
-					console.log(percentageLoaded)
 					for(var i = 0; i < scene.children.length; i++)
 					{
 						scene.children[i].material.opacity = (percentageLoaded/100 - i/scene.children.length ) * scene.children.length;
@@ -128,15 +127,15 @@ function load_AV_stuff()
 		random_texture_urls.push( "Data/Misc textures/cell/cell-" + i.toString() + ".png");
 	
 	//Tree
-	random_texture_urls.push( "Data/Misc textures/tree/Boca_name.png");
-	random_texture_urls.push( "Data/Misc textures/tree/Hepa_name.png");
-	random_texture_urls.push( "Data/Misc textures/tree/HIV_name.png");
-	random_texture_urls.push( "Data/Misc textures/tree/Zika_name.png");
-	random_texture_urls.push( "Data/Misc textures/tree/Measles_name.png");
+	random_texture_urls.push( "Data/Misc textures/tree/names/erythrovirus.png");
+	random_texture_urls.push( "Data/Misc textures/tree/names/hep.png");
+	random_texture_urls.push( "Data/Misc textures/tree/names/hiv.png");
+	random_texture_urls.push( "Data/Misc textures/tree/names/zikaVirus.png");
+	random_texture_urls.push( "Data/Misc textures/tree/names/measles.png");
 	
 	random_texture_urls.push( "Data/Misc textures/tree/Boca_icon.png");
 	random_texture_urls.push( "Data/Slides/hepA.jpg");
-	random_texture_urls.push( "Data/Slides/HIV.png");
+	random_texture_urls.push( "Data/Slides/HIV.jpg");
 	random_texture_urls.push( "Data/Slides/Zika Virus.jpg");
 	random_texture_urls.push( "Data/Slides/measles.jpg");
 	
@@ -158,7 +157,7 @@ function load_AV_stuff()
 	random_texture_urls.push( "Data/Slides/hepBspikes.jpg");
 	random_texture_urls.push( "Data/Slides/hepBdimples.jpg");
 
-	random_texture_urls.push( "Data/Slides/HIV.png");
+	random_texture_urls.push( "Data/Slides/HIV.jpg");
 	random_texture_urls.push( "Data/Slides/amv.png");
 	random_texture_urls.push( "Data/Slides/pp2.jpg");
 	random_texture_urls.push( "Data/Slides/uneven.png");
@@ -167,6 +166,7 @@ function load_AV_stuff()
 	random_texture_urls.push( "Data/Slides/bluetongue.jpg");
 	random_texture_urls.push( "Data/Slides/HPV.jpg");
 	
+	random_texture_urls.push( "Data/Slides/golden spiral.png");
 	
 	var randomTargets = Array(random_texture_urls.length);
 	
@@ -191,8 +191,11 @@ function load_AV_stuff()
 			golf:null,golfVirus:null,building:null,buildingVirus:null,art:null,artVirus:null,
 			hepA:null,hepB:null,aMimic1:null,aMimic2:null,bMimic1:null,bMimic2:null,
 			hiv:null, amv:null, pp2:null,uneven:null,
-			zika:null,bluetongue:null, hpv:null};
-	var randomTargetIndex = randomTargets.length-19;
+			zika:null,bluetongue:null, hpv:null,
+			spiral:null
+			};
+	var numMovingPictures = 20;
+	var randomTargetIndex = randomTargets.length-numMovingPictures;
 	for( var picture in movingPictures)
 	{
 		var picWidth = 1;
@@ -203,18 +206,23 @@ function load_AV_stuff()
 		movingPictures[picture] = new THREE.Mesh( new THREE.CubeGeometry(picWidth,picWidth, 0),
 				  								new THREE.MeshBasicMaterial({transparent:true}) );
 		
-		if( randomTargetIndex >= randomTargets.length-3 )
+		//not necessarily comparable with ytplayer.chapter ;_; but it doesn't have to be...
+		if( randomTargetIndex >= randomTargets.length-1 )
+			movingPictures[picture].chapter = ENDING_MODE;
+		else if( randomTargetIndex >= randomTargets.length-4 )
 			movingPictures[picture].chapter = QC_SPHERE_MODE;
-		else if( randomTargetIndex >= randomTargets.length-7 )
+		else if( randomTargetIndex >= randomTargets.length-8 )
 			movingPictures[picture].chapter = IRREGULAR_MODE;
-		else if( randomTargetIndex >= randomTargets.length-13 )
+		else if( randomTargetIndex >= randomTargets.length-14 )
 			movingPictures[picture].chapter = CK_MODE;
 		else
 		{
 			movingPictures[picture].chapter = BOCAVIRUS_MODE;
-			if(randomTargetIndex!==randomTargets.length-19)//first one
+			if(randomTargetIndex!==randomTargets.length-numMovingPictures)//first one
 				movingPictures[picture].position.x = playing_field_dimension;
 		}
+		
+		movingPictures[picture].position.z = 0.02;
 		
 		randomTargets[randomTargetIndex] = movingPictures[picture];
 		randomTargetIndex++;
@@ -272,7 +280,7 @@ function load_AV_stuff()
 	slide_texture_urls.push( "Data/Slides/fuller-DIY-sun-dome.jpg"); borderMultiplier.push(1);
 
 	//HIV
-	slide_texture_urls.push( "Data/Slides/HIV.png"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/HIV.jpg"); borderMultiplier.push(1);
 	slide_texture_urls.push( "Data/Slides/HIV variety.jpg"); borderMultiplier.push(1);
 	
 	slide_texture_urls.push( "Data/Slides/mimi.jpg"); borderMultiplier.push(1/(807/512));
@@ -306,7 +314,7 @@ function load_AV_stuff()
 	slide_texture_urls.push( "Data/Slides/tra_0114.jpg"); borderMultiplier.push(1);
 	slide_texture_urls.push( "Data/Slides/syr_0203.jpg"); borderMultiplier.push(1);
 	slide_texture_urls.push( "Data/Slides/spa_2220.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "Data/Slides/Darb e modified.png"); borderMultiplier.push(590/720);
+	slide_texture_urls.push( "Data/Slides/Darb e modified.jpg"); borderMultiplier.push(590/720);
 	slide_texture_urls.push( "Data/Slides/Darb e above entrance.jpg"); borderMultiplier.push(1);
 	slide_texture_urls.push( "Data/Slides/Darb e inside.jpg"); borderMultiplier.push(1);
 	slide_texture_urls.push( "Data/Slides/Darb e pentagons.jpg"); borderMultiplier.push(1);
@@ -319,8 +327,6 @@ function load_AV_stuff()
 	slide_texture_urls.push( "Data/Slides/Tomoko.jpg"); borderMultiplier.push(normalBorderMultiplier);
 	slide_texture_urls.push( "Data/Slides/boca.jpg"); borderMultiplier.push( normalBorderMultiplier);
 	slide_texture_urls.push( "Data/Slides/shell.jpg"); borderMultiplier.push(normalBorderMultiplier);
-	slide_texture_urls.push( "Data/Slides/golden spiral.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "Data/Slides/nautilus with spiral.jpg"); borderMultiplier.push(1);
 	slide_texture_urls.push( "Data/Slides/hk97.jpg"); borderMultiplier.push(normalBorderMultiplier);
 	
 	slideObjects = Array(slide_texture_urls.length);

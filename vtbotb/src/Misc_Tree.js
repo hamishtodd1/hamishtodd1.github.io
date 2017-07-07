@@ -29,7 +29,7 @@ Need sound effects here, if nowhere else
 
 */
 
-var Chapters_visible = Array(1,1,1,0,0);
+var Chapters_visible = Array(1,1,1,1,1);
 var Chapters_completed = Array(1,0,0,0,0); //first has been done by definition, for the time being at least
 
 var zika_introduction_animation = 0;
@@ -66,7 +66,7 @@ function add_tree_stuff_to_scene()
 		scene.add(Virus_chapter_icons[i]);
 	
 	for(var i = 0; i < treeBranches.length; i++)
-		scene.add(treeBranches[i]);
+		scene.add( treeBranches[i] );
 	
 	/*
 	 * opacity of branches depends on whether the chapter associated with them is complete.
@@ -109,25 +109,25 @@ function init_tree()
 		Virus_chapter_names[i].position.z -= 0.01;
 	}
 	
-	var fullTreeSize = IconDimension * 17.5;
+	var fullTreeSize = IconDimension * 13.5;
 	for(var i = 0; i < treeBranches.length; i++)
 	{
 		treeBranches[i] = new THREE.Mesh( new THREE.CubeGeometry(fullTreeSize,fullTreeSize, 0),
 						new THREE.MeshBasicMaterial({transparent:true}) );
-		treeBranches[i].position.set(0,0, -0.02);
+		treeBranches[i].position.set(0,0, 0.02);
 		
 		treeBranches[i].material.opacity = 0;
 	}
 	treeBranches[4].position.z = treeBranches[3].position.z + 0.01;
 	
 	//somewhere between max and min
-	Virus_chapter_icons[0].position.set(-1.2275910098644418, 	-7.081533028015544, 0 ); //boca
-	Virus_chapter_icons[0].scale.setScalar( 1024/720*0.6 ); //boca
-	Virus_chapter_icons[1].position.set( 0.33847159531241794, -1.49927761278835, 0 ); //Polio
+	Virus_chapter_icons[0].position.set( -0.34559600438419635, -3.520681345784686, 0 ); //boca
+	Virus_chapter_icons[0].scale.setScalar( 1024/720*0.6 );
+	Virus_chapter_icons[1].position.set( 0.2256477302082786, -0.5895184085255669, 0 ); //Polio
 	Virus_chapter_icons[2].position.set( -3.2, -3.8, 0 ); //HIV
-	Virus_chapter_icons[3].position.set(1.9045342004892776,		-3.469485406397948, 0 ); //Zika
-	Virus_chapter_icons[0].scale.setScalar( 1024/720 );
-	Virus_chapter_icons[4].position.set(2,		-7.081533028015544, 0 ); //Measles
+	Virus_chapter_icons[3].position.set(1.9045342004892776, -3.469485406397948, 0 ); //Zika
+	Virus_chapter_icons[3].scale.setScalar( 1024/720 );
+	Virus_chapter_icons[4].position.set(2, -3.481022018677029, 0 ); //Measles
 
 	for(var i = 0; i < Virus_chapter_icons.length; i++)
 	{
@@ -175,25 +175,29 @@ function update_tree()
 	}
 	
 	
-	if( !Chapters_completed[3] )
-		treeBranches[4].material.opacity = Virus_chapter_icons[3].material.opacity;
+	
 
 	{
-		for(var i = 0; i < 4; i++)
-		{
-			if( Chapters_completed[i] )
-				treeBranches[i].material.opacity += 0.02;
-			if(treeBranches[i].material.opacity > fadedOpacity)
-				treeBranches[i].material.opacity = fadedOpacity;
-		}
+		for(var i = 0; i < treeBranches.length; i++)
+			treeBranches[i].material.opacity = 1;
+		for(var i = 0; i < treeViruses.length; i++)
+			treeViruses[i].material.opacity = 1;
 		
-		for(var i = Virus_chapter_icons.length; i < treeViruses.length; i++)
-		{
-			if( Chapters_completed[ treeViruses.parentVirus] )
-				treeViruses[i].material.opacity += 0.02;
-			if(treeViruses[i].material.opacity > 1 )
-				treeViruses[i].material.opacity = 1;
-		}	
+//		for(var i = 0; i < 4; i++)
+//		{
+//			if( Chapters_completed[i] )
+//				treeBranches[i].material.opacity += 0.02;
+//			if(treeBranches[i].material.opacity > 1)
+//				treeBranches[i].material.opacity = 1;
+//		}
+//		
+//		for(var i = Virus_chapter_icons.length; i < treeViruses.length; i++)
+//		{
+//			if( Chapters_completed[ treeViruses.parentVirus] )
+//				treeViruses[i].material.opacity += 0.02;
+//			if(treeViruses[i].material.opacity > 1 )
+//				treeViruses[i].material.opacity = 1;
+//		}
 	}
 	
 	
@@ -207,7 +211,7 @@ function update_tree()
 		else
 		{
 			all_encompassing_camera_position.multiplyScalar(1/i);
-			all_encompassing_camera_position.z = min_cameradist; //hack
+			all_encompassing_camera_position.z = min_cameradist * 1.6;
 			break;
 		}
 	}

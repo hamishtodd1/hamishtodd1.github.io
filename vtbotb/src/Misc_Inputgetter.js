@@ -59,7 +59,8 @@ function onWindowResizeExceptYoutube( canvasWidthOverHeight )
 //			finalCanvasDimension = possibleDimensions[i];
 //	if( maxCanvasDimension >= 1080 * 4/3 )
 //		finalCanvasDimension = maxCanvasDimension;
-	finalCanvasDimension = maxCanvasDimension;
+	
+	var finalCanvasDimension = maxCanvasDimension;
 	
 	{
 		var playerAndCanvas = document.getElementById("playerAndCanvas");
@@ -128,7 +129,11 @@ document.addEventListener( 'mousedown', function(event) {
 	
 	InputObject.isMouseDown = true;
 	
-	console.log(MousePosition)
+	var cellPosition = new THREE.Vector3( MousePosition.x,MousePosition.y,0);
+	EggCell.children[0].updateMatrixWorld();
+	EggCell.children[0].worldToLocal( cellPosition );
+	
+	console.log( MousePosition,cellPosition );
 }, false);
 document.addEventListener( 'mouseup', 	function(event) {
 	event.preventDefault();
@@ -138,10 +143,13 @@ document.addEventListener( 'mouseup', 	function(event) {
 
 document.addEventListener( 'mousemove', function(event) {
 	event.preventDefault();
-	InputObject.mousex = event.clientX - window.innerWidth / 2 - renderer.domElement.offsetLeft / 2;
-	InputObject.mousey = -(event.clientY - window.innerHeight / 2 - renderer.domElement.offsetTop / 2);
-	InputObject.mousex *= playing_field_dimension / renderer.domElement.width;
-	InputObject.mousey *= playing_field_dimension / renderer.domElement.height;
+	
+	var canvasDimension = renderer.domElement.width;
+	
+	InputObject.mousex = event.clientX - (document.body.clientWidth / 2 + canvasDimension/2);
+	InputObject.mousey = -(event.clientY - ( ( window.innerHeight - canvasDimension ) * 3/4 + canvasDimension / 2));
+	InputObject.mousex *= playing_field_dimension / canvasDimension;
+	InputObject.mousey *= playing_field_dimension / canvasDimension;
 	
 	InputObject.mousex += camera.position.x;
 	InputObject.mousey += camera.position.y;
@@ -154,10 +162,13 @@ document.addEventListener( 'touchmove', function( event ) {
 	event.preventDefault();
 	//only the first one. You could have multitouch, but, well...
 	//TODO page scrolls when you hold it down
-	InputObject.mousex = event.changedTouches[0].clientX - window.innerWidth / 2 - renderer.domElement.offsetLeft / 2;
-	InputObject.mousey = -(event.changedTouches[0].clientY - window.innerHeight / 2 - renderer.domElement.offsetTop / 2);
-	InputObject.mousex *= playing_field_dimension / renderer.domElement.width;
-	InputObject.mousey *= playing_field_dimension / renderer.domElement.height;
+	
+	var canvasDimension = renderer.domElement.width;
+	
+	InputObject.mousex = event.changedTouches[0].clientX - (document.body.clientWidth / 2 + canvasDimension/2);
+	InputObject.mousey = -(event.changedTouches[0].clientY - ( ( window.innerHeight - canvasDimension ) * 3/4 + canvasDimension / 2));v
+	InputObject.mousex *= playing_field_dimension / canvasDimension;
+	InputObject.mousey *= playing_field_dimension / canvasDimension;
 	
 	InputObject.mousex += camera.position.x;
 	InputObject.mousey += camera.position.y;

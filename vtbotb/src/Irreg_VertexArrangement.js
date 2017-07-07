@@ -198,13 +198,17 @@ function manipulate_vertices()
 		if( capsidopenness === 1 )
 		{
 			var max_corner_mvmt = 0.01 * delta_t / 0.016;
+			
+			var hadActualDisplacementResolution = false;
+			
 			for(var i = 0; i < flatnet_vertices.array.length / 3; i++){
 				var displacement_vector = new THREE.Vector3(
 						flatnet_vertices.array[i*3+0] - manipulation_surface.geometry.attributes.position.array[i*3+0],
 						flatnet_vertices.array[i*3+1] - manipulation_surface.geometry.attributes.position.array[i*3+1],
 						flatnet_vertices.array[i*3+2] - manipulation_surface.geometry.attributes.position.array[i*3+2]);
 				if(displacement_vector.lengthSq() > 0.0001 ) {
-					//if you want it to wiggle into place it needs remembered momentum
+					hadActualDisplacementResolution = true;
+					
 					if( displacement_vector.length() > max_corner_mvmt)
 						displacement_vector.setLength(max_corner_mvmt);
 					
@@ -213,12 +217,23 @@ function manipulate_vertices()
 					manipulation_surface.geometry.attributes.position.array[i*3+2] += displacement_vector.z;
 					
 					if( !Sounds.shapeSettles.isPlaying && ytplayer.getPlayerState() === 2 )
+					{
+						Sounds.shapeSettles.volume = 1;
 						Sounds.shapeSettles.play();
+					}
 					
 					manipulation_surface.geometry.attributes.position.needsUpdate = true;
 					
 					//you also want the minimum_angles to get there at the same rate. adjust the correction function to take an array, and pass it a "to be gotten to" one
 				}
+			}
+			
+			if(!hadActualDisplacementResolution)
+			{
+				if( Sounds.shapeSettles.volume - 0.13333 < 0)//don't want this playing
+					Sounds.shapeSettles.volume = 0;
+				else
+					Sounds.shapeSettles.volume -= 0.13333;
 			}
 		}
 		else

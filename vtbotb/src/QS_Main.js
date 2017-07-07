@@ -100,8 +100,6 @@ function update_QS_center()
 		QS_measuring_stick.children[0].material.color.b -= delta_t / 1.6;
 	if(QS_measuring_stick.children[0].material.color.b < 0)
 		QS_measuring_stick.children[0].material.color.b = 0;
-	QS_measuring_stick.children[0].material.color.r = QS_measuring_stick.children[0].material.color.b;
-	QS_measuring_stick.children[0].material.color.g = QS_measuring_stick.children[0].material.color.b;
 	
 	QS_measuring_stick.children[0].material.opacity = QS_center.material.opacity; 
 	
@@ -115,6 +113,9 @@ function update_QS_center()
 	
 	QS_measuring_stick.rotation.z = Math.atan2(MousePosition.y,MousePosition.x) + TAU / 4;
 	QS_center.rotation.z = QS_measuring_stick.rotation.z;
+	
+	if(MODE === CK_MODE && capsidopenness !== 1)
+		QS_measuring_stick.children[0].material.opacity = 0;
 }
 
 var cutout_vector0_displayed = new THREE.Vector3();
@@ -132,7 +133,11 @@ function MoveQuasiLattice()
 			if( !Sounds.vertexReleased.isPlaying)
 				Sounds.vertexReleased.play();
 			if( !Sounds.shapeSettles.isPlaying )
+			{
+				Sounds.shapeSettles.volume = 1;
+				Sounds.shapeSettles.currentTime = 0;
 				Sounds.shapeSettles.play();
+			}
 		}
 	}
 	else {
@@ -308,6 +313,11 @@ function MoveQuasiLattice()
 	if(interpolation_factor == 1){ //if they've allowed it to expand, it's now officially snapped
 		cutout_vector0_player.copy(cutout_vector0);
 		cutout_vector1_player.copy(cutout_vector1);
+		
+		if(Sounds.shapeSettles.volume - 0.13333 < 0)//don't want this playing
+			Sounds.shapeSettles.volume = 0;
+		else
+			Sounds.shapeSettles.volume -= 0.13333;
 	}
 	
 	cutout_vector0_displayed.set(0,0,0)

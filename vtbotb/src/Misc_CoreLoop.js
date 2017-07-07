@@ -11,35 +11,24 @@
  * 		Film with fraps on firefox. ~3GB per file. Stick them on your hardrive
  * 		Can stop once you've got a still tree
  * 		Set resolution very high
- * 		Tree: just make an image and stick it at the end
- * 
- * ------For youtube version. In office at 8:45
- * "A pattern like this one"
- * All moving slides in high rez
- * Shape settles needs to be stoppable
- * reproduced virus proteins go in right places, "Digest the individual pieces"
- * Another picture dance for the nautilus and spiral?
- * smooth qs transitions?
- * "images of some other viruses" and "the reason I wanted to show this to you" - i.e. full tree
+ * 		black background
+ * 		No tree, but yes to "now you can choose
+ * 		960 resolution
+ * 		Wait til after you've realeased it, so you know you're not tempted to make another version
  * 
  * -------General
- * what made irreg crash?
- * Veiny appearance when thingy CK first opens
  * Tree
 		Really important that tree icons light up
 		Fade highlighted virus pictures on top
 		level select button
 		"images of some other viruses"
- * No second "next virus" cue?
- * Loading screen
- * Size snapping for the video and canvas was bullshit, correct it to whatever Sheree gives in her design
- * Check for required things like flash 10, webgl, link to video if page doesn't work in some way. Or recommend a different browser
+ * what made irreg crash?
+ * Veiny appearance when CK first opens
  * Push to the server and test (resolvable URLs)
  * Prompt bugs
  * Rotate qs into place for "resemblance"
    
    So you've triggered a repetition... but you need pause again once it's done; bear in mind the player might have done the necessary thing
- * Take a picture of yourself with VR (tomorrow, when you record)
 
 		
 	Repetition trigger fired on use button?
@@ -53,6 +42,7 @@ Touch:
 		Or did it? You put the finger down, moved it, and it flicked. Even though it copies
 	
  *  ---------Probably never to be solved
+ *  smooth qs transitions?
  *  Incorporate youtube loading into loading bar
  *  Flicker on chapter start. Could keep chapter start on the tree?
  *  Dodeca on "create lots of symmetry"

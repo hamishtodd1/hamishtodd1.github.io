@@ -2,14 +2,6 @@
 	
 function UpdateCamera() 
 {
-//	switch(MODE)
-//	{	
-//		case TREE_MODE: //NOTE THIS MAY BREAK THE CLICK DETECTION. Could do in tree code?
-//			var dampener = 200;
-//			camera.position.x = Math.sqrt(MousePosition.x) / dampener;
-//			camera.position.y = Math.sqrt(MousePosition.y) / dampener;
-//			break;
-//	}
 	
 	{
 		//z is the time through

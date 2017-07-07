@@ -84,7 +84,7 @@ function init_CK_and_irreg()
 		IrregButton.pulsing = 1;
 		IrregButton.pulse = 0;
 		
-		IrregButton.position.set(-2.5,-2.5,0.07); //or 0.002?
+		IrregButton.position.set(-2.387025, -2.387025,0.07); //or 0.002?
 		IrregButton.scale.z = 0.1;
 		IrregButton.capsidopen = 0;
 	}
