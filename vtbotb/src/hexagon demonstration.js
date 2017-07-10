@@ -253,6 +253,15 @@ pentagonDemo.init = function()
 		this.pentagons[i].rotations[3] = this.pentagons[i%8].rotations[1];
 	}
 	
+	for(var j = 1; j < 4; j++)
+	{
+		for( var i = 0; i < this.pentagons.length; i++ )
+			this.pentagons[i].positions[j].y -= 0.3;
+		
+		for( var i = 0; i < this.thins.length; i++ )
+			this.thins[i].positions[j].y -= 0.3;
+	}
+	
 	//--------------4
 	var horizontalSpacing = 0.9;
 	var verticalSpacing = 0.8;

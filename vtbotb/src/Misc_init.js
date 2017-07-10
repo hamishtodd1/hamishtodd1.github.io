@@ -57,6 +57,9 @@ function init()
 	treePic.addEventListener('click', function(event) {
 		//this needs more work
 		event.preventDefault();
+
+		window.scrollTo(0,0);
+		
 		var treeTimeStamps = [296.06,263.3,221.7,196.5, 219.9];
 		ytplayer.seekTo( treeTimeStamps[ ytplayer.chapter ] );
 	});

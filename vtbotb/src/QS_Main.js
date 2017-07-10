@@ -4,7 +4,7 @@ function UpdateQuasiSurface()
 {
 	//-------Rotation
 	//TODO saw it vibrate weirdly once?
-	if(!isMouseDown) {
+	if(!isMouseDown && Story_states[Storypage].enforced_qs_quaternion.x === 5 ) {
 		QS_rotationangle = Mouse_delta.length() / 2.5;
 		
 		QS_rotationaxis.set(-Mouse_delta.y, Mouse_delta.x, 0);
@@ -12,7 +12,7 @@ function UpdateQuasiSurface()
 		QS_rotationaxis.normalize();
 	}
 	else {
-		QS_rotationangle *= 0.93;
+		QS_rotationangle = 0;
 	}
 	
 	dodeca.rotateOnAxis(QS_rotationaxis,QS_rotationangle);
@@ -97,7 +97,7 @@ function update_QS_center()
 	if(!Mouse_delta.equals(THREE.zeroVector))
 		QS_measuring_stick.children[0].material.color.b = 1; 
 	else
-		QS_measuring_stick.children[0].material.color.b -= delta_t / 1.6;
+		QS_measuring_stick.children[0].material.color.b -= delta_t * 1.5;
 	if(QS_measuring_stick.children[0].material.color.b < 0)
 		QS_measuring_stick.children[0].material.color.b = 0;
 	

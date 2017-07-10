@@ -236,6 +236,12 @@ function Update_story()
 	if( Story_states[Storypage].enforced_cutout_vector0_player.x !== -1 ) //note to self: you're screwed if you'd like it to be -1 as that is the "default"!
 		cutout_vector0_interpolatingfrom.copy(cutout_vector0_player); //could choose it based on proximity to the destination modulo TAU / 5
 	
+	if( Story_states[Storypage].enforced_qs_quaternion.x !== 5 ) //we want you either going towards closed or closed
+	{
+		dodeca.quaternion.copy( Story_states[Storypage].enforced_qs_quaternion );
+		dodeca.updateMatrixWorld();
+	}
+	
 	//only want this for sudden transitions, not wrapups - that is handled automatically.
 	if( Story_states[Storypage].enforced_irreg_quaternion.x !== 5 ) //we want you either going towards closed or closed
 	{
@@ -385,6 +391,7 @@ function init_story()
 		enforced_CK_quaternion: new THREE.Quaternion(5,5,5,5),
 		enforced_irreg_quaternion: new THREE.Quaternion(5,5,5,5),
 		slerpIrregQuaternion: new THREE.Quaternion(5,5,5,5),
+		enforced_qs_quaternion: new THREE.Quaternion(5,5,5,5),
 		
 		pentamers_color: defaultPentamersColor.clone(),
 		hexamers_color: defaultHexamersColor.clone(),
@@ -488,6 +495,7 @@ function init_story()
 		
 		new_story_state.enforced_CK_quaternion = Story_states[0].enforced_CK_quaternion.clone();
 		new_story_state.enforced_irreg_quaternion = Story_states[0].enforced_irreg_quaternion.clone();
+		new_story_state.enforced_qs_quaternion = Story_states[0].enforced_qs_quaternion.clone();
 		new_story_state.slerpIrregQuaternion = Story_states[0].slerpIrregQuaternion.clone();
 		
 		new_story_state.startingtime = ST;
@@ -824,6 +832,7 @@ function init_story()
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,71.7); //football
+	var footballSlide = ns.slide_number;
 	ns.fadePicture = true;
 	Story_states.push(ns);
 
@@ -962,17 +971,16 @@ function init_story()
 	ns.MODE = SLIDE_MODE;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,199); //example
-	var football_slide = ns.slide_number;
+	ns = default_clone_story_state(1,196.45); //example
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,201); //geodesic example
+	ns = default_clone_story_state(1,199.7); //geodesic example
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,203); //geodesic example
+	ns = default_clone_story_state(1,202.95); //geodesic example
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(1,205.9); //geodesic building
+	ns = default_clone_story_state(1,206.2); //geodesic building
 	var epcotSlide = ns.slide_number;
 	Story_states.push(ns);
 
@@ -1054,11 +1062,11 @@ function init_story()
 	ns.capsid_open = 0;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,261); //polio position
+	ns = default_clone_story_state(0,260); //polio position
 	ns.enforced_CK_quaternion.set( -0.5795583117792323,0.2592476704069174, 0.31482085241857005,0.7055427974575411 );
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,262); //fade to polio
+	ns = default_clone_story_state(0,261); //fade to polio
 	ns.fadePicture = true;
 	ns.slide_number = hepASlide;
 	Story_states.push(ns);
@@ -1259,11 +1267,14 @@ function init_story()
 	ns.wedgesOpacity = 1;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,129.4); //t4
+	ns = default_clone_story_state(1,129.4); //phi29
+	ns.enforced_irreg_quaternion.set( -0.6474512636267394, 0.09959006634153321, -0.014453333803084903, 0.7554335030990861 );
+	ns.MODE = SLIDE_MODE;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,131.3); //T4 TODO quaternion, fade
-	ns.enforced_irreg_quaternion.set( -0.5216554828631857,-0.40506237503583453,-0.44657300762976543,0.603632817711505 );
+	ns.MODE = IRREGULAR_MODE;
+	ns.enforced_irreg_quaternion.set( -0.6474512636267394, 0.09959006634153321, -0.014453333803084903, 0.7554335030990861 );
 	ns.enforced_irreg_state = 1;
 	ns.capsid_open_immediately = 0;
 	Story_states.push(ns);
@@ -1473,25 +1484,15 @@ function init_story()
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,134.4); //back to shrine
+	ns.enforced_qs_quaternion.set( 0,0,1,0 );
+	ns.enforced_cutout_vector0_player.set(2.618033988749895, 0.8506508083520401, 0);
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,143); //pause to play around and see resemblence
 	ns.pause_at_end = 1;
+	ns.enforced_qs_quaternion.set( 0,0,1,0 );
+	ns.enforced_cutout_vector0_player.set(2.618033988749895, 0.8506508083520401, 0);
 	ns.MODE = QC_SPHERE_MODE;
-	/*
-	 * If you want:
-	 * 
-		-0.949472494034682
-		_x
-		:
-		-0.0004717317015881722
-		_y
-		:
-		-0.0032047829278359827
-		_z
-		:
-		0.313833538531401
-	 */
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,154.5); //so why do viruses use these patterns?
@@ -1514,15 +1515,15 @@ function init_story()
 	ns.enforced_cutout_vector0_player.set(1.118033988749895, 2.389492576939667, 0);
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,180.3); //lots
+	ns = default_clone_story_state(0,179.8); //lots
 	ns.enforced_cutout_vector0_player.set( 1, 2.752763840942347, 0 );
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,180.9); //of different
+	ns = default_clone_story_state(0,180.4); //of different
 	ns.enforced_cutout_vector0_player.set( 1.5, 2.389492576939667, 0 );
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,181.6); //states
+	ns = default_clone_story_state(0,180.6); //states
 	ns.enforced_cutout_vector0_player.set( 2.3090169943749475, 0.6261368200622472, 0 );
 	Story_states.push(ns);
 	
@@ -1643,8 +1644,7 @@ function init_story()
 	ns.slide_number = Measles_slide;
 	Story_states.push(ns);
 
-	ns = default_clone_story_state(0,219.9); //lots of viruses
-//	ns.slide_number = Measles_slide;
+	ns = default_clone_story_state(1,219.9); //lots of viruses
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,231.8); //complexity
@@ -1698,13 +1698,16 @@ function init_story()
 	ns = default_clone_story_state(0,259.2); //pentagons in same places
 	ns.pentamers_color.copy(hexamerPentamerHighlightColor);
 	Story_states.push(ns);
+	
+	ns = default_clone_story_state(0,261); //and back
+	Story_states.push(ns);
 
 	ns = default_clone_story_state(0,263.3); //humans coming around to the same patterns, golf ball
 	ns.MODE = SLIDE_MODE;
-	ns.slide_number = epcotSlide;
+	ns.slide_number = footballSlide;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,273.6); //HK97
+	ns = default_clone_story_state(1,271.7); //HK97
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,279); //credits viruses
@@ -1712,7 +1715,7 @@ function init_story()
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,285);
-	ns.slide_number = HIV_slide;
+	ns.slide_number = zika_slide;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,291);
@@ -1720,11 +1723,11 @@ function init_story()
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,297);
-	ns.slide_number = zika_slide;
+	ns.slide_number = first_virus_slide;
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(0,303);
-	ns.slide_number = first_virus_slide;
+	ns.slide_number = epcotSlide;
 	Story_states.push(ns);
 	
 

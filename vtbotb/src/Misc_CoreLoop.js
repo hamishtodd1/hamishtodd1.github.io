@@ -14,25 +14,10 @@
  * 		black background
  * 		No tree, but yes to "now you can choose
  * 		960 resolution
- * 		Wait til after you've realeased it, so you know you're not tempted to make another version
+ * 		Wait til after you've released it, so you know you're not tempted to make another version
  * 
  * -------General
- * Tree
-		Really important that tree icons light up
-		Fade highlighted virus pictures on top
-		level select button
-		"images of some other viruses"
- * what made irreg crash?
- * Veiny appearance when CK first opens
  * Push to the server and test (resolvable URLs)
- * Prompt bugs
- * Rotate qs into place for "resemblance"
-   
-   So you've triggered a repetition... but you need pause again once it's done; bear in mind the player might have done the necessary thing
-
-		
-	Repetition trigger fired on use button?
-	
 	
 Touch:
 	tree went wrong
@@ -42,6 +27,10 @@ Touch:
 		Or did it? You put the finger down, moved it, and it flicked. Even though it copies
 	
  *  ---------Probably never to be solved
+ *  So you've triggered a repetition... but you need pause again once it's done; bear in mind the player might have done the necessary thing
+ *  Stop player from playing on prompt
+ *  Pop
+ *  CK doesn't lose pentamer colors the first time it opens
  *  smooth qs transitions?
  *  Incorporate youtube loading into loading bar
  *  Flicker on chapter start. Could keep chapter start on the tree?

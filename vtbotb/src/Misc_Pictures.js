@@ -25,8 +25,6 @@ function load_AV_stuff()
 				}
 				if(type === 2)
 				{
-					if( index === 4 )
-						console.log(playing_field_dimension * borderMultiplier[index]);
 					var width = playing_field_dimension * borderMultiplier[index];
 					
 					slideObjects[index] = new THREE.Mesh( new THREE.CubeGeometry(width,width, 0),
@@ -139,8 +137,10 @@ function load_AV_stuff()
 	random_texture_urls.push( "Data/Slides/Zika Virus.jpg");
 	random_texture_urls.push( "Data/Slides/measles.jpg");
 	
-	for(var i = 0; i < treeBranches.length; i++)
-		random_texture_urls.push( "Data/Misc textures/tree/branches/"+i.toString()+".png");
+	random_texture_urls.push( "Data/Misc textures/tree/highlighted/hepA.jpg");
+	random_texture_urls.push( "Data/Misc textures/tree/highlighted/HIV.jpg");
+	random_texture_urls.push( "Data/Misc textures/tree/highlighted/Zika Virus.jpg");
+	random_texture_urls.push( "Data/Misc textures/tree/highlighted/measles.jpg");
 	
 	//moving pictures
 	random_texture_urls.push( "Data/Slides/golf-ball.jpg");
@@ -182,9 +182,9 @@ function load_AV_stuff()
 		randomTargets[ highestCellLayer+7+i] = Virus_chapter_icons[i];
 	}
 	
-	for(var i = 0; i < treeBranches.length; i++)
+	for(var i = 0; i < Virus_chapter_icons.length-1; i++ )
 	{
-		randomTargets[ 2+highestCellLayer+Virus_chapter_icons.length*2+i] = treeBranches[i];
+		randomTargets[ highestCellLayer+12+i] = Virus_chapter_highlights[i];
 	}
 	
 	movingPictures = {
@@ -246,7 +246,7 @@ function load_AV_stuff()
 	slide_texture_urls.push( "Data/Slides/slapped-cheek.jpg"); borderMultiplier.push(normalBorderMultiplier);
 	slide_texture_urls.push( "Data/Slides/pregnant.jpg"); borderMultiplier.push(normalBorderMultiplier);
 
-	slide_texture_urls.push( "Data/Slides/allViruses.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/allViruses.png"); borderMultiplier.push(2048/1667);
 	slide_texture_urls.push( "Data/Slides/humans.jpg"); borderMultiplier.push(normalBorderMultiplier);
 
 	slide_texture_urls.push( "Data/Slides/Cell with proteins.png"); borderMultiplier.push(1);
@@ -255,7 +255,7 @@ function load_AV_stuff()
 	slide_texture_urls.push( "Data/Slides/Cell lysis.jpg"); borderMultiplier.push(1);
 	slide_texture_urls.push( "Data/Slides/infect other cells.jpg"); borderMultiplier.push(1);
 	
-	slide_texture_urls.push( "Data/Misc textures/tree/Boca_icon.png"); borderMultiplier.push(normalBorderMultiplier*0.6);
+	slide_texture_urls.push( "Data/Misc textures/tree/Boca_icon.png"); borderMultiplier.push(normalBorderMultiplier);
 	
 	var slidesInIntro = slide_texture_urls.length;
 	
@@ -296,7 +296,7 @@ function load_AV_stuff()
 	slide_texture_urls.push( "Data/Slides/t4corners.jpg"); borderMultiplier.push(1);
 	slide_texture_urls.push( "Data/Slides/t4 shape.jpg"); borderMultiplier.push(1);
 	
-	slide_texture_urls.push( "Data/Slides/phi29.jpg"); borderMultiplier.push(1);
+	slide_texture_urls.push( "Data/Slides/phi29.jpg"); borderMultiplier.push(0.8);
 	
 	slide_texture_urls.push( "Data/Slides/Lucky.jpg"); borderMultiplier.push(512/720);
 	slide_texture_urls.push( "Data/Slides/book.jpg"); borderMultiplier.push(normalBorderMultiplier);
@@ -320,13 +320,14 @@ function load_AV_stuff()
 	slide_texture_urls.push( "Data/Slides/Darb e pentagons.jpg"); borderMultiplier.push(1);
 	slide_texture_urls.push( "Data/Slides/darb e sharp.jpg"); borderMultiplier.push(1); //next thing is to test (tree and final reused slides) without this extra slide
 	slide_texture_urls.push( "Data/Slides/drug.jpg"); borderMultiplier.push(1);
-	slide_texture_urls.push( "Data/Slides/Zika Virus.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/Zika Virus.jpg"); borderMultiplier.push(1);
 
 	//----Ending
-	slide_texture_urls.push( "Data/Slides/measles.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/measles.jpg"); borderMultiplier.push(1);
 	slide_texture_urls.push( "Data/Slides/Tomoko.jpg"); borderMultiplier.push(normalBorderMultiplier);
 	slide_texture_urls.push( "Data/Slides/boca.jpg"); borderMultiplier.push( normalBorderMultiplier);
 	slide_texture_urls.push( "Data/Slides/shell.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/allWithNames.png"); borderMultiplier.push(2048/1667);
 	slide_texture_urls.push( "Data/Slides/hk97.jpg"); borderMultiplier.push(normalBorderMultiplier);
 	
 	slideObjects = Array(slide_texture_urls.length);

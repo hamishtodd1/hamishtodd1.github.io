@@ -128,12 +128,6 @@ document.addEventListener( 'mousedown', function(event) {
 	event.preventDefault();
 	
 	InputObject.isMouseDown = true;
-	
-	var cellPosition = new THREE.Vector3( MousePosition.x,MousePosition.y,0);
-	EggCell.children[0].updateMatrixWorld();
-	EggCell.children[0].worldToLocal( cellPosition );
-	
-	console.log( MousePosition,cellPosition );
 }, false);
 document.addEventListener( 'mouseup', 	function(event) {
 	event.preventDefault();

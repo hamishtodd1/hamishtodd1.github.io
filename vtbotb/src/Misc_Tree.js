@@ -29,20 +29,18 @@ Need sound effects here, if nowhere else
 
 */
 
-var Chapters_visible = Array(1,1,1,1,1);
+var Chapters_visible = Array(1,1,1,0,0);
 var Chapters_completed = Array(1,0,0,0,0); //first has been done by definition, for the time being at least
 
 var zika_introduction_animation = 0;
 
 var Virus_chapter_icons = Array(5);
 var Virus_chapter_names = Array(5);
+var Virus_chapter_highlights = Array(4);
 
 var delay_timer = 0;
 
-//everything you decide about this is temporary, but: dark blue circle, quite transparent
-var Chapter_highlighter;
-
-var IconDimension = playing_field_dimension * 0.225 * 2/3;
+var IconDimension = 1.4;
 
 var tree_zoomedness = 1;
 var tree_zoomtowards = 999;
@@ -65,8 +63,8 @@ function add_tree_stuff_to_scene()
 	for(var i = 0; i < Virus_chapter_icons.length; i++ )
 		scene.add(Virus_chapter_icons[i]);
 	
-	for(var i = 0; i < treeBranches.length; i++)
-		scene.add( treeBranches[i] );
+//	for(var i = 0; i < treeBranches.length; i++)
+//		scene.add( treeBranches[i] );
 	
 	/*
 	 * opacity of branches depends on whether the chapter associated with them is complete.
@@ -77,81 +75,70 @@ function add_tree_stuff_to_scene()
 	 * 
 	 * Aaaaaaand take a picture of it for the "images of some other viruses" preview
 	 */
-	
-	scene.add(Chapter_highlighter);
 }
 
 function init_tree()
 {
-	Chapter_highlighter = new THREE.Mesh( 
-			new THREE.CircleGeometry( IconDimension / 2, 32 ), 
-			new THREE.MeshBasicMaterial( { transparent: true, opacity: 0.3, color: 0x0000ff } ) );
-	Chapter_highlighter.position.z = 0.01;
-	Chapter_highlighter.position.y = playing_field_dimension;
-	
-	for(var i = 0; i < treeViruses.length; i++)
+	var name_dimension = IconDimension / 3 * 1.8;
+	for(var i = 0; i < Virus_chapter_icons.length; i++)
 	{
-		treeViruses[i] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension, IconDimension ), new THREE.MeshBasicMaterial({transparent: true}) );
-		if(i < Virus_chapter_icons.length)
-			Virus_chapter_icons[i] = treeViruses[i];
-	}
-	
-	var name_dimension = IconDimension / 3;
-	for(var i = 0; i < treeViruses.length; i++)
-	{	
+		var hackMultiplier = i ? 0.93 : 1024 / 720;
+		Virus_chapter_icons[i] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension*hackMultiplier, IconDimension*hackMultiplier ), new THREE.MeshBasicMaterial({transparent: true}) );
+		
+		if( i )
+		{
+			Virus_chapter_highlights[i-1] = new THREE.Mesh( new THREE.PlaneGeometry( IconDimension*0.9, IconDimension*0.9 ), new THREE.MeshBasicMaterial({transparent: true, opacity:0}) );
+			Virus_chapter_highlights[i-1].position.z = 0.01;
+			Virus_chapter_icons[i].add(Virus_chapter_highlights[i-1]);
+		}
+		
 		Virus_chapter_names[i] = new THREE.Mesh( new THREE.CubeGeometry(name_dimension, name_dimension, 0),
-				  new THREE.MeshBasicMaterial( { transparent: true, opacity: 0 } ) );
+				  new THREE.MeshBasicMaterial( { transparent: true, opacity: 1 } ) );
 		
-		treeViruses[i].add(Virus_chapter_names[i]);
+		Virus_chapter_names[i].position.y = -0.64;
+		Virus_chapter_names[i].position.z = 0.01;
 		
-		Virus_chapter_names[i].position.y -= IconDimension / 2;
-		Virus_chapter_names[i].position.y -= name_dimension / 4;
-		Virus_chapter_names[i].position.z -= 0.01;
+		Virus_chapter_icons[i].add(Virus_chapter_names[i]);
 	}
 	
-	var fullTreeSize = IconDimension * 13.5;
-	for(var i = 0; i < treeBranches.length; i++)
-	{
-		treeBranches[i] = new THREE.Mesh( new THREE.CubeGeometry(fullTreeSize,fullTreeSize, 0),
-						new THREE.MeshBasicMaterial({transparent:true}) );
-		treeBranches[i].position.set(0,0, 0.02);
-		
-		treeBranches[i].material.opacity = 0;
-	}
-	treeBranches[4].position.z = treeBranches[3].position.z + 0.01;
+//	Virus_chapter_icons[0].scale.setScalar( 1024/720*0.6 );
+//	Virus_chapter_icons[3].scale.setScalar( 1024/720 );
 	
-	//somewhere between max and min
-	Virus_chapter_icons[0].position.set( -0.34559600438419635, -3.520681345784686, 0 ); //boca
-	Virus_chapter_icons[0].scale.setScalar( 1024/720*0.6 );
-	Virus_chapter_icons[1].position.set( 0.2256477302082786, -0.5895184085255669, 0 ); //Polio
-	Virus_chapter_icons[2].position.set( -3.2, -3.8, 0 ); //HIV
-	Virus_chapter_icons[3].position.set(1.9045342004892776, -3.469485406397948, 0 ); //Zika
-	Virus_chapter_icons[3].scale.setScalar( 1024/720 );
-	Virus_chapter_icons[4].position.set(2, -3.481022018677029, 0 ); //Measles
 
 	for(var i = 0; i < Virus_chapter_icons.length; i++)
 	{
-		Virus_chapter_icons[i].position.multiplyScalar(2/3)
+		Virus_chapter_icons[i].position.copy(getCorrectTreePosition(i));
+	}
+}
+
+function getCorrectTreePosition(iconIndex)
+{
+	var numVisible = 0;
+	for(var i = 0; i < Virus_chapter_icons.length; i++)
+	{
+		if( Chapters_completed[i] )
+			numVisible += 1;
+		else
+			numVisible += Virus_chapter_icons[i].material.opacity;
 	}
 	
-	for(var i = Virus_chapter_icons.length; i < treeViruses.length; i++)
-	{	
-		if( i -Virus_chapter_icons.length < 9)
-			treeViruses[i].parentVirus = 1;
-		else if( i -Virus_chapter_icons.length < 12)
-			treeViruses[i].parentVirus = 2;
-		else if( i -Virus_chapter_icons.length < 14)
-			treeViruses[i].parentVirus = 3;
-	}	
+	var circleRadius = 1.4;
+	
+	var correctPosition = new THREE.Vector3(0,circleRadius,0);
+	correctPosition.applyAxisAngle( z_central_axis, iconIndex * TAU / numVisible );
+	
+	return correctPosition;
 }
 
 //maybe this should be called before anything in the loop
 function update_tree()
 {
-	var fadedOpacity = 0.3;
+	var fadedOpacity = 0.2;
 	
 	for(var i = 0; i < Virus_chapter_icons.length; i++)
 	{
+		Virus_chapter_icons[i].position.copy(getCorrectTreePosition(i));
+		
 		if( Chapters_completed[i] )
 		{
 			if(delay_timer > 1.3)
@@ -169,37 +156,8 @@ function update_tree()
 			Virus_chapter_icons[i].material.opacity += 0.02;
 			if(Virus_chapter_icons[i].material.opacity > 1)
 				Virus_chapter_icons[i].material.opacity = 1;
-		} 
-		
-		Virus_chapter_icons[i].children[0].material.opacity = Virus_chapter_icons[i].material.opacity;
+		}
 	}
-	
-	
-	
-
-	{
-		for(var i = 0; i < treeBranches.length; i++)
-			treeBranches[i].material.opacity = 1;
-		for(var i = 0; i < treeViruses.length; i++)
-			treeViruses[i].material.opacity = 1;
-		
-//		for(var i = 0; i < 4; i++)
-//		{
-//			if( Chapters_completed[i] )
-//				treeBranches[i].material.opacity += 0.02;
-//			if(treeBranches[i].material.opacity > 1)
-//				treeBranches[i].material.opacity = 1;
-//		}
-//		
-//		for(var i = Virus_chapter_icons.length; i < treeViruses.length; i++)
-//		{
-//			if( Chapters_completed[ treeViruses.parentVirus] )
-//				treeViruses[i].material.opacity += 0.02;
-//			if(treeViruses[i].material.opacity > 1 )
-//				treeViruses[i].material.opacity = 1;
-//		}
-	}
-	
 	
 	var tree_zoom_increment_amt = 0.6 * delta_t;
 	
@@ -211,7 +169,7 @@ function update_tree()
 		else
 		{
 			all_encompassing_camera_position.multiplyScalar(1/i);
-			all_encompassing_camera_position.z = min_cameradist * 1.6;
+			all_encompassing_camera_position.z = min_cameradist;
 			break;
 		}
 	}
@@ -266,7 +224,6 @@ function update_tree()
 		{
 			//skip to it being there, don't want to come back here and see it moving weirdly
 			Chapters_completed[tree_zoomtowards] = 1;
-			Chapter_highlighter.visible = false;
 			
 			ytplayer.changeChapter(tree_zoomtowards);
 			
@@ -276,36 +233,40 @@ function update_tree()
 		}
 	}
 	
-	var hovering = 0;
-	
 	//------------------Mouse stuff
-	for(var i = 0; i < Virus_chapter_icons.length; i++ )
+	for(var i = 1; i < Virus_chapter_icons.length; i++ )
 	{
 		if( !Chapters_visible[i] )
 			continue;
 		
-		//for the time being, you can't repeat chapters. If you want to, we need to make a "back button", sooo... yeah, almost certainly fuck it
 		if( Chapters_completed[i] )
 			continue;
 		
-		if( MousePosition.distanceTo(Virus_chapter_icons[i].position) < IconDimension / 2 ) //the radius, we're modelling them as circles
+		if( MousePosition.distanceTo(Virus_chapter_icons[i].position) < IconDimension / 2 )
 		{
 			//player has officially hovered
-			Chapter_highlighter.position.set( Virus_chapter_icons[i].position.x, Virus_chapter_icons[i].position.y, 0.01 );
-			
-			Chapter_highlighter.visible = true;
+			Virus_chapter_highlights[i-1].material.opacity = 1;
 			
 			//and have they clicked?
 			if(isMouseDown && !isMouseDown_previously)
 			{
 				tree_zoomtowards = i;
 			}
-			
-			hovering = 1;
+		}
+		else
+		{
+			Virus_chapter_highlights[i-1].material.opacity = 0;
 		}
 	}
-	if(hovering)
-		Chapter_highlighter.visible = true;
-	else
-		Chapter_highlighter.visible = false;
+	
+	if(tree_zoomedness !== 0)
+	{
+		for(var i = 0; i < Virus_chapter_highlights.length; i++ )
+		{
+			Virus_chapter_highlights[i].material.opacity = 0;
+		}
+	}
+	
+	for(var i = 0; i < Virus_chapter_names.length; i++)
+		Virus_chapter_names[i].material.opacity = Virus_chapter_icons[i].material.opacity;
 }

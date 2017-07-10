@@ -18,10 +18,10 @@ function Map_lattice() {
 	{
 		var lattice_fadein_duration = 2;
 		var lattice_opacity = capsidopenness; //we'd like to have this be capsidopenness but it is hiding a bug!
-		if( our_CurrentTime < lattice_fadein_time )
-			lattice_opacity = 0;
 		if( Story_states[Storypage].persistentLattice )
 			lattice_opacity = 1;
+		if( our_CurrentTime < lattice_fadein_time )
+			lattice_opacity = 0;
 		else if( our_CurrentTime < lattice_fadein_time + lattice_fadein_duration )
 			lattice_opacity = ( our_CurrentTime - lattice_fadein_time ) / lattice_fadein_duration;
 		//otherwise it's 1.

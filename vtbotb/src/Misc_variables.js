@@ -77,10 +77,6 @@ var number_of_lattice_points = 1 + 3 * number_of_hexagon_rings*(number_of_hexago
 //in the limited environment we will end up with (and might do well to be going with) a circle of existence for lattice pts is prb. best
 
 //----------------Initialized, then static
-var treeBranches = Array(5);
-
-var treeViruses = Array(14+5);
-
 var backgroundtexture;
 var viruspicture_scales = Array(1,0.577,0.5,0.3779,1/3,0.28867,0.27735);
 var camera_movementspeed = 0;
