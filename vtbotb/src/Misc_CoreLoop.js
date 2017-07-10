@@ -97,6 +97,9 @@ function UpdateWorld()
 var everySoOftenTimer = 0;
 
 function render() {
+	if(!logged)
+		console.error("yo")
+	logged = 1
 	delta_t = ourclock.getDelta();
 	
 	everySoOftenTimer += delta_t;

@@ -1,5 +1,6 @@
 function initInit()
 {
+	console.log("startingInit")
 	var supportsWebGL = ( function () { try { return !! window.WebGLRenderingContext && !! document.createElement( 'canvas' ).getContext( 'experimental-webgl' ); } catch( e ) { return false; } } )();
 
 	if( !supportsWebGL )
@@ -51,6 +52,7 @@ function initInit()
 function init() 
 {
 	camera.position.z = min_cameradist;
+	console.log("rendering something")
 	render();
 
 	var treePic = document.getElementById("goToTreeElement");

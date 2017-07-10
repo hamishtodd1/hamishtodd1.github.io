@@ -14,6 +14,7 @@ var theyKnowYouCanOpenAndClose = false;
 
 function Update_story()
 {	
+	console.log("updating story")
 	if(Storypage !== -1) //first part of this function is all based on current state, which you don't have at the very start
 	{
 		if( Story_states[Storypage].fadePicture )

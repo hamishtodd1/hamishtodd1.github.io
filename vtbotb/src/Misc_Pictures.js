@@ -101,6 +101,9 @@ function load_AV_stuff()
 					Sounds.shapeClose.volume = openCloseVolume;
 					Sounds.triangleEdgeSound.volume = 0.4;
 					
+					Sounds.rotateAntiClockwise.volume = 0.4;
+					Sounds.rotateClockwise.volume = 0.4;
+					
 					PICTURES_LOADED = 1; //this may create problems with skipping forward to places where you haven't loaded the pic yet
 					attempt_launch();
 				}
@@ -299,7 +302,7 @@ function load_AV_stuff()
 	slide_texture_urls.push( "Data/Slides/phi29.jpg"); borderMultiplier.push(0.8);
 	
 	slide_texture_urls.push( "Data/Slides/Lucky.jpg"); borderMultiplier.push(512/720);
-	slide_texture_urls.push( "Data/Slides/book.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/Book.jpg"); borderMultiplier.push(normalBorderMultiplier);
 	slide_texture_urls.push( "Data/Slides/excerpt.jpg"); borderMultiplier.push(normalBorderMultiplier);
 	
 	//----QS

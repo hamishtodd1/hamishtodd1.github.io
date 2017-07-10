@@ -50,7 +50,9 @@ function onWindowResizeExceptYoutube( canvasWidthOverHeight )
 {
 	var maxCanvasDimension = window.innerHeight * (447/550); //chosen by inspection
 	if( maxCanvasDimension > document.body.clientWidth / 2 ) 
-		maxCanvasDimension = document.body.clientWidth / 2;
+		maxCanvasDimension = Math.floor( document.body.clientWidth / 2 );
+	if(maxCanvasDimension % 2)
+		maxCanvasDimension -= 1;
 	
 //	var finalCanvasDimension = 144;
 //	var possibleDimensions = [240,360,480,720,1080];
@@ -141,7 +143,7 @@ document.addEventListener( 'mousemove', function(event) {
 	var canvasDimension = renderer.domElement.width;
 	
 	InputObject.mousex = event.clientX - (document.body.clientWidth / 2 + canvasDimension/2);
-	InputObject.mousey = -(event.clientY - ( ( window.innerHeight - canvasDimension ) * 3/4 + canvasDimension / 2));
+	InputObject.mousey = -(event.clientY - ( ( window.innerHeight - canvasDimension ) * 3/4 + canvasDimension / 2)) - document.body.scrollTop;
 	InputObject.mousex *= playing_field_dimension / canvasDimension;
 	InputObject.mousey *= playing_field_dimension / canvasDimension;
 	
@@ -160,7 +162,7 @@ document.addEventListener( 'touchmove', function( event ) {
 	var canvasDimension = renderer.domElement.width;
 	
 	InputObject.mousex = event.changedTouches[0].clientX - (document.body.clientWidth / 2 + canvasDimension/2);
-	InputObject.mousey = -(event.changedTouches[0].clientY - ( ( window.innerHeight - canvasDimension ) * 3/4 + canvasDimension / 2));v
+	InputObject.mousey = -(event.changedTouches[0].clientY - ( ( window.innerHeight - canvasDimension ) * 3/4 + canvasDimension / 2)) - document.body.scrollTop;
 	InputObject.mousex *= playing_field_dimension / canvasDimension;
 	InputObject.mousey *= playing_field_dimension / canvasDimension;
 	
