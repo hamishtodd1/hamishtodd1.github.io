@@ -302,7 +302,7 @@ function load_AV_stuff()
 	slide_texture_urls.push( "Data/Slides/phi29.jpg"); borderMultiplier.push(0.8);
 	
 	slide_texture_urls.push( "Data/Slides/Lucky.jpg"); borderMultiplier.push(512/720);
-	slide_texture_urls.push( "Data/Slides/Book.jpg"); borderMultiplier.push(normalBorderMultiplier);
+	slide_texture_urls.push( "Data/Slides/Book.jpg"); borderMultiplier.push(normalBorderMultiplier); 
 	slide_texture_urls.push( "Data/Slides/excerpt.jpg"); borderMultiplier.push(normalBorderMultiplier);
 	
 	//----QS
