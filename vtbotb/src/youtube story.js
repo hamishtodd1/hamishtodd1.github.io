@@ -13,8 +13,7 @@ var cutout_vector0_interpolatingfrom = new THREE.Vector3();
 var theyKnowYouCanOpenAndClose = false;
 
 function Update_story()
-{	
-	console.log("updating story")
+{
 	if(Storypage !== -1) //first part of this function is all based on current state, which you don't have at the very start
 	{
 		if( Story_states[Storypage].fadePicture )
@@ -131,7 +130,9 @@ function Update_story()
 		}
 		
 		if( Story_states[Storypage].unpauseOn() )
+		{
 			ytplayer.playVideo();
+		}
 		
 		if( ytplayer.getPlayerState() === 2 )
 			unpause_timer += delta_t;
@@ -318,7 +319,9 @@ function Update_story()
 	
 	//If we've just ticked forward then of course we should be playing anyway, but if we just started a new chapter, having been on the tree, we might be paused
 	if( !Story_states[Storypage].prevent_playing )
-		ytplayer.playVideo();
+	{
+		ytplayer.playVideo(); //this is what was starting it initially
+	}
 	
 	if( Story_states[Storypage].capsid_open !== -1 )
 		IrregButton.capsidopen = Story_states[Storypage].capsid_open;
@@ -516,8 +519,11 @@ function init_story()
 //	Story_states.push(ns);
 	
 	//---------------Real thing
+	ns = default_clone_story_state(1,0);
+	ns.fadePicture = true;
+	Story_states.push(ns);
 	
-	ns = default_clone_story_state(1,0.01);
+	ns = default_clone_story_state(1,0.01); //really we want bluetongue first
 	Story_states.push(ns);
 	
 	ns = default_clone_story_state(1,12.2); //hiv
@@ -699,7 +705,7 @@ function init_story()
 	ns.playerHasLearned = function() { return false;}
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,500);
+	ns = default_clone_story_state(0,1000);
 	Story_states.push(ns);
 	
 	//------CK BEGINS
@@ -1081,7 +1087,7 @@ function init_story()
 	ns.prevent_playing = 1;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,500); //safety
+	ns = default_clone_story_state(0,1000); //safety
 	Story_states.push(ns);
 	
 	//-----------IRREG BEGINS
@@ -1389,7 +1395,7 @@ function init_story()
 	ns.CKPicScale = playing_field_dimension;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,500); //safety
+	ns = default_clone_story_state(0,1000); //safety
 	ns.capsid_open = 0;
 	Story_states.push(ns);
 
@@ -1417,12 +1423,12 @@ function init_story()
 
 	ns = default_clone_story_state(0,9.4); //QS, Try it out, (pause)
 	ns.MODE = QC_SPHERE_MODE;
-	ns.loopBackTo = 10.4;
-	ns.playerHasLearned = function() { return theyknowyoucanchangestate; };
+//	ns.loopBackTo = 10.4;
+//	ns.playerHasLearned = function() { return theyknowyoucanchangestate; };
 	ns.pause_at_end = 1;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,12.4); //may not seem like a virus
+	ns = default_clone_story_state(0,12.35); //may not seem like a virus
 	Story_states.push(ns);
 
 	ns = default_clone_story_state(1,17.9); //HPV
@@ -1547,7 +1553,7 @@ function init_story()
 	ns.prevent_playing = 1;
 	Story_states.push(ns);
 	
-	ns = default_clone_story_state(0,300);
+	ns = default_clone_story_state(0,1000);
 	Story_states.push(ns);
 	
 	//------ENDING BEGINS!!!!

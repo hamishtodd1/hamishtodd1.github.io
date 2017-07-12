@@ -14,7 +14,7 @@ function load_AV_stuff()
 	
 	function loadpic(url, type, index) {
 		texture_loader.load(
-				url,
+				"http://viruspatterns.com/" + url,
 			function(texture) {
 				if(type === 1)
 				{
@@ -91,7 +91,7 @@ function load_AV_stuff()
 					                      ];
 					for(var i = 0; i < soundInfoArray.length; i++)
 					{
-						Sounds[soundInfoArray[i]] = new Audio( "Data/Sounds/" + soundInfoArray[i] + ".mp3" );
+						Sounds[soundInfoArray[i]] = new Audio( "http://viruspatterns.com/Data/Sounds/" + soundInfoArray[i] + ".mp3" );
 					}
 					
 					var openCloseVolume = 0.2;
@@ -241,6 +241,8 @@ function load_AV_stuff()
 	//slides
 	var normalBorderMultiplier = 1024 / 720;
 	var borderMultiplier = [];
+	
+	slide_texture_urls.push( "Data/Slides/bug.jpg"); borderMultiplier.push(1);
 	
 	slide_texture_urls.push( "Data/Slides/Zika victim.jpg"); borderMultiplier.push(normalBorderMultiplier);
 	slide_texture_urls.push( "Data/Slides/hiv victim.jpg"); borderMultiplier.push(normalBorderMultiplier);

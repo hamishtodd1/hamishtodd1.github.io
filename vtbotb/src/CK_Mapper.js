@@ -9,17 +9,20 @@ function Map_lattice() {
 	var pentamers_color_adder = 1;
 	if(LatticeGrabbed)
 		pentamers_color_adder = 0;
+	
+	var pentamersHighlighter = (1-capsidopenness);
+	if( Story_states[Storypage].persistentLattice )
+		pentamersHighlighter = 1;
 	var pentamers_color = new THREE.Color( /*we're trying something new*/
-			surface_hexamers_color.r + (1-capsidopenness) * pentamers_color_adder * ( final_pentamers_color.r - surface_hexamers_color.r ),
-			surface_hexamers_color.g + (1-capsidopenness) * pentamers_color_adder * ( final_pentamers_color.g - surface_hexamers_color.g ),
-			surface_hexamers_color.b + (1-capsidopenness) * pentamers_color_adder * ( final_pentamers_color.b - surface_hexamers_color.b ) );
+			surface_hexamers_color.r + pentamersHighlighter * pentamers_color_adder * ( final_pentamers_color.r - surface_hexamers_color.r ),
+			surface_hexamers_color.g + pentamersHighlighter * pentamers_color_adder * ( final_pentamers_color.g - surface_hexamers_color.g ),
+			surface_hexamers_color.b + pentamersHighlighter * pentamers_color_adder * ( final_pentamers_color.b - surface_hexamers_color.b ) );
 	
 	//the part where we explain things
 	{
 		var lattice_fadein_duration = 2;
 		var lattice_opacity = capsidopenness; //we'd like to have this be capsidopenness but it is hiding a bug!
-		if( Story_states[Storypage].persistentLattice )
-			lattice_opacity = 1;
+		
 		if( our_CurrentTime < lattice_fadein_time )
 			lattice_opacity = 0;
 		else if( our_CurrentTime < lattice_fadein_time + lattice_fadein_duration )

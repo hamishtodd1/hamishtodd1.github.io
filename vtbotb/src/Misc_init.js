@@ -1,6 +1,5 @@
 function initInit()
 {
-	console.log("startingInit")
 	var supportsWebGL = ( function () { try { return !! window.WebGLRenderingContext && !! document.createElement( 'canvas' ).getContext( 'experimental-webgl' ); } catch( e ) { return false; } } )();
 
 	if( !supportsWebGL )
@@ -19,7 +18,7 @@ function initInit()
 	
 	function loadFace(i)
 	{
-		var url = "Data/Misc textures/loading/" + i.toString() + ".png";
+		var url = "http://viruspatterns.com/Data/Misc textures/loading/" + i.toString() + ".png";
 		texture_loader.load( url,
 			function(texture) 
 			{
@@ -52,25 +51,24 @@ function initInit()
 function init() 
 {
 	camera.position.z = min_cameradist;
-	console.log("rendering something")
 	render();
 
 	var treePic = document.getElementById("goToTreeElement");
-	treePic.addEventListener('click', function(event) {
-		//this needs more work
-		event.preventDefault();
-
-		window.scrollTo(0,0);
-		
-		var treeTimeStamps = [296.06,263.3,221.7,196.5, 219.9];
-		ytplayer.seekTo( treeTimeStamps[ ytplayer.chapter ] );
-	});
-	treePic.addEventListener('mouseleave', function(event) {
-		if(cursorIsHand)
-			document.body.style.cursor = '-webkit-grab';
-		else
-			document.body.style.cursor = '';
-	});
+//	treePic.addEventListener('click', function(event) {
+//		//this needs more work
+//		event.preventDefault();
+//
+//		window.scrollTo(0,0);
+//		
+//		var treeTimeStamps = [296.06,263.3,221.7,196.5, 219.9];
+//		ytplayer.seekTo( treeTimeStamps[ ytplayer.chapter ] );
+//	});
+//	treePic.addEventListener('mouseleave', function(event) {
+//		if(cursorIsHand)
+//			document.body.style.cursor = '-webkit-grab';
+//		else
+//			document.body.style.cursor = '';
+//	});
 	
 	//-----properly initializing
 	pentagonDemo.init();
@@ -97,12 +95,5 @@ function attempt_launch()
 		return;
 	}
 	
-	/*
-	 * Don't worry about having the loading as a percentage - have it as a geometrical object.
-	 * Do load a canvas, because we should be checking for webgl first.
-	 * 
-	 * There's an argument for only loading those of the current youtube video
-	 * 
-	 * Really you want the youtube stuff to begin coming in after you have a loading picture up
-	 */
+	ytplayer.playVideo(); //no, it does not make sense that this would solve it
 }

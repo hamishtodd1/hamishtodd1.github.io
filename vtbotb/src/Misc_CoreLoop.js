@@ -1,4 +1,5 @@
 /* Youtube version, from which you edit facebook version
+ * 		960 tall
  * 		Spacebar to play
  * 		Mouse visible but get it out of the way
  * 		And one long youtube version for if the page doesn't load?
@@ -17,7 +18,17 @@
  * 		Wait til after you've released it, so you know you're not tempted to make another version
  * 
  * -------General
- * Push to the server and test (resolvable URLs)
+ * 
+ * Do need to stop because of end of prompt...
+ * Tablet
+ * 
+ * 
+ * 
+	Animations in animated gifs, changes in systems / games. Both of these allow your brain to perform the same procedures better. = training. Your brain works over time, it's interesting how... in some sense all we do with systems is "put things in the time dimension"
+
+Maybe you could prove platonic sharks by finding a godel's incompleteness theorem for biology?
+
+
 	
 Touch:
 	tree went wrong
@@ -46,7 +57,7 @@ Touch:
 function UpdateWorld()
 {
 //	performance_checker.begin_frame();
-	console.log()
+	
 	switch(MODE)
 	{	
 		case BOCAVIRUS_MODE:
@@ -97,10 +108,11 @@ function UpdateWorld()
 var everySoOftenTimer = 0;
 
 function render() {
-	if(!logged)
-		console.error("yo")
-	logged = 1
 	delta_t = ourclock.getDelta();
+	
+//	console.log(YOUTUBE_READY)
+//	if(ytplayer && typeof ytplayer.getPlayerState === 'function' && ytplayer.getPlayerState() === -1)
+//		console.log('"unstarted"')
 	
 	everySoOftenTimer += delta_t;
 	if( everySoOftenTimer > 1 )

@@ -8,7 +8,6 @@ var our_CurrentTime = 0;
 var last_timeupdate = 0;
 
 var rolling_sum = 0;
-var num_samples_taken = 0;
 
 function react_to_video()
 {
@@ -18,7 +17,7 @@ function react_to_video()
 	var timeupdate = ytplayer.getCurrentTime();
 	if( timeupdate === last_timeupdate)
 	{
-		if( ytplayer.getPlayerState() === 1 ) //it's playing. Problem though: we might need to wait longer than one frame for timeupdate to catch up
+		if( ytplayer.getPlayerState() === 1 || ytplayer.getPlayerState() === 3 ) //it's playing. Problem though: we might need to wait longer than one frame for timeupdate to catch up
 			our_CurrentTime += probable_time_elapsed_in_video;
 	}
 	else
@@ -28,11 +27,6 @@ function react_to_video()
 		var potential_new_STV = timeupdate;
 		if( ytplayer.getPlayerState() === 1 )
 			potential_new_STV += probable_time_elapsed_in_video / 2; //it probably reached this time in the middle of the last frame
-		
-		var jolt_size = potential_new_STV - (our_CurrentTime + probable_time_elapsed_in_video);
-		rolling_sum += jolt_size;
-		num_samples_taken++;
-//		console.log( rolling_sum / num_samples_taken );
 		
 		if( potential_new_STV > our_CurrentTime || potential_new_STV < our_CurrentTime - 1 ) //we don't want to step back, unless maybe the player has!
 			our_CurrentTime = potential_new_STV;
@@ -67,7 +61,7 @@ function onYouTubeIframeAPIReady()
 				}, false);
 				
 				attempt_launch(); 
-			} 
+			},
 		},
 		playerVars: 
 		{
