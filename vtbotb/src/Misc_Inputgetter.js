@@ -14,7 +14,6 @@
 //this function shouldn't actually *do* anything with the data, it's only to be read elsewhere.
 var cursorIsHand = false;
 var justLeftiFrame = false;
-var resetMouse = false;
 
 function ReadInput()
 {
@@ -29,19 +28,15 @@ function ReadInput()
 		justLeftiFrame = 0;
 	}
 	
-	Mouse_delta.set( MousePosition.x - OldMousePosition.x, MousePosition.y - OldMousePosition.y);
-	
 	isMouseDown_previously = isMouseDown;
 	isMouseDown = InputObject.isMouseDown;
 	
 	if(isMouseDown && !isMouseDown_previously) //because touchscreen - you're not jumping from one place to another
-		resetMouse = true;
-	
-	if(resetMouse && !OldMousePosition.equals(MousePosition))
 	{
 		OldMousePosition.copy( MousePosition );
-		resetMouse = false; //test on jessie's computer
 	}
+	
+	Mouse_delta.set( MousePosition.x - OldMousePosition.x, MousePosition.y - OldMousePosition.y);
 	
 	react_to_video();	
 }
@@ -137,13 +132,19 @@ document.addEventListener( 'mouseup', 	function(event) {
 	InputObject.isMouseDown = false;
 }, false);
 
-document.addEventListener( 'mousemove', function(event) {
-	event.preventDefault();
-	
+function updateInputObjectMousePosition(unfilteredX, unfilteredY)
+{
 	var canvasDimension = renderer.domElement.width;
 	
-	InputObject.mousex = event.clientX - (document.body.clientWidth / 2 + canvasDimension/2);
-	InputObject.mousey = -(event.clientY - ( ( window.innerHeight - canvasDimension ) * 3/4 + canvasDimension / 2)) - document.body.scrollTop;
+	var wasInCanvas = false;
+	
+	InputObject.mousex = unfilteredX - (document.body.clientWidth / 2 + canvasDimension/2);
+	InputObject.mousey = -(unfilteredY - ( ( window.innerHeight - canvasDimension ) * 3/4 + canvasDimension / 2)) - document.body.scrollTop;
+	
+	if( -0.5 <= InputObject.mousex / canvasDimension && InputObject.mousex / canvasDimension <= 0.5 &&
+		-0.5 <= InputObject.mousey / canvasDimension && InputObject.mousey / canvasDimension <= 0.5 )
+		wasInCanvas = true;
+	
 	InputObject.mousex *= playing_field_dimension / canvasDimension;
 	InputObject.mousey *= playing_field_dimension / canvasDimension;
 	
@@ -151,33 +152,30 @@ document.addEventListener( 'mousemove', function(event) {
 	InputObject.mousey += camera.position.y;
 	InputObject.mousex -= camera.directionalShakeContribution.x;
 	InputObject.mousey -= camera.directionalShakeContribution.y;
+	
+	return wasInCanvas;
+}
+
+document.addEventListener( 'mousemove', function(event) 
+{
+	event.preventDefault();
+	updateInputObjectMousePosition(event.clientX, event.clientY);
 }, false ); //window?
 
-//remember there can be weirdness for multiple fingers, so make sure any crazy series of inputs are interpretable
-document.addEventListener( 'touchmove', function( event ) {
-	event.preventDefault();
+document.addEventListener( 'touchmove', function( event )
+{
 	//only the first one. You could have multitouch, but, well...
 	//TODO page scrolls when you hold it down
 	
-	var canvasDimension = renderer.domElement.width;
-	
-	InputObject.mousex = event.changedTouches[0].clientX - (document.body.clientWidth / 2 + canvasDimension/2);
-	InputObject.mousey = -(event.changedTouches[0].clientY - ( ( window.innerHeight - canvasDimension ) * 3/4 + canvasDimension / 2)) - document.body.scrollTop;
-	InputObject.mousex *= playing_field_dimension / canvasDimension;
-	InputObject.mousey *= playing_field_dimension / canvasDimension;
-	
-	InputObject.mousex += camera.position.x;
-	InputObject.mousey += camera.position.y;
-	InputObject.mousex -= camera.directionalShakeContribution.x;
-	InputObject.mousey -= camera.directionalShakeContribution.y;
-}, false );
+	if( updateInputObjectMousePosition( event.changedTouches[0].clientX, event.changedTouches[0].clientY ) )
+		event.preventDefault();
+}, { passive: false } );
 document.addEventListener( 'touchstart', function(event)
 {
-	event.preventDefault();
+	updateInputObjectMousePosition( event.changedTouches[0].clientX, event.changedTouches[0].clientY );
 	InputObject.isMouseDown = true;
 }, false );
 document.addEventListener( 'touchend', function(event)
 {
-	event.preventDefault();
 	InputObject.isMouseDown = false;
 }, false );

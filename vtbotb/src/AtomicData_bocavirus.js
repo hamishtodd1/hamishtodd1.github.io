@@ -17,7 +17,6 @@ var start_reproducing_time = 2;
 var whole_thing_finish_time = 2000;
 
 function update_bocavirus() {
-	stmvHider.position.z = EggCell.position.z + 0.001;
 	
 	//-------camera Story stuff
 	if( our_CurrentTime < pullback_start_time || whole_thing_finish_time < our_CurrentTime)
@@ -262,6 +261,7 @@ function init_bocavirus_stuff()
 	var outlineColor = 0x000000;
 	
 	stmvHider = new THREE.Mesh(new THREE.CircleBufferGeometry(2.2,32),new THREE.MeshBasicMaterial({color:outlineColor}));
+	stmvHider.position.z = 0.001;
 	
 	//aligns it with the color transformations we're going to do
 	{

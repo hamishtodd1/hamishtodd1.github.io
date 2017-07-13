@@ -26,7 +26,7 @@ function react_to_video()
 		//then they update just before you check again. So they have a whole frame over you, and the reverse might put them a frame under you.
 		var potential_new_STV = timeupdate;
 		if( ytplayer.getPlayerState() === 1 )
-			potential_new_STV += probable_time_elapsed_in_video / 2; //it probably reached this time in the middle of the last frame
+			potential_new_STV += probable_time_elapsed_in_video / 2; //we guess it reached this time in the middle of the last frame
 		
 		if( potential_new_STV > our_CurrentTime || potential_new_STV < our_CurrentTime - 1 ) //we don't want to step back, unless maybe the player has!
 			our_CurrentTime = potential_new_STV;
