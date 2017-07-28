@@ -1,110 +1,197 @@
-<!--So, this needs to be quite sophisticated. Reacts to window resize. Changes youtube video resolution. This can be done by changing body properties in javascript-->
-<!--A gradient or something in the background too, not pure white-->
+<!--E8E9E8-->
 
 <html>
-	<head>
-		<title>Virus, the Beauty of the Beast</title>
-		<meta name="title" content="Virus, the Beauty of the Beast" />
-		
-		<meta name="description" content="An interactive documentary about viruses, and how humans have accidentally imitated them..." />
-		<meta property="twitter:description" content="An interactive documentary about viruses, and how humans have accidentally imitated them..." />
-		<meta property="og:description" content="An interactive documentary about viruses, and how humans have accidentally imitated them..." />
-		
-		<meta property="og:image" content="http://hamishtodd1.github.io/aboutme/VR_example.jpg" />
-		<meta property="twitter:image" content="http://hamishtodd1.github.io/aboutme/VR_example.jpg" />
-		
-		<style>
+
+<head>
+	<title>Virus, the Beauty of the Beast</title>
+	
+	<!-- miscellaneous -->
+	<meta name="twitter:card" content="player">
+	<meta name="twitter:creator" content="@hamish_todd">
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="http://viruspatterns.com">
+	
+	<meta name="title" content="Virus, the Beauty of the Beast" />
+	<meta itemprop="name" content="Virus, the Beauty of the Beast">
+	<meta name="twitter:title" content="Virus, the Beauty of the Beast">
+	<meta property="og:site_name" content="Virus, the Beauty of the Beast">
+	<meta property="og:title" content="Virus, the Beauty of the Beast">
+	
+	<meta itemprop="description" content="An interactive science video about viruses - and how humans have accidentally imitated them.">
+	<meta name="description" content="An interactive science video about viruses - and how humans have accidentally imitated them." />
+	<meta name="twitter:description" content="An interactive science video about viruses - and how humans have accidentally imitated them." />
+	<meta property="og:description" content="An interactive science video about viruses - and how humans have accidentally imitated them." />
+	
+	<meta property="og:image" content="http://viruspatterns.com/screenshot.jpg" />
+	<meta name="twitter:image" content="http://viruspatterns.com/screenshot.jpg" />
+	<meta itemprop="image" content="http://viruspatterns.com/screenshot.jpg">
+	
+	<meta property="og:image:width" content="640" />
+	<meta property="og:image:height" content="320" />
+	
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+	<link rel="manifest" href="/manifest.json">
+	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+	
+	<link href="https://fonts.googleapis.com/css?family=Zilla+Slab" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Noto+Sans" rel="stylesheet">
+	
+	<meta name="twitter:player" content="https://viruspatterns.com/container.html" />
+	<meta name="twitter:player:width" content="640" />
+	<meta name="twitter:player:height" content="320" />
+	<meta name="twitter:player:stream" content="https://viruspatterns.com/preview.mp4" />
+	<meta name="twitter:player:stream:content_type" content="video/mp4" />
+	
+	<style>
 		body {
 			background-color:#E8E9E8;
 			margin:auto;
 			line-height:1.6;
-			font-size:18px;
-			color:#444;
+			font-size:15px;
+			color:#29435A;
+			font-family:'Noto Sans',serif;
 		}
-		strong{
-			font-size:28px
+		.subHeading {
+			font-family:'Zilla Slab';
+			font-size:30px;
+			font-weight:bold;
 		}
-		</style>
-	</head>
+		.spacing{
+			font-size: 24px;
+			color:#E8E9E8;
+		}
+		.socialMedia{
+			font-size:70px;
+			line-height:1;
+			color:#A84E5A;
+			text-decoration:none;
+		}
+	</style>
 	
-	<body>
-	<!--
-	think of the margin as a displacer, the way that we center it
-	the way it is here is not necessarily the way it's gonna be, we can't have logic here.
-	The thing we carry is: this div is centered, horizontally and vertically
-	-->
-		<div id="playerAndCanvas" style="width:720px; height:360px; position:absolute; top:60%; left:50%; margin:-180px 0 0 -360px; display: flex; align:center;">
-			<div id="player"></div>
-			<div id="canvasID"></div>
-		</div>
-		<div id="extras" style="text-align:center;margin-top: 360px;"><!--gets changed-->
-			<div style="display: inline-block;">
-				<!--"go to tree" button; make sure the picture's bigger than the widest text!-->
-				<div id="treePic" style="cursor:pointer;cursor:hand;padding:0pxmargin:0px"><img src="clickableTree.jpg" style="width:100%;"></div>
-				
-				<!--Social media buttons-->
-				</br>
-				</br>
-				
-				<a href='http://hamishtodd1.github.io/personal/teachingResources.html'>Teaching resources</a></br>
-				<a href='http://hamishtodd1.github.io/personal/pressPage.html'>Press page</a>
-				</br>
-				</br>
-				
-				Press contact / bug reports:</br>
-				<span style="unicode-bidi: bidi-override;direction: rtl;">ku.ca.de@ddoT.hsimaH</span>
-				</br>
-				
-				<p><strong>More of this</strong></br>
-				<a href='http://hamishtodd1.github.io/'>Other things by Hamish Todd</a></br>
-				<a href='http://explorabl.es/'>Other "Explorable Explanations"</a></br>
-				<a href='http://viralzone.expasy.org/'>More on viruses</a></br>
-				<a href='https://www.youtube.com/channel/UCTl0dASnxto6j2wlVs5Bs2Q/videos'>More on spherical patterns (geodesic domes etc)</a></br>
-				<a href='http://gallery.bridgesmathart.org/exhibitions'>More sciencey art</a></p>
-			</div>
-		</div>
-	</body>
-</html>
+	<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-102337687-1', 'auto');
+		ga('send', 'pageview');
+
+	</script>
+</head>
+
+<body>
+	<div id="title" ><!--just don't fucking touch it. They have to be dealt with in different ways, for no good reason-->
+		<center><span style="font-family:'Zilla Slab';font-weight:bold;">Virus, the Beauty of the Beast</span></center>
+	</div>
+	
+								<!--positions the div center on the page| side-by-side -->
+	<div id="playerAndCanvas" style="position:absolute; left:50%;display: flex;">
+		<div id="player"></div>
+		<div id="canvasID"></div>
+	</div>
+	
+	<div id="extras" style="position:absolute;left:50%;top:100%">
+		<center>
+		<!--the tree has to be the widest thing, so we can be sure of width. You can make it short though, and give it cream sides -->
+		<div id="goToTreeElement" style="cursor:pointer;cursor:hand;"><span class="subHeading"><u>Click <span style="color:#A84E5A;">here</span> to skip to <span style="color:#A84E5A;">virus selection</span>!</u></span></div>
+		<span class="spacing">a</span></br>
 		
-<script src="Outside_numeric.js"></script>
-<script src="three.min.js"></script>
-<script src="Outside_combinedcamera.js"></script>
+		<span class="subHeading">Share:</span></br>
+			<a href="https://twitter.com/home?status=An%20interactive%20documentary%20about%20viruses!%20viruspatterns.com%20(via%20%40hamish_todd)" rel="noopener noreferrer" target="_blank"><span class="socialMedia"><i class="fa fa-twitter-square"></i></span></a><span class="socialMedia"> </span>
+				
+			<a href="https://www.facebook.com/viruspatterns/" rel="noopener noreferrer" target="_blank"><span class="socialMedia"><i class="fa fa-facebook-square"></i></span></a><span class="socialMedia"> </span>
+			
+			<a href="https://plus.google.com/share?url=http%3A%2F%2Fviruspatterns.com" rel="noopener noreferrer" target="_blank"><span class="socialMedia"><i class="fa fa-google-plus-square" aria-hidden="true"></i></span></a><span class="socialMedia"> </span>
+			
+			<a href="https://www.reddit.com/submit?url=http%3A%2F%2Fviruspatterns.com" rel="noopener noreferrer" target="_blank"><span class="socialMedia"><i class="fa fa-reddit" aria-hidden="true"></i></span></a><span class="socialMedia"> </span>
+			
+			<a href="http://www.tumblr.com/share/link?url=http%3A%2F%2Fviruspatterns.com" rel="noopener noreferrer" target="_blank"><span class="socialMedia"><i class="fa fa-tumblr" aria-hidden="true"></i></span></a>
+			
+			<a href="http://www.tumblr.com/share/link?url=http%3A%2F%2Fviruspatterns.com" rel="noopener noreferrer" target="_blank"><span class="socialMedia"><i class="fa fa-hacker-news" aria-hidden="true"></i></span></a>
+			<a href="https://news.ycombinator.com/submit" class="hn-button" data-title="Virus, the Beauty of the Beast" data-url="http://viruspatterns.com">Vote on Hacker News</a>
+<script type="text/javascript">var HN=[];HN.factory=function(e){return function()
+{HN.push([e].concat(Array.prototype.slice.call(arguments,0)))};
+},HN.on=HN.factory("on"),HN.once=HN.factory("once"),HN.off=HN.factory("off"),HN.emit=HN.factory("emit"),
+HN.load=function(){var e="hn-button.js";if(document.getElementById(e))return;var t=document.createElement("script");
+t.id=e,t.src="//hn-button.herokuapp.com/hn-button.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(t,n)},HN.load();</script>
+			
+			<!--<a href="" rel="noopener noreferrer" target="_blank"><span class="socialMedia"><i class="fa fa-stumbleupon" aria-hidden="true"></i></span></a> screw stumbleupon-->
+			
+		</span></br>
+		<span class="spacing">a</span></br>
+		
+		<!--all other links in new tabs?-->
+		
+		<span class="subHeading">Press information:</span></br>
+		<a href='http://hamishtodd1.github.io/personal/pressPage.html'>Presskit</a></br>
+		Contact: <span style="unicode-bidi: bidi-override;direction: rtl;"><strong>ku.ca.de@ddoT.hsimaH</strong></span></br>
+		Please send <strong>bug reports</strong> to this address too :)</br>
+		<span class="spacing">a</span></br>
+		
+		<span class="subHeading">Additional Information</span></br>
+		<a href='http://hamishtodd1.github.io/personal/teachingResources.html'>Teaching resources</a></br>
+		<a href='http://hamishtodd1.github.io/'>Other things by Hamish Todd</a></br>
+		<a href='http://explorabl.es/'>Other explorable explanations</a></br>
+		<a href='http://viralzone.expasy.org/'>More on viruses</a></br>
+		<a href='https://www.youtube.com/channel/UCTl0dASnxto6j2wlVs5Bs2Q/videos'>More on spherical patterns (geodesic domes etc)</a></br>
+		<a href='http://www.sciencewithinreach.com/'>Virus assembly toy</a></br>
+		<a href='http://gallery.bridgesmathart.org/exhibitions'>More sciencey art</a></br>
+		
+		<span class="spacing">a</span></br>
+		</center>
+	</div>
+</body>
+	
+</html>
 
-<script src="Misc_variables.js"></script>
-<script src="Misc_Functions.js"></script>
 
-<script src="Misc_Tree.js"></script>
+
+<script src="Data/fonts/fontAwesome.js"></script>
+
+<script src="src/Outside_numeric.js"></script>
+<script src="src/three.min.js"></script>
+<script src="src/Outside_combinedcamera.js"></script>
+
+<script src="src/Misc_variables.js"></script>
+<script src="src/Misc_Functions.js"></script>
+
+<script src="src/Misc_Tree.js"></script>
 
 <script src="Data/coarse protein coords.js"></script>
 <script src="Data/coarse protein triangle indices.js"></script>
-<script src="AtomicData_bocavirus.js"></script>
+<script src="src/AtomicData_bocavirus.js"></script>
 
-<script src="CK_MappingFunctions.js"></script>
-<script src="CK_Mapper.js"></script>
-<script src="CK_lattice.js"></script>
-<script src="CK_Irreg_init.js"></script>
-<script src="CK_Surface.js"></script>
+<script src="src/CK_MappingFunctions.js"></script>
+<script src="src/CK_Mapper.js"></script>
+<script src="src/CK_lattice.js"></script>
+<script src="src/CK_Irreg_init.js"></script>
+<script src="src/CK_Surface.js"></script>
 
-<script src="Irreg_checkingfunctions.js"></script>
-<script src="Irreg_VertexArrangement.js"></script>
-<script src="Irreg_surfacestuff.js"></script>
+<script src="src/Irreg_checkingfunctions.js"></script>
+<script src="src/Irreg_VertexArrangement.js"></script>
+<script src="src/Irreg_surfacestuff.js"></script>
 
-<script src="QS_Main.js"></script>
-<script src="QS_init.js"></script>
-<script src="QS_Mapper.js"></script>
+<script src="src/QS_Main.js"></script>
+<script src="src/QS_init.js"></script>
+<script src="src/QS_Mapper.js"></script>
 
-<script src="Misc_Inputgetter.js"></script>
+<script src="src/Misc_Inputgetter.js"></script>
 
-<script src="Irreg_alexandrov.js"></script>
-<script src="Irreg_alexandrovflipper.js"></script>
-<script src="Misc_camerastuff.js"></script>
-<script src="Misc_CoreLoop.js"></script>
-<script src="Misc_Pictures.js"></script>
-<script src="Misc_init.js"></script>
+<script src="src/Irreg_alexandrov.js"></script>
+<script src="src/Irreg_alexandrovflipper.js"></script>
+<script src="src/Misc_camerastuff.js"></script>
+<script src="src/Misc_CoreLoop.js"></script>
+<script src="src/Misc_Pictures.js"></script>
+<script src="src/Misc_init.js"></script>
 
-<script src="hexagon demonstration.js"></script>
+<script src="src/hexagon demonstration.js"></script>
 
-<script src="Data/youtube story.js"></script>
-<script src="Data/youtube stuff.js"></script>
+<script src="src/youtube story.js"></script>
+<script src="src/youtube stuff.js"></script>
 
-<script>init();</script>
+<script>
+	initInit();
+</script>
