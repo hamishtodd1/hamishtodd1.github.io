@@ -1,66 +1,72 @@
 <html>
-	<head>
-		<title>Protein Viewer</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<style>
-			body {
-				font-family: Monospace;
-				background-color: #101010;
-				color: #fff;
-				margin: 0px;
-				overflow: hidden;
-			}
-			a {
-				color: #f00;
-			}
-		</style>
-	</head>
-	<body>
-		<!--these two scripts are purely for the ripped-off setup-->
-		<script type="x-shader/x-vertex" id="vertexShader">
-			varying vec3 vWorldPosition;
-			void main() {
-				vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
-				vWorldPosition = worldPosition.xyz;
-				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-			}
-		</script>
-		<script type="x-shader/x-fragment" id="fragmentShader">
-			uniform vec3 topColor;
-			uniform vec3 bottomColor;
-			uniform float offset;
-			uniform float exponent;
-			varying vec3 vWorldPosition;
-			void main() {
-				float h = normalize( vWorldPosition + offset ).y;
-				gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( max( h , 0.0), exponent ), 0.0 ) ), 1.0 );
-			}
-		</script>
+<head>
+	<title>Application of the Klein Bottle</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<style>
+		body {
+			background-color:#E8E9E8;
+			margin:auto;
+			line-height:1.6;
+			font-size:15px;
+			color:#29435A;
+			font-family:'Noto Sans',serif;
+		}
+		.subHeading {
+			font-family:'Zilla Slab';
+			font-size:30px;
+			font-weight:bold;
+		}
+		.spacing{
+			font-size: 24px;
+			color:#E8E9E8;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="canvas" style="position:absolute; left:50%; top:50%"></div>
+	
+	<div id="extras" style="position:absolute;left:50%;top:100%">
+		<center>
 		
-		<!----><script src="Dependencies/ngl.js"></script>
+		<iframe src="https://www.youtube.com/embed/BWiO9X2b2t4" frameborder="0" width="853" height="480" ></iframe>
 		
-		<script src="Dependencies/three.min.js"></script>
-		<script src="Dependencies/SceneFromDemo.js"></script>
-		<script src="Dependencies/THREEx.FullScreen.js"></script>
-				
-		<script src="Dependencies/StereoEffect.js"></script>
-		<script src="Dependencies/DeviceOrientationControls.js"></script>
+		<span class="spacing">a</span></br>
+		Contact: <span style="unicode-bidi: bidi-override;direction: rtl;"><strong>moc.liamg@1ddot.hsimah</strong></span></br>
+		<span class="spacing">a</span></br>
 		
-		<script src="Variables.js"></script>
+		<span class="subHeading">Additional Information</span></br>
+		<a href='http://hamishtodd1.github.io/'>Other things by Hamish Todd</a></br>
+		<a href='http://explorabl.es/'>Other explorable explanations</a></br>
+		<a href='https://en.wikipedia.org/wiki/Klein_Bottle'>More on the Klein Bottle</a></br>
 		
-		<script src="Input.js"></script>
-		
-		<script src="Initialization.js"></script>
-		<script src="NGLgetter.js"></script>
-		<script src="ObjectOfInterest.js"></script>
-		<script src="CoreLoop.js"></script>
-		
-		<script>
-			Initialize();
-		</script>
-		
-	</body>
+		<span class="spacing">a</span></br>
+		</center>
+	</div>
+</body>
+	
 </html>
 
-<!--webglviewer is "appended" in init-->
+
+
+<script src="lib/three.min.js"></script>
+<script src="lib/OBJLoader.js"></script>
+
+<script src="variables.js"></script>
+<script src="input.js"></script>
+<script src="kleinBottle.js"></script>
+<script src="gliderSystem.js"></script>
+<script src="core.js"></script>
+
+<script>
+	/*new THREE.FontLoader().load( "data/gentilis.js", 
+		function ( reponse ) {
+			gentilis = reponse;
+			
+		},
+		function ( xhr ) {}, //progression function
+		function ( xhr ) { console.error( "couldn't load font" ); }
+	);*/
+	init();
+</script>

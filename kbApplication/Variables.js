@@ -1,46 +1,36 @@
 //-----Mathematical constants
-var TAU = Math.PI * 2;
-var PHI = (1+Math.sqrt(5)) / 2;
-var zAxis = new THREE.Vector3(0,0,1); //also used as a placeholder normal
-var yAxis = new THREE.Vector3(0,1,0);
-var xAxis = new THREE.Vector3(1,0,0);
+TAU = Math.PI * 2;
+PHI = (1+Math.sqrt(5)) / 2;
+HS3 = Math.sqrt(3)/2;
+zAxis = new THREE.Vector3(0,0,1); //also used as a placeholder normal
+yAxis = new THREE.Vector3(0,1,0);
+xAxis = new THREE.Vector3(1,0,0);
+zeroVector = new THREE.Vector3();
 
-//-----Fundamental
-var ourclock = new THREE.Clock( true ); //.getElapsedTime ()
-var delta_t = 0;
-var logged = 0;
-var debugging = 0;
+//-----Fundamental, varying
+ourclock = new THREE.Clock( true ); //.getElapsedTime ()
+frameDelta = 0.000001;
+logged = 0;
+debugging = 0;
 
-var isMobileOrTablet = false;
+THREE.Quaternion.prototype.distanceTo = function(q2)
+{
+	var theta = Math.acos(this.w*q2.w + this.x*q2.x + this.y*q2.y + this.z*q2.z);
+	return theta;
+}
 
-//Static. At least in some sense.
-var gentilis;
+var gliderGrabbed = false;
+var bgGrabbed = false;
+var kbPointGrabbed = false;
 
-var Scene;
-var Camera;
-
-var OurVREffect;
-var OurVRControls;
-
-var OurObject = new THREE.Object3D();
-
-var Protein = new THREE.Object3D();
-
-var stage = new NGL.Stage();
-
-var TestSphere = new THREE.Mesh( new THREE.SphereGeometry( 0.3, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
-
-var PointOfFocus = new THREE.Vector3(); //where the user is looking
-
-/*
- * Don't rush it out with a bad fov or whatever
- * 
- * you probably want a floor
- * 
- * Coooooould look into basic collaboration with GearVR. Two people in there could talk to one another, they could have a cursor that's just on the protein
- * 
- * We would like a loading model a sign saying "loading", that throbs or something, until the protein arrives, and rotates to face you
- * 
- * Let's see about a nice translucent surface around a ribbon
- */
-
+function getSignedAngleBetween(a,b)
+{	
+	var aN = a.clone().normalize();
+	var bN = b.clone().normalize();
+	var crossProd = new THREE.Vector3().crossVectors(aN,bN);
+	var angleChange = Math.asin(crossProd.length());
+	if( crossProd.z < 0 )
+		angleChange *= -1;
+	
+	return angleChange;
+}
