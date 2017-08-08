@@ -1269,7 +1269,7 @@ function init_story()
 	
 	irreg_flash_time = 124.1; //highlight cuts
 
-	ns = default_clone_story_state(0,128.35); //wedges
+	ns = default_clone_story_state(0,127.9); //wedges
 	ns.irreg_button_invisible = 1;
 	ns.wedgesOpacity = 1;
 	Story_states.push(ns);

@@ -2,14 +2,12 @@
  * 		960 tall
  * 		Spacebar to play
  * 		Mouse visible but get it out of the way
- * 		And one long youtube version for if the page doesn't load?
  * 		Titles, (virus, object) Each gets a pic of the virus side by side with the object
  * 			Why do viruses have so much in common with human designs? (rota, golf ball)
  * 			What does zika virus have in common with Islamic art? (zika, dome)
  * 			What do Hepatitis viruses have in common with soccer balls? (hep a, soccer ball)
  * 			What does HIV have in common with origami? (phi29, origami)
  * 			And that's what viruses have in common with human designs (measles and super dodecahedral?)
- * 		Film with fraps on firefox. ~3GB per file. Stick them on your hardrive
  * 		Can stop once you've got a still tree
  * 		Set resolution very high
  * 		black background

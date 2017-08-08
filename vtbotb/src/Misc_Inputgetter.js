@@ -77,13 +77,23 @@ function onWindowResizeExceptYoutube( canvasWidthOverHeight )
 	}
 	
 	{
-		var titleDiv = document.getElementById( "title" );
-		
 		var fontSizeOverFinalCanvasDimension = 0.0854;
 		var fontSize = Math.round( fontSizeOverFinalCanvasDimension * finalCanvasDimension );
-		titleDiv.style.fontSize = fontSize.toString() + "px";
 		
+		var titleDiv = document.getElementById( "title" );
+		titleDiv.style.fontSize = fontSize.toString() + "px";
 		titleDiv.style.lineHeight = 2.6 * playerAndCanvasBottomToWindowBottom / fontSize;
+		
+		var warningDiv = document.getElementById( "warning" );
+		
+		if( window.innerHeight>window.innerWidth )
+		{
+			warningDiv.style.fontSize = fontSize.toString() + "px";
+			warningDiv.style.lineHeight = 0;
+			warningDiv.style.visibility='visible';
+		}
+		else
+			warningDiv.style.visibility='hidden';
 	}
 	
 	{

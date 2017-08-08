@@ -61,7 +61,8 @@ function init()
 		window.scrollTo(0,0);
 		
 		var treeTimeStamps = [296.06,263.3,221.7,196.5, 219.9];
-		ytplayer.seekTo( treeTimeStamps[ ytplayer.chapter ] );
+		if(ytplayer.chapter !== 5)
+			ytplayer.seekTo( treeTimeStamps[ ytplayer.chapter ] );
 	});
 	treePic.addEventListener('mouseleave', function(event) {
 		if(cursorIsHand)

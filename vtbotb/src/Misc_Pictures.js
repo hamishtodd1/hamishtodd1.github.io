@@ -99,6 +99,10 @@ function load_AV_stuff()
 					Sounds.shapeClose.defaultVolume = openCloseVolume;
 					Sounds.shapeOpen.volume = openCloseVolume;
 					Sounds.shapeClose.volume = openCloseVolume;
+					
+					Sounds.vertexGrabbed.volume = 0.3;
+					Sounds.vertexReleased.volume = 0.3;
+					
 					Sounds.triangleEdgeSound.volume = 0.4;
 					
 					Sounds.rotateAntiClockwise.volume = 0.4;
