@@ -28,9 +28,7 @@ function getSignedAngleBetween(a,b)
 	var aN = a.clone().normalize();
 	var bN = b.clone().normalize();
 	var crossProd = new THREE.Vector3().crossVectors(aN,bN);
-	var angleChange = Math.asin(crossProd.length());
-	if( crossProd.z < 0 )
-		angleChange *= -1;
+	var angleChange = Math.asin(crossProd.z );
 	
 	return angleChange;
 }

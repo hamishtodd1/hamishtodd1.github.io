@@ -20,92 +20,155 @@ function initKBSystem()
 {
 	var kbSystem = new THREE.Object3D();
 	
-	var minorTubeRadius = 0.03;
+	var minorTubeRadius = 0.026;
 	var majorTubeRadius = minorTubeRadius * 3;
 	var bendRadius = minorTubeRadius * 2;
 	var neckHeight = bendRadius * 3;
 	
-	kbSystem.kb = makeKB( minorTubeRadius, majorTubeRadius,bendRadius,neckHeight ); //repeat this line with whatever you like
-	kbSystem.add(kbSystem.kb);
+	kb = makeKB( minorTubeRadius, majorTubeRadius,bendRadius,neckHeight ); //repeat this line with whatever you like
+	kbSystem.add(kb);
 	
-	kbSystem.diamond = new THREE.Mesh(new THREE.CylinderGeometry(0.0034,0.0034,0.01,4), new THREE.MeshBasicMaterial({color:0x000000, side: THREE.DoubleSide}));
-	for(var i =0; i < kbSystem.diamond.geometry.vertices.length; i++)
+	diamond = new THREE.Mesh(new THREE.CylinderGeometry(0.0034,0.0034,0.004,4), new THREE.MeshBasicMaterial({color:0x000000, side: THREE.DoubleSide}));
+	for(var i =0; i < diamond.geometry.vertices.length; i++)
 	{
-		kbSystem.diamond.geometry.vertices[i].applyAxisAngle(xAxis,TAU/4)
+		diamond.geometry.vertices[i].applyAxisAngle(xAxis,TAU/4)
 	}
-	kbSystem.kb.add(kbSystem.diamond)
-	kbSystem.diamond.orientation = 0;
-	kbSystem.diamond.direction = 7/8*TAU;
+	kb.add(diamond)
+	diamond.orientation = 0;
+	diamond.direction = 7/8*TAU;
+	diamond.position.copy( kb.getPointOnKB( diamond.direction,diamond.orientation ) );
+	diamond.flip = 1; //1 if right side up, -1 otherwise
+	
+	//----arrow shit
+	{
+		var directionArrow = new THREE.Mesh( new THREE.Geometry(), new THREE.MeshBasicMaterial({color: 0xFF0000, side:THREE.DoubleSide}) );
+		var full_length = 0.02;
+		var head_length = full_length / 3;
+		var head_width = head_length / (Math.sqrt(3) / 2);
+		var body_width = head_width / 2.8;
+		
+		directionArrow.geometry.vertices.push(
+			new THREE.Vector3( 0, full_length, 0 ),
+			new THREE.Vector3( head_width / 2, full_length - head_length, 0 ),
+			new THREE.Vector3(-head_width / 2, full_length - head_length, 0 )
+		);
+		directionArrow.geometry.faces.push(new THREE.Face3(0,2,1));
+		
+		directionArrow.geometry.vertices.push(
+				new THREE.Vector3(-body_width / 2, full_length - head_length, 0 ),
+				new THREE.Vector3( body_width / 2, full_length - head_length, 0 ),
+				new THREE.Vector3(-body_width / 2, 0, 0 ),
+				new THREE.Vector3( body_width / 2, 0, 0 )
+			);
+		directionArrow.geometry.faces.push(new THREE.Face3(3,6,4));
+		directionArrow.geometry.faces.push(new THREE.Face3(5,6,3));
+		directionArrow.position.z+=0.001
+		
+		diamond.add(directionArrow);
+	}
+	
+	var trailCurrentSegment = 0;
+	var trailSegments = 600;
+	var trail = new THREE.LineSegments(new THREE.Geometry(), new THREE.LineBasicMaterial({color: 0x000000}) );
+	for(var i = 0; i < trailSegments; i++)
+		trail.geometry.vertices.push(
+				diamond.position.clone(),
+				diamond.position.clone() );
+	kb.add(trail);
 	
 	var oldXDirection = new THREE.Vector3(1,0,0);
 	
 	kbSystem.update = function(direction,orientation)
 	{
+		var currentKBPosition = diamond.position.clone();
+		
+		if(!kbPointGrabbed)
+			directionArrow.visible = false;
+		
 		if( typeof orientation !== 'undefined')
 		{
-			this.diamond.orientation = orientation;
-			this.diamond.direction = direction;
+			diamond.orientation = orientation;
+			
+			while( diamond.orientation > TAU )
+				diamond.orientation -= TAU;
+			while( diamond.orientation < 0 )
+				diamond.orientation += TAU;
+			
+			diamond.flip = diamond.orientation > Math.PI ? -1:1;
+			
+			if( diamond.flip === 1 )
+				diamond.direction = direction;
+			else
+				diamond.direction = TAU / 4 - (direction-TAU/4);
+			
+			//the mapping may not be right, shouldn't a 180 of the glider be a closed loop? No, only if the *whole* situation is equal to its own mirror image 
 		}
-		
-//		console.log(this.diamond.orientation,this.diamond.direction)
-		//the LOCATION of the diamond is the important thing. Its other features, eh. So you could be a bit fakey and have it range over 360
-		
-		if( kbPointGrabbed )
+		else if( kbPointGrabbed )
 		{
-			var stateAddition = clientPosition.clone();
+			var stateAddition = new THREE.Vector2(clientPosition.x,clientPosition.y);
 			stateAddition.x -= kbSystem.position.x * 2;
 			stateAddition.y -= kbSystem.position.y * 2; //makes an assumption here
-			stateAddition.z = 0;
-			stateAddition.setLength(0.007); //distance doesn't matter
-			this.diamond.orientation += stateAddition.y;
-			this.diamond.direction += stateAddition.x * 5; //much thinner
+			stateAddition.setLength(frameDelta/2); //distance doesn't matter
 			
-			if( this.diamond.orientation > Math.PI )
-			{
-				this.diamond.orientation -= Math.PI;
-				this.diamond.direction = TAU / 4 - (this.diamond.direction-TAU/4);
-			}
-			if( this.diamond.orientation < 0 )
-			{
-				this.diamond.orientation += Math.PI;
-				this.diamond.direction = TAU / 4 - (this.diamond.direction-TAU/4);
-			}
-			if(this.diamond.direction<0)
-				this.diamond.direction += TAU;
-			if(this.diamond.direction>=TAU)
-				this.diamond.direction -= TAU;
+			directionArrow.rotation.z = stateAddition.angle() - TAU/4;
+			directionArrow.visible = true;
+			
+			diamond.orientation += stateAddition.y;
+			
+			while( diamond.orientation > TAU )
+				diamond.orientation -= TAU;
+			while( diamond.orientation < 0 )
+				diamond.orientation += TAU;
+			
+			var oldFlip = diamond.flip;
+			diamond.flip = diamond.orientation > Math.PI ? -1:1;
+			if( oldFlip !== diamond.flip )
+				diamond.direction = TAU / 4 - (diamond.direction-TAU/4);
+			
+			diamond.direction += stateAddition.x * 5 * diamond.flip;
+		}
+		else return;
+		
+		while(diamond.direction<0)
+			diamond.direction += TAU;
+		while(diamond.direction>=TAU)
+			diamond.direction -= TAU;
+		
+		diamond.position.copy( kb.getPointOnKB( diamond.direction,diamond.orientation ) );
+		
+		{
+			trail.geometry.vertices[trailCurrentSegment * 2 + 1].copy(diamond.position);
+			if( trailCurrentSegment !== 0)
+				trail.geometry.vertices[trailCurrentSegment * 2 + 0].copy(trail.geometry.vertices[trailCurrentSegment * 2 - 1]);
+			else
+				trail.geometry.vertices[trailCurrentSegment * 2 + 0].copy(trail.geometry.vertices[trail.geometry.vertices.length - 1]);
+			trail.geometry.verticesNeedUpdate = true;
+			
+			trailCurrentSegment++;
+			if( trailCurrentSegment === trailSegments )
+				trailCurrentSegment = 0;
 		}
 		
-		if( this.diamond.position.distanceTo( kbSystem.kb.getPointOnKB( this.diamond.direction,this.diamond.orientation ) ) > 0.0025 )
-			console.log( this.diamond.position.distanceTo( kbSystem.kb.getPointOnKB( this.diamond.direction,this.diamond.orientation ) ) )
-		this.diamond.position.copy( kbSystem.kb.getPointOnKB( this.diamond.direction,this.diamond.orientation ) );
-		
 		var epsilon = 0.0001;
-		var xDirection = this.kb.getPointOnKB( this.diamond.direction + epsilon, this.diamond.orientation ).sub(this.diamond.position).normalize();
-		//The way it's cashed out is that there comes a point where this flips
-		var yDirection = this.kb.getPointOnKB( this.diamond.direction, this.diamond.orientation + epsilon ).sub(this.diamond.position).normalize();
+		var xDirection = kb.getPointOnKB( diamond.direction + epsilon * diamond.flip, diamond.orientation ).sub(diamond.position).normalize();
+		var yDirection = kb.getPointOnKB( diamond.direction, diamond.orientation + epsilon ).sub(diamond.position).normalize();
 		var zDirection = xDirection.clone().cross(yDirection).normalize();
 		xDirection.crossVectors(yDirection,zDirection).normalize();
 		
 		var newQuat = new THREE.Quaternion().setFromRotationMatrix( new THREE.Matrix4().makeBasis(xDirection, yDirection, zDirection) );;
-		this.diamond.quaternion.copy( newQuat );
+		diamond.quaternion.copy( newQuat );
+		kb.quaternion.copy( newQuat );
+		kb.quaternion.inverse();
 		
-		var newQuatInverse = newQuat.clone().inverse();
-		if( Math.abs( newQuatInverse.distanceTo( this.kb.quaternion ) - Math.PI/2 ) < 0.1 )
+		kb.position.set(0,0,0);
+		kb.updateMatrix();
+		var diamondPosition = (diamond.position.clone()).applyMatrix4(kb.matrix);
+		kb.position.copy( diamondPosition.negate() );
+		
+		if(kbPointGrabbed)
 		{
-			this.kb.quaternion.copy( newQuatInverse );
-			var rotationAxis = yAxis.clone();
-			this.kb.updateMatrix();
-			var kbRotationMatrix = new THREE.Matrix4().extractRotation( this.kb.matrix );
-			rotationAxis.applyMatrix4( kbRotationMatrix );
-			this.kb.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(rotationAxis,Math.PI));
+			gliderSystem.update(diamond.direction,diamond.orientation)
 		}
-		else
-			this.kb.quaternion.copy( newQuatInverse );
-		this.kb.position.set(0,0,0);
-		this.kb.updateMatrix();
-		var diamondPosition = (this.diamond.position.clone()).applyMatrix4(this.kb.matrix);
-		this.kb.position.copy( diamondPosition.negate() );
 	}
 	
 	return kbSystem;
@@ -117,7 +180,7 @@ function makeKB( minorTubeRadius, majorTubeRadius,bendRadius,neckHeight )
 		new THREE.Geometry(), 
 		new THREE.MeshPhongMaterial({
 			transparent:true,
-			opacity:0.7,
+			opacity:0.9,
 			color: 0xE0B7A3,
 			shininess: 10,
 			side:THREE.DoubleSide})
@@ -243,39 +306,50 @@ function makeKB( minorTubeRadius, majorTubeRadius,bendRadius,neckHeight )
 	
 	var numRibs = 64;
 	var numTubePoints = 80;
-	kb.geometry.vertices = Array( (numTubePoints+1) * numRibs );
+	kb.geometry.vertices = Array( (numTubePoints+1) * (numRibs+1) );
 	kb.geometry.faces = Array( numTubePoints * numRibs * 2 );
 	for( var i = 0; i < numTubePoints+1; i++)
 	{
-		for(var j = 0; j < numRibs; j++)
+		for(var j = 0; j < numRibs+1; j++)
 		{
-			kb.geometry.vertices[i*numRibs+j] = kb.getPointOnKB( j / numRibs * TAU, i / numTubePoints * Math.PI )
-			
-			if(i<numTubePoints)
-			{
-				var TL = i*numRibs + j;
-				var TR = i*numRibs + (j+1)%numRibs;
-				var BL = (i+1)*numRibs + j
-				var BR = (i+1)*numRibs + (j+1)%numRibs;
-				
-				//TODO at some point in the KB this flips, probably half way down the neck
-				
-				if(i / numTubePoints * Math.PI<1.6)
-				{
-					kb.geometry.faces[ (i*numRibs+j)*2+0 ] = new THREE.Face3( TL, TR, BL );
-					kb.geometry.faces[ (i*numRibs+j)*2+1 ] = new THREE.Face3( TR, BR, BL );
-				}
-				else
-				{
-					kb.geometry.faces[ (i*numRibs+j)*2+0 ] = new THREE.Face3( TL, BL, TR );
-					kb.geometry.faces[ (i*numRibs+j)*2+1 ] = new THREE.Face3( TR, BL, BR );
-				}
-			}
+			kb.geometry.vertices[i*numRibs+j] = new THREE.Vector3();
 		}
 	}
 	
-	kb.geometry.computeFaceNormals();
-	kb.geometry.computeVertexNormals();
+	function setKBVertices(lengthCompleteness,widthCompleteness) //change as you scroll down? And then when you click it goes back up. It's the mobius that people want to see
+	{	
+		for( var i = 0; i < numTubePoints+1; i++)
+		{
+			for(var j = 0; j < numRibs+1; j++)
+			{
+				kb.geometry.vertices[i*(numRibs+1)+j] = kb.getPointOnKB( j / numRibs * TAU * widthCompleteness, i / numTubePoints * Math.PI * lengthCompleteness )
+				
+				if(i<numTubePoints && j<numRibs)
+				{
+					var TL = i*(numRibs+1) + j;
+					var TR = i*(numRibs+1) + (j+1);
+					var BL = (i+1)*(numRibs+1) + j
+					var BR = (i+1)*(numRibs+1) + (j+1);
+					
+					if(i / numTubePoints * Math.PI<1.6) //flip occurs in the part you can't see
+					{
+						kb.geometry.faces[ (i*numRibs+j)*2+0 ] = new THREE.Face3( TL, TR, BL );
+						kb.geometry.faces[ (i*numRibs+j)*2+1 ] = new THREE.Face3( TR, BR, BL );
+					}
+					else
+					{
+						kb.geometry.faces[ (i*numRibs+j)*2+0 ] = new THREE.Face3( TL, BL, TR );
+						kb.geometry.faces[ (i*numRibs+j)*2+1 ] = new THREE.Face3( TR, BL, BR );
+					}
+				}
+			}
+		}
+		
+		kb.geometry.computeFaceNormals();
+		kb.geometry.computeVertexNormals();
+	}
+	
+	setKBVertices(1,1);
 	
 	return kb;
 }
