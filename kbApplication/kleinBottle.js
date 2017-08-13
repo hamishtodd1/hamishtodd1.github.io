@@ -1,4 +1,7 @@
 /*
+ * Can't distinguish it from its own mirror image
+ * So maybe have the direction change with the parachute?
+ * 
  * A little diamond that turns around with some delay to look at your mouse and goes in that direction
  * And a little trail behind it
  * Keep it centerd
@@ -122,8 +125,8 @@ function initKBSystem()
 			
 			var oldFlip = diamond.flip;
 			diamond.flip = diamond.orientation > Math.PI ? -1:1;
-			if( oldFlip !== diamond.flip )
-				diamond.direction = TAU / 4 - (diamond.direction-TAU/4);
+			if( oldFlip !== diamond.flip ) //should this be necessary? Certainly if you didn't have ranging over full tau it shouldn't
+				diamond.direction = TAU / 4 - (diamond.direction-TAU/4); //maybe holding control and rotating will rotate them simultaneously, which you see does nothing
 			
 			diamond.direction += stateAddition.x * 5 * diamond.flip;
 		}
