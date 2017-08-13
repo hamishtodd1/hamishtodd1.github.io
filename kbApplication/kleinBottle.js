@@ -130,6 +130,15 @@ function initKBSystem()
 			/*
 			 * should this be necessary? Certainly if you didn't have ranging over full tau it shouldn't
 			 * maybe holding control and rotating will rotate them simultaneously, which you see does nothing
+			 * 
+			 * If you look at the mirror image, the direction will be mapped to points going in the opposite direction
+			 * Possibly: direction is measured as an angle from the forward (makes sense as they generally believe forward is the neuron expectation).
+			 * And somewhere between a state and its mirror image, a particular direction becomes the negative
+			 * 
+			 * Saying "I know which side of the bottle you're on" *is* the same as saying "I know the direction the paraglider is pointing in"
+			 * And it is this "you can reach the other side" that is the argument for why we have a kb
+			 * 
+			 * When you grab the glider or bg, a red spot appears in the current diamond location
 			 */
 			
 			diamond.direction += stateAddition.x * 5 * diamond.flip;

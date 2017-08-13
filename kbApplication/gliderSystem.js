@@ -8,7 +8,7 @@ function initGliderSystem()
 	gliderSystem.add( bgs[0] );
 	
 	new THREE.TextureLoader().load(
-		"http://hamishtodd1.github.io/kbApplication/data/satellite.png",
+		"data/satellite.png",
 		function(texture) {
 			bgs[0].material.map = texture;
 			bgs[0].material.needsUpdate = true;
@@ -25,7 +25,7 @@ function initGliderSystem()
 	gliderSystem.glider = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshPhongMaterial());
 	gliderSystem.add( gliderSystem.glider );
 	gliderSystem.glider.position.z = 0.06;
-	new THREE.OBJLoader().load( "http://hamishtodd1.github.io/kbApplication/data/paraglider.obj",
+	new THREE.OBJLoader().load( "data/paraglider.obj",
 		function ( object ) 
 		{
 			gliderSystem.glider.geometry = object.children[0].geometry;
