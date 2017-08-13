@@ -125,8 +125,12 @@ function initKBSystem()
 			
 			var oldFlip = diamond.flip;
 			diamond.flip = diamond.orientation > Math.PI ? -1:1;
-			if( oldFlip !== diamond.flip ) //should this be necessary? Certainly if you didn't have ranging over full tau it shouldn't
-				diamond.direction = TAU / 4 - (diamond.direction-TAU/4); //maybe holding control and rotating will rotate them simultaneously, which you see does nothing
+			if( oldFlip !== diamond.flip ) 
+				diamond.direction = TAU / 4 - (diamond.direction-TAU/4);
+			/*
+			 * should this be necessary? Certainly if you didn't have ranging over full tau it shouldn't
+			 * maybe holding control and rotating will rotate them simultaneously, which you see does nothing
+			 */
 			
 			diamond.direction += stateAddition.x * 5 * diamond.flip;
 		}
