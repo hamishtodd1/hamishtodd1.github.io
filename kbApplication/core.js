@@ -11,11 +11,18 @@ function init()
 		0.001, 700);
 	camera.position.z = 16;
 	
+//	var paragliderPic = new THREE.Mesh( new THREE.PlaneGeometry(0.5,0.5), new THREE.MeshBasicMaterial({transparent:true, map:paragliderTexture}) );
+//	paragliderPic.position.z = camera.position.z / 2;
+//	scene.add(paragliderPic);
+	
 	kbSystem = initKBSystem()
 	scene.add(kbSystem);
 	
 	gliderSystem = initGliderSystem();
 	scene.add(gliderSystem);
+	
+	kbSystem.update(kbSystem.diamond.direction,kbSystem.diamond.orientation)
+	gliderSystem.update(kbSystem.diamond.direction,kbSystem.diamond.orientation)
 	
 	var bgHider = new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshPhongMaterial( {color:0xFFFFFF} ) );
 	scene.add(bgHider);
@@ -99,6 +106,7 @@ function init()
 			kbPointGrabbed = false;
 		}
 		
+//		paragliderPic.material.opacity -= frameDelta / 3;
 		kbSystem.update();
 		gliderSystem.update();
 		

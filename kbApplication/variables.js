@@ -32,3 +32,5 @@ function getSignedAngleBetween(a,b)
 	
 	return angleChange;
 }
+
+var ourTextureLoader = new THREE.TextureLoader();

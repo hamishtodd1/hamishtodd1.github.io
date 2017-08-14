@@ -3,11 +3,11 @@ function initGliderSystem()
 	var gliderSystem = new THREE.Object3D();
 	
 	var bgs = Array(9);
-	bgs[0] = new THREE.Mesh( new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({transparent:true}) );
+	bgs[0] = new THREE.Mesh( new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({transparent:true}) ); //transparent because png has transparency
 	bgs[0].scale.setScalar(1.2);
 	gliderSystem.add( bgs[0] );
 	
-	new THREE.TextureLoader().load(
+	ourTextureLoader.load(
 		"data/satellite.png",
 		function(texture) {
 			bgs[0].material.map = texture;
@@ -118,16 +118,13 @@ function initGliderSystem()
 		clientRelative.y -= this.position.y;
 		var angleChange = getSignedAngleBetween(oldClientRelative,clientRelative);
 		
-		if(gliderGrabbed)
+		if( gliderGrabbed )
 		{	
 			this.addToOrientation(angleChange);
 		}
-		else if(bgGrabbed)
+		else if( bgGrabbed )
 		{
-			directionArrow.visible = true;
-			
 			angleFromUpward += angleChange;
-			directionArrow.rotation.z = angleFromUpward;
 		}
 		else if( typeof direction !== 'undefined' )
 		{
@@ -135,8 +132,17 @@ function initGliderSystem()
 			this.addToOrientation(orientation - this.glider.rotation.z);
 		}
 		
+		if( kbPointGrabbed || bgGrabbed || gliderGrabbed )
+		{
+			directionArrow.visible = true;
+			directionArrow.rotation.z = angleFromUpward + this.glider.rotation.z;
+		}
+		else
+			directionArrow.visible = false;
+		
 		var velocity = new THREE.Vector3(0,frameDelta/10,0);
 		velocity.applyAxisAngle(zAxis,angleFromUpward);
+		velocity.applyAxisAngle(zAxis,this.glider.rotation.z);
 		bgs[4].position.sub( velocity );
 		//wrapping
 		while( bgs[4].position.dot(hNormal) > horizontalSpacer.length() / 2 )
@@ -181,8 +187,6 @@ function initGliderSystem()
 		
 		if( bgGrabbed || gliderGrabbed )
 			kbSystem.update( angleFromUpward, this.glider.rotation.z);
-		else
-			directionArrow.visible = false;
 	}
 	
 	return gliderSystem;

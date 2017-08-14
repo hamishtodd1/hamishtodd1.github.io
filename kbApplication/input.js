@@ -46,6 +46,7 @@ document.addEventListener( 'mousedown', function(event)
 {
 	event.preventDefault();
 	asynchronousInput.clientClicking = true;
+	kbSystem.resetTrail();
 }, false );
 
 document.addEventListener( 'mouseup', function(event) 
