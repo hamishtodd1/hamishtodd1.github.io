@@ -33,4 +33,38 @@ function getSignedAngleBetween(a,b)
 	return angleChange;
 }
 
+function sq(x)
+{
+	return x*x;
+}
+
+THREE.ArrowGeometry(fullLength,bodyWidth,headLength,headWidth)
+{
+	var full_length = 0.02;
+	var head_length = full_length / 3;
+	var head_width = head_length / (Math.sqrt(3) / 2);
+	if( typeof bodyWidth === 'undefined')
+	var body_width = head_width / 2.8;
+	
+	var arrowGeometry = new THREE.Geometry();
+	
+	directionArrow.geometry.vertices.push(
+		new THREE.Vector3( 0, full_length, 0 ),
+		new THREE.Vector3( head_width / 2, full_length - head_length, 0 ),
+		new THREE.Vector3(-head_width / 2, full_length - head_length, 0 )
+	);
+	directionArrow.geometry.faces.push(new THREE.Face3(0,2,1));
+	
+	directionArrow.geometry.vertices.push(
+			new THREE.Vector3(-body_width / 2, full_length - head_length, 0 ),
+			new THREE.Vector3( body_width / 2, full_length - head_length, 0 ),
+			new THREE.Vector3(-body_width / 2, 0, 0 ),
+			new THREE.Vector3( body_width / 2, 0, 0 )
+		);
+	directionArrow.geometry.faces.push(new THREE.Face3(3,6,4));
+	directionArrow.geometry.faces.push(new THREE.Face3(5,6,3));
+	
+	return arrowGeometry;
+}
+
 var ourTextureLoader = new THREE.TextureLoader();
