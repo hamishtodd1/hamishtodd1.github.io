@@ -8,19 +8,9 @@ function ReadInput()
 
 function update_PointOfFocus()
 {
-	PointOfFocus.set(0,0,-1);
+	PointOfFocus.set(0,0,-1.3);
+	Camera.updateMatrixWorld();
 	Camera.localToWorld(PointOfFocus);
-	/*
-	 * Could try to smooth it.
-	 * But your phone is probably unusually bad so it won't affect many
-	 * Disadvantage: people might want to do the movement that your phone simulates
-	 * 
-	 * var OldPointOfFocus = PointOfFocus.clone();
-	PointOfFocus.set(0,0,-1);
-	Camera.localToWorld(PointOfFocus);
-	if(PointOfFocus.angleTo(OldPointOfFocus) > TAU / 100 ) //revert to make it smooth
-		PointOfFocus.copy(OldPointOfFocus);
-	 */
 }
 
 document.addEventListener( 'mousedown', go_fullscreen_and_init_object, false );
