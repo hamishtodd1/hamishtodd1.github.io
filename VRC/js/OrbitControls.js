@@ -9,7 +9,7 @@
 
 // This set of controls performs orbiting, dollying (zooming), and panning. It maintains
 // the "up" direction as +Y, unlike the TrackballControls. Touch on tablet and phones is
-// supported.
+// supported. 
 //
 //    Orbit - left mouse / touch: one finger move
 //    Zoom - middle mouse, or mousewheel / touch: two finger spread or squish

@@ -3,7 +3,7 @@
 /**
  * @author mrdoob / http://mrdoob.com/
  */
-
+ 
 var THREE = { REVISION: '68' };
 
 // browserify support
