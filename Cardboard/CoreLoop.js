@@ -1,6 +1,6 @@
 function UpdateWorld(Models,Hands)
 {	
-	OurObject.position.copy(PointOfFocus);
+	update_ourobject_position();
 	update_signs();
 }
 
