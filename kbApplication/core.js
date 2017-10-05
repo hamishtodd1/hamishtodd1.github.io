@@ -21,7 +21,6 @@ function init()
 	gliderSystem = initGliderSystem();
 	scene.add(gliderSystem);
 	
-	kbSystem.update(kbSystem.diamond.direction,kbSystem.diamond.orientation)
 	gliderSystem.update(kbSystem.diamond.direction,kbSystem.diamond.orientation)
 	
 	var bgHider = new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshPhongMaterial( {color:0xFFFFFF} ) );

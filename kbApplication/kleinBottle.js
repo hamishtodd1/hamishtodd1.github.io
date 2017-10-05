@@ -1,22 +1,34 @@
 /*
- * Can't distinguish it from its own mirror image
- * So maybe have the direction change with the parachute?
+ * Current thinking state is: Flip is ok, because it's what the neurons do.
+ * This does mean having the discontinuity on the right
+ * 		When you're moving the glider continuously, there will be a jump, and when you move the diamond continuously, there will be a flip
+ * 			(unless you're going directly forward, which corresponds to lots of neurons firing)
+ * 		And that's ok because the neurons are like that
+ * 		Still doesn't feel very good
  * 
- * A little diamond that turns around with some delay to look at your mouse and goes in that direction
- * And a little trail behind it
- * Keep it centerd
+ * There should be angular momentum btw, and your state change gives you acceleration
+ * How about when you have the flip, the glider contracts then expands.
+ * "This flipping of the glider is obviously not something that happens in real life, but it does sort of happen in your brain."
+ * 	but whyyyyy would it have an effect on how the neurons register travel direction?
+ * That flip says: "a discontinuity just happened". So another flip and sound effect for moving the kb and having the directionarrow change
  * 
- * To position the camera:
- * 	Look at point's position
- * 	Get the position of two close by points cross product
- * 	Then lookAt. Might result in weirdness
- * Glider and field are children of camera
+ * When you move the point around on the bottle, something is happenning that never happens in real life, which is the neurons are determining the sight they see
  * 
- * When you move around the kb purposefully, camera follows. If it's responding to glider system, not.
+ * Hey Brady, ask me if it was hard to make this
  * 
- * Touch somewhere on the glider side and a line will appear in the direction of travel.
-	Move your mouse and it will change the direction.
- * So long as your mouse/finger is down, the glider will slowly turn in that direction
+ * Deffo use 20T, because you can say "the icosahedron is made of 20 triangles and we need to work out the number in one triangle"
+ * Profundity note: maybe people make their own profundity from the story that matters to them, and you can't control that. So you make little things, and they make their own thing
+ * 
+ * But still you're not sure why the sight seems to correspond to T2 instead of RP1xS1
+ * 
+ * where's francesco?
+
+	TODO
+	maybe get high quality pictures for kb
+	Find out which alg is the high dimensionality one
+	Put all of them into powerpoint to organize them
+	aperture problem animation?
+	Make a t=1 out of sonobe
  */
 
 function initKBSystem()
@@ -28,20 +40,24 @@ function initKBSystem()
 	var bendRadius = minorTubeRadius * 2;
 	var neckHeight = bendRadius * 3;
 	
-	kb = makeKB( minorTubeRadius, majorTubeRadius,bendRadius,neckHeight ); //repeat this line with whatever you like
+	var kb = makeKB( minorTubeRadius, majorTubeRadius,bendRadius,neckHeight ); //repeat this line with whatever you like
 	kbSystem.add(kb);
 	
-	var diamond = new THREE.Mesh(new THREE.CylinderGeometry(0.0034,0.0034,0.006,4), new THREE.MeshBasicMaterial({color:0x000000, side: THREE.DoubleSide}));
+	var diamond = new THREE.Mesh(new THREE.CylinderGeometry(0.0034,0.0034,0.009,4), new THREE.MeshBasicMaterial({color:0x000000, side: THREE.DoubleSide}));
 	kbSystem.diamond = diamond;
 	for(var i =0; i < diamond.geometry.vertices.length; i++)
 	{
 		diamond.geometry.vertices[i].applyAxisAngle(xAxis,TAU/4)
 	}
 	kb.add(diamond)
-	diamond.orientation = 0;
-	diamond.direction = 7/8*TAU;
 	diamond.position.copy( kb.getPointOnKB( diamond.direction,diamond.orientation ) );
 	diamond.flip = 1; //1 if right side up, -1 otherwise
+	
+	diamond.orientation = TAU / 8;
+	diamond.direction = -TAU/8;
+	
+	var kbDestinationQuaternion = kb.quaternion.clone();
+	var lastSpecifiedDiamondPosition = diamond.position.clone();
 	
 	//----arrow shit
 	{
@@ -87,6 +103,30 @@ function initKBSystem()
 	
 	var oldXDirection = new THREE.Vector3(1,0,0);
 	
+	function setDiamondDirection(newDirection)
+	{
+		diamond.direction = newDirection;
+		
+		while(diamond.direction<0)
+			diamond.direction += TAU;
+		while(diamond.direction>=TAU)
+			diamond.direction -= TAU;
+	}
+	
+	function setDiamondOrientationAndFlipAndReturnFlipChange(newOrientation)
+	{
+		diamond.orientation = newOrientation;
+		
+		while(diamond.orientation<0)
+			diamond.orientation += TAU;
+		while(diamond.orientation>=TAU)
+			diamond.orientation -= TAU;
+		
+		var oldFlip = diamond.flip;
+		diamond.flip = diamond.orientation > Math.PI ? -1:1;
+		return oldFlip !== diamond.flip;
+	}
+	
 	kbSystem.update = function(direction,orientation)
 	{
 		/* change the trail to cylinders
@@ -101,14 +141,8 @@ function initKBSystem()
 		 * 
 		 * shouldn't a 180 of the glider be a closed loop? No, only if the *whole* situation is equal to its own mirror image
 		 * 
-		 * The flip is what's causing the mapping of mirror images to not be the same.
-		 * 
 		 * Go around a mobius strip and you'll only get back to where you began (without going left or right) if you were in the center
 		 * There are 2 places on the KB where that happens
-		 * 
-		 * Maybe you should just try and map it to the torus
-		 * 
-		 * You do have something wrong, rotating the glider 180 should bring you back to where you started
 		 * 
 		 * If you look at the mirror image, the direction will be mapped to points going in the opposite direction
 		 * Possibly: direction is measured as an angle from the forward (makes sense as they generally believe forward is the neuron expectation).
@@ -120,99 +154,81 @@ function initKBSystem()
 		 * When you grab the glider or bg, a red spot appears in the current diamond location
 		 */
 		
-		if(!kbPointGrabbed)
-			directionArrow.visible = false;
-		
 		if( typeof orientation !== 'undefined')
 		{
-			diamond.orientation = orientation;
+			setDiamondOrientationAndFlipAndReturnFlipChange( orientation );
 			
-			while( diamond.orientation > TAU )
-				diamond.orientation -= TAU;
-			while( diamond.orientation < 0 )
-				diamond.orientation += TAU;
-			
-			diamond.flip = diamond.orientation > Math.PI ? -1:1;
-			
-			if( diamond.flip === 1 )
-				diamond.direction = direction;
-			else
-				diamond.direction = TAU / 4 - (direction-TAU/4); 
+//			if( diamond.flip !== 1 )
+//				setDiamondDirection( TAU / 2 - direction );
+//			else
+				setDiamondDirection( direction );
 		}
 		else if( kbPointGrabbed )
 		{
 			var stateAddition = new THREE.Vector2(clientPosition.x,clientPosition.y);
 			stateAddition.x -= kbSystem.position.x * 2;
 			stateAddition.y -= kbSystem.position.y * 2; //makes an assumption here
-			stateAddition.setLength(frameDelta/2); //distance doesn't matter
+			var maxAddition = frameDelta/2;
+			if(stateAddition.length()>maxAddition)
+				stateAddition.setLength(maxAddition);
 			
-			directionArrow.rotation.z = stateAddition.angle() - TAU/4;
-			directionArrow.visible = true;
+			if( setDiamondOrientationAndFlipAndReturnFlipChange( diamond.orientation + stateAddition.y ) ) 
+				setDiamondDirection( TAU / 2 - diamond.direction + stateAddition.x * 5 * diamond.flip );
+			else
+				setDiamondDirection( diamond.direction + stateAddition.x * 5 * diamond.flip );
 			
-			diamond.orientation += stateAddition.y;
-			
-			while( diamond.orientation > TAU )
-				diamond.orientation -= TAU;
-			while( diamond.orientation < 0 )
-				diamond.orientation += TAU;
-			
-			var oldFlip = diamond.flip;
-			diamond.flip = diamond.orientation > Math.PI ? -1:1;
-			if( oldFlip !== diamond.flip ) 
-				diamond.direction = TAU / 2 - diamond.direction;
-			
-			diamond.direction += stateAddition.x * 5 * diamond.flip;
+//			if(diamond.flip !== 1)
+//				gliderSystem.update(TAU / 2 - diamond.direction,diamond.orientation)
+//			else
+				gliderSystem.update(diamond.direction,diamond.orientation)
+				
 		}
-		else return;
 		
-		while(diamond.direction<0)
-			diamond.direction += TAU;
-		while(diamond.direction>=TAU)
-			diamond.direction -= TAU;
-		
+		//-----Responding to the above
 		{
+			directionArrow.visible = kbPointGrabbed;
+			if( kbPointGrabbed )
+				directionArrow.rotation.z = stateAddition.angle() - TAU/4;
+			
 			diamond.position.copy( kb.getPointOnKB( diamond.direction,diamond.orientation ) );
 			
+			//are these always guaranteed to give you the points you want?
 			var epsilon = 0.0001;
 			var xDirection = kb.getPointOnKB( diamond.direction + epsilon * diamond.flip, diamond.orientation ).sub(diamond.position).normalize();
 			var yDirection = kb.getPointOnKB( diamond.direction, diamond.orientation + epsilon ).sub(diamond.position).normalize();
 			var zDirection = xDirection.clone().cross(yDirection).normalize();
 			xDirection.crossVectors(yDirection,zDirection).normalize();
 			
-			var newQuat = new THREE.Quaternion().setFromRotationMatrix( new THREE.Matrix4().makeBasis(xDirection, yDirection, zDirection) );;
+			var newQuat = new THREE.Quaternion().setFromRotationMatrix( new THREE.Matrix4().makeBasis(xDirection, yDirection, zDirection) );
 			diamond.quaternion.copy( newQuat );
-		}
-		
-		{
-			trail.geometry.vertices[trailCurrentSegment * 2 + 1].copy(diamond.position);
-			if( trailCurrentSegment !== 0)
-				trail.geometry.vertices[trailCurrentSegment * 2 + 0].copy(trail.geometry.vertices[trailCurrentSegment * 2 - 1]);
-			else
-				trail.geometry.vertices[trailCurrentSegment * 2 + 0].copy(trail.geometry.vertices[trail.geometry.vertices.length - 1]);
-			trail.geometry.verticesNeedUpdate = true;
 			
-			trailCurrentSegment++;
-			if( trailCurrentSegment === trailSegments )
-				trailCurrentSegment = 0;
-		}
-		
-		if(kbPointGrabbed)
-		{
-			kb.quaternion.copy( newQuat );
-			kb.quaternion.inverse();
+			if(kbPointGrabbed) //rotating kb. We do it this way because gamefeel and also don't want to jerk when you grab the glider
+			{
+				lastSpecifiedDiamondPosition.copy( diamond.position );
+				kbDestinationQuaternion.copy(newQuat).inverse();
+			}
 			
+			var currentKBPosition = kb.position.clone();
 			kb.position.set(0,0,0);
 			kb.updateMatrix();
-			var diamondPosition = (diamond.position.clone()).applyMatrix4(kb.matrix);
-			kb.position.copy( diamondPosition.negate() );
-		}
-		
-		if(kbPointGrabbed)
-		{
-			if(diamond.flip === 1)
-				gliderSystem.update(diamond.direction,diamond.orientation)
-			else
-				gliderSystem.update(TAU / 2 - diamond.direction,diamond.orientation)
+			var kbDestination = lastSpecifiedDiamondPosition.clone().applyMatrix4(kb.matrix).negate();
+			kb.position.lerpVectors( currentKBPosition,kbDestination,0.1 );
+			
+			kb.quaternion.slerp( kbDestinationQuaternion, frameDelta * 2.4 );
+
+			if( kbPointGrabbed || bgGrabbed || gliderGrabbed )
+			{
+				trail.geometry.vertices[trailCurrentSegment * 2 + 1].copy(diamond.position);
+				if( trailCurrentSegment !== 0)
+					trail.geometry.vertices[trailCurrentSegment * 2 + 0].copy(trail.geometry.vertices[trailCurrentSegment * 2 - 1]);
+				else
+					trail.geometry.vertices[trailCurrentSegment * 2 + 0].copy(trail.geometry.vertices[trail.geometry.vertices.length - 1]);
+				trail.geometry.verticesNeedUpdate = true;
+				
+				trailCurrentSegment++;
+				if( trailCurrentSegment === trailSegments )
+					trailCurrentSegment = 0;
+			}
 		}
 	}
 	

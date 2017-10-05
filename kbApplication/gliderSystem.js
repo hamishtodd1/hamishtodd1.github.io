@@ -22,27 +22,29 @@ function initGliderSystem()
 		gliderSystem.add( bgs[i] );
 	}
 	
-	gliderSystem.glider = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshPhongMaterial());
-	gliderSystem.add( gliderSystem.glider );
-	gliderSystem.glider.position.z = 0.06;
+	var glider = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshPhongMaterial());
+	gliderSystem.glider = glider;
+	gliderSystem.add( glider );
+	glider.position.z = 0.06;
+	glider.flipAnimation = -1;
 	new THREE.OBJLoader().load( "data/paraglider.obj",
 		function ( object ) 
 		{
-			gliderSystem.glider.geometry = object.children[0].geometry;
-			gliderSystem.glider.material = object.children[0].material;
+			glider.geometry = object.children[0].geometry;
+			glider.material = object.children[0].material;
 			
 			var corrector = new THREE.Matrix4();
-			gliderSystem.glider.geometry.computeBoundingSphere();
-			var correctorScale = 0.3/gliderSystem.glider.geometry.boundingSphere.radius;
+			glider.geometry.computeBoundingSphere();
+			var correctorScale = 0.3/glider.geometry.boundingSphere.radius;
 			for(var i = 0; i < 3; i++)
 				corrector.elements[i*5] *= correctorScale;
-			corrector.setPosition( gliderSystem.glider.geometry.boundingSphere.center.clone().multiplyScalar(-correctorScale))
-			var corrector2 = new THREE.Matrix4().makeRotationAxis( xAxis,TAU/4 + 0.1 );
+			corrector.setPosition( glider.geometry.boundingSphere.center.clone().multiplyScalar(-correctorScale))
+			corrector.premultiply(new THREE.Matrix4().makeRotationAxis( xAxis,TAU/4 + 0.1 ) );
+			corrector.premultiply(new THREE.Matrix4().makeRotationAxis( zAxis,TAU/4 ) );
 			
-			gliderSystem.glider.geometry.applyMatrix( corrector );
-			gliderSystem.glider.geometry.applyMatrix( corrector2 );
-			gliderSystem.glider.material.color.setRGB(1,0,0);
-			gliderSystem.glider.material.needsUpdate = true;
+			glider.geometry.applyMatrix( corrector );
+			glider.material.color.setRGB(1,0,0);
+			glider.material.needsUpdate = true;
 		},
 		function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );}
 	);
@@ -52,16 +54,11 @@ function initGliderSystem()
 	var hNormal = horizontalSpacer.clone().normalize();
 	var vNormal = verticalSpacer.clone().normalize();
 	
-	gliderSystem.direction = 0;
-	gliderSystem.orientation = 0;
-	
-	var angleFromUpward = 0;
-	
 	//start with the glider "jumping from plane" - they swing into position?
 	
 	//----arrow shit
 	{
-		var directionArrow = new THREE.Mesh( new THREE.Geometry(), new THREE.MeshBasicMaterial({color: 0xFFFFFF}) );
+		var directionArrow = new THREE.Mesh( new THREE.Geometry(), new THREE.MeshBasicMaterial({color: 0xFFFFFF, side:THREE.DoubleSide}) );
 		var full_length = 0.45;
 		var head_length = full_length / 3;
 		var head_width = head_length / (Math.sqrt(3) / 2);
@@ -82,111 +79,174 @@ function initGliderSystem()
 			);
 		directionArrow.geometry.faces.push(new THREE.Face3(3,6,4));
 		directionArrow.geometry.faces.push(new THREE.Face3(5,6,3));
-		directionArrow.position.z = bgs[0].position.z + 0.01;
+		
+		directionArrow.matrixAutoUpdate = false;
+		
+		directionArrow.flipAnimation = -1;
 		
 		gliderSystem.add(directionArrow);
 	}
 	
-	gliderSystem.addToOrientation = function( orientationChange )
+	glider.rotation.z = TAU / 8;
+	var directionRotation = -TAU / 8;
+	
+	function setOrientation( orientationChange )
 	{
-		this.glider.rotation.z += orientationChange;
-		while(this.glider.rotation.z > TAU)
-			this.glider.rotation.z -= TAU;
-		while(this.glider.rotation.z < 0 )
-			this.glider.rotation.z += TAU;
+		glider.rotation.z = orientationChange;
+		while(glider.rotation.z > TAU)
+			glider.rotation.z -= TAU;
+		while(glider.rotation.z < 0 )
+			glider.rotation.z += TAU;
+	}
+	
+	function getMouseAngleChange()
+	{
+		var oldClientRelative = oldClientPosition.clone();
+		oldClientRelative.x -= gliderSystem.position.x;
+		oldClientRelative.y -= gliderSystem.position.y;
+		var clientRelative = clientPosition.clone();
+		clientRelative.x -= gliderSystem.position.x;
+		clientRelative.y -= gliderSystem.position.y;
+		return getSignedAngleBetween(oldClientRelative,clientRelative);
 	}
 	
 	gliderSystem.update = function(direction,orientation)
 	{
-		var mouseInGliderCircleSpace = clientPosition.clone();
-		mouseInGliderCircleSpace.sub(this.position)
-		this.glider.updateMatrix();
-		mouseInGliderCircleSpace.applyMatrix4( new THREE.Matrix4().getInverse( this.glider.matrix.clone() ) );
-		mouseInGliderCircleSpace.y *= 568/153;
-		var mouseIsInGlider = ( mouseInGliderCircleSpace.length() < 0.3 );
-		
-		if( gliderGrabbed || (mouseIsInGlider && !bgGrabbed ) )
-			this.glider.material.emissive.b = 0.4;
-		else
-			this.glider.material.emissive.b = 0;
-		
-		var oldClientRelative = oldClientPosition.clone();
-		oldClientRelative.x -= this.position.x;
-		oldClientRelative.y -= this.position.y;
-		var clientRelative = clientPosition.clone();
-		clientRelative.x -= this.position.x;
-		clientRelative.y -= this.position.y;
-		var angleChange = getSignedAngleBetween(oldClientRelative,clientRelative);
-		
+		//----The business end
 		if( gliderGrabbed )
-		{	
-			this.addToOrientation(angleChange);
+		{
+			var oldOrientation = glider.rotation.z;
+			
+			setOrientation( glider.rotation.z + getMouseAngleChange() );
+			
+			if( ( oldOrientation > Math.PI && glider.rotation.z <= Math.PI) ||
+				( oldOrientation <= Math.PI && glider.rotation.z > Math.PI) )
+				glider.flipAnimation = 0;
 		}
 		else if( bgGrabbed )
 		{
-			angleFromUpward += angleChange;
+			directionRotation += getMouseAngleChange();
 		}
 		else if( typeof direction !== 'undefined' )
 		{
+<<<<<<< HEAD
 			angleFromUpward = direction;
 			this.addToOrientation(orientation - this.glider.rotation.z);
 		}
 		
 		if( kbPointGrabbed || bgGrabbed || gliderGrabbed )
 		{
-			directionArrow.visible = true;
-			directionArrow.rotation.z = angleFromUpward;// + this.glider.rotation.z;
-		}
-		else
-			directionArrow.visible = false;
-		
-		var velocity = new THREE.Vector3(0,frameDelta/10,0);
-		velocity.applyAxisAngle(zAxis,angleFromUpward);
-//		velocity.applyAxisAngle(zAxis,this.glider.rotation.z);
-		bgs[4].position.sub( velocity );
-		//wrapping
-		while( bgs[4].position.dot(hNormal) > horizontalSpacer.length() / 2 )
-			bgs[4].position.sub(horizontalSpacer);
-		while( bgs[4].position.dot(hNormal) < horizontalSpacer.length() /-2 )
-			bgs[4].position.add(horizontalSpacer);
-		while( bgs[4].position.dot(vNormal) > verticalSpacer.length() / 2 )
-			bgs[4].position.sub(verticalSpacer);
-		while( bgs[4].position.dot(vNormal) < verticalSpacer.length() /-2 )
-			bgs[4].position.add(verticalSpacer);
-		
-		for(var i = 0; i < bgs.length; i++)
-		{
-			if(i===4)
-				continue;
+			var oldOrientation = glider.rotation.z;
+			setOrientation( orientation );
 			
-			bgs[i].position.copy( bgs[4].position );
+			directionRotation = direction;
 			
-			/*
-			 * 036
-			 * 147
-			 * 258
-			 */
-			if(i<3)
-			{
-				bgs[i].position.sub(horizontalSpacer);
-			}
-			if(i>=6)
-			{
-				bgs[i].position.add(horizontalSpacer);
-			}
-			
-			if( i%3 === 0 )
-			{
-				bgs[i].position.add(verticalSpacer);
-			}
-			if( i%3 === 2 )
-			{
-				bgs[i].position.sub(verticalSpacer);
-			}
+			if( ( oldOrientation > Math.PI && glider.rotation.z <= Math.PI) ||
+				( oldOrientation <=Math.PI && glider.rotation.z > Math.PI) )
+				directionArrow.flipAnimation = 0;
 		}
 		
 		if( bgGrabbed || gliderGrabbed )
-			kbSystem.update( angleFromUpward, this.glider.rotation.z);
+			kbSystem.update( directionRotation, glider.rotation.z);
+		
+		//----"Implementing" the above
+		{
+			if(glider.flipAnimation !== -1)
+			{
+//				if( glider.flipAnimation < 0.5)
+//					glider.scale.y = 1 - 2 * glider.flipAnimation;
+//				else
+//					glider.scale.y = -1 + 2 * glider.flipAnimation;
+				
+				var power = 2;
+				glider.scale.y = Math.abs(Math.pow( glider.flipAnimation - 0.5, power )) / Math.pow( 0.5, power );
+				
+				glider.flipAnimation += frameDelta * 4;
+				if(glider.flipAnimation > 1)
+					glider.flipAnimation = -1;
+			}
+			else glider.scale.y = 1;
+			
+			var dASquash = 1;
+			if(directionArrow.flipAnimation !== -1)
+			{
+				//make a dotted line appear?
+				
+				dASquash = -1 + directionArrow.flipAnimation * 2;
+				
+				directionArrow.flipAnimation += frameDelta * 1.9;
+				if( directionArrow.flipAnimation > 1 )
+					directionArrow.flipAnimation = -1;
+			}
+			
+			var dAXVector = new THREE.Vector3(1,0,0).applyAxisAngle(zAxis,directionRotation);
+			var dAYVector = new THREE.Vector3(0,1,0).applyAxisAngle(zAxis,directionRotation);
+			dAXVector.y *= dASquash;
+			dAYVector.y *= dASquash;
+			directionArrow.matrix.makeBasis(dAXVector,dAYVector, new THREE.Vector3(0,0,1));
+			directionArrow.matrix.setPosition( new THREE.Vector3(0,0,bgs[0].position.z + 0.01) );
+			
+			var mouseInGliderCircleSpace = clientPosition.clone();
+			mouseInGliderCircleSpace.sub(this.position)
+			glider.updateMatrix();
+			mouseInGliderCircleSpace.applyMatrix4( new THREE.Matrix4().getInverse( glider.matrix.clone() ) );
+			mouseInGliderCircleSpace.x *= 568/153;
+			var mouseIsInGlider = ( mouseInGliderCircleSpace.length() < 0.3 );
+			
+			if( kbPointGrabbed || bgGrabbed )
+				directionArrow.visible = true;
+			else
+				directionArrow.visible = false;
+			
+			if( gliderGrabbed || (mouseIsInGlider && !bgGrabbed ) )
+				glider.material.emissive.b = 0.4;
+			else
+				glider.material.emissive.b = 0;
+
+			var velocity = new THREE.Vector3(0,frameDelta/10,0);
+			velocity.applyAxisAngle(zAxis,directionRotation);
+			bgs[4].position.sub( velocity );
+			//wrapping
+			while( bgs[4].position.dot(hNormal) > horizontalSpacer.length() / 2 )
+				bgs[4].position.sub(horizontalSpacer);
+			while( bgs[4].position.dot(hNormal) < horizontalSpacer.length() /-2 )
+				bgs[4].position.add(horizontalSpacer);
+			while( bgs[4].position.dot(vNormal) > verticalSpacer.length() / 2 )
+				bgs[4].position.sub(verticalSpacer);
+			while( bgs[4].position.dot(vNormal) < verticalSpacer.length() /-2 )
+				bgs[4].position.add(verticalSpacer);
+			
+			for(var i = 0; i < bgs.length; i++)
+			{
+				if(i===4)
+					continue;
+				
+				bgs[i].position.copy( bgs[4].position );
+				
+				/*
+				 * 036
+				 * 147
+				 * 258
+				 */
+				if(i<3)
+				{
+					bgs[i].position.sub(horizontalSpacer);
+				}
+				if(i>=6)
+				{
+					bgs[i].position.add(horizontalSpacer);
+				}
+				
+				if( i%3 === 0 )
+				{
+					bgs[i].position.add(verticalSpacer);
+				}
+				if( i%3 === 2 )
+				{
+					bgs[i].position.sub(verticalSpacer);
+				}
+			}
+		}
 	}
 	
 	return gliderSystem;
