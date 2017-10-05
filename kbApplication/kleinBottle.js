@@ -31,7 +31,7 @@ function initKBSystem()
 	kb = makeKB( minorTubeRadius, majorTubeRadius,bendRadius,neckHeight ); //repeat this line with whatever you like
 	kbSystem.add(kb);
 	
-	var diamond = new THREE.Mesh(new THREE.CylinderGeometry(0.0034,0.0034,0.004,4), new THREE.MeshBasicMaterial({color:0x000000, side: THREE.DoubleSide}));
+	var diamond = new THREE.Mesh(new THREE.CylinderGeometry(0.0034,0.0034,0.006,4), new THREE.MeshBasicMaterial({color:0x000000, side: THREE.DoubleSide}));
 	kbSystem.diamond = diamond;
 	for(var i =0; i < diamond.geometry.vertices.length; i++)
 	{

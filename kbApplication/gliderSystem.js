@@ -135,14 +135,14 @@ function initGliderSystem()
 		if( kbPointGrabbed || bgGrabbed || gliderGrabbed )
 		{
 			directionArrow.visible = true;
-			directionArrow.rotation.z = angleFromUpward + this.glider.rotation.z;
+			directionArrow.rotation.z = angleFromUpward;// + this.glider.rotation.z;
 		}
 		else
 			directionArrow.visible = false;
 		
 		var velocity = new THREE.Vector3(0,frameDelta/10,0);
 		velocity.applyAxisAngle(zAxis,angleFromUpward);
-		velocity.applyAxisAngle(zAxis,this.glider.rotation.z);
+//		velocity.applyAxisAngle(zAxis,this.glider.rotation.z);
 		bgs[4].position.sub( velocity );
 		//wrapping
 		while( bgs[4].position.dot(hNormal) > horizontalSpacer.length() / 2 )
