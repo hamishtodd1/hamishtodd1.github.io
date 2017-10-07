@@ -88,7 +88,47 @@ function init()
 	
 	var asynchronousInput = initInputSystem();
 	
-	initArrangement();
+//	initArrangement();
+	
+	var cylinderRadius = 0.06;
+	var ourCylinderGeometry = new THREE.CylinderBufferGeometry( cylinderRadius,cylinderRadius,1,15,1, true);
+	for(var i = 0, il = ourCylinderGeometry.attributes.position.array.length / 3; i < il; i++)
+	{
+		ourCylinderGeometry.attributes.position.array[i*3+1] += 0.5;
+	}
+	
+	var placeCylinder = function( origin, end, newRadius )
+	{
+//		this.scale.set(1,origin.distanceTo(end),1);
+		if(!newRadius)
+			newRadius = 1;
+		
+		var newY = end.clone().sub(origin);
+		var newX = randomPerpVector( newY );
+		var newZ = newY.clone().cross(newX);
+		newX.setLength(newRadius);
+		newZ.setLength(newRadius);
+		
+		this.matrix.makeBasis(newX,newY,newZ);
+		this.matrix.setPosition(origin);
+		this.matrixAutoUpdate = false;
+		
+		this.origin.copy(origin);
+		this.end.copy(end);
+	}
+	var setCylinderRadius = function( newRadius )
+	{
+		this.place(this.origin, this.end, newRadius)
+	}
+	function makePlaceableCylinder()
+	{
+		var ourPlaceableCylinder = new THREE.Mesh( ourCylinderGeometry, new THREE.MeshPhongMaterial({color:0x000000, side:THREE.DoubleSide}));
+		ourPlaceableCylinder.place = placeCylinder;
+		ourPlaceableCylinder.setRadius = setCylinderRadius;
+		ourPlaceableCylinder.origin = new THREE.Vector3();
+		ourPlaceableCylinder.end = new THREE.Vector3(0,1,0);
+		return ourPlaceableCylinder;
+	}
 	
 	var model = new THREE.Mesh( new THREE.Geometry(), new THREE.MeshPhongMaterial({side:THREE.DoubleSide, color:0xFF0000}) );
 	model.scale.setScalar(0.1)
@@ -126,41 +166,127 @@ function init()
 				faceFromQuaternion(ourQuaternion);
 			}
 		}
-		console.log(model.geometry.faces.length);
 		model.geometry.computeFaceNormals();
-		model.geometry.computeFlatVertexNormals();
-//		scene.add(model);
+		model.geometry.computeVertexNormals();
+		scene.add(model);
 	}
 	
-	function coreLoop() {
+	var grabbableEdges = [];
+	var wholeGrabbed = false;
+	var grabbedEdge = -1;
+	
+	for(var i = 0, il = model.geometry.faces.length; i < il; i++ )
+	{
+		for(var j = 0; j < 3; j++ )
+		{
+			var newCylinder = makePlaceableCylinder();
+			newCylinder.place(
+					model.geometry.vertices[model.geometry.faces[i].getCorner(j)], 
+					model.geometry.vertices[model.geometry.faces[i].getCorner((j+1)%3)] );
+			scene.add(newCylinder);
+			
+			model.add(newCylinder);
+			
+			grabbableEdges.push(newCylinder)
+		}
+	}
+	
+	function coreLoop()
+	{
 		frameDelta = ourclock.getDelta();
 		timeSinceStart += frameDelta;
 		
 		asynchronousInput.read();
 		
-		if(clientClicking )
+		if( !wholeGrabbed && grabbedEdge === -1)
 		{
-			var rotationAmount = clientPosition.clone().sub(oldClientPosition).length() * 5;
-			var rotationAxis = clientPosition.clone().sub(oldClientPosition).applyAxisAngle(zAxis,TAU/4);
-			model.updateMatrixWorld();
-			model.worldToLocal(rotationAxis)
-			rotationAxis.normalize();
-			var quaternion = new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAmount);
-			model.quaternion.multiply(quaternion)
+			var hoveringEdge = -1;
+			
+			if( clientPosition.length() < 0.3)
+				hoveringEdge = 0;
+			
+//			var hoveringEdgePlaneClientRayIntersectionZ = -Infinity;
+//			for(var i = 0; i < grabbableEdges.length; i++)
+//			{
+//				//it lies in the plane orthogonal to the edge and in the z = 0 plane
+//				var pointInEdgePlane = grabbableEdges[i].end.clone().sub(grabbableEdges[i].origin).cross(zAxis).add(grabbableEdges[i].origin);
+//				
+//				var edgePlaneClientRayIntersection = linePlaneIntersection( 
+//						camera.position, clientPosition,
+//						grabbableEdges[i].origin, grabbableEdges[i].end, pointInEdgePlane );
+//				
+//				if( pointLineDistance( edgePlaneClientRayIntersection, grabbableEdges[i].origin, grabbableEdges[i].end ) < edgeRadius )
+//				{
+//					if( edgePlaneClientRayIntersection.z > hoveringEdgePlaneClientRayIntersectionZ )
+//					{
+//						hoveringEdge = i;
+//						hoveringEdgePlaneClientRayIntersectionZ = edgePlaneClientRayIntersection.z;
+//					}
+//				}
+//			}
+			
+			for(var i = 0; i < grabbableEdges.length; i++)
+			{
+				if( i === hoveringEdge )
+				{
+					grabbableEdges[i].material.color.setRGB(1,1,1);
+					grabbableEdges[i].setRadius( 1.9 );
+				}
+				else
+				{
+					grabbableEdges[i].material.color.setRGB(0,0,0);
+					grabbableEdges[i].setRadius( 1 );
+				}
+				
+				grabbableEdges[i].material.needsUpdate = true;
+			}
 		}
-		else
+
+		if( clientClicking )
 		{
+			if( !oldClientClicking )
+			{
+				if( hoveringEdge !== -1)
+				{
+					grabbedEdge = hoveringEdge;
+					grabbableEdges[ grabbedEdge ].material.color.set(0,0,1);
+					grabbableEdges[ grabbedEdge ].materialNeedsUpdate = true;
+				}
+				else {
+					wholeGrabbed = true;
+				}
+			}
+			
+			if( wholeGrabbed )
+			{
+				var rotationAmount = clientPosition.clone().sub(oldClientPosition).length() * 5;
+				var rotationAxis = clientPosition.clone().sub(oldClientPosition).applyAxisAngle(zAxis,TAU/4);
+				model.updateMatrixWorld();
+				model.worldToLocal(rotationAxis)
+				rotationAxis.normalize();
+				var quaternion = new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAmount);
+				model.quaternion.multiply(quaternion)
+			}
+			else
+			{
+				//the business of morphing grabbableEdges[ grabbedEdge ]
+			}
+		}
+		else {
+			wholeGrabbed = false;
+			grabbedEdge = -1;
 		}
 		
 		requestAnimationFrame( coreLoop );
 		renderer.render( scene, camera );
 	}
+	
 	coreLoop();
 }
 
 function initArrangement()
 {
-var arrangementGeometry = new THREE.Geometry();
+	var arrangementGeometry = new THREE.Geometry();
 	
 	function triplicateMostRecent()
 	{
