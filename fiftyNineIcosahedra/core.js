@@ -1,9 +1,4 @@
 /*
- * Would wikipedia allow you to embed this?
- * you should click in an area and it "fills". So key thing, on both: triangle with circular cutout
- * 
- * why even make people click? mouse hover, see it change faster
- * 
  * animation: their various face sets move out from the center(or scale down) until their corners are touching. For ico this does nothing but for many...
  * 
  * What nice transitions could you get?
@@ -15,6 +10,8 @@
  * Muse on their beauty, how we like things to line up
  * 
  * Actually maybe the user should extend out the lines? start them on the first stellation. They can grab corners and lines come out?
+ * 
+ * You're drawing the corners out along at least one pre-existing line? 
  */
 
 
@@ -23,11 +20,12 @@ function init()
 {
 	renderer = new THREE.WebGLRenderer({antialias: true});
 	renderer.setPixelRatio( window.devicePixelRatio );
-	renderer.setClearColor( 0xFFFFFF );	
+	renderer.setClearColor( 0xFFFFFF );
+	renderer.sortObjects = false;
 	document.getElementById("canvas").appendChild( renderer.domElement );
 	
 	scene = new THREE.Scene();
-	camera = new THREE.PerspectiveCamera( 1,1,0.001, 700); //both first arguments are irrelevant
+	camera = new THREE.PerspectiveCamera( 1,1,1,100); //both first arguments are irrelevant because of below
 	camera.position.z = 16;
 	
 	var respondToResize = function() 
@@ -88,45 +86,46 @@ function init()
 	
 	var asynchronousInput = initInputSystem();
 	
+	//----------BUSINESS
 //	initArrangement();
 	
-	var cylinderRadius = 0.06;
-	var ourCylinderGeometry = new THREE.CylinderBufferGeometry( cylinderRadius,cylinderRadius,1,15,1, true);
+	var edgeRadius = 0.06;
+	var ourCylinderGeometry = new THREE.CylinderBufferGeometry( 1,1,1,15,1, true);
 	for(var i = 0, il = ourCylinderGeometry.attributes.position.array.length / 3; i < il; i++)
 	{
 		ourCylinderGeometry.attributes.position.array[i*3+1] += 0.5;
 	}
 	
-	var placeCylinder = function( origin, end, newRadius )
+	var placeCylinder = function( start, end, newRadius )
 	{
-//		this.scale.set(1,origin.distanceTo(end),1);
 		if(!newRadius)
-			newRadius = 1;
+			newRadius = edgeRadius;
 		
-		var newY = end.clone().sub(origin);
+		var newY = end.clone().sub(start);
 		var newX = randomPerpVector( newY );
 		var newZ = newY.clone().cross(newX);
 		newX.setLength(newRadius);
 		newZ.setLength(newRadius);
 		
 		this.matrix.makeBasis(newX,newY,newZ);
-		this.matrix.setPosition(origin);
+		this.matrix.setPosition(start);
 		this.matrixAutoUpdate = false;
 		
-		this.origin.copy(origin);
+		this.start.copy(start);
 		this.end.copy(end);
 	}
 	var setCylinderRadius = function( newRadius )
 	{
-		this.place(this.origin, this.end, newRadius)
+		this.place(this.start, this.end, newRadius )
 	}
 	function makePlaceableCylinder()
 	{
 		var ourPlaceableCylinder = new THREE.Mesh( ourCylinderGeometry, new THREE.MeshPhongMaterial({color:0x000000, side:THREE.DoubleSide}));
 		ourPlaceableCylinder.place = placeCylinder;
 		ourPlaceableCylinder.setRadius = setCylinderRadius;
-		ourPlaceableCylinder.origin = new THREE.Vector3();
+		ourPlaceableCylinder.start = new THREE.Vector3();
 		ourPlaceableCylinder.end = new THREE.Vector3(0,1,0);
+		ourPlaceableCylinder.line3 = new THREE.Line3( ourPlaceableCylinder.start, ourPlaceableCylinder.end );
 		return ourPlaceableCylinder;
 	}
 	
@@ -182,7 +181,8 @@ function init()
 			var newCylinder = makePlaceableCylinder();
 			newCylinder.place(
 					model.geometry.vertices[model.geometry.faces[i].getCorner(j)], 
-					model.geometry.vertices[model.geometry.faces[i].getCorner((j+1)%3)] );
+					model.geometry.vertices[model.geometry.faces[i].getCorner((j+1)%3)],
+					edgeRadius);
 			scene.add(newCylinder);
 			
 			model.add(newCylinder);
@@ -191,6 +191,9 @@ function init()
 		}
 	}
 	
+	indicatorSphere = new THREE.Mesh(new THREE.SphereGeometry(0.3), new THREE.MeshBasicMaterial({color:0x888888}));
+	model.add(indicatorSphere)
+	
 	function coreLoop()
 	{
 		frameDelta = ourclock.getDelta();
@@ -198,44 +201,62 @@ function init()
 		
 		asynchronousInput.read();
 		
+		//determination of selection
 		if( !wholeGrabbed && grabbedEdge === -1)
 		{
 			var hoveringEdge = -1;
 			
-			if( clientPosition.length() < 0.3)
-				hoveringEdge = 0;
+//			if( clientPosition.length() < 0.3)
+//				hoveringEdge = 0;
 			
-//			var hoveringEdgePlaneClientRayIntersectionZ = -Infinity;
-//			for(var i = 0; i < grabbableEdges.length; i++)
-//			{
-//				//it lies in the plane orthogonal to the edge and in the z = 0 plane
-//				var pointInEdgePlane = grabbableEdges[i].end.clone().sub(grabbableEdges[i].origin).cross(zAxis).add(grabbableEdges[i].origin);
-//				
-//				var edgePlaneClientRayIntersection = linePlaneIntersection( 
-//						camera.position, clientPosition,
-//						grabbableEdges[i].origin, grabbableEdges[i].end, pointInEdgePlane );
-//				
-//				if( pointLineDistance( edgePlaneClientRayIntersection, grabbableEdges[i].origin, grabbableEdges[i].end ) < edgeRadius )
-//				{
-//					if( edgePlaneClientRayIntersection.z > hoveringEdgePlaneClientRayIntersectionZ )
-//					{
-//						hoveringEdge = i;
-//						hoveringEdgePlaneClientRayIntersectionZ = edgePlaneClientRayIntersection.z;
-//					}
-//				}
-//			}
+			var hoveringEdgePlaneClientRayIntersectionZ = -Infinity;
+			model.updateMatrixWorld();
+			var mouseRay = new THREE.Line3( camera.position.clone(), clientPosition.clone().sub(camera.position).multiplyScalar(2).add(camera.position) );
+			model.worldToLocal(mouseRay.start);
+			model.worldToLocal(mouseRay.end);
+			indicatorSphere.position.copy( mouseRay.at(0.5) );
+			for(var i = 0; i < grabbableEdges.length; i++)
+			{
+				//it lies in the plane orthogonal to the edge and in the z = 0 plane. Could also set from normal
+				var pointInEdgePlane = grabbableEdges[i].line3.delta().cross(mouseRay.start).add(grabbableEdges[i].start);
+				
+				var edgePlane = new THREE.Plane().setFromCoplanarPoints(grabbableEdges[i].start, grabbableEdges[i].end, pointInEdgePlane);
+				
+//				if(!logged)
+//					console.log(edgePlane)
+				
+				var edgePlaneClientRayIntersection = edgePlane.intersectLine( mouseRay );
+				if( edgePlaneClientRayIntersection )
+				{
+					var closestPointOnEdgeLineParameter = grabbableEdges[i].line3.closestPointToPointParameter( edgePlaneClientRayIntersection );
+					if( 0 < closestPointOnEdgeLineParameter && closestPointOnEdgeLineParameter < 1 &&
+							edgeRadius * 3 > grabbableEdges[i].line3.at( closestPointOnEdgeLineParameter ).distanceTo( edgePlaneClientRayIntersection )
+					)
+					{
+						var worldspaceIntersection = edgePlaneClientRayIntersection.clone();
+						model.localToWorld(worldspaceIntersection);
+						if( worldspaceIntersection.z > hoveringEdgePlaneClientRayIntersectionZ )
+						{
+							hoveringEdge = i;
+							hoveringEdgePlaneClientRayIntersectionZ = worldspaceIntersection.z;
+							indicatorSphere.position.copy( edgePlaneClientRayIntersection )
+						}
+					}
+				}
+			}
+			logged = 1;
 			
 			for(var i = 0; i < grabbableEdges.length; i++)
 			{
 				if( i === hoveringEdge )
 				{
 					grabbableEdges[i].material.color.setRGB(1,1,1);
-					grabbableEdges[i].setRadius( 1.9 );
+					grabbableEdges[i].setRadius( edgeRadius * 2 );
 				}
 				else
 				{
 					grabbableEdges[i].material.color.setRGB(0,0,0);
-					grabbableEdges[i].setRadius( 1 );
+					grabbableEdges[i].setRadius( edgeRadius );
 				}
 				
 				grabbableEdges[i].material.needsUpdate = true;
