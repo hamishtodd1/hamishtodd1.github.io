@@ -11,9 +11,10 @@
  * 
  * Actually maybe the user should extend out the lines? start them on the first stellation. They can grab corners and lines come out?
  * 
- * You're drawing the corners out along at least one pre-existing line? 
+ * You're drawing the corners out along at least one pre-existing line?
+ * 
+ *  This does lend itself to the puzzle where you have to get what is shown
  */
-
 
 
 function init()
@@ -89,7 +90,7 @@ function init()
 	//----------BUSINESS
 //	initArrangement();
 	
-	var edgeRadius = 0.06;
+	var edgeRadius = 0.034;
 	var ourCylinderGeometry = new THREE.CylinderBufferGeometry( 1,1,1,15,1, true);
 	for(var i = 0, il = ourCylinderGeometry.attributes.position.array.length / 3; i < il; i++)
 	{
@@ -129,12 +130,17 @@ function init()
 		return ourPlaceableCylinder;
 	}
 	
-	var model = new THREE.Mesh( new THREE.Geometry(), new THREE.MeshPhongMaterial({side:THREE.DoubleSide, color:0xFF0000}) );
-	model.scale.setScalar(0.1)
-	var baseVertices = [ new THREE.Vector3(0,PHI,1),new THREE.Vector3(PHI,1,0),new THREE.Vector3(1,0,PHI) ];
+	var model = new THREE.Object3D();
+	model.scale.setScalar(0.1); //because we want the edges to be 1
 	
-	//rotations
 	{
+		var centralFaceGeometry = new THREE.Geometry();
+		centralFaceGeometry.vertices.push( new THREE.Vector3(0,PHI,1),new THREE.Vector3(PHI,1,0),new THREE.Vector3(1,0,PHI) );
+		centralFaceGeometry.vertices[0].lerp( centralFaceGeometry.vertices[1].clone().lerp(centralFaceGeometry.vertices[2], 0.5), 2/3 );
+		centralFaceGeometry.faces.push( new THREE.Face3(0,2,1) );
+		centralFaceGeometry.computeFaceNormals();
+		centralFaceGeometry.computeVertexNormals();
+		
 		var spindleAxis = new THREE.Vector3(0,PHI,1);
 		spindleAxis.normalize();
 		var layerGenerators = [
@@ -142,31 +148,30 @@ function init()
 		                       new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,PHI).normalize(),-TAU/5),
 		                       new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,PHI).normalize(),-2*TAU/5),
 		                       new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,PHI).normalize(),-2*TAU/5).multiply( new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(PHI,-1,0).normalize(),-TAU/5) ),
-		                       ]
+		                       ];
 		
-		function faceFromQuaternion(ourQuaternion)
-		{
-			var lowestVertexIntroduced = model.geometry.vertices.length;
-			for(var l = 0; l < 3; l++)
-			{
-				var newVertex = baseVertices[l].clone();
-				newVertex.applyQuaternion(ourQuaternion);
-				
-				model.geometry.vertices.push(newVertex)
-			}
-			
-			model.geometry.faces.push( new THREE.Face3(lowestVertexIntroduced,lowestVertexIntroduced+1,lowestVertexIntroduced+2) )
-		}
 		for(var i = 0; i < layerGenerators.length; i++)
 		{
 			for(var j = 0; j < 5; j++)
 			{
-				var ourQuaternion = layerGenerators[i].clone().premultiply(new THREE.Quaternion().setFromAxisAngle(spindleAxis,TAU/5*j))
-				faceFromQuaternion(ourQuaternion);
+				var planeQuaternion = layerGenerators[i].clone();
+				planeQuaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(spindleAxis,TAU/5*j));
+				
+				var faceCentralAxis = centralFaceGeometry.vertices[0].clone().applyQuaternion(planeQuaternion);
+				faceCentralAxis.normalize();
+				
+				var faceMaterial = new THREE.MeshPhongMaterial({side:THREE.DoubleSide})
+				faceMaterial.color.setRGB(Math.random(),Math.random(),Math.random).getHex();
+				
+				for(var k = 0; k < 3; k++)
+				{
+					var fundamentalDomain = new THREE.Mesh( centralFaceGeometry, faceMaterial );
+					fundamentalDomain.quaternion.copy( planeQuaternion );
+					fundamentalDomain.quaternion.premultiply( new THREE.Quaternion().setFromAxisAngle(faceCentralAxis,TAU/3*k) );
+					model.add(fundamentalDomain);
+				}
 			}
 		}
-		model.geometry.computeFaceNormals();
-		model.geometry.computeVertexNormals();
 		scene.add(model);
 	}
 	
@@ -174,25 +179,21 @@ function init()
 	var wholeGrabbed = false;
 	var grabbedEdge = -1;
 	
-	for(var i = 0, il = model.geometry.faces.length; i < il; i++ )
+	for(var i = 0, il = model.children.length; i < il; i++ )
 	{
-		for(var j = 0; j < 3; j++ )
-		{
-			var newCylinder = makePlaceableCylinder();
-			newCylinder.place(
-					model.geometry.vertices[model.geometry.faces[i].getCorner(j)], 
-					model.geometry.vertices[model.geometry.faces[i].getCorner((j+1)%3)],
-					edgeRadius);
-			scene.add(newCylinder);
-			
-			model.add(newCylinder);
-			
-			grabbableEdges.push(newCylinder)
-		}
+		var newCylinder = makePlaceableCylinder();
+		newCylinder.place(
+				model.children[i].geometry.vertices[ 1 ], 
+				model.children[i].geometry.vertices[ 2 ],
+				edgeRadius);
+		
+		model.children[i].add(newCylinder);
+		
+		grabbableEdges.push(newCylinder)
 	}
 	
-	indicatorSphere = new THREE.Mesh(new THREE.SphereGeometry(0.3), new THREE.MeshBasicMaterial({color:0x888888}));
-	model.add(indicatorSphere)
+	indicatorSphere = new THREE.Mesh(new THREE.SphereGeometry(0.03), new THREE.MeshBasicMaterial({color:0x888888}));
+	scene.add(indicatorSphere)
 	
 	function coreLoop()
 	{
@@ -202,30 +203,25 @@ function init()
 		asynchronousInput.read();
 		
 		//determination of selection
+		indicatorSphere.position.copy(clientPosition)
 		if( !wholeGrabbed && grabbedEdge === -1)
 		{
 			var hoveringEdge = -1;
 			
-//			if( clientPosition.length() < 0.3)
-//				hoveringEdge = 0;
-			
 			var hoveringEdgePlaneClientRayIntersectionZ = -Infinity;
 			model.updateMatrixWorld();
-			var mouseRay = new THREE.Line3( camera.position.clone(), clientPosition.clone().sub(camera.position).multiplyScalar(2).add(camera.position) );
-			model.worldToLocal(mouseRay.start);
-			model.worldToLocal(mouseRay.end);
-			indicatorSphere.position.copy( mouseRay.at(0.5) );
 			for(var i = 0; i < grabbableEdges.length; i++)
 			{
+				var clientRay = new THREE.Line3( camera.position.clone(), clientPosition.clone().sub(camera.position).multiplyScalar(2).add(camera.position) );
+				grabbableEdges[i].parent.worldToLocal(clientRay.start);
+				grabbableEdges[i].parent.worldToLocal(clientRay.end);
+				
 				//it lies in the plane orthogonal to the edge and in the z = 0 plane. Could also set from normal
-				var pointInEdgePlane = grabbableEdges[i].line3.delta().cross(mouseRay.start).add(grabbableEdges[i].start);
+				var pointInEdgePlane = grabbableEdges[i].line3.delta().cross(clientRay.start).add(grabbableEdges[i].start);
 				
 				var edgePlane = new THREE.Plane().setFromCoplanarPoints(grabbableEdges[i].start, grabbableEdges[i].end, pointInEdgePlane);
 				
-//				if(!logged)
-//					console.log(edgePlane)
-				
-				var edgePlaneClientRayIntersection = edgePlane.intersectLine( mouseRay );
+				var edgePlaneClientRayIntersection = edgePlane.intersectLine( clientRay );
 				if( edgePlaneClientRayIntersection )
 				{
 					var closestPointOnEdgeLineParameter = grabbableEdges[i].line3.closestPointToPointParameter( edgePlaneClientRayIntersection );
@@ -234,23 +230,23 @@ function init()
 					)
 					{
 						var worldspaceIntersection = edgePlaneClientRayIntersection.clone();
-						model.localToWorld(worldspaceIntersection);
+						grabbableEdges[i].parent.localToWorld(worldspaceIntersection);
 						if( worldspaceIntersection.z > hoveringEdgePlaneClientRayIntersectionZ )
 						{
 							hoveringEdge = i;
 							hoveringEdgePlaneClientRayIntersectionZ = worldspaceIntersection.z;
 							indicatorSphere.position.copy( edgePlaneClientRayIntersection )
+							grabbableEdges[i].parent.localToWorld(indicatorSphere.position);
 						}
 					}
 				}
 			}
-			logged = 1;
 			
 			for(var i = 0; i < grabbableEdges.length; i++)
 			{
 				if( i === hoveringEdge )
 				{
-					grabbableEdges[i].material.color.setRGB(1,1,1);
+					grabbableEdges[i].material.color.setRGB(0.6,0.6,0.6);
 					grabbableEdges[i].setRadius( edgeRadius * 2 );
 				}
 				else
@@ -270,15 +266,41 @@ function init()
 				if( hoveringEdge !== -1)
 				{
 					grabbedEdge = hoveringEdge;
-					grabbableEdges[ grabbedEdge ].material.color.set(0,0,1);
+					grabbableEdges[ grabbedEdge ].material.color.setRGB(1,1,1);
+					grabbableEdges[ grabbedEdge ].setRadius( edgeRadius * 1.5 );
 					grabbableEdges[ grabbedEdge ].materialNeedsUpdate = true;
+					
+					var newSegmentGeometry = new THREE.Geometry();
+					newSegmentGeometry.faces.push(new THREE.Face3(0,1,2));
+					newSegmentGeometry.vertices.push(new THREE.Vector3(),grabbableEdges[ grabbedEdge ].start.clone(), grabbableEdges[ grabbedEdge ].end );
+					
+					for(var i = 0; i < 60; i++)
+					{
+						model.children[i].add( new THREE.Mesh(newSegmentGeometry, model.children[i].material) );
+					}
 				}
 				else {
 					wholeGrabbed = true;
 				}
 			}
 			
-			if( wholeGrabbed )
+			if( grabbedEdge !== -1 )
+			{
+				var clientRay = new THREE.Line3( camera.position.clone(), clientPosition.clone().sub(camera.position).multiplyScalar(2).add(camera.position) );
+				grabbableEdges[grabbedEdge].parent.worldToLocal(clientRay.start);
+				grabbableEdges[grabbedEdge].parent.worldToLocal(clientRay.end);
+				
+				var facePlane = new THREE.Plane().setFromCoplanarPoints(
+						grabbableEdges[grabbedEdge].parent.geometry.vertices[0],
+						grabbableEdges[grabbedEdge].parent.geometry.vertices[1],
+						grabbableEdges[grabbedEdge].parent.geometry.vertices[2] );
+				
+				var facePlaneClientRayIntersection = facePlane.intersectLine( clientRay );
+				
+				grabbableEdges[ grabbedEdge ].parent.children[grabbableEdges[ grabbedEdge ].parent.children.length-1].geometry.vertices[0].copy(facePlaneClientRayIntersection);
+				grabbableEdges[ grabbedEdge ].parent.children[grabbableEdges[ grabbedEdge ].parent.children.length-1].geometry.verticesNeedUpdate = true;
+			}
+			else
 			{
 				var rotationAmount = clientPosition.clone().sub(oldClientPosition).length() * 5;
 				var rotationAxis = clientPosition.clone().sub(oldClientPosition).applyAxisAngle(zAxis,TAU/4);
@@ -287,10 +309,6 @@ function init()
 				rotationAxis.normalize();
 				var quaternion = new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAmount);
 				model.quaternion.multiply(quaternion)
-			}
-			else
-			{
-				//the business of morphing grabbableEdges[ grabbedEdge ]
 			}
 		}
 		else {
