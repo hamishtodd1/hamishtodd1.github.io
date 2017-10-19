@@ -22,7 +22,7 @@ function initInputSystem()
 		clientClicking: false,
 		read: function()
 		{
-			oldClientClicking = this.clientClicking;
+			oldClientClicking = clientClicking;
 			clientClicking = this.clientClicking;
 			
 			oldClientPosition.copy(clientPosition);

@@ -64,3 +64,27 @@ function sq(x)
 {
 	return x*x;
 }
+
+THREE.Face3.prototype.getCorner = function(i)
+{
+	switch(i)
+	{
+	case 0:
+		return this.a;
+	case 1:
+		return this.b;
+	case 2:
+		return this.c;
+	}
+}
+
+function randomPerpVector(ourVector){
+	var perpVector = new THREE.Vector3();
+	
+	if( ourVector.equals(zAxis))
+		perpVector.crossVectors(ourVector, yAxis);
+	else
+		perpVector.crossVectors(ourVector, zAxis);
+	
+	return perpVector;
+}
