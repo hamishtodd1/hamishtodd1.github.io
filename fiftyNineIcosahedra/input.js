@@ -3,6 +3,18 @@ var oldClientPosition = new THREE.Vector3();
 var clientClicking = false;
 var oldClientClicking = false;
 
+function getClientRay()
+{
+	if(camera.isOrthographicCamera)
+	{
+		return new THREE.Line3( camera.position.clone().setZ(camera.z), clientPosition.clone().setZ(-camera.z) );
+	}
+	else
+	{
+		return new THREE.Line3( camera.position.clone(), clientPosition.clone().sub(camera.position).multiplyScalar(2).add(camera.position) );
+	}
+}
+
 function initInputSystem()
 {
 	var asynchronousInput = { //only allowed to use this in this file, and maybe in init
