@@ -123,7 +123,9 @@ function init()
 		}
 	}
 	ico.geometry.computeFaceNormals();
-//	ico.geometry.computeVertexNormals();
+	
+	var destinationQuaternion = ico.quaternion.clone();
+	var destination = ico.position.clone();
 	
 	var edgeRadius = 0.034;
 	var ourCylinderGeometry = new THREE.CylinderBufferGeometry( 1,1,1,15,1, true);
@@ -311,24 +313,23 @@ function init()
 						var flattenedTriangleCornerB = triangleOppositeGE.indexOfThirdCorner(
 								grabbedVertexIndex,
 								flattenedTriangleCornerA );
+
+						var facePlane = new THREE.Plane().setFromCoplanarPoints(
+								ico.geometry.vertices[ flattenedTriangleCornerA ],
+								ico.geometry.vertices[ flattenedTriangleCornerB ],
+								ico.geometry.vertices[ grabbedVertexIndex ] );
+						if(facePlane.normal.angleTo( ico.geometry.vertices[ grabbedVertexIndex ] ) > TAU / 4 )
+							facePlane.normal.negate();
+						destinationQuaternion.setFromUnitVectors( facePlane.normal, zAxis );
+						
+						var edgeInIQ = grabbableEdges[ grabbedEdge ].line3.delta().applyQuaternion(ico.quaternion).setZ(0).normalize();
+						var edgeInDQ = grabbableEdges[ grabbedEdge ].line3.delta().applyQuaternion(destinationQuaternion).setZ(0).normalize();
+						destinationQuaternion.premultiply(new THREE.Quaternion().setFromUnitVectors( edgeInDQ,edgeInIQ ))
+						
+						var geWorld = ico.geometry.vertices[grabbedVertexIndex].clone().multiplyScalar(ico.scale.x).applyQuaternion(destinationQuaternion).add(ico.position);
+						var movementToMouse = clientPosition.clone().sub(geWorld);
+						destination.addVectors(ico.position,movementToMouse);
 					}
-					
-					/*
-					 * ok so your vertex stays in place but the other two need moving
-					 * 
-					 * the below will not precisely work, think it through
-					 */
-					var vectorToPutInPlane = ico.geometry.vertices[ flattenedTriangleCornerA ].clone().sub( ico.geometry.vertices[ flattenedTriangleCornerB ] ).normalize();
-					var newVTPIP = vectorToPutInPlane.clone().setZ(0).normalize();
-					ico.quaternion.multiply(new THREE.Quaternion.setFromUnitVectors( vectorToPutInPlane, newVTPIP ) );
-					vectorToPutInPlane = ico.geometry.vertices[ flattenedTriangleCornerA ].clone().sub( ico.geometry.vertices[ flattenedTriangleCornerB ] ).normalize();
-					newVTPIP = vectorToPutInPlane.clone().setZ(0).normalize();
-					ico.quaternion.multiply(new THREE.Quaternion.setFromUnitVectors( vectorToPutInPlane, newVTPIP ) );
-					
-					var geWorld = ico.geometry.vertices[grabbedVertexIndex].clone();
-					ico.localToWorld(geWorld);
-					var movementToMouse = clientPosition.clone().sub(geWorld);
-					ico.position.add(movementToMouse);
 				}
 				else {
 					wholeGrabbed = true;
@@ -357,7 +358,6 @@ function init()
 				 * Increase size
 				 * deal with implications for other edge lengths
 				 * send to AO, put vertices in our thing
-				 * When returned, change the position and quaternion of our thing such that triangle's non-grabbed edge is in correct place
 				 * 
 				 */
 			}
@@ -377,6 +377,9 @@ function init()
 			wholeGrabbed = false;
 			grabbedEdge = -1;
 		}
+		
+		ico.quaternion.slerp(destinationQuaternion, 0.12);
+		ico.position.lerp(destination, 0.12);
 		
 		requestAnimationFrame( coreLoop );
 		renderer.render( scene, camera );
