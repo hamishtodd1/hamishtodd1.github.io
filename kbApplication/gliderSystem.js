@@ -134,6 +134,13 @@ function initGliderSystem()
 		}
 		else if( typeof direction !== 'undefined' )
 		{
+<<<<<<< HEAD
+			angleFromUpward = direction;
+			this.addToOrientation(orientation - this.glider.rotation.z);
+		}
+		
+		if( kbPointGrabbed || bgGrabbed || gliderGrabbed )
+		{
 			var oldOrientation = glider.rotation.z;
 			setOrientation( orientation );
 			

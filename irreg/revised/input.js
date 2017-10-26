@@ -7,7 +7,7 @@ function getClientRay()
 {
 	if(camera.isOrthographicCamera)
 	{
-		return new THREE.Line3( camera.position.clone().setZ(camera.z), clientPosition.clone().setZ(-camera.z) );
+		return new THREE.Line3( clientPosition.clone().setZ(camera.position.z), clientPosition.clone().setZ(-camera.position.z) );
 	}
 	else
 	{
@@ -41,8 +41,16 @@ function initInputSystem()
 		asynchronousInput.clientPosition.x /= renderer.domElement.width / 2;
 		asynchronousInput.clientPosition.y /= renderer.domElement.height / 2;
 		
-		var centerToFrameVertical = Math.tan( camera.fov * TAU / 360 / 2 ) * camera.position.z;
-		var centerToFrameHorizontal = centerToFrameVertical * camera.aspect;
+		if(camera.isOrthographicCamera)
+		{
+			var centerToFrameVertical = (camera.top - camera.bottom) / 2;
+			var centerToFrameHorizontal = centerToFrameVertical * camera.aspect;
+		}
+		else
+		{
+			var centerToFrameVertical = Math.tan( camera.fov * TAU / 360 / 2 ) * camera.position.z;
+			var centerToFrameHorizontal = centerToFrameVertical * camera.aspect;
+		}
 		
 		asynchronousInput.clientPosition.x *= centerToFrameHorizontal;
 		asynchronousInput.clientPosition.y *= centerToFrameVertical;
