@@ -135,9 +135,36 @@ function initPresentation(presentation)
 	 * 
 	 */
 	var h = presentation.holdables;
+	presentation.holdables.goldenLattice
 	var p = presentation.pages;
 	
 //	p.push( new page( [h.tetToy] ) );
+	
+	//----TEMP
+	p.push( new page( [h.goldenLattice] ) );
+	
+	g = h.goldenLattice;
+	g.timer = 0;
+	g.timerAddition = 0.97;
+	g.middleDist = -0.54;
+	g.amplitude = 0.29;
+	g.rotationSpeed = 0.00168;
+	g.update = function()
+	{
+		this.rotation.y += this.rotationSpeed;
+		this.timer += this.timerAddition * delta_t;
+		
+		var harmonicPart = Math.floor(this.timer/2) === this.timer/2 ? this.timer * 2 : this.timer
+		
+		var harmonicPart = Math.sin( this.timer ) *2.3;
+		if( harmonicPart > 1 )
+			harmonicPart = 1;
+		if( harmonicPart < -1 )
+			harmonicPart = -1;
+		this.position.z =  this.middleDist + harmonicPart * this.amplitude;
+	}
+	
+	//----Presentation
 	
 	p.push( new page([]) );
 	

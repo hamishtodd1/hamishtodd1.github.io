@@ -41,7 +41,7 @@ socket.on('OnConnect_Message', function(msg)
 		Controllers[ i ] = new THREE.Object3D();
 		Controllers[ i ].Gripping = 0;
 		Controllers[ i ].heldObject = null;
-		Scene.add( Controllers[ i ] );
+//		Scene.add( Controllers[ i ] );
 	}
 	var handModelLink = "http://hamishtodd1.github.io/BrowserProsenter/Data/glove.obj"
 	if ( WEBVR.isAvailable() === true ) //Hah and when all browsers have VR?
