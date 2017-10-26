@@ -12,6 +12,7 @@ ourclock = new THREE.Clock( true ); //.getElapsedTime ()
 frameDelta = 0.000001;
 logged = 0;
 debugging = 0;
+timeSinceStart = 0;
 
 THREE.Quaternion.prototype.distanceTo = function(q2)
 {

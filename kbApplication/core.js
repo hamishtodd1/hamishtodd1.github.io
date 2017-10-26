@@ -8,7 +8,7 @@ function init()
 	scene = new THREE.Scene();
 	camera = new THREE.PerspectiveCamera( 70,
 		renderer.domElement.width / renderer.domElement.height,
-		0.001, 700);
+		1, 32);
 	camera.position.z = 16;
 	
 //	var paragliderPic = new THREE.Mesh( new THREE.PlaneGeometry(0.5,0.5), new THREE.MeshBasicMaterial({transparent:true, map:paragliderTexture}) );
@@ -77,8 +77,27 @@ function init()
 	scene.add(lights[0]);
 	scene.add(lights[1]);
 	
+	//---------SOUND
+	Sounds = {};
+	var soundInfoArray = [
+		"change0",
+		"change1",
+		"grab",
+		"release",
+		"pop1",
+		"pop2",
+		"pop3"
+	];
+	for(var i = 0; i < soundInfoArray.length; i++)
+		Sounds[soundInfoArray[i]] = new Audio( "data/" + soundInfoArray[i] + ".mp3" );
+	
+	Sounds.grab.volume = 1;
+	
+	
+	
 	function coreLoop() {
 		frameDelta = ourclock.getDelta();
+		timeSinceStart += frameDelta;
 		
 		asynchronousInput.read();
 		

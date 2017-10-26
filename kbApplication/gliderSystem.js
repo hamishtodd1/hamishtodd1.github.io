@@ -40,7 +40,7 @@ function initGliderSystem()
 				corrector.elements[i*5] *= correctorScale;
 			corrector.setPosition( glider.geometry.boundingSphere.center.clone().multiplyScalar(-correctorScale))
 			corrector.premultiply(new THREE.Matrix4().makeRotationAxis( xAxis,TAU/4 + 0.1 ) );
-			corrector.premultiply(new THREE.Matrix4().makeRotationAxis( zAxis,TAU/4 ) );
+//			corrector.premultiply(new THREE.Matrix4().makeRotationAxis( zAxis,TAU/4 ) );
 			
 			glider.geometry.applyMatrix( corrector );
 			glider.material.color.setRGB(1,0,0);
@@ -121,7 +121,12 @@ function initGliderSystem()
 			
 			if( ( oldOrientation > Math.PI && glider.rotation.z <= Math.PI) ||
 				( oldOrientation <= Math.PI && glider.rotation.z > Math.PI) )
-				glider.flipAnimation = 0;
+			{
+				kbSystem.diamond.material.color.r = 1;
+				var randomSoundIndex = Math.round( Math.random() * 2 ) + 1;
+				Sounds["pop"+randomSoundIndex.toString()].play();
+//				glider.flipAnimation = 0;
+			}
 		}
 		else if( bgGrabbed )
 		{
@@ -134,9 +139,19 @@ function initGliderSystem()
 			
 			directionRotation = direction;
 			
-			if( ( oldOrientation > Math.PI && glider.rotation.z <= Math.PI) ||
-				( oldOrientation <=Math.PI && glider.rotation.z > Math.PI) )
+			var ourFlip = -1;
+			if( oldOrientation > Math.PI && glider.rotation.z <= Math.PI)
+				ourFlip = 1;
+			if( oldOrientation <=Math.PI && glider.rotation.z > Math.PI)
+				ourFlip = 0;
+				
+			var allowedForNoFlip = 0.1;
+			console.log(directionRotation)
+			if(ourFlip !== -1 && Math.abs(directionRotation - TAU/4) > allowedForNoFlip && Math.abs(directionRotation - 3*TAU/4) > allowedForNoFlip )
+			{
 				directionArrow.flipAnimation = 0;
+				Sounds[ "change" + ourFlip.toString() ].play();
+			}
 		}
 		
 		if( bgGrabbed || gliderGrabbed )
@@ -183,7 +198,7 @@ function initGliderSystem()
 			mouseInGliderCircleSpace.sub(this.position)
 			glider.updateMatrix();
 			mouseInGliderCircleSpace.applyMatrix4( new THREE.Matrix4().getInverse( glider.matrix.clone() ) );
-			mouseInGliderCircleSpace.x *= 568/153;
+			mouseInGliderCircleSpace.y *= 568/153;
 			var mouseIsInGlider = ( mouseInGliderCircleSpace.length() < 0.3 );
 			
 			if( kbPointGrabbed || bgGrabbed )

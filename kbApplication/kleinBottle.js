@@ -58,6 +58,7 @@ function initKBSystem()
 	
 	var kbDestinationQuaternion = kb.quaternion.clone();
 	var lastSpecifiedDiamondPosition = diamond.position.clone();
+	var lastDiamondPosition = diamond.position.clone();
 	
 	//----arrow shit
 	{
@@ -89,11 +90,43 @@ function initKBSystem()
 	
 	var trailCurrentSegment = 0;
 	var trailSegments = 600;
-	var trail = new THREE.LineSegments(new THREE.Geometry(), new THREE.LineBasicMaterial({color: 0x000000}) );
-	for(var i = 0; i < trailSegments; i++)
-		trail.geometry.vertices.push(
-				diamond.position.clone(),
-				diamond.position.clone() );
+	var trail;
+	var trailThickness = 0;
+	var trailCylinderSides = 16;
+	if( trailThickness == 0)
+	{
+		trail = new THREE.LineSegments(new THREE.Geometry(), new THREE.LineBasicMaterial({color: 0x000000}) );
+		for(var i = 0; i < trailSegments; i++)
+			trail.geometry.vertices.push(
+					diamond.position.clone(),
+					diamond.position.clone() );
+	}
+	else
+	{
+		trail = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color: 0x000000}) );
+		trail.geometry.vertices = Array(trailCylinderSides*2);
+		trail.geometry.faces = Array(trailCylinderSides*2);
+		var firstVertexIndex = 0;
+		for(var i = 0; i < trailSegments; i++)
+		{
+			for( var j = 0; j < trailCylinderSides; j++)
+			{
+				trail.geometry.vertices[firstVertexIndex+j*2  ] = new THREE.Vector3();
+				trail.geometry.vertices[firstVertexIndex+j*2+1] = new THREE.Vector3();
+				
+				trail.geometry.faces[firstVertexIndex+j*2 ] = new THREE.Face3(
+					firstVertexIndex +  j*2+1,
+					firstVertexIndex +  j*2+0,
+					firstVertexIndex + (j*2+2) % (trailCylinderSides*2) );
+				
+				trail.geometry.faces[firstVertexIndex+j*2+1 ] = new THREE.Face3(
+					firstVertexIndex +  j*2+1,
+					firstVertexIndex + (j*2+2) % (trailCylinderSides*2),
+					firstVertexIndex + (j*2+3) % (trailCylinderSides*2) );
+			}
+			firstVertexIndex += trailCylinderSides * 2;
+		}
+	}
 	kbSystem.resetTrail = function()
 	{
 		for(var i = 0, il = trail.geometry.vertices.length; i < il; i++)
@@ -180,8 +213,7 @@ function initKBSystem()
 //			if(diamond.flip !== 1)
 //				gliderSystem.update(TAU / 2 - diamond.direction,diamond.orientation)
 //			else
-				gliderSystem.update(diamond.direction,diamond.orientation)
-				
+				gliderSystem.update(diamond.direction,diamond.orientation);
 		}
 		
 		//-----Responding to the above
@@ -190,6 +222,7 @@ function initKBSystem()
 			if( kbPointGrabbed )
 				directionArrow.rotation.z = stateAddition.angle() - TAU/4;
 			
+			lastDiamondPosition.copy(diamond.position)
 			diamond.position.copy( kb.getPointOnKB( diamond.direction,diamond.orientation ) );
 			
 			//are these always guaranteed to give you the points you want?
@@ -215,14 +248,30 @@ function initKBSystem()
 			kb.position.lerpVectors( currentKBPosition,kbDestination,0.1 );
 			
 			kb.quaternion.slerp( kbDestinationQuaternion, frameDelta * 2.4 );
+			
+			{
+				diamond.material.color.r -= frameDelta * 2;
+				if( diamond.material.color.r < 0 )
+					diamond.material.color.r = 0;
+				diamond.material.color.setRGB(diamond.material.color.r,diamond.material.color.r,diamond.material.color.r);
+				diamond.material.needsUpdate = true;
+				
+				diamond.scale.setScalar( 1 + diamond.material.color.r * 1.9 );
+//				diamond.position.x += Math.sin(timeSinceStart / TAU) * diamond.material.color.r;
+			}
 
 			if( kbPointGrabbed || bgGrabbed || gliderGrabbed )
 			{
-				trail.geometry.vertices[trailCurrentSegment * 2 + 1].copy(diamond.position);
-				if( trailCurrentSegment !== 0)
-					trail.geometry.vertices[trailCurrentSegment * 2 + 0].copy(trail.geometry.vertices[trailCurrentSegment * 2 - 1]);
+				if(trailThickness === 0)
+				{
+					trail.geometry.vertices[trailCurrentSegment * 2 + 1].copy(diamond.position);
+					trail.geometry.vertices[trailCurrentSegment * 2 + 0].copy( lastDiamondPosition );
+				}
 				else
-					trail.geometry.vertices[trailCurrentSegment * 2 + 0].copy(trail.geometry.vertices[trail.geometry.vertices.length - 1]);
+				{
+					insertCylindernumbers( diamond.position, lastDiamondPosition,
+							trail.geometry.vertices, trailCylinderSides, trailCurrentSegment * trailCylinderSides * 2, trailThickness );
+				}
 				trail.geometry.verticesNeedUpdate = true;
 				
 				trailCurrentSegment++;
@@ -233,6 +282,35 @@ function initKBSystem()
 	}
 	
 	return kbSystem;
+}
+
+function randomPerpVector(OurVector){
+	var PerpVector = new THREE.Vector3();
+	
+	if( OurVector.equals(zAxis))
+		PerpVector.crossVectors(OurVector, yAxis);
+	else
+		PerpVector.crossVectors(OurVector, zAxis);
+	
+	return PerpVector;
+}
+function insertCylindernumbers(A,B, verticesArray, cylinderSides, arrayStartpoint, radius ) {
+	var aToB = new THREE.Vector3(B.x-A.x, B.y-A.y, B.z-A.z);
+	aToB.normalize();
+	var perp = randomPerpVector(aToB);
+	perp.normalize(); 
+	for( var i = 0; i < cylinderSides; i++)
+	{
+		var radiuscomponent = perp.clone();
+		radiuscomponent.multiplyScalar(radius);
+		radiuscomponent.applyAxisAngle(aToB, i * TAU / cylinderSides);
+		
+		verticesArray[arrayStartpoint + i*2 ].copy(radiuscomponent);
+		verticesArray[arrayStartpoint + i*2 ].add(A);
+		
+		verticesArray[arrayStartpoint + i*2+1 ].copy(radiuscomponent);
+		verticesArray[arrayStartpoint + i*2+1 ].add(B);
+	}
 }
 
 function makeKB( minorTubeRadius, majorTubeRadius,bendRadius,neckHeight )
