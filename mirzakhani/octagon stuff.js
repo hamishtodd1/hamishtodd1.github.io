@@ -77,7 +77,7 @@ function initOctagonScene()
 		}
 		//top of arms
 		if( p.x + p.y <= inRadius + centralRadius * 2)
-		{
+		{ 
 			
 		}
 		
