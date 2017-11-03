@@ -1,5 +1,7 @@
 var volumeDecreaseAmt = 0.05;
 
+var MINLATTICESCALE = 0;//0.2773500870617064;
+
 //Speedup opportunity: this. Profile it, it may be a huge thing
 function updatelattice() {
 	var costheta = Math.cos(LatticeAngle);
@@ -53,7 +55,7 @@ function HandleNetMovement()
 				LatticeScaleChange = OldMousedist / Mousedist;
 				var max_lattice_scale_change = 0.08;
 				
-				var min_lattice_scale_given_angle = get_min_lattice_scale(LatticeAngle);
+				var min_lattice_scale_given_angle = MINLATTICESCALE;
 				min_lattice_scale_given_angle /= Math.sqrt(7);
 				
 				LatticeScale *= LatticeScaleChange;
@@ -106,7 +108,7 @@ function HandleNetMovement()
 	} else { //this is where snapping takes place. Can put in the contingency on the button here
 		LatticeGrabbed = false;
 		
-		if( !IrregButton.capsidopen || LatticeScale < 0.2773500870617064 )
+		if( !IrregButton.capsidopen || LatticeScale < MINLATTICESCALE )
 		{
 			var firstnetvertex = new THREE.Vector3(setvirus_flatnet_vertices[3][3],setvirus_flatnet_vertices[3][ 4 ],0);
 			firstnetvertex.multiplyScalar(1/LatticeScale);
@@ -129,12 +131,13 @@ function HandleNetMovement()
 												firstnetvertex.x,firstnetvertex.y, 0,0) ===0 )
 					angleaugmentation *= -1;
 				
-				min_lattice_scale_given_angle = get_min_lattice_scale(LatticeAngle+angleaugmentation);
+				min_lattice_scale_given_angle = MINLATTICESCALE;
 				
 				var full_scale_addition = LatticeScale * scaleaugmentation - LatticeScale;
 				
 				ourchoice++;
-			} while(LatticeScale + full_scale_addition < min_lattice_scale_given_angle - 0.000001 && ourchoice < 7)
+			} while(LatticeScale + full_scale_addition < min_lattice_scale_given_angle - 0.000001 && ourchoice < closestlatticevertices_indices.length )
+			console.log(ourchoice)
 				
 			var speed_towards_fix = 0.03 + 0.97 * Math.pow((1-capsidopenness), 10); //sure this won't change which one you're heading for?
 			LatticeAngle += angleaugmentation*speed_towards_fix;
@@ -155,18 +158,6 @@ function HandleNetMovement()
 	updatelattice();
 }
 
-function get_min_lattice_scale(ourangle) {
-	//this value needs updating if you ever change hexagon_rings
-//	var min_lattice_scale = 1/(2*Math.sqrt(2.5*2.5+3/4));
-//	var angle_for_min_lattice = TAU/6 - Math.atan(Math.sqrt(3)/2 / 2.5);
-//
-//	var virtual_angle = ourangle - angle_for_min_lattice + TAU/12;
-//	while(virtual_angle< -TAU/12) virtual_angle += TAU/6;
-//	while(virtual_angle > TAU/12) virtual_angle -= TAU/6;
-//	return min_lattice_scale / HS3 * Math.cos(virtual_angle);
-	return 0.2773500870617064;
-}
-
 //vertex *destination*. Not vertex, which may be interesting.
 function index_of_closest_default_lattice_vertex(x,y) {
 	var closest_point_so_far_index = 66666;
@@ -184,7 +175,7 @@ function index_of_closest_default_lattice_vertex(x,y) {
 }
 
 function indices_of_closest_default_lattice_vertices(x,y) {
-	var number_of_returns = 7; //all the points near a point, should be ok?
+	var number_of_returns = 1; //all the points near a point, should be ok?
 	var closest_points_indices = Array(number_of_returns);
 	var lowest_quadrances_so_far = Array(number_of_returns );
 	for(var i = 0; i<number_of_returns; i++){
@@ -194,8 +185,8 @@ function indices_of_closest_default_lattice_vertices(x,y) {
 	//speedup opportunity: only go through a sixth of them
 	//speedup opportunity: discard those whose quadrance from the center of the lattice is larger than that of the closest one
 	for( var i = 0; i < number_of_lattice_points; i++) {
-		if(i > 60) //scale would be less than the 0.27735 limit
-			continue;
+//		if(i > 60) //scale would be less than the 0.27735 limit
+//			continue;
 		
 		var quadrance = (x-flatlattice_default_vertices[i*3 + 0])*(x-flatlattice_default_vertices[i*3 + 0]) + 
 						(y-flatlattice_default_vertices[i*3 + 1])*(y-flatlattice_default_vertices[i*3 + 1]);

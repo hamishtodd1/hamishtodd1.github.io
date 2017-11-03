@@ -35,7 +35,3 @@ THREE.Quaternion.prototype.negate = function()
 	this.z *= -1;
 	this.w *= -1;
 }
-
-var TestSphere = new THREE.Mesh( new THREE.SphereGeometry( 0.3, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
-
-var PointOfFocus = new THREE.Vector3();
