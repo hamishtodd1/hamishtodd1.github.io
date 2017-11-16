@@ -1,3 +1,10 @@
+/*
+ * Possibly fun: you're holding a sphere with a few circles in it. The circles move on the sphere
+ *  There are lines coming in from every direction
+ *  rotate the sphere so the lines are going into the circles
+ *  in theory you need only look at three
+ */
+
 function Render() {
 	delta_t = ourclock.getDelta();
 	
