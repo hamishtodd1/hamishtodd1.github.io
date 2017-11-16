@@ -10,7 +10,7 @@ function initInputSystem()
 		clientClicking: false,
 		read: function()
 		{
-			oldClientClicking = this.clientClicking;
+			oldClientClicking = clientClicking;
 			clientClicking = this.clientClicking;
 			
 			oldClientPosition.copy(clientPosition);
@@ -28,8 +28,6 @@ function initInputSystem()
 		//scale
 		asynchronousInput.clientPosition.x /= renderer.domElement.width / 2;
 		asynchronousInput.clientPosition.y /= renderer.domElement.height / 2;
-		
-		console.log(asynchronousInput.clientPosition)
 		
 		var centerToFrameVertical = Math.tan( camera.fov * TAU / 360 / 2 ) * camera.position.z;
 		var centerToFrameHorizontal = centerToFrameVertical * camera.aspect;
