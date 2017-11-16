@@ -1,0 +1,92 @@
+<html>
+	<head>
+		<title>cootVR</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				margin: 0px;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<!--these two scripts are purely for the ripped-off setup-->
+		<script type="x-shader/x-vertex" id="modelVertexShader">
+			varying vec3 N;
+			varying vec3 v;
+			void main() 
+			{
+				//v = vec3(gl_ModelViewMatrix * gl_Vertex);       
+				//N = normalize(gl_NormalMatrix * gl_Normal);
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+				//gl_Position = gl_ModelViewProjectionMatrix * position;
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="modelFragmentShader">
+			void main()
+			{
+				gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+			}
+		</script>
+		
+		<script type="x-shader/x-vertex" id="vertexShader">
+			varying vec3 vWorldPosition;
+			void main() {
+				vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
+				vWorldPosition = worldPosition.xyz;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="fragmentShader">
+			uniform vec3 topColor;
+			uniform vec3 bottomColor;
+			uniform float offset;
+			uniform float exponent;
+			varying vec3 vWorldPosition;
+			void main() {
+				float h = normalize( vWorldPosition + offset ).y;
+				gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( max( h , 0.0), exponent ), 0.0 ) ), 1.0 );
+			}
+		</script>
+		
+		<script src="lib/three.min.js"></script> <!--change to v=something if you want reloading-->
+		<script src="lib/WireframeGeometry.js"></script> <!--change to v=something if you want reloading-->
+
+		<script src="lib/SceneFromDemo.js"></script>
+		<script src="lib/THREEx.FullScreen.js"></script>
+		<script src="lib/OBJLoader.js"></script>
+		<script src="lib/PDBLoader.js"></script>
+		
+		<script src="lib/WebVR.js"></script>
+		<script src="lib/VREffect.js"></script>
+		<script src="lib/VRControls.js"></script>
+		
+		<script src="lib/StereoEffect.js"></script>
+		<script src="lib/DeviceOrientationControls.js"></script>
+		
+		<script src="stemoskiMC.js"></script>
+		
+		<script src="variables.js"></script>
+		<script src="VRControlSystem.js"></script>
+		<script src="socketCommunication.js"></script>
+		
+		<script src="models.js"></script>
+		<script src="maps.js"></script>
+		<script src="holdables.js"></script>
+		<script src="tools.js"></script>
+		
+		<script src="mobileInitialization.js"></script>
+		<script src="mobileCoreLoop.js"></script>
+		
+		<script src="desktopInitialization.js"></script>
+		<script src="desktopCoreLoop.js"></script>
+		
+		<script>
+			desktopInitialize();
+		</script>
+		
+	</body>
+</html>
+
+<!--webglviewer is "appended" in init--><!--yo-->
