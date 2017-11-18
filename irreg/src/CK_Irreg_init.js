@@ -21,16 +21,6 @@ function init_CK_and_irreg()
 		IrregButton.radius = 0.37;
 		var button_line_width = 0.04;
 		
-		/*
-		 * Ideally you'd like a shaded thing so it looks 3D. Add lights to CK
-		 * 
-		 * Either squares or triangles; three surrounding a point
-		 * 
-		 * It shouldn't be black
-		 * 
-		 * And by the way, functions that construct 3D shapes should be re-callable
-		 */
-		
 		IrregButton.logoFaces = Array(3);
 		var faceWidth = IrregButton.radius / 1.8;
 		var squareGeometry = new THREE.Geometry();

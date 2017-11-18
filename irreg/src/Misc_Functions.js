@@ -228,44 +228,6 @@ function deduce_most_of_surface(openness, vertices_numbers) {
 	}
 }
 
-function deduce_most_of_surface_regular(openness, vertices_numbers) {
-	var bend_angle = Math.acos(-Math.sqrt(5)/3);
-	bend_angle = bend_angle + openness * (TAU/2 - bend_angle);
-	
-	var a = new THREE.Vector3(
-			vertices_numbers.array[0 * 3 + 0],
-			vertices_numbers.array[0 * 3 + 1],
-			vertices_numbers.array[0 * 3 + 2]);	
-	var b = new THREE.Vector3(
-			vertices_numbers.array[1 * 3 + 0],
-			vertices_numbers.array[1 * 3 + 1],
-			vertices_numbers.array[1 * 3 + 2]);
-	var edgelength = a.distanceTo(b);
-		
-	for( var i = 3; i < 22; i++) {
-		var a_index = vertices_derivations[i][0];
-		var b_index = vertices_derivations[i][1];
-		var c_index = vertices_derivations[i][2];
-			
-		var a = new THREE.Vector3(
-			vertices_numbers.array[a_index * 3 + 0],
-			vertices_numbers.array[a_index * 3 + 1],
-			vertices_numbers.array[a_index * 3 + 2]);	
-		var b = new THREE.Vector3(
-			vertices_numbers.array[b_index * 3 + 0],
-			vertices_numbers.array[b_index * 3 + 1],
-			vertices_numbers.array[b_index * 3 + 2]);
-		var c = new THREE.Vector3(
-			vertices_numbers.array[c_index * 3 + 0],
-			vertices_numbers.array[c_index * 3 + 1],
-			vertices_numbers.array[c_index * 3 + 2]);
-		
-		var d = bent_down_quad_corner(a,b,c,bend_angle,0.5 * edgelength, HS3 * edgelength);
-		
-		vertices_numbers.setXYZ(i, d.x,d.y,d.z);
-	}
-}
-
 function bent_down_quad_corner(a,b,c,theta,d_hinge_origin_length, d_hinge_length) {
 	var crossbar_unit = b.clone();
 	crossbar_unit.sub(a);			

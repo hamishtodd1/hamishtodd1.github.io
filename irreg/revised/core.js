@@ -30,8 +30,8 @@ function init()
 		{
 			camera.right = 0.5;
 			camera.left = -0.5;
-			camera.top = camera.right * camera.aspect;
-			camera.bottom = camera.left * camera.aspect;
+			camera.top = camera.right / camera.aspect;
+			camera.bottom = camera.left / camera.aspect;
 		}
 		
 		camera.updateProjectionMatrix();

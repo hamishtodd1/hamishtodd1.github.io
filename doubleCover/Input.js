@@ -25,7 +25,7 @@ var previousMousePosition = new THREE.Vector2();
 //	var mouseMovementAmount = mouseDelta.length() / 200;
 //	
 //	var spectatorMouseMovementAxis = mouseMovementAxis.clone();
-//	spectatorMouseMovementAxis.applyQuaternion(doubleSphere.spectatorQuaternion);
+//	spectatorMouseMovementAxis.applyQuaternion( doubleSphere.spectatorQuaternion );
 //	spectatorMouseMovementAxis.normalize();
 //	var spectatorMouseMovementQuaternion = new THREE.Quaternion().setFromAxisAngle(spectatorMouseMovementAxis, mouseMovementAmount );
 //	doubleSphere.spectatorQuaternion.multiply(spectatorMouseMovementQuaternion);

@@ -41,6 +41,8 @@ function ReadInput()
 	react_to_video();	
 }
 
+//this is a separate function because of the part where we resize the canvas
+//bug: you get the canvas and embed resizing but the text doesn't move. And the thingy is on the screen. You've scrolled down but it puts them both there
 function onWindowResizeExceptYoutube( canvasWidthOverHeight )
 {
 	var maxCanvasDimension = window.innerHeight * (447/550); //chosen by inspection
@@ -58,6 +60,7 @@ function onWindowResizeExceptYoutube( canvasWidthOverHeight )
 //		finalCanvasDimension = maxCanvasDimension;
 	
 	var finalCanvasDimension = maxCanvasDimension;
+	console.log("dimension", finalCanvasDimension)
 	
 	{
 		var playerAndCanvas = document.getElementById("playerAndCanvas");
@@ -83,7 +86,10 @@ function onWindowResizeExceptYoutube( canvasWidthOverHeight )
 		var titleDiv = document.getElementById( "title" );
 		titleDiv.style.fontSize = fontSize.toString() + "px";
 		titleDiv.style.lineHeight = 2.6 * playerAndCanvasBottomToWindowBottom / fontSize;
+		console.log("font", fontSize)
+	}
 		
+	{
 		var warningDiv = document.getElementById( "warning" );
 		
 		if( window.innerHeight>window.innerWidth )
@@ -111,22 +117,6 @@ onWindowResizeExceptYoutube(1);
 function onWindowResize()
 {
 	var finalCanvasDimension = onWindowResizeExceptYoutube(1);
-	
-	//Hopefully youtube knows what to do (it didn't always listen anyway)
-//	var qualityString = "";
-//	if(finalCanvasDimension === 240)
-//		qualityString += "small";
-//	else if(finalCanvasDimension === 360)
-//		qualityString += "medium";
-//	else if(finalCanvasDimension === 480)
-//		qualityString += "large";
-//	else if(finalCanvasDimension === 720)
-//		qualityString += "hd720";
-//	else if(finalCanvasDimension >= 1080)
-//		qualityString += "hd1080";
-//	else qualityString += "default";
-//	ytplayer.setPlaybackQuality( qualityString ); //and if their connection is too slow, they have the cog
-	
 	ytplayer.setSize(finalCanvasDimension,finalCanvasDimension);
 }		
 window.addEventListener( 'resize', onWindowResize, false );

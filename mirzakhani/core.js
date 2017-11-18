@@ -218,6 +218,16 @@ function init()
  * 5,5,5
  * 
  * [a2, b5, c1, b1, c5], [b2, c5, a1, c1, a5], [c2, a5, b1, a1, b5]
+ * 
+ * 
+ * decompose into all cycles
+forget those not of length 5
+Try all combinations of them
+
+Can be ruled out if there's an odd number of edges
+	Or #edges is not a multiple of 5
+
+for each edge, do a search
  */	
 	
 	var decomposition;
@@ -317,6 +327,7 @@ function init()
 		else
 			decompositionDisplayState = decompositionDisplayState + (0-decompositionDisplayState)*0.1;
 			
+		console.log(edges.length);
 		
 		asynchronousInput.read();
 		
@@ -369,7 +380,6 @@ function init()
 							edges[i].endIndex--;
 					}
 				}
-				console.log(disjointSets, nodes, edges)
 				
 				findCycles(1)
 			}
