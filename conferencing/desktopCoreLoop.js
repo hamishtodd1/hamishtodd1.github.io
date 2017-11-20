@@ -24,10 +24,10 @@ function desktopLoop(ourVREffect, socket, controllers, VRInputSystem, visiBox, t
 	{
 		if(Math.abs( controllers[i].thumbStickAxes[1] ) > 0.001)
 		{
-			modelAndMap.scale.setScalar( modelAndMap.scale.x * (1+controllers[i].thumbStickAxes[1] / 100) );
+			model.scale.setScalar( model.scale.x * (1+controllers[i].thumbStickAxes[1] / 100) );
 			var minScale = 0.0000001;
-			if( modelAndMap.scale.x < minScale )
-				modelAndMap.scale.setScalar( minScale )
+			if( model.scale.x < minScale )
+				model.scale.setScalar( minScale )
 		}
 		
 		if( controllers[i].grippingTop )
@@ -70,7 +70,7 @@ function desktopLoop(ourVREffect, socket, controllers, VRInputSystem, visiBox, t
 		ensureDetachment(visiBox, controllers[1-bothAttachedController]);
 		
 		ensureAttachment(visiBox, controllers[bothAttachedController]);
-		ensureAttachment(modelAndMap, controllers[bothAttachedController]);
+		ensureAttachment(model, controllers[bothAttachedController]);
 		
 		var handSeparationDifferential = controllers[0].position.distanceTo( controllers[1].position ) / 
 			controllers[0].oldPosition.distanceTo( controllers[1].oldPosition );
@@ -79,21 +79,21 @@ function desktopLoop(ourVREffect, socket, controllers, VRInputSystem, visiBox, t
 		visiBox.scale.setScalar( visiBox.scale.x * handSeparationDifferential );
 		visiBox.position.multiplyScalar(visiBox.scale.x);
 		
-		modelAndMap.position.multiplyScalar( 1 / modelAndMap.scale.x ); 
-		modelAndMap.scale.setScalar( modelAndMap.scale.x * handSeparationDifferential );
-		modelAndMap.position.multiplyScalar(modelAndMap.scale.x);
+		model.position.multiplyScalar( 1 / model.scale.x ); 
+		model.scale.setScalar( model.scale.x * handSeparationDifferential );
+		model.position.multiplyScalar(model.scale.x);
 	}
 	else
 	{
 		if( controllers[bothAttachedController].grippingSide )
 		{
 			ensureAttachment(visiBox, controllers[bothAttachedController]);
-			ensureAttachment(modelAndMap, controllers[bothAttachedController]);
+			ensureAttachment(model, controllers[bothAttachedController]);
 		}
 		else
 		{
 			ensureDetachment(visiBox, controllers[bothAttachedController]);
-			ensureDetachment(modelAndMap, controllers[bothAttachedController]);
+			ensureDetachment(model, controllers[bothAttachedController]);
 		}
 		
 		if( controllers[1-bothAttachedController].grippingSide )
@@ -117,13 +117,13 @@ function desktopLoop(ourVREffect, socket, controllers, VRInputSystem, visiBox, t
 			thingsToBeUpdated[thing].update();
 	}
 	
-	modelAndMap.map.material.linewidth = 0.2 / modelAndMap.position.distanceTo(camera.position);
-	modelAndMap.map.material.needsUpdate = true;
+	if( model.map )
+	{
+		model.map.material.linewidth = 0.2 / model.position.distanceTo(camera.position);
+		model.map.material.needsUpdate = true;
+	}
 	
 	socket.send("loopDone");
 	
-	ourVREffect.requestAnimationFrame( function(){
-		ourVREffect.render( scene, camera );
-		desktopLoop(ourVREffect, socket, controllers, VRInputSystem, visiBox, thingsToBeUpdated, holdables );
-	} );
+	render();
 }

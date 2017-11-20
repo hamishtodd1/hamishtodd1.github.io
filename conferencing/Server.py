@@ -1,26 +1,3 @@
-#http://www.remwebdevelopment.com/blog/python/simple-websocket-server-in-python-144.html
-'''
-To get the imports below (ensuring along the way that it is the python.exe installed in coot):
-	get pip by downloading this https://bootstrap.pypa.io/get-pip.py and running python.exe get-pip.py
-	pip install pypiwin32 - then you can import win32api
-	pip install tornado
-	subprocess should already be in there
-	and you might need to restart coot
-	
-	map_contours(1, 0.6) #0.6 electrons per cubic angstrom, enough to see donuts in the tutorial data
-	problem was it wasn't in the right directory
-	
-SimpleXMLRPCServer
-
-	
-	
-TODO CHECK FOR FIREWALLS! So you can warn if they're there
-'''
-
-
-
-
-
 import signal
 is_closing = False
 def signal_handler(signum, frame):
@@ -39,9 +16,7 @@ def try_exit():
 #---------specific to our setup in some way
 import os #platform independent
 if os.name == 'nt':
-	os.chdir("C:\CVR")
-if os.name == 'posix':
-	os.chdir("/home/htodd/CVR")
+	os.chdir("C:\hamishtodd1.github.io\conferencing")
 
 #to get these, open the python console (of the coot install but not in coot)
 #the procedure is: download get-pip.py, put it in wincoot/python27. run python.exe get-pip.py. run python.exe -m pip install pypiwin32.
@@ -118,25 +93,6 @@ class wsHandler(tornado.websocket.WebSocketHandler):
 		self.write_message(mapString)
 
 	def open(self):
-		#we change all these numbers to ensure that hard refresh actually works
-		indexFile = open('index.html', 'r')
-		modifiedIndexFile = ""
-		for line in indexFile:
-			newLine = ""
-			versionNumber = "0"
-			if line[len(line)-24:len(line)-18] != ".js?v=":
-				newLine = line
-			else:
-				newLine += line[:len(line)-18]
-				if versionNumber == "0":
-					versionNumber = int( line[ len(line)-18:len(line)-12 ] )
-					versionNumber += 1
-					versionNumber = str(versionNumber)
-				newLine += versionNumber
-				newLine += line[len(line)-12:]
-			modifiedIndexFile += newLine
-		indexFileWrite = open('index.html', 'w')
-		indexFileWrite.write(modifiedIndexFile)
 			
 		'''
 		type in "window.location.reload(true)" on the remote debugging console if it's not reloading. Ctrl+refresh once worked too
@@ -144,68 +100,12 @@ class wsHandler(tornado.websocket.WebSocketHandler):
 		'''
 		self.set_nodelay(True) #doesn't hurt to have this hopefully...
 		
-		if runningInCoot:
-			set_map_radius(15)
-		self.sendMap()
-		
-		#-------update the version numbers so that the whole thing gets refreshed
-		
 		debug = True
 		
 	def on_message(self, message):
 		#time to send the next one. TODO make it sooner?
 		splitMessage = message.split(";")
 		messageHeader = splitMessage[0]
-		
-		'''
-		if messageHeader == "refine": #no addition or deletion
-			if runningInCoot:
-				imol = splitMessage[1]
-				chain_id = splitMessage[2]
-				res_no = splitMessage[3]
-				ins_code = splitMessage[4]
-				refine_residues( imol, [[chain_id,res_no,ins_code]] )
-				atomDeltas = get_most_recent_atom_changes()
-				
-				#post_manipulation_hook?
-				newModelData = get_bonds_representation(imol)
-				self.write_message(newModelData)
-			
-				
-		elif messageHeader == "increase radius":
-			if runningInCoot:
-				currentRadius = get_map_radius()
-				set_map_radius(currentRadius + 4)
-			self.sendMap()
-			
-		elif messageHeader == "mutate":
-			if runningInCoot:
-				mutate_and_auto_fit( splitMessage[1],splitMessage[2],splitMessage[3],splitMessage[4] )
-				self.write_message(atomDeltas)
-				
-				refine_active_reside()
-		elif messageHeader === "moveAtom":
-			if runningInCoot:
-				set_atom_attribute(imol, chain_id, res_no, ins_code, atom_name, alt_conf, "x", attribute_value);
-		
-		Also useful
-		pepflip-active-residue
-		%coot-listener-socket
-		active_residue()
-		add-molecule
-		auto-fit-best-rotamer
-		view-matrix
-		set-view-matrix
-		
-		self.write_message("Didn't understand that")
-		print('received unrecognized message:', message)
-		'''
-			
-	def sendButtonState(self, buttonString):
-		buttonState = 0
-		if GetKeyState( VK_CODE[ buttonString ] ) < 0:
-			buttonState = 1
-		self.write_message( buttonString + "," + str( buttonState ) )
 
 	def on_close(self):
 		print('connection closed...')
@@ -234,6 +134,3 @@ ssl_options={
 application.listen(9090)
 tornado.ioloop.PeriodicCallback(try_exit, 100).start() 
 tornado.ioloop.IOLoop.instance().start()
-	
-#note that we need to be able to continue coot running and have things passed from coot to this
-#but like... will there be a wait before coot gets back to you?

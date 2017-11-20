@@ -1,7 +1,11 @@
-function desktopInitialize()
+/*
+ * Webpage with simple box. Enter pdb ID or weblink to page or serial number
+ * Enter something other than a serial number and it creates a "lobby" with a unique serial number that will be on the wall
+ */
+
+function desktopInitialize(pdbWebAddress)
 {
 	var launcher = {
-		socketOpened: false,
 		dataLoaded:{
 			font: false,
 			controllerModel0: false,
@@ -14,26 +18,17 @@ function desktopInitialize()
 				if( !this.dataLoaded[data] )
 					return;
 			}
-			if(!this.socketOpened )
-				return;
-			else
-			{
-//				initMutator(tools);
-//				initAtomDeleter(tools);
-				
-				/*
-				 * tutModelWithLigand
-				 * ribosome.txt
-				 * oneAtomOneBond.txt
-				 * 3C0.lst
-				 */
-				loadModel("data/tutModelWithLigand.txt", thingsToBeUpdated, visiBox.planes);
-				initMap("data/try-2-map-fragment.tab.txt", visiBox.planes);
-				
-				desktopLoop(ourVREffect, socket, controllers, VRInputSystem, visiBox, thingsToBeUpdated, holdables );
-			}
+
+			loadModel(pdbWebAddress, thingsToBeUpdated );
+			render();
 		}
 	}
+
+	var renderer = new THREE.WebGLRenderer({ antialias: true });
+	renderer.localClippingEnabled = true; //necessary if it's done in a shader you write?
+	renderer.setPixelRatio( window.devicePixelRatio );
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	document.body.appendChild( renderer.domElement );
 
 	var thingsToBeUpdated = {};
 	thingsToBeUpdated.labels = [];
@@ -42,19 +37,25 @@ function desktopInitialize()
 	var visiBox = initVisiBox(thingsToBeUpdated,holdables);
 	
 	var ourVREffect = new THREE.VREffect( renderer );
+	render = function()
+	{
+		ourVREffect.requestAnimationFrame( function(){
+			ourVREffect.render( scene, camera );
+			desktopLoop(ourVREffect, socket, controllers, VRInputSystem, visiBox, thingsToBeUpdated, holdables );
+		} );
+	}
 	
 	controllers = Array(2);
 	var VRInputSystem = initVRInputSystem(controllers, launcher);
 	
-	//rename when it's more than model and map. "the workspace" or something
-	modelAndMap = new THREE.Object3D();
-	modelAndMap.scale.setScalar( 0.028 );
+	model = new THREE.Object3D();
+	model.scale.setScalar( 0.01 ); //0.028 is nice
 	getAngstrom = function()
 	{
-		return modelAndMap.scale.x;
+		return model.scale.x;
 	}
-	modelAndMap.position.z = -FOCALPOINT_DISTANCE;
-	scene.add(modelAndMap);
+	model.position.z = -FOCALPOINT_DISTANCE;
+	scene.add(model);
 	
 	new THREE.FontLoader().load( "data/gentilis.js", 
 		function ( gentilis ) {
@@ -122,44 +123,5 @@ function desktopInitialize()
 		}
 		
 		thingsToBeUpdated.blinker = blinker;
-	}
-
-	//socket crap
-	{
-		socket = initSocket();
-		
-		socket.onopen = function( )
-		{
-			launcher.socketOpened = true;
-			launcher.attemptLaunch();
-		}
-		
-		socket.messageResponses["This is the server"] = function(messageContents)
-		{}
-		
-		socket.messageResponses["mousePosition"] = function(messageContents)
-		{}
-		
-		socket.messageResponses["lmb"] = function(messageContents)
-		{}
-		
-		
-		
-		//A solution to narrow screens. Works fine but we can't record it!
-		//siiiiigh, it would introduce complexity for the user anyway
-//		else if( messageContents[0] === "o" && parseInt( messageContents[1] ) )
-//		{
-//			ourStereoEffect.stereoCamera.cameraL.projectionMatrix.elements[8] -= 0.01;
-//			ourStereoEffect.stereoCamera.cameraR.projectionMatrix.elements[8] += 0.01;
-//			console.log(ourStereoEffect.stereoCamera.cameraL.projectionMatrix.elements[8])
-//			console.log(ourStereoEffect.stereoCamera.cameraR.projectionMatrix.elements[8])
-//		}
-//		else if( messageContents[0] === "l" && parseInt( messageContents[1] ) )
-//		{
-//			ourStereoEffect.stereoCamera.cameraL.projectionMatrix.elements[8] += 0.01;
-//			ourStereoEffect.stereoCamera.cameraR.projectionMatrix.elements[8] -= 0.01;
-//			console.log(ourStereoEffect.stereoCamera.cameraL.projectionMatrix.elements[8])
-//			console.log(ourStereoEffect.stereoCamera.cameraR.projectionMatrix.elements[8])
-//		}
 	}
 }

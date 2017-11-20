@@ -48,7 +48,6 @@ function initVRInputSystem(controllers, launcher)
 			function ( object ) 
 			{
 				controllers[  i ].controllerModel.geometry = object.children[0].geometry;
-			
 				controllers[  i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeRotationAxis(xAxis,0.5) );
 				controllers[  i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeTranslation((i==LEFT_CONTROLLER_INDEX?1:-1)*0.002,0.036,-0.039) );
 				controllers[  i ].controllerModel.geometry.computeBoundingSphere();
