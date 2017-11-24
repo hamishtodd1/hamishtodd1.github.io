@@ -18,7 +18,7 @@ var rooms = {};
 //it gets serverConnected but not the one after that?
 io.on('connection', function(socket)
 {
-	console.log("User connected: ", socket.id);
+	console.log("potential user connected: ", socket.id);
 
 	socket.emit('serverConnected');
 
@@ -28,16 +28,6 @@ io.on('connection', function(socket)
 	});
 
 	var roomKey = "";
-
-	function bringIntoAllocatedRoom()
-	{
-		socket.emit('roomInvitation', {roomKey:roomKey,pdbWebAddress:rooms[roomKey].pdbWebAddress} );
-		//next is to add participants
-
-		rooms[roomKey].participants.push(socket);
-
-		console.log( "\nallocating ", socket.id, " to room ", roomKey, ".\ncurrent set of participants: ", rooms[roomKey].participants);
-	}
 
 	socket.on('roomInitializationRequest', function(pdbWebAddress)
 	{
@@ -66,6 +56,33 @@ io.on('connection', function(socket)
 			bringIntoAllocatedRoom();
 		}
 	});
+
+	function bringIntoAllocatedRoom()
+	{
+		socket.emit('roomInvitation', {
+			roomKey:roomKey,
+			pdbWebAddress:rooms[roomKey].pdbWebAddress
+		} );
+
+		//next is to add participants
+
+		rooms[roomKey].participants.push(socket);
+
+		console.log( "\nallocating ", socket.id, " to room ", roomKey, "\ncurrent number of participants: ", rooms[roomKey].participants.length);
+
+		//---------------the below is everything that goes beyond entry
+
+		socket.on('userUpdate', function(updatePackage)
+		{
+			for(var i = 0; i < rooms[roomKey].participants.length; i++)
+			{
+				if( rooms[roomKey].participants[i] !== socket )
+				{
+					rooms[roomKey].participants[i].emit('userUpdate',updatePackage);
+				}
+			}
+		});
+	}
 
 	// socket.on('disconnect', function ()
 	// {

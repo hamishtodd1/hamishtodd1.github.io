@@ -15,7 +15,7 @@ function ensureDetachment(child, parent)
 	}
 }
 
-function desktopLoop(ourVREffect, socket, controllers, vrInputSystem, visiBox, thingsToBeUpdated, holdables ) {
+function desktopLoop(ourVREffect, socket, controllers, vrInputSystem, visiBox, thingsToBeUpdated, holdables, userManager ) {
 	frameDelta = ourClock.getDelta();
 	
 	vrInputSystem.update( socket);
@@ -123,7 +123,5 @@ function desktopLoop(ourVREffect, socket, controllers, vrInputSystem, visiBox, t
 		model.map.material.needsUpdate = true;
 	}
 	
-	socket.send("loopDone");
-	
-	render();
+	userManager.sendOurUpdate();
 }

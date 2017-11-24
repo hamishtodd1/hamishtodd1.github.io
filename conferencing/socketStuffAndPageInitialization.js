@@ -2,7 +2,7 @@
 
 (function()
 {
-	socket = io();
+	var socket = io();
 
 	socket.on( 'logThisMessage', function(msg)
 	{
@@ -38,6 +38,8 @@
 
 			if( request.length === 2 )
 			{
+				camera.position.z = -1;
+				camera.rotation.y = TAU/2;
 				socket.emit( 'roomEntryRequest', request );
 			}
 			else if(request.length === 4 )

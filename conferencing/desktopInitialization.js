@@ -13,11 +13,6 @@ ssl crap
 
 function desktopInitialize(socket, pdbWebAddress, roomKey)
 {
-	// var userManager = initUserManager();
-	// user = userManager.User("daydream","placeholderID");
-	// scene.add(user);
-	// user.position.z = -0.8;
-
 	var launcher = {
 		dataLoaded:{
 			font: false,
@@ -33,10 +28,10 @@ function desktopInitialize(socket, pdbWebAddress, roomKey)
 			}
 
 			var roomSign = TextMesh( roomKey, 0.5);
-			// roomSign.position.z = -2;
+			roomSign.position.z = -2;
 			scene.add(roomSign);
 
-			// loadModel(pdbWebAddress, thingsToBeUpdated );
+			loadModel(pdbWebAddress, thingsToBeUpdated );
 			render();
 		}
 	}
@@ -53,17 +48,20 @@ function desktopInitialize(socket, pdbWebAddress, roomKey)
 	
 	var visiBox = initVisiBox(thingsToBeUpdated,holdables);
 	
-	var ourVREffect = new THREE.VREffect( renderer );
-	render = function()
+	var ourVrEffect = new THREE.VREffect( renderer );
+	function render()
 	{
-		ourVREffect.requestAnimationFrame( function(){
-			ourVREffect.render( scene, camera );
-			desktopLoop(ourVREffect, socket, controllers, vrInputSystem, visiBox, thingsToBeUpdated, holdables );
+		desktopLoop(ourVrEffect, socket, controllers, vrInputSystem, visiBox, thingsToBeUpdated, holdables, userManager );
+		ourVrEffect.requestAnimationFrame( function(){
+			ourVrEffect.render( scene, camera );
+			render();
 		} );
 	}
 	
-	controllers = Array(2);
-	var vrInputSystem = initvrInputSystem(controllers, launcher);
+	var controllers = Array(2);
+	var vrInputSystem = initVrInputSystem(controllers, launcher);
+
+	var userManager = initUserManager(controllers,socket);
 	
 	model = new THREE.Object3D();
 	model.scale.setScalar( 0.01 ); //0.028 is nice
@@ -100,7 +98,7 @@ function desktopInitialize(socket, pdbWebAddress, roomKey)
 		{
 			event.preventDefault();
 			vrInputSystem.startGettingInput();
-			ourVREffect.setFullScreen( true );
+			ourVrEffect.setFullScreen( true );
 		}
 	}, false );
 	
@@ -131,7 +129,7 @@ function desktopInitialize(socket, pdbWebAddress, roomKey)
 			
 			if( oldBlinkProgress < 0 && this.blinkProgress > 0)
 			{
-				ourVREffect.toggleEyeSeparation();
+				ourVrEffect.toggleEyeSeparation();
 				if( visiBox.position.distanceTo(camera.position) < camera.near )
 				{
 					visiBox.position.setLength(camera.near * 1.1);

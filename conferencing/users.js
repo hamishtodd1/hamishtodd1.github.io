@@ -4,106 +4,99 @@
 //forget about tablet for a bit, that'll be pinch to zoom
 //probably laser is invisible when mouse is down
 
-function initUserManager(controllers)
+function initUserManager(controllers, socket)
 {
 	var userManager = {};
 
-	var headWidth = 0.3;
-	var headHeight = 0.2;
-	var headDepth = 0.03;
+	var users = {};
 
-	var baseHead = new THREE.Mesh(new THREE.BoxBufferGeometry(headWidth,headHeight,headDepth), new THREE.MeshBasicMaterial() );
-
-	var eye = new THREE.Mesh(new THREE.CircleBufferGeometry(0.05,32), new THREE.MeshBasicMaterial({color:0xFFFFFF}));
-	eye.add( new THREE.Mesh(new THREE.CircleBufferGeometry(0.02,32), new THREE.MeshBasicMaterial({color:0x000000})) );
-	eye.children[0].position.z = 0.001;
-	var rightEye = eye.clone();
-	var leftEye = eye.clone();
-	leftEye.position.set( -headWidth / 4, 0, headDepth * 0.51);
-	rightEye.position.set( headWidth / 4, 0, headDepth * 0.51);
-	baseHead.add(leftEye,rightEye);
-
-	var pointer = new THREE.Mesh( new THREE.CylinderBufferGeometryUncentered(0.015,0.08), new THREE.MeshStandardMaterial({color:0x000000}) );
-	// pointer.add( new THREE.Mesh( new THREE.CylinderBufferGeometryUncentered(0.005, 3), new THREE.MeshBasicMaterial({transparent:true,opacity:0.2}) ) );
-
-	var copyEverything = function(copyTo,copyFrom)
+	//models
 	{
-		copyTo.head.position.copy(copyFrom.head.position);
-		copyTo.head.rotation.copy(copyFrom.head.rotation);
+		var headWidth = 0.3;
+		var headHeight = 0.2;
+		var headDepth = 0.03;
 
-		if( copyFrom.platform === "desktopVR")
+		var baseHead = new THREE.Mesh(new THREE.BoxBufferGeometry(headWidth,headHeight,headDepth), new THREE.MeshBasicMaterial() );
+
+		var eye = new THREE.Mesh(new THREE.CircleBufferGeometry(0.05,32), new THREE.MeshBasicMaterial({color:0xFFFFFF, side: THREE.DoubleSide}));
+		eye.add( new THREE.Mesh(new THREE.CircleBufferGeometry(0.02,32), new THREE.MeshBasicMaterial({color:0x000000, side: THREE.DoubleSide})) );
+		eye.children[0].position.z = -0.01;
+		var rightEye = eye.clone();
+		var leftEye = eye.clone();
+		leftEye.position.set( -headWidth / 4, 0, -headDepth * 0.51);
+		rightEye.position.set( headWidth / 4, 0, -headDepth * 0.51);
+		baseHead.add(leftEye,rightEye);
+
+		var pointer = new THREE.Mesh( new THREE.CylinderBufferGeometryUncentered(0.015,0.08), new THREE.MeshStandardMaterial({color:0x000000}) );
+		// pointer.add( new THREE.Mesh( new THREE.CylinderBufferGeometryUncentered(0.005, 3), new THREE.MeshBasicMaterial({transparent:true,opacity:0.2}) ) );
+	}
+
+	socket.on('userUpdate', function(updatePackage)
+	{
+		if(!logged )
+			console.log("messaged by another user")
+		logged = 1
+
+		if(!users[updatePackage.id])
+		{
+			users[updatePackage.id] = User(updatePackage.platform);
+		}
+
+		users[updatePackage.id].head.position.copy(updatePackage.head.position);
+		users[updatePackage.id].head.rotation.copy(updatePackage.head.rotation);
+
+		if( updatePackage.platform === "desktopVR")
 		{
 			for(var i = 0; i < 2; i++)
 			{
-				copyTo.controllers[i].position.copy(copyFrom.controllers[i].position);
-				copyTo.controllers[i].rotation.copy(copyFrom.controllers[i].rotation);
+				users[updatePackage.id].controllers[i].position.copy(updatePackage.controllers[i].position);
+				users[updatePackage.id].controllers[i].rotation.copy(updatePackage.controllers[i].rotation);
 			}
 		}
 		else
 		{
-			copyTo.pointer.rotation.copy( copyFrom.pointer.rotation );
+			users[updatePackage.id].pointer.rotation.copy( updatePackage.pointer.rotation );
 		}
-	}
+	} );
 
-	userManager.updateSomeUser = function(updatePackage)
-	{
-		copyEverything(users[updatePackage.id],updatePackage)
-	}
-	socket.on('userUpdate', userManager.updateSomeUser);
-
+	var ourPlatform = getPlatform();
 	var ourUpdatePackage = {
 		head:{
 			position: camera.position,
-			rotation: camera.rotation,
+			rotation: camera.rotation
 		},
-		platform: platform
+		platform: ourPlatform
 	};
-	if( platform === "desktopVR")
+	if( ourPlatform === "desktopVR")
 	{
-		ourUpdatePackage.controllers = controllers;
+		ourUpdatePackage.controllers = Array(2);
+		ourUpdatePackage.controllers[0] = {position:controllers[0].position,rotation:controllers[0].rotation};
+		ourUpdatePackage.controllers[1] = {position:controllers[1].position,rotation:controllers[1].rotation};
 	}
 	else
 	{
-		ourUpdatePackage.pointer = {rotation: {x:0,y:0, z:0}};
+		ourUpdatePackage.pointer = {position:pointer.position,rotation:pointer.rotation};
 	}
 
-	userManager.sendOurData = function()
+	userManager.sendOurUpdate = function()
 	{
-		var ourUpdatePackage = {
-			head:{
-				position: camera.position,
-				rotation: camera.rotation,
-			},
-			platform: platform
-		};
-		if( platform === "desktopVR")
-		{
-			ourUpdatePackage.controllers = [{},{}];
-		}
-		else
-		{
-			ourUpdatePackage.pointer = {rotation: {x:0,y:0, z:0}};
-		}
-
-		socket.emit('userUpdate', updatePackage)
+		socket.emit('userUpdate', ourUpdatePackage);
 	}
 
 	/*
 		only the molecule moving from a given person's point of view?
 		But then they sort of lose the ability to say "up" and stuff like that?
-	*/
-	socket.on('newUser', function(msg)
-	{
-		users[msg] = new THREE.Object3D();
-		users[msg].head = new THREE.Mesh(headGeometry.clone())
-	})
 
-	userManager.User = function(platform, id)
+		So probably that's a bad idea
+		If someone repositions the molecule, the molecule gets put in the same place for everyone
+	*/
+
+	function User(platform)
 	{
 		var user = new THREE.Object3D();
-		user.id = id;
 		user.platform = platform;
 		scene.add(user);
+		console.log(user)
 
 		var userMaterial = new THREE.MeshStandardMaterial();
 		userMaterial.color.setRGB( Math.random(),Math.random(),Math.random() );

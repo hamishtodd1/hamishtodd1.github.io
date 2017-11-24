@@ -1,4 +1,4 @@
-function initvrInputSystem(controllers, launcher)
+function initVrInputSystem(controllers, launcher)
 {
 	var vrInputSystem = {};
 	
