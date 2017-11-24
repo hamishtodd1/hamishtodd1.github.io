@@ -1,10 +1,23 @@
 /*
  * Webpage with simple box. Enter pdb ID or weblink to page or serial number
  * Enter something other than a serial number and it creates a "lobby" with a unique serial number that will be on the wall
+
+ Get cardboard and rift in there and able to see each other and their pointers
+
+Computer monitors may be sufficient! Make it so they can see each other's mouse rays?
+
+That chimera thing
+
+ssl crap
  */
 
-function desktopInitialize(pdbWebAddress)
+function desktopInitialize(socket, pdbWebAddress, roomKey)
 {
+	// var userManager = initUserManager();
+	// user = userManager.User("daydream","placeholderID");
+	// scene.add(user);
+	// user.position.z = -0.8;
+
 	var launcher = {
 		dataLoaded:{
 			font: false,
@@ -19,7 +32,11 @@ function desktopInitialize(pdbWebAddress)
 					return;
 			}
 
-			loadModel(pdbWebAddress, thingsToBeUpdated );
+			var roomSign = TextMesh( roomKey, 0.5);
+			// roomSign.position.z = -2;
+			scene.add(roomSign);
+
+			// loadModel(pdbWebAddress, thingsToBeUpdated );
 			render();
 		}
 	}
@@ -41,12 +58,12 @@ function desktopInitialize(pdbWebAddress)
 	{
 		ourVREffect.requestAnimationFrame( function(){
 			ourVREffect.render( scene, camera );
-			desktopLoop(ourVREffect, socket, controllers, VRInputSystem, visiBox, thingsToBeUpdated, holdables );
+			desktopLoop(ourVREffect, socket, controllers, vrInputSystem, visiBox, thingsToBeUpdated, holdables );
 		} );
 	}
 	
 	controllers = Array(2);
-	var VRInputSystem = initVRInputSystem(controllers, launcher);
+	var vrInputSystem = initvrInputSystem(controllers, launcher);
 	
 	model = new THREE.Object3D();
 	model.scale.setScalar( 0.01 ); //0.028 is nice
@@ -82,7 +99,7 @@ function desktopInitialize(pdbWebAddress)
 		if(event.keyCode === 190 && ( navigator.getVRDisplays !== undefined || navigator.getVRDevices !== undefined ) )
 		{
 			event.preventDefault();
-			VRInputSystem.startGettingInput();
+			vrInputSystem.startGettingInput();
 			ourVREffect.setFullScreen( true );
 		}
 	}, false );

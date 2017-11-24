@@ -15,10 +15,10 @@ function ensureDetachment(child, parent)
 	}
 }
 
-function desktopLoop(ourVREffect, socket, controllers, VRInputSystem, visiBox, thingsToBeUpdated, holdables ) {
+function desktopLoop(ourVREffect, socket, controllers, vrInputSystem, visiBox, thingsToBeUpdated, holdables ) {
 	frameDelta = ourClock.getDelta();
 	
-	VRInputSystem.update( socket);
+	vrInputSystem.update( socket);
 	
 	for(var i = 0; i < controllers.length; i++)
 	{

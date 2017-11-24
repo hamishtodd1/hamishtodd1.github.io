@@ -1,12 +1,12 @@
-function initVRInputSystem(controllers, launcher)
+function initvrInputSystem(controllers, launcher)
 {
-	var VRInputSystem = {};
+	var vrInputSystem = {};
 	
 	var cameraRepositioner = new THREE.VRControls( camera );
 	
 	//wouldn't it make sense if moving whole was better without clipping planes?
 	
-	VRInputSystem.startGettingInput = function()
+	vrInputSystem.startGettingInput = function()
 	{
 		if(cameraRepositioner.vrInputs.length < 1)
 			console.error("no vr input? Check steamVR or Oculus to make sure it's working correctly")
@@ -47,10 +47,10 @@ function initVRInputSystem(controllers, launcher)
 		new THREE.OBJLoader().load( "data/external_controller01_" + (i===LEFT_CONTROLLER_INDEX?"left":"right") + ".obj",
 			function ( object ) 
 			{
-				controllers[  i ].controllerModel.geometry = object.children[0].geometry;
-				controllers[  i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeRotationAxis(xAxis,0.5) );
-				controllers[  i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeTranslation((i==LEFT_CONTROLLER_INDEX?1:-1)*0.002,0.036,-0.039) );
-				controllers[  i ].controllerModel.geometry.computeBoundingSphere();
+				controllers[ i ].controllerModel.geometry = object.children[0].geometry;
+				controllers[ i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeRotationAxis(xAxis,0.5) );
+				controllers[ i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeTranslation((i==LEFT_CONTROLLER_INDEX?1:-1)*0.002,0.036,-0.039) );
+				controllers[ i ].controllerModel.geometry.computeBoundingSphere();
 				
 				launcher.dataLoaded["controllerModel"+i.toString()] = true;
 				launcher.attemptLaunch();
@@ -77,7 +77,7 @@ function initVRInputSystem(controllers, launcher)
 		loadControllerModel(i);
 	}
 	
-	VRInputSystem.update = function(socket)
+	vrInputSystem.update = function(socket)
 	{
 		cameraRepositioner.update(); //positions the head
 
@@ -114,5 +114,5 @@ function initVRInputSystem(controllers, launcher)
 		}
 	}
 	
-	return VRInputSystem;
+	return vrInputSystem;
 }

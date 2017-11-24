@@ -262,14 +262,11 @@ function loadModel(modelURL, thingsToBeUpdated, visiBoxPlanes)
 //					this.lookAt(positionToLookAt);
 				}
 				
-				var labelMaterial = new THREE.MeshLambertMaterial( { color: 0x156289 });
 				model.toggleLabel = function(atomIndex)
 				{
 					if( this.atoms[atomIndex].label === undefined)
 					{
-						this.atoms[atomIndex].label = new THREE.Mesh(
-							new THREE.TextGeometry( this.atoms[atomIndex].labelString, {size: DEFAULT_BOND_RADIUS * 2, height: DEFAULT_BOND_RADIUS / 2, font: THREE.defaultFont }),
-							labelMaterial );
+						this.atoms[atomIndex].label = TextMesh( this.atoms[atomIndex].labelString, DEFAULT_BOND_RADIUS * 2 );
 						
 						labels.push( this.atoms[atomIndex].label );
 						

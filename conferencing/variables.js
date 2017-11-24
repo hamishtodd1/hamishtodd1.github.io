@@ -20,5 +20,3 @@ var camera = new THREE.PerspectiveCamera( 70, //can be changed by VR effect
 		window.innerWidth / window.innerHeight,
 		0.01, 700);
 var scene = new THREE.Scene().add(camera);
-
-var socket = io();
