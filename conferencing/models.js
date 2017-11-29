@@ -78,7 +78,8 @@ function loadModel(modelURL, thingsToBeUpdated, visiBoxPlanes)
 				{
 					for( var j = i+1, jl = model.atoms.length; j < jl; j++)
 					{
-						if( model.atoms[i].position.distanceTo( model.atoms[j].position ) < 1.81 ) //quantum chemistry
+						var bondLength = model.atoms[i].position.distanceTo( model.atoms[j].position );
+						if( 0.74 < bondLength && bondLength < 1.81 ) //quantum chemistry
 						{
 							var midPoint = model.atoms[i].position.clone();
 							midPoint.lerp( model.atoms[j].position, 0.5 );
@@ -98,6 +99,7 @@ function loadModel(modelURL, thingsToBeUpdated, visiBoxPlanes)
 					}
 				}
 			}
+			console.log(bondData)
 
 			var numberOfCylinders = 0;
 			for(var element in CPK)
