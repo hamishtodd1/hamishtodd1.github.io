@@ -61,7 +61,7 @@ function makeScene( loadFloor ){
 		var walls = Array(4);
 		for(var i = 0; i < walls.length; i++)
 		{
-			walls[i] = new THREE.Mesh(new THREE.PlaneGeometry(4,2), new THREE.MeshStandardMaterial({color:0xFFFFFF, side:THREE.DoubleSide}));
+			walls[i] = new THREE.Mesh(new THREE.PlaneGeometry(4,2), new THREE.MeshStandardMaterial({color:0xFFFFFF}));
 			walls[i].rotation.y = i * TAU/4;
 			walls[i].position.z = -2;
 			walls[i].position.applyAxisAngle(yAxis,i*TAU/4);

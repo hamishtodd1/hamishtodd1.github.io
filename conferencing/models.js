@@ -2,137 +2,243 @@
  * Change color of carbons as you go down the chain, to give you landmarks. This is interesting. Useful though?
  */
 
-ELEMENT_TO_NUMBER = {
-		C: 0,
-		S: 1,
-		O: 2,
-		N: 3,
-		P: 6,
-		H: 9
-}
-ATOM_COLORS = Array(10);
-for(var i = 0; i < ATOM_COLORS.length; i++)
-	ATOM_COLORS[i] = new THREE.Color( 0.2,0.2,0.2 );
-ATOM_COLORS[0].setRGB(72/255,193/255,103/255); //carbon
-ATOM_COLORS[1].setRGB(0.8,0.8,0.2); //sulphur
-ATOM_COLORS[2].setRGB(0.8,0.2,0.2); //oxygen
-ATOM_COLORS[3].setRGB(0.2,0.4,0.8); //nitrogen
-ATOM_COLORS[6].setRGB(1.0,165/255,0.0); //phosphorus
-ATOM_COLORS[9].setRGB(1.0,1.0,1.0); //hydrogen
-
-DEFAULT_BOND_RADIUS = 0.13;
-
-function Atom(element,labelString,position)
-{
-	if(typeof element === "number") //there are a lot of these things, best to keep it as a number
-		this.element = element;
-	else
-		this.element = ELEMENT_TO_NUMBER[ element ];
-	this.labelString = labelString;
-	if(this.element === undefined)
-		console.error("unrecognized element: ", element)
-	this.position = position;
-}
-function Residue()
-{
-	this.atoms = [];
-	this.position = new THREE.Vector3();
-}
-Residue.prototype.updatePosition = function()
-{
-	this.position.set(0,0,0);
-	for(var i = 0, il = this.atoms.length; i < il; i++)
-	{
-		this.position.add( this.atoms[i].position );
-	}
-	this.position.multiplyScalar( 1 / this.atoms.length );
-}
-
 function loadModel(modelURL, thingsToBeUpdated, visiBoxPlanes)
 {
-	new THREE.FileLoader().load( modelURL,
-		function ( modelStringCoot )
+	var CPK = { "h": [ 255, 255, 255 ], "he": [ 217, 255, 255 ], "li": [ 204, 128, 255 ], "be": [ 194, 255, 0 ], "b": [ 255, 181, 181 ], "c": [ 144, 144, 144 ], "n": [ 48, 80, 248 ], "o": [ 255, 13, 13 ], "f": [ 144, 224, 80 ], "ne": [ 179, 227, 245 ], "na": [ 171, 92, 242 ], "mg": [ 138, 255, 0 ], "al": [ 191, 166, 166 ], "si": [ 240, 200, 160 ], "p": [ 255, 128, 0 ], "s": [ 255, 255, 48 ], "cl": [ 31, 240, 31 ], "ar": [ 128, 209, 227 ], "k": [ 143, 64, 212 ], "ca": [ 61, 255, 0 ], "sc": [ 230, 230, 230 ], "ti": [ 191, 194, 199 ], "v": [ 166, 166, 171 ], "cr": [ 138, 153, 199 ], "mn": [ 156, 122, 199 ], "fe": [ 224, 102, 51 ], "co": [ 240, 144, 160 ], "ni": [ 80, 208, 80 ], "cu": [ 200, 128, 51 ], "zn": [ 125, 128, 176 ], "ga": [ 194, 143, 143 ], "ge": [ 102, 143, 143 ], "as": [ 189, 128, 227 ], "se": [ 255, 161, 0 ], "br": [ 166, 41, 41 ], "kr": [ 92, 184, 209 ], "rb": [ 112, 46, 176 ], "sr": [ 0, 255, 0 ], "y": [ 148, 255, 255 ], "zr": [ 148, 224, 224 ], "nb": [ 115, 194, 201 ], "mo": [ 84, 181, 181 ], "tc": [ 59, 158, 158 ], "ru": [ 36, 143, 143 ], "rh": [ 10, 125, 140 ], "pd": [ 0, 105, 133 ], "ag": [ 192, 192, 192 ], "cd": [ 255, 217, 143 ], "in": [ 166, 117, 115 ], "sn": [ 102, 128, 128 ], "sb": [ 158, 99, 181 ], "te": [ 212, 122, 0 ], "i": [ 148, 0, 148 ], "xe": [ 66, 158, 176 ], "cs": [ 87, 23, 143 ], "ba": [ 0, 201, 0 ], "la": [ 112, 212, 255 ], "ce": [ 255, 255, 199 ], "pr": [ 217, 255, 199 ], "nd": [ 199, 255, 199 ], "pm": [ 163, 255, 199 ], "sm": [ 143, 255, 199 ], "eu": [ 97, 255, 199 ], "gd": [ 69, 255, 199 ], "tb": [ 48, 255, 199 ], "dy": [ 31, 255, 199 ], "ho": [ 0, 255, 156 ], "er": [ 0, 230, 117 ], "tm": [ 0, 212, 82 ], "yb": [ 0, 191, 56 ], "lu": [ 0, 171, 36 ], "hf": [ 77, 194, 255 ], "ta": [ 77, 166, 255 ], "w": [ 33, 148, 214 ], "re": [ 38, 125, 171 ], "os": [ 38, 102, 150 ], "ir": [ 23, 84, 135 ], "pt": [ 208, 208, 224 ], "au": [ 255, 209, 35 ], "hg": [ 184, 184, 208 ], "tl": [ 166, 84, 77 ], "pb": [ 87, 89, 97 ], "bi": [ 158, 79, 181 ], "po": [ 171, 92, 0 ], "at": [ 117, 79, 69 ], "rn": [ 66, 130, 150 ], "fr": [ 66, 0, 102 ], "ra": [ 0, 125, 0 ], "ac": [ 112, 171, 250 ], "th": [ 0, 186, 255 ], "pa": [ 0, 161, 255 ], "u": [ 0, 143, 255 ], "np": [ 0, 128, 255 ], "pu": [ 0, 107, 255 ], "am": [ 84, 92, 242 ], "cm": [ 120, 92, 227 ], "bk": [ 138, 79, 227 ], "cf": [ 161, 54, 212 ], "es": [ 179, 31, 212 ], "fm": [ 179, 31, 186 ], "md": [ 179, 13, 166 ], "no": [ 189, 13, 135 ], "lr": [ 199, 0, 102 ], "rf": [ 204, 0, 89 ], "db": [ 209, 0, 79 ], "sg": [ 217, 0, 69 ], "bh": [ 224, 0, 56 ], "hs": [ 230, 0, 46 ], "mt": [ 235, 0, 38 ], "ds": [ 235, 0, 38 ], "rg": [ 235, 0, 38 ], "cn": [ 235, 0, 38 ], "uut": [ 235, 0, 38 ], "uuq": [ 235, 0, 38 ], "uup": [ 235, 0, 38 ], "uuh": [ 235, 0, 38 ], "uus": [ 235, 0, 38 ], "uuo": [ 235, 0, 38 ] };
+	for(var e in CPK)
+	{
+		CPK[e][0] /= 255; CPK[e][1] /= 255; CPK[e][2] /= 255;
+	}
+
+	DEFAULT_BOND_RADIUS = 0.13;
+	DEFAULT_ATOM_RADIUS = DEFAULT_BOND_RADIUS * 3;
+	
+	function Atom(x,y,z,element,index)
+	{
+		this.element = element;
+		
+		this.labelString = "element: " + this.element + "\nindex: " + index;
+		
+		if(this.element === undefined)
+			console.error("unrecognized element: ", element)
+		this.position = new THREE.Vector3(x,y,z);
+	}
+	
+	new THREE.PDBLoader().load( modelURL,
+		function ( backboneData, atomData )
 		{
-			var modelStringTranslated = modelStringCoot.replace(/(\])|(\[)|(\()|(\))|(Fa)|(Tr)/g, function(str,p1,p2,p3,p4,p5,p6) {
-				if(p1||p2) return '';
-		        if(p3) return '[';
-		        if(p4) return ']';
-		        if(p5) return 'fa';
-		        if(p6) return 'tr';
-		    });
-			var cootArray = eval(modelStringTranslated);
-			var atomDataFromCoot = cootArray[0];
-			var bondDataFromCoot = cootArray[1];
+			var backbones = new THREE.Group();
+		
+			for(var i = 0, il = backboneData.length; i < il; i++)
+			{
+				var curve = new THREE.CatmullRomCurve3( backboneData[i] );
+				// console.log(backboneData[i])
+				var tubeGeometry = new THREE.TubeBufferGeometry( 
+						curve,
+						backboneData[i].length * 8, DEFAULT_BOND_RADIUS * 5, 16 );
+				
+				var backbone = new THREE.Mesh( tubeGeometry, new THREE.MeshLambertMaterial({
+//					clippingPlanes:visiBoxPlanes
+					}));
+				backbone.material.color.setRGB(Math.random(),Math.random(),Math.random());
+				backbones.add(backbone);
+			}
 			
-//			ourClippingPlanes[1] = new THREE.Plane( zAxis.clone().negate(), -0.2 );
-			var model = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshLambertMaterial( { 
+			backbones.position.z = -0.3;
+			model.add(backbones);
+			
+			/* Alpha and beta are in pdb file?
+			 * OPTIONAL! Plausibly makes it worse, a single tube is less confusing when you're looking at something in density!
+			 * to extend along binormal, note that the normal is the 0th index https://github.com/mrdoob/three.js/blob/master/src/geometries/TubeGeometry.js
+			 */
+
+			var ballsAndSticks = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshLambertMaterial( { 
 				vertexColors: THREE.VertexColors,
-				clippingPlanes:visiBoxPlanes
+//				clippingPlanes:visiBoxPlanes
 			} ) );
+			model.add(ballsAndSticks);
 			
-			var numberOfAtoms = 0;
-			for(var i = 0, il = atomDataFromCoot.length; i < il; i++ )
-				numberOfAtoms += atomDataFromCoot[i].length;
+			var numberOfAtoms = atomData.length;
 			model.atoms = Array(numberOfAtoms);
+			for(var i = 0; i < numberOfAtoms; i++)
+			{
+				model.atoms[i] = new Atom( atomData[i][0],atomData[i][1],atomData[i][2],atomData[i][3], i);
+			}
 			
 			var lowestUnusedAtom = 0;
-			model.residues = [];
-			for(var i = 0, il = atomDataFromCoot.length; i < il; i++) //colors
+			
+			var bondData = {};
 			{
-				for(var j = 0, jl = atomDataFromCoot[i].length; j < jl; j++)
+				for(var element in CPK)
 				{
-					/*
-					 * atomDataFromCoot[i][j][2], the label:
-					 * 	model number,  
-					 * 	chain-id string, 
-					 * 	residue number, 
-					 * 	insertion-code string
-					 * 	atom name string,
-					 * 	alt-conf string
-					 * 
-					 * model 1 "A" 1 "" " CA " ""
-					 */
-					model.atoms[lowestUnusedAtom] = new Atom( i, atomDataFromCoot[i][j][2], new THREE.Vector3().fromArray(atomDataFromCoot[i][j][0], atomDataFromCoot[i][j][3]) );
-					
-					if( -1 !== atomDataFromCoot[i][j][3] )
+					bondData[element] = [];
+				}
+				//could make linear time?
+				for( var i = 0, il = model.atoms.length; i < il; i++ )
+				{
+					for( var j = i+1, jl = model.atoms.length; j < jl; j++)
 					{
-						if( !model.residues[ atomDataFromCoot[i][j][3] ] )
-							model.residues[ atomDataFromCoot[i][j][3] ] = new Residue();
-						
-						model.residues[ atomDataFromCoot[i][j][3] ].atoms.push( model.atoms[lowestUnusedAtom] );
-						model.atoms[lowestUnusedAtom].residue = model.residues[ atomDataFromCoot[i][j][3] ];
-					}
+						if( model.atoms[i].position.distanceTo( model.atoms[j].position ) < 1.81 ) //quantum chemistry
+						{
+							var midPoint = model.atoms[i].position.clone();
+							midPoint.lerp( model.atoms[j].position, 0.5 );
+
+							bondData[ model.atoms[i].element ].push( [ 
+	                             [ model.atoms[i].position.x, model.atoms[i].position.y, model.atoms[i].position.z ],
+	                             [ midPoint.x, midPoint.y, midPoint.z ]
+	                           ]
+							);
 							
-					lowestUnusedAtom++;
+							bondData[ model.atoms[j].element ].push( [ 
+		                         [ midPoint.x, midPoint.y, midPoint.z ],
+		                         [ model.atoms[j].position.x, model.atoms[j].position.y, model.atoms[j].position.z ]
+		                       ]
+							);
+						}
+					}
 				}
 			}
-			console.log("hopefully we'll have more than one residue in here soon: ", model.residues )
-			for(var i = 0, il = model.residues.length; i < il; i++)
+
+			var numberOfCylinders = 0;
+			for(var element in CPK)
+				numberOfCylinders += bondData[element].length;
+			
+			var hydrogenGeometry = new THREE.EfficientSphereGeometry(DEFAULT_BOND_RADIUS);
+			var atomGeometry = new THREE.EfficientSphereGeometry(DEFAULT_ATOM_RADIUS);
+			atomGeometry.vertexNormals = Array(atomGeometry.vertices.length);
+			for(var i = 0, il = atomGeometry.vertices.length; i < il; i++)
+				atomGeometry.vertexNormals[i] = atomGeometry.vertices[i].clone().normalize();
+			
+			var nSphereVertices = atomGeometry.vertices.length;
+			var nSphereFaces = atomGeometry.faces.length;
+			var cylinderSides = 15;
+			
+			var numberOfAtoms = model.atoms.length;
+			ballsAndSticks.geometry.addAttribute( 'position',new THREE.BufferAttribute(new Float32Array( 3 * (cylinderSides * numberOfCylinders * 2 + numberOfAtoms * nSphereVertices) ), 3) );
+			ballsAndSticks.geometry.addAttribute( 'color', 	new THREE.BufferAttribute(new Float32Array( 3 * (cylinderSides * numberOfCylinders * 2 + numberOfAtoms * nSphereVertices) ), 3) ); //Speedup opportunity: you only need as many colors as there are atoms and bonds
+			ballsAndSticks.geometry.addAttribute( 'normal',	new THREE.BufferAttribute(new Float32Array( 3 * (cylinderSides * numberOfCylinders * 2 + numberOfAtoms * nSphereVertices) ), 3) );
+			ballsAndSticks.geometry.setIndex( new THREE.BufferAttribute(new Uint32Array( 3 * (cylinderSides * numberOfCylinders * 2 + numberOfAtoms * nSphereFaces) ), 1) );
+			
+			ballsAndSticks.geometry.index.setABC = function(index,a,b,c) //can't use XYZ because itemsize is 1
 			{
-				model.residues[i].updatePosition();
+				this.array[index*3+0] = a;
+				this.array[index*3+1] = b;
+				this.array[index*3+2] = c;
 			}
 			
-			model.moveAtom = function(atomIndex)
+			ballsAndSticks.geometry.colorAtom = function( atomIndex, newColor )
 			{
-				this.atoms[atomIndex].position.x += 2;
+				if(!newColor)
+					newColor = CPK[ model.atoms[atomIndex].element ];
 				
 				for(var k = 0; k < nSphereVertices; k++)
 				{
-					model.geometry.attributes.position.setXYZ( this.atoms[atomIndex].firstVertexIndex + k, 
-							atomGeometry.vertices[k].x + model.atoms[i].position.x, 
-							atomGeometry.vertices[k].y + model.atoms[i].position.y, 
-							atomGeometry.vertices[k].z + model.atoms[i].position.z );
+					this.attributes.color.setXYZ( model.atoms[atomIndex].firstVertexIndex + k, 
+						newColor[0], 
+						newColor[1], 
+						newColor[2] );
 				}
-				
-				if(this.atoms[atomIndex].residue)
-					this.atoms[atomIndex].residue.updatePosition();
-				
-//				socket.send("moveAtom|" + this.atoms[atomIndex].labelString )
-				
-				model.verticesNeedUpdate = true;
 			}
 			
-			makeMoleculeMesh(model.geometry, model.atoms, bondDataFromCoot);
+			for(var i = 0, il = model.atoms.length; i < il; i++ )
+			{
+				model.atoms[i].firstVertexIndex = i*nSphereVertices;
+				model.atoms[i].firstFaceIndex = i*nSphereFaces;
+				
+				ballsAndSticks.geometry.colorAtom(i);
+				
+				for(var k = 0; k < nSphereVertices; k++)
+				{
+					if(model.atoms[i].element === 9)
+					{
+						ballsAndSticks.geometry.attributes.position.setXYZ( model.atoms[i].firstVertexIndex + k, 
+								hydrogenGeometry.vertices[k].x + model.atoms[i].position.x, 
+								hydrogenGeometry.vertices[k].y + model.atoms[i].position.y, 
+								hydrogenGeometry.vertices[k].z + model.atoms[i].position.z );
+					}
+					else
+					{
+						ballsAndSticks.geometry.attributes.position.setXYZ( model.atoms[i].firstVertexIndex + k, 
+								atomGeometry.vertices[k].x + model.atoms[i].position.x, 
+								atomGeometry.vertices[k].y + model.atoms[i].position.y, 
+								atomGeometry.vertices[k].z + model.atoms[i].position.z );
+					}
+					
+					ballsAndSticks.geometry.attributes.normal.setXYZ( model.atoms[i].firstVertexIndex + k, 
+							atomGeometry.vertexNormals[k].x, 
+							atomGeometry.vertexNormals[k].y, 
+							atomGeometry.vertexNormals[k].z );
+				}
+				for(var k = 0; k < nSphereFaces; k++)
+				{
+					ballsAndSticks.geometry.index.setABC( model.atoms[i].firstFaceIndex + k, 
+							atomGeometry.faces[k].a + model.atoms[i].firstVertexIndex, 
+							atomGeometry.faces[k].b + model.atoms[i].firstVertexIndex, 
+							atomGeometry.faces[k].c + model.atoms[i].firstVertexIndex );
+				}
+			}
+			
+			var cylinderBeginning = new THREE.Vector3();
+			var cylinderEnd = new THREE.Vector3();
+			var firstFaceIndex = model.atoms.length * model.atoms[1].firstFaceIndex;
+			var firstVertexIndex = model.atoms.length * model.atoms[1].firstVertexIndex;
+			for(var i in CPK )
+			{
+				for(var j = 0, jl = bondData[i].length; j < jl; j++)
+				{
+					for(var k = 0; k < cylinderSides; k++)
+					{
+						ballsAndSticks.geometry.index.setABC(firstFaceIndex+k*2,
+							(k*2+1) + firstVertexIndex,
+							(k*2+0) + firstVertexIndex,
+							(k*2+2) % (cylinderSides*2) + firstVertexIndex );
+						
+						ballsAndSticks.geometry.index.setABC(firstFaceIndex+k*2 + 1,
+							(k*2+1) + firstVertexIndex,
+							(k*2+2) % (cylinderSides*2) + firstVertexIndex,
+							(k*2+3) % (cylinderSides*2) + firstVertexIndex );
+					}
+					
+					cylinderBeginning.fromArray( bondData[i][j][0] );
+					cylinderEnd.fromArray( bondData[i][j][1] );
+					
+					var bondRadius = DEFAULT_BOND_RADIUS;
+		 			if( i === 9) //hydrogen
+						bondRadius /= 3;
+					else if(bondData[i][j][2] )
+						bondRadius /= bondData[i][j][2];
+		 			
+		 			if(bondData[i][j][2] === 2)
+		 				console.log("double?")
+					
+					insertCylinderCoordsAndNormals( cylinderBeginning, cylinderEnd, ballsAndSticks.geometry.attributes.position, ballsAndSticks.geometry.attributes.normal, cylinderSides, firstVertexIndex, bondRadius );
+					
+					for(var k = 0, kl = cylinderSides * 2; k < kl; k++)
+					{
+						ballsAndSticks.geometry.attributes.color.setXYZ( firstVertexIndex + k, 
+							CPK[i][0],
+							CPK[i][1],
+							CPK[i][2] );
+					}
+					
+					firstVertexIndex += cylinderSides * 2;
+					firstFaceIndex += cylinderSides * 2;
+				}
+			}
+			
+			{
+				var averagePosition = new THREE.Vector3();
+				for(var i = 0, il = model.atoms.length; i < il; i++)
+				{
+					averagePosition.add(model.atoms[i].position);
+				}
+				averagePosition.multiplyScalar( 1 / model.atoms.length);
+
+				for(var i = 0; i < model.children.length; i++) //the representations
+				{
+					model.children[i].position.sub( averagePosition );
+				}
+			}
 			
 			//-----Labels
 			{
@@ -151,14 +257,11 @@ function loadModel(modelURL, thingsToBeUpdated, visiBoxPlanes)
 //					this.lookAt(positionToLookAt);
 				}
 				
-				var labelMaterial = new THREE.MeshLambertMaterial( { color: 0x156289 });
 				model.toggleLabel = function(atomIndex)
 				{
 					if( this.atoms[atomIndex].label === undefined)
 					{
-						this.atoms[atomIndex].label = new THREE.Mesh(
-							new THREE.TextGeometry( this.atoms[atomIndex].labelString, {size: DEFAULT_BOND_RADIUS * 2, height: DEFAULT_BOND_RADIUS / 2, font: THREE.defaultFont }),
-							labelMaterial );
+						this.atoms[atomIndex].label = TextMesh( this.atoms[atomIndex].labelString, DEFAULT_BOND_RADIUS * 2 );
 						
 						labels.push( this.atoms[atomIndex].label );
 						
@@ -178,30 +281,6 @@ function loadModel(modelURL, thingsToBeUpdated, visiBoxPlanes)
 					}
 				}
 			}
-			
-			{
-				var averagePosition = new THREE.Vector3();
-				for(var i = 0, il = model.atoms.length; i < il; i++)
-				{
-					averagePosition.add(model.atoms[i].position);
-				}
-				averagePosition.multiplyScalar( 1  /model.atoms.length);
-				
-				var furthestDistanceSquared = -1;
-				for(var i = 0, il = model.atoms.length; i < il; i++)
-				{
-					var distSq = averagePosition.distanceToSquared(model.atoms[i].position)
-					if(distSq>furthestDistanceSquared)
-						furthestDistanceSquared = distSq;
-				}
-				
-				model.position.sub( averagePosition );
-				if( modelAndMap.map )
-					modelAndMap.map.position.sub(averagePosition);
-			}
-			
-			modelAndMap.model = model;
-			modelAndMap.add( model );
 		},
 		function ( xhr ) {}, //progression function
 		function ( xhr ) { console.error( "couldn't load PDB" ); }
@@ -234,177 +313,6 @@ function insertCylinderCoordsAndNormals(A,B, vertexAttribute, normalAttribute, c
 		normalAttribute.setXYZ(firstVertexIndex + i*2+1, tickVector.x,tickVector.y,tickVector.z );
 		
 		tickVector.applyAxisAngle(aToB, TAU / cylinderSides);
-	}
-}
-
-function makeMoleculeMesh(bufferGeometry, atoms, bondDataFromCoot )
-{
-	var bondData;
-	if( bondDataFromCoot )
-	{
-		bondData = bondDataFromCoot;
-	}
-	else
-	{
-		bondData = Array(4); //seems to be 24
-		for(var i = 0; i < bondData.length; i++)
-			bondData[i] = [];
-		if( atoms.length > 100 )
-		{
-			console.error("Sure you want to compute bonds for ", atoms.length, " atoms?")
-		}
-		else //TODO
-		{
-			for( var i = 0, il = atoms.length; i < il; i++ )
-			{
-				for( var j = i+1, jl = atoms.length; j < jl; j++)
-				{
-					if( atoms[i].position.distanceTo( atoms[j].position ) < 1.81 ) //quantum chemistry
-					{
-						var midPoint = atoms[i].position.clone();
-						midPoint.lerp( atoms[j].position, 0.5 );
-						
-						bondData[ atoms[i].element ].push( [ 
-                             [ atoms[i].position.x, atoms[i].position.y, atoms[i].position.z ],
-                             [ midPoint.x, midPoint.y, midPoint.z ]
-                           ]
-						);
-						
-						bondData[ atoms[j].element ].push( [ 
-	                         [ midPoint.x, midPoint.y, midPoint.z ],
-	                         [ atoms[j].position.x, atoms[j].position.y, atoms[j].position.z ]
-	                       ]
-						);
-					}
-				}
-			}
-		}
-	}
-	var numberOfCylinders = 0;
-	for(var i = 0, il = bondData.length; i < il; i++ )
-		numberOfCylinders += bondData[i].length;
-	
-	var hydrogenGeometry = new THREE.EfficientSphereGeometry(DEFAULT_BOND_RADIUS);
-	var atomGeometry = new THREE.EfficientSphereGeometry(DEFAULT_BOND_RADIUS * 3);
-	atomGeometry.vertexNormals = Array(atomGeometry.vertices.length);
-	for(var i = 0, il = atomGeometry.vertices.length; i < il; i++)
-		atomGeometry.vertexNormals[i] = atomGeometry.vertices[i].clone().normalize();
-	
-	var nSphereVertices = atomGeometry.vertices.length;
-	var nSphereFaces = atomGeometry.faces.length;
-	var cylinderSides = 15;
-	
-	var numberOfAtoms = atoms.length;
-	bufferGeometry.addAttribute( 'position',new THREE.BufferAttribute(new Float32Array( 3 * (cylinderSides * numberOfCylinders * 2 + numberOfAtoms * nSphereVertices) ), 3) );
-	bufferGeometry.addAttribute( 'color', 	new THREE.BufferAttribute(new Float32Array( 3 * (cylinderSides * numberOfCylinders * 2 + numberOfAtoms * nSphereVertices) ), 3) ); //Speedup opportunity: you only need as many colors as there are atoms and bonds
-	bufferGeometry.addAttribute( 'normal',	new THREE.BufferAttribute(new Float32Array( 3 * (cylinderSides * numberOfCylinders * 2 + numberOfAtoms * nSphereVertices) ), 3) );
-	bufferGeometry.setIndex( new THREE.BufferAttribute(new Uint32Array( 3 * (cylinderSides * numberOfCylinders * 2 + numberOfAtoms * nSphereFaces) ), 1) );
-	
-	bufferGeometry.index.setABC = function(index,a,b,c) //can't use XYZ because itemsize is 1
-	{
-		this.array[index*3+0] = a;
-		this.array[index*3+1] = b;
-		this.array[index*3+2] = c;
-	}
-	
-	bufferGeometry.colorAtom = function( atomIndex, newColor )
-	{
-		if(!newColor)
-			newColor = ATOM_COLORS[ atoms[atomIndex].element ];
-		
-		for(var k = 0; k < nSphereVertices; k++)
-		{
-			this.attributes.color.setXYZ( atoms[atomIndex].firstVertexIndex + k, 
-				newColor.r, 
-				newColor.g, 
-				newColor.b );
-		}
-	}
-	
-	for(var i = 0, il = atoms.length; i < il; i++ )
-	{
-		atoms[i].firstVertexIndex = i*nSphereVertices;
-		atoms[i].firstFaceIndex = i*nSphereFaces;
-		
-		bufferGeometry.colorAtom(i);
-		
-		for(var k = 0; k < nSphereVertices; k++)
-		{
-			if(atoms[i].element === 9)
-			{
-				bufferGeometry.attributes.position.setXYZ( atoms[i].firstVertexIndex + k, 
-						hydrogenGeometry.vertices[k].x + atoms[i].position.x, 
-						hydrogenGeometry.vertices[k].y + atoms[i].position.y, 
-						hydrogenGeometry.vertices[k].z + atoms[i].position.z );
-			}
-			else
-			{
-				bufferGeometry.attributes.position.setXYZ( atoms[i].firstVertexIndex + k, 
-						atomGeometry.vertices[k].x + atoms[i].position.x, 
-						atomGeometry.vertices[k].y + atoms[i].position.y, 
-						atomGeometry.vertices[k].z + atoms[i].position.z );
-			}
-			
-			bufferGeometry.attributes.normal.setXYZ( atoms[i].firstVertexIndex + k, 
-					atomGeometry.vertexNormals[k].x, 
-					atomGeometry.vertexNormals[k].y, 
-					atomGeometry.vertexNormals[k].z );
-		}
-		for(var k = 0; k < nSphereFaces; k++)
-		{
-			bufferGeometry.index.setABC( atoms[i].firstFaceIndex + k, 
-					atomGeometry.faces[k].a + atoms[i].firstVertexIndex, 
-					atomGeometry.faces[k].b + atoms[i].firstVertexIndex, 
-					atomGeometry.faces[k].c + atoms[i].firstVertexIndex );
-		}
-	}
-	
-	var cylinderBeginning = new THREE.Vector3();
-	var cylinderEnd = new THREE.Vector3();
-	var firstFaceIndex = atoms.length * atoms[1].firstFaceIndex;
-	var firstVertexIndex = atoms.length * atoms[1].firstVertexIndex;
-	for(var i = 0, il = bondData.length; i < il; i++ )
-	{
-		for(var j = 0, jl = bondData[i].length; j < jl; j++)
-		{
-			for(var k = 0; k < cylinderSides; k++)
-			{
-				bufferGeometry.index.setABC(firstFaceIndex+k*2,
-					(k*2+1) + firstVertexIndex,
-					(k*2+0) + firstVertexIndex,
-					(k*2+2) % (cylinderSides*2) + firstVertexIndex );
-				
-				bufferGeometry.index.setABC(firstFaceIndex+k*2 + 1,
-					(k*2+1) + firstVertexIndex,
-					(k*2+2) % (cylinderSides*2) + firstVertexIndex,
-					(k*2+3) % (cylinderSides*2) + firstVertexIndex );
-			}
-			
-			cylinderBeginning.fromArray( bondData[i][j][0] );
-			cylinderEnd.fromArray( bondData[i][j][1] );
-			
-			var bondRadius = DEFAULT_BOND_RADIUS;
- 			if( i === 9) //hydrogen
-				bondRadius /= 3;
-			else if(bondData[i][j][2] )
-				bondRadius /= bondData[i][j][2];
- 			
- 			if(bondData[i][j][2] === 2)
- 				console.log("double?")
-			
-			insertCylinderCoordsAndNormals( cylinderBeginning, cylinderEnd, bufferGeometry.attributes.position, bufferGeometry.attributes.normal, cylinderSides, firstVertexIndex, bondRadius );
-			
-			for(var k = 0, kl = cylinderSides * 2; k < kl; k++)
-			{
-				bufferGeometry.attributes.color.setXYZ( firstVertexIndex + k, 
-					ATOM_COLORS[i].r,
-					ATOM_COLORS[i].g,
-					ATOM_COLORS[i].b );
-			}
-			
-			firstVertexIndex += cylinderSides * 2;
-			firstFaceIndex += cylinderSides * 2;
-		}
 	}
 }
 

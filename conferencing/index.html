@@ -12,24 +12,6 @@
 	</head>
 	<body>
 		<!--these two scripts are purely for the ripped-off setup-->
-		<script type="x-shader/x-vertex" id="modelVertexShader">
-			varying vec3 N;
-			varying vec3 v;
-			void main() 
-			{
-				//v = vec3(gl_ModelViewMatrix * gl_Vertex);       
-				//N = normalize(gl_NormalMatrix * gl_Normal);
-				gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-				//gl_Position = gl_ModelViewProjectionMatrix * position;
-			}
-		</script>
-		<script type="x-shader/x-fragment" id="modelFragmentShader">
-			void main()
-			{
-				gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-			}
-		</script>
-		
 		<script type="x-shader/x-vertex" id="vertexShader">
 			varying vec3 vWorldPosition;
 			void main() {
@@ -49,9 +31,11 @@
 				gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( max( h , 0.0), exponent ), 0.0 ) ), 1.0 );
 			}
 		</script>
+
+		<script src="/socket.io/socket.io.js"></script>
 		
-		<script src="lib/three.min.js"></script> <!--change to v=something if you want reloading-->
-		<script src="lib/WireframeGeometry.js"></script> <!--change to v=something if you want reloading-->
+		<script src="lib/three.min.js"></script>
+		<script src="lib/WireframeGeometry.js"></script>
 
 		<script src="lib/SceneFromDemo.js"></script>
 		<script src="lib/THREEx.FullScreen.js"></script>
@@ -65,28 +49,26 @@
 		<script src="lib/StereoEffect.js"></script>
 		<script src="lib/DeviceOrientationControls.js"></script>
 		
-		<script src="stemoskiMC.js"></script>
-		
+		<script src="miscFunctions.js"></script>
 		<script src="variables.js"></script>
-		<script src="VRControlSystem.js"></script>
-		<script src="socketCommunication.js"></script>
+
+		<script src="vrControlSystem.js"></script>
+		<script src="mouseControlSystem.js"></script>
 		
+		<script src="users.js"></script>
 		<script src="models.js"></script>
-		<script src="maps.js"></script>
 		<script src="holdables.js"></script>
 		<script src="tools.js"></script>
 		
-		<script src="mobileInitialization.js"></script>
-		<script src="mobileCoreLoop.js"></script>
-		
-		<script src="desktopInitialization.js"></script>
-		<script src="desktopCoreLoop.js"></script>
-		
-		<script>
-			desktopInitialize();
-		</script>
+		<!--important-->
+		<script src="crossPlatform.js"></script>
+
+		<script src="desktopVrInitialization.js"></script>
+		<script src="desktopVrCoreLoop.js"></script>
+
+		<script src="simpleDesktop.js"></script>
+
+		<script src="socketStuffAndPageInitialization.js"></script>
 		
 	</body>
 </html>
-
-<!--webglviewer is "appended" in init--><!--yo-->
