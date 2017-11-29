@@ -1,13 +1,14 @@
 /*
 For thursday:
 	Ensure VR works on your laptop
-	Need movement controls on normal desktop
-	Ensure others can connect through the wifi. Hotspot phone if worst comes to worst
-	Daydream/SSL urgh
-		Hack: get mouse position from another computer
+	Get mouse position for daydream from another computer
 	Get rid of all not in main chain?
+	Remove logged out heads
+	"Make me the master" button?
+	Switch to single room
 	
 After
+	Daydream/SSL urgh
 	instead of id, you want to generate a bit.ly
 	trackpad is best with zoom, have separate thing for that
 	That chimera thing
@@ -16,6 +17,8 @@ After
 	Show their frusta?
 
 	Hmm, people waving their heads around may be distracting...
+
+
  */
 
 function crossPlatformInitialize(socket, pdbWebAddress, roomKey)
