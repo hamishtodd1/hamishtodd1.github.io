@@ -4,7 +4,7 @@
 //forget about tablet for a bit, that'll be pinch to zoom
 //probably laser is invisible when mouse is down
 
-function initUserManager(controllers, socket)
+function initUserManager(controllerGeometries, socket)
 {
 	var userManager = {};
 
@@ -70,8 +70,8 @@ function initUserManager(controllers, socket)
 	if( ourPlatform === "desktopVR")
 	{
 		ourUpdatePackage.controllers = Array(2);
-		ourUpdatePackage.controllers[0] = {position:controllers[0].position,rotation:controllers[0].rotation};
-		ourUpdatePackage.controllers[1] = {position:controllers[1].position,rotation:controllers[1].rotation};
+		// ourUpdatePackage.controllers[0] = {position:controllers[0].position,rotation:controllers[0].rotation};
+		// ourUpdatePackage.controllers[1] = {position:controllers[1].position,rotation:controllers[1].rotation};
 	}
 	else
 	{
@@ -108,8 +108,8 @@ function initUserManager(controllers, socket)
 		if( user.platform === "desktopVR")
 		{
 			user.controllers = Array(2);
-			user.controllers[ LEFT_CONTROLLER_INDEX ] = new THREE.Mesh(controllers[ LEFT_CONTROLLER_INDEX ].controllerModel.geometry,userMaterial);
-			user.controllers[1-LEFT_CONTROLLER_INDEX] = new THREE.Mesh(controllers[1-LEFT_CONTROLLER_INDEX].controllerModel.geometry,userMaterial);
+			user.controllers[ LEFT_CONTROLLER_INDEX ] = new THREE.Mesh(controllerGeometries[ LEFT_CONTROLLER_INDEX ],userMaterial);
+			user.controllers[1-LEFT_CONTROLLER_INDEX] = new THREE.Mesh(controllerGeometries[1-LEFT_CONTROLLER_INDEX],userMaterial);
 			user.add( user.controllers[0] );
 			user.add( user.controllers[1] );
 		}

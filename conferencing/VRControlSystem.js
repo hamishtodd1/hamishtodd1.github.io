@@ -1,4 +1,4 @@
-function initVrInputSystem(controllers, launcher)
+function initVrInputSystem(renderer,controllers, controllerGeometries)
 {
 	var vrInputSystem = {};
 	
@@ -24,41 +24,8 @@ function initVrInputSystem(controllers, launcher)
 			button1: 3,
 			button2: 4
 	}
-	
-	function overlappingHoldable(holdable)
-	{
-		var ourPosition = this.controllerModel.geometry.boundingSphere.center.clone();
-		this.localToWorld( ourPosition );
 		
-		var holdablePosition = holdable.boundingSphere.center.clone();
-		holdable.localToWorld( holdablePosition );
-		
-		var ourScale = this.matrixWorld.getMaxScaleOnAxis();
-		var holdableScale = holdable.matrixWorld.getMaxScaleOnAxis();
-		
-		if( ourPosition.distanceTo(holdablePosition) < holdable.boundingSphere.radius * holdableScale + this.controllerModel.geometry.boundingSphere.radius * ourScale )
-			return true;
-		else
-			return false;
-	}
-		
-	function loadControllerModel(i)
-	{
-		new THREE.OBJLoader().load( "data/external_controller01_" + (i===LEFT_CONTROLLER_INDEX?"left":"right") + ".obj",
-			function ( object ) 
-			{
-				controllers[ i ].controllerModel.geometry = object.children[0].geometry;
-				controllers[ i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeRotationAxis(xAxis,0.5) );
-				controllers[ i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeTranslation((i==LEFT_CONTROLLER_INDEX?1:-1)*0.002,0.036,-0.039) );
-				controllers[ i ].controllerModel.geometry.computeBoundingSphere();
-				
-				launcher.dataLoaded["controllerModel"+i.toString()] = true;
-				launcher.attemptLaunch();
-			},
-			function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); } );
-	}
-	
-	var controllerMaterial = new THREE.MeshLambertMaterial({color:0x444444});
+	var controllerMaterial = new THREE.MeshLambertMaterial({color:0x333333});
 	for(var i = 0; i < 2; i++)
 	{
 		controllers[ i ] = new THREE.Object3D();
@@ -67,14 +34,13 @@ function initVrInputSystem(controllers, launcher)
 			controllers[ i ][propt] = false;
 		}
 		controllers[ i ].thumbStickAxes = [0,0];
-		controllers[ i ].controllerModel = new THREE.Mesh( new THREE.Geometry(), controllerMaterial.clone() );
+		controllers[ i ].controllerModel = new THREE.Mesh( controllerGeometries[i], controllerMaterial.clone() );
 		controllers[ i ].add( controllers[ i ].controllerModel );
+		console.log(controllerGeometries[ i ])
 		controllers[ i ].oldPosition = controllers[ i ].position.clone();
 		controllers[ i ].oldQuaternion = controllers[ i ].quaternion.clone();
 		
-		controllers[ i ].overlappingHoldable = overlappingHoldable;
-		
-		loadControllerModel(i);
+		// controllers[ i ].overlappingHoldable = overlappingHoldable;
 	}
 	
 	vrInputSystem.update = function(socket)

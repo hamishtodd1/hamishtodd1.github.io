@@ -55,9 +55,7 @@ function initVisiBox(thingsToBeUpdated,holdables)
 
 			visiBox.updateMatrixWorld();
 			
-			assignPosition(i, visiBox.corners[i].position)
-			
-			holdables[ "visiBoxCorner" + i.toString() ] = visiBox.corners[i];
+			assignPosition(i, visiBox.corners[i].position);
 		}
 	}
 	

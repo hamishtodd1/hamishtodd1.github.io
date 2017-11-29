@@ -15,7 +15,7 @@
 		textBox.cols = 100;
 		textBox.rows = 8;
 		textBox.autofocus = true;
-		textBox.value = "4ins"
+		textBox.value = "data/NUDT7A-x1203.pdb"//"2AM9"
 		// textBox.value = "Please enter one of the following:\n1. Session ID number (if someone has already set up a room)\n2. PDB ID\n3. Weblink to a .pdb file\n\nThen press enter";
 		document.body.appendChild( textBox );
 
@@ -26,7 +26,7 @@
 			document.removeEventListener( 'keydown', onEnterPressed );
 			document.body.removeChild(textBox);
 
-			desktopInitialize(socket, roomInformation.pdbWebAddress, roomInformation.roomKey);
+			crossPlatformInitialize(socket, roomInformation.pdbWebAddress, roomInformation.roomKey);
 		});
 
 		var onEnterPressed = function(event)
@@ -53,7 +53,7 @@
 			else textBox.value = "Sorry, request was not recognized"
 		}
 
-		document.addEventListener( 'keydown', onEnterPressed );
-		// onEnterPressed({keyCode:13});
+		// document.addEventListener( 'keydown', onEnterPressed );
+		onEnterPressed({keyCode:13});
 	});
 })();

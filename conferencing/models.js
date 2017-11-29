@@ -233,16 +233,11 @@ function loadModel(modelURL, thingsToBeUpdated, visiBoxPlanes)
 					averagePosition.add(model.atoms[i].position);
 				}
 				averagePosition.multiplyScalar( 1 / model.atoms.length);
-				
-				var furthestDistanceSquared = -1;
-				for(var i = 0, il = model.atoms.length; i < il; i++)
+
+				for(var i = 0; i < model.children.length; i++) //the representations
 				{
-					var distSq = averagePosition.distanceToSquared(model.atoms[i].position)
-					if(distSq>furthestDistanceSquared)
-						furthestDistanceSquared = distSq;
+					model.children[i].position.sub( averagePosition );
 				}
-				
-				model.position.sub( averagePosition.multiplyScalar(model.scale.x) );
 			}
 			
 			//-----Labels

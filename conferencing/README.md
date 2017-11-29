@@ -14,8 +14,8 @@ And then if you get your IP address and go to <ipadress>:9090 in any other compu
 
 ## License
 
-Do what you like, I don't know much about this! Would like to hear about it. @hamish_todd on twitter
+Do what you like, I don't know much about this! Would like to hear about it though. @hamish_todd on twitter
 
 ## Backstory
 
-Was sitting in a meeting at the Delft lab at Diamond, and I swear they spent *at least* an hour talking about/staring at a single structure. Three people in the room plus at least three others tuned into separate video programs. One of them screenshares the structure opened in some molecular graphics program, but it's like 2fps, and you don't really get the 3D effect from shaking unless it's you doing the shaking (this was pointed out by Anthony Bradley, who also suggested that a piece of software like this one would be useful).
+Was sitting in a meeting at the Delft lab at Diamond, and I swear they spent *at least* an hour talking about/staring at a single structure. Three people in the room plus at least three others tuned into separate video programs. One of them screenshares the structure opened in some molecular graphics program, but it's like 2fps. It was Anthony Bradley who said he strongly believed software like this would be useful, and he also pointed out that you don't really get the 3D effect from shaking unless it's you doing the shaking.

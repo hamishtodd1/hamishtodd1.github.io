@@ -105,9 +105,9 @@ function getPlatform()
 		platform = "tablet";
 
 	if( typeof WEBVR === 'undefined' || !WEBVR.isAvailable() )
-		platform = "desktopNonVR";
+		platform = "simpleDesktop";
 	else if( WEBVR.isAvailable() )
-		platform = "desktopVR";
+		platform = "desktopVr";
 
 	return platform;
 }
