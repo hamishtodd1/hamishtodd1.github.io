@@ -27,16 +27,12 @@ function initUserManager(controllerGeometries, socket)
 		rightEye.position.set( headWidth / 4, 0, -headDepth * 0.51);
 		baseHead.add(leftEye,rightEye);
 
-		var pointer = new THREE.Mesh( new THREE.CylinderBufferGeometryUncentered(0.015,0.08), new THREE.MeshStandardMaterial({color:0x000000}) );
+		// var pointer = new THREE.Mesh( new THREE.CylinderBufferGeometryUncentered(0.015,0.08), new THREE.MeshStandardMaterial({color:0x000000}) );
 		// pointer.add( new THREE.Mesh( new THREE.CylinderBufferGeometryUncentered(0.005, 3), new THREE.MeshBasicMaterial({transparent:true,opacity:0.2}) ) );
 	}
 
 	socket.on('userUpdate', function(updatePackage)
 	{
-		if(!logged )
-			console.log("messaged by another user")
-		logged = 1
-
 		if(!users[updatePackage.id])
 		{
 			users[updatePackage.id] = User(updatePackage.platform);
@@ -55,7 +51,8 @@ function initUserManager(controllerGeometries, socket)
 		}
 		else
 		{
-			users[updatePackage.id].pointer.rotation.copy( updatePackage.pointer.rotation );
+			// users[updatePackage.id].pointer.rotation.copy( updatePackage.pointer.rotation );
+			users[updatePackage.id].poiSphere.position.copy(users[updatePackage.id].poiSphere.getPoi(users[updatePackage.id]));
 		}
 	} );
 
@@ -75,7 +72,7 @@ function initUserManager(controllerGeometries, socket)
 	}
 	else
 	{
-		ourUpdatePackage.pointer = {position:pointer.position,rotation:pointer.rotation};
+		// ourUpdatePackage.pointer = {position:pointer.position,rotation:pointer.rotation};
 	}
 
 	userManager.sendOurUpdate = function()
@@ -102,29 +99,35 @@ function initUserManager(controllerGeometries, socket)
 		userMaterial.color.setRGB( Math.random(),Math.random(),Math.random() );
 
 		user.head = baseHead.clone();
+		console.log(baseHead,user.head)
 		user.head.material = userMaterial;
 		user.add(user.head);
+
+		user.poiSphere = makePoiSphere();
+		scene.add(user.poiSphere);
 
 		if( user.platform === "desktopVR")
 		{
 			user.controllers = Array(2);
 			user.controllers[ LEFT_CONTROLLER_INDEX ] = new THREE.Mesh(controllerGeometries[ LEFT_CONTROLLER_INDEX ],userMaterial);
 			user.controllers[1-LEFT_CONTROLLER_INDEX] = new THREE.Mesh(controllerGeometries[1-LEFT_CONTROLLER_INDEX],userMaterial);
-			user.add( user.controllers[0] );
-			user.add( user.controllers[1] );
+			scene.add( user.controllers[0] );
+			scene.add( user.controllers[1] );
 		}
 		else
 		{
-			user.pointer = pointer.clone();
-			user.pointer.material.color.setRGB( (userMaterial.color.r+1)/2, (userMaterial.color.g+1)/2, (userMaterial.color.b+1)/2 );
-			user.pointer.position.z = headDepth/2; //make heads big enough that this sits in the right place
-			user.add(user.pointer);
+			// user.pointer = pointer.clone();
+			// user.pointer.material.color.setRGB( (userMaterial.color.r+1)/2, (userMaterial.color.g+1)/2, (userMaterial.color.b+1)/2 );
+			// user.pointer.position.z = headDepth/2; //make heads big enough that this sits in the right place
+			// user.add(user.pointer);
 
-			if(user.platform === "daydream")
-			{
-				user.pointer.position.y = -headHeight/2; //make heads big enough that this sits in the right place
-			}
+			// if(user.platform === "daydream")
+			// {
+			// 	user.pointer.position.y = -headHeight/2; //make heads big enough that this sits in the right place
+			// }
 		}
+
+		//pointer could appear and have some fake perspective?
 
 		return user;
 	}

@@ -13,9 +13,11 @@ var io = require('socket.io')(http);
 
 //-------------The real stuff
 var rooms = {};
+rooms["no"] = {};
+rooms["no"].pdbWebAddress = "data/NUDT7A-x1203.pdb";
+rooms["no"].participants = [];
 
 // https://gist.github.com/alexpchin/3f257d0bb813e2c8c476
-//it gets serverConnected but not the one after that?
 io.on('connection', function(socket)
 {
 	console.log("potential user connected: ", socket.id);
@@ -64,24 +66,34 @@ io.on('connection', function(socket)
 			pdbWebAddress:rooms[roomKey].pdbWebAddress
 		} );
 
-		//next is to add participants
-
 		rooms[roomKey].participants.push(socket);
 
 		console.log( "\nallocating ", socket.id, " to room ", roomKey, "\ncurrent number of participants: ", rooms[roomKey].participants.length);
 
 		//---------------the below is everything that goes beyond entry
-
-		socket.on('userUpdate', function(updatePackage)
+		function emitToAllOthersInRoom(messageString,content)
 		{
 			for(var i = 0; i < rooms[roomKey].participants.length; i++)
 			{
 				if( rooms[roomKey].participants[i] !== socket )
 				{
-					rooms[roomKey].participants[i].emit('userUpdate',updatePackage);
+					rooms[roomKey].participants[i].emit(messageString,content);
 				}
 			}
-		});
+		}
+
+		function markMessageAsSimplyRebroadcasted(messageString)
+		{
+			socket.on(messageString, function(content)
+			{
+				emitToAllOthersInRoom(messageString,content)
+			});
+		}
+		markMessageAsSimplyRebroadcasted('userUpdate');
+		markMessageAsSimplyRebroadcasted('left');
+		markMessageAsSimplyRebroadcasted('right');
+		markMessageAsSimplyRebroadcasted('forward');
+		markMessageAsSimplyRebroadcasted('backward');
 	}
 
 	// socket.on('disconnect', function ()

@@ -15,7 +15,7 @@
 		textBox.cols = 100;
 		textBox.rows = 8;
 		textBox.autofocus = true;
-		textBox.value = "data/NUDT7A-x1203.pdb"//"2AM9"
+		textBox.value = "no"//"2AM9"
 		// textBox.value = "Please enter one of the following:\n1. Session ID number (if someone has already set up a room)\n2. PDB ID\n3. Weblink to a .pdb file\n\nThen press enter";
 		document.body.appendChild( textBox );
 

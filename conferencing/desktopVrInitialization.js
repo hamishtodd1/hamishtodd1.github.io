@@ -7,7 +7,6 @@ initializers.desktopVr = function(socket, pdbWebAddress, roomKey, launcher, visi
 		holdables[ "visiBoxCorner" + i.toString() ] = visiBox.corners[i];
 	}
 	
-	console.log(controllerGeometries)
 	var controllers = Array(2);
 	var vrInputSystem = initVrInputSystem(renderer,controllers,controllerGeometries);
 	
@@ -20,6 +19,28 @@ initializers.desktopVr = function(socket, pdbWebAddress, roomKey, launcher, visi
 			ourVrEffect.setFullScreen( true );
 		}
 	} );
+
+	function associateKeyHoldToMessages(keyCode, buttonKey)
+	{
+		document.addEventListener( 'keydown', function(event)
+		{
+			if(event.keyCode === keyCode )
+			{
+				socket.emit(buttonKey,true);
+			}
+		});
+		document.addEventListener( 'keyup', function(event)
+		{
+			if(event.keyCode === keyCode )
+			{
+				socket.emit(buttonKey,false);
+			}
+		});
+	}
+	associateKeyHoldToMessages(87, "forward");
+	associateKeyHoldToMessages(83, "backward");
+	associateKeyHoldToMessages(65, "left");
+	associateKeyHoldToMessages(68, "right");
 	
 	{
 		var blinker = new THREE.Mesh(new THREE.PlaneBufferGeometry(10,10),new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:0}))
@@ -54,6 +75,13 @@ initializers.desktopVr = function(socket, pdbWebAddress, roomKey, launcher, visi
 		
 		thingsToBeUpdated.blinker = blinker;
 	}
+
+	window.addEventListener( 'resize', function()
+	{
+	    renderer.setSize( window.innerWidth, window.innerHeight ); //nothing about vr effect?
+	    camera.aspect = window.innerWidth / window.innerHeight;
+	    camera.updateProjectionMatrix();
+	}, false );
 
 	var ourVrEffect = new THREE.VREffect( renderer );
 	function render()
