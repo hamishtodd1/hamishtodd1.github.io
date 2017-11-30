@@ -2,7 +2,7 @@ function initVrInputSystem(renderer,controllers, controllerGeometries)
 {
 	var vrInputSystem = {};
 	
-	var cameraRepositioner = new THREE.VRControls( camera );
+	var cameraRepositioner = null;
 	
 	//wouldn't it make sense if moving whole was better without clipping planes?
 	
@@ -45,6 +45,12 @@ function initVrInputSystem(renderer,controllers, controllerGeometries)
 	
 	vrInputSystem.update = function(socket)
 	{
+		if( !WEBVR.isAvailable() )
+			return;
+
+		if(cameraRepositioner === null )
+			cameraRepositioner = new THREE.VRControls( camera );
+
 		cameraRepositioner.update(); //positions the head
 
 		var gamepads = navigator.getGamepads();

@@ -99,7 +99,6 @@ function loadModel(modelURL, thingsToBeUpdated, visiBoxPlanes)
 					}
 				}
 			}
-			console.log(bondData)
 
 			var numberOfCylinders = 0;
 			for(var element in CPK)

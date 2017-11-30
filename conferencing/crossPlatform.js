@@ -1,18 +1,18 @@
 /*
 For thursday:
-	Ensure VR works on your laptop
-	Get mouse position for daydream from another computer
-	Get rid of all not in main chain?
-	Remove logged out heads
+	Get rid of all in main chain?
 	"Make me the master" button?
-	Switch to single room
+	Remove logged out heads
+
+Go in there and set up
+	You want the server in there so you can change things
+	Record? Paper?
 	
 After
 	Daydream/SSL urgh
 	instead of id, you want to generate a bit.ly
 	trackpad is best with zoom, have separate thing for that
 	That chimera thing
-	"make self master viewport"
 
 	Show their frusta?
 
@@ -46,6 +46,7 @@ function crossPlatformInitialize(socket, pdbWebAddress, roomKey)
 			loadModel(pdbWebAddress, thingsToBeUpdated );
 
 			var platform = getPlatform();
+			console.log(platform)
 			if(!initializers[platform])
 				console.error("no initializer for ", platform)
 			initializers[platform](socket, pdbWebAddress, roomKey, launcher, visiBox, thingsToBeUpdated, renderer, userManager,
@@ -108,17 +109,71 @@ function crossPlatformInitialize(socket, pdbWebAddress, roomKey)
 	);
 	
 	scene.add( new THREE.PointLight( 0xFFFFFF, 1, FOCALPOINT_DISTANCE ) );
-	
-	window.addEventListener( 'resize', function(){
-		console.log("resizing")
-	    renderer.setSize( window.innerWidth, window.innerHeight ); //nothing about vr effect?
-	    camera.aspect = window.innerWidth / window.innerHeight;
-	    camera.updateProjectionMatrix();
-	}, false );
 
 	makeScene(true);
 
 	var visiBox = initVisiBox(thingsToBeUpdated);
 
 	launcher.attemptLaunch();
+}
+
+function initPoiSphereAndButtonMonitorerAndMovementSystem()
+{
+	var poiSphere = makePoiSphere();
+	scene.add(poiSphere);
+
+	var buttonsHeld = {
+		forward:false,
+		backward:false,
+		left:false,
+		right:false
+	}
+
+	function moveCamera()
+	{
+		var forward = poiSphere.getPoi(camera).sub(camera.position).multiplyScalar(0.05);
+		if(buttonsHeld.forward)
+		{
+			camera.position.add(forward);
+		}
+		if(buttonsHeld.backward)
+		{
+			camera.position.sub(forward);
+		}
+		if(buttonsHeld.left)
+		{
+			camera.position.add( new THREE.Vector3(-0.003,0,0).applyEuler(camera.rotation) );
+		}
+		if(buttonsHeld.right)
+		{
+			camera.position.add( new THREE.Vector3(0.003,0,0).applyEuler(camera.rotation) );
+		}
+	}
+
+	return {poiSphere:poiSphere,buttonsHeld:buttonsHeld,moveCamera:moveCamera};
+}
+
+function makePoiSphere()
+{
+	var poiSphere = new THREE.Object3D();
+
+	poiSphere.getPoi = function(nominalCamera)
+	{
+		var pointOfInterestInModel = new THREE.Vector3(0,0,-0.1)
+		nominalCamera.localToWorld( pointOfInterestInModel );
+		return pointOfInterestInModel;
+	}
+
+	for(var i = 0; i < 3; i++)
+	{
+		poiSphere.add(new THREE.Line(new THREE.Geometry(), new THREE.LineBasicMaterial({color:0xFFFFFF})));
+		var numVertices = 32;
+		for(var j = 0; j < numVertices+1; j++)
+		{
+			var a = new THREE.Vector3().setComponent((i+1)%3,0.004);
+			a.applyAxisAngle(new THREE.Vector3().setComponent(i,1), j/numVertices * TAU);
+			poiSphere.children[i].geometry.vertices.push(a)
+		}
+	}
+	return poiSphere;
 }

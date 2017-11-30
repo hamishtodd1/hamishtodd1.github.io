@@ -24,7 +24,6 @@ THREE.DeviceOrientationControls = function( object ) {
 	var onDeviceOrientationChangeEvent = function( event ) {
 
 		scope.deviceOrientation = event;
-		console.log("yo")
 
 	};
 
