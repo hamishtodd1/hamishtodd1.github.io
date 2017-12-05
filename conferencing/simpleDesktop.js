@@ -57,7 +57,7 @@ initializers.simpleDesktop = function(socket, pdbWebAddress, roomKey, launcher, 
 		mouse.readFromAsynchronousInput();
 		// if(!mouse.clicking)
 		{
-			if(!buttonsHeld.ctrl)
+			// if(!buttonsHeld.ctrl)
 			{
 				// model.localToWorld(pointOfInterestInModel);
 				// camera.worldToLocal(pointOfInterestInModel);
@@ -75,10 +75,10 @@ initializers.simpleDesktop = function(socket, pdbWebAddress, roomKey, launcher, 
 
 				poiSphere.position.copy(currentLocationOfPOI)
 			}
-			else
-			{
-				model.position.addScaledVector(mouse.delta,0.1);
-			}
+			// else
+			// {
+			// 	model.position.addScaledVector(mouse.delta,0.1);
+			// }
 			
 			viewPlaneIndicator.position.copy(poiSphere.position)
 			viewPlaneIndicator.lookAt(camera.position);
