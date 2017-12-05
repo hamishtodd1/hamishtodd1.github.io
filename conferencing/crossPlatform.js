@@ -136,18 +136,24 @@ function initPoiSphereAndButtonMonitorerAndMovementSystem()
 		{
 			camera.position.add(forward);
 		}
-		if(buttonsHeld.backward)
+		else if(buttonsHeld.backward)
 		{
 			camera.position.sub(forward);
 		}
-		if(buttonsHeld.left)
+		else if(buttonsHeld.left)
 		{
 			camera.position.add( new THREE.Vector3(-0.003,0,0).applyEuler(camera.rotation) );
 		}
-		if(buttonsHeld.right)
+		else if(buttonsHeld.right)
 		{
 			camera.position.add( new THREE.Vector3(0.003,0,0).applyEuler(camera.rotation) );
 		}
+		// else
+		// {
+		// 	return;
+		// }
+		// camera.updateMatrix();
+		// socket.emit("cameraPosition",camera.matrix);
 	}
 
 	return {poiSphere:poiSphere,buttonsHeld:buttonsHeld,moveCamera:moveCamera};

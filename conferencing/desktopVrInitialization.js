@@ -19,28 +19,6 @@ initializers.desktopVr = function(socket, pdbWebAddress, roomKey, launcher, visi
 			ourVrEffect.setFullScreen( true );
 		}
 	} );
-
-	function associateKeyHoldToMessages(keyCode, buttonKey)
-	{
-		document.addEventListener( 'keydown', function(event)
-		{
-			if(event.keyCode === keyCode )
-			{
-				socket.emit(buttonKey,true);
-			}
-		});
-		document.addEventListener( 'keyup', function(event)
-		{
-			if(event.keyCode === keyCode )
-			{
-				socket.emit(buttonKey,false);
-			}
-		});
-	}
-	associateKeyHoldToMessages(87, "forward");
-	associateKeyHoldToMessages(83, "backward");
-	associateKeyHoldToMessages(65, "left");
-	associateKeyHoldToMessages(68, "right");
 	
 	{
 		var blinker = new THREE.Mesh(new THREE.PlaneBufferGeometry(10,10),new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:0}))
