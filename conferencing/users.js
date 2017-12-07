@@ -39,7 +39,7 @@ function initUserManager(controllerGeometries, socket)
 		}
 		var targetUser = users[updatePackage.id];
 
-		targetUser.head.position.copy(updatePackage.head.position);
+		targetUser.head.position.lerp(updatePackage.head.position,0.3);
 		targetUser.head.rotation.copy(updatePackage.head.rotation);
 
 		if( updatePackage.platform === "desktopVR")
@@ -53,7 +53,7 @@ function initUserManager(controllerGeometries, socket)
 		else
 		{
 			// targetUser.pointer.rotation.copy( updatePackage.pointer.rotation );
-			targetUser.poiSphere.position.copy(targetUser.poiSphere.getPoi(targetUser));
+			targetUser.poiSphere.position.copy(getPoi(targetUser.head));
 		}
 
 		targetUser.timeSinceUpdate = 0;
@@ -64,11 +64,11 @@ function initUserManager(controllerGeometries, socket)
 		for( var userID in users)
 		{
 			users[userID].timeSinceUpdate += frameDelta;
-			if( users[userID].timeSinceUpdate > 5 )
+			if( users[userID].timeSinceUpdate > 1.2 )
 			{
-				console.log("removing user")
 				{
-					scene.remove(user[userID]);
+					scene.remove(users[userID]);
+					scene.remove(users[userID].poiSphere);
 					delete users[userID];
 				}
 			}
@@ -123,7 +123,7 @@ function initUserManager(controllerGeometries, socket)
 		user.head.material = userMaterial;
 		user.add(user.head);
 
-		user.poiSphere = makePoiSphere();
+		user.poiSphere = makePoiSphere(userMaterial.color);
 		scene.add(user.poiSphere);
 
 		if( user.platform === "desktopVR")

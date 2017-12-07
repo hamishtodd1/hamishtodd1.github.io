@@ -135,7 +135,7 @@ function initPoiSphereAndButtonMonitorerAndMovementSystem()
 
 	function moveCamera()
 	{
-		var forward = poiSphere.getPoi(camera).sub(camera.position).multiplyScalar(0.05);
+		var forward = getPoi(camera).sub(camera.position).multiplyScalar(0.05);
 		if(buttonsHeld.forward)
 		{
 			camera.position.add(forward);
@@ -163,20 +163,24 @@ function initPoiSphereAndButtonMonitorerAndMovementSystem()
 	return {poiSphere:poiSphere,buttonsHeld:buttonsHeld,moveCamera:moveCamera};
 }
 
-function makePoiSphere()
+function getPoi(nominalCamera)
 {
-	var poiSphere = new THREE.Object3D();
+	var pointOfInterestInModel = new THREE.Vector3(0,0,-0.1)
+	nominalCamera.localToWorld( pointOfInterestInModel );
+	return pointOfInterestInModel;
+}
 
-	poiSphere.getPoi = function(nominalCamera)
+function makePoiSphere(color)
+{
+	if(!color)
 	{
-		var pointOfInterestInModel = new THREE.Vector3(0,0,-0.1)
-		nominalCamera.localToWorld( pointOfInterestInModel );
-		return pointOfInterestInModel;
+		var color = new THREE.Color(1,1,1)
 	}
+	var poiSphere = new THREE.Object3D();
 
 	for(var i = 0; i < 3; i++)
 	{
-		poiSphere.add(new THREE.Line(new THREE.Geometry(), new THREE.LineBasicMaterial({color:0xFFFFFF})));
+		poiSphere.add(new THREE.Line(new THREE.Geometry(), new THREE.LineBasicMaterial({color:color})));
 		var numVertices = 32;
 		for(var j = 0; j < numVertices+1; j++)
 		{

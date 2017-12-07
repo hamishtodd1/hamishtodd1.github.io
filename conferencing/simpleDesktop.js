@@ -54,45 +54,24 @@ initializers.simpleDesktop = function(socket, pdbWebAddress, roomKey, launcher, 
 	{
 		frameDelta = ourClock.getDelta();
 
+		var poi = getPoi(camera);
+
 		mouse.readFromAsynchronousInput();
-		// if(!mouse.clicking)
-		{
-			// if(!buttonsHeld.ctrl)
-			{
-				// model.localToWorld(pointOfInterestInModel);
-				// camera.worldToLocal(pointOfInterestInModel);
-				var pointOfInterestInModel = poiSphere.getPoi(camera);
+		camera.rotation.y += -mouse.proportionalDelta.x * 4;
+		camera.rotation.x += mouse.proportionalDelta.y*2;
+		camera.rotation.y = clamp(camera.rotation.y, -TAU/2, TAU/2);
+		camera.rotation.x = clamp(camera.rotation.x, -TAU/4, TAU/4);
 
-				camera.rotation.y += -mouse.proportionalDelta.x * 4;
-				camera.rotation.x += mouse.proportionalDelta.y*2;
-				camera.rotation.y = clamp(camera.rotation.y, -TAU/2, TAU/2);
-				camera.rotation.x = clamp(camera.rotation.x, -TAU/4, TAU/4);
-				camera.updateMatrixWorld();
-
-				var currentLocationOfPOI = poiSphere.getPoi(camera);
-				model.position.sub(pointOfInterestInModel);
-				model.position.add(currentLocationOfPOI);
-
-				poiSphere.position.copy(currentLocationOfPOI)
-			}
-			// else
-			// {
-			// 	model.position.addScaledVector(mouse.delta,0.1);
-			// }
-			
-			viewPlaneIndicator.position.copy(poiSphere.position)
-			viewPlaneIndicator.lookAt(camera.position);
-		}
-		// else
-		// {
-		// 	reticle.position.copy(mouse.position);
-		// 	reticle.position.lerp(camera.position,0.98)
-		// 	reticle.lookAt(camera.position);
-		// }
-		// reticle.visible = mouse.clicking;
-		// viewPlaneIndicator.visible = buttonsHeld.ctrl;
+		camera.updateMatrix();
+		camera.updateMatrixWorld();
+		var offsetPoiSphereLocation = getPoi(camera);
+		camera.position.sub(offsetPoiSphereLocation).add(poi);
 
 		moveCamera();
+		camera.updateMatrix();
+		camera.updateMatrixWorld();
+		poiSphere.position.copy(getPoi(camera));
+		socket.emit('poiUpdate', poiSphere.position);
 		
 		for( var thing in thingsToBeUpdated)
 		{
@@ -104,10 +83,13 @@ initializers.simpleDesktop = function(socket, pdbWebAddress, roomKey, launcher, 
 				}
 			}
 			else
+			{
 				thingsToBeUpdated[thing].update();
+			}
 		}
 		
 		userManager.sendOurUpdate();
+		userManager.checkForDormancy();
 	}
 
 	function render()

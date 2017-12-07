@@ -53,19 +53,20 @@ initializers.mobile = function(socket, pdbWebAddress, roomKey, launcher, visiBox
 	{
 		frameDelta = ourClock.getDelta();
 
+		var poi = getPoi(camera);
+		console.log("yo")
+
 		ourOrientationControls.update();
 
-		poiSphere.position.copy(poiSphere.getPoi(camera))
-
 		camera.updateMatrix();
 		camera.updateMatrixWorld();
+		var offsetPoiSphereLocation = getPoi(camera);
+		camera.position.sub(offsetPoiSphereLocation).add(poi);
 
-		var offsetPoiSphereLocation = poiSphere.getPoi(camera);
-		camera.position.sub(offsetPoiSphereLocation).add(poiSphere.position);
-
+		moveCamera(); //well really we'd just copy the poisphere location.
 		camera.updateMatrix();
 		camera.updateMatrixWorld();
-		moveCamera();
+		poiSphere.position.copy(getPoi(camera));
 		
 		for( var thing in thingsToBeUpdated)
 		{
