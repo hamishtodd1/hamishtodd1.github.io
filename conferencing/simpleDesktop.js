@@ -71,6 +71,7 @@ initializers.simpleDesktop = function(socket, pdbWebAddress, roomKey, launcher, 
 		camera.updateMatrix();
 		camera.updateMatrixWorld();
 		poiSphere.position.copy(getPoi(camera));
+		
 		socket.emit('poiUpdate', poiSphere.position);
 		
 		for( var thing in thingsToBeUpdated)

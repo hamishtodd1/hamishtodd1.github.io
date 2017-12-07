@@ -116,7 +116,7 @@ function crossPlatformInitialize(socket, pdbWebAddress, roomKey)
 
 	makeScene(true);
 
-	var visiBox = initVisiBox(thingsToBeUpdated);
+	var visiBox = {};//initVisiBox(thingsToBeUpdated);
 
 	launcher.attemptLaunch();
 }
