@@ -12,15 +12,15 @@ function initUserManager(controllerGeometries, socket)
 
 	//models
 	{
-		var headWidth = 0.3;
-		var headHeight = 0.2;
-		var headDepth = 0.03;
+		var headWidth = 0.06;
+		var headHeight = 0.04;
+		var headDepth = 0.006;
 
 		var baseHead = new THREE.Mesh(new THREE.BoxBufferGeometry(headWidth,headHeight,headDepth), new THREE.MeshBasicMaterial() );
 
-		var eye = new THREE.Mesh(new THREE.CircleBufferGeometry(0.05,32), new THREE.MeshBasicMaterial({color:0xFFFFFF, side: THREE.DoubleSide}));
-		eye.add( new THREE.Mesh(new THREE.CircleBufferGeometry(0.02,32), new THREE.MeshBasicMaterial({color:0x000000, side: THREE.DoubleSide})) );
-		eye.children[0].position.z = -0.01;
+		var eye = new THREE.Mesh(new THREE.CircleBufferGeometry(headWidth/6,32), new THREE.MeshBasicMaterial({color:0xFFFFFF, side: THREE.DoubleSide}));
+		eye.add( new THREE.Mesh(new THREE.CircleBufferGeometry(headWidth/18,32), new THREE.MeshBasicMaterial({color:0x000000, side: THREE.DoubleSide})) );
+		eye.children[0].position.z = -0.0001;
 		var rightEye = eye.clone();
 		var leftEye = eye.clone();
 		leftEye.position.set( -headWidth / 4, 0, -headDepth * 0.51);
@@ -37,24 +37,43 @@ function initUserManager(controllerGeometries, socket)
 		{
 			users[updatePackage.id] = User(updatePackage.platform);
 		}
+		var targetUser = users[updatePackage.id];
 
-		users[updatePackage.id].head.position.copy(updatePackage.head.position);
-		users[updatePackage.id].head.rotation.copy(updatePackage.head.rotation);
+		targetUser.head.position.copy(updatePackage.head.position);
+		targetUser.head.rotation.copy(updatePackage.head.rotation);
 
 		if( updatePackage.platform === "desktopVR")
 		{
 			for(var i = 0; i < 2; i++)
 			{
-				users[updatePackage.id].controllers[i].position.copy(updatePackage.controllers[i].position);
-				users[updatePackage.id].controllers[i].rotation.copy(updatePackage.controllers[i].rotation);
+				targetUser.controllers[i].position.copy(updatePackage.controllers[i].position);
+				targetUser.controllers[i].rotation.copy(updatePackage.controllers[i].rotation);
 			}
 		}
 		else
 		{
-			// users[updatePackage.id].pointer.rotation.copy( updatePackage.pointer.rotation );
-			users[updatePackage.id].poiSphere.position.copy(users[updatePackage.id].poiSphere.getPoi(users[updatePackage.id]));
+			// targetUser.pointer.rotation.copy( updatePackage.pointer.rotation );
+			targetUser.poiSphere.position.copy(targetUser.poiSphere.getPoi(targetUser));
 		}
+
+		targetUser.timeSinceUpdate = 0;
 	} );
+
+	userManager.checkForDormancy = function()
+	{
+		for( var userID in users)
+		{
+			users[userID].timeSinceUpdate += frameDelta;
+			if( users[userID].timeSinceUpdate > 5 )
+			{
+				console.log("removing user")
+				{
+					scene.remove(user[userID]);
+					delete users[userID];
+				}
+			}
+		}
+	}
 
 	var ourPlatform = getPlatform();
 	var ourUpdatePackage = {
@@ -93,7 +112,8 @@ function initUserManager(controllerGeometries, socket)
 		var user = new THREE.Object3D();
 		user.platform = platform;
 		scene.add(user);
-		console.log(user)
+		
+		user.timeSinceUpdate = 0;
 
 		var userMaterial = new THREE.MeshStandardMaterial();
 		userMaterial.color.setRGB( Math.random(),Math.random(),Math.random() );

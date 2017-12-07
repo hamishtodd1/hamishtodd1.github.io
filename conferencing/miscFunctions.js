@@ -6,14 +6,17 @@ function TextMesh(str, textSize)
 
 THREE.CylinderBufferGeometryUncentered = function(radius, length, radiusSegments)
 {
-	if(radiusSegments === undefined)
+	if( !radiusSegments )
+	{
 		radiusSegments = 8;
-	var geometry = new THREE.CylinderBufferGeometry(radius, radius, length,radiusSegments);
+	}
+	var geometry = new THREE.CylinderBufferGeometry(radius, radius, length,radiusSegments,1,true);
 	for(var i = 0, il = geometry.attributes.position.array.length / 3; i < il; i++)
+	{
 		geometry.attributes.position.array[i*3+1] += length / 2;
+	}
 	return geometry;
 }
-
 //to be called every frame from the start
 function checkForNewGlobals()
 {

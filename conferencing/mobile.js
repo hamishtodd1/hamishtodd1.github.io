@@ -47,6 +47,8 @@ initializers.mobile = function(socket, pdbWebAddress, roomKey, launcher, visiBox
 		buttonsHeld["backward"] = eval(value);
 	});
 
+	camera.position.copy(model.position);
+
 	coreLoops.mobile = function( socket, visiBox, thingsToBeUpdated, userManager, mouse )
 	{
 		frameDelta = ourClock.getDelta();
@@ -55,6 +57,14 @@ initializers.mobile = function(socket, pdbWebAddress, roomKey, launcher, visiBox
 
 		poiSphere.position.copy(poiSphere.getPoi(camera))
 
+		camera.updateMatrix();
+		camera.updateMatrixWorld();
+
+		var offsetPoiSphereLocation = poiSphere.getPoi(camera);
+		camera.position.sub(offsetPoiSphereLocation).add(poiSphere.position);
+
+		camera.updateMatrix();
+		camera.updateMatrixWorld();
 		moveCamera();
 		
 		for( var thing in thingsToBeUpdated)
@@ -65,10 +75,13 @@ initializers.mobile = function(socket, pdbWebAddress, roomKey, launcher, visiBox
 					thingsToBeUpdated[thing][i].update();
 			}
 			else
+			{
 				thingsToBeUpdated[thing].update();
+			}
 		}
 		
 		userManager.sendOurUpdate();
+		userManager.checkForDormancy();
 	}
 
 	document.addEventListener( 'mousedown', function(event)
