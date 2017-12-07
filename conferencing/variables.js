@@ -21,5 +21,6 @@ var camera = new THREE.PerspectiveCamera( 70, //can be changed by VR effect
 		0.01, 700);
 var scene = new THREE.Scene().add(camera);
 
+console.log(initializers,coreLoops)
 var initializers = {};
 var coreLoops = {};

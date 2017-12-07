@@ -30,49 +30,42 @@ initializers.mobile = function(socket, pdbWebAddress, roomKey, launcher, visiBox
 	var buttonsHeld = load.buttonsHeld;
 	var moveCamera = load.moveCamera;
 
-	socket.on("right", function(value)
-	{
-		buttonsHeld["right"] = eval(value);
-	});
-	socket.on("left", function(value)
-	{
-		buttonsHeld["left"] = eval(value);
-	});
-	socket.on("forward", function(value)
-	{
-		buttonsHeld["forward"] = eval(value);
-	});
-	socket.on("backward", function(value)
-	{
-		buttonsHeld["backward"] = eval(value);
-	});
-
 	camera.position.copy(model.position);
+
+	socket.on('poiUpdate', function(msg)
+		{
+			var currentPoi = getPoi(camera);
+			camera.position.sub(currentPoi).add(msg)
+			camera.updateMatrix();
+			camera.updateMatrixWorld();
+			poiSphere.position.copy(getPoi(camera));
+		});
 
 	coreLoops.mobile = function( socket, visiBox, thingsToBeUpdated, userManager, mouse )
 	{
 		frameDelta = ourClock.getDelta();
 
+		var poi = getPoi(camera);
+
 		ourOrientationControls.update();
 
-		poiSphere.position.copy(poiSphere.getPoi(camera))
+		camera.updateMatrix();
+		camera.updateMatrixWorld();
+		var offsetPoiSphereLocation = getPoi(camera);
+		camera.position.sub(offsetPoiSphereLocation).add(poi);
 
 		camera.updateMatrix();
 		camera.updateMatrixWorld();
-
-		var offsetPoiSphereLocation = poiSphere.getPoi(camera);
-		camera.position.sub(offsetPoiSphereLocation).add(poiSphere.position);
-
-		camera.updateMatrix();
-		camera.updateMatrixWorld();
-		moveCamera();
+		poiSphere.position.copy(getPoi(camera));
 		
 		for( var thing in thingsToBeUpdated)
 		{
 			if( thingsToBeUpdated[thing].length !== undefined)
 			{
 				for(var i = 0, il = thingsToBeUpdated[thing].length; i < il; i++)
+				{
 					thingsToBeUpdated[thing][i].update();
+				}
 			}
 			else
 			{

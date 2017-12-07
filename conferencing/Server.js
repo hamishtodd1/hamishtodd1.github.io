@@ -90,10 +90,7 @@ io.on('connection', function(socket)
 			});
 		}
 		markMessageAsSimplyRebroadcasted('userUpdate');
-		markMessageAsSimplyRebroadcasted('left');
-		markMessageAsSimplyRebroadcasted('right');
-		markMessageAsSimplyRebroadcasted('forward');
-		markMessageAsSimplyRebroadcasted('backward');
+		markMessageAsSimplyRebroadcasted('poiUpdate');
 	}
 
 	// socket.on('disconnect', function ()
