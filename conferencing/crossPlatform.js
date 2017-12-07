@@ -1,15 +1,19 @@
 /*
-For thursday:
+	Working on laptop
+	Simpledesktop movement moves mobile users
+	Try Anthony's phone
+	No flashing. Well, that was desktop
+	heads more reliable - they are moving! No, the molecule is moving.
+	pointers
 	Get rid of all in main chain?
 	"Make me the master" button?
 	Remove logged out heads
+	Clean up whole
 
 Go in there and set up
-	You want the server in there so you can change things
 	Record? Paper?
 	
 After
-	Daydream/SSL urgh
 	instead of id, you want to generate a bit.ly
 	trackpad is best with zoom, have separate thing for that
 	That chimera thing
@@ -69,7 +73,7 @@ function crossPlatformInitialize(socket, pdbWebAddress, roomKey)
 	{
 		return model.scale.x;
 	}
-	model.position.z = -FOCALPOINT_DISTANCE;
+	// model.position.z = -FOCALPOINT_DISTANCE;
 	scene.add(model);
 
 	var thingsToBeUpdated = {};
@@ -148,12 +152,12 @@ function initPoiSphereAndButtonMonitorerAndMovementSystem()
 		{
 			camera.position.add( new THREE.Vector3(0.003,0,0).applyEuler(camera.rotation) );
 		}
-		// else
-		// {
-		// 	return;
-		// }
+		else
+		{
+			return;
+		}
 		// camera.updateMatrix();
-		// socket.emit("cameraPosition",camera.matrix);
+		// socket.emit("cameraMatrix",camera.matrix);
 	}
 
 	return {poiSphere:poiSphere,buttonsHeld:buttonsHeld,moveCamera:moveCamera};
