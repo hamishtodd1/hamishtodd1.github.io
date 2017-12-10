@@ -41,8 +41,8 @@ function initMonitorer()
 		}
 		if(event.keyCode===83) //s for save 
 		{
-			console.log(recordedFrames)
-			// socket.send( JSON.stringify(recordedFrames) );
+			console.log("saving")
+			socket.send( JSON.stringify(recordedFrames) );
 		}
 		if(event.keyCode===32) //space
 		{
@@ -97,7 +97,7 @@ function initMonitorer()
 		newFrame.frameTime = recordingTime;
 
 		newFrame.objectPropertyData = Array( monitorer.objectsAndPropertiesToBeMonitored.length );
-		newFrame.quaternionData = Array( quaternionsToBeMonitored.length * 4 );
+		newFrame.quaternionData = Array( quaternionsToBeMonitored.length );
 
 		for(var i = 0, il = monitorer.objectsAndPropertiesToBeMonitored.length; i < il; i++)
 		{
