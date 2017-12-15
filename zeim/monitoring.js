@@ -5,6 +5,11 @@
 		Have two "screens" - left plays clips, right plays timeline
 
 	To generate a "random" frame you need to know about typical ranges of values
+
+	Would be nice if speed was a slider
+
+	What's a small, simple room in which you would expect to find geese?
+	Office might be appropriate
 */
 
 function initMonitorer()
@@ -14,7 +19,8 @@ function initMonitorer()
 	monitorer.objectsAndPropertiesToBeMonitored = [];
 	var quaternionsToBeMonitored = [];
 	
-	var recordedFrames = [];
+	var recordedFrames = null;
+	THREE.Cache.enabled = false; //don't forget to ctrl+F5
 	new THREE.FileLoader().load("record.txt",function(stringFromFile)
 	{
 		recordedFrames = JSON.parse(stringFromFile);
@@ -22,18 +28,23 @@ function initMonitorer()
 
 	monitorer.recording = false;
 	monitorer.playing = false;
+	var playingTime = 0;
+	var recordingTime = 0;
 
 	document.addEventListener( 'keydown', function(event)
 	{
-		if(event.keyCode === 82) //r toggle
+		if(event.keyCode === 82) //r for record
 		{
-			if(!monitorer.recording)
+			if( !monitorer.recording )
 			{
 				monitorer.playing = false;
 				monitorer.recording = true;
+				recordingTime = 0;
+				recordedFrames.length = 0;
+				playingTime = 0;
 				console.log("rolling");
 			}
-			else if(monitorer.recording)
+			else if( monitorer.recording )
 			{
 				monitorer.recording = false;
 				console.log("cut, ", recordedFrames);
@@ -44,7 +55,7 @@ function initMonitorer()
 			console.log("saving")
 			socket.send( JSON.stringify(recordedFrames) );
 		}
-		if(event.keyCode===32) //space
+		if(event.keyCode===32) //space for play
 		{
 			if(monitorer.playing)
 			{
@@ -61,34 +72,42 @@ function initMonitorer()
 				else
 				{
 					monitorer.playing = true;
-					console.log("playing")
+					console.log("playing");
+					if( playingTime > recordedFrames[recordedFrames.length-1].frameTime )
+					{
+						playingTime = 0;
+					}
 				}
 			}
 		}
 	} );
 
-	var playingTime = 0;
-	var recordingTime = 0;
-
 	{
-		// var playButton = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0xFFFFFF}));
-		// playButton.geometry.vertices.push(new THREE.Vector3(1,0,0),new THREE.Vector3(-1,1,0),new THREE.Vector3(-1,-1,0));
-		// playButton.geometry.faces.push(new THREE.Face3(0,1,2));
-		// playButton.scale.setScalar(0.001)
-		// playButton.position.set(-0.014,-0.008,-camera.near*2);
+		var playButton = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0xFFFFFF}));
+		playButton.geometry.vertices.push(new THREE.Vector3(1,0,0),new THREE.Vector3(-1,1,0),new THREE.Vector3(-1,-1,0));
+		playButton.geometry.faces.push(new THREE.Face3(0,1,2));
+		playButton.scale.setScalar(0.001)
+		playButton.position.set(-0.014,-0.008,-camera.near*2);
 
-		// var timeLine = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0xFFFFFF}));
-		// timeLine.geometry.vertices.push(new THREE.Vector3(1,1,0),new THREE.Vector3(-1,1,0),new THREE.Vector3(-1,-1,0),new THREE.Vector3(1,-1,0));
-		// timeLine.geometry.faces.push(new THREE.Face3(0,1,2),new THREE.Face3(2,3,0));
-		// timeLine.scale.set(0.01, 0.0003,1);
-		// timeLine.position.set(0,-0.008,-camera.near*2);
+		var timeLine = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0xFFFFFF}));
+		timeLine.geometry.vertices.push(new THREE.Vector3(1,1,0),new THREE.Vector3(-1,1,0),new THREE.Vector3(-1,-1,0),new THREE.Vector3(1,-1,0));
+		timeLine.geometry.faces.push(new THREE.Face3(0,1,2),new THREE.Face3(2,3,0));
+		timeLine.scale.set(0.01, 0.0003,1);
+		timeLine.position.set(0,-0.008,-camera.near*2);
 
-		// var tracker = new THREE.Mesh(new THREE.CircleGeometry(0.0006,16), new THREE.MeshBasicMaterial({color:0xFF00FF}));
-		// tracker.position.set(0,-0.008,-camera.near*2+0.00001);
+		var tracker = new THREE.Mesh(new THREE.CircleGeometry(0.0006,16), new THREE.MeshBasicMaterial({color:0xFF00FF}));
+		tracker.position.set(0,-0.008,-camera.near*2+0.00001);
 
-		// camera.add(playButton);
-		// camera.add(timeLine);
-		// camera.add(tracker);
+		camera.add(playButton);
+		camera.add(timeLine);
+		camera.add(tracker);
+
+		monitorer.checkForControlInput = function()
+		{
+			
+		}
+
+		//speed and maybe volume would be nice but not necessary
 	}
 
 	monitorer.record = function()
@@ -129,8 +148,7 @@ function initMonitorer()
 		if( frameJustAfter > recordedFrames.length-1 )
 		{
 			console.log("recording end reached")
-			frameJustAfter--;
-			frameJustBefore--;
+			monitorer.playing = false;
 			return;
 		}
 
@@ -156,15 +174,13 @@ function initMonitorer()
 			quaternionsToBeMonitored[i].slerp( nextFrameQuaternion, lerpValue );
 		}
 
-		if( frameJustAfter !== frameJustBefore)
-		{
-			playingTime += frameDelta;
-		}
+		playingTime += frameDelta;
 
-		// playButton.visible = !monitorer.recording;
-		// timeLine.visible = !monitorer.recording;
-		// tracker.visible = !monitorer.recording;
-		// tracker.position.x = -timeLine.scale.x + timeLine.scale.x * 2 * playingTime;
+		playButton.visible = !monitorer.recording;
+		timeLine.visible = !monitorer.recording;
+		tracker.visible = !monitorer.recording;
+		var proportionThrough = playingTime / recordedFrames[recordedFrames.length-1].frameTime;
+		tracker.position.x = -timeLine.scale.x + timeLine.scale.x * 2 * proportionThrough;
 	}
 
 	monitorer.monitorObjectAndProperty = function( object, property )

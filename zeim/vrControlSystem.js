@@ -1,4 +1,4 @@
-function initvrInputSystem(controllers, launcher, ourVrEffect, renderer)
+function initVrInputSystem(controllers, launcher, ourVrEffect, renderer)
 {
 	var vrInputSystem = {};
 	if( WEBVR && WEBVR.isAvailable())

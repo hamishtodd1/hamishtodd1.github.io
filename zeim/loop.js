@@ -15,12 +15,14 @@ function ensureDetachment(child, parent)
 	}
 }
 
-function loop( controllers, vrInputSystem, thingsToBeUpdated, holdables, monitorer )
+function loop( controllers, vrInputSystem, thingsToBeUpdated, holdables, monitorer, mouse )
 {
 	frameDelta = ourClock.getDelta();
 	frameTime += frameDelta;
 	
 	vrInputSystem.update();
+
+	mouse.update();
 	
 	for(var i = 0; i < controllers.length; i++)
 	{
@@ -57,15 +59,25 @@ function loop( controllers, vrInputSystem, thingsToBeUpdated, holdables, monitor
 		}
 	}
 
+	/*
+		Philofophie
+		It would be nice if you could change the initial conditions then watch me make a fool of myself.
+		But it is also important to be able to skip around the timeline
+		That means: DO NOT record certain things, instead... ugh... update them while the recording is playing... jeez
+
+		Alternatively, could record only controller input and update everything but that! Not really feasible
+
+		Can simulate forward by going through what's happened in every frame.
+
+		Could mark certain properties as "recalled if you skip to this point but not if you're simulating forward". That's a lot of work for yourself.
+	*/
+	console.assert(!(monitorer.playing && monitorer.recording))
 	if(monitorer.playing)
 	{
 		monitorer.dispense();
-
-		//it would be nice if you could change the initial conditions then watch me make a fool of myself
 	}
 	else
 	{
-		//principle: variables affected by updates must be tracked by monitorer
 		for( var thing in thingsToBeUpdated)
 		{
 			thingsToBeUpdated[thing].update();
