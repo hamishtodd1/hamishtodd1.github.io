@@ -1,3 +1,7 @@
+/*
+	Assume 16:9 because that's youtube. All resolutions should get the controls but people viewing in portrait
+*/
+
 function initVrInputSystem(controllers, launcher, ourVrEffect, renderer)
 {
 	var vrInputSystem = {};

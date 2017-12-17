@@ -21,6 +21,16 @@ function checkForNewGlobals()
 	}	
 }
 
+function frameDimensionsAtZDistance(z)
+{
+	var cameraFovRadians = camera.fov*TAU/360;
+	var dimensions = {
+		height: 2 * Math.tan(cameraFovRadians/2) * z,
+		width: 	2 * Math.tan(cameraFovRadians/2) * z * camera.aspect,
+	}
+	return dimensions;
+}
+
 THREE.Quaternion.prototype.distanceTo = function(q2)
 {
 	var theta = Math.acos(this.w*q2.w + this.x*q2.x + this.y*q2.y + this.z*q2.z);
