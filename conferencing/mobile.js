@@ -32,15 +32,6 @@ initializers.mobile = function(socket, pdbWebAddress, roomKey, launcher, visiBox
 
 	camera.position.copy(model.position);
 
-	// socket.on('poiUpdate', function(msg)
-	// 	{
-	// 		var currentPoi = getPoi(camera);
-	// 		camera.position.sub(currentPoi).add(msg)
-	// 		camera.updateMatrix();
-	// 		camera.updateMatrixWorld();
-	// 		poiSphere.position.copy(getPoi(camera));
-	// 	});
-
 	coreLoops.mobile = function( socket, visiBox, thingsToBeUpdated, userManager, mouse )
 	{
 		frameDelta = ourClock.getDelta();

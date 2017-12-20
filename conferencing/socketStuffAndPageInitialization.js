@@ -65,7 +65,7 @@
 			else textBox.value = "Sorry, request was not recognized"
 		}
 
-		if(0)
+		if(1)
 		{
 			textBox.value = "oo";
 			onEnterPressed({keyCode:13});

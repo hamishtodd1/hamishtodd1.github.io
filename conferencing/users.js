@@ -37,34 +37,30 @@ function initUserManager(controllerGeometries, socket)
 		{
 			users[updatePackage.id] = User(updatePackage.platform);
 		}
-		var targetUser = users[updatePackage.id];
 
-		targetUser.head.position.lerp(updatePackage.head.position,0.3);
-		targetUser.head.rotation.copy(updatePackage.head.rotation);
+		users[updatePackage.id].head.position.lerp(updatePackage.head.position,0.3);
+		users[updatePackage.id].head.rotation.copy(updatePackage.head.rotation);
 
-		if( updatePackage.platform === "desktopVR")
-		{
-			for(var i = 0; i < 2; i++)
-			{
-				targetUser.controllers[i].position.copy(updatePackage.controllers[i].position);
-				targetUser.controllers[i].rotation.copy(updatePackage.controllers[i].rotation);
-			}
-		}
-		else
-		{
-			// targetUser.pointer.rotation.copy( updatePackage.pointer.rotation );
-			targetUser.poiSphere.position.copy(getPoi(targetUser.head));
-		}
+		users[updatePackage.id].poiSphere.position.copy(getPoi(users[updatePackage.id].head));
 
-		targetUser.timeSinceUpdate = 0;
+		users[updatePackage.id].timeSinceUpdate = 0;
 	} );
 
-	socket.on('masterCommand', function(updatePackage)
+	// socket.on('masterCommand', function(updatePackage)
+	// {
+	// 	console.log(updatePackage.head.position)
+	// 	camera.position.copy(updatePackage.head.position);
+	// 	console.log(updatePackage.head.position,camera.position)
+	// 	camera.rotation.copy(updatePackage.head.rotation); //slerp would be much nicer
+	// } );
+
+	socket.on('poiUpdate', function(msg)
 	{
-		camera.position.copy(updatePackage.head.position);
-		var eventualQuaternion = new THREE.Quaternion().setFromEuler(updatePackage.head.rotation);
-		camera.quaternion.copy(expectedQuaternion); //slerp would be much nicer
-	} );
+		var currentPoi = getPoi(camera);
+		camera.position.sub(currentPoi).add(msg)
+		camera.updateMatrix();
+		camera.updateMatrixWorld();
+	});
 
 	userManager.checkForDormancy = function()
 	{

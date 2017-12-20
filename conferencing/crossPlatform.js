@@ -5,7 +5,7 @@
 	get onto the node server
 	No flashing. Well, that was desktop
 	Remove logged out heads
-	should use quaternions for slerp
+	should use quaternions for
 	Try Anthony's phone
 	Get rid of all in main chain?
 

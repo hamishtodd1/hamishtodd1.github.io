@@ -72,15 +72,15 @@ initializers.simpleDesktop = function(socket, pdbWebAddress, roomKey, launcher, 
 		camera.updateMatrixWorld();
 		poiSphere.position.copy(getPoi(camera));
 		
-		// socket.emit('poiUpdate', poiSphere.position);//this is what currently does mobile movement
-
 		if(buttonsHeld.shift)
 		{
-			userManager.commandAsMaster();
+			// userManager.commandAsMaster();
+			socket.emit('poiUpdate', poiSphere.position);//this is what currently does mobile movement
 		}
 		
 		userManager.sendOurUpdate();
 		userManager.checkForDormancy();
+
 	}
 
 	function render()
