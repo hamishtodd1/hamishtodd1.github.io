@@ -1,27 +1,21 @@
 /*
-	Working on laptop
-	Simpledesktop movement moves mobile users
-	Try Anthony's phone
-	No flashing. Well, that was desktop
-	heads more reliable - they are moving! No, the molecule is moving.
 	pointers
-	Get rid of all in main chain?
-	"Make me the master" button?
+	"Make me the master" button? Toggle.
+	Simpledesktop movement moves mobile users
+	get onto the node server
+	No flashing. Well, that was desktop
 	Remove logged out heads
-	Clean up whole
+	should use quaternions for slerp
+	Try Anthony's phone
+	Get rid of all in main chain?
 
-Go in there and set up
-	Record? Paper?
 	
 After
 	instead of id, you want to generate a bit.ly
 	trackpad is best with zoom, have separate thing for that
-	That chimera thing
+	That chimera idea
 
 	Show their frusta?
-
-	Hmm, people waving their heads around may be distracting...
-
 
  */
 
@@ -44,15 +38,17 @@ function crossPlatformInitialize(socket, pdbWebAddress, roomKey)
 			}
 
 			var roomSign = TextMesh( roomKey, 0.5);
+			roomSign.material.color.setRGB(1,1,1)
 			roomSign.position.z = -2;
 			scene.add(roomSign);
 
 			loadModel(pdbWebAddress, thingsToBeUpdated );
 
 			var platform = getPlatform();
-			console.log(platform)
 			if(!initializers[platform])
+			{
 				console.error("no initializer for ", platform)
+			}
 			initializers[platform](socket, pdbWebAddress, roomKey, launcher, visiBox, thingsToBeUpdated, renderer, userManager,
 				controllerGeometries);
 
@@ -65,7 +61,6 @@ function crossPlatformInitialize(socket, pdbWebAddress, roomKey)
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	document.body.appendChild( renderer.domElement );
-	console.log(renderer)
 
 	model = new THREE.Object3D();
 	model.scale.setScalar( 0.01 ); //0.028 is nice
@@ -89,7 +84,6 @@ function crossPlatformInitialize(socket, pdbWebAddress, roomKey)
 					controllerGeometries[i] = object.children[0].geometry;
 					controllerGeometries[i].applyMatrix( new THREE.Matrix4().makeRotationAxis(xAxis,0.5) );
 					controllerGeometries[i].applyMatrix( new THREE.Matrix4().makeTranslation((i==LEFT_CONTROLLER_INDEX?1:-1)*0.002,0.036,-0.039) );
-					console.log(controllerGeometries[i])
 					
 					launcher.dataLoaded["controllerGeometry"+i.toString()] = true;
 					launcher.attemptLaunch();
@@ -135,7 +129,7 @@ function initPoiSphereAndButtonMonitorerAndMovementSystem()
 
 	function moveCamera()
 	{
-		var forward = getPoi(camera).sub(camera.position).multiplyScalar(0.05);
+		var forward = getPoi(camera).sub(camera.position).multiplyScalar(0.03);
 		if(buttonsHeld.forward)
 		{
 			camera.position.add(forward);

@@ -32,14 +32,14 @@ initializers.mobile = function(socket, pdbWebAddress, roomKey, launcher, visiBox
 
 	camera.position.copy(model.position);
 
-	socket.on('poiUpdate', function(msg)
-		{
-			var currentPoi = getPoi(camera);
-			camera.position.sub(currentPoi).add(msg)
-			camera.updateMatrix();
-			camera.updateMatrixWorld();
-			poiSphere.position.copy(getPoi(camera));
-		});
+	// socket.on('poiUpdate', function(msg)
+	// 	{
+	// 		var currentPoi = getPoi(camera);
+	// 		camera.position.sub(currentPoi).add(msg)
+	// 		camera.updateMatrix();
+	// 		camera.updateMatrixWorld();
+	// 		poiSphere.position.copy(getPoi(camera));
+	// 	});
 
 	coreLoops.mobile = function( socket, visiBox, thingsToBeUpdated, userManager, mouse )
 	{
@@ -49,29 +49,12 @@ initializers.mobile = function(socket, pdbWebAddress, roomKey, launcher, visiBox
 
 		ourOrientationControls.update();
 
-		camera.updateMatrix();
 		camera.updateMatrixWorld();
 		var offsetPoiSphereLocation = getPoi(camera);
 		camera.position.sub(offsetPoiSphereLocation).add(poi);
 
-		camera.updateMatrix();
 		camera.updateMatrixWorld();
 		poiSphere.position.copy(getPoi(camera));
-		
-		for( var thing in thingsToBeUpdated)
-		{
-			if( thingsToBeUpdated[thing].length !== undefined)
-			{
-				for(var i = 0, il = thingsToBeUpdated[thing].length; i < il; i++)
-				{
-					thingsToBeUpdated[thing][i].update();
-				}
-			}
-			else
-			{
-				thingsToBeUpdated[thing].update();
-			}
-		}
 		
 		userManager.sendOurUpdate();
 		userManager.checkForDormancy();

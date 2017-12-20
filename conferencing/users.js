@@ -59,6 +59,13 @@ function initUserManager(controllerGeometries, socket)
 		targetUser.timeSinceUpdate = 0;
 	} );
 
+	socket.on('masterCommand', function(updatePackage)
+	{
+		camera.position.copy(updatePackage.head.position);
+		var eventualQuaternion = new THREE.Quaternion().setFromEuler(updatePackage.head.rotation);
+		camera.quaternion.copy(expectedQuaternion); //slerp would be much nicer
+	} );
+
 	userManager.checkForDormancy = function()
 	{
 		for( var userID in users)
@@ -97,6 +104,11 @@ function initUserManager(controllerGeometries, socket)
 	userManager.sendOurUpdate = function()
 	{
 		socket.emit('userUpdate', ourUpdatePackage);
+	}
+
+	userManager.commandAsMaster = function()
+	{
+		socket.emit('masterCommand', ourUpdatePackage);
 	}
 
 	/*

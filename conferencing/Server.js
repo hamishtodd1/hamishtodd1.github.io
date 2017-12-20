@@ -1,9 +1,9 @@
-//--------------Bringing in libraries, not really sure what they do
+//--------------Bringing in libraries
 var express = require('express');
 var app = express();
 app.use(express.static(__dirname ));
 
-//Sends files when requested?
+//Sends files when requested
 app.get('/', function(req, res){
 	res.sendFile(__dirname + '/index.html');
 });
@@ -11,13 +11,17 @@ app.get('/', function(req, res){
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
-//-------------The real stuff
+//-------------Below here is our stuff
 var rooms = {};
-rooms["no"] = {};
-rooms["no"].pdbWebAddress = "data/NUDT7A-x1203.pdb";
-rooms["no"].participants = [];
+function beginRoom(pdbWebAddress, id)
+{
+	rooms[id] = {};
+	rooms[id].pdbWebAddress = "data/NUDT7A-x1203.pdb";
+	rooms[id].participants = [];
+}
+//Default room
+beginRoom("data/NUDT7A-x1203.pdb", "oo");
 
-// https://gist.github.com/alexpchin/3f257d0bb813e2c8c476
 io.on('connection', function(socket)
 {
 	console.log("potential user connected: ", socket.id);
@@ -36,11 +40,11 @@ io.on('connection', function(socket)
 		roomKey = (Math.random()+1).toString(36).substr(2,2);
 		console.log( "starting room: ", roomKey)
 		if( rooms[roomKey] )
-			console.log("Oh dear")
+		{
+			console.log("Tried to start a room that already exists?")
+		}
 
-		rooms[roomKey] = {};
-		rooms[roomKey].pdbWebAddress = pdbWebAddress;
-		rooms[roomKey].participants = [];
+		beginRoom(pdbWebAddress, roomKey)
 
 		bringIntoAllocatedRoom();
 	});
@@ -91,14 +95,19 @@ io.on('connection', function(socket)
 		}
 		markMessageAsSimplyRebroadcasted('userUpdate');
 		markMessageAsSimplyRebroadcasted('poiUpdate');
+		markMessageAsSimplyRebroadcasted('masterCommand');
+
+		socket.on('disconnect', function ()
+		{
+			rooms[roomKey].participants.splice(rooms[roomKey].participants.indexOf(socket),1);
+
+			if( roomKey !== "oo" && rooms[roomKey].participants.length === 0)
+			{
+				delete rooms[roomKey];
+			}
+		});
 	}
 
-	// socket.on('disconnect', function ()
-	// {
-	// 	ourRoom.participants.splice(rooms.indexOf(socket),1);
-		
-	// 	socket.broadcast.emit('UserDisconnected', socket.id);
-	// });
 });
 
 http.listen(9090, function() //Might need a sudo
@@ -118,14 +127,3 @@ http.listen(9090, function() //Might need a sudo
 	    }
 	}
 });
-
-/*
-This server runs "forever"
-
-When someone logs in they have, themselves,
-
-TODO if you refresh the script, all running windows must close, who knows what happens otherwise
-*/
-
-//bug: as soon as user's address bar autocompletes to the address, apparently that's a connection?
-//that is a problem because they register as separate connections but one of them DOESN'T DISCONNECT RAAAARGH

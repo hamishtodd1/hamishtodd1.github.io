@@ -8,6 +8,9 @@ I was using windows 10 and node v6.9.4. Go into the directory in the command pro
 
 And then if you get your IP address and go to <ipadress>:9090 in any other computer, or phone or tablet, and you have no firewall problems, you should see the same thing. And if there are multiple users you can see each other and where your mice are pointing.
 
+## Usage
+On a desktop, left/right/forward/backward to move, hold shift to "become the master", and click in order for everyone to see your pointer.
+
 ## Modification
 
 "Loadmodel" creates an Object3D. You can replace it if you want! Which will let you do things like add new representations. Hey, you can even bring in .obj files and talk about them if you like!

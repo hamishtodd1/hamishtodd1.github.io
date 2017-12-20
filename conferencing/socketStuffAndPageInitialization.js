@@ -8,6 +8,11 @@
 	{
 		console.log(msg);
 	});
+
+	// socket.on( 'userDisconnected', function(msg)
+	// {
+	// 	console.log(msg);
+	// });
 	
 	socket.on('serverConnected', function()
 	{
@@ -15,8 +20,15 @@
 		textBox.cols = 100;
 		textBox.rows = 8;
 		textBox.autofocus = true;
-		textBox.value = "no"//"2AM9"
-		// textBox.value = "Please enter one of the following:\n1. Session ID number (if someone has already set up a room)\n2. PDB ID\n3. Weblink to a .pdb file\n\nThen press enter";
+		// textBox.value = "oo"//"2AM9"
+		textBox.value = "Please enter one of the following:\n1. Session ID number (if someone has already set up a room)\n2. PDB ID\n3. Weblink to a .pdb file\n4. oo to get into the test room\n\nThen press enter";
+		// for(var i = 0, il = document.body.children.length; i < il; i++ )
+		// {
+		// 	if( document.body.children[i].localName === "canvas" || document.body.children[i].localName === "textarea")
+		// 	{
+		// 		document.body.removeChild(document.body.children[i]);
+		// 	}
+		// }
 		document.body.appendChild( textBox );
 
 		socket.on('roomInvitation', function(roomInformation)
@@ -53,7 +65,14 @@
 			else textBox.value = "Sorry, request was not recognized"
 		}
 
-		// document.addEventListener( 'keydown', onEnterPressed );
-		onEnterPressed({keyCode:13});
+		if(0)
+		{
+			textBox.value = "oo";
+			onEnterPressed({keyCode:13});
+		}
+		else
+		{
+			document.addEventListener( 'keydown', onEnterPressed );
+		}
 	});
 })();

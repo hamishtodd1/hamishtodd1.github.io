@@ -27,7 +27,6 @@ function loadModel(modelURL, thingsToBeUpdated, visiBoxPlanes)
 	new THREE.PDBLoader().load( modelURL,
 		function ( backboneData, atomData )
 		{
-			console.log(atomData)
 // 			var backbones = new THREE.Group();
 		
 // 			for(var i = 0, il = backboneData.length; i < il; i++)
@@ -142,7 +141,6 @@ function loadModel(modelURL, thingsToBeUpdated, visiBoxPlanes)
 				}
 			}
 			
-			console.log(model.atoms)
 			for(var i = 0, il = model.atoms.length; i < il; i++ )
 			{
 				model.atoms[i].firstVertexIndex = i*nSphereVertices;

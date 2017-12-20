@@ -12,7 +12,8 @@ initializers.simpleDesktop = function(socket, pdbWebAddress, roomKey, launcher, 
 	var moveCamera = load.moveCamera;
 
 	buttonsHeld.ctrl = false;
-	function associateKeyHoldToBoolean(keyCode, buttonKey)
+	buttonsHeld.shift = false;
+	function associateKeyHold(keyCode, buttonKey)
 	{
 		document.addEventListener( 'keydown', function(event)
 		{
@@ -29,11 +30,12 @@ initializers.simpleDesktop = function(socket, pdbWebAddress, roomKey, launcher, 
 			}
 		});
 	}
-	associateKeyHoldToBoolean(17, "ctrl");
-	associateKeyHoldToBoolean(87, "forward");
-	associateKeyHoldToBoolean(83, "backward");
-	associateKeyHoldToBoolean(65, "left");
-	associateKeyHoldToBoolean(68, "right");
+	associateKeyHold(17, "ctrl");
+	associateKeyHold(87, "forward");
+	associateKeyHold(83, "backward");
+	associateKeyHold(65, "left");
+	associateKeyHold(68, "right");
+	associateKeyHold(16, "shift");
 
 	var viewPlaneIndicator = new THREE.Mesh(new THREE.PlaneGeometry(0.08,0.08), new THREE.MeshBasicMaterial({color:0xFF0000,transparent:true,opacity:0.4}));
 	viewPlaneIndicator.visible = false
@@ -62,31 +64,19 @@ initializers.simpleDesktop = function(socket, pdbWebAddress, roomKey, launcher, 
 		camera.rotation.y = clamp(camera.rotation.y, -TAU/2, TAU/2);
 		camera.rotation.x = clamp(camera.rotation.x, -TAU/4, TAU/4);
 
-		camera.updateMatrix();
 		camera.updateMatrixWorld();
 		var offsetPoiSphereLocation = getPoi(camera);
 		camera.position.sub(offsetPoiSphereLocation).add(poi);
 
 		moveCamera();
-		camera.updateMatrix();
 		camera.updateMatrixWorld();
 		poiSphere.position.copy(getPoi(camera));
 		
-		socket.emit('poiUpdate', poiSphere.position);
-		
-		for( var thing in thingsToBeUpdated)
+		// socket.emit('poiUpdate', poiSphere.position);//this is what currently does mobile movement
+
+		if(buttonsHeld.shift)
 		{
-			if( thingsToBeUpdated[thing].length !== undefined)
-			{
-				for(var i = 0, il = thingsToBeUpdated[thing].length; i < il; i++)
-				{
-					thingsToBeUpdated[thing][i].update();
-				}
-			}
-			else
-			{
-				thingsToBeUpdated[thing].update();
-			}
+			userManager.commandAsMaster();
 		}
 		
 		userManager.sendOurUpdate();
