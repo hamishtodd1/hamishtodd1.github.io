@@ -19,7 +19,7 @@ After
 
  */
 
-function crossPlatformInitialize(socket, pdbWebAddress, roomKey)
+function crossPlatformInitialize(socket, pdbWebAddress, roomKey, ourID)
 {
 	//ideally you don't have to wait, you just have callback functions when download is completed
 	var launcher = {
@@ -93,7 +93,7 @@ function crossPlatformInitialize(socket, pdbWebAddress, roomKey)
 		loadControllerGeometry(0);
 		loadControllerGeometry(1);
 	}
-	var userManager = initUserManager(controllerGeometries,socket);
+	var userManager = initUserManager(controllerGeometries,socket, ourID);
 	
 	new THREE.FontLoader().load( "data/gentilis.js", 
 		function ( gentilis ) {

@@ -67,7 +67,8 @@ io.on('connection', function(socket)
 	{
 		socket.emit('roomInvitation', {
 			roomKey:roomKey,
-			pdbWebAddress:rooms[roomKey].pdbWebAddress
+			pdbWebAddress:rooms[roomKey].pdbWebAddress,
+			ourID:socket.id
 		} );
 
 		rooms[roomKey].participants.push(socket);

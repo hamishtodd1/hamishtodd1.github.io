@@ -4,7 +4,7 @@
 //forget about tablet for a bit, that'll be pinch to zoom
 //probably laser is invisible when mouse is down
 
-function initUserManager(controllerGeometries, socket)
+function initUserManager(controllerGeometries, socket,ourID)
 {
 	var userManager = {};
 
@@ -36,6 +36,7 @@ function initUserManager(controllerGeometries, socket)
 		if(!users[updatePackage.id])
 		{
 			users[updatePackage.id] = User(updatePackage.platform);
+			console.log(updatePackage.id, users)
 		}
 
 		users[updatePackage.id].head.position.lerp(updatePackage.head.position,0.3);
@@ -84,7 +85,8 @@ function initUserManager(controllerGeometries, socket)
 			position: camera.position,
 			rotation: camera.rotation
 		},
-		platform: ourPlatform
+		platform: ourPlatform,
+		id: ourID
 	};
 	if( ourPlatform === "desktopVR")
 	{
