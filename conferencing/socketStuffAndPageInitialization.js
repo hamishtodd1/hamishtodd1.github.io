@@ -74,7 +74,7 @@
 			else textBox.value = "Sorry, request was not recognized"
 		}
 
-		if(1)
+		if(0) //fast start for debugging
 		{
 			textBox.value = "oo";
 			onEnterPressed({keyCode:13});
