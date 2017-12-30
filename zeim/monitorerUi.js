@@ -9,22 +9,27 @@
 	Probably want names for the various bits displayed on them
 
 	timeline should be a nice relative-motion slider! Or not, because people are used to one thing
+
+	should there be something to bring it closer to 1? Hah, maybe not. Philosophy!
 */
 
 function initUi(clickables, grabbables, audio, monitorer, recordedFrames)
 {
 	var ui = {};
 
-	var timeline = new THREE.Mesh(new THREE.PlaneBufferGeometry(2,2), new THREE.MeshBasicMaterial({color:0x808080}));
+	var timeline = new THREE.Mesh(new THREE.PlaneBufferGeometry(2,2), new THREE.MeshBasicMaterial({color:0xDADADA}));
 	timeline.position.z = -camera.near*2;
 
-	var background = new THREE.Mesh(new THREE.PlaneBufferGeometry(2,2), new THREE.MeshBasicMaterial({color:0xFFFFFF}));
+	var background = new THREE.Mesh(new THREE.PlaneBufferGeometry(2,2), new THREE.MeshBasicMaterial({color:0xFAFAFA}));
 	background.position.z = timeline.position.z - 0.0001;
 
-	var timelineTracker = new THREE.Mesh(new THREE.CircleBufferGeometry(1,16), new THREE.MeshBasicMaterial({color:0xFF0000}));
+	var timelineTracker = new THREE.Mesh(new THREE.CircleBufferGeometry(1,16), new THREE.MeshBasicMaterial({color:0x298AF1}));
 	timelineTracker.position.z = timeline.position.z+0.00001;
 
-	var playPauseButton = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0x00FF00}));
+	var speedline = timeline.clone();
+	var speedlineTracker = timelineTracker.clone();
+
+	var playPauseButton = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0x5A5A5A}));
 	for(var i = 0; i < 8; i++)
 	{
 		playPauseButton.geometry.vertices.push(new THREE.Vector3());
@@ -34,15 +39,15 @@ function initUi(clickables, grabbables, audio, monitorer, recordedFrames)
 	playPauseButton.geometry.vertices[4].set(-1,-1,0);
 	playPauseButton.geometry.faces.push(new THREE.Face3(0,4,1),new THREE.Face3(1,4,5),new THREE.Face3(2,6,3),new THREE.Face3(3,6,7));
 
-	var speedline = timeline.clone();
-	var speedlineTracker = timelineTracker.clone();
-
 	camera.add(background);
 	camera.add(playPauseButton);
 	camera.add(timeline);
 	camera.add(timelineTracker);
 	camera.add(speedline);
 	camera.add(speedlineTracker);
+
+	clickables.push(playPauseButton,timeline);
+	grabbables.push(timelineTracker, speedlineTracker);
 
 	function updateTrackerPositionFromTime()
 	{
@@ -56,9 +61,6 @@ function initUi(clickables, grabbables, audio, monitorer, recordedFrames)
 		audio.currentTime = proportionThrough * recordedFrames[recordedFrames.length-1].frameTime
 		monitorer.dispense();
 	}
-
-	clickables.push(playPauseButton,timeline);
-	grabbables.push(timelineTracker, speedlineTracker);
 
 	timelineTracker.postDragFunction = function(grabbedPoint)
 	{
@@ -79,12 +81,8 @@ function initUi(clickables, grabbables, audio, monitorer, recordedFrames)
 		if( specifiedSpeedDifference < -1 || 1 < specifiedSpeedDifference )
 		{
 			specifiedSpeedDifference = clamp(specifiedSpeedDifference,-1,1)
-			speedlineTracker.position.x = speedline.position.x + specifiedSpeedDifference * speedline.scale.x;
 		}
-		if( Math.abs(specifiedSpeedDifference) < 0.1)
-		{
-			specifiedSpeedDifference = 0;
-		}
+		speedlineTracker.position.x = speedline.position.x + specifiedSpeedDifference * speedline.scale.x;
 
 		audio.playbackRate = Math.pow(2,specifiedSpeedDifference)
 	}
@@ -132,9 +130,14 @@ function initUi(clickables, grabbables, audio, monitorer, recordedFrames)
 
 	ui.update = function(recording, audio)
 	{
-		playPauseButton.visible = !recording;
-		timeline.visible = !recording;
-		timelineTracker.visible = !recording;
+		//youtube visibility: take mouse off and it disappears. Don't move mouse for 3s, it disappears. Dunno about touchscreens
+
+		background.visible = !recording; //also if the mouse isn't towards the bottom?
+		playPauseButton.visible = background.visible
+		timeline.visible = background.visible
+		timelineTracker.visible = background.visible
+		speedline.visible = background.visible
+		speedlineTracker.visible = background.visible
 
 		if(!audio.paused)
 		{

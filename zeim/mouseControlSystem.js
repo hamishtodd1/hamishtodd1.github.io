@@ -34,7 +34,6 @@ function initMouse(renderer, clickables,grabbables, monitorer)
 
 		if(grabbedObject)
 		{
-			//may want to do various things eg keep a thing on the surface of a sphere
 			var newRayPlaneDistanceFromCamera = raycaster.ray.direction.clone().projectOnVector( getCameraLoookingDirection() ).length();
 			var newGrabbedPoint = raycaster.ray.direction.clone().setLength(grabPlaneDistance/newRayPlaneDistanceFromCamera).add(camera.position);
 
