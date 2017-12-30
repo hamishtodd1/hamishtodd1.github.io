@@ -23,6 +23,7 @@ function loop( controllers, vrInputSystem, thingsToBeUpdated, holdables, monitor
 	mouse.updateFromAsyncAndMoveGrabbedObjects();
 	vrInputSystem.update();
 	
+	//sure you want things to be parented given monitoring?
 	for(var i = 0; i < controllers.length; i++)
 	{
 		if( controllers[i].grippingTop )
@@ -39,8 +40,8 @@ function loop( controllers, vrInputSystem, thingsToBeUpdated, holdables, monitor
 							break;
 						}
 						
-						ensureDetachment(holdables[holdable], holdables[holdable].parent)
-						ensureAttachment(holdables[holdable], controllers[i])
+						ensureDetachment( holdables[holdable], holdables[holdable].parent)
+						ensureAttachment( holdables[holdable], controllers[i])
 					}
 				}
 			}
@@ -58,32 +59,5 @@ function loop( controllers, vrInputSystem, thingsToBeUpdated, holdables, monitor
 		}
 	}
 
-	/*
-		Philofophie
-		One might like to change initial conditions then watch what I do
-			That would mean: DO NOT record certain things, instead update them while the recording is playing
-			But it is also important to be able to skip around the timeline
-			Could simulate forward by going through what's happened in every frame.
-			Could mark certain properties as "recalled if you skip to this point but not if you're simulating forward". That's a lot of work for yourself.
-			It is REALLY UNAVOIDABLY COMPLEX to think about any kind of updating during playingtime. Consider that some things are inter-frame.
-			Could record only controller input
-			It also risks (hugely) people seeing something you didn't intend
-	*/
-	console.assert(!(monitorer.playing && monitorer.recording))
-	monitorer.updateUiAppearance();
-	if(monitorer.playing)
-	{
-		monitorer.dispense();
-	}
-	else
-	{
-		for( var thing in thingsToBeUpdated)
-		{
-			thingsToBeUpdated[thing].update();
-		}
-		if(monitorer.recording)
-		{
-			monitorer.record();
-		}
-	}
+	monitorer.update(thingsToBeUpdated);
 }

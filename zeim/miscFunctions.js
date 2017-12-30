@@ -21,6 +21,11 @@ function checkForNewGlobals()
 	}	
 }
 
+function getCameraLoookingDirection()
+{
+	return zAxis.clone().negate().applyQuaternion(camera.quaternion); //negate?
+}
+
 function frameDimensionsAtZDistance(z)
 {
 	var cameraFovRadians = camera.fov*TAU/360;

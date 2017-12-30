@@ -1,21 +1,41 @@
 /*
-	Your hands are a pair of swan heads? "Science with Swans" as a name?
+	"blackboard"?
+		Arbitrary writing
+		Or actually no. If you want a blackboard it may be a sign you need to make more things to work with. Like lines.
+		Maybe add lines?
 
-	You need a "blackboard". Ideally it should rotate to face you.
-
-	You probably want boards to rotate to face you and stay upright. You position tho
-
+	Probably the camera "sits on your lap", it is not your face. Yeah, show frustum
+	Make it so events can propagate back in time?
+		For example, a goose is to pick up an object, but it turns its head to it first
+	At some point may want to do black hole effects, eg something that will want to render for a long time, so timestep should be slowable
+	Put links to your work at the end. It's just confusing to have a scrollbar
+	avoid things being affected by camera movement, because that will be smoothed out
+	As soon as there's a hololens like thing with hand controllers, be the first to do a good hand enabled VR lecture!
+	If you're not running from a server (i.e. you're not intending to save things i.e. you're being run by a user), have some stuff come up in the console for the benefit of people who'd like to play around with it
 	Theoretically possible: Video is always at an angle such that camera is looking at the same place that you in webcam video appear to be looking?
 
-	At some point may want to do black hole effects, eg something that will want to render for a long time, so timestep should be slowable
+	Must follow simple principle: if I can do or change a thing, so can you.
+		Probably impossible! You do want lots of points in 3d space
+		Can we determine anything from this?
+		Eg: proximity to the camera should never be an input to a function.
 
-	As soon as there's a hololens like thing with hand controllers, be the first to do a good hand enabled VR lecture!
+	One proposal is to not actually have the camera move for the client, things just move relative to it
+		Possibly bad because everything would be moving the whole time
+		Could be great because with a blank background it would look like 3b1b et al
+		Possibly better than alternative because people are just not used to seeing shit from a person's point of view
 
-	If you're not running from a server (i.e. you're not intending to save things i.e. you're being run by a user), have some stuff come up in the console for the benefit of people who'd like to play around with it
+	Geese should in general be facing the screen
 
-	Must follow simple principle: if I can do or change a thing, so can you. Can we determine anything from this? Therefore: proximity to the camera should never be a function.
+	Puzzles go at the end
 
-	Put links to your work at the end. It's just confusing to have a scrollbar
+	What about music?
+
+	TODO for slack demo:
+		-Slider
+		-59 icos object
+			-A puzzle
+		-Make geese?
+		-Arbitrary "writing"?
 */
 
 (function init()
@@ -92,23 +112,26 @@
 	var clickables = [];
 	var grabbables = [];
 
-	var monitorer = initMonitorer(clickables);
+	var monitorer = initMonitorer(clickables,grabbables);
 
 	var testObject = new THREE.Mesh( new THREE.SphereGeometry(0.01), new THREE.MeshLambertMaterial( {} ) );
 	scene.add(testObject);
 	testObject.position.z = -0.1;
-	// testObject.update = function()
-	// {
-	// 	this.position.y = 0.01*Math.sin(frameTime*4);
-	// 	this.rotation.z = Math.sin(frameTime*4.1);
-	// }
-	// thingsToBeUpdated.testObject = testObject;
+	testObject.update = function()
+	{
+		// this.position.y = 0.01*Math.sin(frameTime*4);
+		// this.rotation.z = Math.sin(frameTime*4.1);
+	}
+	thingsToBeUpdated.testObject = testObject;
 	monitorer.monitorPositionAndQuaternion(testObject);
 	grabbables.push(testObject);
 
-	var mouse = initMouse(renderer, clickables,grabbables, monitorer);
+	initPictures(thingsToBeUpdated,grabbables);
 
-	//avoid things being affected by camera movement, because that will be smoothed out
+	// monitorer.monitorPositionAndQuaternion(controllers[0]);
+	// monitorer.monitorPositionAndQuaternion(controllers[1]);
+
+	var mouse = initMouse(renderer, clickables,grabbables, monitorer);
 
 	launcher.initCompleted = true;
 	launcher.attemptLaunch();

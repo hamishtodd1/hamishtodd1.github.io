@@ -16,6 +16,8 @@ import tornado.web
 import tornado.websocket
 import tornado.template
 
+import os
+
 class mainHandler(tornado.web.RequestHandler):
 	def get(self):
 		loader = tornado.template.Loader(".")
@@ -25,12 +27,16 @@ class wsHandler(tornado.websocket.WebSocketHandler):
 	def check_origin(self, origin):
 		return True
 
+	def open(self):
+		self.set_nodelay(True)
+
 	def on_message(self, message):
+		os.remove("record.wav");
+		self.write_message("oldAudioDeleted")
+
 		recordWrite = open('record.txt', 'w')
 		recordWrite.write(message)
-		print("file written")
-			
-		self.set_nodelay(True) #doesn't hurt to have this hopefully...
+		print("old audio deleted, frames written")
 
 application = tornado.web.Application([
 	(r'/ws', wsHandler), #The websocket

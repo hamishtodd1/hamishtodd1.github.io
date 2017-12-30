@@ -1,16 +1,17 @@
 <html>
 	<head>
-		<title>cootVR</title>
+		<title>Science with geese</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
 			body {
 				margin: 0px;
-				overflow: hidden;
 			}
 		</style>
 	</head>
 	<body>
+		<audio src="record.wav"></audio>
+    	
 		<script type="x-shader/x-vertex" id="vertexShader">
 			varying vec3 vWorldPosition;
 			void main() {
@@ -43,12 +44,17 @@
 		<script src="lib/VRControls.js"></script>
 		
 		<script src="lib/StereoEffect.js"></script>
+
+    	<script src="lib/audioRecorder.js"></script>
+    	<script src="audio.js"></script>
 		
 		<script src="variables.js"></script>
 		<script src="miscFunctions.js"></script>
 		<script src="vrControlSystem.js"></script>
 		<script src="mouseControlSystem.js"></script>
+		<script src="images.js"></script>
 		
+		<script src="monitorerUi.js"></script>
 		<script src="monitoring.js"></script>
 		
 		<script src="loop.js"></script>
