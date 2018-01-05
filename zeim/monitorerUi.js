@@ -8,9 +8,9 @@
 	Just display the pieces above the timeline, grab them when you please
 	Probably want names for the various bits displayed on them
 
-	timeline should be a nice relative-motion slider! Or not, because people are used to one thing
+	audio.buffered() returns something you can use. need to think about autoplay
 
-	should there be something to bring it closer to 1? Hah, maybe not. Philosophy!
+	timeline should be a nice relative-motion slider! Or not, because people are used to one thing
 */
 
 function initUi(clickables, grabbables, audio, monitorer, recordedFrames)
@@ -19,15 +19,25 @@ function initUi(clickables, grabbables, audio, monitorer, recordedFrames)
 
 	var timeline = new THREE.Mesh(new THREE.PlaneBufferGeometry(2,2), new THREE.MeshBasicMaterial({color:0xDADADA}));
 	timeline.position.z = -camera.near*2;
+	camera.add(timeline);
 
 	var background = new THREE.Mesh(new THREE.PlaneBufferGeometry(2,2), new THREE.MeshBasicMaterial({color:0xFAFAFA}));
 	background.position.z = timeline.position.z - 0.0001;
+	camera.add(background);
 
-	var timelineTracker = new THREE.Mesh(new THREE.CircleBufferGeometry(1,16), new THREE.MeshBasicMaterial({color:0x298AF1}));
+	var timelineTracker = new THREE.Mesh(new THREE.CircleBufferGeometry(1,32), new THREE.MeshBasicMaterial({color:0x298AF1}));
 	timelineTracker.position.z = timeline.position.z+0.00001;
+	camera.add(timelineTracker);
 
 	var speedline = timeline.clone();
+	camera.add(speedline);
+
 	var speedlineTracker = timelineTracker.clone();
+	camera.add(speedlineTracker);
+
+	var bufferedHighlights = [];
+	var bufferedMaterial = timeline.material.clone();
+	bufferedMaterial.color.multiplyScalar(0.85);
 
 	var playPauseButton = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0x5A5A5A}));
 	for(var i = 0; i < 8; i++)
@@ -38,21 +48,20 @@ function initUi(clickables, grabbables, audio, monitorer, recordedFrames)
 	playPauseButton.geometry.vertices[0].set(-1,1,0);
 	playPauseButton.geometry.vertices[4].set(-1,-1,0);
 	playPauseButton.geometry.faces.push(new THREE.Face3(0,4,1),new THREE.Face3(1,4,5),new THREE.Face3(2,6,3),new THREE.Face3(3,6,7));
-
-	camera.add(background);
 	camera.add(playPauseButton);
-	camera.add(timeline);
-	camera.add(timelineTracker);
-	camera.add(speedline);
-	camera.add(speedlineTracker);
 
-	clickables.push(playPauseButton,timeline);
+	clickables.push(playPauseButton, timeline);
 	grabbables.push(timelineTracker, speedlineTracker);
+
+	function timelinePositionFromTime(time)
+	{
+		var proportionThrough = recordedFrames ? time / recordedFrames[recordedFrames.length-1].frameTime : 0;
+		return -timeline.scale.x + timeline.scale.x * 2 * proportionThrough;
+	}
 
 	function updateTrackerPositionFromTime()
 	{
-		var proportionThrough = recordedFrames ? audio.currentTime / recordedFrames[recordedFrames.length-1].frameTime : 0;
-		timelineTracker.position.x = -timeline.scale.x + timeline.scale.x * 2 * proportionThrough;
+		timelineTracker.position.x = timelinePositionFromTime( audio.currentTime )
 	}
 
 	function updateTimeFromTrackerPosition()
@@ -74,17 +83,32 @@ function initUi(clickables, grabbables, audio, monitorer, recordedFrames)
 		updateTimeFromTrackerPosition();
 	}
 
+	function updateSpeedlineTrackerFromPlaybackRate()
+	{
+		var specifiedSpeedDifference = Math.log2( audio.playbackRate );
+
+		speedlineTracker.position.x = speedline.position.x + specifiedSpeedDifference * speedline.scale.x;
+	}
+
 	speedlineTracker.postDragFunction = function(grabbedPoint)
 	{
 		speedlineTracker.position.y = speedline.position.y;
+
 		var specifiedSpeedDifference = (speedlineTracker.position.x - speedline.position.x) / speedline.scale.x;
 		if( specifiedSpeedDifference < -1 || 1 < specifiedSpeedDifference )
 		{
 			specifiedSpeedDifference = clamp(specifiedSpeedDifference,-1,1)
 		}
-		speedlineTracker.position.x = speedline.position.x + specifiedSpeedDifference * speedline.scale.x;
 
 		audio.playbackRate = Math.pow(2,specifiedSpeedDifference)
+
+		updateSpeedlineTrackerFromPlaybackRate();
+
+		//bit deceptive but whatever. Nice because lerps will look bad at anything other than the native framerate
+		if(Math.abs(audio.playbackRate - 1) < 0.1)
+		{
+			audio.playbackRate = 1;
+		}
 	}
 
 	playPauseButton.onClick = function()
@@ -96,35 +120,36 @@ function initUi(clickables, grabbables, audio, monitorer, recordedFrames)
 	{
 		var frameDimensions = frameDimensionsAtZDistance(-timeline.position.z);
 
-		var distanceAboveBottom = frameDimensions.width * 0.05;
+		var height = frameDimensions.width * 0.05;
+		//TODO aspect ratio logic
 
-		timeline.scale.x = frameDimensions.width / 2 * 0.7;
-		timeline.scale.y = timeline.scale.x / 30;
+		timeline.scale.x = ( frameDimensions.width - height * 16/9 * 2 ) / 2;
+		timeline.scale.y = height * 0.1;
 		timeline.scale.z = timeline.scale.y;
 
-		playPauseButton.scale.setScalar(timeline.scale.y*3);
-		playPauseButton.position.y = -frameDimensions.height / 2 + distanceAboveBottom;
+		playPauseButton.scale.setScalar(height/2*0.8);
+		playPauseButton.position.y = -frameDimensions.height / 2 + height / 2;
 		playPauseButton.position.x = -frameDimensions.width / 2 + (frameDimensions.width / 2-timeline.scale.x)/2;
 
 		timeline.position.y = playPauseButton.position.y;
 
 		timelineTracker.position.y = timeline.position.y;
-		timelineTracker.scale.setScalar(timeline.scale.y * 1.9);
+		timelineTracker.scale.setScalar(timeline.scale.y * 1.6);
+		updateTrackerPositionFromTime();
 
 		background.position.copy(timeline.position);
 		background.position.z -= 0.00001;
 		background.scale.x = frameDimensions.width / 2;
-		background.scale.y = distanceAboveBottom;
+		background.scale.y = height / 2;
 
 		speedline.position.copy(timeline.position);
 		speedline.position.x = -playPauseButton.position.x;
-		speedline.scale.x = playPauseButton.scale.x
+		speedline.scale.x = playPauseButton.scale.x;
 		speedline.scale.y = timeline.scale.y;
 		speedlineTracker.scale.copy(timelineTracker.scale);
-		speedlineTracker.position.copy(speedline.position);
 		speedlineTracker.position.z = timelineTracker.position.z;
-
-		updateTrackerPositionFromTime()
+		speedlineTracker.position.y = speedline.position.y;
+		updateSpeedlineTrackerFromPlaybackRate();
 	}
 	monitorer.setUiSize();
 
@@ -133,11 +158,47 @@ function initUi(clickables, grabbables, audio, monitorer, recordedFrames)
 		//youtube visibility: take mouse off and it disappears. Don't move mouse for 3s, it disappears. Dunno about touchscreens
 
 		background.visible = !recording; //also if the mouse isn't towards the bottom?
-		playPauseButton.visible = background.visible
-		timeline.visible = background.visible
-		timelineTracker.visible = background.visible
-		speedline.visible = background.visible
-		speedlineTracker.visible = background.visible
+		playPauseButton.visible = background.visible;
+		timeline.visible = background.visible;
+		timelineTracker.visible = background.visible;
+		speedline.visible = background.visible;
+		speedlineTracker.visible = background.visible;
+
+		if(bufferedHighlights.length > audio.buffered.length)
+		{
+			for(var i = bufferedHighlights.length-1; i >= audio.buffered.length; i--)
+			{
+				scene.remove(bufferedHighlights[i])
+				delete bufferedHighlights[i];
+			}
+			bufferedHighlights.length = audio.buffered.length;
+		}
+		for(var i = 0, il = audio.buffered.length; i < il; i++)
+		{
+			if( bufferedHighlights.length <= i)
+			{
+				var bufferedHighlight = new THREE.Mesh( new THREE.PlaneBufferGeometry(2,2), bufferedMaterial);
+				camera.add( bufferedHighlight );
+				bufferedHighlight.position.z = ( timeline.position.z + timelineTracker.position.z ) / 2;
+				
+				bufferedHighlights.push(bufferedHighlight);
+			}
+			var start = timelinePositionFromTime(audio.buffered.start(i));
+			var end = timelinePositionFromTime(audio.buffered.end(i));
+
+			// var start = timelinePositionFromTime(0);
+			// var end = timelinePositionFromTime(5);
+			// console.log(start,end, timeline.scale.x)
+
+			bufferedHighlights[i].scale.x = (end-start)/2
+			bufferedHighlights[i].scale.y = timeline.scale.y;
+			bufferedHighlights[i].position.x = (start+end)/2;
+			bufferedHighlights[i].position.y = timeline.position.y;
+			if(bufferedHighlights[i].scale.x === 0)
+			{
+				bufferedHighlights[i].scale.x = 0.000001
+			}
+		}
 
 		if(!audio.paused)
 		{
