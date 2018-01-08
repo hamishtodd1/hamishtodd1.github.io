@@ -35,9 +35,10 @@ THREE.CylinderBufferGeometryUncentered = function(radius, length, radiusSegments
 	return geometry;
 }
 
-function getCameraLoookingDirection()
+function cameraZPlaneDistance(point)
 {
-	return zAxis.clone().negate().applyQuaternion(camera.quaternion); //negate?
+	var displacementFromCamera = point.clone().sub(camera.position);
+	return displacementFromCamera.projectOnVector( camera.getWorldDirection() ).length();
 }
 
 function frameDimensionsAtZDistance(z)

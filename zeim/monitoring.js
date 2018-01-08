@@ -18,7 +18,7 @@
 		Another alternative: we reduce the improvizational nature and say nothing gets made at runtime.
 */
 
-function initMonitorer(clickables,grabbables)
+function initMonitorer(clickables)
 {
 	var socket = new WebSocket("ws://" + window.location.href.substring(7) + "ws");
 	if(!socket)

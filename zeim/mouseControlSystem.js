@@ -1,6 +1,100 @@
 //control disappears when you start recording, probably due to keyboard crap. Irrelevant
 
-function initMouse(renderer, clickables,grabbables, monitorer)
+//grabbedPoint is world space!
+function applyMouseDrag( object )
+{
+	var dragPlaneDistanceFromCamera = cameraZPlaneDistance(object.grabbedPoint)
+	var distanceFromCameraOfPlaneContainingCurrentRayEnd = cameraZPlaneDistance(mouse.ray.at(1))
+	var lengthRatio = dragPlaneDistanceFromCamera / distanceFromCameraOfPlaneContainingCurrentRayEnd;
+	var newPositionOfGrabbedPoint = mouse.ray.at(lengthRatio);
+	
+	var displacement = newPositionOfGrabbedPoint.clone().sub(object.grabbedPoint);
+	displacement.add(object.parent.getWorldPosition())
+	object.parent.updateMatrixWorld();
+	object.parent.worldToLocal(displacement);
+	object.position.add(displacement);
+
+	object.grabbedPoint.copy(newPositionOfGrabbedPoint);
+	//note this can mean the point is not on the object. Can be good
+}
+
+//vibration if you drag it off the side would be good
+function SliderSystem(onValueChange, initialValue, clickables, threeDimensional)
+{
+	var sliderSystem = new THREE.Mesh(new THREE.PlaneBufferGeometry(1,1), new THREE.MeshBasicMaterial({color:0xDADADA}));
+	sliderSystem.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.5,0,0))
+	sliderSystem.onClick = function(grabbedPoint)
+	{
+		var localGrabbedPoint = grabbedPoint.clone();
+		sliderSystem.worldToLocal(localGrabbedPoint);
+
+		tracker.position.x = localGrabbedPoint.x;
+		onValueChange( tracker.position.x );
+
+		tracker.grabbedPoint = grabbedPoint;
+	}
+	clickables.push(sliderSystem);
+
+	var tracker = new THREE.Mesh(new THREE.CylinderBufferGeometry(1,1,1,32), new THREE.MeshBasicMaterial({color:0x298AF1}));
+	tracker.geometry.applyMatrix(new THREE.Matrix4().makeRotationX(TAU/4))
+	tracker.position.x = initialValue;
+	onValueChange(tracker.position.x);
+	tracker.grabbedPoint = null;
+	tracker.onClick = function(grabbedPoint)
+	{
+		tracker.grabbedPoint = grabbedPoint;
+	}
+	clickables.push(tracker)
+	sliderSystem.add(tracker);
+
+	sliderSystem.setDimensions = function(length, height)
+	{
+		sliderSystem.scale.set(length,height,1);
+		var trackerRadius = height * 0.8;
+		tracker.scale.set( trackerRadius / length, trackerRadius / height,trackerRadius / height * 0.00001);
+	}
+
+	var zanyLimits = false; //could also have it vibrate
+
+	sliderSystem.update = function()
+	{
+		if( ( mouse.lastClickedObject === tracker || mouse.lastClickedObject === sliderSystem ) && mouse.clicking )
+		{
+			applyMouseDrag(tracker);
+
+			if(!zanyLimits)
+			{
+				tracker.position.set(clamp(tracker.position.x,0,1), 0,0);
+			}
+			else
+			{
+				tracker.position.y = 0;
+				tracker.position.z = 0;
+				if(tracker.position.x < 0 || tracker.position.x > 1 )
+				{
+					var parentSpaceTrackerPosition = tracker.getWorldPosition();
+					this.parent.worldToLocal(parentSpaceTrackerPosition);
+					this.position.copy(parentSpaceTrackerPosition)
+					if(tracker.position.x > 1 )
+					{
+						this.position.x -= this.scale.x;
+					}
+					tracker.position.x = clamp(tracker.position.x,0,1);
+				}
+			}
+
+			onValueChange(tracker.position.x);
+		}
+		else
+		{
+			tracker.grabbedPoint = null;
+		}
+	}
+
+	return sliderSystem;
+}
+
+function initMouse(renderer, clickables,monitorer)
 {
 	var asynchronous = {
 		normalizedDevicePosition: new THREE.Vector2(),
@@ -12,83 +106,50 @@ function initMouse(renderer, clickables,grabbables, monitorer)
 		}
 	};
 
-	var mouse = {
-		clicking:false
-	};
 	var raycaster = new THREE.Raycaster();
+	var mouse = {
+		ray:null,
+		lastClickedObject: null
+	};
 
+	//TODO completely get rid of this. In here we work out what has been clicked but "postdrag" stuff is too complex.
+	//we were about to do this. Everything to be done with onclick
 	var grabbedObject = null; 
 	var grabbedPoint = null;
-	var grabPlaneDistance = -1;
+	var grabPlaneDistanceFromCamera = -1;
 
 	mouse.updateFromAsyncAndMoveGrabbedObjects = function()
 	{
 		this.oldClicking = this.clicking;
 		this.clicking = asynchronous.clicking;
 
-		// if(this.clicking)
-		// 	camera.rotation.y += TAU/100
-		// camera.updateMatrix();
-		
-		raycaster.setFromCamera( asynchronous.normalizedDevicePosition, camera );
-
-		if(grabbedObject)
+		if(!this.clicking)
 		{
-			var newRayPlaneDistanceFromCamera = raycaster.ray.direction.clone().projectOnVector( getCameraLoookingDirection() ).length();
-			var newGrabbedPoint = raycaster.ray.direction.clone().setLength(grabPlaneDistance/newRayPlaneDistanceFromCamera).add(camera.position);
-
-			grabbedObject.position.sub(grabbedPoint).add(newGrabbedPoint);
-			if(grabbedObject.postDragFunction)
-			{
-				grabbedObject.postDragFunction(grabbedPoint);
-			}
-
-			grabbedPoint.copy(newGrabbedPoint);
+			this.ray = null; //since we don't know where you are!
 		}
-
-		if( this.clicking && !this.oldClicking )
+		else
 		{
-			var clickableIntersections = raycaster.intersectObjects( clickables );
-			var grabbableIntersections = raycaster.intersectObjects( grabbables );
-			var clickableCloser = -1;
-			if( clickableIntersections[0] && grabbableIntersections[0] )
+			// if(this.clicking)
+			// 	camera.rotation.y += TAU/100
+			// camera.updateMatrix();
+			
+			raycaster.setFromCamera( asynchronous.normalizedDevicePosition, camera );
+
+			if( !this.oldClicking )
 			{
-				if( clickableIntersections[0].point.distanceTo(camera.position) <
-					grabbableIntersections[0].point.distanceTo(camera.position) )
+				this.ray = raycaster.ray;
+
+				var clickableIntersections = raycaster.intersectObjects( clickables );
+				if( clickableIntersections[0] )
 				{
-					clickableCloser = 1;
+					clickableIntersections[0].object.onClick(clickableIntersections[0].point);
+					this.lastClickedObject = clickableIntersections[0].object;
 				}
 				else
 				{
-					clickableCloser = 0;
+					this.lastClickedObject = null;
 				}
 			}
-
-			if( (clickableIntersections[0] && !grabbableIntersections[0]) || clickableCloser === 1 )
-			{
-				clickableIntersections[0].object.onClick(clickableIntersections[0].point);
-			}
-			if( (grabbableIntersections[0] && !clickableIntersections[0]) || clickableCloser === 0 )
-			{
-				grabbedObject = grabbableIntersections[0].object;
-				grabbedPoint = grabbableIntersections[0].point;
-
-				var cameraToGrabbedPointPlane = raycaster.ray.direction.clone().setLength( grabbableIntersections[0].distance )
-				cameraToGrabbedPointPlane.projectOnVector( getCameraLoookingDirection() ); //possibly no negate
-				grabPlaneDistance = cameraToGrabbedPointPlane.length();
-
-				if(monitorer.playing)
-				{
-					monitorer.togglePlaying();
-				}
-			}
-		}
-
-		if(!this.clicking )
-		{
-			grabbedObject = null;
-			grabbedPoint = null;
-			grabPlaneDistance = -1;
 		}
 	}
 

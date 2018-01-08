@@ -14,6 +14,12 @@
 	If you're not running from a server (i.e. you're not intending to save things i.e. you're being run by a user), have some stuff come up in the console for the benefit of people who'd like to play around with it
 	Theoretically possible: Video is always at an angle such that camera is looking at the same place that you in webcam video appear to be looking?
 
+	Would be super easy to implement Bret Victor recordable inputs for debugging!
+
+	To fork for every video or to not fork?
+
+	Probably you will want to simulate the mouse with a controller
+
 	Must follow simple principle: if I can do or change a thing, so can you.
 		Probably impossible! You do want lots of points in 3d space
 		Can we determine anything from this?
@@ -50,10 +56,13 @@
 		-Working on phones and tablets, working well! No need to hide address bar at least, leave that to them
 		-Slider
 		-editing suite?
+		-smoothing?
+		-have the zoomable factorial tree
 
 	TODO for factorial tree
 		-zoomable tree
-		-"interleaving"
+		-sets
+		-"interleaving"?
 */
 
 (function init()
@@ -74,7 +83,6 @@
 		var launcher = {
 			initCompleted:false,
 			dataLoaded:{
-				font: false,
 				controllerModel0: false,
 				controllerModel1: false
 			},
@@ -111,17 +119,6 @@
 		var controllers = Array(2);
 		var vrInputSystem = initVrInputSystem(controllers, launcher, ourVrEffect, renderer);
 		
-		new THREE.FontLoader().load( "data/gentilis.js", 
-			function ( gentilis ) {
-				THREE.defaultFont = gentilis;
-				
-				launcher.dataLoaded.font = true;
-				launcher.attemptLaunch();
-			},
-			function ( xhr ) {},
-			function ( xhr ) { console.error( "couldn't load font" ); }
-		);
-		
 		window.addEventListener( 'resize', function()
 		{
 		    renderer.setSize( window.innerWidth, window.innerHeight );
@@ -146,25 +143,24 @@
 	// thingsToBeUpdated.goose = goose;
 
 	var clickables = [];
-	var grabbables = [];
 
-	var monitorer = initMonitorer(clickables,grabbables);
+	var monitorer = initMonitorer(clickables);
 
-	var testObject = new THREE.Mesh( new THREE.SphereGeometry(0.01), new THREE.MeshLambertMaterial( {} ) );
-	scene.add(testObject);
-	testObject.position.z = -0.1;
-	testObject.update = function()
-	{
-		// this.position.y = 0.01*Math.sin(frameTime*4);
-		// this.rotation.z = Math.sin(frameTime*4.1);
-	}
-	thingsToBeUpdated.testObject = testObject;
-	monitorer.monitorPositionAndQuaternion(testObject);
-	grabbables.push(testObject);
+	// var testObject = new THREE.Mesh( new THREE.SphereGeometry(0.01), new THREE.MeshLambertMaterial( {} ) );
+	// scene.add(testObject);
+	// testObject.position.z = -0.1;
+	// testObject.update = function()
+	// {
+	// 	// this.position.y = 0.01*Math.sin(frameTime*4);
+	// 	// this.rotation.z = Math.sin(frameTime*4.1);
+	// }
+	// thingsToBeUpdated.testObject = testObject;
+	// monitorer.monitorPositionAndQuaternion(testObject);
+	// grabbables.push(testObject);
 
-	// initPictures(thingsToBeUpdated,grabbables);
+	// initPictures(thingsToBeUpdated);
 
-	var mouse = initMouse(renderer, clickables,grabbables, monitorer);
+	mouse = initMouse(renderer, clickables, monitorer);
 
 	launcher.initCompleted = true;
 	launcher.attemptLaunch();
