@@ -31,51 +31,34 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 	playPauseButton.geometry.vertices[4].set(-1,-1,0);
 	playPauseButton.geometry.faces.push(new THREE.Face3(0,4,1),new THREE.Face3(1,4,5),new THREE.Face3(2,6,3),new THREE.Face3(3,6,7));
 	camera.add(playPauseButton);
+	clickables.push(playPauseButton);
 
 	{
-		//NEXT UP IS THIS IN THE NEW FORM. THEN MOVING PICTURES WITH NEW SYSTEM
-		var timeline = new THREE.Mesh(new THREE.PlaneBufferGeometry(2,2), new THREE.MeshBasicMaterial({color:0xDADADA}));
-		timeline.position.z = playPauseButton.position.z
-		camera.add(timeline);
-		timeline.onClick = function(grabbedPoint)
+		function updateTimeFromSlider(valueBetweenZeroAndOne)
 		{
-			timelineTracker.grabbedPoint = grabbedPoint;
-
-			var grabbedPointInCameraSpace = grabbedPoint.clone();
-			camera.worldToLocal(grabbedPointInCameraSpace)
-			timelineTracker.position.x = grabbedPointInCameraSpace.x;
-			updateTimeFromTrackerPosition();
+			audio.currentTime = valueBetweenZeroAndOne * recordedFrames[recordedFrames.length-1].frameTime; //or audio length?
+			monitorer.dispense();
 		}
-
-		var timelineTracker = new THREE.Mesh(new THREE.CircleBufferGeometry(1,32), new THREE.MeshBasicMaterial({color:0x298AF1}));
-		timelineTracker.position.z = timeline.position.z+0.00001;
-		timelineTracker.grabbedPoint = null;
-		camera.add(timelineTracker);
-		timelineTracker.onClick = function(grabbedPoint)
+		function onTimeTrackerGrab()
 		{
-			this.grabbedPoint = grabbedPoint;
+			audio.pause();
 		}
+		var timeSlider = SliderSystem(updateTimeFromSlider, 0, clickables,onTimeTrackerGrab);
+		camera.add(timeSlider);
+		timeSlider.position.z = playPauseButton.position.z
 
 		function getTimelinePositionFromTime(time)
 		{
-			var proportionThrough = recordedFrames ? time / recordedFrames[recordedFrames.length-1].frameTime : 0;
-			return -timeline.scale.x + timeline.scale.x * 2 * proportionThrough;
+			return recordedFrames ? time / recordedFrames[recordedFrames.length-1].frameTime : 0;
 		}
 
-		function updateTrackerPositionFromTime()
+		function updateTimeSliderFromTime()
 		{
-			timelineTracker.position.x = getTimelinePositionFromTime( audio.currentTime )
-		}
-
-		function updateTimeFromTrackerPosition()
-		{
-			var proportionThrough = (timelineTracker.position.x + timeline.scale.x) / (timeline.scale.x * 2);
-			audio.currentTime = proportionThrough * recordedFrames[recordedFrames.length-1].frameTime
-			monitorer.dispense();
+			timeSlider.setValue( getTimelinePositionFromTime( audio.currentTime ) )
 		}
 
 		var bufferedHighlights = [];
-		var bufferedMaterial = timeline.material.clone();
+		var bufferedMaterial = timeSlider.material.clone();
 		bufferedMaterial.color.multiplyScalar(0.85);
 	}
 
@@ -101,36 +84,34 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 		monitorer.togglePlaying();
 	}
 
-	clickables.push(playPauseButton, timeline, timelineTracker);
-
 	monitorer.setUiSize = function()
 	{
-		var frameDimensions = frameDimensionsAtZDistance(-timeline.position.z);
+		var frameDimensions = frameDimensionsAtZDistance(-playPauseButton.position.z);
 
-		var height = frameDimensions.width * 0.15;
+		var height = frameDimensions.width * 0.05;
 		//TODO aspect ratio logic
 
-		timeline.scale.x = ( frameDimensions.width - height * 16/9 * 2 ) / 2;
-		timeline.scale.y = height * 0.1;
-		timeline.scale.z = timeline.scale.y;
+		var slidersHeight = height * 0.2;
+
+		timeSlider.setDimensions( frameDimensions.width - height * 16/9 * 2,slidersHeight);
+		timeSlider.position.x = -timeSlider.scale.x / 2;
 
 		playPauseButton.scale.setScalar(height/2*0.8);
 		playPauseButton.position.y = -frameDimensions.height / 2 + height / 2;
-		playPauseButton.position.x = -frameDimensions.width / 2 + (frameDimensions.width / 2-timeline.scale.x)/2;
+		playPauseButton.position.x = -frameDimensions.width / 2 + (frameDimensions.width / 2 - timeSlider.scale.x / 2) / 2;
 
-		timeline.position.y = playPauseButton.position.y;
+		timeSlider.position.y = playPauseButton.position.y;
+		timeSlider.position.z = playPauseButton.position.z;
+		updateTimeSliderFromTime();
 
-		timelineTracker.position.y = timeline.position.y;
-		timelineTracker.scale.setScalar(timeline.scale.y * 1.6);
-		updateTrackerPositionFromTime();
-
-		background.position.copy(timeline.position);
+		background.position.copy(playPauseButton.position);
+		background.position.x = 0;
 		background.position.z -= 0.00001;
 		background.scale.x = frameDimensions.width / 2;
 		background.scale.y = height / 2;
 
-		speedSlider.setDimensions(playPauseButton.scale.x*2.6,timeline.scale.y*2);
-		speedSlider.position.copy(timeline.position);
+		speedSlider.setDimensions(playPauseButton.scale.x*2.6,slidersHeight);
+		speedSlider.position.copy(playPauseButton.position);
 		speedSlider.position.x = -playPauseButton.position.x;
 		speedSlider.position.x -= speedSlider.scale.x / 2;
 	}
@@ -142,41 +123,40 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 
 		background.visible = !recording; //also if the mouse isn't towards the bottom?
 		playPauseButton.visible = background.visible;
-		timeline.visible = background.visible;
-		timelineTracker.visible = background.visible;
+		timeSlider.visible = background.visible;
 		speedSlider.visible = background.visible; //and children?
 
-		if(bufferedHighlights.length > audio.buffered.length)
-		{
-			for(var i = bufferedHighlights.length-1; i >= audio.buffered.length; i--)
-			{
-				scene.remove(bufferedHighlights[i])
-				delete bufferedHighlights[i];
-			}
-			bufferedHighlights.length = audio.buffered.length;
-		}
-		for(var i = 0, il = audio.buffered.length; i < il; i++)
-		{
-			if( bufferedHighlights.length <= i)
-			{
-				var bufferedHighlight = new THREE.Mesh( new THREE.PlaneBufferGeometry(2,2), bufferedMaterial);
-				camera.add( bufferedHighlight );
-				bufferedHighlight.position.z = ( timeline.position.z + timelineTracker.position.z ) / 2;
+		// if(bufferedHighlights.length > audio.buffered.length)
+		// {
+		// 	for(var i = bufferedHighlights.length-1; i >= audio.buffered.length; i--)
+		// 	{
+		// 		scene.remove(bufferedHighlights[i])
+		// 		delete bufferedHighlights[i];
+		// 	}
+		// 	bufferedHighlights.length = audio.buffered.length;
+		// }
+		// for(var i = 0, il = audio.buffered.length; i < il; i++)
+		// {
+		// 	if( bufferedHighlights.length <= i)
+		// 	{
+		// 		var bufferedHighlight = new THREE.Mesh( new THREE.PlaneBufferGeometry(2,2), bufferedMaterial);
+		// 		camera.add( bufferedHighlight );
+		// 		bufferedHighlight.position.z = timeSlider.position.z + 0.00001;
 				
-				bufferedHighlights.push(bufferedHighlight);
-			}
-			var start = getTimelinePositionFromTime(audio.buffered.start(i));
-			var end = getTimelinePositionFromTime(audio.buffered.end(i));
+		// 		bufferedHighlights.push(bufferedHighlight);
+		// 	}
 
-			bufferedHighlights[i].scale.x = (end-start)/2
-			bufferedHighlights[i].scale.y = timeline.scale.y;
-			bufferedHighlights[i].position.x = (start+end)/2;
-			bufferedHighlights[i].position.y = timeline.position.y;
-			if(bufferedHighlights[i].scale.x === 0)
-			{
-				bufferedHighlights[i].scale.x = 0.000001
-			}
-		}
+		// 	var start = getTimelinePositionFromTime(audio.buffered.start(i));
+		// 	var end = getTimelinePositionFromTime(audio.buffered.end(i));
+		// 	bufferedHighlights[i].scale.x = (end-start) / 2;
+		// 	bufferedHighlights[i].scale.y = timeSlider.scale.y / 2;
+		// 	bufferedHighlights[i].position.x = (start+end) / 2;
+		// 	bufferedHighlights[i].position.y = timeSlider.position.y;
+		// 	if(bufferedHighlights[i].scale.x === 0)
+		// 	{
+		// 		bufferedHighlights[i].scale.x = 0.000001
+		// 	}
+		// }
 
 		if(!audio.paused)
 		{
@@ -201,19 +181,9 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 		playPauseButton.geometry.verticesNeedUpdate = true;
 
 		speedSlider.update();
+		timeSlider.update();
 
-		if( ( mouse.lastClickedObject === timelineTracker || mouse.lastClickedObject === timeline ) && mouse.clicking )
-		{
-			applyMouseDrag(timelineTracker);
-			timelineTracker.position.y = timeline.position.y;
-			updateTimeFromTrackerPosition();
-		}
-		else
-		{
-			timelineTracker.grabbedPoint = null;
-		}
-
-		updateTrackerPositionFromTime();
+		updateTimeSliderFromTime();
 	}
 
 	return ui;

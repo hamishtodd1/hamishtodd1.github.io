@@ -1,15 +1,7 @@
 /*
-	Would be nice if speed was a slider
-
 	The camera is a specific thing
 
-	What's a small, simple room in which you would expect to find geese?
-	Geese rather than swans, geese are more humourous whereas swans are known for elegance and you can do the former but not the latter
 	Office might be appropriate, things on desk
-
-	But ask: how does AR integrate into this? Well, it'll just be a video in the bg
-
-	A hard one is things like drawing, what's the state of that? Could record control points.
 
 	You DO want to be able to create as many things as you like at runtime, and make them disappear too.
 		Special notification when a particular thing is created

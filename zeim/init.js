@@ -1,9 +1,4 @@
 /*
-	"blackboard"?
-		Arbitrary writing
-		Or actually no. If you want a blackboard it may be a sign you need to make more things to work with. Like lines.
-		Maybe add lines?
-
 	Probably the camera "sits on your lap", it is not your face. Yeah, show frustum
 	Make it so events can propagate back in time?
 		For example, a goose is to pick up an object, but it turns its head to it first
@@ -14,11 +9,15 @@
 	If you're not running from a server (i.e. you're not intending to save things i.e. you're being run by a user), have some stuff come up in the console for the benefit of people who'd like to play around with it
 	Theoretically possible: Video is always at an angle such that camera is looking at the same place that you in webcam video appear to be looking?
 
-	Would be super easy to implement Bret Victor recordable inputs for debugging!
+	To fork for every video or to not fork? Fork. Backwards compatibility shouldn't be a concern
 
-	To fork for every video or to not fork?
+	Make that 3D pong thing and a rotation thing.
+		Maybe: there's a transparent sphere with a series of balls on it. the balls are dropping off one by one. 
+		You must keep them above a hold that is in front of you
 
-	Probably you will want to simulate the mouse with a controller
+	There are also notes in old RIlecture and RIlectureVR
+
+	Probably you will want to simulate the mouse with a controller sometimes
 
 	Must follow simple principle: if I can do or change a thing, so can you.
 		Probably impossible! You do want lots of points in 3d space
@@ -36,13 +35,9 @@
 		Could average the position of your hands and have everything onscreen, and the camera, float around them
 		Wallace and gromit inspired
 
-	Press a button to make it auto transcribe what you're saying? Then touch the words to make them bold?
-
 	Try to make it so that the objects could work together. Build up a library that allows you to string things together.
 
 	Puzzles go at the end
-
-	What about music?
 
 	Sort out audio buffering, timeline fills up
 
@@ -52,9 +47,7 @@
 		-59 icos object
 			-A puzzle
 		-Make geese?
-		-Arbitrary "writing"?
 		-Working on phones and tablets, working well! No need to hide address bar at least, leave that to them
-		-Slider
 		-editing suite?
 		-smoothing?
 		-have the zoomable factorial tree
@@ -104,6 +97,7 @@
 		renderer.setPixelRatio( window.devicePixelRatio );
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		document.body.appendChild( renderer.domElement );
+
 		var ourVrEffect = new THREE.VREffect( renderer );
 		var loopCallString = getStandardFunctionCallString(loop);
 		function render()
@@ -134,9 +128,6 @@
 		var holdables = {};
 	}
 
-	// monitorer.monitorPositionAndQuaternion(controllers[0]);
-	// monitorer.monitorPositionAndQuaternion(controllers[1]);
-
 	// var goose = new Goose();
 	// goose.position.z = -0.1
 	// scene.add(goose);
@@ -146,19 +137,36 @@
 
 	var monitorer = initMonitorer(clickables);
 
-	// var testObject = new THREE.Mesh( new THREE.SphereGeometry(0.01), new THREE.MeshLambertMaterial( {} ) );
-	// scene.add(testObject);
-	// testObject.position.z = -0.1;
-	// testObject.update = function()
-	// {
-	// 	// this.position.y = 0.01*Math.sin(frameTime*4);
-	// 	// this.rotation.z = Math.sin(frameTime*4.1);
-	// }
-	// thingsToBeUpdated.testObject = testObject;
-	// monitorer.monitorPositionAndQuaternion(testObject);
-	// grabbables.push(testObject);
+	// monitorer.monitorPositionAndQuaternion(controllers[0]);
+	// monitorer.monitorPositionAndQuaternion(controllers[1]);
 
-	// initPictures(thingsToBeUpdated);
+	testObject = new THREE.Mesh( new THREE.SphereGeometry(0.01), new THREE.MeshLambertMaterial( {} ) );
+	scene.add(testObject);
+	testObject.position.z = -0.1;
+	testObject.grabbedPoint = null;
+	testObject.onClick = function(grabbedPoint)
+	{
+		this.grabbedPoint = grabbedPoint;
+	}
+	testObject.update = function()
+	{
+		// this.position.y = 0.01*Math.sin(frameTime*4);
+		// this.rotation.z = Math.sin(frameTime*4.1);
+
+		if( mouse.lastClickedObject === this && mouse.clicking )
+		{
+			mouse.applyDrag(this);
+		}
+		else
+		{
+			this.grabbedPoint = null;
+		}
+	}
+	thingsToBeUpdated.testObject = testObject;
+	clickables.push(testObject)
+	monitorer.monitorPositionAndQuaternion(testObject);
+
+	initImages(thingsToBeUpdated, clickables);
 
 	mouse = initMouse(renderer, clickables, monitorer);
 

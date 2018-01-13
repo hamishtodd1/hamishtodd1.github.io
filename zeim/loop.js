@@ -15,12 +15,12 @@ function ensureDetachment(child, parent)
 	}
 }
 
-function loop( controllers, vrInputSystem, thingsToBeUpdated, holdables, monitorer, mouse, clickables )
+function loop( controllers, vrInputSystem, thingsToBeUpdated, holdables, monitorer, clickables )
 {
 	frameDelta = ourClock.getDelta();
 	frameTime += frameDelta;
 	
-	mouse.updateFromAsyncAndMoveGrabbedObjects();
+	mouse.updateFromAsyncAndCheckClicks();
 	vrInputSystem.update();
 	
 	//sure you want things to be parented given monitoring?
