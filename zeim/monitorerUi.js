@@ -88,7 +88,7 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 	{
 		var frameDimensions = frameDimensionsAtZDistance(-playPauseButton.position.z);
 
-		var height = frameDimensions.width * 0.05;
+		var height = frameDimensions.width * 0.1;
 		//TODO aspect ratio logic
 
 		var slidersHeight = height * 0.2;
@@ -126,37 +126,37 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 		timeSlider.visible = background.visible;
 		speedSlider.visible = background.visible; //and children?
 
-		// if(bufferedHighlights.length > audio.buffered.length)
-		// {
-		// 	for(var i = bufferedHighlights.length-1; i >= audio.buffered.length; i--)
-		// 	{
-		// 		scene.remove(bufferedHighlights[i])
-		// 		delete bufferedHighlights[i];
-		// 	}
-		// 	bufferedHighlights.length = audio.buffered.length;
-		// }
-		// for(var i = 0, il = audio.buffered.length; i < il; i++)
-		// {
-		// 	if( bufferedHighlights.length <= i)
-		// 	{
-		// 		var bufferedHighlight = new THREE.Mesh( new THREE.PlaneBufferGeometry(2,2), bufferedMaterial);
-		// 		camera.add( bufferedHighlight );
-		// 		bufferedHighlight.position.z = timeSlider.position.z + 0.00001;
+		if(bufferedHighlights.length > audio.buffered.length)
+		{
+			for(var i = bufferedHighlights.length-1; i >= audio.buffered.length; i--)
+			{
+				timeSlider.remove(bufferedHighlights[i])
+				delete bufferedHighlights[i];
+			}
+			bufferedHighlights.length = audio.buffered.length;
+		}
+		for(var i = 0, il = audio.buffered.length; i < il; i++)
+		{
+			if( bufferedHighlights.length <= i)
+			{
+				var bufferedHighlight = new THREE.Mesh( new THREE.PlaneBufferGeometry(1,1), bufferedMaterial);
+				bufferedHighlight.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.5,0,0))
+				timeSlider.add( bufferedHighlight );
+				bufferedHighlight.position.z = 0.00000001;
 				
-		// 		bufferedHighlights.push(bufferedHighlight);
-		// 	}
+				bufferedHighlights.push(bufferedHighlight);
+			}
 
-		// 	var start = getTimelinePositionFromTime(audio.buffered.start(i));
-		// 	var end = getTimelinePositionFromTime(audio.buffered.end(i));
-		// 	bufferedHighlights[i].scale.x = (end-start) / 2;
-		// 	bufferedHighlights[i].scale.y = timeSlider.scale.y / 2;
-		// 	bufferedHighlights[i].position.x = (start+end) / 2;
-		// 	bufferedHighlights[i].position.y = timeSlider.position.y;
-		// 	if(bufferedHighlights[i].scale.x === 0)
-		// 	{
-		// 		bufferedHighlights[i].scale.x = 0.000001
-		// 	}
-		// }
+			var start = getTimelinePositionFromTime(audio.buffered.start(i));
+			var end = getTimelinePositionFromTime(audio.buffered.end(i));
+			console.log(start, end)
+			bufferedHighlights[i].scale.x = end-start;
+			bufferedHighlights[i].position.x = start;
+			if(bufferedHighlights[i].scale.x === 0)
+			{
+				bufferedHighlights[i].scale.x = 0.000001
+			}
+		}
 
 		if(!audio.paused)
 		{

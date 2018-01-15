@@ -91,6 +91,15 @@ THREE.Vector3.prototype.addArray = function(array)
 	this.z += array[2];
 }
 
+THREE.Vector3.prototype.localToWorld = function(object)
+{
+	object.localToWorld(this);
+}
+THREE.Vector3.prototype.worldToLocal = function(object)
+{
+	object.worldToLocal(this);
+}
+
 THREE.Face3.prototype.addOffset = function(offset)
 {
 	this.a += offset;

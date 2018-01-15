@@ -1,4 +1,10 @@
 /*
+	Man, could you do it without talking?
+
+	Maybe the dignified thing is to have the same interface as the users. mousewheel to z, and rotate as they do
+
+	//position and rotation is 6D space, anything that can be done with that?
+
 	Probably the camera "sits on your lap", it is not your face. Yeah, show frustum
 	Make it so events can propagate back in time?
 		For example, a goose is to pick up an object, but it turns its head to it first
@@ -141,29 +147,16 @@
 	// monitorer.monitorPositionAndQuaternion(controllers[1]);
 
 	testObject = new THREE.Mesh( new THREE.SphereGeometry(0.01), new THREE.MeshLambertMaterial( {} ) );
-	scene.add(testObject);
+	camera.add(testObject);
 	testObject.position.z = -0.1;
-	testObject.grabbedPoint = null;
-	testObject.onClick = function(grabbedPoint)
-	{
-		this.grabbedPoint = grabbedPoint;
-	}
-	testObject.update = function()
-	{
-		// this.position.y = 0.01*Math.sin(frameTime*4);
-		// this.rotation.z = Math.sin(frameTime*4.1);
-
-		if( mouse.lastClickedObject === this && mouse.clicking )
-		{
-			mouse.applyDrag(this);
-		}
-		else
-		{
-			this.grabbedPoint = null;
-		}
-	}
+	// testObject.update = function()
+	// {
+	// 	this.position.y = 0.01*Math.sin(frameTime*4);
+	// 	this.rotation.z = Math.sin(frameTime*4.1);
+	// }
+	bestowDefaultMouseDragProperties(testObject);
 	thingsToBeUpdated.testObject = testObject;
-	clickables.push(testObject)
+	clickables.push(testObject);
 	monitorer.monitorPositionAndQuaternion(testObject);
 
 	initImages(thingsToBeUpdated, clickables);

@@ -17,8 +17,9 @@ var frameTime = 0;
 var RIGHT_CONTROLLER_INDEX = 0;
 var LEFT_CONTROLLER_INDEX = 1-RIGHT_CONTROLLER_INDEX;
 
-//------THREE stuff
-var camera = new THREE.PerspectiveCamera( 70, //can be changed by VR effect
+//------Honest to god global variables
+//Probably an orthographic for thingy
+var camera = new THREE.PerspectiveCamera( 70,
 		window.innerWidth / window.innerHeight,
 		0.01, 700);
 var scene = new THREE.Scene().add(camera);

@@ -1,5 +1,3 @@
-//images are always behind everything except each other?
-
 function initImages(thingsToBeUpdated, clickables)
 {
 	var imageFileNames = [
@@ -9,7 +7,7 @@ function initImages(thingsToBeUpdated, clickables)
 
 	thingsToBeUpdated.images = [];
 
-	function Image(texture)
+	function GrabbableImage(texture)
 	{
 		THREE.Mesh.call( this,
 			new THREE.PlaneBufferGeometry( 
@@ -17,52 +15,31 @@ function initImages(thingsToBeUpdated, clickables)
 				texture.image.naturalHeight / 1000 ), 
 			new THREE.MeshBasicMaterial({ map: texture }) );
 
-		this.grabbedPoint = null;
+		this.clickedPoint = null;
 	}
-	Image.prototype = Object.create(THREE.Mesh.prototype);
+	GrabbableImage.prototype = Object.create(THREE.Mesh.prototype);
 
-	Image.prototype.rotateToFaceCamera = function(image)
+	GrabbableImage.prototype.onControllerGrab = function()
 	{
-		var currentForward = zAxis.clone().applyQuaternion(this.quaternion).normalize();
-		var newForward = camera.getWorldDirection().negate();
-		this.quaternion.multiply( new THREE.Quaternion().setFromUnitVectors( currentForward, newForward ));
-
-		var currentUp = yAxis.clone().applyQuaternion(this.quaternion);
-		var newUp = yAxis.clone().applyQuaternion(camera.quaternion);
-		this.quaternion.multiply( new THREE.Quaternion().setFromUnitVectors( currentUp, newUp ));
+		//stuff about whether it was grabbed with side button
+		//either way it stays in camera space, hurgh
 	}
-
-	//urgh there's a little jolt when you first click
-	Image.prototype.onClick = function(grabbedPoint)
+	GrabbableImage.prototype.onClick = function(cameraSpaceClickedPoint)
 	{
-		this.grabbedPoint = grabbedPoint;
+		this.clickedPoint = cameraSpaceClickedPoint;
 	}
-
-	Image.prototype.update = function()
+	GrabbableImage.prototype.update = function()
 	{
-		if( mouse.clicking && mouse.lastClickedObject === this )
+		if( mouse.lastClickedObject === this && mouse.clicking )
 		{
 			mouse.applyDrag(this);
-
-			this.updateMatrixWorld();
-			var displacementCausedByRotationToFaceCamera = this.grabbedPoint.clone();
-			this.worldToLocal( displacementCausedByRotationToFaceCamera );
-			// console.log(this.grabbedPoint.distanceTo(camera.position))
-
-			// this.rotateToFaceCamera();
-
-			this.updateMatrixWorld();
-			this.localToWorld( displacementCausedByRotationToFaceCamera );
-			displacementCausedByRotationToFaceCamera.sub(this.grabbedPoint);
-
-			this.position.sub(displacementCausedByRotationToFaceCamera);
 		}
 		else
 		{
-			this.grabbedPoint = null;
-			this.rotateToFaceCamera();
+			this.clickedPoint = null;
 		}
 	}
+	// bestowDefaultMouseDragProperties(GrabbableImage.prototype)
 
 	var textureLoader = new THREE.TextureLoader();
 	textureLoader.crossOrigin = true;
@@ -71,11 +48,11 @@ function initImages(thingsToBeUpdated, clickables)
 	{
 		textureLoader.load( "/data/textures/" + imageFileNames[i], function(texture) 
 		{
-			var image = new Image(texture);
+			var image = new GrabbableImage(texture);
 			image.position.set( -i * 0.5, 0, -1.8 );
 			thingsToBeUpdated.images.push(image);
 			clickables.push(image)
-			scene.add(image);
+			camera.add(image); //sigh, maybe better added to camera
 		}, function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );} );
 	}
 

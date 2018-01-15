@@ -1,3 +1,4 @@
+
 //we assume natural parent is scene
 function ensureAttachment(child, parent)
 {
@@ -20,8 +21,8 @@ function loop( controllers, vrInputSystem, thingsToBeUpdated, holdables, monitor
 	frameDelta = ourClock.getDelta();
 	frameTime += frameDelta;
 	
-	mouse.updateFromAsyncAndCheckClicks();
 	vrInputSystem.update();
+	mouse.updateFromAsyncAndCheckClicks();
 	
 	//sure you want things to be parented given monitoring?
 	for(var i = 0; i < controllers.length; i++)

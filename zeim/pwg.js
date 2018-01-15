@@ -13,6 +13,8 @@
 		If everything CAN be done with onchangecallbacks, then the only time that needs to happen is when the frame is done
 		But probably there are smaller "pops" you need to do
 
+	Names are bad - if you detach the name and think of "the variable that has this behavior" it is better
+
 	Like you're going to have so much like this anyway, and you were going to have "intermediate render" debugging anyway
 
 	Need to encapsulate it, that's what might make this useful for cootVR and other software, the possibility
@@ -52,7 +54,13 @@
 
 	When you grab a gun, the horns of equal type everywhere appear and turn to face it
 
-	No variable names, you just see the objects
+	No variable names, you just see the objects. Comments, yes
+
+	entity component system
+
+	First try to program a javascript thing using only "onChange"s
+
+	You would need copy and paste
 
 	"Go to the space of that thing". Heh, that's more like old opengl
 
@@ -67,6 +75,7 @@
 
 	First focus on position
 
+	bootstrapping might help you build much of this. Even making the representations of local transform
 
 	As in games, collisions cause function calls with the two objects as inputs
 		There is stupid philosophy about whether it should be bunnyA.collideWithTeapot(teapotB) vs teapotB.collideWithBunny(bunnyA). There is only: collideTeapotWithBunny(teapotB,bunnyA)
