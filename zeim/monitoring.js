@@ -1,5 +1,5 @@
 /*
-	The camera is a specific thing
+	The pilotCamera is a specific thing
 
 	Office might be appropriate, things on desk
 
@@ -10,7 +10,7 @@
 		Another alternative: we reduce the improvizational nature and say nothing gets made at runtime.
 */
 
-function initMonitorer(clickables)
+function initMonitorer(clickables, launcher)
 {
 	var socket = new WebSocket("ws://" + window.location.href.substring(7) + "ws");
 	if(!socket)
@@ -172,6 +172,9 @@ function initMonitorer(clickables)
 		recordedFrames = JSON.parse(stringFromFile);
 		var initUiCallString = getStandardFunctionCallString(initUi);
 		ui = eval(initUiCallString);
+
+		launcher.dataLoaded["recordedFrames"] = true;
+		launcher.attemptLaunch();
 	});
 
 	monitorer.update = function(thingsToBeUpdated)
@@ -197,20 +200,11 @@ function initMonitorer(clickables)
 		}
 		else
 		{
-			for( var thing in thingsToBeUpdated)
+			for(var i = 0; i < thingsToBeUpdated.length; i++)
 			{
-				if( Array.isArray( thingsToBeUpdated[thing] ) )
-				{
-					for(var i = 0, il = thingsToBeUpdated[thing].length; i < il; i++)
-					{
-						thingsToBeUpdated[thing][i].update();
-					}
-				}
-				else
-				{
-					thingsToBeUpdated[thing].update();
-				}
+				thingsToBeUpdated[i].update();
 			}
+			
 			if(recording)
 			{
 				monitorer.record();

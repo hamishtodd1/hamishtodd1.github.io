@@ -1,4 +1,6 @@
-function initAudioRecorder(audio)
+//yeah, wav is pretty big, but it streams.
+
+function initAudioRecorder()
 {
     var audioRecorder = {};
     var internalRecorder;

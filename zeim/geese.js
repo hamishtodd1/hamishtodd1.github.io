@@ -13,11 +13,15 @@
 
 	Board is 16:9
 
+	The beak goes where your hand goes
+
+	Holding down the button opens the mouth. If there's a thing to bite down on, it does that
+
 	It's certainly fine / plausible, in say an RI lecture, for one's assistants to not have a full understanding
 
 	beak mouth is 0
 
-	The camera lies on the z axis of the board
+	The pilotCamera lies on the z axis of the board
 
 	bird heads fully respect hand rotation iff hand is holding something
 	Otherwise their rotation is such that their neck is in a plane parallel to the board
@@ -25,7 +29,7 @@
 	Geese should in general be facing the screen?
 		Always have one in the frame, like if your hand leaves it it sticks around?
 	Enforce some kind of "you can't move things in z because user can't?"
-	Keep geese at fixed z and y in camera space
+	Keep geese at fixed z and y in pilotCamera space
 	Camera swivels so the board is directed towards you
 	The left one is "sitting", the right one is showing stuff/teaching. Right one is bigger, left is a gosling
 	But you do want to do things with both hands
@@ -45,7 +49,7 @@
 
 	When left is the only one onscreen you have some kind of holding animation
 
-	Geese heads are always upright, never turned more than 90 degrees from camera
+	Geese heads are always upright, never turned more than 90 degrees from pilotCamera
 	Necks infinitely long probably, so swans maybe better
 
 	Beaker from the muppets, simpsons, aardman, snakebird. But which have eyebrows. Groundskeeper willie

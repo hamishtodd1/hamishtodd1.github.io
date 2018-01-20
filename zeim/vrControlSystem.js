@@ -4,32 +4,36 @@
 
 function initVrInputSystem(controllers, launcher, ourVrEffect, renderer)
 {
-	var vrInputSystem = {};
 	if( WEBVR && WEBVR.isAvailable())
 	{
-		var cameraRepositioner = new THREE.VRControls( camera );
+		var pilotCameraRepositioner = new THREE.VRControls( pilotCamera );
 
 		document.addEventListener( 'keydown', function(event)
 		{
 			if(event.keyCode === 190 && ( navigator.getVRDisplays !== undefined || navigator.getVRDevices !== undefined ) )
 			{
 				event.preventDefault();
-				if(cameraRepositioner.vrInputs.length < 1)
+				if(pilotCameraRepositioner.vrInputs.length < 1)
+				{
 					console.error("no vr input? Check steamVR or Oculus to make sure it's working correctly")
+				}
 					
-				cameraRepositioner.vrInputs[0].requestPresent([{ source: renderer.domElement }])
+				pilotCameraRepositioner.vrInputs[0].requestPresent([{ source: renderer.domElement }])
 				
 				ourVrEffect.setFullScreen( true );
 			}
 		}, false );
+	}
+	else return;
+	
+	var vrInputSystem = {};
 
-		var riftControllerKeys = {
-				thumbstickButton:0,
-				grippingTop: 1,
-				grippingSide:2,
-				button1: 3,
-				button2: 4
-		}
+	var riftControllerKeys = {
+		thumbstickButton:0,
+		grippingTop: 1,
+		grippingSide:2,
+		button1: 3,
+		button2: 4
 	}
 
 	function overlappingHoldable(holdable)
@@ -89,9 +93,9 @@ function initVrInputSystem(controllers, launcher, ourVrEffect, renderer)
 	
 	vrInputSystem.update = function(socket)
 	{
-		if(cameraRepositioner)
+		if(pilotCameraRepositioner)
 		{
-			cameraRepositioner.update();
+			pilotCameraRepositioner.update();
 		}
 
 		var gamepads = navigator.getGamepads();

@@ -18,8 +18,8 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 	var ui = {};
 
 	var background = new THREE.Mesh(new THREE.PlaneBufferGeometry(2,2), new THREE.MeshBasicMaterial({color:0xFAFAFA}));
-	background.position.z = -camera.near*2;
-	camera.add(background);
+	background.position.z = -pilotCamera.near*2;
+	pilotCamera.add(background);
 
 	var playPauseButton = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0x5A5A5A}));
 	for(var i = 0; i < 8; i++)
@@ -30,7 +30,7 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 	playPauseButton.geometry.vertices[0].set(-1,1,0);
 	playPauseButton.geometry.vertices[4].set(-1,-1,0);
 	playPauseButton.geometry.faces.push(new THREE.Face3(0,4,1),new THREE.Face3(1,4,5),new THREE.Face3(2,6,3),new THREE.Face3(3,6,7));
-	camera.add(playPauseButton);
+	pilotCamera.add(playPauseButton);
 	clickables.push(playPauseButton);
 
 	{
@@ -44,7 +44,7 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 			audio.pause();
 		}
 		var timeSlider = SliderSystem(updateTimeFromSlider, 0, clickables,onTimeTrackerGrab);
-		camera.add(timeSlider);
+		pilotCamera.add(timeSlider);
 		timeSlider.position.z = playPauseButton.position.z
 
 		function getTimelinePositionFromTime(time)
@@ -75,7 +75,7 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 			}
 		}
 		var speedSlider = SliderSystem(updateSpeedFromSlider, 0.5, clickables);
-		camera.add(speedSlider);
+		pilotCamera.add(speedSlider);
 		speedSlider.position.z = playPauseButton.position.z
 	}
 
@@ -121,7 +121,7 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 	{
 		//youtube visibility: take mouse off and it disappears. Don't move mouse for 3s, it disappears. Dunno about touchscreens
 
-		background.visible = !recording; //also if the mouse isn't towards the bottom?
+		background.visible = false;//!recording; //also if the mouse isn't towards the bottom?
 		playPauseButton.visible = background.visible;
 		timeSlider.visible = background.visible;
 		speedSlider.visible = background.visible; //and children?
@@ -149,7 +149,6 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 
 			var start = getTimelinePositionFromTime(audio.buffered.start(i));
 			var end = getTimelinePositionFromTime(audio.buffered.end(i));
-			console.log(start, end)
 			bufferedHighlights[i].scale.x = end-start;
 			bufferedHighlights[i].position.x = start;
 			if(bufferedHighlights[i].scale.x === 0)

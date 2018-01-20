@@ -1,4 +1,4 @@
-//to be called every frame from the start
+//to be called every frame from the start. Must be called at the veeeery top
 function checkForNewGlobals()
 {
 	if( typeof numGlobalVariables === 'undefined')
@@ -37,16 +37,16 @@ THREE.CylinderBufferGeometryUncentered = function(radius, length, radiusSegments
 
 function cameraZPlaneDistance(point)
 {
-	var displacementFromCamera = point.clone().sub(camera.position);
-	return displacementFromCamera.projectOnVector( camera.getWorldDirection() ).length();
+	var displacementFromCamera = point.clone().sub(pilotCamera.position);
+	return displacementFromCamera.projectOnVector( pilotCamera.getWorldDirection() ).length();
 }
 
 function frameDimensionsAtZDistance(z)
 {
-	var cameraFovRadians = camera.fov*TAU/360;
+	var pilotCameraFovRadians = pilotCamera.fov*TAU/360;
 	var dimensions = {
-		height: 2 * Math.tan(cameraFovRadians/2) * z,
-		width: 	2 * Math.tan(cameraFovRadians/2) * z * camera.aspect,
+		height: 2 * Math.tan(pilotCameraFovRadians/2) * z,
+		width: 	2 * Math.tan(pilotCameraFovRadians/2) * z * pilotCamera.aspect,
 	}
 	return dimensions;
 }

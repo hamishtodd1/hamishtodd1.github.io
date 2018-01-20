@@ -1,18 +1,19 @@
+//this looks bad, but there are a bunch of objects that will need that point.
 function bestowDefaultMouseDragProperties(object)
 {
 	object.clickedPoint = null;
 	object.onControllerGrab = function()
 	{
 		//stuff about whether it was grabbed with side button
-		//either way it stays in camera space, hurgh
+		//either way it stays in spectatorCamera space, hurgh
 	}
-	object.onClick = function(cameraSpaceClickedPoint)
+	object.onClick = function(spectatorCameraSpaceClickedPoint)
 	{
-		this.clickedPoint = cameraSpaceClickedPoint;
+		this.clickedPoint = spectatorCameraSpaceClickedPoint;
 	}
 	object.update = function()
 	{
-		if( mouse.lastClickedObject === this && mouse.clicking )
+		if( mouse.clicking && mouse.lastClickedObject === this )
 		{
 			mouse.applyDrag(this);
 		}
@@ -47,10 +48,10 @@ function initMouse(renderer, clickables,monitorer)
 		var unitRayEndZ = cameraZPlaneDistance(raycaster.ray.at(1))
 		var rayLengthToGetZEquallingClickedPointZ = -object.clickedPoint.z / unitRayEndZ;
 		var newPositionOfGrabbedPoint = raycaster.ray.at(rayLengthToGetZEquallingClickedPointZ);
-		newPositionOfGrabbedPoint.worldToLocal(camera);
+		newPositionOfGrabbedPoint.worldToLocal(spectatorCamera);
 
 		var displacement = newPositionOfGrabbedPoint.clone().sub(object.clickedPoint);
-		camera.localToWorld(displacement);
+		spectatorCamera.localToWorld(displacement);
 		displacement.add(object.parent.getWorldPosition())
 		object.parent.updateMatrixWorld();
 		object.parent.worldToLocal(displacement);
@@ -66,22 +67,16 @@ function initMouse(renderer, clickables,monitorer)
 
 		if(this.clicking)
 		{
-			camera.rotation.y += 0.01
-		}
-		camera.updateMatrixWorld();
-
-		if(this.clicking)
-		{
-			raycaster.setFromCamera( asynchronous.normalizedDevicePosition, camera );
+			raycaster.setFromCamera( asynchronous.normalizedDevicePosition, spectatorCamera );
 
 			if( !this.oldClicking )
 			{
 				var clickableIntersections = raycaster.intersectObjects( clickables );
 				if( clickableIntersections[0] )
 				{
-					var cameraSpaceClickedPoint = clickableIntersections[0].point.clone();
-					cameraSpaceClickedPoint.worldToLocal(camera);
-					clickableIntersections[0].object.onClick(cameraSpaceClickedPoint);
+					var spectatorCameraSpaceClickedPoint = clickableIntersections[0].point.clone();
+					spectatorCameraSpaceClickedPoint.worldToLocal(spectatorCamera);
+					clickableIntersections[0].object.onClick(spectatorCameraSpaceClickedPoint);
 
 					this.lastClickedObject = clickableIntersections[0].object;
 				}
@@ -121,37 +116,37 @@ function SliderSystem(changeValue, initialValue, clickables, onTrackerGrab, thre
 
 	var sliderSystem = new THREE.Mesh(new THREE.PlaneBufferGeometry(1,1), new THREE.MeshBasicMaterial({color:0xDADADA}));
 	sliderSystem.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.5,0,0))
-	sliderSystem.onClick = function(cameraSpaceClickedPoint)
+	sliderSystem.onClick = function(spectatorCameraSpaceClickedPoint)
 	{
-		var localGrabbedPoint = cameraSpaceClickedPoint.clone();
-		camera.localToWorld(localGrabbedPoint);
+		var localGrabbedPoint = spectatorCameraSpaceClickedPoint.clone();
+		spectatorCamera.localToWorld(localGrabbedPoint);
 		sliderSystem.worldToLocal(localGrabbedPoint);
 
 		tracker.position.x = localGrabbedPoint.x;
 		changeValue( tracker.position.x );
 
-		tracker.clickedPoint = cameraSpaceClickedPoint;
+		tracker.clickedPoint = spectatorCameraSpaceClickedPoint;
 	}
 	clickables.push(sliderSystem);
 
 	var tracker = new THREE.Mesh(
 		new THREE.CylinderBufferGeometry(1,1,1,32), 
 		new THREE.MeshBasicMaterial({color:0x298AF1, /*transparent:true, opacity:1*/}));
-	tracker.geometry.applyMatrix(new THREE.Matrix4().makeRotationX(TAU/4))
 	tracker.position.x = initialValue;
 	changeValue(tracker.position.x);
-	tracker.clickedPoint = null;
-	tracker.onClick = function(cameraSpaceClickedPoint)
-	{
-		this.clickedPoint = cameraSpaceClickedPoint;
-		onTrackerGrab();
-	}
 	clickables.push(tracker)
 	sliderSystem.add(tracker);
+	tracker.geometry.applyMatrix(new THREE.Matrix4().makeRotationX(TAU/4))
+	tracker.clickedPoint = null;
+	tracker.onClick = function(spectatorCameraSpaceClickedPoint)
+	{
+		this.clickedPoint = spectatorCameraSpaceClickedPoint;
+		onTrackerGrab();
+	}
 
 	sliderSystem.update = function()
 	{
-		if( ( mouse.lastClickedObject === tracker || mouse.lastClickedObject === sliderSystem ) && mouse.clicking )
+		if( mouse.clicking && ( mouse.lastClickedObject === tracker || mouse.lastClickedObject === sliderSystem ) )
 		{
 			mouse.applyDrag(tracker);
 			tracker.position.set(clamp(tracker.position.x,0,1), 0,0);

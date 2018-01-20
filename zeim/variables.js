@@ -18,9 +18,18 @@ var RIGHT_CONTROLLER_INDEX = 0;
 var LEFT_CONTROLLER_INDEX = 1-RIGHT_CONTROLLER_INDEX;
 
 //------Honest to god global variables
-//Probably an orthographic for thingy
-var camera = new THREE.PerspectiveCamera( 70,
+var pilotCamera = new THREE.PerspectiveCamera( 70,
 		window.innerWidth / window.innerHeight,
 		0.01, 700);
-var scene = new THREE.Scene().add(camera);
+var spectatorCamera = new THREE.OrthographicCamera( -1.6,1.6,0.9,-0.9,0.01, 700);
+
+/*
+	Spectator camera
+		Wants a representation
+		Needs a way to grab the objects (it's still working off pilotCamera)
+		How far back is it going?
+		Have ui and everything else added to it
+*/
+
+var scene = new THREE.Scene().add(pilotCamera, spectatorCamera);
 var mouse = null;

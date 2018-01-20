@@ -8,10 +8,24 @@
 	You also want Bret Victor time extrusion. But that's over many frames
 	A tool you have with you always is "time along frame", the equivalent of the scrollbar in a text editor
 
-	"popping": a variable has been changed, the ball gets flung back to... hmm there needs to be memory.
+	maybe the "dots" are the equivalent of lines, like object.color - color is a thing floating nearby
+
+	Philosophical thing: good for your audience to see behavior as you see it.
+	This "selective slow down" thing where you only see a few "lines"/"shots" from the main loop. Use that.
+
+	Your eyes can move around a file pretty fucking fast
+
+	Ought to be able to compile in opposite direction too
+
+	Control flow / popping: a variable has been changed, the ball gets flung back to... hmm there needs to be memory.
 		Well, something which flung a ball needs to be aware of when there's nothing left to be done
 		If everything CAN be done with onchangecallbacks, then the only time that needs to happen is when the frame is done
 		But probably there are smaller "pops" you need to do
+		You're compiling to javascript. It's a concession, yes, but just have a shot follow another shot.
+
+	Stop picturing projectiles, you're firing the objects themselves. Of course you are... that's the advantage...
+
+	Would be nice not to have to paste screengrabs into paint.net
 
 	Names are bad - if you detach the name and think of "the variable that has this behavior" it is better
 
@@ -59,6 +73,8 @@
 	entity component system
 
 	First try to program a javascript thing using only "onChange"s
+
+	Don't want to be outcompeted by geogebra now!
 
 	You would need copy and paste
 
