@@ -69,7 +69,7 @@ function initMonitorer(clickables, launcher)
 
 	document.addEventListener( 'keydown', function(event)
 	{
-		if(event.keyCode === 82) //r for record
+		if( event.keyCode === 82 ) //r for record
 		{
 			if( !recording )
 			{
@@ -80,11 +80,12 @@ function initMonitorer(clickables, launcher)
 				stopRecording()
 			}
 		}
-		if(event.keyCode===32) //space to play
+		if( event.keyCode === 32 ) //space to play
 		{
 			monitorer.togglePlaying()
 		}
 	});
+	//click, and it pauses
 
 	monitorer.record = function()
 	{
@@ -211,10 +212,12 @@ function initMonitorer(clickables, launcher)
 			}
 		}
 
-		if( ui )
+		if( !audio.paused && mouse.clicking && mouse.lastClickedObject !== ui.playPauseButton )
 		{
-			ui.update(recording,audio);
+			audio.pause();
 		}
+
+		ui.update(recording,audio);
 	}
 
 	return monitorer;

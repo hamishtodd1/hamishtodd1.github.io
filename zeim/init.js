@@ -52,8 +52,8 @@
 		-Working on tablets. Phones get embed, no need to worry about address bar
 		-editing suite?
 		-Funkiness in which you move your head and hand around and pilotCamera is in right place
-		-aspect ratio crap. 16:9
 		-Would be nice if people could spectate in monoscopic
+		-input before update
 
 	TODO for factorial tree
 		-zoomable tree

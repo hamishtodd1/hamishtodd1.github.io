@@ -17,11 +17,12 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 {
 	var ui = {};
 
-	var background = new THREE.Mesh(new THREE.PlaneBufferGeometry(2,2), new THREE.MeshBasicMaterial({color:0xFAFAFA}));
+	var background = new THREE.Mesh(new THREE.PlaneBufferGeometry(2,2), new THREE.MeshBasicMaterial({color:0xFAFAFA, transparent:true, opacity:0.77}));
 	background.position.z = -spectatorCamera.near*2;
 	spectatorCamera.add(background);
 
 	var playPauseButton = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0x5A5A5A}));
+	ui.playPauseButton = playPauseButton;
 	for(var i = 0; i < 8; i++)
 	{
 		playPauseButton.geometry.vertices.push(new THREE.Vector3());
@@ -89,7 +90,6 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 		var frameDimensions = frameDimensionsAtZDistance(spectatorCamera,-playPauseButton.position.z);
 
 		var height = frameDimensions.width * 0.1;
-		//TODO aspect ratio logic
 
 		var slidersHeight = height * 0.2;
 
@@ -116,14 +116,33 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 		speedSlider.position.x -= speedSlider.scale.x / 2;
 	}
 
-	ui.update = function(recording, audio)
 	{
 		//youtube visibility: take mouse off and it disappears. Don't move mouse for 3s, it disappears. Dunno about touchscreens
+		//if you're paused it's only there if you move your mouse downt there
+		var uiVisibilityTimeout = 3;
+		var uiVisibilityTimer = uiVisibilityTimeout;
 
-		background.visible = !recording; //also if the mouse isn't towards the bottom?
-		playPauseButton.visible = background.visible;
-		timeSlider.visible = background.visible;
-		speedSlider.visible = background.visible; //and children?
+		document.addEventListener( 'mousemove', function(event)
+		{
+			event.preventDefault();
+			background.visible = true;
+			uiVisibilityTimer = uiVisibilityTimeout;
+		}, false );
+	}
+
+	ui.update = function(recording, audio)
+	{
+		if( mouse.clicking )
+		{
+			uiVisibilityTimer = uiVisibilityTimeout;
+		}
+		uiVisibilityTimer -= frameDelta;
+		var uiVisibility = audio.paused || uiVisibilityTimer >= 0;
+
+		background.visible = uiVisibility;
+		playPauseButton.visible = uiVisibility;
+		timeSlider.visible = uiVisibility;
+		speedSlider.visible = uiVisibility;
 
 		if(bufferedHighlights.length > audio.buffered.length)
 		{
