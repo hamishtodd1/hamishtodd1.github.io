@@ -18,8 +18,8 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 	var ui = {};
 
 	var background = new THREE.Mesh(new THREE.PlaneBufferGeometry(2,2), new THREE.MeshBasicMaterial({color:0xFAFAFA}));
-	background.position.z = -pilotCamera.near*2;
-	pilotCamera.add(background);
+	background.position.z = -spectatorCamera.near*2;
+	spectatorCamera.add(background);
 
 	var playPauseButton = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0x5A5A5A}));
 	for(var i = 0; i < 8; i++)
@@ -30,7 +30,7 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 	playPauseButton.geometry.vertices[0].set(-1,1,0);
 	playPauseButton.geometry.vertices[4].set(-1,-1,0);
 	playPauseButton.geometry.faces.push(new THREE.Face3(0,4,1),new THREE.Face3(1,4,5),new THREE.Face3(2,6,3),new THREE.Face3(3,6,7));
-	pilotCamera.add(playPauseButton);
+	spectatorCamera.add(playPauseButton);
 	clickables.push(playPauseButton);
 
 	{
@@ -44,7 +44,7 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 			audio.pause();
 		}
 		var timeSlider = SliderSystem(updateTimeFromSlider, 0, clickables,onTimeTrackerGrab);
-		pilotCamera.add(timeSlider);
+		spectatorCamera.add(timeSlider);
 		timeSlider.position.z = playPauseButton.position.z
 
 		function getTimelinePositionFromTime(time)
@@ -75,7 +75,7 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 			}
 		}
 		var speedSlider = SliderSystem(updateSpeedFromSlider, 0.5, clickables);
-		pilotCamera.add(speedSlider);
+		spectatorCamera.add(speedSlider);
 		speedSlider.position.z = playPauseButton.position.z
 	}
 
@@ -86,7 +86,7 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 
 	monitorer.setUiSize = function()
 	{
-		var frameDimensions = frameDimensionsAtZDistance(-playPauseButton.position.z);
+		var frameDimensions = frameDimensionsAtZDistance(spectatorCamera,-playPauseButton.position.z);
 
 		var height = frameDimensions.width * 0.1;
 		//TODO aspect ratio logic
@@ -115,13 +115,12 @@ function initUi(clickables, audio, monitorer, recordedFrames)
 		speedSlider.position.x = -playPauseButton.position.x;
 		speedSlider.position.x -= speedSlider.scale.x / 2;
 	}
-	monitorer.setUiSize();
 
 	ui.update = function(recording, audio)
 	{
 		//youtube visibility: take mouse off and it disappears. Don't move mouse for 3s, it disappears. Dunno about touchscreens
 
-		background.visible = false;//!recording; //also if the mouse isn't towards the bottom?
+		background.visible = !recording; //also if the mouse isn't towards the bottom?
 		playPauseButton.visible = background.visible;
 		timeSlider.visible = background.visible;
 		speedSlider.visible = background.visible; //and children?

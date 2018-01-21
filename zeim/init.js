@@ -94,7 +94,7 @@
 				}
 
 				//because the recorder data has to load before monitorer is ready
-				initWindowResizeSystem(monitorer, renderer, spectatorCameraRepresentation);
+				initWindowResizeSystem(monitorer, renderer);
 
 				render();
 			}
@@ -146,32 +146,11 @@
 	// monitorer.monitorPositionAndQuaternion(controllers[0]);
 	// monitorer.monitorPositionAndQuaternion(controllers[1]);
 
-	{
-		var spectatorCameraRepresentation = new THREE.Mesh(new THREE.CylinderGeometry(Math.sqrt(2)/2,Math.sqrt(2)/4,1,4), new THREE.MeshLambertMaterial({color:0xA0A0A0, side:THREE.DoubleSide}));
-		spectatorCameraRepresentation.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,-0.5,0))
-		spectatorCameraRepresentation.geometry.applyMatrix(new THREE.Matrix4().makeRotationX(-TAU/4))
-		spectatorCameraRepresentation.geometry.applyMatrix(new THREE.Matrix4().makeRotationZ( TAU/8))
-
-		var lineMaterial = new THREE.LineBasicMaterial({ color: 0xA0A0A0 });
-		for(var i = 0; i < 4; i++)
-		{
-			spectatorCameraRepresentation.add(new THREE.Line(new THREE.Geometry(),lineMaterial));
-			spectatorCameraRepresentation.children[i].geometry.vertices.push(spectatorCameraRepresentation.geometry.vertices[i].clone());
-			spectatorCameraRepresentation.children[i].geometry.vertices.push(spectatorCameraRepresentation.geometry.vertices[i].clone().setZ(1));
-		}
-
-		scene.add(spectatorCameraRepresentation)
-
-		spectatorCameraRepresentation.position.copy(spectatorCamera.position);
-		// spectatorCameraRepresentation.position.z -= 1
-
-		//you're going to git push
-		//then you're going to turn it into a perspectivecamera because you want to be able to make things bigger and smaller!
-	}
+	initSpectatorCamera();
 
 	{
 		testObject = new THREE.Mesh( new THREE.SphereGeometry(0.01), new THREE.MeshLambertMaterial( {} ) );
-		pilotCamera.add(testObject);
+		spectatorCamera.add(testObject);
 		testObject.position.z = -0.1;
 		// testObject.update = function()
 		// {

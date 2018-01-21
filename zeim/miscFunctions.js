@@ -41,12 +41,12 @@ function cameraZPlaneDistance(point)
 	return displacementFromCamera.projectOnVector( pilotCamera.getWorldDirection() ).length();
 }
 
-function frameDimensionsAtZDistance(z)
+function frameDimensionsAtZDistance(camera,z)
 {
-	var pilotCameraFovRadians = pilotCamera.fov*TAU/360;
+	var cameraFovRadians = camera.fov*TAU/360;
 	var dimensions = {
-		height: 2 * Math.tan(pilotCameraFovRadians/2) * z,
-		width: 	2 * Math.tan(pilotCameraFovRadians/2) * z * pilotCamera.aspect,
+		height: 2 * Math.tan(cameraFovRadians/2) * z,
+		width: 	2 * Math.tan(cameraFovRadians/2) * z * camera.aspect,
 	}
 	return dimensions;
 }

@@ -18,10 +18,8 @@ var RIGHT_CONTROLLER_INDEX = 0;
 var LEFT_CONTROLLER_INDEX = 1-RIGHT_CONTROLLER_INDEX;
 
 //------Honest to god global variables
-var pilotCamera = new THREE.PerspectiveCamera( 70,
-		window.innerWidth / window.innerHeight,
-		0.01, 700);
-var spectatorCamera = new THREE.OrthographicCamera( -1.6,1.6,0.9,-0.9,0.01, 700);
+var pilotCamera = new THREE.PerspectiveCamera( 0,0,0.01, 700);
+var spectatorCamera = new THREE.PerspectiveCamera( 0,0,0.01, 700);
 
 /*
 	Spectator camera
@@ -33,3 +31,6 @@ var spectatorCamera = new THREE.OrthographicCamera( -1.6,1.6,0.9,-0.9,0.01, 700)
 
 var scene = new THREE.Scene().add(pilotCamera, spectatorCamera);
 var mouse = null;
+
+var SPECTATOR_MINIMUM_FOV = 70;
+var SPECTATOR_DESIRED_ASPECT_RATIO = 16/9;
