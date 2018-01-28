@@ -46,7 +46,7 @@ function initVrInputSystem(controllers, ourVrEffect, renderer)
 {	
 	var cameraRepositioner = new THREE.VRControls( camera );
 
-	document.addEventListener( 'keydown', function(event)
+	document.addEventListener( 'keydown', function( event )
 	{
 		if(event.keyCode === 190 && ( navigator.getVRDisplays !== undefined || navigator.getVRDevices !== undefined ) )
 		{
