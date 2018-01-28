@@ -2,11 +2,9 @@
 	Extreme democratization: I am programming the game as you play it, but you can reprogram it, maybe even me
 
 	TODO for slack demo:
-		-VR interaction
-		-Funkiness in which you move your head and hand around and camera is in right place
+		-VR interaction / funkiness in which you move your head and hand around and camera is in right place
 		-Finish geese? Eyes
-		-go to the site and you get the right thing
-			-Even on tablets. Phones get embed, no need to worry about address bar
+		-Working on tablets. Phones get embed and maybe message, no need to worry about address bar
 
 		-Make that 3D pong thing and a rotation thing.
 			Maybe: there's a transparent sphere with a series of balls on it. the balls are dropping off one by one. 
@@ -31,7 +29,7 @@
 (function init()
 {
 	var platform = getPlatform()
-	if(platform === "phone")
+	if(platform === "phone" )
 	{
 		var iframe = document.createElement("iframe");
 	    iframe.setAttribute("src","https://www.youtube.com/embed/agOdP2Bmieg"); 
@@ -76,10 +74,9 @@
 
 	var ourVrEffect = new THREE.VREffect( renderer );
 
-	var loopCallString = getStandardFunctionCallString(loop);
 	function render()
 	{
-		eval(loopCallString);
+		loop( controllers )
 		ourVrEffect.requestAnimationFrame( function()
 		{
 			//a reasonable indicator is ourVREffect.isPresenting
@@ -88,10 +85,6 @@
 		} );
 	}
 	
-	var controllers = Array(2);
-	
-	makeScene(true);
-	
 	// var goose = new Goose();
 	// goose.position.z = -0.1
 	// scene.add(goose);
@@ -99,7 +92,15 @@
 
 	initPlaybackSystemAndMaybeRecorder(launcher);
 
-	var vrInputSystem = initVrInputSystem(controllers, launcher, ourVrEffect, renderer);
+	var controllers = initControllers(launcher);
+	if( WEBVR && !WEBVR.isAvailable() && RUNNING_LOCALLY )
+	{
+		initVrInputSystem(controllers, ourVrEffect, renderer);
+	}
+	
+	makeScene(true);
+
+	mouse = initMouse(renderer);
 
 	{
 		var testObject = new THREE.Mesh( new THREE.SphereGeometry(0.01), new THREE.MeshLambertMaterial( {} ) );
@@ -125,11 +126,9 @@
 		scene.add(testSlider)
 		
 		markedThingsToBeUpdated.push(testSlider);
+
+		initImages();
 	}
-
-	initImages();
-
-	mouse = initMouse(renderer);
 
 	launcher.initCompleted = true;
 	launcher.attemptLaunch();

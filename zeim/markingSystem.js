@@ -1,6 +1,4 @@
 /*
-	The camera is a specific thing
-
 	You DO want to be able to create as many things as you like at runtime, and make them disappear too.
 		Special notification when a particular thing is created
 		But what if you go over that part many times?
@@ -52,15 +50,14 @@ function initPlaybackSystemAndMaybeRecorder(launcher)
 		initPlaybackSystem( audio, recordedFrames,
 			markedObjectsAndProperties, markedQuaternions );
 
-		var socket = new WebSocket("ws://" + window.location.href.substring(7) + "ws")
-		socket.onopen = function()
+		if( RUNNING_LOCALLY )
 		{
-			initRecorder( this, audio, recordedFrames,
-				markedObjectsAndProperties, markedQuaternions );
-		}
-		socket.onerror = function()
-		{
-			audio.play();
+			var socket = new WebSocket("ws://" + window.location.href.substring(7) + "ws")
+			socket.onopen = function()
+			{
+				initRecorder( this, audio, recordedFrames,
+					markedObjectsAndProperties, markedQuaternions );
+			}
 		}
 
 		launcher.dataLoaded["recordedFrames"] = true;

@@ -93,8 +93,7 @@ function initRecorder(socket, audio,
 
 	var recordingToggled = false;
 
-	var recorder = {};
-	recorder.update = function()
+	updateRecorder = function()
 	{
 		if( recordingToggled)
 		{

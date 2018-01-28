@@ -68,7 +68,7 @@ function initPlaybackSystem(audio,
 
 	var ui = initUi(audio, playbackSystem, recordedFrames);
 
-	playbackSystem.update = function()
+	updatePlaybackSystem = function()
 	{
 		if( playingToggled)
 		{
@@ -107,6 +107,8 @@ function initPlaybackSystem(audio,
 				markedThingsToBeUpdated[i].update();
 			}
 		}
+
+		ui.update();
 	}
 }
 
@@ -119,18 +121,24 @@ function initUi( audio, playbackSystem, recordedFrames)
 	background.position.z = -camera.near*2;
 	camera.add(background);
 
-	var playPauseButton = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0x5A5A5A}));
-	ui.playPauseButton = playPauseButton;
-	for(var i = 0; i < 8; i++)
 	{
-		playPauseButton.geometry.vertices.push(new THREE.Vector3());
+		var playPauseButton = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0x5A5A5A}));
+		ui.playPauseButton = playPauseButton;
+		camera.add(playPauseButton);
+		for(var i = 0; i < 8; i++)
+		{
+			playPauseButton.geometry.vertices.push(new THREE.Vector3());
+		}
+		playPauseButton.position.z = background.position.z + 0.0001;
+		playPauseButton.geometry.vertices[0].set(-1,1,0);
+		playPauseButton.geometry.vertices[4].set(-1,-1,0);
+		playPauseButton.geometry.faces.push(new THREE.Face3(0,4,1),new THREE.Face3(1,4,5),new THREE.Face3(2,6,3),new THREE.Face3(3,6,7));
+		playPauseButton.onClick = function()
+		{
+			playbackSystem.togglePlaying();
+		}
+		clickables.push(playPauseButton);
 	}
-	playPauseButton.position.z = background.position.z + 0.0001;
-	playPauseButton.geometry.vertices[0].set(-1,1,0);
-	playPauseButton.geometry.vertices[4].set(-1,-1,0);
-	playPauseButton.geometry.faces.push(new THREE.Face3(0,4,1),new THREE.Face3(1,4,5),new THREE.Face3(2,6,3),new THREE.Face3(3,6,7));
-	camera.add(playPauseButton);
-	clickables.push(playPauseButton);
 
 	{
 		function updateTimeFromSlider(valueBetweenZeroAndOne)
@@ -142,7 +150,7 @@ function initUi( audio, playbackSystem, recordedFrames)
 		{
 			audio.pause();
 		}
-		var timeSlider = SliderSystem(updateTimeFromSlider, 0, false,onTimeTrackerGrab);
+		var timeSlider = SliderSystem(updateTimeFromSlider, 0, false, onTimeTrackerGrab);
 		camera.add(timeSlider);
 		timeSlider.position.z = playPauseButton.position.z
 
@@ -173,8 +181,9 @@ function initUi( audio, playbackSystem, recordedFrames)
 		{
 			audio.playbackRate = Math.pow(2,valueBetweenZeroAndOne * 2 - 1)
 
-			//lerps will look bad at anything other than the native framerate
-			//this is not reflected in the tracker position. But if it was it would be more complex to allow you to move away from this
+			//The below is because lerps will look bad at anything other than the native framerate
+			//This is not reflected in the tracker position, which is dishonest.
+			//But! If it was it would be more complex to allow you to move away from this
 			if(Math.abs(audio.playbackRate - 1) < 0.1)
 			{
 				audio.playbackRate = 1;
@@ -183,11 +192,6 @@ function initUi( audio, playbackSystem, recordedFrames)
 		var speedSlider = SliderSystem(updateSpeedFromSlider, 0.5 );
 		camera.add(speedSlider);
 		speedSlider.position.z = playPauseButton.position.z
-	}
-
-	playPauseButton.onClick = function()
-	{
-		playbackSystem.togglePlaying();
 	}
 
 	function setUiSize()
@@ -275,7 +279,16 @@ function initUi( audio, playbackSystem, recordedFrames)
 			}
 		}
 
-		if(!audio.paused)
+		if( audio.paused )
+		{
+			playPauseButton.geometry.vertices[3].set(1,0,0);
+			playPauseButton.geometry.vertices[7].set(1,0,0);
+			playPauseButton.geometry.vertices[1].set(1,0,0);
+			playPauseButton.geometry.vertices[2].set(1,0,0);
+			playPauseButton.geometry.vertices[5].set(1,0,0);
+			playPauseButton.geometry.vertices[6].set(1,0,0);
+		}
+		else
 		{
 			playPauseButton.geometry.vertices[1].set(-1/16,1,0);
 			playPauseButton.geometry.vertices[2].set(1/16,1,0);
@@ -284,16 +297,6 @@ function initUi( audio, playbackSystem, recordedFrames)
 			playPauseButton.geometry.vertices[5].set(-1/16,-1,0);
 			playPauseButton.geometry.vertices[6].set(1/16,-1,0);
 			playPauseButton.geometry.vertices[7].set(1,-1,0);
-		}
-		else
-		{
-			playPauseButton.geometry.vertices[3].set(1,0,0);
-			playPauseButton.geometry.vertices[7].set(1,0,0);
-
-			playPauseButton.geometry.vertices[1].set(0,0.5,0);
-			playPauseButton.geometry.vertices[2].set(0,0.5,0);
-			playPauseButton.geometry.vertices[5].set(0,-0.5,0);
-			playPauseButton.geometry.vertices[6].set(0,-0.5,0);
 		}
 		playPauseButton.geometry.verticesNeedUpdate = true;
 

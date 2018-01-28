@@ -29,3 +29,5 @@ var unmarkedThingsToBeUpdated = [];
 var markedThingsToBeUpdated = [];
 var holdables = [];
 var clickables = [];
+
+var RUNNING_LOCALLY = window.location.href === "http://localhost:9090";
