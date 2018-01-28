@@ -16,10 +16,11 @@ function ensureDetachment(child, parent)
 	}
 }
 
-function loop( controllers, vrInputSystem, thingsToBeUpdated, holdables, monitorer, clickables )
+function loop( controllers, vrInputSystem )
 {
 	frameDelta = ourClock.getDelta();
 	frameTime += frameDelta;
+	frameCount++;
 	
 	vrInputSystem.update();
 	mouse.updateFromAsyncAndCheckClicks();
@@ -31,9 +32,9 @@ function loop( controllers, vrInputSystem, thingsToBeUpdated, holdables, monitor
 		{
 			if( controllers[i].children.length === 1)
 			{
-				for(var holdable in holdables )
+				for(var j = 0; j < holdables.length; j++ )
 				{
-					if( controllers[i].overlappingHoldable(holdables[holdable]) )
+					if( controllers[i].overlappingHoldable(holdables[j]) )
 					{
 						if( controllers[i].children.length > 1)
 						{
@@ -41,24 +42,27 @@ function loop( controllers, vrInputSystem, thingsToBeUpdated, holdables, monitor
 							break;
 						}
 						
-						ensureDetachment( holdables[holdable], holdables[holdable].parent)
-						ensureAttachment( holdables[holdable], controllers[i])
+						ensureDetachment( holdables[j], holdables[j].parent)
+						ensureAttachment( holdables[j], controllers[i])
 					}
 				}
 			}
 		}
 		else
 		{
-			for(var holdable in holdables )
+			for(var j = 0; j < holdables.length; j++ )
 			{
-				if( holdables[holdable].parent === controllers[i])
+				if( holdables[j].parent === controllers[i])
 				{
-					ensureDetachment(holdables[holdable], controllers[i])
-					ensureAttachment(holdables[holdable], holdables[ holdable ].ordinaryParent )
+					ensureDetachment(holdables[j], controllers[i])
+					ensureAttachment(holdables[j], holdables[ j ].ordinaryParent )
 				}
 			}
 		}
 	}
 
-	monitorer.update(thingsToBeUpdated);
+	for(var i = 0; i < unmarkedThingsToBeUpdated.length; i++)
+	{
+		unmarkedThingsToBeUpdated[i].update();
+	}
 }

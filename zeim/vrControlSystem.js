@@ -4,27 +4,28 @@
 
 function initVrInputSystem(controllers, launcher, ourVrEffect, renderer)
 {
-	if( WEBVR && WEBVR.isAvailable())
+	if( !WEBVR || !WEBVR.isAvailable())
 	{
-		var pilotCameraRepositioner = new THREE.VRControls( pilotCamera );
-
-		document.addEventListener( 'keydown', function(event)
-		{
-			if(event.keyCode === 190 && ( navigator.getVRDisplays !== undefined || navigator.getVRDevices !== undefined ) )
-			{
-				event.preventDefault();
-				if(pilotCameraRepositioner.vrInputs.length < 1)
-				{
-					console.error("no vr input? Check steamVR or Oculus to make sure it's working correctly")
-				}
-					
-				pilotCameraRepositioner.vrInputs[0].requestPresent([{ source: renderer.domElement }])
-				
-				ourVrEffect.setFullScreen( true );
-			}
-		}, false );
+		return;
 	}
-	else return;
+	
+	var cameraRepositioner = new THREE.VRControls( camera );
+
+	document.addEventListener( 'keydown', function(event)
+	{
+		if(event.keyCode === 190 && ( navigator.getVRDisplays !== undefined || navigator.getVRDevices !== undefined ) )
+		{
+			event.preventDefault();
+			if(cameraRepositioner.vrInputs.length < 1)
+			{
+				console.error("no vr input? Check steamVR or Oculus to make sure it's working correctly")
+			}
+				
+			cameraRepositioner.vrInputs[0].requestPresent([{ source: renderer.domElement }])
+			
+			ourVrEffect.setFullScreen( true );
+		}
+	}, false ); 
 	
 	var vrInputSystem = {};
 
@@ -87,15 +88,17 @@ function initVrInputSystem(controllers, launcher, ourVrEffect, renderer)
 		controllers[ i ].overlappingHoldable = overlappingHoldable;
 		controllers[ i ].position.y = -0.1;
 		scene.add( controllers[ i ] );
+
+		// markPositionAndQuaternion(controllers[i]);
 		
 		loadControllerModel(i);
 	}
 	
-	vrInputSystem.update = function(socket)
+	vrInputSystem.update = function()
 	{
-		if(pilotCameraRepositioner)
+		if(cameraRepositioner)
 		{
-			pilotCameraRepositioner.update();
+			cameraRepositioner.update();
 		}
 
 		var gamepads = navigator.getGamepads();

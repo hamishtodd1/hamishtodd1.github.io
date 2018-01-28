@@ -37,8 +37,8 @@ THREE.CylinderBufferGeometryUncentered = function(radius, length, radiusSegments
 
 function cameraZPlaneDistance(point)
 {
-	var displacementFromCamera = point.clone().sub(pilotCamera.position);
-	return displacementFromCamera.projectOnVector( pilotCamera.getWorldDirection() ).length();
+	var displacementFromCamera = point.clone().sub(camera.position);
+	return displacementFromCamera.projectOnVector( camera.getWorldDirection() ).length();
 }
 
 function frameDimensionsAtZDistance(camera,z)

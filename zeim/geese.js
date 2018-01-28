@@ -1,4 +1,13 @@
 /*
+	For figuring out this "sometimes rotate" business, you should only have 
+
+	One proposal is to not actually have the camera move for the client, things just move relative to it
+		Possibly bad because everything would be moving the whole time
+		Could be great because with a blank background it would look like 3b1b et al
+		Possibly better than alternative because people are just not used to seeing shit from a person's point of view
+		Could average the position of your hands and have everything onscreen, and the camera, float around them
+		Wallace and gromit inspired
+
 	Sigh, need to consult an animator over this. It is an art and therefore it might go badly
 	Eh, the pi creatures have very little to them but are effective. And you never notice the monkies in super monkey ball. This is exactly the kind of thing that *doesn't* matter
 	Actually thinking about it more might make people like it less? Snakebird...
@@ -21,7 +30,7 @@
 
 	beak mouth is 0
 
-	The pilotCamera lies on the z axis of the board
+	The camera lies on the z axis of the board
 
 	bird heads fully respect hand rotation iff hand is holding something
 	Otherwise their rotation is such that their neck is in a plane parallel to the board
@@ -29,7 +38,7 @@
 	Geese should in general be facing the screen?
 		Always have one in the frame, like if your hand leaves it it sticks around?
 	Enforce some kind of "you can't move things in z because user can't?"
-	Keep geese at fixed z and y in pilotCamera space
+	Keep geese at fixed z and y in camera space
 	Camera swivels so the board is directed towards you
 	The left one is "sitting", the right one is showing stuff/teaching. Right one is bigger, left is a gosling
 	But you do want to do things with both hands
@@ -49,7 +58,7 @@
 
 	When left is the only one onscreen you have some kind of holding animation
 
-	Geese heads are always upright, never turned more than 90 degrees from pilotCamera
+	Geese heads are always upright, never turned more than 90 degrees from camera
 	Necks infinitely long probably, so swans maybe better
 
 	Beaker from the muppets, simpsons, aardman, snakebird. But which have eyebrows. Groundskeeper willie

@@ -1,6 +1,6 @@
 //yeah, wav is pretty big, but it streams.
 
-function initAudioRecorder()
+function initAudioRecorder(audio)
 {
     var audioRecorder = {};
     var internalRecorder;
@@ -26,6 +26,10 @@ function initAudioRecorder()
     audioRecorder.stopRecording = function()
     {
         internalRecorder.stop();
+    }
+
+    audioRecorder.sendRecording = function()
+    {
         internalRecorder.exportWAV(function(blob)
         {
             var url = window.URL.createObjectURL(blob);

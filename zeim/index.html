@@ -10,8 +10,6 @@
 		</style>
 	</head>
 	<body>
-		<audio src="record.wav"></audio>
-    	
 		<script type="x-shader/x-vertex" id="vertexShader">
 			varying vec3 vWorldPosition;
 			void main() {
@@ -34,7 +32,6 @@
 		
 		<script src="lib/three.min.js"></script>
 
-		<script src="lib/SceneFromDemo.js"></script>
 		<script src="lib/OBJLoader.js"></script>
 		
 		<script src="lib/WebVR.js"></script>
@@ -43,23 +40,25 @@
 
     	<script src="lib/audioRecorder.js"></script>
     	<script src="audio.js"></script>
+
+    	<script src="sceneFromDemo.js"></script>
 		
 		<script src="variables.js"></script>
 		<script src="miscFunctions.js"></script>
 		<script src="vrControlSystem.js"></script>
 		<script src="mouseControlSystem.js"></script>
+		<script src="slider.js"></script>
 		<script src="images.js"></script>
-
-		<script src="spectatorCamera.js"></script>
 
 		<script src="geese.js"></script>
 		
-		<script src="monitorerUi.js"></script>
-		<script src="monitoring.js"></script>
+		<script src="markingSystem.js"></script>
+		<script src="recorder.js"></script>
+		<script src="playbackSystem.js"></script>
 
 		<script src="windowResizeSystem.js"></script>
 		
-		<script src="loop.js"></script>
+		<script src="loop.js?v=11"></script>
 		<script src="init.js"></script>
 	</body>
 </html>

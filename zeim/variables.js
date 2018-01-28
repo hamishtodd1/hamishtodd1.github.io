@@ -18,19 +18,14 @@ var RIGHT_CONTROLLER_INDEX = 0;
 var LEFT_CONTROLLER_INDEX = 1-RIGHT_CONTROLLER_INDEX;
 
 //------Honest to god global variables
-var pilotCamera = new THREE.PerspectiveCamera( 0,0,0.01, 700);
-var spectatorCamera = new THREE.PerspectiveCamera( 0,0,0.01, 700);
+var camera = new THREE.PerspectiveCamera( 0,0,0.01, 700);
 
-/*
-	Spectator camera
-		Wants a representation
-		Needs a way to grab the objects (it's still working off pilotCamera)
-		How far back is it going?
-		Have ui and everything else added to it
-*/
-
-var scene = new THREE.Scene().add(pilotCamera, spectatorCamera);
+var scene = new THREE.Scene().add(camera, camera);
 var mouse = null;
 
-var SPECTATOR_MINIMUM_FOV = 70;
-var SPECTATOR_DESIRED_ASPECT_RATIO = 16/9;
+var frameCount = 0;
+
+var unmarkedThingsToBeUpdated = [];
+var markedThingsToBeUpdated = [];
+var holdables = [];
+var clickables = [];

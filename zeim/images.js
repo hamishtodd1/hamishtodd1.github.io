@@ -1,4 +1,4 @@
-function initImages(thingsToBeUpdated, clickables)
+function initImages()
 {
 	var imageFileNames = [
 		"murrays.png",
@@ -22,13 +22,13 @@ function initImages(thingsToBeUpdated, clickables)
 
 	function singleLoadLoop(i)
 	{
-		textureLoader.load( "/data/textures/" + imageFileNames[i], function(texture) 
+		textureLoader.load( "./data/textures/" + imageFileNames[i], function(texture) 
 		{
 			var image = new GrabbableImage(texture);
 			image.position.set( -i * 0.5, 0, -1.8 );
-			thingsToBeUpdated.push(image);
+			unmarkedThingsToBeUpdated.push(image);
 			clickables.push(image)
-			pilotCamera.add(image); //sigh, maybe better added to pilotCamera
+			camera.add(image);
 		}, function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );} );
 	}
 
