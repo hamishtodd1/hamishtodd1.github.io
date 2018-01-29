@@ -34,9 +34,8 @@ function initRecorder(socket, audio,
 		}
 	}
 
-	document.addEventListener( 'contextmenu', function(event)
+	document.addEventListener( 'contextmenu', function(event) //right click because keyboard briefly makes it so mousedown is not called!
 	{
-		//right click because keyboard briefly makes it so mousedown is not called!
 		event.preventDefault();
 		recordingToggled = true;
 	});
@@ -107,6 +106,4 @@ function initRecorder(socket, audio,
 			recordState();
 		}
 	}
-
-	unmarkedThingsToBeUpdated.push( recorder );
 }

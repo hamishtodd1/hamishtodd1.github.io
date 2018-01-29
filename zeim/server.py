@@ -63,6 +63,7 @@ class wsHandler(tornado.websocket.WebSocketHandler):
 			monitoringFileWrite = open('markingSystem.js', 'w')
 			monitoringFileWrite.write(modifiedMonitoringFile)
 			print("updated audio version")
+			print("\n")
 
 			self.write_message("oldAudioDeleted")
 

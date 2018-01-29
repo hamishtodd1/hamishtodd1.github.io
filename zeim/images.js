@@ -26,7 +26,7 @@ function initImages()
 		{
 			var image = new GrabbableImage(texture);
 			image.position.set( -i * 0.5, 0, -1.8 );
-			unmarkedThingsToBeUpdated.push(image);
+			markedThingsToBeUpdated.push(image);
 			clickables.push(image)
 			camera.add(image);
 		}, function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );} );

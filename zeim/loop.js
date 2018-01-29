@@ -4,14 +4,14 @@ function loop( controllers )
 	frameTime += frameDelta;
 	frameCount++;
 	
-	if( RUNNING_LOCALLY )
+	if( FULL_SETUP )
 	{
 		updateVrInputSystem();
 	}
 	mouse.updateFromAsyncAndCheckClicks();
 
-	updatePlaybackSystem();
-	if( RUNNING_LOCALLY )
+	playShowOrUpdateObjects();
+	if( FULL_SETUP )
 	{
 		updateRecorder();
 	}

@@ -25,9 +25,8 @@ var mouse = null;
 
 var frameCount = 0;
 
-var unmarkedThingsToBeUpdated = [];
 var markedThingsToBeUpdated = [];
 var holdables = [];
 var clickables = [];
 
-var RUNNING_LOCALLY = window.location.href === "http://localhost:9090";
+var FULL_SETUP = WEBVR && WEBVR.isAvailable() && window.location.href !== "http://localhost:9090";

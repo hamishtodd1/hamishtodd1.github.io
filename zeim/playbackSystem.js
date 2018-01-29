@@ -2,9 +2,8 @@ function initPlaybackSystem(audio,
 	recordedFrames, markedObjectsAndProperties, markedQuaternions)
 {
 	var playbackSystem = {};
-	unmarkedThingsToBeUpdated.push( playbackSystem );
 
-	playbackSystem.togglePlaying = function()
+	togglePlaying = function()
 	{
 		if( audio.paused )
 		{
@@ -25,8 +24,21 @@ function initPlaybackSystem(audio,
 		}
 	});
 
+	var notedDiscrepancy = false;
 	playbackSystem.dispense = function()
 	{
+		//you can use this to clobber out a starting state you don't like
+		if(	recordedFrames[0].quaternionData.length !== markedQuaternions.length
+			|| recordedFrames[0].objectPropertyData.length !== markedObjectsAndProperties.length )
+		{
+			if(!notedDiscrepancy)
+			{
+				console.error("Recorded data not what expected, we're not using it")
+				notedDiscrepancy = true;
+			}
+			return;
+		}
+
 		var frameJustBefore = 0;
 		for( var i = 0, il = recordedFrames.length; i < il; i++ )
 		{
@@ -58,7 +70,7 @@ function initPlaybackSystem(audio,
 				markedObjectsAndProperties[i].object[ markedObjectsAndProperties[i].property ] = recordedFrames[frameJustBefore].objectPropertyData[i];
 			}
 		}
-		for(var i = 0, il = markedQuaternions.length; i < il; i++)
+		for(var i = 0, il = recordedFrames[frameJustBefore].quaternionData.length; i < il; i++)
 		{
 			markedQuaternions[i].fromArray( recordedFrames[frameJustBefore].quaternionData[i] );
 			var nextFrameQuaternion = new THREE.Quaternion().fromArray( recordedFrames[frameJustAfter].quaternionData[i] );
@@ -68,11 +80,11 @@ function initPlaybackSystem(audio,
 
 	var ui = initUi(audio, playbackSystem, recordedFrames);
 
-	updatePlaybackSystem = function()
+	playShowOrUpdateObjects = function()
 	{
 		if( playingToggled)
 		{
-			playbackSystem.togglePlaying();
+			togglePlaying();
 			playingToggled = false;
 		}
 
@@ -115,7 +127,6 @@ function initPlaybackSystem(audio,
 function initUi( audio, playbackSystem, recordedFrames)
 {
 	var ui = {};
-	unmarkedThingsToBeUpdated.push( ui );
 
 	var background = new THREE.Mesh(new THREE.PlaneBufferGeometry(2,2), new THREE.MeshBasicMaterial({color:0xFAFAFA, transparent:true, opacity:0.77}));
 	background.position.z = -camera.near*2;
@@ -135,45 +146,9 @@ function initUi( audio, playbackSystem, recordedFrames)
 		playPauseButton.geometry.faces.push(new THREE.Face3(0,4,1),new THREE.Face3(1,4,5),new THREE.Face3(2,6,3),new THREE.Face3(3,6,7));
 		playPauseButton.onClick = function()
 		{
-			playbackSystem.togglePlaying();
+			togglePlaying();
 		}
 		clickables.push(playPauseButton);
-	}
-
-	{
-		function updateTimeFromSlider(valueBetweenZeroAndOne)
-		{
-			audio.currentTime = valueBetweenZeroAndOne * recordedFrames[recordedFrames.length-1].frameTime; //or audio length?
-			playbackSystem.dispense();
-		}
-		function onTimeTrackerGrab()
-		{
-			audio.pause();
-		}
-		var timeSlider = SliderSystem(updateTimeFromSlider, 0, false, onTimeTrackerGrab);
-		camera.add(timeSlider);
-		timeSlider.position.z = playPauseButton.position.z
-
-		function getTimelinePositionFromTime(time)
-		{
-			if( !recordedFrames || recordedFrames[recordedFrames.length-1].frameTime === 0)
-			{
-				return 0;
-			}
-			else
-			{
-				return time / recordedFrames[recordedFrames.length-1].frameTime;
-			}
-		}
-
-		function updateTimeSliderFromTime()
-		{
-			timeSlider.setValue( getTimelinePositionFromTime( audio.currentTime ) )
-		}
-
-		var bufferedHighlights = [];
-		var bufferedMaterial = timeSlider.material.clone();
-		bufferedMaterial.color.multiplyScalar(0.85);
 	}
 
 	{
@@ -194,11 +169,59 @@ function initUi( audio, playbackSystem, recordedFrames)
 		speedSlider.position.z = playPauseButton.position.z
 	}
 
+	{
+		function getShowLength()
+		{
+			if(isNaN(audio.duration))
+			{
+				return recordedFrames[recordedFrames.length-1].frameTime
+			}
+			else
+			{
+				return Math.min(audio.duration, recordedFrames[recordedFrames.length-1].frameTime)
+			}
+		}
+		function updateTimeFromSlider(valueBetweenZeroAndOne)
+		{
+			audio.currentTime = valueBetweenZeroAndOne * getShowLength();
+			playbackSystem.dispense();
+		}
+		function onTimeTrackerGrab()
+		{
+			audio.pause();
+		}
+		var timeSlider = SliderSystem(updateTimeFromSlider, 0, false, onTimeTrackerGrab);
+		camera.add(timeSlider);
+		timeSlider.position.z = playPauseButton.position.z
+
+		function getTimelinePositionFromTime(time)
+		{
+			if( !recordedFrames || getShowLength() === 0)
+			{
+				return 0;
+			}
+			else
+			{
+				return time / getShowLength();
+			}
+		}
+
+		function updateTimeSliderFromTime()
+		{
+			timeSlider.setValue( getTimelinePositionFromTime( audio.currentTime ) )
+		}
+
+		var bufferedHighlights = [];
+		var bufferedMaterial = timeSlider.material.clone();
+		bufferedMaterial.color.multiplyScalar(0.85);
+	}
+
 	function setUiSize()
 	{
 		var frameDimensions = frameDimensionsAtZDistance(camera,-playPauseButton.position.z);
 
-		var height = frameDimensions.width * 0.1;
+		var height = frameDimensions.width * 0.08
+		/ Math.pow(frameDimensions.width/frameDimensions.height,1);
 
 		var slidersHeight = height * 0.2;
 
@@ -227,12 +250,10 @@ function initUi( audio, playbackSystem, recordedFrames)
 	setUiSize();
 	window.addEventListener( 'resize', setUiSize, false );
 
-	{
-		//youtube visibility: take mouse off and it disappears. Don't move mouse for 3s, it disappears. Dunno about touchscreens
-		//if you're paused it's only there if you move your mouse downt there
-		var uiVisibilityTimerLength = 3;
-		var uiVisibilityTimer = uiVisibilityTimerLength;
-	}
+	//youtube visibility: take mouse off and it disappears. Don't move mouse for 3s, it disappears. Dunno about touchscreens
+	//if you're paused it's only there if you move your mouse downt there
+	var uiVisibilityTimerLength = 3;
+	var uiVisibilityTimer = uiVisibilityTimerLength;
 
 	ui.update = function()
 	{

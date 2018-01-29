@@ -19,7 +19,7 @@
 function initPlaybackSystemAndMaybeRecorder(launcher)
 {
 	var audio = new Audio();
-	audio.src = "record.wav?v=1164";
+	audio.src = "record.wav?v=1171";
 
 	var markedObjectsAndProperties = [];
 	/*
@@ -50,17 +50,22 @@ function initPlaybackSystemAndMaybeRecorder(launcher)
 		initPlaybackSystem( audio, recordedFrames,
 			markedObjectsAndProperties, markedQuaternions );
 
-		if( RUNNING_LOCALLY )
+		if( FULL_SETUP )
 		{
 			var socket = new WebSocket("ws://" + window.location.href.substring(7) + "ws")
 			socket.onopen = function()
 			{
 				initRecorder( this, audio, recordedFrames,
 					markedObjectsAndProperties, markedQuaternions );
+
+				launcher.dataLoaded["recordedFrames"] = true;
+				launcher.attemptLaunch();
 			}
 		}
-
-		launcher.dataLoaded["recordedFrames"] = true;
-		launcher.attemptLaunch();
+		else
+		{
+			launcher.dataLoaded["recordedFrames"] = true;
+			launcher.attemptLaunch();
+		}
 	});
 }

@@ -62,6 +62,12 @@
 				return;
 			}
 
+			if( !FULL_SETUP )
+			{
+				console
+				togglePlaying();
+			}
+
 			render();
 		}
 	}
@@ -90,10 +96,10 @@
 	// scene.add(goose);
 	// thingsToBeUpdated.goose = goose;
 
-	initPlaybackSystemAndMaybeRecorder(launcher);
+	initPlaybackSystemAndMaybeRecorder( launcher );
 
 	var controllers = initControllers(launcher);
-	if( WEBVR && !WEBVR.isAvailable() && RUNNING_LOCALLY )
+	if( FULL_SETUP )
 	{
 		initVrInputSystem(controllers, ourVrEffect, renderer);
 	}
@@ -116,13 +122,18 @@
 		markedThingsToBeUpdated.push(testObject);
 		clickables.push(testObject);
 
+		markObjectProperty(testObject.scale,"y")
 		markPositionAndQuaternion(testObject);
 
-		function testChangeValue(){};
-		var testSlider = SliderSystem(testChangeValue, 0, false);
-		//would like that last argument to be true. Darn, need a way to add marks while reading previous file
+		function testChangeValue(valueBetweenZeroAndOne)
+		{
+			testObject.scale.y = 1 + 0.7 * (valueBetweenZeroAndOne-0.5);
+		}
+		var testSlider = SliderSystem(testChangeValue, 0, true );
+		testObject.scale.y = 1;
+		testSlider.setValue(0.5)
 		testSlider.setDimensions(0.1)
-		testSlider.position.set(0,0.2,-0.4)
+		testSlider.position.set(0,0.08,-0.4)
 		scene.add(testSlider)
 		
 		markedThingsToBeUpdated.push(testSlider);

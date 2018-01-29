@@ -1,11 +1,6 @@
 //vibration if you drag it off the side would be good
 function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGrab)
 {
-	if(!onTrackerGrab)
-	{
-		onTrackerGrab = function(){};
-	}
-
 	var sliderSystem = new THREE.Mesh(new THREE.PlaneBufferGeometry(1,1), new THREE.MeshBasicMaterial({color:0xDADADA}));
 	sliderSystem.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.5,0,0))
 	sliderSystem.onClick = function(cameraSpaceClickedPoint)
@@ -35,23 +30,18 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 	tracker.onClick = function(cameraSpaceClickedPoint)
 	{
 		this.clickedPoint = cameraSpaceClickedPoint;
-		onTrackerGrab();
-	}
-
-	{
-		var joltedness = 0;
-
-		function cancelJolt()
+		if(onTrackerGrab)
 		{
-			joltedness = 0;
-			tracker.material.color.copy(trackerDefaultColor)
+			onTrackerGrab();
 		}
 	}
+
+	sliderSystem.joltedness = 0;
 
 	sliderSystem.update = function()
 	{
 		var specifiedValueAtStart = tracker.position.x;
-		joltedness -= frameDelta * 5.5;
+		sliderSystem.joltedness -= frameDelta * 5.5;
 
 		if( mouse.clicking && ( mouse.lastClickedObject === tracker || mouse.lastClickedObject === sliderSystem ) )
 		{
@@ -65,27 +55,22 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 				if( tracker.position.x < 0 )
 				{
 					tracker.position.x = 0;
-					joltedness = 1.35;
+					sliderSystem.joltedness = 1.35;
 				}
 				else if( 1 < tracker.position.x )
 				{
 					tracker.position.x = 1;
-					joltedness = 1.35;
-				}
-				else
-				{
-					cancelJolt();
+					sliderSystem.joltedness = 1.35;
 				}
 			}
 		}
 		else
 		{
-			cancelJolt();
 			tracker.clickedPoint = null;
 		}
 
 		tracker.material.color.copy(trackerDefaultColor);
-		tracker.material.color.lerp(trackerJoltedColor,clamp(joltedness,0,1))
+		tracker.material.color.lerp(trackerJoltedColor,clamp(sliderSystem.joltedness,0,1))
 
 		if(tracker.position.x !== specifiedValueAtStart)
 		{
@@ -107,7 +92,6 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 
 	sliderSystem.setValue = function(trackerPositionX)
 	{
-		cancelJolt();
 		tracker.position.x = trackerPositionX;
 	}
 
@@ -115,6 +99,8 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 	{
 		markPositionAndQuaternion(sliderSystem)
 		markObjectProperty(tracker.position,"x")
+
+		markObjectProperty(sliderSystem,"joltedness")
 	}
 
 	return sliderSystem;
