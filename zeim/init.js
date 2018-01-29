@@ -1,6 +1,8 @@
 /*
 	Extreme democratization: I am programming the game as you play it, but you can reprogram it, maybe even me
 
+	May want to pull out an actual picture of a mouse cursor and put it where you want
+
 	TODO for slack demo:
 		-VR interaction / funkiness in which you move your head and hand around and camera is in right place
 		-Finish geese? Eyes
