@@ -19,7 +19,7 @@
 function initPlaybackSystemAndMaybeRecorder(launcher)
 {
 	var audio = new Audio();
-	audio.src = "record.wav?v=1171";
+	audio.src = "record.wav?v=1174";
 
 	var markedObjectsAndProperties = [];
 	/*

@@ -101,6 +101,9 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 		markObjectProperty(tracker.position,"x")
 
 		markObjectProperty(sliderSystem,"joltedness")
+		markObjectProperty(tracker.material.color,"r")
+		markObjectProperty(tracker.material.color,"g")
+		markObjectProperty(tracker.material.color,"b")
 	}
 
 	return sliderSystem;

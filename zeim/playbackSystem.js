@@ -33,7 +33,11 @@ function initPlaybackSystem(audio,
 		{
 			if(!notedDiscrepancy)
 			{
-				console.error("Recorded data not what expected, we're not using it")
+				console.error("Recorded data not what expected, this should not play")
+				if(!audio.paused)
+				{
+					togglePlaying()
+				}
 				notedDiscrepancy = true;
 			}
 			return;
