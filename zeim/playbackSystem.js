@@ -12,6 +12,9 @@ function initPlaybackSystem(audio,
 		else
 		{
 			audio.pause();
+			//flick to a specific recordedFrameso it’s not interpolated
+			//otherwise bugs, proooobably
+			//unless your interpolations are valid game states, unlikely with booleans
 		}
 	}
 	var playingToggled = false;

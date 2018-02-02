@@ -20,11 +20,8 @@
 
 	First things to put in/actually do
 		-my favourite 3d patterns/neoshapes
-		-59 icos object
-			-A puzzle
-		Klein bottle?
-		-Lynne thing
-		-conic section?
+		-A puzzle
+		-pwg
 
 */
 

@@ -1,4 +1,7 @@
 /*
+Ken Perlin could give feedback
+	Not visible when you're paused!
+
 	For figuring out this "sometimes rotate" business, you should only have 
 
 	One proposal is to not actually have the camera move for the client, things just move relative to it
