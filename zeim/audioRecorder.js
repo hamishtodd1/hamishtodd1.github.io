@@ -40,7 +40,6 @@ function initAudioRecorder(audio)
             downloadObject.href = url;
             downloadObject.download = "record";
             downloadObject.click();
-            // window.URL.revokeObjectURL(url);
         });
     }
 

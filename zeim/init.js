@@ -1,16 +1,9 @@
 /*
-	Extreme democratization: I am programming the game as you play it, but you can reprogram it, maybe even me
-
 	May want to pull out an actual picture of a mouse cursor and put it where you want
 
 	TODO for slack demo:
 		-VR interaction / funkiness in which you move your head and hand around and camera is in right place
-		-Finish geese? Eyes
-		-Working on tablets. Phones get embed and maybe message, no need to worry about address bar
-
-		-Make that 3D pong thing and a rotation thing.
-			Maybe: there's a transparent sphere with a series of balls on it. the balls are dropping off one by one. 
-			You must keep them above a hold that is in front of you
+		-Working on tablets. Phones get embed and maybe message. No need to worry about address bar
 
 	Once presentation is done
 		-Would be nice if people could spectate live
@@ -20,16 +13,19 @@
 
 	First things to put in/actually do
 		-my favourite 3d patterns/neoshapes
-		-A puzzle
+		-Something with bloody puzzles
 		-pwg
-
 */
 
 (function init()
 {
+	var vrAndRecording = WEBVR && WEBVR.isAvailable() && window.location.href === "http://localhost:9090/";
+	if(vrAndRecording)
+		console.log("Full setup")
 	var platform = getPlatform()
 	if(platform === "phone" )
 	{
+		//and a message telling you it's better on desktop
 		var iframe = document.createElement("iframe");
 	    iframe.setAttribute("src","https://www.youtube.com/embed/agOdP2Bmieg"); 
 	    iframe.style.width  = window.innerWidth;
@@ -42,8 +38,6 @@
 	var launcher = {
 		initCompleted:false,
 		dataLoaded:{
-			controllerModel0: false,
-			controllerModel1: false,
 			recordedFrames:false,
 		},
 		attemptLaunch: function()
@@ -61,12 +55,6 @@
 				return;
 			}
 
-			if( !FULL_SETUP )
-			{
-				console
-				togglePlaying();
-			}
-
 			render();
 		}
 	}
@@ -81,7 +69,7 @@
 
 	function render()
 	{
-		loop( controllers )
+		loop( controllers, vrAndRecording )
 		ourVrEffect.requestAnimationFrame( function()
 		{
 			//a reasonable indicator is ourVREffect.isPresenting
@@ -90,22 +78,28 @@
 		} );
 	}
 	
-	// var goose = new Goose();
-	// goose.position.z = -0.1
-	// scene.add(goose);
-	// thingsToBeUpdated.goose = goose;
+	initPlaybackSystemAndMaybeRecordingSystem( launcher, vrAndRecording );
 
-	initPlaybackSystemAndMaybeRecorder( launcher );
+	makeScene(true);
 
-	var controllers = initControllers(launcher);
-	if( FULL_SETUP )
+	var controllers = initControllers();
+	if( vrAndRecording )
 	{
 		initVrInputSystem(controllers, ourVrEffect, renderer);
 	}
-	
-	makeScene(true);
+
+	// var goose = new Goose();
+	// goose.position.z = -0.1
+	// scene.add(goose);
 
 	mouse = initMouse(renderer);
+
+	// initPwg();
+	
+	// initStereographicThreeSphere();
+	// initWorldMap();
+	// initShapeMaker();
+	initSnapShapes();
 
 	{
 		var testObject = new THREE.Mesh( new THREE.SphereGeometry(0.01), new THREE.MeshLambertMaterial( {} ) );
@@ -113,8 +107,8 @@
 		testObject.position.z = -0.1;
 		// testObject.update = function()
 		// {
-		// 	this.position.y = 0.01*Math.sin(frameTime*4);
-		// 	this.rotation.z = Math.sin(frameTime*4.1);
+		// 	this.position.y = 0.01*Math.sin(ourClock.getElapsedTime()*4);
+		// 	this.rotation.z = Math.sin(ourClock.getElapsedTime()*4.1);
 		// }
 		bestowDefaultMouseDragProperties(testObject);
 		

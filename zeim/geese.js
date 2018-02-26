@@ -4,13 +4,6 @@ Ken Perlin could give feedback
 
 	For figuring out this "sometimes rotate" business, you should only have 
 
-	One proposal is to not actually have the camera move for the client, things just move relative to it
-		Possibly bad because everything would be moving the whole time
-		Could be great because with a blank background it would look like 3b1b et al
-		Possibly better than alternative because people are just not used to seeing shit from a person's point of view
-		Could average the position of your hands and have everything onscreen, and the camera, float around them
-		Wallace and gromit inspired
-
 	Sigh, need to consult an animator over this. It is an art and therefore it might go badly
 	Eh, the pi creatures have very little to them but are effective. And you never notice the monkies in super monkey ball. This is exactly the kind of thing that *doesn't* matter
 	Actually thinking about it more might make people like it less? Snakebird...
@@ -21,30 +14,39 @@ Ken Perlin could give feedback
 
 	sound effect when you pick something up
 
-	Geese never look at the screen, that's distracting, only at the stuff that you want the user to look at.
-
-	Board is 16:9
-
-	The beak goes where your hand goes
-
 	Holding down the button opens the mouth. If there's a thing to bite down on, it does that
 
 	It's certainly fine / plausible, in say an RI lecture, for one's assistants to not have a full understanding
 
 	beak mouth is 0
 
+	Necks infinitely long probably, so swans maybe better
+
+	Beaker from the muppets, simpsons, aardman, snakebird. But which have eyebrows. Groundskeeper willie
+
+	Perhaps they could get frustrated if you've not done anything fun for a while
+
+	eyelids, eyebrows (for raising), tongue
+
+	could not update the geese while recording so they don't distract you?
+
+	when paused, eyes could follow mouse
+
+	//----------POSITIONING
 	The camera lies on the z axis of the board
 
 	bird heads fully respect hand rotation iff hand is holding something
 	Otherwise their rotation is such that their neck is in a plane parallel to the board
 
 	Geese should in general be facing the screen?
+	But never look at the screen, that's distracting, only at the stuff that you want the user to look at.
 		Always have one in the frame, like if your hand leaves it it sticks around?
 	Enforce some kind of "you can't move things in z because user can't?"
 	Keep geese at fixed z and y in camera space
 	Camera swivels so the board is directed towards you
 	The left one is "sitting", the right one is showing stuff/teaching. Right one is bigger, left is a gosling
 	But you do want to do things with both hands
+	Geese heads are always upright, never turned more than 90 degrees from camera
 
 	The situation is: you have an object and you want to gesture with both hands
 
@@ -61,20 +63,15 @@ Ken Perlin could give feedback
 
 	When left is the only one onscreen you have some kind of holding animation
 
-	Geese heads are always upright, never turned more than 90 degrees from camera
-	Necks infinitely long probably, so swans maybe better
+	One proposal is to not actually have the camera move for the client, things just move relative to it
+		Possibly bad because everything would be moving the whole time
+		Could be great because with a blank background it would look like 3b1b et al
+		Possibly better than alternative because people are just not used to seeing shit from a person's point of view
+		Could average the position of your hands and have everything onscreen, and the camera, float around them
+		Wallace and gromit inspired
+	Board is 16:9
 
-	Beaker from the muppets, simpsons, aardman, snakebird. But which have eyebrows. Groundskeeper willie
-
-	Perhaps they could get frustrated if you've not done anything fun for a while
-
-	eyelids, eyebrows (for raising), tongue
-
-	could not update the geese while recording so they don't distract you?
-
-	when paused, eyes could follow mouse
-
-	Really you want to control the position of the beak, the head should not be the center
+	
 	 _
 	/ \		pate
 	| |O	
@@ -115,18 +112,20 @@ function Goose()
 		{
 			eyeAngleFromForward *= -1;
 		}
-		eyeballs[i].position.applyAxisAngle(yAxis,eyeAngleFromForward)
+		eyeballs[i].position.applyAxisAngle(yUnit,eyeAngleFromForward)
 
 		newGoose.add(eyeballs[i]);
 	}
+	var positionForEyesToLookAt = new THREE.Vector3(0.1,0,0);
 
 	var beakTop = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshLambertMaterial({color:0xE8B281}));
-	var beakWidth = 1.2;
+	var beakWidth = 2;
+	var beakLength = beakWidth*1.4;
 	beakTop.geometry.vertices.push(
 		new THREE.Vector3( beakWidth/2,0,0),
 		new THREE.Vector3(-beakWidth/2,0,0),
-		new THREE.Vector3(0,beakWidth*0.9,0),
-		new THREE.Vector3(0,0,beakWidth*0.7)
+		new THREE.Vector3(0,beakWidth*0.9,0), //top
+		new THREE.Vector3(0,0,beakLength) //tip
 		);
 	beakTop.geometry.faces.push(
 		new THREE.Face3(0,2,3),
@@ -141,8 +140,8 @@ function Goose()
 	beakBottom.geometry.vertices.push(
 		new THREE.Vector3( beakWidth/2*0.9,0,0),
 		new THREE.Vector3(-beakWidth/2*0.8,0,0),
-		new THREE.Vector3(0,-beakWidth*0.4,0),
-		new THREE.Vector3(0,0,beakWidth*0.65)
+		new THREE.Vector3(0,-beakWidth*0.6,0), //bottom
+		new THREE.Vector3(0,0,beakLength*0.9) //tip
 		);
 	beakBottom.geometry.faces.push(
 		new THREE.Face3(0,3,2),
@@ -150,7 +149,6 @@ function Goose()
 		new THREE.Face3(0,1,3)
 		);
 	beakBottom.geometry.computeFaceNormals();
-	beakBottom.position.z = Math.sqrt(1-sq(beakWidth/2))
 	newGoose.add(beakBottom);
 
 	beakSupposedToBeGrabbing = false;
@@ -159,7 +157,7 @@ function Goose()
 	//a sound effect would be nice
 	newGoose.update = function()
 	{
-		// this.rotation.y += 0.02
+		this.rotation.y += 0.02
 		
 		var beakAngle = 0;
 		var beakAngleWhenGrabbing = TAU/8;
@@ -190,10 +188,21 @@ function Goose()
 			beakAngle = beakGrabbingStage * beakAngleWhenGrabbing;
 		}
 
-		// beakAngle = (Math.sin(frameTime) + 1)/2 * TAU/6;
+		beakAngle = (Math.sin(ourClock.getElapsedTime()) + 1) * TAU/36;
 		beakTop.rotation.x = -beakAngle/2;
 		beakBottom.rotation.x = beakAngle/2;
+
+		// positionForEyesToLookAt.x = Math.sin(ourClock.getElapsedTime()*10) * 0.1;
+		var endLocal = positionForEyesToLookAt.clone();
+		this.worldToLocal(endLocal)
+		for(var i = 0; i < eyeballs.length; i++)
+		{
+			var startToEnd = endLocal.clone().sub(eyeballs[i].position);
+			eyeballs[i].quaternion.setFromUnitVectors(yUnit,startToEnd.normalize());
+			eyeballs[i].quaternion.normalize();
+		}
 	}
+	thingsToAlwaysBeUpdated.push(newGoose)
 
 	return newGoose;
 }

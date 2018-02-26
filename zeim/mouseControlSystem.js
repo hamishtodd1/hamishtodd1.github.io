@@ -1,7 +1,7 @@
 //"inheritance"
 function bestowDefaultMouseDragProperties(object)
 {
-	object.clickedPoint = null;
+	object.cameraSpaceClickedPoint = null;
 	object.onControllerGrab = function()
 	{
 		//stuff about whether it was grabbed with side button
@@ -9,7 +9,7 @@ function bestowDefaultMouseDragProperties(object)
 	}
 	object.onClick = function(cameraSpaceClickedPoint)
 	{
-		this.clickedPoint = cameraSpaceClickedPoint;
+		this.cameraSpaceClickedPoint = cameraSpaceClickedPoint;
 	}
 	object.update = function()
 	{
@@ -19,8 +19,16 @@ function bestowDefaultMouseDragProperties(object)
 		}
 		else
 		{
-			this.clickedPoint = null;
+			this.cameraSpaceClickedPoint = null;
 		}
+	}
+	if(markedThingsToBeUpdated.indexOf(object) === -1)
+	{
+		markedThingsToBeUpdated.push(object)
+	}
+	if(clickables.indexOf(object) === -1)
+	{
+		clickables.push(object)
 	}
 }
 
@@ -47,21 +55,28 @@ function initMouse(renderer)
 		justMoved: false
 	};
 
+	mouse.rayIntersectionWithZPlaneInCameraSpace = function(z)
+	{
+		var displacementFromCamera = raycaster.ray.at(1).sub(camera.position);
+		var unitRayEndZ = -displacementFromCamera.projectOnVector( camera.getWorldDirection() ).length();
+		var rayLengthToGetZEquallingClickedPointZ = z / unitRayEndZ;
+		var intersectionWithZPlane = raycaster.ray.at(rayLengthToGetZEquallingClickedPointZ);
+		intersectionWithZPlane.worldToLocal(camera);
+		return intersectionWithZPlane;
+	}
+
 	mouse.applyDrag = function( object )
 	{
-		var unitRayEndZ = cameraZPlaneDistance(raycaster.ray.at(1))
-		var rayLengthToGetZEquallingClickedPointZ = -object.clickedPoint.z / unitRayEndZ;
-		var newPositionOfGrabbedPoint = raycaster.ray.at(rayLengthToGetZEquallingClickedPointZ);
-		newPositionOfGrabbedPoint.worldToLocal(camera);
+		var newPositionOfGrabbedPoint = this.rayIntersectionWithZPlaneInCameraSpace(object.cameraSpaceClickedPoint.z);
 
-		var displacement = newPositionOfGrabbedPoint.clone().sub(object.clickedPoint);
+		var displacement = newPositionOfGrabbedPoint.clone().sub(object.cameraSpaceClickedPoint);
 		camera.localToWorld(displacement);
 		displacement.add(object.parent.getWorldPosition())
 		object.parent.updateMatrixWorld();
 		object.parent.worldToLocal(displacement);
 		object.position.add(displacement);
 
-		object.clickedPoint.copy(newPositionOfGrabbedPoint);
+		object.cameraSpaceClickedPoint.copy(newPositionOfGrabbedPoint);
 	}
 
 	mouse.updateFromAsyncAndCheckClicks = function()

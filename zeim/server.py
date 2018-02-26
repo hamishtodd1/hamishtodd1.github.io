@@ -43,7 +43,8 @@ class wsHandler(tornado.websocket.WebSocketHandler):
 			recordWrite.write(message)
 			print("frames written")
 
-			monitoringFileRead = open('markingSystem.js', 'r')
+			fileName = 'playbackAndRecording.js'
+			monitoringFileRead = open(fileName, 'r')
 			modifiedMonitoringFile = ""
 			lineNumber = 0
 			for line in monitoringFileRead:
@@ -58,11 +59,11 @@ class wsHandler(tornado.websocket.WebSocketHandler):
 					versionNumber = str(versionNumber)
 					newLine += versionNumber
 					newLine += line[positionOfFirstCharacterOfVersionString+4:]
+					print("updated audio version to ", versionNumber)
 				modifiedMonitoringFile += newLine
 				lineNumber += 1
-			monitoringFileWrite = open('markingSystem.js', 'w')
+			monitoringFileWrite = open(fileName, 'w')
 			monitoringFileWrite.write(modifiedMonitoringFile)
-			print("updated audio version")
 			print("\n")
 
 			self.write_message("oldAudioDeleted")

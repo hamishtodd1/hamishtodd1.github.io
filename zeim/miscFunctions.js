@@ -21,6 +21,51 @@ function checkForNewGlobals()
 	}	
 }
 
+function getHighestValueInArray(array)
+{
+	var highestValue = -Infinity;
+	var index = null;
+	for(var i = 0, il = array.length; i<il;i++)
+	{
+		if(array[i]>highestValue)
+		{
+			highestValue = array[i];
+			index = i;
+		}
+	}
+	return index;
+}
+function getHighestFunctionCallResult(array, functionName)
+{
+	var highestValue = -Infinity;
+	var index = null;
+	for(var i = 0, il = array.length; i<il;i++)
+	{
+		var result = array[i][functionName]();
+		if( result > highestValue )
+		{
+			highestValue = result;
+			index = i;
+		}
+	}
+	return index;
+}
+
+function pointCylinder(cylinderMesh, end)
+{
+	var endLocal = end.clone();
+	cylinderMesh.parent.worldToLocal(endLocal)
+	var startToEnd = endLocal.clone().sub(cylinderMesh.position);
+	cylinderMesh.scale.set(1,startToEnd.length(),1);
+	cylinderMesh.quaternion.setFromUnitVectors(yUnit,startToEnd.normalize());
+	cylinderMesh.quaternion.normalize();
+}
+
+function basicallyEqual(a,b)
+{
+	return Math.abs(a-b) <= 0.0000001;
+}
+
 THREE.CylinderBufferGeometryUncentered = function(radius, length, radiusSegments)
 {
 	if( !radiusSegments )
@@ -35,10 +80,21 @@ THREE.CylinderBufferGeometryUncentered = function(radius, length, radiusSegments
 	return geometry;
 }
 
-function cameraZPlaneDistance(point)
+function randomPerpVector(ourVector)
 {
-	var displacementFromCamera = point.clone().sub(camera.position);
-	return displacementFromCamera.projectOnVector( camera.getWorldDirection() ).length();
+	var perpVector = ourVector.clone();
+	perpVector.clone().normalize();
+	
+	if( Math.abs(perpVector.dot(zUnit)-1) < 0.001 || Math.abs(perpVector.dot(zUnit)+1) < 0.001 )
+	{
+		perpVector.crossVectors(ourVector, yUnit);
+	}
+	else
+	{
+		perpVector.crossVectors(ourVector, zUnit);
+	}
+	
+	return perpVector;
 }
 
 function frameDimensionsAtZDistance(camera,z)
@@ -76,13 +132,21 @@ function sq(x)
 	return x*x;
 }
 
-THREE.EfficientSphereBufferGeometry = function(radius)
+THREE.EfficientSphereBufferGeometry = function(radius, sphericality)
 {
-	return new THREE.IcosahedronBufferGeometry(radius, 1);
+	if(sphericality === undefined)
+	{
+		sphericality = 1;
+	}
+	return new THREE.IcosahedronBufferGeometry(radius, sphericality);
 }
-THREE.EfficientSphereGeometry = function(radius)
+THREE.EfficientSphereGeometry = function(radius, sphericality)
 {
-	return new THREE.IcosahedronGeometry(radius, 1);
+	if(sphericality === undefined)
+	{
+		sphericality = 1;
+	}
+	return new THREE.IcosahedronGeometry(radius, sphericality);
 }
 THREE.Vector3.prototype.addArray = function(array)
 {
@@ -139,4 +203,66 @@ function getPlatform()
 		platform = "tablet";
 
 	return platform;
+}
+
+function tetrahedronTop(P1,P2,P3, r1,r2,r3) {
+	P3.sub(P1);
+	P2.sub(P1);
+	var cos_P3_P2_angle = P3.dot(P2)/P2.length()/P3.length();
+	var sin_P3_P2_angle = Math.sqrt(1-cos_P3_P2_angle*cos_P3_P2_angle);
+	
+	var P1_t = new THREE.Vector3(0,0,0);
+	var P2_t = new THREE.Vector3(P2.length(),0,0);
+	var P3_t = new THREE.Vector3(P3.length() * cos_P3_P2_angle, P3.length() * sin_P3_P2_angle,0);
+	
+	var cp_t = new THREE.Vector3(0,0,0);
+	cp_t.x = ( r1*r1 - r2*r2 + P2_t.x * P2_t.x ) / ( 2 * P2_t.x );
+	cp_t.y = ( r1*r1 - r3*r3 + P3_t.x * P3_t.x + P3_t.y * P3_t.y ) / ( P3_t.y * 2 ) - ( P3_t.x / P3_t.y ) * cp_t.x;
+	if(r1*r1 - cp_t.x*cp_t.x - cp_t.y*cp_t.y < 0) {
+		console.error("Impossible tetrahedron");
+		return false;			
+	}
+	cp_t.z = Math.sqrt(r1*r1 - cp_t.x*cp_t.x - cp_t.y*cp_t.y);
+	
+	var cp = new THREE.Vector3(0,0,0);
+	
+	var z_direction = new THREE.Vector3();
+	z_direction.crossVectors(P2,P3);
+	z_direction.normalize(); 
+	z_direction.multiplyScalar(cp_t.z);
+	cp.add(z_direction);
+	
+	var x_direction = P2.clone();
+	x_direction.normalize();
+	x_direction.multiplyScalar(cp_t.x);
+	cp.add(x_direction);
+	
+	var y_direction = new THREE.Vector3();
+	y_direction.crossVectors(z_direction,x_direction);
+	y_direction.normalize();
+	y_direction.multiplyScalar(cp_t.y);
+	cp.add(y_direction);		
+	cp.add(P1);
+	
+	P2.add(P1);
+	P3.add(P1);
+	
+	return cp;
+}
+
+THREE.OriginCorneredPlaneGeometry = function(width,height)
+{
+	var g = new THREE.PlaneBufferGeometry(1,1);
+	g.applyMatrix(new THREE.Matrix4().makeTranslation(0.5,0.5,0))
+
+	if(width)
+	{
+		g.applyMatrix(new THREE.Matrix4().makeScale(width,1,1))
+	}
+	if(height)
+	{
+		g.applyMatrix(new THREE.Matrix4().makeScale(1,height,1))
+	}
+
+	return g;
 }

@@ -1,22 +1,9 @@
-function initPlaybackSystem(audio,
-	recordedFrames, markedObjectsAndProperties, markedQuaternions)
-{
-	var playbackSystem = {};
+//when paused, all clickable objects should flash
 
-	togglePlaying = function()
-	{
-		if( audio.paused )
-		{
-			audio.play();
-		}
-		else
-		{
-			audio.pause();
-			//flick to a specific recordedFrameso it’s not interpolated
-			//otherwise bugs, proooobably
-			//unless your interpolations are valid game states, unlikely with booleans
-		}
-	}
+
+
+function initPlaybackControl(audio,recordedFrames)
+{
 	var playingToggled = false;
 	document.addEventListener( 'keydown', function(event)
 	{
@@ -27,113 +14,34 @@ function initPlaybackSystem(audio,
 		}
 	});
 
-	var notedDiscrepancy = false;
-	playbackSystem.dispense = function()
-	{
-		//you can use this to clobber out a starting state you don't like
-		if(	recordedFrames[0].quaternionData.length !== markedQuaternions.length
-			|| recordedFrames[0].objectPropertyData.length !== markedObjectsAndProperties.length )
-		{
-			if(!notedDiscrepancy)
-			{
-				console.error("Recorded data not what expected, this should not play")
-				if(!audio.paused)
-				{
-					togglePlaying()
-				}
-				notedDiscrepancy = true;
-			}
-			return;
-		}
-
-		var frameJustBefore = 0;
-		for( var i = 0, il = recordedFrames.length; i < il; i++ )
-		{
-			if( recordedFrames[i].frameTime <= audio.currentTime )
-			{
-				frameJustBefore = i;
-			}
-		}
-		var frameJustAfter = frameJustBefore + 1;
-		if( frameJustAfter > recordedFrames.length-1 )
-		{
-			console.log("recording end reached")
-			audio.pause()
-			return;
-		}
-
-		var lerpValue = ( audio.currentTime - recordedFrames[frameJustBefore].frameTime ) / (recordedFrames[frameJustAfter].frameTime - recordedFrames[frameJustBefore].frameTime);
-		lerpValue = clamp(lerpValue, 0,1);
-
-		for(var i = 0, il = markedObjectsAndProperties.length; i < il; i++)
-		{
-			if( typeof recordedFrames[frameJustBefore].objectPropertyData[i] === "number")
-			{
-				var frameDiff = recordedFrames[frameJustAfter].objectPropertyData[i] - recordedFrames[frameJustBefore].objectPropertyData[i];
-				markedObjectsAndProperties[i].object[ markedObjectsAndProperties[i].property ] = lerpValue * frameDiff + recordedFrames[frameJustBefore].objectPropertyData[i];
-			}
-			else
-			{
-				markedObjectsAndProperties[i].object[ markedObjectsAndProperties[i].property ] = recordedFrames[frameJustBefore].objectPropertyData[i];
-			}
-		}
-		for(var i = 0, il = recordedFrames[frameJustBefore].quaternionData.length; i < il; i++)
-		{
-			markedQuaternions[i].fromArray( recordedFrames[frameJustBefore].quaternionData[i] );
-			var nextFrameQuaternion = new THREE.Quaternion().fromArray( recordedFrames[frameJustAfter].quaternionData[i] );
-			markedQuaternions[i].slerp( nextFrameQuaternion, lerpValue );
-		}
-	}
-
-	var ui = initUi(audio, playbackSystem, recordedFrames);
-
-	playShowOrUpdateObjects = function()
+	respondToPlaybackControlInput = function()
 	{
 		if( playingToggled)
 		{
-			togglePlaying();
+			if( audio.paused )
+			{
+				audio.play();
+			}
+			else
+			{
+				audio.pause();
+				audio.currentTime = recordedFrames[getIndexOfFrameJustBeforeTime(audio.currentTime)+1].frameTime; //avoid interpolation issues
+			}
+
 			playingToggled = false;
 		}
 
-		if( mouse.clicking && mouse.lastClickedObject !== ui.playPauseButton )
+		if( mouse.clicking && mouse.lastClickedObject !== playPauseButton )
 		{
 			audio.pause();
 		}
 
-		/*
-			Philofophie
-			One might like to change initial conditions then watch what I do
-				That would mean: DO NOT record certain things, instead update them while the recording is playing
-				But it is also important to be able to skip around the timeline
-				Could simulate forward by going through what's happened in every frame.
-				Could mark certain properties as "recalled if you skip to this point but not if you're simulating forward". That's a lot of work for yourself.
-				It is REALLY UNAVOIDABLY COMPLEX to think about any kind of updating during playingtime. Consider that some things are inter-frame.
-				Could record only controller input
-				It also risks (hugely) people seeing something you didn't intend
+		updateUi();
 
-			updating when paused will mean stuff continues to do things
-			but that's ok, you're pausing *me*, not the simulation
-			But mightn't it be quite fun to "play" with the audience? Yeesh
-		*/
-		if(!audio.paused)
-		{
-			playbackSystem.dispense();
-		}
-		else
-		{
-			for(var i = 0; i < markedThingsToBeUpdated.length; i++)
-			{
-				markedThingsToBeUpdated[i].update();
-			}
-		}
-
-		ui.update();
+		return audio.paused;
 	}
-}
 
-function initUi( audio, playbackSystem, recordedFrames)
-{
-	var ui = {};
+	//--------------ui
 
 	var background = new THREE.Mesh(new THREE.PlaneBufferGeometry(2,2), new THREE.MeshBasicMaterial({color:0xFAFAFA, transparent:true, opacity:0.77}));
 	background.position.z = -camera.near*2;
@@ -141,7 +49,6 @@ function initUi( audio, playbackSystem, recordedFrames)
 
 	{
 		var playPauseButton = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0x5A5A5A}));
-		ui.playPauseButton = playPauseButton;
 		camera.add(playPauseButton);
 		for(var i = 0; i < 8; i++)
 		{
@@ -153,7 +60,7 @@ function initUi( audio, playbackSystem, recordedFrames)
 		playPauseButton.geometry.faces.push(new THREE.Face3(0,4,1),new THREE.Face3(1,4,5),new THREE.Face3(2,6,3),new THREE.Face3(3,6,7));
 		playPauseButton.onClick = function()
 		{
-			togglePlaying();
+			playingToggled = true;
 		}
 		clickables.push(playPauseButton);
 	}
@@ -191,7 +98,6 @@ function initUi( audio, playbackSystem, recordedFrames)
 		function updateTimeFromSlider(valueBetweenZeroAndOne)
 		{
 			audio.currentTime = valueBetweenZeroAndOne * getShowLength();
-			playbackSystem.dispense();
 		}
 		function onTimeTrackerGrab()
 		{
@@ -262,7 +168,7 @@ function initUi( audio, playbackSystem, recordedFrames)
 	var uiVisibilityTimerLength = 3;
 	var uiVisibilityTimer = uiVisibilityTimerLength;
 
-	ui.update = function()
+	function updateUi()
 	{
 		if( mouse.clicking || mouse.justMoved )
 		{
@@ -334,5 +240,5 @@ function initUi( audio, playbackSystem, recordedFrames)
 		updateTimeSliderFromTime();
 	}
 
-	return ui;
+	return audio;
 }

@@ -1,4 +1,4 @@
-function initRecorder(socket, audio, 
+function initRecordingSystem(socket, audio, 
 	recordedFrames, markedObjectsAndProperties, markedQuaternions)
 {
 	var recording = false;
