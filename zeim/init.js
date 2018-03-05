@@ -15,6 +15,7 @@
 		-my favourite 3d patterns/neoshapes
 		-Something with bloody puzzles
 		-pwg
+		-Maryam Mirzakhani, 14th of July
 */
 
 (function init()
@@ -101,38 +102,38 @@
 	// initShapeMaker();
 	initSnapShapes();
 
-	{
-		var testObject = new THREE.Mesh( new THREE.SphereGeometry(0.01), new THREE.MeshLambertMaterial( {} ) );
-		camera.add(testObject);
-		testObject.position.z = -0.1;
-		// testObject.update = function()
-		// {
-		// 	this.position.y = 0.01*Math.sin(ourClock.getElapsedTime()*4);
-		// 	this.rotation.z = Math.sin(ourClock.getElapsedTime()*4.1);
-		// }
-		bestowDefaultMouseDragProperties(testObject);
+	// {
+	// 	var testObject = new THREE.Mesh( new THREE.SphereGeometry(0.01), new THREE.MeshLambertMaterial( {} ) );
+	// 	camera.add(testObject);
+	// 	testObject.position.z = -0.1;
+	// 	// testObject.update = function()
+	// 	// {
+	// 	// 	this.position.y = 0.01*Math.sin(ourClock.getElapsedTime()*4);
+	// 	// 	this.rotation.z = Math.sin(ourClock.getElapsedTime()*4.1);
+	// 	// }
+	// 	bestowDefaultMouseDragProperties(testObject);
 		
-		markedThingsToBeUpdated.push(testObject);
-		clickables.push(testObject);
+	// 	markedThingsToBeUpdated.push(testObject);
+	// 	clickables.push(testObject);
 
-		markObjectProperty(testObject.scale,"y")
-		markPositionAndQuaternion(testObject);
+	// 	markObjectProperty(testObject.scale,"y")
+	// 	markPositionAndQuaternion(testObject);
 
-		function testChangeValue(valueBetweenZeroAndOne)
-		{
-			testObject.scale.y = 1 + 0.7 * (valueBetweenZeroAndOne-0.5);
-		}
-		var testSlider = SliderSystem(testChangeValue, 0, true );
-		testObject.scale.y = 1;
-		testSlider.setValue(0.5)
-		testSlider.setDimensions(0.1)
-		testSlider.position.set(0,0.08,-0.4)
-		scene.add(testSlider)
+	// 	function testChangeValue(valueBetweenZeroAndOne)
+	// 	{
+	// 		testObject.scale.y = 1 + 0.7 * (valueBetweenZeroAndOne-0.5);
+	// 	}
+	// 	var testSlider = SliderSystem(testChangeValue, 0, true );
+	// 	testObject.scale.y = 1;
+	// 	testSlider.setValue(0.5)
+	// 	testSlider.setDimensions(0.1)
+	// 	testSlider.position.set(0,0.08,-0.4)
+	// 	scene.add(testSlider)
 		
-		markedThingsToBeUpdated.push(testSlider);
+	// 	markedThingsToBeUpdated.push(testSlider);
 
-		initImages();
-	}
+	// 	initImages();
+	// }
 
 	launcher.initCompleted = true;
 	launcher.attemptLaunch();

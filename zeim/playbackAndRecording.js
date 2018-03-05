@@ -28,7 +28,7 @@
 function initPlaybackSystemAndMaybeRecordingSystem(launcher, vrAndRecording)
 {
 	var audio = new Audio();
-	audio.src = "record.wav?v=1188";
+	audio.src = "record.wav?v=1190";
 	if( !vrAndRecording )
 	{
 		audio.autoplay = true;

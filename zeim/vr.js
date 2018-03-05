@@ -8,7 +8,7 @@ function initControllers()
 
 	function loadControllerModel(i)
 	{
-		new THREE.OBJLoader().load( "data/external_controller01_" + (i===LEFT_CONTROLLER_INDEX?"left":"right") + ".obj",
+		new THREE.OBJLoader().load( "data/meshes/external_controller01_" + (i===LEFT_CONTROLLER_INDEX?"left":"right") + ".obj",
 			function ( object ) 
 			{
 				controllers[  i ].controllerModel.geometry = object.children[0].geometry;

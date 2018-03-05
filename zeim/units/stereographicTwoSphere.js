@@ -1,3 +1,34 @@
+/*
+	Could have lines on there quite easily, circles of course. 
+	Grab a little circle on the projected field and move it around.
+	Have to touch some things and avoid other things and other things you crash into
+	Maybe: the light automatically opposes the "screen"?
+
+	TODO
+		Grab to rotate the sphere
+		Lines(/circles) that map to circles and vice versa. Three points on each, grab and move
+			out of which you build crosses mapping to perfect right angle crosses
+		A little dot to move around. You can then change the projection but not such that it is inside shapes. It has a destination
+		A "sheet" it projects onto
+		fix triangle stretching problem?
+		They should be able to move the sphere arbitrarily
+		Surface of jupiter?
+			Yes but screw texture mapper, make it yourself with triangles.
+			You want a concentric circles thing anyway
+			Can you make a virtue of this? Yes, the red spot can be circles
+		Projectiles, dummy. They move on the sphere so have interesting behaviour
+		Or a constant stream of projectiles on plane that look funny on sphere, forever slowing down
+
+		Visualize the formula? Nah, not your style. But
+
+		That old rainbow square from Mobius Transformations revealed
+
+	Script
+		Thanks to Henry Segerman for making me aware of the coolness of this
+
+	Use toon material
+*/
+
 function initStereographicTwoSphere()
 {
 	function getStereographicProjection(vector, rayOrigin)
@@ -12,7 +43,7 @@ function initStereographicTwoSphere()
 			stereographicProjectionInFourSpace.z );
 	}
 
-	new THREE.OBJLoader().load( "data/textures/worldMap.obj",
+	new THREE.OBJLoader().load( "data/meshes/worldMap.obj",
 		function ( object ) 
 		{
 			var worldMap = new THREE.Mesh(

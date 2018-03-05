@@ -8,7 +8,7 @@
 	A method of creating new ones would be best, is there one? May wanna make looooots.
 	I mean, you do like polyhedra.
 
-	Stick in vertices and go in VR and specify faces by hitting the vertices one at a time. Just create a fan
+	Stick in vertices specify faces by hitting clicking the vertices one at a time. Create a fan
 	Export an array easy to copypaste.
 	"Face" data structure is just series of points that build up the fan. Check respective lengths, that's surely enough to identify face types
 	You decide what color they are
@@ -21,8 +21,6 @@
 	note that so long as you have a teeny bit of depth, you can have snapping squares
 
 */
-
-
 
 
 
@@ -200,7 +198,7 @@ function initSnapShapes()
 				edgesMesh.geometry.attributes.normal.setArray( new Float32Array( 3 * (cylinderSides * edgePairs.length * 2) ) );
 				edgesMesh.geometry.index.setArray( new Uint32Array( 3 * (cylinderSides * edgePairs.length * 2) ) );
 
-				//can't use XYZ because itemsize is 1
+				//can't use setXYZ because itemsize is 1
 				edgesMesh.geometry.index.setABC = function(index,a,b,c)
 				{
 					this.array[ index*3+0 ] = a;
@@ -318,6 +316,7 @@ function initSnapShapes()
 
 	cubeA.update = function()
 	{
+
 		//we assume the face vertex list has been ordered in a specific way (that only works if it's convex)
 
 		//it's not necessarily the case that you want to snap 0 to 0 ><
@@ -434,3 +433,160 @@ function initSnapShapes()
 		this.matrix.setPosition(finalPosition);
 	}
 }
+
+//coords or Vector3s is fine
+var truncatedCubeVertices = [];
+var exceptionalCoord = Math.sqrt(2)-1;
+for(var i = 0; i < 3; i++)
+{
+	for(var j = 0; j < 8; j++)
+	{
+		var a = [1,1,1];
+		a[i] = exceptionalCoord;
+		for(var k = 0; k < 3; k++ )
+		{
+			if( j & (1 << k) )
+			{
+				a[k] *= -1;
+			}
+		}
+		truncatedCubeVertices.push(new THREE.Vector3().fromArray(a));
+	}
+}
+var octahedronVertices = [];
+for(var i = 0; i < 3; i++)
+{
+	for(var j = 0; j < 2; j++)
+	{
+		var a = [0,0,0];
+		if(j)
+		{
+			a[i] = -1;
+		}
+		else
+		{
+			a[i] = 1;
+		}
+		octahedronVertices.push(new THREE.Vector3().fromArray(a));
+	}
+}
+
+var truncatedOctahedronVertices = [];
+for(var i = 0; i < 3; i++)
+{
+	for(var j = 0; j < 8; j++)
+	{
+		var a = [0,0,0];
+		var oneIndex = null;
+		var twoIndex = null;
+		if(j>3)
+		{
+			oneIndex = (i+1)%3;
+			twoIndex = (i+2)%3;
+		}
+		else
+		{
+			oneIndex = (i+2)%3;
+			twoIndex = (i+1)%3;
+		}
+		a[oneIndex] = 1;
+		a[twoIndex] = 2;
+		if(j&1)
+		{
+			a[oneIndex] *= -1;
+		}
+		if(j&2)
+		{
+			a[twoIndex] *= -1;
+		}
+		console.log(a)
+		truncatedOctahedronVertices.push(new THREE.Vector3().fromArray(a));
+	}
+}
+
+/*
+	Need a way to rotate them
+
+	Quasicrystals!
+
+	icosahedron - you've got them somewhere
+	truncated octahedron (0,±1,±2), whoah
+	truncated cuboctahedron (±1, ±(1 + Math.sqrt(2)), ±(1 + 2*Math.sqrt(2)))
+	snub cube (±1, ±1/t, ±t) even permutations
+	truncated cube
+		a = Math.sqrt(2)-1
+		(±a, ±1, ±1),
+		(±1, ±a, ±1),
+		(±1, ±1, ±a)
+
+	hendecahedron
+		[
+		13 / 7, 3*Math.sqrt(3) / 7, 1, 
+		1, Math.sqrt(3), 0, 
+		2, Math.sqrt(3), 0.5, 
+		2.5, Math.sqrt(3) / 2, 0, 
+		2.25, Math.sqrt(3) / 4, 0.5, 
+		2, 0, 0, 
+		0, 0, 0.5, 
+		2, Math.sqrt(3), -0.5, 
+		2.25, Math.sqrt(3) / 4, -0.5, 
+		0, 0, -0.5, 
+		13 / 7, 3*Math.sqrt(3) / 7, -1
+		];
+
+	octagonal prism - (1,0,0) and rotate
+
+	triakis truncated tetrahedron - have to work them out
+
+	rhombic dod
+	(±1, ±1, ±1); (±2, 0, 0), (0, ±2, 0) and (0, 0, ±2)
+
+	doggy - mirror symmetry but nothing else
+
+	Weaire–Phelan
+		"3.1498   0        6.2996
+		-3.1498   0        6.2996
+		 4.1997   4.1997   4.1997
+		 0        6.2996   3.1498
+		-4.1997   4.1997   4.1997
+		-4.1997  -4.1997   4.1997
+		 0       -6.2996   3.1498
+		 4.1997  -4.1997   4.1997
+		 6.2996   3.1498   0
+		-6.2996   3.1498   0
+		-6.2996  -3.1498   0
+		 6.2996  -3.1498   0
+		 4.1997   4.1997  -4.1997
+		 0        6.2996  -3.1498
+		-4.1997   4.1997  -4.1997
+		-4.1997  -4.1997  -4.1997
+		 0       -6.2996  -3.1498
+		 4.1997  -4.1997  -4.1997
+		 3.1498   0       -6.2996
+		-3.1498   0       -6.2996"
+
+		"3.14980   3.70039   5
+		-3.14980   3.70039   5
+		-5         0         5
+		-3.14980  -3.70039   5
+		 3.14980  -3.70039   5
+		 5         0         5
+		 4.19974   5.80026   0.80026
+		-4.19974   5.80026   0.80026
+		-6.85020   0         1.29961
+		-4.19974  -5.80026   0.80026
+		 4.19974  -5.80026   0.80026
+		 6.85020   0         1.29961
+		 5.80026   4.19974  -0.80026
+		 0         6.85020  -1.29961
+		-5.80026   4.19974  -0.80026
+		-5.80026  -4.19974  -0.80026
+		 0        -6.85020  -1.29961
+		 5.80026  -4.19974  -0.80026
+		 3.70039   3.14980  -5
+		 0         5        -5
+		-3.70039   3.14980  -5
+		-3.70039  -3.14980  -5
+		 0        -5        -5
+		 3.70039  -3.14980  -5"
+*/
