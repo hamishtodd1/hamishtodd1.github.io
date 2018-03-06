@@ -81,6 +81,10 @@ Ken Perlin could give feedback
 	| |\	
 	| |/	
 	| |
+
+	You see your hands normally. Their beaks go there. But that's a point.
+	Their heads are rotated around there by some number (you can tweak)...
+	such that they are geeenerally faced towards camera
 */
 
 function Goose()
