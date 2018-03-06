@@ -2,23 +2,20 @@
 	Assume 16:9 because that's youtube. All resolutions should get the controls but people viewing in portrait
 */
 
-function initControllers(launcher)
+function initControllers()
 {
 	var controllers = Array(2);
 
 	function loadControllerModel(i)
 	{
-		new THREE.OBJLoader().load( "data/external_controller01_" + (i===LEFT_CONTROLLER_INDEX?"left":"right") + ".obj",
+		new THREE.OBJLoader().load( "data/meshes/external_controller01_" + (i===LEFT_CONTROLLER_INDEX?"left":"right") + ".obj",
 			function ( object ) 
 			{
 				controllers[  i ].controllerModel.geometry = object.children[0].geometry;
 			
-				controllers[  i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeRotationAxis(xAxis,0.5) );
+				controllers[  i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeRotationAxis(xUnit,0.5) );
 				controllers[  i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeTranslation((i==LEFT_CONTROLLER_INDEX?1:-1)*0.002,0.036,-0.039) );
 				controllers[  i ].controllerModel.geometry.computeBoundingSphere();
-				
-				launcher.dataLoaded["controllerModel"+i.toString()] = true;
-				launcher.attemptLaunch();
 			},
 			function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); } );
 	}

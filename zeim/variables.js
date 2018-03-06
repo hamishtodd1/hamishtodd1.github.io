@@ -1,8 +1,8 @@
 //-----Mathematical
 var TAU = Math.PI * 2;
-var zAxis = new THREE.Vector3(0,0,1); //also used as a placeholder normal
-var yAxis = new THREE.Vector3(0,1,0);
-var xAxis = new THREE.Vector3(1,0,0);
+var zUnit = new THREE.Vector3(0,0,1); //also used as a placeholder normal
+var yUnit = new THREE.Vector3(0,1,0);
+var xUnit = new THREE.Vector3(1,0,0);
 var zeroVector = new THREE.Vector3();
 
 //-----Fundamental
@@ -11,7 +11,6 @@ var debugging = 0;
 
 var ourClock = new THREE.Clock( true );
 var frameDelta = 0;
-var frameTime = 0;
 
 //------We enforce these to be static
 var RIGHT_CONTROLLER_INDEX = 0;
@@ -26,7 +25,7 @@ var mouse = null;
 var frameCount = 0;
 
 var markedThingsToBeUpdated = [];
+var thingsToAlwaysBeUpdated = [];
+
 var holdables = [];
 var clickables = [];
-
-var FULL_SETUP = WEBVR && WEBVR.isAvailable() && window.location.href === "http://localhost:9090/";

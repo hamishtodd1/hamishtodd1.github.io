@@ -12,7 +12,7 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 		tracker.position.x = localGrabbedPoint.x;
 		changeValue( tracker.position.x );
 
-		tracker.clickedPoint = cameraSpaceClickedPoint;
+		tracker.cameraSpaceClickedPoint = cameraSpaceClickedPoint;
 	}
 	clickables.push(sliderSystem);
 
@@ -26,10 +26,10 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 	clickables.push(tracker)
 	sliderSystem.add(tracker);
 	tracker.geometry.applyMatrix(new THREE.Matrix4().makeRotationX(TAU/4))
-	tracker.clickedPoint = null;
+	tracker.cameraSpaceClickedPoint = null;
 	tracker.onClick = function(cameraSpaceClickedPoint)
 	{
-		this.clickedPoint = cameraSpaceClickedPoint;
+		this.cameraSpaceClickedPoint = cameraSpaceClickedPoint;
 		if(onTrackerGrab)
 		{
 			onTrackerGrab();
@@ -66,7 +66,7 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 		}
 		else
 		{
-			tracker.clickedPoint = null;
+			tracker.cameraSpaceClickedPoint = null;
 		}
 
 		tracker.material.color.copy(trackerDefaultColor);
