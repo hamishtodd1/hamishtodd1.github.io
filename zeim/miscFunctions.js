@@ -21,6 +21,11 @@ function checkForNewGlobals()
 	}	
 }
 
+function getRandomColor()
+{
+	return new THREE.Color(Math.random(),Math.random(),Math.random())
+}
+
 function getHighestValueInArray(array)
 {
 	var highestValue = -Infinity;
