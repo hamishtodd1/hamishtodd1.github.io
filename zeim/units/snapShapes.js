@@ -471,6 +471,7 @@ for(var i = 0; i < 3; i++)
 	}
 }
 
+//all the (0,1,2)s whoah
 var truncatedOctahedronVertices = [];
 for(var i = 0; i < 3; i++)
 {
@@ -499,10 +500,102 @@ for(var i = 0; i < 3; i++)
 		{
 			a[twoIndex] *= -1;
 		}
-		console.log(a)
 		truncatedOctahedronVertices.push(new THREE.Vector3().fromArray(a));
 	}
 }
+
+var truncatedCuboctahedronVertices = [];
+var possibleValues = [1,1 + Math.sqrt(2), 1 + 2*Math.sqrt(2)];
+for(var i = 0; i < possibleValues.length; i++)
+{
+	for(var j = 0; j < possibleValues.length; j++)
+	{
+		for(var k = 0; k < possibleValues.length; k++)
+		{
+			if(j===i || k===i||k===j)
+			{
+				continue;
+			}
+
+			//an order has been chosen. Now cycle the minuses
+
+			for(var copy = 0; copy < 8; copy++)
+			{
+				var a = [possibleValues[i],possibleValues[j],possibleValues[k]];
+				for(var l = 0; l < 3; l++)
+				{
+					if( copy & (1<<l))
+					{
+						a[l] *= -1;
+					}
+				}
+				truncatedCuboctahedronVertices.push(new THREE.Vector3().fromArray(a));
+			}
+		}
+	}
+}
+
+var firstHandedSnubCubeVertices = [];
+var secondHandedSnubCubeVertices = [];
+var tribonnaciConstant = 1.839286755214161132551852564;
+var scPossibleValues = [1, 1/tribonnaciConstant, tribonnaciConstant];
+var firstHanded = true;
+for(var i = 0; i < scPossibleValues.length; i++)
+{
+	for(var j = 0; j < scPossibleValues.length; j++)
+	{
+		for(var k = 0; k < scPossibleValues.length; k++)
+		{
+			if(j===i || k===i||k===j)
+			{
+				continue;
+			}
+
+			//an order has been chosen. Now cycle the minuses
+
+			for(var copy = 0; copy < 8; copy++)
+			{
+				var a = [scPossibleValues[i],scPossibleValues[j],scPossibleValues[k]];
+				for(var l = 0; l < 3; l++)
+				{
+					if( copy & (1<<l))
+					{
+						a[l] *= -1;
+					}
+				}
+				if(firstHanded)
+				{
+					firstHandedSnubCubeVertices.push(new THREE.Vector3().fromArray(a));
+				}
+				else
+				{
+					secondHandedSnubCubeVertices.push(new THREE.Vector3().fromArray(a));
+				}
+				firstHanded = !firstHanded;
+			}
+		}
+	}
+}
+
+var triakisTruncatedTetrahedronVertices = [];
+for(var i = 0; i < 3; i++)
+{
+	var a = [1,1,1];
+	a[i] = 3;
+	triakisTruncatedTetrahedronVertices.push(new THREE.Vector3().fromArray(a));
+	for(var j = 0; j < 3; j++)
+	{
+		var a = [-1,-1,-1];
+		a[i] = -3;
+		a[j] *= -1;
+		triakisTruncatedTetrahedronVertices.push(new THREE.Vector3().fromArray(a));
+	}
+}
+triakisTruncatedTetrahedronVertices
+//that extra vertex: tet face to center is edgelen/Math.sqrt(24)
+
+
+//so you're swapping, and getting every combination
 
 /*
 	Need a way to rotate them
@@ -510,9 +603,9 @@ for(var i = 0; i < 3; i++)
 	Quasicrystals!
 
 	icosahedron - you've got them somewhere
-	truncated octahedron (0,±1,±2), whoah
-	truncated cuboctahedron (±1, ±(1 + Math.sqrt(2)), ±(1 + 2*Math.sqrt(2)))
-	snub cube (±1, ±1/t, ±t) even permutations
+	snub cube
+	
+
 	truncated cube
 		a = Math.sqrt(2)-1
 		(±a, ±1, ±1),

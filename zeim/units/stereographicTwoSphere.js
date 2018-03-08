@@ -1,4 +1,6 @@
 /*
+	Example of a game format where seeing right angles is important?
+
 	Could have lines on there quite easily, circles of course. 
 	Grab a little circle on the projected field and move it around.
 	Have to touch some things and avoid other things and other things you crash into
