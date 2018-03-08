@@ -18,7 +18,13 @@
 
 	Two planes, both with points in them; move one point around changes where the other plane is coming from
 
-	Complex plane: click the number, and the number it maps to
+	Complex plane: there are two planes.
+		Click the number, and the number it maps to is highlighted in the other
+		Number or numbers. Depending on function it could be line or loop
+		And maybe you could click a patch, or get the boundary of a patch, or draw a line
+		And you could use this to capture things or see if loops close up? That's proper math
+	This could be done with a frag shader
+
 */
 
 function initMyGraph()
@@ -65,6 +71,5 @@ function initMyGraph()
 		[0.1,											0.2,			0.5,		0.4]));
 	dataPoints.push(DataPoint("Bond Breaker",
 		[0.8,											0.9,			0.9,		0.8]));
-
 
 }

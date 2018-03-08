@@ -12,11 +12,29 @@
 	urgh, need to re assess rotation anyway, it's getting the wrong one or something
 		No it's ok, it's focussed on the triangle, you need to change that
 
-	7 viruses you never knew were beautiful!
+	Round off errors are a bitch, but oh well
+
+	7 viruses you never thought could be so beautiful!
 */
+
+
 
 function initLatticeMapper(ico)
 {
+	//true then false
+	console.log(circleTriangleIntersection(
+		0,0,1,
+		0,0,
+		0,0.5,
+		0.5,0))
+
+	console.log(circleTriangleIntersection(
+		0,0,1,
+		2,0,
+		2,0.5,
+		2.5,0))
+
+
 	//for each triangle we want to draw the lattice on it
 	//for that we need its vertex positions in 3D
 	//we try to make the ico fit these triangles by we may fail
@@ -30,9 +48,6 @@ function initLatticeMapper(ico)
 	scene.add( net );
 	
 	net.geometry.vertices.push(
-		new THREE.Vector3(0,0,0),
-		new THREE.Vector3(HS3,-0.5,0),
-
 		new THREE.Vector3(0,0,0),
 		new THREE.Vector3(HS3,-0.5,0),
 		
@@ -59,7 +74,7 @@ function initLatticeMapper(ico)
 		new THREE.Vector3(0,-1,0),
 		new THREE.Vector3(-HS3,-1.5,0),
 		new THREE.Vector3(0,-2,0),
-		new THREE.Vector3(-HS3,-2.5,0 ) );
+		new THREE.Vector3(-HS3,-2.5,0) );
 
 	var derivations = new Array(
 		[null,null,null],
@@ -98,10 +113,10 @@ function initLatticeMapper(ico)
 		5,11,7,3,
 		10,7,1,3];
 
-	for(var i = 2; i < derivations.length; i++)
-	{
-		net.geometry.vertices.push(new THREE.Vector3())
-	}
+	// for(var i = 2; i < derivations.length; i++)
+	// {
+	// 	net.geometry.vertices.push(new THREE.Vector3())
+	// }
 
 	net.geometry.faces.push(
 		new THREE.Face3(2,1,0),
@@ -132,28 +147,28 @@ function initLatticeMapper(ico)
 	// markedThingsToBeUpdated.push(net)
 	net.update = function()
 	{
-		// for( var i = 2; i < derivations.length; i++)
-		// {
-		// 	//This is about mapping - the flat approximates the wrapped
-		// 	//when you're moving, it's done in the flat
-		// 	// you have fewer vertices than this
+		for( var i = 2; i < derivations.length; i++)
+		{
+			//This is about mapping - the flat approximates the wrapped
+			//when you're moving, it's done in the flat
+			// you have fewer vertices than this
 
-		// 	var aR = ico.geometry.vertices[ equivalencies[i]].distanceTo(
-		// 			 ico.geometry.vertices[ equivalencies[derivations[i][0]] ] );
-		// 	var a =  net.geometry.vertices[ equivalencies[derivations[i][0]] ];
-		// 	var bR = ico.geometry.vertices[ equivalencies[i]].distanceTo(
-		// 			 ico.geometry.vertices[ equivalencies[derivations[i][1] ] ] );
-		// 	var b =  net.geometry.vertices[ equivalencies[derivations[i][1] ] ];
+			var aR = ico.geometry.vertices[ equivalencies[i]].distanceTo(
+					 ico.geometry.vertices[ equivalencies[derivations[i][0]] ] );
+			var a =  net.geometry.vertices[ derivations[i][0] ];
+			var bR = ico.geometry.vertices[ equivalencies[i]].distanceTo(
+					 ico.geometry.vertices[ equivalencies[derivations[i][1] ] ] );
+			var b =  net.geometry.vertices[ derivations[i][1] ];
 
-		// 	net.geometry.vertices[i].copy( counterClockwiseTrianglePoint(
-		// 		a,aR,b,bR));
-		// 	console.log(a,b,net.geometry.vertices[i])
-		// }
+			var proposedPosition = counterClockwiseTrianglePoint(
+				a,aR,b,bR);
+			console.log(i,proposedPosition,net.geometry.vertices[i])
+			// net.geometry.vertices[i].copy( );
+		}
 	}
 	net.update()
-	console.log(net.geometry.vertices)
 
-	var mappingSpheres = Array(2);
+	var mappingSpheres = Array(5000);
 	var msGeometry = new THREE.EfficientSphereBufferGeometry(0.03);
 	var msMaterial = new THREE.MeshPhongMaterial({color:0x000000})
 	for(var i = 0; i < mappingSpheres.length; i++)
@@ -161,6 +176,10 @@ function initLatticeMapper(ico)
 		mappingSpheres[i] = new THREE.Mesh(msGeometry, msMaterial);
 		mappingSpheres[i].position.set(i*0.5,0,0)
 		net.add(mappingSpheres[i]);
+
+		// circleTriangleIntersection(
+		// 	centreX,centreY,radius,
+		// 	v1x,v1y,v2x,v2y,v3x,v3y)
 	}
 	/*
 		make a fuckload of spheres
@@ -172,8 +191,10 @@ function initLatticeMapper(ico)
 function counterClockwiseTrianglePoint(p1,r1,p2,r2)
 {
 	var R2 = p2.distanceToSquared(p1);
-	if(R2<r1+r2)
-		console.log("yeah")
+	if(R2>r1+r2)
+	{
+		console.error("impossible")
+	}
 
 	var halfComponent = p1.clone()
 	halfComponent.lerp(p2,0.5);
@@ -508,4 +529,105 @@ function initIrreg()
 	}
 
 	initLatticeMapper(ico);
+}
+
+//http://www.phatcode.net/articles.php?id=459
+function circleTriangleIntersection(
+	centreX,centreY,radius,
+	v1x,v1y,v2x,v2y,v3x,v3y)
+{
+	var c1x = centreX - v1x
+	var c1y = centreY - v1y
+
+	var radiusSqr = radius*radius
+	var c1sqr = c1x*c1x + c1y*c1y - radiusSqr
+
+	if( c1sqr <= 0)
+		return true
+
+	var c2x = centreX - v2x
+	var c2y = centreY - v2y
+	var c2sqr = c2x*c2x + c2y*c2y - radiusSqr
+
+	if( c2sqr <= 0)
+		return true
+
+	var c3x = centreX - v3x
+	var c3y = centreY - v3y
+
+	var c3sqr = radiusSqr	// reference to radiusSqr var USED TO BE &
+	 c3sqr = c3x*c3x + c3y*c3y - radiusSqr
+
+	if( c3sqr <= 0)
+		return true
+
+
+	//
+	// TEST 2: Circle centre within triangle
+	//
+
+	//
+	// Calculate edges
+	//
+	var e1x = v2x - v1x
+	var e1y = v2y - v1y
+
+	var e2x = v3x - v2x
+	var e2y = v3y - v2y
+
+	var e3x = v1x - v3x
+	var e3y = v1y - v3y
+
+	if(e1y*c1x - e1x*c1y >= 0 &&
+	   e2y*c2x - e2x*c2y >= 0 &&
+	   e3y*c3x - e3x*c3y >= 0 )
+	     return true
+
+
+	//
+	// TEST 3: Circle intersects edge
+	//
+	var k = c1x*e1x + c1y*e1y
+
+	if( k > 0)
+	{
+		len = e1x*e1x + e1y*e1y     // squared len
+
+		if( k < len)
+		{
+		if( c1sqr * len <= k*k)
+			return true
+		}
+	}
+
+	// Second edge
+	var k = c2x*e2x + c2y*e2y
+
+	if( k > 0)
+	{
+		len = e2x*e2x + e2y*e2y
+
+		if( k < len)
+		{
+		if( c2sqr * len <= k*k)
+			return true
+		}
+	}
+
+	// Third edge
+	var k = c3x*e3x + c3y*e3y
+
+	if( k > 0)
+	{
+		len = e3x*e3x + e3y*e3y
+
+		if( k < len)
+		{
+		if( c3sqr * len <= k*k)
+			return true
+		}
+	}
+
+	// We're done, no intersection
+	return false
 }
