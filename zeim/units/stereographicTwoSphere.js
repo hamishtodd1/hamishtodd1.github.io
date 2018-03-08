@@ -23,6 +23,10 @@
 
 		That old rainbow square from Mobius Transformations revealed
 
+		You're looking at a sphere.
+		You click on its surface, it selects the correct pt
+		You click outside the sphere, it selects a point on the side you couldn't reach
+
 	Script
 		Thanks to Henry Segerman for making me aware of the coolness of this
 
