@@ -271,3 +271,52 @@ THREE.OriginCorneredPlaneGeometry = function(width,height)
 
 	return g;
 }
+
+THREE.Face3.prototype.cornerFromIndex = function(i)
+{
+	switch(i)
+	{
+	case 0:
+		return this.a;
+		break;
+	case 1:
+		return this.b;
+		break;
+	case 2:
+		return this.c;
+		break;
+	}
+}
+
+THREE.Face3.prototype.indexOfCorner = function(vertexIndexYouWant)
+{
+	for(var i = 0; i < 3; i++)
+	{
+		if( this.cornerFromIndex(i) === vertexIndexYouWant)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+THREE.Face3.prototype.indexOfThirdCorner = function(notThisOne,orThisOne)
+{
+	for(var i = 0; i < 3; i++)
+	{
+		if( this.cornerFromIndex(i) !== notThisOne && 
+			this.cornerFromIndex(i) !== orThisOne )
+		{
+			return this.cornerFromIndex(i);
+		}
+	}
+	return -1;
+}
+
+function getSignedAngleBetween(a,b)
+{	
+	var aN = a.clone().normalize();
+	var bN = b.clone().normalize();
+	var crossProd = new THREE.Vector3().crossVectors(aN,bN);
+	var angleChange = Math.asin(crossProd.z );
+}

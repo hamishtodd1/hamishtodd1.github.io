@@ -100,7 +100,8 @@
 	// initStereographicThreeSphere();
 	// initWorldMap();
 	// initShapeMaker();
-	initSnapShapes();
+	// initSnapShapes();
+	initIrreg();
 
 	// {
 	// 	var testObject = new THREE.Mesh( new THREE.SphereGeometry(0.01), new THREE.MeshLambertMaterial( {} ) );

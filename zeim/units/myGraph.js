@@ -2,6 +2,23 @@
 	Visual beauty is also a factor, as is number of objects. That's how you get Turner, Escher in there
 
 	Simple controls. The reason you like platformers...
+
+	Sandwich space
+
+	you can use color. That comes in when you smoosh things down
+
+	turtle geometry is good but low "learning/minute"
+	Direction I'd like to go in
+
+	"Smoosh a scale down to nothing"
+
+	"the real political spectrum".
+	At least add "compassion" - some people are conservative for right or wrong reasons
+	And hey, some people are surely left wing because they are lazy
+
+	Two planes, both with points in them; move one point around changes where the other plane is coming from
+
+	Complex plane: click the number, and the number it maps to
 */
 
 function initMyGraph()
@@ -16,8 +33,18 @@ function initMyGraph()
 	{
 		var representation = new THREE.Mesh(new THREE.SphereGeometry(0.01), new THREE.MeshPhongMaterial({color:0x000000}));
 		display.add(representation)
-
 		representation.position.set(coords[0],coords[1],coords[2]);
+
+		var sign = makeTextSign(name);
+		sign.position.copy(representation.position)
+	}
+	DataPoint.prototype.update = function()
+	{
+		this.visible = (this.position.distanceTo(viewingHyperPlane) < 0.01);
+		if(hovering)
+		{
+			sign.visible = false;
+		}
 	}
 
 	var dataPoints = [];

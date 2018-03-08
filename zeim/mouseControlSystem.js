@@ -48,12 +48,27 @@ function initMouse(renderer)
 	};
 
 	var raycaster = new THREE.Raycaster();
+	raycaster.setFromCamera( asynchronous.normalizedDevicePosition, camera );
 	var mouse = {
 		lastClickedObject: null,
 		clicking: false,
 		oldClicking: false,
 		justMoved: false
 	};
+
+	//hack. remove it.
+	getClientPosition = function()
+	{
+		return mouse.rayIntersectionWithZPlaneInCameraSpace(-1);
+	}
+	getClientRay = function()
+	{
+		var clientPosition = getClientPosition();
+
+		return new THREE.Line3( 
+			camera.position.clone(), 
+			clientPosition.clone().sub(camera.position).multiplyScalar(2).add(camera.position) );
+	}
 
 	mouse.rayIntersectionWithZPlaneInCameraSpace = function(z)
 	{
@@ -86,10 +101,10 @@ function initMouse(renderer)
 		this.justMoved = asynchronous.justMoved;
 		asynchronous.justMoved = false;
 
+		raycaster.setFromCamera( asynchronous.normalizedDevicePosition, camera );
+
 		if(this.clicking )
 		{
-			raycaster.setFromCamera( asynchronous.normalizedDevicePosition, camera );
-
 			if( !this.oldClicking )
 			{
 				var clickableIntersections = raycaster.intersectObjects( clickables );
