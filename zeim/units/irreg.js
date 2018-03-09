@@ -17,6 +17,86 @@
 	7 viruses you never thought could be so beautiful!
 */
 
+function discrepancy(coords)
+{
+	var total = 0;
+	for(var edge = 0; edge < 30; edge++)
+	{
+		var vertexIndexA = edgeIndices[edge][0];
+		var vertexIndexB = edgeIndices[edge][0];
+		var displacementX = []
+		total += sq( Math.sqrt(
+			sq( displacementX ) +
+			sq( displacementY ) +
+			sq( displacementZ ) ) - l[edge] );
+	}
+	
+	return total;
+}
+
+function correctPositions(l)
+{
+	var coords = Array(12*3);//Float32Array
+	for(var i = 0; i < ico.vertices.length; i++)
+	{
+		coords[i*3+0] = ico.vertices[i].x;
+		coords[i*3+1] = ico.vertices[i].y;
+		coords[i*3+2] = ico.vertices[i].z;
+	}
+
+	//wait a tick, is it getting the Jacobian itself? How?
+	var newCoords = numeric.uncmin( discrepancy, coords ).solution;
+}
+
+function newtonSolve(final_curvatures_intended)
+{
+	//could fix one of the triangles. Don't see a problem with that, l is determined for a frame
+	var jacobian;
+	var delta_radii;
+	var iterations = 0;
+	var epsilon = 0.00001; //it converges quadratically so you can be greedy. This is minimum to avoid a certain flip-and-flip-back. Stefan uses 1E-10!
+
+	var desired_jacobianmultiplication_output = get_curvatures(radii_guess,1); //This is the result of the function at the next place we intend to call it at it.
+	for( var i = 0; i < 12; i++)
+	{
+		desired_jacobianmultiplication_output[i] = final_curvatures_intended[i] - desired_jacobianmultiplication_output[i]; //make sure the destination is zero.
+	}
+	
+	do {
+		jacobian = get_Jacobian(radii_guess);
+		
+		delta_radii = numeric.solve(jacobian, desired_jacobianmultiplication_output);
+
+		for( var i = 0, il = ; i < 12; i++)
+		{
+			//want to multiply by some number related to lengths
+			radii_guess[i] += delta_radii[i];
+		}
+		
+		desired_jacobianmultiplication_output = get_curvatures(radii_guess,1);
+		if(desired_jacobianmultiplication_output === 999 )
+		{
+			console.error("  newton: went bad naturally")
+			return 0;
+		}
+		
+		for( var i = 0; i < 12; i++)
+		{
+			desired_jacobianmultiplication_output[i] = 
+				final_curvatures_intended[i] - desired_jacobianmultiplication_output[i];
+		}
+		
+		iterations++;
+		if(iterations >= 20 ) {
+			console.log("  newton: failed to converge after 20 iterations"); //Works for Stefan
+			return 0;
+		}
+		
+	} while( quadrance(desired_jacobianmultiplication_output) > epsilon && iterations < 20);
+
+	return 1;
+}
+
 
 
 function initLatticeMapper(ico)
