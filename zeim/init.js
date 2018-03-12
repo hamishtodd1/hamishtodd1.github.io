@@ -98,10 +98,10 @@
 	// initPwg();
 	
 	// initStereographicThreeSphere();
-	// initWorldMap();
+	// initStereographicTwoSphere();
 	// initShapeMaker();
-	// initSnapShapes();
-	initIrreg();
+	initSnapShapes();
+	// initIrreg();
 
 	// {
 	// 	var testObject = new THREE.Mesh( new THREE.SphereGeometry(0.01), new THREE.MeshLambertMaterial( {} ) );

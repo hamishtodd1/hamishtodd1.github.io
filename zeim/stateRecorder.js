@@ -39,14 +39,14 @@ function initRecordingSystem(socket, audio,
 		event.preventDefault();
 		recordingToggled = true;
 	});
-	document.addEventListener( 'keydown', function(event)
-	{
-		if( event.keyCode === 83 ) //s to resend recording
-		{
-			event.preventDefault();
-			sendOffRecordedFramesAsSignalForAudioReplacement();
-		}
-	});
+	// document.addEventListener( 'keydown', function(event)
+	// {
+	// 	if( event.keyCode === 83 ) //s to resend recording
+	// 	{
+	// 		event.preventDefault();
+	// 		sendOffRecordedFramesAsSignalForAudioReplacement();
+	// 	}
+	// });
 
 	socket.onmessage = function(msg)
 	{

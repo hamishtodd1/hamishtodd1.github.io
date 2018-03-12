@@ -40,16 +40,36 @@ function getHighestValueInArray(array)
 	}
 	return index;
 }
-function getHighestFunctionCallResult(array, functionName)
+function getHighestFunctionCallResult()
 {
-	var highestValue = -Infinity;
+	console.error("switch to extreme")
+}
+function getClosestPointToPoint(point,array)
+{
+	var nearestVertexIndex = null;
+	var closestDistance = Infinity;
+	for(var i = 0; i < array.length; i++ )
+	{
+		if(array[i].distanceToSquared(point) < closestDistance)
+		{
+			nearestVertexIndex = i;
+			closestDistance = array[i].distanceToSquared(point);
+		}
+	}
+	return nearestVertexIndex;
+}
+//look, it's just about closeness
+function getExtremeFunctionCallResult(array, functionName,lowest)
+{
+	var extremeValue = lowest ? Infinity : -Infinity;
 	var index = null;
 	for(var i = 0, il = array.length; i<il;i++)
 	{
 		var result = array[i][functionName]();
-		if( result > highestValue )
+		if( 	( lowest && result < extremeValue ) 
+			|| 	(!lowest && result > extremeValue ) )
 		{
-			highestValue = result;
+			extremeValue = result;
 			index = i;
 		}
 	}

@@ -1,31 +1,20 @@
 /*
 	TODO
-	shapes rotateable with mouse
 	visiplanes
 	"Clone" is terribly important. If there's multiple shapes obv clone them too
 	Want to unsnap. grabbingSide vs grabbingTop for hand separation
 
-	A method of creating new ones would be best, is there one? May wanna make looooots.
-	I mean, you do like polyhedra.
-
-	Stick in vertices specify faces by hitting clicking the vertices one at a time. Create a fan
-	Export an array easy to copypaste.
 	"Face" data structure is just series of points that build up the fan. Check respective lengths, that's surely enough to identify face types
-	You decide what color they are
 
 	//-------Snapping
-	go through triangles in shape B. Find the one closest to that triangle.
-	if you're within some minim distance, snap. Just multiply by that matrix, making sure that you have the clockwise shit right
-	maybe show a ghost first; all shapes have a ghost of their volume.
-	when a shape is ready to snap, a "ghost" version of it appears in the prospective place. Letting go causes the snap
+	maybe show a ghost first? All shapes have a ghost of their volume.
 	note that so long as you have a teeny bit of depth, you can have snapping squares
-
 */
-
 
 
 function initSnapShapes()
 {
+
 	var allPolyhedra = [];
 
 	{
@@ -79,151 +68,156 @@ function initSnapShapes()
 		}
 	}
 
-	var point = new THREE.Mesh( new THREE.EfficientSphereBufferGeometry(1/20), 
+	var point = new THREE.Mesh( new THREE.EfficientSphereBufferGeometry(1),
 		new THREE.MeshPhongMaterial({
 			color: 0xD4AF37,//gold
 			shininess: 100,
 			transparent:true, opacity:1
 		}) );
 
-	function Cube()
+	Shape = function(coordsOrVertices, facesData)
 	{
-		var cube = new THREE.Group();
-		
-		var coords = [
-			0,0,0,
-			1,0,0,
-			0,1,0,
-			1,1,0,
+		var shape = new THREE.Group();
+		allPolyhedra.push(shape);
 
-			0,0,-1,
-			1,0,-1,
-			0,1,-1,
-			1,1,-1,
-			];
-		cube.vertices = Array(coords.length / 3);
-		for(var i = 0; i < cube.vertices.length; i++)
+		var edges = [];
+		var faces = [];
+		shape.faces = faces;
+		//array of arrays of vertex indices, ordered with a fan
+		//counter clockwise or clockwise? Whichever it is, it's strict.
+
+		var verticesMesh = new THREE.Mesh(new THREE.BufferGeometry(),point.material);
+		var edgesMesh = new THREE.Mesh(new THREE.Geometry(),new THREE.MeshPhongMaterial({color:0x000000, transparent:true, opacity:1}));
+		var volumeMesh = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0xFF0000, transparent:true, opacity:1}));
+		shape.verticesMesh = verticesMesh;
+		shape.edgesMesh = edgesMesh;
+		shape.volumeMesh = volumeMesh;
+
+		//faceColors
+		shape.add(verticesMesh);
+		shape.add(edgesMesh);
+		shape.add(volumeMesh);
+
+		//make what you can with the geometry
 		{
-			cube.vertices[i] = new THREE.Vector3(
-				coords[i*3+0],
-				coords[i*3+1],
-				coords[i*3+2]);
-		}
+			if( typeof( coordsOrVertices[0] ) !== "number")
+			{
+				var vertices = coordsOrVertices;
+			}
+			else
+			{
+				var vertices = Array(coordsOrVertices.length / 3);
+				for(var i = 0; i < vertices.length; i++)
+				{
+					vertices[i] = new THREE.Vector3(
+						coordsOrVertices[i*3+0],
+						coordsOrVertices[i*3+1],
+						coordsOrVertices[i*3+2]);
+				}
+			}	
 
-		cube.volumeMesh = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0xFF0000, side:THREE.DoubleSide, transparent:true, opacity:1}));
-		cube.volumeMesh.geometry.vertices = cube.vertices;
-		cube.add(cube.volumeMesh)
+			volumeMesh.geometry.vertices = vertices;
+			volumeMesh.geometry.computeBoundingSphere();
+			shape.boundingSphere = volumeMesh.geometry.boundingSphere;
 
-		{
-			var verticesMesh = new THREE.Mesh(new THREE.BufferGeometry(),point.material);
-			cube.verticesMesh = verticesMesh;
-			var numCoords = cube.vertices.length * point.geometry.attributes.position.array.length;
+			var numCoords = vertices.length * point.geometry.attributes.position.array.length;
 			verticesMesh.geometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( numCoords ), 3 ) );
 			verticesMesh.geometry.addAttribute( 'normal', new THREE.BufferAttribute( new Float32Array( numCoords), 3 ) );
-			cube.add(verticesMesh);
+			var vertexRadius = getEdgeRadius(shape) * 2;
 
-			for(var i = 0; i < cube.vertices.length; i++)
+			for(var i = 0; i < vertices.length; i++)
 			{
 				var newVertexGeometry = point.geometry.clone();
-				newVertexGeometry.applyMatrix(new THREE.Matrix4().setPosition(cube.vertices[i]))
+				newVertexGeometry.applyMatrix(new THREE.Matrix4().scale(new THREE.Vector3().setScalar( vertexRadius ) ) )
+				newVertexGeometry.applyMatrix(new THREE.Matrix4().setPosition(vertices[i]) )
+
 				verticesMesh.geometry.merge(newVertexGeometry,i*point.geometry.attributes.position.count);
 			}
 		}
 
-		var edgesMesh = new THREE.Mesh(new THREE.BufferGeometry(),new THREE.MeshPhongMaterial({color:0x000000, transparent:true, opacity:1}));
-		cube.edgesMesh = edgesMesh;
-		edgesMesh.geometry.addAttribute( 'position',new THREE.BufferAttribute(new Float32Array(), 3) );
-		edgesMesh.geometry.addAttribute( 'normal',	new THREE.BufferAttribute(new Float32Array(), 3) );
-		edgesMesh.geometry.setIndex( new THREE.BufferAttribute(new Uint32Array(), 1) );
-		cube.add(edgesMesh)
-
-		cube.faces = []; //array of arrays of verices, ordered in a specific way
-		var face = [1,3,7,5];
-		face.center = new THREE.Vector3();
-		cube.faces.push(face);
-
-		cube.refreshFromFaces = function()
+		shape.addFace = function(vertexIndexArray, log)
 		{
-			delete cube.volumeMesh.geometry.faces;
-			cube.volumeMesh.geometry.faces = [];
-			for(var i = 0; i <cube.faces.length; i++)
+			var face = vertexIndexArray;
+			face.center = new THREE.Vector3();
+			faces.push(face);
+
+			if(log)
 			{
-				cube.faces[i].center.set(0,0,0);
-				for(var j = 0; j < cube.faces[i].length; j++)
+				var facesString = "[";
+				for(var i = 0; i < faces.length; i++)
 				{
-					cube.faces[i].center.add(cube.vertices[ cube.faces[i][j] ])
-					if( j === 0|| j === cube.faces[i].length-1)
+					facesString += "[" + faces[i].toString() + "]";
+					if(i<faces.length-1)
 					{
-						continue;
+						facesString += ",";
 					}
-
-					cube.volumeMesh.geometry.faces.push( new THREE.Face3(
-						cube.faces[i][0],
-						cube.faces[i][j],
-						cube.faces[i][j+1]) );
 				}
-				cube.faces[i].center.multiplyScalar( 1 / cube.faces[i].length);
+				facesString += "]";
+				console.log(facesString)
 			}
-			cube.volumeMesh.geometry.computeBoundingSphere();
-			cube.boundingSphere = cube.volumeMesh.geometry.boundingSphere;
 
+			face.center.set(0,0,0);
+			for(var j = 0; j < face.length; j++)
 			{
-				var edgeRadius = 1/40;
+				face.center.add( vertices[ face[j] ] )
+				if( j === 0 || j === face.length-1)
+				{
+					continue;
+				}
+
+				volumeMesh.geometry.faces.push( new THREE.Face3(
+					face[0],
+					face[j],
+					face[j+1]) );
+			}
+			face.center.multiplyScalar( 1 / face.length );
+			volumeMesh.geometry.computeBoundingSphere();
+			volumeMesh.geometry.elementsNeedUpdate = true; //who knew?
+
+			//edges
+			{
+				var edgeRadius = getEdgeRadius(this);
 				var cylinderSides = 15;
 
-				var edgePairs = [];
-				for(var i = 0; i < cube.faces.length; i++)
+				for(var j = 0, jl = face.length; j < jl; j++)
 				{
-					for(var j = 0, jl = cube.faces[i].length; j < jl; j++)
+					var potentialNewEdgePair = face[j] < face[(j+1)%jl] ? [face[j], face[(j+1)%jl]] : [face[(j+1)%jl], face[j]];
+					var alreadyListed = false;
+					for(var k = 0, kl = edges.length; k < kl; k++)
 					{
-						var potentialNewEdgePair = cube.faces[i][j] < cube.faces[i][(j+1)%jl] ? [cube.faces[i][j], cube.faces[i][(j+1)%jl]] : [cube.faces[i][(j+1)%jl], cube.faces[i][j]];
-						var alreadyListed = false;
-						for(var k = 0, kl = edgePairs.length; k < kl; k++)
+						if( ( potentialNewEdgePair[0] === edges[k][0] &&
+							  potentialNewEdgePair[1] === edges[k][1] ) ||
+							( potentialNewEdgePair[0] === edges[k][1] &&
+							  potentialNewEdgePair[1] === edges[k][0] ) )
 						{
-							if(	potentialNewEdgePair[0] === edgePairs[k][0] &&
-								potentialNewEdgePair[1] === edgePairs[k][1])
-							{
-								alreadyListed = true;
-								break;
-							}
+							alreadyListed = true;
+							break;
 						}
-						if(!alreadyListed)
-						{
-							edgePairs.push(potentialNewEdgePair);
-						}
+					}
+					if(!alreadyListed)
+					{
+						edges.push(potentialNewEdgePair);
 					}
 				}
 				
-				edgesMesh.geometry.attributes.position.setArray( new Float32Array( 3 * (cylinderSides * edgePairs.length * 2) ) );
-				edgesMesh.geometry.attributes.normal.setArray( new Float32Array( 3 * (cylinderSides * edgePairs.length * 2) ) );
-				edgesMesh.geometry.index.setArray( new Uint32Array( 3 * (cylinderSides * edgePairs.length * 2) ) );
-
-				//can't use setXYZ because itemsize is 1
-				edgesMesh.geometry.index.setABC = function(index,a,b,c)
-				{
-					this.array[ index*3+0 ] = a;
-					this.array[ index*3+1 ] = b;
-					this.array[ index*3+2 ] = c;
-				}
-
 				var cylinderBeginning = new THREE.Vector3();
 				var cylinderEnd = new THREE.Vector3();
 				var cylinderSides = 5;
 				var firstFaceIndex = 0;
 				var firstVertexIndex = 0;
-				for(var i = 0, il = edgePairs.length; i < il; i++ )
+				for(var i = 0, il = edges.length; i < il; i++ )
 				{
-					cylinderBeginning.copy(cube.vertices[edgePairs[i][0]])
-					cylinderEnd.copy(cube.vertices[edgePairs[i][1]])
+					cylinderBeginning.copy(vertices[edges[i][0]])
+					cylinderEnd.copy(vertices[edges[i][1]])
 					
 					for(var k = 0; k < cylinderSides; k++)
 					{
-						edgesMesh.geometry.index.setABC(firstFaceIndex+k*2,
+						edgesMesh.geometry.faces[firstFaceIndex+k*2] = new THREE.Face3(
 							(k*2+1) + firstVertexIndex,
 							(k*2+0) + firstVertexIndex,
 							(k*2+2) % (cylinderSides*2) + firstVertexIndex );
 						
-						edgesMesh.geometry.index.setABC(firstFaceIndex+k*2 + 1,
+						edgesMesh.geometry.faces[firstFaceIndex+k*2 + 1] = new THREE.Face3(
 							(k*2+1) + firstVertexIndex,
 							(k*2+2) % (cylinderSides*2) + firstVertexIndex,
 							(k*2+3) % (cylinderSides*2) + firstVertexIndex );
@@ -235,451 +229,245 @@ function initSnapShapes()
 					tickVector.normalize();
 					for( var j = 0; j < cylinderSides; j++)
 					{
-						edgesMesh.geometry.attributes.position.setXYZ(  firstVertexIndex + j*2, tickVector.x*edgeRadius + cylinderBeginning.x,tickVector.y*edgeRadius + cylinderBeginning.y,tickVector.z*edgeRadius + cylinderBeginning.z );
-						edgesMesh.geometry.attributes.position.setXYZ(firstVertexIndex + j*2+1, tickVector.x*edgeRadius + cylinderEnd.x,tickVector.y*edgeRadius + cylinderEnd.y,tickVector.z*edgeRadius + cylinderEnd.z );
-						
-						edgesMesh.geometry.attributes.normal.setXYZ(  firstVertexIndex + j*2, tickVector.x,tickVector.y,tickVector.z );
-						edgesMesh.geometry.attributes.normal.setXYZ(firstVertexIndex + j*2+1, tickVector.x,tickVector.y,tickVector.z );
+						edgesMesh.geometry.vertices[firstVertexIndex + j*2  ] = new THREE.Vector3( tickVector.x*edgeRadius + cylinderBeginning.x,	tickVector.y*edgeRadius + cylinderBeginning.y,	tickVector.z*edgeRadius + cylinderBeginning.z );
+						edgesMesh.geometry.vertices[firstVertexIndex + j*2+1] = new THREE.Vector3( tickVector.x*edgeRadius + cylinderEnd.x,			tickVector.y*edgeRadius + cylinderEnd.y,		tickVector.z*edgeRadius + cylinderEnd.z );
 						
 						tickVector.applyAxisAngle(edgeVector, TAU / cylinderSides);
 					}
+
+					edgesMesh.geometry.elementsNeedUpdate = true;
+					edgesMesh.geometry.computeVertexNormals();
 					
 					firstVertexIndex += cylinderSides * 2;
 					firstFaceIndex += cylinderSides * 2;
 				}
 			}
 		}
-		cube.refreshFromFaces();
 
-		markedThingsToBeUpdated.push(cube);
-		cube.update = function()
+		if(facesData)
 		{
-		}
-
-		cube.fanRibLength = function(faceIndex, ribIndex)
-		{
-			return cube.vertices[cube.faces[ faceIndex ][0]].distanceTo( 
-				   cube.vertices[cube.faces[ faceIndex ][ribIndex]] )
-		}
-
-		allPolyhedra.push(cube)
-		return cube;
-	}
-
-	{
-		var cubeA = Cube();
-		var cubeB = Cube();
-		scene.add(cubeA,cubeB)
-		cubeB.position.x = 0.12
-		cubeB.position.z = -0.6
-		cubeB.rotation.y = TAU/4
-		cubeB.scale.setScalar(0.1)
-
-		cubeA.position.z = -0.5
-		cubeA.scale.setScalar(0.1)
-		cubeA.position.x = -0.12
-
-		cubeB.refreshFromFaces();
-	}
-
-	clickables.push(cubeB.volumeMesh)
-	cubeB.cameraSpaceClickedPoint = null;
-	cubeB.volumeMesh.onClick = function(cameraSpaceClickedPoint)
-	{
-		this.cameraSpaceClickedPoint = cameraSpaceClickedPoint;
-	}
-	cubeB.update = function()
-	{
-		if( mouse.clicking && mouse.lastClickedObject === this.volumeMesh )
-		{
-			var newCameraSpaceClickedPoint = mouse.rayIntersectionWithZPlaneInCameraSpace(this.volumeMesh.cameraSpaceClickedPoint.z);
-
-			var mouseDisplacement = newCameraSpaceClickedPoint.clone().sub(this.volumeMesh.cameraSpaceClickedPoint);
-			camera.getWorldDirection();
-			var directionToCamera = camera.getWorldDirection().negate();
-			var axis = directionToCamera.clone().cross(mouseDisplacement).normalize();
-			var angle = mouseDisplacement.length() * -10;
-
-			if(angle!== 0 && angle !== -0)
-				console.log(axis,angle);
-			this.position.sub(this.boundingSphere.center);
-			this.rotateOnAxis(axis,angle);
-			this.position.add(this.boundingSphere.center);
-
-			this.volumeMesh.cameraSpaceClickedPoint.copy(newCameraSpaceClickedPoint)
-		}
-		else
-		{
-			this.cameraSpaceClickedPoint = null;
-		}
-	}
-
-	cubeA.update = function()
-	{
-
-		//we assume the face vertex list has been ordered in a specific way (that only works if it's convex)
-
-		//it's not necessarily the case that you want to snap 0 to 0 ><
-		//a problem in cases where the face has symmetry that the whole does not
-		//we'll see how much of a problem this is
-		var polyhedronToSnapTo = null;
-		var faceToSnapTo = null;
-		var faceOnThis = null;
-		var distanceBetweenTwo = Infinity;
-		for(var i = 0; i < allPolyhedra.length; i++)
-		{
-			if(allPolyhedra[i] === this)
+			for(var i = 0; i < facesData.length; i++)
 			{
-				continue;
+				shape.addFace(facesData[i]);
 			}
-			if(this.position.distanceTo(allPolyhedra[i].position) < this.boundingSphere.radius * 2 + allPolyhedra[i].boundingSphere.radius * 2 )
+		}
+
+		/*
+			Fucks up if you move some of the vertices, so cube is a pathological case
+
+			//it's not necessarily the case that you want to snap 0 to 0 ><
+			//a problem in cases where the face has symmetry that the whole does not
+			//but NOT in the case of the octagon you're thinking about, that probably does respect symmetry
+
+			Maybe instead do the tetrahedronTop first then work out where the things should go
+		*/
+		shape.snapToNearestPolyhedron = function()
+		{
+			//we assume the face vertex list has been ordered in a specific way (that only works if it's convex)
+
+			var them = null; //polyhedron to snap to
+			var theirFace = null;
+			var ourFace = null;
+			var distanceBetweenTwo = Infinity;
+			for(var i = 0; i < allPolyhedra.length; i++)
 			{
-				for(var j = 0; j < this.faces.length; j++)
+				if(allPolyhedra[i] === this)
 				{
-					for(var k = 0; k < allPolyhedra[i].faces.length; k++)
+					continue;
+				}
+				if(this.position.distanceTo(allPolyhedra[i].position) < this.boundingSphere.radius * 2 + allPolyhedra[i].boundingSphere.radius * 2 )
+				{
+					for(var j = 0; j < faces.length; j++)
 					{
-						var potentialFace = allPolyhedra[i].faces[k];
-						var potentialDistance = potentialFace.center.clone().applyMatrix4(allPolyhedra[i].matrixWorld).distanceTo(
-							this.faces[j].center.clone().applyMatrix4(this.matrixWorld) );
-						if( potentialDistance < distanceBetweenTwo )
+						for(var k = 0; k < allPolyhedra[i].faces.length; k++)
 						{
-							if( this.faces[j].length === potentialFace.length )
+							var potentialFace = allPolyhedra[i].faces[k];
+							var potentialDistance = potentialFace.center.clone().applyMatrix4(allPolyhedra[i].matrixWorld).distanceTo(
+								faces[j].center.clone().applyMatrix4(this.matrixWorld) );
+							if( potentialDistance < distanceBetweenTwo )
 							{
-								var faceCongruent = true;
-								for(var l = 0; l < this.faces[j].length; l++)
+								if( faces[j].length === potentialFace.length ) //"topology"
 								{
-									if( !basicallyEqual( cubeA.fanRibLength(j,l), cubeB.fanRibLength(j,l) ) )
+									var faceCongruent = true;
+									for(var l = 0; l < faces[j].length; l++)
 									{
-										faceCongruent = false;
-										break;
+										if( !basicallyEqual( this.fanRibLength(j,l), allPolyhedra[i].fanRibLength(j,l) ) )
+										{
+											faceCongruent = false;
+											break;
+										}
 									}
-								}
-								if( faceCongruent )
-								{
-									faceToSnapTo = potentialFace;
-									faceOnThis = this.faces[j];
-									distanceBetweenTwo = potentialDistance;
-									polyhedronToSnapTo = allPolyhedra[i];
+									if( faceCongruent )
+									{
+										theirFace = potentialFace;
+										ourFace = faces[j];
+										distanceBetweenTwo = potentialDistance;
+										them = allPolyhedra[i];
+									}
 								}
 							}
 						}
 					}
 				}
 			}
-		}
-
-		if(faceToSnapTo === null)
-		{
-			return;
-		}
-
-		polyhedronToSnapTo.updateMatrixWorld();
-		var polyhedronToSnapToVerticesWorld = [
-			polyhedronToSnapTo.vertices[faceToSnapTo[0]].clone().applyMatrix4(polyhedronToSnapTo.matrix),
-			polyhedronToSnapTo.vertices[faceToSnapTo[1]].clone().applyMatrix4(polyhedronToSnapTo.matrix),
-			polyhedronToSnapTo.vertices[faceToSnapTo[2]].clone().applyMatrix4(polyhedronToSnapTo.matrix)
-		];
-		var thisVertices = [
-			this.vertices[faceOnThis[0]],
-			this.vertices[faceOnThis[1]],
-			this.vertices[faceOnThis[2]]
-		];
-
-		var newMatrix = new THREE.Matrix4();
-
-		newMatrix.makeBasis(
-			polyhedronToSnapToVerticesWorld[0].clone().sub(polyhedronToSnapTo.position),
-			polyhedronToSnapToVerticesWorld[1].clone().sub(polyhedronToSnapTo.position),
-			polyhedronToSnapToVerticesWorld[2].clone().sub(polyhedronToSnapTo.position) );
-
-		newMatrix.multiply( new THREE.Matrix4().getInverse( new THREE.Matrix4().makeBasis(
-			thisVertices[0],
-			thisVertices[1],
-			thisVertices[2] ) ) );
-
-		var positionWithFacesOverlapping = tetrahedronTop(
-			polyhedronToSnapToVerticesWorld[0],
-			polyhedronToSnapToVerticesWorld[1],
-			polyhedronToSnapToVerticesWorld[2],
-			thisVertices[0].length() * this.scale.x,
-			thisVertices[1].length() * this.scale.x,
-			thisVertices[2].length() * this.scale.x );
-		newMatrix.setPosition( positionWithFacesOverlapping );
-
-		this.matrix.copy(newMatrix);
-		this.matrixAutoUpdate = false;
-
-		var axisStart = this.vertices[faceOnThis[0]];
-		var axisEnd = null;
-		if( faceOnThis.length % 2 === 0 )
-		{
-			var middleFaceVertex = faceOnThis.length / 2;
-			var axisEnd = this.vertices[faceOnThis[middleFaceVertex]]
-		}
-		else
-		{
-			var beforeMiddleVertex = Math.floor(faceOnThis.length / 2);
-			var afterMiddleVertex = Math.ceil(faceOnThis.length / 2);
-
-			var axisEnd = this.vertices[faceOnThis[beforeMiddleVertex]].clone();
-			axisEnd.lerp( this.vertices[faceOnThis[afterMiddleVertex]], 0.5 );
-		}
-		var axis = axisEnd.clone().sub(axisStart).normalize();
-
-		var pBeforeRotation = this.vertices[faceOnThis[0]].clone().applyMatrix4(this.matrix);
-		this.matrix.multiply(new THREE.Matrix4().makeRotationAxis(axis, TAU/2));
-		var pAfterRotation = this.vertices[faceOnThis[0]].clone().applyMatrix4(this.matrix);
-		var finalPosition = positionWithFacesOverlapping.sub(pAfterRotation).add(pBeforeRotation);
-		this.matrix.setPosition(finalPosition);
-	}
-}
-
-//coords or Vector3s is fine
-var truncatedCubeVertices = [];
-var exceptionalCoord = Math.sqrt(2)-1;
-for(var i = 0; i < 3; i++)
-{
-	for(var j = 0; j < 8; j++)
-	{
-		var a = [1,1,1];
-		a[i] = exceptionalCoord;
-		for(var k = 0; k < 3; k++ )
-		{
-			if( j & (1 << k) )
+			if(them === null)
 			{
-				a[k] *= -1;
-			}
-		}
-		truncatedCubeVertices.push(new THREE.Vector3().fromArray(a));
-	}
-}
-var octahedronVertices = [];
-for(var i = 0; i < 3; i++)
-{
-	for(var j = 0; j < 2; j++)
-	{
-		var a = [0,0,0];
-		if(j)
-		{
-			a[i] = -1;
-		}
-		else
-		{
-			a[i] = 1;
-		}
-		octahedronVertices.push(new THREE.Vector3().fromArray(a));
-	}
-}
-
-//all the (0,1,2)s whoah
-var truncatedOctahedronVertices = [];
-for(var i = 0; i < 3; i++)
-{
-	for(var j = 0; j < 8; j++)
-	{
-		var a = [0,0,0];
-		var oneIndex = null;
-		var twoIndex = null;
-		if(j>3)
-		{
-			oneIndex = (i+1)%3;
-			twoIndex = (i+2)%3;
-		}
-		else
-		{
-			oneIndex = (i+2)%3;
-			twoIndex = (i+1)%3;
-		}
-		a[oneIndex] = 1;
-		a[twoIndex] = 2;
-		if(j&1)
-		{
-			a[oneIndex] *= -1;
-		}
-		if(j&2)
-		{
-			a[twoIndex] *= -1;
-		}
-		truncatedOctahedronVertices.push(new THREE.Vector3().fromArray(a));
-	}
-}
-
-var truncatedCuboctahedronVertices = [];
-var possibleValues = [1,1 + Math.sqrt(2), 1 + 2*Math.sqrt(2)];
-for(var i = 0; i < possibleValues.length; i++)
-{
-	for(var j = 0; j < possibleValues.length; j++)
-	{
-		for(var k = 0; k < possibleValues.length; k++)
-		{
-			if(j===i || k===i||k===j)
-			{
-				continue;
+				return;
 			}
 
-			//an order has been chosen. Now cycle the minuses
-
-			for(var copy = 0; copy < 8; copy++)
+			//use three reference points to make the faces overlap (polyhedra intersect)
 			{
-				var a = [possibleValues[i],possibleValues[j],possibleValues[k]];
-				for(var l = 0; l < 3; l++)
+				them.updateMatrixWorld();
+				var theirVerticesWorld = [
+					them.vertices[theirFace[0]].clone().applyMatrix4(them.matrix),
+					them.vertices[theirFace[1]].clone().applyMatrix4(them.matrix),
+					them.vertices[theirFace[2]].clone().applyMatrix4(them.matrix)
+				];
+				var ourVertices = [
+					vertices[ourFace[0]],
+					vertices[ourFace[1]],
+					vertices[ourFace[2]]
+				];
+
+				var matrixSendingTheirVerticesToUnitAxes = new THREE.Matrix4().makeBasis(
+					theirVerticesWorld[0].clone().sub(them.position),
+					theirVerticesWorld[1].clone().sub(them.position),
+					theirVerticesWorld[2].clone().sub(them.position) );
+				var matrixSendingUnitAxesToOurVertices = new THREE.Matrix4().getInverse( new THREE.Matrix4().makeBasis(
+					ourVertices[0],
+					ourVertices[1],
+					ourVertices[2] ) );
+				var matrixWithFacesOverlapping = matrixSendingTheirVerticesToUnitAxes.clone().multiply( matrixSendingUnitAxesToOurVertices );
+
+				//tetrahedron has two tops, so this part is specific to order
+				var positionWithFacesOverlapping = tetrahedronTop(
+					theirVerticesWorld[0],
+					theirVerticesWorld[2],
+					theirVerticesWorld[1],
+					ourVertices[0].length() * this.scale.x,
+					ourVertices[2].length() * this.scale.x,
+					ourVertices[1].length() * this.scale.x );
+				matrixWithFacesOverlapping.setPosition( positionWithFacesOverlapping );
+
+				this.matrix.copy(matrixWithFacesOverlapping);
+				this.matrixAutoUpdate = false;
+			}
+
+			//make an axis through face and rotate around it
+			{
+				var axisStart = vertices[ourFace[0]];
+				var axisEnd = null;
+				if( ourFace.length % 2 === 0 )
 				{
-					if( copy & (1<<l))
-					{
-						a[l] *= -1;
-					}
-				}
-				truncatedCuboctahedronVertices.push(new THREE.Vector3().fromArray(a));
-			}
-		}
-	}
-}
-
-var firstHandedSnubCubeVertices = [];
-var secondHandedSnubCubeVertices = [];
-var tribonnaciConstant = 1.839286755214161132551852564;
-var scPossibleValues = [1, 1/tribonnaciConstant, tribonnaciConstant];
-var firstHanded = true;
-for(var i = 0; i < scPossibleValues.length; i++)
-{
-	for(var j = 0; j < scPossibleValues.length; j++)
-	{
-		for(var k = 0; k < scPossibleValues.length; k++)
-		{
-			if(j===i || k===i||k===j)
-			{
-				continue;
-			}
-
-			//an order has been chosen. Now cycle the minuses
-
-			for(var copy = 0; copy < 8; copy++)
-			{
-				var a = [scPossibleValues[i],scPossibleValues[j],scPossibleValues[k]];
-				for(var l = 0; l < 3; l++)
-				{
-					if( copy & (1<<l))
-					{
-						a[l] *= -1;
-					}
-				}
-				if(firstHanded)
-				{
-					firstHandedSnubCubeVertices.push(new THREE.Vector3().fromArray(a));
+					var middleFaceVertex = ourFace.length / 2;
+					var axisEnd = vertices[ourFace[middleFaceVertex]]
 				}
 				else
 				{
-					secondHandedSnubCubeVertices.push(new THREE.Vector3().fromArray(a));
+					var beforeMiddleVertex = Math.floor(ourFace.length / 2);
+					var afterMiddleVertex = Math.ceil(ourFace.length / 2);
+
+					var axisEnd = vertices[ourFace[beforeMiddleVertex]].clone();
+					axisEnd.lerp( vertices[ourFace[afterMiddleVertex]], 0.5 );
 				}
-				firstHanded = !firstHanded;
+				var axis = axisEnd.clone().sub(axisStart).normalize();
+
+				var pBeforeRotation = vertices[ourFace[0]].clone().applyMatrix4(this.matrix);
+				this.matrix.multiply(new THREE.Matrix4().makeRotationAxis(axis, TAU/2));
+				var pAfterRotation = vertices[ourFace[0]].clone().applyMatrix4(this.matrix);
+				var finalPosition = positionWithFacesOverlapping.sub(pAfterRotation).add(pBeforeRotation);
+				this.matrix.setPosition(finalPosition);
 			}
 		}
+
+		shape.fanRibLength = function(faceIndex, ribIndex)
+		{
+			return vertices[faces[ faceIndex ][0]].distanceTo( 
+				   vertices[faces[ faceIndex ][ribIndex]] )
+		}
+
+		function getEdgeRadius(shape)
+		{
+			return vertices[0].distanceTo(vertices[1]) / 40; //guess
+		}
+
+		clickables.push(verticesMesh);
+		var newPotentialFace = null;
+		verticesMesh.onClick = function(cameraSpaceClickedPoint)
+		{
+			var localPosition = cameraSpaceClickedPoint.clone();
+			camera.localToWorld(localPosition);
+			this.worldToLocal(localPosition);
+			var nearestVertexIndex = getClosestPointToPoint(localPosition, this.parent.vertices);
+
+			if(newPotentialFace === null)
+			{
+				newPotentialFace = [];
+				newPotentialFace.push(nearestVertexIndex)
+			}
+			else if( newPotentialFace[0] !== nearestVertexIndex )
+			{
+				newPotentialFace.push(nearestVertexIndex)
+			}
+			else
+			{
+				shape.addFace(newPotentialFace,true);
+				newPotentialFace = null;
+			}
+		}
+
+		clickables.push(volumeMesh)
+		var cameraSpaceClickedPoint = null;
+		volumeMesh.onClick = function(newCameraSpaceClickedPoint)
+		{
+			cameraSpaceClickedPoint = newCameraSpaceClickedPoint;
+		}
+		markedThingsToBeUpdated.push(shape);
+		shape.update = function()
+		{
+			if( mouse.clicking && mouse.lastClickedObject === volumeMesh )
+			{
+				var newCameraSpaceClickedPoint = mouse.rayIntersectionWithZPlaneInCameraSpace(cameraSpaceClickedPoint.z);
+
+				var mouseDisplacement = newCameraSpaceClickedPoint.clone().sub(cameraSpaceClickedPoint);
+				camera.getWorldDirection();
+				var directionToCamera = camera.getWorldDirection().negate();
+				var axis = directionToCamera.clone().cross(mouseDisplacement).normalize();
+				var angle = mouseDisplacement.length() * 10;
+
+				// if(angle!== 0 && angle !== -0)
+				// 	console.log(axis,angle);
+				this.position.sub(this.boundingSphere.center);
+				this.rotateOnAxis(axis,angle);
+				this.position.add(this.boundingSphere.center);
+
+				cameraSpaceClickedPoint.copy(newCameraSpaceClickedPoint)
+			}
+			else
+			{
+				cameraSpaceClickedPoint = null;
+			}
+		}
+
+		return shape;
 	}
+
+	makeShapes(allPolyhedra);
 }
-
-var triakisTruncatedTetrahedronVertices = [];
-for(var i = 0; i < 3; i++)
-{
-	var a = [1,1,1];
-	a[i] = 3;
-	triakisTruncatedTetrahedronVertices.push(new THREE.Vector3().fromArray(a));
-	for(var j = 0; j < 3; j++)
-	{
-		var a = [-1,-1,-1];
-		a[i] = -3;
-		a[j] *= -1;
-		triakisTruncatedTetrahedronVertices.push(new THREE.Vector3().fromArray(a));
-	}
-}
-triakisTruncatedTetrahedronVertices
-//that extra vertex: tet face to center is edgelen/Math.sqrt(24)
-
-
-//so you're swapping, and getting every combination
 
 /*
-	Need a way to rotate them
+	want point as a "private variable" just in the closure, but the same for all
+	want edges and probably edgesMesh etc also private but specific to the object
+	could declare all functions inside the constructor.
+		The functions would be compiled for every single copy of the object, which is not ideal
+		But that might be premature optimization, you're not aware of any slowdowns due to that
+		It is an extra scope for them to be in. But that is accurate!
 
-	Quasicrystals!
+	So we're going to refactor
+		anything that can take shape as an argument and work only on its public variables need not be a property
+		that blurs the public/private distinction, but it is worthwhile because Casey says so!
 
-	icosahedron - you've got them somewhere
-	snub cube
-	
+	For the time being volumeMesh is public
 
-	truncated cube
-		a = Math.sqrt(2)-1
-		(±a, ±1, ±1),
-		(±1, ±a, ±1),
-		(±1, ±1, ±a)
-
-	hendecahedron
-		[
-		13 / 7, 3*Math.sqrt(3) / 7, 1, 
-		1, Math.sqrt(3), 0, 
-		2, Math.sqrt(3), 0.5, 
-		2.5, Math.sqrt(3) / 2, 0, 
-		2.25, Math.sqrt(3) / 4, 0.5, 
-		2, 0, 0, 
-		0, 0, 0.5, 
-		2, Math.sqrt(3), -0.5, 
-		2.25, Math.sqrt(3) / 4, -0.5, 
-		0, 0, -0.5, 
-		13 / 7, 3*Math.sqrt(3) / 7, -1
-		];
-
-	octagonal prism - (1,0,0) and rotate
-
-	triakis truncated tetrahedron - have to work them out
-
-	rhombic dod
-	(±1, ±1, ±1); (±2, 0, 0), (0, ±2, 0) and (0, 0, ±2)
-
-	doggy - mirror symmetry but nothing else
-
-	Weaire–Phelan
-		"3.1498   0        6.2996
-		-3.1498   0        6.2996
-		 4.1997   4.1997   4.1997
-		 0        6.2996   3.1498
-		-4.1997   4.1997   4.1997
-		-4.1997  -4.1997   4.1997
-		 0       -6.2996   3.1498
-		 4.1997  -4.1997   4.1997
-		 6.2996   3.1498   0
-		-6.2996   3.1498   0
-		-6.2996  -3.1498   0
-		 6.2996  -3.1498   0
-		 4.1997   4.1997  -4.1997
-		 0        6.2996  -3.1498
-		-4.1997   4.1997  -4.1997
-		-4.1997  -4.1997  -4.1997
-		 0       -6.2996  -3.1498
-		 4.1997  -4.1997  -4.1997
-		 3.1498   0       -6.2996
-		-3.1498   0       -6.2996"
-
-		"3.14980   3.70039   5
-		-3.14980   3.70039   5
-		-5         0         5
-		-3.14980  -3.70039   5
-		 3.14980  -3.70039   5
-		 5         0         5
-		 4.19974   5.80026   0.80026
-		-4.19974   5.80026   0.80026
-		-6.85020   0         1.29961
-		-4.19974  -5.80026   0.80026
-		 4.19974  -5.80026   0.80026
-		 6.85020   0         1.29961
-		 5.80026   4.19974  -0.80026
-		 0         6.85020  -1.29961
-		-5.80026   4.19974  -0.80026
-		-5.80026  -4.19974  -0.80026
-		 0        -6.85020  -1.29961
-		 5.80026  -4.19974  -0.80026
-		 3.70039   3.14980  -5
-		 0         5        -5
-		-3.70039   3.14980  -5
-		-3.70039  -3.14980  -5
-		 0        -5        -5
-		 3.70039  -3.14980  -5"
+	in your style, the purpose of initBlah() is to simulate file scope and the
 */
