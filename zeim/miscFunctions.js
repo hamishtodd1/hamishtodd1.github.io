@@ -319,6 +319,13 @@ THREE.Face3.prototype.indexOfCorner = function(vertexIndexYouWant)
 	}
 	return -1;
 }
+THREE.Face3.prototype.set = function(a,b,c)
+{
+	this.a = a;
+	this.b = b;
+	this.c = c;
+	return this;
+}
 
 THREE.Face3.prototype.indexOfThirdCorner = function(notThisOne,orThisOne)
 {
@@ -339,4 +346,26 @@ function getSignedAngleBetween(a,b)
 	var bN = b.clone().normalize();
 	var crossProd = new THREE.Vector3().crossVectors(aN,bN);
 	var angleChange = Math.asin(crossProd.z );
+}
+
+function worldClone(vecToBeCloned,object)
+{
+	object.updateMatrixWorld();
+	var vec = vecToBeCloned.clone();
+	object.localToWorld(vec);
+	return vec;
+}
+
+function rotateToFaceCamera()
+{
+	camera.updateMatrix();
+	var cameraUp = yUnit.clone().applyQuaternion(camera.quaternion);
+	cameraUp.add(this.parent.getWorldPosition())
+	this.parent.worldToLocal(cameraUp)
+	this.up.copy(cameraUp);
+
+	this.parent.updateMatrixWorld()
+	var localCameraPosition = camera.position.clone()
+	this.parent.worldToLocal(localCameraPosition);
+	this.lookAt(localCameraPosition);
 }

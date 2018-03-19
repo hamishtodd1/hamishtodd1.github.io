@@ -1,11 +1,52 @@
-function initRecordingSystem(socket, audio, 
-	recordedFrames, markedObjectsAndProperties, markedQuaternions)
+function initRecordingSystem(
+	audio, recordedFrames, 
+	markedObjectsAndProperties, markedQuaternions,
+	socket)
 {
 	var recording = false;
 
-	function sendOffRecordedFramesAsSignalForAudioReplacement()
+	var recordSyncability = null;
+	isRecordSynchable = function()
 	{
-		socket.send( JSON.stringify(recordedFrames) );
+		if( recordSyncability === null)
+		{
+			recordSyncability = true;
+			var errorMessage = "Detected discrepancy with record. Will not play. Culprit:";
+			if(	recordedFrames[0].quaternionData.length 	!== markedQuaternions.length
+			 || recordedFrames[0].objectPropertyData.length !== markedObjectsAndProperties.length )
+			{
+				recordSyncability = false;
+				console.error( errorMessage, "change of markings" )
+			}
+			else
+			{
+				for(var i = 0; i < recordedFrames[0].objectPropertyData.length; i++ )
+				{
+					//we expect all these to be the initial states
+					if( markedObjectsAndProperties[i].object[ markedObjectsAndProperties[i].property ] !== recordedFrames[0].objectPropertyData[i] )
+					{
+						recordSyncability = false;
+						console.error( errorMessage,
+							"discrepancy with initial state: ",
+							markedObjectsAndProperties[i].object,
+							markedObjectsAndProperties[i].property
+						 )
+					}
+				}
+			}
+
+			//rotation, quaternion, matrix
+			//you can change them during the frame, but are you sure what is seen during recording is what is seen in re
+			//you have to decide what you should monitor here. Think about this later
+			//quaternion is objectively the best because slerp
+
+			if(!recordSyncability)
+			{
+				audio.pause();
+			}
+		}
+
+		return recordSyncability;
 	}
 
 	function toggleRecording()
@@ -30,7 +71,9 @@ function initRecordingSystem(socket, audio,
 			audioRecorder.stopRecording();
 			audioRecorder.sendRecording();
 
-			sendOffRecordedFramesAsSignalForAudioReplacement()
+			socket.send( JSON.stringify(recordedFrames) );
+
+			recordSyncability = true;
 		}
 	}
 
@@ -39,14 +82,6 @@ function initRecordingSystem(socket, audio,
 		event.preventDefault();
 		recordingToggled = true;
 	});
-	// document.addEventListener( 'keydown', function(event)
-	// {
-	// 	if( event.keyCode === 83 ) //s to resend recording
-	// 	{
-	// 		event.preventDefault();
-	// 		sendOffRecordedFramesAsSignalForAudioReplacement();
-	// 	}
-	// });
 
 	socket.onmessage = function(msg)
 	{

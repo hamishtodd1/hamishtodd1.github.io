@@ -42,6 +42,10 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 	{
 		var specifiedValueAtStart = tracker.position.x;
 		sliderSystem.joltedness -= frameDelta * 5.5;
+		if(sliderSystem.joltedness < 0)
+		{
+			sliderSystem.joltedness = 0;
+		}
 
 		if( mouse.clicking && ( mouse.lastClickedObject === tracker || mouse.lastClickedObject === sliderSystem ) )
 		{

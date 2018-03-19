@@ -35,7 +35,7 @@ function bestowDefaultMouseDragProperties(object)
 function initMouse(renderer)
 {
 	var asynchronous = {
-		normalizedDevicePosition: new THREE.Vector2(),
+		normalizedDevicePosition: new THREE.Vector2(), //top right is 1,1, bottom left is -1,-1
 		clicking: false,
 		justMoved: false,
 		currentRawX: 0,
@@ -49,33 +49,38 @@ function initMouse(renderer)
 
 	var raycaster = new THREE.Raycaster();
 	raycaster.setFromCamera( asynchronous.normalizedDevicePosition, camera );
+	var ray = raycaster.ray;
+	var previousRay = new THREE.Ray();
+
 	var mouse = {
 		lastClickedObject: null,
 		clicking: false,
 		oldClicking: false,
-		justMoved: false
+		justMoved: false,
+		ray: ray,
+		previousRay: previousRay,
 	};
 
 	//hack. remove it.
-	getClientPosition = function()
-	{
-		return mouse.rayIntersectionWithZPlaneInCameraSpace(-1);
-	}
-	getClientRay = function()
-	{
-		var clientPosition = getClientPosition();
+	// getClientPosition = function()
+	// {
+	// 	return mouse.rayIntersectionWithZPlaneInCameraSpace(-1);
+	// }
+	// getClientRay = function()
+	// {
+	// 	var clientPosition = getClientPosition();
 
-		return new THREE.Line3( 
-			camera.position.clone(), 
-			clientPosition.clone().sub(camera.position).multiplyScalar(2).add(camera.position) );
-	}
+	// 	return new THREE.Line3( 
+	// 		camera.position.clone(), 
+	// 		clientPosition.clone().sub(camera.position).multiplyScalar(2).add(camera.position) );
+	// }
 
 	mouse.rayIntersectionWithZPlaneInCameraSpace = function(z)
 	{
-		var displacementFromCamera = raycaster.ray.at(1).sub(camera.position);
+		var displacementFromCamera = ray.at(1).sub(camera.position);
 		var unitRayEndZ = -displacementFromCamera.projectOnVector( camera.getWorldDirection() ).length();
 		var rayLengthToGetZEquallingClickedPointZ = z / unitRayEndZ;
-		var intersectionWithZPlane = raycaster.ray.at(rayLengthToGetZEquallingClickedPointZ);
+		var intersectionWithZPlane = ray.at(rayLengthToGetZEquallingClickedPointZ);
 		intersectionWithZPlane.worldToLocal(camera);
 		return intersectionWithZPlane;
 	}
@@ -101,6 +106,7 @@ function initMouse(renderer)
 		this.justMoved = asynchronous.justMoved;
 		asynchronous.justMoved = false;
 
+		previousRay.copy(ray);
 		raycaster.setFromCamera( asynchronous.normalizedDevicePosition, camera );
 
 		if(this.clicking )
@@ -112,7 +118,10 @@ function initMouse(renderer)
 				{
 					var cameraSpaceClickedPoint = clickableIntersections[0].point.clone();
 					cameraSpaceClickedPoint.worldToLocal(camera);
-					clickableIntersections[0].object.onClick(cameraSpaceClickedPoint);
+					if(clickableIntersections[0].object.onClick)
+					{
+						clickableIntersections[0].object.onClick(cameraSpaceClickedPoint);
+					}
 
 					this.lastClickedObject = clickableIntersections[0].object;
 				}

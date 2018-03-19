@@ -28,7 +28,7 @@
 function initPlaybackSystemAndMaybeRecordingSystem(launcher, vrAndRecording)
 {
 	var audio = new Audio();
-	audio.src = "record.wav?v=1191";
+	audio.src = "record.wav?v=1196";
 	if( !vrAndRecording )
 	{
 		audio.autoplay = true;
@@ -75,8 +75,10 @@ function initPlaybackSystemAndMaybeRecordingSystem(launcher, vrAndRecording)
 			return recordedFrames.length - 1;
 		}
 
-		initPlaybackControl( audio, recordedFrames );
-		initStateSynchronization( audio, recordedFrames,
+		initPlaybackControl( 
+			audio, recordedFrames );
+		initStateSynchronization( 
+			audio, recordedFrames,
 			markedObjectsAndProperties, markedQuaternions );
 
 		if( vrAndRecording )
@@ -84,8 +86,10 @@ function initPlaybackSystemAndMaybeRecordingSystem(launcher, vrAndRecording)
 			var socket = new WebSocket("ws://" + window.location.href.substring(7) + "ws")
 			socket.onopen = function()
 			{
-				initRecordingSystem( socket, audio, recordedFrames,
-					markedObjectsAndProperties, markedQuaternions );
+				initRecordingSystem(
+					audio, recordedFrames,
+					markedObjectsAndProperties, markedQuaternions,
+					socket);
 
 				launcher.dataLoaded["recordedFrames"] = true;
 				launcher.attemptLaunch();
@@ -93,6 +97,11 @@ function initPlaybackSystemAndMaybeRecordingSystem(launcher, vrAndRecording)
 		}
 		else
 		{
+			isRecordSynchable = function()
+			{
+				return true;
+			}
+
 			launcher.dataLoaded["recordedFrames"] = true;
 			launcher.attemptLaunch();
 		}

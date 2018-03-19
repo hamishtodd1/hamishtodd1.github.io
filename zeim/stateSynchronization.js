@@ -3,29 +3,15 @@
 function initStateSynchronization(audio,
 	recordedFrames, markedObjectsAndProperties, markedQuaternions)
 {
-	var notedDiscrepancy = false;
 	var lastTimeReadFrom = null;
 
-	isStateSynchronizedToAudio = function()
+	hasStateBeenSynchronizedToCurrentTime = function()
 	{
 		return audio.currentTime === lastTimeReadFrom;
 	}
 
 	synchronizeState = function()
 	{
-		//you can use this to clobber out a starting state you don't like
-		if(	recordedFrames[0].quaternionData.length !== markedQuaternions.length
-			|| recordedFrames[0].objectPropertyData.length !== markedObjectsAndProperties.length )
-		{
-			if(!notedDiscrepancy)
-			{
-				console.error("Recorded data not what expected, this should not play")
-				audio.pause();
-				notedDiscrepancy = true;
-			}
-			return;
-		}
-
 		lastTimeReadFrom = audio.currentTime;
 
 		var frameJustBefore = getIndexOfFrameJustBeforeTime(lastTimeReadFrom);
