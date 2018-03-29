@@ -43,7 +43,12 @@ function initPlaybackControl(audio,recordedFrames)
 
 	//--------------ui
 
-	var background = new THREE.Mesh(new THREE.PlaneBufferGeometry(2,2), new THREE.MeshBasicMaterial({color:0xFAFAFA, transparent:true, opacity:0.77}));
+	var background = new THREE.Mesh(new THREE.PlaneBufferGeometry(2,2), 
+		new THREE.MeshBasicMaterial({
+			color:0xFAFAFA,
+			// transparent:true,
+			// opacity:0.77
+		}));
 	background.position.z = -camera.near*2;
 	camera.add(background);
 

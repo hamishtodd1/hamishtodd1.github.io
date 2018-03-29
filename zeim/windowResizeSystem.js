@@ -17,7 +17,7 @@ function otherFov(inputFov,ratio)
 
 function initCameraAndRendererResizeSystemAndCameraRepresentation(renderer)
 {
-	var spectatorMinimumFov = 30;
+	var spectatorMinimumFov = 5; //formerly 30
 	var desiredSpectatorAspectRatio = 16/9;
 
 	function respondToResize() 

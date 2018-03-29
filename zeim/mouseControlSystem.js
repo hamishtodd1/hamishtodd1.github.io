@@ -57,6 +57,8 @@ function initMouse(renderer)
 		clicking: false,
 		oldClicking: false,
 		justMoved: false,
+
+		//no, you shouldn't need to know its position at all times! there are other ways to alert people to interactivity!
 		ray: ray,
 		previousRay: previousRay,
 	};

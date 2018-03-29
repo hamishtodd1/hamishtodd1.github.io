@@ -28,7 +28,7 @@
 function initPlaybackSystemAndMaybeRecordingSystem(launcher, vrAndRecording)
 {
 	var audio = new Audio();
-	audio.src = "record.wav?v=1196";
+	audio.src = "playbackAndRecording/record.wav?v=1219";
 	if( !vrAndRecording )
 	{
 		audio.autoplay = true;
@@ -50,16 +50,20 @@ function initPlaybackSystemAndMaybeRecordingSystem(launcher, vrAndRecording)
 	{
 		markedObjectsAndProperties.push({object: object, property: property});
 	}
+	markQuaternion = function( object3D )
+	{
+		markedQuaternions.push(object3D.quaternion)
+	}
 	markPositionAndQuaternion = function( object3D )
 	{
 		markObjectProperty(object3D.position, "x");
 		markObjectProperty(object3D.position, "y");
 		markObjectProperty(object3D.position, "z");
 
-		markedQuaternions.push(object3D.quaternion)
+		markQuaternion(object3D)
 	}
 
-	new THREE.FileLoader().load("record.txt",function(stringFromFile)
+	new THREE.FileLoader().load("playbackAndRecording/record.txt",function(stringFromFile)
 	{
 		var recordedFrames = JSON.parse(stringFromFile);
 
@@ -83,7 +87,7 @@ function initPlaybackSystemAndMaybeRecordingSystem(launcher, vrAndRecording)
 
 		if( vrAndRecording )
 		{
-			var socket = new WebSocket("ws://" + window.location.href.substring(7) + "ws")
+			var socket = new WebSocket("ws://localhost:9090/ws")
 			socket.onopen = function()
 			{
 				initRecordingSystem(

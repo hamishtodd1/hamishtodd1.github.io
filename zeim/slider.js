@@ -1,7 +1,9 @@
 //vibration if you drag it off the side would be good
-function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGrab)
+function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGrab, pulseTilUsed)
 {
-	var sliderSystem = new THREE.Mesh(new THREE.PlaneBufferGeometry(1,1), new THREE.MeshBasicMaterial({color:0xDADADA}));
+	var sliderSystem = new THREE.Mesh(
+		new THREE.PlaneBufferGeometry(1,1),
+		new THREE.MeshBasicMaterial({color:0xDADADA}));
 	sliderSystem.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.5,0,0))
 	sliderSystem.onClick = function(cameraSpaceClickedPoint)
 	{
@@ -27,6 +29,14 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 	sliderSystem.add(tracker);
 	tracker.geometry.applyMatrix(new THREE.Matrix4().makeRotationX(TAU/4))
 	tracker.cameraSpaceClickedPoint = null;
+	var defaultTrackerScale = new THREE.Vector3(1,1,1);
+
+	var userKnowsAboutMovement = true;
+	if(pulseTilUsed)
+	{
+		userKnowsAboutMovement = false;
+	}
+
 	tracker.onClick = function(cameraSpaceClickedPoint)
 	{
 		this.cameraSpaceClickedPoint = cameraSpaceClickedPoint;
@@ -40,6 +50,18 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 
 	sliderSystem.update = function()
 	{
+		if(!userKnowsAboutMovement)
+		{
+			tracker.scale.copy(defaultTrackerScale);
+			var sinTime = Math.sin( ourClock.elapsedTime * 9 );
+			tracker.scale.x *= 1 + 0.3 * sinTime;
+			tracker.scale.y *= 1 + 0.3 * sinTime;
+		}
+		else
+		{
+			tracker.scale.copy(defaultTrackerScale);
+		}
+
 		var specifiedValueAtStart = tracker.position.x;
 		sliderSystem.joltedness -= frameDelta * 5.5;
 		if(sliderSystem.joltedness < 0)
@@ -67,6 +89,8 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 					sliderSystem.joltedness = 1.35;
 				}
 			}
+
+			userKnowsAboutMovement = true;
 		}
 		else
 		{
@@ -90,7 +114,7 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 		}
 		sliderSystem.scale.set(length,height,1);
 		var trackerRadius = height * 0.8;
-		tracker.scale.set( trackerRadius / length, trackerRadius / height,trackerRadius / height * 0.00001);
+		defaultTrackerScale.set( trackerRadius / length, trackerRadius / height,trackerRadius / height * 0.00001);
 	}
 	sliderSystem.setDimensions(1)
 
@@ -103,11 +127,6 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 	{
 		markPositionAndQuaternion(sliderSystem)
 		markObjectProperty(tracker.position,"x")
-
-		markObjectProperty(sliderSystem,"joltedness")
-		markObjectProperty(tracker.material.color,"r")
-		markObjectProperty(tracker.material.color,"g")
-		markObjectProperty(tracker.material.color,"b")
 	}
 
 	return sliderSystem;

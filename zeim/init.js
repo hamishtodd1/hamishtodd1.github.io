@@ -1,8 +1,8 @@
 /*
 	May want to pull out an actual picture of a mouse cursor and put it where you want
 
-	To be honest, the youtube thing is a colossal perverse incentive.
-		Subtleties in interactive learning is your raison d'etre, but here we are making something non-interactive
+	The youtube thing is a colossal perverse incentive
+		Subtleties in interactive learning is your raison d'etre, but here we are, making something non-interactive
 
 	TODO for slack demo:
 		-VR interaction / funkiness in which you move your head and hand around and camera is in right place
@@ -19,13 +19,21 @@
 		-Something with bloody puzzles
 		-pwg
 		-Maryam Mirzakhani, 14th of July
+
+	You can bring interface bits on and off, less need to think about some great big "game state" thing
 */
 
 (function init()
 {
 	var vrAndRecording = WEBVR && WEBVR.isAvailable() && window.location.href === "http://localhost:9090/";
 	if(vrAndRecording)
+	{
 		console.log("Full setup")
+	}
+	else
+	{
+		console.log("Playback setup")
+	}
 	var platform = getPlatform()
 	if(platform === "phone" )
 	{
@@ -65,6 +73,7 @@
 
 	var renderer = new THREE.WebGLRenderer({ antialias: true });
 	renderer.setPixelRatio( window.devicePixelRatio );
+	renderer.setClearColor(0xFFFFFF)
 	document.body.appendChild( renderer.domElement );
 
 	initCameraAndRendererResizeSystemAndCameraRepresentation(renderer);
@@ -84,7 +93,8 @@
 	
 	initPlaybackSystemAndMaybeRecordingSystem( launcher, vrAndRecording );
 
-	makeScene(true);
+	setUpSpectatorScene()
+	addExtraForVR()
 
 	var controllers = initControllers();
 	if( vrAndRecording )
@@ -104,8 +114,8 @@
 	// initStereographicTwoSphere();
 	// initShapeMaker();
 	// initIrreg();
-	var allPolyhedra = initSnapShapes();
-	// initSnapShapesPresentation();
+	// var allPolyhedra = initSnapShapes();
+	// initSnapShapesPresentation( allPolyhedra );
 	initMyGraph();
 
 	{

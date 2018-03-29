@@ -18,12 +18,8 @@ import tornado.template
 
 import os
 
-class mainHandler(tornado.web.RequestHandler):
-	def get(self):
-		loader = tornado.template.Loader(".")
-		self.write(loader.load("index.html").generate())
-
-class wsHandler(tornado.websocket.WebSocketHandler):
+#TODO revert! not coming from localhost = mic warning = slow and gets in way of recording
+class websocketHandler(tornado.websocket.WebSocketHandler):
 	def check_origin(self, origin):
 		return True
 
@@ -69,10 +65,15 @@ class wsHandler(tornado.websocket.WebSocketHandler):
 			self.write_message("oldAudioDeleted")
 
 
+class pageHandler(tornado.web.RequestHandler):
+	def get(self):
+		loader = tornado.template.Loader("..")
+		self.write(loader.load("./index.html").generate())
+
 application = tornado.web.Application([
-	(r'/ws', wsHandler), #The websocket
-	(r'/', mainHandler), #The page
-	(r"/(.*)", tornado.web.StaticFileHandler, {"path": "."}), #the files
+	(r'/ws', websocketHandler),
+	(r'/', pageHandler),
+	(r"/(.*)", tornado.web.StaticFileHandler, {"path": ".."}), #the files
 ] )
 
 print( "9090" )

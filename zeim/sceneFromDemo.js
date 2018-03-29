@@ -1,7 +1,5 @@
-function makeScene( loadFloor ){
-	scene.fog = new THREE.Fog( 0xffffff, 1, 600 );
-	scene.fog.color.setHSL( 0.6, 0, 1 );
-	
+function setUpSpectatorScene()
+{
 	// LIGHTS
 
 	hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.6 );
@@ -30,7 +28,24 @@ function makeScene( loadFloor ){
 
 	dirLight.shadow.camera.far = 3500;
 	dirLight.shadow.bias = -0.0001;
-	
+
+	var centerToWall = 20;
+	var walls = Array(4);
+	for(var i = 0; i < walls.length; i++)
+	{
+		walls[i] = new THREE.Mesh(new THREE.PlaneGeometry(centerToWall*2,centerToWall*4), new THREE.MeshStandardMaterial({color:0xFFFFFF, side:THREE.DoubleSide}));
+		walls[i].rotation.y = i * TAU/4;
+		walls[i].position.z = -centerToWall;
+		walls[i].position.applyAxisAngle(yUnit,i*TAU/4);
+		scene.add(walls[i])
+	}
+}
+
+function addExtraForVR( loadFloor )
+{
+	scene.fog = new THREE.Fog( 0xffffff, 1, 600 );
+	scene.fog.color.setHSL( 0.6, 0, 1 );
+
 	var OurTextureLoader = new THREE.TextureLoader();
 	OurTextureLoader.crossOrigin = true;
 	if(loadFloor)
@@ -92,7 +107,7 @@ function makeScene( loadFloor ){
 		offset:		 { type: "f", value: 33 },
 		exponent:	 { type: "f", value: 0.6 }
 	};
-	uniforms.topColor.value.copy( hemiLight.color );
+	uniforms.topColor.value.copy( new THREE.Color().setHSL( 0.6, 1, 0.6 ) );
 
 	scene.fog.color.copy( uniforms.bottomColor.value );
 

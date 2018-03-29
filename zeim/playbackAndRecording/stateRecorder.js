@@ -25,12 +25,15 @@ function initRecordingSystem(
 					//we expect all these to be the initial states
 					if( markedObjectsAndProperties[i].object[ markedObjectsAndProperties[i].property ] !== recordedFrames[0].objectPropertyData[i] )
 					{
-						recordSyncability = false;
-						console.error( errorMessage,
-							"discrepancy with initial state: ",
-							markedObjectsAndProperties[i].object,
-							markedObjectsAndProperties[i].property
-						 )
+						// recordSyncability = false;
+						// console.error( errorMessage,
+						// 	"discrepancy with initial state: ",
+						// 	markedObjectsAndProperties[i].object,
+						// 	markedObjectsAndProperties[i].property,
+
+						// 	markedObjectsAndProperties[i].object[ markedObjectsAndProperties[i].property ],
+						// 	recordedFrames[0].objectPropertyData[i]
+						//  )
 					}
 				}
 			}
@@ -118,6 +121,7 @@ function initRecordingSystem(
 		recordedFrames.push(newFrame);
 
 		recordingTime += frameDelta;
+		//TODO use ourClock
 	}
 
 	var audioRecorder = initAudioRecorder(audio);
