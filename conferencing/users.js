@@ -26,9 +26,6 @@ function initUserManager(controllerGeometries, socket,ourID)
 		leftEye.position.set( -headWidth / 4, 0, -headDepth * 0.51);
 		rightEye.position.set( headWidth / 4, 0, -headDepth * 0.51);
 		baseHead.add(leftEye,rightEye);
-
-		// var pointer = new THREE.Mesh( new THREE.CylinderBufferGeometryUncentered(0.015,0.08), new THREE.MeshStandardMaterial({color:0x000000}) );
-		// pointer.add( new THREE.Mesh( new THREE.CylinderBufferGeometryUncentered(0.005, 3), new THREE.MeshBasicMaterial({transparent:true,opacity:0.2}) ) );
 	}
 
 	socket.on('userUpdate', function(updatePackage)
@@ -43,6 +40,8 @@ function initUserManager(controllerGeometries, socket,ourID)
 		users[updatePackage.id].head.rotation.copy(updatePackage.head.rotation);
 
 		users[updatePackage.id].poiSphere.position.copy(getPoi(users[updatePackage.id].head));
+
+		// console.log(users[updatePackage.id].pointer.parent)
 
 		users[updatePackage.id].timeSinceUpdate = 0;
 	} );
@@ -86,7 +85,8 @@ function initUserManager(controllerGeometries, socket,ourID)
 			rotation: camera.rotation
 		},
 		platform: ourPlatform,
-		id: ourID
+		id: ourID,
+		pointerDirection:
 	};
 	if( ourPlatform === "desktopVR")
 	{
@@ -146,18 +146,10 @@ function initUserManager(controllerGeometries, socket,ourID)
 		}
 		else
 		{
-			// user.pointer = pointer.clone();
-			// user.pointer.material.color.setRGB( (userMaterial.color.r+1)/2, (userMaterial.color.g+1)/2, (userMaterial.color.b+1)/2 );
-			// user.pointer.position.z = headDepth/2; //make heads big enough that this sits in the right place
-			// user.add(user.pointer);
-
-			// if(user.platform === "daydream")
-			// {
-			// 	user.pointer.position.y = -headHeight/2; //make heads big enough that this sits in the right place
-			// }
+			user.pointer = new THREE.Mesh( new THREE.CylinderBufferGeometryUncentered(0.0002,10), new THREE.MeshStandardMaterial({transparent:true, opacity:0.3}) );
+			user.pointer.material.color.setRGB( (userMaterial.color.r+1)/2, (userMaterial.color.g+1)/2, (userMaterial.color.b+1)/2 );
+			user.head.add(user.pointer);
 		}
-
-		//pointer could appear and have some fake perspective?
 
 		return user;
 	}

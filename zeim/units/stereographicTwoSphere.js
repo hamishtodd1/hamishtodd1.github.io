@@ -34,6 +34,10 @@
 	Script
 		Thanks to Henry Segerman for making me aware of the coolness of this
 
+	Sliding shapes around on this surface would be nice
+		Think of the 1D analogy
+		All lines are great circles
+
 	Use toon material
 */
 
@@ -65,7 +69,7 @@ function initStereographicTwoSphere()
 			worldMap.geometry.applyMatrix(new THREE.Matrix4().makeRotationX(-TAU/4))
 
 			worldMap.position.z -= 0.5
-			worldMap.scale.setScalar(1/15);
+			worldMap.scale.setScalar(1/60);
 			scene.add(worldMap)
 			worldMap.update = function()
 			{
@@ -78,7 +82,7 @@ function initStereographicTwoSphere()
 				worldMap.material.clone());
 			worldStereographicProjection.material.side = THREE.DoubleSide
 			worldStereographicProjection.projectionPoint = new THREE.Vector3(-1,0,0)
-			worldStereographicProjection.scale.setScalar(1/5);
+			worldStereographicProjection.scale.setScalar(worldMap.scale.x);
 			worldStereographicProjection.position.copy(worldMap.position)
 			// worldStereographicProjection.position.x += 0.12;
 			scene.add(worldStereographicProjection)

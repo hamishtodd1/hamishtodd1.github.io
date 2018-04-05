@@ -4,7 +4,7 @@ initializers.simpleDesktop = function(socket, pdbWebAddress, roomKey, launcher, 
 {
 	camera.rotation.order = "YXZ";
 
-	var mouse = initMouseSystem(renderer);
+	var mouse = initMouseSystem(renderer, mouse);
 
 	var load = initPoiSphereAndButtonMonitorerAndMovementSystem();
 	var poiSphere = load.poiSphere;
@@ -114,6 +114,9 @@ function initMouseSystem(renderer)
 		proportionalDelta:new THREE.Vector2()
 	};
 
+	var raycaster = new THREE.Raycaster();
+	var coordsForRaycaster = new THREE.Vector2();
+	
 	mouse.readFromAsynchronousInput = function()
 	{
 		this.oldClicking = this.clicking;
@@ -126,6 +129,9 @@ function initMouseSystem(renderer)
 		this.oldPosition.copy(mouse.position);
 		this.position.copy(asynchronousInput.position);
 		this.delta.subVectors(this.position, this.oldPosition);
+
+		raycaster.setFromCamera( coordsForRaycaster, camera );
+		this.direction.copy(raycaster.direction);
 	}
 
 	var asynchronousInput = { //only allowed to use this in this file, and maybe in init
@@ -163,6 +169,9 @@ function initMouseSystem(renderer)
 		asynchronousInput.position.y = asynchronousInput.proportionalPosition.y * centerToFrameVertical;
 		
 		camera.localToWorld( asynchronousInput.position );
+
+		coordsForRaycaster.x = ( rawX / window.innerWidth  ) * 2 - 1;
+		coordsForRaycaster.y =-( rawY / window.innerHeight ) * 2 + 1;
 	}
 
 	document.addEventListener( 'mousemove', function(event)

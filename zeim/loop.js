@@ -10,24 +10,20 @@ function loop( controllers, vrAndRecording )
 	mouse.updateFromAsyncAndCheckClicks();
 
 	/*
-		Philofophie
-		One might like to change initial conditions then watch what I do
+		One might like to change initial conditions then watch what I do.
+			In principle, that would just mean not monitoring something
 			That would mean: DO NOT record certain things, instead update them while the recording is playing
 			But it is also important to be able to skip around the timeline
 			Could simulate forward by going through what's happened in every frame.
 			Could mark certain properties as "recalled if you skip to this point but not if you're simulating forward". That's a lot of work for yourself.
 			It is REALLY UNAVOIDABLY COMPLEX to think about any kind of updating during playingtime. Consider that some things are inter-frame.
 			Could record only controller input
-			It also risks (hugely) people seeing something you didn't intend
-
-		updating when paused will mean stuff continues to do things
-		but that's ok, you're pausing *me*, not the simulation
-		But mightn't it be quite fun to "play" with the audience? Yeesh
+			It obviously risks people seeing something you didn't intend
 	*/
 
 	respondToPlaybackControlInput();
 	
-	if( !isStateSynchronizedToAudio() )
+	if( isRecordSynchable() && !hasStateBeenSynchronizedToCurrentTime() )
 	{
 		synchronizeState();
 	}

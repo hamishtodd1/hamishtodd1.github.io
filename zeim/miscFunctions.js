@@ -91,13 +91,25 @@ function basicallyEqual(a,b)
 	return Math.abs(a-b) <= 0.0000001;
 }
 
-THREE.CylinderBufferGeometryUncentered = function(radius, length, radiusSegments)
+THREE.CylinderBufferGeometryUncentered = function(radius, length, radiusSegments, capped)
 {
+	if(!radius)
+	{
+		radius = 1;
+	}
+	if(!length)
+	{
+		length = 1;
+	}
 	if( !radiusSegments )
 	{
 		radiusSegments = 8;
 	}
-	var geometry = new THREE.CylinderBufferGeometry(radius, radius, length,radiusSegments,1,true);
+	if(!capped)
+	{
+		capped = false;
+	}
+	var geometry = new THREE.CylinderBufferGeometry(radius, radius, length,radiusSegments,1,!capped);
 	for(var i = 0, il = geometry.attributes.position.array.length / 3; i < il; i++)
 	{
 		geometry.attributes.position.array[i*3+1] += length / 2;
@@ -277,6 +289,22 @@ function tetrahedronTop(P1,P2,P3, r1,r2,r3) {
 
 THREE.OriginCorneredPlaneGeometry = function(width,height)
 {
+	var g = new THREE.PlaneGeometry(1,1);
+	g.applyMatrix(new THREE.Matrix4().makeTranslation(0.5,0.5,0))
+
+	if(width)
+	{
+		g.applyMatrix(new THREE.Matrix4().makeScale(width,1,1))
+	}
+	if(height)
+	{
+		g.applyMatrix(new THREE.Matrix4().makeScale(1,height,1))
+	}
+
+	return g;
+}
+THREE.OriginCorneredPlaneBufferGeometry = function(width,height)
+{
 	var g = new THREE.PlaneBufferGeometry(1,1);
 	g.applyMatrix(new THREE.Matrix4().makeTranslation(0.5,0.5,0))
 
@@ -319,6 +347,13 @@ THREE.Face3.prototype.indexOfCorner = function(vertexIndexYouWant)
 	}
 	return -1;
 }
+THREE.Face3.prototype.set = function(a,b,c)
+{
+	this.a = a;
+	this.b = b;
+	this.c = c;
+	return this;
+}
 
 THREE.Face3.prototype.indexOfThirdCorner = function(notThisOne,orThisOne)
 {
@@ -339,4 +374,26 @@ function getSignedAngleBetween(a,b)
 	var bN = b.clone().normalize();
 	var crossProd = new THREE.Vector3().crossVectors(aN,bN);
 	var angleChange = Math.asin(crossProd.z );
+}
+
+function worldClone(vecToBeCloned,object)
+{
+	object.updateMatrixWorld();
+	var vec = vecToBeCloned.clone();
+	object.localToWorld(vec);
+	return vec;
+}
+
+function rotateToFaceCamera()
+{
+	camera.updateMatrix();
+	var cameraUp = yUnit.clone().applyQuaternion(camera.quaternion);
+	cameraUp.add(this.parent.getWorldPosition())
+	this.parent.worldToLocal(cameraUp)
+	this.up.copy(cameraUp);
+
+	this.parent.updateMatrixWorld()
+	var localCameraPosition = camera.position.clone()
+	this.parent.worldToLocal(localCameraPosition);
+	this.lookAt(localCameraPosition);
 }

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Street Facing</title>
+    <link rel="icon" type="image/png" href="http://alexhancock.com/street-facing/favicon.png">
+    <link rel="stylesheet" href="css/bootstrap.min.css"></link>
+    <link rel="stylesheet" href="css/main.css"></link>
+</head>
+
+<body>
+    <canvas id="inputCanvas" width="320" height="240" style="display:none"></canvas>
+    <video id="inputVideo" autoplay loop></video>
+
+    <div id="main_street_view"></div>
+    <form id="searchForm" class="form-inline">
+        <input id="searchInput" type="text" placeholder="Enter an Address"></input>
+        <input type="submit" class="btn" value="Search"></input>
+    </form>
+
+    <div data-role="footer">
+        <script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyD6mQAr_Xiwh7Z8CWOsSu6DvKeGPjq1_9c&sensor=true"></script>
+        <script src="deps/jquery.min.js"></script>
+        <script src="deps/underscore-min.js"></script>
+        <script src="deps/backbone-min.js"></script>
+        <script src="deps/headtrackr.js"></script>
+        <script src="js/views/search.js"></script>
+        <script src="js/views/main.js"></script>
+        <script src="js/base.js"></script>
+    </div>
+</body>
+</html>
