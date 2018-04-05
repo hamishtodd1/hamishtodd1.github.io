@@ -7,7 +7,7 @@
 
 	Once presentation is done
 		-Would be nice if people could spectate live
-		-send to haxiomic, get "make it nicer looking for free by doing this:"
+		-send to haxiomic/mrdoob/wannerstedt, get "make it nicer looking for free by doing this:"
 		-fix lighting
 		-editing suite?
 
@@ -64,10 +64,7 @@
 	renderer.setPixelRatio( window.devicePixelRatio );
 	document.body.appendChild( renderer.domElement );
 
-	initCameraAndRendererResizeSystemAndCameraRepresentation(renderer);
-
 	var ourVrEffect = new THREE.VREffect( renderer );
-
 	function render()
 	{
 		loop( controllers, vrAndRecording )
@@ -78,6 +75,8 @@
 			render();
 		} );
 	}
+
+	initCameraAndRendererResizeSystemAndCameraRepresentation(renderer);
 	
 	initPlaybackSystemAndMaybeRecordingSystem( launcher, vrAndRecording );
 
@@ -100,41 +99,41 @@
 	// initStereographicThreeSphere();
 	// initStereographicTwoSphere();
 	// initShapeMaker();
-	initSnapShapes();
+	// initSnapShapes();
 	// initIrreg();
 
-	// {
-	// 	var testObject = new THREE.Mesh( new THREE.SphereGeometry(0.01), new THREE.MeshLambertMaterial( {} ) );
-	// 	camera.add(testObject);
-	// 	testObject.position.z = -0.1;
-	// 	// testObject.update = function()
-	// 	// {
-	// 	// 	this.position.y = 0.01*Math.sin(ourClock.getElapsedTime()*4);
-	// 	// 	this.rotation.z = Math.sin(ourClock.getElapsedTime()*4.1);
-	// 	// }
-	// 	bestowDefaultMouseDragProperties(testObject);
+	{
+		var testObject = new THREE.Mesh( new THREE.SphereGeometry(0.01), new THREE.MeshLambertMaterial( {} ) );
+		camera.add(testObject);
+		testObject.position.z = -0.1;
+		// testObject.update = function()
+		// {
+		// 	this.position.y = 0.01*Math.sin(ourClock.getElapsedTime()*4);
+		// 	this.rotation.z = Math.sin(ourClock.getElapsedTime()*4.1);
+		// }
+		bestowDefaultMouseDragProperties(testObject);
 		
-	// 	markedThingsToBeUpdated.push(testObject);
-	// 	clickables.push(testObject);
+		markedThingsToBeUpdated.push(testObject);
+		clickables.push(testObject);
 
-	// 	markObjectProperty(testObject.scale,"y")
-	// 	markPositionAndQuaternion(testObject);
+		markObjectProperty(testObject.scale,"y")
+		markPositionAndQuaternion(testObject);
 
-	// 	function testChangeValue(valueBetweenZeroAndOne)
-	// 	{
-	// 		testObject.scale.y = 1 + 0.7 * (valueBetweenZeroAndOne-0.5);
-	// 	}
-	// 	var testSlider = SliderSystem(testChangeValue, 0, true );
-	// 	testObject.scale.y = 1;
-	// 	testSlider.setValue(0.5)
-	// 	testSlider.setDimensions(0.1)
-	// 	testSlider.position.set(0,0.08,-0.4)
-	// 	scene.add(testSlider)
+		function testChangeValue(valueBetweenZeroAndOne)
+		{
+			testObject.scale.y = 1 + 0.7 * (valueBetweenZeroAndOne-0.5);
+		}
+		var testSlider = SliderSystem(testChangeValue, 0, true );
+		testObject.scale.y = 1;
+		testSlider.setValue(0.5)
+		testSlider.setDimensions(0.1)
+		testSlider.position.set(0,0.08,-0.4)
+		scene.add(testSlider)
 		
-	// 	markedThingsToBeUpdated.push(testSlider);
+		markedThingsToBeUpdated.push(testSlider);
 
-	// 	initImages();
-	// }
+		initImages();
+	}
 
 	launcher.initCompleted = true;
 	launcher.attemptLaunch();
