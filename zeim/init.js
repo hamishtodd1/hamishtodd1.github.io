@@ -114,9 +114,12 @@
 	// initStereographicTwoSphere();
 	// initShapeMaker();
 	// initIrreg();
-	// var allPolyhedra = initSnapShapes();
+	// initMyGraph();
+	initVectorFields();
+	
+	// var allPolyhedra = [];
+	// initSnapShapes( allPolyhedra );
 	// initSnapShapesPresentation( allPolyhedra );
-	initMyGraph();
 
 	{
 		// var testObject = new THREE.Mesh( new THREE.SphereGeometry(0.01), new THREE.MeshLambertMaterial( {} ) );

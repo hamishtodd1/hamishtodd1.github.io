@@ -28,7 +28,7 @@
 function initPlaybackSystemAndMaybeRecordingSystem(launcher, vrAndRecording)
 {
 	var audio = new Audio();
-	audio.src = "playbackAndRecording/record.wav?v=1219";
+	audio.src = "playbackAndRecording/record.wav?v=1233";
 	if( !vrAndRecording )
 	{
 		audio.autoplay = true;
@@ -54,12 +54,15 @@ function initPlaybackSystemAndMaybeRecordingSystem(launcher, vrAndRecording)
 	{
 		markedQuaternions.push(object3D.quaternion)
 	}
-	markPositionAndQuaternion = function( object3D )
+	markPosition = function( object3D )
 	{
 		markObjectProperty(object3D.position, "x");
 		markObjectProperty(object3D.position, "y");
 		markObjectProperty(object3D.position, "z");
-
+	}
+	markPositionAndQuaternion = function( object3D )
+	{
+		markPosition(object3D)
 		markQuaternion(object3D)
 	}
 

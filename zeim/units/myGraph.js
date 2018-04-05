@@ -15,9 +15,6 @@
 
 	Could make it so each axis is r, g, b. The points are colored with the rgb values
 
-	turtle geometry is good but low "learning/minute"
-	Direction I'd like to go in
-
 	"Smoosh a scale down to nothing"
 	Swap the unseen dimension obv, or rearrange those that are there
 	click a side of the graph, it rotates around so that's the only side you see
@@ -132,6 +129,7 @@ function initMyGraph()
 		axisLabels[3] = makeTextSign('Learning "density"');
 		for(var i = 0; i < 3; i++)
 		{
+			markPositionAndQuaternion(axisLabels[i])
 			axisLabels[i].material.color.setRGB(0.3,0.9,0.6)
 			if(i < 3)
 			{
@@ -330,30 +328,26 @@ function initMyGraph()
 		[0.0,											0.9,			0.9,		0.9]));
 	dataPoints.push(DataPoint("Godel Escher Bach",
 		[0.2,											0.6,			0.8,		0.9]));
+	//Collective dynamics of small world networks?
 
 	/*
 		Script
-			I'm not looking to make value judgements here
 			Ultimately, there is a rigor-worldliness tradeoff in maths and science and that's happenning with us
-			"Sim City" - you're not necessarily more rigorous
 			Anything that isn't maths or isn't game design is not rigorous
-			You get extra worldliness points for having relevance to daily life
 			Some of this, especially the rigor stuff, comes from the actual argument that I'm making
-
-			Turtle learning is wonderful but it's philosophically different from what I'm after
-
-			"The bug with opacity is unintentional, sorry about that folks"
-			One thing I also don't have is entertainment value / beauty; everything on here is very far up there
 
 			Ultimately there will always be a negative correlation between rigor and worldliness, any philosopher of science can tell you that
 			What is both non-trivial and an important constraint for EE makers is this fact that worldliness also negatively correlates with interactiveness
 			Only when learning density is high though?
 
-			Gotta admit, this was a line that I was fitting myself so obviously there's room for deception here,
-			but my point might be that if you agree with me about point placement then you should probably agree that these trends exist
+			"Sim City" - you're not necessarily more rigorous
+			Turtle learning is wonderful but it's philosophically different from what I'm after
 
 			If you're learning a lot, and it's interactive, then it is almost by definition rigorous
 
-		Weren't you working on having the slider record?
+			Gotta admit, this was a line that I was fitting myself so obviously there's room for deception here,
+			but my point might be that if you agree with me about point placement then you should probably agree that these trends exist
+
+			"The bug with opacity is unintentional, sorry about that folks"
 	*/
 }

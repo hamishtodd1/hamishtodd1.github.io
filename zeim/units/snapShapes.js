@@ -1,5 +1,7 @@
 /*
 	TODO
+	When you do S3, do that lovely ring of tetrahedra
+
 	visiplanes
 	"Clone" is terribly important. If there's multiple shapes obv clone them too
 	Want to unsnap. grabbingSide vs grabbingTop for hand separation
@@ -12,11 +14,8 @@
 */
 
 
-function initSnapShapes()
+function initSnapShapes(allPolyhedra)
 {
-
-	var allPolyhedra = [];
-
 	// {
 	// 	var visibilityPanel = new THREE.Mesh(new THREE.OriginCorneredPlaneGeometry(), new THREE.MeshBasicMaterial());
 	// 	visibilityPanel.position.z = -0.1
@@ -75,7 +74,7 @@ function initSnapShapes()
 			transparent:true, opacity:1
 		}) );
 
-	Shape = function(coordsOrVertices, facesData, radiusMultiplier)
+	Shape = function(coordsOrVertices, facesData, vertexRadiusMultiplier)
 	{
 		var shape = new THREE.Group();
 		allPolyhedra.push(shape);
@@ -122,11 +121,11 @@ function initSnapShapes()
 			var numCoords = vertices.length * point.geometry.attributes.position.array.length;
 			verticesMesh.geometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( numCoords ), 3 ) );
 			verticesMesh.geometry.addAttribute( 'normal', new THREE.BufferAttribute( new Float32Array( numCoords), 3 ) );
-			if(radiusMultiplier === undefined)
+			if(vertexRadiusMultiplier === undefined)
 			{
-				radiusMultiplier = 2;
+				vertexRadiusMultiplier = 2;
 			}
-			var vertexRadius = getEdgeRadius(shape) * radiusMultiplier;
+			var vertexRadius = getEdgeRadius(shape) * vertexRadiusMultiplier;
 
 			for(var i = 0; i < vertices.length; i++)
 			{
@@ -419,38 +418,32 @@ function initSnapShapes()
 			}
 		}
 
-		clickables.push(volumeMesh)
+		clickables.push(volumeMesh);
+
+
+
 		// var cameraSpaceClickedPoint = null;
 		// volumeMesh.onClick = function(newCameraSpaceClickedPoint)
 		// {
 		// 	cameraSpaceClickedPoint = newCameraSpaceClickedPoint;
 		// }
-		// markedThingsToBeUpdated.push(shape);
-		// shape.update = function()
-		// {
-		// 	if( mouse.clicking && mouse.lastClickedObject === volumeMesh )
-		// 	{
-		// 		var newCameraSpaceClickedPoint = mouse.rayIntersectionWithZPlaneInCameraSpace(cameraSpaceClickedPoint.z);
+		markedThingsToBeUpdated.push(shape);
+		shape.update = function()
+		{
+			if(mouse.clicking && this.children.includes(mouse.lastClickedObject) )
+			{
+				var oldCenterWorld = worldClone(volumeMesh.geometry.boundingSphere.center,this);
 
-		// 		var mouseDisplacement = newCameraSpaceClickedPoint.clone().sub(cameraSpaceClickedPoint);
-		// 		camera.getWorldDirection();
-		// 		var directionToCamera = camera.getWorldDirection().negate();
-		// 		var axis = directionToCamera.clone().cross(mouseDisplacement).normalize();
-		// 		var angle = mouseDisplacement.length() * 10;
+				var angle = 20 * mouse.ray.direction.angleTo(mouse.previousRay.direction);
+				var axis = mouse.ray.direction.clone().cross(mouse.previousRay.direction).normalize(); //put it in object space?
+				axis.applyQuaternion(this.quaternion.clone().inverse());
+				var quat = new THREE.Quaternion().setFromAxisAngle(axis,angle);
+				this.quaternion.multiply(quat);
 
-		// 		// if(angle!== 0 && angle !== -0)
-		// 		// 	console.log(axis,angle);
-		// 		this.position.sub(this.boundingSphere.center);
-		// 		this.rotateOnAxis(axis,angle);
-		// 		this.position.add(this.boundingSphere.center);
-
-		// 		cameraSpaceClickedPoint.copy(newCameraSpaceClickedPoint)
-		// 	}
-		// 	else
-		// 	{
-		// 		cameraSpaceClickedPoint = null;
-		// 	}
-		// }
+				var newCenterWorld = worldClone(volumeMesh.geometry.boundingSphere.center,this);
+				this.position.sub(newCenterWorld).add(oldCenterWorld);
+			}
+		}
 
 		return shape;
 	}

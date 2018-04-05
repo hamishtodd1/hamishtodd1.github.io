@@ -34,6 +34,31 @@ function bestowDefaultMouseDragProperties(object)
 
 function initMouse(renderer)
 {
+	{
+		var coneHeight = 0.002;
+		var coneRadius = coneHeight * 0.4;
+		var cursorGeometry = new THREE.ConeGeometry(coneRadius, coneHeight,31);
+		cursorGeometry.computeFaceNormals();
+		cursorGeometry.computeVertexNormals();
+		cursorGeometry.merge( new THREE.CylinderGeometry(coneRadius / 4, coneRadius / 4, coneHeight / 2, 31 ), (new THREE.Matrix4()).makeTranslation(0, -coneHeight/2, 0) );
+		cursorGeometry.applyMatrix( (new THREE.Matrix4()).makeTranslation(0, -coneHeight / 2, 0) );
+		cursorGeometry.applyMatrix( (new THREE.Matrix4()).makeRotationZ(TAU/8) );
+		var cursor = new THREE.Mesh(
+				cursorGeometry, 
+				new THREE.MeshPhongMaterial({color:0xFFFFFF, side: THREE.DoubleSide })
+		);
+
+		cursor.position.z = -0.3
+		camera.add(cursor)
+
+		markedThingsToBeUpdated.push(cursor)
+		cursor.update = function()
+		{
+			this.position.copy(mouse.rayIntersectionWithZPlaneInCameraSpace(this.position.z))
+		}
+		markPosition(cursor);
+	}
+
 	var asynchronous = {
 		normalizedDevicePosition: new THREE.Vector2(), //top right is 1,1, bottom left is -1,-1
 		clicking: false,
