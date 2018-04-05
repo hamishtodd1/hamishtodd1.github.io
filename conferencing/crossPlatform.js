@@ -1,13 +1,7 @@
 /*
+	Cleanup. They're all at the bloody origin!
 	pointers
-	"Make me the master" button? Toggle.
-	Simpledesktop movement moves mobile users
-	get onto the node server
-	No flashing. Well, that was desktop
-	Remove logged out heads
-	should use quaternions for
-	Try Anthony's phone
-	Get rid of all in main chain?
+	master's rotation
 
 	
 After

@@ -1,0 +1,26 @@
+body {
+    margin: 0;
+}
+#main_street_view {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+#inputVideo {
+    display: none;
+}
+#searchForm {
+    position: absolute;
+    z-index: 100000000000000000;
+    top: 20px;
+    right: 20px;
+}
+#searchInput {
+    width: 250px;
+}
+#headtrackerMessageDiv {
+    top: 200px !important;
+    font-weight: bold !important;
+}

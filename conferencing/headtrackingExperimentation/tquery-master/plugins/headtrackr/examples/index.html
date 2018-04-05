@@ -1,0 +1,29 @@
+<!doctype html><title>Minimal tQuery Page</title>
+<script src="../../../build/tquery-bundle-require.js"></script>
+<script src="../vendor/headtrackr.js"></script>
+<script src="../tquery.headtrackr.js"></script>
+<body><script>
+	// init the world
+	var world	= tQuery.createWorld().boilerplate().start();
+	world.removeCameraControls();
+	
+	// create the headTracker
+	var headTracker	= tQuery.createHeadtrackr().debugView(true).start();
+
+	// add a cube in the world scene
+	var object	= tQuery.createCube().addTo(world);
+	// make the camera move depending on facetrackingEvent
+	headTracker.addEventListener("found", function(event){
+		object.rotationZ(event.angle)
+			.positionX(event.x).positionY(event.y)
+			.scaleX(event.width).scaleY(event.height);
+	});
+
+	// reset headTracker if space is pressed
+	document.addEventListener('keydown', function(event){
+		// only if the key is space
+		if( event.keyCode !== ' '.charCodeAt(0) )	return;
+		// reset the head tracker
+		headTracker.reset();
+	});
+</script></body>

@@ -16,12 +16,14 @@
 	
 	socket.on('serverConnected', function()
 	{
+		var defaultTextBoxContent = "Please delete this text then enter one of the following:\n1. Session ID number (if someone has already set up a room)\n2. PDB ID\n3. Weblink to a .pdb file\n4. oo to get into the test room\n\nThen press enter";
+
 		var textBox = document.createElement("TEXTAREA");
 		textBox.cols = 100;
 		textBox.rows = 8;
 		textBox.autofocus = true;
 		// textBox.value = "oo"//"2AM9"
-		textBox.value = "Please enter one of the following:\n1. Session ID number (if someone has already set up a room)\n2. PDB ID\n3. Weblink to a .pdb file\n4. oo to get into the test room\n\nThen press enter";
+		textBox.value = defaultTextBoxContent;
 		for(var i = 0, il = document.body.children.length; i < il; i++ )
 		{
 			if( document.body.children[i].localName === "canvas" || document.body.children[i].localName === "textarea")
@@ -54,6 +56,10 @@
 				return;
 			}
 
+			if( textBox.value === defaultTextBoxContent )
+			{
+				textBox.value = "oo";
+			}
 			var request = textBox.value.replace(/\s/g, '');
 			request.toLowerCase()
 
@@ -74,9 +80,10 @@
 			else textBox.value = "Sorry, request was not recognized"
 		}
 
-		if(0) //fast start for debugging
+		if( 1
+			&& 0 //fast start for debugging
+		)
 		{
-			textBox.value = "oo";
 			onEnterPressed({keyCode:13});
 		}
 		else
