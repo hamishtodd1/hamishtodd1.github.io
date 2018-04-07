@@ -6,8 +6,6 @@ function initDefaultGame()
 		scene.add(avatar);
 	}
 	
-	var circlesToInvert = [];
-	
 	var badObjects = Array(2);
 	var badMat = new THREE.MeshBasicMaterial({color:0xFF0000, side: THREE.DoubleSide});
 	for( var i = 0; i < badObjects.length; i++)
@@ -17,7 +15,6 @@ function initDefaultGame()
 		badObjects[i].geometry.computeBoundingSphere();
 		
 		scene.add(badObjects[i]);
-		circlesToInvert.push(badObjects[i])
 	}
 	
 	var goodObjects = Array(1);
@@ -29,7 +26,6 @@ function initDefaultGame()
 		goodObjects[i].geometry.computeBoundingSphere();
 		
 		scene.add(goodObjects[i]);
-		circlesToInvert.push(goodObjects[i])
 	}
 	
 	var neutralObjects = Array(3);
@@ -41,23 +37,6 @@ function initDefaultGame()
 		neutralObjects[i].geometry.computeBoundingSphere();
 		
 		scene.add(neutralObjects[i]);
-		circlesToInvert.push(neutralObjects[i])
-	}
-	
-	var inversionRadius = 0.2;
-	var perimeterWidth = 0.01;
-	var inversionPerimeter = new THREE.Mesh(new THREE.RingBufferGeometry( inversionRadius - perimeterWidth / 2,inversionRadius + perimeterWidth / 2, 32), new THREE.MeshBasicMaterial({color:0xFFFF00, side:THREE.DoubleSide}) );
-	inversionPerimeter.position.z -= 0.01;
-	scene.add(inversionPerimeter);
-	
-	function getRadius()
-	{
-		return this.geometry.vertices[1].distanceTo( this.geometry.vertices[0]);
-	}
-	
-	for(var i = 0; i < circlesToInvert.length; i++)
-	{
-		circlesToInvert[i].getRadius = getRadius;
 	}
 	
 	function objectsOverlapping(a,b)
@@ -68,43 +47,9 @@ function initDefaultGame()
 		else return false;
 	}
 	
-	invert = function()
+	markedThingsToBeUpdated.push(avatar)
+	avatar.update = function()
 	{
-		//a nice tween would be if you started with the circle inversion as if it was at the place where the vertex is
-		
-		//To get exact center: find those two points that would be on a line touching both circle centers. Invert those two points and find their midpoint
-		//this requires things to be more virtual
-		
-		for(var i = 0; i < circlesToInvert.length; i++)
-		{
-			circlesToInvert[i].updateMatrixWorld();
-			for(var j = 0, jl = circlesToInvert[i].geometry.vertices.length; j < jl; j++)
-			{
-				circlesToInvert[i].localToWorld( circlesToInvert[i].geometry.vertices[j] );
-				var newLength = inversionRadius * inversionRadius / circlesToInvert[i].geometry.vertices[j].length();
-				circlesToInvert[i].geometry.vertices[j].setLength(newLength);
-			}
-			
-			circlesToInvert[i].geometry.computeBoundingSphere();
-			circlesToInvert[i].position.copy( circlesToInvert[i].geometry.boundingSphere.center );
-			circlesToInvert[i].updateMatrixWorld();
-			
-			for(var j = 0, jl = circlesToInvert[i].geometry.vertices.length; j < jl; j++)
-			{
-				circlesToInvert[i].worldToLocal( circlesToInvert[i].geometry.vertices[j] );
-			}
-			circlesToInvert[i].geometry.computeBoundingSphere();
-			
-			circlesToInvert[i].geometry.verticesNeedUpdate = true;
-		}
-	}
-	
-	function coreLoop() {
-		frameDelta = ourclock.getDelta();
-		timeSinceStart += frameDelta;
-		
-		asynchronousInput.read();
-		
 		avatar.position.copy(clientPosition);
 		
 		for(var i = 0; i < neutralObjects.length; i++)

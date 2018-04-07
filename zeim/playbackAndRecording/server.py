@@ -27,17 +27,21 @@ class websocketHandler(tornado.websocket.WebSocketHandler):
 		self.set_nodelay(True)
 
 	def on_message(self, message):
+		#might do this if you have the audio open elsewhere, like in the browser
+		deletionsDenied = False
 		try:
 			os.remove("record.wav");
 		except:
-			#might do this if you have the audio open elsewhere, like in the browser
-			self.write_message("audioDeletionDenied")
-			print("audio deletion denied")
+			deletionsDenied = True
+		try:
+			os.remove("record.txt");
+		except:
+			deletionsDenied = True
+			
+		if deletionsDenied:
+			self.write_message("oldAudioDeleted")
 		else:
-			print("old audio deleted")
-			recordWrite = open('record.txt', 'w')
-			recordWrite.write(message)
-			print("frames written")
+			print("deletions done")
 
 			fileName = 'playbackAndRecording.js'
 			monitoringFileRead = open(fileName, 'r')

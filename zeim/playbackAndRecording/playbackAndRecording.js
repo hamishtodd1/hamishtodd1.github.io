@@ -28,7 +28,7 @@
 function initPlaybackSystemAndMaybeRecordingSystem(launcher, vrAndRecording)
 {
 	var audio = new Audio();
-	audio.src = "playbackAndRecording/record.wav?v=1233";
+	audio.src = "playbackAndRecording/record.wav?v=1257";
 	if( !vrAndRecording )
 	{
 		audio.autoplay = true;
@@ -66,7 +66,7 @@ function initPlaybackSystemAndMaybeRecordingSystem(launcher, vrAndRecording)
 		markQuaternion(object3D)
 	}
 
-	new THREE.FileLoader().load("playbackAndRecording/record.txt",function(stringFromFile)
+	new THREE.FileLoader().load("playbackAndRecording/record.txt?v=1299",function(stringFromFile)
 	{
 		var recordedFrames = JSON.parse(stringFromFile);
 

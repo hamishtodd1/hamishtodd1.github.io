@@ -349,5 +349,10 @@ function initMyGraph()
 			but my point might be that if you agree with me about point placement then you should probably agree that these trends exist
 
 			"The bug with opacity is unintentional, sorry about that folks"
+
+
+			v2
+				These are all just me making up some numbers
+				Pretty much everything with high learning density ends up in this
 	*/
 }
