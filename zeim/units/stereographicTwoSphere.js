@@ -41,6 +41,8 @@
 		The case you're picturing is a cube net being stretched over
 
 	Use toon material
+
+	It all works if you assume vertices are on circle
 */
 
 function initStereographicTwoSphere()

@@ -116,8 +116,9 @@
 	// initStereographicTwoSphere();
 	// initShapeMaker();
 	// initIrreg();
-	initMyGraph();
+	// initMyGraph();
 	// initVectorFields();
+	initDogGame();
 	
 	// var allPolyhedra = [];
 	// initSnapShapes( allPolyhedra );

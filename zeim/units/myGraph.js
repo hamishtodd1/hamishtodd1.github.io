@@ -354,5 +354,6 @@ function initMyGraph()
 			v2
 				These are all just me making up some numbers
 				Pretty much everything with high learning density ends up in this
+				There's a certain trend
 	*/
 }
