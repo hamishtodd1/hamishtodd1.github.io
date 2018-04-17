@@ -1,4 +1,6 @@
 /*
+	Ask Maya what her proposed solutions are. Then ctrl+f "?"
+
 	Messages that should be built in or emerge
 		The meta-message is that knowledge of genetics gives you power
 			Nature, i.e. chaos, has its own approach to genetics that is not that bad:
@@ -7,56 +9,69 @@
 			Genome sequencing and "virtual mating" should be embraced
 				Studbooks are just a failed attempt to approximate it
 			Some airlines don’t ship three certain breeds; some insurers do some mongrels more cheaply. They're using sequencing
-			If you clone a hermaphrodite and mate it with itself, its offspring are genetically identical
+			We can do better than this system
 		Dog welfare is important to try to interpret
 			Though they want to breed, doing it within breed leads to pain
 		Aesthetics -> stud books -> inbreeding -> phenotypic expression of recessive traits -> pain
 			In principle, as with lab mice, we could breed until inbreeding isn't that bad
 			And in fairness, WE WANT TO GET RID OF THOSE RECESSIVE SUFFERING TRAITS ANYWAY because they would sometimes come out randomly!
 			Genotype-ignorant breeding -> phenotypic expression of recessive traits, so you ought to have some bad-but-not-inbreeding breeding at some point
-			Inbreeding = lessened gene pool
+			Gene "pool" = we're sort of assuming you're drawing from the pool randomly
 		Aesthetics -> pain
 			Some standards ARE pain. Maybe nothing to be done about these?
 				Excessive skin
-				Short legs arguably
-				Short snouts arguably
-				Bug eyes
+				Brachycephaly - less than 3cm or whatever it is?
 				Weird tail
 				Ridge? "a FORM of spina bifida"
-				Brachycephaly?
-				What is a companion dog if not a dog that has deformities that limit its movement?
-			Some standards indirectly necessitate pain
+				Short legs / poorly angled - limit movement
+			Some standards lead to pain
+				Short legs
+				Bug eyes
+				Too much / too little coat for the climate
 				Tiny heads -> squeezed brain
-				Small -> overheats
 			Some are neutral
 				All others will make pain more probable due to genetics-unaware breeders
 				Some very specific combo of height and length. Only a few examples exist, so you inbreed
 			But some can make pain less probable. That's good. Er, so long as you're ok with eugenics
 				Eg Belinda *is* too scared
-				Testicles
+				Two descended testicles
 				Lack of teeth is bad, or unshed teeth
 				"I'm trying to breed away from those weaknesses" - need to hold them to that. They certainly aren't breeding pugs
-		This is not what the original creators of the breeds wanted
+					The breed standard SOUNDS like it's concerned with health
+		This is not what the original creators of the breeds wanted / "drift" happens
 			They didn't understand genetics
 			Unknown to them, their actions lead to exaggeration
 				Shows how the definition of "breed" is daft because it exemplifies it
 				In many decades, the drift will have gotten even worse
-			With knowledge of genetics we can do better
 		Possibly: interventions exists and is awful
 		Possibly: culling happens and is awful
 
+	Revamp
+		“Best in show” has an influence on the breed
+		The breed changes by design
+		Assumption: you meet the new breed standard, you meet the old too (reasonable because each individual step...)
+		So, breed standard is a set of metric requirements
+		And "best in show" is closest to single point.
+		Could just shrink distance requirement to the distance of the furthest living one considered in the breed
+		Maybe you are trying to get "best in show"?
+		What is exaggeration? Are the breed standards not excluding it with all their "mediums"?
+
 	Intervention system?
-		Obviously affects phenotype but not genotype?
+		Examples
+			"clipping ears"
+			"propping ear up with cotton bud"
+			Changing termperament i.e. training?
+		Obviously affects phenotype but not genotype
+		Interesting because you're thinking "how close can I get?" instead of "can I get this?"
+			Which does happen in real life?
 		The control method could just involve dragging them into the breed area, which causes them to change (and suffer)
-		You get any dog resembling any phenotype with sufficient intervention
-			But it increases their pain
+		Interventions only change a few things and often increase pain
 		Some interventions can decrease pain
 			If all interventions are dragging into breed, how do do this?
 			But allowing them can make people care less about the genotype
 			Some are necessary for survival?
 			Technically "training" is intervention
 			Caesarian section for bulldogs = intervention necessary for reproduction
-		Intervention is interesting because you're thinking "how close can I get?" instead of "can I get this?"
 
 	Death system? i.e. going into the "bin"
 		Why do people kill IRL?
@@ -76,25 +91,20 @@
 		This is dubious because not all mongrels are killed. But they are a nuisance for breeders
 		Have a few puzzles where you avoid making mongrels. 
 
-	Genotype system
-		Two individuals can have same genotype but different phenotype, but not other way around
-			- except for the intervention system!
-		Mendelian genetics
-			Mating two individuals of a certain relatedness level increases genetic disease probability in a certain way. Try to replicate that graph
-			Two arrays of booleans, one dominant and one recessive
-			So the genes are either something you want or they're timebombs?
-				Probably no, probably you do want "genes you don't care about" eg so long as coat is sleek colour is irrelevant
-			Is "exaggeration" possible in this context?
-			We could say all that the dominant version of this gene does is stop the recessive one from appearing
-			Perhaps you can take a recessive trait you want, breed it such that it disappears but keep in your head that it is in this individual
+	Genotype system (mendelian)
+		Try to replicate IRL stuff: mating two individuals of a certain relatedness level increases genetic disease probability a certain amount (cousins 5%, strangers 3%)
+		Two arrays of booleans, one dominant and one recessive
+		So the genes are either something you can want or they're timebombs?
+			Probably no, probably you do want "genes you don't care about" eg so long as coat is sleek colour is irrelevant
+		"Exaggeration" should be possible
+		We could say all that the dominant version of this gene does is stop the recessive one from appearing
+		Perhaps you can take a recessive trait you want, breed it such that it disappears but keep in your head that it is in this individual
 
 	Phenotype system
 		You have at least one number between 0 and 1, why not others?
-			Can be interpreted geometrically
-			Can have something like: 3 genes affect this number, that gives you 8 possible values
+		If 3 genes affect this number, that gives you 8 possible values
 		Wolves should be somewhere in phenotype space. Anything to be made of this?
 			Between them they had all genes that you seen now (?), it's just that they averaged out
-		"Aesthetics" are another mapping from indviduality space
 		Stripes of different widths and colors, angles?
 		Overlapping sets of waves, some angle. Can get spots with this.
 		Suffering (expressed facially)
@@ -103,9 +113,12 @@
 			Divergence of eyes is a hallmark of inbreeding, haha
 			Make a utility function taking in all the pain
 				They could have done that with Parable of the polygons... didn't need to... it was intuitive. Also, not part of puzzles
+				So, don't track pain, just have people notice it and tell them to bear it in mind
+				Awwww but fun puzzles come about from trying to minimize it
 			This "hack" to get rid of all the bad genes
 				Those mice, are we positive they'll never go bad
 				Is that ok then? =/
+			Sometimes it's a combination of things that leads to pain. Eg small+energetic = pain in case of chihuahua
 
 	Breed recognition system
 		"Breeds" can be close together -> this business about floppy ears
@@ -217,23 +230,111 @@
 
 function initDogGame()
 {
-	function MakeDog()
+	var radius = 0.1;
+	var mouthMaterial = new THREE.MeshBasicMaterial({color:0x000000})
+	function MakeDog(genotype)
 	{
 		var dog = new THREE.Mesh(
-			new THREE.CircleGeometry(0.1,16),
+			new THREE.CircleGeometry(radius,16),
 			new THREE.MeshBasicMaterial({
+				color:genotype.color
 			}));
 		dog.position.z = -10;
 		scene.add(dog);
-		bestowDefaultMouseDragProperties(dog)
+		bestowDefaultMouseDragProperties(dog);
+
+		dog.hadKid = false;
+		dog.update = function()
+		{
+			if( mouse.clicking && mouse.lastClickedObject === this )
+			{
+				mouse.applyDrag(this);
+
+				if(!this.hadKid)
+				{
+					for(var i = 0; i < dogs.length; i++)
+					{
+						if( dogs[i] !== this )
+						{
+							continue;
+						}
+
+						if( checkCollision(this,dogs[i]) )
+						{
+							var newGenome = mateGenomesRandomly(this.genome,dogs[i].genome);
+							var newDog = MakeDog();
+							dogs.push( newDog )
+							this.hadKid = true;
+							break;
+						}
+					}
+				}
+			}
+			else
+			{
+				this.cameraSpaceClickedPoint = null;
+			}
+		}
+
+		var mouthCurvature = 0;
+		if(genotype.pain < 0.1)
+		{
+			mouthCurvature = genotype.pain
+		}
+		var mouth = new THREE.Mesh(
+			new THREE.RingGeometry(radius / 2,radius*3/4,31,1,0,TAU/2),
+			mouthMaterial)
+
+		//the phenotype is the geometry
 
 		return dog;
+	}
+
+	function checkCollision(dog1,dog2)
+	{
+		if(dog1.position.distanceTo(dog2.position) <= radius)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	function queryGenomeTrait(genome,traitToQuery)
+	{
+		if( genome[0][traitToQuery] || genome.rightChromosome[1][traitToQuery] )
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	function mateGenomesRandomly(parent1,parent2)
+	{
+		var newGenome = [[],[]];
+
+		for(var i = 0; i < parent1.genome[0].length; i++)
+		{
+			var order = Math.random() >= 0.5 ? 1 : 0;
+			newGenome[ order ][i] = Math.random() >= 0.5 ? parent1.genome[0][i] : parent1.genome[1][i];
+			newGenome[1-order][i] = Math.random() >= 0.5 ? parent2.genome[0][i] : parent2.genome[1][i];
+		}
+
+		return newGenome;
 	}
 
 	var dogs = [];
 	var fieldDimension = 0.8;
 	for(var i = 0; i < 5; i++)
 	{
+		//1 = it has the dominant, 0 = recessive
+		var genome = [[],[]]
+
 		dogs[i] = MakeDog();
 		dogs[i].material.color.setRGB(Math.random(),Math.random(),Math.random());
 		dogs[i].position.x = (Math.random()-0.5)*fieldDimension;
