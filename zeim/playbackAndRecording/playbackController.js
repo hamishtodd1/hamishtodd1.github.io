@@ -93,7 +93,11 @@ function initPlaybackControl(audio,recordedFrames)
 		{
 			if(isNaN(audio.duration))
 			{
-				return recordedFrames[recordedFrames.length-1].frameTime
+				if(recordedFrames.length === 0)
+				{
+					return 0;
+				}
+				else return recordedFrames[recordedFrames.length-1].frameTime
 			}
 			else
 			{

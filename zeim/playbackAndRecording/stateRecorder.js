@@ -72,9 +72,8 @@ function initRecordingSystem(
 			recording = false;
 			console.log("cut. Saving");
 			audioRecorder.stopRecording();
-			audioRecorder.sendRecording();
 
-			socket.send( JSON.stringify(recordedFrames) );
+			socket.send( "delete" );
 
 			recordSyncability = true;
 		}
@@ -90,14 +89,23 @@ function initRecordingSystem(
 	{
 		if(msg.data === "oldAudioDeleted")
 		{
-			if(recording)
-			{
-				toggleRecording();
-			}
+			var data = new Blob([JSON.stringify(recordedFrames)], {type: 'text/plain'});
+			var textFile = window.URL.createObjectURL(data);
+
+			var downloadObject = document.createElement("a");
+			document.body.appendChild(downloadObject);
+			downloadObject.style = "display: none";
+			downloadObject.href = textFile;
+			downloadObject.download = "record";
+			downloadObject.click();
+
+			audioRecorder.sendRecording();
 		}
-		if(msg.data === "audioDeletionDenied")
+		if(msg.data === "deletionDenied")
 		{
-			console.error("couldn't delete audio. Try again")
+			console.error("couldn't delete? use below in emergency")
+			GLOBAL_RECORDED_FRAMES = recordedFrames;
+			GLOBAL_AUDIO = audio;
 		}
 	}
 
@@ -105,6 +113,7 @@ function initRecordingSystem(
 	{
 		var newFrame = {};
 		newFrame.frameTime = recordingTime;
+		console.log(newFrame.frameTime)
 
 		newFrame.objectPropertyData = Array( markedObjectsAndProperties.length );
 		newFrame.quaternionData = Array( markedQuaternions.length );

@@ -37,8 +37,14 @@
 	Sliding shapes around on this surface would be nice
 		Think of the 1D analogy
 		All lines are great circles
+		Easy to imagine for a line on a 2-sphere: "lay" it on. Any shape WILL have its gaussian curvature changed, it's a different shape
+		Any shape can be turned into triangles, and those triangles can be put on the sphere?
+		Any convex regular polygon is fine
+		The case you're picturing is a cube net being stretched over
 
 	Use toon material
+
+	It all works if you assume vertices are on circle
 */
 
 function initStereographicTwoSphere()

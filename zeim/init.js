@@ -1,4 +1,6 @@
 /*
+	OI JOHN AND IAN WHAT DO I FRIKKIN DO
+
 	May want to pull out an actual picture of a mouse cursor and put it where you want
 
 	The youtube thing is a colossal perverse incentive
@@ -114,7 +116,8 @@
 	// initShapeMaker();
 	// initIrreg();
 	// initMyGraph();
-	initVectorFields();
+	// initVectorFields();
+	initDogGame();
 	
 	// var allPolyhedra = [];
 	// initSnapShapes( allPolyhedra );
