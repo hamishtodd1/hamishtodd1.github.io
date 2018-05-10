@@ -1,26 +1,23 @@
 /*
 	OI JOHN AND IAN WHAT DO I FRIKKIN DO
 
-	May want to pull out an actual picture of a mouse cursor and put it where you want
-
 	The youtube thing is a colossal perverse incentive
 		Subtleties in interactive learning is your raison d'etre, but here we are, making something non-interactive
 
-	TODO for slack demo:
-		-VR interaction / funkiness in which you move your head and hand around and camera is in right place
+	Eventually
+		-mp3; diffed record.
 		-Working on tablets. Phones get embed and maybe message. No need to worry about address bar
-
-	Once presentation is done
+		-VR interaction / funkiness in which you move your head and hand around and camera is in right place
 		-Would be nice if people could spectate live
 		-send to haxiomic, get "make it nicer looking for free by doing this:"
-		-fix lighting
+		-lighting?
 		-editing suite?
 
-	First things to put in/actually do
+	To make
+		-Maryam Mirzakhani, 14th of July
 		-my favourite 3d patterns/neoshapes
 		-Something with bloody puzzles
 		-pwg
-		-Maryam Mirzakhani, 14th of July
 
 	You can bring interface bits on and off, less need to think about some great big "game state" thing
 */
@@ -118,7 +115,8 @@
 	// initIrreg();
 	// initMyGraph();
 	// initVectorFields();
-	initDogGame();
+	// initDogGame();
+	initHyperbolic();
 	
 	// var allPolyhedra = [];
 	// initSnapShapes( allPolyhedra );

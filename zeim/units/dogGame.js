@@ -40,6 +40,7 @@
 		Possibly: culling happens and is awful
 
 	Revamp
+		They have to move the red dot; there is too much pain close to it
 		“Best in show” has an influence on the breed
 		The breed changes by design
 		Assumption: you meet the new breed standard, you meet the old too (reasonable because each individual step...)
@@ -48,6 +49,7 @@
 		Could just shrink distance requirement to the distance of the furthest living one considered in the breed
 		Maybe you are trying to get "best in show"?
 		What is exaggeration? Are the breed standards not excluding it with all their "mediums"?
+		Suffering is purely a mapping from phenotype space.
 
 	Death system? i.e. going into the "bin"
 		Why do people kill IRL?
@@ -371,6 +373,7 @@ function initDogGame()
 
 		dog.update = function()
 		{
+			console.error("yo")
 			if(!mouse.clicking && mouse.oldClicking && mouse.lastClickedObject === this )
 			{
 				for(var i = 0; i < dogs.length; i++)
@@ -448,4 +451,7 @@ function initDogGame()
 		dogs[i].position.x = (Math.random()-0.5) * fieldDimension;
 		dogs[i].position.y = (Math.random()-0.5) * fieldDimension;
 	}
+
+	//ok so they can't escape the rectangle
+	//but they all repel each other (except the one you're holding)
 }

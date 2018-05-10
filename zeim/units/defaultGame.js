@@ -43,7 +43,9 @@ function initDefaultGame()
 	{
 		var dist = a.position.clone().add(a.geometry.boundingSphere.center).distanceTo( b.position.clone().add(b.geometry.boundingSphere.center) );
 		if( dist < a.geometry.boundingSphere.radius + b.geometry.boundingSphere.radius )
+		{
 			return true;
+		}
 		else return false;
 	}
 	

@@ -86,6 +86,25 @@ function pointCylinder(cylinderMesh, end)
 	cylinderMesh.quaternion.normalize();
 }
 
+function insertCylindernumbers(A,B, verticesArray, cylinderSides, arrayStartpoint, radius ) {
+	var aToB = new THREE.Vector3(B.x-A.x, B.y-A.y, B.z-A.z);
+	aToB.normalize();
+	var perp = randomPerpVector(aToB);
+	perp.normalize(); 
+	for( var i = 0; i < cylinderSides; i++)
+	{
+		var radiuscomponent = perp.clone();
+		radiuscomponent.multiplyScalar(radius);
+		radiuscomponent.applyAxisAngle(aToB, i * TAU / cylinderSides);
+		
+		verticesArray[arrayStartpoint + i*2 ].copy(radiuscomponent);
+		verticesArray[arrayStartpoint + i*2 ].add(A);
+		
+		verticesArray[arrayStartpoint + i*2+1 ].copy(radiuscomponent);
+		verticesArray[arrayStartpoint + i*2+1 ].add(B);
+	}
+}
+
 function basicallyEqual(a,b)
 {
 	return Math.abs(a-b) <= 0.0000001;
