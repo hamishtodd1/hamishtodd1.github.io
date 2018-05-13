@@ -56,40 +56,13 @@ function initStereographicThreeSphere()
 	stereographicThreeSphere.scale.setScalar(0.1);
 	scene.add(stereographicThreeSphere);
 
-	function getStereographicProjection(vector)
-	{
-		var rayOrigin = new THREE.Vector4(-1,0,0,0);
-		//projects from the side of the sphere it's on to the hyperplane at x = 0
-		var sphereToGoInto = null;
-		if(vector.x > 0)
-		{
-			sphereToGoInto = sphereRepresentations[0].position.x > sphereRepresentations[1].position.x ? sphereRepresentations[0] : sphereRepresentations[1];
-		}
-		else
-		{
-			rayOrigin.negate()
-			sphereToGoInto = sphereRepresentations[0].position.x > sphereRepresentations[1].position.x ? sphereRepresentations[1] : sphereRepresentations[0];
-		}
-		var rayDirection = vector.clone().sub(rayOrigin);
-		var multiplier = 1 / rayDirection.x;
-		var stereographicProjectionInFourSpace = rayDirection.multiplyScalar(multiplier);
-		stereographicProjectionInFourSpace.add(rayOrigin);
-		//if you've done it right these will not leave the spheres
-		var stereographicProjection = new THREE.Vector3(
-			stereographicProjectionInFourSpace.y,
-			stereographicProjectionInFourSpace.z,
-			stereographicProjectionInFourSpace.w );
-		stereographicProjection.add(sphereToGoInto.position)
-		return stereographicProjection;
-	}
-
 	var positionsOnThreeSphere = Array(5);
 	updatePositionOnThreeSphere = function()
 	{
 		// this.add(new THREE.Vector4().setToRandomQuaternion().multiplyScalar(0.05))
 		this.setLength(1);
 		
-		this.representation.position.copy(getStereographicProjection(this));
+		this.representation.position.copy(getStereographicProjectionToTwoSpheres(this));
 		if( this.representation.position.distanceTo(sphereRepresentations[ 0 ].position) > 1 &&
 			this.representation.position.distanceTo(sphereRepresentations[ 1 ].position) > 1 )
 		{
@@ -128,4 +101,31 @@ THREE.Vector4.prototype.setToRandomQuaternion = function()
 	this.setLength(1);
 
 	return this;
+}
+
+function getStereographicProjectionToTwoSpheres(vector)
+{
+	var rayOrigin = new THREE.Vector4(-1,0,0,0);
+	//projects from the side of the sphere it's on to the hyperplane at x = 0
+	var sphereToGoInto = null;
+	if(vector.x > 0)
+	{
+		sphereToGoInto = sphereRepresentations[0].position.x > sphereRepresentations[1].position.x ? sphereRepresentations[0] : sphereRepresentations[1];
+	}
+	else
+	{
+		rayOrigin.negate()
+		sphereToGoInto = sphereRepresentations[0].position.x > sphereRepresentations[1].position.x ? sphereRepresentations[1] : sphereRepresentations[0];
+	}
+	var rayDirection = vector.clone().sub(rayOrigin);
+	var multiplier = 1 / rayDirection.x;
+	var stereographicProjectionInFourSpace = rayDirection.multiplyScalar(multiplier);
+	stereographicProjectionInFourSpace.add(rayOrigin);
+	//if you've done it right these will not leave the spheres
+	var stereographicProjection = new THREE.Vector3(
+		stereographicProjectionInFourSpace.y,
+		stereographicProjectionInFourSpace.z,
+		stereographicProjectionInFourSpace.w );
+	stereographicProjection.add(sphereToGoInto.position)
+	return stereographicProjection;
 }

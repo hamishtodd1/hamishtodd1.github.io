@@ -2,13 +2,8 @@
 	maybe you just want to get the longest geodesic possible?
 	Maybe your projectile has a radius and it shouldn't get too close in a parallel-ish way
 
-		https://cs.stanford.edu/people/jbaek/18.821.paper2.pdf
-	Requires a fast way to "find the closest point on the surface to r in ambient space
-	http://www.staff.uni-mainz.de/schoemer/publications/GMP02.pdf
-
-		Let's say it's a quartic surface in affine space
-		Could define it using spherical coordinates somehow? We know we want it to be closed
-
+	https://cs.stanford.edu/people/jbaek/18.821.paper2.pdf
+	
 	Do for plane, sphere, torus, elipsoid, weirdly curved torus? Cylinder. Hyperboloid?
 	Surfaces of revolution? Picture a skewed figure-of-8
 
@@ -17,20 +12,21 @@
 	Finding paths for paint on robots spraying car parts - so the Tesla Model 3 plant might do well to take account of this
 	Also useful in geometric optics? "illumination problem"
 
-	Would be nice to be able to "take the distance between two points"
-
-	does it, or does it not, come back? = simple vs non simple
-
 	surfaces (function = 0)
 		sphere			x2+y2+z2 - 1
-		cross cap		4x2*(x2+y2+z2)+(y2+z2-1)
-		Torus			(x2+y2+z2+R2−r2)2−4R2(x2+y2)
+		Trousers
+		Torus			(x2+y2+z2+R2−r2)2−4R2(x2+y2)		easy parameterization
 		Cylinder		x2+y2-1
+		Dini Surface	http://web1.kcn.jp/hp28ah77/us20_pseu.htm https://mathoverflow.net/questions/149842/geodesics-on-the-twisted-pseudosphere-dinis-surface
+		Pseudosphere	nonHypotenuseyBit = Math.sqrt(sq(radius)-sq(x)) - choose lots of x's
+						y = radius * Math.log((radius+nonHypotenuseyBit)/x) - nonHypotenuseyBit
+		Something made of a bunch of pseudospheres?
 		klein quartic	x3y + y3z + z3x = 0 supposed to be in complex numbers but surely something?
-		Klein bottle?
 		double torus? nicholas schmitt/dugan hammock. 
 		https://arxiv.org/pdf/1307.6938.pdf
-		Things with punctures?
+		hyperbolic paraboloid z = sq(x)-sq(y)
+		Hyperboloid
+
 	Can nicely morph between these because it's just lerping a few coefficients
 */
 
@@ -81,16 +77,6 @@ function initHyperbolic()
 			}
 		}
 
-		function objectsOverlapping(a,b)
-		{
-			var dist = a.position.clone().add(a.geometry.boundingSphere.center).distanceTo( b.position.clone().add(b.geometry.boundingSphere.center) );
-			if( dist < a.geometry.boundingSphere.radius + b.geometry.boundingSphere.radius )
-			{
-				return true;
-			}
-			else return false;
-		}
-		
 		markedThingsToBeUpdated.push(ball);
 		ball.update = function()
 		{
@@ -134,88 +120,124 @@ function initHyperbolic()
 			{
 				trailCurrentSegment = 0;
 			}
-
-			
-			
-			// for(var i = 0; i < goodObjects.length; i++)
-			// {
-			// 	if(goodObjects[i].parent !== scene)
-			// 	{
-			// 		continue;
-			// 	}
-			// 	if( objectsOverlapping( avatar, goodObjects[i] ) )
-			// 	{
-			// 		scene.remove(goodObjects[i]);
-			// 		Sounds.pop1.play();
-			// 	}
-			// }
-			
-			// for(var i = 0; i < badObjects.length; i++)
-			// {
-			// 	if(badObjects[i].parent !== scene)
-			// 	{
-			// 		continue;
-			// 	}
-			// 	if( objectsOverlapping( avatar, badObjects[i] ) )
-			// 	{
-			// 		Sounds.change1.play();
-			// 	}
-			// }
 		}
 	}
 
-	var surfaceMaterial = new THREE.MeshStandardMaterial({color:0x00FF00});
+	var surfaceMaterial = new THREE.MeshStandardMaterial({color:0x00FF00, side:THREE.DoubleSide});
+	var surfaces = {};
 
-	var planarSurface = new THREE.Mesh(new THREE.PlaneGeometry(0.9,0.9), surfaceMaterial )
-	planarSurface.position.z = -10;
-	scene.add(planarSurface)
-	clickables.push(planarSurface)
-	planarSurface.closestPointToPoint = function(ambientPoint)
+	surfaces.planar = new THREE.Mesh(new THREE.PlaneGeometry(0.9,0.9), surfaceMaterial )
+	surfaces.planar.closestPointToPoint = function(ambientPoint)
 	{
 		return ambientPoint.clone().setComponent(2,0)
 	}
-	planarSurface.getNormal = function(pointOnSurface)
+	surfaces.planar.getNormal = function(pointOnSurface)
 	{
 		return zUnit.clone();
 	}
-	planarSurface.add(ball, trail);
 
-	// var radius = 0.45;
-	// var sphericalSurface = new THREE.Mesh(new THREE.EfficientSphereGeometry(0.45,2), surfaceMaterial);
-	// sphericalSurface.position.z = -10;
-	// scene.add(sphericalSurface)
-	// clickables.push(sphericalSurface)
-	// sphericalSurface.closestPointToPoint = function(ambientPoint)
-	// {
-	// 	return ambientPoint.clone().setLength(radius)
-	// }
-	// sphericalSurface.getNormal = function(pointOnSurface)
-	// {
-	// 	return pointOnSurface.clone().normalize();
-	// }
-	// sphericalSurface.add(ball, trail);
-
+	var radius = 0.45;
+	surfaces.spherical = new THREE.Mesh(new THREE.EfficientSphereGeometry(0.45,2), surfaceMaterial);
+	surfaces.spherical.closestPointToPoint = function(ambientPoint)
 	{
-		var badObjects = Array(2);
-		var badMat = new THREE.MeshBasicMaterial({color:0xFF0000, side: THREE.DoubleSide});
-		for( var i = 0; i < badObjects.length; i++)
+		return ambientPoint.clone().setLength(radius)
+	}
+	surfaces.spherical.getNormal = function(pointOnSurface)
+	{
+		return pointOnSurface.clone().normalize();
+	}
+
+	surfaces.toroidal = new THREE.Mesh(new THREE.Geometry(), surfaceMaterial);
+	var torusRadiusIn4Space = 1;
+	var param = 20;
+	var projectionVector = new THREE.Vector4(1,0,0,0)
+	for(var i = 0; i < param; i++)
+	{
+		for(var j = 0; j < param; j++)
 		{
-			badObjects[i] = new THREE.Mesh(new THREE.CircleGeometry(0.03,32), badMat);
-			badObjects[i].position.set(Math.random() - 0.5,Math.random() - 0.5,0);
-			badObjects[i].geometry.computeBoundingSphere();
-			
-			scene.add(badObjects[i]);
-		}
-		
-		var goodObjects = Array(1);
-		var goodMat = new THREE.MeshBasicMaterial({color:0x00FF00, side: THREE.DoubleSide});
-		for( var i = 0; i < goodObjects.length; i++)
-		{
-			goodObjects[i] = new THREE.Mesh(new THREE.CircleGeometry(0.01,32), goodMat);
-			goodObjects[i].position.set(Math.random() - 0.5,Math.random() - 0.5,0);
-			goodObjects[i].geometry.computeBoundingSphere();
-			
-			scene.add(goodObjects[i]);
+			var newPoint = new THREE.Vector3();
+			surfaces.toroidal.geometry.vertices.push(newPoint);
+
+			var wrappedI = i === 0? param-1:i-1;
+			var wrappedJ = j === 0? param-1:j-1;
+			var tl = wrappedI*param + wrappedJ;
+			var tr = wrappedI*param + j;
+			var bl = i*param + wrappedJ;
+			var br = i*param + j;
+			surfaces.toroidal.geometry.faces.push(new THREE.Face3(tl,tr,bl))
+			surfaces.toroidal.geometry.faces.push(new THREE.Face3(bl,tr,br))
 		}
 	}
+	
+	// surfaces.toroidal.geometry.faces.push(new THREE.Face3(1,0,param))
+	surfaces.toroidal.scale.setScalar(0.03)
+
+	markedThingsToBeUpdated.push(surfaces.toroidal)
+	surfaces.toroidal.update = function()
+	{
+		for(var i = 0; i < param; i++)
+		{
+			for(var j = 0; j < param; j++)
+			{
+				var newPointIn4Space = surfaces.toroidal.geometry.vertices[i*param+j]
+				
+				newPointIn4Space.x = Math.sin((i/param * TAU)*1.001);
+				newPointIn4Space.y = Math.cos((i/param * TAU)*1.001);
+
+				newPointIn4Space.z = Math.sin((j/param * TAU)*1.001);
+				newPointIn4Space.w = Math.cos((j/param * TAU)*1.001);
+
+				var newPoint = getStereographicProjection(newPointIn4Space,projectionVector)
+				surfaces.toroidal.geometry.vertices[i*param+j].copy(newPoint)
+			}
+		}
+		surfaces.toroidal.geometry.computeFaceNormals();
+		surfaces.toroidal.geometry.computeVertexNormals();
+		surfaces.toroidal.geometry.verticesNeedUpdate = true;
+		surfaces.toroidal.geometry.normalsNeedUpdate = true;
+		surfaces.toroidal.rotation.y += 0.01
+	}
+
+	/*
+		Klein quartic
+		Want a heptagon
+		If there's a better way to do the genus 3 surface do that. But perfectly distributed perfectly toroidal holes sounds good
+		Lots of partial tori
+		4 * 2 triangles
+
+		Heptagon
+			Boundary first, that's the real part. Polar coordinates
+			Then this thing becomes a parameterization from which you get thingy
+
+		Five pentagon thing. Glue four edges together and you get a dodecagon
+		Hmm so apparently two pentagons parameterize a pair of pants?
+		Look you need to contact saul schleimer or whoever.
+			Ok, the point is moving on the hyperbolic plane and the tori are a wrapped-up version of that
+			
+
+
+
+		
+	*/
+
+	var chosenSurface = surfaces.spherical
+	scene.add(chosenSurface)
+	clickables.push(chosenSurface)
+	chosenSurface.position.z = -10;
+	chosenSurface.add(ball, trail);
+}
+
+function getStereographicProjection(vector, projectionVector)
+{
+	//projects from the side of the sphere it's on to the hyperplane at x = 0
+	var rayDirection = vector.clone().sub(projectionVector);
+	var multiplier = 1 / rayDirection.x;
+	var stereographicProjectionInFourSpace = rayDirection.multiplyScalar(multiplier);
+	stereographicProjectionInFourSpace.add(projectionVector);
+
+	var stereographicProjection = new THREE.Vector3(
+		stereographicProjectionInFourSpace.y,
+		stereographicProjectionInFourSpace.z,
+		stereographicProjectionInFourSpace.w );
+	return stereographicProjection;
 }
