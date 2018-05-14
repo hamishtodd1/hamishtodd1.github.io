@@ -1,6 +1,4 @@
 /*
-	Ask Maya what her proposed solutions are. Then ctrl+f "?"
-
 	Messages that should be built in or emerge
 		The meta-message is that knowledge of genetics gives you power
 			Nature, i.e. chaos, has its own approach to genetics that is not that bad:
@@ -9,9 +7,7 @@
 			Genome sequencing and "virtual mating" should be embraced
 				Studbooks are just a failed attempt to approximate it
 			Some airlines don’t ship three certain breeds; some insurers do some mongrels more cheaply. They're using sequencing
-			We can do better than this system
-		Dog welfare is important to try to interpret
-			Though they want to breed, doing it within breed leads to pain
+		Dog welfare is important to try to interpret and factor into decisions
 		Aesthetics -> stud books -> inbreeding -> phenotypic expression of recessive traits -> pain
 			In principle, as with lab mice, we could breed until inbreeding isn't that bad
 			And in fairness, WE WANT TO GET RID OF THOSE RECESSIVE SUFFERING TRAITS ANYWAY because they would sometimes come out randomly!
@@ -38,15 +34,13 @@
 				Lack of teeth is bad, or unshed teeth
 				"I'm trying to breed away from those weaknesses" - need to hold them to that. They certainly aren't breeding pugs
 					The breed standard SOUNDS like it's concerned with health
-		This is not what the original creators of the breeds wanted / "drift" happens
-			They didn't understand genetics
-			Unknown to them, their actions lead to exaggeration
-				Shows how the definition of "breed" is daft because it exemplifies it
-				In many decades, the drift will have gotten even worse
+		"drift" happens
+			In many decades, the drift will have gotten even worse
 		Possibly: interventions exists and is awful
 		Possibly: culling happens and is awful
 
 	Revamp
+		They have to move the red dot; there is too much pain close to it
 		“Best in show” has an influence on the breed
 		The breed changes by design
 		Assumption: you meet the new breed standard, you meet the old too (reasonable because each individual step...)
@@ -55,23 +49,7 @@
 		Could just shrink distance requirement to the distance of the furthest living one considered in the breed
 		Maybe you are trying to get "best in show"?
 		What is exaggeration? Are the breed standards not excluding it with all their "mediums"?
-
-	Intervention system?
-		Examples
-			"clipping ears"
-			"propping ear up with cotton bud"
-			Changing termperament i.e. training?
-		Obviously affects phenotype but not genotype
-		Interesting because you're thinking "how close can I get?" instead of "can I get this?"
-			Which does happen in real life?
-		The control method could just involve dragging them into the breed area, which causes them to change (and suffer)
-		Interventions only change a few things and often increase pain
-		Some interventions can decrease pain
-			If all interventions are dragging into breed, how do do this?
-			But allowing them can make people care less about the genotype
-			Some are necessary for survival?
-			Technically "training" is intervention
-			Caesarian section for bulldogs = intervention necessary for reproduction
+		Suffering is purely a mapping from phenotype space.
 
 	Death system? i.e. going into the "bin"
 		Why do people kill IRL?
@@ -182,6 +160,13 @@
 		Facial expression
 			Easy to curve the smile a variable amount
 			Have color too so it's super easy to see the pain concentration of a population in the simulations
+		Effects
+			SFX
+				"mating" = harp?
+				new litter = yapping
+			Drag them on a lead
+			They bound around chasing your mouse
+			little shadow
 
 	Gameplay
 		Goals
@@ -203,11 +188,13 @@
 			You'd have to not do this when evolving, because that would create weird incentives
 			Do not want people to get lucky and solve a puzzle. Do not want people to get unlucky and find they never can.
 		Major strategy: breed a dog purely to find out if it has some nasty gene/
+
 */
 
 /*
 	Order in which things are introduced
 		Dogs, breeding (level 1)
+		Early on, breeding *is* just "the one inbetween"
 		Phenotypic features (genotype is later, initially phenotype tells you all)
 		"Breeds" (but not as implemented in stud book)
 			Intervention?
@@ -215,7 +202,7 @@
 		Closed stud books
 		Suffering (everything prior has had no recessive problems)
 			Death?
-		Genotype visualization?
+		Genotype visualization? A series of black and white squares?
 
 	TODO
 		Make display systems for it all,
@@ -230,43 +217,207 @@
 
 function initDogGame()
 {
+	var genes = [
+		"pain",
+		"stripeWidth",
+		"angle",
+
+		//"furnishing"
+	];
+
+	function MakeGenome(parentGenomes)
+	{
+		var genome = {};
+
+		var chromosomes = [[],[]];
+
+		if(parentGenomes === undefined)
+		{
+			for(var i = 0; i < genes.length; i++)
+			{
+				chromosomes[0][i] = Math.random() < 0.5 ? 0:1;
+				chromosomes[1][i] = Math.random() < 0.5 ? 0:1;
+			}
+		}
+		else
+		{
+			//this is mating them randomly
+			//given a gene, you DON'T know which grandparent it came from (for hermaphrodites)
+			//it doesn't matter, anywhere, which way around things are
+			for(var i = 0; i < genes.length; i++)
+			{
+				chromosomes[0][i] = parentGenomes[0].getRandomAllele(i);
+				chromosomes[1][i] = parentGenomes[1].getRandomAllele(i);
+			}
+
+			console.log("Congratulations!")
+			for(var i = 0; i < genes.length; i++)
+			{
+				console.log(genes[i], chromosomes[0][i],chromosomes[1][i])
+			}
+		}
+
+		genome.expressingRecessive = function(trait)
+		{
+			var traitIndex = genes.indexOf(trait)
+			//1 = recessive, 0 = dominant
+			if( chromosomes[0][traitIndex] && chromosomes[1][traitIndex] )
+			{
+				return 1;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+
+		genome.getRandomAllele = function(traitIndex)
+		{
+			return chromosomes[Math.random() < 0.5 ? 0 : 1 ][traitIndex];
+		}
+
+		return genome;
+	}
+
 	var radius = 0.1;
 	var mouthMaterial = new THREE.MeshBasicMaterial({color:0x000000})
-	function MakeDog(genotype)
+	function MakeDog(parentGenomes)
 	{
 		var dog = new THREE.Mesh(
-			new THREE.CircleGeometry(radius,16),
-			new THREE.MeshBasicMaterial({
-				color:genotype.color
+			new THREE.Geometry(),
+			new THREE.MeshPhongMaterial({
+				vertexColors:THREE.FaceColors
 			}));
 		dog.position.z = -10;
 		scene.add(dog);
 		bestowDefaultMouseDragProperties(dog);
 
-		dog.hadKid = false;
+		dog.genome = MakeGenome(parentGenomes)
+
+		var stripeSpacing = radius / 6;
+		//phenotype = geometry
+		{
+			var neutralPain = 0.2;
+			if( dog.genome.expressingRecessive("pain") < neutralPain )
+			{
+				var thetaLength = TAU / 2;
+				var thetaStart = TAU / 2;
+			}
+			else
+			{
+				var thetaLength = TAU / 2 * (dog.genome.expressingRecessive("pain") - neutralPain)/(1-neutralPain);
+				var thetaStart = TAU / 4 - thetaLength / 2;
+			}
+
+			var mouthScalar = Math.sin(thetaLength / 2);
+			var mouthRadius = radius * 0.66;
+
+			var mouth = new THREE.Mesh(
+				new THREE.RingGeometry(
+					mouthRadius,
+					mouthRadius + mouthScalar / 80,
+					31,1,
+					thetaStart,
+					thetaLength),
+				mouthMaterial)
+			mouth.geometry.applyMatrix(new THREE.Matrix4().scale(new THREE.Vector3().setScalar(1/mouthScalar)))
+
+			mouth.geometry.computeBoundingBox();
+			var mouthCenter = mouth.geometry.boundingBox.max.clone().lerp(mouth.geometry.boundingBox.min,0.5)
+			mouth.position.sub(mouthCenter)
+			mouth.position.y -= radius / 4;
+			mouth.position.z = 0.01;
+			dog.add(mouth)
+		}
+
+		var stripeStart = -radius;
+		var numStripes = -1;
+		while(1)
+		{
+			var height = Math.sqrt(sq(radius)-sq(stripeStart));
+
+			var v1 = new THREE.Vector3(stripeStart, height,0);
+			v1.applyAxisAngle(zUnit, dog.genome.expressingRecessive("angle"))
+			dog.geometry.vertices.push( v1 );
+			var v2 = new THREE.Vector3(stripeStart,-height,0);
+			v2.applyAxisAngle(zUnit, dog.genome.expressingRecessive("angle"))
+			dog.geometry.vertices.push( v2 );
+
+			numStripes += 1;
+
+			if(stripeStart < radius )
+			{
+				stripeStart += numStripes % 2 ? stripeSpacing : stripeSpacing * (1 + dog.genome.expressingRecessive("stripeWidth") );
+				if(stripeStart > radius )
+				{
+					stripeStart = radius;
+				}
+			}
+			else
+			{
+				break;
+			}
+		}
+		logged = 1
+		var colors = [
+			new THREE.Color(1,0,0),
+			new THREE.Color(1,1,0)
+		];
+		for(var i = 0; i < numStripes; i++)
+		{
+			dog.geometry.faces.push(
+				new THREE.Face3(i*2,  i*2+1,i*2+2,zUnit.clone(),colors[i%2]),
+				new THREE.Face3(i*2+2,i*2+1,i*2+3,zUnit.clone(),colors[i%2])
+				);
+		}
+
 		dog.update = function()
 		{
+			console.error("yo")
+			if(!mouse.clicking && mouse.oldClicking && mouse.lastClickedObject === this )
+			{
+				for(var i = 0; i < dogs.length; i++)
+				{
+					if( dogs[i] === this )
+					{
+						continue;
+					}
+
+					if( checkCollision(this,dogs[i]) )
+					{
+						var newDog = MakeDog([this.genome,dogs[i].genome]);
+						dogs.push( newDog )
+						newDog.position.copy(this.position).lerp(dogs[i].position,0.5);
+
+						this.position.add(this.position.clone().sub(newDog.position).setLength(radius*2));
+						dogs[i].position.add(dogs[i].position.clone().sub(newDog.position).setLength(radius*2));
+					}
+					
+					dogs[i].material.emissive.b = 0;
+					dogs[i].material.needsUpdate = true;
+				}
+			}
+
 			if( mouse.clicking && mouse.lastClickedObject === this )
 			{
 				mouse.applyDrag(this);
 
-				if(!this.hadKid)
+				for(var i = 0; i < dogs.length; i++)
 				{
-					for(var i = 0; i < dogs.length; i++)
+					if( dogs[i] === this )
 					{
-						if( dogs[i] !== this )
-						{
-							continue;
-						}
+						continue;
+					}
 
-						if( checkCollision(this,dogs[i]) )
-						{
-							var newGenome = mateGenomesRandomly(this.genome,dogs[i].genome);
-							var newDog = MakeDog();
-							dogs.push( newDog )
-							this.hadKid = true;
-							break;
-						}
+					if( checkCollision(this,dogs[i]) )
+					{
+						dogs[i].material.emissive.b = 1;
+						dogs[i].material.needsUpdate = true;
+					}
+					else
+					{
+						dogs[i].material.emissive.b = 0;
+						dogs[i].material.needsUpdate = true;
 					}
 				}
 			}
@@ -276,23 +427,12 @@ function initDogGame()
 			}
 		}
 
-		var mouthCurvature = 0;
-		if(genotype.pain < 0.1)
-		{
-			mouthCurvature = genotype.pain
-		}
-		var mouth = new THREE.Mesh(
-			new THREE.RingGeometry(radius / 2,radius*3/4,31,1,0,TAU/2),
-			mouthMaterial)
-
-		//the phenotype is the geometry
-
 		return dog;
 	}
 
 	function checkCollision(dog1,dog2)
 	{
-		if(dog1.position.distanceTo(dog2.position) <= radius)
+		if(dog1.position.distanceTo(dog2.position) <= radius * 2)
 		{
 			return true;
 		}
@@ -300,44 +440,18 @@ function initDogGame()
 		{
 			return false;
 		}
-	}
-
-	function queryGenomeTrait(genome,traitToQuery)
-	{
-		if( genome[0][traitToQuery] || genome.rightChromosome[1][traitToQuery] )
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	function mateGenomesRandomly(parent1,parent2)
-	{
-		var newGenome = [[],[]];
-
-		for(var i = 0; i < parent1.genome[0].length; i++)
-		{
-			var order = Math.random() >= 0.5 ? 1 : 0;
-			newGenome[ order ][i] = Math.random() >= 0.5 ? parent1.genome[0][i] : parent1.genome[1][i];
-			newGenome[1-order][i] = Math.random() >= 0.5 ? parent2.genome[0][i] : parent2.genome[1][i];
-		}
-
-		return newGenome;
 	}
 
 	var dogs = [];
 	var fieldDimension = 0.8;
-	for(var i = 0; i < 5; i++)
-	{
-		//1 = it has the dominant, 0 = recessive
-		var genome = [[],[]]
 
+	for(var i = 0; i < 3; i++)
+	{
 		dogs[i] = MakeDog();
-		dogs[i].material.color.setRGB(Math.random(),Math.random(),Math.random());
-		dogs[i].position.x = (Math.random()-0.5)*fieldDimension;
-		dogs[i].position.y = (Math.random()-0.5)*fieldDimension;
+		dogs[i].position.x = (Math.random()-0.5) * fieldDimension;
+		dogs[i].position.y = (Math.random()-0.5) * fieldDimension;
 	}
+
+	//ok so they can't escape the rectangle
+	//but they all repel each other (except the one you're holding)
 }

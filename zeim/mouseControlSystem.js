@@ -72,9 +72,9 @@ function initMouse(renderer)
 		}
 	};
 
-	var raycaster = new THREE.Raycaster();
-	raycaster.setFromCamera( asynchronous.normalizedDevicePosition, camera );
-	var ray = raycaster.ray;
+	var rayCaster = new THREE.Raycaster();
+	rayCaster.setFromCamera( asynchronous.normalizedDevicePosition, camera );
+	var ray = rayCaster.ray;
 	var previousRay = new THREE.Ray();
 
 	var mouse = {
@@ -86,6 +86,7 @@ function initMouse(renderer)
 		//no, you shouldn't need to know its position at all times! there are other ways to alert people to interactivity!
 		ray: ray,
 		previousRay: previousRay,
+		rayCaster: rayCaster
 	};
 
 	//hack. remove it.
@@ -134,20 +135,20 @@ function initMouse(renderer)
 		asynchronous.justMoved = false;
 
 		previousRay.copy(ray);
-		raycaster.setFromCamera( asynchronous.normalizedDevicePosition, camera );
+		rayCaster.setFromCamera( asynchronous.normalizedDevicePosition, camera );
 
 		if(this.clicking )
 		{
 			if( !this.oldClicking )
 			{
-				var clickableIntersections = raycaster.intersectObjects( clickables );
+				var clickableIntersections = rayCaster.intersectObjects( clickables );
 				if( clickableIntersections[0] )
 				{
 					var cameraSpaceClickedPoint = clickableIntersections[0].point.clone();
 					cameraSpaceClickedPoint.worldToLocal(camera);
 					if(clickableIntersections[0].object.onClick)
 					{
-						clickableIntersections[0].object.onClick(cameraSpaceClickedPoint);
+						clickableIntersections[0].object.onClick(cameraSpaceClickedPoint,clickableIntersections[0].point);
 					}
 
 					this.lastClickedObject = clickableIntersections[0].object;

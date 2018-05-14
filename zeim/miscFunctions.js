@@ -21,6 +21,33 @@ function checkForNewGlobals()
 	}	
 }
 
+function ArrowGeometry()
+{
+	var geo = new THREE.Geometry();
+	var fullLength = 0.02;
+	var headLength = fullLength / 3;
+	var headWidth = headLength / (Math.sqrt(3) / 2);
+	var bodyWidth = headWidth / 2.8;
+	
+	geo.vertices.push(
+		new THREE.Vector3( 0, fullLength, 0 ),
+		new THREE.Vector3( headWidth / 2, fullLength - headLength, 0 ),
+		new THREE.Vector3(-headWidth / 2, fullLength - headLength, 0 )
+	);
+	geo.faces.push(new THREE.Face3(0,2,1));
+	
+	geo.vertices.push(
+			new THREE.Vector3(-bodyWidth / 2, fullLength - headLength, 0 ),
+			new THREE.Vector3( bodyWidth / 2, fullLength - headLength, 0 ),
+			new THREE.Vector3(-bodyWidth / 2, 0, 0 ),
+			new THREE.Vector3( bodyWidth / 2, 0, 0 )
+		);
+	geo.faces.push(new THREE.Face3(3,6,4));
+	geo.faces.push(new THREE.Face3(5,6,3));
+	
+	diamond.add(geo);
+}
+
 function getRandomColor()
 {
 	return new THREE.Color(Math.random(),Math.random(),Math.random())
@@ -84,6 +111,25 @@ function pointCylinder(cylinderMesh, end)
 	cylinderMesh.scale.set(1,startToEnd.length(),1);
 	cylinderMesh.quaternion.setFromUnitVectors(yUnit,startToEnd.normalize());
 	cylinderMesh.quaternion.normalize();
+}
+
+function insertCylindernumbers(A,B, verticesArray, cylinderSides, arrayStartpoint, radius ) {
+	var aToB = new THREE.Vector3(B.x-A.x, B.y-A.y, B.z-A.z);
+	aToB.normalize();
+	var perp = randomPerpVector(aToB);
+	perp.normalize(); 
+	for( var i = 0; i < cylinderSides; i++)
+	{
+		var radiuscomponent = perp.clone();
+		radiuscomponent.multiplyScalar(radius);
+		radiuscomponent.applyAxisAngle(aToB, i * TAU / cylinderSides);
+		
+		verticesArray[arrayStartpoint + i*2 ].copy(radiuscomponent);
+		verticesArray[arrayStartpoint + i*2 ].add(A);
+		
+		verticesArray[arrayStartpoint + i*2+1 ].copy(radiuscomponent);
+		verticesArray[arrayStartpoint + i*2+1 ].add(B);
+	}
 }
 
 function basicallyEqual(a,b)
