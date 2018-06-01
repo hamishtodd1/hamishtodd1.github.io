@@ -229,7 +229,7 @@ function initHyperbolic()
 		var numTurns = 3;
 		var totalHelixHeight = 0.1;
 		var turnHeight = totalHelixHeight / numTurns;
-		var diniVerticesWide = numTurns * 40;
+		var diniVerticesWide = numTurns * 40; 
 		for(var i = 0; i < diniVerticesWide; i++)
 		{
 			var u = (i / diniVerticesWide) * TAU * numTurns; //The thing does not "close up" completely for numTurns = 0, the cause is in here
