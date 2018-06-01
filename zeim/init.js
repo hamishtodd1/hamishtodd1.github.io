@@ -93,12 +93,12 @@
 	initPlaybackSystemAndMaybeRecordingSystem( launcher, vrAndRecording );
 
 	setUpSpectatorScene()
-	addExtraForVR()
 
 	var controllers = initControllers();
 	if( vrAndRecording )
 	{
 		initVrInputSystem(controllers, ourVrEffect, renderer);
+		addExtraForVR()
 	}
 
 	// var goose = new Goose();

@@ -196,6 +196,17 @@ THREE.Quaternion.prototype.distanceTo = function(q2)
 	if (theta>Math.PI/2) theta = Math.PI - theta;
 	return theta;
 }
+THREE.Quaternion.prototype.ToVector4 = function(q2)
+{
+	return new THREE.Vector4(this.x,this.y,this.z,this.w);
+}
+THREE.Vector4.prototype.fromQuaternion = function(q)
+{
+	this.x = q.x;
+	this.y = q.y;
+	this.z = q.z;
+	this.w = q.w;
+}
 
 THREE.Face3.prototype.getCorner = function(i)
 {

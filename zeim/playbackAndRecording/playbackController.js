@@ -186,6 +186,8 @@ function initPlaybackControl(audio,recordedFrames)
 		uiVisibilityTimer -= frameDelta;
 		var uiVisibility = audio.paused || uiVisibilityTimer >= 0;
 
+		uiVisibility = false; //hack for when working on things
+
 		background.visible = uiVisibility;
 		playPauseButton.visible = uiVisibility;
 		timeSlider.visible = uiVisibility;
