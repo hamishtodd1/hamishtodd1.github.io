@@ -22,6 +22,15 @@
 	You can bring interface bits on and off, less need to think about some great big "game state" thing
 */
 
+// function importScript(scriptName)
+// {
+// 	var extraScript = document.createElement('script');
+// 	extraScript.setAttribute('src',scriptName + '.js');
+// 	document.body.appendChild(extraScript);
+// 	extraScript.onload = init;
+// }
+// importScript('variables')
+
 (function init()
 {
 	var vrAndRecording = WEBVR && WEBVR.isAvailable() && window.location.href === "http://localhost:9090/";

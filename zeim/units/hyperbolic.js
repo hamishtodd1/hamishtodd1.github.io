@@ -24,10 +24,13 @@
 		klein quartic	x3y + y3z + z3x = 0 supposed to be in complex numbers but surely something?
 		double torus? nicholas schmitt/dugan hammock. 
 		https://arxiv.org/pdf/1307.6938.pdf
+		Nice 2-torus	((sqrt(y^2+z^2)-b)^2+(x-a)^2) * ((sqrt(((sqrt(3)x-y)/2)^2+z^2)-b)^2+((x+sqrt(3)y)/2+a)^2) * ((sqrt((-(sqrt(3)x+y)/2)^2+z^2)-b)^2+((x-sqrt(3)y)/2+a)^2) = c^6
 		hyperbolic paraboloid z = sq(x)-sq(y)
 		Hyperboloid
 
 	Can nicely morph between these because it's just lerping a few coefficients
+
+
 */
 
 function initHyperbolic()
