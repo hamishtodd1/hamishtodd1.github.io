@@ -18,7 +18,7 @@ function getClientRay()
 
 function initInputSystem()
 {
-	var asynchronousInput = { //only allowed to use this in this file, and maybe in init
+	var asynchronousInput = {
 		clientPosition: new THREE.Vector3(),
 		clientClicking: false,
 		read: function()
