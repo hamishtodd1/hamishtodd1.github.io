@@ -206,7 +206,7 @@ function MakeToroidalSurfaces(surfaces)
 					nodeTops[1],	armSideCenterA,
 					( i * 4 + 1 ) * sq(verticesWide), verticesWide, surfaces.genus2.geometry);
 
-				// //extra arm
+				//extra arm
 				insertS3TetrahedronSurface(
 					armSideCenterB,	nodeBottoms[1],
 					nodeTops[0],	nearbyArmBCenter,
@@ -257,7 +257,7 @@ function MakeToroidalSurfaces(surfaces)
 
 		surfaces.genus2.update = function()
 		{
-			if(mouse.clicking )
+			if(mouse.clicking && mouse.lastClickedObject === null)
 			{
 				var rotationAmount = mouse.ray.direction.angleTo(mouse.previousRay.direction) * 12
 				var rotationAxis = mouse.ray.direction.clone().cross(mouse.previousRay.direction);
@@ -265,12 +265,12 @@ function MakeToroidalSurfaces(surfaces)
 				this.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAmount))
 			}
 
-			// var timeScaled = frameCount / 100;
-			// projectionOriginAsQuaternion.x = Math.sin( timeScaled )
-			// projectionOriginAsQuaternion.w = Math.cos( timeScaled )
-			// updateProjectionSetup()
+			var timeScaled = frameCount / 1000;
+			projectionOriginAsQuaternion.x = Math.sin( timeScaled )
+			projectionOriginAsQuaternion.w = Math.cos( timeScaled )
+			updateProjectionSetup()
 
-			// surfaces.genus2.deriveVertexPositions()
+			surfaces.genus2.deriveVertexPositions()
 		}
 	}
 
@@ -299,7 +299,7 @@ function MakeToroidalSurfaces(surfaces)
 			];
 			for(var j = 0; j < verticesWide; j++)
 			{
-				var newPointInS3 = jonSlerp(endsOfRule[0],endsOfRule[1], j/(verticesWide-1) );
+				var newPointInS3 = jonSlerp( endsOfRule[0], endsOfRule[1], j/(verticesWide-1) );
 				geometry.vertices[ firstVertexIndex + i * verticesWide + j ].copy( getStereographicProjection( newPointInS3.ToVector4() ) );
 			}
 		}

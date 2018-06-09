@@ -40,8 +40,6 @@
 
 function initGraphTheory()
 {
-	return;
-
 	var disjointSets = [];
 	function addDisjointSet()
 	{
@@ -291,6 +289,7 @@ for each edge, do a search
 	markedThingsToBeUpdated.push(graphGame)
 	graphGame.update = function()
 	{
+		console.log("yo")
 		if(decompose)
 			decompositionDisplayState = decompositionDisplayState + (1-decompositionDisplayState)*0.1;
 		else
@@ -398,8 +397,5 @@ for each edge, do a search
 				decomposition[i][j].position.addScaledVector(cycleDirection, decompositionDisplayState );
 			}
 		}
-		
-		requestAnimationFrame( coreLoop );
-		renderer.render( scene, camera );
 	}
 }

@@ -17,18 +17,19 @@
 		Show to diego, get suggestions about zoom speed and such
 
 	Script. 4 things?
-		She used to doodle so much that her daughter thought she was an artist.
-			Long rolls of parchment, on the floor
-			And this is not a surprise given what you're about to see
 		She once earned infinity dollars
 			Bit of a long story to this
-		first of any gender to get full marks at olympiad
-			Enthusiastic and driven
+		Ridiculously modest
+			First female fields medallist - also first Iranian + Muslim!
+			first of any gender to get full marks at olympiad
+			First to be shown without a headscarf in media
 		Her work is connected to big bang
 			New approach to witten's conjecture
 			"Chainsaw"
-		First female fields medallist - also first Iranian + Muslim!
-			First to be shown without a headscarf in media
+			Snake
+		She used to doodle so much that her daughter thought she was an artist.
+			Long rolls of parchment, on the floor
+			That's what mathematics really is - show cool animations
 		
 		Surfaces part
 			Compare to the escher picture, the tree images from petworth
@@ -88,8 +89,8 @@ function initConditionsVisualization()
 
 function initMirzakhani()
 {
-	// initGraphTheory();
-	var surfaces = initSurfaces();
+	initGraphTheory();
+	// var surfaces = initSurfaces();
 
 	/*
 	TODO
@@ -226,10 +227,10 @@ function initMirzakhani()
 
 			if(faceThatBallIsOn !== null)
 			{
-				if(!this.velocity.equals(zeroVector))
+				if(!this.velocity.equals(zeroVector) && !mouse.clicking)
 				{
 					var formerPosition = this.position.clone();
-					var numIterations = 10;
+					var numIterations = 3;
 					for(var i = 0; i < numIterations; i++)
 					{
 						var formerNormal = faceThatBallIsOn.normal.clone();
@@ -240,7 +241,15 @@ function initMirzakhani()
 
 						updateFromRayCastToSurface(positionRayCaster,this.position.clone().applyMatrix4(this.parent.matrix));
 
-						var normalChangingQuaternion = new THREE.Quaternion().setFromUnitVectors(formerNormal,faceThatBallIsOn.normal);
+						//wouldn't have to do this if all the normals were pointing in same direction
+						if(formerNormal.dot(faceThatBallIsOn.normal) < 0 )
+						{
+							var normalChangingQuaternion = new THREE.Quaternion().setFromUnitVectors(formerNormal.clone().negate(),faceThatBallIsOn.normal);
+						}
+						else
+						{
+							var normalChangingQuaternion = new THREE.Quaternion().setFromUnitVectors(formerNormal,faceThatBallIsOn.normal);
+						}
 						this.velocity.applyQuaternion(normalChangingQuaternion);
 					}
 
@@ -257,23 +266,23 @@ function initMirzakhani()
 		}
 	}
 
-	var chosenSurface = surfaces.genus2;
-	if(chosenSurface.update === undefined)
-	{
-		chosenSurface.update = function()
-		{
-			if(mouse.clicking )
-			{
-				var rotationAmount = mouse.ray.direction.angleTo(mouse.previousRay.direction) * 12
-				var rotationAxis = mouse.ray.direction.clone().cross(mouse.previousRay.direction);
-				rotationAxis.applyQuaternion(this.quaternion.clone().inverse()).normalize();
-				this.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAmount))
-			}
-		}
-	}
-	markedThingsToBeUpdated.push( chosenSurface )
-	scene.add(chosenSurface)
-	clickables.push(chosenSurface)
-	chosenSurface.position.z = -10;
-	chosenSurface.add(ball, trail);
+	// var chosenSurface = surfaces.genus2;
+	// if(chosenSurface.update === undefined)
+	// {
+	// 	chosenSurface.update = function()
+	// 	{
+	// 		// if(mouse.clicking )
+	// 		// {
+	// 		// 	var rotationAmount = mouse.ray.direction.angleTo(mouse.previousRay.direction) * 12
+	// 		// 	var rotationAxis = mouse.ray.direction.clone().cross(mouse.previousRay.direction);
+	// 		// 	rotationAxis.applyQuaternion(this.quaternion.clone().inverse()).normalize();
+	// 		// 	this.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAmount))
+	// 		// }
+	// 	}
+	// }
+	// markedThingsToBeUpdated.push( chosenSurface )
+	// scene.add(chosenSurface)
+	// clickables.push(chosenSurface)
+	// chosenSurface.position.z = -10;
+	// chosenSurface.add(ball, trail);
 }
