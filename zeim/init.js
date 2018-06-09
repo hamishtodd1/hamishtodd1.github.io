@@ -10,8 +10,8 @@
 		-Working on tablets. Phones get embed and maybe message. No need to worry about address bar
 		-VR interaction / funkiness in which you move your head and hand around and camera is in right place
 		-Would be nice if people could spectate live
-		-send to haxiomic, get "make it nicer looking for free by doing this:"
-		-lighting?
+		-send to haxiomic/mrdoob/wannerstedt, get "make it nicer looking for free by doing this:"
+		-fix lighting
 		-editing suite?
 
 	To make
@@ -22,6 +22,15 @@
 
 	You can bring interface bits on and off, less need to think about some great big "game state" thing
 */
+
+// function importScript(scriptName)
+// {
+// 	var extraScript = document.createElement('script');
+// 	extraScript.setAttribute('src',scriptName + '.js');
+// 	document.body.appendChild(extraScript);
+// 	extraScript.onload = init;
+// }
+// importScript('variables')
 
 (function init()
 {
@@ -76,10 +85,7 @@
 	renderer.setClearColor(0xFFFFFF)
 	document.body.appendChild( renderer.domElement );
 
-	initCameraAndRendererResizeSystemAndCameraRepresentation(renderer);
-
 	var ourVrEffect = new THREE.VREffect( renderer );
-
 	function render()
 	{
 		loop( controllers, vrAndRecording )
@@ -90,6 +96,8 @@
 			render();
 		} );
 	}
+
+	initCameraAndRendererResizeSystemAndCameraRepresentation(renderer);
 	
 	initPlaybackSystemAndMaybeRecordingSystem( launcher, vrAndRecording );
 

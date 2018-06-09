@@ -18,7 +18,7 @@ THREE.VREffect = function ( renderer, onError ) {
 	var eyeMatrixL = new THREE.Matrix4();
 	var eyeMatrixR = new THREE.Matrix4();
 	
-	var eyesAreSeparated = 0;
+	var eyesAreSeparated = 1;
 	this.toggleEyeSeparation = function()
 	{
 		if(eyesAreSeparated === 0)

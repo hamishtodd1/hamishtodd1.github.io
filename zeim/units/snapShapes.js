@@ -8,11 +8,14 @@
 
 	"Face" data structure is just series of points that build up the fan. Check respective lengths, that's surely enough to identify face types
 
+	Consider colouring slightly differently, like maybe variation in tone towards corners
+
 	//-------Snapping
 	maybe show a ghost first? All shapes have a ghost of their volume.
 	note that so long as you have a teeny bit of depth, you can have snapping squares
-*/
 
+	might be better to have a "hollowing out" thing so you can make arbitrary 3D shapes with them https://pbs.twimg.com/media/DCboE-AVwAI_aAW.jpg
+*/
 
 function initSnapShapes(allPolyhedra)
 {

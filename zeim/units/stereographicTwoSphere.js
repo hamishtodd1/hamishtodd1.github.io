@@ -1,4 +1,6 @@
 /*
+	Stereographic projection = very high FOV game.
+
 	Example of a game format where seeing right angles is important?
 
 	Could have lines on there quite easily, circles of course. 

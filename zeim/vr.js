@@ -45,7 +45,7 @@ function initVrInputSystem(controllers, ourVrEffect, renderer)
 
 	document.addEventListener( 'keydown', function( event )
 	{
-		if(event.keyCode === 190 && ( navigator.getVRDisplays !== undefined || navigator.getVRDevices !== undefined ) )
+		if(event.keyCode === 69 && ( navigator.getVRDisplays !== undefined || navigator.getVRDevices !== undefined ) )
 		{
 			event.preventDefault();
 			if(cameraRepositioner.vrInputs.length < 1)
