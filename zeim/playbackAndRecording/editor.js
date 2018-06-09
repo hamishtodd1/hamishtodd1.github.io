@@ -1,6 +1,7 @@
 /*
 	What are the editing controls you'd need? Remember a major point is that "effects" are done live, eg putting music over
 	You're going to use keyboard shortcuts anyway so not much need for buttons
+	
 	The fundamental thing to imagine: a bunch of lines of different colors, parts of which you shall cut out and assemble into another line
 	You can grab the ends and move them to change how much is there. Contract a line and it will "ripple" the gap shut
 	Do want zooming and marks for seconds and minutes. And the ability to grab and move the timeline along

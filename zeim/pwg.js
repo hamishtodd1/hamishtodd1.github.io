@@ -1,12 +1,15 @@
 /*
 	Extreme democratization: I am programming the game as you play it, but you can reprogram it, maybe even me
 
+	The way you show things should be similar to the way you program them; otherwise illustrating how they were made is extra work
+
 	Maybe don't open source this, lest people make demands of you. Better that they implement it better than you. Or hire you to do it well!
 
 	The first purpose it serves is as the default "relationship between two objects transferrer". Eg between that sphere and slider
 	The projectiles are the objects themselves
 
-	If you have an "actual" object affected by "actual" things, have them be joined by a line (hanging wire?) to the variable whose visibility can be off or on. That part is declarative!
+	If you have an "actual" object affected by "actual" things,
+		have them be joined by a line (hanging wire?) to the variable whose visibility can be off or on. That part is declarative!
 
 	Next focus on positions, and making animations
 	

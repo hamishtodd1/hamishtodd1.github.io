@@ -1,6 +1,8 @@
-//when paused, all clickable objects should flash
+/*
+	when paused, all clickable objects should flash
 
-
+	mousewheel goes forwards and back? Makes sense to me, that's what a webpage is
+*/
 
 function initPlaybackControl(audio,recordedFrames)
 {

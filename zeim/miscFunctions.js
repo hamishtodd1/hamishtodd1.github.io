@@ -21,6 +21,12 @@ function checkForNewGlobals()
 	}	
 }
 
+function moduloWithNegatives(a,n)
+{
+	while( a < 0 ) a += n;
+	return a % n;
+}
+
 function ArrowGeometry()
 {
 	var geo = new THREE.Geometry();
@@ -195,6 +201,30 @@ THREE.Quaternion.prototype.distanceTo = function(q2)
 	var theta = Math.acos(this.w*q2.w + this.x*q2.x + this.y*q2.y + this.z*q2.z);
 	if (theta>Math.PI/2) theta = Math.PI - theta;
 	return theta;
+}
+THREE.Quaternion.prototype.multiplyScalar = function(s)
+{
+	this.x *= s;
+	this.y *= s;
+	this.z *= s;
+	this.w *= s;
+	return this;
+}
+THREE.Quaternion.prototype.sub = function(q)
+{
+	this.x -= q.x;
+	this.y -= q.y;
+	this.z -= q.z;
+	this.w -= q.w;
+	return this;
+}
+THREE.Quaternion.prototype.add = function(q)
+{
+	this.x += q.x;
+	this.y += q.y;
+	this.z += q.z;
+	this.w += q.w;
+	return this;
 }
 THREE.Quaternion.prototype.ToVector4 = function(q2)
 {

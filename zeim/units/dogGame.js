@@ -373,7 +373,7 @@ function initDogGame()
 
 		dog.update = function()
 		{
-			console.error("yo")
+			// console.error("yo")
 			if(!mouse.clicking && mouse.oldClicking && mouse.lastClickedObject === this )
 			{
 				for(var i = 0; i < dogs.length; i++)
@@ -445,7 +445,7 @@ function initDogGame()
 	var dogs = [];
 	var fieldDimension = 0.8;
 
-	for(var i = 0; i < 3; i++)
+	for(var i = 0; i < 8; i++)
 	{
 		dogs[i] = MakeDog();
 		dogs[i].position.x = (Math.random()-0.5) * fieldDimension;

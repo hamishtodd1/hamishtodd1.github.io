@@ -1,4 +1,4 @@
-//yeah, wav is pretty big, but it streams.
+//yeah, wav is pretty big, but it streams. Doesn't mp3?
 
 function initAudioRecorder(audio)
 {

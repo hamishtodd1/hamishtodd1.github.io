@@ -141,6 +141,7 @@ function initMouse(renderer)
 		{
 			if( !this.oldClicking )
 			{
+				//not working for a mesh? Check for infinities
 				var clickableIntersections = rayCaster.intersectObjects( clickables );
 				if( clickableIntersections[0] )
 				{

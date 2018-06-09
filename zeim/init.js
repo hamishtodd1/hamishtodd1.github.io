@@ -1,5 +1,6 @@
 /*
-	OI JOHN AND IAN WHAT DO I FRIKKIN DO
+	Hmm, if it all takes place on a board, and you're moving around on it, well, that's the timeline
+	Could be used for navigation / scrollability
 
 	The youtube thing is a colossal perverse incentive
 		Subtleties in interactive learning is your raison d'etre, but here we are, making something non-interactive
@@ -113,10 +114,11 @@
 	// initStereographicTwoSphere();
 	// initShapeMaker();
 	// initIrreg();
-	// initMyGraph();
 	// initVectorFields();
+
 	// initDogGame();
-	initHyperbolic();
+	
+	initMirzakhani();
 	
 	// var allPolyhedra = [];
 	// initSnapShapes( allPolyhedra );
