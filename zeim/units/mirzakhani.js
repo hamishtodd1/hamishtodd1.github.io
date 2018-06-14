@@ -15,6 +15,7 @@
 		Record, on twitch
 		Facebook version?
 		Show to diego, get suggestions about zoom speed and such
+		Send to mum for music
 
 	Script. 4 things?
 		She once earned infinity dollars
@@ -23,10 +24,9 @@
 			First female fields medallist - also first Iranian + Muslim!
 			first of any gender to get full marks at olympiad
 			First to be shown without a headscarf in media
-		Her work is connected to big bang
-			New approach to witten's conjecture
+		Her work is extremely similar to playing "Snake"
+			Her work is connected to big bang, new approach to witten's conjecture
 			"Chainsaw"
-			Snake
 		She used to doodle so much that her daughter thought she was an artist.
 			Long rolls of parchment, on the floor
 			That's what mathematics really is - show cool animations
