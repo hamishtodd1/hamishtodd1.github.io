@@ -18,6 +18,8 @@ import tornado.template
 
 import os
 
+# os.listdir()
+
 #TODO revert! not coming from localhost = mic warning = slow and gets in way of recording
 class websocketHandler(tornado.websocket.WebSocketHandler):
 	def check_origin(self, origin):

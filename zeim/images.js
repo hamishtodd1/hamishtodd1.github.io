@@ -1,3 +1,10 @@
+/*
+	want to be able to put mosue over a picture on the internet,
+		press a keyboard shortcut, see it appear
+
+	save file to the directory is easy, you'll want to "save as"
+*/
+
 function initImages()
 {
 	var imageFileNames = [
@@ -25,7 +32,7 @@ function initImages()
 		textureLoader.load( "./data/textures/" + imageFileNames[i], function(texture) 
 		{
 			var image = new GrabbableImage(texture);
-			image.position.set( -i * 0.5, 0, -1.8 );
+			image.position.set( -i * 0.5, 0, -18 );
 			markedThingsToBeUpdated.push(image);
 			clickables.push(image)
 			camera.add(image);
@@ -36,4 +43,10 @@ function initImages()
 	{
 		singleLoadLoop(i);
 	}
+
+	// loadRecentlyAddedImage = function(filename)
+	// {
+	// 	socket.send("wantRecentlyAddedFile")
+	// }
+	// socket.onmessage = blah
 }

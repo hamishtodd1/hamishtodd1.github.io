@@ -218,8 +218,6 @@ function initHyperbolic()
 			Ok, the point is moving on the hyperbolic plane and the tori are a wrapped-up version of that
 			
 
-
-
 		
 	*/
 

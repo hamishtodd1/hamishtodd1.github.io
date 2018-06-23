@@ -90,7 +90,7 @@ function initPlaybackSystemAndMaybeRecordingSystem(launcher, vrAndRecording)
 
 		if( vrAndRecording )
 		{
-			var socket = new WebSocket("ws://localhost:9090/ws")
+			socket = new WebSocket("ws://localhost:9090/ws")
 			socket.onopen = function()
 			{
 				initRecordingSystem(

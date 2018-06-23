@@ -23,6 +23,11 @@ function checkForNewGlobals()
 
 function moduloWithNegatives(a,n)
 {
+	if(n<=0)
+	{
+		console.log("errrm")
+		return a;
+	}
 	while( a < 0 ) a += n;
 	return a % n;
 }

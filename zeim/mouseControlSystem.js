@@ -1,3 +1,7 @@
+/*
+	TODO Burn this all to the ground
+*/
+
 //"inheritance"
 function bestowDefaultMouseDragProperties(object)
 {
