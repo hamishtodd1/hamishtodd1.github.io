@@ -2,7 +2,6 @@
 /*
 	TODO
 		display method for partitioning
-		partitioning algorithm https://idea-instructions.com/graph-scan/
 
 	Introducing n-partite graphs (without words!)
 		Assemble the n sets on a circle
@@ -40,63 +39,65 @@
 
 function initGraphTheory()
 {
-	// var disjointSets = [];
+	// var partitions = [];
 	// function addDisjointSet()
 	// {
-	// 	var colorAsNumber = disjointSets.length+1;
-	// 	disjointSets.push([]);
+	// 	var colorAsNumber = partitions.length+1;
+	// 	partitions.push([]);
 	// 	var min = 0.2;
-	// 	disjointSets[disjointSets.length-1].color = new THREE.Color( min + (1-min) * Math.random(), min + (1-min) * Math.random(), min + (1-min) * Math.random() );
-	// 	disjointSets[disjointSets.length-1].color.multiplyScalar(0.8)
-	// 	disjointSets[disjointSets.length-1].position = new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,-10);
+	// 	partitions[partitions.length-1].color = new THREE.Color( min + (1-min) * Math.random(), min + (1-min) * Math.random(), min + (1-min) * Math.random() );
+	// 	partitions[partitions.length-1].color.multiplyScalar(0.8)
+	// 	partitions[partitions.length-1].position = new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,-10);
 	// }
 	// for(var i = 0; i < 3; i++)
 	// {
 	// 	addDisjointSet();
 	// }
-	// disjointSets[0].length = 2;
-	// disjointSets[1].length = 2;
-	// disjointSets[2].length = 3;
+	// partitions[0].length = 2;
+	// partitions[1].length = 2;
+	// partitions[2].length = 3;
 
 	var nodes = [];
 	
-	var edgeRadius = 0.002;
-	var nodeRadius = edgeRadius * 12;
+	var nodeRadius = 0.024;
+	var edgeRadius = nodeRadius * 0.1;
 	var nodeGeometry = new THREE.EfficientSphereGeometry(nodeRadius);
-	var smallSpringIdealLength = edgeRadius * 80;
-	var largeSpringIdealLength = smallSpringIdealLength * 2;
+	var smallSpringIdealLength = 0.6;
+	var largeSpringIdealLength = smallSpringIdealLength * 1.2;
+	var highlightedColor = new THREE.Color().setHex(0xFF0000)
+	var unhighlightedColor = new THREE.Color().setHex(0xFFFFFF)
+	var z = -10;
 
 	function Node(putAtMousePosition)
 	{
-		var node = new THREE.Mesh(nodeGeometry, new THREE.MeshPhongMaterial());
-		nodes.push(node);
-
+		var node = new THREE.Mesh(nodeGeometry, new THREE.MeshPhongMaterial({color:unhighlightedColor.clone()}));
 		node.velocity = new THREE.Vector3();
+		nodes.push(node);
 		scene.add(node);
+
+		node.adjacentNodes = [];
 		
-		node.disjointSet = -1;
-		
-		// for(var i = 0; i < disjointSets.length; i++)
+		// for(var i = 0; i < partitions.length; i++)
 		// {
-		// 	for(var j = 0; j < disjointSets[i].length; j++)
+		// 	for(var j = 0; j < partitions[i].length; j++)
 		// 	{
-		// 		if( disjointSets[i][j] === undefined )
+		// 		if( partitions[i][j] === undefined )
 		// 		{
-		// 			node.disjointSet = i;
-		// 			disjointSets[i][j] = node;
+		// 			node.partition = i;
+		// 			partitions[i][j] = node;
 		// 			break;
 		// 		}
 		// 	}
-		// 	if( node.disjointSet !== -1 )
+		// 	if( node.partition !== -1 )
 		// 	{
 		// 		break;
 		// 	}
 		// }
 
 		//do something with position and color, possibly involving the disjoint set's color, possibly taking account of putAtMousePosition
-		node.position.set(Math.random()-0.5,Math.random()-0.5,-10)
+		node.position.set(Math.random()-0.5,Math.random()-0.5,z)
 
-		node.update = function updateNode()
+		node.update = function()
 		{
 			var acceleration = new THREE.Vector3()
 			
@@ -107,230 +108,282 @@ function initGraphTheory()
 					continue;
 				}
 				
-				var addition = new THREE.Vector3().subVectors(nodes[i].position, this.position);
+				var accelerationComponent = new THREE.Vector3().subVectors(nodes[i].position, this.position);
 				
-				if(nodes[i].disjointSet === this.disjointSet)
+				if( this.partition !== undefined && nodes[i].partition === this.partition)
 				{
-					var magnitude = (smallSpringIdealLength - addition.length()) * -0.03;
+					var magnitude = (smallSpringIdealLength - accelerationComponent.length()) * -0.03;
 				}
 				else
 				{
-					var magnitude = (0.6 - addition.length()) * -0.06;
+					var magnitude = (largeSpringIdealLength - accelerationComponent.length()) * -0.06;
 				}
+				// magnitude = 0;
 				
-				addition.setLength( magnitude );
+				accelerationComponent.setLength( magnitude );
 				
-				acceleration.add(addition);
+				acceleration.add(accelerationComponent);
 			}
 			
+			//attraction to center
 			acceleration.add(this.position.clone().setComponent(2,0).multiplyScalar(-0.08))
-			// console.log(acceleration)
 			
-			this.velocity.set(0,0,0); //can remove this severe damping for bounciness
+			this.velocity.set(0,0,0); //severe damping - can remove for bounciness
 			this.velocity.add(acceleration);
 			this.position.add(this.velocity);
+			this.position.z = z;
 		}
 		
 		return node;
 	}
-
-	Node();
-	Node();
 	
-// 	for(var i = 0,il = disjointSets[0].length+disjointSets[1].length+disjointSets[2].length; i < il; i++)
-// 	{
-// 		Node(false);
-// 	}
-	
-	var edgeGeometry = THREE.CylinderBufferGeometryUncentered(0.01,1,15)
-	function PlaceableCylinder(startIndex,endIndex)
+	var edgeGeometry = THREE.CylinderBufferGeometryUncentered(edgeRadius,1,15)
+	function addNewEdge(startNode,endNode)
 	{
-		var ourPlaceableCylinder = new THREE.Mesh( edgeGeometry, new THREE.MeshPhongMaterial({color:0x000000, side:THREE.DoubleSide}));
-		scene.add(ourPlaceableCylinder)
-		ourPlaceableCylinder.place = function()
+		if( startNode.adjacentNodes.indexOf( endNode) !== -1 )
 		{
-			this.position.copy(this.start)
-			pointCylinder(this, ourPlaceableCylinder.end)
+			return;
 		}
-		
-		ourPlaceableCylinder.startIndex = startIndex;
-		ourPlaceableCylinder.endIndex = endIndex;
 
-		ourPlaceableCylinder.start = nodes[startIndex].position;
-		ourPlaceableCylinder.end = nodes[endIndex].position;
-		ourPlaceableCylinder.place();
+		startNode.adjacentNodes.push(endNode);
+		endNode.adjacentNodes.push(startNode);
+
+		var edge = new THREE.Mesh( edgeGeometry, new THREE.MeshPhongMaterial({color:0x000000, side:THREE.DoubleSide}));
+		scene.add(edge)
+		edge.startNode = startNode;
+		edge.endNode = endNode;
+
+		edge.place = function()
+		{
+			this.position.copy(startNode.position)
+			pointCylinder(this, endNode.position)
+		}
+		edge.place();
 		
-		return ourPlaceableCylinder;
+		edges.push(edge)
 	}
 
 	var edges = [];
-	for(var i = 0; i < nodes.length; i++)
+	var partitions = [];
+
+	function makePartiteGraph(partitionLengths)
 	{
-		for(var j = i+1; j < nodes.length; j++)
+		for(var i = 0; i < partitionLengths.length; i++)
 		{
-			// if( nodes[i].disjointSet === nodes[j].disjointSet )
-			// {
-			// 	continue;
-			// }
-				
-			edges.push( PlaceableCylinder( i, j ) );
+			partitions[i] = Array(partitionLengths[i])
+			var partitionAngle = i*TAU/partitionLengths.length;
+
+			for(var j = 0; j < partitions[i].length; j++)
+			{
+				partitions[i][j] = Node()
+				partitions[i][j].partition = partitions[i]
+				partitions[i][j].position.set(0,0.56,z).applyAxisAngle( zUnit, partitionAngle + j*TAU/partitionLengths.length/partitions[i].length/2 )
+
+				for(var k = 0; k < i; k++)
+				{
+					for(var l = 0, ll = partitions[k].length; l < ll; l++ )
+					{
+						addNewEdge( partitions[i][j], partitions[k][l] )
+						//could keep track of these
+						//you should store the index if you need to know wehre in the array something is
+					}
+				}
+			}
 		}
 	}
+
+	function makeRandomGraph(numNodes, maxEdges)
+	{
+		for(var i = 0; i < numNodes; i++)
+		{
+			Node();
+		}
+		for(var i = 0; i < maxEdges; i++)
+		{
+			var nodeA = nodes[clamp(Math.round(Math.random()*numNodes),0,numNodes-1)]
+			var nodeB = nodes[clamp(Math.round(Math.random()*numNodes),0,numNodes-1)]
+
+			for(var j = 0; j < edges.length; j++)
+			{
+				if( edges[j].startNode === nodeA && edges[j].endNode === nodeB &&
+					edges[j].startNode === nodeB && edges[j].endNode === nodeA )
+				{
+					break;
+				}
+			}
+			if(j === edges.length && nodeA !== nodeB)
+			{
+				addNewEdge( nodeA,nodeB )
+			}
+		}
+	}
+	// makeRandomGraph(14,20)
 	
-/*
- * 2,2,4
- * 
- * 3,5,5 is also possible
- * 
- * 5,5,5
- * 
- * [a2, b5, c1, b1, c5], [b2, c5, a1, c1, a5], [c2, a5, b1, a1, b5]
- * 
- * decompose into all cycles
-forget those not of length 5
-Try all combinations of them
+	//formerly we had "findEdge"
 
-Can be ruled out if there's an odd number of edges
-	Or #edges is not a multiple of 5
+	function findNCyclesInKPartiteGraph(edgesInCycle)
+	{
+		console.log(partitions.length, edgesInCycle)
+		if(partitions.length === 3 && edgesInCycle===5)
+		{
+			return findFiveCyclesInTripartiteGraph()
+		}
+		else
+		{
+			console.error("no.")
+		}
+	}
+	function mirzakhaniConditions(r,s,t)
+	{
+		console.assert( r<=s && s<=t )
+		return 	(
+					(  r % 2  &&  s % 2  &&  t % 2 ) ||
+					(!(r % 2) &&!(s % 2) &&!(t % 2))
+				) &&
+				r*s + s*t + t*r % 5 &&
+				t <= 4 * r * s / (r+s)
+	}
+	function findFiveCyclesInTripartiteGraph()
+	{
+		var r = partitions[0].length, s = partitions[1].length, t = partitions[2].length;
+		if( !mirzakhaniConditions(r,s,t) )
+		{
+			console.error("can't decompose")
+		}
 
-for each edge, do a search
+		var fiveCycles = [];
+		function pathIteration(cycleNodes)
+		{
+			var currentNode = cycleNodes[cycleNodes.length-1];
 
-To divide a graph with n nodes into c-cycles,
-	First check if all nodes have an even degree
-		If not, can't be decomposed
-	Find all s c-cycles that exist in the graph. The same edge can appear in multiple cycles
-	go through every possible set of them of magnitude n/c.
-		for each edge, check that it appears once and only once
- */	
-	
-	// var decomposition;
-	// function findEdge(startNode,endNode)
-	// {
-	// 	var edgeIndex = -1;
-	// 	for(var i = 0, il = edges.length; i < il; i++)
-	// 	{
-	// 		if( ( nodes[edges[i].startIndex] === startNode && nodes[edges[i].endIndex] === endNode ) ||
-	// 			( nodes[edges[i].startIndex] === endNode && nodes[edges[i].endIndex] === startNode ) )
-	// 		{
-	// 			return edges[i];
-	// 		}
-	// 	}
-	// 	console.error("no such edge found ", startNode.disjointSet,endNode.disjointSet, edges)
-	// 	return 0;
-	// }
-// 	function findCycles(edgesInCycle)
-// 	{
-// 		if( edges.length % edgesInCycle )
-// 			console.error("can't decompose");
-		
-// //		var decomposition = Array( edges.length / edgesInCycle );
-// //		for(var i = 0, il = decomposition.length; i < il; i++)
-// //		{
-// //			decomposition[i] = Array(edgesInCycle);
-// //		}
-		
-// 		console.log(disjointSets)
-		
-// 		if(disjointSets.length === 3)
-// 		{
-// 			for(var i = 0; i < 3; i++)
-// 			{
-// 				if(disjointSets[i].length === 4 && disjointSets[(i+1)%3].length === 2 && disjointSets[(i+2)%3].length === 2 )
-// 				{
-// 					console.log("ok")
-// 					var a = disjointSets[ i ];
-// 					var b = disjointSets[(i+1)%3];
-// 					var c = disjointSets[(i+2)%3];
-					
-// 					var raw = [ [b[0], a[0], c[1], a[2], c[0]], [b[1], a[0], c[0], a[3], c[1]], [c[1], a[1], b[1], a[2], b[0]], [c[0], a[1], b[0], a[3], b[1]] ];
-// 					decomposition = Array(raw.length);
-// 					for(var i = 0, il = raw.length; i < il; i++)
-// 					{
-// 						decomposition[i] = Array(5);
-// 						for(var j = 0; j < 5; j++)
-// 						{
-// 							decomposition[i][j] = findEdge( raw[i][j], raw[i][(j+1)%5] );
-// 						}
-// 					}
-// 					return;
-// 				}
-				
-// //				if(disjointSets[i].length === 5 && disjointSets[(i+1)%3].length === 5 && disjointSets[(i+2)%3].length === 5 )
-// //				{
-// //					a0615 a1726 a2837 a3948 a4509 b5291 c5364 c6b70 b9c80 c3b47 b2c18
-// //					return;
-// //				}
-// 			}
-// 		}
-		
-// 		var decompositionSize = 2 + Math.round(Math.random() * 2.499);
-// 		decomposition = Array( decompositionSize );
-// 		for(var i = 0; i < decomposition.length; i++)
-// 			decomposition[i] = [];
-// 		console.log(decompositionSize)
-// 		for(var i = 0; i < edges.length; i++)
-// 		{
-// 			var index = Math.round( i/edges.length * (decomposition.length-1))
-// 			decomposition[index].push(edges[i]);
-// 		}
-// 	}
-// 	findCycles(1);
+			console.assert( cycleNodes.length < 6 )
+			if(cycleNodes.length === 5)
+			{
+				if( currentNode.adjacentNodes.indexOf(cycleNodes[0]) !== -1 )
+				{
+					var duplicateFound = false;
+					for(var i = 0, il = fiveCycles.length; i < il; i++)
+					{
+						var fiveCycleToCompare = fiveCycles[i];
+						for(var cyclicOffset = 1; cyclicOffset < 5; cyclicOffset++)
+						{
+							duplicateFound = true;
+							for(var k = 0; k < 5; k++)
+							{
+								if( cycleNodes[k] !== fiveCycleToCompare[(k+cyclicOffset)%5] )
+								{
+									duplicateFound = false;
+									break;
+									//reverse order is theoretically possible, but appears not to be a problem!
+								}
+							}
+							if(duplicateFound)
+							{
+								break;
+							}
+						}
+						if(duplicateFound)
+						{
+							break;
+						}
+					}
+					if(!duplicateFound)
+					{
+						console.log(cycleNodes.map(function(n){return nodes.indexOf(n)}))
+						fiveCycles.push(cycleNodes)
+					}
+					else
+					{
+						console.log("duplicate found")
+					}
+				}
+				return;
+			}
+			else
+			{
+				for(var i = 0; i < currentNode.adjacentNodes.length; i++)
+				{
+					var possibleNextNode = currentNode.adjacentNodes[i];
+
+					if( cycleNodes.indexOf(possibleNextNode) === -1 )
+					{
+						var newCycleNodes = cycleNodes.slice();
+						newCycleNodes.push(possibleNextNode)
+						pathIteration(newCycleNodes)
+					}
+				}
+			}
+		}
+		for(var i = 0, il = nodes.length; i < il; i++ )
+		{
+			//we might have already checked for every cycle that could contain this node?
+			pathIteration([nodes[i]])
+		}
+		console.log(fiveCycles.length)
+
+		var numCyclesInDecomposition = edges.length / 5;
+		var possibleDecompositions = kCombinations([1,2,3,4,5,6,7], numCyclesInDecomposition);
+		console.log( numCyclesInDecomposition, possibleDecompositions.length )
+
+		// for(var i = 0, il = possibleDecompositions.length; i < il; i++)
+		// {
+		// 	var possibleDecomposition = possibleDecompositions[i];
+		// 	var viable = true;
+		// 	for(var j = 0, jl = edges.length; j < jl; j++)
+		// 	{
+		// 		var numOccurrences = 0;
+		// 		for(var k = 0; k < numCyclesInDecomposition; k++)
+		// 		{
+		// 			if( possibleDecomposition[k].indexOf(edges[j]) !== -1 )
+		// 			{
+		// 				numOccurrences++; //could break out early if it's 2
+		// 			}
+		// 		}
+		// 		if(numOccurrences !== 1)
+		// 		{
+		// 			viable = false;
+		// 			break;
+		// 		}
+		// 	}
+		// 	if(viable)
+		// 	{
+		// 		return possibleDecomposition;
+		// 	}
+		// }
+	}
+	makePartiteGraph( [2,2,4] )
+	// 2,2,4
+	// 3,5,5 is also possible
+	// 5,5,5
+	var decomposition = findFiveCyclesInTripartiteGraph()
+	console.log(decomposition)
 	
 	var decompose = false;
 	var decomposedness = 1;
 	document.addEventListener( 'keydown', function(event)
 	{
-		var spacebarKeyCode = 32;
-		if( event.keyCode === spacebarKeyCode )
+		var enterKeyCode = 13;
+		if( event.keyCode === enterKeyCode )
 		{
 			decompose = !decompose;
 		}
 	}, false );
 	
-	var graphGame = {};
+	var graphGame = {}; //"update functions to be called"?
 	markedThingsToBeUpdated.push(graphGame)
 	graphGame.update = function()
 	{
-		if(decompose)
-		{
-			decomposedness = decomposedness + (1-decomposedness)*0.1;
-		}
-		else
-		{
-			decomposedness = decomposedness + (0-decomposedness)*0.1;
-		}
+		var clientPosition = mouse.rayIntersectionWithZPlaneInCameraSpace(nodes[0].position.z)
 		
-		// var highlightedNode = -1;
-		for(var i = 0,il = nodes.length; i < il; i++)
-		{
-			nodes[i].update();
-			
-			// if(nodes[i].position.distanceTo( clientPosition ) < nodeRadius )
-			// {
-			// 	highlightedNode = i;
-			// }
-		}
-		// for(var j = 0, jl = edges.length; j < jl; j++)
+		// if(mouse.Clicking && !mouse.oldClicking )
 		// {
-		// 	if(edges[j].startIndex === highlightedNode || edges[j].endIndex === highlightedNode )
-		// 	{
-		// 		edges[j].material.color.setRGB(1,0,0)
-		// 	}
-		// 	else
-		// 	{
-		// 		edges[j].material.color.setRGB(0,0,0)
-		// 	}
-		// }
-		
-		if(mouse.Clicking && !mouse.oldClicking )
-		{
-			// if(highlightedNode !== -1)
+			// if( highlightedNode )
 			// {
 			// 	scene.remove( nodes[ highlightedNode ] );
-			// 	disjointSets[ nodes[ highlightedNode ].disjointSet ].splice( disjointSets.indexOf( nodes[ highlightedNode ] ),1 );
+			// 	partitions[ nodes[ highlightedNode ].partition ].splice( partitions.indexOf( nodes[ highlightedNode ] ),1 );
 				
-			// 	if(disjointSets[nodes[ highlightedNode ].disjointSet].length === 0)
-			// 		disjointSets.splice(nodes[ highlightedNode ].disjointSet, 1);
+			// 	if(partitions[nodes[ highlightedNode ].partition].length === 0)
+			// 		partitions.splice(nodes[ highlightedNode ].partition, 1);
 			// 	nodes.splice(highlightedNode, 1);
 			// 	for(var i = 0; i < edges.length; i++)
 			// 	{
@@ -369,11 +422,11 @@ To divide a graph with n nodes into c-cycles,
 			// 	{
 			// 		console.log("adding set")
 			// 		addDisjointSet();
-			// 		disjointSets[ disjointSets.length-1 ].length = 1;
+			// 		partitions[ partitions.length-1 ].length = 1;
 			// 	}
 			// 	else
 			// 	{
-			// 		disjointSets[ nodes[ closestNode ].disjointSet ].length += 1; 
+			// 		partitions[ nodes[ closestNode ].partition ].length += 1; 
 			// 	}
 				
 			// 	var nodeIndex = nodes.length;
@@ -381,28 +434,136 @@ To divide a graph with n nodes into c-cycles,
 				
 			// 	for(var i = 0; i < nodes.length; i++)
 			// 	{
-			// 		if( nodes[i].disjointSet === nodes[nodeIndex].disjointSet )
+			// 		if( nodes[i].partition === nodes[nodeIndex].partition )
 			// 			continue;
 						
-			// 		edges.push( PlaceableCylinder( i, nodeIndex ) );
+			// 		edges.push( Edge( i, nodeIndex ) );
 			// 		scene.add( edges[ edges.length - 1 ] );
 			// 	}
 			// 	findCycles(1)
 			// }
-		}
+		// }
 		
-		for(var i = 0, il = edges.length; i < il; i++ )
+		if(decompose)
 		{
-			edges[i].place(edges[i].start,edges[i].end);
+			decomposedness = decomposedness + (1-decomposedness)*0.1;
 		}
-		
+		else
+		{
+			decomposedness = decomposedness + (0-decomposedness)*0.1;
+		}
+
+		//ought to be in node.update?
 		// for(var i = 0; i < decomposition.length; i++)
 		// {
 		// 	var cycleDirection = xUnit.clone().applyAxisAngle(zUnit, i / decomposition.length * TAU ).setLength(0.5);
 		// 	for(var j = 0; j < decomposition[i].length; j++)
 		// 	{
-		// 		decomposition[i][j].position.addScaledVector(cycleDirection, decomposedness );
+		// 		decomposition[i][j].position.addScaledVector( cycleDirection, decomposedness * 0.1 );
 		// 	}
 		// }
+
+		var highlightedNode = null;
+		for(var i = 0,il = nodes.length; i < il; i++)
+		{
+			nodes[i].update();
+			
+			if(nodes[i].position.distanceTo( clientPosition ) < nodeRadius )
+			{
+				highlightedNode = nodes[i];
+				nodes[i].material.color.copy(highlightedColor)
+			}
+			else
+			{
+				if(nodes[i].material.color.equals(highlightedColor) )
+				{
+					nodes[i].material.color.copy(unhighlightedColor)
+				}
+			}
+		}
+		for(var i = 0, il = edges.length; i < il; i++)
+		{
+			if(edges[i].startNode === highlightedNode || edges[i].endNode === highlightedNode )
+			{
+				edges[i].material.color.copy(highlightedColor)
+			}
+			else
+			{
+				edges[i].material.color.set(0,0,0)
+			}
+		}
+
+		for(var i = 0, il = edges.length; i < il; i++ )
+		{
+			edges[i].place();
+		}
 	}
+}
+
+/**
+ * This bit: Copyright 2012 Akseli Palén.
+ * Created 2012-07-15.
+ * Licensed under the MIT license.
+**/
+function kCombinations(set, k)
+{
+	var i, j, combs, head, tailcombs;
+	
+	// There is no way to take e.g. sets of 5 elements from
+	// a set of 4.
+	if (k > set.length || k <= 0)
+	{
+		return [];
+	}
+	
+	// K-sized set has only one K-sized subset.
+	if (k == set.length)
+	{
+		return [set];
+	}
+	
+	// There is N 1-sized subsets in a N-sized set.
+	if (k == 1)
+	{
+		combs = [];
+		for (i = 0; i < set.length; i++) {
+			combs.push([set[i]]);
+		}
+		return combs;
+	}
+	
+	// Assert {1 < k < set.length}
+	
+	// Algorithm description:
+	// To get k-combinations of a set, we want to join each element
+	// with all (k-1)-combinations of the other elements. The set of
+	// these k-sized sets would be the desired result. However, as we
+	// represent sets with lists, we need to take duplicates into
+	// account. To avoid producing duplicates and also unnecessary
+	// computing, we use the following approach: each element i
+	// divides the list into three: the preceding elements, the
+	// current element i, and the subsequent elements. For the first
+	// element, the list of preceding elements is empty. For element i,
+	// we compute the (k-1)-computations of the subsequent elements,
+	// join each with the element i, and store the joined to the set of
+	// computed k-combinations. We do not need to take the preceding
+	// elements into account, because they have already been the i:th
+	// element so they are already computed and stored. When the length
+	// of the subsequent list drops below (k-1), we cannot find any
+	// (k-1)-combs, hence the upper limit for the iteration:
+	combs = [];
+	for (i = 0; i < set.length - k + 1; i++)
+	{
+		// head is a list that includes only our current element.
+		head = set.slice(i, i + 1);
+		// We take smaller combinations from the subsequent elements
+		tailcombs = kCombinations(set.slice(i + 1), k - 1);
+		// For each (k-1)-combination we join it with the current
+		// and store it to the set of k-combinations.
+		for (j = 0; j < tailcombs.length; j++)
+		{
+			combs.push(head.concat(tailcombs[j]));
+		}
+	}
+	return combs;
 }
