@@ -14,6 +14,7 @@
 		Record, on twitch
 		Facebook version?
 		Show to diego, get suggestions about zoom speed and such
+		Send to mum for music
 
 
 	Picture stuff
