@@ -13,7 +13,6 @@
 		Choose colors
 		Record, on twitch
 		Facebook version?
-		Show to diego, get suggestions about zoom speed and such
 		Send to mum for music
 
 
@@ -23,8 +22,8 @@
 		Just lay them out horizontally in space
 		Spacebar or whatever for you to "flick to next one"
 
-	Script outline. 4 things?
-		She once earned infinity dollars
+	Script outline. 4 things
+		As a teenager, she won a prize technically worth infinity dollars
 		Ridiculously modest
 			https://www.youtube.com/watch?v=TxbE6mkYUAg her drawing on board
 			First female fields medallist - also first Iranian + Muslim! There's a tribute to her in farsi in the description
@@ -36,12 +35,12 @@
 			She was considering not attending the ceremony due to sickness
 			Might also want some footage from her lectures
 		Her work is connected to big bang
-			New approach to witten's conjecture
 			"Chainsaw"
 			Snake
 			Not just these surfaces, but all possible similar surfaces
 			In ordinary mathematics we integrate over a single line - she had to integrate over the moduli space of riemann surfaces
 			If you draw a random loop on a genus-2 surface, the probability that it cuts it in 2 is 1/7
+			New approach to witten's conjecture
 		She used to doodle so much that her daughter thought she was an artist.
 			Long rolls of parchment, on the floor
 			That's what mathematics really is - show cool animations

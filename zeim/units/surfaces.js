@@ -1,6 +1,6 @@
 'use strict';
 /*
-	Pevsner / ruled surrfaces / stereographic projection
+	Pevsner / ruled surfaces / stereographic projection
 		Bring back that lovely circle-enclosing-line
 		Sliced torus getting two circles, what's up with that?
 		Look these surfaces you've come up with are quite "nice". 
@@ -12,28 +12,9 @@
 		This is much more of an aesthetic thing than you usually do. Probably? What's the generalization of a ruled surface...
 		These things are cartesian products of circles in S3. What's the equation post-stereographic projection
 		The radially symmetric ones are self-dual.
-			They cut S3 into two equal pieces.
+			They cut S3 into two equal pieces. 
 			One way to show the self duality is to make two small copies of them with nodes in slightly different places
-
-	TODO
-		Trouser crotches and collars are perfect because people know about ironing; there again, we won't be mentioning hyperbolics much
-		lerping
-		check what this was for https://arxiv.org/pdf/1307.6938.pdf
-
-	Post mirzakhani
-		Clifford torus: x2+y2 = z2+w2 = 0.5
-		Bolza
-			y2 = x5 - x
-			x = r + i
-			1 5 10 10 5 1
-			r^5 + 5*r^4i + 
-
-		Cone
-		clebsch		x0^3+x1^3+x2^3+x3^3+x4^3=0, x0+x1+x2+x3+x4=0
-		cross cap		4x2*(x2+y2+z2)+(y2+z2-1)
-		Klein bottle?
-		Helicoid
-		Genus 3		((x−1)x2(x+1)+y2)2+((y−1)y2(y+1)+z2)2+0.1y2+0.05(y−1)y2(y+1)
+		https://arxiv.org/pdf/1307.6938.pdf
 */
 
 function lerpSurfacesMadeOfPatchworks(from,To,t)
