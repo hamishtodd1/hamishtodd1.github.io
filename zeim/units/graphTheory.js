@@ -251,149 +251,24 @@ function initGraphTheory()
 			console.error("can't decompose")
 		}
 
-		var fiveCycles = [];
-		function pathIteration(cycleNodes)
+		if(r===2&&s===2&&t===4)
 		{
-			var currentNode = cycleNodes[cycleNodes.length-1];
-
-			if(cycleNodes.length === 5)
-			{
-				if( currentNode.adjacentNodes.indexOf(cycleNodes[0]) !== -1 )
-				{
-					var duplicateFound = false;
-					for(var i = 0, il = fiveCycles.length; i < il; i++)
-					{
-						var fiveCycleToCompare = fiveCycles[i];
-						for(var cyclicOffset = 1; cyclicOffset < 5; cyclicOffset++)
-						{
-							duplicateFound = true;
-							for(var k = 0; k < 5; k++)
-							{
-								if( cycleNodes[k] !== fiveCycleToCompare[(k+cyclicOffset)%5] )
-								{
-									duplicateFound = false;
-									break;
-									//reverse order is theoretically possible, but appears not to be a problem!
-								}
-							}
-							if(duplicateFound)
-							{
-								break;
-							}
-						}
-						if(duplicateFound)
-						{
-							break;
-						}
-					}
-					if(!duplicateFound)
-					{
-						// console.log(cycleNodes.map(function(n){return nodes.indexOf(n)}))
-						fiveCycles.push(cycleNodes)
-					}
-				}
-				return;
-			}
-			else
-			{
-				for(var i = 0; i < currentNode.adjacentNodes.length; i++)
-				{
-					var possibleNextNode = currentNode.adjacentNodes[i];
-
-					if( cycleNodes.indexOf(possibleNextNode) === -1 )
-					{
-						var newCycleNodes = cycleNodes.slice();
-						newCycleNodes.push(possibleNextNode)
-						pathIteration(newCycleNodes)
-					}
-				}
-			}
+			return [
+				[nodes[0],nodes[2],nodes[4],nodes[1],nodes[5],],
+				[nodes[0],nodes[3],nodes[5],nodes[2],nodes[6],],
+				[nodes[0],nodes[4],nodes[3],nodes[1],nodes[7],],
+				[nodes[1],nodes[2],nodes[7],nodes[3],nodes[6],]
+			]
 		}
-		for(var i = 0, il = nodes.length; i < il; i++ )
-		{
-			//we might have already checked for every cycle that could contain this node?
-			pathIteration([nodes[i]])
-		}
-
-		var numCyclesInDecomposition = edges.length / 5;
-		console.log(numCyclesInDecomposition)
-		var len = fiveCycles.length;
-		console.log(fiveCycles.length)
-		for(var i = 0; i < len; i++)
-		{
-			var numExcluded = 0;
-			fiveCycles[i].skipList = Array(len);
-			for(var j = 0; j < len; j++)
-			{
-				fiveCycles[i].skipList[j] = false;
-				for(var k = 0; k < 5; k++)
-				{
-					for(var l = 0; l < 5; l++)
-					{
-						if( fiveCycles[i][k] === fiveCycles[j][l] &&
-						  (	fiveCycles[i][(k+1)%5] === fiveCycles[j][(l+1)%5] ||
-							fiveCycles[i][(k+1)%5] === fiveCycles[j][(l+4)%5] )
-						)
-						{
-							fiveCycles[i].skipList[j] = true;
-							numExcluded++;
-							break;
-						}
-					}
-					if(l!==5)
-					{
-						break;
-					}
-				}
-			}
-		}
-		console.log(numExcluded/len)
-
-		function decompositionSearchIteration( decomposition, skipList, indexToStartAt )
-		{
-			for(var i = indexToStartAt; i < len; i++)
-			{
-				if( skipList[i] )
-				{
-					continue;
-				}
-
-				var possibleNewFiveCycle = fiveCycles[i];
-
-				var newDecomposition = decomposition.slice();
-				newDecomposition.push(possibleNewFiveCycle)
-				
-				if( newDecomposition.length === numCyclesInDecomposition)
-				{
-					return newDecomposition;
-				}
-				else
-				{
-					var newSkiplist = Array(len)
-					for(var j = 0; j < len; j++)
-					{
-						newSkiplist[j] = skipList[j] || possibleNewFiveCycle.skipList[j]
-					}
-
-					var finalDecomposition = decompositionSearchIteration( newDecomposition, newSkiplist, i+1 )
-					if(finalDecomposition !== undefined)
-					{
-						return finalDecomposition
-					}
-				}
-			}
-		}
-		var startSkipList = Array(len);
-		for(var i = 0; i < len; i++)
-		{
-			startSkipList[i] = false;
-		}
-		// return decompositionSearchIteration([],startSkipList,0)
 	}
-	// makePartiteGraph( [2,2,4] )
-	makePartiteGraph( [3,5,5] )
+	makePartiteGraph( [2,2,4] )
+	// makePartiteGraph( [3,5,5] )
 	// makePartiteGraph( [5,5,5] )
+	//the paper gives [4,10,10] and [3,5,5] and [2,2,4], [1,3,3]. Maybe 5,5,5 is easy?
+	//This "integer multiples" thing helps
 	var decomposition = findFiveCyclesInTripartiteGraph()
+	decomposition.forEach(function(fc){console.log(fc.map(function(n){return nodes.indexOf(n)}))})
+
 	
 	var decompose = false;
 	var decomposedness = 1;
