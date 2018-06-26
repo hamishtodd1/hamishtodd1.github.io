@@ -256,7 +256,6 @@ function initGraphTheory()
 		{
 			var currentNode = cycleNodes[cycleNodes.length-1];
 
-			console.assert( cycleNodes.length < 6 )
 			if(cycleNodes.length === 5)
 			{
 				if( currentNode.adjacentNodes.indexOf(cycleNodes[0]) !== -1 )
@@ -289,12 +288,8 @@ function initGraphTheory()
 					}
 					if(!duplicateFound)
 					{
-						console.log(cycleNodes.map(function(n){return nodes.indexOf(n)}))
+						// console.log(cycleNodes.map(function(n){return nodes.indexOf(n)}))
 						fiveCycles.push(cycleNodes)
-					}
-					else
-					{
-						console.log("duplicate found")
 					}
 				}
 				return;
@@ -319,44 +314,86 @@ function initGraphTheory()
 			//we might have already checked for every cycle that could contain this node?
 			pathIteration([nodes[i]])
 		}
-		console.log(fiveCycles.length)
 
 		var numCyclesInDecomposition = edges.length / 5;
-		var possibleDecompositions = kCombinations([1,2,3,4,5,6,7], numCyclesInDecomposition);
-		console.log( numCyclesInDecomposition, possibleDecompositions.length )
+		console.log(numCyclesInDecomposition)
+		var len = fiveCycles.length;
+		console.log(fiveCycles.length)
+		for(var i = 0; i < len; i++)
+		{
+			var numExcluded = 0;
+			fiveCycles[i].skipList = Array(len);
+			for(var j = 0; j < len; j++)
+			{
+				fiveCycles[i].skipList[j] = false;
+				for(var k = 0; k < 5; k++)
+				{
+					for(var l = 0; l < 5; l++)
+					{
+						if( fiveCycles[i][k] === fiveCycles[j][l] &&
+						  (	fiveCycles[i][(k+1)%5] === fiveCycles[j][(l+1)%5] ||
+							fiveCycles[i][(k+1)%5] === fiveCycles[j][(l+4)%5] )
+						)
+						{
+							fiveCycles[i].skipList[j] = true;
+							numExcluded++;
+							break;
+						}
+					}
+					if(l!==5)
+					{
+						break;
+					}
+				}
+			}
+		}
+		console.log(numExcluded/len)
 
-		// for(var i = 0, il = possibleDecompositions.length; i < il; i++)
-		// {
-		// 	var possibleDecomposition = possibleDecompositions[i];
-		// 	var viable = true;
-		// 	for(var j = 0, jl = edges.length; j < jl; j++)
-		// 	{
-		// 		var numOccurrences = 0;
-		// 		for(var k = 0; k < numCyclesInDecomposition; k++)
-		// 		{
-		// 			if( possibleDecomposition[k].indexOf(edges[j]) !== -1 )
-		// 			{
-		// 				numOccurrences++; //could break out early if it's 2
-		// 			}
-		// 		}
-		// 		if(numOccurrences !== 1)
-		// 		{
-		// 			viable = false;
-		// 			break;
-		// 		}
-		// 	}
-		// 	if(viable)
-		// 	{
-		// 		return possibleDecomposition;
-		// 	}
-		// }
+		function decompositionSearchIteration( decomposition, skipList, indexToStartAt )
+		{
+			for(var i = indexToStartAt; i < len; i++)
+			{
+				if( skipList[i] )
+				{
+					continue;
+				}
+
+				var possibleNewFiveCycle = fiveCycles[i];
+
+				var newDecomposition = decomposition.slice();
+				newDecomposition.push(possibleNewFiveCycle)
+				
+				if( newDecomposition.length === numCyclesInDecomposition)
+				{
+					return newDecomposition;
+				}
+				else
+				{
+					var newSkiplist = Array(len)
+					for(var j = 0; j < len; j++)
+					{
+						newSkiplist[j] = skipList[j] || possibleNewFiveCycle.skipList[j]
+					}
+
+					var finalDecomposition = decompositionSearchIteration( newDecomposition, newSkiplist, i+1 )
+					if(finalDecomposition !== undefined)
+					{
+						return finalDecomposition
+					}
+				}
+			}
+		}
+		var startSkipList = Array(len);
+		for(var i = 0; i < len; i++)
+		{
+			startSkipList[i] = false;
+		}
+		// return decompositionSearchIteration([],startSkipList,0)
 	}
-	makePartiteGraph( [2,2,4] )
-	// 2,2,4
-	// 3,5,5 is also possible
-	// 5,5,5
+	// makePartiteGraph( [2,2,4] )
+	makePartiteGraph( [3,5,5] )
+	// makePartiteGraph( [5,5,5] )
 	var decomposition = findFiveCyclesInTripartiteGraph()
-	console.log(decomposition)
 	
 	var decompose = false;
 	var decomposedness = 1;
