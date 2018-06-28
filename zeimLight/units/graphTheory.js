@@ -357,8 +357,8 @@ function initGraphTheory()
 
 	// makePartiteGraph( [1,3,3] )
 	// makePartiteGraph( [2,2,4] )
-	// makePartiteGraph( [3,5,5] )
-	makePartiteGraph( [4,10,10] )
+	makePartiteGraph( [3,5,5] )
+	// makePartiteGraph( [4,10,10] )
 
 	var decomposition = findFiveCyclesInTripartiteGraph()
 	
@@ -496,7 +496,7 @@ function initGraphTheory()
 		var edgeInQuestion = 0;
 		for(var i = 0; i < decomposition.length; i++)
 		{
-			var cycleDirection = xUnit.clone().applyAxisAngle(zUnit, i / decomposition.length * TAU ).setLength(0.07 * decomposition.length);
+			var cycleDirection = xUnit.clone().applyAxisAngle(zUnit, i / decomposition.length * TAU ).setLength(0.05 * decomposition.length);
 			for(var j = 0; j < decomposition[i].length; j++)
 			{
 				for(var k = 0, kl = edges.length; k < kl; k++)

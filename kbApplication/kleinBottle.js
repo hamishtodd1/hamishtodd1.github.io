@@ -61,6 +61,7 @@ function initKBSystem()
 	var lastDiamondPosition = diamond.position.clone();
 	
 	//----arrow shit
+	//there is now ArrowGeometry()
 	{
 		var directionArrow = new THREE.Mesh( new THREE.Geometry(), new THREE.MeshBasicMaterial({color: 0xFF0000, side:THREE.DoubleSide}) );
 		var full_length = 0.02;

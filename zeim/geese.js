@@ -1,5 +1,5 @@
 /*
-Ken Perlin could give feedback
+	Ken Perlin could give feedback
 	Not visible when you're paused!
 
 	For figuring out this "sometimes rotate" business, you should only have 
@@ -33,6 +33,10 @@ Ken Perlin could give feedback
 	when paused, eyes could follow mouse
 
 	//----------POSITIONING
+	From elsewhere
+		Probably the camera "sits on your lap", it is not your face
+		Theoretically possible: Video is always at an angle such that camera is looking at the same place that you in webcam video appear to be looking?
+		
 	The camera lies on the z axis of the board
 
 	bird heads fully respect hand rotation iff hand is holding something

@@ -1,4 +1,5 @@
 /*
+
 	want to be able to put mosue over a picture on the internet,
 		press a keyboard shortcut, see it appear
 

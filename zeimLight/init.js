@@ -94,8 +94,10 @@
 		// scene.add(goose);
 	}
 
-	initMouse();	
+	initMouse();
 	initMirzakhani();
+
+	initImagesAndVideos();
 
 	render();
 })();

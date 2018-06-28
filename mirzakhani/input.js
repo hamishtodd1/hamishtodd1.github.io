@@ -22,19 +22,15 @@ function initInputSystem()
 	asynchronousInput.updateClientPosition = function(rawX,rawY)
 	{
 		//center
-		asynchronousInput.clientPosition.x = rawX - ( renderer.domElement.width / 2 );
-		asynchronousInput.clientPosition.y = -rawY+ ( renderer.domElement.height/ 2 ) - document.body.scrollTop;
-		
-		//scale
-		asynchronousInput.clientPosition.x /= renderer.domElement.width / 2;
-		asynchronousInput.clientPosition.y /= renderer.domElement.height / 2;
-		
+		this.clientPosition.x = ( rawX / window.innerWidth  ) * 2 - 1;
+		this.clientPosition.y =-( rawY / window.innerHeight ) * 2 + 1;
+
 		var centerToFrameVertical = Math.tan( camera.fov * TAU / 360 / 2 ) * camera.position.z;
 		var centerToFrameHorizontal = centerToFrameVertical * camera.aspect;
 		
 		asynchronousInput.clientPosition.x *= centerToFrameHorizontal;
 		asynchronousInput.clientPosition.y *= centerToFrameVertical;
-		
+
 		asynchronousInput.clientPosition.x += camera.position.x;
 		asynchronousInput.clientPosition.y += camera.position.y;
 	}
@@ -61,17 +57,6 @@ function initInputSystem()
 	{
 //		Sounds.grab.play();
 		asynchronousInput.clientClicking = true;
-	}, false );
-	
-	document.addEventListener( 'touchend', function(event)
-	{
-		Sounds.release.play();
-		asynchronousInput.clientClicking = false;
-	}, false );
-	document.addEventListener( 'mouseup', function(event) 
-	{
-		Sounds.release.play();
-		asynchronousInput.clientClicking = false;
 	}, false );
 
 	return asynchronousInput;

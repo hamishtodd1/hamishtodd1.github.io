@@ -1,3 +1,47 @@
+/*
+The initial idea seems to have been to have some kind of machine that is initially obscured by curtains.
+Gawd hope you wrote it down somewhere
+You had ideas about the balls being shunted into a row, being sorted into either end somehow
+
+ * No slopes, instead we have a pair of fans blowing them together
+ * 
+ * Rather interesting: with these things, the slider is the realization of the value controlled by the slider
+ * 
+ * "A and B are proportional" = a rectangle with sidelengths A and B always looks the same
+ * 
+ * Eventually show the visual interface for working out the numbers
+ 		and let people tweak it into the numbers they see to get the answer?
+ 		Or calculator onscreen? No, that's why you have the multiples of 2
+ * 
+ * You have planes that come over and hide the different bits of the machine.
+ * 	The separator is the funny part, might be nice to have an emergent way to have them appear on either side, but even from seeing
+ * 
+ * Start with just the rectangle on its own. Hole that it must fit into. Starts out and it is the same size
+ * 
+ * Numbers displayed. They are numbers that are really easy to multiply and divide, multiples of 2 and 5
+ * 
+ * When you resize the thing, sound effect and glow. And that also happens when you push it against the side
+
+
+
+
+--------Redesign
+Pair of circles. Can think of them as being like darts boards
+They are color A. A pie-chart-like segment of them is color B.
+	Screw anti-pi chart people. You're not estimating area, it is length.
+
+Maybe one of the platforms makes the balls small. Then you see the result from above
+You are controlling P(ball spotty | ball red) by moving the ends of the segment
+If you're going to control this table you will see that there is only one angle such that the probabilities are independent
+biases people towards believing that all probabilities are dependent?
+
+ Need to be fair to people about the medical test thing
+ 	When you say "you get a test" people think "well I probably am already a bit worried then".
+
+ The only situation where you're allowed to say p = 1 is where a is in S by definition.
+*/
+
+
 function init()
 {
 	renderer = new THREE.WebGLRenderer({antialias: true});
@@ -241,7 +285,7 @@ function init()
 			new THREE.Vector3((1-gapWidth)/2,1-gapHeight,0),
 			new THREE.Vector3(1-(1-gapWidth)/2,1-gapHeight,0),
 			new THREE.Vector3(0,0,0),
-			new THREE.Vector3(1,0,0),
+			new THREE.Vector3(1,0,0)
 	);
 	singleHolderGeometry.faces.push(
 			new THREE.Face3(0,1,6),
@@ -249,7 +293,7 @@ function init()
 			new THREE.Face3(4,5,6),
 			new THREE.Face3(7,5,6),
 			new THREE.Face3(7,5,2),
-			new THREE.Face3(7,3,2),
+			new THREE.Face3(7,3,2)
 	);
 	var singleHolderMaterial = new THREE.MeshBasicMaterial({color:0x000000, side:THREE.DoubleSide});
 
@@ -263,25 +307,6 @@ function init()
 	arrayHolder.scale.setScalar(0.4/balls.length)
 	scene.add(arrayHolder)
 	
-	
-	/*
-	 * No slopes, instead we have a pair of fans blowing them together
-	 * 
-	 * Rather interesting: with these things, the slider is the realization of the value controlled by the slider
-	 * 
-	 * "A and B are proportional" = a rectangle with sidelengths A and B always looks the same
-	 * 
-	 * Eventually show the visual interface for working out the numbers and let people tweak it into the numbers they see to get the answer? Or calculator onscreen? No, that's why you have the multiples of 2
-	 * 
-	 * You have planes that come over and hide the different bits of the machine.
-	 * 	The separator is the funny part, might be nice to have an emergent way to have them appear on either side, but even from seeing
-	 * 
-	 * Start with just the rectangle on its own. Hole that it must fit into. Starts out and it is the same size
-	 * 
-	 * Numbers displayed. They are numbers that are really easy to multiply and divide, multiples of 2 and 5
-	 * 
-	 * When you resize the thing, sound effect and glow. And that also happens when you push it against the side
-	 */
 	
 	var somethingGrabbed = false;
 	
@@ -307,3 +332,26 @@ function init()
 	
 	coreLoop();
 }
+
+/*
+
+Probably this visualization doesn't go up to more than two variables.
+Attempt a dimension up; maybe to be discussed with Ivans:
+	concentric spheres with probably-circular regions of them.
+	Huh this is venn diagrams
+	And yyyyeah you would probably be able to move it around such that it'd have any set of overlaps you like
+You can grab and move the regions both on plane and sphere
+Stereographically project down onto plane
+Surely this doesn't work, if you know the overlap of three spheres then their three-way overlap is determined.
+Well, maybe that's the way the probability necessarily works out?
+	If you know P(A|B),P(B|C),P(C|A),P(A),P(B),P(C), then you know P(A,B|C)?
+	If that is not the case, it might be that circles are not the right way to do this.
+	Yeah probably doesn't work. First three low, second three high. Zero three-way overlap
+	Sooo the question is can you make a venn diagram with any set of joint probabilities?
+Hmm, venn diagrams are cool but there's something to be careful about with them:
+	A randomly laid down set of ellipses or whatever will have some amount of overlap. That's intuitive
+	But a specific set of joint probabilities implies a certain shape for things
+	Perhaps the way to make them is to think about manipulating length over the full circuit of the flower
+
+
+ */

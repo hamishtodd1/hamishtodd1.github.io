@@ -31,13 +31,6 @@ function init()
 		
 		var sideToCenter = renderer.domElement.width / 2;
 		var topToCenter = renderer.domElement.height / 2;
-		renderer.domElement.style.margin = "-" + topToCenter.toString() + "px 0 0 -" + sideToCenter.toString() + "px";
-		
-		{
-			var extras = document.getElementById("extras");
-			var halfExtrasWidth = extras.offsetWidth / 2;
-			extras.style.margin = "0 0 0 -" + halfExtrasWidth.toString() + "px";
-		}
 	}
 	respondToResize();
 	window.addEventListener( 'resize', respondToResize, false );
@@ -50,24 +43,8 @@ function init()
 	scene.add(lights[0]);
 	scene.add(lights[1]);
 	
-	//---------SOUND
-	Sounds = {};
-	var soundInfoArray = [
-		"change0",
-		"change1",
-		"grab",
-		"release",
-		"pop1",
-		"pop2",
-		"pop3"
-	];
-	for(var i = 0; i < soundInfoArray.length; i++)
-		Sounds[soundInfoArray[i]] = new Audio( "data/" + soundInfoArray[i] + ".mp3" );
-	
+	//---------non boilerplate
 	var asynchronousInput = initInputSystem();
-	
-//	var octagonScene = initOctagonScene();
-//	octagonScene.setUpScene();
 	
 	var disjointSets = [];
 	function addDisjointSet()
@@ -75,7 +52,7 @@ function init()
 		var colorAsNumber = disjointSets.length+1;
 		disjointSets.push([]);
 		var min = 0.2;
-		disjointSets[disjointSets.length-1].color = new THREE.Color( min + (1-min) * Math.random(), min + (1-min) * Math.random(), min + (1-min) * Math.random(), );
+		disjointSets[disjointSets.length-1].color = new THREE.Color( min + (1-min) * Math.random(), min + (1-min) * Math.random(), min + (1-min) * Math.random() );
 		disjointSets[disjointSets.length-1].color.multiplyScalar(0.8)
 		disjointSets[disjointSets.length-1].position = new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,0);
 	}
@@ -92,7 +69,7 @@ function init()
 	var nodeRadius = edgeRadius * 12;
 	var nodeGeometry = new THREE.EfficientSphereGeometry(nodeRadius);
 	var smallSpringIdealLength = edgeRadius * 80;
-	var largeSpringIdealLength = smallSpringIdealLength * 6;
+	var largeSpringIdealLength = smallSpringIdealLength * 2;
 	
 	function updateNode()
 	{
@@ -211,10 +188,7 @@ function init()
 	
 /*
  * 2,2,4
- * 
- * 
  * 3,5,5 is also possible
- * 
  * 5,5,5
  * 
  * [a2, b5, c1, b1, c5], [b2, c5, a1, c1, a5], [c2, a5, b1, a1, b5]
@@ -299,7 +273,6 @@ for each edge, do a search
 		for(var i = 0; i < edges.length; i++)
 		{
 			var index = Math.round( i/edges.length * (decomposition.length-1))
-			console.log(index)
 			decomposition[index].push(edges[i]);
 		}
 	}
@@ -311,10 +284,7 @@ for each edge, do a search
 		//arrow keys
 		if( 32 === event.keyCode )
 		{
-			if( decompose )
-				decompose = false;
-			else
-				decompose = true;
+			decompose = !decompose;
 		}
 	}, false );
 	
@@ -327,8 +297,6 @@ for each edge, do a search
 		else
 			decompositionDisplayState = decompositionDisplayState + (0-decompositionDisplayState)*0.1;
 			
-		console.log(edges.length);
-		
 		asynchronousInput.read();
 		
 //		octagonScene.update();

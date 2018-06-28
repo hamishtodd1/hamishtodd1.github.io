@@ -3,6 +3,8 @@
  *  There are lines coming in from every direction
  *  rotate the sphere so the lines are going into the circles
  *  in theory you need only look at three
+
+ 	Simple way to do this would be to have the color change depending on whether you're in the top or bottom half of the quaternions
  */
 
 function Render() {

@@ -23,7 +23,7 @@ function initInputSystem()
 	{
 		//center
 		asynchronousInput.clientPosition.x = rawX - ( renderer.domElement.width / 2 );
-		asynchronousInput.clientPosition.y = -rawY+ ( renderer.domElement.height/ 2 ) - document.body.scrollTop;
+		asynchronousInput.clientPosition.y = -rawY+ ( renderer.domElement.height/ 2 );
 		
 		//scale
 		asynchronousInput.clientPosition.x /= renderer.domElement.width / 2;

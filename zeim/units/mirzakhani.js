@@ -1,5 +1,16 @@
 'use strict';
 /*
+	New plan
+		Two puzzles with Maryam Mirzakhani
+		Broadcast on twitch, just you and the screen.
+		Introduce Mirzakhani while assorted video bits play
+		You make graphs, you move them around; much more like khan academy
+		Button you can press to make a graph partite
+			Can even use broadcaster to crop buttons. "Screen capture" works.
+		Then people can go to the webpage and try the stuff out themselves
+		Have some pre-prepared
+		Embed it on the page, then scroll down to the puzzles.
+
 	TODO
 		Get images to illustrate everything, put them in a powerpoint
 		Test marking system
@@ -45,7 +56,6 @@
 			Long rolls of parchment, on the floor
 			That's what mathematics really is - show cool animations
 			Hey, maybe that's what she was!
-			Wired has footage of this
 			Daughter on lap pic
 			When she received her fields medal at the age of 37, she already knew she had terminal cancer
 		She once survived a bus crash

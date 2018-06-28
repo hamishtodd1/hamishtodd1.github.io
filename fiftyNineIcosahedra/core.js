@@ -30,7 +30,7 @@ function init()
 	
 	var respondToResize = function() 
 	{
-		renderer.setSize( document.documentElement.clientWidth,window.innerHeight ); //different because we do expect a scrollbar. Bullshit that you can't use both in the same way but whatever
+		renderer.setSize( window.innerWidth, window.innerHeight );
 		camera.aspect = renderer.domElement.width / renderer.domElement.height;
 		
 		//eg playing field is 1x1 square
@@ -48,16 +48,6 @@ function init()
 		}
 		
 		camera.updateProjectionMatrix();
-		
-		var sideToCenter = renderer.domElement.width / 2;
-		var topToCenter = renderer.domElement.height / 2;
-		renderer.domElement.style.margin = "-" + topToCenter.toString() + "px 0 0 -" + sideToCenter.toString() + "px";
-		
-		{
-			var extras = document.getElementById("extras");
-			var halfExtrasWidth = extras.offsetWidth / 2;
-			extras.style.margin = "0 0 0 -" + halfExtrasWidth.toString() + "px";
-		}
 	}
 	respondToResize();
 	window.addEventListener( 'resize', respondToResize, false );
