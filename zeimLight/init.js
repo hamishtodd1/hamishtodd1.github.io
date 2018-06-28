@@ -51,7 +51,7 @@
 
 	var renderer = new THREE.WebGLRenderer({ antialias: true });
 	renderer.setPixelRatio( window.devicePixelRatio );
-	renderer.setClearColor(0xFFFFFF)
+	renderer.setClearColor(0x000000) //youtube
 	document.body.appendChild( renderer.domElement );
 
 	var ourVrEffect = new THREE.VREffect( renderer );
@@ -95,7 +95,7 @@
 	}
 
 	initMouse();	
-	// initMirzakhani();
+	initMirzakhani();
 
 	render();
 })();

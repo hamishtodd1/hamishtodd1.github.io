@@ -1,7 +1,12 @@
 function initCameraAndRendererResizeSystemAndCameraRepresentation(renderer)
 {
+	var centerToSideOfFrameAtZ0 = 1.0;
+	var intendedAspectRatio = 16/9; //because that's YOUR screen. It's also the youtube screen; that on it's own wouldn't necessarily mean you want it, but it's easy/simple to think of them as the same
 	var backwardExtension = 0.6;
-	var box = new THREE.Mesh( new THREE.BoxGeometry(2,2,backwardExtension), new THREE.MeshStandardMaterial({side:THREE.BackSide, vertexColors:THREE.FaceColors}));
+	var box = new THREE.Mesh( 
+		new THREE.BoxGeometry(2*centerToSideOfFrameAtZ0,2*centerToSideOfFrameAtZ0/intendedAspectRatio,backwardExtension),
+		new THREE.MeshStandardMaterial({side:THREE.BackSide, vertexColors:THREE.FaceColors})
+	);
 	box.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-backwardExtension/2))
 	for(var i = 0; i< box.geometry.faces.length; i++)
 	{
@@ -30,7 +35,8 @@ function initCameraAndRendererResizeSystemAndCameraRepresentation(renderer)
 	pointLight.shadow.mapSize.width = 1024;
 	pointLight.shadow.mapSize.height = pointLight.shadow.mapSize.width;
 	pointLight.castShadow = true;
-	pointLight.position.set( 0, 2, 1 );
+	pointLight.position.copy(box.geometry.vertices[3])
+	pointLight.position.negate().multiplyScalar(0.6);
 	box.add( pointLight );
 
 	scene.add( new THREE.AmbientLight( 0xFFFFFF, 0.7 ) );
@@ -38,10 +44,6 @@ function initCameraAndRendererResizeSystemAndCameraRepresentation(renderer)
 	renderer.shadowMap.type = THREE.BasicShadowMap;
 
 	{
-		var desiredAspectRatio = 16/9; //because that's YOUR screen. It's also the youtube screen; that on it's own wouldn't necessarily mean you want it, but it's easy/simple to think of them as the same
-		var minimumCenterToSideOfFrame = 1.0;
-		var minimumHorizontalFov = fovGivenCenterToFrameDistance(minimumCenterToSideOfFrame,1);
-
 		function respondToResize() 
 		{
 			//could try to turn it on its side!
@@ -50,26 +52,16 @@ function initCameraAndRendererResizeSystemAndCameraRepresentation(renderer)
 			// 	camera.projectionMatrix.multiply(new THREE.Matrix4().makeRotationZ(TAU/4))
 			// }
 
-			camera.position.z = 1;
-			renderer.setSize( window.innerWidth, window.innerHeight );		
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			console.log(renderer.domElement.width, renderer.domElement.height)
 			camera.aspect = renderer.domElement.width / renderer.domElement.height;
-			var excessIsOnSides = camera.aspect >= desiredAspectRatio;
-			
-			if( excessIsOnSides )
-			{
-				camera.fov = otherFov(minimumHorizontalFov,desiredAspectRatio,false);
-			}
-			else
-			{
-				camera.fov = otherFov(minimumHorizontalFov,camera.aspect, false);
-			}
-			var currentHorizontalFov = otherFov(camera.fov,camera.aspect,true)
-
-			box.scale.x = centerToFrameDistanceGivenFov(currentHorizontalFov,1)
-			box.scale.y = centerToFrameDistanceGivenFov(camera.fov,1)
+			var horizontalFov = fovGivenCenterToFrameDistance(centerToSideOfFrameAtZ0,camera.position.z);
+			camera.fov = otherFov(horizontalFov,camera.aspect, false);
 
 			camera.updateProjectionMatrix();
 		}
+
+		camera.position.z = 1; //just to start
 		respondToResize();
 		window.addEventListener( 'resize', respondToResize, false );
 	}
@@ -77,7 +69,7 @@ function initCameraAndRendererResizeSystemAndCameraRepresentation(renderer)
 	document.addEventListener("mousewheel", function(event)
 	{
 		/*
-			essentially the scene scales up and down
+			camera zooms in and out
 			There is a 1280x720 part of the screen that is what the audience sees
 			There are a bunch of things outside that get brought in
 
@@ -86,6 +78,7 @@ function initCameraAndRendererResizeSystemAndCameraRepresentation(renderer)
 		var delta = event.deltaY/125;
 
 		camera.position.z += delta / 10;
+		//not so close that you 
 	});
 }
 

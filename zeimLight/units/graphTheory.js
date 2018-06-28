@@ -70,6 +70,7 @@ function initGraphTheory()
 	function Node(putAtMousePosition)
 	{
 		var node = new THREE.Mesh(nodeGeometry, new THREE.MeshPhongMaterial({color:unhighlightedColor.clone()}));
+		node.castShadow = true
 		node.velocity = new THREE.Vector3();
 		nodes.push(node);
 		scene.add(node);
@@ -148,6 +149,7 @@ function initGraphTheory()
 		endNode.adjacentNodes.push(startNode);
 
 		var edge = new THREE.Mesh( edgeGeometry, new THREE.MeshPhongMaterial({color:0x000000, side:THREE.DoubleSide}));
+		edge.castShadow = true;
 		scene.add(edge)
 		edge.startNode = startNode;
 		edge.endNode = endNode;
@@ -375,7 +377,7 @@ function initGraphTheory()
 	objectsToBeUpdated.push(graphGame)
 	graphGame.update = function()
 	{
-		var clientPosition = mouse.rayIntersectionWithZPlaneInCameraSpace(nodes[0].position.z)
+		var clientPosition = mouse.rayIntersectionWithZPlane(nodes[0].position.z)
 		
 		// if(mouse.Clicking && !mouse.oldClicking )
 		// {
