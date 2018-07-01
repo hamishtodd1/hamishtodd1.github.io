@@ -99,5 +99,20 @@
 
 	initImagesAndVideos();
 
+	buttonBindings = {}
+	var buttonIndexGivenName = {
+		"enter":13//I think...
+	}
+	document.addEventListener( 'keydown', function(event)
+	{
+		for( var buttonName in buttonBindings )
+		{
+			if( event.keyCode === buttonIndexGivenName[buttonName] )
+			{
+				buttonBindings[buttonName]();
+			}
+		}
+	}, false );
+
 	render();
 })();

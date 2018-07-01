@@ -390,7 +390,7 @@ function initMirzakhani()
 	}
 	objectsToBeUpdated.push( chosenSurface )
 	scene.add(chosenSurface)
-	clickables.push(chosenSurface)
+	mouseables.push(chosenSurface)
 	chosenSurface.position.z = -10;
 	chosenSurface.add(
 		projectile,

@@ -1,10 +1,8 @@
 function initCameraAndRendererResizeSystemAndCameraRepresentation(renderer)
 {
-	var centerToSideOfFrameAtZ0 = 1.0;
-	var intendedAspectRatio = 16/9; //because that's YOUR screen. It's also the youtube screen; that on it's own wouldn't necessarily mean you want it, but it's easy/simple to think of them as the same
 	var backwardExtension = 0.6;
 	var box = new THREE.Mesh( 
-		new THREE.BoxGeometry(2*centerToSideOfFrameAtZ0,2*centerToSideOfFrameAtZ0/intendedAspectRatio,backwardExtension),
+		new THREE.BoxGeometry(2*STARTING_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0,2*STARTING_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0,backwardExtension),
 		new THREE.MeshStandardMaterial({side:THREE.BackSide, vertexColors:THREE.FaceColors})
 	);
 	box.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-backwardExtension/2))
@@ -53,9 +51,9 @@ function initCameraAndRendererResizeSystemAndCameraRepresentation(renderer)
 			// }
 
 			renderer.setSize( window.innerWidth, window.innerHeight );
-			console.log(renderer.domElement.width, renderer.domElement.height)
+			console.log( "Renderer dimensions: ", renderer.domElement.width, renderer.domElement.height )
 			camera.aspect = renderer.domElement.width / renderer.domElement.height;
-			var horizontalFov = fovGivenCenterToFrameDistance(centerToSideOfFrameAtZ0,camera.position.z);
+			var horizontalFov = fovGivenCenterToFrameDistance(STARTING_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0,camera.position.z);
 			camera.fov = otherFov(horizontalFov,camera.aspect, false);
 
 			camera.updateProjectionMatrix();
@@ -82,7 +80,7 @@ function initCameraAndRendererResizeSystemAndCameraRepresentation(renderer)
 	});
 }
 
-function centerToFrameDistanceGivenFov(fov, distance)
+function centerToFrameDistance(fov, distance)
 {
 	return Math.tan( fov / 2 * (TAU/360) ) * distance;
 }
@@ -93,7 +91,7 @@ function fovGivenCenterToFrameDistance(centerToTopOfFrame, distance)
 
 function otherFov(inputFov,aspectRatio,inputIsVertical)
 {
-	var centerToFrameInput = centerToFrameDistanceGivenFov(inputFov,1)
+	var centerToFrameInput = centerToFrameDistance(inputFov,1)
 	var centerToFrameOutput = centerToFrameInput;
 	if(inputIsVertical)
 	{

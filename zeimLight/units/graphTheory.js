@@ -59,10 +59,10 @@ function initGraphTheory()
 
 	var nodes = [];
 	
-	var nodeRadius = 0.024;
+	var nodeRadius = 0.01;
 	var edgeRadius = nodeRadius * 0.1;
 	var nodeGeometry = new THREE.EfficientSphereGeometry(nodeRadius);
-	var smallSpringIdealLength = 0.6;
+	var smallSpringIdealLength = 0.2;
 	var largeSpringIdealLength = smallSpringIdealLength * 1.2;
 	var highlightedColor = new THREE.Color().setHex(0xFF0000)
 	var unhighlightedColor = new THREE.Color().setHex(0xFFFFFF)
@@ -350,28 +350,23 @@ function initGraphTheory()
 		}
 
 		//"integer multiples" thing?
-
-		console.log(decomposition)
 		return decomposition;
 	}
 
 	// makePartiteGraph( [1,3,3] )
-	// makePartiteGraph( [2,2,4] )
-	makePartiteGraph( [3,5,5] )
+	makePartiteGraph( [2,2,4] )
+	// makePartiteGraph( [3,5,5] )
 	// makePartiteGraph( [4,10,10] )
 
 	var decomposition = findFiveCyclesInTripartiteGraph()
 	
 	var decompose = false;
 	var decomposedness = 0;
-	document.addEventListener( 'keydown', function(event)
+
+	buttonBindings["enter"] = function()
 	{
-		var enterKeyCode = 13;
-		if( event.keyCode === enterKeyCode )
-		{
-			decompose = !decompose;
-		}
-	}, false );
+		decompose = !decompose;
+	}
 	
 	var graphGame = {}; //"update functions to be called"?
 	objectsToBeUpdated.push(graphGame)
@@ -494,9 +489,10 @@ function initGraphTheory()
 
 		//ought to be in node.update?
 		var edgeInQuestion = 0;
+		var dist = ( STARTING_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0 - largeSpringIdealLength * 0.6 ) * decomposedness
 		for(var i = 0; i < decomposition.length; i++)
 		{
-			var cycleDirection = xUnit.clone().applyAxisAngle(zUnit, i / decomposition.length * TAU ).setLength(0.05 * decomposition.length);
+			var displacement = new THREE.Vector3(dist,0,0).applyAxisAngle(zUnit, i / decomposition.length * TAU );
 			for(var j = 0; j < decomposition[i].length; j++)
 			{
 				for(var k = 0, kl = edges.length; k < kl; k++)
@@ -504,80 +500,11 @@ function initGraphTheory()
 					if( edges[k].startNode === nodes[decomposition[i][j]] && edges[k].endNode === nodes[decomposition[i][(j+1)%5]] ||
 						edges[k].endNode === nodes[decomposition[i][j]] && edges[k].startNode === nodes[decomposition[i][(j+1)%5]] )
 					{
-						edges[k].position.addScaledVector( cycleDirection, decomposedness );
+						edges[k].position.add( displacement );
 						break;
 					}
 				}
 			}
 		}
-		logged = 1
 	}
-}
-
-/**
- * This bit: Copyright 2012 Akseli Palén.
- * Created 2012-07-15.
- * Licensed under the MIT license.
-**/
-function kCombinations(set, k)
-{
-	var i, j, combs, head, tailcombs;
-	
-	// There is no way to take e.g. sets of 5 elements from
-	// a set of 4.
-	if (k > set.length || k <= 0)
-	{
-		return [];
-	}
-	
-	// K-sized set has only one K-sized subset.
-	if (k == set.length)
-	{
-		return [set];
-	}
-	
-	// There is N 1-sized subsets in a N-sized set.
-	if (k == 1)
-	{
-		combs = [];
-		for (i = 0; i < set.length; i++) {
-			combs.push([set[i]]);
-		}
-		return combs;
-	}
-	
-	// Assert {1 < k < set.length}
-	
-	// Algorithm description:
-	// To get k-combinations of a set, we want to join each element
-	// with all (k-1)-combinations of the other elements. The set of
-	// these k-sized sets would be the desired result. However, as we
-	// represent sets with lists, we need to take duplicates into
-	// account. To avoid producing duplicates and also unnecessary
-	// computing, we use the following approach: each element i
-	// divides the list into three: the preceding elements, the
-	// current element i, and the subsequent elements. For the first
-	// element, the list of preceding elements is empty. For element i,
-	// we compute the (k-1)-computations of the subsequent elements,
-	// join each with the element i, and store the joined to the set of
-	// computed k-combinations. We do not need to take the preceding
-	// elements into account, because they have already been the i:th
-	// element so they are already computed and stored. When the length
-	// of the subsequent list drops below (k-1), we cannot find any
-	// (k-1)-combs, hence the upper limit for the iteration:
-	combs = [];
-	for (i = 0; i < set.length - k + 1; i++)
-	{
-		// head is a list that includes only our current element.
-		head = set.slice(i, i + 1);
-		// We take smaller combinations from the subsequent elements
-		tailcombs = kCombinations(set.slice(i + 1), k - 1);
-		// For each (k-1)-combination we join it with the current
-		// and store it to the set of k-combinations.
-		for (j = 0; j < tailcombs.length; j++)
-		{
-			combs.push(head.concat(tailcombs[j]));
-		}
-	}
-	return combs;
 }

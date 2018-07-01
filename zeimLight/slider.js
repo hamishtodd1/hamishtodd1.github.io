@@ -16,7 +16,7 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 
 		tracker.cameraSpaceClickedPoint = cameraSpaceClickedPoint;
 	}
-	clickables.push(sliderSystem);
+	mouseables.push(sliderSystem);
 
 	var trackerDefaultColor = new THREE.Color(0x298AF1);
 	var trackerJoltedColor = new THREE.Color(1,0,0);
@@ -25,7 +25,7 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 		new THREE.MeshBasicMaterial({color:trackerDefaultColor, /*transparent:true, opacity:1*/}));
 	tracker.position.x = initialValue;
 	changeValue(tracker.position.x);
-	clickables.push(tracker)
+	mouseables.push(tracker)
 	sliderSystem.add(tracker);
 	tracker.geometry.applyMatrix(new THREE.Matrix4().makeRotationX(TAU/4))
 	tracker.cameraSpaceClickedPoint = null;

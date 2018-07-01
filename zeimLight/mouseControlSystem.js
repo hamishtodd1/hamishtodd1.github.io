@@ -56,24 +56,30 @@ function initMouse()
 		mouse.previousRay.copy(mouse.rayCaster.ray);
 		mouse.rayCaster.setFromCamera( asynchronous.normalizedDevicePosition, camera );
 
-		if(this.clicking )
+		var intersections = mouse.rayCaster.intersectObjects( mouseables ); //we're changing the name of that...
+		if( intersections.length !== 0 )
 		{
-			if( !this.oldClicking )
+			if( intersections[0].object.onHover )
 			{
-				//not working for a mesh? Check for infinities
-				var clickableIntersections = mouse.rayCaster.intersectObjects( clickables );
-				if( clickableIntersections.length !== 0 )
+				intersections[0].object.onHover(intersections[0].point);
+			}
+			if(this.clicking )
+			{
+				if( !this.oldClicking )
 				{
-					var cameraSpaceClickedPoint = clickableIntersections[0].point.clone();
-					cameraSpaceClickedPoint.worldToLocal(camera);
-					if( clickableIntersections[0].object.onClick )
+					this.lastClickedObject = intersections[0].object;
+					if( intersections[0].object.onClick )
 					{
-						clickableIntersections[0].object.onClick(cameraSpaceClickedPoint,clickableIntersections[0].point);
+						intersections[0].object.onClick(intersections[0].point);
 					}
-
-					this.lastClickedObject = clickableIntersections[0].object;
 				}
-				else
+			}
+		}
+		else
+		{
+			if(this.clicking )
+			{
+				if( !this.oldClicking )
 				{
 					this.lastClickedObject = null;
 				}
