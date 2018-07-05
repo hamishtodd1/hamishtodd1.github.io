@@ -12,13 +12,13 @@
 function initImagesAndVideos()
 {
 	var textureFileNames = [
-		"jupiterJpl.jpg",
-		"bluetongue.jpg",
-		// "interview.mp4",
-		"Seoul ICM2014 Opening Ceremony (0).mp4",
+		// "jupiterJpl.jpg",
+		// "bluetongue.jpg",
+		"interview.mp4",
+		// "Seoul ICM2014 Opening Ceremony (0).mp4",
 		// "Seoul ICM2014 Opening Ceremony (1).mp4",
-		// "Seoul ICM2014 Opening Ceremony (2).mp4",
-		// "clips.mov"
+		"Seoul ICM2014 Opening Ceremony (2).mp4",
+		"clips.mov"
 	];
 
 	var everythingGeometry = new THREE.PlaneGeometry( 1,1 );
@@ -53,7 +53,7 @@ function initImagesAndVideos()
 	{
 		var mostRecentClickWasOnAThumbnailWeAreReflecting = 
 				mouse.lastClickedObject !== null && 
-				mouse.lastClickedObject.material.map === this.material.map
+				mouse.lastClickedObject.material.map.video.src === this.material.map.video.src
 		if( mostRecentClickWasOnAThumbnailWeAreReflecting )
 		{
 			this.scale.copy(scaleThatFillsScreen)
@@ -73,12 +73,16 @@ function initImagesAndVideos()
 		}
 	}
 
-	function Thumbnail( i, texture, video )
+	function Thumbnail( i, thumbnailTexture, displayTexture )
 	{
+		if(displayTexture === undefined)
+		{
+			displayTexture = thumbnailTexture;
+		}
 		var width = 0.15;
 		var thumbnail = new THREE.Mesh(
 			everythingGeometry,
-			new THREE.MeshBasicMaterial({depthTest:false,map:texture}) );
+			new THREE.MeshBasicMaterial({depthTest:false,map:thumbnailTexture}) );
 		scene.add(thumbnail)
 		mouseables.push(thumbnail)
 		thumbnail.scale.set( width, width, 1 )
@@ -96,12 +100,13 @@ function initImagesAndVideos()
 		thumbnail.onClick = function()
 		{
 			setScaleThatFillsScreen(this.scale.x / this.scale.y)
-			displayMesh.material.map = this.material.map;
+			displayMesh.material.map = displayTexture;
 			displayMesh.material.needsUpdate = true;
 			displayMesh.material.visible = true;
-			if( texture.video !== undefined )
+			if( displayTexture.video !== undefined )
 			{
-				texture.video.play();
+				displayTexture.video.currentTime = thumbnailTexture.video.currentTime;
+				displayTexture.video.play();
 			}
 			else
 			{
@@ -122,77 +127,82 @@ function initImagesAndVideos()
 		}, function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );} );
 	}
 
-	function loadVideo(i)
+	function VideoTexture(i)
 	{
 		var video = document.createElement( 'video' )
+		video.id = Math.random().toString()
 		video.loop = true
 		video.muted = true
 		video.style = "display:none"
 		video.src = "./data/textures/" + textureFileNames[i]
-		video.currentTime = 0.05; //first frame is often no good
 
 		var videoImage = document.createElement( 'canvas' );
 		var videoTexture = new THREE.Texture( videoImage );
-		console.log(video, video === videoTexture.image, videoTexture)
 		videoTexture.video = video;
-		videoTexture.minFilter = THREE.LinearFilter;
-		videoTexture.magFilter = THREE.LinearFilter;
+		// videoTexture.minFilter = THREE.LinearFilter;
+		// videoTexture.magFilter = THREE.LinearFilter;
 		var videoImageContext = videoImage.getContext( '2d' );
 		videoImageContext.fillStyle = '#FFFFFF';
 		videoImageContext.fillRect( 0, 0, 1280, 720 );
 
-		var thumbnail = Thumbnail( i, videoTexture )
-
+		//this doesn't always have to be happenning
 		objectsToBeUpdated.push(videoTexture)
 		videoTexture.update = function()
 		{
-			if(thumbnail.scale.y === thumbnail.scale.x)
-			{
-				if( video.videoHeight === 0 )
-				{
-					return
-				}
-
-				videoImage.width = video.videoWidth;
-				videoImage.height = video.videoHeight;
-				var aspectRatio = video.videoWidth / video.videoHeight;
-				thumbnail.scale.set(thumbnail.scale.x,thumbnail.scale.x/aspectRatio,1)
-			}
-
-			var mayBeTryingToHover = (displayMesh.material.map !== this && !mouse.clicking)
-			// console.log(mayBeTryingToHover)
-			if( mayBeTryingToHover )
-			{
-				var intersections = mouse.rayCaster.intersectObject( thumbnail ); //we're changing the name of that...
-				if( intersections.length !== 0 )
-				{
-					var frameLimitLeft =  thumbnail.geometry.vertices[0].clone().applyMatrix4( thumbnail.matrix ).x;
-					var frameLimitRight = thumbnail.geometry.vertices[1].clone().applyMatrix4( thumbnail.matrix ).x;
-					var hoveredTime = video.duration * (intersections[0].point.x - frameLimitLeft) / (frameLimitRight-frameLimitLeft)
-
-					//we check because currentTime needs a chance to get set. Also, useful looping effect
-					if( Math.abs( video.currentTime - hoveredTime ) > 0.05 )
-					{
-						video.currentTime = hoveredTime
-						if(video.paused)
-						{
-							video.play()
-						}
-					}
-				}
-				else
-				{
-					if(!video.paused)
-					{
-						video.pause()
-					}
-				}
-			}
-
 			if( video.readyState === video.HAVE_ENOUGH_DATA )
 			{
 				videoImageContext.drawImage( video, 0, 0 );
 				videoTexture.needsUpdate = true;
+			}
+		}
+
+		return videoTexture
+	}
+
+	function loadVideo(i)
+	{
+		var displayTexture = VideoTexture(i)
+		var thumbnailTexture = VideoTexture(i)
+		thumbnailTexture.video.currentTime = 0.05; //first frame is often no good
+
+		var thumbnail = Thumbnail( i, thumbnailTexture, displayTexture )
+
+		objectsToBeUpdated.push(thumbnail)
+		thumbnail.update = function()
+		{
+			if(thumbnail.scale.y === thumbnail.scale.x && thumbnailTexture.video.videoHeight !== 0 )
+			{
+				thumbnailTexture.image.width = thumbnailTexture.video.videoWidth;
+				thumbnailTexture.image.height = thumbnailTexture.video.videoHeight;
+				displayTexture.image.width = thumbnailTexture.video.videoWidth;
+				displayTexture.image.height = thumbnailTexture.video.videoHeight;
+				var aspectRatio = thumbnailTexture.video.videoWidth / thumbnailTexture.video.videoHeight;
+				thumbnail.scale.set(thumbnail.scale.x,thumbnail.scale.x/aspectRatio,1)
+			}
+
+			var intersections = mouse.rayCaster.intersectObject( thumbnail ); //we're changing the name of that...
+			if( intersections.length !== 0 )
+			{
+				var frameLimitLeft =  thumbnail.geometry.vertices[0].clone().applyMatrix4( thumbnail.matrix ).x;
+				var frameLimitRight = thumbnail.geometry.vertices[1].clone().applyMatrix4( thumbnail.matrix ).x;
+				var hoveredTime = thumbnailTexture.video.duration * (intersections[0].point.x - frameLimitLeft) / (frameLimitRight-frameLimitLeft)
+
+				//we check because currentTime needs a chance to get set. Also, useful looping effect
+				if( Math.abs( thumbnailTexture.video.currentTime - hoveredTime ) > 0.05 )
+				{
+					thumbnailTexture.video.currentTime = hoveredTime
+					if( thumbnailTexture.video.paused )
+					{
+						thumbnailTexture.video.play()
+					}
+				}
+			}
+			else
+			{
+				if(!thumbnailTexture.video.paused)
+				{
+					thumbnailTexture.video.pause()
+				}
 			}
 		}
 	}
