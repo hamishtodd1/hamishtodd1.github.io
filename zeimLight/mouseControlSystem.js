@@ -59,10 +59,6 @@ function initMouse()
 		var intersections = mouse.rayCaster.intersectObjects( mouseables ); //we're changing the name of that...
 		if( intersections.length !== 0 )
 		{
-			if( intersections[0].object.onHover )
-			{
-				intersections[0].object.onHover(intersections[0].point);
-			}
 			if(this.clicking )
 			{
 				if( !this.oldClicking )

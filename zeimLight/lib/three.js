@@ -19682,6 +19682,7 @@
 
 		}
 
+		var powerOfTwoRescalings = 0;
 		function makePowerOfTwo( image ) {
 
 			if ( image instanceof HTMLImageElement || image instanceof HTMLCanvasElement || image instanceof ImageBitmap ) {
@@ -19694,7 +19695,11 @@
 				var context = _canvas.getContext( '2d' );
 				context.drawImage( image, 0, 0, _canvas.width, _canvas.height );
 
-				console.warn( 'THREE.WebGLRenderer: image is not power of two (' + image.width + 'x' + image.height + '). Resized to ' + _canvas.width + 'x' + _canvas.height, image );
+				if(powerOfTwoRescalings === 0)
+				{
+					console.warn( 'at least one image resized. This could be happening every frame. (' + image.width + 'x' + image.height + '). Resized to ' + _canvas.width + 'x' + _canvas.height, image );
+				}
+				powerOfTwoRescalings++;
 
 				return _canvas;
 

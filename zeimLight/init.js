@@ -34,7 +34,12 @@
 
 (function init()
 {
-	var doingVr = WEBVR && WEBVR.isAvailable();
+	var buttonBindings = {};
+	bindButton = function( buttonName, ourFunction, functionDescription )
+	{
+		console.log(buttonName.toUpperCase() + ": " + functionDescription)
+		buttonBindings[buttonName] = ourFunction;
+	}
 
 	var platform = getPlatform()
 	if(platform === "phone" )
@@ -54,16 +59,11 @@
 	renderer.setClearColor(0x000000) //youtube
 	document.body.appendChild( renderer.domElement );
 
-	var ourVrEffect = new THREE.VREffect( renderer );
 	function render()
 	{
 		{
 			frameDelta = clock.getDelta();
 			
-			if( doingVr )
-			{
-				updateVrInputSystem();
-			}
 			mouse.updateFromAsyncAndCheckClicks();
 
 			for(var i = 0; i < objectsToBeUpdated.length; i++)
@@ -74,35 +74,29 @@
 			frameCount++;
 		}
 
-		ourVrEffect.requestAnimationFrame( function()
-		{
-			ourVrEffect.render( scene, camera );
-			render();
-		} );
+		requestAnimationFrame( render );
+		renderer.render( scene, camera );
 	}
 
 	initCameraAndRendererResizeSystemAndCameraRepresentation(renderer);
-
-	if( doingVr )
-	{
-		initControllers();
-		initVrInputSystem(ourVrEffect, renderer);
-		addExtraForVR()
-
-		// var goose = new Goose();
-		// goose.position.z = -0.1
-		// scene.add(goose);
-	}
 
 	initMouse();
 	initMirzakhani();
 
 	initImagesAndVideos();
 
-	buttonBindings = {}
 	var buttonIndexGivenName = {
-		"enter":13//I think...
+		"enter":13,
+		"alt":18,
+		"shift":16,
+
+		"left":37,
+		"up":38,
+		"right":39,
+		"down":12,
+		"space":32
 	}
+	//don't use ctrl
 	document.addEventListener( 'keydown', function(event)
 	{
 		for( var buttonName in buttonBindings )
@@ -110,6 +104,7 @@
 			if( event.keyCode === buttonIndexGivenName[buttonName] )
 			{
 				buttonBindings[buttonName]();
+				return
 			}
 		}
 	}, false );

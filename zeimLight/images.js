@@ -5,17 +5,19 @@
 	save file to the directory is easy, you'll want to "save as"
 
 	TODO copy and paste to make a new one appear
+
+	You do need to convert all videos to power-of-2
 */
 
 function initImagesAndVideos()
 {
 	var textureFileNames = [
-		"Seoul ICM2014 Opening Ceremony (0).mp4",
 		"jupiterJpl.jpg",
 		"bluetongue.jpg",
+		// "interview.mp4",
+		"Seoul ICM2014 Opening Ceremony (0).mp4",
 		// "Seoul ICM2014 Opening Ceremony (1).mp4",
 		// "Seoul ICM2014 Opening Ceremony (2).mp4",
-		// "interview.mp4",
 		// "clips.mov"
 	];
 
@@ -24,83 +26,65 @@ function initImagesAndVideos()
 	var textureLoader = new THREE.TextureLoader();
 	textureLoader.crossOrigin = true;
 
-	var blankMaterial = new THREE.MeshBasicMaterial();
-	blankMaterial.visible = false;
-	var imageMesh = new THREE.Mesh( everythingGeometry, blankMaterial);
-	imageMesh.position.z = camera.position.z - camera.near - 0.001
-	scene.add( imageMesh )
-
-	var videoMesh = new THREE.Mesh( everythingGeometry, blankMaterial );
-	videoMesh.position.copy(imageMesh.position)
-	scene.add( videoMesh )
+	var displayMesh = new THREE.Mesh( everythingGeometry, new THREE.MeshBasicMaterial());
+	displayMesh.material.visible = false;
+	displayMesh.position.z = camera.position.z - camera.near - 0.001
+	scene.add( displayMesh )
 
 	var scaleThatFillsScreen = new THREE.Vector3(1,1,1);
 	function setScaleThatFillsScreen(aspectRatio)
 	{
-		var viewerScreenHeightAtZ0 = STARTING_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 * 2 / STARTING_ASPECT_RATIO;
-		var viewerScreenHeightAtZ = viewerScreenHeightAtZ0 * imageMesh.position.distanceTo( camera.position) / camera.position.z;
-		if(aspectRatio > STARTING_ASPECT_RATIO)
+		var viewerScreenHeightAtZ0 = AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 * 2 / AUDIENCE_ASPECT_RATIO;
+		var viewerScreenHeightAtZ = viewerScreenHeightAtZ0 * displayMesh.position.distanceTo( camera.position) / camera.position.z;
+		if(aspectRatio > AUDIENCE_ASPECT_RATIO)
 		{
 			scaleThatFillsScreen.set( viewerScreenHeightAtZ * aspectRatio, viewerScreenHeightAtZ, 1 );
 		}
 		else
 		{
-			var viewerScreenWidthAtZ = viewerScreenHeightAtZ * STARTING_ASPECT_RATIO;
+			var viewerScreenWidthAtZ = viewerScreenHeightAtZ * AUDIENCE_ASPECT_RATIO;
 			scaleThatFillsScreen.set( viewerScreenWidthAtZ, viewerScreenWidthAtZ / aspectRatio, 1 );
 		}
 	}
 	var zoomProgress = 0;
 
-	objectsToBeUpdated.push( imageMesh )
-	imageMesh.update = function()
+	objectsToBeUpdated.push( displayMesh )
+	displayMesh.update = function()
 	{
-		if(	mouse.lastClickedObject !== null && 
-			mouse.lastClickedObject.material === this.material )
+		var mostRecentClickWasOnAThumbnailWeAreReflecting = 
+				mouse.lastClickedObject !== null && 
+				mouse.lastClickedObject.material.map === this.material.map
+		if( mostRecentClickWasOnAThumbnailWeAreReflecting )
 		{
 			this.scale.copy(scaleThatFillsScreen)
-			this.scale.multiplyScalar(1+zoomProgress);
-			zoomProgress += 0.0003;
+			if(this.material.map.video === undefined)
+			{
+				this.scale.multiplyScalar(1+zoomProgress);
+				zoomProgress += 0.0003
+			}
 		}
 		else
 		{
-			if(this.material !== blankMaterial)
+			if( this.material.map !== null )
 			{
-				this.material = blankMaterial;
+				this.material.visible = false;
+				this.material.map = null;
 			}
 		}
 	}
 
-	objectsToBeUpdated.push( videoMesh )
-	videoMesh.update = function()
+	function Thumbnail( i, texture, video )
 	{
-		if(	mouse.lastClickedObject !== null && 
-			mouse.lastClickedObject.material === this.material )
-		{
-			this.material.makeSureImageIsChanged()
-		}
-		else
-		{
-			if(this.material !== blankMaterial)
-			{
-				this.material.documentElement.pause();
-				this.material = blankMaterial;
-			}
-		}
-	}
-
-	function Thumbnail( aspectRatio, i, textureMaterial )
-	{
-		var width = 0.3;
-		var height = width / aspectRatio;
+		var width = 0.15;
 		var thumbnail = new THREE.Mesh(
-			everythingGeometry, 
-			textureMaterial );
+			everythingGeometry,
+			new THREE.MeshBasicMaterial({depthTest:false,map:texture}) );
 		scene.add(thumbnail)
 		mouseables.push(thumbnail)
-		thumbnail.scale.set( width, height, 1 )
+		thumbnail.scale.set( width, width, 1 )
 
-		thumbnail.position.y = STARTING_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0 * 1.1 + 0.5 * width;
-		var numWeCanSqueezeIn = STARTING_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 * 2 / width;
+		thumbnail.position.y = AUDIENCE_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0 * 1.02 + 0.5 * width;
+		var numWeCanSqueezeIn = AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 * 2 / width;
 		var rowPosition = i;
 		if( rowPosition >= numWeCanSqueezeIn )
 		{
@@ -108,6 +92,22 @@ function initImagesAndVideos()
 			thumbnail.position.y *= -1
 		}
 		thumbnail.position.x = (rowPosition - (numWeCanSqueezeIn-1)/2) * width;
+
+		thumbnail.onClick = function()
+		{
+			setScaleThatFillsScreen(this.scale.x / this.scale.y)
+			displayMesh.material.map = this.material.map;
+			displayMesh.material.needsUpdate = true;
+			displayMesh.material.visible = true;
+			if( texture.video !== undefined )
+			{
+				texture.video.play();
+			}
+			else
+			{
+				zoomProgress = 0;
+			}
+		}
 		
 		return thumbnail;
 	}
@@ -116,84 +116,84 @@ function initImagesAndVideos()
 	{
 		textureLoader.load( "./data/textures/" + textureFileNames[i], function(texture) 
 		{
+			var thumbnail = Thumbnail( i, texture );
 			var aspectRatio = texture.image.naturalWidth / texture.image.naturalHeight;
-			var textureMaterial = new THREE.MeshBasicMaterial({map:texture})
-			var thumbnail = Thumbnail( aspectRatio, i, textureMaterial );
-			thumbnail.onClick = function()
-			{
-				setScaleThatFillsScreen(aspectRatio) 
-
-				zoomProgress = 0;
-				imageMesh.material = textureMaterial;
-
-				/*
-					Could allow panning too
-					You have one thumbnail space for clicking when you want to clear
-					Could have a starting position and
-				*/
-			}
+			thumbnail.scale.set(thumbnail.scale.x,thumbnail.scale.x / aspectRatio,1)
 		}, function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );} );
 	}
 
 	function loadVideo(i)
-	{	
-		// var video = document.createElement( "video" );
-		// video.id = "videoWhoseTextureIndexIs" + i.toString();
-		// video.type = ' video/mp4; codecs="theora, vorbis" ';
-		// video.src = "./data/textures/" + textureFileNames[i];
-		// video.crossOrigin = "anonymous";
-		// video.load();
-		// // video.play();
-		// if(video.videoHeight === 0)
-		// {
-		// 	console.error("video not loaded?")
-		// 	return
-		// }
-		// var aspectRatio = video.videoWidth / video.videoHeight;
-		// you need to get rid of the below
-		var aspectRatio = 1;
-		
-		// var videoImage = document.createElement( 'canvas' );
-		// videoImage.width = video.videoWidth;
-		// videoImage.height = video.videoHeight;
-		// var videoImageContext = videoImage.getContext( '2d' );
-		// videoImageContext.fillStyle = '#ffffff'; // background color if no video present
-		// videoImageContext.fillRect( 0, 0, videoImage.width, videoImage.height );
+	{
+		var video = document.createElement( 'video' )
+		video.loop = true
+		video.muted = true
+		video.style = "display:none"
+		video.src = "./data/textures/" + textureFileNames[i]
+		video.currentTime = 0.05; //first frame is often no good
 
-		var videoMaterial = new THREE.MeshBasicMaterial(
-		{
-			// overdraw: true,
-			// map: new THREE.Texture( videoImage ) 
-		})
-		// videoMaterial.documentElement = video;
-		// videoMaterial.map.minFilter = THREE.LinearFilter;
-		// videoMaterial.map.magFilter = THREE.LinearFilter;
+		var videoImage = document.createElement( 'canvas' );
+		var videoTexture = new THREE.Texture( videoImage );
+		console.log(video, video === videoTexture.image, videoTexture)
+		videoTexture.video = video;
+		videoTexture.minFilter = THREE.LinearFilter;
+		videoTexture.magFilter = THREE.LinearFilter;
+		var videoImageContext = videoImage.getContext( '2d' );
+		videoImageContext.fillStyle = '#FFFFFF';
+		videoImageContext.fillRect( 0, 0, 1280, 720 );
 
-		videoMaterial.makeSureImageIsChanged = function()
-		{
-			// if( video !== null && video.readyState === video.HAVE_ENOUGH_DATA )
-			// {
-			// 	videoImageContext.drawImage( video, 0, 0 )
-			// 	this.map.needsUpdate = true;
-			// 	this.needsUpdate = true;
-			// }
-		}
+		var thumbnail = Thumbnail( i, videoTexture )
 
-		var thumbnail = Thumbnail( aspectRatio, i, videoMaterial );
-		thumbnail.onHover = function(hoveredPoint)
+		objectsToBeUpdated.push(videoTexture)
+		videoTexture.update = function()
 		{
-			var frameLimitLeft =  this.geometry.vertices[0].clone().applyMatrix4( this.matrix ).x;
-			var frameLimitRight = this.geometry.vertices[1].clone().applyMatrix4( this.matrix ).x;
-			//if there's a massive bit of it you don't want at the beginning, could add something
-			// video.currentTime = (hoveredPoint.x - frameLimitLeft) / (frameLimitRight-frameLimitLeft)
+			if(thumbnail.scale.y === thumbnail.scale.x)
+			{
+				if( video.videoHeight === 0 )
+				{
+					return
+				}
 
-			videoMaterial.makeSureImageIsChanged()
-		}
-		thumbnail.onClick = function()
-		{
-			videoMesh.material = videoMaterial;
-			setScaleThatFillsScreen(aspectRatio)
-			// video.play();
+				videoImage.width = video.videoWidth;
+				videoImage.height = video.videoHeight;
+				var aspectRatio = video.videoWidth / video.videoHeight;
+				thumbnail.scale.set(thumbnail.scale.x,thumbnail.scale.x/aspectRatio,1)
+			}
+
+			var mayBeTryingToHover = (displayMesh.material.map !== this && !mouse.clicking)
+			// console.log(mayBeTryingToHover)
+			if( mayBeTryingToHover )
+			{
+				var intersections = mouse.rayCaster.intersectObject( thumbnail ); //we're changing the name of that...
+				if( intersections.length !== 0 )
+				{
+					var frameLimitLeft =  thumbnail.geometry.vertices[0].clone().applyMatrix4( thumbnail.matrix ).x;
+					var frameLimitRight = thumbnail.geometry.vertices[1].clone().applyMatrix4( thumbnail.matrix ).x;
+					var hoveredTime = video.duration * (intersections[0].point.x - frameLimitLeft) / (frameLimitRight-frameLimitLeft)
+
+					//we check because currentTime needs a chance to get set. Also, useful looping effect
+					if( Math.abs( video.currentTime - hoveredTime ) > 0.05 )
+					{
+						video.currentTime = hoveredTime
+						if(video.paused)
+						{
+							video.play()
+						}
+					}
+				}
+				else
+				{
+					if(!video.paused)
+					{
+						video.pause()
+					}
+				}
+			}
+
+			if( video.readyState === video.HAVE_ENOUGH_DATA )
+			{
+				videoImageContext.drawImage( video, 0, 0 );
+				videoTexture.needsUpdate = true;
+			}
 		}
 	}
 

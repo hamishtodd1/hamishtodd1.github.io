@@ -363,10 +363,10 @@ function initGraphTheory()
 	var decompose = false;
 	var decomposedness = 0;
 
-	buttonBindings["enter"] = function()
+	bindButton("enter", function()
 	{
 		decompose = !decompose;
-	}
+	}, "Decomposes and un-decomposes graph")
 	
 	var graphGame = {}; //"update functions to be called"?
 	objectsToBeUpdated.push(graphGame)
@@ -489,7 +489,7 @@ function initGraphTheory()
 
 		//ought to be in node.update?
 		var edgeInQuestion = 0;
-		var dist = ( STARTING_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0 - largeSpringIdealLength * 0.6 ) * decomposedness
+		var dist = ( AUDIENCE_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0 - largeSpringIdealLength * 0.6 ) * decomposedness
 		for(var i = 0; i < decomposition.length; i++)
 		{
 			var displacement = new THREE.Vector3(dist,0,0).applyAxisAngle(zUnit, i / decomposition.length * TAU );
