@@ -1,19 +1,10 @@
 'use strict';
 /*
 	TODO
-		Test marking system
-		Compression...
-		Set up markings for all objects
-		Lay it all out on a board
-		Implement such that the board tweens nicely to where you put it
-			Step back--move--step forward
-		Auto-zoom, surely?
-		Eh, not a whole lot of point in controlling the trajectory; set it up like powerpoint
-		Choose colors
-		Record, on twitch
-		Facebook version?
+		If nothing else, do trail collision
+		Bind button to stereographic projection. Also visibox
+		Urrrrrgh it'd be better with a single renderer in the middle of a webpage
 		Send to mum for music
-
 
 	Picture stuff
 		Want to be able to ctrl+v, after copying image link, and picture appears

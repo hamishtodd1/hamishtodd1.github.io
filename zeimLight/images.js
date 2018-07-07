@@ -14,8 +14,9 @@
 function initImagesAndVideos()
 {
 	var textureFileNames = [
-		"jupiterJpl.jpg",
-		"bluetongue.jpg",
+		"2515823.jpg",
+		"Roberts-Maryam-Mirzakhanis-Pioneering-Mathematical-Legacy.jpg",
+		"thirdFromRight.jpg",
 		"interview.mp4",
 		"Seoul ICM2014 Opening Ceremony (0).mp4",
 		// "Seoul ICM2014 Opening Ceremony (1).mp4",
@@ -32,6 +33,11 @@ function initImagesAndVideos()
 	displayMesh.material.visible = false;
 	displayMesh.position.z = - camera.near - 0.001
 	camera.add( displayMesh )
+
+	var progressTracker = new THREE.Line(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0xFFFFFF,depthTest:false}))
+	progressTracker.visible = false
+	progressTracker.geometry.vertices.push(new THREE.Vector3(0,-0.6,0),new THREE.Vector3(0,0.6,0))
+	camera.add(progressTracker)
 
 	var scaleThatFillsScreen = new THREE.Vector3(1,1,1);
 	function setScaleThatFillsScreen(aspectRatio)
@@ -66,7 +72,20 @@ function initImagesAndVideos()
 			if( this.material.map.video === undefined)
 			{
 				this.scale.multiplyScalar(1+zoomProgress);
+				// if(this.zoomDirection)
+				// {
+				// 	//something
+				// }
+
 				zoomProgress += 0.0003
+			}
+			else
+			{
+				var thumbnail = mouse.lastClickedObject
+				progressTracker.position.copy( thumbnail.position )
+				progressTracker.position.x = thumbnail.getTimeAt( this.material.map.video.currentTime, true )
+				progressTracker.scale.y = thumbnail.scale.y
+				console.log(progressTracker.visible)
 			}
 		}
 		else
@@ -75,6 +94,7 @@ function initImagesAndVideos()
 			{
 				this.material.visible = false;
 				this.material.map = null;
+				progressTracker.visible = false
 			}
 		}
 	}
@@ -84,10 +104,36 @@ function initImagesAndVideos()
 		displayMesh.material.map.setCurrentTimeToStart()
 		//also "save"... later...
 	}, "set current time as when you would start current clip")
-	// bindButton("z",function()
-	// {
 
-	// }, "set point as place to zoom toward")
+	{
+		// var frameDrawer = new THREE.Line(new THREE.OriginCorneredPlaneBufferGeometry(1,1))
+		// frameDrawer.material.depthTest = false;
+		// scene.add(frameDrawer)
+		// displayMesh.onClick = function()
+		// {
+		// 	if( !this.visible || !this.material.visible)
+		// 	{
+		// 		return
+		// 	}
+
+		// 	frameDrawer.visible = true;
+		// }
+		// objectsToBeUpdated.push(frameDrawer)
+		// frameDrawer.update = function()
+		// {
+		// 	var mousePosition = mouse.rayIntersectionWithZPlane(this.position.z)
+		// 	this.scale.x = mousePosition.x - this.position.x;
+		// 	this.scale.y = this.scale.x / AUDIENCE_ASPECT_RATIO
+		// }
+
+		// bindButton("z",function()
+		// {
+		// 	//stop zooming and set zoomprogress to 0
+		// 	zoomProgress = 0;
+		// 	frameDrawer.position.copy(mouse.rayIntersectionWithZPlane(0))
+		// }, "set zoom direction")
+	}
+
 	bindButton("v",function()
 	{
 		if( displayMesh.material.map === null || displayMesh.material.map.video === undefined )
@@ -171,6 +217,8 @@ function initImagesAndVideos()
 			{
 				displayTexture.video.currentTime = thumbnailTexture.video.currentTime;
 				displayTexture.video.play();
+
+				progressTracker.visible = true
 			}
 			else
 			{
@@ -239,6 +287,23 @@ function initImagesAndVideos()
 			startTime = this.video.currentTime
 		}
 
+		thumbnail.getTimeAt = function(input, reverse)
+		{
+			var frameLimitLeft =  this.geometry.vertices[0].clone().applyMatrix4( this.matrixWorld ).x;
+			var frameWidth = this.scale.x;
+
+			var trueDuration = thumbnailTexture.video.duration - startTime;
+
+			if(reverse)
+			{
+				var proportionAlong = ( input - startTime ) / trueDuration
+				return proportionAlong * frameWidth + frameLimitLeft;
+			}
+
+			var proportionAlong = (input - frameLimitLeft) / frameWidth;
+			return startTime + proportionAlong * trueDuration;
+		}
+
 		objectsToBeUpdated.push(thumbnail)
 		thumbnail.update = function()
 		{
@@ -255,10 +320,7 @@ function initImagesAndVideos()
 			var intersections = mouse.rayCaster.intersectObject( thumbnail ); //we're changing the name of that...
 			if( intersections.length !== 0 )
 			{
-				var frameLimitLeft =  thumbnail.geometry.vertices[0].clone().applyMatrix4( thumbnail.matrixWorld ).x;
-				var frameLimitRight = thumbnail.geometry.vertices[1].clone().applyMatrix4( thumbnail.matrixWorld ).x;
-				var proportionAlongThumbnail = (intersections[0].point.x - frameLimitLeft) / (frameLimitRight-frameLimitLeft);
-				var hoveredTime = startTime + proportionAlongThumbnail * ( thumbnailTexture.video.duration - startTime );
+				var hoveredTime = thumbnail.getTimeAt( intersections[0].point.x, false )
 
 				//we check because currentTime needs a chance to get set. Also, useful looping effect
 				if( Math.abs( thumbnailTexture.video.currentTime - hoveredTime ) > 0.05 )
