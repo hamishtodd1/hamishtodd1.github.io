@@ -79,10 +79,15 @@ function initImagesAndVideos()
 		}
 	}
 
-	// bindButton("[",function()
+	bindButton("[",function()
+	{
+		displayMesh.material.map.setCurrentTimeToStart()
+		//also "save"... later...
+	}, "set current time as when you would start current clip")
+	// bindButton("z",function()
 	// {
-		
-	// }, "set current time as when you would start current clip")
+
+	// }, "set point as place to zoom toward")
 	bindButton("v",function()
 	{
 		if( displayMesh.material.map === null || displayMesh.material.map.video === undefined )
@@ -194,14 +199,13 @@ function initImagesAndVideos()
 		video.muted = true
 		video.style = "display:none"
 		video.src = "./data/textures/" + textureFileNames[i]
-		video.load()
 		video.crossOrigin = 'anonymous';
 
 		var videoImage = document.createElement( 'canvas' );
 		var videoTexture = new THREE.Texture( videoImage );
 		videoTexture.video = video;
-		// videoTexture.minFilter = THREE.LinearFilter;
-		// videoTexture.magFilter = THREE.LinearFilter;
+		videoTexture.minFilter = THREE.LinearFilter; //no mipmapping
+		videoTexture.magFilter = THREE.LinearFilter;
 		var videoImageContext = videoImage.getContext( '2d' );
 		videoImageContext.fillStyle = '#FFFFFF';
 		videoImageContext.fillRect( 0, 0, 1280, 720 );
@@ -223,11 +227,17 @@ function initImagesAndVideos()
 	function loadVideo(i)
 	{
 		var displayTexture = VideoTexture(i)
-
 		var thumbnailTexture = VideoTexture(i)
-		thumbnailTexture.video.currentTime = 0.05; //first frame is often no good
+		var startTime = 0.05
+		thumbnailTexture.video.currentTime = startTime
+		displayTexture.video.currentTime = startTime
 
 		var thumbnail = Thumbnail( i, thumbnailTexture, displayTexture )
+
+		displayTexture.setCurrentTimeToStart = function()
+		{
+			startTime = this.video.currentTime
+		}
 
 		objectsToBeUpdated.push(thumbnail)
 		thumbnail.update = function()
@@ -247,7 +257,8 @@ function initImagesAndVideos()
 			{
 				var frameLimitLeft =  thumbnail.geometry.vertices[0].clone().applyMatrix4( thumbnail.matrixWorld ).x;
 				var frameLimitRight = thumbnail.geometry.vertices[1].clone().applyMatrix4( thumbnail.matrixWorld ).x;
-				var hoveredTime = thumbnailTexture.video.duration * (intersections[0].point.x - frameLimitLeft) / (frameLimitRight-frameLimitLeft)
+				var proportionAlongThumbnail = (intersections[0].point.x - frameLimitLeft) / (frameLimitRight-frameLimitLeft);
+				var hoveredTime = startTime + proportionAlongThumbnail * ( thumbnailTexture.video.duration - startTime );
 
 				//we check because currentTime needs a chance to get set. Also, useful looping effect
 				if( Math.abs( thumbnailTexture.video.currentTime - hoveredTime ) > 0.05 )
@@ -267,6 +278,8 @@ function initImagesAndVideos()
 				}
 			}
 		}
+
+		return thumbnail;
 	}
 
 	for(var i = 0, il = textureFileNames.length; i < il; i++)
