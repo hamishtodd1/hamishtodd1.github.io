@@ -1,7 +1,7 @@
 function initMouse()
 {
 	{
-		var coneHeight = 0.13;
+		var coneHeight = 0.06;
 		var coneRadius = coneHeight * 0.4;
 		var cursorGeometry = new THREE.ConeGeometry(coneRadius, coneHeight,31);
 		cursorGeometry.computeFaceNormals();
@@ -9,10 +9,12 @@ function initMouse()
 		cursorGeometry.merge( new THREE.CylinderGeometry(coneRadius / 4, coneRadius / 4, coneHeight / 2, 31 ), (new THREE.Matrix4()).makeTranslation(0, -coneHeight/2, 0) );
 		cursorGeometry.applyMatrix( (new THREE.Matrix4()).makeTranslation(0, -coneHeight / 2, 0) );
 		cursorGeometry.applyMatrix( (new THREE.Matrix4()).makeRotationZ(TAU/16) );
-		var cursor = new THREE.Mesh(
-				cursorGeometry, 
-				new THREE.MeshPhongMaterial({color:0xCCCCCC })
-		)
+		var cursor = new THREE.Mesh( cursorGeometry, new THREE.MeshPhongMaterial(
+		{
+			color:0xCCCCCC,
+			transparent:true,
+			opacity:0.001
+		}))
 		cursor.castShadow = true;
 		scene.add(cursor)
 

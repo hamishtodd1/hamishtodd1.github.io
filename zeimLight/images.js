@@ -1,4 +1,6 @@
 /*
+	"No supported source"? Use chrome rather than chromium
+
 	want to be able to put mosue over a picture on the internet,
 		press a keyboard shortcut, see it appear
 
@@ -12,13 +14,13 @@
 function initImagesAndVideos()
 {
 	var textureFileNames = [
-		// "jupiterJpl.jpg",
-		// "bluetongue.jpg",
+		"jupiterJpl.jpg",
+		"bluetongue.jpg",
 		"interview.mp4",
-		// "Seoul ICM2014 Opening Ceremony (0).mp4",
+		"Seoul ICM2014 Opening Ceremony (0).mp4",
 		// "Seoul ICM2014 Opening Ceremony (1).mp4",
-		"Seoul ICM2014 Opening Ceremony (2).mp4",
-		"clips.mov"
+		// "Seoul ICM2014 Opening Ceremony (2).mp4",
+		// "clips.mov"
 	];
 
 	var everythingGeometry = new THREE.PlaneGeometry( 1,1 );
@@ -28,21 +30,23 @@ function initImagesAndVideos()
 
 	var displayMesh = new THREE.Mesh( everythingGeometry, new THREE.MeshBasicMaterial());
 	displayMesh.material.visible = false;
-	displayMesh.position.z = camera.position.z - camera.near - 0.001
-	scene.add( displayMesh )
+	displayMesh.position.z = - camera.near - 0.001
+	camera.add( displayMesh )
 
 	var scaleThatFillsScreen = new THREE.Vector3(1,1,1);
 	function setScaleThatFillsScreen(aspectRatio)
 	{
-		var viewerScreenHeightAtZ0 = AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 * 2 / AUDIENCE_ASPECT_RATIO;
-		var viewerScreenHeightAtZ = viewerScreenHeightAtZ0 * displayMesh.position.distanceTo( camera.position) / camera.position.z;
+		var centerToFrameSideDistanceAtZ = centerToFrameDistance(otherFov(camera.fov,camera.aspect,true), -displayMesh.position.z)
+		var audienceCenterToFrameSideDistanceAtZ = centerToFrameSideDistanceAtZ * getAudienceProportionOfWindowWidth()
+		var audienceScreenHeightAtZ = audienceCenterToFrameSideDistanceAtZ * 2 / AUDIENCE_ASPECT_RATIO;
+
 		if(aspectRatio > AUDIENCE_ASPECT_RATIO)
 		{
-			scaleThatFillsScreen.set( viewerScreenHeightAtZ * aspectRatio, viewerScreenHeightAtZ, 1 );
+			scaleThatFillsScreen.set( audienceScreenHeightAtZ * aspectRatio, audienceScreenHeightAtZ, 1 );
 		}
 		else
 		{
-			var viewerScreenWidthAtZ = viewerScreenHeightAtZ * AUDIENCE_ASPECT_RATIO;
+			var viewerScreenWidthAtZ = audienceScreenHeightAtZ * AUDIENCE_ASPECT_RATIO;
 			scaleThatFillsScreen.set( viewerScreenWidthAtZ, viewerScreenWidthAtZ / aspectRatio, 1 );
 		}
 	}
@@ -52,12 +56,14 @@ function initImagesAndVideos()
 	displayMesh.update = function()
 	{
 		var mostRecentClickWasOnAThumbnailWeAreReflecting = 
-				mouse.lastClickedObject !== null && 
-				mouse.lastClickedObject.material.map.video.src === this.material.map.video.src
+				thumbnails.indexOf(mouse.lastClickedObject) !== -1 && (
+					mouse.lastClickedObject.material.map === this.material.map ||
+					mouse.lastClickedObject.material.map.video.src === this.material.map.video.src )
+				
 		if( mostRecentClickWasOnAThumbnailWeAreReflecting )
 		{
 			this.scale.copy(scaleThatFillsScreen)
-			if(this.material.map.video === undefined)
+			if( this.material.map.video === undefined)
 			{
 				this.scale.multiplyScalar(1+zoomProgress);
 				zoomProgress += 0.0003
@@ -73,6 +79,37 @@ function initImagesAndVideos()
 		}
 	}
 
+	// bindButton("[",function()
+	// {
+		
+	// }, "set current time as when you would start current clip")
+	bindButton("v",function()
+	{
+		if( displayMesh.material.map === null || displayMesh.material.map.video === undefined )
+		{
+			return
+		}
+		var stringJustBefore = "textures/"
+		var startingPointInString = displayMesh.material.map.video.src.indexOf(stringJustBefore) + stringJustBefore.length;
+		var fileNameInArray = decodeURIComponent(displayMesh.material.map.video.src.slice(startingPointInString) )
+		var fileIndex = textureFileNames.indexOf( fileNameInArray )
+		if(fileIndex === -1)
+		{
+			console.error("no such file: ",fileNameInArray)
+		}
+		else
+		{
+			loadVideo( fileIndex )
+		}
+	}, "clone current clip")
+	// bindButton("d",function()
+	// {
+
+	// }, "delete current clip")
+	//could make it so that if you reach the end, return to beginning
+	//also a little line going along them to let you know when it's about to end...
+
+	var thumbnails = [];
 	function Thumbnail( i, thumbnailTexture, displayTexture )
 	{
 		if(displayTexture === undefined)
@@ -83,19 +120,41 @@ function initImagesAndVideos()
 		var thumbnail = new THREE.Mesh(
 			everythingGeometry,
 			new THREE.MeshBasicMaterial({depthTest:false,map:thumbnailTexture}) );
-		scene.add(thumbnail)
+		thumbnails.push(thumbnail)
 		mouseables.push(thumbnail)
 		thumbnail.scale.set( width, width, 1 )
 
-		thumbnail.position.y = AUDIENCE_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0 * 1.02 + 0.5 * width;
-		var numWeCanSqueezeIn = AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 * 2 / width;
-		var rowPosition = i;
-		if( rowPosition >= numWeCanSqueezeIn )
+		thumbnail.reposition = function(effectiveIndex)
 		{
-			rowPosition -= numWeCanSqueezeIn
-			thumbnail.position.y *= -1
+			console.log(effectiveIndex)
+			thumbnail.position.y = AUDIENCE_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0 * 1.02 + 0.5 * width;
+			var numWeCanSqueezeIn = AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 * 2 / width;
+
+			var rowPosition = effectiveIndex;
+			if( rowPosition >= numWeCanSqueezeIn )
+			{
+				rowPosition -= numWeCanSqueezeIn
+				thumbnail.position.y *= -1 // will need more lines eventually
+			}
+			thumbnail.position.x = (rowPosition - (numWeCanSqueezeIn-1)/2) * width;
+
+			camera.updateMatrixWorld()
+			thumbnail.position.z = 0
+			camera.worldToLocal(thumbnail.position)
+			camera.add(thumbnail)
+
+			for(var j = 0; j < thumbnails.length; j++)
+			{
+				if(thumbnails[j] === thumbnail) continue;
+
+				if(thumbnails[j].position.distanceTo(thumbnail.position) < 0.0001)
+				{
+					this.reposition(effectiveIndex+1);
+					break;
+				}
+			}
 		}
-		thumbnail.position.x = (rowPosition - (numWeCanSqueezeIn-1)/2) * width;
+		thumbnail.reposition( i )
 
 		thumbnail.onClick = function()
 		{
@@ -135,6 +194,8 @@ function initImagesAndVideos()
 		video.muted = true
 		video.style = "display:none"
 		video.src = "./data/textures/" + textureFileNames[i]
+		video.load()
+		video.crossOrigin = 'anonymous';
 
 		var videoImage = document.createElement( 'canvas' );
 		var videoTexture = new THREE.Texture( videoImage );
@@ -162,6 +223,7 @@ function initImagesAndVideos()
 	function loadVideo(i)
 	{
 		var displayTexture = VideoTexture(i)
+
 		var thumbnailTexture = VideoTexture(i)
 		thumbnailTexture.video.currentTime = 0.05; //first frame is often no good
 
@@ -183,8 +245,8 @@ function initImagesAndVideos()
 			var intersections = mouse.rayCaster.intersectObject( thumbnail ); //we're changing the name of that...
 			if( intersections.length !== 0 )
 			{
-				var frameLimitLeft =  thumbnail.geometry.vertices[0].clone().applyMatrix4( thumbnail.matrix ).x;
-				var frameLimitRight = thumbnail.geometry.vertices[1].clone().applyMatrix4( thumbnail.matrix ).x;
+				var frameLimitLeft =  thumbnail.geometry.vertices[0].clone().applyMatrix4( thumbnail.matrixWorld ).x;
+				var frameLimitRight = thumbnail.geometry.vertices[1].clone().applyMatrix4( thumbnail.matrixWorld ).x;
 				var hoveredTime = thumbnailTexture.video.duration * (intersections[0].point.x - frameLimitLeft) / (frameLimitRight-frameLimitLeft)
 
 				//we check because currentTime needs a chance to get set. Also, useful looping effect

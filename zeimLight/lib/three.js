@@ -26157,7 +26157,7 @@
 	TubeGeometry.prototype.constructor = TubeGeometry;
 
 	// TubeBufferGeometry
-
+	
 	function TubeBufferGeometry( path, tubularSegments, radius, radialSegments, closed ) {
 
 		BufferGeometry.call( this );
@@ -26214,6 +26214,8 @@
 
 		// functions
 
+
+
 		function generateBufferData() {
 
 			for ( i = 0; i < tubularSegments; i ++ ) {
@@ -26221,6 +26223,7 @@
 				generateSegment( i );
 
 			}
+			console.log(normals.length, 3 * tubularSegments * radialSegments)
 
 			// if the geometry is not closed, generate the last row of vertices and normals
 			// at the regular position on the given path
@@ -26268,6 +26271,9 @@
 				normal.normalize();
 
 				normals.push( normal.x, normal.y, normal.z );
+				// normals[(i*radialSegments+j)*3+0] = normal.x
+				// normals[(i*radialSegments+j)*3+0] = normal.y
+				// normals[(i*radialSegments+j)*3+0] = normal.z
 
 				// vertex
 

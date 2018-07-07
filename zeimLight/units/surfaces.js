@@ -64,7 +64,7 @@ function initSurfaces()
 
 	{
 		var radius = 0.45;
-		surfaces.spherical = new THREE.Mesh(new THREE.EfficientSphereGeometry(0.45,4), surfaceMaterial);
+		surfaces.spherical = new THREE.Mesh(new THREE.EfficientSphereGeometry(0.3,4), surfaceMaterial);
 		surfaces.spherical.closestPointToPoint = function(ambientPoint)
 		{
 			return ambientPoint.clone().setLength(radius)
@@ -185,7 +185,7 @@ function MakeToroidalSurfaces(surfaces)
 			lowestVertexIndex + 3 * sq(geometry.verticesWide), geometry);
 	}
 
-	function makeToroidalSurface(arms)
+	function makeHandleBody(arms)
 	{
 		var newSurface = new THREE.Mesh(new THREE.Geometry(), s3SurfaceMaterial );
 		newSurface.geometry.verticesWide = 60;
@@ -227,23 +227,26 @@ function MakeToroidalSurfaces(surfaces)
 		}
 		newSurface.deriveVertexPositions()
 
-		newSurface.update = function()
-		{
-			if(mouse.clicking && mouse.lastClickedObject === null)
-			{
-				var rotationAmount = mouse.ray.direction.angleTo(mouse.previousRay.direction) * 12
-				var rotationAxis = mouse.ray.direction.clone().cross(mouse.previousRay.direction);
-				rotationAxis.applyQuaternion(this.quaternion.clone().inverse()).normalize();
-				this.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAmount))
-			}
+		// newSurface.update = function()
+		// {
+		// 	if(mouse.clicking && mouse.lastClickedObject === null)
+		// 	{
+		// 		var rotationAmount = mouse.ray.direction.angleTo(mouse.previousRay.direction) * 12
+		// 		var rotationAxis = mouse.ray.direction.clone().cross(mouse.previousRay.direction);
+		// 		rotationAxis.applyQuaternion(this.quaternion.clone().inverse()).normalize();
+		// 		this.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAmount))
 
-			// var timeScaled = frameCount / 1000;
-			// projectionOriginAsQuaternion.x = Math.sin( timeScaled )
-			// projectionOriginAsQuaternion.w = Math.cos( timeScaled )
-			// updateProjectionSetup()
 
-			// newSurface.deriveVertexPositions()
-		}
+		// 	}
+
+		// 	var timeScaled = frameCount / 1000;
+		// 	projectionOriginAsQuaternion.x = Math.sin( timeScaled )
+		// 	projectionOriginAsQuaternion.w = Math.cos( timeScaled )
+		// 	updateProjectionSetup()
+
+		// 	newSurface.deriveVertexPositions()
+		// }
+		newSurface.geometry.applyMatrix(new THREE.Matrix4().makeScale(0.6,0.6,0.6))
 		return newSurface;
 	}
 
@@ -275,7 +278,7 @@ function MakeToroidalSurfaces(surfaces)
 			}
 		}
 
-		surfaces["genus"+(numArms-1).toString()] = makeToroidalSurface(arms);
+		surfaces["genus"+(numArms-1).toString()] = makeHandleBody(arms);
 	}
 
 	{
@@ -336,7 +339,7 @@ function MakeToroidalSurfaces(surfaces)
 		// 	arms[i].armSideCenters[moduloWithNegatives(i*2+2,numArms*2)],
 		// }
 
-		// surfaces.experimental = makeToroidalSurface(arms);
+		// surfaces.experimental = makeHandleBody(arms);
 	}
 }
 

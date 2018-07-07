@@ -1,97 +1,74 @@
-function initCameraAndRendererResizeSystemAndCameraRepresentation(renderer)
+function initCameraAndRendererResizeSystem(renderer)
 {
-	{
-		var backwardExtension = 0.4;
-		var box = new THREE.Mesh( 
-			new THREE.BoxGeometry(2*AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0,2*AUDIENCE_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0,backwardExtension),
-			new THREE.MeshStandardMaterial({side:THREE.BackSide, vertexColors:THREE.FaceColors})
-		);
-		box.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-backwardExtension/2))
-		for(var i = 0; i< box.geometry.faces.length; i++)
-		{
-			if(i === 0 || i === 1)
-			{
-				box.geometry.faces[i].color.setHex(0x6964D0)
-			}
-			else if(i === 2 || i === 3)
-			{
-				box.geometry.faces[i].color.setHex(0xCD6166)
-			}
-			else
-			{
-				box.geometry.faces[i].color.setHex(0xFFFFFF)
-			}
-		}
-		box.material.metalness = 0.1;
-		box.material.roughness = 0.2;
-		box.receiveShadow = true;
-		//you only see the back half
-		scene.add(box)
+	var cameraDestinations = [1.27,0.3]
+	var cameraDestinationIndex;
+	var zoomT;
 
-		var pointLight = new THREE.PointLight(0xFFFFFF, 0.4, 5.3);
-		pointLight.shadow.camera.far = 10;
-		pointLight.shadow.camera.near = 0.01;
-		pointLight.shadow.mapSize.width = 1024;
-		pointLight.shadow.mapSize.height = pointLight.shadow.mapSize.width;
-		pointLight.castShadow = true;
-		pointLight.position.copy(box.geometry.vertices[3])
-		pointLight.position.negate().multiplyScalar(0.6);
-		box.add( pointLight );
-
-		scene.add( new THREE.AmbientLight( 0xFFFFFF, 0.7 ) );
-		renderer.shadowMap.enabled = true;
-		renderer.shadowMap.type = THREE.BasicShadowMap;
-	}
-
-	
-	{
-		function respondToResize() 
-		{
-			console.log( "Renderer dimensions: ", window.innerWidth, window.innerHeight )
-			renderer.setSize( window.innerWidth, window.innerHeight );
-			camera.aspect = window.innerWidth / window.innerHeight;
-
-			var audienceCenterToFramePixels = 640;
-			var audienceHorizontalProportion = audienceCenterToFramePixels / (window.innerWidth*0.5*window.devicePixelRatio)
-			var centerToFrameDistance = AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 / audienceHorizontalProportion
-
-			var horizontalFov = fovGivenCenterToFrameDistance( centerToFrameDistance, camera.position.z );
-			camera.fov = otherFov( horizontalFov, camera.aspect, false );
-			camera.updateProjectionMatrix();
-		}
-
-		camera.position.z = 1;
-		respondToResize();
-		window.addEventListener( 'resize', respondToResize, false );
-	}
-
-	var cameraDestination = 1;
-	camera.position.z = cameraDestination;
 	bindButton( "space", function()
 	{
-		if( cameraDestination === 1 )
+		cameraDestinationIndex = 1 - cameraDestinationIndex
+		zoomT = 0;
+	}, "Zooms in and out" )
+	objectsToBeUpdated.push(camera)
+
+	function smoothTween(start, end, t)
+	{
+		if(t < 0.5)
 		{
-			cameraDestination = 0.3
+			var areaUnderVelocityGraph = sq(t) / 2
 		}
 		else
 		{
-			cameraDestination = 1
+			var displacementFromHalf = t - 0.5;
+			var extraArea = displacementFromHalf / 2 - sq(displacementFromHalf) / 2
+			var areaUnderVelocityGraph = 1 / 8 + extraArea;
 		}
-	}, "Zooms in and out" )
-	objectsToBeUpdated.push(camera)
+		var scaledToMakeUnitIntegral1 = areaUnderVelocityGraph * 4;
+
+		return start + scaledToMakeUnitIntegral1 * (end-start);
+	}
 	camera.update = function()
 	{
-		this.position.z += (cameraDestination-this.position.z) * 0.1
+		zoomT += 0.019;
+		zoomT = clamp(zoomT,0,1)
+		this.position.z = smoothTween(cameraDestinations[1-cameraDestinationIndex],cameraDestinations[cameraDestinationIndex],zoomT)
 	}
+
+	var audienceScreenIndicator = new THREE.Mesh(new THREE.RingBufferGeometry(Math.sqrt(2), Math.sqrt(2) + 0.01, 4, 1, TAU / 8), new THREE.MeshBasicMaterial({color:0xFF0000}));
+	camera.add(audienceScreenIndicator)
+	audienceScreenIndicator.position.z = -camera.near-0.0001
+
+	function respondToResize() 
+	{
+		console.log( "Renderer dimensions: ", window.innerWidth, window.innerHeight )
+		renderer.setSize( window.innerWidth, window.innerHeight );
+		camera.aspect = window.innerWidth / window.innerHeight;
+
+		cameraDestinationIndex = 0;
+		camera.position.z = cameraDestinations[cameraDestinationIndex]
+		zoomT = 1;
+
+		var audienceProportionOfWindowWidth = getAudienceProportionOfWindowWidth();
+		var horizontalCenterToFrameDistance = AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 / audienceProportionOfWindowWidth
+
+		var horizontalFov = fovGivenCenterToFrameDistance( horizontalCenterToFrameDistance, camera.position.z );
+		camera.fov = otherFov(horizontalFov,camera.aspect, false)
+		camera.updateProjectionMatrix();
+
+		audienceScreenIndicator.scale.x = centerToFrameDistance(horizontalFov, audienceScreenIndicator.position.z) * audienceProportionOfWindowWidth
+		audienceScreenIndicator.scale.y = audienceScreenIndicator.scale.x / AUDIENCE_ASPECT_RATIO;
+	}
+	respondToResize();
+	window.addEventListener( 'resize', respondToResize, false );
 }
 
-function centerToFrameDistance(fov, distance)
+function centerToFrameDistance(fov, cameraDistance)
 {
-	return Math.tan( fov / 2 * (TAU/360) ) * distance;
+	return Math.tan( fov / 2 * (TAU/360) ) * cameraDistance;
 }
-function fovGivenCenterToFrameDistance(centerToFrame, distance)
+function fovGivenCenterToFrameDistance(centerToFrame, cameraDistance)
 {
-	return 2 * Math.atan(centerToFrame / distance) * (360/TAU);
+	return 2 * Math.atan(centerToFrame / cameraDistance) * (360/TAU);
 }
 
 function otherFov(inputFov,aspectRatio,inputIsVertical)
@@ -108,4 +85,9 @@ function otherFov(inputFov,aspectRatio,inputIsVertical)
 	}
 	var outputFov = fovGivenCenterToFrameDistance(centerToFrameOutput,1);
 	return outputFov;
+}
+
+function getAudienceProportionOfWindowWidth()
+{
+	return AUDIENCE_CENTER_TO_SIDE_OF_FRAME_PIXELS / (window.innerWidth*0.5*window.devicePixelRatio)
 }

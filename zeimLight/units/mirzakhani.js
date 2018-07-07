@@ -1,7 +1,6 @@
 'use strict';
 /*
 	TODO
-		Get images to illustrate everything, put them in a powerpoint
 		Test marking system
 		Compression...
 		Set up markings for all objects
@@ -106,20 +105,22 @@ function initConditionsVisualization()
 }
 
 
-
 function initMirzakhani()
 {
-	initGraphTheory();
-	return;
+	// initGraphTheory();
+	// return;
 	
 	var surfaces = initSurfaces();
+
+	var movementSpeed = 0.01;
 
 	/*
 	TODO
 		Put a character on the surface that you move, and that shoots
 			Click outside the surface to move in that direction
 			Click inside it to shoot from current location
-			Give them limits and targets. Multitouch, or eight way, or keyboard and mouse. Also: an enemy that shoots a bunch at you, but you lure it into shooting ones that will not be on simple geodesics, i.e. they will die.
+			Give them limits and targets. Multitouch, or eight way, or keyboard and mouse.
+			Also: an enemy that shoots a bunch at you, but you lure it into shooting ones that will not be on simple geodesics, i.e. they will die.
 		should have a "machine gun" shooting in direction of mouse diff
 
 		You are playing snake / shooting the things. do need the self-intersection code probably
@@ -132,9 +133,6 @@ function initMirzakhani()
 		Making the trail collide
 			closestDistanceBetweenLineSegments()
 			What's the radii?
-
-	Maybe todo
-		direction should be gotten by intersecting mouse ray with tangent plane
 	*/
 	//maybe two projectiles sent in opposite directions?
 	{
@@ -142,6 +140,7 @@ function initMirzakhani()
 		{
 			var blackMaterial = new THREE.MeshPhongMaterial({color:0x000000})
 			var carapace = new THREE.Mesh(new THREE.SphereBufferGeometry(1,8,16,0,TAU/2), blackMaterial)
+			carapace.castShadow = true
 			var headVerticalProportion = 0.243;
 			var wingGap = 0.02;
 			var shellLeft = new THREE.Mesh(new THREE.SphereBufferGeometry(1.04,8,16,
@@ -295,7 +294,7 @@ function initMirzakhani()
 					this.quaternion.premultiply( new THREE.Quaternion().setFromUnitVectors(zUnit.clone().applyQuaternion(this.quaternion),newUp) );
 
 					var worldZ = this.position.clone().applyMatrix4(this.parent.matrix).z;
-					var lookTowards = mouse.rayIntersectionWithZPlaneInCameraSpace(worldZ);
+					var lookTowards = mouse.rayIntersectionWithZPlane(worldZ);
 					this.parent.worldToLocal(lookTowards)
 					lookTowards.sub(this.position)
 					lookTowards.projectOnPlane(newUp);
@@ -306,8 +305,7 @@ function initMirzakhani()
 				{
 					if(mouse.oldClicking)
 					{
-						var maxSpeed = 0.01;
-						this.speed = maxSpeed;
+						this.speed = movementSpeed;
 					}
 				}
 			}
@@ -374,24 +372,42 @@ function initMirzakhani()
 		}
 	}
 
-	var chosenSurface = surfaces.genus2;
+	bindButton( "up", function()
+	{
+		console.log("yo")
+		if(this.speed === movementSpeed)
+		{
+			this.speed *= 1.9;
+		}
+		movementSpeed *= 1.9
+	}, "increases projectile speed" )
+	bindButton( "down", function()
+	{
+		if(this.speed === movementSpeed)
+		{
+			this.speed /= 1.9;
+		}
+		movementSpeed /= 1.9
+	}, "decreases projectile speed" )
+
+	var chosenSurface = surfaces.genus2
 	if(chosenSurface.update === undefined)
 	{
 		chosenSurface.update = function()
 		{
-			// if(mouse.clicking )
-			// {
-			// 	var rotationAmount = mouse.ray.direction.angleTo(mouse.previousRay.direction) * 12
-			// 	var rotationAxis = mouse.ray.direction.clone().cross(mouse.previousRay.direction);
-			// 	rotationAxis.applyQuaternion(this.quaternion.clone().inverse()).normalize();
-			// 	this.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAmount))
-			// }
+			if(mouse.clicking && mouse.lastClickedObject === null )
+			{
+				var rotationAmount = mouse.rayCaster.ray.direction.angleTo(mouse.previousRay.direction) * 2
+				var rotationAxis = mouse.rayCaster.ray.direction.clone().cross(mouse.previousRay.direction);
+				rotationAxis.applyQuaternion(this.quaternion.clone().inverse()).normalize();
+				this.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAmount))
+			}
 		}
 	}
 	objectsToBeUpdated.push( chosenSurface )
 	scene.add(chosenSurface)
+	chosenSurface.castShadow = true
 	mouseables.push(chosenSurface)
-	chosenSurface.position.z = -10;
 	chosenSurface.add(
 		projectile,
 		trail
