@@ -132,12 +132,43 @@ function initButtons()
 	}
 
 	initCameraAndRendererResizeSystem(renderer);
-	initSurroundings()
-
+	var stage = initSurroundings();
 	initMouse();
-	initMirzakhani();
+
+	/*
+		They are down there
+		There are panels at their positions
+		Click them (i.e. the panel surrounding them) and they'll tween in
+		Click the panel again and they tween back
+		If there's already a bunch in the scene, they tween to nice positions too
+
+		We're mostly thinking about pre-prepared graphs here.
+		How to get them out again?
+	*/
 
 	initImagesAndVideos();
+	{
+		var conditionsVisualization = initConditionsVisualization()
+		conditionsVisualization.position.y = -1
+		scene.add(conditionsVisualization)
+
+		initGraphTheory();
+
+		var panelMaterial = new THREE.MeshBasicMaterial({color:0xCCCCCC})
+		for(var i = 0; i < 9; i++)
+		{
+			if( i===1 || i === 4)
+			{
+				continue
+			}
+			var newPanel = new THREE.Mesh(stage.geometry, panelMaterial)
+			newPanel.position.x = ( -1 + i % 3 ) * 2
+			newPanel.position.y = ( 1 - (i-i%3)/3 ) * 2 / AUDIENCE_ASPECT_RATIO
+			newPanel.scale.set(0.98,0.98,0)
+			console.log(newPanel.position)
+			scene.add(newPanel)
+		}
+	}
 
 	render();
 })();

@@ -86,20 +86,19 @@ function initConditionsVisualization()
 		return evenCondition(i,j,k) && weirdCondition(i,j,k) && divisibilityCondition(i,j,k);
 	}
 
-	var conditionsLattice = new THREE.Group()
-	// conditionsLattice.position.x = -0.5
-	scene.add(conditionsLattice)
+	var conditionsVisualization = new THREE.Group()
+	// conditionsVisualization.position.x = -0.5
 	var gridDimension = 21;
-	conditionsLattice.scale.setScalar(0.5 * 1/gridDimension)
+	conditionsVisualization.scale.setScalar(0.5 * 1/gridDimension)
 
 	var pointGeometry = new THREE.EfficientSphereGeometry(1)
 	var points = new THREE.Group()
-	conditionsLattice.add(points)
+	conditionsVisualization.add(points)
 	points.position.setScalar(-(gridDimension-1) / 2)
 	for(var i = 0; i < gridDimension; i++){
 	for(var j = i; j < gridDimension; j++){
 	for(var k = j; k < gridDimension; k++){
-		var newPoint = new THREE.Mesh(pointGeometry, new THREE.MeshPhongMaterial({color:0x000000}))
+		var newPoint = new THREE.Mesh(pointGeometry, new THREE.MeshPhongMaterial({color:0x333333}))
 		newPoint.position.set(i,j,k);
 		newPoint.castShadow = true
 		if( mirzakhaniConditions(i,j,k) )
@@ -116,8 +115,8 @@ function initConditionsVisualization()
 	}
 	}
 
-	objectsToBeUpdated.push(conditionsLattice)
-	conditionsLattice.update = function()
+	objectsToBeUpdated.push(conditionsVisualization)
+	conditionsVisualization.update = function()
 	{
 		if(mouse.clicking && mouse.lastClickedObject === null )
 		{
@@ -172,15 +171,12 @@ function initConditionsVisualization()
 	);
 
 	//probably you want inflation AND color change
+	return conditionsVisualization
 }
 
 
 function initMirzakhani()
 {
-	initConditionsVisualization()
-	return;
-	// // initGraphTheory();
-	
 	var surfaces = initSurfaces();
 
 	var movementSpeed = 0.01;

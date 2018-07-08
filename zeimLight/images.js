@@ -166,7 +166,7 @@ function initImagesAndVideos()
 		{
 			displayTexture = thumbnailTexture;
 		}
-		var width = 0.15;
+		var width = AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 * 2 / textureFileNames.length;
 		var thumbnail = new THREE.Mesh(
 			everythingGeometry,
 			new THREE.MeshBasicMaterial({depthTest:false,map:thumbnailTexture}) );
