@@ -15,6 +15,7 @@
 			They cut S3 into two equal pieces. 
 			One way to show the self duality is to make two small copies of them with nodes in slightly different places
 		https://arxiv.org/pdf/1307.6938.pdf
+		It is weird enough just to go inside a surface, it does not look how you expect
 */
 
 function lerpSurfacesMadeOfPatchworks(from,To,t)
@@ -188,7 +189,7 @@ function MakeToroidalSurfaces(surfaces)
 	function makeHandleBody(arms)
 	{
 		var newSurface = new THREE.Mesh(new THREE.Geometry(), s3SurfaceMaterial );
-		newSurface.geometry.verticesWide = 60;
+		newSurface.geometry.verticesWide = 22;
 		newSurface.geometry.vertices.length = sq(newSurface.geometry.verticesWide) * 4 * arms.length;
 		for(var k = 0; k < arms.length * 4; k++)
 		{
@@ -266,9 +267,9 @@ function MakeToroidalSurfaces(surfaces)
 		for(var i = 0; i < numArms; i++)
 		{
 			arms[i] = {
-				nodeLTop:		new THREE.Quaternion(1,0,0,0),
+				nodeLTop:	new THREE.Quaternion(1,0,0,0),
 				nodeLBot:	new THREE.Quaternion(0,0,0,1),
-				nodeRTop:		new THREE.Quaternion(-1,0,0,0),
+				nodeRTop:	new THREE.Quaternion(-1,0,0,0),
 				nodeRBot:	new THREE.Quaternion(0,0,0,-1),
 
 				nearbyArmASideCenter: 	armSideCenters[moduloWithNegatives(i*2-1,numArms*2)],

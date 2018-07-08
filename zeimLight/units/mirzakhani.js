@@ -1,19 +1,17 @@
 'use strict';
 /*
 	TODO
+		Stick the things - graph, conditions lattice, the surfaces - around the frame the
+
 		If nothing else, do trail collision
-		Bind button to stereographic projection. Also visibox
+		Bind button to stereographic projection location. Also visibox
 		Urrrrrgh it'd be better with a single renderer in the middle of a webpage
 		Send to mum for music
 
-	Picture stuff
-		Want to be able to ctrl+v, after copying image link, and picture appears
-		Check some similar videos to see what movements they do.
-		Just lay them out horizontally in space
-		Spacebar or whatever for you to "flick to next one"
 
 	Script outline. 4 things
 		As a teenager, she won a prize technically worth infinity dollars
+		Didn’t like maths when she was at school
 		Ridiculously modest
 			https://www.youtube.com/watch?v=TxbE6mkYUAg her drawing on board
 			First female fields medallist - also first Iranian + Muslim! There's a tribute to her in farsi in the description
@@ -23,7 +21,6 @@
 			Towards the end of her life she worked at Harvard and Stanford
 			Her parents couldn't travel to US due to Trump's ban
 			She was considering not attending the ceremony due to sickness
-			Might also want some footage from her lectures
 		Her work is connected to big bang
 			"Chainsaw"
 			Snake
@@ -35,8 +32,6 @@
 			Long rolls of parchment, on the floor
 			That's what mathematics really is - show cool animations
 			Hey, maybe that's what she was!
-			Wired has footage of this
-			Daughter on lap pic
 			When she received her fields medal at the age of 37, she already knew she had terminal cancer
 		She once survived a bus crash
 
@@ -65,17 +60,10 @@
 		Hyperboloid
 */
 
+var mirzakhaniConditions;
+
 function initConditionsVisualization()
 {
-	var gridDimension = 20;
-	for(var i = 0; i < gridDimension; i++){
-	for(var j = 0; j < gridDimension; j++){
-	for(var k = 0; k < gridDimension; k++){
-		(i,j,k);
-	}
-	}
-	}
-
 	function evenCondition(i,j,k)
 	{
 		var allEven = ( i%2 === 0 && j%2 === 0 && k%2 === 0 );
@@ -93,13 +81,105 @@ function initConditionsVisualization()
 		var r = array[0], s = array[1], t = array[2];
 		return t <= 4*r*s/(r+s);
 	}
+	mirzakhaniConditions = function(i,j,k)
+	{
+		return evenCondition(i,j,k) && weirdCondition(i,j,k) && divisibilityCondition(i,j,k);
+	}
+
+	var conditionsLattice = new THREE.Group()
+	// conditionsLattice.position.x = -0.5
+	scene.add(conditionsLattice)
+	var gridDimension = 21;
+	conditionsLattice.scale.setScalar(0.5 * 1/gridDimension)
+
+	var pointGeometry = new THREE.EfficientSphereGeometry(1)
+	var points = new THREE.Group()
+	conditionsLattice.add(points)
+	points.position.setScalar(-(gridDimension-1) / 2)
+	for(var i = 0; i < gridDimension; i++){
+	for(var j = i; j < gridDimension; j++){
+	for(var k = j; k < gridDimension; k++){
+		var newPoint = new THREE.Mesh(pointGeometry, new THREE.MeshPhongMaterial({color:0x000000}))
+		newPoint.position.set(i,j,k);
+		newPoint.castShadow = true
+		if( mirzakhaniConditions(i,j,k) )
+		{
+			newPoint.scale.setScalar(0.3)
+		}
+		else
+		{
+			newPoint.scale.setScalar(0.3)
+			// newPoint.visible = false
+		}
+		points.add(newPoint)
+	}
+	}
+	}
+
+	objectsToBeUpdated.push(conditionsLattice)
+	conditionsLattice.update = function()
+	{
+		if(mouse.clicking && mouse.lastClickedObject === null )
+		{
+			mouse.rotateObjectByGesture(this)
+		}
+	}
+
+	function toggleCondition(conditionFunction,col)
+	{
+		for(var i = 0, il = points.children.length; i < il; i++)
+		{
+			if(conditionFunction(points.children[i].position.x,points.children[i].position.y,points.children[i].position.z))
+			{
+				points.children[i].material.color[col] = 1-points.children[i].material.color[col]
+			}
+		}
+	}
+
+	bindButton("1",
+		function()
+		{
+			toggleCondition(evenCondition,"r")
+		},
+		"toggle visual of even condition"
+	);
+	bindButton("2",
+		function()
+		{
+			toggleCondition(divisibilityCondition,"g")
+		},
+		"toggle visual of divisibility condition"
+	);
+	bindButton("3",
+		function()
+		{
+			toggleCondition(weirdCondition,"b")
+		},
+		"toggle visual of weird condition"
+	);
+	bindButton("4",
+		function()
+		{
+			for( var i = 0, il = points.children.length; i < il; i++ )
+			{
+				if( !mirzakhaniConditions(points.children[i].position.x,points.children[i].position.y,points.children[i].position.z) )
+				{
+					points.children[i].visible = !points.children[i].visible;
+				}
+			}
+		},
+		"toggle visual of non mirzakhani points"
+	);
+
+	//probably you want inflation AND color change
 }
 
 
 function initMirzakhani()
 {
-	// initGraphTheory();
-	// return;
+	initConditionsVisualization()
+	return;
+	// // initGraphTheory();
 	
 	var surfaces = initSurfaces();
 
@@ -176,7 +256,7 @@ function initMirzakhani()
 		
 		{
 			var trailCurrentSegment = 0;
-			var trailSegments = 600;
+			var trailSegments = 60;
 			var trail;
 			var trailThickness = 0.003;
 			var trailCylinderSides = 16;
@@ -343,21 +423,25 @@ function initMirzakhani()
 						trailCurrentSegment = 0;
 					}
 
-					//here is where you do trail collision. would be better with a three.curve
 					//also closure check
-					//but since you can barely do any geodesics =/
-					// for(var i = 0, il = trail.points.length; i < il; i++)
-					// {
-					// 	if( i === trailCurrentSegment )
-					// 	{
-					// 		continue;
-					// 	}
-					// 	if( closestDistanceBetweenLineSegments(
-					// 		trail.points[ trailCurrentSegment ],
-					// 		trail.points[ moduloWithNegatives(trailCurrentSegment-1,trailSegments) ],
+					for(var i = 0, il = trail.points.length; i < il; i++)
+					{
+						if( i === trailCurrentSegment )
+						{
+							continue;
+						}
 
-					// 		) )
-					// }
+						if( trailThickness / 10 > closestDistanceBetweenLineSegments(
+							trail.points[ trailCurrentSegment ],
+							trail.points[ moduloWithNegatives(trailCurrentSegment-1,trailSegments) ],
+							trail.points[ i ],
+							trail.points[ moduloWithNegatives(i-1,trailSegments) ]
+							) )
+						{
+							//lots of false positives. And shouldn't radius be in there???
+							console.log("cross")
+						}
+					}
 				}
 			}
 		}
@@ -365,20 +449,19 @@ function initMirzakhani()
 
 	bindButton( "up", function()
 	{
-		console.log("yo")
-		if(this.speed === movementSpeed)
+		if(projectile.speed === movementSpeed)
 		{
-			this.speed *= 1.9;
+			projectile.speed *= 1.2;
 		}
-		movementSpeed *= 1.9
+		movementSpeed *= 1.2
 	}, "increases projectile speed" )
 	bindButton( "down", function()
 	{
-		if(this.speed === movementSpeed)
+		if(projectile.speed === movementSpeed)
 		{
-			this.speed /= 1.9;
+			projectile.speed /= 1.2;
 		}
-		movementSpeed /= 1.9
+		movementSpeed /= 1.2
 	}, "decreases projectile speed" )
 
 	var chosenSurface = surfaces.genus2
@@ -388,10 +471,7 @@ function initMirzakhani()
 		{
 			if(mouse.clicking && mouse.lastClickedObject === null )
 			{
-				var rotationAmount = mouse.rayCaster.ray.direction.angleTo(mouse.previousRay.direction) * 2
-				var rotationAxis = mouse.rayCaster.ray.direction.clone().cross(mouse.previousRay.direction);
-				rotationAxis.applyQuaternion(this.quaternion.clone().inverse()).normalize();
-				this.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAmount))
+				mouse.rotateObjectByGesture(this)
 			}
 		}
 	}

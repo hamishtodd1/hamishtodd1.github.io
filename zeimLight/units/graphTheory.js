@@ -1,9 +1,6 @@
 'use strict';
 /*
-	TODO
-		display method for partitioning
-
-	Introducing n-partite graphs (without words!)
+	Introducing n-partite graphs
 		Assemble the n sets on a circle
 		Show a bunch of examples
 		Want to hover your mouse over the partitions 
@@ -252,16 +249,6 @@ function initGraphTheory()
 		{
 			console.error("no.")
 		}
-	}
-	function mirzakhaniConditions(r,s,t)
-	{
-		console.assert( r<=s && s<=t )
-		return 	(
-					(  r % 2  &&  s % 2  &&  t % 2 ) ||
-					(!(r % 2) &&!(s % 2) &&!(t % 2))
-				) &&
-				r*s + s*t + t*r % 5 &&
-				t <= 4 * r * s / (r+s)
 	}
 	function findFiveCyclesInTripartiteGraph()
 	{

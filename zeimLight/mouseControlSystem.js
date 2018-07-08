@@ -38,14 +38,29 @@ function initMouse()
 		oldClicking: false,
 		justMoved: false,
 
-		rayCaster: new THREE.Raycaster(), //don't use too much if clicking is not true - touchscreens. There are other ways to do things, and many people will be on phone
+		//don't use too much if clicking is not true - touchscreens. There are other ways to do things, and many people will be on phone
+		rayCaster: new THREE.Raycaster()
 	};
+	mouse.rayCaster.setFromCamera(asynchronous.normalizedDevicePosition, camera)
 	mouse.previousRay = mouse.rayCaster.ray.clone()
 
 	mouse.rayIntersectionWithZPlane = function(z)
 	{
 		var zPlane = new THREE.Plane(zUnit,-z)
 		return mouse.rayCaster.ray.intersectPlane(zPlane)
+	}
+
+	mouse.rotateObjectByGesture = function(object)
+	{
+		var rotationAmount = mouse.rayCaster.ray.direction.angleTo(mouse.previousRay.direction) * 2
+		// console.log(mouse.rayCaster.ray.direction,mouse.previousRay.direction)
+		if(rotationAmount === 0)
+		{
+			return
+		}
+		var rotationAxis = mouse.rayCaster.ray.direction.clone().cross(mouse.previousRay.direction);
+		rotationAxis.applyQuaternion(object.quaternion.clone().inverse()).normalize();
+		object.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAmount))
 	}
 
 	mouse.updateFromAsyncAndCheckClicks = function()

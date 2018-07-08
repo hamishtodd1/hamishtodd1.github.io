@@ -1,6 +1,6 @@
 //from https://stackoverflow.com/questions/2824478/shortest-distance-between-two-line-segments
 
-function closestDistanceBetweenLineSegments()
+function closestDistanceBetweenLineSegments(a0,a1,b0,b1)
 {
 	return closestDistanceBetweenLines(
 		a0, a1,
@@ -82,7 +82,7 @@ function closestDistanceBetweenLines(
 
 	var t0 = det0 / denom;
 	var t1 = det1 / denom;
-	console.log(det0,det1)
+	// console.log(det0,det1)
 
 	var pA = a0.clone().add(_A.clone().multiplyScalar(t0))
 	var pB = b0.clone().add(_B.clone().multiplyScalar(t1))

@@ -85,7 +85,6 @@ function initImagesAndVideos()
 				progressTracker.position.copy( thumbnail.position )
 				progressTracker.position.x = thumbnail.getTimeAt( this.material.map.video.currentTime, true )
 				progressTracker.scale.y = thumbnail.scale.y
-				console.log(progressTracker.visible)
 			}
 		}
 		else
@@ -177,7 +176,6 @@ function initImagesAndVideos()
 
 		thumbnail.reposition = function(effectiveIndex)
 		{
-			console.log(effectiveIndex)
 			thumbnail.position.y = AUDIENCE_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0 * 1.02 + 0.5 * width;
 			var numWeCanSqueezeIn = AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 * 2 / width;
 
