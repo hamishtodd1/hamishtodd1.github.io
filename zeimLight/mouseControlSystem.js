@@ -27,16 +27,22 @@ function initMouse()
 	}
 
 	var asynchronous = {
-		normalizedDevicePosition: new THREE.Vector2(), //top right is 1,1, bottom left is -1,-1
 		clicking: false,
+		rightClicking:false,
 		justMoved: false,
+
+		normalizedDevicePosition: new THREE.Vector2(), //top right is 1,1, bottom left is -1,-1
 	};
 
 	mouse = {
-		lastClickedObject: null,
 		clicking: false,
+		rightClicking: false,
 		oldClicking: false,
+		oldRightClicking: false,
 		justMoved: false,
+
+		lastClickedObject: null,
+		lastRightClickedObject:null,
 
 		//don't use too much if clicking is not true - touchscreens. There are other ways to do things, and many people will be on phone
 		rayCaster: new THREE.Raycaster()
@@ -66,35 +72,54 @@ function initMouse()
 	mouse.updateFromAsyncAndCheckClicks = function()
 	{
 		this.oldClicking = this.clicking;
-		this.clicking = asynchronous.clicking;
+		this.clicking = asynchronous.clicking
+		this.oldRightClicking = this.rightClicking;
+		this.rightClicking = asynchronous.rightClicking;
+
 		this.justMoved = asynchronous.justMoved;
 		asynchronous.justMoved = false;
 
 		mouse.previousRay.copy(mouse.rayCaster.ray);
 		mouse.rayCaster.setFromCamera( asynchronous.normalizedDevicePosition, camera );
 
-		var intersections = mouse.rayCaster.intersectObjects( mouseables ); //we're changing the name of that...
-		if( intersections.length !== 0 )
+		//"whileClicking"? Naaaaah, "update" keeps things in once place
+		//but clickedpoint should be in here.
+
+		var clicked = this.clicking && !this.oldClicking;
+		var rightClicked = asynchronous.rightClicking && !this.oldRightClicking;
+		if( clicked || rightClicked )
 		{
-			if(this.clicking )
+			var intersections = mouse.rayCaster.intersectObjects( mouseables );
+
+			if( intersections.length !== 0 )
 			{
-				if( !this.oldClicking )
+				if(clicked)
 				{
 					this.lastClickedObject = intersections[0].object;
 					if( intersections[0].object.onClick )
 					{
-						intersections[0].object.onClick(intersections[0].point);
+						intersections[0].object.onClick(intersections[0]);
+					}
+				}
+
+				if(rightClicked)
+				{
+					this.lastRightClickedObject = intersections[0].object;
+					if( intersections[0].object.onRightClick )
+					{
+						intersections[0].object.onRightClick(intersections[0]);
 					}
 				}
 			}
-		}
-		else
-		{
-			if(this.clicking )
+			else
 			{
-				if( !this.oldClicking )
+				if(clicked)
 				{
 					this.lastClickedObject = null;
+				}
+				if(rightClicked)
+				{
+					this.lastRightClickedObject = null;
 				}
 			}
 		}
@@ -120,12 +145,31 @@ function initMouse()
 
 	document.addEventListener( 'mousedown', function(event) 
 	{
-		asynchronous.clicking = true;
+		if(event.which === 1)
+		{
+			asynchronous.clicking = true;
+		}
+		if(event.which === 3)
+		{
+			asynchronous.rightClicking = true;
+		}
 	}, false );
 	document.addEventListener( 'mouseup', function(event) 
 	{
-		asynchronous.clicking = false;
+		if(event.which === 1)
+		{
+			asynchronous.clicking = false;
+		}
+		if(event.which === 3)
+		{
+			asynchronous.rightClicking = false;
+		}
 	}, false );
+
+	document.addEventListener('contextmenu', function(event)
+	{
+	    event.preventDefault()
+	}, false);
 }
 
 /*

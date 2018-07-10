@@ -238,6 +238,18 @@ function initGraphTheory()
 	}
 	// makeRandomGraph(14,20)
 
+	var warningSign = makeTextSign( "COULDN'T DECOMPOSE", false, false, false)
+	warningSign.position.y = 0.5
+	warningSign.scale.multiplyScalar(0.094)
+	scene.add(warningSign)
+	warningSign.material.transparent = true
+	warningSign.update = function()
+	{
+		this.material.opacity -= 0.08
+		this.material.opacity = clamp(this.material.opacity,0,1)
+	}
+	objectsToBeUpdated.push(warningSign)
+
 	function findNCyclesInKPartiteGraph(edgesInCycle)
 	{
 		console.log(partitions.length, edgesInCycle)
@@ -247,7 +259,7 @@ function initGraphTheory()
 		}
 		else
 		{
-			console.error("no.")
+			warningSign.material.opacity = 1
 		}
 	}
 	function findFiveCyclesInTripartiteGraph()
@@ -255,7 +267,7 @@ function initGraphTheory()
 		var r = partitions[0].length, s = partitions[1].length, t = partitions[2].length;
 		if( !mirzakhaniConditions(r,s,t) )
 		{
-			console.error("can't decompose")
+			warningSign.material.opacity = 1
 		}
 
 		var decomposition = [];

@@ -86,18 +86,47 @@ function initConditionsVisualization()
 		return evenCondition(i,j,k) && weirdCondition(i,j,k) && divisibilityCondition(i,j,k);
 	}
 
-	var conditionsVisualization = new THREE.Group()
-	// conditionsVisualization.position.x = -0.5
-	var gridDimension = 21;
+	var gridDimension = 14;
+	var conditionsVisualization = new THREE.Mesh(
+		new THREE.BoxGeometry(gridDimension,gridDimension,gridDimension), 
+		new THREE.MeshBasicMaterial({visible:false})
+	);
 	conditionsVisualization.scale.setScalar(0.5 * 1/gridDimension)
+
+	mouseables.push(conditionsVisualization)
+	var clickedPoint = new THREE.Vector3()
+	conditionsVisualization.onRightClick = function(intersectionInformation)
+	{
+		clickedPoint.copy( intersectionInformation.point )
+	}
+	objectsToBeUpdated.push(conditionsVisualization)
+	conditionsVisualization.update = function()
+	{
+		if(mouse.clicking)
+		{
+			if( mouse.lastClickedObject === this )
+			{
+				mouse.rotateObjectByGesture(this)
+			}
+		}
+		if( mouse.rightClicking )
+		{
+			if( mouse.lastRightClickedObject === this )
+			{
+				var newClickedPoint = mouse.rayIntersectionWithZPlane(clickedPoint.z)
+				this.position.sub(clickedPoint).add(newClickedPoint)
+				clickedPoint.copy(newClickedPoint)
+			}
+		}
+	}
 
 	var pointGeometry = new THREE.EfficientSphereGeometry(1)
 	var points = new THREE.Group()
 	conditionsVisualization.add(points)
 	points.position.setScalar(-(gridDimension-1) / 2)
-	for(var i = 0; i < gridDimension; i++){
-	for(var j = i; j < gridDimension; j++){
-	for(var k = j; k < gridDimension; k++){
+	for(var i = 1; i < gridDimension; i++){
+	for(var j = 1; j < gridDimension; j++){
+	for(var k = 1; k < gridDimension; k++){
 		var newPoint = new THREE.Mesh(pointGeometry, new THREE.MeshPhongMaterial({color:0x333333}))
 		newPoint.position.set(i,j,k);
 		newPoint.castShadow = true
@@ -113,15 +142,6 @@ function initConditionsVisualization()
 		points.add(newPoint)
 	}
 	}
-	}
-
-	objectsToBeUpdated.push(conditionsVisualization)
-	conditionsVisualization.update = function()
-	{
-		if(mouse.clicking && mouse.lastClickedObject === null )
-		{
-			mouse.rotateObjectByGesture(this)
-		}
 	}
 
 	function toggleCondition(conditionFunction,col)
@@ -338,6 +358,7 @@ function initMirzakhani()
 
 			this.parent.updateMatrixWorld()
 
+			//hmm, can do better than this. Then, maybe remove oldClicking?
 			if(mouse.lastClickedObject === this.parent)
 			{
 				if( mouse.clicking )

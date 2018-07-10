@@ -143,31 +143,32 @@ function initButtons()
 		If there's already a bunch in the scene, they tween to nice positions too
 
 		We're mostly thinking about pre-prepared graphs here.
-		How to get them out again?
+		Drag with right click
+
+		Two: side by side
+		Three: side by side by side
+		Four: Two and two
+		Five: Three on top, two on bottom
+
+		TODO
+			Sign saying "cannot decompose!"
+			Clicking lattice makes a graph
+			Drawing nodes
+			Drawing edges
+			visibox for surfaces
+			Just detect whether it's hit the trail's start. That's all you need for sphere
+			"Make complete graph" button (sensetive to partiteness)
 	*/
 
 	initImagesAndVideos();
 	{
 		var conditionsVisualization = initConditionsVisualization()
-		conditionsVisualization.position.y = -1
+		// conditionsVisualization.position.y = -1
 		scene.add(conditionsVisualization)
 
-		initGraphTheory();
+		// initGraphTheory();
 
-		var panelMaterial = new THREE.MeshBasicMaterial({color:0xCCCCCC})
-		for(var i = 0; i < 9; i++)
-		{
-			if( i===1 || i === 4)
-			{
-				continue
-			}
-			var newPanel = new THREE.Mesh(stage.geometry, panelMaterial)
-			newPanel.position.x = ( -1 + i % 3 ) * 2
-			newPanel.position.y = ( 1 - (i-i%3)/3 ) * 2 / AUDIENCE_ASPECT_RATIO
-			newPanel.scale.set(0.98,0.98,0)
-			console.log(newPanel.position)
-			scene.add(newPanel)
-		}
+		// initToyArrangement()
 	}
 
 	render();
