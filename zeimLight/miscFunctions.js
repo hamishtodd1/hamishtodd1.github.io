@@ -114,16 +114,6 @@ function getExtremeFunctionCallResult(array, functionName,lowest)
 	return index;
 }
 
-function pointCylinder(cylinderMesh, end)
-{
-	var endLocal = end.clone();
-	cylinderMesh.parent.worldToLocal(endLocal)
-	var startToEnd = endLocal.clone().sub(cylinderMesh.position);
-	cylinderMesh.scale.set(1,startToEnd.length(),1);
-	cylinderMesh.quaternion.setFromUnitVectors(yUnit,startToEnd.normalize());
-	cylinderMesh.quaternion.normalize();
-}
-
 function insertCylindernumbers(A,B, verticesArray, cylinderSides, arrayStartpoint, radius ) {
 	var aToB = new THREE.Vector3(B.x-A.x, B.y-A.y, B.z-A.z);
 	aToB.normalize();

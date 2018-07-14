@@ -9,7 +9,36 @@
 	TODO copy and paste to make a new one appear
 
 	You do need to convert all videos to power-of-2
+		Take the highest resolution
+		compress to the highest power of 2 beneath it
+
 */
+
+//Possibly this works as a bookmark. Might require an autohotkey F12 then copypaste
+// var videoUrls = ytplayer.config.args.adaptive_fmts
+// 	.split(',')
+// 	.map(item => item
+// 		.split('&')
+// 		.reduce((prev, curr) => (curr = curr.split('='),
+// 			Object.assign(prev, {[curr[0]]: decodeURIComponent(curr[1])})
+// 		), {})
+// 	).reduce((prev, curr) => Object.assign(prev, {
+// 		[curr.quality_label || curr.type]: curr
+// 	}), {} );
+
+// var desiredResolutions = [/*2160,1440,1080, */
+// "720p", "480p", "360p", "240p","144p"];
+// for(var i = 0; i < desiredResolutions.length; i++)
+// {
+// 	if( videoUrls[ desiredResolutions[i] ] !== undefined)
+// 	{
+// 		var url = videoUrls[ desiredResolutions[i] ].url
+// 		//it goes into your clipboard, and you ctrl+v in the program
+// 		//just as you do with images
+// 		//Do you want it locally?
+// 		break
+// 	}
+// }
 
 function initImagesAndVideos()
 {
@@ -100,9 +129,9 @@ function initImagesAndVideos()
 
 	bindButton("[",function()
 	{
-		displayMesh.material.map.setCurrentTimeToStart()
+		displayMesh.material.map.thumbnail.startTime = displayMesh.material.map.thumbnail.material.map.video.currentTime;
 		//also "save"... later...
-	}, "set current time as when you would start current clip")
+	}, "set current time on displayMesh as when you would start current clip")
 
 	{
 		// var frameDrawer = new THREE.Line(new THREE.OriginCorneredPlaneBufferGeometry(1,1))
@@ -143,14 +172,10 @@ function initImagesAndVideos()
 		var startingPointInString = displayMesh.material.map.video.src.indexOf(stringJustBefore) + stringJustBefore.length;
 		var fileNameInArray = decodeURIComponent(displayMesh.material.map.video.src.slice(startingPointInString) )
 		var fileIndex = textureFileNames.indexOf( fileNameInArray )
-		if(fileIndex === -1)
-		{
-			console.error("no such file: ",fileNameInArray)
-		}
-		else
-		{
-			loadVideo( fileIndex )
-		}
+		var thumbnail = loadVideo( fileIndex )
+
+		thumbnail.startTime = displayMesh.material.map.thumbnail.material.map.video.currentTime;
+		thumbnail.material.map.video.currentTime = thumbnail.startTime
 	}, "clone current clip")
 	// bindButton("d",function()
 	// {
@@ -160,50 +185,60 @@ function initImagesAndVideos()
 	//also a little line going along them to let you know when it's about to end...
 
 	var thumbnails = [];
+	//actually needs lots of updating
+	var effectiveCenterToTopOfFrame = centerToFrameDistance(camera.fov, camera.position.z)
+	var thumbnailHeight = effectiveCenterToTopOfFrame * 2 / (textureFileNames.length);
 	function Thumbnail( i, thumbnailTexture, displayTexture )
 	{
 		if(displayTexture === undefined)
 		{
 			displayTexture = thumbnailTexture;
 		}
-		var width = AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 * 2 / textureFileNames.length;
+
 		var thumbnail = new THREE.Mesh(
 			everythingGeometry,
 			new THREE.MeshBasicMaterial({depthTest:false,map:thumbnailTexture}) );
 		thumbnails.push(thumbnail)
-		mouseables.push(thumbnail)
-		thumbnail.scale.set( width, width, 1 )
+		clickables.push(thumbnail)
 
-		thumbnail.reposition = function(effectiveIndex)
+		thumbnail.scale.set( thumbnailHeight, thumbnailHeight, 1 )
+
+		thumbnail.reposition = function(rowPosition)
 		{
-			thumbnail.position.y = AUDIENCE_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0 * 1.02 + 0.5 * width;
-			var numWeCanSqueezeIn = AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 * 2 / width;
-
-			var rowPosition = effectiveIndex;
-			if( rowPosition >= numWeCanSqueezeIn )
-			{
-				rowPosition -= numWeCanSqueezeIn
-				thumbnail.position.y *= -1 // will need more lines eventually
-			}
-			thumbnail.position.x = (rowPosition - (numWeCanSqueezeIn-1)/2) * width;
-
-			camera.updateMatrixWorld()
-			thumbnail.position.z = 0
-			camera.worldToLocal(thumbnail.position)
 			camera.add(thumbnail)
+			thumbnail.position.set(
+				thumbnailHeight * 8/9 - AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 * 3,
+				effectiveCenterToTopOfFrame - (rowPosition+0.5) * thumbnailHeight,
+				0 );
+			camera.updateMatrixWorld()
+			camera.worldToLocal(thumbnail.position)
+
+			if( thumbnails.length > textureFileNames.length )
+			{
+				thumbnail.position.x *= -1
+			}
 
 			for(var j = 0; j < thumbnails.length; j++)
 			{
-				if(thumbnails[j] === thumbnail) continue;
+				if( thumbnails[j] === thumbnail ) continue;
 
-				if(thumbnails[j].position.distanceTo(thumbnail.position) < 0.0001)
+				if( thumbnails[j].position.distanceTo(thumbnail.position) < 0.0001)
 				{
-					this.reposition(effectiveIndex+1);
+					this.reposition(rowPosition+1);
 					break;
 				}
 			}
+
+			return
 		}
-		thumbnail.reposition( i )
+		if( thumbnails.length <= textureFileNames.length )
+		{
+			thumbnail.reposition( i )
+		}
+		else
+		{
+			thumbnail.reposition( thumbnails.length - textureFileNames.length - 1 )
+		}
 
 		thumbnail.onClick = function()
 		{
@@ -233,7 +268,7 @@ function initImagesAndVideos()
 		{
 			var thumbnail = Thumbnail( i, texture );
 			var aspectRatio = texture.image.naturalWidth / texture.image.naturalHeight;
-			thumbnail.scale.set(thumbnail.scale.x,thumbnail.scale.x / aspectRatio,1)
+			thumbnail.scale.set(thumbnail.scale.y * aspectRatio,thumbnail.scale.y,1)
 		}, function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );} );
 	}
 
@@ -274,32 +309,28 @@ function initImagesAndVideos()
 	{
 		var displayTexture = VideoTexture(i)
 		var thumbnailTexture = VideoTexture(i)
-		var startTime = 0.05
-		thumbnailTexture.video.currentTime = startTime
-		displayTexture.video.currentTime = startTime
-
 		var thumbnail = Thumbnail( i, thumbnailTexture, displayTexture )
 
-		displayTexture.setCurrentTimeToStart = function()
-		{
-			startTime = this.video.currentTime
-		}
+		thumbnail.startTime = 0.05
+		thumbnailTexture.video.currentTime = thumbnail.startTime
+		displayTexture.video.currentTime = thumbnail.startTime
+		displayTexture.thumbnail = thumbnail;
 
 		thumbnail.getTimeAt = function(input, reverse)
 		{
 			var frameLimitLeft =  this.geometry.vertices[0].clone().applyMatrix4( this.matrixWorld ).x;
 			var frameWidth = this.scale.x;
 
-			var trueDuration = thumbnailTexture.video.duration - startTime;
+			var trueDuration = thumbnailTexture.video.duration - thumbnail.startTime;
 
 			if(reverse)
 			{
-				var proportionAlong = ( input - startTime ) / trueDuration
+				var proportionAlong = ( input - thumbnail.startTime ) / trueDuration
 				return proportionAlong * frameWidth + frameLimitLeft;
 			}
 
 			var proportionAlong = (input - frameLimitLeft) / frameWidth;
-			return startTime + proportionAlong * trueDuration;
+			return thumbnail.startTime + proportionAlong * trueDuration;
 		}
 
 		objectsToBeUpdated.push(thumbnail)
@@ -312,7 +343,7 @@ function initImagesAndVideos()
 				displayTexture.image.width = thumbnailTexture.video.videoWidth;
 				displayTexture.image.height = thumbnailTexture.video.videoHeight;
 				var aspectRatio = thumbnailTexture.video.videoWidth / thumbnailTexture.video.videoHeight;
-				thumbnail.scale.set(thumbnail.scale.x,thumbnail.scale.x/aspectRatio,1)
+				thumbnail.scale.set(thumbnail.scale.y * aspectRatio,thumbnail.scale.y,1)
 			}
 
 			var intersections = mouse.rayCaster.intersectObject( thumbnail ); //we're changing the name of that...

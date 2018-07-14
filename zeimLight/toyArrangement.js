@@ -1,9 +1,14 @@
 //charges that repel, including by the frame?
 //wouldn't even need to tween
 //also repelled by your head in the corner!
+//it's more likely to be: you put a recent object in 
+/*
+	When you put an object in the scene, it stays in place and everything else is repelled
 
-var projectOntoToyShelf;
-function initToyArrangement()
+	Do the repelling in one frame, then tween them nicely.
+*/
+
+function arrangeToys()
 {
 	function projectOntoToyShelf(p)
 	{
@@ -25,6 +30,19 @@ function initToyArrangement()
 			p.multiplyScalar( maxX / Math.abs(p.x) )
 		}
 	}
+
+	for(var i = 0; i < toysToBeArranged.length; i++)
+	{
+		scene.add(toysToBeArranged[i])
+		if( toysToBeArranged[i].position.equals(zeroVector) )
+		{
+			toysToBeArranged[i].position.x = 1
+			toysToBeArranged[i].position.applyAxisAngle(zUnit,i/toysToBeArranged.length*TAU)
+			projectOntoToyShelf(toysToBeArranged[i].position)
+		}
+	}
+
+	return;
 
 	var dummyToys = Array(20)
 	var toysInScene = [];
@@ -59,7 +77,7 @@ function initToyArrangement()
 		dummyToys[i] = new THREE.Mesh(new THREE.CircleGeometry(0.1))
 		scene.add(dummyToys[i])
 
-		mouseables.push(dummyToys[i])
+		clickables.push(dummyToys[i])
 		dummyToys[i].onClick = function()
 		{
 			if( toysInScene.indexOf(this) === -1 )

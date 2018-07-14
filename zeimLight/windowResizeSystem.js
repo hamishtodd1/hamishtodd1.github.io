@@ -6,6 +6,7 @@ function initSurroundings()
 		new THREE.MeshStandardMaterial({side:THREE.BackSide, vertexColors:THREE.FaceColors})
 	);
 	stage.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-backwardExtension/2))
+	camera.far = camera.defaultZ + backwardExtension + 0.01
 	for(var i = 0; i< stage.geometry.faces.length; i++)
 	{
 		if(i === 0 || i === 1)
@@ -44,7 +45,7 @@ function initSurroundings()
 
 function initCameraZoomSystem()
 {
-	camera.defaultZ = 1.27
+	camera.defaultZ = 2.5
 	camera.setToDefaultZoom = function()
 	{
 		camera.zoomTo = camera.defaultZ
@@ -71,6 +72,10 @@ function initCameraZoomSystem()
 
 		return start + scaledToMakeUnitIntegral1 * (end-start);
 	}
+	function linearTween(start, end, t)
+	{
+		return start + t * (end-start);
+	}
 	var timeSinceZoomToConsideration = 0;
 	objectsToBeUpdated.push(camera)
 	camera.update = function()
@@ -90,7 +95,7 @@ function initCameraZoomSystem()
 
 	camera.updatePosition = function()
 	{
-		camera.position.z = smoothTween(
+		camera.position.z = linearTween(
 			camera.zoomFrom,
 			camera.zoomTo,
 			camera.zoomProgress)
@@ -121,7 +126,7 @@ function initCameraZoomSystem()
 		event.preventDefault();
 		if(!event.ctrlKey)
 		{
-			var proposedZoomTo = zoomToBeingConsidered + 0.14 * -event.deltaY / 250;
+			var proposedZoomTo = zoomToBeingConsidered + 0.14 * -event.deltaY / 250 * camera.defaultZ;
 			setZoomToBeingConsidered(proposedZoomTo)
 			timeSinceZoomToConsideration = 0;
 		}
@@ -145,7 +150,7 @@ function initCameraAndRendererResizeSystem(renderer)
 
 	function respondToResize() 
 	{
-		console.log( "Renderer dimensions: ", window.innerWidth, window.innerHeight )
+		// console.log( "Renderer dimensions: ", window.innerWidth, window.innerHeight )
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		camera.aspect = window.innerWidth / window.innerHeight;
 

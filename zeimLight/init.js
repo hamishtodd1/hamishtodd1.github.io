@@ -1,36 +1,10 @@
 /*
-	Hmm, if it all takes place on a board, and you're moving around on it, well, that's the timeline
-	Could be used for navigation / scrollability
-
+	Send to haxiomic/mrdoob/wannerstedt, get "make it nicer looking for free by doing this:"
+	
+	Make something with bloody puzzles
 	The youtube thing is a colossal perverse incentive
 		Subtleties in interactive learning is your raison d'etre, but here we are, making something non-interactive
-
-	Eventually
-		-mp3; diffed record.
-		-Working on tablets. Phones get embed and maybe message. No need to worry about address bar
-		-VR interaction / funkiness in which you move your head and hand around and camera is in right place
-		-Would be nice if people could spectate live
-		-send to haxiomic/mrdoob/wannerstedt, get "make it nicer looking for free by doing this:"
-		-fix lighting
-		-editing suite?
-
-	To make
-		-Maryam Mirzakhani, 14th of July
-		-my favourite 3d patterns/neoshapes
-		-Something with bloody puzzles
-		-pwg
-
-	You can bring interface bits on and off, less need to think about some great big "game state" thing
 */
-
-// function importScript(scriptName)
-// {
-// 	var extraScript = document.createElement('script');
-// 	extraScript.setAttribute('src',scriptName + '.js');
-// 	document.body.appendChild(extraScript);
-// 	extraScript.onload = init;
-// }
-// importScript('variables')
 
 function initButtons()
 {
@@ -42,7 +16,7 @@ function initButtons()
 			console.error("attempted to bind a button that already has a binding")
 		}
 
-		console.log(buttonName.toUpperCase() + ": " + functionDescription)
+		console.log("\n",buttonName + ": " + functionDescription)
 		buttonBindings[buttonName] = ourFunction;
 	}
 
@@ -151,24 +125,22 @@ function initButtons()
 		Five: Three on top, two on bottom
 
 		TODO
-			Sign saying "cannot decompose!"
+			visibox for surfaces
 			Clicking lattice makes a graph
 			Drawing nodes
 			Drawing edges
-			visibox for surfaces
 			Just detect whether it's hit the trail's start. That's all you need for sphere
 			"Make complete graph" button (sensetive to partiteness)
+			Signs enumerating the different cool things
 	*/
 
 	initImagesAndVideos();
 	{
-		var conditionsVisualization = initConditionsVisualization()
-		// conditionsVisualization.position.y = -1
-		scene.add(conditionsVisualization)
+		// initGeodesics()
 
-		// initGraphTheory();
+		initMirzakhaniGraphTheory()
 
-		// initToyArrangement()
+		arrangeToys()
 	}
 
 	render();

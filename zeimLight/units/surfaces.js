@@ -26,60 +26,9 @@ function lerpSurfacesMadeOfPatchworks(from,To,t)
 	*/
 }
 
-function initSurfaces()
+function makeToroidalSurfaces(surfaces)
 {
-	var surfaceMaterial = new THREE.MeshStandardMaterial({color:0x5050FF, side:THREE.DoubleSide});
-	var surfaces = {};
-
-	{
-		surfaces.planar = new THREE.Mesh(new THREE.PlaneGeometry(0.9,0.9), surfaceMaterial )
-		surfaces.planar.closestPointToPoint = function(ambientPoint)
-		{
-			return ambientPoint.clone().setComponent(2,0)
-		}
-	}
-
-	{
-		surfaces.hyperbolicParaboloid = new THREE.Mesh(new THREE.Geometry(), surfaceMaterial);
-		surfaces.hyperbolicParaboloid.verticesWide = 30;
-		for(var i = 0; i < surfaces.hyperbolicParaboloid.verticesWide; i++)
-		{
-			for(var j = 0; j < surfaces.hyperbolicParaboloid.verticesWide; j++)
-			{
-				var newPoint = new THREE.Vector3((i-surfaces.hyperbolicParaboloid.verticesWide/2),0,(j-surfaces.hyperbolicParaboloid.verticesWide/2));
-				newPoint.applyAxisAngle(yUnit,TAU/8)
-				newPoint.y = (sq(newPoint.x)-sq(newPoint.z))/surfaces.hyperbolicParaboloid.verticesWide;
-				newPoint.multiplyScalar(0.02)
-				surfaces.hyperbolicParaboloid.geometry.vertices.push(newPoint);
-			}
-		}
-		insertPatchworkFaces(surfaces.hyperbolicParaboloid.verticesWide, surfaces.hyperbolicParaboloid.geometry.faces, 0)
-		surfaces.hyperbolicParaboloid.geometry.computeFaceNormals();
-		surfaces.hyperbolicParaboloid.geometry.computeVertexNormals();
-
-		surfaces.hyperbolicParaboloid.closestPointToPoint = function(ambientPoint)
-		{
-			return new THREE.Vector3(ambientPoint.x,sq(ambientPoint.x)-sq(ambientPoint.z),ambientPoint.z)
-		}
-	}
-
-	{
-		var radius = 0.45;
-		surfaces.spherical = new THREE.Mesh(new THREE.EfficientSphereGeometry(0.3,4), surfaceMaterial);
-		surfaces.spherical.closestPointToPoint = function(ambientPoint)
-		{
-			return ambientPoint.clone().setLength(radius)
-		}
-	}
-
-	MakeToroidalSurfaces(surfaces);
-
-	return surfaces;
-}
-
-function MakeToroidalSurfaces(surfaces)
-{
-	var s3SurfaceMaterial = surfaces.planar.material.clone();
+	var s3SurfaceMaterial = surfaces[0].material.clone();
 	s3SurfaceMaterial.vertexColors = THREE.FaceColors;
 
 	var projectionOriginAsQuaternion = new THREE.Quaternion(1,0,0,0);
@@ -188,23 +137,23 @@ function MakeToroidalSurfaces(surfaces)
 
 	function makeHandleBody(arms)
 	{
-		var newSurface = new THREE.Mesh(new THREE.Geometry(), s3SurfaceMaterial );
-		newSurface.geometry.verticesWide = 22;
-		newSurface.geometry.vertices.length = sq(newSurface.geometry.verticesWide) * 4 * arms.length;
+		var handleBody = new THREE.Mesh(new THREE.Geometry(), s3SurfaceMaterial );
+		handleBody.geometry.verticesWide = 22;
+		handleBody.geometry.vertices.length = sq(handleBody.geometry.verticesWide) * 4 * arms.length;
 		for(var k = 0; k < arms.length * 4; k++)
 		{
-			var firstVertexIndex = sq(newSurface.geometry.verticesWide) * k;
-			for(var i = 0; i < newSurface.geometry.verticesWide; i++)
+			var firstVertexIndex = sq(handleBody.geometry.verticesWide) * k;
+			for(var i = 0; i < handleBody.geometry.verticesWide; i++)
 			{
-				for(var j = 0; j < newSurface.geometry.verticesWide; j++)
+				for(var j = 0; j < handleBody.geometry.verticesWide; j++)
 				{
-					newSurface.geometry.vertices[ firstVertexIndex + i * newSurface.geometry.verticesWide + j ] = new THREE.Vector3();
+					handleBody.geometry.vertices[ firstVertexIndex + i * handleBody.geometry.verticesWide + j ] = new THREE.Vector3();
 				}
 			}
-			insertPatchworkFaces(newSurface.geometry.verticesWide, newSurface.geometry.faces, firstVertexIndex, true);
+			insertPatchworkFaces(handleBody.geometry.verticesWide, handleBody.geometry.faces, firstVertexIndex, true);
 		}
 
-		newSurface.deriveVertexPositions = function()
+		handleBody.deriveVertexPositions = function()
 		{
 			for(var i = 0; i < arms.length; i++ )
 			{
@@ -213,47 +162,41 @@ function MakeToroidalSurfaces(surfaces)
 					arms[i].armSideCenterA,arms[i].armSideCenterB,
 					arms[i].nodeLTop,arms[i].nodeLBot,
 					arms[i].nodeRTop,arms[i].nodeRBot,
-					i * 4 * sq(newSurface.geometry.verticesWide), this.geometry);
+					i * 4 * sq(handleBody.geometry.verticesWide), this.geometry);
 			}
 
-			newSurface.geometry.vertices.forEach(function(vertex)
+			handleBody.geometry.vertices.forEach(function(vertex)
 			{
-				vertex.multiplyScalar(0.3)
+				vertex.multiplyScalar(0.18)
 			});
 
-			newSurface.geometry.computeFaceNormals();
-			newSurface.geometry.computeVertexNormals();
-			newSurface.geometry.verticesNeedUpdate = true;
-			newSurface.geometry.normalsNeedUpdate = true;	
+			handleBody.geometry.computeFaceNormals();
+			handleBody.geometry.computeVertexNormals();
+			handleBody.geometry.verticesNeedUpdate = true;
+			handleBody.geometry.normalsNeedUpdate = true;	
 		}
-		newSurface.deriveVertexPositions()
+		handleBody.deriveVertexPositions()
 
-		// newSurface.update = function()
-		// {
-		// 	if(mouse.clicking && mouse.lastClickedObject === null)
-		// 	{
-		// 		var rotationAmount = mouse.ray.direction.angleTo(mouse.previousRay.direction) * 12
-		// 		var rotationAxis = mouse.ray.direction.clone().cross(mouse.previousRay.direction);
-		// 		rotationAxis.applyQuaternion(this.quaternion.clone().inverse()).normalize();
-		// 		this.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAmount))
+		objectsToBeUpdated.push(handleBody)
+		handleBody.update = function()
+		{
+			if( mouse.clicking && mouse.lastClickedObject === null )
+			{
+				mouse.rotateObjectByGesture(this)
+			}
 
+			// var timeScaled = frameCount * 0.001;
+			// projectionOriginAsQuaternion.x = Math.sin( timeScaled )
+			// projectionOriginAsQuaternion.w = Math.cos( timeScaled )
+			// updateProjectionSetup()
 
-		// 	}
-
-		// 	var timeScaled = frameCount / 1000;
-		// 	projectionOriginAsQuaternion.x = Math.sin( timeScaled )
-		// 	projectionOriginAsQuaternion.w = Math.cos( timeScaled )
-		// 	updateProjectionSetup()
-
-		// 	newSurface.deriveVertexPositions()
-		// }
-		newSurface.geometry.applyMatrix(new THREE.Matrix4().makeScale(0.6,0.6,0.6))
-		return newSurface;
+			// handleBody.deriveVertexPositions()
+		}
+		return handleBody;
 	}
 
+	function makeRotationallySymmetricHandleBody(numArms)
 	{
-		var numArms = 3;
-
 		var centerForTicks = new THREE.Vector2(0,0);
 		var armSideCenters = [];
 		for( var armSideCenter = 0; armSideCenter < numArms*2; armSideCenter++ )
@@ -278,9 +221,11 @@ function MakeToroidalSurfaces(surfaces)
 				nearbyArmBSideCenter: 	armSideCenters[moduloWithNegatives(i*2+2,numArms*2)],
 			}
 		}
-
-		surfaces["genus"+(numArms-1).toString()] = makeHandleBody(arms);
+		return makeHandleBody(arms)
 	}
+	surfaces.push( makeRotationallySymmetricHandleBody(3))
+	surfaces.push( makeRotationallySymmetricHandleBody(7))
+	surfaces.push( makeRotationallySymmetricHandleBody(2))
 
 	{
 		// var armSideCenters = [];
@@ -347,6 +292,11 @@ function MakeToroidalSurfaces(surfaces)
 function insertPatchworkFaces(verticesWide, facesArray, startingIndex, colorFaces)
 {
 	var colors = [new THREE.Color(0,0,0),new THREE.Color(1,1,1)];
+
+	if(startingIndex === undefined)
+	{
+		startingIndex = 0
+	}
 
 	for(var i = 1; i < verticesWide; i++)
 	{

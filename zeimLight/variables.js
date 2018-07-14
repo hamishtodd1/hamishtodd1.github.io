@@ -21,8 +21,12 @@ const scene = new THREE.Scene().add(camera, camera);
 var mouse = null;
 
 const objectsToBeUpdated = [];
-const mouseables = [];
+const clickables = [];
 var bindButton;
+
+const toysToBeArranged = [];
+
+const efficientSphereGeometryWithRadiusOne = new THREE.EfficientSphereGeometry(1);
 
 const AUDIENCE_ASPECT_RATIO = 16/9; //also your screen when you're recording. Which is kinda convenient
 const AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 = 1;

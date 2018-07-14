@@ -1,4 +1,9 @@
-function initMouse()
+/*
+	intersectObjects may need to be recursive.
+		But then you need to make it so the object grabbed is the parent
+*/
+
+function initMouse() 
 {
 	{
 		var coneHeight = 0.06;
@@ -15,6 +20,7 @@ function initMouse()
 			transparent:true,
 			opacity:0.001
 		}))
+		cursor.scale.z *= 0.0001
 		cursor.castShadow = true;
 		scene.add(cursor)
 
@@ -69,6 +75,8 @@ function initMouse()
 		object.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAmount))
 	}
 
+	var clickedPoint = new THREE.Vector3();
+	var toyBeingArranged = null;
 	mouse.updateFromAsyncAndCheckClicks = function()
 	{
 		this.oldClicking = this.clicking;
@@ -83,45 +91,50 @@ function initMouse()
 		mouse.rayCaster.setFromCamera( asynchronous.normalizedDevicePosition, camera );
 
 		//"whileClicking"? Naaaaah, "update" keeps things in once place
-		//but clickedpoint should be in here.
 
-		var clicked = this.clicking && !this.oldClicking;
-		var rightClicked = asynchronous.rightClicking && !this.oldRightClicking;
-		if( clicked || rightClicked )
+		if( this.clicking && !this.oldClicking )
 		{
-			var intersections = mouse.rayCaster.intersectObjects( mouseables );
+			var intersections = mouse.rayCaster.intersectObjects( clickables );
 
 			if( intersections.length !== 0 )
 			{
-				if(clicked)
+				this.lastClickedObject = intersections[0].object;
+				if( intersections[0].object.onClick )
 				{
-					this.lastClickedObject = intersections[0].object;
-					if( intersections[0].object.onClick )
-					{
-						intersections[0].object.onClick(intersections[0]);
-					}
-				}
-
-				if(rightClicked)
-				{
-					this.lastRightClickedObject = intersections[0].object;
-					if( intersections[0].object.onRightClick )
-					{
-						intersections[0].object.onRightClick(intersections[0]);
-					}
+					intersections[0].object.onClick(intersections[0]);
 				}
 			}
 			else
 			{
-				if(clicked)
+				this.lastClickedObject = null;
+			}
+		}
+
+		if( this.rightClicking )
+		{
+			if( !this.oldRightClicking )
+			{
+				var intersections = mouse.rayCaster.intersectObjects( toysToBeArranged );
+
+				if( intersections.length !== 0 )
 				{
-					this.lastClickedObject = null;
-				}
-				if(rightClicked)
-				{
-					this.lastRightClickedObject = null;
+					toyBeingArranged = intersections[0].object;
+					clickedPoint.copy( intersections[0].point )
 				}
 			}
+			else
+			{
+				if(toyBeingArranged !== null)
+				{
+					var newClickedPoint = this.rayIntersectionWithZPlane(clickedPoint.z)
+					toyBeingArranged.position.sub(clickedPoint).add(newClickedPoint)
+					clickedPoint.copy(newClickedPoint)
+				}
+			}
+		}
+		else
+		{
+			toyBeingArranged = null;
 		}
 	}
 
