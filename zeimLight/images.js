@@ -43,14 +43,36 @@
 function initImagesAndVideos()
 {
 	var textureFileNames = [
-		"2515823.jpg",
-		"Roberts-Maryam-Mirzakhanis-Pioneering-Mathematical-Legacy.jpg",
-		"thirdFromRight.jpg",
-		"interview.mp4",
+		//intro
+		"Maryam Mirzakhani, Dynamics Moduli Spaces of Curves I.mp4",
 		"Seoul ICM2014 Opening Ceremony (0).mp4",
-		// "Seoul ICM2014 Opening Ceremony (1).mp4",
-		// "Seoul ICM2014 Opening Ceremony (2).mp4",
-		// "clips.mov"
+		"Seoul ICM2014 Opening Ceremony (1).mp4",
+		"Seoul ICM2014 Opening Ceremony (2).mp4",
+		//first muslim
+		"headings/1.png",
+		"vlcsnap-2018-07-06-17h05m41s279.png",
+		"headscarf.jpg",
+		"rohani.png",
+		"newspapers.jpg",
+		"Tribute to Maryam Mirzakhani, by Artan Sheshmani (Farsi) (1).mp4",
+		"trump.jpg",
+		//stephen hawking
+		"headings/2.png",
+		"hawking2.mp4",
+		"Edward-Witten-0627.jpg",
+		"Calabi-Yau Manifold.mp4",
+		"tesla.mp4",
+		"Discrete Geodesic Nets for Modeling Developable Surfaces.mp4",
+		//graph theory
+		"headings/3.png",
+		"2515823.jpg",
+		"cartography.jpg",
+		"circuitDesign.jpeg",
+		//extremely visual
+		"vlcsnap-2018-07-06-17h08m09s876.png",
+		"headings/4.png",
+		"clips.mov",
+		"interview.mp4",
 	];
 
 	var everythingGeometry = new THREE.PlaneGeometry( 1,1 );
@@ -106,7 +128,7 @@ function initImagesAndVideos()
 				// 	//something
 				// }
 
-				zoomProgress += 0.0003
+				zoomProgress += 0.009 * frameDelta
 			}
 			else
 			{
@@ -187,7 +209,7 @@ function initImagesAndVideos()
 	var thumbnails = [];
 	//actually needs lots of updating
 	var effectiveCenterToTopOfFrame = centerToFrameDistance(camera.fov, camera.position.z)
-	var thumbnailHeight = effectiveCenterToTopOfFrame * 2 / (textureFileNames.length);
+	var thumbnailVerticalSpaceTaken = effectiveCenterToTopOfFrame * 2 / (textureFileNames.length);
 	function Thumbnail( i, thumbnailTexture, displayTexture )
 	{
 		if(displayTexture === undefined)
@@ -200,15 +222,18 @@ function initImagesAndVideos()
 			new THREE.MeshBasicMaterial({depthTest:false,map:thumbnailTexture}) );
 		thumbnails.push(thumbnail)
 		clickables.push(thumbnail)
+		toysToBeArranged.push(thumbnail) //save their position! 
 
+		var thumbnailHeight = thumbnailVerticalSpaceTaken * 0.9
 		thumbnail.scale.set( thumbnailHeight, thumbnailHeight, 1 )
 
 		thumbnail.reposition = function(rowPosition)
 		{
 			camera.add(thumbnail)
 			thumbnail.position.set(
-				thumbnailHeight * 8/9 - AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 * 3,
-				effectiveCenterToTopOfFrame - (rowPosition+0.5) * thumbnailHeight,
+				// 0,
+				thumbnailVerticalSpaceTaken * 8/9 - AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 * 3,
+				effectiveCenterToTopOfFrame - (rowPosition+0.5) * thumbnailVerticalSpaceTaken,
 				0 );
 			camera.updateMatrixWorld()
 			camera.worldToLocal(thumbnail.position)
@@ -309,9 +334,14 @@ function initImagesAndVideos()
 	{
 		var displayTexture = VideoTexture(i)
 		var thumbnailTexture = VideoTexture(i)
-		var thumbnail = Thumbnail( i, thumbnailTexture, displayTexture )
+		var thumbnail = Thumbnail( i, thumbnailTexture, displayTexture )			
 
 		thumbnail.startTime = 0.05
+		if(textureFileNames[i] === "clips.mov")
+		{
+			thumbnail.startTime = 148
+		}
+
 		thumbnailTexture.video.currentTime = thumbnail.startTime
 		displayTexture.video.currentTime = thumbnail.startTime
 		displayTexture.thumbnail = thumbnail;

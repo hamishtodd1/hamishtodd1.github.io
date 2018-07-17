@@ -31,13 +31,24 @@ function arrangeToys()
 		}
 	}
 
+	var numAroundEdges = 0;
 	for(var i = 0; i < toysToBeArranged.length; i++)
 	{
-		scene.add(toysToBeArranged[i])
+		if( toysToBeArranged[i].position.equals(zeroVector) )
+		{
+			numAroundEdges++;
+		}
+	}
+	for(var i = 0; i < toysToBeArranged.length; i++)
+	{
+		if(toysToBeArranged[i].parent === null)
+		{
+			scene.add(toysToBeArranged[i])
+		}
 		if( toysToBeArranged[i].position.equals(zeroVector) )
 		{
 			toysToBeArranged[i].position.x = 1
-			toysToBeArranged[i].position.applyAxisAngle(zUnit,i/toysToBeArranged.length*TAU)
+			toysToBeArranged[i].position.applyAxisAngle(zUnit,i/numAroundEdges*TAU)
 			projectOntoToyShelf(toysToBeArranged[i].position)
 		}
 	}

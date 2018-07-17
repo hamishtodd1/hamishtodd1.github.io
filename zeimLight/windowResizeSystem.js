@@ -1,3 +1,5 @@
+//TODO up top!
+
 function initSurroundings()
 {
 	var backwardExtension = 0.6;
@@ -26,7 +28,7 @@ function initSurroundings()
 	stage.material.roughness = 0.2;
 	stage.receiveShadow = true;
 	//you only see the back half
-	scene.add(stage)
+	// scene.add(stage)
 
 	var pointLight = new THREE.PointLight(0xFFFFFF, 0.4, 5.3);
 	pointLight.shadow.camera.far = 10;
@@ -88,14 +90,14 @@ function initCameraZoomSystem()
 			camera.zoomProgress = 0;
 		}
 		timeSinceZoomToConsideration += frameDelta;
-		camera.zoomProgress += 0.019;
+		camera.zoomProgress += 1.1 * frameDelta;
 		camera.zoomProgress = clamp(camera.zoomProgress,0,1)
 		camera.updatePosition()
 	}
 
 	camera.updatePosition = function()
 	{
-		camera.position.z = linearTween(
+		camera.position.z = smoothTween(
 			camera.zoomFrom,
 			camera.zoomTo,
 			camera.zoomProgress)
@@ -126,7 +128,7 @@ function initCameraZoomSystem()
 		event.preventDefault();
 		if(!event.ctrlKey)
 		{
-			var proposedZoomTo = zoomToBeingConsidered + 0.14 * -event.deltaY / 250 * camera.defaultZ;
+			var proposedZoomTo = zoomToBeingConsidered + 0.14 * event.deltaY / 250 * camera.defaultZ;
 			setZoomToBeingConsidered(proposedZoomTo)
 			timeSinceZoomToConsideration = 0;
 		}

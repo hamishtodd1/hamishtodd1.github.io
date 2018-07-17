@@ -6,7 +6,7 @@
 function initMouse() 
 {
 	{
-		var coneHeight = 0.06;
+		var coneHeight = 0.05;
 		var coneRadius = coneHeight * 0.4;
 		var cursorGeometry = new THREE.ConeGeometry(coneRadius, coneHeight,31);
 		cursorGeometry.computeFaceNormals();
@@ -16,13 +16,13 @@ function initMouse()
 		cursorGeometry.applyMatrix( (new THREE.Matrix4()).makeRotationZ(TAU/16) );
 		var cursor = new THREE.Mesh( cursorGeometry, new THREE.MeshPhongMaterial(
 		{
-			color:0xCCCCCC,
-			transparent:true,
-			opacity:0.001
+			color:0xFFFFFF,
+			// transparent:true,
+			// opacity:0.001
 		}))
-		cursor.scale.z *= 0.0001
+		cursor.scale.z *= 0.01
 		cursor.castShadow = true;
-		scene.add(cursor)
+		// scene.add(cursor)
 
 		objectsToBeUpdated.push(cursor)
 		cursor.update = function()
@@ -91,7 +91,8 @@ function initMouse()
 		mouse.rayCaster.setFromCamera( asynchronous.normalizedDevicePosition, camera );
 
 		//"whileClicking"? Naaaaah, "update" keeps things in once place
-
+		//deffo need onHover
+		
 		if( this.clicking && !this.oldClicking )
 		{
 			var intersections = mouse.rayCaster.intersectObjects( clickables );

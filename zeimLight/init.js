@@ -81,7 +81,7 @@ function initButtons()
 
 	var renderer = new THREE.WebGLRenderer({ antialias: true });
 	renderer.setPixelRatio( window.devicePixelRatio );
-	renderer.setClearColor(0x000000) //youtube
+	renderer.setClearColor(0xFFFFFF) //youtube
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.BasicShadowMap;
 	document.body.appendChild( renderer.domElement );
@@ -123,20 +123,11 @@ function initButtons()
 		Three: side by side by side
 		Four: Two and two
 		Five: Three on top, two on bottom
-
-		TODO
-			visibox for surfaces
-			Clicking lattice makes a graph
-			Drawing nodes
-			Drawing edges
-			Just detect whether it's hit the trail's start. That's all you need for sphere
-			"Make complete graph" button (sensetive to partiteness)
-			Signs enumerating the different cool things
 	*/
 
 	initImagesAndVideos();
 	{
-		// initGeodesics()
+		initGeodesics()
 
 		initMirzakhaniGraphTheory()
 

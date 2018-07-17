@@ -114,6 +114,11 @@ function getExtremeFunctionCallResult(array, functionName,lowest)
 	return index;
 }
 
+function c(a)
+{
+	console.log(a)
+}
+
 function insertCylindernumbers(A,B, verticesArray, cylinderSides, arrayStartpoint, radius ) {
 	var aToB = new THREE.Vector3(B.x-A.x, B.y-A.y, B.z-A.z);
 	aToB.normalize();

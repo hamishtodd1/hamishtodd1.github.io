@@ -1,63 +1,36 @@
 'use strict';
 /*
-	TODO
-		Stick the things - graph, conditions lattice, the surfaces - around the frame the
+	Description
+Credits
+Artan Sheshmani tribute https://www.youtube.com/watch?v=zO0jwL3spfQ
 
-		If nothing else, do trail collision
-		Bind button to stereographic projection location. Also visibox
-		Urrrrrgh it'd be better with a single renderer in the middle of a webpage
-		Send to mum for music
+Mirzakhani fields medal tribute, copyright Simons Foundation
+https://www.mathunion.org/imu-awards/fields-medal/fields-medals-2014
 
+Application of geodesics in computer graphics (one of many!)
+http://igl.ethz.ch/projects/developable/
+
+Tesla factory
+https://www.youtube.com/watch?v=Ta2lLJXkSss
+
+Mirzakhani talk
+https://www.youtube.com/watch?v=tprlQMClSYQ
+
+Seoul ceremony
+https://www.youtube.com/watch?v=8151azmRaVc
+
+Here is the citation for her being a muslim http://radianceweekly.in/portal/issue/bjp-fails-to-respect-sentiments-of-lok-sabha-polls/article/first-muslim-to-be-awarded-a-fields-medal/
 
 	Script outline. 4 things
-		As a teenager, she won a prize technically worth infinity dollars
+		Incredibly lovely and fun person, Not necessarily all that common in mathematics
+		first of any gender to get full marks at olympiad
+		Not just these surfaces, but all possible similar surfaces
+		If you draw a random loop on a genus-2 surface, the probability that it cuts it in 2 is 1/7
 		Didn’t like maths when she was at school
-		Incredibly lovely and fun person
-			Not necessarily all that common in mathematics
-			https://www.youtube.com/watch?v=TxbE6mkYUAg her drawing on board
-			First female fields medallist - also first Iranian + Muslim! There's a tribute to her in farsi in the description
-			first of any gender to get full marks at olympiad
-			First to be shown without a headscarf in media
-			pic of her with dad in front of islamic art
-			Towards the end of her life she worked at Harvard and Stanford
-			Her parents couldn't travel to US due to Trump's ban
-			She was considering not attending the ceremony due to sickness
-		Her work is connected to big bang
-			The witten conjecture can be proved using Mirzakhani's work
-			Not just these surfaces, but all possible similar surfaces
-			In ordinary mathematics we integrate over a single line - she had to integrate over the moduli space of riemann surfaces
-			If you draw a random loop on a genus-2 surface, the probability that it cuts it in 2 is 1/7
-			New approach to witten's conjecture
-		She used to doodle so much that her daughter thought she was an artist.
-			Long rolls of parchment, on the floor
-			That's what mathematics really is - show cool animations
-			Hey, maybe that's what she was!
-			When she received her fields medal at the age of 37, she already knew she had terminal cancer
-		She once survived a bus crash
-
-		
-		Surfaces part
-			Geodesics are important for the same reason straight lines are important
-				These surfaces might exist in a billion dimensions or be weirdly distorted, so trying to draw straight lines on them is one way of getting an idea of their structure
-			Compare to the escher picture, the tree images from petworth
-			Useful in 3D graphics http://igl.ethz.ch/projects/developable/
-			in reality, our universe is weirdly curved and has a huge number of dimensions.
-			The path that particles take through it are always geodesics, so studies of this are very important for physics
-			Finding paths for paint on robots spraying car parts - so the Tesla Model 3 plant might do well to take account of this
-			She would study infinite sets of possible surfaces like this one
-			What you'll find if you shoot is that choosing a place at random and a direction at random,
-				you always likely get some completely insane path
-				I as the programmer of this thing have the ability to do stuff like choose a nice specific point and set it off in a nice direction
-			Did she love the azadi tower?
-
-
-	surfaces in order
-		Sphere
-		Plane
-		Cylinder		x2+y2-1 
-		Torus			(x2+y2+z2+R2−r2)2−4R2(x2+y2)		easy parameterization
-		hyperbolic paraboloid z = sq(x)-sq(y)
-		Hyperboloid
+		But this is what mathematics really is
+		Geodesics are important for the same reason straight lines are important
+			These surfaces might exist in a billion dimensions or be weirdly distorted, so trying to draw straight lines on them is one way of getting an idea of their structure
+		Compare to the escher picture, the tree images from petworth
 
 	Former ideas
 		a race? Get from here to here in the time limit?
@@ -65,132 +38,7 @@
 		As the things move around the surface, depict their length. Ask: can you think of a geodesic whose length would be between these two?
 */
 
-var mirzakhaniConditions;
 
-function initConditionsVisualization()
-{
-	function evenCondition(i,j,k)
-	{
-		var allEven = ( i%2 === 0 && j%2 === 0 && k%2 === 0 );
-		var allOdd  = ( i%2 === 1 && j%2 === 1 && k%2 === 1 );
-		return allEven || allOdd;
-	}
-	function divisibilityCondition(i,j,k)
-	{
-		var interestingSum = i*j + j*k + k*i;
-		return interestingSum % 5 !== 0;
-	}
-	function weirdCondition(i,j,k)
-	{
-		var array = [i,j,k].sort();
-		var r = array[0], s = array[1], t = array[2];
-		return t <= 4*r*s/(r+s);
-	}
-	mirzakhaniConditions = function(i,j,k)
-	{
-		return evenCondition(i,j,k) && weirdCondition(i,j,k) && divisibilityCondition(i,j,k);
-	}
-
-	var gridDimension = 11;
-	var conditionsVisualization = new THREE.Mesh(
-		new THREE.BoxGeometry(gridDimension,gridDimension,gridDimension), 
-		new THREE.MeshBasicMaterial({visible:false})
-	);
-	conditionsVisualization.scale.setScalar(0.5 * 1/gridDimension)
-	conditionsVisualization.rotation.y += TAU / 4
-
-	objectsToBeUpdated.push(conditionsVisualization)
-	toysToBeArranged.push(conditionsVisualization)
-	conditionsVisualization.update = function()
-	{
-		if( mouse.clicking && mouse.lastClickedObject === null )
-		{
-			mouse.rotateObjectByGesture(this)
-		}
-	}
-
-	var pointGeometry = efficientSphereGeometryWithRadiusOne;
-	var points = new THREE.Group()
-	conditionsVisualization.add(points)
-	points.position.setScalar(-(gridDimension-1) / 2)
-
-	function Point(i,j,k)
-	{
-		var point = new THREE.Mesh(pointGeometry, new THREE.MeshPhongMaterial({color:0x444444}))
-		point.position.set(i,j,k);
-		point.scale.setScalar(0.23)
-		points.add(point)
-
-		point.add( new THREE.Mesh(pointGeometry, new THREE.MeshBasicMaterial({color:0x000000, side:THREE.BackSide}) ) )
-		point.children[0].scale.multiplyScalar(1.35)
-		point.children[0].castShadow = true
-
-		clickables.push(point)
-		point.onClick = function()
-		{
-			var graph = PartiteGraph( this.position.toArray() );
-			scene.add(graph)
-			graph.position.x = 0.5
-		}
-	}
-
-	for(var i = 1; i < gridDimension; i++){
-	for(var j = 1; j < gridDimension; j++){
-	for(var k = 1; k < gridDimension; k++){
-		Point(i,j,k)
-	}
-	}
-	}
-
-	function toggleCondition(conditionFunction,col)
-	{
-		for(var i = 0, il = points.children.length; i < il; i++)
-		{
-			if(conditionFunction(points.children[i].position.x,points.children[i].position.y,points.children[i].position.z))
-			{
-				points.children[i].material.color[col] = 1-points.children[i].material.color[col]
-			}
-		}
-	}
-
-	bindButton("1",
-		function()
-		{
-			toggleCondition(evenCondition,"r")
-		},
-		"toggle visual of even condition"
-	);
-	bindButton("2",
-		function()
-		{
-			toggleCondition(divisibilityCondition,"g")
-		},
-		"toggle visual of divisibility condition"
-	);
-	bindButton("3",
-		function()
-		{
-			toggleCondition(weirdCondition,"b")
-		},
-		"toggle visual of weird condition"
-	);
-	bindButton("4",
-		function()
-		{
-			for( var i = 0, il = points.children.length; i < il; i++ )
-			{
-				if( !mirzakhaniConditions(points.children[i].position.x,points.children[i].position.y,points.children[i].position.z) )
-				{
-					points.children[i].visible = !points.children[i].visible;
-				}
-			}
-		},
-		"toggle visual of non mirzakhani points"
-	);
-
-	//probably you want inflation AND color change
-	return conditionsVisualization
-}
 
 function putSomewhereOnParentSurface(projectile,rayCaster, locationToBeCloserToInWorldSpace)
 {
@@ -199,7 +47,6 @@ function putSomewhereOnParentSurface(projectile,rayCaster, locationToBeCloserToI
 	{
 		projectile.speed = 0;
 		console.log("off surface")
-		projectile.position.set(0,0,0)
 		projectile.faceThatWeAreOn = null;
 		return;
 	}
@@ -231,23 +78,23 @@ function initGeodesics()
 	surfaces.push( new THREE.Mesh(new THREE.PlaneGeometry(0.75,0.75), surfaceMaterial ) )
 	surfaces.push( new THREE.Mesh(new THREE.EfficientSphereGeometry(0.3,4), surfaceMaterial) )
 
-	var hyperbolicParaboloid = new THREE.Mesh(new THREE.Geometry(), surfaceMaterial);
-	var verticesWide = 30;
-	for(var i = 0; i < verticesWide; i++)
-	{
-		for(var j = 0; j < verticesWide; j++)
-		{
-			var newPoint = new THREE.Vector3((i-verticesWide/2),0,(j-verticesWide/2));
-			newPoint.applyAxisAngle(yUnit,TAU/8)
-			newPoint.y = (sq(newPoint.x)-sq(newPoint.z))/verticesWide;
-			newPoint.multiplyScalar(0.02)
-			hyperbolicParaboloid.geometry.vertices.push(newPoint);
-		}
-	}
-	insertPatchworkFaces(verticesWide, hyperbolicParaboloid.geometry.faces)
-	hyperbolicParaboloid.geometry.computeFaceNormals();
-	hyperbolicParaboloid.geometry.computeVertexNormals();
-	surfaces.push(hyperbolicParaboloid)
+	// var hyperbolicParaboloid = new THREE.Mesh(new THREE.Geometry(), surfaceMaterial);
+	// var verticesWide = 30;
+	// for(var i = 0; i < verticesWide; i++)
+	// {
+	// 	for(var j = 0; j < verticesWide; j++)
+	// 	{
+	// 		var newPoint = new THREE.Vector3((i-verticesWide/2),0,(j-verticesWide/2));
+	// 		newPoint.applyAxisAngle(yUnit,TAU/8)
+	// 		newPoint.y = (sq(newPoint.x)-sq(newPoint.z))/verticesWide;
+	// 		newPoint.multiplyScalar(0.02)
+	// 		hyperbolicParaboloid.geometry.vertices.push(newPoint);
+	// 	}
+	// }
+	// insertPatchworkFaces(verticesWide, hyperbolicParaboloid.geometry.faces)
+	// hyperbolicParaboloid.geometry.computeFaceNormals();
+	// hyperbolicParaboloid.geometry.computeVertexNormals();
+	// surfaces.push(hyperbolicParaboloid)
 
 	makeToroidalSurfaces(surfaces);
 
@@ -561,18 +408,24 @@ function makeProjectile(projectile, surfaces, numIterations, trail)
 					formerNormal.clone().negate().applyQuaternion(this.parent.quaternion) );
 
 				putSomewhereOnParentSurface(projectile, projectile.positionRayCaster,this.position.clone().applyMatrix4(this.parent.matrix));
-
-				//wouldn't need the if statement if all the normals were pointing in same direction
-				//won't work if you're doing non-orientable
-				if(formerNormal.dot(projectile.faceThatWeAreOn.normal) < 0 )
+				if(projectile.faceThatWeAreOn !== null)
 				{
-					var deltaQuaternion = new THREE.Quaternion().setFromUnitVectors(formerNormal.clone().negate(),projectile.faceThatWeAreOn.normal);
+					//wouldn't need the if statement if all the normals were pointing in same direction
+					//won't work if you're doing non-orientable
+					if(formerNormal.dot(projectile.faceThatWeAreOn.normal) < 0 )
+					{
+						var deltaQuaternion = new THREE.Quaternion().setFromUnitVectors(formerNormal.clone().negate(),projectile.faceThatWeAreOn.normal);
+					}
+					else
+					{
+						var deltaQuaternion = new THREE.Quaternion().setFromUnitVectors(formerNormal,projectile.faceThatWeAreOn.normal);
+					}
+					this.quaternion.premultiply(deltaQuaternion);
 				}
 				else
 				{
-					var deltaQuaternion = new THREE.Quaternion().setFromUnitVectors(formerNormal,projectile.faceThatWeAreOn.normal);
+					break;
 				}
-				this.quaternion.premultiply(deltaQuaternion);
 			}
 
 			if(trail !== undefined)
