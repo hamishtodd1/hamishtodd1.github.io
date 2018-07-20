@@ -183,7 +183,7 @@ function initCameraAndRendererResizeSystem(renderer)
 			else
 			{
 				var horizontalFov = camera.fov = fovGivenCenterToFrameDistance(AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0, camera.position.z )
-				camera.fov = otherFov(horizontalFov,camera.aspect,false)
+				camera.fov = otherFov( horizontalFov, camera.aspect, false )
 			}
 		}
 

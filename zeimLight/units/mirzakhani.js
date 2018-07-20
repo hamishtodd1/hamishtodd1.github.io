@@ -250,32 +250,35 @@ function initGeodesics()
 		var firingMachineGun = false
 		var bulletIndex = 0;
 
-		bindButton("m",function()
+		if(!PUBLIC_FACING)
 		{
-			firingMachineGun = !firingMachineGun
-
-			if(!firingMachineGun)
+			bindButton("m",function()
 			{
-				for(var i = 0; i < machineGunProjectiles.length; i++)
+				firingMachineGun = !firingMachineGun
+
+				if(!firingMachineGun)
 				{
-					if( machineGunProjectiles[i].parent )
+					for(var i = 0; i < machineGunProjectiles.length; i++)
 					{
-						machineGunProjectiles[i].parent.remove(machineGunProjectiles[i])
+						if( machineGunProjectiles[i].parent )
+						{
+							machineGunProjectiles[i].parent.remove(machineGunProjectiles[i])
+						}
 					}
 				}
-			}
-			else
-			{
-				if(ladybird.parent)
+				else
 				{
-					ladybird.parent.remove(ladybird)
+					if(ladybird.parent)
+					{
+						ladybird.parent.remove(ladybird)
+					}
+					if(trail.parent)
+					{
+						trail.parent.remove(trail)
+					}
 				}
-				if(trail.parent)
-				{
-					trail.parent.remove(trail)
-				}
-			}
-		}, "toggle machine gun")
+			}, "toggle machine gun")
+		}
 
 		objectsToBeUpdated.push(machineGun)
 		machineGun.update = function()
