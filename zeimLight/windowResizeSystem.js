@@ -27,8 +27,7 @@ function initSurroundings()
 	stage.material.metalness = 0.1;
 	stage.material.roughness = 0.2;
 	stage.receiveShadow = true;
-	//you only see the back half
-	// scene.add(stage)
+	scene.add(stage)
 
 	var pointLight = new THREE.PointLight(0xFFFFFF, 0.4, 5.3);
 	pointLight.shadow.camera.far = 10;
@@ -55,7 +54,6 @@ function initCameraZoomSystem()
 		camera.zoomProgress = 1;
 		setZoomToBeingConsidered(camera.defaultZ)
 		camera.updatePosition()
-		//and stuff about indicator
 	}
 
 	function smoothTween(start, end, t)
@@ -123,16 +121,20 @@ function initCameraZoomSystem()
 		new THREE.Vector3(-1,-a,0), new THREE.Vector3(-1,-a-1,0) )
 
 	var zoomToBeingConsidered;
-	document.onwheel = function (event)
+	if(PUBLIC_FACING)
 	{
-		event.preventDefault();
-		if(!event.ctrlKey)
+		document.onwheel = function (event)
 		{
-			var proposedZoomTo = zoomToBeingConsidered + 0.14 * event.deltaY / 250 * camera.defaultZ;
-			setZoomToBeingConsidered(proposedZoomTo)
-			timeSinceZoomToConsideration = 0;
+			event.preventDefault();
+			if(!event.ctrlKey)
+			{
+				var proposedZoomTo = zoomToBeingConsidered + 0.14 * event.deltaY / 250 * camera.defaultZ;
+				setZoomToBeingConsidered(proposedZoomTo)
+				timeSinceZoomToConsideration = 0;
+			}
 		}
 	}
+	
 	function setZoomToBeingConsidered(proposedZoomTo)
 	{
 		zoomToBeingConsidered = clamp( proposedZoomTo, 0.0001, camera.defaultZ)
@@ -146,9 +148,12 @@ function initCameraAndRendererResizeSystem(renderer)
 {
 	initCameraZoomSystem()
 
-	var audienceScreenIndicator = new THREE.Mesh(new THREE.RingBufferGeometry(Math.sqrt(2), Math.sqrt(2) + 0.1, 4, 1, TAU / 8), new THREE.MeshBasicMaterial({color:0xFF0000}));
-	camera.add(audienceScreenIndicator)
-	audienceScreenIndicator.position.z = -camera.near-0.0001
+	if(!PUBLIC_FACING)
+	{
+		var audienceScreenIndicator = new THREE.Mesh(new THREE.RingBufferGeometry(Math.sqrt(2), Math.sqrt(2) + 0.1, 4, 1, TAU / 8), new THREE.MeshBasicMaterial({color:0xFF0000}));
+		audienceScreenIndicator.position.z = -camera.near-0.0001
+		camera.add(audienceScreenIndicator)
+	}
 
 	function respondToResize() 
 	{
@@ -158,15 +163,31 @@ function initCameraAndRendererResizeSystem(renderer)
 
 		camera.setToDefaultZoom()
 
-		var audienceProportionOfWindowWidth = getAudienceProportionOfWindowWidth();
-		var horizontalCenterToFrameDistance = AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 / audienceProportionOfWindowWidth
+		if( !PUBLIC_FACING )
+		{
+			var audienceProportionOfWindowWidth = getAudienceProportionOfWindowWidth();
+			var horizontalCenterToFrameDistance = AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 / audienceProportionOfWindowWidth
 
-		var horizontalFov = fovGivenCenterToFrameDistance( horizontalCenterToFrameDistance, camera.position.z );
-		camera.fov = otherFov(horizontalFov,camera.aspect, false)
+			var horizontalFov = fovGivenCenterToFrameDistance( horizontalCenterToFrameDistance, camera.position.z );
+			camera.fov = otherFov(horizontalFov,camera.aspect, false)
+
+			audienceScreenIndicator.scale.x = centerToFrameDistance(horizontalFov, audienceScreenIndicator.position.z) * audienceProportionOfWindowWidth
+			audienceScreenIndicator.scale.y = audienceScreenIndicator.scale.x / AUDIENCE_ASPECT_RATIO;
+		}
+		else
+		{
+			if(camera.aspect > AUDIENCE_ASPECT_RATIO)
+			{
+				camera.fov = fovGivenCenterToFrameDistance(AUDIENCE_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0, camera.position.z )
+			}
+			else
+			{
+				var horizontalFov = camera.fov = fovGivenCenterToFrameDistance(AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0, camera.position.z )
+				camera.fov = otherFov(horizontalFov,camera.aspect,false)
+			}
+		}
+
 		camera.updateProjectionMatrix();
-
-		audienceScreenIndicator.scale.x = centerToFrameDistance(horizontalFov, audienceScreenIndicator.position.z) * audienceProportionOfWindowWidth
-		audienceScreenIndicator.scale.y = audienceScreenIndicator.scale.x / AUDIENCE_ASPECT_RATIO;
 	}
 	respondToResize();
 	window.addEventListener( 'resize', respondToResize, false );

@@ -1,26 +1,5 @@
 'use strict';
 /*
-	Description
-Credits
-Artan Sheshmani tribute https://www.youtube.com/watch?v=zO0jwL3spfQ
-
-Mirzakhani fields medal tribute, copyright Simons Foundation
-https://www.mathunion.org/imu-awards/fields-medal/fields-medals-2014
-
-Application of geodesics in computer graphics (one of many!)
-http://igl.ethz.ch/projects/developable/
-
-Tesla factory
-https://www.youtube.com/watch?v=Ta2lLJXkSss
-
-Mirzakhani talk
-https://www.youtube.com/watch?v=tprlQMClSYQ
-
-Seoul ceremony
-https://www.youtube.com/watch?v=8151azmRaVc
-
-Here is the citation for her being a muslim http://radianceweekly.in/portal/issue/bjp-fails-to-respect-sentiments-of-lok-sabha-polls/article/first-muslim-to-be-awarded-a-fields-medal/
-
 	Script outline. 4 things
 		Incredibly lovely and fun person, Not necessarily all that common in mathematics
 		first of any gender to get full marks at olympiad
@@ -74,33 +53,12 @@ function initGeodesics()
 
 	var surfaceMaterial = new THREE.MeshStandardMaterial({color:0x5050FF, side:THREE.DoubleSide});
 	var surfaces = [];
-
-	surfaces.push( new THREE.Mesh(new THREE.PlaneGeometry(0.75,0.75), surfaceMaterial ) )
-	surfaces.push( new THREE.Mesh(new THREE.EfficientSphereGeometry(0.3,4), surfaceMaterial) )
-
-	// var hyperbolicParaboloid = new THREE.Mesh(new THREE.Geometry(), surfaceMaterial);
-	// var verticesWide = 30;
-	// for(var i = 0; i < verticesWide; i++)
-	// {
-	// 	for(var j = 0; j < verticesWide; j++)
-	// 	{
-	// 		var newPoint = new THREE.Vector3((i-verticesWide/2),0,(j-verticesWide/2));
-	// 		newPoint.applyAxisAngle(yUnit,TAU/8)
-	// 		newPoint.y = (sq(newPoint.x)-sq(newPoint.z))/verticesWide;
-	// 		newPoint.multiplyScalar(0.02)
-	// 		hyperbolicParaboloid.geometry.vertices.push(newPoint);
-	// 	}
-	// }
-	// insertPatchworkFaces(verticesWide, hyperbolicParaboloid.geometry.faces)
-	// hyperbolicParaboloid.geometry.computeFaceNormals();
-	// hyperbolicParaboloid.geometry.computeVertexNormals();
-	// surfaces.push(hyperbolicParaboloid)
-
-	makeToroidalSurfaces(surfaces);
+	makeToroidalSurfaces(surfaces)
+	surfaces.push(makeRotationallySymmetricHandleBody(3))
 
 	for(var i = 0; i < surfaces.length; i++)
 	{
-		toysToBeArranged.push(surfaces[i])
+		scene.add(surfaces[i])
 		surfaces[i].castShadow = true;
 		clickables.push(surfaces[i])
 

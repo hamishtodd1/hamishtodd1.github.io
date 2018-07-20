@@ -1,11 +1,15 @@
-//charges that repel, including by the frame?
-//wouldn't even need to tween
-//also repelled by your head in the corner!
-//it's more likely to be: you put a recent object in 
 /*
+	charges that repel, including by the frame?
+	wouldn't even need to tween
+	also repelled by your head in the corner!
+	it's more likely to be: you put a recent object in 
+
 	When you put an object in the scene, it stays in place and everything else is repelled
 
-	Do the repelling in one frame, then tween them nicely.
+	Do the repelling to figure out where they go in one frame, then tween them nicely.
+
+	Could have a little circle with a little arrow pointing at the thing that came from it
+		And/or its name on the circle
 */
 
 function arrangeToys()

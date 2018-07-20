@@ -6,6 +6,8 @@
 		Subtleties in interactive learning is your raison d'etre, but here we are, making something non-interactive
 */
 
+var PUBLIC_FACING = false;
+
 function initButtons()
 {
 	var buttonBindings = {};
@@ -109,21 +111,7 @@ function initButtons()
 	var stage = initSurroundings();
 	initMouse();
 
-	/*
-		They are down there
-		There are panels at their positions
-		Click them (i.e. the panel surrounding them) and they'll tween in
-		Click the panel again and they tween back
-		If there's already a bunch in the scene, they tween to nice positions too
-
-		We're mostly thinking about pre-prepared graphs here.
-		Drag with right click
-
-		Two: side by side
-		Three: side by side by side
-		Four: Two and two
-		Five: Three on top, two on bottom
-	*/
+	
 
 	initImagesAndVideos();
 	{

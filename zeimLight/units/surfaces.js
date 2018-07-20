@@ -1,4 +1,3 @@
-'use strict';
 /*
 	Pevsner / ruled surfaces / stereographic projection
 		Bring back that lovely circle-enclosing-line
@@ -18,6 +17,8 @@
 		It is weird enough just to go inside a surface, it does not look how you expect
 */
 
+var makeRotationallySymmetricHandleBody = null
+
 function lerpSurfacesMadeOfPatchworks(from,To,t)
 {
 	/*
@@ -28,7 +29,7 @@ function lerpSurfacesMadeOfPatchworks(from,To,t)
 
 function makeToroidalSurfaces(surfaces)
 {
-	var s3SurfaceMaterial = surfaces[0].material.clone();
+	var s3SurfaceMaterial = new THREE.MeshStandardMaterial({color:0x5050FF, side:THREE.DoubleSide})
 	s3SurfaceMaterial.vertexColors = THREE.FaceColors;
 
 	var projectionOriginAsQuaternion = new THREE.Quaternion(1,0,0,0);
@@ -195,7 +196,7 @@ function makeToroidalSurfaces(surfaces)
 		return handleBody;
 	}
 
-	function makeRotationallySymmetricHandleBody(numArms)
+	makeRotationallySymmetricHandleBody = function(numArms)
 	{
 		var centerForTicks = new THREE.Vector2(0,0);
 		var armSideCenters = [];
@@ -222,70 +223,6 @@ function makeToroidalSurfaces(surfaces)
 			}
 		}
 		return makeHandleBody(arms)
-	}
-	surfaces.push( makeRotationallySymmetricHandleBody(3))
-	surfaces.push( makeRotationallySymmetricHandleBody(7))
-	surfaces.push( makeRotationallySymmetricHandleBody(2))
-
-	{
-		// var armSideCenters = [];
-		
-		// var nodes = [
-		// 	new THREE.Quaternion( 1,  1, 1, 0),
-		// 	new THREE.Quaternion(-1, -1, 1, 0),
-		// 	new THREE.Quaternion(1, -1, -1, 0),
-		// 	new THREE.Quaternion(-1, 1, -1, 0),
-		// ]
-		// nodes.forEach(function(node){node.normalize()})
-
-		// var wUnit = new THREE.Quaternion(0,0,0,1)
-
-		// //the arm centers are just plus or minus 1 for x,y,z, octahedron vertices
-		// //slerp in the direction of 
-		// //eh this'd be easy with a picture
-		// //probably you do not want it dependent on node thickness
-
-		// var armCenters = Array(6)
-		// var edgeIndices = [[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]]
-		// for(var i = 0; i < armCenters.length; i++)
-		// {
-		// 	armCenters[i] = nodes[edgeIndices[i][0]];
-		// 	armCenters[i].slerp( nodes[edgeIndices[i][1]], 0.5 );
-		// 	console.assert( Math.abs(armCenters[i].w) < 0.00001 )
-		// }
-		// var armSideCenters = Array(6);
-		// for(var i = 0; i < armSideCenters.length; i++)
-		// {
-		// 	armSideCenters[i] = [
-		// 		armCenters[i].clone()
-		// 	]
-		// }
-
-		// for(var i = 0; i < 1; i++)
-		// {
-		// 	arms[i] = {
-		// 		nodeLTop:	nodes[0].clone(),
-		// 		nodeLBot:	nodes[0].clone(),
-		// 		nodeRTop:	nodes[1].clone(),
-		// 		nodeRBot:	nodes[1].clone(),
-		// 	}
-
-		// 	//w is topward
-		// 	//these will still be on the surface of an S2
-		// 	arms[i].nodeLTop.slerp(wUnit,0.1)
-		// 	arms[i].nodeLBot.slerp(wUnit,-0.1)
-		// 	arms[i].nodeRTop.slerp(wUnit,0.1)
-		// 	arms[i].nodeRBot.slerp(wUnit,-0.1)
-
-		// 	var 
-
-		// 	arms[i].armSideCenters[nodes[0].clone().slerp(nodes[1])],
-		// 	arms[i].armSideCenters[i*2+0],
-		// 	arms[i].armSideCenters[i*2+1],
-		// 	arms[i].armSideCenters[moduloWithNegatives(i*2+2,numArms*2)],
-		// }
-
-		// surfaces.experimental = makeHandleBody(arms);
 	}
 }
 
