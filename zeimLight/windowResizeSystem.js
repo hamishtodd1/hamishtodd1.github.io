@@ -121,7 +121,7 @@ function initCameraZoomSystem()
 		new THREE.Vector3(-1,-a,0), new THREE.Vector3(-1,-a-1,0) )
 
 	var zoomToBeingConsidered;
-	if(PUBLIC_FACING)
+	if(!PUBLIC_FACING)
 	{
 		document.onwheel = function (event)
 		{
