@@ -6,7 +6,7 @@
 		Subtleties in interactive learning is your raison d'etre, but here we are, making something non-interactive
 */
 
-var PUBLIC_FACING = false;
+
 
 function initButtons()
 {
@@ -68,19 +68,6 @@ function initButtons()
 {
 	initButtons()
 
-	var platform = getPlatform()
-	if(platform === "phone" )
-	{
-		//and a message telling you it's better on desktop
-		var iframe = document.createElement("iframe");
-	    iframe.setAttribute("src","https://www.youtube.com/embed/agOdP2Bmieg"); 
-	    iframe.style.width  = window.innerWidth;
-	    iframe.style.height = window.innerHeight;
-
-	    document.body.appendChild(iframe);
-	    return;
-	}
-
 	var renderer = new THREE.WebGLRenderer({ antialias: true });
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setClearColor(0xFFFFFF) //youtube
@@ -111,14 +98,15 @@ function initButtons()
 	var stage = initSurroundings();
 	initMouse();
 
-	
-
-	initImagesAndVideos();
+	if(PUBLIC_FACING)
 	{
 		initGeodesics()
-
+	}
+	else
+	{
+		initImagesAndVideos();
+		initGeodesics()
 		initMirzakhaniGraphTheory()
-
 		arrangeToys()
 	}
 

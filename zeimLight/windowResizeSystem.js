@@ -220,5 +220,5 @@ function otherFov(inputFov,aspectRatio,inputIsVertical)
 
 function getAudienceProportionOfWindowWidth()
 {
-	return AUDIENCE_CENTER_TO_SIDE_OF_FRAME_PIXELS / (window.innerWidth*0.5*window.devicePixelRatio)
+	return AUDIENCE_CENTER_TO_SIDE_OF_FRAME_PIXELS * 2 / (window.innerWidth*window.devicePixelRatio)
 }
