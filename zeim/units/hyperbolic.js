@@ -1,4 +1,6 @@
 /*
+	Whoah, some statistical thing https://twitter.com/gabrielpeyre/status/1033957406714286081
+
 	maybe you just want to get the longest geodesic possible?
 	Maybe your projectile has a radius and it shouldn't get too close in a parallel-ish way
 

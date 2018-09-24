@@ -1,4 +1,8 @@
 /*
+	Programming by example
+		move the object the amount that it will move in a frame
+		On collision, do the thing that would be triggered by that collision
+
 	Extreme democratization: I am programming the game as you play it, but you can reprogram it, maybe even me
 
 	The way you show things should be similar to the way you program them; otherwise illustrating how they were made is extra work

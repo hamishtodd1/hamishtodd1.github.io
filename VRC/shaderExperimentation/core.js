@@ -1,24 +1,15 @@
 function init()
 {
-	var renderer,
-		scene,
-		camera,
-		myCanvas = document.getElementById('myCanvas');
-	
-	//RENDERER
-	renderer = new THREE.WebGLRenderer({
-	  canvas: myCanvas, 
+	var renderer = new THREE.WebGLRenderer({
+	  canvas: document.getElementById('myCanvas'), 
 	  antialias: true
 	});
 	renderer.setClearColor(0xffffff);
 	renderer.setPixelRatio(window.devicePixelRatio);
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	
-	//CAMERA
-	camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 300, 10000 );
-	
-	//SCENE
-	scene = new THREE.Scene();
+	var camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 300, 10000 );
+	var scene = new THREE.Scene();
 	
 	//Custom Shader Material
 	var whichMaterial = 2;
@@ -62,14 +53,12 @@ function init()
 	//attribute
 	var vertexDisplacement = new Float32Array(box.geometry.attributes.position.count);
 	
-	for (var i = 0; i < vertexDisplacement.length; i ++) {
+	for (var i = 0; i < vertexDisplacement.length; i ++)
+	{
 	    vertexDisplacement[i] = Math.sin(i);
 	}
 	
 	box.geometry.addAttribute('vertexDisplacement', new THREE.BufferAttribute(vertexDisplacement, 1));
-	
-	//RENDER LOOP
-	render();
 	
 	var delta = 0;
 	function render() 
@@ -78,7 +67,9 @@ function init()
 	
 	    //uniform
 		if(whichMaterial === 2)
+		{
 			material.uniforms.delta.value = 0.5 + Math.sin(delta) * 0.5;
+		}
 	
 	    //attribute
 	    for (var i = 0, il = vertexDisplacement.length; i < il; i ++) {
@@ -90,4 +81,5 @@ function init()
 	
 		requestAnimationFrame(render);
 	}
+	render();
 }

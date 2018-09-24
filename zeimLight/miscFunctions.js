@@ -1,3 +1,59 @@
+function insertPatchworkFaces(verticesWide, facesArray, startingIndex, colorFaces)
+{
+	var colors = [new THREE.Color(0,0,0),new THREE.Color(1,1,1)];
+
+	if(startingIndex === undefined)
+	{
+		startingIndex = 0
+	}
+
+	for(var i = 1; i < verticesWide; i++)
+	{
+		for(var j = 1; j < verticesWide; j++)
+		{
+			var tl = (i-1)*verticesWide + (j-1) + startingIndex;
+			var tr = (i-1)*verticesWide + j + startingIndex;
+			var bl = i*verticesWide + (j-1) + startingIndex;
+			var br = i*verticesWide + j + startingIndex;
+
+			if( colorFaces === undefined )
+			{
+				facesArray.push(new THREE.Face3(tl,bl,tr))
+				facesArray.push(new THREE.Face3(bl,br,tr))
+			}
+			else
+			{
+				if( !(i%2) ) //row!
+				{
+					if(!(j%2))
+					{
+						facesArray.push(new THREE.Face3(tl,tr,bl, new THREE.Vector3(), colors[0]))
+						facesArray.push(new THREE.Face3(bl,tr,br, new THREE.Vector3(), colors[1]))
+					}
+					else
+					{
+						facesArray.push(new THREE.Face3(tl,tr,br, new THREE.Vector3(), colors[0]))
+						facesArray.push(new THREE.Face3(bl,tl,br, new THREE.Vector3(), colors[1]))
+					}
+				}
+				else
+				{
+					if(!(j%2))
+					{
+						facesArray.push(new THREE.Face3(tl,tr,br, new THREE.Vector3(), colors[1]))
+						facesArray.push(new THREE.Face3(bl,tl,br, new THREE.Vector3(), colors[0]))
+					}
+					else
+					{
+						facesArray.push(new THREE.Face3(tl,tr,bl, new THREE.Vector3(), colors[1]))
+						facesArray.push(new THREE.Face3(bl,tr,br, new THREE.Vector3(), colors[0]))
+					}
+				}
+			}
+		}
+	}
+}
+
 //to be called every frame from the start. Must be called at the veeeery top
 function checkForNewGlobals()
 {

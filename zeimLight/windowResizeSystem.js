@@ -2,7 +2,7 @@
 
 function initSurroundings()
 {
-	var backwardExtension = 0.6;
+	var backwardExtension = 1.6;
 	var stage = new THREE.Mesh( 
 		new THREE.BoxGeometry(2*AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0,2*AUDIENCE_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0,backwardExtension),
 		new THREE.MeshStandardMaterial({side:THREE.BackSide, vertexColors:THREE.FaceColors})
@@ -190,6 +190,17 @@ function initCameraAndRendererResizeSystem(renderer)
 		camera.updateProjectionMatrix();
 	}
 	respondToResize();
+
+	// console.log(camera.view)
+	// camera.setViewOffset(
+	// 	camera.view.fullWidth,
+	// 	camera.view.fullHieght,
+	// 	camera.view.offsetX,
+	// 	0.1,
+	// 	camera.view.width,
+	// 	camera.view.height)
+	// camera.updateProjectionMatrix();
+	
 	window.addEventListener( 'resize', respondToResize, false );
 }
 

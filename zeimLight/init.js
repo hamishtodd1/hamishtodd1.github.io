@@ -6,8 +6,6 @@
 		Subtleties in interactive learning is your raison d'etre, but here we are, making something non-interactive
 */
 
-
-
 function initButtons()
 {
 	var buttonBindings = {};
@@ -98,17 +96,21 @@ function initButtons()
 	var stage = initSurroundings();
 	initMouse();
 
-	if(PUBLIC_FACING)
-	{
-		initGeodesics()
-	}
-	else
-	{
-		initImagesAndVideos();
-		initGeodesics()
-		initMirzakhaniGraphTheory()
-		arrangeToys()
-	}
+	// if(PUBLIC_FACING)
+	// {
+	// 	initGeodesics()
+	// }
+	// else
+	// {
+	// 	initImagesAndVideos();
+	// 	// initGeodesics()
+	// 	// initMirzakhaniGraphTheory()
+	// 	arrangeToys()
+	// }
+	// initStereographicTwoSphere()
+	initShaderExperimentation()
+
+	// initIrreg()
 
 	render();
 })();

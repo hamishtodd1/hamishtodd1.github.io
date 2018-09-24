@@ -32,6 +32,8 @@ function makeTextSign(text)
 		context.fillText(text, canvas.width / 2, canvas.height / 2);
 
 		sign.scale.x = sign.scale.y * canvas.width/canvas.height;
+
+		sign.material.map.needsUpdate = true
 	}
 
 	sign.updateText(text)

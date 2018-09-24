@@ -146,7 +146,7 @@ function initSnapShapes(allPolyhedra)
 			face.center = new THREE.Vector3();
 			faces.push(face);
 
-			if(log)
+			if( log )
 			{
 				var facesString = "[";
 				for(var i = 0; i < faces.length; i++)
