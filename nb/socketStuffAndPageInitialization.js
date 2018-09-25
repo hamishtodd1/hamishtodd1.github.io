@@ -20,8 +20,6 @@
 // 	socket.on("chapter update",updateChapter)
 // })();
 
-init()
-
 function bestowTeacherControls()
 {
 	isTeacher = true

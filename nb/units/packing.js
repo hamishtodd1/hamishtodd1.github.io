@@ -80,7 +80,7 @@
 	That gets you the rotation intuition
 */
 
-function initPacking()
+function initPacking(chapter)
 {
 	{
 		var packCounter = makeTextSign("")
@@ -96,35 +96,35 @@ function initPacking()
 		packCounter.excitedness = 0;
 	}
 
-	{
-		var rightArrow = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({side:THREE.DoubleSide, color:0xFF0000}))
-		rightArrow.geometry.vertices.push(new THREE.Vector3(0,0,0),new THREE.Vector3(-1,1,0),new THREE.Vector3(-1,-1,0))
-		rightArrow.geometry.faces.push(new THREE.Face3(0,1,2))
-		rightArrow.scale.multiplyScalar(0.07)
-		var leftArrow = rightArrow.clone()
-		leftArrow.scale.x *= -1
-		rightArrow.position.x = 1
-		leftArrow.position.x = -1
+	// {
+	// 	var rightArrow = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({side:THREE.DoubleSide, color:0xFF0000}))
+	// 	rightArrow.geometry.vertices.push(new THREE.Vector3(0,0,0),new THREE.Vector3(-1,1,0),new THREE.Vector3(-1,-1,0))
+	// 	rightArrow.geometry.faces.push(new THREE.Face3(0,1,2))
+	// 	rightArrow.scale.multiplyScalar(0.07)
+	// 	var leftArrow = rightArrow.clone()
+	// 	leftArrow.scale.x *= -1
+	// 	rightArrow.position.x = 1
+	// 	leftArrow.position.x = -1
 
-		camera.add(rightArrow,leftArrow)
-		leftArrow.position.z = rightArrow.position.z = -camera.position.z
+	// 	camera.add(rightArrow,leftArrow)
+	// 	leftArrow.position.z = rightArrow.position.z = -camera.position.z
 
-		clickables.push(rightArrow)
-		rightArrow.onClick = function()
-		{
-			for(var i = scene.children.length-1; i > -1; i--)
-			{
-				if(scene.children[i] !== camera)
-				{
-					scene.remove(scene.children[i])
-				}
-			}
-		}
-		clickables.push(leftArrow)
-		leftArrow.onClick = function()
-		{
-		}
-	}
+	// 	clickables.push(rightArrow)
+	// 	rightArrow.onClick = function()
+	// 	{
+	// 		for(var i = scene.children.length-1; i > -1; i--)
+	// 		{
+	// 			if(scene.children[i] !== camera)
+	// 			{
+	// 				scene.remove(scene.children[i])
+	// 			}
+	// 		}
+	// 	}
+	// 	clickables.push(leftArrow)
+	// 	leftArrow.onClick = function()
+	// 	{
+	// 	}
+	// }
 
 	{
 		var orbitControls = {}
@@ -172,9 +172,9 @@ function initPacking()
 	// 	scene.add(resetButton)
 	// }
 
-	// initManualPacking(packCounter)
-	initResizingRectangle(packCounter) 
-	// initMultipleChoice()
+	if(chapter === 0) initManualPacking(packCounter)
+	if(chapter === 1) initResizingRectangle(packCounter)
+	if(chapter === 2) initMultipleChoice()
 	return
 
 	{
@@ -254,39 +254,25 @@ function initMultipleChoice()
 	var countdownTilNext = Infinity;
 	var correctAnswer = null
 
-	var primeNumbers = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,51]
-
-	// var correctSign = makeTextSign("Correct!")
-	// correctSign.material.color.setRGB(0,1,0)
-	// var incorrectSign = makeTextSign("Incorrect!")
-	// incorrectSign.material.color.setRGB(1,0,0)
-	// var signs = [correctSign,incorrectSign]
-	// for(var i = 0; i < signs.length; i++)
-	// {
-	// 	signs[i].visible = false
-	// 	signs[i].scale.multiplyScalar( 4 )
-	// 	scene.add( signs[i] )
-	// }
-
-	var dimensionsInCuboids = new THREE.Vector3(5,5,5)
-	var smallunDimensions = new THREE.Vector3(0.1,0.1,0.1)
-	//IT AIN'T LINING UP
-	var smallun = ResizingCuboid(smallunDimensions,new THREE.Vector3(-0.5,0,0),true,false,true)
-
-	var biggunDimensions = smallunDimensions.clone().multiply( dimensionsInCuboids )
-	biggunDimensions.multiplyScalar(1.01)
-	var biggun = ResizingCuboid(biggunDimensions,new THREE.Vector3(0.3,0,0),true,false,true)
-	for(var i = 0; i < biggun.cuboidsInside.length; i++)
-	{
-		biggun.cuboidsInside[i].place(smallunDimensions)
-	}
-
 	var answers = []
 	setUpQuestion = function()
 	{
-		var correctValue = 100
+		var dimensionsInCuboids = new THREE.Vector3(Math.floor(Math.random()*10),Math.floor(Math.random()*7),Math.floor(Math.random()*7))
+		var smallunDimensions = new THREE.Vector3(0.1,0.2,0.1)
+		var smallun = ResizingCuboid(smallunDimensions,new THREE.Vector3(-0.5,0,0),true,false,true)
 
-		var numPresentedAnswers = 9; //also the minimum correct answer
+		var biggunDimensions = dimensionsInCuboids.clone().multiply(smallunDimensions).multiplyScalar(1.01)
+		var biggun = ResizingCuboid(biggunDimensions,new THREE.Vector3(0.3,0,0),true,false,true)
+		for(var i = 0; i < biggun.cuboidsInside.length; i++)
+		{
+			biggun.cuboidsInside[i].place(smallunDimensions)
+			biggun.cuboidsInside[i].visible = false
+		}
+
+		var correctValue = dimensionsInCuboids.x * dimensionsInCuboids.y * dimensionsInCuboids.z
+
+		var numPresentedAnswers = 9;
+		console.assert(correctValue >= numPresentedAnswers)
 		var whereCorrectValueIsInAnswers = Math.floor( Math.random() * numPresentedAnswers )
 		var lowestAnswerToPresent = correctValue - whereCorrectValueIsInAnswers;
 		for(var i = 0; i < numPresentedAnswers; i++ )
@@ -310,7 +296,12 @@ function initMultipleChoice()
 					this.material.color.setRGB(1,0,0)
 				}
 				countdownTilNext = 2.3
-				scene.remove(adviceSign)
+				// scene.remove(adviceSign)
+
+				for(var i = 0; i < biggun.cuboidsInside.length; i++)
+				{
+					biggun.cuboidsInside[i].visible = checkBoxMeshContainment(biggun,biggun.cuboidsInside[i])
+				}
 			}
 		}
 	}
@@ -330,6 +321,12 @@ function initMultipleChoice()
 
 		if(countdownTilNext < 0)
 		{
+			var hackSign = makeTextSign("Press F5")
+			hackSign.material.depthTest = false
+			hackSign.position.y = 0.4
+			hackSign.scale.multiplyScalar(4)
+			scene.add(hackSign)
+
 			countdownTilNext = Infinity
 			correctAnswer.material.color.setRGB(1,1,1)
 
@@ -342,7 +339,7 @@ function initMultipleChoice()
 			}
 			answers = []
 
-			setUpQuestion()
+			// setUpQuestion()
 		}
 	}
 }
@@ -353,8 +350,8 @@ function initResizingRectangle(packCounter)
 	// camera.rotation.y += TAU / 8
 	// scene.rotation.y += TAU/8
 
-	var containingCuboid = ResizingCuboid(new THREE.Vector3(1.0,1.0,1.0),new THREE.Vector3(0.4,0,0),false,true,true)
-	var cuboidToAffectLittleOnes = ResizingCuboid(new THREE.Vector3(0.3,0.3,0.3),new THREE.Vector3(-0.5,0,0),false,true,false)
+	var containingCuboid = ResizingCuboid(new THREE.Vector3(0.5,0.5,0.5),new THREE.Vector3(0.4,0,0),false,true,true)
+	var cuboidToAffectLittleOnes = ResizingCuboid(new THREE.Vector3(0.15,0.15,0.15),new THREE.Vector3(-0.5,0,0),false,true,false)
 
 	for(var i = 0; i < containingCuboid.cuboidsInside.length; i++)
 	{
@@ -391,7 +388,6 @@ function measuringStick(sideLength)
 	var cmMarkers = Array(Math.floor(numMarkers) )
 	var markerLength = markerThickness*4
 	var cmMarkerGeometry = new THREE.CylinderBufferGeometryUncentered(markerThickness/2,markerLength).applyMatrix(new THREE.Matrix4().makeRotationZ(-TAU/4))
-
 	for( var i = 0; i < cmMarkers.length; i++ )
 	{
 		cmMarkers[i] = new THREE.Mesh(
@@ -399,19 +395,22 @@ function measuringStick(sideLength)
 			markerMaterial)
 		cmMarkers[i].position.y = i * markerSpacing
 		cmMarkers[i].position.x = lengthMarker.position.x - markerLength
-		lengthMarker.add( cmMarkers[i] )
-		
+
 		// cmMarkers[i].numberSign = makeTextSign( i.toString() )
 		// cmMarkers[i].numberSign.position.x = -markerLength/2
 		// cmMarkers[i].add( cmMarkers[i].numberSign ) //sure you need these?
+
+		lengthMarker.add( cmMarkers[i] )
 	}
 
-	lengthMarker.updateCmMarkers = function(newRotation)
+	lengthMarker.updateCmMarkers = function()
 	{
-		for(var i = 0; i < cmMarkers.length; i++)
-		{
-			cmMarkers[i].numberSign.rotation.copy(newRotation)
-		}
+		// for(var i = 0; i < cmMarkers.length; i++)
+		// {
+		// 	cmMarkers[i].numberSign.rotation.x = -lengthMarker.rotation.x
+		// 	cmMarkers[i].numberSign.rotation.y = -lengthMarker.rotation.y
+		// 	cmMarkers[i].numberSign.rotation.z = -lengthMarker.rotation.z
+		// }
 	}
 
 	return lengthMarker
@@ -419,7 +418,7 @@ function measuringStick(sideLength)
 
 function ResizingCuboid(dimensions,position,measurementMarkers,modifiable,filled)
 {
-	var cuboidInitialDimension = 0.5
+	var cuboidInitialDimension = 1.0
 	var binColor = new THREE.Color(0.8,0.8,0.8);
 	var transparentMaterial = new THREE.MeshPhongMaterial({transparent:true, opacity: 0.3, color:binColor})
 	var cuboid = new THREE.Mesh(new THREE.CubeGeometry(cuboidInitialDimension,cuboidInitialDimension,cuboidInitialDimension), transparentMaterial)
@@ -577,7 +576,7 @@ function ResizingCuboid(dimensions,position,measurementMarkers,modifiable,filled
 
 	if(filled)
 	{
-		var dimensionsInCuboids = new THREE.Vector3(5,5,5)
+		var dimensionsInCuboids = new THREE.Vector3(9,9,9)
 		var cuboidsInside = Array(Math.round(dimensionsInCuboids.x*dimensionsInCuboids.y*dimensionsInCuboids.z) );
 		cuboid.cuboidsInside = cuboidsInside
 		var placeholderGeo = new THREE.BoxBufferGeometry(1,1,1).applyMatrix(new THREE.Matrix4().makeTranslation(0.5,0.5,0.5))
@@ -591,7 +590,7 @@ function ResizingCuboid(dimensions,position,measurementMarkers,modifiable,filled
 			{
 				this.scale.copy(dimensions)
 
-				this.position.set(this.i,this.j,this.k)
+				this.position.set(-this.i,this.j,this.k)
 				this.position.multiply(dimensions)
 				this.position.add(cuboid.geometry.vertices[3])
 
@@ -617,17 +616,9 @@ function ResizingCuboid(dimensions,position,measurementMarkers,modifiable,filled
 			var lengthMarker = measuringStick( dimensions.getComponent(i) )
 			scene.add(lengthMarker)
 			lengthMarker.position.copy( cuboid.geometry.vertices[7] )
-			if(i===1)
-			{
-				lengthMarker.rotation.x -= TAU/4
-				// lengthMarker.updateCmMarkers( new THREE.Euler(-lengthMarker.rotation.x,-lengthMarker.rotation.y,-lengthMarker.rotation.z) )
-			}
-			if(i===2)
-			{
-				lengthMarker.rotation.x += TAU/4;
-				lengthMarker.rotation.z -= TAU/4
-				// lengthMarker.updateCmMarkers(new THREE.Euler(0,TAU/2,0))
-			}
+			if(i===1) lengthMarker.rotation.x -= TAU/4
+			if(i===2) {lengthMarker.rotation.z -= TAU*3/4;lengthMarker.rotation.y -= TAU/2;}
+			lengthMarker.updateCmMarkers()
 		}
 	}
 	cuboid.updateVerticesAndEdges()
