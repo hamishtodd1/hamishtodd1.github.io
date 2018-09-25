@@ -63,46 +63,16 @@ function init( ourID )
 	initCameraAndRendererResizeSystem(renderer);
 	initMouse();
 
-	var teacherChecker = {}
-	var sequenceStage = 0
-	var password = [0]//[0,1,3,2,0,1,3,2,0,1,3,2,3]
-	teacherChecker.update = function()
-	{
-		if( mouse.clicking && !mouse.oldClicking )
-		{
-			var mousePosition = mouse.rayIntersectionWithZPlane(0)
-			var quadrant = 0
-			if( mousePosition.y > 0 )
-			{
-				quadrant = quadrant | 1
-			}
-			if(mousePosition.x > 0)
-			{
-				quadrant = quadrant | 2
-			}
-
-			if( password[ sequenceStage ] === quadrant )
-			{
-				sequenceStage++
-				if(sequenceStage === password.length)
-				{
-					sequenceStage = 0
-					socket.emit("This is the teacher")
-				}
-			}
-			else
-			{
-				sequenceStage = 0
-			}
-		}
-	}
-	objectsToBeUpdated.push(teacherChecker)
-
 	initPacking()
 	// initClt();
 
 	// var sliderSystem = SliderSystem(function(val){s.scale.y = val}, 0.5, function(){}, true)
 	// scene.add(sliderSystem)
+
+	if(typeof socket === "undefined")
+	{
+		bestowTeacherControls()
+	}
 
 	render();
 }
