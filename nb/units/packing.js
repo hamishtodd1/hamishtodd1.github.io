@@ -142,6 +142,7 @@ function initPacking(chapter)
 					if( Math.abs( displacement.x ) > Math.abs( displacement.y ) )
 					{
 						camera.rotation.y += displacement.x * 0.3;
+						camera.rotation.y = clamp(camera.rotation.y,-0.16,0.16)
 					}
 				}
 				else
@@ -172,9 +173,13 @@ function initPacking(chapter)
 	// 	scene.add(resetButton)
 	// }
 
-	if(chapter === 0) initManualPacking(packCounter)
+	if(chapter === 0) initManualPacking(packCounter,true)
 	if(chapter === 1) initResizingRectangle(packCounter)
 	if(chapter === 2) initMultipleChoice()
+	if(chapter === 3)
+	{
+		initManualPacking(packCounter,false)
+	}
 	return
 
 	{
@@ -257,12 +262,18 @@ function initMultipleChoice()
 	var answers = []
 	setUpQuestion = function()
 	{
-		var dimensionsInCuboids = new THREE.Vector3(Math.floor(Math.random()*10),Math.floor(Math.random()*7),Math.floor(Math.random()*7))
-		var smallunDimensions = new THREE.Vector3(0.1,0.2,0.1)
+		var dimensionsInCuboids = new THREE.Vector3()
+		var smallunDimensions = new THREE.Vector3()
+		var maxDimensions = [4,4,4]
+		for(var i = 0; i < 3; i++)
+		{
+			smallunDimensions.setComponent(i,0.1 * (Math.floor( Math.random() * 3)+1))
+			dimensionsInCuboids.setComponent(i, Math.max(2,(Math.floor( Math.random() * maxDimensions[i] )) ) )
+		}
 		var smallun = ResizingCuboid(smallunDimensions,new THREE.Vector3(-0.5,0,0),true,false,true)
 
 		var biggunDimensions = dimensionsInCuboids.clone().multiply(smallunDimensions).multiplyScalar(1.01)
-		var biggun = ResizingCuboid(biggunDimensions,new THREE.Vector3(0.3,0,0),true,false,true)
+		var biggun = ResizingCuboid(biggunDimensions,new THREE.Vector3(0.25,0,0),true,false,true)
 		for(var i = 0; i < biggun.cuboidsInside.length; i++)
 		{
 			biggun.cuboidsInside[i].place(smallunDimensions)
@@ -295,6 +306,10 @@ function initMultipleChoice()
 				{
 					this.material.color.setRGB(1,0,0)
 				}
+				else
+				{
+					correctSign.material.opacity = 1
+				}
 				countdownTilNext = 2.3
 				// scene.remove(adviceSign)
 
@@ -306,6 +321,14 @@ function initMultipleChoice()
 		}
 	}
 	setUpQuestion()
+
+	var correctSign = makeTextSign("Correct!")
+	correctSign.material.color.setRGB(0,1,0)
+	correctSign.scale.multiplyScalar(3)
+	correctSign.position.set(-0.5,-0.34,0)
+	correctSign.material.transparent = true
+	correctSign.material.opacity = 0.0001
+	scene.add(correctSign)
 
 	var handler = {}
 	objectsToBeUpdated.push(handler)
@@ -321,10 +344,9 @@ function initMultipleChoice()
 
 		if(countdownTilNext < 0)
 		{
-			var hackSign = makeTextSign("Press F5")
+			var hackSign = new THREE.Mesh(new THREE.PlaneGeometry(0.8,0.2), new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load('data/textures/refresh.jpg'),side:THREE.DoubleSide}) )
 			hackSign.material.depthTest = false
 			hackSign.position.y = 0.4
-			hackSign.scale.multiplyScalar(4)
 			scene.add(hackSign)
 
 			countdownTilNext = Infinity
@@ -379,7 +401,8 @@ function initResizingRectangle(packCounter)
 function measuringStick(sideLength)
 {
 	var markerSpacing = 0.1
-	var numMarkers = Math.max(sideLength / markerSpacing,3)
+	var numMarkers = Math.max(sideLength / markerSpacing + 1,3)
+	console.log(sideLength,numMarkers)
 	var markerThickness = 0.01
 	var markerMaterial = new THREE.MeshBasicMaterial({color:0x0000FF})
 	var lengthMarker = new THREE.Mesh(
@@ -613,11 +636,21 @@ function ResizingCuboid(dimensions,position,measurementMarkers,modifiable,filled
 	{
 		for(var i = 0; i < 3; i++)
 		{
-			var lengthMarker = measuringStick( dimensions.getComponent(i) )
+			var lengthMarker = measuringStick( dimensions.getComponent(i) ) 
 			scene.add(lengthMarker)
-			lengthMarker.position.copy( cuboid.geometry.vertices[7] )
-			if(i===1) lengthMarker.rotation.x -= TAU/4
-			if(i===2) {lengthMarker.rotation.z -= TAU*3/4;lengthMarker.rotation.y -= TAU/2;}
+			if(position.x > 0)
+			{
+				lengthMarker.position.copy( cuboid.geometry.vertices[7] )
+				if(i===0) {lengthMarker.rotation.z -= TAU*3/4;lengthMarker.rotation.y -= TAU/2;}
+				if(i===2) lengthMarker.rotation.x -= TAU/4
+			}
+			else
+			{
+				lengthMarker.position.copy( cuboid.geometry.vertices[2] )
+				if(i===0) {lengthMarker.rotation.z += TAU/4;}
+				if(i===1) {lengthMarker.rotation.y += TAU/2;}
+				if(i===2) {lengthMarker.rotation.y += TAU/2;lengthMarker.rotation.x -= TAU/4;}
+			}
 			lengthMarker.updateCmMarkers()
 		}
 	}
@@ -685,8 +718,10 @@ function initCircleOnSpherePacking()
 	}
 }
 
-function initManualPacking(packCounter)
+var objectsToBeRotated = []
+function initManualPacking(packCounter,haveRotateButton)
 {
+	if(haveRotateButton)
 	{
 		var rotateButton = makeTextSign( "Rotate" )
 		rotateButton.geometry = new THREE.OriginCorneredPlaneBufferGeometry(0.05,0.05)
@@ -697,7 +732,6 @@ function initManualPacking(packCounter)
 		camera.add(rotateButton)
 		rotateButton.position.z = -camera.position.z
 
-		objectsToBeRotated = []
 		var rotationQueued = 0;
 
 		clickables.push(rotateButton)
@@ -748,7 +782,14 @@ function initManualPacking(packCounter)
 
 	var originalCuboidPosition = new THREE.Vector3(0,1/ (16/9),0)
 
-	var binDimensions = new THREE.Vector3(0.4,0.21,0.4)
+	if(haveRotateButton)
+	{
+		var binDimensions = new THREE.Vector3(0.41,0.21,0.41)
+	}
+	else
+	{
+		var binDimensions = new THREE.Vector3(0.41,0.41,0.41)
+	}
 	var binGeometry = new THREE.BoxGeometry(binDimensions.x,binDimensions.y,binDimensions.z);
 	binGeometry.applyMatrix(new THREE.Matrix4().makeTranslation( binDimensions.x/2,binDimensions.y/2,binDimensions.z/2 ))
 	binGeometry.computeBoundingBox();
@@ -783,7 +824,14 @@ function initManualPacking(packCounter)
 
 		if( !thereIsALooseOne && !mouse.clicking )
 		{
-			var newCuboid = Cuboid(0.2,0.1,0.1)
+			if(haveRotateButton)
+			{
+				var newCuboid = Cuboid(0.2,0.1,0.1)
+			}
+			else
+			{
+				var newCuboid = Cuboid(0.1,0.1,0.1)
+			}
 			newCuboid.position.copy(originalCuboidPosition)
 		}
 
