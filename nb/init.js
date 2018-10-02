@@ -35,7 +35,7 @@
 	Various ways teachers could be “pranked”. One problem is you don’t know which kids have which laptops.
 */
 
-function init(chapter)
+function init( ourID )
 {
 	var renderer = new THREE.WebGLRenderer({ antialias: true });
 	document.body.appendChild( renderer.domElement );
@@ -63,16 +63,8 @@ function init(chapter)
 	initCameraAndRendererResizeSystem(renderer);
 	initMouse();
 
-	initPacking(chapter)
-	// initClt();
-
-	// var sliderSystem = SliderSystem(function(val){s.scale.y = val}, 0.5, function(){}, true)
-	// scene.add(sliderSystem)
-
-	// if(typeof socket === "undefined")
-	// {
-	// 	bestowTeacherControls()
-	// }
+	// initPacking()
+	initClt();
 
 	render();
 }

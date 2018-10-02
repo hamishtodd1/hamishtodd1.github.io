@@ -20,6 +20,8 @@
 // 	socket.on("chapter update",updateChapter)
 // })();
 
+init()
+
 function bestowTeacherControls()
 {
 	isTeacher = true
@@ -32,18 +34,18 @@ function bestowTeacherControls()
 	leftArrow.scale.x *= -1
 	rightArrow.position.x = 1
 	leftArrow.position.x = -1
-
-	camera.add(rightArrow,leftArrow)
-	leftArrow.position.z = rightArrow.position.z = -camera.position.z
+	scene.add(rightArrow,leftArrow)
 
 	clickables.push(rightArrow)
 	rightArrow.onClick = function()
 	{
 		chapter++
+		socket.emit("chapter update",chapter)
 	}
 	clickables.push(leftArrow)
 	leftArrow.onClick = function()
 	{
 		chapter--
+		socket.emit("chapter update",chapter)
 	}
 }

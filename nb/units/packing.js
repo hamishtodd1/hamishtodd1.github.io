@@ -80,7 +80,7 @@
 	That gets you the rotation intuition
 */
 
-function initPacking(chapter)
+function initPacking()
 {
 	{
 		var packCounter = makeTextSign("")
@@ -173,13 +173,9 @@ function initPacking(chapter)
 	// 	scene.add(resetButton)
 	// }
 
-	if(chapter === 0) initManualPacking(packCounter,true)
-	if(chapter === 1) initResizingRectangle(packCounter)
-	if(chapter === 2) initMultipleChoice()
-	if(chapter === 3)
-	{
-		initManualPacking(packCounter,false)
-	}
+	// initManualPacking(packCounter,true)
+	// initResizingRectangle(packCounter)
+	initMultipleChoice()
 	return
 
 	{
@@ -262,28 +258,99 @@ function initMultipleChoice()
 	var answers = []
 	setUpQuestion = function()
 	{
-		var dimensionsInCuboids = new THREE.Vector3()
+		var dimensionsInCuboids = new THREE.Vector3(3,3,3)
+		// for(var i = 0; i < 3; i++)
+		// {
+		// 	dimensionsInCuboids.setComponent(i, Math.max(2,(Math.floor( Math.random() * maxDimensions[i] )) ) )
+		// }
+
 		var smallunDimensions = new THREE.Vector3()
 		var maxDimensions = [4,4,4]
 		for(var i = 0; i < 3; i++)
 		{
 			smallunDimensions.setComponent(i,0.1 * (Math.floor( Math.random() * 3)+1))
-			dimensionsInCuboids.setComponent(i, Math.max(2,(Math.floor( Math.random() * maxDimensions[i] )) ) )
 		}
-		var smallun = ResizingCuboid(smallunDimensions,new THREE.Vector3(-0.5,0,0),true,false,true)
+		var smallunPosition = new THREE.Vector3(-0.5,0,0)
+		var smallun = ResizingCuboid(smallunDimensions,smallunPosition,true,false,false)
 
-		var biggunDimensions = dimensionsInCuboids.clone().multiply(smallunDimensions).multiplyScalar(1.01)
-		var biggun = ResizingCuboid(biggunDimensions,new THREE.Vector3(0.25,0,0),true,false,true)
+		var biggunDimensions = smallunDimensions.clone().multiply(dimensionsInCuboids).multiplyScalar(1.01)
+		var biggun = ResizingCuboid(biggunDimensions,new THREE.Vector3(0.25,0,0),true,false,true,dimensionsInCuboids)
 		for(var i = 0; i < biggun.cuboidsInside.length; i++)
 		{
 			biggun.cuboidsInside[i].place(smallunDimensions)
-			biggun.cuboidsInside[i].visible = false
+			// biggun.cuboidsInside[i].visible = false
 		}
 
+		var movementSegment = 0;
+		var standIn = {}
+		var numSegments = dimensionsInCuboids.x + (dimensionsInCuboids.y-1) + (dimensionsInCuboids.z-1)
+		var cuboidsMovingInSegments = Array(Math.round(numSegments))
+		for(var i = 0 ; i < numSegments; i++)
+		{
+			cuboidsMovingInSegments[i] = []
+		}
+
+		var lowestUnallocatedCuboidIndex = 0
+		var segmentIndex = 0;
+		for(segmentIndex; segmentIndex < dimensionsInCuboids.x; segmentIndex++)
+		{
+			cuboidsMovingInSegments[segmentIndex].push(biggun.cuboidsInside[lowestUnallocatedCuboidIndex])
+			lowestUnallocatedCuboidIndex++
+		}
+
+		for(segmentIndex; segmentIndex < dimensionsInCuboids.x + dimensionsInCuboids.y - 1; segmentIndex++)
+		{
+			for(var j = 0; j < dimensionsInCuboids.x; j++)
+			{
+				console.log("uo")
+				cuboidsMovingInSegments[segmentIndex].push(biggun.cuboidsInside[lowestUnallocatedCuboidIndex])
+				lowestUnallocatedCuboidIndex++
+			}
+		}
+
+		for(segmentIndex; segmentIndex < cuboidsMovingInSegments.length; segmentIndex++)
+		{
+			for(var i = 0; i < dimensionsInCuboids.x; i++)
+			{
+				for(var j = 0; j < dimensionsInCuboids.y; j++)
+				{
+					cuboidsMovingInSegments[segmentIndex].push(biggun.cuboidsInside[lowestUnallocatedCuboidIndex])
+					lowestUnallocatedCuboidIndex++
+				}
+			}
+		}
+		
+		console.log(cuboidsMovingInSegments)
+		objectsToBeUpdated.push(standIn)
+		standIn.update = function()
+		{
+			movementSegment += frameDelta
+			movementSegment = clamp(movementSegment,0,cuboidsMovingInSegments.length-1)
+			var currentSegment = cuboidsMovingInSegments[Math.floor(movementSegment)]
+			for(var i = 0; i < biggun.cuboidsInside.length; i++)
+			{
+				var cuboidInside = biggun.cuboidsInside[i]
+				if( currentSegment.indexOf( cuboidInside ) !== -1)
+				{
+					cuboidInside.position.lerp(cuboidInside.eventualPosition,0.1 )
+				}
+			}
+		}
+
+		for(var i = 0; i < biggun.cuboidsInside.length; i++)
+		{
+			var cuboidInside = biggun.cuboidsInside[i];
+			cuboidInside.visible = true
+
+			cuboidInside.eventualPosition = cuboidInside.position.clone()
+
+			cuboidInside.position.copy(smallunPosition)
+			cuboidInside.position.addScaledVector(smallunDimensions,-0.5)
+		}
+		
 		var correctValue = dimensionsInCuboids.x * dimensionsInCuboids.y * dimensionsInCuboids.z
 
-		var numPresentedAnswers = 9;
-		console.assert(correctValue >= numPresentedAnswers)
+		var numPresentedAnswers = 8; //the minimum correct answer!
 		var whereCorrectValueIsInAnswers = Math.floor( Math.random() * numPresentedAnswers )
 		var lowestAnswerToPresent = correctValue - whereCorrectValueIsInAnswers;
 		for(var i = 0; i < numPresentedAnswers; i++ )
@@ -439,7 +506,7 @@ function measuringStick(sideLength)
 	return lengthMarker
 }
 
-function ResizingCuboid(dimensions,position,measurementMarkers,modifiable,filled)
+function ResizingCuboid(dimensions,position,measurementMarkers,modifiable,filled,dimensionsInCuboids)
 {
 	var cuboidInitialDimension = 1.0
 	var binColor = new THREE.Color(0.8,0.8,0.8);
@@ -599,7 +666,10 @@ function ResizingCuboid(dimensions,position,measurementMarkers,modifiable,filled
 
 	if(filled)
 	{
-		var dimensionsInCuboids = new THREE.Vector3(9,9,9)
+		if(dimensionsInCuboids === undefined)
+		{
+			dimensionsInCuboids = new THREE.Vector3(9,9,9)
+		}
 		var cuboidsInside = Array(Math.round(dimensionsInCuboids.x*dimensionsInCuboids.y*dimensionsInCuboids.z) );
 		cuboid.cuboidsInside = cuboidsInside
 		var placeholderGeo = new THREE.BoxBufferGeometry(1,1,1).applyMatrix(new THREE.Matrix4().makeTranslation(0.5,0.5,0.5))
@@ -613,9 +683,9 @@ function ResizingCuboid(dimensions,position,measurementMarkers,modifiable,filled
 			{
 				this.scale.copy(dimensions)
 
-				this.position.set(-this.i,this.j,this.k)
+				this.position.set(this.i,this.j,this.k)
 				this.position.multiply(dimensions)
-				this.position.add(cuboid.geometry.vertices[3])
+				this.position.add(cuboid.geometry.vertices[6])
 
 				this.visible = checkBoxMeshContainment(cuboid,this)
 			}
