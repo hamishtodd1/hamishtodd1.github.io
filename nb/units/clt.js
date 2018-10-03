@@ -55,54 +55,56 @@ function initClt()
 
 	Chapter()
 
-	 initFinger()
-
-	 {
-	 	var numColoredBalls = 2;
-	 	var numSwaps = 2;
-		
-	 	var ballAndCupResetButton = makeTextSign("Reset")
-	 	ballAndCupResetButton.position.x = 0.8
-	 	ballAndCupResetButton.position.y = -0.4
-	 	function reset()
-	 	{
-	 		var newChapterPosition = chapters.indexOf(chapter) + 1
-	 		if( numColoredBalls === 2 || (numColoredBalls<4 && numSwaps>6))
-	 			numColoredBalls++
-	 		else
-	 			numSwaps += 2
-	 		var newChapter = makeBallAndCupChapter( newChapterPosition )
-	 		changeChapter(1)
-	 	}
-	 	ballAndCupResetButton.onClick = reset
-
-	 	function makeBallAndCupChapter(newChapterPosition)
-	 	{
-	 		var cupChapter = Chapter( newChapterPosition )
-
-	 		cupChapter.addSceneElement(ballAndCupResetButton)
-	 		cupChapter.addClickable(ballAndCupResetButton)
-
-	 		var coloredBalls = Array(numColoredBalls)
-	 		for(var i = 0; i < coloredBalls.length; i++)
-	 		{
-	 			coloredBalls[i] = ColoredBall()
-	 			coloredBalls[i].position.y = i/(coloredBalls.length-1) * 0.8 - 0.4
-	 			cupChapter.addSceneElement(coloredBalls[i])
-	 		}
-	 		makeCupGame(coloredBalls, numSwaps, cupChapter)
-	 		return cupChapter
-	 	}
-	 	var firstBallAndCupChapter = makeBallAndCupChapter()
-	 }
+	//initFinger()
 
 	var singleCdChapter = Chapter()
-	var singularDist = HumpedClickableDistribution([1,1,1,1.2,1,1.3,1.6,3,3.6,2,1],false,singleCdChapter,false)
+	var singularDist = HumpedClickableDistribution([0.7,0.7,1.2,0.7,1.1,2.6,3,3.6,2.5,1],false,singleCdChapter,false)
 	singularDist.position.y -= 0.24
+
+	{
+		var numColoredBalls = 2;
+		var numSwaps = 2;
+		
+		var ballAndCupResetButton = makeTextSign("Reset")
+		ballAndCupResetButton.position.x = 0.8
+		ballAndCupResetButton.position.y = -0.4
+		ballAndCupResetButton.scale.multiplyScalar(2)
+		function reset()
+		{
+			var newChapterPosition = chapters.indexOf(chapter) + 1
+			if( numColoredBalls === 2 || (numColoredBalls<4 && numSwaps>6))
+				numColoredBalls++
+			else
+				numSwaps += 2
+			var newChapter = makeBallAndCupChapter( newChapterPosition )
+			changeChapter(1)
+		}
+		ballAndCupResetButton.onClick = reset
+
+		function makeBallAndCupChapter(newChapterPosition)
+		{
+			var cupChapter = Chapter( newChapterPosition )
+
+			cupChapter.addSceneElement(ballAndCupResetButton)
+			cupChapter.addClickable(ballAndCupResetButton)
+
+			var coloredBalls = Array(numColoredBalls)
+			for(var i = 0; i < coloredBalls.length; i++)
+			{
+				coloredBalls[i] = ColoredBall()
+				coloredBalls[i].position.y = i/(coloredBalls.length-1) * 0.8 - 0.4
+				cupChapter.addSceneElement(coloredBalls[i])
+			}
+			makeCupGame(coloredBalls, numSwaps, cupChapter)
+			return cupChapter
+		}
+		var firstBallAndCupChapter = makeBallAndCupChapter()
+	}
 
 	{
 		var cdAndCupResetButton = makeTextSign("Reset")
 		cdAndCupResetButton.position.x = 0.8
+		cdAndCupResetButton.scale.multiplyScalar(2)
 		cdAndCupResetButton.position.y = -0.4
 		function cdAndCupReset()
 		{
@@ -485,6 +487,7 @@ function initClickableDistributions()
 		{
 			if(mouse.clicking && mouse.lastClickedObject === this )
 			{
+				console.log("yo")
 				if(spray)
 				{
 					if( !mouse.oldClicking || frameCount % 11 === 0 ) //always get the first
@@ -536,6 +539,10 @@ function initClickableDistributions()
 		
 		clickableDistribution.profilePicture = profilePictures[lowestUnusedProfilePicture]
 		lowestUnusedProfilePicture++
+		if( lowestUnusedProfilePicture >= profilePictures.length )
+		{
+			lowestUnusedProfilePicture = 1
+		}
 
 		clickableDistribution.add(clickableDistribution.profilePicture)
 		// profilePictures[lowestUnusedProfilePicture].scale.set( ,clickableDistribution.height/clickableDistribution.scale.y,1)
