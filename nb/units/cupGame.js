@@ -39,15 +39,15 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter )
 		incorrectSign.material.opacity = 0.0001
 	})
 
-	// var texture = new THREE.TextureLoader().load( "data/textures/wand.png" )
 	var wand = new THREE.Mesh(new THREE.PlaneGeometry(1/8,1), new THREE.MeshPhongMaterial({transparent:true, depthTest:false}))
+	wand.material.map = new THREE.TextureLoader().load( "data/textures/wand.png" )
 	wand.geometry.vertices[2].y = 0
 	wand.geometry.vertices[3].y = 0
 	wand.scale.setScalar(0.5)
     wand.objectToDuplicate = null
     wand.duplicationProgress = 0;
     var progressSpeed = 0;
-    wand.unusedPosition = new THREE.Vector3(1.1,0,0)
+    wand.unusedPosition = new THREE.Vector3(1.2,0,0)
     wand.position.copy(wand.unusedPosition)
 	var duplicatingPosition = null
 	chapter.addSceneElement(wand)
@@ -167,6 +167,11 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter )
 			this.unusedPosition.y = hideTarget.position.y
 
 			THREE.SceneUtils.detach(this,hideTarget,scene)
+			if(hideTarget.profilePicture)
+			{
+				hideTarget.profilePicture.visible = true
+			}
+
 			this.progressSpeed = -frameDelta * 1.5
 
 			scene.add(cup.answerSelector)
@@ -210,6 +215,10 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter )
 					this.updateMatrixWorld()
 					hideTarget.updateMatrixWorld()
 					THREE.SceneUtils.attach(this,scene,hideTarget)
+					if(hideTarget.profilePicture)
+					{
+						hideTarget.profilePicture.visible = false
+					}
 
 					this.hidingProgress = 3
 					this.progressSpeed = 0;

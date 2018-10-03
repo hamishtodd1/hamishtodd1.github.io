@@ -13,7 +13,7 @@ function initClt()
 	// 		var amountTheyGotThroughGuessing = Math.round(numRightSoFar / 3) //TODO
 	// 		this.updateText("Score: " + numRightSoFar.toString())
 	// 	}
-	// }
+	// } 
 
 	{
 		var rightArrow = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({side:THREE.DoubleSide, color:0xFF0000}))
@@ -55,50 +55,50 @@ function initClt()
 
 	Chapter()
 
-	// initFinger()
+	 initFinger()
 
-	// {
-	// 	var numColoredBalls = 2;
-	// 	var numSwaps = 2;
+	 {
+	 	var numColoredBalls = 2;
+	 	var numSwaps = 2;
 		
-	// 	var ballAndCupResetButton = makeTextSign("Reset")
-	// 	ballAndCupResetButton.position.x = 0.8
-	// 	ballAndCupResetButton.position.y = -0.4
-	// 	function reset()
-	// 	{
-	// 		var newChapterPosition = chapters.indexOf(chapter) + 1
-	// 		if( numColoredBalls === 2 || (numColoredBalls<4 && numSwaps>6))
-	// 			numColoredBalls++
-	// 		else
-	// 			numSwaps += 2
-	// 		var newChapter = makeBallAndCupChapter( newChapterPosition )
-	// 		changeChapter(1)
-	// 	}
-	// 	ballAndCupResetButton.onClick = reset
+	 	var ballAndCupResetButton = makeTextSign("Reset")
+	 	ballAndCupResetButton.position.x = 0.8
+	 	ballAndCupResetButton.position.y = -0.4
+	 	function reset()
+	 	{
+	 		var newChapterPosition = chapters.indexOf(chapter) + 1
+	 		if( numColoredBalls === 2 || (numColoredBalls<4 && numSwaps>6))
+	 			numColoredBalls++
+	 		else
+	 			numSwaps += 2
+	 		var newChapter = makeBallAndCupChapter( newChapterPosition )
+	 		changeChapter(1)
+	 	}
+	 	ballAndCupResetButton.onClick = reset
 
-	// 	function makeBallAndCupChapter(newChapterPosition)
-	// 	{
-	// 		var cupChapter = Chapter( newChapterPosition )
+	 	function makeBallAndCupChapter(newChapterPosition)
+	 	{
+	 		var cupChapter = Chapter( newChapterPosition )
 
-	// 		cupChapter.addSceneElement(ballAndCupResetButton)
-	// 		cupChapter.addClickable(ballAndCupResetButton)
+	 		cupChapter.addSceneElement(ballAndCupResetButton)
+	 		cupChapter.addClickable(ballAndCupResetButton)
 
-	// 		var coloredBalls = Array(numColoredBalls)
-	// 		for(var i = 0; i < coloredBalls.length; i++)
-	// 		{
-	// 			coloredBalls[i] = ColoredBall()
-	// 			coloredBalls[i].position.y = i/(coloredBalls.length-1) * 0.8 - 0.4
-	// 			cupChapter.addSceneElement(coloredBalls[i])
-	// 		}
-	// 		makeCupGame(coloredBalls, numSwaps, cupChapter)
-	// 		return cupChapter
-	// 	}
-	// 	var firstBallAndCupChapter = makeBallAndCupChapter()
-	// }
+	 		var coloredBalls = Array(numColoredBalls)
+	 		for(var i = 0; i < coloredBalls.length; i++)
+	 		{
+	 			coloredBalls[i] = ColoredBall()
+	 			coloredBalls[i].position.y = i/(coloredBalls.length-1) * 0.8 - 0.4
+	 			cupChapter.addSceneElement(coloredBalls[i])
+	 		}
+	 		makeCupGame(coloredBalls, numSwaps, cupChapter)
+	 		return cupChapter
+	 	}
+	 	var firstBallAndCupChapter = makeBallAndCupChapter()
+	 }
 
-	// var singleCdChapter = Chapter()
-	// var singularDist = HumpedClickableDistribution([1,1,1,2,3,1,3,2],false,singleCdChapter)
-	// singularDist.position.y -= 0.24
+	var singleCdChapter = Chapter()
+	var singularDist = HumpedClickableDistribution([1,1,1,1.2,1,1.3,1.6,3,3.6,2,1],false,singleCdChapter,false)
+	singularDist.position.y -= 0.24
 
 	{
 		var cdAndCupResetButton = makeTextSign("Reset")
@@ -107,36 +107,40 @@ function initClt()
 		function cdAndCupReset()
 		{
 			var newChapterPosition = chapters.indexOf(chapter) + 1
-			var newChapter = makeCdAndCupChapter( newChapterPosition )
+			var newChapter = makeCdAndCupChapter( 3, newChapterPosition )
 			changeChapter(1)
 		}
 		cdAndCupResetButton.onClick = cdAndCupReset
 
-		function makeCdAndCupChapter(newChapterPosition)
+		function makeCdAndCupChapter(numDistributions,newChapterPosition)
 		{
 			var cdAndCupChapter = Chapter( newChapterPosition )
 
 			cdAndCupChapter.addSceneElement(cdAndCupResetButton)
 			cdAndCupChapter.addClickable(cdAndCupResetButton)
 
-			var oneHumpedDistribution = HumpedClickableDistribution([1,1,1,1,4.5,1],false,cdAndCupChapter)
-			var twoHumpedDistribution = HumpedClickableDistribution([1,2.75,1,1,4.5,1],false,cdAndCupChapter)
-			var threeHumpedDistribution = HumpedClickableDistribution([4,1,4,1,1,4],false,cdAndCupChapter)
-			oneHumpedDistribution.scale.multiplyScalar(0.2)
-			twoHumpedDistribution.scale.multiplyScalar(0.2)
-			threeHumpedDistribution.scale.multiplyScalar(0.2)
-
-			var clickableDistributions = [oneHumpedDistribution,twoHumpedDistribution,threeHumpedDistribution]
-
-			for(var i = 0; i < clickableDistributions.length; i++)
+			var clickableDistributions = Array(numDistributions)
+			for(var i = 0; i < numDistributions; i++)
 			{
-				clickableDistributions[i].position.y = 0.3 * (i-(clickableDistributions.length-1)/2)
+				var humpArray = Array(5)
+				for(var j = 0; j < humpArray.length; j++)
+				{
+					humpArray[j] = 1 + Math.floor( Math.random() * 5)
+				}
+				console.log(humpArray)
+
+				var newDistribution = HumpedClickableDistribution( humpArray,false,cdAndCupChapter,true )
+				newDistribution.scale.multiplyScalar(0.2)
+				newDistribution.position.y = 0.3 * (i-(clickableDistributions.length-1)/2)
+
+				clickableDistributions[i] = newDistribution
 			}
+			console.log(clickableDistributions)
 			
 			makeCupGame(clickableDistributions, 3, cdAndCupChapter)
 			return cdAndCupChapter
 		}
-		var firstCdCupChapter = makeCdAndCupChapter()
+		var firstCdCupChapter = makeCdAndCupChapter(3)
 	}
 
 	Chapter()
@@ -149,15 +153,9 @@ function initClt()
 	TODO
 	Finger thing (graph next to them) - should be on its side. Bump going up and down
 	correct and incorrect signs, jesus christ
+	Actual randomization
 
-	Show slides
-	Ball thing where it gets faster and faster
-	Graph where you're learning how it works
-	Graph thing where you try to guess
-	And change the positions of those blasted things
-
-	Graph thing where you try to get out early using normal dist
-	Final slide: values in front of mug are your "sample"	
+	Graph thing where you try to get out early using normal dist?
 	
 	Back to puzzles
 	Now you can click and hold and you'll get them
@@ -191,7 +189,7 @@ function initClt()
 function initFinger()
 {
 	var fingerMaterial = new THREE.MeshBasicMaterial()
-	// fingerMaterial.map = new THREE.TextureLoader().load( "data/textures/finger.jpg" )
+	fingerMaterial.map = new THREE.TextureLoader().load( "data/textures/finger.jpg" )
 	var fingerGeometry = new THREE.OriginCorneredPlaneBufferGeometry(0.5,1)
 	
 	var fingerRuler = new THREE.Mesh( fingerGeometry, fingerMaterial )
@@ -253,7 +251,7 @@ function initFinger()
 	}
 }
 
-function HumpedClickableDistribution(arrayOfBlocks, normalDistributionsPresent,chapter)
+function HumpedClickableDistribution(arrayOfBlocks, normalDistributionsPresent,chapter, spray)
 {
 	//the distribution is made of blocks
 	var totalBlocks = 0;
@@ -276,7 +274,7 @@ function HumpedClickableDistribution(arrayOfBlocks, normalDistributionsPresent,c
 			blocksCountedThrough += arrayOfBlocks[i]
 		}
 	}
-	return ClickableDistribution( humpedSamplingFunction, arrayOfBlocks.length,240, normalDistributionsPresent,chapter )
+	return ClickableDistribution( humpedSamplingFunction, arrayOfBlocks.length,240, normalDistributionsPresent,chapter,spray )
 }
 
 var ClickableDistribution = null;
@@ -292,6 +290,7 @@ function initClickableDistributions()
 		{
 			fileName = "0" + fileName
 		}
+
 		if(i < 8)
 		{
 			fileName += ".png"
@@ -302,13 +301,13 @@ function initClickableDistributions()
 		}
 
 		profilePictures[i] = new THREE.Mesh(profilePictureGeometry,new THREE.MeshBasicMaterial())
-		profilePictures[i].material.color.setRGB(Math.random(),Math.random,Math.random())
-		// profilePictures[i].map = textureLoader.load( 'data/textures/rugbyPlayers/' + fileName )
+		//profilePictures[i].material.color.setRGB(Math.random(),Math.random(),Math.random())
+		profilePictures[i].material.map = textureLoader.load( 'data/textures/rugbyPlayers/' + fileName )
 	}
 
 	var lowestUnusedProfilePicture = 0;
 
-	ClickableDistribution = function( samplingFunction,numControlPoints = 11,numSamples = 30 * numControlPoints, normalDistributionsPresent, chapter, samples )
+	ClickableDistribution = function( samplingFunction,numControlPoints = 11,numSamples = 30 * numControlPoints, normalDistributionsPresent, chapter, spray, samples )
 	{
 		//if you go too high on numControlPoints the noise is bad ;_;
 
@@ -486,10 +485,19 @@ function initClickableDistributions()
 		{
 			if(mouse.clicking && mouse.lastClickedObject === this )
 			{
-				// if( !mouse.oldClicking )
-				if( !mouse.oldClicking || frameCount % 11 === 0 ) //always get the first
+				if(spray)
 				{
-					this.vomitMember()
+					if( !mouse.oldClicking || frameCount % 11 === 0 ) //always get the first
+					{
+						this.vomitMember()
+					}
+				}
+				else
+				{
+					if( !mouse.oldClicking )
+					{
+						this.vomitMember()
+					}
 				}
 			}
 
@@ -515,7 +523,7 @@ function initClickableDistributions()
 
 		clickableDistribution.wandClone = function()
 		{
-			var clone = ClickableDistribution(samplingFunction, numControlPoints,numSamples, false, chapter,this.samples)
+			var clone = ClickableDistribution(samplingFunction, numControlPoints,numSamples, false, chapter,true,this.samples)
 			clone.scale.copy(this.scale)
 			// for(var i = clone.children.length; i < this.children.length; i++)
 			// {
