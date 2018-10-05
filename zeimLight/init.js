@@ -108,9 +108,9 @@ function initButtons()
 	// 	arrangeToys()
 	// }
 	// initStereographicTwoSphere()
-	initShaderExperimentation()
+	// initShaderExperimentation()
 
-	// initIrreg()
+	initComplexAnalysis()
 
 	render();
 })();

@@ -15,24 +15,9 @@
 
 	The goal is to get them to invent the terms themselves
 
-	We assume only one classroom is ever being used for this
-
-	Could have pinch to zoom if you want navigation... but not really, should be single-screen
-
-	Teacher can just "advance simulation", same as powerpoint
- 
-	It looks like Evolution of Trust. Kids can go backwards but not forwards.
-		But not while teacher is demonstrating. There, you see everything on your own computer
-
 	Teacher could make sure that a non-troublemaker wins the competitions?
 
-	First person to start a session (picked from a bunch on the website) has that session. The url changes to 
-
-	Teacher sets a puzzle they all try to do it, one who gets it has their solution recorded and shown on the master? Or they’re superimposed?
-
-	“Teacher is currently demonstrating” mode and “free interaction” mode?
-
-	Various ways teachers could be “pranked”. One problem is you don’t know which kids have which laptops.
+	Teacher sets a puzzle they all try to do it, one who gets it has their solution recorded and shown on the master? Or they’re superimposed?	
 */
 
 function init( ourID )
@@ -47,9 +32,9 @@ function init( ourID )
 			
 			mouse.updateFromAsyncAndCheckClicks();
 
-			for(var i = 0; i < objectsToBeUpdated.length; i++)
+			for(var i = 0; i < updatables.length; i++)
 			{
-				objectsToBeUpdated[i].update();
+				updatables[i].update();
 			}
 
 			frameCount++;
@@ -58,6 +43,8 @@ function init( ourID )
 		requestAnimationFrame( render );
 		renderer.render( scene, camera );
 	}
+
+	initChapters()
 
 	initStage();
 	initCameraAndRendererResizeSystem(renderer);

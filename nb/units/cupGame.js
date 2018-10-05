@@ -31,8 +31,8 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter )
 {
 	var duplicate = null
 	
-	chapter.addSceneElement(correctSign)	
-	chapter.addSceneElement(incorrectSign)
+	chapter.add(correctSign,"sceneElements"	)
+	chapter.add(incorrectSign,"sceneElements")
 	chapter.functionsToCallOnSetDown.push(function()
 	{
 		correctSign.material.opacity = 0.0001
@@ -40,7 +40,7 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter )
 	})
 
 	var wand = new THREE.Mesh(new THREE.PlaneGeometry(1/8,1), new THREE.MeshPhongMaterial({transparent:true, depthTest:false}))
-	wand.material.map = new THREE.TextureLoader().load( "data/textures/wand.png" )
+	// wand.material.map = new THREE.TextureLoader().load( "data/textures/wand.png" )
 	wand.geometry.vertices[2].y = 0
 	wand.geometry.vertices[3].y = 0
 	wand.scale.setScalar(0.5)
@@ -50,7 +50,7 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter )
     wand.unusedPosition = new THREE.Vector3(1.2,0,0)
     wand.position.copy(wand.unusedPosition)
 	var duplicatingPosition = null
-	chapter.addSceneElement(wand)
+	chapter.add(wand,"sceneElements")
 
 	wand.duplicateObjectAndCoveringCup = function(object)
 	{
@@ -115,7 +115,7 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter )
 			}
 		}
 	}
-	chapter.addUpdatingObject(wand)
+	chapter.add(wand,"updatables")
 
 	var answerSelectorGeometry = new THREE.Geometry()
 	answerSelectorGeometry.vertices.push(
@@ -152,7 +152,7 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter )
 			duplicate.remove(duplicate.cup)
 			//and then question restarting stuff, including removing these from the scene and nulling associated objects
 		}
-		chapter.addClickable(answerSelector)
+		chapter.add(answerSelector,"clickables")
 
 		cup.hide = function( newHideTarget )
 		{
@@ -225,9 +225,9 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter )
 				}
 			}
 		}
-		chapter.addUpdatingObject( cup )
+		chapter.add( cup ,"updatables")
 
-		chapter.addSceneElement( cup )
+		chapter.add( cup ,"sceneElements")
 		return cup;
 	}
 
@@ -350,7 +350,7 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter )
 			}
 		}
 	}
-	chapter.addUpdatingObject(manager)
+	chapter.add(manager,"updatables")
 
 	return chapter
 }

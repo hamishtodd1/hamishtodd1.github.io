@@ -23,7 +23,7 @@ var mouse = null;
 
 var testSphere = new THREE.Mesh(new THREE.SphereBufferGeometry(0.01))
 
-const objectsToBeUpdated = [];
+const updatables = [];
 const clickables = [];
 var bindButton;
 

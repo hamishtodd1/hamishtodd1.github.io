@@ -1,4 +1,7 @@
 /*
+	PORT TO THE CHAPTER SYSTEM!!
+
+
 	Chapters
 		They compete to see how many they can get in
 			Same, but with rotation and a bigger container
@@ -96,36 +99,6 @@ function initPacking()
 		packCounter.excitedness = 0;
 	}
 
-	// {
-	// 	var rightArrow = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({side:THREE.DoubleSide, color:0xFF0000}))
-	// 	rightArrow.geometry.vertices.push(new THREE.Vector3(0,0,0),new THREE.Vector3(-1,1,0),new THREE.Vector3(-1,-1,0))
-	// 	rightArrow.geometry.faces.push(new THREE.Face3(0,1,2))
-	// 	rightArrow.scale.multiplyScalar(0.07)
-	// 	var leftArrow = rightArrow.clone()
-	// 	leftArrow.scale.x *= -1
-	// 	rightArrow.position.x = 1
-	// 	leftArrow.position.x = -1
-
-	// 	camera.add(rightArrow,leftArrow)
-	// 	leftArrow.position.z = rightArrow.position.z = -camera.position.z
-
-	// 	clickables.push(rightArrow)
-	// 	rightArrow.onClick = function()
-	// 	{
-	// 		for(var i = scene.children.length-1; i > -1; i--)
-	// 		{
-	// 			if(scene.children[i] !== camera)
-	// 			{
-	// 				scene.remove(scene.children[i])
-	// 			}
-	// 		}
-	// 	}
-	// 	clickables.push(leftArrow)
-	// 	leftArrow.onClick = function()
-	// 	{
-	// 	}
-	// }
-
 	{
 		var orbitControls = {}
 		var previousIntersection = mouse.rayIntersectionWithZPlane(0)
@@ -159,23 +132,9 @@ function initPacking()
 		}
 	}
 
-	// {
-	// 	var resetButton = makeTextSign("Reset")
-	// 	resetButton.geometry = new THREE.OriginCorneredPlaneBufferGeometry(0.05,0.05)
-	// 	rotateButton.position.copy(packCounter.position)
-	// 	rotateButton.position.y *= -1
-	// 	rotateButton.position.y -= 0.05 * rotateButton.scale.y
-	// 	clickables.push(resetButton)
-	// 	resetButton.onClick = function()
-	// 	{
-	// 		console.log("yo")
-	// 	}
-	// 	scene.add(resetButton)
-	// }
-
-	// initManualPacking(packCounter,true)
+	initManualPacking(packCounter,true)
 	// initResizingRectangle(packCounter)
-	initMultipleChoice()
+	// initMultipleChoice()
 	return
 
 	{
@@ -281,20 +240,15 @@ function initMultipleChoice()
 			// biggun.cuboidsInside[i].visible = false
 		}
 
-		var movementSegment = 0;
-		var standIn = {}
+		var innerCuboidsMovementProgress = 0;
+		var cuboidInsideMover = {}
 		var numSegments = dimensionsInCuboids.x + (dimensionsInCuboids.y-1) + (dimensionsInCuboids.z-1)
-		var cuboidsMovingInSegments = Array(Math.round(numSegments))
-		for(var i = 0 ; i < numSegments; i++)
-		{
-			cuboidsMovingInSegments[i] = []
-		}
 
 		var lowestUnallocatedCuboidIndex = 0
 		var segmentIndex = 0;
 		for(segmentIndex; segmentIndex < dimensionsInCuboids.x; segmentIndex++)
 		{
-			cuboidsMovingInSegments[segmentIndex].push(biggun.cuboidsInside[lowestUnallocatedCuboidIndex])
+			biggun.cuboidsInside[lowestUnallocatedCuboidIndex].segmentToMoveIn = segmentIndex
 			lowestUnallocatedCuboidIndex++
 		}
 
@@ -302,38 +256,33 @@ function initMultipleChoice()
 		{
 			for(var j = 0; j < dimensionsInCuboids.x; j++)
 			{
-				console.log("uo")
-				cuboidsMovingInSegments[segmentIndex].push(biggun.cuboidsInside[lowestUnallocatedCuboidIndex])
+				biggun.cuboidsInside[lowestUnallocatedCuboidIndex].segmentToMoveIn = segmentIndex
 				lowestUnallocatedCuboidIndex++
 			}
 		}
 
-		for(segmentIndex; segmentIndex < cuboidsMovingInSegments.length; segmentIndex++)
+		for(segmentIndex; lowestUnallocatedCuboidIndex < biggun.cuboidsInside.length; segmentIndex++)
 		{
 			for(var i = 0; i < dimensionsInCuboids.x; i++)
 			{
 				for(var j = 0; j < dimensionsInCuboids.y; j++)
 				{
-					cuboidsMovingInSegments[segmentIndex].push(biggun.cuboidsInside[lowestUnallocatedCuboidIndex])
+					biggun.cuboidsInside[lowestUnallocatedCuboidIndex].segmentToMoveIn = segmentIndex
 					lowestUnallocatedCuboidIndex++
 				}
 			}
 		}
 		
-		console.log(cuboidsMovingInSegments)
-		objectsToBeUpdated.push(standIn)
-		standIn.update = function()
+		objectsToBeUpdated.push(cuboidInsideMover)
+		cuboidInsideMover.update = function()
 		{
-			movementSegment += frameDelta
-			movementSegment = clamp(movementSegment,0,cuboidsMovingInSegments.length-1)
-			var currentSegment = cuboidsMovingInSegments[Math.floor(movementSegment)]
+			innerCuboidsMovementProgress += frameDelta
+			var smallunActualPosition = smallunPosition.clone().addScaledVector(smallunDimensions,-0.5)
 			for(var i = 0; i < biggun.cuboidsInside.length; i++)
 			{
 				var cuboidInside = biggun.cuboidsInside[i]
-				if( currentSegment.indexOf( cuboidInside ) !== -1)
-				{
-					cuboidInside.position.lerp(cuboidInside.eventualPosition,0.1 )
-				}
+				var howFarWeAreThroughThisOnesSegment = clamp( innerCuboidsMovementProgress - cuboidInside.segmentToMoveIn,0,1 )
+				cuboidInside.position.lerpVectors(smallunActualPosition,cuboidInside.positionInsideBox, howFarWeAreThroughThisOnesSegment )
 			}
 		}
 
@@ -341,8 +290,6 @@ function initMultipleChoice()
 		{
 			var cuboidInside = biggun.cuboidsInside[i];
 			cuboidInside.visible = true
-
-			cuboidInside.eventualPosition = cuboidInside.position.clone()
 
 			cuboidInside.position.copy(smallunPosition)
 			cuboidInside.position.addScaledVector(smallunDimensions,-0.5)
@@ -397,9 +344,9 @@ function initMultipleChoice()
 	correctSign.material.opacity = 0.0001
 	scene.add(correctSign)
 
-	var handler = {}
-	objectsToBeUpdated.push(handler)
-	handler.update = function()
+	var questioner = {}
+	objectsToBeUpdated.push(questioner)
+	questioner.update = function()
 	{
 		countdownTilNext -= frameDelta
 
@@ -683,9 +630,11 @@ function ResizingCuboid(dimensions,position,measurementMarkers,modifiable,filled
 			{
 				this.scale.copy(dimensions)
 
-				this.position.set(this.i,this.j,this.k)
-				this.position.multiply(dimensions)
-				this.position.add(cuboid.geometry.vertices[6])
+				this.positionInsideBox = new THREE.Vector3(this.k,this.j,this.i)
+				this.positionInsideBox.multiply(dimensions)
+				this.positionInsideBox.add(cuboid.geometry.vertices[6])
+
+				this.position.copy(this.positionInsideBox)
 
 				this.visible = checkBoxMeshContainment(cuboid,this)
 			}
@@ -695,7 +644,7 @@ function ResizingCuboid(dimensions,position,measurementMarkers,modifiable,filled
 		for(var i = 0; i < dimensionsInCuboids.x; i++) {
 		for(var j = 0; j < dimensionsInCuboids.y; j++) {
 		for(var k = 0; k < dimensionsInCuboids.z; k++) {
-			CuboidInside(i,j,k)
+			CuboidInside(i,j,k) 
 		}
 		}
 		}
@@ -791,6 +740,8 @@ function initCircleOnSpherePacking()
 var objectsToBeRotated = []
 function initManualPacking(packCounter,haveRotateButton)
 {
+	var chapter = Chapter();
+
 	if(haveRotateButton)
 	{
 		var rotateButton = makeTextSign( "Rotate" )
@@ -804,13 +755,13 @@ function initManualPacking(packCounter,haveRotateButton)
 
 		var rotationQueued = 0;
 
-		clickables.push(rotateButton)
+		chapter.addClickable(rotateButton)
 		rotateButton.onClick = function()
 		{
 			rotationQueued += TAU / 3
 			this.beenClicked = true
 		}
-		objectsToBeUpdated.push(rotateButton)
+		chapter.addUpdatingObject(rotateButton)
 		rotateButton.update = function()
 		{
 			if(rotationQueued > 0)
@@ -845,7 +796,7 @@ function initManualPacking(packCounter,haveRotateButton)
 	}
 
 	var _scene = new THREE.Object3D();
-	scene.add(_scene)
+	chapter.addSceneElement(_scene)
 	_scene.position.z = stage.geometry.vertices[1].z * stage.scale.z;
 	_scene.position.y = -9/16
 	_scene.rotation.y = -TAU / 8
@@ -948,13 +899,13 @@ function initManualPacking(packCounter,haveRotateButton)
 		cuboids.push(cuboid);
 
 		var clickedPoint = new THREE.Vector3();
-		clickables.push(cuboid)
+		chapter.addClickable(cuboid)
 		cuboid.onClick = function(intersectionInformation)
 		{
 			clickedPoint = intersectionInformation.point;
 		}
 
-		objectsToBeUpdated.push(cuboid)
+		chapter.addUpdatingObject(cuboid)
 		cuboid.update = function()
 		{
 			if( mouse.clicking && mouse.lastClickedObject === this )

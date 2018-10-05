@@ -1,98 +1,151 @@
-var chapters = []
-
-function Chapter(newChapterPosition)
+let chapters = []
+function initChapters()
 {
-	var chapter = {
-		sceneElementsToAdd:[],
-		sceneElementsToRemove:[],
-		updatingObjectsToAdd:[],
-		updatingObjectsToRemove:[],
-		clickablesToAdd:[],
-		clickablesToRemove:[],
-		functionsToCallOnSetUp:[],
-		functionsToCallOnSetDown:[]
-    }
-    
-    if(newChapterPosition === undefined)
-    {
-        chapters.push(chapter)
-    }
-    else
-    {
-        chapters.splice(newChapterPosition,0,chapter)
-    }
-
-	chapter.addSceneElement = function(object3D)
 	{
-		this.sceneElementsToAdd.push(object3D)
-		this.sceneElementsToRemove.push(object3D)
+		let rightArrow = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({side:THREE.DoubleSide, color:0xFF0000}))
+		rightArrow.geometry.vertices.push(new THREE.Vector3(0,0,0),new THREE.Vector3(-1,1,0),new THREE.Vector3(-1,-1,0))
+		rightArrow.geometry.faces.push(new THREE.Face3(0,1,2))
+		rightArrow.scale.multiplyScalar(0.07)
+		let leftArrow = rightArrow.clone()
+		leftArrow.scale.x *= -1
+		rightArrow.position.x = 1
+		leftArrow.position.x = -1
+		scene.add(rightArrow)
+
+		changeChapter = function(chapterAddition)
+		{
+			chapter.setDown()
+
+			let newChapterIndex = chapters.indexOf(chapter)
+			newChapterIndex += chapterAddition
+			newChapterIndex = clamp(newChapterIndex,0,chapters.length-1)
+			chapter = chapters[newChapterIndex]
+
+			chapter.setUp()
+		}
+
+		clickables.push(rightArrow)
+		rightArrow.onClick = function()
+		{
+			changeChapter(1)
+		}
+
+		// clickables.push(leftArrow)
+		// leftArrow.onClick = function()
+		// {
+		// 	changeChapter(-1)
+		// }
 	}
-	chapter.addUpdatingObject = function(object)
+
+	Chapter = function(newChapterPosition)	
 	{
-		this.updatingObjectsToAdd.push(object)
-		this.updatingObjectsToRemove.push(object)
-	}
-	chapter.addClickable = function(object)
-	{
-		this.clickablesToAdd.push(object)
-		this.clickablesToRemove.push(object)
-	}
-
-	chapter.setUp = function()
-	{
-		for(var i = 0; i < this.sceneElementsToAdd.length; i++)
-		{
-			scene.add(this.sceneElementsToAdd[i])
+		let chapter = {
+			sceneElementsToAdd:[],
+			sceneElementsToRemove:[],
+			updatablesToAdd:[],
+			updatablesToRemove:[],
+			clickablesToAdd:[],
+			clickablesToRemove:[],
+			functionsToCallOnSetUp:[],
+			functionsToCallOnSetDown:[]
 		}
 
-		for(var i = 0; i < this.updatingObjectsToAdd.length; i++)
+		let isSetUp = false
+		
+		if(newChapterPosition === undefined)
 		{
-			objectsToBeUpdated.push(this.updatingObjectsToAdd[i])
+			chapters.push(chapter)
+		}
+		else
+		{
+			chapters.splice(newChapterPosition,0,chapter)
 		}
 
-		for(var i = 0; i < this.clickablesToAdd.length; i++)
+		chapter.add = function(object,arrayName)
 		{
-			clickables.push(this.clickablesToAdd[i])
-		}
-
-		for(var i = 0; i < this.functionsToCallOnSetUp.length; i++)
-		{
-			this.functionsToCallOnSetUp[i]()
-		}
-	}
-	chapter.setDown = function()
-	{
-		for(var i = 0; i < this.sceneElementsToRemove.length; i++)
-		{
-            if(this.sceneElementsToRemove[i].parent)
-            {
-                this.sceneElementsToRemove[i].parent.remove(this.sceneElementsToRemove[i])
-            }
-		}
-
-		for(var i = 0; i < this.updatingObjectsToRemove.length; i++)
-		{
-			var index = objectsToBeUpdated.indexOf(this.updatingObjectsToRemove[i])
-			if(index !== -1)
+			if(isSetUp)
 			{
-				objectsToBeUpdated.splice(index,1)
+				if( arrayName === "sceneElements")
+				{
+					scene.add(object)
+				}
+				else
+				{
+					eval(arrayName).push(object)
+				}
 			}
-		}
-
-		for(var i = 0; i < this.clickablesToRemove.length; i++)
-		{
-			var index = clickables.indexOf(this.clickablesToRemove[i])
-			if(index !== -1)
+			else
 			{
-				clickables.splice(index,1)
+				this[arrayName + "ToAdd"].push(object)
 			}
+
+			//hmm, and if you come back to this chapter? Well, we don't do that.
+			this[arrayName + "ToRemove"].push(object)
 		}
 
-		for(var i = 0; i < this.functionsToCallOnSetDown.length; i++)
+		chapter.setUp = function()
 		{
-			this.functionsToCallOnSetDown[i]()
+			for(let i = 0; i < this.sceneElementsToAdd.length; i++)
+			{
+				scene.add(this.sceneElementsToAdd[i])
+			}
+
+			for(let i = 0; i < this.updatablesToAdd.length; i++)
+			{
+				updatables.push(this.updatablesToAdd[i])
+			}
+
+			for(let i = 0; i < this.clickablesToAdd.length; i++)
+			{
+				clickables.push(this.clickablesToAdd[i])
+			}
+
+			for(let i = 0; i < this.functionsToCallOnSetUp.length; i++)
+			{
+				this.functionsToCallOnSetUp[i]()
+			}
+
+			isSetUp = true
 		}
+		chapter.setDown = function()
+		{
+			for(let i = 0; i < this.sceneElementsToRemove.length; i++)
+			{
+				if(this.sceneElementsToRemove[i].parent)
+				{
+					this.sceneElementsToRemove[i].parent.remove(this.sceneElementsToRemove[i])
+				}
+			}
+
+			for(let i = 0; i < this.updatablesToRemove.length; i++)
+			{
+				let index = updatables.indexOf(this.updatablesToRemove[i])
+				if(index !== -1)
+				{
+					updatables.splice(index,1)
+				}
+			}
+
+			for(let i = 0; i < this.clickablesToRemove.length; i++)
+			{
+				let index = clickables.indexOf(this.clickablesToRemove[i])
+				if(index !== -1)
+				{
+					clickables.splice(index,1)
+				}
+			}
+
+			for(let i = 0; i < this.functionsToCallOnSetDown.length; i++)
+			{
+				this.functionsToCallOnSetDown[i]()
+			}
+
+			isSetUp = false
+		}
+
+		return chapter;
 	}
 
-	return chapter;
+	Chapter()
+	let chapter = chapters[0]
 }
