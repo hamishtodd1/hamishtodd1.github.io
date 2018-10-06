@@ -88,7 +88,7 @@ function initPacking()
 	{
 		var packCounter = makeTextSign("")
 		packCounter.stringPrecedingScore = "Packed: "
-		objectsToBeUpdated.push(packCounter)
+		updatables.push(packCounter)
 		packCounter.update = function(){}
 		packCounter.position.x = -0.95
 		packCounter.position.y = -0.95 / (16/9)
@@ -102,7 +102,7 @@ function initPacking()
 	{
 		var orbitControls = {}
 		var previousIntersection = mouse.rayIntersectionWithZPlane(0)
-		objectsToBeUpdated.push(orbitControls)
+		updatables.push(orbitControls)
 		orbitControls.update = function()
 		{
 			if(mouse.lastClickedObject === null && mouse.clicking)
@@ -132,9 +132,9 @@ function initPacking()
 		}
 	}
 
-	initManualPacking(packCounter,true)
+	// initManualPacking(packCounter,true)
 	// initResizingRectangle(packCounter)
-	// initMultipleChoice()
+	initMultipleChoice()
 	return
 
 	{
@@ -211,6 +211,8 @@ function initMultipleChoice()
 	// adviceSign.material.color.setRGB(1,1,0)
 	// scene.add(adviceSign)
 
+	var chapter = Chapter()
+
 	var countdownTilNext = Infinity;
 	var correctAnswer = null
 
@@ -230,10 +232,10 @@ function initMultipleChoice()
 			smallunDimensions.setComponent(i,0.1 * (Math.floor( Math.random() * 3)+1))
 		}
 		var smallunPosition = new THREE.Vector3(-0.5,0,0)
-		var smallun = ResizingCuboid(smallunDimensions,smallunPosition,true,false,false)
+		var smallun = ResizingCuboid(chapter,smallunDimensions,smallunPosition,true,false,false)
 
 		var biggunDimensions = smallunDimensions.clone().multiply(dimensionsInCuboids).multiplyScalar(1.01)
-		var biggun = ResizingCuboid(biggunDimensions,new THREE.Vector3(0.25,0,0),true,false,true,dimensionsInCuboids)
+		var biggun = ResizingCuboid(chapter,biggunDimensions,new THREE.Vector3(0.25,0,0),true,false,true,dimensionsInCuboids)
 		for(var i = 0; i < biggun.cuboidsInside.length; i++)
 		{
 			biggun.cuboidsInside[i].place(smallunDimensions)
@@ -273,7 +275,7 @@ function initMultipleChoice()
 			}
 		}
 		
-		objectsToBeUpdated.push(cuboidInsideMover)
+		chapter.add(cuboidInsideMover,"updatables")
 		cuboidInsideMover.update = function()
 		{
 			innerCuboidsMovementProgress += frameDelta
@@ -313,7 +315,7 @@ function initMultipleChoice()
 			{
 				correctAnswer = answer
 			}
-			clickables.push(answer)
+			chapter.add(answer,"clickables")
 			answer.onClick = function()
 			{
 				if( this !== correctAnswer )
@@ -345,7 +347,7 @@ function initMultipleChoice()
 	scene.add(correctSign)
 
 	var questioner = {}
-	objectsToBeUpdated.push(questioner)
+	updatables.push(questioner)
 	questioner.update = function()
 	{
 		countdownTilNext -= frameDelta
@@ -382,16 +384,18 @@ function initMultipleChoice()
 
 function initResizingRectangle(packCounter)
 {
+	var chapter = Chapter();
+
 	// camera.position.applyAxisAngle(yUnit,TAU/8)
 	// camera.rotation.y += TAU / 8
 	// scene.rotation.y += TAU/8
 
-	var containingCuboid = ResizingCuboid(new THREE.Vector3(0.5,0.5,0.5),new THREE.Vector3(0.4,0,0),false,true,true)
-	var cuboidToAffectLittleOnes = ResizingCuboid(new THREE.Vector3(0.15,0.15,0.15),new THREE.Vector3(-0.5,0,0),false,true,false)
+	var containingCuboid = ResizingCuboid(chapter,new THREE.Vector3(0.5,0.5,0.5),new THREE.Vector3(0.4,0,0),false,true,true)
+	var cuboidToAffectLittleOnes = ResizingCuboid(chapter,new THREE.Vector3(0.15,0.15,0.15),new THREE.Vector3(-0.5,0,0),false,true,false)
 
 	for(var i = 0; i < containingCuboid.cuboidsInside.length; i++)
 	{
-		objectsToBeUpdated.push(containingCuboid.cuboidsInside[i])
+		chapter.add(containingCuboid.cuboidsInside[i],"updatables")
 		containingCuboid.cuboidsInside[i].update = function()
 		{
 			this.place(cuboidToAffectLittleOnes.currentDimensions)
@@ -410,6 +414,8 @@ function initResizingRectangle(packCounter)
 		}
 		packCounter.updateText(packCounter.stringPrecedingScore + score.toString())
 	}
+	chapter.add(packCounter,"updatables")
+	chapter.add(packCounter,"sceneElements")
 }
 
 function measuringStick(sideLength)
@@ -453,7 +459,7 @@ function measuringStick(sideLength)
 	return lengthMarker
 }
 
-function ResizingCuboid(dimensions,position,measurementMarkers,modifiable,filled,dimensionsInCuboids)
+function ResizingCuboid(chapter,dimensions,position,measurementMarkers,modifiable,filled,dimensionsInCuboids)
 {
 	var cuboidInitialDimension = 1.0
 	var binColor = new THREE.Color(0.8,0.8,0.8);
@@ -461,14 +467,14 @@ function ResizingCuboid(dimensions,position,measurementMarkers,modifiable,filled
 	var cuboid = new THREE.Mesh(new THREE.CubeGeometry(cuboidInitialDimension,cuboidInitialDimension,cuboidInitialDimension), transparentMaterial)
 	cuboid.geometry.computeBoundingBox()
 	cuboid.currentDimensions = new THREE.Vector3()
-	scene.add(cuboid)
+	chapter.add(cuboid,"sceneElements")
 
 	var vertexGeometry = new THREE.SphereBufferGeometry(0.015)
 	var vertexMaterial = new THREE.MeshPhongMaterial({color:0xFFD700})
 	function Vertex()
 	{
 		var vertex = new THREE.Mesh(vertexGeometry,vertexMaterial)
-		scene.add(vertex)
+		chapter.add(vertex,"sceneElements")
 		return vertex
 	}
 
@@ -477,7 +483,7 @@ function ResizingCuboid(dimensions,position,measurementMarkers,modifiable,filled
 	function Edge(start,end)
 	{
 		var edge = new THREE.Mesh(edgeGeometry,edgeMaterial )
-		scene.add( edge )
+		chapter.add( edge ,"sceneElements")
 		return edge;
 	}
 
@@ -514,6 +520,7 @@ function ResizingCuboid(dimensions,position,measurementMarkers,modifiable,filled
 		for(var i = 0; i < cuboid.edges.length; i++)
 		{
 			cuboid.edges[i].position.copy( cuboid.edges[i].start )
+			console.log(cuboid.edges[i].end) //There's an error. You just transitioned everything to chapter.add.
 			pointCylinder(cuboid.edges[i], cuboid.edges[i].end )
 			cuboid.edges[i].scale.y = cuboid.edges[i].start.distanceTo(cuboid.edges[i].end)
 		}
@@ -525,7 +532,7 @@ function ResizingCuboid(dimensions,position,measurementMarkers,modifiable,filled
 
 	if(modifiable)
 	{
-		objectsToBeUpdated.push(cuboid)
+		chapter.add(cuboid,"updatables")
 		cuboid.update = function()
 		{
 			//Can't use onclick because intersectObject doesn't always work whereas this does
@@ -638,7 +645,7 @@ function ResizingCuboid(dimensions,position,measurementMarkers,modifiable,filled
 
 				this.visible = checkBoxMeshContainment(cuboid,this)
 			}
-			scene.add( cuboidsInside[index] )
+			chapter.add( cuboidsInside[index] ,"sceneElements")
 		}
 		
 		for(var i = 0; i < dimensionsInCuboids.x; i++) {
@@ -656,7 +663,7 @@ function ResizingCuboid(dimensions,position,measurementMarkers,modifiable,filled
 		for(var i = 0; i < 3; i++)
 		{
 			var lengthMarker = measuringStick( dimensions.getComponent(i) ) 
-			scene.add(lengthMarker)
+			chapter.add(lengthMarker,"sceneElements")
 			if(position.x > 0)
 			{
 				lengthMarker.position.copy( cuboid.geometry.vertices[7] )
@@ -692,7 +699,7 @@ function initCircleInRectanglePacking()
 		clickedPoint = intersectionInformation.point;
 	}
 
-	objectsToBeUpdated.push(circle)
+	updatables.push(circle)
 	circle.update = function()
 	{
 		if( mouse.lastClickedObject === this && mouse.clicking )
@@ -712,7 +719,7 @@ function initCircleOnSpherePacking()
 		new THREE.MeshPhongMaterial({color:0xFF0000}))
 	sphere.castShadow = true
 	scene.add( sphere );
-	objectsToBeUpdated.push(sphere)
+	updatables.push(sphere)
 	sphere.update = function()
 	{
 		this.rotation.y += 0.01
@@ -728,7 +735,7 @@ function initCircleOnSpherePacking()
 		
 		spot.rotation.x = spotRotations[i][0];
 		spot.rotation.z = spotRotations[i][1];
-		objectsToBeUpdated.push(spot)
+		updatables.push(spot)
 		spot.update = function()
 		{
 			this.rotation.y += 0.008
@@ -755,13 +762,13 @@ function initManualPacking(packCounter,haveRotateButton)
 
 		var rotationQueued = 0;
 
-		chapter.addClickable(rotateButton)
+		chapter.add(rotateButton,"clickables")
 		rotateButton.onClick = function()
 		{
 			rotationQueued += TAU / 3
 			this.beenClicked = true
 		}
-		chapter.addUpdatingObject(rotateButton)
+		chapter.add(rotateButton,"updatables")
 		rotateButton.update = function()
 		{
 			if(rotationQueued > 0)
@@ -796,7 +803,7 @@ function initManualPacking(packCounter,haveRotateButton)
 	}
 
 	var _scene = new THREE.Object3D();
-	chapter.addSceneElement(_scene)
+	chapter.add(_scene,"sceneElements")
 	_scene.position.z = stage.geometry.vertices[1].z * stage.scale.z;
 	_scene.position.y = -9/16
 	_scene.rotation.y = -TAU / 8
@@ -899,13 +906,13 @@ function initManualPacking(packCounter,haveRotateButton)
 		cuboids.push(cuboid);
 
 		var clickedPoint = new THREE.Vector3();
-		chapter.addClickable(cuboid)
+		chapter.add(cuboid,"clickables")
 		cuboid.onClick = function(intersectionInformation)
 		{
 			clickedPoint = intersectionInformation.point;
 		}
 
-		chapter.addUpdatingObject(cuboid)
+		chapter.add(cuboid,"updatables")
 		cuboid.update = function()
 		{
 			if( mouse.clicking && mouse.lastClickedObject === this )

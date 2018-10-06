@@ -4,6 +4,8 @@
     To have them click anywhere or to not have them click anywhere?
 
     Nice little jam game; just set a goal and a way to get there
+
+    Wanna divide and subtract too
 */
 
 function initComplexAnalysis()
@@ -39,6 +41,18 @@ function initComplexAnalysis()
         
         target.x = a.x*b.x - a.y*b.y
         target.y = a.y*b.x + a.x*b.y
+
+        return target
+    }
+
+    function complexDivide(a,b,target)
+    {
+        if(target === undefined)
+        {
+            target = new THREE.Vector3()
+        }
+
+        //http://mathworld.wolfram.com/ComplexDivision.html
 
         return target
     }

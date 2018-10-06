@@ -50,8 +50,8 @@ function init( ourID )
 	initCameraAndRendererResizeSystem(renderer);
 	initMouse();
 
-	// initPacking()
-	initClt();
+	initPacking()
+	// initClt();
 
 	render();
 }
