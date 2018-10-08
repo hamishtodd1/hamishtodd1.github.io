@@ -131,7 +131,7 @@ function initPacking()
 	initManualPacking(2)
 
 	initResizingRectangle()
-	makeMultipleChoiceChapter()
+	makeMultipleChoiceChapter(new THREE.Vector3(2,2,2))
 	return
 
 	// {
@@ -202,7 +202,7 @@ function initPacking()
 }
 
 var UNIT = 0.06
-function makeMultipleChoiceChapter()
+function makeMultipleChoiceChapter(dimensionsInCuboids)
 {
 	// var adviceSign = makeTextSign("Click on one of these:")
 	// adviceSign.position.y = -0.43
@@ -217,18 +217,6 @@ function makeMultipleChoiceChapter()
 	var answers = []
 	setUpQuestion = function()
 	{
-		var dimensionsInCuboids = new THREE.Vector3(3,3,3)
-		var maxDimensions = [4,4,4]
-		for(var i = 0; i < 3; i++)
-		{
-			dimensionsInCuboids.setComponent(i, Math.max(1,(Math.floor( Math.random() * maxDimensions[i] )) ) )
-		}
-		if( dimensionsInCuboids.z > 3 )
-		{
-			dimensionsInCuboids.z = 3
-		}
-		// dimensionsInCuboids.set(2,2,3)
-
 		var smallunDimensions = new THREE.Vector3()
 		for(var i = 0; i < 3; i++)
 		{
@@ -337,7 +325,7 @@ function makeMultipleChoiceChapter()
 				{
 					correctSign.material.opacity = 1
 				}
-				countdownTilNext = biggun.cuboidsInside[biggun.cuboidsInside.length-1].segmentToMoveIn + 1
+				countdownTilNext = biggun.cuboidsInside[biggun.cuboidsInside.length-1].segmentToMoveIn + 3.5
 
 				biggun.makeLengthMarkersVisible()
 				smallun.makeLengthMarkersVisible()
@@ -387,7 +375,17 @@ function makeMultipleChoiceChapter()
 			}
 			answers = []
 
-			makeMultipleChoiceChapter()
+			{
+				var dimensionsInCuboids = new THREE.Vector3(3,3,3)
+				var maxDimensions = [4,4,3]
+				for(var i = 0; i < 3; i++)
+				{
+					dimensionsInCuboids.setComponent(i, Math.max(2,(Math.floor( Math.random() * maxDimensions[i] )) ) )
+				}
+				// dimensionsInCuboids.set(2,2,3)
+			}
+
+			makeMultipleChoiceChapter(dimensionsInCuboids)
 			changeChapter(1)
 
 			// setUpQuestion()
@@ -444,7 +442,6 @@ function initResizingRectangle()
 		}
 	}
 	// goals.sort(function(a,b){return a >= b})
-	console.log(goals)
 
 	var questioner = makeTextSign("Try to pack " + goals[goalIndex].toString())
 	// questioner.visible = false
