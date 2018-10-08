@@ -10,7 +10,10 @@ function initChapters()
 		leftArrow.scale.x *= -1
 		rightArrow.position.x = 1
 		leftArrow.position.x = -1
-		scene.add(rightArrow)
+
+		rightArrow.position.z = -camera.position.z
+		leftArrow.position.z = -camera.position.z
+		camera.add(rightArrow)
 
 		changeChapter = function(chapterAddition)
 		{
@@ -42,6 +45,8 @@ function initChapters()
 		let chapter = {
 			sceneElementsToAdd:[],
 			sceneElementsToRemove:[],
+			cameraElementsToAdd:[],
+			cameraElementsToRemove:[],
 			updatablesToAdd:[],
 			updatablesToRemove:[],
 			clickablesToAdd:[],
@@ -50,16 +55,13 @@ function initChapters()
 			functionsToCallOnSetDown:[]
 		}
 
-		let isSetUp = false
-		
 		if(newChapterPosition === undefined)
 		{
-			chapters.push(chapter)
+			newChapterPosition = chapters.length;
 		}
-		else
-		{
-			chapters.splice(newChapterPosition,0,chapter)
-		}
+		chapters.splice(newChapterPosition,0,chapter)
+
+		let isSetUp = false
 
 		chapter.add = function(object,arrayName)
 		{
@@ -68,6 +70,10 @@ function initChapters()
 				if( arrayName === "sceneElements")
 				{
 					scene.add(object)
+				}
+				else if( arrayName === "cameraElements")
+				{
+					camera.add(object)
 				}
 				else
 				{
@@ -88,6 +94,13 @@ function initChapters()
 			for(let i = 0; i < this.sceneElementsToAdd.length; i++)
 			{
 				scene.add(this.sceneElementsToAdd[i])
+			}
+
+			for(let i = 0; i < this.cameraElementsToAdd.length; i++)
+			{
+				camera.add(this.cameraElementsToAdd[i])
+				this.cameraElementsToAdd[i].updateText(this.cameraElementsToAdd[i].text)
+				// console.log(this.cameraElementsToAdd[i].material.map.needsUpdate)
 			}
 
 			for(let i = 0; i < this.updatablesToAdd.length; i++)
@@ -114,6 +127,14 @@ function initChapters()
 				if(this.sceneElementsToRemove[i].parent)
 				{
 					this.sceneElementsToRemove[i].parent.remove(this.sceneElementsToRemove[i])
+				}
+			}
+
+			for(let i = 0; i < this.cameraElementsToRemove.length; i++)
+			{
+				if(this.cameraElementsToRemove[i].parent)
+				{
+					this.cameraElementsToRemove[i].parent.remove(this.cameraElementsToRemove[i])
 				}
 			}
 
@@ -146,6 +167,10 @@ function initChapters()
 		return chapter;
 	}
 
-	Chapter()
-	let chapter = chapters[0]
+	let chapter = null
+	finishSettingUpChapters = function()
+	{
+		chapter = chapters[0]
+		chapter.setUp()
+	}
 }

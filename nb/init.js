@@ -44,14 +44,15 @@ function init( ourID )
 		renderer.render( scene, camera );
 	}
 
-	initChapters()
-
 	initStage();
 	initCameraAndRendererResizeSystem(renderer);
+	initChapters()
 	initMouse();
 
 	initPacking()
 	// initClt();
+
+	finishSettingUpChapters()
 
 	render();
 }

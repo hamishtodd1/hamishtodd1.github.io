@@ -1,6 +1,12 @@
 /*
-	PORT TO THE CHAPTER SYSTEM!!
-
+	TODO
+		GET QUOTES AND MAYBE PICTURES
+		Restartable
+		Bug: they sometimes come out weirdly
+		
+		More rotation?
+		Cylinders
+		Get rid of the server
 
 	Chapters
 		They compete to see how many they can get in
@@ -86,20 +92,6 @@
 function initPacking()
 {
 	{
-		var packCounter = makeTextSign("")
-		packCounter.stringPrecedingScore = "Packed: "
-		updatables.push(packCounter)
-		packCounter.update = function(){}
-		packCounter.position.x = -0.95
-		packCounter.position.y = -0.95 / (16/9)
-		packCounter.defaultPosition = packCounter.position.clone()
-		packCounter.geometry = new THREE.OriginCorneredPlaneBufferGeometry(0.05,0.05)
-		camera.add(packCounter)
-		packCounter.position.z = -camera.position.z
-		packCounter.excitedness = 0;
-	}
-
-	{
 		var orbitControls = {}
 		var previousIntersection = mouse.rayIntersectionWithZPlane(0)
 		updatables.push(orbitControls)
@@ -132,79 +124,85 @@ function initPacking()
 		}
 	}
 
-	// initManualPacking(packCounter,true)
-	// initResizingRectangle(packCounter)
-	initMultipleChoice()
+	Chapter()
+
+	initManualPacking(0)
+	initManualPacking(1)
+	initManualPacking(2)
+
+	initResizingRectangle()
+	makeMultipleChoiceChapter()
 	return
 
-	{
-		var applicationButton = makeTextSign( "Different object" )
-		applicationButton.scale.multiplyScalar(1.6)
-		applicationButton.position.y = 0.5
-		clickables.push(applicationButton)
+	// {
+	// 	var applicationButton = makeTextSign( "Different object" )
+	// 	applicationButton.scale.multiplyScalar(1.6)
+	// 	applicationButton.position.y = 0.5
+	// 	clickables.push(applicationButton)
 
-		var cuboidsToChange = []
-		var applications = []
-		applicationButton.onClick = function()
-		{
-			var newIndex = Math.floor(Math.random() * applications.length)
-			//ideally you can't get the same one repeatedly
-			for(var i = 0; i < cuboidsToChange.length; i++)
-			{
+	// 	var cuboidsToChange = []
+	// 	var applications = []
+	// 	applicationButton.onClick = function()
+	// 	{
+	// 		var newIndex = Math.floor(Math.random() * applications.length)
+	// 		//ideally you can't get the same one repeatedly
+	// 		for(var i = 0; i < cuboidsToChange.length; i++)
+	// 		{
 				
-			}
-		}
-		scene.add(applicationButton)
-	}
+	// 		}
+	// 	}
+	// 	scene.add(applicationButton)
+	// }
 
-	new THREE.OBJLoader().load("data/meshes/book.obj", function(obj)
-	{
-		var scaleMatrix = new THREE.Matrix4().makeScale(0.1,0.1,0.1)
-		var coverGeometry = obj.children[1].geometry.applyMatrix( scaleMatrix )
-		coverGeometry.computeBoundingBox()
+	// new THREE.OBJLoader().load("data/meshes/book.obj", function(obj)
+	// {
+	// 	var scaleMatrix = new THREE.Matrix4().makeScale(0.1,0.1,0.1)
+	// 	var coverGeometry = obj.children[1].geometry.applyMatrix( scaleMatrix )
+	// 	coverGeometry.computeBoundingBox()
 
-		var pagesGeometry = obj.children[2].geometry.applyMatrix( scaleMatrix )
+	// 	var pagesGeometry = obj.children[2].geometry.applyMatrix( scaleMatrix )
 
-		var book = new THREE.Mesh(coverGeometry, new THREE.MeshPhongMaterial({color:0xFF0000}) )
-		book.add( new THREE.Mesh(pagesGeometry, new THREE.MeshBasicMaterial({color:0xFFFFFF}) ) )
+	// 	var book = new THREE.Mesh(coverGeometry, new THREE.MeshPhongMaterial({color:0xFF0000}) )
+	// 	book.add( new THREE.Mesh(pagesGeometry, new THREE.MeshBasicMaterial({color:0xFFFFFF}) ) )
 
-		scene.add(book)
-	})
+	// 	scene.add(book)
+	// })
 
-	{
-		var cereal = new THREE.Group()
-		scene.add(cereal)
+	// {
+	// 	var cereal = new THREE.Group()
+	// 	scene.add(cereal)
 
-		var names = ["front", "side", "top"]
-		var addition = new THREE.Vector3(0.5,0.5,0.5)
-		for(var i = 0; i < 3; i++)
-		{
-			var texture = new THREE.TextureLoader().load('data/textures/cereal/' + names[i] + '.jpg')
-			var a = new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide}) )
-			var b = new THREE.Mesh(new THREE.PlaneGeometry(1,1), a.material )
-			a.position.setComponent((i+2)%3, 0.5)
-			b.position.setComponent((i+2)%3,-0.5)
+	// 	var names = ["front", "side", "top"]
+	// 	var addition = new THREE.Vector3(0.5,0.5,0.5)
+	// 	for(var i = 0; i < 3; i++)
+	// 	{
+	// 		var texture = new THREE.TextureLoader().load('data/textures/cereal/' + names[i] + '.jpg')
+	// 		var a = new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide}) )
+	// 		var b = new THREE.Mesh(new THREE.PlaneGeometry(1,1), a.material )
+	// 		a.position.setComponent((i+2)%3, 0.5)
+	// 		b.position.setComponent((i+2)%3,-0.5)
 
-			a.position.add(addition)
-			b.position.add(addition)
+	// 		a.position.add(addition)
+	// 		b.position.add(addition)
 
-			if(i===1)
-			{
-				a.rotation.y = b.rotation.y = TAU/4
-			}
-			if(i===2)
-			{
-				a.rotation.x = b.rotation.x = TAU/4
-			}
-			b.rotation.y += TAU / 2
-			cereal.add(a,b)
-		}
-		cereal.scale.set(0.228,0.414,0.072)
-		objectsToBeRotated.push(cereal)
-	}
+	// 		if(i===1)
+	// 		{
+	// 			a.rotation.y = b.rotation.y = TAU/4
+	// 		}
+	// 		if(i===2)
+	// 		{
+	// 			a.rotation.x = b.rotation.x = TAU/4
+	// 		}
+	// 		b.rotation.y += TAU / 2
+	// 		cereal.add(a,b)
+	// 	}
+	// 	cereal.scale.set(0.228,0.414,0.072)
+	// 	objectsToBeRotated.push(cereal)
+	// }
 }
 
-function initMultipleChoice()
+var UNIT = 0.06
+function makeMultipleChoiceChapter()
 {
 	// var adviceSign = makeTextSign("Click on one of these:")
 	// adviceSign.position.y = -0.43
@@ -220,16 +218,21 @@ function initMultipleChoice()
 	setUpQuestion = function()
 	{
 		var dimensionsInCuboids = new THREE.Vector3(3,3,3)
-		// for(var i = 0; i < 3; i++)
-		// {
-		// 	dimensionsInCuboids.setComponent(i, Math.max(2,(Math.floor( Math.random() * maxDimensions[i] )) ) )
-		// }
-
-		var smallunDimensions = new THREE.Vector3()
 		var maxDimensions = [4,4,4]
 		for(var i = 0; i < 3; i++)
 		{
-			smallunDimensions.setComponent(i,0.1 * (Math.floor( Math.random() * 3)+1))
+			dimensionsInCuboids.setComponent(i, Math.max(1,(Math.floor( Math.random() * maxDimensions[i] )) ) )
+		}
+		if( dimensionsInCuboids.z > 3 )
+		{
+			dimensionsInCuboids.z = 3
+		}
+		// dimensionsInCuboids.set(2,2,3)
+
+		var smallunDimensions = new THREE.Vector3()
+		for(var i = 0; i < 3; i++)
+		{
+			smallunDimensions.setComponent(i,UNIT * (Math.floor( Math.random() * 3)+1))
 		}
 		var smallunPosition = new THREE.Vector3(-0.5,0,0)
 		var smallun = ResizingCuboid(chapter,smallunDimensions,smallunPosition,true,false,false)
@@ -278,6 +281,12 @@ function initMultipleChoice()
 		chapter.add(cuboidInsideMover,"updatables")
 		cuboidInsideMover.update = function()
 		{
+			// console.log(countdownTilNext)
+			if(countdownTilNext === Infinity)
+			{
+				return
+			}
+
 			innerCuboidsMovementProgress += frameDelta
 			var smallunActualPosition = smallunPosition.clone().addScaledVector(smallunDimensions,-0.5)
 			for(var i = 0; i < biggun.cuboidsInside.length; i++)
@@ -286,6 +295,7 @@ function initMultipleChoice()
 				var howFarWeAreThroughThisOnesSegment = clamp( innerCuboidsMovementProgress - cuboidInside.segmentToMoveIn,0,1 )
 				cuboidInside.position.lerpVectors(smallunActualPosition,cuboidInside.positionInsideBox, howFarWeAreThroughThisOnesSegment )
 			}
+			// console.log(biggun.cuboidsInside[1].position.x)
 		}
 
 		for(var i = 0; i < biggun.cuboidsInside.length; i++)
@@ -306,8 +316,9 @@ function initMultipleChoice()
 		{
 			var num = lowestAnswerToPresent+i
 			var answer = makeTextSign(num.toString())
+			answer.depthTest = false
 			answers.push(answer)
-			scene.add(answer)
+			chapter.add(answer,"sceneElements")
 			answer.position.x = 0.16 * (i-(numPresentedAnswers-1)/2)
 			answer.position.y = -0.5
 
@@ -326,13 +337,15 @@ function initMultipleChoice()
 				{
 					correctSign.material.opacity = 1
 				}
-				countdownTilNext = 2.3
-				// scene.remove(adviceSign)
+				countdownTilNext = biggun.cuboidsInside[biggun.cuboidsInside.length-1].segmentToMoveIn + 1
 
-				for(var i = 0; i < biggun.cuboidsInside.length; i++)
-				{
-					biggun.cuboidsInside[i].visible = checkBoxMeshContainment(biggun,biggun.cuboidsInside[i])
-				}
+				biggun.makeLengthMarkersVisible()
+				smallun.makeLengthMarkersVisible()
+
+				// for(var i = 0; i < biggun.cuboidsInside.length; i++)
+				// {
+				// 	biggun.cuboidsInside[i].visible = checkBoxMeshContainment(biggun,biggun.cuboidsInside[i])
+				// }
 			}
 		}
 	}
@@ -344,7 +357,7 @@ function initMultipleChoice()
 	correctSign.position.set(-0.5,-0.34,0)
 	correctSign.material.transparent = true
 	correctSign.material.opacity = 0.0001
-	scene.add(correctSign)
+	chapter.add(correctSign,"sceneElements")
 
 	var questioner = {}
 	updatables.push(questioner)
@@ -360,10 +373,7 @@ function initMultipleChoice()
 
 		if(countdownTilNext < 0)
 		{
-			var hackSign = new THREE.Mesh(new THREE.PlaneGeometry(0.8,0.2), new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load('data/textures/refresh.jpg'),side:THREE.DoubleSide}) )
-			hackSign.material.depthTest = false
-			hackSign.position.y = 0.4
-			scene.add(hackSign)
+			//previously we had "refresh sign comes up" here
 
 			countdownTilNext = Infinity
 			correctAnswer.material.color.setRGB(1,1,1)
@@ -377,12 +387,15 @@ function initMultipleChoice()
 			}
 			answers = []
 
+			makeMultipleChoiceChapter()
+			changeChapter(1)
+
 			// setUpQuestion()
 		}
 	}
 }
 
-function initResizingRectangle(packCounter)
+function initResizingRectangle()
 {
 	var chapter = Chapter();
 
@@ -402,6 +415,7 @@ function initResizingRectangle(packCounter)
 		}
 	}
 
+	var packCounter = PackCounter(chapter)
 	packCounter.update = function()
 	{
 		var score = 0;
@@ -412,18 +426,100 @@ function initResizingRectangle(packCounter)
 				score++
 			}
 		}
-		packCounter.updateText(packCounter.stringPrecedingScore + score.toString())
+		if(score !== packCounter.score)
+		{
+			packCounter.updateScore(score)
+		}
+		packCounter.expressExcitedness()
 	}
+
+	var goalIndex = 0;
+	var primeNumbers = [2,3,5,7,11,13]
+	var goals = []
+	for(var i = 0; i < primeNumbers.length; i++){
+		for(var j = i; j < primeNumbers.length; j++){
+			for(var k = j; k < primeNumbers.length; k++){
+				goals.push(primeNumbers[i]*primeNumbers[j]*primeNumbers[k])
+			}
+		}
+	}
+	// goals.sort(function(a,b){return a >= b})
+	console.log(goals)
+
+	var questioner = makeTextSign("Try to pack " + goals[goalIndex].toString())
+	// questioner.visible = false
+	questioner.position.copy(packCounter.position)
+	questioner.position.y *= -1
+	questioner.position.x += 0.15
+	chapter.add(questioner,"cameraElements")
+	chapter.add(questioner,"updatables")
+	chapter.functionsToCallOnSetUp.push(function()
+	{
+		questioner.material = makeTextSign(questioner.text, true)
+	})
+	questioner.update = function()
+	{
+		if(packCounter.score === goals[goalIndex])
+		{
+			this.visible = true
+			this.material.color.setRGB(0,1,0)
+			goalIndex++
+			questioner.material = makeTextSign("Try to pack " + goals[goalIndex].toString(),true)
+			questioner.material.color.setRGB(0,1,0)
+		}
+
+		this.material.color.r = clamp(this.material.color.r+0.03,0,1)
+		this.material.color.b = clamp(this.material.color.r+0.03,0,1)
+		this.material.needsUpdate = true
+	}
+}
+
+function PackCounter(chapter)
+{
+	var stringPrecedingScore = "Packed: "
+	var packCounter = makeTextSign(stringPrecedingScore + "0")
+	packCounter.stringPrecedingScore = stringPrecedingScore
+	packCounter.position.x = -0.95
+	packCounter.position.y = -0.85 / (16/9)
+	packCounter.defaultPosition = packCounter.position.clone()
+	packCounter.geometry = new THREE.OriginCorneredPlaneBufferGeometry(0.05,0.05)
+	packCounter.position.z = -camera.position.z
+	packCounter.excitedness = 0;
+	packCounter.score = 0;
+
+	chapter.add(packCounter,"cameraElements")
 	chapter.add(packCounter,"updatables")
-	chapter.add(packCounter,"sceneElements")
+	chapter.functionsToCallOnSetUp.push(function()
+	{
+		packCounter.material = makeTextSign(packCounter.text, true)
+	})
+
+	packCounter.expressExcitedness = function()
+	{
+		packCounter.excitedness -= frameDelta * 1.5
+		if(packCounter.excitedness < 0)
+		{
+			packCounter.excitedness = 0
+		}
+		packCounter.material.color.g = 1-packCounter.excitedness
+		packCounter.position.y = packCounter.defaultPosition.y + packCounter.excitedness * 0.06 * sq(Math.sin(frameCount * 0.2))
+	}
+	packCounter.updateScore = function(newScore)
+	{
+		this.score = newScore
+		var newText = packCounter.stringPrecedingScore + this.score.toString()
+		packCounter.material = makeTextSign(newText, true)
+		packCounter.excitedness = 1;
+	}
+
+	return packCounter
 }
 
 function measuringStick(sideLength)
 {
-	var markerSpacing = 0.1
+	var markerSpacing = UNIT
 	var numMarkers = Math.max(sideLength / markerSpacing + 1,3)
-	console.log(sideLength,numMarkers)
-	var markerThickness = 0.01
+	var markerThickness = 0.008
 	var markerMaterial = new THREE.MeshBasicMaterial({color:0x0000FF})
 	var lengthMarker = new THREE.Mesh(
 		new THREE.CylinderBufferGeometryUncentered(markerThickness/2,numMarkers * markerSpacing * 1.03),
@@ -456,6 +552,12 @@ function measuringStick(sideLength)
 		// }
 	}
 
+	lengthMarker.readOut = makeTextSign((Math.floor(sideLength / markerSpacing)).toString())
+	lengthMarker.readOut.material.depthTest = false
+	lengthMarker.readOut.position.y = (cmMarkers.length-1) / 2 * markerSpacing
+	lengthMarker.readOut.position.x = -1.4*markerLength
+	lengthMarker.add(lengthMarker.readOut)
+
 	return lengthMarker
 }
 
@@ -469,7 +571,7 @@ function ResizingCuboid(chapter,dimensions,position,measurementMarkers,modifiabl
 	cuboid.currentDimensions = new THREE.Vector3()
 	chapter.add(cuboid,"sceneElements")
 
-	var vertexGeometry = new THREE.SphereBufferGeometry(0.015)
+	var vertexGeometry = new THREE.SphereBufferGeometry(0.01)
 	var vertexMaterial = new THREE.MeshPhongMaterial({color:0xFFD700})
 	function Vertex()
 	{
@@ -479,7 +581,7 @@ function ResizingCuboid(chapter,dimensions,position,measurementMarkers,modifiabl
 	}
 
 	var edgeMaterial = new THREE.MeshPhongMaterial({color:0x000000})
-	var edgeGeometry = new THREE.CylinderBufferGeometryUncentered(0.01,1)
+	var edgeGeometry = new THREE.CylinderBufferGeometryUncentered(0.006,1)
 	function Edge(start,end)
 	{
 		var edge = new THREE.Mesh(edgeGeometry,edgeMaterial )
@@ -520,7 +622,6 @@ function ResizingCuboid(chapter,dimensions,position,measurementMarkers,modifiabl
 		for(var i = 0; i < cuboid.edges.length; i++)
 		{
 			cuboid.edges[i].position.copy( cuboid.edges[i].start )
-			console.log(cuboid.edges[i].end) //There's an error. You just transitioned everything to chapter.add.
 			pointCylinder(cuboid.edges[i], cuboid.edges[i].end )
 			cuboid.edges[i].scale.y = cuboid.edges[i].start.distanceTo(cuboid.edges[i].end)
 		}
@@ -637,7 +738,8 @@ function ResizingCuboid(chapter,dimensions,position,measurementMarkers,modifiabl
 			{
 				this.scale.copy(dimensions)
 
-				this.positionInsideBox = new THREE.Vector3(this.k,this.j,this.i)
+				this.positionInsideBox = new THREE.Vector3(this.i,this.j,this.k)
+
 				this.positionInsideBox.multiply(dimensions)
 				this.positionInsideBox.add(cuboid.geometry.vertices[6])
 
@@ -660,22 +762,57 @@ function ResizingCuboid(chapter,dimensions,position,measurementMarkers,modifiabl
 	cuboid.geometry.applyMatrix(new THREE.Matrix4().setPosition(position))
 	if(measurementMarkers)
 	{
+		cuboid.lengthMarkers = []
+		cuboid.makeLengthMarkersVisible = function()
+		{
+			for(var i = 0; i < 3; i++)
+			{
+				cuboid.lengthMarkers[i].readOut.visible = true;
+			}
+		}
+
 		for(var i = 0; i < 3; i++)
 		{
 			var lengthMarker = measuringStick( dimensions.getComponent(i) ) 
 			chapter.add(lengthMarker,"sceneElements")
+			lengthMarker.readOut.visible = false;
+			cuboid.lengthMarkers.push(lengthMarker)
 			if(position.x > 0)
 			{
 				lengthMarker.position.copy( cuboid.geometry.vertices[7] )
-				if(i===0) {lengthMarker.rotation.z -= TAU*3/4;lengthMarker.rotation.y -= TAU/2;}
-				if(i===2) lengthMarker.rotation.x -= TAU/4
+				if(i===0)
+				{
+					lengthMarker.rotation.z -= TAU*3/4;
+					lengthMarker.readOut.rotation.z += TAU/4
+					lengthMarker.rotation.y -= TAU/2;
+					lengthMarker.readOut.rotation.y += TAU/2;
+				}
+				if(i===2)
+				{
+					lengthMarker.rotation.x -= TAU/4
+					lengthMarker.readOut.rotation.x += TAU/4
+				}
 			}
 			else
 			{
 				lengthMarker.position.copy( cuboid.geometry.vertices[2] )
-				if(i===0) {lengthMarker.rotation.z += TAU/4;}
-				if(i===1) {lengthMarker.rotation.y += TAU/2;}
-				if(i===2) {lengthMarker.rotation.y += TAU/2;lengthMarker.rotation.x -= TAU/4;}
+				if(i===0)
+				{
+					lengthMarker.rotation.z += TAU/4
+					lengthMarker.readOut.rotation.z -= TAU/4
+				}
+				if(i===1)
+				{
+					lengthMarker.rotation.y += TAU/2;
+					lengthMarker.readOut.rotation.y -= TAU/2
+				}
+				if(i===2)
+				{	
+					lengthMarker.rotation.y += TAU/2;
+					lengthMarker.readOut.rotation.y -= TAU/2
+					lengthMarker.rotation.x -= TAU/4;
+					lengthMarker.readOut.rotation.x -= TAU/4
+				}
 			}
 			lengthMarker.updateCmMarkers()
 		}
@@ -745,11 +882,54 @@ function initCircleOnSpherePacking()
 }
 
 var objectsToBeRotated = []
-function initManualPacking(packCounter,haveRotateButton)
+function initManualPacking(challengeNum)
 {
 	var chapter = Chapter();
 
-	if(haveRotateButton)
+	var packCounter = PackCounter(chapter)
+	packCounter.update = function()
+	{
+		var score = 0;
+		var thereIsALooseOne = false
+		for(var i = 0; i < cuboids.length; i++)
+		{
+			if( checkBoxMeshContainment(bin, cuboids[i]) )
+			{
+				score++;
+			}
+			else
+			{
+				thereIsALooseOne = true
+			}
+		}
+
+		if(score !== packCounter.score)
+		{
+			packCounter.updateScore(score)
+		}
+
+		if( !thereIsALooseOne && !mouse.clicking )
+		{
+			if(challengeNum === 0)
+			{
+				var newCuboid = Cuboid(0.1,0.1,0.1)
+			}
+			else if(challengeNum === 1)
+			{
+				var newCuboid = Cuboid(0.1,0.1,0.2)
+			}
+			else if(challengeNum === 2)
+			{
+				var newCuboid = Cuboid(0.1,0.2,0.3)
+			}
+			newCuboid.position.copy(originalCuboidPosition)
+			newCuboid.rotation.copy(cuboids[0].rotation)
+		}
+
+		packCounter.expressExcitedness()
+	}
+
+	if(challengeNum > 0)
 	{
 		var rotateButton = makeTextSign( "Rotate" )
 		rotateButton.geometry = new THREE.OriginCorneredPlaneBufferGeometry(0.05,0.05)
@@ -757,8 +937,13 @@ function initManualPacking(packCounter,haveRotateButton)
 		rotateButton.position.x *= -1
 		rotateButton.position.x -= 0.05 * rotateButton.scale.x
 		rotateButton.beenClicked = false
-		camera.add(rotateButton)
 		rotateButton.position.z = -camera.position.z
+
+		chapter.add(rotateButton,"cameraElements")
+		chapter.functionsToCallOnSetUp.push(function()
+		{
+			rotateButton.material = makeTextSign(rotateButton.text, true)
+		})
 
 		var rotationQueued = 0;
 
@@ -810,14 +995,19 @@ function initManualPacking(packCounter,haveRotateButton)
 
 	var originalCuboidPosition = new THREE.Vector3(0,1/ (16/9),0)
 
-	if(haveRotateButton)
+	if(challengeNum === 0)
 	{
-		var binDimensions = new THREE.Vector3(0.41,0.21,0.41)
+		var binDimensions = new THREE.Vector3(0.22,0.22,0.22)
 	}
-	else
+	else if(challengeNum === 1)
 	{
-		var binDimensions = new THREE.Vector3(0.41,0.41,0.41)
+		var binDimensions = new THREE.Vector3(0.43,0.32,0.43)
 	}
+	else if(challengeNum === 2)
+	{
+		var binDimensions = new THREE.Vector3(0.43,0.43,0.43)
+	}
+
 	var binGeometry = new THREE.BoxGeometry(binDimensions.x,binDimensions.y,binDimensions.z);
 	binGeometry.applyMatrix(new THREE.Matrix4().makeTranslation( binDimensions.x/2,binDimensions.y/2,binDimensions.z/2 ))
 	binGeometry.computeBoundingBox();
@@ -827,50 +1017,6 @@ function initManualPacking(packCounter,haveRotateButton)
 	// bin.position.y = 0.01
 	bin.add( new THREE.Mesh( binGeometry, new THREE.MeshPhongMaterial({side:THREE.BackSide,color:binColor}) ) );
 	_scene.add(bin)
-
-	packCounter.update = function()
-	{
-		var score = 0;
-		var thereIsALooseOne = false
-		for(var i = 0; i < cuboids.length; i++)
-		{
-			if( checkBoxMeshContainment(bin, cuboids[i]) )
-			{
-				score++;
-			}
-			else
-			{
-				thereIsALooseOne = true
-			}
-		}
-		var oldText = packCounter.text
-		packCounter.updateText(packCounter.stringPrecedingScore + score.toString())
-		if( oldText !== packCounter.text && oldText !== "")
-		{
-			packCounter.excitedness = 1;
-		}
-
-		if( !thereIsALooseOne && !mouse.clicking )
-		{
-			if(haveRotateButton)
-			{
-				var newCuboid = Cuboid(0.2,0.1,0.1)
-			}
-			else
-			{
-				var newCuboid = Cuboid(0.1,0.1,0.1)
-			}
-			newCuboid.position.copy(originalCuboidPosition)
-		}
-
-		packCounter.excitedness -= frameDelta * 1.5
-		if(packCounter.excitedness < 0)
-		{
-			packCounter.excitedness = 0
-		}
-		packCounter.material.color.g = 1-packCounter.excitedness
-		packCounter.position.y = packCounter.defaultPosition.y + packCounter.excitedness * 0.06 * sq(Math.sin(frameCount * 0.2))
-	}
 
 	var collideableCuboids = []
 

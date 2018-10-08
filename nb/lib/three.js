@@ -18283,6 +18283,8 @@
 
 		this.needsUpdate = true;
 
+		this.needsUpdaten = true;
+
 	}
 
 	CanvasTexture.prototype = Object.create( Texture.prototype );

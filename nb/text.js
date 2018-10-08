@@ -1,4 +1,4 @@
-function makeTextSign(text)
+function makeTextSign(text, materialOnly)
 {
 	//"Context" is a persistent thing
 	var canvas = document.createElement("canvas");
@@ -9,7 +9,10 @@ function makeTextSign(text)
 	var backGroundColor = "white"
 	var textColor = "black"
 
-	var sign = new THREE.Mesh(new THREE.PlaneBufferGeometry(0.05,0.05), new THREE.MeshBasicMaterial({map: new THREE.CanvasTexture(canvas)}));
+	var sign = new THREE.Mesh(
+		new THREE.PlaneBufferGeometry(0.05,0.05),
+		new THREE.MeshBasicMaterial({map: new THREE.CanvasTexture(canvas)})
+	);
 	
 	sign.updateText = function(text)
 	{
@@ -34,9 +37,17 @@ function makeTextSign(text)
 		sign.scale.x = sign.scale.y * canvas.width/canvas.height;
 
 		sign.material.map.needsUpdate = true
+		// console.log(sign.material.map.needsUpdate)
 	}
 
 	sign.updateText(text)
 
-	return sign;
+	if(!materialOnly)
+	{
+		return sign;
+	}
+	else
+	{
+		return sign.material
+	}
 }

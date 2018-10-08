@@ -89,7 +89,6 @@ function initClt()
 				{
 					humpArray[j] = 1 + Math.floor( Math.random() * 5)
 				}
-				console.log(humpArray)
 
 				let newDistribution = HumpedClickableDistribution( humpArray,false,cdAndCupChapter,true )
 				newDistribution.scale.multiplyScalar(0.2)
@@ -97,7 +96,6 @@ function initClt()
 
 				clickableDistributions[i] = newDistribution
 			}
-			console.log(clickableDistributions)
 			
 			makeCupGame(clickableDistributions, 3, cdAndCupChapter)
 			return cdAndCupChapter

@@ -117,7 +117,10 @@ function getExtremeFunctionCallResult(array, functionName,lowest)
 function pointCylinder(cylinderMesh, end)
 {
 	var endLocal = end.clone();
-	cylinderMesh.parent.worldToLocal(endLocal)
+	if( cylinderMesh.parent && cylinderMesh.parent !== scene)
+	{
+		cylinderMesh.parent.worldToLocal(endLocal)
+	}
 	var startToEnd = endLocal.clone().sub(cylinderMesh.position);
 	cylinderMesh.scale.set(1,startToEnd.length(),1);
 	cylinderMesh.quaternion.setFromUnitVectors(yUnit,startToEnd.normalize());
