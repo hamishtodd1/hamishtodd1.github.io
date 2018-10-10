@@ -15,6 +15,30 @@ function initClt()
 
 	initClickableDistributions()
 
+	{
+		let acceptRejectChapter = Chapter(-1,)
+
+		let clickableDistributions = Array(2)
+		for(let i = 0; i < clickableDistributions.length; i++)
+		{
+			let humpArray = Array(5)
+			for(let j = 0; j < humpArray.length; j++)
+			{
+				humpArray[j] = 1 + Math.floor( Math.random() * 5)
+			}
+
+			let newDistribution = HumpedClickableDistribution( humpArray,false,acceptRejectChapter,true )
+			newDistribution.scale.multiplyScalar(0.2)
+			newDistribution.position.y = 0.3 * (i-(clickableDistributions.length-1)/2)
+
+			clickableDistributions[i] = newDistribution
+		}
+		
+		makeCupGame( clickableDistributions, 4, acceptRejectChapter, true )
+	}
+
+	return
+
 	//initFinger()
 
 	let singleCdChapter = Chapter()
@@ -25,28 +49,9 @@ function initClt()
 		let numColoredBalls = 2;
 		let numSwaps = 2;
 		
-		let ballAndCupResetButton = makeTextSign("Reset")
-		ballAndCupResetButton.position.x = 0.8
-		ballAndCupResetButton.position.y = -0.4
-		ballAndCupResetButton.scale.multiplyScalar(2)
-		function reset()
-		{
-			let newChapterPosition = chapters.indexOf(chapter) + 1
-			if( numColoredBalls === 2 || (numColoredBalls<4 && numSwaps>6))
-				numColoredBalls++
-			else
-				numSwaps += 2
-			let newChapter = makeBallAndCupChapter( newChapterPosition )
-			changeChapter(1)
-		}
-		ballAndCupResetButton.onClick = reset
-
 		function makeBallAndCupChapter(newChapterPosition)
 		{
 			let cupChapter = Chapter( newChapterPosition )
-
-			cupChapter.add(ballAndCupResetButton,"sceneElements")
-			cupChapter.add(ballAndCupResetButton,"clickables")
 
 			let coloredBalls = Array(numColoredBalls)
 			for(let i = 0; i < coloredBalls.length; i++)
@@ -56,30 +61,27 @@ function initClt()
 				cupChapter.add(coloredBalls[i],"sceneElements")
 			}
 			makeCupGame(coloredBalls, numSwaps, cupChapter)
+
+			if( numColoredBalls === 2 || (numColoredBalls<4 && numSwaps>6))
+			{
+				numColoredBalls++
+			}
+			else
+			{
+				numSwaps += 2
+			}
+
 			return cupChapter
 		}
-		let firstBallAndCupChapter = makeBallAndCupChapter()
+		
+		makeResettableChapter(makeBallAndCupChapter)
 	}
 
 	{
-		let cdAndCupResetButton = makeTextSign("Reset")
-		cdAndCupResetButton.position.x = 0.8
-		cdAndCupResetButton.scale.multiplyScalar(2)
-		cdAndCupResetButton.position.y = -0.4
-		function cdAndCupReset()
+		function makeCdAndCupChapter(newChapterPosition)
 		{
-			let newChapterPosition = chapters.indexOf(chapter) + 1
-			let newChapter = makeCdAndCupChapter( 3, newChapterPosition )
-			changeChapter(1)
-		}
-		cdAndCupResetButton.onClick = cdAndCupReset
-
-		function makeCdAndCupChapter(numDistributions,newChapterPosition)
-		{
+			let numDistributions = 3
 			let cdAndCupChapter = Chapter( newChapterPosition )
-
-			cdAndCupChapter.add(cdAndCupResetButton,"sceneElements")
-			cdAndCupChapter.add(cdAndCupResetButton,"clickables")
 
 			let clickableDistributions = Array(numDistributions)
 			for(let i = 0; i < numDistributions; i++)
@@ -97,10 +99,11 @@ function initClt()
 				clickableDistributions[i] = newDistribution
 			}
 			
-			makeCupGame(clickableDistributions, 3, cdAndCupChapter)
+			makeCupGame(clickableDistributions, 4, cdAndCupChapter)
 			return cdAndCupChapter
 		}
-		let firstCdCupChapter = makeCdAndCupChapter(3)
+
+		makeResettableChapter(makeCdAndCupChapter)
 	}
 
 	Chapter()
@@ -112,28 +115,25 @@ function initClt()
 	correct and incorrect signs, jesus christ
 	Actual randomization
 
+	At least do the multiple graphs thing and have them understand p-value
+
+	Just accept/reject
+
 	That life expectancy thing where they drop
 
 	Graph thing where you try to get out early using normal dist?
+	Then at some point you only get the normal dist.
 	
-	Back to puzzles
-	Now you can click and hold and you'll get them
 	They see the normal distribution describing where the average should go
 	They should get used to looking at the normal distribution next to it, using it to "get out early"
-	Still should feel slow
-	Now you get a big bunch at a time
-	You can do it faster
-	Now...
 	We are NOT showing the actual graph, or actual samples, just the normal distribution
 	And all you're doing is accepting/rejecting a single graph
 	Now: automated. You see loads at a time.
 	You see ~200 sample means marked on as many distributions next to a "accept/reject"
-	You can control the p (width of acceptance on graph) - changes many accept/reject statuses
 	You're given a specific n, at least at this point
 	Then you click "go" and "correct/incorrect" pop up on all the graphs.
 	You get shown another bunch
 	Should be able to see that approximately 200 * p of them give false positives
-	Then?
 	You can control the n - but it means you do more/less experiments
 
 	// Central limit theorem
@@ -233,7 +233,7 @@ function HumpedClickableDistribution(arrayOfBlocks, normalDistributionsPresent,c
 			blocksCountedThrough += arrayOfBlocks[i]
 		}
 	}
-	return ClickableDistribution( humpedSamplingFunction, arrayOfBlocks.length,240, normalDistributionsPresent,chapter,spray )
+	return ClickableDistribution( true, humpedSamplingFunction, arrayOfBlocks.length,240, normalDistributionsPresent,chapter,spray )
 }
 
 let ClickableDistribution = null;
@@ -266,7 +266,7 @@ function initClickableDistributions()
 
 	let lowestUnusedProfilePicture = 0;
 
-	ClickableDistribution = function( samplingFunction,numControlPoints = 11,numSamples = 30 * numControlPoints, normalDistributionsPresent, chapter, spray, samples )
+	ClickableDistribution = function(haveProfilePicture, samplingFunction,numControlPoints = 11,numSamples = 30 * numControlPoints, normalDistributionsPresent, chapter, spray, samples )
 	{
 		//if you go too high on numControlPoints the noise is bad ;_;
 
@@ -430,7 +430,6 @@ function initClickableDistributions()
 		{
 			if(mouse.clicking && mouse.lastClickedObject === this )
 			{
-				console.log("yo")
 				if(spray)
 				{
 					if( !mouse.oldClicking || frameCount % 11 === 0 ) //always get the first
@@ -469,7 +468,7 @@ function initClickableDistributions()
 
 		clickableDistribution.wandClone = function()
 		{
-			let clone = ClickableDistribution(samplingFunction, numControlPoints,numSamples, false, chapter,true,this.samples)
+			let clone = ClickableDistribution(false, samplingFunction, numControlPoints,numSamples, false, chapter,true,this.samples)
 			clone.scale.copy(this.scale)
 			// for(let i = clone.children.length; i < this.children.length; i++)
 			// {
@@ -480,19 +479,22 @@ function initClickableDistributions()
 
 		clickableDistribution.scale.set(1/clickableDistribution.width,0.5/clickableDistribution.height,1)
 		
-		clickableDistribution.profilePicture = profilePictures[lowestUnusedProfilePicture]
-		lowestUnusedProfilePicture++
-		if( lowestUnusedProfilePicture >= profilePictures.length )
+		if(haveProfilePicture)
 		{
-			lowestUnusedProfilePicture = 1
-		}
+			clickableDistribution.profilePicture = profilePictures[lowestUnusedProfilePicture]
+			lowestUnusedProfilePicture++
+			if( lowestUnusedProfilePicture >= profilePictures.length )
+			{
+				lowestUnusedProfilePicture = 1
+			}
 
-		clickableDistribution.add(clickableDistribution.profilePicture)
-		// profilePictures[lowestUnusedProfilePicture].scale.set( ,clickableDistribution.height/clickableDistribution.scale.y,1)
-		clickableDistribution.profilePicture.scale.y = clickableDistribution.height
-		clickableDistribution.profilePicture.scale.x = clickableDistribution.height / clickableDistribution.scale.x * clickableDistribution.scale.y
-		clickableDistribution.profilePicture.position.z = -0.001
-		clickableDistribution.profilePicture.position.x = -clickableDistribution.width/2 - clickableDistribution.profilePicture.scale.x
+			clickableDistribution.add(clickableDistribution.profilePicture)
+			// profilePictures[lowestUnusedProfilePicture].scale.set( ,clickableDistribution.height/clickableDistribution.scale.y,1)
+			clickableDistribution.profilePicture.scale.y = clickableDistribution.height
+			clickableDistribution.profilePicture.scale.x = clickableDistribution.height / clickableDistribution.scale.x * clickableDistribution.scale.y
+			clickableDistribution.profilePicture.position.z = -0.001
+			clickableDistribution.profilePicture.position.x = -clickableDistribution.width/2 - clickableDistribution.profilePicture.scale.x
+		}
 
 		return clickableDistribution;
 	}

@@ -64,7 +64,7 @@ function initCameraAndRendererResizeSystem(renderer)
 			camera.updateProjectionMatrix();
 		}
 
-		camera.position.z = 0.8; //feel free to change
+		camera.position.z = 1.8; //feel free to change
 		stage.position.z = -camera.position.z
 		respondToResize();
 		window.addEventListener( 'resize', respondToResize, false );

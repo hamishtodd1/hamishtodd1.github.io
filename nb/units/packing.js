@@ -1,6 +1,6 @@
 /*
 	TODO
-		GET QUOTES AND MAYBE PICTURES
+		"incorrect" too
 		Restartable
 		Bug: they sometimes come out weirdly
 		
@@ -124,13 +124,13 @@ function initPacking()
 		}
 	}
 
-	Chapter()
+	// Chapter()
 
-	initManualPacking(0)
-	initManualPacking(1)
-	initManualPacking(2)
+	// initManualPacking(0)
+	// initManualPacking(1)
+	// initManualPacking(2)
 
-	initResizingRectangle()
+	// initResizingRectangle()
 	makeMultipleChoiceChapter(new THREE.Vector3(2,2,2))
 	return
 
@@ -377,10 +377,12 @@ function makeMultipleChoiceChapter(dimensionsInCuboids)
 
 			{
 				var dimensionsInCuboids = new THREE.Vector3(3,3,3)
-				var maxDimensions = [4,4,3]
+				var minDimensions = [2,2,1]
+				var maxDimensions = [5,4,4]
 				for(var i = 0; i < 3; i++)
 				{
-					dimensionsInCuboids.setComponent(i, Math.max(2,(Math.floor( Math.random() * maxDimensions[i] )) ) )
+					var coord = minDimensions[i] + Math.floor( Math.random() * (maxDimensions[i] - minDimensions[i] + 1) ) 
+					dimensionsInCuboids.setComponent(i, coord )
 				}
 				// dimensionsInCuboids.set(2,2,3)
 			}

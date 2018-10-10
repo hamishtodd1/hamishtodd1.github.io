@@ -1,6 +1,32 @@
 let chapters = []
+
 function initChapters()
 {
+	makeResettableChapter = function(chapterMakingFunction)
+	{
+		let resetButton = makeTextSign("Reset")
+		resetButton.position.x = 0.8
+		resetButton.position.y = -0.4
+		resetButton.scale.multiplyScalar(2)
+		function reset()
+		{
+			let newChapterPosition = chapters.indexOf(chapter) + 1
+			let newChapter = chapterMakingFunction( newChapterPosition )
+			newChapter.add(resetButton,"sceneElements")
+			newChapter.add(resetButton,"clickables")
+			changeChapter(1)
+		}
+		resetButton.onClick = reset
+
+		// updatables.push({update:function(){
+		// 	console.log(resetButton.parent)
+		// }})
+
+		let firstChapterOfThisKind = chapterMakingFunction()
+		firstChapterOfThisKind.add(resetButton,"sceneElements")
+		firstChapterOfThisKind.add(resetButton,"clickables")
+	}
+
 	{
 		let rightArrow = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({side:THREE.DoubleSide, color:0xFF0000}))
 		rightArrow.geometry.vertices.push(new THREE.Vector3(0,0,0),new THREE.Vector3(-1,1,0),new THREE.Vector3(-1,-1,0))
@@ -40,8 +66,13 @@ function initChapters()
 		// }
 	}
 
-	Chapter = function(newChapterPosition)	
+	Chapter = function(newChapterPosition,_scene)
 	{
+		if(_scene === undefined)
+		{
+			_scene = scene
+		}
+
 		let chapter = {
 			sceneElementsToAdd:[],
 			sceneElementsToRemove:[],
@@ -55,7 +86,7 @@ function initChapters()
 			functionsToCallOnSetDown:[]
 		}
 
-		if(newChapterPosition === undefined)
+		if(newChapterPosition === undefined || newChapterPosition === -1 )
 		{
 			newChapterPosition = chapters.length;
 		}
@@ -69,7 +100,7 @@ function initChapters()
 			{
 				if( arrayName === "sceneElements")
 				{
-					scene.add(object)
+					_scene.add(object)
 				}
 				else if( arrayName === "cameraElements")
 				{
@@ -93,7 +124,7 @@ function initChapters()
 		{
 			for(let i = 0; i < this.sceneElementsToAdd.length; i++)
 			{
-				scene.add(this.sceneElementsToAdd[i])
+				_scene.add(this.sceneElementsToAdd[i])
 			}
 
 			for(let i = 0; i < this.cameraElementsToAdd.length; i++)

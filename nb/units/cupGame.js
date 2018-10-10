@@ -12,32 +12,23 @@ function ColoredBall()
 	return coloredBall
 }
 
-var correctSign = makeTextSign("Correct!")
-correctSign.material.color.setRGB(0,1,0)
-// correctSign.material.transparent = true
-// correctSign.material.opacity = 0.00001
-correctSign.scale.multiplyScalar(3)
-correctSign.position.x = -1.7
-correctSign.position.y = 0.3
-var incorrectSign = makeTextSign("Incorrect!")
-incorrectSign.material.color.setRGB(1,0,0)
-// incorrectSign.material.transparent = true
-// incorrectSign.material.opacity = 0.00001
-incorrectSign.scale.multiplyScalar(3)
-incorrectSign.position.x = -1.7
-incorrectSign.position.y = 0.3
-
-function makeCupGame( objectsToHide, defaultScrambleAmount, chapter )
+function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptReject )
 {
-	var duplicate = null
-	
-	chapter.add(correctSign,"sceneElements"	)
-	chapter.add(incorrectSign,"sceneElements")
-	chapter.functionsToCallOnSetDown.push(function()
+	var correctSign = makeTextSign("Correct!")
+	correctSign.material.color.setRGB(0,1,0)
+	correctSign.scale.multiplyScalar(1.8)
+	correctSign.position.x = -0.44
+	var incorrectSign = makeTextSign("Incorrect!")
+	incorrectSign.material.color.setRGB(1,0,0)
+	incorrectSign.scale.multiplyScalar(1.8)
+	incorrectSign.position.x = -0.44
+
+	if(acceptReject === undefined)
 	{
-		correctSign.material.opacity = 0.0001
-		incorrectSign.material.opacity = 0.0001
-	})
+		acceptReject = false
+	}
+
+	var duplicate = null
 
 	var wand = new THREE.Mesh(new THREE.PlaneGeometry(1/8,1), new THREE.MeshPhongMaterial({transparent:true, depthTest:false}))
 	// wand.material.map = new THREE.TextureLoader().load( "data/textures/wand.png" )
@@ -97,11 +88,10 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter )
 					}
 					duplicate.originalObject = this.objectToDuplicate
 
-					scene.add(duplicate)
-					chapter.sceneElementsToRemove.push(duplicate)
+					chapter.add(duplicate,"sceneElements")
 				}
 
-				var placeToSitAndBeInspected = new THREE.Vector3(-0.7,0,0)
+				var placeToSitAndBeInspected = new THREE.Vector3(-0.85,0,0)
 				duplicate.position.lerpVectors(wand.objectToDuplicate.position, placeToSitAndBeInspected,wand.duplicationProgress-2)
 			}
 			else if(wand.duplicationProgress <4)
@@ -117,14 +107,44 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter )
 	}
 	chapter.add(wand,"updatables")
 
-	var answerSelectorGeometry = new THREE.Geometry()
-	answerSelectorGeometry.vertices.push(
+	var selectionArrowGeometry = new THREE.Geometry()
+	selectionArrowGeometry.vertices.push(
 		new THREE.Vector3(-1.5,0,0),
 		new THREE.Vector3(-0.5,1,0),
 		new THREE.Vector3(-0.5,-1,0))
-	answerSelectorGeometry.faces.push(new THREE.Face3(0,2,1) )
-	answerSelectorGeometry.merge(new THREE.PlaneGeometry(1,1))
-	answerSelectorGeometry.applyMatrix(new THREE.Matrix4().makeScale(cupHeight/2,cupHeight/2,cupHeight/2) )
+	selectionArrowGeometry.faces.push(new THREE.Face3(0,2,1) )
+	selectionArrowGeometry.merge(new THREE.PlaneGeometry(1,1))
+	selectionArrowGeometry.applyMatrix(new THREE.Matrix4().makeScale(cupHeight/2,cupHeight/2,cupHeight/2) )
+
+	let tickGeometry = new THREE.Geometry()
+	tickGeometry.merge(new THREE.OriginCorneredPlaneGeometry(0.06,0.16))
+	tickGeometry.merge(new THREE.OriginCorneredPlaneGeometry(0.32,0.06))
+	tickGeometry.applyMatrix(new THREE.Matrix4().makeRotationZ(TAU/8).setPosition(new THREE.Vector3(-0.12,-0.12,0)))
+	tickGeometry.applyMatrix(new THREE.Matrix4().makeScale(0.8,0.8,0.8))
+
+	let crossGeometry = new THREE.Geometry()
+	crossGeometry.merge(new THREE.PlaneGeometry(0.06,0.24))
+	crossGeometry.merge(new THREE.PlaneGeometry(0.24,0.06))
+	crossGeometry.applyMatrix(new THREE.Matrix4().makeRotationZ(TAU/8))
+
+	function addCorrectOrIncorrectSign(correct, objectToTurnGreenOrRed)
+	{
+		if( correct )
+		{
+			correctSign.material = makeTextSign("Correct!",true)
+			correctSign.material.color.setRGB(0,1,0)
+			chapter.add(correctSign,"sceneElements")
+			// objectToTurnGreenOrRed.material.color.setRGB(0,1,0)
+		}
+		else
+		{
+			incorrectSign.material = makeTextSign("Incorrect!",true)
+			incorrectSign.material.color.setRGB(1,0,0)
+			chapter.add(incorrectSign,"sceneElements")
+			// objectToTurnGreenOrRed.material.color.setRGB(1,0,0)
+		}
+	}
+
 	function Cup()
 	{
 		var cup = new THREE.Mesh(cupGeometry, cupMaterial);
@@ -133,26 +153,42 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter )
 		cup.hidingProgress = 0;
 		var hideTarget = null
 
-		var answerSelector = new THREE.Mesh(answerSelectorGeometry,new THREE.MeshBasicMaterial({color:0x000000}))
-		cup.answerSelector = answerSelector
-		answerSelector.onClick = function()
+		cup.selectors = [];
+		if(!acceptReject)
 		{
-			if( this.associatedObject === duplicate.originalObject )
+			var arrowSelector = new THREE.Mesh(selectionArrowGeometry,new THREE.MeshBasicMaterial({color:0x000000}))
+			arrowSelector.position.x = 0.33
+			cup.selectors.push(arrowSelector)
+			arrowSelector.onClick = function()
 			{
-				// correctSign.position.x = -0.7
-				// correctSign.updateText("Correct!")
-				this.material.color.setRGB(0,1,0)
+				addCorrectOrIncorrectSign(this.associatedObject === duplicate.originalObject,this)
+				duplicate.remove(duplicate.cup)
+				//and then question restarting stuff, including removing these from the scene and nulling associated objects
 			}
-			else
-			{
-				// incorrectSign.position.x = -0.7
-				// incorrectSign.updateText("Incorrect!")
-				this.material.color.setRGB(1,0,0)
-			}
-			duplicate.remove(duplicate.cup)
-			//and then question restarting stuff, including removing these from the scene and nulling associated objects
+			chapter.add(arrowSelector,"clickables")
 		}
-		chapter.add(answerSelector,"clickables")
+		else
+		{
+			var tick = new THREE.Mesh(tickGeometry,new THREE.MeshBasicMaterial({color:0x0000FF}))
+			tick.position.x = 0.33
+			cup.selectors.push(tick)
+			chapter.add(tick,"clickables")
+			tick.onClick = function()
+			{
+				addCorrectOrIncorrectSign(this.associatedObject === duplicate.originalObject,this)
+				duplicate.remove(duplicate.cup)
+			}
+
+			var cross = new THREE.Mesh(crossGeometry,new THREE.MeshBasicMaterial({color:0x0000FF}))
+			cross.position.x = 0.66
+			cup.selectors.push(cross)
+			chapter.add(cross,"clickables")
+			cross.onClick = function()
+			{
+				addCorrectOrIncorrectSign(this.associatedObject !== duplicate.originalObject,this)
+				duplicate.remove(duplicate.cup)
+			}
+		}
 
 		cup.hide = function( newHideTarget )
 		{
@@ -174,11 +210,12 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter )
 
 			this.progressSpeed = -frameDelta * 1.5
 
-			scene.add(cup.answerSelector)
-			chapter.sceneElementsToRemove.push(cup.answerSelector)
-			cup.answerSelector.position.y = this.position.y
-			cup.answerSelector.position.x = this.position.x + 0.5
-			cup.answerSelector.associatedObject = hideTarget
+			for(let i = 0; i < cup.selectors.length; i++)
+			{
+				chapter.add( cup.selectors[i],"sceneElements" )
+				cup.selectors[i].position.y = this.position.y
+				cup.selectors[i].associatedObject = hideTarget
+			}
 		}
 
 		cup.update = function()
@@ -256,6 +293,9 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter )
 		var objectB = null
 		var swapProgress = 0
 
+		let allButOneToTakeAwayIndex = null
+		let takingAwayAllButOneProgress = 0
+
 		var manager = {};
 		var puzzlingStep = 0;
 		var scrambleStarted = false;
@@ -275,7 +315,8 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter )
 			{
 				if( scrambleCount === 0 )
 				{
-					wand.duplicateObjectAndCoveringCup( objectsToHide[0] )
+					let indexOfObjectToDuplicate = Math.floor( Math.random() * objectsToHide.length )
+					wand.duplicateObjectAndCoveringCup( objectsToHide[indexOfObjectToDuplicate] )
 					puzzlingStep++;
 				}
 			}
@@ -293,6 +334,26 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter )
 			{
 				if( scrambleCount === 0 )
 				{
+					//commence lerping them into correct place
+					if(!acceptReject)
+					{
+						for(var i = 0; i < cups.length; i++)
+						{
+							cups[i].reveal();
+						}
+					}
+					else
+					{
+						allButOneToTakeAwayIndex = Math.floor( Math.random() * objectsToHide.length )
+					}
+					puzzlingStep++;
+				}
+			}
+
+			if( puzzlingStep === 4 && acceptReject)
+			{
+				if( takingAwayAllButOneProgress > 1 )
+				{
 					for(var i = 0; i < cups.length; i++)
 					{
 						cups[i].reveal();
@@ -302,6 +363,40 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter )
 			}
 
 			//-----actually doing stuff
+			if( allButOneToTakeAwayIndex !== null && takingAwayAllButOneProgress <= 1 )
+			{
+				for( let i = 0; i < objectsToHide.length; i++ )
+				{
+					if(takingAwayAllButOneProgress === 0)
+					{
+						objectsToHide[i].positionBeforeWeStartedTakingThemAway = objectsToHide[i].position.clone()
+					}
+				}
+
+				takingAwayAllButOneProgress += frameDelta * 1.3
+
+				for( let i = 0; i < objectsToHide.length; i++ )
+				{
+					if(i === allButOneToTakeAwayIndex)
+					{
+						objectsToHide[i].position.lerpVectors(objectsToHide[i].positionBeforeWeStartedTakingThemAway,zeroVector,takingAwayAllButOneProgress)
+					}
+					else
+					{
+						let placeToTakeAwayTo = new THREE.Vector3(0,0,0)
+						if(objectsToHide[i].position.y > 0)
+						{
+							placeToTakeAwayTo.y = 0.9
+						}
+						else
+						{
+							placeToTakeAwayTo.y = -0.9
+						}
+						objectsToHide[i].position.lerpVectors(objectsToHide[i].positionBeforeWeStartedTakingThemAway,placeToTakeAwayTo,takingAwayAllButOneProgress)
+					}
+				}
+			}
+
 			if( scrambleCount !== 0 )
 			{
 				if( objectA === null )
