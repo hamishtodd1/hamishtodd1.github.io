@@ -18,10 +18,6 @@ function initChapters()
 		}
 		resetButton.onClick = reset
 
-		// updatables.push({update:function(){
-		// 	console.log(resetButton.parent)
-		// }})
-
 		let firstChapterOfThisKind = chapterMakingFunction()
 		firstChapterOfThisKind.add(resetButton,"sceneElements")
 		firstChapterOfThisKind.add(resetButton,"clickables")

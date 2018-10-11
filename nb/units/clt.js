@@ -16,7 +16,7 @@ function initClt()
 	initClickableDistributions()
 
 	{
-		let acceptRejectChapter = Chapter(-1,)
+		let acceptRejectChapter = Chapter(-1)
 
 		let clickableDistributions = Array(2)
 		for(let i = 0; i < clickableDistributions.length; i++)
@@ -34,7 +34,8 @@ function initClt()
 			clickableDistributions[i] = newDistribution
 		}
 		
-		makeCupGame( clickableDistributions, 4, acceptRejectChapter, true )
+		let cupGame = makeCupGame( clickableDistributions, 4, acceptRejectChapter, true, false )
+		// cupGame.position.y = 1
 	}
 
 	return
@@ -278,7 +279,6 @@ function initClickableDistributions()
 
 		//very hacky
 		chapter.add(clickableDistribution,"clickables")
-		chapter.add(clickableDistribution,"sceneElements")
 		chapter.add(clickableDistribution,"updatables")
 
 		//going the samples route is kiiiinda cheating, but you want to give people an assurance that they'll eventually reproduce what they'll seeing

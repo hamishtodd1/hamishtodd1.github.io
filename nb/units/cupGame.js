@@ -12,8 +12,16 @@ function ColoredBall()
 	return coloredBall
 }
 
-function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptReject )
+function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptReject, spedUp )
 {
+	let _scene = new THREE.Group()
+	chapter.add(_scene,"sceneElements")
+
+	for(var i = 0; i < objectsToHide.length; i++)
+	{
+		_scene.add(objectsToHide[i])
+	}
+
 	var correctSign = makeTextSign("Correct!")
 	correctSign.material.color.setRGB(0,1,0)
 	correctSign.scale.multiplyScalar(1.8)
@@ -41,7 +49,7 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
     wand.unusedPosition = new THREE.Vector3(1.2,0,0)
     wand.position.copy(wand.unusedPosition)
 	var duplicatingPosition = null
-	chapter.add(wand,"sceneElements")
+	_scene.add(wand)
 
 	wand.duplicateObjectAndCoveringCup = function(object)
 	{
@@ -51,7 +59,14 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 		duplicatingPosition.y -= 0.2
 
 		wand.duplicationProgress = 0;
-		progressSpeed = frameDelta * 2.9
+		if(!spedUp)
+		{
+			progressSpeed = frameDelta * 2.9
+		}
+		else
+		{
+			progressSpeed = 0.14
+		}
 	}
 
 	wand.update = function()
@@ -88,7 +103,7 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 					}
 					duplicate.originalObject = this.objectToDuplicate
 
-					chapter.add(duplicate,"sceneElements")
+					_scene.add(duplicate)
 				}
 
 				var placeToSitAndBeInspected = new THREE.Vector3(-0.85,0,0)
@@ -133,14 +148,14 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 		{
 			correctSign.material = makeTextSign("Correct!",true)
 			correctSign.material.color.setRGB(0,1,0)
-			chapter.add(correctSign,"sceneElements")
+			_scene.add(correctSign)
 			// objectToTurnGreenOrRed.material.color.setRGB(0,1,0)
 		}
 		else
 		{
 			incorrectSign.material = makeTextSign("Incorrect!",true)
 			incorrectSign.material.color.setRGB(1,0,0)
-			chapter.add(incorrectSign,"sceneElements")
+			_scene.add(incorrectSign)
 			// objectToTurnGreenOrRed.material.color.setRGB(1,0,0)
 		}
 	}
@@ -194,7 +209,14 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 		{
 			hideTarget = newHideTarget
 			this.hidingProgress = 0
-			this.progressSpeed = frameDelta * 1.5
+			if(!spedUp)
+			{
+				this.progressSpeed = frameDelta * 1.5
+			}
+			else
+			{
+				this.progressSpeed = 0.14
+			}
 			this.unusedPosition.y = hideTarget.position.y
 		}
 
@@ -208,11 +230,18 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 				hideTarget.profilePicture.visible = true
 			}
 
-			this.progressSpeed = -frameDelta * 1.5
+			if(!spedUp)
+			{
+				this.progressSpeed = -frameDelta * 1.5
+			}
+			else
+			{
+				this.progressSpeed = -0.14
+			}
 
 			for(let i = 0; i < cup.selectors.length; i++)
 			{
-				chapter.add( cup.selectors[i],"sceneElements" )
+				_scene.add(cup.selectors[i])
 				cup.selectors[i].position.y = this.position.y
 				cup.selectors[i].associatedObject = hideTarget
 			}
@@ -264,7 +293,7 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 		}
 		chapter.add( cup ,"updatables")
 
-		chapter.add( cup ,"sceneElements")
+		_scene.add(cup)
 		return cup;
 	}
 
@@ -373,7 +402,16 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 					}
 				}
 
-				takingAwayAllButOneProgress += frameDelta * 1.3
+				if(!spedUp)
+				{
+					takingAwayAllButOneProgress += frameDelta * 1.3
+				}
+				else
+				{
+					takingAwayAllButOneProgress += 0.14
+				}
+
+				console.log(spedUp)
 
 				for( let i = 0; i < objectsToHide.length; i++ )
 				{
@@ -409,7 +447,14 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 					originB.copy(objectB.position)
 				}
 
-				swapProgress += frameDelta * swapsPerSecond
+				if(!spedUp)
+				{
+					swapProgress += frameDelta * swapsPerSecond
+				}
+				else
+				{
+					swapProgress += 0.14
+				}
 
 				var pointToRotateAround = originA.clone().lerp(originB,0.5)
 
@@ -447,7 +492,7 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 	}
 	chapter.add(manager,"updatables")
 
-	return chapter
+	return _scene
 }
 
 var cupRadius = 0.12
