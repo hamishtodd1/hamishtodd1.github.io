@@ -15,35 +15,10 @@ function initClt()
 
 	initClickableDistributions()
 
-	{
-		let acceptRejectChapter = Chapter(-1)
-
-		let clickableDistributions = Array(2)
-		for(let i = 0; i < clickableDistributions.length; i++)
-		{
-			let humpArray = Array(5)
-			for(let j = 0; j < humpArray.length; j++)
-			{
-				humpArray[j] = 1 + Math.floor( Math.random() * 5)
-			}
-
-			let newDistribution = HumpedClickableDistribution( humpArray,false,acceptRejectChapter,true )
-			newDistribution.scale.multiplyScalar(0.2)
-			newDistribution.position.y = 0.3 * (i-(clickableDistributions.length-1)/2)
-
-			clickableDistributions[i] = newDistribution
-		}
-		
-		let cupGame = makeCupGame( clickableDistributions, 4, acceptRejectChapter, true, false )
-		// cupGame.position.y = 1
-	}
-
-	return
-
 	//initFinger()
 
 	let singleCdChapter = Chapter()
-	let singularDist = HumpedClickableDistribution([0.7,0.7,1.2,0.7,1.1,2.6,3,3.6,2.5,1],false,singleCdChapter,false)
+	let singularDist = HumpedClickableDistribution(true,[0.7,0.7,1.2,0.7,1.1,2.6,3,3.6,2.5,1],false,singleCdChapter,false)
 	singularDist.position.y -= 0.24
 
 	{
@@ -93,7 +68,7 @@ function initClt()
 					humpArray[j] = 1 + Math.floor( Math.random() * 5)
 				}
 
-				let newDistribution = HumpedClickableDistribution( humpArray,false,cdAndCupChapter,true )
+				let newDistribution = HumpedClickableDistribution(true, humpArray,false,cdAndCupChapter,true )
 				newDistribution.scale.multiplyScalar(0.2)
 				newDistribution.position.y = 0.3 * (i-(clickableDistributions.length-1)/2)
 
@@ -107,14 +82,111 @@ function initClt()
 		makeResettableChapter(makeCdAndCupChapter)
 	}
 
-	Chapter()
+	{
+		function makeSimpleAcceptRejectChapter(newChapterPosition)
+		{
+			let simpleAcceptRejectChapter = Chapter(newChapterPosition)
+
+			let clickableDistributions = Array(2)
+			for(let i = 0; i < clickableDistributions.length; i++)
+			{
+				let humpArray = Array(5)
+				for(let j = 0; j < humpArray.length; j++)
+				{
+					humpArray[j] = 1 + Math.floor( Math.random() * 5)
+				}
+
+				let newDistribution = HumpedClickableDistribution(false, humpArray,false,simpleAcceptRejectChapter,true )
+				newDistribution.scale.multiplyScalar(0.2)
+				newDistribution.position.y = 0.3 * (i-(clickableDistributions.length-1)/2)
+
+				clickableDistributions[i] = newDistribution
+			}
+			
+			let cupGame = makeCupGame( clickableDistributions, 4, simpleAcceptRejectChapter, true, true )
+
+			return simpleAcceptRejectChapter
+		}
+		makeResettableChapter(makeSimpleAcceptRejectChapter)
+	}
+
+	{
+		function makePValueChapter(newChapterPosition)
+		{
+			let pValueChapter = Chapter(newChapterPosition)
+
+			let clickableDistributions = Array(2)
+			for(let i = 0; i < clickableDistributions.length; i++)
+			{
+				let humpArray = Array(5)
+				for(let j = 0; j < humpArray.length; j++)
+				{
+					humpArray[j] = 1 + Math.floor( Math.random() * 5)
+				}
+
+				let newDistribution = HumpedClickableDistribution(false,humpArray,false,pValueChapter,true )
+				newDistribution.scale.multiplyScalar(0.2)
+				newDistribution.position.y = 0.3 * (i-(clickableDistributions.length-1)/2)
+
+				clickableDistributions[i] = newDistribution
+			}
+			
+			let cupGame = makeCupGame( clickableDistributions, 4, pValueChapter, true, true )
+
+			var pointer = new THREE.Mesh(new THREE.Geometry(),new THREE.MeshBasicMaterial({color:0x707070,side:THREE.DoubleSide}))
+			pointer.geometry.vertices.push(new THREE.Vector3(0,cupGame.position.y,0),new THREE.Vector3(-0.1,0,0),new THREE.Vector3(0.1,0,0))
+			pointer.geometry.faces.push(new THREE.Face3(0,1,2))
+			pValueChapter.add(pointer,"sceneElements")
+			pValueChapter.add(pointer,"updatables")
+			let userP = 0.5 //nooo, line up with slider
+			pointer.update = function()
+			{
+				pointer.geometry.vertices[0].x = cupGame.decideBasedOnPValue(userP)
+				pointer.geometry.verticesNeedUpdate = true
+			}
+
+			function changePValue(valueBetweenZeroAndOne)
+			{
+				// let valueBetweenMinusOneAndOne = 2 * valueBetweenZeroAndOne - 1
+				// let valueInCenter = 0.1 //be very skeptical, these fucking things have similar means
+				// let normalizer = Math.log(1/valueInCenter)
+				userP = valueBetweenZeroAndOne //valueInCenter * Math.exp(valueBetweenMinusOneAndOne * normalizer)
+			}
+			let slider = SliderSystem(changePValue, userP, true,pValueChapter)
+			let sliderHeight = 0.05
+			let sliderWidth = 0.7
+			slider.setDimensions(sliderWidth,sliderHeight)
+			slider.position.x -= sliderWidth / 2
+			slider.position.y = -1/(16/9) + sliderHeight * 2
+
+			pointer.geometry.vertices[1].y = slider.position.y
+			pointer.geometry.vertices[2].y = slider.position.y
+
+			var skeptical = makeTextSign("Skeptical")
+			var accepting = makeTextSign("Accepting")
+			pValueChapter.add(skeptical,"sceneElements")
+			pValueChapter.add(accepting,"sceneElements")
+			pValueChapter.functionsToCallOnSetUp.push(function()
+			{
+				skeptical.material = makeTextSign("Skeptical",true)	
+				accepting.material = makeTextSign("Accepting",true)	
+			})
+			skeptical.position.y = slider.position.y
+			skeptical.position.x = 0.55
+			accepting.position.y = slider.position.y
+			accepting.position.x = -0.55
+
+			return pValueChapter
+		}
+
+		makeResettableChapter(makePValueChapter)
+	}
 }
 
 /*
 	TODO
+	Something that incentivizes them to not take so many samples at least
 	Finger thing (graph next to them) - should be on its side. Bump going up and down
-	correct and incorrect signs, jesus christ
-	Actual randomization
 
 	At least do the multiple graphs thing and have them understand p-value
 
@@ -211,7 +283,7 @@ function initFinger()
 	}
 }
 
-function HumpedClickableDistribution(arrayOfBlocks, normalDistributionsPresent,chapter, spray)
+function HumpedClickableDistribution(haveProfilePicture,arrayOfBlocks, normalDistributionsPresent,chapter, spray)
 {
 	//the distribution is made of blocks
 	let totalBlocks = 0;
@@ -234,7 +306,7 @@ function HumpedClickableDistribution(arrayOfBlocks, normalDistributionsPresent,c
 			blocksCountedThrough += arrayOfBlocks[i]
 		}
 	}
-	return ClickableDistribution( true, humpedSamplingFunction, arrayOfBlocks.length,240, normalDistributionsPresent,chapter,spray )
+	return ClickableDistribution( haveProfilePicture, humpedSamplingFunction, arrayOfBlocks.length,240, normalDistributionsPresent,chapter,spray )
 }
 
 let ClickableDistribution = null;
@@ -364,6 +436,8 @@ function initClickableDistributions()
 			}
 		}
 
+		clickableDistribution.meanOfSamplesTaken = null
+
 		clickableDistribution.vomitMember = function()
 		{
 			if(numSamplesAvailable === 0)
@@ -417,6 +491,39 @@ function initClickableDistributions()
 		}
 
 		clickableDistribution.excitedness = 0
+
+		clickableDistribution.getSamplesAverage = function()
+		{
+			if(memberHolder.children.length === 0)
+			{
+				clickableDistribution.vomitMember()
+			}
+
+			var sumOfSamplesTaken = 0
+			var numSamplesTaken = 0
+
+			for(let i = 0; i < numSamples; i++)
+			{
+				if( this.samplesDone[i] )
+				{
+					sumOfSamplesTaken += this.samples[i]
+					numSamplesTaken++
+				}
+			}
+			return sumOfSamplesTaken / numSamplesTaken
+		}
+		clickableDistribution.getNumSamples = function()
+		{
+			var numSamplesTaken = 0
+			for(var i = 0; i < memberHolder.children.length; i++)
+			{
+				if( memberHolder.children[i].placeToLand !== undefined )
+				{
+					numSamplesTaken++
+				}
+			}
+			return numSamplesTaken
+		}
 
 		clickableDistribution.add( areaBeneath )
 		let curveOnTop = new THREE.Mesh( new THREE.TubeBufferGeometry( new THREE.CatmullRomCurve3( controlPoints, false, "centripetal" ), controlPoints.length * 8, 0.01 ) )
@@ -882,3 +989,30 @@ function gamma(z)
 			Might work better/well with more than three axes!
 		Numbers next to the lines, probably
 */
+
+function standardNormalCdf(x)
+{
+	let mean = 0
+	let variance = 1
+	return 0.5 * (1 + erf((x - mean) / (Math.sqrt(2 * variance))));
+}
+
+function erf(x)
+{
+	// save the sign of x
+	var sign = (x >= 0) ? 1 : -1;
+	x = Math.abs(x);
+
+	// constants
+	var a1 =  0.254829592;
+	var a2 = -0.284496736;
+	var a3 =  1.421413741;
+	var a4 = -1.453152027;
+	var a5 =  1.061405429;
+	var p  =  0.3275911;
+
+	// A&S formula 7.1.26
+	var t = 1.0/(1.0 + p*x);
+	var y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+	return sign * y; // erf(-x) = -erf(x);
+}

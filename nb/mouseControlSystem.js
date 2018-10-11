@@ -38,6 +38,20 @@ function initMouse()
 		object.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAmount))
 	}
 
+	mouse.applyDrag = function( object )
+	{
+		var newPositionOfGrabbedPoint = this.rayIntersectionWithZPlaneInCameraSpace(object.cameraSpaceClickedPoint.z);
+
+		var displacement = newPositionOfGrabbedPoint.clone().sub(object.cameraSpaceClickedPoint);
+		camera.localToWorld(displacement);
+		displacement.add(object.parent.getWorldPosition())
+		object.parent.updateMatrixWorld();
+		object.parent.worldToLocal(displacement);
+		object.position.add(displacement);
+
+		object.cameraSpaceClickedPoint.copy(newPositionOfGrabbedPoint);
+	}
+
 	mouse.updateFromAsyncAndCheckClicks = function()
 	{
 		this.oldClicking = this.clicking;

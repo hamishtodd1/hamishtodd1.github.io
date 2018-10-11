@@ -46,9 +46,7 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
     wand.objectToDuplicate = null
     wand.duplicationProgress = 0;
     var progressSpeed = 0;
-    wand.unusedPosition = new THREE.Vector3(1.2,0,0)
-    wand.position.copy(wand.unusedPosition)
-	var duplicatingPosition = null
+    var duplicatingPosition = null
 	_scene.add(wand)
 
 	wand.duplicateObjectAndCoveringCup = function(object)
@@ -74,13 +72,17 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 		var pulse = sq( Math.sin(frameCount * 0.15) )
 		this.material.emissive.setRGB(pulse,pulse,0)
 
+		let unusedPosition = new THREE.Vector3(1.2,0,0)
+		_scene.worldToLocal(unusedPosition)
+		this.position.copy(unusedPosition)
+
 		if(this.objectToDuplicate !== null)
 		{
 			wand.duplicationProgress += progressSpeed
 
 			if(wand.duplicationProgress < 1)
 			{
-				this.position.lerpVectors(this.unusedPosition,duplicatingPosition,wand.duplicationProgress)
+				this.position.lerpVectors(unusedPosition,duplicatingPosition,wand.duplicationProgress)
 			}
 			else if(wand.duplicationProgress < 2)
 			{
@@ -116,7 +118,7 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 			}
 			else if(wand.duplicationProgress < 5 )
 			{
-				this.position.lerpVectors(duplicatingPosition,this.unusedPosition,wand.duplicationProgress-4)
+				this.position.lerpVectors(duplicatingPosition,unusedPosition,wand.duplicationProgress-4)
 			}
 		}
 	}
@@ -168,6 +170,8 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 		cup.hidingProgress = 0;
 		var hideTarget = null
 
+		let followHideTarget = false;
+
 		cup.selectors = [];
 		if(!acceptReject)
 		{
@@ -218,13 +222,19 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 				this.progressSpeed = 0.14
 			}
 			this.unusedPosition.y = hideTarget.position.y
+
+			if(acceptReject)
+			{
+				hideTarget.tick = tick
+				hideTarget.cross = cross
+			}
 		}
 
 		cup.reveal = function()
 		{
 			this.unusedPosition.y = hideTarget.position.y
 
-			THREE.SceneUtils.detach(this,hideTarget,scene)
+			followHideTarget = false
 			if(hideTarget.profilePicture)
 			{
 				hideTarget.profilePicture.visible = true
@@ -278,9 +288,7 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 					this.position.copy( hideTarget.position )
 					this.rotation.x = 0;
 
-					this.updateMatrixWorld()
-					hideTarget.updateMatrixWorld()
-					THREE.SceneUtils.attach(this,scene,hideTarget)
+					followHideTarget = true
 					if(hideTarget.profilePicture)
 					{
 						hideTarget.profilePicture.visible = false
@@ -290,29 +298,20 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 					this.progressSpeed = 0;
 				}
 			}
+
+			if(followHideTarget)
+			{
+				this.position.copy(hideTarget.position)
+			}
 		}
-		chapter.add( cup ,"updatables")
+		chapter.add( cup ,"updatables") 
 
 		_scene.add(cup)
 		return cup;
 	}
 
-	var cups = Array(objectsToHide.length);
-	for(var i = 0; i < cups.length; i++)
-	{
-		cups[i] = Cup();
-		cups[i].unusedPosition = new THREE.Vector3(1.2,-(i-1) * cupHeight * 1.2,0)
-		cups[i].position.copy(cups[i].unusedPosition)
-	}
-
 	//"story"
 	{
-		
-		for(var i = 0; i < objectsToHide.length; i++)
-		{
-			cups[i].hide(objectsToHide[i])
-		}
-		
 		var scrambleCount = 0
 		var startingSwapsPerSecond = 1.2
 		var swapsPerSecond = startingSwapsPerSecond
@@ -411,8 +410,6 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 					takingAwayAllButOneProgress += 0.14
 				}
 
-				console.log(spedUp)
-
 				for( let i = 0; i < objectsToHide.length; i++ )
 				{
 					if(i === allButOneToTakeAwayIndex)
@@ -421,15 +418,12 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 					}
 					else
 					{
-						let placeToTakeAwayTo = new THREE.Vector3(0,0,0)
-						if(objectsToHide[i].position.y > 0)
-						{
-							placeToTakeAwayTo.y = 0.9
-						}
-						else
-						{
-							placeToTakeAwayTo.y = -0.9
-						}
+						let placeToTakeAwayTo = new THREE.Vector3(0,1,0)
+						// if(objectsToHide[i].position.y < 0)
+						// {
+						// 	placeToTakeAwayTo.y *= -1
+						// }
+						objectsToHide[i].parent.worldToLocal(placeToTakeAwayTo)
 						objectsToHide[i].position.lerpVectors(objectsToHide[i].positionBeforeWeStartedTakingThemAway,placeToTakeAwayTo,takingAwayAllButOneProgress)
 					}
 				}
@@ -489,37 +483,76 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 				}
 			}
 		}
+
+		_scene.decideBasedOnPValue = function(userP)
+		{
+			if(duplicate === null || allButOneToTakeAwayIndex === null)
+			{
+				return
+			}
+			let meanOfSamplesTaken = duplicate.getSamplesAverage()
+
+			//it should be the case that if you have the lot, thing will be accepted even if p = 0.99999
+			//yo what if two distributions have similar means?
+
+			let populationDistribution = objectsToHide[allButOneToTakeAwayIndex]
+			let standardError = Math.sqrt( populationDistribution.variance ) / Math.sqrt(duplicate.getNumSamples())
+			let z = ( meanOfSamplesTaken - populationDistribution.mean ) / standardError
+			//standard error? =/ ie num samples gets involved
+			let probabilityOfSampleMeanAtLeastAsExtremeAsThisFromPopulation = 2 * ( 1 - standardNormalCdf( Math.abs(z) ) )
+			// console.log(z,standardNormalCdf( Math.abs(z) ))
+			// console.log(z,probabilityOfSampleMeanAtLeastAsExtremeAsThisFromPopulation, userP)
+			if( probabilityOfSampleMeanAtLeastAsExtremeAsThisFromPopulation < userP )
+			{
+				return populationDistribution.cross.position.x
+			}
+			else
+			{
+				return populationDistribution.tick.position.x
+			}
+		}
 	}
 	chapter.add(manager,"updatables")
+
+	var cups = Array(objectsToHide.length);
+	for(var i = 0; i < cups.length; i++)
+	{
+		cups[i] = Cup();
+		cups[i].unusedPosition = new THREE.Vector3(1.2,-(i-1) * cupHeight * 1.2,0)
+		cups[i].position.copy(cups[i].unusedPosition)
+		cups[i].hide(objectsToHide[i])
+	}
 
 	return _scene
 }
 
-var cupRadius = 0.12
-var cupInnerRadius = cupRadius * 0.86
-var cupHeight = 2 * cupRadius
-var cupRoundedness = 4;
-var cupRadialSegments = 16;
-var cupGeometry = new THREE.CylinderGeometry( cupRadius, cupRadius, cupHeight, cupRadialSegments)
-
-var indexOfVertexAtBottom = cupGeometry.vertices.length-1; //2?
-for(var i = 0; i < cupGeometry.faces.length; i++)
 {
-	for(var j = 0; j < 3; j++)
+	let cupRadius = 0.12
+	let cupInnerRadius = cupRadius * 0.86
+	cupHeight = 2 * cupRadius
+	let cupRoundedness = 4;
+	let cupRadialSegments = 16;
+	cupGeometry = new THREE.CylinderGeometry( cupRadius, cupRadius, cupHeight, cupRadialSegments)
+
+	let indexOfVertexAtBottom = cupGeometry.vertices.length-1; //2?
+	for(let i = 0; i < cupGeometry.faces.length; i++)
 	{
-		if( cupGeometry.faces[i].getCorner(j) === indexOfVertexAtBottom )
+		for(let j = 0; j < 3; j++)
 		{
-			cupGeometry.faces[i].set(indexOfVertexAtBottom,indexOfVertexAtBottom,indexOfVertexAtBottom)
-			break;
+			if( cupGeometry.faces[i].getCorner(j) === indexOfVertexAtBottom )
+			{
+				cupGeometry.faces[i].set(indexOfVertexAtBottom,indexOfVertexAtBottom,indexOfVertexAtBottom)
+				break;
+			}
 		}
 	}
-}
-cupGeometry.merge( new THREE.CylinderGeometry( cupInnerRadius, cupInnerRadius, cupHeight, cupRadialSegments,1,true) )
-cupGeometry.merge( new THREE.RingGeometry( cupInnerRadius, cupRadius, cupRadialSegments).applyMatrix(new THREE.Matrix4().makeRotationX(TAU/4).setPosition(new THREE.Vector3(0,-cupHeight/2,0))) )
-var cupMaterial = new THREE.MeshLambertMaterial({color:0xC0C0FF, side:THREE.DoubleSide})
+	cupGeometry.merge( new THREE.CylinderGeometry( cupInnerRadius, cupInnerRadius, cupHeight, cupRadialSegments,1,true) )
+	cupGeometry.merge( new THREE.RingGeometry( cupInnerRadius, cupRadius, cupRadialSegments).applyMatrix(new THREE.Matrix4().makeRotationX(TAU/4).setPosition(new THREE.Vector3(0,-cupHeight/2,0))) )
+	cupMaterial = new THREE.MeshLambertMaterial({color:0xC0C0FF, side:THREE.DoubleSide})
 
-var handleThickness = cupRadius / 6
-var handleGeometry = new THREE.TorusGeometry(cupRadius/1.5,handleThickness,16,16,TAU/2)
-handleGeometry.applyMatrix(new THREE.Matrix4().makeRotationZ(-TAU/4))
-handleGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(cupRadius-handleThickness,0,0))
-cupGeometry.merge(handleGeometry)
+	let handleThickness = cupRadius / 6
+	let handleGeometry = new THREE.TorusGeometry(cupRadius/1.5,handleThickness,16,16,TAU/2)
+	handleGeometry.applyMatrix(new THREE.Matrix4().makeRotationZ(-TAU/4))
+	handleGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(cupRadius-handleThickness,0,0))
+	cupGeometry.merge(handleGeometry)
+}
