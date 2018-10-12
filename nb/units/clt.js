@@ -351,7 +351,7 @@ function initClickableDistributions()
 
 		profilePictures[i] = new THREE.Mesh(profilePictureGeometry,new THREE.MeshBasicMaterial())
 		profilePictures[i].material.color.setRGB(Math.random(),Math.random(),Math.random())
-		// profilePictures[i].material.map = textureLoader.load( 'data/textures/rugbyPlayers/' + fileName )
+		profilePictures[i].material.map = textureLoader.load( 'data/textures/rugbyPlayers/' + fileName )
 	}
 
 	let lowestUnusedProfilePicture = 0;
