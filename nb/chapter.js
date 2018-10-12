@@ -96,7 +96,6 @@ function initChapters()
 
 		chapter.add = function(object,arrayName)
 		{
-			console.log(arrayName)
 			if(isSetUp)
 			{
 				if( arrayName === "sceneElements")
