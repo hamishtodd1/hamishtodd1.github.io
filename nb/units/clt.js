@@ -203,6 +203,10 @@ function initClt()
 	Check you have the pics
 	Finger thing (graph next to them) - should be on its side. Bump going up and down
 
+	Make it so the friggin mugs can be clicked
+	Outlines on the things
+	Finger thing
+
 	At least do the multiple graphs thing and have them understand p-value
 
 	Just accept/reject
@@ -350,7 +354,7 @@ function initClickableDistributions()
 		}
 
 		profilePictures[i] = new THREE.Mesh(profilePictureGeometry,new THREE.MeshBasicMaterial())
-		profilePictures[i].material.color.setRGB(Math.random(),Math.random(),Math.random())
+		// profilePictures[i].material.color.setRGB(Math.random(),Math.random(),Math.random())
 		profilePictures[i].material.map = textureLoader.load( 'data/textures/rugbyPlayers/' + fileName )
 	}
 

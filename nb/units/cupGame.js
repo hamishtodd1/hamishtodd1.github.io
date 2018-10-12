@@ -17,11 +17,6 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 	let _scene = new THREE.Group()
 	chapter.add(_scene,"sceneElements")
 
-	for(var i = 0; i < objectsToHide.length; i++)
-	{
-		_scene.add(objectsToHide[i])
-	}
-
 	var correctSign = makeTextSign("Correct!")
 	correctSign.material.color.setRGB(0,1,0)
 	correctSign.scale.multiplyScalar(1.8)
@@ -39,7 +34,7 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 	var duplicate = null
 
 	var wand = new THREE.Mesh(new THREE.PlaneGeometry(1/8,1), new THREE.MeshPhongMaterial({transparent:true, depthTest:false}))
-	// wand.material.map = new THREE.TextureLoader().load( "data/textures/wand.png" )
+	wand.material.map = new THREE.TextureLoader().load( "data/textures/wand.png" )
 	wand.geometry.vertices[2].y = 0
 	wand.geometry.vertices[3].y = 0
 	wand.scale.setScalar(0.5)
@@ -306,7 +301,7 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 		}
 		chapter.add( cup ,"updatables") 
 
-		_scene.add(cup)
+		_scene.add(cup) 
 		return cup;
 	}
 
@@ -521,6 +516,11 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 		cups[i].unusedPosition = new THREE.Vector3(1.2,-(i-1) * cupHeight * 1.2,0)
 		cups[i].position.copy(cups[i].unusedPosition)
 		cups[i].hide(objectsToHide[i])
+	}
+
+	for(var i = 0; i < objectsToHide.length; i++)
+	{
+		_scene.add(objectsToHide[i])
 	}
 
 	return _scene
