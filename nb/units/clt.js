@@ -86,7 +86,7 @@ function initClt()
 				clickableDistributions[i] = newDistribution
 			}
 			
-			makeCupGame(clickableDistributions, 7, cdAndCupChapter)
+			makeCupGame(clickableDistributions, 6, cdAndCupChapter)
 			return cdAndCupChapter
 		}
 
