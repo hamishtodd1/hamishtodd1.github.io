@@ -17,7 +17,6 @@ function initClt()
 
 	initClickableDistributions()
 
-	// Chapter()
 	// let fingerChapter = initFinger()
 	// var fingerNormalDist = []
 	// for(var i = 0; i < 20; i++)
@@ -27,8 +26,6 @@ function initClt()
 	// let fingerDist = ClickableDistribution(false,fingerNormalDist,false,fingerChapter,false)
 	// fingerDist.position.y = -0.3
 	// fingerChapter.add(fingerDist,"sceneElements")
-
-	// return
 
 	let singleCdChapter = Chapter()
 	let singularDist = HumpedClickableDistribution(true,[0.7,0.7,1.2,0.7,1.1,2.6,3,3.6,2.5,1],false,singleCdChapter,false)
@@ -58,7 +55,7 @@ function initClt()
 			}
 			else
 			{
-				numSwaps += 0.7
+				numSwaps += 0.86
 			}
 
 			return cupChapter
@@ -89,11 +86,61 @@ function initClt()
 				clickableDistributions[i] = newDistribution
 			}
 			
-			makeCupGame(clickableDistributions, 4, cdAndCupChapter)
+			makeCupGame(clickableDistributions, 7, cdAndCupChapter)
 			return cdAndCupChapter
 		}
 
 		makeResettableChapter(makeCdAndCupChapter)
+	}
+
+	{
+		function makeTimedCdAndCupChapter(newChapterPosition)
+		{
+			let numDistributions = 3
+			let timedCdAndCupChapter = Chapter( newChapterPosition )
+
+			let clickableDistributions = Array(numDistributions)
+			for(let i = 0; i < numDistributions; i++)
+			{
+				let humpArray = Array(5)
+				for(let j = 0; j < humpArray.length; j++)
+				{
+					humpArray[j] = 1 + Math.floor( Math.random() * 5)
+				}
+
+				let newDistribution = HumpedClickableDistribution(true, humpArray,false,timedCdAndCupChapter,true )
+				newDistribution.scale.multiplyScalar(0.2)
+				newDistribution.position.y = 0.3 * (i-(clickableDistributions.length-1)/2)
+
+				clickableDistributions[i] = newDistribution
+			}
+
+			let timeLeft = 10 + Math.random() * 6
+			let timer = makeTextSign("Time left: " + (20).toString() )
+			timer.position.x = 0.8
+			timer.update = function()
+			{
+				timeLeft -= frameDelta
+				if(timeLeft >= 0)
+				{
+					timer.material = makeTextSign("Time left: " + (Math.floor(timeLeft)).toString(),true)
+				}
+				else
+				{
+					timer.material.color.setRGB(1,0,0)
+				}
+			}
+			// scene.add(timer)
+			// updatables.push(timer)
+			timedCdAndCupChapter.add(timer,"sceneElements")
+			timedCdAndCupChapter.add(timer,"updatables")
+			//then auto-reset?
+			
+			makeCupGame(clickableDistributions, 4, timedCdAndCupChapter, false,true)
+			return timedCdAndCupChapter
+		}
+
+		makeResettableChapter(makeTimedCdAndCupChapter)
 	}
 
 	{
@@ -200,12 +247,9 @@ function initClt()
 /*
 	TODO
 	Something that incentivizes them to not take so many samples at least
-	Check you have the pics
 	Finger thing (graph next to them) - should be on its side. Bump going up and down
 
-	Make it so the friggin mugs can be clicked
 	Outlines on the things
-	Finger thing
 
 	At least do the multiple graphs thing and have them understand p-value
 
@@ -685,7 +729,7 @@ function initEditableDistributionWithPopulation()
 	population.representation.position.x = -0.9
 	population.representation.scale.x = 1/max
 	//yeah needs to be fixed
-	scene.add( population.representation )
+	// scene.add( population.representation )
 	updatables.push(population.representation)
 	population.representation.update = function()
 	{
@@ -743,13 +787,13 @@ function initEditableDistributionWithPopulation()
 			// 	refreshFromPopulation()
 			// }
 		}
-		population[i].onClick = function()
-		{
-			//TODO to get the closest one to your click in case it's between
-			this.clickedPoint = mouse.rayIntersectionWithZPlane(population.representation.position.z)
-		}
-		clickables.push(population[i])
-		updatables.push(population[i])
+		// population[i].onClick = function()
+		// {
+		// 	//TODO to get the closest one to your click in case it's between
+		// 	this.clickedPoint = mouse.rayIntersectionWithZPlane(population.representation.position.z)
+		// }
+		// clickables.push(population[i])
+		// updatables.push(population[i])
 
 		{
 			let numRounds = 1+Math.round(population[i].scale.x)
@@ -836,39 +880,41 @@ function initEditableDistributionWithPopulation()
 	populationDistributionCurve.position.y = -0.4
 	populationDistributionCurve.scale.x *= 0.9
 
-	clickables.push(populationDistributionCurve)
-	let grabbedPoint = null;
-	populationDistributionCurve.onClick = function(intersection)
-	{
-		let localIntersection = intersection.point.clone()
-		this.worldToLocal(localIntersection)
-		grabbedPoint = controlPoints[0]
-		for(let i = 1; i < controlPoints.length; i++ )
-		{
-			if( Math.abs( controlPoints[i].x - localIntersection.x ) < Math.abs( grabbedPoint.x - localIntersection.x ) )
-			{
-				grabbedPoint = controlPoints[i]
-			}
-		}
-		//and those whose height is equal to this number flash
-	}
+	// clickables.push(populationDistributionCurve)
+	// let grabbedPoint = null;
+	// populationDistributionCurve.onClick = function(intersection)
+	// {
+	// 	let localIntersection = intersection.point.clone()
+	// 	this.worldToLocal(localIntersection)
+	// 	grabbedPoint = controlPoints[0]
+	// 	for(let i = 1; i < controlPoints.length; i++ )
+	// 	{
+	// 		if( Math.abs( controlPoints[i].x - localIntersection.x ) < Math.abs( grabbedPoint.x - localIntersection.x ) )
+	// 		{
+	// 			grabbedPoint = controlPoints[i]
+	// 		}
+	// 	}
+	// 	//and those whose height is equal to this number flash
+	// }
 
-	updatables.push(populationDistributionCurve)
-	populationDistributionCurve.update = function()
-	{
-		if(grabbedPoint !== null)
-		{
-			let placeDraggedTo = mouse.rayIntersectionWithZPlane(0)
-			this.worldToLocal(placeDraggedTo)
-			grabbedPoint.y = placeDraggedTo.y
-			populationDistributionCurve.geometry.refreshSegmentsFromCurve()
+	// updatables.push(populationDistributionCurve)
+	// populationDistributionCurve.update = function()
+	// {
+	// 	if(grabbedPoint !== null)
+	// 	{
+	// 		let placeDraggedTo = mouse.rayIntersectionWithZPlane(0)
+	// 		this.worldToLocal(placeDraggedTo)
+	// 		grabbedPoint.y = placeDraggedTo.y
+	// 		populationDistributionCurve.geometry.refreshSegmentsFromCurve()
 
-			if( mouse.lastClickedObject !== this || !mouse.clicking )
-			{
-				grabbedPoint = null
-			}
-		}
-	}
+	// 		// if( mouse.lastClickedObject !== this || !mouse.clicking )
+	// 		// {
+	// 		// 	grabbedPoint = null
+	// 		// }
+	// 	}
+	// }
+
+	return populationDistributionCurve
 }
 
 //as you "pick up more" for your sample
