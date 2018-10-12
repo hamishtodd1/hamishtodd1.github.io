@@ -2,6 +2,10 @@ let chapters = []
 
 function initChapters()
 {
+	// updatables.push({update:function()
+	// {
+	// 	console.log(chapters.indexOf(chapter))
+	// }})
 	makeResettableChapter = function(chapterMakingFunction)
 	{
 		let resetButton = makeTextSign("Reset")
@@ -92,6 +96,7 @@ function initChapters()
 
 		chapter.add = function(object,arrayName)
 		{
+			console.log(arrayName)
 			if(isSetUp)
 			{
 				if( arrayName === "sceneElements")

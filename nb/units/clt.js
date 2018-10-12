@@ -13,12 +13,26 @@ function initClt()
 	// 	}
 	// }
 
+	// initEditableDistributionWithPopulation()
+
 	initClickableDistributions()
 
-	//initFinger()
+	// Chapter()
+	// let fingerChapter = initFinger()
+	// var fingerNormalDist = []
+	// for(var i = 0; i < 20; i++)
+	// {
+	// 	fingerNormalDist.push(1+Math.exp(-i*i))
+	// }
+	// let fingerDist = ClickableDistribution(false,fingerNormalDist,false,fingerChapter,false)
+	// fingerDist.position.y = -0.3
+	// fingerChapter.add(fingerDist,"sceneElements")
+
+	// return
 
 	let singleCdChapter = Chapter()
 	let singularDist = HumpedClickableDistribution(true,[0.7,0.7,1.2,0.7,1.1,2.6,3,3.6,2.5,1],false,singleCdChapter,false)
+	singleCdChapter.add(singularDist,"sceneElements")
 	singularDist.position.y -= 0.24
 
 	{
@@ -36,7 +50,7 @@ function initClt()
 				coloredBalls[i].position.y = i/(coloredBalls.length-1) * 0.8 - 0.4
 				cupChapter.add(coloredBalls[i],"sceneElements")
 			}
-			makeCupGame(coloredBalls, numSwaps, cupChapter)
+			makeCupGame(coloredBalls, Math.floor(numSwaps), cupChapter)
 
 			if( numColoredBalls === 2 || (numColoredBalls<4 && numSwaps>6))
 			{
@@ -44,7 +58,7 @@ function initClt()
 			}
 			else
 			{
-				numSwaps += 2
+				numSwaps += 0.7
 			}
 
 			return cupChapter
@@ -186,6 +200,7 @@ function initClt()
 /*
 	TODO
 	Something that incentivizes them to not take so many samples at least
+	Check you have the pics
 	Finger thing (graph next to them) - should be on its side. Bump going up and down
 
 	At least do the multiple graphs thing and have them understand p-value
@@ -281,6 +296,8 @@ function initFinger()
 	{
 		fingerChapter.add(cmMarkers[i],"sceneElements")
 	}
+
+	return fingerChapter
 }
 
 function HumpedClickableDistribution(haveProfilePicture,arrayOfBlocks, normalDistributionsPresent,chapter, spray)
@@ -665,7 +682,7 @@ function initEditableDistributionWithPopulation()
 	population.representation.scale.x = 1/max
 	//yeah needs to be fixed
 	scene.add( population.representation )
-	objectsToBeUpdated.push(population.representation)
+	updatables.push(population.representation)
 	population.representation.update = function()
 	{
 		// if(mouse.lastClickedObject === null && mouse.clicking)
@@ -728,7 +745,7 @@ function initEditableDistributionWithPopulation()
 			this.clickedPoint = mouse.rayIntersectionWithZPlane(population.representation.position.z)
 		}
 		clickables.push(population[i])
-		objectsToBeUpdated.push(population[i])
+		updatables.push(population[i])
 
 		{
 			let numRounds = 1+Math.round(population[i].scale.x)
@@ -832,7 +849,7 @@ function initEditableDistributionWithPopulation()
 		//and those whose height is equal to this number flash
 	}
 
-	objectsToBeUpdated.push(populationDistributionCurve)
+	updatables.push(populationDistributionCurve)
 	populationDistributionCurve.update = function()
 	{
 		if(grabbedPoint !== null)
