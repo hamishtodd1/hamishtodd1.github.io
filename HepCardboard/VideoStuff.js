@@ -7,7 +7,7 @@ function initVideo()
 	
 	video.id = 'video';
 	
-	// video.load(); // must call after setting/changing source
+	// video.load(); // must call after setting/changing source 
 	
 	
 //	video.currentTime = 24;
