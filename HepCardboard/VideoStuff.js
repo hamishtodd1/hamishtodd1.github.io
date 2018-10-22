@@ -2,14 +2,12 @@ function initVideo()
 {	
 	// create the video element
 	video = document.createElement( 'video' );
-	video.src = "http://hamishtodd1.github.io/HepCardboard/Data/vid.mp4";
+	video.src = "Data/vid.mp4";
 	video.crossOrigin = "anonymous";
 	
 	video.id = 'video';
-//	video.type = 'video/ogg; codecs="theora, vorbis" ';
-//	video.loop = true;
 	
-	video.load(); // must call after setting/changing source
+	// video.load(); // must call after setting/changing source
 	
 	
 //	video.currentTime = 24;
@@ -45,23 +43,3 @@ function initVideo()
 	movieScreen.scale.x = -1; //coz you're inside it
 	Scene.add(movieScreen);
 }
-
-//
-//function update()
-//{
-//	if ( keyboard.pressed("p") )
-//		video.play();
-//		
-//	if ( keyboard.pressed("space") )
-//		video.pause();
-//
-//	if ( keyboard.pressed("s") ) // stop video
-//	{
-//		video.pause();
-//		video.currentTime = 0;
-//	}
-//	
-//	if ( keyboard.pressed("r") ) // rewind video
-//		video.currentTime = 0;
-//}
-
