@@ -1,3 +1,41 @@
+/*
+	Part 1: "How to perform a one-sample z-test"
+		A few pictures of applications
+		Probability distributions
+			Sorting then grouping
+			Bobble going up and down as you change some values
+		Scaling and moving normal dist
+		Seeing the average on a normal distribution
+		The thing where you have multiple studies and must trade off sample sizes
+			Slider for spreading samples amongst multiple tests
+		Show the formula
+		P value only works if it is in scene, and points to whatever else is in scene
+
+	Part 2: Why the z-test works, and why not to use it
+		Normal distribution animation.
+			A long line of balls going back on z, all with copies of the graph
+			They all jump forward by one sample of the distribution
+			The graphs jump with them
+			They jump forward a bunch more times
+		We boil a known distribution down to its mean and variance
+			Because there are many distributions out there and it's hard to make a scheme that works for all
+
+	TODO
+		Taking samples away
+
+	They see the normal distribution describing where the average should go
+	They should get used to looking at the normal distribution next to it, using it to "get out early"
+	We are NOT showing the actual graph, or actual samples, just the normal distribution
+	And all you're doing is accepting/rejecting a single graph
+	Now: automated. You see loads at a time.
+	You see ~200 sample means marked on as many distributions next to a "accept/reject"
+	You're given a specific n, at least at this point
+	Then you click "go" and "correct/incorrect" pop up on all the graphs.
+	You get shown another bunch
+	Should be able to see that approximately 200 * p of them give false positives
+	You can control the n - but it means you do more/less experiments
+*/
+
 function initClt()
 {
 	// {
@@ -23,7 +61,7 @@ function initClt()
 	// 	fingerNormalDist.push(1+Math.exp(-i*i))
 	// }
 	// let fingerDist = ClickableDistribution(false,fingerNormalDist,false,fingerChapter,false)
-	// fingerDist.position.y = -0.3
+	// fingerDist.position.y = -0.3 
 	// fingerChapter.add(fingerDist,"sceneElements")
 
 	initClickableDistributions()
@@ -253,37 +291,7 @@ function initClt()
 	}
 }
 
-/*
-	TODO
-	Something that incentivizes them to not take so many samples at least
-	Finger thing (graph next to them) - should be on its side. Bump going up and down
-	Click on whole fucking cup
 
-	That life expectancy thing where they drop
-
-	Graph thing where you try to get out early using normal dist?
-	Then at some point you only get the normal dist.
-	
-	They see the normal distribution describing where the average should go
-	They should get used to looking at the normal distribution next to it, using it to "get out early"
-	We are NOT showing the actual graph, or actual samples, just the normal distribution
-	And all you're doing is accepting/rejecting a single graph
-	Now: automated. You see loads at a time.
-	You see ~200 sample means marked on as many distributions next to a "accept/reject"
-	You're given a specific n, at least at this point
-	Then you click "go" and "correct/incorrect" pop up on all the graphs.
-	You get shown another bunch
-	Should be able to see that approximately 200 * p of them give false positives
-	You can control the n - but it means you do more/less experiments
-
-	// Central limit theorem
-	// 	One of the distributions is one that they all got
-	// 	Their averages are plotted on teacher screen
-	// 		You can hover on teacher screen and you'll see on your own screen that teacher is hovering on yours
-	// 	Bulk it up with a few more?
-	// 	Woo it's a normal distribution
-	// 	Give loads more examples, using every distribution they faced 
-	*/
 
 function initFinger()
 {
