@@ -36,8 +36,35 @@
 	You can control the n - but it means you do more/less experiments
 */
 
+function initNormalDistributionAnimation()
+{
+	//want to be able to draw the distribution
+	//and obviously sort and group
+
+	let balls = Array(100)
+	let ballGeometry = new THREE.SphereGeometry(0.08)
+	let ballMaterial = new THREE.MeshPhongMaterial()
+	for( let i = 0; i < balls.length; i++)
+	{
+		balls[i] = new THREE.Mesh(ballGeometry,ballMaterial)
+		balls[i].position.set(-0.5,0,-i*0.1)
+		scene.add(balls[i])
+	}
+
+	bindButton( "space", function()
+	{
+		for( let i = 0; i < balls.length; i++)
+		{
+			balls[i].position.x += 0.01
+		}
+	}, "advance clt animation" )
+}
+
 function initClt()
 {
+	initNormalDistributionAnimation()
+	return
+
 	// {
 	// 	let counter = makeTextSign("Score: 0")
 	// 	scene.add(counter)
