@@ -64,7 +64,7 @@ function initGeodesics()
 
 		if( surfaces[i].update === undefined)
 		{
-			objectsToBeUpdated.push(surfaces[i])
+			updatables.push(surfaces[i])
 			surfaces[i].update = function()
 			{
 				if( mouse.clicking && mouse.lastClickedObject === null )
@@ -171,7 +171,7 @@ function initGeodesics()
 	makeProjectile(ladybird, surfaces, 7, trail)
 	ladybird.speed = 0;
 
-	objectsToBeUpdated.push(ladybird);
+	updatables.push(ladybird);
 	ladybird.speedWhenMoving = 0.01;
 	ladybird.update = function()
 	{
@@ -236,7 +236,7 @@ function initGeodesics()
 			machineGunProjectiles[i].material.color.setRGB(Math.random(),Math.random(),Math.random())
 			makeProjectile(machineGunProjectiles[i], surfaces, 2)
 
-			objectsToBeUpdated.push(machineGunProjectiles[i])
+			updatables.push(machineGunProjectiles[i])
 			machineGunProjectiles[i].update = function()
 			{
 				if(firingMachineGun)
@@ -280,7 +280,7 @@ function initGeodesics()
 			}, "toggle machine gun")
 		}
 
-		objectsToBeUpdated.push(machineGun)
+		updatables.push(machineGun)
 		machineGun.update = function()
 		{
 			if( firingMachineGun && mouse.clicking && surfaces.indexOf(mouse.lastClickedObject) !== -1 && frameCount % 4 === 0 )
@@ -342,7 +342,7 @@ function makeProjectile(projectile, surfaces, numIterations, trail)
 			this.material.opacity -= 0.8 * frameDelta
 			this.material.opacity = clamp(this.material.opacity,0,1)
 		}
-		objectsToBeUpdated.push(warningSign)
+		updatables.push(warningSign)
 	}
 
 	projectile.move = function()

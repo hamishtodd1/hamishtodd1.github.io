@@ -77,7 +77,7 @@ function initCameraZoomSystem()
 		return start + t * (end-start);
 	}
 	var timeSinceZoomToConsideration = 0;
-	objectsToBeUpdated.push(camera)
+	updatables.push(camera)
 	camera.update = function()
 	{
 		var timeToWaitBeforeZooming = 0.18

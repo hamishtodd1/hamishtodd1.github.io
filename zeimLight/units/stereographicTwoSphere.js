@@ -86,7 +86,7 @@ function initStereographicTwoSphere()
 			{
 				this.rotation.y += 0.01
 			}
-			objectsToBeUpdated.push(worldMap)
+			updatables.push(worldMap)
 
 			var worldStereographicProjection = new THREE.Mesh(
 				worldMap.geometry.clone(),
@@ -110,7 +110,7 @@ function initStereographicTwoSphere()
 				this.geometry.verticesNeedUpdate = true
 				this.rotation.y+=0.01
 			}
-			objectsToBeUpdated.push(worldStereographicProjection)
+			updatables.push(worldStereographicProjection)
 		},
 		function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); } );
 }
@@ -161,6 +161,6 @@ function initShapeStretchedOverSphere()
 
 		regularShape.geometry.verticesNeedUpdate = true;
 	}
-	objectsToBeUpdated.push(regularShape)
+	updatables.push(regularShape)
 	sphere.add(regularShape)
 }

@@ -178,7 +178,7 @@ function makeToroidalSurfaces(surfaces)
 		}
 		handleBody.deriveVertexPositions()
 
-		objectsToBeUpdated.push(handleBody)
+		updatables.push(handleBody)
 		handleBody.update = function()
 		{
 			if( mouse.clicking && mouse.lastClickedObject === null )

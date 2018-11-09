@@ -10,10 +10,6 @@
 		</style>
 	</head>
 	<body>
-		<script>
-			const PUBLIC_FACING = true;
-		</script>
-
 		<script src="lib/three.js"></script>
 		<script src="lib/closestDistanceBetweenLines.js"></script>
 
@@ -27,12 +23,31 @@
 		<script src="images.js"></script>
 		<script src="text.js"></script>
 
-		<script src="units/mirzakhani.js"></script>
-			<script src="units/surfaces.js"></script>
-			<script src="units/irreg.js"></script>
-			<script src="units/complexAnalysis.js"></script>
+		<!-- <script src="units/bayes.js"></script>
+		<script src="units/bayesNets.js"></script> -->
+		<script src="units/clt.js"></script>
 
-	    <script src="variables.js"></script>
+	    <script src="toyArrangement.js"></script>
+
+		<script src="variables.js"></script>
 		<script src="init.js"></script>
+
+		<script>
+			const PUBLIC_FACING = true;
+			{
+				let render = init()
+
+				// initImagesAndVideos();
+				// initGeodesics()
+				// initMirzakhaniGraphTheory()
+				// arrangeToys()
+
+				// initBayes()
+				// initBayesNets()
+				initClt()
+
+				render()
+			}
+		</script>
 	</body>
 </html>

@@ -109,7 +109,7 @@ function initImagesAndVideos()
 	}
 	var zoomProgress = 0;
 
-	objectsToBeUpdated.push( displayMesh )
+	updatables.push( displayMesh )
 	displayMesh.update = function()
 	{
 		var mostRecentClickWasOnAThumbnailWeAreReflecting = 
@@ -168,7 +168,7 @@ function initImagesAndVideos()
 
 		// 	frameDrawer.visible = true;
 		// }
-		// objectsToBeUpdated.push(frameDrawer)
+		// updatables.push(frameDrawer)
 		// frameDrawer.update = function()
 		// {
 		// 	var mousePosition = mouse.rayIntersectionWithZPlane(this.position.z)
@@ -317,7 +317,7 @@ function initImagesAndVideos()
 		videoImageContext.fillRect( 0, 0, 1280, 720 );
 
 		//this doesn't always have to be happenning
-		objectsToBeUpdated.push(videoTexture)
+		updatables.push(videoTexture)
 		videoTexture.update = function()
 		{
 			if( video.readyState === video.HAVE_ENOUGH_DATA )
@@ -363,7 +363,7 @@ function initImagesAndVideos()
 			return thumbnail.startTime + proportionAlong * trueDuration;
 		}
 
-		objectsToBeUpdated.push(thumbnail)
+		updatables.push(thumbnail)
 		thumbnail.update = function()
 		{
 			if(thumbnail.scale.y === thumbnail.scale.x && thumbnailTexture.video.videoHeight !== 0 )

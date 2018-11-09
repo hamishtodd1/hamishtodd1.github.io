@@ -217,7 +217,7 @@ function initLatticeMapper(ico)
 		new THREE.Face3(20,19,18),
 		new THREE.Face3(19,20,21) );
 
-	// objectsToBeUpdated.push(net)
+	// updatables.push(net)
 	net.update = function()
 	{
 		for( var i = 2; i < derivations.length; i++)
@@ -424,7 +424,7 @@ function initIrreg()
 	var indicatorSphere2 = new THREE.Mesh(new THREE.SphereGeometry(0.09), new THREE.MeshBasicMaterial({color:0xFF00F0}));
 	ico.add(indicatorSphere2)
 
-	objectsToBeUpdated.push(ico)
+	updatables.push(ico)
 	ico.update = function()
 	{
 		var hoveringEdge = -1;

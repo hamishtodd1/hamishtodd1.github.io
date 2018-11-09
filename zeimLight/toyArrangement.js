@@ -120,7 +120,7 @@ function arrangeToys()
 				console.log(this.correctPosition)
 			}
 		}
-		objectsToBeUpdated.push(dummyToys[i])
+		updatables.push(dummyToys[i])
 		dummyToys[i].update = function()
 		{
 			this.position.lerp(this.correctPosition,0.1)

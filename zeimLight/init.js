@@ -6,18 +6,63 @@
 		Subtleties in interactive learning is your raison d'etre, but here we are, making something non-interactive
 */
 
+function init()
+{
+	initButtons()
+
+	renderer = new THREE.WebGLRenderer({ antialias: true });
+	renderer.setPixelRatio( window.devicePixelRatio );
+	renderer.setClearColor(0x000000) //youtube
+	renderer.shadowMap.enabled = true;
+	renderer.shadowMap.type = THREE.BasicShadowMap;
+	document.body.appendChild( renderer.domElement );
+
+	initCameraAndRendererResizeSystem(renderer);
+	var stage = initSurroundings();
+	initMouse();
+
+	function render()
+	{
+		{
+			frameDelta = clock.getDelta();
+			
+			mouse.updateFromAsyncAndCheckClicks();
+
+			for(var i = 0; i < updatables.length; i++)
+			{
+				updatables[i].update();
+			}
+
+			frameCount++;
+		}
+
+		requestAnimationFrame( render );
+		renderer.render( scene, camera );
+	}
+
+	return render
+}
+
 function initButtons()
 {
-	var buttonBindings = {};
-	bindButton = function( buttonName, ourFunction, functionDescription )
+	var buttons = {};
+
+	bindButton = function( buttonName, onDown, buttonDescription,whileDown )
 	{
-		if(buttonBindings[buttonName] !== undefined)
+		if(buttons[buttonName] !== undefined)
 		{
 			console.error("attempted to bind a button that already has a binding")
 		}
 
-		console.log("\n",buttonName + ": " + functionDescription)
-		buttonBindings[buttonName] = ourFunction;
+		console.log("\n",buttonName + ": " + buttonDescription)
+		buttons[buttonName] = {
+			down: false,
+			onDown: onDown
+		}
+		if(whileDown)
+		{
+			buttons[buttonName].whileDown = whileDown
+		}
 	}
 
 	var buttonIndexGivenName = {
@@ -35,82 +80,69 @@ function initButtons()
 		"]":221
 	}
 	var keycodeArray = "0123456789abcdefghijklmnopqrstuvwxyz";
+	function getButton(keyCode)
+	{
+		for( var buttonName in buttons )
+		{
+			if( keyCode === buttonIndexGivenName[buttonName] )
+			{
+				return buttons[buttonName]
+			}
+		}
+		if( 48 <= keyCode && keyCode <= 57 )
+		{
+			let buttonName = keyCode - 48;
+			return buttons[buttonName]
+		}
+		if( 65 <= keyCode && keyCode <= 90 )
+		{
+			let buttonName = keyCode - 55;
+			return buttons[buttonName]
+		}
+		return null
+	}
+
 	//don't use ctrl or other things that conflict
 	document.addEventListener( 'keydown', function(event)
 	{
-		for( var buttonName in buttonBindings )
+		let button = getButton(event.keyCode)
+
+		if(button === null)
 		{
-			if( event.keyCode === buttonIndexGivenName[buttonName] )
-			{
-				buttonBindings[buttonName]();
-			}
+			return
 		}
 
-		var arrayposition;
-		if( 48 <= event.keyCode && event.keyCode <= 57 )
+		if(!button.down)
 		{
-			arrayposition = event.keyCode - 48;
-		}
-		if( 65 <= event.keyCode && event.keyCode <= 90 )
-		{
-			arrayposition = event.keyCode - 55;
-		}
-		if( buttonBindings[ keycodeArray[arrayposition] ] !== undefined )
-		{
-			buttonBindings[ keycodeArray[arrayposition] ]();
+			button.onDown()
+			button.down = true
 		}
 	}, false );
-}
-
-(function init()
-{
-	initButtons()
-
-	var renderer = new THREE.WebGLRenderer({ antialias: true });
-	renderer.setPixelRatio( window.devicePixelRatio );
-	renderer.setClearColor(0xFFFFFF) //youtube
-	renderer.shadowMap.enabled = true;
-	renderer.shadowMap.type = THREE.BasicShadowMap;
-	document.body.appendChild( renderer.domElement );
-
-	function render()
+	document.addEventListener( 'keyup', function(event)
 	{
+		let button = getButton(event.keyCode)
+
+		if(button === null)
 		{
-			frameDelta = clock.getDelta();
-			
-			mouse.updateFromAsyncAndCheckClicks();
-
-			for(var i = 0; i < objectsToBeUpdated.length; i++)
-			{
-				objectsToBeUpdated[i].update();
-			}
-
-			frameCount++;
+			return
 		}
 
-		requestAnimationFrame( render );
-		renderer.render( scene, camera );
+		if( button.down )
+		{
+			// button.onUp()
+			button.down = false
+		}
+	}, false );
+
+	updatables.push(buttons)
+	buttons.update = function()
+	{
+		for(var buttonName in buttons )
+		{
+			if( buttons[buttonName].down && buttons[buttonName].whileDown )
+			{
+				buttons[buttonName].whileDown()
+			}
+		}
 	}
-
-	initCameraAndRendererResizeSystem(renderer);
-	var stage = initSurroundings();
-	initMouse();
-
-	// if(PUBLIC_FACING)
-	// {
-	// 	initGeodesics()
-	// }
-	// else
-	// {
-	// 	initImagesAndVideos();
-	// 	// initGeodesics()
-	// 	// initMirzakhaniGraphTheory()
-	// 	arrangeToys()
-	// }
-	// initStereographicTwoSphere()
-	// initShaderExperimentation()
-
-	initComplexAnalysis()
-
-	render();
-})();
+}

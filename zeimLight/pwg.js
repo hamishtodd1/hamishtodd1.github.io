@@ -99,7 +99,7 @@ function initPwg()
 		trumpet.rotation.x = -TAU/4;
 		dataAbstraction.add(trumpet)
 
-		objectsToBeUpdated.push(dataAbstraction)
+		updatables.push(dataAbstraction)
 
 		dataAbstraction.update = function()
 		{

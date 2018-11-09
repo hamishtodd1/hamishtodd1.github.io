@@ -50,7 +50,7 @@ async function initShaderExperimentation()
 	
 	plane.geometry.addAttribute('vertexDisplacement', new THREE.BufferAttribute(vertexDisplacement, 1));
 
-	objectsToBeUpdated.push(plane)
+	updatables.push(plane)
 	plane.update = function() 
 	{
 	    //uniform

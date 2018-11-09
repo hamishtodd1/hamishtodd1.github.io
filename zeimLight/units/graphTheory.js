@@ -137,7 +137,7 @@ function initConditionsVisualization()
 	conditionsVisualization.scale.setScalar(0.5 * 1/gridDimension)
 	conditionsVisualization.rotation.y += TAU / 4
 
-	objectsToBeUpdated.push(conditionsVisualization)
+	updatables.push(conditionsVisualization)
 	toysToBeArranged.push(conditionsVisualization)
 	conditionsVisualization.update = function()
 	{
@@ -232,28 +232,10 @@ function initConditionsVisualization()
 
 function initGraphTheory()
 {
-// var partitions = [];
-// function addDisjointSet()
-// {
-// 	var colorAsNumber = partitions.length+1;
-// 	partitions.push([]);
-// 	var min = 0.2;
-// 	partitions[partitions.length-1].color = new THREE.Color( min + (1-min) * Math.random(), min + (1-min) * Math.random(), min + (1-min) * Math.random() );
-// 	partitions[partitions.length-1].color.multiplyScalar(0.8)
-// 	partitions[partitions.length-1].position = new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,-10);
-// }
-// for(var i = 0; i < 3; i++)
-// {
-// 	addDisjointSet();
-// }
-// partitions[0].length = 2;
-// partitions[1].length = 2;
-// partitions[2].length = 3;
-
 var nodeRadius = 0.02;
 var edgeRadius = nodeRadius * 0.25;
 var nodeGeometry = new THREE.EfficientSphereGeometry(nodeRadius);
-var edgeGeometry = THREE.CylinderBufferGeometryUncentered(edgeRadius,1,15)
+var edgeGeometry = CylinderBufferGeometryUncentered(edgeRadius,1,15)
 var smallSpringIdealLength = 0.2;
 var largeSpringIdealLength = smallSpringIdealLength * 1.2;
 var highlightedColor = new THREE.Color().setHex(0xFF0000)
@@ -263,7 +245,7 @@ var edgeBeingModified = new THREE.Mesh( edgeGeometry, new THREE.MeshPhongMateria
 
 edgeBeingModified.castShadow = true;
 edgeBeingModified.startNode = null;
-objectsToBeUpdated.push(edgeBeingModified)
+updatables.push(edgeBeingModified)
 edgeBeingModified.update = function()
 {
 	if(this.parent !== null)
@@ -309,7 +291,7 @@ Graph = function()
 		}
 	}
 
-	objectsToBeUpdated.push(graph)
+	updatables.push(graph)
 	graph.update = function()
 	{
 		var clientPosition = mouse.rayIntersectionWithZPlane(nodes[0].position.z)
@@ -614,7 +596,7 @@ PartiteGraph = function(partitionSizes)
 // 	this.material.opacity -= 0.08
 // 	this.material.opacity = clamp(this.material.opacity,0,1)
 // }
-// objectsToBeUpdated.push(warningSign)
+// updatables.push(warningSign)
 
 function findNCyclesInKPartiteGraph(partitions,edgesInCycle)
 {

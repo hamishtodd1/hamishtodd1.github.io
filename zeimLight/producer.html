@@ -9,12 +9,7 @@
 			}
 		</style>
 	</head>
-
 	<body>
-		<script>
-			const PUBLIC_FACING = false;
-		</script>
-
 		<script src="lib/three.js"></script>
 		<script src="lib/closestDistanceBetweenLines.js"></script>
 
@@ -28,15 +23,28 @@
 		<script src="images.js"></script>
 		<script src="text.js"></script>
 
-		<script src="units/stereographicTwoSphere.js"></script>
-		<script src="units/shaderExperimentation.js"></script>
+		<script src="units/bayes.js"></script>
+		<script src="units/bayesNets.js"></script>
 
-	    <script src="pwg.js"></script>
-		
-		<script src="toyArrangement.js"></script>
-
+	    <script src="toyArrangement.js"></script>
 
 		<script src="variables.js"></script>
 		<script src="init.js"></script>
+
+		<script>
+			const PUBLIC_FACING = false;
+			{
+				let render = init()
+
+				// initImagesAndVideos();
+				// initGeodesics()
+				// initMirzakhaniGraphTheory()
+				// arrangeToys()
+
+				initBayes()
+
+				render()
+			}
+		</script>
 	</body>
 </html>

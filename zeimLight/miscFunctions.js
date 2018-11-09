@@ -1,3 +1,8 @@
+function uniformRandomInRange(min,max)
+{
+	return min + (max-min)*Math.random()
+}
+
 function insertPatchworkFaces(verticesWide, facesArray, startingIndex, colorFaces)
 {
 	var colors = [new THREE.Color(0,0,0),new THREE.Color(1,1,1)];
@@ -199,7 +204,7 @@ function basicallyEqual(a,b)
 	return Math.abs(a-b) <= 0.0000001;
 }
 
-THREE.CylinderBufferGeometryUncentered = function(radius, length, radiusSegments, capped)
+function CylinderBufferGeometryUncentered(radius, length, radiusSegments, capped)
 {
 	if(!radius)
 	{
@@ -218,10 +223,7 @@ THREE.CylinderBufferGeometryUncentered = function(radius, length, radiusSegments
 		capped = false;
 	}
 	var geometry = new THREE.CylinderBufferGeometry(radius, radius, length,radiusSegments,1,!capped);
-	for(var i = 0, il = geometry.attributes.position.array.length / 3; i < il; i++)
-	{
-		geometry.attributes.position.array[i*3+1] += length / 2;
-	}
+	geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,length/2,0))
 	return geometry;
 }
 

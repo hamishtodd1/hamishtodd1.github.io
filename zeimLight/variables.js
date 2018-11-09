@@ -20,7 +20,7 @@ const camera = new THREE.PerspectiveCamera( 0,0,0.01, 10);
 const scene = new THREE.Scene().add(camera, camera);
 var mouse = null;
 
-const objectsToBeUpdated = [];
+const updatables = [];
 const clickables = [];
 var bindButton;
 
