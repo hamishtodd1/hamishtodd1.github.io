@@ -1,14 +1,16 @@
 /*
+	TODO Alabama
+		Something fun looking, the things moving around, springs, maybe faces on them
+		working on a phone, vertical, taking account of resolution
+
 	TODO
 		You click a node...
-			Basic: you control its probability magnitude
+			You control its probability magnitude
+			Can click further nodes to "control for them", ask "what about if they're..."
 		"zooming in" on regions + selecting regions
 
 	What does picking givens mean in the context of the net?
 		Making a new net... the sub-tree coming from that node? No, you need other things affecting it
-
-	Wordy aspect
-		Word scale Julia Galef had it somewhere? "Impossible" "Highly improbable" [...] "almost certain" "certain"
 
 	Possible goals
 		Get a bunch of balls, build/reproduce their bayes net / venn
@@ -35,6 +37,9 @@
 		Scientists should share likelihood ratios, not posteriors
 		Conditional independence
 		If you know P(A|B),P(B|C),P(C|A),P(A),P(B),P(C), you DON'T necessarily know P(A,B|C)
+
+	Wordy aspect
+		Word scale Julia Galef had it somewhere? "Impossible" "Highly improbable" [...] "almost certain" "certain"
 
 	interesting is when you want to remove an edge; make it conditionally independent
 	like... one could see the intended output as a venn, and see one's own output as a venn
@@ -359,7 +364,7 @@ function initBayesNets()
 					{
 						this.add(closeUp)
 						let ourAssociatedBit = nodes.indexOf(this)
-						segregateDispensees(ourAssociatedBit)
+						updateDispenseeSegregation(ourAssociatedBit)
 					}
 				}
 				else
@@ -396,7 +401,7 @@ function initBayesNets()
 			scene.add(dispenseesHolder)
 
 			let dispenseeGeometries = [
-				new THREE.CircleBufferGeometry(0.04,32),
+				new THREE.CircleBufferGeometry(0.04,4),
 				new THREE.CircleBufferGeometry(0.04,3)
 			]
 
@@ -426,39 +431,64 @@ function initBayesNets()
 		//does feel like what you want is to click two nodes and see their relationship, i.e. their x and y
 		//first they go into two colums, then both columns turn into two rectangles each with division lines at different levels
 		//better, and more marketable, might be a puzzle game using those deep learning visualization methdos
-		function segregateDispensees(bitIndex)
+
+		//ones with same bit are attracted, non-same-bit are repelled
+		//buuuut they repel one another iff they're close
+		//some might not be displayed at all
+		function updateDispenseeSegregation(horizontalBitIndex,verticalBitIndex)
 		{
-			let segregationDirection = bitIndex === 0? "x":"y"
-
-			let proportion = 0
+			//would be a bit nicer if it was an emergent thing; they go till they're beyond
+			let numberOfDispenseesOnLeft = 0
+			let numberOfDispenseesInTL = 0
+			let numberOfDispenseesOnTopRight = 0
 			for(let i = 0; i < dispensees.length; i++)
 			{
-				if( dispensees[i].bits & (1<<bitIndex) )
+				if( dispensees[i].bits & (1<<horizontalBitIndex) )
 				{
-					proportion++
-				}
-			}
-			proportion /= dispensees.length
-
-			for(let i = 0; i < dispensees.length; i++)
-			{
-				if(dispensees[i].bits & (1<<bitIndex))
-				{
-					if(	dispensees[i].position[segregationDirection] > proportion )
+					numberOfDispenseesOnLeft++
+					if( dispensees[i].bits & (1<<verticalBitIndex) )
 					{
-						dispensees[i].position[segregationDirection] = Math.random() * proportion
+						numberOfDispenseesInTL++
 					}
 				}
 				else
 				{
-					if(	dispensees[i].position[segregationDirection] < proportion)
+					if( dispensees[i].bits & (1<<verticalBitIndex) )
 					{
-						dispensees[i].position[segregationDirection] = Math.random() * (1-proportion) + proportion
+						numberOfDispenseesOnTopRight++
 					}
 				}
 			}
 
-			lastSegregationDirection = segregationDirection
+			let leftVerticalThreshold = numberOfDispenseesInTL / numberOfDispenseesOnLeft
+			let rightVerticalThreshold = numberOfDispenseesInTL / (dispensees.length-numberOfDispenseesOnLeft)
+			let horizontalThreshold = numberOfDispenseesOnLeft / dispensees.length
+
+			for(let i = 0; i < dispensees.length; i++)
+			{
+				let shouldBeOnLeft = dispensees[i].bits & (1<<horizontalBitIndex)
+				let isOnLeft = dispensees[i].position.x < horizontalThreshold
+
+				let shouldBeOnBottom = dispensees[i].bits & (1<<verticalBitIndex)
+				let isOnBottom = dispensees[i].position.y < (shouldBeOnLeft ? leftVerticalThreshold : rightVerticalThreshold)
+
+				let acceleration = new THREE.Vector2()
+
+				if( shouldBeOnLeft !== isOnLeft )
+				{
+					acceleration.x = shouldBeOnLeft ? 1:-1
+				}
+
+				if(shouldBeOnBottom && !isOnBottom)
+				{
+					acceleration.y = shouldBeOnBottom ? 1:-1
+				}
+
+				if(acceleration.x === 0 && acceleration.y === 0)
+				{
+					//repelled by all surroundings
+				}
+			}
 		}
 
 		return bn
