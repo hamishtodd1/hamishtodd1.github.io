@@ -2,7 +2,7 @@
 	TODO
 	When you do S3, do that lovely ring of tetrahedra
 
-	visiplanes
+	visiplanes, easy
 	"Clone" is terribly important. If there's multiple shapes obv clone them too
 	Want to unsnap. grabbingSide vs grabbingTop for hand separation
 

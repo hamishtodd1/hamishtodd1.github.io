@@ -364,7 +364,6 @@ function initBayesNets()
 					{
 						this.add(closeUp)
 						let ourAssociatedBit = nodes.indexOf(this)
-						updateDispenseeSegregation(ourAssociatedBit)
 					}
 				}
 				else
@@ -377,6 +376,8 @@ function initBayesNets()
 				
 				//attraction to center
 				acceleration.add(this.position.clone().setComponent(2,0).multiplyScalar(-0.08))
+
+				updateDispenseeSegregation(0,1)
 				
 				this.velocity.set(0,0,0); //severe damping - can remove for bounciness
 				this.velocity.add(acceleration);
@@ -388,6 +389,7 @@ function initBayesNets()
 		}
 
 		let dispensees = Array(7*7*7)
+		let dispenseeRadius = 0.04
 		bn.dispensees = dispensees
 
 		bn.dispense = function()
@@ -401,8 +403,8 @@ function initBayesNets()
 			scene.add(dispenseesHolder)
 
 			let dispenseeGeometries = [
-				new THREE.CircleBufferGeometry(0.04,4),
-				new THREE.CircleBufferGeometry(0.04,3)
+				new THREE.CircleBufferGeometry(dispenseeRadius,4),
+				new THREE.CircleBufferGeometry(dispenseeRadius,3)
 			]
 
 			for(let i = 0; i < dispensees.length; i++)
@@ -424,7 +426,14 @@ function initBayesNets()
 				}))
 				dispensees[i].bits = bits
 				dispensees[i].position.set(Math.random(),Math.random(),0.001)
+				dispensees[i].velocity = new THREE.Vector3()
 				dispenseesHolder.add(dispensees[i])
+				updatables.push(dispensees[i])
+				dispensees[i].update = function()
+				{
+					this.velocity.multiplyScalar(0.9)
+					this.position.add(this.velocity)
+				}
 			}
 		}
 
@@ -464,30 +473,45 @@ function initBayesNets()
 			let rightVerticalThreshold = numberOfDispenseesInTL / (dispensees.length-numberOfDispenseesOnLeft)
 			let horizontalThreshold = numberOfDispenseesOnLeft / dispensees.length
 
-			for(let i = 0; i < dispensees.length; i++)
+			let dispenseeRadiusSquared = sq(dispenseeRadius)
+
+			for(let i = 0, il = dispensees.length; i < il; i++)
 			{
-				let shouldBeOnLeft = dispensees[i].bits & (1<<horizontalBitIndex)
+				let shouldBeOnLeft = dispensees[i].bits & (1<<horizontalBitIndex)?true:false
 				let isOnLeft = dispensees[i].position.x < horizontalThreshold
 
-				let shouldBeOnBottom = dispensees[i].bits & (1<<verticalBitIndex)
+				let shouldBeOnBottom = dispensees[i].bits & (1<<verticalBitIndex)?true:false
 				let isOnBottom = dispensees[i].position.y < (shouldBeOnLeft ? leftVerticalThreshold : rightVerticalThreshold)
+				// if(i===0)console.log(shouldBeOnLeft,isOnLeft)
 
-				let acceleration = new THREE.Vector2()
+				let acceleration = new THREE.Vector3()
 
 				if( shouldBeOnLeft !== isOnLeft )
 				{
-					acceleration.x = shouldBeOnLeft ? 1:-1
+					acceleration.x = shouldBeOnLeft ? -1:1
 				}
 
-				if(shouldBeOnBottom && !isOnBottom)
+				if(shouldBeOnBottom !== !isOnBottom)
 				{
-					acceleration.y = shouldBeOnBottom ? 1:-1
+					acceleration.y = shouldBeOnBottom ? -1:1
 				}
 
-				if(acceleration.x === 0 && acceleration.y === 0)
-				{
-					//repelled by all surroundings
-				}
+				// if(acceleration.x === 0 && acceleration.y === 0)
+				// {
+				// 	for( let j = 0, jl = dispensees.length; j < jl; j++)
+				// 	{
+				// 		if( i!==j && dispensees[i].position.distanceToSquared(dispensees[j].position) < dispenseeRadiusSquared )
+				// 		{
+				// 			let displacementFromUs = dispensees[j].position.clone().sub(dispensees[i])
+				// 			let addition = displacementFromUs.clone().negate()
+				// 			addition.setLength( dispenseeRadius - displacementFromUs.length() )
+				// 			acceleration.add( addition )
+				// 		}
+				// 	}
+				// }
+
+				acceleration.multiplyScalar(0.01)
+				dispensees[i].velocity.copy(acceleration)
 			}
 		}
 
