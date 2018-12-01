@@ -45,6 +45,11 @@ function arrangeToys()
 	}
 	for(var i = 0; i < toysToBeArranged.length; i++)
 	{
+		if(toysToBeArranged[i].geometry === undefined)
+		{
+			console.error("this toy has no geometry, won't be clickable:", toysToBeArranged[i])
+		}
+
 		if(toysToBeArranged[i].parent === null)
 		{
 			scene.add(toysToBeArranged[i])

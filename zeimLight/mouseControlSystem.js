@@ -121,6 +121,7 @@ function initMouse()
 		{
 			if( !this.oldRightClicking )
 			{
+				console.log("yo")
 				var intersections = mouse.rayCaster.intersectObjects( toysToBeArranged );
 
 				if( intersections.length !== 0 )

@@ -43,36 +43,13 @@
 function initImagesAndVideos()
 {
 	var textureFileNames = [
-		//intro
-		"Maryam Mirzakhani, Dynamics Moduli Spaces of Curves I.mp4",
-		"Seoul ICM2014 Opening Ceremony (0).mp4",
-		"Seoul ICM2014 Opening Ceremony (1).mp4",
-		"Seoul ICM2014 Opening Ceremony (2).mp4",
-		//first muslim
-		"headings/1.png",
-		"vlcsnap-2018-07-06-17h05m41s279.png",
-		"headscarf.jpg",
-		"rohani.png",
-		"newspapers.jpg",
-		"Tribute to Maryam Mirzakhani, by Artan Sheshmani (Farsi) (1).mp4",
-		"trump.jpg",
-		//stephen hawking
-		"headings/2.png",
-		"hawking2.mp4",
-		"Edward-Witten-0627.jpg",
-		"Calabi-Yau Manifold.mp4",
-		"tesla.mp4",
-		"Discrete Geodesic Nets for Modeling Developable Surfaces.mp4",
-		//graph theory
-		"headings/3.png",
-		"2515823.jpg",
+		//note that you should have a few...
 		"cartography.jpg",
-		"circuitDesign.jpeg",
-		//extremely visual
-		"vlcsnap-2018-07-06-17h08m09s876.png",
-		"headings/4.png",
-		"clips.mov",
-		"interview.mp4",
+		"cartography.jpg",
+		"cartography.jpg",
+		"cartography.jpg",
+		"cartography.jpg",
+		"cartography.jpg"
 	];
 
 	var everythingGeometry = new THREE.PlaneGeometry( 1,1 );
@@ -403,6 +380,10 @@ function initImagesAndVideos()
 		return thumbnail;
 	}
 
+	if(textureFileNames.length < 3)
+	{
+		console.error("are you sure you want as few as that? We inflate them to take up left")
+	}
 	for(var i = 0, il = textureFileNames.length; i < il; i++)
 	{
 		var fileExtension = textureFileNames[i].slice(textureFileNames[i].length-3);

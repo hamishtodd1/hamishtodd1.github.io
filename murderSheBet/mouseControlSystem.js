@@ -51,7 +51,10 @@ function initMouse()
 		lastRightClickedObject:null,
 
 		//don't use too much if clicking is not true - touchscreens. There are other ways to do things, and many people will be on phone
-		rayCaster: new THREE.Raycaster()
+		rayCaster: new THREE.Raycaster(),
+
+		zZeroPosition: new THREE.Vector3(),
+		oldZZeroPosition: new THREE.Vector3()
 	};
 	mouse.rayCaster.setFromCamera(asynchronous.normalizedDevicePosition, camera)
 	mouse.previousRay = mouse.rayCaster.ray.clone()
@@ -59,7 +62,7 @@ function initMouse()
 	mouse.rayIntersectionWithZPlane = function(z)
 	{
 		var zPlane = new THREE.Plane(zUnit,-z)
-		return mouse.rayCaster.ray.intersectPlane(zPlane)
+		return mouse.rayCaster.ray.intersectPlane(zPlane,new THREE.Vector3())
 	}
 
 	mouse.rotateObjectByGesture = function(object)
@@ -90,6 +93,9 @@ function initMouse()
 		mouse.previousRay.copy(mouse.rayCaster.ray);
 		mouse.rayCaster.setFromCamera( asynchronous.normalizedDevicePosition, camera );
 
+		mouse.oldZZeroPosition.copy( mouse.zZeroPosition )
+		mouse.zZeroPosition.copy(this.rayIntersectionWithZPlane(0))
+
 		//"whileClicking"? Naaaaah, "update" keeps things in once place
 		//deffo need onHover
 		
@@ -115,6 +121,7 @@ function initMouse()
 		{
 			if( !this.oldRightClicking )
 			{
+				console.log("yo")
 				var intersections = mouse.rayCaster.intersectObjects( toysToBeArranged );
 
 				if( intersections.length !== 0 )

@@ -15,7 +15,6 @@ function initClt()
 
 	// initEditableDistributionWithPopulation()
 
-	initClickableDistributions()
 
 	// let fingerChapter = initFinger()
 	// var fingerNormalDist = []
@@ -26,6 +25,10 @@ function initClt()
 	// let fingerDist = ClickableDistribution(false,fingerNormalDist,false,fingerChapter,false)
 	// fingerDist.position.y = -0.3
 	// fingerChapter.add(fingerDist,"sceneElements")
+
+	initClickableDistributions()
+
+	//clicking seems to get the things if you wait for animation to complete???? There were situations where it didn't happen!
 
 	let singleCdChapter = Chapter()
 	let singularDist = HumpedClickableDistribution(true,[0.7,0.7,1.2,0.7,1.1,2.6,3,3.6,2.5,1],false,singleCdChapter,false)
@@ -125,9 +128,13 @@ function initClt()
 				{
 					timer.material = makeTextSign("Time left: " + (Math.floor(timeLeft)).toString(),true)
 				}
-				else
+				else if(timeLeft > -2.3)
 				{
 					timer.material.color.setRGB(1,0,0)
+				}
+				else
+				{
+
 				}
 			}
 			// scene.add(timer)
@@ -248,12 +255,7 @@ function initClt()
 	TODO
 	Something that incentivizes them to not take so many samples at least
 	Finger thing (graph next to them) - should be on its side. Bump going up and down
-
-	Outlines on the things
-
-	At least do the multiple graphs thing and have them understand p-value
-
-	Just accept/reject
+	Click on whole fucking cup
 
 	That life expectancy thing where they drop
 
@@ -404,7 +406,7 @@ function initClickableDistributions()
 
 	let lowestUnusedProfilePicture = 0;
 
-	ClickableDistribution = function(haveProfilePicture, samplingFunction,numControlPoints = 11,numSamples = 30 * numControlPoints, normalDistributionsPresent, chapter, spray, samples )
+	ClickableDistribution = function(haveProfilePicture, samplingFunction,numControlPoints = 11,numSamples = 30 * numControlPoints, normalDistributionsPresent, chapter, spray, samples, cup )
 	{
 		//if you go too high on numControlPoints the noise is bad ;_;
 
@@ -590,7 +592,6 @@ function initClickableDistributions()
 			return numSamplesTaken
 		}
 
-		clickableDistribution.add( areaBeneath )
 		let curveOnTop = new THREE.Mesh( new THREE.TubeBufferGeometry( new THREE.CatmullRomCurve3( controlPoints, false, "centripetal" ), controlPoints.length * 8, 0.01 ) )
 		// areaBeneath.add( curveOnTop )
 		clickableDistribution.width = controlPoints[numControlPoints-1].x * 2
@@ -640,7 +641,8 @@ function initClickableDistributions()
 
 		clickableDistribution.wandClone = function()
 		{
-			let clone = ClickableDistribution(false, samplingFunction, numControlPoints,numSamples, false, chapter,true,this.samples)
+			let cup = new THREE.Mesh(cupGeometry, cupMaterial)
+			let clone = ClickableDistribution(false, samplingFunction, numControlPoints,numSamples, false, chapter,true,this.samples,cup)
 			clone.scale.copy(this.scale)
 			// for(let i = clone.children.length; i < this.children.length; i++)
 			// {
@@ -650,6 +652,12 @@ function initClickableDistributions()
 		}
 
 		clickableDistribution.scale.set(1/clickableDistribution.width,0.5/clickableDistribution.height,1)
+		if(cup !== undefined)
+		{
+			clickableDistribution.add(cup)
+			clickableDistribution.cup = cup
+		}
+		clickableDistribution.add( areaBeneath )
 		
 		if(haveProfilePicture)
 		{

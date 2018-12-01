@@ -188,6 +188,9 @@ function initCameraAndRendererResizeSystem(renderer)
 		}
 
 		camera.updateProjectionMatrix();
+
+		//here's the off center thing. Would have to adjust toys and images and surely the above though
+		// camera.projectionMatrix.elements[9] = -2/3
 	}
 	respondToResize();
 

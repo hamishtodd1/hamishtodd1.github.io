@@ -135,8 +135,6 @@ function initCameraAndRendererResizeSystem(renderer)
 {
 	initCameraZoomSystem()
 
-	let embed = document.getElementById('embed')
-
 	function respondToResize() 
 	{
 		let generalWidth = Math.floor(window.innerWidth/3)
@@ -144,7 +142,7 @@ function initCameraAndRendererResizeSystem(renderer)
 		renderer.setSize( generalWidth, window.innerHeight );
 		camera.aspect = generalWidth / window.innerHeight;
 
-		embed.style.marginTop = "320px" //TODO
+		embed.style.marginTop = "0px" //TODO
 
 		ytPlayer.setSize(generalWidth,generalWidth/16*9);
 		//then need to add that padding above

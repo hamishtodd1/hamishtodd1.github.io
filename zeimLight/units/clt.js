@@ -1,27 +1,44 @@
 /*
-	Part 1: "How to perform a one-sample z-test"
+	"How to perform a z-test, and why you should never do so"
+
+	Part 1: Probability distributions
 		A few pictures of applications
-		Probability distributions
-			Sorting then grouping
-			Bobble going up and down as you change some values
+		Sorting then grouping
+		Bobble going up and down as you change some values
+
+	Part 2: "how to perform a one-sample z-test"
+		Take the mean of your sample
 		Scaling and moving normal dist
 		Seeing the average on a normal distribution
-		The thing where you have multiple studies and must trade off sample sizes
-			Slider for spreading samples amongst multiple tests
 		Show the formula
 		P value only works if it is in scene, and points to whatever else is in scene
 
-	Part 2: Why the z-test works, and why not to use it
+	Part 3: Why the z-test works
 		Normal distribution animation.
 			A long line of balls going back on z, all with copies of the graph
-			They all jump forward by one sample of the distribution
-			The graphs jump with them
+			They all jump forward by one sample of the distribution, the graphs jump with them
 			They jump forward a bunch more times
+			We look at them from above
+			We sort them
+		Each of these paths is a summed sample, essentially a sample mean
+		Kinda like looking at the distribution with your eyes blurred
+		In the real world, there's not a single thing that is normally distributed
+
+	Part 4: Why you shouldn't use a z-test
+		Don't want to be too zealous, you're not an expert
+			The horrible thing is just that this becomes the only quantitative assessment
+		The thing where you have multiple studies and must trade off sample sizes
+			Slider for spreading samples amongst multiple tests
+		e^-x^2, very simple
+		You might be watching this video because you have a homework assignment. The people who have set it as a homework should not be teaching you stuff
 		We boil a known distribution down to its mean and variance
 			Because there are many distributions out there and it's hard to make a scheme that works for all
+		I've talked to people where it's clear they don't want to do statistical modelling, the p-value for them is just a sticker they put on
+		Basically, you should be doing mathematical modelling and assessing it using bayesian methods
 
 	TODO
 		Taking samples away
+		Bind button to "associated normal distributions visible"
 
 	They see the normal distribution describing where the average should go
 	They should get used to looking at the normal distribution next to it, using it to "get out early"
@@ -41,23 +58,101 @@ function initNormalDistributionAnimation()
 	//want to be able to draw the distribution
 	//and obviously sort and group
 
-	let balls = Array(100)
-	let ballGeometry = new THREE.SphereGeometry(0.08)
+	let frameWidth = 1.8
+	let frameHeight = frameWidth / (16/9)
+	let howFarBallsGoBack = 2 / (16/9) * 0.95
+	let normalDistributionAnimation = new THREE.Mesh(new THREE.OriginCorneredPlaneGeometry(frameWidth,frameHeight), new THREE.MeshBasicMaterial({color:0xFFFFFF, transparent:true, opacity:0.4}))
+	let frontGeometry = new THREE.OriginCorneredPlaneGeometry(howFarBallsGoBack,frameHeight)
+	frontGeometry.applyMatrix(new THREE.Matrix4().makeRotationY(TAU/4).setPosition(new THREE.Vector3(frameWidth,0,0)))
+	normalDistributionAnimation.geometry.merge(frontGeometry)
+	normalDistributionAnimation.position.x = -frameWidth/2
+	normalDistributionAnimation.position.y = -frameHeight/2
+	scene.add(normalDistributionAnimation)
+
+	let balls = Array(50)
+	let ballGeometry = new THREE.SphereGeometry(0.01)
 	let ballMaterial = new THREE.MeshPhongMaterial()
 	for( let i = 0; i < balls.length; i++)
 	{
 		balls[i] = new THREE.Mesh(ballGeometry,ballMaterial)
-		balls[i].position.set(-0.5,0,-i*0.1)
-		scene.add(balls[i])
+		balls[i].correctPosition = balls[i].position.clone()
+		normalDistributionAnimation.add(balls[i])
+		
+		updatables.push(balls[i])
+		balls[i].update = function()
+		{
+			this.position.lerp(this.correctPosition,0.1)
+		}
 	}
+
+	function sortBalls()
+	{
+		balls.sort(function(a,b)
+		{
+			return -a.correctPosition.x - -b.correctPosition.x
+		})
+		for(let i = 0; i < balls.length; i++)
+		{
+			balls[i].correctPosition.z = -i / balls.length * howFarBallsGoBack
+		}
+	}
+	sortBalls()
 
 	bindButton( "space", function()
 	{
 		for( let i = 0; i < balls.length; i++)
 		{
-			balls[i].position.x += 0.01
+			balls[i].correctPosition.x += Math.random() * 0.03
+			balls[i].correctPosition.y = 0
 		}
 	}, "advance clt animation" )
+
+	bindButton( "s", function()
+	{
+		sortBalls()
+	}, "sort normalDistributionAnimation balls" )
+	bindButton( "p", function()
+	{
+		sortBalls()
+		for(let i = 0; i < balls.length; i++)
+		{
+			balls[i].correctPosition.y = 0
+			for(let j = 0; j < balls.length; j++)
+			{
+				if( Math.abs( balls[j].correctPosition.x - balls[i].correctPosition.x ) < howFarBallsGoBack/30 )
+				{
+					balls[i].correctPosition.y += 0.03
+				}
+			}
+		}
+	}, "position normalDistributionAnimation balls" )
+
+	bindButton( "r", function()
+	{
+		//and it would be nice to 
+	}, "reset normalDistributionAnimation" )
+
+	updatables.push(normalDistributionAnimation)
+	clickables.push(normalDistributionAnimation)
+	normalDistributionAnimation.update = function()
+	{
+		if(mouse.clicking && mouse.lastClickedObject === this)
+		{
+			let centerOfMass = new THREE.Vector3(frameWidth/2,0,-howFarBallsGoBack/2)
+
+			let worldCenterOfMassBeforeRotation = centerOfMass.clone()
+			this.localToWorld(worldCenterOfMassBeforeRotation)
+
+			let mouseDisp = mouse.zZeroPosition.clone().sub(mouse.oldZZeroPosition).x
+			normalDistributionAnimation.rotation.y += mouseDisp * 2
+			normalDistributionAnimation.rotation.y = clamp(normalDistributionAnimation.rotation.y,-TAU/4,0)
+
+			let worldCenterOfMassAfterRotation = centerOfMass.clone()
+			this.updateMatrixWorld()
+			this.localToWorld(worldCenterOfMassAfterRotation)
+			this.position.add(worldCenterOfMassBeforeRotation).sub(worldCenterOfMassAfterRotation)
+		}
+	}
 }
 
 function initClt()
@@ -588,10 +683,7 @@ function initClickableDistributions()
 
 			this.excitedness = 1;
 
-			if(normalDistributionsPresent)
-			{
-				correspondingNormalDistribution.sendInSample(placeToLand.x)
-			}
+			correspondingNormalDistribution.sendInSample(placeToLand.x)
 		}
 
 		clickableDistribution.excitedness = 0
@@ -664,17 +756,11 @@ function initClickableDistributions()
 			areaBeneath.material.color.r = clickableDistribution.excitedness
 			areaBeneath.position.y = clickableDistribution.excitedness * 5 * sq(Math.sin(frameCount * 0.2))
 
-			if( normalDistributionsPresent )
-			{
-				correspondingNormalDistribution.scale.y = 1 / clickableDistribution.scale.y
-			}
+			correspondingNormalDistribution.scale.y = 1 / clickableDistribution.scale.y
 		}
 
-		if(normalDistributionsPresent)
-		{
-			let correspondingNormalDistribution = MarkedNormalDistribution( clickableDistribution.mean, clickableDistribution.variance )
-			clickableDistribution.add(correspondingNormalDistribution)
-		}
+		let correspondingNormalDistribution = MarkedNormalDistribution( clickableDistribution.mean, clickableDistribution.variance )
+		clickableDistribution.add(correspondingNormalDistribution)
 
 		clickableDistribution.wandClone = function()
 		{

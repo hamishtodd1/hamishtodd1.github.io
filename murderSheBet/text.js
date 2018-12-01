@@ -5,11 +5,6 @@ function ceilPowerOfTwo( value )
 
 function makeTextSign(originalText, materialOnly, originCornered)
 {
-	if(twoSided == undefined)
-	{
-		twoSided = true;
-	}
-
 	let canvas = document.createElement("canvas");
 	let context = canvas.getContext("2d");
 	let material = new THREE.MeshBasicMaterial({map: new THREE.CanvasTexture(canvas)});
@@ -31,7 +26,6 @@ function makeTextSign(originalText, materialOnly, originCornered)
 		context.font = textHeight + "pt " + font; //yes, seriously
 		context.textAlign = "center";
 		context.textBaseline = "middle";
-		
 		let backGroundColor = "#3F3D3F"
 		context.fillStyle = backGroundColor;
 		context.fillRect(0,0,canvas.width,canvas.height);

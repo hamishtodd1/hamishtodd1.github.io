@@ -6,7 +6,10 @@ function ColoredBall()
 
 	coloredBall.wandClone = function()
 	{
-		return new THREE.Mesh(new THREE.SphereGeometry(0.1),this.material)
+		let cup = new THREE.Mesh(cupGeometry, cupMaterial)
+		let newBall = new THREE.Mesh(new THREE.SphereGeometry(0.1),this.material)
+		newBall.cup = cup
+		return newBall
 	}
 
 	return coloredBall
@@ -90,8 +93,7 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 				{
 					duplicate = this.objectToDuplicate.wandClone()
 
-					duplicate.cup = new THREE.Mesh(cupGeometry, cupMaterial)
-					duplicate.add( duplicate.cup )
+					duplicate.cup.visible = true
 					duplicate.cup.scale.divide(duplicate.scale)
 
 					if(duplicate.profilePicture)
@@ -176,7 +178,7 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 			arrowSelector.onClick = function()
 			{
 				addCorrectOrIncorrectSign(this.associatedObject === duplicate.originalObject,this)
-				duplicate.remove(duplicate.cup)
+				duplicate.cup.visible = false
 				//and then question restarting stuff, including removing these from the scene and nulling associated objects
 			}
 			chapter.add(arrowSelector,"clickables")
@@ -190,7 +192,7 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 			tick.onClick = function()
 			{
 				addCorrectOrIncorrectSign(this.associatedObject === duplicate.originalObject,this)
-				duplicate.remove(duplicate.cup)
+				duplicate.cup.visible = false
 			}
 
 			var cross = new THREE.Mesh(crossGeometry,new THREE.MeshBasicMaterial({color:0x0000FF}))
@@ -200,7 +202,7 @@ function makeCupGame( objectsToHide, defaultScrambleAmount, chapter, acceptRejec
 			cross.onClick = function()
 			{
 				addCorrectOrIncorrectSign(this.associatedObject !== duplicate.originalObject,this)
-				duplicate.remove(duplicate.cup)
+				duplicate.cup.visible = false
 			}
 		}
 

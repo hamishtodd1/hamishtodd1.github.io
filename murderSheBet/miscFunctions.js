@@ -88,10 +88,14 @@ function moduloWithNegatives(a,n)
 	return a % n;
 }
 
-function ArrowGeometry()
+function ArrowGeometry(fullLength)
 {
+	if(fullLength === undefined)
+	{
+		fullLength = 0.02
+	}
+
 	var geo = new THREE.Geometry();
-	var fullLength = 0.02;
 	var headLength = fullLength / 3;
 	var headWidth = headLength / (Math.sqrt(3) / 2);
 	var bodyWidth = headWidth / 2.8;
@@ -111,8 +115,8 @@ function ArrowGeometry()
 		);
 	geo.faces.push(new THREE.Face3(3,6,4));
 	geo.faces.push(new THREE.Face3(5,6,3));
-	
-	diamond.add(geo);
+
+	return geo
 }
 
 function getRandomColor()

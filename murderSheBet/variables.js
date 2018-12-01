@@ -9,8 +9,10 @@ const zeroVector = new THREE.Vector3();
 //-----Fundamental
 const clock = new THREE.Clock( true );
 const debugging = 0;
-var frameCount = 0;
-var logged = 0;
+let frameCount = 0;
+let logged = 0;
+
+const embed = document.getElementById('embed')
 
 const RIGHT_CONTROLLER_INDEX = 0;
 const LEFT_CONTROLLER_INDEX = 1-RIGHT_CONTROLLER_INDEX;
@@ -18,11 +20,13 @@ const LEFT_CONTROLLER_INDEX = 1-RIGHT_CONTROLLER_INDEX;
 //------global variables
 const camera = new THREE.PerspectiveCamera( 0,0,0.01, 10);
 const scene = new THREE.Scene().add(camera, camera);
-var mouse = null;
+let mouse = null;
+
+let makingSuspectPortrait = false;
 
 const updatables = [];
 const clickables = [];
-var bindButton;
+let bindButton;
 
 const toysToBeArranged = [];
 
