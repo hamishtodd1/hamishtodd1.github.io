@@ -1,4 +1,6 @@
 /*
+	The main point of this is to make something that visualizes how your shit works, show it to the user, and it's not code
+
 	Programming by example
 		move the object the amount that it will move in a frame
 		On collision, do the thing that would be triggered by that collision

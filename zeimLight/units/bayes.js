@@ -1,8 +1,3 @@
-let meshesCoveringArea = []
-let meshInclusions = [true,]
-
-function overlapSizeAsProportionOfWholeArea( includedMeshes )
-
 function initBayes()
 {
 	let horizontalResolution = 74
