@@ -22,7 +22,7 @@ function init()
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setClearColor( 0xFFFFFF );
 	renderer.sortObjects = false;
-	document.getElementById("canvas").appendChild( renderer.domElement );
+	document.body.appendChild( renderer.domElement );
 	
 	scene = new THREE.Scene();
 	camera = new THREE.PerspectiveCamera( 1,1,1,100); //both first arguments are irrelevant because of below

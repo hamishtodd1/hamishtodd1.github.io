@@ -34,12 +34,12 @@ function initInputSystem()
 	asynchronousInput.updateClientPosition = function(rawX,rawY)
 	{
 		//center
-		asynchronousInput.clientPosition.x = rawX - ( renderer.domElement.width / 2 );
-		asynchronousInput.clientPosition.y = -rawY+ ( renderer.domElement.height/ 2 ) - document.body.scrollTop;
+		asynchronousInput.clientPosition.x = rawX - ( renderer.getSize().width / 2 );
+		asynchronousInput.clientPosition.y = -rawY+ ( renderer.getSize().height/ 2 )
 		
 		//scale
-		asynchronousInput.clientPosition.x /= renderer.domElement.width / 2;
-		asynchronousInput.clientPosition.y /= renderer.domElement.height / 2;
+		asynchronousInput.clientPosition.x /= renderer.getSize().width / 2;
+		asynchronousInput.clientPosition.y /= renderer.getSize().height / 2;
 		
 		var centerToFrameVertical = Math.tan( camera.fov * TAU / 360 / 2 ) * camera.position.z;
 		var centerToFrameHorizontal = centerToFrameVertical * camera.aspect;
