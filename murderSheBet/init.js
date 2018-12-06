@@ -30,31 +30,17 @@ function init()
 	initButtons()
 
 	let renderer = new THREE.WebGLRenderer();
-	renderer.setClearColor(0xFFFFFF)
-	let rendererDomElementContainer = document.getElementById( 'rendererDomElementContainer' );
-	rendererDomElementContainer.appendChild( renderer.domElement )
+	renderer.setPixelRatio( window.devicePixelRatio )
+	document.body.appendChild( renderer.domElement )
 
 	let buttonContainer = document.getElementById( 'buttonContainer' );
-	addButtonBelowVideo = function(label,buttonFunction)
-	{
-		let button = document.createElement("BUTTON");
-		let textNode = document.createTextNode(label);       // Create a text node
-		button.appendChild(textNode); 
-		button.addEventListener('click',buttonFunction)
-		buttonContainer.appendChild(button)
-	}
-	addButtonBelowVideo("Play tutorial",function()
-	{
-		ytPlayer.loadVideoById('uZgbKrDEzAs')
-		ytPlayer.playVideo()
-	})
-
+	
 	function render()
 	{
 		{
 			frameDelta = clock.getDelta();
 			
-			// mouse.updateFromAsyncAndCheckClicks();
+			mouse.updateFromAsyncAndCheckClicks();
 
 			for(let i = 0; i < updatables.length; i++)
 			{
@@ -71,48 +57,6 @@ function init()
 	initCameraAndRendererResizeSystem( renderer );
 	let stage = initSurroundings();
 	initMouse();
-
-	addButtonBelowVideo("Finish game",function()
-	{
-		console.log("yo")
-	})
-
-	addButtonBelowVideo("New suspect",function()
-	{
-		//this is the hard part; you want screenshots; there isn't a whole lot of point in a computer version without screenshots
-		//there are apparently plans for iframes to have .getScreenshot
-
-		//one way to do this: tell people to ctrl+printscreen whenever they want a new one
-		//the embed should have, on its right and bottom, a recognizable series of pixels eg black white black white etc
-
-		// let domvasTestCanvasContext = document.getElementById("domvasTestCanvas").getContext('2d');
-		// domvas.toImage(embed, function()
-		// {
-		// 	domvasTestCanvasContext.drawImage(this, 20, 20);
-		// });
-
-		//maaaay want to delete suspects
-		let a = makeTextSign("Anonymous new suspect", false, true)
-		a.material.color.setRGB(Math.random(),Math.random(),Math.random())
-		a.scale.multiplyScalar(0.1)
-		scene.add(a)
-		updatables.push(a)
-		a.update = function()
-		{
-			console.log(newSuspectTextBox.value)
-		}
-
-		let newSuspectTextBox = document.createElement("TEXTAREA");
-		newSuspectTextBox.value = ""
-		newSuspectTextBox.focus()
-	})
-
-	let textBox = document.createElement("TEXTAREA");
-	textBox.cols = 19;
-	textBox.rows = 1;
-	textBox.value = "Paste video id here"
-	let textBoxContainer = document.getElementById( "textBoxContainer" )
-	textBoxContainer.appendChild( textBox );
 
 	bindButton( "enter", function(event)
 	{
@@ -135,17 +79,92 @@ function init()
 	scene.add(copiedImageNotFoundSign)
 
 	{
+		let pastedImageMesh = new THREE.Mesh(new THREE.OriginCorneredPlaneGeometry(1,1),new THREE.MeshBasicMaterial())
+		pastedImageMesh.visible = false
+		pastedImageMesh.position.z = 0.3
+		scene.add(pastedImageMesh)
+
 		let selectionBox = new THREE.LineLoop(new THREE.Geometry())
+		selectionBox.position.z = pastedImageMesh.position.z + 0.01
+		scene.add(selectionBox)
 		selectionBox.geometry.vertices.push(
 			new THREE.Vector3(0,0,0),
 			new THREE.Vector3(1,0,0),
-			new THREE.Vector3(1,-1,0),
-			new THREE.Vector3(0,-1,0)
+			new THREE.Vector3(1,1,0),
+			new THREE.Vector3(0,1,0)
 		)
+		let selecting = false
+		selectionBox.visible = false
+		updatables.push(selectionBox)
+		let initialMousePosition = new THREE.Vector3()
 		selectionBox.update = function()
 		{
-			selectionBox.scale.subVectors(mouse.zZeroPosition,selectionBox.position)
-			selectionBox.scale.z = 1
+			if( !makingSuspectPortrait )
+			{
+				return
+			}
+
+			if(mouse.clicking && !mouse.oldClicking && selecting === false)
+			{
+				selecting = true
+				initialMousePosition.copy(mouse.zZeroPosition)
+				selectionBox.visible = true
+				selectionBox.scale.copy(zeroVector)
+			}
+
+			if(selecting)
+			{
+				selectionBox.position.x = mouse.zZeroPosition.x < initialMousePosition.x? mouse.zZeroPosition.x : initialMousePosition.x
+				selectionBox.position.y = mouse.zZeroPosition.y < initialMousePosition.y? mouse.zZeroPosition.y : initialMousePosition.y
+				selectionBox.scale.x  = Math.abs(mouse.zZeroPosition.x - initialMousePosition.x)
+				selectionBox.scale.y  = Math.abs(mouse.zZeroPosition.y - initialMousePosition.y)
+				selectionBox.scale.z = 1
+			}
+
+			if(!mouse.clicking && selecting === true)
+			{
+				if(selectionBox.scale.length()<1.01)
+				{
+					console.log("yo")
+					selecting = false
+					selectionBox.visible = false
+				}
+				else
+				{
+					selecting = false
+					makingSuspectPortrait = false
+
+					selectionBox.visible = false
+					pastedImageMesh.visible = false
+
+					let clippedMesh = new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({map:pastedImageMesh.material.map}))
+					clippedMesh.scale.copy(selectionBox.scale)
+					clippedMesh.position.copy(selectionBox.position)
+
+					for(let i = 0; i < 4; i++)
+					{
+						let onPastedImage = selectionBox.geometry.vertices[i].clone()
+						selectionBox.localToWorld(onPastedImage)
+						pastedImageMesh.worldToLocal(onPastedImage)
+
+						for(let j = 0; j < clippedMesh.geometry.faceVertexUvs[0].length; j++)
+						{
+							for(let k = 0; k < clippedMesh.geometry.faceVertexUvs[0][j].length; k++)
+							{
+								if( clippedMesh.geometry.faceVertexUvs[0][j][k].x === selectionBox.geometry.vertices[i].x &&
+									clippedMesh.geometry.faceVertexUvs[0][j][k].y === selectionBox.geometry.vertices[i].y )
+								{
+									clippedMesh.geometry.faceVertexUvs[0][j][k].x = onPastedImage.x
+									clippedMesh.geometry.faceVertexUvs[0][j][k].y = onPastedImage.y
+								}
+							}
+						}
+					}
+					clippedMesh.geometry.uvsNeedUpdate = true
+
+					scene.add(clippedMesh)
+				}
+			}
 		}
 		//click the profile picture and it opens this again
 
@@ -160,8 +179,6 @@ function init()
 				{
 					if (items[i].type.indexOf("image") !== -1)
 					{
-						makingSuspectPortrait = true
-
 						var blob = items[i].getAsFile();
 						var URLObj = window.URL || window.webkitURL;
 						var source = URLObj.createObjectURL(blob);
@@ -175,13 +192,11 @@ function init()
 							canvas.height = pastedImage.height;
 							ctx.drawImage(pastedImage, 0, 0);
 
-							let pastedImageMesh = new THREE.Mesh(new THREE.PlaneGeometry(2,2*pastedImage.height/pastedImage.width),new THREE.MeshBasicMaterial({map: new THREE.CanvasTexture( canvas )}))
-							pastedImageMesh.material.depthTest = false
-							scene.add(pastedImageMesh)
+							makingSuspectPortrait = true
 
-							selectionBox.position.copy(mouse.zZeroPosition)
-							selectionBox.scale.set(0.001,0.001,1)
-							scene.add(selectionBox)
+							pastedImageMesh.scale.set(1,pastedImage.height/pastedImage.width,1)
+							pastedImageMesh.material.map = new THREE.CanvasTexture( canvas )
+							pastedImageMesh.visible = true
 						}
 						pastedImage.src = source;
 
@@ -233,7 +248,7 @@ function initButtons()
 		"left":37,
 		"up":38,
 		"right":39,
-		"down":12,
+		"down":40,
 		"space":32,
 
 		"[":219,

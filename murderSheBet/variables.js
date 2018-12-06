@@ -18,7 +18,7 @@ const RIGHT_CONTROLLER_INDEX = 0;
 const LEFT_CONTROLLER_INDEX = 1-RIGHT_CONTROLLER_INDEX;
 
 //------global variables
-const camera = new THREE.PerspectiveCamera( 0,0,0.01, 10);
+const camera = new THREE.OrthographicCamera( -1, 1, 1, -1, 0.01, 10 );
 const scene = new THREE.Scene().add(camera, camera);
 let mouse = null;
 
@@ -31,8 +31,3 @@ let bindButton;
 const toysToBeArranged = [];
 
 const efficientSphereGeometryWithRadiusOne = new THREE.EfficientSphereGeometry(1);
-
-const AUDIENCE_ASPECT_RATIO = 16/9; //also your screen when you're recording. Which is kinda convenient
-const AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 = 1;
-const AUDIENCE_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0 = AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 / AUDIENCE_ASPECT_RATIO;
-const AUDIENCE_CENTER_TO_SIDE_OF_FRAME_PIXELS = 640;

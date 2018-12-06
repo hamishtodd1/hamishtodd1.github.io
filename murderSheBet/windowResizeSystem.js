@@ -2,31 +2,11 @@
 
 function initSurroundings()
 {
-	var backwardExtension = 1.6;
 	var stage = new THREE.Mesh( 
-		new THREE.BoxGeometry(2*AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0,2*AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0,backwardExtension),
-		new THREE.MeshStandardMaterial({side:THREE.BackSide, vertexColors:THREE.FaceColors})
-	);
-	stage.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-backwardExtension/2))
-	camera.far = camera.defaultZ + backwardExtension + 0.01
-	for(var i = 0; i< stage.geometry.faces.length; i++)
-	{
-		if(i === 0 || i === 1)
-		{
-			stage.geometry.faces[i].color.setHex(0x6964D0)
-		}
-		else if(i === 2 || i === 3)
-		{
-			stage.geometry.faces[i].color.setHex(0xCD6166)
-		}
-		else
-		{
-			stage.geometry.faces[i].color.setHex(0xFFFFFF)
-		}
-	}
-	stage.material.metalness = 0.1;
-	stage.material.roughness = 0.2;
-	stage.receiveShadow = true;
+		new THREE.PlaneGeometry(camera.right-camera.left,camera.top-camera.bottom),
+		new THREE.MeshBasicMaterial({color:0xFFFFFF})
+	)
+	stage.position.z = -1
 	scene.add(stage)
 
 	var pointLight = new THREE.PointLight(0xFFFFFF, 0.4, 5.3);
@@ -44,120 +24,13 @@ function initSurroundings()
 	return stage;
 }
 
-function initCameraZoomSystem()
-{
-	camera.defaultZ = 2.5
-	camera.setToDefaultZoom = function()
-	{
-		camera.zoomTo = camera.defaultZ
-		camera.zoomFrom = camera.defaultZ
-		camera.zoomProgress = 1;
-		setZoomToBeingConsidered(camera.defaultZ)
-		camera.updatePosition()
-	}
-
-	function smoothTween(start, end, t)
-	{
-		if(t < 0.5)
-		{
-			var areaUnderVelocityGraph = sq(t) / 2
-		}
-		else
-		{
-			var displacementFromHalf = t - 0.5;
-			var extraArea = displacementFromHalf / 2 - sq(displacementFromHalf) / 2
-			var areaUnderVelocityGraph = 1 / 8 + extraArea;
-		}
-		var scaledToMakeUnitIntegral1 = areaUnderVelocityGraph * 4;
-
-		return start + scaledToMakeUnitIntegral1 * (end-start);
-	}
-	function linearTween(start, end, t)
-	{
-		return start + t * (end-start);
-	}
-	var timeSinceZoomToConsideration = 0;
-	updatables.push(camera)
-	camera.update = function()
-	{
-		var timeToWaitBeforeZooming = 0.18
-		if(timeSinceZoomToConsideration < timeToWaitBeforeZooming && timeToWaitBeforeZooming < timeSinceZoomToConsideration + frameDelta )
-		{
-			camera.zoomTo = zoomToBeingConsidered;
-			camera.zoomFrom = camera.position.z;
-			camera.zoomProgress = 0;
-		}
-		timeSinceZoomToConsideration += frameDelta;
-		camera.zoomProgress += 1.1 * frameDelta;
-		camera.zoomProgress = clamp(camera.zoomProgress,0,1)
-		camera.updatePosition()
-	}
-
-	camera.updatePosition = function()
-	{
-		camera.position.z = smoothTween(
-			camera.zoomFrom,
-			camera.zoomTo,
-			camera.zoomProgress)
-	}
-
-	var considerationIndicatorHorizontal = new THREE.LineSegments(new THREE.Geometry(), new THREE.LineBasicMaterial({color:0xFFFFFF}))
-	scene.add(considerationIndicatorHorizontal)
-	var a = AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0;
-	considerationIndicatorHorizontal.geometry.vertices.push(
-		new THREE.Vector3(a,1,0), new THREE.Vector3(a+1,1,0),
-		new THREE.Vector3(-a,1,0), new THREE.Vector3(-a-1,1,0),
-
-		new THREE.Vector3(a,-1,0), new THREE.Vector3(a+1,-1,0),
-		new THREE.Vector3(-a,-1,0), new THREE.Vector3(-a-1,-1,0) )
-	var considerationIndicatorVertical = new THREE.LineSegments(new THREE.Geometry(), considerationIndicatorHorizontal.material)
-	scene.add(considerationIndicatorVertical)
-	a = AUDIENCE_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0;
-	considerationIndicatorVertical.geometry.vertices.push(
-		new THREE.Vector3(1,a,0), new THREE.Vector3(1,a+1,0),
-		new THREE.Vector3(1,-a,0), new THREE.Vector3(1,-a-1,0),
-
-		new THREE.Vector3(-1,a,0), new THREE.Vector3(-1,a+1,0),
-		new THREE.Vector3(-1,-a,0), new THREE.Vector3(-1,-a-1,0) )
-
-	var zoomToBeingConsidered;
-	
-	function setZoomToBeingConsidered(proposedZoomTo)
-	{
-		zoomToBeingConsidered = clamp( proposedZoomTo, 0.0001, camera.defaultZ)
-		considerationIndicatorVertical.scale.x = AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 * (zoomToBeingConsidered/camera.defaultZ);
-		considerationIndicatorHorizontal.scale.y = considerationIndicatorVertical.scale.x / AUDIENCE_ASPECT_RATIO
-	}
-	setZoomToBeingConsidered(camera.defaultZ)
-}
-
 function initCameraAndRendererResizeSystem(renderer)
 {
-	initCameraZoomSystem()
-
-	function respondToResize() 
+	camera.position.z = 1
+	function respondToResize()
 	{
-		let generalWidth = Math.floor(window.innerWidth/3)
-
-		renderer.setSize( generalWidth, window.innerHeight );
-		camera.aspect = generalWidth / window.innerHeight;
-
-		embed.style.marginTop = "0px" //TODO
-
-		ytPlayer.setSize(generalWidth,generalWidth/16*9);
-		//then need to add that padding above
-
-		camera.setToDefaultZoom()
-
-		if(camera.aspect > AUDIENCE_ASPECT_RATIO)
-		{
-			camera.fov = fovGivenCenterToFrameDistance(AUDIENCE_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0, camera.position.z )
-		}
-		else
-		{
-			var horizontalFov = camera.fov = fovGivenCenterToFrameDistance(AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0, camera.position.z )
-			camera.fov = otherFov( horizontalFov, camera.aspect, false )
-		}
+		renderer.setSize( window.innerWidth, window.innerHeight );
+		camera.aspect = renderer.domElement.width / renderer.domElement.height;
 
 		camera.updateProjectionMatrix();
 	}

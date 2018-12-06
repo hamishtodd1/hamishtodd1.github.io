@@ -8,7 +8,7 @@ function initSelectors()
 	let fullBoardAspectRatio = maxColumns / numRows
 
 	let columnWidth = 1
-	let rowHeight = 0.08
+	let rowHeight = 0.12
 	let dollarHeight = rowHeight / 80
 
 	function getPrice(index)
@@ -17,12 +17,12 @@ function initSelectors()
 		//one could argue that the final step, 60 -> 80, is discontinuously large due to being "prestigious"
 		//on the other hand, Hanson prices are rounded to the nearest 5, not necessary here
 
-		// let lookupTable = [5,10,15,20,25,30,40,50,60,80]
-		// return lookupTable[index]
+		let lookupTable = [5,10,15,20,25,30,40,50,60,80]
+		return lookupTable[index] 
 
 		// return 5 + 1.2*Math.pow(index+1,1.8) //1.8 is such that 4 * (2^x-1^x) = (10^x - 9^x)
 
-		return 20 * Math.exp(index * 0.1733) - 15 //0.1733 is such that 4*(x^1-x^0) = x^9-x^8
+		// return 20 * Math.exp(index * 0.1733) - 15 //0.1733 is such that 4*(x^1-x^0) = x^9-x^8
 	}
 
 	{
@@ -76,7 +76,7 @@ function initSelectors()
 		let controlsArray = [
 			"right","left","up","down",
 			"d","a","w","s",
-			"l","j","i","k",
+			// "l","j","i","k",
 		]
 
 		let arrowHeight = 0.1
@@ -84,11 +84,11 @@ function initSelectors()
 		selectorGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,-arrowHeight,0))
 
 		let moneyMaterial = new THREE.MeshBasicMaterial({color:0x00FF00})
-		let moneyGeometry = new THREE.PlaneGeometry(columnWidth* 0.6, 1)
-		moneyGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,-0.5,0))
+		let savingsGeometry = new THREE.PlaneGeometry(columnWidth* 0.6, 1)
+		savingsGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,-0.5,0))
 
 		let handWidth = columnWidth * 0.9
-		let handHeight = handWidth / fullBoardAspectRatio
+		let handHeight = rowHeight
 		let handGeometry = new THREE.PlaneGeometry( handWidth, handHeight )
 		handGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-0.001) )
 
@@ -111,9 +111,16 @@ function initSelectors()
 				updatables.push(hand)
 				hand.update = function()
 				{
+					let handWorldPosition = this.getWorldPosition(new THREE.Vector3())
 					for(let i = 0; i < this.bets.length; i++)
 					{
-						this.bets[i].position.lerp(this.position,0.1)
+						this.bets[i].position.z = handWorldPosition.z
+
+						let actualHandWidth = handWidth * 0.9
+						let positionToLerpTo = handWorldPosition.clone()
+						positionToLerpTo.x += i * (actualHandWidth / this.bets.length) - actualHandWidth/2
+						this.bets[i].position.lerp(positionToLerpTo,0.1)
+
 						//ideally they go into its columns and maybe rows
 					}
 				}
@@ -121,7 +128,7 @@ function initSelectors()
 				selector.hand = hand
 			}
 
-			let savings = new THREE.Mesh(moneyGeometry,moneyMaterial)
+			let savings = new THREE.Mesh(savingsGeometry,moneyMaterial)
 			{
 				savings.position.y -= arrowHeight + handHeight
 				savings.scale.y = 200 * dollarHeight
@@ -174,7 +181,7 @@ function initSelectors()
 							let bet = column.slots[i].contents
 							hand.bets.push( bet )
 
-							let priceMesh = new THREE.Mesh(moneyGeometry,moneyMaterial)
+							let priceMesh = new THREE.Mesh(new THREE.PlaneGeometry(columnWidth* 0.6,1),moneyMaterial)
 							scene.add(priceMesh)
 							priceMesh.scale.y = price * dollarHeight
 							priceMesh.position.y = savings.position.y - savings.scale.y + priceMesh.scale.y
@@ -182,7 +189,6 @@ function initSelectors()
 							priceMesh.position.x = selector.position.x
 
 							savings.scale.y -= priceMesh.scale.y
-							console.log(savings.scale.y / dollarHeight)
 
 							column.slots[i].contents = priceMesh
 						}
@@ -197,6 +203,7 @@ function initSelectors()
 				if(makingSuspectPortrait) return;
 				
 				let column = selector.currentColumn
+
 				for(let i = 0; i < hand.bets.length; i++)
 				{
 					let bet = hand.bets[i]
@@ -232,6 +239,8 @@ function initSelectors()
 			updatables.push(selector)
 			selector.update = function()
 			{
+				if(makingSuspectPortrait) return
+
 				let correctPosition = this.currentColumn.position.clone()
 				correctPosition.y -= rowHeight / 2
 				for(let i = selectors.indexOf(this) + 1; i < selectors.length; i++)
