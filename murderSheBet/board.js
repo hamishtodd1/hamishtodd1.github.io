@@ -79,33 +79,37 @@ function initSelectors()
 			// "l","j","i","k",
 		]
 
-		let arrowHeight = 0.1
-		let selectorGeometry = ArrowGeometry(arrowHeight)
-		selectorGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,-arrowHeight,0))
+		let selectorGeometry = new THREE.OriginCorneredPlaneGeometry(0.1,1)
 
 		let moneyMaterial = new THREE.MeshBasicMaterial({color:0x00FF00})
-		let savingsGeometry = new THREE.PlaneGeometry(columnWidth* 0.6, 1)
+		let savingsGeometry = new THREE.PlaneGeometry(0.01, 1)
 		savingsGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,-0.5,0))
 
-		let handWidth = columnWidth * 0.9
-		let handHeight = rowHeight
+		let handWidth = 2 * 0.9
+		let handHeight = 0.1 //1 divided by number of hands
 		let handGeometry = new THREE.PlaneGeometry( handWidth, handHeight )
-		handGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-0.001) )
+		handGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,-handHeight/2,0))
+		let handSpacing = handHeight * 0.1
+
+		let highestHandPosition = -0.3
 
 		let Selector = function()
 		{
 			let selector = new THREE.Mesh( selectorGeometry )
 			let index = selectors.length
-			selector.currentColumn = columns[0]
-			selector.position.copy(selector.currentColumn.position)
 			if(index > 1)
 			{
 				selector.visible = false
 			}
+			
+			selector.currentColumn = columns[0]
+			selector.position.x = selector.currentColumn.position.x
+			selector.position.y = highestHandPosition - (handHeight+handSpacing) * index			
 
 			let hand = new THREE.Mesh( handGeometry, selector.material )
 			{
-				hand.position.y -= arrowHeight + handHeight / 2
+				hand.position.y = selector.position.y
+				hand.position.z = -index * 0.01
 				hand.bets = [];
 
 				updatables.push(hand)
@@ -124,13 +128,12 @@ function initSelectors()
 						//ideally they go into its columns and maybe rows
 					}
 				}
-				selector.add(hand)
+				scene.add(hand)
 				selector.hand = hand
 			}
 
 			let savings = new THREE.Mesh(savingsGeometry,moneyMaterial)
 			{
-				savings.position.y -= arrowHeight + handHeight
 				savings.scale.y = 200 * dollarHeight
 				selector.add(savings)
 				selector.savings = savings
@@ -241,17 +244,8 @@ function initSelectors()
 			{
 				if(makingSuspectPortrait) return
 
-				let correctPosition = this.currentColumn.position.clone()
-				correctPosition.y -= rowHeight / 2
-				for(let i = selectors.indexOf(this) + 1; i < selectors.length; i++)
-				{
-					if(selectors[i].currentColumn === this.currentColumn && selectors[i].visible === true)
-					{
-						correctPosition.x += columnWidth * 0.1
-						correctPosition.y -= columnWidth * 0.1
-						correctPosition.z += 0.004
-					}
-				}
+				let correctPosition = this.position.clone()
+				correctPosition.x = this.currentColumn.position.x
 
 				selector.position.lerp(correctPosition,0.1)
 			}
