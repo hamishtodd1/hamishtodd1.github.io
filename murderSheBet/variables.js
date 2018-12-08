@@ -18,7 +18,7 @@ const RIGHT_CONTROLLER_INDEX = 0;
 const LEFT_CONTROLLER_INDEX = 1-RIGHT_CONTROLLER_INDEX;
 
 //------global variables
-const camera = new THREE.OrthographicCamera( -1, 1, 1, -1, 0.01, 10 );
+const camera = new THREE.OrthographicCamera( 0, 1, 1, -1, 0.01, 10 );
 const scene = new THREE.Scene().add(camera, camera);
 let mouse = null;
 

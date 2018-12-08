@@ -91,7 +91,11 @@ function initMouse()
 		asynchronous.justMoved = false;
 
 		mouse.previousRay.copy(mouse.rayCaster.ray);
-		mouse.rayCaster.setFromCamera( asynchronous.normalizedDevicePosition, camera );
+		mouse.rayCaster.ray.origin.copy(asynchronous.normalizedDevicePosition)
+		mouse.rayCaster.ray.origin.x = camera.left + (camera.right-camera.left)*mouse.rayCaster.ray.origin.x
+		mouse.rayCaster.ray.origin.y = camera.bottom + (camera.top-camera.bottom)*mouse.rayCaster.ray.origin.y
+		mouse.rayCaster.ray.origin.z = camera.position.z
+		mouse.rayCaster.ray.direction.set(0,0,-1)
 
 		mouse.oldZZeroPosition.copy( mouse.zZeroPosition )
 		mouse.zZeroPosition.copy(this.rayIntersectionWithZPlane(0))
@@ -156,8 +160,8 @@ function initMouse()
 		{
 			asynchronous.justMoved = true;
 
-			asynchronous.normalizedDevicePosition.x = ( event.clientX / window.innerWidth  ) * 2 - 1;
-			asynchronous.normalizedDevicePosition.y =-( event.clientY / window.innerHeight ) * 2 + 1;
+			asynchronous.normalizedDevicePosition.x = ( event.clientX / window.innerWidth  );
+			asynchronous.normalizedDevicePosition.y = 1-( event.clientY / window.innerHeight );
 
 			currentRawX = event.clientX;
 			currentRawY = event.clientY;

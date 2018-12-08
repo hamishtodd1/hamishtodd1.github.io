@@ -9,7 +9,10 @@ function initSelectors()
 
 	let columnWidth = 1
 	let rowHeight = 0.12
-	let dollarHeight = rowHeight / 80
+	let dollarHeight = 0.003
+	let betHeight = getPrice(0) * dollarHeight
+	let selectorWidth = 0.02
+	let selectorSpacing = selectorWidth * 0.3
 
 	function getPrice(index)
 	{
@@ -26,28 +29,47 @@ function initSelectors()
 	}
 
 	{
-		let slotMaterial = new THREE.MeshBasicMaterial({color:0x000000})
-		let Slot = function(column,row)
+		let slotMaterial = new THREE.MeshBasicMaterial({color:0xE0E0E0})
+		let slotGeometry = new THREE.OriginCorneredPlaneGeometry(1,1)
+		slotGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-1))
+		let betGeometry = new THREE.OriginCorneredPlaneGeometry(1,1)
+		betGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-0.001))
+		let Slot = function(column,row,material)
 		{
-			let slot = new THREE.Mesh(new THREE.PlaneGeometry(columnWidth*0.8,rowHeight * 0.8), slotMaterial)
-			slot.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-0.001))
+			let slot = new THREE.Mesh(slotGeometry, slotMaterial)
 			scene.add(slot)
 
-			let bet = new THREE.Mesh(new THREE.PlaneGeometry(rowHeight * 0.5,rowHeight * 0.5))
+			let index = column.slots.length
+			column.slots.push(slot)
+
+			let bet = new THREE.Mesh(betGeometry,material)
+			bet.scale.set(selectorWidth,betHeight,1)
 			bet.column = column
 			scene.add(bet)
 			slot.contents = bet
 
+			slot.scale.y = getPrice(index) * dollarHeight - 0.002
+			for(let i = 0; i < index; i++)
+			{
+				slot.position.y += getPrice(i) * dollarHeight
+			}
+
 			updatables.push(slot)
 			slot.update = function()
 			{
-				this.position.x = column.position.x
-				this.position.y = row * rowHeight
+				slot.scale.x = columnWidth - (selectorWidth + selectorSpacing ) * selectors.length - 0.05
 
-				this.contents.position.lerp(this.position,0.1)
+				slot.position.x = column.position.x + selectors.length * (selectorWidth+selectorSpacing)
+				let positionToLerpTo = slot.position.clone()
+				positionToLerpTo.x += slot.scale.x / 2 - slot.contents.scale.x / 2
+				positionToLerpTo.y += slot.scale.y / 2 - slot.contents.scale.y / 2
+
+				slot.contents.position.x += (positionToLerpTo.x-slot.contents.position.x) * 0.1
+				slot.contents.position.y += (positionToLerpTo.y-slot.contents.position.y) * 0.1
 			}
 			slot.update()
 			bet.position.copy(slot.position)
+			bet.position.z = camera.position.z - camera.near*1.1
 
 			return slot
 		}
@@ -55,19 +77,24 @@ function initSelectors()
 		let Column = function()
 		{
 			let column = new THREE.Group()
+			let material = new THREE.MeshBasicMaterial({color:new THREE.Color(Math.random(),0,Math.random())})
 			let index = columns.length
-			column.position.x = -1 + columnWidth / 2 + index * columnWidth
+			column.position.x = index * columnWidth
 
 			column.slots = []
 			for( let j = 0; j < numRows; j++)
 			{
-				column.slots[j] = Slot(column,j)
+				Slot(column,j,material)
 			}
 
 			scene.add(column)
 			columns.push(column)
+
+			camera.right = columnWidth * columns.length
+			camera.updateProjectionMatrix()
 		}
 
+		Column()
 		Column()
 		Column()
 	}
@@ -79,23 +106,28 @@ function initSelectors()
 			// "l","j","i","k",
 		]
 
-		let selectorGeometry = new THREE.OriginCorneredPlaneGeometry(0.1,1)
+		let selectorGeometry = new THREE.OriginCorneredPlaneGeometry(selectorWidth,1)
 
 		let moneyMaterial = new THREE.MeshBasicMaterial({color:0x00FF00})
-		let savingsGeometry = new THREE.PlaneGeometry(0.01, 1)
-		savingsGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,-0.5,0))
+		let savingsGeometry = new THREE.OriginCorneredPlaneGeometry(selectorWidth, 1)
 
-		let handWidth = 2 * 0.9
-		let handHeight = 0.1 //1 divided by number of hands
+		let handWidth = 20
+		let handHeight = betHeight * columns[0].slots.length
 		let handGeometry = new THREE.PlaneGeometry( handWidth, handHeight )
-		handGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,-handHeight/2,0))
-		let handSpacing = handHeight * 0.1
+		handGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(handWidth/2,-handHeight/2,0))
+		let handSpacing = getPrice(0)*dollarHeight
 
-		let highestHandPosition = -0.3
+		let highestHandPosition = -handSpacing
+
+		//once you've selected winners, some money is exchanged with their slips and the hands are rearranged
 
 		let Selector = function()
 		{
-			let selector = new THREE.Mesh( selectorGeometry )
+			let selector = new THREE.Mesh( selectorGeometry, new THREE.MeshBasicMaterial({
+				color:getRandomColor(),
+				transparent:true,
+				opacity:0.5
+			}) )
 			let index = selectors.length
 			if(index > 1)
 			{
@@ -104,26 +136,31 @@ function initSelectors()
 			
 			selector.currentColumn = columns[0]
 			selector.position.x = selector.currentColumn.position.x
-			selector.position.y = highestHandPosition - (handHeight+handSpacing) * index			
+			selector.position.y = highestHandPosition - (handHeight+handSpacing) * index
 
 			let hand = new THREE.Mesh( handGeometry, selector.material )
 			{
 				hand.position.y = selector.position.y
-				hand.position.z = -index * 0.01
+				hand.position.z = -0.01 - index * 0.01
 				hand.bets = [];
 
 				updatables.push(hand)
 				hand.update = function()
 				{
+					selector.scale.y += ( (savings.position.y - selector.position.y) - selector.scale.y ) * 0.1
+
 					let handWorldPosition = this.getWorldPosition(new THREE.Vector3())
 					for(let i = 0; i < this.bets.length; i++)
 					{
-						this.bets[i].position.z = handWorldPosition.z
-
-						let actualHandWidth = handWidth * 0.9
-						let positionToLerpTo = handWorldPosition.clone()
-						positionToLerpTo.x += i * (actualHandWidth / this.bets.length) - actualHandWidth/2
-						this.bets[i].position.lerp(positionToLerpTo,0.1)
+						let yInHand = handWorldPosition.y - handHeight
+						for(let j = 0; j < i; j++)
+						{
+							if(this.bets[j].material ===this.bets[i].material)
+							{
+								yInHand += betHeight
+							}
+						}
+						this.bets[i].position.y += (yInHand-this.bets[i].position.y)*0.1
 
 						//ideally they go into its columns and maybe rows
 					}
@@ -132,11 +169,29 @@ function initSelectors()
 				selector.hand = hand
 			}
 
+			selector.position.z = hand.position.z
+
 			let savings = new THREE.Mesh(savingsGeometry,moneyMaterial)
 			{
 				savings.scale.y = 200 * dollarHeight
-				selector.add(savings)
+				scene.add(savings)
 				selector.savings = savings
+
+				updatables.push(savings)
+				savings.update = function()
+				{
+					savings.position.x = selector.position.x
+					let topSlot = selector.currentColumn.slots[selector.currentColumn.slots.length-1]
+					savings.position.y = topSlot.position.y + topSlot.scale.y
+					for(let i = 0; i < selector.currentColumn.slots.length; i++)
+					{
+						if( selector.currentColumn.slots[i].contents.material !== moneyMaterial )
+						{
+							savings.position.y = selector.currentColumn.slots[i].position.y
+							break;
+						}
+					}
+				}
 			}
 
 			function changeCurrentColumn(addition)
@@ -184,11 +239,12 @@ function initSelectors()
 							let bet = column.slots[i].contents
 							hand.bets.push( bet )
 
-							let priceMesh = new THREE.Mesh(new THREE.PlaneGeometry(columnWidth* 0.6,1),moneyMaterial)
+							let priceMesh = new THREE.Mesh(new THREE.OriginCorneredPlaneGeometry(1,1),moneyMaterial)
 							scene.add(priceMesh)
+							priceMesh.scale.x = selectorWidth
 							priceMesh.scale.y = price * dollarHeight
-							priceMesh.position.y = savings.position.y - savings.scale.y + priceMesh.scale.y
-							selector.localToWorld(priceMesh.position)
+							priceMesh.position.y = selector.position.y + selector.scale.y
+							priceMesh.position.z = selector.position.z
 							priceMesh.position.x = selector.position.x
 
 							savings.scale.y -= priceMesh.scale.y
@@ -244,14 +300,18 @@ function initSelectors()
 			{
 				if(makingSuspectPortrait) return
 
-				let correctPosition = this.position.clone()
-				correctPosition.x = this.currentColumn.position.x
+				let correctX = this.currentColumn.position.x
+				correctX += (selectorWidth+selectorSpacing) * index
 
-				selector.position.lerp(correctPosition,0.1)
+				selector.position.x += (correctX - selector.position.x) * 0.1
 			}
 
 			scene.add(selector)
 			selectors.push(selector)
+
+			camera.bottom = -selectors.length * (handHeight + handSpacing) - handSpacing
+			//bizarre bug when we tried to change the handSpacing multiple
+			camera.updateProjectionMatrix()
 		}
 
 		for(let i = 0; i < controlsArray.length / 4; i++ )

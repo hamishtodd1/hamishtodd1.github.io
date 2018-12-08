@@ -31,6 +31,7 @@ function init()
 
 	let renderer = new THREE.WebGLRenderer();
 	renderer.setPixelRatio( window.devicePixelRatio )
+	renderer.setClearColor(0xFFFFFF)
 	document.body.appendChild( renderer.domElement )
 
 	let buttonContainer = document.getElementById( 'buttonContainer' );
@@ -55,7 +56,6 @@ function init()
 	}
 
 	initCameraAndRendererResizeSystem( renderer );
-	let stage = initSurroundings();
 	initMouse();
 
 	bindButton( "enter", function(event)
