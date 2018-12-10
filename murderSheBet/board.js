@@ -1,10 +1,7 @@
 //big advantage: the "display" of confidence on the normal board is linear
-//John's idea: move the slots down
-//maybe even wrap them. Makes it so you don't have to move the selector up
 
 //one might get things like the radiolab "Buy and then immediately sell when you see the price"
-//different name: "the hansonian betting board". Forget the video embed.
-//fuck it, they probably don't want the whole video anyway, just have them drag out a rectangle
+//different name: "the hansonian betting board". Bet on anything you like
 //advantage this might have over board game: you don't have to look down and check whether you've got bets on a character you've lost faith in being guilty, you can just immediately go over and decrease your bet
 
 //really this is trying to prove dynamicland wrong
@@ -13,22 +10,22 @@
 function getPrice(index)
 {
 	//John says: don't start at 1 because 2 is twice as much
-	//scale is based around the fact that a card is worth 100
+	//scale is based around the fact that a card is worth 100. Note
 	//one could argue that the final step, 60 -> 80, is discontinuously large due to being "prestigious"
 	//on the other hand, Hanson prices are rounded to the nearest 5, not necessary here
 
 	//has the advantage of being discrete quantities
-	// let lookupTable = [5,10,15,20,25,30,40,50,60,80]
-	// if(index >= lookupTable.length)
-	// {
-	// 	console.error("not got that in lookupTable mode")
-	// 	return 20 * Math.exp(index * 0.1733) - 15 //0.1733 is such that 4*(x^1-x^0) = x^9-x^8
-	// }
-	// return lookupTable[index] 
+	let lookupTable = [5,10,15,20,25,30,40,50,60,80]
+	if(index >= lookupTable.length)
+	{
+		console.error("not got that in lookupTable mode")
+		return 20 * Math.exp(index * 0.1733) - 15 //0.1733 is such that 4*(x^1-x^0) = x^9-x^8
+	}
+	return lookupTable[index] 
 
 	// return 5 + 1.2*Math.pow(index+1,1.8) //1.8 is such that 4 * (2^x-1^x) = (10^x - 9^x)
 
-	return 20 * Math.exp(index * 0.1733) - 15 //0.1733 is such that 4*(x^1-x^0) = x^9-x^8
+	// return 20 * Math.exp(index * 0.1733) - 15 //0.1733 is such that 4*(x^1-x^0) = x^9-x^8
 
 	// return Math.pow(1.1,index) //0.1733 is such that 4*(x^1-x^0) = x^9-x^8
 }
@@ -42,7 +39,7 @@ function initSelectors()
 	let selectors = []
 
 	let maxColumns = 12
-	let numRows = 8 //should there be a limit? Advantage
+	let numRows = 10 //should there be a limit? Advantage
 
 	let columnWidth = 1
 	let betHeight = getPrice(0) * dollarHeight / 2
@@ -56,12 +53,11 @@ function initSelectors()
 		let slotMaterial = new THREE.MeshBasicMaterial({color:0x000000})
 		let slotGeometry = new THREE.Geometry()
 		slotGeometry.vertices.push(
-			new THREE.Vector3(0,0,0),
-			new THREE.Vector3(1,0,0),
-			new THREE.Vector3(1,1,0),
-			new THREE.Vector3(0,1,0)
+			new THREE.Vector3(0,0,-1),
+			new THREE.Vector3(1,0,-1),
+			new THREE.Vector3(1,1,-1),
+			new THREE.Vector3(0,1,-1)
 		)
-		slotGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-1))
 		let Slot = function(column,material)
 		{
 			let slot = new THREE.LineLoop(slotGeometry, slotMaterial)
