@@ -1,12 +1,16 @@
-//TODO up top!
-
 function initCameraAndRendererResizeSystem(renderer)
 {
-	camera.position.z = 1
+	camera.getHorizontalStretching = function()
+	{
+		let cameraAspect = (camera.right - camera.left) / (camera.top - camera.bottom)
+		let windowAspect = window.innerWidth / window.innerHeight
+		let horizontalStretching = windowAspect / cameraAspect
+		return horizontalStretching
+	}
+
 	function respondToResize()
 	{
-		renderer.setSize( window.innerWidth, window.innerHeight );
-		camera.aspect = renderer.domElement.width / renderer.domElement.height;
+		renderer.setSize( window.innerWidth, window.innerHeight )
 
 		camera.updateProjectionMatrix();
 	}

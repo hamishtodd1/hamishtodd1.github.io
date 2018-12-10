@@ -3,28 +3,6 @@ let ytPlayer = {
 }
 init()
 
-// let tag = document.createElement('script');
-// tag.src = "https://www.youtube.com/iframe_api";
-// let firstScriptTag = document.getElementsByTagName('script')[0];
-// firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-// function onYouTubeIframeAPIReady()
-// {
-// 	ytPlayer = new YT.Player('embed',
-// 	{
-// 		playerVars: 
-// 		{
-// 			autoplay: 0,
-// 			fs: 0,
-// 			rel: 0,
-// 			showinfo: 0,
-// 			modestbranding: 1,
-// 		},
-// 		events: {
-// 			'onReady': init
-// 		}
-// 	});
-// }
-
 function init()
 {
 	initButtons()
@@ -34,8 +12,6 @@ function init()
 	renderer.setClearColor(0xFFFFFF)
 	document.body.appendChild( renderer.domElement )
 
-	let buttonContainer = document.getElementById( 'buttonContainer' );
-	
 	function render()
 	{
 		{
@@ -67,10 +43,8 @@ function init()
 		ytPlayer.playVideo()
 	})
 
-	initPortraits()	
-
-	// initVideo()
 	initSelectors() 
+	initPortraits()	
 
 	render();
 }
@@ -83,7 +57,7 @@ function initButtons()
 	{
 		if(buttons[buttonName] !== undefined)
 		{
-			console.error("attempted to bind a button that already has a binding")
+			console.error("attempted to bind a button that already has a binding: ", buttonName)
 		}
 
 		if(buttonDescription !== undefined)
@@ -99,6 +73,10 @@ function initButtons()
 			buttons[buttonName].whileDown = whileDown
 		}
 	}
+	unbindButton = function(buttonName)
+	{
+		delete buttons[buttonName]
+	}
 
 	let buttonIndexGivenName = {
 		"enter":13,
@@ -112,7 +90,11 @@ function initButtons()
 		"space":32,
 
 		"[":219,
-		"]":221
+		"]":221,
+
+		";":186,
+		"'":192,
+		"#":222,
 	}
 	let keycodeArray = "0123456789abcdefghijklmnopqrstuvwxyz";
 	function getButton(keyCode)
