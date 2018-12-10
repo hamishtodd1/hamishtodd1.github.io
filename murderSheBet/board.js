@@ -121,7 +121,7 @@ function initSelectors()
 		Column = function()
 		{
 			let column = new THREE.Group()
-			let material = new THREE.MeshBasicMaterial({color:new THREE.Color(Math.random(),0,Math.random())})
+			let material = new THREE.MeshBasicMaterial({color:new THREE.Color(0,Math.random(),Math.random())})
 			column.ordinaryMaterial = material
 			let index = columns.length
 			column.position.x = index * columnWidth
