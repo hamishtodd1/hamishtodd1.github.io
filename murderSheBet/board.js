@@ -268,6 +268,7 @@ function initSelectors()
 				}
 
 				betlessnessFlasher.material.opacity -= frameDelta * 1.5
+				betlessnessFlasher.position.y = hand.position.y - handHeight/2
 				savings.material.color.lerp(moneyMaterial.color,0.1)
 				selector.material.color.lerp(hand.material.color,0.1)
 			}
@@ -279,7 +280,6 @@ function initSelectors()
 				transparent:true,
 				opacity:0
 			}))
-			betlessnessFlasher.position.y = hand.position.y - handHeight/2
 			hand.betlessnessFlasher = betlessnessFlasher
 			scene.add(betlessnessFlasher)
 		}
