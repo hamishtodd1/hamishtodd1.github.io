@@ -22,7 +22,8 @@ async function initShaderExperimentation()
 		uniforms: customUniforms,
 	});
 	await assignShader("vertex2", material, "vertex")
-	await assignShader("fragment2", material, "fragment")
+	await assignShader("sdfFragment", material, "fragment")
+	// await assignShader("fragment2", material, "fragment")
 
 
 	// function c()
