@@ -218,7 +218,7 @@ function initSelectors()
 	let Selector = function(right,left,up,down)
 	{
 		let selector = new THREE.Mesh( selectorGeometry, new THREE.MeshBasicMaterial({
-			color:getRandomColor(),
+			color:new THREE.Color(0,Math.random(),Math.random()),
 			transparent:true,
 			opacity:0.5
 		}) )

@@ -1,8 +1,8 @@
+
 /*
 	Pevsner / ruled surfaces / stereographic projection
 		Bring back that lovely circle-enclosing-line
 		Sliced torus getting two circles, what's up with that?
-		Look these surfaces you've come up with are quite "nice". 
 		You probably are going to do some minimal surface shit in future
 		But you do want to do stereographic projection stuff and they really are suuuuuper nice in that context so FUCK IT
 		Ruled surfaces probably allow for badass animations that you can do at some point
@@ -16,8 +16,6 @@
 		https://arxiv.org/pdf/1307.6938.pdf
 		It is weird enough just to go inside a surface, it does not look how you expect
 */
-
-var makeRotationallySymmetricHandleBody = null
 
 function lerpSurfacesMadeOfPatchworks(from,To,t)
 {
@@ -74,16 +72,6 @@ function makeToroidalSurfaces(surfaces)
 			stereographicProjectionInFourSpace.dot(projectedHyperplaneBasis[1]),
 			stereographicProjectionInFourSpace.dot(projectedHyperplaneBasis[2]) );
 		return stereographicProjection;
-	}
-
-	function jonSlerp(q0,q1,t)
-	{
-		var theta0 = Math.acos(q0.dot(q1))
-		var theta = t * theta0;
-		var toSubtract = q0.clone().multiplyScalar( q0.dot(q1) );
-		var q2 = q1.clone().sub( toSubtract ).normalize();
-
-		return q0.clone().multiplyScalar(Math.cos(theta)).add( q2.clone().multiplyScalar(Math.sin(theta)) );
 	}
 
 	function insertS3TetrahedronSurface(
@@ -196,7 +184,7 @@ function makeToroidalSurfaces(surfaces)
 		return handleBody;
 	}
 
-	makeRotationallySymmetricHandleBody = function(numArms)
+	let makeRotationallySymmetricHandleBody = function(numArms)
 	{
 		var centerForTicks = new THREE.Vector2(0,0);
 		var armSideCenters = [];
