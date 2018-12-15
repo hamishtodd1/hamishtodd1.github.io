@@ -1,5 +1,11 @@
 /*
+	The location of the things should be decided automatically =/ moving shit around in blueprints was bad, like indenting
+
 	The main point of this is to make something that visualizes how your shit works, show it to the user, and it's not code
+
+	You don't need 6dof to do this =/ can be done with 1: your mouse points in the direction of the desired target
+
+	Take a look at squeak etoys and ask "how would you make this without those floating menus"
 
 	Programming by example
 		move the object the amount that it will move in a frame
