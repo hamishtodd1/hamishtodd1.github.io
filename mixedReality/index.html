@@ -1,0 +1,81 @@
+<html>
+	<head>
+		<title>a</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				margin: 0px;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<script src="lib/three.js"></script>
+		<script src="lib/sceneUtils.js"></script>
+
+		<script src="lib/OBJLoader.js"></script>
+		<script src="lib/WebVR.js"></script>
+		
+		<script src="handInput.js"></script>
+
+		<script src="lighting.js"></script>
+		<script src="head.js"></script>
+
+		<script src="recording.js"></script>
+		
+		<script src="text.js"></script>
+
+		<script src="keyboard.js"></script>
+		
+		<script src="miscFunctions.js"></script>
+		<script src="variables.js"></script>
+
+		<script src="units/threeSphereExploration.js"></script>
+
+		<script>
+			{
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.localClippingEnabled = true;
+				document.body.appendChild( renderer.domElement );
+
+				let windowResize = function()
+				{
+					renderer.setSize( window.innerWidth, window.innerHeight );
+					camera.aspect = window.innerWidth / window.innerHeight;
+					camera.updateProjectionMatrix();
+				}
+				window.addEventListener( 'resize', windowResize)
+
+				camera.position.z = 2 //doesn't matter
+
+				// initVr()
+
+				initButtons()
+				initLights();
+				initPlaybackAndRecording()
+				// initHead()
+
+				initThreeSphereExploration()
+
+				renderer.setAnimationLoop( function()
+				{
+					frameDelta = clock.getDelta();
+					frameCount++;
+
+					readHandInput();
+
+					synchronizeToVideoOrCallContingentUpdateFunctions()
+
+					for(let i = 0; i < alwaysUpdateFunctions.length; i++)
+					{
+						alwaysUpdateFunctions[i]()
+					}
+
+					renderer.render( scene, camera );
+				})
+			}
+		</script>
+	</body>
+</html>

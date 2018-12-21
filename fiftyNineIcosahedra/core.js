@@ -1,6 +1,8 @@
 /*
  * animation: their various face sets move out from the center(or scale down) until their corners are touching. For ico this does nothing but for many...
  * 
+	"The ten most mathematical christmas stars"
+
  * What nice transitions could you get?
  * 
  * https://www.uwgb.edu/dutchs/symmetry/stic0007.htm

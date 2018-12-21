@@ -1,4 +1,6 @@
 /**
+ * Altered by @hamish_todd to give carbon alphas in callback
+ * 
  * @author alteredq / http://alteredqualia.com/
  * @author Mugen87 / https://github.com/Mugen87
  */
@@ -20,15 +22,15 @@ THREE.PDBLoader.prototype = {
 		var loader = new THREE.FileLoader( scope.manager );
 		loader.load( url, function ( text ) {
 
-			var json = scope.parsePDB( text );
-			scope.createModel( json, onLoad );
+			var atomsAndBonds = scope.parsePDB( text );
+			scope.createModel( atomsAndBonds, onLoad );
 
 		}, onProgress, onError );
 
 	},
 
 	// Based on CanvasMol PDB parser
-
+	
 	parsePDB: function ( text ) {
 
 		function trim( text ) {
@@ -81,16 +83,16 @@ THREE.PDBLoader.prototype = {
 
 		var atoms = [];
 		var bonds = [];
+		var terminations = [];
 		var histogram = {};
 
 		var bhash = {};
 
 		var lines = text.split( "\n" );
 
-		var x, y, z, e;
+		var x, y, z, e, isCA;
 
 		for ( var i = 0, l = lines.length; i < l; ++ i ) {
-
 			if ( lines[ i ].substr( 0, 4 ) == "ATOM" || lines[ i ].substr( 0, 6 ) == "HETATM" ) {
 
 				x = parseFloat( lines[ i ].substr( 30, 7 ) );
@@ -98,9 +100,12 @@ THREE.PDBLoader.prototype = {
 				z = parseFloat( lines[ i ].substr( 46, 7 ) );
 
 				e = trim( lines[ i ].substr( 76, 2 ) ).toLowerCase();
+				
+				isCA = lines[ i ].substr( 13, 2 ) === "CA";
 
-				if ( e === "" ) e = trim( lines[ i ].substr( 12, 2 ) ).toLowerCase();
-				atoms.push( [ x, y, z, CPK[ e ], capitalize( e ) ] );
+				if ( e === "" )
+					e = trim( lines[ i ].substr( 12, 2 ) ).toLowerCase();
+				atoms.push( [ x, y, z, CPK[ e ], capitalize( e ), isCA ] );
 
 				if ( histogram[ e ] === undefined ) histogram[ e ] = 1;
 				else histogram[ e ] += 1;
@@ -114,6 +119,9 @@ THREE.PDBLoader.prototype = {
 				parseBond( 21, 5 );
 				parseBond( 26, 5 );
 
+			} else if ( lines[ i ].substr( 0, 3 ) === "TER" )
+			{
+				terminations.push(atoms.length)
 			}
 
 		}
@@ -122,10 +130,12 @@ THREE.PDBLoader.prototype = {
 
 	},
 
-	createModel: function ( json, callback ) {
+	createModel: function ( atomsAndBonds, callback ) {
 
 		var geometryAtoms = new THREE.BufferGeometry();
 		var geometryBonds = new THREE.BufferGeometry();
+
+		var CAs = [];
 
 		var i, l;
 
@@ -135,8 +145,8 @@ THREE.PDBLoader.prototype = {
 
 		geometryAtoms.elements = [];
 
-		var atoms = json.atoms;
-		var bonds = json.bonds;
+		var atoms = atomsAndBonds.atoms;
+		var bonds = atomsAndBonds.bonds;
 
 		for ( i = 0, l = atoms.length; i < l; i ++ ) {
 
@@ -145,6 +155,11 @@ THREE.PDBLoader.prototype = {
 			var x = atom[ 0 ];
 			var y = atom[ 1 ];
 			var z = atom[ 2 ];
+			
+			if(atoms[i][5])
+			{
+				CAs.push(new THREE.Vector3(x,y,z));
+			}
 
 			verticesAtoms.push( x, y, z );
 
@@ -180,7 +195,7 @@ THREE.PDBLoader.prototype = {
 
 		geometryBonds.addAttribute( 'position', new THREE.Float32BufferAttribute( verticesBonds, 3 ) );
 
-		callback( geometryAtoms, geometryBonds, json );
+		callback( CAs, geometryAtoms, geometryBonds );
 
 	}
 

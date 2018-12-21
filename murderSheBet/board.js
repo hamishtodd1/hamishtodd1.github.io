@@ -117,7 +117,7 @@ function initSelectors()
 		Column = function()
 		{
 			let column = new THREE.Group()
-			let material = new THREE.MeshBasicMaterial({color:new THREE.Color(Math.random(),0,Math.random())})
+			let material = new THREE.MeshBasicMaterial({color:new THREE.Color(0,Math.random(),Math.random())})
 			column.ordinaryMaterial = material
 			let index = columns.length
 			column.position.x = index * columnWidth
@@ -218,7 +218,7 @@ function initSelectors()
 	let Selector = function(right,left,up,down)
 	{
 		let selector = new THREE.Mesh( selectorGeometry, new THREE.MeshBasicMaterial({
-			color:getRandomColor(),
+			color:new THREE.Color(0,Math.random(),Math.random()),
 			transparent:true,
 			opacity:0.5
 		}) )
