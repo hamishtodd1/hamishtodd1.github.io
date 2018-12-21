@@ -28,9 +28,9 @@ function init()
 			
 			mouse.updateFromAsyncAndCheckClicks();
 
-			for(var i = 0; i < updatables.length; i++)
+			for(var i = 0; i < updateFunctionsToBeCalled.length; i++)
 			{
-				updatables[i].update();
+				updateFunctionsToBeCalled[i]();
 			}
 
 			frameCount++;
@@ -134,8 +134,7 @@ function initButtons()
 		}
 	}, false );
 
-	updatables.push(buttons)
-	buttons.update = function()
+	updateFunctionsToBeCalled.push(function()
 	{
 		for(var buttonName in buttons )
 		{
@@ -144,5 +143,5 @@ function initButtons()
 				buttons[buttonName].whileDown()
 			}
 		}
-	}
+	})
 }
