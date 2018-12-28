@@ -428,16 +428,17 @@ function redirectCylinder(cylinder, start, newY)
 	cylinder.matrix.setPosition( start );
 	cylinder.matrixAutoUpdate = false;
 }
-function randomPerpVector(ourVector){
+function randomPerpVector(ourVector)
+{
 	var perpVector = new THREE.Vector3();
 	
-	if( ourVector.equals(zVector))
+	if( ourVector.equals(zUnit))
 	{
-		perpVector.crossVectors(ourVector, yVector);
+		perpVector.crossVectors(ourVector, yUnit);
 	}
 	else
 	{
-		perpVector.crossVectors(ourVector, zVector);
+		perpVector.crossVectors(ourVector, zUnit);
 	}
 	
 	return perpVector;

@@ -48,7 +48,9 @@
 				}
 				window.addEventListener( 'resize', windowResize)
 
-				camera.position.z = 2 //doesn't matter
+				camera.position.z = 16 //doesn't matter
+				camera.far = camera.position.z * 2
+				camera.updateProjectionMatrix()
 
 				// initVr()
 

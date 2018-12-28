@@ -1,10 +1,12 @@
 /*
 	What it's fundamentally about is cool stuff you can do with this stereographic projection
 
-	//alternative way of looking at it: the sphere is stuck in place
-	//but your plane and projection point are moving
-	//so the fish universe's z is equal to your hand z and pitch and yaw at first
-	//but you can make it so that... the board keeps its z and sphere does too...
+	alternative way of looking at it: the sphere is stuck in place
+	but your plane and projection point are moving
+	so the fish universe's z is equal to your hand z and pitch and yaw at first
+	but you can make it so that... the board keeps its z and sphere does too...
+
+	worth mentioning that you have "great spheres" rather than great circles
 
 	Sequel: "turning things inside-out with 4D spheres"
 		Surfaces
@@ -67,6 +69,9 @@ function initThreeSphereExploration()
 	tubeGeometriesAffectedByProjection = []
 
 	let imitationHand = new THREE.Group()
+	imitationHand.grippingTopOld = false
+	imitationHand.gripping = true
+	imitationHand.position.x = 0.5
 	imitationHand.add(new THREE.Mesh(new THREE.CylinderGeometry(0.01,0.01,0.1)))
 	imitationHand.add(new THREE.Mesh(new THREE.CylinderGeometry(0.01,0.01,0.1)))
 	imitationHand.add(new THREE.Mesh(new THREE.CylinderGeometry(0.01,0.01,0.1)))
@@ -75,27 +80,78 @@ function initThreeSphereExploration()
 	imitationHand.children[2].rotation.z += TAU/4
 	scene.add(imitationHand)
 
+	bindButton("space",function(){imitationHand.grippingTop = !imitationHand.grippingTop},"toggle gripping")
+
+	let fourSpaceGrabLocation = null
+	let grabOrientation = null
 	updateFunctions.push( function()
 	{
-		if(frameCount>1)return
+		// if(frameCount>1)return
 		let t = frameCount*0.03
-		imitationHand.position.set(0.3+0.2*Math.sin(t), 0.3+0.1*Math.cos(t),0)
-		imitationHand.rotation.z = 0.2*Math.sin(t*3)
+
+		// imitationHand.position.set(0.3+0.2*Math.sin(t), 0.3+0.1*Math.cos(t),0.3*Math.sin(t))
+		imitationHand.position.set(0.3, 0.1*Math.sin(t),0)
+
+		// imitationHand.rotation.z = 0.2*Math.sin(t*3)
+
+		//take the quaternions and store them, they won't change until you let go
+
+		if(imitationHand.grippingTop)
+		{
+			let pFourSpace = stereographicallyUnproject(imitationHand.position)
+			if( !imitationHand.grippingTopOld )
+			{
+				fourSpaceGrabLocation = stereographicallyUnproject(imitationHand.position.clone())
+				grabOrientation = imitationHand.quaternion.clone()
+
+				let singleCircle = GreatCircle(
+					fourSpaceGrabLocation,
+					stereographicallyUnproject(zeroVector)
+				)
+
+				let surfaceCircles = Array(5)
+				normalizedGrabLocation = grabLocation.clone().normalize()
+				let otherPoint0 = randomPerpVector(grabLocation).normalize()
+				for(let i = 0; i < surfaceCircles.length; i++)
+				{
+					let otherPoint = otherPoint0.clone()
+					otherPoint.applyAxisAngle(normalizedGrabLocation,TAU/2 * i/surfaceCircles.length)
+					otherPoint.multiplyScalar(0.01)
+					otherPoint.add(grabLocation)
+
+					GreatCircle(
+						fourSpaceGrabLocation,
+						stereographicallyUnproject(otherPoint),
+					)
+				}
+			}
+		}
+		else
+		{
+			grabOrientation = null
+			grabLocation = null
+		}
+
+		imitationHand.grippingTopOld = imitationHand.grippingTop
+
+		//you get the line connecting your hand directly to the pole
+		//	and also the great sphere passing thr
+		//...but then if you angle your hand?
 	} )
 
-	let rayOrigin = new THREE.Quaternion(0,0,0,-1) //opposite to the default
+	let rayOrigin = new THREE.Vector4(0,0,0,1) //opposite to the default
 	let fourSpaceAxes = [
-		new THREE.Quaternion(1,0,0,0),
-		new THREE.Quaternion(0,1,0,0),
-		new THREE.Quaternion(0,0,1,0)
+		new THREE.Vector4(1,0,0,0),
+		new THREE.Vector4(0,1,0,0),
+		new THREE.Vector4(0,0,1,0)
 	]
 	function stereographicallyProject(q)
 	{
-		let rayDirection = q.clone().sub(rayOrigin);
+		let rayDirection = new THREE.Vector4().copy(q).sub(rayOrigin);
 		let distanceAlongAxis = -1 * rayDirection.dot(rayOrigin)
 		if(distanceAlongAxis===0||distanceAlongAxis===-0)
 		{
-			console.warn("0ish")
+			console.warn("singularity")
 			return new THREE.Vector3()
 		}
 		let fourSpaceProjection = rayDirection.clone().multiplyScalar(1/distanceAlongAxis).add(rayOrigin)
@@ -107,31 +163,58 @@ function initThreeSphereExploration()
 		}
 		return threeSpaceProjection
 	}
+	function stereographicallyUnproject(p)
+	{
+		let fourSpaceProjection = new THREE.Vector4(0,0,0,0)
+		for(let i = 0; i < 3; i++)
+		{
+			fourSpaceProjection.add( fourSpaceAxes[i].clone().multiplyScalar( p.getComponent(i) ) )
+		}
+		// console.assert(fourSpaceProjection.dot(rayOrigin) === 0)
+
+		let projectionLengthSq = fourSpaceProjection.lengthSq()
+		let unprojectedPointDistanceAlongOriginSpindle = 1 + (1-projectionLengthSq)/(1+projectionLengthSq) //algebra
+
+		let rayDirection = fourSpaceProjection.clone().sub(rayOrigin)
+		rayDirection.multiplyScalar(unprojectedPointDistanceAlongOriginSpindle).add(rayOrigin)
+
+		let unprojected = new THREE.Quaternion().copy(rayDirection)
+		return unprojected
+	}
 
 	//could have points too
 	//alternatively could have had a torusgeometry. Disadvantage is that radius could get small
-	function GreatCircle(controlPoints)
+	function GreatCircle(controlPointA,controlPointB)
 	{
-		if(controlPoints === undefined)
+		if(controlPointB === undefined)
 		{
-			let controlPoints = [new THREE.Quaternion(),new THREE.Quaternion()]
-			controlPoints[0].set(Math.random(),Math.random(),Math.random(),Math.random()).normalize()
-			controlPoints[1].set(Math.random(),Math.random(),Math.random(),Math.random()).normalize()
+			var controlPointA = new THREE.Quaternion().set(Math.random(),Math.random(),Math.random(),Math.random()).normalize()
+			var controlPointB = new THREE.Quaternion().set(Math.random(),Math.random(),Math.random(),Math.random()).normalize()
 		}
-		let separationAngle = Math.acos(controlPoints[0].dot(controlPoints[1]))
+		let separationAngle = Math.acos(controlPointA.dot(controlPointB))
 
 		var curve = new THREE.Curve();
+		let furthestOutDistance = 0
 		curve.getPoint = function( t )
 		{
-			let positionOnThreeSphere = jonSlerp(controlPoints[0],controlPoints[1], t * TAU / separationAngle )
+			let positionOnThreeSphere = jonSlerp(controlPointA,controlPointB, t * TAU / separationAngle )
 			let projection = stereographicallyProject(positionOnThreeSphere)
+			if( projection.length() > furthestOutDistance )
+			{
+				furthestOutDistance = projection.length()
+			}
 			return projection
 		}
 		let tubularSegments = 60
-		let representation = new THREE.Mesh( new THREE.TubeBufferGeometry( curve, tubularSegments, 0.01,5 ) )
+		let radius = 0.04
+		let representation = new THREE.Mesh( new THREE.TubeBufferGeometry( curve, tubularSegments, radius,5 ), new THREE.MeshLambertMaterial() )
+		// representation.scale.setScalar(0.1)
 		scene.add( representation )
+		
+		let log = Math.log(furthestOutDistance)
+		representation.material.color.setHSL(clamp(log / 2,0,1),0.5,0.5)
 
-		updateFunctions.push(function()
+		updateFunctions.push( function()
 		{
 			// representation.rotation.y += 0.01
 			// representation.rotation.x += 0.01
@@ -140,23 +223,46 @@ function initThreeSphereExploration()
 		// tubeGeometriesAffectedByProjection.push(representation.geometry)
 	}
 
-	GreatCircle([new THREE.Quaternion(1,0,0,0),new THREE.Quaternion(0,1,0,0)])
-	GreatCircle([new THREE.Quaternion(1,0,0,0),new THREE.Quaternion(0,0,1,0)])
-	GreatCircle([new THREE.Quaternion(1,0,0,0),new THREE.Quaternion(0,0,0,1)])
+	//hyper octahedron
+	// {
+	// 	GreatCircle(new THREE.Quaternion(1,0,0,0),new THREE.Quaternion(0,1,0,0))
+	// 	GreatCircle(new THREE.Quaternion(1,0,0,0),new THREE.Quaternion(0,0,1,0))
+	// 	GreatCircle(new THREE.Quaternion(1,0,0,0),new THREE.Quaternion(0,0,0,1))
 
-	GreatCircle([new THREE.Quaternion(0,1,0,0),new THREE.Quaternion(0,0,1,0)])
-	GreatCircle([new THREE.Quaternion(0,1,0,0),new THREE.Quaternion(0,0,0,1)])
+	// 	GreatCircle(new THREE.Quaternion(0,1,0,0),new THREE.Quaternion(0,0,1,0))
+	// 	GreatCircle(new THREE.Quaternion(0,1,0,0),new THREE.Quaternion(0,0,0,1))
 
-	GreatCircle([new THREE.Quaternion(0,0,1,0),new THREE.Quaternion(0,0,0,1)])
+	// 	GreatCircle(new THREE.Quaternion(0,0,1,0),new THREE.Quaternion(0,0,0,1))
+	// }
+
+	let fixedAxes = [];
+
+	let icoVertices = new THREE.IcosahedronGeometry(1,2).vertices
+	fixedAxes = icoVertices
+
+	// for(let i = 0; i < 20; i++)
+	// {
+	// 	fixedAxes[i] = yUnit.clone().applyAxisAngle(zUnit,i*TAU/20) //icoVertices[i]
+	// }
+
+	function hopfFibrate(axisToPoint)
+	{
+		for(let i = 0; i < fixedAxes.length; i++)
+		{
+			let q1 = new THREE.Quaternion().setFromUnitVectors(axisToPoint,fixedAxes[i])
+			let q2 = q1.clone().premultiply(new THREE.Quaternion().setFromAxisAngle(fixedAxes[i],TAU/4))
+			GreatCircle(q1,q2)
+		}
+	}
+	// hopfFibrate(xUnit)
+	// hopfFibrate(yUnit)
+	// hopfFibrate(zUnit)
 
 	updateFunctions.push(function()
 	{
-		if(0) //new projection situation
+		for(let i = 0; i < tubeGeometriesAffectedByProjection.length; i++)
 		{
-			for(let i = 0; i < tubeGeometriesAffectedByProjection.length; i++)
-			{
-				tubeGeometriesAffectedByProjection[i].updateFromCurve()
-			}
+			tubeGeometriesAffectedByProjection[i].updateFromCurve()
 		}
 	})
 }
