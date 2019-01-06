@@ -27498,6 +27498,7 @@
 			// we use getPointAt to sample evenly distributed points from the given path
 
 			P = path.getPointAt( i / tubularSegments, P );
+			// if(!logged)console.log(P)
 
 			// retrieve corresponding normal and binormal
 
@@ -27520,6 +27521,7 @@
 				normal.z = ( cos * N.z + sin * B.z );
 				normal.normalize();
 
+
 				normals.push( normal.x, normal.y, normal.z );
 
 				// vertex
@@ -27527,6 +27529,7 @@
 				vertex.x = P.x + radius * normal.x;
 				vertex.y = P.y + radius * normal.y;
 				vertex.z = P.z + radius * normal.z;
+				if(i===22&&j===3)console.log(vertex)
 
 				vertices.push( vertex.x, vertex.y, vertex.z );
 

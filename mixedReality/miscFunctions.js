@@ -1,3 +1,59 @@
+function insertPatchworkFaces(verticesWide, facesArray, startingIndex, colorFaces)
+{
+	var colors = [new THREE.Color(0,0,0),new THREE.Color(1,1,1)];
+
+	if(startingIndex === undefined)
+	{
+		startingIndex = 0
+	}
+
+	for(var i = 1; i < verticesWide; i++)
+	{
+		for(var j = 1; j < verticesWide; j++)
+		{
+			var tl = (i-1)*verticesWide + (j-1) + startingIndex;
+			var tr = (i-1)*verticesWide + j + startingIndex;
+			var bl = i*verticesWide + (j-1) + startingIndex;
+			var br = i*verticesWide + j + startingIndex;
+
+			if( colorFaces === undefined )
+			{
+				facesArray.push(new THREE.Face3(tl,tr,bl))
+				facesArray.push(new THREE.Face3(bl,tr,br))	
+			}
+			else
+			{
+				if( !(i%2) ) //row!
+				{
+					if(!(j%2))
+					{
+						facesArray.push(new THREE.Face3(tl,tr,bl, new THREE.Vector3(), colors[0]))
+						facesArray.push(new THREE.Face3(bl,tr,br, new THREE.Vector3(), colors[1]))
+					}
+					else
+					{
+						facesArray.push(new THREE.Face3(tl,tr,br, new THREE.Vector3(), colors[0]))
+						facesArray.push(new THREE.Face3(bl,tl,br, new THREE.Vector3(), colors[1]))
+					}
+				}
+				else
+				{
+					if(!(j%2))
+					{
+						facesArray.push(new THREE.Face3(tl,tr,br, new THREE.Vector3(), colors[1]))
+						facesArray.push(new THREE.Face3(bl,tl,br, new THREE.Vector3(), colors[0]))
+					}
+					else
+					{
+						facesArray.push(new THREE.Face3(tl,tr,bl, new THREE.Vector3(), colors[1]))
+						facesArray.push(new THREE.Face3(bl,tr,br, new THREE.Vector3(), colors[0]))
+					}
+				}
+			}
+		}
+	}
+}
+
 function objectNotAppearingTest(obj)
 {
 	console.log("parent: ",obj.parent)
@@ -50,6 +106,7 @@ THREE.TubeBufferGeometry.prototype.updateFromCurve = function()
 	function generateSegment(i)
 	{
 		P = path.getPointAt( i / tubularSegments, P );
+		// if(!logged)console.log(P)
 
 		var N = frames.normals[ i ];
 		var B = frames.binormals[ i ];
@@ -57,7 +114,6 @@ THREE.TubeBufferGeometry.prototype.updateFromCurve = function()
 		for ( j = 0; j <= radialSegments; j ++ )
 		{
 			var theta = j / radialSegments * TAU
-			vertexIndex++
 
 			var sin = Math.sin( theta );
 			var cos = - Math.cos( theta );
@@ -74,6 +130,8 @@ THREE.TubeBufferGeometry.prototype.updateFromCurve = function()
 			vertex.z = P.z + radius * normal.z;
 
 			vertexArray.setXYZ(vertexIndex,vertex.x, vertex.y, vertex.z)
+
+			vertexIndex++
 		}
 	}
 
@@ -82,6 +140,8 @@ THREE.TubeBufferGeometry.prototype.updateFromCurve = function()
 		generateSegment(i)
 	}
 	generateSegment( ( this.parameters.closed === false ) ? tubularSegments : 0 );
+	// console.log(vertexIndex, vertexArray.length / 3)
+	logged = true
 
 	this.attributes.position.needsUpdate = true
 	this.attributes.normal.needsUpdate = true
