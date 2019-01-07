@@ -109,7 +109,7 @@ function initThreeSphereExploration()
 			}
 		})
 
-		sphereFrameGreatCircles[0].controlPointB.set(Math.random(),Math.random(),Math.random(),Math.random()).normalize()
+		// sphereFrameGreatCircles[0].controlPointB.set(Math.random(),Math.random(),Math.random(),Math.random()).normalize()
 	}
 
 	let fourSpaceGrabLocation = null
@@ -213,11 +213,19 @@ function initThreeSphereExploration()
 		greatCircle.controlPointA = controlPointA
 		greatCircle.controlPointB = controlPointB
 
+		//urgh for the love of god, it's to do with the fact that getPointAt maps it to a place that should be evenly distributed
+		//however since you've changed the places, they're not anymore
+
+		//how about getting two antipodal points on the circle and then another?
+
 		var curve = new THREE.Curve();
 		let furthestOutDistance = 0
+		let lastQ = new THREE.Quaternion()
 		curve.getPoint = function( t )
 		{
 			let positionOnThreeSphere = jonSlerp(controlPointA,controlPointB, t * TAU / separationAngle )
+			if(t!==0&&!logged)console.log(t)
+			lastQ.copy(positionOnThreeSphere)
 			let projection = stereographicallyProject(positionOnThreeSphere)
 			if( projection.length() > furthestOutDistance )
 			{
@@ -225,7 +233,7 @@ function initThreeSphereExploration()
 			}
 			return projection
 		}
-		let tubularSegments = 30
+		let tubularSegments = 10
 		let radius = 0.04
 		let representation = new THREE.Mesh( new THREE.TubeBufferGeometry( curve, tubularSegments, radius,5,true ), new THREE.MeshLambertMaterial() )
 		scene.add( representation )
@@ -238,6 +246,7 @@ function initThreeSphereExploration()
 		{
 			// representation.rotation.y += 0.01
 			// representation.rotation.x += 0.01
+			logged = true
 		})
 
 		tubeGeometriesAffectedByProjection.push(representation.geometry)

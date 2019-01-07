@@ -1,3 +1,37 @@
+//	a - therefore normal is x
+//	
+//		b  c //origin and x=1
+//
+//	a - therefore normal is ⊙
+
+function centerOfCircleThroughThreePoints(a,b,c)
+{
+	let ba = a.clone().sub(b)
+	let bc = c.clone().sub(b)
+
+	let normal = ba.clone().cross(bc)//.normalize() ?
+	let bcPerp = bc.clone().cross(normal)
+
+	let aInFrame = new THREE.Vector2(ba.dot(bc),ba.dot(bcPerp))
+
+	let baBisectorDirectionInFrame = new THREE.Vector2(aInFrame.y,-aInFrame.x)
+	let baBisectorMidpointInFrame = aInFrame.clone().multiplyScalar(0.5)
+
+	console.assert( baBisectorMidpointInFrame.y > 0 )
+
+	//ofRightTriangleWhoseGradientIsBisectorAndBottomLeftCornerIs
+	let bottomLength = 0.5 - baBisectorMidpointInFrame.x
+	let height = bottomLength * baBisectorDirectionInFrame.y / baBisectorDirectionInFrame.x
+
+	let bcMidpointToCenterDistance = height + baBisectorMidpointInFrame.y
+
+	let bcMidpoint = bc.clone().multiplyScalar(0.5)
+	let center = bcPerp.clone().multiplyScalar(bcMidpointToCenterDistance).add(bcMidpoint)
+	return center
+}
+
+console.log(centerOfCircleThroughThreePoints(new THREE.Vector3(1,0,0),new THREE.Vector3(0,1,0),new THREE.Vector3(0,0,1))
+
 function insertPatchworkFaces(verticesWide, facesArray, startingIndex, colorFaces)
 {
 	var colors = [new THREE.Color(0,0,0),new THREE.Color(1,1,1)];
