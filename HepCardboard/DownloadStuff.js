@@ -127,7 +127,7 @@ function Loadobj_initially(linkstring,ThisIndex,OurLoadedThings, PreInitChecklis
 			AttemptFinalInit(OurLoadedThings,PreInitChecklist);
 		},
 		function ( xhr ) {}, //progression function
-		function ( xhr ) { console.error( "couldn't load OBJ" ); }
+		function ( xhr ) { console.error( "couldn't load OBJ",linkstring ); }
 	);
 }
 
