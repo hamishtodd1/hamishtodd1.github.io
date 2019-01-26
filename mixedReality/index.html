@@ -27,6 +27,8 @@
 		<script src="text.js"></script>
 
 		<script src="keyboard.js"></script>
+
+		<script src="surroundings.js"></script>
 		
 		<script src="miscFunctions.js"></script>
 		<script src="variables.js"></script>
@@ -34,6 +36,7 @@
 		<script src="units/threeSphereExploration.js"></script>
 
 		<script>
+			async function init()
 			{
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.setPixelRatio( window.devicePixelRatio );
@@ -59,6 +62,8 @@
 				initPlaybackAndRecording()
 				// initHead()
 
+				await initSurroundings()
+
 				initThreeSphereExploration()
 
 				renderer.setAnimationLoop( function()
@@ -78,6 +83,7 @@
 					renderer.render( scene, camera );
 				})
 			}
+			init()
 		</script>
 	</body>
 </html>

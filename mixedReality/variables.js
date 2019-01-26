@@ -13,6 +13,7 @@ let clock = new THREE.Clock( true );
 let frameDelta = 0;
 let logged = 0;
 let frameCount = 0;
+const log = console.log
 const debugging = 0;
 
 let camera = new THREE.PerspectiveCamera( 30, //can be changed by VR effect

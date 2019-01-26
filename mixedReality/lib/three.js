@@ -27529,7 +27529,6 @@
 				vertex.x = P.x + radius * normal.x;
 				vertex.y = P.y + radius * normal.y;
 				vertex.z = P.z + radius * normal.z;
-				if(i===22&&j===3)console.log(vertex)
 
 				vertices.push( vertex.x, vertex.y, vertex.z );
 

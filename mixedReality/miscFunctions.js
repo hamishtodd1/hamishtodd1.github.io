@@ -1,3 +1,24 @@
+function assignShader(fileName, materialToReceiveAssignment, vertexOrFragment)
+{
+	var propt = vertexOrFragment + "Shader"
+	var fullFileName = "units/shaders/" + fileName + ".glsl"
+
+	return new Promise(resolve => {
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", fullFileName, true);
+		xhr.onload = function(e)
+		{
+			materialToReceiveAssignment[propt] = xhr.response
+			resolve();
+		};
+		xhr.onerror = function ()
+		{
+			console.error(fullFileName, "didn't load");
+		};
+		xhr.send();
+	})
+}
+
 //	a - therefore normal is x
 //	
 //		b  c //origin and x=1
@@ -8,29 +29,35 @@ function centerOfCircleThroughThreePoints(a,b,c)
 {
 	let ba = a.clone().sub(b)
 	let bc = c.clone().sub(b)
+	let bcNormal = bc.clone().normalize()
 
-	let normal = ba.clone().cross(bc)//.normalize() ?
-	let bcPerp = bc.clone().cross(normal)
+	let normal = ba.clone().cross(bc).normalize()
+	let bcPerp = bcNormal.clone().cross(normal)
 
-	let aInFrame = new THREE.Vector2(ba.dot(bc),ba.dot(bcPerp))
+	let aInPlane = new THREE.Vector2(ba.dot(bcNormal),ba.dot(bcPerp))
 
-	let baBisectorDirectionInFrame = new THREE.Vector2(aInFrame.y,-aInFrame.x)
-	let baBisectorMidpointInFrame = aInFrame.clone().multiplyScalar(0.5)
+	let baBisectorDirectionInPlane = new THREE.Vector2(aInPlane.y,-aInPlane.x)
+	let baBisectorMidpointInPlane = aInPlane.clone().multiplyScalar(0.5)
 
-	console.assert( baBisectorMidpointInFrame.y > 0 )
+	//ofRightTriangleWhoseGradientIsBisectorAndBottomLeftCornerIsA
+	let midpointTobcBisectorHorizontal = bc.length() * 0.5 - baBisectorMidpointInPlane.x
+	let midpointTobcBisectorVertical = midpointTobcBisectorHorizontal * baBisectorDirectionInPlane.y / baBisectorDirectionInPlane.x
 
-	//ofRightTriangleWhoseGradientIsBisectorAndBottomLeftCornerIs
-	let bottomLength = 0.5 - baBisectorMidpointInFrame.x
-	let height = bottomLength * baBisectorDirectionInFrame.y / baBisectorDirectionInFrame.x
-
-	let bcMidpointToCenterDistance = height + baBisectorMidpointInFrame.y
+	let bcMidpointToCenterDistance = midpointTobcBisectorVertical + baBisectorMidpointInPlane.y
 
 	let bcMidpoint = bc.clone().multiplyScalar(0.5)
-	let center = bcPerp.clone().multiplyScalar(bcMidpointToCenterDistance).add(bcMidpoint)
+	let center = bcPerp.clone().multiplyScalar(bcMidpointToCenterDistance).add(bcMidpoint).add(b)
+
+	console.assert(
+		basicallyEqual(center.distanceTo(a),center.distanceTo(b)) && 
+		basicallyEqual(center.distanceTo(b),center.distanceTo(c)) )
 	return center
 }
 
-console.log(centerOfCircleThroughThreePoints(new THREE.Vector3(1,0,0),new THREE.Vector3(0,1,0),new THREE.Vector3(0,0,1))
+function basicallyEqual(a,b)
+{
+	return Math.abs(a-b) < 0.00001
+}
 
 function insertPatchworkFaces(verticesWide, facesArray, startingIndex, colorFaces)
 {
@@ -108,12 +135,70 @@ function objectNotAppearingTest(obj)
 
 function jonSlerp(q0,q1,t)
 {
-	var theta0 = Math.acos(q0.dot(q1))
+	// debugger;
+	let cosAngle = q0.dot(q1) / Math.sqrt( q0.lengthSq()*q1.lengthSq() )
+	var theta0 = Math.acos(cosAngle)
 	var theta = t * theta0;
 	var toSubtract = q0.clone().multiplyScalar( q0.dot(q1) );
 	var q2 = q1.clone().sub( toSubtract ).normalize();
 
 	return q0.clone().multiplyScalar(Math.cos(theta)).add( q2.clone().multiplyScalar(Math.sin(theta)) );
+}
+
+//bit costly
+THREE.Vector4.prototype.slerp = function(v,t)
+{
+	this.copy( jonSlerp(this,v,t) )
+
+	return this
+}
+
+THREE.Vector4.prototype.angleTo = function(v)
+{
+	let theta = this.dot( v ) / ( Math.sqrt( this.lengthSq() * v.lengthSq() ) );
+
+	// clamp, to handle numerical problems
+
+	return Math.acos( clamp( theta, - 1, 1 ) );
+}
+
+THREE.Matrix4.prototype.basicallyEqual = function(m)
+{
+	for(let i = 0; i < 16; i++)
+	{
+		if(!basicallyEqual(this.elements[i],m.elements[i]))
+		{
+			return false
+		}
+	}
+	
+	return true
+}
+
+THREE.Matrix4.prototype.setBasisVector = function(index,vec4OrQuaternion)
+{
+	let te = this.elements;
+	let start = index*4
+
+	te[ start+0 ] = vec4OrQuaternion.x;
+	te[ start+1 ] = vec4OrQuaternion.y;
+	te[ start+2 ] = vec4OrQuaternion.z;
+	te[ start+3 ] = vec4OrQuaternion.w;
+
+	return this;
+}
+
+THREE.Matrix4.prototype.setBasisVector = function(index,vec4OrQuaternion)
+{
+	let te = this.elements;
+	let start = index*4
+
+	te[ start+0 ] = vec4OrQuaternion.x;
+	te[ start+1 ] = vec4OrQuaternion.y;
+	te[ start+2 ] = vec4OrQuaternion.z;
+	te[ start+3 ] = vec4OrQuaternion.w;
+
+	return this;
 }
 
 THREE.TubeBufferGeometry.prototype.updateFromCurve = function()
@@ -526,7 +611,7 @@ function randomPerpVector(ourVector)
 {
 	var perpVector = new THREE.Vector3();
 	
-	if( ourVector.equals(zUnit))
+	if( Math.abs( Math.abs( ourVector.dot(zUnit) ) - 1 ) < 0.0001 )
 	{
 		perpVector.crossVectors(ourVector, yUnit);
 	}
