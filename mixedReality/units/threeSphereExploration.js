@@ -124,9 +124,9 @@ function stereographicallyUnproject(p)
 function initProjectionControls()
 {
 	imitationHand = new THREE.Group()
-	imitationHand.grippingTopOld = false
 	imitationHand.grippingTop = false
-	// imitationHand.position.x = 0.5
+	imitationHand.grippingTopOld = imitationHand.grippingTop
+	// imitationHand.position.x = 1
 	// imitationHand.position.y = 0.5
 	imitationHand.add( new THREE.Mesh( new THREE.CylinderGeometry(0.04,0.04,0.3)))
 	imitationHand.add( new THREE.Mesh( new THREE.CylinderGeometry(0.04,0.04,0.3)))
@@ -150,7 +150,7 @@ function initProjectionControls()
 	}
 	//could have latitude lines, at least the equator
 
-	let oldGrabBasis = null
+	let oldGrabBasis = getHandBasis()
 	function getHandBasis(target)
 	{
 		if(target === undefined)
@@ -185,48 +185,63 @@ function initProjectionControls()
 		return target
 	}
 
-	if(0)
+	function applyHandDiffToRotatingThreeSphereMatrix()
 	{
-		// {
-		// 	oldGrabBasis = getHandBasis()
+		let currentBasis = getHandBasis()
+		let oldGrabBasisInverse = new THREE.Matrix4().getInverse( oldGrabBasis )
+		let diff = currentBasis.clone().premultiply(oldGrabBasisInverse)
+		log(oldGrabBasis.elements)//suspicious
 
-		// 	imitationHand.position.set(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5)
-		// 	imitationHand.quaternion.set(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).normalize()
-			
-		// 	applyHandDiffToRotatingThreeSphereMatrix()
-		// }
+		//old * diff = current
+		//diff = old^-1 * current
+		// if(!diff.basicallyEqual(new THREE.Matrix4()))console.log(diff)
+		//if there's no movement it should be the identity, that's goal for now
+		//could have "original basis", like from when you grabbed
 
+		threeSphereMatrix.multiply(diff) //possibly premultiply, but surely not
+		threeSphereMatrixInverse.getInverse(threeSphereMatrix)
+
+		//obv you're solving for the three vectors, from which you ought to be able to get the projection pt
+		// Deffo want momentum on the spin
+	}
+
+	// if(0)
+	{
 		//you want a v that is close to the hand before a move,
 		//then let hand do the move, then see if v is still close to hand
-		let original = new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).setLength(0.00000001)
+
+		imitationHand.position.x = 1
+
+		let original = new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).setLength(0)
 
 		let v = original.clone()
+		imitationHand.updateMatrixWorld()
 		imitationHand.localToWorld(v)
 		let vLocalToRotatingThreeSphere = stereographicallyUnproject(v).applyMatrix4(threeSphereMatrixInverse)
-		console.log(vLocalToRotatingThreeSphere)
+		console.log(vLocalToRotatingThreeSphere.toArray())
 
-		for(let i = 0; i < 3; i++)
+		// for(let i = 0; i < 3; i++)
 		{
-			oldGrabBasis = getHandBasis()
+			getHandBasis(oldGrabBasis)
 
-			imitationHand.position.set(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5)
-			imitationHand.quaternion.set(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).normalize()
+			// imitationHand.position.set(  Math.random()-0.5,Math.random()-0.5,Math.random()-0.5)
+			// imitationHand.quaternion.set(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).normalize()
 			
 			applyHandDiffToRotatingThreeSphereMatrix()
 		}
 
 		v = original.clone()
+		imitationHand.updateMatrixWorld()
 		imitationHand.localToWorld(v)
 		vLocalToRotatingThreeSphere = stereographicallyUnproject(v).applyMatrix4(threeSphereMatrixInverse)
-		console.log(vLocalToRotatingThreeSphere)
+		console.log(vLocalToRotatingThreeSphere.toArray())
 	}
 
 	updateFunctions.push( function()
 	{
 		let t = frameCount*0.03
 
-		imitationHand.position.set(1.0, 0.4*Math.sin(t),0)
-		// imitationHand.grippingTop = true
+		// imitationHand.position.set(1.0, 0.4*Math.sin(t),0)
 
 		// imitationHand.position.set( 2*0.2*Math.sin(t), 2*0.1*Math.cos(t),camera.position.z/2 + 2*0.3*Math.sin(t))
 		// imitationHand.rotation.set(
@@ -271,6 +286,7 @@ function initProjectionControls()
 			}
 			else
 			{
+				console.log("yo")
 				applyHandDiffToRotatingThreeSphereMatrix()
 
 				/*
@@ -290,11 +306,14 @@ function initProjectionControls()
 			}
 
 			// debugger
-			getHandBasis(oldGrabBasis)
 		}
-		else
+		getHandBasis(oldGrabBasis)
+
+		if(logged<3)
 		{
-			oldGrabBasis = null
+			// console.log(imitationHand.position, threeSphereMatrix.elements)
+			// debugger;
+			logged++
 		}
 
 		for(let i = 0; i < sphereFrameGreatCircles.length; i++)
@@ -303,26 +322,18 @@ function initProjectionControls()
 			sphereFrameGreatCircles[i].representation.visible = false//imitationHand.grippingTop
 		}
 
+		if( imitationHand.grippingTop && imitationHand.grippingTopOld )
+			imitationHand.grippingTop = false
+
 		imitationHand.grippingTopOld = imitationHand.grippingTop
+
+		if(imitationHand.grippingTop)
+			imitationHand.position.y = 0.1
+
+		if(imitationHand.position.y === 0)
+			imitationHand.grippingTop = true
+
 	} )
-
-	function applyHandDiffToRotatingThreeSphereMatrix()
-	{
-		let currentBasis = getHandBasis()
-		let oldGrabBasisInverse = new THREE.Matrix4().getInverse( oldGrabBasis )
-		let diff = currentBasis.clone().premultiply(oldGrabBasisInverse)
-
-		//old * d = current.
-		// if(!diff.basicallyEqual(new THREE.Matrix4()))console.log(diff)
-		//if there's no movement it should be the identity, that's goal for now
-		//could have "original basis", like from when you grabbed
-
-		threeSphereMatrix.multiply(diff) //possibly premultiply, but surely not
-		threeSphereMatrixInverse.getInverse(threeSphereMatrix)
-
-		//obv you're solving for the three vectors, from which you ought to be able to get the projection pt
-		// Deffo want momentum on the spin
-	}
 }
 
 function initThreeSphereExploration()
@@ -398,7 +409,7 @@ function GreatCircle(controlPoint0,controlPoint1)
 			let realSpacePoint0 = stereographicallyProject(controlPoints[0].clone().applyMatrix4(threeSphereMatrix))
 			let realSpacePoint1 = stereographicallyProject(controlPoints[1].clone().applyMatrix4(threeSphereMatrix))
 
-			let pointBetween = controlPoints[0].clone().slerp(controlPoints[1],0.5)
+			let pointBetween = controlPoints[0].clone().slerp(controlPoints[1],0.5).applyMatrix4(threeSphereMatrix)
 			let realSpacePointBetween = stereographicallyProject(pointBetween)
 
 			let bivectorMagnitudeSq = realSpacePoint0.clone().sub(pointBetween).cross( realSpacePoint1.clone().sub(pointBetween) ).lengthSq()

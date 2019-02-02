@@ -260,7 +260,6 @@ THREE.TubeBufferGeometry.prototype.updateFromCurve = function()
 	}
 	generateSegment( ( this.parameters.closed === false ) ? tubularSegments : 0 );
 	// console.log(vertexIndex, vertexArray.length / 3)
-	logged = true
 
 	this.attributes.position.needsUpdate = true
 	this.attributes.normal.needsUpdate = true
