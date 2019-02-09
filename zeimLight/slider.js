@@ -5,13 +5,16 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 		new THREE.PlaneBufferGeometry(1,1),
 		new THREE.MeshBasicMaterial({color:0xDADADA}));
 	sliderSystem.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.5,0,0))
-	sliderSystem.onClick = function(cameraSpaceClickedPoint)
+	sliderSystem.onClick = function()
 	{
+		//hacky
+		let cameraSpaceClickedPoint = camera.worldToLocal(mouse.zZeroPosition.clone())
+
 		var localGrabbedPoint = cameraSpaceClickedPoint.clone();
 		camera.localToWorld(localGrabbedPoint);
 		sliderSystem.worldToLocal(localGrabbedPoint);
 
-		tracker.position.x = localGrabbedPoint.x;
+		tracker.position.x = localGrabbedPoint.x
 		changeValue( tracker.position.x );
 
 		tracker.cameraSpaceClickedPoint = cameraSpaceClickedPoint;
@@ -37,8 +40,9 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 		userKnowsAboutMovement = false;
 	}
 
-	tracker.onClick = function(cameraSpaceClickedPoint)
+	tracker.onClick = function()
 	{
+		let cameraSpaceClickedPoint = camera.worldToLocal(mouse.zZeroPosition.clone())
 		this.cameraSpaceClickedPoint = cameraSpaceClickedPoint;
 		if(onTrackerGrab)
 		{
@@ -48,12 +52,12 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 
 	sliderSystem.joltedness = 0;
 
-	sliderSystem.update = function()
+	updateFunctionsToBeCalled.push( function()
 	{
 		if(!userKnowsAboutMovement)
 		{
 			tracker.scale.copy(defaultTrackerScale);
-			var sinTime = Math.sin( ourClock.elapsedTime * 9 );
+			var sinTime = Math.sin( clock.elapsedTime * 9 );
 			tracker.scale.x *= 1 + 0.3 * sinTime;
 			tracker.scale.y *= 1 + 0.3 * sinTime;
 		}
@@ -74,7 +78,10 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 			if(mouse.justMoved)
 			{
 				var prev = tracker.position.clone()
-				mouse.applyDrag(tracker);
+
+				let mouseDelta = mouse.zZeroPosition.clone().sub(mouse.oldZZeroPosition).x
+				tracker.position.x += mouseDelta / sliderSystem.scale.x
+
 				tracker.position.z = 0;
 				tracker.position.y = 0;
 
@@ -104,7 +111,7 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 		{
 			changeValue(tracker.position.x);
 		}
-	}
+	} )
 
 	sliderSystem.setDimensions = function(length, height)
 	{

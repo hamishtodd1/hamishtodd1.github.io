@@ -27,7 +27,7 @@ function initSurroundings()
 	stage.material.metalness = 0.1;
 	stage.material.roughness = 0.2;
 	stage.receiveShadow = true;
-	scene.add(stage)
+	// scene.add(stage)
 
 	var pointLight = new THREE.PointLight(0xFFFFFF, 0.4, 5.3);
 	pointLight.shadow.camera.far = 10;
