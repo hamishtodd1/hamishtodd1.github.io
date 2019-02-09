@@ -360,18 +360,17 @@ function getStandardFunctionCallString(myFunc)
 
 function clamp(value, min, max)
 {
-	if(value < min)
+	if( min !== null && value < min)
 	{
 		return min;
 	}
-	else if(value > max )
+
+	if( max !== undefined && value > max )
 	{
 		return max;
 	}
-	else
-	{
-		return value;
-	}
+
+	return value;
 }
 
 function getPlatform()
