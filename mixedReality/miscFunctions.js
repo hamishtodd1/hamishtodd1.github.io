@@ -552,6 +552,35 @@ THREE.Quaternion.prototype.sub = function(q2)
 	return this;
 }
 
+function presentJsonFile(obj, filename)
+{
+	let download = document.createElement('a');
+	download.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(obj)));
+	download.setAttribute('download', filename);
+	download.style.display = 'none';
+	document.body.appendChild(download);
+	download.click();
+	document.body.removeChild(download);
+}
+
+THREE.BufferAttribute.prototype.getXYZ = function(i, target)
+{
+	if(target === undefined)
+	{
+		return new THREE.Vector3(
+			this.array[ i * this.itemSize + 0 ],
+			this.array[ i * this.itemSize + 1 ],
+			this.array[ i * this.itemSize + 2 ] )
+	}
+	else
+	{
+		target.set(
+			this.array[ i * this.itemSize + 0 ],
+			this.array[ i * this.itemSize + 1 ],
+			this.array[ i * this.itemSize + 2 ])
+	}
+}
+
 THREE.Face3.prototype.getCorner = function(i)
 {
 	switch(i)

@@ -167,14 +167,7 @@ function bindPlaybackControls()
 			handControllers[LEFT_CONTROLLER_INDEX].children[0].material.color.r = 0.267
 			recording = false
 
-			let filename = "frames"
-			let download = document.createElement('a');
-			download.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(frames)));
-			download.setAttribute('download', filename);
-			download.style.display = 'none';
-			document.body.appendChild(download);
-			download.click();
-			document.body.removeChild(download);
+			presentJsonFile(frames, "frames")
 		}
 	}
 	document.addEventListener( 'keydown', function(event)

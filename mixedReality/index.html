@@ -22,17 +22,21 @@
 		<script src="lighting.js"></script>
 		<script src="head.js"></script>
 
+		<script src="imitationHand.js"></script>
+
 		<script src="recording.js"></script>
 		
 		<script src="text.js"></script>
 
 		<script src="keyboard.js"></script>
 
+
 		<script src="surroundings.js"></script>
 		
 		<script src="miscFunctions.js"></script>
 		<script src="variables.js"></script>
 
+		<script src="units/fish.js"></script>
 		<script src="units/threeSphereExploration.js"></script>
 
 		<script>
@@ -62,7 +66,11 @@
 				initPlaybackAndRecording()
 				// initHead()
 
-				await initSurroundings()
+				initImitationHand();
+
+				initFish();
+
+				// await initSurroundings()
 
 				initThreeSphereExploration()
 

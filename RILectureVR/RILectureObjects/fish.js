@@ -1,4 +1,4 @@
-function initFishUniverse( presentation, Controller, transferredObjectData )
+function initFishUniverse( presentation, transferredObjectData )
 {
 	var fishUniverse = new THREE.Object3D();
 	var universeWidth = 1;
@@ -29,21 +29,13 @@ function initFishUniverse( presentation, Controller, transferredObjectData )
 	fish.add(fishEye);
 	fishUniverse.add(fish);
 	
-	var updateoctagon = function()
+	let octagon = new THREE.Mesh(new THREE.CylinderGeometry(fishLength / 2,fishLength / 2, fish.children[0].position.z * 4, 8, 1, false, TAU / 16), new THREE.MeshBasicMaterial({ color:0xFF6A00 }));
+	updateFunctions.push(function()
 	{
 		this.position.z = fishUniverse.position.z + 0.0001;
 		this.rotation.x = TAU / 4;
 		this.rotation.z = 0;
-	}
-	
-	var octagons = Array(3);
-	
-	for(var i = 0; i < 3; i++)
-	{
-		octagons[i] = new THREE.Mesh(new THREE.CylinderGeometry(fishLength / 2,fishLength / 2, fish.children[0].position.z * 4, 8, 1, false, TAU / 16), new THREE.MeshBasicMaterial({ color:0xFF6A00 }));
-		octagons[i].update = updateoctagon;
-		presentation.createNewHoldable("octagon" + i.toString(), octagons[i] );
-	}
+	})
 	
 	var OurTextureLoader = new THREE.TextureLoader();
 	OurTextureLoader.crossOrigin = true;
@@ -67,37 +59,35 @@ function initFishUniverse( presentation, Controller, transferredObjectData )
 	
 	fishUniverse.update = function()
 	{
-		if(VRMODE)
-		{
-			var focusPosition = new THREE.Vector3(0,0,0);
-			fish.updateMatrix();
-			fishEye.updateMatrix();
-			var invFish = new THREE.Matrix4();
-			var invEye = new THREE.Matrix4();
-			invFish.getInverse(fish.matrix);
-			invEye.getInverse(fishEye.matrix);
-			
-			//could control the eye with the joystick?
-			
-			fishPupil.position.copy(focusPosition);
-			fishPupil.position.applyMatrix4(invFish);
-			fishPupil.position.applyMatrix4(invEye);
-			fishPupil.position.setLength(pupilRadius);
-			fishPupil.position.y = 0;
-			
-			fish.position.copy(Controller.position);
-			fish.position.z = 0;
-			var fishRadiusScalar = 0.6;
-			if( fish.position.x < -universeWidth/2 * fishRadiusScalar)
-				fish.position.x = -universeWidth / 2 * fishRadiusScalar;
-			if( fish.position.x > universeWidth/2 * fishRadiusScalar)
-				fish.position.x = universeWidth / 2 * fishRadiusScalar;
-			if( fish.position.y < -universeHeight/2 * fishRadiusScalar)
-				fish.position.y = -universeHeight / 2 * fishRadiusScalar;
-			if( fish.position.y > universeHeight/2 * fishRadiusScalar)
-				fish.position.y = universeHeight / 2 * fishRadiusScalar;
-			
-			//untested
+		var focusPosition = new THREE.Vector3(0,0,0);
+		fish.updateMatrix();
+		fishEye.updateMatrix();
+		var invFish = new THREE.Matrix4();
+		var invEye = new THREE.Matrix4();
+		invFish.getInverse(fish.matrix);
+		invEye.getInverse(fishEye.matrix);
+		
+		//could control the eye with the joystick?
+		
+		fishPupil.position.copy(focusPosition);
+		fishPupil.position.applyMatrix4(invFish);
+		fishPupil.position.applyMatrix4(invEye);
+		fishPupil.position.setLength(pupilRadius);
+		fishPupil.position.y = 0;
+		
+		fish.position.copy(Controller.position);
+		fish.position.z = 0;
+		var fishRadiusScalar = 0.6;
+		if( fish.position.x < -universeWidth/2 * fishRadiusScalar)
+			fish.position.x = -universeWidth / 2 * fishRadiusScalar;
+		if( fish.position.x > universeWidth/2 * fishRadiusScalar)
+			fish.position.x = universeWidth / 2 * fishRadiusScalar;
+		if( fish.position.y < -universeHeight/2 * fishRadiusScalar)
+			fish.position.y = -universeHeight / 2 * fishRadiusScalar;
+		if( fish.position.y > universeHeight/2 * fishRadiusScalar)
+			fish.position.y = universeHeight / 2 * fishRadiusScalar;
+		
+		//untested
 //			if(Math.random() < 0.01)
 //			{
 //				eyeWhite.material.color.set(0,0,0);
@@ -106,12 +96,7 @@ function initFishUniverse( presentation, Controller, transferredObjectData )
 //			blickCountdown -= delta_t;
 //			if( blickCountdown < 0 )
 //				eyeWhite.material.color.set(1,1,1);
-			
-			fish.rotation.z = Controller.rotation.z;
-		}
+		
+		fish.rotation.z = imitationHand.rotation.z;
 	}
-
-	transferredObjectData.thingsWithCopy.fishPosition = fish.position;
-	transferredObjectData.thingsWithCopy.fishRotation = fish.rotation;
-	transferredObjectData.thingsWithCopy.fishPupilPosition = fishPupil.position;
 }

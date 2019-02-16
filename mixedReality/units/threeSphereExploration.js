@@ -80,6 +80,171 @@ let fourSpaceAxes = [
 	new THREE.Vector4(0,0,1,0)
 ]
 
+function initThreeSphereExploration()
+{
+	imitationHand.position.x = 2
+
+	let light = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.1))
+	light.position.z = 1
+	scene.add(light)
+
+	function addProjection(mesh)
+	{
+		let mat = mesh.material.clone() //TODO, nice rectangle clipping planes
+		mesh.projection = new THREE.LineSegments(mesh.geometry.clone(),mat)
+		updateFunctions.push(function()
+		{
+			mesh.rotation.y += 0.01
+			mesh.updateMatrixWorld()
+
+			let v = null
+			for(let i = 0; i < mesh.geometry.vertices.length; i++)
+			{
+				v = mesh.projection.geometry.vertices[i]
+				v.copy(mesh.geometry.vertices[i])
+				v.applyMatrix4(mesh.matrixWorld)
+
+				v.sub(light.position)
+				let multiplier = -1 * v.dot(light.position)
+				v.multiplyScalar(1/multiplier).add(light.position)
+			}
+			mesh.projection.geometry.verticesNeedUpdate = true
+		})
+		scene.add(mesh.projection)
+	}
+
+	let s = new THREE.LineSegments(new THREE.Geometry())
+	for(let i = 0; i < 24; i++)
+	{
+		let longtitude = TAU * i / 24
+		for(let j = 0; j < 12; j++)
+		{
+			let latitude = j / 12 * TAU / 2
+			let p = new THREE.Vector3(0,1,0).applyAxisAngle(xUnit,latitude).applyAxisAngle(yUnit,longtitude)
+			s.geometry.vertices.push(p)
+
+			let nextLatitude = (j+1) / 12 * TAU / 2
+			let q = new THREE.Vector3(0,1,0).applyAxisAngle(xUnit,nextLatitude).applyAxisAngle(yUnit,longtitude)
+			s.geometry.vertices.push(q)
+
+			if(j)
+			{
+				s.geometry.vertices.push(p)
+				let nextLongtitude = TAU * (i+1) / 24
+				let r = new THREE.Vector3(0,1,0).applyAxisAngle(xUnit,latitude).applyAxisAngle(yUnit,nextLongtitude)
+				s.geometry.vertices.push(r)
+			}
+		}
+	}
+	// scene.add(s)
+	// addProjection(s)
+
+	let sphericalOctahedron = new THREE.LineSegments(new THREE.Geometry())
+	for(let i = 0; i < 3; i++)
+	{
+		let start = new THREE.Vector3().setComponent(i,1)
+		let axis = new THREE.Vector3().setComponent((i+1)%3,1)
+		for(let j = 0; j < 16; j++)
+		{
+			let latitude = j / 16 * TAU
+			let p = start.clone().applyAxisAngle(axis,latitude)
+			sphericalOctahedron.geometry.vertices.push(p)
+
+			let nextLatitude = (j+1) / 16 * TAU
+			let q = start.clone().applyAxisAngle(axis,nextLatitude)
+			sphericalOctahedron.geometry.vertices.push(q)
+		}
+	}
+	// scene.add(sphericalOctahedron)
+	// addProjection(sphericalOctahedron)
+
+	let sourceGeo = new THREE.IcosahedronGeometry(1,2 )
+	let goldberg = new THREE.Line(new THREE.Geometry())
+	for(let i = 0; i < sourceGeo.faces.length; i++)
+	{
+		let f = sourceGeo.faces[i]
+		for(let j = 0; j < 3; j++)
+		{
+			goldberg.geometry.vertices.push(sourceGeo.vertices[ f.getCorner(j) ])
+			goldberg.geometry.vertices.push(sourceGeo.vertices[ f.getCorner((j+1)%3) ])
+		}
+	}
+	// scene.add(goldberg)
+	// addProjection(goldberg)
+
+	//want normal sphere, AND world map, AND icosahedron buffer geometry
+
+	new THREE.OBJLoader().load("data/worldMap.obj",function(obj)
+	{
+		let transform = new THREE.Matrix4().makeRotationX(-TAU/4)
+		transform.elements[0] *= -1
+		let geo = obj.children[0].geometry.applyMatrix(transform)
+		
+		new THREE.FileLoader().load("data/coastlineIndices.txt", function(coastlineTxt)
+		{
+			let newGeo = new THREE.Geometry()
+			let coastlineIndices = JSON.parse(coastlineTxt)
+
+			for(let i = 0; i < coastlineIndices.length; i += 2)
+			{
+				let index = coastlineIndices[i]
+				let otherIndex = coastlineIndices[i] % 3 === 2 ? coastlineIndices[i] - 2 : coastlineIndices[i] + 1
+
+				newGeo.vertices.push( geo.attributes.position.getXYZ(index).setLength(1), geo.attributes.position.getXYZ(otherIndex).setLength(1) )
+			}
+
+			let m = new THREE.LineSegments(newGeo)
+			// scene.add(m)
+			// addProjection(m)
+		})
+	})
+
+	return
+
+	initProjectionControls()
+
+	// GreatCircle()
+
+	//hyper octahedron
+	{
+		GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,1,0,0))
+		GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,0,1,0))
+		GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,0,0,1))
+
+		GreatCircle(new THREE.Vector4(0,1,0,0),new THREE.Vector4(0,0,1,0))
+		GreatCircle(new THREE.Vector4(0,1,0,0),new THREE.Vector4(0,0,0,1))
+
+		GreatCircle(new THREE.Vector4(0,0,1,0),new THREE.Vector4(0,0,0,1))
+	}
+
+	//hopf fibrating
+	{
+		let fixedAxes = [];
+
+		let icoVertices = new THREE.IcosahedronGeometry(1,2).vertices
+		fixedAxes = icoVertices
+
+		// for(let i = 0; i < 20; i++)
+		// {
+		// 	fixedAxes[i] = yUnit.clone().applyAxisAngle(zUnit,i*TAU/20) //icoVertices[i]
+		// }
+
+		function hopfFibrate(axisToPoint)
+		{
+			for(let i = 0; i < fixedAxes.length; i++)
+			{
+				let q1 = new THREE.Quaternion().setFromUnitVectors(axisToPoint,fixedAxes[i])
+				let q2 = q1.clone().premultiply(new THREE.Quaternion().setFromAxisAngle(fixedAxes[i],TAU/4))
+
+				GreatCircle( new THREE.Vector4().copy(q1), new THREE.Vector4().copy(q2) )
+			}
+		}
+		// hopfFibrate(xUnit)
+		// hopfFibrate(yUnit)
+		// hopfFibrate(zUnit)
+	}
+}
+
 let threeSphereMatrix = new THREE.Matrix4()
 let threeSphereMatrixInverse = new THREE.Matrix4()
 
@@ -123,23 +288,6 @@ function stereographicallyUnproject(p)
 
 function initProjectionControls()
 {
-	imitationHand = new THREE.Group()
-	imitationHand.grippingTop = false
-	imitationHand.grippingTopOld = imitationHand.grippingTop
-	// imitationHand.position.x = 1
-	// imitationHand.position.y = 0.5
-	imitationHand.add( new THREE.Mesh( new THREE.CylinderGeometry(0.04,0.04,0.3)))
-	imitationHand.add( new THREE.Mesh( new THREE.CylinderGeometry(0.04,0.04,0.3)))
-	imitationHand.add( new THREE.Mesh( new THREE.CylinderGeometry(0.04,0.04,0.3)))
-	imitationHand.children[0].rotation.x += TAU/4
-	imitationHand.children[1].rotation.y += TAU/4
-	imitationHand.children[2].rotation.z += TAU/4
-	scene.add( imitationHand )
-
-	bindButton("space",
-		function(){imitationHand.grippingTop = !imitationHand.grippingTop},
-		"toggle gripping")
-
 	let sphereFrameGreatCircles = []
 	{
 		let numCirclesInGreatSphere = 5
@@ -334,52 +482,6 @@ function initProjectionControls()
 			imitationHand.grippingTop = true
 
 	} )
-}
-
-function initThreeSphereExploration()
-{
-	initProjectionControls()
-
-	// GreatCircle()
-
-	//hyper octahedron
-	{
-		GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,1,0,0))
-		GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,0,1,0))
-		GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,0,0,1))
-
-		GreatCircle(new THREE.Vector4(0,1,0,0),new THREE.Vector4(0,0,1,0))
-		GreatCircle(new THREE.Vector4(0,1,0,0),new THREE.Vector4(0,0,0,1))
-
-		GreatCircle(new THREE.Vector4(0,0,1,0),new THREE.Vector4(0,0,0,1))
-	}
-
-	//hopf fibrating
-	{
-		let fixedAxes = [];
-
-		let icoVertices = new THREE.IcosahedronGeometry(1,2).vertices
-		fixedAxes = icoVertices
-
-		// for(let i = 0; i < 20; i++)
-		// {
-		// 	fixedAxes[i] = yUnit.clone().applyAxisAngle(zUnit,i*TAU/20) //icoVertices[i]
-		// }
-
-		function hopfFibrate(axisToPoint)
-		{
-			for(let i = 0; i < fixedAxes.length; i++)
-			{
-				let q1 = new THREE.Quaternion().setFromUnitVectors(axisToPoint,fixedAxes[i])
-				let q2 = q1.clone().premultiply(new THREE.Quaternion().setFromAxisAngle(fixedAxes[i],TAU/4))
-
-				GreatCircle( new THREE.Vector4().copy(q1), new THREE.Vector4().copy(q2) )
-			}
-		}
-		// hopfFibrate(xUnit)
-		// hopfFibrate(yUnit)
-		// hopfFibrate(zUnit)
-	}
 }
 
 //could have points too, maybe travelling along the circles
