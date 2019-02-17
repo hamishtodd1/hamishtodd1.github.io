@@ -82,125 +82,6 @@ let fourSpaceAxes = [
 
 function initThreeSphereExploration()
 {
-	imitationHand.position.x = 2
-
-	let light = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.1))
-	light.position.z = 1
-	scene.add(light)
-
-	function addProjection(mesh)
-	{
-		let mat = mesh.material.clone() //TODO, nice rectangle clipping planes
-		mesh.projection = new THREE.LineSegments(mesh.geometry.clone(),mat)
-		updateFunctions.push(function()
-		{
-			mesh.rotation.y += 0.01
-			mesh.updateMatrixWorld()
-
-			let v = null
-			for(let i = 0; i < mesh.geometry.vertices.length; i++)
-			{
-				v = mesh.projection.geometry.vertices[i]
-				v.copy(mesh.geometry.vertices[i])
-				v.applyMatrix4(mesh.matrixWorld)
-
-				v.sub(light.position)
-				let multiplier = -1 * v.dot(light.position)
-				v.multiplyScalar(1/multiplier).add(light.position)
-			}
-			mesh.projection.geometry.verticesNeedUpdate = true
-		})
-		scene.add(mesh.projection)
-	}
-
-	let s = new THREE.LineSegments(new THREE.Geometry())
-	for(let i = 0; i < 24; i++)
-	{
-		let longtitude = TAU * i / 24
-		for(let j = 0; j < 12; j++)
-		{
-			let latitude = j / 12 * TAU / 2
-			let p = new THREE.Vector3(0,1,0).applyAxisAngle(xUnit,latitude).applyAxisAngle(yUnit,longtitude)
-			s.geometry.vertices.push(p)
-
-			let nextLatitude = (j+1) / 12 * TAU / 2
-			let q = new THREE.Vector3(0,1,0).applyAxisAngle(xUnit,nextLatitude).applyAxisAngle(yUnit,longtitude)
-			s.geometry.vertices.push(q)
-
-			if(j)
-			{
-				s.geometry.vertices.push(p)
-				let nextLongtitude = TAU * (i+1) / 24
-				let r = new THREE.Vector3(0,1,0).applyAxisAngle(xUnit,latitude).applyAxisAngle(yUnit,nextLongtitude)
-				s.geometry.vertices.push(r)
-			}
-		}
-	}
-	// scene.add(s)
-	// addProjection(s)
-
-	let sphericalOctahedron = new THREE.LineSegments(new THREE.Geometry())
-	for(let i = 0; i < 3; i++)
-	{
-		let start = new THREE.Vector3().setComponent(i,1)
-		let axis = new THREE.Vector3().setComponent((i+1)%3,1)
-		for(let j = 0; j < 16; j++)
-		{
-			let latitude = j / 16 * TAU
-			let p = start.clone().applyAxisAngle(axis,latitude)
-			sphericalOctahedron.geometry.vertices.push(p)
-
-			let nextLatitude = (j+1) / 16 * TAU
-			let q = start.clone().applyAxisAngle(axis,nextLatitude)
-			sphericalOctahedron.geometry.vertices.push(q)
-		}
-	}
-	// scene.add(sphericalOctahedron)
-	// addProjection(sphericalOctahedron)
-
-	let sourceGeo = new THREE.IcosahedronGeometry(1,2 )
-	let goldberg = new THREE.Line(new THREE.Geometry())
-	for(let i = 0; i < sourceGeo.faces.length; i++)
-	{
-		let f = sourceGeo.faces[i]
-		for(let j = 0; j < 3; j++)
-		{
-			goldberg.geometry.vertices.push(sourceGeo.vertices[ f.getCorner(j) ])
-			goldberg.geometry.vertices.push(sourceGeo.vertices[ f.getCorner((j+1)%3) ])
-		}
-	}
-	// scene.add(goldberg)
-	// addProjection(goldberg)
-
-	//want normal sphere, AND world map, AND icosahedron buffer geometry
-
-	new THREE.OBJLoader().load("data/worldMap.obj",function(obj)
-	{
-		let transform = new THREE.Matrix4().makeRotationX(-TAU/4)
-		transform.elements[0] *= -1
-		let geo = obj.children[0].geometry.applyMatrix(transform)
-		
-		new THREE.FileLoader().load("data/coastlineIndices.txt", function(coastlineTxt)
-		{
-			let newGeo = new THREE.Geometry()
-			let coastlineIndices = JSON.parse(coastlineTxt)
-
-			for(let i = 0; i < coastlineIndices.length; i += 2)
-			{
-				let index = coastlineIndices[i]
-				let otherIndex = coastlineIndices[i] % 3 === 2 ? coastlineIndices[i] - 2 : coastlineIndices[i] + 1
-
-				newGeo.vertices.push( geo.attributes.position.getXYZ(index).setLength(1), geo.attributes.position.getXYZ(otherIndex).setLength(1) )
-			}
-
-			let m = new THREE.LineSegments(newGeo)
-			// scene.add(m)
-			// addProjection(m)
-		})
-	})
-
-	return
-
 	initProjectionControls()
 
 	// GreatCircle()
@@ -299,6 +180,8 @@ function initProjectionControls()
 	//could have latitude lines, at least the equator
 
 	let oldGrabBasis = getHandBasis()
+	console.log(getHandBasis().elements) //should be identity
+	console.log(getHandBasis().elements,oldGrabBasis.elements) //should be identity
 	function getHandBasis(target)
 	{
 		if(target === undefined)
@@ -358,22 +241,20 @@ function initProjectionControls()
 		//you want a v that is close to the hand before a move,
 		//then let hand do the move, then see if v is still close to hand
 
-		imitationHand.position.x = 1
-
-		let original = new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).setLength(0)
+		let original = new THREE.Vector3(Math.random(),Math.random(),Math.random()).setLength(0.00000001) //should be able to do other nearby values but for now...
 
 		let v = original.clone()
 		imitationHand.updateMatrixWorld()
 		imitationHand.localToWorld(v)
 		let vLocalToRotatingThreeSphere = stereographicallyUnproject(v).applyMatrix4(threeSphereMatrixInverse)
-		console.log(vLocalToRotatingThreeSphere.toArray())
+		console.warn(vLocalToRotatingThreeSphere.toArray())
 
 		// for(let i = 0; i < 3; i++)
 		{
 			getHandBasis(oldGrabBasis)
 
-			// imitationHand.position.set(  Math.random()-0.5,Math.random()-0.5,Math.random()-0.5)
-			// imitationHand.quaternion.set(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).normalize()
+			imitationHand.position.set(  Math.random()-0.5,Math.random()-0.5,Math.random()-0.5)
+			imitationHand.quaternion.set(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).normalize()
 			
 			applyHandDiffToRotatingThreeSphereMatrix()
 		}
@@ -382,8 +263,9 @@ function initProjectionControls()
 		imitationHand.updateMatrixWorld()
 		imitationHand.localToWorld(v)
 		vLocalToRotatingThreeSphere = stereographicallyUnproject(v).applyMatrix4(threeSphereMatrixInverse)
-		console.log(vLocalToRotatingThreeSphere.toArray())
+		console.warn(vLocalToRotatingThreeSphere.toArray())
 	}
+	return
 
 	updateFunctions.push( function()
 	{

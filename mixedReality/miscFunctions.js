@@ -175,28 +175,19 @@ THREE.Matrix4.prototype.basicallyEqual = function(m)
 	return true
 }
 
-THREE.Matrix4.prototype.setBasisVector = function(index,vec4OrQuaternion)
+THREE.Matrix4.prototype.setBasisVector = function(index,vec)
 {
 	let te = this.elements;
 	let start = index*4
 
-	te[ start+0 ] = vec4OrQuaternion.x;
-	te[ start+1 ] = vec4OrQuaternion.y;
-	te[ start+2 ] = vec4OrQuaternion.z;
-	te[ start+3 ] = vec4OrQuaternion.w;
+	te[ start+0 ] = vec.x;
+	te[ start+1 ] = vec.y;
+	te[ start+2 ] = vec.z;
 
-	return this;
-}
-
-THREE.Matrix4.prototype.setBasisVector = function(index,vec4OrQuaternion)
-{
-	let te = this.elements;
-	let start = index*4
-
-	te[ start+0 ] = vec4OrQuaternion.x;
-	te[ start+1 ] = vec4OrQuaternion.y;
-	te[ start+2 ] = vec4OrQuaternion.z;
-	te[ start+3 ] = vec4OrQuaternion.w;
+	if(vec.w)
+	{
+		te[ start+3 ] = vec.w;
+	}
 
 	return this;
 }
