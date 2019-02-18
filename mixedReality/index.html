@@ -80,7 +80,6 @@
 				renderer.setAnimationLoop( function()
 				{
 					frameDelta = clock.getDelta();
-					frameCount++;
 
 					readHandInput();
 
@@ -92,6 +91,7 @@
 					}
 
 					renderer.render( scene, camera );
+					frameCount++;
 				})
 			}
 			init()

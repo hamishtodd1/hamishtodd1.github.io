@@ -88,14 +88,14 @@ function initThreeSphereExploration()
 
 	//hyper octahedron
 	{
-		GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,1,0,0))
-		GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,0,1,0))
-		GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,0,0,1))
+		// GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,1,0,0))
+		// GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,0,1,0))
+		// GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,0,0,1))
 
-		GreatCircle(new THREE.Vector4(0,1,0,0),new THREE.Vector4(0,0,1,0))
-		GreatCircle(new THREE.Vector4(0,1,0,0),new THREE.Vector4(0,0,0,1))
+		// GreatCircle(new THREE.Vector4(0,1,0,0),new THREE.Vector4(0,0,1,0))
+		// GreatCircle(new THREE.Vector4(0,1,0,0),new THREE.Vector4(0,0,0,1))
 
-		GreatCircle(new THREE.Vector4(0,0,1,0),new THREE.Vector4(0,0,0,1))
+		// GreatCircle(new THREE.Vector4(0,0,1,0),new THREE.Vector4(0,0,0,1))
 	}
 
 	//hopf fibrating
@@ -120,7 +120,7 @@ function initThreeSphereExploration()
 				GreatCircle( new THREE.Vector4().copy(q1), new THREE.Vector4().copy(q2) )
 			}
 		}
-		// hopfFibrate(xUnit)
+		hopfFibrate(xUnit)
 		// hopfFibrate(yUnit)
 		// hopfFibrate(zUnit)
 	}
@@ -180,8 +180,6 @@ function initProjectionControls()
 	//could have latitude lines, at least the equator
 
 	let oldGrabBasis = getHandBasis()
-	console.log(getHandBasis().elements) //should be identity
-	console.log(getHandBasis().elements,oldGrabBasis.elements) //should be identity
 	function getHandBasis(target)
 	{
 		if(target === undefined)
@@ -202,16 +200,19 @@ function initProjectionControls()
 
 		for(let i = 0; i < 3; i++)
 		{
-			let unitVector = new THREE.Vector3().setComponent(i,0.001) //"epsilon". Can't be too miniscule because round-off in angle acquisition
+			let unitVector = new THREE.Vector3().setComponent(i,0.000001) //"epsilon". Can't be too miniscule because round-off in angle acquisition
 			imitationHand.localToWorld(unitVector)
 			let curvedAwayUnitVector = stereographicallyUnproject( unitVector )
 
 			let amountToSlerp = (TAU/4) / unprojectedPosition.angleTo( curvedAwayUnitVector )
 			let basisVector = unprojectedPosition.clone()
 			basisVector.slerp( curvedAwayUnitVector, amountToSlerp )
+			// console.log(basisVector,basisVector.length())
 			target.setBasisVector(i,basisVector)
+			// console.log(target.elements)
 		}
 		target.setBasisVector(3,unprojectedPosition) //a weird hack. Think about it
+		// console.log(target.elements)
 
 		return target
 	}
@@ -220,8 +221,8 @@ function initProjectionControls()
 	{
 		let currentBasis = getHandBasis()
 		let oldGrabBasisInverse = new THREE.Matrix4().getInverse( oldGrabBasis )
-		let diff = currentBasis.clone().premultiply(oldGrabBasisInverse)
-		log(oldGrabBasis.elements)//suspicious
+		let diff = currentBasis.clone().multiply(oldGrabBasisInverse)
+		// log(oldGrabBasis.elements)//suspicious
 
 		//old * diff = current
 		//diff = old^-1 * current
@@ -236,12 +237,29 @@ function initProjectionControls()
 		// Deffo want momentum on the spin
 	}
 
-	// if(0)
+	if(0)
 	{
 		//you want a v that is close to the hand before a move,
 		//then let hand do the move, then see if v is still close to hand
 
-		let original = new THREE.Vector3(Math.random(),Math.random(),Math.random()).setLength(0.00000001) //should be able to do other nearby values but for now...
+		//SOOOO you're trying to do an experiment
+		//but uncommenting the below = chaos
+		// console.log(imitationHand.position, imitationHand.quaternion)
+		imitationHand.position.x = 1
+		// getHandBasis(oldGrabBasis)
+
+		/*
+			This should work, because
+
+			0 + x = x
+			y + x = z
+
+
+			So if you're grabbing the origin it's ok
+		*/
+
+		let original = new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5)
+		original.setLength(0.0000000) //should be able to do other nearby values but for now...
 
 		let v = original.clone()
 		imitationHand.updateMatrixWorld()
@@ -249,36 +267,46 @@ function initProjectionControls()
 		let vLocalToRotatingThreeSphere = stereographicallyUnproject(v).applyMatrix4(threeSphereMatrixInverse)
 		console.warn(vLocalToRotatingThreeSphere.toArray())
 
-		// for(let i = 0; i < 3; i++)
+		for(let i = 0; i < 200; i++)
 		{
 			getHandBasis(oldGrabBasis)
 
-			imitationHand.position.set(  Math.random()-0.5,Math.random()-0.5,Math.random()-0.5)
-			imitationHand.quaternion.set(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).normalize()
-			
+			imitationHand.position.y += 0.02
+			// imitationHand.position.set(  Math.random()-0.5,Math.random()-0.5,Math.random()-0.5)
+			// imitationHand.quaternion.set(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).normalize()
+
+			checkOrthonormality(threeSphereMatrix)
+
 			applyHandDiffToRotatingThreeSphereMatrix()
+
+			checkOrthonormality(threeSphereMatrix)
 		}
 
 		v = original.clone()
 		imitationHand.updateMatrixWorld()
 		imitationHand.localToWorld(v)
 		vLocalToRotatingThreeSphere = stereographicallyUnproject(v).applyMatrix4(threeSphereMatrixInverse)
-		console.warn(vLocalToRotatingThreeSphere.toArray())
+		console.warn(vLocalToRotatingThreeSphere.toArray(), "should be same as above")
 	}
-	return
 
 	updateFunctions.push( function()
 	{
+		// camera.position.applyAxisAngle(yUnit, 0.01)
+		// camera.rotation.y += 0.01
+
 		let t = frameCount*0.03
 
-		// imitationHand.position.set(1.0, 0.4*Math.sin(t),0)
+		imitationHand.position.set( 0*0.2*Math.sin(t), 2*0.1*Math.sin(t),3.8)
+		imitationHand.rotation.set(
+			0.4*Math.sin(t*1.0),
+			0.1*Math.sin(t*1.6),
+			0.6*Math.sin(t*1.3)
+			)
 
-		// imitationHand.position.set( 2*0.2*Math.sin(t), 2*0.1*Math.cos(t),camera.position.z/2 + 2*0.3*Math.sin(t))
-		// imitationHand.rotation.set(
-		// 	0.4*Math.sin(t*1.0),
-		// 	0.1*Math.sin(t*1.6),
-		// 	0.6*Math.sin(t*1.3)
-		// 	)
+		imitationHand.grippingTop = true
+
+		// imitationHand.position.set(0, 2.4*Math.sin(t),1.0)
+		// imitationHand.position.z = 1
 
 		if(imitationHand.grippingTop)
 		{
@@ -316,7 +344,6 @@ function initProjectionControls()
 			}
 			else
 			{
-				console.log("yo")
 				applyHandDiffToRotatingThreeSphereMatrix()
 
 				/*
@@ -352,16 +379,16 @@ function initProjectionControls()
 			sphereFrameGreatCircles[i].representation.visible = false//imitationHand.grippingTop
 		}
 
-		if( imitationHand.grippingTop && imitationHand.grippingTopOld )
-			imitationHand.grippingTop = false
+		// if( imitationHand.grippingTop && imitationHand.grippingTopOld )
+		// 	imitationHand.grippingTop = false
 
 		imitationHand.grippingTopOld = imitationHand.grippingTop
 
-		if(imitationHand.grippingTop)
-			imitationHand.position.y = 0.1
+		// if(imitationHand.grippingTop)
+		// 	imitationHand.position.y = 0.1
 
-		if(imitationHand.position.y === 0)
-			imitationHand.grippingTop = true
+		// if(imitationHand.position.y === 0)
+		// 	imitationHand.grippingTop = true
 
 	} )
 }

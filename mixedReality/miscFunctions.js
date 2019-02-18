@@ -56,7 +56,7 @@ function centerOfCircleThroughThreePoints(a,b,c)
 
 function basicallyEqual(a,b)
 {
-	return Math.abs(a-b) < 0.00001
+	return Math.abs(a-b) < 0.0005
 }
 
 function insertPatchworkFaces(verticesWide, facesArray, startingIndex, colorFaces)
@@ -184,12 +184,40 @@ THREE.Matrix4.prototype.setBasisVector = function(index,vec)
 	te[ start+1 ] = vec.y;
 	te[ start+2 ] = vec.z;
 
-	if(vec.w)
+	if(vec.w !== undefined)
 	{
 		te[ start+3 ] = vec.w;
 	}
 
 	return this;
+}
+
+function checkOrthonormality(m)
+{
+	let te = m.elements;
+
+	for(let i = 0; i < 4; i++)
+	{
+		let start = i*4
+		let column = new THREE.Vector4(te[start+0],te[start+1],te[start+2],te[start+3])
+		if(!basicallyEqual(column.length(),1) )
+		{
+			console.error("non-normal column: ", i,column.toArray(), " length: ", column.length())
+			// return false
+		}
+		for(let j = i+1; j < 4; j++)
+		{
+			let jStart = j*4
+			let jColumn = new THREE.Vector4(te[jStart+0],te[jStart+1],te[jStart+2],te[jStart+3])
+			if( !basicallyEqual(column.dot(jColumn)), 0 )
+			{
+				console.error("non-orthogonal columns: ", i,j)
+				// return false
+			}
+		}
+	}
+
+	// return true
 }
 
 THREE.TubeBufferGeometry.prototype.updateFromCurve = function()
