@@ -3,7 +3,7 @@ async function initSurroundings()
 	//floor
 	let floorDimension = 8;				
 	let floorTile = new THREE.Mesh( new THREE.PlaneBufferGeometry( floorDimension, floorDimension ), new THREE.MeshLambertMaterial());
-	floorTile.position.y = -1.2;
+	floorTile.position.y = 0;
 	floorTile.rotation.x = -TAU / 4;
 	scene.add(floorTile);
 	new THREE.TextureLoader().setCrossOrigin(true).load(

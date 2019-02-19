@@ -79,6 +79,12 @@ let fourSpaceAxes = [
 	new THREE.Vector4(0,1,0,0),
 	new THREE.Vector4(0,0,1,0)
 ]
+let assemblage = new THREE.Group()
+assemblage.position.y += 1.6
+assemblage.position.z -= 0.3
+assemblage.scale.setScalar(0.1)
+assemblage.updateMatrixWorld()
+scene.add(assemblage)
 
 function initThreeSphereExploration()
 {
@@ -87,22 +93,23 @@ function initThreeSphereExploration()
 	// GreatCircle()
 
 	//hyper octahedron
+	if(0)
 	{
-		// GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,1,0,0))
-		// GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,0,1,0))
-		// GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,0,0,1))
+		GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,1,0,0))
+		GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,0,1,0))
+		GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,0,0,1))
 
-		// GreatCircle(new THREE.Vector4(0,1,0,0),new THREE.Vector4(0,0,1,0))
-		// GreatCircle(new THREE.Vector4(0,1,0,0),new THREE.Vector4(0,0,0,1))
+		GreatCircle(new THREE.Vector4(0,1,0,0),new THREE.Vector4(0,0,1,0))
+		GreatCircle(new THREE.Vector4(0,1,0,0),new THREE.Vector4(0,0,0,1))
 
-		// GreatCircle(new THREE.Vector4(0,0,1,0),new THREE.Vector4(0,0,0,1))
+		GreatCircle(new THREE.Vector4(0,0,1,0),new THREE.Vector4(0,0,0,1))
 	}
 
 	//hopf fibrating
 	{
 		let fixedAxes = [];
 
-		let icoVertices = new THREE.IcosahedronGeometry(1,2).vertices
+		let icoVertices = new THREE.IcosahedronGeometry(1,1).vertices
 		fixedAxes = icoVertices
 
 		// for(let i = 0; i < 20; i++)
@@ -123,6 +130,9 @@ function initThreeSphereExploration()
 		hopfFibrate(xUnit)
 		// hopfFibrate(yUnit)
 		// hopfFibrate(zUnit)
+		// hopfFibrate(xUnit.clone().negate())
+		// hopfFibrate(yUnit.clone().negate())
+		// hopfFibrate(zUnit.clone().negate())
 	}
 }
 
@@ -169,6 +179,10 @@ function stereographicallyUnproject(p)
 
 function initProjectionControls()
 {
+	let matrixWhenGrabbed = new THREE.Matrix4()
+	let whenGrabbedHandPosition = new THREE.Vector3()
+	let whenGrabbedHandQuaternion = new THREE.Quaternion()
+
 	let sphereFrameGreatCircles = []
 	{
 		let numCirclesInGreatSphere = 5
@@ -179,58 +193,57 @@ function initProjectionControls()
 	}
 	//could have latitude lines, at least the equator
 
-	let oldGrabBasis = getHandBasis()
-	function getHandBasis(target)
+	let designatedHand = handControllers[0]
+	// if(0)
 	{
-		if(target === undefined)
+		designatedHand = imitationHand
+		scene.add( imitationHand )
+	}
+	function getHandBasis(position, quaternion,targetMatrix)
+	{
+		if(targetMatrix === undefined)
 		{
-			target = new THREE.Matrix4()
+			targetMatrix = new THREE.Matrix4()
 		}
 
-		imitationHand.updateMatrixWorld()
+		//no rotating the assemblage.
+		let localPosition = assemblage.worldToLocal(position.clone())
+		let localHandMatrix = new THREE.Matrix4().makeRotationFromQuaternion(quaternion)
+		localHandMatrix.setPosition(localPosition)
 
-		//so you're getting the current basis using t'old one. It's ok coz it's a diff
-		//in 2D/3D with rayOrigin = (0,0,1),
-		//suppose your hand's matrix is the identity, we want that to correspond to identity in 4D
-		//points: position: (0,0,-1); 
 		//maybe the one corresponding to position should be in the direction of the ray origin?
-		//projection causes mirror-reversal? Sheesh, geometric algebra needed
-		//assumes rayOrigin is (0,0,0,1)?
-		let unprojectedPosition = stereographicallyUnproject( imitationHand.position )
+		//projection can cause mirror-reversal
+		let unprojectedPosition = stereographicallyUnproject( localPosition )
 
 		for(let i = 0; i < 3; i++)
 		{
 			let unitVector = new THREE.Vector3().setComponent(i,0.000001) //"epsilon". Can't be too miniscule because round-off in angle acquisition
-			imitationHand.localToWorld(unitVector)
+			unitVector.applyMatrix4(localHandMatrix)
 			let curvedAwayUnitVector = stereographicallyUnproject( unitVector )
 
 			let amountToSlerp = (TAU/4) / unprojectedPosition.angleTo( curvedAwayUnitVector )
 			let basisVector = unprojectedPosition.clone()
 			basisVector.slerp( curvedAwayUnitVector, amountToSlerp )
-			// console.log(basisVector,basisVector.length())
-			target.setBasisVector(i,basisVector)
-			// console.log(target.elements)
+			targetMatrix.setBasisVector(i,basisVector)
 		}
-		target.setBasisVector(3,unprojectedPosition) //a weird hack. Think about it
-		// console.log(target.elements)
+		targetMatrix.setBasisVector(3,unprojectedPosition)
+		checkOrthonormality(targetMatrix)
 
-		return target
+		return targetMatrix
 	}
 
 	function applyHandDiffToRotatingThreeSphereMatrix()
 	{
-		let currentBasis = getHandBasis()
-		let oldGrabBasisInverse = new THREE.Matrix4().getInverse( oldGrabBasis )
-		let diff = currentBasis.clone().multiply(oldGrabBasisInverse)
+		//if you've not moved the diff should be the identity
+
+		let currentBasis = getHandBasis(designatedHand.position,designatedHand.quaternion)
+		let whenGrabbedBasis = getHandBasis(whenGrabbedHandPosition,whenGrabbedHandQuaternion)
+		let whenGrabbedBasisInverse = new THREE.Matrix4().getInverse( whenGrabbedBasis )
+		let diff = currentBasis.clone().multiply(whenGrabbedBasisInverse)
 		// log(oldGrabBasis.elements)//suspicious
 
-		//old * diff = current
-		//diff = old^-1 * current
-		// if(!diff.basicallyEqual(new THREE.Matrix4()))console.log(diff)
-		//if there's no movement it should be the identity, that's goal for now
-		//could have "original basis", like from when you grabbed
 
-		threeSphereMatrix.multiply(diff) //possibly premultiply, but surely not
+		threeSphereMatrix.copy(matrixWhenGrabbed).premultiply(diff) //possibly premultiply, but surely not
 		threeSphereMatrixInverse.getInverse(threeSphereMatrix)
 
 		//obv you're solving for the three vectors, from which you ought to be able to get the projection pt
@@ -239,24 +252,9 @@ function initProjectionControls()
 
 	if(0)
 	{
-		//you want a v that is close to the hand before a move,
-		//then let hand do the move, then see if v is still close to hand
+		imitationHand.position.copy(assemblage.position)
 
-		//SOOOO you're trying to do an experiment
-		//but uncommenting the below = chaos
-		// console.log(imitationHand.position, imitationHand.quaternion)
 		imitationHand.position.x = 1
-		// getHandBasis(oldGrabBasis)
-
-		/*
-			This should work, because
-
-			0 + x = x
-			y + x = z
-
-
-			So if you're grabbing the origin it's ok
-		*/
 
 		let original = new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5)
 		original.setLength(0.0000000) //should be able to do other nearby values but for now...
@@ -267,11 +265,10 @@ function initProjectionControls()
 		let vLocalToRotatingThreeSphere = stereographicallyUnproject(v).applyMatrix4(threeSphereMatrixInverse)
 		console.warn(vLocalToRotatingThreeSphere.toArray())
 
-		for(let i = 0; i < 200; i++)
+		for(let i = 0; i < 3; i++)
 		{
-			getHandBasis(oldGrabBasis)
-
-			imitationHand.position.y += 0.02
+			imitationHand.oldPosition.copy(imitationHand.position)
+			imitationHand.position.y += 0.2
 			// imitationHand.position.set(  Math.random()-0.5,Math.random()-0.5,Math.random()-0.5)
 			// imitationHand.quaternion.set(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).normalize()
 
@@ -291,28 +288,16 @@ function initProjectionControls()
 
 	updateFunctions.push( function()
 	{
-		// camera.position.applyAxisAngle(yUnit, 0.01)
-		// camera.rotation.y += 0.01
-
-		let t = frameCount*0.03
-
-		imitationHand.position.set( 0*0.2*Math.sin(t), 2*0.1*Math.sin(t),3.8)
-		imitationHand.rotation.set(
-			0.4*Math.sin(t*1.0),
-			0.1*Math.sin(t*1.6),
-			0.6*Math.sin(t*1.3)
-			)
-
-		imitationHand.grippingTop = true
-
-		// imitationHand.position.set(0, 2.4*Math.sin(t),1.0)
-		// imitationHand.position.z = 1
-
-		if(imitationHand.grippingTop)
+		if(designatedHand.grippingTop)
 		{
-			if( !imitationHand.grippingTopOld )
+			// console.log(designatedHand.grippingTop)
+			if( !designatedHand.grippingTopOld )
 			{
-				let grabLocation = imitationHand.position.clone()
+				matrixWhenGrabbed.copy(threeSphereMatrix)
+				whenGrabbedHandPosition.copy(designatedHand.position)
+				whenGrabbedHandQuaternion.copy(designatedHand.quaternion)
+
+				let grabLocation = designatedHand.position.clone()
 				let fourSpaceGrabLocation = stereographicallyUnproject(grabLocation)
 
 				let localGrabLocation = fourSpaceGrabLocation.clone().applyMatrix4( threeSphereMatrixInverse )
@@ -339,11 +324,10 @@ function initProjectionControls()
 
 					sphereFrameGreatCircles[i].representation.geometry.updateFromCurve()
 				}
-
-				oldGrabBasis = new THREE.Matrix4()
 			}
 			else
 			{
+				// console.log("yo")
 				applyHandDiffToRotatingThreeSphereMatrix()
 
 				/*
@@ -361,35 +345,13 @@ function initProjectionControls()
 					Orient circle such that grabbed position intersects with that ray (but is not on thingy point)
 				*/
 			}
-
-			// debugger
-		}
-		getHandBasis(oldGrabBasis)
-
-		if(logged<3)
-		{
-			// console.log(imitationHand.position, threeSphereMatrix.elements)
-			// debugger;
-			logged++
 		}
 
 		for(let i = 0; i < sphereFrameGreatCircles.length; i++)
 		{
 			//nicer would be some cool explosion from your hand
-			sphereFrameGreatCircles[i].representation.visible = false//imitationHand.grippingTop
+			sphereFrameGreatCircles[i].representation.visible = false//designatedHand.grippingTop
 		}
-
-		// if( imitationHand.grippingTop && imitationHand.grippingTopOld )
-		// 	imitationHand.grippingTop = false
-
-		imitationHand.grippingTopOld = imitationHand.grippingTop
-
-		// if(imitationHand.grippingTop)
-		// 	imitationHand.position.y = 0.1
-
-		// if(imitationHand.position.y === 0)
-		// 	imitationHand.grippingTop = true
-
 	} )
 }
 
@@ -471,10 +433,10 @@ function GreatCircle(controlPoint0,controlPoint1)
 			return p
 		}
 		let tubularSegments = 45
-		let tubeRadius = 0.009
+		let tubeRadius = 0.007
 		let representation = new THREE.Mesh( new THREE.TubeBufferGeometry( curve, tubularSegments, tubeRadius,5,false ), new THREE.MeshLambertMaterial() )
 		greatCircle.representation = representation
-		scene.add( representation )
+		assemblage.add( representation )
 
 		let logarithm = Math.log(furthestOutDistance)
 		representation.material.color.setHSL(clamp(logarithm /3,0,1),0.5,0.5)

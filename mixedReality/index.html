@@ -57,11 +57,12 @@
 				}
 				window.addEventListener( 'resize', windowResize)
 
-				camera.position.z = 16 //doesn't matter
-				camera.far = camera.position.z * 2
+				camera.position.z = assemblage.position.z + 2
+				camera.position.y = assemblage.position.y
+				camera.far = 30
 				camera.updateProjectionMatrix()
 
-				// initVr()
+				initVr()
 
 				initButtons()
 				initLights();
@@ -72,7 +73,7 @@
 
 				// initFish();
 
-				// await initSurroundings()
+				await initSurroundings()
 
 				initThreeSphereExploration()
 				// initTwoSphereExploration()
@@ -82,6 +83,7 @@
 					frameDelta = clock.getDelta();
 
 					readHandInput();
+					updateImitationHand()
 
 					synchronizeToVideoOrCallContingentUpdateFunctions()
 
