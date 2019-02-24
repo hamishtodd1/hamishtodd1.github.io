@@ -5709,11 +5709,11 @@
 
 				var t = - ( line.start.dot( this.normal ) + this.constant ) / denominator;
 
-				if ( t < 0 || t > 1 ) {
+				// if ( t < 0 || t > 1 ) {
 
-					return undefined;
+				// 	return undefined;
 
-				}
+				// }
 
 				return target.copy( direction ).multiplyScalar( t ).add( line.start );
 
