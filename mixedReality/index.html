@@ -30,7 +30,7 @@
 
 		<script src="keyboard.js"></script>
 
-
+		<script src="visibox.js"></script>
 		<script src="surroundings.js"></script>
 		
 		<script src="miscFunctions.js"></script>
@@ -57,17 +57,18 @@
 				}
 				window.addEventListener( 'resize', windowResize)
 
-				camera.position.z = assemblage.position.z + 2
-				camera.position.y = assemblage.position.y
-				camera.far = 30
+				camera.position.z = 3
+				// camera.position.y = assemblage.position.y
+				camera.far = 40
 				camera.updateProjectionMatrix()
 
-				initVr()
+				// initVr()
 
 				initButtons()
 				initLights();
 				initPlaybackAndRecording()
 				// initHead()
+				initVisiBox()
 
 				initImitationHand();
 
@@ -75,8 +76,8 @@
 
 				await initSurroundings()
 
-				initThreeSphereExploration()
-				// initTwoSphereExploration()
+				// initThreeSphereExploration()
+				initTwoSphereExploration()
 
 				renderer.setAnimationLoop( function()
 				{

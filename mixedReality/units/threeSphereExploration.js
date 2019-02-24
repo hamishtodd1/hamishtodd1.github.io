@@ -288,6 +288,27 @@ function initProjectionControls()
 
 	updateFunctions.push( function()
 	{
+		if(0)
+		{
+			// camera.position.applyAxisAngle(yUnit, 0.01)
+			// camera.rotation.y += 0.01
+
+			let t = frameCount*0.03
+
+			imitationHand.position.set(0, assemblage.position.y,assemblage.position.z+assemblage.scale.z)
+			imitationHand.position.y += 0.04*Math.sin(t)
+
+			// imitationHand.position.set( 0*0.2*Math.sin(t), 2*0.1*Math.sin(t),3.8)
+			imitationHand.rotation.set(
+				0.4*Math.sin(t*1.0),
+				0.5*Math.sin(t*1.6),
+				0//0.6*Math.sin(t*1.3)
+				)
+			// imitationHand.quaternion.setFromEuler(imitationHand.rotation)
+
+			imitationHand.grippingTop = true
+		}
+		
 		if(designatedHand.grippingTop)
 		{
 			// console.log(designatedHand.grippingTop)

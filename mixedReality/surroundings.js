@@ -1,7 +1,7 @@
 async function initSurroundings()
 {
 	//floor
-	let floorDimension = 8;				
+	let floorDimension = 16;
 	let floorTile = new THREE.Mesh( new THREE.PlaneBufferGeometry( floorDimension, floorDimension ), new THREE.MeshLambertMaterial());
 	floorTile.position.y = 0;
 	floorTile.rotation.x = -TAU / 4;
