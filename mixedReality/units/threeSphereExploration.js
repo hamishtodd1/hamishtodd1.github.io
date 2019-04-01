@@ -1,20 +1,45 @@
 /*
-	This is not a sphere, this is the equivalent of a line of longtitude on the earth
+	TODO
+		unify fish universe and projections
+		normal sphere can be rotated in normal way
+		pair of lines showing projection points from fish?
+		automate 2-sphere placement
+		chapter system, sigh. Better would be more improvizational, can just show and hide whatever you like
+		sphere frame great circles as just another shape
+		monitoring
 
-	Could have a unit sphere showing the "equator" where they meet at all times
+		minimalist version for camera person? Prob not
+		Momentum
 
-	//homogeneous coords idea: hand orientation controls 2D.
-	//Z vector scales hand controller model to where it is, which looks bad but it's ok
-	//y and -x directions stay the same for the controller but you can rotate
+	Script, "Rotating a 4D sphere in VR"
+		So to describe 4D rotations, in this video we're going to use basically the same approach to describing 4D
+		That you might have seen elsewhere, which is we're going to think about a 2D creature, and we're going to try to empathize with it
+		We're going to use standard approach, [fish]
+		And we have this sphere here which we can rotate in the normal way
+		To this fish it is a truly crazy idea that you could rotate in more than one way
+
+		degrees of freedom
+
+		The fish can take this point anywhere it likes and put it at any orientation
+		And there will always be some orientation of the sphere that gives it that
+		Can even get a nice rotation effect
+
+		Have to give general sphere definition
+		you have "great spheres" rather than great circles
+	
+		You can rotate while keeping a whole plane in place
+
+		That sphere cuts space into two equal parts
+
+		The 4D sphere is staying at the same location
+
+		So in 2D you get 1 degree of rotational freedom, in 3D we have 3. How many do they have in 4D?
+		Maybe pause the video. If you said 6, well done! In 5D it is 10. Try to work out why!
 
 	alternative way of looking at it: the sphere is stuck in place
 	but your plane and projection point are moving
 	so the fish universe's z is equal to your hand z and pitch and yaw at first
 	but you can make it so that... the board keeps its z and sphere does too...
-
-	Have to give general sphere definition
-	worth mentioning that you have "great spheres" rather than great circles
-	Show yourself rotating (not translating) the regular sphere
 
 	Sequel: "turning things inside-out with 4D spheres"
 		Surfaces
@@ -22,54 +47,6 @@
 		Bring in chirality
 		600-cell tet ring thing
 		hopf fibration, spinors
-
-	Take the ray through the origin out to infinity and the sphere that is normal to that ray at your hand. Now when you move your hand toward the origin, that sphere will become a plane
-	That sphere cuts space into two equal parts
-	Call it "Rotating a 4D sphere in VR"
-
-	To avoid nastiness:
-		If you have a triangle whose interior contains, erm, the point at infinity, don't show it
-
-	You grab a board with a fish on it and the fish is where your hand is
-
-	Rotating a sphere in 5D: 10 degrees of freedom.
-
-	What you want to get out of your
-	Low-d topology, thurston
-
-	//----------double sphere thing
-	You put a slice through the sphere and project from points either side of it, on the surface and as far away as possible from the slice
-	The location and orientation of the slice is what matters
-
-	There's an "equator" controlling where the projection is limited to
-
-	You do want this "go from 2 to one having everything" thing
-	That requires you to think of this universe as S3. ok.
-	Either one "inflates" (around an inflation point quite close to the other)
-	To match up with the other
-	Or one is "sapped" by the other
-
-	If there's a triangle whose vertices are in separate spheres, urgh, gotta "cut" it
-		Make sure that you're rendering twice I guess
-
-	The shells of the spheres are both projections of the slice plane
-	For both spheres, the area outside it is area that COULD be projected to, you just reduce it to the other sphere
-
-	Script 
-		Map analogy: You see the two hemispheres, they have quite a separation
-		"Rotate the globe". Show you can increase and decrease the size of the slice, putting more of the globe on one of the two things
-		Unfolds to a fish universe with a little fish in it
-		It was "wrapped around" the hemisphere with a single widely-curved fold.
-		Make that fold bigger and smaller, showing how that redistributes bits of the globe or makes the same projection bigger and smaller
-		And then you can still move the fold back and forth
-		Close up the fold, showing how it becomes very much like the globe is "squashed" to the center
-			And you can remove the equator
-
-	//------Previous script, on quaternions
-	Belt trick - separete:
-		The double cover is "this shitty little thing"
-			That idea about the fish and its shadow world
-			Attach it to *something outside its world*, and now it can tell whether it is in shadow world
 */
 
 //these are not changing
@@ -80,8 +57,8 @@ let fourSpaceAxes = [
 	new THREE.Vector4(0,0,1,0)
 ]
 let assemblage = new THREE.Group()
-assemblage.position.y += 1.6
-assemblage.position.z -= 0.3
+// assemblage.position.y += 1.6
+// assemblage.position.z -= 0.3
 assemblage.scale.setScalar(0.1)
 assemblage.updateMatrixWorld()
 scene.add(assemblage)
@@ -93,23 +70,26 @@ function initThreeSphereExploration()
 	// GreatCircle()
 
 	//hyper octahedron
-	if(0)
+	// if(0)
+	let sixteenCellCircles = []
 	{
-		GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,1,0,0))
-		GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,0,1,0))
-		GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,0,0,1))
 
-		GreatCircle(new THREE.Vector4(0,1,0,0),new THREE.Vector4(0,0,1,0))
-		GreatCircle(new THREE.Vector4(0,1,0,0),new THREE.Vector4(0,0,0,1))
+		sixteenCellCircles.push( GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,1,0,0)) )
+		sixteenCellCircles.push( GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,0,1,0)) )
+		sixteenCellCircles.push( GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,0,0,1)) )
 
-		GreatCircle(new THREE.Vector4(0,0,1,0),new THREE.Vector4(0,0,0,1))
+		sixteenCellCircles.push( GreatCircle(new THREE.Vector4(0,1,0,0),new THREE.Vector4(0,0,1,0)) )
+		sixteenCellCircles.push( GreatCircle(new THREE.Vector4(0,1,0,0),new THREE.Vector4(0,0,0,1)) )
+
+		sixteenCellCircles.push( GreatCircle(new THREE.Vector4(0,0,1,0),new THREE.Vector4(0,0,0,1)) )
 	}
 
-	//hopf fibrating
+	let hopfCircles = []
 	{
+
 		let fixedAxes = [];
 
-		let icoVertices = new THREE.IcosahedronGeometry(1,1).vertices
+		let icoVertices = new THREE.IcosahedronGeometry(1,2).vertices
 		fixedAxes = icoVertices
 
 		// for(let i = 0; i < 20; i++)
@@ -124,16 +104,49 @@ function initThreeSphereExploration()
 				let q1 = new THREE.Quaternion().setFromUnitVectors(axisToPoint,fixedAxes[i])
 				let q2 = q1.clone().premultiply(new THREE.Quaternion().setFromAxisAngle(fixedAxes[i],TAU/4))
 
-				GreatCircle( new THREE.Vector4().copy(q1), new THREE.Vector4().copy(q2) )
+				/*
+					(1,0,0)  black
+					(-1,0,0) white
+
+					(0,y,z): h = atan(y,z)
+				*/
+				let angle = Math.atan2(fixedAxes[i].y,fixedAxes[i].z)
+				let hue = (angle + Math.PI) / TAU
+				let xNormalized = (fixedAxes[i].x + 1 ) / 2
+				let easedToReduceBlackAndWhite = Math.acos(-(xNormalized*2-1))*2/TAU
+				let lightness = easedToReduceBlackAndWhite
+				let color = new THREE.Color().setHSL(hue,1,lightness)
+
+				hopfCircles.push( GreatCircle( new THREE.Vector4().copy(q1), new THREE.Vector4().copy(q2), color ) )
 			}
 		}
-		hopfFibrate(xUnit)
+		// hopfFibrate(xUnit)
 		// hopfFibrate(yUnit)
-		// hopfFibrate(zUnit)
+		hopfFibrate(zUnit)
 		// hopfFibrate(xUnit.clone().negate())
 		// hopfFibrate(yUnit.clone().negate())
 		// hopfFibrate(zUnit.clone().negate())
 	}
+
+	let greatCircleSets = [sixteenCellCircles,hopfCircles]
+
+	bindButton( "c", function()
+	{
+		let indexToMakeVisible = 0
+		if(greatCircleSets[0][0].representation.visible)
+		{
+			indexToMakeVisible = 1
+		}
+
+		for(let i = 0; i < greatCircleSets[indexToMakeVisible].length; i++)
+		{
+			greatCircleSets[indexToMakeVisible][i].representation.visible = true
+		}
+		for(let i = 0; i < greatCircleSets[1-indexToMakeVisible].length; i++)
+		{
+			greatCircleSets[1-indexToMakeVisible][i].representation.visible = false
+		}
+	}, "toggle hopf" )
 }
 
 let threeSphereMatrix = new THREE.Matrix4()
@@ -235,19 +248,13 @@ function initProjectionControls()
 	function applyHandDiffToRotatingThreeSphereMatrix()
 	{
 		//if you've not moved the diff should be the identity
-
 		let currentBasis = getHandBasis(designatedHand.position,designatedHand.quaternion)
 		let whenGrabbedBasis = getHandBasis(whenGrabbedHandPosition,whenGrabbedHandQuaternion)
 		let whenGrabbedBasisInverse = new THREE.Matrix4().getInverse( whenGrabbedBasis )
 		let diff = currentBasis.clone().multiply(whenGrabbedBasisInverse)
-		// log(oldGrabBasis.elements)//suspicious
 
-
-		threeSphereMatrix.copy(matrixWhenGrabbed).premultiply(diff) //possibly premultiply, but surely not
+		threeSphereMatrix.copy(matrixWhenGrabbed).premultiply(diff)
 		threeSphereMatrixInverse.getInverse(threeSphereMatrix)
-
-		//obv you're solving for the three vectors, from which you ought to be able to get the projection pt
-		// Deffo want momentum on the spin
 	}
 
 	if(0)
@@ -288,7 +295,7 @@ function initProjectionControls()
 
 	updateFunctions.push( function()
 	{
-		if(0)
+		// if(0)
 		{
 			// camera.position.applyAxisAngle(yUnit, 0.01)
 			// camera.rotation.y += 0.01
@@ -305,11 +312,9 @@ function initProjectionControls()
 				0//0.6*Math.sin(t*1.3)
 				)
 			// imitationHand.quaternion.setFromEuler(imitationHand.rotation)
-
-			imitationHand.grippingTop = true
 		}
 		
-		if(designatedHand.grippingTop)
+		if( designatedHand.grippingTop )
 		{
 			// console.log(designatedHand.grippingTop)
 			if( !designatedHand.grippingTopOld )
@@ -378,7 +383,7 @@ function initProjectionControls()
 
 //could have points too, maybe travelling along the circles
 //alternatively could have had a torusgeometry. Disadvantage is that radius could get small
-function GreatCircle(controlPoint0,controlPoint1)
+function GreatCircle(controlPoint0,controlPoint1, color)
 {
 	let greatCircle = {}
 
@@ -454,13 +459,17 @@ function GreatCircle(controlPoint0,controlPoint1)
 			return p
 		}
 		let tubularSegments = 45
-		let tubeRadius = 0.007
-		let representation = new THREE.Mesh( new THREE.TubeBufferGeometry( curve, tubularSegments, tubeRadius,5,false ), new THREE.MeshLambertMaterial() )
+		let tubeRadius = 0.017
+		let representation = new THREE.Mesh( new THREE.TubeBufferGeometry( curve, tubularSegments, tubeRadius,5,false ), new THREE.MeshLambertMaterial({clippingPlanes:visiBox.planes}) )
 		greatCircle.representation = representation
 		assemblage.add( representation )
 
-		let logarithm = Math.log(furthestOutDistance)
-		representation.material.color.setHSL(clamp(logarithm /3,0,1),0.5,0.5)
+		if(color === undefined)
+		{
+			let logarithm = Math.log(furthestOutDistance)
+			color = new THREE.Color().setHSL(clamp(logarithm /3,0,1),0.5,0.5)
+		}
+		representation.material.color.copy(color)
 
 		//a color mapping from the sphere might be nice
 
@@ -568,6 +577,17 @@ THREE.Vector4.prototype.distanceTo = function(otherVec)
 	return displacement.length();
 }
 THREE.Vector4.prototype.setToRandomQuaternion = function()
+{
+	this.set(
+		Math.random()-0.5,
+		Math.random()-0.5,
+		Math.random()-0.5,
+		Math.random()-0.5);
+	this.setLength(1);
+
+	return this;
+}
+THREE.Quaternion.prototype.randomize = function()
 {
 	this.set(
 		Math.random()-0.5,

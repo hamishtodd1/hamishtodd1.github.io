@@ -1,13 +1,8 @@
-/*
-	How to "advance?" Depends on what the advancement is
-		Make something appear
-		Take things out of a box, and while they're inside the box they ain't updated?
-		Ideally advancement
-*/
-
 function initTwoSphereExploration()
 {
 	imitationHand.position.x = 2
+
+	meshesWithProjections = []
 
 	let generalSphereRadius = 0.2
 
@@ -15,7 +10,7 @@ function initTwoSphereExploration()
 	scene.add(ourBulb)
 	updateFunctions.push(function()
 	{
-		ourBulb.position.lerp(new THREE.Vector3(0,0,generalSphereRadius),0.1)
+		ourBulb.position.lerp(new THREE.Vector3(0,0,-generalSphereRadius),0.1)
 	})
 
 	new THREE.OBJLoader().load("data/Lamp_Fluorescent_Illuminated.obj",function(obj)
@@ -55,17 +50,21 @@ function initTwoSphereExploration()
 		}
 	},function(){},function(e){console.log(e)})
 
-	function addProjection(mesh)
+	updateFunctions.push(function()
 	{
-		let mat = mesh.material.clone() //TODO, nice rectangle clipping planes
-		mat.clippingPlanes = visiBox.planes
-		mesh.projection = new THREE.LineSegments(mesh.geometry.clone(),mat)
+		//somewhat ambiguous!
+		// mesh.projection.position.copy(mesh.position)
 
-		updateFunctions.push(function()
+		for(let i = 0; i < meshesWithProjections.length; i++)
 		{
-			//somewhat ambiguous!
-			// mesh.projection.position.copy(mesh.position)
+			let mesh = meshesWithProjections[i]
+			if(mesh.visible === false)
+			{
+				mesh.projection.visible = false
+				continue
+			}
 
+			mesh.projection.visible = true
 			mesh.projection.updateMatrixWorld()
 			let plane = new THREE.Plane()
 			let normal = new THREE.Vector3(0,0,1).applyMatrix4( mesh.projection.matrixWorld ).normalize()
@@ -87,11 +86,34 @@ function initTwoSphereExploration()
 			}
 			// console.log(mesh.projection.geometry.vertices[4])
 			mesh.projection.geometry.verticesNeedUpdate = true
-		})
+
+			let newBasis = getHandBasis2D()
+			newBasis.setPosition(mesh.position)
+			for(let i = 0; i < 3; i++)
+			{
+				let basisVector = newBasis.getBasisVector(i)
+				basisVector.setLength(generalSphereRadius)
+				newBasis.setBasisVector(i,basisVector)
+			}
+			
+			mesh.matrix.copy(newBasis)
+		}
+	})
+
+	let mat = new THREE.LineBasicMaterial({color:0x0F0CC0})
+	mat.clippingPlanes = visiBox.planes
+	function addProjectableSphere(geo)
+	{
+		let mesh = new THREE.LineSegments(geo, mat)
+		scene.add(mesh)
+		mesh.matrixAutoUpdate = false
+
+		mesh.projection = new THREE.LineSegments(geo.clone(),mat)
 		scene.add(mesh.projection)
+		meshesWithProjections.push(mesh)
 	}
 
-	let latitudesAndLontitudes = new THREE.LineSegments(new THREE.Geometry())
+	let latitudesAndLontitudesGeo = new THREE.Geometry()
 	for(let i = 0; i < 24; i++)
 	{
 		let longtitude = TAU * i / 24
@@ -99,25 +121,24 @@ function initTwoSphereExploration()
 		{
 			let latitude = j / 12 * TAU / 2
 			let p = new THREE.Vector3(0,1,0).applyAxisAngle(xUnit,latitude).applyAxisAngle(yUnit,longtitude)
-			latitudesAndLontitudes.geometry.vertices.push(p)
+			latitudesAndLontitudesGeo.vertices.push(p)
 
 			let nextLatitude = (j+1) / 12 * TAU / 2
 			let q = new THREE.Vector3(0,1,0).applyAxisAngle(xUnit,nextLatitude).applyAxisAngle(yUnit,longtitude)
-			latitudesAndLontitudes.geometry.vertices.push(q)
+			latitudesAndLontitudesGeo.vertices.push(q)
 
 			if(j)
 			{
-				latitudesAndLontitudes.geometry.vertices.push(p)
+				latitudesAndLontitudesGeo.vertices.push(p)
 				let nextLongtitude = TAU * (i+1) / 24
 				let r = new THREE.Vector3(0,1,0).applyAxisAngle(xUnit,latitude).applyAxisAngle(yUnit,nextLongtitude)
-				latitudesAndLontitudes.geometry.vertices.push(r)
+				latitudesAndLontitudesGeo.vertices.push(r)
 			}
 		}
 	}
-	// scene.add(latitudesAndLontitudes)
-	// addProjection(latitudesAndLontitudes)
+	addProjectableSphere(latitudesAndLontitudesGeo)
 
-	let sphericalOctahedron = new THREE.LineSegments(new THREE.Geometry())
+	let sphericalOctahedronGeo = new THREE.Geometry()
 	let radialSegements = 128
 	for(let i = 0; i < 3; i++)
 	{
@@ -127,36 +148,28 @@ function initTwoSphereExploration()
 		{
 			let latitude = j / radialSegements * TAU
 			let p = start.clone().applyAxisAngle(axis,latitude)
-			sphericalOctahedron.geometry.vertices.push(p)
+			sphericalOctahedronGeo.vertices.push(p)
 
 			let nextLatitude = (j+1) / radialSegements * TAU
 			let q = start.clone().applyAxisAngle(axis,nextLatitude)
-			sphericalOctahedron.geometry.vertices.push(q)
+			sphericalOctahedronGeo.vertices.push(q)
 		}
 	}
-	// scene.add(sphericalOctahedron)
-	// updateFunctions.push(function(){sphericalOctahedron.rotation.y+=0.01;sphericalOctahedron.rotation.x+=0.01})
-	// addProjection(sphericalOctahedron)
+	addProjectableSphere(sphericalOctahedronGeo)
 
+	let sourceGeo = new THREE.IcosahedronGeometry(1,2 )
+	let goldbergGeo = new THREE.Geometry()
+	for(let i = 0; i < sourceGeo.faces.length; i++)
 	{
-		let sourceGeo = new THREE.IcosahedronGeometry(1,2 )
-		let goldberg = new THREE.LineSegments(new THREE.Geometry())
-		for(let i = 0; i < sourceGeo.faces.length; i++)
+		let f = sourceGeo.faces[i]
+		for(let j = 0; j < 3; j++)
 		{
-			let f = sourceGeo.faces[i]
-			for(let j = 0; j < 3; j++)
-			{
-				goldberg.geometry.vertices.push(sourceGeo.vertices[ f.getCorner(j) ])
-				goldberg.geometry.vertices.push(sourceGeo.vertices[ f.getCorner((j+1)%3) ])
-			}
+			goldbergGeo.vertices.push(sourceGeo.vertices[ f.getCorner(j) ])
+			goldbergGeo.vertices.push(sourceGeo.vertices[ f.getCorner((j+1)%3) ])
 		}
-		// scene.add(goldberg)
-		// addProjection(goldberg)
 	}
+	addProjectableSphere(goldbergGeo)
 
-	//want normal sphere, AND world map, AND icosahedron buffer geometry
-
-	let globe = null
 	new THREE.OBJLoader().load("data/worldMap.obj",function(obj)
 	{
 		let transform = new THREE.Matrix4().makeRotationX(-TAU/4)
@@ -165,7 +178,7 @@ function initTwoSphereExploration()
 		
 		new THREE.FileLoader().load("data/coastlineIndices.txt", function(coastlineTxt)
 		{
-			let newGeo = new THREE.Geometry()
+			let globeGeo = new THREE.Geometry()
 			let coastlineIndices = JSON.parse(coastlineTxt)
 
 			for(let i = 0; i < coastlineIndices.length; i += 2)
@@ -173,13 +186,10 @@ function initTwoSphereExploration()
 				let index = coastlineIndices[i]
 				let otherIndex = coastlineIndices[i] % 3 === 2 ? coastlineIndices[i] - 2 : coastlineIndices[i] + 1
 
-				newGeo.vertices.push( geo.attributes.position.getXYZ(index).setLength(1), geo.attributes.position.getXYZ(otherIndex).setLength(1) )
+				globeGeo.vertices.push( geo.attributes.position.getXYZ(index).setLength(1), geo.attributes.position.getXYZ(otherIndex).setLength(1) )
 			}
 
-			globe = new THREE.LineSegments(newGeo)
-			globe.matrixAutoUpdate = false
-			scene.add(globe)
-			addProjection(globe)
+			addProjectableSphere(globeGeo)
 		})
 	})
 
@@ -252,9 +262,33 @@ function initTwoSphereExploration()
 		scene.add(indicators[i])
 	}
 
-	//"you grabbed it when you were in the middle"
-	imitationHand.position.set(1.5,0,0)
-	scene.add(imitationHand)
+	for(let i = 0; i < meshesWithProjections.length; i++ )
+	{
+		meshesWithProjections[i].visible = false
+	}
+	bindButton( "c", function()
+	{
+		let visibleIndex = 0
+		for(let i = 0; i < meshesWithProjections.length; i++)
+		{
+			if( meshesWithProjections[i].visible )
+			{
+				visibleIndex = i
+				break;
+			}
+		}
+
+		visibleIndex++
+		if(visibleIndex >=meshesWithProjections.length)
+		{
+			visibleIndex = 0
+		}
+
+		for(let i = 0; i < meshesWithProjections.length; i++)
+		{
+			meshesWithProjections[i].visible = (i===visibleIndex)
+		}
+	}, "cycle 2-sphere textures" )
 
 	updateFunctions.push(function()
 	{
@@ -263,20 +297,6 @@ function initTwoSphereExploration()
 		// imitationHand.position.y = 0.6*Math.sin(t*1.3)
 		imitationHand.position.x -= 0.01
 		// imitationHand.rotation.z = 0.6*Math.sin(t*1.3)
-
-		if(globe !== null)
-		{
-			let newBasis = getHandBasis2D()
-			newBasis.setPosition(globe.position)
-			globe.matrix.copy(newBasis)
-
-			for(let i = 0; i < 3; i++)
-			{
-				let basisVector = globe.matrix.getBasisVector(i)
-				basisVector.setLength(generalSphereRadius)
-				globe.matrix.setBasisVector(i,basisVector)
-			}
-		}
 
 		// imitationHand.position.set( 2*0.2*Math.sin(t), 2*0.1*Math.cos(t),camera.position.z/2 + 2*0.3*Math.sin(t))
 		// imitationHand.rotation.set(

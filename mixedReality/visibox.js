@@ -105,7 +105,6 @@ function initVisiBox()
 			}
 		}
 		
-		var facesVisible = false;
 		var cornerScale = new THREE.Vector3(cornerRadius/visiBox.scale.x,cornerRadius/visiBox.scale.y,cornerRadius/visiBox.scale.z);
 		for(var i = 0; i < visiBox.corners.length; i++)
 		{
@@ -115,15 +114,7 @@ function initVisiBox()
 				visiBox.corners[i].rotation.set(0,0,0);
 				putOnCubeCorner(i, visiBox.corners[i].position );
 			}
-			else
-			{
-				facesVisible = true;
-			}
 		}
-		// for(var i = 0; i < faces.length; i++)
-		// {
-		// 	faces[i].visible = facesVisible;
-		// }
 		
 		//beware, the planes may be the negatives of what you expect, seemingly because of threejs bug
 		for(var i = 0; i < visiBox.planes.length; i++)
@@ -136,6 +127,18 @@ function initVisiBox()
 			visiBox.planes[i].applyMatrix4(visiBox.matrixWorld);
 		}
 	})
+
+	bindButton( "enter", function()
+	{
+		if(visiBox.scale.x < 100)
+		{
+			visiBox.scale.multiplyScalar(1000)
+		}
+		else
+		{
+			visiBox.scale.multiplyScalar(1/1000)
+		}
+	}, "toggle visibox hugeness" )
 	
 	return visiBox;
 }

@@ -15,6 +15,7 @@ async function initSurroundings()
 		},
 		function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );}
 	);
+	
 
 	//------------Sky
 	let uniforms = {
