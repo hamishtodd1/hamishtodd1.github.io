@@ -28,9 +28,9 @@ function init()
 			
 			mouse.updateFromAsyncAndCheckClicks();
 
-			for(var i = 0; i < updateFunctionsToBeCalled.length; i++)
+			for(var i = 0; i < updateFunctions.length; i++)
 			{
-				updateFunctionsToBeCalled[i]();
+				updateFunctions[i]();
 			}
 
 			frameCount++;
@@ -134,7 +134,7 @@ function initButtons()
 		}
 	}, false );
 
-	updateFunctionsToBeCalled.push(function()
+	updateFunctions.push(function()
 	{
 		for(var buttonName in buttons )
 		{

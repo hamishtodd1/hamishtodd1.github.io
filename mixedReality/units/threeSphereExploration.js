@@ -1,12 +1,12 @@
 /*
 	TODO
-		unify fish universe and projections
-		normal sphere can be rotated in normal way
 		pair of lines showing projection points from fish?
 		automate 2-sphere placement
+		unify fish universe and projections
+		normal sphere can be rotated in normal way
 		chapter system, sigh. Better would be more improvizational, can just show and hide whatever you like
-		sphere frame great circles as just another shape
 		monitoring
+		Two visiboxes?
 
 		minimalist version for camera person? Prob not
 		Momentum
@@ -69,19 +69,46 @@ function initThreeSphereExploration()
 
 	// GreatCircle()
 
-	//hyper octahedron
-	// if(0)
-	let sixteenCellCircles = []
+	let hyperOctahedronCircles = []
 	{
+		hyperOctahedronCircles.push( GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,1,0,0)) )
+		hyperOctahedronCircles.push( GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,0,1,0)) )
+		hyperOctahedronCircles.push( GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,0,0,1)) )
 
-		sixteenCellCircles.push( GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,1,0,0)) )
-		sixteenCellCircles.push( GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,0,1,0)) )
-		sixteenCellCircles.push( GreatCircle(new THREE.Vector4(1,0,0,0),new THREE.Vector4(0,0,0,1)) )
+		hyperOctahedronCircles.push( GreatCircle(new THREE.Vector4(0,1,0,0),new THREE.Vector4(0,0,1,0)) )
+		hyperOctahedronCircles.push( GreatCircle(new THREE.Vector4(0,1,0,0),new THREE.Vector4(0,0,0,1)) )
 
-		sixteenCellCircles.push( GreatCircle(new THREE.Vector4(0,1,0,0),new THREE.Vector4(0,0,1,0)) )
-		sixteenCellCircles.push( GreatCircle(new THREE.Vector4(0,1,0,0),new THREE.Vector4(0,0,0,1)) )
+		hyperOctahedronCircles.push( GreatCircle(new THREE.Vector4(0,0,1,0),new THREE.Vector4(0,0,0,1)) )
+	}
 
-		sixteenCellCircles.push( GreatCircle(new THREE.Vector4(0,0,1,0),new THREE.Vector4(0,0,0,1)) )
+	{
+		var parasolCircles = Array(10)
+
+		let placeTheyAllMeet = new THREE.Vector3(0.5,0.5,0.5)
+		let fourSpacePtam = stereographicallyUnproject(placeTheyAllMeet)
+		let normalizedPtam = placeTheyAllMeet.clone().normalize()
+		let otherPoint0 = randomPerpVector(placeTheyAllMeet).normalize()
+
+		for(let i = 0; i < parasolCircles.length; i++)
+		{
+			let otherPoint = null
+			if(i===0)
+			{
+				otherPoint = zeroVector
+			}
+			else
+			{
+				otherPoint = otherPoint0.clone()
+				otherPoint.applyAxisAngle( normalizedPtam, TAU/2 * (i / (parasolCircles.length-1)) )
+				otherPoint.multiplyScalar( 0.01 )
+				otherPoint.add( placeTheyAllMeet )
+			}
+
+			let un = stereographicallyUnproject( otherPoint )
+			parasolCircles[i] = GreatCircle( fourSpacePtam, un )
+
+			// console.log(fourSpacePtam, un)
+		}
 	}
 
 	let hopfCircles = []
@@ -128,25 +155,33 @@ function initThreeSphereExploration()
 		// hopfFibrate(zUnit.clone().negate())
 	}
 
-	let greatCircleSets = [sixteenCellCircles,hopfCircles]
+	let greatCircleSets = [parasolCircles,hyperOctahedronCircles,hopfCircles]
 
 	bindButton( "c", function()
 	{
 		let indexToMakeVisible = 0
-		if(greatCircleSets[0][0].representation.visible)
+		for(let i = 0; i < greatCircleSets.length; i++)
 		{
-			indexToMakeVisible = 1
+			if( greatCircleSets[i][0].representation.visible )
+			{
+				indexToMakeVisible = (i+1)%greatCircleSets.length
+				break;
+			}
 		}
 
-		for(let i = 0; i < greatCircleSets[indexToMakeVisible].length; i++)
+		for(let i = 0; i < greatCircleSets.length; i++)
 		{
-			greatCircleSets[indexToMakeVisible][i].representation.visible = true
-		}
-		for(let i = 0; i < greatCircleSets[1-indexToMakeVisible].length; i++)
-		{
-			greatCircleSets[1-indexToMakeVisible][i].representation.visible = false
+			for(let j = 0; j < greatCircleSets[i].length; j++)
+			{
+				greatCircleSets[i][j].representation.visible = (i === indexToMakeVisible)
+			}
 		}
 	}, "toggle hopf" )
+
+	// for(let i = 0; i < greatCircleSets[1].length; i++)
+	// {
+	// 	greatCircleSets[0][i].representation.visible = true
+	// }
 }
 
 let threeSphereMatrix = new THREE.Matrix4()
@@ -392,6 +427,8 @@ function GreatCircle(controlPoint0,controlPoint1, color)
 		controlPoint1 !== undefined ? controlPoint1 : stereographicallyUnproject( new THREE.Vector3(1,0,0) )
 	]
 
+	let triggered = 0
+
 	//representation/real space
 	{
 		let line = false
@@ -411,8 +448,8 @@ function GreatCircle(controlPoint0,controlPoint1, color)
 			let pointBetween = controlPoints[0].clone().slerp(controlPoints[1],0.5).applyMatrix4(threeSphereMatrix)
 			let realSpacePointBetween = stereographicallyProject(pointBetween)
 
-			let bivectorMagnitudeSq = realSpacePoint0.clone().sub(pointBetween).cross( realSpacePoint1.clone().sub(pointBetween) ).lengthSq()
-			line = (bivectorMagnitudeSq < 0.00000001 )
+			let angle = realSpacePoint0.clone().sub(realSpacePointBetween).angleTo( realSpacePoint1.clone().sub(realSpacePointBetween) )
+			line = (Math.abs(angle-Math.PI) < 0.00000000001 )
 
 			if(line)
 			{
@@ -483,92 +520,7 @@ function GreatCircle(controlPoint0,controlPoint1, color)
 		})
 	}
 
-	updateFunctions.push( function()
-	{
-		if(ROTATING)
-		{
-			greatCircle.representation.rotation.y += 0.01
-			greatCircle.representation.rotation.x += 0.01
-		}
-	})
-
 	return greatCircle
-}
-ROTATING = false
-
-function initDoubleSphereThreeSphere()
-{
-	let stereographicThreeSphere = new THREE.Group();
-	let sphereRepresentations = Array(2);
-	for(let i = 0; i < 2; i++)
-	{
-		sphereRepresentations[i] = new THREE.Mesh(
-			new THREE.EfficientSphereBufferGeometry(1),
-			new THREE.MeshPhongMaterial({transparent:true,opacity:0.3}));
-		sphereRepresentations[i].position.x = i?1:-1;
-		sphereRepresentations[i].material.color.setRGB(Math.random(),Math.random(),Math.random());
-		stereographicThreeSphere.add(sphereRepresentations[i]);
-	}
-	stereographicThreeSphere.position.z = -0.5;
-	stereographicThreeSphere.scale.setScalar(0.1);
-	scene.add(stereographicThreeSphere);
-
-	let positionsOnThreeSphere = Array(5);
-	updatePositionOnThreeSphere = function()
-	{
-		// this.add(new THREE.Vector4().setToRandomQuaternion().multiplyScalar(0.05))
-		this.setLength(1);
-		
-		this.representation.position.copy(getStereographicProjectionToDoubleSpheres(this));
-		if( this.representation.position.distanceTo(sphereRepresentations[ 0 ].position) > 1 &&
-			this.representation.position.distanceTo(sphereRepresentations[ 1 ].position) > 1 )
-		{
-			console.error("hmm")
-		}
-	}
-	for(let i = 0; i < positionsOnThreeSphere.length; i++)
-	{
-		positionsOnThreeSphere[i] = new THREE.Vector4().setToRandomQuaternion();
-		markedThingsToBeUpdated.push(positionsOnThreeSphere[i]);
-
-		positionsOnThreeSphere[i].update = updatePositionOnThreeSphere;
-
-		positionsOnThreeSphere[i].representation = new THREE.Mesh(
-			new THREE.EfficientSphereBufferGeometry(0.03),
-			new THREE.MeshPhongMaterial());
-		positionsOnThreeSphere[i].representation.material.color.setRGB(Math.random(),Math.random(),Math.random());
-		stereographicThreeSphere.add(positionsOnThreeSphere[i].representation);
-	}
-
-	function getStereographicProjectionToDoubleSpheres(vector)
-	{
-		let rayOrigin = new THREE.Vector4(-1,0,0,0);
-		//projects from the side of the sphere it's on to the hyperplane at x = 0
-		let sphereToGoInto = null;
-		if(vector.x > 0)
-		{
-			sphereToGoInto = sphereRepresentations[0].position.x > sphereRepresentations[1].position.x ? sphereRepresentations[0] : sphereRepresentations[1];
-		}
-		else
-		{
-			rayOrigin.negate()
-			sphereToGoInto = sphereRepresentations[0].position.x > sphereRepresentations[1].position.x ? sphereRepresentations[1] : sphereRepresentations[0];
-		}
-
-		let rayDirection = vector.clone().sub(rayOrigin);
-		let multiplier = 1 / rayDirection.x;
-		let stereographicProjectionInFourSpace = rayDirection.multiplyScalar(multiplier);
-		stereographicProjectionInFourSpace.add(rayOrigin);
-		//if you've done it right these will not leave the spheres
-		let stereographicProjection = new THREE.Vector3(
-			stereographicProjectionInFourSpace.y,
-			stereographicProjectionInFourSpace.z,
-			stereographicProjectionInFourSpace.w );
-		stereographicProjection.add(sphereToGoInto.position)
-		return stereographicProjection;
-	}
-
-	return stereographicThreeSphere;
 }
 
 THREE.Vector4.prototype.distanceTo = function(otherVec)

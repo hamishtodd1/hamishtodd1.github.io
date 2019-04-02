@@ -102,6 +102,12 @@
 				colorSlice1 = texture2D( cubeTex, texCoordSlice1 );
 				colorSlice2 = texture2D( cubeTex, texCoordSlice2 );
 
+				colorSlice1 -= 0.04;
+				colorSlice2 -= 0.04;
+
+				colorSlice1 *= 2.5;
+				colorSlice2 *= 2.5;
+
 				//Based on the opacity obtained earlier, get the RGB color in the transfer function texture.
 				colorSlice1.rgb = texture2D( transferTex, vec2( colorSlice1.a, 1.0) ).rgb;
 				colorSlice2.rgb = texture2D( transferTex, vec2( colorSlice2.a, 1.0) ).rgb;
@@ -249,6 +255,8 @@
 				cubeTextures['teapot'] = THREE.ImageUtils.loadTexture('teapot.raw.png');
 				cubeTextures['foot'] = THREE.ImageUtils.loadTexture('foot.raw.png');
 
+				a = cubeTextures['densityMap']
+				console.log(cubeTextures['densityMap'])
 
 				//Don't let it generate mipmaps to save memory and apply linear filtering to prevent use of LOD.
 				cubeTextures['densityMap'].generateMipmaps = false;

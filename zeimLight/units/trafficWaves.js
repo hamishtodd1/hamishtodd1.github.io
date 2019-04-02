@@ -298,5 +298,5 @@ function initTrafficWaves()
 			}
 		}
 	}
-	updateFunctionsToBeCalled.push(mainLoop)
+	updateFunctions.push(mainLoop)
 }

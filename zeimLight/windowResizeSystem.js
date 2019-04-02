@@ -77,7 +77,7 @@ function initCameraZoomSystem()
 		return start + t * (end-start);
 	}
 	var timeSinceZoomToConsideration = 0;
-	updateFunctionsToBeCalled.push(function()
+	updateFunctions.push(function()
 	{
 		var timeToWaitBeforeZooming = 0.18
 		if(timeSinceZoomToConsideration < timeToWaitBeforeZooming && timeToWaitBeforeZooming < timeSinceZoomToConsideration + frameDelta )
