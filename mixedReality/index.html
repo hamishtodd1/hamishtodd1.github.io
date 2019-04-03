@@ -39,6 +39,8 @@
 		<script src="units/fish.js"></script>
 		<script src="units/threeSphereExploration.js"></script>
 
+		<script src="units/mobiusTransformations.js"></script>
+
 		<script src="units/twoSphereExploration.js"></script>
 
 		<script>
@@ -75,8 +77,9 @@
 
 				await initSurroundings()
 
-				initThreeSphereExploration()
+				// initThreeSphereExploration()
 				// initTwoSphereExploration()
+				initMobiusTransformations()
 
 				renderer.setAnimationLoop( function()
 				{

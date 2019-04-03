@@ -194,7 +194,7 @@ function initProjectionControls()
 	//could have latitude lines, at least the equator
 
 	let designatedHand = handControllers[0]
-	// if(0)
+	if(0)
 	{
 		designatedHand = imitationHand
 		scene.add( imitationHand )
