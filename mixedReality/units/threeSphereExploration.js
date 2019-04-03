@@ -1,15 +1,10 @@
 /*
 	TODO
-		pair of lines showing projection points from fish?
-		automate 2-sphere placement
-		unify fish universe and projections
-		normal sphere can be rotated in normal way
-		chapter system, sigh. Better would be more improvizational, can just show and hide whatever you like
+		Make sure everything can easily be made visible and invisible
 		monitoring
 		Two visiboxes?
 
 		minimalist version for camera person? Prob not
-		Momentum
 
 	Script, "Rotating a 4D sphere in VR"
 		So to describe 4D rotations, in this video we're going to use basically the same approach to describing 4D
@@ -231,23 +226,20 @@ function initProjectionControls()
 	let whenGrabbedHandPosition = new THREE.Vector3()
 	let whenGrabbedHandQuaternion = new THREE.Quaternion()
 
-	let sphereFrameGreatCircles = []
-	{
-		let numCirclesInGreatSphere = 5
-		for(let i = 0; i < numCirclesInGreatSphere+1; i++)
-		{
-			sphereFrameGreatCircles.push( GreatCircle() )
-		}
-	}
-	//could have latitude lines, at least the equator
-
 	let designatedHand = handControllers[0]
-	if(0)
+	// if(0)
 	{
 		designatedHand = imitationHand
 		scene.add( imitationHand )
 	}
-	function getHandBasis(position, quaternion,targetMatrix)
+	let virtualHand = {
+		position:new THREE.Vector3(),
+		quaternion:new THREE.Quaternion(),
+		velocity:new THREE.Vector3(),
+		angularVelocity:new THREE.Quaternion()
+	}
+
+	function stereographicallyProjectBasis(position, quaternion,targetMatrix)
 	{
 		if(targetMatrix === undefined)
 		{
@@ -256,7 +248,7 @@ function initProjectionControls()
 
 		//no rotating the assemblage.
 		let localPosition = assemblage.worldToLocal(position.clone())
-		let localHandMatrix = new THREE.Matrix4().makeRotationFromQuaternion(quaternion)
+		let localHandMatrix = new THREE.Matrix4().makeRotationFromQuaternion(quaternion) //you better not be rotating the assemblage
 		localHandMatrix.setPosition(localPosition)
 
 		//maybe the one corresponding to position should be in the direction of the ray origin?
@@ -265,7 +257,7 @@ function initProjectionControls()
 
 		for(let i = 0; i < 3; i++)
 		{
-			let unitVector = new THREE.Vector3().setComponent(i,0.000001) //"epsilon". Can't be too miniscule because round-off in angle acquisition
+			let unitVector = new THREE.Vector3().setComponent(i,0.00006) //"epsilon". Can't be too miniscule because round-off in angle acquisition
 			unitVector.applyMatrix4(localHandMatrix)
 			let curvedAwayUnitVector = stereographicallyUnproject( unitVector )
 
@@ -275,20 +267,24 @@ function initProjectionControls()
 			targetMatrix.setBasisVector(i,basisVector)
 		}
 		targetMatrix.setBasisVector(3,unprojectedPosition)
-		checkOrthonormality(targetMatrix)
+		
+		if( !checkOrthonormality(targetMatrix) )
+		{
+			debugger;
+		}
 
 		return targetMatrix
 	}
 
-	function applyHandDiffToRotatingThreeSphereMatrix()
+	function applyVirtualHandDiffToRotatingThreeSphereMatrix()
 	{
 		//if you've not moved the diff should be the identity
-		let currentBasis = getHandBasis(designatedHand.position,designatedHand.quaternion)
-		let whenGrabbedBasis = getHandBasis(whenGrabbedHandPosition,whenGrabbedHandQuaternion)
+		let currentBasis = stereographicallyProjectBasis(virtualHand.position,virtualHand.quaternion)
+		let whenGrabbedBasis = stereographicallyProjectBasis(whenGrabbedHandPosition,whenGrabbedHandQuaternion)
 		let whenGrabbedBasisInverse = new THREE.Matrix4().getInverse( whenGrabbedBasis )
-		let diff = currentBasis.clone().multiply(whenGrabbedBasisInverse)
+		let whenGrabbedToCurrent = currentBasis.clone().multiply(whenGrabbedBasisInverse)
 
-		threeSphereMatrix.copy(matrixWhenGrabbed).premultiply(diff)
+		threeSphereMatrix.copy(matrixWhenGrabbed).premultiply(whenGrabbedToCurrent)
 		threeSphereMatrixInverse.getInverse(threeSphereMatrix)
 	}
 
@@ -316,7 +312,7 @@ function initProjectionControls()
 
 			checkOrthonormality(threeSphereMatrix)
 
-			applyHandDiffToRotatingThreeSphereMatrix()
+			applyVirtualHandDiffToRotatingThreeSphereMatrix()
 
 			checkOrthonormality(threeSphereMatrix)
 		}
@@ -351,68 +347,42 @@ function initProjectionControls()
 		
 		if( designatedHand.grippingTop )
 		{
-			// console.log(designatedHand.grippingTop)
 			if( !designatedHand.grippingTopOld )
 			{
 				matrixWhenGrabbed.copy(threeSphereMatrix)
 				whenGrabbedHandPosition.copy(designatedHand.position)
 				whenGrabbedHandQuaternion.copy(designatedHand.quaternion)
-
-				let grabLocation = designatedHand.position.clone()
-				let fourSpaceGrabLocation = stereographicallyUnproject(grabLocation)
-
-				let localGrabLocation = fourSpaceGrabLocation.clone().applyMatrix4( threeSphereMatrixInverse )
-
-				let normalizedGrabLocation = grabLocation.clone().normalize()
-				let otherPoint0 = randomPerpVector(grabLocation).normalize()
-				for(let i = 0; i < sphereFrameGreatCircles.length; i++)
-				{
-					sphereFrameGreatCircles[i].setControlPoint( 0, localGrabLocation )
-
-					if(i===0)
-					{
-						sphereFrameGreatCircles[i].setControlPoint( 1, stereographicallyUnproject( zeroVector ).applyMatrix4( threeSphereMatrixInverse ) )
-					}
-					else
-					{
-						let otherPoint = otherPoint0.clone()
-						otherPoint.applyAxisAngle( normalizedGrabLocation, TAU/2 * (i / (sphereFrameGreatCircles.length-1)) )
-						otherPoint.multiplyScalar( 0.01 )
-						otherPoint.add( grabLocation )
-
-						sphereFrameGreatCircles[i].setControlPoint( 1, stereographicallyUnproject( otherPoint ).applyMatrix4( threeSphereMatrixInverse ) )
-					}
-
-					sphereFrameGreatCircles[i].representation.geometry.updateFromCurve()
-				}
 			}
-			else
-			{
-				// console.log("yo")
-				applyHandDiffToRotatingThreeSphereMatrix()
 
-				/*
-					in 2D, the plane is (1,0,0), (0,1,0)
-					your grab defines a position and a pair of unit vectors (a 2x2 matrix?)
-						You get that position and unit vectors on the sphere and normalize them
-					you move. stereographically project from (0,0,1)
-					To get the sphere in the right place, you'd rotate it to align the grab position
-					Take the curved unit vectors and put them all the way oot to
-					Then you'd rotate it
-
-					in 1D
-					there is where you've grabbed on line and where you grabbed on circle. Uniquely defines orientation
-					take the ray from the projection point
-					Orient circle such that grabbed position intersects with that ray (but is not on thingy point)
-				*/
-			}
+			virtualHand.position.copy(designatedHand.position)
+			virtualHand.quaternion.copy(designatedHand.quaternion)
+			virtualHand.velocity.copy(designatedHand.position).sub(designatedHand.oldPosition)
+			virtualHand.angularVelocity.copy(designatedHand.oldQuaternion).inverse().multiply(designatedHand.quaternion)
 		}
-
-		for(let i = 0; i < sphereFrameGreatCircles.length; i++)
+		else
 		{
-			//nicer would be some cool explosion from your hand
-			sphereFrameGreatCircles[i].representation.visible = false//designatedHand.grippingTop
+			// let deceleration = 0.001
+
+			// if( virtualHand.velocity.length() - deceleration < 0)
+			// {
+			// 	virtualHand.velocity.set(0,0,0)
+			// 	virtualHand.angularVelocity.copy( new THREE.Quaternion() )
+			// }
+			// else
+			// {
+			// 	virtualHand.velocity.setLength( virtualHand.velocity.length() - deceleration )
+
+			// 	let velocityReduction = deceleration / virtualHand.velocity.length()
+			// 	virtualHand.angularVelocity.slerp(new THREE.Quaternion(),velocityReduction)
+
+			// 	//what's happenning to the velocity? it's being lerped towards 0 by
+			// }
+
+			virtualHand.position.add(virtualHand.velocity)
+			virtualHand.quaternion.multiply(virtualHand.angularVelocity)
+			virtualHand.quaternion.normalize()
 		}
+		applyVirtualHandDiffToRotatingThreeSphereMatrix()
 	} )
 }
 

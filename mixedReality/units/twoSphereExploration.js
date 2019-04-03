@@ -1,10 +1,26 @@
+// pair of lines showing projection points from fish?
+// automate 2-sphere placement
+// unify fish universe and projections
+// normal sphere can be rotated in normal way
+
+// Make sure everything can easily be made visible and invisible
+// monitoring
+
 function initTwoSphereExploration()
 {
-	imitationHand.position.x = 2
+	imitationHand.position.x = 0.39
 
 	meshesWithProjections = []
+	makeProjectableSpheres(meshesWithProjections)
 
-	let generalSphereRadius = 0.2
+	let generalSphereRadius = 1
+	let sphereBackHider = new THREE.Mesh(new THREE.SphereGeometry(0.97*generalSphereRadius,64,64), new THREE.MeshBasicMaterial({
+		color:0xCCCCCC,
+		transparent:true,
+		opacity:0.93
+		// side:THREE.BackSide
+	}))
+	scene.add(sphereBackHider)
 
 	let ourBulb = new THREE.Group()
 	scene.add(ourBulb)
@@ -100,6 +116,123 @@ function initTwoSphereExploration()
 		}
 	})
 
+	//kay so really you'd like arbitrary light location, arbitrary sphere location
+	//but of the two points where to put it? Whichever is further from light
+
+
+	function stereographicallyUnproject2D(x,y)
+	{
+		let v = new THREE.Vector3(x,y,0)
+
+		let sphereIntersections = sphereLineIntersection(ourBulb.position, v, sphereBackHider.position, generalSphereRadius )
+		if(sphereIntersections.length === 0)
+		{
+			return null
+		}
+		else
+		{
+			let index = sphereIntersections[0].distanceToSq(ourBulb.position) < sphereIntersections[1].distanceToSq(ourBulb.position) ? 1:0
+			return sphereIntersections[ index ]
+		}
+	}
+
+	function getHandBasis2D(target)
+	{
+		if(target === undefined)
+		{
+			target = new THREE.Matrix4()
+		}
+
+		//may wanna do some projecting
+
+		imitationHand.updateMatrixWorld()
+
+		let unprojectedHandPosition = stereographicallyUnproject2D(imitationHand.position.x,imitationHand.position.y)
+		console.assert( unprojectedHandPosition !== null)
+
+		indicators[2].position.copy(unprojectedHandPosition)
+		target.setBasisVector(0,unprojectedHandPosition)
+		// console.log(unprojectedHandPosition)
+
+		for(let i = 0; i < 2; i++)
+		{
+			let unitVector = new THREE.Vector3().setComponent(i,0.00001)
+			imitationHand.localToWorld(unitVector)
+			unitVector.z = 0
+			let curvedAwayUnitVector = stereographicallyUnproject2D( unitVector.x,unitVector.y )
+			console.assert( unprojectedHandPosition !== null )
+
+			let orth = unprojectedHandPosition.clone().cross(curvedAwayUnitVector)
+			let basisVector = orth.clone().cross(unprojectedHandPosition).normalize()
+			if(i)
+				indicators[0].position.copy(basisVector)
+			else
+				indicators[1].position.copy(basisVector)
+
+			target.setBasisVector(i,basisVector)
+
+			// if(i===0)
+			// 	console.log( unitVector.y, basisVector )
+		}
+		target.setBasisVector(2,unprojectedHandPosition)
+
+		return target
+	}
+
+	let indicators = []
+	for(let i = 0; i < 3; i++)
+	{
+		indicators[i] = new THREE.Mesh(new THREE.PlaneGeometry(0.2,0.2))
+		scene.add(indicators[i])
+	}
+
+	for(let i = 0; i < meshesWithProjections.length; i++ )
+	{
+		meshesWithProjections[i].visible = false
+	}
+	bindButton( "c", function()
+	{
+		let visibleIndex = 0
+		for(let i = 0; i < meshesWithProjections.length; i++)
+		{
+			if( meshesWithProjections[i].visible )
+			{
+				visibleIndex = i
+				break;
+			}
+		}
+
+		visibleIndex++
+		if(visibleIndex >=meshesWithProjections.length)
+		{
+			visibleIndex = 0
+		}
+
+		for(let i = 0; i < meshesWithProjections.length; i++)
+		{
+			meshesWithProjections[i].visible = (i===visibleIndex)
+		}
+	}, "cycle 2-sphere textures" )
+
+	updateFunctions.push(function()
+	{
+		let t = frameCount*0.03
+
+		// imitationHand.position.y = 0.6*Math.sin(t*1.3)
+		imitationHand.position.x -= 0.006
+		// imitationHand.rotation.z = 0.6*Math.sin(t*1.3)
+
+		// imitationHand.position.set( 2*0.2*Math.sin(t), 2*0.1*Math.cos(t),camera.position.z/2 + 2*0.3*Math.sin(t))
+		// imitationHand.rotation.set(
+		// 	0.4*Math.sin(t*1.0),
+		// 	0.1*Math.sin(t*1.6),
+		// 	0.6*Math.sin(t*1.3)
+		// 	)
+	})
+}
+
+function makeProjectableSpheres(meshesWithProjections)
+{
 	let mat = new THREE.LineBasicMaterial({color:0x0F0CC0})
 	mat.clippingPlanes = visiBox.planes
 	function addProjectableSphere(geo)
@@ -191,118 +324,5 @@ function initTwoSphereExploration()
 
 			addProjectableSphere(globeGeo)
 		})
-	})
-
-	function stereographicallyUnproject2D(x,y)
-	{
-		let v = new THREE.Vector3(x,y,0)
-
-		let projectionLengthSq = v.lengthSq()
-		let unprojectedPointDistanceAlongOriginSpindle = 1 + (1-projectionLengthSq)/(1+projectionLengthSq) //algebra
-
-		let rayDirection = v.clone().sub( ourBulb.position )
-
-		let unprojected = rayDirection.clone()
-		unprojected.multiplyScalar(unprojectedPointDistanceAlongOriginSpindle)
-		unprojected.add(ourBulb.position)
-
-		return unprojected
-	}
-
-	let sphereBackHider = new THREE.Mesh(new THREE.SphereGeometry(0.97*generalSphereRadius,64,64), new THREE.MeshBasicMaterial({
-		color:0x000000,
-		// side:THREE.BackSide
-	}))
-	scene.add(sphereBackHider)
-
-	function getHandBasis2D(target)
-	{
-		if(target === undefined)
-		{
-			target = new THREE.Matrix4()
-		}
-
-		//may wanna do some projecting
-
-		imitationHand.updateMatrixWorld()
-
-		let unprojectedHandPosition = stereographicallyUnproject2D(imitationHand.position.x,imitationHand.position.y)
-		indicators[2].position.copy(unprojectedHandPosition)
-		target.setBasisVector(0,unprojectedHandPosition)
-		// console.log(unprojectedHandPosition)
-
-		for(let i = 0; i < 2; i++)
-		{
-			let unitVector = new THREE.Vector3().setComponent(i,0.00001)
-			imitationHand.localToWorld(unitVector)
-			unitVector.z = 0
-			let curvedAwayUnitVector = stereographicallyUnproject2D( unitVector.x,unitVector.y )
-
-			let orth = unprojectedHandPosition.clone().cross(curvedAwayUnitVector)
-			let basisVector = orth.clone().cross(unprojectedHandPosition).normalize()
-			if(i)
-				indicators[0].position.copy(basisVector)
-			else
-				indicators[1].position.copy(basisVector)
-
-			target.setBasisVector(i,basisVector)
-
-			// if(i===0)
-			// 	console.log( unitVector.y, basisVector )
-		}
-		target.setBasisVector(2,unprojectedHandPosition)
-
-		return target
-	}
-
-	let indicators = []
-	for(let i = 0; i < 3; i++)
-	{
-		indicators[i] = new THREE.Mesh(new THREE.PlaneGeometry(0.2,0.2))
-		scene.add(indicators[i])
-	}
-
-	for(let i = 0; i < meshesWithProjections.length; i++ )
-	{
-		meshesWithProjections[i].visible = false
-	}
-	bindButton( "c", function()
-	{
-		let visibleIndex = 0
-		for(let i = 0; i < meshesWithProjections.length; i++)
-		{
-			if( meshesWithProjections[i].visible )
-			{
-				visibleIndex = i
-				break;
-			}
-		}
-
-		visibleIndex++
-		if(visibleIndex >=meshesWithProjections.length)
-		{
-			visibleIndex = 0
-		}
-
-		for(let i = 0; i < meshesWithProjections.length; i++)
-		{
-			meshesWithProjections[i].visible = (i===visibleIndex)
-		}
-	}, "cycle 2-sphere textures" )
-
-	updateFunctions.push(function()
-	{
-		let t = frameCount*0.03
-
-		// imitationHand.position.y = 0.6*Math.sin(t*1.3)
-		imitationHand.position.x -= 0.01
-		// imitationHand.rotation.z = 0.6*Math.sin(t*1.3)
-
-		// imitationHand.position.set( 2*0.2*Math.sin(t), 2*0.1*Math.cos(t),camera.position.z/2 + 2*0.3*Math.sin(t))
-		// imitationHand.rotation.set(
-		// 	0.4*Math.sin(t*1.0),
-		// 	0.1*Math.sin(t*1.6),
-		// 	0.6*Math.sin(t*1.3)
-		// 	)
 	})
 }
