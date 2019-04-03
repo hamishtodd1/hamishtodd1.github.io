@@ -191,6 +191,18 @@ THREE.Matrix4.prototype.setBasisVector = function(index,vec)
 
 	return this;
 }
+THREE.Matrix4.prototype.getBasisVector = function(index)
+{
+	let te = this.elements;
+	let start = index*4
+
+	let vec = new THREE.Vector3()
+	vec.x = te[ start+0 ];
+	vec.y = te[ start+1 ];
+	vec.z = te[ start+2 ];
+
+	return vec;
+}
 
 function checkOrthonormality(m)
 {

@@ -52,7 +52,7 @@ function SliderSystem(changeValue, initialValue, monitorCompletely, onTrackerGra
 
 	sliderSystem.joltedness = 0;
 
-	updateFunctionsToBeCalled.push( function()
+	updateFunctions.push( function()
 	{
 		if(!userKnowsAboutMovement)
 		{

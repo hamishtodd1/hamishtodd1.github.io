@@ -15,6 +15,7 @@
 		<script src="lib/sceneUtils.js"></script>
 
 		<script src="lib/OBJLoader.js"></script>
+		<script src="lib/GLTFLoader.js"></script>
 		<script src="lib/WebVR.js"></script>
 		
 		<script src="handInput.js"></script>
@@ -30,7 +31,7 @@
 
 		<script src="keyboard.js"></script>
 
-
+		<script src="visibox.js"></script>
 		<script src="surroundings.js"></script>
 		
 		<script src="miscFunctions.js"></script>
@@ -59,19 +60,34 @@
 				}
 				window.addEventListener( 'resize', windowResize)
 
-				camera.position.z = assemblage.position.z + 2
-				camera.position.y = assemblage.position.y
-				camera.far = 30
+				camera.position.z = 2
+				// camera.position.y = assemblage.position.y
+				camera.far = 40
 				camera.updateProjectionMatrix()
 
-				initVr()
+				// updateFunctions.push(function()
+				// {
+				// 	camera.position.applyAxisAngle(yUnit, 0.01)
+				// 	camera.rotation.y += 0.01
+				// })
 
 				initButtons()
+				
+				initImitationHand();
+				if(0)
+				{
+					// initVr()
+				}
+				else
+				{
+					scene.add(imitationHand)
+				}
+
 				initLights();
 				initPlaybackAndRecording()
 				// initHead()
+				initVisiBox()
 
-				initImitationHand();
 
 				// initFish();
 

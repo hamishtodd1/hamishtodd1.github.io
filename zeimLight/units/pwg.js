@@ -159,7 +159,7 @@ function initPwg()
 		trumpet.rotation.x = -TAU/4;
 		dataAbstraction.add(trumpet)
 
-		updateFunctionsToBeCalled.push(function()
+		updateFunctions.push(function()
 		{
 			if(dataAbstraction.visible)
 			{

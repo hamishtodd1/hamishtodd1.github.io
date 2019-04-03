@@ -24,7 +24,7 @@ function initMouse()
 		cursor.castShadow = true;
 		// scene.add(cursor)
 
-		updateFunctionsToBeCalled.push( function()
+		updateFunctions.push( function()
 		{
 			cursor.position.copy(mouse.rayIntersectionWithZPlane(0))
 		})
