@@ -204,9 +204,9 @@ function initTrafficWaves()
 			{
 				/*
 				Agent's fundamental goals
-					obey speed limit (hah)
 					be as fast as possible
 					do not crash
+					obey speed limit (hah)
 
 					"stay at x distance from person in front"
 						turns all these questions, which are about velocity
