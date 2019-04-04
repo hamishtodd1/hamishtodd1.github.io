@@ -82,7 +82,7 @@ function initThreeSphereExploration()
 	}
 
 	{
-		var parasolCircles = Array(10)
+		var parasolCircles = Array(14)
 
 		let placeTheyAllMeet = new THREE.Vector3(0.5,0.5,0.5)
 		let fourSpacePtam = stereographicallyUnproject(placeTheyAllMeet)
