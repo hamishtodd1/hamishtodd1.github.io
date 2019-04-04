@@ -1,3 +1,27 @@
+//Paul Bourke http://paulbourke.net/geometry/circlesphere/index.html#linesphere
+function sphereLineIntersection(p1,p2,center,r)
+{
+	let a = sq(p2.x - p1.x) + sq(p2.y - p1.y) + sq(p2.z - p1.z)
+	let b = 2 * ( (p2.x - p1.x)*(p1.x - x3) + (p2.y - p1.y)*(p1.y - y3) + (p2.z - p1.z)*(p1.z - z3) )
+	let c = sq(center.x) + sq(center.y) + sq(center.z) + sq(p1.x) + sq(p1.y) + sq(p1.z) - 2(center.x*p1.x + center.y*p1.y + center.z*p1.z) - sq(r)
+
+	let squareRootedPart = sq(b)-4*a*c
+	if(squareRootedPart < 0)
+	{
+		return []
+	}
+	else
+	{
+		let solution1 = (-b + Math.sqrt(squareRootedPart) ) / 2*a
+		let solution2 = (-b - Math.sqrt(squareRootedPart) ) / 2*a
+
+		return [
+			p2.clone().sub(p1).multiplyScalar(solution1).add(p1),
+			p2.clone().sub(p1).multiplyScalar(solution2).add(p1)
+		]
+	}
+}
+
 function assignShader(fileName, materialToReceiveAssignment, vertexOrFragment)
 {
 	var propt = vertexOrFragment + "Shader"
@@ -215,7 +239,7 @@ function checkOrthonormality(m)
 		if(!basicallyEqual(column.length(),1) )
 		{
 			console.error("non-normal column: ", i,column.toArray(), " length: ", column.length())
-			// return false
+			return false
 		}
 		for(let j = i+1; j < 4; j++)
 		{
@@ -224,12 +248,12 @@ function checkOrthonormality(m)
 			if( !basicallyEqual(column.dot(jColumn)), 0 )
 			{
 				console.error("non-orthogonal columns: ", i,j)
-				// return false
+				return false
 			}
 		}
 	}
 
-	// return true
+	return true
 }
 
 THREE.TubeBufferGeometry.prototype.updateFromCurve = function()

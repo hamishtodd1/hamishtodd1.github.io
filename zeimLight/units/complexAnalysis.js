@@ -6,6 +6,13 @@
     Nice little jam game; just set a goal and a way to get there
 
     Wanna divide and subtract too
+
+    Cool thought: black and white for up and down, red and blue for left and right
+        Only works if you want to color circle, i.e. your mapping is to
+
+    Visualizing an algebra with moving objects... maybe you want an interesting definition of "momentum"
+
+    Shouldn't complex numbers be better visualized with a cylinder? has a bottom (modulus is 0) but goes up to infinity
 */
 
 function initComplexAnalysis()

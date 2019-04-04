@@ -11,7 +11,7 @@
 		Teacher sets a puzzle they all try to do it, one who gets it has their solution recorded and shown on the master? Or they’re superimposed?	
 */
 
-function init( ourID )
+function init( packing )
 {
 	var renderer = new THREE.WebGLRenderer({ antialias: true });
 	document.body.appendChild( renderer.domElement );
@@ -40,8 +40,7 @@ function init( ourID )
 	initChapters()
 	initMouse();
 
-	// initPacking()
-	initClt();
+	packing ? initPacking() : initClt()
 
 	finishSettingUpChapters()
 
