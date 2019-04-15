@@ -40,7 +40,7 @@
 		<script src="units/fish.js"></script>
 		<script src="units/threeSphereExploration.js"></script>
 
-		<script src="units/mobiusTransformations.js"></script>
+		<!-- <script src="units/mobiusTransformations.js"></script> -->
 
 		<script src="units/twoSphereExploration.js"></script>
 
@@ -60,18 +60,32 @@
 				}
 				window.addEventListener( 'resize', windowResize)
 
+				initButtons()
+
+				bindButton("left",function(){},"turn",function()
+				{
+					cameraAngle -= 0.07
+				})
+				bindButton("right",function(){},"turn",function()
+				{
+					cameraAngle += 0.07
+				})
+
 				camera.position.z = 2
 				// camera.position.y = assemblage.position.y
 				camera.far = 40
 				camera.updateProjectionMatrix()
 
-				// updateFunctions.push(function()
-				// {
-				// 	camera.position.applyAxisAngle(yUnit, 0.01)
-				// 	camera.rotation.y += 0.01
-				// })
+				let cameraAngle = 0//TAU/4
+				updateFunctions.push(function()
+				{
+					let speed = 0//.06
+					cameraAngle += speed
 
-				initButtons()
+					camera.position.set(0,0,camera.position.length())
+					camera.position.applyAxisAngle(yUnit, cameraAngle)
+					camera.rotation.y = cameraAngle
+				})
 				
 				initImitationHand();
 				if(0)
@@ -86,15 +100,14 @@
 				initLights();
 				initPlaybackAndRecording()
 				// initHead()
-				initVisiBox()
-
-
-				// initFish();
 
 				await initSurroundings()
 
+				let twoSphereVisiBox = VisiBox()
+				let fish = initFish(twoSphereVisiBox)
+				initTwoSphereExploration( fish, twoSphereVisiBox )
+
 				initThreeSphereExploration()
-				// initTwoSphereExploration()
 
 				renderer.setAnimationLoop( function()
 				{

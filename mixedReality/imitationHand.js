@@ -1,7 +1,5 @@
 function initImitationHand()
 {
-	imitationHand = new THREE.Group()
-
 	imitationHand.grippingTop = false
 	imitationHand.grippingTopOld = imitationHand.grippingTop
 	imitationHand.oldPosition = new THREE.Vector3()
@@ -23,12 +21,15 @@ function initImitationHand()
 
 	imitationHand.standardVigorousMovement = function()
 	{
-		imitationHand.position.x = 0.6*Math.sin(frameCount*0.03)
-		imitationHand.position.y = 0.3*Math.sin(frameCount*0.02)
+		let t = frameCount * 0.9
+
+		imitationHand.position.x = 0.6*Math.sin(t*0.03)
+		imitationHand.position.y = 0.3*Math.sin(t*0.02)
 		imitationHand.position.z = 0.4
 
-		imitationHand.rotation.z = 0.4*Math.sin(frameCount*0.07)
-		imitationHand.rotation.x = 0.6*Math.sin(frameCount*0.1)
+		imitationHand.rotation.x = 0.6*Math.sin(t*0.1)
+		imitationHand.rotation.y = 0.5*Math.sin(t*0.13)
+		imitationHand.rotation.z = 0.4*Math.sin(t*0.07)
 
 		imitationHand.quaternion.setFromEuler(imitationHand.rotation)
 

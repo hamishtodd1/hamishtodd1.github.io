@@ -1,10 +1,11 @@
 /*
 	TODO
-		Make sure everything can easily be made visible and invisible
 		monitoring
-		Two visiboxes?
-
-		minimalist version for camera person? Prob not
+			fish
+			thingy matrix
+			position and orientation of sphere
+		Make sure everything can easily be made visible and invisible
+			Or hack that in in post?
 
 	Script, "Rotating a 4D sphere in VR"
 		So to describe 4D rotations, in this video we're going to use basically the same approach to describing 4D
@@ -31,6 +32,9 @@
 		So in 2D you get 1 degree of rotational freedom, in 3D we have 3. How many do they have in 4D?
 		Maybe pause the video. If you said 6, well done! In 5D it is 10. Try to work out why!
 
+		You can support me on patreon
+			If I make it to 
+
 	alternative way of looking at it: the sphere is stuck in place
 	but your plane and projection point are moving
 	so the fish universe's z is equal to your hand z and pitch and yaw at first
@@ -51,18 +55,322 @@ let fourSpaceAxes = [
 	new THREE.Vector4(0,1,0,0),
 	new THREE.Vector4(0,0,1,0)
 ]
-let assemblage = new THREE.Group()
-// assemblage.position.y += 1.6
-// assemblage.position.z -= 0.3
-assemblage.scale.setScalar(0.1)
-assemblage.updateMatrixWorld()
-scene.add(assemblage)
 
 function initThreeSphereExploration()
 {
+	let visiBox = VisiBox()
+
+	//could have points too, maybe travelling along the circles
+	//alternatively could have had a torusgeometry. Disadvantage is that radius could get small
+	function GreatCircle(controlPoint0,controlPoint1, color)
+	{
+		let greatCircle = {}
+
+		let controlPoints = [
+			controlPoint0 !== undefined ? controlPoint0 : stereographicallyUnproject( new THREE.Vector3(0,1,0) ),
+			controlPoint1 !== undefined ? controlPoint1 : stereographicallyUnproject( new THREE.Vector3(1,0,0) )
+		]
+
+		let triggered = 0
+
+		//representation/real space
+		{
+			let line = false
+
+			let realSpaceCenter = new THREE.Vector3()
+			let realSpaceRadius = 1;
+			let realSpaceNormal = new THREE.Vector3()
+			let realSpaceStart = new THREE.Vector3()
+
+			let realSpaceOrigin = new THREE.Vector3()
+			let realSpaceDirection = new THREE.Vector3()
+			function rederive()
+			{
+				let realSpacePoint0 = stereographicallyProject(controlPoints[0].clone().applyMatrix4(threeSphereMatrix))
+				let realSpacePoint1 = stereographicallyProject(controlPoints[1].clone().applyMatrix4(threeSphereMatrix))
+
+				let pointBetween = controlPoints[0].clone().slerp(controlPoints[1],0.5).applyMatrix4(threeSphereMatrix)
+				let realSpacePointBetween = stereographicallyProject(pointBetween)
+
+				let angle = realSpacePoint0.clone().sub(realSpacePointBetween).angleTo( realSpacePoint1.clone().sub(realSpacePointBetween) )
+				line = (Math.abs(angle-Math.PI) < 0.00000000001 )
+
+				if(line)
+				{
+					realSpaceOrigin.copy(realSpacePoint0)
+					realSpaceDirection.copy(realSpacePoint1).sub(realSpacePoint0).normalize()
+				}
+				else
+				{
+					realSpaceCenter = centerOfCircleThroughThreePoints(realSpacePoint0,realSpacePointBetween,realSpacePoint1)
+					realSpaceRadius = realSpaceCenter.distanceTo(realSpacePointBetween)
+					realSpaceNormal.copy(realSpacePoint0).sub(realSpaceCenter).cross(realSpacePoint1.clone().sub(realSpaceCenter)).normalize()
+					realSpaceStart.copy( randomPerpVector( realSpaceNormal ) ).normalize()
+				}
+			}
+
+			greatCircle.setControlPoint = function(index,value)
+			{
+				controlPoints[index].copy( value )
+
+				rederive()
+
+				// console.assert( Math.abs( Math.abs( realSpaceNormal.dot(zUnit) ) - 1 ) < 0.0001 )
+			}
+			greatCircle.setControlPoint(0,controlPoints[0])
+
+			let curve = new THREE.Curve();
+			let furthestOutDistance = 0
+			curve.getPoint = function( t )
+			{
+				if( line )
+				{
+					var p = realSpaceDirection.clone().multiplyScalar((t-0.5)*400).add(realSpaceOrigin)
+				}
+				else
+				{
+					var p = realSpaceStart.clone().applyAxisAngle(realSpaceNormal,t*TAU).multiplyScalar(realSpaceRadius).add(realSpaceCenter)
+				}
+
+				if( p.length() > furthestOutDistance )
+				{
+					furthestOutDistance = p.length()
+				}
+
+				return p
+			}
+			let tubularSegments = 45
+			let tubeRadius = 0.017
+			let representation = new THREE.Mesh( new THREE.TubeBufferGeometry( curve, tubularSegments, tubeRadius,5,false ), new THREE.MeshLambertMaterial({clippingPlanes:visiBox.planes}) )
+			greatCircle.representation = representation
+			assemblage.add( representation )
+
+			if(color === undefined)
+			{
+				let logarithm = Math.log(furthestOutDistance)
+				color = new THREE.Color().setHSL(clamp(logarithm /3,0,1),0.5,0.5)
+			}
+			representation.material.color.copy(color)
+
+			//a color mapping from the sphere might be nice
+
+			updateFunctions.push( function()
+			{
+				if(representation.visible)
+				{
+					rederive()
+					representation.geometry.updateFromCurve()
+				}
+			})
+		}
+
+		return greatCircle
+	}
+
+	function initProjectionControls()
+	{
+		let matrixWhenGrabbed = new THREE.Matrix4()
+		let whenGrabbedHandPosition = new THREE.Vector3()
+		let whenGrabbedHandQuaternion = new THREE.Quaternion()
+
+		let designatedHand = handControllers[0]
+		// if(0)
+		{
+			designatedHand = imitationHand
+			scene.add( imitationHand )
+		}
+		let virtualHand = {
+			position:new THREE.Vector3(),
+			quaternion:new THREE.Quaternion(),
+			velocity:new THREE.Vector3(),
+			angularVelocity:new THREE.Quaternion()
+		}
+
+		function stereographicallyProjectBasis(position, quaternion,targetMatrix)
+		{
+			if(targetMatrix === undefined)
+			{
+				targetMatrix = new THREE.Matrix4()
+			}
+
+			//no rotating the assemblage.
+			let localPosition = assemblage.worldToLocal(position.clone())
+			let localHandMatrix = new THREE.Matrix4().makeRotationFromQuaternion(quaternion) //you better not be rotating the assemblage
+			localHandMatrix.setPosition(localPosition)
+
+			//maybe the one corresponding to position should be in the direction of the ray origin?
+			//projection can cause mirror-reversal
+			let unprojectedPosition = stereographicallyUnproject( localPosition )
+
+			for(let i = 0; i < 3; i++)
+			{
+				let unitVector = new THREE.Vector3().setComponent(i,0.0001) //"epsilon". Can't be too miniscule because round-off in angle acquisition
+				unitVector.applyMatrix4(localHandMatrix)
+				let curvedAwayUnitVector = stereographicallyUnproject( unitVector )
+
+				let amountToSlerp = (TAU/4) / unprojectedPosition.angleTo( curvedAwayUnitVector )
+				let basisVector = unprojectedPosition.clone()
+				basisVector.slerp( curvedAwayUnitVector, amountToSlerp )
+				targetMatrix.setBasisVector(i,basisVector)
+			}
+			targetMatrix.setBasisVector(3,unprojectedPosition)
+			
+			if( !checkOrthonormality(targetMatrix) )
+			{
+				debugger;
+			}
+
+			return targetMatrix
+		}
+
+		function applyVirtualHandDiffToRotatingThreeSphereMatrix()
+		{
+			//if you've not moved the diff should be the identity
+			let currentBasis = stereographicallyProjectBasis(virtualHand.position,virtualHand.quaternion)
+			let whenGrabbedBasis = stereographicallyProjectBasis(whenGrabbedHandPosition,whenGrabbedHandQuaternion)
+			let whenGrabbedBasisInverse = new THREE.Matrix4().getInverse( whenGrabbedBasis )
+			let whenGrabbedToCurrent = currentBasis.clone().multiply(whenGrabbedBasisInverse)
+
+			threeSphereMatrix.copy(matrixWhenGrabbed).premultiply(whenGrabbedToCurrent)
+			threeSphereMatrixInverse.getInverse(threeSphereMatrix)
+		}
+
+		if(0)
+		{
+			imitationHand.position.copy(assemblage.position)
+
+			imitationHand.position.x = 1
+
+			let original = new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5)
+			original.setLength(0.0000000) //should be able to do other nearby values but for now...
+
+			let v = original.clone()
+			imitationHand.updateMatrixWorld()
+			imitationHand.localToWorld(v)
+			let vLocalToRotatingThreeSphere = stereographicallyUnproject(v).applyMatrix4(threeSphereMatrixInverse)
+			console.warn(vLocalToRotatingThreeSphere.toArray())
+
+			for(let i = 0; i < 3; i++)
+			{
+				imitationHand.oldPosition.copy(imitationHand.position)
+				imitationHand.position.y += 0.2
+				// imitationHand.position.set(  Math.random()-0.5,Math.random()-0.5,Math.random()-0.5)
+				// imitationHand.quaternion.set(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).normalize()
+
+				checkOrthonormality(threeSphereMatrix)
+
+				applyVirtualHandDiffToRotatingThreeSphereMatrix()
+
+				checkOrthonormality(threeSphereMatrix)
+			}
+
+			v = original.clone()
+			imitationHand.updateMatrixWorld()
+			imitationHand.localToWorld(v)
+			vLocalToRotatingThreeSphere = stereographicallyUnproject(v).applyMatrix4(threeSphereMatrixInverse)
+			console.warn(vLocalToRotatingThreeSphere.toArray(), "should be same as above")
+		}
+
+		updateFunctions.push( function()
+		{
+			// if(0)
+			{
+				// camera.position.applyAxisAngle(yUnit, 0.01)
+				// camera.rotation.y += 0.01
+
+				// imitationHand.standardVigorousMovement()
+
+				let t = frameCount*0.03
+
+				// imitationHand.position.set(0, assemblage.position.y,assemblage.position.z+assemblage.scale.z)
+				imitationHand.position.y += 0.004*Math.cos(t)
+				imitationHand.position.x += 0.0014*Math.cos(t*1.3)
+
+				// imitationHand.position.set( 0*0.2*Math.sin(t), 2*0.1*Math.sin(t),3.8)
+				imitationHand.rotation.set(
+					0.4*Math.sin(t*2.0),
+					0.5*Math.sin(t*3.6),
+					0//0.6*Math.sin(t*1.3)
+					)
+				imitationHand.quaternion.setFromEuler(imitationHand.rotation)
+			}
+			
+			if( designatedHand.grippingTop )
+			{
+				if( !designatedHand.grippingTopOld )
+				{
+					matrixWhenGrabbed.copy(threeSphereMatrix)
+					whenGrabbedHandPosition.copy(designatedHand.position)
+					whenGrabbedHandQuaternion.copy(designatedHand.quaternion)
+				}
+
+				virtualHand.position.copy(designatedHand.position)
+				virtualHand.quaternion.copy(designatedHand.quaternion)
+				virtualHand.velocity.copy(designatedHand.position).sub(designatedHand.oldPosition)
+				virtualHand.angularVelocity.copy(designatedHand.oldQuaternion).inverse().multiply(designatedHand.quaternion)
+			}
+			else
+			{
+				let deceleration = 0.00001
+
+				if( virtualHand.velocity.length() - deceleration > 0)
+				{
+					virtualHand.velocity.setLength( virtualHand.velocity.length() - deceleration )
+				}
+				else
+				{
+					virtualHand.velocity.set(0,0,0)
+				}
+
+				let angularDeceleration = 0.0005
+
+				let currentAngleFromIdentity = virtualHand.angularVelocity.angleTo(new THREE.Quaternion())
+				if(currentAngleFromIdentity <= angularDeceleration)
+				{
+					virtualHand.angularVelocity.copy(new THREE.Quaternion())
+				}
+				else
+				{
+					let slerpAmount = angularDeceleration / currentAngleFromIdentity
+					virtualHand.angularVelocity.slerp(new THREE.Quaternion(),slerpAmount)
+				}
+
+				// if( virtualHand.velocity.length() - deceleration < 0)
+				// {
+				// 	virtualHand.velocity.set(0,0,0)
+				// 	virtualHand.angularVelocity.copy( new THREE.Quaternion() )
+				// }
+				// else
+				// {
+				// 	virtualHand.velocity.setLength( virtualHand.velocity.length() - deceleration )
+
+				// 	let oldangularVelocity = virtualHand.angularVelocity.clone()
+
+				// 	let velocityReduction = deceleration / virtualHand.velocity.length()
+				// 	virtualHand.angularVelocity.slerp(new THREE.Quaternion(),velocityReduction)
+
+				// 	//a slerp is kiiiinda like multiplying by a quaternion, and that quaternion has a certain dist from 0
+
+
+				// 	//ok so surely it (velocity) is going toward identity at a constant rate
+
+				// 	//what's happenning to the velocity? it's being lerped towards 0 by a certain amount that depends on deceleration and its length
+				// }
+
+				virtualHand.position.add(virtualHand.velocity)
+				virtualHand.quaternion.multiply(virtualHand.angularVelocity)
+				virtualHand.quaternion.normalize()
+			}
+			applyVirtualHandDiffToRotatingThreeSphereMatrix()
+		} )
+	}
+
 	initProjectionControls()
 
-	// GreatCircle()
+	let assemblage = new THREE.Group()
+	assemblage.scale.setScalar(0.1)
+	assemblage.updateMatrixWorld()
+	scene.add(assemblage)
 
 	let hyperOctahedronCircles = []
 	{
@@ -142,9 +450,9 @@ function initThreeSphereExploration()
 				hopfCircles.push( GreatCircle( new THREE.Vector4().copy(q1), new THREE.Vector4().copy(q2), color ) )
 			}
 		}
-		// hopfFibrate(xUnit)
+		hopfFibrate(xUnit)  
 		// hopfFibrate(yUnit)
-		hopfFibrate(zUnit)
+		// hopfFibrate(zUnit)
 		// hopfFibrate(xUnit.clone().negate())
 		// hopfFibrate(yUnit.clone().negate())
 		// hopfFibrate(zUnit.clone().negate())
@@ -152,7 +460,7 @@ function initThreeSphereExploration()
 
 	let greatCircleSets = [parasolCircles,hyperOctahedronCircles,hopfCircles]
 
-	bindButton( "c", function()
+	bindButton( "v", function()
 	{
 		let indexToMakeVisible = 0
 		for(let i = 0; i < greatCircleSets.length; i++)
@@ -171,12 +479,7 @@ function initThreeSphereExploration()
 				greatCircleSets[i][j].representation.visible = (i === indexToMakeVisible)
 			}
 		}
-	}, "toggle hopf" )
-
-	// for(let i = 0; i < greatCircleSets[1].length; i++)
-	// {
-	// 	greatCircleSets[0][i].representation.visible = true
-	// }
+	}, "cycle threespheres" )
 }
 
 let threeSphereMatrix = new THREE.Matrix4()
@@ -218,279 +521,6 @@ function stereographicallyUnproject(p)
 	unprojected.multiplyScalar(unprojectedPointDistanceAlongOriginSpindle).add(rayOrigin)
 
 	return unprojected
-}
-
-function initProjectionControls()
-{
-	let matrixWhenGrabbed = new THREE.Matrix4()
-	let whenGrabbedHandPosition = new THREE.Vector3()
-	let whenGrabbedHandQuaternion = new THREE.Quaternion()
-
-	let designatedHand = handControllers[0]
-	// if(0)
-	{
-		designatedHand = imitationHand
-		scene.add( imitationHand )
-	}
-	let virtualHand = {
-		position:new THREE.Vector3(),
-		quaternion:new THREE.Quaternion(),
-		velocity:new THREE.Vector3(),
-		angularVelocity:new THREE.Quaternion()
-	}
-
-	function stereographicallyProjectBasis(position, quaternion,targetMatrix)
-	{
-		if(targetMatrix === undefined)
-		{
-			targetMatrix = new THREE.Matrix4()
-		}
-
-		//no rotating the assemblage.
-		let localPosition = assemblage.worldToLocal(position.clone())
-		let localHandMatrix = new THREE.Matrix4().makeRotationFromQuaternion(quaternion) //you better not be rotating the assemblage
-		localHandMatrix.setPosition(localPosition)
-
-		//maybe the one corresponding to position should be in the direction of the ray origin?
-		//projection can cause mirror-reversal
-		let unprojectedPosition = stereographicallyUnproject( localPosition )
-
-		for(let i = 0; i < 3; i++)
-		{
-			let unitVector = new THREE.Vector3().setComponent(i,0.00006) //"epsilon". Can't be too miniscule because round-off in angle acquisition
-			unitVector.applyMatrix4(localHandMatrix)
-			let curvedAwayUnitVector = stereographicallyUnproject( unitVector )
-
-			let amountToSlerp = (TAU/4) / unprojectedPosition.angleTo( curvedAwayUnitVector )
-			let basisVector = unprojectedPosition.clone()
-			basisVector.slerp( curvedAwayUnitVector, amountToSlerp )
-			targetMatrix.setBasisVector(i,basisVector)
-		}
-		targetMatrix.setBasisVector(3,unprojectedPosition)
-		
-		if( !checkOrthonormality(targetMatrix) )
-		{
-			debugger;
-		}
-
-		return targetMatrix
-	}
-
-	function applyVirtualHandDiffToRotatingThreeSphereMatrix()
-	{
-		//if you've not moved the diff should be the identity
-		let currentBasis = stereographicallyProjectBasis(virtualHand.position,virtualHand.quaternion)
-		let whenGrabbedBasis = stereographicallyProjectBasis(whenGrabbedHandPosition,whenGrabbedHandQuaternion)
-		let whenGrabbedBasisInverse = new THREE.Matrix4().getInverse( whenGrabbedBasis )
-		let whenGrabbedToCurrent = currentBasis.clone().multiply(whenGrabbedBasisInverse)
-
-		threeSphereMatrix.copy(matrixWhenGrabbed).premultiply(whenGrabbedToCurrent)
-		threeSphereMatrixInverse.getInverse(threeSphereMatrix)
-	}
-
-	if(0)
-	{
-		imitationHand.position.copy(assemblage.position)
-
-		imitationHand.position.x = 1
-
-		let original = new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5)
-		original.setLength(0.0000000) //should be able to do other nearby values but for now...
-
-		let v = original.clone()
-		imitationHand.updateMatrixWorld()
-		imitationHand.localToWorld(v)
-		let vLocalToRotatingThreeSphere = stereographicallyUnproject(v).applyMatrix4(threeSphereMatrixInverse)
-		console.warn(vLocalToRotatingThreeSphere.toArray())
-
-		for(let i = 0; i < 3; i++)
-		{
-			imitationHand.oldPosition.copy(imitationHand.position)
-			imitationHand.position.y += 0.2
-			// imitationHand.position.set(  Math.random()-0.5,Math.random()-0.5,Math.random()-0.5)
-			// imitationHand.quaternion.set(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).normalize()
-
-			checkOrthonormality(threeSphereMatrix)
-
-			applyVirtualHandDiffToRotatingThreeSphereMatrix()
-
-			checkOrthonormality(threeSphereMatrix)
-		}
-
-		v = original.clone()
-		imitationHand.updateMatrixWorld()
-		imitationHand.localToWorld(v)
-		vLocalToRotatingThreeSphere = stereographicallyUnproject(v).applyMatrix4(threeSphereMatrixInverse)
-		console.warn(vLocalToRotatingThreeSphere.toArray(), "should be same as above")
-	}
-
-	updateFunctions.push( function()
-	{
-		// if(0)
-		{
-			// camera.position.applyAxisAngle(yUnit, 0.01)
-			// camera.rotation.y += 0.01
-
-			let t = frameCount*0.03
-
-			imitationHand.position.set(0, assemblage.position.y,assemblage.position.z+assemblage.scale.z)
-			imitationHand.position.y += 0.04*Math.sin(t)
-
-			// imitationHand.position.set( 0*0.2*Math.sin(t), 2*0.1*Math.sin(t),3.8)
-			imitationHand.rotation.set(
-				0.4*Math.sin(t*1.0),
-				0.5*Math.sin(t*1.6),
-				0//0.6*Math.sin(t*1.3)
-				)
-			// imitationHand.quaternion.setFromEuler(imitationHand.rotation)
-		}
-		
-		if( designatedHand.grippingTop )
-		{
-			if( !designatedHand.grippingTopOld )
-			{
-				matrixWhenGrabbed.copy(threeSphereMatrix)
-				whenGrabbedHandPosition.copy(designatedHand.position)
-				whenGrabbedHandQuaternion.copy(designatedHand.quaternion)
-			}
-
-			virtualHand.position.copy(designatedHand.position)
-			virtualHand.quaternion.copy(designatedHand.quaternion)
-			virtualHand.velocity.copy(designatedHand.position).sub(designatedHand.oldPosition)
-			virtualHand.angularVelocity.copy(designatedHand.oldQuaternion).inverse().multiply(designatedHand.quaternion)
-		}
-		else
-		{
-			// let deceleration = 0.001
-
-			// if( virtualHand.velocity.length() - deceleration < 0)
-			// {
-			// 	virtualHand.velocity.set(0,0,0)
-			// 	virtualHand.angularVelocity.copy( new THREE.Quaternion() )
-			// }
-			// else
-			// {
-			// 	virtualHand.velocity.setLength( virtualHand.velocity.length() - deceleration )
-
-			// 	let velocityReduction = deceleration / virtualHand.velocity.length()
-			// 	virtualHand.angularVelocity.slerp(new THREE.Quaternion(),velocityReduction)
-
-			// 	//what's happenning to the velocity? it's being lerped towards 0 by
-			// }
-
-			virtualHand.position.add(virtualHand.velocity)
-			virtualHand.quaternion.multiply(virtualHand.angularVelocity)
-			virtualHand.quaternion.normalize()
-		}
-		applyVirtualHandDiffToRotatingThreeSphereMatrix()
-	} )
-}
-
-//could have points too, maybe travelling along the circles
-//alternatively could have had a torusgeometry. Disadvantage is that radius could get small
-function GreatCircle(controlPoint0,controlPoint1, color)
-{
-	let greatCircle = {}
-
-	let controlPoints = [
-		controlPoint0 !== undefined ? controlPoint0 : stereographicallyUnproject( new THREE.Vector3(0,1,0) ),
-		controlPoint1 !== undefined ? controlPoint1 : stereographicallyUnproject( new THREE.Vector3(1,0,0) )
-	]
-
-	let triggered = 0
-
-	//representation/real space
-	{
-		let line = false
-
-		let realSpaceCenter = new THREE.Vector3()
-		let realSpaceRadius = 1;
-		let realSpaceNormal = new THREE.Vector3()
-		let realSpaceStart = new THREE.Vector3()
-
-		let realSpaceOrigin = new THREE.Vector3()
-		let realSpaceDirection = new THREE.Vector3()
-		function rederive()
-		{
-			let realSpacePoint0 = stereographicallyProject(controlPoints[0].clone().applyMatrix4(threeSphereMatrix))
-			let realSpacePoint1 = stereographicallyProject(controlPoints[1].clone().applyMatrix4(threeSphereMatrix))
-
-			let pointBetween = controlPoints[0].clone().slerp(controlPoints[1],0.5).applyMatrix4(threeSphereMatrix)
-			let realSpacePointBetween = stereographicallyProject(pointBetween)
-
-			let angle = realSpacePoint0.clone().sub(realSpacePointBetween).angleTo( realSpacePoint1.clone().sub(realSpacePointBetween) )
-			line = (Math.abs(angle-Math.PI) < 0.00000000001 )
-
-			if(line)
-			{
-				realSpaceOrigin.copy(realSpacePoint0)
-				realSpaceDirection.copy(realSpacePoint1).sub(realSpacePoint0).normalize()
-			}
-			else
-			{
-				realSpaceCenter = centerOfCircleThroughThreePoints(realSpacePoint0,realSpacePointBetween,realSpacePoint1)
-				realSpaceRadius = realSpaceCenter.distanceTo(realSpacePointBetween)
-				realSpaceNormal.copy(realSpacePoint0).sub(realSpaceCenter).cross(realSpacePoint1.clone().sub(realSpaceCenter)).normalize()
-				realSpaceStart.copy( randomPerpVector( realSpaceNormal ) ).normalize()
-			}
-		}
-
-		greatCircle.setControlPoint = function(index,value)
-		{
-			controlPoints[index].copy( value )
-
-			rederive()
-
-			// console.assert( Math.abs( Math.abs( realSpaceNormal.dot(zUnit) ) - 1 ) < 0.0001 )
-		}
-		greatCircle.setControlPoint(0,controlPoints[0])
-
-		let curve = new THREE.Curve();
-		let furthestOutDistance = 0
-		curve.getPoint = function( t )
-		{
-			if( line )
-			{
-				var p = realSpaceDirection.clone().multiplyScalar((t-0.5)*400).add(realSpaceOrigin)
-			}
-			else
-			{
-				var p = realSpaceStart.clone().applyAxisAngle(realSpaceNormal,t*TAU).multiplyScalar(realSpaceRadius).add(realSpaceCenter)
-			}
-
-			if( p.length() > furthestOutDistance )
-			{
-				furthestOutDistance = p.length()
-			}
-
-			return p
-		}
-		let tubularSegments = 45
-		let tubeRadius = 0.017
-		let representation = new THREE.Mesh( new THREE.TubeBufferGeometry( curve, tubularSegments, tubeRadius,5,false ), new THREE.MeshLambertMaterial({clippingPlanes:visiBox.planes}) )
-		greatCircle.representation = representation
-		assemblage.add( representation )
-
-		if(color === undefined)
-		{
-			let logarithm = Math.log(furthestOutDistance)
-			color = new THREE.Color().setHSL(clamp(logarithm /3,0,1),0.5,0.5)
-		}
-		representation.material.color.copy(color)
-
-		//a color mapping from the sphere might be nice
-
-		updateFunctions.push( function()
-		{
-			if(representation.visible)
-			{
-				rederive()
-				representation.geometry.updateFromCurve()
-			}
-		})
-	}
-
-	return greatCircle
 }
 
 THREE.Vector4.prototype.distanceTo = function(otherVec)

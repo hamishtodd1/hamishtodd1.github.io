@@ -1,5 +1,3 @@
-//somewhere in here is the red ball
-
 function readHandInput(){}
 
 function initVr()
@@ -53,13 +51,13 @@ function initVr()
 		new THREE.OBJLoader().load( "data/external_controller01_" + (i===LEFT_CONTROLLER_INDEX?"left":"right") + ".obj",
 			function ( object ) 
 			{
-				handControllers[  i ].controllerModel.geometry = object.children[0].geometry;
-				handControllers[  i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeRotationAxis(xUnit,0.7) );
-				handControllers[  i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeTranslation(
+				handControllers[ i ].controllerModel.geometry = object.children[0].geometry;
+				handControllers[ i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeRotationAxis(xUnit,0.7) );
+				handControllers[ i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeTranslation(
 					0.008 * ( i == LEFT_CONTROLLER_INDEX?-1:1),
 					0.041,
 					-0.03) );
-				handControllers[  i ].controllerModel.geometry.computeBoundingSphere();
+				handControllers[ i ].controllerModel.geometry.computeBoundingSphere();
 			},
 			function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); } );
 	}

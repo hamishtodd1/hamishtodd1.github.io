@@ -1,14 +1,17 @@
 //would be nice if we could have the "rim" where things get cut off make their cross-section glow
 
-function initVisiBox()
+function VisiBox()
 {
-	visiBox = new THREE.Object3D();
+	let visiBox = new THREE.Object3D();
 	scene.add(visiBox);
 
 	visiBox.position.y = camera.position.y
 
-	visiBox.scale.setScalar(0.5)
+	visiBox.scale.setScalar(0.7)
+	visiBox.scale.multiplyScalar(1000)
 	visiBox.scale.x *= 2
+
+	var cornerRadius = 0.02;
 
 	var ourSquareGeometry = new THREE.Geometry();
 	ourSquareGeometry.vertices.push(
@@ -60,9 +63,9 @@ function initVisiBox()
 		{
 			visiBox.corners[i] = new THREE.Mesh( cornerGeometry, cornerMaterial );
 			visiBox.corners[i].boundingSphere = cornerGeometry.boundingSphere;
-			visiBox.corners[i].onLetGo = visiBox.onLetGo;
-			visiBox.add( visiBox.corners[i] );
-			visiBox.corners[i].ordinaryParent = visiBox;
+			visiBox.corners[i].onLetGo = visiBox.onLetGo
+			visiBox.add( visiBox.corners[i] )
+			visiBox.corners[i].ordinaryParent = visiBox
 
 			visiBox.updateMatrixWorld();
 			
@@ -71,12 +74,33 @@ function initVisiBox()
 			holdables.push( visiBox.corners[i] );
 		}
 	}
-
-	var cornerRadius = 0.02;
 	
-	//TODO resize with two corners at once
 	updateFunctions.push( function()
 	{
+		for(let i = 0; i < 2; i++)
+		{
+			//if your hand is in it and you press a certain button, toggle size
+			let p = visiBox.worldToLocal(hands[i].getWorldPosition(new THREE.Vector3()))
+			if( -0.5 < p.x && p.x < 0.5 &&
+				-0.5 < p.y && p.y < 0.5 &&
+				-0.5 < p.z && p.z < 0.5  )
+			{
+				//light up?
+				
+				if( hands[i].button1 && !hands[i].button1Old )
+				{
+					if(visiBox.scale.x < 100)
+					{
+						visiBox.scale.multiplyScalar(1000)
+					}
+					else
+					{
+						visiBox.scale.multiplyScalar(1/1000)
+					}
+				}
+			}
+		}
+
 		visiBox.updateMatrixWorld();
 		for(var i = 0; i < visiBox.corners.length; i++)
 		{
@@ -127,18 +151,6 @@ function initVisiBox()
 			visiBox.planes[i].applyMatrix4(visiBox.matrixWorld);
 		}
 	})
-
-	bindButton( "enter", function()
-	{
-		if(visiBox.scale.x < 100)
-		{
-			visiBox.scale.multiplyScalar(1000)
-		}
-		else
-		{
-			visiBox.scale.multiplyScalar(1/1000)
-		}
-	}, "toggle visibox hugeness" )
 	
 	return visiBox;
 }
