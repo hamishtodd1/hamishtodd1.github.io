@@ -4,23 +4,26 @@
 
 function initTwoSphereExploration(fish, visiBox)
 {
-	imitationHand.position.x = 1.2
-	imitationHand.grippingTop = true
+	let designatedHand = handControllers[0]
+	if(0)
+	{
+		designatedHand = imitationHand
+
+		imitationHand.position.x = 1.2
+		imitationHand.grippingTop = true
+	}
+
+	markPositionAndQuaternion(fish)
 
 	// camera.position.multiplyScalar(10)
 
 	let assemblage = new THREE.Group()
-	assemblage.updateMatrixWorld()
 	scene.add(assemblage)
 
 	assemblage.add(fish)
 	visiBox.scale.z *= 0.001
+	visiBox.scale.multiplyScalar(1/1000)
 	assemblage.add(visiBox)
-
-	//this fucks you
-	// assemblage.position.x += 0.2
-	// assemblage.position.y += 0.2
-	// assemblage.position.z += 0.2
 
 	let s2 = new THREE.Group()
 	s2.radius = 0.1
@@ -33,6 +36,7 @@ function initTwoSphereExploration(fish, visiBox)
 		opacity:0.93
 		// side:THREE.BackSide
 	} ) ) )
+	markQuaternion(s2)
 	scene.add(s2)
 	meshesWithProjections = []
 	makeProjectableSpheres( meshesWithProjections )
@@ -42,6 +46,17 @@ function initTwoSphereExploration(fish, visiBox)
 	let bulb = new THREE.Group()
 	bulb.position.z = -2 * s2.radius
 	scene.add(bulb)
+
+	hackPosition = new THREE.Vector3(0,1.6,0)
+	let thingsInScene = [s2,assemblage,bulb]
+	for(let i = 0; i < thingsInScene.length; i++)
+	{
+		let matrixPosition = new THREE.Vector3().setFromMatrixPosition(thingsInScene[i].matrix)
+		matrixPosition.add(hackPosition)
+		thingsInScene[i].matrix.setPosition(matrixPosition)
+
+		thingsInScene[i].position.add(hackPosition)
+	}
 
 	//maybe better: stereographically unproject the fish's location, 
 	let projectionIndicators = new THREE.LineSegments(new THREE.Geometry(),new THREE.MeshBasicMaterial({
@@ -87,8 +102,31 @@ function initTwoSphereExploration(fish, visiBox)
 		}
 	},function(){},function(e){console.log(e)})
 
+	let lerpProgress = 1
+	let lerpDestination = 1
+	// bindButton("a",function()
+	// {
+	// 	if(lerpDestination === 1)
+	// 	{
+	// 		lerpDestination = 0
+	// 	}
+	// 	else
+	// 	{
+	// 		lerpDestination = 1
+	// 	}
+	// }, "twosphere lerping")
+
 	updateFunctions.push(function()
 	{
+		for(let i = 0; i < thingsInScene.length; i++)
+		{
+			let matrixPosition = new THREE.Vector3().setFromMatrixPosition(thingsInScene[i].matrix)
+			matrixPosition.sub(hackPosition)
+			thingsInScene[i].matrix.setPosition(matrixPosition)
+
+			thingsInScene[i].position.sub(hackPosition)
+		}
+
 		let t = frameCount*0.03
 
 		// fish.position.y = 0.6*Math.sin(t*1.3)
@@ -102,21 +140,7 @@ function initTwoSphereExploration(fish, visiBox)
 		// 	t
 		// 	)
 
-		let s2Destination = new THREE.Vector3(0,0,-s2.radius)
-		assemblage.localToWorld(s2Destination)
-		// if(s2.position.distanceTo(s2Destination) < s2.radius )
-		{
-			s2.position.lerp(s2Destination,1)
-			s2.matrix.setPosition( s2.position )
-		}
-
-		let bulbDestination = assemblage.localToWorld( new THREE.Vector3(0,0,-s2.radius*2) )
-		// if(bulb.position.distanceTo(bulbDestination) < s2.radius )
-		{
-			bulb.position.lerp(bulbDestination,1)
-		}
-
-		if( imitationHand.grippingTop )
+		if( designatedHand.grippingTop )
 		{
 			let justGripped = (s2.matrixAutoUpdate !== false)
 			s2.matrixAutoUpdate = false
@@ -139,16 +163,29 @@ function initTwoSphereExploration(fish, visiBox)
 		}
 		else
 		{
-			if(imitationHand.grippingTopOld)
+			if(designatedHand.grippingTopOld)
 			{
 				s2.matrix.decompose(s2.position,s2.quaternion,s2.scale)
 				s2.matrixAutoUpdate = true
 			}
+
+			if( designatedHand.button1 )
+			{
+				s2.quaternion.premultiply( designatedHand.getDeltaQuaternion() )
+			}
 		}
+
+		if(designatedHand.button2 && !designatedHand.button2Old)
+		{
+			cycleTwoSphereTextures()
+		}
+
+		projectionIndicators.visible = designatedHand.grippingTop
 
 		// log(new THREE.Quaternion().setFromRotationMatrix(s2.matrix))
 
-		// s2.updateMatrixWorld()
+		lerpProgress += (lerpDestination - lerpProgress)*0.1
+		let assemblageMatrixInverse = new THREE.Matrix4().getInverse(assemblage.matrix)
 		for(let i = 0; i < meshesWithProjections.length; i++)
 		{
 			let mesh = meshesWithProjections[i]
@@ -163,13 +200,15 @@ function initTwoSphereExploration(fish, visiBox)
 			plane.setFromNormalAndCoplanarPoint( new THREE.Vector3(0,0,1), new THREE.Vector3(1,0,assemblage.position.z) )
 			
 			let line = new THREE.Line3(bulb.position.clone(), new THREE.Vector3())
+			let intersection = new THREE.Vector3()
 			for(let i = 0; i < mesh.projection.geometry.vertices.length; i++)
 			{
 				line.end.copy(mesh.geometry.vertices[i])
 				line.end.applyMatrix4(s2.matrix)
 
-				plane.intersectLine(line,mesh.projection.geometry.vertices[i])
-				assemblage.worldToLocal(mesh.projection.geometry.vertices[i])
+				plane.intersectLine(line,intersection)
+				mesh.projection.geometry.vertices[i].lerpVectors(line.end,intersection,lerpProgress)
+				mesh.projection.geometry.vertices[i].applyMatrix4(assemblageMatrixInverse)
 			}
 			// console.log(mesh.projection.geometry.vertices[4])
 			mesh.projection.geometry.verticesNeedUpdate = true
@@ -179,7 +218,7 @@ function initTwoSphereExploration(fish, visiBox)
 			for(let i = 0; i < 2; i++)
 			{
 				projectionIndicators.geometry.vertices[i*2].copy(bulb.position)
-				assemblage.worldToLocal(projectionIndicators.geometry.vertices[i*2])
+				projectionIndicators.geometry.vertices[i*2].applyMatrix4(assemblageMatrixInverse)
 
 				let v = projectionIndicators.geometry.vertices[1+i*2].set(0.03,0,0)
 				if(i)
@@ -190,6 +229,19 @@ function initTwoSphereExploration(fish, visiBox)
 				v.applyMatrix4(fish.matrix)
 			}
 			projectionIndicators.geometry.verticesNeedUpdate = true
+		}
+
+		
+
+
+
+		for(let i = 0; i < thingsInScene.length; i++)
+		{
+			let matrixPosition = new THREE.Vector3().setFromMatrixPosition(thingsInScene[i].matrix)
+			matrixPosition.add(hackPosition)
+			thingsInScene[i].matrix.setPosition(matrixPosition)
+
+			thingsInScene[i].position.add(hackPosition)
 		}
 	})
 
@@ -220,9 +272,7 @@ function initTwoSphereExploration(fish, visiBox)
 		//may wanna do some projecting
 
 		fish.updateMatrix()
-		fish.updateMatrixWorld()
-
-		let worldPosition = fish.localToWorld( new THREE.Vector3() ) 
+		let worldPosition = new THREE.Vector3().applyMatrix4(fish.matrix).applyMatrix4(assemblage.matrix)
 		let unprojectedHandPosition = stereographicallyUnproject2D( worldPosition )
 		if( unprojectedHandPosition === null)
 		{
@@ -231,7 +281,7 @@ function initTwoSphereExploration(fish, visiBox)
 
 		{
 			let unitVector = new THREE.Vector3(0.00001,0,0)
-			fish.localToWorld(unitVector)
+			unitVector.applyMatrix4(fish.matrix)
 			let curvedAwayUnitVector = stereographicallyUnproject2D( unitVector )
 			if( curvedAwayUnitVector === null)
 			{
@@ -266,7 +316,12 @@ function initTwoSphereExploration(fish, visiBox)
 	{
 		meshesWithProjections[i].visible = false
 	}
-	bindButton( "c", function()
+	// bindButton( "c", function()
+	// {
+	// 	cycleTwoSphereTextures()
+	// }, "cycle 2-sphere textures" )
+
+	function cycleTwoSphereTextures()
 	{
 		let visibleIndex = 0
 		for(let i = 0; i < meshesWithProjections.length; i++)
@@ -288,7 +343,7 @@ function initTwoSphereExploration(fish, visiBox)
 		{
 			meshesWithProjections[i].visible = (i===visibleIndex)
 		}
-	}, "cycle 2-sphere textures" )
+	}
 
 	function makeProjectableSpheres(meshesWithProjections)
 	{
@@ -331,8 +386,26 @@ function initTwoSphereExploration(fish, visiBox)
 		}
 		addProjectableSphere(latitudesAndLontitudesGeo)
 
-		let sphericalOctahedronGeo = new THREE.Geometry()
+		let twoCirclesGeo = new THREE.Geometry()
 		let radialSegements = 128
+		for(let i = 0; i < 2; i++)
+		{
+			let start = new THREE.Vector3().setComponent(i,1)
+			let axis = new THREE.Vector3().setComponent((i+1)%3,1)
+			for(let j = 0; j < radialSegements; j++)
+			{
+				let latitude = j / radialSegements * TAU
+				let p = start.clone().applyAxisAngle(axis,latitude)
+				twoCirclesGeo.vertices.push(p)
+
+				let nextLatitude = (j+1) / radialSegements * TAU
+				let q = start.clone().applyAxisAngle(axis,nextLatitude)
+				twoCirclesGeo.vertices.push(q)
+			}
+		}
+		addProjectableSphere(twoCirclesGeo)
+
+		let sphericalOctahedronGeo = new THREE.Geometry()
 		for(let i = 0; i < 3; i++)
 		{
 			let start = new THREE.Vector3().setComponent(i,1)
@@ -385,5 +458,28 @@ function initTwoSphereExploration(fish, visiBox)
 				addProjectableSphere(globeGeo)
 			})
 		})
+	}
+
+	{
+		let spacing = 0.07
+		let grid = new THREE.LineSegments( new THREE.Geometry(), new THREE.MeshBasicMaterial({
+			color:0x333333,
+			clippingPlanes: visiBox.planes
+		}) )
+		let numWide = 36
+		let numTall = 20
+		let verticalExtent = numTall/2*spacing
+		let horizontalExtent = numWide/2*spacing
+		for(let i = 0; i < numWide+1; i++)
+		{
+			let x = (i-numWide/2)*spacing
+			grid.geometry.vertices.push(new THREE.Vector3(x,-verticalExtent,0),new THREE.Vector3(x,verticalExtent,0))
+		}
+		for( let i = 0; i < numTall+1; i++)
+		{
+			let y = (i-numTall/2)*spacing
+			grid.geometry.vertices.push(new THREE.Vector3(-horizontalExtent,y,0),new THREE.Vector3(horizontalExtent,y,0))
+		}
+		assemblage.add(grid)
 	}
 }

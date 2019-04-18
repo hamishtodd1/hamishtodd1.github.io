@@ -93,6 +93,11 @@ function initVr()
 
 		scene.add( handControllers[ i ] );
 		handControllers[ i ].position.y = -0.5 //out of way until getting input
+
+		handControllers[i].getDeltaQuaternion = function()
+		{
+			return new THREE.Quaternion().copy(this.oldQuaternion).inverse().multiply(this.quaternion)
+		}
 	}
 
 	loadControllerModel(RIGHT_CONTROLLER_INDEX)

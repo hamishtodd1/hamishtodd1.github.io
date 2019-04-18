@@ -1,5 +1,7 @@
 function initImitationHand()
 {
+	imitationHand = new THREE.Group()
+
 	imitationHand.grippingTop = false
 	imitationHand.grippingTopOld = imitationHand.grippingTop
 	imitationHand.oldPosition = new THREE.Vector3()
@@ -34,6 +36,11 @@ function initImitationHand()
 		imitationHand.quaternion.setFromEuler(imitationHand.rotation)
 
 		imitationHand.updateMatrixWorld()
+	}
+
+	imitationHand.getDeltaQuaternion = function()
+	{
+		return new THREE.Quaternion().copy(imitationHand.oldQuaternion).inverse().multiply(imitationHand.quaternion)
 	}
 
 	updateImitationHand = function()

@@ -62,43 +62,38 @@
 
 				initButtons()
 
-				bindButton("left",function(){},"turn",function()
 				{
-					cameraAngle -= 0.07
-				})
-				bindButton("right",function(){},"turn",function()
-				{
-					cameraAngle += 0.07
-				})
+					camera.position.z = 2
+					// camera.position.y = assemblage.position.y
+					camera.far = 40
+					camera.updateProjectionMatrix()
 
-				camera.position.z = 2
-				// camera.position.y = assemblage.position.y
-				camera.far = 40
-				camera.updateProjectionMatrix()
+					// let cameraAngle = 0//TAU/4
+					// bindButton("left",function(){},"turn",function()
+					// {
+					// 	cameraAngle -= 0.07
+					// })
+					// bindButton("right",function(){},"turn",function()
+					// {
+					// 	cameraAngle += 0.07
+					// })
+					// updateFunctions.push(function()
+					// {
+					// 	let speed = 0//.06
+					// 	cameraAngle += speed
 
-				let cameraAngle = 0//TAU/4
-				updateFunctions.push(function()
-				{
-					let speed = 0//.06
-					cameraAngle += speed
-
-					camera.position.set(0,0,camera.position.length())
-					camera.position.applyAxisAngle(yUnit, cameraAngle)
-					camera.rotation.y = cameraAngle
-				})
+					// 	camera.position.set(0,0,camera.position.length())
+					// 	camera.position.applyAxisAngle(yUnit, cameraAngle)
+					// 	camera.rotation.y = cameraAngle
+					// })
+				}
 				
-				initImitationHand();
-				if(0)
-				{
-					// initVr()
-				}
-				else
-				{
-					scene.add(imitationHand)
-				}
+				// initImitationHand();
+				initVr()
 
 				initLights();
 				initPlaybackAndRecording()
+				log(synchronizeStateToVideo)
 				// initHead()
 
 				await initSurroundings()
@@ -114,7 +109,10 @@
 					frameDelta = clock.getDelta();
 
 					readHandInput();
-					updateImitationHand()
+					if(imitationHand !== null )
+					{
+						updateImitationHand()
+					}
 
 					synchronizeToVideoOrCallContingentUpdateFunctions()
 

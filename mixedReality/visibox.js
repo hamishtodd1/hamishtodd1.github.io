@@ -11,6 +11,10 @@ function VisiBox()
 	visiBox.scale.multiplyScalar(1000)
 	visiBox.scale.x *= 2
 
+	markLerpedFloat(visiBox.scale,"x")
+	markLerpedFloat(visiBox.scale,"y")
+	markLerpedFloat(visiBox.scale,"z")
+
 	var cornerRadius = 0.02;
 
 	var ourSquareGeometry = new THREE.Geometry();
@@ -79,15 +83,15 @@ function VisiBox()
 	{
 		for(let i = 0; i < 2; i++)
 		{
-			//if your hand is in it and you press a certain button, toggle size
-			let p = visiBox.worldToLocal(hands[i].getWorldPosition(new THREE.Vector3()))
+			//if your handController is in it and you press a certain button, toggle size
+			let p = visiBox.worldToLocal(handControllers[i].getWorldPosition(new THREE.Vector3()))
 			if( -0.5 < p.x && p.x < 0.5 &&
 				-0.5 < p.y && p.y < 0.5 &&
 				-0.5 < p.z && p.z < 0.5  )
 			{
 				//light up?
 				
-				if( hands[i].button1 && !hands[i].button1Old )
+				if( handControllers[i].button2 && !handControllers[i].button2Old )
 				{
 					if(visiBox.scale.x < 100)
 					{

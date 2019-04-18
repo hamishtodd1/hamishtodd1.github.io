@@ -6,10 +6,10 @@ function initButtons()
 	{
 		if(buttons[buttonName] !== undefined)
 		{
-			console.error("attempted to bind a button that already has a binding")
+			console.error("attempted to bind a button that already has a binding: ", buttonName)
 		}
 
-		console.log("\n",buttonName + ": " + buttonDescription)
+		console.warn("\n",buttonName + ": " + buttonDescription)
 		buttons[buttonName] = {
 			down: false,
 			onDown: onDown
