@@ -33,7 +33,8 @@
 		Maybe pause the video. If you said 6, well done! In 5D it is 10. Try to work out why!
 
 		You can support me on patreon
-			If I make it to 
+			And get access to the VR page
+			If I make it to $x I will do more
 
 	alternative way of looking at it: the sphere is stuck in place
 	but your plane and projection point are moving
