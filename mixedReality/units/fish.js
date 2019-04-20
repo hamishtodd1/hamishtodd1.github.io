@@ -1,6 +1,5 @@
 function initFish( visiBox )
 {
-	let flatland = new THREE.Object3D();
 	let universeWidth = 1;
 
 	let fish = new THREE.Object3D();
@@ -49,31 +48,29 @@ function initFish( visiBox )
 
 	let grabbed2DObject = fish
 
+	let designatedHand = handControllers[0]
+	// designatedHand = imitationHand
+
 	let pointInHand = new THREE.Vector3(1,0,0)
 	updateFunctions.push(function()
 	{
-		imitationHand.standardVigorousMovement()
-		// imitationHand.position.set(0,0,1)
-		// imitationHand.rotation.y = 0.8 * Math.sin( frameCount * 0.05 )
+		if(designatedHand.grippingSide)
+		{
+			grabbed2DObject.position.x += designatedHand.position.x - designatedHand.oldPosition.x
+			grabbed2DObject.position.y += designatedHand.position.y - designatedHand.oldPosition.y
 
-		console.assert(flatland.quaternion.equals(new THREE.Quaternion()))
-		let universePlane = new THREE.Plane(zUnit.clone(),0).applyMatrix4(flatland.matrix)
-		let handProjected = universePlane.projectPoint( imitationHand.position.clone(), new THREE.Vector3() )
-		grabbed2DObject.position.copy(handProjected)
+			//hand is origin
+			let worldishPointInHand = pointInHand.clone().applyQuaternion(designatedHand.quaternion)
+			let worldishPointInHandOnPlane = worldishPointInHand.clone().projectOnPlane(zUnit).normalize()
 
-		//hand is origin
-		let fishRelative = grabbed2DObject.getWorldPosition( new THREE.Vector3() ).sub(imitationHand.position)
+			let oldWorldishPointInHand = pointInHand.clone().applyQuaternion(designatedHand.oldQuaternion)
+			let oldWorldishPointInHandOnPlane = oldWorldishPointInHand.clone().projectOnPlane(zUnit).normalize()
 
-		let worldishPointInHand = pointInHand.clone().applyQuaternion(imitationHand.quaternion)
-		let worldishPointInHandOnPlane = worldishPointInHand.clone().projectOnPlane(fishRelative).normalize()
+			let diff = new THREE.Quaternion().setFromUnitVectors(oldWorldishPointInHandOnPlane,worldishPointInHandOnPlane)
+			grabbed2DObject.quaternion.multiply(diff)
 
-		let oldWorldishPointInHand = pointInHand.clone().applyQuaternion(imitationHand.oldQuaternion)
-		let oldWorldishPointInHandOnPlane = oldWorldishPointInHand.clone().projectOnPlane(fishRelative).normalize()
-
-		let diff = new THREE.Quaternion().setFromUnitVectors(oldWorldishPointInHandOnPlane,worldishPointInHandOnPlane)
-		grabbed2DObject.quaternion.multiply(diff)
-
-		pointInHand.copy(worldishPointInHand).applyQuaternion(imitationHand.quaternion.clone().inverse())
+			pointInHand.copy(worldishPointInHand).applyQuaternion(designatedHand.quaternion.clone().inverse())
+		}
 
 		if(0)
 		{
@@ -105,6 +102,7 @@ function initFish( visiBox )
 		}
 	})
 	
+	if(0)
 	{
 		let spacing = 0.07
 		let grid = new THREE.LineSegments( new THREE.Geometry(), new THREE.MeshBasicMaterial({

@@ -1,9 +1,5 @@
 /*
 	TODO
-		monitoring
-			fish
-			thingy matrix
-			position and orientation of sphere
 		Make sure everything can easily be made visible and invisible
 			Or hack that in in post?
 
@@ -49,17 +45,18 @@
 		hopf fibration, spinors
 */
 
-//these are not changing
-let rayOrigin = new THREE.Vector4(0,0,0,-1)	
-let fourSpaceAxes = [
-	new THREE.Vector4(1,0,0,0),
-	new THREE.Vector4(0,1,0,0),
-	new THREE.Vector4(0,0,1,0)
-]
-
 function initThreeSphereExploration()
 {
+	initProjectionSystem()
+
 	let visiBox = VisiBox()
+
+	let threeSphereMatrix = new THREE.Matrix4()
+	let threeSphereMatrixInverse = new THREE.Matrix4()
+	for( let i = 0; i < threeSphereMatrix.elements.length; i++)
+	{
+		markLerpedFloat( threeSphereMatrix.elements, i )
+	}
 
 	//could have points too, maybe travelling along the circles
 	//alternatively could have had a torusgeometry. Disadvantage is that radius could get small
@@ -175,7 +172,7 @@ function initThreeSphereExploration()
 		let whenGrabbedHandQuaternion = new THREE.Quaternion()
 
 		let designatedHand = handControllers[0]
-		// if(0)
+		if(0)
 		{
 			designatedHand = imitationHand
 			scene.add( imitationHand )
@@ -274,7 +271,7 @@ function initThreeSphereExploration()
 
 		updateFunctions.push( function()
 		{
-			// if(0)
+			if(imitationHand !== null)
 			{
 				// camera.position.applyAxisAngle(yUnit, 0.01)
 				// camera.rotation.y += 0.01
@@ -361,14 +358,27 @@ function initThreeSphereExploration()
 				virtualHand.position.add(virtualHand.velocity)
 				virtualHand.quaternion.multiply(virtualHand.angularVelocity)
 				virtualHand.quaternion.normalize()
+
+				if(designatedHand.grippingSide)
+				{
+					assemblage.position.add(designatedHand.deltaPosition)
+				}
 			}
 			applyVirtualHandDiffToRotatingThreeSphereMatrix()
+
+			visiBox.position.copy(assemblage.position)
+
+			if( designatedHand.button1 && !designatedHand.button1Old )
+			{
+				cycleThreeSpheres()
+			}
 		} )
 	}
 
 	initProjectionControls()
 
 	let assemblage = new THREE.Group()
+	assemblage.position.y = 1.3
 	assemblage.scale.setScalar(0.1)
 	assemblage.updateMatrixWorld()
 	scene.add(assemblage)
@@ -417,7 +427,6 @@ function initThreeSphereExploration()
 
 	let hopfCircles = []
 	{
-
 		let fixedAxes = [];
 
 		let icoVertices = new THREE.IcosahedronGeometry(1,2).vertices
@@ -461,7 +470,7 @@ function initThreeSphereExploration()
 
 	let greatCircleSets = [parasolCircles,hyperOctahedronCircles,hopfCircles]
 
-	bindButton( "v", function()
+	function cycleThreeSpheres()
 	{
 		let indexToMakeVisible = 0
 		for(let i = 0; i < greatCircleSets.length; i++)
@@ -480,48 +489,62 @@ function initThreeSphereExploration()
 				greatCircleSets[i][j].representation.visible = (i === indexToMakeVisible)
 			}
 		}
+	}
+	cycleThreeSpheres()
+
+	bindButton( "v", function()
+	{
+		cycleThreeSpheres()
 	}, "cycle threespheres" )
 }
 
-let threeSphereMatrix = new THREE.Matrix4()
-let threeSphereMatrixInverse = new THREE.Matrix4()
-
-function stereographicallyProject(q)
+function initProjectionSystem()
 {
-	let rayDirection = new THREE.Vector4().copy(q).sub(rayOrigin);
-	let distanceAlongAxis = -1 * rayDirection.dot(rayOrigin)
-	if(distanceAlongAxis===0||distanceAlongAxis===-0)
+	//these are not changing
+	let rayOrigin = new THREE.Vector4(0,0,0,-1)	
+	let fourSpaceAxes = [
+		new THREE.Vector4(1,0,0,0),
+		new THREE.Vector4(0,1,0,0),
+		new THREE.Vector4(0,0,1,0)
+	]
+
+	stereographicallyProject = function(q)
 	{
-		console.warn("singularity")
-		return new THREE.Vector3()
+		let rayDirection = new THREE.Vector4().copy(q).sub(rayOrigin);
+		let distanceAlongAxis = -1 * rayDirection.dot(rayOrigin)
+		if(distanceAlongAxis===0||distanceAlongAxis===-0)
+		{
+			console.warn("singularity")
+			return new THREE.Vector3()
+		}
+		let fourSpaceProjection = rayDirection.clone().multiplyScalar(1/distanceAlongAxis).add(rayOrigin)
+		
+		let threeSpaceProjection = new THREE.Vector3()
+		for(let i = 0; i < 3; i++)
+		{
+			threeSpaceProjection.setComponent(i,fourSpaceProjection.dot(fourSpaceAxes[i]))
+		}
+		return threeSpaceProjection
 	}
-	let fourSpaceProjection = rayDirection.clone().multiplyScalar(1/distanceAlongAxis).add(rayOrigin)
-	
-	let threeSpaceProjection = new THREE.Vector3()
-	for(let i = 0; i < 3; i++)
+	stereographicallyUnproject = function(p)
 	{
-		threeSpaceProjection.setComponent(i,fourSpaceProjection.dot(fourSpaceAxes[i]))
+		let fourSpaceProjection = new THREE.Vector4(0,0,0,0)
+		for(let i = 0; i < 3; i++)
+		{
+			fourSpaceProjection.add( fourSpaceAxes[i].clone().multiplyScalar( p.getComponent(i) ) )
+		}
+		// console.assert(fourSpaceProjection.dot(rayOrigin) === 0)
+
+		let projectionLengthSq = fourSpaceProjection.lengthSq()
+		let unprojectedPointDistanceAlongOriginSpindle = 1 + (1-projectionLengthSq)/(1+projectionLengthSq) //algebra
+
+		let rayDirection = fourSpaceProjection.clone().sub( rayOrigin )
+
+		let unprojected = new THREE.Vector4().copy(rayDirection)
+		unprojected.multiplyScalar(unprojectedPointDistanceAlongOriginSpindle).add(rayOrigin)
+
+		return unprojected
 	}
-	return threeSpaceProjection
-}
-function stereographicallyUnproject(p)
-{
-	let fourSpaceProjection = new THREE.Vector4(0,0,0,0)
-	for(let i = 0; i < 3; i++)
-	{
-		fourSpaceProjection.add( fourSpaceAxes[i].clone().multiplyScalar( p.getComponent(i) ) )
-	}
-	// console.assert(fourSpaceProjection.dot(rayOrigin) === 0)
-
-	let projectionLengthSq = fourSpaceProjection.lengthSq()
-	let unprojectedPointDistanceAlongOriginSpindle = 1 + (1-projectionLengthSq)/(1+projectionLengthSq) //algebra
-
-	let rayDirection = fourSpaceProjection.clone().sub( rayOrigin )
-
-	let unprojected = new THREE.Vector4().copy(rayDirection)
-	unprojected.multiplyScalar(unprojectedPointDistanceAlongOriginSpindle).add(rayOrigin)
-
-	return unprojected
 }
 
 THREE.Vector4.prototype.distanceTo = function(otherVec)

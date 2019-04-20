@@ -23,7 +23,7 @@ let renderer = new THREE.WebGLRenderer( { antialias: true } );
 const RIGHT_CONTROLLER_INDEX = 0;
 const LEFT_CONTROLLER_INDEX = 1-RIGHT_CONTROLLER_INDEX;
 let handControllers = [new THREE.Object3D(),new THREE.Object3D()]
-let imitationHand = new THREE.Group()
+let imitationHand = null
 
 let updateFunctions = [];
 let alwaysUpdateFunctions = []
