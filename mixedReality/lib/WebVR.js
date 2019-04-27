@@ -6,6 +6,7 @@
  */
 
 var WEBVR = {
+	vrAvailable: false,
 
 	createButton: function ( renderer, options ) {
 
@@ -16,6 +17,8 @@ var WEBVR = {
 		}
 
 		function showEnterVR( device ) {
+
+			this.vrAvailable = true
 
 			button.style.display = '';
 

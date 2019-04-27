@@ -62,7 +62,7 @@ initPlaybackAndRecording = function()
 		function( str )
 		{
 			frames = eval(str)
-			synchronizeStateToVideo()
+			// synchronizeStateToVideo()
 		}
 	);
 

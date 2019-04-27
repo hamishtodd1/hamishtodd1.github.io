@@ -1,5 +1,3 @@
-function readHandInput(){}
-
 function initVr()
 {
 	renderer.vr.enabled = true;
@@ -46,22 +44,6 @@ function initVr()
 	}
 
 		
-	function loadControllerModel(i)
-	{
-		new THREE.OBJLoader().load( "data/external_controller01_" + (i===LEFT_CONTROLLER_INDEX?"left":"right") + ".obj",
-			function ( object ) 
-			{
-				handControllers[ i ].controllerModel.geometry = object.children[0].geometry;
-				handControllers[ i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeRotationAxis(xUnit,0.7) );
-				handControllers[ i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeTranslation(
-					0.008 * ( i == LEFT_CONTROLLER_INDEX?-1:1),
-					0.041,
-					-0.03) );
-				handControllers[ i ].controllerModel.geometry.computeBoundingSphere();
-			},
-			function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); } );
-	}
-	
 	var controllerMaterial = new THREE.MeshLambertMaterial({color:0x444444});
 	var laserRadius = 0.001;
 	var controllerKeys = {
@@ -100,10 +82,53 @@ function initVr()
 		}
 	}
 
+	function loadControllerModel(i)
+	{
+		new THREE.OBJLoader().load( "data/external_controller01_" + (i===LEFT_CONTROLLER_INDEX?"left":"right") + ".obj",
+			function ( object ) 
+			{
+				handControllers[ i ].controllerModel.geometry = object.children[0].geometry;
+				handControllers[ i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeRotationAxis(xUnit,0.7) );
+				handControllers[ i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeTranslation(
+					0.008 * ( i == LEFT_CONTROLLER_INDEX?-1:1),
+					0.041,
+					-0.03) );
+				handControllers[ i ].controllerModel.geometry.computeBoundingSphere();
+			},
+			function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); } );
+	}
+
 	loadControllerModel(RIGHT_CONTROLLER_INDEX)
+
+	{
+		let cone = new THREE.Mesh(new THREE.ConeBufferGeometry(0.1,0.4,4))
+		cone.geometry.applyMatrix(new THREE.Matrix4().makeRotationY(TAU/8))
+		bindButton("i",function()
+		{
+			cone.rotation.x += 0.1
+		},"cone rotation")
+		bindButton("k",function()
+		{
+			cone.rotation.x -= 0.1
+		},"cone rotation")
+		bindButton("j",function()
+		{
+			cone.rotation.z += 0.1
+		},"cone rotation")
+		bindButton("l",function()
+		{
+			cone.rotation.z -= 0.1
+		},"cone rotation")
+		handControllers[1-RIGHT_CONTROLLER_INDEX].add(cone)
+	}
 
 	readHandInput = function()
 	{
+		if( !WEBVR.vrAvailable )
+		{
+			return
+		}
+
 		// var device = renderer.vr.getDevice()
 		// if(device)
 		// 	console.log(device.stageParameters.sittingToStandingTransform)

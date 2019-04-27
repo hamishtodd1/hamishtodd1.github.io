@@ -88,13 +88,11 @@ function initTwoSphereExploration(fish, visiBox)
 			color:0xCCCCCC
 		})))
 
-		let lightBits = [obj.children[2],obj.children[3]]
-		for(let i =  0; i < lightBits.length; i++)
-		{
-			lightBits[i].material = new THREE.MeshLambertMaterial({
-				color: 0xFFFFA0, emissive:0xFFFF80, emissiveIntensity:0.5} )
-			bulb.add(lightBits[i])
-		}
+		bulb.lightBit = obj.children[2]
+		bulb.lightBit.geometry.merge(obj.children[3].geometry)
+		bulb.lightBit.material = new THREE.MeshLambertMaterial({
+			color: 0xFFFFA0, emissive:0xFFFF80, emissiveIntensity:0.5} )
+		bulb.add(bulb.lightBit)
 
 		for(let i = 0; i < bulb.children.length; i++)
 		{

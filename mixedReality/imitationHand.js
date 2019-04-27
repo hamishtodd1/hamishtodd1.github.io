@@ -43,7 +43,7 @@ function initImitationHand()
 		return new THREE.Quaternion().copy(imitationHand.oldQuaternion).inverse().multiply(imitationHand.quaternion)
 	}
 
-	updateImitationHand = function()
+	imitationHand.update = function()
 	{
 		imitationHand.oldPosition.copy(imitationHand.position)
 		imitationHand.oldQuaternion.copy(imitationHand.quaternion)
