@@ -18,7 +18,7 @@ var WEBVR = {
 
 		function showEnterVR( device ) {
 
-			this.vrAvailable = true
+			WEBVR.vrAvailable = true
 
 			button.style.display = '';
 

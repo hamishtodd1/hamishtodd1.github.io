@@ -3,7 +3,7 @@
 		Make sure everything can easily be made visible and invisible
 			Or hack that in in post?
 
-	Script, "Rotating a 4D sphere in VR"
+	Script, "Rotating a 4D sphere in VR" Thumbnail: nice MR thing, "4D"
 		So to describe 4D rotations, in this video we're going to use basically the same approach to describing 4D
 		That you might have seen elsewhere, which is we're going to think about a 2D creature, and we're going to try to empathize with it
 		We're going to use standard approach, [fish]
@@ -39,7 +39,8 @@
 
 	Sequel: "turning things inside-out with 4D spheres"
 		Surfaces
-		Interesting when a surface turned inside-out looks the same roight?
+		Interesting when a surface turned inside-out looks the same roight? You would think that that was only true with spheres
+		Hahaha boy's surface, or at least a cross-cap. Lawson klein probably
 		Bring in chirality
 		600-cell tet ring thing
 		hopf fibration, spinors
@@ -53,10 +54,7 @@ function initThreeSphereExploration()
 
 	let threeSphereMatrix = new THREE.Matrix4()
 	let threeSphereMatrixInverse = new THREE.Matrix4()
-	for( let i = 0; i < threeSphereMatrix.elements.length; i++)
-	{
-		markLerpedFloat( threeSphereMatrix.elements, i )
-	}
+	markMatrix(threeSphereMatrix)
 
 	//could have points too, maybe travelling along the circles
 	//alternatively could have had a torusgeometry. Disadvantage is that radius could get small

@@ -3,7 +3,8 @@ function initFish( visiBox )
 	let universeWidth = 1;
 
 	let fish = new THREE.Object3D();
-	let fishLength = 0.15;
+	markPositionAndQuaternion(fish)
+	let fishLength = 0.3;
 	let fishMaterial = new THREE.MeshBasicMaterial({
 		side: THREE.DoubleSide,
 		transparent: true,
@@ -18,26 +19,43 @@ function initFish( visiBox )
 	fish.children[0].position.z = 0.00006;
 	fish.children[1].position.z =-0.00006;
 
-	new THREE.TextureLoader().setCrossOrigin(true).load("data/fish.png",function(texture)
+	let loader = new THREE.TextureLoader().setCrossOrigin(true)
+	loader.load("data/fish.png",function(texture)
 	{
-		fishMaterial.map = texture
+		let openMouthTexture = texture
+		fishMaterial.map = openMouthTexture
 		fishMaterial.needsUpdate = true
+
+		loader.load("data/fish2.png",function(texture)
+		{
+			let closedMouthMesh = new THREE.Mesh(new THREE.PlaneGeometry(fishLength,fishLength),fishMaterial.clone() )
+			closedMouthMesh.material.map = texture
+			closedMouthMesh.material.needsUpdate = true
+			fish.add(closedMouthMesh)
+			markObjectProperty(closedMouthMesh,"visible")
+
+			updateFunctions.push(function()
+			{
+				closedMouthMesh.visible = handControllers[RIGHT_CONTROLLER_INDEX].grippingTop
+			})
+		},function(){},function(e){console.error(e)})
 	},function(){},function(e){console.error(e)})
 
 	//don't have an octahedron, just have a pair of circles
 
 	{
 		let fishEye = new THREE.Object3D();
-		let pupilRadius = fishLength / 40;
+		let pupilRadius = fishLength / 80;
 		let eyeWhite = new THREE.Mesh(new THREE.CylinderGeometry(pupilRadius*2, pupilRadius*2, fish.children[0].position.z * 4, 20), new THREE.MeshBasicMaterial({ color:0xFFFFFF, clippingPlanes: visiBox.planes }));
 		let fishPupil = new THREE.Mesh(new THREE.CylinderGeometry(pupilRadius, pupilRadius, fish.children[0].position.z * 6, 20), new THREE.MeshBasicMaterial({ color:0x000000, clippingPlanes: visiBox.planes }));
 		let blickCountdown = 0;
 		fishEye.add(eyeWhite);
 		fishEye.add(fishPupil);
 		fishEye.rotation.x = TAU / 4;
-		fishEye.position.x = 0.04 * fishLength / (universeWidth / 8);
+		fishEye.position.x = -0.017
 		fish.add(fishEye);
 
+		let closedMouth = new THREE.Mesh(new THREE.CircleBufferGeometry)
 	}
 
 	{

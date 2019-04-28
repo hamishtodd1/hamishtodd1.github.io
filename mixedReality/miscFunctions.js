@@ -607,10 +607,10 @@ THREE.Quaternion.prototype.sub = function(q2)
 	return this;
 }
 
-function presentJsonFile(obj, filename)
+function presentJsonFile(string, filename)
 {
 	let download = document.createElement('a');
-	download.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(obj)));
+	download.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(string));
 	download.setAttribute('download', filename);
 	download.style.display = 'none';
 	document.body.appendChild(download);

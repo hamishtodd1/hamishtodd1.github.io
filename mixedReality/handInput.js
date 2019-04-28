@@ -1,6 +1,7 @@
-function initVr()
+function initVr(renderer)
 {
-	renderer.vr.enabled = true;
+	// renderer.vr.enabled = true;
+	
 	let vrButton = WEBVR.createButton( renderer )
 	document.body.appendChild( vrButton );
 	document.addEventListener( 'keydown', function( event )
@@ -60,7 +61,15 @@ function initVr()
 			handControllers[ i ][propt] = false;
 			handControllers[ i ][propt+"Old"] = false;
 		}
-		handControllers[ i ].thumbStickAxes = [0,0];
+		handControllers[ i ].thumbstickAxes = [0,0];
+		handControllers[ i ].thumbstickUp = false
+		handControllers[ i ].thumbstickDown = false
+		handControllers[ i ].thumbstickLeft = false
+		handControllers[ i ].thumbstickRight = false
+		handControllers[ i ].thumbstickUpOld = false
+		handControllers[ i ].thumbstickDownOld = false
+		handControllers[ i ].thumbstickLeftOld = false
+		handControllers[ i ].thumbstickRightOld = false
 
 		handControllers[ i ].controllerModel = new THREE.Mesh( new THREE.BoxGeometry(0.1,0.1,0.17), controllerMaterial.clone() );
 		// applyLeftControllerTransformation(handControllers[ i ].controllerModel.geometry)
@@ -184,19 +193,33 @@ function initVr()
 			var controller = handControllers[affectedControllerIndex]
 			
 			// Thumbstick could also be used for light intensity?
-			controller.thumbStickAxes[0] = gamepads[k].axes[0];
-			controller.thumbStickAxes[1] = gamepads[k].axes[1];
-			
-			controller.oldPosition.copy(handControllers[ affectedControllerIndex ].position);
-			controller.oldQuaternion.copy(handControllers[ affectedControllerIndex ].quaternion);
-			
-			controller.position.fromArray( gamepads[k].pose.position );
-			controller.position.applyMatrix4( standingMatrix );
-			controller.quaternion.fromArray( gamepads[k].pose.orientation );
-			controller.updateMatrixWorld();
+			{
+				controller.thumbstickAxes[0] = gamepads[k].axes[0];
+				controller.thumbstickAxes[1] = gamepads[k].axes[1];
 
-			controller.deltaPosition.copy(handControllers[ affectedControllerIndex ].position).sub(handControllers[ affectedControllerIndex ].oldPosition);
-			controller.deltaQuaternion.copy(controller.oldQuaternion).inverse().multiply(controller.quaternion);
+				controller.thumbstickRightOld = controller.thumbstickRight
+				controller.thumbstickLeftOld = controller.thumbstickLeft
+				controller.thumbstickUpOld = controller.thumbstickUp
+				controller.thumbstickDownOld = controller.thumbstickDown
+
+				controller.thumbstickRight = controller.thumbstickAxes[0] > 0.5
+				controller.thumbstickLeft = controller.thumbstickAxes[0] < -0.5
+				controller.thumbstickUp = controller.thumbstickAxes[1] < -0.5
+				controller.thumbstickDown = controller.thumbstickAxes[1] > 0.5
+			}
+			
+			{
+				controller.oldPosition.copy(handControllers[ affectedControllerIndex ].position);
+				controller.oldQuaternion.copy(handControllers[ affectedControllerIndex ].quaternion);
+				
+				controller.position.fromArray( gamepads[k].pose.position );
+				controller.position.applyMatrix4( standingMatrix );
+				controller.quaternion.fromArray( gamepads[k].pose.orientation );
+				controller.updateMatrixWorld();
+
+				controller.deltaPosition.copy(handControllers[ affectedControllerIndex ].position).sub(handControllers[ affectedControllerIndex ].oldPosition);
+				controller.deltaQuaternion.copy(controller.oldQuaternion).inverse().multiply(controller.quaternion);
+			}
 
 			for( var propt in controllerKeys )
 			{

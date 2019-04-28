@@ -25,6 +25,7 @@ function VisiBox()
 		new THREE.Vector3(-0.5,0.5,0) )
 	visiBox.planes = [];
 	var faces = Array(6);
+	visiBox.faces = faces
 	for(var i = 0; i < 6; i++)
 	{
 		faces[i] = new THREE.LineLoop(ourSquareGeometry, new THREE.MeshLambertMaterial({color:0x333333,transparent:true, opacity:0.5, side:THREE.DoubleSide}) );

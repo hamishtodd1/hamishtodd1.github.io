@@ -1,3 +1,5 @@
+//if you make sure the person with the most cash is always at the top, no need to have a "finished" mode
+
 //big advantage: the "display" of confidence on the normal board is linear
 
 //one might get things like the radiolab "Buy and then immediately sell when you see the price"

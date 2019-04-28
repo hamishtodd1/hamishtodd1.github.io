@@ -1,19 +1,11 @@
-// normal sphere can be rotated in normal way
-// Make sure everything can easily be made visible and invisible
-// monitoring
+//each take gets a letter A-Z. draw it through air
+//monitoring should probably be a diff
+
+// monitoring - better off marking the controller? Jon Blow says "pain in the ass"
 
 function initTwoSphereExploration(fish, visiBox)
 {
-	let designatedHand = handControllers[0]
-	if(0)
-	{
-		designatedHand = imitationHand
-
-		imitationHand.position.x = 1.2
-		imitationHand.grippingTop = true
-	}
-
-	markPositionAndQuaternion(fish)
+	let designatedHand = handControllers[RIGHT_CONTROLLER_INDEX]
 
 	// camera.position.multiplyScalar(10)
 
@@ -21,22 +13,35 @@ function initTwoSphereExploration(fish, visiBox)
 	scene.add(assemblage)
 
 	assemblage.add(fish)
+	markObjectProperty(fish,"visible")
+	bindButton("2",function()
+	{
+		fish.visible = !fish.visible
+		for(let i = 0; i < visiBox.faces.length; i++)
+		{
+			faces[i].visible = !faces[i].visible
+		}
+	})
+
 	visiBox.scale.z *= 0.001
 	visiBox.scale.multiplyScalar(1/1000)
 	assemblage.add(visiBox)
 
 	let s2 = new THREE.Group()
+	bindButton("1",function(){s2.visible = !s2.visible})
 	s2.radius = 0.1
 	s2.scale.setScalar(s2.radius)
-	s2.position.z = -s2.radius
-	s2.add( new THREE.Mesh(new THREE.SphereGeometry(0.98,64,64), new THREE.MeshBasicMaterial(
+	s2.correctPosition = new THREE.Vector3(0,0,-s2.radius)
+	s2.position.copy(s2.correctPosition)
+	s2.add( new THREE.Mesh(new THREE.SphereGeometry(0.96,64,64), new THREE.MeshBasicMaterial(
 	{
 		color:0xCCCCCC,
 		transparent:true,
 		opacity:0.93
 		// side:THREE.BackSide
 	} ) ) )
-	markQuaternion(s2)
+	// markQuaternion(s2)
+	markMatrix(s2.matrix)
 	scene.add(s2)
 	meshesWithProjections = []
 	makeProjectableSpheres( meshesWithProjections )
@@ -44,10 +49,13 @@ function initTwoSphereExploration(fish, visiBox)
 	let extraRotationMatrix = new THREE.Matrix4()
 
 	let bulb = new THREE.Group()
+	bindButton("3",function(){bulb.visible = !bulb.visible})
 	bulb.position.z = -2 * s2.radius
+	markPositionAndQuaternion(bulb)
 	scene.add(bulb)
 
-	hackPosition = new THREE.Vector3(0,1.6,0)
+	let hackEngaged = false
+	let hackPosition = new THREE.Vector3(0,1.6,0)
 	let thingsInScene = [s2,assemblage,bulb]
 	for(let i = 0; i < thingsInScene.length; i++)
 	{
@@ -58,7 +66,6 @@ function initTwoSphereExploration(fish, visiBox)
 		thingsInScene[i].position.add(hackPosition)
 	}
 
-	//maybe better: stereographically unproject the fish's location, 
 	let projectionIndicators = new THREE.LineSegments(new THREE.Geometry(),new THREE.MeshBasicMaterial({
 		color: 0x00FF00,
 		clippingPlanes: visiBox.planes
@@ -89,7 +96,7 @@ function initTwoSphereExploration(fish, visiBox)
 		})))
 
 		bulb.lightBit = obj.children[2]
-		bulb.lightBit.geometry.merge(obj.children[3].geometry)
+		// bulb.lightBit.geometry.merge(obj.children[3].geometry)
 		bulb.lightBit.material = new THREE.MeshLambertMaterial({
 			color: 0xFFFFA0, emissive:0xFFFF80, emissiveIntensity:0.5} )
 		bulb.add(bulb.lightBit)
@@ -99,20 +106,6 @@ function initTwoSphereExploration(fish, visiBox)
 			bulb.children[i].position.y -= 90
 		}
 	},function(){},function(e){console.log(e)})
-
-	let lerpProgress = 1
-	let lerpDestination = 1
-	// bindButton("a",function()
-	// {
-	// 	if(lerpDestination === 1)
-	// 	{
-	// 		lerpDestination = 0
-	// 	}
-	// 	else
-	// 	{
-	// 		lerpDestination = 1
-	// 	}
-	// }, "twosphere lerping")
 
 	updateFunctions.push(function()
 	{
@@ -124,20 +117,12 @@ function initTwoSphereExploration(fish, visiBox)
 
 			thingsInScene[i].position.sub(hackPosition)
 		}
+		hackEngaged = true
 
 		let t = frameCount*0.03
 
-		// fish.position.y = 0.6*Math.sin(t*1.3)
-		// fish.position.x -= 0.003
-		// fish.rotation.z = 0.6*Math.sin(t*1.3)
-
-		// fish.position.set( 2*0.2*Math.sin(t), 2*0.1*Math.cos(t),camera.position.z/2 + 2*0.3*Math.sin(t))
-		// fish.rotation.set(
-		// 	0,//0.4*Math.sin(t*1.0),
-		// 	0,//0.1*Math.sin(t*1.6),
-		// 	t
-		// 	)
-
+		//could do this shit differently
+		//test, so it's not even off by a frame
 		if( designatedHand.grippingTop )
 		{
 			let justGripped = (s2.matrixAutoUpdate !== false)
@@ -151,7 +136,6 @@ function initTwoSphereExploration(fish, visiBox)
 				if(justGripped)
 				{
 					s2.updateMatrix()
-					//CURRENTLY: newBasis * extraRotationMatrix = s2.matrix, therefore
 					extraRotationMatrix.getInverse(newBasis).multiply(s2.matrix)
 				}
 				newBasis.multiply(extraRotationMatrix)
@@ -169,25 +153,43 @@ function initTwoSphereExploration(fish, visiBox)
 
 			if( designatedHand.button1 )
 			{
-				s2.quaternion.premultiply( designatedHand.getDeltaQuaternion() )
+				s2.quaternion.copy( designatedHand.quaternion )
+				s2.position.copy( designatedHand.position ).sub(hackPosition)
+			}
+			else
+			{
+				s2.position.copy(s2.correctPosition)
 			}
 		}
 
-		if(designatedHand.button2 && !designatedHand.button2Old)
+		if(designatedHand.thumbstickButton && !designatedHand.thumbstickButtonOld)
 		{
 			cycleTwoSphereTextures()
 		}
 
 		projectionIndicators.visible = designatedHand.grippingTop
+	})
 
-		// log(new THREE.Quaternion().setFromRotationMatrix(s2.matrix))
+	alwaysUpdateFunctions.push(function()
+	{
+		if(!hackEngaged)
+		{
+			for(let i = 0; i < thingsInScene.length; i++)
+			{
+				let matrixPosition = new THREE.Vector3().setFromMatrixPosition(thingsInScene[i].matrix)
+				matrixPosition.sub(hackPosition)
+				thingsInScene[i].matrix.setPosition(matrixPosition)
 
-		lerpProgress += (lerpDestination - lerpProgress)*0.1
+				thingsInScene[i].position.sub(hackPosition)
+			}
+			hackEngaged = true
+		}
+
 		let assemblageMatrixInverse = new THREE.Matrix4().getInverse(assemblage.matrix)
 		for(let i = 0; i < meshesWithProjections.length; i++)
 		{
 			let mesh = meshesWithProjections[i]
-			if(mesh.visible === false)
+			if(mesh.visible === false || bulb.visible === false)
 			{
 				mesh.projection.visible = false
 				continue
@@ -205,8 +207,14 @@ function initTwoSphereExploration(fish, visiBox)
 				line.end.applyMatrix4(s2.matrix)
 
 				plane.intersectLine(line,intersection)
-				mesh.projection.geometry.vertices[i].lerpVectors(line.end,intersection,lerpProgress)
+				mesh.projection.geometry.vertices[i].lerpVectors(line.end,intersection,1)
 				mesh.projection.geometry.vertices[i].applyMatrix4(assemblageMatrixInverse)
+
+				//to stop weirdness in singularity
+				if( i % 2 === 1 && mesh.projection.geometry.vertices[i].distanceToSquared(mesh.projection.geometry.vertices[i-1]) > 4 )
+				{
+					mesh.projection.geometry.vertices[i].copy(mesh.projection.geometry.vertices[i-1])
+				}
 			}
 			// console.log(mesh.projection.geometry.vertices[4])
 			mesh.projection.geometry.verticesNeedUpdate = true
@@ -229,10 +237,6 @@ function initTwoSphereExploration(fish, visiBox)
 			projectionIndicators.geometry.verticesNeedUpdate = true
 		}
 
-		
-
-
-
 		for(let i = 0; i < thingsInScene.length; i++)
 		{
 			let matrixPosition = new THREE.Vector3().setFromMatrixPosition(thingsInScene[i].matrix)
@@ -241,6 +245,7 @@ function initTwoSphereExploration(fish, visiBox)
 
 			thingsInScene[i].position.add(hackPosition)
 		}
+		hackEngaged = false
 	})
 
 	function stereographicallyUnproject2D(worldV)
@@ -319,6 +324,12 @@ function initTwoSphereExploration(fish, visiBox)
 	// 	cycleTwoSphereTextures()
 	// }, "cycle 2-sphere textures" )
 
+	markObjectProperty( bulb,"visible" )
+	for(let i = 0; i < meshesWithProjections.length; i++)
+	{
+		markObjectProperty( meshesWithProjections[i],"visible" )
+	}
+
 	function cycleTwoSphereTextures()
 	{
 		let visibleIndex = 0
@@ -360,23 +371,25 @@ function initTwoSphereExploration(fish, visiBox)
 		}
 
 		let latitudesAndLontitudesGeo = new THREE.Geometry()
-		for(let i = 0; i < 24; i++)
+		let numLongtitude = 12
+		let numLatitude = 8
+		for(let i = 0; i < numLongtitude; i++)
 		{
-			let longtitude = TAU * i / 24
-			for(let j = 0; j < 12; j++)
+			let longtitude = TAU * i / numLongtitude
+			for(let j = 0; j < numLatitude; j++)
 			{
-				let latitude = j / 12 * TAU / 2
+				let latitude = j / numLatitude * TAU / 2
 				let p = new THREE.Vector3(0,1,0).applyAxisAngle(xUnit,latitude).applyAxisAngle(yUnit,longtitude)
 				latitudesAndLontitudesGeo.vertices.push(p)
 
-				let nextLatitude = (j+1) / 12 * TAU / 2
+				let nextLatitude = (j+1) / numLatitude * TAU / 2
 				let q = new THREE.Vector3(0,1,0).applyAxisAngle(xUnit,nextLatitude).applyAxisAngle(yUnit,longtitude)
 				latitudesAndLontitudesGeo.vertices.push(q)
 
 				if(j)
 				{
 					latitudesAndLontitudesGeo.vertices.push(p)
-					let nextLongtitude = TAU * (i+1) / 24
+					let nextLongtitude = TAU * (i+1) / numLongtitude
 					let r = new THREE.Vector3(0,1,0).applyAxisAngle(xUnit,latitude).applyAxisAngle(yUnit,nextLongtitude)
 					latitudesAndLontitudesGeo.vertices.push(r)
 				}
@@ -479,5 +492,22 @@ function initTwoSphereExploration(fish, visiBox)
 			grid.geometry.vertices.push(new THREE.Vector3(-horizontalExtent,y,0),new THREE.Vector3(horizontalExtent,y,0))
 		}
 		assemblage.add(grid)
+
+		let heptagon = new THREE.Mesh(new THREE.CylinderBufferGeometry(0.1,0.1,0.0001,7), new THREE.MeshBasicMaterial({color:0xFFA500}))
+		heptagon.material.clippingPlanes = visiBox.planes
+		heptagon.geometry.applyMatrix(new THREE.Matrix4().makeRotationX(TAU/4))
+		assemblage.add(heptagon)
+		updateFunctions.push(function()
+		{
+			if(designatedHand.thumbstickLeft)
+			{
+				heptagon.position.add(designatedHand.deltaPosition)
+				heptagon.position.z = 0
+
+				grid.visible = heptagon.position.length() < 0.6
+			}
+		})
+		markObjectProperty(grid,"visible")
+		markPosition(heptagon)
 	}
 }

@@ -11,7 +11,7 @@
 		If you glue the vive tracker to a tablet you only have to do it once
 */
 
-initPlaybackAndRecording = function()
+initPlaybackAndRecording = function(renderer)
 {
 	let discretes = [];
 	let quaternions = [];
@@ -22,7 +22,7 @@ initPlaybackAndRecording = function()
 	let lag = 0;
 	let recording = false
 	let recordingTime = 0
-	bindButton("r", function()
+	bindButton( "t", function()
 	{
 		if( !recording )
 		{
@@ -35,16 +35,16 @@ initPlaybackAndRecording = function()
 			handControllers[LEFT_CONTROLLER_INDEX].children[0].material.color.r = 0.267
 			recording = false
 
-			presentJsonFile(frames, "frames")
+			presentJsonFile(JSON.stringify(frames), "frames")
 		}
 	}, "toggle recording" )
 
 	{
 		var videoDomElement = document.createElement( 'video' )
+		videoDomElement.crossOrigin = 'anonymous';
 		videoDomElement.loop = false
 		videoDomElement.style = "display:none"
-		videoDomElement.src = "data/video.mp4"
-		videoDomElement.crossOrigin = 'anonymous';
+		videoDomElement.src = "data/sintel.ogv"
 
 		var videoTexture = new THREE.VideoTexture( videoDomElement );
 		videoTexture.minFilter = THREE.LinearFilter;
@@ -58,31 +58,14 @@ initPlaybackAndRecording = function()
 		plane.position.z -= 3
 	}
 
-	new THREE.FileLoader().load( "data/frames.txt",
+	let version = 6
+	new THREE.FileLoader().load( "data/frames ("+version+").txt",
 		function( str )
 		{
 			frames = eval(str)
 			// synchronizeStateToVideo()
 		}
 	);
-
-	bindButton( 'space', function()
-	{
-		if( videoDomElement.paused )
-		{
-			videoDomElement.play()
-		}
-		else
-		{
-			videoDomElement.pause()
-		}
-	}, "toggle playing");
-
-	bindButton( "y", function(){}, "reset",function()
-	{
-		videoDomElement.currentTime = 0 
-		synchronizeStateToVideo()
-	} )
 
 	function recordFrame()
 	{
@@ -97,15 +80,42 @@ initPlaybackAndRecording = function()
 
 		for(let i = 0, il = discretes.length; i < il; i++)
 		{
-			frame.discretes[i] = discretes[i].object[ discretes[i].property ];
+			let currentValue = discretes[i].object[ discretes[i].property ]
+
+			//FIRST CHECK IT WORKS JEEZ
+			// if( frames.length > 0 )
+			// {
+			// 	let j = frames.length-1;
+			// 	while( true )
+			// 	{
+			// 		if( frames[j].discretes[i] === null )
+			// 		{
+			// 			j--
+			// 		}
+			// 		else if( frames[j].discretes[i] === currentValue )
+			// 		{
+			// 			frame.discretes[i] = null
+			// 			break; //nothing to put in
+			// 		}
+			// 		else
+			// 		{
+			// 			frame.discretes[i] = currentValue
+			// 			break;
+			// 		}
+			// 	}
+			// }
+
+			frame.discretes[i] = currentValue
 		}
 		for(let i = 0, il = quaternions.length; i < il; i++)
 		{
-			frame.quaternions[i] = quaternions[i].toArray();
+			frame.quaternions[i] = quaternions[i].toArray()
 		}
 		for(let i = 0, il = lerpedFloats.length; i < il; i++)
 		{
-			frame.lerpedFloats[i] = lerpedFloats[i].object[ lerpedFloats[i].property ];
+			let currentValue = lerpedFloats[i].object[ lerpedFloats[i].property ]
+
+			frame.lerpedFloats[i] = currentValue
 		}
 
 		frames.push(frame);
@@ -113,15 +123,39 @@ initPlaybackAndRecording = function()
 
 	markObjectProperty = function( object, property )
 	{
+		for(let i = 0; i < discretes.length; i++)
+		{
+			if(discretes[i].object === object && discretes[i].property === property )
+			{
+				console.warn("already marked")
+				return
+			}
+		}
+
 		discretes.push({object, property});
 	}
 	markLerpedFloat = function( object, property )
 	{
+		for(let i = 0; i < discretes.length; i++)
+		{
+			if(discretes[i].object === object && discretes[i].property === property )
+			{
+				console.warn("already marked")
+				return
+			}
+		}
+
 		lerpedFloats.push({object, property});
 	}
 
 	markQuaternion = function( object3d )
 	{
+		if( quaternions.indexOf(object3d.quaternion) !== -1 )
+		{
+			console.warn("already marked")
+			return
+		}
+
 		quaternions.push(object3d.quaternion)
 	}
 	markPosition = function( object3d )
@@ -135,6 +169,13 @@ initPlaybackAndRecording = function()
 		console.warn("marking position and quaternion")
 		markPosition(object3d)
 		markQuaternion(object3d)
+	}
+	markMatrix = function(m)
+	{
+		for( let i = 0; i < m.elements.length; i++)
+		{
+			markObjectProperty( m.elements, i.toString() )
+		}
 	}
 
 	synchronizeStateToVideo = function()
@@ -151,7 +192,7 @@ initPlaybackAndRecording = function()
 				break
 			}
 		}
-		if(frameJustBefore === null)
+		if(frameJustBefore === null) //too far before or too far after
 		{
 			frameJustBefore = frames.length - 2
 		}
@@ -167,7 +208,6 @@ initPlaybackAndRecording = function()
 		for(let i = 0, il = lerpedFloats.length; i < il; i++)
 		{
 			//if it's a matrix this is a bad idea
-			log(frames[frameJustAfter].lerpedFloats)
 			let diff = frames[frameJustAfter].lerpedFloats[i] - frames[frameJustBefore].lerpedFloats[i];
 			lerpedFloats[i].object[ lerpedFloats[i].property ] = lerpValue * diff + frames[frameJustBefore].lerpedFloats[i];
 		}
@@ -179,68 +219,119 @@ initPlaybackAndRecording = function()
 		}
 	}
 
-	synchronizeToVideoOrCallContingentUpdateFunctions = function()
+	maybeRecordFrame = function()
 	{
 		if( recording === true )
 		{
 			recordFrame()
 		}
+	}
 
-		// synchronizeStateToVideo()
-		for(let i = 0; i < updateFunctions.length; i++)
+	synchronizeToVideoOrCallContingentUpdateFunctions = function()
+	{
+		if( videoDomElement.paused )
 		{
-			updateFunctions[i]();
+			for(let i = 0; i < updateFunctions.length; i++)
+			{
+				updateFunctions[i]();
+			}
+		}
+		else
+		{
+			synchronizeStateToVideo()
 		}
 	}
 
-	function bindAlignmentControls()
 	{
-		bindButton( "z", function(){}, "camera left",function()
+		let cameraHolder = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.1))
+		scene.add(cameraHolder)
+		updateFunctions.push(function()
 		{
-			camera.position.x -= 0.01
-		} )
-		bindButton( "x", function(){}, "camera right",function()
-		{
-			camera.position.x += 0.01
-		} )
+			cameraHolder.position.copy(handControllers[LEFT_CONTROLLER_INDEX].position)
+			cameraHolder.quaternion.copy(handControllers[LEFT_CONTROLLER_INDEX].quaternion)
+		})
+		markPositionAndQuaternion(cameraHolder)
+		let helmet = initHelmet()
 		
-		bindButton( "w", function(){}, "camera forward",function()
+		var cameraExtraPosition = new THREE.Vector3(0,0,0)
+		var cameraExtraRotation = new THREE.Euler(0,0,0)
+		bindButton( 'space', function()
 		{
-			camera.position.z -= 0.01
-		} )
-		bindButton( "s", function(){}, "camera back",function()
-		{
-			camera.position.z += 0.01
-		} )
-		bindButton( "a", function(){}, "camera down",function()
-		{ 
-			camera.position.y -= 0.01
-		} )
-		bindButton( "q", function(){}, "camera up",function()
-		{
-			camera.position.y += 0.01
-		} )
+			if( !videoDomElement.paused )
+			{
+				videoDomElement.pause()
+				log("pause")
+			}
+			else
+			{
+				if( frames[0].discretes.length !== discretes.length || 
+					frames[0].quaternions.length !== quaternions.length || 
+					frames[0].lerpedFloats.length !== lerpedFloats.length )
+				{
+					console.error("need to rerecord")
+				}
 
-		bindButton( "e", function(){}, "increase lag",function()
-		{
-			lag += 0.01
-			console.log("lag: ", lag)
-		} )
-		bindButton( "d", function(){}, "decrease lag",function()
-		{
-			lag -= 0.01
-			console.log("lag: ", lag)
-		} )
+				log("playing")
+				renderer.vr.enabled = false
+				videoDomElement.play()
 
-		bindButton( "r", function(){}, "pitch forward",function()
-		{
-			camera.rotation.x += 0.01
-			console.log("pitch: ", camera.rotation.x)
-		} )
-		bindButton( "f", function(){}, "pitch back",function()
-		{
-			camera.rotation.x -= 0.01
-			console.log("pitch: ", camera.rotation.x)
-		} )
+				//if you wanna go back to recording or be in VR, refresh
+				cameraHolder.add(camera)
+				camera.position.copy(cameraExtraPosition)
+				camera.rotation.copy(cameraExtraRotation)
+
+				helmet.visible = true
+
+				{
+					bindButton( "z", function(){}, "camera left",function()
+					{
+						cameraExtraPosition.x -= 0.01
+					} )
+					bindButton( "x", function(){}, "camera right",function()
+					{
+						cameraExtraPosition.x += 0.01
+					} )
+					
+					bindButton( "w", function(){}, "camera forward",function()
+					{
+						cameraExtraPosition.z -= 0.01
+					} )
+					bindButton( "s", function(){}, "camera back",function()
+					{
+						cameraExtraPosition.z += 0.01
+					} )
+					bindButton( "a", function(){}, "camera down",function()
+					{ 
+						cameraExtraPosition.y -= 0.01
+					} )
+					bindButton( "q", function(){}, "camera up",function()
+					{
+						cameraExtraPosition.y += 0.01
+					} )
+
+					bindButton( "e", function(){}, "increase lag",function()
+					{
+						lag += 0.01
+						console.log("lag: ", lag)
+					} )
+					bindButton( "d", function(){}, "decrease lag",function()
+					{
+						lag -= 0.01
+						console.log("lag: ", lag)
+					} )
+
+					bindButton( "r", function(){}, "pitch forward",function()
+					{
+						cameraExtraRotation.x += 0.01
+						console.log("pitch: ", camera.rotation.x)
+					} )
+					bindButton( "f", function(){}, "pitch back",function()
+					{
+						cameraExtraRotation.x -= 0.01
+						console.log("pitch: ", camera.rotation.x)
+					} )
+				}
+			}
+		}, "toggle playing");
 	}
 }

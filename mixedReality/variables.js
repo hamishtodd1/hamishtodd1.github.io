@@ -18,7 +18,6 @@ let camera = new THREE.PerspectiveCamera( 30, //can be changed by VR effect
 		window.innerWidth / window.innerHeight,
 		0.02, 5);
 let scene = new THREE.Scene().add(camera);
-let renderer = new THREE.WebGLRenderer( { antialias: true } );
 
 const RIGHT_CONTROLLER_INDEX = 0;
 const LEFT_CONTROLLER_INDEX = 1-RIGHT_CONTROLLER_INDEX;
