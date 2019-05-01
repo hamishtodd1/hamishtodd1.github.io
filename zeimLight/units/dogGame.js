@@ -280,55 +280,23 @@ function initDogGame()
 	}
 
 	var radius = 0.1;
-	var mouthMaterial = new THREE.MeshBasicMaterial({color:0x000000})
-	function MakeDog(parentGenomes)
+	
+	function Dog(parentGenomes)
 	{
 		var dog = new THREE.Mesh(
 			new THREE.Geometry(),
 			new THREE.MeshPhongMaterial({
 				vertexColors:THREE.FaceColors
 			}));
-		dog.position.z = -10;
 		scene.add(dog);
-		bestowDefaultMouseDragProperties(dog);
+		// bestowDefaultMouseDragProperties(dog);
 
 		dog.genome = MakeGenome(parentGenomes)
 
 		var stripeSpacing = radius / 6;
 		//phenotype = geometry
-		{
-			var neutralPain = 0.2;
-			if( dog.genome.expressingRecessive("pain") < neutralPain )
-			{
-				var thetaLength = TAU / 2;
-				var thetaStart = TAU / 2;
-			}
-			else
-			{
-				var thetaLength = TAU / 2 * (dog.genome.expressingRecessive("pain") - neutralPain)/(1-neutralPain);
-				var thetaStart = TAU / 4 - thetaLength / 2;
-			}
 
-			var mouthScalar = Math.sin(thetaLength / 2);
-			var mouthRadius = radius * 0.66;
-
-			var mouth = new THREE.Mesh(
-				new THREE.RingGeometry(
-					mouthRadius,
-					mouthRadius + mouthScalar / 80,
-					31,1,
-					thetaStart,
-					thetaLength),
-				mouthMaterial)
-			mouth.geometry.applyMatrix(new THREE.Matrix4().scale(new THREE.Vector3().setScalar(1/mouthScalar)))
-
-			mouth.geometry.computeBoundingBox();
-			var mouthCenter = mouth.geometry.boundingBox.max.clone().lerp(mouth.geometry.boundingBox.min,0.5)
-			mouth.position.sub(mouthCenter)
-			mouth.position.y -= radius / 4;
-			mouth.position.z = 0.01;
-			dog.add(mouth)
-		}
+		dog.add(Face(radius,dog.genome.expressingRecessive("pain") ))
 
 		var stripeStart = -radius;
 		var numStripes = -1;
@@ -385,7 +353,7 @@ function initDogGame()
 
 					if( checkCollision(this,dogs[i]) )
 					{
-						var newDog = MakeDog([this.genome,dogs[i].genome]);
+						var newDog = Dog([this.genome,dogs[i].genome]);
 						dogs.push( newDog )
 						newDog.position.copy(this.position).lerp(dogs[i].position,0.5);
 
@@ -447,9 +415,10 @@ function initDogGame()
 
 	for(var i = 0; i < 8; i++)
 	{
-		dogs[i] = MakeDog();
+		dogs[i] = Dog();
 		dogs[i].position.x = (Math.random()-0.5) * fieldDimension;
 		dogs[i].position.y = (Math.random()-0.5) * fieldDimension;
+
 	}
 
 	//ok so they can't escape the rectangle

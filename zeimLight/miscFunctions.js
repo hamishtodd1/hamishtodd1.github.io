@@ -1,3 +1,25 @@
+function Grid(numWide,numTall,spacing)
+{
+	let grid = new THREE.LineSegments( new THREE.Geometry(), new THREE.MeshBasicMaterial({
+		color:0x000000,
+	}) )
+
+	let verticalExtent = numTall/2*spacing
+	let horizontalExtent = numWide/2*spacing
+	for(let i = 0; i < numWide+1; i++)
+	{
+		let x = (i-numWide/2)*spacing
+		grid.geometry.vertices.push(new THREE.Vector3(x,-verticalExtent,0),new THREE.Vector3(x,verticalExtent,0))
+	}
+	for( let i = 0; i < numTall+1; i++)
+	{
+		let y = (i-numTall/2)*spacing
+		grid.geometry.vertices.push(new THREE.Vector3(-horizontalExtent,y,0),new THREE.Vector3(horizontalExtent,y,0))
+	}
+
+	return grid
+}
+
 function uniformRandomInRange(min,max)
 {
 	return min + (max-min)*Math.random()

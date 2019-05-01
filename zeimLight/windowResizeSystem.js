@@ -1,33 +1,31 @@
 //TODO up top!
-
 function initSurroundings()
 {
 	var backwardExtension = 1.6;
+	//you probably don't need the ceiling or walls!
+	let width = 3.3*AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0
 	var stage = new THREE.Mesh( 
-		new THREE.BoxGeometry(2*AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0,2*AUDIENCE_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0,backwardExtension),
-		new THREE.MeshStandardMaterial({side:THREE.BackSide, vertexColors:THREE.FaceColors})
+		new THREE.PlaneGeometry(width,
+			3.3*AUDIENCE_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0),
+		new THREE.MeshStandardMaterial({color:0xFFFFFF})
 	);
-	stage.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-backwardExtension/2))
+	let floor = new THREE.PlaneGeometry(
+		width,
+		backwardExtension)
+	floor.applyMatrix(new THREE.Matrix4().makeRotationX(-TAU/4)
+		.setPosition(new THREE.Vector3(0,-AUDIENCE_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0,backwardExtension/2)))
+	stage.geometry.merge(floor)
+
+	// let backGrid = Grid(40,11,0.1)
+	// backGrid.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-backwardExtension*0.999))
+	// stage.add(backGrid)
+
+	stage.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-backwardExtension))
 	camera.far = camera.defaultZ + backwardExtension + 0.01
-	for(var i = 0; i< stage.geometry.faces.length; i++)
-	{
-		if(i === 0 || i === 1)
-		{
-			stage.geometry.faces[i].color.setHex(0x6964D0)
-		}
-		else if(i === 2 || i === 3)
-		{
-			stage.geometry.faces[i].color.setHex(0xCD6166)
-		}
-		else
-		{
-			stage.geometry.faces[i].color.setHex(0xFFFFFF)
-		}
-	}
 	stage.material.metalness = 0.1;
 	stage.material.roughness = 0.2;
 	stage.receiveShadow = true;
-	// scene.add(stage)
+	scene.add(stage)
 
 	var pointLight = new THREE.PointLight(0xFFFFFF, 0.4, 5.3);
 	pointLight.shadow.camera.far = 10;
@@ -149,7 +147,9 @@ function initCameraAndRendererResizeSystem(renderer)
 
 	if(!PUBLIC_FACING)
 	{
-		var audienceScreenIndicator = new THREE.Mesh(new THREE.RingBufferGeometry(Math.sqrt(2), Math.sqrt(2) + 0.1, 4, 1, TAU / 8), new THREE.MeshBasicMaterial({color:0xFF0000}));
+		var audienceScreenIndicator = new THREE.Mesh(
+			new THREE.RingBufferGeometry(Math.sqrt(2), Math.sqrt(2) + 0.1, 4, 1, TAU / 8), 
+			new THREE.MeshBasicMaterial({color:0x000000}));
 		audienceScreenIndicator.position.z = -camera.near-0.0001
 		camera.add(audienceScreenIndicator)
 	}
@@ -188,8 +188,7 @@ function initCameraAndRendererResizeSystem(renderer)
 
 		camera.updateProjectionMatrix();
 
-		//here's the off center thing. Would have to adjust toys and images and surely the above though
-		// camera.projectionMatrix.elements[9] = -2/3
+		camera.projectionMatrix.elements[9] = -2/3
 	}
 	respondToResize();
 
