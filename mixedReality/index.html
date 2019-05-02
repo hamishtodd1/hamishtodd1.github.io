@@ -65,30 +65,30 @@
 
 				initButtons()
 
-				{
-					camera.position.z = 2
-					camera.far = 40
-					camera.updateProjectionMatrix()
+				// {
+				// 	camera.position.z = 2
+				// 	camera.far = 40
+				// 	camera.updateProjectionMatrix()
 
-					let cameraAngle = 0//TAU/4
-					bindButton("left",function(){},"turn",function()
-					{
-						cameraAngle -= 0.07
-					})
-					bindButton("right",function(){},"turn",function()
-					{
-						cameraAngle += 0.07
-					})
-					updateFunctions.push(function()
-					{
-						let speed = 0//.06
-						cameraAngle += speed
+				// 	let cameraAngle = 0//TAU/4
+				// 	bindButton("left",function(){},"turn",function()
+				// 	{
+				// 		cameraAngle -= 0.07
+				// 	})
+				// 	bindButton("right",function(){},"turn",function()
+				// 	{
+				// 		cameraAngle += 0.07
+				// 	})
+				// 	updateFunctions.push(function()
+				// 	{
+				// 		let speed = 0//.06
+				// 		cameraAngle += speed
 
-						camera.position.set(0,camera.position.y,2.5)
-						camera.position.applyAxisAngle(yUnit, cameraAngle)
-						camera.rotation.y = cameraAngle
-					})
-				}
+				// 		camera.position.set(0,camera.position.y,2.5)
+				// 		camera.position.applyAxisAngle(yUnit, cameraAngle)
+				// 		camera.rotation.y = cameraAngle
+				// 	})
+				// }
 
 				initLights();
 				initPlaybackAndRecording(renderer)

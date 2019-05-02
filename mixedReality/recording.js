@@ -45,6 +45,8 @@ initPlaybackAndRecording = function(renderer)
 		videoDomElement.loop = false
 		videoDomElement.style = "display:none"
 		videoDomElement.src = "data/sintel.ogv"
+		videoDomElement.volume = 0
+		videoDomElement.loop = true
 
 		var videoTexture = new THREE.VideoTexture( videoDomElement );
 		videoTexture.minFilter = THREE.LinearFilter;
@@ -239,6 +241,7 @@ initPlaybackAndRecording = function(renderer)
 		{
 			synchronizeStateToVideo()
 		}
+		plane.visible = !videoDomElement.paused
 	}
 
 	{
@@ -322,12 +325,10 @@ initPlaybackAndRecording = function(renderer)
 					bindButton( "r", function(){}, "pitch forward",function()
 					{
 						cameraExtraRotation.x += 0.01
-						console.log("pitch: ", camera.rotation.x)
 					} )
 					bindButton( "f", function(){}, "pitch back",function()
 					{
 						cameraExtraRotation.x -= 0.01
-						console.log("pitch: ", camera.rotation.x)
 					} )
 				}
 			}
