@@ -3,6 +3,8 @@
 		Make sure everything can easily be made visible and invisible
 			Or hack that in in post?
 
+	Sort out the singularity coarse grain thing
+
 	Script, "Rotating a 4D sphere in VR" Thumbnail: nice MR thing, "4D"
 		So to describe 4D rotations, in this video we're going to use basically the same approach to describing 4D
 		That you might have seen elsewhere, which is we're going to think about a 2D creature, and we're going to try to empathize with it
@@ -299,6 +301,18 @@ function initThreeSphereExploration()
 
 		updateFunctions.push( function()
 		{
+			if( designatedHand.button2 && !designatedHand.button2Old )
+			{
+				if(visiBox.scale.x < 100)
+				{
+					visiBox.scale.multiplyScalar(1000)
+				}
+				else
+				{
+					visiBox.scale.multiplyScalar(1/1000)
+				}
+			}
+
 			if(imitationHand !== null)
 			{
 				// camera.position.applyAxisAngle(yUnit, 0.01)

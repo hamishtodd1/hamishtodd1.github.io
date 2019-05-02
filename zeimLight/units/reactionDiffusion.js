@@ -29,16 +29,16 @@ function initReactionDiffusion()
 {
 	camera.children[0].visible = false //hack for lab
 
-	let resolution = 300
+	let resolution = 200
 
 	let values = new Uint8Array(sq(resolution)*3)
 
 	let field = new THREE.Mesh(new THREE.OriginCorneredPlaneBufferGeometry(resolution,resolution),new THREE.MeshBasicMaterial({
 		map:new THREE.DataTexture( values, resolution, resolution, THREE.RGBFormat )
 	}))
-	field.scale.multiplyScalar(3/resolution)
-	field.position.x -= 1.5
-	field.position.y -= 1.5 + 1
+	field.scale.multiplyScalar(1/resolution)
+	field.position.x -= 0.5
+	field.position.y -= 0.5
 	scene.add(field)
 	clickables.push(field)
 
