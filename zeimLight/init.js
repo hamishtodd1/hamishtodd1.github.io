@@ -20,7 +20,7 @@ function init()
 	initCameraAndRendererResizeSystem(renderer);
 	var stage = initSurroundings();
 	initMouse();
-	initFaceMaker()
+	// initFaceMaker()
 
 	function render()
 	{
