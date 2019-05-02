@@ -1,14 +1,20 @@
 /*
-	"How to perform a z-test, and why you should never do so"
+	"Hypothesis testing visualized"
+
+	Something you send to Andrew Gelman
 
 	Part 1: Probability distributions
-		A few pictures of applications
-		Sorting then grouping
-		Bobble going up and down as you change some values
+		A few pictures of applications. Higgs boson graph
+		Sorting then grouping, people probably want numbers in a spreadsheet
+		Bobble going up and down as you change some value
 
 	Part 2: "how to perform a one-sample z-test"
+		We're trying to reject some null hypothesis!
+			Mug thing
+		That means showing that the mean is some distance from a population mean
 		Take the mean of your sample
-		Scaling and moving normal dist
+		Scaling and moving normal dist with marked 99 and 95%s (eg calculating z)
+		Slider for one's "n"
 		Seeing the average on a normal distribution
 		Show the formula
 		P value only works if it is in scene, and points to whatever else is in scene
@@ -24,21 +30,19 @@
 		Kinda like looking at the distribution with your eyes blurred
 		In the real world, there's not a single thing that is normally distributed
 
-	Part 4: Why you shouldn't use a z-test
-		Don't want to be too zealous, you're not an expert
-			The horrible thing is just that this becomes the only quantitative assessment
+	Conclusion
+		Do not use this like "oh I just want to do my experiment ok? I already know what the results have told me, I just need to know how I'm supposed to put a frikkin p-value on it"
+		You always have a prior.
+
+	Former Part 4: Why you shouldn't use a z-test
+		The horrible thing is just that this becomes the only quantitative assessment
 		The thing where you have multiple studies and must trade off sample sizes
 			Slider for spreading samples amongst multiple tests
-		e^-x^2, very simple
 		You might be watching this video because you have a homework assignment. The people who have set it as a homework should not be teaching you stuff
 		We boil a known distribution down to its mean and variance
 			Because there are many distributions out there and it's hard to make a scheme that works for all
 		I've talked to people where it's clear they don't want to do statistical modelling, the p-value for them is just a sticker they put on
 		Basically, you should be doing mathematical modelling and assessing it using bayesian methods
-
-	TODO
-		Taking samples away
-		Bind button to "associated normal distributions visible"
 
 	They see the normal distribution describing where the average should go
 	They should get used to looking at the normal distribution next to it, using it to "get out early"
@@ -75,14 +79,14 @@ function initNormalDistributionAnimation()
 	for( let i = 0; i < balls.length; i++)
 	{
 		balls[i] = new THREE.Mesh(ballGeometry,ballMaterial)
+		let ball = balls[i]
 		balls[i].correctPosition = balls[i].position.clone()
 		normalDistributionAnimation.add(balls[i])
 		
-		updatables.push(balls[i])
-		balls[i].update = function()
+		updateFunctions.push(function()
 		{
-			this.position.lerp(this.correctPosition,0.1)
-		}
+			ball.position.lerp(ball.correctPosition,0.1)
+		})
 	}
 
 	function sortBalls()
@@ -132,27 +136,26 @@ function initNormalDistributionAnimation()
 		//and it would be nice to 
 	}, "reset normalDistributionAnimation" )
 
-	updatables.push(normalDistributionAnimation)
 	clickables.push(normalDistributionAnimation)
-	normalDistributionAnimation.update = function()
+	updateFunctions.push( function()
 	{
-		if(mouse.clicking && mouse.lastClickedObject === this)
+		if(mouse.clicking && mouse.lastClickedObject === normalDistributionAnimation)
 		{
 			let centerOfMass = new THREE.Vector3(frameWidth/2,0,-howFarBallsGoBack/2)
 
 			let worldCenterOfMassBeforeRotation = centerOfMass.clone()
-			this.localToWorld(worldCenterOfMassBeforeRotation)
+			normalDistributionAnimation.localToWorld(worldCenterOfMassBeforeRotation)
 
 			let mouseDisp = mouse.zZeroPosition.clone().sub(mouse.oldZZeroPosition).x
 			normalDistributionAnimation.rotation.y += mouseDisp * 2
 			normalDistributionAnimation.rotation.y = clamp(normalDistributionAnimation.rotation.y,-TAU/4,0)
 
 			let worldCenterOfMassAfterRotation = centerOfMass.clone()
-			this.updateMatrixWorld()
-			this.localToWorld(worldCenterOfMassAfterRotation)
-			this.position.add(worldCenterOfMassBeforeRotation).sub(worldCenterOfMassAfterRotation)
+			normalDistributionAnimation.updateMatrixWorld()
+			normalDistributionAnimation.localToWorld(worldCenterOfMassAfterRotation)
+			normalDistributionAnimation.position.add(worldCenterOfMassBeforeRotation).sub(worldCenterOfMassAfterRotation)
 		}
-	}
+	})
 }
 
 function initClt()

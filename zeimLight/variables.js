@@ -15,6 +15,8 @@ var logged = 0;
 const RIGHT_CONTROLLER_INDEX = 0;
 const LEFT_CONTROLLER_INDEX = 1-RIGHT_CONTROLLER_INDEX;
 
+const log = console.log
+
 //------global variables
 const camera = new THREE.PerspectiveCamera( 0,0,0.01, 10);
 const scene = new THREE.Scene().add(camera, camera);

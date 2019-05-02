@@ -1,3 +1,25 @@
+function Grid(numWide,numTall,spacing)
+{
+	let grid = new THREE.LineSegments( new THREE.Geometry(), new THREE.MeshBasicMaterial({
+		color:0x000000,
+	}) )
+
+	let verticalExtent = numTall/2*spacing
+	let horizontalExtent = numWide/2*spacing
+	for(let i = 0; i < numWide+1; i++)
+	{
+		let x = (i-numWide/2)*spacing
+		grid.geometry.vertices.push(new THREE.Vector3(x,-verticalExtent,0),new THREE.Vector3(x,verticalExtent,0))
+	}
+	for( let i = 0; i < numTall+1; i++)
+	{
+		let y = (i-numTall/2)*spacing
+		grid.geometry.vertices.push(new THREE.Vector3(-horizontalExtent,y,0),new THREE.Vector3(horizontalExtent,y,0))
+	}
+
+	return grid
+}
+
 //Paul Bourke http://paulbourke.net/geometry/circlesphere/index.html#linesphere
 function sphereLineIntersection(p1,p2,center,r)
 {
@@ -761,4 +783,54 @@ function tetrahedronTop(P1,P2,P3, r1,r2,r3)
 	P3.add(P1);
 	
 	return cp;
+}
+
+function tetrahedronTops(P1,P2,P3, r1,r2,r3)
+{
+	P3.sub(P1);
+	P2.sub(P1);
+	var cos_P3_P2_angle = P3.dot(P2)/P2.length()/P3.length();
+	var sin_P3_P2_angle = Math.sqrt(1-cos_P3_P2_angle*cos_P3_P2_angle);
+	
+	var P1_t = new THREE.Vector3(0,0,0);
+	var P2_t = new THREE.Vector3(P2.length(),0,0);
+	var P3_t = new THREE.Vector3(P3.length() * cos_P3_P2_angle, P3.length() * sin_P3_P2_angle,0);
+	
+	var cp_t = new THREE.Vector3(0,0,0);
+	cp_t.x = ( r1*r1 - r2*r2 + P2_t.x * P2_t.x ) / ( 2 * P2_t.x );
+	cp_t.y = ( r1*r1 - r3*r3 + P3_t.x * P3_t.x + P3_t.y * P3_t.y ) / ( P3_t.y * 2 ) - ( P3_t.x / P3_t.y ) * cp_t.x;
+	if(r1*r1 - cp_t.x*cp_t.x - cp_t.y*cp_t.y < 0)
+	{
+		return false;
+	}
+	cp_t.z = Math.sqrt(r1*r1 - cp_t.x*cp_t.x - cp_t.y*cp_t.y);
+	
+	let solutions = [new THREE.Vector3(0,0,0),new THREE.Vector3(0,0,0)]
+	
+	var z_direction = new THREE.Vector3();
+	z_direction.crossVectors(P2,P3);
+	z_direction.normalize(); 
+	z_direction.multiplyScalar(cp_t.z);
+	solutions[0].add(z_direction)
+	solutions[1].sub(z_direction)
+	
+	var x_direction = P2.clone();
+	x_direction.normalize();
+	x_direction.multiplyScalar(cp_t.x);
+	solutions[0].add(x_direction);
+	solutions[1].add(x_direction);
+	
+	var y_direction = new THREE.Vector3();
+	y_direction.crossVectors(z_direction,x_direction);
+	y_direction.normalize();
+	y_direction.multiplyScalar(cp_t.y);
+	solutions[0].add(y_direction);		
+	solutions[1].add(y_direction);		
+	solutions[0].add(P1);
+	solutions[1].add(P1);
+	
+	P2.add(P1);
+	P3.add(P1);
+	
+	return solutions
 }

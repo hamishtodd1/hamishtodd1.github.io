@@ -21491,7 +21491,7 @@
 			device.depthNear = camera.near;
 			device.depthFar = camera.far;
 
-			device.getFrameData( frameData );
+			device.getFrameData( frameData ); 
 
 			//
 
@@ -22211,7 +22211,10 @@
 
 		if ( typeof navigator !== 'undefined' ) {
 
-			vr = ( 'xr' in navigator ) ? new WebXRManager( _this ) : new WebVRManager( _this );
+			// vr = ( 'xr' in navigator ) ? new WebXRManager( _this ) : new WebVRManager( _this );
+			vr = new WebVRManager( _this );
+			//so it's legacy but apparently XRManager isn't working great
+			//below there was expected to exist global values "XRDevice" and "gl.setCompatibleXRDevice( value );"
 
 		}
 

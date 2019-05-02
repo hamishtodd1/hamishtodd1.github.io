@@ -58,7 +58,7 @@ initPlaybackAndRecording = function(renderer)
 		plane.position.z -= 3
 	}
 
-	let version = 6
+	let version = 0
 	new THREE.FileLoader().load( "data/frames ("+version+").txt",
 		function( str )
 		{
@@ -82,7 +82,6 @@ initPlaybackAndRecording = function(renderer)
 		{
 			let currentValue = discretes[i].object[ discretes[i].property ]
 
-			//FIRST CHECK IT WORKS JEEZ
 			// if( frames.length > 0 )
 			// {
 			// 	let j = frames.length-1;

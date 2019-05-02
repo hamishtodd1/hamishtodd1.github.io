@@ -12,7 +12,7 @@ function init()
 
 	renderer = new THREE.WebGLRenderer({ antialias: true });
 	renderer.setPixelRatio( window.devicePixelRatio );
-	renderer.setClearColor(0x000000) //youtube
+	renderer.setClearColor(0xCCCCCC) //youtube
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.BasicShadowMap;
 	document.body.appendChild( renderer.domElement );
@@ -20,6 +20,7 @@ function init()
 	initCameraAndRendererResizeSystem(renderer);
 	var stage = initSurroundings();
 	initMouse();
+	initFaceMaker()
 
 	function render()
 	{

@@ -1,6 +1,8 @@
 /*
 	"No supported source"? Use chrome rather than chromium
 
+	There is stuff that is very specific to your screen resolution
+
 	want to be able to put mosue over a picture on the internet,
 		press a keyboard shortcut, see it appear
 
@@ -32,7 +34,7 @@
 // {
 // 	if( videoUrls[ desiredResolutions[i] ] !== undefined)
 // 	{
-// 		var url = videoUrls[ desiredResolutions[i] ].url
+// 		let url = videoUrls[ desiredResolutions[i] ].url
 // 		//it goes into your clipboard, and you ctrl+v in the program
 // 		//just as you do with images
 // 		//Do you want it locally?
@@ -40,39 +42,44 @@
 // 	}
 // }
 
-function initImagesAndVideos()
+function initImagesAndVideos(textureFileNames)
 {
-	var textureFileNames = [
-		//note that you should have a few...
-		"cartography.jpg",
-		"cartography.jpg",
-		"cartography.jpg",
-		"cartography.jpg",
-		"cartography.jpg",
-		"cartography.jpg"
-	];
+	let everythingGeometry = new THREE.PlaneGeometry( 1,1 );
 
-	var everythingGeometry = new THREE.PlaneGeometry( 1,1 );
-
-	var textureLoader = new THREE.TextureLoader();
+	let textureLoader = new THREE.TextureLoader();
 	textureLoader.crossOrigin = true;
 
-	var displayMesh = new THREE.Mesh( everythingGeometry, new THREE.MeshBasicMaterial());
+	let displayMesh = new THREE.Mesh( everythingGeometry, new THREE.MeshBasicMaterial());
 	displayMesh.material.visible = false;
 	displayMesh.position.z = - camera.near - 0.001
 	camera.add( displayMesh )
 
-	var progressTracker = new THREE.Line(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0xFFFFFF,depthTest:false}))
+	//actually may needs lots of updating?
+	let effectiveCenterToTopOfFrame = centerToFrameDistance(camera.fov, camera.position.z)
+	let thumbnailVerticalSpaceTaken = effectiveCenterToTopOfFrame * 2 / (textureFileNames.length);
+	let rosterWidth = thumbnailVerticalSpaceTaken * 16/9
+
+	//should be drawn in a separate pass really
+	let roster = new THREE.Mesh( new THREE.PlaneGeometry( rosterWidth,AUDIENCE_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0*2*3 ), new THREE.MeshBasicMaterial());
+	camera.add( roster )
+	roster.position.set(
+		-AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 * 1.9,
+		-AUDIENCE_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0*2,
+		0 );
+	camera.updateMatrixWorld()
+	camera.worldToLocal(roster.position)
+
+	let progressTracker = new THREE.Line(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0xFFFFFF,depthTest:false}))
 	progressTracker.visible = false
 	progressTracker.geometry.vertices.push(new THREE.Vector3(0,-0.6,0),new THREE.Vector3(0,0.6,0))
 	camera.add(progressTracker)
 
-	var scaleThatFillsScreen = new THREE.Vector3(1,1,1);
+	let scaleThatFillsScreen = new THREE.Vector3(1,1,1);
 	function setScaleThatFillsScreen(aspectRatio)
 	{
-		var centerToFrameSideDistanceAtZ = centerToFrameDistance(otherFov(camera.fov,camera.aspect,true), -displayMesh.position.z)
-		var audienceCenterToFrameSideDistanceAtZ = centerToFrameSideDistanceAtZ * getAudienceProportionOfWindowWidth()
-		var audienceScreenHeightAtZ = audienceCenterToFrameSideDistanceAtZ * 2 / AUDIENCE_ASPECT_RATIO;
+		let centerToFrameSideDistanceAtZ = centerToFrameDistance(otherFov(camera.fov,camera.aspect,true), -displayMesh.position.z)
+		let audienceCenterToFrameSideDistanceAtZ = centerToFrameSideDistanceAtZ * getAudienceProportionOfWindowWidth()
+		let audienceScreenHeightAtZ = audienceCenterToFrameSideDistanceAtZ * 2 / AUDIENCE_ASPECT_RATIO;
 
 		if(aspectRatio > AUDIENCE_ASPECT_RATIO)
 		{
@@ -80,27 +87,26 @@ function initImagesAndVideos()
 		}
 		else
 		{
-			var viewerScreenWidthAtZ = audienceScreenHeightAtZ * AUDIENCE_ASPECT_RATIO;
+			let viewerScreenWidthAtZ = audienceScreenHeightAtZ * AUDIENCE_ASPECT_RATIO;
 			scaleThatFillsScreen.set( viewerScreenWidthAtZ, viewerScreenWidthAtZ / aspectRatio, 1 );
 		}
 	}
-	var zoomProgress = 0;
+	let zoomProgress = 0;
 
-	updatables.push( displayMesh )
 	displayMesh.update = function()
 	{
-		var mostRecentClickWasOnAThumbnailWeAreReflecting = 
+		let mostRecentClickWasOnAThumbnailWeAreReflecting = 
 				thumbnails.indexOf(mouse.lastClickedObject) !== -1 && (
-					mouse.lastClickedObject.material.map === this.material.map ||
-					mouse.lastClickedObject.material.map.video.src === this.material.map.video.src )
+					mouse.lastClickedObject.material.map === displayMesh.material.map ||
+					mouse.lastClickedObject.material.map.video.src === displayMesh.material.map.video.src )
 				
 		if( mostRecentClickWasOnAThumbnailWeAreReflecting )
 		{
-			this.scale.copy(scaleThatFillsScreen)
-			if( this.material.map.video === undefined)
+			displayMesh.scale.copy(scaleThatFillsScreen)
+			if( displayMesh.material.map.video === undefined)
 			{
-				this.scale.multiplyScalar(1+zoomProgress);
-				// if(this.zoomDirection)
+				displayMesh.scale.multiplyScalar(1+zoomProgress);
+				// if(displayMesh.zoomDirection)
 				// {
 				// 	//something
 				// }
@@ -109,22 +115,23 @@ function initImagesAndVideos()
 			}
 			else
 			{
-				var thumbnail = mouse.lastClickedObject
+				let thumbnail = mouse.lastClickedObject
 				progressTracker.position.copy( thumbnail.position )
-				progressTracker.position.x = thumbnail.getTimeAt( this.material.map.video.currentTime, true )
+				progressTracker.position.x = thumbnail.getTimeAt( displayMesh.material.map.video.currentTime, true )
 				progressTracker.scale.y = thumbnail.scale.y
 			}
 		}
 		else
 		{
-			if( this.material.map !== null )
+			if( displayMesh.material.map !== null )
 			{
-				this.material.visible = false;
-				this.material.map = null;
+				displayMesh.material.visible = false;
+				displayMesh.material.map = null;
 				progressTracker.visible = false
 			}
 		}
 	}
+	updateFunctions.push( displayMesh.update )
 
 	bindButton("[",function()
 	{
@@ -148,7 +155,7 @@ function initImagesAndVideos()
 		// updatables.push(frameDrawer)
 		// frameDrawer.update = function()
 		// {
-		// 	var mousePosition = mouse.rayIntersectionWithZPlane(this.position.z)
+		// 	let mousePosition = mouse.rayIntersectionWithZPlane(this.position.z)
 		// 	this.scale.x = mousePosition.x - this.position.x;
 		// 	this.scale.y = this.scale.x / AUDIENCE_ASPECT_RATIO
 		// }
@@ -167,11 +174,11 @@ function initImagesAndVideos()
 		{
 			return
 		}
-		var stringJustBefore = "textures/"
-		var startingPointInString = displayMesh.material.map.video.src.indexOf(stringJustBefore) + stringJustBefore.length;
-		var fileNameInArray = decodeURIComponent(displayMesh.material.map.video.src.slice(startingPointInString) )
-		var fileIndex = textureFileNames.indexOf( fileNameInArray )
-		var thumbnail = loadVideo( fileIndex )
+		let stringJustBefore = "textures/"
+		let startingPointInString = displayMesh.material.map.video.src.indexOf(stringJustBefore) + stringJustBefore.length;
+		let fileNameInArray = decodeURIComponent(displayMesh.material.map.video.src.slice(startingPointInString) )
+		let fileIndex = textureFileNames.indexOf( fileNameInArray )
+		let thumbnail = loadVideo( fileIndex )
 
 		thumbnail.startTime = displayMesh.material.map.thumbnail.material.map.video.currentTime;
 		thumbnail.material.map.video.currentTime = thumbnail.startTime
@@ -183,10 +190,7 @@ function initImagesAndVideos()
 	//could make it so that if you reach the end, return to beginning
 	//also a little line going along them to let you know when it's about to end...
 
-	var thumbnails = [];
-	//actually needs lots of updating
-	var effectiveCenterToTopOfFrame = centerToFrameDistance(camera.fov, camera.position.z)
-	var thumbnailVerticalSpaceTaken = effectiveCenterToTopOfFrame * 2 / (textureFileNames.length);
+	let thumbnails = [];
 	function Thumbnail( i, thumbnailTexture, displayTexture )
 	{
 		if(displayTexture === undefined)
@@ -194,26 +198,21 @@ function initImagesAndVideos()
 			displayTexture = thumbnailTexture;
 		}
 
-		var thumbnail = new THREE.Mesh(
+		let thumbnail = new THREE.Mesh(
 			everythingGeometry,
 			new THREE.MeshBasicMaterial({depthTest:false,map:thumbnailTexture}) );
 		thumbnails.push(thumbnail)
 		clickables.push(thumbnail)
 		toysToBeArranged.push(thumbnail) //save their position! 
 
-		var thumbnailHeight = thumbnailVerticalSpaceTaken * 0.9
+		let thumbnailHeight = thumbnailVerticalSpaceTaken * 0.9
 		thumbnail.scale.set( thumbnailHeight, thumbnailHeight, 1 )
 
 		thumbnail.reposition = function(rowPosition)
 		{
-			camera.add(thumbnail)
-			thumbnail.position.set(
-				// 0,
-				thumbnailVerticalSpaceTaken * 8/9 - AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 * 3,
-				effectiveCenterToTopOfFrame - (rowPosition+0.5) * thumbnailVerticalSpaceTaken,
-				0 );
-			camera.updateMatrixWorld()
-			camera.worldToLocal(thumbnail.position)
+			roster.add(thumbnail)
+			thumbnail.position.y = effectiveCenterToTopOfFrame - (rowPosition+0.5) * thumbnailVerticalSpaceTaken
+			thumbnail.position.z = 0.001
 
 			if( thumbnails.length > textureFileNames.length )
 			{
@@ -268,15 +267,15 @@ function initImagesAndVideos()
 	{
 		textureLoader.load( "./data/textures/" + textureFileNames[i], function(texture) 
 		{
-			var thumbnail = Thumbnail( i, texture );
-			var aspectRatio = texture.image.naturalWidth / texture.image.naturalHeight;
+			let thumbnail = Thumbnail( i, texture );
+			let aspectRatio = texture.image.naturalWidth / texture.image.naturalHeight;
 			thumbnail.scale.set(thumbnail.scale.y * aspectRatio,thumbnail.scale.y,1)
 		}, function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );} );
 	}
 
 	function VideoTexture(i)
 	{
-		var video = document.createElement( 'video' )
+		let video = document.createElement( 'video' )
 		video.id = Math.random().toString()
 		video.loop = true
 		video.muted = true
@@ -284,17 +283,16 @@ function initImagesAndVideos()
 		video.src = "./data/textures/" + textureFileNames[i]
 		video.crossOrigin = 'anonymous';
 
-		var videoImage = document.createElement( 'canvas' );
-		var videoTexture = new THREE.Texture( videoImage );
+		let videoImage = document.createElement( 'canvas' );
+		let videoTexture = new THREE.Texture( videoImage );
 		videoTexture.video = video;
 		videoTexture.minFilter = THREE.LinearFilter; //no mipmapping
 		videoTexture.magFilter = THREE.LinearFilter;
-		var videoImageContext = videoImage.getContext( '2d' );
+		let videoImageContext = videoImage.getContext( '2d' );
 		videoImageContext.fillStyle = '#FFFFFF';
 		videoImageContext.fillRect( 0, 0, 1280, 720 );
 
 		//this doesn't always have to be happenning
-		updatables.push(videoTexture)
 		videoTexture.update = function()
 		{
 			if( video.readyState === video.HAVE_ENOUGH_DATA )
@@ -303,15 +301,16 @@ function initImagesAndVideos()
 				videoTexture.needsUpdate = true;
 			}
 		}
+		updateFunctions.push(videoTexture.update)
 
 		return videoTexture
 	}
 
 	function loadVideo(i)
 	{
-		var displayTexture = VideoTexture(i)
-		var thumbnailTexture = VideoTexture(i)
-		var thumbnail = Thumbnail( i, thumbnailTexture, displayTexture )			
+		let displayTexture = VideoTexture(i)
+		let thumbnailTexture = VideoTexture(i)
+		let thumbnail = Thumbnail( i, thumbnailTexture, displayTexture )			
 
 		thumbnail.startTime = 0.05
 		if(textureFileNames[i] === "clips.mov")
@@ -325,22 +324,21 @@ function initImagesAndVideos()
 
 		thumbnail.getTimeAt = function(input, reverse)
 		{
-			var frameLimitLeft =  this.geometry.vertices[0].clone().applyMatrix4( this.matrixWorld ).x;
-			var frameWidth = this.scale.x;
+			let frameLimitLeft =  this.geometry.vertices[0].clone().applyMatrix4( this.matrixWorld ).x;
+			let frameWidth = this.scale.x;
 
-			var trueDuration = thumbnailTexture.video.duration - thumbnail.startTime;
+			let trueDuration = thumbnailTexture.video.duration - thumbnail.startTime;
 
 			if(reverse)
 			{
-				var proportionAlong = ( input - thumbnail.startTime ) / trueDuration
+				let proportionAlong = ( input - thumbnail.startTime ) / trueDuration
 				return proportionAlong * frameWidth + frameLimitLeft;
 			}
 
-			var proportionAlong = (input - frameLimitLeft) / frameWidth;
+			let proportionAlong = (input - frameLimitLeft) / frameWidth;
 			return thumbnail.startTime + proportionAlong * trueDuration;
 		}
 
-		updatables.push(thumbnail)
 		thumbnail.update = function()
 		{
 			if(thumbnail.scale.y === thumbnail.scale.x && thumbnailTexture.video.videoHeight !== 0 )
@@ -349,14 +347,14 @@ function initImagesAndVideos()
 				thumbnailTexture.image.height = thumbnailTexture.video.videoHeight;
 				displayTexture.image.width = thumbnailTexture.video.videoWidth;
 				displayTexture.image.height = thumbnailTexture.video.videoHeight;
-				var aspectRatio = thumbnailTexture.video.videoWidth / thumbnailTexture.video.videoHeight;
+				let aspectRatio = thumbnailTexture.video.videoWidth / thumbnailTexture.video.videoHeight;
 				thumbnail.scale.set(thumbnail.scale.y * aspectRatio,thumbnail.scale.y,1)
 			}
 
-			var intersections = mouse.rayCaster.intersectObject( thumbnail ); //we're changing the name of that...
+			let intersections = mouse.rayCaster.intersectObject( thumbnail ); //we're changing the name of that...
 			if( intersections.length !== 0 )
 			{
-				var hoveredTime = thumbnail.getTimeAt( intersections[0].point.x, false )
+				let hoveredTime = thumbnail.getTimeAt( intersections[0].point.x, false )
 
 				//we check because currentTime needs a chance to get set. Also, useful looping effect
 				if( Math.abs( thumbnailTexture.video.currentTime - hoveredTime ) > 0.05 )
@@ -376,6 +374,7 @@ function initImagesAndVideos()
 				}
 			}
 		}
+		updateFunctions.push(thumbnail.update)
 
 		return thumbnail;
 	}
@@ -386,7 +385,7 @@ function initImagesAndVideos()
 	}
 	for(var i = 0, il = textureFileNames.length; i < il; i++)
 	{
-		var fileExtension = textureFileNames[i].slice(textureFileNames[i].length-3);
+		let fileExtension = textureFileNames[i].slice(textureFileNames[i].length-3);
 		if( fileExtension === "mp4" || fileExtension === "mov")
 		{
 			loadVideo(i);
