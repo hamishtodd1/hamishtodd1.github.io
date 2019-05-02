@@ -4,6 +4,7 @@
  *
  * Based on @tojiro's vr-samples-utils.js
  */
+// navigator.getVRDisplays().then(function(a){console.log(a)})
 
 var WEBVR = {
 	vrAvailable: false,
@@ -99,7 +100,7 @@ var WEBVR = {
 		}
 
 		function showVRNotFound() {
-
+			
 			button.style.display = '';
 
 			button.style.cursor = 'auto';
@@ -134,25 +135,8 @@ var WEBVR = {
 
 		}
 
-		if ( 'xr' in navigator ) {
-
-			var button = document.createElement( 'button' );
-			button.style.display = 'none';
-
-			stylizeElement( button );
-
-			navigator.xr.requestDevice().then( function ( device ) {
-
-				device.supportsSession( { immersive: true, exclusive: true /* DEPRECATED */ } )
-					.then( function () { showEnterXR( device ); } )
-					.catch( showVRNotFound );
-
-			} ).catch( showVRNotFound );
-
-			return button;
-
-		} else if ( 'getVRDisplays' in navigator ) {
-
+		// navigator.getVRDisplays().then(function(a){console.log(a)}).catch( function(){console.log("not found as well?")} );
+		{
 			var button = document.createElement( 'button' );
 			button.style.display = 'none';
 
@@ -182,36 +166,25 @@ var WEBVR = {
 
 			}, false );
 
-			navigator.getVRDisplays()
-				.then( function ( displays ) {
+			navigator.getVRDisplays().then( function ( displays )
+			{
+				if ( displays.length > 0 )
+				{
+					showEnterVR( displays[ 0 ] );
 
-					if ( displays.length > 0 ) {
+				} else {
 
-						showEnterVR( displays[ 0 ] );
+					showVRNotFound();
 
-					} else {
+				}
 
-						showVRNotFound();
-
-					}
-
-				} ).catch( showVRNotFound );
+			} ).catch( function()
+			{
+				//this. is. firing. even. though. the. above. happened.
+				// showVRNotFound()
+			} );
 
 			return button;
-
-		} else {
-
-			var message = document.createElement( 'a' );
-			message.href = 'https://webvr.info';
-			message.innerHTML = 'WEBVR NOT SUPPORTED';
-
-			message.style.left = 'calc(50% - 90px)';
-			message.style.width = '180px';
-			message.style.textDecoration = 'none';
-
-			stylizeElement( message );
-
-			return message;
 
 		}
 

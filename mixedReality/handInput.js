@@ -1,6 +1,6 @@
 function initVr(renderer)
 {
-	// renderer.vr.enabled = true;
+	renderer.vr.enabled = true;
 	
 	let vrButton = WEBVR.createButton( renderer )
 	document.body.appendChild( vrButton );

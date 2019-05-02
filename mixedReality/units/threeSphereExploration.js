@@ -51,6 +51,7 @@ function initThreeSphereExploration()
 	initProjectionSystem()
 
 	let visiBox = VisiBox()
+	// visiBox.scale.multiplyScalar(1/1000)
 
 	let threeSphereMatrix = new THREE.Matrix4()
 	let threeSphereMatrixInverse = new THREE.Matrix4()
@@ -73,10 +74,13 @@ function initThreeSphereExploration()
 		{
 			let line = false
 
+			let boundingSphereRadius = 5
+
 			let realSpaceCenter = new THREE.Vector3()
 			let realSpaceRadius = 1;
 			let realSpaceNormal = new THREE.Vector3()
 			let realSpaceStart = new THREE.Vector3()
+			let arc = TAU
 
 			let realSpaceOrigin = new THREE.Vector3()
 			let realSpaceDirection = new THREE.Vector3()
@@ -101,7 +105,32 @@ function initThreeSphereExploration()
 					realSpaceCenter = centerOfCircleThroughThreePoints(realSpacePoint0,realSpacePointBetween,realSpacePoint1)
 					realSpaceRadius = realSpaceCenter.distanceTo(realSpacePointBetween)
 					realSpaceNormal.copy(realSpacePoint0).sub(realSpaceCenter).cross(realSpacePoint1.clone().sub(realSpaceCenter)).normalize()
-					realSpaceStart.copy( randomPerpVector( realSpaceNormal ) ).normalize()
+
+					//need to choose a bounding sphere (could make it small to begin with)
+					if( realSpaceCenter.length() < boundingSphereRadius )
+					{
+						realSpaceStart.copy( randomPerpVector( realSpaceNormal ) ).normalize()
+						arc = TAU
+					}
+					else
+					{
+						let pointToConstrainCircle = realSpaceNormal.clone().multiplyScalar(realSpaceRadius).add(realSpaceCenter)
+						let distToConstrainCircle = Math.sqrt(2)*realSpaceRadius
+
+						let arcEnds = tetrahedronTops(
+							zeroVector,realSpaceCenter,pointToConstrainCircle,
+							boundingSphereRadius,realSpaceRadius,distToConstrainCircle)
+
+						if(arcEnds === false)
+						{
+							arc = 0
+						}
+						else
+						{
+							realSpaceStart.copy(arcEnds[1]).sub(realSpaceCenter).normalize()
+							arc = arcEnds[0].sub( realSpaceCenter ).angleTo( arcEnds[1].sub( realSpaceCenter ) )
+						}
+					}
 				}
 			}
 
@@ -125,7 +154,8 @@ function initThreeSphereExploration()
 				}
 				else
 				{
-					var p = realSpaceStart.clone().applyAxisAngle(realSpaceNormal,t*TAU).multiplyScalar(realSpaceRadius).add(realSpaceCenter)
+					//but in what direction?
+					var p = realSpaceStart.clone().applyAxisAngle(realSpaceNormal,t*arc).multiplyScalar(realSpaceRadius).add(realSpaceCenter)
 				}
 
 				if( p.length() > furthestOutDistance )
@@ -135,7 +165,7 @@ function initThreeSphereExploration()
 
 				return p
 			}
-			let tubularSegments = 45
+			let tubularSegments = 36
 			let tubeRadius = 0.017
 			let representation = new THREE.Mesh( new THREE.TubeBufferGeometry( curve, tubularSegments, tubeRadius,5,false ), new THREE.MeshLambertMaterial({clippingPlanes:visiBox.planes}) )
 			greatCircle.representation = representation
@@ -488,6 +518,7 @@ function initThreeSphereExploration()
 			}
 		}
 	}
+	cycleThreeSpheres()
 	cycleThreeSpheres()
 
 	bindButton( "v", function()
