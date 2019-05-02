@@ -1,6 +1,6 @@
 function initVr(renderer)
 {
-	// renderer.vr.enabled = true;
+	renderer.vr.enabled = true;
 	
 	let vrButton = WEBVR.createButton( renderer )
 	document.body.appendChild( vrButton );
@@ -24,15 +24,9 @@ function initVr(renderer)
 		
 		var ourScale = this.matrixWorld.getMaxScaleOnAxis();
 		var holdableScale = holdable.matrixWorld.getMaxScaleOnAxis();
-		
-		if( ourPosition.distanceTo(holdablePosition) < holdable.boundingSphere.radius * holdableScale + this.controllerModel.geometry.boundingSphere.radius * ourScale )
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+	
+		let overlapping = ourPosition.distanceTo(holdablePosition) < holdable.boundingSphere.radius * holdableScale + this.controllerModel.geometry.boundingSphere.radius * ourScale		
+		return overlapping
 	}
 
 	function applyLeftControllerTransformation(geometry)
