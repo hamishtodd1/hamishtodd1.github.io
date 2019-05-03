@@ -18,14 +18,14 @@
 		<script src="lib/GLTFLoader.js"></script>
 		<script src="lib/WebVR.js"></script>
 		
-		<script src="handInput.js"></script>
+		<script src="vr.js"></script>
 
 		<script src="lighting.js"></script>
 		<script src="helmet.js"></script>
 
 		<script src="imitationHand.js"></script>
 
-		<script src="recording.js"></script>
+		<script src="recordingAndPlayback.js"></script>
 		
 		<script src="text.js"></script>
 
@@ -39,6 +39,11 @@
 
 		<script src="units/fish.js"></script>
 		<script src="units/threeSphereExploration.js"></script>
+
+		<video id="video" crossOrigin="anonymous" webkit-playsinline style="display:none">
+			<source src="data/bbb.ogv" type='video/ogg; codecs="theora, vorbis"'>
+			<source src="data/video.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+		</video>
 
 		<!-- <script src="units/reactionDiffusion.js"></script> -->
 
@@ -65,49 +70,25 @@
 
 				initButtons()
 
-				// {
-				// 	camera.position.z = 2
-				// 	camera.far = 40
-				// 	camera.updateProjectionMatrix()
-
-				// 	let cameraAngle = 0//TAU/4
-				// 	bindButton("left",function(){},"turn",function()
-				// 	{
-				// 		cameraAngle -= 0.07
-				// 	})
-				// 	bindButton("right",function(){},"turn",function()
-				// 	{
-				// 		cameraAngle += 0.07
-				// 	})
-				// 	updateFunctions.push(function()
-				// 	{
-				// 		let speed = 0//.06
-				// 		cameraAngle += speed
-
-				// 		camera.position.set(0,camera.position.y,2.5)
-				// 		camera.position.applyAxisAngle(yUnit, cameraAngle)
-				// 		camera.rotation.y = cameraAngle
-				// 	})
-				// }
-
 				initLights();
 				initPlaybackAndRecording(renderer)
 				
+				initControllerObjects()
+				// initVrInput( renderer )
 				// initImitationHand();
-				initVr(renderer)
 				markPositionAndQuaternion(handControllers[RIGHT_CONTROLLER_INDEX])
 
-				await initSurroundings()
+				// await initFloorAndSky()
 
-				// let twoSphereVisiBox = VisiBox()
-				// for(let i = 0; i < 8; i++)
-				// {
-				// 	twoSphereVisiBox.corners[i].visible = false
-				// }
-				// let fish = initFish(twoSphereVisiBox)
-				// initTwoSphereExploration( fish, twoSphereVisiBox )
+				let twoSphereVisiBox = VisiBox()
+				for(let i = 0; i < 8; i++)
+				{
+					twoSphereVisiBox.corners[i].visible = false
+				}
+				let fish = initFish(twoSphereVisiBox)
+				initTwoSphereExploration( fish, twoSphereVisiBox )
 
-				initThreeSphereExploration()
+				// initThreeSphereExploration()
 
 				renderer.setAnimationLoop( function()
 				{

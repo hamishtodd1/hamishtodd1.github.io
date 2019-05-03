@@ -1,4 +1,4 @@
-async function initSurroundings()
+async function initFloorAndSky()
 {
 	//floor
 	let floorDimension = 16;
