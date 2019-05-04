@@ -116,10 +116,12 @@ function initControllerObjects()
 
 function initVrInput(renderer)
 {
-	if( !WEBVR.vrAvailable )
-	{
-		console.error("VR not available")
-	}
+	//not working
+	// if( !WEBVR.vrAvailable )
+	// {
+	// 	console.error("VR not available")
+	// 	return
+	// }
 
 	renderer.vr.enabled = true;
 	
@@ -133,6 +135,14 @@ function initVrInput(renderer)
 			window.removeEventListener('resize', windowResize)
 		}
 	}, false );
+
+	var controllerKeys = { //TODO Duplicated!
+		thumbstickButton:0,
+		grippingTop: 1,
+		grippingSide:2,
+		button1: 3,
+		button2: 4
+	}
 
 	readHandInput = function()
 	{

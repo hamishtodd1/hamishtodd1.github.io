@@ -2,7 +2,7 @@ async function initFloorAndSky()
 {
 	//floor
 	let floorDimension = 16;
-	let floorTile = new THREE.Mesh( new THREE.PlaneBufferGeometry( floorDimension, floorDimension ), new THREE.MeshLambertMaterial());
+	let floorTile = new THREE.Mesh( new THREE.PlaneBufferGeometry( floorDimension, floorDimension ), new THREE.MeshLambertMaterial() );
 	floorTile.position.y = 0;
 	floorTile.rotation.x = -TAU / 4;
 	scene.add(floorTile);
@@ -28,8 +28,8 @@ async function initFloorAndSky()
 		uniforms,
 		side:THREE.BackSide
 	});
-	await assignShader("skyVertex", skyMaterial, "vertex")
-	await assignShader("skyFragment", skyMaterial, "fragment")
+	await assignShader("skyVertex", skyMaterial, "vertex");
+	await assignShader("skyFragment", skyMaterial, "fragment");
 
 	scene.add( new THREE.Mesh( 
 		new THREE.SphereGeometry( camera.far*0.5, 32, 15 ),

@@ -46,6 +46,12 @@
 		Bring in chirality
 		600-cell tet ring thing
 		hopf fibration, spinors
+		can do jigsaws!
+
+		S1xS2
+			It's the equivalent of taking the 2D plane and bringing it into 4D on a clifford torus. You stereographically project that clifford torus onto an infinite cylinder wrapped around it. Then stereographically project that onto and projecting that
+			Picture the circle in R4, it's on say x and y axes
+				Any given point on it does have two whole axes that are orthogonal to the arc going through it, namely z and w
 */
 
 function initThreeSphereExploration()

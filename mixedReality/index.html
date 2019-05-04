@@ -40,11 +40,6 @@
 		<script src="units/fish.js"></script>
 		<script src="units/threeSphereExploration.js"></script>
 
-		<video id="video" crossOrigin="anonymous" webkit-playsinline style="display:none">
-			<source src="data/bbb.ogv" type='video/ogg; codecs="theora, vorbis"'>
-			<source src="data/video.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
-		</video>
-
 		<!-- <script src="units/reactionDiffusion.js"></script> -->
 
 		<!-- <script src="units/mobiusTransformations.js"></script> -->
@@ -74,21 +69,21 @@
 				initPlaybackAndRecording(renderer)
 				
 				initControllerObjects()
-				// initVrInput( renderer )
+				initVrInput( renderer )
 				// initImitationHand();
 				markPositionAndQuaternion(handControllers[RIGHT_CONTROLLER_INDEX])
 
-				// await initFloorAndSky()
+				await initFloorAndSky()
 
-				let twoSphereVisiBox = VisiBox()
-				for(let i = 0; i < 8; i++)
-				{
-					twoSphereVisiBox.corners[i].visible = false
-				}
-				let fish = initFish(twoSphereVisiBox)
-				initTwoSphereExploration( fish, twoSphereVisiBox )
+				// let twoSphereVisiBox = VisiBox()
+				// for(let i = 0; i < 8; i++)
+				// {
+				// 	twoSphereVisiBox.corners[i].visible = false
+				// }
+				// let fish = initFish(twoSphereVisiBox)
+				// initTwoSphereExploration( fish, twoSphereVisiBox )
 
-				// initThreeSphereExploration()
+				initThreeSphereExploration()
 
 				renderer.setAnimationLoop( function()
 				{

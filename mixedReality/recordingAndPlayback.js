@@ -46,27 +46,13 @@ initPlaybackAndRecording = function(renderer)
 		videoDomElement.style = "display:none"
 		videoDomElement.crossOrigin = 'anonymous';
 		videoDomElement.src = "data/video.mp4"
-		//could look into .srcObject?
-
-		// var videoDomElement = document.getElementById( 'video' )
 		videoDomElement.loop = true
-		// videoDomElement.load()
-		// for(propt in videoDomElement)
-		// 	log(propt)
-		// log(videoDomElement.codecs)
-		// log(videoDomElement.HAVE_ENOUGH_DATA)
-		videoDomElement.volume = 0
-
-		alwaysUpdateFunctions.push(function()
-		{
-			// log(videoDomElement.readyState)
-			log(videoDomElement.crossOrigin)
-		})
+		// videoDomElement.volume = 0
 
 		var videoTexture = new THREE.VideoTexture( videoDomElement );
 		videoTexture.minFilter = THREE.LinearFilter;
 		videoTexture.magFilter = THREE.LinearFilter;
-		// videoTexture.format = THREE.RGBFormat;
+		videoTexture.format = THREE.RGBFormat;
 
 		var planeHeight = 1.8
 		var plane = new THREE.Mesh(new THREE.PlaneGeometry(planeHeight*(16/9),planeHeight),new THREE.MeshBasicMaterial(
@@ -93,8 +79,13 @@ initPlaybackAndRecording = function(renderer)
 	}
 	loadRecording(1)
 
-	function recordFrame()
+	maybeRecordFrame = function()
 	{
+		if( !recording )
+		{
+			return
+		}
+
 		recordingTime += frameDelta;
 
 		let frame = {};
@@ -181,7 +172,6 @@ initPlaybackAndRecording = function(renderer)
 			return
 		}
 
-
 		quaternions.push(object3d.quaternion)
 
 		let oneWeAreInterestedIn = null
@@ -260,14 +250,6 @@ initPlaybackAndRecording = function(renderer)
 		}
 	}
 
-	maybeRecordFrame = function()
-	{
-		if( recording === true )
-		{
-			recordFrame()
-		}
-	}
-
 	synchronizeToVideoOrCallContingentUpdateFunctions = function()
 	{
 		if( plane.visible )
@@ -309,6 +291,20 @@ initPlaybackAndRecording = function(renderer)
 				if(renderer.vr.enabled)
 				{
 					console.error( "vr enabled, camera will not cooperate (even if you disable vr)" )
+					return
+				}
+				let foundPdfViewer = false
+				for(i in window.navigator.plugins)
+				{
+					if(window.navigator.plugins[i].name === "Chrome PDF Viewer")
+					{
+						foundPdfViewer = true
+						break;
+					}
+				}
+				if(!foundPdfViewer)
+				{
+					console.error(".mp4 doesn't work in chromium, use chrome")
 					return
 				}
 
@@ -358,16 +354,6 @@ initPlaybackAndRecording = function(renderer)
 			}
 		}
 		bindButton( 'space', togglePlaying, "toggle playing");
-
-		renderer.domElement.addEventListener("click", function(){videoDomElement.play()})
-
-		document.addEventListener("keydown",function(event)
-		{
-			if(event.keyCode === 219)
-			{
-				videoDomElement.play()
-			}
-		})
 
 		{
 			bindButton( "a", function(){}, "camera left",function()
