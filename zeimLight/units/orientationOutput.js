@@ -9,7 +9,7 @@ function initOrientationOutput()
 		f(i)
 	}
 	log(object.quaternion.toArray())
-	
+
 
 	function f(i)
 	{
@@ -22,7 +22,7 @@ function initOrientationOutput()
 
 		updateFunctions.push(function()
 		{
-			str = (object.quaternion.toArray())[i].toString()
+			str = frameCount.toString()
 			sign.children[0].material.setText(str)
 		})
 	}
