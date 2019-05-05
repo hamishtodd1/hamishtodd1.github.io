@@ -3,13 +3,15 @@ function initOrientationOutput()
 	let object = new THREE.Object3D()
 	object.quaternion.set( Math.random(),Math.random(),Math.random(),Math.random() )
 	let controls = new THREE.DeviceOrientationControls( object );
+	updateFunctions.push(function()
+	{
+		controls.update()
+	})
 
 	for(let i = 0; i < 4; i++)
 	{
 		f(i)
 	}
-	log(object.quaternion.toArray())
-
 
 	function f(i)
 	{
@@ -22,7 +24,7 @@ function initOrientationOutput()
 
 		updateFunctions.push(function()
 		{
-			str = frameCount.toString()
+			str = (object.quaternion.toArray())[i].toString()
 			sign.children[0].material.setText(str)
 		})
 	}
