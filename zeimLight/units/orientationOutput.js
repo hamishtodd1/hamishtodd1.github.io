@@ -8,14 +8,14 @@ function initOrientationOutput()
 		controls.update()
 	})
 
-	for(let i = 0; i < 4; i++)
+	for(let i = 0; i < 3; i++)
 	{
 		f(i)
 	}
 
 	function f(i)
 	{
-		let str = (object.quaternion.toArray())[i].toString()
+		let str = (object.rotation.toArray())[i].toString()
 
 		let sign = makeTextSign(str)
 		sign.scale.multiplyScalar(0.17)
