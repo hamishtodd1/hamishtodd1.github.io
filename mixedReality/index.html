@@ -1,3 +1,6 @@
+<!-- live maths?
+-->
+
 <html>
 	<head>
 		<title>a</title>
@@ -37,6 +40,8 @@
 		<script src="miscFunctions.js"></script>
 		<script src="variables.js"></script>
 
+		<script src="mouse.js"></script>
+
 		<script src="units/fish.js"></script>
 		<script src="units/threeSphereExploration.js"></script>
 
@@ -49,7 +54,6 @@
 		<script>
 			async function init()
 			{
-				let renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.localClippingEnabled = true;
@@ -64,31 +68,33 @@
 				window.addEventListener( 'resize', windowResize)
 
 				initButtons()
+				initMouse()
 
 				initLights();
-				initPlaybackAndRecording(renderer)
+				initPlaybackAndRecording()
 				
 				initControllerObjects()
-				initVrInput( renderer )
+				if( chromiumRatherThanChrome )
+				{
+					initVrInput()
+				}
 				// initImitationHand();
 				markPositionAndQuaternion(handControllers[RIGHT_CONTROLLER_INDEX])
 
 				await initFloorAndSky()
 
-				// let twoSphereVisiBox = VisiBox()
-				// for(let i = 0; i < 8; i++)
-				// {
-				// 	twoSphereVisiBox.corners[i].visible = false
-				// }
-				// let fish = initFish(twoSphereVisiBox)
-				// initTwoSphereExploration( fish, twoSphereVisiBox )
+				let twoSphereVisiBox = VisiBox()
+				for(let i = 0; i < 8; i++)
+				{
+					twoSphereVisiBox.corners[i].visible = false
+				}
+				let fish = initFish(twoSphereVisiBox)
+				initTwoSphereExploration( fish, twoSphereVisiBox )
 
 				initThreeSphereExploration()
 
 				renderer.setAnimationLoop( function()
 				{
-					maybeRecordFrame()
-
 					frameDelta = clock.getDelta();
 
 					if(renderer.vr.enabled === true)
@@ -100,7 +106,9 @@
 						imitationHand.update()
 					}
 
-					synchronizeToVideoOrCallContingentUpdateFunctions()
+					mouse.updateFromAsyncAndCheckClicks()
+
+					synchronizeToVideoOrCallContingentUpdateFunctionsAndMaybeRecord()
 					for(let i = 0; i < alwaysUpdateFunctions.length; i++)
 					{
 						alwaysUpdateFunctions[i]()

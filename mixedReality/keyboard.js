@@ -47,12 +47,18 @@ function initButtons()
 		if( 48 <= keyCode && keyCode <= 57 )
 		{
 			let buttonName = keycodeArray[keyCode - 48]
-			return buttons[buttonName]
+			if( buttons[buttonName] )
+			{
+				return buttons[buttonName]
+			}
 		}
 		if( 65 <= keyCode && keyCode <= 90 )
 		{
 			let buttonName = keycodeArray[keyCode - 55]
-			return buttons[buttonName]
+			if( buttons[buttonName] )
+			{
+				return buttons[buttonName]
+			}
 		}
 		return null
 	}

@@ -94,9 +94,9 @@ function centerOfCircleThroughThreePoints(a,b,c)
 	let bcMidpoint = bc.clone().multiplyScalar(0.5)
 	let center = bcPerp.clone().multiplyScalar(bcMidpointToCenterDistance).add(bcMidpoint).add(b)
 
-	console.assert(
-		basicallyEqual(center.distanceTo(a),center.distanceTo(b)) && 
-		basicallyEqual(center.distanceTo(b),center.distanceTo(c)) )
+	// console.assert(
+	// 	basicallyEqual(center.distanceToSquared(a),center.distanceToSquared(b)) && 
+	// 	basicallyEqual(center.distanceToSquared(b),center.distanceToSquared(c)) )
 	return center
 }
 

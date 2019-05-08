@@ -2,7 +2,6 @@ function initControllerObjects()
 {
 	function overlappingHoldable(holdable)
 	{
-		//TODO once a weird bug here where geometry was undefined
 		var ourPosition = this.controllerModel.geometry.boundingSphere.center.clone();
 		this.localToWorld( ourPosition );
 		
@@ -16,18 +15,7 @@ function initControllerObjects()
 		return overlapping
 	}
 
-	function applyLeftControllerTransformation(geometry)
-	{
-		geometry.applyMatrix( new THREE.Matrix4().makeRotationAxis(xUnit,0.7) );
-		geometry.applyMatrix( new THREE.Matrix4().makeTranslation(
-			-0.008,
-			0.041,
-			-0.03) );
-	}
-
-		
 	var controllerMaterial = new THREE.MeshLambertMaterial({color:0x444444});
-	var laserRadius = 0.001;
 	var controllerKeys = {
 		thumbstickButton:0,
 		grippingTop: 1,
@@ -53,7 +41,6 @@ function initControllerObjects()
 		handControllers[ i ].thumbstickRightOld = false
 
 		handControllers[ i ].controllerModel = new THREE.Mesh( new THREE.BoxGeometry(0.1,0.1,0.17), controllerMaterial.clone() );
-		// applyLeftControllerTransformation(handControllers[ i ].controllerModel.geometry)
 		handControllers[ i ].add( handControllers[ i ].controllerModel );
 
 		handControllers[ i ].oldPosition = handControllers[ i ].position.clone();
@@ -91,39 +78,32 @@ function initControllerObjects()
 	loadControllerModel(RIGHT_CONTROLLER_INDEX)
 	loadControllerModel( LEFT_CONTROLLER_INDEX)
 
-	{
-		let cone = new THREE.Mesh(new THREE.ConeBufferGeometry(0.1,0.4,4))
-		cone.geometry.applyMatrix(new THREE.Matrix4().makeRotationY(TAU/8))
-		bindButton("i",function()
-		{
-			cone.rotation.x += 0.1
-		},"cone rotation")
-		bindButton("k",function()
-		{
-			cone.rotation.x -= 0.1
-		},"cone rotation")
-		bindButton("j",function()
-		{
-			cone.rotation.z += 0.1
-		},"cone rotation")
-		bindButton("l",function()
-		{
-			cone.rotation.z -= 0.1
-		},"cone rotation")
-		handControllers[1-RIGHT_CONTROLLER_INDEX].add(cone)
-	}
+	// {
+	// 	let cone = new THREE.Mesh(new THREE.ConeBufferGeometry(0.1,0.4,4))
+	// 	cone.geometry.applyMatrix(new THREE.Matrix4().makeRotationY(TAU/8))
+	// 	bindButton("i",function()
+	// 	{
+	// 		cone.rotation.x += 0.1
+	// 	},"cone rotation")
+	// 	bindButton("k",function()
+	// 	{
+	// 		cone.rotation.x -= 0.1
+	// 	},"cone rotation")
+	// 	bindButton("j",function()
+	// 	{
+	// 		cone.rotation.z += 0.1
+	// 	},"cone rotation")
+	// 	bindButton("l",function()
+	// 	{
+	// 		cone.rotation.z -= 0.1
+	// 	},"cone rotation")
+	// 	handControllers[1-RIGHT_CONTROLLER_INDEX].add(cone)
+	// }
 }
 
-function initVrInput(renderer)
+function initVrInput()
 {
-	//not working
-	// if( !WEBVR.vrAvailable )
-	// {
-	// 	console.error("VR not available")
-	// 	return
-	// }
-
-	renderer.vr.enabled = true;
+	renderer.vr.enabled = true; ///uhhhh isn't that the button's job?
 	
 	let vrButton = WEBVR.createButton( renderer )
 	document.body.appendChild( vrButton );
@@ -132,7 +112,7 @@ function initVrInput(renderer)
 		if(event.keyCode === 69 )
 		{
 			vrButton.onclick()
-			window.removeEventListener('resize', windowResize)
+			// window.removeEventListener('resize', windowResize)
 		}
 	}, false );
 
@@ -146,15 +126,9 @@ function initVrInput(renderer)
 
 	readHandInput = function()
 	{
-		// var device = renderer.vr.getDevice()
-		// if(device)
-		// 	console.log(device.stageParameters.sittingToStandingTransform)
-
 		var gamepads = navigator.getGamepads();
 		var standingMatrix = renderer.vr.getStandingMatrix()
 		
-		//If handControllers aren't getting input even from XX-vr-handControllers,
-		//Try restarting computer. Urgh. Just browser isn't enough. Maybe oculus app?
 		for(var k = 0; k < gamepads.length; ++k)
 		{
 			if(!gamepads[k] || gamepads[k].pose === null || gamepads[k].pose === undefined || gamepads[k].pose.position === null)
@@ -200,7 +174,6 @@ function initVrInput(renderer)
 
 			var controller = handControllers[affectedControllerIndex]
 			
-			// Thumbstick could also be used for light intensity?
 			{
 				controller.thumbstickAxes[0] = gamepads[k].axes[0];
 				controller.thumbstickAxes[1] = gamepads[k].axes[1];

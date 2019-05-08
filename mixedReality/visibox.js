@@ -11,9 +11,9 @@ function VisiBox()
 	visiBox.scale.multiplyScalar(1000)
 	visiBox.scale.x *= 2
 
-	markLerpedFloat(visiBox.scale,"x")
-	markLerpedFloat(visiBox.scale,"y")
-	markLerpedFloat(visiBox.scale,"z")
+	// markLerpedFloat(visiBox.scale,"x")
+	// markLerpedFloat(visiBox.scale,"y")
+	// markLerpedFloat(visiBox.scale,"z")
 
 	var cornerRadius = 0.02;
 
