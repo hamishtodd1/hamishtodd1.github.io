@@ -71,17 +71,16 @@
 				initMouse()
 
 				initLights();
-				initPlaybackAndRecording()
+				await initPlaybackAndRecording()
 				
 				initControllerObjects()
 				if( chromiumRatherThanChrome )
 				{
 					initVrInput()
+					await initFloorAndSky()
 				}
 				// initImitationHand();
 				markPositionAndQuaternion(handControllers[RIGHT_CONTROLLER_INDEX])
-
-				await initFloorAndSky()
 
 				let twoSphereVisiBox = VisiBox()
 				for(let i = 0; i < 8; i++)

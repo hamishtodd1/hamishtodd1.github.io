@@ -1,9 +1,7 @@
-//Worried about s2. Test so it's not even off by a frame
-//not everything is marked
-
+//Do a test, including with the markers
+//Worried about s2. Make sure it's not even off by a frame
 //make sure everything is in shot
-
-//if you're gonna have patreon stuff at end you don't necessarily want the jobs to see this
+//make sure this discrete-frame thing makes sense
 
 function initTwoSphereExploration(fish, visiBox)
 {
@@ -25,22 +23,13 @@ function initTwoSphereExploration(fish, visiBox)
 			assemblage.quaternion.set(0,0,0,1)
 		}
 	})
-	markPositionAndQuaternion(assemblage)
+	markPositionAndQuaternion(assemblage,"assemblage")
 
 	assemblage.add(fish)
 	markObjectProperty(fish,"visible")
-	bindButton("2",function()
-	{
-		fish.visible = !fish.visible
-		for(let i = 0; i < visiBox.faces.length; i++)
-		{
-			visiBox.faces[i].visible = !visiBox.faces[i].visible
-		}
-	})
 
 	let s2 = new THREE.Group()
 	markPositionAndQuaternion(s2)
-	bindButton("1",function(){s2.visible = !s2.visible})
 	s2.radius = 0.05
 	s2.scale.setScalar(s2.radius)
 	s2.correctPosition = new THREE.Vector3(0,0,s2.radius)
@@ -49,7 +38,7 @@ function initTwoSphereExploration(fish, visiBox)
 	{
 		color:0xCCCCCC,
 		transparent:true,
-		opacity:0.93
+		opacity:0.85
 	} ) ) )
 	markMatrix(s2.matrix)
 	scene.add(s2)
@@ -59,8 +48,9 @@ function initTwoSphereExploration(fish, visiBox)
 	let extraRotationMatrix = new THREE.Matrix4()
 
 	let bulb = new THREE.Group()
-	bindButton("3",function(){bulb.visible = !bulb.visible})
-	bulb.position.z = 2 * s2.correctPosition.z
+	markPositionAndQuaternion(bulb)
+	bulb.correctPosition = new THREE.Vector3(0,0,2 * s2.correctPosition.z)
+	bulb.position.copy(bulb.correctPosition)
 	scene.add(bulb)
 	// let light = new THREE.PointLight(0xFFFFFF,1,2);
 	// light.position.set( 0,0.1,0);
@@ -119,7 +109,7 @@ function initTwoSphereExploration(fish, visiBox)
 		}
 	},function(){},function(e){console.log(e)})
 
-	updateFunctions.push(function()
+	function engageHack()
 	{
 		for(let i = 0; i < thingsInScene.length; i++)
 		{
@@ -129,7 +119,22 @@ function initTwoSphereExploration(fish, visiBox)
 
 			thingsInScene[i].position.sub(hackPosition)
 		}
-		hackEngaged = true
+	}
+	function disengageHack()
+	{
+		for(let i = 0; i < thingsInScene.length; i++)
+		{
+			let matrixPosition = new THREE.Vector3().setFromMatrixPosition(thingsInScene[i].matrix)
+			matrixPosition.add(hackPosition)
+			thingsInScene[i].matrix.setPosition(matrixPosition)
+
+			thingsInScene[i].position.add(hackPosition)
+		}
+	}
+
+	updateFunctions.push(function()
+	{
+		engageHack()
 
 		let t = frameCount*0.03
 
@@ -161,39 +166,42 @@ function initTwoSphereExploration(fish, visiBox)
 				s2.matrixAutoUpdate = true
 			}
 
-			if( designatedHand.button1 )
+			if( designatedHand.thumbstickUp )
 			{
 				s2.quaternion.copy( designatedHand.quaternion )
 				s2.position.copy( designatedHand.position ).sub(hackPosition)
 			}
-			else
+			if( s2.position.distanceTo(s2.correctPosition) < s2.radius)
 			{
 				s2.position.copy(s2.correctPosition)
 			}
 		}
 
-		if(designatedHand.thumbstickButton && !designatedHand.thumbstickButtonOld)
+		if( designatedHand.thumbstickDown )
+		{
+			bulb.position.copy(designatedHand.position).sub(hackPosition)
+			bulb.quaternion.copy(designatedHand.quaternion)
+		}
+		
+		if(bulb.position.distanceTo(bulb.correctPosition) < s2.radius/2)
+		{
+			bulb.position.copy(bulb.correctPosition)
+			bulb.quaternion.set(0,0,0,1)
+		}
+
+		if(designatedHand.button1 && !designatedHand.button1Old)
 		{
 			cycleTwoSphereTextures()
 		}
 
 		// projectionIndicators.visible = designatedHand.grippingTop
+
+		disengageHack()
 	})
 
 	alwaysUpdateFunctions.push(function()
 	{
-		if(!hackEngaged)
-		{
-			for(let i = 0; i < thingsInScene.length; i++)
-			{
-				let matrixPosition = new THREE.Vector3().setFromMatrixPosition(thingsInScene[i].matrix)
-				matrixPosition.sub(hackPosition)
-				thingsInScene[i].matrix.setPosition(matrixPosition)
-
-				thingsInScene[i].position.sub(hackPosition)
-			}
-			hackEngaged = true
-		}
+		engageHack()
 
 		let assemblageMatrixInverse = new THREE.Matrix4().getInverse(assemblage.matrix)
 		for(let i = 0; i < meshesWithProjections.length; i++)
@@ -247,15 +255,7 @@ function initTwoSphereExploration(fish, visiBox)
 		// 	projectionIndicators.geometry.verticesNeedUpdate = true
 		// }
 
-		for(let i = 0; i < thingsInScene.length; i++)
-		{
-			let matrixPosition = new THREE.Vector3().setFromMatrixPosition(thingsInScene[i].matrix)
-			matrixPosition.add(hackPosition)
-			thingsInScene[i].matrix.setPosition(matrixPosition)
-
-			thingsInScene[i].position.add(hackPosition)
-		}
-		hackEngaged = false
+		disengageHack()
 	})
 
 	function stereographicallyUnproject2D(worldV)
@@ -316,40 +316,25 @@ function initTwoSphereExploration(fish, visiBox)
 	{
 		meshesWithProjections[i].visible = false
 	}
-	// bindButton( "c", function()
-	// {
-	// 	cycleTwoSphereTextures()
-	// }, "cycle 2-sphere textures" )
 
-	markObjectProperty( bulb,"visible" )
-	for(let i = 0; i < meshesWithProjections.length; i++)
-	{
-		markObjectProperty( meshesWithProjections[i],"visible" )
-	}
-
+	let visibleIndex = {value:0}
+	markObjectProperty(visibleIndex,"value")
 	function cycleTwoSphereTextures()
 	{
-		let visibleIndex = 0
-		for(let i = 0; i < meshesWithProjections.length; i++)
+		visibleIndex.value++
+		if(visibleIndex.value >= meshesWithProjections.length)
 		{
-			if( meshesWithProjections[i].visible )
-			{
-				visibleIndex = i
-				break;
-			}
-		}
-
-		visibleIndex++
-		if(visibleIndex >=meshesWithProjections.length)
-		{
-			visibleIndex = 0
-		}
-
-		for(let i = 0; i < meshesWithProjections.length; i++)
-		{
-			meshesWithProjections[i].visible = (i===visibleIndex)
+			visibleIndex.value = 0
 		}
 	}
+
+	alwaysUpdateFunctions.push(function()
+	{
+		for(let i = 0; i < meshesWithProjections.length; i++)
+		{
+			meshesWithProjections[i].visible = (i===visibleIndex.value)
+		}
+	})
 
 	function makeProjectableSpheres(meshesWithProjections)
 	{
@@ -487,7 +472,7 @@ function initTwoSphereExploration(fish, visiBox)
 		heptagon.material.clippingPlanes = visiBox.planes
 		heptagon.geometry.applyMatrix(new THREE.Matrix4().makeRotationX(TAU/4))
 		assemblage.add(heptagon)
-		markPosition(heptagon)
+		markPositionAndQuaternion(heptagon)
 
 		let grabbed2DObject = null
 		let pointInHand = new THREE.Vector3(1,0,0)

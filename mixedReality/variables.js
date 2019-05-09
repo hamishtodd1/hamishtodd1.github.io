@@ -14,9 +14,9 @@ let frameCount = 0;
 const log = console.log
 const debugging = 0;
 
-let camera = new THREE.PerspectiveCamera( 30, //can be changed by VR effect
+let camera = new THREE.PerspectiveCamera( 80, //can be changed by VR effect
 		window.innerWidth / window.innerHeight,
-		0.02, 5);
+		0.02, 10);
 let scene = new THREE.Scene().add(camera);
 let renderer = new THREE.WebGLRenderer( { antialias: true } );
 

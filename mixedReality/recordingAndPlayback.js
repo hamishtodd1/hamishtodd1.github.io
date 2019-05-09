@@ -14,43 +14,97 @@
 	Visual synchronization
 		If you glue the vive tracker to a tablet you only have to do it once
 
-	would be nice to have a frustum. Hahaha
-
 	Really ought to list names and put them in output file
 
 	better off marking the controller/inputs?
 		Jon Blow says "pain in the ass"
 		Smaller filesize for recording
 		Might somehow have to backtrack through frames to recover total state
+
+	Current workflow, one take:
+	1. physically set up camera
+	2. set up VR browser
+	3. in VR, put guides in place
+	4. start recording on both
+	5. do stuff
+	6. stop recording on both
+	7. import video onto computer
+	8. Put guides in place on video
+	9. Adjust lag
+	9a. "Post" eg eyes?
+	10. Record whole thing using XSplit
+	11. Edit with kdenlive? Patreon symbol at least
+
+	The speed of light:
+		there's an app on your phone/tablet which has the virtual objects etc. 
+		Also connects to an audio recorder which automatically combines that with video. 
+		Can figure out where it is in virtual world in relation to your hands and head (the only truly shared objects). 
+		Would need to have the actual position and orientation of the frikkin controllers. 
+		Even Vive tracker wouldn't be great. 
+		Skip from 2 to 11.
 */
 
 initPlaybackAndRecording = function()
 {
-	{
-		let theoreticalCamera = new THREE.Group()
-		scene.add(theoreticalCamera)
+	let playbackMode = false
 
-		let plane = new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({side:THREE.DoubleSide}))
-		plane.position.z = -1
-		plane.scale.y = 2 * Math.tan( camera.fov * THREE.Math.DEG2RAD / 2 ) * Math.abs( plane.position.z )
-		plane.scale.x = 16/9 * plane.scale.y
-		theoreticalCamera.add(plane)
-		clickables.push(plane)
+	{
+		var cameraHolder = new THREE.Group()
+		scene.add(cameraHolder)
+
+		cameraHolder.add(new THREE.Mesh(new THREE.SphereGeometry(0.01), new THREE.MeshLambertMaterial({color:0xFF0000}) ))
+		// let height = 0.1
+		// new THREE.Vector3(Math.tan(40*THREE.Math.DEG2RAD),,-1),
+		// var frustumIndicator = new THREE.Mesh(new THREE.CylinderBufferGeometry(0.0,height,0.1,4), new THREE.MeshLambertMaterial())
+		// frustumIndicator.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,-height/2,0))
+		// frustumIndicator.geometry.applyMatrix(new THREE.Matrix4().makeRotationY(TAU/8))
+		// frustumIndicator.geometry.applyMatrix(new THREE.Matrix4().makeRotationX(TAU/4))
+		// cameraHolder.add(frustumIndicator)
+
+		{
+			var videoDomElement = document.createElement( 'video' )
+			videoDomElement.style = "display:none"
+			videoDomElement.crossOrigin = 'anonymous';
+			videoDomElement.src = "recordings/test.mp4"
+			// videoDomElement.volume = 0
+
+			var videoTexture = new THREE.VideoTexture( videoDomElement );
+			videoTexture.minFilter = THREE.LinearFilter;
+			videoTexture.magFilter = THREE.LinearFilter;
+			videoTexture.format = THREE.RGBFormat;
+			videoTexture.needsUpdate = true
+			// videoTexture.rotation = TAU/2
+			// videoTexture.center.set(0.5,0.5)
+		}
+
+		let screen = new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({
+			map:videoTexture,
+			overdraw: true
+		}))
+		screen.position.z = -1
+		screen.scale.y = 2 * Math.tan( camera.fov * THREE.Math.DEG2RAD / 2 ) * Math.abs( screen.position.z )
+		screen.scale.x = 16/9 * screen.scale.y
+		cameraHolder.add(screen)
+		
+		clickables.push(screen)
 		let indexBeingLaid = 0
 		bindButton("[",function()
 		{
 			indexBeingLaid = 1-indexBeingLaid
 		}, "switch guide point being laid on videoScreen")
-		plane.onClick = function(intersection)
+		screen.onClick = function(intersection)
 		{
 			let newLocation = intersection.point
-			theoreticalCamera.worldToLocal(newLocation)
+			cameraHolder.worldToLocal(newLocation)
 			screenGuidePoints[indexBeingLaid].copy(newLocation)
+			log("screen guide point " + indexBeingLaid + " at ", newLocation.toArray().toString())
 
 			repositionScreen()
-
-			log("guide point " + indexBeingLaid + " at ", newLocation.toArray().toString())
 		}
+
+		let laser = new THREE.Mesh(new THREE.CylinderBufferGeometryUncentered(0.001,100))
+		laser.rotation.x = -TAU/4
+		handControllers[LEFT_CONTROLLER_INDEX].add(laser)
 
 		let realSpaceGuidePoints = Array(2)
 		for(let i = 0; i < 2; i++)
@@ -62,38 +116,92 @@ initPlaybackAndRecording = function()
 			realSpaceGuidePoints[i].x = 2 * (i?1:-1) * Math.random()
 			realSpaceGuidePoints[i].z = -0.5
 		}
+		realSpaceGuidePoints[0].set(-0.21576,1.30663,2.3199)
+		realSpaceGuidePoints[1].set(-1.24467,1.30663,1.2123)
+
 		let screenGuidePoints = Array(2)
 		for(let i = 0; i < 2; i++)
 		{
 			let ball = new THREE.Mesh(new THREE.SphereGeometry(0.02))
 			ball.material.transparent = true
 			ball.material.opacity = 0.5
-			theoreticalCamera.add(ball)
-
+			cameraHolder.add(ball)
 			screenGuidePoints[i] = ball.position
-			screenGuidePoints[i].z = plane.position.z
-			screenGuidePoints[i].x = 0.4 * plane.scale.x * (i?1:-1)
-			screenGuidePoints[i].y = -0.25 * plane.scale.y
 
-			let line = new THREE.Line(new THREE.Geometry())
-			line.geometry.vertices.push(new THREE.Vector3())
-			line.geometry.vertices.push(screenGuidePoints[i].clone().multiplyScalar(100))
-			theoreticalCamera.add(line)
+			screenGuidePoints[i].z = screen.position.z
+			screenGuidePoints[i].x = 0.4 * screen.scale.x * (i?1:-1)
+			screenGuidePoints[i].y = -0.25 * screen.scale.y
 		}
+
+		let lines = Array(2)
+		for(let i = 0; i < 2; i++)
+		{
+			lines[i] = new THREE.Line(new THREE.Geometry())
+			lines[i].geometry.vertices.push( new THREE.Vector3() )
+			lines[i].geometry.vertices.push( new THREE.Vector3() )
+			scene.add(lines[i])
+		}
+
 		updateFunctions.push(function()
 		{
 			if( handControllers[LEFT_CONTROLLER_INDEX].button1 )
 			{
 				realSpaceGuidePoints[0].copy( handControllers[LEFT_CONTROLLER_INDEX].position )
-				repositionScreen()
 			}
-			if( handControllers[LEFT_CONTROLLER_INDEX].button2 )
+			else if( handControllers[LEFT_CONTROLLER_INDEX].button2 )
 			{
 				realSpaceGuidePoints[1].copy( handControllers[LEFT_CONTROLLER_INDEX].position )
-				repositionScreen()
+			}
+			else if( handControllers[LEFT_CONTROLLER_INDEX].button1Old )
+			{
+				realSpaceGuidePoints[1].y = realSpaceGuidePoints[0].y
+				log("real space guide point " + 1 + " at ", screenGuidePoints[1].toArray().toString())
+			}
+			else if( handControllers[LEFT_CONTROLLER_INDEX].button2Old )
+			{
+				realSpaceGuidePoints[0].y = realSpaceGuidePoints[1].y
+				log("real space guide point " + 0 + " at ", screenGuidePoints[0].toArray().toString())
 			}
 
-			//mouse???? add ability to edit screen ones on here. Can "zoom in" and everything.
+			if( (handControllers[LEFT_CONTROLLER_INDEX].grippingTop && !handControllers[LEFT_CONTROLLER_INDEX].grippingTopOld) || 
+				(handControllers[LEFT_CONTROLLER_INDEX].grippingSide && !handControllers[LEFT_CONTROLLER_INDEX].grippingSideOld))
+			{
+				let line = new THREE.Line3(
+					handControllers[LEFT_CONTROLLER_INDEX].position,
+					handControllers[LEFT_CONTROLLER_INDEX].localToWorld( zUnit.clone().negate() )
+					)
+
+				let plane = new THREE.Plane().setFromCoplanarPoints(
+					screen.localToWorld( screen.geometry.vertices[0].clone() ),
+					screen.localToWorld( screen.geometry.vertices[1].clone() ),
+					screen.localToWorld( screen.geometry.vertices[2].clone() ) )
+
+				let index = handControllers[LEFT_CONTROLLER_INDEX].grippingTop ? 1:0
+				let newPosition = new THREE.Vector3()
+				plane.intersectLine(line, newPosition )
+				cameraHolder.worldToLocal(newPosition)
+				if( newPosition.y >= 0 || Math.abs(newPosition.x) > screen.scale.x / 2 ||
+					(newPosition.x > 0 && index === 0) || (newPosition.x < 0 && index === 1) )
+				{
+					console.error("not in limits", newPosition)
+				}
+				else
+				{
+					screenGuidePoints[index].copy(newPosition)
+					log("guide point " + index + " at ", screenGuidePoints[index].toArray().toString())
+				}
+			}
+
+			repositionScreen()
+
+			for(let i = 0; i < 2; i++)
+			{
+				lines[i].geometry.vertices[0].copy( realSpaceGuidePoints[i] )
+				lines[i].geometry.vertices[1].copy( screenGuidePoints[i] )
+				cameraHolder.localToWorld(lines[i].geometry.vertices[1])
+
+				lines[i].geometry.verticesNeedUpdate = true
+			}
 		})
 
 		function repositionScreen()
@@ -105,14 +213,14 @@ initPlaybackAndRecording = function()
 			let planarVectorScreen = planarScreenGuidePoints[1].clone().sub(planarScreenGuidePoints[0]).setComponent(1,0)
 			let planarVectorRealSpace = realSpaceGuidePoints[1].clone().sub(realSpaceGuidePoints[0]).setComponent(1,0)
 
-			theoreticalCamera.quaternion.setFromUnitVectors(planarVectorScreen.clone().normalize(),planarVectorRealSpace.clone().normalize())
+			cameraHolder.quaternion.setFromUnitVectors(planarVectorScreen.clone().normalize(),planarVectorRealSpace.clone().normalize())
 
 			let expectedBall0PositionFromCamera = planarScreenGuidePoints[0].clone()
 			expectedBall0PositionFromCamera.multiplyScalar( planarVectorRealSpace.length() / planarVectorScreen.length() )
-			expectedBall0PositionFromCamera.applyQuaternion( theoreticalCamera.quaternion )
+			expectedBall0PositionFromCamera.applyQuaternion( cameraHolder.quaternion )
 
-			theoreticalCamera.position.copy(realSpaceGuidePoints[0])
-			theoreticalCamera.position.sub(expectedBall0PositionFromCamera)
+			cameraHolder.position.copy(realSpaceGuidePoints[0])
+			cameraHolder.position.sub(expectedBall0PositionFromCamera)
 		}
 		repositionScreen()
 	}
@@ -123,7 +231,7 @@ initPlaybackAndRecording = function()
 	let quaternions = [];
 	let lerpedFloats = []
 
-	let frames = [] //there is a problem here, download error, fix it
+	let frames = []
 
 	let lag = 0;
 	let recording = false
@@ -133,18 +241,19 @@ initPlaybackAndRecording = function()
 	{
 		if( !recording )
 		{
-			frustumIndicator.material.color.r = 1;
+			// frustumIndicator.material.color.r = 1;
 			recording = true
 			log("recording")
-			frames = []
+			frames = Array(262144) //hopefully enough for 20 minutes
+			recordingTime = 0
 		}
 		else
 		{
-			frustumIndicator.material.color.r = 0.267
+			// frustumIndicator.material.color.r = 0.267
 			recording = false
 			log("not recording")
 
-			filename = new Date().toString().slice(16,23)
+			filename = new Date().toString().slice(17,21)
 			presentFramesFile()
 		}
 	}, "toggle recording" )
@@ -154,43 +263,19 @@ initPlaybackAndRecording = function()
 		presentJsonFile( JSON.stringify(frames), filename )
 	}
 
-	{
-		var videoDomElement = document.createElement( 'video' )
-		videoDomElement.style = "display:none"
-		videoDomElement.crossOrigin = 'anonymous';
-		videoDomElement.src = "recordings/video.mp4"
-		videoDomElement.loop = true
-		// videoDomElement.volume = 0
-
-		var videoTexture = new THREE.VideoTexture( videoDomElement );
-		videoTexture.minFilter = THREE.LinearFilter;
-		videoTexture.magFilter = THREE.LinearFilter;
-		videoTexture.format = THREE.RGBFormat;
-
-		var planeHeight = 1.8
-		var plane = new THREE.Mesh(new THREE.PlaneGeometry(planeHeight*(16/9),planeHeight),new THREE.MeshBasicMaterial(
-			{
-				map:videoTexture,
-				overdraw: true
-			}))
-		plane.visible = false
-		camera.add(plane)
-		plane.position.z -= 3
-	}
-
 	loadRecording = function(version)
 	{
-		new THREE.FileLoader().load( "recordings/00-55-4.txt",
+		new THREE.FileLoader().load( "recordings/test.txt",
 			function( str )
 			{
 				frames = eval(str)
-				// synchronizeStateToVideo()
 			}
 		);
-
-		// videoDomElement.src = bbb.ogv
 	}
-	loadRecording()
+	if(!chromiumRatherThanChrome)
+	{
+		loadRecording()
+	}
 
 	maybeRecordFrame = function()
 	{
@@ -247,7 +332,26 @@ initPlaybackAndRecording = function()
 			frame.lerpedFloats[i] = currentValue
 		}
 
-		frames.push(frame);
+		let toNearestSecond = Math.floor(recordingTime)
+		if( toNearestSecond % 10 === 0 && recordingTime - toNearestSecond < frameDelta )
+		{
+			log( toNearestSecond )
+		}
+		//7MB/m
+		//compared with 200MB/m. It's ok.
+		//there again not streaming
+		//20m should be enough = 140MB
+		//1165s = 20m = 95MB = 155,000 frames
+
+		for(let i = 0; i < frames.length; i++)
+		{
+			if(frames[i] === undefined)
+			{
+				frames[i] = frame
+				return;
+			}
+		}
+		frames.push(frame)
 	}
 
 	markObjectProperty = function( object, property )
@@ -308,14 +412,14 @@ initPlaybackAndRecording = function()
 		markLerpedFloat(object3d.position, "y");
 		markLerpedFloat(object3d.position, "z");
 	}
-	markPositionAndQuaternion = function( object3d )
+	markPositionAndQuaternion = function( object3d,name )
 	{
-		console.warn("marking position and quaternion")
 		markPosition(object3d)
 		markQuaternion(object3d)
 	}
 	markMatrix = function(m)
 	{
+		//not lerped floats, that'd be bad
 		for( let i = 0; i < m.elements.length; i++)
 		{
 			markObjectProperty( m.elements, i.toString() )
@@ -323,95 +427,69 @@ initPlaybackAndRecording = function()
 	}
 
 	{
-		let height = 0.1
-		var cameraHolder = new THREE.Mesh(new THREE.SphereGeometry(0.1), new THREE.MeshLambertMaterial({color:0xFF0000}) )
-		cameraHolder.position.set(0,1.6,0.4)
-		scene.add(cameraHolder)
-
-		// var frustumIndicator = new THREE.Mesh(new THREE.CylinderBufferGeometry(0.0,height,0.1,4), new THREE.MeshLambertMaterial())
-		// frustumIndicator.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,-height/2,0))
-		// frustumIndicator.geometry.applyMatrix(new THREE.Matrix4().makeRotationY(TAU/8))
-		// frustumIndicator.geometry.applyMatrix(new THREE.Matrix4().makeRotationX(TAU/4))
-		// cameraHolder.add(frustumIndicator)
-
-		let heldVertical = true
-		let heldHorizontal = true
-
-		bindButton("b",function()
-		{
-			heldVertical = !heldVertical
-			heldHorizontal = !heldHorizontal
-		}, "grab cameraHolder" )
-		updateFunctions.push(function()
-		{
-			if( heldVertical )
-			{
-				cameraHolder.position.y = handControllers[LEFT_CONTROLLER_INDEX].position.y
-			}
-			if( heldHorizontal )
-			{
-				cameraHolder.position.x = handControllers[LEFT_CONTROLLER_INDEX].position.x
-				cameraHolder.position.z = handControllers[LEFT_CONTROLLER_INDEX].position.z - 0.03
-			}
-
-			if( !heldHorizontal && !heldVertical )
-			{
-				cameraHolder.rotation.y = -TAU/2
-			}
-			else
-			{
-				cameraHolder.rotation.y = 0
-			}
-		})
-		markPositionAndQuaternion(cameraHolder)
+		//GET RID OF THIS. You should be able to derive the correct place by now
+		let absorberForUselessData = new THREE.Group()
+		markPositionAndQuaternion(absorberForUselessData)
 	}
 
 	let helmet = initHelmet()
 
 	synchronizeStateToVideo = function()
 	{
-		let lastTimeReadFrom = videoDomElement.currentTime + lag;
-		lastTimeReadFrom = clamp(lastTimeReadFrom,0)
+		let exactTime = videoDomElement.currentTime + lag;
+		if(exactTime < 0)
+		{
+			console.warn("time is less than 0")
+			return;
+		}
+
+		// let frameRate = 30.0 //ffmpeg tells us so
+		// let exactTime = Math.floor( exactTime.toFixed(5) * frameRate); //from VideoFrame.js
 
 		let frameJustBefore = null
-		for( let i = 0, il = frames.length - 1; i < il; i++ )
+		let frameJustAfter = null
+		for( let i = 0, il = frames.length - 1; i < il && frames[i+1] !== null; i++ )
 		{
-			if( frames[i+1].frameTime > lastTimeReadFrom )
+			if( frames[i+1].frameTime > exactTime )
 			{
-				frameJustBefore = i;
+				frameJustBefore = frames[i];
+				frameJustAfter = frames[i+1];
 				break
 			}
 		}
-		if(frameJustBefore === null) //too far before or too far after
-		{
-			frameJustBefore = frames.length - 2
-		}
-		let frameJustAfter = frameJustBefore + 1;
 
-		let lerpValue = ( lastTimeReadFrom - frames[frameJustBefore].frameTime ) / (frames[frameJustAfter].frameTime - frames[frameJustBefore].frameTime);
+		if( frameJustBefore === null )
+		{
+			console.warn("time is greater than limit")
+			videoDomElement.pause()
+			videoDomElement.currentTime = 0
+			return;
+		}
+
+		let lerpValue = ( exactTime - frameJustBefore.frameTime ) /
+						( frameJustAfter.frameTime - frameJustBefore.frameTime );
 		lerpValue = clamp(lerpValue, 0, 1);
 
 		for(let i = 0, il = discretes.length; i < il; i++)
 		{
-			discretes[i].object[ discretes[i].property ] = frames[frameJustBefore].discretes[i];
+			discretes[i].object[ discretes[i].property ] = frameJustBefore.discretes[i];
 		}
 		for(let i = 0, il = lerpedFloats.length; i < il; i++)
 		{
-			//if it's a matrix this is a bad idea
-			let diff = frames[frameJustAfter].lerpedFloats[i] - frames[frameJustBefore].lerpedFloats[i];
-			lerpedFloats[i].object[ lerpedFloats[i].property ] = lerpValue * diff + frames[frameJustBefore].lerpedFloats[i];
+			let diff = frameJustAfter.lerpedFloats[i] - frameJustBefore.lerpedFloats[i];
+			lerpedFloats[i].object[ lerpedFloats[i].property ] = lerpValue * diff + frameJustBefore.lerpedFloats[i];
 		}
-		for(let i = 0, il = frames[frameJustBefore].quaternions.length; i < il; i++)
+		for(let i = 0, il = frameJustBefore.quaternions.length; i < il; i++)
 		{
-			quaternions[i].fromArray( frames[frameJustBefore].quaternions[i] );
-			let nextFrameQuaternion = new THREE.Quaternion().fromArray( frames[frameJustAfter].quaternions[i] );
+			quaternions[i].fromArray( frameJustBefore.quaternions[i] );
+			let nextFrameQuaternion = new THREE.Quaternion().fromArray( frameJustAfter.quaternions[i] );
 			quaternions[i].slerp( nextFrameQuaternion, lerpValue );
 		}
 	}
 
 	synchronizeToVideoOrCallContingentUpdateFunctionsAndMaybeRecord = function()
 	{
-		if( plane.visible )
+		if( playbackMode )
 		{
 			synchronizeStateToVideo()
 		}
@@ -428,7 +506,7 @@ initPlaybackAndRecording = function()
 
 	function togglePlaying()
 	{
-		if(plane.visible === false) //first time
+		if(playbackMode === false) //first time
 		{
 			if( frames[0].discretes.length !== discretes.length || 
 				frames[0].quaternions.length !== quaternions.length || 
@@ -442,7 +520,7 @@ initPlaybackAndRecording = function()
 			}
 			if(renderer.vr.enabled)
 			{
-				console.error( "vr enabled, camera will not cooperate (even if you disable vr)" )
+				console.error( "vr enabled, use chrome (camera will not cooperate even if you disable vr)" )
 				return
 			}
 			if(chromiumRatherThanChrome)
@@ -453,21 +531,20 @@ initPlaybackAndRecording = function()
 
 			//if you wanna go back to recording or be in VR, refresh
 			cameraHolder.add(camera)
-			frustumIndicator.visible = false
+			// frustumIndicator.visible = false
 			camera.position.set(0,0,0)
 			camera.rotation.set(0,0,0)
 
 			helmet.visible = true
-			plane.visible = true
 
 			if(videoDomElement.currentTime === 0)
 			{
-				bindButton( "e", function(){}, "increase lag",function()
+				bindButton( "o", function(){}, "increase lag",function()
 				{
 					lag += 0.01
 					console.log("lag: ", lag)
 				} )
-				bindButton( "q", function(){}, "decrease lag",function()
+				bindButton( "p", function(){}, "decrease lag",function()
 				{
 					lag -= 0.01
 					console.log("lag: ", lag)
@@ -529,6 +606,17 @@ initPlaybackAndRecording = function()
 		{
 			camera.position.y += 0.01
 			console.log("camera position: ", camera.position.toArray().toString() )
+		} )
+
+		bindButton( "q", function(){}, "camera down",function()
+		{
+			camera.rotation.y -= 0.01
+			console.log("camera rotation: ", camera.rotation.toArray().toString() )
+		} )
+		bindButton( "e", function(){}, "camera up",function()
+		{
+			camera.rotation.y += 0.01
+			console.log("camera rotation: ", camera.rotation.toArray().toString() )
 		} )
 	}
 }

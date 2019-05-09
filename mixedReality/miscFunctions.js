@@ -631,13 +631,18 @@ THREE.Quaternion.prototype.sub = function(q2)
 
 function presentJsonFile(string, filename)
 {
+	let data = new Blob([string], {type: 'text/plain'});
+	let url = window.URL.createObjectURL(data);
+
 	let download = document.createElement('a');
-	download.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(string));
+	download.href = url
 	download.setAttribute('download', filename);
 	download.style.display = 'none';
 	document.body.appendChild(download);
 	download.click();
 	document.body.removeChild(download);
+	
+	window.URL.revokeObjectURL(url)
 }
 
 THREE.BufferAttribute.prototype.getXYZ = function(i, target)

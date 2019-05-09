@@ -103,7 +103,7 @@ function initControllerObjects()
 
 function initVrInput()
 {
-	renderer.vr.enabled = true; ///uhhhh isn't that the button's job?
+	renderer.vr.enabled = true;
 	
 	let vrButton = WEBVR.createButton( renderer )
 	document.body.appendChild( vrButton );

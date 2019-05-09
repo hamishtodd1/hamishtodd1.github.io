@@ -43,6 +43,7 @@ function initHelmet()
 	})
 	markPositionAndQuaternion(helmetHolder)
 	scene.add(helmetHolder)
+	helmet.visible = false
 
 	return helmet
 }

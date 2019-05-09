@@ -2,7 +2,10 @@ async function initFloorAndSky()
 {
 	//floor
 	let floorDimension = 16;
-	let floorTile = new THREE.Mesh( new THREE.PlaneBufferGeometry( floorDimension, floorDimension ), new THREE.MeshLambertMaterial() );
+	let floorTile = new THREE.Mesh( new THREE.PlaneBufferGeometry( floorDimension, floorDimension ), new THREE.MeshLambertMaterial({
+		transparent:true,
+		opacity:0.5
+	}) );
 	floorTile.position.y = 0;
 	floorTile.rotation.x = -TAU / 4;
 	scene.add(floorTile);
@@ -14,8 +17,7 @@ async function initFloorAndSky()
 			floorTile.material.map = texture;
 		},
 		function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );}
-	);
-	
+	);	
 
 	//------------Sky
 	let uniforms = {
