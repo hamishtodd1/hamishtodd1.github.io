@@ -188,7 +188,10 @@ function initCameraAndRendererResizeSystem(renderer)
 
 		camera.updateProjectionMatrix();
 
-		camera.projectionMatrix.elements[9] = -2/3
+		if(!PUBLIC_FACING)
+		{
+			camera.projectionMatrix.elements[9] = -2/3
+		}
 	}
 	respondToResize();
 

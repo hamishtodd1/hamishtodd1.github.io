@@ -1,3 +1,6 @@
+<!-- live maths?
+-->
+
 <html>
 	<head>
 		<title>a</title>
@@ -18,14 +21,14 @@
 		<script src="lib/GLTFLoader.js"></script>
 		<script src="lib/WebVR.js"></script>
 		
-		<script src="handInput.js"></script>
+		<script src="vr.js"></script>
 
 		<script src="lighting.js"></script>
 		<script src="helmet.js"></script>
 
 		<script src="imitationHand.js"></script>
 
-		<script src="recording.js"></script>
+		<script src="recordingAndPlayback.js"></script>
 		
 		<script src="text.js"></script>
 
@@ -36,6 +39,8 @@
 		
 		<script src="miscFunctions.js"></script>
 		<script src="variables.js"></script>
+
+		<script src="mouse.js"></script>
 
 		<script src="units/fish.js"></script>
 		<script src="units/threeSphereExploration.js"></script>
@@ -49,7 +54,6 @@
 		<script>
 			async function init()
 			{
-				let renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.localClippingEnabled = true;
@@ -64,55 +68,33 @@
 				window.addEventListener( 'resize', windowResize)
 
 				initButtons()
-
-				// {
-				// 	camera.position.z = 2
-				// 	camera.far = 40
-				// 	camera.updateProjectionMatrix()
-
-				// 	let cameraAngle = 0//TAU/4
-				// 	bindButton("left",function(){},"turn",function()
-				// 	{
-				// 		cameraAngle -= 0.07
-				// 	})
-				// 	bindButton("right",function(){},"turn",function()
-				// 	{
-				// 		cameraAngle += 0.07
-				// 	})
-				// 	updateFunctions.push(function()
-				// 	{
-				// 		let speed = 0//.06
-				// 		cameraAngle += speed
-
-				// 		camera.position.set(0,camera.position.y,2.5)
-				// 		camera.position.applyAxisAngle(yUnit, cameraAngle)
-				// 		camera.rotation.y = cameraAngle
-				// 	})
-				// }
+				initMouse()
 
 				initLights();
-				initPlaybackAndRecording(renderer)
+				initPlaybackAndRecording()
 				
+				initControllerObjects()
+				if( chromiumRatherThanChrome )
+				{
+					initVrInput()
+				}
 				// initImitationHand();
-				initVr(renderer)
 				markPositionAndQuaternion(handControllers[RIGHT_CONTROLLER_INDEX])
 
-				await initSurroundings()
+				await initFloorAndSky()
 
-				// let twoSphereVisiBox = VisiBox()
-				// for(let i = 0; i < 8; i++)
-				// {
-				// 	twoSphereVisiBox.corners[i].visible = false
-				// }
-				// let fish = initFish(twoSphereVisiBox)
-				// initTwoSphereExploration( fish, twoSphereVisiBox )
+				let twoSphereVisiBox = VisiBox()
+				for(let i = 0; i < 8; i++)
+				{
+					twoSphereVisiBox.corners[i].visible = false
+				}
+				let fish = initFish(twoSphereVisiBox)
+				initTwoSphereExploration( fish, twoSphereVisiBox )
 
 				initThreeSphereExploration()
 
 				renderer.setAnimationLoop( function()
 				{
-					maybeRecordFrame()
-
 					frameDelta = clock.getDelta();
 
 					if(renderer.vr.enabled === true)
@@ -124,7 +106,9 @@
 						imitationHand.update()
 					}
 
-					synchronizeToVideoOrCallContingentUpdateFunctions()
+					mouse.updateFromAsyncAndCheckClicks()
+
+					synchronizeToVideoOrCallContingentUpdateFunctionsAndMaybeRecord()
 					for(let i = 0; i < alwaysUpdateFunctions.length; i++)
 					{
 						alwaysUpdateFunctions[i]()

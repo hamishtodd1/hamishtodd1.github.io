@@ -1,11 +1,5 @@
 /*
-	TODO
-		Make sure everything can easily be made visible and invisible
-			Or hack that in in post?
-
-	Sort out the singularity coarse grain thing
-
-	Script, "Rotating a 4D sphere in VR" Thumbnail: nice MR thing, "4D"
+	Script, "How are rotations different in 4D? in VR" Thumbnail: nice MR thing, "4 space dimensions??"
 		So to describe 4D rotations, in this video we're going to use basically the same approach to describing 4D
 		That you might have seen elsewhere, which is we're going to think about a 2D creature, and we're going to try to empathize with it
 		We're going to use standard approach, [fish]
@@ -27,6 +21,8 @@
 
 		The 4D sphere is staying at the same location
 
+		It is possible for we as 3D creatures to rotate a 4D sphere
+
 		So in 2D you get 1 degree of rotational freedom, in 3D we have 3. How many do they have in 4D?
 		Maybe pause the video. If you said 6, well done! In 5D it is 10. Try to work out why!
 
@@ -46,6 +42,12 @@
 		Bring in chirality
 		600-cell tet ring thing
 		hopf fibration, spinors
+		can do jigsaws!
+
+		S1xS2
+			It's the equivalent of taking the 2D plane and bringing it into 4D on a clifford torus. You stereographically project that clifford torus onto an infinite cylinder wrapped around it. Then stereographically project that onto and projecting that
+			Picture the circle in R4, it's on say x and y axes
+				Any given point on it does have two whole axes that are orthogonal to the arc going through it, namely z and w
 */
 
 function initThreeSphereExploration()
@@ -53,14 +55,20 @@ function initThreeSphereExploration()
 	initProjectionSystem()
 
 	let visiBox = VisiBox()
-	// visiBox.scale.multiplyScalar(1/1000)
+	for(let i = 0; i < visiBox.children.length; i++)
+	{
+		if(visiBox.children[i].isMesh)
+		{
+			visiBox.children[i].visible = false
+		}
+	}
+	visiBox.scale.multiplyScalar(1/2)
+	visiBox.scale.multiplyScalar(1/1000)
 
 	let threeSphereMatrix = new THREE.Matrix4()
 	let threeSphereMatrixInverse = new THREE.Matrix4()
 	markMatrix(threeSphereMatrix)
 
-	//could have points too, maybe travelling along the circles
-	//alternatively could have had a torusgeometry. Disadvantage is that radius could get small
 	function GreatCircle(controlPoint0,controlPoint1, color)
 	{
 		let greatCircle = {}
@@ -76,7 +84,7 @@ function initThreeSphereExploration()
 		{
 			let line = false
 
-			let boundingSphereRadius = 5
+			let boundingSphereRadius = 20
 
 			let realSpaceCenter = new THREE.Vector3()
 			let realSpaceRadius = 1;
@@ -95,7 +103,7 @@ function initThreeSphereExploration()
 				let realSpacePointBetween = stereographicallyProject(pointBetween)
 
 				let angle = realSpacePoint0.clone().sub(realSpacePointBetween).angleTo( realSpacePoint1.clone().sub(realSpacePointBetween) )
-				line = (Math.abs(angle-Math.PI) < 0.00000000001 )
+				line = (Math.abs(angle-Math.PI) < 0.00000001 )
 
 				if(line)
 				{
@@ -108,7 +116,6 @@ function initThreeSphereExploration()
 					realSpaceRadius = realSpaceCenter.distanceTo(realSpacePointBetween)
 					realSpaceNormal.copy(realSpacePoint0).sub(realSpaceCenter).cross(realSpacePoint1.clone().sub(realSpaceCenter)).normalize()
 
-					//need to choose a bounding sphere (could make it small to begin with)
 					if( realSpaceCenter.length() < boundingSphereRadius )
 					{
 						realSpaceStart.copy( randomPerpVector( realSpaceNormal ) ).normalize()
@@ -141,8 +148,6 @@ function initThreeSphereExploration()
 				controlPoints[index].copy( value )
 
 				rederive()
-
-				// console.assert( Math.abs( Math.abs( realSpaceNormal.dot(zUnit) ) - 1 ) < 0.0001 )
 			}
 			greatCircle.setControlPoint(0,controlPoints[0])
 
@@ -156,7 +161,7 @@ function initThreeSphereExploration()
 				}
 				else
 				{
-					//but in what direction?
+					//but in what direction? it seems to work
 					var p = realSpaceStart.clone().applyAxisAngle(realSpaceNormal,t*arc).multiplyScalar(realSpaceRadius).add(realSpaceCenter)
 				}
 
@@ -180,8 +185,6 @@ function initThreeSphereExploration()
 			}
 			representation.material.color.copy(color)
 
-			//a color mapping from the sphere might be nice
-
 			updateFunctions.push( function()
 			{
 				if(representation.visible)
@@ -202,11 +205,6 @@ function initThreeSphereExploration()
 		let whenGrabbedHandQuaternion = new THREE.Quaternion()
 
 		let designatedHand = handControllers[0]
-		if(0)
-		{
-			designatedHand = imitationHand
-			scene.add( imitationHand )
-		}
 		let virtualHand = {
 			position:new THREE.Vector3(),
 			quaternion:new THREE.Quaternion(),
@@ -221,13 +219,13 @@ function initThreeSphereExploration()
 				targetMatrix = new THREE.Matrix4()
 			}
 
-			//no rotating the assemblage.
+			//no rotating the assemblage!
 			let localPosition = assemblage.worldToLocal(position.clone())
-			let localHandMatrix = new THREE.Matrix4().makeRotationFromQuaternion(quaternion) //you better not be rotating the assemblage
+			let localHandMatrix = new THREE.Matrix4().makeRotationFromQuaternion(quaternion)
 			localHandMatrix.setPosition(localPosition)
 
 			//maybe the one corresponding to position should be in the direction of the ray origin?
-			//projection can cause mirror-reversal
+			//projection can cause mirror-reversal?
 			let unprojectedPosition = stereographicallyUnproject( localPosition )
 
 			for(let i = 0; i < 3; i++)
@@ -253,7 +251,7 @@ function initThreeSphereExploration()
 
 		function applyVirtualHandDiffToRotatingThreeSphereMatrix()
 		{
-			//if you've not moved the diff should be the identity
+			//helpful observation: if you've not moved the diff should be the identity
 			let currentBasis = stereographicallyProjectBasis(virtualHand.position,virtualHand.quaternion)
 			let whenGrabbedBasis = stereographicallyProjectBasis(whenGrabbedHandPosition,whenGrabbedHandQuaternion)
 			let whenGrabbedBasisInverse = new THREE.Matrix4().getInverse( whenGrabbedBasis )
@@ -282,8 +280,6 @@ function initThreeSphereExploration()
 			{
 				imitationHand.oldPosition.copy(imitationHand.position)
 				imitationHand.position.y += 0.2
-				// imitationHand.position.set(  Math.random()-0.5,Math.random()-0.5,Math.random()-0.5)
-				// imitationHand.quaternion.set(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).normalize()
 
 				checkOrthonormality(threeSphereMatrix)
 
@@ -301,18 +297,6 @@ function initThreeSphereExploration()
 
 		updateFunctions.push( function()
 		{
-			if( designatedHand.button2 && !designatedHand.button2Old )
-			{
-				if(visiBox.scale.x < 100)
-				{
-					visiBox.scale.multiplyScalar(1000)
-				}
-				else
-				{
-					visiBox.scale.multiplyScalar(1/1000)
-				}
-			}
-
 			if(imitationHand !== null)
 			{
 				// camera.position.applyAxisAngle(yUnit, 0.01)
@@ -335,9 +319,9 @@ function initThreeSphereExploration()
 				imitationHand.quaternion.setFromEuler(imitationHand.rotation)
 			}
 			
-			if( designatedHand.grippingTop )
+			if( designatedHand.thumbstickUp )
 			{
-				if( !designatedHand.grippingTopOld )
+				if( !designatedHand.thumbstickUpOld )
 				{
 					matrixWhenGrabbed.copy(threeSphereMatrix)
 					whenGrabbedHandPosition.copy(designatedHand.position)
@@ -401,16 +385,20 @@ function initThreeSphereExploration()
 				virtualHand.quaternion.multiply(virtualHand.angularVelocity)
 				virtualHand.quaternion.normalize()
 
-				if(designatedHand.grippingSide)
+				if( designatedHand.thumbstickDown )
 				{
 					assemblage.position.add(designatedHand.deltaPosition)
+				}
+				else if(designatedHand.thumbstickDownOld)
+				{
+					log(assemblage.position)
 				}
 			}
 			applyVirtualHandDiffToRotatingThreeSphereMatrix()
 
 			visiBox.position.copy(assemblage.position)
 
-			if( designatedHand.button1 && !designatedHand.button1Old )
+			if( designatedHand.button2 && !designatedHand.button2Old )
 			{
 				cycleThreeSpheres()
 			}
@@ -421,7 +409,7 @@ function initThreeSphereExploration()
 
 	let assemblage = new THREE.Group()
 	assemblage.position.y = 1.3
-	assemblage.scale.setScalar(0.1)
+	assemblage.scale.setScalar(0.05)
 	assemblage.updateMatrixWorld()
 	scene.add(assemblage)
 
@@ -462,8 +450,6 @@ function initThreeSphereExploration()
 
 			let un = stereographicallyUnproject( otherPoint )
 			parasolCircles[i] = GreatCircle( fourSpacePtam, un )
-
-			// console.log(fourSpacePtam, un)
 		}
 	}
 
@@ -512,33 +498,38 @@ function initThreeSphereExploration()
 
 	let greatCircleSets = [parasolCircles,hyperOctahedronCircles,hopfCircles]
 
-	function cycleThreeSpheres()
 	{
-		let indexToMakeVisible = 0
-		for(let i = 0; i < greatCircleSets.length; i++)
+		let visibleSet = {value:greatCircleSets.length}
+		markObjectProperty(visibleSet,"value")
+
+		function cycleThreeSpheres()
 		{
-			if( greatCircleSets[i][0].representation.visible )
+			visibleSet.value++
+			if(visibleSet.value > greatCircleSets.length)
 			{
-				indexToMakeVisible = (i+1)%greatCircleSets.length
-				break;
+				visibleSet.value = 0
 			}
 		}
 
-		for(let i = 0; i < greatCircleSets.length; i++)
+		alwaysUpdateFunctions.push(function()
 		{
-			for(let j = 0; j < greatCircleSets[i].length; j++)
+			for(let i = 0; i < greatCircleSets.length; i++)
 			{
-				greatCircleSets[i][j].representation.visible = (i === indexToMakeVisible)
+				if( greatCircleSets[i][0].representation.visible !== (i === visibleSet.value) )
+				{
+					for(let j = 0; j < greatCircleSets[i].length; j++)
+					{
+						greatCircleSets[i][j].representation.visible = (i === visibleSet.value)
+					}
+				}
 			}
-		}
+
+			for(let i = 0; i < visiBox.faces.length; i++)
+			{
+				visiBox.faces[i].visible = (visibleSet.value !== greatCircleSets.length)
+			}
+		})
 	}
-	cycleThreeSpheres()
-	cycleThreeSpheres()
-
-	bindButton( "v", function()
-	{
-		cycleThreeSpheres()
-	}, "cycle threespheres" )
 }
 
 function initProjectionSystem()

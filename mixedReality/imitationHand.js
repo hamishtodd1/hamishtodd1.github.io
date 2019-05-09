@@ -1,5 +1,11 @@
 function initImitationHand()
 {
+	if( renderer.vr.enabled )
+	{
+		console.error("unneeded")
+	}
+	console.log("hey switch to the controller model")
+
 	imitationHand = new THREE.Group()
 
 	imitationHand.grippingTop = false

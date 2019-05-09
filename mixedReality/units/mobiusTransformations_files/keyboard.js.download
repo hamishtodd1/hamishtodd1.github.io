@@ -6,10 +6,10 @@ function initButtons()
 	{
 		if(buttons[buttonName] !== undefined)
 		{
-			console.error("attempted to bind a button that already has a binding: ", buttonName)
+			console.error("attempted to bind a button that already has a binding")
 		}
 
-		// console.warn("\n",buttonName + ": " + buttonDescription)
+		console.log("\n",buttonName + ": " + buttonDescription)
 		buttons[buttonName] = {
 			down: false,
 			onDown: onDown
@@ -47,18 +47,12 @@ function initButtons()
 		if( 48 <= keyCode && keyCode <= 57 )
 		{
 			let buttonName = keycodeArray[keyCode - 48]
-			if( buttons[buttonName] )
-			{
-				return buttons[buttonName]
-			}
+			return buttons[buttonName]
 		}
 		if( 65 <= keyCode && keyCode <= 90 )
 		{
 			let buttonName = keycodeArray[keyCode - 55]
-			if( buttons[buttonName] )
-			{
-				return buttons[buttonName]
-			}
+			return buttons[buttonName]
 		}
 		return null
 	}
