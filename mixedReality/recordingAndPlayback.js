@@ -52,15 +52,6 @@ initPlaybackAndRecording = function()
 		var cameraHolder = new THREE.Group()
 		scene.add(cameraHolder)
 
-		cameraHolder.add(new THREE.Mesh(new THREE.SphereGeometry(0.01), new THREE.MeshLambertMaterial({color:0xFF0000}) ))
-		// let height = 0.1
-		// new THREE.Vector3(Math.tan(40*THREE.Math.DEG2RAD),,-1),
-		// var frustumIndicator = new THREE.Mesh(new THREE.CylinderBufferGeometry(0.0,height,0.1,4), new THREE.MeshLambertMaterial())
-		// frustumIndicator.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,-height/2,0))
-		// frustumIndicator.geometry.applyMatrix(new THREE.Matrix4().makeRotationY(TAU/8))
-		// frustumIndicator.geometry.applyMatrix(new THREE.Matrix4().makeRotationX(TAU/4))
-		// cameraHolder.add(frustumIndicator)
-
 		{
 			var videoDomElement = document.createElement( 'video' )
 			videoDomElement.style = "display:none"
@@ -77,14 +68,30 @@ initPlaybackAndRecording = function()
 			// videoTexture.center.set(0.5,0.5)
 		}
 
-		let screen = new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({
+		{
+			//can get y first
+		}
+
+		var screen = new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({
 			map:videoTexture,
-			overdraw: true
+			overdraw: true,
+			transparent:true,
+			opacity:0.2
 		}))
 		screen.position.z = -1
 		screen.scale.y = 2 * Math.tan( camera.fov * THREE.Math.DEG2RAD / 2 ) * Math.abs( screen.position.z )
 		screen.scale.x = 16/9 * screen.scale.y
 		cameraHolder.add(screen)
+
+		screen.updateMatrix()
+		var frustumIndicator = new THREE.LineSegments(new THREE.Geometry())
+		frustumIndicator.geometry.vertices.push(
+			new THREE.Vector3(),screen.geometry.vertices[0].clone().applyMatrix4(screen.matrix),
+			new THREE.Vector3(),screen.geometry.vertices[1].clone().applyMatrix4(screen.matrix),
+			new THREE.Vector3(),screen.geometry.vertices[2].clone().applyMatrix4(screen.matrix),
+			new THREE.Vector3(),screen.geometry.vertices[3].clone().applyMatrix4(screen.matrix)
+			)
+		cameraHolder.add(frustumIndicator)
 		
 		clickables.push(screen)
 		let indexBeingLaid = 0
@@ -102,17 +109,14 @@ initPlaybackAndRecording = function()
 			repositionScreen()
 		}
 
-		let laser = new THREE.Mesh(new THREE.CylinderBufferGeometryUncentered(0.001,100))
-		laser.rotation.x = -TAU/4
-		handControllers[LEFT_CONTROLLER_INDEX].add(laser)
-
 		let realSpaceGuidePoints = Array(2)
 		for(let i = 0; i < 2; i++)
 		{
-			let ball = new THREE.Mesh(new THREE.SphereGeometry(0.02))
-			scene.add(ball)
+			let mesh = makeTextSign(i?"R":"L",true,false,false)
+			mesh.scale.multiplyScalar(0.06)
+			scene.add(mesh)
 
-			realSpaceGuidePoints[i] = ball.position
+			realSpaceGuidePoints[i] = mesh.position
 			realSpaceGuidePoints[i].x = 2 * (i?1:-1) * Math.random()
 			realSpaceGuidePoints[i].z = -0.5
 		}
@@ -122,24 +126,24 @@ initPlaybackAndRecording = function()
 		let screenGuidePoints = Array(2)
 		for(let i = 0; i < 2; i++)
 		{
-			let ball = new THREE.Mesh(new THREE.SphereGeometry(0.02))
-			ball.material.transparent = true
-			ball.material.opacity = 0.5
-			cameraHolder.add(ball)
-			screenGuidePoints[i] = ball.position
+			let mesh = makeTextSign(i?"R":"L",true,false,false)
+			mesh.scale.multiplyScalar(0.06)
+			cameraHolder.add(mesh)
+			screenGuidePoints[i] = mesh.position
 
 			screenGuidePoints[i].z = screen.position.z
 			screenGuidePoints[i].x = 0.4 * screen.scale.x * (i?1:-1)
 			screenGuidePoints[i].y = -0.25 * screen.scale.y
 		}
+		screenGuidePoints[0].set(-0.9300020912214844,-0.07516934195963221,-1)
+		screenGuidePoints[1].set(0.24473739242654347,-0.0629324723382858,-1)
 
 		let lines = Array(2)
 		for(let i = 0; i < 2; i++)
 		{
 			lines[i] = new THREE.Line(new THREE.Geometry())
-			lines[i].geometry.vertices.push( new THREE.Vector3() )
-			lines[i].geometry.vertices.push( new THREE.Vector3() )
-			scene.add(lines[i])
+			lines[i].geometry.vertices.push( new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3() )
+			cameraHolder.add(lines[i])
 		}
 
 		updateFunctions.push(function()
@@ -163,42 +167,13 @@ initPlaybackAndRecording = function()
 				log("real space guide point " + 0 + " at ", screenGuidePoints[0].toArray().toString())
 			}
 
-			if( (handControllers[LEFT_CONTROLLER_INDEX].grippingTop && !handControllers[LEFT_CONTROLLER_INDEX].grippingTopOld) || 
-				(handControllers[LEFT_CONTROLLER_INDEX].grippingSide && !handControllers[LEFT_CONTROLLER_INDEX].grippingSideOld))
-			{
-				let line = new THREE.Line3(
-					handControllers[LEFT_CONTROLLER_INDEX].position,
-					handControllers[LEFT_CONTROLLER_INDEX].localToWorld( zUnit.clone().negate() )
-					)
-
-				let plane = new THREE.Plane().setFromCoplanarPoints(
-					screen.localToWorld( screen.geometry.vertices[0].clone() ),
-					screen.localToWorld( screen.geometry.vertices[1].clone() ),
-					screen.localToWorld( screen.geometry.vertices[2].clone() ) )
-
-				let index = handControllers[LEFT_CONTROLLER_INDEX].grippingTop ? 1:0
-				let newPosition = new THREE.Vector3()
-				plane.intersectLine(line, newPosition )
-				cameraHolder.worldToLocal(newPosition)
-				if( newPosition.y >= 0 || Math.abs(newPosition.x) > screen.scale.x / 2 ||
-					(newPosition.x > 0 && index === 0) || (newPosition.x < 0 && index === 1) )
-				{
-					console.error("not in limits", newPosition)
-				}
-				else
-				{
-					screenGuidePoints[index].copy(newPosition)
-					log("guide point " + index + " at ", screenGuidePoints[index].toArray().toString())
-				}
-			}
-
 			repositionScreen()
 
 			for(let i = 0; i < 2; i++)
 			{
 				lines[i].geometry.vertices[0].copy( realSpaceGuidePoints[i] )
 				lines[i].geometry.vertices[1].copy( screenGuidePoints[i] )
-				cameraHolder.localToWorld(lines[i].geometry.vertices[1])
+				cameraHolder.worldToLocal(lines[i].geometry.vertices[0])
 
 				lines[i].geometry.verticesNeedUpdate = true
 			}
@@ -269,6 +244,7 @@ initPlaybackAndRecording = function()
 			function( str )
 			{
 				frames = eval(str)
+				log("frames loaded")
 			}
 		);
 	}
@@ -443,8 +419,9 @@ initPlaybackAndRecording = function()
 			return;
 		}
 
+		//goes haywire
 		// let frameRate = 30.0 //ffmpeg tells us so
-		// let exactTime = Math.floor( exactTime.toFixed(5) * frameRate); //from VideoFrame.js
+		// exactTime = Math.floor( exactTime.toFixed(5) * frameRate); //from VideoFrame.js
 
 		let frameJustBefore = null
 		let frameJustAfter = null
@@ -506,7 +483,7 @@ initPlaybackAndRecording = function()
 
 	function togglePlaying()
 	{
-		if(playbackMode === false) //first time
+		if( playbackMode === false ) //first time
 		{
 			if( frames[0].discretes.length !== discretes.length || 
 				frames[0].quaternions.length !== quaternions.length || 
@@ -529,12 +506,16 @@ initPlaybackAndRecording = function()
 				return
 			}
 
+			playbackMode = true
+
 			//if you wanna go back to recording or be in VR, refresh
 			cameraHolder.add(camera)
 			// frustumIndicator.visible = false
 			camera.position.set(0,0,0)
 			camera.rotation.set(0,0,0)
 
+			screen.material.opacity = 1
+			log(screen.material.opacity)
 			helmet.visible = true
 
 			if(videoDomElement.currentTime === 0)
