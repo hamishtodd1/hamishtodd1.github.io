@@ -70,6 +70,8 @@ initPlaybackAndRecording = function()
 
 		{
 			//can get y first
+
+			//oh come on, just line up a controller
 		}
 
 		var screen = new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({

@@ -65,12 +65,35 @@ function initControllerObjects()
 			function ( object ) 
 			{
 				handControllers[ i ].controllerModel.geometry = object.children[0].geometry;
-				handControllers[ i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeRotationAxis(xUnit,0.7) );
-				handControllers[ i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeTranslation(
-					0.008 * ( i == LEFT_CONTROLLER_INDEX?-1:1),
-					0.041,
-					-0.03) );
-				handControllers[ i ].controllerModel.geometry.computeBoundingSphere();
+				// handControllers[ i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeRotationAxis(xUnit,0.7) );
+				// handControllers[ i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeTranslation(
+				// 	0.008 * ( i == LEFT_CONTROLLER_INDEX?-1:1),
+				// 	0.041,
+				// 	-0.03) );
+				// handControllers[ i ].controllerModel.geometry.computeBoundingSphere()
+
+				let m = new THREE.Matrix4()
+				let q = new THREE.Quaternion( -0.3375292117664683,-0.044097048926644455,0.0016882363725985309,-0.9402800813258839 )
+
+				if(i === LEFT_CONTROLLER_INDEX)
+				{
+					m.makeRotationFromQuaternion(q)
+					m.setPosition(new THREE.Vector3(-0.012547648553172985,0.03709224605844833,-0.038470991285082676))
+					handControllers[ i ].controllerModel.geometry.applyMatrix( m )
+				}
+				else
+				{
+					let qAxis = new THREE.Vector3(
+						q.x / Math.sqrt(1-q.w*q.w),
+						q.y / Math.sqrt(1-q.w*q.w),
+						q.z / Math.sqrt(1-q.w*q.w))
+					qAxis.x *= -1
+					let otherQ = new THREE.Quaternion().setFromAxisAngle(qAxis,-2 * Math.acos(q.w))
+					
+					m.makeRotationFromQuaternion(otherQ)
+					m.setPosition(new THREE.Vector3(0.012547648553172985,0.03709224605844833,-0.038470991285082676))
+					handControllers[i].controllerModel.geometry.applyMatrix( m )
+				}
 			},
 			function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); } );
 	}
