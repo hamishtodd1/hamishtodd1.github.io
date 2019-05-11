@@ -1,5 +1,7 @@
 /*
-	Script, "How are rotations different in 4D? in VR" Thumbnail: nice MR thing, "4 space dimensions??"
+	"How do things rotate in 4D? in VR" Thumbnail: nice MR thing, "4 space dimensions??"
+
+	Script, 
 		So to describe 4D rotations, in this video we're going to use basically the same approach to describing 4D
 		That you might have seen elsewhere, which is we're going to think about a 2D creature, and we're going to try to empathize with it
 		We're going to use standard approach, [fish]
@@ -69,8 +71,13 @@ function initThreeSphereExploration()
 	let threeSphereMatrixInverse = new THREE.Matrix4()
 	markMatrix(threeSphereMatrix)
 
-	function GreatCircle(controlPoint0,controlPoint1, color)
+	function GreatCircle(controlPoint0,controlPoint1, color, lotsOfSegments)
 	{
+		if(lotsOfSegments === undefined)
+		{
+			lotsOfSegments = true
+		}
+
 		let greatCircle = {}
 
 		let controlPoints = [
@@ -103,7 +110,7 @@ function initThreeSphereExploration()
 				let realSpacePointBetween = stereographicallyProject(pointBetween)
 
 				let angle = realSpacePoint0.clone().sub(realSpacePointBetween).angleTo( realSpacePoint1.clone().sub(realSpacePointBetween) )
-				line = (Math.abs(angle-Math.PI) < 0.00000001 )
+				line = (Math.abs(angle-Math.PI) < 0.0000001 )
 
 				if(line)
 				{
@@ -172,9 +179,9 @@ function initThreeSphereExploration()
 
 				return p
 			}
-			let tubularSegments = 36
+			let tubularSegments = lotsOfSegments ? 72:36
 			let tubeRadius = 0.017
-			let representation = new THREE.Mesh( new THREE.TubeBufferGeometry( curve, tubularSegments, tubeRadius,5,false ), new THREE.MeshLambertMaterial({clippingPlanes:visiBox.planes}) )
+			let representation = new THREE.Mesh( new THREE.TubeBufferGeometry( curve, tubularSegments, tubeRadius,3,false ), new THREE.MeshLambertMaterial({clippingPlanes:visiBox.planes}) )
 			greatCircle.representation = representation
 			assemblage.add( representation )
 
@@ -185,7 +192,7 @@ function initThreeSphereExploration()
 			}
 			representation.material.color.copy(color)
 
-			updateFunctions.push( function()
+			alwaysUpdateFunctions.push( function()
 			{
 				if(representation.visible)
 				{
@@ -319,9 +326,9 @@ function initThreeSphereExploration()
 				imitationHand.quaternion.setFromEuler(imitationHand.rotation)
 			}
 			
-			if( designatedHand.thumbstickUp )
+			if( designatedHand.thumbstickButton )
 			{
-				if( !designatedHand.thumbstickUpOld )
+				if( !designatedHand.thumbstickButtonOld )
 				{
 					matrixWhenGrabbed.copy(threeSphereMatrix)
 					whenGrabbedHandPosition.copy(designatedHand.position)
@@ -385,14 +392,14 @@ function initThreeSphereExploration()
 				virtualHand.quaternion.multiply(virtualHand.angularVelocity)
 				virtualHand.quaternion.normalize()
 
-				if( designatedHand.thumbstickDown )
-				{
-					assemblage.position.add(designatedHand.deltaPosition)
-				}
-				else if(designatedHand.thumbstickDownOld)
-				{
-					log(assemblage.position)
-				}
+				// if( designatedHand.thumbstickDown )
+				// {
+				// 	assemblage.position.add(designatedHand.deltaPosition)
+				// }
+				// else if(designatedHand.thumbstickDownOld)
+				// {
+				// 	log(assemblage.position)
+				// }
 			}
 			applyVirtualHandDiffToRotatingThreeSphereMatrix()
 
@@ -485,7 +492,7 @@ function initThreeSphereExploration()
 				let lightness = easedToReduceBlackAndWhite
 				let color = new THREE.Color().setHSL(hue,1,lightness)
 
-				hopfCircles.push( GreatCircle( new THREE.Vector4().copy(q1), new THREE.Vector4().copy(q2), color ) )
+				hopfCircles.push( GreatCircle( new THREE.Vector4().copy(q1), new THREE.Vector4().copy(q2), color, false ) )
 			}
 		}
 		hopfFibrate(xUnit)  
