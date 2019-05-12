@@ -511,7 +511,7 @@ function initTwoSphereExploration(fish, visiBox)
 				pointInHand.copy(worldishPointInHand).applyQuaternion(designatedHand.quaternion.clone().inverse())
 			}
 
-			grid.visible = heptagon.position.length() < 0.5
+			grid.visible = heptagon.position.length() < 0.3
 		})
 	}
 }

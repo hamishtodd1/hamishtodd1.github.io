@@ -14,7 +14,7 @@ let frameCount = 0;
 const log = console.log
 const debugging = 0;
 
-let camera = new THREE.PerspectiveCamera( 80, //can be changed by VR effect
+let camera = new THREE.PerspectiveCamera( 40, //the shorter fov of the samsung galaxy S8 selfie camera, sigh
 		window.innerWidth / window.innerHeight,
 		0.02, 10);
 let scene = new THREE.Scene().add(camera);
