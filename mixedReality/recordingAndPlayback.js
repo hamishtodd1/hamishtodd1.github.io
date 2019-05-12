@@ -1,18 +1,11 @@
 /*
-	Diffing
-		An hour is less than 2MB, you're probably fine
-		If you do do it, round the floats.
-
 	It's complicated to think about but you probably do need parenthood to be marked
-
-	can make eyes follow after
 
 	Time synchronization
 		smack controllers together
 		could make controller flash at instant that it changes direction dramatically
 
-	Visual synchronization
-		If you glue the vive tracker to a tablet you only have to do it once
+	Vive tracker?
 
 	Really ought to list names and put them in output file
 
@@ -56,7 +49,7 @@ initPlaybackAndRecording = function()
 			var videoDomElement = document.createElement( 'video' )
 			videoDomElement.style = "display:none"
 			videoDomElement.crossOrigin = 'anonymous';
-			videoDomElement.src = "recordings/test.mp4"
+			videoDomElement.src = "recordings/sintel.mp4"
 			// videoDomElement.volume = 0
 
 			var videoTexture = new THREE.VideoTexture( videoDomElement );
@@ -242,7 +235,7 @@ initPlaybackAndRecording = function()
 
 	loadRecording = function(version)
 	{
-		new THREE.FileLoader().load( "recordings/test.txt",
+		new THREE.FileLoader().load( "recordings/2-42.txt",
 			function( str )
 			{
 				frames = eval(str)
@@ -275,6 +268,9 @@ initPlaybackAndRecording = function()
 		{
 			let currentValue = discretes[i].object[ discretes[i].property ]
 
+			//"diffing". Get a factor of 2-10
+			//But file size is already ~10% of the size of the video
+			//Could also round the floats
 			// if( frames.length > 0 )
 			// {
 			// 	let j = frames.length-1;
