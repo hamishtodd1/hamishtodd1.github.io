@@ -1,7 +1,9 @@
+//eye following
 //Do a test, including with the markers
 //Worried about s2. Make sure it's not even off by a frame
 //make sure everything is in shot
 //make sure this discrete-frame thing makes sense
+//maybe need to write function determining camera position etc from matrix
 
 function initTwoSphereExploration(fish, visiBox)
 {

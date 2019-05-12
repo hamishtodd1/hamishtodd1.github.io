@@ -22,6 +22,41 @@ function init()
 	initMouse();
 	// initFaceMaker()
 
+	{
+		let randomTri = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({side:THREE.DoubleSide}))
+		for(let i = 0; i < 3; i++)
+		{
+			randomTri.geometry.vertices.push( new THREE.Vector3(
+				(Math.random()-0.5)*0.5,
+				(Math.random()-0.5)*0.5,
+				-0.1) )
+		}
+		log(randomTri.geometry.vertices)
+		randomTri.geometry.faces.push(new THREE.Face3(0,1,2))
+		for(let i = 0; i < 3; i++)
+		{
+			let line = new THREE.Line(new THREE.Geometry())
+			line.geometry.vertices.push(new THREE.Vector3(),randomTri.geometry.vertices[i])
+			randomTri.add(line)
+		}
+		scene.add(randomTri)
+
+		let balls = Array(3)
+		for(let i = 0; i <3; i++)
+		{
+			balls[i] = new THREE.Mesh(new THREE.SphereGeometry(0.03))
+			balls[i].position.set(
+				(Math.random()-0.5)*0.5,
+				(Math.random()-0.5)*0.5,
+				(Math.random()-0.5)*0.5
+				)
+			scene.add(balls[i])
+		}
+
+		//aight, now your job is to find a position and orientation for the triangle
+		//such that there is a point with
+	}
+
 	function render()
 	{
 		{
