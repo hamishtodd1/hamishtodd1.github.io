@@ -1,11 +1,18 @@
 /*
+	Diffing
+		An hour is less than 2MB, you're probably fine
+		If you do do it, round the floats.
+
 	It's complicated to think about but you probably do need parenthood to be marked
+
+	can make eyes follow after
 
 	Time synchronization
 		smack controllers together
 		could make controller flash at instant that it changes direction dramatically
 
-	Vive tracker?
+	Visual synchronization
+		If you glue the vive tracker to a tablet you only have to do it once
 
 	Really ought to list names and put them in output file
 
@@ -42,160 +49,32 @@ initPlaybackAndRecording = function()
 	let playbackMode = false
 
 	{
-		var cameraHolder = new THREE.Group()
-		scene.add(cameraHolder)
+		var videoDomElement = document.createElement( 'video' )
+		videoDomElement.style = "display:none"
+		videoDomElement.crossOrigin = 'anonymous';
+		videoDomElement.src = "recordings/2-07.mp4"
+		// videoDomElement.volume = 0
+		GLOBAL = videoDomElement
 
-		{
-			var videoDomElement = document.createElement( 'video' )
-			videoDomElement.style = "display:none"
-			videoDomElement.crossOrigin = 'anonymous';
-			videoDomElement.src = "recordings/sintel.mp4"
-			// videoDomElement.volume = 0
-
-			var videoTexture = new THREE.VideoTexture( videoDomElement );
-			videoTexture.minFilter = THREE.LinearFilter;
-			videoTexture.magFilter = THREE.LinearFilter;
-			videoTexture.format = THREE.RGBFormat;
-			videoTexture.needsUpdate = true
-			// videoTexture.rotation = TAU/2
-			// videoTexture.center.set(0.5,0.5)
-		}
-
-		{
-			//can get y first
-
-			//oh come on, just line up a controller
-		}
+		var videoTexture = new THREE.VideoTexture( videoDomElement );
+		videoTexture.minFilter = THREE.LinearFilter;
+		videoTexture.magFilter = THREE.LinearFilter;
+		videoTexture.format = THREE.RGBFormat;
+		videoTexture.needsUpdate = true
+		videoTexture.rotation = TAU/2
+		videoTexture.center.set(0.5,0.5)
 
 		var screen = new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({
 			map:videoTexture,
 			overdraw: true,
 			transparent:true,
-			opacity:0.2
+			opacity:1.0
 		}))
-		screen.position.z = -1
+		screen.position.z = -2
 		screen.scale.y = 2 * Math.tan( camera.fov * THREE.Math.DEG2RAD / 2 ) * Math.abs( screen.position.z )
 		screen.scale.x = 16/9 * screen.scale.y
-		cameraHolder.add(screen)
-
-		screen.updateMatrix()
-		var frustumIndicator = new THREE.LineSegments(new THREE.Geometry())
-		frustumIndicator.geometry.vertices.push(
-			new THREE.Vector3(),screen.geometry.vertices[0].clone().applyMatrix4(screen.matrix),
-			new THREE.Vector3(),screen.geometry.vertices[1].clone().applyMatrix4(screen.matrix),
-			new THREE.Vector3(),screen.geometry.vertices[2].clone().applyMatrix4(screen.matrix),
-			new THREE.Vector3(),screen.geometry.vertices[3].clone().applyMatrix4(screen.matrix)
-			)
-		cameraHolder.add(frustumIndicator)
-		
-		clickables.push(screen)
-		let indexBeingLaid = 0
-		bindButton("[",function()
-		{
-			indexBeingLaid = 1-indexBeingLaid
-		}, "switch guide point being laid on videoScreen")
-		screen.onClick = function(intersection)
-		{
-			let newLocation = intersection.point
-			cameraHolder.worldToLocal(newLocation)
-			screenGuidePoints[indexBeingLaid].copy(newLocation)
-			log("screen guide point " + indexBeingLaid + " at ", newLocation.toArray().toString())
-
-			repositionScreen()
-		}
-
-		let realSpaceGuidePoints = Array(2)
-		for(let i = 0; i < 2; i++)
-		{
-			let mesh = makeTextSign(i?"R":"L",true,false,false)
-			mesh.scale.multiplyScalar(0.06)
-			scene.add(mesh)
-
-			realSpaceGuidePoints[i] = mesh.position
-			realSpaceGuidePoints[i].x = 2 * (i?1:-1) * Math.random()
-			realSpaceGuidePoints[i].z = -0.5
-		}
-		realSpaceGuidePoints[0].set(-0.21576,1.30663,2.3199)
-		realSpaceGuidePoints[1].set(-1.24467,1.30663,1.2123)
-
-		let screenGuidePoints = Array(2)
-		for(let i = 0; i < 2; i++)
-		{
-			let mesh = makeTextSign(i?"R":"L",true,false,false)
-			mesh.scale.multiplyScalar(0.06)
-			cameraHolder.add(mesh)
-			screenGuidePoints[i] = mesh.position
-
-			screenGuidePoints[i].z = screen.position.z
-			screenGuidePoints[i].x = 0.4 * screen.scale.x * (i?1:-1)
-			screenGuidePoints[i].y = -0.25 * screen.scale.y
-		}
-		screenGuidePoints[0].set(-0.9300020912214844,-0.07516934195963221,-1)
-		screenGuidePoints[1].set(0.24473739242654347,-0.0629324723382858,-1)
-
-		let lines = Array(2)
-		for(let i = 0; i < 2; i++)
-		{
-			lines[i] = new THREE.Line(new THREE.Geometry())
-			lines[i].geometry.vertices.push( new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3() )
-			cameraHolder.add(lines[i])
-		}
-
-		updateFunctions.push(function()
-		{
-			if( handControllers[LEFT_CONTROLLER_INDEX].button1 )
-			{
-				realSpaceGuidePoints[0].copy( handControllers[LEFT_CONTROLLER_INDEX].position )
-			}
-			else if( handControllers[LEFT_CONTROLLER_INDEX].button2 )
-			{
-				realSpaceGuidePoints[1].copy( handControllers[LEFT_CONTROLLER_INDEX].position )
-			}
-			else if( handControllers[LEFT_CONTROLLER_INDEX].button1Old )
-			{
-				realSpaceGuidePoints[1].y = realSpaceGuidePoints[0].y
-				log("real space guide point " + 1 + " at ", screenGuidePoints[1].toArray().toString())
-			}
-			else if( handControllers[LEFT_CONTROLLER_INDEX].button2Old )
-			{
-				realSpaceGuidePoints[0].y = realSpaceGuidePoints[1].y
-				log("real space guide point " + 0 + " at ", screenGuidePoints[0].toArray().toString())
-			}
-
-			repositionScreen()
-
-			for(let i = 0; i < 2; i++)
-			{
-				lines[i].geometry.vertices[0].copy( realSpaceGuidePoints[i] )
-				lines[i].geometry.vertices[1].copy( screenGuidePoints[i] )
-				cameraHolder.worldToLocal(lines[i].geometry.vertices[0])
-
-				lines[i].geometry.verticesNeedUpdate = true
-			}
-		})
-
-		function repositionScreen()
-		{
-			let planarScreenGuidePoints = [screenGuidePoints[0].clone(),screenGuidePoints[1].clone()]
-			let toBeFlattenedIndex = planarScreenGuidePoints[0].y < planarScreenGuidePoints[1].y ? 1:0
-			planarScreenGuidePoints[toBeFlattenedIndex].multiplyScalar( planarScreenGuidePoints[1-toBeFlattenedIndex].y / planarScreenGuidePoints[toBeFlattenedIndex].y )
-
-			let planarVectorScreen = planarScreenGuidePoints[1].clone().sub(planarScreenGuidePoints[0]).setComponent(1,0)
-			let planarVectorRealSpace = realSpaceGuidePoints[1].clone().sub(realSpaceGuidePoints[0]).setComponent(1,0)
-
-			cameraHolder.quaternion.setFromUnitVectors(planarVectorScreen.clone().normalize(),planarVectorRealSpace.clone().normalize())
-
-			let expectedBall0PositionFromCamera = planarScreenGuidePoints[0].clone()
-			expectedBall0PositionFromCamera.multiplyScalar( planarVectorRealSpace.length() / planarVectorScreen.length() )
-			expectedBall0PositionFromCamera.applyQuaternion( cameraHolder.quaternion )
-
-			cameraHolder.position.copy(realSpaceGuidePoints[0])
-			cameraHolder.position.sub(expectedBall0PositionFromCamera)
-		}
-		repositionScreen()
 	}
-
-
+	let cameraHolder = initCameraHolder(screen)
 
 	let discretes = [];
 	let quaternions = [];
@@ -203,7 +82,7 @@ initPlaybackAndRecording = function()
 
 	let frames = []
 
-	let lag = 0;
+	let lag = -7.424;
 	let recording = false
 	let recordingTime = 0
 	let filename = ""
@@ -216,6 +95,8 @@ initPlaybackAndRecording = function()
 			log("recording")
 			frames = Array(262144) //hopefully enough for 20 minutes
 			recordingTime = 0
+
+			cameraHolder.frustumIndicator.material.color.setRGB(1,0,0)
 		}
 		else
 		{
@@ -225,6 +106,8 @@ initPlaybackAndRecording = function()
 
 			filename = new Date().toString().slice(17,21)
 			presentFramesFile()
+
+			cameraHolder.frustumIndicator.material.color.setRGB(0,0,0)
 		}
 	}, "toggle recording" )
 
@@ -235,7 +118,7 @@ initPlaybackAndRecording = function()
 
 	loadRecording = function(version)
 	{
-		new THREE.FileLoader().load( "recordings/2-42.txt",
+		new THREE.FileLoader().load( "recordings/2-07.txt",
 			function( str )
 			{
 				frames = eval(str)
@@ -268,9 +151,6 @@ initPlaybackAndRecording = function()
 		{
 			let currentValue = discretes[i].object[ discretes[i].property ]
 
-			//"diffing". Get a factor of 2-10
-			//But file size is already ~10% of the size of the video
-			//Could also round the floats
 			// if( frames.length > 0 )
 			// {
 			// 	let j = frames.length-1;
@@ -400,50 +280,42 @@ initPlaybackAndRecording = function()
 		}
 	}
 
-	{
-		//GET RID OF THIS. You should be able to derive the correct place by now
-		let absorberForUselessData = new THREE.Group()
-		markPositionAndQuaternion(absorberForUselessData)
-	}
-
 	let helmet = initHelmet()
 
+	let hackLag = 0.0
 	synchronizeStateToVideo = function()
 	{
-		let exactTime = videoDomElement.currentTime + lag;
-		if(exactTime < 0)
-		{
-			console.warn("time is less than 0")
-			return;
-		}
-
-		//goes haywire
-		// let frameRate = 30.0 //ffmpeg tells us so
-		// exactTime = Math.floor( exactTime.toFixed(5) * frameRate); //from VideoFrame.js
+		//if you're recording in 30fps it doesn't matter! Eeeeexcept the recording might be off by one frame from what you saw
+		let videoFps = 30.0 //ffmpeg tells us so 
+		let frameWeAreOn = Math.floor( (videoDomElement.currentTime + hackLag) * videoFps); //VideoFrame.js says floor		
+		let timeInSimulation = frameWeAreOn / videoFps + lag
 
 		let frameJustBefore = null
 		let frameJustAfter = null
-		for( let i = 0, il = frames.length - 1; i < il && frames[i+1] !== null; i++ )
+		let lerpValue = null
+		if(timeInSimulation < 0)
 		{
-			if( frames[i+1].frameTime > exactTime )
+			console.warn("simulation before beginning")
+			frameJustBefore = frames[0]
+			frameJustAfter = frames[1]
+			lerpValue = 0
+		}
+		else
+		{
+			for( let i = 0, il = frames.length - 1; i < il; i++ )
 			{
 				frameJustBefore = frames[i];
 				frameJustAfter = frames[i+1];
-				break
+
+				if( frames[i+2] === null || frames[i+1].frameTime > timeInSimulation )
+				{
+					break
+				}
 			}
+			lerpValue = ( timeInSimulation - frameJustBefore.frameTime ) /
+							( frameJustAfter.frameTime - frameJustBefore.frameTime );
+			lerpValue = clamp(lerpValue, 0, 1);
 		}
-
-		if( frameJustBefore === null )
-		{
-			console.warn("time is greater than limit")
-			videoDomElement.pause()
-			videoDomElement.currentTime = 0
-			return;
-		}
-
-		let lerpValue = ( exactTime - frameJustBefore.frameTime ) /
-						( frameJustAfter.frameTime - frameJustBefore.frameTime );
-		lerpValue = clamp(lerpValue, 0, 1);
 
 		for(let i = 0, il = discretes.length; i < il; i++)
 		{
@@ -493,14 +365,14 @@ initPlaybackAndRecording = function()
 					frames[0].lerpedFloats.length, lerpedFloats.length )
 				return
 			}
-			if(renderer.vr.enabled)
-			{
-				console.error( "vr enabled, use chrome (camera will not cooperate even if you disable vr)" )
-				return
-			}
 			if(chromiumRatherThanChrome)
 			{
-				console.error(".mp4 doesn't work in chromium, use chrome")
+				console.error("Use chrome, .mp4 doesn't work in chromium")
+				return
+			}
+			if(renderer.vr.enabled)
+			{
+				console.error( "vr enabled, restart (camera will not cooperate even if you disable vr)" )
 				return
 			}
 
@@ -508,38 +380,45 @@ initPlaybackAndRecording = function()
 
 			//if you wanna go back to recording or be in VR, refresh
 			cameraHolder.add(camera)
-			// frustumIndicator.visible = false
+			cameraHolder.frustumIndicator.visible = false
 			camera.position.set(0,0,0)
 			camera.rotation.set(0,0,0)
 
-			screen.material.opacity = 1
-			log(screen.material.opacity)
 			helmet.visible = true
 
-			if(videoDomElement.currentTime === 0)
+			let lagVelocity = 0
+			bindButton( "o", function(){}, "video got there first",function()
 			{
-				bindButton( "o", function(){}, "increase lag",function()
-				{
-					lag += 0.01
-					console.log("lag: ", lag)
-				} )
-				bindButton( "p", function(){}, "decrease lag",function()
-				{
-					lag -= 0.01
-					console.log("lag: ", lag)
-				} )
-
-				bindButton( "r", function(){}, "pitch forward",function()
-				{
-					camera.rotation.x += 0.01
-					console.log( "camera rotation: " + camera.rotation.toArray().slice(0,3).toString() )
-				} )
-				bindButton( "f", function(){}, "pitch back",function()
-				{
-					camera.rotation.x -= 0.01
-					console.log( "camera rotation: " + camera.rotation.toArray().slice(0,3).toString() )
-				} )
-			}
+				if(lagVelocity < 0)
+					lagVelocity = 0
+				lagVelocity += 0.0005
+				lag += lagVelocity
+				console.log("lag: ", lag)
+			} )
+			bindButton( "p", function(){}, "virtual controller got there first",function()
+			{
+				if(lagVelocity > 0)
+					lagVelocity = 0
+				lagVelocity -= 0.0005
+				lag += lagVelocity
+				console.log("lag: ", lag)
+			})
+			bindButton("up",function()
+			{
+				videoDomElement.playbackRate += 0.1
+			}, "increase video speed")
+			bindButton("down",function()
+			{
+				videoDomElement.playbackRate -= 0.1
+			}, "decrease video speed")
+			bindButton("left",function()
+			{
+				videoDomElement.currentTime -= 1
+			}, "jump back")
+			bindButton("right",function()
+			{
+				videoDomElement.currentTime += 1
+			}, "jump forwards")
 		}
 
 		if( !videoDomElement.paused )
@@ -553,49 +432,5 @@ initPlaybackAndRecording = function()
 			log("playing")
 		}
 	}
-	bindButton( 'space', togglePlaying, "toggle playing");
-
-	{
-		bindButton( "a", function(){}, "camera left",function()
-		{
-			camera.position.x -= 0.01
-			console.log("camera position: ", camera.position.toArray().toString() )
-		} )
-		bindButton( "d", function(){}, "camera right",function()
-		{
-			camera.position.x += 0.01
-			console.log("camera position: ", camera.position.toArray().toString() )
-		} )
-		bindButton( "w", function(){}, "camera forward",function()
-		{
-			camera.position.z -= 0.01
-			console.log("camera position: ", camera.position.toArray().toString() )
-		} )
-		bindButton( "s", function(){}, "camera back",function()
-		{
-			camera.position.z += 0.01
-			console.log("camera position: ", camera.position.toArray().toString() )
-		} )
-		bindButton( "g", function(){}, "camera down",function()
-		{
-			camera.position.y -= 0.01
-			console.log("camera position: ", camera.position.toArray().toString() )
-		} )
-		bindButton( "t", function(){}, "camera up",function()
-		{
-			camera.position.y += 0.01
-			console.log("camera position: ", camera.position.toArray().toString() )
-		} )
-
-		bindButton( "q", function(){}, "camera down",function()
-		{
-			camera.rotation.y -= 0.01
-			console.log("camera rotation: ", camera.rotation.toArray().toString() )
-		} )
-		bindButton( "e", function(){}, "camera up",function()
-		{
-			camera.rotation.y += 0.01
-			console.log("camera rotation: ", camera.rotation.toArray().toString() )
-		} )
-	}
+	bindButton( 'space', togglePlaying, "toggle playing")
 }

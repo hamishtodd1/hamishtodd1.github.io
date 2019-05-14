@@ -1,10 +1,8 @@
 function initFish( visiBox )
 {
-	let universeWidth = 1;
-
 	let fish = new THREE.Object3D();
 	markPositionAndQuaternion(fish)
-	let fishLength = 0.3;
+	let fishLength = 0.15 // 0.2;
 	let fishMaterial = new THREE.MeshBasicMaterial({
 		side: THREE.DoubleSide,
 		transparent: true,

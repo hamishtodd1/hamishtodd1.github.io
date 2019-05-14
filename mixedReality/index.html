@@ -31,6 +31,7 @@
 		<script src="face.js"></script>
 
 		<script src="recordingAndPlayback.js"></script>
+		<script src="cameraHolder.js"></script>
 		
 		<script src="text.js"></script>
 
@@ -42,7 +43,7 @@
 		<script src="miscFunctions.js"></script>
 		<script src="variables.js"></script>
 
-		<script src="mouse.js"></script>
+		<!-- <script src="mouse.js"></script> -->
 
 		<script src="units/fish.js"></script>
 		<script src="units/threeSphereExploration.js"></script>
@@ -79,7 +80,7 @@
 				window.addEventListener( 'resize', windowResize)
 
 				initButtons()
-				initMouse()
+				// initMouse()
 
 				initFaceMaker()
 
@@ -95,15 +96,19 @@
 				// initImitationHand();
 				markPositionAndQuaternion(handControllers[RIGHT_CONTROLLER_INDEX])
 
-				let twoSphereVisiBox = VisiBox()
-				for(let i = 0; i < 8; i++)
 				{
-					twoSphereVisiBox.corners[i].visible = false
-				}
-				let fish = initFish(twoSphereVisiBox)
-				initTwoSphereExploration( fish, twoSphereVisiBox )
+					let height = 0.2
 
-				initThreeSphereExploration()
+					let twoSphereVisiBox = VisiBox()
+					for(let i = 0; i < 8; i++)
+					{
+						twoSphereVisiBox.corners[i].visible = false
+					}
+					let fish = initFish( twoSphereVisiBox )
+					initTwoSphereExploration( fish, twoSphereVisiBox, height )
+
+					initThreeSphereExploration( height )
+				}
 
 				renderer.setAnimationLoop( function()
 				{
@@ -118,7 +123,7 @@
 						imitationHand.update()
 					}
 
-					mouse.updateFromAsyncAndCheckClicks()
+					// mouse.updateFromAsyncAndCheckClicks()
 
 					synchronizeToVideoOrCallContingentUpdateFunctionsAndMaybeRecord()
 					for(let i = 0; i < alwaysUpdateFunctions.length; i++)

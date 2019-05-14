@@ -8217,7 +8217,7 @@
 		this.castShadow = false;
 		this.receiveShadow = false;
 
-		this.frustumCulled = true;
+		this.frustumCulled = false;
 		this.renderOrder = 0;
 
 		this.userData = {};
@@ -21281,6 +21281,8 @@
 		var standingMatrix = new Matrix4();
 		var standingMatrixInverse = new Matrix4();
 
+		var userHackMatrixAffectingStandingMatrix = new Matrix4()
+
 		var frameOfReferenceType = 'stage';
 
 		if ( typeof window !== 'undefined' && 'VRFrameData' in window ) {
@@ -21432,6 +21434,8 @@
 		//
 
 		this.enabled = false;
+		
+		this.userHackMatrixAffectingStandingMatrix = userHackMatrixAffectingStandingMatrix
 
 		this.getController = function ( id ) {
 
@@ -21510,6 +21514,8 @@
 				}
 
 			}
+
+			standingMatrix.multiply(userHackMatrixAffectingStandingMatrix)
 
 			if ( device.isPresenting === false ) return camera;
 

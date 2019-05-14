@@ -1,4 +1,12 @@
 /*
+	TODO
+		rescale/position threesphere visibox (chop off bottom as much as front)
+		superimpose numbers?
+		helmet eyes
+		remove background sound?
+		make it so it's not triangly sphere in that one part?
+		Probably can get the lag such that it's on-frame
+
 	"How do things rotate in 4D? in VR" Thumbnail: nice MR thing, "4 space dimensions??"
 
 	Script, 
@@ -52,7 +60,7 @@
 				Any given point on it does have two whole axes that are orthogonal to the arc going through it, namely z and w
 */
 
-function initThreeSphereExploration()
+function initThreeSphereExploration( height )
 {
 	initProjectionSystem()
 
@@ -64,8 +72,7 @@ function initThreeSphereExploration()
 			visiBox.children[i].visible = false
 		}
 	}
-	visiBox.scale.multiplyScalar(1/2)
-	visiBox.scale.multiplyScalar(1/1000)
+	visiBox.scale.set(height / 9 * 16,height,height)
 
 	let threeSphereMatrix = new THREE.Matrix4()
 	let threeSphereMatrixInverse = new THREE.Matrix4()
@@ -415,7 +422,7 @@ function initThreeSphereExploration()
 	initProjectionControls()
 
 	let assemblage = new THREE.Group()
-	assemblage.position.y = 1.3
+	assemblage.position.y = 1.6 - height * 0.6
 	assemblage.scale.setScalar(0.05)
 	assemblage.updateMatrixWorld()
 	scene.add(assemblage)

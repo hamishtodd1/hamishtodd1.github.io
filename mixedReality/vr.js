@@ -150,7 +150,8 @@ function initVrInput()
 	readHandInput = function()
 	{
 		var gamepads = navigator.getGamepads();
-		var standingMatrix = renderer.vr.getStandingMatrix()
+
+		let standingMatrix = renderer.vr.getStandingMatrix()
 		
 		for(var k = 0; k < gamepads.length; ++k)
 		{
