@@ -1,8 +1,18 @@
+/*
+	could have a pair of eyebrows linked to the intonation of your voice
+*/
+
 function initHelmet()
 {
-	let helmetRadius = 0.15
-	var helmet = new THREE.Mesh(new THREE.SphereGeometry(helmetRadius,32,32,0,TAU,0,TAU*0.31), new THREE.MeshPhongMaterial({color:0xFF0000,opacity:0.96,transparent:true}))
+	let helmetRadius = 0.17
+	var helmet = new THREE.Mesh(new THREE.SphereGeometry(helmetRadius,32,32,0,TAU,0,TAU*0.31), new THREE.MeshPhongMaterial({
+		color:0xFF0000,
+		transparent:true,
+		opacity:1.0,
+	}))
+	//add an annulus
 	scene.add(helmet)
+	helmet.visible = false
 
 	var eyeRadius = 0.023;
 	var eyeballs = Array(2);
@@ -20,6 +30,9 @@ function initHelmet()
 	}
 
 	let helmetHolder = new THREE.Object3D()
+	helmetHolder.add(helmet)
+	helmet.position.z += 0.13
+	ARGH = helmet.position
 	scene.add(helmetHolder)
 	updateFunctions.push(function()
 	{
@@ -28,11 +41,6 @@ function initHelmet()
 	})
 	markPositionAndQuaternion(helmetHolder)
 
-	helmetHolder.add(helmet)
-	helmet.position.z += 0.13
-	helmet.visible = false
-
-	objectsToBeLookedAtByHelmet = [camera]
 	alwaysUpdateFunctions.push(function()
 	{
 		if(!helmet.visible)
@@ -45,16 +53,14 @@ function initHelmet()
 		helmet.localToWorld(betweenEyes)
 		helmet.localToWorld(inHead)
 		let sightRay = new THREE.Ray(inHead,betweenEyes.clone().sub(inHead))
-		log(sightRay.origin.toArray().toString(),sightRay.direction.toArray().toString())
 
 		let closestWorldPosition = null
-		for(let i = 0; i < objectsToBeLookedAt.length; i++)
+		for(let i = 0; i < objectsToBeLookedAtByHelmet.length; i++)
 		{
 			//don't be surprised if this screws some shit up because of updateMatrixWorld
-			let worldPosition = objectsToBeLookedAt[i].getWorldPosition(new THREE.Vector3())
+			let worldPosition = objectsToBeLookedAtByHelmet[i].getWorldPosition(new THREE.Vector3())
 
 			let dist = sightRay.distanceSqToPoint( worldPosition )
-			log(i,dist)
 			if( closestWorldPosition === null || dist < sightRay.distanceSqToPoint( closestWorldPosition ) )
 			{
 				closestWorldPosition = worldPosition

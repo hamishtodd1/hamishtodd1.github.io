@@ -1,11 +1,4 @@
-//eye following
-//Do a test, including with the markers
-//Worried about s2. Make sure it's not even off by a frame
-//make sure everything is in shot
-//make sure this discrete-frame thing makes sense
-//maybe need to write function determining camera position etc from matrix
-
-function initTwoSphereExploration(fish, visiBox)
+function initTwoSphereExploration(fish, visiBox, height)
 {
 	let designatedHand = handControllers[RIGHT_CONTROLLER_INDEX]
 
@@ -17,10 +10,10 @@ function initTwoSphereExploration(fish, visiBox)
 		{
 			assemblage.position.copy(designatedHand.position)
 			assemblage.quaternion.copy(designatedHand.quaternion)
+			assemblage.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(yUnit,TAU/4))
 		}
 		else
 		{
-			hackPosition.set(0,1.7,0)
 			assemblage.position.copy(hackPosition)
 			assemblage.quaternion.set(0,0,0,1)
 		}
@@ -40,9 +33,10 @@ function initTwoSphereExploration(fish, visiBox)
 	{
 		color:0xCCCCCC,
 		transparent:true,
-		opacity:0.85
+		opacity:0.75
 	} ) ) )
 	markMatrix(s2.matrix)
+	markObjectProperty(s2, "matrixAutoUpdate")
 	scene.add(s2)
 	meshesWithProjections = []
 	makeProjectableSpheres( meshesWithProjections )
@@ -59,7 +53,7 @@ function initTwoSphereExploration(fish, visiBox)
 	// bulb.add( light );
 
 	let hackEngaged = false
-	let hackPosition = new THREE.Vector3(0,1.7,0)
+	let hackPosition = new THREE.Vector3(0, 1.6 + height * 0.6, 0)
 	let thingsInScene = [s2,assemblage,bulb]
 	for(let i = 0; i < thingsInScene.length; i++)
 	{
@@ -117,7 +111,7 @@ function initTwoSphereExploration(fish, visiBox)
 		{
 			let matrixPosition = new THREE.Vector3().setFromMatrixPosition(thingsInScene[i].matrix)
 			matrixPosition.sub(hackPosition)
-			thingsInScene[i].matrix.setPosition(matrixPosition)
+			thingsInScene[i].matrix.setPosition(matrixPosition) //but then no updating of the matrixWorld? Yes, hack.
 
 			thingsInScene[i].position.sub(hackPosition)
 		}
@@ -209,7 +203,7 @@ function initTwoSphereExploration(fish, visiBox)
 		for(let i = 0; i < meshesWithProjections.length; i++)
 		{
 			let mesh = meshesWithProjections[i]
-			if(mesh.visible === false || mesh.parent.visible === false || bulb.visible === false)
+			if( mesh.visible === false )
 			{
 				mesh.projection.visible = false
 				continue
@@ -319,7 +313,7 @@ function initTwoSphereExploration(fish, visiBox)
 		meshesWithProjections[i].visible = false
 	}
 
-	let visibleIndex = {value:0}
+	let visibleIndex = {value:4}
 	markObjectProperty(visibleIndex,"value")
 	function cycleTwoSphereTextures()
 	{
@@ -350,6 +344,7 @@ function initTwoSphereExploration(fish, visiBox)
 			s2.add(mesh)
 
 			mesh.projection = new THREE.LineSegments(geo.clone(),projectionMat)
+			mesh.projection.frustumCulled = false
 			assemblage.add(mesh.projection)
 			meshesWithProjections.push(mesh)
 		}
@@ -456,21 +451,21 @@ function initTwoSphereExploration(fish, visiBox)
 	}
 
 	{
-		let gridSquareWidth = 0.04
-		let numSquaresHorizontal = 16
-		let numSquaresVertical = 10
-		let grid = Grid(numSquaresHorizontal,numSquaresVertical,gridSquareWidth)
+		let numGridSquaresVertical = 9
+		let numGridSquaresHorizontal = 16
+		let gridSquareDimension = height / numGridSquaresVertical
+		let grid = Grid(numGridSquaresHorizontal,numGridSquaresVertical,gridSquareDimension)
 		// grid.material.clippingPlanes = visiBox.planes
 		grid.material.color.setHex(0x333333)
 		assemblage.add(grid)
 		markObjectProperty(grid,"visible")
 
-		visiBox.scale.x = gridSquareWidth * numSquaresHorizontal
-		visiBox.scale.y = gridSquareWidth * numSquaresVertical
+		visiBox.scale.y = height
+		visiBox.scale.x = height / numGridSquaresVertical * numGridSquaresHorizontal
 		visiBox.scale.z = 0.001
 		assemblage.add(visiBox)
 
-		let heptagon = new THREE.Mesh(new THREE.CylinderBufferGeometry(0.08,0.08,0.0001,7), new THREE.MeshBasicMaterial({color:0xFFA500}))
+		let heptagon = new THREE.Mesh(new THREE.CylinderBufferGeometry(0.05,0.05,0.0001,7), new THREE.MeshBasicMaterial({color:0xFFA500}))
 		heptagon.material.clippingPlanes = visiBox.planes
 		heptagon.geometry.applyMatrix(new THREE.Matrix4().makeRotationX(TAU/4))
 		assemblage.add(heptagon)

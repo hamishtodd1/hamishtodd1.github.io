@@ -52,8 +52,9 @@ initPlaybackAndRecording = function()
 		var videoDomElement = document.createElement( 'video' )
 		videoDomElement.style = "display:none"
 		videoDomElement.crossOrigin = 'anonymous';
-		videoDomElement.src = "recordings/t.mp4"
+		videoDomElement.src = "recordings/2-07.mp4"
 		// videoDomElement.volume = 0
+		GLOBAL = videoDomElement
 
 		var videoTexture = new THREE.VideoTexture( videoDomElement );
 		videoTexture.minFilter = THREE.LinearFilter;
@@ -67,7 +68,7 @@ initPlaybackAndRecording = function()
 			map:videoTexture,
 			overdraw: true,
 			transparent:true,
-			opacity:0.2
+			opacity:1.0
 		}))
 		screen.position.z = -2
 		screen.scale.y = 2 * Math.tan( camera.fov * THREE.Math.DEG2RAD / 2 ) * Math.abs( screen.position.z )
@@ -81,7 +82,7 @@ initPlaybackAndRecording = function()
 
 	let frames = []
 
-	let lag = 0;
+	let lag = -7.424;
 	let recording = false
 	let recordingTime = 0
 	let filename = ""
@@ -94,6 +95,8 @@ initPlaybackAndRecording = function()
 			log("recording")
 			frames = Array(262144) //hopefully enough for 20 minutes
 			recordingTime = 0
+
+			cameraHolder.frustumIndicator.material.color.setRGB(1,0,0)
 		}
 		else
 		{
@@ -103,6 +106,8 @@ initPlaybackAndRecording = function()
 
 			filename = new Date().toString().slice(17,21)
 			presentFramesFile()
+
+			cameraHolder.frustumIndicator.material.color.setRGB(0,0,0)
 		}
 	}, "toggle recording" )
 
@@ -113,7 +118,7 @@ initPlaybackAndRecording = function()
 
 	loadRecording = function(version)
 	{
-		new THREE.FileLoader().load( "recordings/t.txt",
+		new THREE.FileLoader().load( "recordings/2-07.txt",
 			function( str )
 			{
 				frames = eval(str)
@@ -275,50 +280,42 @@ initPlaybackAndRecording = function()
 		}
 	}
 
-	{
-		//GET RID OF THIS. You should be able to derive the correct place by now
-		let absorberForUselessData = new THREE.Group()
-		markPositionAndQuaternion(absorberForUselessData)
-	}
-
 	let helmet = initHelmet()
 
+	let hackLag = 0.0
 	synchronizeStateToVideo = function()
 	{
-		let exactTime = videoDomElement.currentTime + lag;
-		if(exactTime < 0)
-		{
-			console.warn("time is less than 0")
-			return;
-		}
-
-		let frameRate = 30.0 //ffmpeg tells us so
-		let frameWeAreOn = Math.floor( exactTime * frameRate); //VideoFrame.js says floor
-		exactTime = frameWeAreOn / frameRate
+		//if you're recording in 30fps it doesn't matter! Eeeeexcept the recording might be off by one frame from what you saw
+		let videoFps = 30.0 //ffmpeg tells us so 
+		let frameWeAreOn = Math.floor( (videoDomElement.currentTime + hackLag) * videoFps); //VideoFrame.js says floor		
+		let timeInSimulation = frameWeAreOn / videoFps + lag
 
 		let frameJustBefore = null
 		let frameJustAfter = null
-		for( let i = 0, il = frames.length - 1; i < il && frames[i+1] !== null; i++ )
+		let lerpValue = null
+		if(timeInSimulation < 0)
 		{
-			if( frames[i+1].frameTime > exactTime )
+			console.warn("simulation before beginning")
+			frameJustBefore = frames[0]
+			frameJustAfter = frames[1]
+			lerpValue = 0
+		}
+		else
+		{
+			for( let i = 0, il = frames.length - 1; i < il; i++ )
 			{
 				frameJustBefore = frames[i];
 				frameJustAfter = frames[i+1];
-				break
+
+				if( frames[i+2] === null || frames[i+1].frameTime > timeInSimulation )
+				{
+					break
+				}
 			}
+			lerpValue = ( timeInSimulation - frameJustBefore.frameTime ) /
+							( frameJustAfter.frameTime - frameJustBefore.frameTime );
+			lerpValue = clamp(lerpValue, 0, 1);
 		}
-
-		if( frameJustBefore === null )
-		{
-			console.warn("time is greater than limit")
-			videoDomElement.pause()
-			videoDomElement.currentTime = 0
-			return;
-		}
-
-		let lerpValue = ( exactTime - frameJustBefore.frameTime ) /
-						( frameJustAfter.frameTime - frameJustBefore.frameTime );
-		lerpValue = clamp(lerpValue, 0, 1);
 
 		for(let i = 0, il = discretes.length; i < il; i++)
 		{
@@ -368,14 +365,14 @@ initPlaybackAndRecording = function()
 					frames[0].lerpedFloats.length, lerpedFloats.length )
 				return
 			}
-			if(renderer.vr.enabled)
-			{
-				console.error( "vr enabled, use chrome (camera will not cooperate even if you disable vr)" )
-				return
-			}
 			if(chromiumRatherThanChrome)
 			{
-				console.error(".mp4 doesn't work in chromium, use chrome")
+				console.error("Use chrome, .mp4 doesn't work in chromium")
+				return
+			}
+			if(renderer.vr.enabled)
+			{
+				console.error( "vr enabled, restart (camera will not cooperate even if you disable vr)" )
 				return
 			}
 
@@ -387,34 +384,41 @@ initPlaybackAndRecording = function()
 			camera.position.set(0,0,0)
 			camera.rotation.set(0,0,0)
 
-			screen.material.opacity = 1
-			log(screen.material.opacity)
 			helmet.visible = true
 
-			if(videoDomElement.currentTime === 0)
+			let lagVelocity = 0
+			bindButton( "o", function(){}, "video got there first",function()
 			{
-				bindButton( "o", function(){}, "increase lag",function()
-				{
-					lag += 0.01
-					console.log("lag: ", lag)
-				} )
-				bindButton( "p", function(){}, "decrease lag",function()
-				{
-					lag -= 0.01
-					console.log("lag: ", lag)
-				} )
-
-				bindButton( "r", function(){}, "pitch forward",function()
-				{
-					camera.rotation.x += 0.01
-					console.log( "camera rotation: " + camera.rotation.toArray().slice(0,3).toString() )
-				} )
-				bindButton( "f", function(){}, "pitch back",function()
-				{
-					camera.rotation.x -= 0.01
-					console.log( "camera rotation: " + camera.rotation.toArray().slice(0,3).toString() )
-				} )
-			}
+				if(lagVelocity < 0)
+					lagVelocity = 0
+				lagVelocity += 0.0005
+				lag += lagVelocity
+				console.log("lag: ", lag)
+			} )
+			bindButton( "p", function(){}, "virtual controller got there first",function()
+			{
+				if(lagVelocity > 0)
+					lagVelocity = 0
+				lagVelocity -= 0.0005
+				lag += lagVelocity
+				console.log("lag: ", lag)
+			})
+			bindButton("up",function()
+			{
+				videoDomElement.playbackRate += 0.1
+			}, "increase video speed")
+			bindButton("down",function()
+			{
+				videoDomElement.playbackRate -= 0.1
+			}, "decrease video speed")
+			bindButton("left",function()
+			{
+				videoDomElement.currentTime -= 1
+			}, "jump back")
+			bindButton("right",function()
+			{
+				videoDomElement.currentTime += 1
+			}, "jump forwards")
 		}
 
 		if( !videoDomElement.paused )

@@ -3,6 +3,8 @@
 		But then you need to make it so the object grabbed is the parent
 */
 
+let mouse = null
+let clickables = []
 function initMouse()
 {
 	var asynchronous = {

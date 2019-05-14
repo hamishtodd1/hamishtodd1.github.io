@@ -28,7 +28,11 @@ function VisiBox()
 	visiBox.faces = faces
 	for(var i = 0; i < 6; i++)
 	{
-		faces[i] = new THREE.LineLoop(ourSquareGeometry, new THREE.MeshLambertMaterial({color:0x333333,transparent:true, opacity:0.5, side:THREE.DoubleSide}) );
+		faces[i] = new THREE.LineLoop(ourSquareGeometry, new THREE.MeshLambertMaterial({
+			color:0x00FFFF,
+			// transparent:true,
+			// opacity:0.5
+		}) );
 		visiBox.add( faces[i] );
 		if( i === 1 ) faces[i].rotation.x = TAU/2;
 		if( i === 2 ) faces[i].rotation.x = TAU/4;

@@ -14,14 +14,13 @@ let frameCount = 0;
 const log = console.log
 const debugging = 0;
 
-let camera = new THREE.PerspectiveCamera( 40, //the shorter fov of the samsung galaxy S8 selfie camera, sigh
+let renderer = new THREE.WebGLRenderer( { antialias: true } );
+let scene = new THREE.Scene()
+let camera = new THREE.PerspectiveCamera( 40.1, //the shorter fov of the samsung galaxy S8 selfie camera, sigh
 		window.innerWidth / window.innerHeight,
 		0.02, 10);
-let scene = new THREE.Scene().add(camera);
-let renderer = new THREE.WebGLRenderer( { antialias: true } );
-
-let mouse = null
-let clickables = []
+objectsToBeLookedAtByHelmet = [camera]
+scene.add(camera)
 
 const RIGHT_CONTROLLER_INDEX = 0;
 const LEFT_CONTROLLER_INDEX = 1-RIGHT_CONTROLLER_INDEX;
