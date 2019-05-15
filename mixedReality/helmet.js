@@ -1,5 +1,15 @@
 /*
 	could have a pair of eyebrows linked to the intonation of your voice
+
+	Quizzical: one brow lifted
+	Angry: brow furrowed
+	Dopey: boss-eyed
+	Sad: bottom lids up, eyebrows slanted up
+	suspicious: squint
+	Frustrated: closed
+	Tired: furrow beneath
+	Condescending: bottom lids down
+	Excited: bottom lid up
 */
 
 function initHelmet()
