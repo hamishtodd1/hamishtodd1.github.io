@@ -46,6 +46,7 @@ function initHelmet()
 	for(var i = 0; i < 2; i++)
 	{
 		eyeballs[i] = new Eyeball(eyeRadius);
+		// let lid = new THREE.Mesh(new THREE.SphereGeometry())
 		eyeballs[i].position.set(0,0,-helmetRadius)
 		eyeballs[i].position.applyAxisAngle(yUnit,0.125*TAU)
 		eyeballs[i].position.applyAxisAngle(zUnit,-0.125*TAU)
