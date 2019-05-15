@@ -15,6 +15,8 @@ function initFaceMaker()
 		eyeWhite.scale.setScalar(radius)
 		pupil.scale.setScalar(radius)
 		let eyeball = new THREE.Group().add(eyeWhite,pupil)
+
+		let eyebrow = new THREE.
 		return eyeball;
 	}
 
@@ -58,6 +60,8 @@ function initFaceMaker()
 			mouth.position.z = 0.01;
 			// group.add(mouth)
 		}
+
+		function crescentGeometry()
 		{
 			//01234
 			//56789
