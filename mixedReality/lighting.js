@@ -5,7 +5,7 @@ function initLights()
 	scene.add( ambientLight );
 
 	var ourLight = new THREE.PointLight(0xFFFFFF,1,99,0.36,0,1);
-	ourLight.position.set( 0,0.1,0.1 );
+	ourLight.position.set( 0,2.4,0 );
 	scene.add( ourLight );
 	
 	let helperSphereRadius = 0.04
