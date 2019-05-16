@@ -1,18 +1,15 @@
 /*
-	Diffing
-		An hour is less than 2MB, you're probably fine
-		If you do do it, round the floats.
-
-	It's complicated to think about but you probably do need parenthood to be marked
-
-	can make eyes follow after
+	You probably do need parenthood to be marked. Not *that* complicated to think about
 
 	Time synchronization
 		smack controllers together
 		could make controller flash at instant that it changes direction dramatically
+			Automatic sync then?
 
 	Visual synchronization
 		If you glue the vive tracker to a tablet you only have to do it once
+		could glue the vive tracker to a point exactly behind the camera
+		but for time being it is better not to move dude!
 
 	Really ought to list names and put them in output file
 
@@ -49,12 +46,8 @@ initPlaybackAndRecording = function()
 	let playbackMode = false
 
 	{
-		var videoDomElement = document.createElement( 'video' )
-		videoDomElement.style = "display:none"
-		videoDomElement.crossOrigin = 'anonymous';
 		videoDomElement.src = "recordings/2-07.mp4"
 		// videoDomElement.volume = 0
-		GLOBAL = videoDomElement
 
 		var videoTexture = new THREE.VideoTexture( videoDomElement );
 		videoTexture.minFilter = THREE.LinearFilter;
@@ -155,6 +148,11 @@ initPlaybackAndRecording = function()
 		{
 			let currentValue = discretes[i].object[ discretes[i].property ]
 
+			//this is about diffing, which is basically unncessary.
+			//rounding the floats and doing this you can reduce file size by maybe 80%
+			//Loads in faster, easier to transfer through git
+			//but video is so much bigger.
+			//is "looking for commonalities" essentially what gzip et al already do?
 			// if( frames.length > 0 )
 			// {
 			// 	let j = frames.length-1;
@@ -286,50 +284,50 @@ initPlaybackAndRecording = function()
 
 	let helmet = initHelmet()
 
-	let hackLag = 0.0
 	synchronizeStateToVideo = function()
 	{
 		//if you're recording in 30fps it doesn't matter! Eeeeexcept the recording might be off by one frame from what you saw
 		let videoFps = 30.0 //ffmpeg tells us so 
-		let frameWeAreOn = Math.floor( (videoDomElement.currentTime + hackLag) * videoFps); //VideoFrame.js says floor		
-		let timeInSimulation = frameWeAreOn / videoFps + lag
+		let videoFrameWeAreOn = Math.floor( videoDomElement.currentTime * videoFps); //VideoFrame.js says floor		
+		let timeInSimulation = videoFrameWeAreOn / videoFps + lag
+		if(timeInSimulation < 0)
+		{
+			videoDomElement.currentTime = (Math.ceil(-lag * videoFps) + 5) / videoFps 
+			log("went to start: ", videoDomElement.currentTime)
+			videoFrameWeAreOn = Math.floor( videoDomElement.currentTime * videoFps) //VideoFrame.js says floor		
+			timeInSimulation = videoFrameWeAreOn / videoFps + lag
+		}
 
 		let frameJustBefore = null
 		let frameJustAfter = null
 		let lerpValue = null
-		if(timeInSimulation < 0)
+		for( let i = 0, il = frames.length - 1; i < il; i++ )
 		{
-			console.warn("simulation before beginning")
-			frameJustBefore = frames[0]
-			frameJustAfter = frames[1]
-			lerpValue = 0
-		}
-		else
-		{
-			for( let i = 0, il = frames.length - 1; i < il; i++ )
+			frameJustBefore = frames[i];
+			frameJustAfter = frames[i+1];
+
+			if( frames[i+2] === null || frames[i+1].frameTime > timeInSimulation )
 			{
-				frameJustBefore = frames[i];
-				frameJustAfter = frames[i+1];
-
-				if( frames[i+2] === null || frames[i+1].frameTime > timeInSimulation )
-				{
-					break
-				}
+				break
 			}
-			lerpValue = ( timeInSimulation - frameJustBefore.frameTime ) /
-							( frameJustAfter.frameTime - frameJustBefore.frameTime );
-			lerpValue = clamp(lerpValue, 0, 1);
 		}
+		lerpValue = ( timeInSimulation - frameJustBefore.frameTime ) /
+						( frameJustAfter.frameTime - frameJustBefore.frameTime );
+		lerpValue = clamp(lerpValue, 0, 1);
 
+		let alreadyDoneThatHack = false
 		for(let i = 0, il = discretes.length; i < il; i++)
 		{
-			//for replacing triangly sphere
-			// if( discretes[i].property === "value" && 0 < timeInSimulation && timeInSimulation < 99999999 )
-			// {
-			// 	log(recordingTime)
-			// }
-
 			discretes[i].object[ discretes[i].property ] = frameJustBefore.discretes[i];
+
+			//post-production hacking
+
+			if( 455.669324 <= videoDomElement.currentTime && videoDomElement.currentTime <= 510.2 &&
+				discretes[i].property === "value" && frameJustBefore.discretes[i] === 3 && !alreadyDoneThatHack )
+			{
+				discretes[i].object[ discretes[i].property ] = 0
+				alreadyDoneThatHack = true
+			}
 		}
 		for(let i = 0, il = lerpedFloats.length; i < il; i++)
 		{

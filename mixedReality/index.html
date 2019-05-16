@@ -74,7 +74,7 @@
 				let windowResize = function()
 				{
 					renderer.setSize( window.innerWidth, window.innerHeight );
-					camera.aspect = window.innerWidth / window.innerHeight;
+					camera.aspect = window.innerWidth / window.innerHeight; //so the sides may be cut off
 					camera.updateProjectionMatrix();
 				}
 				window.addEventListener( 'resize', windowResize)

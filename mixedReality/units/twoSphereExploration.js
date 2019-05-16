@@ -228,7 +228,7 @@ function initTwoSphereExploration(fish, visiBox, height)
 				mesh.projection.geometry.vertices[i].applyMatrix4(assemblageMatrixInverse)
 
 				//to stop weirdness in singularity
-				if( i % 2 === 1 && mesh.projection.geometry.vertices[i].distanceToSquared(mesh.projection.geometry.vertices[i-1]) > 4 )
+				if( i % 2 === 1 && mesh.projection.geometry.vertices[i].distanceToSquared(mesh.projection.geometry.vertices[i-1]) > 2 )
 				{
 					mesh.projection.geometry.vertices[i].copy(mesh.projection.geometry.vertices[i-1])
 				}
@@ -459,13 +459,13 @@ function initTwoSphereExploration(fish, visiBox, height)
 		let gridSquareDimension = height / numGridSquaresVertical
 		let grid = Grid(numGridSquaresHorizontal,numGridSquaresVertical,gridSquareDimension)
 		// grid.material.clippingPlanes = visiBox.planes
-		grid.material.color.setHex(0x333333)
+		grid.material.color.setHex(0x800080)
 		assemblage.add(grid)
 		markObjectProperty(grid,"visible")
 
 		visiBox.scale.y = height
 		visiBox.scale.x = height / numGridSquaresVertical * numGridSquaresHorizontal
-		visiBox.scale.z = 0.001
+		visiBox.scale.z = 0.0002
 		assemblage.add(visiBox)
 
 		let heptagon = new THREE.Mesh(new THREE.CylinderBufferGeometry(0.05,0.05,0.0001,7), new THREE.MeshBasicMaterial({color:0xFFA500}))

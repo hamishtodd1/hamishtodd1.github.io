@@ -40,3 +40,7 @@ for(i in window.navigator.plugins)
 		break;
 	}
 }
+
+let videoDomElement = document.createElement( 'video' )
+videoDomElement.style = "display:none"
+videoDomElement.crossOrigin = 'anonymous';

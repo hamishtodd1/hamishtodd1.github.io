@@ -73,7 +73,7 @@ function initHelmet()
 
 	let beakTop = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshLambertMaterial(helmet.material));
 	let beakWidth = helmetRadius / 2;
-	let beakLength = beakWidth*1.1;
+	let beakLength = beakWidth*0.6;
 	beakTop.geometry.vertices.push(
 		new THREE.Vector3( beakWidth/2,0,0),
 		new THREE.Vector3(-beakWidth/2,0,0),
@@ -89,7 +89,7 @@ function initHelmet()
 	beakTop.rotation.y = TAU/2
 	helmet.add(beakTop)
 	beakTop.geometry.computeFaceNormals();
-	beakTop.position.y = annulus.position.y + 0.001
+	beakTop.position.y = annulus.position.y
 
 	var eyeRadius = 0.023;
 	var eyeballs = Array(2);
@@ -97,8 +97,8 @@ function initHelmet()
 	{
 		eyeballs[i] = new Eyeball(eyeRadius);
 		eyeballs[i].position.set(0,0,-helmetRadius)
-		eyeballs[i].position.applyAxisAngle(yUnit,0.09*TAU)
-		eyeballs[i].position.applyAxisAngle(zUnit,-0.125*TAU)
+		eyeballs[i].position.applyAxisAngle(yUnit,0.07*TAU)
+		// eyeballs[i].position.applyAxisAngle(zUnit,-0.125*TAU)
 		if(i)
 		{
 			eyeballs[i].position.x *= -1
@@ -106,14 +106,17 @@ function initHelmet()
 
 		helmet.add(eyeballs[i]);
 
-		let lid = new THREE.Mesh(new THREE.SphereGeometry(eyeRadius*1.05, 32,32),helmet.material)
-		for(let i = lid.geometry.vertices.length/2; i < lid.geometry.vertices.length; i++)
+		for( let j = 0; j < 2; j++ )
 		{
-			lid.geometry.vertices[i].y = 0
+			let lid = new THREE.Mesh(new THREE.SphereGeometry(eyeRadius*1.05, 32,32),helmet.material)
+			for(let i = lid.geometry.vertices.length/2; i < lid.geometry.vertices.length; i++)
+			{
+				lid.geometry.vertices[i].y = 0
+			}
+			lid.position.copy(eyeballs[i].position)
+			lid.rotation.x = j ? TAU * 0.13 : TAU / 4
+			helmet.add(lid)
 		}
-		lid.position.copy(eyeballs[i].position)
-		lid.rotation.x = TAU * 0.13
-		helmet.add(lid)
 	}
 
 	let positionWeAreLookingAt = new THREE.Vector3()
@@ -125,7 +128,8 @@ function initHelmet()
 		}
 
 		let betweenEyes = eyeballs[0].position.clone().lerp(eyeballs[1].position,0.5)
-		let inHead = betweenEyes.clone().setComponent(2,0)
+		let inHead = betweenEyes.clone()
+		inHead.z += eyeRadius
 		helmet.localToWorld(betweenEyes)
 		helmet.localToWorld(inHead)
 		let lookingDirection = betweenEyes.clone().sub(inHead)
@@ -134,10 +138,19 @@ function initHelmet()
 		let positionToLookTowards = new THREE.Vector3()
 		for(let i = 0; i < objectsToBeLookedAtByHelmet.length; i++)
 		{
+			if( !objectsToBeLookedAtByHelmet[i].visible )
+			{
+				continue;
+			}
+
 			//don't be surprised if this screws some shit up because of updateMatrixWorld
 			let worldPosition = objectsToBeLookedAtByHelmet[i].getWorldPosition(new THREE.Vector3())
 			let headToWorldPosition = worldPosition.clone().sub(inHead)
 			let angle = lookingDirection.angleTo(headToWorldPosition)
+			if(objectsToBeLookedAtByHelmet[i].eyeAttractionAngle !== undefined)
+			{
+				angle -= objectsToBeLookedAtByHelmet[i].eyeAttractionAngle
+			}
 
 			if( closestAngle === null || angle < closestAngle )
 			{

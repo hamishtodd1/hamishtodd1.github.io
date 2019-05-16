@@ -1,18 +1,23 @@
 /*
 	TODO
-		rescale/position threesphere visibox (chop off bottom as much as front)
+		grid
 		superimpose numbers?
 		make it so it's not triangly sphere in that one part?
-		Probably can get the lag such that it's on-frame
-		remove background sound? Probably not, mic does it!
 		sound effects?
 			Grab and ungrab, fairly easy to check
 			visibility change, easy to check
 			Rotation of fish and heptagon? fairly easy
+		Probably can get the lag such that it's on-frame
+		remove background sound? Probably not, mic does it!
+
+		Brief clip of threesphere close up for opening... maybe without video! Maybe a cartoon fish?
 		Camera shake? You'd want to set screen in place - not too hard
 		Deadline is 23rd I guess. Nice as it would be to "go viral" in time
 
 	"How do things rotate in 4D? in VR" Thumbnail: nice MR thing, "4 space dimensions??"
+	Description
+		Thank you to khalidsrri https://www.turbosquid.com/3d-models/free-golden-fish-3d-model/755156
+		Tags: flatland
 
 	Script, 
 		So to describe 4D rotations, in this video we're going to use basically the same approach to describing 4D
@@ -67,6 +72,25 @@
 
 function initThreeSphereExploration( height )
 {
+	new THREE.OBJLoader().load( "data/fish.obj",
+		function ( object ) 
+		{
+			let fish = new THREE.Mesh(object.children[0].geometry, new THREE.MeshPhongMaterial({
+				color:0xE6BE8A
+			}))
+
+			handControllers[RIGHT_CONTROLLER_INDEX].add(fish)
+			fish.scale.setScalar(0.004)
+
+			let eyeCylinder = new THREE.Mesh(new THREE.CylinderBufferGeometry(0.003,0.003,0.0202,32), new THREE.MeshBasicMaterial({color:0x000000}))
+			eyeCylinder.rotation.x = TAU/4
+			handControllers[RIGHT_CONTROLLER_INDEX].add(eyeCylinder)
+			eyeCylinder.position.x = 0.13
+			eyeCylinder.position.y = 0.007
+		},
+		function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); }
+	);
+
 	initProjectionSystem()
 
 	let visiBox = VisiBox()
@@ -428,11 +452,12 @@ function initThreeSphereExploration( height )
 	initProjectionControls()
 
 	let assemblage = new THREE.Group()
-	objectsToBeLookedAtByHelmet.push(assemblage)
 	assemblage.position.y = 1.6 - height * 0.6
 	assemblage.scale.setScalar(0.05)
 	assemblage.updateMatrixWorld()
+	assemblage.eyeAttractionAngle = 0.3
 	scene.add(assemblage)
+	objectsToBeLookedAtByHelmet.push(assemblage)
 
 	let hyperOctahedronCircles = []
 	{
