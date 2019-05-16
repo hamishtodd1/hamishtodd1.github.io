@@ -16,7 +16,7 @@ function initFaceMaker()
 		pupil.scale.setScalar(radius)
 		let eyeball = new THREE.Group().add(eyeWhite,pupil)
 
-		let eyebrow = new THREE.
+		// let eyebrow = new THREE.
 		return eyeball;
 	}
 

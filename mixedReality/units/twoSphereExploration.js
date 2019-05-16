@@ -19,6 +19,7 @@ function initTwoSphereExploration(fish, visiBox, height)
 		}
 	})
 	markPositionAndQuaternion(assemblage,"assemblage")
+	objectsToBeLookedAtByHelmet.push(assemblage) //maybe don't be surprised if eyes are down
 
 	assemblage.add(fish)
 	markObjectProperty(fish,"visible")
@@ -38,6 +39,7 @@ function initTwoSphereExploration(fish, visiBox, height)
 	markMatrix(s2.matrix)
 	markObjectProperty(s2, "matrixAutoUpdate")
 	scene.add(s2)
+	objectsToBeLookedAtByHelmet.push(s2)
 	meshesWithProjections = []
 	makeProjectableSpheres( meshesWithProjections )
 
@@ -48,6 +50,7 @@ function initTwoSphereExploration(fish, visiBox, height)
 	bulb.correctPosition = new THREE.Vector3(0,0,2 * s2.correctPosition.z)
 	bulb.position.copy(bulb.correctPosition)
 	scene.add(bulb)
+	objectsToBeLookedAtByHelmet.push(bulb)
 	// let light = new THREE.PointLight(0xFFFFFF,1,2);
 	// light.position.set( 0,0.1,0);
 	// bulb.add( light );

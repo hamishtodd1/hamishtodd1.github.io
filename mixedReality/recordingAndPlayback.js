@@ -118,11 +118,15 @@ initPlaybackAndRecording = function()
 
 	loadRecording = function(version)
 	{
-		new THREE.FileLoader().load( "recordings/2-07.txt",
+		new THREE.FileLoader().load( "recordings/2-07.txt", //2-07
 			function( str )
 			{
 				frames = eval(str)
 				log("frames loaded")
+				if(!chromiumRatherThanChrome)
+				{
+					togglePlaying()
+				}
 			}
 		);
 	}
@@ -319,6 +323,12 @@ initPlaybackAndRecording = function()
 
 		for(let i = 0, il = discretes.length; i < il; i++)
 		{
+			//for replacing triangly sphere
+			// if( discretes[i].property === "value" && 0 < timeInSimulation && timeInSimulation < 99999999 )
+			// {
+			// 	log(recordingTime)
+			// }
+
 			discretes[i].object[ discretes[i].property ] = frameJustBefore.discretes[i];
 		}
 		for(let i = 0, il = lerpedFloats.length; i < il; i++)

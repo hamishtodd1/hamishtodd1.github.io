@@ -2,10 +2,9 @@
 	TODO
 		rescale/position threesphere visibox (chop off bottom as much as front)
 		superimpose numbers?
-		helmet eyes
-		remove background sound?
 		make it so it's not triangly sphere in that one part?
 		Probably can get the lag such that it's on-frame
+		remove background sound? Probably not, mic does it!
 
 	"How do things rotate in 4D? in VR" Thumbnail: nice MR thing, "4 space dimensions??"
 
@@ -422,6 +421,7 @@ function initThreeSphereExploration( height )
 	initProjectionControls()
 
 	let assemblage = new THREE.Group()
+	objectsToBeLookedAtByHelmet.push(assemblage)
 	assemblage.position.y = 1.6 - height * 0.6
 	assemblage.scale.setScalar(0.05)
 	assemblage.updateMatrixWorld()
