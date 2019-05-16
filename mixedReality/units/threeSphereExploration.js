@@ -6,6 +6,8 @@
 		remove background sound?
 		make it so it's not triangly sphere in that one part?
 		Probably can get the lag such that it's on-frame
+		sound effects?
+		Deadline is 23rd I guess. Nice as it would be to "go viral" in time
 
 	"How do things rotate in 4D? in VR" Thumbnail: nice MR thing, "4 space dimensions??"
 
@@ -72,7 +74,10 @@ function initThreeSphereExploration( height )
 			visiBox.children[i].visible = false
 		}
 	}
-	visiBox.scale.set(height / 9 * 16,height,height)
+	visiBox.scale.set(0.335,0.185,0.195)
+	visiBox.position.set(0.0,1.49,0.015)
+	visiBox.rotation.y = 0.075
+	VISIBOX = visiBox
 
 	let threeSphereMatrix = new THREE.Matrix4()
 	let threeSphereMatrixInverse = new THREE.Matrix4()
@@ -409,8 +414,6 @@ function initThreeSphereExploration( height )
 				// }
 			}
 			applyVirtualHandDiffToRotatingThreeSphereMatrix()
-
-			visiBox.position.copy(assemblage.position)
 
 			if( designatedHand.button2 && !designatedHand.button2Old )
 			{
