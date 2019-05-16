@@ -30,6 +30,7 @@ function VisiBox()
 	{
 		faces[i] = new THREE.LineLoop(ourSquareGeometry, new THREE.MeshLambertMaterial({
 			color:0x00FFFF,
+			// linewidth:4
 			// transparent:true,
 			// opacity:0.5
 		}) );
