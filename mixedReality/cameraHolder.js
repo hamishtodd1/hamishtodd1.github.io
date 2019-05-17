@@ -1,9 +1,3 @@
-/*
-	When you let go of the camera holder...
-	...it moves back to where it was...
-	but changes camera and handPositions such that they are where
-*/
-
 function initCameraHolder(screen)
 {
 	screen.updateMatrix()
@@ -112,16 +106,16 @@ function initCameraHolder(screen)
 
 	//need speed modification
 
-	// bindButton( "t", function(){}, "pitch forward",function()
-	// {
-	// 	camera.rotation.x += 0.01
-	// 	console.log( "camera rotation: " + camera.rotation.toArray().slice(0,3).toString() )
-	// } )
-	// bindButton( "g", function(){}, "pitch back",function()
-	// {
-	// 	camera.rotation.x -= 0.01
-	// 	console.log( "camera rotation: " + camera.rotation.toArray().slice(0,3).toString() )
-	// } )
+	bindButton( "t", function(){}, "pitch forward",function()
+	{
+		camera.rotation.x += 0.01
+		console.log( "camera rotation: " + camera.rotation.toArray().slice(0,3).toString() )
+	} )
+	bindButton( "g", function(){}, "pitch back",function()
+	{
+		camera.rotation.x -= 0.01
+		console.log( "camera rotation: " + camera.rotation.toArray().slice(0,3).toString() )
+	} )
 
 	//aligning of points
 	{

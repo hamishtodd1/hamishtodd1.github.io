@@ -1,5 +1,7 @@
 /*
 	TODO
+		DEFINITELY a translucent plane for fish universe
+		Switch triangly to soccer ball?
 		grid
 		superimpose numbers?
 		make it so it's not triangly sphere in that one part?
@@ -17,6 +19,8 @@
 	"How do things rotate in 4D? in VR" Thumbnail: nice MR thing, "4 space dimensions??"
 	Description
 		Thank you to khalidsrri https://www.turbosquid.com/3d-models/free-golden-fish-3d-model/755156
+		Aaand motionstock https://www.youtube.com/watch?v=PK1ybF8ZYCU
+			https://freesound.org/people/Kinoton/sounds/393819/
 		Tags: flatland
 
 	Script, 
@@ -72,24 +76,6 @@
 
 function initThreeSphereExploration( height )
 {
-	new THREE.OBJLoader().load( "data/fish.obj",
-		function ( object ) 
-		{
-			let fish = new THREE.Mesh(object.children[0].geometry, new THREE.MeshPhongMaterial({
-				color:0xE6BE8A
-			}))
-
-			handControllers[RIGHT_CONTROLLER_INDEX].add(fish)
-			fish.scale.setScalar(0.004)
-
-			let eyeCylinder = new THREE.Mesh(new THREE.CylinderBufferGeometry(0.003,0.003,0.0202,32), new THREE.MeshBasicMaterial({color:0x000000}))
-			eyeCylinder.rotation.x = TAU/4
-			handControllers[RIGHT_CONTROLLER_INDEX].add(eyeCylinder)
-			eyeCylinder.position.x = 0.13
-			eyeCylinder.position.y = 0.007
-		},
-		function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); }
-	);
 
 	initProjectionSystem()
 
@@ -219,7 +205,7 @@ function initThreeSphereExploration( height )
 				return p
 			}
 			let tubularSegments = lotsOfSegments ? 72:36
-			let tubeRadius = 0.017
+			let tubeRadius = 0.02
 			let representation = new THREE.Mesh( new THREE.TubeBufferGeometry( curve, tubularSegments, tubeRadius,3,false ), new THREE.MeshLambertMaterial({clippingPlanes:visiBox.planes}) )
 			greatCircle.representation = representation
 			assemblage.add( representation )
@@ -455,9 +441,10 @@ function initThreeSphereExploration( height )
 	assemblage.position.y = 1.6 - height * 0.6
 	assemblage.scale.setScalar(0.05)
 	assemblage.updateMatrixWorld()
-	assemblage.eyeAttractionAngle = 0.3
 	scene.add(assemblage)
-	objectsToBeLookedAtByHelmet.push(assemblage)
+
+	objectsToBeLookedAtByHelmet.push(visiBox.faces[5])
+	visiBox.faces[5].eyeAttractionAngle = 0.4
 
 	let hyperOctahedronCircles = []
 	{
