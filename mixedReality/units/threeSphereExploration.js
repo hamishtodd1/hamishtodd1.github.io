@@ -1,8 +1,7 @@
 /*
 	TODO
-		grid
 		superimpose numbers?
-		make it so it's not triangly sphere in that one part?
+		Transparent plane on twoSphere?
 		sound effects?
 			Grab and ungrab, fairly easy to check
 			visibility change, easy to check
@@ -72,24 +71,28 @@
 
 function initThreeSphereExploration( height )
 {
-	new THREE.OBJLoader().load( "data/fish.obj",
-		function ( object ) 
+	if(0)
+	{
+		new THREE.OBJLoader().load( "data/fish.obj", function ( object ) 
 		{
 			let fish = new THREE.Mesh(object.children[0].geometry, new THREE.MeshPhongMaterial({
 				color:0xE6BE8A
 			}))
 
 			handControllers[RIGHT_CONTROLLER_INDEX].add(fish)
-			fish.scale.setScalar(0.004)
+			handControllers[RIGHT_CONTROLLER_INDEX].controllerModel.visible = false
+			fish.geometry.applyMatrix( new THREE.Matrix4().makeScale(0.004,0.004,0.006) )
 
-			let eyeCylinder = new THREE.Mesh(new THREE.CylinderBufferGeometry(0.003,0.003,0.0202,32), new THREE.MeshBasicMaterial({color:0x000000}))
+			let eyeCylinder = new THREE.Mesh(new THREE.CylinderBufferGeometry(0.003,0.003,0.0303,32), new THREE.MeshBasicMaterial({color:0x000000}))
 			eyeCylinder.rotation.x = TAU/4
-			handControllers[RIGHT_CONTROLLER_INDEX].add(eyeCylinder)
+			fish.add(eyeCylinder)
 			eyeCylinder.position.x = 0.13
 			eyeCylinder.position.y = 0.007
-		},
-		function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); }
-	);
+
+			fish.position.z += 0.13
+			fish.rotation.y = TAU/4
+		}, function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); } );
+	}
 
 	initProjectionSystem()
 
