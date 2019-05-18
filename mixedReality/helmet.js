@@ -1,4 +1,10 @@
 /*
+	Hands
+		The beak is your hand. The head is "pulled" around behind it, eg position += destination-position * 0.1
+		This is more from back when it was a puppet show
+
+	could add some hair easily
+
 	definitely want eyebrows
 	could have a pair of eyebrows linked to the intonation of your voice
 

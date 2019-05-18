@@ -421,11 +421,11 @@ initPlaybackAndRecording = function()
 			}, "decrease video speed")
 			bindButton("left",function()
 			{
-				videoDomElement.currentTime -= 1
+				videoDomElement.currentTime -= 5
 			}, "jump back")
 			bindButton("right",function()
 			{
-				videoDomElement.currentTime += 1
+				videoDomElement.currentTime += 5
 			}, "jump forwards")
 		}
 

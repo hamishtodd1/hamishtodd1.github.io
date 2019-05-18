@@ -1,22 +1,30 @@
 /*
 	TODO
+		Switch triangly to soccer ball?
 		superimpose numbers?
-		Transparent plane on twoSphere?
 		sound effects?
 			Grab and ungrab, fairly easy to check
 			visibility change, easy to check
 			Rotation of fish and heptagon? fairly easy
+			Camera shake? You'd want to set screen in place - not too hard
 		Probably can get the lag such that it's on-frame
-		remove background sound? Probably not, mic does it!
-
-		Brief clip of threesphere close up for opening... maybe without video! Maybe a cartoon fish?
-		Camera shake? You'd want to set screen in place - not too hard
 		Deadline is 23rd I guess. Nice as it would be to "go viral" in time
 
 	"How do things rotate in 4D? in VR" Thumbnail: nice MR thing, "4 space dimensions??"
 	Description
 		Thank you to khalidsrri https://www.turbosquid.com/3d-models/free-golden-fish-3d-model/755156
+		Aaand motionstock https://www.youtube.com/watch?v=PK1ybF8ZYCU
+			https://freesound.org/people/Kinoton/sounds/393819/
 		Tags: flatland
+
+	Send to
+		Pierre
+		Vi
+		Bret
+		Marc
+		Grant
+		Andy
+		
 
 	Script, 
 		So to describe 4D rotations, in this video we're going to use basically the same approach to describing 4D
@@ -71,29 +79,6 @@
 
 function initThreeSphereExploration( height )
 {
-	if(0)
-	{
-		new THREE.OBJLoader().load( "data/fish.obj", function ( object ) 
-		{
-			let fish = new THREE.Mesh(object.children[0].geometry, new THREE.MeshPhongMaterial({
-				color:0xE6BE8A
-			}))
-
-			handControllers[RIGHT_CONTROLLER_INDEX].add(fish)
-			handControllers[RIGHT_CONTROLLER_INDEX].controllerModel.visible = false
-			fish.geometry.applyMatrix( new THREE.Matrix4().makeScale(0.004,0.004,0.006) )
-
-			let eyeCylinder = new THREE.Mesh(new THREE.CylinderBufferGeometry(0.003,0.003,0.0303,32), new THREE.MeshBasicMaterial({color:0x000000}))
-			eyeCylinder.rotation.x = TAU/4
-			fish.add(eyeCylinder)
-			eyeCylinder.position.x = 0.13
-			eyeCylinder.position.y = 0.007
-
-			fish.position.z += 0.13
-			fish.rotation.y = TAU/4
-		}, function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); } );
-	}
-
 	initProjectionSystem()
 
 	let visiBox = VisiBox()
@@ -222,8 +207,10 @@ function initThreeSphereExploration( height )
 				return p
 			}
 			let tubularSegments = lotsOfSegments ? 72:36
-			let tubeRadius = 0.017
-			let representation = new THREE.Mesh( new THREE.TubeBufferGeometry( curve, tubularSegments, tubeRadius,3,false ), new THREE.MeshLambertMaterial({clippingPlanes:visiBox.planes}) )
+			let tubeRadius = 0.02
+			let representation = new THREE.Mesh(
+				new THREE.TubeBufferGeometry( curve, tubularSegments, tubeRadius,3,false ),
+				new THREE.MeshStandardMaterial({clippingPlanes:visiBox.planes}) )
 			greatCircle.representation = representation
 			assemblage.add( representation )
 
@@ -458,9 +445,11 @@ function initThreeSphereExploration( height )
 	assemblage.position.y = 1.6 - height * 0.6
 	assemblage.scale.setScalar(0.05)
 	assemblage.updateMatrixWorld()
-	assemblage.eyeAttractionAngle = 0.3
 	scene.add(assemblage)
-	objectsToBeLookedAtByHelmet.push(assemblage)
+
+	let faceToLookAt = visiBox.faces[1]
+	faceToLookAt.eyeAttractionAngle = 0.3
+	objectsToBeLookedAtByHelmet.push(faceToLookAt)
 
 	let hyperOctahedronCircles = []
 	{
@@ -562,6 +551,15 @@ function initThreeSphereExploration( height )
 
 		alwaysUpdateFunctions.push(function()
 		{
+			if( visibleSet.value === greatCircleSets.indexOf(hyperOctahedronCircles) )
+			{
+				assemblage.scale.setScalar(0.038)
+			}
+			else
+			{
+				assemblage.scale.setScalar(0.05)
+			}
+
 			for(let i = 0; i < greatCircleSets.length; i++)
 			{
 				if( greatCircleSets[i][0].representation.visible !== (i === visibleSet.value) )
