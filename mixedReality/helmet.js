@@ -35,16 +35,35 @@ function initHelmet()
 	})
 	markPositionAndQuaternion( helmetHolder )
 
+	{
+		let equirectShader = THREE.ShaderLib[ "equirect" ];
+		let equirectMaterial = new THREE.ShaderMaterial( {
+			fragmentShader: equirectShader.fragmentShader,
+			vertexShader: equirectShader.vertexShader,
+			uniforms: equirectShader.uniforms,
+			depthWrite: false,
+			side: THREE.BackSide
+		} );
+		let textureLoader = new THREE.TextureLoader();
+		textureEquirec = textureLoader.load( "data/environmentMap.JPG" );
+		equirectMaterial.uniforms[ "tEquirect" ].value = textureEquirec;
+		textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
+		textureEquirec.magFilter = THREE.LinearFilter;
+		textureEquirec.minFilter = THREE.LinearMipMapLinearFilter;
+		textureEquirec.encoding = THREE.sRGBEncoding;
+	}
+
 	let helmetRadius = 0.152
 	let radialSegments = 64
 	var helmet = new THREE.Mesh(new THREE.SphereGeometry(helmetRadius,radialSegments,radialSegments,0,TAU,0,TAU/4),
 	new THREE.MeshPhysicalMaterial({
-		color:0x66393B,
-		roughness:1,
-		metalness:0.5, //not sure!
-		reflectivity:0, //can add an environment map easily! Where's that spherical camera? But what about virtual objects?
+		color:0xFD6A02,
+		roughness:0.15,
+		metalness:0.8,
+		reflectivity:1.0,
 		clearCoat:1,
-		clearCoatRoughness:0.2
+		clearCoatRoughness:0.2,
+		envMap: textureEquirec
 	}))
 	HELMET = helmet
 	helmetHolder.add(helmet)
@@ -77,7 +96,7 @@ function initHelmet()
 	annulus.rotation.z = TAU / 2
 	helmet.add(annulus)
 
-	let beakTop = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshLambertMaterial(helmet.material));
+	let beakTop = new THREE.Mesh(new THREE.Geometry(), helmet.material);
 	let beakWidth = helmetRadius / 2;
 	let beakLength = beakWidth*0.6;
 	beakTop.geometry.vertices.push(

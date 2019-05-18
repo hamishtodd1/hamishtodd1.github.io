@@ -42,22 +42,20 @@ function initFish( visiBox )
 	//don't have an octahedron, just have a pair of circles
 
 	{
-		let fishEye = new THREE.Object3D();
-		let pupilRadius = fishLength / 80;
-		let eyeWhite = new THREE.Mesh(new THREE.CylinderBufferGeometry(pupilRadius*2, pupilRadius*2, fish.children[0].position.z * 4, 20), new THREE.MeshBasicMaterial({ color:0xFFFFFF,
-			// clippingPlanes: visiBox.planes
-			 }));
-		let fishPupil = new THREE.Mesh(new THREE.CylinderBufferGeometry(pupilRadius, pupilRadius, fish.children[0].position.z * 6, 20), new THREE.MeshBasicMaterial({ color:0x000000,
-			// clippingPlanes: visiBox.planes
-			 }));
-		let blickCountdown = 0;
-		fishEye.add(eyeWhite);
-		fishEye.add(fishPupil);
-		fishEye.rotation.x = TAU / 4;
-		fishEye.position.x = -0.06 * fishLength
-		fish.add(fishEye);
-
-		let closedMouth = new THREE.Mesh(new THREE.CircleBufferGeometry)
+		// let fishEye = new THREE.Object3D();
+		// let pupilRadius = fishLength / 80;
+		// let eyeWhite = new THREE.Mesh(new THREE.CylinderBufferGeometry(pupilRadius*2, pupilRadius*2, fish.children[0].position.z * 4, 20), new THREE.MeshBasicMaterial({ color:0xFFFFFF,
+		// 	// clippingPlanes: visiBox.planes
+		// 	 }));
+		// let fishPupil = new THREE.Mesh(new THREE.CylinderBufferGeometry(pupilRadius, pupilRadius, fish.children[0].position.z * 6, 20), new THREE.MeshBasicMaterial({ color:0x000000,
+		// 	// clippingPlanes: visiBox.planes
+		// 	 }));
+		// let blickCountdown = 0;
+		// fishEye.add(eyeWhite);
+		// fishEye.add(fishPupil);
+		// fishEye.rotation.x = TAU / 4;
+		// fishEye.position.x = -0.06 * fishLength
+		// fish.add(fishEye);
 	}
 
 	updateFunctions.push(function()

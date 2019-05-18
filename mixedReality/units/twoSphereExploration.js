@@ -30,7 +30,7 @@ function initTwoSphereExploration(fish, visiBox, height)
 	s2.scale.setScalar(s2.radius)
 	s2.correctPosition = new THREE.Vector3(0,0,s2.radius)
 	s2.position.copy(s2.correctPosition)
-	s2.add( new THREE.Mesh(new THREE.SphereGeometry(0.96,64,64), new THREE.MeshBasicMaterial(
+	s2.add( new THREE.Mesh(new THREE.SphereGeometry(0.96,64,64), new THREE.MeshLambertMaterial(
 	{
 		color:0xCCCCCC,
 		transparent:true,
@@ -96,10 +96,10 @@ function initTwoSphereExploration(fish, visiBox, height)
 			color:0xCCCCCC
 		})))
 
-		bulb.lightBit = obj.children[2]
-		bulb.lightBit.geometry.merge(obj.children[3].geometry)
-		bulb.lightBit.material = new THREE.MeshLambertMaterial({
-			color: 0xFFFFA0, emissive:0xFFFF80, emissiveIntensity:0.5} )
+		bulb.lightBit = new THREE.Mesh(
+			obj.children[2].geometry.merge(obj.children[3].geometry),
+			new THREE.MeshLambertMaterial({color: 0xFFFFA0, emissive:0xFFFF80, emissiveIntensity:0.5
+		} ) )
 		bulb.add(bulb.lightBit)
 
 		for(let i = 0; i < bulb.children.length; i++)
@@ -467,6 +467,32 @@ function initTwoSphereExploration(fish, visiBox, height)
 		visiBox.scale.x = height / numGridSquaresVertical * numGridSquaresHorizontal
 		visiBox.scale.z = 0.0002
 		assemblage.add(visiBox)
+
+		let pane = new THREE.Mesh(new THREE.PlaneGeometry(visiBox.scale.x,visiBox.scale.y),new THREE.MeshStandardMaterial({
+			color:0x00FF00,
+			side:THREE.DoubleSide,
+			transparent:true,
+			opacity:0.13
+		}))
+		assemblage.add(pane)
+		alwaysUpdateFunctions.push(function()
+		{
+			if(videoDomElement.currentTime > 385.6 && videoDomElement.currentTime < 438)
+			{
+				fish.children[0].material.depthTest = true
+				fish.children[1].material.depthTest = true
+				fish.children[0].material.neesUpdate = true
+				fish.children[1].material.neesUpdate = true
+			}
+			else
+			{
+				fish.children[0].material.depthTest = false
+				fish.children[1].material.depthTest = false
+				fish.children[0].material.neesUpdate = true
+				fish.children[1].material.neesUpdate = true
+			}
+		})
+		
 
 		let heptagon = new THREE.Mesh(new THREE.CylinderBufferGeometry(0.05,0.05,0.0001,7), new THREE.MeshBasicMaterial({color:0xFFA500}))
 		heptagon.material.clippingPlanes = visiBox.planes
