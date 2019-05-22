@@ -1,22 +1,53 @@
 /*
-	You probably do need parenthood to be marked. Not *that* complicated to think about
+	Reasons to have bradyBot:
+		Draws people's attention to things (including face) better
+		Makes it feel more like being present with you/more natural
+		More exciting / varied / "dynamic"
+		Don't want to bring someone else into this
+			Make things dependent on when *they* can do things
+			Extra communication
+			They're not necessarily good at it / understand ambitions
+			More costly
+			Can't re-zoom or track things as accurately as a robot
+	Spherical camera
+		Camera direction is going to change a lot, both sideways and downwards. Spherical necessary for perspective correction
+		More transferrable to VR. Need depth information for that though
+		No need to worry about fucking pitch
+		In principle could turn yourself into a virtual object
+			Better for maintaining illusion
+				Hat can go all the way around head!
+				Arms can go in front of virtual objects
+			Key out everything but you and your chair,
+			Sphere's radius equal to the distance from the camera to the controller
+			Depth camera or static key are options but green is probably easiest
+	Pose / cinematography
+		When you look at the stuff yourself, audience should have basically the same view
+		Shots
+			Looking at thing
+			Looking at face while face looks at camera
+			Looking at both while face looks at camera
+			Looking at both while face looks at thing
+		Automatic camera movement
+			Shake? See surely that's cheap and bad
+			Zoom?
+			Automatic shot selection CAN WAIT UNTIL YOU'VE DONE IT MANUALLY! But:
+				Looking at camera = camera looks at you
+					If you're not holding or even gesturing at thing, probably it *only* looks at you
+				Looking at camera while holding thing = both in frame. Probably it's something small
+				Looking at thing but face reacts = probably you've not done anything serious with it
+	Resolution (after the next video!)
+		May not matter so much, since interacting hand and face are mainly obscured
+		Could do the chromakey crap and then have a high-res photo behind you
+		Your phone with a 180x180 fisheye is not a improvement resolution-wise
+		But a 4k camera with a 180x100 fisheye or something, that'd be nice and allow the video to be 1080p
 
-	Time synchronization
-		smack controllers together
-		could make controller flash at instant that it changes direction dramatically
-			Automatic sync then?
-
-	Visual synchronization
-		If you glue the vive tracker to a tablet you only have to do it once
-		could glue the vive tracker to a point exactly behind the camera
-		but for time being it is better not to move dude!
-
-	Really ought to list names and put them in output file
-
-	better off marking the controller/inputs?
-		Jon Blow says "pain in the ass"
-		Smaller filesize for recording
-		Might somehow have to backtrack through frames to recover total state
+	TODO
+		XSplit definitely fucked you
+		Maybe wear a glove and have that in 3D model?
+		Arms and hands behind objects. Have a warning thing for this. Palm always towards camera
+		You probably do need parenthood to be marked. Not *that* complicated to think about
+		Detect controller smack in VR and in sound (ulp)
+		Maaaaaybe bring back Hiro.
 
 	Current workflow, one take:
 	1. physically set up camera
@@ -106,6 +137,8 @@ initPlaybackAndRecording = function()
 
 	presentFramesFile = function()
 	{
+		//Really ought to list names of objects and put them in output file
+		//also post processing effects eg eye state
 		presentJsonFile( JSON.stringify(frames), filename )
 	}
 
