@@ -1,35 +1,49 @@
 /*
+	TODO
+		XSplit definitely fucked you, find a different compositer, maybe OBS
+		You probably do need parenthood to be marked. Not *that* complicated to think about
+		Detect controller smack in VR and make it so you just have to get to the frame where it happened
+		More roughness on helmet
+		Some smooth jazz or whatever
+		Sound effects
+		Eyebrows
+		Visual alignment
+			Could bring back hiro or points
+			If there's *any* adjustment in post then it defeats the entire point.
+			There has to be some adjustment during the shoot anyway, because AR probably can't get that camera in place
+	
+	Pics and videos
+		Like in Captain disillusion
+		Take them out from behind your head
+		Put them next to you while you're talking
+		They are meant to come in a specific sequence, you should make use of that
+		Physics sim when they fall
+
 	Reasons to have bradyBot:
 		Draws people's attention to things (including face) better
 		Makes it feel more like being present with you/more natural
 		More exciting / varied / "dynamic"
-		Don't want to bring someone else into this
-			Make things dependent on when *they* can do things
+		Want all this but don't want to bring someone else in
+			Have to wait on them
 			Extra communication
-			They're not necessarily good at it / understand ambitions
-			More costly
-			Can't re-zoom or track things as accurately as a robot
+			They can't re-zoom or track things as accurately as a robot
+			And if they can they're probably costly
 	Spherical camera
 		Camera direction is going to change a lot, both sideways and downwards. Spherical necessary for perspective correction
-		More transferrable to VR. Need depth information for that though
-		No need to worry about fucking pitch
-		In principle could turn yourself into a virtual object
-			Better for maintaining illusion
-				Hat can go all the way around head!
-				Arms can go in front of virtual objects
-			Key out everything but you and your chair,
-			Sphere's radius equal to the distance from the camera to the controller
-			Depth camera or static key are options but green is probably easiest
+		No need to do that roll/pitch eliminating adjustment
+		Transferrable to VR (but depth information would be better)
 	Pose / cinematography
-		When you look at the stuff yourself, audience should have basically the same view
+		Shake? See surely that's cheap and bad
+		Zoom? For shots of thing versus shot of both of you
+		You want the visiBox close to the camera, closer than your hands
+			Arms/writsts behind objects
+				Can work out where wrist is just from model, check wrist dist to camera vs controller
+			Maybe wear a glove and have that in 3D model?
 		Shots
-			Looking at thing
-			Looking at face while face looks at camera
+			Looking at visiBox (audience view should be basically the same as yours)
+			Looking at face (face is not in center of shot, don't forget)
 			Looking at both while face looks at camera
-			Looking at both while face looks at thing
-		Automatic camera movement
-			Shake? See surely that's cheap and bad
-			Zoom?
+			Looking at face and small thing brought out of visiBox
 			Automatic shot selection CAN WAIT UNTIL YOU'VE DONE IT MANUALLY! But:
 				Looking at camera = camera looks at you
 					If you're not holding or even gesturing at thing, probably it *only* looks at you
@@ -40,36 +54,14 @@
 		Could do the chromakey crap and then have a high-res photo behind you
 		Your phone with a 180x180 fisheye is not a improvement resolution-wise
 		But a 4k camera with a 180x100 fisheye or something, that'd be nice and allow the video to be 1080p
-
-	TODO
-		XSplit definitely fucked you
-		Maybe wear a glove and have that in 3D model?
-		Arms and hands behind objects. Have a warning thing for this. Palm always towards camera
-		You probably do need parenthood to be marked. Not *that* complicated to think about
-		Detect controller smack in VR and in sound (ulp)
-		Maaaaaybe bring back Hiro.
-
-	Current workflow, one take:
-	1. physically set up camera
-	2. set up VR browser
-	3. in VR, put guides in place
-	4. start recording on both
-	5. do stuff
-	6. stop recording on both
-	7. import video onto computer
-	8. Put guides in place on video
-	9. Adjust lag
-	9a. "Post" eg eyes?
-	10. Record whole thing using XSplit
-	11. Edit with kdenlive? Patreon symbol at least
-
-	The speed of light:
-		there's an app on your phone/tablet which has the virtual objects etc. 
-		Also connects to an audio recorder which automatically combines that with video. 
-		Can figure out where it is in virtual world in relation to your hands and head (the only truly shared objects). 
-		Would need to have the actual position and orientation of the frikkin controllers. 
-		Even Vive tracker wouldn't be great. 
-		Skip from 2 to 11.
+	Could turn yourself into a virtual object
+		Helmet can go all the way around head
+		Arms can go in front of virtual objects
+		Better for folks in VR
+		How
+			Key out everything but you and your chair,
+			Know where head and hand are in 3D space, adjust sphere scale to make it line up
+			Depth camera or static key are options but green is probably easiest
 */
 
 initPlaybackAndRecording = function()
