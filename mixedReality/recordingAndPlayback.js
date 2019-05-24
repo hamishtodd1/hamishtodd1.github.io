@@ -1,44 +1,75 @@
 /*
-	You probably do need parenthood to be marked. Not *that* complicated to think about
+	TODO
+		XSplit definitely fucked you, find a different compositer, maybe OBS
+		You probably do need parenthood to be marked. Not *that* complicated to think about
+		Detect controller smack in VR and make it so you just have to get to the frame where it happened
+		More roughness on helmet
+		Music, sound effects
+		Eyebrows
+		Visual alignment
+			Could bring back hiro or points
+			If there's *any* adjustment in post then it defeats the entire point.
+			There has to be some adjustment during the shoot anyway, because AR probably can't get that camera in place
+	
+	Pics and videos
+		Like in Captain disillusion
+		Take them out from behind your head
+		Put them next to you while you're talking
+		They are meant to come in a specific sequence, you should make use of that
+		Physics sim when they fall
 
-	Time synchronization
-		smack controllers together
-		could make controller flash at instant that it changes direction dramatically
-			Automatic sync then?
+	Bob Ross looked at his canvas and at the camera
 
-	Visual synchronization
-		If you glue the vive tracker to a tablet you only have to do it once
-		could glue the vive tracker to a point exactly behind the camera
-		but for time being it is better not to move dude!
-
-	Really ought to list names and put them in output file
-
-	better off marking the controller/inputs?
-		Jon Blow says "pain in the ass"
-		Smaller filesize for recording
-		Might somehow have to backtrack through frames to recover total state
-
-	Current workflow, one take:
-	1. physically set up camera
-	2. set up VR browser
-	3. in VR, put guides in place
-	4. start recording on both
-	5. do stuff
-	6. stop recording on both
-	7. import video onto computer
-	8. Put guides in place on video
-	9. Adjust lag
-	9a. "Post" eg eyes?
-	10. Record whole thing using XSplit
-	11. Edit with kdenlive? Patreon symbol at least
-
-	The speed of light:
-		there's an app on your phone/tablet which has the virtual objects etc. 
-		Also connects to an audio recorder which automatically combines that with video. 
-		Can figure out where it is in virtual world in relation to your hands and head (the only truly shared objects). 
-		Would need to have the actual position and orientation of the frikkin controllers. 
-		Even Vive tracker wouldn't be great. 
-		Skip from 2 to 11.
+	Reasons to have bradyBot:
+		Draws people's attention to things (including face) better
+		Makes it feel more like being present with you/more natural
+		More exciting / varied / "dynamic"
+		Want all this but don't want to bring someone else in
+			Have to wait on them
+			Extra communication
+			They can't re-zoom or track things as accurately as a robot
+			And if they can they're probably costly
+	Spherical camera
+		Camera direction is going to change a lot, both sideways and downwards. Spherical necessary for perspective correction
+		No need to do that roll/pitch eliminating adjustment
+		Transferrable to VR (but depth information would be better)
+	Pose / cinematography
+		Shake? See surely that's cheap and bad
+		Zoom? For shots of thing versus shot of both of you
+		You want the board close to the camera, closer than your hands
+			Arms/writsts behind objects
+				Can work out where wrist is just from model, check wrist dist to camera vs controller
+			Maybe wear a glove and have that in 3D model?
+		Shots
+			Looking at board (audience view should be basically the same as yours)
+			Looking at face (potentially very zoomed in)
+			Looking at both while face looks at camera
+			Looking at face and small thing brought out of board
+			Automatic shot selection CAN WAIT UNTIL YOU'VE DONE IT MANUALLY! But:
+				Looking at camera = camera looks at you
+					If you're not holding or even gesturing at thing, probably it *only* looks at you
+				Looking at camera while holding some object = track the thing, potentially getting your face in
+				Looking at thing but face reacts = probably you've not done anything serious with it
+				Looking at face and board should be very rare, so it's ok if it's got weird barrel distortion!
+	Resolution
+		May not matter so much, since interacting hand and face are mainly obscured. You'll know after trying it!
+		Temporary solution for background (might look awful, test first):
+			Choose your alpha color in threejs
+			Get your high-res picture in paint.net
+			"Paint" on it in that color in all the places where your body goes
+		Could do the chromakey crap and then have a high-res photo as an inner sphere
+		New camera
+			3840x2160 with 180x2*camera.fov lens, that'd allow the video to be 1080p
+			No zooming though
+			Your phone with a 180x180 fisheye is not a improvement resolution-wise
+	Could turn yourself into a virtual object
+		Helmet can go all the way around head
+		Arms can go in front of virtual objects
+		Better for folks in VR
+		How
+			Key out everything but you and your chair,
+			Know where head and hand are in 3D space, adjust sphere scale to make it line up
+			Depth camera or static key are options but green is probably easiest
 */
 
 initPlaybackAndRecording = function()
@@ -106,6 +137,8 @@ initPlaybackAndRecording = function()
 
 	presentFramesFile = function()
 	{
+		//Really ought to list names of objects and put them in output file
+		//also post processing effects eg eye state
 		presentJsonFile( JSON.stringify(frames), filename )
 	}
 
