@@ -4,8 +4,7 @@
 		You probably do need parenthood to be marked. Not *that* complicated to think about
 		Detect controller smack in VR and make it so you just have to get to the frame where it happened
 		More roughness on helmet
-		Some smooth jazz or whatever
-		Sound effects
+		Music, sound effects
 		Eyebrows
 		Visual alignment
 			Could bring back hiro or points
@@ -18,6 +17,8 @@
 		Put them next to you while you're talking
 		They are meant to come in a specific sequence, you should make use of that
 		Physics sim when they fall
+
+	Bob Ross looked at his canvas and at the camera
 
 	Reasons to have bradyBot:
 		Draws people's attention to things (including face) better
@@ -35,25 +36,32 @@
 	Pose / cinematography
 		Shake? See surely that's cheap and bad
 		Zoom? For shots of thing versus shot of both of you
-		You want the visiBox close to the camera, closer than your hands
+		You want the board close to the camera, closer than your hands
 			Arms/writsts behind objects
 				Can work out where wrist is just from model, check wrist dist to camera vs controller
 			Maybe wear a glove and have that in 3D model?
 		Shots
-			Looking at visiBox (audience view should be basically the same as yours)
-			Looking at face (face is not in center of shot, don't forget)
+			Looking at board (audience view should be basically the same as yours)
+			Looking at face (potentially very zoomed in)
 			Looking at both while face looks at camera
-			Looking at face and small thing brought out of visiBox
+			Looking at face and small thing brought out of board
 			Automatic shot selection CAN WAIT UNTIL YOU'VE DONE IT MANUALLY! But:
 				Looking at camera = camera looks at you
 					If you're not holding or even gesturing at thing, probably it *only* looks at you
-				Looking at camera while holding thing = both in frame. Probably it's something small
+				Looking at camera while holding some object = track the thing, potentially getting your face in
 				Looking at thing but face reacts = probably you've not done anything serious with it
-	Resolution (after the next video!)
-		May not matter so much, since interacting hand and face are mainly obscured
-		Could do the chromakey crap and then have a high-res photo behind you
-		Your phone with a 180x180 fisheye is not a improvement resolution-wise
-		But a 4k camera with a 180x100 fisheye or something, that'd be nice and allow the video to be 1080p
+				Looking at face and board should be very rare, so it's ok if it's got weird barrel distortion!
+	Resolution
+		May not matter so much, since interacting hand and face are mainly obscured. You'll know after trying it!
+		Temporary solution for background (might look awful, test first):
+			Choose your alpha color in threejs
+			Get your high-res picture in paint.net
+			"Paint" on it in that color in all the places where your body goes
+		Could do the chromakey crap and then have a high-res photo as an inner sphere
+		New camera
+			3840x2160 with 180x2*camera.fov lens, that'd allow the video to be 1080p
+			No zooming though
+			Your phone with a 180x180 fisheye is not a improvement resolution-wise
 	Could turn yourself into a virtual object
 		Helmet can go all the way around head
 		Arms can go in front of virtual objects
