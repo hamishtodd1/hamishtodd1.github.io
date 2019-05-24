@@ -46,7 +46,7 @@ initPlaybackAndRecording = function()
 	let playbackMode = false
 
 	{
-		videoDomElement.src = "recordings/2-07.mp4"
+		videoDomElement.src = "recordings/water.mp4"
 		// videoDomElement.volume = 0
 
 		var videoTexture = new THREE.VideoTexture( videoDomElement );
@@ -111,7 +111,7 @@ initPlaybackAndRecording = function()
 
 	loadRecording = function(version)
 	{
-		new THREE.FileLoader().load( "recordings/2-07.txt", //2-07
+		new THREE.FileLoader().load( "recordings/0-03 (2).txt", //2-07
 			function( str )
 			{
 				frames = eval(str)

@@ -12,9 +12,6 @@
 
 	"How do things rotate in 4D? in VR" Thumbnail: nice MR thing, "4 space dimensions??"
 	Description
-		Thank you to khalidsrri https://www.turbosquid.com/3d-models/free-golden-fish-3d-model/755156
-		Aaand motionstock https://www.youtube.com/watch?v=PK1ybF8ZYCU
-			https://freesound.org/people/Kinoton/sounds/393819/
 		Tags: flatland
 
 	Send to
@@ -24,7 +21,10 @@
 		Marc
 		Grant
 		Andy
-		
+		Destin
+		Robin Hunicke, Richard Lemarchand
+		MrDoob, tojiro, some other webvr person
+		inigo quilez with that job!
 
 	Script, 
 		So to describe 4D rotations, in this video we're going to use basically the same approach to describing 4D
