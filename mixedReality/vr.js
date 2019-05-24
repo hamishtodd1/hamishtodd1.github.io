@@ -15,7 +15,7 @@ function initControllerObjects()
 		return overlapping
 	}
 
-	var controllerMaterial = new THREE.MeshLambertMaterial({color:0x444444});
+	var controllerMaterial = new THREE.MeshStandardMaterial({color:0x444444});
 	var controllerKeys = {
 		thumbstickButton:0,
 		grippingTop: 1,

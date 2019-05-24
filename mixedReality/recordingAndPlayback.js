@@ -106,7 +106,7 @@ initPlaybackAndRecording = function()
 
 	let frames = []
 
-	let lag = -7.424;
+	let lag = -7.4209;
 	let recording = false
 	let recordingTime = 0
 	let filename = ""
@@ -321,14 +321,13 @@ initPlaybackAndRecording = function()
 	{
 		//if you're recording in 30fps it doesn't matter! Eeeeexcept the recording might be off by one frame from what you saw
 		let videoFps = 30.0 //ffmpeg tells us so 
-		let videoFrameWeAreOn = Math.floor( videoDomElement.currentTime * videoFps); //VideoFrame.js says floor		
-		let timeInSimulation = videoFrameWeAreOn / videoFps + lag
+		let relevantVideoFrameWeAreOn = Math.floor( (videoDomElement.currentTime + lag) * videoFps); //VideoFrame.js says floor		
+		let timeInSimulation = relevantVideoFrameWeAreOn / videoFps
 		if(timeInSimulation < 0)
 		{
-			videoDomElement.currentTime = (Math.ceil(-lag * videoFps) + 5) / videoFps 
-			log("went to start: ", videoDomElement.currentTime)
-			videoFrameWeAreOn = Math.floor( videoDomElement.currentTime * videoFps) //VideoFrame.js says floor		
-			timeInSimulation = videoFrameWeAreOn / videoFps + lag
+			videoDomElement.currentTime = 1 - lag
+			relevantVideoFrameWeAreOn = Math.floor( (videoDomElement.currentTime + lag) * videoFps);
+			timeInSimulation = relevantVideoFrameWeAreOn / videoFps
 		}
 
 		let frameJustBefore = null
@@ -432,7 +431,7 @@ initPlaybackAndRecording = function()
 			{
 				if(lagVelocity < 0)
 					lagVelocity = 0
-				lagVelocity += 0.0005
+				lagVelocity += 0.0001
 				lag += lagVelocity
 				console.log("lag: ", lag)
 			} )
@@ -440,7 +439,7 @@ initPlaybackAndRecording = function()
 			{
 				if(lagVelocity > 0)
 					lagVelocity = 0
-				lagVelocity -= 0.0005
+				lagVelocity -= 0.0001
 				lag += lagVelocity
 				console.log("lag: ", lag)
 			})
@@ -465,12 +464,12 @@ initPlaybackAndRecording = function()
 		if( !videoDomElement.paused )
 		{
 			videoDomElement.pause()
-			log("pause")
+			log("pause ", videoDomElement.currentTime)
 		}
 		else
 		{
 			videoDomElement.play();
-			log("playing")
+			log("playing ", videoDomElement.currentTime)
 		}
 	}
 	bindButton( 'space', togglePlaying, "toggle playing")

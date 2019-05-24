@@ -1,7 +1,7 @@
 function initCameraHolder(screen)
 {
 	screen.updateMatrix()
-	var cameraHolder = new THREE.Group()
+	let cameraHolder = new THREE.Group()
 	scene.add(cameraHolder)
 	let height = 0.2
 	let correctPosition = new THREE.Vector3(-0.2547435361785763,1.610,-0.6565080057853395)

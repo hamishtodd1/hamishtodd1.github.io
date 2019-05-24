@@ -1,19 +1,13 @@
 /*
 	TODO
-		DEFINITELY a translucent plane for fish universe
 		Switch triangly to soccer ball?
-		grid
 		superimpose numbers?
-		make it so it's not triangly sphere in that one part?
 		sound effects?
 			Grab and ungrab, fairly easy to check
 			visibility change, easy to check
 			Rotation of fish and heptagon? fairly easy
+			Camera shake? You'd want to set screen in place - not too hard
 		Probably can get the lag such that it's on-frame
-		remove background sound? Probably not, mic does it!
-
-		Brief clip of threesphere close up for opening... maybe without video! Maybe a cartoon fish?
-		Camera shake? You'd want to set screen in place - not too hard
 		Deadline is 23rd I guess. Nice as it would be to "go viral" in time
 
 	"How do things rotate in 4D? in VR" Thumbnail: nice MR thing, "4 space dimensions??"
@@ -22,6 +16,15 @@
 		Aaand motionstock https://www.youtube.com/watch?v=PK1ybF8ZYCU
 			https://freesound.org/people/Kinoton/sounds/393819/
 		Tags: flatland
+
+	Send to
+		Pierre
+		Vi
+		Bret
+		Marc
+		Grant
+		Andy
+		
 
 	Script, 
 		So to describe 4D rotations, in this video we're going to use basically the same approach to describing 4D
@@ -76,7 +79,6 @@
 
 function initThreeSphereExploration( height )
 {
-
 	initProjectionSystem()
 
 	let visiBox = VisiBox()
@@ -206,7 +208,9 @@ function initThreeSphereExploration( height )
 			}
 			let tubularSegments = lotsOfSegments ? 72:36
 			let tubeRadius = 0.02
-			let representation = new THREE.Mesh( new THREE.TubeBufferGeometry( curve, tubularSegments, tubeRadius,3,false ), new THREE.MeshLambertMaterial({clippingPlanes:visiBox.planes}) )
+			let representation = new THREE.Mesh(
+				new THREE.TubeBufferGeometry( curve, tubularSegments, tubeRadius,3,false ),
+				new THREE.MeshStandardMaterial({clippingPlanes:visiBox.planes}) )
 			greatCircle.representation = representation
 			assemblage.add( representation )
 
@@ -443,8 +447,9 @@ function initThreeSphereExploration( height )
 	assemblage.updateMatrixWorld()
 	scene.add(assemblage)
 
-	objectsToBeLookedAtByHelmet.push(visiBox.faces[5])
-	visiBox.faces[5].eyeAttractionAngle = 0.4
+	let faceToLookAt = visiBox.faces[1]
+	faceToLookAt.eyeAttractionAngle = 0.3
+	objectsToBeLookedAtByHelmet.push(faceToLookAt)
 
 	let hyperOctahedronCircles = []
 	{
@@ -546,6 +551,15 @@ function initThreeSphereExploration( height )
 
 		alwaysUpdateFunctions.push(function()
 		{
+			if( visibleSet.value === greatCircleSets.indexOf(hyperOctahedronCircles) )
+			{
+				assemblage.scale.setScalar(0.038)
+			}
+			else
+			{
+				assemblage.scale.setScalar(0.05)
+			}
+
 			for(let i = 0; i < greatCircleSets.length; i++)
 			{
 				if( greatCircleSets[i][0].representation.visible !== (i === visibleSet.value) )
