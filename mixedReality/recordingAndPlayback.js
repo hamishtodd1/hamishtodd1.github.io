@@ -13,10 +13,10 @@
 	
 	Pics and videos
 		Like in Captain disillusion
-		Take them out from behind your head
 		Put them next to you while you're talking
 		They are meant to come in a specific sequence, you should make use of that
 		Physics sim when they fall
+		Videos thing: no need for little green screen
 
 	Bob Ross looked at his canvas and at the camera
 
@@ -72,7 +72,7 @@
 			Depth camera or static key are options but green is probably easiest
 */
 
-initPlaybackAndRecording = function()
+function initPlaybackAndRecording()
 {
 	let playbackMode = false
 
@@ -110,30 +110,6 @@ initPlaybackAndRecording = function()
 	let recording = false
 	let recordingTime = 0
 	let filename = ""
-	bindButton( "z", function()
-	{
-		if( !recording )
-		{
-			// frustumIndicator.material.color.r = 1;
-			recording = true
-			log("recording")
-			frames = Array(262144) //hopefully enough for 20 minutes
-			recordingTime = 0
-
-			cameraHolder.frustumIndicator.material.color.setRGB(1,0,0)
-		}
-		else
-		{
-			// frustumIndicator.material.color.r = 0.267
-			recording = false
-			log("not recording")
-
-			filename = new Date().toString().slice(17,21)
-			presentFramesFile()
-
-			cameraHolder.frustumIndicator.material.color.setRGB(0,0,0)
-		}
-	}, "toggle recording" )
 
 	presentFramesFile = function()
 	{
@@ -142,7 +118,7 @@ initPlaybackAndRecording = function()
 		presentJsonFile( JSON.stringify(frames), filename )
 	}
 
-	loadRecording = function(version)
+	function loadRecording(version)
 	{
 		new THREE.FileLoader().load( "recordings/0-03 (2).txt", //2-07
 			function( str )
@@ -156,18 +132,9 @@ initPlaybackAndRecording = function()
 			}
 		);
 	}
-	if(!chromiumRatherThanChrome)
-	{
-		loadRecording()
-	}
 
-	maybeRecordFrame = function()
+	function recordFrame()
 	{
-		if( !recording )
-		{
-			return
-		}
-
 		recordingTime += frameDelta;
 
 		let frame = {};
@@ -317,7 +284,7 @@ initPlaybackAndRecording = function()
 
 	let helmet = initHelmet()
 
-	synchronizeStateToVideo = function()
+	function synchronizeStateToVideo()
 	{
 		//if you're recording in 30fps it doesn't matter! Eeeeexcept the recording might be off by one frame from what you saw
 		let videoFps = 30.0 //ffmpeg tells us so 
@@ -385,10 +352,13 @@ initPlaybackAndRecording = function()
 			for(let i = 0; i < updateFunctions.length; i++)
 			{
 				updateFunctions[i]();
-			}			
-		}
+			}
 
-		maybeRecordFrame()
+			if( recording )
+			{
+				recordFrame()
+			}
+		}
 	}
 
 	function togglePlaying()
@@ -472,5 +442,35 @@ initPlaybackAndRecording = function()
 			log("playing ", videoDomElement.currentTime)
 		}
 	}
-	bindButton( 'space', togglePlaying, "toggle playing")
+
+	if(!chromiumRatherThanChrome)
+	{
+		bindButton( "z", function()
+		{
+			if( !recording )
+			{
+				// frustumIndicator.material.color.r = 1;
+				recording = true
+				log("recording")
+				frames = Array(262144) //hopefully enough for 20 minutes
+				recordingTime = 0
+
+				cameraHolder.frustumIndicator.material.color.setRGB(1,0,0)
+			}
+			else
+			{
+				// frustumIndicator.material.color.r = 0.267
+				recording = false
+				log("not recording")
+
+				filename = new Date().toString().slice(17,21)
+				presentFramesFile()
+
+				cameraHolder.frustumIndicator.material.color.setRGB(0,0,0)
+			}
+		}, "toggle recording" )
+		bindButton( 'space', togglePlaying, "toggle playing")
+
+		loadRecording()
+	}
 }

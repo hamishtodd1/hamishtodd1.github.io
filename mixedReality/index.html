@@ -1,10 +1,3 @@
-<!-- live maths?
-
-	Hodgkin: one of the first women to get a first class degree
-	Videos thing: no need for little green screen
-	Nice growing crystal
--->
-
 <html>
 	<head>
 		<title>a</title>
@@ -30,7 +23,7 @@
 		<script src="lighting.js"></script>
 		<script src="helmet.js"></script>
 
-		<script src="imitationHand.js"></script>
+		<script src="mockVrInput.js"></script>
 
 		<script src="face.js"></script>
 
@@ -49,9 +42,6 @@
 
 		<!-- <script src="mouse.js"></script> -->
 
-		<script src="units/fish.js"></script>
-		<script src="units/threeSphereExploration.js"></script>
-
 		<!-- <script src="https://aframe.io/releases/0.9.0/aframe.min.js"></script>
 		<script src="https://cdn.rawgit.com/jeromeetienne/AR.js/1.6.2/aframe/build/aframe-ar.js"></script>
 		<a-scene embedded arjs>
@@ -65,7 +55,7 @@
 
 		<!-- <script src="units/mobiusTransformations.js"></script> -->
 
-		<script src="units/twoSphereExploration.js"></script>
+		<script src="units/shaderExperimentation.js"></script>
 
 		<script>
 			async function init()
@@ -84,52 +74,29 @@
 				window.addEventListener( 'resize', windowResize)
 
 				initButtons()
-				// initMouse()
-
 				initFaceMaker()
-
-				initLights();
-				await initPlaybackAndRecording()
-				
+				initLights()
+				await initPlaybackAndRecording()				
 				initControllerObjects()
 				if( chromiumRatherThanChrome )
 				{
 					initVrInput()
 					await initFloorAndSky()
 				}
-				// initImitationHand();
-				markPositionAndQuaternion(handControllers[RIGHT_CONTROLLER_INDEX])
 
-				{
-					let height = 0.2
-
-					let twoSphereVisiBox = VisiBox()
-					for(let i = 0; i < 8; i++)
-					{
-						twoSphereVisiBox.corners[i].visible = false
-					}
-					let fish = initFish( twoSphereVisiBox )
-					initTwoSphereExploration( fish, twoSphereVisiBox, height )
-
-					initThreeSphereExploration( height )
-				}
+				await initShaderExperimentation()
 
 				renderer.setAnimationLoop( function()
 				{
-					frameDelta = clock.getDelta();
+					frameDelta = clock.getDelta()
 
 					if(renderer.vr.enabled === true)
 					{
-						readHandInput();
+						readHandInput()
 					}
-					if(imitationHand !== null )
-					{
-						imitationHand.update()
-					}
-
-					// mouse.updateFromAsyncAndCheckClicks()
 
 					synchronizeToVideoOrCallContingentUpdateFunctionsAndMaybeRecord()
+					
 					for(let i = 0; i < alwaysUpdateFunctions.length; i++)
 					{
 						alwaysUpdateFunctions[i]()

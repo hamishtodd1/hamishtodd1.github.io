@@ -27,7 +27,7 @@ var WEBVR = {
 			button.style.left = 'calc(50% - 50px)';
 			button.style.width = '100px';
 
-			button.textContent = 'ENTER VR (e)';
+			button.textContent = 'ENTER VR (y)';
 
 			button.onmouseenter = function () { button.style.opacity = '1.0'; };
 			button.onmouseleave = function () { button.style.opacity = '0.5'; };
@@ -62,7 +62,7 @@ var WEBVR = {
 				currentSession.removeEventListener( 'end', onSessionEnded );
 
 				renderer.vr.setSession( null );
-				button.textContent = 'ENTER VR (e)';
+				button.textContent = 'ENTER VR (y)';
 
 				currentSession = null;
 
@@ -76,7 +76,7 @@ var WEBVR = {
 			button.style.left = 'calc(50% - 50px)';
 			button.style.width = '100px';
 
-			button.textContent = 'ENTER VR (e)';
+			button.textContent = 'ENTER VR (y)';
 
 			button.onmouseenter = function () { button.style.opacity = '1.0'; };
 			button.onmouseleave = function () { button.style.opacity = '0.5'; };
@@ -156,7 +156,7 @@ var WEBVR = {
 
 			window.addEventListener( 'vrdisplaypresentchange', function ( event ) {
 
-				button.textContent = event.display.isPresenting ? 'EXIT VR' : 'ENTER VR (e)';
+				button.textContent = event.display.isPresenting ? 'EXIT VR' : 'ENTER VR (y)';
 
 			}, false );
 

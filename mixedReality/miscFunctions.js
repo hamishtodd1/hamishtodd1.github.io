@@ -1,3 +1,24 @@
+function assignShader(fileName, materialToReceiveAssignment, vertexOrFragment)
+{
+	var propt = vertexOrFragment + "Shader"
+	var fullFileName = "units/shaders/" + fileName + ".glsl"
+
+	return new Promise(resolve => {
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", fullFileName, true);
+		xhr.onload = function(e)
+		{
+			materialToReceiveAssignment[propt] = xhr.response
+			resolve();
+		};
+		xhr.onerror = function ()
+		{
+			console.error(fullFileName, "didn't load");
+		};
+		xhr.send();
+	})
+}
+
 function Grid(numWide,numTall,spacing)
 {
 	let grid = new THREE.LineSegments( new THREE.Geometry(), new THREE.MeshBasicMaterial({
@@ -42,27 +63,6 @@ function sphereLineIntersection(p1,p2,center,r)
 			p2.clone().sub(p1).multiplyScalar(solution2).add(p1)
 		]
 	}
-}
-
-function assignShader(fileName, materialToReceiveAssignment, vertexOrFragment)
-{
-	var propt = vertexOrFragment + "Shader"
-	var fullFileName = "units/shaders/" + fileName + ".glsl"
-
-	return new Promise(resolve => {
-		var xhr = new XMLHttpRequest();
-		xhr.open("GET", fullFileName, true);
-		xhr.onload = function(e)
-		{
-			materialToReceiveAssignment[propt] = xhr.response
-			resolve();
-		};
-		xhr.onerror = function ()
-		{
-			console.error(fullFileName, "didn't load");
-		};
-		xhr.send();
-	})
 }
 
 //	a - therefore normal is x
@@ -177,6 +177,9 @@ function objectNotAppearingTest(obj)
 	{
 		console.log("children: ",obj.children.length)
 	}
+
+	console.log("camera position: ", camera.position)
+	console.log("it's good to have camera here, prevents bad practice, everything needs to move around")
 }
 
 function jonSlerp(q0,q1,t)

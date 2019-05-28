@@ -314,7 +314,7 @@ function initThreeSphereExploration( height )
 
 			for(let i = 0; i < 3; i++)
 			{
-				imitationHand.oldPosition.copy(imitationHand.position)
+				imitationHand.positionOld.copy(imitationHand.position)
 				imitationHand.position.y += 0.2
 
 				checkOrthonormality(threeSphereMatrix)
@@ -366,8 +366,8 @@ function initThreeSphereExploration( height )
 
 				virtualHand.position.copy(designatedHand.position)
 				virtualHand.quaternion.copy(designatedHand.quaternion)
-				virtualHand.velocity.copy(designatedHand.position).sub(designatedHand.oldPosition)
-				virtualHand.angularVelocity.copy(designatedHand.oldQuaternion).inverse().multiply(designatedHand.quaternion)
+				virtualHand.velocity.copy(designatedHand.position).sub(designatedHand.positionOld)
+				virtualHand.angularVelocity.copy(designatedHand.quaternionOld).inverse().multiply(designatedHand.quaternion)
 			}
 			else
 			{

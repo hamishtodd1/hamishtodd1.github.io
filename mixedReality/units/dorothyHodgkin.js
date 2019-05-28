@@ -7,6 +7,8 @@
 		She directly saved the lives of tens or hundreds of millions of people, indirectly billions
 		First person to do biological crystallography
 		Oxford Professor, Nobel prize
+		one of the first women to get a first class degree
+		have a video of a nice growing crystal
 		An incredible scientist who was a woman (and an attentive mother to three kids) IN THE THIRTIES
 		"Dorothy Crowfoot Hodgkin" because she held out for a long time against taking her husband's name for twelve years; she took it under pressure from a publisher.
 		Left wing: adviser to Marxist prime minister of Ghana

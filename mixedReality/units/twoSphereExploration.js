@@ -519,14 +519,14 @@ function initTwoSphereExploration(fish, visiBox, height)
 
 			if( grabbed2DObject !== null )
 			{
-				grabbed2DObject.position.x += designatedHand.position.x - designatedHand.oldPosition.x
-				grabbed2DObject.position.y += designatedHand.position.y - designatedHand.oldPosition.y
+				grabbed2DObject.position.x += designatedHand.position.x - designatedHand.positionOld.x
+				grabbed2DObject.position.y += designatedHand.position.y - designatedHand.positionOld.y
 
 				//hand is origin
 				let worldishPointInHand = pointInHand.clone().applyQuaternion(designatedHand.quaternion)
 				let worldishPointInHandOnPlane = worldishPointInHand.clone().projectOnPlane(zUnit).normalize()
 
-				let oldWorldishPointInHand = pointInHand.clone().applyQuaternion(designatedHand.oldQuaternion)
+				let oldWorldishPointInHand = pointInHand.clone().applyQuaternion(designatedHand.quaternionOld)
 				let oldWorldishPointInHandOnPlane = oldWorldishPointInHand.clone().projectOnPlane(zUnit).normalize()
 
 				let diff = new THREE.Quaternion().setFromUnitVectors(oldWorldishPointInHandOnPlane,worldishPointInHandOnPlane)

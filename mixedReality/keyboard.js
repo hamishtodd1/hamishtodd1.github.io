@@ -9,7 +9,7 @@ function initButtons()
 			console.error("attempted to bind a button that already has a binding: ", buttonName)
 		}
 
-		console.warn("\n",buttonName + ": " + buttonDescription)
+		// console.warn("\n",buttonName + ": " + buttonDescription)
 		buttons[buttonName] = {
 			down: false,
 			onDown: onDown
