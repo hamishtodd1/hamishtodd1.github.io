@@ -140,41 +140,12 @@ void main(void)
  
 <script type="text/javascript"> 
 
-function getShader ( gl, id )
-{
-	var shaderScript = document.getElementById ( id );
-	var str = "";
-	var k = shaderScript.firstChild;
-	while ( k )
-	{
-		if ( k.nodeType == 3 ) str += k.textContent;
-		k = k.nextSibling;
-	}
-	var shader;
-	if ( shaderScript.type == "x-shader/x-fragment" )
-	{
-		shader = gl.createShader ( gl.FRAGMENT_SHADER );
-	}
-	else if ( shaderScript.type == "x-shader/x-vertex" )
-	{
-		shader = gl.createShader(gl.VERTEX_SHADER);
-	}
-	else return null;
-	gl.shaderSource(shader, str);
-	gl.compileShader(shader);
-	if (gl.getShaderParameter(shader, gl.COMPILE_STATUS) == 0)
-	{
-		alert(gl.getShaderInfoLog(shader));
-	}
-	return shader;
-}
-
-var gl, canvas, c_w, c_h,
+var gl, canvas, canvasWidth, canvasHeight,
 	prog, prog2, texture, texture2, FBO, FBO2, mvMat, mvMatLoc, rotMat,
 	xOffs = yOffs = 0,  drag  = 0,  xRot = yRot = 0,  transl = -2.,
-	n = 128, ny = 64,  it = 1, frames = 0, animating = true,
+	n = 128, ny = 64,  it = 1, animating = true,
 	a = .1, b = .2, eps = .05, D = 1,
-	dt = .5, h = 2,  time, time0, ti0;
+	dt = .5, h = 2;
 
 function generateStartingPixels()
 {
@@ -196,11 +167,46 @@ function generateStartingPixels()
 
 function webGlStart()
 {
+	function getShader ( gl, id )
+	{
+		var shaderScript = document.getElementById ( id );
+		var str = "";
+		var k = shaderScript.firstChild;
+		while ( k )
+		{
+			if ( k.nodeType == 3 ) str += k.textContent;
+			k = k.nextSibling;
+		}
+
+		//very much equivalent to our stuff at this point, just a string
+
+		var shader;
+		if ( shaderScript.type == "x-shader/x-fragment" )
+		{
+			shader = gl.createShader ( gl.FRAGMENT_SHADER );
+		}
+		else if ( shaderScript.type == "x-shader/x-vertex" )
+		{
+			shader = gl.createShader(gl.VERTEX_SHADER);
+		}
+		else
+		{
+			return null;
+		}
+		gl.shaderSource(shader, str);
+		gl.compileShader(shader);
+		if (gl.getShaderParameter(shader, gl.COMPILE_STATUS) == 0)
+		{
+			alert(gl.getShaderInfoLog(shader));
+		}
+		return shader;
+	}
+
 	canvas = document.getElementById("canvas");
-	c_w = window.innerWidth - 50;
-	c_h = window.innerHeight - 10;
-	canvas.width = c_w;
-	canvas.height = c_h;
+	canvasWidth = window.innerWidth - 50;
+	canvasHeight = window.innerHeight - 10;
+	canvas.width = canvasWidth;
+	canvas.height = canvasHeight;
 
 	//compatibility
 	{
@@ -235,7 +241,7 @@ function webGlStart()
 
 		function render()
 		{
-			gl.viewport(0, 0, c_w, c_h);
+			gl.viewport(0, 0, canvasWidth, canvasHeight);
 			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 			gl.useProgram(prog);
 			rotMat.rotate(xRot/3, 1,0,0);  rotMat.rotate(yRot/3, 0,1,0);
@@ -249,10 +255,7 @@ function webGlStart()
 			gl.drawArrays(gl.POINTS, 0, n*ny*n);
 			gl.flush ();
 		}
-	}
-
-	//no idea
-	{
+		
 		var vertices = [];
 		for ( var y = 0; y < ny; y++ )
 		for ( var z = 0; z < n; z++ )
@@ -298,7 +301,7 @@ function webGlStart()
 	//projection and rotation
 	{
 		var prMatrix = new CanvasMatrix4();
-		prMatrix.perspective(45, c_w/c_h, .1, 100);
+		prMatrix.perspective(45, canvasWidth/canvasHeight, .1, 100);
 		gl.uniformMatrix4fv( gl.getUniformLocation(prog,"prMatrix"),
 				false, new Float32Array(prMatrix.getAsArray()) );
 		mvMatrix = new CanvasMatrix4();
@@ -328,7 +331,7 @@ function webGlStart()
 		gl.uniform1f(gl.getUniformLocation(prog2, "dt"),  dt);
 		gl.uniform1f(gl.getUniformLocation(prog2, "dth2"), D*dt/(h*h));
 
-		function update()
+		function updateSimulation()
 		{
 			gl.viewport(0,0,n,ny*n);
 			gl.useProgram(prog2);
@@ -342,7 +345,6 @@ function webGlStart()
 				gl.bindFramebuffer(gl.FRAMEBUFFER, FBO);
 				gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 			}
-			frames++;
 		}
 	}
 
@@ -376,60 +378,57 @@ function webGlStart()
 		}
 	}
 
-	//snore
+	//boilerplate?
 	{
 		gl.enable(gl.DEPTH_TEST);
 		gl.depthFunc(gl.LEQUAL);
 		gl.clearDepth(1.0);
 		gl.clearColor(0, 0, .2, 1);
-
-		time = time0 = ti0 = new Date().getTime();
-		setInterval(function()
-		{
-			var ti = new Date().getTime();
-			var fps = Math.round(1000*frames/(ti - time));
-			frames = 0;  time = ti;
-		}, 500);
 	}
 
-	canvas.onmousedown = function ( ev )
+	//mouse
 	{
-		drag  = 1;
-		xOffs = ev.clientX;  yOffs = ev.clientY;
-	}
-	canvas.onmouseup = function ( ev )
-	{
-		drag  = 0;
-		xOffs = ev.clientX;  yOffs = ev.clientY;
-	}
-	canvas.onmousemove = function ( ev )
-	{
-		if ( drag == 0 ) return;
-		if ( ev.shiftKey )
+		canvas.onmousedown = function ( ev )
 		{
-			transl *= 1 + (ev.clientY - yOffs)/300;
-			yRot = - xOffs + ev.clientX;
+			drag  = 1;
+			xOffs = ev.clientX;  yOffs = ev.clientY;
 		}
-		else {
-			yRot = - xOffs + ev.clientX;  xRot = - yOffs + ev.clientY; }
-		xOffs = ev.clientX;   yOffs = ev.clientY;
+		canvas.onmouseup = function ( ev )
+		{
+			drag  = 0;
+			xOffs = ev.clientX;  yOffs = ev.clientY;
+		}
+		canvas.onmousemove = function ( ev )
+		{
+			if ( drag == 0 ) return;
+			if ( ev.shiftKey )
+			{
+				transl *= 1 + (ev.clientY - yOffs)/300;
+				yRot = - xOffs + ev.clientX;
+			}
+			else
+			{
+				yRot = - xOffs + ev.clientX;  xRot = - yOffs + ev.clientY;
+			}
+			xOffs = ev.clientX;   yOffs = ev.clientY;
+		}
+		var wheelHandler = function(ev)
+		{
+			var del = 1.1;
+			if (ev.shiftKey) del = 1.01;
+			var ds = ((ev.detail || ev.wheelDelta) < 0) ? del : (1 / del);
+			transl *= ds;
+			ev.preventDefault();
+		};
+		canvas.addEventListener('DOMMouseScroll', wheelHandler, false);
+		canvas.addEventListener('mousewheel', wheelHandler, false);
 	}
-	var wheelHandler = function(ev)
-	{
-		var del = 1.1;
-		if (ev.shiftKey) del = 1.01;
-		var ds = ((ev.detail || ev.wheelDelta) < 0) ? del : (1 / del);
-		transl *= ds;
-		ev.preventDefault();
-	};
-	canvas.addEventListener('DOMMouseScroll', wheelHandler, false);
-	canvas.addEventListener('mousewheel', wheelHandler, false);
 
 	function loop()
 	{
 		if( animating )
 		{
-			update();
+			updateSimulation();
 		}
 
 		render()
@@ -455,15 +454,12 @@ function reset()
 	var pixels = generateStartingPixels();
 
 	gl.bindTexture(gl.TEXTURE_2D, texture);
-
 	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, n, ny*n, 0,
 		gl.RGBA, gl.FLOAT, new Float32Array(pixels));
 
 	gl.bindTexture(gl.TEXTURE_2D, texture2);
 	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, n, ny*n, 0, gl.RGBA,
-	gl.FLOAT, new Float32Array(pixels));
-
-	time0 = time;
+		gl.FLOAT, new Float32Array(pixels));
 
 	animating = true
 	document.getElementById('runBtn').value = "Stop";
