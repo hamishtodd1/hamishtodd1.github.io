@@ -1,11 +1,11 @@
 /*
-	Ken Perlin could give feedback
 	Not visible when you're paused!
 
 	For figuring out this "sometimes rotate" business, you should only have 
 
 	Sigh, need to consult an animator over this. It is an art and therefore it might go badly
-	Eh, the pi creatures have very little to them but are effective. And you never notice the monkies in super monkey ball. This is exactly the kind of thing that *doesn't* matter
+	Eh, the pi creatures have very little to them but are effective.
+	And you never notice the monkies in super monkey ball. This is exactly the kind of thing that *doesn't* matter
 	Actually thinking about it more might make people like it less? Snakebird...
 	Think snakebird music. Also noby noby boy
 	Could add a "replace birds with controllers" button to ui if many don't like them.

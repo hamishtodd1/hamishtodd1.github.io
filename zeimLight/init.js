@@ -23,38 +23,39 @@ function init()
 	// initFaceMaker()
 
 	{
-		let randomTri = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({side:THREE.DoubleSide}))
-		for(let i = 0; i < 3; i++)
-		{
-			randomTri.geometry.vertices.push( new THREE.Vector3(
-				(Math.random()-0.5)*0.5,
-				(Math.random()-0.5)*0.5,
-				-0.1) )
-		}
-		log(randomTri.geometry.vertices)
-		randomTri.geometry.faces.push(new THREE.Face3(0,1,2))
-		for(let i = 0; i < 3; i++)
-		{
-			let line = new THREE.Line(new THREE.Geometry())
-			line.geometry.vertices.push(new THREE.Vector3(),randomTri.geometry.vertices[i])
-			randomTri.add(line)
-		}
-		scene.add(randomTri)
+		var textureLoader = new THREE.TextureLoader();
+		textureEquirec = textureLoader.load( "textures/2294472375_24a3b8ef46_o.jpg" );
+		textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
+		textureEquirec.magFilter = THREE.LinearFilter;
+		textureEquirec.minFilter = THREE.LinearMipMapLinearFilter;
+		textureEquirec.encoding = THREE.sRGBEncoding;
 
-		let balls = Array(3)
-		for(let i = 0; i <3; i++)
-		{
-			balls[i] = new THREE.Mesh(new THREE.SphereGeometry(0.03))
-			balls[i].position.set(
-				(Math.random()-0.5)*0.5,
-				(Math.random()-0.5)*0.5,
-				(Math.random()-0.5)*0.5
-				)
-			scene.add(balls[i])
-		}
+		// Materials
+		var equirectShader = THREE.ShaderLib[ "equirect" ];
+		var equirectMaterial = new THREE.ShaderMaterial( {
+			fragmentShader: equirectShader.fragmentShader,
+			vertexShader: equirectShader.vertexShader,
+			uniforms: equirectShader.uniforms,
+			depthWrite: false,
+			side: THREE.BackSide
+		} );
+		equirectMaterial.uniforms[ "tEquirect" ].value = textureEquirec;
+		// enable code injection for non-built-in material
+		Object.defineProperty( equirectMaterial, 'map', {
+			get: function () {
+				return this.uniforms.tEquirect.value;
+			}
+		} );
 
-		//aight, now your job is to find a position and orientation for the triangle
-		//such that there is a point with
+		var params = {
+			Equirectangular: function () {
+				cubeMesh.material = equirectMaterial;
+				cubeMesh.visible = true;
+				sphereMaterial.envMap = textureEquirec;
+				sphereMaterial.needsUpdate = true;
+			},
+			Refraction: false
+		};
 	}
 
 	function render()
