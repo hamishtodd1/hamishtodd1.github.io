@@ -22,6 +22,41 @@ function init()
 	initMouse();
 	// initFaceMaker()
 
+	{
+		var textureLoader = new THREE.TextureLoader();
+		textureEquirec = textureLoader.load( "textures/2294472375_24a3b8ef46_o.jpg" );
+		textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
+		textureEquirec.magFilter = THREE.LinearFilter;
+		textureEquirec.minFilter = THREE.LinearMipMapLinearFilter;
+		textureEquirec.encoding = THREE.sRGBEncoding;
+
+		// Materials
+		var equirectShader = THREE.ShaderLib[ "equirect" ];
+		var equirectMaterial = new THREE.ShaderMaterial( {
+			fragmentShader: equirectShader.fragmentShader,
+			vertexShader: equirectShader.vertexShader,
+			uniforms: equirectShader.uniforms,
+			depthWrite: false,
+			side: THREE.BackSide
+		} );
+		equirectMaterial.uniforms[ "tEquirect" ].value = textureEquirec;
+		// enable code injection for non-built-in material
+		Object.defineProperty( equirectMaterial, 'map', {
+			get: function () {
+				return this.uniforms.tEquirect.value;
+			}
+		} );
+
+		var params = {
+			Equirectangular: function () {
+				cubeMesh.material = equirectMaterial;
+				cubeMesh.visible = true;
+				sphereMaterial.envMap = textureEquirec;
+				sphereMaterial.needsUpdate = true;
+			},
+			Refraction: false
+		};
+	}
 	function render()
 	{
 		{
