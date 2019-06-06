@@ -48049,3 +48049,776 @@
 	Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
+
+/**
+ * This class had been written to handle the output of the NRRD loader.
+ * It contains a volume of data and informations about it.
+ * For now it only handles 3 dimensional data.
+ * See the webgl_loader_nrrd.html example and the loaderNRRD.js file to see how to use this class.
+ * @class
+ * @author Valentin Demeusy / https://github.com/stity
+ * @param   {number}        xLength         Width of the volume
+ * @param   {number}        yLength         Length of the volume
+ * @param   {number}        zLength         Depth of the volume
+ * @param   {string}        type            The type of data (uint8, uint16, ...)
+ * @param   {ArrayBuffer}   arrayBuffer     The buffer with volume data
+ */
+THREE.Volume = function ( xLength, yLength, zLength, type, arrayBuffer ) {
+
+	if ( arguments.length > 0 ) {
+
+		/**
+		 * @member {number} xLength Width of the volume in the IJK coordinate system
+		 */
+		this.xLength = Number( xLength ) || 1;
+		/**
+		 * @member {number} yLength Height of the volume in the IJK coordinate system
+		 */
+		this.yLength = Number( yLength ) || 1;
+		/**
+		 * @member {number} zLength Depth of the volume in the IJK coordinate system
+		 */
+		this.zLength = Number( zLength ) || 1;
+
+		/**
+		 * @member {TypedArray} data Data of the volume
+		 */
+
+		switch ( type ) {
+
+			case 'Uint8' :
+			case 'uint8' :
+			case 'uchar' :
+			case 'unsigned char' :
+			case 'uint8_t' :
+				this.data = new Uint8Array( arrayBuffer );
+				break;
+			case 'Int8' :
+			case 'int8' :
+			case 'signed char' :
+			case 'int8_t' :
+				this.data = new Int8Array( arrayBuffer );
+				break;
+			case 'Int16' :
+			case 'int16' :
+			case 'short' :
+			case 'short int' :
+			case 'signed short' :
+			case 'signed short int' :
+			case 'int16_t' :
+				this.data = new Int16Array( arrayBuffer );
+				break;
+			case 'Uint16' :
+			case 'uint16' :
+			case 'ushort' :
+			case 'unsigned short' :
+			case 'unsigned short int' :
+			case 'uint16_t' :
+				this.data = new Uint16Array( arrayBuffer );
+				break;
+			case 'Int32' :
+			case 'int32' :
+			case 'int' :
+			case 'signed int' :
+			case 'int32_t' :
+				this.data = new Int32Array( arrayBuffer );
+				break;
+			case 'Uint32' :
+			case 'uint32' :
+			case 'uint' :
+			case 'unsigned int' :
+			case 'uint32_t' :
+				this.data = new Uint32Array( arrayBuffer );
+				break;
+			case 'longlong' :
+			case 'long long' :
+			case 'long long int' :
+			case 'signed long long' :
+			case 'signed long long int' :
+			case 'int64' :
+			case 'int64_t' :
+			case 'ulonglong' :
+			case 'unsigned long long' :
+			case 'unsigned long long int' :
+			case 'uint64' :
+			case 'uint64_t' :
+				throw 'Error in THREE.Volume constructor : this type is not supported in JavaScript';
+				break;
+			case 'Float32' :
+			case 'float32' :
+			case 'float' :
+				this.data = new Float32Array( arrayBuffer );
+				break;
+			case 'Float64' :
+			case 'float64' :
+			case 'double' :
+				this.data = new Float64Array( arrayBuffer );
+				break;
+			default :
+				this.data = new Uint8Array( arrayBuffer );
+
+		}
+
+		if ( this.data.length !== this.xLength * this.yLength * this.zLength ) {
+
+			throw 'Error in THREE.Volume constructor, lengths are not matching arrayBuffer size';
+
+		}
+
+	}
+
+	/**
+	 * @member {Array}  spacing Spacing to apply to the volume from IJK to RAS coordinate system
+	 */
+	this.spacing = [ 1, 1, 1 ];
+	/**
+	 * @member {Array}  offset Offset of the volume in the RAS coordinate system
+	 */
+	this.offset = [ 0, 0, 0 ];
+	/**
+	 * @member {THREE.Martrix3} matrix The IJK to RAS matrix
+	 */
+	this.matrix = new THREE.Matrix3();
+	this.matrix.identity();
+	/**
+	 * @member {THREE.Martrix3} inverseMatrix The RAS to IJK matrix
+	 */
+	/**
+	 * @member {number} lowerThreshold The voxels with values under this threshold won't appear in the slices.
+	 *                      If changed, geometryNeedsUpdate is automatically set to true on all the slices associated to this volume
+	 */
+	var lowerThreshold = - Infinity;
+	Object.defineProperty( this, 'lowerThreshold', {
+		get: function () {
+
+			return lowerThreshold;
+
+		},
+		set: function ( value ) {
+
+			lowerThreshold = value;
+			this.sliceList.forEach( function ( slice ) {
+
+				slice.geometryNeedsUpdate = true;
+
+			} );
+
+		}
+	} );
+	/**
+	 * @member {number} upperThreshold The voxels with values over this threshold won't appear in the slices.
+	 *                      If changed, geometryNeedsUpdate is automatically set to true on all the slices associated to this volume
+	 */
+	var upperThreshold = Infinity;
+	Object.defineProperty( this, 'upperThreshold', {
+		get: function () {
+
+			return upperThreshold;
+
+		},
+		set: function ( value ) {
+
+			upperThreshold = value;
+			this.sliceList.forEach( function ( slice ) {
+
+				slice.geometryNeedsUpdate = true;
+
+			} );
+
+		}
+	} );
+
+
+	/**
+	 * @member {Array} sliceList The list of all the slices associated to this volume
+	 */
+	this.sliceList = [];
+
+
+	/**
+	 * @member {Array} RASDimensions This array holds the dimensions of the volume in the RAS space
+	 */
+
+};
+
+THREE.Volume.prototype = {
+
+	constructor: THREE.Volume,
+
+	/**
+	 * @member {Function} getData Shortcut for data[access(i,j,k)]
+	 * @memberof THREE.Volume
+	 * @param {number} i    First coordinate
+	 * @param {number} j    Second coordinate
+	 * @param {number} k    Third coordinate
+	 * @returns {number}  value in the data array
+	 */
+	getData: function ( i, j, k ) {
+
+		return this.data[ k * this.xLength * this.yLength + j * this.xLength + i ];
+
+	},
+
+	/**
+	 * @member {Function} access compute the index in the data array corresponding to the given coordinates in IJK system
+	 * @memberof THREE.Volume
+	 * @param {number} i    First coordinate
+	 * @param {number} j    Second coordinate
+	 * @param {number} k    Third coordinate
+	 * @returns {number}  index
+	 */
+	access: function ( i, j, k ) {
+
+		return k * this.xLength * this.yLength + j * this.xLength + i;
+
+	},
+
+	/**
+	 * @member {Function} reverseAccess Retrieve the IJK coordinates of the voxel corresponding of the given index in the data
+	 * @memberof THREE.Volume
+	 * @param {number} index index of the voxel
+	 * @returns {Array}  [x,y,z]
+	 */
+	reverseAccess: function ( index ) {
+
+		var z = Math.floor( index / ( this.yLength * this.xLength ) );
+		var y = Math.floor( ( index - z * this.yLength * this.xLength ) / this.xLength );
+		var x = index - z * this.yLength * this.xLength - y * this.xLength;
+		return [ x, y, z ];
+
+	},
+
+	/**
+	 * @member {Function} map Apply a function to all the voxels, be careful, the value will be replaced
+	 * @memberof THREE.Volume
+	 * @param {Function} functionToMap A function to apply to every voxel, will be called with the following parameters :
+	 *                                 value of the voxel
+	 *                                 index of the voxel
+	 *                                 the data (TypedArray)
+	 * @param {Object}   context    You can specify a context in which call the function, default if this Volume
+	 * @returns {THREE.Volume}   this
+	 */
+	map: function ( functionToMap, context ) {
+
+		var length = this.data.length;
+		context = context || this;
+
+		for ( var i = 0; i < length; i ++ ) {
+
+			this.data[ i ] = functionToMap.call( context, this.data[ i ], i, this.data );
+
+		}
+
+		return this;
+
+	},
+
+	/**
+	 * @member {Function} extractPerpendicularPlane Compute the orientation of the slice and returns all the information relative to the geometry such as sliceAccess, the plane matrix (orientation and position in RAS coordinate) and the dimensions of the plane in both coordinate system.
+	 * @memberof THREE.Volume
+	 * @param {string}            axis  the normal axis to the slice 'x' 'y' or 'z'
+	 * @param {number}            index the index of the slice
+	 * @returns {Object} an object containing all the usefull information on the geometry of the slice
+	 */
+	extractPerpendicularPlane: function ( axis, RASIndex ) {
+
+		var iLength,
+			jLength,
+			sliceAccess,
+			planeMatrix = ( new THREE.Matrix4() ).identity(),
+			volume = this,
+			planeWidth,
+			planeHeight,
+			firstSpacing,
+			secondSpacing,
+			positionOffset,
+			IJKIndex;
+
+		var axisInIJK = new THREE.Vector3(),
+			firstDirection = new THREE.Vector3(),
+			secondDirection = new THREE.Vector3();
+
+		var dimensions = new THREE.Vector3( this.xLength, this.yLength, this.zLength );
+
+
+		switch ( axis ) {
+
+			case 'x' :
+				axisInIJK.set( 1, 0, 0 );
+				firstDirection.set( 0, 0, - 1 );
+				secondDirection.set( 0, - 1, 0 );
+				firstSpacing = this.spacing[ 2 ];
+				secondSpacing = this.spacing[ 1 ];
+				IJKIndex = new THREE.Vector3( RASIndex, 0, 0 );
+
+				planeMatrix.multiply( ( new THREE.Matrix4() ).makeRotationY( Math.PI / 2 ) );
+				positionOffset = ( volume.RASDimensions[ 0 ] - 1 ) / 2;
+				planeMatrix.setPosition( new THREE.Vector3( RASIndex - positionOffset, 0, 0 ) );
+				break;
+			case 'y' :
+				axisInIJK.set( 0, 1, 0 );
+				firstDirection.set( 1, 0, 0 );
+				secondDirection.set( 0, 0, 1 );
+				firstSpacing = this.spacing[ 0 ];
+				secondSpacing = this.spacing[ 2 ];
+				IJKIndex = new THREE.Vector3( 0, RASIndex, 0 );
+
+				planeMatrix.multiply( ( new THREE.Matrix4() ).makeRotationX( - Math.PI / 2 ) );
+				positionOffset = ( volume.RASDimensions[ 1 ] - 1 ) / 2;
+				planeMatrix.setPosition( new THREE.Vector3( 0, RASIndex - positionOffset, 0 ) );
+				break;
+			case 'z' :
+			default :
+				axisInIJK.set( 0, 0, 1 );
+				firstDirection.set( 1, 0, 0 );
+				secondDirection.set( 0, - 1, 0 );
+				firstSpacing = this.spacing[ 0 ];
+				secondSpacing = this.spacing[ 1 ];
+				IJKIndex = new THREE.Vector3( 0, 0, RASIndex );
+
+				positionOffset = ( volume.RASDimensions[ 2 ] - 1 ) / 2;
+				planeMatrix.setPosition( new THREE.Vector3( 0, 0, RASIndex - positionOffset ) );
+				break;
+
+		}
+
+		firstDirection.applyMatrix4( volume.inverseMatrix ).normalize();
+		firstDirection.argVar = 'i';
+		secondDirection.applyMatrix4( volume.inverseMatrix ).normalize();
+		secondDirection.argVar = 'j';
+		axisInIJK.applyMatrix4( volume.inverseMatrix ).normalize();
+		iLength = Math.floor( Math.abs( firstDirection.dot( dimensions ) ) );
+		jLength = Math.floor( Math.abs( secondDirection.dot( dimensions ) ) );
+		planeWidth = Math.abs( iLength * firstSpacing );
+		planeHeight = Math.abs( jLength * secondSpacing );
+
+		IJKIndex = Math.abs( Math.round( IJKIndex.applyMatrix4( volume.inverseMatrix ).dot( axisInIJK ) ) );
+		var base = [ new THREE.Vector3( 1, 0, 0 ), new THREE.Vector3( 0, 1, 0 ), new THREE.Vector3( 0, 0, 1 ) ];
+		var iDirection = [ firstDirection, secondDirection, axisInIJK ].find( function ( x ) {
+
+			return Math.abs( x.dot( base[ 0 ] ) ) > 0.9;
+
+		} );
+		var jDirection = [ firstDirection, secondDirection, axisInIJK ].find( function ( x ) {
+
+			return Math.abs( x.dot( base[ 1 ] ) ) > 0.9;
+
+		} );
+		var kDirection = [ firstDirection, secondDirection, axisInIJK ].find( function ( x ) {
+
+			return Math.abs( x.dot( base[ 2 ] ) ) > 0.9;
+
+		} );
+		var argumentsWithInversion = [ 'volume.xLength-1-', 'volume.yLength-1-', 'volume.zLength-1-' ];
+		var argArray = [ iDirection, jDirection, kDirection ].map( function ( direction, n ) {
+
+			return ( direction.dot( base[ n ] ) > 0 ? '' : argumentsWithInversion[ n ] ) + ( direction === axisInIJK ? 'IJKIndex' : direction.argVar );
+
+		} );
+		var argString = argArray.join( ',' );
+		sliceAccess = eval( '(function sliceAccess (i,j) {return volume.access( ' + argString + ');})' );
+
+
+		return {
+			iLength: iLength,
+			jLength: jLength,
+			sliceAccess: sliceAccess,
+			matrix: planeMatrix,
+			planeWidth: planeWidth,
+			planeHeight: planeHeight
+		};
+
+	},
+
+	/**
+	 * @member {Function} extractSlice Returns a slice corresponding to the given axis and index
+	 *                        The coordinate are given in the Right Anterior Superior coordinate format
+	 * @memberof THREE.Volume
+	 * @param {string}            axis  the normal axis to the slice 'x' 'y' or 'z'
+	 * @param {number}            index the index of the slice
+	 * @returns {THREE.VolumeSlice} the extracted slice
+	 */
+	extractSlice: function ( axis, index ) {
+
+		var slice = new THREE.VolumeSlice( this, index, axis );
+		this.sliceList.push( slice );
+		return slice;
+
+	},
+
+	/**
+	 * @member {Function} repaintAllSlices Call repaint on all the slices extracted from this volume
+	 * @see THREE.VolumeSlice.repaint
+	 * @memberof THREE.Volume
+	 * @returns {THREE.Volume} this
+	 */
+	repaintAllSlices: function () {
+
+		this.sliceList.forEach( function ( slice ) {
+
+			slice.repaint();
+
+		} );
+
+		return this;
+
+	},
+
+	/**
+	 * @member {Function} computeMinMax Compute the minimum and the maximum of the data in the volume
+	 * @memberof THREE.Volume
+	 * @returns {Array} [min,max]
+	 */
+	computeMinMax: function () {
+
+		var min = Infinity;
+		var max = - Infinity;
+
+		// buffer the length
+		var datasize = this.data.length;
+
+		var i = 0;
+		for ( i = 0; i < datasize; i ++ ) {
+
+			if ( ! isNaN( this.data[ i ] ) ) {
+
+				var value = this.data[ i ];
+				min = Math.min( min, value );
+				max = Math.max( max, value );
+
+			}
+
+		}
+		this.min = min;
+		this.max = max;
+
+		return [ min, max ];
+
+	}
+
+};
+
+/**
+ * @author Almar Klein / http://almarklein.org
+ *
+ * Shaders to render 3D volumes using raycasting.
+ * The applied techniques are based on similar implementations in the Visvis and Vispy projects.
+ * This is not the only approach, therefore it's marked 1.
+ */
+
+THREE.VolumeRenderShader1 = {
+	uniforms: {
+        "u_size": { value: new THREE.Vector3( 1, 1, 1 ) },
+        "u_renderstyle": { value: 0 },
+        "u_isolevel": { value: 0.5 },
+        "u_clim": { value: new THREE.Vector2( 1, 1 ) },
+        "u_data": { value: null },
+        "u_cmdata": { value: null }
+    },
+    vertexShader: [
+        'varying vec4 v_nearpos;',
+        'varying vec4 v_farpos;',
+        'varying vec3 v_position;',
+
+        'mat4 inversemat(mat4 m) {',
+            // Taken from https://github.com/stackgl/glsl-inverse/blob/master/index.glsl
+            // This function is licenced by the MIT license to Mikola Lysenko
+            'float',
+            'a00 = m[0][0], a01 = m[0][1], a02 = m[0][2], a03 = m[0][3],',
+            'a10 = m[1][0], a11 = m[1][1], a12 = m[1][2], a13 = m[1][3],',
+            'a20 = m[2][0], a21 = m[2][1], a22 = m[2][2], a23 = m[2][3],',
+            'a30 = m[3][0], a31 = m[3][1], a32 = m[3][2], a33 = m[3][3],',
+
+            'b00 = a00 * a11 - a01 * a10,',
+            'b01 = a00 * a12 - a02 * a10,',
+            'b02 = a00 * a13 - a03 * a10,',
+            'b03 = a01 * a12 - a02 * a11,',
+            'b04 = a01 * a13 - a03 * a11,',
+            'b05 = a02 * a13 - a03 * a12,',
+            'b06 = a20 * a31 - a21 * a30,',
+            'b07 = a20 * a32 - a22 * a30,',
+            'b08 = a20 * a33 - a23 * a30,',
+            'b09 = a21 * a32 - a22 * a31,',
+            'b10 = a21 * a33 - a23 * a31,',
+            'b11 = a22 * a33 - a23 * a32,',
+
+            'det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;',
+
+        'return mat4(',
+            'a11 * b11 - a12 * b10 + a13 * b09,',
+            'a02 * b10 - a01 * b11 - a03 * b09,',
+            'a31 * b05 - a32 * b04 + a33 * b03,',
+            'a22 * b04 - a21 * b05 - a23 * b03,',
+            'a12 * b08 - a10 * b11 - a13 * b07,',
+            'a00 * b11 - a02 * b08 + a03 * b07,',
+            'a32 * b02 - a30 * b05 - a33 * b01,',
+            'a20 * b05 - a22 * b02 + a23 * b01,',
+            'a10 * b10 - a11 * b08 + a13 * b06,',
+            'a01 * b08 - a00 * b10 - a03 * b06,',
+            'a30 * b04 - a31 * b02 + a33 * b00,',
+            'a21 * b02 - a20 * b04 - a23 * b00,',
+            'a11 * b07 - a10 * b09 - a12 * b06,',
+            'a00 * b09 - a01 * b07 + a02 * b06,',
+            'a31 * b01 - a30 * b03 - a32 * b00,',
+            'a20 * b03 - a21 * b01 + a22 * b00) / det;',
+        '}',
+
+
+        'void main() {',
+            // Prepare transforms to map to "camera view". See also:
+            // https://threejs.org/docs/#api/renderers/webgl/WebGLProgram
+            'mat4 viewtransformf = viewMatrix;',
+            'mat4 viewtransformi = inversemat(viewMatrix);',
+
+            // Project local vertex coordinate to camera position. Then do a step
+            // backward (in cam coords) to the near clipping plane, and project back. Do
+            // the same for the far clipping plane. This gives us all the information we
+            // need to calculate the ray and truncate it to the viewing cone.
+            'vec4 position4 = vec4(position, 1.0);',
+            'vec4 pos_in_cam = viewtransformf * position4;',
+
+            // Intersection of ray and near clipping plane (z = -1 in clip coords)
+            'pos_in_cam.z = -pos_in_cam.w;',
+            'v_nearpos = viewtransformi * pos_in_cam;',
+
+            // Intersection of ray and far clipping plane (z = +1 in clip coords)
+            'pos_in_cam.z = pos_in_cam.w;',
+            'v_farpos = viewtransformi * pos_in_cam;',
+
+            // Set varyings and output pos
+            'v_position = position;',
+            'gl_Position = projectionMatrix * viewMatrix * modelMatrix * position4;',
+        '}',
+    ].join( '\n' ),
+	fragmentShader: [
+        'precision highp float;',
+        'precision mediump sampler3D;',
+
+        'uniform vec3 u_size;',
+        'uniform int u_renderstyle;',
+        'uniform float u_isolevel;',
+        'uniform vec2 u_clim;',
+
+        'uniform sampler3D u_data;',
+        'uniform sampler2D u_cmdata;',
+
+        'varying vec3 v_position;',
+        'varying vec4 v_nearpos;',
+        'varying vec4 v_farpos;',
+
+        // The maximum distance through our rendering volume is sqrt(3).
+        'const int MAX_STEPS = 887;  // 887 for 512^3, 1774 for 1024^3',
+        'const int REFINEMENT_STEPS = 4;',
+        'const float relative_step_size = 1.0;',
+        'const vec4 ambient_color = vec4(0.2, 0.4, 0.2, 1.0);',
+        'const vec4 diffuse_color = vec4(0.8, 0.2, 0.2, 1.0);',
+        'const vec4 specular_color = vec4(1.0, 1.0, 1.0, 1.0);',
+        'const float shininess = 40.0;',
+
+        'void cast_mip(vec3 start_loc, vec3 step, int nsteps, vec3 view_ray);',
+        'void cast_iso(vec3 start_loc, vec3 step, int nsteps, vec3 view_ray);',
+
+        'float sample1(vec3 texcoords);',
+        'vec4 apply_colormap(float val);',
+        'vec4 add_lighting(float val, vec3 loc, vec3 step, vec3 view_ray);',
+
+
+        'void main() {',
+            // Normalize clipping plane info
+            'vec3 farpos = v_farpos.xyz / v_farpos.w;',
+            'vec3 nearpos = v_nearpos.xyz / v_nearpos.w;',
+
+            // Calculate unit vector pointing in the view direction through this fragment.
+            'vec3 view_ray = normalize(nearpos.xyz - farpos.xyz);',
+
+            // Compute the (negative) distance to the front surface or near clipping plane.
+            // v_position is the back face of the cuboid, so the initial distance calculated in the dot
+            // product below is the distance from near clip plane to the back of the cuboid
+            'float distance = dot(nearpos - v_position, view_ray);',
+            'distance = max(distance, min((-0.5 - v_position.x) / view_ray.x,',
+                                        '(u_size.x - 0.5 - v_position.x) / view_ray.x));',
+            'distance = max(distance, min((-0.5 - v_position.y) / view_ray.y,',
+                                        '(u_size.y - 0.5 - v_position.y) / view_ray.y));',
+            'distance = max(distance, min((-0.5 - v_position.z) / view_ray.z,',
+                                        '(u_size.z - 0.5 - v_position.z) / view_ray.z));',
+
+                                        // Now we have the starting position on the front surface
+            'vec3 front = v_position + view_ray * distance;',
+
+            // Decide how many steps to take
+            'int nsteps = int(-distance / relative_step_size + 0.5);',
+            'if ( nsteps < 1 )',
+                'discard;',
+
+            // Get starting location and step vector in texture coordinates
+            'vec3 step = ((v_position - front) / u_size) / float(nsteps);',
+            'vec3 start_loc = front / u_size;',
+
+            // For testing: show the number of steps. This helps to establish
+            // whether the rays are correctly oriented
+            //'gl_FragColor = vec4(0.0, float(nsteps) / 1.0 / u_size.x, 1.0, 1.0);',
+            //'return;',
+
+            'if (u_renderstyle == 0)',
+                'cast_mip(start_loc, step, nsteps, view_ray);',
+            'else if (u_renderstyle == 1)',
+                'cast_iso(start_loc, step, nsteps, view_ray);',
+
+            'if (gl_FragColor.a < 0.05)',
+                'discard;',
+        '}',
+
+
+        'float sample1(vec3 texcoords) {',
+            '/* Sample float value from a 3D texture. Assumes intensity data. */',
+            'return texture(u_data, texcoords.xyz).r;',
+        '}',
+
+
+        'vec4 apply_colormap(float val) {',
+            'val = (val - u_clim[0]) / (u_clim[1] - u_clim[0]);',
+            'return texture2D(u_cmdata, vec2(val, 0.5));',
+        '}',
+
+
+        'void cast_mip(vec3 start_loc, vec3 step, int nsteps, vec3 view_ray) {',
+
+            'float max_val = -1e6;',
+            'int max_i = 100;',
+            'vec3 loc = start_loc;',
+
+            // Enter the raycasting loop. In WebGL 1 the loop index cannot be compared with
+            // non-constant expression. So we use a hard-coded max, and an additional condition
+            // inside the loop.
+            'for (int iter=0; iter<MAX_STEPS; iter++) {',
+                'if (iter >= nsteps)',
+                    'break;',
+                // Sample from the 3D texture
+                'float val = sample1(loc);',
+                // Apply MIP operation
+                'if (val > max_val) {',
+                    'max_val = val;',
+                    'max_i = iter;',
+                '}',
+                // Advance location deeper into the volume
+                'loc += step;',
+            '}',
+
+            // Refine location, gives crispier images
+            'vec3 iloc = start_loc + step * (float(max_i) - 0.5);',
+            'vec3 istep = step / float(REFINEMENT_STEPS);',
+            'for (int i=0; i<REFINEMENT_STEPS; i++) {',
+                'max_val = max(max_val, sample1(iloc));',
+                'iloc += istep;',
+            '}',
+
+            // Resolve final color
+            'gl_FragColor = apply_colormap(max_val);',
+        '}',
+
+
+        'void cast_iso(vec3 start_loc, vec3 step, int nsteps, vec3 view_ray) {',
+
+            'gl_FragColor = vec4(0.0);  // init transparent',
+            'vec4 color3 = vec4(0.0);  // final color',
+            'vec3 dstep = 1.5 / u_size;  // step to sample derivative',
+            'vec3 loc = start_loc;',
+
+            'float low_threshold = u_isolevel - 0.02 * (u_clim[1] - u_clim[0]);',
+
+            // Enter the raycasting loop. In WebGL 1 the loop index cannot be compared with
+            // non-constant expression. So we use a hard-coded max, and an additional condition
+            // inside the loop.
+            'for (int iter=0; iter<MAX_STEPS; iter++) {',
+                'if (iter >= nsteps)',
+                    'break;',
+
+                    // Sample from the 3D texture
+                'float val = sample1(loc);',
+
+                'if (val > low_threshold) {',
+                // Take the last interval in smaller steps
+                    'vec3 iloc = loc - 0.5 * step;',
+                    'vec3 istep = step / float(REFINEMENT_STEPS);',
+                    'for (int i=0; i<REFINEMENT_STEPS; i++) {',
+                        'val = sample1(iloc);',
+                        'if (val > u_isolevel) {',
+                            'gl_FragColor = add_lighting(val, iloc, dstep, view_ray);',
+                            'return;',
+                        '}',
+                        'iloc += istep;',
+                    '}',
+                '}',
+
+                // Advance location deeper into the volume
+                'loc += step;',
+            '}',
+        '}',
+
+
+        'vec4 add_lighting(float val, vec3 loc, vec3 step, vec3 view_ray)',
+        '{',
+            // Calculate color by incorporating lighting
+
+            // View direction
+            'vec3 V = normalize(view_ray);',
+
+            // calculate normal vector from gradient
+            'vec3 N;',
+            'float val1, val2;',
+            'val1 = sample1(loc + vec3(-step[0], 0.0, 0.0));',
+            'val2 = sample1(loc + vec3(+step[0], 0.0, 0.0));',
+            'N[0] = val1 - val2;',
+            'val = max(max(val1, val2), val);',
+            'val1 = sample1(loc + vec3(0.0, -step[1], 0.0));',
+            'val2 = sample1(loc + vec3(0.0, +step[1], 0.0));',
+            'N[1] = val1 - val2;',
+            'val = max(max(val1, val2), val);',
+            'val1 = sample1(loc + vec3(0.0, 0.0, -step[2]));',
+            'val2 = sample1(loc + vec3(0.0, 0.0, +step[2]));',
+            'N[2] = val1 - val2;',
+            'val = max(max(val1, val2), val);',
+
+            'float gm = length(N); // gradient magnitude',
+            'N = normalize(N);',
+
+            // Flip normal so it points towards viewer
+            'float Nselect = float(dot(N, V) > 0.0);',
+            'N = (2.0 * Nselect - 1.0) * N;  // ==  Nselect * N - (1.0-Nselect)*N;',
+
+            // Init colors
+            'vec4 ambient_color = vec4(0.0, 0.0, 0.0, 0.0);',
+            'vec4 diffuse_color = vec4(0.0, 0.0, 0.0, 0.0);',
+            'vec4 specular_color = vec4(0.0, 0.0, 0.0, 0.0);',
+
+            // note: could allow multiple lights
+            'for (int i=0; i<1; i++)',
+            '{',
+                 // Get light direction (make sure to prevent zero devision)
+                'vec3 L = normalize(view_ray);  //lightDirs[i];',
+                'float lightEnabled = float( length(L) > 0.0 );',
+                'L = normalize(L + (1.0 - lightEnabled));',
+
+                // Calculate lighting properties
+                'float lambertTerm = clamp(dot(N, L), 0.0, 1.0);',
+                'vec3 H = normalize(L+V); // Halfway vector',
+                'float specularTerm = pow(max(dot(H, N), 0.0), shininess);',
+
+                // Calculate mask
+                'float mask1 = lightEnabled;',
+
+                // Calculate colors
+                'ambient_color +=  mask1 * ambient_color;  // * gl_LightSource[i].ambient;',
+                'diffuse_color +=  mask1 * lambertTerm;',
+                'specular_color += mask1 * specularTerm * specular_color;',
+            '}',
+
+            // Calculate final color by componing different components
+            'vec4 final_color;',
+            'vec4 color = apply_colormap(val);',
+            'final_color = color * (ambient_color + diffuse_color) + specular_color;',
+            'final_color.a = color.a;',
+            'return final_color;',
+        '}',
+	].join( '\n' )
+};
