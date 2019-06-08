@@ -3,99 +3,80 @@
 	Can we make a circuit that can calculate 2 + 2 = 4?
 -->
 
-<!-- <!DOCTYPE html>
+<html><head>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>three.js webgl - volume rendering example</title>
-	<meta charset="utf-8">
+	<me ta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	<link type="text/css" rel="stylesheet" href="https://threejs.org/examples/main.css">
 </head>
 
-<body>
-	<script src="../../lib/three.js"></script>
-	<script src="../../lib/nrrdLoader.js"></script>
-
-	<script>
-
-		let scene = new THREE.Scene();
-
-		let canvas = document.createElement( 'canvas' );
-		let context = canvas.getContext( 'webgl2' );
-		let renderer = new THREE.WebGLRenderer( { canvas: canvas, context: context } );
-		renderer.setPixelRatio( window.devicePixelRatio );
-		renderer.setSize( window.innerWidth, window.innerHeight );
-		document.body.appendChild( renderer.domElement );
-
-		// does not work with perspective, may have to do that yourself
-		let frustumHeight = 512;
-		let aspect = window.innerWidth / window.innerHeight;
-		let camera = new THREE.OrthographicCamera( - frustumHeight * aspect / 2, frustumHeight * aspect / 2, frustumHeight / 2, - frustumHeight / 2, 1, 1000 );
-		camera.position.set( 0, 0, 128 )
-
-		new THREE.NRRDLoader().load( "../../data/stent.nrrd", function ( volume )
-		{
-			// We have scalars, so we put our data in the red channel.
-			// THREEJS will select R32F (33326) based on the RedFormat and FloatType.
-			// Also see https://www.khronos.org/registry/webgl/specs/latest/2.0/#TEXTURE_TYPES_FORMATS_FROM_DOM_ELEMENTS_TABLE
-			let texture = new THREE.DataTexture3D( volume.data, volume.xLength, volume.yLength, volume.zLength );
-			texture.format = THREE.RedFormat;
-			texture.type = THREE.FloatType;
-			texture.minFilter = texture.magFilter = THREE.LinearFilter;
-			texture.unpackAlignment = 1;
-			texture.needsUpdate = true;
-
-			let uniforms = THREE.UniformsUtils.clone( THREE.VolumeRenderShader1.uniforms );
-			uniforms[ "u_data" ].value = texture;
-			uniforms[ "u_size" ].value.set( volume.xLength, volume.yLength, volume.zLength );
-			uniforms[ "u_cmdata" ].value = new THREE.TextureLoader().load( '../../data/viridisColorMap.png', render )
-			uniforms[ "u_clim" ].value.set( 0, 1 );
-
-			let isContourSurface = 1
-			uniforms[ "u_renderstyle" ].value = isContourSurface
-			uniforms[ "u_isolevel" ].value = 0.15
-
-			let box = new THREE.Mesh( 
-				new THREE.BoxBufferGeometry( volume.xLength, volume.yLength, volume.zLength ),
-				new THREE.ShaderMaterial( {
-					uniforms: uniforms,
-					vertexShader: THREE.VolumeRenderShader1.vertexShader,
-					fragmentShader: THREE.VolumeRenderShader1.fragmentShader,
-					side: THREE.BackSide // The volume shader uses the backface as its "reference point"
-				} ) );
-			box.geometry.translate( volume.xLength / 2 - 0.5, volume.yLength / 2 - 0.5, volume.zLength / 2 - 0.5 );
-			box.position.sub( new THREE.Vector3( volume.xLength / 2 - 0.5, volume.yLength / 2 - 0.5, volume.zLength / 2 - 0.5 ) );
-			scene.add( box );
-
-			function render()
-			{
-				renderer.render( scene, camera );
-			}
-			render();
-
-		} );
-
-	</script>
-
-</body>
-</html> -->
-
-
-
-
-
-
-
-
-
-
-
-
-<html><head>
-
 <script src="CanvasMatrix.js" type="text/javascript"></script>
 
-<script type="text/javascript"> 
+<script src="../../lib/three.js"></script>
+<script src="../../lib/nrrdLoader.js"></script>
+
+<script>
+// function init()
+// {
+// 	let scene = new THREE.Scene();
+
+// 	let canvas = document.createElement( 'canvas' );
+// 	let context = canvas.getContext( 'webgl2' );
+// 	let renderer = new THREE.WebGLRenderer( { canvas: canvas, context: context } );
+// 	renderer.setPixelRatio( window.devicePixelRatio );
+// 	renderer.setSize( window.innerWidth, window.innerHeight );
+// 	document.body.appendChild( renderer.domElement );
+
+// 	// does not work with perspective, may have to do that yourself
+// 	let frustumHeight = 512;
+// 	let aspect = window.innerWidth / window.innerHeight;
+// 	let camera = new THREE.OrthographicCamera( - frustumHeight * aspect / 2, frustumHeight * aspect / 2, frustumHeight / 2, - frustumHeight / 2, 1, 1000 );
+// 	camera.position.set( 0, 0, 128 )
+
+// 	new THREE.NRRDLoader().load( "../../data/stent.nrrd", function ( volume )
+// 	{
+// 		// We have scalars, so we put our data in the red channel.
+// 		// THREEJS will select R32F (33326) based on the RedFormat and FloatType.
+// 		// Also see https://www.khronos.org/registry/webgl/specs/latest/2.0/#TEXTURE_TYPES_FORMATS_FROM_DOM_ELEMENTS_TABLE
+// 		let texture = new THREE.DataTexture3D( volume.data, volume.xLength, volume.yLength, volume.zLength );
+// 		texture.format = THREE.RedFormat;
+// 		texture.type = THREE.FloatType;
+// 		texture.minFilter = texture.magFilter = THREE.LinearFilter;
+// 		texture.unpackAlignment = 1;
+// 		texture.needsUpdate = true;
+
+// 		let uniforms = THREE.UniformsUtils.clone( THREE.VolumeRenderShader1.uniforms );
+// 		uniforms[ "u_data" ].value = texture;
+// 		uniforms[ "u_size" ].value.set( volume.xLength, volume.yLength, volume.zLength );
+// 		uniforms[ "u_cmdata" ].value = new THREE.TextureLoader().load( '../../data/viridisColorMap.png', render )
+// 		uniforms[ "u_clim" ].value.set( 0, 1 );
+
+// 		let isContourSurface = 1
+// 		uniforms[ "u_renderstyle" ].value = isContourSurface
+// 		uniforms[ "u_isolevel" ].value = 0.15
+
+// 		let box = new THREE.Mesh( 
+// 			new THREE.BoxBufferGeometry( volume.xLength, volume.yLength, volume.zLength ),
+// 			new THREE.ShaderMaterial( {
+// 				uniforms: uniforms,
+// 				vertexShader: THREE.VolumeRenderShader1.vertexShader,
+// 				fragmentShader: THREE.VolumeRenderShader1.fragmentShader,
+// 				side: THREE.BackSide // The volume shader uses the backface as its "reference point"
+// 			} ) );
+// 		box.geometry.translate( volume.xLength / 2 - 0.5, volume.yLength / 2 - 0.5, volume.zLength / 2 - 0.5 );
+// 		box.position.sub( new THREE.Vector3( volume.xLength / 2 - 0.5, volume.yLength / 2 - 0.5, volume.zLength / 2 - 0.5 ) );
+// 		scene.add( box );
+
+// 		function render()
+// 		{
+// 			renderer.render( scene, camera );
+// 		}
+// 		render();
+
+// 	} );
+// }
 
 const vertexShader = `#version 300 es
 uniform mat4 objectMatrix;
@@ -130,59 +111,66 @@ void main(void)
 }
 `;
 
+//note it is not this that puts it in the actual location
 const simulationVertexShader = `#version 300 es
 layout (location = 1) in vec2 aPos2;
-out vec2 vTC;
+out vec2 locationInLayer;
 void main(void)
 {
 	gl_Position = vec4(aPos2, 0., 1.);
-	vTC = .5*aPos2 + .5;
+	locationInLayer = .5*aPos2 + .5;
 }
 `;
 
 const simulationFragmentShader = `#version 300 es
 precision highp float;
 
-uniform highp sampler3D uTS;
+uniform highp sampler3D wholeTexture;
 
-uniform float tcz;
-
-in vec2 vTC;
+uniform float layerElevation;
+in vec2 locationInLayer;
 out vec2 FragColor;
 
-const float a = .8, b = .001, dt = .05* .02, eps = .007, h = .2* .607,
-			dte = dt/eps, ba = b/a, dth2 = dt/(h*h);
-const float dimension = 128., d = 1./dimension;
+const float a = .8, b = .001, dt = .05* .02, eps = .007, h = 0.2 * 0.607;
+const float inverseEpsilonDeltaT = dt/eps, bOverA = b/a, inverseHSquaredDeltaT = dt/(h*h);
+
+const float dimension = 128.;
+const float d = 1./dimension;
 
 void main(void)
 {
-	vec4 t = texture(uTS, vec3(vTC, tcz));
+	vec4 t = texture(wholeTexture, vec3(locationInLayer, layerElevation)); //just reading the texture
+	float u = t.r;
+	float v = t.g;
 
-	float u = t.r,  v = t.g;
-	float vnew = v + (u - v) * dt;
-	float uth = v/a + ba;
-	float unew;
-	float tmp = dte*(u - uth);
+	float uth = v/a + bOverA;
 
+	float partWay = inverseEpsilonDeltaT * (u - uth);
+
+	float uNew;
 	if ( u <= uth)
 	{
-		unew = u / (1. - tmp*(1. - u));
+		//quench
+		uNew = u / (1. - partWay*(1. - u));
 	}
 	else
 	{
-		tmp *= u;
-		unew = (tmp + u) / (tmp + 1.);
+		partWay *= u;
+		uNew = (partWay + u) / (partWay + 1.);
 	}
 
-	unew += 
-		(	texture(uTS, vec3(vTC.x, vTC.y + d, tcz) ).r +
-			texture(uTS, vec3(vTC.x, vTC.y - d, tcz) ).r +
-			texture(uTS, vec3(vTC, tcz + d) ).r +
-			texture(uTS, vec3(vTC, tcz - d) ).r +
-			texture(uTS, vec3(vTC.x + d, vTC.y, tcz) ).r +
-			texture(uTS, vec3(vTC.x - d, vTC.y, tcz) ).r
-			- 6.*u)*dth2;
-	FragColor = vec2(unew, vnew );
+	uNew += 
+		(	texture(wholeTexture, vec3( locationInLayer.x,     locationInLayer.y + d, layerElevation    ) ).r +
+			texture(wholeTexture, vec3( locationInLayer.x,     locationInLayer.y - d, layerElevation    ) ).r +
+			texture(wholeTexture, vec3( locationInLayer.x,     locationInLayer.y,     layerElevation + d) ).r +
+			texture(wholeTexture, vec3( locationInLayer.x,     locationInLayer.y,     layerElevation - d) ).r +
+			texture(wholeTexture, vec3( locationInLayer.x + d, locationInLayer.y,     layerElevation    ) ).r +
+			texture(wholeTexture, vec3( locationInLayer.x - d, locationInLayer.y,     layerElevation    ) ).r
+			- 6. * u ) //normalization of the 6 terms above
+			* inverseHSquaredDeltaT;
+
+	float vNew = v + (u - v) * dt;
+	FragColor = vec2(uNew, vNew );
 }
 `;
  
@@ -199,9 +187,10 @@ function createShader(gl, type, source)
 	gl.deleteShader(shader);
 }
 
-function webGLStart()
+function init2()
 {
-	let canvas = document.getElementById("canvas");
+	let canvas = document.createElement( 'canvas' );
+	document.body.appendChild( canvas )
 	gl = canvas.getContext("webgl2")
 
 	let dimension = 128
@@ -287,10 +276,9 @@ function webGLStart()
 	let aPos2Loc = 1
 	gl.linkProgram(simulation)
 	gl.useProgram(simulation)
-	let tczPointer = gl.getUniformLocation(simulation, "tcz")
+	let layerElevationPointer = gl.getUniformLocation(simulation, "layerElevation")
 	gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer())
-	gl.bufferData(gl.ARRAY_BUFFER,
-		new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW)
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW)
 	gl.vertexAttribPointer(aPos2Loc, 2, gl.FLOAT, gl.FALSE, 0, 0)
 	gl.enableVertexAttribArray( aPos2Loc )
 
@@ -302,7 +290,7 @@ function webGLStart()
 		for(var i = 0; i < dimension; i++)
 		{
 			//set the layer
-			gl.uniform1f(tczPointer, i/dimension)
+			gl.uniform1f(layerElevationPointer, i/dimension)
 			gl.framebufferTextureLayer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0,
 				textureToWriteTo,
 				0, i)
@@ -318,8 +306,9 @@ function webGLStart()
 		gl.useProgram(simulation)
 
 		//presumably two steps because you've got to step both u and v. Yet shader gets both?
+		//maybe they're two steps of the simulation?
 		stepTexture(texture, texture2, fb)
-		stepTexture(texture2, texture, fb)
+		stepTexture(texture2, texture, fb2)
 
 		drawScene() //hopefully we can replace. So how does it get communicated in?
 		requestAnimationFrame(loop)
@@ -328,8 +317,9 @@ function webGLStart()
 	loop()
 }
 
-</script> 
+</script>
+
 </head>
-<body onload="webGLStart();"> 
-	<canvas id="canvas"></canvas> 
-</body></html>
+<body onload="init();">
+</body>
+</html>
