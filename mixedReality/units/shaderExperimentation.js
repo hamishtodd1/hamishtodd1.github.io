@@ -12,12 +12,22 @@
 		SDF
 			These are interesting for constructive geometry
 			But are they even the best way of doing eg toruses? Can surely get arbitrary intersection immediately
+		Complex functions; height = modulus, color = angle
 
 	QM
 		particle in a 1D box. Visualize as the series of complex planes along the line, eg a 3D space
 		It's vertical
 		Or could be a donut, which makes it simpler
 		Amplitude to probability distribution is easy, it's a surface of revolution of |phi^2|
+
+	Reaction diffusion
+		https://www.youtube.com/watch?v=BV9ny785UNc
+		https://pmneila.github.io/jsexp/grayscott/
+		https://www.quantamagazine.org/wrinkles-and-dimples-obey-simple-rules-20150408/
+		howto http://www.karlsims.com/rd.html to go with reaction diffusion what would be cool would be a cube of it,
+		maybe even concentric spheres.
+		You could have a “graph” going along the time axis next to the rectangle that shows the feed rate and death rate,
+		and you could change them.
 
 	z buffer crap? Can intersect hand controller? Test
 
