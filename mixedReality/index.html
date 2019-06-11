@@ -1,6 +1,5 @@
 <html>
 	<head>
-		<title>a</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
@@ -60,6 +59,8 @@
 		<script>
 			async function init()
 			{
+				let canvas = document.createElement( 'canvas' );
+				renderer = new THREE.WebGLRenderer( { canvas: canvas, context: canvas.getContext( 'webgl2' ), antialias: true } );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.localClippingEnabled = true;
@@ -84,7 +85,7 @@
 					await initFloorAndSky()
 				}
 
-				await initShaderExperimentation()
+				await initShaderExperimentation( canvas )
 
 				renderer.setAnimationLoop( function()
 				{

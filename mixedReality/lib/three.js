@@ -20313,6 +20313,7 @@
 
 				texture.addEventListener( 'dispose', onTextureDispose );
 
+				log(texture.uuid)
 				textureProperties.__webglTexture = _gl.createTexture();
 
 				info.memory.textures ++;

@@ -14,7 +14,7 @@ let frameCount = 0;
 const log = console.log
 const debugging = 0;
 
-let renderer = new THREE.WebGLRenderer( { antialias: true } );
+let renderer = null
 let scene = new THREE.Scene()
 let camera = new THREE.PerspectiveCamera( 40.1, //the shorter fov of the samsung galaxy S8 selfie camera, determined by experiment
 		window.innerWidth / window.innerHeight,
