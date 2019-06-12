@@ -1,7 +1,10 @@
 /*
-	"Dorothy Hodgkin, Margaret Thatcher, Luke Skywalker, and diabetes"
+	Hodgkin, Thatcher, Skywalker, and diabetes"
 
 	Need pdb reader, contouring, zooming. Ideally you can put them side by side and see difference easily
+	Her amazing drawings
+		https://blogs.mhs.ox.ac.uk/insidemhs/files/2017/03/Dorothy-Crowfoot-Hodgkin-Insulin-Map-Bod-944x1024.jpg
+		https://www.margaretalmon.com/wp-content/uploads/6a0105362f4359970b0120a859270a970b.png
 
 	Intro
 		She directly saved the lives of tens or hundreds of millions of people, indirectly billions
@@ -31,7 +34,8 @@
 		We know Thatcher (then Roberts) admired Dorothy enormously, and was an enthusiastic chemist
 		Angela Merkel chemist connection
 		She delivers on her potential, first woman prime minister
-		1987, awarded the order of Lenin, which she went behind the iron curtain to collect!
+		1987, awarded the order of Lenin, which she went behind the iron curtain to collect
+		It is amazing to me that the BBC has not done a drama about this
 	Luke Skywalker
 		She likes you so much she has a portrait of you in her office
 		but using her position to do everything Dorothy saw as evil?

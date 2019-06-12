@@ -15,6 +15,7 @@
 				Elliptic curves
 		Amman beenker! Could be very fun
 		bezier tetrahedra
+		Complex functions; height = modulus, color = angle
 
 	Fuck SDFs. Good for constructive geometry and not much else. Even with single toruses, can get intersection immediately
 
@@ -24,6 +25,16 @@
 		Or could be a donut, which makes it simpler
 		Amplitude to probability distribution is easy, it's a surface of revolution of |phi^2|
 
+	Reaction diffusion
+		https://www.youtube.com/watch?v=BV9ny785UNc
+		https://pmneila.github.io/jsexp/grayscott/
+		https://www.quantamagazine.org/wrinkles-and-dimples-obey-simple-rules-20150408/
+		howto http://www.karlsims.com/rd.html to go with reaction diffusion what would be cool would be a cube of it,
+		maybe even concentric spheres.
+		You could have a “graph” going along the time axis next to the rectangle that shows the feed rate and death rate,
+		and you could change them.
+
+	z buffer crap? Can intersect hand controller? Test
 
 
 	most basic vertex:
