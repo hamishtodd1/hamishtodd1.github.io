@@ -1,4 +1,9 @@
 /*
+	mimic this shit I suppose
+	https://raw.githubusercontent.com/mrdoob/three.js/master/examples/webgl_shaders_ocean2.html
+	https://threejs.org/examples/js/Ocean.js
+	https://threejs.org/examples/js/shaders/OceanShaders.js
+
 	Ideas
 		Placing spheres and cylinders would be nice, for corners
 		Arrows too
@@ -149,6 +154,11 @@ async function initShaderExperimentation( canvas )
 		{
 			//urgh but you need to make it so each fucking pixel gets "drawn"
 			offscreenMaterial.needsUpdate = true
+
+
+			//almost certainly it's useProgram
+			// renderer.state.activeTexture( gl.TEXTURE0 );
+			// renderer.state.bindTexture( gl.TEXTURE_2D, textureToWriteTo );
 		})
 
 		//do consider using the compute shaders!
@@ -183,83 +193,4 @@ function assignShader(fileName, materialToReceiveAssignment, vertexOrFragment)
 		};
 		xhr.send();
 	})
-}
-
-
-function initCompute(canvas)
-{
-	let dimension = 512;
-
-	const gl = canvas.getContext('webgl2-compute');
-	if( !gl )
-	{
-		console.error("need webglCompute, https://9ballsyndrome.github.io/WebGL_Compute_shader/")
-	}
-
-	const computeShaderSource1 = `#version 310 es
-	layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
-	layout (rgba8, binding = 0) writeonly uniform highp image2D destTex;
-
-	void main() {
-		ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);
-		imageStore(destTex, storePos, vec4(vec2(gl_WorkGroupID.xy) / vec2(gl_NumWorkGroups.xy), 0.0, 1.0));
-	}
-	`;
-
-	const computeShaderSource2 = `#version 310 es
-	layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
-	layout (rgba8, binding = 0) writeonly uniform highp image2D destTex;
-
-	void main() {
-		ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);
-		imageStore(destTex, storePos, vec4(vec2(gl_WorkGroupID.xy) / vec2(gl_NumWorkGroups.xy), 0.0, 1.0));
-	}
-	`;
-
-	const computeShader = gl.createShader(gl.COMPUTE_SHADER);
-	gl.shaderSource(computeShader, computeShaderSource1);
-	gl.compileShader(computeShader);
-	if (!gl.getShaderParameter(computeShader, gl.COMPILE_STATUS))
-	{
-		console.log(gl.getShaderInfoLog(computeShader));
-		return;
-	}
-
-	const computeProgram = gl.createProgram();
-	gl.attachShader(computeProgram, computeShader);
-	gl.linkProgram(computeProgram);
-	if (!gl.getProgramParameter(computeProgram, gl.LINK_STATUS))
-	{
-		console.log(gl.getProgramInfoLog(computeProgram));
-		return;
-	}
-
-	//so we want to get that texture to be treated in the same way as the threejs textures which apparently get in there
-
-	const textureToWriteTo = gl.createTexture();
-	gl.bindTexture(gl.TEXTURE_2D, textureToWriteTo);
-	gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RGBA8, dimension, dimension);
-	gl.bindImageTexture(0, textureToWriteTo, 0, false, 0, gl.WRITE_ONLY, gl.RGBA8);
-
-	// create frameBuffer to read from texture
-	const frameBuffer = gl.createFramebuffer();
-	gl.bindFramebuffer(gl.READ_FRAMEBUFFER, frameBuffer);
-	gl.framebufferTexture2D(gl.READ_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textureToWriteTo, 0);
-
-	// execute ComputeShader
-	updateFunctions.push(function()
-	{
-		gl.useProgram(computeProgram);
-		gl.dispatchCompute(dimension / 16, dimension / 16, 1);
-		gl.memoryBarrier(gl.SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-		renderer.state.activeTexture( gl.TEXTURE0 );
-		renderer.state.bindTexture( gl.TEXTURE_2D, textureToWriteTo );
-	})
-
-	// show computed texture to Canvas
-	// gl.blitFramebuffer(
-	// 	0, 0, dimension, dimension,
-	// 	0, 0, dimension, dimension,
-	// 	gl.COLOR_BUFFER_BIT, gl.NEAREST);
 }
