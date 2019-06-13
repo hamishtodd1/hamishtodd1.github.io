@@ -16,6 +16,9 @@
 		Amman beenker! Could be very fun
 		bezier tetrahedra
 		Complex functions; height = modulus, color = angle
+			Throw any polynomial in you like, could be fun
+			Will replicate the recognizable stuff along the real axis?
+				Better for that might be height = real, color = im
 
 	Fuck SDFs. Good for constructive geometry and not much else. Even with single toruses, can get intersection immediately
 
