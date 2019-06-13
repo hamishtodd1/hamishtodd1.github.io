@@ -3,15 +3,42 @@
 	Can we make a circuit that can calculate 2 + 2 = 4?
 
 	"Any effort to model macroscopic systems in biology has to start with the reaction-diffusion framework"
+	http://dev1.thevirtualheart.org/Media/WebGL/84.html
+
+	Volume rendering https://github.com/nbigaouette/libtricubic/tree/master/tricubic-1.0/src
+		Need it because perspective
+		Need contour surface in there too
+		Value: ret+=a[ijk2n(i,j,k)]*pow(x,i)*pow(y,j)*pow(z,k)
+		Can get normal from C code
+		Root... need to interpolate, probably linearly
+		Definite integral
+			Need to extract F from c code. F:x,y,z -> value.
+			Derive your single-variable degree-10 polynomial
+			Ox,Oy,Oz and nx,ny,nz still unknown
+
+	Script
+		Turing patterns are the most beautiful and powerful patterns discovered in biology
+		That Jelly; cuttlefish. Then pictures of cows, giraffes etc
+		The really profound stuff is how they're important in all animals:
+			developmental bio;
+			wound healing / Ivan stuff / flourescence microscopy
+		Then the REALLY cool thing is something we're all familiar with, the heart and the brain
+			But these are the final bosses, the real limits of what computers are able to do
 -->
+
 
 <html><head>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<me ta charset="utf-8">
+	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	<link type="text/css" rel="stylesheet" href="https://threejs.org/examples/main.css">
+	<style>
+		body {
+			margin: 0px;
+			overflow: hidden;
+		}
+	</style>
 </head>
 
 <script src="CanvasMatrix.js" type="text/javascript"></script>
@@ -20,162 +47,66 @@
 <script src="../../lib/nrrdLoader.js"></script>
 
 <script>
-// function init()
-// {
-// 	let scene = new THREE.Scene();
-
-// 	let canvas = document.createElement( 'canvas' );
-// 	let context = canvas.getContext( 'webgl2' );
-// 	let renderer = new THREE.WebGLRenderer( { canvas: canvas, context: context } );
-// 	renderer.setPixelRatio( window.devicePixelRatio );
-// 	renderer.setSize( window.innerWidth, window.innerHeight );
-// 	document.body.appendChild( renderer.domElement );
-
-// 	// does not work with perspective, may have to do that yourself
-// 	let frustumHeight = 512;
-// 	let aspect = window.innerWidth / window.innerHeight;
-// 	let camera = new THREE.OrthographicCamera( - frustumHeight * aspect / 2, frustumHeight * aspect / 2, frustumHeight / 2, - frustumHeight / 2, 1, 1000 );
-// 	camera.position.set( 0, 0, 128 )
-
-// 	new THREE.NRRDLoader().load( "../../data/stent.nrrd", function ( volume )
-// 	{
-// 		// We have scalars, so we put our data in the red channel.
-// 		// THREEJS will select R32F (33326) based on the RedFormat and FloatType.
-// 		// Also see https://www.khronos.org/registry/webgl/specs/latest/2.0/#TEXTURE_TYPES_FORMATS_FROM_DOM_ELEMENTS_TABLE
-// 		let texture = new THREE.DataTexture3D( volume.data, volume.xLength, volume.yLength, volume.zLength );
-// 		texture.format = THREE.RedFormat;
-// 		texture.type = THREE.FloatType;
-// 		texture.minFilter = texture.magFilter = THREE.LinearFilter;
-// 		texture.unpackAlignment = 1;
-// 		texture.needsUpdate = true;
-
-// 		let uniforms = THREE.UniformsUtils.clone( THREE.VolumeRenderShader1.uniforms );
-// 		uniforms[ "u_data" ].value = texture;
-// 		uniforms[ "u_size" ].value.set( volume.xLength, volume.yLength, volume.zLength );
-// 		uniforms[ "u_cmdata" ].value = new THREE.TextureLoader().load( '../../data/viridisColorMap.png', render )
-// 		uniforms[ "u_clim" ].value.set( 0, 1 );
-
-// 		let isContourSurface = 1
-// 		uniforms[ "u_renderstyle" ].value = isContourSurface
-// 		uniforms[ "u_isolevel" ].value = 0.15
-
-// 		let box = new THREE.Mesh( 
-// 			new THREE.BoxBufferGeometry( volume.xLength, volume.yLength, volume.zLength ),
-// 			new THREE.ShaderMaterial( {
-// 				uniforms: uniforms,
-// 				vertexShader: THREE.VolumeRenderShader1.vertexShader,
-// 				fragmentShader: THREE.VolumeRenderShader1.fragmentShader,
-// 				side: THREE.BackSide // The volume shader uses the backface as its "reference point"
-// 			} ) );
-// 		box.geometry.translate( volume.xLength / 2 - 0.5, volume.yLength / 2 - 0.5, volume.zLength / 2 - 0.5 );
-// 		box.position.sub( new THREE.Vector3( volume.xLength / 2 - 0.5, volume.yLength / 2 - 0.5, volume.zLength / 2 - 0.5 ) );
-// 		scene.add( box );
-
-// 		function render()
-// 		{
-// 			renderer.render( scene, camera );
-// 		}
-// 		render();
-
-// 	} );
-// }
-
-const vertexShader = `#version 300 es
-uniform mat4 objectMatrix;
-uniform mat4 projectionMatrix;
-uniform float pointSize;
-uniform highp sampler3D uTS;
-out vec2 color;
-void main(void)
+function init()
 {
-	ivec3 pos = ivec3(gl_InstanceID & 127,
-		(gl_InstanceID>>7) & 127, gl_InstanceID>>14);
-	vec2 t = texelFetch(uTS, pos, 0 ).rg;
-	if (t.r < .6)
+	let scene = new THREE.Scene();
+
+	let canvas = document.createElement( 'canvas' );
+	let context = canvas.getContext( 'webgl2' );
+	let renderer = new THREE.WebGLRenderer( { canvas: canvas, context: context } );
+	renderer.setPixelRatio( window.devicePixelRatio );
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	document.body.appendChild( renderer.domElement );
+
+	// does not work with perspective, may have to do that yourself
+	let frustumHeight = 512;
+	let aspect = window.innerWidth / window.innerHeight;
+	let camera = new THREE.OrthographicCamera( - frustumHeight * aspect / 2, frustumHeight * aspect / 2, frustumHeight / 2, - frustumHeight / 2, 1, 1000 );
+	camera.position.set( 0, 0, 128 )
+
+	new THREE.NRRDLoader().load( "../../data/stent.nrrd", function ( volume )
 	{
-		gl_Position = vec4(1000.,0.,0.,1.);
-		return;
-	}
-	color = t;
-	vec4 p = objectMatrix * vec4(pos, 1);
-	gl_Position = projectionMatrix * p;
-	gl_PointSize = -pointSize/p.z;
+		// We have scalars, so we put our data in the red channel.
+		// THREEJS will select R32F (33326) based on the RedFormat and FloatType.
+		// Also see https://www.khronos.org/registry/webgl/specs/latest/2.0/#TEXTURE_TYPES_FORMATS_FROM_DOM_ELEMENTS_TABLE
+		let texture = new THREE.DataTexture3D( volume.data, volume.xLength, volume.yLength, volume.zLength );
+		texture.format = THREE.RedFormat;
+		texture.type = THREE.FloatType;
+		texture.minFilter = texture.magFilter = THREE.LinearFilter;
+		texture.unpackAlignment = 1;
+		texture.needsUpdate = true;
+
+		let uniforms = THREE.UniformsUtils.clone( THREE.VolumeRenderShader1.uniforms );
+		uniforms[ "u_data" ].value = texture;
+		uniforms[ "u_size" ].value.set( volume.xLength, volume.yLength, volume.zLength );
+		uniforms[ "u_cmdata" ].value = new THREE.TextureLoader().load( '../../data/viridisColorMap.png', render )
+		uniforms[ "u_clim" ].value.set( 0, 1 );
+
+		let isContourSurface = 1
+		uniforms[ "u_renderstyle" ].value = isContourSurface
+		uniforms[ "u_isolevel" ].value = 0.15
+
+		let box = new THREE.Mesh( 
+			new THREE.BoxBufferGeometry( volume.xLength, volume.yLength, volume.zLength ),
+			new THREE.ShaderMaterial( {
+				uniforms: uniforms,
+				vertexShader: THREE.VolumeRenderShader1.vertexShader,
+				fragmentShader: THREE.VolumeRenderShader1.fragmentShader,
+				side: THREE.BackSide // The volume shader uses the backface as its "reference point"
+			} ) );
+		box.geometry.translate( volume.xLength / 2 - 0.5, volume.yLength / 2 - 0.5, volume.zLength / 2 - 0.5 );
+		box.position.sub( new THREE.Vector3( volume.xLength / 2 - 0.5, volume.yLength / 2 - 0.5, volume.zLength / 2 - 0.5 ) );
+		scene.add( box );
+
+		function render()
+		{
+			renderer.render( scene, camera );
+		}
+		render();
+
+	} );
 }
-`;
- 
-const fragmentShader = `#version 300 es
-precision highp float;
-in vec2 color;
-out vec4 FragColor;
-void main(void)
-{
-	FragColor = vec4(color, 0., 1.);
-}
-`;
 
-//note it is not this that puts it in the actual location
-const simulationVertexShader = `#version 300 es
-layout (location = 1) in vec2 aPos2;
-out vec2 locationInLayer;
-void main(void)
-{
-	gl_Position = vec4(aPos2, 0., 1.);
-	locationInLayer = .5*aPos2 + .5;
-}
-`;
-
-const simulationFragmentShader = `#version 300 es
-precision highp float;
-
-uniform highp sampler3D wholeTexture;
-
-uniform float layerElevation;
-in vec2 locationInLayer;
-out vec2 FragColor;
-
-const float a = .8, b = .001, dt = .05* .02, eps = .007, h = 0.2 * 0.607;
-const float inverseEpsilonDeltaT = dt/eps, bOverA = b/a, inverseHSquaredDeltaT = dt/(h*h);
-
-const float dimension = 128.;
-const float d = 1./dimension;
-
-void main(void)
-{
-	vec4 t = texture(wholeTexture, vec3(locationInLayer, layerElevation)); //just reading the texture
-	float u = t.r;
-	float v = t.g;
-
-	float uth = v/a + bOverA;
-
-	float partWay = inverseEpsilonDeltaT * (u - uth);
-
-	float uNew;
-	if ( u <= uth)
-	{
-		//quench
-		uNew = u / (1. - partWay*(1. - u));
-	}
-	else
-	{
-		partWay *= u;
-		uNew = (partWay + u) / (partWay + 1.);
-	}
-
-	uNew += 
-		(	texture(wholeTexture, vec3( locationInLayer.x,     locationInLayer.y + d, layerElevation    ) ).r +
-			texture(wholeTexture, vec3( locationInLayer.x,     locationInLayer.y - d, layerElevation    ) ).r +
-			texture(wholeTexture, vec3( locationInLayer.x,     locationInLayer.y,     layerElevation + d) ).r +
-			texture(wholeTexture, vec3( locationInLayer.x,     locationInLayer.y,     layerElevation - d) ).r +
-			texture(wholeTexture, vec3( locationInLayer.x + d, locationInLayer.y,     layerElevation    ) ).r +
-			texture(wholeTexture, vec3( locationInLayer.x - d, locationInLayer.y,     layerElevation    ) ).r
-			- 6. * u ) //normalization of the 6 terms above
-			* inverseHSquaredDeltaT;
-
-	float vNew = v + (u - v) * dt;
-	FragColor = vec2(uNew, vNew );
-}
-`;
- 
 function createShader(gl, type, source)
 {
 	var shader = gl.createShader(type);
@@ -191,35 +122,75 @@ function createShader(gl, type, source)
 
 function init2()
 {
+	let dimension = 128
+
 	let canvas = document.createElement( 'canvas' );
 	document.body.appendChild( canvas )
 	gl = canvas.getContext("webgl2")
 
-	let dimension = 128
-
-	var ext = gl.getExtension("EXT_color_buffer_float")
-	let c_w = window.innerWidth - 50;
-	let c_h = window.innerHeight - 10
-	canvas.width = c_w;
-	canvas.height = c_h
-	gl.enable(gl.DEPTH_TEST)
-	gl.depthFunc(gl.LEQUAL)
-	gl.clearDepth(1.0)
-	gl.clearColor(0, 0, 0, 1)
-
-	let drawingProgram = gl.createProgram()
 	{
+		const vertexShader = `#version 300 es
+		uniform mat4 objectMatrix;
+		uniform mat4 projectionMatrix;
+		uniform float pointSize;
+
+		uniform highp sampler3D wholeTexture;
+		out vec2 color;
+
+		void main(void)
+		{
+			ivec3 voxel = ivec3( //gl_InstanceID is the number of the point (and this is why 128 is locked)
+				gl_InstanceID & 127,
+				(gl_InstanceID>>7) & 127,
+				gl_InstanceID>>14);
+
+			vec2 t = texelFetch(wholeTexture, voxel, 0 ).rg;
+
+			if (t.r < .6)
+			{
+				gl_Position = vec4(1000.,0.,0.,1.);
+				return;
+			}
+
+			color = t;
+
+			vec4 p = objectMatrix * vec4(voxel, 1);
+			gl_Position = projectionMatrix * p;
+			gl_PointSize = -pointSize/p.z;
+		}
+		`;
+		 
+		const fragmentShader = `#version 300 es
+		precision highp float;
+		in vec2 color;
+		out vec4 FragColor;
+		void main(void)
+		{
+			FragColor = vec4(color, 0., 1.);
+		}
+		`;
+
+		let drawingProgram = gl.createProgram()
+
+		let ext = gl.getExtension("EXT_color_buffer_float")
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight
+		gl.enable(gl.DEPTH_TEST)
+		gl.depthFunc(gl.LEQUAL)
+		gl.clearDepth(1.0)
+		gl.clearColor(0, 0, 0, 1)
+
 		gl.attachShader(drawingProgram, createShader( gl, gl.VERTEX_SHADER, vertexShader))
 		gl.attachShader(drawingProgram, createShader( gl, gl.FRAGMENT_SHADER, fragmentShader))
 		gl.linkProgram(drawingProgram)
 		gl.useProgram(drawingProgram)
 
 		var projectionMatrix = new CanvasMatrix4()
-		projectionMatrix.perspective(45, c_w/c_h, .1, 100)
+		projectionMatrix.perspective( 45, canvas.width/canvas.height, .1, 100 )
 		gl.uniformMatrix4fv( 
 			gl.getUniformLocation(drawingProgram,"projectionMatrix"), false,
 			new Float32Array(projectionMatrix.getAsArray()) )
-		gl.uniform1f(gl.getUniformLocation(drawingProgram, "pointSize"), .01*c_h)
+		gl.uniform1f(gl.getUniformLocation(drawingProgram, "pointSize"), .01*canvas.height)
 
 		let objectMatrixPointer = gl.getUniformLocation(drawingProgram,"objectMatrix")
 		let objectMatrix = new CanvasMatrix4()
@@ -228,18 +199,82 @@ function init2()
 		objectMatrix.translate(-.5, -.5, -.5)
 		objectMatrix.rotate(110, 0,1,0)
 		objectMatrix.translate(0, 0, -2)
+		gl.uniformMatrix4fv( objectMatrixPointer, false, new Float32Array( objectMatrix.getAsArray() ) )
 
 		function drawScene()
 		{
-			gl.viewport(0, 0, c_w, c_h)
-			gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+			gl.viewport(0, 0, canvas.width, canvas.height)
 			gl.useProgram(drawingProgram)
 
+			gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+
 			gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT )
-			gl.uniformMatrix4fv( objectMatrixPointer, false, new Float32Array( objectMatrix.getAsArray() ) )
 			gl.drawArraysInstanced( gl.POINTS, 0, 1, dimension*dimension*dimension)
 		}
 	}
+
+	//note it is not this that puts it in the actual location
+	const simulationVertexShader = `#version 300 es
+	layout (location = 1) in vec2 aPos2;
+	out vec2 locationInLayer;
+	void main(void)
+	{
+		gl_Position = vec4(aPos2, 0., 1.);
+		locationInLayer = .5*aPos2 + .5;
+	}
+	`;
+
+	const simulationFragmentShader = `#version 300 es
+	precision highp float;
+
+	uniform highp sampler3D wholeTexture;
+
+	uniform float layerElevation;
+	in vec2 locationInLayer;
+	out vec2 FragColor;
+
+	const float a = .8, b = .001, dt = .05* .02, eps = .007, h = 0.2 * 0.607;
+	const float inverseEpsilonDeltaT = dt/eps, bOverA = b/a, inverseHSquaredDeltaT = dt/(h*h);
+
+	const float dimension = 128.;
+	const float d = 1./dimension;
+
+	void main(void)
+	{
+		vec4 t = texture(wholeTexture, vec3(locationInLayer, layerElevation)); //just reading the texture
+		float u = t.r;
+		float v = t.g;
+
+		float uth = v/a + bOverA;
+
+		float partWay = inverseEpsilonDeltaT * (u - uth);
+
+		float uNew;
+		if ( u <= uth)
+		{
+			//quench
+			uNew = u / (1. - partWay*(1. - u));
+		}
+		else
+		{
+			partWay *= u;
+			uNew = (partWay + u) / (partWay + 1.);
+		}
+
+		uNew += 
+			(	texture(wholeTexture, vec3( locationInLayer.x,     locationInLayer.y + d, layerElevation    ) ).r +
+				texture(wholeTexture, vec3( locationInLayer.x,     locationInLayer.y - d, layerElevation    ) ).r +
+				texture(wholeTexture, vec3( locationInLayer.x,     locationInLayer.y,     layerElevation + d) ).r +
+				texture(wholeTexture, vec3( locationInLayer.x,     locationInLayer.y,     layerElevation - d) ).r +
+				texture(wholeTexture, vec3( locationInLayer.x + d, locationInLayer.y,     layerElevation    ) ).r +
+				texture(wholeTexture, vec3( locationInLayer.x - d, locationInLayer.y,     layerElevation    ) ).r
+				- 6. * u ) //normalization of the 6 terms above
+				* inverseHSquaredDeltaT;
+
+		float vNew = v + (u - v) * dt;
+		FragColor = vec2(uNew, vNew );
+	}
+	`;
 
 	let initialState = new Float32Array(2*dimension*dimension*dimension)
 	for(var k = 0; k < 3*dimension/4; k++)
@@ -270,7 +305,8 @@ function init2()
 	let texture = TextureWithInitialState()
 	let texture2 = TextureWithInitialState()
 	let fb = gl.createFramebuffer()
-	let fb2 = gl.createFramebuffer()
+
+	//using drawArrays will... set up something that gets used by the next thing
 
 	let simulation = gl.createProgram()
 	gl.attachShader(simulation, createShader( gl, gl.VERTEX_SHADER, simulationVertexShader))
@@ -302,17 +338,17 @@ function init2()
 		}
 	}
 
+	let lastOneStepped = 0
+
 	function loop()
 	{
-		gl.viewport(0,0,dimension,dimension) //it's divided into dimension x dimension layers
+		gl.viewport(0,0,dimension,dimension)
 		gl.useProgram(simulation)
 
-		//presumably two steps because you've got to step both u and v. Yet shader gets both?
-		//maybe they're two steps of the simulation?
-		stepTexture(texture, texture2, fb)
-		stepTexture(texture2, texture, fb2)
+		lastOneStepped ? stepTexture(texture, texture2, fb) : stepTexture(texture2, texture, fb)
+		lastOneStepped = 1 - lastOneStepped
 
-		drawScene() //hopefully we can replace. So how does it get communicated in?
+		drawScene()
 		requestAnimationFrame(loop)
 	}
 
@@ -321,7 +357,7 @@ function init2()
 
 </script>
 
-</head>
-<body onload="init();">
+<body onload="init2();">
 </body>
+
 </html>

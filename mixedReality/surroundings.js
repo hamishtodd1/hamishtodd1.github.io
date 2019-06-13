@@ -13,6 +13,7 @@ async function initFloorAndSky()
 		"data/floor.png",
 		function(texture)
 		{
+			log(texture.uuid)
 			texture.magFilter = THREE.NearestFilter;
 			floorTile.material.map = texture;
 		},
