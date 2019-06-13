@@ -27,6 +27,7 @@ THREE.Ocean = function ( renderer, camera, actualScene )
 	// framebuffers
 	{
 		var renderTargetType = THREE.FloatType //THREE.HalfFloatType
+
 		var LinearClampParams = {
 			minFilter: THREE.LinearFilter,
 			magFilter: THREE.LinearFilter,
@@ -60,14 +61,14 @@ THREE.Ocean = function ( renderer, camera, actualScene )
 			premultiplyAlpha: false,
 			type: renderTargetType
 		};
-		var initialSpectrumFramebuffer = new THREE.WebGLRenderTarget( resolution, resolution, NearestRepeatParams );
-		var spectrumFramebuffer = new THREE.WebGLRenderTarget( resolution, resolution, NearestClampParams );
-		var pingPhaseFramebuffer = new THREE.WebGLRenderTarget( resolution, resolution, NearestClampParams );
-		var pongPhaseFramebuffer = new THREE.WebGLRenderTarget( resolution, resolution, NearestClampParams );
-		var pingTransformFramebuffer = new THREE.WebGLRenderTarget( resolution, resolution, NearestClampParams );
-		var pongTransformFramebuffer = new THREE.WebGLRenderTarget( resolution, resolution, NearestClampParams );
-		var displacementMapFramebuffer = new THREE.WebGLRenderTarget( resolution, resolution, LinearClampParams );
-		var normalMapFramebuffer = new THREE.WebGLRenderTarget( resolution, resolution, LinearClampParams );
+		var initialSpectrumFramebuffer	 = new THREE.WebGLRenderTarget( resolution, resolution, NearestRepeatParams );
+		var spectrumFramebuffer			 = new THREE.WebGLRenderTarget( resolution, resolution, NearestClampParams );
+		var pingPhaseFramebuffer		 = new THREE.WebGLRenderTarget( resolution, resolution, NearestClampParams );
+		var pongPhaseFramebuffer		 = new THREE.WebGLRenderTarget( resolution, resolution, NearestClampParams );
+		var pingTransformFramebuffer	 = new THREE.WebGLRenderTarget( resolution, resolution, NearestClampParams );
+		var pongTransformFramebuffer	 = new THREE.WebGLRenderTarget( resolution, resolution, NearestClampParams );
+		var displacementMapFramebuffer	 = new THREE.WebGLRenderTarget( resolution, resolution, LinearClampParams );
+		var normalMapFramebuffer		 = new THREE.WebGLRenderTarget( resolution, resolution, LinearClampParams );
 	}
 
 	// Shaders and constant uniforms
@@ -307,17 +308,17 @@ THREE.Ocean = function ( renderer, camera, actualScene )
 
 					renderer.setRenderTarget( displacementMapFramebuffer );
 					renderer.render( ourScene, ourCamera );
-
-				} else if ( i % 2 === 1 )
+				}
+				else if ( i % 2 === 1 )
 				{
 					materialWindVertical.uniforms.u_input.value = pingTransformFramebuffer.texture;
 					materialWindVertical.uniforms.u_subtransformSize.value = Math.pow( 2, ( i % ( iterations ) ) + 1 );
 
 					renderer.setRenderTarget( pongTransformFramebuffer );
 					renderer.render( ourScene, ourCamera );
-
-				} else {
-
+				}
+				else
+				{
 					materialWindVertical.uniforms.u_input.value = pongTransformFramebuffer.texture;
 					materialWindVertical.uniforms.u_subtransformSize.value = Math.pow( 2, ( i % ( iterations ) ) + 1 );
 

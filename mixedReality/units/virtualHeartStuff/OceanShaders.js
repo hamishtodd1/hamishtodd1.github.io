@@ -7,19 +7,14 @@
 // The general method is to apply shaders to simulation Framebuffers
 // and then sample these framebuffers when rendering the ocean mesh
 
-// The set uses 7 shaders:
-
 // -- Simulation shaders
-// [1] ocean_sim_vertex         -> Vertex shader used to set up a 2x2 simulation plane centered at (0,0)
-// [2] ocean_subtransform       -> Fragment shader used to subtransform the mesh (generates the displacement map)
-// [3] ocean_initial_spectrum   -> Fragment shader used to set intitial wave frequency at a texel coordinate
-// [4] ocean_phase              -> Fragment shader used to set wave phase at a texel coordinate
-// [5] ocean_spectrum           -> Fragment shader used to set current wave frequency at a texel coordinate
-// [6] ocean_normal             -> Fragment shader used to set face normals at a texel coordinate
-
-// -- Rendering Shader
-// [7] oceanDisplay               -> Vertex and Fragment shader used to create the final render
-
+// [1] ocean_sim_vertex         -> Vertex,   used to set up a 2x2 simulation plane centered at (0,0)
+// [2] ocean_subtransform       -> Fragment, used to subtransform the mesh (generates the displacement map)
+// [3] ocean_initial_spectrum   -> Fragment, used to set intitial wave frequency at a texel coordinate
+// [4] ocean_phase              -> Fragment, used to set wave phase at a texel coordinate
+// [5] ocean_spectrum           -> Fragment, used to set current wave frequency at a texel coordinate
+// [6] ocean_normal             -> Fragment, used to set face normals at a texel coordinate
+// [7] oceanDisplay             -> Vertex+Fragment, final render
 
 THREE.ShaderLib[ 'ocean_sim_vertex' ] = {
 	vertexShader: [
@@ -266,9 +261,6 @@ THREE.ShaderLib[ 'ocean_spectrum' ] = {
 		'}'
 	].join( '\n' )
 };
-
-
-
 THREE.ShaderLib[ 'ocean_normals' ] = {
 	uniforms: {
 		"u_displacementMap": { value: null },
@@ -303,6 +295,9 @@ THREE.ShaderLib[ 'ocean_normals' ] = {
 		'}'
 	].join( '\n' )
 };
+
+
+
 
 THREE.ShaderLib[ 'oceanDisplay' ] = {
 	uniforms: {
