@@ -18,7 +18,7 @@
 // [6] ocean_normal             -> Fragment shader used to set face normals at a texel coordinate
 
 // -- Rendering Shader
-// [7] ocean_main               -> Vertex and Fragment shader used to create the final render
+// [7] oceanDisplay               -> Vertex and Fragment shader used to create the final render
 
 
 THREE.ShaderLib[ 'ocean_sim_vertex' ] = {
@@ -266,6 +266,9 @@ THREE.ShaderLib[ 'ocean_spectrum' ] = {
 		'}'
 	].join( '\n' )
 };
+
+
+
 THREE.ShaderLib[ 'ocean_normals' ] = {
 	uniforms: {
 		"u_displacementMap": { value: null },
@@ -301,7 +304,7 @@ THREE.ShaderLib[ 'ocean_normals' ] = {
 	].join( '\n' )
 };
 
-THREE.ShaderLib[ 'ocean_main' ] = {
+THREE.ShaderLib[ 'oceanDisplay' ] = {
 	uniforms: {
 		"u_displacementMap": { value: null },
 		"u_normalMap": { value: null },
@@ -311,10 +314,11 @@ THREE.ShaderLib[ 'ocean_main' ] = {
 		"u_viewMatrix": { value: null },
 		"u_cameraPosition": { value: null },
 		"u_skyColor": { value: null },
-		"u_oceanColor": { value: null },
+		"u_waterColor": { value: null },
 		"u_sunDirection": { value: null },
 		"u_exposure": { value: null }
 	},
+
 	vertexShader: [
 		'precision highp float;',
 
@@ -328,22 +332,24 @@ THREE.ShaderLib[ 'ocean_main' ] = {
 		'uniform sampler2D u_displacementMap;',
 
 		'void main (void) {',
-			'vec3 newPos = position + texture2D(u_displacementMap, uv).rgb * (u_geometrySize / u_size);',
+			// 'vec3 newPos = position + texture2D(u_displacementMap, uv).rgb * (u_geometrySize / u_size);',
+			'vec3 newPos = position;',
 			'vPos = newPos;',
 			'vUV = uv;',
 			'gl_Position = u_projectionMatrix * u_viewMatrix * vec4(newPos, 1.0);',
 		'}'
 	].join( '\n' ),
+
 	fragmentShader: [
 		'precision highp float;',
 
 		'varying vec3 vPos;',
 		'varying vec2 vUV;',
 
-		'uniform sampler2D u_displacementMap;', //there you are
-		'uniform sampler2D u_normalMap;',
+		'uniform sampler2D u_displacementMap;',
+		'uniform sampler2D u_normalMap;', //all about this guy. Hopefully not hard to bring out of sync with vertices
 		'uniform vec3 u_cameraPosition;',
-		'uniform vec3 u_oceanColor;',
+		'uniform vec3 u_waterColor;',
 		'uniform vec3 u_skyColor;',
 		'uniform vec3 u_sunDirection;',
 		'uniform float u_exposure;',
@@ -360,7 +366,7 @@ THREE.ShaderLib[ 'ocean_main' ] = {
 			'vec3 sky = fresnel * u_skyColor;',
 
 			'float diffuse = clamp(dot(normal, normalize(u_sunDirection)), 0.0, 1.0);',
-			'vec3 water = (1.0 - fresnel) * u_oceanColor * u_skyColor * diffuse;',
+			'vec3 water = (1.0 - fresnel) * u_waterColor * u_skyColor * diffuse;',
 
 			'vec3 color = sky + water;',
 
