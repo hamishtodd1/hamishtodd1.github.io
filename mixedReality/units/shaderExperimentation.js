@@ -187,24 +187,3 @@ async function initShaderExperimentation( canvas )
 		scene.add(plane);
 	}
 }
-
-function assignShader(fileName, materialToReceiveAssignment, vertexOrFragment)
-{
-	var propt = vertexOrFragment + "Shader"
-	var fullFileName = "units/shaders/" + fileName + ".glsl"
-
-	return new Promise(resolve => {
-		var xhr = new XMLHttpRequest();
-		xhr.open("GET", fullFileName, true);
-		xhr.onload = function(e)
-		{
-			materialToReceiveAssignment[propt] = xhr.response
-			resolve();
-		};
-		xhr.onerror = function ()
-		{
-			console.error(fullFileName, "didn't load");
-		};
-		xhr.send();
-	})
-}

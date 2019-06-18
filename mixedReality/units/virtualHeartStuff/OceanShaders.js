@@ -8,15 +8,15 @@
 // and then sample these framebuffers when rendering the ocean mesh
 
 // -- Simulation shaders
-// [1] ocean_sim_vertex         -> Vertex,   used to set up a 2x2 simulation plane centered at (0,0)
-// [2] ocean_subtransform       -> Fragment, used to subtransform the mesh (generates the displacement map)
-// [3] ocean_initial_spectrum   -> Fragment, used to set intitial wave frequency at a texel coordinate
-// [4] ocean_phase              -> Fragment, used to set wave phase at a texel coordinate
-// [5] ocean_spectrum           -> Fragment, used to set current wave frequency at a texel coordinate
-// [6] ocean_normal             -> Fragment, used to set face normals at a texel coordinate
-// [7] oceanDisplay             -> Vertex+Fragment, final render
+// [1] alwaysUsedVertexShader	-> Vertex,   used to set up a 2x2 simulation plane centered at (0,0)
+// [2] ocean_subtransform		-> Fragment, used to subtransform the mesh (generates the displacement map)
+// [3] ocean_initial_spectrum	-> Fragment, used to set intitial wave frequency at a texel coordinate
+// [4] ocean_phase				-> Fragment, used to set wave phase at a texel coordinate
+// [5] ocean_spectrum			-> Fragment, used to set current wave frequency at a texel coordinate
+// [6] ocean_normal				-> Fragment, used to set face normals at a texel coordinate
+// [7] oceanDisplay				-> Vertex+Fragment, final render
 
-THREE.ShaderLib[ 'ocean_sim_vertex' ] = {
+THREE.ShaderLib[ 'alwaysUsedVertexShader' ] = {
 	vertexShader: [
 		'varying vec2 vUV;',
 
@@ -80,7 +80,7 @@ THREE.ShaderLib[ 'ocean_initial_spectrum' ] = {
 	uniforms: {
 		"u_wind": { value: new THREE.Vector2( 10.0, 10.0 ) },
 		"u_resolution": { value: 512.0 },
-		"u_size": { value: 250.0 }
+		"u_size": { value: 256.0 }
 	},
 	vertexShader: [
 		'void main (void) {',
@@ -303,7 +303,7 @@ THREE.ShaderLib[ 'oceanDisplay' ] = {
 	uniforms: {
 		"u_displacementMap": { value: null },
 		"u_normalMap": { value: null },
-		"u_geometrySize": { value: null },
+		"u_geometrySize": { value: null }, //not clear why you need this
 		"u_size": { value: null },
 		"u_projectionMatrix": { value: null },
 		"u_viewMatrix": { value: null },
@@ -327,8 +327,8 @@ THREE.ShaderLib[ 'oceanDisplay' ] = {
 		'uniform sampler2D u_displacementMap;',
 
 		'void main (void) {',
-			// 'vec3 newPos = position + texture2D(u_displacementMap, uv).rgb * (u_geometrySize / u_size);',
-			'vec3 newPos = position;',
+			'vec3 newPos = position + texture2D(u_displacementMap, uv).rgb * (u_geometrySize / u_size);',
+			// 'vec3 newPos = position;',
 			'vPos = newPos;',
 			'vUV = uv;',
 			'gl_Position = u_projectionMatrix * u_viewMatrix * vec4(newPos, 1.0);',

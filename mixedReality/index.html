@@ -13,6 +13,7 @@
 	</head>
 	<body>
 		<script src="lib/three.js"></script>
+		<!-- three97WithOurModifications.js -->
 		<script src="lib/sceneUtils.js"></script>
 
 		<script src="lib/OBJLoader.js"></script>
@@ -58,6 +59,8 @@
 
 		<script src="units/shaderExperimentation.js"></script>
 
+		<script src="units/basicSimulation.js"></script>		
+
 		<script>
 			async function init()
 			{
@@ -87,7 +90,8 @@
 					await initFloorAndSky()
 				}
 
-				await initShaderExperimentation( canvas )
+				// await initShaderExperimentation( canvas )
+				initBasicSimulation()
 
 				renderer.setAnimationLoop( function()
 				{
