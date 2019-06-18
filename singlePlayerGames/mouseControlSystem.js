@@ -24,11 +24,10 @@ function initMouse()
 		cursor.castShadow = true;
 		scene.add(cursor)
 
-		objectsToBeUpdated.push(cursor)
-		cursor.update = function()
+		updateFunctions.push( function()
 		{
-			this.position.copy(mouse.rayIntersectionWithZPlane(0))
-		}
+			cursor.position.copy(mouse.rayIntersectionWithZPlane(0))
+		} )
 		// window.addEventListener( 'resize', function(){console.log(cursor.position)}, false );
 	}
 
