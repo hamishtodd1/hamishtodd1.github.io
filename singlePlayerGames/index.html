@@ -25,9 +25,51 @@
 		<script src="miscFunctions.js"></script>
 		<script src="mouseControlSystem.js"></script>
 
-		<script src="units/rotationGame.js"></script>
+		<!-- <script src="units/rotationGame.js"></script> -->
+		<script src="units/flappyBird.js"></script>
 
 	    <script src="variables.js"></script>
-		<script src="init.js"></script>
+		<script src="buttons.js"></script>
+
+		<script>
+		{
+			initButtons()
+
+			var renderer = new THREE.WebGLRenderer({ antialias: true });
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setClearColor(0xFFFFFF) //youtube
+			renderer.shadowMap.enabled = true;
+			renderer.shadowMap.type = THREE.BasicShadowMap;
+			document.body.appendChild( renderer.domElement );
+
+			function render()
+			{
+				{
+					frameDelta = clock.getDelta();
+					
+					mouse.updateFromAsyncAndCheckClicks();
+
+					for(var i = 0; i < updateFunctions.length; i++)
+					{
+						updateFunctions[i]();
+					}
+
+					frameCount++;
+				}
+
+				requestAnimationFrame( render );
+				renderer.render( scene, camera );
+			}
+
+			initCameraAndRendererResizeSystem(renderer);
+			var stage = initSurroundings();
+			initMouse();
+			console.log("y")
+
+			initFlappyBird()
+
+			render();
+		}
+		</script>
 	</body>
 </html>

@@ -80,8 +80,8 @@ function initCameraZoomSystem()
 		return start + t * (end-start);
 	}
 	var timeSinceZoomToConsideration = 0;
-	objectsToBeUpdated.push(camera)
-	camera.update = function()
+
+	updateFunctions.push(function()
 	{
 		var timeToWaitBeforeZooming = 0.18
 		if(timeSinceZoomToConsideration < timeToWaitBeforeZooming && timeToWaitBeforeZooming < timeSinceZoomToConsideration + frameDelta )
@@ -94,7 +94,7 @@ function initCameraZoomSystem()
 		camera.zoomProgress += 1.1 * frameDelta;
 		camera.zoomProgress = clamp(camera.zoomProgress,0,1)
 		camera.updatePosition()
-	}
+	})
 
 	camera.updatePosition = function()
 	{
