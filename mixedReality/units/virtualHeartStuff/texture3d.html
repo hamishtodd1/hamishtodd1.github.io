@@ -109,21 +109,23 @@ function init()
 	} );
 }
 
-function createShader(gl, type, source)
-{
-	var shader = gl.createShader(type);
-	gl.shaderSource(shader, source);
-	gl.compileShader(shader);
-	if( gl.getShaderParameter(shader, gl.COMPILE_STATUS) )
-	{
-		return shader;
-	}
-	alert( gl.getShaderInfoLog(shader));
-	gl.deleteShader(shader);
-}
 
+//--------------
 function init2()
 {
+	function createShader(gl, type, source)
+	{
+		var shader = gl.createShader(type);
+		gl.shaderSource(shader, source);
+		gl.compileShader(shader);
+		if( gl.getShaderParameter(shader, gl.COMPILE_STATUS) )
+		{
+			return shader;
+		}
+		alert( gl.getShaderInfoLog(shader));
+		gl.deleteShader(shader);
+	}
+
 	let dimension = 128
 
 	let canvas = document.createElement( 'canvas' );
@@ -359,7 +361,7 @@ function init2()
 
 </script>
 
-<body onload="init2();">
+<body onload="init();">
 </body>
 
 </html>

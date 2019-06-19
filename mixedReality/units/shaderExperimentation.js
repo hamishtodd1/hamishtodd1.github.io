@@ -94,96 +94,21 @@ async function initShaderExperimentation( canvas )
 		} )
 	}
 
-	//heat 2D
 	// if(0)
+	/*
+		mkay so first it's just face-on and you're making a sphere
+	*/
 	{
+		let material = new THREE.ShaderMaterial({
+			uniforms: {
+			},
+		});
+		// await assignShader("basicVertex", material, "vertex")
+		// await assignShader("basicFragment", material, "fragment")
 
-		{
-			// webGl2Context
-			/*
-				2 textures
-
-				Use raw shaders for the simulation
-				Then how to communicate?
-			*/
-
-			let dimension = 64;
-			let initialState = new Float32Array(64*64*64)
-			for(let i = 0; i < 64*64*64; i++)
-			{
-				initialState[i] = Math.random()
-			}
-
-			function halfSimulation()
-			{
-				let texture = gl.createTexture()
-
-
-
-				// gl.bindTexture(gl.TEXTURE_2D, texture);
-				// gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-				// gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, dimension, dimension, 0, gl.RGBA, gl.UNSIGNED_BYTE,
-				// 	initialState);
-				// gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-				// gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-				// gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-				// gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-				// let framebuffer = gl.createFramebuffer();
-				// gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-				// gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0,
-				// 	gl.TEXTURE_2D, texture, 0);
-
-				// texture.stepSimulation = function()
-				// {
-				// 	gl.bindTexture(gl.TEXTURE_2D, texture);
-				// 	gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-				// }
-
-				return texture;
-			}
-
-			// var texture1 = halfSimulation()
-			// let texture2 = halfSimulation()
-
-			// updateFunctions.push( function() 
-			// {
-			// 	gl.useProgram(prog);
-			// 	lastOneStepped ? texture1.stepSimulation() : texture2.stepSimulation()
-			// 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-			// 	gl.flush();
-			// } )
-		}
-
-		let material = new THREE.ShaderMaterial({});
-		await assignShader("simulation2dDisplayVertex", material, "vertex")
-		await assignShader("simulation2dDisplayFragment", material, "fragment")
-
-		let offscreenMaterial = new THREE.ShaderMaterial() //raw might be better
-		await assignShader("heatVertex", offscreenMaterial, "vertex")
-		await assignShader("heatFragment", offscreenMaterial, "fragment")
-		let offscreenPlane = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.0, 1.0), offscreenMaterial);
-
-		updateFunctions.push(function()
-		{
-			//urgh but you need to make it so each fucking pixel gets "drawn"
-			offscreenMaterial.needsUpdate = true
-
-
-			//almost certainly it's useProgram
-			// renderer.state.activeTexture( gl.TEXTURE0 );
-			// renderer.state.bindTexture( gl.TEXTURE_2D, textureToWriteTo );
-		})
-
-		//do consider using the compute shaders!
-		//
-
-		//alright so next thing to do is get those heat things to run and then communicate their value
-		//probably have to mimic how three.js does it, because it probably is doing it somehow
-
-		let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.0, 1.0), material);
+		let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(0.1, 0.1, 10, 10), material);
 		plane.position.y = 1.6
-		plane.position.z = -1.5;
+		plane.position.z = -0.5;
 		scene.add(plane);
 	}
 }

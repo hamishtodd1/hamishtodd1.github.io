@@ -49184,7 +49184,8 @@
  * @param   {string}        type            The type of data (uint8, uint16, ...)
  * @param   {ArrayBuffer}   arrayBuffer     The buffer with volume data
  */
-THREE.Volume = function ( xLength, yLength, zLength, type, arrayBuffer ) {
+THREE.Volume = function ( xLength, yLength, zLength, type, arrayBuffer )
+{
 
 	if ( arguments.length > 0 ) {
 
@@ -49280,10 +49281,9 @@ THREE.Volume = function ( xLength, yLength, zLength, type, arrayBuffer ) {
 
 		}
 
-		if ( this.data.length !== this.xLength * this.yLength * this.zLength ) {
-
+		if ( this.data.length !== this.xLength * this.yLength * this.zLength )
+		{
 			throw 'Error in THREE.Volume constructor, lengths are not matching arrayBuffer size';
-
 		}
 
 	}
@@ -49299,67 +49299,6 @@ THREE.Volume = function ( xLength, yLength, zLength, type, arrayBuffer ) {
 	/**
 	 * @member {THREE.Martrix3} matrix The IJK to RAS matrix
 	 */
-	this.matrix = new THREE.Matrix3();
-	this.matrix.identity();
-	/**
-	 * @member {THREE.Martrix3} inverseMatrix The RAS to IJK matrix
-	 */
-	/**
-	 * @member {number} lowerThreshold The voxels with values under this threshold won't appear in the slices.
-	 *                      If changed, geometryNeedsUpdate is automatically set to true on all the slices associated to this volume
-	 */
-	var lowerThreshold = - Infinity;
-	Object.defineProperty( this, 'lowerThreshold', {
-		get: function () {
-
-			return lowerThreshold;
-
-		},
-		set: function ( value ) {
-
-			lowerThreshold = value;
-			this.sliceList.forEach( function ( slice ) {
-
-				slice.geometryNeedsUpdate = true;
-
-			} );
-
-		}
-	} );
-	/**
-	 * @member {number} upperThreshold The voxels with values over this threshold won't appear in the slices.
-	 *                      If changed, geometryNeedsUpdate is automatically set to true on all the slices associated to this volume
-	 */
-	var upperThreshold = Infinity;
-	Object.defineProperty( this, 'upperThreshold', {
-		get: function () {
-
-			return upperThreshold;
-
-		},
-		set: function ( value ) {
-
-			upperThreshold = value;
-			this.sliceList.forEach( function ( slice ) {
-
-				slice.geometryNeedsUpdate = true;
-
-			} );
-
-		}
-	} );
-
-
-	/**
-	 * @member {Array} sliceList The list of all the slices associated to this volume
-	 */
-	this.sliceList = [];
-
-
-	/**
-	 * @member {Array} RASDimensions This array holds the dimensions of the volume in the RAS space
-	 */
-
 };
 
 THREE.Volume.prototype = {
