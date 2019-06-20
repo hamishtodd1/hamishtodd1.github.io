@@ -1,8 +1,7 @@
-varying vec3 vUv; //where you are in world (screen?) coordinates? clip space?
+varying vec3 pointOnFace;
 
 void main() 
 {
-	vec3 p = position;
-	gl_Position = projectionMatrix * modelViewPosition;
-	vUv = vec3(gl_Position);
+	pointOnFace = position;
+	gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }

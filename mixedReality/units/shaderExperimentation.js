@@ -70,7 +70,7 @@ async function initShaderExperimentation( canvas )
 
 		let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(0.5, 0.5, 10, 10), material);
 		plane.position.y = 1.6
-		plane.position.z = -0.5;
+		plane.position.z = -0.45;
 		scene.add(plane);
 		
 		let vertexDisplacement = new Float32Array(plane.geometry.attributes.position.count);
@@ -101,14 +101,15 @@ async function initShaderExperimentation( canvas )
 	{
 		let material = new THREE.ShaderMaterial({
 			uniforms: {
+				// isolevel:{value:0.1}
 			},
 		});
-		// await assignShader("basicVertex", material, "vertex")
-		// await assignShader("basicFragment", material, "fragment")
+		await assignShader("scalarFieldVertex", material, "vertex")
+		await assignShader("scalarFieldFragment", material, "fragment")
 
 		let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(0.1, 0.1, 10, 10), material);
 		plane.position.y = 1.6
-		plane.position.z = -0.5;
+		plane.position.z = -0.45;
 		scene.add(plane);
 	}
 }
