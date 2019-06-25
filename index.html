@@ -1,3 +1,82 @@
+<!-- 
+	Imagine a disinterested person on their mobile
+	Also imagine someone very interested in you
+	They're going to this page to be entertained. If anyone's ever going to read those interviews
+
+	All your works are rectangles
+		Ones in same category are connected to a single special node that isn't a work?
+		And all works repel each other
+		How to draw the sections?
+			Metaballs, radius = half spring length
+			But you don't want them to get anywhere near
+
+	You might like some subregions to have a subheading and extra stuff
+
+	Nice how it could adjust to any screen size
+
+	Have things horizontally aligned
+
+	People who have influenced me and connections between them
+
+	Text needs to be not-pixellated and big enough to read, probably CSS
+			
+	Pixelshaders from webgl, but do rather want CSS -> youtube embed. Let them load later!
+
+	Pinch to zoom?
+
+	Click on a section
+		It is now centered
+		Click outside it, and we're back to master
+
+	When you click on a work
+		Its section is centered and it is centered in its section
+		Its rectangle enlarges
+		Corners connected by springs
+		Potentially, it embeds
+		Or at least you get an image preview
+
+	Venns
+		Unconnected to else
+			Contact
+			Recommended stuff
+				Recommended games drop-down
+				Recommended EEs
+				Recommended belief systems
+
+			Patreon
+		"things I didn't make but do recommend"
+		Level design analysis
+		Lectures
+		"Interaction design"
+		"Science communication"
+		Scientific work
+		Educational work
+		Videos
+		Actionbutton.net, Insertcredit. Time to copypaste
+		Misc (no section, just interesting to see them outside)
+			Name of the power that moves you
+			Film reviews
+			Speculations
+			Wikipedia articles
+				Reidun
+
+			Bug pictures
+			Joke pictures
+			Battle of Ideas shit
+			Coins workshop
+
+
+	HepCardboard, Sysmic, Apple presentation, NGS presentations, Women in science presentations
+
+	Failed projects
+		Verney Junction
+		Klein Bottle visual cortex
+		Diane Mclagan
+		Simulation of the Grandfather paradox in the game Braid
+
+	"Timeline button" which draws a string putting it in order
+ -->
+
 <!DOCTYPE html><html>
 <head><meta
 	charset="utf-8"><meta
@@ -37,7 +116,7 @@ and read a bare-bones bio <a href="personal/bio.html">here</a>.</p>
 <h3>Science videos / explorable explanations</h3>
 <ul>
 <li><a href="https://www.youtube.com/watch?v=BWiO9X2b2t4">Mathematics and crafts</a>, with more on viruses and origami</li>
-<li><a href="https://youtu.be/i9A6xVkVVUQ?t=13s">The Spread of Measles</a>, an interactive lecture about measles epidemeology</li>
+<li><a href="http://hamishtodd1.github.io/Sysmic">The Spread of Measles</a>, an interactive lecture about measles epidemeology</li>
 <li><a href="https://www.youtube.com/watch?v=YzbmF2NSkDk">Crystals and six-dimensional patterns</a>, a lecture in virtual reality</li>
 <li><a href="https://www.youtube.com/watch?v=AgpCm6pMYNE">The GM crop that could save a billion people from malnourishment</a></li>
 <li><a href="http://gamejolt.com/games/the-stranger-loop/10679">Topology via Asteroids</a>, my (the?) first interactive documentary</li>
@@ -65,8 +144,10 @@ and read a bare-bones bio <a href="personal/bio.html">here</a>.</p>
 	<li>My favourite science popularisers: 
 		<a href="https://www.youtube.com/playlist?list=PLTBqohhFNBE_09L0i-lf3fYXF5woAbrzJ">Tadashi Tokieda</a>, 
 		<a href="https://www.youtube.com/user/Vihart">Vi Hart</a>, 
-		<a href="https://www.youtube.com/watch?v=EHppJ0Demkg">Jacob Bronowski</a>,
-		<a href="https://youtu.be/9Zdg3UPVUtA?t=3m59s">Katherine Hayhoe</a></li>
+		<a href="https://www.youtube.com/watch?v=EHppJ0Demkg">Jacob Bronowski</a>, 
+		<a href="https://youtu.be/9Zdg3UPVUtA?t=3m59s">Katherine Hayhoe</a></li>, 
+		<a href="https://www.amazon.co.uk/Art-Forms-Nature-Prints-Haeckel/dp/3791319906/">Ernst Haeckel</a></li>, 
+		<a href="https://www.youtube.com/user/3blue1brown">3blue1brown</a>, 
 	<li>Below are some controversial things that I agree with. If you disagree with me on them and would like to talk about them, please let me know!
 		Shannonian / Jaynesian / Laplacian <a href='http://ksvanhorn.com/bayes/index.html'>epistemology</a>,
 		Tegmarkian / Godelian <a href='https://space.mit.edu/home/tegmark/'>metaphysics</a>,

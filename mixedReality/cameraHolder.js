@@ -61,7 +61,7 @@ function initCameraHolder(screen)
 		cameraHolder.position.add( velocity )
 	}
 
-	bindButton( "a", function(){}, "camera left",function()
+	bindButton( "a", function(){}, "cameraHolder left",function()
 	{
 		goInDirection(xUnit.clone().negate())
 		console.log("cameraHolder position: ", cameraHolder.position.toArray().toString() )

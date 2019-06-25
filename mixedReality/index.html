@@ -65,11 +65,15 @@
 			async function init()
 			{
 				let canvas = document.createElement( 'canvas' );
-				renderer = new THREE.WebGLRenderer( { canvas: canvas, context: canvas.getContext( 'webgl2' ), antialias: true } );
+				renderer = new THREE.WebGLRenderer( { canvas: canvas, context: canvas.getContext( 'webgl2' ),antialias: true } );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.localClippingEnabled = true;
 				document.body.appendChild( renderer.domElement );
+
+				// let a = new THREE.WebGLRenderer()
+				// let c = renderer.getContext()
+				// log(c.getExtension("EXT_frag_depth")) //so maybe would work without webgl2?
 
 				let windowResize = function()
 				{
@@ -82,7 +86,7 @@
 				initButtons()
 				initFaceMaker()
 				initLights()
-				await initPlaybackAndRecording()				
+				await initPlaybackAndRecording()			
 				initControllerObjects()
 				if( chromiumRatherThanChrome )
 				{
