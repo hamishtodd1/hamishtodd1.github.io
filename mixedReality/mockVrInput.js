@@ -6,12 +6,12 @@ function initMockVrInput()
 		grippingToggled = true
 	}, "toggle gripping" )
 
-	let visiblePosition = new THREE.Vector3(0,1.6,-0.5)
+	let visiblePosition = new THREE.Vector3(0,1.6,-0.3)
 	rightHand.position.copy(visiblePosition)
 
 	return function()
 	{
-		let t = frameCount * 0.9
+		let t = frameCount * 0.4
 
 		rightHand.position.set(0,0,0)
 		// rightHand.position.x = 0.2*Math.sin(t*0.03)

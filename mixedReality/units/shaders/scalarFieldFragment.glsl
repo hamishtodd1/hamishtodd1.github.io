@@ -24,14 +24,15 @@
 varying vec3 pointOnFace;
 
 uniform vec3 scalarFieldCameraPosition;
+uniform vec3 scalarFieldPointLightPosition;
 uniform float renderRadiusSquared;
 
-const float stepLength = 0.0005;
-const float colorNormalizer = .01; //wanna do at runtime
+const float stepLength = 0.0003;
+const float colorNormalizer = .000006; //wanna do at runtime
 
-const float isolevel = 0.96;
+const float isolevel = -1000.;
 
-const bool doIsosurface = false;
+const bool doIsosurface = true;
 const bool doSmoke = !doIsosurface;
 
 // float tanh(float x)
@@ -45,6 +46,7 @@ float sampleEllipticCurveSpace(vec3 p)
 	vec3 scaledP = p;
 	return scaledP.y*scaledP.y - scaledP.x*scaledP.x*scaledP.x - scaledP.z*scaledP.x;
 }
+
 float fourDConeThatIsZeroAtRadius(vec3 p)
 {
 	float radius = 0.03;
@@ -56,24 +58,33 @@ float differenceAccentuator(float value)//,float expectedMin,float expectedMax)
 {
 	return ( tanh( value ) + 1. ) / 2.;
 }
+float zeroAccentuator(float value)//,float expectedMin,float expectedMax)
+{
+	return 1. / value;
+}
 
 float sampleField( vec3 p )
 {
-	return differenceAccentuator(sampleEllipticCurveSpace(p) );
+	return zeroAccentuator(sampleEllipticCurveSpace(p) );
+}
+vec3 shittyGradient(vec3 p)
+{
+	//y*y - x*x*x - z*x
+	//
+	float valueHere = sampleField(p);
+	float eps = 0.0000001;
+	float x = ( valueHere - sampleField(p+vec3(eps,0.,0.)) ) / eps;
+	float y = ( valueHere - sampleField(p+vec3(0.,eps,0.)) ) / eps;
+	float z = ( valueHere - sampleField(p+vec3(0.,0.,eps)) ) / eps;
+
+	return vec3(x,y,z);
 }
 
-int relationshipToSurface(vec3 p)
+float relationshipToIsosurface(vec3 p)
 {
-	float val = sampleField(p);
-	if( val == isolevel )
-	{
-		return 0;
-	}
-	if( val < isolevel )
-	{
-		return -1;
-	}
-	return 1;
+	float val = sampleField(p) - isolevel;
+	float zeroOrOneOrMinusOne = sign(val);
+	return zeroOrOneOrMinusOne;
 }
 
 void main()
@@ -82,7 +93,7 @@ void main()
 	vec3 direction = normalize( pointOnFace - scalarFieldCameraPosition );
 
 	vec3 pointInScalarField = pointOnFace;
-	int oldRelationshipToSurface = relationshipToSurface(pointInScalarField);
+	float oldRelationshipToSurface = relationshipToIsosurface(pointInScalarField);
 
 	while( true )
 	{
@@ -118,35 +129,86 @@ void main()
 			{
 				gl_FragColor.b += val * colorNormalizer;
 			}
-			else
+			else if( val < 0.)
 			{
 				gl_FragColor.g += -val * colorNormalizer;
 			}
 		}
+
+		// vec3 poin = pointLights[0];
 
 		if(doIsosurface)
 		{
 			//so there's the "you might miss a hump" aspect. But it's still pretty good and that may never be avoidable
 
 			//bit rubbish without lighting
-			//if you can do lighting can you do environment mapping?
-			// int newRelationshipToSurface = relationshipToSurface(pointInScalarField);
-			// if( oldRelationshipToSurface != newRelationshipToSurface )
-			// {
-			// 	// gl_FragDepth = pointInScalarField.z - 500.; //would be nice
+			float newRelationshipToSurface = relationshipToIsosurface(pointInScalarField);
+			if( oldRelationshipToSurface != newRelationshipToSurface )
+			{
+				// gl_FragDepth = pointInScalarField.z - 500.; //would be nice
 
-			// 	if( newRelationshipToSurface == 1 )
-			// 	{
-			// 		gl_FragColor.r = 1.0;
-			// 	}
-			// 	else if( newRelationshipToSurface == -1 )
-			// 	{
-			// 		gl_FragColor.g = 1.0;
-			// 	}
-			// 	//nice would be if you could get the threejs-ish texture
-			// 	//https://github.com/mrdoob/three.js/blob/dev/src/renderers/shaders/ShaderLib/meshphong_frag.glsl.js ?
-			// 	return;
-			// }
+				//could take a half step back
+
+				if( newRelationshipToSurface == 1. )
+				{
+					gl_FragColor.r = 1.0;
+				}
+				else //if(newRelationshipToSurface == -1.)
+				{
+					gl_FragColor.g = 1.0;
+				}
+
+				//ultrasound dude
+
+				{
+					float ks = 1.;
+					float kd = 1.;
+					float ka = 1.;
+					float shininess = 1.;
+					float ambientIntensity = 1.;
+					float pointLightDiffuse = 1.;
+					float pointLightSpecular = 1.;
+
+					vec3 normal = normalize( shittyGradient(pointInScalarField) );
+					vec3 viewerDirection = -1. * direction;
+
+					float intensity = ka * ambientIntensity;
+					// for(lights)
+					{
+						vec3 pointLightDirection = normalize(scalarFieldPointLightPosition - pointInScalarField);
+						intensity += kd * dot( pointLightDirection, normal ) * pointLightDiffuse;
+
+						vec3 perfectlyReflectedDirection = 2. * dot(pointLightDirection, normal) * normal - pointLightDirection;
+						intensity += ks * pow( dot( perfectlyReflectedDirection, viewerDirection ), shininess ) * pointLightSpecular;
+					}
+					gl_FragColor.r *= intensity;
+					gl_FragColor.g *= intensity;
+				}
+
+				// {
+				// 	vec4 sumLights = vec4(0.0, 0.0, 0.0, 1.0);
+					 
+				// 	//point lights
+				// 	vec4 sumPointLights = vec4(0.0, 0.0, 0.0, 1.0);
+				// 	for(int i = 0; i &lt; MAX_POINT_LIGHTS; i++) { vec3 dir = normalize(vWorldPos - pointLightPosition[i]); sumPointLights.rgb += clamp(dot(-dir, vWorldNormal), 0.0, 1.0) * pointLightColor[i]; }
+				// 	for(int i = 0; i &lt; MAX_DIR_LIGHTS; i++)
+				// 	{
+				// 		vec3 dir = directionalLightDirection[i];
+				// 		sumDirLights.rgb += clamp(dot(-dir, vWorldNormal), 0.0, 1.0) * directionalLightColor[i];
+				// 	}
+				// 	#endif
+					 
+				// 	//take ambient light, add highlight if point sum big enough
+				// 	sumLights = sumPointLights + sumDirLights;
+				// 	//sumLights = vec4(ambientLightColor, 1.0) + floor( sumLights * vec4(5, 5, 5, 1)) * vec4(0.2, 0.2, 0.2, 1);
+				// 	sumLights = vec4(ambientLightColor, 1.0) + sumLights;
+					 
+				// 	gl_FragColor *= sumLights;
+				// }
+
+				//https://github.com/mrdoob/three.js/blob/dev/src/renderers/shaders/ShaderLib/meshphong_frag.glsl.js ?
+				return;
+			}
 		}
 	}
 
@@ -159,18 +221,18 @@ void main()
 	{
 		//to help normalization
 		//better would be something to let you
-		if( gl_FragColor.g > 1. )
-		{
-			gl_FragColor.r = 1.;// / gl_FragColor.g; //wanna read from this really
-			gl_FragColor.g = 0.;
-			gl_FragColor.b = 0.;
-		}
-		if( gl_FragColor.b > 1. )
-		{
-			gl_FragColor.r = 1.;// / gl_FragColor.b;
-			gl_FragColor.g = 0.;
-			gl_FragColor.b = 0.;
-		}
+		// if( gl_FragColor.g > 1. )
+		// {
+		// 	gl_FragColor.r = 1.;// / gl_FragColor.g; //wanna read from this really
+		// 	gl_FragColor.g = 0.;
+		// 	gl_FragColor.b = 0.;
+		// }
+		// if( gl_FragColor.b > 1. )
+		// {
+		// 	gl_FragColor.r = 1.;// / gl_FragColor.b;
+		// 	gl_FragColor.g = 0.;
+		// 	gl_FragColor.b = 0.;
+		// }
 	}
 }
 

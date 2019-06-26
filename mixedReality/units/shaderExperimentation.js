@@ -100,14 +100,14 @@ async function initShaderExperimentation( canvas )
 	*/
 	{
 		let scalarFieldCameraPosition = new THREE.Vector3();
-		let material = new THREE.ShaderMaterial({
-			uniforms: {
-				// isolevel:{value:0.1}
-				scalarFieldCameraPosition: {value: scalarFieldCameraPosition },
-				renderRadiusSquared: {value:0.005}
-				//hope frontside works
-			},
-		});
+		let scalarFieldPointLightPosition = new THREE.Vector3();
+		let uniforms = {};
+		uniforms.scalarFieldPointLightPosition = {value:scalarFieldPointLightPosition}
+		uniforms.scalarFieldCameraPosition = {value: scalarFieldCameraPosition };
+		uniforms.renderRadiusSquared = {value:0.005};
+		// uniforms.isolevel = {value:0.1};
+		
+		let material = new THREE.ShaderMaterial({uniforms});
 		await assignShader("scalarFieldVertex", material, "vertex")
 		await assignShader("scalarFieldFragment", material, "fragment")
 
@@ -136,7 +136,11 @@ async function initShaderExperimentation( canvas )
 
 			scalarField.updateMatrixWorld();
 			scalarFieldCameraPosition.copy(camera.position);
-			scalarField.worldToLocal( scalarFieldCameraPosition ); //not scalarField, but scalarField
+			scalarField.worldToLocal( scalarFieldCameraPosition );
+			let pointLight = scene.children[2];
+			console.assert(pointLight.isPointLight)
+			scalarFieldPointLightPosition.copy(pointLight.position)
+			scalarField.worldToLocal( scalarFieldPointLightPosition );
 		})
 	}
 }

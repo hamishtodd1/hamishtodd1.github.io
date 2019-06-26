@@ -1,10 +1,10 @@
 function initLights()
 {
-	var ambientLight = new THREE.AmbientLight( 0xffffff, 0.7 );
+	var ambientLight = new THREE.AmbientLight( 0xffffff, 1.0 ); //previously 0.7
 	// ambientLight.color.setHSL( 0.6, 1, 0.6 );
 	scene.add( ambientLight );
 
-	var ourLight = new THREE.PointLight(0xFFFFFF,1,99,0.36,0,1);
+	var ourLight = new THREE.PointLight(0xFFFFFF,1.,99,4);
 	ourLight.position.set( 0,2.4,0 );
 	scene.add( ourLight );
 	
