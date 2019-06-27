@@ -19,32 +19,43 @@
 	//concentrations of three chemicals mofo!
 
 	to get actual line number, subtract ~130
+
+	ultrasound! It's a clear analogy
+
+	https://mrob.com/pub/comp/xmorphia/ - ideal colorings!
 */
 
 varying vec3 pointOnFace;
 
-uniform vec3 scalarFieldCameraPosition;
+uniform mat4 matrixWorldInverse;
+
 uniform vec3 scalarFieldPointLightPosition;
 uniform float renderRadiusSquared;
 
 const float stepLength = 0.0003;
-const float colorNormalizer = .000006; //wanna do at runtime
+const float colorNormalizer = .0001; //wanna do at runtime
 
-const float isolevel = -1000.;
+const float isolevel = 10.;
 
 const bool doIsosurface = true;
-const bool doSmoke = !doIsosurface;
+const bool doSmoke = false;
 
-// float tanh(float x)
-// {
-// 	float exp2x = exp(2 * x); // sure you wanna do this so much?
-// 	return (exp2x - 1) / (exp2x + 1);
-// }
+
+float tanh(float x)
+{
+	float exp2x = exp(2. * x); // sure you wanna do this so much?
+	return (exp2x - 1.) / (exp2x + 1.);
+}
 
 float sampleEllipticCurveSpace(vec3 p)
 {
-	vec3 scaledP = p;
+	vec3 scaledP = p * 10.;
 	return scaledP.y*scaledP.y - scaledP.x*scaledP.x*scaledP.x - scaledP.z*scaledP.x;
+}
+vec3 gradientOfEllipticCurveSpace(vec3 p)
+{
+	vec3 scaledP = p * 10.;
+	return vec3(3.*scaledP.x*scaledP.x+scaledP.z,2.*scaledP.y,scaledP.x);
 }
 
 float fourDConeThatIsZeroAtRadius(vec3 p)
@@ -67,18 +78,56 @@ float sampleField( vec3 p )
 {
 	return zeroAccentuator(sampleEllipticCurveSpace(p) );
 }
-vec3 shittyGradient(vec3 p)
+vec3 numericalGradient(vec3 p) //very easy to work out for polynomials, y does not depend on x
 {
-	//y*y - x*x*x - z*x
-	//
 	float valueHere = sampleField(p);
-	float eps = 0.0000001;
+	float eps = 0.001;
 	float x = ( valueHere - sampleField(p+vec3(eps,0.,0.)) ) / eps;
 	float y = ( valueHere - sampleField(p+vec3(0.,eps,0.)) ) / eps;
 	float z = ( valueHere - sampleField(p+vec3(0.,0.,eps)) ) / eps;
 
 	return vec3(x,y,z);
 }
+float getLightIntensityAtPoint(vec3 p, vec3 scalarFieldCameraPosition)
+{
+	float ks = 1.;
+	float kd = 1.;
+	float ka = 1.;
+	float shininess = 1.;
+	float ambientIntensity = 1.;
+	float pointLightDiffuse = 1.;
+	float pointLightSpecular = 1.;
+
+	vec3 normal = normalize( gradientOfEllipticCurveSpace(p) );
+	vec3 viewerDirection = normalize( scalarFieldCameraPosition - pointOnFace );
+
+	float intensity = ka * ambientIntensity;
+	// for(lights)
+	{
+		vec3 pointLightDirection = normalize(scalarFieldPointLightPosition - p);
+		intensity += kd * dot( pointLightDirection, normal ) * pointLightDiffuse;
+
+		vec3 perfectlyReflectedDirection = 2. * dot(pointLightDirection, normal) * normal - pointLightDirection;
+		intensity += ks * pow( dot( perfectlyReflectedDirection, viewerDirection ), shininess ) * pointLightSpecular;
+	}
+	return intensity;
+}
+
+// A(x^4+y^4+z^4+1)+Bxyz+C(x^2y^2+z^2)+D(x^2z^2+y^2)+E(z^2y^2+x^2).
+// Run it with A,B,C,D,E = [1,0,0,0,0]
+// [1,0,5,0,0]
+// [1,2,3,4,5]
+// [425,0,-1025,-1025,1207]
+// const float florianArray[5] = [0.,0.,0.,0.,0.];
+
+// float florianPolynomial(vec3 p)
+// {
+// 	A*(p.x*p.x*p.x*p.x+p.y*p.y*p.y*p.y+p.z*p.z*p.z*p.z+1) + 
+// 	B*p.x*p.y*p.z + 
+// 	C*(p.x*p.x*p.y*p.y + p.z*p.z) + 
+// 	D*(p.x*p.x*p.z*p.z + p.y*p.y) + 
+// 	E*(p.z*p.z*p.y*p.y + p.x*p.x);
+// }
 
 float relationshipToIsosurface(vec3 p)
 {
@@ -89,13 +138,15 @@ float relationshipToIsosurface(vec3 p)
 
 void main()
 {
+	vec3 scalarFieldCameraPosition = vec3( matrixWorldInverse * vec4(cameraPosition,1.) );
+
 	gl_FragColor = vec4(0.,0.,0., 1.0);
 	vec3 direction = normalize( pointOnFace - scalarFieldCameraPosition );
 
 	vec3 pointInScalarField = pointOnFace;
 	float oldRelationshipToSurface = relationshipToIsosurface(pointInScalarField);
 
-	while( true )
+	for(int i = 0; i < 4095; i++)
 	{
 		pointInScalarField += stepLength * direction;
 		float lengthSquared = dot(pointInScalarField,pointInScalarField);
@@ -124,14 +175,15 @@ void main()
 
 		if(doSmoke)
 		{
-			float val = sampleField( pointInScalarField );
+			float val = clamp( sampleField( pointInScalarField ), -800.,800.);
+			gl_FragColor.b += abs(val) * colorNormalizer;
 			if( val > 0.)
 			{
 				gl_FragColor.b += val * colorNormalizer;
 			}
 			else if( val < 0.)
 			{
-				gl_FragColor.g += -val * colorNormalizer;
+				gl_FragColor.r += -val * colorNormalizer;
 			}
 		}
 
@@ -145,44 +197,19 @@ void main()
 			float newRelationshipToSurface = relationshipToIsosurface(pointInScalarField);
 			if( oldRelationshipToSurface != newRelationshipToSurface )
 			{
+				pointInScalarField -= stepLength * direction * .5;
+
 				// gl_FragDepth = pointInScalarField.z - 500.; //would be nice
 
-				//could take a half step back
+				float intensity = getLightIntensityAtPoint(pointInScalarField, scalarFieldCameraPosition);
 
 				if( newRelationshipToSurface == 1. )
 				{
-					gl_FragColor.r = 1.0;
+					gl_FragColor.r = intensity;
 				}
 				else //if(newRelationshipToSurface == -1.)
 				{
-					gl_FragColor.g = 1.0;
-				}
-
-				//ultrasound dude
-
-				{
-					float ks = 1.;
-					float kd = 1.;
-					float ka = 1.;
-					float shininess = 1.;
-					float ambientIntensity = 1.;
-					float pointLightDiffuse = 1.;
-					float pointLightSpecular = 1.;
-
-					vec3 normal = normalize( shittyGradient(pointInScalarField) );
-					vec3 viewerDirection = -1. * direction;
-
-					float intensity = ka * ambientIntensity;
-					// for(lights)
-					{
-						vec3 pointLightDirection = normalize(scalarFieldPointLightPosition - pointInScalarField);
-						intensity += kd * dot( pointLightDirection, normal ) * pointLightDiffuse;
-
-						vec3 perfectlyReflectedDirection = 2. * dot(pointLightDirection, normal) * normal - pointLightDirection;
-						intensity += ks * pow( dot( perfectlyReflectedDirection, viewerDirection ), shininess ) * pointLightSpecular;
-					}
-					gl_FragColor.r *= intensity;
-					gl_FragColor.g *= intensity;
+					gl_FragColor.g = intensity;
 				}
 
 				// {
@@ -212,7 +239,7 @@ void main()
 		}
 	}
 
-	if( doIsosurface )
+	if( doIsosurface && !doSmoke )
 	{
 		discard;
 	}

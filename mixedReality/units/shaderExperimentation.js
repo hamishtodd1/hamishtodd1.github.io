@@ -95,18 +95,17 @@ async function initShaderExperimentation( canvas )
 	}
 
 	// if(0)
-	/*
-		mkay so first it's just face-on and you're making a sphere
-	*/
 	{
-		let scalarFieldCameraPosition = new THREE.Vector3();
 		let scalarFieldPointLightPosition = new THREE.Vector3();
 		let uniforms = {};
 		uniforms.scalarFieldPointLightPosition = {value:scalarFieldPointLightPosition}
-		uniforms.scalarFieldCameraPosition = {value: scalarFieldCameraPosition };
-		uniforms.renderRadiusSquared = {value:0.005};
+		uniforms.matrixWorldInverse = {value:new THREE.Matrix4()}
+		uniforms.renderRadiusSquared = {value:0.015};
 		// uniforms.isolevel = {value:0.1};
 		
+		let pointLight = scene.children[2];
+		console.assert(pointLight.isPointLight)
+
 		let material = new THREE.ShaderMaterial({uniforms});
 		await assignShader("scalarFieldVertex", material, "vertex")
 		await assignShader("scalarFieldFragment", material, "fragment")
@@ -118,14 +117,16 @@ async function initShaderExperimentation( canvas )
 			let displayPlane = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(radius,4), material)
 			scalarField.add( displayPlane )
 
-			//Idea of the container is to give some sense of occasion, maybe have it open up
-			//also to make sure that it make sense that the pixels behind are black
-			//maybe make sense of the fact that it's rotating too?
-			//justify black on the inside
-			//pokeballs are a structure that makes sense
-			// let backHider = new THREE.Circ
+			//CONTAINER.
+				//Idea is to give some sense of occasion, maybe have it open up
+				//also to make sure that it make sense that the pixels behind are black
+				//maybe make sense of the fact that it's rotating too?
+				//justify black on the inside
+				//pokeballs are a structure that makes sense
+				// let backHider = new THREE.Circ
 		}
 
+		handControllers[0].controllerModel.visible = false;
 		updateFunctions.push(function()
 		{
 			// scalarField.position.x = 0.14 * Math.sin(frameCount * 0.04)
@@ -133,12 +134,10 @@ async function initShaderExperimentation( canvas )
 
 			scalarField.position.copy(handControllers[0].position);
 			scalarField.quaternion.copy( handControllers[0].quaternion );
-
 			scalarField.updateMatrixWorld();
-			scalarFieldCameraPosition.copy(camera.position);
-			scalarField.worldToLocal( scalarFieldCameraPosition );
-			let pointLight = scene.children[2];
-			console.assert(pointLight.isPointLight)
+
+			uniforms.matrixWorldInverse.value.getInverse(scalarField.matrixWorld);
+
 			scalarFieldPointLightPosition.copy(pointLight.position)
 			scalarField.worldToLocal( scalarFieldPointLightPosition );
 		})

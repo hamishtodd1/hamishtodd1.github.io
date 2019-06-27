@@ -27,7 +27,7 @@
 
 function initReactionDiffusion()
 {
-	camera.children[0].visible = false //hack for lab
+	//camera.children[0].visible = false //hack for lab
 
 	let resolution = 200
 

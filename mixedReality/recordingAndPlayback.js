@@ -77,7 +77,7 @@ function initPlaybackAndRecording()
 	let playbackMode = false
 
 	{
-		videoDomElement.src = "recordings/water.mp4"
+		videoDomElement.src = "recordings/sintel.mp4"
 		// videoDomElement.volume = 0
 
 		var videoTexture = new THREE.VideoTexture( videoDomElement );
