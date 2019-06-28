@@ -72,6 +72,20 @@
 			Depth camera or static key are options but green is probably easiest
 */
 
+markObjectProperty = function(){}
+markLerpedFloat = function(){}
+markQuaternion = function(){}
+markPosition = function(){}
+markPositionAndQuaternion = function(){}
+markMatrix = function(){}
+callContingentUpdateFunctionsAndMaybeRecordOrSynchronizeToVideo = function()
+{
+	for(let i = 0; i < updateFunctions.length; i++)
+	{
+		updateFunctions[i]();
+	}
+}
+
 function initPlaybackAndRecording()
 {
 	let playbackMode = false
@@ -341,7 +355,7 @@ function initPlaybackAndRecording()
 		}
 	}
 
-	synchronizeToVideoOrCallContingentUpdateFunctionsAndMaybeRecord = function()
+	callContingentUpdateFunctionsAndMaybeRecordOrSynchronizeToVideo = function()
 	{
 		if( playbackMode )
 		{
