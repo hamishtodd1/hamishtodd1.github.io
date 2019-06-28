@@ -40,6 +40,43 @@ const float isolevel = 10.;
 const bool doIsosurface = true;
 const bool doSmoke = false;
 
+float lengthSq(vec3 v)
+{
+	return dot(v,v);
+}
+
+//http://lousodrome.net/blog/light/2017/01/03/intersection-of-a-ray-and-a-cone/
+vec3 getRelationshipToHandModel(vec3 origin, vec3 direction)
+{
+	vec3 tip = vec3(0.019,-0.03,-0.17);
+	vec3 downSpindle = vec3(0.,0.,1.);
+	float cosSquaredTipAngle = 0.88; //1/8 of an angle
+
+	vec3 tipToOrigin = origin - tip;
+	float tipToOriginDotDownSpindle = dot(tipToOrigin,downSpindle);
+	float directionDotDownSpindle = dot(direction,downSpindle);
+
+	float a = directionDotDownSpindle*directionDotDownSpindle - cosSquaredTipAngle;
+	float b = 2. * ( directionDotDownSpindle * tipToOriginDotDownSpindle - dot(direction,tipToOrigin) * cosSquaredTipAngle );
+	float c = tipToOriginDotDownSpindle * tipToOriginDotDownSpindle - dot(tipToOrigin,tipToOrigin) * cosSquaredTipAngle;
+
+	float determinant = b*b - 4. * a * c;
+	if( determinant > 0. )
+	{
+		float t = (-b+sqrt(determinant)) / (2.*a); //bit surprising that it's + not - since you want the closer one
+		if( t > 0. )
+		{
+			vec3 point = origin + t * direction;
+			vec3 tipToPoint = point-tip;
+			if( lengthSq(tipToPoint) < 0.038 && dot(downSpindle,tipToPoint) > 0. )
+			{
+				return point;
+			}
+		}
+	}
+
+	return origin;
+}
 
 float tanh(float x)
 {
@@ -143,6 +180,20 @@ void main()
 	gl_FragColor = vec4(0.,0.,0., 1.0);
 	vec3 direction = normalize( pointOnFace - scalarFieldCameraPosition );
 
+	vec3 handP = getRelationshipToHandModel(pointOnFace, direction);
+	if(handP == pointOnFace)
+	{
+		discard;
+	}
+	else
+	{
+		float intensity = getLightIntensityAtPoint(handP, scalarFieldCameraPosition);
+		gl_FragColor.r = intensity * 0.6;
+		gl_FragColor.g = intensity * 0.6;
+		gl_FragColor.b = intensity * 0.6;
+		return;
+	}
+
 	vec3 pointInScalarField = pointOnFace;
 	float oldRelationshipToSurface = relationshipToIsosurface(pointInScalarField);
 
@@ -211,29 +262,6 @@ void main()
 				{
 					gl_FragColor.g = intensity;
 				}
-
-				// {
-				// 	vec4 sumLights = vec4(0.0, 0.0, 0.0, 1.0);
-					 
-				// 	//point lights
-				// 	vec4 sumPointLights = vec4(0.0, 0.0, 0.0, 1.0);
-				// 	for(int i = 0; i &lt; MAX_POINT_LIGHTS; i++) { vec3 dir = normalize(vWorldPos - pointLightPosition[i]); sumPointLights.rgb += clamp(dot(-dir, vWorldNormal), 0.0, 1.0) * pointLightColor[i]; }
-				// 	for(int i = 0; i &lt; MAX_DIR_LIGHTS; i++)
-				// 	{
-				// 		vec3 dir = directionalLightDirection[i];
-				// 		sumDirLights.rgb += clamp(dot(-dir, vWorldNormal), 0.0, 1.0) * directionalLightColor[i];
-				// 	}
-				// 	#endif
-					 
-				// 	//take ambient light, add highlight if point sum big enough
-				// 	sumLights = sumPointLights + sumDirLights;
-				// 	//sumLights = vec4(ambientLightColor, 1.0) + floor( sumLights * vec4(5, 5, 5, 1)) * vec4(0.2, 0.2, 0.2, 1);
-				// 	sumLights = vec4(ambientLightColor, 1.0) + sumLights;
-					 
-				// 	gl_FragColor *= sumLights;
-				// }
-
-				//https://github.com/mrdoob/three.js/blob/dev/src/renderers/shaders/ShaderLib/meshphong_frag.glsl.js ?
 				return;
 			}
 		}

@@ -86,7 +86,7 @@
 				initButtons()
 				initFaceMaker()
 				initLights()
-				await initPlaybackAndRecording()			
+				// await initPlaybackAndRecording()			
 				initControllerObjects()
 				if( chromiumRatherThanChrome )
 				{
@@ -106,7 +106,7 @@
 						readHandInput()
 					}
 
-					synchronizeToVideoOrCallContingentUpdateFunctionsAndMaybeRecord()
+					callContingentUpdateFunctionsAndMaybeRecordOrSynchronizeToVideo()
 					
 					for(let i = 0; i < alwaysUpdateFunctions.length; i++)
 					{

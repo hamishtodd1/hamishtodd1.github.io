@@ -110,6 +110,22 @@ async function initShaderExperimentation( canvas )
 		await assignShader("scalarFieldVertex", material, "vertex")
 		await assignShader("scalarFieldFragment", material, "fragment")
 
+		{
+			let dataArray = new Float32Array(5*5*5)
+			for(let i = 0; i < dataArray.length; i++)
+			{
+				dataArray[i] = Math.random();
+			}
+			let data = new THREE.DataTexture3D( dataArray, 5, 5, 5 );
+			data.format = THREE.RedFormat;
+			data.type = THREE.FloatType;
+			data.minFilter = data.magFilter = THREE.NearestFilter;
+			data.unpackAlignment = 1;
+			data.needsUpdate = true;
+
+			material.uniforms.data.value = data;
+		}
+
 		let scalarField = new THREE.Object3D();
 		scene.add(scalarField);
 		{
@@ -126,7 +142,7 @@ async function initShaderExperimentation( canvas )
 				// let backHider = new THREE.Circ
 		}
 
-		handControllers[0].controllerModel.visible = false;
+		// handControllers[0].controllerModel.visible = false;
 		updateFunctions.push(function()
 		{
 			// scalarField.position.x = 0.14 * Math.sin(frameCount * 0.04)
