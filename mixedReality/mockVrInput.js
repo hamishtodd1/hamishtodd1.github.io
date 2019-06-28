@@ -20,8 +20,8 @@ function initMockVrInput()
 
 		rightHand.position.add(visiblePosition)
 
-		rightHand.rotation.x = 0.6*Math.sin(t*0.1)
-		rightHand.rotation.y = 0.5*Math.sin(t*0.13)
+		// rightHand.rotation.x = 0.6*Math.sin(t*0.1)
+		// rightHand.rotation.y = 0.5*Math.sin(t*0.13)
 		// rightHand.rotation.z = 0.4*Math.sin(t*0.07)
 		rightHand.quaternion.setFromEuler(rightHand.rotation)
 

@@ -32,7 +32,7 @@ uniform mat4 matrixWorldInverse;
 uniform vec3 scalarFieldPointLightPosition;
 uniform float renderRadiusSquared;
 
-const float stepLength = 0.0003;
+const float stepLength = 0.003;
 const float colorNormalizer = .0001; //wanna do at runtime
 
 const float isolevel = 10.;
@@ -41,11 +41,11 @@ const bool doIsosurface = true;
 const bool doSmoke = false;
 
 
-float tanh(float x)
-{
-	float exp2x = exp(2. * x); // sure you wanna do this so much?
-	return (exp2x - 1.) / (exp2x + 1.);
-}
+// float tanh(float x)
+// {
+// 	float exp2x = exp(2. * x); // sure you wanna do this so much?
+// 	return (exp2x - 1.) / (exp2x + 1.);
+// }
 
 float sampleEllipticCurveSpace(vec3 p)
 {
@@ -136,6 +136,8 @@ float relationshipToIsosurface(vec3 p)
 	return zeroOrOneOrMinusOne;
 }
 
+// float sampleFakeTexture(vec3 p, floatfakeTexture)
+
 void main()
 {
 	vec3 scalarFieldCameraPosition = vec3( matrixWorldInverse * vec4(cameraPosition,1.) );
@@ -145,6 +147,24 @@ void main()
 
 	vec3 pointInScalarField = pointOnFace;
 	float oldRelationshipToSurface = relationshipToIsosurface(pointInScalarField);
+
+	float fakeTexture[ 5*5*5 ];
+	for(int i = 0; i < 5; i++) {
+	for(int j = 0; j < 5; j++) {
+	for(int k = 0; k < 5; k++) {
+		if( (i+j+k) % 2 == 0 )
+		{
+			fakeTexture[i+j*5+k*25] = 0.9;
+		}
+		else
+		{
+			fakeTexture[i+j*5+k*25] = 0.1;
+		}
+	}
+	}
+	}
+
+	float r = round(5.4);
 
 	for(int i = 0; i < 4095; i++)
 	{
@@ -287,7 +307,7 @@ void main()
 // 	}
 // }
 
-// double tricubic_eval(double a[64], double x, double y, double z)
+// double tricubic_eval(double a[64], vec3 p )
 // {
 // 	int i,j,k;
 // 	double ret=(double)(0.0);
@@ -302,7 +322,7 @@ void main()
 // 		{
 // 			for (k=0;k<4;k++)
 // 			{
-// 				ret+=a[ijk2n(i,j,k)]*pow(x,i)*pow(y,j)*pow(z,k);
+// 				ret+=a[ijk2n(i,j,k)]*pow(p.x,i)*pow(p.y,j)*pow(p.z,k);
 // 			}
 // 		}
 // 	}
