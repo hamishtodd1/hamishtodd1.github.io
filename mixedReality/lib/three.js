@@ -16881,9 +16881,10 @@
 
 		var lines = string.split( '\n' );
 
+		//HAMISH
 		for ( var i = 0; i < lines.length; i ++ ) {
 
-			lines[ i ] = ( i + 1 ) + ': ' + lines[ i ];
+			lines[ i ] = ( i + 1 - 118 ) + ': ' + lines[ i ];
 
 		}
 
@@ -16908,7 +16909,21 @@
 
 			if ( gl.getShaderInfoLog( shader ) !== '' ) {
 
-				console.warn( 'THREE.WebGLShader: gl.getShaderInfoLog()', type === 35633 ? 'vertex' : 'fragment', gl.getShaderInfoLog( shader ), addLineNumbers( string ) );
+				//HAMISH
+				let rawInfoLog = gl.getShaderInfoLog( shader );
+				let splitInHalf = rawInfoLog.split('ERROR: 0:')
+				let processedInfoLog = splitInHalf[0] + "ERROR: 0:"
+
+				let splitByColon = splitInHalf[1].split(":")
+				let actualLineNumber = parseInt(splitByColon[0]) - 118;
+				processedInfoLog += actualLineNumber
+
+				for(let i = 1; i < splitByColon.length; i++)
+					processedInfoLog += ": " + splitByColon[i]
+
+				console.warn( 'THREE.WebGLShader: gl.getShaderInfoLog()', type === 35633 ? 'vertex' : 'fragment',
+					processedInfoLog,
+					addLineNumbers( string ) );
 
 			}
 

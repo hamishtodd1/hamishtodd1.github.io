@@ -1,26 +1,47 @@
 /*
-	So we want the position that we're drawing on in world space and the camera position
-	We march backwards until, well, until the scalar field ends! It may be a portal ya know
+	TODO
+		Combine with your simulator, for andrew
+		Make it editable
+		Blending? if you know
+		Tricubic thing
+			You put the coefficients in a texture (or two) and then nearest neighbour within each voxel
+		ultrasound-esque slicing
+		Ask George about removing branchings and reading a teeny bit out, eg the normalization redness
+
+	"Top 7 scalar fields", ask folks at ICERM!
+		What's the equivalent of a 3D contour map that you'd use lots of contour lines to indicate?
+			lots of saddle points. What's a 3D saddle point?
+			A pathologically bad-for-contour-surfaces example. Something where all contour surfaces are tiny?
+		Features:
+			squarish
+		Evelyn Lamb's multiplying surfaces thing (union)
 
 	Allowed to assume a black background, because it's hard to put eg the hands behind it
 
 	http://www.shaderific.com/glsl-functions
 
-	Alright so there's the modelMatrix. You might say it affects
-
-	you're thinking about adding based on density.
-	This assumes that you can clock that a part might be very red because the light way went through one very red place or multiple slightly-red places
+	Adding based on density assumes that you can clock:
+		a part might be very red because the light way went through one very red place
+		OR multiple slightly-red places
 	but maybe it'd be better to add iff isolevel
 
-	//red +0, blue -0, larger numbers closer to black
-	//Is there anything interesting doable with three overlapping scalar fields with all values > 0?
+	red +0, blue -0, larger numbers closer to black
+	Is there anything interesting doable with three overlapping scalar fields with all values > 0?
 		//fuck yes, direction. It's enclosed by your rainbow-banded sphere, color is what it's attracted to
 	//Any color mapping is a line throught the RGB cube
 	//concentrations of three chemicals mofo!
 
 	to get actual line number, subtract ~130
 
-	ultrasound! It's a clear analogy
+	Presentation
+		Could blend with background
+		Spheres look nice and make it so you
+		Can have sphere without it affecting complexity of course
+		Better might be a pair of planes
+		Is it a region you're moving shit around in, or objects you're picking up?
+		Objects you pick up dude, this is not cootVR
+		Yet you do want to move them around inside that ball
+	
 
 	https://mrob.com/pub/comp/xmorphia/ - ideal colorings!
 */
@@ -32,21 +53,20 @@ uniform mat4 matrixWorldInverse;
 uniform vec3 scalarFieldPointLightPosition;
 uniform float renderRadiusSquared;
 
-const float stepLength = 0.003;
-const float colorNormalizer = .0001; //wanna do at runtime
+const float smokeNormalizer = 10.; //wanna do at runtime
 
-const float isolevel = 10.;
+const float isolevel = 0.;
 
 const bool doIsosurface = true;
-const bool doSmoke = false;
+const bool doSmoke = true;
 
 float lengthSq(vec3 v)
 {
 	return dot(v,v);
 }
 
-//http://lousodrome.net/blog/light/2017/01/03/intersection-of-a-ray-and-a-cone/
-vec3 getRelationshipToHandModel(vec3 origin, vec3 direction)
+//it's a cone: lousodrome.net/blog/light/2017/01/03/intersection-of-a-ray-and-a-cone/
+float getScalarToHandCone( vec3 origin, vec3 direction )
 {
 	vec3 tip = vec3(0.019,-0.03,-0.17);
 	vec3 downSpindle = vec3(0.,0.,1.);
@@ -66,16 +86,15 @@ vec3 getRelationshipToHandModel(vec3 origin, vec3 direction)
 		float t = (-b+sqrt(determinant)) / (2.*a); //bit surprising that it's + not - since you want the closer one
 		if( t > 0. )
 		{
-			vec3 point = origin + t * direction;
-			vec3 tipToPoint = point-tip;
+			vec3 tipToPoint = origin + t * direction - tip;
 			if( lengthSq(tipToPoint) < 0.038 && dot(downSpindle,tipToPoint) > 0. )
 			{
-				return point;
+				return t;
 			}
 		}
 	}
 
-	return origin;
+	return 99999999.;
 }
 
 // float tanh(float x)
@@ -111,17 +130,17 @@ float zeroAccentuator(float value)//,float expectedMin,float expectedMax)
 	return 1. / value;
 }
 
-float sampleField( vec3 p )
+float getLevel( vec3 p )
 {
-	return zeroAccentuator(sampleEllipticCurveSpace(p) );
+	return sampleEllipticCurveSpace(p) - isolevel;
 }
 vec3 numericalGradient(vec3 p) //very easy to work out for polynomials, y does not depend on x
 {
-	float valueHere = sampleField(p);
+	float valueHere = getLevel(p);
 	float eps = 0.001;
-	float x = ( valueHere - sampleField(p+vec3(eps,0.,0.)) ) / eps;
-	float y = ( valueHere - sampleField(p+vec3(0.,eps,0.)) ) / eps;
-	float z = ( valueHere - sampleField(p+vec3(0.,0.,eps)) ) / eps;
+	float x = ( valueHere - getLevel(p+vec3(eps,0.,0.)) ) / eps;
+	float y = ( valueHere - getLevel(p+vec3(0.,eps,0.)) ) / eps;
+	float z = ( valueHere - getLevel(p+vec3(0.,0.,eps)) ) / eps;
 
 	return vec3(x,y,z);
 }
@@ -166,125 +185,119 @@ float getLightIntensityAtPoint(vec3 p, vec3 scalarFieldCameraPosition)
 // 	E*(p.z*p.z*p.y*p.y + p.x*p.x);
 // }
 
-float relationshipToIsosurface(vec3 p)
-{
-	float val = sampleField(p) - isolevel;
-	float zeroOrOneOrMinusOne = sign(val);
-	return zeroOrOneOrMinusOne;
-}
+//you're going to put your arm behind these things, so the "back" might be quite close
 
-// float sampleFakeTexture(vec3 p, floatfakeTexture)
-
+//want these outside really
 void main()
 {
 	vec3 scalarFieldCameraPosition = vec3( matrixWorldInverse * vec4(cameraPosition,1.) );
-
-	gl_FragColor = vec4(0.,0.,0., 1.0);
 	vec3 direction = normalize( pointOnFace - scalarFieldCameraPosition );
 
-	vec3 handP = getRelationshipToHandModel(pointOnFace, direction);
-	if(handP == pointOnFace)
+	float handDistance = getScalarToHandCone(pointOnFace, direction);
+
+	float totalDistanceToGo = 2. * -dot( pointOnFace, direction );
+	float numSteps = 128.;
+	float defaultStepLength = totalDistanceToGo / numSteps;
+	float thisStepLength = defaultStepLength;
+	float distanceAlong = 0.;
+
+	float oldLevel = getLevel( pointOnFace );
+	float newLevel;
+
+	bool isoSurfaceToBeDrawn = false;
+
+	gl_FragColor = vec4( 0.,0.,0., 1.0 );
+	for(float i = 1.; i <= numSteps; i++)
 	{
-		discard;
-	}
-	else
-	{
-		float intensity = getLightIntensityAtPoint(handP, scalarFieldCameraPosition);
-		gl_FragColor.r = intensity * 0.6;
-		gl_FragColor.g = intensity * 0.6;
-		gl_FragColor.b = intensity * 0.6;
-		return;
-	}
-
-	vec3 pointInScalarField = pointOnFace;
-	float oldRelationshipToSurface = relationshipToIsosurface(pointInScalarField);
-
-	float fakeTexture[ 5*5*5 ];
-	for(int i = 0; i < 5; i++) {
-	for(int j = 0; j < 5; j++) {
-	for(int k = 0; k < 5; k++) {
-		if( (i+j+k) % 2 == 0 )
-		{
-			fakeTexture[i+j*5+k*25] = 0.9;
-		}
-		else
-		{
-			fakeTexture[i+j*5+k*25] = 0.1;
-		}
-	}
-	}
-	}
-
-	float r = round(5.4);
-
-	for(int i = 0; i < 4095; i++)
-	{
-		pointInScalarField += stepLength * direction;
-		float lengthSquared = dot(pointInScalarField,pointInScalarField);
-		if( lengthSquared > renderRadiusSquared )
-		{
-			break;
-		}
-		
-		// vec3 currentPosition;
-		// float smallestMultiplier = 9999999.;
-		// for(int i = 0; i < 3; i++)
+		//precise voxel jump lengths
+		//probably unnecessary, the function along the length is piecewise continuous
+		// if(voxels)
 		// {
-		// 	float thisCoordJumpLength = ceil( currentPosition[i] ) - currentPosition[i];
-		// 	if( thisCoordJumpLength == 0.0 )
+		// 	vec3 currentPosition;
+		// 	float smallestMultiplier = 9999999.;
+		// 	for(int j = 0; j < 3; j++)
 		// 	{
-		// 		thisCoordJumpLength = 1.;
+		// 		float thisCoordJumpLength = ceil( currentPosition[j] ) - currentPosition[j];
+		// 		if( thisCoordJumpLength == 0.0 )
+		// 		{
+		// 			thisCoordJumpLength = 1.;
+		// 		}
+		// 		float multiplierForJump = thisCoordJumpLength / direction[j];
+		// 		if( multiplierForJump < smallestMultiplier )
+		// 		{
+		// 			smallestMultiplier = multiplierForJump;
+		// 		}
 		// 	}
-		// 	float multiplierForJump = thisCoordJumpLength / direction[i];
-		// 	if( multiplierForJump < smallestMultiplier )
-		// 	{
-		// 		smallestMultiplier = multiplierForJump;
-		// 	}
+		// 	currentPosition += direction * smallestMultiplier;
+		// 	//and then you look directly between it and the previous position to get your sampling point?
 		// }
-		// currentPosition += direction * smallestMultiplier;
-		// //and then you look directly between it and the previous position to get your sampling point?
+
+		distanceAlong = i * defaultStepLength;
+		newLevel = getLevel( pointOnFace + distanceAlong * direction );
+
+		if( doIsosurface )
+		{
+			//not missing a hump probably means some crazy analysis
+			//you could MAYBE try to solve in the case of that degree-10 interpolation polynomial
+			//still better than marchingcubes
+
+			isoSurfaceToBeDrawn = sign( oldLevel) != sign( newLevel );
+
+			if( isoSurfaceToBeDrawn )
+			{
+				thisStepLength = -oldLevel / (newLevel-oldLevel) * defaultStepLength;
+				distanceAlong = defaultStepLength * (i-1.) + thisStepLength;
+				newLevel = getLevel( pointOnFace + distanceAlong * direction );
+			}
+		}
+
+		if( handDistance < distanceAlong )
+		{
+			distanceAlong = handDistance;
+			thisStepLength = handDistance - defaultStepLength * (i-1.);
+			newLevel = getLevel( pointOnFace + distanceAlong * direction );
+		}
 
 		if(doSmoke)
 		{
-			float val = clamp( sampleField( pointInScalarField ), -800.,800.);
-			gl_FragColor.b += abs(val) * colorNormalizer;
-			if( val > 0.)
+			//"layers of colored glass"
+			float average = ( oldLevel + newLevel ) * .5;
+			float contribution = (1. - abs(average) * 1.)  * 10. * thisStepLength;
+			if( average > 0. )
 			{
-				gl_FragColor.b += val * colorNormalizer;
+				gl_FragColor.b += contribution;
 			}
-			else if( val < 0.)
+			else
 			{
-				gl_FragColor.r += -val * colorNormalizer;
+				gl_FragColor.b += contribution;
 			}
 		}
 
-		// vec3 poin = pointLights[0];
-
-		if(doIsosurface)
+		if( distanceAlong == handDistance )
 		{
-			//so there's the "you might miss a hump" aspect. But it's still pretty good and that may never be avoidable
-
-			//bit rubbish without lighting
-			float newRelationshipToSurface = relationshipToIsosurface(pointInScalarField);
-			if( oldRelationshipToSurface != newRelationshipToSurface )
-			{
-				pointInScalarField -= stepLength * direction * .5;
-
-				// gl_FragDepth = pointInScalarField.z - 500.; //would be nice
-
-				float intensity = getLightIntensityAtPoint(pointInScalarField, scalarFieldCameraPosition);
-
-				if( newRelationshipToSurface == 1. )
-				{
-					gl_FragColor.r = intensity;
-				}
-				else //if(newRelationshipToSurface == -1.)
-				{
-					gl_FragColor.g = intensity;
-				}
-				return;
-			}
+			//that's not the intensity
+			float intensity = getLightIntensityAtPoint( pointOnFace + distanceAlong * direction, scalarFieldCameraPosition );
+			gl_FragColor.r += intensity * 0.6;
+			gl_FragColor.g += intensity * 0.6;
+			gl_FragColor.b += intensity * 0.6;
+			return;
 		}
+		else if( isoSurfaceToBeDrawn )
+		{
+			float intensity = getLightIntensityAtPoint( pointOnFace + distanceAlong * direction, scalarFieldCameraPosition );
+
+			if( sign( oldLevel ) == 1. )
+			{
+				gl_FragColor.r += intensity;
+			}
+			else
+			{
+				gl_FragColor.g += intensity;
+			}
+			return;
+		}
+
+		oldLevel = newLevel;
 	}
 
 	if( doIsosurface && !doSmoke )
@@ -292,23 +305,21 @@ void main()
 		discard;
 	}
 	
-	if(doSmoke)
-	{
-		//to help normalization
-		//better would be something to let you
-		// if( gl_FragColor.g > 1. )
-		// {
-		// 	gl_FragColor.r = 1.;// / gl_FragColor.g; //wanna read from this really
-		// 	gl_FragColor.g = 0.;
-		// 	gl_FragColor.b = 0.;
-		// }
-		// if( gl_FragColor.b > 1. )
-		// {
-		// 	gl_FragColor.r = 1.;// / gl_FragColor.b;
-		// 	gl_FragColor.g = 0.;
-		// 	gl_FragColor.b = 0.;
-		// }
-	}
+	//to help normalization
+	// {
+	// 	if( gl_FragColor.g > 1. )
+	// 	{
+	// 		gl_FragColor.r = 1.;// / gl_FragColor.g; //wanna read from this really
+	// 		gl_FragColor.g = 0.;
+	// 		gl_FragColor.b = 0.;
+	// 	}
+	// 	if( gl_FragColor.b > 1. )
+	// 	{
+	// 		gl_FragColor.r = 1.;// / gl_FragColor.b;
+	// 		gl_FragColor.g = 0.;
+	// 		gl_FragColor.b = 0.;
+	// 	}
+	// }
 }
 
 
