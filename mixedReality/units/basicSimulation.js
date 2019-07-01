@@ -66,18 +66,18 @@ function initBasicSimulation()
 			'void main (void) {',
 				'vec3 simulationRgb = texture2D(simulationTexture, vUV).rgb;',
 
-				'float g = 1.0;',
+				'float val = 1.0;',
 				'if(simulationRgb.r > 0.5)',
 				'{',
-					'g = 0.0;',
+					'val = 0.0;',
 				'}',
 
-				'gl_FragColor = vec4( g, g, g, 1.0 );',
+				'gl_FragColor = vec4( val, val, val, 1.0 );',
 			'}'
 		].join( '\n' )
 	};
 
-	const dimension = 128
+	const dimension = 8
 
 	{
 		var ping = true;

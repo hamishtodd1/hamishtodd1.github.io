@@ -7,21 +7,12 @@
 	Ideas
 		Placing spheres and cylinders would be nice, for corners
 		Arrows too
-		volumetric ray cast scalar fields
-			wavefunctions
-			Reaction diffusion
-			complex analysis
-			algebraic varieties
-				Elliptic curves
-		Amman beenker! Could be very fun
-		bezier tetrahedra
-		Diffusion tensor
+		complex analysis
+		Amman beenker
 		Complex functions; height = modulus, color = angle
 			Throw any polynomial in you like, could be fun
 			Will replicate the recognizable stuff along the real axis?
 				Better for that might be height = real, color = im
-
-	Fuck SDFs. Good for constructive geometry and not much else. Even with single toruses, can get intersection immediately
 
 	QM
 		particle in a 1D box. Visualize as the series of complex planes along the line, eg a 3D space
@@ -112,15 +103,20 @@ async function initShaderExperimentation( canvas )
 		await assignShader("scalarFieldFragment", material, "fragment")
 
 		{
-			let dataArray = new Float32Array(5*5*5)
-			for(let i = 0; i < dataArray.length; i++)
+			let dimension = 32;
+			let dataArray = new Float32Array(dimension*dimension*dimension)
+			for(let i = 0; i < dataArray.length * 4; i++)
 			{
-				dataArray[i] = Math.random();
+				dataArray[i] = Math.random() > 0.5?0.:1.;
 			}
-			let data = new THREE.DataTexture3D( dataArray, 5, 5, 5 );
+			let data = new THREE.DataTexture3D( dataArray, dimension, dimension, dimension );
+			data.wrapS = THREE.ClampToEdgeWrapping;
+			data.wrapT = THREE.ClampToEdgeWrapping;
+
+			//copied from threejs texture3D example
 			data.format = THREE.RedFormat;
 			data.type = THREE.FloatType;
-			data.minFilter = data.magFilter = THREE.NearestFilter;
+			data.minFilter = data.magFilter = THREE.LinearFilter;
 			data.unpackAlignment = 1;
 			data.needsUpdate = true;
 
@@ -129,19 +125,18 @@ async function initShaderExperimentation( canvas )
 
 		let scalarField = new THREE.Object3D();
 		scene.add(scalarField);
-		{
-			let radius = Math.sqrt( material.uniforms.renderRadiusSquared.value );
-			let displayPlane = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(radius,4), material)
-			scalarField.add( displayPlane )
 
-			//CONTAINER.
-				//Idea is to give some sense of occasion, maybe have it open up
-				//also to make sure that it make sense that the pixels behind are black
-				//maybe make sense of the fact that it's rotating too?
-				//justify black on the inside
-				//pokeballs are a structure that makes sense
-				// let backHider = new THREE.Circ
-		}
+		let displayPlane = new THREE.Mesh( new THREE.PlaneBufferGeometry(1,1), material )
+		camera.add( displayPlane )
+		displayPlane.position.z = -camera.near;
+
+		//CONTAINER.
+			//Idea is to give some sense of occasion, maybe have it open up
+			//also to make sure that it make sense that the pixels behind are black
+			//maybe make sense of the fact that it's rotating too?
+			//justify black on the inside
+			//pokeballs are a structure that makes sense
+			// let backHider = new THREE.Circ
 
 		handControllers[0].controllerModel.visible = false;
 		handControllers[0].rotation.x += TAU/4;

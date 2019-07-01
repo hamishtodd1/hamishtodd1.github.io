@@ -71,6 +71,7 @@ function init()
 		// We have scalars, so we put our data in the red channel.
 		// THREEJS will select R32F (33326) based on the RedFormat and FloatType.
 		// Also see https://www.khronos.org/registry/webgl/specs/latest/2.0/#TEXTURE_TYPES_FORMATS_FROM_DOM_ELEMENTS_TABLE
+		console.log(volume.data)
 		let texture = new THREE.DataTexture3D( volume.data, volume.xLength, volume.yLength, volume.zLength );
 		texture.format = THREE.RedFormat;
 		texture.type = THREE.FloatType;

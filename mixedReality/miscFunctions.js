@@ -42,6 +42,10 @@ function Grid(numWide,numTall,spacing)
 }
 
 //Paul Bourke http://paulbourke.net/geometry/circlesphere/index.html#linesphere
+//Same Paul Bourke who does cool youtube simulations, a diamond geezer!
+
+//origin to center, direction
+//normalize both, dot product, if angle 
 function sphereLineIntersection(p1,p2,center,r)
 {
 	let a = sq(p2.x - p1.x) + sq(p2.y - p1.y) + sq(p2.z - p1.z)
