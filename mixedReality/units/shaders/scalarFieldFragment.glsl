@@ -62,7 +62,7 @@ uniform float renderRadiusSquared;
 
 
 const bool doIsosurface = true;
-const bool doSmoke = false;
+const bool doGas = false;
 
 float lengthSq(vec3 v)
 {
@@ -325,7 +325,7 @@ void main()
 				newLevel = getLevel( probeStart + probeDistance * direction );
 			}
 
-			if(doSmoke)
+			if(doGas)
 			{
 				//"layers of colored glass"
 				float average = ( oldLevel + newLevel ) * .5;
@@ -360,7 +360,7 @@ void main()
 			oldLevel = newLevel;
 		}
 
-		if( doIsosurface && !doSmoke )
+		if( doIsosurface && !doGas )
 		{
 			discard;
 		}
@@ -383,8 +383,122 @@ void main()
 	}
 }
 
+// from stackoverflow.com/questions/4078401/trying-to-optimize-line-vs-cylinder-intersection
+vec4 distanceToCylinderWithNormal(vec3 origin, vec3 direction, float cylinderRadius, float cylinderLength, vec3 cylinderPosition, vec3 cylinderDirection )
+{
+	vec3 n = cross(direction,cylinderDirection);
+	float ln = length(n);
+	normalize(n);
 
+	float epsilon = 0.001;
+	// Parallel?
+	if( abs(ln) < epsilon )
+	{
+		return vec4(0.,0.,0.,0.);
+	}
 
+	vec3 cylinderPositionToOrigin = origin - cylinderPosition;
+	float d = abs( dot( cylinderPositionToOrigin, n ) );
+
+	if( d <= cylinderRadius )
+	{
+		vec3 O = cross(cylinderPositionToOrigin,cylinderDirection);
+		float t = -dot(O,n)/ln;
+
+		O = cross(n,cylinderDirection);
+		normalize(O);
+		float s = abs( sqrt(cylinderRadius*cylinderRadius-d*d) / dot(direction,O) );
+
+		if( t-s < -epsilon )
+		{
+			if(t+s < -epsilon)
+			{
+				return vec4(0.,0.,0.,0.);
+			}
+			else
+			{
+				lambda = t+s;
+			}
+		}
+		else if(t+s < -epsilon)
+		{
+			lambda = t-s;
+		}
+		else if(t-s<t+s)
+		{
+			lambda = t-s;
+		}
+		else
+		{
+			lambda = t+s;
+		}
+
+		vec3 localIntersection = origin + direction * lambda - cylinderPosition;
+		float distanceAlongAxis = dot( localIntersection, cylinderDirection );
+		if( 0. < distanceAlongAxis && distanceAlongAxis < cylinderLength )
+		{
+			vec3 normal = normalize(localIntersection - cylinderDirection * distanceAlongAxis);
+			return vec4(lambda,normal.xyz);
+		}
+	}
+
+	return vec4(0.,0.,0.,0.);
+}
+
+// {
+// 	solids = Array()
+// 	function getFront(o,d, solid)
+// 	{	
+// 	}
+
+// 	float currentClosest = 99999.;
+// 	int indexOfClosestSolid = -1;
+// 	for(solids)
+// 	{
+// 		float front = 
+// 		switch(solid)
+// 		{
+// 			case 0: 
+// 		}
+// 		getFront(o,d,solid)
+// 		if( front < currentClosest )
+// 		{
+// 			indexOfClosestSolid = i;
+// 			currentClosest = front;
+// 		}
+// 	}
+
+// 	struct Gas
+// 	{
+// 		bool isTexture;
+// 		mat4 matrixWorldInverse;
+// 	};
+
+// 	gases = Array()
+// 	closestGasFront
+// 	closestGasBack
+// 	for(gases)
+// 	{
+// 		vec2 dists = sphereIntersectionDistances;
+
+// 		switch( gas )
+// 		{
+
+// 		}
+// 		//combined with cuboids if it's a texture
+// 	}
+// 	if(closestGasDist < closestSolidDist)
+// 	{
+// 		maxMarchingDistance = min(closestGasBack, closestSolidDist)
+
+// 		//raymarch
+// 	}
+
+// 	if(closestSolidDist < 99999.)
+// 	{
+// 		draw(indexOfClosestSolid)
+// 	}
+// }
 
 
 // int ijk2n(int i, int j, int k)
