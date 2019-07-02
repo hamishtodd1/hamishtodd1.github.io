@@ -105,9 +105,13 @@ async function initShaderExperimentation( canvas )
 		{
 			let dimension = 32;
 			let dataArray = new Float32Array(dimension*dimension*dimension)
-			for(let i = 0; i < dataArray.length * 4; i++)
+			for(let i = 0; i < dimension; i++)
+			for(let j = 0; j < dimension; j++)
+			for(let k = 0; k < dimension; k++)
 			{
-				dataArray[i] = Math.random() > 0.5?0.:1.;
+				dataArray[i*dimension*dimension+j*dimension+k] = 
+					// i >= dimension/2 ^ j >= dimension/2 ^ k >= dimension/2 ? 0.:1.;
+					(i+j+k) % 2 ? 0.:1.;
 			}
 			let data = new THREE.DataTexture3D( dataArray, dimension, dimension, dimension );
 			data.wrapS = THREE.ClampToEdgeWrapping;

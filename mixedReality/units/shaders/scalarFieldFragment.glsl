@@ -60,7 +60,6 @@ uniform mat4 matrixWorldInverse;
 uniform vec3 scalarFieldPointLightPosition;
 uniform float renderRadiusSquared;
 
-
 const bool doIsosurface = true;
 const bool doSmoke = false;
 
@@ -136,7 +135,10 @@ float zeroAccentuator(float value)//,float expectedMin,float expectedMax)
 const float isolevel = 0.5;
 float getLevel( vec3 p )
 {
-	vec3 scaledP = p * 4.;
+	vec3 scaledP = p * 20.;
+	scaledP.x += .5;
+	scaledP.y += .5;
+	scaledP.z += .5;
 	//the corners of the texture are 0s and 1s
 	float textureSample = texture( data, scaledP.xyz ).r;
 	return textureSample - isolevel;
@@ -202,8 +204,8 @@ float distanceToHandCone( vec3 origin, vec3 direction )
 		if( lesserT > 0. )
 		{
 			vec3 tipToPoint = (origin + lesserT * direction) - tip;
-			if( lengthSq(tipToPoint) < 0.038 && //within the length
-				dot( downSpindle, tipToPoint ) > 0. //not the top cone
+			if( dot( downSpindle, tipToPoint ) > 0. && //not the top cone
+				lengthSq(tipToPoint) < 0.001 //0.038 //within the length
 				//maybe also don't show the underside
 				)
 			{
@@ -278,10 +280,10 @@ void main()
 	{
 		vec3 probeStart = scalarFieldPixelPosition + direction * renderSphereIntersectionDistances[0];
 
-		handDistance -= renderSphereIntersectionDistances[0];
+		float handDistanceInSphere = handDistance - renderSphereIntersectionDistances[0];
 
 		float totalDistanceToGo = renderSphereIntersectionDistances[1] - renderSphereIntersectionDistances[0];
-		float numSteps = 128.;
+		float numSteps = 16.;
 		float defaultStepLength = totalDistanceToGo / numSteps;
 
 		float thisStepLength = defaultStepLength;
@@ -318,10 +320,10 @@ void main()
 				}
 			}
 
-			if( handDistance < probeDistance )
+			if( handDistanceInSphere < probeDistance )
 			{
-				probeDistance = handDistance;
-				thisStepLength = handDistance - defaultStepLength * (i-1.);
+				probeDistance = handDistanceInSphere;
+				thisStepLength = handDistanceInSphere - defaultStepLength * (i-1.);
 				newLevel = getLevel( probeStart + probeDistance * direction );
 			}
 
@@ -334,10 +336,10 @@ void main()
 				gl_FragColor.b += contribution;
 			}
 
-			if( probeDistance == handDistance )
+			if( probeDistance == handDistanceInSphere )
 			{
 				vec3 p = probeStart + probeDistance * direction;
-				renderHand(p, -direction );
+				renderHand( p, -direction );
 				return;
 			}
 
@@ -362,7 +364,15 @@ void main()
 
 		if( doIsosurface && !doSmoke )
 		{
-			discard;
+			if(handDistance < 9999.)
+			{
+				renderHand( scalarFieldPixelPosition + handDistance * direction, -direction );
+				return;
+			}
+			else
+			{
+				discard;
+			}
 		}
 		
 		//to help normalization
