@@ -64,6 +64,12 @@ uniform float renderRadiusSquared;
 const bool doIsosurface = true;
 const bool doGas = false;
 
+
+
+
+
+//------------GENERIC
+
 float lengthSq(vec3 v)
 {
 	return dot(v,v);
@@ -72,32 +78,6 @@ float lengthSq(vec3 v)
 float sq(float a)
 {
 	return a*a;
-}
-
-vec2 sphereIntersectionDistances( vec3 origin, vec3 direction, vec3 center, float rSquared )
-{
-	vec3 centerToOrigin = origin - center;
-
-	float a = lengthSq(direction);
-	float b = 2. * dot(direction,centerToOrigin);
-	float c = lengthSq(center) + lengthSq(origin) - 2. * dot(center,origin) - rSquared;
-
-	float squareRootedPart = b*b - 4. * a * c;
-	if( squareRootedPart > 0. )
-	{
-		float t1 = (-b+sqrt(squareRootedPart)) / (2.*a);
-		float t2 = (-b-sqrt(squareRootedPart)) / (2.*a);
-		if(t1 < t2)
-		{
-			return vec2(t1,t2);
-		}
-		else if(t2 < t1)
-		{
-			return vec2(t2,t1);
-		}
-	}
-
-	return vec2(0.,0.);
 }
 
 // float tanh(float x)
@@ -133,10 +113,40 @@ float zeroAccentuator(float value)//,float expectedMin,float expectedMax)
 	return 1. / value;
 }
 
+vec2 sphereIntersectionDistances( vec3 origin, vec3 direction, vec3 center, float rSquared )
+{
+	vec3 centerToOrigin = origin - center;
+
+	float a = lengthSq(direction);
+	float b = 2. * dot(direction,centerToOrigin);
+	float c = lengthSq(center) + lengthSq(origin) - 2. * dot(center,origin) - rSquared;
+
+	float squareRootedPart = b*b - 4. * a * c;
+	if( squareRootedPart > 0. )
+	{
+		float t1 = (-b+sqrt(squareRootedPart)) / (2.*a);
+		float t2 = (-b-sqrt(squareRootedPart)) / (2.*a);
+		if(t1 < t2)
+		{
+			return vec2(t1,t2);
+		}
+		else if(t2 < t1)
+		{
+			return vec2(t2,t1);
+		}
+	}
+
+	return vec2(0.,0.);
+}
 
 
 
-//------------------Texture crap
+
+
+
+
+
+//------------------Texture
 
 const float isolevel = 0.5;
 float getTextureLevel(vec3 p)
@@ -163,6 +173,37 @@ float getTextureLevel(vec3 p)
 	float textureSample = texture( data, textureSpaceP.xyz ).r;
 	return textureSample - isolevel;
 }
+
+//NEXT WANNA TEST THIS
+vec2 faceOnCubeIntersectionDistances( vec3 origin, vec3 direction )
+{
+	vec2 intersectionDistances = vec2(99999.,99999.);
+	int index = 0;
+
+	for(int i = 0; i < 3; i++)
+	{
+		for(float j = 0.; j < 2.; j++)
+		{
+			float planeCoord = j - 0.5;
+			float planeIntersectionDistance = direction[i] / (planeCoord - origin[i]);
+			planeIntersectionDistance = min(planeIntersectionDistance,0.);
+
+			vec3 intersection = origin + direction * planeIntersectionDistance;
+			if( -0.5 < intersection[(i+1)%3] && intersection[(i+1)%3] < 0.5 &&
+				-0.5 < intersection[(i+2)%3] && intersection[(i+2)%3] < 0.5 )
+			{
+				index = index+1;
+				intersectionDistances[index] = planeIntersectionDistance;
+			}
+		}
+	}
+
+	return intersectionDistances;
+}
+
+
+
+
 
 //------------------------------FUNDAMENTAL
 
@@ -207,6 +248,13 @@ float getLightIntensityAtPoint(vec3 p, vec3 viewerDirection, vec3 normal )
 	}
 	return intensity;
 }
+
+
+
+
+
+
+//---------------------HAND
 
 //lousodrome.net/blog/light/2017/01/03/intersection-of-a-ray-and-a-cone/
 const float cosSquaredTipAngle = 0.88; //1/8 of an angle
@@ -277,6 +325,19 @@ void renderHand(vec3 p, vec3 viewerDirection)
 
 //you're going to put your arm behind these things, so the "back" might be quite close
 
+
+
+
+
+
+
+
+
+
+
+
+//-------------------------loop
+
 //want these outside really
 void main()
 {
@@ -286,12 +347,12 @@ void main()
 
 	float handDistance = distanceToHandCone( scalarFieldPixelPosition, direction );
 
-	vec2 renderSphereIntersectionDistances = sphereIntersectionDistances( scalarFieldPixelPosition, direction, vec3(0.,0.,0.), renderRadiusSquared );
-	bool sphereToBeRendered = !(renderSphereIntersectionDistances[0] == 0. && renderSphereIntersectionDistances[1] == 0.);
+	vec2 renderVolumeIntersectionDistances = sphereIntersectionDistances( scalarFieldPixelPosition, direction, vec3(0.,0.,0.), renderRadiusSquared );
+	bool volumeShallBeRendered = !(renderVolumeIntersectionDistances[0] == 0. && renderVolumeIntersectionDistances[1] == 0.);
 
 	gl_FragColor = vec4( 0.,0.,0., 1.0 );
 
-	if( !sphereToBeRendered || handDistance < renderSphereIntersectionDistances[0] )
+	if( !volumeShallBeRendered || handDistance < renderVolumeIntersectionDistances[0] )
 	{
 		if(handDistance < 9999.)
 		{
@@ -305,11 +366,11 @@ void main()
 	}
 	else
 	{
-		vec3 probeStart = scalarFieldPixelPosition + direction * renderSphereIntersectionDistances[0];
+		vec3 probeStart = scalarFieldPixelPosition + direction * renderVolumeIntersectionDistances[0];
 
-		float handDistanceInSphere = handDistance - renderSphereIntersectionDistances[0];
+		float handDistanceInSphere = handDistance - renderVolumeIntersectionDistances[0];
 
-		float totalDistanceToGo = renderSphereIntersectionDistances[1] - renderSphereIntersectionDistances[0];
+		float totalDistanceToGo = renderVolumeIntersectionDistances[1] - renderVolumeIntersectionDistances[0];
 		float numSteps = 16.;
 		float defaultStepLength = totalDistanceToGo / numSteps;
 

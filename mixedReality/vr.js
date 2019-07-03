@@ -6,22 +6,152 @@ var handControllerKeys = {
 	button2: 4
 }
 
+function initVrOrMockVrInput()
+{
+	if(MODE === NONVR_TESTING_MODE)
+	{
+		//could make some vr presence detectors
+		//and even refresh the page with the mode changed
+
+		var mockVrInput = initMockVrInput();
+	}
+	else
+	{
+		renderer.vr.enabled = true;
+
+		let vrButton = WEBVR.createButton( renderer )
+		document.body.appendChild( vrButton );
+
+		// vrButton.onclick()
+	}
+
+	let getVrOrMockVrInput = function()
+	{
+		for(let i = 0; i < 2; i++ )
+		{
+			let hand = handControllers[i]
+
+			hand.thumbstickRightOld = hand.thumbstickRight
+			hand.thumbstickLeftOld = hand.thumbstickLeft
+			hand.thumbstickUpOld = hand.thumbstickUp
+			hand.thumbstickDownOld = hand.thumbstickDown
+
+			hand.positionOld.copy(hand.position);
+			hand.quaternionOld.copy(hand.quaternion);
+
+			for( var propt in handControllerKeys )
+			{
+				hand[propt+"Old"] = hand[propt];
+			}
+		}
+
+		if( MODE === NONVR_TESTING_MODE )
+		{
+			mockVrInput()
+		}
+		else
+		{
+			actualVrInput()
+		}		
+
+		for(let i = 0; i < 2; i++ )
+		{
+			let hand = handControllers[i]
+			hand.deltaPosition.copy(hand.position).sub(hand.positionOld);
+			hand.deltaQuaternion.copy(hand.quaternionOld).inverse().multiply(hand.quaternion);
+		}
+	}
+
+	return getVrOrMockVrInput;
+}
+
+function actualVrInput()
+{
+	let gamepads = navigator.getGamepads();
+	let standingMatrix = renderer.vr.getStandingMatrix()
+
+	for(var k = 0; k < gamepads.length; ++k)
+	{
+		if(!gamepads[k] || gamepads[k].pose === null || gamepads[k].pose === undefined || gamepads[k].pose.position === null)
+		{
+			continue;
+		}
+
+		var affectedControllerIndex = -1;
+		if (gamepads[k].id === "OpenVR Gamepad" )
+		{
+			if(gamepads[k].index )
+			{
+				affectedControllerIndex = RIGHT_CONTROLLER_INDEX;
+			}
+			else
+			{
+				affectedControllerIndex = LEFT_CONTROLLER_INDEX;
+			}
+		}
+		else if (gamepads[k].id === "Oculus Touch (Right)")
+		{
+			affectedControllerIndex = RIGHT_CONTROLLER_INDEX;
+		}
+		else if (gamepads[k].id === "Oculus Touch (Left)")
+		{
+			affectedControllerIndex = LEFT_CONTROLLER_INDEX;
+		}
+		else if (gamepads[k].id === "Spatial Controller (Spatial Interaction Source)")
+		{
+			if( gamepads[k].hand === "right" )
+			{
+				affectedControllerIndex = RIGHT_CONTROLLER_INDEX;
+			}
+			else
+			{
+				affectedControllerIndex = LEFT_CONTROLLER_INDEX;
+			}
+		}
+		else
+		{
+			continue;
+		}
+
+		let hand = handControllers[affectedControllerIndex]
+		
+		hand.thumbstickAxes[0] = gamepads[k].axes[0];
+		hand.thumbstickAxes[1] = gamepads[k].axes[1];
+
+		hand.thumbstickRight = hand.thumbstickAxes[0] > 0.5
+		hand.thumbstickLeft = hand.thumbstickAxes[0] < -0.5
+		hand.thumbstickUp = hand.thumbstickAxes[1] < -0.5
+		hand.thumbstickDown = hand.thumbstickAxes[1] > 0.5
+		
+		hand.position.fromArray( gamepads[k].pose.position );
+		hand.position.applyMatrix4( standingMatrix );
+		hand.quaternion.fromArray( gamepads[k].pose.orientation );
+		hand.updateMatrixWorld();
+
+		for( var propt in handControllerKeys )
+		{
+			hand[propt] = gamepads[k].buttons[handControllerKeys[propt]].pressed;
+		}
+		hand["grippingSide"] = gamepads[k].buttons[handControllerKeys["grippingSide"]].value > 0.7;
+	}
+}
+
 function initControllerObjects()
 {
-	function overlappingHoldable(holdable)
-	{
-		var ourPosition = this.controllerModel.geometry.boundingSphere.center.clone();
-		this.localToWorld( ourPosition );
+	// function overlappingHoldable(holdable)
+	// {
+	// 	var ourPosition = this.controllerModel.geometry.boundingSphere.center.clone();
+	// 	this.localToWorld( ourPosition );
 		
-		var holdablePosition = holdable.boundingSphere.center.clone();
-		holdable.localToWorld( holdablePosition );
+	// 	var holdablePosition = holdable.boundingSphere.center.clone();
+	// 	holdable.localToWorld( holdablePosition );
 		
-		var ourScale = this.matrixWorld.getMaxScaleOnAxis();
-		var holdableScale = holdable.matrixWorld.getMaxScaleOnAxis();
+	// 	var ourScale = this.matrixWorld.getMaxScaleOnAxis();
+	// 	var holdableScale = holdable.matrixWorld.getMaxScaleOnAxis();
 	
-		let overlapping = ourPosition.distanceTo(holdablePosition) < holdable.boundingSphere.radius * holdableScale + this.controllerModel.geometry.boundingSphere.radius * ourScale		
-		return overlapping
-	}
+	// 	let overlapping = ourPosition.distanceTo(holdablePosition) < holdable.boundingSphere.radius * holdableScale + this.controllerModel.geometry.boundingSphere.radius * ourScale		
+	// 	return overlapping
+	// }
 
 	var controllerMaterial = new THREE.MeshStandardMaterial({color:0x444444});
 	for(var i = 0; i < 2; i++)
@@ -53,7 +183,7 @@ function initControllerObjects()
 		hand.deltaQuaternion = hand.quaternion.clone();
 		hand.deltaPosition = hand.position.clone();
 		
-		hand.overlappingHoldable = overlappingHoldable;
+		// hand.overlappingHoldable = overlappingHoldable;
 
 		scene.add( hand )
 
@@ -99,130 +229,11 @@ function initControllerObjects()
 	}
 
 	loadControllerModel(RIGHT_CONTROLLER_INDEX)
-	// loadControllerModel( LEFT_CONTROLLER_INDEX)
+
+	if(MODE === VR_TESTING_MODE)
+	{
+		loadControllerModel( LEFT_CONTROLLER_INDEX)
+	}
 
 	markPositionAndQuaternion( rightHand )
-}
-
-function initVrInput()
-{
-	renderer.vr.enabled = true;
-	
-	let vrButtonOrJustSign = WEBVR.createButton( renderer )
-	document.body.appendChild( vrButtonOrJustSign );
-	if( !WEBVR.vrAvailable )
-	{
-		var mockVrInput = initMockVrInput()
-	}
-	else
-	{
-		bindButton("y",function()
-		{
-			vrButtonOrJustSign.onclick()
-			window.removeEventListener('resize', windowResize)
-		}, "enter vr" );
-	}
-
-	readHandInput = function()
-	{
-		for(let i = 0; i < 2; i++ )
-		{
-			let hand = handControllers[i]
-
-			hand.thumbstickRightOld = hand.thumbstickRight
-			hand.thumbstickLeftOld = hand.thumbstickLeft
-			hand.thumbstickUpOld = hand.thumbstickUp
-			hand.thumbstickDownOld = hand.thumbstickDown
-
-			hand.positionOld.copy(hand.position);
-			hand.quaternionOld.copy(hand.quaternion);
-
-			for( var propt in handControllerKeys )
-			{
-				hand[propt+"Old"] = hand[propt];
-			}
-		}
-
-		if( !WEBVR.vrAvailable )
-		{
-			mockVrInput()
-		}
-		else
-		{
-			let gamepads = navigator.getGamepads();
-			let standingMatrix = renderer.vr.getStandingMatrix()
-
-			for(var k = 0; k < gamepads.length; ++k)
-			{
-				if(!gamepads[k] || gamepads[k].pose === null || gamepads[k].pose === undefined || gamepads[k].pose.position === null)
-				{
-					continue;
-				}
-
-				var affectedControllerIndex = -1;
-				if (gamepads[k].id === "OpenVR Gamepad" )
-				{
-					if(gamepads[k].index )
-					{
-						affectedControllerIndex = RIGHT_CONTROLLER_INDEX;
-					}
-					else
-					{
-						affectedControllerIndex = LEFT_CONTROLLER_INDEX;
-					}
-				}
-				else if (gamepads[k].id === "Oculus Touch (Right)")
-				{
-					affectedControllerIndex = RIGHT_CONTROLLER_INDEX;
-				}
-				else if (gamepads[k].id === "Oculus Touch (Left)")
-				{
-					affectedControllerIndex = LEFT_CONTROLLER_INDEX;
-				}
-				else if (gamepads[k].id === "Spatial Controller (Spatial Interaction Source)")
-				{
-					if( gamepads[k].hand === "right" )
-					{
-						affectedControllerIndex = RIGHT_CONTROLLER_INDEX;
-					}
-					else
-					{
-						affectedControllerIndex = LEFT_CONTROLLER_INDEX;
-					}
-				}
-				else
-				{
-					continue;
-				}
-
-				let hand = handControllers[affectedControllerIndex]
-				
-				hand.thumbstickAxes[0] = gamepads[k].axes[0];
-				hand.thumbstickAxes[1] = gamepads[k].axes[1];
-
-				hand.thumbstickRight = hand.thumbstickAxes[0] > 0.5
-				hand.thumbstickLeft = hand.thumbstickAxes[0] < -0.5
-				hand.thumbstickUp = hand.thumbstickAxes[1] < -0.5
-				hand.thumbstickDown = hand.thumbstickAxes[1] > 0.5
-				
-				hand.position.fromArray( gamepads[k].pose.position );
-				hand.position.applyMatrix4( standingMatrix );
-				hand.quaternion.fromArray( gamepads[k].pose.orientation );
-				hand.updateMatrixWorld();
-
-				for( var propt in handControllerKeys )
-				{
-					hand[propt] = gamepads[k].buttons[handControllerKeys[propt]].pressed;
-				}
-				hand["grippingSide"] = gamepads[k].buttons[handControllerKeys["grippingSide"]].value > 0.7;
-			}
-		}		
-
-		for(let i = 0; i < 2; i++ )
-		{
-			let hand = handControllers[i]
-			hand.deltaPosition.copy(hand.position).sub(hand.positionOld);
-			hand.deltaQuaternion.copy(hand.quaternionOld).inverse().multiply(hand.quaternion);
-		}
-	}
 }

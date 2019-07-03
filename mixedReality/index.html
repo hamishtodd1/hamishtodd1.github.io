@@ -65,33 +65,33 @@
 			async function init()
 			{
 				let canvas = document.createElement( 'canvas' );
+				console.assert(canvas.getContext( 'webgl2' ) !== null )
 				renderer = new THREE.WebGLRenderer( { canvas: canvas, context: canvas.getContext( 'webgl2' ),antialias: true } );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.localClippingEnabled = true;
 				document.body.appendChild( renderer.domElement );
 
-				// let a = new THREE.WebGLRenderer()
-				// let c = renderer.getContext()
-				// log(c.getExtension("EXT_frag_depth")) //so maybe would work without webgl2?
-
-				let windowResize = function()
+				if(MODE !== VR_TESTING_MODE)
 				{
-					renderer.setSize( window.innerWidth, window.innerHeight );
-					camera.aspect = window.innerWidth / window.innerHeight; //so the sides may be cut off
-					camera.updateProjectionMatrix();
+					let windowResize = function()
+					{
+						renderer.setSize( window.innerWidth, window.innerHeight );
+						camera.aspect = window.innerWidth / window.innerHeight; //so the sides may be cut off
+						camera.updateProjectionMatrix();
+					}
+					window.addEventListener( 'resize', windowResize)
 				}
-				window.addEventListener( 'resize', windowResize)
 
 				initButtons()
 				initFaceMaker()
 				initLights()
 				// await initPlaybackAndRecording()			
 				initControllerObjects()
-				if( chromiumRatherThanChrome )
+				if( MODE !== PLAYBACK_MODE )
 				{
-					initVrInput()
 					await initFloorAndSky()
+					var getVrOrMockVrInput = initVrOrMockVrInput()
 				}
 
 				await initShaderExperimentation( canvas )
@@ -101,9 +101,9 @@
 				{
 					frameDelta = clock.getDelta()
 
-					if(renderer.vr.enabled === true)
+					if( MODE !== PLAYBACK_MODE )
 					{
-						readHandInput()
+						getVrOrMockVrInput()
 					}
 
 					callContingentUpdateFunctionsAndMaybeRecordOrSynchronizeToVideo()

@@ -106,7 +106,7 @@ async function initShaderExperimentation( canvas )
 		await assignShader("scalarFieldFragment", material, "fragment")
 
 		{
-			let dimension = 64;
+			let dimension = 16;
 			let dataArray = new Float32Array(dimension*dimension*dimension)
 			for(let i = 0; i < dimension; i++)
 			for(let j = 0; j < dimension; j++)

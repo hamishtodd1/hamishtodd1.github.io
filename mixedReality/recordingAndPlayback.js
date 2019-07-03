@@ -88,8 +88,6 @@ callContingentUpdateFunctionsAndMaybeRecordOrSynchronizeToVideo = function()
 
 function initPlaybackAndRecording()
 {
-	let playbackMode = false
-
 	{
 		videoDomElement.src = "recordings/sintel.mp4"
 		// videoDomElement.volume = 0
@@ -139,10 +137,7 @@ function initPlaybackAndRecording()
 			{
 				frames = eval(str)
 				log("frames loaded")
-				if(!chromiumRatherThanChrome)
-				{
-					togglePlaying()
-				}
+				togglePlaying()
 			}
 		);
 	}
@@ -357,7 +352,7 @@ function initPlaybackAndRecording()
 
 	callContingentUpdateFunctionsAndMaybeRecordOrSynchronizeToVideo = function()
 	{
-		if( playbackMode )
+		if( MODE === PLAYBACK_MODE )
 		{
 			synchronizeStateToVideo()
 		}
@@ -377,74 +372,6 @@ function initPlaybackAndRecording()
 
 	function togglePlaying()
 	{
-		if( playbackMode === false ) //first time
-		{
-			if( frames[0].discretes.length !== discretes.length || 
-				frames[0].quaternions.length !== quaternions.length || 
-				frames[0].lerpedFloats.length !== lerpedFloats.length )
-			{
-				console.error("need to rerecord",
-					frames[0].discretes.length, discretes.length,
-					frames[0].quaternions.length, quaternions.length,
-					frames[0].lerpedFloats.length, lerpedFloats.length )
-				return
-			}
-			if(chromiumRatherThanChrome)
-			{
-				console.error("Use chrome, .mp4 doesn't work in chromium")
-				return
-			}
-			if(renderer.vr.enabled)
-			{
-				console.error( "vr enabled, restart (camera will not cooperate even if you disable vr)" )
-				return
-			}
-
-			playbackMode = true
-
-			//if you wanna go back to recording or be in VR, refresh
-			cameraHolder.add(camera)
-			cameraHolder.frustumIndicator.visible = false
-			camera.position.set(0,0,0)
-			camera.rotation.set(0,0,0)
-
-			helmet.visible = true
-
-			let lagVelocity = 0
-			bindButton( "o", function(){}, "video got there first",function()
-			{
-				if(lagVelocity < 0)
-					lagVelocity = 0
-				lagVelocity += 0.0001
-				lag += lagVelocity
-				console.log("lag: ", lag)
-			} )
-			bindButton( "p", function(){}, "virtual controller got there first",function()
-			{
-				if(lagVelocity > 0)
-					lagVelocity = 0
-				lagVelocity -= 0.0001
-				lag += lagVelocity
-				console.log("lag: ", lag)
-			})
-			bindButton("up",function()
-			{
-				videoDomElement.playbackRate += 0.1
-			}, "increase video speed")
-			bindButton("down",function()
-			{
-				videoDomElement.playbackRate -= 0.1
-			}, "decrease video speed")
-			bindButton("left",function()
-			{
-				videoDomElement.currentTime -= 5
-			}, "jump back")
-			bindButton("right",function()
-			{
-				videoDomElement.currentTime += 5
-			}, "jump forwards")
-		}
-
 		if( !videoDomElement.paused )
 		{
 			videoDomElement.pause()
@@ -457,7 +384,73 @@ function initPlaybackAndRecording()
 		}
 	}
 
-	if(!chromiumRatherThanChrome)
+	if( MODE === PLAYBACK_MODE )
+	{
+		if( frames[0].discretes.length !== discretes.length || 
+			frames[0].quaternions.length !== quaternions.length || 
+			frames[0].lerpedFloats.length !== lerpedFloats.length )
+		{
+			console.error("need to rerecord",
+				frames[0].discretes.length, discretes.length,
+				frames[0].quaternions.length, quaternions.length,
+				frames[0].lerpedFloats.length, lerpedFloats.length )
+			return
+		}
+		console.error(".mp4 doesn't work in chromium")
+		if(renderer.vr.enabled)
+		{
+			console.error( "vr enabled, restart (camera will not cooperate even if you disable vr)" )
+			return
+		}
+
+		//if you wanna go back to recording or be in VR, refresh
+		cameraHolder.add(camera)
+		cameraHolder.frustumIndicator.visible = false
+		camera.position.set(0,0,0)
+		camera.rotation.set(0,0,0)
+
+		helmet.visible = true
+
+		let lagVelocity = 0
+		bindButton( "o", function(){}, "video got there first",function()
+		{
+			if(lagVelocity < 0)
+				lagVelocity = 0
+			lagVelocity += 0.0001
+			lag += lagVelocity
+			console.log("lag: ", lag)
+		} )
+		bindButton( "p", function(){}, "virtual controller got there first",function()
+		{
+			if(lagVelocity > 0)
+				lagVelocity = 0
+			lagVelocity -= 0.0001
+			lag += lagVelocity
+			console.log("lag: ", lag)
+		})
+		bindButton("up",function()
+		{
+			videoDomElement.playbackRate += 0.1
+		}, "increase video speed")
+		bindButton("down",function()
+		{
+			videoDomElement.playbackRate -= 0.1
+		}, "decrease video speed")
+		bindButton("left",function()
+		{
+			videoDomElement.currentTime -= 5
+		}, "jump back")
+		bindButton("right",function()
+		{
+			videoDomElement.currentTime += 5
+		}, "jump forwards")
+
+		bindButton( 'space', togglePlaying, "toggle playing")
+
+		loadRecording()
+	}
+
+	if( MODE === VR_TESTING_MODE )
 	{
 		bindButton( "z", function()
 		{
@@ -483,8 +476,5 @@ function initPlaybackAndRecording()
 				cameraHolder.frustumIndicator.material.color.setRGB(0,0,0)
 			}
 		}, "toggle recording" )
-		bindButton( 'space', togglePlaying, "toggle playing")
-
-		loadRecording()
 	}
 }
