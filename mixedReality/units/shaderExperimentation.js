@@ -28,6 +28,8 @@
 		maybe even concentric spheres.
 		You could have a “graph” going along the time axis next to the rectangle that shows the feed rate and death rate,
 		and you could change them.
+		If you want to know how chemistry, not just navier stokes crap, looked at in a way that varies in space, you need reaction diffusion
+			That's why it's important in developmental biology; Turing guessed this
 
 	z buffer crap? Can intersect hand controller? Test
 
@@ -92,7 +94,8 @@ async function initShaderExperimentation( canvas )
 		let uniforms = {};
 		uniforms.scalarFieldPointLightPosition = {value:scalarFieldPointLightPosition}
 		uniforms.matrixWorldInverse = {value:new THREE.Matrix4()}
-		uniforms.renderRadiusSquared = {value:0.015};
+		uniforms.renderRadius = {value:0.12};
+		uniforms.renderRadiusSquared = {value:sq(uniforms.renderRadius.value)};
 		// uniforms.isolevel = {value:0.1};
 		
 		let pointLight = scene.children[2];
@@ -103,7 +106,7 @@ async function initShaderExperimentation( canvas )
 		await assignShader("scalarFieldFragment", material, "fragment")
 
 		{
-			let dimension = 32;
+			let dimension = 64;
 			let dataArray = new Float32Array(dimension*dimension*dimension)
 			for(let i = 0; i < dimension; i++)
 			for(let j = 0; j < dimension; j++)
@@ -143,7 +146,7 @@ async function initShaderExperimentation( canvas )
 			// let backHider = new THREE.Circ
 
 		handControllers[0].controllerModel.visible = false;
-		handControllers[0].rotation.x += TAU/4;
+		// handControllers[0].rotation.x += TAU/4;
 		updateFunctions.push(function()
 		{
 			// scalarField.position.x = 0.14 * Math.sin(frameCount * 0.04)

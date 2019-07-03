@@ -49,7 +49,7 @@
 	https://mrob.com/pub/comp/xmorphia/ - ideal colorings for reaction diffusion
 */
 
-// precision highp float;
+precision highp float;
 precision mediump sampler3D;
 uniform sampler3D data;
 
@@ -58,6 +58,7 @@ varying vec4 worldSpacePixelPosition;
 uniform mat4 matrixWorldInverse;
 
 uniform vec3 scalarFieldPointLightPosition;
+uniform float renderRadius;
 uniform float renderRadiusSquared;
 
 const bool doIsosurface = true;
@@ -132,16 +133,42 @@ float zeroAccentuator(float value)//,float expectedMin,float expectedMax)
 	return 1. / value;
 }
 
+
+
+
+//------------------Texture crap
+
 const float isolevel = 0.5;
+float getTextureLevel(vec3 p)
+{
+	// if(p.z < 0.)
+	// {
+	// 	return 1.;
+	// }
+	// else
+	// {
+	// 	return 0.;
+	// }
+
+	//the corners of the texture are 0s and 1s
+	//a bit better:
+		//each voxel is an integer
+		//cut off the half-pixels at the edges. Means there's an odd number!
+
+	//p.x = renderRadius -> 1
+	//p.x =-renderRadius -> 0
+
+	vec3 textureSpaceP = (p + renderRadius ) / (2.*renderRadius);
+
+	float textureSample = texture( data, textureSpaceP.xyz ).r;
+	return textureSample - isolevel;
+}
+
+//------------------------------FUNDAMENTAL
+
 float getLevel( vec3 p )
 {
-	vec3 scaledP = p * 20.;
-	scaledP.x += .5;
-	scaledP.y += .5;
-	scaledP.z += .5;
-	//the corners of the texture are 0s and 1s
-	float textureSample = texture( data, scaledP.xyz ).r;
-	return textureSample - isolevel;
+	return getTextureLevel(p);
 }
 vec3 getNormal(vec3 p)
 {
@@ -205,7 +232,7 @@ float distanceToHandCone( vec3 origin, vec3 direction )
 		{
 			vec3 tipToPoint = (origin + lesserT * direction) - tip;
 			if( dot( downSpindle, tipToPoint ) > 0. && //not the top cone
-				lengthSq(tipToPoint) < 0.001 //0.038 //within the length
+				lengthSq(tipToPoint) < 0.00001 //0.038 //within the length
 				//maybe also don't show the underside
 				)
 			{
@@ -418,6 +445,7 @@ vec4 distanceToCylinderWithNormal(vec3 origin, vec3 direction, float cylinderRad
 		O = cross(n,cylinderDirection);
 		normalize(O);
 		float s = abs( sqrt(cylinderRadius*cylinderRadius-d*d) / dot(direction,O) );
+		float lambda;
 
 		if( t-s < -epsilon )
 		{
