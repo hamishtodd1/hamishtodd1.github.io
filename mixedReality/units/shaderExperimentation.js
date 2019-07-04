@@ -9,6 +9,12 @@
 		Arrows too
 		complex analysis
 		Amman beenker
+		Tensor fields
+			"The visualization of 3D stress and strain tensor fields"
+			Interactive tensor field design and visualization on surfaces
+			"Tensor field design in volumes" Two versions with different pictures at least
+				probably better: https://web.engr.oregonstate.edu/~zhange/images/3Dtensor_design.pdf
+				https://www.researchgate.net/publication/311097782_Tensor_field_design_in_volumes
 		Complex functions; height = modulus, color = angle
 			Throw any polynomial in you like, could be fun
 			Will replicate the recognizable stuff along the real axis?
@@ -106,7 +112,7 @@ async function initShaderExperimentation( canvas )
 		await assignShader("scalarFieldFragment", material, "fragment")
 
 		{
-			let dimension = 16;
+			let dimension = 8;
 			let dataArray = new Float32Array(dimension*dimension*dimension)
 			for(let i = 0; i < dimension; i++)
 			for(let j = 0; j < dimension; j++)
@@ -114,7 +120,8 @@ async function initShaderExperimentation( canvas )
 			{
 				dataArray[i*dimension*dimension+j*dimension+k] = 
 					// i >= dimension/2 ^ j >= dimension/2 ^ k >= dimension/2 ? 0.:1.;
-					(i+j+k) % 2 ? 0.:1.;
+					// (i+j+k) % 2 ? 0.:1.;
+					Math.random();
 			}
 			let data = new THREE.DataTexture3D( dataArray, dimension, dimension, dimension );
 			data.wrapS = THREE.ClampToEdgeWrapping;

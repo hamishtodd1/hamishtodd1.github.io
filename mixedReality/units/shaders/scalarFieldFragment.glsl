@@ -86,7 +86,7 @@ float sq(float a)
 // 	return (exp2x - 1.) / (exp2x + 1.);
 // }
 
-float sampleEllipticCurveSpace(vec3 p)
+float levelOfEllipticCurveSpace(vec3 p)
 {
 	vec3 scaledP = p * 20.;
 	return scaledP.y*scaledP.y - scaledP.x*scaledP.x*scaledP.x - scaledP.z*scaledP.x;
@@ -174,64 +174,105 @@ float getTextureLevel(vec3 p)
 	return textureSample - isolevel;
 }
 
-//NEXT WANNA TEST THIS
-vec2 faceOnCubeIntersectionDistances( vec3 origin, vec3 direction )
-{
-	vec2 intersectionDistances = vec2(99999.,99999.);
-	int index = 0;
+vec2 renderCubeIntersectionDistances( vec3 origin, vec3 direction )
+{ 
+	vec2 intersectionDistances = vec2(0.,0.);
+	int insertionIndex = 0;
+	int i = 0; //got a warning saying this makes things slow?
+	vec3 intersection;
+	float planeCoord, planeIntersectionDistance, j;
 
-	for(int i = 0; i < 3; i++)
+	for(i; i < 3; i++)
 	{
-		for(float j = 0.; j < 2.; j++)
+		for(j = 0.; j <= 1.; j++)
 		{
-			float planeCoord = j - 0.5;
-			float planeIntersectionDistance = direction[i] / (planeCoord - origin[i]);
-			planeIntersectionDistance = min(planeIntersectionDistance,0.);
+			planeCoord = (j * 2. - 1.) * renderRadius;
+			planeIntersectionDistance = (planeCoord - origin[i]) / direction[i];
 
-			vec3 intersection = origin + direction * planeIntersectionDistance;
-			if( -0.5 < intersection[(i+1)%3] && intersection[(i+1)%3] < 0.5 &&
-				-0.5 < intersection[(i+2)%3] && intersection[(i+2)%3] < 0.5 )
+			intersection = origin + direction * planeIntersectionDistance;
+			if( -renderRadius < intersection[(i+1)%3] && intersection[(i+1)%3] < renderRadius &&
+				-renderRadius < intersection[(i+2)%3] && intersection[(i+2)%3] < renderRadius )
 			{
-				index = index+1;
-				intersectionDistances[index] = planeIntersectionDistance;
+				intersectionDistances[insertionIndex] = max( planeIntersectionDistance, 0. );
+				insertionIndex = 1-insertionIndex;
 			}
 		}
 	}
 
-	return intersectionDistances;
+	int lowerIndex = intersectionDistances[0] < intersectionDistances[1] ? 0:1;
+	vec2 orderedIntersectionDistances = vec2(intersectionDistances[lowerIndex],intersectionDistances[1-lowerIndex]);
+
+	return orderedIntersectionDistances;
 }
+
+/*
+Two weeks!
+
+Make Andrew thing
+	-> Andrew can sign off on topology and geometry
+	-> Hotel booking
+Get starting date -> Rent out flat
+	->have money, can book plane
+	->can get reimbursed
+
+Release
+Case study
+Tests
+Thesis chapters
+Proof read
+Publication
+
+
+Group meeting:
+	Planning a video
+	And a basic idea of the history
+	Imagine that you've got to communicate everything the next generation will know about reaction diffusion systems
+		1000 words
+		As many videos as you want
+		300 words on history
+	I want you to give me examples, AS MANY AS POSSIBLE
+	The best examples are videos
+		Paul Sutcliffe had a fitzhugh nagumo from heart
+		jellyfish
+		That little experiment
+		The zebrafish thing
+*/
 
 
 
 
 
 //------------------------------FUNDAMENTAL
-
 float getLevel( vec3 p )
 {
 	return getTextureLevel(p);
-}
-vec3 getNormal(vec3 p)
-{
-	// float textureSample = texture3D(data, vec3(0.,0.,0.)).r;
-	return vec3(1.,0.,0.);
+	// return levelOfEllipticCurveSpace(p);
 }
 
 vec3 numericalGradient(vec3 p) //very easy to work out for polynomials, y does not depend on x
 {
 	float valueHere = getLevel(p);
-	float eps = 0.001;
+	float eps = 0.01;
 	float x = ( valueHere - getLevel(p+vec3(eps,0.,0.)) ) / eps;
 	float y = ( valueHere - getLevel(p+vec3(0.,eps,0.)) ) / eps;
 	float z = ( valueHere - getLevel(p+vec3(0.,0.,eps)) ) / eps;
 
 	return vec3(x,y,z);
 }
+
+vec3 getNormal(vec3 p)
+{
+	// float textureSample = texture3D(data, vec3(0.,0.,0.)).r;
+	return normalize( numericalGradient(p) );
+	// return gradientOfEllipticCurveSpace(p);
+	// return vec3(1.,0.,0.);
+}
+
 float getLightIntensityAtPoint(vec3 p, vec3 viewerDirection, vec3 normal )
 {
-	float ks = 1.;
-	float kd = 1.;
-	float ka = 1.;
+	float ks = .3;
+	float kd = .3;
+	float ka = .6;
 	float shininess = 1.;
 	float ambientIntensity = 1.;
 	float pointLightDiffuse = 1.;
@@ -347,7 +388,8 @@ void main()
 
 	float handDistance = distanceToHandCone( scalarFieldPixelPosition, direction );
 
-	vec2 renderVolumeIntersectionDistances = sphereIntersectionDistances( scalarFieldPixelPosition, direction, vec3(0.,0.,0.), renderRadiusSquared );
+	vec2 renderVolumeIntersectionDistances = renderCubeIntersectionDistances( scalarFieldPixelPosition, direction );
+	// vec2 renderVolumeIntersectionDistances = sphereIntersectionDistances( scalarFieldPixelPosition, direction, vec3(0.,0.,0.), renderRadiusSquared );
 	bool volumeShallBeRendered = !(renderVolumeIntersectionDistances[0] == 0. && renderVolumeIntersectionDistances[1] == 0.);
 
 	gl_FragColor = vec4( 0.,0.,0., 1.0 );
@@ -370,9 +412,8 @@ void main()
 
 		float handDistanceInSphere = handDistance - renderVolumeIntersectionDistances[0];
 
-		float totalDistanceToGo = renderVolumeIntersectionDistances[1] - renderVolumeIntersectionDistances[0];
-		float numSteps = 16.;
-		float defaultStepLength = totalDistanceToGo / numSteps;
+		float numSteps = 50.;
+		float defaultStepLength = (renderVolumeIntersectionDistances[1] - renderVolumeIntersectionDistances[0]) / numSteps;
 
 		float thisStepLength = defaultStepLength;
 		float probeDistance = 0.;
