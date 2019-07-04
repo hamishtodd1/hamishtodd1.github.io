@@ -9,12 +9,6 @@
 		Arrows too
 		complex analysis
 		Amman beenker
-		Tensor fields
-			"The visualization of 3D stress and strain tensor fields"
-			Interactive tensor field design and visualization on surfaces
-			"Tensor field design in volumes" Two versions with different pictures at least
-				probably better: https://web.engr.oregonstate.edu/~zhange/images/3Dtensor_design.pdf
-				https://www.researchgate.net/publication/311097782_Tensor_field_design_in_volumes
 		Complex functions; height = modulus, color = angle
 			Throw any polynomial in you like, could be fun
 			Will replicate the recognizable stuff along the real axis?
@@ -36,9 +30,6 @@
 		and you could change them.
 		If you want to know how chemistry, not just navier stokes crap, looked at in a way that varies in space, you need reaction diffusion
 			That's why it's important in developmental biology; Turing guessed this
-
-	z buffer crap? Can intersect hand controller? Test
-
 
 	most basic vertex:
 	void main() 
@@ -102,7 +93,16 @@ async function initShaderExperimentation( canvas )
 		uniforms.matrixWorldInverse = {value:new THREE.Matrix4()}
 		uniforms.renderRadius = {value:0.12};
 		uniforms.renderRadiusSquared = {value:sq(uniforms.renderRadius.value)};
-		// uniforms.isolevel = {value:0.1};
+		uniforms.isolevel = {value:0.5};
+
+		bindButton("i",function(){},"increase isolevel",function()
+		{
+			uniforms.isolevel.value += 0.01;
+		})
+		bindButton("o",function(){},"increase isolevel",function()
+		{
+			uniforms.isolevel.value -= 0.01;
+		})
 		
 		let pointLight = scene.children[2];
 		console.assert(pointLight.isPointLight)
@@ -121,6 +121,7 @@ async function initShaderExperimentation( canvas )
 				dataArray[i*dimension*dimension+j*dimension+k] = 
 					// i >= dimension/2 ^ j >= dimension/2 ^ k >= dimension/2 ? 0.:1.;
 					// (i+j+k) % 2 ? 0.:1.;
+					// Math.sqrt(sq(i-dimension/2)+sq(j-dimension/2)+sq(k-dimension/2)) / 4;
 					Math.random();
 			}
 			let data = new THREE.DataTexture3D( dataArray, dimension, dimension, dimension );
@@ -135,6 +136,7 @@ async function initShaderExperimentation( canvas )
 			data.needsUpdate = true;
 
 			material.uniforms.data = {value:data}
+			material.uniforms.dataDimension = {value:dimension}
 		}
 
 		let scalarField = new THREE.Object3D();
@@ -153,7 +155,7 @@ async function initShaderExperimentation( canvas )
 			// let backHider = new THREE.Circ
 
 		handControllers[0].controllerModel.visible = false;
-		// handControllers[0].rotation.x += TAU/4;
+		handControllers[0].rotation.y += TAU/4;
 		updateFunctions.push(function()
 		{
 			// scalarField.position.x = 0.14 * Math.sin(frameCount * 0.04)

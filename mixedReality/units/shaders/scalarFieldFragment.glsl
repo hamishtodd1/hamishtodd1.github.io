@@ -1,27 +1,33 @@
 /*
 	TODO
-		3D textures
-		Moving stuff around inside the clipping volume
+		MRI
+		Arbitrary extra cylinders, spheres and cones
 		Combine with your simulator, for andrew
 		Make it editable
-		Blending?
-			Disadvantage
-				Black background makes it easier to think about what you're seeing, nothing to try to remove
-			Need to know exactly what threejs does
-			Need to know exactly how smoke affects color
 		Tricubic thing
 			You put the coefficients in a texture (or two) and then nearest neighbour within each voxel
+			But it's really probably not noticeable
+				It's only intended for the volume data, so check with that
 		ultrasound-esque slicing
-		Ask George about removing branchings and reading a teeny bit out, eg the normalization redness
+		Ask George about
+			removing branchings
+			reading a teeny bit out, eg the normalization redness
 		Control color mapping
 			Any color mapping is a line throught the RGB cube
-			Three overlapping scalar fields with all values > 0?
-				Direction. It's enclosed by your rainbow-banded sphere, color is what it's attracted to
-				Concentrations of three chemicals
-		Urgh, you probably want shit like arrows in there
-		squarish
 
 	Need your cone outside the sphere, therefore we have to go beyond the sphere
+
+	Other ideas
+		constructive/destructive interference in many dimensions
+		Three overlapping scalar fields with all values > 0?
+			Direction. It's enclosed by your rainbow-banded sphere, color is what it's attracted to
+			Concentrations of three chemicals
+		Tensor fields
+			"The visualization of 3D stress and strain tensor fields"
+			Interactive tensor field design and visualization on surfaces
+			"Tensor field design in volumes" Two versions with different pictures at least
+				probably better: https://web.engr.oregonstate.edu/~zhange/images/3Dtensor_design.pdf
+				https://www.researchgate.net/publication/311097782_Tensor_field_design_in_volumes
 
 	"Top 7 scalar fields / algebraic varieties"
 		wavefunctions
@@ -36,6 +42,11 @@
 		Evelyn Lamb's multiplying surfaces thing (union)
 
 	Presentation
+		Blending?
+			Disadvantage
+				Black background makes it easier to think about what you're seeing, nothing to try to remove
+			Need to know exactly what threejs does
+			Need to know exactly how smoke affects color
 		You know it definitely needs SOME limitations
 		Could blend with background
 		Spheres look nice and make it so you aren't distracted by the shape of the thing
@@ -52,6 +63,7 @@
 precision highp float;
 precision mediump sampler3D;
 uniform sampler3D data;
+uniform float dataDimension;
 
 varying vec4 worldSpacePixelPosition;
 
@@ -62,8 +74,9 @@ uniform float renderRadius;
 uniform float renderRadiusSquared;
 
 const bool doIsosurface = true;
-const bool doGas = false;
+const bool doGas = true;
 
+uniform float isolevel;
 
 
 
@@ -89,12 +102,13 @@ float sq(float a)
 float levelOfEllipticCurveSpace(vec3 p)
 {
 	vec3 scaledP = p * 20.;
-	return scaledP.y*scaledP.y - scaledP.x*scaledP.x*scaledP.x - scaledP.z*scaledP.x;
+	float val = scaledP.y*scaledP.y - scaledP.x*scaledP.x*scaledP.x - scaledP.z*scaledP.x;
+	return isolevel - val;
 }
 vec3 gradientOfEllipticCurveSpace(vec3 p)
 {
 	vec3 scaledP = p * 20.;
-	return vec3(3.*scaledP.x*scaledP.x+scaledP.z,2.*scaledP.y,scaledP.x);
+	return -vec3(3.*scaledP.x*scaledP.x+scaledP.z,2.*scaledP.y,scaledP.x);
 }
 
 float fourDConeThatIsZeroAtRadius(vec3 p)
@@ -148,7 +162,6 @@ vec2 sphereIntersectionDistances( vec3 origin, vec3 direction, vec3 center, floa
 
 //------------------Texture
 
-const float isolevel = 0.5;
 float getTextureLevel(vec3 p)
 {
 	// if(p.z < 0.)
@@ -165,10 +178,10 @@ float getTextureLevel(vec3 p)
 		//each voxel is an integer
 		//cut off the half-pixels at the edges. Means there's an odd number!
 
-	//p.x = renderRadius -> 1
-	//p.x =-renderRadius -> 0
-
-	vec3 textureSpaceP = (p + renderRadius ) / (2.*renderRadius);
+	//p.x = renderRadius -> 1 - 0.5 / dataDimension
+	//p.x =-renderRadius -> 0 + 0.5 / dataDimension
+	float radiusInTexture = 0.5 - 0.5 / dataDimension;
+	vec3 textureSpaceP = p / renderRadius * radiusInTexture + 0.5;
 
 	float textureSample = texture( data, textureSpaceP.xyz ).r;
 	return textureSample - isolevel;
@@ -412,7 +425,7 @@ void main()
 
 		float handDistanceInSphere = handDistance - renderVolumeIntersectionDistances[0];
 
-		float numSteps = 50.;
+		float numSteps = 80.;
 		float defaultStepLength = (renderVolumeIntersectionDistances[1] - renderVolumeIntersectionDistances[0]) / numSteps;
 
 		float thisStepLength = defaultStepLength;
@@ -420,18 +433,14 @@ void main()
 		float oldLevel = getLevel( probeStart );
 		float newLevel;
 
-		bool isoSurfaceToBeDrawn = false;
+		float solutionProportionThroughThisStepAssumingLinearity;
 
 		for(float i = 1.; i <= numSteps; i++)
 		{
 			probeDistance = i * defaultStepLength;
 			newLevel = getLevel( probeStart + probeDistance * direction );
 
-			// if( newLevel != oldLevel )
-			// {
-			// 	gl_FragColor.r = 1.;
-			// 	return;
-			// }
+			solutionProportionThroughThisStepAssumingLinearity = -oldLevel / (newLevel-oldLevel);
 
 			if( doIsosurface )
 			{
@@ -439,13 +448,47 @@ void main()
 				//you could MAYBE try to solve in the case of that degree-10 interpolation polynomial
 				//still better than marchingcubes
 
-				isoSurfaceToBeDrawn = sign( oldLevel) != sign( newLevel );
-
-				if( isoSurfaceToBeDrawn )
+				if( 0. < solutionProportionThroughThisStepAssumingLinearity && 
+					solutionProportionThroughThisStepAssumingLinearity <= 1. )
 				{
-					thisStepLength = -oldLevel / (newLevel-oldLevel) * defaultStepLength;
-					probeDistance = defaultStepLength * (i-1.) + thisStepLength;
-					newLevel = getLevel( probeStart + probeDistance * direction );
+					float possibleProbeDistance = defaultStepLength * (i-1. + solutionProportionThroughThisStepAssumingLinearity);
+
+					if( oldLevel < 0. )
+					{
+						//assuming the surface is planar, are you within a certain radius of an integer value?
+						float gridThickness = 0.0009;
+						float gridSpacing = gridThickness * 15.;
+
+						vec3 p = probeStart + possibleProbeDistance * direction;
+						vec3 normal = getNormal(p);
+						float minDist = 99999.;
+						for(int i = 0; i < 3; i++)
+						{
+							float pointToRoundingPlane = round(p[i]/gridSpacing)*gridSpacing - p[i];
+
+							vec3 roundingPlaneNormal = vec3(0.,0.,0.);
+							roundingPlaneNormal[i] = sign(pointToRoundingPlane);
+
+							float cosTheta = dot(roundingPlaneNormal,normal);
+							float cosAlpha = sqrt(1.-sq(cosTheta)); // = sinTheta
+
+							float distToRoundingPlaneOnPlanarApproximationToSurface = abs(pointToRoundingPlane) / cosAlpha;
+
+							minDist = min(minDist, distToRoundingPlaneOnPlanarApproximationToSurface);
+						}
+						if(minDist < gridThickness)
+						{
+							thisStepLength = solutionProportionThroughThisStepAssumingLinearity * defaultStepLength;
+							probeDistance = possibleProbeDistance;
+							newLevel = getLevel( probeStart + probeDistance * direction );
+						}
+					}
+					else
+					{
+						thisStepLength = solutionProportionThroughThisStepAssumingLinearity * defaultStepLength;
+						probeDistance = possibleProbeDistance;
+						newLevel = getLevel( probeStart + probeDistance * direction );
+					}
 				}
 			}
 
@@ -454,15 +497,31 @@ void main()
 				probeDistance = handDistanceInSphere;
 				thisStepLength = handDistanceInSphere - defaultStepLength * (i-1.);
 				newLevel = getLevel( probeStart + probeDistance * direction );
+				//hah, and if that level gives you another solution?
 			}
 
 			if(doGas)
 			{
-				//"layers of colored glass"
-				float average = ( oldLevel + newLevel ) * .5;
-				float boost = .1; //ideally it is such that there is one pixel for which it reaches 1
-				float contribution = (1. - abs(average) * boost)  * 10. * thisStepLength;
-				gl_FragColor.b += contribution;
+				//now is the time for an overhaul. You don't need steplength, just make the steps go as far as the hand
+				// float positiveContribution = 0.;
+				// float negativeContribution = 0.
+				// oldLevel + (oldLevel - newLevel) * 0.5 * defaultStepLength;
+				// if( 0. < solutionProportionThroughThisStepAssumingLinearity &&
+				// 	solutionProportionThroughThisStepAssumingLinearity <= 1.)
+				// {
+					
+				// }
+				// //"layers of colored glass"
+				// float average = ( oldLevel + newLevel ) * .5;
+				// if( average < 0. )
+				// {
+				// }
+				// float effectBoost = .1; //ideally it is such that there is one pixel for which it reaches 1
+				// float contribution = (1. - abs(average) * effectBoost) * 10. * thisStepLength;
+				// // if(average > 0.)
+				// {
+				// 	gl_FragColor.b += contribution;
+				// }
 			}
 
 			if( probeDistance == handDistanceInSphere )
@@ -472,7 +531,7 @@ void main()
 				return;
 			}
 
-			if( isoSurfaceToBeDrawn )
+			if( thisStepLength != defaultStepLength )
 			{
 				vec3 p = probeStart + probeDistance * direction;
 				float intensity = getLightIntensityAtPoint( p, -direction, getNormal(p) );
