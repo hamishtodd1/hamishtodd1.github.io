@@ -492,22 +492,22 @@ void main()
 
 				if(oldLevel > 0. && newLevel > 0.)
 				{
-					positiveContribution = (.5 * abs(oldLevel - newLevel) + min(oldLevel,newLevel) );
+					positiveContribution = .5 * abs(oldLevel - newLevel) + min(oldLevel,newLevel);
 				}
 				// else if(oldLevel < 0. && newLevel < 0.)
 				// {
-				// 	negativeContribution = (.5 * abs(oldLevel - newLevel) + max(oldLevel,newLevel) );
+				// 	negativeContribution = .5 * abs(oldLevel - newLevel) + max(oldLevel,newLevel);
 				// }
 				else
 				{
 					if(oldLevel > newLevel)
 					{
-						positiveContribution = .5 * oldLevel *    solutionProportionThroughThisStepAssumingLinearity ;
+						positiveContribution = .5 * oldLevel *    solutionProportionThroughThisStepAssumingLinearity;
 						negativeContribution = .5 * newLevel *(1.-solutionProportionThroughThisStepAssumingLinearity);
 					}
 					else
 					{
-						// negativeContribution = .5 * oldLevel *    solutionProportionThroughThisStepAssumingLinearity ;
+						// negativeContribution = .5 * oldLevel *    solutionProportionThroughThisStepAssumingLinearity;
 						// positiveContribution = .5 * newLevel *(1.-solutionProportionThroughThisStepAssumingLinearity);
 					}
 				}
