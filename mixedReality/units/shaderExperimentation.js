@@ -91,9 +91,15 @@ async function initShaderExperimentation( canvas )
 		let uniforms = {};
 		uniforms.scalarFieldPointLightPosition = {value:scalarFieldPointLightPosition}
 		uniforms.matrixWorldInverse = {value:new THREE.Matrix4()}
+
 		uniforms.renderRadius = {value:0.12};
 		uniforms.renderRadiusSquared = {value:sq(uniforms.renderRadius.value)};
-		uniforms.isolevel = {value:0.5};
+		uniforms.isolevel = {value:0.};
+		uniforms.useTexture = {value:true}
+		uniforms.doIsosurface = {value:true}
+		uniforms.doGas = {value:true}
+		uniforms.bothGasColors = {value:true}
+		uniforms.squarish = {value:true}
 
 		bindButton("i",function(){},"increase isolevel",function()
 		{
@@ -103,6 +109,12 @@ async function initShaderExperimentation( canvas )
 		{
 			uniforms.isolevel.value -= 0.01;
 		})
+
+		bindToggle("1",uniforms.useTexture,"useTexture",true,false)
+		bindToggle("2",uniforms.bothGasColors,"bothGasColors",true,false)
+		bindToggle("3",uniforms.doIsosurface,"doIsosurface",true,false)
+		bindToggle("4",uniforms.doGas,"doGas",true,false)
+		bindToggle("5",uniforms.squarish,"squarish",true,false)
 		
 		let pointLight = scene.children[2];
 		console.assert(pointLight.isPointLight)
@@ -112,19 +124,20 @@ async function initShaderExperimentation( canvas )
 		await assignShader("scalarFieldFragment", material, "fragment")
 
 		{
-			let dimension = 8;
-			let dataArray = new Float32Array(dimension*dimension*dimension)
-			for(let i = 0; i < dimension; i++)
-			for(let j = 0; j < dimension; j++)
-			for(let k = 0; k < dimension; k++)
+			let artificialDimension = 8;
+			let artificialDataArray = new Float32Array(artificialDimension*artificialDimension*artificialDimension)
+			for(let i = 0; i < artificialDimension; i++)
+			for(let j = 0; j < artificialDimension; j++)
+			for(let k = 0; k < artificialDimension; k++)
 			{
-				dataArray[i*dimension*dimension+j*dimension+k] = 
-					// i >= dimension/2 ^ j >= dimension/2 ^ k >= dimension/2 ? 0.:1.;
+				artificialDataArray[i*artificialDimension*artificialDimension+j*artificialDimension+k] = 
+					// i >= artificialDimension/2 ^ j >= artificialDimension/2 ^ k >= artificialDimension/2 ? 0.:1.;
 					// (i+j+k) % 2 ? 0.:1.;
-					// Math.sqrt(sq(i-dimension/2)+sq(j-dimension/2)+sq(k-dimension/2)) / 4;
-					Math.random();
+					// Math.sqrt(sq(i-artificialDimension/2)+sq(j-artificialDimension/2)+sq(k-artificialDimension/2)) / 4;
+					Math.random() - 0.5;
 			}
-			let data = new THREE.DataTexture3D( dataArray, dimension, dimension, dimension );
+			let data = new THREE.DataTexture3D( artificialDataArray, artificialDimension, artificialDimension, artificialDimension );
+
 			data.wrapS = THREE.ClampToEdgeWrapping;
 			data.wrapT = THREE.ClampToEdgeWrapping;
 
@@ -136,7 +149,7 @@ async function initShaderExperimentation( canvas )
 			data.needsUpdate = true;
 
 			material.uniforms.data = {value:data}
-			material.uniforms.dataDimension = {value:dimension}
+			material.uniforms.dataDimension = {value:artificialDimension}
 		}
 
 		let scalarField = new THREE.Object3D();
@@ -156,6 +169,7 @@ async function initShaderExperimentation( canvas )
 
 		handControllers[0].controllerModel.visible = false;
 		handControllers[0].rotation.x += TAU/4;
+		handControllers[0].rotation.z = -0.7420778219380804
 		updateFunctions.push(function()
 		{
 			// scalarField.position.x = 0.14 * Math.sin(frameCount * 0.04)

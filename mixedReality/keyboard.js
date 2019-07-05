@@ -20,6 +20,21 @@ function initButtons()
 		}
 	}
 
+	bindToggle = function(buttonName,variableToToggle,value1,value2, description)
+	{
+		bindButton(buttonName,function()
+		{
+			if(variableToToggle.value === value1)
+			{
+				variableToToggle.value = value2;
+			}
+			else
+			{
+				variableToToggle.value = value1;
+			}
+		},"toggle " + description)
+	}
+
 	var buttonIndexGivenName = {
 		"enter":13,
 		"alt":18,

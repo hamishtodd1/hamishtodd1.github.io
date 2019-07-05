@@ -72,11 +72,14 @@ uniform mat4 matrixWorldInverse;
 uniform vec3 scalarFieldPointLightPosition;
 uniform float renderRadius;
 uniform float renderRadiusSquared;
-
-const bool doIsosurface = true;
-const bool doGas = true;
-
 uniform float isolevel;
+
+uniform bool doIsosurface;
+uniform bool doGas;
+uniform bool useTexture;
+uniform bool bothGasColors;
+uniform bool squarish;
+
 
 
 
@@ -101,13 +104,13 @@ float sq(float a)
 
 float levelOfEllipticCurveSpace(vec3 p)
 {
-	vec3 scaledP = p * 20.;
+	vec3 scaledP = p * 8.;
 	float val = scaledP.y*scaledP.y - scaledP.x*scaledP.x*scaledP.x - scaledP.z*scaledP.x;
 	return isolevel - val;
 }
 vec3 gradientOfEllipticCurveSpace(vec3 p)
 {
-	vec3 scaledP = p * 20.;
+	vec3 scaledP = p * 8.;
 	return -vec3(3.*scaledP.x*scaledP.x+scaledP.z,2.*scaledP.y,scaledP.x);
 }
 
@@ -258,7 +261,10 @@ Group meeting:
 //------------------------------FUNDAMENTAL
 float getLevel( vec3 p )
 {
-	// return getTextureLevel(p);
+	if(useTexture)
+	{
+		return getTextureLevel(p);
+	}
 	return levelOfEllipticCurveSpace(p);
 }
 
@@ -275,8 +281,11 @@ vec3 numericalGradient(vec3 p) //very easy to work out for polynomials, y does n
 
 vec3 getNormal(vec3 p)
 {
+	if(useTexture)
+	{
+		return normalize( numericalGradient(p) );
+	}
 	// float textureSample = texture3D(data, vec3(0.,0.,0.)).r;
-	// return normalize( numericalGradient(p) );
 	return gradientOfEllipticCurveSpace(p);
 	// return vec3(1.,0.,0.);
 }
@@ -314,7 +323,7 @@ float getLightIntensityAtPoint(vec3 p, vec3 viewerDirection, vec3 normal )
 const float cosSquaredTipAngle = 0.88; //1/8 of an angle
 const vec3 downSpindle = vec3(0.,0.,1.);
 const vec3 tip = vec3(0.019,-0.03,-0.17);
-const float coneSizeSq = 0.0001;//0.038;
+const float coneSizeSq = (0==1) ? 0.038 : 0.000001;
 float distanceToHandCone( vec3 origin, vec3 direction )
 {
 	vec3 tipToOrigin = origin - tip;
@@ -351,7 +360,7 @@ vec3 handConeSurfaceNormal(vec3 p) //assumed
 	vec3 tipToPoint = p - tip;
 	return normalize( cross( cross(downSpindle,tipToPoint), tipToPoint) );
 }
-void renderHand(vec3 p, vec3 viewerDirection)
+void addHandColor(vec3 p, vec3 viewerDirection)
 {
 	float intensity = getLightIntensityAtPoint( p, viewerDirection, handConeSurfaceNormal(p) );
 	gl_FragColor.g += 0.6 * intensity;
@@ -359,6 +368,31 @@ void renderHand(vec3 p, vec3 viewerDirection)
 	gl_FragColor.b += 0.6 * intensity;
 
 	return;
+}
+
+
+
+
+
+//if you're doing 2 colors, only works if both values are above or below 0
+void addColor(float levelAtStart, float levelAtEnd, float stepLength)
+{
+	// closer to 0 = more intense, 0 or less = 0
+	//ideally there is one pixel for which it reaches 1
+	float dropoffer = useTexture ? .1 : 2.;
+	float sizeBoost = useTexture ? 5. : 9.;
+
+	float trapeziumArea = ( levelAtStart + levelAtEnd ) * .5 * dropoffer;
+
+	if( trapeziumArea > 0. )
+	{
+		gl_FragColor.b += max(1. - trapeziumArea, 0.) * sizeBoost * stepLength;
+	}
+
+	if( bothGasColors && trapeziumArea < 0. )
+	{
+		gl_FragColor.r += max(1. + trapeziumArea, 0.) * sizeBoost * stepLength;
+	}
 }
 
 // A(x^4+y^4+z^4+1)+Bxyz+C(x^2y^2+z^2)+D(x^2z^2+y^2)+E(z^2y^2+x^2).
@@ -396,23 +430,23 @@ void renderHand(vec3 p, vec3 viewerDirection)
 //want these outside really
 void main()
 {
+	gl_FragColor = vec4( 0.,0.,0., 1.0 );
+
 	vec3 scalarFieldPixelPosition = vec3( matrixWorldInverse * worldSpacePixelPosition );
 	vec3 scalarFieldCameraPosition = vec3( matrixWorldInverse * vec4(cameraPosition,1.) );
 	vec3 direction = normalize( scalarFieldPixelPosition - scalarFieldCameraPosition );
 
 	float handDistance = distanceToHandCone( scalarFieldPixelPosition, direction );
-
 	float nearestDistanceOfNonVolumeObject = handDistance; //could be cylinders and balls in there
 
-	vec2 volumeIntersectionDistances = renderCubeIntersectionDistances( scalarFieldPixelPosition, direction );
-	// vec2 volumeIntersectionDistances = sphereIntersectionDistances( scalarFieldPixelPosition, direction, vec3(0.,0.,0.), renderRadiusSquared );
+	vec2 volumeIntersectionDistances = useTexture ?
+		renderCubeIntersectionDistances( scalarFieldPixelPosition, direction ) :
+		sphereIntersectionDistances( scalarFieldPixelPosition, direction, vec3(0.,0.,0.), renderRadiusSquared );
 
 	if( !(volumeIntersectionDistances[0] == 0. && volumeIntersectionDistances[1] == 0.) &&
 		volumeIntersectionDistances[0] < nearestDistanceOfNonVolumeObject )
 	{
-		gl_FragColor = vec4( 0.,0.,0., 1.0 );
-
-		float stepLength = (volumeIntersectionDistances[1] - volumeIntersectionDistances[0]) / 80.;
+		float stepLength = (volumeIntersectionDistances[1] - volumeIntersectionDistances[0]) / 250.;
 
 		float stoppingDistance = min(
 			nearestDistanceOfNonVolumeObject - volumeIntersectionDistances[0],
@@ -430,7 +464,7 @@ void main()
 			probeDistance = i * stepLength;
 			newLevel = getLevel( probeStart + probeDistance * direction );
 
-			//not missing a hump means some crazy analysis
+			//not missing a hump means real analysis
 			//you could MAYBE try to solve in the case of that degree-10 interpolation polynomial
 			//still better than marchingcubes
 			solutionProportionThroughThisStepAssumingLinearity = -oldLevel / (newLevel-oldLevel);
@@ -441,15 +475,15 @@ void main()
 			{
 				float isosurfaceProbeDistance = stepLength * (i-1. + solutionProportionThroughThisStepAssumingLinearity);
 
-				if( sign(oldLevel) != -1. )
+				if( !squarish || sign(oldLevel) != -1. )
 				{
 					probeDistance = isosurfaceProbeDistance;
-					newLevel = getLevel( probeStart + probeDistance * direction );
+					newLevel = 0.;
 				}
 				else
 				{
-					float gridThickness = 0.0009;
-					float gridSpacing = gridThickness * 15.;
+					float gridThickness = 0.0003;
+					float gridSpacing = gridThickness * 20.;
 
 					vec3 p = probeStart + isosurfaceProbeDistance * direction;
 					vec3 normal = getNormal(p);
@@ -472,55 +506,31 @@ void main()
 					if( minDist < gridThickness )
 					{
 						probeDistance = isosurfaceProbeDistance;
-						newLevel = getLevel( probeStart + probeDistance * direction );
+						newLevel = 0.;
 					}
 				}
 			}
 
 			if( stoppingDistance < probeDistance )
 			{
-				probeDistance = stoppingDistance ;
+				probeDistance = stoppingDistance;
 				newLevel = getLevel( probeStart + probeDistance * direction );
 			}
 
-			//"layers of colored glass"
-			if(doGas)
+			if( doGas )
 			{
-				float positiveContribution = 0.;
-				float negativeContribution = 0.;
 				float thisStepLength = probeDistance - stepLength * (i-1.);
 
-				if(oldLevel > 0. && newLevel > 0.)
+				if(	0. < solutionProportionThroughThisStepAssumingLinearity &&
+					solutionProportionThroughThisStepAssumingLinearity <= 1. )
 				{
-					positiveContribution = .5 * abs(oldLevel - newLevel) + min(oldLevel,newLevel);
+					addColor(oldLevel,0., thisStepLength *   solutionProportionThroughThisStepAssumingLinearity );
+					addColor(0.,newLevel, thisStepLength *(1.-solutionProportionThroughThisStepAssumingLinearity));
 				}
-				// else if(oldLevel < 0. && newLevel < 0.)
-				// {
-				// 	negativeContribution = .5 * abs(oldLevel - newLevel) + max(oldLevel,newLevel);
-				// }
 				else
 				{
-					if(oldLevel > newLevel)
-					{
-						positiveContribution = .5 * oldLevel *    solutionProportionThroughThisStepAssumingLinearity;
-						negativeContribution = .5 * newLevel *(1.-solutionProportionThroughThisStepAssumingLinearity);
-					}
-					else
-					{
-						// negativeContribution = .5 * oldLevel *    solutionProportionThroughThisStepAssumingLinearity;
-						// positiveContribution = .5 * newLevel *(1.-solutionProportionThroughThisStepAssumingLinearity);
-					}
+					addColor(oldLevel,newLevel,thisStepLength );
 				}
-
-				//ideally there is one pixel for which it reaches 1
-				float dropoffAmountBoost = .1;
-				float sizeBoost = 10.;
-
-				if(positiveContribution != 0.)
-				{
-					gl_FragColor.b += (1. - abs(positiveContribution) * dropoffAmountBoost) * sizeBoost * thisStepLength;
-				}
-				// gl_FragColor.g += (1. - abs( negativeContribution ) * effectBoost) * 10.;
 			}
 
 			if(probeDistance == stoppingDistance )
@@ -535,7 +545,15 @@ void main()
 
 				if( sign( oldLevel ) == 1. )
 				{
-					gl_FragColor.r += intensity;
+					//if both colors of gas, you're pretty maxed out on color
+					if( doGas && bothGasColors )
+					{
+						gl_FragColor.g += intensity;
+					}
+					else
+					{
+						gl_FragColor.r += intensity;
+					}
 				}
 				else
 				{
@@ -564,13 +582,13 @@ void main()
 		// }
 	}
 
-	if( doIsosurface && !doGas )
+	if( nearestDistanceOfNonVolumeObject < 9999. ) //and less than the back render plane?
 	{
-		if(nearestDistanceOfNonVolumeObject < 9999.)
-		{
-			renderHand( scalarFieldPixelPosition + nearestDistanceOfNonVolumeObject * direction, -direction );
-		}
-		else
+		addHandColor( scalarFieldPixelPosition + nearestDistanceOfNonVolumeObject * direction, -direction );
+	}
+	else
+	{
+		if( (doIsosurface && !doGas) || (volumeIntersectionDistances[0] == 0. && volumeIntersectionDistances[1] == 0.) )
 		{
 			discard;
 		}
@@ -627,6 +645,8 @@ vec4 distanceToCylinderWithNormal(vec3 origin, vec3 direction, float cylinderRad
 		{
 			lambda = t+s;
 		}
+
+		//possibly more complicated because there are two intersections and only one is the front
 
 		vec3 localIntersection = origin + direction * lambda - cylinderPosition;
 		float distanceAlongAxis = dot( localIntersection, cylinderDirection );
