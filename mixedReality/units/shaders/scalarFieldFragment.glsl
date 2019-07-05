@@ -258,8 +258,8 @@ Group meeting:
 //------------------------------FUNDAMENTAL
 float getLevel( vec3 p )
 {
-	return getTextureLevel(p);
-	// return levelOfEllipticCurveSpace(p);
+	// return getTextureLevel(p);
+	return levelOfEllipticCurveSpace(p);
 }
 
 vec3 numericalGradient(vec3 p) //very easy to work out for polynomials, y does not depend on x
@@ -276,8 +276,8 @@ vec3 numericalGradient(vec3 p) //very easy to work out for polynomials, y does n
 vec3 getNormal(vec3 p)
 {
 	// float textureSample = texture3D(data, vec3(0.,0.,0.)).r;
-	return normalize( numericalGradient(p) );
-	// return gradientOfEllipticCurveSpace(p);
+	// return normalize( numericalGradient(p) );
+	return gradientOfEllipticCurveSpace(p);
 	// return vec3(1.,0.,0.);
 }
 
@@ -314,6 +314,7 @@ float getLightIntensityAtPoint(vec3 p, vec3 viewerDirection, vec3 normal )
 const float cosSquaredTipAngle = 0.88; //1/8 of an angle
 const vec3 downSpindle = vec3(0.,0.,1.);
 const vec3 tip = vec3(0.019,-0.03,-0.17);
+const float coneSizeSq = 0.0001;//0.038;
 float distanceToHandCone( vec3 origin, vec3 direction )
 {
 	vec3 tipToOrigin = origin - tip;
@@ -334,7 +335,7 @@ float distanceToHandCone( vec3 origin, vec3 direction )
 		{
 			vec3 tipToPoint = (origin + lesserT * direction) - tip;
 			if( dot( downSpindle, tipToPoint ) > 0. && //not the top cone
-				lengthSq(tipToPoint) < 0.00001 //0.038 //within the length
+				lengthSq(tipToPoint) < coneSizeSq //0.038 //within the length
 				//maybe also don't show the underside
 				)
 			{
@@ -401,137 +402,133 @@ void main()
 
 	float handDistance = distanceToHandCone( scalarFieldPixelPosition, direction );
 
-	vec2 renderVolumeIntersectionDistances = renderCubeIntersectionDistances( scalarFieldPixelPosition, direction );
-	// vec2 renderVolumeIntersectionDistances = sphereIntersectionDistances( scalarFieldPixelPosition, direction, vec3(0.,0.,0.), renderRadiusSquared );
-	bool volumeShallBeRendered = !(renderVolumeIntersectionDistances[0] == 0. && renderVolumeIntersectionDistances[1] == 0.);
+	float nearestDistanceOfNonVolumeObject = handDistance; //could be cylinders and balls in there
 
-	gl_FragColor = vec4( 0.,0.,0., 1.0 );
+	vec2 volumeIntersectionDistances = renderCubeIntersectionDistances( scalarFieldPixelPosition, direction );
+	// vec2 volumeIntersectionDistances = sphereIntersectionDistances( scalarFieldPixelPosition, direction, vec3(0.,0.,0.), renderRadiusSquared );
 
-	if( !volumeShallBeRendered || handDistance < renderVolumeIntersectionDistances[0] )
+	if( !(volumeIntersectionDistances[0] == 0. && volumeIntersectionDistances[1] == 0.) &&
+		volumeIntersectionDistances[0] < nearestDistanceOfNonVolumeObject )
 	{
-		if(handDistance < 9999.)
-		{
-			renderHand(scalarFieldPixelPosition + handDistance * direction, -direction );
-			return;
-		}
-		else
-		{
-			discard;
-		}
-	}
-	else
-	{
-		vec3 probeStart = scalarFieldPixelPosition + direction * renderVolumeIntersectionDistances[0];
+		gl_FragColor = vec4( 0.,0.,0., 1.0 );
 
-		float handDistanceInSphere = handDistance - renderVolumeIntersectionDistances[0];
+		float stepLength = (volumeIntersectionDistances[1] - volumeIntersectionDistances[0]) / 80.;
 
-		float numSteps = 80.;
-		float defaultStepLength = (renderVolumeIntersectionDistances[1] - renderVolumeIntersectionDistances[0]) / numSteps;
+		float stoppingDistance = min(
+			nearestDistanceOfNonVolumeObject - volumeIntersectionDistances[0],
+			volumeIntersectionDistances[1]   - volumeIntersectionDistances[0] );
 
-		float thisStepLength = defaultStepLength;
+		vec3 probeStart = scalarFieldPixelPosition + direction * volumeIntersectionDistances[0];
 		float probeDistance = 0.;
 		float oldLevel = getLevel( probeStart );
 		float newLevel;
 
 		float solutionProportionThroughThisStepAssumingLinearity;
 
-		for(float i = 1.; i <= numSteps; i++)
+		for(float i = 1.; probeDistance < stoppingDistance; i++)
 		{
-			probeDistance = i * defaultStepLength;
+			probeDistance = i * stepLength;
 			newLevel = getLevel( probeStart + probeDistance * direction );
 
+			//not missing a hump means some crazy analysis
+			//you could MAYBE try to solve in the case of that degree-10 interpolation polynomial
+			//still better than marchingcubes
 			solutionProportionThroughThisStepAssumingLinearity = -oldLevel / (newLevel-oldLevel);
 
-			if( doIsosurface )
+			if( doIsosurface && 
+				0. < solutionProportionThroughThisStepAssumingLinearity &&
+				solutionProportionThroughThisStepAssumingLinearity <= 1. )
 			{
-				//not missing a hump probably means some crazy analysis
-				//you could MAYBE try to solve in the case of that degree-10 interpolation polynomial
-				//still better than marchingcubes
+				float isosurfaceProbeDistance = stepLength * (i-1. + solutionProportionThroughThisStepAssumingLinearity);
 
-				if( 0. < solutionProportionThroughThisStepAssumingLinearity && 
-					solutionProportionThroughThisStepAssumingLinearity <= 1. )
+				if( sign(oldLevel) != -1. )
 				{
-					float possibleProbeDistance = defaultStepLength * (i-1. + solutionProportionThroughThisStepAssumingLinearity);
+					probeDistance = isosurfaceProbeDistance;
+					newLevel = getLevel( probeStart + probeDistance * direction );
+				}
+				else
+				{
+					float gridThickness = 0.0009;
+					float gridSpacing = gridThickness * 15.;
 
-					if( oldLevel < 0. )
+					vec3 p = probeStart + isosurfaceProbeDistance * direction;
+					vec3 normal = getNormal(p);
+					float minDist = 99999.;
+					for(int i = 0; i < 3; i++)
 					{
-						//assuming the surface is planar, are you within a certain radius of an integer value?
-						float gridThickness = 0.0009;
-						float gridSpacing = gridThickness * 15.;
+						float pointToRoundingPlane = round(p[i]/gridSpacing)*gridSpacing - p[i];
 
-						vec3 p = probeStart + possibleProbeDistance * direction;
-						vec3 normal = getNormal(p);
-						float minDist = 99999.;
-						for(int i = 0; i < 3; i++)
-						{
-							float pointToRoundingPlane = round(p[i]/gridSpacing)*gridSpacing - p[i];
+						vec3 roundingPlaneNormal = vec3(0.,0.,0.);
+						roundingPlaneNormal[i] = sign(pointToRoundingPlane);
 
-							vec3 roundingPlaneNormal = vec3(0.,0.,0.);
-							roundingPlaneNormal[i] = sign(pointToRoundingPlane);
+						float cosTheta = dot(roundingPlaneNormal,normal);
+						float cosAlpha = sqrt(1.-sq(cosTheta)); // = sinTheta
 
-							float cosTheta = dot(roundingPlaneNormal,normal);
-							float cosAlpha = sqrt(1.-sq(cosTheta)); // = sinTheta
+						float distToRoundingPlaneOnPlanarApproximationToSurface = abs(pointToRoundingPlane) / cosAlpha;
 
-							float distToRoundingPlaneOnPlanarApproximationToSurface = abs(pointToRoundingPlane) / cosAlpha;
-
-							minDist = min(minDist, distToRoundingPlaneOnPlanarApproximationToSurface);
-						}
-						if(minDist < gridThickness)
-						{
-							thisStepLength = solutionProportionThroughThisStepAssumingLinearity * defaultStepLength;
-							probeDistance = possibleProbeDistance;
-							newLevel = getLevel( probeStart + probeDistance * direction );
-						}
+						minDist = min(minDist, distToRoundingPlaneOnPlanarApproximationToSurface);
 					}
-					else
+
+					if( minDist < gridThickness )
 					{
-						thisStepLength = solutionProportionThroughThisStepAssumingLinearity * defaultStepLength;
-						probeDistance = possibleProbeDistance;
+						probeDistance = isosurfaceProbeDistance;
 						newLevel = getLevel( probeStart + probeDistance * direction );
 					}
 				}
 			}
 
-			if( handDistanceInSphere < probeDistance )
+			if( stoppingDistance < probeDistance )
 			{
-				probeDistance = handDistanceInSphere;
-				thisStepLength = handDistanceInSphere - defaultStepLength * (i-1.);
+				probeDistance = stoppingDistance ;
 				newLevel = getLevel( probeStart + probeDistance * direction );
-				//hah, and if that level gives you another solution?
 			}
 
+			//"layers of colored glass"
 			if(doGas)
 			{
-				//now is the time for an overhaul. You don't need steplength, just make the steps go as far as the hand
-				// float positiveContribution = 0.;
-				// float negativeContribution = 0.
-				// oldLevel + (oldLevel - newLevel) * 0.5 * defaultStepLength;
-				// if( 0. < solutionProportionThroughThisStepAssumingLinearity &&
-				// 	solutionProportionThroughThisStepAssumingLinearity <= 1.)
+				float positiveContribution = 0.;
+				float negativeContribution = 0.;
+				float thisStepLength = probeDistance - stepLength * (i-1.);
+
+				if(oldLevel > 0. && newLevel > 0.)
+				{
+					positiveContribution = (.5 * abs(oldLevel - newLevel) + min(oldLevel,newLevel) );
+				}
+				// else if(oldLevel < 0. && newLevel < 0.)
 				// {
-					
+				// 	negativeContribution = (.5 * abs(oldLevel - newLevel) + max(oldLevel,newLevel) );
 				// }
-				// //"layers of colored glass"
-				// float average = ( oldLevel + newLevel ) * .5;
-				// if( average < 0. )
-				// {
-				// }
-				// float effectBoost = .1; //ideally it is such that there is one pixel for which it reaches 1
-				// float contribution = (1. - abs(average) * effectBoost) * 10. * thisStepLength;
-				// // if(average > 0.)
-				// {
-				// 	gl_FragColor.b += contribution;
-				// }
+				else
+				{
+					if(oldLevel > newLevel)
+					{
+						positiveContribution = .5 * oldLevel *    solutionProportionThroughThisStepAssumingLinearity ;
+						negativeContribution = .5 * newLevel *(1.-solutionProportionThroughThisStepAssumingLinearity);
+					}
+					else
+					{
+						// negativeContribution = .5 * oldLevel *    solutionProportionThroughThisStepAssumingLinearity ;
+						// positiveContribution = .5 * newLevel *(1.-solutionProportionThroughThisStepAssumingLinearity);
+					}
+				}
+
+				//ideally there is one pixel for which it reaches 1
+				float dropoffAmountBoost = .1;
+				float sizeBoost = 10.;
+
+				if(positiveContribution != 0.)
+				{
+					gl_FragColor.b += (1. - abs(positiveContribution) * dropoffAmountBoost) * sizeBoost * thisStepLength;
+				}
+				// gl_FragColor.g += (1. - abs( negativeContribution ) * effectBoost) * 10.;
 			}
 
-			if( probeDistance == handDistanceInSphere )
+			if(probeDistance == stoppingDistance )
 			{
-				vec3 p = probeStart + probeDistance * direction;
-				renderHand( p, -direction );
-				return;
+				break;
 			}
 
-			if( thisStepLength != defaultStepLength )
+			if( probeDistance < i * stepLength )
 			{
 				vec3 p = probeStart + probeDistance * direction;
 				float intensity = getLightIntensityAtPoint( p, -direction, getNormal(p) );
@@ -549,19 +546,6 @@ void main()
 
 			oldLevel = newLevel;
 		}
-
-		if( doIsosurface && !doGas )
-		{
-			if(handDistance < 9999.)
-			{
-				renderHand( scalarFieldPixelPosition + handDistance * direction, -direction );
-				return;
-			}
-			else
-			{
-				discard;
-			}
-		}
 		
 		//to help normalization
 		// {
@@ -578,6 +562,18 @@ void main()
 		// 		gl_FragColor.b = 0.;
 		// 	}
 		// }
+	}
+
+	if( doIsosurface && !doGas )
+	{
+		if(nearestDistanceOfNonVolumeObject < 9999.)
+		{
+			renderHand( scalarFieldPixelPosition + nearestDistanceOfNonVolumeObject * direction, -direction );
+		}
+		else
+		{
+			discard;
+		}
 	}
 }
 

@@ -155,7 +155,7 @@ async function initShaderExperimentation( canvas )
 			// let backHider = new THREE.Circ
 
 		handControllers[0].controllerModel.visible = false;
-		handControllers[0].rotation.y += TAU/4;
+		handControllers[0].rotation.x += TAU/4;
 		updateFunctions.push(function()
 		{
 			// scalarField.position.x = 0.14 * Math.sin(frameCount * 0.04)
