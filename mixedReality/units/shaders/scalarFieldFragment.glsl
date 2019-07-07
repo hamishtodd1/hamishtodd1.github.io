@@ -1,21 +1,81 @@
 /*
+Make Andrew thing
+	-> Andrew can sign off on topology and geometry
+	-> Hotel booking
+Get starting date -> Rent out flat
+	->have money, can book plane
+	->can get reimbursed
+
+Release
+Case study
+Tests
+Thesis chapters
+Proof read
+Publication
+
+Group meeting, planning a video:
+	A basic idea of the history
+	Imagine that you've got to communicate everything the next generation will know about reaction diffusion systems
+		1000 words
+		As many videos as you want
+		300 words on history
+	I want you to give me examples, AS MANY AS POSSIBLE
+	The best examples are videos
+		Paul Sutcliffe had a fitzhugh nagumo from heart
+		jellyfish
+		That little chemistry experiment
+		The zebrafish thing
+
+Surfaces game:
+	square parametric geometries with tangent planes at the corners is the way to go re level design probably
+		Creates natural way to divide surface into squares -> the way you move
+		Yeah that was what you were thinking for your tetrahedron-hyperbolic paraboloid thing
+		Therefore maybe study the properties of that?
+
+	Player goal:
+		Make a loop that doesn't shrink down to a point
+			You're not just taking one path, you're taking a set of them, reasoning about general properties of paths
+			In the fundamental group of a surface, are there any super-special elements?
+			Are there many surfaces whose fundamental group has only one non-identity element?
+			With the mesh discretized, there probably are ways to detect this
+				Need a robust way, otherwise fuck it seriously
+				If you're piecewise homotopic, you're homotopic
+		Just get to a place, eg find a line
+			Becomes about exploration rather than line-snagging weirdness
+			"find a loop not homotopic to a point" can be turned into "find a line" question and vice versa w/ homotopy?
+				Can glue two locations together. Does that fuck up other properties of the surface?
+			Why do topologists care more about unshrinkable loops than about curves?
+				Lines can be homotopied to points
+				Is there any difference between a handle and no handle if you're not making a loop?
+	Objects:
+		edges (they block you)
+		cross caps (they take you to the other side, and maybe your goal is on the other side?
+		handles - these make it so that the disc containing them can have entry and exit points side by side
+		Aaaaand then the game becomes about seeing weird surfaces and working out how to decompose them into the above
+	This is interesting because:
+		It is a human instinct to break a task down *qualitatively* into pieces
+		Beautiful 3D stuff that directly impacts gameplay
+		Game about space itself rather than stuff in space
+		To move through a space continously is to draw a line
+		All good games involve movement, elegant to have JUST movement
+		Phase space analogy, everything is about navigating a space under limitations, better to visualize directly!
+*/
+/*
 	TODO
-		MRI
-		Arbitrary extra cylinders, spheres and cones
-		Combine with your simulator, for andrew
+		Control color mapping
+			Any color mapping is a line throught the RGB cube
+			But viridis
+		Combine with your simulator
 		Make it editable
-		Tricubic thing
+		MRI
+		ultrasound-esque slicing
+		Tricubic
 			You put the coefficients in a texture (or two) and then nearest neighbour within each voxel
 			But it's really probably not noticeable
 				It's only intended for the volume data, so check with that
-		ultrasound-esque slicing
 		Ask George about
 			removing branchings
 			reading a teeny bit out, eg the normalization redness
-		Control color mapping
-			Any color mapping is a line throught the RGB cube
-
-	Need your cone outside the sphere, therefore we have to go beyond the sphere
 
 	Other ideas
 		constructive/destructive interference in many dimensions
@@ -81,7 +141,7 @@ uniform bool bothGasColors;
 uniform bool squarish;
 
 
-
+// renderTargets
 
 
 //------------GENERIC
@@ -106,7 +166,7 @@ float levelOfEllipticCurveSpace(vec3 p)
 {
 	vec3 scaledP = p * 8.;
 	float val = scaledP.y*scaledP.y - scaledP.x*scaledP.x*scaledP.x - scaledP.z*scaledP.x;
-	return isolevel - val;
+	return val - isolevel;
 }
 vec3 gradientOfEllipticCurveSpace(vec3 p)
 {
@@ -221,38 +281,6 @@ vec2 renderCubeIntersectionDistances( vec3 origin, vec3 direction )
 	return orderedIntersectionDistances;
 }
 
-/*
-Two weeks!
-
-Make Andrew thing
-	-> Andrew can sign off on topology and geometry
-	-> Hotel booking
-Get starting date -> Rent out flat
-	->have money, can book plane
-	->can get reimbursed
-
-Release
-Case study
-Tests
-Thesis chapters
-Proof read
-Publication
-
-
-Group meeting:
-	Planning a video
-	And a basic idea of the history
-	Imagine that you've got to communicate everything the next generation will know about reaction diffusion systems
-		1000 words
-		As many videos as you want
-		300 words on history
-	I want you to give me examples, AS MANY AS POSSIBLE
-	The best examples are videos
-		Paul Sutcliffe had a fitzhugh nagumo from heart
-		jellyfish
-		That little experiment
-		The zebrafish thing
-*/
 
 
 
@@ -323,7 +351,7 @@ float getLightIntensityAtPoint(vec3 p, vec3 viewerDirection, vec3 normal )
 const float cosSquaredTipAngle = 0.88; //1/8 of an angle
 const vec3 downSpindle = vec3(0.,0.,1.);
 const vec3 tip = vec3(0.019,-0.03,-0.17);
-const float coneSizeSq = (0==1) ? 0.038 : 0.000001;
+const float coneSizeSq = (1==0) ? 0.038 : 0.000001;
 float distanceToHandCone( vec3 origin, vec3 direction )
 {
 	vec3 tipToOrigin = origin - tip;
@@ -421,7 +449,8 @@ void addColor(float levelAtStart, float levelAtEnd, float stepLength)
 
 
 
-
+uniform mat4 projectionMatrix;
+uniform mat4 modelViewMatrix;
 
 
 
@@ -433,8 +462,12 @@ void main()
 	gl_FragColor = vec4( 0.,0.,0., 1.0 );
 
 	vec3 scalarFieldPixelPosition = vec3( matrixWorldInverse * worldSpacePixelPosition );
-	vec3 scalarFieldCameraPosition = vec3( matrixWorldInverse * vec4(cameraPosition,1.) );
+	vec3 scalarFieldCameraPosition = vec3( matrixWorldInverse * vec4(cameraPosition,1.) ); //supposedly doable in vertex shader therefore made global
 	vec3 direction = normalize( scalarFieldPixelPosition - scalarFieldCameraPosition );
+
+	//only works given that the center is where it is, which will soon cease to be true!
+	vec3 scalarFieldCameraLookingDirection = normalize( vec3(0.,0.,0.) - cameraPosition );
+	//if psi > tau/4, want to negate the above
 
 	float handDistance = distanceToHandCone( scalarFieldPixelPosition, direction );
 	float nearestDistanceOfNonVolumeObject = handDistance; //could be cylinders and balls in there
@@ -475,39 +508,69 @@ void main()
 			{
 				float isosurfaceProbeDistance = stepLength * (i-1. + solutionProportionThroughThisStepAssumingLinearity);
 
-				if( !squarish || sign(oldLevel) != -1. )
+				// vec3 p = probeStart + isosurfaceProbeDistance * direction;
+				// vec3 normal = getNormal(p);
+
+				// const float gridThickness = 0.00009;
+				// const float gridSpacing = gridThickness * 200.;
+
+				// float cosPsi = abs( dot(normal,-scalarFieldCameraLookingDirection) );
+				// float sinPsi = sqrt(1.-sq(cosPsi));
+
+				// //http://madebyevan.com/shaders/grid/
+				// vec3 distancesToGridPlanes = round(p/gridSpacing)*gridSpacing - p;
+				// for(int i = 0; i < 3; i++)
+				// {
+				// 	float distanceToGridPlane = round(p[i]/gridSpacing)*gridSpacing - p[i];
+				// 	float distancesToGridPlaneFromPointOfViewOfCamera[i] = 
+				// }
+				// float closest = distancesToGridPlanes.x;// min(min(distancesToGridPlanes.x, distancesToGridPlanes.y), distancesToGridPlanes.z);
+
+				// //not "distance on the surface"?
+
+				// //TODO take into account camera distance
+
+				// if( //( !squarish || sign(oldLevel) != -1. ) || //eg the above is useless
+				// 	closest < gridThickness / sinPsi )
+				// {
+				// 	probeDistance = isosurfaceProbeDistance;
+				// 	newLevel = 0.;
+				// }
+
+
+				//so you want to do individual curves in the field
+					//"manifold intersection"
+
+
+
+				float gridSpacing = renderRadius / 14.;
+				float gridThickness = gridSpacing / 10.;
+
+				vec3 p = probeStart + isosurfaceProbeDistance * direction;
+				vec3 normal = getNormal(p);
+				float minDist = 99999.;
+				for(int i = 0; i < 3; i++)
+				{
+					float pointToRoundingPlaneDistance = round(p[i]/gridSpacing)*gridSpacing - p[i];
+					vec3 pointToRoundingPlane;
+					pointToRoundingPlane[i] = pointToRoundingPlaneDistance;
+
+					vec3 intermediate = cross(normal, pointToRoundingPlane); //length is p2RpDist * sin angle = cos(angle-tau/4)
+					vec3 pointToRoundingPlaneOnTangentPlane = cross(intermediate,normal);
+					float lengthCorrection = pointToRoundingPlaneDistance / pointToRoundingPlaneOnTangentPlane[i];
+					pointToRoundingPlaneOnTangentPlane *= lengthCorrection;
+
+					vec3 squashedToCameraPlane = pointToRoundingPlaneOnTangentPlane + dot(pointToRoundingPlaneOnTangentPlane,-scalarFieldCameraLookingDirection) * -scalarFieldCameraLookingDirection;
+					float distFromCameraPointOfView = length(squashedToCameraPlane);
+
+					minDist = min( minDist, distFromCameraPointOfView );
+				}
+
+				if( //(!squarish || sign(oldLevel) != 1.) ||
+					minDist < gridThickness )
 				{
 					probeDistance = isosurfaceProbeDistance;
 					newLevel = 0.;
-				}
-				else
-				{
-					float gridThickness = 0.0003;
-					float gridSpacing = gridThickness * 20.;
-
-					vec3 p = probeStart + isosurfaceProbeDistance * direction;
-					vec3 normal = getNormal(p);
-					float minDist = 99999.;
-					for(int i = 0; i < 3; i++)
-					{
-						float pointToRoundingPlane = round(p[i]/gridSpacing)*gridSpacing - p[i];
-
-						vec3 roundingPlaneNormal = vec3(0.,0.,0.);
-						roundingPlaneNormal[i] = sign(pointToRoundingPlane);
-
-						float cosTheta = dot(roundingPlaneNormal,normal);
-						float cosAlpha = sqrt(1.-sq(cosTheta)); // = sinTheta
-
-						float distToRoundingPlaneOnPlanarApproximationToSurface = abs(pointToRoundingPlane) / cosAlpha;
-
-						minDist = min(minDist, distToRoundingPlaneOnPlanarApproximationToSurface);
-					}
-
-					if( minDist < gridThickness )
-					{
-						probeDistance = isosurfaceProbeDistance;
-						newLevel = 0.;
-					}
 				}
 			}
 

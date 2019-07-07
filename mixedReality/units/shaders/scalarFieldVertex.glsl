@@ -1,4 +1,5 @@
 varying vec4 worldSpacePixelPosition;
+uniform vec3 scalarFieldCameraPosition;
 
 void main() 
 {

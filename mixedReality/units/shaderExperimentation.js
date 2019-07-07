@@ -31,6 +31,10 @@
 		If you want to know how chemistry, not just navier stokes crap, looked at in a way that varies in space, you need reaction diffusion
 			That's why it's important in developmental biology; Turing guessed this
 
+	Parametric stuff, use vertex shader
+		Lines
+		Surfaces
+
 	most basic vertex:
 	void main() 
 	{
@@ -92,12 +96,19 @@ async function initShaderExperimentation( canvas )
 		uniforms.scalarFieldPointLightPosition = {value:scalarFieldPointLightPosition}
 		uniforms.matrixWorldInverse = {value:new THREE.Matrix4()}
 
+		{
+
+
+			// uniforms.frameColor = {value:}
+			// uniforms.frameDepth = {value:}
+		}
+
 		uniforms.renderRadius = {value:0.12};
 		uniforms.renderRadiusSquared = {value:sq(uniforms.renderRadius.value)};
 		uniforms.isolevel = {value:0.};
-		uniforms.useTexture = {value:true}
+		uniforms.useTexture = {value:false}
 		uniforms.doIsosurface = {value:true}
-		uniforms.doGas = {value:true}
+		uniforms.doGas = {value:false}
 		uniforms.bothGasColors = {value:true}
 		uniforms.squarish = {value:true}
 
@@ -115,6 +126,8 @@ async function initShaderExperimentation( canvas )
 		bindToggle("3",uniforms.doIsosurface,"doIsosurface",true,false)
 		bindToggle("4",uniforms.doGas,"doGas",true,false)
 		bindToggle("5",uniforms.squarish,"squarish",true,false)
+
+		//So we want color and depth
 		
 		let pointLight = scene.children[2];
 		console.assert(pointLight.isPointLight)
@@ -170,6 +183,8 @@ async function initShaderExperimentation( canvas )
 		handControllers[0].controllerModel.visible = false;
 		handControllers[0].rotation.x += TAU/4;
 		handControllers[0].rotation.z = -0.7420778219380804
+		let v = new THREE.Vector3(0,0,-1)
+		v.applyQuaternion(camera.quaternion)
 		updateFunctions.push(function()
 		{
 			// scalarField.position.x = 0.14 * Math.sin(frameCount * 0.04)
