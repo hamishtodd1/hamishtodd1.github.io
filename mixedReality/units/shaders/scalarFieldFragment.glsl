@@ -72,6 +72,7 @@ Group meeting, planning a video:
 			You put the coefficients in a texture (or two) and then nearest neighbour within each voxel
 			But it's really probably not noticeable
 				It's only intended for the volume data, so check with that
+			If you want it for the simulations, have to do the polynomial in realtime
 		Ask George about
 			removing branchings
 			reading a teeny bit out, eg the normalization redness
@@ -140,6 +141,7 @@ uniform bool doGas;
 uniform bool useTexture;
 uniform bool bothGasColors;
 uniform bool squarish;
+uniform bool cubeVolume;
 
 
 // renderTargets
@@ -286,11 +288,19 @@ vec3 numericalGradient(vec3 p) //very easy to work out for polynomials, y does n
 	float eps = 0.0001;
 	if(useTexture)
 	{
-		eps = texturePixelWidth;
+		eps = texturePixelWidth*2000000.;
 	}
 	float x = ( getLevel(p-vec3(eps,0.,0.)) - getLevel(p+vec3(eps,0.,0.)) ) / eps;
-	float y = ( getLevel(p-vec3(eps,0.,0.)) - getLevel(p+vec3(0.,eps,0.)) ) / eps;
-	float z = ( getLevel(p-vec3(eps,0.,0.)) - getLevel(p+vec3(0.,0.,eps)) ) / eps;
+	float y = ( getLevel(p-vec3(0.,eps,0.)) - getLevel(p+vec3(0.,eps,0.)) ) / eps;
+	float z = ( getLevel(p-vec3(0.,0.,eps)) - getLevel(p+vec3(0.,0.,eps)) ) / eps;
+	// if(x==0.||y==0.||z==0.)
+	// {
+	// 	return vec3(1.,0.,0.);
+	// }
+	// else
+	// {
+	// 	return vec3(0.,0.,0.);
+	// }
 
 	return vec3(x,y,z);
 }
@@ -309,10 +319,10 @@ vec3 getNormal(vec3 p)
 
 float getLightIntensityAtPoint(vec3 p, vec3 viewerDirection, vec3 normal )
 {
-	float ks = 1.2;
+	float ks = .007;
 	float kd = 1.;
 	float ka = 1.;
-	float shininess = 16.;
+	float shininess = 4.;
 	float ambientIntensity = .5;
 
 	//light assumed to have diffuse and specular = 1
@@ -462,7 +472,7 @@ void main()
 	float handDistance = distanceToHandCone( scalarFieldPixelPosition, direction );
 	float nearestDistanceOfNonVolumeObject = handDistance; //could be cylinders and balls in there
 
-	vec2 volumeIntersectionDistances = useTexture ? //(0==1)?//
+	vec2 volumeIntersectionDistances = cubeVolume ?
 		renderCubeIntersectionDistances( scalarFieldPixelPosition, direction ) :
 		sphereIntersectionDistances( scalarFieldPixelPosition, direction, vec3(0.,0.,0.), renderRadiusSquared );
 
@@ -502,7 +512,7 @@ void main()
 				float gridThicknessSq = sq(gridSpacing / 10.); //TODO should depend on distance
 				float minDistToGridSq = 0.;
 
-				if( squarish && sign(oldLevel) == 1. )
+				if( useTexture && squarish && sign(oldLevel) == 1. )
 				{
 					vec3 p = probeStart + isosurfaceProbeDistance * direction;
 					vec3 normal = getNormal(p);

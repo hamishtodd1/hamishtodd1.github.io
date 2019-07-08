@@ -114,12 +114,13 @@ async function initShaderExperimentation( canvas )
 
 		uniforms.renderRadius = {value:0.12};
 		uniforms.renderRadiusSquared = {value:sq(uniforms.renderRadius.value)};
-		uniforms.isolevel = {value:0.084};
-		uniforms.useTexture = {value:false}
+		uniforms.isolevel = {value:-0.03};
+		uniforms.useTexture = {value:true}
 		uniforms.doIsosurface = {value:true}
 		uniforms.doGas = {value:false}
 		uniforms.bothGasColors = {value:true}
 		uniforms.squarish = {value:false}
+		uniforms.cubeVolume = {value:false}
 
 		bindButton("i",function(){},"increase isolevel",function()
 		{
@@ -132,6 +133,8 @@ async function initShaderExperimentation( canvas )
 		})
 
 		bindToggle("1",uniforms.useTexture,"useTexture")
+
+		bindToggle("5",uniforms.cubeVolume,"cube volume")
 
 		bindButton("2",function()
 		{
