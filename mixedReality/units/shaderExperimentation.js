@@ -1,9 +1,4 @@
 /*
-	mimic this shit I suppose
-	https://raw.githubusercontent.com/mrdoob/three.js/master/examples/webgl_shaders_ocean2.html
-	https://threejs.org/examples/js/Ocean.js
-	https://threejs.org/examples/js/shaders/OceanShaders.js
-
 	Ideas
 		Placing spheres and cylinders would be nice, for corners
 		Arrows too
@@ -119,35 +114,24 @@ async function initShaderExperimentation( canvas )
 
 		uniforms.renderRadius = {value:0.12};
 		uniforms.renderRadiusSquared = {value:sq(uniforms.renderRadius.value)};
-		uniforms.isolevel = {value:0.};
-		uniforms.useTexture = {value:true}
+		uniforms.isolevel = {value:0.084};
+		uniforms.useTexture = {value:false}
 		uniforms.doIsosurface = {value:true}
-		uniforms.doGas = {value:true}
+		uniforms.doGas = {value:false}
 		uniforms.bothGasColors = {value:true}
 		uniforms.squarish = {value:false}
 
 		bindButton("i",function(){},"increase isolevel",function()
 		{
-			uniforms.isolevel.value += 0.01;
+			uniforms.isolevel.value += 0.003;
+			log(uniforms.isolevel.value)
 		})
 		bindButton("o",function(){},"increase isolevel",function()
 		{
-			uniforms.isolevel.value -= 0.01;
+			uniforms.isolevel.value -= 0.003;
 		})
 
 		bindToggle("1",uniforms.useTexture,"useTexture")
-
-		bindButton("4",function()
-		{
-			if(!uniforms.doIsosurface.value)
-			{
-				uniforms.doIsosurface.value = true;
-			}
-			else
-			{
-				uniforms.squarish.value = !uniforms.squarish.value;
-			}
-		})
 
 		bindButton("2",function()
 		{
@@ -178,6 +162,18 @@ async function initShaderExperimentation( canvas )
 			}
 		})
 
+		bindButton("4",function()
+		{
+			if(!uniforms.doIsosurface.value)
+			{
+				uniforms.doIsosurface.value = true;
+			}
+			else
+			{
+				uniforms.squarish.value = !uniforms.squarish.value;
+			}
+		})
+
 		//So we want color and depth
 		
 		let pointLight = scene.children[2];
@@ -189,47 +185,77 @@ async function initShaderExperimentation( canvas )
 
 		{
 			let dataArray = null;
-			let dimensions = null;
+			let dimension = null;
 			let texturePixelWidth = null;
 
-			let artificialDimension = 16;
-			let artificialDataArray = new Float32Array(artificialDimension*artificialDimension*artificialDimension)
-			for(let i = 0; i < artificialDimension; i++)
-			for(let j = 0; j < artificialDimension; j++)
-			for(let k = 0; k < artificialDimension; k++)
-			{
-				artificialDataArray[i*artificialDimension*artificialDimension+j*artificialDimension+k] = 
-					// i >= artificialDimension/2 ^ j >= artificialDimension/2 ^ k >= artificialDimension/2 ? 0.:1.;
-					// (i+j+k) % 2 ? 0.:1.;
-					// Math.sqrt(sq(i-artificialDimension/2)+sq(j-artificialDimension/2)+sq(k-artificialDimension/2)) / 4;
-					Math.random() - 0.5;
-			}
-			dimensions = [artificialDimension,artificialDimension,artificialDimension];
-			dataArray = artificialDataArray;
-
-			// await new Promise(resolve =>
+			// let artificialDimension = 16;
+			// let artificialDataArray = new Float32Array(artificialDimension*artificialDimension*artificialDimension)
+			// for(let i = 0; i < artificialDimension; i++)
+			// for(let j = 0; j < artificialDimension; j++)
+			// for(let k = 0; k < artificialDimension; k++)
 			// {
-			// 	let img = new Image();
-			// 	img.src = 'data/brain16x16.png';
-			// 	img.style.display = 'none';
-			// 	img.onload = function()
-			// 	{
-			// 		let readingCanvas = document.createElement('canvas')
-			// 		readingCanvas.width = 2848
-			// 		readingCanvas.height = 4096
+			// 	artificialDataArray[i*artificialDimension*artificialDimension+j*artificialDimension+k] = 
+			// 		// i >= artificialDimension/2 ^ j >= artificialDimension/2 ^ k >= artificialDimension/2 ? 0.:1.;
+			// 		// (i+j+k) % 2 ? 0.:1.;
+			// 		// Math.sqrt(sq(i-artificialDimension/2)+sq(j-artificialDimension/2)+sq(k-artificialDimension/2)) / 4;
+			// 		Math.random() - 0.5;
+			// }
+			// dimension = artificialDimension;
+			// dataArray = artificialDataArray;
 
-			// 		let ctx = readingCanvas.getContext('2d');
-			// 		ctx.drawImage(img, 0, 0);
+			await new Promise(resolve =>
+			{
+				let img = new Image();
+				img.src = 'data/brain16x16.png';
+				img.style.display = 'none';
+				img.onload = function()
+				{
+					let readingCanvas = document.createElement('canvas')
+					readingCanvas.width = 2848
+					readingCanvas.height = 4096
 
-			// 		let d = ctx.getImageData(0, 0, 2848,4096).data;
-					
-			// 		let 
+					let ctx = readingCanvas.getContext('2d');
+					ctx.drawImage(img, 0, 0);
 
-			// 		resolve();
-			// 	};
-			// })
+					let flatMriTexture = ctx.getImageData(0, 0, 2848,4096).data;
 
-			let data = new THREE.DataTexture3D( dataArray, dimensions[0], dimensions[1], dimensions[2] );
+					let mriArray = new Float32Array(256*256*256);
+
+					let row = 0, column = 0, bigRow = 0, bigColumn = 0, pixelNumber = 0;
+					let index3d = 0;
+					for(let i = 0; i < 256; i++)
+					for(let j = 0; j < 256; j++)
+					for(let k = 0; k < 256; k++)
+					{
+						index3d = i+256*(j+k*256);
+						let truncatedI = i - 39
+
+						if( truncatedI < 0 || 178 <= truncatedI )
+						{
+							mriArray[ index3d ] = -.2;
+						}
+						else
+						{
+							bigColumn = 15 - k % 16;
+							bigRow = (k - k % 16) / 16;
+
+							column = bigColumn * 178 + truncatedI;
+							row = bigRow * 256 + j;
+
+							pixelNumber = column + row*2848;
+
+							mriArray[index3d] = flatMriTexture[pixelNumber*4] / 255. - 0.2;
+						}
+					}
+
+					dataArray = mriArray;
+					dimension = 256
+
+					resolve();
+				};
+			})
+
+			let data = new THREE.DataTexture3D( dataArray, dimension, dimension, dimension );
 			data.wrapS = THREE.ClampToEdgeWrapping;
 			data.wrapT = THREE.ClampToEdgeWrapping;
 
@@ -241,7 +267,7 @@ async function initShaderExperimentation( canvas )
 			data.needsUpdate = true;
 
 			material.uniforms.data = {value:data}
-			material.uniforms.texturePixelWidth = {value: uniforms.renderRadius.value / (0.5 - 0.5 / artificialDimension) }
+			material.uniforms.texturePixelWidth = {value: uniforms.renderRadius.value / (0.5 - 0.5 / dimension) }
 		}
 
 		let scalarField = new THREE.Object3D();
@@ -274,6 +300,9 @@ async function initShaderExperimentation( canvas )
 			scalarField.updateMatrixWorld();
 
 			uniforms.matrixWorldInverse.value.getInverse(scalarField.matrixWorld);
+
+			// pointLight.position.x = 0.4*Math.sin(frameCount*0.01)
+			// log(pointLight.position)
 
 			scalarFieldPointLightPosition.copy(pointLight.position)
 			scalarField.worldToLocal( scalarFieldPointLightPosition );

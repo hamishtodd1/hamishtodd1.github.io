@@ -20,11 +20,43 @@ Group meeting, planning a video:
 		As many videos as you want
 		300 words on history
 	I want you to give me examples, AS MANY AS POSSIBLE
-	The best examples are videos
-		Paul Sutcliffe had a fitzhugh nagumo from heart
-		jellyfish
-		That little chemistry experiment
-		The zebrafish thing
+		Examples ideally:
+			-have a video or at least picture of the thing in real life
+			-have a video of the computer simulation
+		Heart
+			bit shit https://www.youtube.com/watch?v=XyBt_cBDtOw
+			https://www.youtube.com/watch?v=eV9ajG-PGXg
+			https://www.youtube.com/watch?v=rloYMsVFk-c
+		Cuttlefish https://www.youtube.com/watch?v=-O5tQUsCcus  
+		Zebrafish microvillae (Ivan is working on these)
+		Belousov-Zhabotinsky https://www.youtube.com/watch?v=PnOy1fSxBdI 
+		Ventricular tachycardia https://youtu.be/1IhGJjYw5BQ?t=26
+		Some kind of sea cucumber https://www.nature.com/articles/d41586-018-06660-2
+		Cuttlefish stripes (possibly dubious) https://youtu.be/SfkhEm3LfvE?t=56
+			->Angelfish technically, "A reaction-diffusion wave on the skin of the marine angelfish Pomacanthus"
+		Sand (guys, I nearly missed this one)
+			irl https://youtu.be/HVZjcOujr4E?t=188
+			in lab https://www.youtube.com/watch?v=zRGuMddjRGg
+		Find me an embryo concentration thing
+		Slime mould
+			https://youtu.be/5h8WOWEqP6o?t=16
+			https://www.youtube.com/watch?v=oYRF7BaaaJY
+			No one cell in your body is conscious, it's the group together. We are spiral waves
+			An impressive example. Why does it do it?
+			The answer is to help make decisions about what cells should do what
+			Slime moulds are impressive but we still describe them as a lower organism than a mouse, or a caterpillar, or a ourselves
+			When each of us was a growing embryo in our mother's womb, our cells communicated this way, and they still do
+			A sand grain, or a Zhabotinsky atom
+		Brain
+			https://www.youtube.com/watch?v=BFOjQUafsKM
+		Mussels
+			https://www.youtube.com/watch?v=pwZZiNHyTgI
+		Static crap:
+			The giraffes would be nice, much more convincing than spots and stripes which can come about many ways
+			Tortoiseshell patterns
+		Oil and water separation?
+
+	There's a fundamental thing going on here: reactions are local and equilibria at given points
 */
 /*
 	TODO
@@ -93,8 +125,6 @@ precision highp float;
 precision mediump sampler3D;
 uniform sampler3D data;
 uniform float texturePixelWidth;
-
-uniform sampler2D mriTexture;
 
 varying vec4 worldSpacePixelPosition;
 
@@ -195,40 +225,6 @@ vec2 sphereIntersectionDistances( vec3 origin, vec3 direction, vec3 center, floa
 
 
 //------------------Texture
-
-//there's 16 of them along and they are 178 pixels wide = 2848 pixels wide for whole thing
-//16 tall
-// uniform vec3 mriActualDimensions = vec3(178.,256.,256.);
-// uniform vec3 mriDimensionRatios = vec3(178./256.,1.,1.);
-// float getMriTextureLevel(vec3 p)
-// {
-	//p.z = renderRadius -> 1 - 0.5 / mriActualDimension.z
-	//p.z =-renderRadius -> 0 + 0.5 / mriActualDimension.z
-	//p.y = renderRadius -> 1 - 0.5 / mriActualDimension.y
-	//p.y =-renderRadius -> 0 + 0.5 / mriActualDimension.y
-	//p.x = renderRadius * 178./256. -> 1 - 0.5 / mriActualDimension.x
-	//p.x =-renderRadius * 178./256. -> 1 - 0.5 / mriActualDimension.x
-	// vec3 radiusInTheoreticalTexture = 0.5 - 0.5 / mriActualDimensions;
-	// vec3 theoreticalTextureSpaceP = p * mriDimensionRatios / renderRadius * radiusInTheoreticalTexture + 0.5;
-
-	// vec3 textureSpaceP
-	// p * mriDimensionRatios
-
-
-	// 1024;
-	// int zLevel = 
-
-
-	// float radiusInTexture = 0.5 - 0.5 / dataDimension;
-	// vec3 textureSpaceP = p / renderRadius * radiusInTexture + 0.5;
-
-	// float textureSample = texture( data, textureSpaceP.xyz ).r;
-	// return textureSample - isolevel;
-// }
-
-//4 pixel wide texture -> renderRadius is at 0.5 - 0.5 / dataDimension
-//8 ->renderRadius / 3.5
-//
 float getTextureLevel(vec3 p)
 {
 	vec3 textureSpaceP = p / texturePixelWidth + 0.5;
@@ -281,6 +277,7 @@ float getLevel( vec3 p )
 		return getTextureLevel(p);
 	}
 	return levelOfEllipticCurveSpace(p);
+	// return length(p) -0.1;
 }
 
 vec3 numericalGradient(vec3 p) //very easy to work out for polynomials, y does not depend on x
@@ -306,28 +303,30 @@ vec3 getNormal(vec3 p)
 	}
 	// float textureSample = texture3D(data, vec3(0.,0.,0.)).r;
 	return gradientOfEllipticCurveSpace(p);
+	// return normalize(p);
 	// return vec3(1.,0.,0.);
 }
 
 float getLightIntensityAtPoint(vec3 p, vec3 viewerDirection, vec3 normal )
 {
-	float ks = .3;
-	float kd = .3;
-	float ka = .6;
-	float shininess = 1.;
-	float ambientIntensity = 1.;
-	float pointLightDiffuse = 1.;
-	float pointLightSpecular = 1.;
+	float ks = 1.2;
+	float kd = 1.;
+	float ka = 1.;
+	float shininess = 16.;
+	float ambientIntensity = .5;
 
-	float intensity = ka * ambientIntensity;
-	// for(lights)
-	{
-		vec3 pointLightDirection = normalize(scalarFieldPointLightPosition - p);
-		intensity += kd * dot( pointLightDirection, normal ) * pointLightDiffuse;
+	//light assumed to have diffuse and specular = 1
+	//and is a white light = (1,1,1), otherwise you might multiply by its color
 
-		vec3 perfectlyReflectedDirection = 2. * dot(pointLightDirection, normal) * normal - pointLightDirection;
-		intensity += ks * pow( dot( perfectlyReflectedDirection, viewerDirection ), shininess ) * pointLightSpecular;
-	}
+	float intensity = 0.;
+	intensity += ka * ambientIntensity;
+	
+	vec3 pointLightDirection = normalize(scalarFieldPointLightPosition - p);
+	intensity += kd * max(0.,dot( pointLightDirection, normal ));
+
+	vec3 perfectlyReflectedDirection = 2. * dot(pointLightDirection, normal) * normal - pointLightDirection;
+	intensity += ks * pow( max(0.,dot( perfectlyReflectedDirection, viewerDirection )), shininess );
+
 	return intensity;
 }
 
@@ -463,7 +462,7 @@ void main()
 	float handDistance = distanceToHandCone( scalarFieldPixelPosition, direction );
 	float nearestDistanceOfNonVolumeObject = handDistance; //could be cylinders and balls in there
 
-	vec2 volumeIntersectionDistances = useTexture ?
+	vec2 volumeIntersectionDistances = useTexture ? //(0==1)?//
 		renderCubeIntersectionDistances( scalarFieldPixelPosition, direction ) :
 		sphereIntersectionDistances( scalarFieldPixelPosition, direction, vec3(0.,0.,0.), renderRadiusSquared );
 
@@ -564,22 +563,27 @@ void main()
 				vec3 p = probeStart + probeDistance * direction;
 				float intensity = getLightIntensityAtPoint( p, -direction, getNormal(p) );
 
+				vec3 surfaceColor = vec3(0.1,0.1,0.1);
+
 				if( sign( oldLevel ) == 1. )
 				{
 					//if both colors of gas, you're pretty maxed out on color
 					if( doGas && bothGasColors )
 					{
-						gl_FragColor.g += intensity;
+						surfaceColor.g = 1.;
 					}
 					else
 					{
-						gl_FragColor.r += intensity;
+						surfaceColor.r = 1.;
 					}
 				}
 				else
 				{
-					gl_FragColor.g += intensity;
+					surfaceColor.g = 1.;
 				}
+
+				gl_FragColor.rgb += surfaceColor * intensity;
+
 				return;
 			}
 
