@@ -170,7 +170,9 @@ function initBasicSimulation()
 			renderer.setRenderTarget( renderTarget );
 			renderer.render( simScene, simCamera );
 			simulationMaterial.uniforms.oldState.value = renderTarget.texture;
+
 			displayMaterial.uniforms.simulationTexture.value = renderTarget.texture;
+			
 			ping = !ping;
 		}
 		renderer.setRenderTarget( nonSimulationRenderTarget );

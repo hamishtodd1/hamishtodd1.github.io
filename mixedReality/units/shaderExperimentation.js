@@ -96,21 +96,35 @@ async function initShaderExperimentation( canvas )
 		uniforms.scalarFieldPointLightPosition = {value:scalarFieldPointLightPosition}
 		uniforms.matrixWorldInverse = {value:new THREE.Matrix4()}
 
+		//IF you want to try having proper meshes and shit
 		{
+			//could have a camera that is a clone of the ordinary one with no attachment, render the scene with that
+			//then the real rendering is the whole thing again with that
+			//probably VR will fuck you!
+			//https://github.com/mrdoob/three.js/blob/master/examples/webgl_depth_texture.html
 
+			// frameBehind = new THREE.WebGLRenderTarget( window.innerWidth, window.innerHeight );
+			// frameBehind.texture.format = THREE.RGBFormat;
+			// frameBehind.texture.minFilter = THREE.NearestFilter;
+			// frameBehind.texture.magFilter = THREE.NearestFilter;
+			// frameBehind.texture.generateMipmaps = false;
+			// frameBehind.stencilBuffer = false;
+			// frameBehind.depthBuffer = true;
+			// frameBehind.depthTexture = new THREE.DepthTexture();
+			// frameBehind.depthTexture.type = THREE.UnsignedShortType;
 
-			// uniforms.frameColor = {value:}
-			// uniforms.frameDepth = {value:}
+			// uniforms.frameColor = {value:frameBehind.texture}
+			// uniforms.frameDepth = {value:frameBehind.depthTexture}
 		}
 
 		uniforms.renderRadius = {value:0.12};
 		uniforms.renderRadiusSquared = {value:sq(uniforms.renderRadius.value)};
 		uniforms.isolevel = {value:0.};
-		uniforms.useTexture = {value:false}
+		uniforms.useTexture = {value:true}
 		uniforms.doIsosurface = {value:true}
-		uniforms.doGas = {value:false}
+		uniforms.doGas = {value:true}
 		uniforms.bothGasColors = {value:true}
-		uniforms.squarish = {value:true}
+		uniforms.squarish = {value:false}
 
 		bindButton("i",function(){},"increase isolevel",function()
 		{
@@ -121,11 +135,48 @@ async function initShaderExperimentation( canvas )
 			uniforms.isolevel.value -= 0.01;
 		})
 
-		bindToggle("1",uniforms.useTexture,"useTexture",true,false)
-		bindToggle("2",uniforms.bothGasColors,"bothGasColors",true,false)
-		bindToggle("3",uniforms.doIsosurface,"doIsosurface",true,false)
-		bindToggle("4",uniforms.doGas,"doGas",true,false)
-		bindToggle("5",uniforms.squarish,"squarish",true,false)
+		bindToggle("1",uniforms.useTexture,"useTexture")
+
+		bindButton("4",function()
+		{
+			if(!uniforms.doIsosurface.value)
+			{
+				uniforms.doIsosurface.value = true;
+			}
+			else
+			{
+				uniforms.squarish.value = !uniforms.squarish.value;
+			}
+		})
+
+		bindButton("2",function()
+		{
+			if( uniforms.doGas.value && uniforms.doIsosurface.value )
+			{
+				uniforms.doGas.value = false;
+			}
+			else if(!uniforms.doGas.value && uniforms.doIsosurface.value )
+			{
+				uniforms.doGas.value = true;
+				uniforms.doIsosurface.value = false;
+			}
+			else if( uniforms.doGas.value &&!uniforms.doIsosurface.value )
+			{
+				uniforms.doIsosurface.value = true;
+			}
+		})
+
+		bindButton("3",function()
+		{
+			if(!uniforms.doGas.value)
+			{
+				uniforms.doGas.value = true;
+			}
+			else
+			{
+				uniforms.bothGasColors.value = !uniforms.bothGasColors.value;
+			}
+		})
 
 		//So we want color and depth
 		
@@ -137,7 +188,11 @@ async function initShaderExperimentation( canvas )
 		await assignShader("scalarFieldFragment", material, "fragment")
 
 		{
-			let artificialDimension = 8;
+			let dataArray = null;
+			let dimensions = null;
+			let texturePixelWidth = null;
+
+			let artificialDimension = 16;
 			let artificialDataArray = new Float32Array(artificialDimension*artificialDimension*artificialDimension)
 			for(let i = 0; i < artificialDimension; i++)
 			for(let j = 0; j < artificialDimension; j++)
@@ -149,8 +204,32 @@ async function initShaderExperimentation( canvas )
 					// Math.sqrt(sq(i-artificialDimension/2)+sq(j-artificialDimension/2)+sq(k-artificialDimension/2)) / 4;
 					Math.random() - 0.5;
 			}
-			let data = new THREE.DataTexture3D( artificialDataArray, artificialDimension, artificialDimension, artificialDimension );
+			dimensions = [artificialDimension,artificialDimension,artificialDimension];
+			dataArray = artificialDataArray;
 
+			// await new Promise(resolve =>
+			// {
+			// 	let img = new Image();
+			// 	img.src = 'data/brain16x16.png';
+			// 	img.style.display = 'none';
+			// 	img.onload = function()
+			// 	{
+			// 		let readingCanvas = document.createElement('canvas')
+			// 		readingCanvas.width = 2848
+			// 		readingCanvas.height = 4096
+
+			// 		let ctx = readingCanvas.getContext('2d');
+			// 		ctx.drawImage(img, 0, 0);
+
+			// 		let d = ctx.getImageData(0, 0, 2848,4096).data;
+					
+			// 		let 
+
+			// 		resolve();
+			// 	};
+			// })
+
+			let data = new THREE.DataTexture3D( dataArray, dimensions[0], dimensions[1], dimensions[2] );
 			data.wrapS = THREE.ClampToEdgeWrapping;
 			data.wrapT = THREE.ClampToEdgeWrapping;
 
@@ -162,7 +241,7 @@ async function initShaderExperimentation( canvas )
 			data.needsUpdate = true;
 
 			material.uniforms.data = {value:data}
-			material.uniforms.dataDimension = {value:artificialDimension}
+			material.uniforms.texturePixelWidth = {value: uniforms.renderRadius.value / (0.5 - 0.5 / artificialDimension) }
 		}
 
 		let scalarField = new THREE.Object3D();

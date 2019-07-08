@@ -20,8 +20,14 @@ function initButtons()
 		}
 	}
 
-	bindToggle = function(buttonName,variableToToggle,value1,value2, description)
+	bindToggle = function(buttonName,variableToToggle, description,value1,value2)
 	{
+		if(value1 === undefined)
+		{
+			value1 = true;
+			value2 = false;
+		}
+
 		bindButton(buttonName,function()
 		{
 			if(variableToToggle.value === value1)

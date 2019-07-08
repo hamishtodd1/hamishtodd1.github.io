@@ -25,40 +25,6 @@ Group meeting, planning a video:
 		jellyfish
 		That little chemistry experiment
 		The zebrafish thing
-
-Surfaces game:
-	square parametric geometries with tangent planes at the corners is the way to go re level design probably
-		Creates natural way to divide surface into squares -> the way you move
-		Yeah that was what you were thinking for your tetrahedron-hyperbolic paraboloid thing
-		Therefore maybe study the properties of that?
-
-	Player goal:
-		Make a loop that doesn't shrink down to a point
-			You're not just taking one path, you're taking a set of them, reasoning about general properties of paths
-			In the fundamental group of a surface, are there any super-special elements?
-			Are there many surfaces whose fundamental group has only one non-identity element?
-			With the mesh discretized, there probably are ways to detect this
-				Need a robust way, otherwise fuck it seriously
-				If you're piecewise homotopic, you're homotopic
-		Just get to a place, eg find a line
-			Becomes about exploration rather than line-snagging weirdness
-			"find a loop not homotopic to a point" can be turned into "find a line" question and vice versa w/ homotopy?
-				Can glue two locations together. Does that fuck up other properties of the surface?
-			Why do topologists care more about unshrinkable loops than about curves?
-				Lines can be homotopied to points
-				Is there any difference between a handle and no handle if you're not making a loop?
-	Objects:
-		edges (they block you)
-		cross caps (they take you to the other side, and maybe your goal is on the other side?
-		handles - these make it so that the disc containing them can have entry and exit points side by side
-		Aaaaand then the game becomes about seeing weird surfaces and working out how to decompose them into the above
-	This is interesting because:
-		It is a human instinct to break a task down *qualitatively* into pieces
-		Beautiful 3D stuff that directly impacts gameplay
-		Game about space itself rather than stuff in space
-		To move through a space continously is to draw a line
-		All good games involve movement, elegant to have JUST movement
-		Phase space analogy, everything is about navigating a space under limitations, better to visualize directly!
 */
 /*
 	TODO
@@ -68,6 +34,7 @@ Surfaces game:
 		Combine with your simulator
 		Make it editable
 		MRI
+		Individual curves in the field = isosurfaces intersected with other manifolds
 		ultrasound-esque slicing
 		Tricubic
 			You put the coefficients in a texture (or two) and then nearest neighbour within each voxel
@@ -93,6 +60,7 @@ Surfaces game:
 		wavefunctions
 		Reaction diffusion
 		MRI
+		fruit http://insideinsides.blogspot.com/2010/12/onion.html
 		Diffusion tensor
 		ask folks at ICERM
 		Florian stuff
@@ -103,6 +71,7 @@ Surfaces game:
 
 	Presentation
 		Blending?
+			FUCK IT until you have more experience/control, it is not necessary.
 			Disadvantage
 				Black background makes it easier to think about what you're seeing, nothing to try to remove
 			Need to know exactly what threejs does
@@ -123,7 +92,9 @@ Surfaces game:
 precision highp float;
 precision mediump sampler3D;
 uniform sampler3D data;
-uniform float dataDimension;
+uniform float texturePixelWidth;
+
+uniform sampler2D mriTexture;
 
 varying vec4 worldSpacePixelPosition;
 
@@ -225,26 +196,42 @@ vec2 sphereIntersectionDistances( vec3 origin, vec3 direction, vec3 center, floa
 
 //------------------Texture
 
+//there's 16 of them along and they are 178 pixels wide = 2848 pixels wide for whole thing
+//16 tall
+// uniform vec3 mriActualDimensions = vec3(178.,256.,256.);
+// uniform vec3 mriDimensionRatios = vec3(178./256.,1.,1.);
+// float getMriTextureLevel(vec3 p)
+// {
+	//p.z = renderRadius -> 1 - 0.5 / mriActualDimension.z
+	//p.z =-renderRadius -> 0 + 0.5 / mriActualDimension.z
+	//p.y = renderRadius -> 1 - 0.5 / mriActualDimension.y
+	//p.y =-renderRadius -> 0 + 0.5 / mriActualDimension.y
+	//p.x = renderRadius * 178./256. -> 1 - 0.5 / mriActualDimension.x
+	//p.x =-renderRadius * 178./256. -> 1 - 0.5 / mriActualDimension.x
+	// vec3 radiusInTheoreticalTexture = 0.5 - 0.5 / mriActualDimensions;
+	// vec3 theoreticalTextureSpaceP = p * mriDimensionRatios / renderRadius * radiusInTheoreticalTexture + 0.5;
+
+	// vec3 textureSpaceP
+	// p * mriDimensionRatios
+
+
+	// 1024;
+	// int zLevel = 
+
+
+	// float radiusInTexture = 0.5 - 0.5 / dataDimension;
+	// vec3 textureSpaceP = p / renderRadius * radiusInTexture + 0.5;
+
+	// float textureSample = texture( data, textureSpaceP.xyz ).r;
+	// return textureSample - isolevel;
+// }
+
+//4 pixel wide texture -> renderRadius is at 0.5 - 0.5 / dataDimension
+//8 ->renderRadius / 3.5
+//
 float getTextureLevel(vec3 p)
 {
-	// if(p.z < 0.)
-	// {
-	// 	return 1.;
-	// }
-	// else
-	// {
-	// 	return 0.;
-	// }
-
-	//the corners of the texture are 0s and 1s
-	//a bit better:
-		//each voxel is an integer
-		//cut off the half-pixels at the edges. Means there's an odd number!
-
-	//p.x = renderRadius -> 1 - 0.5 / dataDimension
-	//p.x =-renderRadius -> 0 + 0.5 / dataDimension
-	float radiusInTexture = 0.5 - 0.5 / dataDimension;
-	vec3 textureSpaceP = p / renderRadius * radiusInTexture + 0.5;
+	vec3 textureSpaceP = p / texturePixelWidth + 0.5;
 
 	float textureSample = texture( data, textureSpaceP.xyz ).r;
 	return textureSample - isolevel;
@@ -299,10 +286,14 @@ float getLevel( vec3 p )
 vec3 numericalGradient(vec3 p) //very easy to work out for polynomials, y does not depend on x
 {
 	float valueHere = getLevel(p);
-	float eps = 0.01;
-	float x = ( valueHere - getLevel(p+vec3(eps,0.,0.)) ) / eps;
-	float y = ( valueHere - getLevel(p+vec3(0.,eps,0.)) ) / eps;
-	float z = ( valueHere - getLevel(p+vec3(0.,0.,eps)) ) / eps;
+	float eps = 0.0001;
+	if(useTexture)
+	{
+		eps = texturePixelWidth;
+	}
+	float x = ( getLevel(p-vec3(eps,0.,0.)) - getLevel(p+vec3(eps,0.,0.)) ) / eps;
+	float y = ( getLevel(p-vec3(eps,0.,0.)) - getLevel(p+vec3(0.,eps,0.)) ) / eps;
+	float z = ( getLevel(p-vec3(eps,0.,0.)) - getLevel(p+vec3(0.,0.,eps)) ) / eps;
 
 	return vec3(x,y,z);
 }
@@ -479,7 +470,7 @@ void main()
 	if( !(volumeIntersectionDistances[0] == 0. && volumeIntersectionDistances[1] == 0.) &&
 		volumeIntersectionDistances[0] < nearestDistanceOfNonVolumeObject )
 	{
-		float stepLength = (volumeIntersectionDistances[1] - volumeIntersectionDistances[0]) / 250.;
+		float stepLength = (volumeIntersectionDistances[1] - volumeIntersectionDistances[0]) / 80.;
 
 		float stoppingDistance = min(
 			nearestDistanceOfNonVolumeObject - volumeIntersectionDistances[0],
@@ -508,66 +499,33 @@ void main()
 			{
 				float isosurfaceProbeDistance = stepLength * (i-1. + solutionProportionThroughThisStepAssumingLinearity);
 
-				// vec3 p = probeStart + isosurfaceProbeDistance * direction;
-				// vec3 normal = getNormal(p);
-
-				// const float gridThickness = 0.00009;
-				// const float gridSpacing = gridThickness * 200.;
-
-				// float cosPsi = abs( dot(normal,-scalarFieldCameraLookingDirection) );
-				// float sinPsi = sqrt(1.-sq(cosPsi));
-
-				// //http://madebyevan.com/shaders/grid/
-				// vec3 distancesToGridPlanes = round(p/gridSpacing)*gridSpacing - p;
-				// for(int i = 0; i < 3; i++)
-				// {
-				// 	float distanceToGridPlane = round(p[i]/gridSpacing)*gridSpacing - p[i];
-				// 	float distancesToGridPlaneFromPointOfViewOfCamera[i] = 
-				// }
-				// float closest = distancesToGridPlanes.x;// min(min(distancesToGridPlanes.x, distancesToGridPlanes.y), distancesToGridPlanes.z);
-
-				// //not "distance on the surface"?
-
-				// //TODO take into account camera distance
-
-				// if( //( !squarish || sign(oldLevel) != -1. ) || //eg the above is useless
-				// 	closest < gridThickness / sinPsi )
-				// {
-				// 	probeDistance = isosurfaceProbeDistance;
-				// 	newLevel = 0.;
-				// }
-
-
-				//so you want to do individual curves in the field
-					//"manifold intersection"
-
-
-
 				float gridSpacing = renderRadius / 14.;
-				float gridThickness = gridSpacing / 10.;
+				float gridThicknessSq = sq(gridSpacing / 10.); //TODO should depend on distance
+				float minDistToGridSq = 0.;
 
-				vec3 p = probeStart + isosurfaceProbeDistance * direction;
-				vec3 normal = getNormal(p);
-				float minDist = 99999.;
-				for(int i = 0; i < 3; i++)
+				if( squarish && sign(oldLevel) == 1. )
 				{
-					float pointToRoundingPlaneDistance = round(p[i]/gridSpacing)*gridSpacing - p[i];
-					vec3 pointToRoundingPlane;
-					pointToRoundingPlane[i] = pointToRoundingPlaneDistance;
+					vec3 p = probeStart + isosurfaceProbeDistance * direction;
+					vec3 normal = getNormal(p);
+					minDistToGridSq = 99999.;
 
-					vec3 intermediate = cross(normal, pointToRoundingPlane); //length is p2RpDist * sin angle = cos(angle-tau/4)
-					vec3 pointToRoundingPlaneOnTangentPlane = cross(intermediate,normal);
-					float lengthCorrection = pointToRoundingPlaneDistance / pointToRoundingPlaneOnTangentPlane[i];
-					pointToRoundingPlaneOnTangentPlane *= lengthCorrection;
+					vec3 pointToRoundingPlaneOnTangentPlane,squashedToCameraPlane;
+					float pointToRoundingPlaneDistance,distFromCameraPointOfView;
+					for(int i = 0; i < 3; i++)
+					{
+						pointToRoundingPlaneDistance = round(p[i]/gridSpacing)*gridSpacing - p[i];
+						vec3 pointToRoundingPlane;
+						pointToRoundingPlane[i] = pointToRoundingPlaneDistance;
+						pointToRoundingPlaneOnTangentPlane = cross(cross(normal, pointToRoundingPlane),normal);
 
-					vec3 squashedToCameraPlane = pointToRoundingPlaneOnTangentPlane + dot(pointToRoundingPlaneOnTangentPlane,-scalarFieldCameraLookingDirection) * -scalarFieldCameraLookingDirection;
-					float distFromCameraPointOfView = length(squashedToCameraPlane);
+						squashedToCameraPlane = pointToRoundingPlaneOnTangentPlane + dot(pointToRoundingPlaneOnTangentPlane,scalarFieldCameraLookingDirection) * scalarFieldCameraLookingDirection;
+						distFromCameraPointOfView = lengthSq(squashedToCameraPlane) * sq(pointToRoundingPlaneDistance / pointToRoundingPlaneOnTangentPlane[i]);
 
-					minDist = min( minDist, distFromCameraPointOfView );
+						minDistToGridSq = min( minDistToGridSq, distFromCameraPointOfView );
+					}
 				}
 
-				if( //(!squarish || sign(oldLevel) != 1.) ||
-					minDist < gridThickness )
+				if( minDistToGridSq < gridThicknessSq )
 				{
 					probeDistance = isosurfaceProbeDistance;
 					newLevel = 0.;
