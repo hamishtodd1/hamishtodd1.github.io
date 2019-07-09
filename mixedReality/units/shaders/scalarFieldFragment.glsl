@@ -512,7 +512,7 @@ void main()
 				float gridThicknessSq = sq(gridSpacing / 10.); //TODO should depend on distance
 				float minDistToGridSq = 0.;
 
-				if( useTexture && squarish && sign(oldLevel) == 1. )
+				if( !useTexture && squarish && sign(oldLevel) == 1. )
 				{
 					vec3 p = probeStart + isosurfaceProbeDistance * direction;
 					vec3 normal = getNormal(p);

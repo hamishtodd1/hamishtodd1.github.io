@@ -125,7 +125,6 @@ function initBasicSimulation()
 
 	displayMesh.position.copy(camera.position)
 	displayMesh.position.z -= 1
-	log(camera.position)
 
 	function generateInitialTexture()
 	{

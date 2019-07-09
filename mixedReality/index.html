@@ -65,8 +65,9 @@
 			async function init()
 			{
 				let canvas = document.createElement( 'canvas' );
-				console.assert(canvas.getContext( 'webgl2' ) !== null )
-				renderer = new THREE.WebGLRenderer( { canvas: canvas, context: canvas.getContext( 'webgl2' ),antialias: true } );
+				let ctx = canvas.getContext( 'webgl2' );
+				console.assert(ctx !== null )
+				renderer = new THREE.WebGLRenderer( { canvas: canvas, context: ctx,antialias: true } );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.localClippingEnabled = true;
@@ -94,8 +95,8 @@
 					var getVrOrMockVrInput = initVrOrMockVrInput()
 				}
 
-				await initShaderExperimentation( canvas )
-				// initBasicSimulation()
+				// await initShaderExperimentation( canvas )
+				initBasicSimulation()
 
 				renderer.setAnimationLoop( function()
 				{
