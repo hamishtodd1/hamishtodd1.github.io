@@ -57,9 +57,11 @@
 
 		<!-- <script src="units/mobiusTransformations.js"></script> -->
 
-		<script src="units/shaderExperimentation.js"></script>
+		<!-- <script src="units/shaderExperimentation.js"></script> -->
 
-		<script src="units/basicSimulation.js"></script>		
+		<script src="units/scalarFieldVisualization.js"></script>
+
+		<script src="units/simulation.js"></script>		
 
 		<script>
 			async function init()
@@ -96,7 +98,9 @@
 				}
 
 				// await initShaderExperimentation( canvas )
-				initBasicSimulation()
+				// await initGrayScottSimulation()
+				// await initBasicSimulation()
+				await initScalarFieldVisualization();
 
 				renderer.setAnimationLoop( function()
 				{
