@@ -15,17 +15,6 @@
 		Or could be a donut, which makes it simpler
 		Amplitude to probability distribution is easy, it's a surface of revolution of |phi^2|
 
-	Reaction diffusion
-		https://www.youtube.com/watch?v=BV9ny785UNc
-		https://pmneila.github.io/jsexp/grayscott/
-		https://www.quantamagazine.org/wrinkles-and-dimples-obey-simple-rules-20150408/
-		howto http://www.karlsims.com/rd.html to go with reaction diffusion what would be cool would be a cube of it,
-		maybe even concentric spheres.
-		You could have a “graph” going along the time axis next to the rectangle that shows the feed rate and death rate,
-		and you could change them.
-		If you want to know how chemistry, not just navier stokes crap, looked at in a way that varies in space, you need reaction diffusion
-			That's why it's important in developmental biology; Turing guessed this
-
 	Parametric stuff, use vertex shader
 		Lines
 		Surfaces

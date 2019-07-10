@@ -19,7 +19,10 @@ Group meeting, planning a video:
 		1000 words
 		As many videos as you want
 		300 words on history
+	If you want to know how chemistry, not just navier stokes crap, looked at in a way that varies in space, you need reaction diffusion
+		That's why it's important in developmental biology; Turing guessed this
 	I want you to give me examples, AS MANY AS POSSIBLE
+		https://www.quantamagazine.org/wrinkles-and-dimples-obey-simple-rules-20150408/
 		Examples ideally:
 			-have a video or at least picture of the thing in real life
 			-have a video of the computer simulation
@@ -55,6 +58,11 @@ Group meeting, planning a video:
 			The giraffes would be nice, much more convincing than spots and stripes which can come about many ways
 			Tortoiseshell patterns
 		Oil and water separation?
+		Blood clotting
+			https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.93.098303
+			Find a video, needn't be serious
+
+		Yeah, the hard part is getting people to think of all of these as one thing
 
 	There's a fundamental thing going on here: reactions are local and equilibria at given points
 */

@@ -4,14 +4,14 @@ varying vec2 vUV;
 
 uniform sampler2D oldState;
 uniform float deltaTime;
-uniform float dimension;
+uniform vec2 dimensions;
 
 const vec2 diffusionRates = vec2(0.2097,0.105);
 
 void main (void)
 {
 	//should have an index really
-	vec2 spatialStep = vec2( 1. / dimension, 1. / dimension );
+	vec2 spatialStep = vec2( 1. / dimensions.x, 1. / dimensions.y );
 
 	vec2 uv  = texture2D( oldState, vUV).rg;
 	vec2 uv0 = texture2D( oldState, vUV + vec2(-spatialStep.x, 0.)).rg;
