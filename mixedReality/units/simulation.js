@@ -1,27 +1,28 @@
 async function initLayeredSimulation()
 {
-	let dimensions = new THREE.Vector2(11,7);
+	let threeDDimensions = new THREE.Vector3(16,16,16);
+	let textureDimensions = new THREE.Vector2(threeDDimensions.x,threeDDimensions.y*threeDDimensions.z);
 
-	let initialState = new window.Float32Array( dimensions.x * dimensions.y * 4 );
-	for ( let row = 0; row < dimensions.y; row ++ )
-	for ( let column = 0; column < dimensions.x; column ++ )
+	let initialState = new window.Float32Array( textureDimensions.x * textureDimensions.y * 4 );
+
+	for ( let row = 0; row < threeDDimensions.y; row ++ )
+	for ( let column = 0; column < threeDDimensions.x; column ++ )
+	for ( let slice = 0; slice < threeDDimensions.z; slice ++ )
 	{
-		let firstIndex = (row * dimensions.x + column) * 4;
+		let firstIndex = ((row * threeDDimensions.x + column) * threeDDimensions.z + slice) * 4;
 
-		initialState[ firstIndex + 0 ] = Math.random();
+		initialState[ firstIndex + 0 ] = clamp(1 - 0.07 * new THREE.Vector3(row,column,slice).multiplyScalar(2.).distanceTo(threeDDimensions),0,1);
 		initialState[ firstIndex + 1 ] = 0.;
 		initialState[ firstIndex + 2 ] = 0.;
 		initialState[ firstIndex + 3 ] = 0.;
 
-		if( column == 1 )
-		{
-			initialState[ firstIndex + 0 ] = 0.;
-		}
-		if( row == 2 )
-		{
-			initialState[ firstIndex + 0 ] = 0.;
-		}
+		// if(  < 9. )
+		// {
+		// 	initialState[ firstIndex + 0 ] = 1.;
+		// }
 	}
+
+	rightHand.controllerModel.visible = false;
 
 	let displayMaterial = new THREE.ShaderMaterial( {
 		blending: 0, //prevent default premultiplied alpha values
@@ -54,10 +55,10 @@ async function initLayeredSimulation()
 	} );
 
 	let numStepsPerFrame = 1;
-	await Simulation(dimensions,"basicSimulation", "clamped", initialState, numStepsPerFrame, displayMaterial.uniforms.simulationTexture )
+	await Simulation(textureDimensions,"layeredSimulation", "periodic", initialState, numStepsPerFrame, displayMaterial.uniforms.simulationTexture )
 
 	let displayMesh = new THREE.Mesh(
-		new THREE.PlaneBufferGeometry( 0.3 * dimensions.x / dimensions.y, 0.3 ),
+		new THREE.PlaneBufferGeometry( 0.3 * textureDimensions.x / textureDimensions.y, 0.3 ),
 		displayMaterial );
 	scene.add( displayMesh );
 	displayMesh.position.copy(handControllers[0].position)

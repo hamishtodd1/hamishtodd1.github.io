@@ -10,7 +10,7 @@ const vec2 diffusionRates = vec2(0.2097,0.105);
 
 void main (void)
 {
-	//should have an index really
+	//shouldn't it be an index? Probably not, whatsisname does it this way
 	vec2 spatialStep = vec2( 1. / dimensions.x, 1. / dimensions.y );
 
 	vec2 uv  = texture2D( oldState, vUV).rg;
@@ -19,6 +19,7 @@ void main (void)
 	vec2 uv2 = texture2D( oldState, vUV + vec2(0., -spatialStep.y)).rg;
 	vec2 uv3 = texture2D( oldState, vUV + vec2(0.,  spatialStep.y)).rg;
 	vec2 laplacian = (uv0 + uv1 + uv2 + uv3 - 4. * uv);
+	//laplacian???? Seems like the way whatsisname gets the gradient!
 
 	float reactionQuantity = uv.r * uv.g * uv.g;
 
