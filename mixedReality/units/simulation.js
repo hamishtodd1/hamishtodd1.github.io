@@ -1,6 +1,6 @@
 async function initLayeredSimulation()
 {
-	let threeDDimensions = new THREE.Vector3(16,16,16);
+	let threeDDimensions = new THREE.Vector3(256,256,256);
 	let textureDimensions = new THREE.Vector2(threeDDimensions.x,threeDDimensions.y*threeDDimensions.z);
 
 	let initialState = new window.Float32Array( textureDimensions.x * textureDimensions.y * 4 );
@@ -11,7 +11,7 @@ async function initLayeredSimulation()
 	{
 		let firstIndex = ((row * threeDDimensions.x + column) * threeDDimensions.z + slice) * 4;
 
-		initialState[ firstIndex + 0 ] = clamp(1 - 0.07 * new THREE.Vector3(row,column,slice).multiplyScalar(2.).distanceTo(threeDDimensions),0,1);
+		initialState[ firstIndex + 0 ] = clamp(1 - 0.1 * new THREE.Vector3(row,column,slice).multiplyScalar(2.).distanceTo(threeDDimensions),0,1.);
 		initialState[ firstIndex + 1 ] = 0.;
 		initialState[ firstIndex + 2 ] = 0.;
 		initialState[ firstIndex + 3 ] = 0.;

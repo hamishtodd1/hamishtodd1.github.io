@@ -50,57 +50,61 @@ async function initScalarFieldVisualization()
 
 	//TEXTURE
 	{
-		let dataArray = null;
-		let dimension = null;
-		let texturePixelWidth = null;
+		// let dataArray = null;
+		// let dimension = null;
+		// let texturePixelWidth = null;
 
-		let artificialDimension = 8;
-		let artificialDataArray = new Float32Array(artificialDimension*artificialDimension*artificialDimension)
-		for(let i = 0; i < artificialDimension; i++)
-		for(let j = 0; j < artificialDimension; j++)
-		for(let k = 0; k < artificialDimension; k++)
+		// let artificialDimension = 8;
+		// let artificialDataArray = new Float32Array(artificialDimension*artificialDimension*artificialDimension)
+		// for(let i = 0; i < artificialDimension; i++)
+		// for(let j = 0; j < artificialDimension; j++)
+		// for(let k = 0; k < artificialDimension; k++)
+		// {
+		// 	artificialDataArray[i*artificialDimension*artificialDimension+j*artificialDimension+k] = 
+		// 		// i >= artificialDimension/2 ^ j >= artificialDimension/2 ^ k >= artificialDimension/2 ? 0.:1.;
+		// 		// (i+j+k) % 2 ? 0.:1.;
+		// 		// Math.sqrt(sq(i-artificialDimension/2)+sq(j-artificialDimension/2)+sq(k-artificialDimension/2)) / 4;
+		// 		Math.random() - 0.5;
+		// }
+		// dimension = artificialDimension;
+		// dataArray = artificialDataArray;
+
 		{
-			artificialDataArray[i*artificialDimension*artificialDimension+j*artificialDimension+k] = 
-				// i >= artificialDimension/2 ^ j >= artificialDimension/2 ^ k >= artificialDimension/2 ? 0.:1.;
-				// (i+j+k) % 2 ? 0.:1.;
-				// Math.sqrt(sq(i-artificialDimension/2)+sq(j-artificialDimension/2)+sq(k-artificialDimension/2)) / 4;
-				Math.random() - 0.5;
-		}
-		dimension = artificialDimension;
-		dataArray = artificialDataArray;
+			let dimension = 256;
+			let threeDDimensions = new THREE.Vector3(dimension,dimension,dimension);
+			let textureDimensions = new THREE.Vector2(threeDDimensions.x,threeDDimensions.y*threeDDimensions.z);
 
-		{
-			let dimensions = new THREE.Vector2(11,7);
+			let initialState = new window.Float32Array( textureDimensions.x * textureDimensions.y * 4 );
 
-			let initialState = new window.Float32Array( dimensions.x * dimensions.y * 4 );
-			for ( let row = 0; row < dimensions.y; row ++ )
-			for ( let column = 0; column < dimensions.x; column ++ )
+			for ( let row = 0; row < threeDDimensions.y; row ++ )
+			for ( let column = 0; column < threeDDimensions.x; column ++ )
+			for ( let slice = 0; slice < threeDDimensions.z; slice ++ )
 			{
-				let firstIndex = (row * dimensions.x + column) * 4;
+				let firstIndex = ((row * threeDDimensions.x + column) * threeDDimensions.z + slice) * 4;
 
-				initialState[ firstIndex + 0 ] = Math.random();
+				initialState[ firstIndex + 0 ] = clamp(1 - 0.1 * new THREE.Vector3(row,column,slice).multiplyScalar(2.).distanceTo(threeDDimensions),0,1.);
 				initialState[ firstIndex + 1 ] = 0.;
 				initialState[ firstIndex + 2 ] = 0.;
 				initialState[ firstIndex + 3 ] = 0.;
-
-				if( column == 1 )
-				{
-					initialState[ firstIndex + 0 ] = 0.;
-				}
-				if( row == 2 )
-				{
-					initialState[ firstIndex + 0 ] = 0.;
-				}
 			}
 
 			let numStepsPerFrame = 1;
-			await Simulation(dimensions,"basicSimulation", "clamped", initialState, numStepsPerFrame, displayMaterial.uniforms.simulationTexture )
+			await Simulation(textureDimensions,"layeredSimulation", "periodic", initialState, numStepsPerFrame, displayMaterial.uniforms.simulationTexture )
 
-			let displayMesh = new THREE.Mesh(
-				new THREE.PlaneBufferGeometry( 0.3 * dimensions.x / dimensions.y, 0.3 ),
-				displayMaterial );
-			scene.add( displayMesh );
-			displayMesh.position.copy(handControllers[0].position)
+			// simulationTexture //gets assigned to data
+
+			let data = new THREE.DataTexture3D( dataArray, dimension, dimension, dimension );
+			data.wrapS = THREE.ClampToEdgeWrapping;
+			data.wrapT = THREE.ClampToEdgeWrapping;
+
+			//copied from threejs texture3D example
+			data.format = THREE.RedFormat;
+			data.type = THREE.FloatType;
+			data.minFilter = data.magFilter = THREE.LinearFilter;
+			data.unpackAlignment = 1; //1 byte. Buuuuut the numbers have 32 bits = 4 bytes?
+			data.needsUpdate = true;
+
+			material.uniforms.data = {value:data}
 		}
 
 		// await new Promise(resolve =>
@@ -155,19 +159,19 @@ async function initScalarFieldVisualization()
 		// 	};
 		// })
 
-		let data = new THREE.DataTexture3D( dataArray, dimension, dimension, dimension );
-		data.wrapS = THREE.ClampToEdgeWrapping;
-		data.wrapT = THREE.ClampToEdgeWrapping;
+		// let data = new THREE.DataTexture3D( dataArray, dimension, dimension, dimension );
+		// data.wrapS = THREE.ClampToEdgeWrapping;
+		// data.wrapT = THREE.ClampToEdgeWrapping;
 
-		//copied from threejs texture3D example
-		data.format = THREE.RedFormat;
-		data.type = THREE.FloatType;
-		data.minFilter = data.magFilter = THREE.LinearFilter;
-		data.unpackAlignment = 1; //1 byte. Buuuuut the numbers have 32 bits = 4 bytes?
-		data.needsUpdate = true;
+		// //copied from threejs texture3D example
+		// data.format = THREE.RedFormat;
+		// data.type = THREE.FloatType;
+		// data.minFilter = data.magFilter = THREE.LinearFilter;
+		// data.unpackAlignment = 1; //1 byte. Buuuuut the numbers have 32 bits = 4 bytes?
+		// data.needsUpdate = true;
 
-		material.uniforms.data = {value:data}
-		material.uniforms.texturePixelWidth = {value: uniforms.renderRadius.value / (0.5 - 0.5 / dimension) }
+		// material.uniforms.data = {value:data}
+		// material.uniforms.texturePixelWidth = {value: uniforms.renderRadius.value / (0.5 - 0.5 / dimension) }
 	}
 
 	{

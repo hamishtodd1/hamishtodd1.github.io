@@ -13,58 +13,6 @@ Thesis chapters
 Proof read
 Publication
 
-Group meeting, planning a video:
-	A basic idea of the history
-	Imagine that you've got to communicate everything the next generation will know about reaction diffusion systems
-		1000 words
-		As many videos as you want
-		300 words on history
-	If you want to know how chemistry, not just navier stokes crap, looked at in a way that varies in space, you need reaction diffusion
-		That's why it's important in developmental biology; Turing guessed this
-	I want you to give me examples, AS MANY AS POSSIBLE
-		https://www.quantamagazine.org/wrinkles-and-dimples-obey-simple-rules-20150408/
-		Examples ideally:
-			-have a video or at least picture of the thing in real life
-			-have a video of the computer simulation
-		Heart
-			bit shit https://www.youtube.com/watch?v=XyBt_cBDtOw
-			https://www.youtube.com/watch?v=eV9ajG-PGXg
-			https://www.youtube.com/watch?v=rloYMsVFk-c
-		Cuttlefish https://www.youtube.com/watch?v=-O5tQUsCcus  
-		Zebrafish microvillae (Ivan is working on these)
-		Belousov-Zhabotinsky https://www.youtube.com/watch?v=PnOy1fSxBdI 
-		Ventricular tachycardia https://youtu.be/1IhGJjYw5BQ?t=26
-		Some kind of sea cucumber https://www.nature.com/articles/d41586-018-06660-2
-		Cuttlefish stripes (possibly dubious) https://youtu.be/SfkhEm3LfvE?t=56
-			->Angelfish technically, "A reaction-diffusion wave on the skin of the marine angelfish Pomacanthus"
-		Sand (guys, I nearly missed this one)
-			irl https://youtu.be/HVZjcOujr4E?t=188
-			in lab https://www.youtube.com/watch?v=zRGuMddjRGg
-		Find me an embryo concentration thing
-		Slime mould
-			https://youtu.be/5h8WOWEqP6o?t=16
-			https://www.youtube.com/watch?v=oYRF7BaaaJY
-			No one cell in your body is conscious, it's the group together. We are spiral waves
-			An impressive example. Why does it do it?
-			The answer is to help make decisions about what cells should do what
-			Slime moulds are impressive but we still describe them as a lower organism than a mouse, or a caterpillar, or a ourselves
-			When each of us was a growing embryo in our mother's womb, our cells communicated this way, and they still do
-			A sand grain, or a Zhabotinsky atom
-		Brain
-			https://www.youtube.com/watch?v=BFOjQUafsKM
-		Mussels
-			https://www.youtube.com/watch?v=pwZZiNHyTgI
-		Static crap:
-			The giraffes would be nice, much more convincing than spots and stripes which can come about many ways
-			Tortoiseshell patterns
-		Oil and water separation?
-		Blood clotting
-			https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.93.098303
-			Find a video, needn't be serious
-
-		Yeah, the hard part is getting people to think of all of these as one thing
-
-	There's a fundamental thing going on here: reactions are local and equilibria at given points
 */
 /*
 	TODO
@@ -235,6 +183,23 @@ vec2 sphereIntersectionDistances( vec3 origin, vec3 direction, vec3 center, floa
 
 
 //------------------Texture
+float get2DTextureLevel(vec3 p)
+{
+	vec3 textureSpaceP = p / texturePixelWidth + 0.5;
+	vec2 textureSpaceP2d = vec2(
+
+		)
+	texture2D(data2d, textureSpaceP2d);
+	return textureSample - isolevel;
+
+
+
+	vec3 textureSpaceP = p / texturePixelWidth + 0.5;
+
+	float textureSample = texture( data, textureSpaceP.xyz ).r;
+	return textureSample - isolevel;
+}
+
 float getTextureLevel(vec3 p)
 {
 	vec3 textureSpaceP = p / texturePixelWidth + 0.5;
