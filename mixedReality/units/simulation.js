@@ -1,9 +1,10 @@
 async function initLayeredSimulation()
 {
-	let threeDDimensions = new THREE.Vector3(256,256,256);
+	let dimension = 32;
+	let threeDDimensions = new THREE.Vector3( dimension, dimension, dimension );
 	let textureDimensions = new THREE.Vector2(threeDDimensions.x,threeDDimensions.y*threeDDimensions.z);
 
-	let initialState = new window.Float32Array( textureDimensions.x * textureDimensions.y * 4 );
+	let initialState = new Float32Array( textureDimensions.x * textureDimensions.y * 4 );
 
 	for ( let row = 0; row < threeDDimensions.y; row ++ )
 	for ( let column = 0; column < threeDDimensions.x; column ++ )
@@ -11,15 +12,10 @@ async function initLayeredSimulation()
 	{
 		let firstIndex = ((row * threeDDimensions.x + column) * threeDDimensions.z + slice) * 4;
 
-		initialState[ firstIndex + 0 ] = clamp(1 - 0.1 * new THREE.Vector3(row,column,slice).multiplyScalar(2.).distanceTo(threeDDimensions),0,1.);
+		initialState[ firstIndex + 0 ] = clamp(1 - 0.03 * new THREE.Vector3(row,column,slice).multiplyScalar(2.).distanceTo(threeDDimensions),0,1.);
 		initialState[ firstIndex + 1 ] = 0.;
 		initialState[ firstIndex + 2 ] = 0.;
 		initialState[ firstIndex + 3 ] = 0.;
-
-		// if(  < 9. )
-		// {
-		// 	initialState[ firstIndex + 0 ] = 1.;
-		// }
 	}
 
 	rightHand.controllerModel.visible = false;
@@ -68,7 +64,7 @@ async function initGrayScottSimulation()
 {
 	let dimensions = new THREE.Vector2(1024,1024);
 
-	let initialState = new window.Float32Array( dimensions.x * dimensions.y * 4 );
+	let initialState = new Float32Array( dimensions.x * dimensions.y * 4 );
 	for ( let row = 0; row < dimensions.y; row ++ )
 	for ( let column = 0; column < dimensions.x; column ++ )
 	{
@@ -131,7 +127,7 @@ async function initBasicSimulation()
 {
 	let dimensions = new THREE.Vector2(11,7);
 
-	let initialState = new window.Float32Array( dimensions.x * dimensions.y * 4 );
+	let initialState = new Float32Array( dimensions.x * dimensions.y * 4 );
 	for ( let row = 0; row < dimensions.y; row ++ )
 	for ( let column = 0; column < dimensions.x; column ++ )
 	{
@@ -192,7 +188,11 @@ async function initBasicSimulation()
 	displayMesh.position.copy(handControllers[0].position)
 }
 
-async function Simulation( dimensions, simulationShaderFilename, boundaryConditions, initialState, numStepsPerFrame, simulationTexture)
+async function Simulation( 
+	dimensions, simulationShaderFilename, boundaryConditions,
+	initialState,
+	numStepsPerFrame,
+	objectToHaveSimulationTextureAssignedTo)
 {
 	let wrap = boundaryConditions === "periodic" ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
 
@@ -272,7 +272,7 @@ async function Simulation( dimensions, simulationShaderFilename, boundaryConditi
 			ping = !ping;
 		}
 
-		simulationTexture.value = renderTarget.texture;
+		objectToHaveSimulationTextureAssignedTo.value = renderTarget.texture;
 
 		renderer.setRenderTarget( nonSimulationRenderTarget );
 	} );

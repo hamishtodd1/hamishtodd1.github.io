@@ -19,7 +19,6 @@ void main (void)
 	vec2 uv2 = texture2D( oldState, vUV + vec2(0., -spatialStep.y)).rg;
 	vec2 uv3 = texture2D( oldState, vUV + vec2(0.,  spatialStep.y)).rg;
 	vec2 laplacian = (uv0 + uv1 + uv2 + uv3 - 4. * uv);
-	//laplacian???? Seems like the way whatsisname gets the gradient!
 
 	float reactionQuantity = uv.r * uv.g * uv.g;
 
