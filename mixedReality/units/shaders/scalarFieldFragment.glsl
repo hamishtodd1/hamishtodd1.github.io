@@ -80,8 +80,12 @@ Publication
 
 precision highp float;
 precision mediump sampler3D;
-uniform sampler3D data;
-uniform float texturePixelWidth;
+uniform sampler3D data3d;
+uniform float texture3dPixelWidth;
+
+uniform float texture2dPixelWidth;
+uniform float texture2dDimension;
+uniform sampler2D data2d;
 
 varying vec4 worldSpacePixelPosition;
 
@@ -183,29 +187,26 @@ vec2 sphereIntersectionDistances( vec3 origin, vec3 direction, vec3 center, floa
 
 
 //------------------Texture
+//maybe test with checkerboard
 float get2DTextureLevel(vec3 p)
 {
-	vec3 textureSpaceP = p / texturePixelWidth + 0.5;
+	vec3 textureSpaceP3d = p / texture2dPixelWidth + 0.5;
+	float roundedZ = floor( textureSpaceP3d.z * texture2dDimension ) / texture2dDimension; //floor coz it's like an array
 	vec2 textureSpaceP2d = vec2(
-
-		)
-	texture2D(data2d, textureSpaceP2d);
-	return textureSample - isolevel;
-
-
-
-	vec3 textureSpaceP = p / texturePixelWidth + 0.5;
-
-	float textureSample = texture( data, textureSpaceP.xyz ).r;
-	return textureSample - isolevel;
+		textureSpaceP3d.x,
+		textureSpaceP3d.y / texture2dDimension + roundedZ
+		);
+	vec4 textureSample = texture2D(data2d, textureSpaceP2d);
+	return -0.1;
 }
 
 float getTextureLevel(vec3 p)
 {
-	vec3 textureSpaceP = p / texturePixelWidth + 0.5;
+	return get2DTextureLevel(p);
+	// vec3 textureSpaceP = p / texture3dPixelWidth + 0.5;
 
-	float textureSample = texture( data, textureSpaceP.xyz ).r;
-	return textureSample - isolevel;
+	// float textureSample = texture( data3d, textureSpaceP.xyz ).r;
+	// return textureSample - isolevel;
 }
 
 vec2 renderCubeIntersectionDistances( vec3 origin, vec3 direction )
@@ -261,7 +262,7 @@ vec3 numericalGradient(vec3 p) //very easy to work out for polynomials, y does n
 	float eps = 0.0001;
 	if(useTexture)
 	{
-		eps = texturePixelWidth*2000000.;
+		eps = texture3dPixelWidth*2000000.;
 	}
 	float x = ( getLevel(p-vec3(eps,0.,0.)) - getLevel(p+vec3(eps,0.,0.)) ) / eps;
 	float y = ( getLevel(p-vec3(0.,eps,0.)) - getLevel(p+vec3(0.,eps,0.)) ) / eps;

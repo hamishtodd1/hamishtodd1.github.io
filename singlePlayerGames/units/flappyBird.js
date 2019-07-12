@@ -16,6 +16,10 @@
 
 	Hey, it's how drug developers work!
 
+	Claim: the flappy bird extrusion game IS the probability game
+	You extrude all the possibilities then pick one? Do you have a timer?
+	It's predictable, it's kind of about phase space too
+
 	Ivan: there's at least a bit of a cognitive gap between "this is the right series of actions" and "this is scientifically something I know the outcome of"
 */
 function initFlappyBird()
