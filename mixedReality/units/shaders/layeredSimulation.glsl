@@ -28,7 +28,7 @@ void main (void)
 	vec2 uv5 = texture2D( oldState, vUV + spatialStep( 0., 0., 1.)).rg;
 	vec2 grad = (uv0 + uv1 + uv2 + uv3 + uv4 + uv5 - 6. * uv);
 
-	vec2 result = uv;// + grad * 0.007;
+	vec2 result = uv + grad * 0.007;
 
 	gl_FragColor = vec4(result, 0.0, 1.0);
 }

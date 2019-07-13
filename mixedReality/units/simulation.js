@@ -197,8 +197,8 @@ async function Simulation(
 	let wrap = boundaryConditions === "periodic" ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
 
 	let params = {
-		minFilter: THREE.NearestFilter,
-		magFilter: THREE.NearestFilter,
+		minFilter: THREE.LinearFilter,
+		magFilter: THREE.LinearFilter,
 		wrapS: wrap,
 		wrapT: wrap,
 		format: THREE.RGBAFormat,

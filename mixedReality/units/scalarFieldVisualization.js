@@ -19,13 +19,13 @@ async function initScalarFieldVisualization()
 
 	uniforms.renderRadius = {value:0.12};
 	uniforms.renderRadiusSquared = {value:sq(uniforms.renderRadius.value)};
-	uniforms.isolevel = {value:-0.03};
+	uniforms.isolevel = {value:0.5};
 	uniforms.useTexture = {value:true}
-	uniforms.doIsosurface = {value:true}
-	uniforms.doGas = {value:false}
+	uniforms.doIsosurface = {value:false}
+	uniforms.doGas = {value:true}
 	uniforms.bothGasColors = {value:true}
 	uniforms.squarish = {value:false}
-	uniforms.cubeVolume = {value:true}
+	uniforms.cubeVolume = {value:false}
 
 	rightHand.controllerModel.visible = false;
 	rightHand.rotation.x += TAU/4;
@@ -71,6 +71,10 @@ async function initScalarFieldVisualization()
 		let numStepsPerFrame = 1; //maaaaaybe worth making sure it's even
 		material.uniforms.data2d = {value:null};
 		await Simulation( textureDimensions, "layeredSimulation", "periodic", initialState, numStepsPerFrame, material.uniforms.data2d )
+		// updateFunctions.push(function()
+		// {
+		// 	log(material.uniforms.data2d.value.minFilter, THREE.LinearFilter)
+		// })
 		material.uniforms.texture2dPixelWidth = {value: uniforms.renderRadius.value / (0.5 - 0.5 / dimension) }
 		material.uniforms.texture2dDimension = {value: dimension }
 	}
@@ -81,7 +85,7 @@ async function initScalarFieldVisualization()
 		let dimension = null;
 		let texturePixelWidth = null;
 
-		let artificialDimension = 8;
+		let artificialDimension = 32;
 		let artificialDataArray = new Float32Array(artificialDimension*artificialDimension*artificialDimension)
 		for(let i = 0; i < artificialDimension; i++)
 		for(let j = 0; j < artificialDimension; j++)

@@ -191,22 +191,32 @@ vec2 sphereIntersectionDistances( vec3 origin, vec3 direction, vec3 center, floa
 float get2DTextureLevel(vec3 p)
 {
 	vec3 textureSpaceP3d = p / texture2dPixelWidth + 0.5;
-	float roundedZ = floor( textureSpaceP3d.z * texture2dDimension ) / texture2dDimension; //floor coz it's like an array
-	vec2 textureSpaceP2d = vec2(
+	float zRoundedDown = floor( textureSpaceP3d.z * texture2dDimension ) / texture2dDimension;
+	float zRoundedUp = ceil( textureSpaceP3d.z * texture2dDimension ) / texture2dDimension;
+	float lerpAmount = (textureSpaceP3d.z-zRoundedDown) / (zRoundedUp-zRoundedDown);
+
+	vec2 textureSpacePRoundedUp = vec2(
 		textureSpaceP3d.x,
-		textureSpaceP3d.y / texture2dDimension + roundedZ
+		textureSpaceP3d.y / texture2dDimension + zRoundedUp
 		);
-	vec4 textureSample = texture2D(data2d, textureSpaceP2d);
-	return -0.1;
+	vec2 textureSpacePRoundedDown = vec2(
+		textureSpaceP3d.x,
+		textureSpaceP3d.y / texture2dDimension + zRoundedDown
+		);
+	float sampleRoundedUp = texture2D(data2d, textureSpacePRoundedUp).r;
+	float sampleRoundedDown = texture2D(data2d, textureSpacePRoundedDown).r;
+
+	return mix(sampleRoundedDown,sampleRoundedUp,lerpAmount) - isolevel;
 }
 
 float getTextureLevel(vec3 p)
 {
-	return get2DTextureLevel(p);
 	// vec3 textureSpaceP = p / texture3dPixelWidth + 0.5;
 
 	// float textureSample = texture( data3d, textureSpaceP.xyz ).r;
 	// return textureSample - isolevel;
+
+	return get2DTextureLevel(p);
 }
 
 vec2 renderCubeIntersectionDistances( vec3 origin, vec3 direction )
