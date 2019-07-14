@@ -12,10 +12,24 @@ async function initLayeredSimulation()
 	{
 		let firstIndex = ((row * threeDDimensions.x + column) * threeDDimensions.z + slice) * 4;
 
-		initialState[ firstIndex + 0 ] = clamp(1 - 0.03 * new THREE.Vector3(row,column,slice).multiplyScalar(2.).distanceTo(threeDDimensions),0,1.);
+		initialState[ firstIndex + 0 ] = 0. //clamp(1 - 0.03 * new THREE.Vector3(row,column,slice).multiplyScalar(2.).distanceTo(threeDDimensions),0,1.);
 		initialState[ firstIndex + 1 ] = 0.;
 		initialState[ firstIndex + 2 ] = 0.;
 		initialState[ firstIndex + 3 ] = 0.;
+	}
+
+	let layersToExciteU = [dimension / 2 + 19,dimension / 2 + 20];
+	let layersToExciteV = [dimension / 2 + 21,dimension / 2 + 22,dimension / 2 + 23,dimension / 2 + 24];
+	for(var k = 0; k < 3*dimension/4; k++)
+	for(var i = 0; i < 3*dimension/4; i++)
+	{
+		initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteU[0])) + 0] = 1.;
+		initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteU[1])) + 0] = 1.;
+		
+		initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteV[0])) + 1] = 1.;
+		initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteV[1])) + 1] = 1.;
+		initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteV[2])) + 1] = 1.;
+		initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteV[3])) + 1] = 1.;
 	}
 
 	rightHand.controllerModel.visible = false;
@@ -51,7 +65,7 @@ async function initLayeredSimulation()
 	} );
 
 	let numStepsPerFrame = 1;
-	await Simulation(textureDimensions,"layeredSimulation", "periodic", initialState, numStepsPerFrame, displayMaterial.uniforms.simulationTexture )
+	await Simulation(textureDimensions,"layeredSimulation", "clamped", initialState, numStepsPerFrame, displayMaterial.uniforms.simulationTexture )
 
 	let displayMesh = new THREE.Mesh(
 		new THREE.PlaneBufferGeometry( 0.3 * textureDimensions.x / textureDimensions.y, 0.3 ),
@@ -221,7 +235,7 @@ async function Simulation(
 		{
 			"oldState":	{ value: null },
 			"deltaTime":{ value: null },
-			"dimensions":{ value: dimensions } //worth knowing so you can get the surrounding ones
+			"dimensions":{ value: dimensions }
 		},
 		vertexShader: [
 			'varying vec2 vUV;',

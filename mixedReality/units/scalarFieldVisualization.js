@@ -25,11 +25,11 @@ async function initScalarFieldVisualization()
 	uniforms.doGas = {value:true}
 	uniforms.bothGasColors = {value:true}
 	uniforms.squarish = {value:false}
-	uniforms.cubeVolume = {value:false}
+	uniforms.cubeVolume = {value:true}
 
 	rightHand.controllerModel.visible = false;
 	rightHand.rotation.x += TAU/4;
-	rightHand.rotation.z = -0.7420778219380804
+	rightHand.rotation.z = 1.4
 	updateFunctions.push(function()
 	{
 		// scalarField.position.x = 0.14 * Math.sin(frameCount * 0.04)
@@ -50,7 +50,7 @@ async function initScalarFieldVisualization()
 
 	//SIMULATION
 	{
-		let dimension = 32;
+		let dimension = 128;
 		let threeDDimensions = new THREE.Vector3( dimension, dimension, dimension );
 		let textureDimensions = new THREE.Vector2(threeDDimensions.x,threeDDimensions.y*threeDDimensions.z);
 
@@ -62,15 +62,34 @@ async function initScalarFieldVisualization()
 		{
 			let firstIndex = ((row * threeDDimensions.x + column) * threeDDimensions.z + slice) * 4;
 
-			initialState[ firstIndex + 0 ] = clamp(1 - 0.03 * new THREE.Vector3(row,column,slice).multiplyScalar(2.).distanceTo(threeDDimensions),0,1.);
+			initialState[ firstIndex + 0 ] = 0.;//clamp(1 - 0.03 * new THREE.Vector3(row,column,slice).multiplyScalar(2.).distanceTo(threeDDimensions),0,1.);
 			initialState[ firstIndex + 1 ] = 0.;
 			initialState[ firstIndex + 2 ] = 0.;
 			initialState[ firstIndex + 3 ] = 0.;
 		}
 
+
+
+		let layersToExciteU = [dimension / 2 + 19,dimension / 2 + 20];
+		let layersToExciteV = [dimension / 2 + 21,dimension / 2 + 22,dimension / 2 + 23,dimension / 2 + 24];
+		for(var k = 0; k < 3*dimension/4; k++)
+		for(var i = 0; i < 3*dimension/4; i++)
+		{
+			initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteU[0])) + 0] = 1.;
+			initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteU[1])) + 0] = 1.;
+			
+			initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteV[0])) + 1] = 1.;
+			initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteV[1])) + 1] = 1.;
+			initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteV[2])) + 1] = 1.;
+			initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteV[3])) + 1] = 1.;
+		}
+
+
+
+
 		let numStepsPerFrame = 1; //maaaaaybe worth making sure it's even
 		material.uniforms.data2d = {value:null};
-		await Simulation( textureDimensions, "layeredSimulation", "periodic", initialState, numStepsPerFrame, material.uniforms.data2d )
+		await Simulation( textureDimensions, "layeredSimulation", "clamped", initialState, numStepsPerFrame, material.uniforms.data2d )
 		// updateFunctions.push(function()
 		// {
 		// 	log(material.uniforms.data2d.value.minFilter, THREE.LinearFilter)
@@ -154,11 +173,10 @@ async function initScalarFieldVisualization()
 
 		let data3d = new THREE.DataTexture3D( dataArray, dimension, dimension, dimension );
 
-		//copied from threejs texture3D example
 		data3d.format = THREE.RedFormat;
 		data3d.type = THREE.FloatType;
 		data3d.minFilter = data3d.magFilter = THREE.LinearFilter;
-		data3d.unpackAlignment = 1; //1 byte. Buuuuut the numbers have 32 bits = 4 bytes?
+		data3d.unpackAlignment = 1; //1 byte. Buuuuut the numbers have 32 bits = 4 bytes? From threejs texture3D example
 		data3d.needsUpdate = true;
 
 		material.uniforms.data3d = {value:data3d}
@@ -169,7 +187,7 @@ async function initScalarFieldVisualization()
 		bindButton("i",function(){},"increase isolevel",function()
 		{
 			uniforms.isolevel.value += 0.003;
-			// log(uniforms.isolevel.value)
+			log(uniforms.isolevel.value)
 		})
 		bindButton("o",function(){},"increase isolevel",function()
 		{
