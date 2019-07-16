@@ -22,7 +22,7 @@ function initMouse()
 		}))
 		cursor.scale.z *= 0.01
 		cursor.castShadow = true;
-		scene.add(cursor)
+		// scene.add(cursor)
 
 		updateFunctions.push( function()
 		{

@@ -47,152 +47,40 @@ function initSurroundings()
 	return stage;
 }
 
-function initCameraZoomSystem()
-{
-	camera.defaultZ = 2.5
-	camera.setToDefaultZoom = function()
-	{
-		camera.zoomTo = camera.defaultZ
-		camera.zoomFrom = camera.defaultZ
-		camera.zoomProgress = 1;
-		setZoomToBeingConsidered(camera.defaultZ)
-		camera.updatePosition()
-	}
+// function smoothTween(start, end, t)
+// {
+// 	if(t < 0.5)
+// 	{
+// 		var areaUnderVelocityGraph = sq(t) / 2
+// 	}
+// 	else
+// 	{
+// 		var displacementFromHalf = t - 0.5;
+// 		var extraArea = displacementFromHalf / 2 - sq(displacementFromHalf) / 2
+// 		var areaUnderVelocityGraph = 1 / 8 + extraArea;
+// 	}
+// 	var scaledToMakeUnitIntegral1 = areaUnderVelocityGraph * 4;
 
-	function smoothTween(start, end, t)
-	{
-		if(t < 0.5)
-		{
-			var areaUnderVelocityGraph = sq(t) / 2
-		}
-		else
-		{
-			var displacementFromHalf = t - 0.5;
-			var extraArea = displacementFromHalf / 2 - sq(displacementFromHalf) / 2
-			var areaUnderVelocityGraph = 1 / 8 + extraArea;
-		}
-		var scaledToMakeUnitIntegral1 = areaUnderVelocityGraph * 4;
-
-		return start + scaledToMakeUnitIntegral1 * (end-start);
-	}
-	function linearTween(start, end, t)
-	{
-		return start + t * (end-start);
-	}
-	var timeSinceZoomToConsideration = 0;
-
-	updateFunctions.push(function()
-	{
-		var timeToWaitBeforeZooming = 0.18
-		if(timeSinceZoomToConsideration < timeToWaitBeforeZooming && timeToWaitBeforeZooming < timeSinceZoomToConsideration + frameDelta )
-		{
-			camera.zoomTo = zoomToBeingConsidered;
-			camera.zoomFrom = camera.position.z;
-			camera.zoomProgress = 0;
-		}
-		timeSinceZoomToConsideration += frameDelta;
-		camera.zoomProgress += 1.1 * frameDelta;
-		camera.zoomProgress = clamp(camera.zoomProgress,0,1)
-		camera.updatePosition()
-	})
-
-	camera.updatePosition = function()
-	{
-		camera.position.z = smoothTween(
-			camera.zoomFrom,
-			camera.zoomTo,
-			camera.zoomProgress)
-	}
-
-	var considerationIndicatorHorizontal = new THREE.LineSegments(new THREE.Geometry(), new THREE.LineBasicMaterial({color:0xFFFFFF}))
-	scene.add(considerationIndicatorHorizontal)
-	var a = AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0;
-	considerationIndicatorHorizontal.geometry.vertices.push(
-		new THREE.Vector3(a,1,0), new THREE.Vector3(a+1,1,0),
-		new THREE.Vector3(-a,1,0), new THREE.Vector3(-a-1,1,0),
-
-		new THREE.Vector3(a,-1,0), new THREE.Vector3(a+1,-1,0),
-		new THREE.Vector3(-a,-1,0), new THREE.Vector3(-a-1,-1,0) )
-	var considerationIndicatorVertical = new THREE.LineSegments(new THREE.Geometry(), considerationIndicatorHorizontal.material)
-	scene.add(considerationIndicatorVertical)
-	a = AUDIENCE_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0;
-	considerationIndicatorVertical.geometry.vertices.push(
-		new THREE.Vector3(1,a,0), new THREE.Vector3(1,a+1,0),
-		new THREE.Vector3(1,-a,0), new THREE.Vector3(1,-a-1,0),
-
-		new THREE.Vector3(-1,a,0), new THREE.Vector3(-1,a+1,0),
-		new THREE.Vector3(-1,-a,0), new THREE.Vector3(-1,-a-1,0) )
-
-	var zoomToBeingConsidered;
-	if(!PUBLIC_FACING)
-	{
-		document.onwheel = function (event)
-		{
-			event.preventDefault();
-			if(!event.ctrlKey)
-			{
-				var proposedZoomTo = zoomToBeingConsidered + 0.14 * event.deltaY / 250 * camera.defaultZ;
-				setZoomToBeingConsidered(proposedZoomTo)
-				timeSinceZoomToConsideration = 0;
-			}
-		}
-	}
-	
-	function setZoomToBeingConsidered(proposedZoomTo)
-	{
-		zoomToBeingConsidered = clamp( proposedZoomTo, 0.0001, camera.defaultZ)
-		considerationIndicatorVertical.scale.x = AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 * (zoomToBeingConsidered/camera.defaultZ);
-		considerationIndicatorHorizontal.scale.y = considerationIndicatorVertical.scale.x / AUDIENCE_ASPECT_RATIO
-	}
-	setZoomToBeingConsidered(camera.defaultZ)
-}
+// 	return start + scaledToMakeUnitIntegral1 * (end-start);
+// }
+// function linearTween(start, end, t)
+// {
+// 	return start + t * (end-start);
+// }
 
 function initCameraAndRendererResizeSystem(renderer)
 {
-	initCameraZoomSystem()
-
-	if(!PUBLIC_FACING)
-	{
-		var audienceScreenIndicator = new THREE.Mesh(new THREE.RingBufferGeometry(Math.sqrt(2), Math.sqrt(2) + 0.1, 4, 1, TAU / 8), new THREE.MeshBasicMaterial({color:0xFF0000}));
-		audienceScreenIndicator.position.z = -camera.near-0.0001
-		camera.add(audienceScreenIndicator)
-	}
+	camera.position.z = 2.5
+	camera.fov = 70;
 
 	function respondToResize() 
 	{
-		// console.log( "Renderer dimensions: ", window.innerWidth, window.innerHeight )
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		camera.aspect = window.innerWidth / window.innerHeight;
-
-		camera.setToDefaultZoom()
-
-		if( !PUBLIC_FACING )
-		{
-			var audienceProportionOfWindowWidth = getAudienceProportionOfWindowWidth();
-			var horizontalCenterToFrameDistance = AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0 / audienceProportionOfWindowWidth
-
-			var horizontalFov = fovGivenCenterToFrameDistance( horizontalCenterToFrameDistance, camera.position.z );
-			camera.fov = otherFov(horizontalFov,camera.aspect, false)
-
-			audienceScreenIndicator.scale.x = centerToFrameDistance(horizontalFov, audienceScreenIndicator.position.z) * audienceProportionOfWindowWidth
-			audienceScreenIndicator.scale.y = audienceScreenIndicator.scale.x / AUDIENCE_ASPECT_RATIO;
-		}
-		else
-		{
-			if(camera.aspect > AUDIENCE_ASPECT_RATIO)
-			{
-				camera.fov = fovGivenCenterToFrameDistance(AUDIENCE_CENTER_TO_TOP_OF_FRAME_AT_Z_EQUALS_0, camera.position.z )
-			}
-			else
-			{
-				var horizontalFov = camera.fov = fovGivenCenterToFrameDistance(AUDIENCE_CENTER_TO_SIDE_OF_FRAME_AT_Z_EQUALS_0, camera.position.z )
-				camera.fov = otherFov( horizontalFov, camera.aspect, false )
-			}
-		}
-
 		camera.updateProjectionMatrix();
 	}
 	respondToResize();
+	log(camera.fov)
 	window.addEventListener( 'resize', respondToResize, false );
 }
 

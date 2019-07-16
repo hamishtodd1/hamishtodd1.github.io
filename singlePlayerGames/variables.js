@@ -1,3 +1,5 @@
+const log = console.log
+
 //-----Mathematical
 const TAU = Math.PI * 2;
 const HS3 = Math.sqrt(3)/2
