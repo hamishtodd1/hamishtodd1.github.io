@@ -1,3 +1,7 @@
+/*
+	
+*/
+
 async function initLayeredSimulation()
 {
 	let dimension = 32;

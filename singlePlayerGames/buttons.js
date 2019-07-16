@@ -8,7 +8,7 @@ function initButtons()
 			console.error("attempted to bind a button that already has a binding")
 		}
 
-		console.log("\n",buttonName + ": " + functionDescription)
+		// console.log("\n",buttonName + ": " + functionDescription)
 		buttonBindings[buttonName] = ourFunction;
 	}
 
