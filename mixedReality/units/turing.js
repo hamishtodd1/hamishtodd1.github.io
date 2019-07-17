@@ -100,6 +100,19 @@ async function initGrayScottSimulation()
 				//why does it happen?
 				// black (can switch to blue) ones that occasionally turn red
 				// aaaaand green ones can occasionally turn black
+
+				/*
+					Ok though, so how does a reaction diffusion system work?
+
+					We are going to pause this thing and massively zoom in on the pixels here.
+					What do we see,
+					[explain diffusion]
+					If you just have diffusion, things are, well, not super interesting, the things just mix together in a simple way
+					You have to have this other thing which is reaction. Now this is the part that allows for the diversity of reaction diffusion systems (show all the videos), because there are many chemicals that react in lots of different ways. We're going to take a simple kind of reaction.
+					First, 
+					
+					have the background of the box reflect the chemicals in there
+				*/
 			}
 
 			pointsGeometry.verticesNeedUpdate = true;
