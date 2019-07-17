@@ -32,7 +32,7 @@ async function initGrayScottSimulation()
 		pointsMesh.position.copy(rightHand.position)
 		pointsMesh.position.z += 0.1
 
-		let pl = new THREE.Mesh(new THREE.OriginCorneredPlaneBufferGeometry(0.1,0.1), new THREE.MeshBasicMaterial())
+		let pl = new THREE.Mesh(new THREE.OriginCorneredPlaneBufferGeometry(0.1,0.1), new THREE.MeshBasicMaterial({color:0x000000}))
 		scene.add(pl)
 		pl.position.copy(pointsMesh.position)
 		pl.position.z -= 0.001
@@ -74,27 +74,31 @@ async function initGrayScottSimulation()
 					p.position.y = limits.bottom + (-p.position.y + limits.bottom)
 				}
 
-				if(p.color.r === discreteViridis[0].color.r && Math.random() < 0.01)
-				{
-					p.color.copy(discreteViridis[1].color) //1 gets fed by 0
-				}
-				if(p.color.r === discreteViridis[2].color.r && Math.random() < 0.01)
-				{
-					p.color.copy(discreteViridis[0].color) //2 gets killed to 0
-				}
+				// if(p.color.r === discreteViridis[0].color.r && Math.random() < 0.01)
+				// {
+				// 	p.color.copy(discreteViridis[1].color) //1 gets fed by 0
+				// }
+				// if(p.color.r === discreteViridis[2].color.r && Math.random() < 0.01)
+				// {
+				// 	p.color.copy(discreteViridis[0].color) //2 gets killed to 0
+				// }
 
-				// numNearby = 0;
-				// for(otherParticles)
-				// {
-				// 	if( particle.position.distanceSq(otherParticles.position) )
-				// 	{
-				// 		numNearby++;
-				// 	}
-				// }
-				// if(numNearby >= 2)
-				// {
-				// 	particle.color = blah;
-				// }
+				numNearby = 0;
+				if(p.color.r === discreteViridis[1].color.r)
+				{
+					for(let j = 0; j < numPoints; j++)
+					{
+						if( points[j].color.r === discreteViridis[2].color.r &&
+							points[j].position.distanceToSquared(p.position) < 0.00001 )
+						{
+							numNearby++;
+						}
+					}
+					if(numNearby >= 2)
+					{
+						p.color.copy( discreteViridis[2].color )
+					}
+				}
 
 				// kill and feed
 				//why does it happen?
