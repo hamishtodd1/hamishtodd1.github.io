@@ -14,6 +14,7 @@
 		It's vertical
 		Or could be a donut, which makes it simpler
 		Amplitude to probability distribution is easy, it's a surface of revolution of |phi^2|
+		Some wave functions that would be interesting to diffuse
 
 	Parametric stuff, use vertex shader
 		Lines

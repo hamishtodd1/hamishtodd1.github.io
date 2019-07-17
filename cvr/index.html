@@ -1,0 +1,164 @@
+<html>
+	<head>
+		<title>cootVR</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				margin: 0px;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<script src="lib/three.js"></script>
+		<script src="lib/sceneUtils.js"></script>
+
+		<!--<script src="lib/WireframeGeometry.js"></script> if you've had no errors for a while, delete this and the file-->
+
+		<!-- <script src="lib/THREE.AugmentedConsole.js"></script> -->
+
+		<script src="lib/OBJLoader.js"></script>
+		
+		<script src="pdb.js"></script>
+		
+		<script src="lib/WebVR.js"></script>
+		<script src="hands.js"></script>
+
+		<script src="surroundings.js"></script>
+		<script src="panel.js"></script>
+
+		<script src="atom.js"></script>
+
+		<script src="displayManager.js"></script>
+
+		<script src="maps.js"></script>
+		
+		<script src="models.js"></script>
+		<script src="holdables.js"></script>
+		<script src="text.js"></script>
+		
+			<script src="tools/deleters.js"></script>
+			<script src="tools/atomLabeller.js"></script>
+			<script src="tools/movers.js"></script>
+			<script src="tools/refine.js"></script>
+			<script src="tools/proteinPainter.js"></script>
+			<script src="tools/nucleicAcidPainter.js"></script>
+			<script src="tools/mutator.js"></script>
+			<!--<script src="tools/handDistances.js"></script>-->
+			<script src="tools/newAtomRoster.js"></script>
+			<script src="tools/fileNavigation.js"></script>
+			<script src="tools/environmentDistances.js"></script>
+
+			<script src="ramachandran.js"></script>	
+			
+		<script src="stats.js"></script>
+		<script src="spectatorRepresentation.js"></script>
+		
+		<script src="scaleStick.js"></script>
+		<!--<script src="keyboardInputAndMonomerReceiver.js"></script>-->
+		<script src="visiBox.js"></script>
+		
+		<script src="loop.js"></script>
+		<script src="connection.js"></script>
+
+		<script src="nonCootConnectedInit.js"></script>
+		
+		<script src="miscFunctions.js"></script>
+		<script src="variables.js"></script>
+		<script src="init.js"></script>
+
+		<script type="x-shader/x-vertex" id="modelVertexShader">
+			varying vec3 N;
+			varying vec3 v;
+			void main() 
+			{
+				//v = vec3(gl_ModelViewMatrix * gl_Vertex);       
+				//N = normalize(gl_NormalMatrix * gl_Normal);
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+				//gl_Position = gl_ModelViewProjectionMatrix * position;
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="modelFragmentShader">
+			void main()
+			{
+				gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+			}
+		</script>
+		
+		<script type="x-shader/x-vertex" id="vertexShader">
+			varying vec3 vWorldPosition;
+			void main() {
+				vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
+				vWorldPosition = worldPosition.xyz;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="fragmentShader">
+			uniform vec3 topColor;
+			uniform vec3 bottomColor;
+			uniform float offset;
+			uniform float exponent;
+			varying vec3 vWorldPosition;
+			void main() {
+				float h = normalize( vWorldPosition + offset ).y;
+				gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( max( h , 0.0), exponent ), 0.0 ) ), 1.0 );
+			}
+		</script>
+
+		<script>
+			init()
+		</script>
+	</body>
+</html>
+
+<!--
+windows key + space to change keyboard layout
+
+Install procedure
+	work/setup-path to ensure python, pip, coot were all consistent
+	Needed pip to install python modules
+		To install pip needed python with SSL
+		Had to use 2.7.14
+		Edited Modules/setup to uncomment the SSL section
+		   	Changed library to lib64 from lib
+		   	--with-ensurepip=install
+	python.exe get-pip.py
+	pip install singledispatch
+	pip install backports_abc
+	pip install tornado
+	Never try to avoid pip
+
+Update procedure, in autobuild:
+	Switch virtual machine connection mode to NAT
+	in gitcoot/coot, git pull
+	in gitcoot/coot, bash autogen.sh
+	in gitcoot/build, bash CIH.sh
+	in gitcoot/build, make
+	in gitcoot/build, make install
+	It is now in Linux-localhost
+
+Running procedure:
+	Switch virtual machine connection mode to host-only
+		May say "invalid settings". Go to file > host network manager
+		Create one and enable DCPH
+	hostname -I gets ip address to put in browser
+	For no graphics: /home/htodd/autobuild/Linux-localhost.../bin/coot --no-graphics -s CVR/Server.py
+	To get out of coot:
+		ctrl C
+		ctrl D
+	
+at some point:
+	do a 
+	git status
+	make sure that it's clean
+	"Your branch is up to date"
+	"working directory clean"
+	then:
+	    git branch refinement origin/refinement
+
+https://drive.google.com/open?id=0BzudLt22BqGRRElMNmVqQjJWS2c webvr build, yes it's a bit old but fast and no timebomb
+
+Workflow: save script, change window, ctrl+C to finish script in coot, ctrl+D to exit coot, up and enter to re-run coot
+Need to optimize this workflow.
+-->

@@ -15,6 +15,20 @@ Publication
 
 */
 /*
+	While you're not holding it it should probably be rotating. And be close to the camera.
+	Aaaaand ideally you want to render, not from the back, but from the back OR the place that the mesh begins
+	Could be very helpful for wave functions.
+	Surely useful for electromagnetism.
+	Could put a "handle" at the back of it, i.e. a black box rendered with THREE.BackSide
+	Diffusive tensor imaging
+	"orientation field" with Ivan
+		lower dimensional analogy is moving hand around 2D
+			It starts out all neutral orientation
+			So you draw some lines (or points) and those do get set in stone
+			Every point becomes a weighted average of the value at those curves nearest to it
+		Bunch of transparent copies of the controller mesh probably. instancing!
+
+
 	TODO
 		Control color mapping
 			Any color mapping is a line throught the RGB cube
