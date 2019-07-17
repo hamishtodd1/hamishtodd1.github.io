@@ -240,7 +240,7 @@ function initThreeSphereExploration( height )
 		let whenGrabbedHandPosition = new THREE.Vector3()
 		let whenGrabbedHandQuaternion = new THREE.Quaternion()
 
-		let designatedHand = handControllers[0]
+		let designatedHand = hands[0]
 		let virtualHand = {
 			position:new THREE.Vector3(),
 			quaternion:new THREE.Quaternion(),

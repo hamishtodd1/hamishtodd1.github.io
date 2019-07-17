@@ -90,14 +90,14 @@ function VisiBox()
 		// for(let i = 0; i < 2; i++)
 		// {
 		// 	//if your handController is in it and you press a certain button, toggle size
-		// 	let p = visiBox.worldToLocal(handControllers[i].getWorldPosition(new THREE.Vector3()))
+		// 	let p = visiBox.worldToLocal(hands[i].getWorldPosition(new THREE.Vector3()))
 		// 	if( -0.5 < p.x && p.x < 0.5 &&
 		// 		-0.5 < p.y && p.y < 0.5 &&
 		// 		-0.5 < p.z && p.z < 0.5  )
 		// 	{
 		// 		//light up?
 				
-		// 		if( handControllers[i].button2 && !handControllers[i].button2Old )
+		// 		if( hands[i].button2 && !hands[i].button2Old )
 		// 		{
 		// 			if(visiBox.scale.x < 100)
 		// 			{

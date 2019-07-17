@@ -1,6 +1,6 @@
 function initTwoSphereExploration(fish, visiBox, height)
 {
-	let designatedHand = handControllers[RIGHT_CONTROLLER_INDEX]
+	let designatedHand = hands[RIGHT_CONTROLLER_INDEX]
 
 	let assemblage = new THREE.Group()
 	scene.add(assemblage)

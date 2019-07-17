@@ -61,9 +61,9 @@ function initMapCreationSystem(visiBox)
 
 				for(var i = 0; i < 2; i++)
 				{
-					if( Math.abs( handControllers[i].thumbStickAxes[1] ) > 0.1 )
+					if( Math.abs( hands[i].thumbStickAxes[1] ) > 0.1 )
 					{
-						isolevel += 0.06 * handControllers[i].thumbStickAxes[1] * handControllers[i].thumbStickAxes[1] * handControllers[i].thumbStickAxes[1];
+						isolevel += 0.06 * hands[i].thumbStickAxes[1] * hands[i].thumbStickAxes[1] * hands[i].thumbStickAxes[1];
 						msg.currentCenterOnGrids.length = 0;
 					}
 				}

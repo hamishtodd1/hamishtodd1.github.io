@@ -34,7 +34,7 @@ function initFish( visiBox )
 
 			updateFunctions.push(function()
 			{
-				closedMouthMesh.visible = handControllers[RIGHT_CONTROLLER_INDEX].grippingTop
+				closedMouthMesh.visible = hands[RIGHT_CONTROLLER_INDEX].grippingTop
 			})
 		},function(){},function(e){console.error(e)})
 	},function(){},function(e){console.error(e)})

@@ -22,14 +22,14 @@ function initCameraHolder(screen)
 
 	updateFunctions.push(function()
 	{
-		if(handControllers[LEFT_CONTROLLER_INDEX].button1)
+		if(hands[LEFT_CONTROLLER_INDEX].button1)
 		{
 			//don't think too hard, will be tweaked away anyway.
 			cameraHolder.position.set(0,0,-0.1)
-			cameraHolder.position.add(handControllers[LEFT_CONTROLLER_INDEX].position)
+			cameraHolder.position.add(hands[LEFT_CONTROLLER_INDEX].position)
 		}
 
-		if(handControllers[LEFT_CONTROLLER_INDEX].button1Old && !handControllers[LEFT_CONTROLLER_INDEX].button1)
+		if(hands[LEFT_CONTROLLER_INDEX].button1Old && !hands[LEFT_CONTROLLER_INDEX].button1)
 		{
 			let m = new THREE.Matrix4()
 			m.setPosition(correctPosition.clone().sub(cameraHolder.position))
@@ -174,20 +174,20 @@ function initCameraHolder(screen)
 
 		// updateFunctions.push(function()
 		// {
-		// 	if( handControllers[LEFT_CONTROLLER_INDEX].button1 )
+		// 	if( hands[LEFT_CONTROLLER_INDEX].button1 )
 		// 	{
-		// 		realSpaceGuidePoints[0].copy( handControllers[LEFT_CONTROLLER_INDEX].position )
+		// 		realSpaceGuidePoints[0].copy( hands[LEFT_CONTROLLER_INDEX].position )
 		// 	}
-		// 	else if( handControllers[LEFT_CONTROLLER_INDEX].button2 )
+		// 	else if( hands[LEFT_CONTROLLER_INDEX].button2 )
 		// 	{
-		// 		realSpaceGuidePoints[1].copy( handControllers[LEFT_CONTROLLER_INDEX].position )
+		// 		realSpaceGuidePoints[1].copy( hands[LEFT_CONTROLLER_INDEX].position )
 		// 	}
-		// 	else if( handControllers[LEFT_CONTROLLER_INDEX].button1Old )
+		// 	else if( hands[LEFT_CONTROLLER_INDEX].button1Old )
 		// 	{
 		// 		realSpaceGuidePoints[1].y = realSpaceGuidePoints[0].y
 		// 		log("real space guide point " + 1 + " at ", screenGuidePoints[1].toArray().toString())
 		// 	}
-		// 	else if( handControllers[LEFT_CONTROLLER_INDEX].button2Old )
+		// 	else if( hands[LEFT_CONTROLLER_INDEX].button2Old )
 		// 	{
 		// 		realSpaceGuidePoints[0].y = realSpaceGuidePoints[1].y
 		// 		log("real space guide point " + 0 + " at ", screenGuidePoints[0].toArray().toString())

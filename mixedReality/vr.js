@@ -29,7 +29,7 @@ function initVrOrMockVrInput()
 	{
 		for(let i = 0; i < 2; i++ )
 		{
-			let hand = handControllers[i]
+			let hand = hands[i]
 
 			hand.thumbstickRightOld = hand.thumbstickRight
 			hand.thumbstickLeftOld = hand.thumbstickLeft
@@ -56,7 +56,7 @@ function initVrOrMockVrInput()
 
 		for(let i = 0; i < 2; i++ )
 		{
-			let hand = handControllers[i]
+			let hand = hands[i]
 			hand.deltaPosition.copy(hand.position).sub(hand.positionOld);
 			hand.deltaQuaternion.copy(hand.quaternionOld).inverse().multiply(hand.quaternion);
 		}
@@ -113,7 +113,7 @@ function actualVrInput()
 			continue;
 		}
 
-		let hand = handControllers[affectedControllerIndex]
+		let hand = hands[affectedControllerIndex]
 		
 		hand.thumbstickAxes[0] = gamepads[k].axes[0];
 		hand.thumbstickAxes[1] = gamepads[k].axes[1];
@@ -156,7 +156,7 @@ function initControllerObjects()
 	var controllerMaterial = new THREE.MeshStandardMaterial({color:0x444444});
 	for(var i = 0; i < 2; i++)
 	{
-		let hand = handControllers[i]
+		let hand = hands[i]
 
 		for( var propt in handControllerKeys )
 		{
@@ -198,7 +198,7 @@ function initControllerObjects()
 		new THREE.OBJLoader().load( "data/external_controller01_" + (i===LEFT_CONTROLLER_INDEX?"left":"right") + ".obj",
 			function ( object )
 			{
-				handControllers[i].controllerModel.geometry = object.children[0].geometry;
+				hands[i].controllerModel.geometry = object.children[0].geometry;
 
 				let m = new THREE.Matrix4()
 				let q = new THREE.Quaternion( -0.3375292117664683,-0.044097048926644455,0.0016882363725985309,-0.9402800813258839 )
@@ -207,7 +207,7 @@ function initControllerObjects()
 				{
 					m.makeRotationFromQuaternion(q)
 					m.setPosition(new THREE.Vector3(-0.012547648553172985,0.03709224605844833,-0.038470991285082676))
-					handControllers[ i ].controllerModel.geometry.applyMatrix( m )
+					hands[ i ].controllerModel.geometry.applyMatrix( m )
 				}
 				else
 				{
@@ -220,10 +220,10 @@ function initControllerObjects()
 					
 					m.makeRotationFromQuaternion(otherQ)
 					m.setPosition(new THREE.Vector3(0.012547648553172985,0.03709224605844833,-0.038470991285082676))
-					handControllers[i].controllerModel.geometry.applyMatrix( m )
+					hands[i].controllerModel.geometry.applyMatrix( m )
 				}
 
-				handControllers[ i ].controllerModel.geometry.computeBoundingSphere()
+				hands[ i ].controllerModel.geometry.computeBoundingSphere()
 			},
 			function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); } );
 	}

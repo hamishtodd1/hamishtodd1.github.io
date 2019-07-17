@@ -36,9 +36,9 @@ let objectsToBeLookedAtByHelmet = [camera]
 
 const RIGHT_CONTROLLER_INDEX = 0;
 const LEFT_CONTROLLER_INDEX = 1-RIGHT_CONTROLLER_INDEX;
-let handControllers = [new THREE.Object3D(),new THREE.Object3D()]
-let rightHand = handControllers[RIGHT_CONTROLLER_INDEX]
-let leftHand = handControllers[LEFT_CONTROLLER_INDEX]
+let hands = [new THREE.Object3D(),new THREE.Object3D()]
+let rightHand = hands[RIGHT_CONTROLLER_INDEX]
+let leftHand = hands[LEFT_CONTROLLER_INDEX]
 
 let updateFunctions = [];
 let alwaysUpdateFunctions = []
@@ -47,3 +47,9 @@ let holdables = [];
 let videoDomElement = document.createElement( 'video' )
 videoDomElement.style = "display:none"
 videoDomElement.crossOrigin = 'anonymous';
+
+const discreteViridis = [
+	{hex:0xFCE51E, color:new THREE.Color(0.984375,0.89453125,0.1171875)},
+	{hex:0x49BE54, color:new THREE.Color(0.28515625,0.7421875,0.328125)},
+	{hex:0x2A477A, color:new THREE.Color(0.1640625,0.27734375,0.4765625)},
+	{hex:0x340042, color:new THREE.Color(0.203125,0.,0.2578125)}];

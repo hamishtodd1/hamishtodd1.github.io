@@ -109,7 +109,7 @@ function initPanel()
 		cursors[i] = new THREE.Mesh(cursorGeometry,cursorMaterial)
 		cursors[i].polar = 0;
 		cursors[i].azimuthal = 0;
-		handControllers[i].cursor = cursors[i]
+		hands[i].cursor = cursors[i]
 		panel.add(cursors[i])
 	}
 
@@ -122,9 +122,9 @@ function initPanel()
 			The laser should end at the cursor
 		*/
 
-		for(let i = 0; i < handControllers.length; i++)
+		for(let i = 0; i < hands.length; i++)
 		{
-			let intersections = handControllers[i].intersectLaserWithObject(collisionPanel)
+			let intersections = hands[i].intersectLaserWithObject(collisionPanel)
 			if( intersections.length )
 			{
 				let intersection = intersections[0].point
@@ -141,13 +141,13 @@ function initPanel()
 
 				cursors[i].position.copy( anglesToPanel(cursors[i].polar,cursors[i].azimuthal) )
 
-				handControllers[i].laser.scale.y = handControllers[i].position.distanceTo( cursors[i].position.clone().applyMatrix4(panel.matrix) )
+				hands[i].laser.scale.y = hands[i].position.distanceTo( cursors[i].position.clone().applyMatrix4(panel.matrix) )
 			}
 
 			//a bad idea
-			// if( handControllers[i].position.length() > panel.scale.x )
+			// if( hands[i].position.length() > panel.scale.x )
 			// {
-			// 	panel.scale.setScalar( handControllers[i].position.length() )
+			// 	panel.scale.setScalar( hands[i].position.length() )
 			// 	collisionPanel.scale.copy( panel.scale )
 			// }
 		}
@@ -299,14 +299,14 @@ function initPanel()
 					}
 				}
 
-				for(var j = 0; j < handControllers.length; j++)
+				for(var j = 0; j < hands.length; j++)
 				{
 					if( textMeshes[i].buttonFunction || textMeshes[i].switchObject )
 					{
-						if( handControllers[j].intersectLaserWithObject( textMeshes[i] ).length !== 0 )
+						if( hands[j].intersectLaserWithObject( textMeshes[i] ).length !== 0 )
 						{
 							textMeshes[i].material.color.copy( highlightedColor )
-							if( handControllers[j].grippingTop && !handControllers[j].grippingTopOld )
+							if( hands[j].grippingTop && !hands[j].grippingTopOld )
 							{
 								if( textMeshes[i].buttonFunction )
 								{
@@ -322,15 +322,15 @@ function initPanel()
 
 					if( textMeshes[i].object3d )
 					{
-						if( handControllers[j].intersectLaserWithObject( textMeshes[i] ).length !== 0 ||
-							handControllers[j].intersectLaserWithObject( textMeshes[i].object3dFrame ).length !== 0 )
+						if( hands[j].intersectLaserWithObject( textMeshes[i] ).length !== 0 ||
+							hands[j].intersectLaserWithObject( textMeshes[i].object3dFrame ).length !== 0 )
 						{
-							if( handControllers[j].grippingTop && !handControllers[j].grippingTopOld )
+							if( hands[j].grippingTop && !hands[j].grippingTopOld )
 							{
 								textMeshes[i].material.color.copy( highlightedColor )
 
 								menu.remove(textMeshes[i].object3d)
-								handControllers[j].add(textMeshes[i].object3d) 
+								hands[j].add(textMeshes[i].object3d) 
 
 								if(textMeshes[i].object3d.onPickUp !== undefined)
 								{
@@ -342,10 +342,10 @@ function initPanel()
 							}
 						}
 					}
-					if( !handControllers[j].grippingTop && handControllers[j].grippingTopOld && 
-						textMeshes[i].object3d && textMeshes[i].object3d.parent === handControllers[j] )
+					if( !hands[j].grippingTop && hands[j].grippingTopOld && 
+						textMeshes[i].object3d && textMeshes[i].object3d.parent === hands[j] )
 					{
-						handControllers[j].remove(textMeshes[i].object3d)
+						hands[j].remove(textMeshes[i].object3d)
 						menu.add(textMeshes[i].object3d)
 
 						if(textMeshes[i].object3d.onLetGo !== undefined)
@@ -363,13 +363,13 @@ function initPanel()
 
 			if(!menu.parentController )
 			{
-				for(var i = 0; i < handControllers.length; i++)
+				for(var i = 0; i < hands.length; i++)
 				{
-					if( handControllers[i].button2 && !handControllers[i].button2Old ) //or alternatively, get grabbed if handControllers not grabbing anything. i.e. this goes in panelUpdate. Look in todo!
+					if( hands[i].button2 && !hands[i].button2Old ) //or alternatively, get grabbed if hands not grabbing anything. i.e. this goes in panelUpdate. Look in todo!
 					{
-						if( handControllers[i].intersectLaserWithObject( this ).length !== 0 )
+						if( hands[i].intersectLaserWithObject( this ).length !== 0 )
 						{
-							menu.parentController = handControllers[i]
+							menu.parentController = hands[i]
 						}
 					}
 				}
@@ -462,7 +462,7 @@ function initPanel()
 		updatables.push(tool);
 		tool.update = function()
 		{
-			if(handControllers.indexOf(this.parent) !== -1)
+			if(hands.indexOf(this.parent) !== -1)
 			{
 				var positionInAssemblage = this.getWorldPosition(new THREE.Vector3());
 				assemblage.updateMatrixWorld();
@@ -491,7 +491,7 @@ function initPanel()
 		{string:"Example menu"},
 		{string:"    Switch", 	switchObject:	assemblage, switchProperty:"visible"},
 		{string:"    Object3d",	object3d: testObject3d },//object3d could be a graph or rama
-		{string:"    Button", 	buttonFunction:	function(){handControllers[0].controllerModel.material.color.setRGB(Math.random(),Math.random(),Math.random());console.log("example menu item clicked")}},
+		{string:"    Button", 	buttonFunction:	function(){hands[0].controllerModel.material.color.setRGB(Math.random(),Math.random(),Math.random());console.log("example menu item clicked")}},
 	],6.34,6.24)
 }
 

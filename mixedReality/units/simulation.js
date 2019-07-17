@@ -1,5 +1,5 @@
 /*
-	
+	Could just use a whiteboard for RD explanation
 */
 
 async function initLayeredSimulation()
@@ -75,70 +75,7 @@ async function initLayeredSimulation()
 		new THREE.PlaneBufferGeometry( 0.3 * textureDimensions.x / textureDimensions.y, 0.3 ),
 		displayMaterial );
 	scene.add( displayMesh );
-	displayMesh.position.copy(handControllers[0].position)
-}
-
-async function initGrayScottSimulation()
-{
-	let dimensions = new THREE.Vector2(1024,1024);
-
-	let initialState = new Float32Array( dimensions.x * dimensions.y * 4 );
-	for ( let row = 0; row < dimensions.y; row ++ )
-	for ( let column = 0; column < dimensions.x; column ++ )
-	{
-		let firstIndex = (row * dimensions.x + column) * 4;
-
-		initialState[ firstIndex + 0 ] = 0.;
-		initialState[ firstIndex + 1 ] = 0.;
-		initialState[ firstIndex + 2 ] = 0.;
-		initialState[ firstIndex + 3 ] = 0.;
-
-		if( 40 < column && column < 60 )
-		{
-			initialState[ firstIndex + 0 ] = 1.;
-		}
-		if( 40 < row && row < 60 )
-		{
-			initialState[ firstIndex + 1 ] = 1.;
-		}
-	}
-
-	let displayMaterial = new THREE.ShaderMaterial( {
-		blending: 0, //prevent default premultiplied alpha values
-		uniforms:
-		{
-			simulationTexture: { value: null },
-		},
-		vertexShader: [
-			'precision highp float;',
-			'varying vec2 vUV;',
-
-			'void main (void) {',
-				'vUV = uv;', //necessary? Needs to be varying vec2
-				'gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
-			'}'
-		].join( '\n' ),
-		fragmentShader: [
-			'precision highp float;',
-			'varying vec2 vUV;',
-			'uniform sampler2D simulationTexture;',
-
-			'void main (void) {',
-				'vec2 uv = texture2D(simulationTexture, vUV).rg;',
-
-				'gl_FragColor = vec4( uv, 0., 1.0 );',
-			'}'
-		].join( '\n' )
-	} );
-
-	let numStepsPerFrame = 100;
-	await Simulation(dimensions,"grayScottSimulation", "periodic", initialState, numStepsPerFrame, displayMaterial.uniforms.simulationTexture )
-
-	let displayMesh = new THREE.Mesh(
-		new THREE.PlaneBufferGeometry( 0.3 * dimensions.x / dimensions.y, 0.3 ),
-		displayMaterial );
-	scene.add( displayMesh );
-	displayMesh.position.copy(handControllers[0].position)
+	displayMesh.position.copy(hands[0].position)
 }
 
 async function initBasicSimulation()
@@ -203,7 +140,7 @@ async function initBasicSimulation()
 		new THREE.PlaneBufferGeometry( 0.3 * dimensions.x / dimensions.y, 0.3 ),
 		displayMaterial );
 	scene.add( displayMesh );
-	displayMesh.position.copy(handControllers[0].position)
+	displayMesh.position.copy(hands[0].position)
 }
 
 async function Simulation( 

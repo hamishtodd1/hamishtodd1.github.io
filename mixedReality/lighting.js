@@ -30,8 +30,8 @@ function initLights()
 		renderer.shadowMap.enabled = true;
 		renderer.shadowMap.type = THREE.BasicShadowMap;
 
-		handControllers[0].controllerModel.castShadow = true;
-		handControllers[1].controllerModel.castShadow = true;
+		hands[0].controllerModel.castShadow = true;
+		hands[1].controllerModel.castShadow = true;
 		//the controller lasers too?
 		backPanel.receiveShadow = true;
 		floorTile.receiveShadow = true;
