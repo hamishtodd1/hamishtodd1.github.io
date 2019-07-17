@@ -3,7 +3,7 @@ async function initGrayScottSimulation()
 	//would be nice to have looooads of them and it is when you zoom out that they blur together
 	{
 		let pointsGeometry = new THREE.Geometry();
-		let numPoints = 100;
+		let numPoints = 200;
 		let points = Array(numPoints);
 		for(let i = 0; i < numPoints; i++)
 		{
@@ -16,51 +16,26 @@ async function initGrayScottSimulation()
 							0.002 * (Math.random() - 0.5),
 							0.002 * (Math.random() - 0.5),
 							0),
-				color: new THREE.Color().setHex(discreteViridis[Math.floor(Math.random() * 4)].hex)
+				color: new THREE.Color().copy(discreteViridis[Math.floor(Math.random() * 3)].color)
 			}
 
 			pointsGeometry.vertices.push(points[i].position);
 			pointsGeometry.colors.push(points[i].color);
 		}
 
-		let vShader = ['float size = 10.;', //yo
-		'uniform float scale;',
-		'#include <common>',
-		'#include <color_pars_vertex>',
-		'#include <fog_pars_vertex>',
-		'#include <morphtarget_pars_vertex>',
-		'#include <logdepthbuf_pars_vertex>',
-		'#include <clipping_planes_pars_vertex>',
-		'void main() {',
-			'#include <color_vertex>',
-			'#include <begin_vertex>',
-			'#include <morphtarget_vertex>',
-			'#include <project_vertex>',
-			'gl_PointSize = size;',
-			'#ifdef USE_SIZEATTENUATION',
-				'bool isPerspective = ( projectionMatrix[ 2 ][ 3 ] == - 1.0 );',
-				'if ( isPerspective ) gl_PointSize *= ( scale / - mvPosition.z );',
-			'#endif',
-			'#include <logdepthbuf_vertex>',
-			'#include <clipping_planes_vertex>',
-			'#include <worldpos_vertex>',
-			'#include <fog_vertex>',
-		'}'].join( '\n' )
-
-		// log(THREE.ShaderLib.points.uniforms.size.value)
-		let pointsMesh = new THREE.Points(pointsGeometry, new THREE.ShaderMaterial(
+		let pointsMesh = new THREE.Points(pointsGeometry, new THREE.PointsMaterial(
 		{
-			vertexColors: THREE.VertexColors,
-			fragmentShader: THREE.ShaderLib.points.fragmentShader,
-			vertexShader: vShader,
-			uniforms: THREE.ShaderLib.points.uniforms
+			size: 0.006,
+			vertexColors: THREE.VertexColors
 		}))
-		// log(THREE.ShaderLib.points.uniforms.size.value)
-		// pointsMesh.material.needsUpdate = true;
-
 		scene.add(pointsMesh)
 		pointsMesh.position.copy(rightHand.position)
 		pointsMesh.position.z += 0.1
+
+		let pl = new THREE.Mesh(new THREE.OriginCorneredPlaneBufferGeometry(0.1,0.1), new THREE.MeshBasicMaterial())
+		scene.add(pl)
+		pl.position.copy(pointsMesh.position)
+		pl.position.z -= 0.001
 
 		let limits = {
 			left:0,
@@ -98,27 +73,37 @@ async function initGrayScottSimulation()
 					p.velocity.y *= -1;
 					p.position.y = limits.bottom + (-p.position.y + limits.bottom)
 				}
+
+				if(p.color.r === discreteViridis[0].color.r && Math.random() < 0.01)
+				{
+					p.color.copy(discreteViridis[1].color) //1 gets fed by 0
+				}
+				if(p.color.r === discreteViridis[2].color.r && Math.random() < 0.01)
+				{
+					p.color.copy(discreteViridis[0].color) //2 gets killed to 0
+				}
+
+				// numNearby = 0;
+				// for(otherParticles)
+				// {
+				// 	if( particle.position.distanceSq(otherParticles.position) )
+				// 	{
+				// 		numNearby++;
+				// 	}
+				// }
+				// if(numNearby >= 2)
+				// {
+				// 	particle.color = blah;
+				// }
+
+				// kill and feed
+				//why does it happen?
+				// black (can switch to blue) ones that occasionally turn red
+				// aaaaand green ones can occasionally turn black
 			}
 
 			pointsGeometry.verticesNeedUpdate = true;
 			pointsGeometry.colorsNeedUpdate = true;
-
-			// numNearby = 0;
-			// for(otherParticles)
-			// {
-			// 	if( particle.position.distanceSq(otherParticles.position) )
-			// 	{
-			// 		numNearby++;
-			// 	}
-			// }
-			// if(numNearby >= 2)
-			// {
-			// 	particle.color = blah;
-			// }
-
-			// kill and feed
-			// black (can switch to blue) ones that occasionally turn red
-			// aaaaand green ones can occasionally turn black
 		})
 	}
 
