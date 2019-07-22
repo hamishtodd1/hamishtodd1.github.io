@@ -1,3 +1,7 @@
+/*
+	https://www.youtube.com/watch?v=Av6EUqf10vM
+*/
+
 async function initGrayScottSimulation()
 {
 	//would be nice to have looooads of them and it is when you zoom out that they blur together
@@ -106,14 +110,35 @@ async function initGrayScottSimulation()
 				// aaaaand green ones can occasionally turn black
 
 				/*
-					Ok though, so how does a reaction diffusion system work?
+					But what exactly is a reaction diffusion system? Well, I have a simple simulation of one here
+						it's quite interesting and dynamic
+						You can make lots of pretty stuff with some fairly clear resemblence to different animals
+						Especially if I change the colors
+					But how is this thing actually generating the patterns? Well it's very simple,
+						we're going to zoom in and slow down
+					Full of particles, just moving around randomly, which is what what molecules do all the time
+					Now "diffusion" is something that you can already see going on here, and I'm going to make it a bit easier to see. Let's pause
+					Suppose that for some reason you have a situation where, temporarily, we have a high concentration of one kind of molecule in one place like this
+					If we let time run forward, it all spreads out slowly, and eventually it's all completely equal
+						This situation is exactly what you have when somebody farts, as captured by this thermal camera
+					Aaaaand this is what diffusion is, the spreading out of chemicals until everything is mixed.
 
-					We are going to pause this thing and massively zoom in on the pixels here.
-					What do we see,
-					[explain diffusion]
-					If you just have diffusion, things are, well, not super interesting, the things just mix together in a simple way
-					You have to have this other thing which is reaction. Now this is the part that allows for the diversity of reaction diffusion systems (show all the videos), because there are many chemicals that react in lots of different ways. We're going to take a simple kind of reaction.
-					First, 
+					The reaction part you can probably guess. Let's zoom in again and pretend there are very few molecules around.
+					The chemicals that we can see now can transform into one another
+
+
+					Features needed:
+						Hide all
+						Show those that don't react
+						Show only those that react into one another
+						Reduce such that there are only enough to see a single reaction
+						Change averaged colors.
+						Confine to a single square
+						"paint"
+
+					You have to have this other thing which is reaction. Now . We're going to take a simple kind of reaction.
+
+					this is the part that allows for the diversity of reaction diffusion systems (show all the videos), because there are many chemicals that react in lots of different ways
 					
 					have the background of the box reflect the chemicals in there
 				*/
