@@ -19,6 +19,7 @@
 		Married a communist
 		Campaigned a lot against nuclear proliferation
 		Married to a communist
+		Possibly the first scientist ever to receive maternity leave
 	Structural biology
 		Her penicillin thing looks great, have that
 		The stuff in epipens
