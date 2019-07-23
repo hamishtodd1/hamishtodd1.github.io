@@ -1,6 +1,8 @@
 /*
 	Surfaces editing game
 
+	A set of bezier patches. You can control their tangent planes at corners and fix them together.
+
 	If you drag it in the direction of the gradient it "expands" or "retracts"
 	"No constants / linears allowed"?
 
@@ -15,4 +17,15 @@
 		The plane
 
 	Deffo do stereographic projection first
+
+	Look you have to be empirical, the point is to think of it all as temporary
+
+	One strategy to find all elements of fundamental group: you know you won't get crosses
 */
+
+function initSurfaceSculpting()
+{
+	//how to glue?
+
+
+}
