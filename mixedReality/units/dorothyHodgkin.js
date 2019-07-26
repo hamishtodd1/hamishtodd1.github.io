@@ -52,4 +52,11 @@
 		Whenever they were going to meet, Thatcher would read up on recent discoveries in chemistry
 		There's something very British about the idea of two extremely influential political people...
 			sitting and talking about chemistry
+
+			opposed giving her an honorary doctorate
+			Thatcher most certainly did not care about whether anybody on the left liked her
+			https://twitter.com/SomervilleOx/status/1072544277660618752
+			She later helped to found Somerville nursery with her Nobel Prize. To date, Somerville is one of the few colleges with onsite childcare provision in the university.
+
+	Imagine her in the room, trying to persuade her old student to lay down her weapon
 */

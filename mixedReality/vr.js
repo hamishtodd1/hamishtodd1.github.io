@@ -1,7 +1,7 @@
 var handControllerKeys = {
-	thumbstickButton:0,
+	thumbstickButton: 0,
 	grippingTop: 1,
-	grippingSide:2,
+	grippingSide: 2,
 	button1: 3,
 	button2: 4
 }
@@ -195,44 +195,43 @@ function initControllerObjects()
 
 	function loadControllerModel(i)
 	{
-		new THREE.OBJLoader().load( "data/external_controller01_" + (i===LEFT_CONTROLLER_INDEX?"left":"right") + ".obj",
-			function ( object )
+		new THREE.OBJLoader().load( "data/external_controller01_" + (i===LEFT_CONTROLLER_INDEX?"left":"right") + ".obj", function ( object )
+		{
+			hands[i].controllerModel.geometry = object.children[0].geometry;
+
+			let m = new THREE.Matrix4()
+			let q = new THREE.Quaternion( -0.3375292117664683,-0.044097048926644455,0.0016882363725985309,-0.9402800813258839 )
+
+			if(i === LEFT_CONTROLLER_INDEX)
 			{
-				hands[i].controllerModel.geometry = object.children[0].geometry;
+				m.makeRotationFromQuaternion(q)
+				m.setPosition(new THREE.Vector3(-0.012547648553172985,0.03709224605844833,-0.038470991285082676))
+				hands[ i ].controllerModel.geometry.applyMatrix( m )
+			}
+			else
+			{
+				let qAxis = new THREE.Vector3(
+					q.x / Math.sqrt(1-q.w*q.w),
+					q.y / Math.sqrt(1-q.w*q.w),
+					q.z / Math.sqrt(1-q.w*q.w))
+				qAxis.x *= -1
+				let otherQ = new THREE.Quaternion().setFromAxisAngle(qAxis,-2 * Math.acos(q.w))
+				
+				m.makeRotationFromQuaternion(otherQ)
+				m.setPosition(new THREE.Vector3(0.012547648553172985,0.03709224605844833,-0.038470991285082676))
+				hands[i].controllerModel.geometry.applyMatrix( m )
+			}
 
-				let m = new THREE.Matrix4()
-				let q = new THREE.Quaternion( -0.3375292117664683,-0.044097048926644455,0.0016882363725985309,-0.9402800813258839 )
-
-				if(i === LEFT_CONTROLLER_INDEX)
-				{
-					m.makeRotationFromQuaternion(q)
-					m.setPosition(new THREE.Vector3(-0.012547648553172985,0.03709224605844833,-0.038470991285082676))
-					hands[ i ].controllerModel.geometry.applyMatrix( m )
-				}
-				else
-				{
-					let qAxis = new THREE.Vector3(
-						q.x / Math.sqrt(1-q.w*q.w),
-						q.y / Math.sqrt(1-q.w*q.w),
-						q.z / Math.sqrt(1-q.w*q.w))
-					qAxis.x *= -1
-					let otherQ = new THREE.Quaternion().setFromAxisAngle(qAxis,-2 * Math.acos(q.w))
-					
-					m.makeRotationFromQuaternion(otherQ)
-					m.setPosition(new THREE.Vector3(0.012547648553172985,0.03709224605844833,-0.038470991285082676))
-					hands[i].controllerModel.geometry.applyMatrix( m )
-				}
-
-				hands[ i ].controllerModel.geometry.computeBoundingSphere()
-			},
-			function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); } );
+			hands[ i ].controllerModel.geometry.computeBoundingSphere()
+		},
+		function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); } );
 	}
 
-	loadControllerModel(RIGHT_CONTROLLER_INDEX)
+	loadControllerModel( RIGHT_CONTROLLER_INDEX )
 
-	if(MODE === VR_TESTING_MODE)
+	if( MODE === VR_TESTING_MODE )
 	{
-		loadControllerModel( LEFT_CONTROLLER_INDEX)
+		loadControllerModel( LEFT_CONTROLLER_INDEX )
 	}
 
 	markPositionAndQuaternion( rightHand )

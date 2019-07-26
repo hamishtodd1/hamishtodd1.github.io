@@ -282,7 +282,7 @@ function initProteinPainter()
 				// newAmide.quaternion.copy(proteinPainter.quaternion).premultiply()
 
 				let toolQuaternionInAssemblage = proteinPainter.quaternion.clone().premultiply( proteinPainter.parent.quaternion )
-				toolQuaternionInAssemblage.premultiply( assemblage.quaternion.getInverse() )
+				toolQuaternionInAssemblage.premultiply( assemblage.quaternion.clone().premultiply(assemblage.parent.quaternion).getInverse() )
 				newAmide.quaternion.copy(toolQuaternionInAssemblage)
 
 				//Oooooor, you might be continuing
@@ -365,7 +365,7 @@ function initProteinPainter()
 				newCarbon = prevNitrogen.clone()
 				newCarbon.applyAxisAngle(axis, TETRAHEDRAL_ANGLE )
 
-				let allowance = THREE.Math.DEG2RAD * 15 //Feels right; Lynne Regan would say 5
+				let allowance = THREE.Math.DEG2RAD * 15 //ALLOWANCE!! "Feels right"; Lynne Regan would say 5.
 				let extraAttractionTowardHand = prevCAlphaToHand.angleTo(newCarbon) - carbon.angleTo(nextCAlpha)
 				extraAttractionTowardHand = clamp( extraAttractionTowardHand, 0, allowance )
 				extraAttractionTowardHand *= handAtTopOfLampShade
