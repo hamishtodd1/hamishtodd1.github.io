@@ -19,6 +19,7 @@
 		<script src="lib/OBJLoader.js"></script>
 		<script src="lib/GLTFLoader.js"></script>
 		<script src="lib/WebVR.js"></script>
+		<script src="lib/d3-quadtree.js"></script>
 		
 		<script src="vr.js"></script>
 
@@ -69,9 +70,9 @@
 			async function init()
 			{
 				let canvas = document.createElement( 'canvas' );
-				let ctx = canvas.getContext( 'webgl2' );
-				console.assert(ctx !== null )
-				renderer = new THREE.WebGLRenderer( { canvas: canvas, context: ctx,antialias: true } );
+				let gl = canvas.getContext( 'webgl2' );
+				console.assert(gl !== null )
+				renderer = new THREE.WebGLRenderer( { canvas: canvas, context: gl,antialias: true } );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.localClippingEnabled = true;
@@ -88,6 +89,7 @@
 					window.addEventListener( 'resize', windowResize)
 				}
 
+				// initMouse()
 				initButtons()
 				initFaceMaker()
 				initLights()
@@ -100,7 +102,7 @@
 				}
 
 				// await initShaderExperimentation( canvas )
-				await initGrayScottSimulation()
+				await initGrayScottSimulation(gl)
 				// await initBasicSimulation()
 				// await initScalarFieldVisualization();
 				// await initLayeredSimulation()

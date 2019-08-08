@@ -10,6 +10,7 @@ log("Mode: ", MODE===PLAYBACK_MODE?"VR testing":MODE===VR_TESTING_MODE?"VR testi
 
 const TAU = Math.PI * 2;
 const HS3 = Math.sqrt(3)/2;
+const sqrt2 = Math.sqrt(2);
 const TETRAHEDRAL_ANGLE = 2 * Math.atan(Math.sqrt(2))
 
 let zUnit = new THREE.Vector3(0,0,1); //also used as a placeholder normal

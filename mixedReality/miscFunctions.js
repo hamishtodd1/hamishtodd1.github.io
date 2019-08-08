@@ -1,3 +1,18 @@
+function crappyLittleEffect()
+{
+	let effect = new THREE.Mesh(new THREE.RingBufferGeometry(0.01,0.011,32), new THREE.MeshBasicMaterial({transparent:true}))
+	effect.position.copy(rightHand.position)
+	effect.position.z += 0.1
+	scene.add(effect)
+
+	updateFunctions.push(function()
+	{
+		effect.scale.x += .4/effect.scale.x
+		effect.scale.setScalar(effect.scale.x)
+		effect.material.opacity -= 0.02;
+	})
+}
+
 function assignShader(fileName, materialToReceiveAssignment, vertexOrFragment)
 {
 	var propt = vertexOrFragment + "Shader"

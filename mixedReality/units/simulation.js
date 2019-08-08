@@ -145,15 +145,22 @@ async function initBasicSimulation()
 
 async function Simulation( 
 	dimensions, simulationShaderFilename, boundaryConditions,
-	initialState,
+	state,
 	numStepsPerFrame,
-	objectToHaveSimulationTextureAssignedTo)
+	objectToAssignSimulationTexture,
+	extraUniforms,
+	filter)
 {
 	let wrap = boundaryConditions === "periodic" ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
 
+	if(filter === undefined)
+	{
+		filter = THREE.NearestFilter;
+	}
+
 	let params = {
-		minFilter: THREE.LinearFilter,
-		magFilter: THREE.LinearFilter,
+		minFilter: filter,
+		magFilter: filter,
 		wrapS: wrap,
 		wrapT: wrap,
 		format: THREE.RGBAFormat,
@@ -165,7 +172,7 @@ async function Simulation(
 	let pingFramebuffer = new THREE.WebGLRenderTarget( dimensions.x, dimensions.y, params );
 	let pongFramebuffer = new THREE.WebGLRenderTarget( dimensions.x, dimensions.y, params );
 
-	let initialStateTexture = new THREE.DataTexture( initialState, dimensions.x, dimensions.y, THREE.RGBAFormat );
+	let initialStateTexture = new THREE.DataTexture( state, dimensions.x, dimensions.y, THREE.RGBAFormat );
 	initialStateTexture.wrapS = wrap;
 	initialStateTexture.wrapT = wrap;
 	initialStateTexture.type = params.type;
@@ -190,6 +197,12 @@ async function Simulation(
 		depthTest: false
 	} );
 
+	if(extraUniforms !== undefined)
+	{
+		Object.assign(simulationMaterial.uniforms,extraUniforms)
+		log(simulationMaterial.uniforms)
+	}
+
 	await assignShader(simulationShaderFilename, simulationMaterial, "fragment");
 
 	let ping = true;
@@ -200,9 +213,16 @@ async function Simulation(
 	let simulationMesh = new THREE.Mesh( new THREE.PlaneBufferGeometry( 2, 2 ), simulationMaterial );
 	simScene.add( simulationMesh );
 
+	let paused = {value:false}
+
 	let initial = true;
 	updateFunctions.push( function()
 	{
+		if(paused.value)
+		{
+			return;
+		}
+
 		let nonSimulationRenderTarget = renderer.getRenderTarget();
 
 		for( let i = 0; i < numStepsPerFrame; i++ )
@@ -227,8 +247,11 @@ async function Simulation(
 			ping = !ping;
 		}
 
-		objectToHaveSimulationTextureAssignedTo.value = renderTarget.texture;
+		renderer.readRenderTargetPixels( renderer.getRenderTarget(),0,0,64,64,state )
+		objectToAssignSimulationTexture.value = renderTarget.texture;
 
 		renderer.setRenderTarget( nonSimulationRenderTarget );
 	} );
+
+	return paused
 }

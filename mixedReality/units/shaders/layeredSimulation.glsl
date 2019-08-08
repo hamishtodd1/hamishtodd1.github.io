@@ -1,10 +1,9 @@
 precision highp float;
 
 varying vec2 vUV;
-
 uniform sampler2D oldState;
-uniform vec3 dimensions;
 
+uniform vec3 dimensions;
 uniform float deltaTime;
 
 //sigh, would be nice to test this
