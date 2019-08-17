@@ -31,7 +31,7 @@ void main (void)
 		laplacian.r * diffusionRates.x - reactionQuantity + feed * (1. - uv.r), //1-u to "keep it interesting"?
 		laplacian.g * diffusionRates.y + reactionQuantity - (feed+killMinusFeed) * uv.g ); //because kill > feed
 
-	vec2 result = uv + delta;
+	vec2 result = uv + delta; //could control speed in detail by multiplying this by a scalar < 1
 
 	if(brush.x > 0.0)
 	{

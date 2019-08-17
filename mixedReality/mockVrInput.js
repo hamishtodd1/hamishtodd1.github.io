@@ -19,15 +19,16 @@ function initMockVrInput()
 		// rightHand.position.y = 0.1*Math.sin(t*0.02)
 		// rightHand.position.z = 0.07*Math.sin(t*0.05)
 
-		{
-			// let oldL = Math.sqrt( sq(rightHand.position.x) + sq(rightHand.position.y) );
-			rightHand.position.x = Math.cos(t)
-			rightHand.position.y = Math.sin(t)
-			rightHand.position.multiplyScalar(t*0.015)
+		// {
+		// 	// let oldL = Math.sqrt( sq(rightHand.position.x) + sq(rightHand.position.y) );
+		// 	rightHand.position.x = Math.cos(t)
+		// 	rightHand.position.y = Math.sin(t)
+		// 	rightHand.position.multiplyScalar(t*0.015)
 
-			rightHand.position.y += 0.08
-			rightHand.position.x += 0.01
-		}
+		// 	rightHand.position.y += 0.08
+		// 	rightHand.position.x += 0.01
+		// }
+		rightHand.position.x = -0.2
 
 		rightHand.position.add(visiblePosition)
 

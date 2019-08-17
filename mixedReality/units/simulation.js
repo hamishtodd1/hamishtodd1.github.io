@@ -146,7 +146,7 @@ async function initBasicSimulation()
 async function Simulation( 
 	dimensions, simulationShaderFilename, boundaryConditions,
 	state,
-	numStepsPerFrame,
+	numStepsPerFrameSpecification,
 	objectToAssignSimulationTexture,
 	extraUniforms,
 	filter)
@@ -218,7 +218,9 @@ async function Simulation(
 	let initial = true;
 	updateFunctions.push( function()
 	{
-		if(paused.value)
+		let numStepsPerFrame = typeof numStepsPerFrameSpecification === "number" ? numStepsPerFrameSpecification:numStepsPerFrameSpecification.value;
+
+		if(paused.value || numStepsPerFrame === 0)
 		{
 			return;
 		}
