@@ -1,0 +1,106 @@
+<!--
+	You can surely do better by just smoothing the fucking thing, there should not be single-frame jumps
+
+	Probably left-right is sufficient
+
+	Calibration:
+		1. Put your head at the default position
+		2. Rotate the scene until these two points line up
+		3. Put your finger half way between the monitor and your face
+		4. Then move your head side to side
+		5. Tweak this one other parameter such that this white spot stays opposite your finger"
+-->
+
+<html>
+	<head>
+		<title>cootVR</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				margin: 0px;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- <script src="lib/three.js"></script>
+		<script src="lib/sceneUtils.js"></script> -->
+
+		<script src="lib/headtrackr.js"></script>
+		<script src="lib/three.js"></script>
+
+		<script src="variables.js"></script>
+
+		<canvas id="inputCanvas" width="320" height="240" style="display:none"></canvas>
+		<video id="inputVideo" autoplay loop style="display:none"></video>
+
+		<script type="text/javascript">
+			{
+				let videoInput = document.getElementById('inputVideo');
+				let canvasInput = document.getElementById('inputCanvas');
+				
+				let tracker = new headtrackr.Tracker();
+				tracker.init(videoInput, canvasInput);
+				tracker.start();
+
+				document.addEventListener("headtrackingEvent",function(e)
+				{
+					// console.log(e.x,e.y,e.z)
+
+					// camera.projectionMatrix.makePerspective( left, left + width, top, top - height, near, camera.far );
+
+					// camera.projectionMatrixInverse.getInverse( camera.projectionMatrix );
+				})
+			}
+
+			alwaysUpdateFunctions.push(function()
+			{
+				// camera.position.y = Math.sin(frameCount*0.03) * 0.2
+			})
+
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.localClippingEnabled = true;
+			document.body.appendChild( renderer.domElement );
+
+			let windowResize = function()
+			{
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+			}
+			window.addEventListener( 'resize', windowResize)
+
+			camera.position.z = 1
+			camera.far = camera.position.z * 2
+			camera.updateProjectionMatrix()
+
+			// initButtons()
+
+			let cube = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.1))
+			scene.add(cube)
+
+			let a = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.1))
+			a.position.x = 0.2
+			alwaysUpdateFunctions.push(function()
+			{
+				// a.rotation.y += 0.01
+			})
+			scene.add(a)
+
+			renderer.setAnimationLoop( function()
+			{
+				frameDelta = clock.getDelta();
+				frameCount++;
+
+				for(let i = 0; i < alwaysUpdateFunctions.length; i++)
+				{
+					alwaysUpdateFunctions[i]()
+				}
+
+				renderer.render( scene, camera );
+			})
+		</script>
+	</body>
+</html>

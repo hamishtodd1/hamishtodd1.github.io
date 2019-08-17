@@ -73,6 +73,14 @@ function initHands()
 		button1: 3,
 		button2: 4
 	}
+	var viveControllerKeys = {
+		grippingTop: 1, //trigger
+		grippingSide:2, //side things
+		
+		button1: 0,
+		button2:0
+	}
+
 	for(var i = 0; i < 2; i++)
 	{
 		{
@@ -186,7 +194,7 @@ function initHands()
 			controller.oldQuaternion.copy(handControllers[ affectedControllerIndex ].quaternion);
 			
 			controller.position.fromArray( gamepads[k].pose.position );
-			// controller.position.add(HACKY_HAND_ADDITION)
+			controller.position.add(HACKY_HAND_ADDITION_REMOVE)
 			// controller.position.applyMatrix4( standingMatrix );
 			controller.quaternion.fromArray( gamepads[k].pose.orientation );
 			controller.updateMatrixWorld();
@@ -194,12 +202,26 @@ function initHands()
 			controller.deltaPosition.copy(handControllers[ affectedControllerIndex ].position).sub(handControllers[ affectedControllerIndex ].oldPosition);
 			controller.deltaQuaternion.copy(controller.oldQuaternion).inverse().multiply(controller.quaternion);
 
-			for( var propt in controllerKeys )
+			if( gamepads[k].id === "Oculus Touch (Right)" || gamepads[k].id === "Oculus Touch (Left)" )
 			{
-				handControllers[ affectedControllerIndex ][propt+"Old"] = handControllers[ affectedControllerIndex ][propt];
-				handControllers[ affectedControllerIndex ][propt] = gamepads[k].buttons[controllerKeys[propt]].pressed;
+				for( var propt in controllerKeys )
+				{
+					handControllers[ affectedControllerIndex ][propt+"Old"] = handControllers[ affectedControllerIndex ][propt];
+					handControllers[ affectedControllerIndex ][propt] = gamepads[k].buttons[controllerKeys[propt]].pressed;
+				}
+				handControllers[ affectedControllerIndex ]["grippingSide"] = gamepads[k].buttons[controllerKeys["grippingSide"]].value > 0.7;
 			}
-			handControllers[ affectedControllerIndex ]["grippingSide"] = gamepads[k].buttons[controllerKeys["grippingSide"]].value > 0.7;
+			else if( gamepads[k].id === "OpenVR Gamepad" )
+			{
+				for( var propt in viveControllerKeys )
+				{
+					handControllers[ affectedControllerIndex ][propt+"Old"] = handControllers[ affectedControllerIndex ][propt];
+					handControllers[ affectedControllerIndex ][propt] = gamepads[k].buttons[viveControllerKeys[propt]].pressed;
+				}
+
+				hand.button1 = gamepads[k].axes[0] > 0.2;
+				hand.button2 = gamepads[k].axes[0] <-0.2;
+			}
 			
 			//gamepads[k].buttons[controllerKeys.grippingTop].value;
 
