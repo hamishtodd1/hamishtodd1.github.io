@@ -27,17 +27,15 @@ async function initScalarFieldVisualization()
 	uniforms.squarish = {value:false}
 	uniforms.cubeVolume = {value:true}
 
-	rightHand.controllerModel.visible = false;
-	rightHand.rotation.x += TAU/4;
-	rightHand.rotation.z = 1.4
+	scalarField.position.copy(rightHand.position);
 	updateFunctions.push(function()
 	{
 		// scalarField.position.x = 0.14 * Math.sin(frameCount * 0.04)
 		// scalarField.rotation.x = 0.4 * Math.sin(frameCount * 0.05)
 
-		scalarField.position.copy(rightHand.position);
-		scalarField.quaternion.copy( rightHand.quaternion );
-		scalarField.updateMatrixWorld();
+		// scalarField.position.copy(rightHand.position);
+		scalarField.rotation.y += 0.01
+		// scalarField.updateMatrixWorld();
 
 		uniforms.matrixWorldInverse.value.getInverse(scalarField.matrixWorld);
 
@@ -87,9 +85,11 @@ async function initScalarFieldVisualization()
 
 
 
-		let numStepsPerFrame = 1; //maaaaaybe worth making sure it's even
+		let numStepsPerFrame = 10; //maaaaaybe worth making sure it's even
 		material.uniforms.data2d = {value:null};
-		await Simulation( textureDimensions, "layeredSimulation", "clamped", initialState, numStepsPerFrame, material.uniforms.data2d )
+		await Simulation( textureDimensions, "layeredSimulation", "clamped", initialState, numStepsPerFrame, 
+			material.uniforms.data2d,
+			{threeDDimensions:{value:threeDDimensions}} )
 		// updateFunctions.push(function()
 		// {
 		// 	log(material.uniforms.data2d.value.minFilter, THREE.LinearFilter)

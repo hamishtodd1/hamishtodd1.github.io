@@ -1,4 +1,8 @@
 /*
+	There should be tinier particles that are only visible when you're REALLY zoomed in
+	And you just explain A turns into B randomly, B into C when collides with C, and C into A
+
+
 	But what exactly is a reaction diffusion system? Well, here I have a simulation of one, following essentially what Turing wrote in his paper
 		it's quite interesting and dynamic
 		You can make lots of pretty stuff with some fairly clear resemblence to different animals
@@ -355,7 +359,8 @@ async function initGrayScottSimulation(gl)
 	let brush = new THREE.Vector2(.5,.5);
 	updateFunctions.push(function()
 	{
-		brush.copy( displayMesh.worldToLocal(rightHand.position.clone()) )
+		// brush.copy( displayMesh.worldToLocal(rightHand.position.clone()) )
+		brush.x = -1000
 	})
 
 	let displayMaterial = new THREE.ShaderMaterial( {

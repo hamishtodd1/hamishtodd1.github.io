@@ -39,6 +39,8 @@ function initVrOrMockVrInput()
 			hand.positionOld.copy(hand.position);
 			hand.quaternionOld.copy(hand.quaternion);
 
+			hand.laser.visible = false;
+
 			for( var propt in handControllerKeys )
 			{
 				hand[propt+"Old"] = hand[propt];
@@ -178,6 +180,35 @@ function initControllerObjects()
 		hand.controllerModel = new THREE.Mesh( new THREE.BoxGeometry(0.1,0.1,0.17), controllerMaterial.clone() );
 		hand.add( hand.controllerModel );
 
+		//could totes use this to make a whiteboard
+		//it could be a transparent thing that you use to make shapes
+		{
+			hand.laser = new THREE.Mesh(
+				new THREE.CylinderBufferGeometryUncentered( 0.001, 1), 
+				new THREE.MeshBasicMaterial({color:0xFF0000, transparent:true,opacity:0.14}) 
+			);
+			hand.laser.rotation.x = -TAU/4
+			hand.add(hand.laser);
+
+			let raycaster = new THREE.Raycaster();
+			hand.intersectLaserWithObject = function(object3D)
+			{
+				hand.laser.updateMatrixWorld();
+
+				raycaster.ray.origin.set(0,0,0);
+				hand.laser.localToWorld(raycaster.ray.origin)
+				raycaster.ray.direction.set(0,1,0);
+				hand.laser.localToWorld(raycaster.ray.direction)
+				raycaster.ray.direction.sub(raycaster.ray.origin).normalize();
+
+				return raycaster.intersectObject(object3D);
+			}
+			hand.setlaserLengthFromEnd = function(end)
+			{
+				hand.laser.scale.y = end.distanceTo(hand);
+			}
+		}
+
 		hand.positionOld = hand.position.clone();
 		hand.quaternionOld = hand.quaternion.clone();
 		hand.deltaQuaternion = hand.quaternion.clone();
@@ -214,7 +245,7 @@ function initControllerObjects()
 					q.x / Math.sqrt(1-q.w*q.w),
 					q.y / Math.sqrt(1-q.w*q.w),
 					q.z / Math.sqrt(1-q.w*q.w))
-				qAxis.x *= -1
+				qAxis.x *= -1.
 				let otherQ = new THREE.Quaternion().setFromAxisAngle(qAxis,-2 * Math.acos(q.w))
 				
 				m.makeRotationFromQuaternion(otherQ)

@@ -10,12 +10,15 @@ When a ray travels through
 
 This is both a minor exercise in 3-manifold stuff and something useful for Dom collab
 
-The three-manifolds may self-intersect in the sense of the tets intersecting (in planes? Maybe in full 3D).
-This is ok right? Even in the worst case scenario I know their connectivity.
 
 Beyond visualization (THIS FILE IS JUST VISUALIZATION YOU ARE JUST MAKING A WORMHOLE)
+Arbitrary three manifolds
 	The mesh is made of tets, but you could visualize them as vertices with four edges
 	Possibly a graph is the right way to think about modifying the 3-manifold?
+	Game objects should include planes, lines, points
+	What's the 3-manifold equivalent of handles?
+The three-manifolds may self-intersect in the sense of the tets intersecting (in planes? Maybe in full 3D).
+This is ok right? Even in the worst case scenario I know their connectivity.
 */
 
 void main()

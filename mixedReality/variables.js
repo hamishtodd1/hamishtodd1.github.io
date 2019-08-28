@@ -45,9 +45,9 @@ let updateFunctions = [];
 let alwaysUpdateFunctions = []
 let holdables = [];
 
-let videoDomElement = document.createElement( 'video' )
-videoDomElement.style = "display:none"
-videoDomElement.crossOrigin = 'anonymous';
+let realityVideoDomElement = document.createElement( 'video' )
+realityVideoDomElement.style = "display:none"
+realityVideoDomElement.crossOrigin = 'anonymous';
 
 const discreteViridis = [
 	{hex:0xFCE51E, color:new THREE.Color(0.984375,0.89453125,0.1171875)},

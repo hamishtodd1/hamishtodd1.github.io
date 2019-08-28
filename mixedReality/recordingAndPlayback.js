@@ -3,7 +3,7 @@
 		XSplit definitely fucked you, find a different compositer, maybe OBS
 		You probably do need parenthood to be marked. Not *that* complicated to think about
 		Detect controller smack in VR and make it so you just have to get to the frame where it happened
-		More roughness on helmet
+		More roughness on helmet. Is lower part reflecting correctly?
 		Music, sound effects
 		Eyebrows
 		Visual alignment
@@ -11,16 +11,9 @@
 			If there's *any* adjustment in post then it defeats the entire point.
 			There has to be some adjustment during the shoot anyway, because AR probably can't get that camera in place
 	
-	Pics and videos
-		Like in Captain disillusion
-		Put them next to you while you're talking
-		They are meant to come in a specific sequence, you should make use of that
-		Physics sim when they fall
-		Videos thing: no need for little green screen
-
-	Bob Ross looked at his canvas and at the camera
 
 	Reasons to have bradyBot:
+		Bob Ross looked at his canvas and at the camera, watch him
 		Draws people's attention to things (including face) better
 		Makes it feel more like being present with you/more natural
 		More exciting / varied / "dynamic"
@@ -89,22 +82,20 @@ callContingentUpdateFunctionsAndMaybeRecordOrSynchronizeToVideo = function()
 function initPlaybackAndRecording()
 {
 	{
-		videoDomElement.src = "recordings/sintel.mp4"
-		// videoDomElement.volume = 0
+		realityVideoDomElement.src = "recordings/sintel.mp4"
+		// realityVideoDomElement.volume = 0
 
-		var videoTexture = new THREE.VideoTexture( videoDomElement );
-		videoTexture.minFilter = THREE.LinearFilter;
-		videoTexture.magFilter = THREE.LinearFilter;
-		videoTexture.format = THREE.RGBFormat;
-		videoTexture.needsUpdate = true
-		videoTexture.rotation = TAU/2
+		let videoTexture = new THREE.VideoTexture( realityVideoDomElement );
+
+		//????????
+		videoTexture.rotation = TAU/2;
 		videoTexture.center.set(0.5,0.5)
 
-		var screen = new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({
+		let screen = new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({
 			map:videoTexture,
 			overdraw: true,
-			transparent:true,
-			opacity:1.0
+			// transparent:true,
+			// opacity:1.0
 		}))
 		screen.position.z = -2
 		screen.scale.y = 2 * Math.tan( camera.fov * THREE.Math.DEG2RAD / 2 ) * Math.abs( screen.position.z )
@@ -262,7 +253,7 @@ function initPlaybackAndRecording()
 			let fakeError = new Error()
 			if(fakeError.stack)
 			{
-				var name = (fakeError.stack.split("at init"))[1].split(" (")[0]
+				let name = (fakeError.stack.split("at init"))[1].split(" (")[0]
 				log(name)
 			}
 			else
@@ -297,12 +288,12 @@ function initPlaybackAndRecording()
 	{
 		//if you're recording in 30fps it doesn't matter! Eeeeexcept the recording might be off by one frame from what you saw
 		let videoFps = 30.0 //ffmpeg tells us so 
-		let relevantVideoFrameWeAreOn = Math.floor( (videoDomElement.currentTime + lag) * videoFps); //VideoFrame.js says floor		
+		let relevantVideoFrameWeAreOn = Math.floor( (realityVideoDomElement.currentTime + lag) * videoFps); //VideoFrame.js says floor		
 		let timeInSimulation = relevantVideoFrameWeAreOn / videoFps
 		if(timeInSimulation < 0)
 		{
-			videoDomElement.currentTime = 1 - lag
-			relevantVideoFrameWeAreOn = Math.floor( (videoDomElement.currentTime + lag) * videoFps);
+			realityVideoDomElement.currentTime = 1 - lag
+			relevantVideoFrameWeAreOn = Math.floor( (realityVideoDomElement.currentTime + lag) * videoFps);
 			timeInSimulation = relevantVideoFrameWeAreOn / videoFps
 		}
 
@@ -330,7 +321,7 @@ function initPlaybackAndRecording()
 
 			//post-production hacking
 
-			if( 455.669324 <= videoDomElement.currentTime && videoDomElement.currentTime <= 510.2 &&
+			if( 455.669324 <= realityVideoDomElement.currentTime && realityVideoDomElement.currentTime <= 510.2 &&
 				discretes[i].property === "value" && frameJustBefore.discretes[i] === 3 && !alreadyDoneThatHack )
 			{
 				discretes[i].object[ discretes[i].property ] = 0
@@ -372,15 +363,15 @@ function initPlaybackAndRecording()
 
 	function togglePlaying()
 	{
-		if( !videoDomElement.paused )
+		if( !realityVideoDomElement.paused )
 		{
-			videoDomElement.pause()
-			log("pause ", videoDomElement.currentTime)
+			realityVideoDomElement.pause()
+			log("pause ", realityVideoDomElement.currentTime)
 		}
 		else
 		{
-			videoDomElement.play();
-			log("playing ", videoDomElement.currentTime)
+			realityVideoDomElement.play();
+			log("playing ", realityVideoDomElement.currentTime)
 		}
 	}
 
@@ -430,19 +421,19 @@ function initPlaybackAndRecording()
 		})
 		bindButton("up",function()
 		{
-			videoDomElement.playbackRate += 0.1
+			realityVideoDomElement.playbackRate += 0.1
 		}, "increase video speed")
 		bindButton("down",function()
 		{
-			videoDomElement.playbackRate -= 0.1
+			realityVideoDomElement.playbackRate -= 0.1
 		}, "decrease video speed")
 		bindButton("left",function()
 		{
-			videoDomElement.currentTime -= 5
+			realityVideoDomElement.currentTime -= 5
 		}, "jump back")
 		bindButton("right",function()
 		{
-			videoDomElement.currentTime += 5
+			realityVideoDomElement.currentTime += 5
 		}, "jump forwards")
 
 		bindButton( 'space', togglePlaying, "toggle playing")

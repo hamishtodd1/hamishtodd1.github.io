@@ -477,7 +477,7 @@ function initTwoSphereExploration(fish, visiBox, height)
 		assemblage.add(pane)
 		alwaysUpdateFunctions.push(function()
 		{
-			if(videoDomElement.currentTime > 385.6 && videoDomElement.currentTime < 438)
+			if(realityVideoDomElement.currentTime > 385.6 && realityVideoDomElement.currentTime < 438)
 			{
 				fish.children[0].material.depthTest = true
 				fish.children[1].material.depthTest = true

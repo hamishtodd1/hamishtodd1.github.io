@@ -1,10 +1,6 @@
-/*
-	Could just use a whiteboard for RD explanation
-*/
-
 async function initLayeredSimulation()
 {
-	let dimension = 32;
+	let dimension = 128;
 	let threeDDimensions = new THREE.Vector3( dimension, dimension, dimension );
 	let textureDimensions = new THREE.Vector2(threeDDimensions.x,threeDDimensions.y*threeDDimensions.z);
 
@@ -16,19 +12,20 @@ async function initLayeredSimulation()
 	{
 		let firstIndex = ((row * threeDDimensions.x + column) * threeDDimensions.z + slice) * 4;
 
-		initialState[ firstIndex + 0 ] = 0. //clamp(1 - 0.03 * new THREE.Vector3(row,column,slice).multiplyScalar(2.).distanceTo(threeDDimensions),0,1.);
+		initialState[ firstIndex + 0 ] = 0.//clamp(1 - 0.05 * new THREE.Vector3(row,column,slice).multiplyScalar(2.).distanceTo(threeDDimensions),0,1.);
 		initialState[ firstIndex + 1 ] = 0.;
 		initialState[ firstIndex + 2 ] = 0.;
 		initialState[ firstIndex + 3 ] = 0.;
 	}
 
+	//Problem: it's having no impact in the z direction
 	let layersToExciteU = [dimension / 2 + 19,dimension / 2 + 20];
 	let layersToExciteV = [dimension / 2 + 21,dimension / 2 + 22,dimension / 2 + 23,dimension / 2 + 24];
 	for(var k = 0; k < 3*dimension/4; k++)
 	for(var i = 0; i < 3*dimension/4; i++)
 	{
-		initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteU[0])) + 0] = 1.;
-		initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteU[1])) + 0] = 1.;
+		initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteU[0]))] = 1.;
+		initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteU[1]))] = 1.;
 		
 		initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteV[0])) + 1] = 1.;
 		initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteV[1])) + 1] = 1.;
@@ -63,13 +60,27 @@ async function initLayeredSimulation()
 
 				'float shadeOfGrey = clamp(simulationRgb.r,0.,1.);',
 
+				'shadeOfGrey = simulationRgb.r;',
+
+				//white if anything other than 0
+				// 'if(simulationRgb.r == 0.)',
+				// '{',
+				// 	'shadeOfGrey = 0.;',
+				// '}',
+				// 'else',
+				// '{',
+				// 	'shadeOfGrey = 1.;',
+				// '}',
+
 				'gl_FragColor = vec4( shadeOfGrey, shadeOfGrey, shadeOfGrey, 1.0 );',
 			'}'
 		].join( '\n' )
 	} );
 
 	let numStepsPerFrame = 1;
-	await Simulation(textureDimensions,"layeredSimulation", "clamped", initialState, numStepsPerFrame, displayMaterial.uniforms.simulationTexture )
+	await Simulation(textureDimensions,"layeredSimulation", "periodic", initialState, numStepsPerFrame, 
+		displayMaterial.uniforms.simulationTexture,
+		{threeDDimensions:{value:threeDDimensions}})
 
 	let displayMesh = new THREE.Mesh(
 		new THREE.PlaneBufferGeometry( 0.3 * textureDimensions.x / textureDimensions.y, 0.3 ),
@@ -144,7 +155,8 @@ async function initBasicSimulation()
 }
 
 async function Simulation( 
-	dimensions, simulationShaderFilename, boundaryConditions,
+	dimensions, simulationShaderFilename,
+	boundaryConditions,
 	state,
 	numStepsPerFrameSpecification,
 	objectToAssignSimulationTexture,
@@ -215,6 +227,8 @@ async function Simulation(
 
 	let paused = {value:false}
 
+	let doneOne = false;
+
 	let initial = true;
 	updateFunctions.push( function()
 	{
@@ -225,33 +239,36 @@ async function Simulation(
 			return;
 		}
 
+		// if(frameCount > 0)
+		// 	return
+
 		let nonSimulationRenderTarget = renderer.getRenderTarget();
-
-		for( let i = 0; i < numStepsPerFrame; i++ )
 		{
-			if( initial )
+			for( let i = 0; i < numStepsPerFrame; i++ )
 			{
-				simulationMaterial.uniforms.oldState.value = initialStateTexture;
-				initial = false;
-			}
-			else
-			{
-				simulationMaterial.uniforms.oldState.value = ping ? pingFramebuffer.texture : pongFramebuffer.texture;
+				if( initial )
+				{
+					simulationMaterial.uniforms.oldState.value = initialStateTexture;
+					initial = false;
+				}
+				else
+				{
+					simulationMaterial.uniforms.oldState.value = ping ? pingFramebuffer.texture : pongFramebuffer.texture;
+				}
+
+				simulationMaterial.uniforms.deltaTime.value = frameDelta;
+
+				var renderTarget = ping ? pongFramebuffer : pingFramebuffer
+				renderer.setRenderTarget( renderTarget );
+				renderer.render( simScene, simCamera );
+				simulationMaterial.uniforms.oldState.value = renderTarget.texture;
+				
+				ping = !ping;
 			}
 
-			simulationMaterial.uniforms.deltaTime.value = frameDelta;
-
-			var renderTarget = ping ? pongFramebuffer : pingFramebuffer
-			renderer.setRenderTarget( renderTarget );
-			renderer.render( simScene, simCamera );
-			simulationMaterial.uniforms.oldState.value = renderTarget.texture;
-			
-			ping = !ping;
+			// renderer.readRenderTargetPixels( renderer.getRenderTarget(),0,0,64,64,state )
+			objectToAssignSimulationTexture.value = renderTarget.texture;
 		}
-
-		renderer.readRenderTargetPixels( renderer.getRenderTarget(),0,0,64,64,state )
-		objectToAssignSimulationTexture.value = renderTarget.texture;
-
 		renderer.setRenderTarget( nonSimulationRenderTarget );
 	} );
 
