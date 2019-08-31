@@ -34,7 +34,7 @@ async function initScalarFieldVisualization()
 		// scalarField.rotation.x = 0.4 * Math.sin(frameCount * 0.05)
 
 		// scalarField.position.copy(rightHand.position);
-		scalarField.rotation.y += 0.01
+		// scalarField.rotation.y += 0.01
 		// scalarField.updateMatrixWorld();
 
 		uniforms.matrixWorldInverse.value.getInverse(scalarField.matrixWorld);
@@ -66,8 +66,6 @@ async function initScalarFieldVisualization()
 			initialState[ firstIndex + 3 ] = 0.;
 		}
 
-
-
 		let layersToExciteU = [dimension / 2 + 19,dimension / 2 + 20];
 		let layersToExciteV = [dimension / 2 + 21,dimension / 2 + 22,dimension / 2 + 23,dimension / 2 + 24];
 		for(var k = 0; k < 3*dimension/4; k++)
@@ -82,18 +80,12 @@ async function initScalarFieldVisualization()
 			initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteV[3])) + 1] = 1.;
 		}
 
-
-
-
 		let numStepsPerFrame = 10; //maaaaaybe worth making sure it's even
 		material.uniforms.data2d = {value:null};
-		await Simulation( textureDimensions, "layeredSimulation", "clamped", initialState, numStepsPerFrame, 
+		await Simulation( textureDimensions, "barkley3d", "clamped", initialState, numStepsPerFrame, 
 			material.uniforms.data2d,
-			{threeDDimensions:{value:threeDDimensions}} )
-		// updateFunctions.push(function()
-		// {
-		// 	log(material.uniforms.data2d.value.minFilter, THREE.LinearFilter)
-		// })
+			{threeDDimensions:{value:threeDDimensions}},
+			THREE.LinearFilter )
 		material.uniforms.texture2dPixelWidth = {value: uniforms.renderRadius.value / (0.5 - 0.5 / dimension) }
 		material.uniforms.texture2dDimension = {value: dimension }
 	}
