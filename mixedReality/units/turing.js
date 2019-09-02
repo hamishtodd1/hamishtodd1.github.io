@@ -42,7 +42,7 @@ async function initTuring(gl)
 			}
 		}
 
-		let numStepsPerFrame = 2;
+		let numStepsPerFrame = 8;
 		var data2d = {value:null};
 		await Simulation( textureDimensions, "fitzHughNagumo", "clamped", initialState, numStepsPerFrame, 
 			data2d,
@@ -52,7 +52,7 @@ async function initTuring(gl)
 		let scalarField = await scalarFieldVisualization(data2d,dimension);
 		updateFunctions.push(function()
 		{
-			// scalarField.rotation.y += 0.01
+			scalarField.rotation.y += 0.01
 			// scalarField.rotation.x += 0.01
 		})
 	}

@@ -29,7 +29,7 @@ async function scalarFieldVisualization(data2d, dimension)
 
 	uniforms.data2d = data2d;
 	uniforms.texture2dWorldSpacePixelWidth = {value: uniforms.renderRadius.value / (0.5 - 0.5 / dimension) }
-	uniforms.texture2dDimensionReciprocal = {value: dimension }
+	uniforms.texture2dDimensionReciprocal = {value: 1./dimension }
 
 	scalarField.position.copy(rightHand.position);
 	alwaysUpdateFunctions.push(function()
