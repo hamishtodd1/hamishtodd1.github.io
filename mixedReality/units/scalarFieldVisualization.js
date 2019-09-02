@@ -1,4 +1,4 @@
-async function initScalarFieldVisualization()
+async function scalarFieldVisualization(data2d, dimension)
 {
 	let uniforms = {};
 	let material = new THREE.ShaderMaterial({uniforms});
@@ -21,165 +21,29 @@ async function initScalarFieldVisualization()
 	uniforms.renderRadiusSquared = {value:sq(uniforms.renderRadius.value)};
 	uniforms.isolevel = {value:0.5};
 	uniforms.useTexture = {value:true}
-	uniforms.doIsosurface = {value:false}
+	uniforms.doIsosurface = {value:true}
 	uniforms.doGas = {value:true}
 	uniforms.bothGasColors = {value:true}
 	uniforms.squarish = {value:false}
-	uniforms.cubeVolume = {value:true}
+	uniforms.cubeVolume = {value:false}
+
+	uniforms.data2d = data2d;
+	uniforms.texture2dWorldSpacePixelWidth = {value: uniforms.renderRadius.value / (0.5 - 0.5 / dimension) }
+	uniforms.texture2dDimensionReciprocal = {value: dimension }
 
 	scalarField.position.copy(rightHand.position);
-	updateFunctions.push(function()
+	alwaysUpdateFunctions.push(function()
 	{
-		// scalarField.position.x = 0.14 * Math.sin(frameCount * 0.04)
-		// scalarField.rotation.x = 0.4 * Math.sin(frameCount * 0.05)
-
-		// scalarField.position.copy(rightHand.position);
-		// scalarField.rotation.y += 0.01
-		// scalarField.updateMatrixWorld();
-
-		uniforms.matrixWorldInverse.value.getInverse(scalarField.matrixWorld);
-
-		// pointLight.position.x = 0.4*Math.sin(frameCount*0.01)
-		// log(pointLight.position)
-
+		scalarField.updateMatrixWorld()
+		uniforms.matrixWorldInverse.value.getInverse(scalarField.matrixWorld)
 		uniforms.scalarFieldPointLightPosition.value.copy(pointLight.position)
-		scalarField.worldToLocal( uniforms.scalarFieldPointLightPosition.value );
+		scalarField.worldToLocal( uniforms.scalarFieldPointLightPosition.value)
 	})
-
-	//SIMULATION
-	{
-		let dimension = 128;
-		let threeDDimensions = new THREE.Vector3( dimension, dimension, dimension );
-		let textureDimensions = new THREE.Vector2(threeDDimensions.x,threeDDimensions.y*threeDDimensions.z);
-
-		let initialState = new Float32Array( textureDimensions.x * textureDimensions.y * 4 );
-
-		for ( let row = 0; row < threeDDimensions.y; row ++ )
-		for ( let column = 0; column < threeDDimensions.x; column ++ )
-		for ( let slice = 0; slice < threeDDimensions.z; slice ++ )
-		{
-			let firstIndex = ((row * threeDDimensions.x + column) * threeDDimensions.z + slice) * 4;
-
-			initialState[ firstIndex + 0 ] = 0.;//clamp(1 - 0.03 * new THREE.Vector3(row,column,slice).multiplyScalar(2.).distanceTo(threeDDimensions),0,1.);
-			initialState[ firstIndex + 1 ] = 0.;
-			initialState[ firstIndex + 2 ] = 0.;
-			initialState[ firstIndex + 3 ] = 0.;
-		}
-
-		let layersToExciteU = [dimension / 2 + 19,dimension / 2 + 20];
-		let layersToExciteV = [dimension / 2 + 21,dimension / 2 + 22,dimension / 2 + 23,dimension / 2 + 24];
-		for(var k = 0; k < 3*dimension/4; k++)
-		for(var i = 0; i < 3*dimension/4; i++)
-		{
-			initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteU[0])) + 0] = 1.;
-			initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteU[1])) + 0] = 1.;
-			
-			initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteV[0])) + 1] = 1.;
-			initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteV[1])) + 1] = 1.;
-			initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteV[2])) + 1] = 1.;
-			initialState[4*(i + k*dimension*dimension + dimension*(layersToExciteV[3])) + 1] = 1.;
-		}
-
-		let numStepsPerFrame = 10; //maaaaaybe worth making sure it's even
-		material.uniforms.data2d = {value:null};
-		await Simulation( textureDimensions, "barkley3d", "clamped", initialState, numStepsPerFrame, 
-			material.uniforms.data2d,
-			{threeDDimensions:{value:threeDDimensions}},
-			THREE.LinearFilter )
-		material.uniforms.texture2dPixelWidth = {value: uniforms.renderRadius.value / (0.5 - 0.5 / dimension) }
-		material.uniforms.texture2dDimension = {value: dimension }
-	}
-
-	//TEXTURE
-	{
-		let dataArray = null;
-		let dimension = null;
-		let texturePixelWidth = null;
-
-		let artificialDimension = 32;
-		let artificialDataArray = new Float32Array(artificialDimension*artificialDimension*artificialDimension)
-		for(let i = 0; i < artificialDimension; i++)
-		for(let j = 0; j < artificialDimension; j++)
-		for(let k = 0; k < artificialDimension; k++)
-		{
-			artificialDataArray[i*artificialDimension*artificialDimension+j*artificialDimension+k] = 
-				// i >= artificialDimension/2 ^ j >= artificialDimension/2 ^ k >= artificialDimension/2 ? 0.:1.;
-				// (i+j+k) % 2 ? 0.:1.;
-				// Math.sqrt(sq(i-artificialDimension/2)+sq(j-artificialDimension/2)+sq(k-artificialDimension/2)) / 4;
-				Math.random() - 0.5;
-		}
-		dimension = artificialDimension;
-		dataArray = artificialDataArray;
-
-		// await new Promise(resolve =>
-		// {
-		// 	let img = new Image();
-		// 	img.src = 'data/brain16x16.png';
-		// 	img.style.display = 'none';
-		// 	img.onload = function()
-		// 	{
-		// 		let readingCanvas = document.createElement('canvas')
-		// 		readingCanvas.width = 2848
-		// 		readingCanvas.height = 4096
-
-		// 		let ctx = readingCanvas.getContext('2d');
-		// 		ctx.drawImage(img, 0, 0);
-
-		// 		let flatMriTexture = ctx.getImageData(0, 0, 2848,4096).data;
-
-		// 		let mriArray = new Float32Array(256*256*256);
-
-		// 		let row = 0, column = 0, bigRow = 0, bigColumn = 0, pixelNumber = 0;
-		// 		let index3d = 0;
-		// 		for(let i = 0; i < 256; i++)
-		// 		for(let j = 0; j < 256; j++)
-		// 		for(let k = 0; k < 256; k++)
-		// 		{
-		// 			index3d = i+256*(j+k*256);
-		// 			let truncatedI = i - 39
-
-		// 			if( truncatedI < 0 || 178 <= truncatedI )
-		// 			{
-		// 				mriArray[ index3d ] = -.2;
-		// 			}
-		// 			else
-		// 			{
-		// 				bigColumn = 15 - k % 16;
-		// 				bigRow = (k - k % 16) / 16;
-
-		// 				column = bigColumn * 178 + truncatedI;
-		// 				row = bigRow * 256 + j;
-
-		// 				pixelNumber = column + row*2848;
-
-		// 				mriArray[index3d] = flatMriTexture[pixelNumber*4] / 255. - 0.2;
-		// 			}
-		// 		}
-
-		// 		dataArray = mriArray;
-		// 		dimension = 256
-
-		// 		resolve();
-		// 	};
-		// })
-
-		let data3d = new THREE.DataTexture3D( dataArray, dimension, dimension, dimension );
-
-		data3d.format = THREE.RedFormat;
-		data3d.type = THREE.FloatType;
-		data3d.minFilter = data3d.magFilter = THREE.LinearFilter;
-		data3d.unpackAlignment = 1; //1 byte. Buuuuut the numbers have 32 bits = 4 bytes? From threejs texture3D example
-		data3d.needsUpdate = true;
-
-		material.uniforms.data3d = {value:data3d}
-		material.uniforms.texture3dPixelWidth = {value: uniforms.renderRadius.value / (0.5 - 0.5 / dimension) }
-	}
 
 	{
 		bindButton("i",function(){},"increase isolevel",function()
 		{
 			uniforms.isolevel.value += 0.003;
-			log(uniforms.isolevel.value)
 		})
 		bindButton("o",function(){},"increase isolevel",function()
 		{
@@ -232,6 +96,91 @@ async function initScalarFieldVisualization()
 		})
 	}
 
+	//TEXTURE
+	// {
+	// 	let dataArray = null;
+	// 	dimension = null;
+	// 	let textureWorldSpacePixelWidth = null;
+
+	// 	let artificialDimension = 32;
+	// 	let artificialDataArray = new Float32Array(artificialDimension*artificialDimension*artificialDimension)
+	// 	for(let i = 0; i < artificialDimension; i++)
+	// 	for(let j = 0; j < artificialDimension; j++)
+	// 	for(let k = 0; k < artificialDimension; k++)
+	// 	{
+	// 		artificialDataArray[i*artificialDimension*artificialDimension+j*artificialDimension+k] = 
+	// 			// i >= artificialDimension/2 ^ j >= artificialDimension/2 ^ k >= artificialDimension/2 ? 0.:1.;
+	// 			// (i+j+k) % 2 ? 0.:1.;
+	// 			// Math.sqrt(sq(i-artificialDimension/2)+sq(j-artificialDimension/2)+sq(k-artificialDimension/2)) / 4;
+	// 			Math.random() - 0.5;
+	// 	}
+	// 	dimension = artificialDimension;
+	// 	dataArray = artificialDataArray;
+
+	// 	// await new Promise(resolve =>
+	// 	// {
+	// 	// 	let img = new Image();
+	// 	// 	img.src = 'data/brain16x16.png';
+	// 	// 	img.style.display = 'none';
+	// 	// 	img.onload = function()
+	// 	// 	{
+	// 	// 		let readingCanvas = document.createElement('canvas')
+	// 	// 		readingCanvas.width = 2848
+	// 	// 		readingCanvas.height = 4096
+
+	// 	// 		let ctx = readingCanvas.getContext('2d');
+	// 	// 		ctx.drawImage(img, 0, 0);
+
+	// 	// 		let flatMriTexture = ctx.getImageData(0, 0, 2848,4096).data;
+
+	// 	// 		let mriArray = new Float32Array(256*256*256);
+
+	// 	// 		let row = 0, column = 0, bigRow = 0, bigColumn = 0, pixelNumber = 0;
+	// 	// 		let index3d = 0;
+	// 	// 		for(let i = 0; i < 256; i++)
+	// 	// 		for(let j = 0; j < 256; j++)
+	// 	// 		for(let k = 0; k < 256; k++)
+	// 	// 		{
+	// 	// 			index3d = i+256*(j+k*256);
+	// 	// 			let truncatedI = i - 39
+
+	// 	// 			if( truncatedI < 0 || 178 <= truncatedI )
+	// 	// 			{
+	// 	// 				mriArray[ index3d ] = -.2;
+	// 	// 			}
+	// 	// 			else
+	// 	// 			{
+	// 	// 				bigColumn = 15 - k % 16;
+	// 	// 				bigRow = (k - k % 16) / 16;
+
+	// 	// 				column = bigColumn * 178 + truncatedI;
+	// 	// 				row = bigRow * 256 + j;
+
+	// 	// 				pixelNumber = column + row*2848;
+
+	// 	// 				mriArray[index3d] = flatMriTexture[pixelNumber*4] / 255. - 0.2;
+	// 	// 			}
+	// 	// 		}
+
+	// 	// 		dataArray = mriArray;
+	// 	// 		dimension = 256
+
+	// 	// 		resolve();
+	// 	// 	};
+	// 	// })
+
+	// 	let data3d = new THREE.DataTexture3D( dataArray, dimension, dimension, dimension );
+
+	// 	data3d.format = THREE.RedFormat;
+	// 	data3d.type = THREE.FloatType;
+	// 	data3d.minFilter = data3d.magFilter = THREE.LinearFilter;
+	// 	data3d.unpackAlignment = 1; //1 byte. Buuuuut the numbers have 32 bits = 4 bytes? From threejs texture3D example
+	// 	data3d.needsUpdate = true;
+
+	// 	material.uniforms.data3d = {value:data3d}
+	// 	material.uniforms.texture3dWorldSpacePixelWidth = {value: uniforms.renderRadius.value / (0.5 - 0.5 / dimension) }
+	// }
+
 	//IF you want to try having proper meshes and shit	
 	{
 		//could have a camera that is a clone of the ordinary one with no attachment, render the scene with that
@@ -262,6 +211,8 @@ async function initScalarFieldVisualization()
 		//pokeballs are a structure that makes sense
 		// let backHider = new THREE.Circ
 	}
+
+	return scalarField;
 }
 
 {

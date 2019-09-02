@@ -12,22 +12,35 @@ const float b = .2;
 const float h = 2.;
 const float eps = .05;
 
-//NEED TO DO BOUNDARY CONDITIONS YOURSELF
-vec4 laplacian(vec2 uv)
+vec4 laplacian(vec4 uv)
 {
-	vec4 xUp = texture2D( oldState, vUV + vec2( 1./threeDDimensions.x,0.));
-	vec4 xDn = texture2D( oldState, vUV + vec2(-1./threeDDimensions.x,0.));
+	float possibleLayer = 0.;
+	float correctLayer = 0.;
 
-	float possibleYUp = vUV.y + 1./dimensions.y;
-	float yUp = possibleYUp < 1 ? possibleYUp : 
-	vec2 uvYUp = 
+	vec4 xInc = texture2D( oldState, vec2( vUV.x + 1./threeDDimensions.x, vUV.y ) );
+	vec4 xDec = texture2D( oldState, vec2( vUV.x - 1./threeDDimensions.x, vUV.y ) );
 
+	float possibleZIncY = vUV.y + 1./threeDDimensions.z;
+	float zIncY = possibleZIncY < 1. ? possibleZIncY : vUV.y; //clamp
+	vec4 zInc = texture2D( oldState, vec2( vUV.x, zIncY) );
 
-	vec4 uv2 = texture2D( oldState, vUV + vec2( 0., 1./dimensions.y ) );
-	vec4 uv3 = texture2D( oldState, vUV + vec2( 0.,-1./dimensions.y ) );
-	vec4 uv4 = texture2D( oldState, vUV + vec2( 0., 1./threeDDimensions.z) );
-	vec4 uv5 = texture2D( oldState, vUV + vec2( 0.,-1./threeDDimensions.z) );
-	vec4 laplacian = ( uv0 + uv1 + uv2 + uv3 + uv4 + uv5 - 6. * uv );
+	float possibleZDecY = vUV.y - 1./threeDDimensions.z;
+	float zDecY = possibleZDecY > 0. ? possibleZDecY : vUV.y; //clamp
+	vec4 zDec = texture2D( oldState, vec2( vUV.x, zDecY) );
+
+	float possibleYIncY = vUV.y + 1./dimensions.y;
+	possibleLayer = ceil(possibleYIncY*threeDDimensions.z);
+	correctLayer = ceil(vUV.y*threeDDimensions.z);
+	float yIncY = possibleLayer == correctLayer ? possibleYIncY : vUV.y; //clamp
+	vec4 yInc = texture2D( oldState, vec2( vUV.x, yIncY ) );
+
+	float possibleYDecY = vUV.y - 1./dimensions.y;
+	possibleLayer = ceil(possibleYDecY*threeDDimensions.z);
+	correctLayer = ceil(vUV.y*threeDDimensions.z);
+	float yDecY = possibleLayer == correctLayer ? possibleYDecY : vUV.y; //clamp
+	vec4 yDec = texture2D( oldState, vec2( vUV.x, yDecY ) );
+
+	vec4 laplacian = ( xInc + xDec + yInc + yDec + zInc + zDec - 6. * uv );
 
 	return laplacian;
 }
@@ -36,8 +49,8 @@ void main(void)
 {
 	float dtOverHSq = dt / (h*h);
 
-	vec4 t = texture2D(oldState, vUV);
-	float u = t.r,  v = t.g;
+	vec4 uv = texture2D(oldState, vUV);
+	float u = uv.r,  v = uv.g;
 	float vnew = v + dt*eps*(b*u - v);
 
 	float du = dt*(u*(1.0 - u)*(u - a) - v);

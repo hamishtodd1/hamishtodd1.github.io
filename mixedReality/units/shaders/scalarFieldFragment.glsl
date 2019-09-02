@@ -94,8 +94,9 @@ Publication
 
 precision highp float;
 precision mediump sampler3D;
-uniform sampler3D data3d;
-uniform float texture3dPixelWidth;
+
+// uniform sampler3D data3d;
+// uniform float texture3dPixelWidth;
 
 uniform float texture2dPixelWidth;
 uniform float texture2dDimension;
@@ -280,14 +281,14 @@ float getLevel( vec3 p )
 	// return length(p) -0.1;
 }
 
-vec3 numericalGradient(vec3 p) //very easy to work out for polynomials, y does not depend on x
+vec3 numericalGradient( vec3 p ) //very easy to work out for polynomials, y does not depend on x
 {
 	float valueHere = getLevel(p);
 	float eps = 0.0001;
-	if(useTexture)
-	{
-		eps = texture3dPixelWidth*2000000.;
-	}
+	// if(useTexture) //data3d
+	// {
+	// 	eps = texture3dPixelWidth*2000000.;
+	// }
 	float x = ( getLevel(p-vec3(eps,0.,0.)) - getLevel(p+vec3(eps,0.,0.)) ) / eps;
 	float y = ( getLevel(p-vec3(0.,eps,0.)) - getLevel(p+vec3(0.,eps,0.)) ) / eps;
 	float z = ( getLevel(p-vec3(0.,0.,eps)) - getLevel(p+vec3(0.,0.,eps)) ) / eps;

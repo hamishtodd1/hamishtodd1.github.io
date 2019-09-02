@@ -74,6 +74,7 @@ async function Simulation(
 {
 	let wrap = boundaryConditions === "periodic" ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
 
+	//would be good to make it always nearest in simulation, always linear in viz
 	if(filter === undefined)
 	{
 		filter = THREE.NearestFilter;
