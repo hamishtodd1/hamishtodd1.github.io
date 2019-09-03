@@ -202,58 +202,89 @@ vec2 sphereIntersectionDistances( vec3 origin, vec3 direction, vec3 center, floa
 
 
 //------------------Texture
-vec4 sample2dTexture(float x, float y, float z)
+vec4 sample2dTextureOnGrid(float x, float y, float z)
 {
-	vec2 textureSpacePRounded = vec2( x, y * texture2dDimensionReciprocal + floor(z) );
+	float zFloored = floor( z / texture2dDimensionReciprocal ) * texture2dDimensionReciprocal;
+	vec2 textureSpacePRounded = vec2( x, y * texture2dDimensionReciprocal + zFloored );
 	return texture2D(data2d, textureSpacePRounded);
 }
 
-//could color surface with this
-// float getFilamentLevel(vec3 p)
-// {
-// 	float p_x = p.x + texture2dDimensionReciprocal;
-// 	if(p_x > 1.) p_x = p.x;
-// 	float p_y = p.y + texture2dDimensionReciprocal;
-// 	if(p_y > 1.) p_y = p.y;
-// 	float p_z = p.z + texture2dDimensionReciprocal;
-// 	if(p_z > 1.) p_z = p.z;
-
-// 	float threshold = .5;
-// 	float sum =
-// 		step(threshold, sample2dTexture( p.x, p.y, p.z ).r) +
-// 		step(threshold, sample2dTexture( p.x, p.y, p_z ).r) +
-// 		step(threshold, sample2dTexture( p.x, p_y, p.z ).r) +
-// 		step(threshold, sample2dTexture( p.x, p_y, p_z ).r) +
-// 		step(threshold, sample2dTexture( p_x, p.y, p.z ).r) +
-// 		step(threshold, sample2dTexture( p_x, p.y, p_z ).r) +
-// 		step(threshold, sample2dTexture( p_x, p_y, p.z ).r) +
-// 		step(threshold, sample2dTexture( p_x, p_y, p_z ).r);
-// 	bool uIsConsistentlyHigh = .5 < sum && sum < 7.5;
-
-// 	sum =
-// 		step(		.0, sample2dTexture( p.x, p.y, p.z ).b) +
-// 		step(		.0, sample2dTexture( p.x, p.y, p_z ).b) +
-// 		step(		.0, sample2dTexture( p.x, p_y, p.z ).b) +
-// 		step(		.0, sample2dTexture( p.x, p_y, p_z ).b) +
-// 		step(		.0, sample2dTexture( p_x, p.y, p.z ).b) +
-// 		step(		.0, sample2dTexture( p_x, p.y, p_z ).b) +
-// 		step(		.0, sample2dTexture( p_x, p_y, p.z ).b) +
-// 		step(		.0, sample2dTexture( p_x, p_y, p_z ).b);
-// 	bool uChangeRateIsPositive = .5 < sum && sum < 7.5;
-
-// 	return ( uIsConsistentlyHigh && uChangeRateIsPositive ) ? 1.:0.;
-// }
-
-float sample2dTextureAs3d(vec3 p)
+vec4 sample2dTextureAs3d(vec3 p)
 {
 	vec3 textureSpaceP3d = p / texture2dWorldSpacePixelWidth + 0.5;
 
-	float sampleRoundedDown =	sample2dTexture(textureSpaceP3d.x,textureSpaceP3d.y,textureSpaceP3d.z).r;
-	float sampleRoundedUp =		sample2dTexture(textureSpaceP3d.x,textureSpaceP3d.y,textureSpaceP3d.z + texture2dDimensionReciprocal ).r;
+	vec4 sampleRoundedDown =	sample2dTextureOnGrid(textureSpaceP3d.x,textureSpaceP3d.y,textureSpaceP3d.z);
+	vec4 sampleRoundedUp =		sample2dTextureOnGrid(textureSpaceP3d.x,textureSpaceP3d.y,textureSpaceP3d.z + texture2dDimensionReciprocal );
 
-	float lerpAmount = textureSpaceP3d.z - floor( textureSpaceP3d.z / texture2dDimensionReciprocal );
-	return mix(sampleRoundedDown,sampleRoundedUp,lerpAmount) - isolevel;
+	float lerpAmount = fract(textureSpaceP3d.z / texture2dDimensionReciprocal);
+	return mix(sampleRoundedDown,sampleRoundedUp,lerpAmount);
 }
+
+vec4 sample2dTextureAs3d(float x, float y, float z)
+{
+	vec3 textureSpaceP3d = vec3(x,y,z) / texture2dWorldSpacePixelWidth + 0.5;
+
+	vec4 sampleRoundedDown =	sample2dTextureOnGrid(textureSpaceP3d.x,textureSpaceP3d.y,textureSpaceP3d.z);
+	vec4 sampleRoundedUp =		sample2dTextureOnGrid(textureSpaceP3d.x,textureSpaceP3d.y,textureSpaceP3d.z + texture2dDimensionReciprocal );
+
+	float lerpAmount = fract(textureSpaceP3d.z / texture2dDimensionReciprocal);
+	return mix(sampleRoundedDown,sampleRoundedUp,lerpAmount);
+}
+
+//could color surface with this
+float getFilamentLevel(vec3 p)
+{
+	float p_x = p.x + texture2dDimensionReciprocal;
+	if(p_x > 1.) p_x = p.x;
+	float p_y = p.y + texture2dDimensionReciprocal;
+	if(p_y > 1.) p_y = p.y;
+	float p_z = p.z + texture2dDimensionReciprocal;
+	if(p_z > 1.) p_z = p.z;
+
+	float threshold = .5;
+	float sum =
+		step(threshold, sample2dTextureAs3d( p.x, p.y, p.z ).r) +
+		step(threshold, sample2dTextureAs3d( p.x, p.y, p_z ).r) +
+		step(threshold, sample2dTextureAs3d( p.x, p_y, p.z ).r) +
+		step(threshold, sample2dTextureAs3d( p.x, p_y, p_z ).r) +
+		step(threshold, sample2dTextureAs3d( p_x, p.y, p.z ).r) +
+		step(threshold, sample2dTextureAs3d( p_x, p.y, p_z ).r) +
+		step(threshold, sample2dTextureAs3d( p_x, p_y, p.z ).r) +
+		step(threshold, sample2dTextureAs3d( p_x, p_y, p_z ).r);
+	bool uIsConsistentlyHigh = .5 < sum && sum < 7.5; 
+
+	sum =
+		step(		.0, sample2dTextureAs3d( p.x, p.y, p.z ).b) +
+		step(		.0, sample2dTextureAs3d( p.x, p.y, p_z ).b) +
+		step(		.0, sample2dTextureAs3d( p.x, p_y, p.z ).b) +
+		step(		.0, sample2dTextureAs3d( p.x, p_y, p_z ).b) +
+		step(		.0, sample2dTextureAs3d( p_x, p.y, p.z ).b) +
+		step(		.0, sample2dTextureAs3d( p_x, p.y, p_z ).b) +
+		step(		.0, sample2dTextureAs3d( p_x, p_y, p.z ).b) +
+		step(		.0, sample2dTextureAs3d( p_x, p_y, p_z ).b);
+	bool uChangeRateIsPositive = .5 < sum && sum < 7.5;
+
+	return ( uIsConsistentlyHigh && uChangeRateIsPositive ) ? 1.:0.;
+}
+
+// vec4 sample2dTextureOnGrid(float x, float y, float zRounded)
+// {
+// 	vec2 textureSpacePRounded = vec2( x, y * texture2dDimensionReciprocal + zRounded );
+// 	return texture2D(data2d, textureSpacePRounded);
+// }
+
+// float get3dLinearlyFilteredSampleFrom2dTexture(vec3 p)
+// {
+// 	vec3 textureSpaceP3d = p / texture2dWorldSpacePixelWidth + 0.5;
+// 	float zRoundedDown =floor( textureSpaceP3d.z / texture2dDimensionReciprocal ) * texture2dDimensionReciprocal;
+// 	float zRoundedUp   = ceil( textureSpaceP3d.z / texture2dDimensionReciprocal ) * texture2dDimensionReciprocal;
+
+// 	float sampleRoundedUp = 	sample2dTextureOnGrid(textureSpaceP3d.x,textureSpaceP3d.y,zRoundedUp).r;
+// 	float sampleRoundedDown = 	sample2dTextureOnGrid(textureSpaceP3d.x,textureSpaceP3d.y,zRoundedDown).r;
+
+// 	float lerpAmount = (textureSpaceP3d.z-zRoundedDown) / (zRoundedUp-zRoundedDown);
+// 	return mix(sampleRoundedDown,sampleRoundedUp,lerpAmount) - isolevel;
+// }
 
 vec2 renderCubeIntersectionDistances( vec3 origin, vec3 direction )
 { 
@@ -303,7 +334,8 @@ float getLevel( vec3 p )
 			// return textureSample - isolevel;
 		}
 
-		return sample2dTextureAs3d(p);
+		return sample2dTextureAs3d(p).r - isolevel;
+		// return getFilamentLevel(p) - isolevel;
 	}
 
 	return levelOfEllipticCurveSpace(p);
@@ -319,9 +351,9 @@ vec3 numericalGradient( vec3 p ) //very easy to work out for polynomials, y does
 	// {
 	// 	eps = texture3dWorldSpacePixelWidth*2000000.;
 	// }
-	float x = ( getLevel(p-vec3(eps,0.,0.)) - getLevel(p+vec3(eps,0.,0.)) ) / eps;
-	float y = ( getLevel(p-vec3(0.,eps,0.)) - getLevel(p+vec3(0.,eps,0.)) ) / eps;
-	float z = ( getLevel(p-vec3(0.,0.,eps)) - getLevel(p+vec3(0.,0.,eps)) ) / eps;
+	float x = ( valueHere - getLevel(vec3(p.x+eps,p.y,    p.z    )) ) / eps;
+	float y = ( valueHere - getLevel(vec3(p.x,    p.y+eps,p.z    )) ) / eps;
+	float z = ( valueHere - getLevel(vec3(p.x,    p.y,    p.z+eps)) ) / eps;
 	// if(x==0.||y==0.||z==0.)
 	// {
 	// 	return vec3(1.,0.,0.);
@@ -334,11 +366,41 @@ vec3 numericalGradient( vec3 p ) //very easy to work out for polynomials, y does
 	return vec3(x,y,z);
 }
 
+vec3 textureNumericalGradientWithLerp(vec3 p)
+{
+	vec3 textureSpaceP3d = (p / texture2dWorldSpacePixelWidth + 0.5);
+	vec3 floored = floor( textureSpaceP3d / texture2dDimensionReciprocal ) * texture2dDimensionReciprocal;
+
+	vec3 vecs[4];
+	vec3 a,b;
+	float valueHere;
+
+	for(int i = 0; i < 4; i++)
+	{
+		a = floored;
+		if(i>0) a[i-1] += texture2dDimensionReciprocal;
+
+		valueHere = sample2dTextureOnGrid(a.x,a.y,a.z).r;
+		b.x = sample2dTextureOnGrid(a.x+texture2dDimensionReciprocal,    a.y,    a.z    ).r - valueHere;
+		b.y = sample2dTextureOnGrid(a.x,    a.y+texture2dDimensionReciprocal,    a.z    ).r - valueHere;
+		b.z = sample2dTextureOnGrid(a.x,    a.y,    a.z+texture2dDimensionReciprocal    ).r - valueHere;
+
+		vecs[i] = normalize(b);
+	}
+
+	vec3 final = vecs[0] +
+		(vecs[1]-vecs[0]) * fract( textureSpaceP3d.x / texture2dDimensionReciprocal ) +
+		(vecs[2]-vecs[0]) * fract( textureSpaceP3d.y / texture2dDimensionReciprocal ) +
+		(vecs[3]-vecs[0]) * fract( textureSpaceP3d.z / texture2dDimensionReciprocal );
+	return final;
+}
+
 vec3 getNormal(vec3 p)
 {
 	if(useTexture)
 	{
-		return normalize( numericalGradient(p) );
+		return normalize( textureNumericalGradientWithLerp(p) );
+		// return normalize( numericalGradient(p) );
 	}
 	// float textureSample = texture3D(data, vec3(0.,0.,0.)).r;
 	return gradientOfEllipticCurveSpace(p);
