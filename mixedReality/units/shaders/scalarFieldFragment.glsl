@@ -1,21 +1,4 @@
 /*
-Make Andrew thing
-	-> Andrew can sign off on topology and geometry
-	-> Hotel booking
-Get starting date -> Rent out flat
-	->have money, can book plane
-	->can get reimbursed
-
-Release
-Case study
-Tests
-Thesis chapters
-Proof read
-Publication
-
-*/
-/*
-	While you're not holding it it should probably be rotating. And be close to the camera.
 	Aaaaand ideally you want to render, not from the back, but from the back OR the place that the mesh begins
 	Could be very helpful for wave functions.
 	Surely useful for electromagnetism.
@@ -95,13 +78,6 @@ Publication
 precision highp float;
 precision mediump sampler3D;
 
-// uniform sampler3D data3d;
-// uniform float texture3dWorldSpacePixelWidth;
-
-uniform float texture2dWorldSpacePixelWidth;
-uniform float texture2dDimensionReciprocal;
-uniform sampler2D data2d;
-
 varying vec4 worldSpacePixelPosition;
 
 uniform mat4 matrixWorldInverse;
@@ -111,16 +87,12 @@ uniform float renderRadius;
 uniform float renderRadiusSquared;
 uniform float isolevel;
 
+uniform int source;
 uniform bool doIsosurface;
 uniform bool doGas;
-uniform bool useTexture;
 uniform bool bothGasColors;
 uniform bool squarish;
 uniform bool cubeVolume;
-
-
-// renderTargets
-
 
 //------------GENERIC
 
@@ -194,98 +166,6 @@ vec2 sphereIntersectionDistances( vec3 origin, vec3 direction, vec3 center, floa
 	return vec2(0.,0.);
 }
 
-
-
-
-
-
-
-
-//------------------Texture
-vec4 sample2dTextureOnGrid(float x, float y, float z)
-{
-	float zFloored = floor( z / texture2dDimensionReciprocal ) * texture2dDimensionReciprocal;
-	vec2 textureSpacePRounded = vec2( x, y * texture2dDimensionReciprocal + zFloored );
-	return texture2D(data2d, textureSpacePRounded);
-}
-
-vec4 sample2dTextureAs3d(vec3 p)
-{
-	vec3 textureSpaceP3d = p / texture2dWorldSpacePixelWidth + 0.5;
-
-	vec4 sampleRoundedDown =	sample2dTextureOnGrid(textureSpaceP3d.x,textureSpaceP3d.y,textureSpaceP3d.z);
-	vec4 sampleRoundedUp =		sample2dTextureOnGrid(textureSpaceP3d.x,textureSpaceP3d.y,textureSpaceP3d.z + texture2dDimensionReciprocal );
-
-	float lerpAmount = fract(textureSpaceP3d.z / texture2dDimensionReciprocal);
-	return mix(sampleRoundedDown,sampleRoundedUp,lerpAmount);
-}
-
-vec4 sample2dTextureAs3d(float x, float y, float z)
-{
-	vec3 textureSpaceP3d = vec3(x,y,z) / texture2dWorldSpacePixelWidth + 0.5;
-
-	vec4 sampleRoundedDown =	sample2dTextureOnGrid(textureSpaceP3d.x,textureSpaceP3d.y,textureSpaceP3d.z);
-	vec4 sampleRoundedUp =		sample2dTextureOnGrid(textureSpaceP3d.x,textureSpaceP3d.y,textureSpaceP3d.z + texture2dDimensionReciprocal );
-
-	float lerpAmount = fract(textureSpaceP3d.z / texture2dDimensionReciprocal);
-	return mix(sampleRoundedDown,sampleRoundedUp,lerpAmount);
-}
-
-//could color surface with this
-float getFilamentLevel(vec3 p)
-{
-	float p_x = p.x + texture2dDimensionReciprocal;
-	if(p_x > 1.) p_x = p.x;
-	float p_y = p.y + texture2dDimensionReciprocal;
-	if(p_y > 1.) p_y = p.y;
-	float p_z = p.z + texture2dDimensionReciprocal;
-	if(p_z > 1.) p_z = p.z;
-
-	float threshold = .5;
-	float sum =
-		step(threshold, sample2dTextureAs3d( p.x, p.y, p.z ).r) +
-		step(threshold, sample2dTextureAs3d( p.x, p.y, p_z ).r) +
-		step(threshold, sample2dTextureAs3d( p.x, p_y, p.z ).r) +
-		step(threshold, sample2dTextureAs3d( p.x, p_y, p_z ).r) +
-		step(threshold, sample2dTextureAs3d( p_x, p.y, p.z ).r) +
-		step(threshold, sample2dTextureAs3d( p_x, p.y, p_z ).r) +
-		step(threshold, sample2dTextureAs3d( p_x, p_y, p.z ).r) +
-		step(threshold, sample2dTextureAs3d( p_x, p_y, p_z ).r);
-	bool uIsConsistentlyHigh = .5 < sum && sum < 7.5; 
-
-	sum =
-		step(		.0, sample2dTextureAs3d( p.x, p.y, p.z ).b) +
-		step(		.0, sample2dTextureAs3d( p.x, p.y, p_z ).b) +
-		step(		.0, sample2dTextureAs3d( p.x, p_y, p.z ).b) +
-		step(		.0, sample2dTextureAs3d( p.x, p_y, p_z ).b) +
-		step(		.0, sample2dTextureAs3d( p_x, p.y, p.z ).b) +
-		step(		.0, sample2dTextureAs3d( p_x, p.y, p_z ).b) +
-		step(		.0, sample2dTextureAs3d( p_x, p_y, p.z ).b) +
-		step(		.0, sample2dTextureAs3d( p_x, p_y, p_z ).b);
-	bool uChangeRateIsPositive = .5 < sum && sum < 7.5;
-
-	return ( uIsConsistentlyHigh && uChangeRateIsPositive ) ? 1.:0.;
-}
-
-// vec4 sample2dTextureOnGrid(float x, float y, float zRounded)
-// {
-// 	vec2 textureSpacePRounded = vec2( x, y * texture2dDimensionReciprocal + zRounded );
-// 	return texture2D(data2d, textureSpacePRounded);
-// }
-
-// float get3dLinearlyFilteredSampleFrom2dTexture(vec3 p)
-// {
-// 	vec3 textureSpaceP3d = p / texture2dWorldSpacePixelWidth + 0.5;
-// 	float zRoundedDown =floor( textureSpaceP3d.z / texture2dDimensionReciprocal ) * texture2dDimensionReciprocal;
-// 	float zRoundedUp   = ceil( textureSpaceP3d.z / texture2dDimensionReciprocal ) * texture2dDimensionReciprocal;
-
-// 	float sampleRoundedUp = 	sample2dTextureOnGrid(textureSpaceP3d.x,textureSpaceP3d.y,zRoundedUp).r;
-// 	float sampleRoundedDown = 	sample2dTextureOnGrid(textureSpaceP3d.x,textureSpaceP3d.y,zRoundedDown).r;
-
-// 	float lerpAmount = (textureSpaceP3d.z-zRoundedDown) / (zRoundedUp-zRoundedDown);
-// 	return mix(sampleRoundedDown,sampleRoundedUp,lerpAmount) - isolevel;
-// }
-
 vec2 renderCubeIntersectionDistances( vec3 origin, vec3 direction )
 { 
 	vec2 intersectionDistances = vec2(0.,0.);
@@ -322,23 +202,118 @@ vec2 renderCubeIntersectionDistances( vec3 origin, vec3 direction )
 
 
 
-//------------------------------FUNDAMENTAL
+
+
+//------------------Texture2d
+uniform float texture2dWorldSpacePixelWidth;
+uniform float texture2dDimensionReciprocal;
+uniform sampler2D data2d;
+
+vec4 sample2dTextureOnGrid(float x, float y, float z)
+{
+	float zFloored = floor( z / texture2dDimensionReciprocal ) * texture2dDimensionReciprocal;
+	vec2 textureSpacePRounded = vec2( x, y * texture2dDimensionReciprocal + zFloored );
+	return texture2D(data2d, textureSpacePRounded);
+}
+
+vec4 sample2dTextureAs3d(vec3 p)
+{
+	vec3 textureSpaceP3d = p / texture2dWorldSpacePixelWidth + 0.5;
+
+	vec4 sampleRoundedDown =	sample2dTextureOnGrid(textureSpaceP3d.x,textureSpaceP3d.y,textureSpaceP3d.z);
+	vec4 sampleRoundedUp =		sample2dTextureOnGrid(textureSpaceP3d.x,textureSpaceP3d.y,textureSpaceP3d.z + texture2dDimensionReciprocal );
+
+	float lerpAmount = fract(textureSpaceP3d.z / texture2dDimensionReciprocal);
+	return mix(sampleRoundedDown,sampleRoundedUp,lerpAmount);
+}
+
+vec4 sample2dTextureAs3d(float x, float y, float z)
+{
+	vec3 textureSpaceP3d = vec3(x,y,z) / texture2dWorldSpacePixelWidth + 0.5;
+
+	vec4 sampleRoundedDown =	sample2dTextureOnGrid(textureSpaceP3d.x,textureSpaceP3d.y,textureSpaceP3d.z);
+	vec4 sampleRoundedUp =		sample2dTextureOnGrid(textureSpaceP3d.x,textureSpaceP3d.y,textureSpaceP3d.z + texture2dDimensionReciprocal );
+
+	float lerpAmount = fract(textureSpaceP3d.z / texture2dDimensionReciprocal);
+	return mix(sampleRoundedDown,sampleRoundedUp,lerpAmount);
+}
+
+float getFilamentLevel(vec3 p)
+{
+	float p_x = p.x + texture2dDimensionReciprocal * texture2dWorldSpacePixelWidth;
+	if(p_x > 1.) p_x = p.x;
+	float p_y = p.y + texture2dDimensionReciprocal * texture2dWorldSpacePixelWidth;
+	if(p_y > 1.) p_y = p.y;
+	float p_z = p.z + texture2dDimensionReciprocal * texture2dWorldSpacePixelWidth;
+	if(p_z > 1.) p_z = p.z;
+
+	float threshold = .5;
+	float sum =
+		step(threshold, sample2dTextureAs3d( p.x, p.y, p.z ).r) +
+		step(threshold, sample2dTextureAs3d( p.x, p.y, p_z ).r) +
+		step(threshold, sample2dTextureAs3d( p.x, p_y, p.z ).r) +
+		step(threshold, sample2dTextureAs3d( p.x, p_y, p_z ).r) +
+		step(threshold, sample2dTextureAs3d( p_x, p.y, p.z ).r) +
+		step(threshold, sample2dTextureAs3d( p_x, p.y, p_z ).r) +
+		step(threshold, sample2dTextureAs3d( p_x, p_y, p.z ).r) +
+		step(threshold, sample2dTextureAs3d( p_x, p_y, p_z ).r);
+	bool uIsConsistentlyHigh = .5 < sum && sum < 7.5; 
+
+	sum =
+		step(		.0, sample2dTextureAs3d( p.x, p.y, p.z ).b) +
+		step(		.0, sample2dTextureAs3d( p.x, p.y, p_z ).b) +
+		step(		.0, sample2dTextureAs3d( p.x, p_y, p.z ).b) +
+		step(		.0, sample2dTextureAs3d( p.x, p_y, p_z ).b) +
+		step(		.0, sample2dTextureAs3d( p_x, p.y, p.z ).b) +
+		step(		.0, sample2dTextureAs3d( p_x, p.y, p_z ).b) +
+		step(		.0, sample2dTextureAs3d( p_x, p_y, p.z ).b) +
+		step(		.0, sample2dTextureAs3d( p_x, p_y, p_z ).b);
+	bool uChangeRateIsPositive = .5 < sum && sum < 7.5;
+
+	return ( uIsConsistentlyHigh && uChangeRateIsPositive ) ? 1.:0.;
+}
+
+float get3dLinearlyFilteredSampleFrom2dTexture(vec3 p)
+{
+	vec3 textureSpaceP3d = p / texture2dWorldSpacePixelWidth + 0.5;
+	float zRoundedDown =floor( textureSpaceP3d.z / texture2dDimensionReciprocal ) * texture2dDimensionReciprocal;
+	float zRoundedUp   = ceil( textureSpaceP3d.z / texture2dDimensionReciprocal ) * texture2dDimensionReciprocal;
+
+	float sampleRoundedUp = 	sample2dTextureOnGrid(textureSpaceP3d.x,textureSpaceP3d.y,zRoundedUp).r;
+	float sampleRoundedDown = 	sample2dTextureOnGrid(textureSpaceP3d.x,textureSpaceP3d.y,zRoundedDown).r;
+
+	float lerpAmount = (textureSpaceP3d.z-zRoundedDown) / (zRoundedUp-zRoundedDown);
+	return mix(sampleRoundedDown,sampleRoundedUp,lerpAmount) - isolevel;
+}
+
+
+
+
+
+
+
+
+
+
+
+//----------Texture3d
+uniform sampler3D data3d;
+uniform float texture3dWorldSpacePixelWidth;
+
 float getLevel( vec3 p )
 {
-	if(useTexture)
-	{
-		{
-			// vec3 textureSpaceP = p / texture3dWorldSpacePixelWidth + 0.5;
+	if(source == 0) {
+		vec3 textureSpaceP = p / texture3dWorldSpacePixelWidth + 0.5;
 
-			// float textureSample = texture( data3d, textureSpaceP.xyz ).r;
-			// return textureSample - isolevel;
-		}
-
-		return sample2dTextureAs3d(p).r - isolevel;
-		// return getFilamentLevel(p) - isolevel;
+		float textureSample = texture( data3d, textureSpaceP.xyz ).r;
+		return textureSample - isolevel;
 	}
-
-	return levelOfEllipticCurveSpace(p);
+	else if(source == 1) {
+		return sample2dTextureAs3d(p).r - isolevel;
+	}
+	else {
+		return levelOfEllipticCurveSpace(p);
+	}
 
 	// return length(p) -0.1;
 }
@@ -366,7 +341,7 @@ vec3 numericalGradient( vec3 p ) //very easy to work out for polynomials, y does
 	return vec3(x,y,z);
 }
 
-vec3 textureNumericalGradientWithLerp(vec3 p)
+vec3 texture2dGradient(vec3 p)
 {
 	vec3 textureSpaceP3d = (p / texture2dWorldSpacePixelWidth + 0.5);
 	vec3 floored = floor( textureSpaceP3d / texture2dDimensionReciprocal ) * texture2dDimensionReciprocal;
@@ -397,13 +372,16 @@ vec3 textureNumericalGradientWithLerp(vec3 p)
 
 vec3 getNormal(vec3 p)
 {
-	if(useTexture)
-	{
-		return normalize( textureNumericalGradientWithLerp(p) );
-		// return normalize( numericalGradient(p) );
+	if( source == 0 ) {
+		return normalize( numericalGradient(p) );
+	}
+	else if( source == 1 ) {
+		return normalize( texture2dGradient(p) );
+	}
+	else {
+		return gradientOfEllipticCurveSpace(p);
 	}
 	// float textureSample = texture3D(data, vec3(0.,0.,0.)).r;
-	return gradientOfEllipticCurveSpace(p);
 	// return normalize(p);
 	// return vec3(1.,0.,0.);
 }
@@ -430,6 +408,11 @@ float getLightIntensityAtPoint(vec3 p, vec3 viewerDirection, vec3 normal )
 
 	return intensity;
 }
+
+
+
+
+
 
 
 
@@ -498,8 +481,8 @@ void addColor(float levelAtStart, float levelAtEnd, float stepLength)
 {
 	// closer to 0 = more intense, 0 or less = 0
 	//ideally there is one pixel for which it reaches 1
-	float dropoffer = useTexture ? .1 : 2.;
-	float sizeBoost = useTexture ? 5. : 9.;
+	float dropoffer = source != 2 ? .1 : 2.;
+	float sizeBoost = source != 2 ? 5. : 9.;
 
 	float trapeziumArea = ( levelAtStart + levelAtEnd ) * .5 * dropoffer;
 
@@ -603,7 +586,7 @@ void main()
 				float gridThicknessSq = sq(gridSpacing / 10.); //TODO should depend on distance
 				float minDistToGridSq = 0.;
 
-				if( !useTexture && squarish && sign(oldLevel) == 1. )
+				if( source == 2 && squarish && sign(oldLevel) == 1. )
 				{
 					vec3 p = probeStart + isosurfaceProbeDistance * direction;
 					vec3 normal = getNormal(p);
@@ -682,6 +665,15 @@ void main()
 				{
 					surfaceColor.g = 1.;
 				}
+
+				// if( getFilamentLevel(p) > .3 )
+				// {
+				// 	surfaceColor *= .002;
+				// }
+				// else
+				// {
+				// 	discard;
+				// }
 
 				gl_FragColor.rgb += surfaceColor * intensity;
 

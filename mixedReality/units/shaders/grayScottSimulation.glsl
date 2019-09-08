@@ -45,15 +45,3 @@ void main (void)
 
 	gl_FragColor = vec4(result, 0.0, 1.0);
 }
-
-
-float sample2dTextureAs3d(vec3 p)
-{
-	vec3 textureSpaceP3d = p / texture2dWorldSpacePixelWidth + 0.5;
-
-	float sampleRoundedDown =	sample2dTexture(textureSpaceP3d.x,textureSpaceP3d.y,textureSpaceP3d.z).r;
-	float sampleRoundedUp =		sample2dTexture(textureSpaceP3d.x,textureSpaceP3d.y,textureSpaceP3d.z + texture2dDimensionReciprocal ).r;
-
-	float lerpAmount = textureSpaceP3d.z - floor( textureSpaceP3d.z / texture2dDimensionReciprocal );
-	return mix(sampleRoundedDown,sampleRoundedUp,lerpAmount) - isolevel;
-}

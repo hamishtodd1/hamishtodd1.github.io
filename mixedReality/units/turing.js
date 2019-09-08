@@ -31,28 +31,36 @@ async function initTuring(gl)
 		{
 			return i + k*dimension*dimension + dimension*j;
 		}
-		for(let i = 0; i < dimension; i++) {
+		let center = new THREE.Vector3(Math.floor(dimension/2),Math.floor(dimension/2),Math.floor(dimension/2));
+		let a = new THREE.Vector3();
+		for(let i = 0; i < dimension; i++)
 		for(let j = 0; j < dimension; j++)
-		for(let k = 0; k < dimension; k++)
+		for(let k = 0; k < dimension; k++) {
 			if( j > dimension / 2. ) {
 				let t = (i + .2 * k - dimension / 2 ) * .1;
 
 				initialState[ 4 * ijkToI(i,j,k) + 0] =    Math.exp(-sq( t ));
 				initialState[ 4 * ijkToI(i,j,k) + 1] = .5*Math.exp(-sq(t-2));
 			}
+
+			// a.set(i,j,k);
+			// let t = .12 * a.distanceTo(center);
+
+			// initialState[ 4 * ijkToI(i,j,k) + 1] = Math.exp(-sq( t ));
+			// initialState[ 4 * ijkToI(i,j,k) + 0] = Math.exp(-sq(t-2));
 		}
 
-		let numStepsPerFrame = 8;
+		let numStepsPerFrame = 4;
 		var data2d = {value:null};
 		await Simulation( textureDimensions, "fitzHughNagumo", "clamped", initialState, numStepsPerFrame, 
 			data2d,
 			{threeDDimensions:{value:new THREE.Vector3( dimension, dimension, dimension )}},
 			THREE.LinearFilter )
 
-		let scalarField = await scalarFieldVisualization(data2d,dimension);
+		let scalarField = await scalarFieldVisualization({data2d,dimension});
 		updateFunctions.push(function()
 		{
-			scalarField.rotation.y += 0.01
+			// scalarField.rotation.y += 0.01
 			// scalarField.rotation.x += 0.01
 		})
 	}
