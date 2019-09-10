@@ -297,64 +297,8 @@ function initThreeSphereExploration( height )
 			threeSphereMatrixInverse.getInverse(threeSphereMatrix)
 		}
 
-		if(0)
-		{
-			imitationHand.position.copy(assemblage.position)
-
-			imitationHand.position.x = 1
-
-			let original = new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5)
-			original.setLength(0.0000000) //should be able to do other nearby values but for now...
-
-			let v = original.clone()
-			imitationHand.updateMatrixWorld()
-			imitationHand.localToWorld(v)
-			let vLocalToRotatingThreeSphere = stereographicallyUnproject(v).applyMatrix4(threeSphereMatrixInverse)
-			console.warn(vLocalToRotatingThreeSphere.toArray())
-
-			for(let i = 0; i < 3; i++)
-			{
-				imitationHand.positionOld.copy(imitationHand.position)
-				imitationHand.position.y += 0.2
-
-				checkOrthonormality(threeSphereMatrix)
-
-				applyVirtualHandDiffToRotatingThreeSphereMatrix()
-
-				checkOrthonormality(threeSphereMatrix)
-			}
-
-			v = original.clone()
-			imitationHand.updateMatrixWorld()
-			imitationHand.localToWorld(v)
-			vLocalToRotatingThreeSphere = stereographicallyUnproject(v).applyMatrix4(threeSphereMatrixInverse)
-			console.warn(vLocalToRotatingThreeSphere.toArray(), "should be same as above")
-		}
-
 		updateFunctions.push( function()
 		{
-			if(imitationHand !== null)
-			{
-				// camera.position.applyAxisAngle(yUnit, 0.01)
-				// camera.rotation.y += 0.01
-
-				// imitationHand.standardVigorousMovement()
-
-				let t = frameCount*0.03
-
-				// imitationHand.position.set(0, assemblage.position.y,assemblage.position.z+assemblage.scale.z)
-				imitationHand.position.y += 0.004*Math.cos(t)
-				imitationHand.position.x += 0.0014*Math.cos(t*1.3)
-
-				// imitationHand.position.set( 0*0.2*Math.sin(t), 2*0.1*Math.sin(t),3.8)
-				imitationHand.rotation.set(
-					0.4*Math.sin(t*2.0),
-					0.5*Math.sin(t*3.6),
-					0//0.6*Math.sin(t*1.3)
-					)
-				imitationHand.quaternion.setFromEuler(imitationHand.rotation)
-			}
-			
 			if( designatedHand.thumbstickButton )
 			{
 				if( !designatedHand.thumbstickButtonOld )

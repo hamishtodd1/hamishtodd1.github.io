@@ -117,6 +117,7 @@ float levelOfEllipticCurveSpace(vec3 p)
 	vec3 scaledP = p * 8.;
 	float val = scaledP.y*scaledP.y - scaledP.x*scaledP.x*scaledP.x - scaledP.z*scaledP.x;
 	return val - isolevel;
+	// return sin( 57.*(val - isolevel) );
 }
 vec3 gradientOfEllipticCurveSpace(vec3 p)
 {
@@ -379,7 +380,8 @@ vec3 getNormal(vec3 p)
 		return normalize( texture2dGradient(p) );
 	}
 	else {
-		return gradientOfEllipticCurveSpace(p);
+		// return gradientOfEllipticCurveSpace(p);
+		return normalize( numericalGradient(p) );
 	}
 	// float textureSample = texture3D(data, vec3(0.,0.,0.)).r;
 	// return normalize(p);
@@ -586,7 +588,9 @@ void main()
 				float gridThicknessSq = sq(gridSpacing / 10.); //TODO should depend on distance
 				float minDistToGridSq = 0.;
 
-				if( source == 2 && squarish && sign(oldLevel) == 1. )
+				if( source == 2 && squarish 
+					// && sign(oldLevel) == 1. 
+					)
 				{
 					vec3 p = probeStart + isosurfaceProbeDistance * direction;
 					vec3 normal = getNormal(p);
@@ -594,7 +598,8 @@ void main()
 
 					vec3 pointToRoundingPlaneOnTangentPlane,squashedToCameraPlane;
 					float pointToRoundingPlaneDistance,distFromCameraPointOfView;
-					for(int i = 0; i < 3; i++)
+					// for(int i = 0; i < 3; i++)
+					for(int i = 2; i < 3; i++)
 					{
 						pointToRoundingPlaneDistance = round(p[i]/gridSpacing)*gridSpacing - p[i];
 						vec3 pointToRoundingPlane;

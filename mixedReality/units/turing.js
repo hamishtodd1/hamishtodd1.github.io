@@ -14,7 +14,8 @@ async function initTuring(gl)
 	// 	// "sintel.mp4"
 	// ],"turing")
 
-	// await initGrayScottSimulation(gl)
+	await initGrayScottSimulation(gl)
+	return
 
 	//3d
 	{

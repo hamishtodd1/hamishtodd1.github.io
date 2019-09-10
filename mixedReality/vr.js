@@ -1,4 +1,4 @@
-var handControllerKeys = {
+let handControllerKeys = {
 	thumbstickButton: 0,
 	grippingTop: 1,
 	grippingSide: 2,

@@ -5,8 +5,8 @@ const VR_TESTING_MODE = 0;
 const NONVR_TESTING_MODE = 1; //if you want switching to this to be automatic, you need to start with some kind of callback
 const PLAYBACK_MODE = 2;
 
-const MODE = NONVR_TESTING_MODE;
-log("Mode: ", MODE===PLAYBACK_MODE?"VR testing":MODE===VR_TESTING_MODE?"VR testing":"Non VR testing")
+const MODE = 1//VR_TESTING_MODE;
+log("Mode: ", MODE===PLAYBACK_MODE?"VR testing, USE FIREFOX!":MODE===VR_TESTING_MODE?"VR testing":"Non VR testing")
 
 const TAU = Math.PI * 2;
 const HS3 = Math.sqrt(3)/2;

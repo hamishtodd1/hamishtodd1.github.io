@@ -34,9 +34,9 @@ function initMockVrInput()
 
 		p.add(visiblePosition)
 
-		rightHand.rotation.x = 1.6*Math.sin(t*0.1)
-		rightHand.rotation.y = 1.5*Math.sin(t*0.13)
-		rightHand.rotation.z = 1.4*Math.sin(t*0.07)
+		// rightHand.rotation.x = 1.6*Math.sin(t*0.1)
+		// rightHand.rotation.y = 1.5*Math.sin(t*0.13)
+		// rightHand.rotation.z = 1.4*Math.sin(t*0.07)
 		rightHand.quaternion.setFromEuler(rightHand.rotation)
 
 		rightHand.updateMatrixWorld()

@@ -408,7 +408,8 @@ async function initGrayScottSimulation(gl)
 		dimensions,"grayScottSimulation", "periodic", state, numStepsPerFrame,
 		displayMaterial.uniforms.simulationTexture,
 		{brush:{value:brush}},
-		THREE.LinearFilter )
+		THREE.LinearFilter,
+		state )
 
 	let displayMesh = new THREE.Mesh(
 		new THREE.OriginCorneredPlaneBufferGeometry( dimensions.x / dimensions.y, 1. ),

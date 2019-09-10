@@ -66,11 +66,12 @@ async function initBasicSimulation()
 async function Simulation( 
 	dimensions, simulationShaderFilename,
 	boundaryConditions,
-	state,
+	initialState,
 	numStepsPerFrameSpecification,
 	objectToAssignSimulationTexture,
 	extraUniforms,
-	filter)
+	filter,
+	readPixelsState)
 {
 	let wrap = boundaryConditions === "periodic" ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
 
@@ -94,7 +95,7 @@ async function Simulation(
 	let pingFramebuffer = new THREE.WebGLRenderTarget( dimensions.x, dimensions.y, params );
 	let pongFramebuffer = new THREE.WebGLRenderTarget( dimensions.x, dimensions.y, params );
 
-	let initialStateTexture = new THREE.DataTexture( state, dimensions.x, dimensions.y, THREE.RGBAFormat );
+	let initialStateTexture = new THREE.DataTexture( initialState, dimensions.x, dimensions.y, THREE.RGBAFormat );
 	initialStateTexture.wrapS = wrap;
 	initialStateTexture.wrapT = wrap;
 	initialStateTexture.type = params.type;
@@ -149,9 +150,6 @@ async function Simulation(
 			return;
 		}
 
-		// if(frameCount > 0)
-		// 	return
-
 		let nonSimulationRenderTarget = renderer.getRenderTarget();
 		{
 			for( let i = 0; i < numStepsPerFrame; i++ )
@@ -176,7 +174,10 @@ async function Simulation(
 				ping = !ping;
 			}
 
-			// renderer.readRenderTargetPixels( renderer.getRenderTarget(),0,0,64,64,state )
+			if( readPixelsState !== undefined ) {
+				renderer.readRenderTargetPixels( renderer.getRenderTarget(),0,0,64,64,readPixelsState )
+			}
+
 			objectToAssignSimulationTexture.value = renderTarget.texture;
 		}
 		renderer.setRenderTarget( nonSimulationRenderTarget );

@@ -6,11 +6,12 @@ async function scalarFieldVisualization(params)
 	await assignShader("scalarFieldFragment", material, "fragment")
 
 	let scalarField = new THREE.Object3D();
-	scene.add(scalarField);
+	scene.add(scalarField); //more about matrices / updatematrixworld than visualization
 
 	let displayPlane = new THREE.Mesh( new THREE.PlaneBufferGeometry(1,1), material )
 	camera.add( displayPlane )
 	displayPlane.position.z = -camera.near;
+	camera.scalarFieldDisplayPlane = displayPlane;
 
 	uniforms.scalarFieldPointLightPosition = {value:new THREE.Vector3()}
 	uniforms.matrixWorldInverse = {value:new THREE.Matrix4()}
@@ -19,7 +20,7 @@ async function scalarFieldVisualization(params)
 
 	uniforms.renderRadius = {value:0.12};
 	uniforms.renderRadiusSquared = {value:sq(uniforms.renderRadius.value)};
-	uniforms.isolevel = {value:0.};
+	uniforms.isolevel = {value:0.02};
 	uniforms.doIsosurface = {value:true}
 	uniforms.doGas = {value:true}
 	uniforms.bothGasColors = {value:true}
@@ -222,11 +223,6 @@ async function scalarFieldVisualization(params)
 		material.uniforms.data3d = {value:data3d}
 		material.uniforms.texture3dWorldSpacePixelWidth = {value: uniforms.renderRadius.value / (0.5 - 0.5 / dimension) }
 	}
-
-	updateFunctions.push(function()
-	{
-		scalarField.quaternion.copy(rightHand.quaternion)
-	})
 
 	//IF you want to try having proper meshes and shit	
 	{
