@@ -15,21 +15,17 @@
 		Map that square (likey with the same point going to same place twice in many places) to RP3
 */
 
-async function initIcerm() {
+async function initIcerm(gl) {
 	//"local maximum of interestingness" liouville's thm
 	//S1 x S2?
 
 	//did not work in small steps!
 
-	//short term goal: useful visualization + interface for making video games / investigating dynamical systems
-	//movement wants to feel pleasant / can be understood well enough
+	//short term goal: useful visualization + interface for making video games / teaching about dynamical systems
+	//movement wants to feel pleasant + be understood
 
-	//later intention: give way of navigating / remapping 3-manifolds
-
-	// initThreeSphereExploration( 1.6 );
-	// return;
-
-	let ellipticCurveSpace = await scalarFieldVisualization({});
+	let ellipticCurveSpace = await scalarFieldVisualization({source:2});
+	
 
 	updateFunctions.push(function()
 	{
@@ -37,12 +33,13 @@ async function initIcerm() {
 		ellipticCurveSpace.position.copy(rightHand.position)
 	})
 
-	new THREE.TextureLoader().load("data/fish.png",function(texture) {
-		let height = 1;
-		let slide = new THREE.Mesh(new THREE.PlaneBufferGeometry(16/9*height,height), new THREE.MeshBasicMaterial({map:texture}));
+	let slideHeight = 1.5
+	let slide = new THREE.Mesh(new THREE.PlaneBufferGeometry(16/9*slideHeight,slideHeight), new THREE.MeshBasicMaterial());
+	new THREE.TextureLoader().load("data/icermSlide.png",function(texture) {
+		slide.material.map = texture;
 		scene.add(slide)
 		slide.position.y = 1.6;
-		slide.position.z = -1;
+		slide.position.z = -3;
 	})
 
 	let chapters = [
@@ -51,16 +48,36 @@ async function initIcerm() {
 		{name:"fish"},
 		{name:"S3"}
 	]
+	
+	let currentChapterIndex = {value:-1};
 
-	let currentChapterIndex = 0;
-	bindButton("right",function() {
-		currentChapterIndex++;
-		if( currentChapterIndex >= chapters.length ) {
-			currentChapterIndex = 0;
+	function nextChapter() {
+		currentChapterIndex.value++;
+		if( currentChapterIndex.value >= chapters.length ) {
+			currentChapterIndex.value = 0;
 		}
 
-		console.warn("changing to: ",chapters[currentChapterIndex].name);
+		console.warn("changing to: ",chapters[currentChapterIndex.value].name);
 
-		camera.scalarFieldDisplayPlane.visible = (chapters[currentChapterIndex].name === "scalar field")
-	})
+		camera.scalarFieldDisplayPlane.visible = (chapters[currentChapterIndex.value].name === "scalar field")
+
+		//visible, 
+	}
+	bindButton("right",nextChapter)
+
+	{
+		let height = 0.2
+		
+		let twoSphereVisiBox = VisiBox()
+		for(let i = 0; i < 8; i++)
+		{
+			twoSphereVisiBox.corners[i].visible = false
+		}
+		let fish = initFish( twoSphereVisiBox )
+		initTwoSphereExploration( fish, twoSphereVisiBox, height, currentChapterIndex )
+
+		initThreeSphereExploration( height, currentChapterIndex )
+	}
+
+	nextChapter();
 }

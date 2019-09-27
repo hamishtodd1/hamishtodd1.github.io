@@ -380,8 +380,8 @@ vec3 getNormal(vec3 p)
 		return normalize( texture2dGradient(p) );
 	}
 	else {
-		// return gradientOfEllipticCurveSpace(p);
-		return normalize( numericalGradient(p) );
+		return gradientOfEllipticCurveSpace(p);
+		// return normalize( numericalGradient(p) );
 	}
 	// float textureSample = texture3D(data, vec3(0.,0.,0.)).r;
 	// return normalize(p);

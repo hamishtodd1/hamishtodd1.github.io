@@ -1,4 +1,4 @@
-function initTwoSphereExploration(fish, visiBox, height)
+function initTwoSphereExploration(fish, visiBox, height, currentChapterIndex)
 {
 	let designatedHand = hands[RIGHT_CONTROLLER_INDEX]
 
@@ -6,17 +6,8 @@ function initTwoSphereExploration(fish, visiBox, height)
 	scene.add(assemblage)
 	updateFunctions.push(function()
 	{
-		if( designatedHand.thumbstickRight )
-		{
-			assemblage.position.copy(designatedHand.position)
-			assemblage.quaternion.copy(designatedHand.quaternion)
-			assemblage.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(yUnit,TAU/4))
-		}
-		else
-		{
-			assemblage.position.copy(hackPosition)
-			assemblage.quaternion.set(0,0,0,1)
-		}
+		assemblage.position.copy(hackPosition)
+		assemblage.quaternion.set(0,0,0,1)
 	})
 	markPositionAndQuaternion(assemblage,"assemblage")
 	objectsToBeLookedAtByHelmet.push(assemblage) //maybe don't be surprised if eyes are down
@@ -56,7 +47,7 @@ function initTwoSphereExploration(fish, visiBox, height)
 	// bulb.add( light );
 
 	let hackEngaged = false
-	let hackPosition = new THREE.Vector3(0, 1.6 + height * 0.6, 0)
+	let hackPosition = new THREE.Vector3(0, 1.6 + height * 0.6, -.4)
 	let thingsInScene = [s2,assemblage,bulb]
 	for(let i = 0; i < thingsInScene.length; i++)
 	{
@@ -76,7 +67,7 @@ function initTwoSphereExploration(fish, visiBox, height)
 
 	new THREE.OBJLoader().load("data/Lamp_Fluorescent_Illuminated.obj",function(obj)
 	{
-		bulb.scale.multiplyScalar(0.0007)
+		bulb.scale.multiplyScalar(0.0003)
 
 		let bottom = obj.children[0]
 		bulb.add(new THREE.Mesh(bottom.geometry,new THREE.MeshStandardMaterial({
@@ -165,23 +156,12 @@ function initTwoSphereExploration(fish, visiBox, height)
 				s2.matrixAutoUpdate = true
 			}
 
-			if( designatedHand.thumbstickUp )
-			{
-				s2.quaternion.copy( designatedHand.quaternion )
-				s2.position.copy( designatedHand.position ).sub(hackPosition)
-			}
 			if( s2.position.distanceTo(s2.correctPosition) < s2.radius)
 			{
 				s2.position.copy(s2.correctPosition)
 			}
 		}
 
-		if( designatedHand.thumbstickDown )
-		{
-			bulb.position.copy(designatedHand.position).sub(hackPosition)
-			bulb.quaternion.copy(designatedHand.quaternion)
-		}
-		
 		if(bulb.position.distanceTo(bulb.correctPosition) < s2.radius/2)
 		{
 			bulb.position.copy(bulb.correctPosition)
@@ -329,9 +309,35 @@ function initTwoSphereExploration(fish, visiBox, height)
 
 	alwaysUpdateFunctions.push(function()
 	{
-		for(let i = 0; i < meshesWithProjections.length; i++)
-		{
-			meshesWithProjections[i].visible = (i===visibleIndex.value)
+		// for(let i = 0; i < meshesWithProjections.length; i++)
+		// {
+		// 	meshesWithProjections[i].visible = (i===visibleIndex.value)
+		// }
+		// return
+
+		if(currentChapterIndex.value == 2) {
+			for(let i = 0; i < meshesWithProjections.length; i++)
+			{
+				meshesWithProjections[i].visible = (i===visibleIndex.value)
+				if(meshesWithProjections[i].visible)
+					log("y")
+			}
+			visiBox.visible = true
+			bulb.visible = true
+			s2.visible = true
+			fish.visible = true
+			assemblage.pane.visible = true
+		}
+		else {
+			for(let i = 0; i < meshesWithProjections.length; i++)
+			{
+				meshesWithProjections[i].visible = false
+			}
+			visiBox.visible = false
+			bulb.visible = false
+			s2.visible = false
+			fish.visible = false
+			assemblage.pane.visible = false
 		}
 	})
 
@@ -466,6 +472,7 @@ function initTwoSphereExploration(fish, visiBox, height)
 		visiBox.scale.y = height
 		visiBox.scale.x = height / numGridSquaresVertical * numGridSquaresHorizontal
 		visiBox.scale.z = 0.0002
+		visiBox.position.y = 0
 		assemblage.add(visiBox)
 
 		let pane = new THREE.Mesh(new THREE.PlaneGeometry(visiBox.scale.x,visiBox.scale.y),new THREE.MeshStandardMaterial({
@@ -475,30 +482,8 @@ function initTwoSphereExploration(fish, visiBox, height)
 			opacity:0.13
 		}))
 		assemblage.add(pane)
-		alwaysUpdateFunctions.push(function()
-		{
-			if(realityVideoDomElement.currentTime > 385.6 && realityVideoDomElement.currentTime < 438)
-			{
-				fish.children[0].material.depthTest = true
-				fish.children[1].material.depthTest = true
-				fish.children[0].material.neesUpdate = true
-				fish.children[1].material.neesUpdate = true
-			}
-			else
-			{
-				fish.children[0].material.depthTest = false
-				fish.children[1].material.depthTest = false
-				fish.children[0].material.neesUpdate = true
-				fish.children[1].material.neesUpdate = true
-			}
-		})
+		assemblage.pane = pane
 		
-
-		let heptagon = new THREE.Mesh(new THREE.CylinderBufferGeometry(0.05,0.05,0.0001,7), new THREE.MeshBasicMaterial({color:0xFFA500}))
-		heptagon.material.clippingPlanes = visiBox.planes
-		heptagon.geometry.applyMatrix(new THREE.Matrix4().makeRotationX(TAU/4))
-		assemblage.add(heptagon)
-		markPositionAndQuaternion(heptagon)
 
 		let grabbed2DObject = null
 		let pointInHand = new THREE.Vector3(1,0,0)
@@ -507,10 +492,6 @@ function initTwoSphereExploration(fish, visiBox, height)
 			if(designatedHand.grippingSide)
 			{
 				grabbed2DObject = fish
-			}
-			else if(designatedHand.thumbstickLeft)
-			{
-				grabbed2DObject = heptagon
 			}
 			else
 			{
@@ -537,7 +518,7 @@ function initTwoSphereExploration(fish, visiBox, height)
 				pointInHand.copy(worldishPointInHand).applyQuaternion(designatedHand.quaternion.clone().inverse())
 			}
 
-			grid.visible = heptagon.position.length() < 0.3
+			grid.visible = false
 		})
 	}
 }

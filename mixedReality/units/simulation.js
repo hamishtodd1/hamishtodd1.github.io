@@ -66,12 +66,11 @@ async function initBasicSimulation()
 async function Simulation( 
 	dimensions, simulationShaderFilename,
 	boundaryConditions,
-	initialState,
+	stateArray,
 	numStepsPerFrameSpecification,
 	objectToAssignSimulationTexture,
 	extraUniforms,
-	filter,
-	readPixelsState)
+	filter)
 {
 	let wrap = boundaryConditions === "periodic" ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
 
@@ -95,7 +94,7 @@ async function Simulation(
 	let pingFramebuffer = new THREE.WebGLRenderTarget( dimensions.x, dimensions.y, params );
 	let pongFramebuffer = new THREE.WebGLRenderTarget( dimensions.x, dimensions.y, params );
 
-	let initialStateTexture = new THREE.DataTexture( initialState, dimensions.x, dimensions.y, THREE.RGBAFormat );
+	let initialStateTexture = new THREE.DataTexture( stateArray, dimensions.x, dimensions.y, THREE.RGBAFormat );
 	initialStateTexture.wrapS = wrap;
 	initialStateTexture.wrapT = wrap;
 	initialStateTexture.type = params.type;
@@ -136,16 +135,26 @@ async function Simulation(
 	let simulationMesh = new THREE.Mesh( new THREE.PlaneBufferGeometry( 2, 2 ), simulationMaterial );
 	simScene.add( simulationMesh );
 
-	let paused = {value:false}
-
 	let doneOne = false;
+
+	let renderTarget = null;
+
+	let simulation = {
+		// simulationTexture: null,
+		speed:10.,
+		paused:false,
+		stateArray,
+		updateStateArray:function() {
+			renderer.readRenderTargetPixels( renderTarget,0,0,64,64,stateArray )
+		}
+	}
 
 	let initial = true;
 	updateFunctions.push( function()
 	{
 		let numStepsPerFrame = typeof numStepsPerFrameSpecification === "number" ? numStepsPerFrameSpecification:numStepsPerFrameSpecification.value;
 
-		if(paused.value || numStepsPerFrame === 0)
+		if(simulation.paused || numStepsPerFrame === 0)
 		{
 			return;
 		}
@@ -164,9 +173,9 @@ async function Simulation(
 					simulationMaterial.uniforms.oldState.value = ping ? pingFramebuffer.texture : pongFramebuffer.texture;
 				}
 
-				simulationMaterial.uniforms.deltaTime.value = frameDelta;
+				simulationMaterial.uniforms.deltaTime.value = clamp(frameDelta,0.,1./30) * simulation.speed;
 
-				var renderTarget = ping ? pongFramebuffer : pingFramebuffer
+				renderTarget = ping ? pongFramebuffer : pingFramebuffer
 				renderer.setRenderTarget( renderTarget );
 				renderer.render( simScene, simCamera );
 				simulationMaterial.uniforms.oldState.value = renderTarget.texture;
@@ -174,14 +183,10 @@ async function Simulation(
 				ping = !ping;
 			}
 
-			if( readPixelsState !== undefined ) {
-				renderer.readRenderTargetPixels( renderer.getRenderTarget(),0,0,64,64,readPixelsState )
-			}
-
 			objectToAssignSimulationTexture.value = renderTarget.texture;
 		}
 		renderer.setRenderTarget( nonSimulationRenderTarget );
 	} );
 
-	return paused
+	return simulation
 }

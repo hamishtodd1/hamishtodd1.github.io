@@ -33,10 +33,8 @@
 	}
 */
 
-async function initShaderExperimentation( canvas )
+async function initShaderExperimentation( gl )
 {
-	const gl = canvas.getContext( 'webgl2' );
-
 	//basic
 	if(0)
 	{

@@ -27,7 +27,7 @@ async function scalarFieldVisualization(params)
 	uniforms.squarish = {value:true}
 	uniforms.cubeVolume = {value:false}
 
-	uniforms.source = {value:2}
+	uniforms.source = {value:params.source !== undefined?params.source:1}
 
 	if(params.data2d !== undefined)
 	{
@@ -94,7 +94,7 @@ async function scalarFieldVisualization(params)
 			}
 		})
 
-		bindToggle("5",uniforms.cubeVolume,"cube volume")
+		bindToggle("5",uniforms.cubeVolume)
 
 		bindButton("2",function()
 		{
@@ -143,7 +143,7 @@ async function scalarFieldVisualization(params)
 		dimension = null;
 		let textureWorldSpacePixelWidth = null;
 
-		if(1) //params.data3d === undefined
+		if(0) //params.data3d === undefined
 		{
 			let artificialDimension = 16;
 			let artificialDataArray = new Float32Array(artificialDimension*artificialDimension*artificialDimension)

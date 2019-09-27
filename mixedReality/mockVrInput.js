@@ -11,7 +11,7 @@ function initMockVrInput()
 
 	return function()
 	{
-		let t = frameCount * 0.2
+		let t = frameCount * 0.5
 
 		let p = rightHand.position
 

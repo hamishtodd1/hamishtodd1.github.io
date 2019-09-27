@@ -53,17 +53,22 @@
 
 		<!-- <script src="units/shaderExperimentation.js"></script> -->
 
+		<script src="units/maps.js"></script>
+
+		<!-- <script src="units/fish.js"></script>
 		<script src="units/threeSphereExploration.js"></script>
+		<script src="units/twoSphereExploration.js"></script>
 
 		<script src="units/scalarFieldVisualization.js"></script>
 
 		<script src="units/icerm.js"></script>
 
-		<script src="units/grayScott.js"></script>
 		<script src="units/turing.js"></script>
+		<script src="units/grayScott.js"></script>
+		<script src="units/fitzhughNagumo.js"></script>
 		<script src="units/barkley.js"></script>
 
-		<script src="units/simulation.js"></script>		
+		<script src="units/simulation.js"></script>		 -->
 
 		<script>
 			async function init()
@@ -100,9 +105,11 @@
 					var getVrOrMockVrInput = initVrOrMockVrInput()
 				}
 
-				// await initShaderExperimentation( canvas )
-				await initTuring(gl)
-				// await initIcerm();
+				await initMaps();
+
+				// await initShaderExperimentation( gl )
+				// await initTuring(gl)
+				// await initIcerm(gl);
 				// await initBarkley(gl)
 				// await initBasicSimulation()
 				// await initScalarFieldVisualization();

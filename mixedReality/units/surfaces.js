@@ -25,7 +25,7 @@ function lerpSurfacesMadeOfPatchworks(from,To,t)
 	*/
 }
 
-function makeToroidalSurfaces(surfaces)
+function makeToroidalSurfaces()
 {
 	var s3SurfaceMaterial = new THREE.MeshStandardMaterial({color:0x5050FF, side:THREE.DoubleSide})
 	s3SurfaceMaterial.vertexColors = THREE.FaceColors;
@@ -166,21 +166,20 @@ function makeToroidalSurfaces(surfaces)
 		}
 		handleBody.deriveVertexPositions()
 
-		updatables.push(handleBody)
-		handleBody.update = function()
+		updateFunctions.push( function()
 		{
 			if( mouse.clicking && mouse.lastClickedObject === null )
 			{
-				mouse.rotateObjectByGesture(this)
+				mouse.rotateObjectByGesture(handleBody)
 			}
 
-			// var timeScaled = frameCount * 0.001;
-			// projectionOriginAsQuaternion.x = Math.sin( timeScaled )
-			// projectionOriginAsQuaternion.w = Math.cos( timeScaled )
-			// updateProjectionSetup()
+			var timeScaled = frameCount * 0.01;
+			projectionOriginAsQuaternion.x = Math.sin( timeScaled )
+			projectionOriginAsQuaternion.w = Math.cos( timeScaled )
+			updateProjectionSetup()
 
-			// handleBody.deriveVertexPositions()
-		}
+			handleBody.deriveVertexPositions()
+		} )
 		return handleBody;
 	}
 
@@ -212,4 +211,7 @@ function makeToroidalSurfaces(surfaces)
 		}
 		return makeHandleBody(arms)
 	}
+
+	let a = makeRotationallySymmetricHandleBody(5);
+	scene.add(a)
 }

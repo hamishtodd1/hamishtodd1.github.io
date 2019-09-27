@@ -50,7 +50,7 @@
 
 //would be nice if it is when you zoom out that they blur together
 //pixellation, that's what fucks you
-function initGrayScottParticles(displayMesh, state, numStepsPerFrame)
+function initGrayScottParticles(displayMesh, simulation, numStepsPerFrame)
 {
 	let numParticles = 90000;
 
@@ -133,9 +133,6 @@ function initGrayScottParticles(displayMesh, state, numStepsPerFrame)
 		}
 	}
 
-	let paused = {value:false}
-	bindToggle("p",paused)
-
 	let cameraLine = new THREE.Line3();
 	let simulationPlane = new THREE.Plane()
 	simulationPlane.normal.set(0,0,1)
@@ -153,7 +150,7 @@ function initGrayScottParticles(displayMesh, state, numStepsPerFrame)
 
 	updateFunctions.push(function()
 	{
-		if(paused.value)
+		if(simulation.paused) 
 		{
 			return
 		}
@@ -227,6 +224,8 @@ function initGrayScottParticles(displayMesh, state, numStepsPerFrame)
 
 		// 	//deduce transition probabilities
 		// }
+
+		simulation.updateStateArray();
 
 		for(let i = 0; i < numParticles; i++)
 		{
@@ -311,7 +310,10 @@ function initGrayScottParticles(displayMesh, state, numStepsPerFrame)
 			}
 			
 			particlesGeometry.colors[i].copy( discreteViridis[p.element].color )
-			particlesGeometry.colors[i].setRGB( state[p.pixelIndex*4+0], state[p.pixelIndex*4+1], 1.-state[p.pixelIndex*4+0]-state[i*4+1] )
+			particlesGeometry.colors[i].setRGB( 
+				simulation.stateArray[p.pixelIndex*4+0], 
+				simulation.stateArray[p.pixelIndex*4+1],
+				1. - simulation.stateArray[p.pixelIndex*4+0] - simulation.stateArray[i*4+1] )
 		}
 
 		particlesGeometry.verticesNeedUpdate = true;
@@ -359,8 +361,9 @@ async function initGrayScottSimulation(gl)
 	let brush = new THREE.Vector2(.5,.5);
 	updateFunctions.push(function()
 	{
-		// brush.copy( displayMesh.worldToLocal(rightHand.position.clone()) )
-		brush.x = -1000
+		brush.copy( displayMesh.worldToLocal(rightHand.position.clone()) )
+		log(brush)
+		// brush.x = -1000
 	})
 
 	let displayMaterial = new THREE.ShaderMaterial( {
@@ -404,12 +407,14 @@ async function initGrayScottSimulation(gl)
 		].join( '\n' )
 	} );
 
-	let paused = await Simulation(
-		dimensions,"grayScottSimulation", "periodic", state, numStepsPerFrame,
+	let simulation = await Simulation(
+		dimensions,"grayScott", "periodic", state, numStepsPerFrame,
 		displayMaterial.uniforms.simulationTexture,
 		{brush:{value:brush}},
 		THREE.LinearFilter,
 		state )
+
+	bindToggle("p",simulation,"paused")
 
 	let displayMesh = new THREE.Mesh(
 		new THREE.OriginCorneredPlaneBufferGeometry( dimensions.x / dimensions.y, 1. ),
@@ -420,7 +425,7 @@ async function initGrayScottSimulation(gl)
 	displayMesh.position.x -= displayMesh.scale.x/2
 	displayMesh.position.y -= displayMesh.scale.y/2
 
-	initGrayScottParticles(displayMesh, state, numStepsPerFrame)
+	initGrayScottParticles(displayMesh, simulation, numStepsPerFrame)
 }
 
 //Quadtree

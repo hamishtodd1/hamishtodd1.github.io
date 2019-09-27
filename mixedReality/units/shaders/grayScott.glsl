@@ -3,10 +3,10 @@ precision highp float;
 varying vec2 vUV;
 uniform sampler2D oldState;
 
-uniform vec2 dimensions;
 uniform float deltaTime;
 
 uniform vec2 brush;
+uniform vec2 dimensions;
 
 const vec2 diffusionRates = vec2(0.2097,0.105);
 

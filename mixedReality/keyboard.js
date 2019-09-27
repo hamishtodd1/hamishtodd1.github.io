@@ -20,7 +20,7 @@ function initButtons()
 		}
 	}
 
-	bindToggle = function(buttonName,variableToToggle, description,value1,value2)
+	bindToggle = function(buttonName,variableToToggle, propertyName, description,value1,value2)
 	{
 		if(value1 === undefined)
 		{
@@ -28,15 +28,20 @@ function initButtons()
 			value2 = false;
 		}
 
+		if(propertyName === undefined) {
+			propertyName = "value"
+		}
+
 		bindButton(buttonName,function()
 		{
-			if(variableToToggle.value === value1)
+			log("y")
+			if(variableToToggle[propertyName] === value1)
 			{
-				variableToToggle.value = value2;
+				variableToToggle[propertyName] = value2;
 			}
 			else
 			{
-				variableToToggle.value = value1;
+				variableToToggle[propertyName] = value1;
 			}
 		},"toggle " + description)
 	}

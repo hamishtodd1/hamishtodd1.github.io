@@ -3,10 +3,12 @@ precision highp float;
 varying vec2 vUV;
 uniform sampler2D oldState;
 
+uniform float deltaTime;
+
+uniform vec3 brush;
 uniform vec2 dimensions;
 uniform vec3 threeDDimensions;
 
-const float dt = .5;
 const float a = .1;
 const float b = .2;
 const float h = 2.;
@@ -47,14 +49,23 @@ vec4 laplacian(vec4 uv)
 
 void main(void)
 {
-	float dtOverHSq = dt / (h*h);
+	// get into the right space, possibly more needed outside
+	// if(brush) { //something something
+	// 	vec2 diff = (vUV - brush) / pixelStep;
+	// 	float dist = dot(diff, diff);
+	// 	if(dist < 5.0)
+	// 	{
+	// 		result.g = .9;
+	// 	}
+	// }
 
 	vec4 uv = texture2D(oldState, vUV);
 	float u = uv.r,  v = uv.g;
-	float vnew = v + dt*eps*(b*u - v);
+	
+	float vnew = v + deltaTime*eps*(b*u - v);
 
-	float du = dt*(u*(1.0 - u)*(u - a) - v);
-	du += laplacian(uv).r * dtOverHSq;
+	float du = deltaTime*(u*(1. - u)*(u - a) - v);
+	du += laplacian(uv).r * deltaTime / (h*h);
 
 	gl_FragColor = vec4(u + du, vnew, du, 0. );
 }

@@ -1,4 +1,8 @@
 /*
+	S2 x S1
+		reorienting just reorients it, so quaternion unchanged I guess
+		
+
 	TODO
 		Switch triangly to soccer ball?
 		superimpose numbers?
@@ -15,10 +19,7 @@
 		Tags: flatland
 
 	Send to
-		Pierre
 		Vi
-		Bret
-		Marc
 		Grant
 		Andy
 		Destin
@@ -77,7 +78,7 @@
 				Any given point on it does have two whole axes that are orthogonal to the arc going through it, namely z and w
 */
 
-function initThreeSphereExploration( height )
+function initThreeSphereExploration( height, currentChapterIndex )
 {
 	initProjectionSystem()
 
@@ -92,7 +93,7 @@ function initThreeSphereExploration( height )
 	visiBox.scale.set(0.335,0.185,0.195)
 	visiBox.position.set(0.0,1.49,0.015)
 	visiBox.rotation.y = 0.075
-	VISIBOX = visiBox
+	VISIBOX = visiBox //hmm
 
 	let threeSphereMatrix = new THREE.Matrix4()
 	let threeSphereMatrixInverse = new THREE.Matrix4()
@@ -277,10 +278,10 @@ function initThreeSphereExploration( height )
 			}
 			targetMatrix.setBasisVector(3,unprojectedPosition)
 			
-			if( !checkOrthonormality(targetMatrix) )
-			{
-				debugger;
-			}
+			// if( !checkOrthonormality(targetMatrix) )
+			// {
+			// 	debugger;
+			// }
 
 			return targetMatrix
 		}
@@ -299,9 +300,9 @@ function initThreeSphereExploration( height )
 
 		updateFunctions.push( function()
 		{
-			if( designatedHand.thumbstickButton )
+			if( designatedHand.grippingTop )
 			{
-				if( !designatedHand.thumbstickButtonOld )
+				if( !designatedHand.grippingTopOld )
 				{
 					matrixWhenGrabbed.copy(threeSphereMatrix)
 					whenGrabbedHandPosition.copy(designatedHand.position)
@@ -387,6 +388,13 @@ function initThreeSphereExploration( height )
 
 	let assemblage = new THREE.Group()
 	assemblage.position.y = 1.6 - height * 0.6
+
+	//just for your hotel room!
+	{
+		assemblage.position.z = -.3
+		visiBox.position.z = assemblage.position.z
+	}
+
 	assemblage.scale.setScalar(0.05)
 	assemblage.updateMatrixWorld()
 	scene.add(assemblage)
@@ -481,13 +489,13 @@ function initThreeSphereExploration( height )
 	let greatCircleSets = [parasolCircles,hyperOctahedronCircles,hopfCircles]
 
 	{
-		let visibleSet = {value:greatCircleSets.length}
+		let visibleSet = {value:0}
 		markObjectProperty(visibleSet,"value")
 
 		function cycleThreeSpheres()
 		{
 			visibleSet.value++
-			if(visibleSet.value > greatCircleSets.length)
+			if(visibleSet.value >= greatCircleSets.length)
 			{
 				visibleSet.value = 0
 			}
@@ -495,29 +503,47 @@ function initThreeSphereExploration( height )
 
 		alwaysUpdateFunctions.push(function()
 		{
-			if( visibleSet.value === greatCircleSets.indexOf(hyperOctahedronCircles) )
+			if(currentChapterIndex.value !== 3)
 			{
-				assemblage.scale.setScalar(0.038)
-			}
-			else
-			{
-				assemblage.scale.setScalar(0.05)
-			}
+				for(let i = 0; i < visiBox.faces.length; i++)
+				{
+					visiBox.faces[i].visible = false
+				}
 
-			for(let i = 0; i < greatCircleSets.length; i++)
-			{
-				if( greatCircleSets[i][0].representation.visible !== (i === visibleSet.value) )
+				for(let i = 0; i < greatCircleSets.length; i++)
 				{
 					for(let j = 0; j < greatCircleSets[i].length; j++)
 					{
-						greatCircleSets[i][j].representation.visible = (i === visibleSet.value)
+						greatCircleSets[i][j].representation.visible = false
 					}
 				}
 			}
-
-			for(let i = 0; i < visiBox.faces.length; i++)
+			else
 			{
-				visiBox.faces[i].visible = (visibleSet.value !== greatCircleSets.length)
+				if( visibleSet.value === greatCircleSets.indexOf(hyperOctahedronCircles) )
+				{
+					assemblage.scale.setScalar(0.038)
+				}
+				else
+				{
+					assemblage.scale.setScalar(0.05)
+				}
+
+				for(let i = 0; i < greatCircleSets.length; i++)
+				{
+					if( greatCircleSets[i][0].representation.visible !== (i === visibleSet.value) )
+					{
+						for(let j = 0; j < greatCircleSets[i].length; j++)
+						{
+							greatCircleSets[i][j].representation.visible = (i === visibleSet.value)
+						}
+					}
+				}
+
+				for(let i = 0; i < visiBox.faces.length; i++)
+				{
+					visiBox.faces[i].visible = true
+				}
 			}
 		})
 	}
