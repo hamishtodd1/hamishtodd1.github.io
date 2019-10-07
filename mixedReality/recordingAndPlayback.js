@@ -1,4 +1,7 @@
 /*
+	Live
+		
+
 	TODO
 		XSplit definitely fucked you, find a different compositer, maybe OBS
 		You probably do need parenthood to be marked. Not *that* complicated to think about
@@ -10,7 +13,6 @@
 			Could bring back hiro or points
 			If there's *any* adjustment in post then it defeats the entire point.
 			There has to be some adjustment during the shoot anyway, because AR probably can't get that camera in place
-	
 
 	Reasons to have bradyBot:
 		Bob Ross looked at his canvas and at the camera, watch him
@@ -90,6 +92,18 @@ function initPlaybackAndRecording()
 		//????????
 		videoTexture.rotation = TAU/2;
 		videoTexture.center.set(0.5,0.5)
+
+		if(0) //live! Untested.
+		{
+			//would be good to have the dimensions of the camera
+			let params = { video: { width: 1280, height: 720, facingMode: 'user' } };
+			navigator.mediaDevices.getUserMedia( params ).then( function ( stream )
+			{
+				//normal video and texture
+				video.srcObject = stream;
+				video.play();
+			} ).catch( function ( error ){ console.error( 'Unable to access the camera/webcam.', error ); } );
+		}
 
 		let screen = new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({
 			map:videoTexture,

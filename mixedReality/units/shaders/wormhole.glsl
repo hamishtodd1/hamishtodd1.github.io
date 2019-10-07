@@ -19,6 +19,8 @@ Arbitrary three manifolds
 	What's the 3-manifold equivalent of handles?
 The three-manifolds may self-intersect in the sense of the tets intersecting (in planes? Maybe in full 3D).
 This is ok right? Even in the worst case scenario I know their connectivity.
+
+How to rasterize... I suppose you figure out some transformation and then apply it to the vertices
 */
 
 void main()

@@ -11,7 +11,7 @@ function initMockVrInput()
 
 	return function()
 	{
-		let t = frameCount * 0.5
+		let t = frameCount * 0.1
 
 		let p = rightHand.position
 
@@ -34,9 +34,9 @@ function initMockVrInput()
 
 		p.add(visiblePosition)
 
-		// rightHand.rotation.x = 1.6*Math.sin(t*0.1)
-		// rightHand.rotation.y = 1.5*Math.sin(t*0.13)
-		// rightHand.rotation.z = 1.4*Math.sin(t*0.07)
+		rightHand.rotation.x = 1.6*Math.sin(t*0.1)
+		rightHand.rotation.y = 1.5*Math.sin(t*0.13)
+		rightHand.rotation.z = 1.4*Math.sin(t*0.07)
 		rightHand.quaternion.setFromEuler(rightHand.rotation)
 
 		rightHand.updateMatrixWorld()

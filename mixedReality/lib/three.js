@@ -4797,7 +4797,7 @@
 
 				var t = - ( line.start.dot( this.normal ) + this.constant ) / denominator;
 
-				//HAMISH we comment this out for some reason!
+				//HAMISH don't care where it is on the line
 				// if ( t < 0 || t > 1 ) {
 
 				// 	return undefined;

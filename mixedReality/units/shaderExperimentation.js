@@ -36,7 +36,7 @@
 async function initShaderExperimentation( gl )
 {
 	//basic
-	if(0)
+	// if(0)
 	{
 		let material = new THREE.ShaderMaterial({
 			uniforms: {
