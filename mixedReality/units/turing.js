@@ -15,5 +15,4 @@ async function initTuring(gl)
 	// ],"turing")
 
 	// await initGrayScottSimulation(gl)
-	await initFitzhughNagumo(gl)
 }

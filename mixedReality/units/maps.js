@@ -22,7 +22,7 @@
 				And then it gets more complex than that, like with navigators wanting to make rhumb lines straight
 				Really, all these things are so beautiful and he was denying that beauty - "one map for one world", fascistic really
 			Arno Peters
-				He raised a tremendously important objection
+				He raised an important objection
 				Let's imagine a parallel universe where Peters parents had raised him to believe that while pointing out structural oppression is important, it doesn't justify talking bollocks
 				I would have loved Peters for ever, if he had recommended everyone use a non-piece of shit projection like Dymaxion I'd have loved him!
 				Even if he had plaigarized Dymaxion!
@@ -88,7 +88,7 @@
 			"The direction from any point to the center of the map is the angle that a straight line connecting the two points makes with a vertical line."
 				You're looking at a point on the sphere, there is a line connecting that point with its opposite pole
 				For each point connect it to that opposite pole and look at the angle it makes,
-			??? NEED the mecca one, and that before gall peters
+			??? NEED the mecca one, to compare with gall peters
 			??? Two point equidistant
 				Might be interesting, gotten in an ellipse-drawing-like way
 		Axial - means you start out by turning the globe into a half-cylinder
@@ -104,11 +104,15 @@
 			Sinusoidal is very easy out of these dull diamond shaped ones
 				Can do interrupted too! different distortion in different places, yuck
 		Misc
-			??? Conic - cone involved
-				polyconics
-					latitude lines get unwrapped as if there's a cone on them. 1-manifolds.
-				??? Bonne -> Werner
+			Conic - cone involved
 				One of the ones that fan out
+				polyconics
+					Buncha cones
+				Werner isn't there some way to connect to normal conic?
+					p = TAU/4 - lat				[0,TAU/2]
+					E = long * cos(lat) / p		[-TAU/2*]
+					x = p * sin(E)
+					y =-p * cos(E)
 
 	HOW FAR DOES PROJECTING ONTO MESHES GET YOU?
 		Polyhedral, central cyl, mercator, equirect, conic, 
@@ -135,7 +139,7 @@ async function initMaps()
 			nextTriangleIndex++;
 		}
 
-		let numQuads = 10;
+		let numQuads = 500;
 		let numTriangles = numQuads*2;
 		let projectionSurfaceCoords = new Float32Array( 9 * numTriangles );
 		let cylinderRadius = globeRadius * 1.3;
@@ -160,7 +164,7 @@ async function initMaps()
 		let geo = new THREE.BufferGeometry()
 		geo.addAttribute('position',new THREE.BufferAttribute( projectionSurfaceCoords, 3 ));
 		var projectionSurfaceMesh = new THREE.Mesh( geo, new THREE.MeshBasicMaterial({wireframe:true}));
-		scene.add(projectionSurfaceMesh)
+		// scene.add(projectionSurfaceMesh)
 		projectionSurfaceMesh.position.copy(rightHand.position)
 
 		// let numTriangles = 1;
