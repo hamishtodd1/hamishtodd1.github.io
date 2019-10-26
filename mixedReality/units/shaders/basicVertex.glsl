@@ -14,3 +14,7 @@ void main()
 	gl_Position = projectionMatrix * modelViewPosition;
 	vUv = vec3(gl_Position);
 }
+
+vec4 modelViewPosition = 
+gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); //need that last part
+vUv = vec3(gl_Position);
