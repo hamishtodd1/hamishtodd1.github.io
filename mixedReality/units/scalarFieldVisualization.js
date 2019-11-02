@@ -11,7 +11,6 @@ async function scalarFieldVisualization(params)
 	let displayPlane = new THREE.Mesh( new THREE.PlaneBufferGeometry(1,1), material )
 	camera.add( displayPlane )
 	displayPlane.position.z = -camera.near;
-	camera.scalarFieldDisplayPlane = displayPlane;
 
 	uniforms.scalarFieldPointLightPosition = {value:new THREE.Vector3()}
 	uniforms.matrixWorldInverse = {value:new THREE.Matrix4()}

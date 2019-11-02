@@ -9,6 +9,7 @@
 	Yeah, test! Have it come through server
 	Check it at the venue, VR and all
 	"see from my point of view" button
+	Performance test on their laptop!!
 */
 
 const socket = io();

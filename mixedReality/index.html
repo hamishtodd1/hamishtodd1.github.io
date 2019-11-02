@@ -12,8 +12,8 @@
 		</style>
 	</head>
 	<body>
-		<script src="/socket.io/socket.io.js"></script>
-		<script src="connection.js"></script>
+		<!-- <script src="/socket.io/socket.io.js"></script>
+		<script src="connection.js"></script> -->
 
 		<script src="lib/three.js"></script>
 		<script src="lib/sceneUtils.js"></script>
@@ -54,20 +54,24 @@
 		<!-- <script src="units/shaderExperimentation.js"></script> -->
 		<script src="units/maps.js"></script>
 
-		<!-- <script src="units/fish.js"></script>
+		<script src="units/fish.js"></script>
 		<script src="units/threeSphereExploration.js"></script>
 		<script src="units/twoSphereExploration.js"></script>
 
 		<script src="units/scalarFieldVisualization.js"></script>
 
-		<script src="units/icerm.js"></script>
+		<!-- <script src="units/icerm.js"></script> -->
 
-		<script src="units/turing.js"></script>
+		<!-- <script src="units/turing.js"></script> -->
 		<script src="units/grayScott.js"></script>
 		<script src="units/fitzhughNagumo.js"></script>
 		<script src="units/barkley.js"></script>
 
-		<script src="units/simulation.js"></script>		 -->
+		<script src="units/escher.js"></script>
+
+		<script src="units/dynamicalSystems.js"></script>
+
+		<script src="units/simulation.js"></script>		
 
 		<script>
 			async function init()
@@ -104,7 +108,17 @@
 					var getVrOrMockVrInput = initVrOrMockVrInput()
 				}
 
-				await initMaps();
+				function ourRender()
+				{
+					renderer.render( scene, camera );
+				}
+
+				// await initMaps();
+
+				// await initFitzhughNagumo(gl)
+				// initDynamicalSystems()
+
+				ourRender = await initEscher()
 
 				// await initShaderExperimentation( gl )
 				// await initTuring(gl)
@@ -113,6 +127,7 @@
 				// await initBasicSimulation()
 				// await initScalarFieldVisualization();
 				// await initLayeredSimulation()
+
 
 				renderer.setAnimationLoop( function()
 				{
@@ -130,7 +145,8 @@
 						alwaysUpdateFunctions[i]()
 					}
 
-					renderer.render( scene, camera );
+					ourRender()
+
 					frameCount++;
 				})
 			}

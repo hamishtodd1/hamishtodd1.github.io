@@ -37,6 +37,13 @@
 	Then, yeah, put it in a texture in the scene you see
 
 	do you 
+
+	He's cheating really, pretending that the picture contains the person when really it contains another, smaller, person
+
+	Script
+		Pick up TV, "turn it on"
+
+	If you save all the frames -without the image on top- you can generate many layers down and no resolution loss
 */
 
 async function initEscher()
@@ -49,29 +56,84 @@ async function initEscher()
 	texture.wrapT = THREE.ClampToEdgeWrapping;
 	var bottomLeft = new THREE.Vector2(0,0)
 
+	let loader = new THREE.OBJLoader()
+
 	let material = new THREE.ShaderMaterial( {
 		uniforms:
 		{
-			"lastFrame":	{ value: texture } //can you just put the framebuffer straight in there?
+			"lastFrame":	{ value: texture }, //can you just put the framebuffer straight in there?
+			"framePosition": { value: new THREE.Vector2() },
+			"bottomUnit": { value: new THREE.Vector2(1,0) },
+			"sideUnit": { value: new THREE.Vector2(0,1) },
 		},
-		vertexShader: [
-			'precision highp float;',
+		fragmentShader: [
+			'uniform sampler2D lastFrame;',
 			'varying vec2 vUV;',
 
-			'void main (void) {',
-				'vUV = uv;',
-				'gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
+			// 'varying vec2 ndcV;',
+
+			'void main()',
+			'{',
+				// 'if(gl_FragCoord.z > .98)', //something like this?
+				// '{',
+				// 	'discard;',
+				// '}',
+
+				// ndcV.x = 
+
+				'vec4 rgba = texture2D(lastFrame, vUV);',
+				'gl_FragColor = rgba;',
 			'}'
 		].join( '\n' ),
 		depthTest: false
 	} );
-	await assignShader("escher", material, "fragment");
+	await assignShader("escher", material, "vertex");
 
-	let plane = new THREE.Mesh(new THREE.OriginCorneredPlaneGeometry(),material)
-	scene.add(plane)
-	plane.scale.x = renderer.domElement.width / renderer.domElement.height
-	plane.scale.multiplyScalar(.1)
-	plane.position.copy(rightHand.position)
+	let screen = new THREE.Mesh(new THREE.PlaneGeometry(renderer.domElement.width / renderer.domElement.height,1),material)
+	screen.position.copy(rightHand.position)
+	// scene.add(screen)
+	screen.scale.multiplyScalar(.1)
+
+	// can switch to using this. May need to get viewport size?
+	let height = centerToFrameDistance(camera.fov, camera.near);
+	let width = height * camera.aspect
+	let displayPlane = new THREE.Mesh( new THREE.PlaneBufferGeometry(width,height), material )
+	camera.add( displayPlane )
+	displayPlane.position.z = -camera.near;
+
+	assert(camera.parent == scene)
+
+	let framePosition3d = new THREE.Vector3() //ideally attached to a real thing
+
+	if(0)
+	{
+		let tv = null
+		await new Promise(resolve => {
+			loader.load("data/hdtv.obj",function(obj)
+			{
+				tv = new THREE.Mesh(obj.children[1].geometry,new THREE.MeshStandardMaterial({color:0x0F0F0F})) //0 appears to contain nothing
+				tv.geometry.applyMatrix(new THREE.Matrix4().scale(new THREE.Vector3(.08,.08,.08)).setPosition(0.,1.2905-1.6,-0.036))
+
+				// scene.add(tv)
+				// tv.position.copy(rightHand.position)
+
+				rightHand.visible = false
+
+				resolve();
+			})
+		})
+		screen.add(tv)
+		tv.scale.multiplyScalar(5.7)
+	}
+
+	updateFunctions.push(function()
+	{
+		framePosition3d.copy(rightHand.position)
+		framePosition3d.project(camera)
+		material.uniforms.framePosition.value.copy(framePosition3d)
+
+		displayPlane.scale.y = displayPlane.scale.x / camera.aspect
+	})
 
 	function ourRender()
 	{
