@@ -32,6 +32,10 @@ let camera = new THREE.PerspectiveCamera( 40.1, //the shorter fov of the samsung
 camera.position.y = 1.6
 camera.updateMatrixWorld()
 scene.add(camera)
+let ourRender = function()
+{
+	renderer.render( scene, camera );
+}
 
 let objectsToBeLookedAtByHelmet = [camera]
 

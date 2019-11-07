@@ -108,17 +108,12 @@
 					var getVrOrMockVrInput = initVrOrMockVrInput()
 				}
 
-				function ourRender()
-				{
-					renderer.render( scene, camera );
-				}
-
 				// await initMaps();
 
 				// await initFitzhughNagumo(gl)
 				// initDynamicalSystems()
 
-				ourRender = await initEscher()
+				await initEscher()
 
 				// await initShaderExperimentation( gl )
 				// await initTuring(gl)
