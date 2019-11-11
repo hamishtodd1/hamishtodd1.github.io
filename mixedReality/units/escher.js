@@ -1,32 +1,13 @@
 /*
-	You are holding a rectangle on which you see a duplicate of the whole video
-	But then you can grab the frame and connect it to the frame of your real video
-	(and the copy of you does it to the one it is holding, etc)
+	Rendering current real world = drawing everything except the smaller thing.
+	Then, yeah, put it in a texture in the scene you see
+	If you save all the frames -without the image on top- you can generate many layers down and no resolution loss
 
-	Hah, move it all the way towards the camera and it looks normal. And if you move it off screen?
-
-	The picture frame is a funny thing, it is a portal into another world.
-	It's funny that our minds buy it, but we don't appreciate that when we walk around and look at pictures
-	I think escher wanted to heighten that appreciation 
-
-	Philosophy
-		Omission of the singularity
-		Look closely at the area around the singularity. It's not so hard to see what's going on if you do that
-		The size of the scaling is what makes escher's version weirder than most
-		If the loop is tightened, it becomes completely undefined to ask "am I in the real world or the picture?"
-		The inclusion of the window is a good idea
-		I, possibly because I am a westerner, look at the top left first and my eyes go right
-			As you walk around you can ask "am I looking at the picture or the real world, which contains the picture?"
+	Could just use geese, since your mouth is saying nothing
 
 	Pick up the image and adjust parameters for stuff like this?
 		http://escherdroste.math.leidenuniv.nl/index.php?menu=im&sub=escher&show=-1x1
-
-	You scale it with your hands, while keeping or not keeping camera in place
-		It gets scaled around the vanishing point
-		Your hands define a line segment that stays the same size on the screen
-
-	Rendering current real world = drawing everything except the smaller thing.
-	Then, yeah, put it in a texture in the scene you see
+		And the exponential map thing? Roll it into a tube
 
 	Script
 		Pick up TV, "turn it on"
@@ -36,104 +17,173 @@
 
 		Make inflation pretty large before doing "cut"
 		Then make it super small, almost vanishing
+
+		Move it all the way towards the camera and it looks normal.
 	Epilogue
 		He's cheating really, pretending that the picture contains the person when really it contains another, smaller, person
 
-	If you save all the frames -without the image on top- you can generate many layers down and no resolution loss
+		Omission of the singularity
+		Look closely at the area around the singularity. It's not so hard to see what's going on if you do that
+		The size of the scaling is what makes escher's version weirder than most
+		If the loop is tightened, it becomes completely undefined to ask "am I in the real world or the picture?"
+		The inclusion of the window is a good idea
+		I, possibly because I am a westerner, look at the top left first and my eyes go right
+			As you walk around you can ask "am I looking at the picture or the real world, which contains the picture?"
 
-	Consciousness is never one persistent thing, that is an illusion. It's 
+		I first encountered this picture in this book, which is if nothing else a very entertaining book
+		The main thing it is about is self-reference or self-reflection.
+		A big part of it is about how self-reflection is one of the main things that human minds do that computers and AI still don't do
+		You can have a thought, like "Liverpool will probably beat Tottenham today"
+		And then having had a thought, you have thoughts about that thought.
+		You might then say "I wonder why I thought that?" And you might then investigate your own thoughts, question their origin.
+		You think "Maybe the reason I believe that is because Liverpool have done well recently"
+		In a way, it is kind of weird that we humans can think about our own thoughts
+		The reason it's remarkable is that we are the thing that is thinking, but we think about how we think
+		AIs don't do that. In order for an AI to be improved on, its outputs have to be inspected by a human
+		And this picture gets used as an analogy in the book. Like the thoughts are the pictures and each layer is a bunch of thoughts about that thought
+		If you want to think of your self as a single persisting thing, this is what it is, it is a thing which is modelling itself
 
-	You might be walking along and have a thought hit you, let's say the thought is "shoe X is better than shoe Y"
-	You might then say "I wonder why I thought that?" And you might then investigate your own thoughts, question their origin.
-	GEB points out that it is remarkable that we can do this, that we can think about our own motives
-	The reason it's remarkable is that we are the thing that is thinking, but we think about how we think
-	And this picture gets used as an analogy in the book.
-	If you want to think of your self as a single persisting thing, this is what it is, it is a thing which is modelling itself
+	You scale it with your hands, while keeping or not keeping camera in place
+		It gets scaled around the vanishing point
+		Your hands define a line segment that stays the same size on the screen
 */
 
 async function initEscher()
 {
 	var data = new Uint8Array( renderer.domElement.width * renderer.domElement.height * 3 );
 	var texture = new THREE.DataTexture( data, renderer.domElement.width, renderer.domElement.height, THREE.RGBFormat );
-	texture.minFilter = THREE.NearestFilter; //?
-	texture.magFilter = THREE.NearestFilter;
-	texture.wrapS = THREE.ClampToEdgeWrapping;
-	texture.wrapT = THREE.ClampToEdgeWrapping;
+	texture.minFilter = THREE.LinearFilter;
+	texture.magFilter = THREE.LinearFilter;
+	texture.wrapS = THREE.RepeatWrapping;
+	texture.wrapT = THREE.RepeatWrapping;
 	var bottomLeft = new THREE.Vector2(0,0)
 
-	let loader = new THREE.OBJLoader()
-
+	let framePositionReal = new THREE.Vector3() //ideally attached to a real thing
+	let bottomReal = new THREE.Vector3(.13,0.)
+	let sideReal = new THREE.Vector3(.13,0.)
 	let material = new THREE.ShaderMaterial( {
 		uniforms:
 		{
-			lastFrame:	{ value: texture }, //can you just put the framebuffer straight in there?
-			framePosition: { value: new THREE.Vector2() },
-			bottom: { value: new THREE.Vector2(1.3,0.) },
-			side: { value: new THREE.Vector2() },
+			lastFrame:	{ value: texture },
 
-			logScaleFactor: { value: new THREE.Vector2(Math.log(256.),0.) }
+			//positions on the camera near plane
+			framePosition: { value: new THREE.Vector2() },
+			bottom: { value: new THREE.Vector2() },
+			side: 	{ value: new THREE.Vector2() },
+
+			exponent: { value: new THREE.Vector2(Math.log(256.),0.) }
 		},
 		depthTest: false
 	} );
 	await assignShader("escherFragment", material, "fragment");
 	await assignShader("escherVertex", material, "vertex");
 
-	let screen = new THREE.Mesh(new THREE.PlaneGeometry(renderer.domElement.width / renderer.domElement.height,1),material)
-	screen.position.copy(rightHand.position)
-	// scene.add(screen)
-	screen.scale.multiplyScalar(.1)
+	let ourScene = new THREE.Scene()
+	let ourCamera = new THREE.OrthographicCamera()
+	ourCamera.position.z = 1;
+	let displayPlane = new THREE.Mesh(new THREE.PlaneBufferGeometry(2.,2.),material);
+	ourScene.add(displayPlane)
 
-	// can switch to using this. May need to get viewport size?
-	let displayPlane = new THREE.Mesh( new THREE.PlaneBufferGeometry(1.,1.), material )
-	camera.add( displayPlane )
-	displayPlane.position.z = -camera.near;
+	// ourCamera.add( displayPlane )
 
-	console.assert(camera.parent == scene)
+	ourRender = function()
+	{
+		renderer.render( scene, camera );
+		renderer.copyFramebufferToTexture( bottomLeft, texture, 0 )
 
-	let framePositionReal = new THREE.Vector3() //ideally attached to a real thing
-	let bottomReal = new THREE.Vector3(.13,0.)
-	let sideReal = new THREE.Vector3(.13,0.)
+		renderer.render( ourScene, ourCamera );
+	}
 
 	if(0)
 	{
 		let tv = null
 		await new Promise( resolve => {
-			loader.load("data/hdtv.obj",function(obj)
+			new THREE.OBJLoader().load("data/hdtv.obj",function(obj)
 			{
 				tv = new THREE.Mesh(obj.children[1].geometry,new THREE.MeshStandardMaterial({color:0x0F0F0F})) //0 appears to contain nothing
 				tv.geometry.applyMatrix(new THREE.Matrix4().scale(new THREE.Vector3(.08,.08,.08)).setPosition(0.,1.2905-1.6,-0.036))
 
-				// scene.add(tv)
-				// tv.position.copy(rightHand.position)
+				scene.add(tv)
+				tv.position.copy(rightHand.position)
+				tv.scale.multiplyScalar(.06)
+
+				let rect = new THREE.Mesh(new THREE.PlaneBufferGeometry(.55,.4))
+				tv.add(rect)
 
 				rightHand.visible = false
 
 				resolve();
 			})
 		})
-		screen.add(tv)
 		tv.scale.multiplyScalar(5.7)
 	}
 
-	function projectOnDisplayMesh(p, target)
+	function projectOnCameraNearPlane(p, target)
 	{
 		let cameraSpaceP = p.clone()
 		camera.worldToLocal(cameraSpaceP)
 
-		cameraSpaceP.multiplyScalar( displayPlane.position.z / cameraSpaceP.z );
+		cameraSpaceP.multiplyScalar( -camera.near / cameraSpaceP.z );
 		target.set(cameraSpaceP.x,cameraSpaceP.y);
 
 		return target
 	}
 
+	let pointInHand = new THREE.Vector3(1,0,0)
+	let designatedHand = rightHand
+	let angle = 0.;
+
+	let worldishPointInHand = new THREE.Vector3()
+	let worldishPointInHandOnPlane = new THREE.Vector2()
+	let oldWorldishPointInHand = new THREE.Vector3()
+	let oldWorldishPointInHandOnPlane = new THREE.Vector2()
+
+	let width = .16
+
+	function divideComplex(a, b)
+	{
+		return new THREE.Vector2(
+			a.x * b.x + a.y * b.y,
+			a.y * b.x - a.x * b.y).multiplyScalar(1./b.lengthSq());
+	}
+
 	updateFunctions.push( function()
 	{
-		framePositionReal.copy(rightHand.position)
-		projectOnDisplayMesh(framePositionReal, material.uniforms.framePosition.value)
+		/*
+			so what we want is that the hands get closer and further
+				and the screen gets closer and further...
+				such that they are in the same place on the screen
+				hmm is this actually related to self reference?
+		*/
+
+		if(camera.aspect > 1.)
+			log("taller")
+		else if(camera.aspect < 1. )
+			log("shorter")
 
 		{
-			bottomReal.set(.15,0.,0.) //because you don't understand coordinate systems, weirdness
-			bottomReal.applyAxisAngle(zUnit,frameCount * .01);
+			//"Worldish" because only orientation, not position. hand is origin.
+			worldishPointInHand.copy( pointInHand ).applyQuaternion(designatedHand.quaternion)
+			worldishPointInHandOnPlane.copy(worldishPointInHand).normalize()
+
+			oldWorldishPointInHand.copy( pointInHand ).applyQuaternion(designatedHand.quaternionOld)
+			oldWorldishPointInHandOnPlane.copy(oldWorldishPointInHand).normalize()
+
+			angle += worldishPointInHandOnPlane.angle() - oldWorldishPointInHandOnPlane.angle();
+			while(angle > TAU) angle -= TAU
+
+			pointInHand.set(worldishPointInHandOnPlane.x,worldishPointInHandOnPlane.y,0.)
+			pointInHand.applyQuaternion(designatedHand.quaternion.clone().inverse())
+		}
+
+		rightHand.position.x -= width / 2;
+		rightHand.position.y -= width / camera.aspect / 2;
+		framePositionReal.copy(rightHand.position) //or possibly just the diff
+		projectOnCameraNearPlane(framePositionReal, material.uniforms.framePosition.value)
+
+		{
+			bottomReal.set(width,0.,0.)
+			bottomReal.applyAxisAngle(zUnit,angle);
 
 			sideReal.copy(bottomReal)
 			sideReal.applyAxisAngle(zUnit,TAU/4.);
@@ -143,17 +193,17 @@ async function initEscher()
 			sideReal.add(framePositionReal)
 		}
 
-		projectOnDisplayMesh(bottomReal, material.uniforms.bottom.value)
+		projectOnCameraNearPlane(bottomReal, material.uniforms.bottom.value)
 		material.uniforms.bottom.value.sub(material.uniforms.framePosition.value)
-		projectOnDisplayMesh(sideReal, material.uniforms.side.value)
+		projectOnCameraNearPlane(sideReal, material.uniforms.side.value)
 		material.uniforms.side.value.sub(material.uniforms.framePosition.value)
+
+		log(material.uniforms.framePosition.value);
+
+		let ourAngle = Math.pow(2,(8-frameCount*.007) )
+		ourAngle = TAU
+		material.uniforms.exponent.value.copy(divideComplex(
+			new THREE.Vector2(Math.log(256.), ourAngle),
+			new THREE.Vector2(0.,ourAngle) ) );
 	})
-
-	ourRender = function()
-	{
-		renderer.render( scene, camera );
-		renderer.copyFramebufferToTexture( bottomLeft, texture, 0 )
-	}
-
-	return ourRender
 }
