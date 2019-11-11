@@ -118,13 +118,18 @@ async function initEscher()
 		tv.scale.multiplyScalar(5.7)
 	}
 
-	function projectOnCameraNearPlane(p, target)
+	function getTexturePosition(p, target)
 	{
 		let cameraSpaceP = p.clone()
 		camera.worldToLocal(cameraSpaceP)
 
 		cameraSpaceP.multiplyScalar( -camera.near / cameraSpaceP.z );
-		target.set(cameraSpaceP.x,cameraSpaceP.y);
+
+		let sideLength = centerToFrameDistance(camera.fov, camera.near)
+
+		target.set(
+			cameraSpaceP.x / sideLength / 2 + .5,
+			cameraSpaceP.y / sideLength / 2 + .5);
 
 		return target
 	}
@@ -179,7 +184,7 @@ async function initEscher()
 		rightHand.position.x -= width / 2;
 		rightHand.position.y -= width / camera.aspect / 2;
 		framePositionReal.copy(rightHand.position) //or possibly just the diff
-		projectOnCameraNearPlane(framePositionReal, material.uniforms.framePosition.value)
+		getTexturePosition(framePositionReal, material.uniforms.framePosition.value)
 
 		{
 			bottomReal.set(width,0.,0.)
@@ -193,12 +198,12 @@ async function initEscher()
 			sideReal.add(framePositionReal)
 		}
 
-		projectOnCameraNearPlane(bottomReal, material.uniforms.bottom.value)
+		getTexturePosition(bottomReal, material.uniforms.bottom.value)
 		material.uniforms.bottom.value.sub(material.uniforms.framePosition.value)
-		projectOnCameraNearPlane(sideReal, material.uniforms.side.value)
+		getTexturePosition(sideReal, material.uniforms.side.value)
 		material.uniforms.side.value.sub(material.uniforms.framePosition.value)
 
-		log(material.uniforms.framePosition.value);
+		// log(material.uniforms.framePosition.value);
 
 		let ourAngle = Math.pow(2,(8-frameCount*.007) )
 		ourAngle = TAU

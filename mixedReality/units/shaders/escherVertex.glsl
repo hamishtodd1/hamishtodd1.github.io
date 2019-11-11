@@ -3,10 +3,10 @@
 */
 
 precision highp float;
-varying vec2 ndc;
+varying vec2 texturePosition;
 
 void main(void)
 {
-	ndc = uv*2. - vec2(1.,1.);
+	texturePosition = uv;
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.);
 }

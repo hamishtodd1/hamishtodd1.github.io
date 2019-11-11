@@ -30,9 +30,9 @@
 */
 
 uniform sampler2D lastFrame;
-varying vec2 ndc; //centered, real-space coordinates
+varying vec2 texturePosition; //centered, real-space coordinates
 
-//with this and ndc, center is origin
+//with this and texturePosition, center is origin
 //positions on the camera near plane
 uniform vec2 framePosition;
 uniform vec2 bottom;
@@ -102,51 +102,58 @@ vec2 drosteToEscher(vec2 droste)
 	return logComplex(droste,exponent);
 }
 
+vec2 textureToDroste(vec2 originalP)
+{
+	vec2 p = originalP;
+	vec2 pNextLayer;
+	float bottomInverseLengthSq = 1. / sq( length(bottom) );
+	float sideInverseLengthSq = 1. / sq( length(side) );
+	for(int i = 0; i < 15; i++)
+	{
+		pNextLayer.x = dot(p-framePosition,bottom) * bottomInverseLengthSq;
+		pNextLayer.y = dot(p-framePosition,side)   * sideInverseLengthSq;
+		if( pNextLayer.x < 0. || 1. < pNextLayer.x ||
+			pNextLayer.y < 0. || 1. < pNextLayer.y )
+		{
+			break;
+		}
+		else
+		{
+			p.x = pNextLayer.x;
+			p.y = pNextLayer.y;
+		}
+	}
+	return p;
+}
+
 void main()
 {
-	vec2 c = ndc;
+	// vec2 c = texturePosition * 2. - vec2(1.,1.);
 
 	// c = drosteToEscher(c);
 
-	// vec2 pRelative = ndc - framePosition;
+	// vec2 pRelative = texturePosition - framePosition;
 	// vec2 frameP = vec2(
 	// 	dot(pRelative,bottom) / sq( length(bottom) ),
 	// 	dot(pRelative,side)   / sq( length(side) ) ); //could be uniforms
 
-	// vec2 polar = complexToPolar(ndc);
+	// vec2 polar = complexToPolar(texturePosition);
 	// float l = log(polar.x);
 	// vec2 t = polarToComplex( vec2(l, polar.y) );
 
-	vec2 p = ndc;
-	vec2 nextLayerP;
-	float bottomInverseLengthSq = 1. / sq( length(bottom) );
-	float sideInverseLengthSq = 1. / sq( length(side) );
-	for(int i = 0; i < 5; i++)
-	{
-		nextLayerP.x = dot(p-framePosition,bottom) * bottomInverseLengthSq;
-		nextLayerP.y = dot(p-framePosition,side)   * sideInverseLengthSq;
-		if( nextLayerP.x < 0. || 1. < nextLayerP.x ||
-			nextLayerP.y < 0. || 1. < nextLayerP.y )
-		{
-			gl_FragColor = vec4( 0.,1.,0., 1. );
-		}
-		else
-		{
-			gl_FragColor = vec4( 1.,0.,0., 1. );
-		}
 
-		// return;
+
+
+	vec2 t = textureToDroste(texturePosition);
+
+	if( t.x < 0. || 1. < t.x ||
+		t.y < 0. || 1. < t.y )
+	{
+		//because apparently clamping is being ignored!
+		discard;
 	}
-
-	vec2 t = p;// * .5 + vec2(.5,.5);
-	// if( t.x < 0. || 1. < t.x ||
-	// 	t.y < 0. || 1. < t.y )
-	// {
-	// 	//because apparently clamping is being ignored!
-	// 	gl_FragColor = vec4( 1.,0.,0.,1. );
-	// }
-	// else
+	else
 	{
-		// gl_FragColor = vec4( texture2D(lastFrame,t).rgb, 1. );
+		gl_FragColor = vec4( texture2D(lastFrame,t).rgb, 1. );
 	}
 }
