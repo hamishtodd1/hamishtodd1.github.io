@@ -43,6 +43,8 @@
 		And this picture gets used as an analogy in the book. Like the thoughts are the pictures and each layer is a bunch of thoughts about that thought
 		If you want to think of your self as a single persisting thing, this is what it is, it is a thing which is modelling itself
 
+		explain with concentric circles
+
 	You scale it with your hands, while keeping or not keeping camera in place
 		It gets scaled around the vanishing point
 		Your hands define a line segment that stays the same size on the screen
@@ -71,10 +73,12 @@ async function initEscher()
 			bottom: { value: new THREE.Vector2() },
 			side: 	{ value: new THREE.Vector2() },
 
-			exponent: { value: new THREE.Vector2(Math.log(256.),0.) }
+			// exponent: { value: new THREE.Vector2(Math.log(256.),0.) }
+			escherness: {value:0.}
 		},
 		depthTest: false
 	} );
+	let u = material.uniforms;
 	await assignShader("escherFragment", material, "fragment");
 	await assignShader("escherVertex", material, "vertex");
 
@@ -92,30 +96,6 @@ async function initEscher()
 		renderer.copyFramebufferToTexture( bottomLeft, texture, 0 )
 
 		renderer.render( ourScene, ourCamera );
-	}
-
-	if(0)
-	{
-		let tv = null
-		await new Promise( resolve => {
-			new THREE.OBJLoader().load("data/hdtv.obj",function(obj)
-			{
-				tv = new THREE.Mesh(obj.children[1].geometry,new THREE.MeshStandardMaterial({color:0x0F0F0F})) //0 appears to contain nothing
-				tv.geometry.applyMatrix(new THREE.Matrix4().scale(new THREE.Vector3(.08,.08,.08)).setPosition(0.,1.2905-1.6,-0.036))
-
-				scene.add(tv)
-				tv.position.copy(rightHand.position)
-				tv.scale.multiplyScalar(.06)
-
-				let rect = new THREE.Mesh(new THREE.PlaneBufferGeometry(.55,.4))
-				tv.add(rect)
-
-				rightHand.visible = false
-
-				resolve();
-			})
-		})
-		tv.scale.multiplyScalar(5.7)
 	}
 
 	function getTexturePosition(p, target)
@@ -143,7 +123,33 @@ async function initEscher()
 	let oldWorldishPointInHand = new THREE.Vector3()
 	let oldWorldishPointInHandOnPlane = new THREE.Vector2()
 
-	let width = .16
+	let maxEscherness = u.escherness.value;
+	bindButton("l",function()
+	{
+		maxEscherness += 1.
+		log(maxEscherness)
+	})
+
+	let width = .22//.1825/128//.36
+	if(0)
+	{
+		let tv = null
+		await new Promise( resolve => {
+			new THREE.OBJLoader().load("data/hdtv2.obj",function(obj)
+			{
+				tv = new THREE.Mesh(obj.children[0].geometry,new THREE.MeshStandardMaterial({color:0x3F3F3F})) //0 appears to contain nothing
+				tv.geometry.applyMatrix(new THREE.Matrix4().scale(new THREE.Vector3().setScalar(width * .084)))
+
+				scene.add(tv)
+				tv.position.copy(rightHand.position)
+
+				rightHand.visible = false
+
+				resolve();
+			})
+		})
+		tv.scale.multiplyScalar(5.7)
+	}
 
 	function divideComplex(a, b)
 	{
@@ -184,7 +190,7 @@ async function initEscher()
 		rightHand.position.x -= width / 2;
 		rightHand.position.y -= width / camera.aspect / 2;
 		framePositionReal.copy(rightHand.position) //or possibly just the diff
-		getTexturePosition(framePositionReal, material.uniforms.framePosition.value)
+		getTexturePosition(framePositionReal, u.framePosition.value)
 
 		{
 			bottomReal.set(width,0.,0.)
@@ -198,17 +204,26 @@ async function initEscher()
 			sideReal.add(framePositionReal)
 		}
 
-		getTexturePosition(bottomReal, material.uniforms.bottom.value)
-		material.uniforms.bottom.value.sub(material.uniforms.framePosition.value)
-		getTexturePosition(sideReal, material.uniforms.side.value)
-		material.uniforms.side.value.sub(material.uniforms.framePosition.value)
+		getTexturePosition(bottomReal, u.bottom.value)
+		u.bottom.value.sub(u.framePosition.value)
+		getTexturePosition(sideReal, u.side.value)
+		u.side.value.sub(  u.framePosition.value)
 
-		// log(material.uniforms.framePosition.value);
+		let angleYesThereIsAnother = 0.// TAU / 16.;
+		u.framePosition.value.rotateAround(new THREE.Vector2(.5,.5),angleYesThereIsAnother)
+		u.bottom.value.rotateAround(zeroVector,angleYesThereIsAnother)
+		u.side.value.rotateAround(zeroVector,angleYesThereIsAnother)
 
-		let ourAngle = Math.pow(2,(8-frameCount*.007) )
-		ourAngle = TAU
-		material.uniforms.exponent.value.copy(divideComplex(
-			new THREE.Vector2(Math.log(256.), ourAngle),
-			new THREE.Vector2(0.,ourAngle) ) );
+		// log(u.framePosition.value);
+
+		//the 256 is to be determined based on the above
+		//well fuck it, the whole thing is meant to be determined that way matey
+		//you "just" need to know where the tear is and how to adjust it
+		let size = u.bottom.value.length()
+		// log(size, 1/256)
+
+		u.escherness.value += .01
+		if( u.escherness.value > maxEscherness )
+			u.escherness.value = maxEscherness;
 	})
 }

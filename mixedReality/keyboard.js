@@ -34,7 +34,7 @@ function initButtons()
 
 		bindButton(buttonName,function()
 		{
-			log("y")
+			log("yeah this doesn't work with just a normal variable, you need a pointer")
 			if(variableToToggle[propertyName] === value1)
 			{
 				variableToToggle[propertyName] = value2;

@@ -29,18 +29,20 @@
 		Don't worry about the background, it could be blackness, "the beginning of time"
 */
 
-uniform sampler2D lastFrame;
-varying vec2 texturePosition; //centered, real-space coordinates
+uniform sampler2D unmolestedFrame;
+varying vec2 texturePosition;
 
-//with this and texturePosition, center is origin
-//positions on the camera near plane
+//bottom left is origin, top right is 1,1, like on a texture
 uniform vec2 framePosition;
 uniform vec2 bottom;
 uniform vec2 side;
 
-uniform vec2 exponent;
+uniform float escherness;
+
+// uniform vec2 exponent;
 
 #define TAU 6.28318530718
+#define PI 3.14159265359
 const vec2 tauI = vec2(0.,TAU);
 
 // // https://github.com/anvaka/pplay/blob/master/src/util/shaders/complex.glsl many nice things
@@ -56,7 +58,8 @@ float lengthSq(vec2 a) //haha there again length() is probably hardware accelera
 
 vec2 complexToPolar(vec2 c)
 {
-	return vec2(length(c), atan(c.y, c.x));
+	float betweenMinusPiAndPi = atan(c.y, c.x);
+	return vec2(length(c), betweenMinusPiAndPi > 0. ? betweenMinusPiAndPi : betweenMinusPiAndPi + TAU );
 }
 
 vec2 polarToComplex(vec2 a) //r,theta
@@ -92,23 +95,36 @@ vec2 logComplex(vec2 a, vec2 base)
 	return divideComplex( lnComplex(a), lnComplex(base) );
 }
 
-vec2 escherToDroste(vec2 escher)
+// vec2 escherToDroste(vec2 escher)
+// {
+// 	return powComplex(escher,exponent);
+// }
+
+// vec2 drosteToEscher(vec2 droste)
+// {
+// 	return logComplex(droste,exponent);
+// }
+
+vec2 ndcToTexture(vec2 ndc)
 {
-	return powComplex(escher,exponent);
+	return ndc * .5 + vec2(.5,.5);
+}
+vec2 textureCoordsToNormalizedDeviceCoords(vec2 t)
+{
+	return t * 2. - vec2(1.,1.);
 }
 
-vec2 drosteToEscher(vec2 droste)
-{
-	return logComplex(droste,exponent);
-}
-
+//just do it in log space, which is translationally symmetric!
 vec2 textureToDroste(vec2 originalP)
 {
-	vec2 p = originalP;
-	vec2 pNextLayer;
 	float bottomInverseLengthSq = 1. / sq( length(bottom) );
 	float sideInverseLengthSq = 1. / sq( length(side) );
-	for(int i = 0; i < 15; i++)
+
+	//we go one layer out
+	vec2 p = originalP.x * bottom + originalP.y * side + framePosition;
+
+	vec2 pNextLayer;
+	for(int i = 0; i < 24; i++)
 	{
 		pNextLayer.x = dot(p-framePosition,bottom) * bottomInverseLengthSq;
 		pNextLayer.y = dot(p-framePosition,side)   * sideInverseLengthSq;
@@ -125,35 +141,66 @@ vec2 textureToDroste(vec2 originalP)
 	}
 	return p;
 }
+// incomplete alternative to the above
+//that also allows for infinity
+//come back once you understand translation
+// vec2 positionInFundamentalDomain = vec2(
+// 	mod(pLogSpace.x,logScaleFactor),
+// 	mod(pLogSpace.y,1.)
+// );
+// float frameEdgeForThisAngle = exp( positionInFundamentalDomain.y / 4. );
+// if( positionInFundamentalDomain.x < frameEdgeForThisAngle )
+// {
+// 	positionInFundamentalDomain.x += logScaleFactor
+// }
 
 void main()
 {
-	// vec2 c = texturePosition * 2. - vec2(1.,1.);
+	//put monitor in front of you and put your arms around it and join them
 
-	// c = drosteToEscher(c);
+	//the split must be in the right place
+	//twist might be good first
 
-	// vec2 pRelative = texturePosition - framePosition;
-	// vec2 frameP = vec2(
-	// 	dot(pRelative,bottom) / sq( length(bottom) ),
-	// 	dot(pRelative,side)   / sq( length(side) ) ); //could be uniforms
+	//a^b r*e^i*t ^ b = r^b * e ^ it
+	//a single iteration is a multiplication by a complex number z. So it's multiplication by z ^ magnitude
+	//so... "shift it back to being aligned"!
 
-	// vec2 polar = complexToPolar(texturePosition);
-	// float l = log(polar.x);
-	// vec2 t = polarToComplex( vec2(l, polar.y) );
+	//4 degrees of freedom
+
+	// {
+		float scaleFactor = length(bottom);
+		float logScaleFactor = log(scaleFactor); //could optimize this away, but need to work on everything first
+
+		// vec2 placeToArcLeftwardToFromOriginTextureCoord = framePosition + bottom + .5 * side;
+		// vec2 placeToArcLeftwardToFromOrigin = textureCoordsToNormalizedDeviceCoords(placeToArcToFromOrigin);
+		// vec2 leftwardArcLogSpace = logComplex(placeToArcLeftwardToFromOrigin);
+		// leftwardArcLogSpace.y /= TAU;
+
+		vec2 leftwardArcLogSpace = vec2(-1.,0.);
+		
+		vec2 upwardArcLogSpace = vec2(-escherness*.5,1.);
+
+		//things line up so long as these are on lattice points?
+	// }
+
+	vec2 ndc = textureCoordsToNormalizedDeviceCoords(texturePosition);
+	vec2 polar = complexToPolar(ndc);
+
+	//strip has height / vertical period 1, horizontal period logScaleFactor
+	vec2 pLogSpace = vec2( log(polar.x), polar.y / TAU );
+	//want to incorporate placeToArcToFromOrigin.y, 
+
+	vec2 newStripPosition = -pLogSpace.x * leftwardArcLogSpace + pLogSpace.y * upwardArcLogSpace;
+
+	
 
 
+	vec2 newPolar = vec2(exp(newStripPosition.x), newStripPosition.y * TAU );
+	vec2 newC = polarToComplex(newPolar);
+	vec2 t = ndcToTexture(newC);
 
+	vec2 finalT = textureToDroste(t);
 
-	vec2 t = textureToDroste(texturePosition);
-
-	if( t.x < 0. || 1. < t.x ||
-		t.y < 0. || 1. < t.y )
-	{
-		//because apparently clamping is being ignored!
-		discard;
-	}
-	else
-	{
-		gl_FragColor = vec4( texture2D(lastFrame,t).rgb, 1. );
-	}
+	gl_FragColor = vec4( texture2D(unmolestedFrame,finalT).rgb, 1. );
+	return;
 }

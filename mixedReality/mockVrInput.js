@@ -11,15 +11,18 @@ function initMockVrInput()
 
 	return function()
 	{
-		let t = frameCount * 0.3
+		let t = frameCount;
+		t *= 0
+		// t *= 0.003
+		t *= 0.2
 
 		let p = rightHand.position
 
 		p.set(0,0,0) //no don't remove, you're doing a function of t
 
-		// p.x = 0.3*Math.sin(t*0.03)
+		p.y = 0.005 * Math.sin(t*0.03)
 		// p.y = 0.2*Math.sin(t*0.02)
-		// p.z = 0.07*Math.sin(t*0.05)
+		// p.z = 0.29*Math.sin(t*0.05)
 
 		// {
 		// 	// let oldL = Math.sqrt( sq(p.x) + sq(p.y) );
