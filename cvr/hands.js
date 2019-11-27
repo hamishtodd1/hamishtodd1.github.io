@@ -219,8 +219,8 @@ function initHands()
 					handControllers[ affectedControllerIndex ][propt] = gamepads[k].buttons[viveControllerKeys[propt]].pressed;
 				}
 
-				hand.button1 = gamepads[k].axes[0] > 0.2;
-				hand.button2 = gamepads[k].axes[0] <-0.2;
+				handControllers[ affectedControllerIndex ].button1 = gamepads[k].axes[0] > 0.2;
+				handControllers[ affectedControllerIndex ].button2 = gamepads[k].axes[0] <-0.2;
 			}
 			
 			//gamepads[k].buttons[controllerKeys.grippingTop].value;
