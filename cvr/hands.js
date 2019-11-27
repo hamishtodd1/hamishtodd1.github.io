@@ -35,7 +35,7 @@ function initHands()
 		var vive = true
 		if(vive)
 		{
-			controllerFilename = "data/external_controller01_left.obj"
+			controllerFilename = "data/vr_controller_vive_1_5.obj"
 		}
 
 		new THREE.OBJLoader().load( controllerFilename,
