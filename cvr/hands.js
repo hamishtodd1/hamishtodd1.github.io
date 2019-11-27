@@ -12,13 +12,13 @@ function initHands()
 		//TODO once a weird bug here where geometry was undefined
 		var ourPosition = this.controllerModel.geometry.boundingSphere.center.clone();
 		this.localToWorld( ourPosition );
-		
+
 		var holdablePosition = holdable.boundingSphere.center.clone();
 		holdable.localToWorld( holdablePosition );
-		
+
 		var ourScale = this.matrixWorld.getMaxScaleOnAxis();
 		var holdableScale = holdable.matrixWorld.getMaxScaleOnAxis();
-		
+
 		if( ourPosition.distanceTo(holdablePosition) < holdable.boundingSphere.radius * holdableScale + this.controllerModel.geometry.boundingSphere.radius * ourScale )
 		{
 			return true;
@@ -31,15 +31,24 @@ function initHands()
 
 	function loadControllerModel(i)
 	{
-		new THREE.OBJLoader().load( "data/external_controller01_" + (i===LEFT_CONTROLLER_INDEX?"left":"right") + ".obj",
-			function ( object ) 
+		let controllerFilename = "data/external_controller01_" + (i===LEFT_CONTROLLER_INDEX?"left":"right") + ".obj"
+		var vive = false
+		if(vive)
+		{
+			controllerFilename = "data/external_controller01_left.obj"
+		}
+
+		new THREE.OBJLoader().load( controllerFilename,
+			function ( object )
 			{
 				handControllers[  i ].controllerModel.geometry = object.children[0].geometry;
 
 				let m = new THREE.Matrix4()
 				let q = new THREE.Quaternion( -0.3375292117664683,-0.044097048926644455,0.0016882363725985309,-0.9402800813258839 )
 
-				if(i === LEFT_CONTROLLER_INDEX)
+				if(!vive)
+				{
+					if(i === LEFT_CONTROLLER_INDEX)
 				{
 					m.makeRotationFromQuaternion(q)
 					m.setPosition(new THREE.Vector3(-0.012547648553172985,0.03709224605844833,-0.038470991285082676))
@@ -53,17 +62,19 @@ function initHands()
 						q.z / Math.sqrt(1-q.w*q.w))
 					qAxis.x *= -1
 					let otherQ = new THREE.Quaternion().setFromAxisAngle(qAxis,-2 * Math.acos(q.w))
-					
+
 					m.makeRotationFromQuaternion(otherQ)
 					m.setPosition(new THREE.Vector3(0.012547648553172985,0.03709224605844833,-0.038470991285082676))
 					handControllers[i].controllerModel.geometry.applyMatrix( m )
 				}
+				}
+
 
 				handControllers[  i ].controllerModel.geometry.computeBoundingSphere();
 			},
-			function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); } );
+			function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ", xhr ); } );
 	}
-	
+
 	var controllerMaterial = new THREE.MeshLambertMaterial({color:0x444444});
 	var laserRadius = 0.001;
 	var controllerKeys = {
@@ -76,7 +87,7 @@ function initHands()
 	var viveControllerKeys = {
 		grippingTop: 1, //trigger
 		grippingSide:2, //side things
-		
+
 		button1: 0,
 		button2:0
 	}
@@ -85,8 +96,8 @@ function initHands()
 	{
 		{
 			handControllers[ i ].laser = new THREE.Mesh(
-				new THREE.CylinderBufferGeometryUncentered( laserRadius, 1), 
-				new THREE.MeshBasicMaterial({color:0xFF0000, transparent:true,opacity:0.14}) 
+				new THREE.CylinderBufferGeometryUncentered( laserRadius, 1),
+				new THREE.MeshBasicMaterial({color:0xFF0000, transparent:true,opacity:0.14})
 			);
 			handControllers[ i ].laser.rotation.z = TAU/4 * (i?1:-1)
 			handControllers[ i ].laser.rotation.x = -0.1
@@ -113,19 +124,19 @@ function initHands()
 		}
 		handControllers[ i ].thumbStickAxes = [0,0];
 
-		handControllers[ i ].controllerModel = new THREE.Mesh( new THREE.Geometry(), controllerMaterial.clone() );
+		handControllers[ i ].controllerModel = new THREE.Mesh( new THREE.BoxGeometry(.1,.1,), controllerMaterial.clone() );
 		handControllers[ i ].add( handControllers[ i ].controllerModel );
 
 		handControllers[ i ].oldPosition = handControllers[ i ].position.clone();
 		handControllers[ i ].oldQuaternion = handControllers[ i ].quaternion.clone();
 		handControllers[ i ].deltaQuaternion = handControllers[ i ].quaternion.clone();
 		handControllers[ i ].deltaPosition = handControllers[ i ].position.clone();
-		
+
 		handControllers[ i ].overlappingHoldable = overlappingHoldable;
 
 		scene.add( handControllers[ i ] );
 		handControllers[ i ].position.y = -0.5 //out of way until getting input
-		
+
 		loadControllerModel(i);
 	}
 
@@ -137,7 +148,7 @@ function initHands()
 
 		var gamepads = navigator.getGamepads();
 		var standingMatrix = renderer.vr.getStandingMatrix()
-		
+
 		//If handControllers aren't getting input even from XX-vr-handControllers,
 		//Try restarting computer. Urgh. Just browser isn't enough. Maybe oculus app?
 		for(var k = 0; k < gamepads.length; ++k)
@@ -185,14 +196,14 @@ function initHands()
 			}
 
 			var controller = handControllers[affectedControllerIndex]
-			
+
 			// Thumbstick could also be used for light intensity?
 			controller.thumbStickAxes[0] = gamepads[k].axes[0];
 			controller.thumbStickAxes[1] = gamepads[k].axes[1];
-			
+
 			controller.oldPosition.copy(handControllers[ affectedControllerIndex ].position);
 			controller.oldQuaternion.copy(handControllers[ affectedControllerIndex ].quaternion);
-			
+
 			controller.position.fromArray( gamepads[k].pose.position );
 			// controller.position.add(HACKY_HAND_ADDITION_REMOVE)
 			controller.position.applyMatrix4( standingMatrix );
@@ -222,7 +233,7 @@ function initHands()
 				handControllers[ affectedControllerIndex ].button1 = gamepads[k].axes[0] > 0.2;
 				handControllers[ affectedControllerIndex ].button2 = gamepads[k].axes[0] <-0.2;
 			}
-			
+
 			//gamepads[k].buttons[controllerKeys.grippingTop].value;
 
 			// handControllers[ affectedControllerIndex ].controllerModel.material.color.r = handControllers[ affectedControllerIndex ].button1?1:0;
