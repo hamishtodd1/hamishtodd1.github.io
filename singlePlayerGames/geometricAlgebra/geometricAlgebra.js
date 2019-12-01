@@ -1,62 +1,66 @@
 /*
-	Generate a bunch that cover the gamut of the operation them randomly, combine them, that's interesting enough to show the folks
+	TODO
+		Grab and move it around: everything else comes with it
+		Grab it with two fingers (right mouse button? ctrl+click?) and pull apart to make a free-moving clone which is connected by a line
+		
+		Scalar is a line instead? =/ an opacity?
+		Should be able to make the alg even as things move
+		In the playground you probably want a slidey scalar / number that counts up and up until you click it
+			And maybe a vector or orthonormal basis you can play around with?
+		Wanna grab and rotate the whole scene
+			Hmm, nice unity: rotating the basis vectors rotates eeeeverything
+		Every aspect of the multiplication and addition needs to be visualized
+			Probably want circles to morph into parallelograms
+			Bring two bivectors together, they snap
 
-	The scalar is probably a line, probably horizontal
+	Ideas
+		This could be your AR-modelling-from-footage thing. Make it AR.
+		Functions that you may want to create:
+			Get in-plane component
+			Make rotor from axis and angle
+		Analogies: balloons, which can be inflated, or deflated all the way to the point that they are turned inside out ("negative volume")
+		Squishy bubbles in wallpaper. Can move bubbles around in the same plane and add them.
 
-	You want people to make their own "toolboxes", starting them off with only the vectors
-		Eg they make the bivectors
+	Things that might have to change
+		Line is there because if you change the parent you change the child. If you clone and there's no line, then what, is it a new object?
+		Could have them stacked in a column, or around in a circle
 
-	Probably bivectors is interesting enough
-	Show they can all be made from the 3 basis bivectors
+	Justification
+		This is about elegantly building up sophisticated things from minimal elements
+		Levereging people's geometrical intuition
+		It is about seeing mathematical structure in the world around you.
+		GA is good because the things don't come out of nowhere, you see that they are emergent
+		This is way better than Human Resource Machine, no symbols, things actually are what thtye represent
+		Maybe this is even useful for you programming stuff?
+			What the hell are summed bivectors?
+			Trivector times bivector is presumably vector. 
+			Trivector times trivector is presumably bivector.
+		The idea of negative area and length is a nice balance of intuitive and surprising, and makes total sense in this context (no other?)
 
-	Bring two bivectors together, they snap
-
-	Probably want circles to morph into parallelograms
-
-	Want orthogonal
-
-	Infinity - yellow
-	1 - red
-	0 - black
-	-1 - green
-	-Infinity - cyan
-
-	So it's like the countdown numbers game, just tryna make stuff
-
-	One problem is you can't put everything at the origin
-
-	What the hell are summed bivectors?
-	Trivector times bivector is presumably vector. 
-	Trivector times trivector is presumably bivector.
-
-	Ideally there's some way of showing how they get multiplied
-
-	probably wanna grab and rotate all simultaneously
-
-	Based on examples, you're trying to make a machine (equation) out of adds and multiplies
-		that takes in a set of inputs and gives certain outputs
-		And the relation is one that is, well, potentially useful, maybe appears IRL so can have ordinary meshes attached
-
-	Aesthetics
+	Aesthetics/non-design
+		Names
+			Bivector
+			The beautiful bivector
+			The Device
 		Want nice lighting ofc
 		But mostly can think of stuff as being in the background. Leave that to a game engine?
 		Some of the puzzles are real-world?
 
-	This is about elegantly building up sophisticated things from minimal elements
-	Levereging people's geometrical intuition
-	It is about seeing mathematical structure in the world around you.
-	GA is good because the things don't come out of nowhere, you see that they are emergent
-
-
 	Send to
 		Pontus
-		Andy (both for "here is the model" and "here is a tool for thinking")
+		Andy Matushak (both for "here is the model" and "here is a tool for thinking")
+		The slack
+		Marc
+		Jon/indie fund
 */
-
-let Multivector = null
 
 function initWheelScene()
 {
+	//is there an elegant way to feed back into the scene?
+	//the "real" ones are frozen in place, when you click them they're cloned
+
+	//you have to put it somewhere though otherwise it disappears when you let go
+
 	function bestowConnectionPotential(obj, exchangeMultivectorValues,exchangeMultivectorValuesInitial)
 	{
 		clickables.push(obj)
@@ -151,7 +155,7 @@ function initWheelScene()
 		hummingbird.position.y = multivec.elements[2]
 	},function(multivec)
 	{
-		multivec.setVector(hummingbird.position)
+		multivec.updateVectorAppearance(hummingbird.position)
 	} )
 
 	//the basis vectors should be inside the scene
@@ -258,7 +262,7 @@ function initGeometricAlgebra()
 
 	let multivectors = []
 
-	let vectorRadius = .02
+	let vectorRadius = .07
 	let vectorGeometry = new THREE.CylinderBufferGeometry(0.,vectorRadius,1.,16,1,false);
 	vectorGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.,.5,0.))
 
@@ -268,107 +272,136 @@ function initGeometricAlgebra()
 	let bivecMaterialFront = new THREE.MeshStandardMaterial({color:0xFF0000,transparent:true,opacity:.4,side:THREE.FrontSide})
 	let bivecMaterialBack = new THREE.MeshStandardMaterial({color:0x0000FF,transparent:true,opacity:.4,side:THREE.BackSide})
 
-	Multivector = function( startingPosition, elements )
+	Multivector = function()
 	{
 		let multivec = new THREE.Object3D();
-		multivec.position.copy(startingPosition)
 		scene.add(multivec)
 		multivectors.push(multivec)
 
-		if(elements === undefined)
+		//maaaaybe you shouldn't have this because it's stateful?
+		multivec.elements = new Float32Array(8);
+
+		function onClick(intersection)
 		{
-			multivec.elements = new Float32Array(8);
-			for(let i = 0; i < multivec.elements.length; i++)
-				multivec.elements[i] = 0.;
+			clickedPoint.copy(intersection.point)
 		}
 
-		let scalar = makeTextSign("",false,false,false)
-		scalar.material.depthTest = false
-		scalar.scale.multiplyScalar(0.1)
-		multivec.add(scalar)
-
-		multivec.setParallelogram = function(a,b)
 		{
-			let bivecMesh = new THREE.Mesh(parallelogramGeometry, bivecMaterialFront);
-			bivecMesh.castShadow = true
-			bivecMesh.add(	new THREE.Mesh(parallelogramGeometry, bivecMaterialBack))
-			bivecMesh.children[0].castShadow = true
-			multivec.add(bivecMesh)
+			let scalar = makeTextSign("",false,false,false)
+			scalar.material.depthTest = false
+			scalar.castShadow = true
+			scalar.material.side = THREE.DoubleSide
+			scalar.scale.multiplyScalar(0.3)
+			multivec.add(scalar)
 
-			bivecMesh.matrixAutoUpdate = false;
-			a.toArray(bivecMesh.matrix.elements,0);
-			b.toArray(bivecMesh.matrix.elements,4);
+			clickables.push(scalar)
+			scalar.onClick = onClick
 
-			clickables.push(bivecMesh)
-			bivecMesh.onClick = onClick
-		}
-		multivec.setCircle = function()
-		{
-			if( multivec.elements[5] !== 0 && multivec.elements[6] !== 0 )
+			multivec.setScalar = function(newScalar)
 			{
-				log("can't deal with ones out of plane yet", multivec.elements[5] !== 0, multivec.elements[6])
+				multivec.elements[0] = newScalar
+				multivec.updateScalarAppearance()
 			}
-			else
+			multivec.updateScalarAppearance = function(newScalar)
 			{
-				let circleRadius = .2;
-				let circle = new THREE.Mesh(circleGeometry, bivecMaterialFront)
-				circle.scale.setScalar(multivec.elements[4])
-				multivec.add(circle)
+				scalar.material.setText(multivec.elements[0].toFixed(1))
 			}
+			multivec.updateScalarAppearance()
 		}
 
-		multivec.getVector = function(target)
 		{
-			target.set(multivec.elements[1],multivec.elements[2],multivec.elements[3])
-			return target
-		}
-		multivec.setVector = function(newY)
-		{
-			if(newY===undefined)
-			{
-				newY = new THREE.Vector3()
-				newY.x = multivec.elements[1]
-				newY.y = multivec.elements[2]
-				newY.z = multivec.elements[3]
-			}
-			else
-			{
-				multivec.elements[1] = newY.x
-				multivec.elements[2] = newY.y
-				multivec.elements[3] = newY.z
-			}
-
-			if(multivec.elements[1] === 0. && multivec.elements[2] === 0. && multivec.elements[3] === 0.)
-				return
-
-			var newX = randomPerpVector( newY ).normalize();
-			var newZ = newY.clone().cross(newX).normalize().negate();
-
 			let vecMesh = new THREE.Mesh( vectorGeometry, new THREE.MeshStandardMaterial() );
+			vecMesh.matrixAutoUpdate = false;
 			vecMesh.castShadow = true
 			multivec.add(vecMesh)
 			
-			vecMesh.matrix.makeBasis( newX, newY, newZ );
-			vecMesh.matrixAutoUpdate = false;
-
 			clickables.push(vecMesh)
 			vecMesh.onClick = onClick
-		}
-		multivec.setVector();
 
-		multivec.setScalar = function(newScalar)
-		{
-			if(newScalar === undefined)
+			multivec.setTo1Blade = function(newY)
 			{
-				newScalar = multivec.elements[0]
+				multivec.elements[0] = 0.
+
+				multivec.elements[1] = newY.x
+				multivec.elements[2] = newY.y
+				multivec.elements[3] = newY.z
+
+				multivec.elements[4] = 0.
+				multivec.elements[5] = 0.
+				multivec.elements[6] = 0.
+
+				multivec.elements[7] = 0.
+
+				multivec.updateVectorAppearance();
 			}
-			else
+
+			multivec.updateVectorAppearance = function()
 			{
-				multivec.elements[0] = newScalar
+				let vecPart = new THREE.Vector3(multivec.elements[1],multivec.elements[2],multivec.elements[3])
+
+				var newX = randomPerpVector( vecPart ).normalize();
+				var newZ = vecPart.clone().cross(newX).normalize().negate();
+
+				vecMesh.matrix.makeBasis( newX, vecPart, newZ );
+
+				vecMesh.visible = (vecMesh.matrix.determinant() !== 0. )
 			}
-			scalar.material.setText(newScalar.toFixed(3).toString())
+			multivec.updateVectorAppearance();
 		}
-		multivec.setScalar(multivec.elements[0]);
+
+		{
+			let parallelogram = new THREE.Object3D()
+			let front = new THREE.Mesh(parallelogramGeometry, bivecMaterialFront);
+			front.castShadow = true
+			let back = new THREE.Mesh(parallelogramGeometry, bivecMaterialBack)
+			back.castShadow = true
+
+			//TODO THIS IS NOT WORKING, THE BACK IS NOT SHOWING IN THE CASE WHERE IT'S NEGATIVE
+
+			multivec.add(parallelogram)
+
+			parallelogram.add(front,back)
+			parallelogram.matrix.elements[0] = .0001
+			parallelogram.matrix.elements[5] = .0001
+			parallelogram.matrixAutoUpdate = false;
+
+			clickables.push(front)
+			front.onClick = onClick
+			clickables.push(back)
+			back.onClick = onClick
+
+			multivec.setParallelogram = function(multivecA,multivecB)
+			{
+				parallelogram.visible = true
+
+				let a = multivecA.elements
+				let b = multivecB.elements
+
+				parallelogram.matrix.set(
+					a[1], b[1], 0., (a[1] + b[1]) / -2.,
+					a[2], b[2], 0., (a[2] + b[2]) / -2.,
+					a[3], b[3], 1., (a[3] + b[3]) / -2.,
+					0.,0.,0.,1.
+					)
+
+				parallelogram.visible = (parallelogram.matrix.determinant() !== 0. )
+
+				//TODO is it the case that when it goes around the para gets "turned inside out"?
+
+			}
+
+			multivec.setCircle = function()
+			{
+				// parallelogram.visible = false
+
+				// let circle = new THREE.Mesh(circleGeometry, bivecMaterialFront)
+				// circle.scale.setScalar(multivec.elements[4])
+				// multivec.add(circle)
+
+				// //convert to matrix I suppose
+				// randomPerpVector(zAxis)
+			}
+		}
 
 		function areAnyOthersNonZero(arr,elementsToIgnore)
 		{
@@ -402,20 +435,17 @@ function initGeometricAlgebra()
 		multivec.geometricProductMultivectors = function(multivecA,multivecB)
 		{
 			geometricProduct(multivecA.elements,multivecB.elements,multivec.elements)
+			log(multivec.elements)
+
+			multivec.updateScalarAppearance()
+			multivec.updateVectorAppearance()
+
 			let aGrade = multivecA.getGrade()
 			let bGrade = multivecB.getGrade()
-
-			if( aGrade === 1 && bGrade === 1 )
-			{
-				multivec.setParallelogram(multivecA.getVector(new THREE.Vector3()),multivecB.getVector(new THREE.Vector3()))
-			}
+			if( aGrade === 1 && bGrade === 1 ) //actually you should also check area not 0
+				multivec.setParallelogram(multivecA,multivecB)
 			else
-			{
 				multivec.setCircle()
-			}
-
-			multivec.setScalar()
-			multivec.setVector()
 		}
 
 		let clickedPoint = zeroVector.clone()
@@ -427,47 +457,65 @@ function initGeometricAlgebra()
 				multivec.position.sub(clickedPoint).add(newClickedPoint)
 				clickedPoint.copy(newClickedPoint)
 
-				if(!mouse.clicking)
+				for(let i = 0; i < multivectors.length; i++)
 				{
-					clickedPoint.copy(zeroVector)
-
-					for(let i = 0; i < multivectors.length; i++)
+					if( multivectors[i] === multivec )
+						continue
+					
+					if( multivectors[i].position.distanceTo(multivec.position) < 1.2 )
 					{
-						if( multivectors[i] !== multivec )
-						{
-							if( multivectors[i].position.distanceTo(multivec.position) < .2 )
-							{
-								let a = Multivector(new THREE.Vector3(-.6,0,0))
-								a.geometricProductMultivectors(multivectors[i], multivec)
-								log(a.getGrade())
+						//symbol goes here
 
-								// let val = multivectors[i].getVector(new THREE.Vector3()).add(multivec.getVector(new THREE.Vector3()));
-								// a.setVector(val)
-							}
+						symbol.position.copy( multivec.position).lerp(multivectors[i].position,.5)
+
+						let onscreenDisplacement = new THREE.Vector2().copy(multivectors[i].position).sub(multivec.position)
+						let intendedZRotation = onscreenDisplacement.angle()
+						if( multivectors[i].position.distanceTo(multivec.position) < .8 )
+						{
+							intendedZRotation += TAU/8.
+							symbol.material.color.r = 1.
+						}
+						else
+						{
+							symbol.material.color.r = 0.
+						}
+						symbol.rotation.z = intendedZRotation
+
+						if(!mouse.clicking)
+						{
+							let a = Multivector()
+							a.position.set(-.6,0,0)
+							a.geometricProductMultivectors(multivectors[i], multivec)
+
+							log("y")
+
+							break;
 						}
 					}
 				}
 			}
+
+			if(!mouse.clicking)
+				clickedPoint.copy(zeroVector)
 		})
-
-		function onClick(intersection)
-		{
-			clickedPoint.copy(intersection.point)
-		}
-
-		clickables.push(scalar)
-		scalar.onClick = onClick
 
 		return multivec
 	}
 
-	Multivector(zeroVector)
-	multivectors[0].setVector(yUnit.clone().multiplyScalar(.4))
-	Multivector(new THREE.Vector3(.4,0))
-	multivectors[1].setVector(xUnit.clone().multiplyScalar(.4))
+	let symbol = new THREE.Mesh(new THREE.PlaneGeometry(.3,.06),new THREE.MeshBasicMaterial({color:0x0F0FFF}))
+	symbol.geometry.merge(new THREE.PlaneGeometry(.06,.3))
+	scene.add(symbol)
+
+	Multivector()
+	multivectors[0].setTo1Blade(yUnit.clone().multiplyScalar(1.))
+	Multivector()
+	multivectors[1].setTo1Blade(xUnit.clone().multiplyScalar(1.))
+	multivectors[1].position.set(1.,0.,0.)
 
 	function geometricProduct(a,b,target)
 	{
+		//from ganja.js
+
 		target[0]=b[0]*a[0]+b[1]*a[1]+b[2]*a[2]+b[3]*a[3]-b[4]*a[4]-b[5]*a[5]-b[6]*a[6]-b[7]*a[7];
 
 		target[1]=b[1]*a[0]+b[0]*a[1]-b[4]*a[2]-b[5]*a[3]+b[2]*a[4]+b[3]*a[5]-b[7]*a[6]-b[6]*a[7];
@@ -484,15 +532,17 @@ function initGeometricAlgebra()
 
 		return target;
 	}
+	function geometricAdd(a,b,target)
+	{
+		for(let i = 0; i < target.length; i++)
+			target[i] = a[i] + b[i];
 
-	log(geometricProduct(
-		[2.,0.,0.,0.,0.,0.,0.,0.],
-		[0.,3.,4.,5.,0.,0.,0.,0.],
-		[]))
+		return target;
+	}
 
 	updateFunctions.push(function()
 	{
-		// multivectors[1].setVector(new THREE.Vector3(.4,0,0).applyAxisAngle(zUnit,
+		// multivectors[1].updateVectorAppearance(new THREE.Vector3(.4,0,0).applyAxisAngle(zUnit,
 		// 	.9//frameCount*.01
 		// 	))
 	})

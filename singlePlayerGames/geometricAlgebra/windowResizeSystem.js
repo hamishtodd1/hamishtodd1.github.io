@@ -5,15 +5,14 @@
 //TODO up top!
 function initSurroundings()
 {
-	var backwardExtension = 1.6;
+	var backwardExtension = 1.9;
 	var stage = new THREE.Mesh( 
 		new THREE.BoxGeometry(1.,1.,backwardExtension),
 		new THREE.MeshStandardMaterial({color:0xFFFFFF,side:THREE.BackSide})
 	);
 	stage.scale.y = 2.* centerToFrameDistance(camera.fov, camera.position.z);
 	stage.scale.x = stage.scale.y * camera.aspect;
-	stage.geometry.applyMatrix(new THREE.Matrix4().setPosition(new THREE.Vector3(0.,0.,backwardExtension/2)))
-	stage.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.,0.,-backwardExtension))
+	stage.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.,0.,-backwardExtension/2))
 
 	camera.far = camera.defaultZ + backwardExtension + 0.01
 	stage.material.metalness = 0.1;
@@ -22,14 +21,15 @@ function initSurroundings()
 	scene.add(stage)
 
 	{
-		var pointLight = new THREE.PointLight(0xFFFFFF, 0.4, 5.3);
+		var pointLight = new THREE.PointLight(0xFFFFFF, 0.4, 10.3);
 		pointLight.shadow.camera.far = 10;
 		pointLight.shadow.camera.near = 0.01;
 		pointLight.shadow.mapSize.width = 1024;
 		pointLight.shadow.mapSize.height = pointLight.shadow.mapSize.width;
 		pointLight.castShadow = true;
 		pointLight.position.copy(stage.geometry.vertices[3])
-		pointLight.position.negate().multiplyScalar(0.6);
+		log(pointLight.position)
+		pointLight.position.negate().multiplyScalar(0.3);
 		stage.add( pointLight );
 
 		scene.add( new THREE.AmbientLight( 0xFFFFFF, 0.7 ) );
@@ -40,6 +40,8 @@ function initSurroundings()
 
 function initCameraAndRendererResizeSystem(renderer)
 {
+	let stageHeight = 6.
+
 	function respondToResize() 
 	{
 		// console.log( "Renderer dimensions: ", window.innerWidth, window.innerHeight )
@@ -49,9 +51,9 @@ function initCameraAndRendererResizeSystem(renderer)
 		// camera.left = -window.innerWidth / window.innerHeight;
 		// camera.right = window.innerWidth / window.innerHeight;
 
-		camera.position.z = 2.5;
+		camera.position.z = 3.5;
 
-		camera.fov = fovGivenCenterToFrameDistance(1., camera.position.z )
+		camera.fov = fovGivenCenterToFrameDistance(stageHeight / 2., camera.position.z )
 
 		camera.updateProjectionMatrix();
 	}
