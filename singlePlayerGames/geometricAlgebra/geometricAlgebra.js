@@ -14,6 +14,9 @@
 			Bring two bivectors together, they snap
 
 	Ideas
+		you want to put random things in the scene. That's how you make cool demoscene stuff
+		Should be easy to make
+			the threejs demo with the parented cubes
 		This could be your AR-modelling-from-footage thing. Make it AR.
 		Functions that you may want to create:
 			Get in-plane component
@@ -24,27 +27,31 @@
 	Things that might have to change
 		Line is there because if you change the parent you change the child. If you clone and there's no line, then what, is it a new object?
 		Could have them stacked in a column, or around in a circle
+		What if you have some things that are enormously larger than others? That's why we have zooming in and out. But some things keep size
 
 	Justification
 		This is about elegantly building up sophisticated things from minimal elements
 		Levereging people's geometrical intuition
 		It is about seeing mathematical structure in the world around you.
 		GA is good because the things don't come out of nowhere, you see that they are emergent
+			sin and cos come out of nowhere in your education too
 		This is way better than Human Resource Machine, no symbols, things actually are what thtye represent
 		Maybe this is even useful for you programming stuff?
 			What the hell are summed bivectors?
 			Trivector times bivector is presumably vector. 
 			Trivector times trivector is presumably bivector.
 		The idea of negative area and length is a nice balance of intuitive and surprising, and makes total sense in this context (no other?)
+		You do want to model familiar, visible things in the real world, using this separate mathematical realm. That is applied maths.
 
 	Aesthetics/non-design
 		Names
-			Bivector
-			The beautiful bivector
+			The Bivector
+			The Beautiful bivector
 			The Device
 		Want nice lighting ofc
 		But mostly can think of stuff as being in the background. Leave that to a game engine?
 		Some of the puzzles are real-world?
+		If it's all simple geometric shapes you can get explicit ray intersections -> good shadows etc
 
 	Send to
 		Pontus
@@ -52,48 +59,108 @@
 		The slack
 		Marc
 		Jon/indie fund
+
+
+	is there an elegant way to feed back into the scene?
+	the "real" ones are frozen in place, when you click them they're cloned
+
+	would be nice if there was something going on like 
+
+
+
+	Yes it's top left. You can drag in a thing to multiply it by
+	Thing goes underneath it
+
+	Connection = "these things are the same", quite powerful and you probably need it anyway
+	
+
+	Do all equations have some order? No, you need to have multiple sources
+
+	Ok you can pull stuff out, but it'll go somewhere automatically. Top 
+
+	you have to put it somewhere though otherwise it disappears when you let go
+
+	it's quite separate to pull something out of
+
+	One possibility: you have your "multivector pot" - you can pull new (all 0) multivectors out, and dump away unneeded ones
+	Well, "unneeded". If there's one floating in space it should be dumped immediately
+	Making a new product creates one automatically
+	Then you just set up connections
+
+	Everything should move automatically in a nice way. Therefore moving one moves all. Therefore mov
+
+	Can work backwards from the equals sign?
+
+
+	If it's a root and it's clicked, duplicated, otherwise deleted
 */
+
+function Connector(obj1,obj2)
+{
+	let connector = new THREE.Line(new THREE.Geometry(),new THREE.LineBasicMaterial({
+		color:0x0F0FFF
+	}))
+	connector.geometry.vertices.push(new THREE.Vector3())
+	connector.geometry.vertices.push(new THREE.Vector3(1.,1.,0.))
+	scene.add(connector)
+
+	updateFunctions.push(function()
+	{
+		obj1.getWorldPosition(connector.position)
+
+		obj2.getWorldPosition(connector.scale)
+		connector.scale.sub(connector.position)
+		connector.scale.z = 1.
+	})
+
+	return connector
+}
 
 function initWheelScene()
 {
-	//is there an elegant way to feed back into the scene?
-	//the "real" ones are frozen in place, when you click them they're cloned
+	// let draggingMultivec = Multivector()
 
-	//you have to put it somewhere though otherwise it disappears when you let go
+	// multivec.onClick = function()
+	// {
+	// 	//somehow draggingMultivec is made to take on multivec.elements
+	// 	scene.add(draggingMultivec)
+
+	// 	updateFunctions.push(function()
+	// 	{
+	// 		copy.position.copy(mouse.zZeroPosition)
+
+	// 		if(!mouse.clicking)
+	// 		{
+	// 			scene.remove(draggingMultivec)
+
+	// 			if() //there's some operation
+	// 			{
+	// 				let copy = Multivector(multivec.elements)
+	// 				draggingMultivec
+	// 			}
+	// 		}
+	// 	})
+	// }
 
 	function bestowConnectionPotential(obj, exchangeMultivectorValues,exchangeMultivectorValuesInitial)
 	{
 		clickables.push(obj)
 		obj.onClick = function()
 		{
-			let multivec = Multivector(new THREE.Vector3())
+			let multivec = Multivector()
 			multivec.position.copy(mouse.zZeroPosition)
-
-			let connector = new THREE.Line(new THREE.Geometry(),new THREE.LineBasicMaterial({
-				color:0x0F0FFF
-			}))
-			connector.geometry.vertices.push(new THREE.Vector3())
-			connector.geometry.vertices.push(new THREE.Vector3(1.,1.,0.))
-			scene.add(connector)
 
 			if( exchangeMultivectorValuesInitial !== undefined )
 				exchangeMultivectorValuesInitial(multivec)
 
-			updateFunctions.push(function()
-			{
-				exchangeMultivectorValues(multivec)
-				connector.position.copy(obj.position)
-				littleScene.localToWorld(connector.position)
-
-				connector.scale.copy(multivec.position).sub(connector.position)
-				connector.scale.z = 1.
-			})
+			let connector = Connector(multivec,obj)
+			scene.add(connector)
 		}
 	}
 
 	let littleScene = new THREE.Object3D()
-	littleScene.scale.setScalar(.7)
-	littleScene.position.y += .65
+	littleScene.scale.setScalar(2)
+	littleScene.position.y += .9
 	scene.add(littleScene)
 
 	let background = new THREE.Mesh(new THREE.PlaneGeometry(2.5,.9), new THREE.MeshBasicMaterial({color:0x00AAAA}))
@@ -142,21 +209,11 @@ function initWheelScene()
 
 	let hummingbirdRadius = flowerRadius * 3.
 	let hummingbird = new THREE.Mesh(new THREE.PlaneGeometry(hummingbirdRadius*2.,hummingbirdRadius*2.),new THREE.MeshBasicMaterial({transparent:true}))
-	hummingbird.position.set(.1,.1,0.)
 	new THREE.TextureLoader().load("data/hummingbird.png",function(texture){
 		hummingbird.material.map = texture
 		hummingbird.material.needsUpdate = true
 	})
 	littleScene.add(hummingbird)
-
-	bestowConnectionPotential(hummingbird,function(multivec)
-	{
-		hummingbird.position.x = multivec.elements[1]
-		hummingbird.position.y = multivec.elements[2]
-	},function(multivec)
-	{
-		multivec.updateVectorAppearance(hummingbird.position)
-	} )
 
 	//the basis vectors should be inside the scene
 
@@ -175,7 +232,7 @@ function initWheelScene()
 	//	renderer.render( s, camera );
 	// }
 
-	let placeStuckOnWheel = new THREE.Vector3(wheelRadius*0.5,0,0)
+	let placeStuckOnWheel = new THREE.Vector3(0.,wheelRadius*0.5,0.)
 
 	let playing = false
 
@@ -254,11 +311,38 @@ function initWheelScene()
 			}
 		}
 	})
+
+	return hummingbird
 }
 
 function initGeometricAlgebra()
 {
-	// initWheelScene()
+	let hummingbird = initWheelScene()
+
+	{
+		let transformationArrowRadius = .5;
+		let transformationArrowGeometry = new THREE.PlaneGeometry(transformationArrowRadius*2.,transformationArrowRadius*2.)
+		transformationArrowGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(transformationArrowRadius,-transformationArrowRadius,0.))
+		transformationArrowGeometry.arrowTipLocation = new THREE.Vector3(0.,-transformationArrowRadius*2.*426./512.,0.)
+		transformationArrowGeometry.centerLocation = new THREE.Vector3(transformationArrowRadius*2.*376./512.,-transformationArrowRadius*2.*245./512.,0.)
+		let transformationArrow = new THREE.Mesh(transformationArrowGeometry,new THREE.MeshBasicMaterial({
+			transparent: true,
+			color: discreteViridis[0].hex
+		}))
+		let transformationArrowTexture = null
+		new THREE.TextureLoader().load("data/arrow.png",function(texture){transformationArrowTexture = texture})
+
+		function TransformationArrow()
+		{
+			let transformationArrow = new THREE.Mesh(transformationArrowGeometry,new THREE.MeshBasicMaterial({
+				map: transformationArrowTexture,
+				color: discreteViridis[0].hex
+			}))
+			scene.add(transformationArrow)
+
+			return transformationArrow
+		}
+	}
 
 	let multivectors = []
 
@@ -272,18 +356,51 @@ function initGeometricAlgebra()
 	let bivecMaterialFront = new THREE.MeshStandardMaterial({color:0xFF0000,transparent:true,opacity:.4,side:THREE.FrontSide})
 	let bivecMaterialBack = new THREE.MeshStandardMaterial({color:0x0000FF,transparent:true,opacity:.4,side:THREE.BackSide})
 
-	Multivector = function()
+	function ConnectedMultivector(thingToConnectTo)
+	{
+		let newMultivec = Multivector(thingToConnectTo.elements)
+		newMultivec.position.copy(mouse.zZeroPosition)
+		newMultivec.root = thingToConnectTo
+
+		mouse.lastClickedObject = newMultivec.children[0] // the scalar
+
+		let connector = Connector(newMultivec,thingToConnectTo)
+		newMultivec.connector = connector
+		scene.add(connector)
+	}
+
+	Multivector = function(elements)
 	{
 		let multivec = new THREE.Object3D();
 		scene.add(multivec)
 		multivectors.push(multivec)
 
-		//maaaaybe you shouldn't have this because it's stateful?
-		multivec.elements = new Float32Array(8);
+		multivec.thingsThatCanBeDragged = []
 
-		function onClick(intersection)
+		multivec.root = null
+		multivec.connector = null
+
+		//maaaaybe you shouldn't have this because it's stateful?
+		if(elements === undefined)
+			multivec.elements = new Float32Array(8);
+		else
+			multivec.elements = elements
+
+		let onClick = function()
 		{
-			clickedPoint.copy(intersection.point)
+			if( multivec.connector === null )
+			{
+				ConnectedMultivector(multivec)
+			}
+			else
+			{
+				//TODO delete aaaaaaaand remove from the array
+				scene.remove(multivec)
+				scene.remove(multivec.connector)
+				removeSingleElementFromArray(multivectors,multivec)
+
+				//and remove everything deriving from it? Or just don't do its operation?
+			}
 		}
 
 		{
@@ -294,8 +411,9 @@ function initGeometricAlgebra()
 			scalar.scale.multiplyScalar(0.3)
 			multivec.add(scalar)
 
-			clickables.push(scalar)
 			scalar.onClick = onClick
+
+			multivec.thingsThatCanBeDragged.push(scalar)
 
 			multivec.setScalar = function(newScalar)
 			{
@@ -314,9 +432,10 @@ function initGeometricAlgebra()
 			vecMesh.matrixAutoUpdate = false;
 			vecMesh.castShadow = true
 			multivec.add(vecMesh)
-			
-			clickables.push(vecMesh)
+
 			vecMesh.onClick = onClick
+			
+			multivec.thingsThatCanBeDragged.push(vecMesh)
 
 			multivec.setTo1Blade = function(newY)
 			{
@@ -343,6 +462,7 @@ function initGeometricAlgebra()
 				var newZ = vecPart.clone().cross(newX).normalize().negate();
 
 				vecMesh.matrix.makeBasis( newX, vecPart, newZ );
+				vecMesh.matrix.setPosition(vecPart.multiplyScalar(-.5))
 
 				vecMesh.visible = (vecMesh.matrix.determinant() !== 0. )
 			}
@@ -365,10 +485,11 @@ function initGeometricAlgebra()
 			parallelogram.matrix.elements[5] = .0001
 			parallelogram.matrixAutoUpdate = false;
 
-			clickables.push(front)
 			front.onClick = onClick
-			clickables.push(back)
 			back.onClick = onClick
+
+			multivec.thingsThatCanBeDragged.push(front)
+			multivec.thingsThatCanBeDragged.push(back)
 
 			multivec.setParallelogram = function(multivecA,multivecB)
 			{
@@ -448,56 +569,8 @@ function initGeometricAlgebra()
 				multivec.setCircle()
 		}
 
-		let clickedPoint = zeroVector.clone()
-		updateFunctions.push(function()
-		{
-			if(!clickedPoint.equals(zeroVector))
-			{
-				let newClickedPoint = mouse.rayIntersectionWithZPlane(clickedPoint.z)
-				multivec.position.sub(clickedPoint).add(newClickedPoint)
-				clickedPoint.copy(newClickedPoint)
-
-				for(let i = 0; i < multivectors.length; i++)
-				{
-					if( multivectors[i] === multivec )
-						continue
-					
-					if( multivectors[i].position.distanceTo(multivec.position) < 1.2 )
-					{
-						//symbol goes here
-
-						symbol.position.copy( multivec.position).lerp(multivectors[i].position,.5)
-
-						let onscreenDisplacement = new THREE.Vector2().copy(multivectors[i].position).sub(multivec.position)
-						let intendedZRotation = onscreenDisplacement.angle()
-						if( multivectors[i].position.distanceTo(multivec.position) < .8 )
-						{
-							intendedZRotation += TAU/8.
-							symbol.material.color.r = 1.
-						}
-						else
-						{
-							symbol.material.color.r = 0.
-						}
-						symbol.rotation.z = intendedZRotation
-
-						if(!mouse.clicking)
-						{
-							let a = Multivector()
-							a.position.set(-.6,0,0)
-							a.geometricProductMultivectors(multivectors[i], multivec)
-
-							log("y")
-
-							break;
-						}
-					}
-				}
-			}
-
-			if(!mouse.clicking)
-				clickedPoint.copy(zeroVector)
-		})
+		for(let i = 0; i < multivec.thingsThatCanBeDragged.length; i++)
+			clickables.push(multivec.thingsThatCanBeDragged[i])
 
 		return multivec
 	}
@@ -506,11 +579,19 @@ function initGeometricAlgebra()
 	symbol.geometry.merge(new THREE.PlaneGeometry(.06,.3))
 	scene.add(symbol)
 
+	//you may want to put stuff on the left or the right
+	//Therefore, "result" needs to be able to switch to right or left
+	//Therefore, little t-shaped things showing what results from what
+	//There again, who says right- and left- multiplying is the right thing to do?
+	//are left and right multiply the same as multiply by conjugate?
+
 	Multivector()
 	multivectors[0].setTo1Blade(yUnit.clone().multiplyScalar(1.))
+	multivectors[0].root = multivectors[0]
 	Multivector()
 	multivectors[1].setTo1Blade(xUnit.clone().multiplyScalar(1.))
 	multivectors[1].position.set(1.,0.,0.)
+	multivectors[1].root = multivectors[1]
 
 	function geometricProduct(a,b,target)
 	{
@@ -545,6 +626,99 @@ function initGeometricAlgebra()
 		// multivectors[1].updateVectorAppearance(new THREE.Vector3(.4,0,0).applyAxisAngle(zUnit,
 		// 	.9//frameCount*.01
 		// 	))
+
+		if(mouse.clicking && mouse.lastClickedObject === null)
+		{
+			for(let i = 0; i < multivectors.length; i++)
+			{
+				multivectors[i].position.add(mouse.zZeroPosition).sub(mouse.oldZZeroPosition)
+			}
+
+			return
+		}
+
+		let multivec = null
+		for(let i = 0; i < multivectors.length; i++)
+		{
+			if( (mouse.clicking||mouse.oldClicking) && multivectors[i].thingsThatCanBeDragged.indexOf(mouse.lastClickedObject) !== -1 )
+			{
+				multivec = multivectors[i]
+			}
+		}
+		if(multivec === null)
+			return
+
+		multivec.position.add(mouse.zZeroPosition).sub(mouse.oldZZeroPosition)
+
+		let closeObject = null
+		let p = new THREE.Vector3()
+		for(let i = 0; i < multivectors.length + 1; i++)
+		{
+			let thingToCheckDistanceTo = i < multivectors.length ? multivectors[i] : hummingbird
+			if( thingToCheckDistanceTo === multivec || thingToCheckDistanceTo === multivec.root)
+				continue
+
+			//no, don't want to check the ones we come from
+			let dist = thingToCheckDistanceTo.getWorldPosition(p).distanceTo(multivec.position)
+
+			if( dist < 1.2 &&
+				(closeObject === null || dist < closeObject.position.distanceTo(multivec.position) ) )
+			{
+				closeObject = thingToCheckDistanceTo
+			}
+		}
+
+		if( closeObject === null )
+		{
+			if(!mouse.clicking)
+			{
+				scene.remove(multivec)
+				scene.remove(multivec.connector)
+				removeSingleElementFromArray(multivectors,multivec)
+			}
+		}
+		else if( closeObject === hummingbird)
+		{
+			if(!mouse.clicking)
+			{
+				hummingbird.position.x = multivec.elements[1]
+				hummingbird.position.y = multivec.elements[2]
+				log(hummingbird.position)
+
+				scene.remove(multivec) //TODO and destroy
+				scene.remove(multivec.connector)
+				removeSingleElementFromArray(multivectors,multivec)
+
+				Connector(hummingbird,multivec.root)
+			}
+		}
+		else
+		{
+			let multivectorToOperateOn = closeObject
+
+			symbol.position.copy( multivec.position).lerp(multivectorToOperateOn.position,.5)
+
+			let onscreenDisplacement = new THREE.Vector2().copy(multivectorToOperateOn.position).sub(multivec.position)
+			let intendedZRotation = onscreenDisplacement.angle()
+			if( multivectorToOperateOn.position.distanceTo(multivec.position) < .8 )
+			{
+				intendedZRotation += TAU/8.
+				symbol.material.color.r = 1.
+			}
+			else
+			{
+				symbol.material.color.r = 0.
+			}
+			symbol.rotation.z = intendedZRotation
+
+			if(!mouse.clicking)
+			{
+				let result = Multivector()
+				result.position.lerpVectors(multivec.position,multivectorToOperateOn.position,.5)
+				result.position.y -= multivec.position.distanceTo(multivectorToOperateOn.position)
+				result.geometricProductMultivectors(multivectorToOperateOn, multivec)
+			}
+		}
 	})
 }
 

@@ -1,3 +1,14 @@
+function removeSingleElementFromArray(array, element)
+{
+	var index = array.indexOf(element);
+	if (index > -1)
+	{
+	    array.splice(index, 1);
+	    return;
+	}
+	else console.error("no such element");
+}
+
 function jonSlerp(q0,q1,t)
 {
 	// debugger;

@@ -20,6 +20,8 @@ function init()
 	initSurroundings();
 	initMouse();
 
+	initGeometricAlgebra()
+
 	function render()
 	{
 		frameDelta = clock.getDelta();
@@ -37,8 +39,9 @@ function init()
 		renderer.render( scene, camera );
 	}
 
-	return render
+	render()
 }
+init()
 
 function initButtons()
 {

@@ -31,3 +31,9 @@ var bindButton;
 const toysToBeArranged = [];
 
 const efficientSphereGeometryWithRadiusOne = new THREE.EfficientSphereGeometry(1);
+
+const discreteViridis = [
+	{hex:0xFCE51E, color:new THREE.Color(0.984375,0.89453125,0.1171875)},
+	{hex:0x49BE54, color:new THREE.Color(0.28515625,0.7421875,0.328125)},
+	{hex:0x2A477A, color:new THREE.Color(0.1640625,0.27734375,0.4765625)},
+	{hex:0x340042, color:new THREE.Color(0.203125,0.,0.2578125)}];
