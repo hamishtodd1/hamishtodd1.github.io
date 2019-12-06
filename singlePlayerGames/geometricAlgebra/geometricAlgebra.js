@@ -29,6 +29,14 @@
 		Could have them stacked in a column, or around in a circle
 		What if you have some things that are enormously larger than others? That's why we have zooming in and out. But some things keep size
 
+	"Language"
+		Should have good gamefeel, kids are a major audience, quite possibly the only one
+			Functions as creatures that swallow and poop out
+		Need copyable functions
+			Add and multiply are functions so should probably have same syntax
+			The nice thing in comparison with other programming is that things get animated
+
+
 	Justification
 		This is about elegantly building up sophisticated things from minimal elements
 		Levereging people's geometrical intuition
@@ -320,28 +328,38 @@ function initGeometricAlgebra()
 	let hummingbird = initWheelScene()
 
 	{
-		let transformationArrowRadius = .5;
-		let transformationArrowGeometry = new THREE.PlaneGeometry(transformationArrowRadius*2.,transformationArrowRadius*2.)
-		transformationArrowGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(transformationArrowRadius,-transformationArrowRadius,0.))
-		transformationArrowGeometry.arrowTipLocation = new THREE.Vector3(0.,-transformationArrowRadius*2.*426./512.,0.)
-		transformationArrowGeometry.centerLocation = new THREE.Vector3(transformationArrowRadius*2.*376./512.,-transformationArrowRadius*2.*245./512.,0.)
-		let transformationArrow = new THREE.Mesh(transformationArrowGeometry,new THREE.MeshBasicMaterial({
-			transparent: true,
-			color: discreteViridis[0].hex
-		}))
+		let transformationArrowWidth = 1.;
+		let transformationArrowHeight = 1.;
+		var transformationArrowGeometry = new THREE.PlaneGeometry(transformationArrowWidth,transformationArrowHeight)
+		transformationArrowGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(transformationArrowWidth*.5,-transformationArrowHeight*.5,0.))
+		transformationArrowGeometry.arrowTipLocation = new THREE.Vector3(0.,-transformationArrowHeight*426./512.,0.)
+		transformationArrowGeometry.centerLocation = new THREE.Vector3(transformationArrowWidth*376./512.,-transformationArrowHeight*245./512.,0.)
+
+		var TransformationArrow = null
+		var arrowForConsidering = null
+		var transformationArrows = []
+
 		let transformationArrowTexture = null
-		new THREE.TextureLoader().load("data/arrow.png",function(texture){transformationArrowTexture = texture})
-
-		function TransformationArrow()
+		new THREE.TextureLoader().load("data/arrow.png",function(texture)
 		{
-			let transformationArrow = new THREE.Mesh(transformationArrowGeometry,new THREE.MeshBasicMaterial({
-				map: transformationArrowTexture,
-				color: discreteViridis[0].hex
-			}))
-			scene.add(transformationArrow)
+			transformationArrowTexture = texture;
 
-			return transformationArrow
-		}
+			TransformationArrow = function()
+			{
+				let transformationArrow = new THREE.Mesh(transformationArrowGeometry,new THREE.MeshBasicMaterial({
+					map: transformationArrowTexture,
+					color: discreteViridis[0].hex,
+					transparent:true
+				}))
+
+				transformationArrows.push(transformationArrow)
+
+				return transformationArrow
+			}
+
+			arrowForConsidering = TransformationArrow()
+			scene.remove(arrowForConsidering)
+		})
 	}
 
 	let multivectors = []
@@ -575,10 +593,6 @@ function initGeometricAlgebra()
 		return multivec
 	}
 
-	let symbol = new THREE.Mesh(new THREE.PlaneGeometry(.3,.06),new THREE.MeshBasicMaterial({color:0x0F0FFF}))
-	symbol.geometry.merge(new THREE.PlaneGeometry(.06,.3))
-	scene.add(symbol)
-
 	//you may want to put stuff on the left or the right
 	//Therefore, "result" needs to be able to switch to right or left
 	//Therefore, little t-shaped things showing what results from what
@@ -633,6 +647,10 @@ function initGeometricAlgebra()
 			{
 				multivectors[i].position.add(mouse.zZeroPosition).sub(mouse.oldZZeroPosition)
 			}
+			for(let i = 0; i < transformationArrows.length; i++)
+			{
+				transformationArrows[i].position.add(mouse.zZeroPosition).sub(mouse.oldZZeroPosition)
+			}
 
 			return
 		}
@@ -672,9 +690,9 @@ function initGeometricAlgebra()
 		{
 			if(!mouse.clicking)
 			{
-				scene.remove(multivec)
-				scene.remove(multivec.connector)
-				removeSingleElementFromArray(multivectors,multivec)
+				// scene.remove(multivec)
+				// scene.remove(multivec.connector)
+				// removeSingleElementFromArray(multivectors,multivec)
 			}
 		}
 		else if( closeObject === hummingbird)
@@ -694,29 +712,58 @@ function initGeometricAlgebra()
 		}
 		else
 		{
+			let clearance = .5
+
 			let multivectorToOperateOn = closeObject
+			let whereArrowCenterWouldBe = multivectorToOperateOn.position.clone().add(transformationArrowGeometry.centerLocation)
+			whereArrowCenterWouldBe.x += clearance
+			let dist = whereArrowCenterWouldBe.distanceTo(multivec.position)
+			delete(whereArrowCenterWouldBe)
 
-			symbol.position.copy( multivec.position).lerp(multivectorToOperateOn.position,.5)
+			let operations = ["add","multiply"] //wanna left multiply? move the other one
+			let distances = [.5,.7]
+			let operationIndex = -1
 
-			let onscreenDisplacement = new THREE.Vector2().copy(multivectorToOperateOn.position).sub(multivec.position)
-			let intendedZRotation = onscreenDisplacement.angle()
-			if( multivectorToOperateOn.position.distanceTo(multivec.position) < .8 )
+			for(let i = operations.length-1; i >= 0; --i)
 			{
-				intendedZRotation += TAU/8.
-				symbol.material.color.r = 1.
+				if(dist < distances[i])
+					operationIndex = i
+			}
+
+			if(operationIndex === -1)
+			{
+				scene.remove(arrowForConsidering)
 			}
 			else
 			{
-				symbol.material.color.r = 0.
+				scene.add(arrowForConsidering)
+				arrowForConsidering.position.copy(multivectorToOperateOn.position)
+				arrowForConsidering.material.color.setHex(discreteViridis[operationIndex].hex)
+				arrowForConsidering.position.x += clearance;
 			}
-			symbol.rotation.z = intendedZRotation
+
+			log(operationIndex)
 
 			if(!mouse.clicking)
 			{
 				let result = Multivector()
-				result.position.lerpVectors(multivec.position,multivectorToOperateOn.position,.5)
-				result.position.y -= multivec.position.distanceTo(multivectorToOperateOn.position)
-				result.geometricProductMultivectors(multivectorToOperateOn, multivec)
+
+				if(operationIndex === operations.indexOf("add"))
+					result.addMultivectors(multivectorToOperateOn, multivec)
+				if(operationIndex === operations.indexOf("multiply"))
+					result.geometricProductMultivectors(multivec, multivectorToOperateOn)
+
+				result.position.y = arrowForConsidering.position.y + transformationArrowGeometry.arrowTipLocation.y
+				result.position.x = multivectorToOperateOn.position.x
+
+				let newArrow = TransformationArrow()
+				newArrow.position.copy(arrowForConsidering.position)
+				newArrow.material.color.copy(arrowForConsidering.material.color)
+				scene.remove(arrowForConsidering)
+				scene.add(newArrow)
+
+				multivec.position.copy(newArrow.position)
+				multivec.position.add(transformationArrowGeometry.centerLocation)
 			}
 		}
 	})
