@@ -21,14 +21,16 @@ function initSurroundings()
 	scene.add(stage)
 
 	{
-		var pointLight = new THREE.PointLight(0xFFFFFF, 0.4, 10.3);
-		pointLight.shadow.camera.far = 10;
+		log(backwardExtension)
+		var pointLight = new THREE.PointLight(0xFFFFFF, 0.4, 20.);
+
+		pointLight.shadow.camera.far = 20.;
 		pointLight.shadow.camera.near = 0.01;
 		pointLight.shadow.mapSize.width = 1024;
 		pointLight.shadow.mapSize.height = pointLight.shadow.mapSize.width;
+
 		pointLight.castShadow = true;
 		pointLight.position.copy(stage.geometry.vertices[3])
-		log(pointLight.position)
 		pointLight.position.negate().multiplyScalar(0.3);
 		stage.add( pointLight );
 
@@ -40,7 +42,7 @@ function initSurroundings()
 
 function initCameraAndRendererResizeSystem(renderer)
 {
-	let stageHeight = 6.
+	let stageHeight = 9.
 
 	function respondToResize() 
 	{

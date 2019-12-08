@@ -1,8 +1,14 @@
 /*
-	TODO
-		Grab and move it around: everything else comes with it
-		Grab it with two fingers (right mouse button? ctrl+click?) and pull apart to make a free-moving clone which is connected by a line
-		
+	TODO for slack / Cambridge demo
+		More like a scripting environment / calculator
+		make it so there are animations, so it is a good playground (and for your own understanding!)
+		Some basic puzzle
+
+		In a scripting-type situation you can still have more than one variable on screen
+
+		So:
+			You have your
+
 		Scalar is a line instead? =/ an opacity?
 		Should be able to make the alg even as things move
 		In the playground you probably want a slidey scalar / number that counts up and up until you click it
@@ -14,15 +20,15 @@
 			Bring two bivectors together, they snap
 
 	Ideas
-		you want to put random things in the scene. That's how you make cool demoscene stuff
-		Should be easy to make
+		you want to put random things in the littlescene. That's how you make cool demoscene stuff
+		Should be easy to make:
 			the threejs demo with the parented cubes
-		This could be your AR-modelling-from-footage thing. Make it AR.
-		Functions that you may want to create:
+			mandelbrot set
+		Should be possible to model
+			Dice with constant angular momentum spinning in zero gravity
+			Some other real world footage
 			Get in-plane component
 			Make rotor from axis and angle
-		Analogies: balloons, which can be inflated, or deflated all the way to the point that they are turned inside out ("negative volume")
-		Squishy bubbles in wallpaper. Can move bubbles around in the same plane and add them.
 
 	Things that might have to change
 		Line is there because if you change the parent you change the child. If you clone and there's no line, then what, is it a new object?
@@ -30,12 +36,34 @@
 		What if you have some things that are enormously larger than others? That's why we have zooming in and out. But some things keep size
 
 	"Language"
-		Should have good gamefeel, kids are a major audience, quite possibly the only one
+		Should have good gamefeel, "the public" is the primary audience, yourself/GA users is secondary
 			Functions as creatures that swallow and poop out
-		Need copyable functions
+		Need copyable functions - LATER. MUCH CAN BE DONE MAKING JUST ONE FUNCTION. MORE LIKE EQUATIONS!
 			Add and multiply are functions so should probably have same syntax
 			The nice thing in comparison with other programming is that things get animated
-
+			So you're making rectangles that wires go into
+			You know those starting things? For a function, you must supply those and only those
+		Inspiration
+			programarbles
+			dynamic diagrams
+			blueprints
+			Claude's thing
+			Human Resource Machin
+		How to represent variables
+			Proooobably best for them to be immutable
+			Wires or projectiles or falling programarbles, there's probably nothing else
+			Serious mode is wires, fun mode is programarbles?
+			Programarbles falling is nice. Arrows can go in any direction so harder to read. Natural "control flow"
+				Programarbles has this "duplicate" thing. Fine. But with code you can refer to a variable in multiple places
+		Could be more like Drawing Dynamic Visualizations, where you do stuff
+			it's the difference between interactive scripting (which immediately gives you output) and writing into a text file
+			Then you get a record of what you did
+		You are NOT trying to make an arbitrary programming language as an end unto itself.
+			You are trying to show what can be done with this data structure
+			There are few things in scope
+			There's only one kind of data
+			Loops? urgh
+		Try to bear in mind it might change =/ Work on level design!
 
 	Justification
 		This is about elegantly building up sophisticated things from minimal elements
@@ -168,7 +196,7 @@ function initWheelScene()
 
 	let littleScene = new THREE.Object3D()
 	littleScene.scale.setScalar(2)
-	littleScene.position.y += .9
+	littleScene.position.y += 3.88
 	scene.add(littleScene)
 
 	let background = new THREE.Mesh(new THREE.PlaneGeometry(2.5,.9), new THREE.MeshBasicMaterial({color:0x00AAAA}))
@@ -217,6 +245,7 @@ function initWheelScene()
 
 	let hummingbirdRadius = flowerRadius * 3.
 	let hummingbird = new THREE.Mesh(new THREE.PlaneGeometry(hummingbirdRadius*2.,hummingbirdRadius*2.),new THREE.MeshBasicMaterial({transparent:true}))
+	hummingbird.material.depthTest = false
 	new THREE.TextureLoader().load("data/hummingbird.png",function(texture){
 		hummingbird.material.map = texture
 		hummingbird.material.needsUpdate = true
@@ -320,46 +349,76 @@ function initWheelScene()
 		}
 	})
 
-	return hummingbird
+	littleScene.hummingbird = hummingbird
+
+	return littleScene
 }
 
-function initGeometricAlgebra()
+async function initGeometricAlgebra()
 {
-	let hummingbird = initWheelScene()
+	//when you bring a multivec over to a place WHERE ANOTHER MULTIVECTOR MAY BE FOUND IN FUTURE, we "run debug build" and break at the point where it would be there
 
 	{
-		let transformationArrowWidth = 1.;
-		let transformationArrowHeight = 1.;
-		var transformationArrowGeometry = new THREE.PlaneGeometry(transformationArrowWidth,transformationArrowHeight)
-		transformationArrowGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(transformationArrowWidth*.5,-transformationArrowHeight*.5,0.))
-		transformationArrowGeometry.arrowTipLocation = new THREE.Vector3(0.,-transformationArrowHeight*426./512.,0.)
-		transformationArrowGeometry.centerLocation = new THREE.Vector3(transformationArrowWidth*376./512.,-transformationArrowHeight*245./512.,0.)
+		var operatorSymbolGeometry = new THREE.PlaneGeometry(1.,1.)
 
-		var TransformationArrow = null
-		var arrowForConsidering = null
-		var transformationArrows = []
+		//The two things could come together inside the operation and the operation becomes the result. Then gets eaten.
 
-		let transformationArrowTexture = null
-		new THREE.TextureLoader().load("data/arrow.png",function(texture)
-		{
-			transformationArrowTexture = texture;
+		var operatorSymbolForConsidering = null
+		var operatorSymbols = []
 
-			TransformationArrow = function()
+		//at first, people should just do the series of things. Only later do you get your visualization of what you did
+
+		let operatorSymbolTexture = null
+		let textureLoader = new THREE.TextureLoader();
+
+		await new Promise(resolve => {
+			textureLoader.load("data/squarePipe.png",function(texture)
 			{
-				let transformationArrow = new THREE.Mesh(transformationArrowGeometry,new THREE.MeshBasicMaterial({
-					map: transformationArrowTexture,
-					color: discreteViridis[0].hex,
-					transparent:true
-				}))
-
-				transformationArrows.push(transformationArrow)
-
-				return transformationArrow
-			}
-
-			arrowForConsidering = TransformationArrow()
-			scene.remove(arrowForConsidering)
+				operatorSymbolTexture = texture;
+				resolve()
+			})
 		})
+
+		let OperatorSymbol = function()
+		{
+			let operatorSymbol = new THREE.Mesh(operatorSymbolGeometry,new THREE.MeshBasicMaterial({
+				map: operatorSymbolTexture,
+				color: discreteViridis[0].hex,
+				transparent:true
+			}))
+
+			operatorSymbols.push(operatorSymbol)
+
+			return operatorSymbol
+		}
+
+		operatorSymbolForConsidering = OperatorSymbol()
+
+		addOperatorOriginal = OperatorSymbol()
+
+		rightMultiplyOperatorOriginal = OperatorSymbol()
+		leftMultiplyOperatorOriginal = OperatorSymbol()
+
+		let operatorOriginals = [addOperatorOriginal,rightMultiplyOperatorOriginal,leftMultiplyOperatorOriginal];
+
+		for(let i = 0; i < operatorOriginals.length; ++i )
+		{
+			let o = operatorOriginals[i]
+
+			o.material.color.setHex(discreteViridis[i].hex)
+
+			o.rotation.z = TAU/8.
+
+			o.position.y = -3.5
+			o.position.x = (i-1) * 2.
+			scene.add(o)
+
+			clickables.push(o)
+			o.onClick = function()
+			{
+				log("y")
+			}
+		}
 	}
 
 	let multivectors = []
@@ -382,9 +441,10 @@ function initGeometricAlgebra()
 
 		mouse.lastClickedObject = newMultivec.children[0] // the scalar
 
-		let connector = Connector(newMultivec,thingToConnectTo)
-		newMultivec.connector = connector
-		scene.add(connector)
+		//this waits for when we're about making a record
+		// let connector = Connector(newMultivec,thingToConnectTo)
+		// newMultivec.connector = connector
+		// scene.add(connector)
 	}
 
 	Multivector = function(elements)
@@ -423,7 +483,7 @@ function initGeometricAlgebra()
 
 		{
 			let scalar = makeTextSign("",false,false,false)
-			scalar.material.depthTest = false
+			scalar.material.depthFunc = THREE.AlwaysDepth
 			scalar.castShadow = true
 			scalar.material.side = THREE.DoubleSide
 			scalar.scale.multiplyScalar(0.3)
@@ -512,6 +572,7 @@ function initGeometricAlgebra()
 			multivec.setParallelogram = function(multivecA,multivecB)
 			{
 				parallelogram.visible = true
+				circle.visible = false
 
 				let a = multivecA.elements
 				let b = multivecB.elements
@@ -529,15 +590,19 @@ function initGeometricAlgebra()
 
 			}
 
+			let circle = new THREE.Mesh(circleGeometry, bivecMaterialFront)
+			multivec.add(circle)
+			circle.visible = false
 			multivec.setCircle = function()
 			{
-				// parallelogram.visible = false
+				parallelogram.visible = false
+				circle.visible = true
 
-				// let circle = new THREE.Mesh(circleGeometry, bivecMaterialFront)
-				// circle.scale.setScalar(multivec.elements[4])
-				// multivec.add(circle)
+				circle.scale.setScalar(multivec.elements[4])
+				if(multivec.elements[5]!==0. || multivec.elements[6] !== 0.)
+					log("not working yet")
 
-				// //convert to matrix I suppose
+				//Properly: convert to matrix I suppose
 				// randomPerpVector(zAxis)
 			}
 		}
@@ -586,6 +651,14 @@ function initGeometricAlgebra()
 			else
 				multivec.setCircle()
 		}
+		multivec.addMultivectors = function(multivecA,multivecB)
+		{
+			geometricAdd(multivecA.elements,multivecB.elements,multivec.elements)
+
+			multivec.updateScalarAppearance()
+			multivec.updateVectorAppearance()
+			multivec.setCircle()
+		}
 
 		for(let i = 0; i < multivec.thingsThatCanBeDragged.length; i++)
 			clickables.push(multivec.thingsThatCanBeDragged[i])
@@ -601,10 +674,11 @@ function initGeometricAlgebra()
 
 	Multivector()
 	multivectors[0].setTo1Blade(yUnit.clone().multiplyScalar(1.))
+	multivectors[0].position.x = -1.
 	multivectors[0].root = multivectors[0]
 	Multivector()
 	multivectors[1].setTo1Blade(xUnit.clone().multiplyScalar(1.))
-	multivectors[1].position.set(1.,0.,0.)
+	multivectors[1].position.x = 1.
 	multivectors[1].root = multivectors[1]
 
 	function geometricProduct(a,b,target)
@@ -635,6 +709,9 @@ function initGeometricAlgebra()
 		return target;
 	}
 
+	// let indicator = new THREE.Mesh(new THREE.SphereGeometry(.2))
+	// scene.add(indicator)
+
 	updateFunctions.push(function()
 	{
 		// multivectors[1].updateVectorAppearance(new THREE.Vector3(.4,0,0).applyAxisAngle(zUnit,
@@ -647,9 +724,9 @@ function initGeometricAlgebra()
 			{
 				multivectors[i].position.add(mouse.zZeroPosition).sub(mouse.oldZZeroPosition)
 			}
-			for(let i = 0; i < transformationArrows.length; i++)
+			for(let i = 0; i < operatorSymbols.length; i++)
 			{
-				transformationArrows[i].position.add(mouse.zZeroPosition).sub(mouse.oldZZeroPosition)
+				operatorSymbols[i].position.add(mouse.zZeroPosition).sub(mouse.oldZZeroPosition)
 			}
 
 			return
@@ -668,59 +745,51 @@ function initGeometricAlgebra()
 
 		multivec.position.add(mouse.zZeroPosition).sub(mouse.oldZZeroPosition)
 
-		let closeObject = null
+		let closestObject = null
 		let p = new THREE.Vector3()
 		for(let i = 0; i < multivectors.length + 1; i++)
 		{
-			let thingToCheckDistanceTo = i < multivectors.length ? multivectors[i] : hummingbird
+			let thingToCheckDistanceTo = i < multivectors.length ? multivectors[i] : otherThingToCheckDistanceTo[i-multivectors.length]
 			if( thingToCheckDistanceTo === multivec || thingToCheckDistanceTo === multivec.root)
 				continue
 
 			//no, don't want to check the ones we come from
 			let dist = thingToCheckDistanceTo.getWorldPosition(p).distanceTo(multivec.position)
 
-			if( dist < 1.2 &&
-				(closeObject === null || dist < closeObject.position.distanceTo(multivec.position) ) )
+			if( (closestObject === null || dist < closestObject.position.distanceTo(multivec.position) ) )
 			{
-				closeObject = thingToCheckDistanceTo
+				closestObject = thingToCheckDistanceTo
 			}
 		}
 
-		if( closeObject === null )
+		scene.remove(operatorSymbolForConsidering)
+
+		if( multivectors.indexOf(closestObject) === -1 )
 		{
 			if(!mouse.clicking)
 			{
-				// scene.remove(multivec)
-				// scene.remove(multivec.connector)
-				// removeSingleElementFromArray(multivectors,multivec)
-			}
-		}
-		else if( closeObject === hummingbird)
-		{
-			if(!mouse.clicking)
-			{
-				hummingbird.position.x = multivec.elements[1]
-				hummingbird.position.y = multivec.elements[2]
-				log(hummingbird.position)
+				closestObject.position.x = multivec.elements[1]
+				closestObject.position.y = multivec.elements[2]
+				log(closestObject.position)
 
 				scene.remove(multivec) //TODO and destroy
 				scene.remove(multivec.connector)
 				removeSingleElementFromArray(multivectors,multivec)
 
-				Connector(hummingbird,multivec.root)
+				Connector(closestObject,multivec.root)
+
+				return;
 			}
 		}
 		else
 		{
-			let clearance = .5
+			let multivectorToOperateOn = closestObject
+			let placeWeWouldGo = multivectorToOperateOn.position.clone()
+			placeWeWouldGo.x += 1.
+			placeWeWouldGo.y -= 1.
+			let dist = placeWeWouldGo.distanceTo(multivec.position)
 
-			let multivectorToOperateOn = closeObject
-			let whereArrowCenterWouldBe = multivectorToOperateOn.position.clone().add(transformationArrowGeometry.centerLocation)
-			whereArrowCenterWouldBe.x += clearance
-			let dist = whereArrowCenterWouldBe.distanceTo(multivec.position)
-			delete(whereArrowCenterWouldBe)
-
-			let operations = ["add","multiply"] //wanna left multiply? move the other one
+			let operations = ["add","leftMultiply"] //wanna left multiply? move the other one
 			let distances = [.5,.7]
 			let operationIndex = -1
 
@@ -730,43 +799,90 @@ function initGeometricAlgebra()
 					operationIndex = i
 			}
 
-			if(operationIndex === -1)
+			if(operationIndex !== -1)
 			{
-				scene.remove(arrowForConsidering)
-			}
-			else
-			{
-				scene.add(arrowForConsidering)
-				arrowForConsidering.position.copy(multivectorToOperateOn.position)
-				arrowForConsidering.material.color.setHex(discreteViridis[operationIndex].hex)
-				arrowForConsidering.position.x += clearance;
-			}
+				scene.add(operatorSymbolForConsidering)
+				operatorSymbolForConsidering.position.copy(multivectorToOperateOn.position)
+				operatorSymbolForConsidering.material.color.setHex(discreteViridis[operationIndex].hex)
+				// operatorSymbolForConsidering.position.x += clearance;
 
-			log(operationIndex)
+				if(!mouse.clicking)
+				{
+					let newOperatorSymbol = OperatorSymbol()
+					newOperatorSymbol.position.copy(operatorSymbolForConsidering.position)
+					newOperatorSymbol.material.color.copy(operatorSymbolForConsidering.material.color)
+					scene.remove(operatorSymbolForConsidering)
+					scene.add(newOperatorSymbol)
 
-			if(!mouse.clicking)
-			{
-				let result = Multivector()
+					multivec.position.copy(multivectorToOperateOn.position)
+					multivec.position.x += 1.;
+					multivec.position.y -= 1.;
 
-				if(operationIndex === operations.indexOf("add"))
-					result.addMultivectors(multivectorToOperateOn, multivec)
-				if(operationIndex === operations.indexOf("multiply"))
-					result.geometricProductMultivectors(multivec, multivectorToOperateOn)
+					//------
 
-				result.position.y = arrowForConsidering.position.y + transformationArrowGeometry.arrowTipLocation.y
-				result.position.x = multivectorToOperateOn.position.x
+					let result = Multivector()
 
-				let newArrow = TransformationArrow()
-				newArrow.position.copy(arrowForConsidering.position)
-				newArrow.material.color.copy(arrowForConsidering.material.color)
-				scene.remove(arrowForConsidering)
-				scene.add(newArrow)
+					if(operationIndex === operations.indexOf("add"))
+						result.addMultivectors(multivectorToOperateOn, multivec)
+					if(operationIndex === operations.indexOf("multiply"))
+						result.geometricProductMultivectors(multivec, multivectorToOperateOn)
 
-				multivec.position.copy(newArrow.position)
-				multivec.position.add(transformationArrowGeometry.centerLocation)
+					result.position.copy( multivectorToOperateOn.position )
+					result.position.y -= 2.;
+					scene.add(result)
+
+					//play animation
+
+					return;
+				}
 			}
 		}
+		
+		if( false /*mouse.clicking*/ )
+		{
+			let functionPlane = new THREE.Object3D()
+			functionPlane.position.copy(multivec.position)
+			functionPlane.position.x -= .5
+			functionPlane.position.y += .5
+			scene.add(functionPlane)
+
+			let background = new THREE.Mesh(new THREE.PlaneGeometry(1.,1.), new THREE.MeshBasicMaterial({color:0x000000}))
+			functionPlane.add(background)
+
+			let spacing = 1.
+			let numWide = 2.
+			let numTall = 3.
+
+			background.scale.set(numWide*spacing,numTall*spacing,0.)
+			background.position.copy(background.scale).multiplyScalar(.5)
+			background.position.y*= -1
+
+			let grid = new THREE.LineSegments( new THREE.Geometry(), new THREE.MeshBasicMaterial({
+				color:0x00FF00,
+			}) )
+
+			let verticalExtent = numTall/2*spacing
+			let horizontalExtent = numWide/2*spacing
+			for(let i = 0; i < numWide+1; i++)
+			{
+				let x = i*spacing
+				grid.geometry.vertices.push(new THREE.Vector3(x,0.,0),new THREE.Vector3(x,-numTall*spacing,0))
+			}
+			for( let i = 0; i < numTall+1; i++)
+			{
+				let y =-i*spacing
+				grid.geometry.vertices.push(new THREE.Vector3(0.,y,0),new THREE.Vector3(numWide*spacing,y,0))
+			}
+
+			functionPlane.add(grid)
+		}
+
+		//your actions you can understand. All the complexities of the circuit should just be a visual representation of them
 	})
+
+	var otherThingToCheckDistanceTo = []
+	let littleScene = initWheelScene()
+	otherThingToCheckDistanceTo.push(littleScene.hummingbird)
 }
 
 function NO_initGeometricAlgebra()

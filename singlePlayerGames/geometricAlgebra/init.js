@@ -6,7 +6,7 @@
 		Subtleties in interactive learning is your raison d'etre, but here we are, making something non-interactive
 */
 
-function init()
+async function init()
 {
 	initButtons()
 
@@ -20,7 +20,7 @@ function init()
 	initSurroundings();
 	initMouse();
 
-	initGeometricAlgebra()
+	await initGeometricAlgebra()
 
 	function render()
 	{
