@@ -78,6 +78,11 @@ function initMouse()
 		object.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAmount))
 	}
 
+	// mouse.simulate = function(positionToClickAt)
+	// {
+	// 	mouse.
+	// }
+
 	var clickedPoint = new THREE.Vector3();
 	var toyBeingArranged = null;
 	mouse.updateFromAsyncAndCheckClicks = function()
@@ -191,8 +196,3 @@ function initMouse()
 	    event.preventDefault()
 	}, false);
 }
-
-/*
-	Array of pictures and videos of her that you can click on and they appear and with pictures automatically zoom
-	zooming in and out
-*/

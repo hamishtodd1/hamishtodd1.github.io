@@ -53,7 +53,7 @@ function initCameraAndRendererResizeSystem(renderer)
 		// camera.left = -window.innerWidth / window.innerHeight;
 		// camera.right = window.innerWidth / window.innerHeight;
 
-		camera.position.z = 3.5;
+		camera.position.z = 8.;
 
 		camera.fov = fovGivenCenterToFrameDistance(stageHeight / 2., camera.position.z )
 

@@ -1,8 +1,37 @@
+<!-- 
+Justification
+	This is about elegantly building up sophisticated things from minimal elements
+	Levereging people's geometrical intuition
+	It is about seeing mathematical structure in the world around you.
+	GA is good because the things don't come out of nowhere, you see that they are emergent
+		sin and cos come out of nowhere in your education too
+	This is way better than Human Resource Machine, no symbols, things actually are what thtye represent
+	Maybe this is even useful for you programming stuff?
+		What the hell are summed bivectors?
+		Trivector times bivector is presumably vector. 
+		Trivector times trivector is presumably bivector.
+	The idea of negative area and length is a nice balance of intuitive and surprising, and makes total sense in this context (no other?)
+	You do want to model familiar, visible things in the real world, using this separate mathematical realm. That is applied maths.
+	It is an exercise in making a propaganda piece, in trying to change a bunch of stuff
+		Of all topics, games are most easily suited to maths...
+		and while it's all well and good to try to educate people, it's not very impressive if it's just something you'll hear in a undergrad anyway
+	Apparently it lets you cover special relativity and QM soooo
+	This is one set of visualizable *objects* with specific, interesting collision-rules
+		Both objects and rules are deeply important in the world
+	Gets people to think abstractly about real stuff that they know they need to think about
+	Also it's a useful example of an algebra / group / lambda calculus 
+		All functions have two inputs
+
+	Send to
+		Pontus
+		Andy Matushak (both for "here is the model" and "here is a tool for thinking")
+		The slack
+		Marc
+		Jon/indie fund
+-->
 <html>
 	<head>
-		<title>The Clifford Abacus</title>
-		<!-- The Bladed Abacus -->
-		<meta charset="utf-8">
+		<title>The Clifford Abacus</title> <!-- The Bladed Abacus -->
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
 			body {
@@ -12,6 +41,46 @@
 		</style>
 	</head>
 	<body>
+		<script>
+			async function init()
+			{
+				initButtons()
+
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setClearColor(0x000000) //youtube
+				renderer.shadowMap.enabled = true;
+				renderer.shadowMap.type = THREE.BasicShadowMap;
+				document.body.appendChild( renderer.domElement );
+
+				initCameraAndRendererResizeSystem(renderer);
+				initSurroundings();
+				initMouse();
+
+				// initBivectorAppearance()
+
+				await initGeometricAlgebra()
+
+				function render()
+				{
+					frameDelta = clock.getDelta();
+					
+					mouse.updateFromAsyncAndCheckClicks();
+
+					for(var i = 0; i < updateFunctions.length; i++)
+					{
+						updateFunctions[i]();
+					}
+
+					frameCount++;
+
+					requestAnimationFrame( render );
+					renderer.render( scene, camera );
+				}
+
+				render()
+			}
+		</script>
+
 		<script src="lib/three.js"></script>
 
 		<script src="lib/OBJLoader.js"></script>
@@ -21,11 +90,20 @@
 		<script src="mouseControlSystem.js"></script>
 		<script src="text.js"></script>
 
-		<script src="geometricAlgebra.js"></script>
+		<script src="scenes/hummingbirdFlowerUnicycle.js"></script>
+
+		<script src="appearances.js"></script>
+		<script src="bivectorAppearance.js"></script>
+		<script src="game.js"></script>
+		<script src="record.js"></script>
 
 	    <script src="slider.js"></script>
  
 		<script src="variables.js"></script>
-		<script src="init.js"></script>
+		<script src="buttons.js"></script>
+
+		<script>
+			init()
+		</script>
 	</body>
 </html>
