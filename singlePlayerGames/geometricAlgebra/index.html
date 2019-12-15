@@ -31,7 +31,7 @@ Justification
 -->
 <html>
 	<head>
-		<title>The Clifford Abacus</title> <!-- The Bladed Abacus -->
+		<title>The Clifford Abacus</title> <!-- The Bladed Abacus; The Bivector; The Beautiful bivector; The Device; The Clifford Machine; -->
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
 			body {
@@ -42,7 +42,7 @@ Justification
 	</head>
 	<body>
 		<script>
-			async function init()
+			async function technicalInit()
 			{
 				initButtons()
 
@@ -58,7 +58,7 @@ Justification
 
 				// initBivectorAppearance()
 
-				await initGeometricAlgebra()
+				await init()
 
 				function render()
 				{
@@ -94,7 +94,7 @@ Justification
 
 		<script src="appearances.js"></script>
 		<script src="bivectorAppearance.js"></script>
-		<script src="game.js"></script>
+		<script src="init.js"></script>
 		<script src="record.js"></script>
 
 	    <script src="slider.js"></script>
@@ -103,7 +103,7 @@ Justification
 		<script src="buttons.js"></script>
 
 		<script>
-			init()
+			technicalInit()
 		</script>
 	</body>
 </html>

@@ -1,6 +1,8 @@
 /*
 	intersectObjects may need to be recursive.
 		But then you need to make it so the object grabbed is the parent
+
+	simulation would be nice
 */
 
 function initMouse() 
