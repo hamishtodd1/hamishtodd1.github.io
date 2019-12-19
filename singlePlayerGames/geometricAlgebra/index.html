@@ -52,8 +52,7 @@ Justification
 				renderer.shadowMap.type = THREE.BasicShadowMap;
 				document.body.appendChild( renderer.domElement );
 
-				initCameraAndRendererResizeSystem(renderer);
-				initSurroundings();
+				initWindowResizeSystemAndSurroundings(renderer);
 				initMouse();
 
 				// initBivectorAppearance()
@@ -92,12 +91,15 @@ Justification
 
 		<script src="scenes/hummingbirdFlowerUnicycle.js"></script>
 
-		<script src="appearances.js"></script>
+		<script src="multivectorAppearances.js"></script>
+		<script src="operatorAppearances.js"></script>
 		<script src="bivectorAppearance.js"></script>
 		<script src="init.js"></script>
 		<script src="record.js"></script>
 
 	    <script src="slider.js"></script>
+
+	    <script src="algebra.js"></script>
  
 		<script src="variables.js"></script>
 		<script src="buttons.js"></script>

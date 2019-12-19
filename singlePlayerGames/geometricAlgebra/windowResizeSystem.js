@@ -1,27 +1,46 @@
 /*
-	remember mobile is probably upright
+	
 */
 
 //TODO up top!
-function initSurroundings()
+function initWindowResizeSystemAndSurroundings(renderer)
 {
-	var backwardExtension = 1.9;
-	var stage = new THREE.Mesh( 
-		new THREE.BoxGeometry(1.,1.,backwardExtension),
-		new THREE.MeshStandardMaterial({color:0xFFFFFF,side:THREE.BackSide})
-	);
-	stage.scale.y = 2.* centerToFrameDistance(camera.fov, camera.position.z);
-	stage.scale.x = stage.scale.y * camera.aspect;
-	stage.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.,0.,-backwardExtension/2))
+	camera.topAtZZero = 4.5; //want unit vectors to be a reasonable size
+	camera.position.z = 16.; //however you feel it should look
 
-	camera.far = camera.defaultZ + backwardExtension + 0.01
-	stage.material.metalness = 0.1;
-	stage.material.roughness = 0.2;
-	stage.receiveShadow = true;
-	scene.add(stage)
+	function respondToResize() 
+	{
+		renderer.setSize( window.innerWidth, window.innerHeight );
+		camera.aspect = window.innerWidth / window.innerHeight;
+
+		camera.fov = fovGivenCenterToFrameDistance(camera.topAtZZero, camera.position.z )
+		camera.rightAtZZero = camera.topAtZZero * camera.aspect
+
+		camera.updateProjectionMatrix();
+	}
+	respondToResize();
+	// window.addEventListener( 'resize', respondToResize, false );
 
 	{
-		log(backwardExtension)
+		var stage = new THREE.Mesh( 
+			new THREE.BoxGeometry(1.,1.,1.),
+			new THREE.MeshStandardMaterial({color:0xFFFFFF,side:THREE.BackSide})
+		);
+		stage.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.,0.,-.5))
+		stage.scale.x = camera.rightAtZZero*2
+		stage.scale.y = camera.topAtZZero*2
+		stage.scale.z = camera.topAtZZero*2
+
+		camera.near = .1
+		camera.far = camera.position.z + stage.scale.z + .01
+		camera.updateProjectionMatrix()
+		stage.material.metalness = 0.1;
+		stage.material.roughness = 0.2;
+		stage.receiveShadow = true;
+		scene.add(stage)
+	}
+
+	{
 		var pointLight = new THREE.PointLight(0xFFFFFF, 0.4, 20.);
 
 		pointLight.shadow.camera.far = 20.;
@@ -38,40 +57,6 @@ function initSurroundings()
 	}
 
 	return stage;
-}
-
-function initCameraAndRendererResizeSystem(renderer)
-{
-	let stageHeight = 9.
-
-	function respondToResize() 
-	{
-		// console.log( "Renderer dimensions: ", window.innerWidth, window.innerHeight )
-		renderer.setSize( window.innerWidth, window.innerHeight );
-		camera.aspect = window.innerWidth / window.innerHeight;
-
-		// camera.left = -window.innerWidth / window.innerHeight;
-		// camera.right = window.innerWidth / window.innerHeight;
-
-		camera.position.z = 8.;
-
-		camera.fov = fovGivenCenterToFrameDistance(stageHeight / 2., camera.position.z )
-
-		camera.updateProjectionMatrix();
-	}
-	respondToResize();
-
-	// console.log(camera.view)
-	// camera.setViewOffset(
-	// 	camera.view.fullWidth,
-	// 	camera.view.fullHieght,
-	// 	camera.view.offsetX,
-	// 	0.1,
-	// 	camera.view.width,
-	// 	camera.view.height)
-	// camera.updateProjectionMatrix();
-	
-	window.addEventListener( 'resize', respondToResize, false );
 }
 
 function centerToFrameDistance(fov, cameraDistance)
