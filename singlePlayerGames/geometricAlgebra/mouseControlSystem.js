@@ -152,6 +152,12 @@ function initMouse()
 		}
 	}
 
+	function updateNdc(clientX,clientY)
+	{
+		asynchronous.normalizedDevicePosition.x = ( event.clientX / window.innerWidth  ) * 2 - 1;
+		asynchronous.normalizedDevicePosition.y =-( event.clientY / window.innerHeight ) * 2 + 1;
+	}
+
 	var currentRawX = 0;
 	var currentRawY = 0;
 	document.addEventListener( 'mousemove', function(event)
@@ -162,8 +168,7 @@ function initMouse()
 		{
 			asynchronous.justMoved = true;
 
-			asynchronous.normalizedDevicePosition.x = ( event.clientX / window.innerWidth  ) * 2 - 1;
-			asynchronous.normalizedDevicePosition.y =-( event.clientY / window.innerHeight ) * 2 + 1;
+			updateNdc(event.clientX,event.clientY)
 
 			currentRawX = event.clientX;
 			currentRawY = event.clientY;
@@ -191,6 +196,27 @@ function initMouse()
 		{
 			asynchronous.rightClicking = false;
 		}
+	}, false );
+
+	document.addEventListener( 'touchmove', function( event )
+	{
+		event.preventDefault();
+
+		updateNdc(event.changedTouches[0].clientX,event.changedTouches[0].clientY)
+	}, false );
+	document.addEventListener( 'touchstart', function(event)
+	{
+		event.preventDefault();
+
+		mouse.clicking = true;
+
+		updateNdc(event.changedTouches[0].clientX,event.changedTouches[0].clientY)
+	}, false );
+	document.addEventListener( 'touchend', function(event)
+	{
+		event.preventDefault();
+
+		mouse.clicking = false;
 	}, false );
 
 	document.addEventListener('contextmenu', function(event)
