@@ -1,37 +1,58 @@
 <!-- 
 Justification
-	This is about elegantly building up sophisticated things from minimal elements
-	Levereging people's geometrical intuition
-	It is about seeing mathematical structure in the world around you.
-	GA is good because the things don't come out of nowhere, you see that they are emergent
-		sin and cos come out of nowhere in your education too
-	This is way better than Human Resource Machine, no symbols, things actually are what thtye represent
-	Maybe this is even useful for you programming stuff?
-		What the hell are summed bivectors?
-		Trivector times bivector is presumably vector. 
-		Trivector times trivector is presumably bivector.
-	The idea of negative area and length is a nice balance of intuitive and surprising, and makes total sense in this context (no other?)
-	You do want to model familiar, visible things in the real world, using this separate mathematical realm. That is applied maths.
-	It is an exercise in making a propaganda piece, in trying to change a bunch of stuff
-		Of all topics, games are most easily suited to maths...
-		and while it's all well and good to try to educate people, it's not very impressive if it's just something you'll hear in a undergrad anyway
-	Apparently it lets you cover special relativity and QM soooo
-	This is one set of visualizable *objects* with specific, interesting collision-rules
-		Both objects and rules are deeply important in the world
-	Gets people to think abstractly about real stuff that they know they need to think about
-	Also it's a useful example of an algebra / group / lambda calculus 
+	Ticks boxes for your game design aesthetics
+		Leveraging people's geometrical intuition
+		An area of maths/physics where the system invovles specific, interesting objects with specific, interesting collision-rules
+		The idea of negative area and length is a nice balance of intuitive and surprising, and makes total sense in this context (no other?)
+		A way in to special relativity AND QM, which are metaphysically awesome
+		An exercise in making a propaganda piece, in trying to change a bunch of stuff
+			Of all topics, games are most easily suited to maths...
+			and while it's all well and good to try to educate people, it's not very impressive if it's just something you'll hear in a undergrad anyway
+		This is about elegantly building up sophisticated models from minimal elements - the powerful thing that systems running on a computer can do
+		And this is equivalent to the usual argument for GA: many things from your education don't come out of nowhere/aren't arbitrary:
+			length
+			sin and cos
+			complex numbers
+		Both understandable to the public and really quite sophisticated - it is a gift that scientists need this explained to them
+	AR/video thing
+		Genuinely useful for computer graphics, mechanical engineers
+		Seeing mathematical structure in the world around you
+		Generally thinking abstractly
+		But the stuff you're modelling will be reeeeeally familiar and visible from real world/daily life. Shows people what applied maths is
+	As a tool for thinking/example of a programming language:
+		Better than Human Resource Machine, no symbols, things actually are what they represent
 		All functions have two inputs
+		It's an example of an algebra / group, very deep
+	You can use it to make algorithms yourself for VR UI and pretty animations
 
-	Send to
-		Pontus
-		Andy Matushak (both for "here is the model" and "here is a tool for thinking")
-		The slack
-		Marc
-		Jon/indie fund
+Aesthetics/non-design
+	But mostly can think of stuff as being in the background. Leave that to a game engine?
+	If it's all simple geometric shapes you can get explicit ray intersections -> good shadows etc
+
+Send to
+	Andy Matushak (both for "here is the model for teaching" and "here is a tool for thinking")
+	The slack
+	Marc
+	Jon
+	indie fund
+
+Marketing
+	Could go on physics/maths podcasts
+	Could go on rationallyspeaking - it is interesting to have a genuine disagreement in mathematics
+
 -->
 <html>
 	<head>
-		<title>The Clifford Abacus</title> <!-- The Bladed Abacus; The Bivector; The Beautiful bivector; The Device; The Clifford Machine; -->
+		<title>The Clifford Abacus</title>
+			<!-- 
+				The Bladed Abacus
+				Abacus of Blades
+				The Bivector
+				The Beautiful bivector
+				The Device
+				The Clifford Machine
+				The Clifford Engine
+			-->
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
 			body {
@@ -47,15 +68,12 @@ Justification
 				initButtons()
 
 				renderer.setPixelRatio( window.devicePixelRatio );
-				renderer.setClearColor(0x000000) //youtube
 				renderer.shadowMap.enabled = true;
 				renderer.shadowMap.type = THREE.BasicShadowMap;
 				document.body.appendChild( renderer.domElement );
 
 				initWindowResizeSystemAndSurroundings(renderer);
 				initMouse();
-
-				// initBivectorAppearance()
 
 				await init()
 

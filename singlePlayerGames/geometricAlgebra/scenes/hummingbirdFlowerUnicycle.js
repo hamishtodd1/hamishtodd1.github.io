@@ -7,6 +7,9 @@
 	Properties of ideas
 		you want to put random things in the littlescene. That's how you make cool demoscene stuff
 
+	It should mostly be about mechanics to be a fun easy thing for people to do in their lives with AR
+		Look through mechanics textbooks for examples
+
 	Ideas
 		someone going down a helter skelter
 		the threejs demo with the parented cubes

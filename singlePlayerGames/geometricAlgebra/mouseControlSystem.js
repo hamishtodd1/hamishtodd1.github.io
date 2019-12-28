@@ -113,6 +113,7 @@ function initMouse()
 			if( intersections.length !== 0 )
 			{
 				this.lastClickedObject = intersections[0].object;
+				log(intersections[0].object.position,intersections[0].object.uuid)
 				if( intersections[0].object.onClick )
 				{
 					intersections[0].object.onClick(intersections[0]);
@@ -154,8 +155,8 @@ function initMouse()
 
 	function updateNdc(clientX,clientY)
 	{
-		asynchronous.normalizedDevicePosition.x = ( event.clientX / window.innerWidth  ) * 2 - 1;
-		asynchronous.normalizedDevicePosition.y =-( event.clientY / window.innerHeight ) * 2 + 1;
+		asynchronous.normalizedDevicePosition.x = ( clientX / window.innerWidth  ) * 2 - 1;
+		asynchronous.normalizedDevicePosition.y =-( clientY / window.innerHeight ) * 2 + 1;
 	}
 
 	var currentRawX = 0;
@@ -175,52 +176,57 @@ function initMouse()
 		}
 	}, false );
 
-	document.addEventListener( 'mousedown', function(event) 
 	{
-		if(event.which === 1)
+		document.addEventListener('contextmenu', function(event)
 		{
+			event.preventDefault()
+		}, false);
+
+		document.addEventListener( 'mousedown', function(event) 
+		{
+			if(event.which === 1)
+			{
+				asynchronous.clicking = true;
+			}
+			if(event.which === 3)
+			{
+				asynchronous.rightClicking = true;
+			}
+		}, false );
+		document.addEventListener( 'mouseup', function(event) 
+		{
+			if(event.which === 1)
+			{
+				asynchronous.clicking = false;
+			}
+			if(event.which === 3)
+			{
+				asynchronous.rightClicking = false;
+			}
+		}, false );
+	}
+
+	{
+		document.addEventListener( 'touchstart', function(event)
+		{
+			event.preventDefault();
+
 			asynchronous.clicking = true;
-		}
-		if(event.which === 3)
+
+			updateNdc(event.changedTouches[0].clientX,event.changedTouches[0].clientY)
+		}, { passive: false } );
+		document.addEventListener( 'touchmove', function( event )
 		{
-			asynchronous.rightClicking = true;
-		}
-	}, false );
-	document.addEventListener( 'mouseup', function(event) 
-	{
-		if(event.which === 1)
+			event.preventDefault();
+
+			//apparently this can come even if touch has ended
+			updateNdc(event.changedTouches[0].clientX,event.changedTouches[0].clientY)
+		}, { passive: false } );
+		document.addEventListener( 'touchend', function(event)
 		{
+			event.preventDefault();
+
 			asynchronous.clicking = false;
-		}
-		if(event.which === 3)
-		{
-			asynchronous.rightClicking = false;
-		}
-	}, false );
-
-	document.addEventListener( 'touchmove', function( event )
-	{
-		event.preventDefault();
-
-		updateNdc(event.changedTouches[0].clientX,event.changedTouches[0].clientY)
-	}, false );
-	document.addEventListener( 'touchstart', function(event)
-	{
-		event.preventDefault();
-
-		mouse.clicking = true;
-
-		updateNdc(event.changedTouches[0].clientX,event.changedTouches[0].clientY)
-	}, false );
-	document.addEventListener( 'touchend', function(event)
-	{
-		event.preventDefault();
-
-		mouse.clicking = false;
-	}, false );
-
-	document.addEventListener('contextmenu', function(event)
-	{
-	    event.preventDefault()
-	}, false);
+		}, false );
+	}
 }

@@ -1,3 +1,25 @@
+function assignShader(fileName, materialToReceiveAssignment, vertexOrFragment)
+{
+	let propt = vertexOrFragment + "Shader"
+	let fullFileName = "shaders/" + fileName + ".glsl"
+
+	return new Promise(resolve =>
+	{
+		let xhr = new XMLHttpRequest();
+		xhr.open("GET", fullFileName, true);
+		xhr.onload = function(e)
+		{
+			materialToReceiveAssignment[propt] = xhr.response
+			resolve();
+		};
+		xhr.onerror = function ()
+		{
+			console.error(fullFileName, "didn't load");
+		};
+		xhr.send();
+	})
+}
+
 function removeSingleElementFromArray(array, element)
 {
 	var index = array.indexOf(element);

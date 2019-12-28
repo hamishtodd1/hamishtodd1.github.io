@@ -1,31 +1,60 @@
 /*
-	Centering
-		Quite interesting actually. Gets you to think about vectors in a bivector like way
-		You picture a vector as an arrow. But where is that arrow located? Has to originate at origin
-		The claim is that your "quantity of directed, positive or negative, mass" is a better way of thinking of vectors than arrows
-			Certainly it generalizes better to higher dimensions
-		It's a little surprising that adding arrows in any order gets the same result
-			This tells you that it is best to think of them all, equally, being taken away from the origin
-
 	The trivector
-		scalar and trivector could be a single complex number
-			visualized differently than the vector, maybe a nice pear shape
 		Sphere of certain radius for magnitude, colored according to phase
 		Or a horizontal line and a vertical line
 
 	The scalar
+		The unit size should be clear, and the numeral does make that clear
 		Numeral with positive or negative sign
-		
+		Spiral?
+		Probably better off as red five versus blue five if you're going to carry it
+		Opacity?
 
-	Aesthetics/non-design
-		But mostly can think of stuff as being in the background. Leave that to a game engine?
-		If it's all simple geometric shapes you can get explicit ray intersections -> good shadows etc
+	Scalar and trivector could be a single complex number
+		visualized differently than the vector. 2D as opposed to 3D
+		Maybe a nice pear shape
+		Has the significant advantage that you get to see how complex numbers rotate each other
+		But, the system we're talking about has so many damn dimensions
+		related to the fact that all multivectors have an r e^i theta and cos theta + i sin theta decomposition
 
-	So liquids for vectors?
+	Vectors
+		Liquid too?
 		The bivector situation is confusing and there's no way around that. So whatever confusion you think vector thing introduces, it's maybe already there
+		Arrow
+			Can be anywhere and so long as its length is the same you can think of it as the same thing
+			Tells you which end is which. Useful for adding
+		Centering
+			Gets you to think about vectors in a bivector like way
+			You picture a vector as an arrow. But where is that arrow located? Has to originate at origin
+			"Quantity of directed, positive or negative, mass" may be a better way of thinking of vectors than arrows
+				Certainly it generalizes better to higher dimensions
+			It's a little surprising that adding arrows in any order gets the same result
+				This tells you that it is best to think of them all, equally, being taken away from the origin
 
+	Bivector addition
+		So you get the unit vector in the intersection line (dare I ask, the positive or negative one?)
 
+	Man, RP(n) is surely more fundamental than Rn
 
+	Which bivectors are positive, which negative?
+		Whatever you decide distinguishes clockwise and anticlockwise (positive and negative) bivectors, that surely applies to vectors
+			Maybe you can even deduce it from the trivectors
+		Choose a plane:
+			y=0
+				People do think of "up" as being special
+			x+y+z=0
+				It seems like for vectors on the x,y,z axes you definitely know which are positive, like this is embedded in your system
+			z=0
+				This may be just a question of perspective
+		It seems like turning the plane around actually DOES turn red into blue?
+		Surely it is arbitary, same as right hand/left hand. The important thing is that for a given plane, 
+			whichever ones you decide are positive are all a positive multiple of one another and
+			whichever ones you decide are negative are all a positive multiple of one another
+		So:
+			get the normal vector to that plane
+			check its dot product with the vector(float_min,0.,1.)
+			If it's positive your bivectors are one way, negative another
+			Ideally a vector such that dot product is never 0. If it is sometimes 0 you need to divide that plane in half too
 
 	Could have the different blades stacked in a column, or around in a circle
 	What if you have some things that are enormously larger than others? That's why we have zooming in and out. But some things keep size
@@ -45,13 +74,22 @@ function initMultivectorAppearances()
 
 	let trivectorGeometry = new THREE.SphereBufferGeometry(1.,32,16)
 	let trivectorMaterial = new THREE.MeshStandardMaterial()
-	
+
 	MultivectorAppearance = function(externalOnClick,elements)
 	{
 		let multivec = new THREE.Object3D();
 		scene.add(multivec)
 
-		thingsThatCanBeDragged = []
+		{
+			let thingYouClick = new THREE.Mesh(new THREE.SphereBufferGeometry(.5),new THREE.MeshBasicMaterial({color:0x00FF00,transparent:true,opacity:0.0001}))
+			multivec.add(thingYouClick)
+
+			clickables.push(thingYouClick)
+			thingYouClick.onClick = function()
+			{
+				externalOnClick(multivec)
+			}
+		}
 
 		multivec.root = null
 		multivec.connector = null
@@ -62,11 +100,6 @@ function initMultivectorAppearances()
 		else
 			multivec.elements = elements
 
-		function onClick()
-		{
-			externalOnClick(multivec)
-		}
-
 		{
 			let scalar = makeTextSign("",false,false,false)
 			scalar.material.depthFunc = THREE.AlwaysDepth
@@ -75,7 +108,7 @@ function initMultivectorAppearances()
 			scalar.scale.multiplyScalar(0.3)
 			multivec.add(scalar)
 
-			thingsThatCanBeDragged.push(scalar)
+			
 
 			multivec.setScalar = function(newScalar)
 			{
@@ -103,7 +136,7 @@ function initMultivectorAppearances()
 			vecMesh.castShadow = true
 			multivec.add(vecMesh)
 			
-			thingsThatCanBeDragged.push(vecMesh)
+			
 
 			multivec.setTo1Blade = function(newY)
 			{
@@ -156,8 +189,9 @@ function initMultivectorAppearances()
 			parallelogram.add(front,back)
 			parallelogram.matrixAutoUpdate = false;
 
-			thingsThatCanBeDragged.push(front)
-			thingsThatCanBeDragged.push(back)
+			log(front.uuid)
+			
+			
 
 			multivec.setParallelogram = function(multivecA,multivecB)
 			{
@@ -185,7 +219,7 @@ function initMultivectorAppearances()
 
 			let circle = new THREE.Mesh(circleGeometry, bivecMaterialFront)
 			multivec.add(circle)
-			thingsThatCanBeDragged.push(circle)
+			
 			multivec.setCircle = function()
 			{
 				circle.scale.setScalar(Math.abs(multivec.elements[4])) // no, not abs because negativity! Also area! Yeesh
@@ -292,12 +326,6 @@ function initMultivectorAppearances()
 			for(let i = 0; i < 8; i++)
 				multivec.elements[i] = elementsToTakeOn[i]
 			multivec.updateAppearance()
-		}
-
-		for(let i = 0; i < thingsThatCanBeDragged.length; i++)
-		{
-			clickables.push(thingsThatCanBeDragged[i])
-			thingsThatCanBeDragged[i].onClick = onClick
 		}
 
 		return multivec

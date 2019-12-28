@@ -1,9 +1,12 @@
 /*
 	So the animation is...
 
-	vector * scalar = extend
+	all * scalar = extend
 
-	Could have complex number!
+	trivec * vector   = dual bivector
+	trivec * bivector = dual vector
+
+	vector * bivector = 
 
 				Scalar		Vector 		Bivector	Trivector
 	Scalar		

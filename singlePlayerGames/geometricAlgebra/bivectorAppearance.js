@@ -1,39 +1,80 @@
 /*
 	Amount of time this is worth?
+		May turn out to be unnecessary
 		Bivectors and trivectors are quite interesting and exotic. It makes sense to give them an intriguing characterization
 
-	Requirements:
-		ability to control it
-		probably ability to know when
-		You don't exactly know what you want yet, figure out the needs first while having something temporary, probably lerping
-		There are going to be multiple blobs in the same plane that get combined into one
-		It probably needs to be able to become LOTS of special-case things, probably even take on special case animations
-			For example, say there's some new scene where the bivector has some specific interesting embodiment
-		Should converge fast, ideally fast enough that
-
-	Some geometric flow. It might be a scalar field
-		Geodesic flow preserves volume
-			It would be great to know this because it'd be transferrable to a project related to hamiltonians / stat mech
-			https://en.wikipedia.org/wiki/Liouville%27s_theorem_(Hamiltonian)
-			https://math.stackexchange.com/questions/2221237/geodesic-flow-preserves-the-volume-liouville-s-theorem
-		Mean curvature aka "surface tension flow"
-			Too general or not general enough? https://mathoverflow.net/questions/265670/derivation-of-the-volume-preserving-mean-curvature-flow	
-		A Hyperbolic Geometric Flow for Evolving Films and Foams
-			They have an area correction step
-		ALGORITHMS FOR AREA PRESERVING FLOWS
 	Liquid simulation
-		Standard, apparently: balls with momentum, plus some radius that globs them together visually
-		Some underlying vector field that sends them where you want
-	Diffusion?
-		Very simple equation of course
-	Masses and springs
-		Triangles area preserved
-	Loads of special cases
-		Would be nice if you can find some underlying thing
+		Set of balls with momentum, which can be confined to a plane or line or whatever
+		For now, have the vertex positions calculated on the CPU. Ideally, no round trip needed
+		Some underlying forcefield that sends them to the shape you want
+			Probably represented as a texture
+			probably just fill in the shape you want in the texture with black (velocity = 0)
+				all other pixels are "pointed" in the direction of the nearest bit of that shape
+		They bounce off each other / repel
+		"Metaballs" in appearance
+
+	Other ideas
+		Requirements:
+			ability to control it
+			probably ability to know when
+			You don't exactly know what you want yet, figure out the needs first while having something temporary, probably lerping
+			There are going to be multiple blobs in the same plane that get combined into one
+			It probably needs to be able to become LOTS of special-case things, probably even take on special case animations
+				For example, say there's some new scene where the bivector has some specific interesting embodiment
+			Should converge fast, ideally fast enough that
+		Some geometric flow. It might be a scalar field
+			Geodesic flow preserves volume
+				It would be great to know this because it'd be transferrable to a project related to hamiltonians / stat mech
+				https://en.wikipedia.org/wiki/Liouville%27s_theorem_(Hamiltonian)
+				https://math.stackexchange.com/questions/2221237/geodesic-flow-preserves-the-volume-liouville-s-theorem
+			Mean curvature aka "surface tension flow"
+				Too general or not general enough? https://mathoverflow.net/questions/265670/derivation-of-the-volume-preserving-mean-curvature-flow	
+			A Hyperbolic Geometric Flow for Evolving Films and Foams
+				They have an area correction step
+			ALGORITHMS FOR AREA PRESERVING FLOWS
+		Diffusion?
+			Very simple equation of course
+		Masses and springs
+			Triangles area preserved
+		Loads of special cases
+			Would be nice if you can find some underlying thing
 */
 
-function initBivectorAppearance()
+async function initBivectorAppearance()
 {
+	// {
+	// 	let material = new THREE.ShaderMaterial({
+	// 		uniforms: {
+	// 			numberGoingBetweenZeroAndOne: {value: 0}
+	// 		},
+	// 	});
+	// 	await assignShader("bivectorVertex", material, "vertex")
+	// 	await assignShader("bivectorFragment", material, "fragment")
+
+	// 	let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(5., 5., 10, 10), material);
+	// 	scene.add(plane);
+		
+	// 	let vertexDisplacement = new Float32Array(plane.geometry.attributes.position.count);
+	// 	for(let i = 0; i < vertexDisplacement.length; i ++)
+	// 	{
+	// 		vertexDisplacement[i] = Math.sin(i);
+	// 	}
+	// 	plane.geometry.addAttribute('vertexDisplacement', new THREE.BufferAttribute(vertexDisplacement, 1));
+
+	// 	updateFunctions.push( function() 
+	// 	{
+	// 		material.uniforms.numberGoingBetweenZeroAndOne.value = 0.5 + Math.sin(clock.elapsedTime) * 0.5;
+		
+	// 		for( let i = 0, il = vertexDisplacement.length; i < il; i++ )
+	// 		{
+	// 			vertexDisplacement[i] = Math.sin(i + clock.elapsedTime);
+	// 		}
+	// 		plane.geometry.attributes.vertexDisplacement.needsUpdate = true;
+	// 	} )
+
+	// 	return
+	// }
+
 	let interior = new THREE.Mesh(new THREE.Geometry(),new THREE.MeshBasicMaterial({color:0xFF0000, side:THREE.DoubleSide,transparent:true,opacity:.6}))
 	let exterior = new THREE.Mesh(new THREE.Geometry(),new THREE.MeshBasicMaterial({color:0x0000FF, side:THREE.DoubleSide,transparent:true,opacity:.6}))
 

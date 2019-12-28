@@ -1,28 +1,22 @@
 /*
+	TODO for slack / Cambridge demo
+		Every aspect of the multiplication and addition needs to be visualized
+		Already a nice product/tool for thinking that can be shown to folks!
+
+		Wanna grab and rotate the whole scene
+			Hmm, nice unity: rotating the basis vectors rotates eeeeverything
+
 	Levels:
 		Add only, diagonal
 		Add only, two along three up
 
-	TODO for slack / Cambridge demo
-		Make it so it's just clicking what you want and your scope is on the right
-
-		Working on smartphone
-
-		Can totally make a nice little countdown style "make this multivector"
-		More like a scripting environment / calculator
-		make it so there are animations, so it is a good playground (and for your own understanding!)
-		Some basic puzzle
-
-		In a scripting-type situation you can still have more than one variable on screen
-
-		Scalar is a line instead? =/ an opacity?
-		In the playground you probably want a slidey scalar / number that counts up and up until you click it
-			And maybe a vector or orthonormal basis you can play around with?
-		Wanna grab and rotate the whole scene
-			Hmm, nice unity: rotating the basis vectors rotates eeeeverything
-		Every aspect of the multiplication and addition needs to be visualized
-			Probably want circles to morph into parallelograms
-			Bring two bivectors together, they snap
+	General structure
+		Addition only, scalars only
+		Addition only, vectors only
+		Addition only, bivectors only
+		multiplication and addition, scalars
+		multiplication and addition, scalars and vectors
+		multiplication and addition, scalars and bivectors
 */
 
 async function init()
