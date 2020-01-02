@@ -6,21 +6,42 @@ async function initCrystallography()
 	scene.add(crystalArea)
 
 	let asymmetricUnitAtoms = []
+	let atomGeometry = new THREE.SphereBufferGeometry(.04)
 	function AsymmetricUnitAtom()
 	{
-		let atom = new THREE.Mesh(new THREE.SphereBufferGeometry(.04))
+		let atom = new THREE.Object3D()
 		crystalArea.add(atom)
+		let mat = new THREE.MeshBasicMaterial()
+		mat.color.r = Math.random()
+
+		for(let i = 0; i < 4; i++)
+		{
+			let symmetricCopy = new THREE.Mesh(atomGeometry,mat)
+			atom.add(symmetricCopy)
+			clickables.push(symmetricCopy)
+		}
+		atom.children[0].position.x += .4;
+		atom.children[1].position.y += .4;
+		atom.children[2].position.x += .4;
+		atom.children[2].position.y += .4;
 
 		asymmetricUnitAtoms.push(atom)
 
-		clickables.push(atom)
-
 		updateFunctions.push(function()
 		{
-			if(mouse.clicking && mouse.lastClickedObject === atom)
+			if(mouse.clicking && atom.children.indexOf(mouse.lastClickedObject) !== -1 )
 			{
 				atom.position.add(mouse.zZeroPosition)
 				atom.position.sub(mouse.oldZZeroPosition)
+
+				if(atom.position.x > 0.)
+					atom.position.x -= .4
+				if(atom.position.x < -.4)
+					atom.position.x += .4
+				if(atom.position.y > 0.)
+					atom.position.y -= .4
+				if(atom.position.y < -.4)
+					atom.position.y += .4
 			}
 		})
 	}
