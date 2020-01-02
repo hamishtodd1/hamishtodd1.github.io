@@ -4,6 +4,31 @@
 	If stratification is 0, probability is 1/N!
 	I don't know if anyone has done this experiment, but if there are any psychologists out there, you can try to figure out this parameter
 	Could animate/graph this
+	You're adapting the stable marriage thm right? If so talk about the good aspects of the unmodified Model
+
+	The thing that should make us a little sad in the monogamous world: poly people are sad that they are not having fun that they could otherwise have
+
+	New notes
+		https://slatestarcodex.com/2014/08/20/ozys-anti-heartiste-faq/
+		There probably is a limit on the sex that happens. (Surely) We want there to be as much consensual sex in the world as possible
+		Forget this crap about civil unrest from rejected men. Utility scale.
+		Claim: women are slightly attracted to assholes
+		Intervention
+			Suppose you're faced with the control panel for humanity.
+			One of the dials is "average female libido", one is "average male libido". Would be nice if they were equal!
+		How far should we sympathize with men who can't get any? Some people say not at all, they just have high standards. clearly daft
+		Netherlands prostitute intervention in the sex market https://www.mic.com/articles/85201/the-surprising-way-the-netherlands-is-helping-its-disabled-have-sex
+			Not exactly the same because it's arguably the logistics of meeting people and dating that causes this inequality
+		Market analogy
+			Commencing sex / agreeing to go on a date is, for a woman, taking
+			People who fancy each other not having sex = market failure, needs system change
+			Price discrimination
+			So the suggestion is that people bid for relationships with people they find attractive, using their own attractiveness
+			The intervention scale
+				Prohibition of sex outside marriage: extremely high price floor. If there's nobody who you'd shag exclusively forever, there's nobody you can shag
+				Prohibition of sex outside relationships: high price floor
+				"Incels", apparently: price ceiling?
+		Now, when we "prohibit unmarried sex", we're doing something mathematically ideal. irl philandering
 
 	TODO
 		Parameters
@@ -24,7 +49,6 @@
 				One by one it sends a projectile (envelope with love heart) towards another
 				A bond is made, and they get closer til they collide as hard spheres
 
-	The thing that should make us a little sad in the monogamous world: poly people are sad that they are not having fun that they could otherwise have
 
 	Script
 		Intro
@@ -44,6 +68,9 @@
 	Title
 		"Simulating red pill sex philosophy"
 		"Simulating polyamory: happier or sadder?"
+		"Sex as a market"
+		"Sex redistribution"
+		Waiting until marriage: how to put a price floor
 
 	Nice to have ("for a sequel folks! Let me know if you think these would make a difference")
 		In a society with more movies or whatever, things will be homogenized. Show a movie and a few individuals will be made much more attractive

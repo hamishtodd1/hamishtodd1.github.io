@@ -6,78 +6,7 @@
 		Subtleties in interactive learning is your raison d'etre, but here we are, making something non-interactive
 */
 
-function init()
-{
-	initButtons()
 
-	renderer = new THREE.WebGLRenderer({ antialias: true });
-	renderer.setPixelRatio( window.devicePixelRatio );
-	renderer.setClearColor(0xCCCCCC) //youtube
-	renderer.shadowMap.enabled = true;
-	renderer.shadowMap.type = THREE.BasicShadowMap;
-	document.body.appendChild( renderer.domElement );
-
-	initCameraAndRendererResizeSystem(renderer);
-	var stage = initSurroundings();
-	initMouse();
-	// initFaceMaker()
-
-	{
-		var textureLoader = new THREE.TextureLoader();
-		textureEquirec = textureLoader.load( "textures/2294472375_24a3b8ef46_o.jpg" );
-		textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
-		textureEquirec.magFilter = THREE.LinearFilter;
-		textureEquirec.minFilter = THREE.LinearMipMapLinearFilter;
-		textureEquirec.encoding = THREE.sRGBEncoding;
-
-		// Materials
-		var equirectShader = THREE.ShaderLib[ "equirect" ];
-		var equirectMaterial = new THREE.ShaderMaterial( {
-			fragmentShader: equirectShader.fragmentShader,
-			vertexShader: equirectShader.vertexShader,
-			uniforms: equirectShader.uniforms,
-			depthWrite: false,
-			side: THREE.BackSide
-		} );
-		equirectMaterial.uniforms[ "tEquirect" ].value = textureEquirec;
-		// enable code injection for non-built-in material
-		Object.defineProperty( equirectMaterial, 'map', {
-			get: function () {
-				return this.uniforms.tEquirect.value;
-			}
-		} );
-
-		var params = {
-			Equirectangular: function () {
-				cubeMesh.material = equirectMaterial;
-				cubeMesh.visible = true;
-				sphereMaterial.envMap = textureEquirec;
-				sphereMaterial.needsUpdate = true;
-			},
-			Refraction: false
-		};
-	}
-	function render()
-	{
-		{
-			frameDelta = clock.getDelta();
-			
-			mouse.updateFromAsyncAndCheckClicks();
-
-			for(var i = 0; i < updateFunctions.length; i++)
-			{
-				updateFunctions[i]();
-			}
-
-			frameCount++;
-		}
-
-		requestAnimationFrame( render );
-		renderer.render( scene, camera );
-	}
-
-	return render
-}
 
 function initButtons()
 {

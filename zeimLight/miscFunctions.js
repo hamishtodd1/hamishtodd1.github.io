@@ -1,3 +1,36 @@
+function assignShader(fileName, materialToReceiveAssignment, vertexOrFragment)
+{
+	var propt = vertexOrFragment + "Shader"
+	var fullFileName = "units/shaders/" + fileName + ".glsl"
+
+	return new Promise(resolve => {
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", fullFileName, true);
+		xhr.onload = function(e)
+		{
+			materialToReceiveAssignment[propt] = xhr.response
+			resolve();
+		};
+		xhr.onerror = function ()
+		{
+			console.error(fullFileName, "didn't load");
+		};
+		xhr.send();
+	})
+}
+
+function jonSlerp(q0,q1,t)
+{
+	// debugger;
+	let cosAngle = q0.dot(q1) / Math.sqrt( q0.lengthSq()*q1.lengthSq() )
+	var theta0 = Math.acos(cosAngle)
+	var theta = t * theta0;
+	var toSubtract = q0.clone().multiplyScalar( q0.dot(q1) );
+	var q2 = q1.clone().sub( toSubtract ).normalize();
+
+	return q0.clone().multiplyScalar(Math.cos(theta)).add( q2.clone().multiplyScalar(Math.sin(theta)) );
+}
+
 function Grid(numWide,numTall,spacing)
 {
 	let grid = new THREE.LineSegments( new THREE.Geometry(), new THREE.MeshBasicMaterial({
@@ -248,6 +281,7 @@ function CylinderBufferGeometryUncentered(radius, length, radiusSegments, capped
 	geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,length/2,0))
 	return geometry;
 }
+
 
 function randomPerpVector(ourVector)
 {
