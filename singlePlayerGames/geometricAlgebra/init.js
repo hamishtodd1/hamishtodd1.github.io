@@ -3,8 +3,13 @@
 		Every aspect of the multiplication and addition needs to be visualized
 		Already a nice product/tool for thinking that can be shown to folks!
 
-		Wanna grab and rotate the whole scene
-			Hmm, nice unity: rotating the basis vectors rotates eeeeverything
+	Wanna grab and rotate the whole scene
+
+	"Bootstrapping"
+		Maybe you should use GA for your camera projection and that should be considered part of the system
+		After all, if you pick up a vector and rotate it it can be rotated to become its negative
+		Rotating the basis vectors rotates eeeeverything
+		If you rotate a vector, well, it is a different vector
 
 	Levels:
 		Add only, diagonal
@@ -21,6 +26,10 @@
 
 async function init()
 {
+
+	await initBivectorAppearance()
+	return
+
 	// var otherThingToCheckDistanceTo = []
 	// let littleScene = initWheelScene()
 	// otherThingToCheckDistanceTo.push(littleScene.hummingbird)
@@ -80,7 +89,8 @@ async function init()
 		{
 			let o = operatorOriginals[i]
 
-			o.material.color.setHex(discreteViridis[i].hex)
+			if(i)
+				o.material.color.setRGB(1.,0.,0.)
 
 			o.position.y = -3.5
 			o.position.x = (i - 0.5 * (operatorOriginals.length-1) ) * 2.
@@ -113,228 +123,139 @@ async function init()
 		background.position.y += .18
 		goal.add(background)
 
-		let goalElements = new Float32Array(8)
-		goalElements[1] = 1.
-		goalElements[2] = 1.
-		var goalMultivector = MultivectorAppearance(function(){},goalElements)
+		//level generator
+		// {
+		// 	let numOperations = 4;
+		// 	let generatorScope = []
+		// 	for(let i = 0; i < scope.length; i++)
+		// 		generatorScope.push(scope[i].elements)
+		// 	for(let operation = 0; operation < numOperations; operation++)
+		// 	{
+		// 		let operandA = generatorScope[ Math.floor( Math.random() * generatorScope.length ) ];
+		// 		let operandB = generatorScope[ Math.floor( Math.random() * generatorScope.length ) ];
+
+		// 		let functionToUse = Math.random() < .5 ? geometricProduct : geometricSum;
+
+		// 		let result = functionToUse(operandA,operandB)
+
+		// 		// if(searchArray(generatorScope,result))
+		// 		// {
+		// 		// 	operation--
+		// 		// }
+		// 		// else
+		// 		{
+		// 			generatorScope.push(result)
+		// 		}
+		// 	}
+
+		// 	var goalMultivector = MultivectorAppearance(function(){},generatorScope[generatorScope.length-1])
+		// }
+
+		{
+			let goalElements = new Float32Array(8)
+			goalElements[1] = 1.
+			goalElements[2] = 1.
+			var goalMultivector = MultivectorAppearance(function(){},goalElements)
+		}
+
 		goal.add(goalMultivector)
 	}
 
 	{
-		var functionRegisters = Array(2)
-		functionRegisters[0] = new THREE.Vector3(0.,1.,0.)
-		functionRegisters[1] = new THREE.Vector3(1.,0.,0.)
+		var inputRegisters = Array(2)
+		inputRegisters[0] = new THREE.Vector3(0.,1.,0.)
+		inputRegisters[1] = new THREE.Vector3(-1.,0.,0.)
 	}
 
 	let scopePosition = new THREE.Vector3()
+	let animationT = -1.; //-1 = no animation in progress
 	updateFunctions.push(function()
 	{
-		for(let i = 0; i < scope.length; i++ )
+		if(animationT === -1.)
 		{
-			scopePosition.y = 4. - i;
-			scopePosition.x = camera.rightAtZZero - 1.4
-			scope[i].position.lerp(scopePosition,.1)
-		}
+			for(let i = 0; i < scope.length; i++ )
+			{
+				scopePosition.y = 4. - i;
+				scopePosition.x = camera.rightAtZZero - 1.4
+				scope[i].position.lerp(scopePosition,.1)
+			}
 
-		let ready = true
+			let ready = true
+			let distanceRequirement = .03
 
-		let distanceRequirement = .03
+			for(let i = 0; i < activeMultivectors.length; i++)
+			{
+				if(activeMultivectors[i].parent !== scene)
+					ready = false
+				else
+				{
+					activeMultivectors[i].position.lerp(inputRegisters[i],0.1)
+					if( activeMultivectors[i].position.distanceTo(inputRegisters[i] ) > distanceRequirement )
+						ready = false
+				}
+			}
 
-		for(let i = 0; i < activeMultivectors.length; i++)
-		{
-			if(activeMultivectors[i].parent !== scene)
+			if( activeOperator.parent !== scene )
 				ready = false
 			else
 			{
-				activeMultivectors[i].position.lerp(functionRegisters[i],0.1)
-				if( activeMultivectors[i].position.distanceTo(functionRegisters[i] ) > distanceRequirement )
+				activeOperator.position.lerp(zeroVector,0.1)
+				if( activeOperator.position.distanceTo(zeroVector ) > distanceRequirement )
 					ready = false
 			}
-		}
 
-		if( activeOperator.parent !== scene )
-			ready = false
-		else
-		{
-			activeOperator.position.lerp(zeroVector,0.1)
-			if( activeOperator.position.distanceTo(zeroVector ) > distanceRequirement )
-				ready = false
-		}
-
-		if(!ready)
-			return
-
-		let newMultivector = MultivectorAppearance(scopeOnClick)
-		clickables.push(newMultivector)
-		activeOperator.function(
-			activeMultivectors[0].elements,
-			activeMultivectors[1].elements,
-			newMultivector.elements)
-		newMultivector.updateAppearance()
-
-		scene.remove(activeMultivectors[0],activeMultivectors[1],activeOperator)
-		scene.add(newMultivector)
-		log(newMultivector.elements)
-
-		let identical = true
-		for(let i = 0; i < 8; i++)
-		{
-			if(Math.abs(goalMultivector.elements[i]-newMultivector.elements[i]) > .01)
-				identical = false
-		}
-		if(identical)
-		{
-			let winSign = makeTextSign("You win!!!")
-			winSign.scale.multiplyScalar(.5)
-			winSign.position.y = 2;
-			scene.add(winSign)
+			if(ready)
+				animationT = 0.
 		}
 		else
 		{
-			scope.push(newMultivector)
-		}
+			animationT += frameDelta
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-		return;
-
-		// multivectors[1].updateVectorAppearance(new THREE.Vector3(.4,0,0).applyAxisAngle(zUnit,
-		// 	.9//frameCount*.01
-		// 	))
-
-		if(mouse.clicking && mouse.lastClickedObject === null)
-		{
-			for(let i = 0; i < multivectors.length; i++)
+			switch(Math.floor(animationT))
 			{
-				multivectors[i].position.add(mouse.zZeroPosition).sub(mouse.oldZZeroPosition)
+				case 0:
+					log("y")
+					break;
+
+				case 1:
+					log("y")
+					break;
+
+				case 2:
+					log("y")
+					break;
 			}
-			for(let i = 0; i < operatorSymbols.length; i++)
+			
+
+			//animation finished. We want a way to fast forward to this
+			if(animationT > 1.1)
 			{
-				operatorSymbols[i].position.add(mouse.zZeroPosition).sub(mouse.oldZZeroPosition)
-			}
+				animationT = -1.;
+				let newMultivectorElements = activeOperator.function(activeMultivectors[0].elements,activeMultivectors[1].elements)
+				let newMultivector = MultivectorAppearance(scopeOnClick, newMultivectorElements)
+				clickables.push(newMultivector)
+				
+				newMultivector.updateAppearance()
 
-			return
-		}
+				scene.remove(activeMultivectors[0],activeMultivectors[1],activeOperator)
+				scene.add(newMultivector)
+				log(newMultivector.elements)
 
-		let multivec = null
-		for(let i = 0; i < multivectors.length; i++)
-		{
-			if( (mouse.clicking||mouse.oldClicking) && multivectors[i].children.indexOf(mouse.lastClickedObject) !== -1 )
-			{
-				multivec = multivectors[i]
-			}
-		}
-		if(multivec === null)
-			return
-
-		multivec.position.add(mouse.zZeroPosition).sub(mouse.oldZZeroPosition)
-
-		let closestObject = null
-		let p = new THREE.Vector3()
-		for(let i = 0; i < multivectors.length + otherThingToCheckDistanceTo.length; i++)
-		{
-			let thingToCheckDistanceTo = i < multivectors.length ? multivectors[i] : otherThingToCheckDistanceTo[i-multivectors.length]
-			if( thingToCheckDistanceTo === multivec || thingToCheckDistanceTo === multivec.root)
-				continue
-
-			//no, don't want to check the ones we come from
-			let dist = thingToCheckDistanceTo.getWorldPosition(p).distanceTo(multivec.position)
-
-			if( (closestObject === null || dist < closestObject.position.distanceTo(multivec.position) ) )
-			{
-				closestObject = thingToCheckDistanceTo
-			}
-		}
-
-		scene.remove(operatorSymbolForConsidering)
-
-		if( multivectors.indexOf(closestObject) === -1 )
-		{
-			if(!mouse.clicking)
-			{
-				closestObject.position.x = multivec.elements[1]
-				closestObject.position.y = multivec.elements[2]
-				log(closestObject.position)
-
-				scene.remove(multivec) //TODO and destroy
-				scene.remove(multivec.connector)
-				removeSingleElementFromArray(multivectors,multivec)
-
-				Connector(closestObject,multivec.root)
-
-				return;
-			}
-		}
-		else
-		{
-			let multivectorToOperateOn = closestObject
-			let placeWeWouldGo = multivectorToOperateOn.position.clone()
-			placeWeWouldGo.x += 1.
-			placeWeWouldGo.y -= 1.
-			let dist = placeWeWouldGo.distanceTo(multivec.position)
-
-			let operations = ["add","leftMultiply"] //wanna left multiply? move the other one
-			let distances = [.5,.7]
-			let operationIndex = -1
-
-			for(let i = operations.length-1; i >= 0; --i)
-			{
-				if(dist < distances[i])
-					operationIndex = i
-			}
-
-			if(operationIndex !== -1)
-			{
-				scene.add(operatorSymbolForConsidering)
-				operatorSymbolForConsidering.position.copy(multivectorToOperateOn.position)
-				operatorSymbolForConsidering.material.color.setHex(discreteViridis[operationIndex].hex)
-				// operatorSymbolForConsidering.position.x += clearance;
-
-				if(!mouse.clicking)
+				if( searchArray(scope,newMultivector) )
 				{
-					let newOperatorSymbol = OperatorAppearance()
-					newOperatorSymbol.position.copy(operatorSymbolForConsidering.position)
-					newOperatorSymbol.material.color.copy(operatorSymbolForConsidering.material.color)
-					scene.remove(operatorSymbolForConsidering)
-					scene.add(newOperatorSymbol)
+					log("already got that in the scope, can do something here")
+				}
 
-					multivec.position.copy(multivectorToOperateOn.position)
-					multivec.position.x += 1.;
-					multivec.position.y -= 1.;
-
-					//------
-
-					let result = Multivector()
-					multivectors.push(result)
-
-					if(operationIndex === operations.indexOf("add"))
-						result.addMultivectors(multivectorToOperateOn, multivec)
-					if(operationIndex === operations.indexOf("multiply"))
-						result.geometricProductMultivectors(multivec, multivectorToOperateOn)
-
-					result.position.copy( multivectorToOperateOn.position )
-					result.position.y -= 2.;
-					scene.add(result)
-
-					//play animation
-
-					return;
+				if( equalsMultivector(goalMultivector.elements,newMultivector.elements) )
+				{
+					let winSign = makeTextSign("You win!!!")
+					winSign.scale.multiplyScalar(.5)
+					winSign.position.y = 2;
+					scene.add(winSign)
+				}
+				else
+				{
+					scope.push(newMultivector)
 				}
 			}
 		}

@@ -6,9 +6,11 @@
 	The scalar
 		The unit size should be clear, and the numeral does make that clear
 		Numeral with positive or negative sign
+		Numeral with color
 		Spiral?
 		Probably better off as red five versus blue five if you're going to carry it
 		Opacity?
+		Bunch of dots? To multiply, it makes that many copies of that thing then adds them together
 
 	Scalar and trivector could be a single complex number
 		visualized differently than the vector. 2D as opposed to 3D
@@ -16,6 +18,11 @@
 		Has the significant advantage that you get to see how complex numbers rotate each other
 		But, the system we're talking about has so many damn dimensions
 		related to the fact that all multivectors have an r e^i theta and cos theta + i sin theta decomposition
+
+	The bivector
+		A swarm of little blobs
+		Addition
+			So you get the unit vector in the intersection line (dare I ask, the positive or negative one?)
 
 	Vectors
 		Liquid too?
@@ -32,29 +39,12 @@
 				This tells you that it is best to think of them all, equally, being taken away from the origin
 
 	Bivector addition
-		So you get the unit vector in the intersection line (dare I ask, the positive or negative one?)
 
 	Man, RP(n) is surely more fundamental than Rn
 
-	Which bivectors are positive, which negative?
-		Whatever you decide distinguishes clockwise and anticlockwise (positive and negative) bivectors, that surely applies to vectors
-			Maybe you can even deduce it from the trivectors
-		Choose a plane:
-			y=0
-				People do think of "up" as being special
-			x+y+z=0
-				It seems like for vectors on the x,y,z axes you definitely know which are positive, like this is embedded in your system
-			z=0
-				This may be just a question of perspective
-		It seems like turning the plane around actually DOES turn red into blue?
-		Surely it is arbitary, same as right hand/left hand. The important thing is that for a given plane, 
-			whichever ones you decide are positive are all a positive multiple of one another and
-			whichever ones you decide are negative are all a positive multiple of one another
-		So:
-			get the normal vector to that plane
-			check its dot product with the vector(float_min,0.,1.)
-			If it's positive your bivectors are one way, negative another
-			Ideally a vector such that dot product is never 0. If it is sometimes 0 you need to divide that plane in half too
+	
+
+	A heavily alternative way of doing this is with discrete pieces - vectors and bivectors of unit length, and everything built of htose (looks jaggy)
 
 	Could have the different blades stacked in a column, or around in a circle
 	What if you have some things that are enormously larger than others? That's why we have zooming in and out. But some things keep size
@@ -82,12 +72,16 @@ function initMultivectorAppearances()
 
 		{
 			let thingYouClick = new THREE.Mesh(new THREE.SphereBufferGeometry(.5),new THREE.MeshBasicMaterial({color:0x00FF00,transparent:true,opacity:0.0001}))
+			thingYouClick.visible = false
 			multivec.add(thingYouClick)
 
 			clickables.push(thingYouClick)
+			if( externalOnClick !== undefined)
+				multivec.externalOnClick = externalOnClick
 			thingYouClick.onClick = function()
 			{
-				externalOnClick(multivec)
+				if(multivec.externalOnClick !== undefined)
+					multivec.externalOnClick(multivec)
 			}
 		}
 
@@ -105,7 +99,7 @@ function initMultivectorAppearances()
 			scalar.material.depthFunc = THREE.AlwaysDepth
 			scalar.castShadow = true
 			scalar.material.side = THREE.DoubleSide
-			scalar.scale.multiplyScalar(0.3)
+			scalar.scale.multiplyScalar(.7)
 			multivec.add(scalar)
 
 			
@@ -188,8 +182,6 @@ function initMultivectorAppearances()
 
 			parallelogram.add(front,back)
 			parallelogram.matrixAutoUpdate = false;
-
-			log(front.uuid)
 			
 			
 
@@ -222,7 +214,7 @@ function initMultivectorAppearances()
 			
 			multivec.setCircle = function()
 			{
-				circle.scale.setScalar(Math.abs(multivec.elements[4])) // no, not abs because negativity! Also area! Yeesh
+				circle.scale.setScalar(Math.sqrt(Math.abs(multivec.elements[4]) ) ) // no, not abs because negativity! Also area! Yeesh
 				if(multivec.elements[5]!==0. || multivec.elements[6] !== 0.)
 					log("not working yet")
 
@@ -326,6 +318,14 @@ function initMultivectorAppearances()
 			for(let i = 0; i < 8; i++)
 				multivec.elements[i] = elementsToTakeOn[i]
 			multivec.updateAppearance()
+		}
+
+		for(let i = 0; i < multivec.children.length; i++)
+		{
+			if(multivec.children[i].matrix.equals(zeroMatrix))
+			{
+				debugger;
+			}
 		}
 
 		return multivec

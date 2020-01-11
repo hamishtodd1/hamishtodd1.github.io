@@ -113,7 +113,6 @@ function initMouse()
 			if( intersections.length !== 0 )
 			{
 				this.lastClickedObject = intersections[0].object;
-				log(intersections[0].object.position,intersections[0].object.uuid)
 				if( intersections[0].object.onClick )
 				{
 					intersections[0].object.onClick(intersections[0]);

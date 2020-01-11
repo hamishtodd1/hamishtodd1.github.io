@@ -1,11 +1,22 @@
 /*
+	Old:
+		"Have a handheld “projector” that snaps to certain positions. And a “canvas” to record projection on."
+		A page with a geometric proof of conformality http://www.quadibloc.com/maps/maz0202.htm 
+
+	Title
+		How racist is your map? Which is least racist?
+		Top 8 map projections?
+
 	Script
-		Title
-			How racist is your map? Which is least racist?
-			Top 10 map projections?
 		Yeah, this took ages, thanks for asking
 		Hey, heckling is very unfair, these eyes do not actually work. From my point of view the world looks like this
 		And here's what climate scientists use to show temperature change! pretty important to see the poles :)
+		Mercator
+			So let's say you are a sea captain(Put on a sea captain hat)
+			Wanting to make your fortune by acquiring spices in the bahamas and delivering them to royalty in sweden
+			Literally all you have is a compass. You don't know where you are, you don't know how fast you're going
+			The simplest course you can have is one where your compass is always pointing in the same direction
+
 		Polyhedral
 			"this one is great because it minimizes distortion of area and shape, like Africa here is basically the same size and shape as it really is" (or with a different one, early on)
 			These ones have line discontinuities at the edges. If you know how to do complex analysis you can get rid of these!
@@ -22,6 +33,7 @@
 				And then it gets more complex than that, like with navigators wanting to make rhumb lines straight
 				Really, all these things are so beautiful and he was denying that beauty - "one map for one world", fascistic really
 			Arno Peters
+				It's important to be unambiguous: when people say that maps are racist, they are abusing the word racist
 				He raised an important objection
 				Let's imagine a parallel universe where Peters parents had raised him to believe that while pointing out structural oppression is important, it doesn't justify talking bollocks
 				I would have loved Peters for ever, if he had recommended everyone use a non-piece of shit projection like Dymaxion I'd have loved him!
@@ -32,19 +44,21 @@
 				And in doing that, he was taking a massive shit on the Egyptians and the Chinese folks that first worked this stuff out
 		Take helmet off and hold at side for bow
 		
+	Probably crap
+		1-manifolds
+
 	"The general interface"
+		Do individual triangles
+
 		Remember your first idea was cross section of the earth
 		Goal
 			People want to hear the PURPOSE of a given projection, what it achieves
 			All your gestures should be connected to the thing
 			Make it feel like you'd never imagine algebra would be necessary
-		Surely you want a "grab and pull open" gesture for cylindrical and polyhedral
-		Want it to be able to make new ones with this interface!
-		Perhaps simplest thing from a programming POV is lerping the built in functions! Rather defeats the point
+			be able to make new ones with this interface!
 		You have a (finite) plane (ruled surface) that you can bend into a cone or cylinder
 			Don't think of it as a perfect cone/cylinder
 			And introduce singularities that you can bend around
-		1-manifolds
 		Explosion from manifolds. Gesturally make them, then move hands to do projection from them
 		Would be good to grab the undistorted parallels on cylindrical and vary between these https://en.wikipedia.org/wiki/Lambert_cylindrical_equal-area_projection#/media/File:Tissot_indicatrix_world_map_cyl_equal-area_proj_comparison.svg
 		Unwrap cylindrical, then project onto exp for mercator
@@ -245,6 +259,10 @@ async function initMaps()
 	// })
 
 	//don't want to cheat by changing some built-in crap :P
+}
+
+function initProps()
+{
 	if(0)
 	{
 		let sign = makeTextSign("Mercator", false, false, false);

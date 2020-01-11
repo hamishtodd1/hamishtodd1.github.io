@@ -1,7 +1,18 @@
+// for(let i = 0; i < points.length; i++)
+// {
+// 	for(let j = 0; j < points.length; j++)
+// 	{
+
+// 	}
+// }
+
 /*
 	Amount of time this is worth?
 		May turn out to be unnecessary
 		Bivectors and trivectors are quite interesting and exotic. It makes sense to give them an intriguing characterization
+
+	Addition
+		They glob together on the side where they are both the same color
 
 	Liquid simulation
 		Set of balls with momentum, which can be confined to a plane or line or whatever
@@ -12,6 +23,33 @@
 				all other pixels are "pointed" in the direction of the nearest bit of that shape
 		They bounce off each other / repel
 		"Metaballs" in appearance
+
+	
+	SDF!
+
+	Which bivectors are positive, which negative?
+		The going idea currently is that it's whirlpool-like
+		Whatever you decide distinguishes clockwise and anticlockwise (positive and negative) bivectors, that surely applies to vectors
+			Maybe you can even deduce it from the trivectors
+		Choose a plane:
+			y=0
+				People do think of "up" as being special
+				Conjugation is fundamental
+			x+y+z=0
+				It seems like for vectors on the x,y,z axes you definitely know which are positive, like this is embedded in your system
+			z=0
+				This may be just a question of perspective
+		It seems like turning the plane around actually DOES turn red into blue?
+			Yes, in the same way that looking at the same vector from a different 
+			These are spatial things. Of *course* changing your perspective changes the thing itself
+		Surely it is arbitary, same as right hand/left hand. The important thing is that for a given plane, 
+			whichever ones you decide are positive are all a positive multiple of one another and
+			whichever ones you decide are negative are all a positive multiple of one another
+		So:
+			get the normal vector to that plane
+			check its dot product with the vector(float_min,0.,1.)
+			If it's positive your bivectors are one way, negative another
+			Ideally a vector such that dot product is never 0. If it is sometimes 0 you need to divide that plane in half too
 
 	Other ideas
 		Requirements:
@@ -42,38 +80,30 @@
 
 async function initBivectorAppearance()
 {
-	// {
-	// 	let material = new THREE.ShaderMaterial({
-	// 		uniforms: {
-	// 			numberGoingBetweenZeroAndOne: {value: 0}
-	// 		},
-	// 	});
-	// 	await assignShader("bivectorVertex", material, "vertex")
-	// 	await assignShader("bivectorFragment", material, "fragment")
+	{
+		let numBlobs = 10;
+		let blobCoords = new Float32Array(numBlobs*3); //next thing to do is get an array in there, suuuurely possible
+		for(let i = 0; i < numBlobs; i++)
+			blobCoords[i*3] = i * 3.;
 
-	// 	let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(5., 5., 10, 10), material);
-	// 	scene.add(plane);
-		
-	// 	let vertexDisplacement = new Float32Array(plane.geometry.attributes.position.count);
-	// 	for(let i = 0; i < vertexDisplacement.length; i ++)
-	// 	{
-	// 		vertexDisplacement[i] = Math.sin(i);
-	// 	}
-	// 	plane.geometry.addAttribute('vertexDisplacement', new THREE.BufferAttribute(vertexDisplacement, 1));
+		let material = new THREE.ShaderMaterial({
+			uniforms: {
+				blobCoords: {value: blobCoords}
+			},
+		});
+		await assignShader("bivectorVertex", material, "vertex")
+		await assignShader("bivectorFragment", material, "fragment")
 
-	// 	updateFunctions.push( function() 
-	// 	{
-	// 		material.uniforms.numberGoingBetweenZeroAndOne.value = 0.5 + Math.sin(clock.elapsedTime) * 0.5;
-		
-	// 		for( let i = 0, il = vertexDisplacement.length; i < il; i++ )
-	// 		{
-	// 			vertexDisplacement[i] = Math.sin(i + clock.elapsedTime);
-	// 		}
-	// 		plane.geometry.attributes.vertexDisplacement.needsUpdate = true;
-	// 	} )
+		let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(5., 5., 10, 10), material);
+		scene.add(plane);
 
-	// 	return
-	// }
+		updateFunctions.push( function() 
+		{
+			
+		} )
+
+		return
+	}
 
 	let interior = new THREE.Mesh(new THREE.Geometry(),new THREE.MeshBasicMaterial({color:0xFF0000, side:THREE.DoubleSide,transparent:true,opacity:.6}))
 	let exterior = new THREE.Mesh(new THREE.Geometry(),new THREE.MeshBasicMaterial({color:0x0000FF, side:THREE.DoubleSide,transparent:true,opacity:.6}))

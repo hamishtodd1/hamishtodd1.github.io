@@ -1,5 +1,4 @@
 /*
-
 	Took part in protest, had cambridge conservative society throw stuff at them
 
 	Hodgkin, Thatcher, Skywalker, and diabetes"
@@ -9,20 +8,25 @@
 		https://blogs.mhs.ox.ac.uk/insidemhs/files/2017/03/Dorothy-Crowfoot-Hodgkin-Insulin-Map-Bod-944x1024.jpg
 		https://www.margaretalmon.com/wp-content/uploads/6a0105362f4359970b0120a859270a970b.png
 
+	FFT / crystallography
+		http://www.ysbl.york.ac.uk/~cowtan/sfapplet/sfintro.html
+
 	Intro
-		She directly saved the lives of tens or hundreds of millions of people, indirectly billions
-		First person to do biological crystallography
-		Oxford Professor, Nobel prize
-		one of the first women to get a first class degree
-		have a video of a nice growing crystal
-		An incredible scientist who was a woman (and an attentive mother to three kids) IN THE THIRTIES
-		"Dorothy Crowfoot Hodgkin" because she held out for a long time against taking her husband's name for twelve years; she took it under pressure from a publisher.
+		Incredible scientist
+			Oxford Professor
+			Nobel prize
+			directly saved the lives of tens or hundreds of millions of people, indirectly billions
+			First person to do biological crystallography
 		Left wing: adviser to Marxist prime minister of Ghana
-		Married a communist
-		Campaigned a lot against nuclear proliferation
-		Married to a communist
-		Possibly the first scientist ever to receive maternity leave
+			"Dorothy Crowfoot Hodgkin" because she held out for a long time against taking her husband's name for twelve years; she took it under pressure from a publisher.
+			Married to a communist
+			Campaigned a lot against nuclear proliferation
+			A woman
+				attentive mother to three kids IN THE THIRTIES
+				one of the first women to get a first class degree
+				Possibly the first scientist ever to receive maternity leave
 	Structural biology
+		have a video of a nice growing crystal
 		Her penicillin thing looks great, have that
 		The stuff in epipens
 		First medically relevant protein
@@ -60,3 +64,89 @@
 
 	Imagine her in the room, trying to persuade her old student to lay down her weapon
 */
+
+function arrayOfArraysWithCertainValue(n,m,v)
+{
+	var result = [];
+	for ( var i = 0; i<n; i++ )
+	{
+		result[i] = [];
+		for ( var j = 0; j<m; j++ )
+		{
+			result[i][j] = v;
+		}
+	}
+	return result;
+}
+
+{
+	let ox = this.ox; let oy = this.oy;
+	let sx = this.sx; let sy = this.sy; let sxy = this.sxy;
+	let su = this.su; let sv = this.sv; let suv = this.suv;
+
+	// calculate map. Use coarse grid for speed
+	let map = arrayOfArraysWithCertainValue(canvasWidth,canvasHeight,sfcanvas.f[sfcanvas.maxhk][sfcanvas.maxhk]);
+	let s = 2
+	// calculate the contribution at a point - need frac coords
+	for ( let h = -sfcanvas.maxhk; h<=sfcanvas.maxhk; h++ )
+	{
+		for ( let k = -sfcanvas.maxhk; k<=sfcanvas.maxhk; k++ )
+		{
+			if ( h > 0 || ( h == 0 && k > 0 ) )
+			{
+				f = sfcanvas.f[h+sfcanvas.maxhk][k+sfcanvas.maxhk];
+				if ( f > 0.0 )
+				{
+					phi = sfcanvas.phi[h+sfcanvas.maxhk][k+sfcanvas.maxhk];
+					for ( let y = 0; y<canvasHeight; y+=s )
+					{
+						let v = sv*(y-oy);
+						for ( let x = 0; x<canvasWidth; x+=s )
+						{
+							let u = suv*(y-oy)+su*(x-ox);
+							map[x][y] += 2*f*Math.cos(2*Math.PI*(h*u+k*v-phi/360));
+						}
+					}
+				}
+			}
+		}
+	}
+	// interpolate remaining points
+	if ( s == 2 )
+	{
+		for (let y = 0;y<canvasHeight;y+=2)
+			for (let x = 1;x<canvasWidth-1;x+=2)
+				map[x][y] = (map[x-1][y]+map[x+1][y])/2;
+		for (let y = 1;y<canvasHeight-1;y+=2)
+			for (let x = 0;x<canvasWidth-1;x++)
+				map[x][y] = (map[x][y-1]+map[x][y+1])/2;
+	}
+
+	// draw map
+	let highestMapValue = 1.0e-6;
+	for (let y = 0;y<canvasHeight;y++)
+		for (let x = 0;x<canvasWidth;x++)
+			highestMapValue = Math.max(highestMapValue,Math.abs(map[x][y]));
+
+	let r; let g;
+	for (let y = 0;y<canvasHeight;y++)
+	{
+		for (let x = 0;x<canvasWidth;x++)
+		{
+			let val = map[x][y]/highestMapValue;
+			if ( val >= 0 )
+			{
+				r = 255;
+				g = Math.round(255*(1-val));
+			} else {
+				r = Math.round(255*Math.max(1+1.5*val,0));
+				g = Math.round(255*Math.max(1+0.5*val,0));
+			}
+			let i = 4*(x+canvasWidth*(y));
+			this.img.data[i+0] = r;
+			this.img.data[i+1] = g;
+			this.img.data[i+2] = g;
+			this.img.data[i+3] = 255;
+		}
+	}
+}

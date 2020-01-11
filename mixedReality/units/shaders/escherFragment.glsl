@@ -1,4 +1,11 @@
 /*
+	Idea for translation:
+		The  homogeneous matrix. Want n such that M^n a = b
+		Need to think more thoroughly about final goal, but diagonalization may let you take the log correctly
+
+	
+
+
 	So we choose a vanishing point
 
 	We can then tear and attach the whole lot. Problem: with movement, previous frames will be off

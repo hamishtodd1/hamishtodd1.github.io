@@ -1,9 +1,5 @@
 /*
-	TODO for boston
-		Transfer to zeimLight
-		flat simulation
-		recording works ok
-		just pictures is fine
+	much good stuffhttps://vimeo.com/374534729
 */
 
 async function initTuring(gl)

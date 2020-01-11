@@ -4,27 +4,26 @@
 	Therefore, little t-shaped things showing what results from what
 	There again, who says right- and left- multiplying is the right thing to do?
 	are left and right multiply the same as multiply by conjugate?
+
+	Arguably the add should contain a load of multiplies
 */
 
 async function initOperatorAppearance()
 {
-	var geometry = new THREE.PlaneGeometry(1.,1.)
-
 	let texture = null
 	await new Promise(resolve => {
-		new THREE.TextureLoader().load("data/squarePipe.png",function(result)
+		new THREE.TextureLoader().load("data/frog.png",function(result)
 		{
 			texture = result;
 			resolve()
 		})
 	})
 
-	log(texture)
+	var geometry = new THREE.PlaneGeometry(1.5,1.5)
 	OperatorAppearance = function()
 	{
 		let operatorSymbol = new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({
 			map: texture,
-			color: discreteViridis[0].hex,
 			transparent:true //because transparent part of texture
 		}))
 

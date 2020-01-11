@@ -285,7 +285,7 @@ function initPanel()
 				menu.add(textMeshes[i])
 				if(i === 0)
 				{
-					textMeshes[i].position.z = 0.0001;
+					textMeshes[i].position.z = 0.004;
 					textMeshes[i].position.x = outlineThickness;
 					textMeshes[i].position.y = totalElementsHeight-1 + outlineThickness;
 				}
