@@ -1,13 +1,15 @@
-//if you make sure the person with the most cash is always at the top, no need to have a "finished" mode
+/*
+	if you make sure the person with the most cash is always at the top, no need to have a "finished" mode
 
-//big advantage: the "display" of confidence on the normal board is linear
+	big advantage: the "display" of confidence on the normal board is linear
 
-//one might get things like the radiolab "Buy and then immediately sell when you see the price"
-//different name: "the hansonian betting board". Bet on anything you like
-//advantage this might have over board game: you don't have to look down and check whether you've got bets on a character you've lost faith in being guilty, you can just immediately go over and decrease your bet
+	one might get things like the radiolab "Buy and then immediately sell when you see the price"
+	different name: "the hansonian betting board". Bet on anything you like
+	advantage this might have over board game: you don't have to look down and check whether you've got bets on a character you've lost faith in being guilty, you can just immediately go over and decrease your bet
 
-//really this is trying to prove dynamicland wrong
-//article: "Virtual reality is inefficient" - dynamicland too. Inefficient in the sense that keyboard shortcuts ARE efficient
+	really this is trying to prove dynamicland wrong
+	article: "Virtual reality is inefficient" - dynamicland too. Inefficient in the sense that keyboard shortcuts ARE efficient
+*/
 
 function getPrice(index)
 {
@@ -34,9 +36,36 @@ function getPrice(index)
 let dollarHeight = 0.003
 
 let moneyMaterial = new THREE.MeshBasicMaterial({color:0x00FF00})
-console.log(moneyMaterial.color)
+
+log = console.log
 function initSelectors()
 {
+	{
+		let ctrlVSign = new THREE.Object3D()
+		ctrlVSign.add(
+			makeTextSign("Ctrl+V to"),
+			makeTextSign("add a suspect")
+			)
+		ctrlVSign.children[0].position.y += 1.
+		ctrlVSign.scale.multiplyScalar(.07)
+		ctrlVSign.position.x = camera.right - .2
+		ctrlVSign.position.y = camera.top - .2
+		scene.add(ctrlVSign)
+	}
+
+	{
+		let addPlayerSign = new THREE.Object3D()
+		addPlayerSign.add(
+			makeTextSign("Press i,j,k,l"),
+			makeTextSign("to add a player")
+			)
+		addPlayerSign.children[0].position.y += 1.
+		addPlayerSign.scale.multiplyScalar(.1)
+		addPlayerSign.position.x = .5
+		addPlayerSign.position.y = .5
+		// scene.add(addPlayerSign)
+	}
+
 	let columns = []
 	let selectors = []
 
@@ -60,7 +89,7 @@ function initSelectors()
 			new THREE.Vector3(1,1,-1),
 			new THREE.Vector3(0,1,-1)
 		)
-		let Slot = function(column,material)
+		function Slot(column,material)
 		{
 			let slot = new THREE.LineLoop(slotGeometry, slotMaterial)
 			scene.add(slot)

@@ -1,6 +1,6 @@
 function initPortraits()
 {
-	let copiedImageNotFoundSign = makeTextSign("Copied image not found")
+	let copiedImageNotFoundSign = makeTextSign("No image in clipboard")
 	copiedImageNotFoundSign.scale.multiplyScalar(0.1)
 	copiedImageNotFoundSign.material.opacity = 0;
 	copiedImageNotFoundSign.material.transparent = true
@@ -34,6 +34,24 @@ function initPortraits()
 	selectionBox.visible = false
 	updatables.push(selectionBox)
 	let initialMousePosition = new THREE.Vector3()
+
+	let portraitAdviceSign = new THREE.Object3D()
+	portraitAdviceSign.add(
+		makeTextSign("Click and drag to make"),
+		makeTextSign("suspect portrait")
+		)
+	portraitAdviceSign.children[0].position.y += 1.
+	portraitAdviceSign.scale.multiplyScalar(.1)
+	portraitAdviceSign.position.x = .5
+	portraitAdviceSign.position.y = .5
+	portraitAdviceSign.position.z = selectionBox.position.z
+	scene.add(portraitAdviceSign)
+	updatables.push(portraitAdviceSign)
+	portraitAdviceSign.update = function()
+	{
+		portraitAdviceSign.visible = pastedImageMesh.visible
+	}
+
 	selectionBox.update = function()
 	{
 		if( tradingAllowed )

@@ -61,7 +61,7 @@ async function initCrystallography()
 			},
 		});
 		await assignShader("basicVertex", material, "vertex")
-		await assignShader("basicFragment", material, "fragment")
+		await assignShader("crystallographyFragment", material, "fragment")
 
 		function assignCoords(index, v)
 		{
