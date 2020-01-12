@@ -27,12 +27,12 @@
 async function init()
 {
 
-	await initBivectorAppearance()
-	return
+	// await initBivectorAppearance()
+	// return
 
-	// var otherThingToCheckDistanceTo = []
-	// let littleScene = initWheelScene()
-	// otherThingToCheckDistanceTo.push(littleScene.hummingbird)
+	var otherThingToCheckDistanceTo = []
+	let littleScene = await initWheelScene()
+	otherThingToCheckDistanceTo.push(littleScene.hummingbird)
 
 	{
 		initMultivectorAppearances()
@@ -58,9 +58,9 @@ async function init()
 		let xBasisElement = MultivectorAppearance(scopeOnClick)
 		scope.push(xBasisElement)
 		xBasisElement.setTo1Blade(xUnit)
-		let zBasisElement = MultivectorAppearance(scopeOnClick)
-		scope.push(zBasisElement)
-		zBasisElement.setTo1Blade(zUnit)
+		// let zBasisElement = MultivectorAppearance(scopeOnClick)
+		// scope.push(zBasisElement)
+		// zBasisElement.setTo1Blade(zUnit)
 
 		// let trivec = MultivectorAppearance(scopeOnClick)
 		// scope.push(trivec)
