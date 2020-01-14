@@ -31,8 +31,8 @@ async function init()
 	// return
 
 	var otherThingToCheckDistanceTo = []
-	let littleScene = await initWheelScene()
-	otherThingToCheckDistanceTo.push(littleScene.hummingbird)
+	// let littleScene = await initWheelScene()
+	// otherThingToCheckDistanceTo.push(littleScene.hummingbird)
 
 	{
 		initMultivectorAppearances()
