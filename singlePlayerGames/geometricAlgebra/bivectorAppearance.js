@@ -84,7 +84,10 @@ async function initBivectorAppearance()
 		let numBlobs = 10;
 		let blobCoords = new Float32Array(numBlobs*3); //next thing to do is get an array in there, suuuurely possible
 		for(let i = 0; i < numBlobs; i++)
-			blobCoords[i*3] = i * 3.;
+		{
+			blobCoords[i*3+0] = (Math.random()-.5) * 3.;
+			blobCoords[i*3+1] = (Math.random()-.5) * 3.;
+		}
 
 		let material = new THREE.ShaderMaterial({
 			uniforms: {
@@ -94,7 +97,7 @@ async function initBivectorAppearance()
 		await assignShader("bivectorVertex", material, "vertex")
 		await assignShader("bivectorFragment", material, "fragment")
 
-		let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(5., 5., 10, 10), material);
+		let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(20., 20., 10, 10), material);
 		scene.add(plane);
 
 		updateFunctions.push( function() 

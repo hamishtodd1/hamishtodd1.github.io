@@ -27,8 +27,8 @@
 async function init()
 {
 
-	// await initBivectorAppearance()
-	// return
+	await initBivectorAppearance()
+	return
 
 	var otherThingToCheckDistanceTo = []
 	// let littleScene = await initWheelScene()

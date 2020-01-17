@@ -6,11 +6,15 @@
 
 uniform float numberGoingBetweenZeroAndOne;
 varying vec2 vUv; //gets calculated first
+varying vec3 worldPosition;
 
 //need to update this appropriately
-uniform float blobCoords[30];
+#define numBlobs 10
+#define numBlobCoords numBlobs*3
+uniform float blobCoords[numBlobCoords];
 
 uniform float smooshedness;
+
 
 //from https://www.iquilezles.org/www/articles/smin/smin.htm
 float smin( float d1, float d2 )
@@ -23,11 +27,14 @@ void main()
 {
 	float density = 0.;
 
-	for(int i = 0; i < 4; i++)
+	for(int i = 0; i < numBlobs; i++)
 	{
-		if(length(vUv-vec2(blobCoords[i*3+0],blobCoords[i*3+1])) < .3)
+		if(length(worldPosition-vec3(blobCoords[i*3+0],blobCoords[i*3+1],blobCoords[i*3+2])) < .3)
 			density += .5;
 	}
+
+	if(density == 0.)
+		discard;
 
 	gl_FragColor = vec4(1.-density, 1.-density, 1.-density, 1.0);
 }
