@@ -81,17 +81,34 @@
 async function initBivectorAppearance()
 {
 	{
+		function add( index, velocity )
+		{
+			coords[index*3+0] += velocity.x
+			coords[index*3+1] += velocity.y
+			coords[index*3+2] += velocity.z
+		}
+
 		let numBlobs = 10;
-		let blobCoords = new Float32Array(numBlobs*3); //next thing to do is get an array in there, suuuurely possible
+		let coords = new Float32Array(numBlobs*3); //next thing to do is get an array in there, suuuurely possible
+
+		let positions = Array(numBlobs);
+		let velocities = Array(numBlobs); //next thing to do is get an array in there, suuuurely possible
+
 		for(let i = 0; i < numBlobs; i++)
 		{
-			blobCoords[i*3+0] = (Math.random()-.5) * 3.;
-			blobCoords[i*3+1] = (Math.random()-.5) * 3.;
+			velocities[i] = new THREE.Vector3()
+			positions[i] = new THREE.Vector3()
+
+			positions[i].x = (Math.random()-.5) * 3.;
+			positions[i].y = (Math.random()-.5) * 3.;
+			coords[i*3+0] = (Math.random()-.5) * 3.;
+			coords[i*3+1] = (Math.random()-.5) * 3.;
 		}
 
 		let material = new THREE.ShaderMaterial({
 			uniforms: {
-				blobCoords: {value: blobCoords}
+				coords: {value: coords},
+				matrixWorldInverse: {value:new THREE.Matrix4()}
 			},
 		});
 		await assignShader("bivectorVertex", material, "vertex")
@@ -100,9 +117,64 @@ async function initBivectorAppearance()
 		let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(20., 20., 10, 10), material);
 		scene.add(plane);
 
+		let acceleration = Array(3)
 		updateFunctions.push( function() 
 		{
-			
+			// plane.updateMatrixWorld()
+			// material.uniforms.matrixWorldInverse.value.getInverse(plane.matrixWorld)
+
+			// coords[0] = Math.sin(frameCount * .06)
+			// coords[4] = Math.sin(frameCount * .06)
+
+			// let acceleration = new THREE.Vector3()
+			// function repulsion(distance)
+			// {
+
+			// }
+
+			// let fieldAcceleration = new THREE.Vector3()
+			for(let i = 0; i < numBlobs; i++)
+			{
+				/*
+					Arbitrary forcefield
+						loop through a set of line segments, get your distance to them
+						Not easy to work out whether you're in or out
+
+					+ They repel each other
+					+ slight attraction maybe?
+
+					So there's a shape.
+					If you're inside the shape, nothing.
+					Outside, go in direction of closest part. H
+
+					Friction is apparently a constant (not proportional) force opposite to velocity
+
+					Adding coplanar bivectors is arguably aberrant and you shouldn't think about it too much
+				*/
+
+				//circular
+			// 	if( p.length() > 1. )
+			// 		fieldAcceleration.copy(p).negate().setLength(1.)
+			// 	//rectangle
+			// 	if( Math.abs(p.x) > rectangleWidth / 2. || Math.abs(p.y) > rectangleHeight / 2. )
+			// 		fieldAcceleration.copy(p).negate().setLength(1.)
+
+			// 	//sponge balls
+			// 	for(let j = 0; j < numBlobs; j++)
+			// 	{
+			// 		if(p.distanceTo([j]))
+			// 	}
+
+			// 	velocity.add(fieldAcceleration)
+
+			// 	add( i, velocity )
+
+			// 	//then probably need to project back on plane
+
+				// positions[i].toArray(coords,i*3);
+			}
+				if(frameCount == 1)
+					log(coords)
 		} )
 
 		return
