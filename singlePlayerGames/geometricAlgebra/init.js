@@ -142,7 +142,7 @@ async function init()
 	let animationStage = null;
 	updateFunctions.push(function()
 	{
-		scopePosition.x = -camera.rightAtZZero + 1.
+		scopePosition.x = -camera.rightAtZZero + .7
 
 		if(animationStage === null)
 		{

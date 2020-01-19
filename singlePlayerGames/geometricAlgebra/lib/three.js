@@ -19874,8 +19874,7 @@
 
 				if(!alreadyWarned)
 				{
-					console.warn( 'THREE.WebGLRenderer: image is not power of two (' + image.width + 'x' + image.height + '). Resized to ' + _canvas.width + 'x' + _canvas.height );
-					console.warn("and that may be happenning constantly!")
+					console.warn( 'THREE.WebGLRenderer: image is not power of two (' + image.width + 'x' + image.height + '), resized. This may be happenning constantly!' );
 					alreadyWarned = true
 				}
 

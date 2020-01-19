@@ -31,7 +31,7 @@ async function initMenu()
 		let titleObject = makeTextSign("Menu")
 		let title = titleObject.children[0]
 		title.scale.copy(titleObject.scale)
-		title.scale.multiplyScalar(.4)
+		title.scale.multiplyScalar(.3)
 		menu.add(title)
 		clickables.push(title)
 
@@ -57,8 +57,9 @@ async function initMenu()
 			{
 				let halfMenuTitleWidth = title.scale.x / 2.
 				let halfMenuTitleHeight = title.scale.y / 2.
-				intendedMenuPosition.x = -camera.rightAtZZero + (halfMenuTitleWidth + .1)
-				intendedMenuPosition.y =  camera.topAtZZero   - (halfMenuTitleHeight + .1)
+				let padding = .25
+				intendedMenuPosition.x =  camera.rightAtZZero - (halfMenuTitleWidth  + padding)
+				intendedMenuPosition.y = -camera.topAtZZero   + (halfMenuTitleHeight + padding)
 				intendedFaderOpacity = 0.
 
 				for(let i = 0; i < menuEntries.length; i++)
