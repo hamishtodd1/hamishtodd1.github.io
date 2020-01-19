@@ -1,15 +1,38 @@
 /*
 	TODO for slack / Cambridge demo
+		It's a playground
 		Every aspect of the multiplication and addition needs to be visualized
 		Already a nice product/tool for thinking that can be shown to folks!
+		Generator and goal flashes when you don't get it
+	
+	Long term
+		QM
+			a vector of complex numbers can separate into a vector and bivector (i*vector) parts?
+		Bootstrapping!
+			Maybe you should use GA for your camera projection and that should be considered part of the system
+			After all, if you pick up a vector and rotate it it can be rotated to become its negative
+			Rotating the basis vectors rotates eeeeverything
+			If you rotate a vector, well, it is a different vector
+		Aesthetics/non-design
+			DO NOT THINK ABOUT THIS
+			SDF/raytrace
+				Can at least consider it because the geometry of these objects, which the player will spend a lot of time looking at, is simple
+				good shadows, reflections, colored lighting, transparency. Lights could originate in a texture.
+				But mostly can think of stuff as being in the background. Leave that to a game engine?
+				So anything that is more complicated gets an an sdf https://www.iquilezles.org/www/articles/intersectors/intersectors.htm
+				Lights come from environment/cubemap
+					Ideally one with XHR and all that. Maybe even a light field? Could just be a cylindrical one?
+				Ray tracings
+					https://www.shadertoy.com/view/MtcXWr
+			Cubemap "background"
+				Each pixel of which gets its own ray trace/sdf call, just the one to see if it is immediately accessible to the light
+			Maybe you want a conventional thing
+				Less time consuming, makes it so you can focus on what is important
+				The frogs are a certain animation
+				Particle systems
+				Look dumbass, of course when you bring in an artist they'll want to put in non-mathematical shit with textures etc.
 
-	Wanna grab and rotate the whole scene
-
-	"Bootstrapping"
-		Maybe you should use GA for your camera projection and that should be considered part of the system
-		After all, if you pick up a vector and rotate it it can be rotated to become its negative
-		Rotating the basis vectors rotates eeeeverything
-		If you rotate a vector, well, it is a different vector
+	Could limit the number of operations they have?
 
 	Levels:
 		Add only, diagonal
@@ -26,38 +49,41 @@
 
 async function init()
 {
+	// await initBivectorAppearance()
+	// return
 
-	await initBivectorAppearance()
-	return
+	await initMenu()
 
-	var otherThingToCheckDistanceTo = []
+	// let otherThingToCheckDistanceTo = []
 	// let littleScene = await initWheelScene()
 	// otherThingToCheckDistanceTo.push(littleScene.hummingbird)
 
-	{
-		initMultivectorAppearances()
+	initMultivectorAppearances()
 
+	initGoal()
+
+	{
 		var scope = []
 
 		function scopeOnClick(multivecToCopy)
 		{
-			let activeMultivectorToUse = null
-			if(activeMultivectors[0].parent !== scene)
-				activeMultivectorToUse = activeMultivectors[0]
-			else if(activeMultivectors[1].parent !== scene)
-				activeMultivectorToUse = activeMultivectors[1]
+			let operandToUse = null
+			if(operands[0].parent !== scene)
+				operandToUse = operands[0]
+			else if(operands[1].parent !== scene)
+				operandToUse = operands[1]
 
-			activeMultivectorToUse.copyElements(multivecToCopy.elements)
-			activeMultivectorToUse.position.copy(multivecToCopy.position)
-			scene.add(activeMultivectorToUse)
+			operandToUse.copyElements(multivecToCopy.elements)
+			operandToUse.position.copy(multivecToCopy.position)
+			scene.add(operandToUse)
 		}
 
-		let yBasisElement = MultivectorAppearance(scopeOnClick)
-		scope.push(yBasisElement)
-		yBasisElement.setTo1Blade(yUnit)
 		let xBasisElement = MultivectorAppearance(scopeOnClick)
 		scope.push(xBasisElement)
 		xBasisElement.setTo1Blade(xUnit)
+		let yBasisElement = MultivectorAppearance(scopeOnClick)
+		scope.push(yBasisElement)
+		yBasisElement.setTo1Blade(yUnit)
 		// let zBasisElement = MultivectorAppearance(scopeOnClick)
 		// scope.push(zBasisElement)
 		// zBasisElement.setTo1Blade(zUnit)
@@ -67,10 +93,14 @@ async function init()
 		// trivec.elements[7] = 1.
 		// trivec.updateTrivectorAppearance()
 
-		var activeMultivectors = [
+		var operands = [
 			MultivectorAppearance(function(){}),
 			MultivectorAppearance(function(){}) ]
-		scene.remove(activeMultivectors[0],activeMultivectors[1])
+		scene.remove(operands[0],operands[1])
+
+		var inputPositions = Array(2)
+		inputPositions[0] = new THREE.Vector3( 0.,1.,0.)
+		inputPositions[1] = new THREE.Vector3(-1.,0.,0.)
 	}
 
 	{
@@ -107,90 +137,36 @@ async function init()
 		}
 	}
 
-	{
-		let goal = new THREE.Object3D()
-		scene.add(goal)
-		goal.position.x = -camera.rightAtZZero + 1.4
-
-		let goalSign = makeTextSign("Make this:")
-		goalSign.scale.multiplyScalar(.5)
-		goalSign.position.y = .9
-		goal.add(goalSign)
-
-		let background = new THREE.Mesh(new THREE.PlaneGeometry(1.,1.),new THREE.MeshBasicMaterial({color:0x000000}))
-		background.scale.set(goalSign.scale.x*1.1,goalSign.scale.y*4.3,1.)
-		background.position.z -= .001
-		background.position.y += .18
-		goal.add(background)
-
-		//level generator
-		// {
-		// 	let numOperations = 4;
-		// 	let generatorScope = []
-		// 	for(let i = 0; i < scope.length; i++)
-		// 		generatorScope.push(scope[i].elements)
-		// 	for(let operation = 0; operation < numOperations; operation++)
-		// 	{
-		// 		let operandA = generatorScope[ Math.floor( Math.random() * generatorScope.length ) ];
-		// 		let operandB = generatorScope[ Math.floor( Math.random() * generatorScope.length ) ];
-
-		// 		let functionToUse = Math.random() < .5 ? geometricProduct : geometricSum;
-
-		// 		let result = functionToUse(operandA,operandB)
-
-		// 		// if(searchArray(generatorScope,result))
-		// 		// {
-		// 		// 	operation--
-		// 		// }
-		// 		// else
-		// 		{
-		// 			generatorScope.push(result)
-		// 		}
-		// 	}
-
-		// 	var goalMultivector = MultivectorAppearance(function(){},generatorScope[generatorScope.length-1])
-		// }
-
-		{
-			let goalElements = new Float32Array(8)
-			goalElements[1] = 1.
-			goalElements[2] = 1.
-			var goalMultivector = MultivectorAppearance(function(){},goalElements)
-		}
-
-		goal.add(goalMultivector)
-	}
-
-	{
-		var inputRegisters = Array(2)
-		inputRegisters[0] = new THREE.Vector3(0.,1.,0.)
-		inputRegisters[1] = new THREE.Vector3(-1.,0.,0.)
-	}
-
 	let scopePosition = new THREE.Vector3()
-	let animationT = -1.; //-1 = no animation in progress
+
+	let animationStage = null;
 	updateFunctions.push(function()
 	{
-		if(animationT === -1.)
+		scopePosition.x = -camera.rightAtZZero + 1.
+
+		if(animationStage === null)
 		{
+			scopePosition.y = -camera.topAtZZero
 			for(let i = 0; i < scope.length; i++ )
 			{
-				scopePosition.y = 4. - i;
-				scopePosition.x = camera.rightAtZZero - 1.4
+				let halfHeight = scope[i].getHeightWithPadding() / 2.;
+
+				scopePosition.y += halfHeight
 				scope[i].position.lerp(scopePosition,.1)
+				scopePosition.y += halfHeight
 			}
 
 			let ready = true
 			let distanceRequirement = .03
 
-			for(let i = 0; i < activeMultivectors.length; i++)
+			for(let i = 0; i < operands.length; i++)
 			{
-				if(activeMultivectors[i].parent !== scene)
+				if(operands[i].parent !== scene)
 					ready = false
 				else
 				{
-					activeMultivectors[i].position.lerp(inputRegisters[i],0.1)
-					if( activeMultivectors[i].position.distanceTo(inputRegisters[i] ) > distanceRequirement )
+					operands[i].position.lerp(inputPositions[i],0.1)
+					if( operands[i].position.distanceTo(inputPositions[i] ) > distanceRequirement )
 						ready = false
 				}
 			}
@@ -205,58 +181,62 @@ async function init()
 			}
 
 			if(ready)
-				animationT = 0.
+				animationStage = 0.
 		}
 		else
 		{
-			animationT += frameDelta
+			if( mouse.clicking && !mouse.oldClicking )
+				animationStage = 1. - frameDelta * .001
 
-			switch(Math.floor(animationT))
+			switch(Math.floor(animationStage))
 			{
-				case 0:
-					log("y")
+				case 0: //just staring, til the end
+					{
+						let secondsThisSectionTakes = .3;
+						let increment = frameDelta / secondsThisSectionTakes
+
+						if( animationStage + increment >= 1. )
+						{
+							let newMultivectorElements = activeOperator.function(operands[0].elements,operands[1].elements)
+							let newMultivector = MultivectorAppearance(scopeOnClick, newMultivectorElements)
+							clickables.push(newMultivector)
+							
+							newMultivector.updateAppearance()
+
+							scene.remove(operands[0],operands[1],activeOperator)
+							scene.add(newMultivector)
+							log(newMultivector.elements)
+
+							if( searchArray(scope,newMultivector) )
+							{
+								log("already got that in the scope, can do something here")
+							}
+
+							if( equalsMultivector(goalMultivector.elements,newMultivector.elements) )
+							{
+								setGoalAchievement(true)
+							}
+							else
+							{
+								setGoalIrritation(1.)
+								scope.push(newMultivector)
+							}
+						}
+
+						animationStage += increment
+					}
 					break;
 
 				case 1:
-					log("y")
+					{
+						let secondsThisSectionTakes = 1.3;
+						animationStage += frameDelta / secondsThisSectionTakes
+					}
 					break;
 
 				case 2:
-					log("y")
+					animationStage = null;
 					break;
-			}
-			
-
-			//animation finished. We want a way to fast forward to this
-			if(animationT > 1.1)
-			{
-				animationT = -1.;
-				let newMultivectorElements = activeOperator.function(activeMultivectors[0].elements,activeMultivectors[1].elements)
-				let newMultivector = MultivectorAppearance(scopeOnClick, newMultivectorElements)
-				clickables.push(newMultivector)
-				
-				newMultivector.updateAppearance()
-
-				scene.remove(activeMultivectors[0],activeMultivectors[1],activeOperator)
-				scene.add(newMultivector)
-				log(newMultivector.elements)
-
-				if( searchArray(scope,newMultivector) )
-				{
-					log("already got that in the scope, can do something here")
-				}
-
-				if( equalsMultivector(goalMultivector.elements,newMultivector.elements) )
-				{
-					let winSign = makeTextSign("You win!!!")
-					winSign.scale.multiplyScalar(.5)
-					winSign.position.y = 2;
-					scene.add(winSign)
-				}
-				else
-				{
-					scope.push(newMultivector)
-				}
 			}
 		}
 	})

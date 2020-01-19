@@ -33,9 +33,8 @@ function initMouse()
 		// window.addEventListener( 'resize', function(){console.log(cursor.position)}, false );
 	}
 
-	var asynchronous = {
+	let asynchronous = {
 		clicking: false,
-		rightClicking:false,
 		justMoved: false,
 
 		normalizedDevicePosition: new THREE.Vector2(), //top right is 1,1, bottom left is -1,-1
@@ -43,7 +42,6 @@ function initMouse()
 
 	mouse = {
 		clicking: false,
-		rightClicking: false,
 		oldClicking: false,
 		oldRightClicking: false,
 		justMoved: false,
@@ -86,13 +84,10 @@ function initMouse()
 	// }
 
 	var clickedPoint = new THREE.Vector3();
-	var toyBeingArranged = null;
 	mouse.updateFromAsyncAndCheckClicks = function()
 	{
 		this.oldClicking = this.clicking;
 		this.clicking = asynchronous.clicking
-		this.oldRightClicking = this.rightClicking;
-		this.rightClicking = asynchronous.rightClicking;
 
 		this.justMoved = asynchronous.justMoved;
 		asynchronous.justMoved = false;
@@ -123,33 +118,6 @@ function initMouse()
 				this.lastClickedObject = null;
 			}
 		}
-
-		if( this.rightClicking )
-		{
-			if( !this.oldRightClicking )
-			{
-				var intersections = mouse.rayCaster.intersectObjects( toysToBeArranged );
-
-				if( intersections.length !== 0 )
-				{
-					toyBeingArranged = intersections[0].object;
-					clickedPoint.copy( intersections[0].point )
-				}
-			}
-			else
-			{
-				if(toyBeingArranged !== null)
-				{
-					var newClickedPoint = this.rayIntersectionWithZPlane(clickedPoint.z)
-					toyBeingArranged.position.sub(clickedPoint).add(newClickedPoint)
-					clickedPoint.copy(newClickedPoint)
-				}
-			}
-		}
-		else
-		{
-			toyBeingArranged = null;
-		}
 	}
 
 	function updateNdc(clientX,clientY)
@@ -160,22 +128,23 @@ function initMouse()
 
 	var currentRawX = 0;
 	var currentRawY = 0;
-	document.addEventListener( 'mousemove', function(event)
+
 	{
-		event.preventDefault();
-		//for some bizarre reason this can be called more than once with the same values
-		if(event.clientX !== currentRawX || event.clientY !== currentRawY)
+		document.addEventListener( 'mousemove', function(event)
 		{
-			asynchronous.justMoved = true;
+			event.preventDefault();
+			//for some bizarre reason this can be called more than once with the same values
+			if(event.clientX !== currentRawX || event.clientY !== currentRawY)
+			{
+				asynchronous.justMoved = true;
 
-			updateNdc(event.clientX,event.clientY)
+				updateNdc(event.clientX,event.clientY)
 
-			currentRawX = event.clientX;
-			currentRawY = event.clientY;
-		}
-	}, false );
+				currentRawX = event.clientX;
+				currentRawY = event.clientY;
+			}
+		}, false );
 
-	{
 		document.addEventListener('contextmenu', function(event)
 		{
 			event.preventDefault()
@@ -183,28 +152,16 @@ function initMouse()
 
 		document.addEventListener( 'mousedown', function(event) 
 		{
-			if(event.which === 1)
-			{
-				asynchronous.clicking = true;
-			}
-			if(event.which === 3)
-			{
-				asynchronous.rightClicking = true;
-			}
+			asynchronous.clicking = true;
+			updateNdc(event.clientX,event.clientY)
 		}, false );
 		document.addEventListener( 'mouseup', function(event) 
 		{
-			if(event.which === 1)
-			{
-				asynchronous.clicking = false;
-			}
-			if(event.which === 3)
-			{
-				asynchronous.rightClicking = false;
-			}
+			asynchronous.clicking = false;
 		}, false );
 	}
 
+	//todo buggy with multiple touches
 	{
 		document.addEventListener( 'touchstart', function(event)
 		{

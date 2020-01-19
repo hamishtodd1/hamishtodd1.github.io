@@ -1,4 +1,5 @@
 <!-- 
+
 example video to model? https://www.youtube.com/watch?v=FOJ7JAUK6EU
 
 Justification
@@ -26,19 +27,12 @@ Justification
 		All functions have two inputs
 		It's an example of an algebra / group, very deep
 	You can use it to make algorithms yourself for VR UI and pretty animations
-
-QM
-	a vector of complex numbers can separate into a vector and bivector (i*vector) parts?
-
-Aesthetics/non-design
-	But mostly can think of stuff as being in the background. Leave that to a game engine?
-	If it's all simple gemetric shapes (cylinders, cones, some flat surfaces) you can get explicit ray intersections -> good shadows, reflections, colored lighting, transparency. Lights could originate in a texture.
-	So anything that is more complicated gets an an sdf https://www.iquilezles.org/www/articles/intersectors/intersectors.htm
-	And it ends up on an environment/cubemap. Ideally one with XHR and all that. Maybe even a light field? Could just be a cylindrical one?
-	Mmmm, can't really combine them
-
-	Ray tracings
-		https://www.shadertoy.com/view/MtcXWr
+	"Directness"
+		One of the first things you have to learn in applied mathematics is one of the most difficult things: imagining an abstraction
+		You have to be able to take these real-world things like mass values and images in your head of real things and turn them into algebra
+		Then be, at all times, extremely able to *remember* which algebraic symbols correspond to what
+		This removes at least one layer
+		Similar to the fact that you don't mind having long variable names
 
 Send to
 	Andy Matushak (both for "here is the model for teaching" and "here is a tool for thinking")
@@ -47,11 +41,26 @@ Send to
 	Jon
 	indie fund
 
-Marketing
-	Imagine this
-	Could go on physics/maths podcasts
-	Could go on rationallyspeaking - it is interesting to have a genuine disagreement in mathematics
-		https://xkcd.com/2028/
+Target audiences / marketing
+	People studying physics
+		Undergrads
+			Could go on physics/maths podcasts
+			Could go on rationallyspeaking - it is interesting to have a genuine disagreement in mathematics
+				https://xkcd.com/2028/
+		Masters/PhD
+		PIs - go to conferences
+		Youtube videos
+	People who like indie games
+		GMTK discord
+		Thinky puzzle discord
+		Good graphics
+		Good trailer
+	Schoolkids
+		Do some scientific studies and put it in Times Education Supplement
+		Could try to communicate their marks will be improved
+		"Pre-physics" "physics prep"
+
+Story
 	Personalities
 		Tait was an astonishing asshole who should not be allowed to win
 		The story of Clifford's wife is quite beautiful
@@ -121,10 +130,12 @@ Marketing
 
 		<script src="lib/OBJLoader.js"></script>
 		
-		<script src="windowResizeSystem.js"></script>
+		<script src="windowResizeSystemAndSurroundings.js"></script>
 		<script src="miscFunctions.js"></script>
 		<script src="mouseControlSystem.js"></script>
 		<script src="text.js"></script>
+	    <script src="menu.js"></script>
+	    <script src="goal.js"></script>
 
 		<script src="levels/hummingbirdFlowerUnicycle.js"></script>
 

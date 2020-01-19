@@ -1,12 +1,24 @@
-/*
-	
-*/
-
-//TODO up top!
 function initWindowResizeSystemAndSurroundings(renderer)
 {
 	camera.topAtZZero = 4.5; //want unit vectors to be a reasonable size
-	camera.position.z = 16.; //however you feel it should look
+	camera.position.z = 16.; //however you feel it should look. Stage depth should probably be same as width
+
+	{
+		let depth = camera.topAtZZero*2;
+		var stage = new THREE.Mesh( 
+			new THREE.BoxGeometry(1.,camera.topAtZZero*2,depth),
+			new THREE.MeshStandardMaterial({color:0xFFFFFF,side:THREE.BackSide})
+		);
+		stage.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.,0.,-.5 * depth))
+
+		camera.near = .1
+		camera.far = camera.position.z + depth + .01
+		camera.updateProjectionMatrix()
+		stage.material.metalness = 0.1;
+		stage.material.roughness = 0.2;
+		stage.receiveShadow = true;
+		scene.add(stage)
+	}
 
 	function respondToResize() 
 	{
@@ -16,29 +28,15 @@ function initWindowResizeSystemAndSurroundings(renderer)
 		camera.fov = fovGivenCenterToFrameDistance(camera.topAtZZero, camera.position.z )
 		camera.rightAtZZero = camera.topAtZZero * camera.aspect
 
+		stage.scale.x = camera.rightAtZZero*2.
+
+		//and rearrange all the icons
+
 		camera.updateProjectionMatrix();
 	}
 	respondToResize();
-	// window.addEventListener( 'resize', respondToResize, false );
-
-	{
-		var stage = new THREE.Mesh( 
-			new THREE.BoxGeometry(1.,1.,1.),
-			new THREE.MeshStandardMaterial({color:0xFFFFFF,side:THREE.BackSide})
-		);
-		stage.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.,0.,-.5))
-		stage.scale.x = camera.rightAtZZero*2
-		stage.scale.y = camera.topAtZZero*2
-		stage.scale.z = camera.topAtZZero*2
-
-		camera.near = .1
-		camera.far = camera.position.z + stage.scale.z + .01
-		camera.updateProjectionMatrix()
-		stage.material.metalness = 0.1;
-		stage.material.roughness = 0.2;
-		stage.receiveShadow = true;
-		scene.add(stage)
-	}
+	//user can rotate the screen, go fullscreen, un-fullscreen, have the address bar disappear
+	window.addEventListener( 'resize', respondToResize, false );
 
 	{
 		var pointLight = new THREE.PointLight(0xFFFFFF, 0.4, 20.);
@@ -49,9 +47,9 @@ function initWindowResizeSystemAndSurroundings(renderer)
 		pointLight.shadow.mapSize.height = pointLight.shadow.mapSize.width;
 
 		pointLight.castShadow = true;
-		pointLight.position.copy(stage.geometry.vertices[3])
-		pointLight.position.negate().multiplyScalar(0.3);
-		stage.add( pointLight );
+		pointLight.position.set(-camera.topAtZZero,camera.topAtZZero,camera.topAtZZero*.25)
+		pointLight.position.multiplyScalar(.5)
+		scene.add( pointLight );
 
 		scene.add( new THREE.AmbientLight( 0xFFFFFF, 0.7 ) );
 	}

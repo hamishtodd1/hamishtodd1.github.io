@@ -1,4 +1,8 @@
 /*
+	For both sum and product of vectors, visualize the parallelogram
+
+	Maybe for positive and negative vectors, could have something on one side of it, not the end.
+
 	The trivector
 		Sphere of certain radius for magnitude, colored according to phase
 		Or a horizontal line and a vertical line
@@ -24,6 +28,8 @@
 		Addition
 			So you get the unit vector in the intersection line (dare I ask, the positive or negative one?)
 
+	Could use the minus sign for everything. Doesn't help you decide what's minus and what's plus though!
+
 	Vectors
 		Liquid too?
 		The bivector situation is confusing and there's no way around that. So whatever confusion you think vector thing introduces, it's maybe already there
@@ -39,6 +45,9 @@
 				This tells you that it is best to think of them all, equally, being taken away from the origin
 
 	Bivector addition
+		Make them rectangles with unit length on side that is the shared line
+		Attach them along that side
+		They "Snap" to the hypotenuse
 
 	Man, RP(n) is surely more fundamental than Rn
 
@@ -70,23 +79,29 @@ function initMultivectorAppearances()
 		let multivec = new THREE.Object3D();
 		scene.add(multivec)
 
+		// multivec.root = null
+		// multivec.connector = null
+
+		multivec.getHeightWithPadding = function()
 		{
-			let thingYouClick = new THREE.Mesh(new THREE.SphereBufferGeometry(.5),new THREE.MeshBasicMaterial({color:0x00FF00,transparent:true,opacity:0.0001}))
-			thingYouClick.visible = false
-			multivec.add(thingYouClick)
+			let biggestSoFar = 0.
 
-			clickables.push(thingYouClick)
-			if( externalOnClick !== undefined)
-				multivec.externalOnClick = externalOnClick
-			thingYouClick.onClick = function()
-			{
-				if(multivec.externalOnClick !== undefined)
-					multivec.externalOnClick(multivec)
-			}
+			if(multivec.elements[0] !== 0.)
+				biggestSoFar = scalarHeight
+
+			if( Math.abs(multivec.elements[2]) > biggestSoFar )
+				biggestSoFar = Math.abs(multivec.elements[2])
+
+			let bivectorArea = Math.sqrt(sq(multivec.elements[4])+sq(multivec.elements[5])+sq(multivec.elements[6]))
+			let bivectorHeight = 2. * Math.sqrt( bivectorArea / Math.PI )
+			if( bivectorHeight > biggestSoFar )
+				biggestSoFar = bivectorHeight
+
+			if(multivec.elements[7] !== 0.)
+				log("no trivector size")
+
+			return biggestSoFar + .2
 		}
-
-		multivec.root = null
-		multivec.connector = null
 
 		//maaaaybe you shouldn't have this because it's stateful?
 		if(elements === undefined)
@@ -94,12 +109,13 @@ function initMultivectorAppearances()
 		else
 			multivec.elements = elements
 
+		let scalarHeight = .7
 		{
 			let scalar = makeTextSign("",false,false,false)
 			scalar.material.depthFunc = THREE.AlwaysDepth
 			scalar.castShadow = true
 			scalar.material.side = THREE.DoubleSide
-			scalar.scale.multiplyScalar(.7)
+			scalar.scale.multiplyScalar(scalarHeight)
 			multivec.add(scalar)
 
 			
@@ -111,7 +127,7 @@ function initMultivectorAppearances()
 			}
 			multivec.updateScalarAppearance = function(newScalar)
 			{
-				scalar.material.setText(multivec.elements[0].toFixed(1))
+				scalar.material.setText(multivec.elements[0])
 				if(multivec.elements[0] === 0.)
 				{
 					multivec.remove(scalar)
@@ -146,7 +162,7 @@ function initMultivectorAppearances()
 
 				multivec.elements[7] = 0.
 
-				multivec.updateVectorAppearance();
+				multivec.updateAppearance();
 			}
 
 			multivec.updateVectorAppearance = function()
@@ -214,7 +230,8 @@ function initMultivectorAppearances()
 			
 			multivec.setCircle = function()
 			{
-				circle.scale.setScalar(Math.sqrt(Math.abs(multivec.elements[4]) ) ) // no, not abs because negativity! Also area! Yeesh
+				let area = Math.abs(multivec.elements[4]) //yeah not really because negativity also other elements
+				circle.scale.setScalar( Math.sqrt( area / Math.PI ) )
 				if(multivec.elements[5]!==0. || multivec.elements[6] !== 0.)
 					log("not working yet")
 
@@ -311,6 +328,8 @@ function initMultivectorAppearances()
 			multivec.updateVectorAppearance()
 			multivec.setCircle()
 			multivec.updateTrivectorAppearance()
+
+			multivec.thingYouClick.scale.y = multivec.getHeightWithPadding()
 		}
 
 		multivec.copyElements = function(elementsToTakeOn)
@@ -325,6 +344,22 @@ function initMultivectorAppearances()
 			if(multivec.children[i].matrix.equals(zeroMatrix))
 			{
 				debugger;
+			}
+		}
+
+		{
+			let thingYouClick = new THREE.Mesh(new THREE.SphereBufferGeometry(.5),new THREE.MeshBasicMaterial({color:0x00FF00}))
+			thingYouClick.visible = false
+			multivec.thingYouClick = thingYouClick
+			multivec.add(thingYouClick)
+
+			clickables.push(thingYouClick)
+			if( externalOnClick !== undefined)
+				multivec.externalOnClick = externalOnClick
+			thingYouClick.onClick = function()
+			{
+				if(multivec.externalOnClick !== undefined)
+					multivec.externalOnClick(multivec)
 			}
 		}
 

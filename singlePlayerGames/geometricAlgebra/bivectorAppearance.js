@@ -19,7 +19,7 @@
 		For now, have the vertex positions calculated on the CPU. Ideally, no round trip needed
 		Some underlying forcefield that sends them to the shape you want
 			Probably represented as a texture
-			probably just fill in the shape you want in the texture with black (velocity = 0)
+			probably just fill in the shape you want in the texture with black (velocities = 0)
 				all other pixels are "pointed" in the direction of the nearest bit of that shape
 		They bounce off each other / repel
 		"Metaballs" in appearance
@@ -81,15 +81,9 @@
 async function initBivectorAppearance()
 {
 	{
-		function add( index, velocity )
-		{
-			coords[index*3+0] += velocity.x
-			coords[index*3+1] += velocity.y
-			coords[index*3+2] += velocity.z
-		}
-
-		let numBlobs = 10;
-		let coords = new Float32Array(numBlobs*3); //next thing to do is get an array in there, suuuurely possible
+		let numBlobs = 33; //IF YOU WANT TO CHANGE THIS THEN CHANGE IT IN THE FRAGMENT SHADER TOOOO!!!!!
+		//is it possible to extract a constant from a compiled shader?
+		let coords = new Float32Array(numBlobs*3);
 
 		let positions = Array(numBlobs);
 		let velocities = Array(numBlobs); //next thing to do is get an array in there, suuuurely possible
@@ -97,32 +91,53 @@ async function initBivectorAppearance()
 		for(let i = 0; i < numBlobs; i++)
 		{
 			velocities[i] = new THREE.Vector3()
-			positions[i] = new THREE.Vector3()
-
-			positions[i].x = (Math.random()-.5) * 3.;
-			positions[i].y = (Math.random()-.5) * 3.;
-			coords[i*3+0] = (Math.random()-.5) * 3.;
-			coords[i*3+1] = (Math.random()-.5) * 3.;
+			positions[i] = new THREE.Vector3(
+				(Math.random()-.5) * 3.,
+				(Math.random()-.5) * 3.,
+				0.)
 		}
 
 		let material = new THREE.ShaderMaterial({
 			uniforms: {
 				coords: {value: coords},
-				matrixWorldInverse: {value:new THREE.Matrix4()}
+				radius: {value: .35},
+				smooshedness: {value: 1.45}
 			},
 		});
 		await assignShader("bivectorVertex", material, "vertex")
 		await assignShader("bivectorFragment", material, "fragment")
 
+		{
+			//TODO of course it's bloody built in somewhere
+			// material.uniforms.pointLightPosition = {value:new THREE.Vector3()}
+			// let pointLight = scene.children[2];
+		}
+
+		bindButton( "]",function(){},"", function()
+		{
+			material.uniforms.smooshedness.value += .03
+			log(material.uniforms.smooshedness.value )
+		} )
+		bindButton( "[",function(){},"", function()
+		{
+			material.uniforms.smooshedness.value -= .03
+			log(material.uniforms.smooshedness.value )
+		} )
+
 		let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(20., 20., 10, 10), material);
 		scene.add(plane);
 
-		let acceleration = Array(3)
+		let fieldAcceleration = new THREE.Vector3()
+
+		let circleRadius = 1.5
+		let fieldIndicator = new THREE.Mesh(new THREE.CircleBufferGeometry(circleRadius,32), new THREE.MeshBasicMaterial({color:0x00FF00,transparent:true,opacity:.6}))
+		scene.add(fieldIndicator)
+
+		let fieldMagnitude = .06
+		let repulsiveForceMagnitude = .007;
+		let inherentFriction = .002
 		updateFunctions.push( function() 
 		{
-			// plane.updateMatrixWorld()
-			// material.uniforms.matrixWorldInverse.value.getInverse(plane.matrixWorld)
-
 			// coords[0] = Math.sin(frameCount * .06)
 			// coords[4] = Math.sin(frameCount * .06)
 
@@ -147,34 +162,48 @@ async function initBivectorAppearance()
 					If you're inside the shape, nothing.
 					Outside, go in direction of closest part. H
 
-					Friction is apparently a constant (not proportional) force opposite to velocity
-
 					Adding coplanar bivectors is arguably aberrant and you shouldn't think about it too much
+
+					verlet integration might be nice
 				*/
 
+				let p = positions[i]
+
 				//circular
-			// 	if( p.length() > 1. )
-			// 		fieldAcceleration.copy(p).negate().setLength(1.)
-			// 	//rectangle
-			// 	if( Math.abs(p.x) > rectangleWidth / 2. || Math.abs(p.y) > rectangleHeight / 2. )
-			// 		fieldAcceleration.copy(p).negate().setLength(1.)
+				fieldAcceleration.set(0.,0.,0.)
+				if( p.length() > circleRadius )
+					fieldAcceleration.copy(p).negate().setLength( fieldMagnitude * (fieldAcceleration.length()-circleRadius))
+				// //rectangle
+				// // if( Math.abs(p.x) > rectangleWidth / 2. || Math.abs(p.y) > rectangleHeight / 2. )
+				// // 	fieldAcceleration.copy(p).negate().setLength(1.)
 
-			// 	//sponge balls
-			// 	for(let j = 0; j < numBlobs; j++)
-			// 	{
-			// 		if(p.distanceTo([j]))
-			// 	}
+				velocities[i].add(fieldAcceleration)
 
-			// 	velocity.add(fieldAcceleration)
+				//sponge balls
+				let displacement = new THREE.Vector3()
+				for(let j = i+1; j < numBlobs; j++)
+				{
+					displacement.subVectors(p,positions[j])
+					if( displacement.length() < material.uniforms.radius.value * 2. )
+					{
+						displacement.setLength(repulsiveForceMagnitude / displacement.length())
 
-			// 	add( i, velocity )
+						velocities[i].add(displacement)
+						velocities[j].sub(displacement)
+					}
+				}
 
-			// 	//then probably need to project back on plane
-
-				// positions[i].toArray(coords,i*3);
+				//ask Joel. Friction is apparently a constant (not proportional) force opposite to velocities
+				velocities[i].setLength(velocities[i].length() - inherentFriction )
 			}
-				if(frameCount == 1)
-					log(coords)
+
+			for(let i = 0; i < numBlobs; i++)
+			{
+				positions[i].add(velocities[i])
+				positions[i].z = 0.;
+				//then probably need to project back on plane. Using GA!
+				positions[i].toArray(coords,i*3);
+			}
 		} )
 
 		return

@@ -1,5 +1,7 @@
 /*
-	Possibly you need no record! Just 
+	If you hover the record, it instantly takes you back to that place, but unless you click, when you let go, you return to your current progress
+
+	Possibly you need no record, it never actually gets that complicated?
 
 	We call this the record because for the time being that's all it is
 		your goal is not to "make the general output for some input", it is to make one thing
