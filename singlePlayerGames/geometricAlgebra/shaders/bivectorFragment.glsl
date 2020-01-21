@@ -9,9 +9,10 @@
 varying vec3 pixelPosition;
 
 //need to update this appropriately!!
-#define numBlobs 13
-#define numBlobCoords numBlobs*3
-uniform float coords[numBlobCoords];
+#define numBlobs 30
+uniform vec3 positions[numBlobs];
+
+uniform vec3 bivector;
 
 uniform float radius;
 #define eps = .001
@@ -28,9 +29,10 @@ float getDistance(vec3 p)
 {
 	float dist = 99999999.;
 	float distToThisOnesSurface;
+
 	for(int i = 0; i < numBlobs; i++)
 	{
-		distToThisOnesSurface = distance(p,vec3(coords[i*3+0],coords[i*3+1],coords[i*3+2])) - radius;
+		distToThisOnesSurface = distance(p,positions[i]) - radius;
 		dist = smoothMin(distToThisOnesSurface,dist);
 	}
 
@@ -63,16 +65,14 @@ float getDistance(vec3 p)
 
 void main()
 {
-	vec3 currentLocation = cameraPosition; //we assume we are in world space
-	vec3 direction = normalize( pixelPosition - currentLocation );
+	vec3 direction = normalize( pixelPosition - cameraPosition );
+	//we assume we are in world space
 
-	float distance;
-	#define totalSteps 14
-	for(int i = 0; i < totalSteps; i++)
-	{
-		distance = getDistance(currentLocation);
-		currentLocation += direction * distance;
-	}
+	//man, intersection of a line and a plane. If only there was some mathematical system able to help with this
+	//this is temporary, they're all just z
+	vec3 planeIntersection = pixelPosition - direction * (pixelPosition.z / direction.z);
+	float distance = getDistance(planeIntersection);
+	//ideally write to depth buffer too
 
 	//could put this condition in the opacity to avoid a branch
 	if( distance < .001)

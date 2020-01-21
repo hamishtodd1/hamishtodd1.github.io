@@ -1,7 +1,7 @@
 function initWindowResizeSystemAndSurroundings(renderer)
 {
 	camera.topAtZZero = 4.5; //want unit vectors to be a reasonable size
-	camera.position.z = 16.; //however you feel it should look. Stage depth should probably be same as width
+	camera.position.z = 16.; //subjective. Stage depth should probably be same as width
 
 	{
 		let depth = camera.topAtZZero*2;
@@ -29,6 +29,9 @@ function initWindowResizeSystemAndSurroundings(renderer)
 		camera.rightAtZZero = camera.topAtZZero * camera.aspect
 
 		stage.scale.x = camera.rightAtZZero*2.
+
+		if(camera.topAtZZero < camera.rightAtZZero)
+			console.error("might consider switching side and bottom")
 
 		//and rearrange all the icons
 

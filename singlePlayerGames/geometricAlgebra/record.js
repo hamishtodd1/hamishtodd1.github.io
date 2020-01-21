@@ -90,7 +90,7 @@ function Connector(obj1,obj2)
 
 function FunctionPlane()
 {
-	let functionPlane = new THREE.Object3D()
+	let functionPlane = new THREE.Group()
 	functionPlane.position.copy(multivec.position)
 	functionPlane.position.x -= .5
 	functionPlane.position.y += .5

@@ -67,7 +67,7 @@ function initWheelScene()
 		}
 	}
 
-	let littleScene = new THREE.Object3D()
+	let littleScene = new THREE.Group()
 	littleScene.scale.setScalar(2)
 	littleScene.position.y += 3.88
 	scene.add(littleScene)

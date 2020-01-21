@@ -18,7 +18,7 @@
 
 async function initMenu()
 {
-	let menu = new THREE.Object3D()
+	let menu = new THREE.Group()
 	scene.add(menu)
 
 	let menuFader = new THREE.Mesh(new THREE.PlaneGeometry(1.,1.), new THREE.MeshBasicMaterial({color:0x020202, transparent:true, opacity:0.}))
@@ -31,7 +31,7 @@ async function initMenu()
 		let titleObject = makeTextSign("Menu")
 		let title = titleObject.children[0]
 		title.scale.copy(titleObject.scale)
-		title.scale.multiplyScalar(.3)
+		title.scale.multiplyScalar(.4)
 		menu.add(title)
 		clickables.push(title)
 
@@ -59,7 +59,7 @@ async function initMenu()
 				let halfMenuTitleHeight = title.scale.y / 2.
 				let padding = .25
 				intendedMenuPosition.x =  camera.rightAtZZero - (halfMenuTitleWidth  + padding)
-				intendedMenuPosition.y = -camera.topAtZZero   + (halfMenuTitleHeight + padding)
+				intendedMenuPosition.y =  camera.topAtZZero   - (halfMenuTitleHeight + padding)
 				intendedFaderOpacity = 0.
 
 				for(let i = 0; i < menuEntries.length; i++)
@@ -89,9 +89,14 @@ async function initMenu()
 		}
 	}
 
-	//because on tablets you don't have F11
 	{
-		let fullscreenButton = makeTextSign("Fullscreen")
+		let randomizeButton = makeTextSign("Random puzzle")
+		menuEntries.push(randomizeButton)
+	}
+
+	{
+		let fullscreenButton = makeTextSign("Fullscreen: F11")
+		//but you need more because no F11 on tablets and phones
 		menuEntries.push(fullscreenButton)
 
 		//it's not a normal clickable because fullscreen policy
@@ -121,7 +126,6 @@ async function initMenu()
 		// }, { passive: false } );
 	}
 
-	// if(0)
 	//best laid out using markup dude, do NOT think about this any further
 	{
 		let creditsSignObject = makeTextSign("Credits")
@@ -129,15 +133,18 @@ async function initMenu()
 		creditsSign.scale.copy(creditsSignObject.scale)
 		menuEntries.push(creditsSign)
 		clickables.push(creditsSign)
-
+		
 		creditsSign.onClick = function()
 		{
-			scene.add(credits)
+			credits.position.x = 0.;
 		}
 
 		{
-			var credits = new THREE.Object3D()
-			credits.position.z = .01
+			var credits = new THREE.Mesh(new THREE.PlaneGeometry(100.,100.))
+			credits.position.x = 1000.;
+			scene.add(credits)
+
+			credits.position.z = camera.position.z / 2.
 			let strings = [
 				"Creator",
 				"Hamish Todd",
@@ -153,21 +160,17 @@ async function initMenu()
 				if(strings[i] !== "gap")
 				{
 					let sign = makeTextSign(strings[i])
-					sign.position.y = (strings.length-1) / 2. - i
+					sign.scale.multiplyScalar(.4)
+					sign.position.y = ((strings.length-1) / 2. - i) * .4
+					sign.position.z = .001
 					credits.add(sign)
 				}
 			}
 
-			var creditsBackground = new THREE.Mesh(new THREE.PlaneGeometry(1.,1.))
-			creditsBackground.scale.x = camera.rightAtZZero * 2.
-			creditsBackground.scale.y = camera.topAtZZero * 2.
-			creditsBackground.position.z = -.001
-			credits.add(creditsBackground)
-
-			clickables.push(creditsBackground)
-			creditsBackground.onClick = function()
+			clickables.push(credits)
+			credits.onClick = function()
 			{
-				scene.remove(credits)
+				credits.position.x = 1000;
 			}
 		}
 	}
@@ -177,7 +180,7 @@ async function initMenu()
 	for(let i = 0; i < menuEntries.length; i++)
 	{
 		menuEntries[i].position.y = -1 - i
-		menuEntries[i].position.y *= 1.1
-		menuEntries[i].scale.multiplyScalar(.8)
+		menuEntries[i].position.y *= .9
+		menuEntries[i].scale.multiplyScalar(.7)
 	}
 }

@@ -15,6 +15,7 @@
 		Probably better off as red five versus blue five if you're going to carry it
 		Opacity?
 		Bunch of dots? To multiply, it makes that many copies of that thing then adds them together
+			This makes so much sense. Can have multiplication be visual too
 
 	Scalar and trivector could be a single complex number
 		visualized differently than the vector. 2D as opposed to 3D
@@ -51,7 +52,7 @@
 
 	Man, RP(n) is surely more fundamental than Rn
 
-	
+	One to have would be changing basis vectors
 
 	A heavily alternative way of doing this is with discrete pieces - vectors and bivectors of unit length, and everything built of htose (looks jaggy)
 
@@ -76,7 +77,7 @@ function initMultivectorAppearances()
 
 	MultivectorAppearance = function(externalOnClick,elements)
 	{
-		let multivec = new THREE.Object3D();
+		let multivec = new THREE.Group();
 		scene.add(multivec)
 
 		// multivec.root = null
@@ -112,7 +113,7 @@ function initMultivectorAppearances()
 		let scalarHeight = .7
 		{
 			let scalar = makeTextSign("",false,false,false)
-			scalar.material.depthFunc = THREE.AlwaysDepth
+			// scalar.material.depthFunc = THREE.AlwaysDepth
 			scalar.castShadow = true
 			scalar.material.side = THREE.DoubleSide
 			scalar.scale.multiplyScalar(scalarHeight)
@@ -188,7 +189,7 @@ function initMultivectorAppearances()
 		}
 
 		{
-			let parallelogram = new THREE.Object3D()
+			let parallelogram = new THREE.Group()
 			let front = new THREE.Mesh(parallelogramGeometry, bivecMaterialFront);
 			front.castShadow = true
 			let back = new THREE.Mesh(parallelogramGeometry, bivecMaterialBack)

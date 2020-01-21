@@ -13,6 +13,10 @@
 			After all, if you pick up a vector and rotate it it can be rotated to become its negative
 			Rotating the basis vectors rotates eeeeverything
 			If you rotate a vector, well, it is a different vector
+		So how about when you have too many multivectors in your scope?
+			Could rearrange to put recent ones at top
+			Could pack rectangles
+			Scrollbar
 		Aesthetics/non-design
 			DO NOT THINK ABOUT THIS
 			SDF/raytrace
@@ -37,6 +41,7 @@
 	Levels:
 		Add only, diagonal
 		Add only, two along three up
+		"Double the size of this" - shows elegance of scalar multiplication
 
 	General structure
 		Addition only, scalars only
@@ -49,8 +54,8 @@
 
 async function init()
 {
-	// await initBivectorAppearance()
-	// return
+	await initBivectorAppearance()
+	return
 
 	await initMenu()
 
@@ -60,7 +65,13 @@ async function init()
 
 	initMultivectorAppearances()
 
-	initGoal()
+	// let goalElements = new Float32Array(8)
+	// goalElements[1] = 1.
+	// goalElements[2] = 1.
+	// initSingularGoal( goalElements )
+
+	let inputMultivectors = initInputOutputGoal()
+	// return
 
 	{
 		var scope = []
@@ -88,6 +99,9 @@ async function init()
 		// scope.push(zBasisElement)
 		// zBasisElement.setTo1Blade(zUnit)
 
+		let scopeInputMultivector = MultivectorAppearance(scopeOnClick,inputMultivectors[0].elements)
+		scope.push(scopeInputMultivector)
+
 		// let trivec = MultivectorAppearance(scopeOnClick)
 		// scope.push(trivec)
 		// trivec.elements[7] = 1.
@@ -98,9 +112,9 @@ async function init()
 			MultivectorAppearance(function(){}) ]
 		scene.remove(operands[0],operands[1])
 
-		var inputPositions = Array(2)
-		inputPositions[0] = new THREE.Vector3( 0.,1.,0.)
-		inputPositions[1] = new THREE.Vector3(-1.,0.,0.)
+		var operandPositions = Array(2)
+		operandPositions[0] = new THREE.Vector3( 0.,1.,0.)
+		operandPositions[1] = new THREE.Vector3( 1.,0.,0.)
 	}
 
 	{
@@ -122,7 +136,7 @@ async function init()
 			if(i)
 				o.material.color.setRGB(1.,0.,0.)
 
-			o.position.y = -3.5
+			o.position.y = camera.topAtZZero - .4
 			o.position.x = (i - 0.5 * (operatorOriginals.length-1) ) * 2.
 			scene.add(o)
 
@@ -146,14 +160,14 @@ async function init()
 
 		if(animationStage === null)
 		{
-			scopePosition.y = -camera.topAtZZero
+			scopePosition.y = camera.topAtZZero
 			for(let i = 0; i < scope.length; i++ )
 			{
 				let halfHeight = scope[i].getHeightWithPadding() / 2.;
 
-				scopePosition.y += halfHeight
+				scopePosition.y -= halfHeight
 				scope[i].position.lerp(scopePosition,.1)
-				scopePosition.y += halfHeight
+				scopePosition.y -= halfHeight
 			}
 
 			let ready = true
@@ -165,8 +179,8 @@ async function init()
 					ready = false
 				else
 				{
-					operands[i].position.lerp(inputPositions[i],0.1)
-					if( operands[i].position.distanceTo(inputPositions[i] ) > distanceRequirement )
+					operands[i].position.lerp(operandPositions[i],0.1)
+					if( operands[i].position.distanceTo(operandPositions[i] ) > distanceRequirement )
 						ready = false
 				}
 			}
@@ -209,17 +223,27 @@ async function init()
 
 							if( searchArray(scope,newMultivector) )
 							{
-								log("already got that in the scope, can do something here")
+								console.error("already got that in the scope, can do something here")
 							}
 
-							if( equalsMultivector(goalMultivector.elements,newMultivector.elements) )
+							//goal
 							{
-								setGoalAchievement(true)
-							}
-							else
-							{
-								setGoalIrritation(1.)
-								scope.push(newMultivector)
+								if(singularGoalMultivector !== null)
+								{
+									if( equalsMultivector(singularGoalMultivector.elements,newMultivector.elements) )
+									{
+										setGoalAchievement(true)
+									}
+									else
+									{
+										setGoalIrritation(1.)
+										scope.push(newMultivector)
+									}
+								}
+								else
+								{
+									scope.push(newMultivector)
+								}
 							}
 						}
 
@@ -229,7 +253,7 @@ async function init()
 
 				case 1:
 					{
-						let secondsThisSectionTakes = 1.3;
+						let secondsThisSectionTakes = 1.1;
 						animationStage += frameDelta / secondsThisSectionTakes
 					}
 					break;

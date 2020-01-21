@@ -1,11 +1,3 @@
-// for(let i = 0; i < points.length; i++)
-// {
-// 	for(let j = 0; j < points.length; j++)
-// 	{
-
-// 	}
-// }
-
 /*
 	Amount of time this is worth?
 		May turn out to be unnecessary
@@ -24,8 +16,7 @@
 		They bounce off each other / repel
 		"Metaballs" in appearance
 
-	
-	SDF!
+	Urgh you might want this on a deadline
 
 	Which bivectors are positive, which negative?
 		The going idea currently is that it's whirlpool-like
@@ -80,10 +71,12 @@
 
 async function initBivectorAppearance()
 {
+	let elements = new Float32Array(8)
+	elements[4] = 1.
+
 	{
-		let numBlobs = 33; //IF YOU WANT TO CHANGE THIS THEN CHANGE IT IN THE FRAGMENT SHADER TOOOO!!!!!
+		let numBlobs = 30; //IF YOU WANT TO CHANGE THIS THEN CHANGE IT IN THE FRAGMENT SHADER TOOOO!!!!!
 		//is it possible to extract a constant from a compiled shader?
-		let coords = new Float32Array(numBlobs*3);
 
 		let positions = Array(numBlobs);
 		let velocities = Array(numBlobs); //next thing to do is get an array in there, suuuurely possible
@@ -99,10 +92,11 @@ async function initBivectorAppearance()
 
 		let material = new THREE.ShaderMaterial({
 			uniforms: {
-				coords: {value: coords},
-				radius: {value: .35},
-				smooshedness: {value: 1.45}
-			},
+				positions: {value:positions},
+				radius: {value: .15},
+				smooshedness: {value: 0.7}, //1.45
+				bivector: {value:new THREE.Vector3()}
+			}
 		});
 		await assignShader("bivectorVertex", material, "vertex")
 		await assignShader("bivectorFragment", material, "fragment")
@@ -129,80 +123,94 @@ async function initBivectorAppearance()
 
 		let fieldAcceleration = new THREE.Vector3()
 
-		let circleRadius = 1.5
-		let fieldIndicator = new THREE.Mesh(new THREE.CircleBufferGeometry(circleRadius,32), new THREE.MeshBasicMaterial({color:0x00FF00,transparent:true,opacity:.6}))
-		scene.add(fieldIndicator)
+		// let circleRadius = 1.1
+		// let fieldIndicator = new THREE.Mesh(new THREE.CircleBufferGeometry(circleRadius,32), new THREE.MeshBasicMaterial({color:0x00FF00,transparent:true,opacity:.6}))
+		// scene.add(fieldIndicator)
 
-		let fieldMagnitude = .06
-		let repulsiveForceMagnitude = .007;
-		let inherentFriction = .002
+		let circleCenter = new THREE.Vector3()
+		bindButton("a",function()
+		{
+			if(circleCenter.equals(zeroVector))
+			{
+				circleCenter.copy(xUnit).multiplyScalar(3.)
+			}
+			else
+			{
+				circleCenter.set(0.,0.,0.)
+			}
+		})
+
+		let inherentFriction = .0015
+		let repulsiveForceMagnitude = .00200001;
+		let fieldMagnitude = .0020001
 		updateFunctions.push( function() 
 		{
-			// coords[0] = Math.sin(frameCount * .06)
-			// coords[4] = Math.sin(frameCount * .06)
-
 			// let acceleration = new THREE.Vector3()
 			// function repulsion(distance)
 			// {
 
 			// }
 
-			// let fieldAcceleration = new THREE.Vector3()
-			for(let i = 0; i < numBlobs; i++)
+			material.uniforms.bivector.value.fromArray(elements,4)
+
+			let iterations = 1;
+			for(let iter = 0; iter < iterations; iter++)
 			{
-				/*
-					Arbitrary forcefield
-						loop through a set of line segments, get your distance to them
-						Not easy to work out whether you're in or out
-
-					+ They repel each other
-					+ slight attraction maybe?
-
-					So there's a shape.
-					If you're inside the shape, nothing.
-					Outside, go in direction of closest part. H
-
-					Adding coplanar bivectors is arguably aberrant and you shouldn't think about it too much
-
-					verlet integration might be nice
-				*/
-
-				let p = positions[i]
-
-				//circular
-				fieldAcceleration.set(0.,0.,0.)
-				if( p.length() > circleRadius )
-					fieldAcceleration.copy(p).negate().setLength( fieldMagnitude * (fieldAcceleration.length()-circleRadius))
-				// //rectangle
-				// // if( Math.abs(p.x) > rectangleWidth / 2. || Math.abs(p.y) > rectangleHeight / 2. )
-				// // 	fieldAcceleration.copy(p).negate().setLength(1.)
-
-				velocities[i].add(fieldAcceleration)
-
-				//sponge balls
-				let displacement = new THREE.Vector3()
-				for(let j = i+1; j < numBlobs; j++)
+				// let fieldAcceleration = new THREE.Vector3()
+				for(let i = 0; i < numBlobs; i++)
 				{
-					displacement.subVectors(p,positions[j])
-					if( displacement.length() < material.uniforms.radius.value * 2. )
-					{
-						displacement.setLength(repulsiveForceMagnitude / displacement.length())
+					/*
+						Arbitrary forcefield
+							loop through a set of line segments, get your distance to them
+							Not easy to work out whether you're in or out
 
-						velocities[i].add(displacement)
-						velocities[j].sub(displacement)
+						slight attraction maybe
+
+						So there's a shape.
+						If you're inside the shape, nothing.
+						Outside, go in direction of closest part. H
+
+						Adding coplanar bivectors is arguably aberrant and you shouldn't think about it too much
+
+						verlet integration might be nice
+					*/
+
+					let p = positions[i]
+					
+					// //rectangle
+					// // if( Math.abs(p.x) > rectangleWidth / 2. || Math.abs(p.y) > rectangleHeight / 2. )
+					// // 	fieldAcceleration.copy(p).negate().setLength(1.)
+
+					//circular
+					fieldAcceleration.set(0.,0.,0.)
+					// if( p.length() > circleRadius )
+					fieldAcceleration.copy(p).sub(circleCenter).negate().multiplyScalar( fieldMagnitude )
+
+					velocities[i].add(fieldAcceleration)
+
+					//sponge balls
+					let displacement = new THREE.Vector3()
+					for(let j = i+1; j < numBlobs; j++)
+					{
+						displacement.subVectors(p,positions[j])
+						if( displacement.length() < material.uniforms.radius.value * 2. )
+						{
+							// debugger;
+							displacement.setLength(repulsiveForceMagnitude / displacement.length())
+
+							velocities[i].add(displacement)
+							velocities[j].sub(displacement)
+						}
 					}
+
+					velocities[i].setLength( Math.max( velocities[i].length() - inherentFriction, 0. ) )
 				}
 
-				//ask Joel. Friction is apparently a constant (not proportional) force opposite to velocities
-				velocities[i].setLength(velocities[i].length() - inherentFriction )
-			}
-
-			for(let i = 0; i < numBlobs; i++)
-			{
-				positions[i].add(velocities[i])
-				positions[i].z = 0.;
-				//then probably need to project back on plane. Using GA!
-				positions[i].toArray(coords,i*3);
+				for(let i = 0; i < numBlobs; i++)
+				{
+					positions[i].add(velocities[i])
+					positions[i].z = 0.; //TODO better projection. If only there was some kind of mathematical system that etc
+				}
 			}
 		} )
 
@@ -212,7 +220,7 @@ async function initBivectorAppearance()
 	let interior = new THREE.Mesh(new THREE.Geometry(),new THREE.MeshBasicMaterial({color:0xFF0000, side:THREE.DoubleSide,transparent:true,opacity:.6}))
 	let exterior = new THREE.Mesh(new THREE.Geometry(),new THREE.MeshBasicMaterial({color:0x0000FF, side:THREE.DoubleSide,transparent:true,opacity:.6}))
 
-	let bivector = new THREE.Object3D()
+	let bivector = new THREE.Group()
 	bivector.add(interior,exterior)
 	scene.add(bivector)
 
