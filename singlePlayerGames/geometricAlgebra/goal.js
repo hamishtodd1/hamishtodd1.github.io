@@ -1,4 +1,36 @@
-function initInputOutputGoal()
+/*
+	Level ideas
+		Puzzle such that for each vector you must make the bivector of it and the X axis
+		Classic: person walking on a train. Train machinery on the wheels
+		Videos
+			Diver
+			Dancer
+			Juggler. Lots of circus skills
+		Bee going from flower to flower
+		A puppy that is enjoying licking a lolly. The lolly moves away ordinarily, but if you can get its jetpack to follow the lolly it can continue licking
+
+	Levels:
+		Add only, diagonal
+		Add only, two along three up
+		"Double the size of this" - shows elegance of scalar multiplication
+
+	General structure
+		Addition only, scalars only
+		Addition only, vectors only
+		Addition only, bivectors only
+		multiplication and addition, scalars
+		multiplication and addition, scalars and vectors
+		multiplication and addition, scalars and bivectors
+
+	Could limit the number of operations they have?
+
+	General ideas that might lead to levels
+		A part where you derive the length of a vector. Even that drops out!
+		Knowing distributivity lets you reduce
+		Puzzles based around Orientation could be about a snake trying to eat an apple
+*/
+
+function initInputOutputGoal(scope,scopeOnClick)
 {
 	let background = new THREE.Mesh(new THREE.PlaneGeometry(1.,1.), new THREE.MeshBasicMaterial({color:0xFFFFFF}))
 	background.scale.x = 3.65
@@ -35,10 +67,16 @@ function initInputOutputGoal()
 		var outputSelectionIndicator = inputSelectionIndicator.clone()
 	}
 
+	let scopeInputMultivector = MultivectorAppearance(scopeOnClick,new Float32Array(8));
+	scope.push(scopeInputMultivector)
 	function selectInput(multivec)
 	{
 		inputSelectionIndicator.position.copy(multivec.position)
 		outputSelectionIndicator.position.copy(multivec.position)
+
+		for(let i = 0; i < 8; i++)
+			scopeInputMultivector.elements[i] = multivec.elements[i]
+		scopeInputMultivector.updateAppearance()
 
 		//probably have it shake a little. Well I mean this is what the pipes were meant to be
 
@@ -76,13 +114,16 @@ function initInputOutputGoal()
 		outputGroup.add(background.clone())
 		outputGroup.add(outputSelectionIndicator)
 
-		let outputs = Array(3)
+		let seedForRandomActivity = Math.random()
+
+		let outputs = Array(inputs.length)
+		let scopeWithOneExtra = Array(scope.length+1)
+		for(let i = 0; i < scope.length; i++)
+			scopeWithOneExtra[i] = scope[i]
 		for(let i = 0; i < outputs.length; i++)
 		{
-			let elements = new Float32Array(8)
-			elements[0] = Math.floor(Math.random()*20) - 10.
-			for(let j = 1; j < 5; j++) //ONLY USING THOSE THAT WORK
-				elements[j] = (Math.random()-.5)*2.
+			scopeWithOneExtra[scope.length] = inputs[i]
+			let elements = generateRandomMultivectorElementsFromScope(scopeWithOneExtra,seedForRandomActivity)
 
 			outputs[i] = MultivectorAppearance(function(){},elements)
 			outputs[i].position.x = (i-1) * 1.2;
@@ -107,25 +148,32 @@ function initInputOutputGoal()
 }
 
 let singularGoalMultivector = null
-function initSingularGoal(goalElements)
+function initSingularGoal(goalElements, scope)
 {
-	var goalBox = new THREE.Group()
-	scene.add(goalBox)
-	goalBox.position.y = camera.topAtZZero - 1.4
+	{
+		var goalBox = new THREE.Group()
+		scene.add(goalBox)
+		goalBox.position.y = -camera.topAtZZero + 1.4
 
-	goalBox.title = makeTextSign("Make this:")
-	goalBox.title.scale.multiplyScalar(.5)
-	goalBox.title.position.y = .9
-	goalBox.add(goalBox.title)
+		goalBox.title = makeTextSign("Make this:")
+		goalBox.title.scale.multiplyScalar(.5)
+		goalBox.title.position.y = .9
+		goalBox.add(goalBox.title)
 
-	let background = new THREE.Mesh(new THREE.PlaneGeometry(1.,1.),new THREE.MeshBasicMaterial({color:0x000000}))
-	background.scale.set(goalBox.title.scale.x*1.1,goalBox.title.scale.y*4.3,1.)
-	background.position.z -= .001
-	background.position.y += .18
-	goalBox.add(background)
+		let background = new THREE.Mesh(new THREE.PlaneGeometry(1.,1.),new THREE.MeshBasicMaterial({color:0x000000}))
+		background.scale.set(goalBox.title.scale.x*1.1,goalBox.title.scale.y*4.3,1.)
+		background.position.z -= .001
+		background.position.y += .18
+		goalBox.add(background)
+	}
 
-	singularGoalMultivector = MultivectorAppearance(function(){},goalElements)
+	//level generator
+	let randomMultivectorElements = generateRandomMultivectorElementsFromScope(scope)
+	singularGoalMultivector = MultivectorAppearance(function(){},randomMultivectorElements)
 	goalBox.add(singularGoalMultivector)
+
+	// singularGoalMultivector = MultivectorAppearance(function(){},goalElements)
+	// goalBox.add(singularGoalMultivector)
 
 	var goalIrritation = 0.
 	updateFunctions.push(function()
@@ -171,32 +219,4 @@ function initSingularGoal(goalElements)
 	{
 		goalIrritation = 1.
 	}
-
-	//level generator
-	// {
-	// 	let numOperations = 4;
-	// 	let generatorScope = []
-	// 	for(let i = 0; i < scope.length; i++)
-	// 		generatorScope.push(scope[i].elements)
-	// 	for(let operation = 0; operation < numOperations; operation++)
-	// 	{
-	// 		let operandA = generatorScope[ Math.floor( Math.random() * generatorScope.length ) ];
-	// 		let operandB = generatorScope[ Math.floor( Math.random() * generatorScope.length ) ];
-
-	// 		let functionToUse = Math.random() < .5 ? geometricProduct : geometricSum;
-
-	// 		let result = functionToUse(operandA,operandB)
-
-	// 		// if(searchArray(generatorScope,result))
-	// 		// {
-	// 		// 	operation--
-	// 		// }
-	// 		// else
-	// 		{
-	// 			generatorScope.push(result)
-	// 		}
-	// 	}
-
-	// 	var singularGoalMultivector = MultivectorAppearance(function(){},generatorScope[generatorScope.length-1])
-	// }
 }

@@ -1,4 +1,8 @@
 /*
+	This may be astonishingly misguided and you are better off leaving it to the artist
+
+	So long as you never see the things rotating, it is probably ok for there to be an arbitrary cutoff in what is red and what is blue
+
 	Amount of time this is worth?
 		May turn out to be unnecessary
 		Bivectors and trivectors are quite interesting and exotic. It makes sense to give them an intriguing characterization

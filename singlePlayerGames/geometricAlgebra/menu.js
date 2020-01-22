@@ -1,6 +1,6 @@
 /*
 	TODO
-		playground
+		Sandbox
 		switch horizontal/vertical display method
 			detect region and change appropriately
 			It's linked to what direction time flows in, what direction symbols are read in

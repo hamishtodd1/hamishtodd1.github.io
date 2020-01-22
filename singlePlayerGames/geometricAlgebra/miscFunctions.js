@@ -1,3 +1,23 @@
+function randomSeeded(seed)
+{
+    var x = Math.sin(seed*TAU) * 10000;
+    return x - Math.floor(x);
+}
+
+function RandomSequenceSeeded(seed)
+{
+	let generator = {
+		lastValue:seed,
+		getValue:function()
+		{
+			generator.lastValue = randomSeeded(generator.lastValue)
+			return generator.lastValue
+		}
+	}
+
+	return generator
+}
+
 function assignShader(fileName, materialToReceiveAssignment, vertexOrFragment)
 {
 	let propt = vertexOrFragment + "Shader"

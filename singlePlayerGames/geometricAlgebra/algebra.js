@@ -12,6 +12,44 @@
 	4. Those get combined
 */
 
+function generateRandomMultivectorElementsFromScope(scope, seed)
+{
+	console.assert(scope.length > 0)
+
+	if(seed === undefined)
+		seed = Math.random()
+	let randomSequence = RandomSequenceSeeded(seed)
+
+	let numOperations = 5;
+	let generatorScope = []
+	for(let i = 0; i < scope.length; i++)
+		generatorScope.push(scope[i].elements)
+	for(let operation = 0; operation < numOperations; operation++)
+	{
+		let operandA = generatorScope[ Math.floor( randomSequence.getValue() * generatorScope.length ) ];
+		let operandB = generatorScope[ Math.floor( randomSequence.getValue() * generatorScope.length ) ];
+		// let operandA = generatorScope[ generatorScope.length - (randomSequence.getValue() < .5 ? 1:2) ];
+		// let operandB = generatorScope[ generatorScope.length - (randomSequence.getValue() < .5 ? 1:2) ];
+
+		let functionToUse = randomSequence.getValue() < .5 ? geometricProduct : geometricSum;
+
+		let result = functionToUse(operandA,operandB)
+
+		// if(searchArray(generatorScope,result))
+		// {
+		// 	operation--
+		// }
+		// else
+		{
+			generatorScope.push(result)
+		}
+	}
+
+	delete RandomSequenceSeeded
+
+	return generatorScope[generatorScope.length-1]
+}
+
 function geometricProduct(a,b,target)
 {
 	if(target === undefined)

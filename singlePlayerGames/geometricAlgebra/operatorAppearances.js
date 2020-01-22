@@ -6,6 +6,12 @@
 	are left and right multiply the same as multiply by conjugate?
 
 	Arguably the add should contain a load of multiplies
+
+	Other operationg, ugh
+		"to the power of". Gives you square root, reciprocals
+		Would be nice if that could emerge
+		The vector derivative would be nice
+		Integral?
 */
 
 async function initOperatorAppearance()

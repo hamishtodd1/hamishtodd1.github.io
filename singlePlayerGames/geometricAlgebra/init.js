@@ -1,11 +1,10 @@
 /*
 	TODO for slack / Cambridge demo
-		It's a playground
 		Every aspect of the multiplication and addition needs to be visualized
-		Already a nice product/tool for thinking that can be shown to folks!
-		Generator and goal flashes when you don't get it
+		Sandbox available
 	
 	Long term
+		They should be able to scope things, and delete them
 		QM
 			a vector of complex numbers can separate into a vector and bivector (i*vector) parts?
 		Bootstrapping!
@@ -35,27 +34,16 @@
 				The frogs are a certain animation
 				Particle systems
 				Look dumbass, of course when you bring in an artist they'll want to put in non-mathematical shit with textures etc.
-
-	Could limit the number of operations they have?
-
-	Levels:
-		Add only, diagonal
-		Add only, two along three up
-		"Double the size of this" - shows elegance of scalar multiplication
-
-	General structure
-		Addition only, scalars only
-		Addition only, vectors only
-		Addition only, bivectors only
-		multiplication and addition, scalars
-		multiplication and addition, scalars and vectors
-		multiplication and addition, scalars and bivectors
+		Helping make shaders
+			Ideally you paste and it tells you what it thinks you pasted
+			Spit out glsl?
+			Heh, have it be possible for the input and output to be arranged in a rectangle with x and y smoothly varying, i.e. a framebuffer
 */
 
 async function init()
 {
-	await initBivectorAppearance()
-	return
+	// await initBivectorAppearance()
+	// return
 
 	await initMenu()
 
@@ -65,18 +53,9 @@ async function init()
 
 	initMultivectorAppearances()
 
-	// let goalElements = new Float32Array(8)
-	// goalElements[1] = 1.
-	// goalElements[2] = 1.
-	// initSingularGoal( goalElements )
-
-	let inputMultivectors = initInputOutputGoal()
-	// return
-
+	var scope = []
 	{
-		var scope = []
-
-		function scopeOnClick(multivecToCopy)
+		var scopeOnClick = function(multivecToCopy)
 		{
 			let operandToUse = null
 			if(operands[0].parent !== scene)
@@ -99,9 +78,6 @@ async function init()
 		// scope.push(zBasisElement)
 		// zBasisElement.setTo1Blade(zUnit)
 
-		let scopeInputMultivector = MultivectorAppearance(scopeOnClick,inputMultivectors[0].elements)
-		scope.push(scopeInputMultivector)
-
 		// let trivec = MultivectorAppearance(scopeOnClick)
 		// scope.push(trivec)
 		// trivec.elements[7] = 1.
@@ -116,6 +92,13 @@ async function init()
 		operandPositions[0] = new THREE.Vector3( 0.,1.,0.)
 		operandPositions[1] = new THREE.Vector3( 1.,0.,0.)
 	}
+
+	initInputOutputGoal(scope,scopeOnClick)
+
+	// let goalElements = new Float32Array(8)
+	// goalElements[1] = 1.
+	// goalElements[2] = 1.
+	// initSingularGoal( goalElements,scope )
 
 	{
 		await initOperatorAppearance()

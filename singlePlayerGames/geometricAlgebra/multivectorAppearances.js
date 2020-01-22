@@ -12,6 +12,7 @@
 		Numeral with positive or negative sign
 		Numeral with color
 		Spiral?
+		Should it be clear what the units are?
 		Probably better off as red five versus blue five if you're going to carry it
 		Opacity?
 		Bunch of dots? To multiply, it makes that many copies of that thing then adds them together
@@ -49,6 +50,8 @@
 		Make them rectangles with unit length on side that is the shared line
 		Attach them along that side
 		They "Snap" to the hypotenuse
+
+	Vector addition: always one on left and one above. And when they come together the red ends can melt each other or whatever it is, just like bivectors
 
 	Man, RP(n) is surely more fundamental than Rn
 
