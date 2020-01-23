@@ -1,15 +1,19 @@
 /*
+
 	Level ideas
+		A puzzle where there are 2 inputs and 2 outputs. One pair seems easy. The other appears to be blank- it's 0. Player has to understand this
 		Puzzle such that for each vector you must make the bivector of it and the X axis
 		Classic: person walking on a train. Train machinery on the wheels
 		Videos
 			Diver
 			Dancer
 			Juggler. Lots of circus skills
+			https://www.youtube.com/watch?v=FOJ7JAUK6EU
 		Bee going from flower to flower
 		A puppy that is enjoying licking a lolly. The lolly moves away ordinarily, but if you can get its jetpack to follow the lolly it can continue licking
 
 	Levels:
+		Scalar multiplication is the first aspect of the clifford product to show
 		Add only, diagonal
 		Add only, two along three up
 		"Double the size of this" - shows elegance of scalar multiplication
@@ -169,6 +173,7 @@ function initSingularGoal(goalElements, scope)
 
 	//level generator
 	let randomMultivectorElements = generateRandomMultivectorElementsFromScope(scope)
+	console.assert(!equalsMultivector(randomMultivectorElements,zeroMultivector))
 	singularGoalMultivector = MultivectorAppearance(function(){},randomMultivectorElements)
 	goalBox.add(singularGoalMultivector)
 
@@ -182,11 +187,20 @@ function initSingularGoal(goalElements, scope)
 		
 		singularGoalMultivector.position.x = goalIrritation * .2 * Math.sin(frameCount * .3)
 
-		for(let i = 0; i < singularGoalMultivector.children.length; i++)
-		{
-			singularGoalMultivector.children[i].material.color.g = 1.-goalIrritation
-			singularGoalMultivector.children[i].material.color.b = 1.-goalIrritation
-		}
+		//no, don't do this, there's only one material
+		// for(let i = 0; i < singularGoalMultivector.children.length; i++)
+		// {
+		// 	if(singularGoalMultivector.children[i].isGroup)
+		// 	{
+		// 		singularGoalMultivector.children[i].children[0].material.color.g = 1.-goalIrritation
+		// 		singularGoalMultivector.children[i].children[1].material.color.b = 1.-goalIrritation
+		// 	}
+		// 	else
+		// 	{
+		// 		singularGoalMultivector.children[i].material.color.g = 1.-goalIrritation
+		// 		singularGoalMultivector.children[i].material.color.b = 1.-goalIrritation
+		// 	}
+		// }
 
 		goalIrritation = Math.max(goalIrritation - frameDelta * .75,0.);
 	})

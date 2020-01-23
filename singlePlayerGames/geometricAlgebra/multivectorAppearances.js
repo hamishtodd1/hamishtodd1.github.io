@@ -72,8 +72,9 @@ function initMultivectorAppearances()
 	let parallelogramGeometry = new THREE.OriginCorneredPlaneBufferGeometry(1.,1.)
 	let circleGeometry = new THREE.CircleBufferGeometry(1.,32)
 
-	let bivecMaterialFront = new THREE.MeshStandardMaterial({color:0xFF0000,transparent:true,opacity:.4,side:THREE.DoubleSide})
-	let bivecMaterialBack = new THREE.MeshStandardMaterial({color:0x0000FF,transparent:true,opacity:.4,side:THREE.DoubleSide})
+	//surely frontside?
+	let bivecMaterialFront = new THREE.MeshStandardMaterial({color:0xFF0000,transparent:true,opacity:.4,side:THREE.FrontSide})
+	let bivecMaterialBack = new THREE.MeshStandardMaterial({color:0x0000FF,transparent:true,opacity:.4,side:THREE.BackSide})
 
 	let trivectorGeometry = new THREE.SphereBufferGeometry(1.,32,16)
 	let trivectorMaterial = new THREE.MeshStandardMaterial()
@@ -193,17 +194,12 @@ function initMultivectorAppearances()
 
 		{
 			let parallelogram = new THREE.Group()
-			let front = new THREE.Mesh(parallelogramGeometry, bivecMaterialFront);
-			front.castShadow = true
-			let back = new THREE.Mesh(parallelogramGeometry, bivecMaterialBack)
-			back.castShadow = true
-
-			multivec.add(parallelogram)
-
-			parallelogram.add(front,back)
+			parallelogram.front = new THREE.Mesh(parallelogramGeometry, bivecMaterialFront);
+			parallelogram.front.castShadow = true
+			parallelogram.back = new THREE.Mesh(parallelogramGeometry, bivecMaterialBack)
+			parallelogram.back.castShadow = true
+			parallelogram.add(parallelogram.front,parallelogram.back)
 			parallelogram.matrixAutoUpdate = false;
-			
-			
 
 			multivec.setParallelogram = function(multivecA,multivecB)
 			{
@@ -229,14 +225,23 @@ function initMultivectorAppearances()
 					multivec.remove(parallelogram)
 			}
 
-			let circle = new THREE.Mesh(circleGeometry, bivecMaterialFront)
-			multivec.add(circle)
+			let circle = new THREE.Group()
+			circle.front = new THREE.Mesh(circleGeometry, bivecMaterialFront)
+			circle.front.castShadow = true
+			circle.back = new THREE.Mesh(circleGeometry, bivecMaterialBack)
+			circle.back.castShadow = true
+			circle.add(circle.front,circle.back)
 			
 			multivec.setCircle = function()
 			{
 				let area = Math.abs(multivec.elements[4]) //yeah not really because negativity also other elements
 				circle.scale.setScalar( Math.sqrt( area / Math.PI ) )
-				if(multivec.elements[5]!==0. || multivec.elements[6] !== 0.)
+				if(multivec.elements[4] < 0.)
+					circle.rotation.y = Math.PI
+				else
+					circle.rotation.y = 0.
+
+				if(multivec.elements[5] !== 0. || multivec.elements[6] !== 0.)
 					log("not working yet")
 
 				multivec.remove(parallelogram)

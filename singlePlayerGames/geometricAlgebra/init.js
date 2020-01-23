@@ -57,6 +57,13 @@ async function init()
 	{
 		var scopeOnClick = function(multivecToCopy)
 		{
+			if(animationStage !== null)
+			{
+				log("not doin nothing")
+				return
+			}
+			//better: fastforward animation
+
 			let operandToUse = null
 			if(operands[0].parent !== scene)
 				operandToUse = operands[0]
@@ -93,12 +100,12 @@ async function init()
 		operandPositions[1] = new THREE.Vector3( 1.,0.,0.)
 	}
 
-	initInputOutputGoal(scope,scopeOnClick)
+	// initInputOutputGoal(scope,scopeOnClick)
 
-	// let goalElements = new Float32Array(8)
-	// goalElements[1] = 1.
-	// goalElements[2] = 1.
-	// initSingularGoal( goalElements,scope )
+	let goalElements = new Float32Array(8)
+	goalElements[1] = 1.
+	goalElements[2] = 1.
+	initSingularGoal( goalElements,scope )
 
 	{
 		await initOperatorAppearance()
@@ -126,6 +133,12 @@ async function init()
 			clickables.push(o)
 			o.onClick = function()
 			{
+				if(animationStage !== null)
+				{
+					log("not doin nothing")
+					return
+				}
+
 				activeOperator.material.color.copy(this.material.color)
 				activeOperator.position.copy(o.position)
 				activeOperator.function = o.function
@@ -182,8 +195,8 @@ async function init()
 		}
 		else
 		{
-			if( mouse.clicking && !mouse.oldClicking )
-				animationStage = 1. - frameDelta * .001
+			// if( mouse.clicking && !mouse.oldClicking )
+			// 	animationStage = 1. - frameDelta * .001
 
 			switch(Math.floor(animationStage))
 			{
@@ -192,56 +205,56 @@ async function init()
 						let secondsThisSectionTakes = .3;
 						let increment = frameDelta / secondsThisSectionTakes
 
-						if( animationStage + increment >= 1. )
-						{
-							let newMultivectorElements = activeOperator.function(operands[0].elements,operands[1].elements)
-							let newMultivector = MultivectorAppearance(scopeOnClick, newMultivectorElements)
-							clickables.push(newMultivector)
-							
-							newMultivector.updateAppearance()
-
-							scene.remove(operands[0],operands[1],activeOperator)
-							scene.add(newMultivector)
-							log(newMultivector.elements)
-
-							if( searchArray(scope,newMultivector) )
-							{
-								console.error("already got that in the scope, can do something here")
-							}
-
-							//goal
-							{
-								if(singularGoalMultivector !== null)
-								{
-									if( equalsMultivector(singularGoalMultivector.elements,newMultivector.elements) )
-									{
-										setGoalAchievement(true)
-									}
-									else
-									{
-										setGoalIrritation(1.)
-										scope.push(newMultivector)
-									}
-								}
-								else
-								{
-									scope.push(newMultivector)
-								}
-							}
-						}
-
 						animationStage += increment
 					}
 					break;
 
 				case 1:
+					let newMultivectorElements = activeOperator.function(operands[0].elements,operands[1].elements)
+					if( searchArray(scope,newMultivectorElements) )
+					{
+						console.error("already got that in the scope, can do something here")
+					}
+
+					let newMultivector = MultivectorAppearance(scopeOnClick, newMultivectorElements)
+					clickables.push(newMultivector)
+					
+					newMultivector.updateAppearance()
+
+					scene.remove(operands[0],operands[1],activeOperator)
+					scene.add(newMultivector)
+					log(newMultivector.elements)
+
+					//goal
+					{
+						if(singularGoalMultivector !== null)
+						{
+							if( equalsMultivector(singularGoalMultivector.elements,newMultivector.elements) )
+							{
+								setGoalAchievement(true)
+							}
+							else
+							{
+								setGoalIrritation(1.)
+								scope.push(newMultivector)
+							}
+						}
+						else
+						{
+							scope.push(newMultivector)
+						}
+					}
+					animationStage = 2.;
+					break;
+
+				case 2:
 					{
 						let secondsThisSectionTakes = 1.1;
 						animationStage += frameDelta / secondsThisSectionTakes
 					}
 					break;
 
-				case 2:
+				case 3:
 					animationStage = null;
 					break;
 			}

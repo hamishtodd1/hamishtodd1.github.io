@@ -5,12 +5,14 @@
 	trivec * vector   = dual bivector
 	trivec * bivector = dual vector
 	vector * bivector = 
+	For scalar-pseudoscalar pair, could turn into
 
 	1. Line all up in a table
 	2. Everything gets applied in some order.
 	3. Things get grouped together into the different blades
 	4. Those get combined
 */
+let zeroMultivector = new Float32Array(8)
 
 function generateRandomMultivectorElementsFromScope(scope, seed)
 {
@@ -112,13 +114,12 @@ function equalsMultivector(a,b)
 	return true
 }
 
-function searchArray(arr,multivec)
+function searchArray(arr,elements)
 {
 	for(let i = 0; i < arr.length; i++)
 	{
-		if( equalsMultivector(multivec.elements,arr[i].elements) )
+		if( equalsMultivector(elements,arr[i].elements) )
 		{
-			log(multivec.elements,arr[i].elements)
 			return true
 		}
 	}
