@@ -55,6 +55,7 @@ async function init()
 
 	var scope = []
 	{
+		let lastAssignedOperand = 0
 		var scopeOnClick = function(multivecToCopy)
 		{
 			if(animationStage !== null)
@@ -64,15 +65,13 @@ async function init()
 			}
 			//better: fastforward animation
 
-			let operandToUse = null
-			if(operands[0].parent !== scene)
-				operandToUse = operands[0]
-			else if(operands[1].parent !== scene)
-				operandToUse = operands[1]
+			operandToUse = operands[1-lastAssignedOperand]
 
 			operandToUse.copyElements(multivecToCopy.elements)
 			operandToUse.position.copy(multivecToCopy.position)
 			scene.add(operandToUse)
+
+			lastAssignedOperand = 1 - lastAssignedOperand
 		}
 
 		let xBasisElement = MultivectorAppearance(scopeOnClick)

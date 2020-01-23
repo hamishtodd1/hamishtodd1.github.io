@@ -1,9 +1,9 @@
 /*
-
 	Level ideas
 		A puzzle where there are 2 inputs and 2 outputs. One pair seems easy. The other appears to be blank- it's 0. Player has to understand this
 		Puzzle such that for each vector you must make the bivector of it and the X axis
-		Classic: person walking on a train. Train machinery on the wheels
+		Classic: person walking on a train
+		The machinery you have on the wheels of trains
 		Videos
 			Diver
 			Dancer

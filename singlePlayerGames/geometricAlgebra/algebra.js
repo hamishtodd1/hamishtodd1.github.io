@@ -5,7 +5,7 @@
 	trivec * vector   = dual bivector
 	trivec * bivector = dual vector
 	vector * bivector = 
-	For scalar-pseudoscalar pair, could turn into
+	For scalar-pseudoscalar pair, could turn into the argand diagram version, then transform, then turn back!
 
 	1. Line all up in a table
 	2. Everything gets applied in some order.
