@@ -1,1 +1,1 @@
-For now at least, a game about geometric algebra
+For now at least, a game about Clifford algebra

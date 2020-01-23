@@ -17,6 +17,7 @@
 		Add only, diagonal
 		Add only, two along three up
 		"Double the size of this" - shows elegance of scalar multiplication
+		People like animals! Dung beetle rolls dung for the turning
 
 	General structure
 		Addition only, scalars only
@@ -34,12 +35,19 @@
 		Puzzles based around Orientation could be about a snake trying to eat an apple
 */
 
+let modeDependentReactionToResult = function()
+{
+	//by default nothing
+}
+
 function initInputOutputGoal(scope,scopeOnClick)
 {
 	let background = new THREE.Mesh(new THREE.PlaneGeometry(1.,1.), new THREE.MeshBasicMaterial({color:0xFFFFFF}))
 	background.scale.x = 3.65
 	background.scale.y = 1.2
 	background.position.z = -.001
+
+	modeDependentReactionToResult = function(){}
 
 	let intendedPositions = [
 		new THREE.Vector3( 0.,-camera.topAtZZero + .9, 0.),
@@ -151,7 +159,6 @@ function initInputOutputGoal(scope,scopeOnClick)
 	return inputScope
 }
 
-let singularGoalMultivector = null
 function initSingularGoal(goalElements, scope)
 {
 	{
@@ -170,6 +177,8 @@ function initSingularGoal(goalElements, scope)
 		background.position.y += .18
 		goalBox.add(background)
 	}
+
+	let singularGoalMultivector = null
 
 	//level generator
 	let randomMultivectorElements = generateRandomMultivectorElementsFromScope(scope)
@@ -206,31 +215,36 @@ function initSingularGoal(goalElements, scope)
 	})
 
 	let goalAchieved = false
-	setGoalAchievement = function(newGoalAchieved)
+	modeDependentReactionToResult = function(newMultivectorElements)
 	{
-		if(!goalAchieved && newGoalAchieved)
+		if( equalsMultivector(singularGoalMultivector.elements,newMultivectorElements) )
 		{
-			goalBox.title.children[0].material.setText("You win!")
-
-			updateFunctions.push(function()
+			if(!goalAchieved )
 			{
-				for(let i = 0; i < singularGoalMultivector.children.length; i++)
+				goalBox.title.children[0].material.setText("You win!")
+
+				updateFunctions.push(function()
 				{
-					singularGoalMultivector.children[i].material.color.r = Math.sin(frameCount * .14)
-					singularGoalMultivector.children[i].material.color.b = Math.sin(frameCount * .14)
-				}
+					// for(let i = 0; i < singularGoalMultivector.children.length; i++)
+					// {
+					// 	singularGoalMultivector.children[i].material.color.r = Math.sin(frameCount * .14)
+					// 	singularGoalMultivector.children[i].material.color.b = Math.sin(frameCount * .14)
+					// }
 
-				goalBox.title.children[0].material.color.r = Math.sin(frameCount * .14)
-				goalBox.title.children[0].material.color.b = Math.sin(frameCount * .14)
+					goalBox.title.children[0].material.color.r = Math.sin(frameCount * .14)
+					goalBox.title.children[0].material.color.b = Math.sin(frameCount * .14)
 
-				goalBox.position.y *= .9
-			})
+					goalBox.position.y *= .9
+				})
 
-			goalAchieved = newGoalAchieved
+				goalAchieved = true
+			}
+		}
+		else
+		{
+			goalIrritation = 1.
 		}
 	}
-	setGoalIrritation = function(newValue)
-	{
-		goalIrritation = 1.
-	}
+
+	return goalBox
 }

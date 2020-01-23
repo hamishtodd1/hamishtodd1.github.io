@@ -1,6 +1,8 @@
 /*
 	TODO for slack / Cambridge demo
-		Every aspect of the multiplication and addition needs to be visualized
+		Every aspect of the multiplication and addition needs to be visualized. Well, for 2D!
+			Bivector multiplication - complex multiplication!
+		Some tutorial levels
 		Sandbox available
 	
 	Long term
@@ -16,24 +18,6 @@
 			Could rearrange to put recent ones at top
 			Could pack rectangles
 			Scrollbar
-		Aesthetics/non-design
-			DO NOT THINK ABOUT THIS
-			SDF/raytrace
-				Can at least consider it because the geometry of these objects, which the player will spend a lot of time looking at, is simple
-				good shadows, reflections, colored lighting, transparency. Lights could originate in a texture.
-				But mostly can think of stuff as being in the background. Leave that to a game engine?
-				So anything that is more complicated gets an an sdf https://www.iquilezles.org/www/articles/intersectors/intersectors.htm
-				Lights come from environment/cubemap
-					Ideally one with XHR and all that. Maybe even a light field? Could just be a cylindrical one?
-				Ray tracings
-					https://www.shadertoy.com/view/MtcXWr
-			Cubemap "background"
-				Each pixel of which gets its own ray trace/sdf call, just the one to see if it is immediately accessible to the light
-			Maybe you want a conventional thing
-				Less time consuming, makes it so you can focus on what is important
-				The frogs are a certain animation
-				Particle systems
-				Look dumbass, of course when you bring in an artist they'll want to put in non-mathematical shit with textures etc.
 		Helping make shaders
 			Ideally you paste and it tells you what it thinks you pasted
 			Spit out glsl?
@@ -44,8 +28,6 @@ async function init()
 {
 	// await initBivectorAppearance()
 	// return
-
-	await initMenu()
 
 	// let otherThingToCheckDistanceTo = []
 	// let littleScene = await initWheelScene()
@@ -104,7 +86,9 @@ async function init()
 	let goalElements = new Float32Array(8)
 	goalElements[1] = 1.
 	goalElements[2] = 1.
-	initSingularGoal( goalElements,scope )
+	let goalBox = initSingularGoal( goalElements,scope )
+
+	await initMenu(goalBox)
 
 	{
 		await initOperatorAppearance()
@@ -151,18 +135,25 @@ async function init()
 	let animationStage = null;
 	updateFunctions.push(function()
 	{
-		scopePosition.x = -camera.rightAtZZero + .7
+		let allowedWidth = .7
+		scopePosition.x = -camera.rightAtZZero + allowedWidth
 
 		if(animationStage === null)
 		{
 			scopePosition.y = camera.topAtZZero
 			for(let i = 0; i < scope.length; i++ )
 			{
-				let halfHeight = scope[i].getHeightWithPadding() / 2.;
+				let halfMultivectorHeight = scope[i].getHeightWithPadding() / 2.;
 
-				scopePosition.y -= halfHeight
+				if( scopePosition.y - halfMultivectorHeight < -.5 * camera.topAtZZero)
+				{
+					scopePosition.x += allowedWidth
+					scopePosition.y = -camera.topAtZZero
+				}
+
+				scopePosition.y -= halfMultivectorHeight
 				scope[i].position.lerp(scopePosition,.1)
-				scopePosition.y -= halfHeight
+				scopePosition.y -= halfMultivectorHeight
 			}
 
 			let ready = true
@@ -225,24 +216,9 @@ async function init()
 					log(newMultivector.elements)
 
 					//goal
-					{
-						if(singularGoalMultivector !== null)
-						{
-							if( equalsMultivector(singularGoalMultivector.elements,newMultivector.elements) )
-							{
-								setGoalAchievement(true)
-							}
-							else
-							{
-								setGoalIrritation(1.)
-								scope.push(newMultivector)
-							}
-						}
-						else
-						{
-							scope.push(newMultivector)
-						}
-					}
+					modeDependentReactionToResult(newMultivector.elements)
+					scope.push(newMultivector) //currently it waits for animation to complete before pulling this to scope
+
 					animationStage = 2.;
 					break;
 

@@ -16,7 +16,7 @@
 		video speed
 */
 
-async function initMenu()
+async function initMenu(goalBox)
 {
 	let menu = new THREE.Group()
 	scene.add(menu)
@@ -26,6 +26,19 @@ async function initMenu()
 	scene.add(menuFader)
 
 	let menuEntries = []
+
+	{
+		let sandboxObject = makeTextSign("Sandbox mode")
+		let sandbox = sandboxObject.children[0]
+		sandbox.scale.copy(sandboxObject.scale)
+		menuEntries.push(sandbox)
+		sandbox.onClick = function()
+		{
+			modeDependentReactionToResult = function(){}
+			scene.remove(goalBox)
+			menuMode = false
+		}
+	}
 
 	{
 		let titleObject = makeTextSign("Menu")
@@ -74,7 +87,7 @@ async function initMenu()
 			menuFader.material.opacity += (intendedFaderOpacity - menuFader.material.opacity ) * .1
 		})
 
-		let menuMode = false
+		var menuMode = false
 		updateFromMenuMode()
 		menu.position.copy(intendedMenuPosition)
 		menuFader.material.opacity = intendedFaderOpacity
@@ -82,7 +95,6 @@ async function initMenu()
 		let backObject = makeTextSign("Back to game")
 		var back = backObject.children[0]
 		back.scale.copy(backObject.scale)
-		clickables.push(back)
 		back.onClick = function()
 		{
 			menuMode = false
@@ -90,8 +102,8 @@ async function initMenu()
 	}
 
 	{
-		let randomizeButton = makeTextSign("Random puzzle")
-		menuEntries.push(randomizeButton)
+		// let randomize = makeTextSign("Random puzzle")
+		// menuEntries.push(randomize)
 	}
 
 	{
@@ -132,7 +144,6 @@ async function initMenu()
 		let creditsSign = creditsSignObject.children[0]
 		creditsSign.scale.copy(creditsSignObject.scale)
 		menuEntries.push(creditsSign)
-		clickables.push(creditsSign)
 		
 		creditsSign.onClick = function()
 		{
@@ -153,6 +164,7 @@ async function initMenu()
 				"Pontus Grandstrom",
 				"Ivan Erofeev",
 				"Nina Erofeev", //check surname
+				"Matt Hare",
 				"(Your name goes here!)",
 			]
 			for(let i = 0; i < strings.length; i++)
@@ -182,5 +194,6 @@ async function initMenu()
 		menuEntries[i].position.y = -1 - i
 		menuEntries[i].position.y *= .9
 		menuEntries[i].scale.multiplyScalar(.7)
+		clickables.push(menuEntries[i])
 	}
 }
