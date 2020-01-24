@@ -65,6 +65,44 @@
 	Imagine her in the room, trying to persuade her old student to lay down her weapon
 */
 
+//structure factors
+{
+	lines = open( sys.argv[1] ).readlines()
+	hk = int( sys.argv[2] ) //pretty sure this is the length. TODO get the actual output with both files
+
+	//atom positions?
+	let atomPositions = [	[0.12, 0.10],
+							[0.20, 0.38],
+							[0.40, 0.20], ]
+
+	let hkls = []
+	for(let h = -hk; h <= hk; h++)
+	{
+		for(let k = -hk; k <= hk; k++)
+		{
+			if( k > 0 || ( k == 0 && h >= 0 ) ) //err, so why not start k at 0? I notice all the atom positions are positive...
+			{
+				let r = 0.;
+				let i = 0.;
+				atomPositions.forEach(function(atom)
+				{
+					r += 6. * Math.cos( TAU * (h*atomPositions[atomIndex][0] + k*atomPositions[atomIndex][1]) )
+					i += 6. * Math.sin( TAU * (h*atomPositions[atomIndex][0] + k*atomPositions[atomIndex][1]) )
+				})
+				f = Math.sqrt(r*r+i*i)
+				phi = 180./3.14159265 * Math.atan2(i,r) //I'd strongly prefer radians. This'd remove the "round" below too
+				hkls.push( [-f,h,k,f,phi] )
+			}
+		}
+	}
+
+	let converted = Array(hkls.length)
+	hkls.sort() //sorts by first element?
+
+	for(let i = 0; i < hkls.length; i++)
+		converted[i] = [ hkls[1], hkls[2], hkls[3], Math.round(hkls[4]) ];
+}
+
 function arrayOfArraysWithCertainValue(n,m,v)
 {
 	var result = [];
@@ -150,3 +188,4 @@ function arrayOfArraysWithCertainValue(n,m,v)
 		}
 	}
 }
+
