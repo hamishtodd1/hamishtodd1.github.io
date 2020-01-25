@@ -46,9 +46,6 @@ function initMouse()
 		oldRightClicking: false,
 		justMoved: false,
 
-		lastClickedObject: null,
-		lastRightClickedObject:null,
-
 		//don't use too much if clicking is not true - touchscreens. There are other ways to do things, and many people will be on phone
 		rayCaster: new THREE.Raycaster(),
 
@@ -107,15 +104,10 @@ function initMouse()
 
 			if( intersections.length !== 0 )
 			{
-				this.lastClickedObject = intersections[0].object;
 				if( intersections[0].object.onClick )
 				{
 					intersections[0].object.onClick(intersections[0]);
 				}
-			}
-			else
-			{
-				this.lastClickedObject = null;
 			}
 		}
 	}

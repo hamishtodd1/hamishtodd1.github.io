@@ -75,7 +75,7 @@ function FunctionPlane()
 	functionPlane.position.y += .5
 	scene.add(functionPlane)
 
-	let background = new THREE.Mesh(new THREE.PlaneGeometry(1.,1.), new THREE.MeshBasicMaterial({color:0x000000}))
+	let background = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({color:0x000000}))
 	functionPlane.add(background)
 
 	let spacing = 1.

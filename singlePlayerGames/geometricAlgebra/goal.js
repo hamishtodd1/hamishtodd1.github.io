@@ -1,16 +1,10 @@
 /*
-	Level ideas
+	Abstract level ideas
+		the threejs demo with the parented cubes
 		A puzzle where there are 2 inputs and 2 outputs. One pair seems easy. The other appears to be blank- it's 0. Player has to understand this
 		Puzzle such that for each vector you must make the bivector of it and the X axis
-		Classic: person walking on a train
-		The machinery you have on the wheels of trains
-		Videos
-			Diver
-			Dancer
-			Juggler. Lots of circus skills
-			https://www.youtube.com/watch?v=FOJ7JAUK6EU
-		Bee going from flower to flower
-		A puppy that is enjoying licking a lolly. The lolly moves away ordinarily, but if you can get its jetpack to follow the lolly it can continue licking
+		Get in-plane component
+		Make rotor from axis and angle
 
 	Levels:
 		Scalar multiplication is the first aspect of the clifford product to show
@@ -42,39 +36,17 @@ function initInputOutputGoal(scope,scopeOnClick)
 {
 	let numPairs = 2;
 
-	let background = new THREE.Mesh(new THREE.PlaneGeometry(1.,1.), new THREE.MeshBasicMaterial({color:0xFFFFFF}))
+	let background = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({color:0xFFFFFF}))
 	background.scale.x = numPairs * 1.3
 	background.scale.y = 1.3
 	background.position.z = -.001
 
 	modeDependentReactionToResult = function(){}
 
-	{
-		var inputSelectionIndicator = new THREE.Group()
-		let yellowRect = new THREE.Mesh(new THREE.PlaneGeometry(1.,1.), new THREE.MeshBasicMaterial({color:0xFFFF00}))
-		let thickness = .1
-		for(let i = 0; i < 4; i++)
-		{
-			let r = new THREE.Mesh(yellowRect.geometry,yellowRect.material)
-			inputSelectionIndicator.add(r)
-			if(i < 2)
-			{
-				r.position.x = .5 - thickness * .5
-				r.scale.x = thickness
-			}
-			else
-			{
-				r.position.y = .5 - thickness * .5
-				r.scale.y = thickness
-			}
-			if(i%2)
-				r.position.multiplyScalar(-1.);
-			r.position.z = .01
-		}
-		var outputSelectionIndicator = inputSelectionIndicator.clone()
-	}
+	var inputSelectionIndicator = RectangleIndicator()
+	var outputSelectionIndicator = RectangleIndicator()
 
-	let scopeInputMultivector = MultivectorAppearance(scopeOnClick,new Float32Array(8));
+	let scopeInputMultivector = MultivectorAppearance(scopeOnClick);
 	scope.push(scopeInputMultivector)
 	function selectInput(multivec)
 	{
@@ -107,6 +79,7 @@ function initInputOutputGoal(scope,scopeOnClick)
 			elements[3] = 0.
 
 			inputs[i] = MultivectorAppearance(selectInput,elements)
+			delete elements
 			inputs[i].position.x = 1.2 * (i-(numPairs-1)/2.);
 			inputGroup.add(inputs[i])
 		}
@@ -134,6 +107,7 @@ function initInputOutputGoal(scope,scopeOnClick)
 			let elements = generateRandomMultivectorElementsFromScope(scopeWithOneExtra,seedForRandomActivity)
 
 			outputs[i] = MultivectorAppearance(function(){},elements)
+			delete elements
 			outputs[i].position.x = inputs[i].position.x
 			outputGroup.add(outputs[i])
 		}
@@ -179,7 +153,7 @@ function initSingularGoal(goalElements, scope)
 		goalBox.title.position.y = .9
 		goalBox.add(goalBox.title)
 
-		let background = new THREE.Mesh(new THREE.PlaneGeometry(1.,1.),new THREE.MeshBasicMaterial({color:0x000000}))
+		let background = new THREE.Mesh(unchangingUnitSquareGeometry,new THREE.MeshBasicMaterial({color:0x000000}))
 		background.scale.set(goalBox.title.scale.x*1.1,goalBox.title.scale.y*4.3,1.)
 		background.position.z -= .001
 		background.position.y += .18
@@ -193,6 +167,7 @@ function initSingularGoal(goalElements, scope)
 	console.assert(!equalsMultivector(randomMultivectorElements,zeroMultivector))
 	singularGoalMultivector = MultivectorAppearance(function(){},randomMultivectorElements)
 	goalBox.add(singularGoalMultivector)
+	delete randomMultivectorElements
 
 	// singularGoalMultivector = MultivectorAppearance(function(){},goalElements)
 	// goalBox.add(singularGoalMultivector)

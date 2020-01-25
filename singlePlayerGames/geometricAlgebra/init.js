@@ -1,19 +1,28 @@
 /*
 	TODO for slack / Cambridge demo
 		Get the wheel in there
-		Some tutorial levels
+		Tutorial levels
 		Every aspect of the multiplication and addition needs to be visualized. Well, for 2D!
 			Coplanar bivector addition - easy and fun
 			Vector addition - just do something
+			Vector multiplication - need both scalar and bivector part
 			Scalar multiplication - obvious, duplication then addition
 			Coplanar bivector multiplication - complex multiplication!
 			Bivector-vector multiplication
+			Bivector multiplication???
 		Sandbox available
+
+	TODO for GDC
+		A fast to access webpage
+		With something that creates surprises and communicates its purpose in 45s
 	
 	Long term
-		They should be able to scope things, and delete them
+		Oculus quest / hololens thing where you record a video, and it automatically takes the frames
+		They should be able to rearrange scope, and delete bits of it
+		Have a "superimpose everything so it's in the same coord system" button
 		QM
 			a vector of complex numbers can separate into a vector and bivector (i*vector) parts?
+		Zoom out every time scope gets big
 		Bootstrapping!
 			Maybe you should use GA for your camera projection and that should be considered part of the system
 			After all, if you pick up a vector and rotate it it can be rotated to become its negative
@@ -39,6 +48,71 @@ async function init()
 	// otherThingToCheckDistanceTo.push(littleScene.hummingbird)
 
 	initMultivectorAppearances()
+
+	let keyboardSelectionIndicator = RectangleIndicator()
+	let scopeSelection = 0;
+	let horizontalSelection = 0;
+
+	bindButton("up",function()
+	{
+		if(horizontalSelection !== 0)
+		{
+			horizontalSelection = 0
+		}
+		scopeSelection--
+		if(scopeSelection < 0 )
+			scopeSelection = scope.length-1
+		scene.add(keyboardSelectionIndicator)
+	})
+	bindButton("down",function()
+	{
+		if(horizontalSelection !== 0)
+		{
+			horizontalSelection = 0
+		}
+		scopeSelection++
+		if(scopeSelection > scope.length-1 )
+			scopeSelection = 0
+		scene.add(keyboardSelectionIndicator)
+	})
+	bindButton("left",function()
+	{
+		horizontalSelection--
+		if(horizontalSelection < 0 )
+			horizontalSelection = 2
+		scene.add(keyboardSelectionIndicator)
+	})
+	bindButton("right",function()
+	{
+		horizontalSelection++
+		if(horizontalSelection > 2 )
+			horizontalSelection = 0
+		scene.add(keyboardSelectionIndicator)
+	})
+	bindButton("enter",function()
+	{
+		if(keyboardSelectionIndicator.parent !== scene)
+			scene.add(keyboardSelectionIndicator)
+		else
+		{
+			let selection = getSelection()
+			if(operatorOriginals.indexOf(selection) !== -1)
+				selection.onClick()
+			else
+				selection.thingYouClick.onClick()
+		}
+	})
+	updateFunctions.push(function()
+	{
+		keyboardSelectionIndicator.position.copy(getSelection().position)
+	})
+	function getSelection()
+	{
+		if(horizontalSelection === 0)
+			return scope[scopeSelection]
+		else
+			return operatorOriginals[horizontalSelection-1]
+	}
 
 	var scope = []
 	{
@@ -102,7 +176,7 @@ async function init()
 		addOperatorOriginal.function = geometricSum
 		multiplyOperatorOriginal.function = geometricProduct
 
-		let operatorOriginals = [addOperatorOriginal,multiplyOperatorOriginal];
+		var operatorOriginals = [addOperatorOriginal,multiplyOperatorOriginal];
 		var activeOperator = OperatorAppearance()
 
 		for(let i = 0; i < operatorOriginals.length; ++i )
@@ -142,7 +216,8 @@ async function init()
 			zeroVector]
 	}
 
-	//is it a multivector? Possibly. It would be nice if they could all animate
+	//It's nice if they could all animate
+	//A multivector appearance is a group with children that are bits of multivector. So yes.
 	let animationMultivector = MultivectorAppearance(function(){})
 	let animationStage = -1.;
 

@@ -17,7 +17,8 @@ function initButtons()
 			console.error("attempted to bind a button that already has a binding")
 		}
 
-		console.log("\n",buttonName + ": " + buttonDescription)
+		if(buttonDescription !== undefined)
+			console.log("\n",buttonName + ": " + buttonDescription)
 		buttons[buttonName] = {
 			down: false,
 			onDown: onDown
@@ -36,7 +37,7 @@ function initButtons()
 		"left":37,
 		"up":38,
 		"right":39,
-		"down":12,
+		"down":40,
 		"space":32,
 
 		"[":219,

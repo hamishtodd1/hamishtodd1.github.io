@@ -119,9 +119,7 @@ function initMultivectorAppearances()
 			scalar.castShadow = true
 			scalar.material.side = THREE.DoubleSide
 			scalar.scale.multiplyScalar(scalarHeight)
-			multivec.add(scalar)
-
-			
+			multivec.add(scalar)			
 
 			multivec.setScalar = function(newScalar)
 			{

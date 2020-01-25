@@ -55,7 +55,7 @@ function makeTextSign(initialText, twoSided, materialOnly, originCornered)
 
 	if(originCornered===undefined|| originCornered === false)
 	{
-		var geo = new THREE.PlaneGeometry(1, 1)
+		var geo = unchangingUnitSquareGeometry
 	}
 	else
 	{

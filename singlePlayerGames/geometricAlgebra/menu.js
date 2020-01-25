@@ -5,10 +5,11 @@
 			detect region and change appropriately
 			It's linked to what direction time flows in, what direction symbols are read in
 
-		Physicist: bottom to top
-		Coder(me): Top to bottom
-		Arabic layperson: right to left
-		Non-arabic layperson: left to right
+		Switch direction of time / "processing"
+			Physicist: bottom to top
+			Coder(me): Top to bottom
+			Arabic layperson: right to left
+			Non-arabic layperson: left to right
 
 		use keyboard?
 
@@ -21,7 +22,7 @@ async function initMenu()
 	let menu = new THREE.Group()
 	scene.add(menu)
 
-	let menuFader = new THREE.Mesh(new THREE.PlaneGeometry(1.,1.), new THREE.MeshBasicMaterial({color:0x020202, transparent:true, opacity:0.}))
+	let menuFader = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({color:0x020202, transparent:true, opacity:0.}))
 	menuFader.scale.set(100.,100.,1.)
 	scene.add(menuFader)
 
