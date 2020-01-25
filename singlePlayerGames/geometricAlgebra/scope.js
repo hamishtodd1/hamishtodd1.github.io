@@ -62,61 +62,90 @@ function initScope(multivectorScope,multivectorScopeOnClick,operatorScopeOnClick
 	}
 
 	let keyboardSelectionIndicator = RectangleIndicator()
+	let multivectorScopeSelected = true
 	let multivectorSelection = 0;
 	let operatorSelection = 0;
 	function getSelection()
 	{
-		if(operatorSelection === 0)
+		if( multivectorScopeSelected )
 			return multivectorScope[multivectorSelection]
 		else
-			return operatorScope[operatorSelection-1]
+			return operatorScope[operatorSelection]
 	}
 	bindButton("up",function()
 	{
-		if(operatorSelection !== 0)
+		if(!multivectorScopeSelected)
 		{
-			operatorSelection = 0
-			multivectorSelection = multivectorScope.length - 1
-		}
-		else
-			multivectorSelection--
-
-		if(multivectorSelection < 0 )
-		{
-			operatorSelection++
+			multivectorScopeSelected = true
 			multivectorSelection = multivectorScope.length-1
 		}
+		else
+		{
+			multivectorSelection--
+			if(multivectorSelection < 0)
+			{
+				multivectorSelection = multivectorScope.length-1
+				multivectorScopeSelected = false
+			}
+		}
+
 		scene.add(keyboardSelectionIndicator)
 	})
 	bindButton("down",function()
 	{
-		if(operatorSelection !== 0)
+		if(!multivectorScopeSelected)
 		{
-			operatorSelection = 0
+			multivectorScopeSelected = true
 			multivectorSelection = 0
 		}
 		else
-			multivectorSelection++
-
-		if(multivectorSelection > multivectorScope.length-1 )
 		{
-			operatorSelection++
-			multivectorSelection = 0
+			multivectorSelection++
+			if(multivectorSelection > multivectorScope.length-1)
+			{
+				multivectorSelection = 0
+				multivectorScopeSelected = false
+			}
 		}
+
 		scene.add(keyboardSelectionIndicator)
 	})
 	bindButton("left",function()
 	{
-		operatorSelection--
-		if(operatorSelection < 0 )
-			operatorSelection = 2
+		if(multivectorScopeSelected)
+		{
+			multivectorScopeSelected = false
+			operatorSelection = operatorScope.length-1
+		}
+		else
+		{
+			operatorSelection--
+			if(operatorSelection < 0)
+			{
+				operatorSelection = operatorScope.length - 1
+				multivectorScopeSelected = true
+			}
+		}
+
 		scene.add(keyboardSelectionIndicator)
 	})
 	bindButton("right",function()
 	{
-		operatorSelection++
-		if(operatorSelection > 2 )
+		if(multivectorScopeSelected)
+		{
+			multivectorScopeSelected = false
 			operatorSelection = 0
+		}
+		else
+		{
+			operatorSelection++
+			if(operatorSelection > operatorScope.length-1)
+			{
+				operatorSelection = 0
+				multivectorScopeSelected = true
+			}
+		}
+
 		scene.add(keyboardSelectionIndicator)
 	})
 	bindButton("enter",function()
