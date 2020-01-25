@@ -26,12 +26,14 @@ async function initOperatorAppearance()
 	})
 
 	var geometry = new THREE.PlaneGeometry(1.5,1.5)
-	OperatorAppearance = function()
+	OperatorAppearance = function(func)
 	{
 		let operatorSymbol = new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({
 			map: texture,
 			transparent:true //because transparent part of texture
 		}))
+
+		operatorSymbol.function = func
 
 		return operatorSymbol
 	}

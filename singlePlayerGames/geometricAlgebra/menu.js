@@ -11,8 +11,6 @@
 			Arabic layperson: right to left
 			Non-arabic layperson: left to right
 
-		use keyboard?
-
 		subtitle language
 		video speed
 */
@@ -44,6 +42,12 @@ async function initMenu()
 		}
 	}
 
+	function toggleMenuMode()
+	{
+		menuMode = !menuMode
+	}
+	bindButton("esc",toggleMenuMode)
+
 	{
 		let titleObject = makeTextSign("Menu")
 		let title = titleObject.children[0]
@@ -52,10 +56,7 @@ async function initMenu()
 		menu.add(title)
 		clickables.push(title)
 
-		title.onClick = function()
-		{
-			menuMode = true
-		}
+		title.onClick = toggleMenuMode
 
 		let intendedFaderOpacity = 0.
 		let intendedMenuPosition = new THREE.Vector3(0.,0.,.001)
@@ -99,10 +100,7 @@ async function initMenu()
 		let backObject = makeTextSign("Back to game")
 		var back = backObject.children[0]
 		back.scale.copy(backObject.scale)
-		back.onClick = function()
-		{
-			menuMode = false
-		}
+		back.onClick = toggleMenuMode
 	}
 
 	{

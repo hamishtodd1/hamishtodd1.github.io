@@ -39,6 +39,7 @@ function initButtons()
 		"right":39,
 		"down":40,
 		"space":32,
+		"esc":27,
 
 		"[":219,
 		"]":221
