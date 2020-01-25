@@ -21,52 +21,15 @@
 		Get in-plane component
 		Make rotor from axis and angle
 		A solar system thing
+		Curling stones as a video
+		What's an example of adding torques?
 		Someone is about to set of a spinning top, and you can change the amount of angular momentum they put into it by changing the size of their bicep
+
+	//the basis vectors should be inside the scene
 */
 
 function initWheelScene()
 {
-	// let draggingMultivec = Multivector()
-
-	// multivec.onClick = function()
-	// {
-	// 	//somehow draggingMultivec is made to take on multivec.elements
-	// 	scene.add(draggingMultivec)
-
-	// 	updateFunctions.push(function()
-	// 	{
-	// 		copy.position.copy(mouse.zZeroPosition)
-
-	// 		if(!mouse.clicking)
-	// 		{
-	// 			scene.remove(draggingMultivec)
-
-	// 			if() //there's some operation
-	// 			{
-	// 				let copy = Multivector(multivec.elements)
-	// 				draggingMultivec
-	// 			}
-	// 		}
-	// 	})
-	// }
-
-	function bestowConnectionPotential(obj, exchangeMultivectorValues,exchangeMultivectorValuesInitial)
-	{
-		clickables.push(obj)
-		obj.onClick = function()
-		{
-			let multivec = Multivector()
-			multivectors.push(multivec)
-			multivec.position.copy(mouse.zZeroPosition)
-
-			if( exchangeMultivectorValuesInitial !== undefined )
-				exchangeMultivectorValuesInitial(multivec)
-
-			let connector = Connector(multivec,obj)
-			scene.add(connector)
-		}
-	}
-
 	let littleScene = new THREE.Group()
 	littleScene.scale.setScalar(2)
 	littleScene.position.y += 3.88
@@ -116,16 +79,8 @@ function initWheelScene()
 	})
 	littleScene.add(flower)
 
-	let hummingbirdRadius = flowerRadius * 3.
-	let hummingbird = new THREE.Mesh(new THREE.PlaneGeometry(hummingbirdRadius*2.,hummingbirdRadius*2.),new THREE.MeshBasicMaterial({transparent:true}))
-	hummingbird.material.depthTest = false
-	new THREE.TextureLoader().load("data/hummingbird.png",function(texture){
-		hummingbird.material.map = texture
-		hummingbird.material.needsUpdate = true
-	})
-	littleScene.add(hummingbird)
 
-	//the basis vectors should be inside the scene
+	
 
 	// {
 	//	let s = new THREE.Scene()

@@ -35,24 +35,19 @@
 		Puzzles based around Orientation could be about a snake trying to eat an apple
 */
 
-let modeDependentReactionToResult = function()
-{
-	//by default nothing
-}
+let modeDependentReactionToResult = function(){}
+let dismantleCurrentGoal = function(){}
 
 function initInputOutputGoal(scope,scopeOnClick)
 {
+	let numPairs = 2;
+
 	let background = new THREE.Mesh(new THREE.PlaneGeometry(1.,1.), new THREE.MeshBasicMaterial({color:0xFFFFFF}))
-	background.scale.x = 3.65
-	background.scale.y = 1.2
+	background.scale.x = numPairs * 1.3
+	background.scale.y = 1.3
 	background.position.z = -.001
 
 	modeDependentReactionToResult = function(){}
-
-	let intendedPositions = [
-		new THREE.Vector3( 0.,-camera.topAtZZero + .9, 0.),
-		new THREE.Vector3( 0., camera.topAtZZero - 2.1, 0.)
-	]
 
 	{
 		var inputSelectionIndicator = new THREE.Group()
@@ -102,7 +97,7 @@ function initInputOutputGoal(scope,scopeOnClick)
 
 		inputGroup.add(inputSelectionIndicator)
 
-		var inputs = Array(3)
+		var inputs = Array(numPairs)
 		for(let i = 0; i < inputs.length; i++)
 		{
 			let elements = new Float32Array(8)
@@ -112,11 +107,11 @@ function initInputOutputGoal(scope,scopeOnClick)
 			elements[3] = 0.
 
 			inputs[i] = MultivectorAppearance(selectInput,elements)
-			inputs[i].position.x = (i-1) * 1.2;
+			inputs[i].position.x = 1.2 * (i-(numPairs-1)/2.);
 			inputGroup.add(inputs[i])
 		}
 
-		var inputScope = [inputs[2]]
+		var inputScope = [inputs[0]]
 		selectInput(inputScope[0])
 	}
 
@@ -135,10 +130,11 @@ function initInputOutputGoal(scope,scopeOnClick)
 		for(let i = 0; i < outputs.length; i++)
 		{
 			scopeWithOneExtra[scope.length] = inputs[i]
+			//possible bug: you're getting both outputs the same sometimes
 			let elements = generateRandomMultivectorElementsFromScope(scopeWithOneExtra,seedForRandomActivity)
 
 			outputs[i] = MultivectorAppearance(function(){},elements)
-			outputs[i].position.x = (i-1) * 1.2;
+			outputs[i].position.x = inputs[i].position.x
 			outputGroup.add(outputs[i])
 		}
 
@@ -148,13 +144,25 @@ function initInputOutputGoal(scope,scopeOnClick)
 		// goalSign.position.x -= background.scale.x * .5 + goalSign.scale.x * .5 + .1
 	}
 
+	let intendedPositions = [
+		new THREE.Vector3( 0.,-camera.topAtZZero + 2.1, 0.),
+		new THREE.Vector3( 0., camera.topAtZZero - .9, 0.),
+	]
 	updateFunctions.push(function()
 	{
-		intendedPositions[0].x = camera.rightAtZZero - 2
-		intendedPositions[1].x = camera.rightAtZZero - 2
+		intendedPositions[0].x = camera.rightAtZZero - background.scale.x/2. - .3
+		intendedPositions[1].x = camera.rightAtZZero - background.scale.x/2. - .3
 		outputGroup.position.lerp(intendedPositions[0],frameCount===0?1.:.1)
 		inputGroup.position.lerp( intendedPositions[1],frameCount===0?1.:.1)
 	})
+
+	dismantleCurrentGoal = function()
+	{
+		scene.remove(inputGroup)
+		scene.remove(outputGroup)
+
+		//and removing that shit from the scope?
+	}
 
 	return inputScope
 }
@@ -244,6 +252,11 @@ function initSingularGoal(goalElements, scope)
 		{
 			goalIrritation = 1.
 		}
+	}
+
+	dismantleCurrentGoal = function()
+	{
+		scene.remove(goalBox)
 	}
 
 	return goalBox

@@ -1,3 +1,25 @@
+{
+	let urConnector = new THREE.Line(new THREE.Geometry(),new THREE.LineBasicMaterial({color:0x0F0FFF}))
+	urConnector.geometry.vertices.push(new THREE.Vector3())
+	urConnector.geometry.vertices.push(new THREE.Vector3(1.,1.,0.))
+	Connector = function(obj1,obj2)
+	{
+		let connector = new THREE.Line(urConnector.geometry,urConnector.material)
+		scene.add(connector)
+
+		updateFunctions.push(function()
+		{
+			obj1.getWorldPosition(connector.position)
+
+			obj2.getWorldPosition(connector.scale)
+			connector.scale.sub(connector.position)
+			connector.scale.z = 1.
+		})
+
+		return connector
+	}
+}
+
 function randomSeeded(seed)
 {
     var x = Math.sin(seed*TAU) * 10000;

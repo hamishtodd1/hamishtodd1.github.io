@@ -67,27 +67,6 @@
 	You can click a place in the record and, debug-style, it'll take you to that point in the whole process
 */
 
-function Connector(obj1,obj2)
-{
-	let connector = new THREE.Line(new THREE.Geometry(),new THREE.LineBasicMaterial({
-		color:0x0F0FFF
-	}))
-	connector.geometry.vertices.push(new THREE.Vector3())
-	connector.geometry.vertices.push(new THREE.Vector3(1.,1.,0.))
-	scene.add(connector)
-
-	updateFunctions.push(function()
-	{
-		obj1.getWorldPosition(connector.position)
-
-		obj2.getWorldPosition(connector.scale)
-		connector.scale.sub(connector.position)
-		connector.scale.z = 1.
-	})
-
-	return connector
-}
-
 function FunctionPlane()
 {
 	let functionPlane = new THREE.Group()

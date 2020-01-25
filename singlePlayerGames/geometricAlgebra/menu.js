@@ -16,7 +16,7 @@
 		video speed
 */
 
-async function initMenu(goalBox)
+async function initMenu()
 {
 	let menu = new THREE.Group()
 	scene.add(menu)
@@ -35,8 +35,11 @@ async function initMenu(goalBox)
 		sandbox.onClick = function()
 		{
 			modeDependentReactionToResult = function(){}
-			scene.remove(goalBox)
+			dismantleCurrentGoal()
+			dismantleCurrentGoal = function(){}
 			menuMode = false
+
+			log("TODO Clear scope completely, just basis vectors")
 		}
 	}
 
@@ -72,7 +75,7 @@ async function initMenu(goalBox)
 				let halfMenuTitleHeight = title.scale.y / 2.
 				let padding = .25
 				intendedMenuPosition.x =  camera.rightAtZZero - (halfMenuTitleWidth  + padding)
-				intendedMenuPosition.y =  camera.topAtZZero   - (halfMenuTitleHeight + padding)
+				intendedMenuPosition.y = -camera.topAtZZero   + (halfMenuTitleHeight + padding)
 				intendedFaderOpacity = 0.
 
 				for(let i = 0; i < menuEntries.length; i++)

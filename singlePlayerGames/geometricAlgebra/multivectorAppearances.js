@@ -84,8 +84,11 @@ function initMultivectorAppearances()
 		let multivec = new THREE.Group();
 		scene.add(multivec)
 
-		// multivec.root = null
-		// multivec.connector = null
+		//maaaaybe you shouldn't have this because it's stateful? Yeah no shut up
+		multivec.elements = new Float32Array(8);
+		if(elements !== undefined)
+			for(let i = 0; i < 8; i++)
+				multivec.elements[i] = elements[i]
 
 		multivec.getHeightWithPadding = function()
 		{
@@ -105,14 +108,9 @@ function initMultivectorAppearances()
 			if(multivec.elements[7] !== 0.)
 				log("no trivector size")
 
-			return biggestSoFar + .2
+			let padding = .4
+			return biggestSoFar + padding
 		}
-
-		//maaaaybe you shouldn't have this because it's stateful?
-		if(elements === undefined)
-			multivec.elements = new Float32Array(8);
-		else
-			multivec.elements = elements
 
 		let scalarHeight = .7
 		{
@@ -132,7 +130,9 @@ function initMultivectorAppearances()
 			}
 			multivec.updateScalarAppearance = function(newScalar)
 			{
-				scalar.material.setText(multivec.elements[0])
+				let value2sf = multivec.elements[0].toPrecision(2)
+				let finalValue = (value2sf * 1.).toString() //already a string but this gets rid of trailing zeroes!
+				scalar.material.setText(finalValue)
 				if(multivec.elements[0] === 0.)
 				{
 					multivec.remove(scalar)

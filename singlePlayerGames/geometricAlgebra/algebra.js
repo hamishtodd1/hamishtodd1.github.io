@@ -14,6 +14,14 @@
 */
 let zeroMultivector = new Float32Array(8)
 
+function copyMultivector(fromElements, toElements)
+{
+	for(let i = 0; i < 8; i++)
+	{
+		toElements[i] = fromElements[i]
+	}
+}
+
 function generateRandomMultivectorElementsFromScope(scope, seed)
 {
 	console.assert(scope.length > 0)

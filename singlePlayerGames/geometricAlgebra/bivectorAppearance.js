@@ -23,6 +23,7 @@
 	Urgh you might want this on a deadline
 
 	Which bivectors are positive, which negative?
+		Right hand rule! x^y = red
 		The going idea currently is that it's whirlpool-like
 		Whatever you decide distinguishes clockwise and anticlockwise (positive and negative) bivectors, that surely applies to vectors
 			Maybe you can even deduce it from the trivectors
