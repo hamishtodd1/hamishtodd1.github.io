@@ -1,32 +1,47 @@
+THREE.Raycaster.prototype.updateFromClientCoordinates = function(clientX,clientY)
+{
+	let ndc = new THREE.Vector2()
+	ndc.x = ( clientX / window.innerWidth  ) * 2 - 1;
+	ndc.y =-( clientY / window.innerHeight ) * 2 + 1;
+
+	this.setFromCamera(ndc,camera)
+
+	delete ndc
+}
+
+THREE.Raycaster.prototype.intersectZPlane = function(z)
+{
+	var zPlane = new THREE.Plane(zUnit,-z)
+	return this.ray.intersectPlane(zPlane,new THREE.Vector3())
+}
+
+RectangleIndicator = function()
 {
 	let material = new THREE.MeshBasicMaterial({color:0xFFFF00})
-
-	RectangleIndicator = function()
+	
+	let selectionIndicator = new THREE.Group()
+	let yellowRect = new THREE.Mesh(unchangingUnitSquareGeometry, material)
+	let thickness = .1
+	for(let i = 0; i < 4; i++)
 	{
-		let selectionIndicator = new THREE.Group()
-		let yellowRect = new THREE.Mesh(unchangingUnitSquareGeometry, material)
-		let thickness = .1
-		for(let i = 0; i < 4; i++)
+		let r = new THREE.Mesh(yellowRect.geometry,yellowRect.material)
+		selectionIndicator.add(r)
+		if(i < 2)
 		{
-			let r = new THREE.Mesh(yellowRect.geometry,yellowRect.material)
-			selectionIndicator.add(r)
-			if(i < 2)
-			{
-				r.position.x = .5 - thickness * .5
-				r.scale.x = thickness
-			}
-			else
-			{
-				r.position.y = .5 - thickness * .5
-				r.scale.y = thickness
-			}
-			if(i%2)
-				r.position.multiplyScalar(-1.);
-			r.position.z = .01
+			r.position.x = .5 - thickness * .5
+			r.scale.x = thickness
 		}
-
-		return selectionIndicator
+		else
+		{
+			r.position.y = .5 - thickness * .5
+			r.scale.y = thickness
+		}
+		if(i%2)
+			r.position.multiplyScalar(-1.);
+		r.position.z = .01
 	}
+
+	return selectionIndicator
 }
 
 {

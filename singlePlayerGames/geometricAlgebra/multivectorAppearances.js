@@ -112,13 +112,14 @@ function initMultivectorAppearances()
 			return biggestSoFar + padding
 		}
 
-		let scalarHeight = .7
+		let scalarHeight = .6
 		{
 			let scalar = makeTextSign("",false,false,false)
 			// scalar.material.depthFunc = THREE.AlwaysDepth
 			scalar.castShadow = true
 			scalar.material.side = THREE.DoubleSide
 			scalar.scale.multiplyScalar(scalarHeight)
+			scalar.position.z = .001
 			multivec.add(scalar)			
 
 			multivec.setScalar = function(newScalar)

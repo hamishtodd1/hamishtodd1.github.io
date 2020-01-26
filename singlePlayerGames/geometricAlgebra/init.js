@@ -15,13 +15,12 @@
 	TODO for GDC
 		A fast to access webpage
 		With something that creates surprises and communicates its purpose in 45s
+		And can show something quaternion-related in short order
 	
 	Long term
 		Oculus quest / hololens thing where you record a video, and it automatically takes the frames
 		They should be able to rearrange multivectorScope, and delete bits of it
 		Have a "superimpose everything so it's in the same coord system" button
-		QM
-			a vector of complex numbers can separate into a vector and bivector (i*vector) parts?
 		Zoom out every time multivectorScope gets big
 		Bootstrapping!
 			Maybe you should use GA for your camera projection and that should be considered part of the system
@@ -47,28 +46,31 @@ async function init()
 	// let littleScene = await initWheelScene()
 	// otherThingToCheckDistanceTo.push(littleScene.hummingbird)
 
+	let resetButton = makeTextSign("Reset")
+	scene.add(resetButton)
+
 	initMultivectorAppearances()
 
 	await initOperatorAppearance()
 
-	let activeOperator = OperatorAppearance()
-	let multivectorScope = []
-
-	let operands = [
-		MultivectorAppearance(function(){}),
-		MultivectorAppearance(function(){}) ]
-	scene.remove(operands[0],operands[1])
-	let operandAndActiveOperatorPositions = [
-		new THREE.Vector3( 0.,1.,0.),
-		new THREE.Vector3( 1.,0.,0.),
-		zeroVector]
-	let operandsAndActiveOperator = [
-		operands[0],
-		operands[1],
-		activeOperator
-	]
-
 	{
+		var activeOperator = OperatorAppearance()
+		var multivectorScope = []
+
+		var operands = [
+			MultivectorAppearance(function(){}),
+			MultivectorAppearance(function(){}) ]
+		scene.remove(operands[0],operands[1])
+		var operandAndActiveOperatorPositions = [
+			new THREE.Vector3( 0.,1.,0.),
+			new THREE.Vector3( 1.,0.,0.),
+			zeroVector]
+		var operandsAndActiveOperator = [
+			operands[0],
+			operands[1],
+			activeOperator
+		]
+
 		let lastAssignedOperand = 0
 		function multivectorScopeOnClick(multivecToCopy)
 		{

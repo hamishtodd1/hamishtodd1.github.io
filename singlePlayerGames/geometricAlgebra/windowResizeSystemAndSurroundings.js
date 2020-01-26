@@ -33,12 +33,9 @@ function initWindowResizeSystemAndSurroundings(renderer)
 		if(camera.topAtZZero < camera.rightAtZZero)
 			console.error("might consider switching side and bottom")
 
-		//and rearrange all the icons
-
 		camera.updateProjectionMatrix();
 	}
 	respondToResize();
-	//user can rotate the screen, go fullscreen, un-fullscreen, have the address bar disappear
 	window.addEventListener( 'resize', respondToResize, false );
 
 	{
@@ -48,6 +45,7 @@ function initWindowResizeSystemAndSurroundings(renderer)
 		pointLight.shadow.camera.near = 0.01;
 		pointLight.shadow.mapSize.width = 1024;
 		pointLight.shadow.mapSize.height = pointLight.shadow.mapSize.width;
+		pointLight.shadow.camera.updateProjectionMatrix()
 
 		pointLight.castShadow = true;
 		pointLight.position.set(-camera.topAtZZero,camera.topAtZZero,camera.topAtZZero*.25)
@@ -83,9 +81,4 @@ function otherFov(inputFov,aspectRatio,inputIsVertical)
 	}
 	var outputFov = fovGivenCenterToFrameDistance(centerToFrameOutput,1);
 	return outputFov;
-}
-
-function getAudienceProportionOfWindowWidth()
-{
-	return AUDIENCE_CENTER_TO_SIDE_OF_FRAME_PIXELS * 2 / (window.innerWidth*window.devicePixelRatio)
 }

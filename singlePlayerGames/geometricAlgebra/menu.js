@@ -1,11 +1,10 @@
 /*
 	TODO
-		Sandbox
-		switch horizontal/vertical display method
-			detect region and change appropriately
-			It's linked to what direction time flows in, what direction symbols are read in
+		"mirror along long edge"
 
 		Switch direction of time / "processing"
+			detect region and change appropriately
+			It's linked to what direction time flows in -> what direction symbols are read in
 			Physicist: bottom to top
 			Coder(me): Top to bottom
 			Arabic layperson: right to left
@@ -27,36 +26,12 @@ async function initMenu()
 	let menuEntries = []
 
 	{
-		let sandboxObject = makeTextSign("Sandbox mode")
-		let sandbox = sandboxObject.children[0]
-		sandbox.scale.copy(sandboxObject.scale)
-		menuEntries.push(sandbox)
-		sandbox.onClick = function()
-		{
-			modeDependentReactionToResult = function(){}
-			dismantleCurrentGoal()
-			dismantleCurrentGoal = function(){}
-			menuMode = false
-
-			log("TODO Clear scope completely, just basis vectors")
-		}
-	}
-
-	function toggleMenuMode()
-	{
-		menuMode = !menuMode
-	}
-	bindButton("esc",toggleMenuMode)
-
-	{
 		let titleObject = makeTextSign("Menu")
 		let title = titleObject.children[0]
 		title.scale.copy(titleObject.scale)
 		title.scale.multiplyScalar(.4)
 		menu.add(title)
-		clickables.push(title)
 
-		title.onClick = toggleMenuMode
 
 		let intendedFaderOpacity = 0.
 		let intendedMenuPosition = new THREE.Vector3(0.,0.,.001)
@@ -97,10 +72,28 @@ async function initMenu()
 		menu.position.copy(intendedMenuPosition)
 		menuFader.material.opacity = intendedFaderOpacity
 
-		let backObject = makeTextSign("Back to game")
-		var back = backObject.children[0]
-		back.scale.copy(backObject.scale)
-		back.onClick = toggleMenuMode
+		function toggleMenuMode()
+		{
+			menuMode = !menuMode
+		}
+		bindButton("esc",toggleMenuMode)
+		title.onClick = toggleMenuMode
+	}
+
+	{
+		let sandboxObject = makeTextSign("Sandbox mode")
+		let sandbox = sandboxObject.children[0]
+		sandbox.scale.copy(sandboxObject.scale)
+		menuEntries.push(sandbox)
+		sandbox.onClick = function()
+		{
+			modeDependentReactionToResult = function(){}
+			dismantleCurrentGoal()
+			dismantleCurrentGoal = function(){}
+			menuMode = false
+
+			log("TODO Clear scope completely, just basis vectors")
+		}
 	}
 
 	{
@@ -109,35 +102,46 @@ async function initMenu()
 	}
 
 	{
-		let fullscreenButton = makeTextSign("Fullscreen: F11")
-		//but you need more because no F11 on tablets and phones
+		let fullscreenButton = makeTextSign("Fullscreen")
 		menuEntries.push(fullscreenButton)
 
-		//it's not a normal clickable because fullscreen policy
+		function potentiallyGoFullScreen(clientX,clientY)
+		{
+			if(!menuMode)
+				return
 
-		// document.addEventListener( 'mousedown', function(event) 
-		// {
-		// 	if(event.which === 1)
-		// 	{
-		// 		asynchronous.clicking = true;
-		// 	}
-		// 	if(event.which === 3)
-		// 	{
-		// 		asynchronous.rightClicking = true;
-		// 	}
+			raycaster.updateFromClientCoordinates(event.clientX,event.clientY)
+			let clickPosition = raycaster.intersectZPlane(0.)
+			fullscreenButton.worldToLocal(clickPosition)
 
-		// 	asynchronous.normalizedDevicePosition.x = ( clientX / window.innerWidth  ) * 2 - 1;
-		// 	asynchronous.normalizedDevicePosition.y =-( clientY / window.innerHeight ) * 2 + 1;
-		// }, false );
+			if( -.5 < clickPosition.x && clickPosition.x < .5 &&
+				-.5 < clickPosition.y && clickPosition.y < .5 )
+			{
+				//commence mozilla black box
+				let doc = window.document;
+				let docEl = doc.documentElement;
 
-		// document.addEventListener( 'touchstart', function(event)
-		// {
-		// 	event.preventDefault();
+				let requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+				let cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
 
-		// 	asynchronous.clicking = true;
+				if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+					requestFullScreen.call(docEl);
+				}
+				else {
+					cancelFullScreen.call(doc);
+				}
+			}
+		}
 
-		// 	updateNdc(event.changedTouches[0].clientX,event.changedTouches[0].clientY)
-		// }, { passive: false } );
+		let raycaster = new THREE.Raycaster()
+		document.addEventListener( 'mousedown', function(event)
+		{
+			potentiallyGoFullScreen(event.clientX,event.clientY)
+		}, false );
+		document.addEventListener( 'touchstart', function(event)
+		{
+			potentiallyGoFullScreen(event.changedTouches[0].clientX,event.changedTouches[0].clientY)
+		}, { passive: false } );
 	}
 
 	//best laid out using markup dude, do NOT think about this any further
@@ -189,7 +193,13 @@ async function initMenu()
 		}
 	}
 
-	menuEntries.push(back)
+	{
+		let backObject = makeTextSign("Back to game")
+		var back = backObject.children[0]
+		back.scale.copy(backObject.scale)
+		back.onClick = toggleMenuMode
+		menuEntries.push(back)
+	}
 
 	for(let i = 0; i < menuEntries.length; i++)
 	{
