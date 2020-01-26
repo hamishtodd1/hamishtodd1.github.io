@@ -146,7 +146,7 @@ function initSingularGoal(goalElements, scope)
 	{
 		var goalBox = new THREE.Group()
 		scene.add(goalBox)
-		goalBox.position.y = -camera.topAtZZero + 1.4
+		goalBox.position.y = camera.topAtZZero - 1.4
 
 		goalBox.title = makeTextSign("Make this:")
 		goalBox.title.scale.multiplyScalar(.5)

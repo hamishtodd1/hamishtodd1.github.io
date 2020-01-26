@@ -32,7 +32,6 @@ async function initMenu()
 		title.scale.multiplyScalar(.4)
 		menu.add(title)
 
-
 		let intendedFaderOpacity = 0.
 		let intendedMenuPosition = new THREE.Vector3(0.,0.,.001)
 		function updateFromMenuMode()
@@ -78,6 +77,7 @@ async function initMenu()
 		}
 		bindButton("esc",toggleMenuMode)
 		title.onClick = toggleMenuMode
+		clickables.push(title)
 	}
 
 	{
