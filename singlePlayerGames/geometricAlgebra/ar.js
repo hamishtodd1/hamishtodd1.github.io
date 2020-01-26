@@ -18,6 +18,8 @@
 	With Joan. Train a neural net, extract the bivector
 
 	People make little things out of lego? Cogs?
+
+	The best CV thing is of course the oculus controllers
 */
 
 function initAr()

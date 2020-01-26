@@ -136,12 +136,14 @@ function initInputOutputGoal(scope,scopeOnClick)
 		scene.remove(outputGroup)
 
 		//and removing that shit from the scope?
+
+		dismantleCurrentGoal = function(){}
 	}
 
 	return inputScope
 }
 
-function initSingularGoal(goalElements, scope)
+function initSingularGoal(scope)
 {
 	{
 		var goalBox = new THREE.Group()
@@ -168,9 +170,6 @@ function initSingularGoal(goalElements, scope)
 	singularGoalMultivector = MultivectorAppearance(function(){},randomMultivectorElements)
 	goalBox.add(singularGoalMultivector)
 	delete randomMultivectorElements
-
-	// singularGoalMultivector = MultivectorAppearance(function(){},goalElements)
-	// goalBox.add(singularGoalMultivector)
 
 	var goalIrritation = 0.
 	updateFunctions.push(function()

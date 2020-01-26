@@ -42,13 +42,6 @@ async function init()
 	// await initBivectorAppearance()
 	// return
 
-	// let otherThingToCheckDistanceTo = []
-	// let littleScene = await initWheelScene()
-	// otherThingToCheckDistanceTo.push(littleScene.hummingbird)
-
-	// let resetButton = makeTextSign("Reset")
-	// scene.add(resetButton)
-
 	initMultivectorAppearances()
 
 	await initOperatorAppearance()
@@ -105,10 +98,7 @@ async function init()
 
 	// initInputOutputGoal(multivectorScope,multivectorScopeOnClick)
 
-	let goalElements = new Float32Array(8)
-	goalElements[1] = 1.
-	goalElements[2] = 1.
-	let goalBox = initSingularGoal( goalElements,multivectorScope )
+	initSingularGoal( multivectorScope )
 
 	await initMenu()
 
