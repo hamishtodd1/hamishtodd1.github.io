@@ -97,6 +97,17 @@ async function initMenu()
 	}
 
 	{
+		let levelSelectObject = makeTextSign("Select level")
+		let levelSelect = levelSelectObject.children[0]
+		levelSelect.scale.copy(levelSelectObject.scale)
+		menuEntries.push(levelSelect)
+		levelSelect.onClick = function()
+		{
+			log("TODO")
+		}
+	}
+
+	{
 		// let randomize = makeTextSign("Random puzzle")
 		// menuEntries.push(randomize)
 	}
@@ -131,6 +142,8 @@ async function initMenu()
 					cancelFullScreen.call(doc);
 				}
 			}
+
+			delete clickPosition
 		}
 
 		let raycaster = new THREE.Raycaster()

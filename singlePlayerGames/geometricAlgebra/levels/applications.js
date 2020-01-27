@@ -17,12 +17,22 @@
 
 	General ideas / mario-esque "areas"/islands
 		Quantum mechanics
-			/Electromagnetism
-			/Optics
+			/Electromagnetism/Optics
+				Reflections
 			/Electrical engineering
 			a vector of complex numbers can separate into a vector and bivector (i*vector) parts?
+			3 states are used in this thing on bell https://freelanceastro.github.io/bell/
 		Planetary motion
 		Mechanical engineering
+			Cogs
+				funky mechanical leg https://youtu.be/wFqnH2iemIc?t=46
+				Another nice cog https://youtu.be/SwVWfrZ3Q50?t=306
+			Wave stairs that make marbles go up https://youtu.be/SwVWfrZ3Q50?t=353
+			car engine like? https://youtu.be/SwVWfrZ3Q50?t=443
+			moire patterns?
+			trammel of archimedes https://youtu.be/SwVWfrZ3Q50?t=102
+			conservation of angular momentum https://youtu.be/SwVWfrZ3Q50?t=242
+			Some nice gears like one that gets pushed forward and does a figure of 8 or whatever
 			Henry Segerman's weird gears
 			Dice with constant angular momentum spinning in zero gravity
 			Bicycle chain
@@ -30,10 +40,35 @@
 			What's an example of adding torques?
 			fireworks
 			ink coming out of spinning pens https://www.youtube.com/watch?v=FOJ7JAUK6EU
+			Coat hanger maker https://youtu.be/uuj6NLCG0vM?t=441
+			Whip
+			Constraint solving https://zalo.github.io/blog/constraints/
+			Basketball bounce
+			taco folding https://youtu.be/xWG5Jx66VzQ?t=400
+			cog thing https://youtu.be/IjeKw0B8PG8
+			pizza https://twitter.com/Rainmaker1973/status/1084064448690774016
 		Special relativity?
 		Condensed matter / "spatially extended" / the input is a big rectangle of values
 			mandelbrot set
+		Toys
+			Balancing https://youtu.be/mwzExNYs12Y?t=144
+			beesandbombs
+			Slinky https://youtu.be/Em6krJvumkI?t=422
+			Sprinkler https://youtu.be/Em6krJvumkI?t=471
+			A coiled up fern unrolling
+			keenan crane "cross fields" https://twitter.com/keenanisalive/status/1155851119987290113
+			Bubbles https://youtu.be/uuj6NLCG0vM?t=37
+			harmonic water droplet https://twitter.com/bencbartlett/status/1172932701722009600
 		Animals / humans, literally film them
+			Swings
+			Looks like fun https://youtu.be/mwzExNYs12Y?t=541
+			Skiing?
+			People pushing against one another https://twitter.com/robertghrist/status/1113952877733658624 a different person withdraws their hand
+			Bicycle flip https://youtu.be/IjeKw0B8PG8?t=278
+			Snooker
+			Snooker on a tilted table
+			Look in AR thing, arranged by ease of computer-visioning
+			Ping pong
 			sport eg spinning tennis ball hitting ground
 			Classic: person walking on a train
 			A puppy that is enjoying licking a lolly. The lolly moves away ordinarily, but if you can get its jetpack to follow the lolly it can continue licking
@@ -46,16 +81,65 @@
 			Someone is about to set of a spinning top
 				you can change the amount of angular momentum they put into it by changing the size of their bicep
 
+	Is there some kind of ink you could mark stuff with that only appears in infared?
 */
 
-function initWheelScene()
+async function initVideo()
 {
+	let chrome = false
+	for (var i=0; i < navigator.plugins.length; i++)
+	{
+		if (navigator.plugins[i].name == 'Chrome PDF Viewer')
+			chrome = true
+	}
+	if(!chrome)
+		console.error("Video can only be played on chromium!")
+
+	//details
+	let name = "hoberman.mp4"
+	let startTime = .1
+	let finishTime = 7.7
+
+	let videoDomElement = document.createElement( 'video' )
+	videoDomElement.style = "display:none"
+	videoDomElement.crossOrigin = 'anonymous'
+	videoDomElement.src = "data/" + name
+	videoDomElement.loop = false
+	videoDomElement.muted = true
+	videoDomElement.currentTime = startTime
+	// videoDomElement.playbackRate = .3
+
+	await videoDomElement.load()
+	await videoDomElement.play()
+	videoDomElement.pause()
+	let aspect = videoDomElement.videoWidth/videoDomElement.videoHeight //can't get these til you've done the above!
+
+	let videoTexture = new THREE.VideoTexture( videoDomElement )
+	videoTexture.minFilter = THREE.LinearFilter
+	let mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.,1./aspect), new THREE.MeshBasicMaterial({
+		map: videoTexture
+	}))
+	mesh.scale.multiplyScalar(camera.rightAtZZero * 2. - .1)
+	scene.add(mesh)
+
+	updateFunctions.push(function()
+	{	
+		if(videoDomElement.currentTime > finishTime)
+			videoDomElement.pause()
+	})
+}
+
+async function initWheelScene()
+{
+	await initVideo()
+	return
+
 	let littleScene = new THREE.Group()
-	littleScene.scale.setScalar(2)
-	littleScene.position.y += 3.88
+	littleScene.scale.setScalar(4.4)
+	// littleScene.position.y += 3.88
 	scene.add(littleScene)
 
-	let background = new THREE.Mesh(new THREE.PlaneGeometry(2.5,.9), new THREE.MeshBasicMaterial({color:0x00AAAA}))
+	let background = new THREE.Mesh(new THREE.PlaneGeometry(1.7,.9), new THREE.MeshBasicMaterial({color:0x00AAAA}))
 	background.position.z -= .01
 	littleScene.add(background)
 
@@ -63,15 +147,15 @@ function initWheelScene()
 	muddyTrail.scale.y = .035
 	muddyTrail.scale.x = .001
 	littleScene.add(muddyTrail)
-	muddyTrail.position.x -= .9
+	muddyTrail.position.x -= .53
 	muddyTrail.position.y -= .37
 
 	// littleScene.visible = false
 
-	bestowConnectionPotential(muddyTrail,function(multivec)
-	{
-		multivec.setScalar(muddyTrail.scale.x)
-	} )
+	// bestowConnectionPotential(muddyTrail,function(multivec)
+	// {
+	// 	multivec.setScalar(muddyTrail.scale.x)
+	// } )
 
 	let wheelRadius = .11
 	let wheel = new THREE.Mesh(new THREE.PlaneGeometry(wheelRadius*6*2.,wheelRadius*6*2.),new THREE.MeshBasicMaterial({transparent:true}))
@@ -99,9 +183,6 @@ function initWheelScene()
 	})
 	littleScene.add(flower)
 
-
-	
-
 	// {
 	//	let s = new THREE.Scene()
 	
@@ -117,9 +198,9 @@ function initWheelScene()
 	//	renderer.render( s, camera );
 	// }
 
-	let placeStuckOnWheel = new THREE.Vector3(0.,wheelRadius*0.5,0.)
+	let placeStuckOnWheel = new THREE.Vector3(0.,-wheelRadius*0.5,0.)
 
-	let playing = false
+	let playing = true
 
 	clickables.push(background)
 	background.onClick = function()
@@ -173,31 +254,8 @@ function initWheelScene()
 			muddyTrail.visible = muddyTrail.scale.x !== 0.
 
 			clown.position.copy(wheel.position)
-
-			//DEBUG
-			// hummingbird.position.copy(flower.position)
-
-			if(hummingbird.position.distanceTo(flower.position) > .03)
-			{
-				loseSign.visible = true
-				loseSign.position.copy(hummingbird.position)
-				hummingbird.material.color.b = Math.sin(frameCount*.1)
-				hummingbird.material.color.g = hummingbird.material.color.b
-			}
-			else
-			{
-				if(loseSign.visible === false)
-				{
-					winSign.visible = true
-					winSign.position.copy(hummingbird.position)
-					winSign.material.color.r = Math.sin(frameCount*.1)
-					winSign.material.color.b = Math.sin(frameCount*.1)
-				}
-			}
 		}
 	})
-
-	littleScene.hummingbird = hummingbird
 
 	return littleScene
 }

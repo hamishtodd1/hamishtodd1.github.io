@@ -1,7 +1,10 @@
 /*
 	TODO for slack / Cambridge demo
-		Get the wheel in there
+		Get the wheel in there. Animated
+		And just some videos plus extracting pictures
 		Tutorial levels
+
+	TODO for sandbox / tool for thought
 		Every aspect of the multiplication and addition needs to be visualized. Well, for 2D!
 			Coplanar bivector addition - easy and fun
 			Vector addition - just do something
@@ -10,12 +13,19 @@
 			Coplanar bivector multiplication - complex multiplication!
 			Bivector-vector multiplication
 			Bivector multiplication???
-		Sandbox available
+		Helping make shaders
+			Ideally you paste and it tells you what it thinks you pasted
+			Spit out glsl?
+			Heh, have it be possible for the input and output to be arranged in a rectangle with x and y smoothly varying, i.e. a framebuffer
 
 	TODO for GDC
 		A fast to access webpage
 		With something that creates surprises and communicates its purpose in 45s
 		And can show something quaternion-related in short order
+
+	TODO for academic course
+
+	TODO 
 	
 	Long term
 		Oculus quest / hololens thing where you record a video, and it automatically takes the frames
@@ -31,16 +41,14 @@
 			Could rearrange to put recent ones at top
 			Could pack rectangles
 			Scrollbar
-		Helping make shaders
-			Ideally you paste and it tells you what it thinks you pasted
-			Spit out glsl?
-			Heh, have it be possible for the input and output to be arranged in a rectangle with x and y smoothly varying, i.e. a framebuffer
 */
 
 async function init()
 {
 	// await initBivectorAppearance()
 	// return
+
+	await initWheelScene()
 
 	initMultivectorAppearances()
 
