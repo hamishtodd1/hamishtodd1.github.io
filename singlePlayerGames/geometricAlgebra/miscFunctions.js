@@ -1,3 +1,22 @@
+//can use this within a part of three.js
+function checkIfObjectIsInScene(object)
+{
+	let thingWeWantToBecomeUltimateParent = object
+	while(1)
+	{
+		if(thingWeWantToBecomeUltimateParent.parent !== null)
+		{
+			thingWeWantToBecomeUltimateParent = thingWeWantToBecomeUltimateParent.parent
+		}
+		else
+		{
+			return thingWeWantToBecomeUltimateParent === scene;
+		}
+	}
+
+	return thingWeWantToBecomeUltimateParent
+}
+
 THREE.Raycaster.prototype.updateFromClientCoordinates = function(clientX,clientY)
 {
 	let ndc = new THREE.Vector2()

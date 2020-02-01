@@ -43633,20 +43633,19 @@
 
 		//HAMISH
 		// if ( object.visible === false ) return;
-		
-		let objectToCheckParentOf = object
+		let thingWeWantToBecomeUltimateParent = object
 		while(1)
 		{
-			if(objectToCheckParentOf.parent===null) //it's the ultimate parent
+			if(thingWeWantToBecomeUltimateParent.parent !== null)
 			{
-				if(objectToCheckParentOf !== scene)
-					return;
-				else
-					break;
+				thingWeWantToBecomeUltimateParent = thingWeWantToBecomeUltimateParent.parent
 			}
 			else
 			{
-				objectToCheckParentOf = objectToCheckParentOf.parent
+				if(thingWeWantToBecomeUltimateParent === scene)
+					break;
+				else
+					return;
 			}
 		}
 

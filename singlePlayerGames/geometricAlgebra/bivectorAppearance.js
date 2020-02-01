@@ -1,6 +1,7 @@
 /*
 	Could use GL_POINTS to avoid overdraw
 	Points need a bigger radius than the balls, specifically big enough to contain the largest smoothMin extension
+	On the other hand there might be some point at which you're zoomed all the way in on it
 
 	This may be astonishingly misguided and you are better off leaving it to the artist
 

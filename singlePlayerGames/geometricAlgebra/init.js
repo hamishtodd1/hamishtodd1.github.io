@@ -45,20 +45,21 @@
 			Scrollbar
 */
 
+multivectorScope = []
+
 async function init()
 {
 	// await initBivectorAppearance()
 	// return
 
 	initMultivectorAppearances()
-	await initOperatorAppearance()
+	await initOperatorAppearances()
 
 	// initWheelScene()
 	// await initVideo()
 
 	{
 		var activeOperator = OperatorAppearance()
-		var multivectorScope = []
 
 		var operands = [
 			MultivectorAppearance(function(){}),
@@ -67,7 +68,7 @@ async function init()
 		var operandAndActiveOperatorPositions = [
 			new THREE.Vector3( 0.,1.,0.),
 			new THREE.Vector3( 1.,0.,0.),
-			zeroVector]
+			new THREE.Vector3( 0.,0.,0.)]
 		var operandsAndActiveOperator = [
 			operands[0],
 			operands[1],
@@ -75,19 +76,24 @@ async function init()
 		]
 
 		let lastAssignedOperand = 0
-		function multivectorScopeOnClick(multivecToCopy)
+		ScopeMultivector = function(elements)
 		{
-			if(animationStage !== -1.)
-				completeAnimation()
+			let newScopeMultivector = MultivectorAppearance(function(multivecToCopy)
+			{
+				if(animationStage !== -1.)
+					completeAnimation()
 
-			let operandToUse = operands[1-lastAssignedOperand]
-			lastAssignedOperand = 1 - lastAssignedOperand
+				let operandToUse = operands[1-lastAssignedOperand]
+				lastAssignedOperand = 1 - lastAssignedOperand
 
-			operandToUse.copyElements(multivecToCopy.elements)
-			operandToUse.position.copy(multivecToCopy.position)
-			scene.add(operandToUse)
+				operandToUse.copyElements(multivecToCopy.elements)
+				operandToUse.position.copy(multivecToCopy.position)
+				scene.add(operandToUse)
 
-			potentiallyTriggerAnimation()
+				potentiallyTriggerAnimation()
+			},elements)
+
+			return newScopeMultivector
 		}
 
 		function operatorScopeOnClick(operatorSelection)
@@ -103,14 +109,15 @@ async function init()
 			potentiallyTriggerAnimation()
 		}
 
-		initScope(multivectorScope,multivectorScopeOnClick,operatorScopeOnClick)
+		initScope(operatorScopeOnClick)
 	}
 
-	// initInputOutputGoal(multivectorScope,multivectorScopeOnClick)
+	// initInputOutputGoal()
 
-	initEndlessRandomizedSingularGoals( multivectorScope )
+	let enableEndlessRandomizedSingularGoalsMode = initEndlessRandomizedSingularGoals()
+	enableEndlessRandomizedSingularGoalsMode()
 
-	await initMenu()
+	await initMenu(enableEndlessRandomizedSingularGoalsMode)
 
 	//It's nice if they could all animate
 	//A multivector appearance is a group with children that are bits of multivector. So yes.
@@ -184,7 +191,7 @@ async function init()
 		scene.remove(operands[0],operands[1],activeOperator)
 		scene.remove(animationMultivector)
 
-		let newMultivector = MultivectorAppearance(multivectorScopeOnClick, animationMultivector.elements)
+		let newMultivector = ScopeMultivector(animationMultivector.elements)
 		multivectorScope.push(newMultivector) //currently it waits for animation to complete before pulling this to multivectorScope
 		animationStage = -1.;
 	}

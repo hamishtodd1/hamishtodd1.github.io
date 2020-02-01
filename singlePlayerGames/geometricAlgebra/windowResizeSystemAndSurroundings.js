@@ -1,3 +1,5 @@
+//every part of this goes out the window in VR
+
 function initWindowResizeSystemAndSurroundings(renderer)
 {
 	camera.topAtZZero = 4.5; //want unit vectors to be a reasonable size
@@ -14,6 +16,7 @@ function initWindowResizeSystemAndSurroundings(renderer)
 		camera.near = .1
 		camera.far = camera.position.z + depth + .01
 		camera.updateProjectionMatrix()
+
 		stage.material.metalness = 0.1;
 		stage.material.roughness = 0.2;
 		stage.receiveShadow = true;
@@ -24,14 +27,15 @@ function initWindowResizeSystemAndSurroundings(renderer)
 	{
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		camera.aspect = window.innerWidth / window.innerHeight;
+		if(camera.aspect < 9./21. || camera.aspect > 21./9.)
+			log("yep, that's the most extreme (Xperia 1)")
+		if(camera.aspect > 1.)
+			console.error("Wider than tall: might consider switching side and bottom for this")
 
 		camera.fov = fovGivenCenterToFrameDistance(camera.topAtZZero, camera.position.z )
 		camera.rightAtZZero = camera.topAtZZero * camera.aspect
 
 		stage.scale.x = camera.rightAtZZero*2.
-
-		if(camera.topAtZZero < camera.rightAtZZero)
-			console.error("might consider switching side and bottom")
 
 		camera.updateProjectionMatrix();
 	}
@@ -72,13 +76,9 @@ function otherFov(inputFov,aspectRatio,inputIsVertical)
 	var centerToFrameInput = centerToFrameDistance(inputFov,1)
 	var centerToFrameOutput = centerToFrameInput;
 	if(inputIsVertical)
-	{
 		centerToFrameOutput *= aspectRatio;
-	}
 	else
-	{
 		centerToFrameOutput /= aspectRatio;
-	}
 	var outputFov = fovGivenCenterToFrameDistance(centerToFrameOutput,1);
 	return outputFov;
 }

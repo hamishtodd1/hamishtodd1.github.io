@@ -11,6 +11,7 @@
 
 	The scalar
 		People are so used to numerals. But this *is* about geometry! A length may make more sense
+		It is almost certainly objectively important to know what the multiplicative identity is
 		The unit size should be clear, and the numeral does make that clear
 		Numeral with positive or negative sign
 		Numeral with color

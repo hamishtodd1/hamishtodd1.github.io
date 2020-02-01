@@ -15,7 +15,8 @@
 		Integral?
 */
 
-async function initOperatorAppearance()
+async function initOperatorAppearances
+()
 {
 	let texture = null
 	await new Promise(resolve => {

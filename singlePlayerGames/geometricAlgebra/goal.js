@@ -12,6 +12,7 @@
 		Add only, two along three up
 		"Double the size of this" - shows elegance of scalar multiplication
 		People like animals! Dung beetle rolls dung for the turning
+		it would be funny to have 0 as a goal!
 
 	General structure
 		Addition only, scalars only
@@ -32,14 +33,9 @@
 let modeDependentReactionToResult = function(){}
 let dismantleCurrentGoal = function(){}
 
-function initEndlessRandomizedSingularGoals(scope)
+function initEndlessRandomizedSingularGoals()
 {
 	let defaultText = "Make this:"
-
-	function clearNonBasisScope()
-	{
-		console.error("TODO")
-	}
 
 	{
 		var defaultPosition = new THREE.Vector3(
@@ -50,7 +46,6 @@ function initEndlessRandomizedSingularGoals(scope)
 		victoryPosition.y = 0.
 
 		var goalBox = new THREE.Group()
-		scene.add(goalBox)
 
 		goalBox.title = makeTextSign(defaultText)
 		goalBox.title.scale.multiplyScalar(.5)
@@ -64,24 +59,25 @@ function initEndlessRandomizedSingularGoals(scope)
 		goalBox.add(background)
 	}
 
-	var singularGoalMultivector = MultivectorAppearance(function(){})
+	let singularGoalMultivector = MultivectorAppearance(function(){})
 	goalBox.add(singularGoalMultivector)
 	function randomizeGoalMultivector()
 	{
-		let randomMultivectorElements = generateRandomMultivectorElementsFromScope(scope)
-		console.assert( !equalsMultivector(randomMultivectorElements,zeroMultivector) )
-		//haha but it would be funny to have nothing as a goal!
+		let randomMultivectorElements = generateRandomMultivectorElementsFromScope(multivectorScope)
 
 		copyMultivector(randomMultivectorElements, singularGoalMultivector.elements)
-		singularGoalMultivector.updateAppearance()
 		delete randomMultivectorElements
+		singularGoalMultivector.updateAppearance()
 	}
-	randomizeGoalMultivector()
 
-	var goalIrritation = 0.
+	let goalIrritation
 	updateFunctions.push(function()
 	{
+		if(!checkIfObjectIsInScene(goalBox))
+			return
+
 		let oscillating = .5 + .5 * Math.sin(frameCount * .14)
+		goalBox.title.children[0].material.color.setRGB(1.,1.,1.)		
 
 		if( goalIrritation !== 0.)
 		{
@@ -100,7 +96,7 @@ function initEndlessRandomizedSingularGoals(scope)
 			victorySavouringCounter -= frameDelta
 			if( victorySavouringCounter < 0. )
 			{
-				clearNonBasisScope()
+				clearScopeToBasis()
 				randomizeGoalMultivector()
 
 				victorySavouringCounter = -1.
@@ -112,8 +108,8 @@ function initEndlessRandomizedSingularGoals(scope)
 		goalBox.position.lerp(victorySavouringCounter==-1.?defaultPosition:victoryPosition,.1)
 	})
 
-	let victorySavouringCounter = -1.
-	modeDependentReactionToResult = function(newMultivectorElements)
+	let victorySavouringCounter
+	function ourModeDependentReactionToResult(newMultivectorElements)
 	{
 		if( equalsMultivector(singularGoalMultivector.elements,newMultivectorElements) )
 		{
@@ -126,17 +122,27 @@ function initEndlessRandomizedSingularGoals(scope)
 		}
 	}
 
-	dismantleCurrentGoal = function()
+	function enableEndlessRandomizedSingularGoalsMode()
 	{
-		scene.remove(goalBox)
+		clearScopeToBasis()
+		randomizeGoalMultivector()
+		scene.add(goalBox)
+		goalBox.position.copy(defaultPosition)
 
-		clearNonBasisScope()
+		victorySavouringCounter = -1.
+		goalIrritation = 0.
+
+		modeDependentReactionToResult = ourModeDependentReactionToResult
+		dismantleCurrentGoal = function()
+		{
+			scene.remove(goalBox)
+		}
 	}
 
-	return goalBox
+	return enableEndlessRandomizedSingularGoalsMode
 }
 
-function initInputOutputGoal(scope,scopeOnClick)
+function initInputOutputGoal()
 {
 	let numPairs = 2;
 
@@ -150,8 +156,8 @@ function initInputOutputGoal(scope,scopeOnClick)
 	var inputSelectionIndicator = RectangleIndicator()
 	var outputSelectionIndicator = RectangleIndicator()
 
-	let scopeInputMultivector = MultivectorAppearance(scopeOnClick);
-	scope.push(scopeInputMultivector)
+	let scopeInputMultivector = ScopeMultivector();
+	multivectorScope.push(scopeInputMultivector)
 	function selectInput(multivec)
 	{
 		inputSelectionIndicator.position.copy(multivec.position)
@@ -201,12 +207,12 @@ function initInputOutputGoal(scope,scopeOnClick)
 		let seedForRandomActivity = Math.random()
 
 		let outputs = Array(inputs.length)
-		let scopeWithOneExtra = Array(scope.length+1)
-		for(let i = 0; i < scope.length; i++)
-			scopeWithOneExtra[i] = scope[i]
+		let scopeWithOneExtra = Array(multivectorScope.length+1)
+		for(let i = 0; i < multivectorScope.length; i++)
+			scopeWithOneExtra[i] = multivectorScope[i]
 		for(let i = 0; i < outputs.length; i++)
 		{
-			scopeWithOneExtra[scope.length] = inputs[i]
+			scopeWithOneExtra[multivectorScope.length] = inputs[i]
 			//possible bug: you're getting both outputs the same sometimes
 			let elements = generateRandomMultivectorElementsFromScope(scopeWithOneExtra,seedForRandomActivity)
 
@@ -239,7 +245,7 @@ function initInputOutputGoal(scope,scopeOnClick)
 		scene.remove(inputGroup)
 		scene.remove(outputGroup)
 
-		//and removing that shit from the scope?
+		//and removing that shit from the multivectorScope?
 
 		dismantleCurrentGoal = function(){}
 	}

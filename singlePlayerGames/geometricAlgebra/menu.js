@@ -14,7 +14,7 @@
 		video speed
 */
 
-async function initMenu()
+async function initMenu(enableEndlessRandomizedSingularGoalsMode)
 {
 	let menu = new THREE.Group()
 	scene.add(menu)
@@ -87,73 +87,87 @@ async function initMenu()
 		menuEntries.push(sandbox)
 		sandbox.onClick = function()
 		{
-			modeDependentReactionToResult = function(){}
 			dismantleCurrentGoal()
-			dismantleCurrentGoal = function(){}
+
+			//"enable sandbox mode"
+			{
+				modeDependentReactionToResult = function(){}
+				dismantleCurrentGoal = function(){}
+				clearScopeToBasis()
+			}
+
 			menuMode = false
-
-			log("TODO Clear scope completely, just basis vectors")
 		}
 	}
 
 	{
-		let levelSelectObject = makeTextSign("Select level")
-		let levelSelect = levelSelectObject.children[0]
-		levelSelect.scale.copy(levelSelectObject.scale)
-		menuEntries.push(levelSelect)
-		levelSelect.onClick = function()
+		let randomObject = makeTextSign("Random Singular Goal mode")
+		//difficulty scale might be nice
+		let random = randomObject.children[0]
+		random.scale.copy(randomObject.scale)
+		menuEntries.push(random)
+		random.onClick = function()
 		{
-			log("TODO")
+			dismantleCurrentGoal()
+			enableEndlessRandomizedSingularGoalsMode()
+			menuMode = false
 		}
 	}
 
-	{
-		// let randomize = makeTextSign("Random puzzle")
-		// menuEntries.push(randomize)
-	}
+	// {
+	// 	let levelSelectObject = makeTextSign("Select level")
+	// 	let levelSelect = levelSelectObject.children[0]
+	// 	levelSelect.scale.copy(levelSelectObject.scale)
+	// 	menuEntries.push(levelSelect)
+	// 	levelSelect.onClick = function()
+	// 	{
+	// 		log("TODO")
+	// 	}
+	// }
 
 	{
-		let fullscreenButton = makeTextSign("Fullscreen")
+		let fullscreenButton = makeTextSign("Fullscreen mode")
 		menuEntries.push(fullscreenButton)
 
-		function potentiallyGoFullScreen(clientX,clientY)
+		function potentiallyToggleFullScreen(clientX,clientY)
 		{
-			if(!menuMode)
-				return
-
 			raycaster.updateFromClientCoordinates(event.clientX,event.clientY)
-			let clickPosition = raycaster.intersectZPlane(0.)
-			fullscreenButton.worldToLocal(clickPosition)
+			let zZeroClickPosition = raycaster.intersectZPlane(0.)
+			fullscreenButton.worldToLocal(zZeroClickPosition)
 
-			if( -.5 < clickPosition.x && clickPosition.x < .5 &&
-				-.5 < clickPosition.y && clickPosition.y < .5 )
+			if( -.5 < zZeroClickPosition.x && zZeroClickPosition.x < .5 &&
+				-.5 < zZeroClickPosition.y && zZeroClickPosition.y < .5 )
 			{
-				//commence mozilla black box
+				//these five lines are a mozilla black box
 				let doc = window.document;
 				let docEl = doc.documentElement;
+				let requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen
+				let cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen
+				let notFullscreenCurrently = !doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement
 
-				let requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-				let cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
-
-				if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+				if(notFullscreenCurrently)
+				{
 					requestFullScreen.call(docEl);
+					fullscreenButton.children[0].material.setText("Windowed mode")
 				}
-				else {
+				else
+				{
 					cancelFullScreen.call(doc);
+					fullscreenButton.children[0].material.setText("Fullscreen mode")
 				}
 			}
 
-			delete clickPosition
+			delete zZeroClickPosition
 		}
 
 		let raycaster = new THREE.Raycaster()
 		document.addEventListener( 'mousedown', function(event)
 		{
-			potentiallyGoFullScreen(event.clientX,event.clientY)
+			potentiallyToggleFullScreen(event.clientX,event.clientY)
 		}, false );
 		document.addEventListener( 'touchstart', function(event)
 		{
-			potentiallyGoFullScreen(event.changedTouches[0].clientX,event.changedTouches[0].clientY)
+			potentiallyToggleFullScreen(event.changedTouches[0].clientX,event.changedTouches[0].clientY)
 		}, { passive: false } );
 	}
 

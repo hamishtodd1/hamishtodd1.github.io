@@ -1,45 +1,74 @@
-function initScope(multivectorScope,multivectorScopeOnClick,operatorScopeOnClick)
+function removeFromScope(multivec)
 {
-	let xBasisElement = MultivectorAppearance(multivectorScopeOnClick)
+	//bug: the selector is on you
+	removeSingleElementFromArray(multivectorScope, multivec)
+	scene.remove(multivec)
+	removeSingleElementFromArray(clickables,multivec.thingYouClick)
+	// multivec.dispose()
+	//todo: dispose almost certainly doesn't work fully
+	//You need to get rid of everything that is "new" in multivectorAppearance.js
+}
+
+function clearScopeToBasis()
+{
+	for(let i = multivectorScope.length-1; i > -1; i--)
+		removeFromScope(multivectorScope[i])
+
+	let xBasisElement = ScopeMultivector()
 	multivectorScope.push(xBasisElement)
 	xBasisElement.setTo1Blade(xUnit)
-	let yBasisElement = MultivectorAppearance(multivectorScopeOnClick)
+	getScopePosition(0,xBasisElement.position)
+	let yBasisElement = ScopeMultivector()
 	multivectorScope.push(yBasisElement)
 	yBasisElement.setTo1Blade(yUnit)
-	// let zBasisElement = MultivectorAppearance(multivectorScopeOnClick)
+	getScopePosition(1,yBasisElement.position)
+	// let zBasisElement = ScopeMultivector()
 	// multivectorScope.push(zBasisElement)
 	// zBasisElement.setTo1Blade(zUnit)
 
-	// let littleScalar = MultivectorAppearance(multivectorScopeOnClick)
+	// let littleScalar = ScopeMultivector()
 	// multivectorScope.push(littleScalar)
 	// littleScalar.elements[0] = .2
 	// littleScalar.updateAppearance()
 
-	// let trivec = MultivectorAppearance(multivectorScopeOnClick)
+	// let trivec = ScopeMultivector()
 	// multivectorScope.push(trivec)
 	// trivec.elements[7] = 1.
 	// trivec.updateTrivectorAppearance()
+}
 
+function getScopePosition(desiredindex,dest)
+{
+	let allowedWidth = .7
+	dest.x = -camera.rightAtZZero + allowedWidth
+	dest.y = camera.topAtZZero
+	for(let i = 0; i <= desiredindex; i++ )
+	{
+		let halfMultivectorHeight = multivectorScope[i].getHeightWithPadding() / 2.;
+
+		if( dest.y - halfMultivectorHeight < -camera.topAtZZero)
+		{
+			dest.x += allowedWidth
+			dest.y = camera.topAtZZero
+		}
+
+		dest.y -= halfMultivectorHeight
+		if(i === desiredindex)
+			return dest
+		dest.y -= halfMultivectorHeight
+	}
+}
+
+function initScope(operatorScopeOnClick)
+{
 	// better packing http://www.optimization-online.org/DB_FILE/2016/01/5293.pdf
 	let scopePosition = new THREE.Vector3()
 	updateFunctions.push(function()
 	{
-		let allowedWidth = .7
-		scopePosition.x = -camera.rightAtZZero + allowedWidth
-		scopePosition.y = camera.topAtZZero
-		for(let i = 0; i < multivectorScope.length; i++ )
+		for(let i = 0; i < multivectorScope.length; i++ ) //n^2 but hey scope sucks
 		{
-			let halfMultivectorHeight = multivectorScope[i].getHeightWithPadding() / 2.;
-
-			if( scopePosition.y - halfMultivectorHeight < -camera.topAtZZero)
-			{
-				scopePosition.x += allowedWidth
-				scopePosition.y = camera.topAtZZero
-			}
-
-			scopePosition.y -= halfMultivectorHeight
+			getScopePosition(i,scopePosition)
 			multivectorScope[i].position.lerp(scopePosition,.1)
-			scopePosition.y -= halfMultivectorHeight
 		}
 	})
 
@@ -74,6 +103,8 @@ function initScope(multivectorScope,multivectorScopeOnClick,operatorScopeOnClick
 	}
 	bindButton("up",function()
 	{
+		initKeyboardSelectionIfNotNotAlreadyDone()
+		
 		if(!multivectorScopeSelected)
 		{
 			multivectorScopeSelected = true
@@ -89,10 +120,12 @@ function initScope(multivectorScope,multivectorScopeOnClick,operatorScopeOnClick
 			}
 		}
 
-		scene.add(keyboardSelectionIndicator)
+		getSelection().add(keyboardSelectionIndicator)
 	})
 	bindButton("down",function()
 	{
+		initKeyboardSelectionIfNotNotAlreadyDone()
+		
 		if(!multivectorScopeSelected)
 		{
 			multivectorScopeSelected = true
@@ -108,10 +141,12 @@ function initScope(multivectorScope,multivectorScopeOnClick,operatorScopeOnClick
 			}
 		}
 
-		scene.add(keyboardSelectionIndicator)
+		getSelection().add(keyboardSelectionIndicator)
 	})
 	bindButton("left",function()
 	{
+		initKeyboardSelectionIfNotNotAlreadyDone()
+		
 		if(multivectorScopeSelected)
 		{
 			multivectorScopeSelected = false
@@ -127,10 +162,12 @@ function initScope(multivectorScope,multivectorScopeOnClick,operatorScopeOnClick
 			}
 		}
 
-		scene.add(keyboardSelectionIndicator)
+		getSelection().add(keyboardSelectionIndicator)
 	})
 	bindButton("right",function()
 	{
+		initKeyboardSelectionIfNotNotAlreadyDone()
+		
 		if(multivectorScopeSelected)
 		{
 			multivectorScopeSelected = false
@@ -146,23 +183,27 @@ function initScope(multivectorScope,multivectorScopeOnClick,operatorScopeOnClick
 			}
 		}
 
-		scene.add(keyboardSelectionIndicator)
+		getSelection().add(keyboardSelectionIndicator)
 	})
 	bindButton("enter",function()
 	{
-		if(keyboardSelectionIndicator.parent !== scene)
-			scene.add(keyboardSelectionIndicator)
-		else
-		{
-			let selection = getSelection()
-			if(operatorScope.indexOf(selection) !== -1)
-				selection.onClick()
-			else
-				selection.thingYouClick.onClick()
-		}
+		initKeyboardSelectionIfNotNotAlreadyDone()		
+
+		let selection = getSelection()
+		if(operatorScope.indexOf(selection) !== -1)
+			selection.onClick()
+		else if(multivectorScope.indexOf(selection) !== -1)
+			selection.thingYouClick.onClick()
 	})
-	updateFunctions.push(function()
+
+	function initKeyboardSelectionIfNotNotAlreadyDone()
 	{
-		keyboardSelectionIndicator.position.copy(getSelection().position)
-	})
+		if( !checkIfObjectIsInScene(keyboardSelectionIndicator) )
+		{
+			multivectorScopeSelected = true
+			multivectorSelection = 0;
+			operatorSelection = 0;
+			getSelection().add(keyboardSelectionIndicator)
+		}
+	}
 }
