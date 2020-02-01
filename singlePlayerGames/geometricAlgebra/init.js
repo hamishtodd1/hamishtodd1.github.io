@@ -108,7 +108,7 @@ async function init()
 
 	// initInputOutputGoal(multivectorScope,multivectorScopeOnClick)
 
-	initSingularGoal( multivectorScope )
+	initEndlessRandomizedSingularGoals( multivectorScope )
 
 	await initMenu()
 
@@ -146,6 +146,7 @@ async function init()
 				break;
 
 			case 2:
+				modeDependentReactionToResult(animationMultivector.elements)
 				scene.add(animationMultivector)
 				scene.remove(operands[0],operands[1],activeOperator)
 				animationStage++;
@@ -180,7 +181,6 @@ async function init()
 
 	function completeAnimation()
 	{
-		modeDependentReactionToResult(animationMultivector.elements)
 		scene.remove(operands[0],operands[1],activeOperator)
 		scene.remove(animationMultivector)
 

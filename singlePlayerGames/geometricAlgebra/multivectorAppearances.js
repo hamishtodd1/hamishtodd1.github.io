@@ -76,8 +76,8 @@ function initMultivectorAppearances()
 	let circleGeometry = new THREE.CircleBufferGeometry(1.,32)
 
 	//surely frontside?
-	let bivecMaterialFront = new THREE.MeshStandardMaterial({color:0xFF0000,transparent:true,opacity:.4,side:THREE.FrontSide})
-	let bivecMaterialBack = new THREE.MeshStandardMaterial({color:0x0000FF,transparent:true,opacity:.4,side:THREE.BackSide})
+	let bivecMaterialFront = new THREE.MeshStandardMaterial({color:0xFF0000,transparent:true,opacity:.6,side:THREE.FrontSide})
+	let bivecMaterialBack = new THREE.MeshStandardMaterial({color:0x0000FF,transparent:true,opacity:.6,side:THREE.BackSide})
 
 	let trivectorGeometry = new THREE.SphereBufferGeometry(1.,32,16)
 	let trivectorMaterial = new THREE.MeshStandardMaterial()

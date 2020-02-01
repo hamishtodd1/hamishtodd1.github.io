@@ -6,6 +6,7 @@ function makeTextSign(initialText, twoSided, materialOnly, originCornered)
 	}
 
 	var canvas = document.createElement("canvas");
+	GLOBAL = canvas
 	var context = canvas.getContext("2d");
 	var material = new THREE.MeshBasicMaterial({map: new THREE.CanvasTexture(canvas)});
 

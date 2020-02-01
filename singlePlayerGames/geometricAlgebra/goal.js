@@ -32,9 +32,109 @@
 let modeDependentReactionToResult = function(){}
 let dismantleCurrentGoal = function(){}
 
-/*
-	A series of singular goals
-*/
+function initEndlessRandomizedSingularGoals(scope)
+{
+	let defaultText = "Make this:"
+
+	function clearNonBasisScope()
+	{
+		console.error("TODO")
+	}
+
+	{
+		var defaultPosition = new THREE.Vector3(
+			camera.rightAtZZero - 1.4,
+			camera.topAtZZero - 1.4,
+			0.)
+		var victoryPosition = defaultPosition.clone()
+		victoryPosition.y = 0.
+
+		var goalBox = new THREE.Group()
+		scene.add(goalBox)
+
+		goalBox.title = makeTextSign(defaultText)
+		goalBox.title.scale.multiplyScalar(.5)
+		goalBox.title.position.y = .9
+		goalBox.add(goalBox.title)
+
+		let background = new THREE.Mesh(unchangingUnitSquareGeometry,new THREE.MeshBasicMaterial({color:0x000000}))
+		background.scale.set(goalBox.title.scale.x*1.1,goalBox.title.scale.y*4.3,1.)
+		background.position.z -= .001
+		background.position.y += .18
+		goalBox.add(background)
+	}
+
+	var singularGoalMultivector = MultivectorAppearance(function(){})
+	goalBox.add(singularGoalMultivector)
+	function randomizeGoalMultivector()
+	{
+		let randomMultivectorElements = generateRandomMultivectorElementsFromScope(scope)
+		console.assert( !equalsMultivector(randomMultivectorElements,zeroMultivector) )
+		//haha but it would be funny to have nothing as a goal!
+
+		copyMultivector(randomMultivectorElements, singularGoalMultivector.elements)
+		singularGoalMultivector.updateAppearance()
+		delete randomMultivectorElements
+	}
+	randomizeGoalMultivector()
+
+	var goalIrritation = 0.
+	updateFunctions.push(function()
+	{
+		let oscillating = .5 + .5 * Math.sin(frameCount * .14)
+
+		if( goalIrritation !== 0.)
+		{
+			goalIrritation -= frameDelta * .75
+			if( goalIrritation < 0. )
+				goalIrritation = 0.
+			singularGoalMultivector.position.x = goalIrritation * .2 * Math.sin(frameCount * .3)
+
+			goalBox.title.children[0].material.color.setRGB(1.,1.-oscillating,1.-oscillating)
+		}
+
+		if(victorySavouringCounter !== -1.)
+		{
+			goalBox.title.children[0].material.color.setRGB(1.-oscillating,1.,1.-oscillating)
+
+			victorySavouringCounter -= frameDelta
+			if( victorySavouringCounter < 0. )
+			{
+				clearNonBasisScope()
+				randomizeGoalMultivector()
+
+				victorySavouringCounter = -1.
+				goalBox.title.children[0].material.color.setRGB(1.,1.,1.)
+				goalBox.title.children[0].material.setText(defaultText)
+			}
+		}
+
+		goalBox.position.lerp(victorySavouringCounter==-1.?defaultPosition:victoryPosition,.1)
+	})
+
+	let victorySavouringCounter = -1.
+	modeDependentReactionToResult = function(newMultivectorElements)
+	{
+		if( equalsMultivector(singularGoalMultivector.elements,newMultivectorElements) )
+		{
+			goalBox.title.children[0].material.setText("You win!")
+			victorySavouringCounter = 2.
+		}
+		else
+		{
+			goalIrritation = 1.
+		}
+	}
+
+	dismantleCurrentGoal = function()
+	{
+		scene.remove(goalBox)
+
+		clearNonBasisScope()
+	}
+
+	return goalBox
+}
 
 function initInputOutputGoal(scope,scopeOnClick)
 {
@@ -145,97 +245,4 @@ function initInputOutputGoal(scope,scopeOnClick)
 	}
 
 	return inputScope
-}
-
-function initSingularGoal(scope)
-{
-	{
-		var goalBox = new THREE.Group()
-		scene.add(goalBox)
-		goalBox.position.y = camera.topAtZZero - 1.4
-
-		goalBox.title = makeTextSign("Make this:")
-		goalBox.title.scale.multiplyScalar(.5)
-		goalBox.title.position.y = .9
-		goalBox.add(goalBox.title)
-
-		let background = new THREE.Mesh(unchangingUnitSquareGeometry,new THREE.MeshBasicMaterial({color:0x000000}))
-		background.scale.set(goalBox.title.scale.x*1.1,goalBox.title.scale.y*4.3,1.)
-		background.position.z -= .001
-		background.position.y += .18
-		goalBox.add(background)
-	}
-
-	let singularGoalMultivector = null
-
-	//level generator
-	let randomMultivectorElements = generateRandomMultivectorElementsFromScope(scope)
-	console.assert(!equalsMultivector(randomMultivectorElements,zeroMultivector))
-	singularGoalMultivector = MultivectorAppearance(function(){},randomMultivectorElements)
-	goalBox.add(singularGoalMultivector)
-	delete randomMultivectorElements
-
-	var goalIrritation = 0.
-	updateFunctions.push(function()
-	{
-		goalBox.position.x = camera.rightAtZZero - 1.4
-		
-		singularGoalMultivector.position.x = goalIrritation * .2 * Math.sin(frameCount * .3)
-
-		//no, don't do this, there's only one material
-		// for(let i = 0; i < singularGoalMultivector.children.length; i++)
-		// {
-		// 	if(singularGoalMultivector.children[i].isGroup)
-		// 	{
-		// 		singularGoalMultivector.children[i].children[0].material.color.g = 1.-goalIrritation
-		// 		singularGoalMultivector.children[i].children[1].material.color.b = 1.-goalIrritation
-		// 	}
-		// 	else
-		// 	{
-		// 		singularGoalMultivector.children[i].material.color.g = 1.-goalIrritation
-		// 		singularGoalMultivector.children[i].material.color.b = 1.-goalIrritation
-		// 	}
-		// }
-
-		goalIrritation = Math.max(goalIrritation - frameDelta * .75,0.);
-	})
-
-	let goalAchieved = false
-	modeDependentReactionToResult = function(newMultivectorElements)
-	{
-		if( equalsMultivector(singularGoalMultivector.elements,newMultivectorElements) )
-		{
-			if(!goalAchieved )
-			{
-				goalBox.title.children[0].material.setText("You win!")
-
-				updateFunctions.push(function()
-				{
-					// for(let i = 0; i < singularGoalMultivector.children.length; i++)
-					// {
-					// 	singularGoalMultivector.children[i].material.color.r = Math.sin(frameCount * .14)
-					// 	singularGoalMultivector.children[i].material.color.b = Math.sin(frameCount * .14)
-					// }
-
-					goalBox.title.children[0].material.color.r = Math.sin(frameCount * .14)
-					goalBox.title.children[0].material.color.b = Math.sin(frameCount * .14)
-
-					goalBox.position.y *= .9
-				})
-
-				goalAchieved = true
-			}
-		}
-		else
-		{
-			goalIrritation = 1.
-		}
-	}
-
-	dismantleCurrentGoal = function()
-	{
-		scene.remove(goalBox)
-	}
-
-	return goalBox
 }

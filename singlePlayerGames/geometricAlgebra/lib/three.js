@@ -43633,6 +43633,22 @@
 
 		//HAMISH
 		// if ( object.visible === false ) return;
+		
+		let objectToCheckParentOf = object
+		while(1)
+		{
+			if(objectToCheckParentOf.parent===null) //it's the ultimate parent
+			{
+				if(objectToCheckParentOf !== scene)
+					return;
+				else
+					break;
+			}
+			else
+			{
+				objectToCheckParentOf = objectToCheckParentOf.parent
+			}
+		}
 
 		object.raycast( raycaster, intersects );
 
