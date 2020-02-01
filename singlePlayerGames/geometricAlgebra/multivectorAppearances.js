@@ -23,6 +23,13 @@
 			This makes so much sense. Can have multiplication be visual too
 
 	Scalar and trivector could be a single complex number
+		How about, IF both scalar and trivector are nonzero you get the complex number, otherwise just the one
+		Possibly trivector should be a numeral, with different colors
+		How about
+			a numeral equal to the argument, 
+			the numeral/box around the numeral is a certain color
+			And there is a color wheel around it so it is easy to read off the direction
+		cos(1) + i*sin(1) = e^i could be in your basis
 		visualized differently than the vector. 2D as opposed to 3D
 		Maybe a nice pear shape
 		Has the significant advantage that you get to see how complex numbers rotate each other

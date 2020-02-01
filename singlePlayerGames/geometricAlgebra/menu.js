@@ -87,12 +87,12 @@ async function initMenu(enableEndlessRandomizedSingularGoalsMode)
 		menuEntries.push(sandbox)
 		sandbox.onClick = function()
 		{
-			dismantleCurrentGoal()
+			dismantleCurrentMode()
 
 			//"enable sandbox mode"
 			{
 				modeDependentReactionToResult = function(){}
-				dismantleCurrentGoal = function(){}
+				dismantleCurrentMode = function(){}
 				clearScopeToBasis()
 			}
 
@@ -108,7 +108,7 @@ async function initMenu(enableEndlessRandomizedSingularGoalsMode)
 		menuEntries.push(random)
 		random.onClick = function()
 		{
-			dismantleCurrentGoal()
+			dismantleCurrentMode()
 			enableEndlessRandomizedSingularGoalsMode()
 			menuMode = false
 		}
@@ -126,7 +126,7 @@ async function initMenu(enableEndlessRandomizedSingularGoalsMode)
 	// }
 
 	{
-		let fullscreenButton = makeTextSign("Fullscreen mode")
+		let fullscreenButton = makeTextSign("Toggle Fullscreen")
 		menuEntries.push(fullscreenButton)
 
 		function potentiallyToggleFullScreen(clientX,clientY)
@@ -146,15 +146,9 @@ async function initMenu(enableEndlessRandomizedSingularGoalsMode)
 				let notFullscreenCurrently = !doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement
 
 				if(notFullscreenCurrently)
-				{
 					requestFullScreen.call(docEl);
-					fullscreenButton.children[0].material.setText("Windowed mode")
-				}
 				else
-				{
 					cancelFullScreen.call(doc);
-					fullscreenButton.children[0].material.setText("Fullscreen mode")
-				}
 			}
 
 			delete zZeroClickPosition

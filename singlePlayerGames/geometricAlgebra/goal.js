@@ -31,7 +31,7 @@
 */
 
 let modeDependentReactionToResult = function(){}
-let dismantleCurrentGoal = function(){}
+let dismantleCurrentMode = function(){}
 
 function initEndlessRandomizedSingularGoals()
 {
@@ -133,7 +133,7 @@ function initEndlessRandomizedSingularGoals()
 		goalIrritation = 0.
 
 		modeDependentReactionToResult = ourModeDependentReactionToResult
-		dismantleCurrentGoal = function()
+		dismantleCurrentMode = function()
 		{
 			scene.remove(goalBox)
 		}
@@ -240,14 +240,14 @@ function initInputOutputGoal()
 		inputGroup.position.lerp( intendedPositions[1],frameCount===0?1.:.1)
 	})
 
-	dismantleCurrentGoal = function()
+	dismantleCurrentMode = function()
 	{
 		scene.remove(inputGroup)
 		scene.remove(outputGroup)
 
 		//and removing that shit from the multivectorScope?
 
-		dismantleCurrentGoal = function(){}
+		dismantleCurrentMode = function(){}
 	}
 
 	return inputScope
