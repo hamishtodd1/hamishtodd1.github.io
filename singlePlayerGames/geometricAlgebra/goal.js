@@ -32,6 +32,7 @@
 
 let reactToNewMultivector = function(){}
 let dismantleCurrentMode = function(){}
+let scopeIsLimited = true
 
 function initSingularGoals(modeChange)
 {
@@ -116,10 +117,10 @@ function initSingularGoals(modeChange)
 		victorySavouringCounter = -1.
 		goalIrritation = 0.
 
+		reactToNewMultivector = ourReactionToNewMultivector
 		dismantleCurrentMode = function()
 		{
 			scene.remove(goalBox)
-			dismantleCurrentMode = function(){}
 		}
 	}
 
@@ -127,8 +128,7 @@ function initSingularGoals(modeChange)
 	{
 		dismantleCurrentMode()
 
-		reactToNewMultivector = ourReactionToNewMultivector
-
+		scopeIsLimited = false
 		reactionToVictory = function()
 		{
 			makeSureSingularModeIsSetUp()
@@ -142,15 +142,11 @@ function initSingularGoals(modeChange)
 		reactionToVictory()
 	}
 
+	//randomize/sandbo
+
 	let levelIndex = 0;
-	modeChange.campaign = function()
-	{
-		dismantleCurrentMode()
-
-		reactToNewMultivector = ourReactionToNewMultivector
-
-		let levels = []
-		levels.push({
+	let levels = [
+		{
 			goal: 
 				new Float32Array([0.,1.,1.,0.,0.,0.,0.,0.]),
 			options: [
@@ -165,13 +161,20 @@ function initSingularGoals(modeChange)
 				new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),
 				new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.])
 			]
-		})
+		}
+	]
+	modeChange.campaign = function()
+	{
+		dismantleCurrentMode()
 
+		scopeIsLimited = true
 		reactionToVictory = function()
 		{
+			makeSureSingularModeIsSetUp()
+
 			if(levelIndex >= levels.length)
 			{
-				let sign = makeTextSign("Well done! That's all the levels so far :D")
+				let sign = makeTextSign("Well done! That's all the levels so far :)")
 				sign.scale.multiplyScalar(.55)
 				scene.add(sign)
 				scene.remove(goalBox)
@@ -186,8 +189,6 @@ function initSingularGoals(modeChange)
 
 				return
 			}
-
-			makeSureSingularModeIsSetUp()
 
 			setScope(levels[levelIndex].options)
 			copyMultivector(levels[levelIndex].goal, singularGoalMultivector.elements)
@@ -304,7 +305,7 @@ function initInputOutputGoal()
 
 		//and removing that shit from the multivectorScope?
 
-		dismantleCurrentMode = function(){}
+		
 	}
 
 	return inputScope

@@ -82,16 +82,6 @@ function initScope(operatorScopeOnClick)
 	let multivectorScopeSelected
 	let multivectorSelection
 	let operatorSelection
-	function initKeyboardSelectionIfNotNotAlreadyDone()
-	{
-		if( !checkIfObjectIsInScene(keyboardSelectionIndicator) )
-		{
-			multivectorScopeSelected = true
-			multivectorSelection = 0;
-			operatorSelection = 0;
-			getSelection().add(keyboardSelectionIndicator)
-		}
-	}
 	function getSelection()
 	{
 		if( multivectorScopeSelected )
@@ -99,10 +89,20 @@ function initScope(operatorScopeOnClick)
 		else
 			return operatorScope[operatorSelection]
 	}
+	function makeSureSelectorIsSetUp()
+	{
+		if( !checkIfObjectIsInScene(keyboardSelectionIndicator) )
+		{
+			multivectorScopeSelected = false
+			multivectorSelection = 0;
+			operatorSelection = 0;
+			getSelection().add(keyboardSelectionIndicator)
+		}
+	}
 
 	bindButton("up",function()
 	{
-		initKeyboardSelectionIfNotNotAlreadyDone()
+		makeSureSelectorIsSetUp()
 
 		if(!multivectorScopeSelected)
 		{
@@ -123,7 +123,7 @@ function initScope(operatorScopeOnClick)
 	})
 	bindButton("down",function()
 	{
-		initKeyboardSelectionIfNotNotAlreadyDone()
+		makeSureSelectorIsSetUp()
 
 		if(!multivectorScopeSelected)
 		{
@@ -144,7 +144,7 @@ function initScope(operatorScopeOnClick)
 	})
 	bindButton("left",function()
 	{
-		initKeyboardSelectionIfNotNotAlreadyDone()
+		makeSureSelectorIsSetUp()
 
 		if(multivectorScopeSelected)
 		{
@@ -156,6 +156,9 @@ function initScope(operatorScopeOnClick)
 			operatorSelection--
 			if(operatorSelection < 0)
 			{
+				if(multivectorScope.length === 0)
+					return
+				
 				operatorSelection = operatorScope.length - 1
 				multivectorScopeSelected = true
 			}
@@ -165,7 +168,7 @@ function initScope(operatorScopeOnClick)
 	})
 	bindButton("right",function()
 	{
-		initKeyboardSelectionIfNotNotAlreadyDone()
+		makeSureSelectorIsSetUp()
 
 		if(multivectorScopeSelected)
 		{
@@ -177,6 +180,9 @@ function initScope(operatorScopeOnClick)
 			operatorSelection++
 			if(operatorSelection > operatorScope.length-1)
 			{
+				if(multivectorScope.length === 0)
+					return
+				
 				operatorSelection = 0
 				multivectorScopeSelected = true
 			}
@@ -187,7 +193,7 @@ function initScope(operatorScopeOnClick)
 
 	bindButton("enter",function()
 	{
-		initKeyboardSelectionIfNotNotAlreadyDone()		
+		makeSureSelectorIsSetUp()		
 
 		let selection = getSelection()
 		if(operatorScope.indexOf(selection) !== -1)

@@ -90,6 +90,9 @@ async function init()
 				operandToUse.position.copy(multivecToCopy.position)
 				scene.add(operandToUse)
 
+				if(scopeIsLimited)
+					removeFromScope(multivecToCopy)
+
 				potentiallyTriggerAnimation()
 			},elements)
 			multivectorScope.push(newScopeMultivector)
