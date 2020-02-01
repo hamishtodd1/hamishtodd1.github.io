@@ -6,8 +6,11 @@
 	The trivector
 		Sphere of certain radius for magnitude, colored according to phase
 		Or a horizontal line and a vertical line
+		Naah, blue or red liquid just like bivector
+		Transparent and glowy and smoky and reflective
 
 	The scalar
+		People are so used to numerals. But this *is* about geometry! A length may make more sense
 		The unit size should be clear, and the numeral does make that clear
 		Numeral with positive or negative sign
 		Numeral with color
@@ -115,6 +118,7 @@ function initMultivectorAppearances()
 		let scalarHeight = .6
 		{
 			let scalar = makeTextSign("",false,false,false)
+			//TODO it doesn't need a box around it, just a colored outline
 			// scalar.material.depthFunc = THREE.AlwaysDepth
 			scalar.castShadow = true
 			scalar.material.side = THREE.DoubleSide

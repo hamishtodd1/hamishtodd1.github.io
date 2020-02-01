@@ -93,9 +93,11 @@ async function initVideo()
 			chrome = true
 	}
 	if(!chrome)
-		console.error("Video can only be played on chromium!")
+	{
+		console.error("Video can only be played on chrome!")
+		return
+	}
 
-	//details
 	let name = "hoberman.mp4"
 	let startTime = .1
 	let finishTime = 7.7
@@ -107,33 +109,31 @@ async function initVideo()
 	videoDomElement.loop = false
 	videoDomElement.muted = true
 	videoDomElement.currentTime = startTime
-	// videoDomElement.playbackRate = .3
+	// videoDomElement.playbackRate = .5
+	
+	videoDomElement.load()
+	videoDomElement.oncanplay = function()
+	{
+		let aspect = videoDomElement.videoWidth / videoDomElement.videoHeight //can't get these til you've done the above!
 
-	await videoDomElement.load()
-	await videoDomElement.play()
-	videoDomElement.pause()
-	let aspect = videoDomElement.videoWidth/videoDomElement.videoHeight //can't get these til you've done the above!
+		let videoTexture = new THREE.VideoTexture( videoDomElement )
+		videoTexture.minFilter = THREE.LinearFilter
+		let mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.,1./aspect), new THREE.MeshBasicMaterial({ map: videoTexture }))
+		mesh.scale.multiplyScalar(camera.rightAtZZero * 2. - .1)
+		scene.add(mesh)
 
-	let videoTexture = new THREE.VideoTexture( videoDomElement )
-	videoTexture.minFilter = THREE.LinearFilter
-	let mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.,1./aspect), new THREE.MeshBasicMaterial({
-		map: videoTexture
-	}))
-	mesh.scale.multiplyScalar(camera.rightAtZZero * 2. - .1)
-	scene.add(mesh)
+		updateFunctions.push(function()
+		{	
+			if(videoDomElement.currentTime > finishTime)
+				videoDomElement.pause()
+		})
 
-	updateFunctions.push(function()
-	{	
-		if(videoDomElement.currentTime > finishTime)
-			videoDomElement.pause()
-	})
+		videoDomElement.play()
+	}
 }
 
 async function initWheelScene()
 {
-	await initVideo()
-	return
-
 	let littleScene = new THREE.Group()
 	littleScene.scale.setScalar(4.4)
 	// littleScene.position.y += 3.88

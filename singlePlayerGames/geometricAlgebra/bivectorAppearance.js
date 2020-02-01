@@ -1,4 +1,7 @@
 /*
+	Could use GL_POINTS to avoid overdraw
+	Points need a bigger radius than the balls, specifically big enough to contain the largest smoothMin extension
+
 	This may be astonishingly misguided and you are better off leaving it to the artist
 
 	So long as you never see the things rotating, it is probably ok for there to be an arbitrary cutoff in what is red and what is blue

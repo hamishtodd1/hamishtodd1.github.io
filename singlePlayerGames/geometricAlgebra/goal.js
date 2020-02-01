@@ -32,6 +32,10 @@
 let modeDependentReactionToResult = function(){}
 let dismantleCurrentGoal = function(){}
 
+/*
+	A series of singular goals
+*/
+
 function initInputOutputGoal(scope,scopeOnClick)
 {
 	let numPairs = 2;

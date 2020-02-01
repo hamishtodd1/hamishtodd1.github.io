@@ -1,8 +1,10 @@
 /*
 	TODO for slack / Cambridge demo
+		Level progression to get you to the "inputs outputs" point and to say how you can learn
 		Get the wheel in there. Animated
 		And just some videos plus extracting pictures
 		Tutorial levels
+		AR https://jeromeetienne.github.io/AR.js/three.js/examples/basic.html
 
 	TODO for sandbox / tool for thought
 		Every aspect of the multiplication and addition needs to be visualized. Well, for 2D!
@@ -48,11 +50,11 @@ async function init()
 	// await initBivectorAppearance()
 	// return
 
-	await initWheelScene()
-
 	initMultivectorAppearances()
-
 	await initOperatorAppearance()
+
+	// initWheelScene()
+	// await initVideo()
 
 	{
 		var activeOperator = OperatorAppearance()
