@@ -22,6 +22,11 @@
 		Bunch of dots? To multiply, it makes that many copies of that thing then adds them together
 			This makes so much sense. Can have multiplication be visual too
 
+	Both the engineer and the flexibility-is-key Bret Victor would say it's context-dependent what viz you should use
+		Because look, a bivector can also be considered an imaginary number
+			This whole thing is just a point in space, *ideally* you'd be able to see in 8 dimensions
+			It might even be that sometimes when working on a 3D problem you need to think 2D for a sec
+
 	Scalar and trivector could be a single complex number
 		How about, IF both scalar and trivector are nonzero you get the complex number, otherwise just the one
 		Possibly trivector should be a numeral, with different colors

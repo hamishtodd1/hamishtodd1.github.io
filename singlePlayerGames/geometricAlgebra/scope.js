@@ -1,40 +1,28 @@
 function removeFromScope(multivec)
 {
-	//bug: the selector is on you
 	removeSingleElementFromArray(multivectorScope, multivec)
 	scene.remove(multivec)
 	removeSingleElementFromArray(clickables,multivec.thingYouClick)
-	// multivec.dispose()
-	//todo: dispose almost certainly doesn't work fully
+
+	// multivec.dispose() //TODO
 	//You need to get rid of everything that is "new" in multivectorAppearance.js
 }
 
-function clearScopeToBasis()
+function setScope(elementses)
 {
 	for(let i = multivectorScope.length-1; i > -1; i--)
 		removeFromScope(multivectorScope[i])
 
-	let xBasisElement = ScopeMultivector()
-	multivectorScope.push(xBasisElement)
-	xBasisElement.setTo1Blade(xUnit)
-	getScopePosition(0,xBasisElement.position)
-	let yBasisElement = ScopeMultivector()
-	multivectorScope.push(yBasisElement)
-	yBasisElement.setTo1Blade(yUnit)
-	getScopePosition(1,yBasisElement.position)
-	// let zBasisElement = ScopeMultivector()
-	// multivectorScope.push(zBasisElement)
-	// zBasisElement.setTo1Blade(zUnit)
-
-	// let littleScalar = ScopeMultivector()
-	// multivectorScope.push(littleScalar)
-	// littleScalar.elements[0] = .2
-	// littleScalar.updateAppearance()
-
-	// let trivec = ScopeMultivector()
-	// multivectorScope.push(trivec)
-	// trivec.elements[7] = 1.
-	// trivec.updateTrivectorAppearance()
+	if(elementses === undefined)
+	{
+		ScopeMultivector(new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),true)
+		ScopeMultivector(new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.]),true)
+	}
+	else
+	{
+		for(let i = 0; i < elementses.length; i++)
+			ScopeMultivector(elementses[i],true)
+	}
 }
 
 function getScopePosition(desiredindex,dest)
@@ -91,9 +79,19 @@ function initScope(operatorScopeOnClick)
 	}
 
 	let keyboardSelectionIndicator = RectangleIndicator()
-	let multivectorScopeSelected = true
-	let multivectorSelection = 0;
-	let operatorSelection = 0;
+	let multivectorScopeSelected
+	let multivectorSelection
+	let operatorSelection
+	function initKeyboardSelectionIfNotNotAlreadyDone()
+	{
+		if( !checkIfObjectIsInScene(keyboardSelectionIndicator) )
+		{
+			multivectorScopeSelected = true
+			multivectorSelection = 0;
+			operatorSelection = 0;
+			getSelection().add(keyboardSelectionIndicator)
+		}
+	}
 	function getSelection()
 	{
 		if( multivectorScopeSelected )
@@ -101,10 +99,11 @@ function initScope(operatorScopeOnClick)
 		else
 			return operatorScope[operatorSelection]
 	}
+
 	bindButton("up",function()
 	{
 		initKeyboardSelectionIfNotNotAlreadyDone()
-		
+
 		if(!multivectorScopeSelected)
 		{
 			multivectorScopeSelected = true
@@ -125,7 +124,7 @@ function initScope(operatorScopeOnClick)
 	bindButton("down",function()
 	{
 		initKeyboardSelectionIfNotNotAlreadyDone()
-		
+
 		if(!multivectorScopeSelected)
 		{
 			multivectorScopeSelected = true
@@ -146,7 +145,7 @@ function initScope(operatorScopeOnClick)
 	bindButton("left",function()
 	{
 		initKeyboardSelectionIfNotNotAlreadyDone()
-		
+
 		if(multivectorScopeSelected)
 		{
 			multivectorScopeSelected = false
@@ -167,7 +166,7 @@ function initScope(operatorScopeOnClick)
 	bindButton("right",function()
 	{
 		initKeyboardSelectionIfNotNotAlreadyDone()
-		
+
 		if(multivectorScopeSelected)
 		{
 			multivectorScopeSelected = false
@@ -185,6 +184,7 @@ function initScope(operatorScopeOnClick)
 
 		getSelection().add(keyboardSelectionIndicator)
 	})
+
 	bindButton("enter",function()
 	{
 		initKeyboardSelectionIfNotNotAlreadyDone()		
@@ -195,15 +195,4 @@ function initScope(operatorScopeOnClick)
 		else if(multivectorScope.indexOf(selection) !== -1)
 			selection.thingYouClick.onClick()
 	})
-
-	function initKeyboardSelectionIfNotNotAlreadyDone()
-	{
-		if( !checkIfObjectIsInScene(keyboardSelectionIndicator) )
-		{
-			multivectorScopeSelected = true
-			multivectorSelection = 0;
-			operatorSelection = 0;
-			getSelection().add(keyboardSelectionIndicator)
-		}
-	}
 }

@@ -30,12 +30,15 @@
 		Puzzles based around Orientation could be about a snake trying to eat an apple
 */
 
-let modeDependentReactionToResult = function(){}
+let reactToNewMultivector = function(){}
 let dismantleCurrentMode = function(){}
 
-function initEndlessRandomizedSingularGoals()
+function initSingularGoals(modeChange)
 {
-	let defaultText = "Make this:"
+	let singularGoalMultivector = MultivectorAppearance(function(){})
+	let goalIrritation
+	let victorySavouringCounter
+	let reactionToVictory;
 
 	{
 		var defaultPosition = new THREE.Vector3(
@@ -46,7 +49,10 @@ function initEndlessRandomizedSingularGoals()
 		victoryPosition.y = 0.
 
 		var goalBox = new THREE.Group()
+		goalBox.position.copy(defaultPosition)
+		goalBox.add(singularGoalMultivector)
 
+		var defaultText = "Make this:"
 		goalBox.title = makeTextSign(defaultText)
 		goalBox.title.scale.multiplyScalar(.5)
 		goalBox.title.position.y = .9
@@ -59,18 +65,6 @@ function initEndlessRandomizedSingularGoals()
 		goalBox.add(background)
 	}
 
-	let singularGoalMultivector = MultivectorAppearance(function(){})
-	goalBox.add(singularGoalMultivector)
-	function randomizeGoalMultivector()
-	{
-		let randomMultivectorElements = generateRandomMultivectorElementsFromScope(multivectorScope)
-
-		copyMultivector(randomMultivectorElements, singularGoalMultivector.elements)
-		delete randomMultivectorElements
-		singularGoalMultivector.updateAppearance()
-	}
-
-	let goalIrritation
 	updateFunctions.push(function()
 	{
 		if(!checkIfObjectIsInScene(goalBox))
@@ -95,21 +89,13 @@ function initEndlessRandomizedSingularGoals()
 
 			victorySavouringCounter -= frameDelta
 			if( victorySavouringCounter < 0. )
-			{
-				clearScopeToBasis()
-				randomizeGoalMultivector()
-
-				victorySavouringCounter = -1.
-				goalBox.title.children[0].material.color.setRGB(1.,1.,1.)
-				goalBox.title.children[0].material.setText(defaultText)
-			}
+				reactionToVictory()
 		}
 
 		goalBox.position.lerp(victorySavouringCounter==-1.?defaultPosition:victoryPosition,.1)
 	})
 
-	let victorySavouringCounter
-	function ourModeDependentReactionToResult(newMultivectorElements)
+	function ourReactionToNewMultivector(newMultivectorElements)
 	{
 		if( equalsMultivector(singularGoalMultivector.elements,newMultivectorElements) )
 		{
@@ -122,24 +108,95 @@ function initEndlessRandomizedSingularGoals()
 		}
 	}
 
-	function enableEndlessRandomizedSingularGoalsMode()
+	function makeSureSingularModeIsSetUp(goalElements,scope)
 	{
-		clearScopeToBasis()
-		randomizeGoalMultivector()
+		goalBox.title.children[0].material.setText(defaultText)
 		scene.add(goalBox)
-		goalBox.position.copy(defaultPosition)
 
 		victorySavouringCounter = -1.
 		goalIrritation = 0.
 
-		modeDependentReactionToResult = ourModeDependentReactionToResult
 		dismantleCurrentMode = function()
 		{
 			scene.remove(goalBox)
+			dismantleCurrentMode = function(){}
 		}
 	}
 
-	return enableEndlessRandomizedSingularGoalsMode
+	modeChange.endlessRandomizedSingular = function()
+	{
+		dismantleCurrentMode()
+
+		reactToNewMultivector = ourReactionToNewMultivector
+
+		reactionToVictory = function()
+		{
+			makeSureSingularModeIsSetUp()
+			setScope()
+			
+			let randomMultivectorElements = generateRandomMultivectorElementsFromScope(multivectorScope)
+			copyMultivector(randomMultivectorElements, singularGoalMultivector.elements)
+			singularGoalMultivector.updateAppearance()
+			delete randomMultivectorElements
+		}
+		reactionToVictory()
+	}
+
+	let levelIndex = 0;
+	modeChange.campaign = function()
+	{
+		dismantleCurrentMode()
+
+		reactToNewMultivector = ourReactionToNewMultivector
+
+		let levels = []
+		levels.push({
+			goal: 
+				new Float32Array([0.,1.,1.,0.,0.,0.,0.,0.]),
+			options: [
+				new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),
+				new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.])
+			]
+		},
+		{
+			goal:
+				new Float32Array([0.,2.,0.,0.,0.,0.,0.,0.]),
+			options: [
+				new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),
+				new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.])
+			]
+		})
+
+		reactionToVictory = function()
+		{
+			if(levelIndex >= levels.length)
+			{
+				let sign = makeTextSign("Well done! That's all the levels so far :D")
+				sign.scale.multiplyScalar(.55)
+				scene.add(sign)
+				scene.remove(goalBox)
+
+				let countDown = 3.2;
+				updateFunctions.push(function()
+				{
+					countDown -= frameDelta
+					if(countDown < 0.)
+						location.reload()
+				})
+
+				return
+			}
+
+			makeSureSingularModeIsSetUp()
+
+			setScope(levels[levelIndex].options)
+			copyMultivector(levels[levelIndex].goal, singularGoalMultivector.elements)
+			singularGoalMultivector.updateAppearance()
+
+			levelIndex++
+		}
+		reactionToVictory()
+	}
 }
 
 function initInputOutputGoal()
@@ -151,7 +208,7 @@ function initInputOutputGoal()
 	background.scale.y = 1.3
 	background.position.z = -.001
 
-	modeDependentReactionToResult = function(){}
+	reactToNewMultivector = function(){}
 
 	var inputSelectionIndicator = RectangleIndicator()
 	var outputSelectionIndicator = RectangleIndicator()

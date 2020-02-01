@@ -14,7 +14,7 @@
 		video speed
 */
 
-async function initMenu(enableEndlessRandomizedSingularGoalsMode)
+async function initMenu(modeChange)
 {
 	let menu = new THREE.Group()
 	scene.add(menu)
@@ -81,49 +81,49 @@ async function initMenu(enableEndlessRandomizedSingularGoalsMode)
 	}
 
 	{
-		let sandboxObject = makeTextSign("Sandbox mode")
+		let sandboxObject = makeTextSign("Sandbox Mode")
 		let sandbox = sandboxObject.children[0]
 		sandbox.scale.copy(sandboxObject.scale)
 		menuEntries.push(sandbox)
-		sandbox.onClick = function()
+		modeChange.sandbox = function()
 		{
 			dismantleCurrentMode()
-
-			//"enable sandbox mode"
-			{
-				modeDependentReactionToResult = function(){}
-				dismantleCurrentMode = function(){}
-				clearScopeToBasis()
-			}
-
+			
+			reactToNewMultivector = function(){}
+			dismantleCurrentMode = function(){}
+			setScope()
+		}
+		sandbox.onClick = function()
+		{
+			modeChange.sandbox()
 			menuMode = false
 		}
 	}
 
 	{
-		let randomObject = makeTextSign("Random Singular Goal mode")
+		let randomObject = makeTextSign("Random Singular Goal Mode")
 		//difficulty scale might be nice
 		let random = randomObject.children[0]
 		random.scale.copy(randomObject.scale)
 		menuEntries.push(random)
 		random.onClick = function()
 		{
-			dismantleCurrentMode()
-			enableEndlessRandomizedSingularGoalsMode()
+			modeChange.endlessRandomizedSingular()
 			menuMode = false
 		}
 	}
 
-	// {
-	// 	let levelSelectObject = makeTextSign("Select level")
-	// 	let levelSelect = levelSelectObject.children[0]
-	// 	levelSelect.scale.copy(levelSelectObject.scale)
-	// 	menuEntries.push(levelSelect)
-	// 	levelSelect.onClick = function()
-	// 	{
-	// 		log("TODO")
-	// 	}
-	// }
+	{
+		let campaignObject = makeTextSign("Campaign Mode")
+		let campaign = campaignObject.children[0]
+		campaign.scale.copy(campaignObject.scale)
+		menuEntries.push(campaign)
+		campaign.onClick = function()
+		{
+			modeChange.campaign()
+			menuMode = false
+		}
+	}
 
 	{
 		let fullscreenButton = makeTextSign("Toggle Fullscreen")

@@ -33,9 +33,18 @@ Aesthetics/graphics/non-design
 		nice surface https://www.shadertoy.com/view/Mdl3Ws
 
 Story
-	Invention of i
+	Euclid - invention of geometry
+	India - invention of negative numbers
+		Without which there's only magnitudes, so this is the first step to thinking about directions
+		Debts are not geometric though
+	Kepler - those areas, they are bivectors
+	Descartes - coordinates
+	Newton - application
+	Euler (and others?) - invention of i
 		Euler's identity is surprising only if you don't know GA; only if you haven't fully internalised that maths is statements about shapes
-	Personalities
+	Grassman
+		Rejected
+	Clifford
 		Tait was an astonishing asshole who should not be allowed to win
 		The story of Clifford's wife is quite beautiful
 		Very atheist
@@ -44,4 +53,3 @@ Story
 		It is a great story. Hestenes looking back on it as ancient wisdom
 		Clifford on his deathbed thinking the hope will probably die and people will be doing hacky shit forever
 		Tait was evil, full of wishful thinking and idiotic faith. Hating of divorce and secularity, everything  Clifford wasn't. Kicking a man while he was dying
-	Those areas Kepler talked about, they are bivectors!

@@ -76,7 +76,7 @@ async function init()
 		]
 
 		let lastAssignedOperand = 0
-		ScopeMultivector = function(elements)
+		ScopeMultivector = function(elements, sendToScopeImmediately)
 		{
 			let newScopeMultivector = MultivectorAppearance(function(multivecToCopy)
 			{
@@ -92,6 +92,10 @@ async function init()
 
 				potentiallyTriggerAnimation()
 			},elements)
+			multivectorScope.push(newScopeMultivector)
+
+			if(sendToScopeImmediately)
+				getScopePosition(multivectorScope.length-1,newScopeMultivector.position)
 
 			return newScopeMultivector
 		}
@@ -114,10 +118,11 @@ async function init()
 
 	// initInputOutputGoal()
 
-	let enableEndlessRandomizedSingularGoalsMode = initEndlessRandomizedSingularGoals()
-	enableEndlessRandomizedSingularGoalsMode()
+	let modeChange = {}
+	initSingularGoals(modeChange)
+	modeChange.campaign()
 
-	await initMenu(enableEndlessRandomizedSingularGoalsMode)
+	await initMenu(modeChange)
 
 	//It's nice if they could all animate
 	//A multivector appearance is a group with children that are bits of multivector. So yes.
@@ -134,7 +139,6 @@ async function init()
 			case 0: //creating new thing
 				{
 					let newMultivectorElements = activeOperator.function(operands[0].elements,operands[1].elements)
-					log(newMultivectorElements)
 					copyMultivector(newMultivectorElements, animationMultivector.elements)
 					animationMultivector.updateAppearance()
 					scene.remove(animationMultivector)
@@ -153,7 +157,7 @@ async function init()
 				break;
 
 			case 2:
-				modeDependentReactionToResult(animationMultivector.elements)
+				reactToNewMultivector(animationMultivector.elements)
 				scene.add(animationMultivector)
 				scene.remove(operands[0],operands[1],activeOperator)
 				animationStage++;
@@ -192,7 +196,6 @@ async function init()
 		scene.remove(animationMultivector)
 
 		let newMultivector = ScopeMultivector(animationMultivector.elements)
-		multivectorScope.push(newMultivector) //currently it waits for animation to complete before pulling this to multivectorScope
 		animationStage = -1.;
 	}
 }

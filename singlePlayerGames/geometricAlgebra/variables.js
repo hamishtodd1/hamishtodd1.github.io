@@ -8,8 +8,6 @@ const zeroVector = new THREE.Vector3(0.,0.,0.);
 
 const zeroMatrix = new THREE.Matrix4().set(0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.)
 
-const unchangingUnitSquareGeometry = new THREE.PlaneGeometry(1.,1.)
-
 //-----Fundamental
 const clock = new THREE.Clock( true );
 const debugging = 0;
@@ -32,9 +30,8 @@ const updateFunctions = [];
 const clickables = [];
 var bindButton;
 
-const toysToBeArranged = [];
-
 const efficientSphereGeometryWithRadiusOne = new THREE.EfficientSphereGeometry(1);
+const unchangingUnitSquareGeometry = new THREE.PlaneGeometry(1.,1.)
 
 const discreteViridis = [
 	{hex:0xFCE51E, color:new THREE.Color(0.984375,0.89453125,0.1171875)},
