@@ -51,7 +51,7 @@ async function initMenu(modeChange)
 				let halfMenuTitleHeight = title.scale.y / 2.
 				let padding = .25
 				intendedMenuPosition.x =  camera.rightAtZZero - (halfMenuTitleWidth  + padding)
-				intendedMenuPosition.y = -camera.topAtZZero   + (halfMenuTitleHeight + padding)
+				intendedMenuPosition.y =  camera.topAtZZero   - (halfMenuTitleHeight + padding)
 				intendedFaderOpacity = 0.
 
 				for(let i = 0; i < menuEntries.length; i++)
@@ -85,15 +85,6 @@ async function initMenu(modeChange)
 		let sandbox = sandboxObject.children[0]
 		sandbox.scale.copy(sandboxObject.scale)
 		menuEntries.push(sandbox)
-		modeChange.sandbox = function()
-		{
-			dismantleCurrentMode()
-			
-			scopeIsLimited = false
-			reactToNewMultivector = function(){}
-			dismantleCurrentMode = function(){}
-			setScope()
-		}
 		sandbox.onClick = function()
 		{
 			modeChange.sandbox()
@@ -101,18 +92,18 @@ async function initMenu(modeChange)
 		}
 	}
 
-	{
-		let randomObject = makeTextSign("Random Singular Goal Mode")
-		//difficulty scale might be nice
-		let random = randomObject.children[0]
-		random.scale.copy(randomObject.scale)
-		menuEntries.push(random)
-		random.onClick = function()
-		{
-			modeChange.endlessRandomizedSingular()
-			menuMode = false
-		}
-	}
+	// {
+	// 	let randomObject = makeTextSign("Random Mode")
+	// 	//difficulty scale might be nice
+	// 	let random = randomObject.children[0]
+	// 	random.scale.copy(randomObject.scale)
+	// 	menuEntries.push(random)
+	// 	random.onClick = function()
+	// 	{
+	// 		modeChange.randomized()
+	// 		menuMode = false
+	// 	}
+	// }
 
 	{
 		// let campaignObject = makeTextSign("Campaign Mode")
@@ -132,6 +123,9 @@ async function initMenu(modeChange)
 
 		function potentiallyToggleFullScreen(clientX,clientY)
 		{
+			if(!menuMode)
+				return
+
 			raycaster.updateFromClientCoordinates(event.clientX,event.clientY)
 			let zZeroClickPosition = raycaster.intersectZPlane(0.)
 			fullscreenButton.worldToLocal(zZeroClickPosition)

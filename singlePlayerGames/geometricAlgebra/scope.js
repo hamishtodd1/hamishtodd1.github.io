@@ -1,28 +1,45 @@
-function removeFromScope(multivec)
+operatorScope = [];
+multivectorScope = []
+
+function removeFromScope(entity)
 {
-	removeSingleElementFromArray(multivectorScope, multivec)
-	scene.remove(multivec)
-	removeSingleElementFromArray(clickables,multivec.thingYouClick)
+	let isMultivector = multivectorScope.indexOf(entity) !== -1
+
+	removeSingleElementFromArray(isMultivector ? multivectorScope : operatorScope, entity)
+	scene.remove(entity)
+	removeSingleElementFromArray(clickables,isMultivector ? entity.thingYouClick:entity)
 
 	// multivec.dispose() //TODO
 	//You need to get rid of everything that is "new" in multivectorAppearance.js
+	//and things in updateFunctions
 }
 
-function setScope(elementses)
+function setScope(elementses, operators)
 {
 	for(let i = multivectorScope.length-1; i > -1; i--)
 		removeFromScope(multivectorScope[i])
+	for(let i = operatorScope.length-1; i > -1; i--)
+		removeFromScope(operatorScope[i])
 
 	if(elementses === undefined)
 	{
-		ScopeMultivector(new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),true)
-		ScopeMultivector(new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.]),true)
+		elementses = [
+			new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),
+			new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.])
+		]
 	}
-	else
+	for(let i = 0; i < elementses.length; i++)
+		ScopeMultivector(elementses[i],true)
+
+	if(operators === undefined)
 	{
-		for(let i = 0; i < elementses.length; i++)
-			ScopeMultivector(elementses[i],true)
+		operators = [ 
+			geometricSum,
+			geometricProduct 
+		]
 	}
+	for(let i = 0; i < operators.length; i++)
+		ScopeOperator(operators[i])
 }
 
 function getScopePosition(desiredindex,dest)
@@ -47,7 +64,7 @@ function getScopePosition(desiredindex,dest)
 	}
 }
 
-function initScope(operatorScopeOnClick)
+function initScope()
 {
 	// better packing http://www.optimization-online.org/DB_FILE/2016/01/5293.pdf
 	let scopePosition = new THREE.Vector3()
@@ -58,25 +75,12 @@ function initScope(operatorScopeOnClick)
 			getScopePosition(i,scopePosition)
 			multivectorScope[i].position.lerp(scopePosition,.1)
 		}
+
+		for(let i = 0; i < operatorScope.length; i++)
+			operatorScope[i].position.x += .1 * ((i - 0.5 * (operatorScope.length-1) ) * 2. - operatorScope[i].position.x)
 	})
 
-	let operatorScope = [
-		OperatorAppearance(geometricSum),
-		OperatorAppearance(geometricProduct)
-	];
-
-	for(let i = 0; i < operatorScope.length; ++i )
-	{
-		if(i)
-			operatorScope[i].material.color.setRGB(1.,0.,0.)
-
-		operatorScope[i].position.y = -camera.topAtZZero + .9
-		operatorScope[i].position.x = (i - 0.5 * (operatorScope.length-1) ) * 2.
-		scene.add(operatorScope[i])
-
-		clickables.push(operatorScope[i])
-		operatorScope[i].onClick = function(){operatorScopeOnClick(operatorScope[i])}
-	}
+	//this is a load of shit, just do it as visualized
 
 	let keyboardSelectionIndicator = RectangleIndicator()
 	let multivectorScopeSelected
@@ -84,7 +88,7 @@ function initScope(operatorScopeOnClick)
 	let operatorSelection
 	function getSelection()
 	{
-		if( multivectorScopeSelected )
+		if( multivectorScopeSelected && multivectorScope.length > 0 )
 			return multivectorScope[multivectorSelection]
 		else
 			return operatorScope[operatorSelection]

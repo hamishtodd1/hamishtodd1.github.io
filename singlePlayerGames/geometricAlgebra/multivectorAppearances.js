@@ -372,6 +372,7 @@ function initMultivectorAppearances()
 			}
 		}
 
+		if( externalOnClick !== undefined)
 		{
 			let thingYouClick = new THREE.Mesh(new THREE.SphereBufferGeometry(.5),new THREE.MeshBasicMaterial({color:0x00FF00}))
 			thingYouClick.visible = false
@@ -379,8 +380,7 @@ function initMultivectorAppearances()
 			multivec.add(thingYouClick)
 
 			clickables.push(thingYouClick)
-			if( externalOnClick !== undefined)
-				multivec.externalOnClick = externalOnClick
+			multivec.externalOnClick = externalOnClick
 			thingYouClick.onClick = function()
 			{
 				if(multivec.externalOnClick !== undefined)

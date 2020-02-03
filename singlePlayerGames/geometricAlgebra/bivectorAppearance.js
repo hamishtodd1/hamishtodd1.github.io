@@ -1,4 +1,5 @@
 /*
+
 	Could use GL_POINTS to avoid overdraw
 	Points need a bigger radius than the balls, specifically big enough to contain the largest smoothMin extension
 	On the other hand there might be some point at which you're zoomed all the way in on it
@@ -23,6 +24,13 @@
 				all other pixels are "pointed" in the direction of the nearest bit of that shape
 		They bounce off each other / repel
 		"Metaballs" in appearance
+
+	Balls and springs
+		The vertices are at the boundary, and are connected with springs to the middle
+		You can change the length of the springs
+		No good for merging though
+
+	Bivector-bivector wedge - do you make the triangle as well?
 
 	Urgh you might want this on a deadline
 
@@ -80,6 +88,9 @@
 
 async function initBivectorAppearance()
 {
+	// initFluidBivectorAppearance()
+	// return
+
 	let interior = new THREE.Mesh(new THREE.Geometry(),new THREE.MeshBasicMaterial({color:0xFF0000, side:THREE.DoubleSide,transparent:true,opacity:.6}))
 	let exterior = new THREE.Mesh(new THREE.Geometry(),new THREE.MeshBasicMaterial({color:0x0000FF, side:THREE.DoubleSide,transparent:true,opacity:.6}))
 

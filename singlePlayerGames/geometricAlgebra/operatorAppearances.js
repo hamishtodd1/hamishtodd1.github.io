@@ -7,16 +7,16 @@
 
 	Arguably the add should contain a load of multiplies
 
-	Other operationg, ugh
+	Other operations, ugh
 		"to the power of". Gives you square root, reciprocals-> division
+		2*pi*i is the real thing https://blog.wolfram.com/2015/06/28/2-pi-or-not-2-pi/
 		log, jeez
 		Would be nice if that could emerge
 		The vector derivative would be nice
 		Integral?
 */
 
-async function initOperatorAppearances
-()
+async function initOperatorAppearances()
 {
 	let texture = null
 	await new Promise(resolve => {
@@ -36,6 +36,8 @@ async function initOperatorAppearances
 		}))
 
 		operatorSymbol.function = func
+		if(func === geometricProduct)
+			operatorSymbol.material.color.setRGB(1.,0.,0.)
 
 		return operatorSymbol
 	}

@@ -1,12 +1,13 @@
 /*
-	TODO for slack / Cambridge demo
+	TODO for Cambridge
 		Level progression to get you to the "inputs outputs" point and to say how you can learn
 		Get the wheel in there. Animated
 		And just some videos plus extracting pictures
 		Tutorial levels
 		AR https://jeromeetienne.github.io/AR.js/three.js/examples/basic.html
+		Would be nice to at least have parallelogram liquid sim to show your ambition
 
-	TODO for sandbox / tool for thought
+	TODO for slack
 		Every aspect of the multiplication and addition needs to be visualized. Well, for 2D!
 			Coplanar bivector addition - easy and fun
 			Vector addition - just do something
@@ -15,20 +16,23 @@
 			Coplanar bivector multiplication - complex multiplication!
 			Bivector-vector multiplication
 			Bivector multiplication???
-		Helping make shaders
-			Ideally you paste and it tells you what it thinks you pasted
-			Spit out glsl?
-			Heh, have it be possible for the input and output to be arranged in a rectangle with x and y smoothly varying, i.e. a framebuffer
+
+	TODO sandbox / tool for thought
+	Helping make shaders
+		Parametric geometry - can feed in either line or grid
+		Ideally you paste and it tells you what it thinks you pasted
+		Spit out glsl?
+		Heh, have it be possible for the input and output to be arranged in a rectangle with x and y smoothly varying, i.e. a framebuffer
 
 	TODO for GDC
 		A fast to access webpage
 		With something that creates surprises and communicates its purpose in 45s
 		And can show something quaternion-related in short order
 
-	TODO for academic course
+	TODO for academic course (not much effort)
+		record a bunch of videos in zeimlight style
+		Link it to the ordinary way of visualizing things, brackets and numerals
 
-	TODO 
-	
 	Long term
 		Oculus quest / hololens thing where you record a video, and it automatically takes the frames
 		They should be able to rearrange multivectorScope, and delete bits of it
@@ -45,8 +49,6 @@
 			Scrollbar
 */
 
-multivectorScope = []
-
 async function init()
 {
 	// await initBivectorAppearance()
@@ -58,147 +60,11 @@ async function init()
 	// initWheelScene()
 	// await initVideo()
 
-	{
-		var activeOperator = OperatorAppearance()
-
-		var operands = [
-			MultivectorAppearance(function(){}),
-			MultivectorAppearance(function(){}) ]
-		scene.remove(operands[0],operands[1])
-		var operandAndActiveOperatorPositions = [
-			new THREE.Vector3( 0.,1.,0.),
-			new THREE.Vector3( 1.,0.,0.),
-			new THREE.Vector3( 0.,0.,0.)]
-		var operandsAndActiveOperator = [
-			operands[0],
-			operands[1],
-			activeOperator
-		]
-
-		let lastAssignedOperand = 0
-		ScopeMultivector = function(elements, sendToScopeImmediately)
-		{
-			let newScopeMultivector = MultivectorAppearance(function(multivecToCopy)
-			{
-				if(animationStage !== -1.)
-					completeAnimation()
-
-				let operandToUse = operands[1-lastAssignedOperand]
-				lastAssignedOperand = 1 - lastAssignedOperand
-
-				operandToUse.copyElements(multivecToCopy.elements)
-				operandToUse.position.copy(multivecToCopy.position)
-				scene.add(operandToUse)
-
-				if(scopeIsLimited)
-					removeFromScope(multivecToCopy)
-
-				potentiallyTriggerAnimation()
-			},elements)
-			multivectorScope.push(newScopeMultivector)
-
-			if(sendToScopeImmediately)
-				getScopePosition(multivectorScope.length-1,newScopeMultivector.position)
-
-			return newScopeMultivector
-		}
-
-		function operatorScopeOnClick(operatorSelection)
-		{
-			if(animationStage !== -1.)
-				completeAnimation()
-
-			activeOperator.material.color.copy(operatorSelection.material.color)
-			activeOperator.position.copy(operatorSelection.position)
-			activeOperator.function = operatorSelection.function
-			scene.add(activeOperator)
-
-			potentiallyTriggerAnimation()
-		}
-
-		initScope(operatorScopeOnClick)
-	}
-
-	// initInputOutputGoal()
+	initOperationInterface()
 
 	let modeChange = {}
-	initSingularGoals(modeChange)
+	initPlayModes(modeChange)
 	modeChange.campaign()
 
 	await initMenu(modeChange)
-
-	//It's nice if they could all animate
-	//A multivector appearance is a group with children that are bits of multivector. So yes.
-	let animationMultivector = MultivectorAppearance(function(){})
-	let animationStage = -1.;
-
-	updateFunctions.push(function()
-	{
-		for(let i = 0; i < 3; i++)
-			operandsAndActiveOperator[i].position.lerp(operandAndActiveOperatorPositions[i],.1)
-
-		if(animationStage !== -1.) switch(Math.floor(animationStage))
-		{
-			case 0: //creating new thing
-				{
-					let newMultivectorElements = activeOperator.function(operands[0].elements,operands[1].elements)
-					copyMultivector(newMultivectorElements, animationMultivector.elements)
-					animationMultivector.updateAppearance()
-					scene.remove(animationMultivector)
-
-					// if( searchArray(multivectorScope,newMultivectorElements) ) //already in multivectorScope, could do something here
-
-					animationStage++;
-				}
-				break;
-
-			case 1: //waiting til they get into place then a little staring to clarify what's going to happen
-				{
-					let secondsThisSectionTakes = .9;
-					animationStage += frameDelta / secondsThisSectionTakes
-				}
-				break;
-
-			case 2:
-				reactToNewMultivector(animationMultivector.elements)
-				scene.add(animationMultivector)
-				scene.remove(operands[0],operands[1],activeOperator)
-				animationStage++;
-				break;
-
-			case 3: //admiring result
-				{
-					let secondsThisSectionTakes = 1.1;
-					animationStage += frameDelta / secondsThisSectionTakes
-				}
-				break;
-
-			case 4:
-				completeAnimation()
-				break;
-
-			default:
-				console.error("shouldn't be here")
-				break;
-		}
-	})
-
-	function potentiallyTriggerAnimation()
-	{
-		animationStage = 0.
-		for(let i = 0; i < 3; i++)
-		{
-			if(operandsAndActiveOperator[i].parent !== scene)
-				animationStage = -1.
-		}
-	}
-
-	function completeAnimation()
-	{
-		scene.remove(operands[0],operands[1],activeOperator)
-		scene.remove(animationMultivector)
-
-		let newMultivector = ScopeMultivector(animationMultivector.elements)
-		animationStage = -1.;
-	}
 }

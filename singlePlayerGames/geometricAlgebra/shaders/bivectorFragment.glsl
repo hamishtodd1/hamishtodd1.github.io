@@ -71,7 +71,7 @@ void main()
 	//man, intersection of a line and a plane. If only there was some mathematical system able to help with this
 	//this is temporary, they're all just z
 	vec3 planeIntersection = pixelPosition - direction * (pixelPosition.z / direction.z);
-	float distance = getDistance(planeIntersection);
+	float distance = getDistance(planeIntersection); //not a distance function but an isosurface
 	//ideally write to depth buffer too
 
 	//could put this condition in the opacity to avoid a branch
