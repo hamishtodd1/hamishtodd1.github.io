@@ -39,12 +39,12 @@ function initOperationInterface()
 		multivectorScope.push(newScopeMultivector)
 
 		if(sendToScopeImmediately)
-			getScopePosition(multivectorScope.length-1,newScopeMultivector.position)
+			getMultivectorScopePosition(multivectorScope.length-1,newScopeMultivector.position)
 
 		return newScopeMultivector
 	}
 
-	ScopeOperator = function(func)
+	ScopeOperator = function(func,eventualScopeSize)
 	{
 		let newScopeOperator = OperatorAppearance(func)
 		clickables.push(newScopeOperator)
@@ -69,6 +69,10 @@ function initOperationInterface()
 		operatorScope.push( newScopeOperator )
 
 		scene.add(newScopeOperator)
+
+		newScopeOperator.position.x = getOperatorScopeX(operatorScope.length-1,eventualScopeSize)
+
+		return newScopeOperator
 	}
 
 	initScope()

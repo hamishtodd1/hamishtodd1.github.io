@@ -39,10 +39,10 @@ function setScope(elementses, operators)
 		]
 	}
 	for(let i = 0; i < operators.length; i++)
-		ScopeOperator(operators[i])
+		ScopeOperator(operators[i], operators.length)
 }
 
-function getScopePosition(desiredindex,dest)
+function getMultivectorScopePosition(desiredindex,dest)
 {
 	let allowedWidth = .7
 	dest.x = -camera.rightAtZZero + allowedWidth
@@ -63,6 +63,12 @@ function getScopePosition(desiredindex,dest)
 		dest.y -= halfMultivectorHeight
 	}
 }
+function getOperatorScopeX(desiredindex,eventualScopeSize)
+{
+	if(eventualScopeSize === undefined)
+		eventualScopeSize = operatorScope.length
+	return (desiredindex - 0.5 * (eventualScopeSize-1) ) * 2.
+}
 
 function initScope()
 {
@@ -72,12 +78,12 @@ function initScope()
 	{
 		for(let i = 0; i < multivectorScope.length; i++ ) //n^2 but hey scope sucks
 		{
-			getScopePosition(i,scopePosition)
+			getMultivectorScopePosition(i,scopePosition)
 			multivectorScope[i].position.lerp(scopePosition,.1)
 		}
 
 		for(let i = 0; i < operatorScope.length; i++)
-			operatorScope[i].position.x += .1 * ((i - 0.5 * (operatorScope.length-1) ) * 2. - operatorScope[i].position.x)
+			operatorScope[i].position.x += .1 * (getOperatorScopeX(i) - operatorScope[i].position.x)
 	})
 
 	//this is a load of shit, just do it as visualized
