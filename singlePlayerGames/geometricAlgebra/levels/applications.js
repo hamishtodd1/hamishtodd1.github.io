@@ -113,16 +113,12 @@ function initVideo()
 
 	let video = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial())
 	video.material.map = new THREE.VideoTexture()
-	let wantedOnScreen = true
+	let wantedOnScreen = false
 	clickables.push(video)
 	let onscreenness = 0.
 	let offscreenX = 0.
 	let onscreenX = -.5 * camera.rightAtZZero
 	let intendedMarkerScale = new THREE.Vector3()
-	video.onClick = function()
-	{
-		wantedOnScreen = true
-	}
 	let markers = Array(10)
 	for(let i = 0; i < markers.length; i++)
 		markers[i] = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture() }))
@@ -134,13 +130,22 @@ function initVideo()
 	videoDomElement.muted = true
 	// videoDomElement.playbackRate = .5
 
-	doVideoThing = async function( filename, startTime, endTime, markerTimes, intendedMarkerPositions )
+	setUpVideo = async function( filename, startTime, endTime, markerTimes, intendedMarkerPositions )
 	{
 		console.assert( markers.length >= markerTimes.length )
+
+		function trigger()
+		{
+			wantedOnScreen = true
+			videoDomElement.currentTime = startTime
+		}
+		video.onClick = trigger
+		trigger()
 
 		videoDomElement.paused = true
 
 		videoDomElement.src = "data/videos/" + filename + ".mp4"
+		videoDomElement.currentTime = startTime
 		videoDomElement.load()
 		videoDomElement.onloadeddata = function()
 		{
@@ -151,11 +156,6 @@ function initVideo()
 			video.material.map.minFilter = THREE.LinearFilter
 			video.material.map.image = videoDomElement
 
-			if(endTime === "end")
-				endTime = videoDomElement.duration
-			if(endTime >= 9.9)
-				console.error("it seems that the browser fucks you at 10")
-
 			intendedMarkerScale.copy(video.scale)
 			intendedMarkerScale.multiplyScalar( Math.abs(intendedMarkerPositions[1].y-intendedMarkerPositions[0].y) * .95 / intendedMarkerScale.y)
 
@@ -165,18 +165,16 @@ function initVideo()
 				onscreenness = clamp(onscreenness,0.,1.)
 				video.position.x = (.5+.5*-Math.cos(onscreenness*Math.PI)) * (onscreenX-offscreenX) + offscreenX
 
-				if( wantedOnScreen )
+				if( wantedOnScreen && onscreenness === 1.)
 				{
-					if(videoDomElement.paused)
-					{
+					if( videoDomElement.currentTime === startTime )
 						videoDomElement.play()
-						videoDomElement.currentTime = startTime
-					}
-					else if( videoDomElement.currentTime >= endTime )
-					{
+
+					if( videoDomElement.currentTime >= endTime )
 						videoDomElement.pause()
+
+					if( videoDomElement.paused ) //if there's no endTime
 						wantedOnScreen = false
-					}
 				}
 
 				for(let i = 0; i < markerTimes.length; i++)

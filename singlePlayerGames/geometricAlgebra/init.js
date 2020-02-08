@@ -71,12 +71,6 @@ async function init()
 
 		let v = [
 			{
-				filename: "segerman",
-				startTime: 0.,
-				endTime: 10.,
-				markerTimes: [3.4,5.3,7.2],
-			},
-			{
 				filename: "hoberman",
 				startTime: .1,
 				endTime: 7.7,
@@ -84,8 +78,14 @@ async function init()
 			},
 			{
 				filename: "dzhanibekov",
-				startTime: .1,
-				endTime: 7.7,
+				startTime: 0.,
+				endTime: Infinity,
+				markerTimes: [3.4,5.3,7.2],
+			},
+			{
+				filename: "segerman",
+				startTime: 0.,
+				endTime: Infinity,
 				markerTimes: [3.4,5.3,7.2],
 			},
 		]
