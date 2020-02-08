@@ -1,15 +1,12 @@
 Aesthetics/graphics/non-design
+	Don't need no frustum culling
+	Seriously you want to do bonkers graphics? Just do what everyone knows works, jeez, lots of particle effects and a professional animator
+	Fuck photograph, get someone to do a great animated scene and then use voxel cone tracing
+	Capturing a light field would be nice though
 	Hearthstone may be an inspiration
 	DO NOT THINK ABOUT THIS
 	Liquid should glow. Spelunky's is great
 	Maybe have the whole scene in perspective. The things come towards you to do the operation
-	How about it all happens on a desk
-		On the sand at the Academy in ancient greece
-		At Newton's desk in Cambridge university
-		A desk at NASA in the 60s with a mainframe in the background
-		At the LHC, with others surrounding you
-		On a space station in the future
-		In the middle of a quasar
 	SDF/raytrace
 		Can at least consider it because the geometry of these objects, which the player will spend a lot of time looking at, is simple
 		good shadows, reflections, colored lighting, transparency. Lights could originate in a texture.
@@ -31,6 +28,21 @@ Aesthetics/graphics/non-design
 		clouds https://www.shadertoy.com/view/XslGRr
 		Stateless fight
 		nice surface https://www.shadertoy.com/view/Mdl3Ws
+	Do not think hard about the backgrounds, with AR they disappear
+
+Backgrounds - just need a surface
+	Ancient greece - Euclid / Plato / Archimedes
+	India / Iran - https://en.wikipedia.org/wiki/Mathematics_in_medieval_Islam
+	17th century - Newton / Descartes
+		Weirdly shaped flasks and weird candles abound. Real ancient looking alchemy shit
+	19th - Grassman / Clifford / Hamilton / Maxwell / Faraday
+		More modern
+	60s - Gell-Mann / Feynman / Dirac / NASA / JPL
+		Mainframe in the background, 60s seat, 70s clothing
+	Present day - CERN, ITER
+	Future - space station / control panel of a rocket
+	Far future / abstract platonic realm / inside an eternal cellular automaton - Quasar
+		Ray traced quadric surfaces everywhere
 
 Story
 	Euclid - invention of geometry
@@ -53,3 +65,4 @@ Story
 		It is a great story. Hestenes looking back on it as ancient wisdom
 		Clifford on his deathbed thinking the hope will probably die and people will be doing hacky shit forever
 		Tait was evil, full of wishful thinking and idiotic faith. Hating of divorce and secularity, everything  Clifford wasn't. Kicking a man while he was dying
+	Separate office for Maxwell or faraday, more Victorian plus crackling electricity

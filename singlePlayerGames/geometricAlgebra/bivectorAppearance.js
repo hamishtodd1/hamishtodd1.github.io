@@ -1,4 +1,5 @@
 /*
+	So long as you start the points off in a parallelogram shape, possibly it is ok for them to twitch a little before moving
 
 	Could use GL_POINTS to avoid overdraw
 	Points need a bigger radius than the balls, specifically big enough to contain the largest smoothMin extension

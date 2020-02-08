@@ -14,6 +14,8 @@
 		People like animals! Dung beetle rolls dung for the turning
 		it would be funny to have 0 as a goal!
 
+	A basic smooth input thing to do would be series of numbers to corkscrew
+
 	General structure
 		Addition only, scalars only
 		Addition only, vectors only
@@ -53,7 +55,7 @@ function initPlayModes(modeChange)
 			goalBox.title.position.y = .9
 			goalBox.add(goalBox.title)
 
-			let background = new THREE.Mesh(unchangingUnitSquareGeometry,new THREE.MeshBasicMaterial({color:0x000000}))
+			let background = new THREE.Mesh(unchangingUnitSquareGeometry,new THREE.MeshBasicMaterial({color:0xffa500 }))
 			background.scale.set(goalBox.title.scale.x*1.1,goalBox.title.scale.y*4.3,1.)
 			background.position.z -= .001
 			background.position.y += .18
@@ -88,7 +90,7 @@ function initPlayModes(modeChange)
 			}
 
 			goalBox.position.x = camera.rightAtZZero - 1.4
-			goalBox.position.y = camera.topAtZZero - 2.2
+			goalBox.position.y = 0.//camera.topAtZZero - 2.2
 		})
 
 		function ourReactionToNewMultivector(newMultivectorElements)
@@ -128,116 +130,117 @@ function initPlayModes(modeChange)
 	}
 
 	//inputOutputGoal
-	// {
-	// 	let numPairs = 2;
+	{
+		let numPairs = 2;
 
-	// 	let background = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({color:0xFFFFFF}))
-	// 	background.scale.x = numPairs * 1.3
-	// 	background.scale.y = 1.3
-	// 	background.position.z = -.001
+		let background = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({color:0xFFFFFF}))
+		background.scale.y = numPairs * 1.3
+		background.scale.x = 1.3
+		background.position.z = -.001
 
-	// 	reactToNewMultivector = function(){}
+		let scopeInputMultivector = ScopeMultivector();
+		removeFromScope(scopeInputMultivector)
 
-	// 	var inputSelectionIndicator = RectangleIndicator()
-	// 	var outputSelectionIndicator = RectangleIndicator()
+		function makeSureInputOutputGoalIsSetUp()
+		{
+			scene.add(inputGroup,outputGroup)
 
-	// 	let scopeInputMultivector = ScopeMultivector();
-	// 	multivectorScope.push(scopeInputMultivector)
-	// 	function selectInput(multivec)
-	// 	{
-	// 		inputSelectionIndicator.position.copy(multivec.position)
-	// 		outputSelectionIndicator.position.copy(multivec.position)
+			// victorySavouringCounter = -1.
+			// goalExcitedness = 0.
 
-	// 		for(let i = 0; i < 8; i++)
-	// 			scopeInputMultivector.elements[i] = multivec.elements[i]
-	// 		scopeInputMultivector.updateAppearance()
+			let swapMultivector = multivectorScope[0]
+			multivectorScope[0] = scopeInputMultivector
+			if(swapMultivector)
+				multivectorScope.push( swapMultivector )
+			clickables.push(scopeInputMultivector.thingYouClick)
+			scene.add(scopeInputMultivector)
+			getMultivectorScopePosition(multivectorScope.indexOf(scopeInputMultivector),scopeInputMultivector.position)
 
-	// 		//probably have it shake a little. Well I mean this is what the pipes were meant to be
+			reactToNewMultivector = function(){} //TODO
+			dismantleCurrentGoalApparatus = function()
+			{
+				scene.remove(inputGroup,outputGroup)
+				removeFromScope(scopeInputMultivector)
+			}
+		}
 
-	// 		console.error("Need to update ALL the scope")
-	// 	}
+		var inputSelectionIndicator = RectangleIndicator()
+		var outputSelectionIndicator = RectangleIndicator()
+		function selectInput(multivec)
+		{
+			inputSelectionIndicator.position.copy(multivec.position)
+			outputSelectionIndicator.position.copy(multivec.position)
 
-	// 	{
-	// 		var inputGroup = new THREE.Group()
-	// 		scene.add(inputGroup)
-	// 		inputGroup.add(background)
+			copyMultivector(multivec.elements, scopeInputMultivector.elements)
+			scopeInputMultivector.updateAppearance()
 
-	// 		inputGroup.add(inputSelectionIndicator)
+			//probably have it shake a little. Well I mean this is what the pipes were meant to be
 
-	// 		var inputs = Array(numPairs)
-	// 		for(let i = 0; i < inputs.length; i++)
-	// 		{
-	// 			let elements = new Float32Array(8)
-	// 			for(let j = 0; j < 5; j++) //ONLY USING THOSE THAT WORK
-	// 				elements[j] = (Math.random()-.5)*2.
-	// 			elements[0] = Math.floor(Math.random()*20) - 10.
-	// 			elements[3] = 0.
+			console.error("Need to update ALL the scope")
+		}
 
-	// 			inputs[i] = MultivectorAppearance(selectInput,elements)
-	// 			delete elements
-	// 			inputs[i].position.x = 1.2 * (i-(numPairs-1)/2.);
-	// 			inputGroup.add(inputs[i])
-	// 		}
+		let inputGroup = new THREE.Group()
+		let inputs = Array(numPairs)
+		{
+			inputGroup.add(background)
 
-	// 		var inputScope = [inputs[0]]
-	// 		selectInput(inputScope[0])
-	// 	}
+			inputGroup.add(inputSelectionIndicator)
 
-	// 	{
-	// 		var outputGroup = new THREE.Group()
-	// 		scene.add(outputGroup)
-	// 		outputGroup.add(background.clone())
-	// 		outputGroup.add(outputSelectionIndicator)
+			for(let i = 0; i < inputs.length; i++)
+			{
+				let elements = new Float32Array(8)
+				for(let j = 0; j < 5; j++) //ONLY USING THOSE THAT WORK
+					elements[j] = (Math.random()-.5)*2.
+				elements[0] = Math.floor(Math.random()*20) - 10.
+				elements[3] = 0.
 
-	// 		let seedForRandomActivity = Math.random()
+				inputs[i] = MultivectorAppearance(selectInput,elements)
+				delete elements
+				inputs[i].position.y = 1.2 * (i-(numPairs-1)/2.);
+				inputGroup.add(inputs[i])
+			}
 
-	// 		let outputs = Array(inputs.length)
-	// 		let scopeWithOneExtra = Array(multivectorScope.length+1)
-	// 		for(let i = 0; i < multivectorScope.length; i++)
-	// 			scopeWithOneExtra[i] = multivectorScope[i]
-	// 		for(let i = 0; i < outputs.length; i++)
-	// 		{
-	// 			scopeWithOneExtra[multivectorScope.length] = inputs[i]
-	// 			//possible bug: you're getting both outputs the same sometimes
-	// 			let elements = generateRandomMultivectorElementsFromScope(scopeWithOneExtra,seedForRandomActivity)
+			selectInput(inputs[0])
+		}
 
-	// 			outputs[i] = MultivectorAppearance(function(){},elements)
-	// 			delete elements
-	// 			outputs[i].position.x = inputs[i].position.x
-	// 			outputGroup.add(outputs[i])
-	// 		}
+		let outputGroup = new THREE.Group()
+		let outputs = Array(inputs.length)
+		{
+			outputGroup.add(background.clone())
+			outputGroup.add(outputSelectionIndicator)
 
-	// 		// let goalSign = makeTextSign("Goal:")
-	// 		// goalSign.scale.multiplyScalar(.7)
-	// 		// outputGroup.add(goalSign)
-	// 		// goalSign.position.x -= background.scale.x * .5 + goalSign.scale.x * .5 + .1
-	// 	}
+			let seedForRandomActivity = Math.random()
+			let scopeWithOneExtra = Array(multivectorScope.length+1)
+			for(let i = 0; i < multivectorScope.length; i++)
+				scopeWithOneExtra[i] = multivectorScope[i]
+			for(let i = 0; i < outputs.length; i++)
+			{
+				scopeWithOneExtra[multivectorScope.length] = inputs[i]
+				//possible bug: you're getting both outputs the same sometimes
+				let elements = generateRandomMultivectorElementsFromScope(scopeWithOneExtra,seedForRandomActivity)
 
-	// 	let intendedPositions = [
-	// 		new THREE.Vector3( 0.,-camera.topAtZZero + 2.1, 0.),
-	// 		new THREE.Vector3( 0., camera.topAtZZero - .9, 0.),
-	// 	]
-	// 	updateFunctions.push(function()
-	// 	{
-	// 		intendedPositions[0].x = camera.rightAtZZero - background.scale.x/2. - .3
-	// 		intendedPositions[1].x = camera.rightAtZZero - background.scale.x/2. - .3
-	// 		outputGroup.position.lerp(intendedPositions[0],frameCount===0?1.:.1)
-	// 		inputGroup.position.lerp( intendedPositions[1],frameCount===0?1.:.1)
-	// 	})
+				outputs[i] = MultivectorAppearance(function(){},elements)
+				delete elements
+				outputs[i].position.y = inputs[i].position.y
+				outputGroup.add(outputs[i])
+			}
+		}
 
-	// 	dismantleCurrentGoalApparatus = function()
-	// 	{
-	// 		scene.remove(inputGroup)
-	// 		scene.remove(outputGroup)
-
-	// 		//and removing that shit from the multivectorScope?		
-	// 	}
-
-	// 	return inputScope
-	// }
+		inputGroup.intendedPosition = new THREE.Vector3( -camera.rightAtZZero + background.scale.x/2. + 3., camera.topAtZZero - 1.6, 0.)
+		outputGroup.intendedPosition= new THREE.Vector3( camera.rightAtZZero - background.scale.x/2. - .1, camera.topAtZZero - 1.6, 0.)
+		outputGroup.position.copy(outputGroup.intendedPosition)
+		inputGroup.position.copy(inputGroup.intendedPosition)
+		updateFunctions.push(function()
+		{
+			outputGroup.intendedPosition.x = camera.rightAtZZero - background.scale.x/2. - .1
+			inputGroup.intendedPosition.x = -camera.rightAtZZero + background.scale.x/2. + 3.
+			outputGroup.position.lerp(outputGroup.intendedPosition,.1)
+			inputGroup.position.lerp( inputGroup.intendedPosition,.1)
+		})
+	}
+	// makeSureInputOutputGoalIsSetUp()
 
 	//levels
-	let levelIndex = -1;
 	let levels = Levels()
 	{
 		bindButton("r",function()
@@ -277,19 +280,50 @@ function initPlayModes(modeChange)
 	}
 	function setLevel(levelIndex)
 	{
-		setScope(levels[levelIndex].options,levels[levelIndex].operators)
-		copyMultivector(levels[levelIndex].singularGoal, singularGoalMultivector.elements)
-		singularGoalMultivector.updateAppearance()
+		if(levels[levelIndex]["singularGoal"] !== undefined)
+		{
+			makeSureSingularGoalIsSetUp()
+
+			setScope(levels[levelIndex].options,levels[levelIndex].operators)
+			copyMultivector(levels[levelIndex].singularGoal, singularGoalMultivector.elements)
+			singularGoalMultivector.updateAppearance()
+		}
+		else //inputOutput
+		{
+			// makeSureInputOutputGoalIsSetUp()
+
+			//compute the outputs
+			let outputs = Array(levels[levelIndex].inputs.length)
+			let tempScope = []
+			for(let i = 0; i < outputs.length; i++)
+			{
+				tempScope.push(levels[levelIndex].inputs[i])
+				for(let j = 0; j < levels[levelIndex].options.length; j++)
+					tempScope.push(levels[levelIndex].options[j])
+
+				for(let j = 0; j < levels[levelIndex].steps.length; j++)
+				{
+					let s = levels[levelIndex].steps[j]
+					tempScope.push( s[0](tempScope[s[1]],tempScope[s[2]]) )
+				}
+				outputs[i] = tempScope[tempScope.length-1]
+				for(let j = tempScope.length-1; j > -1; j--)
+					delete tempScope[j]
+				tempScope.length = 0
+			}
+			log(outputs)
+
+			setScope(levels[levelIndex].options,levels[levelIndex].operators)
+		}
 	}
 
+	let levelIndex = -1;
 	modeChange.campaign = function()
 	{
 		dismantleCurrentGoalApparatus()
 
 		reactionToVictory = function()
 		{
-			makeSureSingularGoalIsSetUp()
-
 			levelIndex++
 			if(levelIndex >= levels.length)
 			{

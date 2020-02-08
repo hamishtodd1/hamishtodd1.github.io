@@ -317,19 +317,21 @@ function getHighestFunctionCallResult()
 {
 	console.error("switch to extreme")
 }
-function getClosestPointToPoint(point,array)
+function getClosestObjectToPoint(point,objArray)
 {
-	var nearestVertexIndex = null;
+	var nearestIndex = null;
 	var closestDistance = Infinity;
-	for(var i = 0; i < array.length; i++ )
+	let distSq = -1.
+	for(var i = 0; i < objArray.length; i++ )
 	{
-		if(array[i].distanceToSquared(point) < closestDistance)
+		distSq = objArray[i].distanceToSquared(point)
+		if( distSq < closestDistance)
 		{
-			nearestVertexIndex = i;
-			closestDistance = array[i].distanceToSquared(point);
+			nearestIndex = i;
+			closestDistance = distSq;
 		}
 	}
-	return nearestVertexIndex;
+	return nearestIndex;
 }
 //look, it's just about closeness
 function getExtremeFunctionCallResult(array, functionName,lowest)

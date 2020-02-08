@@ -15,6 +15,8 @@ function initMouse()
 	};
 	asynchronous.raycaster.setFromCamera(new THREE.Vector2(), camera)
 
+	let lastClickedObject = null
+
 	mouse = {
 		clicking: false,
 		oldClicking: false,
@@ -54,6 +56,9 @@ function initMouse()
 		this.oldClicking = this.clicking;
 		this.clicking = asynchronous.clicking
 
+		if(this.oldClicking && !this.clicking && lastClickedObject !== null && lastClickedObject.onNotClicking !== undefined )
+			lastClickedObject.onNotClicking()
+
 		this.justMoved = asynchronous.justMoved;
 		asynchronous.justMoved = false;
 
@@ -67,7 +72,10 @@ function initMouse()
 			if( intersections.length !== 0 )
 			{
 				intersections[0].object.onClick(intersections[0]);
+				lastClickedObject = intersections[0].object
 			}
+			else
+				lastClickedObject = null
 		}
 	}
 

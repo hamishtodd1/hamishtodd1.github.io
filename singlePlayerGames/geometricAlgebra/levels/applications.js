@@ -1,11 +1,18 @@
 /*
 	General
+		A better representation of a thing over time might be its path through the world with timestamps labelled
+		So record yourself with a qr code, throw it in the air etc. Put it into AR.js and stick a cube on top of it. Can get position and quaternion right out!
 		Remember, want to make it so you can doodle! Don't be too a priori!
 		the basis vectors should be inside the scene
 		is there an elegant way to feed back into the scene?
 			the "real" ones are frozen in place, when you click them they're cloned
 		The thinking is: you are trying to go from t = a to t = a + epsilon
 			This tries to avoid numerical analysis. That might be impossible / foolish
+		Kids could program particle effects that come from their dancing friends. Pose estimation is cracked right?
+		Put the whole scope on the pictures?
+		Maybe you're always modelling the time evolution of something in which case it's a simple number as input. But "reaction to different parameters and events" is interesting which is why getting the differential between two frames may be more versatile
+
+		But should start with something simple like a number and should start with only one input
 
 	Properties of ideas
 		Should be "satisfying" stuff. Look at "most satisfying video"
@@ -22,8 +29,13 @@
 			/Electrical engineering
 			a vector of complex numbers can separate into a vector and bivector (i*vector) parts?
 			3 states are used in this thing on bell https://freelanceastro.github.io/bell/
+			Chromodynamics
+				Got three nice variables(?)
+				Applicable to nuclear power which is rather mysterious
 		Planetary motion
+			A bomb going off and lots of pieces of shrapnel. You have to do lots of them
 		Mechanical engineering
+			Make a clock! Haha it's literally euler. Grandfather clock would be nice
 			Cogs
 				funky mechanical leg https://youtu.be/wFqnH2iemIc?t=46
 				Another nice cog https://youtu.be/SwVWfrZ3Q50?t=306
@@ -105,7 +117,7 @@ async function initVideo()
 	let videoDomElement = document.createElement( 'video' )
 	videoDomElement.style = "display:none"
 	videoDomElement.crossOrigin = 'anonymous'
-	videoDomElement.src = "data/" + name
+	videoDomElement.src = "data/videos/" + name + ".mp4"
 	videoDomElement.loop = false
 	videoDomElement.muted = true
 	videoDomElement.currentTime = startTime
@@ -198,7 +210,7 @@ async function initWheelScene()
 	//	renderer.render( s, camera );
 	// }
 
-	let placeStuckOnWheel = new THREE.Vector3(0.,-wheelRadius*0.5,0.)
+	let placeStuckOnWheel = new THREE.Vector3(wheelRadius,0.,0.)
 
 	let playing = true
 
@@ -228,34 +240,61 @@ async function initWheelScene()
 		loseSign.visible = false
 	}
 
+	let goalMultivector = MultivectorAppearance(function(){})
+	let placeForEndToBe = new THREE.Vector3()
+	let timerMultivector = MultivectorAppearance(function(){})
+	//p = (1.,0.,0.) * -i^t + (t.,1.,0.)
+	//can say radius = 1 because we choose the units
+	let bases = Array(2)
+	bases[0] = MultivectorAppearance(function(){},new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]))
+	bases[1] = MultivectorAppearance(function(){},new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.]))
+	bases[0].position.x -= 3.5
+	bases[1].position.x -= 3.5
+	bases[0].position.y -= 1.8
+	bases[1].position.y -= 1.8
+	bases[0].position.x += .5
+	bases[1].position.y += .5
+	timerMultivector.position.set(bases[0].position.x,bases[0].position.y,0.)
+
 	updateFunctions.push( function()
 	{
+		if(wheel.position.x > -muddyTrail.position.x)
 		{
-			if(wheel.position.x > -muddyTrail.position.x)
-			{
-				playing = false
-			}
-
-			let rotationAmount = 0.;
-			if(playing)
-			{
-				rotationAmount += .04
-			}
-			wheel.rotation.z -= rotationAmount
-			let arcLength = rotationAmount * wheelRadius
-			wheel.position.x += arcLength
-			wheel.updateMatrix()
-
-			flower.position.copy(placeStuckOnWheel)
-			flower.rotation.copy(wheel.rotation)
-			flower.position.applyMatrix4(wheel.matrix)
-
-			muddyTrail.scale.x = wheel.position.x - muddyTrail.position.x
-			muddyTrail.visible = muddyTrail.scale.x !== 0.
-
-			clown.position.copy(wheel.position)
+			playing = false
 		}
+
+		let rotationAmount = playing?.04:0.;
+		wheel.rotation.z -= rotationAmount
+		let arcLength = rotationAmount * wheelRadius
+		wheel.position.x += arcLength
+		wheel.updateMatrix()
+
+		flower.position.copy(placeStuckOnWheel)
+		flower.rotation.copy(wheel.rotation)
+		flower.position.applyMatrix4(wheel.matrix)
+
+		muddyTrail.scale.x = wheel.position.x - muddyTrail.position.x
+		muddyTrail.visible = muddyTrail.scale.x !== 0.
+
+		{
+			goalMultivector.position.copy(muddyTrail.position)
+			littleScene.localToWorld(goalMultivector.position)
+			
+			placeForEndToBe.copy(flower.position)
+			littleScene.localToWorld(placeForEndToBe)
+			placeForEndToBe.sub(goalMultivector.position)
+
+			goalMultivector.setTo1Blade(placeForEndToBe)
+			placeForEndToBe.multiplyScalar(.5)
+			goalMultivector.position.add(placeForEndToBe)
+
+			timerMultivector.elements[0] = -wheel.rotation.z / TAU
+			timerMultivector.updateAppearance()
+		}
+
+		clown.position.copy(wheel.position)
 	})
 
 	return littleScene
 }
+

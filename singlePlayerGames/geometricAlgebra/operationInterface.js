@@ -54,6 +54,7 @@ function initOperationInterface()
 				completeAnimation()
 
 			activeOperator.material.color.copy(newScopeOperator.material.color)
+			activeOperator.material.map = newScopeOperator.material.map
 			activeOperator.position.copy(newScopeOperator.position)
 			activeOperator.function = newScopeOperator.function
 			scene.add(activeOperator)

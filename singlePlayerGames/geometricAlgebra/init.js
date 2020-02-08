@@ -1,10 +1,9 @@
 /*
 	TODO for Cambridge
+		Real levels
+		Would be nice to have one time thing and one differential geometry thing
 		Level progression to get you to the "inputs outputs" point and to say how you can learn
-		Get the wheel in there. Animated
 		And just some videos plus extracting pictures
-		Tutorial levels
-		AR https://jeromeetienne.github.io/AR.js/three.js/examples/basic.html
 		Would be nice to at least have parallelogram liquid sim to show your ambition
 
 	TODO for slack
@@ -18,11 +17,18 @@
 			Bivector multiplication???
 
 	TODO sandbox / tool for thought
+	AR https://jeromeetienne.github.io/AR.js/three.js/examples/basic.html
 	Helping make shaders
 		Parametric geometry - can feed in either line or grid
 		Ideally you paste and it tells you what it thinks you pasted
 		Spit out glsl?
 		Heh, have it be possible for the input and output to be arranged in a rectangle with x and y smoothly varying, i.e. a framebuffer
+	A nice thing to do at a live coding event if nothing else
+		Folks can see what you're doing
+		Your hand covers a small surface and your hand is big
+		Music
+			https://www.youtube.com/watch?v=R_Rfkhg7s_M 
+			https://www.youtube.com/watch?v=EtEOl-xJTg8
 
 	TODO for GDC
 		A fast to access webpage
@@ -58,6 +64,7 @@ async function init()
 	await initOperatorAppearances()
 
 	// initWheelScene()
+	// return
 	// await initVideo()
 
 	initOperationInterface()

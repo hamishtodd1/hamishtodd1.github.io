@@ -40,6 +40,14 @@ function setScope(elementses, operators)
 	}
 	for(let i = 0; i < operators.length; i++)
 		ScopeOperator(operators[i], operators.length)
+
+	// let dummy = ScopeMultivector(new Float32Array([9.,0.,0.,0.,0.,0.,0.,0.]),true)
+	// dummy.thingYouClick.onNotClicking = function()
+	// {
+	// 	//drag left and right, maybe even go up and down
+	// 	//drag left and right, the whole scope gets updated, video progresses, goal updates
+	// 	//maybe even rotate an object
+	// }
 }
 
 function getMultivectorScopePosition(desiredindex,dest)
@@ -86,9 +94,57 @@ function initScope()
 			operatorScope[i].position.x += .1 * (getOperatorScopeX(i) - operatorScope[i].position.x)
 	})
 
-	//this is a load of shit, just do it as visualized
-
 	let keyboardSelectionIndicator = RectangleIndicator()
+
+	// updateFunctions.push(function()
+	// {
+	// 	if( keyboardSelectionIndicator.parent === null )
+			
+	// })
+	// bindButton("enter",function()
+	// {
+	// 	if(scopeIsLimited)
+	// 	{
+	// 		let closestMultivector = multivectorScope[ getClosestObjectToPoint(keyboardSelectionIndicator.position,multivectorScope) ]
+	// 		let closestOperator = operatorScope[ getClosestObjectToPoint(keyboardSelectionIndicator.position,operatorScope) ]
+
+	// 		let closerEntity = 
+	// 			closestMultivector.position.distanceToSquared(keyboardSelectionIndicator.position) < 
+	// 			closestOperator.position.distanceToSquared(keyboardSelectionIndicator.position) ?
+	// 			closestMultivector : closestOperator
+
+	// 		keyboardSelectionIndicator.position.copy(closerEntity.position)
+	// 	}
+
+	// 	let selection = getSelection()
+	// 	if(operatorScope.indexOf(selection) !== -1)
+	// 		selection.onClick()
+	// 	else if(multivectorScope.indexOf(selection) !== -1)
+	// 		selection.thingYouClick.onClick()
+	// })
+
+	// function checkIfPositionIsInDirection(origin,direction,position)
+	// {
+	// 	if()
+	// }
+	// bindButton("right",function()
+	// {
+	// 	let oneOnTheRight = null
+	// 	for(let i = 0; i < multivectorScope.length; i++)
+	// 	{
+	// 		//it has to be less than 45 degrees from where you are, otherwise you'd go down to get to it
+	// 		//buuuuut if there's nothing where do you go/
+	// 		if(multivectorScope[i] === keyboardSelectionIndicator.parent)
+	// 			continue;
+
+	// 		if( checkIfPositionIsInDirection(keyboardSelectionIndicator.parent.position,xUnit,multivectorScope[i].position) )
+	// 		{
+
+	// 		}
+	// 	}
+	// })
+	// return;
+
 	let multivectorScopeSelected
 	let multivectorSelection
 	let operatorSelection
@@ -125,7 +181,6 @@ function initScope()
 			if(multivectorSelection < 0)
 			{
 				multivectorSelection = multivectorScope.length-1
-				multivectorScopeSelected = false
 			}
 		}
 
@@ -146,7 +201,6 @@ function initScope()
 			if(multivectorSelection > multivectorScope.length-1)
 			{
 				multivectorSelection = 0
-				multivectorScopeSelected = false
 			}
 		}
 
@@ -166,11 +220,7 @@ function initScope()
 			operatorSelection--
 			if(operatorSelection < 0)
 			{
-				if(multivectorScope.length === 0)
-					return
-				
 				operatorSelection = operatorScope.length - 1
-				multivectorScopeSelected = true
 			}
 		}
 
@@ -190,11 +240,7 @@ function initScope()
 			operatorSelection++
 			if(operatorSelection > operatorScope.length-1)
 			{
-				if(multivectorScope.length === 0)
-					return
-				
 				operatorSelection = 0
-				multivectorScopeSelected = true
 			}
 		}
 
@@ -205,10 +251,33 @@ function initScope()
 	{
 		makeSureSelectorIsSetUp()		
 
+		let closestDistSq = Infinity
+		let closest = null
+		function forEachScope(scopeEntity,index)
+		{
+			if( keyboardSelectionIndicator.parent === scopeEntity )
+				return
+
+			let distSq = scopeEntity.position.distanceToSquared(keyboardSelectionIndicator.parent.position)
+			if(distSq < closestDistSq)
+			{
+				closest = scopeEntity
+				closestDistSq = distSq
+			}
+		}
+		multivectorScope.forEach(forEachScope)
+		operatorScope.forEach(forEachScope)
+
 		let selection = getSelection()
 		if(operatorScope.indexOf(selection) !== -1)
 			selection.onClick()
 		else if(multivectorScope.indexOf(selection) !== -1)
 			selection.thingYouClick.onClick()
+
+		if( closest !== null )
+		{
+			closest.add(keyboardSelectionIndicator)
+			multivectorScopeSelected = multivectorScope.indexOf(closest) !== -1
+		}
 	})
 }

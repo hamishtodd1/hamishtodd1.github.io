@@ -27,10 +27,10 @@ function initWindowResizeSystemAndSurroundings(renderer)
 	{
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		camera.aspect = window.innerWidth / window.innerHeight;
-		if(camera.aspect < 9./21. || camera.aspect > 21./9.)
-			log("yep, that's the most extreme (Xperia 1)")
-		if(camera.aspect > 1.)
-			console.error("Wider than tall: might consider switching side and bottom for this")
+		// if(camera.aspect < 9./21. || camera.aspect > 21./9.)
+		// 	log("yep, that's the most extreme (Xperia 1)")
+		// if(camera.aspect > 1.)
+		// 	console.error("Wider than tall: might consider switching side and bottom for this")
 
 		camera.fov = fovGivenCenterToFrameDistance(camera.topAtZZero, camera.position.z )
 		camera.rightAtZZero = camera.topAtZZero * camera.aspect

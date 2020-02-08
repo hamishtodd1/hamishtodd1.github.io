@@ -51,7 +51,7 @@ async function initMenu(modeChange)
 				let halfMenuTitleHeight = title.scale.y / 2.
 				let padding = .25
 				intendedMenuPosition.x =  camera.rightAtZZero - (halfMenuTitleWidth  + padding)
-				intendedMenuPosition.y =  camera.topAtZZero   - (halfMenuTitleHeight + padding)
+				intendedMenuPosition.y =  -camera.topAtZZero  + (halfMenuTitleHeight + padding) * 2.
 				intendedFaderOpacity = 0.
 
 				for(let i = 0; i < menuEntries.length; i++)
@@ -187,6 +187,7 @@ async function initMenu(modeChange)
 				"Ivan Erofeev",
 				"Nina Erofeev", //check surname
 				"Matt Hare",
+				"Chigozie Nri",
 				"(Your name goes here!)",
 			]
 			for(let i = 0; i < strings.length; i++)

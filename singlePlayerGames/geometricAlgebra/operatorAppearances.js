@@ -5,39 +5,58 @@
 	There again, who says right- and left- multiplying is the right thing to do?
 	are left and right multiply the same as multiply by conjugate?
 
+
 	Arguably the add should contain a load of multiplies
 
 	Other operations, ugh
+		Derivative is taken with respect to whatever is varying them in the output
 		"to the power of". Gives you square root, reciprocals-> division
-		2*pi*i is the real thing https://blog.wolfram.com/2015/06/28/2-pi-or-not-2-pi/
 		log, jeez
+		Pow does division and square root because -1 and 1/2
+		ideally it only takes scalars
 		Would be nice if that could emerge
-		The vector derivative would be nice
 		Integral?
+
+	"i as the circle constant"
+		2*pi*i is the real thing https://blog.wolfram.com/2015/06/28/2-pi-or-not-2-pi/
+		d/dt i^(2*t) - suspicious, you might think that that'd be d/dt (-1)^t = 0
+		https://blog.wolfram.com/2015/06/28/2-pi-or-not-2-pi/ concludes 2*pi*i is very appealing
+		of interest because it looks soooo much more elegantcould have a "pow" that only takes in scalars
+		On the other hand
+			radians is good for arclength and area considerations
+			and it differentiates better. Or does it? Maybe it is more natural for pi to fall out of differentiating?
+		Look it's ok from a visual standpoint
+		Radians to degrees is just a scalar conversion. You can have radians to a base-4 system as well. Consider .54...+i.84... - that is e^i, the unit of our rotation system. Degrees is asking about the complex number .9998+i.017. possibly e^i makes differentiation easier, that is believable but better check. Point is though, the default base of your power and log can be the pseudoscalar for many cases
 */
 
 async function initOperatorAppearances()
 {
-	let texture = null
+	let materials = {
+		geometricProduct:new THREE.MeshBasicMaterial({color:0xFF0000,transparent:true /*because transparent part of texture*/ }),
+		geometricSum:new THREE.MeshBasicMaterial({color:0x80FF00,transparent:true /*because transparent part of texture*/ }),
+	}
 	await new Promise(resolve => {
-		new THREE.TextureLoader().load("data/frog.png",function(result)
+		new THREE.TextureLoader().load("data/plus.png",function(result)
 		{
-			texture = result;
+			materials.geometricSum.map = result
+			// textures.geometricProduct = result
 			resolve()
 		})
 	})
 
-	var geometry = new THREE.PlaneGeometry(1.5,1.5)
+	await new Promise(resolve => {
+		new THREE.TextureLoader().load("data/asterisk.png",function(result)
+		{
+			materials.geometricProduct.map = result;
+			resolve()
+		})
+	})
+
 	OperatorAppearance = function(func)
 	{
-		let operatorSymbol = new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({
-			map: texture,
-			transparent:true //because transparent part of texture
-		}))
+		let operatorSymbol = new THREE.Mesh( unchangingUnitSquareGeometry, func===geometricSum ? materials.geometricSum:materials.geometricProduct )
 
 		operatorSymbol.function = func
-		if(func === geometricProduct)
-			operatorSymbol.material.color.setRGB(1.,0.,0.)
 
 		return operatorSymbol
 	}

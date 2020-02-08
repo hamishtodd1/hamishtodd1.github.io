@@ -1,4 +1,7 @@
 /*
+	You could have the pseudoscalar be a rectangle of width (base) 1, therefore its height is its area (volume)
+	Aaaaand, the scalar pushes that shape to the right or left
+
 	For both sum and product of vectors, visualize the parallelogram
 
 	Maybe for positive and negative vectors, could have something on one side of it, not the end.
@@ -10,6 +13,7 @@
 		Transparent and glowy and smoky and reflective
 
 	The scalar
+		Dotted line for scalar
 		People are so used to numerals. But this *is* about geometry! A length may make more sense
 		It is almost certainly objectively important to know what the multiplicative identity is
 		The unit size should be clear, and the numeral does make that clear
@@ -55,6 +59,7 @@
 			Can be anywhere and so long as its length is the same you can think of it as the same thing
 			Tells you which end is which. Useful for adding
 		Centering
+			Don't worry about this. The point is that they can move around.
 			Gets you to think about vectors in a bivector like way
 			You picture a vector as an arrow. But where is that arrow located? Has to originate at origin
 			"Quantity of directed, positive or negative, mass" may be a better way of thinking of vectors than arrows
@@ -77,6 +82,10 @@
 
 	Could have the different blades stacked in a column, or around in a circle
 	What if you have some things that are enormously larger than others? That's why we have zooming in and out. But some things keep size
+
+	Sweep a along b to get a bivector. On is the sweeper, one is the thing it is swept along. Use this to make the addition too. This way, it is a surprise that addition is commutative, rather than a surprise that wedging is not
+	Addition of codirectional vectors and bivectors probably is different from non conditional, and it's probably ok to encourage that idea. Early levels can be just about them. X vector, X vector, 3. You must make an X vector of length 6.
+
 */
 
 function initMultivectorAppearances()
