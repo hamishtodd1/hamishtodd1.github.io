@@ -27,10 +27,10 @@ async function initMenu(modeChange)
 
 	{
 		let titleObject = makeTextSign("Menu")
-		let title = titleObject.children[0]
-		title.scale.copy(titleObject.scale)
-		title.scale.multiplyScalar(.4)
-		menu.add(title)
+		let menuButton = titleObject.children[0]
+		menuButton.scale.copy(titleObject.scale)
+		menuButton.scale.multiplyScalar(.4)
+		menu.add(menuButton)
 
 		let intendedFaderOpacity = 0.
 		let intendedMenuPosition = new THREE.Vector3(0.,0.,.001)
@@ -47,11 +47,11 @@ async function initMenu(modeChange)
 			}
 			else
 			{
-				let halfMenuTitleWidth = title.scale.x / 2.
-				let halfMenuTitleHeight = title.scale.y / 2.
+				let halfMenuTitleWidth = menuButton.scale.x / 2.
+				let halfMenuTitleHeight = menuButton.scale.y / 2.
 				let padding = .25
 				intendedMenuPosition.x =  camera.rightAtZZero - (halfMenuTitleWidth  + padding)
-				intendedMenuPosition.y =  -camera.topAtZZero  + (halfMenuTitleHeight + padding) * 2.
+				intendedMenuPosition.y =  -camera.topAtZZero  + (halfMenuTitleHeight + padding) * 1.
 				intendedFaderOpacity = 0.
 
 				for(let i = 0; i < menuEntries.length; i++)
@@ -76,8 +76,8 @@ async function initMenu(modeChange)
 			menuMode = !menuMode
 		}
 		bindButton("esc",toggleMenuMode)
-		title.onClick = toggleMenuMode
-		clickables.push(title)
+		menuButton.onClick = toggleMenuMode
+		clickables.push(menuButton)
 	}
 
 	{

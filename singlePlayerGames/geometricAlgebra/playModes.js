@@ -251,7 +251,7 @@ function initPlayModes(modeChange)
 		//might be nice to make it flash when the level isn't completable
 
 		let restartButtonObj = makeTextSign("Restart")
-		let restartButton = restartButtonObj.children[0]
+		var restartButton = restartButtonObj.children[0]
 		restartButton.scale.copy(restartButtonObj.scale)
 		restartButton.scale.multiplyScalar(.4)
 
@@ -272,15 +272,14 @@ function initPlayModes(modeChange)
 		updateFunctions.push(function()
 		{
 			restartButton.position.x =  camera.rightAtZZero - (halfMenuTitleWidth  + padding)
-			restartButton.position.y = -camera.topAtZZero   + (halfMenuTitleHeight + padding)
+			restartButton.position.y = -camera.topAtZZero   + (halfMenuTitleHeight + padding) * 2.
 		})
-
-		//for now restart is only for campaign mode. Only useful in random mode if/when you have 
-		scene.add(restartButton)
 	}
 	function setLevel(levelIndex)
 	{
-		if(levels[levelIndex]["singularGoal"] !== undefined)
+		console.error("h")
+		log("y")
+		if(levels[levelIndex].singularGoal !== undefined)
 		{
 			makeSureSingularGoalIsSetUp()
 
@@ -290,7 +289,7 @@ function initPlayModes(modeChange)
 		}
 		else //inputOutput
 		{
-			// makeSureInputOutputGoalIsSetUp()
+			makeSureInputOutputGoalIsSetUp()
 
 			//compute the outputs
 			let outputs = Array(levels[levelIndex].inputs.length)
@@ -311,7 +310,6 @@ function initPlayModes(modeChange)
 					delete tempScope[j]
 				tempScope.length = 0
 			}
-			log(outputs)
 
 			setScope(levels[levelIndex].options,levels[levelIndex].operators)
 		}
@@ -346,5 +344,8 @@ function initPlayModes(modeChange)
 			setLevel(levelIndex)
 		}
 		reactionToVictory()
+
+		//for now restart is only for campaign mode. Only useful in random mode if/when you have 
+		scene.add(restartButton)
 	}
 }

@@ -2,7 +2,6 @@
 	TODO for Cambridge
 		Real levels
 		Would be nice to have one time thing and one differential geometry thing
-		Level progression to get you to the "inputs outputs" point and to say how you can learn
 		And just some videos plus extracting pictures
 		Would be nice to at least have parallelogram liquid sim to show your ambition
 
@@ -65,13 +64,26 @@ async function init()
 
 	// initWheelScene()
 	// return
-	// await initVideo()
+
+	let filename = "hoberman"
+	let startTime = .1
+	let endTime = 7.7
+	let markerTimes = [3.4,5.3,7.2]
+	let markerPositions = Array(markerTimes.length)
+	for(let i = 0; i < markerTimes.length; i++)
+	{
+		markerPositions[i] = new THREE.Vector3()
+		markerPositions[i].x = camera.rightAtZZero * .5
+		markerPositions[i].y = -(i-(markerTimes.length-1)/2.)*2.
+		markerPositions[i].z = -.01
+	}
+	await doVideoThing(filename,startTime,endTime,markerTimes,markerPositions)
 
 	initOperationInterface()
 
 	let modeChange = {}
 	initPlayModes(modeChange)
-	modeChange.campaign()
+	// modeChange.campaign()
 
 	await initMenu(modeChange)
 }

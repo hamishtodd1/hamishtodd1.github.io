@@ -5,14 +5,14 @@
 	There again, who says right- and left- multiplying is the right thing to do?
 	are left and right multiply the same as multiply by conjugate?
 
-
-	Arguably the add should contain a load of multiplies
+	Arguably the add should contain a load of multiplies. Er, other way around surely?
 
 	Other operations, ugh
 		Derivative is taken with respect to whatever is varying them in the output
-		"to the power of". Gives you square root, reciprocals-> division
+		"to the power of"
+			Gives you square root, reciprocals-> division
+			Possibly only power of scalars matters
 		log, jeez
-		Pow does division and square root because -1 and 1/2
 		ideally it only takes scalars
 		Would be nice if that could emerge
 		Integral?

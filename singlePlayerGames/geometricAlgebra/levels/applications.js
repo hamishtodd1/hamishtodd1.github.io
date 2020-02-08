@@ -1,5 +1,6 @@
 /*
 	General
+		so you're modelling the differential apparently
 		A better representation of a thing over time might be its path through the world with timestamps labelled
 		So record yourself with a qr code, throw it in the air etc. Put it into AR.js and stick a cube on top of it. Can get position and quaternion right out!
 		Remember, want to make it so you can doodle! Don't be too a priori!
@@ -96,7 +97,7 @@
 	Is there some kind of ink you could mark stuff with that only appears in infared?
 */
 
-async function initVideo()
+async function doVideoThing(filename,startTime,endTime,markerTimes,intendedMarkerPositions)
 {
 	let chrome = false
 	for (var i=0; i < navigator.plugins.length; i++)
@@ -110,37 +111,90 @@ async function initVideo()
 		return
 	}
 
-	let name = "hoberman.mp4"
-	let startTime = .1
-	let finishTime = 7.7
-
 	let videoDomElement = document.createElement( 'video' )
 	videoDomElement.style = "display:none"
 	videoDomElement.crossOrigin = 'anonymous'
-	videoDomElement.src = "data/videos/" + name + ".mp4"
+	videoDomElement.src = "data/videos/" + filename + ".mp4"
 	videoDomElement.loop = false
 	videoDomElement.muted = true
 	videoDomElement.currentTime = startTime
 	// videoDomElement.playbackRate = .5
+
+	let markers = Array(markerTimes.length+2) //+2 because you do want to deal with that
+	for(let i = 0; i < markerTimes.length; i++)
+	{
+		markers[i] = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture() }))
+		log(markers[i].material.color.r)
+	}
 	
 	videoDomElement.load()
-	videoDomElement.oncanplay = function()
+	videoDomElement.onloadeddata = function()
 	{
-		let aspect = videoDomElement.videoWidth / videoDomElement.videoHeight //can't get these til you've done the above!
+		let video = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial())
+		scene.add(video)
+		video.scale.y = videoDomElement.videoHeight / videoDomElement.videoWidth
+		video.scale.multiplyScalar(camera.rightAtZZero * .98)
+		let onscreenness = 0.
+		let offscreenX = camera.rightAtZZero + .5 * video.scale.x - .1
+		let onscreenX = -.5 * camera.rightAtZZero
+		video.material.map = new THREE.VideoTexture( videoDomElement )
+		video.material.map.minFilter = THREE.LinearFilter
 
-		let videoTexture = new THREE.VideoTexture( videoDomElement )
-		videoTexture.minFilter = THREE.LinearFilter
-		let mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.,1./aspect), new THREE.MeshBasicMaterial({ map: videoTexture }))
-		mesh.scale.multiplyScalar(camera.rightAtZZero * 2. - .1)
-		scene.add(mesh)
+		clickables.push(video)
+		video.onClick = function()
+		{
+			wantedOnScreen = true
+		}
+
+		let intendedMarkerScale = video.scale.clone()
+		intendedMarkerScale.multiplyScalar( Math.abs(intendedMarkerPositions[1].y-intendedMarkerPositions[0].y) * .95 / intendedMarkerScale.y)
+
+		let wantedOnScreen = true
 
 		updateFunctions.push(function()
-		{	
-			if(videoDomElement.currentTime > finishTime)
-				videoDomElement.pause()
-		})
+		{
+			onscreenness += frameDelta * .75 * (wantedOnScreen?1.:-1.)
+			onscreenness = clamp(onscreenness,0.,1.)
+			video.position.x = (.5+.5*-Math.cos(onscreenness*Math.PI)) * (onscreenX-offscreenX) + offscreenX
 
-		videoDomElement.play()
+			if( wantedOnScreen )
+			{
+				if(videoDomElement.paused)
+				{
+					videoDomElement.play()
+					videoDomElement.currentTime = startTime
+				}
+				else if( videoDomElement.currentTime > endTime )
+				{
+					videoDomElement.pause()
+					wantedOnScreen = false
+				}
+			}
+
+			for(let i = 0; i < markerTimes.length; i++)
+			{
+				if( videoDomElement.currentTime > markerTimes[i] )
+				{
+					if(markers[i].parent === null)
+					{
+						markers[i].material.map.image = videoDomElement
+						markers[i].material.map.needsUpdate = true
+						markers[i].scale.copy(video.scale)
+						markers[i].position.copy(video.position)
+						scene.add(markers[i])
+					}
+
+					markers[i].position.lerp(intendedMarkerPositions[i],.1)
+					let t = markers[i].position.distanceTo(intendedMarkerPositions[i])
+							/ video.position.distanceTo(intendedMarkerPositions[i])
+					markers[i].scale.lerpVectors(intendedMarkerScale,video.scale,t)
+				}
+				else
+				{
+					scene.remove(markers[i])
+				}
+			}
+		})
 	}
 }
 
