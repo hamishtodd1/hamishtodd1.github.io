@@ -189,16 +189,24 @@ async function initMenu(modeChange)
 				"Matt Hare",
 				"Chigozie Nri",
 				"(Your name goes here!)",
+				"gap",
+				"Videos",
+				"Three-geared racks: Dr. Henry Segerman",
+				"Dzhanibekov effect: NASA",
+				"Hoberman sphere: Dr. Boyd Edwards"
 			]
 			for(let i = 0; i < strings.length; i++)
 			{
 				if(strings[i] !== "gap")
 				{
 					let sign = makeTextSign(strings[i])
-					sign.scale.multiplyScalar(.4)
-					sign.position.y = ((strings.length-1) / 2. - i) * .4
-					sign.position.z = .001
 					credits.add(sign)
+					sign.position.y = ((strings.length-1) / 2. - i)
+					sign.position.z = .001
+
+					let height = camera.topAtZZero * 2. / (strings.length*1.2) * (credits.position.z/camera.position.z)
+					sign.scale.multiplyScalar(height)
+					sign.position.y *= height * 1.07
 				}
 			}
 

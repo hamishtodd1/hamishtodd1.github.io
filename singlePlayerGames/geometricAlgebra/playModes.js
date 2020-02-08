@@ -277,8 +277,6 @@ function initPlayModes(modeChange)
 	}
 	function setLevel(levelIndex)
 	{
-		console.error("h")
-		log("y")
 		if(levels[levelIndex].singularGoal !== undefined)
 		{
 			makeSureSingularGoalIsSetUp()

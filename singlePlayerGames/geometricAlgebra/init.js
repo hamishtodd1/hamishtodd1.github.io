@@ -65,19 +65,43 @@ async function init()
 	// initWheelScene()
 	// return
 
-	let filename = "hoberman"
-	let startTime = .1
-	let endTime = 7.7
-	let markerTimes = [3.4,5.3,7.2]
-	let markerPositions = Array(markerTimes.length)
-	for(let i = 0; i < markerTimes.length; i++)
+	// if(0)
 	{
-		markerPositions[i] = new THREE.Vector3()
-		markerPositions[i].x = camera.rightAtZZero * .5
-		markerPositions[i].y = -(i-(markerTimes.length-1)/2.)*2.
-		markerPositions[i].z = -.01
+		initVideo()
+
+		let v = [
+			{
+				filename: "segerman",
+				startTime: 0.,
+				endTime: 10.,
+				markerTimes: [3.4,5.3,7.2],
+			},
+			{
+				filename: "hoberman",
+				startTime: .1,
+				endTime: 7.7,
+				markerTimes: [3.4,5.3,7.2],
+			},
+			{
+				filename: "dzhanibekov",
+				startTime: .1,
+				endTime: 7.7,
+				markerTimes: [3.4,5.3,7.2],
+			},
+		]
+		for(let j = 0; j < v.length; j++)
+		{
+			v[j].markerPositions = Array(v[j].markerTimes.length)
+			for(let i = 0; i < v[j].markerTimes.length; i++)
+			{
+				v[j].markerPositions[i] = new THREE.Vector3(
+					camera.rightAtZZero * .5,
+					-(i-(v[j].markerTimes.length-1)/2.)*2.,
+					-.01 )
+			}
+		}
+		await doVideoThing(v[0].filename,v[0].startTime,v[0].endTime,v[0].markerTimes,v[0].markerPositions)
 	}
-	await doVideoThing(filename,startTime,endTime,markerTimes,markerPositions)
 
 	initOperationInterface()
 

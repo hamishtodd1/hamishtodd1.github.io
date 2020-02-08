@@ -97,7 +97,7 @@
 	Is there some kind of ink you could mark stuff with that only appears in infared?
 */
 
-async function doVideoThing(filename,startTime,endTime,markerTimes,intendedMarkerPositions)
+function initVideo()
 {
 	let chrome = false
 	for (var i=0; i < navigator.plugins.length; i++)
@@ -111,90 +111,99 @@ async function doVideoThing(filename,startTime,endTime,markerTimes,intendedMarke
 		return
 	}
 
+	let video = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial())
+	video.material.map = new THREE.VideoTexture()
+	let wantedOnScreen = true
+	clickables.push(video)
+	let onscreenness = 0.
+	let offscreenX = 0.
+	let onscreenX = -.5 * camera.rightAtZZero
+	let intendedMarkerScale = new THREE.Vector3()
+	video.onClick = function()
+	{
+		wantedOnScreen = true
+	}
+	let markers = Array(10)
+	for(let i = 0; i < markers.length; i++)
+		markers[i] = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture() }))
+
 	let videoDomElement = document.createElement( 'video' )
 	videoDomElement.style = "display:none"
 	videoDomElement.crossOrigin = 'anonymous'
-	videoDomElement.src = "data/videos/" + filename + ".mp4"
 	videoDomElement.loop = false
 	videoDomElement.muted = true
-	videoDomElement.currentTime = startTime
 	// videoDomElement.playbackRate = .5
 
-	let markers = Array(markerTimes.length+2) //+2 because you do want to deal with that
-	for(let i = 0; i < markerTimes.length; i++)
+	doVideoThing = async function( filename, startTime, endTime, markerTimes, intendedMarkerPositions )
 	{
-		markers[i] = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture() }))
-		log(markers[i].material.color.r)
-	}
-	
-	videoDomElement.load()
-	videoDomElement.onloadeddata = function()
-	{
-		let video = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial())
-		scene.add(video)
-		video.scale.y = videoDomElement.videoHeight / videoDomElement.videoWidth
-		video.scale.multiplyScalar(camera.rightAtZZero * .98)
-		let onscreenness = 0.
-		let offscreenX = camera.rightAtZZero + .5 * video.scale.x - .1
-		let onscreenX = -.5 * camera.rightAtZZero
-		video.material.map = new THREE.VideoTexture( videoDomElement )
-		video.material.map.minFilter = THREE.LinearFilter
+		console.assert( markers.length >= markerTimes.length )
 
-		clickables.push(video)
-		video.onClick = function()
+		videoDomElement.paused = true
+
+		videoDomElement.src = "data/videos/" + filename + ".mp4"
+		videoDomElement.load()
+		videoDomElement.onloadeddata = function()
 		{
-			wantedOnScreen = true
-		}
+			scene.add(video)
+			video.scale.y = videoDomElement.videoHeight / videoDomElement.videoWidth
+			video.scale.multiplyScalar(camera.rightAtZZero * .98)
+			offscreenX = camera.rightAtZZero + .5 * video.scale.x - .4
+			video.material.map.minFilter = THREE.LinearFilter
+			video.material.map.image = videoDomElement
 
-		let intendedMarkerScale = video.scale.clone()
-		intendedMarkerScale.multiplyScalar( Math.abs(intendedMarkerPositions[1].y-intendedMarkerPositions[0].y) * .95 / intendedMarkerScale.y)
+			if(endTime === "end")
+				endTime = videoDomElement.duration
+			if(endTime >= 9.9)
+				console.error("it seems that the browser fucks you at 10")
 
-		let wantedOnScreen = true
+			intendedMarkerScale.copy(video.scale)
+			intendedMarkerScale.multiplyScalar( Math.abs(intendedMarkerPositions[1].y-intendedMarkerPositions[0].y) * .95 / intendedMarkerScale.y)
 
-		updateFunctions.push(function()
-		{
-			onscreenness += frameDelta * .75 * (wantedOnScreen?1.:-1.)
-			onscreenness = clamp(onscreenness,0.,1.)
-			video.position.x = (.5+.5*-Math.cos(onscreenness*Math.PI)) * (onscreenX-offscreenX) + offscreenX
-
-			if( wantedOnScreen )
+			updateFunctions.push(function()
 			{
-				if(videoDomElement.paused)
-				{
-					videoDomElement.play()
-					videoDomElement.currentTime = startTime
-				}
-				else if( videoDomElement.currentTime > endTime )
-				{
-					videoDomElement.pause()
-					wantedOnScreen = false
-				}
-			}
+				onscreenness += frameDelta * .75 * (wantedOnScreen?1.:-1.)
+				onscreenness = clamp(onscreenness,0.,1.)
+				video.position.x = (.5+.5*-Math.cos(onscreenness*Math.PI)) * (onscreenX-offscreenX) + offscreenX
 
-			for(let i = 0; i < markerTimes.length; i++)
-			{
-				if( videoDomElement.currentTime > markerTimes[i] )
+				if( wantedOnScreen )
 				{
-					if(markers[i].parent === null)
+					if(videoDomElement.paused)
 					{
-						markers[i].material.map.image = videoDomElement
-						markers[i].material.map.needsUpdate = true
-						markers[i].scale.copy(video.scale)
-						markers[i].position.copy(video.position)
-						scene.add(markers[i])
+						videoDomElement.play()
+						videoDomElement.currentTime = startTime
 					}
+					else if( videoDomElement.currentTime >= endTime )
+					{
+						videoDomElement.pause()
+						wantedOnScreen = false
+					}
+				}
 
-					markers[i].position.lerp(intendedMarkerPositions[i],.1)
-					let t = markers[i].position.distanceTo(intendedMarkerPositions[i])
-							/ video.position.distanceTo(intendedMarkerPositions[i])
-					markers[i].scale.lerpVectors(intendedMarkerScale,video.scale,t)
-				}
-				else
+				for(let i = 0; i < markerTimes.length; i++)
 				{
-					scene.remove(markers[i])
+					if( videoDomElement.currentTime > markerTimes[i] )
+					{
+						if(markers[i].parent === null)
+						{
+							markers[i].material.map.image = videoDomElement
+							markers[i].material.map.needsUpdate = true
+							markers[i].scale.copy(video.scale)
+							markers[i].position.copy(video.position)
+							scene.add(markers[i])
+						}
+
+						markers[i].position.lerp(intendedMarkerPositions[i],.1)
+						let t = markers[i].position.distanceTo(intendedMarkerPositions[i])
+								/ video.position.distanceTo(intendedMarkerPositions[i])
+						markers[i].scale.lerpVectors(intendedMarkerScale,video.scale,t)
+					}
+					else
+					{
+						scene.remove(markers[i])
+					}
 				}
-			}
-		})
+			})
+		}
 	}
 }
 
