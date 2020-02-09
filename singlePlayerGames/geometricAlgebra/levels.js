@@ -7,6 +7,16 @@ function Levels()
 {
 	let arr = [
 		{
+			singularGoal:
+				new Float32Array([0.,1.,1.,0.,0.,0.,0.,0.]),
+			options: [
+				new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.]),
+				new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),
+				new Float32Array([1.,0.,0.,0.,0.,0.,0.,0.]),
+			],
+			operators: [geometricSum,geometricProduct]
+		},
+		{
 			inputs:[ //"0"
 				new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),
 				new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.]),
@@ -21,16 +31,6 @@ function Levels()
 				[geometricProduct,2,3],
 			],
 			operators: [geometricSum,geometricProduct,geometricProduct]
-		},
-		{
-			singularGoal:
-				new Float32Array([0.,1.,1.,0.,0.,0.,0.,0.]),
-			options: [
-				new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.]),
-				new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),
-				new Float32Array([1.,0.,0.,0.,0.,0.,0.,0.]),
-			],
-			operators: [geometricSum,geometricProduct]
 		},
 		{
 			singularGoal: 

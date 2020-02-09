@@ -54,8 +54,8 @@ async function initOperatorAppearances()
 
 	OperatorAppearance = function(func)
 	{
-		let operatorSymbol = new THREE.Mesh( unchangingUnitSquareGeometry, func===geometricSum ? materials.geometricSum:materials.geometricProduct )
-
+		let operatorSymbol = new THREE.Mesh( unchangingUnitSquareGeometry, 
+			func===geometricSum ? materials.geometricSum.clone():materials.geometricProduct.clone() )
 		operatorSymbol.function = func
 
 		return operatorSymbol

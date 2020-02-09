@@ -1,4 +1,4 @@
-operatorScope = [];
+operatorScope = []
 multivectorScope = []
 
 function removeFromScope(entity)
@@ -33,21 +33,13 @@ function setScope(elementses, operators)
 
 	if(operators === undefined)
 	{
-		operators = [ 
+		operators = [
 			geometricSum,
 			geometricProduct 
 		]
 	}
 	for(let i = 0; i < operators.length; i++)
 		ScopeOperator(operators[i], operators.length)
-
-	// let dummy = ScopeMultivector(new Float32Array([9.,0.,0.,0.,0.,0.,0.,0.]),true)
-	// dummy.thingYouClick.onNotClicking = function()
-	// {
-	// 	//drag left and right, maybe even go up and down
-	// 	//drag left and right, the whole scope gets updated, video progresses, goal updates
-	// 	//maybe even rotate an object
-	// }
 }
 
 function getMultivectorScopePosition(desiredindex,dest)
@@ -274,7 +266,7 @@ function initScope()
 		else if(multivectorScope.indexOf(selection) !== -1)
 			selection.thingYouClick.onClick()
 
-		if( closest !== null )
+		if( closest !== null && scopeIsLimited )
 		{
 			closest.add(keyboardSelectionIndicator)
 			multivectorScopeSelected = multivectorScope.indexOf(closest) !== -1

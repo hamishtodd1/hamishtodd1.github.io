@@ -1,4 +1,4 @@
-function initOperationInterface()
+function initOperationInterface(restartButton)
 {
 	var activeOperator = OperatorAppearance()
 
@@ -148,5 +148,35 @@ function initOperationInterface()
 
 		let newMultivector = ScopeMultivector(animationMultivector.elements)
 		animationStage = -1.;
+	}
+
+	//restart button
+	//"undo" might be better
+	{
+		//might be nice to make it flash when the level isn't completable
+		let halfMenuTitleWidth = restartButton.scale.x / 2.
+		let halfMenuTitleHeight = restartButton.scale.y / 2.
+		let padding = .25
+		updateFunctions.push(function()
+		{
+			restartButton.position.x =  camera.rightAtZZero - (halfMenuTitleWidth  + padding)
+			restartButton.position.y = -camera.topAtZZero   + (halfMenuTitleHeight + padding) * 2.
+
+			let levelUncompletable = false
+			if(levelUncompletable)
+				restartButton.material.color.setRGB(Math.sin(frameCount*.01),1.,1.)
+			else
+				restartButton.material.color.setRGB(1.,1.,1.)
+		})
+
+		clickables.push(restartButton)
+		restartButton.onClick = function()
+		{
+			if(animationStage === -1.) //temporary, better would be to completeAnimation
+			{
+				scene.remove(operands[0],operands[1],activeOperator)
+				levelSetUp()
+			}
+		}
 	}
 }

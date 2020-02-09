@@ -30,24 +30,26 @@ function generateRandomMultivectorElementsFromScope(scope, seed)
 		seed = Math.random()
 	let randomSequence = RandomSequenceSeeded(seed)
 
+	let record = Array(numOperations)
+	for(let i = 0; i < numOperations; i++)
+		record[i] = randomSequence.getValue() < .5 ? geometricProduct : geometricSum
+
 	let numOperations = 5;
 	let generatorScope = []
 	for(let i = 0; i < scope.length; i++)
 		generatorScope.push(scope[i].elements)
-	for(let operation = 0; operation < numOperations; operation++)
+	for(let i = 0; i < numOperations; i++)
 	{
 		let operandA = generatorScope[ Math.floor( randomSequence.getValue() * generatorScope.length ) ];
 		let operandB = generatorScope[ Math.floor( randomSequence.getValue() * generatorScope.length ) ];
 		// let operandA = generatorScope[ generatorScope.length - (randomSequence.getValue() < .5 ? 1:2) ];
 		// let operandB = generatorScope[ generatorScope.length - (randomSequence.getValue() < .5 ? 1:2) ];
 
-		let functionToUse = randomSequence.getValue() < .5 ? geometricProduct : geometricSum;
-
-		let result = functionToUse(operandA,operandB)
+		let result = record[i](operandA,operandB)
 
 		// if(searchArray(generatorScope,result))
 		// {
-		// 	operation--
+		// 	i--
 		// }
 		// else
 		{
@@ -56,6 +58,9 @@ function generateRandomMultivectorElementsFromScope(scope, seed)
 	}
 
 	delete RandomSequenceSeeded
+	let ret = generatorScope[generatorScope.length-1]
+	for(let i = 0; i < generatorScope.length-1; i++)
+		delete generatorScope[i]
 
 	return generatorScope[generatorScope.length-1]
 }

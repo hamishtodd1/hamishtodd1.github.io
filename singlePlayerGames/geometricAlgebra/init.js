@@ -15,12 +15,18 @@
 			Bivector-vector multiplication
 			Bivector multiplication???
 
+	TODO for GDC
+		IT HAS TO BE VERY FUCKING FUN
+		A fast to access webpage
+		With something that creates surprises and communicates its purpose in 45s
+		And can show something quaternion-related in short order
+
 	TODO sandbox / tool for thought
 	AR https://jeromeetienne.github.io/AR.js/three.js/examples/basic.html
 	Helping make shaders
 		Parametric geometry - can feed in either line or grid
 		Ideally you paste and it tells you what it thinks you pasted
-		Spit out glsl?
+		Spit out glsl and vertex array
 		Heh, have it be possible for the input and output to be arranged in a rectangle with x and y smoothly varying, i.e. a framebuffer
 	A nice thing to do at a live coding event if nothing else
 		Folks can see what you're doing
@@ -28,11 +34,6 @@
 		Music
 			https://www.youtube.com/watch?v=R_Rfkhg7s_M 
 			https://www.youtube.com/watch?v=EtEOl-xJTg8
-
-	TODO for GDC
-		A fast to access webpage
-		With something that creates surprises and communicates its purpose in 45s
-		And can show something quaternion-related in short order
 
 	TODO for academic course (not much effort)
 		record a bunch of videos in zeimlight style
@@ -65,10 +66,17 @@ async function init()
 	// initWheelScene()
 	// return
 
-	initOperationInterface()
+	{
+		let restartButtonObj = makeTextSign("Restart")
+		var restartButton = restartButtonObj.children[0]
+		restartButton.scale.copy(restartButtonObj.scale)
+		restartButton.scale.multiplyScalar(.4)
+	}
+
+	initOperationInterface(restartButton)
 
 	let modeChange = {}
-	initPlayModes(modeChange)
+	initGoals(modeChange,restartButton)
 	modeChange.campaign()
 
 	await initMenu(modeChange)

@@ -105,17 +105,17 @@ async function initMenu(modeChange)
 	// 	}
 	// }
 
-	{
-		// let campaignObject = makeTextSign("Campaign Mode")
-		// let campaign = campaignObject.children[0]
-		// campaign.scale.copy(campaignObject.scale)
-		// menuEntries.push(campaign)
-		// campaign.onClick = function()
-		// {
-		// 	modeChange.campaign()
-		// 	menuMode = false
-		// }
-	}
+	// {
+	// 	let campaignObject = makeTextSign("Campaign")
+	// 	let campaign = campaignObject.children[0]
+	// 	campaign.scale.copy(campaignObject.scale)
+	// 	menuEntries.push(campaign)
+	// 	campaign.onClick = function()
+	// 	{
+	// 		modeChange.campaign()
+	// 		menuMode = false
+	// 	}
+	// }
 
 	{
 		let fullscreenButton = makeTextSign("Toggle Fullscreen")

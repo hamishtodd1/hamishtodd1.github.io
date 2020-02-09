@@ -71,6 +71,8 @@ function initMouse()
 
 			if( intersections.length !== 0 )
 			{
+				if(!checkIfObjectIsInScene(intersections[0].object))
+					console.error("yeah, this is possible")
 				intersections[0].object.onClick(intersections[0]);
 				lastClickedObject = intersections[0].object
 			}
