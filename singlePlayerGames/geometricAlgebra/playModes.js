@@ -131,13 +131,6 @@ function initPlayModes(modeChange)
 
 	//inputOutputGoal
 	{
-		let numPairs = 2;
-
-		let background = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({color:0xFFFFFF}))
-		background.scale.y = numPairs * 1.3
-		background.scale.x = 1.3
-		background.position.z = -.001
-
 		let scopeInputMultivector = ScopeMultivector();
 		removeFromScope(scopeInputMultivector)
 
@@ -166,7 +159,7 @@ function initPlayModes(modeChange)
 
 		var inputSelectionIndicator = RectangleIndicator()
 		var outputSelectionIndicator = RectangleIndicator()
-		function selectInput(multivec)
+		var selectInput = function(multivec)
 		{
 			inputSelectionIndicator.position.copy(multivec.position)
 			outputSelectionIndicator.position.copy(multivec.position)
@@ -178,62 +171,64 @@ function initPlayModes(modeChange)
 
 			console.error("Need to update ALL the scope")
 		}
-
-		let inputGroup = new THREE.Group()
-		let inputs = Array(numPairs)
+		
+		var inputGroup = new THREE.Group()
+		// let inputs = Array(numPairs)
+		inputGroup.background = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({color:0xFFFFFF}))
+		inputGroup.background.scale.x = 1.3
+		inputGroup.background.position.z = -.001
+		inputGroup.add(inputGroup.background)
+		inputGroup.add(inputSelectionIndicator)
 		{
-			inputGroup.add(background)
+			// for(let i = 0; i < inputs.length; i++)
+			// {
+			// 	let elements = new Float32Array(8)
+			// 	for(let j = 0; j < 5; j++) //ONLY USING THOSE THAT WORK
+			// 		elements[j] = (Math.random()-.5)*2.
+			// 	elements[0] = Math.floor(Math.random()*20) - 10.
+			// 	elements[3] = 0.
 
-			inputGroup.add(inputSelectionIndicator)
+			// 	inputs[i] = MultivectorAppearance(selectInput,elements)
+			// 	delete elements
+			// 	inputs[i].position.y = 1.2 * (i-(numPairs-1)/2.);
+			// 	inputGroup.add(inputs[i])
+			// }
 
-			for(let i = 0; i < inputs.length; i++)
-			{
-				let elements = new Float32Array(8)
-				for(let j = 0; j < 5; j++) //ONLY USING THOSE THAT WORK
-					elements[j] = (Math.random()-.5)*2.
-				elements[0] = Math.floor(Math.random()*20) - 10.
-				elements[3] = 0.
-
-				inputs[i] = MultivectorAppearance(selectInput,elements)
-				delete elements
-				inputs[i].position.y = 1.2 * (i-(numPairs-1)/2.);
-				inputGroup.add(inputs[i])
-			}
-
-			selectInput(inputs[0])
+			// selectInput(inputs[0])
 		}
 
-		let outputGroup = new THREE.Group()
-		let outputs = Array(inputs.length)
+		var outputGroup = new THREE.Group()
+		outputGroup.background = inputGroup.background.clone()
+		outputGroup.add(outputGroup.background)
+		outputGroup.add(outputSelectionIndicator)
 		{
-			outputGroup.add(background.clone())
-			outputGroup.add(outputSelectionIndicator)
+			// let outputs = Array(inputs.length)
 
-			let seedForRandomActivity = Math.random()
-			let scopeWithOneExtra = Array(multivectorScope.length+1)
-			for(let i = 0; i < multivectorScope.length; i++)
-				scopeWithOneExtra[i] = multivectorScope[i]
-			for(let i = 0; i < outputs.length; i++)
-			{
-				scopeWithOneExtra[multivectorScope.length] = inputs[i]
-				//possible bug: you're getting both outputs the same sometimes
-				let elements = generateRandomMultivectorElementsFromScope(scopeWithOneExtra,seedForRandomActivity)
+			// let seedForRandomActivity = Math.random()
+			// let scopeWithOneExtra = Array(multivectorScope.length+1)
+			// for(let i = 0; i < multivectorScope.length; i++)
+			// 	scopeWithOneExtra[i] = multivectorScope[i]
+			// for(let i = 0; i < outputs.length; i++)
+			// {
+			// 	scopeWithOneExtra[multivectorScope.length] = inputs[i]
+			// 	//possible bug: you're getting both outputs the same sometimes
+			// 	let elements = generateRandomMultivectorElementsFromScope(scopeWithOneExtra,seedForRandomActivity)
 
-				outputs[i] = MultivectorAppearance(function(){},elements)
-				delete elements
-				outputs[i].position.y = inputs[i].position.y
-				outputGroup.add(outputs[i])
-			}
+			// 	outputs[i] = MultivectorAppearance(function(){},elements)
+			// 	delete elements
+			// 	outputs[i].position.y = 1.2 * (i-(numPairs-1)/2.);
+			// 	outputGroup.add(outputs[i])
+			// }
 		}
 
-		inputGroup.intendedPosition = new THREE.Vector3( -camera.rightAtZZero + background.scale.x/2. + 3., camera.topAtZZero - 1.6, 0.)
-		outputGroup.intendedPosition= new THREE.Vector3( camera.rightAtZZero - background.scale.x/2. - .1, camera.topAtZZero - 1.6, 0.)
+		inputGroup.intendedPosition = new THREE.Vector3(-camera.rightAtZZero + inputGroup.background.scale.x/2. + 3., camera.topAtZZero - 1.6, 0.)
+		outputGroup.intendedPosition= new THREE.Vector3( camera.rightAtZZero - inputGroup.background.scale.x/2. - .1, camera.topAtZZero - 1.6, 0.)
 		outputGroup.position.copy(outputGroup.intendedPosition)
 		inputGroup.position.copy(inputGroup.intendedPosition)
 		updateFunctions.push(function()
 		{
-			outputGroup.intendedPosition.x = camera.rightAtZZero - background.scale.x/2. - .1
-			inputGroup.intendedPosition.x = -camera.rightAtZZero + background.scale.x/2. + 3.
+			outputGroup.intendedPosition.x = camera.rightAtZZero - inputGroup.background.scale.x/2. - .1
+			inputGroup.intendedPosition.x = -camera.rightAtZZero + inputGroup.background.scale.x/2. + 3.
 			outputGroup.position.lerp(outputGroup.intendedPosition,.1)
 			inputGroup.position.lerp( inputGroup.intendedPosition,.1)
 		})
@@ -245,7 +240,7 @@ function initPlayModes(modeChange)
 	{
 		bindButton("r",function()
 		{
-			setLevel(levelIndex)
+			levelSetUp()
 		})
 
 		//might be nice to make it flash when the level isn't completable
@@ -260,7 +255,7 @@ function initPlayModes(modeChange)
 		clickables.push(restartButton)
 		restartButton.onClick = function()
 		{
-			setLevel(levelIndex)
+			levelSetUp()
 		}
 
 		scopeIsLimited = true
@@ -275,8 +270,12 @@ function initPlayModes(modeChange)
 			restartButton.position.y = -camera.topAtZZero   + (halfMenuTitleHeight + padding) * 2.
 		})
 	}
-	function setLevel(levelIndex)
+	function levelSetUp()
 	{
+		//HERE
+		//and what if you're changing from the previous one?
+		//this is where you bring in the thing about "if goalbox is in scene perform this kind of victory check"
+
 		if(levels[levelIndex].singularGoal !== undefined)
 		{
 			makeSureSingularGoalIsSetUp()
@@ -284,6 +283,19 @@ function initPlayModes(modeChange)
 			setScope(levels[levelIndex].options,levels[levelIndex].operators)
 			copyMultivector(levels[levelIndex].singularGoal, singularGoalMultivector.elements)
 			singularGoalMultivector.updateAppearance()
+		}
+		else if(levels[levelIndex].videoDetails !== undefined)
+		{
+			makeSureInputOutputGoalIsSetUp()
+
+			setVideo(
+				levels[levelIndex].videoDetails.filename,
+				levels[levelIndex].videoDetails.startTime,
+				levels[levelIndex].videoDetails.endTime,
+				levels[levelIndex].videoDetails.markerTimes,
+				levels[levelIndex].videoDetails.markerPositions)
+
+			setScope(levels[levelIndex].options,levels[levelIndex].operators)
 		}
 		else //inputOutput
 		{
@@ -308,6 +320,22 @@ function initPlayModes(modeChange)
 					delete tempScope[j]
 				tempScope.length = 0
 			}
+
+			for(let i = 0; i < levels[levelIndex].inputs.length; i++)
+			{
+				let y = 1.2 * (i-(levels[levelIndex].inputs.length-1)/2.)
+
+				let inputMv = MultivectorAppearance( selectInput,levels[levelIndex].inputs[i])
+				inputGroup.add( inputMv )
+				inputMv.position.y = y
+
+				let outputMv = MultivectorAppearance(function(){},outputs[i])
+				outputGroup.add( outputMv )
+				outputMv.position.y = y
+			}
+			inputGroup.background.scale.y  = inputGroup.background.scale.x * levels[levelIndex].inputs.length
+			outputGroup.background.scale.y = inputGroup.background.scale.y
+			selectInput(inputGroup.children[inputGroup.children.length-1])
 
 			setScope(levels[levelIndex].options,levels[levelIndex].operators)
 		}
@@ -339,9 +367,11 @@ function initPlayModes(modeChange)
 				return
 			}
 
-			setLevel(levelIndex)
+			levelSetUp()
 		}
 		reactionToVictory()
+
+		bindButton("l",reactionToVictory)
 
 		//for now restart is only for campaign mode. Only useful in random mode if/when you have 
 		scene.add(restartButton)

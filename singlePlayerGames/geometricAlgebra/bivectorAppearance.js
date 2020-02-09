@@ -89,8 +89,8 @@
 
 async function initBivectorAppearance()
 {
-	// initFluidBivectorAppearance()
-	// return
+	initFluidBivectorAppearance()
+	return
 
 	let interior = new THREE.Mesh(new THREE.Geometry(),new THREE.MeshBasicMaterial({color:0xFF0000, side:THREE.DoubleSide,transparent:true,opacity:.6}))
 	let exterior = new THREE.Mesh(new THREE.Geometry(),new THREE.MeshBasicMaterial({color:0x0000FF, side:THREE.DoubleSide,transparent:true,opacity:.6}))
@@ -227,7 +227,7 @@ async function initFluidBivectorAppearance()
 	let elements = new Float32Array(8)
 	elements[4] = 1.
 
-	let numBlobs = 30; //IF YOU WANT TO CHANGE THIS THEN CHANGE IT IN THE FRAGMENT SHADER TOOOO!!!!!
+	let numBlobs = 60; //IF YOU WANT TO CHANGE THIS THEN CHANGE IT IN THE FRAGMENT SHADER TOOOO!!!!!
 	//is it possible to extract a constant from a compiled shader?
 
 	let positions = Array(numBlobs);
@@ -237,9 +237,15 @@ async function initFluidBivectorAppearance()
 	{
 		velocities[i] = new THREE.Vector3()
 		positions[i] = new THREE.Vector3(
-			(Math.random()-.5) * 3.,
-			(Math.random()-.5) * 3.,
+			(Math.random()-.5) * 2.,
+			(Math.random()-.5) * 2.,
 			0.)
+	}
+
+	for(let i = 0; i < numBlobs; i++)
+	{
+		let index = Math.round(Math.random())
+		positions[i].setComponent(index,positions[i].getComponent(index) + 3.4)
 	}
 
 	let material = new THREE.ShaderMaterial({
@@ -304,6 +310,9 @@ async function initFluidBivectorAppearance()
 		// }
 
 		material.uniforms.bivector.value.fromArray(elements,4)
+
+		if(frameCount < 30)
+			return
 
 		let iterations = 1;
 		for(let iter = 0; iter < iterations; iter++)

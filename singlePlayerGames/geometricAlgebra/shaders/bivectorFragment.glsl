@@ -9,7 +9,7 @@
 varying vec3 pixelPosition;
 
 //need to update this appropriately!!
-#define numBlobs 30
+#define numBlobs 60
 uniform vec3 positions[numBlobs];
 
 uniform vec3 bivector;

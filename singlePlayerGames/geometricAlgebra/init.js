@@ -1,12 +1,12 @@
 /*
 	TODO for Cambridge
-		Real levels
-		Would be nice to have one time thing and one differential geometry thing
-		And just some videos plus extracting pictures
-		Would be nice to at least have parallelogram liquid sim to show your ambition
+		Real intro levels
+		One time thing
+		One differential geometry thing, like corkscrew
+		One video with extracting pictures
 
 	TODO for slack
-		Every aspect of the multiplication and addition needs to be visualized. Well, for 2D!
+		More aspects of 2D multiplication and addition needs to be visualized
 			Coplanar bivector addition - easy and fun
 			Vector addition - just do something
 			Vector multiplication - need both scalar and bivector part
@@ -65,49 +65,11 @@ async function init()
 	// initWheelScene()
 	// return
 
-	// if(0)
-	{
-		initVideo()
-
-		let v = [
-			{
-				filename: "hoberman",
-				startTime: .1,
-				endTime: 7.7,
-				markerTimes: [3.4,5.3,7.2],
-			},
-			{
-				filename: "dzhanibekov",
-				startTime: 0.,
-				endTime: Infinity,
-				markerTimes: [3.4,5.3,7.2],
-			},
-			{
-				filename: "segerman",
-				startTime: 0.,
-				endTime: Infinity,
-				markerTimes: [3.4,5.3,7.2],
-			},
-		]
-		for(let j = 0; j < v.length; j++)
-		{
-			v[j].markerPositions = Array(v[j].markerTimes.length)
-			for(let i = 0; i < v[j].markerTimes.length; i++)
-			{
-				v[j].markerPositions[i] = new THREE.Vector3(
-					camera.rightAtZZero * .5,
-					-(i-(v[j].markerTimes.length-1)/2.)*2.,
-					-.01 )
-			}
-		}
-		await doVideoThing(v[0].filename,v[0].startTime,v[0].endTime,v[0].markerTimes,v[0].markerPositions)
-	}
-
 	initOperationInterface()
 
 	let modeChange = {}
 	initPlayModes(modeChange)
-	// modeChange.campaign()
+	modeChange.campaign()
 
 	await initMenu(modeChange)
 }

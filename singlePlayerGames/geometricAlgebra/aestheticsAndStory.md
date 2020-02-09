@@ -39,7 +39,7 @@ Backgrounds - just need a surface
 		More modern
 	60s - Gell-Mann / Feynman / Dirac / NASA / JPL
 		Mainframe in the background, 60s seat, 70s clothing
-	Present day - CERN, ITER
+	Present day - CERN, ITER, a quantum computing lab (best)
 	Future - space station / control panel of a rocket
 	Far future / abstract platonic realm / inside an eternal cellular automaton - Quasar
 		Ray traced quadric surfaces everywhere

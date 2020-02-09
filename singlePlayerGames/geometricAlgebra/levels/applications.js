@@ -97,20 +97,9 @@
 	Is there some kind of ink you could mark stuff with that only appears in infared?
 */
 
+setVideo = function(){console.error("Video can only be played on chrome!")}
 function initVideo()
 {
-	let chrome = false
-	for (var i=0; i < navigator.plugins.length; i++)
-	{
-		if (navigator.plugins[i].name == 'Chrome PDF Viewer')
-			chrome = true
-	}
-	if(!chrome)
-	{
-		console.error("Video can only be played on chrome!")
-		return
-	}
-
 	let video = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial())
 	video.material.map = new THREE.VideoTexture()
 	let wantedOnScreen = false
@@ -130,22 +119,26 @@ function initVideo()
 	videoDomElement.muted = true
 	// videoDomElement.playbackRate = .5
 
-	setUpVideo = async function( filename, startTime, endTime, markerTimes, intendedMarkerPositions )
+	setVideo = async function( filename, startTime, endTime, markerTimes, intendedMarkerPositions )
 	{
 		console.assert( markers.length >= markerTimes.length )
 
+		if( startTime <= 0. ) //because first frame
+			startTime = .04
+
 		function trigger()
 		{
-			wantedOnScreen = true
-			videoDomElement.currentTime = startTime
+			if( !wantedOnScreen )
+			{
+				wantedOnScreen = true
+				videoDomElement.currentTime = startTime
+				videoDomElement.paused = true
+			}
 		}
 		video.onClick = trigger
 		trigger()
 
-		videoDomElement.paused = true
-
 		videoDomElement.src = "data/videos/" + filename + ".mp4"
-		videoDomElement.currentTime = startTime
 		videoDomElement.load()
 		videoDomElement.onloadeddata = function()
 		{
