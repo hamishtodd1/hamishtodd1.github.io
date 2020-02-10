@@ -34,10 +34,11 @@ Backgrounds - just need a surface
 	Ancient greece - Euclid / Plato / Archimedes
 	India / Iran - https://en.wikipedia.org/wiki/Mathematics_in_medieval_Islam
 	17th century - Newton / Descartes
-		Weirdly shaped flasks and weird candles abound. Real ancient looking alchemy shit
+		Weirdly shaped flasks, eldritch stuff and weird candles abound. Real ancient looking alchemy shit
 	19th - Grassman / Clifford / Hamilton / Maxwell / Faraday
-		More modern
-	60s - Gell-Mann / Feynman / Dirac / NASA / JPL
+		More modern, electrical stuff is around
+		Royal Institution
+	60s - Gell-Mann / Feynman / Dirac / NASA (Margaret Hamilton guidance computer) / JPL
 		Mainframe in the background, 60s seat, 70s clothing
 	Present day - CERN, ITER, a quantum computing lab (best)
 	Future - space station / control panel of a rocket

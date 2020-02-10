@@ -89,107 +89,9 @@ function initGoals(modeChange,restartButton)
 		}
 	}
 
-	//input and output goal
-	{
-		var scopeInputMultivector = ScopeMultivector();
-		removeFromScope(scopeInputMultivector)
-
-		var inputSelectionIndicator = RectangleIndicator()
-		var outputSelectionIndicator = RectangleIndicator()
-		var selectInput = function(multivec)
-		{
-			inputSelectionIndicator.position.copy(multivec.position)
-			outputSelectionIndicator.position.copy(multivec.position)
-
-			copyMultivector(multivec.elements, scopeInputMultivector.elements)
-			scopeInputMultivector.updateAppearance()
-
-			//probably have it shake a little. Well I mean this is what the pipes were meant to be
-
-			console.error("Need to update ALL the scope")
-			// for(let i = 0; i < multivectorScope.length; i++)
-			// {
-			// 	let mv = multivectorScope[i]
-			// }
-			// //as a result of choosing multivectors and scopes, you have a certain scope. Each . As a result of that
-			// //so for each thing in the scope you keep a record of how it was made
-
-			// record = [
-			// 	geometricProduct, new Float32Array([0.,0.,0.,0.,0.,0.,0.,0.]),
-			// 	geometricSum, scopeInputMultivector.elements,
-
-			// ]
-
-			//it shouldn't care about whether scope is limited
-		}
-		
-		var inputGroup = new THREE.Group()
-		// let inputs = Array(numPairs)
-		inputGroup.background = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({color:0xFFFFFF}))
-		inputGroup.background.scale.x = 1.3
-		inputGroup.background.position.z = -.001
-		inputGroup.add(inputGroup.background)
-		inputGroup.add(inputSelectionIndicator)
-		{
-			// for(let i = 0; i < inputs.length; i++)
-			// {
-			// 	let elements = new Float32Array(8)
-			// 	for(let j = 0; j < 5; j++) //ONLY USING THOSE THAT WORK
-			// 		elements[j] = (Math.random()-.5)*2.
-			// 	elements[0] = Math.floor(Math.random()*20) - 10.
-			// 	elements[3] = 0.
-
-			// 	inputs[i] = MultivectorAppearance(selectInput,elements)
-			// 	delete elements
-			// 	inputs[i].position.y = 1.2 * (i-(numPairs-1)/2.);
-			// 	inputGroup.add(inputs[i])
-			// }
-
-			// selectInput(inputs[0])
-		}
-
-		var outputGroup = new THREE.Group()
-		outputGroup.background = inputGroup.background.clone()
-		outputGroup.add(outputGroup.background)
-		outputGroup.add(outputSelectionIndicator)
-		{
-			// let outputs = Array(inputs.length)
-
-			// let seedForRandomActivity = Math.random()
-			// let scopeWithOneExtra = Array(multivectorScope.length+1)
-			// for(let i = 0; i < multivectorScope.length; i++)
-			// 	scopeWithOneExtra[i] = multivectorScope[i]
-			// for(let i = 0; i < outputs.length; i++)
-			// {
-			// 	scopeWithOneExtra[multivectorScope.length] = inputs[i]
-			// 	//possible bug: you're getting both outputs the same sometimes
-			// 	let elements = generateRandomMultivectorElementsFromScope(scopeWithOneExtra,seedForRandomActivity)
-
-			// 	outputs[i] = MultivectorAppearance(function(){},elements)
-			// 	delete elements
-			// 	outputs[i].position.y = 1.2 * (i-(numPairs-1)/2.);
-			// 	outputGroup.add(outputs[i])
-			// }
-		}
-
-		inputGroup.intendedPosition = new THREE.Vector3(0., camera.topAtZZero - 1.6, 0.)
-		outputGroup.intendedPosition= new THREE.Vector3(0., camera.topAtZZero - 1.6, 0.)
-		outputGroup.position.copy(outputGroup.intendedPosition)
-		inputGroup.position.copy(inputGroup.intendedPosition)
-		let positionGetter = new THREE.Vector3()
-		updateFunctions.push(function()
-		{
-			inputGroup.intendedPosition.x = -camera.rightAtZZero + inputGroup.background.scale.x/2.
-			// outputGroup.intendedPosition.x = camera.rightAtZZero - inputGroup.background.scale.x/2. - .1
-			outputGroup.intendedPosition.x = -inputGroup.intendedPosition.x
-
-			getMultivectorScopePosition( multivectorScope.length-1, positionGetter )
-			inputGroup.intendedPosition.x += positionGetter.x + .9 + camera.rightAtZZero
-
-			outputGroup.position.lerp(outputGroup.intendedPosition,.1)
-			inputGroup.position.lerp( inputGroup.intendedPosition,.1)
-		})
-	}
+	let inputGroup = new THREE.Group()
+	let outputGroup = new THREE.Group()
+	initInputOutputApparatus(inputGroup,outputGroup)
 
 	updateFunctions.push( function()
 	{
@@ -227,44 +129,52 @@ function initGoals(modeChange,restartButton)
 			scene.add(goalBox)
 			copyMultivector(l.singularGoal, singularGoalMultivector.elements)
 			singularGoalMultivector.updateAppearance()
+
+			scopeIsLimited = true
 		}
 		else
 			scene.remove(goalBox)
 
-		if(l.inputs)
+		if( l.singularGoal === undefined) //it's either a video or non-video level
 		{
 			scene.add(inputGroup,outputGroup)
 
-			for(let i = 0; i < l.inputs.length; i++)
+			let inputs = null
+			if(l.inputs !== undefined)
+				inputs = l.inputs
+			else
 			{
-				let inputMv = MultivectorAppearance( selectInput,l.inputs[i])
-				inputGroup.add( inputMv )
-				inputMv.position.y = 1.2 * (i-(l.inputs.length-1)/2.)
+				inputs = Array(l.videoDetails.markerTimes.length)
+				for(let i = 0; i < l.videoDetails.markerTimes.length; i++)
+				{
+					let scalar = l.videoDetails.markerTimes[i] - l.videoDetails.startTime
+					inputs[i] = new Float32Array([scalar,0.,0.,0.,0.,0.,0.,0.])
+				}
 			}
 
-			let swapMultivector = multivectorScope[0]
-			multivectorScope[0] = scopeInputMultivector
-			if(swapMultivector)
-				multivectorScope.push( swapMultivector )
-			scene.add(scopeInputMultivector)
-			clickables.push(scopeInputMultivector.thingYouClick)
+			clearInputAndOutput()
+			for(let i = 0; i < inputs.length; i++)
+				inputGroup.addInput(inputs[i])
 
-			inputGroup.background.scale.y  = inputGroup.background.scale.x * l.inputs.length
-			outputGroup.background.scale.y = inputGroup.background.scale.y
-			selectInput(inputGroup.children[inputGroup.children.length-1])
+			addInputScopeMultivectorToScope()
 
-			for(let i = 0; i < multivectorScope.length; i++)
-				getMultivectorScopePosition(i,multivectorScope[i].position)
+			scopeIsLimited = false
 		}
 
 		if(l.videoDetails !== undefined)
 		{
+			let outputPositions = Array(l.videoDetails.markerTimes.length)
+			outputGroup.background.scale.x *= 1.7
+			
+			for(let i = 0; i < l.videoDetails.markerTimes.length; i++)
+				outputPositions[i] = getInput(i).position.clone().add(outputGroup.position)
+
 			setVideo(
 				l.videoDetails.filename,
 				l.videoDetails.startTime,
 				l.videoDetails.endTime,
 				l.videoDetails.markerTimes,
-				l.videoDetails.markerPositions)
+				outputPositions)
 		}
 		else if(l.steps !== undefined)
 		{
@@ -330,18 +240,22 @@ function initGoals(modeChange,restartButton)
 		levelIndex = -1;
 		reactToVictory()
 
-		scopeIsLimited = true
-
 		//for now restart is only for campaign mode. Only useful in random mode if/when you have 
 		scene.add(restartButton)
 	}
 	modeChange.sandbox = function()
 	{
 		scene.remove(goalBox)
-		scene.remove(inputGroup,outputGroup)
 		scene.remove(restartButton)
+
+		setScope()
+
+		scene.add(inputGroup,outputGroup)
+		clearInputAndOutput()
+		for( let i = 0; i < 3; i++)
+			inputGroup.addInput(new Float32Array([i*.8+.1,0.,0.,0.,0.,0.,0.,0.]))
+		addInputScopeMultivectorToScope()
 		
 		scopeIsLimited = false
-		setScope()
 	}
 }

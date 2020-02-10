@@ -16,6 +16,7 @@
 		ideally it only takes scalars
 		Would be nice if that could emerge
 		Integral?
+		e^ is very good because you don't even have to give two inputs
 
 	"i as the circle constant"
 		2*pi*i is the real thing https://blog.wolfram.com/2015/06/28/2-pi-or-not-2-pi/

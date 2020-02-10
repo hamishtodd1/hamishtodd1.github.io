@@ -1,4 +1,6 @@
 /*
+	bivector is swirling in the orientation direction, that's what ends up making it circular
+
 	So long as you start the points off in a parallelogram shape, possibly it is ok for them to twitch a little before moving
 
 	Could use GL_POINTS to avoid overdraw

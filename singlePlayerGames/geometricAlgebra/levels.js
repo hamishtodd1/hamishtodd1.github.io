@@ -14,7 +14,44 @@ function Levels()
 				new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),
 				new Float32Array([1.,0.,0.,0.,0.,0.,0.,0.]),
 			],
+			operators: [geometricSum]
+		},
+		{
+			singularGoal: 
+				new Float32Array([5.,0.,0.,0.,0.,0.,0.,0.]),
+			options: [
+				new Float32Array([2.,0.,0.,0.,0.,0.,0.,0.]),
+				new Float32Array([3.,0.,0.,0.,0.,0.,0.,0.]),
+			],
+			operators: [geometricSum]
+		},
+		{
+			singularGoal: 
+				new Float32Array([6.,0.,0.,0.,0.,0.,0.,0.]),
+			options: [
+				new Float32Array([2.,0.,0.,0.,0.,0.,0.,0.]),
+				new Float32Array([3.,0.,0.,0.,0.,0.,0.,0.]),
+			],
 			operators: [geometricSum,geometricProduct]
+		},
+		{
+			singularGoal:
+				new Float32Array([2.,0.,2.,0.,0.,0.,0.,0.]),
+			options: [
+				new Float32Array([1.,0.,0.,0.,0.,0.,0.,0.]),
+				new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.]),
+				new Float32Array([2.,0.,0.,0.,0.,0.,0.,0.]),
+			],
+			operators: [geometricSum,geometricProduct]
+		},
+		{
+			singularGoal:
+				new Float32Array([0.,0.,0.,0.,1.,0.,0.,0.]),
+			options: [
+				new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),
+				new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.]),
+			],
+			operators: [geometricProduct]
 		},
 		{
 			inputs:[ //"0"
@@ -32,42 +69,6 @@ function Levels()
 			],
 			operators: [geometricSum,geometricProduct,geometricProduct]
 		},
-		{
-			singularGoal: 
-				new Float32Array([2.,0.,0.,0.,0.,0.,0.,0.]),
-			options: [
-				new Float32Array([1.,0.,0.,0.,0.,0.,0.,0.]),
-				new Float32Array([1.,0.,0.,0.,0.,0.,0.,0.]),
-			],
-			operators: [geometricSum,geometricSum,geometricProduct]
-		},
-		{
-			singularGoal:
-				new Float32Array([6.,0.,0.,0.,0.,0.,0.,0.]),
-			options: [
-				new Float32Array([3.,0.,0.,0.,0.,0.,0.,0.]),
-				new Float32Array([2.,0.,0.,0.,0.,0.,0.,0.]),
-			],
-			operators: [geometricSum,geometricProduct]
-		},
-		{
-			singularGoal:
-				new Float32Array([0.,2.,0.,0.,0.,0.,0.,0.]),
-			options: [
-				new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),
-				new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),
-			],
-			operators: [geometricSum,geometricProduct]
-		},
-		{
-			singularGoal:
-				new Float32Array([0.,0.,0.,0.,1.,0.,0.,0.]),
-			options: [
-				new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.]),
-				new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),
-			],
-			operators: [geometricSum,geometricProduct]
-		}
 	]
 	/*
 		,
@@ -101,19 +102,27 @@ function Levels()
 			filename: "hoberman",
 			startTime: .1,
 			endTime: 7.7,
-			markerTimes: [3.4,7.2],
+			markerTimes: [4.5,7.2],
 		},
-		inputs:[ //"0"
-			new Float32Array([1.,0.,0.,0.,0.,0.,0.,0.]),
-			new Float32Array([3.,0.,0.,0.,0.,0.,0.,0.]),
-		],
 		options: [
 			new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),
 			new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.]),
 		],
-		operators: [geometricSum,geometricProduct,geometricProduct]
+		operators: [geometricSum,geometricProduct]
+	},
+	{
+		videoDetails: {
+			filename: "dzhanibekov",
+			startTime: 0.,
+			endTime: 8.,
+			markerTimes: [4.,5.5,7.],
+		},
+		options: [
+			new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),
+			new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.]),
+		],
+		operators: [geometricSum,geometricProduct]
 	}]
-	arr[1] = videoLevels[0]
 	/*
 		{
 			filename: "dzhanibekov",
@@ -127,25 +136,9 @@ function Levels()
 			endTime: Infinity,
 			markerTimes: [3.4,7.2],
 		},
-		{
-			filename: "hoberman",
-			startTime: .1,
-			endTime: 7.7,
-			markerTimes: [3.4,7.2],
-		},
 	*/
-	for(let j = 0; j < videoLevels.length; j++)
-	{
-		let d = videoLevels[j].videoDetails
-		d.markerPositions = Array(d.markerTimes.length)
-		for(let i = 0; i < d.markerTimes.length; i++)
-		{
-			d.markerPositions[i] = new THREE.Vector3(
-				camera.rightAtZZero * .5,
-				-(i-(d.markerTimes.length-1)/2.)*2.,
-				-.01 )
-		}
-	}
 	
+	arr.push( videoLevels[0] )
+	// arr.push( videoLevels[1] )
 	return arr
 }

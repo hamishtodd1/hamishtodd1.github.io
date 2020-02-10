@@ -1,9 +1,18 @@
 /*
 	TODO for Cambridge
-		Real intro levels
-		One time thing
-		One differential geometry thing, like corkscrew
-		One video with extracting pictures
+		Input output thing
+			In sandbox
+			Start with numbers
+			ideally differential geometry, like corkscrew
+
+		Scope updating would be nice
+
+		Building your own functions is important, it's how you deduce the rest of geometry
+
+		The clown
+		Click and drag on the inputs would be nice
+
+		then use maryam mirzakhani vid and Human Resource Machine to illustrate
 
 	TODO for slack
 		More aspects of 2D multiplication and addition needs to be visualized
@@ -17,8 +26,10 @@
 
 	TODO for GDC
 		IT HAS TO BE VERY FUCKING FUN
-		A fast to access webpage
-		With something that creates surprises and communicates its purpose in 45s
+			Sound effects / juice
+			level design
+		Webpage loads faaaaaast
+		Communicates its fun, creates nice surprises, in 45s
 		And can show something quaternion-related in short order
 
 	TODO sandbox / tool for thought
@@ -40,6 +51,9 @@
 		Link it to the ordinary way of visualizing things, brackets and numerals
 
 	Long term
+		You should play all those games like opus magnum
+			Stream them
+			Can you tolerate ending up like that? cluttered UI, confusing to start with, a zillion words and icons?
 		Oculus quest / hololens thing where you record a video, and it automatically takes the frames
 		They should be able to rearrange multivectorScope, and delete bits of it
 		Have a "superimpose everything so it's in the same coord system" button
@@ -77,7 +91,7 @@ async function init()
 
 	let modeChange = {}
 	initGoals(modeChange,restartButton)
-	modeChange.sandbox()
+	modeChange.campaign()
 
 	await initMenu(modeChange)
 }
