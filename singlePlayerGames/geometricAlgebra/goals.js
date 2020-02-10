@@ -179,8 +179,9 @@ function initGoals(modeChange,restartButton)
 		let positionGetter = new THREE.Vector3()
 		updateFunctions.push(function()
 		{
-			outputGroup.intendedPosition.x = camera.rightAtZZero - inputGroup.background.scale.x/2. - .1
 			inputGroup.intendedPosition.x = -camera.rightAtZZero + inputGroup.background.scale.x/2.
+			// outputGroup.intendedPosition.x = camera.rightAtZZero - inputGroup.background.scale.x/2. - .1
+			outputGroup.intendedPosition.x = -inputGroup.intendedPosition.x
 
 			getMultivectorScopePosition( multivectorScope.length-1, positionGetter )
 			inputGroup.intendedPosition.x += positionGetter.x + .9 + camera.rightAtZZero
@@ -247,6 +248,13 @@ function initGoals(modeChange,restartButton)
 				multivectorScope.push( swapMultivector )
 			scene.add(scopeInputMultivector)
 			clickables.push(scopeInputMultivector.thingYouClick)
+
+			inputGroup.background.scale.y  = inputGroup.background.scale.x * l.inputs.length
+			outputGroup.background.scale.y = inputGroup.background.scale.y
+			selectInput(inputGroup.children[inputGroup.children.length-1])
+
+			for(let i = 0; i < multivectorScope.length; i++)
+				getMultivectorScopePosition(i,multivectorScope[i].position)
 		}
 
 		if(l.videoDetails !== undefined)
@@ -286,12 +294,6 @@ function initGoals(modeChange,restartButton)
 				outputGroup.add( outputMv )
 				outputMv.position.y = 1.2 * (i-(l.inputs.length-1)/2.)
 			}
-			inputGroup.background.scale.y  = inputGroup.background.scale.x * l.inputs.length
-			outputGroup.background.scale.y = inputGroup.background.scale.y
-			selectInput(inputGroup.children[inputGroup.children.length-1])
-
-			for(let i = 0; i < multivectorScope.length; i++)
-				getMultivectorScopePosition(i,multivectorScope[i].position)
 		}
 		else
 		{

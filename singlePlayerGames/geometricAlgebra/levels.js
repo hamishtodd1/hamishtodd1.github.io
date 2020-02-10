@@ -91,7 +91,7 @@ function Levels()
 			break
 		}
 	}
-	// if(!browserIsChrome)
+	if(!browserIsChrome)
 		return arr
 
 	initVideo()
@@ -113,7 +113,7 @@ function Levels()
 		],
 		operators: [geometricSum,geometricProduct,geometricProduct]
 	}]
-	arr[0] = videoLevels[0]
+	arr[1] = videoLevels[0]
 	/*
 		{
 			filename: "dzhanibekov",
