@@ -77,8 +77,8 @@ async function init()
 	initMultivectorAppearances()
 	await initOperatorAppearances()
 
-	// initWheelScene()
-	// return
+	initWheelScene()
+	return
 
 	{
 		let restartButtonObj = makeTextSign("Restart")
@@ -91,7 +91,7 @@ async function init()
 
 	let modeChange = {}
 	initGoals(modeChange,restartButton)
-	modeChange.campaign()
+	modeChange.sandbox()
 
 	await initMenu(modeChange)
 }

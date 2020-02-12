@@ -19,7 +19,7 @@ function initOperationInterface(restartButton)
 	let lastAssignedOperand = 0
 	ScopeMultivector = function(elements, sendToScopeImmediately)
 	{
-		let newScopeMultivector = MultivectorAppearance(function(multivecToCopy)
+		let onClick = function(multivecToCopy)
 		{
 			if(animationStage !== -1.)
 				completeAnimation()
@@ -35,7 +35,9 @@ function initOperationInterface(restartButton)
 				removeFromScope(multivecToCopy)
 
 			potentiallyTriggerAnimation()
-		},elements)
+		}
+
+		let newScopeMultivector = MultivectorAppearance(onClick,elements)
 		multivectorScope.push(newScopeMultivector)
 
 		if(sendToScopeImmediately)

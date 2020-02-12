@@ -247,15 +247,23 @@ function initGoals(modeChange,restartButton)
 	{
 		scene.remove(goalBox)
 		scene.remove(restartButton)
+		scene.remove(inputGroup,outputGroup)
+
+		scopeIsLimited = false
 
 		setScope()
 
-		scene.add(inputGroup,outputGroup)
-		clearInputAndOutput()
-		for( let i = 0; i < 3; i++)
-			inputGroup.addInput(new Float32Array([i*.8+.1,0.,0.,0.,0.,0.,0.,0.]))
-		addInputScopeMultivectorToScope()
-		
-		scopeIsLimited = false
+		// if(0)
+		{
+			scene.add(inputGroup,outputGroup)
+			clearInputAndOutput()
+			for( let i = 0; i < 3; i++)
+				inputGroup.addInput(new Float32Array([i*.8+.1,0.,0.,0.,0.,0.,0.,0.]))
+			addInputScopeMultivectorToScope()
+
+			reactToNewMultivector = outputGroup.reactToNewMultivector
+
+			scene.add( outputGroup.line );
+		}
 	}
 }

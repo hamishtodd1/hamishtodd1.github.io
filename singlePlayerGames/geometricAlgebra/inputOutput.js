@@ -64,6 +64,9 @@ function initInputOutputApparatus(inputGroup,outputGroup)
 			let newInput = MultivectorAppearance( selectInput,elements)
 			inputGroup.add( newInput )
 
+			// let newInput = MultivectorAppearance( selectInput,elements)
+			// inputGroup.add( newInput )
+
 			let numInputs = inputGroup.children.length - numNonInputChildren
 
 			inputGroup.background.scale.y  = inputGroup.background.scale.x * numInputs
@@ -162,12 +165,25 @@ function initInputOutputApparatus(inputGroup,outputGroup)
 		log(multivectorScope)
 	}
 
-	if(0)
 	{
+		// let outputSelector = RectangleIndicator()
+		// outputSelector.children[0].material.color.setRGB(1.,0.,0.)
+		// outputGroup.add(outputSelector)
+		outputGroup.reactToNewMultivector = function(elements)
+		{
+			for(let i = 0; i < outputGroup.children.length - numNonInputChildren; i++)
+			{
+				let mv = getOutput(i)
+				log(outputGroup.children.length)
+				copyMultivector(elements,mv.elements)
+				mv.updateAppearance()
+			}
+		}
+
 		var line = new THREE.Line( new THREE.Geometry(), new THREE.LineBasicMaterial({color:0x0000FF}) );
 		lineVertices = line.geometry.vertices
 		for(let i = 0; i < 3; i++)
 			lineVertices.push(new THREE.Vector3(i));
-		scene.add( line );
+		outputGroup.line = line
 	}
 }
