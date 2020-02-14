@@ -253,7 +253,7 @@ function initGoals(modeChange,restartButton)
 
 		setScope()
 
-		// if(0)
+		if(0)
 		{
 			scene.add(inputGroup,outputGroup)
 			clearInputAndOutput()

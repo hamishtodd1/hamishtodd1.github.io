@@ -77,8 +77,8 @@ async function init()
 	initMultivectorAppearances()
 	await initOperatorAppearances()
 
-	initWheelScene()
-	return
+	// initWheelScene()
+	// return
 
 	{
 		let restartButtonObj = makeTextSign("Restart")

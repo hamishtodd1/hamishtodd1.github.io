@@ -36,8 +36,11 @@ async function initOperatorAppearances()
 		geometricProduct:new THREE.MeshBasicMaterial({color:0xFF0000,transparent:true /*because transparent part of texture*/ }),
 		geometricSum:new THREE.MeshBasicMaterial({color:0x80FF00,transparent:true /*because transparent part of texture*/ }),
 	}
+
+	let loader = new THREE.TextureLoader()
+	loader.crossOrigin = true
 	await new Promise(resolve => {
-		new THREE.TextureLoader().load("data/frog.png",function(result)
+		loader.load("data/frog.png",function(result)
 		{
 			materials.geometricSum.map = result
 			// textures.geometricProduct = result
@@ -46,7 +49,7 @@ async function initOperatorAppearances()
 	})
 
 	await new Promise(resolve => {
-		new THREE.TextureLoader().load("data/frog.png",function(result)
+		loader.load("data/frog.png",function(result)
 		{
 			materials.geometricProduct.map = result;
 			resolve()

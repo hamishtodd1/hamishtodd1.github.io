@@ -51,7 +51,6 @@
 			Bicycle chain
 			The machinery you have on the wheels of trains
 			What's an example of adding torques?
-			fireworks
 			ink coming out of spinning pens https://www.youtube.com/watch?v=FOJ7JAUK6EU
 			Coat hanger maker https://youtu.be/uuj6NLCG0vM?t=441
 			Whip
@@ -60,6 +59,10 @@
 			taco folding https://youtu.be/xWG5Jx66VzQ?t=400
 			cog thing https://youtu.be/IjeKw0B8PG8
 			pizza https://twitter.com/Rainmaker1973/status/1084064448690774016
+		Rocket science
+			Thrusters in different directions
+			guidance computer using gimbals
+			fireworks
 		Special relativity?
 		Condensed matter / "spatially extended" / the input is a big rectangle of values
 			mandelbrot set
