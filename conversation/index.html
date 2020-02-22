@@ -1,0 +1,71 @@
+<!--
+-->
+<html>
+	<head>
+		<title>Conversation</title>
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				margin: 0px;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<script>
+			async function technicalInit()
+			{
+				initButtons()
+
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.shadowMap.enabled = true;
+				renderer.shadowMap.type = THREE.BasicShadowMap;
+				document.body.appendChild( renderer.domElement );
+
+				initWindowResizeSystemAndSurroundings(renderer);
+				initMouse();
+
+				await init()
+
+				function render()
+				{
+					frameDelta = clock.getDelta();
+					
+					mouse.updateFromAsyncAndCheckClicks();
+
+					for(var i = 0; i < updateFunctions.length; i++)
+					{
+						updateFunctions[i]();
+					}
+
+					frameCount++;
+
+					requestAnimationFrame( render );
+					renderer.render( scene, camera );
+				}
+
+				render()
+			}
+		</script>
+
+		<script src="lib/three.js"></script>
+		
+		<script src="windowResizeSystemAndSurroundings.js"></script>
+		<script src="miscFunctions.js"></script>
+		<script src="mouseControlSystem.js"></script>
+		<script src="text.js"></script>
+		<script src="menu.js"></script>
+
+
+		<script src="init.js"></script>
+
+		<!-- <script src="slider.js"></script> -->
+ 
+		<script src="variables.js"></script>
+		<script src="buttons.js"></script>
+
+		<script>
+			technicalInit()
+		</script>
+	</body>
+</html>
