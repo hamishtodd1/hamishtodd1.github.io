@@ -1,4 +1,10 @@
 /*
+	How long do you hold the door for someone?
+		If someone doesn't hold the door for you at all, they are a dick
+		If they hold the door for loads of people, they're super nice
+		If someone has a stethoscope around their neck, and is wearing a white coat, and has blood all over their hands, and is running desperately...
+			You can afford to hold it open a little longer
+
 	can control the look of happiness/suffering of faces easily enough
 	hexagonal grid of them
 
