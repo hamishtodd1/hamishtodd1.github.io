@@ -19,6 +19,7 @@
 		e^ is very good because you don't even have to give two inputs
 
 	"i as the circle constant"
+		split complex numbers with polar coordinates
 		2*pi*i is the real thing https://blog.wolfram.com/2015/06/28/2-pi-or-not-2-pi/
 		d/dt i^(2*t) - suspicious, you might think that that'd be d/dt (-1)^t = 0
 		https://blog.wolfram.com/2015/06/28/2-pi-or-not-2-pi/ concludes 2*pi*i is very appealing

@@ -1,4 +1,27 @@
 /*
+	Your first example
+		Rocket taking off with a given thrust
+		166,60
+
+	AR https://jeromeetienne.github.io/AR.js/three.js/examples/basic.html
+
+	Structure based around rocket science
+		Classical mechanics / mech eng
+			just moving the things around, rockets innit
+		Electromagnetism:
+			Electrically powered rockets https://en.wikipedia.org/wiki/Electrically_powered_spacecraft_propulsion
+			telescope optics,
+			telecommunicatio/satellites. No magnets but this may not matter
+		quantum
+			nuclear powered rockets
+			Not putting stuff in the van allen belt
+			ion thrusters?
+		spec rel
+			super fast rockets
+		Relativistic QM? Quantum computing?
+		To make a thing about real rocket science you ought to have super awesome heart-swelling animations, hngh
+			How to do it on the cheap: public domain NASA footage, plasma drive, ITER stuff with heart-swelling music
+
 	General
 		so you're modelling the differential apparently
 		A better representation of a thing over time might be its path through the world with timestamps labelled
@@ -67,6 +90,7 @@
 		Condensed matter / "spatially extended" / the input is a big rectangle of values
 			mandelbrot set
 		Toys
+			physics fun instagram
 			Balancing https://youtu.be/mwzExNYs12Y?t=144
 			beesandbombs
 			Slinky https://youtu.be/Em6krJvumkI?t=422
@@ -362,3 +386,77 @@ async function initWheelScene()
 	return littleScene
 }
 
+async function initTankScene()
+{
+	let littleScene = new THREE.Group()
+	littleScene.scale.setScalar(4.4)
+	// littleScene.position.y += 3.88
+	scene.add(littleScene)
+
+	let background = new THREE.Mesh(new THREE.PlaneGeometry(1.7,.9), new THREE.MeshBasicMaterial({color:0x00AAAA}))
+	background.position.z -= .01
+	littleScene.add(background)
+
+	let tankRadius = .11
+	let tank = new THREE.Mesh(new THREE.PlaneGeometry(tankRadius*6*2.,tankRadius*6*2.),new THREE.MeshBasicMaterial({transparent:true}))
+	new THREE.TextureLoader().load("data/tank.png",function(texture){
+		tank.material.map = texture
+		tank.material.needsUpdate = true
+	})
+	tank.position.x -= .53
+	tank.position.y -= .37
+	littleScene.add(tank)
+
+	let shell = new THREE.Mesh(new THREE.SphereBufferGeometry(.1))
+	littleScene.add(shell)
+
+	let playing = true
+
+	clickables.push(background)
+	background.onClick = function()
+	{
+		if(playing === false)
+		{
+			playing = true
+			shell.position.x = tank.position.x
+		}
+	}
+
+	let goalMultivector = MultivectorAppearance(function(){})
+	let placeForEndToBe = new THREE.Vector3()
+	let timerMultivector = MultivectorAppearance(function(){})
+	let bases = Array(2)
+	bases[0] = MultivectorAppearance(function(){},new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]))
+	bases[1] = MultivectorAppearance(function(){},new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.]))
+	bases[0].position.x -= 3.5
+	bases[1].position.x -= 3.5
+	bases[0].position.y -= 1.8
+	bases[1].position.y -= 1.8
+	bases[0].position.x += .5
+	bases[1].position.y += .5
+	timerMultivector.position.set(bases[0].position.x,bases[0].position.y,0.)
+
+	updateFunctions.push( function()
+	{
+		// if(wheel.position.x > -muddyTrail.position.x)
+		// {
+		// 	playing = false
+		// }
+
+		{
+			goalMultivector.position.copy(tank.position)
+			littleScene.localToWorld(goalMultivector.position)
+			
+			placeForEndToBe.copy(shell.position)
+
+			goalMultivector.setTo1Blade(placeForEndToBe)
+			placeForEndToBe.multiplyScalar(.5)
+			goalMultivector.position.add(placeForEndToBe)
+
+			timerMultivector.elements[0] = frameCount * frameDelta
+			timerMultivector.updateAppearance()
+		}
+	})
+
+	return littleScene
+}

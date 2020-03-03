@@ -175,8 +175,6 @@ function initMultivectorAppearances()
 			vecMesh.matrixAutoUpdate = false;
 			vecMesh.castShadow = true
 			multivec.add(vecMesh)
-			
-			
 
 			multivec.setTo1Blade = function(newY)
 			{
@@ -369,7 +367,7 @@ function initMultivectorAppearances()
 		multivec.copyElements = function(elementsToTakeOn)
 		{
 			for(let i = 0; i < 8; i++)
-				multivec.elements[i] = elementsToTakeOn[i]
+			multivec.elements[i] = elementsToTakeOn[i]
 			multivec.updateAppearance()
 		}
 
@@ -380,6 +378,8 @@ function initMultivectorAppearances()
 				debugger;
 			}
 		}
+
+		
 
 		if( externalOnClick !== undefined)
 		{

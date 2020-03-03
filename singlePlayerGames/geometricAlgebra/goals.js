@@ -58,9 +58,11 @@ function initGoals(modeChange,restartButton)
 				victorySavouringCounter = 2.
 			goalExcitedness = 1.
 		}
-		else if(outputGroup.parent === scene)
+		else if(goalOutputGroup.parent === scene)
 		{
 			log("here we would check against output vectors")
+
+
 			if(0)
 			{
 				victorySavouringCounter = 2.
@@ -89,9 +91,10 @@ function initGoals(modeChange,restartButton)
 		}
 	}
 
-	let inputGroup = new THREE.Group()
-	let outputGroup = new THREE.Group()
-	initInputOutputApparatus(inputGroup,outputGroup)
+	// initOutputDisplays()
+	let goalOutputGroup = MultivectorCollection()
+	let inputGroup = MultivectorCollection()
+	initInputsAndOutputGoal(inputGroup,goalOutputGroup)
 
 	updateFunctions.push( function()
 	{
@@ -137,7 +140,7 @@ function initGoals(modeChange,restartButton)
 
 		if( l.singularGoal === undefined) //it's either a video or non-video level
 		{
-			scene.add(inputGroup,outputGroup)
+			scene.add(inputGroup,goalOutputGroup)
 
 			let inputs = null
 			if(l.inputs !== undefined)
@@ -152,7 +155,7 @@ function initGoals(modeChange,restartButton)
 				}
 			}
 
-			clearInputAndOutput()
+			clearInputAndOutputGoal()
 			for(let i = 0; i < inputs.length; i++)
 				inputGroup.addInput(inputs[i])
 
@@ -164,10 +167,10 @@ function initGoals(modeChange,restartButton)
 		if(l.videoDetails !== undefined)
 		{
 			let outputPositions = Array(l.videoDetails.markerTimes.length)
-			outputGroup.background.scale.x *= 1.7
+			goalOutputGroup.background.scale.x *= 1.7
 			
 			for(let i = 0; i < l.videoDetails.markerTimes.length; i++)
-				outputPositions[i] = getInput(i).position.clone().add(outputGroup.position)
+				outputPositions[i] = getInput(i).position.clone().add(goalOutputGroup.position)
 
 			setVideo(
 				l.videoDetails.filename,
@@ -201,13 +204,13 @@ function initGoals(modeChange,restartButton)
 			for(let i = 0; i < l.inputs.length; i++)
 			{
 				let outputMv = MultivectorAppearance(function(){},outputs[i])
-				outputGroup.add( outputMv )
+				goalOutputGroup.add( outputMv )
 				outputMv.position.y = 1.2 * (i-(l.inputs.length-1)/2.)
 			}
 		}
 		else
 		{
-			scene.remove(inputGroup,outputGroup)
+			scene.remove(inputGroup,goalOutputGroup)
 		}
 	}
 
@@ -240,30 +243,37 @@ function initGoals(modeChange,restartButton)
 		levelIndex = -1;
 		reactToVictory()
 
-		//for now restart is only for campaign mode. Only useful in random mode if/when you have 
+		//for now restart is only for campaign mode
 		scene.add(restartButton)
 	}
-	modeChange.sandbox = function()
+	modeChange.calculator = function()
 	{
 		scene.remove(goalBox)
 		scene.remove(restartButton)
-		scene.remove(inputGroup,outputGroup)
+		scene.remove(inputGroup,goalOutputGroup)
+
+		scopeIsLimited = false
+
+		setScope()
+	}
+	modeChange.shaderProgramming = function ()
+	{
+		scene.remove(goalBox)
+		scene.remove(restartButton)
 
 		scopeIsLimited = false
 
 		setScope()
 
-		if(0)
-		{
-			scene.add(inputGroup,outputGroup)
-			clearInputAndOutput()
-			for( let i = 0; i < 3; i++)
-				inputGroup.addInput(new Float32Array([i*.8+.1,0.,0.,0.,0.,0.,0.,0.]))
-			addInputScopeMultivectorToScope()
+		scene.add(inputGroup)
 
-			reactToNewMultivector = outputGroup.reactToNewMultivector
-
-			scene.add( outputGroup.line );
-		}
+		clearInputAndOutputGoal()
+		for (let i = 0; i < 3; i++)
+			inputGroup.addInput(new Float32Array([i * .8 + .1, 0., 0., 0., 0., 0., 0., 0.]))
+		addInputScopeMultivectorToScope()
+		scene.add(goalOutputGroup.line);
+		
+		//how to choose the bloody output from the scope
+		//The output CAN be a list of individual multivectors. More generally it is a thing in a white box
 	}
 }

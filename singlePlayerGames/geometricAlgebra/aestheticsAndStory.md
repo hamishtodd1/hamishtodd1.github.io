@@ -1,4 +1,6 @@
 Aesthetics/graphics/non-design
+	Particles matter a lot
+	Seriously, making it look good is someone else's job. Your ideas are not great. Color choice probably matters more than realism
 	Don't need no frustum culling
 	Seriously you want to do bonkers graphics? Just do what everyone knows works, jeez, lots of particle effects and a professional animator
 	Fuck photograph, get someone to do a great animated scene and then use voxel cone tracing

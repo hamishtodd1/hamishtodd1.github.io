@@ -81,13 +81,13 @@ async function initMenu(modeChange)
 	}
 
 	{
-		let sandboxObject = makeTextSign("Sandbox Mode")
-		let sandbox = sandboxObject.children[0]
-		sandbox.scale.copy(sandboxObject.scale)
-		menuEntries.push(sandbox)
-		sandbox.onClick = function()
+		let calculatorObject = makeTextSign("Calculator Mode")
+		let calculator = calculatorObject.children[0]
+		calculator.scale.copy(calculatorObject.scale)
+		menuEntries.push(calculator)
+		calculator.onClick = function()
 		{
-			modeChange.sandbox()
+			modeChange.calculator()
 			menuMode = false
 		}
 	}

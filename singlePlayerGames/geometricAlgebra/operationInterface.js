@@ -1,3 +1,8 @@
+/*
+	When there's loads of the things and we have to do the animations one by one and then add them
+		You probably want to make a full table and as soon as the mv enters the register it breaks up (horizontally or vertically)
+*/
+
 function initOperationInterface(restartButton)
 {
 	var activeOperator = OperatorAppearance()
@@ -15,6 +20,10 @@ function initOperationInterface(restartButton)
 		operands[1],
 		activeOperator
 	]
+	howCurrentIsMade = {
+		operation: null,
+		operandIndices: [-1,-1]
+	}
 
 	let lastAssignedOperand = 0
 	ScopeMultivector = function(elements, sendToScopeImmediately)
@@ -26,6 +35,8 @@ function initOperationInterface(restartButton)
 
 			let operandToUse = operands[1-lastAssignedOperand]
 			lastAssignedOperand = 1 - lastAssignedOperand
+
+			howCurrentIsMade.operandIndices[lastAssignedOperand] = multivectorScope.indexOf(multivecToCopy)
 
 			operandToUse.copyElements(multivecToCopy.elements)
 			operandToUse.position.copy(multivecToCopy.position)
@@ -60,6 +71,8 @@ function initOperationInterface(restartButton)
 			activeOperator.position.copy(newScopeOperator.position)
 			activeOperator.function = newScopeOperator.function
 			scene.add(activeOperator)
+
+			howCurrentIsMade.operation = newScopeOperator.function
 
 			if(scopeIsLimited)
 				removeFromScope(newScopeOperator)
@@ -149,6 +162,10 @@ function initOperationInterface(restartButton)
 		scene.remove(animationMultivector)
 
 		let newMultivector = ScopeMultivector(animationMultivector.elements)
+		newMultivector.howIWasMade = {
+			operandIndices: [howCurrentIsMade.operandIndices[0], howCurrentIsMade.operandIndices[1]],
+			operation: howCurrentIsMade.operation
+		}
 		animationStage = -1.;
 	}
 
