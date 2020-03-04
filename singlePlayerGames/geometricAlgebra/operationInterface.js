@@ -94,6 +94,8 @@ function initOperationInterface(restartButton)
 	initScope()
 
 	let animationMultivector = MultivectorAppearance(function(){})
+	animationMultivector.elements[0] = 0.
+	animationMultivector.updateAppearance()
 	let animationStage = -1.;
 	updateFunctions.push(function()
 	{
@@ -123,7 +125,6 @@ function initOperationInterface(restartButton)
 				break;
 
 			case 2:
-				reactToNewMultivector(animationMultivector.elements)
 				scene.add(animationMultivector)
 				scene.remove(operands[0],operands[1],activeOperator)
 				animationStage++;
@@ -166,6 +167,7 @@ function initOperationInterface(restartButton)
 			operandIndices: [howCurrentIsMade.operandIndices[0], howCurrentIsMade.operandIndices[1]],
 			operation: howCurrentIsMade.operation
 		}
+		reactToNewMultivector(newMultivector)
 		animationStage = -1.;
 	}
 

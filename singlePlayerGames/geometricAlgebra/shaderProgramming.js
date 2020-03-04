@@ -37,5 +37,4 @@ function initShaderProgramming(inputGroup,outputGroup)
 	lineVertices = line.geometry.vertices
 	for (let i = 0; i < 3; i++)
 		lineVertices.push(new THREE.Vector3(i));
-	outputGroup.line = line
 }

@@ -1,3 +1,25 @@
+function objectNotAppearingTest(obj)
+{
+	console.log("parent: ", obj.parent)
+	console.log("visible: ", obj.visible)
+	console.log("scale: ", obj.scale)
+	console.log("position: ", obj.position)
+	if (obj.isMesh)
+	{
+		console.log(obj.geometry.vertices)
+		console.log("opacity: ", obj.material.opacity)
+		console.log("sidedness: ", obj.material.side)
+	}
+	else
+	{
+		console.log("children: ", obj.children.length)
+	}
+
+	log("object in scene: ", checkIfObjectIsInScene(obj))
+	console.log("camera position: ", camera.position)
+	console.log("it's good to have camera here, prevents bad practice, everything needs to move around")
+}
+
 //can use this within a part of three.js
 function checkIfObjectIsInScene(object)
 {

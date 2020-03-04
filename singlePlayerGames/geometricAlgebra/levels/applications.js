@@ -125,7 +125,7 @@
 */
 
 setVideo = async function(){console.error("Video can only be played on chrome!")}
-function initVideo()
+function initVideo(goalOutputGroup)
 {
 	let video = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial())
 	video.position.z = .01
@@ -150,7 +150,7 @@ function initVideo()
 	//hack
 	let notAlreadyUpdating = true
 
-	setVideo = async function( filename, startTime, endTime, outputTimes, intendedOutputPositions )
+	setVideo = async function( filename, startTime, endTime, outputTimes )
 	{
 		console.assert( outputs.length >= outputTimes.length )
 
@@ -180,9 +180,7 @@ function initVideo()
 			video.material.map.minFilter = THREE.LinearFilter
 			video.material.map.image = videoDomElement
 
-			intendedOutputScale.copy(video.scale)
-			intendedOutputScale.multiplyScalar( Math.abs(intendedOutputPositions[1].y-intendedOutputPositions[0].y) * .95 / intendedOutputScale.y)
-
+			let intendedPosition = new THREE.Vector3()
 			function update()
 			{
 				onscreenness += frameDelta * .75 * (wantedOnScreen?1.:-1.)
@@ -201,6 +199,9 @@ function initVideo()
 						wantedOnScreen = false
 				}
 
+				intendedOutputScale.copy(video.scale)
+				intendedOutputScale.multiplyScalar(Math.abs(goalOutputGroup.things[1].position.y - goalOutputGroup.things[0].position.y) * .95 / intendedOutputScale.y)
+
 				for(let i = 0; i < outputTimes.length; i++)
 				{
 					if( videoDomElement.currentTime > outputTimes[i] )
@@ -214,9 +215,10 @@ function initVideo()
 							scene.add(outputs[i])
 						}
 
-						outputs[i].position.lerp(intendedOutputPositions[i],.1)
-						let t = outputs[i].position.distanceTo(intendedOutputPositions[i])
-								/ video.position.distanceTo(intendedOutputPositions[i])
+						intendedPosition.copy(goalOutputGroup.things[i].position).add(goalOutputGroup.position)
+						outputs[i].position.lerp(intendedPosition,.1)
+						let t = outputs[i].position.distanceTo(intendedPosition)
+							/video.position.distanceTo(intendedPosition)
 						outputs[i].scale.lerpVectors(intendedOutputScale,video.scale,t)
 					}
 					else

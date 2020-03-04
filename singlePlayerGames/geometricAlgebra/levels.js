@@ -12,15 +12,17 @@ function Levels()
 				new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.]),
 			],
 			options: [
-				new Float32Array([2.,0.,0.,0.,0.,0.,0.,0.]), //"1"
-				new Float32Array([3.,0.,0.,0.,0.,0.,0.,0.]), //"2"
+				new Float32Array([2.,0.,0.,0.,0.,0.,0.,0.]),
+				new Float32Array([3.,0.,0.,0.,0.,0.,0.,0.]),
+
+				new Float32Array([Math.cos(TAU / 16.), 0., 0., 0., Math.sin(TAU / 16.), 0., 0., 0.]),
 			],
 			steps:[
 				//don't worry about them being deleted
 				[geometricSum,0,1], //result is "3"
 				[geometricProduct,2,3],
 			],
-			operators: [geometricSum,geometricProduct,geometricProduct]
+			operators: [geometricSum,geometricProduct]
 		},
 		{
 			singularGoal:
@@ -95,8 +97,6 @@ function Levels()
 	if(!browserIsChrome)
 		return arr
 
-	initVideo()
-
 	let videoLevels = [{
 		videoDetails: {
 			filename: "hoberman",
@@ -138,7 +138,6 @@ function Levels()
 		},
 	*/
 	
-	arr.push( videoLevels[0] )
-	// arr.push( videoLevels[1] )
+	// arr[0] = videoLevels[0]
 	return arr
 }

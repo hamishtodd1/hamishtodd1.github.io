@@ -111,6 +111,7 @@ function initMultivectorAppearances()
 
 		//maaaaybe you shouldn't have this because it's stateful? Yeah no shut up
 		multivec.elements = new Float32Array(8);
+		multivec.elements[0] = 1. //identity
 		if(elements !== undefined)
 			for(let i = 0; i < 8; i++)
 				multivec.elements[i] = elements[i]
