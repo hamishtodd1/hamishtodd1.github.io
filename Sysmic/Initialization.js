@@ -1,7 +1,7 @@
 function pre_download_init()
 {
 	THREE.ImageUtils.crossOrigin = '';
-	
+
 	Renderer = new THREE.WebGLRenderer({ antialias: true }); //antialiasing would be nice and we're only aiming for 30fps
 	Renderer.setClearColor( 0xFFFFFF );
 	Renderer.setPixelRatio( window.devicePixelRatio );
@@ -12,7 +12,7 @@ function pre_download_init()
 	document.body.appendChild( Renderer.domElement );
 	
 	Scene = new THREE.Scene();
-	
+
 	Camera = new THREE.PerspectiveCamera( 1, //placeholder
 			Renderer.domElement.width / Renderer.domElement.height, //window.innerWidth / window.innerHeight,
 			0.001, 700);
