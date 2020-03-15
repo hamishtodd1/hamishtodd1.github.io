@@ -167,12 +167,15 @@ function initOperationInterface(restartButton)
 		scene.remove(operands[0],operands[1],activeOperator)
 		scene.remove(animationMultivector)
 
-		let newMultivector = ScopeMultivector(animationMultivector.elements)
-		newMultivector.howIWasMade = {
-			operandIndices: [howCurrentIsMade.operandIndices[0], howCurrentIsMade.operandIndices[1]],
-			operation: howCurrentIsMade.operation
+		if (!equalsMultivector(zeroMultivector,animationMultivector.elements))
+		{
+			let newMultivector = ScopeMultivector(animationMultivector.elements)
+			newMultivector.howIWasMade = {
+				operandIndices: [howCurrentIsMade.operandIndices[0], howCurrentIsMade.operandIndices[1]],
+				operation: howCurrentIsMade.operation
+			}
+			reactToNewMultivector(newMultivector)
 		}
-		reactToNewMultivector(newMultivector)
 		animationStage = -1.;
 	}
 

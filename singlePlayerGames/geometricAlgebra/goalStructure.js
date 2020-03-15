@@ -291,7 +291,7 @@ function initGoals(modeChange,restartButton)
 		scopeIsLimited = false
 
 		setScope()
-		addInput(new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.]))
+		ScopeMultivector(new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.]), true)
 	}
 	modeChange.shaderProgramming = function ()
 	{

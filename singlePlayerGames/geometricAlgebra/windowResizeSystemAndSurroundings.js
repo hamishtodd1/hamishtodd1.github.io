@@ -2,11 +2,11 @@
 
 function initWindowResizeSystemAndSurroundings(renderer)
 {
-	camera.topAtZZero = 4.5; //want unit vectors to be a reasonable size
-	camera.position.z = 16.; //subjective. Stage depth should probably be same as width
+	camera.topAtZZero = 9.; //want unit vectors to be a reasonable size. Everything comes from this parameter.
+	camera.position.z = camera.topAtZZero*3.5; //subjective
 
 	{
-		let depth = camera.topAtZZero*2;
+		let depth = camera.topAtZZero * 2;
 		var stage = new THREE.Mesh( 
 			new THREE.BoxGeometry(1.,camera.topAtZZero*2,depth),
 			new THREE.MeshStandardMaterial({color:0xFFFFFF,side:THREE.BackSide})
@@ -43,10 +43,10 @@ function initWindowResizeSystemAndSurroundings(renderer)
 	window.addEventListener( 'resize', respondToResize, false );
 
 	{
-		var pointLight = new THREE.PointLight(0xFFFFFF, 0.4, 20.);
+		var pointLight = new THREE.PointLight(0xFFFFFF, 0.4, camera.position.z);
 
-		pointLight.shadow.camera.far = 20.;
-		pointLight.shadow.camera.near = 0.01;
+		pointLight.shadow.camera.far = pointLight.distance;
+		pointLight.shadow.camera.near = pointLight.distance * .005;
 		pointLight.shadow.mapSize.width = 1024;
 		pointLight.shadow.mapSize.height = pointLight.shadow.mapSize.width;
 		pointLight.shadow.camera.updateProjectionMatrix()

@@ -83,12 +83,16 @@
 
 function initMultivectorAppearances()
 {
-	let vectorRadius = .07
+	let vectorRadius = .25
 	let vectorGeometry = new THREE.CylinderBufferGeometry(0.,vectorRadius,1.,16,1,false);
 	vectorGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.,.5,0.))
 
 	let parallelogramGeometry = new THREE.OriginCorneredPlaneBufferGeometry(1.,1.)
 	let circleGeometry = new THREE.CircleBufferGeometry(1.,32)
+	let scalarUnitGeometry = new THREE.CircleGeometry(.5, 32)
+
+	let positiveColor = 0xFF0000
+	let negativeColor = 0x0000FF
 
 	//surely frontside?
 	let bivecMaterialFront = new THREE.MeshStandardMaterial({color:0xFF0000,transparent:true,opacity:.6,side:THREE.FrontSide})
@@ -133,32 +137,52 @@ function initMultivectorAppearances()
 
 		let scalarHeight = .6
 		{
-			let scalar = makeTextSign("",false,false,false)
-			//TODO it doesn't need a box around it, just a colored outline
-			// scalar.material.depthFunc = THREE.AlwaysDepth
-			scalar.castShadow = true
-			scalar.material.side = THREE.DoubleSide
-			scalar.scale.multiplyScalar(scalarHeight)
+			let scalar = new THREE.Group()
 			scalar.position.z = .001
-			multivec.add(scalar)			
+			multivec.add(scalar)
+			scalar.material = new THREE.MeshBasicMaterial()
 
-			multivec.setScalar = function(newScalar)
+			let newOne = null
+			for(let i = 0; i < 256; i++)
 			{
-				multivec.elements[0] = newScalar
-				multivec.updateScalarAppearance()
+				newOne = new THREE.Mesh(scalarUnitGeometry, scalar.material)
+				newOne.position.x = .5 + i
+				newOne.castShadow = true
+				scalar.add(newOne)
 			}
-			multivec.updateScalarAppearance = function(newScalar)
+
+			let partial = new THREE.Mesh( new THREE.CircleGeometry(1.,32), scalar.material )
+			scalar.add(partial)
+
+			//this is the part where the threejs abstraction is maybe a bad idea
+			multivec.updateScalarAppearance = function()
 			{
-				let value2sf = multivec.elements[0].toPrecision(2)
-				let finalValue = (value2sf * 1.).toString() //already a string but this gets rid of trailing zeroes!
-				scalar.material.setText(finalValue)
-				if(multivec.elements[0] === 0.)
+				let s = this.elements[0]
+				if (Math.abs(s) > scalar.children.length) console.error("not enough scalar units")
+				for (let i = 0, il = scalar.children.length; i < il; i++)
+					scalar.children[i].visible = i < Math.floor(Math.abs(s) )
+
+				scalar.material.color.setHex( s > 0.? positiveColor:negativeColor)
+
+				if(s != Math.round(s))
 				{
-					multivec.remove(scalar)
-				}
-				else
-				{
-					multivec.add(scalar)
+					partial.visible = true
+					let horizontalChop = Math.abs(s - Math.round(s))
+					let verticalChop = 1.
+					for (let i = 0, il = partial.geometry.vertices.length; i < il; i++)
+					{
+						let v = scalarUnitGeometry.vertices[i]
+
+						if (v.y + .5 < verticalChop)
+							partial.geometry.vertices[i].y = v.y
+						else
+							partial.geometry.vertices[i].y = verticalChop - .5
+
+						if (v.x + .5 < horizontalChop)
+							partial.geometry.vertices[i].x = v.x
+						else
+							partial.geometry.vertices[i].x = horizontalChop - .5
+					}
 				}
 			}
 			multivec.updateScalarAppearance()
@@ -325,7 +349,6 @@ function initMultivectorAppearances()
 		multivec.geometricProductMultivectors = function(multivecA,multivecB)
 		{
 			geometricProduct(multivecA.elements,multivecB.elements,multivec.elements)
-			log(multivec.elements)
 
 			multivec.updateScalarAppearance()
 			multivec.updateVectorAppearance()
@@ -377,7 +400,7 @@ function initMultivectorAppearances()
 
 		if( externalOnClick !== undefined)
 		{
-			let thingYouClick = new THREE.Mesh(new THREE.SphereBufferGeometry(.5),new THREE.MeshBasicMaterial({color:0x00FF00}))
+			let thingYouClick = new THREE.Mesh(new THREE.SphereBufferGeometry(.5),new THREE.MeshBasicMaterial({color:0x00FF00,transparent:true,opacity:.2}))
 			thingYouClick.visible = false
 			multivec.thingYouClick = thingYouClick
 			multivec.add(thingYouClick)
