@@ -3,6 +3,7 @@
 		Showing you a certain goal
 		Showing frames of footage/animation
 		Showing results of a vertex shader
+		Programming VR interactions? Molecule constraints?
 
 	ideas
 		corkscrew
@@ -11,6 +12,7 @@
 		That sea wave thing where each point on the surface is a point on a circle
 
 	TODO sandbox / tool for thought / live coding / shader programming / quantum computing sandbox
+	Wanna move mouse/vr controller around area continuously and it updates
 	Helping make shaders
 		This is how you doodle the things that will become goals
 		Inputs
@@ -31,10 +33,7 @@
 				https://www.youtube.com/watch?v=EtEOl-xJTg8
 */
 
-function initShaderProgramming(inputGroup,outputGroup)
+function initShaderProgramming(modeChange,inputGroup,outputGroup)
 {
-	var line = new THREE.Line(new THREE.Geometry(), new THREE.LineBasicMaterial({ color: 0x0000FF }));
-	lineVertices = line.geometry.vertices
-	for (let i = 0; i < 3; i++)
-		lineVertices.push(new THREE.Vector3(i));
+	
 }

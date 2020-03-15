@@ -6,6 +6,7 @@
 	AR https://jeromeetienne.github.io/AR.js/three.js/examples/basic.html
 
 	Structure based around rocket science
+		Could talk to isaac arthur
 		Classical mechanics / mech eng
 			just moving the things around, rockets innit
 		Electromagnetism:
@@ -23,6 +24,7 @@
 			How to do it on the cheap: public domain NASA footage, plasma drive, ITER stuff with heart-swelling music
 
 	General
+		changing basis vectors
 		so you're modelling the differential apparently
 		A better representation of a thing over time might be its path through the world with timestamps labelled
 		So record yourself with a qr code, throw it in the air etc. Put it into AR.js and stick a cube on top of it. Can get position and quaternion right out!

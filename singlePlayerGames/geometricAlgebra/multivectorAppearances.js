@@ -1,10 +1,18 @@
 /*
+	Maybe the right thing to do is to say what the units look like
+		The unit vector is a vector, with unit length, in a given direction
+		The unit bivector is a quadrilateral, with unit length, in a given direction
+		The unit scalar looks like a circle
+		The unit trivector is a paralellipied
+
+	It should be the case that if you turn the whole thing upside down it should feel ok
+		so fretting about whether up, down, left, right is positive and negative (except relatively) is silly
+
 	You could have the pseudoscalar be a rectangle of width (base) 1, therefore its height is its area (volume)
 	Aaaaand, the scalar pushes that shape to the right or left
 
-	For both sum and product of vectors, visualize the parallelogram
-
-	Maybe for positive and negative vectors, could have something on one side of it, not the end.
+	Vector
+		Maybe for positive and negative vectors, could have something on one side of it, not the end.
 
 	The trivector
 		Sphere of certain radius for magnitude, colored according to phase
@@ -13,18 +21,10 @@
 		Transparent and glowy and smoky and reflective
 
 	The scalar
-		Dotted line for scalar
-		People are so used to numerals. But this *is* about geometry! A length may make more sense
-		It is almost certainly objectively important to know what the multiplicative identity is
-		The unit size should be clear, and the numeral does make that clear
-		Numeral with positive or negative sign
-		Numeral with color
-		Spiral?
-		Should it be clear what the units are?
+		IS there any reason to not store the scalars in a line? More compact...
+		circle implies no directionality, and distinguishes it nicely from the square which can be used for bivector
+		Need to know the multiplicative identity is
 		Probably better off as red five versus blue five if you're going to carry it
-		Opacity?
-		Bunch of dots? To multiply, it makes that many copies of that thing then adds them together
-			This makes so much sense. Can have multiplication be visual too
 
 	Both the engineer and the flexibility-is-key Bret Victor would say it's context-dependent what viz you should use
 		Because look, a bivector can also be considered an imaginary number
@@ -38,22 +38,13 @@
 			a numeral equal to the argument, 
 			the numeral/box around the numeral is a certain color
 			And there is a color wheel around it so it is easy to read off the direction
-		cos(1) + i*sin(1) = e^i could be in your basis
 		visualized differently than the vector. 2D as opposed to 3D
-		Maybe a nice pear shape
-		Has the significant advantage that you get to see how complex numbers rotate each other
-		But, the system we're talking about has so many damn dimensions
-		related to the fact that all multivectors have an r e^i theta and cos theta + i sin theta decomposition
 
 	The bivector
-		A swarm of little blobs
 		Addition
 			So you get the unit vector in the intersection line (dare I ask, the positive or negative one?)
 
-	Could use the minus sign for everything. Doesn't help you decide what's minus and what's plus though!
-
 	Vectors
-		Liquid too?
 		The bivector situation is confusing and there's no way around that. So whatever confusion you think vector thing introduces, it's maybe already there
 		Arrow
 			Can be anywhere and so long as its length is the same you can think of it as the same thing
@@ -72,19 +63,21 @@
 		Attach them along that side
 		They "Snap" to the hypotenuse
 
+	Vector addition and multiplication
+		For both sum and product of vectors, visualize the parallelogram
 	Vector addition: always one on left and one above. And when they come together the red ends can melt each other or whatever it is, just like bivectors
 
-	Man, RP(n) is surely more fundamental than Rn
+	Grouping / location
+		Could have the different blades stacked in a column, or around in a circle
+		It is contingent that this vector and this scalar are together
+		This gets into philosophy :)
+		What if you have some things that are enormously larger than others? That's why we have zooming in and out. But some things keep size
 
-	One to have would be changing basis vectors
-
-	A heavily alternative way of doing this is with discrete pieces - vectors and bivectors of unit length, and everything built of htose (looks jaggy)
-
-	Could have the different blades stacked in a column, or around in a circle
-	What if you have some things that are enormously larger than others? That's why we have zooming in and out. But some things keep size
-
-	Sweep a along b to get a bivector. On is the sweeper, one is the thing it is swept along. Use this to make the addition too. This way, it is a surprise that addition is commutative, rather than a surprise that wedging is not
-	Addition of codirectional vectors and bivectors probably is different from non conditional, and it's probably ok to encourage that idea. Early levels can be just about them. X vector, X vector, 3. You must make an X vector of length 6.
+	Vector vector
+		Sweep a along b to get a bivector. On is the sweeper, one is the thing it is swept along.
+		Use this to make the addition too. This way, it is a surprise that addition is commutative, rather than a surprise that wedging is not
+		Addition of codirectional vectors and bivectors probably is different from non conditional,
+		and it's probably ok to encourage that idea. Early levels can be just about them. X vector, X vector, 3. You must make an X vector of length 6.
 
 */
 

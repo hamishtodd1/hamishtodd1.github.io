@@ -1,4 +1,6 @@
 /*
+	To make them merge, urgh
+
 	bivector is swirling in the orientation direction, that's what ends up making it circular
 
 	So long as you start the points off in a parallelogram shape, possibly it is ok for them to twitch a little before moving
@@ -91,8 +93,8 @@
 
 async function initBivectorAppearance()
 {
-	initFluidBivectorAppearance()
-	return
+	// initFluidBivectorAppearance()
+	// return
 
 	let interior = new THREE.Mesh(new THREE.Geometry(),new THREE.MeshBasicMaterial({color:0xFF0000, side:THREE.DoubleSide,transparent:true,opacity:.6}))
 	let exterior = new THREE.Mesh(new THREE.Geometry(),new THREE.MeshBasicMaterial({color:0x0000FF, side:THREE.DoubleSide,transparent:true,opacity:.6}))
@@ -144,63 +146,86 @@ async function initBivectorAppearance()
 		ev[i*2+1].set(1.,i*1,0.)
 	}
 	
-	let circleValues = {
-		iv:bandVertexArray(),
-		ev:bandVertexArray(),
-	}
-	for(let i = 0; i < bandLength; i++)
+	let circleValues = null
+	let sliceValues = null
+	let squareValues = null
 	{
-		let theta = i*TAU / (bandLength-1)
+		circleValues = {
+			iv: bandVertexArray(),
+			ev: bandVertexArray(),
+		}
+		for (let i = 0; i < bandLength; i++)
+		{
+			let theta = i * TAU / (bandLength - 1)
 
-		circleValues.iv[i*2+1].set(1.,0.,0.)
-		circleValues.iv[i*2+1].applyAxisAngle(zUnit,theta )
+			circleValues.iv[i * 2 + 1].set(1., 0., 0.)
+			circleValues.iv[i * 2 + 1].applyAxisAngle(zUnit, theta)
 
-		circleValues.ev[i*2+0].copy(circleValues.iv[i*2+1])
-		circleValues.ev[i*2+1].copy(circleValues.iv[i*2+1])
-		circleValues.ev[i*2+1].multiplyScalar(1.1)
-	}
+			circleValues.ev[i * 2 + 0].copy(circleValues.iv[i * 2 + 1])
+			circleValues.ev[i * 2 + 1].copy(circleValues.iv[i * 2 + 1])
+			circleValues.ev[i * 2 + 1].multiplyScalar(1.1)
+		}
 
-	let squareValues = {
-		iv:bandVertexArray(), //interior
-		ev:bandVertexArray(), //exterior
-	}
-	for(let i = 0; i < bandLength; i++)
-	{
-		let theta = i * TAU / (bandLength-1)
+		sliceValues = {
+			iv: bandVertexArray(),
+			ev: bandVertexArray(),
+		}
+		// sliceValues.iv[0].set(0.,0.,0.)
+		let fullAngle = 1. //arbitrarily chosen, dunno what to do with this
+		for (let i = 0; i < bandLength; i++)
+		{
+			let theta = i * fullAngle / (bandLength - 1)
 
-		let thetaInFundamentalDomain = theta //fundamental domain is triangle
-		while(thetaInFundamentalDomain > TAU/4.)
-			thetaInFundamentalDomain -= TAU/4.
-		if( thetaInFundamentalDomain > TAU / 8.)
-			thetaInFundamentalDomain = TAU/4.-thetaInFundamentalDomain
-		let pInFundamentalDomain = new THREE.Vector3()
-		pInFundamentalDomain.set(1.0,0.,0.)
-		pInFundamentalDomain.applyAxisAngle(zUnit,thetaInFundamentalDomain)
-		let inflationFactor = 1. / pInFundamentalDomain.x
+			sliceValues.iv[i * 2 + 1].set(1., 0., 0.)
+			sliceValues.iv[i * 2 + 1].applyAxisAngle(zUnit, theta)
 
-		squareValues.iv[i*2+1].set(1.0,0.,0.)
-		squareValues.iv[i*2+1].applyAxisAngle(zUnit,theta)
-		squareValues.iv[i*2+1].multiplyScalar( inflationFactor )
+			sliceValues.ev[i * 2 + 0].copy(sliceValues.iv[i * 2 + 1])
+			sliceValues.ev[i * 2 + 1].copy(sliceValues.iv[i * 2 + 1])
+			sliceValues.ev[i * 2 + 1].multiplyScalar(1.1)
+		}
 
-		squareValues.ev[i*2+0].copy(squareValues.iv[i*2+1])
-		squareValues.ev[i*2+1].copy(squareValues.iv[i*2+1])
-		squareValues.ev[i*2+1].multiplyScalar(1.1)
+		squareValues = {
+			iv: bandVertexArray(), //interior
+			ev: bandVertexArray(), //exterior
+		}
+		for (let i = 0; i < bandLength; i++)
+		{
+			let theta = i * TAU / (bandLength - 1)
 
-		squareValues.iv[i*2+0].y *= 2.
-		squareValues.iv[i*2+1].y *= 2.
-		squareValues.ev[i*2+0].y *= 2.
-		squareValues.ev[i*2+1].y *= 2.
+			let thetaInFundamentalDomain = theta //fundamental domain is triangle
+			while (thetaInFundamentalDomain > TAU / 4.)
+				thetaInFundamentalDomain -= TAU / 4.
+			if (thetaInFundamentalDomain > TAU / 8.)
+				thetaInFundamentalDomain = TAU / 4. - thetaInFundamentalDomain
+			let pInFundamentalDomain = new THREE.Vector3()
+			pInFundamentalDomain.set(1.0, 0., 0.)
+			pInFundamentalDomain.applyAxisAngle(zUnit, thetaInFundamentalDomain)
+			let inflationFactor = 1. / pInFundamentalDomain.x
 
-		squareValues.iv[i*2+0].x += squareValues.iv[i*2+0].y
-		squareValues.iv[i*2+1].x += squareValues.iv[i*2+1].y
-		squareValues.ev[i*2+0].x += squareValues.ev[i*2+0].y
-		squareValues.ev[i*2+1].x += squareValues.ev[i*2+1].y
+			squareValues.iv[i * 2 + 1].set(1.0, 0., 0.)
+			squareValues.iv[i * 2 + 1].applyAxisAngle(zUnit, theta)
+			squareValues.iv[i * 2 + 1].multiplyScalar(inflationFactor)
+
+			squareValues.ev[i * 2 + 0].copy(squareValues.iv[i * 2 + 1])
+			squareValues.ev[i * 2 + 1].copy(squareValues.iv[i * 2 + 1])
+			squareValues.ev[i * 2 + 1].multiplyScalar(1.1)
+
+			squareValues.iv[i * 2 + 0].y *= 2.
+			squareValues.iv[i * 2 + 1].y *= 2.
+			squareValues.ev[i * 2 + 0].y *= 2.
+			squareValues.ev[i * 2 + 1].y *= 2.
+
+			squareValues.iv[i * 2 + 0].x += squareValues.iv[i * 2 + 0].y
+			squareValues.iv[i * 2 + 1].x += squareValues.iv[i * 2 + 1].y
+			squareValues.ev[i * 2 + 0].x += squareValues.ev[i * 2 + 0].y
+			squareValues.ev[i * 2 + 1].x += squareValues.ev[i * 2 + 1].y
+		}
 	}
 
 	for(let i = 0, il = ev.length; i < il; i++)
 	{
-		ev[i].copy(circleValues.ev[i])
-		iv[i].copy(circleValues.iv[i])
+		ev[i].copy(sliceValues.ev[i])
+		iv[i].copy(sliceValues.iv[i])
 	}
 
 	let valuesToLerpTo = squareValues
@@ -218,7 +243,7 @@ async function initBivectorAppearance()
 
 	bindButton("q",function()
 	{
-		valuesToLerpTo = circleValues
+		valuesToLerpTo = valuesToLerpTo == sliceValues ? squareValues : sliceValues
 	})
 
 	return bivectorAppearance

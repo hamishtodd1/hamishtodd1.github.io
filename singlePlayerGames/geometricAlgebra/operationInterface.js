@@ -1,6 +1,11 @@
 /*
 	When there's loads of the things and we have to do the animations one by one and then add them
 		You probably want to make a full table and as soon as the mv enters the register it breaks up (horizontally or vertically)
+
+	There's an argument for lambda calculus style: operation, operand1, operand2
+		"Is the next one I touch going to go up top or on side?" so at least maybe get rid of automation there
+
+	Click and hold should probably have the calculation freeze there for a bit
 */
 
 function initOperationInterface(restartButton)

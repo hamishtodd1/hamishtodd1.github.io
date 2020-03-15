@@ -50,10 +50,6 @@ function initGoals(modeChange,restartButton)
 	youWinSign.position.y = camera.topAtZZero - .4
 	scene.add(youWinSign)
 
-	let inputGroup = ThingCollection()
-	let outputGroup = ThingCollection()
-	initInputAndOutputGroups(inputGroup,outputGroup)
-
 	let goalOutputGroup = ThingCollection()
 	{
 		function updateOutputGroupIntendedPosition()
@@ -164,7 +160,9 @@ function initGoals(modeChange,restartButton)
 
 		if( l.singularGoal === undefined)
 		{
-			scene.add(inputGroup,goalOutputGroup,outputGroup)
+			scene.add(goalOutputGroup)
+			scene.add(inputGroup, inputGroup.indicator)
+			scene.add(outputGroup, outputGroup.indicator)
 
 			inputGroup.clear()
 			goalOutputGroup.clear()
@@ -288,11 +286,12 @@ function initGoals(modeChange,restartButton)
 	{
 		scene.remove(goalBox)
 		scene.remove(restartButton)
-		scene.remove(inputGroup,goalOutputGroup)
+		scene.remove(inputGroup,inputGroup.indicator,goalOutputGroup)
 
 		scopeIsLimited = false
 
 		setScope()
+		addInput(new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.]))
 	}
 	modeChange.shaderProgramming = function ()
 	{
@@ -303,14 +302,29 @@ function initGoals(modeChange,restartButton)
 
 		setScope()
 
-		scene.add(inputGroup)
-		scene.add(outputGroup)
-
+		scene.add(inputGroup, inputGroup.indicator)
+		scene.add(outputGroup,outputGroup.indicator)
+		
 		inputGroup.clear()
+
 		for (let i = 0; i < 3; i++)
-			addInput(new Float32Array([i+1., 0., 0., 0., 0., 0., 0., 0.]))
+			addInput(new Float32Array([0., 0., i * .4 + .2, 0., 0., 0., 0., 0.]))
+		//need to forget about their positions so you can do the 2D thing
+
+		//next thing: make it
+		// for (let i = 0; i < 3; i++)
+		// {
+		// 	for(let j = 0; j < 3; j++)
+		// 	{
+		// 		addInput(new Float32Array([0., i * .5, j * .5, 0., 0., 0., 0., 0.]))
+		// 	}
+		// }
+
 		addInputScopeMultivectorToScope()
 		// scene.add(goalOutputGroup.line);
+
+		
+		// ScopeMultivector(new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.]),true)
 		
 		//how to choose the bloody output from the scope
 		//The output CAN be a list of individual multivectors. More generally it is a thing in a white box

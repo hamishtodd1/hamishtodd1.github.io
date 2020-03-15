@@ -8,10 +8,7 @@
 //or a set of outputs that you can link to something in your scope
 //it might even show a single output but vary over time
 //it's flexible
-	//line
-	//plot
-	//scatter plot
-	//inside 3D volume
+	//could even have a scalar field or some weird orientation based thing
 //Maybe everything should be given the same location and if you want a list of numbers you need to use vectors that are increasingly diagonal
 //and then it needs to be extended. Heh, inheritance... except there are only a few things
 //come on, let's have a parabola
@@ -19,11 +16,14 @@ ThingCollection = function ()
 {
 	let group = new THREE.Group()
 
+	let maxThings = sq(256)
 	let things = [] //multivectors, sets of multivectors, video frames, vectors to be interpreted as vertices of a curve
 	group.things = things
 
 	group.addThing = function(thing)
 	{
+		console.assert(things.length < maxThings)
+
 		things.push(thing)
 		group.add(thing)
 		background.scale.y = background.scale.x * things.length
@@ -46,36 +46,144 @@ ThingCollection = function ()
 	background.scale.x = 1.3
 	background.position.z = -.001
 	group.add(background)
-	
-	// var line = new THREE.Line(new THREE.Geometry(), new THREE.LineBasicMaterial({ color: 0x0000FF }));
-	// lineVertices = line.geometry.vertices
-	// for (let i = 0; i < 3; i++)
-	// 	lineVertices.push(new THREE.Vector3(i));
-	// goalOutputGroup.line = line
+	clickables.push(background)
+	let representationNames = ["multivectors", "surface","line","points"]
+	background.onClick = function()
+	{
+		group.representation = representationNames[1 + representationNames.indexOf(group.representation)]
+	}
+
+	//other representations
+	let line = null
+	let points = null
+	let surface = null
+	let coords = new Float32Array(maxThings * 3);
+	{
+		//could also have a single thing whose orientation is controlled. Orientation and position and scale?
+		line = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0x0000FF }));
+		{
+			line.visible = false
+			group.line = line
+			group.add(line)
+			
+			line.geometry.addAttribute('position', new THREE.BufferAttribute(coords, 3))
+		}
+
+		points = new THREE.Points(new THREE.BufferGeometry(), new THREE.PointsMaterial({ color: 0x0000FF, size: .08 }));
+		{
+			points.visible = false
+			group.points = points
+			group.add(points)
+
+			points.geometry.addAttribute('position', new THREE.BufferAttribute(coords, 3))
+		}
+		
+		surface = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0x0000FF }));
+		{
+			surface.visible = false
+			group.surface = surface
+			group.add(surface)
+
+			surface.geometry.addAttribute('position', new THREE.BufferAttribute(coords, 3))
+			
+			let indices = new Uint16Array(256*256*2 - 256*2)
+			let n = 0
+			for(let i = 0; i < 256; i++)
+			{
+				for( let j = 0; j < 256; j++)
+				{
+					let index = i*256+j;
+					if(i < 255)
+					{
+						indices[n] = index; n++
+						indices[n] = index + 1; n++
+					}
+					if (j < 255)
+					{
+						indices[n] = index; n++
+						indices[n] = index + 256; n++
+					}
+				}
+			}
+			surface.geometry.setIndex(new THREE.BufferAttribute(indices, 1))
+		}
+	}
+
+	group.representation = "multivectors"
 
 	group.intendedPosition = new THREE.Vector3()
 	updateFunctions.push(function ()
 	{
 		group.position.lerp(group.intendedPosition, .1)
+
+		for (let i = 0; i < group.things.length; i++)
+			group.things[i].visible = group.representation === "multivectors"
+		line.visible = group.representation === "line"
+		surface.visible = group.representation === "surface"
+		points.visible = group.representation === "points"
+
+		if (line.visible || points.visible)
+		{
+			let thingElements = null
+			for (let i = 0; i < maxThings; i++)
+			{
+				thingElements = i < group.things.length ? group.things[i].elements : group.things[group.things.length - 1 ].elements
+				coords[i * 3 + 0] = thingElements[1]
+				coords[i * 3 + 1] = thingElements[2]
+				coords[i * 3 + 2] = thingElements[3]
+			}
+			line.geometry.attributes.position.needsUpdate = line.visible
+			points.geometry.attributes.position.needsUpdate = points.visible
+		}
+
+		if(surface.visible)
+		{
+			let thingElements = null
+			surface.geometry.attributes.position.needsUpdate = surface.visible
+		}
+		
+		//"add input" is better
+		// group.makeThisAGrid = function()
+		// {
+		// 	let width = 3
+		// 	group.addThing(new Float32Array([0., 0., 0., 0., 0., 0., 0., 0.]))
+		// 	for(let i = 0; i < maxThings; i++)
+		// 	{
+		// 		surfaceCoords[i * 3 + 0] = i % width;
+		// 		surfaceCoords[i * 3 + 1] = (i - i % width) / width;
+		// 		surfaceCoords[i * 3 + 2] = 0.;
+		// 	}
+		// }
+
+		//could scale it down?
+		// let boundingBox = new THREE.Box3()
+		// boundingBox.min.copy(firstVertex)
+		// boundingBox.max.copy(boundingBox.min)
+		// for(let i = 0; i < ; i++)
+		// 	boundingBox.expandByPoint(v)
 	})
 
 	return group;
 }
 
-function initInputAndOutputGroups(inputGroup,outputGroup)
+function initInputAndOutputGroups()
 {
+	// inputGroup.representation = "line"
+	// outputGroup.representation = "line"
+
 	function SelectionIndicator()
 	{
 		let selectionIndicator = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({ color: 0x00FF80, side: THREE.DoubleSide }))
 		selectionIndicator.geometry.faces.push(new THREE.Face3(0, 1, 2))
 		selectionIndicator.geometry.vertices.push(
-			new THREE.Vector3(0., .2, 0.),
+			new THREE.Vector3(0., .1, 0.),
 			new THREE.Vector3(1., 0., 0.),
-			new THREE.Vector3(0., -.2, 0.)
+			new THREE.Vector3(0., -.1, 0.)
 		)
 
 		let indicatorVector = new THREE.Vector3()
 		selectionIndicator.matrixAutoUpdate = false
+		selectionIndicator.height = 1.
 
 		selectionIndicator.setStartAndEnd = function (start, end)
 		{
@@ -84,6 +192,7 @@ function initInputAndOutputGroups(inputGroup,outputGroup)
 			indicatorVector.z = .02
 
 			selectionIndicator.matrix.makeBasis(indicatorVector, yUnit, zUnit)
+			selectionIndicator.matrix.elements[5] = selectionIndicator.height
 			selectionIndicator.matrix.setPosition(start)
 			selectionIndicator.matrix.elements[14] = -.01
 		}
@@ -94,13 +203,16 @@ function initInputAndOutputGroups(inputGroup,outputGroup)
 	let inputScopeMultivector = ScopeMultivector();
 	{
 		inputGroup.indicator = SelectionIndicator()
-		scene.add(inputGroup.indicator)
+		inputGroup.indicator.height = 4.
 		let worldspacePlaceToPoint = new THREE.Vector3()
 		updateFunctions.push(function()
 		{
-			worldspacePlaceToPoint.copy(inputGroup.things[inputIndex].position)
-			worldspacePlaceToPoint.add(inputGroup.position)
-			inputGroup.indicator.setStartAndEnd(inputScopeMultivector.position, worldspacePlaceToPoint)
+			if(inputGroup.parent === scene)
+			{
+				worldspacePlaceToPoint.copy(inputGroup.things[inputIndex].position)
+				worldspacePlaceToPoint.add(inputGroup.position)
+				inputGroup.indicator.setStartAndEnd(inputScopeMultivector.position, worldspacePlaceToPoint)
+			}
 		})
 
 		let inputIndex = 0
@@ -130,8 +242,8 @@ function initInputAndOutputGroups(inputGroup,outputGroup)
 			//TODO support limited-scope puzzles?
 		}
 
-		clickables.push(inputGroup.background)
-		inputGroup.background.onClick = function ()
+		clickables.push(inputGroup.indicator)
+		inputGroup.indicator.onClick = function ()
 		{
 			inputIndex--
 			if(inputIndex < 0)
@@ -186,10 +298,8 @@ function initInputAndOutputGroups(inputGroup,outputGroup)
 	}
 	{
 		outputGroup.indicator = SelectionIndicator()
-		scene.add(outputGroup.indicator)
+		outputGroup.indicator.height = 20.
 
-		clickables.push(outputGroup.background)
-		outputGroup.background.onClick = cycleScopeMultivectorDirectedAt
 		clickables.push(outputGroup.indicator)
 		outputGroup.indicator.onClick = cycleScopeMultivectorDirectedAt
 

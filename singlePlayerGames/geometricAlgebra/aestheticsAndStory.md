@@ -18,6 +18,7 @@ Aesthetics/graphics/non-design
 			Ideally one with XHR and all that. Maybe even a light field? Could just be a cylindrical one?
 		Ray tracings
 			https://www.shadertoy.com/view/MtcXWr
+		https://youtu.be/2xeYr_URt_o?t=893
 	Cubemap "background"
 		Each pixel of which gets its own ray trace/sdf call, just the one to see if it is immediately accessible to the light
 	Maybe you want a conventional thing
@@ -69,3 +70,4 @@ Story
 		Clifford on his deathbed thinking the hope will probably die and people will be doing hacky shit forever
 		Tait was evil, full of wishful thinking and idiotic faith. Hating of divorce and secularity, everything  Clifford wasn't. Kicking a man while he was dying
 	Separate office for Maxwell or faraday, more Victorian plus crackling electricity
+		Faraday: I don't see why you had to bring maths into it

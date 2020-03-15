@@ -15,7 +15,7 @@ function Levels()
 				new Float32Array([2.,0.,0.,0.,0.,0.,0.,0.]),
 				new Float32Array([3.,0.,0.,0.,0.,0.,0.,0.]),
 
-				new Float32Array([Math.cos(TAU / 16.), 0., 0., 0., Math.sin(TAU / 16.), 0., 0., 0.]),
+				// // new Float32Array([Math.cos(TAU / 8.), 0., 0., 0., Math.sin(TAU / 8.), 0., 0., 0.]),
 			],
 			steps:[
 				//don't worry about them being deleted

@@ -84,6 +84,8 @@ async function init()
 	initMultivectorAppearances()
 	await initOperatorAppearances()
 
+	initSound()
+
 	// initTankScene()
 	// return
 
@@ -97,8 +99,9 @@ async function init()
 	initOperationInterface(restartButton)
 
 	let modeChange = {}
+	initInputAndOutputGroups()
 	initGoals(modeChange,restartButton)
-	modeChange.campaign()
+	modeChange.calculator()
 
 	await initMenu(modeChange)
 }
