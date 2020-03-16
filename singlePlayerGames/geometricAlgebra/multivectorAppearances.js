@@ -143,23 +143,47 @@ function initMultivectorAppearances()
 			scalar.material = new THREE.MeshBasicMaterial()
 
 			let newOne = null
-			for(let i = 0; i < 256; i++)
+			let maxUnits = 256
+			for(let i = 0; i < maxUnits; i++)
 			{
-				newOne = new THREE.Mesh(scalarUnitGeometry, scalar.material)
+				if(i !== maxUnits-1)
+					newOne = new THREE.Mesh(scalarUnitGeometry, scalar.material)
+				else
+					newOne = new THREE.Mesh(new THREE.CircleGeometry(1., 32), scalar.material)
+
 				newOne.position.x = .5 + i
 				newOne.castShadow = true
 				scalar.add(newOne)
 			}
+			let partial = scalar.children[maxUnits-1]
 
-			let partial = new THREE.Mesh( new THREE.CircleGeometry(1.,32), scalar.material )
-			scalar.add(partial)
+			//zigzag thing
+			{
+				let currentLayer = 1 //layer n and all below it contain n^2 verts. vertex 0 is layer 1
+				for (let i = 0; i < maxUnits; i++)
+				{
+					if (sq(currentLayer) <= i)
+						currentLayer++;
+						
+					let rightDown = currentLayer % 2; // as opposed to upLeft
+					let diagOfThisLayer = 2 * currentLayer * (currentLayer - 1) / 2
+					let inSecondHalf = i > diagOfThisLayer
+
+					scalar.children[i].position
+						.set(0.,0.,0.)
+						.addScaledVector(rightDown? yUnit : xUnit,currentLayer-1) //get you to the start
+						.addScaledVector(rightDown? xUnit : yUnit, inSecondHalf ? currentLayer-1 : i-sq(currentLayer-1))
+					if(inSecondHalf)
+						scalar.children[i].position.addScaledVector(rightDown ? yUnit : xUnit, -1 * (i-diagOfThisLayer) )
+				}
+			}
 
 			//this is the part where the threejs abstraction is maybe a bad idea
 			multivec.updateScalarAppearance = function()
 			{
 				let s = this.elements[0]
-				if (Math.abs(s) > scalar.children.length) console.error("not enough scalar units")
-				for (let i = 0, il = scalar.children.length; i < il; i++)
+				if (Math.abs(s) > maxUnits) console.error("not enough scalar units")
+				for (let i = 0; i < maxUnits; i++)
 					scalar.children[i].visible = i < Math.floor(Math.abs(s) )
 
 				scalar.material.color.setHex( s > 0.? positiveColor:negativeColor)
