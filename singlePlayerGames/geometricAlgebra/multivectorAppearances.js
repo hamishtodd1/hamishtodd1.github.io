@@ -158,6 +158,7 @@ function initMultivectorAppearances()
 			let partial = scalar.children[maxUnits-1]
 
 			//zigzag thing
+			if(0)
 			{
 				let currentLayer = 1 //layer n and all below it contain n^2 verts. vertex 0 is layer 1
 				for (let i = 0; i < maxUnits; i++)

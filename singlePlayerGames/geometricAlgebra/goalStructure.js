@@ -291,13 +291,13 @@ function initGoals(modeChange,restartButton)
 		scopeIsLimited = false
 
 		setScope()
-		ScopeMultivector(new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]), true)
-		ScopeMultivector(new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]), true)
-		ScopeMultivector(new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]), true)
-		ScopeMultivector(new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]), true)
-		ScopeMultivector(new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]), true)
-		ScopeMultivector(new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]), true)
-		ScopeMultivector(new Float32Array([33., 0., 0., 0., 0., 0., 0., 0.]), true)
+		// ScopeMultivector(new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]), true)
+		// ScopeMultivector(new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]), true)
+		// ScopeMultivector(new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]), true)
+		// ScopeMultivector(new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]), true)
+		// ScopeMultivector(new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]), true)
+		// ScopeMultivector(new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]), true)
+		// ScopeMultivector(new Float32Array([33., 0., 0., 0., 0., 0., 0., 0.]), true)
 	}
 	modeChange.shaderProgramming = function ()
 	{
