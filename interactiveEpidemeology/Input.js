@@ -49,16 +49,26 @@ document.addEventListener( 'mouseup', function(event)
 		event.preventDefault();
 
 		InputObject.isMouseDown = 1;
+
+		var vector = new THREE.Vector3(
+			(event.changedTouches[0].clientX / window.innerWidth) * 2 - 1,
+			- (event.changedTouches[0].clientY / window.innerHeight) * 2 + 1,
+			0.5);
+		vector.unproject(Camera);
+		var dir = vector.sub(Camera.position).normalize();
+		var distance = - Camera.position.z / dir.z;
+		var finalposition = Camera.position.clone();
+		finalposition.add(dir.multiplyScalar(distance));
+
+		InputObject.MousePosition.copy(finalposition);
 	}, { passive: false });
 	document.addEventListener('touchmove', function (event)
 	{
-		InputObject.isMouseDown = 0;
-
 		event.preventDefault();
 
 		var vector = new THREE.Vector3(
-			(event.clientX / window.innerWidth) * 2 - 1,
-			- (event.clientY / window.innerHeight) * 2 + 1,
+			(event.changedTouches[0].clientX / window.innerWidth) * 2 - 1,
+			- (event.changedTouches[0].clientY / window.innerHeight) * 2 + 1,
 			0.5);
 		vector.unproject(Camera);
 		var dir = vector.sub(Camera.position).normalize();
