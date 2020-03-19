@@ -43,6 +43,37 @@ document.addEventListener( 'mouseup', function(event)
 	InputObject.isMouseDown = 0;
 }, false );
 
+{
+	document.addEventListener('touchstart', function (event)
+	{
+		event.preventDefault();
+
+		InputObject.isMouseDown = 1;
+	}, { passive: false });
+	document.addEventListener('touchmove', function (event)
+	{
+		InputObject.isMouseDown = 0;
+
+		event.preventDefault();
+
+		var vector = new THREE.Vector3(
+			(event.clientX / window.innerWidth) * 2 - 1,
+			- (event.clientY / window.innerHeight) * 2 + 1,
+			0.5);
+		vector.unproject(Camera);
+		var dir = vector.sub(Camera.position).normalize();
+		var distance = - Camera.position.z / dir.z;
+		var finalposition = Camera.position.clone();
+		finalposition.add(dir.multiplyScalar(distance));
+
+		InputObject.MousePosition.copy(finalposition);
+	}, { passive: false });
+	document.addEventListener('touchend', function (event)
+	{
+		InputObject.isMouseDown = 0;
+	}, false);
+}
+
 //not document? ok, whatever
 window.addEventListener( 'resize', Resize, false );
 
