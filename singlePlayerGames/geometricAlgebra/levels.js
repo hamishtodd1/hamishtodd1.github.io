@@ -1,7 +1,10 @@
-//this is not doodling
-//possibly should be able to hotload
-//definitely want to doodle with process
-//Heh, the input output sandbox is your editor
+/*
+	this is not doodling
+	possibly should be able to hotload
+	definitely want to doodle with process
+	Heh, the input output sandbox is your editor
+	Can prove dot product is commutative by induction
+*/
 
 function Levels()
 {

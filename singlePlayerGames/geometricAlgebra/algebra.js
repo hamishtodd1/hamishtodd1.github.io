@@ -13,6 +13,27 @@
 	4. Those get combined
 */
 let zeroMultivector = new Float32Array(8)
+MathematicalMultivector = function()
+{
+	return new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.,])
+}
+
+function wedge(a,b) //aka antisymmetric
+{
+	let p = geometricProduct(a, b)
+	let q = geometricProduct(b, a)
+	let ret = geometricSum(p,q)
+	delete p;
+	delete q;
+	for(let i = 0; i < 8; i++)
+		ret[i] *= .5;
+	return ret
+}
+
+function multivectorDot(a,b)
+{
+	return b[0] * a[0] + b[1] * a[1] - b[2] * a[2] - b[3] * a[3] + b[4] * a[4] + b[5] * a[5] - b[6] * a[6] - b[7] * a[7];
+}
 
 function generateRandomMultivectorElementsFromScope(scope, seed)
 {
@@ -61,6 +82,19 @@ function geometricProduct(a,b,target)
 {
 	if(target === undefined)
 		target = new Float32Array(8)
+
+	b = b ? b : a //and skip the antisymmetric part?
+
+	if(a.isVector3 && b.isVector3)
+	{
+		target[0] = b.x  * a.x + b.y * a.y  + b.z  * a.z
+
+		target[4] = b.y * a.x - b.x * a.y
+		target[5] = b.z * a.x - b.x * a.z
+		target[6] = b.z * a.y - b.y * a.z
+
+		return target;
+	} //could have a quaternion? and a complex? Oh yeah Chris says check grade. Heh, 
 
 	//from ganja.js
 	target[0]= b[0]*a[0] + b[1]*a[1] + b[2]*a[2] + b[3]*a[3] - b[4]*a[4] - b[5]*a[5] - b[6]*a[6] - b[7]*a[7]

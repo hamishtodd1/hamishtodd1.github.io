@@ -5,16 +5,8 @@
 		The unit scalar looks like a circle
 		The unit trivector is a paralellipied
 
-	It should be the case that if you turn the whole thing upside down it should feel ok
-		so fretting about whether up, down, left, right is positive and negative (except relatively) is silly
-
-	You could have the pseudoscalar be a rectangle of width (base) 1, therefore its height is its area (volume)
-	Aaaaand, the scalar pushes that shape to the right or left
-
-	Vector
-		Maybe for positive and negative vectors, could have something on one side of it, not the end.
-
 	The trivector
+		You could have the pseudoscalar be a rectangle of width (base) 1, therefore its height is its area (volume)
 		Sphere of certain radius for magnitude, colored according to phase
 		Or a horizontal line and a vertical line
 		Naah, blue or red liquid just like bivector
@@ -40,11 +32,8 @@
 			And there is a color wheel around it so it is easy to read off the direction
 		visualized differently than the vector. 2D as opposed to 3D
 
-	The bivector
-		Addition
-			So you get the unit vector in the intersection line (dare I ask, the positive or negative one?)
-
 	Vectors
+		Maybe for positive and negative vectors, could have something on one side of it, not the end.
 		The bivector situation is confusing and there's no way around that. So whatever confusion you think vector thing introduces, it's maybe already there
 		Arrow
 			Can be anywhere and so long as its length is the same you can think of it as the same thing
@@ -58,7 +47,9 @@
 			It's a little surprising that adding arrows in any order gets the same result
 				This tells you that it is best to think of them all, equally, being taken away from the origin
 
-	Bivector addition
+	Bivectors
+		Bivector-bivector wedge - do you make the triangle as well?
+		So you get the unit vector in the intersection line (dare I ask, the positive or negative one?)
 		Make them rectangles with unit length on side that is the shared line
 		Attach them along that side
 		They "Snap" to the hypotenuse
@@ -83,7 +74,7 @@
 
 function initMultivectorAppearances()
 {
-	let vectorRadius = .25
+	let vectorRadius = .19
 	let vectorGeometry = new THREE.CylinderBufferGeometry(0.,vectorRadius,1.,16,1,false);
 	vectorGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.,.5,0.))
 
@@ -91,12 +82,12 @@ function initMultivectorAppearances()
 	let circleGeometry = new THREE.CircleBufferGeometry(1.,32)
 	let scalarUnitGeometry = new THREE.CircleGeometry(.5, 32)
 
-	let positiveColor = 0xFF0000
-	let negativeColor = 0x0000FF
+	let positiveColor = discreteViridis[0].hex //Red is generally held as a bad thing so
+	let negativeColor = discreteViridis[2].hex
 
 	//surely frontside?
-	let bivecMaterialFront = new THREE.MeshStandardMaterial({color:0xFF0000,transparent:true,opacity:.6,side:THREE.FrontSide})
-	let bivecMaterialBack = new THREE.MeshStandardMaterial({color:0x0000FF,transparent:true,opacity:.6,side:THREE.BackSide})
+	let bivecMaterialFront = new THREE.MeshStandardMaterial({	color:positiveColor,transparent:true, opacity:.6, side:THREE.FrontSide})
+	let bivecMaterialBack =  new THREE.MeshStandardMaterial({	color:negativeColor,transparent:true, opacity:.6, side:THREE.BackSide})
 
 	let trivectorGeometry = new THREE.SphereBufferGeometry(1.,32,16)
 	let trivectorMaterial = new THREE.MeshStandardMaterial()
@@ -107,8 +98,7 @@ function initMultivectorAppearances()
 		scene.add(multivec)
 
 		//maaaaybe you shouldn't have this because it's stateful? Yeah no shut up
-		multivec.elements = new Float32Array(8);
-		multivec.elements[0] = 1. //identity
+		multivec.elements = MathematicalMultivector() //identity
 		if(elements !== undefined)
 			for(let i = 0; i < 8; i++)
 				multivec.elements[i] = elements[i]

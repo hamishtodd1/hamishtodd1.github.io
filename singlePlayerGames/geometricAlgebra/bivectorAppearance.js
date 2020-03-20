@@ -1,70 +1,31 @@
 /*
-	To make them merge, urgh
+	Liquid
+		Hybrid approach?
+			So long as you start the points off in a parallelogram shape, possibly it is ok for them to twitch a little before moving
+			Interpolate the distance function between some value and some other?
+		Could use GL_POINTS to avoid overdraw
+			Points need a bigger radius than the balls, specifically big enough to contain the largest smoothMin extension
+			On the other hand there might be some point at which you're zoomed all the way in on it
+		Balls and springs
+			Triangles area preserved
+			The vertices are at the boundary, and are connected with springs to the middle
+			You can change the length of the springs
+			No good for merging though
 
-	bivector is swirling in the orientation direction, that's what ends up making it circular
-
-	So long as you start the points off in a parallelogram shape, possibly it is ok for them to twitch a little before moving
-
-	Could use GL_POINTS to avoid overdraw
-	Points need a bigger radius than the balls, specifically big enough to contain the largest smoothMin extension
-	On the other hand there might be some point at which you're zoomed all the way in on it
-
-	This may be astonishingly misguided and you are better off leaving it to the artist
-
-	So long as you never see the things rotating, it is probably ok for there to be an arbitrary cutoff in what is red and what is blue
-
-	Amount of time this is worth?
-		May turn out to be unnecessary
-		Bivectors and trivectors are quite interesting and exotic. It makes sense to give them an intriguing characterization
-
-	Addition
-		They glob together on the side where they are both the same color
-
-	Liquid simulation
-		Set of balls with momentum, which can be confined to a plane or line or whatever
-		For now, have the vertex positions calculated on the CPU. Ideally, no round trip needed
-		Some underlying forcefield that sends them to the shape you want
-			Probably represented as a texture
-			probably just fill in the shape you want in the texture with black (velocities = 0)
-				all other pixels are "pointed" in the direction of the nearest bit of that shape
-		They bounce off each other / repel
-		"Metaballs" in appearance
-
-	Balls and springs
-		The vertices are at the boundary, and are connected with springs to the middle
-		You can change the length of the springs
-		No good for merging though
-
-	Bivector-bivector wedge - do you make the triangle as well?
-
-	Urgh you might want this on a deadline
+	Meta
+		most important is to conserve area
+		This may be astonishingly misguided and you are better off leaving it to the artist
+		Amount of time this is worth?
+			May turn out to be unnecessary
+			Bivectors and trivectors are quite interesting and exotic. It makes sense to give them an intriguing characterization
 
 	Which bivectors are positive, which negative?
-		Right hand rule! x^y = red
-		The going idea currently is that it's whirlpool-like
-		Whatever you decide distinguishes clockwise and anticlockwise (positive and negative) bivectors, that surely applies to vectors
-			Maybe you can even deduce it from the trivectors
-		Choose a plane:
-			y=0
-				People do think of "up" as being special
-				Conjugation is fundamental
-			x+y+z=0
-				It seems like for vectors on the x,y,z axes you definitely know which are positive, like this is embedded in your system
-			z=0
-				This may be just a question of perspective
-		It seems like turning the plane around actually DOES turn red into blue?
-			Yes, in the same way that looking at the same vector from a different 
-			These are spatial things. Of *course* changing your perspective changes the thing itself
-		Surely it is arbitary, same as right hand/left hand. The important thing is that for a given plane, 
-			whichever ones you decide are positive are all a positive multiple of one another and
-			whichever ones you decide are negative are all a positive multiple of one another
-		So:
-			get the normal vector to that plane
-			check its dot product with the vector(float_min,0.,1.)
-			If it's positive your bivectors are one way, negative another
-			Ideally a vector such that dot product is never 0. If it is sometimes 0 you need to divide that plane in half too
+		Look if you're asking "what is the bivector that gets vector a to vector b?" Then you can have your answer, it's red or blue depending on clockwise or counter
+		Obviously (hah, except for story with dad) if you turn two vectors around you are changing
+		Why don't vectors have this going on?
 
 	Other ideas
+		little ripples going diagonally
 		Requirements:
 			ability to control it
 			probably ability to know when
@@ -72,7 +33,7 @@
 			There are going to be multiple blobs in the same plane that get combined into one
 			It probably needs to be able to become LOTS of special-case things, probably even take on special case animations
 				For example, say there's some new scene where the bivector has some specific interesting embodiment
-			Should converge fast, ideally fast enough that
+			Should converge fast, ideally fast enough to know exactly how to control
 		Some geometric flow. It might be a scalar field
 			Geodesic flow preserves volume
 				It would be great to know this because it'd be transferrable to a project related to hamiltonians / stat mech
@@ -85,38 +46,152 @@
 			ALGORITHMS FOR AREA PRESERVING FLOWS
 		Diffusion?
 			Very simple equation of course
-		Masses and springs
-			Triangles area preserved
 		Loads of special cases
 			Would be nice if you can find some underlying thing
 */
 
-async function initBivectorAppearance()
+function BivectorAppearance()
+{
+	let numPieces = 60;
+	let piecesPositions = Array(numPieces)
+	let piecesBottomEdges = Array(numPieces)
+	let piecesSideEdges = Array(numPieces)
+	//TODO vertex attributes
+	for (let i = 0; i < numPieces; i++)
+	{
+		piecesPositions[i] = new THREE.Vector3(i * 2., 0., 0.)
+		piecesBottomEdges[i] = new THREE.Vector3(1., 0., 0.)
+		piecesSideEdges[i] = new THREE.Vector3(0., 1., 0.)
+	}
+
+	let geo = new THREE.Geometry()
+	geo.vertices = Array(numPieces * 4)
+	geo.faces = Array(numPieces * 2)
+	for (let i = 0; i < numPieces; i++)
+	{
+		geo.vertices[i * 4 + 0] = new THREE.Vector3()
+		geo.vertices[i * 4 + 1] = new THREE.Vector3()
+		geo.vertices[i * 4 + 2] = new THREE.Vector3()
+		geo.vertices[i * 4 + 3] = new THREE.Vector3()
+
+		geo.faces[i * 2 + 0] = new THREE.Face3(i * 4 + 0, i * 4 + 1, i * 4 + 2)
+		geo.faces[i * 2 + 1] = new THREE.Face3(i * 4 + 1, i * 4 + 3, i * 4 + 2)
+	}
+
+	let bivector = new THREE.Object3D()
+	scene.add(bivector)
+	let front = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0xFF0000, side: THREE.FrontSide, transparent: true, opacity: .6 }))
+	let back =  new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0x0000FF, side: THREE.BackSide, transparent: true, opacity: .6 }))
+	bivector.add(front, back)
+
+	let style = "parallelogram"
+	let bottomEdge =new THREE.Vector3(3.,0.,0.) //0 is "lower", clockwise of the second one, kinda like x axis and y
+	let sideEdge = 	new THREE.Vector3(3.,3.,0.)
+	
+	let v = new THREE.Vector3()
+	let mathematicalBivector = wedge(bottomEdge,sideEdge)
+	updateFunctions.push(function()
+	{
+		let bivectorMagnitude = Math.sqrt(multivectorDot(mathematicalBivector, mathematicalBivector))
+
+		// if( frameCount === 40)
+		// {
+		// 	style = "square"
+		// 	let edgeLen = Math.sqrt(bivectorMagnitude)
+		
+		// 	bottomEdge.set(edgeLen,0.,0.)
+		// 	sideEdge.set(0., edgeLen, 0.)
+		// }
+
+		if( frameCount === 41)
+		{
+			style = "slice"
+
+			//problem: not enough of the things, probably. Subdivide? Urgh
+			//you would want to make them smaller than unit area
+		}
+
+		if(style === "parallelogram" || style === "square")
+		{
+			let pieceSideEdgeProportion = bottomEdge.length() / bivectorMagnitude //because algebra you did
+			let pieceSideEdge = sideEdge.clone().multiplyScalar(pieceSideEdgeProportion)
+			let pieceBottomEdge = bottomEdge.clone().normalize()
+			// debugger
+
+			let pieceIndex = 0;
+			for(let i = 0., il = bottomEdge.length(); i < il; i++)
+			{
+				let bottomEdgeShortener = i + 1. > il ? il - i : 1.
+				for (let j = 0., jl = 1./pieceSideEdgeProportion; j < jl; j++)
+				{
+					let pieceSideEdgeShortener = j + 1. > jl ? jl - j : 1.
+
+					piecesPositions[pieceIndex].set(0.,0.,0.) // cooooould give it a position
+					piecesPositions[pieceIndex].addScaledVector(pieceBottomEdge, i)
+					piecesPositions[pieceIndex].addScaledVector(pieceSideEdge, j)
+
+					piecesBottomEdges[pieceIndex].copy(pieceBottomEdge).multiplyScalar(bottomEdgeShortener)
+					piecesSideEdges[pieceIndex].copy(pieceSideEdge).multiplyScalar( pieceSideEdgeShortener)
+					pieceIndex++
+					if(pieceIndex >= numPieces)
+					{
+						console.error("more pieces needed")
+						break
+					}
+				}
+			}
+
+			for (let i = pieceIndex; i < numPieces; i++)
+			{
+				piecesPositions[i].set(0.,0.,0.)
+				piecesBottomEdges[i].set(0.,0.,0.)
+				piecesSideEdges[i].set(0.,0.,0.)
+			}
+		}
+
+		for (let i = 0; i < numPieces; i++)
+		{
+			v.copy(piecesPositions[i])
+			geo.vertices[i * 4 + 0].lerp(v, .1)
+			v.copy(piecesPositions[i]).add(piecesBottomEdges[i])
+			geo.vertices[i * 4 + 1].lerp(v, .1)
+			v.copy(piecesPositions[i]).add(piecesSideEdges[i])
+			geo.vertices[i * 4 + 2].lerp(v, .1)
+			v.copy(piecesPositions[i]).add(piecesBottomEdges[i]).add(piecesSideEdges[i])
+			geo.vertices[i * 4 + 3].lerp(v, .1)
+		}
+		geo.verticesNeedUpdate = true
+	})
+
+	return bivector
+}
+
+async function initPerimeterBivectorAppearance()
 {
 	// initFluidBivectorAppearance()
 	// return
 
-	let interior = new THREE.Mesh(new THREE.Geometry(),new THREE.MeshBasicMaterial({color:0xFF0000, side:THREE.DoubleSide,transparent:true,opacity:.6}))
-	let exterior = new THREE.Mesh(new THREE.Geometry(),new THREE.MeshBasicMaterial({color:0x0000FF, side:THREE.DoubleSide,transparent:true,opacity:.6}))
+	let interior = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({ color: 0xFF0000, side: THREE.DoubleSide, transparent: true, opacity: .6 }))
+	let exterior = new THREE.Mesh(new THREE.Geometry(), new THREE.MeshBasicMaterial({ color: 0x0000FF, side: THREE.DoubleSide, transparent: true, opacity: .6 }))
 
 	let bivectorAppearance = new THREE.Group()
-	bivectorAppearance.add(interior,exterior)
+	bivectorAppearance.add(interior, exterior)
 	scene.add(bivectorAppearance)
 
-	let bandLength = 32+1
+	let bandLength = 32 + 1
 	function fillIn(geometry)
 	{
-		for(let i = 0; i < bandLength; i++)
+		for (let i = 0; i < bandLength; i++)
 		{
-			geometry.vertices[i*2+0] = new THREE.Vector3()
-			geometry.vertices[i*2+1] = new THREE.Vector3()
+			geometry.vertices[i * 2 + 0] = new THREE.Vector3()
+			geometry.vertices[i * 2 + 1] = new THREE.Vector3()
 
-			if( i !== 0 )
+			if (i !== 0)
 			{
 				geometry.faces.push(
-					new THREE.Face3(i*2-2,i*2+1,i*2  ), //0,3,2		2| /|3
-					new THREE.Face3(i*2-2,i*2-1,i*2+1)  //0,1,3		0|/_|1
-					)
+					new THREE.Face3(i * 2 - 2, i * 2 + 1, i * 2), //0,3,2		2| /|3
+					new THREE.Face3(i * 2 - 2, i * 2 - 1, i * 2 + 1)  //0,1,3		0|/_|1
+				)
 			}
 		}
 	}
@@ -125,27 +200,27 @@ async function initBivectorAppearance()
 
 	function bandVertexArray()
 	{
-		let arr = Array(bandLength*2)
-		for(let i = 0; i < bandLength*2; i++)
+		let arr = Array(bandLength * 2)
+		for (let i = 0; i < bandLength * 2; i++)
 			arr[i] = new THREE.Vector3()
 
 		return arr
 	}
 
 	let iv = interior.geometry.vertices
-	for(let i = 0; i < bandLength; i++)
+	for (let i = 0; i < bandLength; i++)
 	{
-		iv[i*2+0].set(1.,i*1,0.)
-		iv[i*2+1].set(2.,i*1,0.)
+		iv[i * 2 + 0].set(1., i * 1, 0.)
+		iv[i * 2 + 1].set(2., i * 1, 0.)
 	}
 
 	let ev = exterior.geometry.vertices
-	for(let i = 0; i < bandLength; i++)
+	for (let i = 0; i < bandLength; i++)
 	{
-		ev[i*2+0].set(.5,i*1,0.)
-		ev[i*2+1].set(1.,i*1,0.)
+		ev[i * 2 + 0].set(.5, i * 1, 0.)
+		ev[i * 2 + 1].set(1., i * 1, 0.)
 	}
-	
+
 	let circleValues = null
 	let sliceValues = null
 	let squareValues = null
@@ -222,26 +297,26 @@ async function initBivectorAppearance()
 		}
 	}
 
-	for(let i = 0, il = ev.length; i < il; i++)
+	for (let i = 0, il = ev.length; i < il; i++)
 	{
 		ev[i].copy(sliceValues.ev[i])
 		iv[i].copy(sliceValues.iv[i])
 	}
 
 	let valuesToLerpTo = squareValues
-	updateFunctions.push(function()
+	updateFunctions.push(function ()
 	{
-		for(let i = 0, il = ev.length; i < il; i++)
+		for (let i = 0, il = ev.length; i < il; i++)
 		{
-			ev[i].lerp(valuesToLerpTo.ev[i],.1)
-			iv[i].lerp(valuesToLerpTo.iv[i],.1)
+			ev[i].lerp(valuesToLerpTo.ev[i], .1)
+			iv[i].lerp(valuesToLerpTo.iv[i], .1)
 		}
 
 		interior.geometry.verticesNeedUpdate = true
 		exterior.geometry.verticesNeedUpdate = true
 	})
 
-	bindButton("q",function()
+	bindButton("q", function ()
 	{
 		valuesToLerpTo = valuesToLerpTo == sliceValues ? squareValues : sliceValues
 	})
@@ -260,27 +335,27 @@ async function initFluidBivectorAppearance()
 	let positions = Array(numBlobs);
 	let velocities = Array(numBlobs); //next thing to do is get an array in there, suuuurely possible
 
-	for(let i = 0; i < numBlobs; i++)
+	for (let i = 0; i < numBlobs; i++)
 	{
 		velocities[i] = new THREE.Vector3()
 		positions[i] = new THREE.Vector3(
-			(Math.random()-.5) * 2.,
-			(Math.random()-.5) * 2.,
+			(Math.random() - .5) * 2.,
+			(Math.random() - .5) * 2.,
 			0.)
 	}
 
-	for(let i = 0; i < numBlobs; i++)
+	for (let i = 0; i < numBlobs; i++)
 	{
 		let index = Math.round(Math.random())
-		positions[i].setComponent(index,positions[i].getComponent(index) + 3.4)
+		positions[i].setComponent(index, positions[i].getComponent(index) + 3.4)
 	}
 
 	let material = new THREE.ShaderMaterial({
 		uniforms: {
-			positions: {value:positions},
-			radius: {value: .15},
-			smooshedness: {value: 0.7}, //1.45
-			bivector: {value:new THREE.Vector3()}
+			positions: { value: positions },
+			radius: { value: .15 },
+			smooshedness: { value: 0.7 }, //1.45
+			bivector: { value: new THREE.Vector3() }
 		}
 	});
 	await assignShader("bivectorVertex", material, "vertex")
@@ -292,16 +367,16 @@ async function initFluidBivectorAppearance()
 		// let pointLight = scene.children[2];
 	}
 
-	bindButton( "]",function(){},"", function()
+	bindButton("]", function () { }, "", function ()
 	{
 		material.uniforms.smooshedness.value += .03
-		log(material.uniforms.smooshedness.value )
-	} )
-	bindButton( "[",function(){},"", function()
+		log(material.uniforms.smooshedness.value)
+	})
+	bindButton("[", function () { }, "", function ()
 	{
 		material.uniforms.smooshedness.value -= .03
-		log(material.uniforms.smooshedness.value )
-	} )
+		log(material.uniforms.smooshedness.value)
+	})
 
 	let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(20., 20., 10, 10), material);
 	scene.add(plane);
@@ -313,22 +388,22 @@ async function initFluidBivectorAppearance()
 	// scene.add(fieldIndicator)
 
 	let circleCenter = new THREE.Vector3()
-	bindButton("a",function()
+	bindButton("a", function ()
 	{
-		if(circleCenter.equals(zeroVector))
+		if (circleCenter.equals(zeroVector))
 		{
 			circleCenter.copy(xUnit).multiplyScalar(3.)
 		}
 		else
 		{
-			circleCenter.set(0.,0.,0.)
+			circleCenter.set(0., 0., 0.)
 		}
 	})
 
 	let inherentFriction = .0015
 	let repulsiveForceMagnitude = .00200001;
 	let fieldMagnitude = .0020001
-	updateFunctions.push( function() 
+	updateFunctions.push(function () 
 	{
 		// let acceleration = new THREE.Vector3()
 		// function repulsion(distance)
@@ -336,16 +411,16 @@ async function initFluidBivectorAppearance()
 
 		// }
 
-		material.uniforms.bivector.value.fromArray(elements,4)
+		material.uniforms.bivector.value.fromArray(elements, 4)
 
-		if(frameCount < 30)
+		if (frameCount < 30)
 			return
 
 		let iterations = 1;
-		for(let iter = 0; iter < iterations; iter++)
+		for (let iter = 0; iter < iterations; iter++)
 		{
 			// let fieldAcceleration = new THREE.Vector3()
-			for(let i = 0; i < numBlobs; i++)
+			for (let i = 0; i < numBlobs; i++)
 			{
 				/*
 					Arbitrary forcefield
@@ -364,24 +439,24 @@ async function initFluidBivectorAppearance()
 				*/
 
 				let p = positions[i]
-				
+
 				// //rectangle
 				// // if( Math.abs(p.x) > rectangleWidth / 2. || Math.abs(p.y) > rectangleHeight / 2. )
 				// // 	fieldAcceleration.copy(p).negate().setLength(1.)
 
 				//circular
-				fieldAcceleration.set(0.,0.,0.)
+				fieldAcceleration.set(0., 0., 0.)
 				// if( p.length() > circleRadius )
-				fieldAcceleration.copy(p).sub(circleCenter).negate().multiplyScalar( fieldMagnitude )
+				fieldAcceleration.copy(p).sub(circleCenter).negate().multiplyScalar(fieldMagnitude)
 
 				velocities[i].add(fieldAcceleration)
 
 				//sponge balls
 				let displacement = new THREE.Vector3()
-				for(let j = i+1; j < numBlobs; j++)
+				for (let j = i + 1; j < numBlobs; j++)
 				{
-					displacement.subVectors(p,positions[j])
-					if( displacement.length() < material.uniforms.radius.value * 2. )
+					displacement.subVectors(p, positions[j])
+					if (displacement.length() < material.uniforms.radius.value * 2.)
 					{
 						// debugger;
 						displacement.setLength(repulsiveForceMagnitude / displacement.length())
@@ -391,14 +466,14 @@ async function initFluidBivectorAppearance()
 					}
 				}
 
-				velocities[i].setLength( Math.max( velocities[i].length() - inherentFriction, 0. ) )
+				velocities[i].setLength(Math.max(velocities[i].length() - inherentFriction, 0.))
 			}
 
-			for(let i = 0; i < numBlobs; i++)
+			for (let i = 0; i < numBlobs; i++)
 			{
 				positions[i].add(velocities[i])
 				positions[i].z = 0.; //TODO better projection. If only there was some kind of mathematical system that etc
 			}
 		}
-	} )
+	})
 }

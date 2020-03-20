@@ -78,7 +78,8 @@
 
 async function init()
 {
-	// await initBivectorAppearance()
+	let bivectorAppearance = BivectorAppearance()
+	scene.add(bivectorAppearance)
 	// return
 
 	initMultivectorAppearances()
@@ -88,6 +89,8 @@ async function init()
 
 	// initTankScene()
 	// return
+
+
 
 	{
 		let restartButtonObj = makeTextSign("Restart")

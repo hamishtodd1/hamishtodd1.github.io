@@ -20,7 +20,7 @@ const LEFT_CONTROLLER_INDEX = 1-RIGHT_CONTROLLER_INDEX;
 const log = console.log
 
 //------global variables
-const camera = new THREE.PerspectiveCamera( 0,0,0.01, 10);
+const camera = new THREE.PerspectiveCamera( 0.,0.,.1, 10.);
 // new THREE.OrthographicCamera( -1.,1.,1.,-1.,0.01, 10);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 const scene = new THREE.Scene().add(camera, camera);

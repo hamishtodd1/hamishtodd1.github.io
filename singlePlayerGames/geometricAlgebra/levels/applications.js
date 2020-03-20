@@ -61,6 +61,7 @@
 		Planetary motion
 			A bomb going off and lots of pieces of shrapnel. You have to do lots of them
 		Mechanical engineering
+			Different sized cylinders rolling down straight slope
 			Make a clock! Haha it's literally euler. Grandfather clock would be nice
 			Cogs
 				funky mechanical leg https://youtu.be/wFqnH2iemIc?t=46

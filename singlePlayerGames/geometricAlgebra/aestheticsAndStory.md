@@ -71,3 +71,7 @@ Story
 		Tait was evil, full of wishful thinking and idiotic faith. Hating of divorce and secularity, everything  Clifford wasn't. Kicking a man while he was dying
 	Separate office for Maxwell or faraday, more Victorian plus crackling electricity
 		Faraday: I don't see why you had to bring maths into it
+
+
+		margaret hamilton
+		robots?

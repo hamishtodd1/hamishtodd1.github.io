@@ -7,7 +7,8 @@
 
 	Arguably the add should contain a load of multiplies. Er, other way around surely?
 
-	Other operations, ugh
+	Other operations, sigh
+		See how far you can get ok
 		Derivative is taken with respect to whatever is varying them in the output
 		"to the power of"
 			Gives you square root, reciprocals-> division
@@ -17,6 +18,7 @@
 		Would be nice if that could emerge
 		Integral?
 		e^ is very good because you don't even have to give two inputs
+		If you want to exponentiate, how about this feedback thing/
 		Animation:
 			You put in a bivector. It becomes an angle wedge, area conserving obv
 			The wedge is positioned such that the real line cuts it in half

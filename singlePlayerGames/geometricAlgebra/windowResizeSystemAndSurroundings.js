@@ -1,26 +1,21 @@
-//every part of this goes out the window in VR
+/*
+	every part of this goes out the window in VR
+	It should be the case that if you turn the whole thing upside down it should feel ok
+	so fretting about whether up, down, left, right is positive and negative(except relatively) is silly
+*/
 
 function initWindowResizeSystemAndSurroundings(renderer)
 {
-	camera.topAtZZero = 9.; //want unit vectors to be a reasonable size. Everything comes from this parameter.
-	camera.position.z = camera.topAtZZero*3.5; //subjective
-
 	{
-		let depth = camera.topAtZZero * 2;
 		var stage = new THREE.Mesh( 
-			new THREE.BoxGeometry(1.,camera.topAtZZero*2,depth),
+			new THREE.BoxGeometry(1.,1.,1.),
 			new THREE.MeshStandardMaterial({color:0xFFFFFF,side:THREE.BackSide})
 		);
-		stage.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.,0.,-.5 * depth))
-
-		camera.near = .1
-		camera.far = camera.position.z + depth + .01
-		camera.updateProjectionMatrix()
-
+		stage.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.,0.,-.5))
+		scene.add(stage)
 		stage.material.metalness = 0.1;
 		stage.material.roughness = 0.2;
 		stage.receiveShadow = true;
-		scene.add(stage)
 	}
 
 	function respondToResize() 
@@ -39,25 +34,40 @@ function initWindowResizeSystemAndSurroundings(renderer)
 
 		camera.updateProjectionMatrix();
 	}
-	respondToResize();
 	window.addEventListener( 'resize', respondToResize, false );
 
 	{
-		var pointLight = new THREE.PointLight(0xFFFFFF, 0.4, camera.position.z);
-
-		pointLight.shadow.camera.far = pointLight.distance;
-		pointLight.shadow.camera.near = pointLight.distance * .005;
+		var pointLight = new THREE.PointLight(0xFFFFFF, 0.4, 0.);
 		pointLight.shadow.mapSize.width = 1024;
 		pointLight.shadow.mapSize.height = pointLight.shadow.mapSize.width;
-		pointLight.shadow.camera.updateProjectionMatrix()
-
 		pointLight.castShadow = true;
-		pointLight.position.set(-camera.topAtZZero,camera.topAtZZero,camera.topAtZZero*.25)
-		pointLight.position.multiplyScalar(.5)
 		scene.add( pointLight );
 
 		scene.add( new THREE.AmbientLight( 0xFFFFFF, 0.7 ) );
 	}
+
+	camera.setTopAtZZero = function(newTopAtZZero)
+	{
+		camera.topAtZZero = newTopAtZZero;
+		camera.position.z = camera.topAtZZero * 3.5; //subjective
+
+		pointLight.distance = camera.position.z
+		pointLight.shadow.camera.far = pointLight.distance;
+		pointLight.shadow.camera.near = pointLight.distance * .005;
+		pointLight.shadow.camera.updateProjectionMatrix()
+
+		pointLight.position.set(-camera.topAtZZero, camera.topAtZZero, camera.topAtZZero * .25)
+		pointLight.position.multiplyScalar(.5)
+
+		stage.scale.z = camera.topAtZZero * 2.
+		stage.scale.y = stage.scale.z
+
+		camera.far = camera.position.z + stage.scale.z + .01
+		respondToResize();
+	}
+
+	//want unit vectors to be a reasonable size
+	camera.setTopAtZZero(6.)
 
 	return stage;
 }
