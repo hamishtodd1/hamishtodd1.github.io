@@ -21,7 +21,7 @@
 
 	Which bivectors are positive, which negative?
 		Look if you're asking "what is the bivector that gets vector a to vector b?" Then you can have your answer, it's red or blue depending on clockwise or counter
-		Obviously (hah, except for story with dad) if you turn two vectors around you are changing
+		Obviously (hah, except for story with dad) if you turn two vectors around you are changing, therefore one side is one way and one t'other
 		Why don't vectors have this going on?
 
 	Other ideas
@@ -49,122 +49,6 @@
 		Loads of special cases
 			Would be nice if you can find some underlying thing
 */
-
-function BivectorAppearance()
-{
-	let numPieces = 60;
-	let piecesPositions = Array(numPieces)
-	let piecesBottomEdges = Array(numPieces)
-	let piecesSideEdges = Array(numPieces)
-	//TODO vertex attributes
-	for (let i = 0; i < numPieces; i++)
-	{
-		piecesPositions[i] = new THREE.Vector3(i * 2., 0., 0.)
-		piecesBottomEdges[i] = new THREE.Vector3(1., 0., 0.)
-		piecesSideEdges[i] = new THREE.Vector3(0., 1., 0.)
-	}
-
-	let geo = new THREE.Geometry()
-	geo.vertices = Array(numPieces * 4)
-	geo.faces = Array(numPieces * 2)
-	for (let i = 0; i < numPieces; i++)
-	{
-		geo.vertices[i * 4 + 0] = new THREE.Vector3()
-		geo.vertices[i * 4 + 1] = new THREE.Vector3()
-		geo.vertices[i * 4 + 2] = new THREE.Vector3()
-		geo.vertices[i * 4 + 3] = new THREE.Vector3()
-
-		geo.faces[i * 2 + 0] = new THREE.Face3(i * 4 + 0, i * 4 + 1, i * 4 + 2)
-		geo.faces[i * 2 + 1] = new THREE.Face3(i * 4 + 1, i * 4 + 3, i * 4 + 2)
-	}
-
-	let bivector = new THREE.Object3D()
-	scene.add(bivector)
-	let front = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0xFF0000, side: THREE.FrontSide, transparent: true, opacity: .6 }))
-	let back =  new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0x0000FF, side: THREE.BackSide, transparent: true, opacity: .6 }))
-	bivector.add(front, back)
-
-	let style = "parallelogram"
-	let bottomEdge =new THREE.Vector3(3.,0.,0.) //0 is "lower", clockwise of the second one, kinda like x axis and y
-	let sideEdge = 	new THREE.Vector3(3.,3.,0.)
-	
-	let v = new THREE.Vector3()
-	let mathematicalBivector = wedge(bottomEdge,sideEdge)
-	updateFunctions.push(function()
-	{
-		let bivectorMagnitude = Math.sqrt(multivectorDot(mathematicalBivector, mathematicalBivector))
-
-		// if( frameCount === 40)
-		// {
-		// 	style = "square"
-		// 	let edgeLen = Math.sqrt(bivectorMagnitude)
-		
-		// 	bottomEdge.set(edgeLen,0.,0.)
-		// 	sideEdge.set(0., edgeLen, 0.)
-		// }
-
-		if( frameCount === 41)
-		{
-			style = "slice"
-
-			//problem: not enough of the things, probably. Subdivide? Urgh
-			//you would want to make them smaller than unit area
-		}
-
-		if(style === "parallelogram" || style === "square")
-		{
-			let pieceSideEdgeProportion = bottomEdge.length() / bivectorMagnitude //because algebra you did
-			let pieceSideEdge = sideEdge.clone().multiplyScalar(pieceSideEdgeProportion)
-			let pieceBottomEdge = bottomEdge.clone().normalize()
-			// debugger
-
-			let pieceIndex = 0;
-			for(let i = 0., il = bottomEdge.length(); i < il; i++)
-			{
-				let bottomEdgeShortener = i + 1. > il ? il - i : 1.
-				for (let j = 0., jl = 1./pieceSideEdgeProportion; j < jl; j++)
-				{
-					let pieceSideEdgeShortener = j + 1. > jl ? jl - j : 1.
-
-					piecesPositions[pieceIndex].set(0.,0.,0.) // cooooould give it a position
-					piecesPositions[pieceIndex].addScaledVector(pieceBottomEdge, i)
-					piecesPositions[pieceIndex].addScaledVector(pieceSideEdge, j)
-
-					piecesBottomEdges[pieceIndex].copy(pieceBottomEdge).multiplyScalar(bottomEdgeShortener)
-					piecesSideEdges[pieceIndex].copy(pieceSideEdge).multiplyScalar( pieceSideEdgeShortener)
-					pieceIndex++
-					if(pieceIndex >= numPieces)
-					{
-						console.error("more pieces needed")
-						break
-					}
-				}
-			}
-
-			for (let i = pieceIndex; i < numPieces; i++)
-			{
-				piecesPositions[i].set(0.,0.,0.)
-				piecesBottomEdges[i].set(0.,0.,0.)
-				piecesSideEdges[i].set(0.,0.,0.)
-			}
-		}
-
-		for (let i = 0; i < numPieces; i++)
-		{
-			v.copy(piecesPositions[i])
-			geo.vertices[i * 4 + 0].lerp(v, .1)
-			v.copy(piecesPositions[i]).add(piecesBottomEdges[i])
-			geo.vertices[i * 4 + 1].lerp(v, .1)
-			v.copy(piecesPositions[i]).add(piecesSideEdges[i])
-			geo.vertices[i * 4 + 2].lerp(v, .1)
-			v.copy(piecesPositions[i]).add(piecesBottomEdges[i]).add(piecesSideEdges[i])
-			geo.vertices[i * 4 + 3].lerp(v, .1)
-		}
-		geo.verticesNeedUpdate = true
-	})
-
-	return bivector
-}
 
 async function initPerimeterBivectorAppearance()
 {

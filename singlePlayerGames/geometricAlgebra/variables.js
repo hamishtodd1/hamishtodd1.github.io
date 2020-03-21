@@ -6,6 +6,8 @@ const yUnit = new THREE.Vector3(0,1,0);
 const xUnit = new THREE.Vector3(1,0,0);
 const zeroVector = new THREE.Vector3(0.,0.,0.);
 
+const tempVector = new THREE.Vector3()
+
 const zeroMatrix = new THREE.Matrix4().set(0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.)
 
 //-----Fundamental

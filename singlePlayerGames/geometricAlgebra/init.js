@@ -78,8 +78,6 @@
 
 async function init()
 {
-	let bivectorAppearance = BivectorAppearance()
-	scene.add(bivectorAppearance)
 	// return
 
 	initMultivectorAppearances()

@@ -48,6 +48,8 @@
 				This tells you that it is best to think of them all, equally, being taken away from the origin
 
 	Bivectors
+		bivector-scalar: the scalar units go into a square, disperse, the bivectors get copied, then merge
+		bivector bivector multiplication: just rotate 90 deg
 		Bivector-bivector wedge - do you make the triangle as well?
 		So you get the unit vector in the intersection line (dare I ask, the positive or negative one?)
 		Make them rectangles with unit length on side that is the shared line
@@ -85,9 +87,8 @@ function initMultivectorAppearances()
 	let positiveColor = discreteViridis[0].hex //Red is generally held as a bad thing so
 	let negativeColor = discreteViridis[2].hex
 
-	//surely frontside?
-	let bivecMaterialFront = new THREE.MeshStandardMaterial({	color:positiveColor,transparent:true, opacity:.6, side:THREE.FrontSide})
-	let bivecMaterialBack =  new THREE.MeshStandardMaterial({	color:negativeColor,transparent:true, opacity:.6, side:THREE.BackSide})
+	let bivecMaterialClockwise = new THREE.MeshBasicMaterial({	color:positiveColor,transparent:true, opacity:1., side:THREE.FrontSide})
+	let bivecMaterialCounter =  new THREE.MeshBasicMaterial({	color:negativeColor,transparent:true, opacity:1., side:THREE.BackSide})
 
 	let trivectorGeometry = new THREE.SphereBufferGeometry(1.,32,16)
 	let trivectorMaterial = new THREE.MeshStandardMaterial()
@@ -103,12 +104,14 @@ function initMultivectorAppearances()
 			for(let i = 0; i < 8; i++)
 				multivec.elements[i] = elements[i]
 
+		elements = multivec.elements
+
 		multivec.getHeightWithPadding = function()
 		{
 			let biggestSoFar = 0.
 
 			if(multivec.elements[0] !== 0.)
-				biggestSoFar = scalarHeight
+				biggestSoFar = 1.
 
 			if( Math.abs(multivec.elements[2]) > biggestSoFar )
 				biggestSoFar = Math.abs(multivec.elements[2])
@@ -125,7 +128,6 @@ function initMultivectorAppearances()
 			return biggestSoFar + padding
 		}
 
-		let scalarHeight = .6
 		{
 			let scalar = new THREE.Group()
 			scalar.position.z = .001
@@ -177,7 +179,7 @@ function initMultivectorAppearances()
 				for (let i = 0; i < maxUnits; i++)
 					scalar.children[i].visible = i < Math.floor(Math.abs(s) )
 
-				scalar.material.color.setHex( s > 0.? positiveColor:negativeColor)
+				scalar.material.color.setHex(s > 0. ? discreteViridis[1].hex : discreteViridis[3].hex)
 
 				if(s != Math.round(s))
 				{
@@ -204,10 +206,10 @@ function initMultivectorAppearances()
 		}
 
 		{
-			let vecMesh = new THREE.Mesh( vectorGeometry, new THREE.MeshStandardMaterial() );
-			vecMesh.matrixAutoUpdate = false;
-			vecMesh.castShadow = true
-			multivec.add(vecMesh)
+			let vecAppearance = new THREE.Mesh( vectorGeometry, new THREE.MeshStandardMaterial() );
+			vecAppearance.matrixAutoUpdate = false;
+			vecAppearance.castShadow = true
+			multivec.add(vecAppearance)
 
 			multivec.setTo1Blade = function(newY)
 			{
@@ -233,83 +235,150 @@ function initMultivectorAppearances()
 				var newX = randomPerpVector( vecPart ).normalize();
 				var newZ = vecPart.clone().cross(newX).normalize().negate();
 
-				vecMesh.matrix.makeBasis( newX, vecPart, newZ );
-				vecMesh.matrix.setPosition(vecPart.multiplyScalar(-.5))
+				vecAppearance.matrix.makeBasis( newX, vecPart, newZ );
+				vecAppearance.matrix.setPosition(vecPart.multiplyScalar(-.5))
 
 				if(vecPart.equals(zeroVector))
 				{
-					multivec.remove(vecMesh)
+					multivec.remove(vecAppearance)
 				}
 				else
 				{
-					multivec.add(vecMesh)
+					multivec.add(vecAppearance)
 				}
 			}
 			multivec.updateVectorAppearance();
 		}
 
 		{
-			let parallelogram = new THREE.Group()
-			parallelogram.front = new THREE.Mesh(parallelogramGeometry, bivecMaterialFront);
-			parallelogram.front.castShadow = true
-			parallelogram.back = new THREE.Mesh(parallelogramGeometry, bivecMaterialBack)
-			parallelogram.back.castShadow = true
-			parallelogram.add(parallelogram.front,parallelogram.back)
-			parallelogram.matrixAutoUpdate = false;
-
-			multivec.setParallelogram = function(multivecA,multivecB)
+			let numPieces = 60;
+			let piecesPositions = Array(numPieces)
+			let piecesBottomEdges = Array(numPieces)
+			let piecesSideEdges = Array(numPieces)
+			//TODO vertex attributes
+			for (let i = 0; i < numPieces; i++)
 			{
-				let a = multivecA.elements
-				let b = multivecB.elements
-				parallelogram.matrix.set(
-					a[1], b[1], 0., (a[1] + b[1]) / -2.,
-					a[2], b[2], 0., (a[2] + b[2]) / -2.,
-					a[3], b[3], 1., (a[3] + b[3]) / -2.,
-					0.,0.,0.,1.
-					)
-				log(parallelogram.matrix)
+				piecesPositions[i] = new THREE.Vector3(i * 2., 0., 0.)
+				piecesBottomEdges[i] = new THREE.Vector3(1., 0., 0.)
+				piecesSideEdges[i] = new THREE.Vector3(0., 1., 0.)
+			}
 
-				// if(parallelogram.matrix.determinant() < 0.)
+			let geo = new THREE.Geometry()
+			geo.vertices = Array(numPieces * 4)
+			geo.faces = Array(numPieces * 2)
+			for (let i = 0; i < numPieces; i++)
+			{
+				geo.vertices[i * 4 + 0] = new THREE.Vector3()
+				geo.vertices[i * 4 + 1] = new THREE.Vector3()
+				geo.vertices[i * 4 + 2] = new THREE.Vector3()
+				geo.vertices[i * 4 + 3] = new THREE.Vector3()
+
+				geo.faces[i * 2 + 0] = new THREE.Face3(i * 4 + 0, i * 4 + 1, i * 4 + 2)
+				geo.faces[i * 2 + 1] = new THREE.Face3(i * 4 + 1, i * 4 + 3, i * 4 + 2)
+			}
+
+			let bivectorAppearance = new THREE.Object3D()
+			multivec.add(bivectorAppearance)
+			let clockwiseSide = new THREE.Mesh(geo, bivecMaterialClockwise)
+			let counterSide = new THREE.Mesh(geo, bivecMaterialCounter)
+			clockwiseSide.castShadow = true
+			counterSide.castShadow = true
+			bivectorAppearance.add(clockwiseSide, counterSide)
+
+			//alright so which way is it facing? the convention is that positive = clockwise if you're looking at it. OMFG IS THIS THE SAME THING
+			//Therefore if you're looking at
+
+			multivec.updateBivectorAppearance = function ()
+			{
+				//can change pair of vectors
+				//orientation
+			}
+
+			let style = "parallelogram"
+			let bottomEdge = new THREE.Vector3(1., 0., 0.) //0 is "lower", clockwise of the second one, kinda like x axis and y
+			let sideEdge = new THREE.Vector3(0.,1., 0.)
+			let position = new THREE.Vector3()
+
+			updateFunctions.push(function ()
+			{
+				let bivectorMagnitude = Math.sqrt( sq(elements[4]) + sq(elements[5]) + sq(elements[6]) )
+				let edgeLen = Math.sqrt(bivectorMagnitude)
+
+				//TODO this only works because this element is the only one.
+				if (elements[4] >= 0.)
+				{
+					bottomEdge.set(edgeLen, 0., 0.)
+					sideEdge.set(0., edgeLen, 0.)
+				}
+				else
+				{
+					bottomEdge.set(0., edgeLen, 0.)
+					sideEdge.set(edgeLen, 0., 0.)
+				}
+
+
+
+				// if (frameCount === 41)
 				// {
-				// 	//switch
+				// 	style = "slice"
+
+				// 	//problem: not enough of the things, probably. Subdivide? Urgh
+				// 	//you would want to make them smaller than unit area
+				// 	//better with uneven quadrilaterals really, fuck area preserving
 				// }
 
-				multivec.remove(circle)
-				if(multivec.elements[4] !== 0. || multivec.elements[5] !== 0. || multivec.elements[6] !== 0. )
-					multivec.add(parallelogram)
-				else
-					multivec.remove(parallelogram)
-			}
+				if (style === "parallelogram" || style === "square")
+				{
+					let pieceSideEdgeProportion = bottomEdge.length() / bivectorMagnitude //because algebra you did
+					let pieceSideEdge = sideEdge.clone().multiplyScalar(pieceSideEdgeProportion)
+					let pieceBottomEdge = bottomEdge.clone().normalize()
 
-			let circle = new THREE.Group()
-			circle.front = new THREE.Mesh(circleGeometry, bivecMaterialFront)
-			circle.front.castShadow = true
-			circle.back = new THREE.Mesh(circleGeometry, bivecMaterialBack)
-			circle.back.castShadow = true
-			circle.add(circle.front,circle.back)
-			
-			multivec.setCircle = function()
-			{
-				let area = Math.abs(multivec.elements[4]) //yeah not really because negativity also other elements
-				circle.scale.setScalar( Math.sqrt( area / Math.PI ) )
-				if(multivec.elements[4] < 0.)
-					circle.rotation.y = Math.PI
-				else
-					circle.rotation.y = 0.
+					position.addVectors(bottomEdge,sideEdge).multiplyScalar(-.5)
 
-				if(multivec.elements[5] !== 0. || multivec.elements[6] !== 0.)
-					log("not working yet")
+					let pieceIndex = 0;
+					for (let i = 0., il = bottomEdge.length(); i < il; i++)
+					{
+						let bottomEdgeShortener = i + 1. > il ? il - i : 1.
+						for (let j = 0., jl = 1. / pieceSideEdgeProportion; j < jl; j++)
+						{
+							let pieceSideEdgeShortener = j + 1. > jl ? jl - j : 1.
 
-				multivec.remove(parallelogram)
-				if(multivec.elements[4] !== 0. || multivec.elements[5] !== 0. || multivec.elements[6] !== 0. )
-					multivec.add(circle)
-				else
-					multivec.remove(circle)
+							piecesPositions[pieceIndex].copy(position) // cooooould give it a position
+							piecesPositions[pieceIndex].addScaledVector(pieceBottomEdge, i)
+							piecesPositions[pieceIndex].addScaledVector(pieceSideEdge, j)
 
-				//Properly: convert to matrix I suppose
-				// randomPerpVector(zAxis)
-			}
-			multivec.setCircle()
+							piecesBottomEdges[pieceIndex].copy(pieceBottomEdge).multiplyScalar(bottomEdgeShortener)
+							piecesSideEdges[pieceIndex].copy(pieceSideEdge).multiplyScalar(pieceSideEdgeShortener)
+							pieceIndex++
+							if (pieceIndex >= numPieces)
+							{
+								console.error("more pieces needed")
+								break
+							}
+						}
+					}
+
+					for (let i = pieceIndex; i < numPieces; i++)
+					{
+						piecesPositions[i].set(0., 0., 0.)
+						piecesBottomEdges[i].set(0., 0., 0.)
+						piecesSideEdges[i].set(0., 0., 0.)
+					}
+				}
+
+				for (let i = 0; i < numPieces; i++)
+				{
+					tempVector.copy(piecesPositions[i])
+					geo.vertices[i * 4 + 0].lerp(tempVector, .1)
+					tempVector.copy(piecesPositions[i]).add(piecesBottomEdges[i])
+					geo.vertices[i * 4 + 1].lerp(tempVector, .1)
+					tempVector.copy(piecesPositions[i]).add(piecesSideEdges[i])
+					geo.vertices[i * 4 + 2].lerp(tempVector, .1)
+					tempVector.copy(piecesPositions[i]).add(piecesBottomEdges[i]).add(piecesSideEdges[i])
+					geo.vertices[i * 4 + 3].lerp(tempVector, .1)
+				}
+				geo.verticesNeedUpdate = true
+			})
 		}
 
 		{
@@ -390,7 +459,7 @@ function initMultivectorAppearances()
 		{
 			multivec.updateScalarAppearance()
 			multivec.updateVectorAppearance()
-			multivec.setCircle()
+			multivec.updateBivectorAppearance()
 			multivec.updateTrivectorAppearance()
 
 			multivec.thingYouClick.scale.y = multivec.getHeightWithPadding()
