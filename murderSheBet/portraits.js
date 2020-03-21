@@ -43,7 +43,7 @@ function initPortraits()
 	portraitAdviceSign.children[0].position.y += 1.
 	portraitAdviceSign.scale.multiplyScalar(.1)
 	portraitAdviceSign.position.x = .5
-	portraitAdviceSign.position.y = .5
+	portraitAdviceSign.position.y = .2
 	portraitAdviceSign.position.z = selectionBox.position.z
 	scene.add(portraitAdviceSign)
 	updatables.push(portraitAdviceSign)

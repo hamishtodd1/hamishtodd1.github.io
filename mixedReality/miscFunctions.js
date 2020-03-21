@@ -1,3 +1,20 @@
+function SuperEllipseGeometry()
+{
+	let radius = 1.
+	let superEllipseGeometry = new THREE.CircleGeometry(1., 64)
+	let norm = 3.;
+	for (let i = 1; i < superEllipseGeometry.vertices.length; i++)
+	{
+		let ySign = superEllipseGeometry.vertices[i].y > 0. ? 1. : -1.;
+		let yAbs = Math.pow(1 - Math.pow(Math.abs(superEllipseGeometry.vertices[i].x), norm), 1 / norm)
+
+		superEllipseGeometry.vertices[i].set(superEllipseGeometry.vertices[i].x, ySign * yAbs, 0.)
+		superEllipseGeometry.vertices[i].multiplyScalar(radius)
+	}
+
+	return superEllipseGeometry
+}
+
 THREE.Vector2.prototype.swap = function()
 {
 	let temp = this.x;

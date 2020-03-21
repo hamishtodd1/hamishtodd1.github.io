@@ -17,7 +17,7 @@ async function initFloorAndSky()
 			floorTile.material.map = texture;
 		},
 		function ( xhr ) {}, function ( xhr ) {console.log( 'texture loading error' );}
-	);	
+	);
 
 	//------------Sky
 	let uniforms = {

@@ -4,6 +4,9 @@
 			"Therefore"
 			Probably
 			So
+
+	More tech
+		https://www.google.com/intl/en/chrome/demos/speech.html
 */
 
 let generalPadding = .1
@@ -32,13 +35,16 @@ async function init()
 
 	let currentCylinder = null
 
-	let newStatementSign = makeTextSign("New Statement")
-	scene.add(newStatementSign)
-	newStatementSign.position.y = camera.topAtZZero - newStatementSign.scale.y * .5 - .1
-	clickables.push(newStatementSign)
-	newStatementSign.onClick = function()
+	let newStatementButton = makeTextSign("New Statement")
+	scene.add(newStatementButton)
+	newStatementButton.position.y = camera.topAtZZero - newStatementButton.scale.y * .5 - .1
+	clickables.push(newStatementButton)
+	newStatementButton.onClick = function()
 	{
 		let newSign = makeTextSign("")
+		newSign.scale.multiplyScalar(.7)
+		newSign.material.side = THREE.DoubleSide
+		newSign.castShadow = true
 		scene.add(newSign)
 		transcriptionSign = newSign
 

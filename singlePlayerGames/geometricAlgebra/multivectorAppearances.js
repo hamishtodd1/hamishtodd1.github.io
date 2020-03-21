@@ -142,7 +142,8 @@ function initMultivectorAppearances()
 				else
 					newOne = new THREE.Mesh(new THREE.CircleGeometry(1., 32), scalar.material)
 
-				newOne.position.x = .5 + i
+				newOne.intendedPosition = new THREE.Vector3()
+				newOne.intendedPosition.x = .5 + i
 				newOne.castShadow = true
 				scalar.add(newOne)
 			}
@@ -161,12 +162,12 @@ function initMultivectorAppearances()
 					let diagOfThisLayer = 2 * currentLayer * (currentLayer - 1) / 2
 					let inSecondHalf = i > diagOfThisLayer
 
-					scalar.children[i].position
+					scalar.children[i].intendedPosition
 						.set(0.,0.,0.)
 						.addScaledVector(rightDown? yUnit : xUnit,currentLayer-1) //get you to the start
 						.addScaledVector(rightDown? xUnit : yUnit, inSecondHalf ? currentLayer-1 : i-sq(currentLayer-1))
 					if(inSecondHalf)
-						scalar.children[i].position.addScaledVector(rightDown ? yUnit : xUnit, -1 * (i-diagOfThisLayer) )
+						scalar.children[i].intendedPosition.addScaledVector(rightDown ? yUnit : xUnit, -1 * (i-diagOfThisLayer) )
 				}
 			}
 
@@ -201,6 +202,11 @@ function initMultivectorAppearances()
 					}
 				}
 			}
+			updateFunctions.push(function()
+			{
+				for(let i = 0; i < maxUnits; i++)
+					scalar.children[i].position.lerp(scalar.children[i].intendedPosition,.1)
+			})
 			multivec.updateScalarAppearance()
 		}
 

@@ -1,3 +1,12 @@
+/*
+	http://www.ams.org/publicoutreach/feature-column/fc-2011-10
+	https://www.youtube.com/watch?v=r3f__K8aoIE
+	http://www.ysbl.york.ac.uk/~cowtan/sfapplet/sftut1.html
+	http://www.ysbl.york.ac.uk/~cowtan/sfapplet/src/sfcalc.py
+
+	Structure factors feel remarkably like a moire
+*/
+
 async function initCrystallography()
 {
 	//probably want it to receive shadow
@@ -11,8 +20,7 @@ async function initCrystallography()
 	{
 		let atom = new THREE.Object3D()
 		crystalArea.add(atom)
-		let mat = new THREE.MeshBasicMaterial()
-		mat.color.r = Math.random()
+		let mat = new THREE.MeshBasicMaterial({color:0x000000})
 
 		for(let i = 0; i < 4; i++)
 		{
@@ -55,74 +63,48 @@ async function initCrystallography()
 
 	//structure factors
 	{
-		let hk = 2 //how many structure factors wide you want it to be
+		var maxHk = 10 //how many from origin to the right
+		var hkWide = maxHk * 2 + 1
 
 		asymmetricUnitAtoms[0].position.set( 0.12, 0.10, 0. )
 		asymmetricUnitAtoms[1].position.set( 0.20, 0.38, 0. )
 		asymmetricUnitAtoms[2].position.set( 0.40, 0.20, 0. )
 
 		//could be done in a vertex shader? Or a texture if it's axis aligned? Probably isn't though
-		let numHkls = 0
-		for (let h = -hk; h <= hk; h++)
+		var amplitudes = new Float32Array(hkWide*hkWide)
+		var phases = new Float32Array(hkWide*hkWide)
+
+		let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(.8, .8), new THREE.MeshBasicMaterial({color:0x000000}));
+		let geo = new THREE.SphereBufferGeometry(.01)
+		var structureFactorMeshes = Array(hkWide)
+		for(let h = 0; h < hkWide; h++)
 		{
-			for (let k = -hk; k <= hk; k++)
+			structureFactorMeshes[h] = Array(hkWide)
+			for(let k = 0; k < hkWide; k++)
 			{
-				if (k > 0 || (k == 0 && h >= 0))
-					numHkls++
+				structureFactorMeshes[h][k] = new THREE.Mesh(geo, new THREE.MeshBasicMaterial())
+				structureFactorMeshes[h][k].position.set(h - maxHk, k - maxHk, 0.).multiplyScalar(.4 / maxHk)
+				plane.add(structureFactorMeshes[h][k])
 			}
 		}
-		let hkls = arrayOfArraysWithCertainValue(numHkls, 5, 0.)
-		var structureFactors = arrayOfArraysWithCertainValue(numHkls, 4, 0.)
-
-		let numSoFar = 0
-		let r, i,f,phi,a;
-		for (let h = -hk; h <= hk; h++)
-		{
-			for (let k = -hk; k <= hk; k++)
-			{
-				if (k > 0 || (k == 0 && h >= 0)) //err, so why not start k at 0? I notice all the atom positions are positive...
-				{
-					r = 0.;
-					i = 0.;
-					for (let j = 0; j < asymmetricUnitAtoms.length; j++)
-					{
-						a = asymmetricUnitAtoms[j].position
-						r += 6. * Math.cos(TAU * (h * a.x + k * a.y))
-						i += 6. * Math.sin(TAU * (h * a.x + k * a.y))
-					}
-					f = Math.sqrt(r * r + i * i)
-					phi = 180. / 3.14159265 * Math.atan2(i, r) //TODO strongly prefer radians. This'd remove the "round" below too
-					hkls[numSoFar][0] = -f
-					hkls[numSoFar][1] = h
-					hkls[numSoFar][2] = k
-					hkls[numSoFar][3] = f
-					hkls[numSoFar][4] = phi
-
-					numSoFar++
-				}
-			}
-		}
-		hkls.sort(function (a, b) { return b[3] - a[3] })
-		for (let j = 0; j < hkls.length; j++)
-		{
-			structureFactors[j][0] = hkls[j][1]
-			structureFactors[j][1] = hkls[j][2]
-			structureFactors[j][2] = hkls[j][3]
-			structureFactors[j][3] = Math.round(hkls[j][4])
-			log(structureFactors[j])
-		}
+		plane.position.y = 1.1
+		scene.add(plane);
 	}
-
 
 	{
 		let atomCoords = new Float32Array(asymmetricUnitAtoms.length*3); //next thing to do is get an array in there, suuuurely possible
 		//could do it as a texture though, rgb = xyz
 
+		var mapUniforms = {
+			"numberGoingBetweenZeroAndOne": { value: 0 },
+			"atomCoords": { value: atomCoords },
+			"amplitudes": { value: amplitudes },
+			"phases": { value: phases },
+			"numStructureFactors": {value: hkWide*hkWide}
+		}
+
 		let material = new THREE.ShaderMaterial({
-			uniforms: {
-				numberGoingBetweenZeroAndOne: {value: 0},
-				atomCoords: {value: atomCoords}
-			},
+			uniforms: mapUniforms
 		});
 		await assignShader("basicVertex", material, "vertex")
 		await assignShader("crystallographyFragment", material, "fragment")
@@ -137,102 +119,53 @@ async function initCrystallography()
 		let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(.8,.8), material);
 		plane.position.x = .5
 		scene.add(plane);
-
-		updateFunctions.push( function() 
-		{
-			
-
-			material.uniforms.numberGoingBetweenZeroAndOne.value = 0.5 + Math.sin(clock.elapsedTime) * 0.5;
-
-			for(let i = 0; i < asymmetricUnitAtoms.length; i++)
-				assignCoords(i, asymmetricUnitAtoms[i].position)
-		} )
 	}
-}
 
-function arrayOfArraysWithCertainValue(n, m, val)
-{
-	var result = [];
-	for (var i = 0; i < n; i++)
+	updateFunctions.push(function ()
 	{
-		result[i] = [];
-		for (var j = 0; j < m; j++)
 		{
-			result[i][j] = val;
+			let r, i, amplitude, phase, a, sfMesh, sfMeshCopy;
+			//could do it on a texture, or a vertex shader?
+			let amplitudeMax = 60.
+			for (let h = -maxHk; h <= maxHk; h++) 
+			{
+				for (let k = -maxHk; k <= maxHk; k++) 
+				{
+					if (k > 0 || (k == 0 && h >= 0))
+					{
+						sfMesh = structureFactorMeshes[maxHk + h][maxHk + k];
+						sfMeshCopy = structureFactorMeshes[maxHk - h][maxHk - k];
+
+						r = 0.;
+						i = 0.;
+						for (let j = 0; j < asymmetricUnitAtoms.length; j++) {
+							a = asymmetricUnitAtoms[j].position
+							r += 6. * Math.cos(TAU * (h * a.x + k * a.y))
+							i += 6. * Math.sin(TAU * (h * a.x + k * a.y))
+						}
+						amplitude = Math.sqrt(r * r + i * i)
+						phase = Math.atan2(i, r)
+
+						amplitudes	[(maxHk + h)*hkWide + maxHk + k] = amplitude;
+						phases		[(maxHk + h)*hkWide + maxHk + k] = phase;
+						amplitudes	[(maxHk - h)*hkWide + maxHk - k] = amplitude;
+						phases		[(maxHk - h)*hkWide + maxHk - k] = -phase;
+
+						sfMesh.scale.setScalar(.08 * amplitude)
+						sfMeshCopy.scale.setScalar(.08 * amplitude) //better as a vertex attribute
+						if (0) //realistic
+							phase = 0.
+						// amplitude = Math.min(1., amplitude / amplitudeMax)
+						sfMesh.material.color.setHSL(phase, amplitude, .5)
+						sfMeshCopy.material.color.copy(sfMesh.material.color)
+					}
+				}
+			}
 		}
-	}
-	return result;
+
+		mapUniforms.numberGoingBetweenZeroAndOne.value = 0.5 + Math.sin(clock.elapsedTime) * 0.5;
+
+		for (let i = 0; i < asymmetricUnitAtoms.length; i++)
+			assignCoords( i, asymmetricUnitAtoms[i].position )
+	})
 }
-
-//map
-// {
-// 	let ox = this.ox; let oy = this.oy;
-// 	let sx = this.sx; let sy = this.sy; let sxy = this.sxy;
-// 	let su = this.su; let sv = this.sv; let suv = this.suv;
-
-// 	// calculate map. Use coarse grid for speed
-// 	let map = arrayOfArraysWithCertainValue(canvasWidth, canvasHeight, sfcanvas.f[sfcanvas.maxhk][sfcanvas.maxhk]);
-// 	let s = 2
-// 	// calculate the contribution at a point - need frac coords
-// 	for (let h = -sfcanvas.maxhk; h <= sfcanvas.maxhk; h++)
-// 	{
-// 		for (let k = -sfcanvas.maxhk; k <= sfcanvas.maxhk; k++)
-// 		{
-// 			if (h > 0 || (h == 0 && k > 0))
-// 			{
-// 				f = sfcanvas.f[h + sfcanvas.maxhk][k + sfcanvas.maxhk];
-// 				if (f > 0.0)
-// 				{
-// 					phi = sfcanvas.phi[h + sfcanvas.maxhk][k + sfcanvas.maxhk];
-// 					for (let y = 0; y < canvasHeight; y += s)
-// 					{
-// 						let v = sv * (y - oy);
-// 						for (let x = 0; x < canvasWidth; x += s)
-// 						{
-// 							let u = suv * (y - oy) + su * (x - ox);
-// 							map[x][y] += 2 * f * Math.cos(2 * Math.PI * (h * u + k * v - phi / 360));
-// 						}
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
-// 	// interpolate remaining points
-// 	if (s == 2)
-// 	{
-// 		for (let y = 0; y < canvasHeight; y += 2)
-// 			for (let x = 1; x < canvasWidth - 1; x += 2)
-// 				map[x][y] = (map[x - 1][y] + map[x + 1][y]) / 2;
-// 		for (let y = 1; y < canvasHeight - 1; y += 2)
-// 			for (let x = 0; x < canvasWidth - 1; x++)
-// 				map[x][y] = (map[x][y - 1] + map[x][y + 1]) / 2;
-// 	}
-
-// 	// draw map
-// 	// let highestMapValue = 1.0e-6;
-// 	// for (let y = 0; y < canvasHeight; y++)
-// 	// 	for (let x = 0; x < canvasWidth; x++)
-// 	// 		highestMapValue = Math.max(highestMapValue, Math.abs(map[x][y]));
-
-// 	// let r; let g;
-// 	// for (let y = 0; y < canvasHeight; y++)
-// 	// {
-// 	// 	for (let x = 0; x < canvasWidth; x++)
-// 	// 	{
-// 	// 		let val = map[x][y] / highestMapValue;
-// 	// 		if (val >= 0)
-// 	// 		{
-// 	// 			r = 255;
-// 	// 			g = Math.round(255 * (1 - val));
-// 	// 		} else {
-// 	// 			r = Math.round(255 * Math.max(1 + 1.5 * val, 0));
-// 	// 			g = Math.round(255 * Math.max(1 + 0.5 * val, 0));
-// 	// 		}
-// 	// 		let i = 4 * (x + canvasWidth * (y));
-// 	// 		this.img.data[i + 0] = r;
-// 	// 		this.img.data[i + 1] = g;
-// 	// 		this.img.data[i + 2] = g;
-// 	// 		this.img.data[i + 3] = 255;
-// 	// 	}
-// 	// }
-// }

@@ -1,4 +1,6 @@
 /*
+	https://twitter.com/infowetrust/status/967105316272816128
+
 	Old:
 		"Have a handheld “projector” that snaps to certain positions. And a “canvas” to record projection on."
 		A page with a geometric proof of conformality http://www.quadibloc.com/maps/maz0202.htm 
