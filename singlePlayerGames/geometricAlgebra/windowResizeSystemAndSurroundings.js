@@ -46,7 +46,7 @@ function initWindowResizeSystemAndSurroundings(renderer)
 		scene.add( new THREE.AmbientLight( 0xFFFFFF, 0.7 ) );
 	}
 
-	camera.setTopAtZZero = function(newTopAtZZero)
+	camera.setTopAtZZeroAndAdjustScene = function(newTopAtZZero)
 	{
 		camera.topAtZZero = newTopAtZZero;
 		camera.position.z = camera.topAtZZero * 3.5; //subjective
@@ -67,7 +67,7 @@ function initWindowResizeSystemAndSurroundings(renderer)
 	}
 
 	//want unit vectors to be a reasonable size
-	camera.setTopAtZZero(6.)
+	camera.setTopAtZZeroAndAdjustScene(9.)
 
 	return stage;
 }

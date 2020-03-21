@@ -17,8 +17,8 @@ function initOperationInterface(restartButton)
 		MultivectorAppearance(function(){}) ]
 	scene.remove(operands[0],operands[1])
 	var operandAndActiveOperatorPositions = [
-		new THREE.Vector3( 0.,1.,0.),
-		new THREE.Vector3( 1.,0.,0.),
+		new THREE.Vector3( 0.,activeOperator.scale.y,0.),
+		new THREE.Vector3(activeOperator.scale.x,0.,0.),
 		new THREE.Vector3( 0.,0.,0.)]
 	var operandsAndActiveOperator = [
 		operands[0],
@@ -147,7 +147,7 @@ function initOperationInterface(restartButton)
 				break;
 
 			default:
-				console.error("shouldn't be here")
+				console.error("shouldn't be here!")
 				break;
 		}
 	})

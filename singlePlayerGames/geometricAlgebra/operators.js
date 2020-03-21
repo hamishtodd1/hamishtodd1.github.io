@@ -64,6 +64,8 @@ async function initOperatorAppearances()
 			func===geometricSum ? materials.geometricSum.clone():materials.geometricProduct.clone() )
 		operatorSymbol.function = func
 
+		operatorSymbol.scale.multiplyScalar(2.)
+
 		return operatorSymbol
 	}
 }

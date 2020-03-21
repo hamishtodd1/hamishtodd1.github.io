@@ -67,7 +67,9 @@ function getOperatorScopeX(desiredindex,eventualScopeSize)
 {
 	if(eventualScopeSize === undefined)
 		eventualScopeSize = operatorScope.length
-	return (desiredindex - 0.5 * (eventualScopeSize-1) ) * 2.
+		
+	let spacing = 3.
+	return (desiredindex - 0.5 * (eventualScopeSize - 1)) * spacing
 }
 
 function initScope()

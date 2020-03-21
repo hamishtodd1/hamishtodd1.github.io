@@ -84,7 +84,7 @@ function initMultivectorAppearances()
 	let circleGeometry = new THREE.CircleBufferGeometry(1.,32)
 	let scalarUnitGeometry = new THREE.CircleGeometry(.5, 32)
 
-	let positiveColor = discreteViridis[0].hex //Red is generally held as a bad thing so
+	let positiveColor = discreteViridis[0].hex
 	let negativeColor = discreteViridis[2].hex
 
 	let bivecMaterialClockwise = new THREE.MeshBasicMaterial({	color:positiveColor,transparent:true, opacity:1., side:THREE.FrontSide})
@@ -103,7 +103,6 @@ function initMultivectorAppearances()
 		if(elements !== undefined)
 			for(let i = 0; i < 8; i++)
 				multivec.elements[i] = elements[i]
-
 		elements = multivec.elements
 
 		multivec.getHeightWithPadding = function()
@@ -253,14 +252,14 @@ function initMultivectorAppearances()
 		{
 			let numPieces = 60;
 			let piecesPositions = Array(numPieces)
-			let piecesBottomEdges = Array(numPieces)
-			let piecesSideEdges = Array(numPieces)
+			let piecesMoreClockwiseEdges = Array(numPieces)
+			let piecesLessClockwiseEdges = Array(numPieces)
 			//TODO vertex attributes
 			for (let i = 0; i < numPieces; i++)
 			{
 				piecesPositions[i] = new THREE.Vector3(i * 2., 0., 0.)
-				piecesBottomEdges[i] = new THREE.Vector3(1., 0., 0.)
-				piecesSideEdges[i] = new THREE.Vector3(0., 1., 0.)
+				piecesMoreClockwiseEdges[i] = new THREE.Vector3(1., 0., 0.)
+				piecesLessClockwiseEdges[i] = new THREE.Vector3(0., 1., 0.)
 			}
 
 			let geo = new THREE.Geometry()
@@ -277,13 +276,16 @@ function initMultivectorAppearances()
 				geo.faces[i * 2 + 1] = new THREE.Face3(i * 4 + 1, i * 4 + 3, i * 4 + 2)
 			}
 
-			let bivectorAppearance = new THREE.Object3D()
-			multivec.add(bivectorAppearance)
+			multivec.bivectorAppearance = new THREE.Object3D()
+			multivec.add(multivec.bivectorAppearance)
 			let clockwiseSide = new THREE.Mesh(geo, bivecMaterialClockwise)
 			let counterSide = new THREE.Mesh(geo, bivecMaterialCounter)
 			clockwiseSide.castShadow = true
 			counterSide.castShadow = true
-			bivectorAppearance.add(clockwiseSide, counterSide)
+			multivec.bivectorAppearance.add(clockwiseSide, counterSide)
+			multivec.bivectorAppearance.piecesPositions = piecesPositions
+			multivec.bivectorAppearance.piecesMoreClockwiseEdges = piecesMoreClockwiseEdges
+			multivec.bivectorAppearance.piecesLessClockwiseEdges = piecesLessClockwiseEdges
 
 			//alright so which way is it facing? the convention is that positive = clockwise if you're looking at it. OMFG IS THIS THE SAME THING
 			//Therefore if you're looking at
@@ -295,8 +297,8 @@ function initMultivectorAppearances()
 			}
 
 			let style = "parallelogram"
-			let bottomEdge = new THREE.Vector3(1., 0., 0.) //0 is "lower", clockwise of the second one, kinda like x axis and y
-			let sideEdge = new THREE.Vector3(0.,1., 0.)
+			let moreClockwiseEdge = new THREE.Vector3(1., 0., 0.) //0 is "lower", clockwise of the second one, kinda like x axis and y
+			let lessClockwiseEdge = new THREE.Vector3(0.,1., 0.)
 			let position = new THREE.Vector3()
 
 			updateFunctions.push(function ()
@@ -304,19 +306,18 @@ function initMultivectorAppearances()
 				let bivectorMagnitude = Math.sqrt( sq(elements[4]) + sq(elements[5]) + sq(elements[6]) )
 				let edgeLen = Math.sqrt(bivectorMagnitude)
 
-				//TODO this only works because this element is the only one.
+				//TODO this only works because this element is the only one
+				//and it is not clear which vector 
 				if (elements[4] >= 0.)
 				{
-					bottomEdge.set(edgeLen, 0., 0.)
-					sideEdge.set(0., edgeLen, 0.)
+					moreClockwiseEdge.set(edgeLen, 0., 0.)
+					lessClockwiseEdge.set(0., edgeLen, 0.)
 				}
 				else
 				{
-					bottomEdge.set(0., edgeLen, 0.)
-					sideEdge.set(edgeLen, 0., 0.)
+					moreClockwiseEdge.set(0., edgeLen, 0.)
+					lessClockwiseEdge.set(edgeLen, 0., 0.)
 				}
-
-
 
 				// if (frameCount === 41)
 				// {
@@ -329,26 +330,26 @@ function initMultivectorAppearances()
 
 				if (style === "parallelogram" || style === "square")
 				{
-					let pieceSideEdgeProportion = bottomEdge.length() / bivectorMagnitude //because algebra you did
-					let pieceSideEdge = sideEdge.clone().multiplyScalar(pieceSideEdgeProportion)
-					let pieceBottomEdge = bottomEdge.clone().normalize()
+					let pieceLessClockwiseEdgeProportion = moreClockwiseEdge.length() / bivectorMagnitude //because algebra you did
+					let pieceLessClockwiseEdge = lessClockwiseEdge.clone().multiplyScalar(pieceLessClockwiseEdgeProportion)
+					let pieceMoreClockwiseEdge = moreClockwiseEdge.clone().normalize()
 
-					position.addVectors(bottomEdge,sideEdge).multiplyScalar(-.5)
+					position.addVectors(moreClockwiseEdge,lessClockwiseEdge).multiplyScalar(-.5)
 
 					let pieceIndex = 0;
-					for (let i = 0., il = bottomEdge.length(); i < il; i++)
+					for (let i = 0., il = moreClockwiseEdge.length(); i < il; i++)
 					{
 						let bottomEdgeShortener = i + 1. > il ? il - i : 1.
-						for (let j = 0., jl = 1. / pieceSideEdgeProportion; j < jl; j++)
+						for (let j = 0., jl = 1. / pieceLessClockwiseEdgeProportion; j < jl; j++)
 						{
-							let pieceSideEdgeShortener = j + 1. > jl ? jl - j : 1.
+							let pieceLessClockwiseEdgeShortener = j + 1. > jl ? jl - j : 1.
 
 							piecesPositions[pieceIndex].copy(position) // cooooould give it a position
-							piecesPositions[pieceIndex].addScaledVector(pieceBottomEdge, i)
-							piecesPositions[pieceIndex].addScaledVector(pieceSideEdge, j)
+							piecesPositions[pieceIndex].addScaledVector(pieceMoreClockwiseEdge, i)
+							piecesPositions[pieceIndex].addScaledVector(pieceLessClockwiseEdge, j)
 
-							piecesBottomEdges[pieceIndex].copy(pieceBottomEdge).multiplyScalar(bottomEdgeShortener)
-							piecesSideEdges[pieceIndex].copy(pieceSideEdge).multiplyScalar(pieceSideEdgeShortener)
+							piecesMoreClockwiseEdges[pieceIndex].copy(pieceMoreClockwiseEdge).multiplyScalar(bottomEdgeShortener)
+							piecesLessClockwiseEdges[pieceIndex].copy(pieceLessClockwiseEdge).multiplyScalar(pieceLessClockwiseEdgeShortener)
 							pieceIndex++
 							if (pieceIndex >= numPieces)
 							{
@@ -361,21 +362,21 @@ function initMultivectorAppearances()
 					for (let i = pieceIndex; i < numPieces; i++)
 					{
 						piecesPositions[i].set(0., 0., 0.)
-						piecesBottomEdges[i].set(0., 0., 0.)
-						piecesSideEdges[i].set(0., 0., 0.)
+						piecesMoreClockwiseEdges[i].set(0., 0., 0.)
+						piecesLessClockwiseEdges[i].set(0., 0., 0.)
 					}
 				}
 
 				for (let i = 0; i < numPieces; i++)
 				{
 					tempVector.copy(piecesPositions[i])
-					geo.vertices[i * 4 + 0].lerp(tempVector, .1)
-					tempVector.copy(piecesPositions[i]).add(piecesBottomEdges[i])
-					geo.vertices[i * 4 + 1].lerp(tempVector, .1)
-					tempVector.copy(piecesPositions[i]).add(piecesSideEdges[i])
-					geo.vertices[i * 4 + 2].lerp(tempVector, .1)
-					tempVector.copy(piecesPositions[i]).add(piecesBottomEdges[i]).add(piecesSideEdges[i])
-					geo.vertices[i * 4 + 3].lerp(tempVector, .1)
+					geo.vertices[i * 4 + 0].lerp(tempVector, 1.)
+					tempVector.copy(piecesPositions[i]).add(piecesMoreClockwiseEdges[i])
+					geo.vertices[i * 4 + 1].lerp(tempVector, 1.)
+					tempVector.copy(piecesPositions[i]).add(piecesLessClockwiseEdges[i])
+					geo.vertices[i * 4 + 2].lerp(tempVector, 1.)
+					tempVector.copy(piecesPositions[i]).add(piecesMoreClockwiseEdges[i]).add(piecesLessClockwiseEdges[i])
+					geo.vertices[i * 4 + 3].lerp(tempVector, 1.)
 				}
 				geo.verticesNeedUpdate = true
 			})
@@ -479,8 +480,6 @@ function initMultivectorAppearances()
 				debugger;
 			}
 		}
-
-		
 
 		if( externalOnClick !== undefined)
 		{
