@@ -61,7 +61,7 @@ function initVideo()
 {	
 	// create the video element
 	video = document.createElement( 'video' );
-	video.src = "http://hamishtodd1.github.io/Sysmic/Data/Movie_0002.mp4";
+	video.src = "http://hamishtodd1.github.io/InteractiveEpidemiology/Data/Movie_0002.mp4";
 	video.crossOrigin = "anonymous";
 	
 	 video.id = 'video';
