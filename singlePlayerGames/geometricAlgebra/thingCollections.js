@@ -1,17 +1,22 @@
 /*
+	Instead of a specific value, you could have the whole column move and see them all change. Or a whole 2d patch. (what the hell does this mean)
+
 	Here the goals are channelling human resource machine, so probably input varies over one dimension
 	Or, really, you should just see what you find
+
+	If you change an input while an animation is happening, skip to its end
+
+	it can be a display of multivectors
+	or a set of inputs to choose from
+	or a set of outputs that you can link to something in your scope
+	it might even show a single output but vary over time
+	it's flexible
+		could even have a scalar field or some weird orientation based thing
+	Maybe everything should be given the same location and if you want a list of numbers you need to use vectors that are increasingly diagonal
+	and then it needs to be extended. Heh, inheritance... except there are only a few things
+	come on, let's have a parabola
 */
 
-//it can be a display of multivectors
-//or a set of inputs to choose from
-//or a set of outputs that you can link to something in your scope
-//it might even show a single output but vary over time
-//it's flexible
-	//could even have a scalar field or some weird orientation based thing
-//Maybe everything should be given the same location and if you want a list of numbers you need to use vectors that are increasingly diagonal
-//and then it needs to be extended. Heh, inheritance... except there are only a few things
-//come on, let's have a parabola
 ThingCollection = function ()
 {
 	let group = new THREE.Group()

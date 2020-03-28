@@ -1,9 +1,60 @@
 /*
+	Focus on the maths and build animations out of that for a while
 	this is not doodling
 	possibly should be able to hotload
 	definitely want to doodle with process
-	Heh, the input output sandbox is your editor
-	Can prove dot product is commutative by induction
+
+	Technical
+		Better to save as JSON (this basically already is?)
+		Level editor is shader programmer?
+
+	Abstract level ideas
+		Early puzzle about separating orth and para parts of vec
+		Make a torus knot
+		Animation of the angles and squares attached to a right triangle and you figure out a2+b2=c2 cos whatever
+		For a given vector, you can multiply it by I to get a bivec and add some scalar to get a quay. What'sthe relationship between that quat and that vector?
+		You can totes do rotation right now, just have a small complex number. At the same time, don't avoid e^ for the wrong reasons like laziness
+		General ideas that might lead to levels
+			A part where you derive the length of a vector. Even that drops out!
+			Knowing distributivity lets you reduce
+			Puzzles based around Orientation could be about a snake trying to eat an apple
+		Can prove dot product is commutative by induction
+		A basic smooth input thing to do would be series of numbers to corkscrew
+		the threejs demo with the parented cubes
+		A puzzle where there are 2 inputs and 2 outputs. One pair seems easy. The other appears to be blank- it's 0. Player has to understand this
+		Puzzle such that for each vector you must make the bivector of it and the X axis
+		Get in-plane component
+		Make rotor from axis and angle
+
+		Simple input output one: a bunch of vectors and you rotate them a little
+			changing basis vectors
+
+		Simple input output one: a bunch of vectors and you rotate them a little
+
+	Levels:
+		Scalar multiplication is the first aspect of the clifford product to show
+		Add only, diagonal
+		Add only, two along three up
+		"Double the size of this" - shows elegance of scalar multiplication
+		People like animals! Dung beetle rolls dung for the turning
+		it would be funny to have 0 as a goal!
+
+	More aspects of 2D multiplication and addition needs to be visualized
+		Coplanar bivector addition - easy and fun
+		Vector addition - just do something
+		Vector multiplication - need both scalar and bivector part
+		Scalar multiplication - obvious, duplication then addition
+		Coplanar bivector multiplication - complex multiplication!
+		Bivector-vector multiplication
+		Bivector multiplication???
+
+	General structure
+		Addition only, scalars only
+		Addition only, vectors only
+		Addition only, bivectors only
+		multiplication and addition, scalars
+		multiplication and addition, scalars and vectors
+		multiplication and addition, scalars and bivectors
 */
 
 function Levels()

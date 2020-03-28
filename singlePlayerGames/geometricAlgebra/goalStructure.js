@@ -1,35 +1,5 @@
 /*
-	Abstract level ideas
-		the threejs demo with the parented cubes
-		A puzzle where there are 2 inputs and 2 outputs. One pair seems easy. The other appears to be blank- it's 0. Player has to understand this
-		Puzzle such that for each vector you must make the bivector of it and the X axis
-		Get in-plane component
-		Make rotor from axis and angle
-
-	Levels:
-		Scalar multiplication is the first aspect of the clifford product to show
-		Add only, diagonal
-		Add only, two along three up
-		"Double the size of this" - shows elegance of scalar multiplication
-		People like animals! Dung beetle rolls dung for the turning
-		it would be funny to have 0 as a goal!
-
-	A basic smooth input thing to do would be series of numbers to corkscrew
-
-	General structure
-		Addition only, scalars only
-		Addition only, vectors only
-		Addition only, bivectors only
-		multiplication and addition, scalars
-		multiplication and addition, scalars and vectors
-		multiplication and addition, scalars and bivectors
-
-	Could limit the number of operations they have?
-
-	General ideas that might lead to levels
-		A part where you derive the length of a vector. Even that drops out!
-		Knowing distributivity lets you reduce
-		Puzzles based around Orientation could be about a snake trying to eat an apple
+	
 */
 
 let scopeIsLimited = false
@@ -302,6 +272,8 @@ function initGoals(modeChange,restartButton)
 	}
 	modeChange.shaderProgramming = function ()
 	{
+		//since it is good for doodling this may become your level editor
+
 		scene.remove(goalBox)
 		scene.remove(restartButton)
 

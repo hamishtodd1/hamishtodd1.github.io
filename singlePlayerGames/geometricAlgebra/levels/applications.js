@@ -1,44 +1,15 @@
 /*
-	Your first example
-		Rocket taking off with a given thrust
-		166,60
-
-	AR https://jeromeetienne.github.io/AR.js/three.js/examples/basic.html
-
-	Structure based around rocket science
-		Could talk to isaac arthur
-		Classical mechanics / mech eng
-			just moving the things around, rockets innit
-		Electromagnetism:
-			Electrically powered rockets https://en.wikipedia.org/wiki/Electrically_powered_spacecraft_propulsion
-			telescope optics,
-			telecommunicatio/satellites. No magnets but this may not matter
-		quantum
-			nuclear powered rockets
-			Not putting stuff in the van allen belt
-			ion thrusters?
-		spec rel
-			super fast rockets
-		Relativistic QM? Quantum computing?
-		To make a thing about real rocket science you ought to have super awesome heart-swelling animations, hngh
-			How to do it on the cheap: public domain NASA footage, plasma drive, ITER stuff with heart-swelling music
-
-	General
-		changing basis vectors
+	Thoughts
+		All the multivectors coming from the pictures should stay inside the animation, no need to have a clone of them in the scope
 		so you're modelling the differential apparently
-		A better representation of a thing over time might be its path through the world with timestamps labelled
-		So record yourself with a qr code, throw it in the air etc. Put it into AR.js and stick a cube on top of it. Can get position and quaternion right out!
-		Remember, want to make it so you can doodle! Don't be too a priori!
+		A better representation of a thing over time might be its worldline with timestamps labelled
 		the basis vectors should be inside the scene
 		is there an elegant way to feed back into the scene?
 			the "real" ones are frozen in place, when you click them they're cloned
 		The thinking is: you are trying to go from t = a to t = a + epsilon
 			This tries to avoid numerical analysis. That might be impossible / foolish
-		Kids could program particle effects that come from their dancing friends. Pose estimation is cracked right?
-		Put the whole scope on the pictures?
-		Maybe you're always modelling the time evolution of something in which case it's a simple number as input. But "reaction to different parameters and events" is interesting which is why getting the differential between two frames may be more versatile
-
-		But should start with something simple like a number and should start with only one input
+		Maybe you're always modelling the time evolution of something in which case it's a simple number as input.
+		But "reaction to different parameters and events" is interesting which is why getting the differential between two frames may be more versatile
 
 	Properties of ideas
 		Should be "satisfying" stuff. Look at "most satisfying video"
@@ -47,6 +18,37 @@
 		you want to put random things in the littlescene. That's how you make cool demoscene stuff
 		It should mostly be about mechanics to be a fun easy thing for people to do in their lives with AR
 			Look through mechanics textbooks for examples
+
+	First example
+		Ball shot from cannon
+		And then a nice step up is 
+
+	Structure based around rocket science
+		Could talk to isaac arthur
+		Classical mechanics / mech eng
+			it is very interesting that .5mv^2 works if v is squared using the Clifford product
+			just moving the things around, rockets innit
+			Thrusters in different directions
+			guidance computer using gimbals
+			fireworks
+			Lunar Lander type game
+		Electromagnetism:
+			Electrically powered rockets https://en.wikipedia.org/wiki/Electrically_powered_spacecraft_propulsion
+			telescope optics,
+			telecommunicatio/satellites. No magnets but this may not matter
+			Magneto dynamics! Of the sun or earth!
+		quantum
+			nuclear powered rockets
+			Not putting stuff in the van allen belt
+			ion thrusters?
+		spec rel
+			super fast rockets
+		Relativistic QM?
+		Quantum computing somehow?
+			https://www.youtube.com/watch?v=F_Riqjdh2oM
+		To make a thing about real rocket science you ought to have super awesome heart-swelling animations, hngh
+			How to do it on the cheap: public domain NASA footage, plasma drive, ITER stuff with heart-swelling music
+		Magnetised needly droplet going around it
 
 	General ideas / mario-esque "areas"/islands
 		Quantum mechanics
@@ -72,7 +74,6 @@
 			trammel of archimedes https://youtu.be/SwVWfrZ3Q50?t=102
 			conservation of angular momentum https://youtu.be/SwVWfrZ3Q50?t=242
 			Some nice gears like one that gets pushed forward and does a figure of 8 or whatever
-			Henry Segerman's weird gears
 			Dice with constant angular momentum spinning in zero gravity
 			Bicycle chain
 			The machinery you have on the wheels of trains
@@ -85,11 +86,6 @@
 			taco folding https://youtu.be/xWG5Jx66VzQ?t=400
 			cog thing https://youtu.be/IjeKw0B8PG8
 			pizza https://twitter.com/Rainmaker1973/status/1084064448690774016
-		Rocket science
-			Thrusters in different directions
-			guidance computer using gimbals
-			fireworks
-		Special relativity?
 		Condensed matter / "spatially extended" / the input is a big rectangle of values
 			mandelbrot set
 		Toys
@@ -123,8 +119,6 @@
 			someone going down a helter skelter
 			Someone is about to set of a spinning top
 				you can change the amount of angular momentum they put into it by changing the size of their bicep
-
-	Is there some kind of ink you could mark stuff with that only appears in infared?
 */
 
 setVideo = async function(){console.error("Video can only be played on chrome!")}

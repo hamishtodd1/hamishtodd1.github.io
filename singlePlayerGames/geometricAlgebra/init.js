@@ -1,44 +1,29 @@
 /*
-	TODO for Cambridge
-		Input output thing
-			In sandbox
-			Start with numbers
-			ideally differential geometry, like 
+	Look through "record", lots of stuff in there and things you've done
 
-		Scope updating would be nice
+	TODO calculator (Andy/slack)
+		Finish scalar and imaginary number stuff
+		Generally get all animations in
+		Then you have calculator, interesting tool for thought to impress slack/andy/GA folks
+		Then can move back to nice input and output stuff
+		Unify the various "generating" approaches
 
+	TODO for live coding / input output sandbox / level editor
+		Differential geometry / turtle
+		Specify inputs using mouse or VR?
 		Building your own functions is important, it's how you deduce the rest of geometry
 
-		The clown
-		Click and drag on the inputs would be nice
+	TODO for single player tutorial / puzzle documentary that is probably a bad idea
+		levels.js
 
-		then use maryam mirzakhani vid and Human Resource Machine to illustrate
-
-	TODO for slack
-		More aspects of 2D multiplication and addition needs to be visualized
-			Coplanar bivector addition - easy and fun
-			Vector addition - just do something
-			Vector multiplication - need both scalar and bivector part
-			Scalar multiplication - obvious, duplication then addition
-			Coplanar bivector multiplication - complex multiplication!
-			Bivector-vector multiplication
-			Bivector multiplication???
-
-	TODO for GDC
-		needs to be a programming game, inputs and out, with multiple fun levels and a video
-		Try doodling with the scalar input and see what you get
+	TODO for showing to Jon Blow / funders
+		Multiple fun levels
+			Try doodling with the scalar input and see what you get
+		Proof of concept for video
 		If nothing good, try introducing the feedback differential-making thing
 		Don't go 3d, and for now the craziness can be a nice surprise
 
-		IT HAS TO BE VERY FUCKING FUN
-			Sound effects / juice
-			level design
-		Webpage loads faaaaaast
-		Communicates its fun, creates nice surprises, in 45s
-		And can show something quaternion-related in short order
-
 	Send to
-		Andy Matushak (both for "here is the model for teaching" and "here is a tool for thinking")
 		The slack
 		Marc
 		Daniel Piker once you have vertex shaders
@@ -87,8 +72,6 @@ async function init()
 
 	// initTankScene()
 	// return
-
-
 
 	{
 		let restartButtonObj = makeTextSign("Restart")

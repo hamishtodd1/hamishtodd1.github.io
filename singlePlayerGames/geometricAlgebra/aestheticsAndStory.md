@@ -1,3 +1,5 @@
+There is a separate document called marketing. Probably good to keep it that way
+
 Aesthetics/graphics/non-design
 	Particles matter a lot
 	Seriously, making it look good is someone else's job. Your ideas are not great. Color choice probably matters more than realism
@@ -61,6 +63,7 @@ Story
 	Grassman
 		Rejected
 	Clifford
+		http://people.brandeis.edu/~teuber/Clifford_ethics.pdf
 		Tait was an astonishing asshole who should not be allowed to win
 		The story of Clifford's wife is quite beautiful
 		Very atheist

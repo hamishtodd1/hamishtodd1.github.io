@@ -1,4 +1,12 @@
 /*
+	Addition sign in the multivectors?
+	Maybe the scalar line wobbles about a lot to show irrelevance of its dir
+	The bivectors should change to being angle shaped when you do exp
+	Ideally the animations can concatenate into simpler, elegant, cooler, animations that are aware of some additional geometric analogy that is possible
+		Or, well, maybe that doesn't matter. Point is to make yourself a little machine where you tweak the inputs and see the outputs
+		You're building animations from animations. With, say, the reflection of a vector on a bivector, that is an animation that you try to model. Once you have built the function for it, it enters your scope, and when you use it from your scope it can play out that animation again, rather than having to play out all the atomic operations
+		
+
 	Maybe the right thing to do is to say what the units look like
 		The unit vector is a vector, with unit length, in a given direction
 		The unit bivector is a quadrilateral, with unit length, in a given direction
@@ -140,6 +148,7 @@ function initMultivectorAppearances()
 				if(i !== maxUnits-1)
 					newOne = new THREE.Mesh(scalarUnitGeometry, scalar.material)
 				else
+				//coooould be diamonds
 					newOne = new THREE.Mesh(new THREE.CircleGeometry(1., 32), scalar.material)
 
 				newOne.intendedPosition = new THREE.Vector3()

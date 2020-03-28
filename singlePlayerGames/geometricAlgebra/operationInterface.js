@@ -1,4 +1,9 @@
 /*
+	Operation operand operand
+		Quite possibly it is better to have your things chosen in sequence: 
+			you HAVE to go multivecotr multivector operator, and if you don't then you have to delete the whole thing
+		And it is better if they are stacked in a column like in lamda calculus?
+
 	When there's loads of the things and we have to do the animations one by one and then add them
 		You probably want to make a full table and as soon as the mv enters the register it breaks up (horizontally or vertically)
 

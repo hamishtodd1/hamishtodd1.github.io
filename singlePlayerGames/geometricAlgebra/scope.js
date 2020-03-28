@@ -1,3 +1,10 @@
+/*
+	Put the whole scope on the pictures?
+
+	Surely want scope on right because that's the way people hold it
+
+*/
+
 operatorScope = []
 multivectorScope = []
 
