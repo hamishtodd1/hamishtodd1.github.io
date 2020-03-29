@@ -1,7 +1,7 @@
 /*
 	Look through "record", lots of stuff in there and things you've done
 
-	TODO calculator (Andy/slack)
+	TODO calculator (Andy/slack/pontus)
 		Finish scalar and imaginary number stuff
 		Generally get all animations in
 		Then you have calculator, interesting tool for thought to impress slack/andy/GA folks

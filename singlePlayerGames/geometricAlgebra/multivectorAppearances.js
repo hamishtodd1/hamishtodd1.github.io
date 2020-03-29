@@ -1,11 +1,7 @@
 /*
-	Addition sign in the multivectors?
-	Maybe the scalar line wobbles about a lot to show irrelevance of its dir
-	The bivectors should change to being angle shaped when you do exp
-	Ideally the animations can concatenate into simpler, elegant, cooler, animations that are aware of some additional geometric analogy that is possible
-		Or, well, maybe that doesn't matter. Point is to make yourself a little machine where you tweak the inputs and see the outputs
-		You're building animations from animations. With, say, the reflection of a vector on a bivector, that is an animation that you try to model. Once you have built the function for it, it enters your scope, and when you use it from your scope it can play out that animation again, rather than having to play out all the atomic operations
-		
+	Technical
+		At short notice, any appearance can change to any other
+		So should react to its value at every frame really
 
 	Maybe the right thing to do is to say what the units look like
 		The unit vector is a vector, with unit length, in a given direction
@@ -88,8 +84,6 @@ function initMultivectorAppearances()
 	let vectorGeometry = new THREE.CylinderBufferGeometry(0.,vectorRadius,1.,16,1,false);
 	vectorGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.,.5,0.))
 
-	let parallelogramGeometry = new THREE.OriginCorneredPlaneBufferGeometry(1.,1.)
-	let circleGeometry = new THREE.CircleBufferGeometry(1.,32)
 	let scalarUnitGeometry = new THREE.CircleGeometry(.5, 32)
 
 	let positiveColor = discreteViridis[0].hex
@@ -104,13 +98,12 @@ function initMultivectorAppearances()
 	MultivectorAppearance = function(externalOnClick,elements)
 	{
 		let multivec = new THREE.Group();
-		scene.add(multivec)
+		scene.add(multivec) //the only point is to be a visualization
 
 		//maaaaybe you shouldn't have this because it's stateful? Yeah no shut up
 		multivec.elements = MathematicalMultivector() //identity
 		if(elements !== undefined)
-			for(let i = 0; i < 8; i++)
-				multivec.elements[i] = elements[i]
+			copyMultivector(elements, multivec.elements)
 		elements = multivec.elements
 
 		multivec.getHeightWithPadding = function()
@@ -136,6 +129,7 @@ function initMultivectorAppearances()
 		}
 
 		{
+			//how about they have a unit-size surroundings but are actually a little bean?
 			let scalar = new THREE.Group()
 			scalar.position.z = .001
 			multivec.add(scalar)
@@ -158,8 +152,8 @@ function initMultivectorAppearances()
 			}
 			let partial = scalar.children[maxUnits-1]
 
-			//zigzag thing
-			if(0)
+			//zigzag
+			// if(0)
 			{
 				let currentLayer = 1 //layer n and all below it contain n^2 verts. vertex 0 is layer 1
 				for (let i = 0; i < maxUnits; i++)
@@ -211,10 +205,12 @@ function initMultivectorAppearances()
 					}
 				}
 			}
+			let seen = false
 			updateFunctions.push(function()
 			{
 				for(let i = 0; i < maxUnits; i++)
-					scalar.children[i].position.lerp(scalar.children[i].intendedPosition,.1)
+					scalar.children[i].position.lerp(scalar.children[i].intendedPosition, .1)
+				seen = true
 			})
 			multivec.updateScalarAppearance()
 		}
@@ -224,23 +220,6 @@ function initMultivectorAppearances()
 			vecAppearance.matrixAutoUpdate = false;
 			vecAppearance.castShadow = true
 			multivec.add(vecAppearance)
-
-			multivec.setTo1Blade = function(newY)
-			{
-				multivec.elements[0] = 0.
-
-				multivec.elements[1] = newY.x
-				multivec.elements[2] = newY.y
-				multivec.elements[3] = newY.z
-
-				multivec.elements[4] = 0.
-				multivec.elements[5] = 0.
-				multivec.elements[6] = 0.
-
-				multivec.elements[7] = 0.
-
-				multivec.updateAppearance();
-			}
 
 			multivec.updateVectorAppearance = function()
 			{
@@ -478,7 +457,7 @@ function initMultivectorAppearances()
 			multivec.updateBivectorAppearance()
 			multivec.updateTrivectorAppearance()
 
-			multivec.thingYouClick.scale.y = multivec.getHeightWithPadding()
+			multivec.boundingBox.scale.y = multivec.getHeightWithPadding()
 		}
 
 		multivec.copyElements = function(elementsToTakeOn)
@@ -498,19 +477,30 @@ function initMultivectorAppearances()
 
 		if( externalOnClick !== undefined)
 		{
-			let thingYouClick = new THREE.Mesh(new THREE.SphereBufferGeometry(.5),new THREE.MeshBasicMaterial({color:0x00FF00,transparent:true,opacity:.2}))
-			thingYouClick.visible = false
-			multivec.thingYouClick = thingYouClick
-			multivec.add(thingYouClick)
+			let boundingBox = new THREE.Mesh(new THREE.SphereBufferGeometry(.5),new THREE.MeshBasicMaterial({color:0x00FF00,transparent:true,opacity:.2}))
+			boundingBox.visible = false
+			multivec.boundingBox = boundingBox
+			multivec.add(boundingBox)
 
-			clickables.push(thingYouClick)
+			clickables.push(boundingBox)
 			multivec.externalOnClick = externalOnClick
-			thingYouClick.onClick = function()
+			boundingBox.onClick = function()
 			{
 				if(multivec.externalOnClick !== undefined)
 					multivec.externalOnClick(multivec)
 			}
 		}
+
+		let timer = 2.;
+		updateFunctions.push(function()
+		{
+			if(multivec.animationOngoing)
+			{
+				timer -= frameDelta
+				if(timer < 0.)
+					multivec.animationOngoing = false
+			}
+		})
 
 		return multivec
 	}

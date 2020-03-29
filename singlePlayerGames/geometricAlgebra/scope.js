@@ -14,7 +14,7 @@ function removeFromScope(entity)
 
 	removeSingleElementFromArray(isMultivector ? multivectorScope : operatorScope, entity)
 	scene.remove(entity)
-	removeSingleElementFromArray(clickables,isMultivector ? entity.thingYouClick:entity)
+	removeSingleElementFromArray(clickables,isMultivector ? entity.boundingBox:entity)
 
 	// multivec.dispose() //TODO
 	//You need to get rid of everything that is "new" in multivectorAppearance.js
@@ -121,7 +121,7 @@ function initScope()
 	// 	if(operatorScope.indexOf(selection) !== -1)
 	// 		selection.onClick()
 	// 	else if(multivectorScope.indexOf(selection) !== -1)
-	// 		selection.thingYouClick.onClick()
+	// 		selection.boundingBox.onClick()
 	// })
 
 	// function checkIfPositionIsInDirection(origin,direction,position)
@@ -273,7 +273,7 @@ function initScope()
 		if(operatorScope.indexOf(selection) !== -1)
 			selection.onClick()
 		else if(multivectorScope.indexOf(selection) !== -1)
-			selection.thingYouClick.onClick()
+			selection.boundingBox.onClick()
 
 		if( closest !== null && scopeIsLimited )
 		{

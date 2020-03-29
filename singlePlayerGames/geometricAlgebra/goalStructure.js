@@ -246,6 +246,8 @@ function initGoals(modeChange,restartButton)
 
 	modeChange.campaign = function()
 	{
+		log("Campaign mode")
+
 		levelIndex = -1;
 		reactToVictory()
 
@@ -254,6 +256,8 @@ function initGoals(modeChange,restartButton)
 	}
 	modeChange.calculator = function()
 	{
+		log("Calculator mode")
+
 		scene.remove(goalBox)
 		scene.remove(restartButton)
 		scene.remove(inputGroup,inputGroup.indicator,goalOutputGroup)
@@ -261,9 +265,12 @@ function initGoals(modeChange,restartButton)
 		scopeIsLimited = false
 
 		setScope()
+
+		//USEFUL
+		ScopeMultivector(new Float32Array([0., 1., 1., 0., 0., 0., 0., 0.]), true)
 		ScopeMultivector(new Float32Array([ 1., 0., 0., 0., 0., 0., 0., 0.]), true)
 		ScopeMultivector(new Float32Array([-1., 0., 0., 0., 0., 0., 0., 0.]), true)
-		// ScopeMultivector(new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]), true)
+		ScopeMultivector(new Float32Array([2., 0., 0., 0., 0., 0., 0., 0.]), true)
 		// ScopeMultivector(new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]), true)
 		// ScopeMultivector(new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]), true)
 		// ScopeMultivector(new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]), true)
@@ -272,6 +279,8 @@ function initGoals(modeChange,restartButton)
 	}
 	modeChange.shaderProgramming = function ()
 	{
+		log("Shader programming mode")
+
 		//since it is good for doodling this may become your level editor
 
 		scene.remove(goalBox)

@@ -1,4 +1,19 @@
 /*
+	Ideally the animations can concatenate into simpler, elegant, cooler, animations that are aware of some additional geometric analogy that is possible
+		Or, well, maybe that doesn't matter. Point is to make yourself a little machine where you tweak the inputs and see the outputs
+		You're building animations from animations.
+			With, say, the reflection of a vector on a bivector, that is an animation that you try to model
+		Once you have built the function for it, it enters your scope, and when you use it from your scope
+		it can play out that animation again, rather than having to play out all the atomic operations
+
+	Addition sign in the multivectors?
+	Maybe the scalar line wobbles about a lot to show irrelevance of its dir
+	The bivectors should change to being angle shaped when you do exp=
+
+	Things learned due to home quarantine: I drink about a liter of some form of diet cola every day. Previously from assorted pubs and shops, now just from local shop. Optimistically it's £500 a year!
+
+	I kinda feel bad about that... except that cola is my one drink I enjoy (+1 hot chocolate/week). I don't like tea, coffee, or alchohol.
+
 	you may want to put stuff on the left or the right
 	Therefore, "result" needs to be able to switch to right or left
 	Therefore, little t-shaped things showing what results from what

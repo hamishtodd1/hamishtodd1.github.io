@@ -42,7 +42,7 @@ ThingCollection = function ()
 		{
 			things.pop()
 			group.remove(things[i])
-			removeSingleElementFromArray(clickables, things[i].thingYouClick)
+			removeSingleElementFromArray(clickables, things[i].boundingBox)
 		}
 	}
 
@@ -287,7 +287,7 @@ function initInputAndOutputGroups()
 			if (swapMultivector)
 				multivectorScope.push(swapMultivector)
 			scene.add(inputScopeMultivector)
-			clickables.push(inputScopeMultivector.thingYouClick)
+			clickables.push(inputScopeMultivector.boundingBox)
 
 			for (let i = 0; i < multivectorScope.length; i++)
 				getMultivectorScopePosition(i, multivectorScope[i].position)

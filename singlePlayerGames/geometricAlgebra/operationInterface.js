@@ -3,6 +3,9 @@
 		Quite possibly it is better to have your things chosen in sequence: 
 			you HAVE to go multivecotr multivector operator, and if you don't then you have to delete the whole thing
 		And it is better if they are stacked in a column like in lamda calculus?
+		Very important to emphasize the importance of order
+		Buuuuuut, spatially, you did think of a bunch of reasons for current situation
+		And what are you going to do to indicate to people what they have to click? Could take scope off the screen
 
 	When there's loads of the things and we have to do the animations one by one and then add them
 		You probably want to make a full table and as soon as the mv enters the register it breaks up (horizontally or vertically)
@@ -134,10 +137,15 @@ function initOperationInterface(restartButton)
 				}
 				break;
 
-			case 2:
-				scene.add(animationMultivector)
-				scene.remove(operands[0],operands[1],activeOperator)
-				animationStage++;
+			case 2: //where we animate
+				if (animationMultivector.parent !== scene )
+				{
+					animationMultivector.animationOngoing = true
+					scene.add(animationMultivector)
+					scene.remove(operands[0], operands[1], activeOperator)
+				}
+				if (!animationMultivector.animationOngoing)
+					animationStage++;
 				break;
 
 			case 3: //admiring result

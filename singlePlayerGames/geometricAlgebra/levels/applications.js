@@ -371,7 +371,8 @@ async function initWheelScene()
 			littleScene.localToWorld(placeForEndToBe)
 			placeForEndToBe.sub(goalMultivector.position)
 
-			goalMultivector.setTo1Blade(placeForEndToBe)
+			copyMultivector(placeForEndToBe, goalMultivector.elements)
+			goalMultivector.updateAppearance();
 			placeForEndToBe.multiplyScalar(.5)
 			goalMultivector.position.add(placeForEndToBe)
 
@@ -448,7 +449,8 @@ async function initTankScene()
 			
 			placeForEndToBe.copy(shell.position)
 
-			goalMultivector.setTo1Blade(placeForEndToBe)
+			copyMultivector(placeForEndToBe, goalMultivector.elements)
+			goalMultivector.updateAppearance();
 			placeForEndToBe.multiplyScalar(.5)
 			goalMultivector.position.add(placeForEndToBe)
 
