@@ -19,6 +19,9 @@
 		It should mostly be about mechanics to be a fun easy thing for people to do in their lives with AR
 			Look through mechanics textbooks for examples
 
+	Main dude for QC tim@energycompression.com
+		You know, you're just barrelling into QC assuming CA is a good fit for it, maybe it isn't. Well. If it isn't, maybe don't work on this.
+
 	First example
 		Ball shot from cannon
 		And then a nice step up is 
@@ -372,12 +375,12 @@ async function initWheelScene()
 			placeForEndToBe.sub(goalMultivector.position)
 
 			copyMultivector(placeForEndToBe, goalMultivector.elements)
-			goalMultivector.updateAppearance();
+			goalMultivector.skipAnimation();
 			placeForEndToBe.multiplyScalar(.5)
 			goalMultivector.position.add(placeForEndToBe)
 
 			timerMultivector.elements[0] = -wheel.rotation.z / TAU
-			timerMultivector.updateAppearance()
+			timerMultivector.skipAnimation()
 		}
 
 		clown.position.copy(wheel.position)
@@ -450,12 +453,12 @@ async function initTankScene()
 			placeForEndToBe.copy(shell.position)
 
 			copyMultivector(placeForEndToBe, goalMultivector.elements)
-			goalMultivector.updateAppearance();
+			goalMultivector.skipAnimation();
 			placeForEndToBe.multiplyScalar(.5)
 			goalMultivector.position.add(placeForEndToBe)
 
 			timerMultivector.elements[0] = frameCount * frameDelta
-			timerMultivector.updateAppearance()
+			timerMultivector.skipAnimation()
 		}
 	})
 

@@ -3,7 +3,118 @@
 
 	Surely want scope on right because that's the way people hold it
 
+	Optimal Arrangement
+		exponential but n is small
+		Except there is one side along which you do want to fill
+		Not really desirable because you want the simple stuff in one place
+
+	Could try putting them beneath each one in turn and sliding them left and right
 */
+
+function initPacking()
+{
+	//List of unfilled corners plus the distance of each one to its horizontal and vertical limit
+
+	let rects = []
+	for(let i = 0; i < 20; i++)
+	{
+		rects[i] = new THREE.Mesh(unchangingUnitSquareGeometry)
+		rects[i].scale.x = .2 + Math.random() * 4.
+		rects[i].scale.y = .2 + Math.random() * 4.
+		rects[i].intendedPosition = new THREE.Vector3(camera.rightAtZZero*1.5,-camera.topAtZZero,0.)
+		scene.add(rects[i])
+	}
+
+	function intersect(a,b)
+	{
+		let aMaxX = a.intendedPosition.x + a.scale.x / 2.
+		let aMaxY = a.intendedPosition.y + a.scale.y / 2.
+		let bMaxX = b.intendedPosition.x + b.scale.x / 2.
+		let bMaxY = b.intendedPosition.y + b.scale.y / 2.
+		let aMinX = a.intendedPosition.x - a.scale.x / 2.
+		let aMinY = a.intendedPosition.y - a.scale.y / 2.
+		let bMinX = b.intendedPosition.x - b.scale.x / 2.
+		let bMinY = b.intendedPosition.y - b.scale.y / 2.
+
+		return	aMaxX < bMinX || aMinX > bMaxX ||
+				aMaxY < bMinY || aMinY > bMaxY ? false : true
+	}
+
+	let padding = .1
+	let nooks = [{x:-camera.rightAtZZero + padding,y:camera.topAtZZero + padding,height:camera.topAtZZero*2.,width:Infinity}]
+	for(let i = 0, il = rects.length; i < il; i++)
+	{
+		for (let n = 0, nl = nooks.length; n < nl; n++)
+		{
+			rects[i].intendedPosition.x = nooks[n].x + rects[i].scale.x / 2. + padding
+			rects[i].intendedPosition.y = nooks[n].y - rects[i].scale.y / 2. - padding
+
+			let intersection = false
+			for (let j = 0; j < i; j++)
+			{
+				if (intersect(rects[i], rects[j]) ) //even a slight thing poking out just below rules it out
+				{
+					intersection = true
+					break;
+				}
+			}
+			// log(intersection)
+			if(intersection) //success
+			{
+				rects[i].intendedPosition.x = camera.rightAtZZero * 1.5
+				rects[i].intendedPosition.y = -camera.topAtZZero
+			}
+			else
+			{
+				//right
+				if( nooks[n].width > rects[i].scale.x)
+				{
+					nooks.push({
+						x: nooks[n].x + rects[i].scale.x + padding,
+						width: nooks[n].width - rects[i].scale.x - padding,
+						y: nooks[n].y,
+						height: rects[i].scale.y
+					})
+				}
+				//below
+				if (nooks[n].height > rects[i].scale.y)
+				{
+					nooks.push({
+						x: nooks[n].x,
+						width: rects[i].scale.x,
+						y: nooks[n].y - rects[i].scale.y - padding,
+						height: nooks[n].height - rects[i].scale.y - padding
+					})
+				}
+
+				removeSingleElementFromArray(nooks, nooks[n])
+
+				nooks.sort(function(a,b)
+				{
+					if (Math.abs(a.x - b.x ) > .01)
+						return a.x - b.x //leftmost first
+					else
+						return a.y - b.y //top one goes first
+				})
+
+				for(let i = 0; i < nooks.length; i++)
+					log(nooks[i].x + camera.rightAtZZero,camera.topAtZZero - nooks[i].y, nooks[i].width, nooks[i].height)
+				log("next")
+
+				break;
+			}
+		}
+	}
+
+	updateFunctions.push(function ()
+	{
+		for (let i = 0; i < rects.length; i++)
+		{
+			rects[i].position.lerp(rects[i].intendedPosition,.03)
+			rects[i].position.lerp(rects[i].intendedPosition,.03)
+		}
+	})
+}
 
 operatorScope = []
 multivectorScope = []
@@ -51,12 +162,14 @@ function setScope(elementses, operators)
 
 function getMultivectorScopePosition(desiredindex,dest)
 {
+	//if you do want to get them all at once (which you do once per frame) can just pass an array in here
+
 	let allowedWidth = .7
 	dest.x = -camera.rightAtZZero + allowedWidth
 	dest.y = camera.topAtZZero
 	for(let i = 0; i <= desiredindex; i++ )
 	{
-		let halfMultivectorHeight = multivectorScope[i].getHeightWithPadding() / 2.;
+		let halfMultivectorHeight = multivectorScope[i].boundingBox.scale.y / 2.;
 
 		if( dest.y - halfMultivectorHeight < -camera.topAtZZero)
 		{

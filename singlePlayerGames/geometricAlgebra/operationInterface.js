@@ -51,7 +51,8 @@ function initOperationInterface(restartButton)
 
 			howCurrentIsMade.operandIndices[lastAssignedOperand] = multivectorScope.indexOf(multivecToCopy)
 
-			operandToUse.copyElements(multivecToCopy.elements)
+			copyMultivector(multivecToCopy.elements, operandToUse.elements)
+			operandToUse.skipAnimation()
 			operandToUse.position.copy(multivecToCopy.position)
 			scene.add(operandToUse)
 
@@ -108,7 +109,7 @@ function initOperationInterface(restartButton)
 
 	let animationMultivector = MultivectorAppearance(function(){})
 	animationMultivector.elements[0] = 0.
-	animationMultivector.updateAppearance()
+	animationMultivector.skipAnimation()
 	let animationStage = -1.;
 	updateFunctions.push(function()
 	{
@@ -121,7 +122,7 @@ function initOperationInterface(restartButton)
 				{
 					let newMultivectorElements = activeOperator.function(operands[0].elements,operands[1].elements)
 					copyMultivector(newMultivectorElements, animationMultivector.elements)
-					animationMultivector.updateAppearance()
+					animationMultivector.skipAnimation()
 					scene.remove(animationMultivector)
 
 					// if( searchArray(multivectorScope,newMultivectorElements) ) //already in multivectorScope, could do something here
@@ -187,6 +188,8 @@ function initOperationInterface(restartButton)
 				operandIndices: [howCurrentIsMade.operandIndices[0], howCurrentIsMade.operandIndices[1]],
 				operation: howCurrentIsMade.operation
 			}
+			newMultivector.scalar.setIntendedPositionsToSquare()
+			newMultivector.skipAnimation()
 			reactToNewMultivector(newMultivector)
 		}
 		animationStage = -1.;

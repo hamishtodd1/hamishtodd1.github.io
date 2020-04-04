@@ -1,11 +1,14 @@
 /*
+	Possibly useful model: the operator combines with one of the operands to become a thing that is applied to the other operand
+	A little cartoon character doing everything is surely the way to go. The pieces should be gotten rid of
+
 	Technical
 		At short notice, any appearance can change to any other
 		So should react to its value at every frame really
 
 	Maybe the right thing to do is to say what the units look like
 		The unit vector is a vector, with unit length, in a given direction
-		The unit bivector is a quadrilateral, with unit length, in a given direction
+		The unit bivector is a quadrilateral, with unit length, in a given plane
 		The unit scalar looks like a circle
 		The unit trivector is a paralellipied
 
@@ -21,11 +24,6 @@
 		circle implies no directionality, and distinguishes it nicely from the square which can be used for bivector
 		Need to know the multiplicative identity is
 		Probably better off as red five versus blue five if you're going to carry it
-
-	Both the engineer and the flexibility-is-key Bret Victor would say it's context-dependent what viz you should use
-		Because look, a bivector can also be considered an imaginary number
-			This whole thing is just a point in space, *ideally* you'd be able to see in 8 dimensions
-			It might even be that sometimes when working on a 3D problem you need to think 2D for a sec
 
 	Scalar and trivector could be a single complex number
 		How about, IF both scalar and trivector are nonzero you get the complex number, otherwise just the one
@@ -84,165 +82,88 @@ function initMultivectorAppearances()
 	let vectorGeometry = new THREE.CylinderBufferGeometry(0.,vectorRadius,1.,16,1,false);
 	vectorGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.,.5,0.))
 
-	let scalarUnitGeometry = new THREE.CircleGeometry(.5, 32)
+	let scalarUnitGeometry = new THREE.CircleGeometry(.5, 6)
+	// for (let i = 0, il = scalarUnitGeometry.vertices.length / 2; i < il; i++)
+	// 	scalarUnitGeometry.vertices[i*2].multiplyScalar(.7)
 
-	let positiveColor = discreteViridis[0].hex
-	let negativeColor = discreteViridis[2].hex
-
-	let bivecMaterialClockwise = new THREE.MeshBasicMaterial({	color:positiveColor,transparent:true, opacity:1., side:THREE.FrontSide})
-	let bivecMaterialCounter =  new THREE.MeshBasicMaterial({	color:negativeColor,transparent:true, opacity:1., side:THREE.BackSide})
-
-	let trivectorGeometry = new THREE.SphereBufferGeometry(1.,32,16)
-	let trivectorMaterial = new THREE.MeshStandardMaterial()
+	let bivecMaterialClockwise = new THREE.MeshBasicMaterial({ color: discreteViridis[0].hex,transparent:true, opacity:1., side:THREE.FrontSide})
+	let bivecMaterialCounter = new THREE.MeshBasicMaterial({ color: discreteViridis[2].hex,transparent:true, opacity:1., side:THREE.BackSide})
 
 	MultivectorAppearance = function(externalOnClick,elements)
 	{
 		let multivec = new THREE.Group();
 		scene.add(multivec) //the only point is to be a visualization
 
-		//maaaaybe you shouldn't have this because it's stateful? Yeah no shut up
+		function getScalarBlockDimension()
+		{
+			return Math.ceil(Math.sqrt(Math.abs(elements[0])))
+		}
+
 		multivec.elements = MathematicalMultivector() //identity
 		if(elements !== undefined)
 			copyMultivector(elements, multivec.elements)
 		elements = multivec.elements
 
-		multivec.getHeightWithPadding = function()
-		{
-			let biggestSoFar = 0.
-
-			if(multivec.elements[0] !== 0.)
-				biggestSoFar = 1.
-
-			if( Math.abs(multivec.elements[2]) > biggestSoFar )
-				biggestSoFar = Math.abs(multivec.elements[2])
-
-			let bivectorArea = Math.sqrt(sq(multivec.elements[4])+sq(multivec.elements[5])+sq(multivec.elements[6]))
-			let bivectorHeight = 2. * Math.sqrt( bivectorArea / Math.PI )
-			if( bivectorHeight > biggestSoFar )
-				biggestSoFar = bivectorHeight
-
-			if(multivec.elements[7] !== 0.)
-				log("no trivector size")
-
-			let padding = .4
-			return biggestSoFar + padding
-		}
-
+		//scalar
 		{
 			//how about they have a unit-size surroundings but are actually a little bean?
-			let scalar = new THREE.Group()
+			var scalar = new THREE.Group()
 			scalar.position.z = .001
 			multivec.add(scalar)
+			multivec.scalar = scalar
 			scalar.material = new THREE.MeshBasicMaterial()
 
 			let newOne = null
 			let maxUnits = 256
 			for(let i = 0; i < maxUnits; i++)
 			{
-				if(i !== maxUnits-1)
-					newOne = new THREE.Mesh(scalarUnitGeometry, scalar.material)
-				else
-				//coooould be diamonds
-					newOne = new THREE.Mesh(new THREE.CircleGeometry(1., 32), scalar.material)
+				newOne = new THREE.Mesh(scalarUnitGeometry, scalar.material)
 
-				newOne.intendedPosition = new THREE.Vector3()
-				newOne.intendedPosition.x = .5 + i
+				newOne.intendedPosition = new THREE.Vector3(i,0.,0.) //just there as a default
 				newOne.castShadow = true
 				scalar.add(newOne)
 			}
-			let partial = scalar.children[maxUnits-1]
 
-			//zigzag
-			// if(0)
+			scalar.setIntendedPositionsToSquare = function ()
 			{
 				let currentLayer = 1 //layer n and all below it contain n^2 verts. vertex 0 is layer 1
-				for (let i = 0; i < maxUnits; i++)
+				let basicallyTheDimension = getScalarBlockDimension()
+				
+				for (let i = 0, il = scalar.children.length; i < il; i++)
 				{
 					if (sq(currentLayer) <= i)
 						currentLayer++;
-						
+
 					let rightDown = currentLayer % 2; // as opposed to upLeft
 					let diagOfThisLayer = 2 * currentLayer * (currentLayer - 1) / 2
 					let inSecondHalf = i > diagOfThisLayer
 
 					scalar.children[i].intendedPosition
-						.set(0.,0.,0.)
-						.addScaledVector(rightDown? yUnit : xUnit,currentLayer-1) //get you to the start
-						.addScaledVector(rightDown? xUnit : yUnit, inSecondHalf ? currentLayer-1 : i-sq(currentLayer-1))
-					if(inSecondHalf)
-						scalar.children[i].intendedPosition.addScaledVector(rightDown ? yUnit : xUnit, -1 * (i-diagOfThisLayer) )
+						.set(.5 - basicallyTheDimension / 2., .5 - basicallyTheDimension / 2., 0.)
+						.addScaledVector(rightDown ? yUnit : xUnit, currentLayer - 1) //get you to the start
+						.addScaledVector(rightDown ? xUnit : yUnit, inSecondHalf ? currentLayer - 1 : i - sq(currentLayer - 1))
+					if (inSecondHalf)
+						scalar.children[i].intendedPosition.addScaledVector(rightDown ? yUnit : xUnit, -1 * (i - diagOfThisLayer))
 				}
 			}
 
-			//this is the part where the threejs abstraction is maybe a bad idea
-			multivec.updateScalarAppearance = function()
-			{
-				let s = this.elements[0]
-				if (Math.abs(s) > maxUnits) console.error("not enough scalar units")
-				for (let i = 0; i < maxUnits; i++)
-					scalar.children[i].visible = i < Math.floor(Math.abs(s) )
-
-				scalar.material.color.setHex(s > 0. ? discreteViridis[1].hex : discreteViridis[3].hex)
-
-				if(s != Math.round(s))
-				{
-					partial.visible = true
-					let horizontalChop = Math.abs(s - Math.round(s))
-					let verticalChop = 1.
-					for (let i = 0, il = partial.geometry.vertices.length; i < il; i++)
-					{
-						let v = scalarUnitGeometry.vertices[i]
-
-						if (v.y + .5 < verticalChop)
-							partial.geometry.vertices[i].y = v.y
-						else
-							partial.geometry.vertices[i].y = verticalChop - .5
-
-						if (v.x + .5 < horizontalChop)
-							partial.geometry.vertices[i].x = v.x
-						else
-							partial.geometry.vertices[i].x = horizontalChop - .5
-					}
-				}
-			}
-			let seen = false
-			updateFunctions.push(function()
-			{
-				for(let i = 0; i < maxUnits; i++)
-					scalar.children[i].position.lerp(scalar.children[i].intendedPosition, .1)
-				seen = true
-			})
-			multivec.updateScalarAppearance()
+			if(scalar.children.length !== maxUnits)
+				console.log("lots of infrastructure is based on something you just changed")
 		}
 
+		//vector
 		{
-			let vecAppearance = new THREE.Mesh( vectorGeometry, new THREE.MeshStandardMaterial() );
+			var vecAppearance = new THREE.Mesh( vectorGeometry, new THREE.MeshStandardMaterial() );
 			vecAppearance.matrixAutoUpdate = false;
 			vecAppearance.castShadow = true
 			multivec.add(vecAppearance)
 
-			multivec.updateVectorAppearance = function()
-			{
-				let vecPart = new THREE.Vector3(multivec.elements[1],multivec.elements[2],multivec.elements[3])
-
-				var newX = randomPerpVector( vecPart ).normalize();
-				var newZ = vecPart.clone().cross(newX).normalize().negate();
-
-				vecAppearance.matrix.makeBasis( newX, vecPart, newZ );
-				vecAppearance.matrix.setPosition(vecPart.multiplyScalar(-.5))
-
-				if(vecPart.equals(zeroVector))
-				{
-					multivec.remove(vecAppearance)
-				}
-				else
-				{
-					multivec.add(vecAppearance)
-				}
-			}
-			multivec.updateVectorAppearance();
+			var vecPart = new THREE.Vector3()
+			var vecOrthX = new THREE.Vector3()
+			var vecOrthZ = new THREE.Vector3()
 		}
 
+		//bivec
 		{
 			let numPieces = 60;
 			let piecesPositions = Array(numPieces)
@@ -283,12 +204,6 @@ function initMultivectorAppearances()
 
 			//alright so which way is it facing? the convention is that positive = clockwise if you're looking at it. OMFG IS THIS THE SAME THING
 			//Therefore if you're looking at
-
-			multivec.updateBivectorAppearance = function ()
-			{
-				//can change pair of vectors
-				//orientation
-			}
 
 			let style = "parallelogram"
 			let moreClockwiseEdge = new THREE.Vector3(1., 0., 0.) //0 is "lower", clockwise of the second one, kinda like x axis and y
@@ -376,129 +291,113 @@ function initMultivectorAppearances()
 			})
 		}
 
+		multivec.skipAnimation = function()
 		{
-			let trivector = new THREE.Mesh(trivectorGeometry,trivectorMaterial)
-			multivec.updateTrivectorAppearance = function()
-			{
-				//maaaaybe unnecessary
-				let radius = Math.pow( multivec.elements[7] * 3./4. / Math.PI, 1./3. )
+			for (let i = 0, il = scalar.children.length; i < il; i++)
+				scalar.children[i].position.copy(scalar.children[i].intendedPosition)
 
-				trivector.scale.setScalar( radius )
-				if(multivec.elements[7] === 0.)
-				{
-					multivec.remove(trivector)
-				}
-				else
-				{
-					multivec.add(trivector)
-				}
-			}
-			multivec.updateTrivectorAppearance()
+			//bivector relaxes to a rectangle
+			//scalar maybe becomes the other part of the complex number
+			//trivector relaxes to cuboid
 		}
+		multivec.skipAnimation()
 
-		function areAnyOthersNonZero(arr,elementsToIgnore)
+		let boundingBox = new THREE.Mesh(unchangingUnitSquareGeometry,new THREE.MeshBasicMaterial({color:0x00FF00,transparent:true,opacity:.2}))
 		{
-			for(let i = 0; i < arr.length; i++)
-			{
-				if(elementsToIgnore.indexOf(i) !== -1)
-					continue;
-				else if(arr[i] !== 0.)
-					return true;
-			}
-			return false;
-		}
-		multivec.getGrade = function()
-		{
-			let e = multivec.elements;
-			if( !areAnyOthersNonZero(e,[]) ) //only blades can have a grade?
-				return -1;
-
-			if( e[0] !== 0. && !areAnyOthersNonZero(e,[0]) )
-				return 0;
-			if((e[1] !== 0. || e[2] !== 0. || e[3] !== 0.) && !areAnyOthersNonZero(e,[1,2,3]) )
-				return 1;
-			if((e[4] !== 0. || e[5] !== 0. || e[6] !== 0.) && !areAnyOthersNonZero(e,[4,5,6]) )
-				return 2;
-			if( e[7] !== 0. && !areAnyOthersNonZero(e,[7]) )
-				return 3;
-
-			return "compound";
-		}
-
-		multivec.geometricProductMultivectors = function(multivecA,multivecB)
-		{
-			geometricProduct(multivecA.elements,multivecB.elements,multivec.elements)
-
-			multivec.updateScalarAppearance()
-			multivec.updateVectorAppearance()
-
-			let aGrade = multivecA.getGrade()
-			let bGrade = multivecB.getGrade()
-			if( aGrade === 1 && bGrade === 1 ) //actually you should also check area not 0
-				multivec.setParallelogram(multivecA,multivecB)
-			else
-				multivec.setCircle()
-		}
-		multivec.addMultivectors = function(multivecA,multivecB)
-		{
-			geometricAdd(multivecA.elements,multivecB.elements,multivec.elements)
-
-			//could work out the parallelogram
-
-			multivec.updateScalarAppearance()
-			multivec.updateVectorAppearance()
-			multivec.setCircle()
-		}
-
-		multivec.updateAppearance = function()
-		{
-			multivec.updateScalarAppearance()
-			multivec.updateVectorAppearance()
-			multivec.updateBivectorAppearance()
-			multivec.updateTrivectorAppearance()
-
-			multivec.boundingBox.scale.y = multivec.getHeightWithPadding()
-		}
-
-		multivec.copyElements = function(elementsToTakeOn)
-		{
-			for(let i = 0; i < 8; i++)
-			multivec.elements[i] = elementsToTakeOn[i]
-			multivec.updateAppearance()
-		}
-
-		for(let i = 0; i < multivec.children.length; i++)
-		{
-			if(multivec.children[i].matrix.equals(zeroMatrix))
-			{
-				debugger;
-			}
-		}
-
-		if( externalOnClick !== undefined)
-		{
-			let boundingBox = new THREE.Mesh(new THREE.SphereBufferGeometry(.5),new THREE.MeshBasicMaterial({color:0x00FF00,transparent:true,opacity:.2}))
 			boundingBox.visible = false
 			multivec.boundingBox = boundingBox
 			multivec.add(boundingBox)
 
-			clickables.push(boundingBox)
-			multivec.externalOnClick = externalOnClick
-			boundingBox.onClick = function()
+			function updateBoundingBoxSize()
 			{
-				if(multivec.externalOnClick !== undefined)
-					multivec.externalOnClick(multivec)
+				let tallestSoFar = 0.
+
+				//scalar. Doesn't work if they're on a line
+				let scalarHeight = getScalarBlockDimension()
+				if (frameCount < 2) log(elements[0],scalarHeight)
+				if (scalarHeight > tallestSoFar)
+					tallestSoFar = scalarHeight
+
+				//vec
+				if (Math.abs(multivec.elements[2]) > tallestSoFar)
+					tallestSoFar = Math.abs(multivec.elements[2])
+
+				//approximates as circle or something
+				let bivectorArea = Math.sqrt(sq(multivec.elements[4]) + sq(multivec.elements[5]) + sq(multivec.elements[6]))
+				let bivectorHeight = 2. * Math.sqrt(bivectorArea / Math.PI)
+				if (bivectorHeight > tallestSoFar)
+					tallestSoFar = bivectorHeight
+
+				let padding = .4
+				boundingBox.scale.y = tallestSoFar + padding
+			}
+			updateBoundingBoxSize()
+
+			if (externalOnClick !== undefined)
+			{
+				clickables.push(boundingBox)
+				multivec.externalOnClick = externalOnClick
+				boundingBox.onClick = function ()
+				{
+					if (multivec.externalOnClick !== undefined)
+						multivec.externalOnClick(multivec)
+				}
 			}
 		}
 
-		let timer = 2.;
 		updateFunctions.push(function()
 		{
+			if (multivec.elements[5] !== 0. || multivec.elements[6] !== 0. || multivec.elements[7] !== 0.)
+				log("not 3D yet")
+
 			if(multivec.animationOngoing)
 			{
-				timer -= frameDelta
-				if(timer < 0.)
-					multivec.animationOngoing = false
+				multivec.animationOngoing = false
+			}
+
+			{
+				//scalar
+				{
+					// if (elements[0] != Math.round(elements[0]))
+					// {
+					// 	//cut radially
+					// 	//do it in frag shader
+					// }
+					scalar.material.color.setHex(elements[0] > 0. ? discreteViridis[1].hex : discreteViridis[3].hex)
+					if (Math.abs(elements[0]) > scalar.children.length)
+						console.error("not enough scalar units")
+					for (let i = 0, il = scalar.children.length; i < il; i++)
+						scalar.children[i].visible = i < Math.floor(Math.abs(elements[0]))
+					scalar.setIntendedPositionsToSquare()
+
+					for (let i = 0, il = scalar.children.length; i < il; i++)
+						scalar.children[i].position.lerp(scalar.children[i].intendedPosition, .1)
+				}
+
+				//vec
+				{
+					vecPart.set(multivec.elements[1], multivec.elements[2], multivec.elements[3])
+					randomPerpVector(vecPart, vecOrthX)
+					vecOrthX.normalize()
+					vecOrthZ.copy(vecPart).cross(vecOrthX).normalize().negate();
+					vecAppearance.matrix.makeBasis(vecOrthX, vecPart, vecOrthZ);
+					vecAppearance.matrix.setPosition(vecPart.multiplyScalar(-.5))
+
+					if (vecPart.equals(zeroVector))
+						multivec.remove(vecAppearance)
+					else
+						multivec.add(vecAppearance)
+				}
+			}
+
+			updateBoundingBoxSize()
+
+			for (let i = 0; i < multivec.children.length; i++)
+			{
+				if (multivec.children[i].matrix.equals(zeroMatrix))
+				{
+					debugger;
+				}
 			}
 		})
 

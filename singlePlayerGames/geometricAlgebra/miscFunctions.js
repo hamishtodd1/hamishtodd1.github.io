@@ -395,7 +395,8 @@ function c(a)
 	console.log(a)
 }
 
-function insertCylindernumbers(A,B, verticesArray, cylinderSides, arrayStartpoint, radius ) {
+function insertCylindernumbers(A,B, verticesArray, cylinderSides, arrayStartpoint, radius )
+{
 	var aToB = new THREE.Vector3(B.x-A.x, B.y-A.y, B.z-A.z);
 	aToB.normalize();
 	var perp = randomPerpVector(aToB);
@@ -443,21 +444,23 @@ function CylinderBufferGeometryUncentered(radius, length, radiusSegments, capped
 }
 
 
-function randomPerpVector(ourVector)
+function randomPerpVector(ourVector,target)
 {
-	var perpVector = ourVector.clone();
-	perpVector.clone().normalize();
+	if(target === undefined)
+		target = new THREE.Vector3()
+	target.copy(ourVector)
+	target.clone().normalize();
 	
-	if( Math.abs(perpVector.dot(zUnit)-1) < 0.001 || Math.abs(perpVector.dot(zUnit)+1) < 0.001 )
+	if( Math.abs(target.dot(zUnit)-1) < 0.001 || Math.abs(target.dot(zUnit)+1) < 0.001 )
 	{
-		perpVector.crossVectors(ourVector, yUnit);
+		target.crossVectors(ourVector, yUnit);
 	}
 	else
 	{
-		perpVector.crossVectors(ourVector, zUnit);
+		target.crossVectors(ourVector, zUnit);
 	}
 	
-	return perpVector;
+	return target;
 }
 
 function frameDimensionsAtZDistance(camera,z)

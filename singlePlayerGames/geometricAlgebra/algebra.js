@@ -206,3 +206,31 @@ function copyMultivector(fromElements, toElements)
 		}
 	}
 }
+
+function areAnyOthersNonZero(arr, elementsToIgnore)
+{
+	for (let i = 0; i < arr.length; i++)
+	{
+		if (elementsToIgnore.indexOf(i) !== -1)
+			continue;
+		else if (arr[i] !== 0.)
+			return true;
+	}
+	return false;
+}
+function getMultivectorGrade(e)
+{
+	if (!areAnyOthersNonZero(e, [])) //only blades can have a grade?
+		return -1;
+
+	if (e[0] !== 0. && !areAnyOthersNonZero(e, [0]))
+		return 0;
+	if ((e[1] !== 0. || e[2] !== 0. || e[3] !== 0.) && !areAnyOthersNonZero(e, [1, 2, 3]))
+		return 1;
+	if ((e[4] !== 0. || e[5] !== 0. || e[6] !== 0.) && !areAnyOthersNonZero(e, [4, 5, 6]))
+		return 2;
+	if (e[7] !== 0. && !areAnyOthersNonZero(e, [7]))
+		return 3;
+
+	return "compound";
+}
