@@ -13,12 +13,17 @@
 
 function initPacking()
 {
-	//List of unfilled corners plus the distance of each one to its horizontal and vertical limit
-
 	let rects = []
-	for(let i = 0; i < 20; i++)
+	let rectsOrderedBySideRightness = []
+	let rectsOrderedByBottomLowness = []
+	let numRects = 56
+	for(let i = 0; i < numRects; i++)
 	{
-		rects[i] = new THREE.Mesh(unchangingUnitSquareGeometry)
+		rects[i] = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: new THREE.Color(i / numRects,0.,0.)}))
+		rects[i].position.x = camera.rightAtZZero
+		rects[i].position.y = -camera.topAtZZero
+		rectsOrderedBySideRightness.push(rects[i])
+		rectsOrderedByBottomLowness.push(rects[i])
 		rects[i].scale.x = .2 + Math.random() * 4.
 		rects[i].scale.y = .2 + Math.random() * 4.
 		rects[i].intendedPosition = new THREE.Vector3(camera.rightAtZZero*1.5,-camera.topAtZZero,0.)
@@ -40,78 +45,143 @@ function initPacking()
 				aMaxY < bMinY || aMinY > bMaxY ? false : true
 	}
 
-	let padding = .1
-	let nooks = [{x:-camera.rightAtZZero + padding,y:camera.topAtZZero + padding,height:camera.topAtZZero*2.,width:Infinity}]
-	for(let i = 0, il = rects.length; i < il; i++)
+	let roundoffPadding = .005
+	for (let i = 0, il = rects.length; i < il; i++)
 	{
-		for (let n = 0, nl = nooks.length; n < nl; n++)
+		for(let j = -1; j < i; j++) // put it next to each rect
 		{
-			rects[i].intendedPosition.x = nooks[n].x + rects[i].scale.x / 2. + padding
-			rects[i].intendedPosition.y = nooks[n].y - rects[i].scale.y / 2. - padding
-
-			let intersection = false
-			for (let j = 0; j < i; j++)
+			rects[i].intendedPosition.x = j === -1 ?
+				-camera.rightAtZZero + .1 + rects[i].scale.x / 2. :
+				rectsOrderedBySideRightness[j].intendedPosition.x + rectsOrderedBySideRightness[j].scale.x / 2. + roundoffPadding + rects[i].scale.x / 2.
+			
+			//start at top and move down on clashes
+			rects[i].intendedPosition.y = camera.topAtZZero - .1 - rects[i].scale.y / 2.
+			let goneOffBottom = false
+			for (let k = 0; k < i; k++)
 			{
-				if (intersect(rects[i], rects[j]) ) //even a slight thing poking out just below rules it out
+				if(intersect(rects[i],rectsOrderedByBottomLowness[k]))
 				{
-					intersection = true
-					break;
+					rects[i].intendedPosition.y = rectsOrderedByBottomLowness[k].intendedPosition.y - rectsOrderedByBottomLowness[k].scale.y / 2. - rects[i].scale.y / 2. - roundoffPadding
+					if (rects[i].intendedPosition.y - rects[i].scale.y / 2. < -camera.topAtZZero)
+					{
+						goneOffBottom = true
+						break;
+					}
 				}
 			}
-			// log(intersection)
-			if(intersection) //success
-			{
-				rects[i].intendedPosition.x = camera.rightAtZZero * 1.5
-				rects[i].intendedPosition.y = -camera.topAtZZero
-			}
-			else
-			{
-				//right
-				if( nooks[n].width > rects[i].scale.x)
-				{
-					nooks.push({
-						x: nooks[n].x + rects[i].scale.x + padding,
-						width: nooks[n].width - rects[i].scale.x - padding,
-						y: nooks[n].y,
-						height: rects[i].scale.y
-					})
-				}
-				//below
-				if (nooks[n].height > rects[i].scale.y)
-				{
-					nooks.push({
-						x: nooks[n].x,
-						width: rects[i].scale.x,
-						y: nooks[n].y - rects[i].scale.y - padding,
-						height: nooks[n].height - rects[i].scale.y - padding
-					})
-				}
 
-				removeSingleElementFromArray(nooks, nooks[n])
-
-				nooks.sort(function(a,b)
+			if (!goneOffBottom)
+			{
+				rectsOrderedByBottomLowness.sort(function(a,b)
 				{
-					if (Math.abs(a.x - b.x ) > .01)
-						return a.x - b.x //leftmost first
-					else
-						return a.y - b.y //top one goes first
+					let aLowness = a.intendedPosition.y - a.scale.y / 2.
+					let bLowness = b.intendedPosition.y - b.scale.y / 2.
+					return bLowness - aLowness //because larger numbers come first
 				})
-
-				for(let i = 0; i < nooks.length; i++)
-					log(nooks[i].x + camera.rightAtZZero,camera.topAtZZero - nooks[i].y, nooks[i].width, nooks[i].height)
-				log("next")
+				rectsOrderedBySideRightness.sort(function(a,b)
+				{
+					let aRightness = a.intendedPosition.x + a.scale.x / 2.
+					let bRightness = b.intendedPosition.x + b.scale.x / 2.
+					return aRightness - bRightness
+				})
 
 				break;
 			}
 		}
 	}
 
+	for(let i = 0; i < rects.length; i++)
+	{
+		log(rectsOrderedBySideRightness[i].position.x + rectsOrderedBySideRightness[i].scale.x )
+	}
+
+	// let nooks = [{
+	// 	x:-camera.rightAtZZero + roundoffPadding + .1,
+	// 	y:camera.topAtZZero + roundoffPadding - .1,
+	// 	height:camera.topAtZZero*2.,
+	// 	width:Infinity}]
+	// for(let i = 0, il = rects.length; i < il; i++)
+	// {
+	// 	for (let n = 0, nl = nooks.length; n < nl; n++)
+	// 	{
+	// 		rects[i].intendedPosition.x = nooks[n].x + rects[i].scale.x / 2. + roundoffPadding
+	// 		rects[i].intendedPosition.y = nooks[n].y - rects[i].scale.y / 2. - roundoffPadding
+
+	// 		let intersection = false
+	// 		for (let j = 0; j < i; j++)
+	// 		{
+	// 			if (intersect(rects[i], rects[j]) ) //even a slight thing poking out just below rules it out
+	// 			{
+	// 				intersection = true
+	// 				break;
+	// 			}
+	// 		}
+	// 		// log(intersection)
+	// 		if(intersection) //success
+	// 		{
+	// 			rects[i].intendedPosition.x = camera.rightAtZZero * 1.5
+	// 			rects[i].intendedPosition.y = -camera.topAtZZero
+	// 		}
+	// 		else
+	// 		{
+	// 			//right
+	// 			if( nooks[n].width > rects[i].scale.x)
+	// 			{
+	// 				nooks.push({
+	// 					x: nooks[n].x + rects[i].scale.x + roundoffPadding,
+	// 					width: nooks[n].width - rects[i].scale.x - roundoffPadding,
+	// 					y: nooks[n].y,
+	// 					height: rects[i].scale.y
+	// 				})
+	// 			}
+	// 			// else
+	// 			// {
+	// 			// 	nooks.push({
+	// 			// 		x: nooks[n].width,
+	// 			// 		width: 0.,
+	// 			// 		y: nooks[n].y,
+	// 					// height: rects[i].scale.y
+	// 			// 	})
+	// 			// }
+	// 			//below
+	// 			if (nooks[n].height > rects[i].scale.y)
+	// 			{
+	// 				nooks.push({
+	// 					x: nooks[n].x,
+	// 					width: rects[i].scale.x,
+	// 					y: nooks[n].y - rects[i].scale.y - roundoffPadding,
+	// 					height: nooks[n].height - rects[i].scale.y - roundoffPadding
+	// 				})
+	// 			}
+
+	// 			removeSingleElementFromArray(nooks, nooks[n])
+
+	// 			nooks.sort(function(a,b)
+	// 			{
+	// 				if (Math.abs(a.x - b.x ) > .01)
+	// 					return a.x - b.x //leftmost first
+	// 				else
+	// 					return a.y - b.y //top one goes first
+	// 			})
+
+	// 			for(let i = 0; i < nooks.length; i++)
+	// 				log(nooks[i].x + camera.rightAtZZero,camera.topAtZZero - nooks[i].y, nooks[i].width, nooks[i].height)
+	// 			log("next")
+
+	// 			break;
+	// 		}
+	// 	}
+	// }
+
 	updateFunctions.push(function ()
 	{
 		for (let i = 0; i < rects.length; i++)
 		{
-			rects[i].position.lerp(rects[i].intendedPosition,.03)
-			rects[i].position.lerp(rects[i].intendedPosition,.03)
+			// if( i < frameCount / 30)
+			{
+				rects[i].position.lerp(rects[i].intendedPosition, 1.)
+				rects[i].position.lerp(rects[i].intendedPosition, 1.)
+			}
 		}
 	})
 }
