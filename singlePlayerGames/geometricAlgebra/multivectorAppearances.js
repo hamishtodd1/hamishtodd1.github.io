@@ -20,6 +20,7 @@
 		Transparent and glowy and smoky and reflective
 
 	The scalar
+		For unit circle it will be less than one
 		IS there any reason to not store the scalars in a line? More compact...
 		circle implies no directionality, and distinguishes it nicely from the square which can be used for bivector
 		Need to know the multiplicative identity is
@@ -369,28 +370,6 @@ function initMultivectorAppearances()
 				let minSize = Math.min(camera.topAtZZero, camera.rightAtZZero) * 2. / 20.
 				boundingBox.scale.x = Math.max(minSize, boundingBox.scale.x)
 				boundingBox.scale.y = Math.max(minSize, boundingBox.scale.y)
-
-				return
-
-				let tallestSoFar = 0.
-
-				//scalar. Doesn't work if they're on a line
-				let scalarHeight = scalarBlockDimension()
-				if (scalarHeight > tallestSoFar)
-					tallestSoFar = scalarHeight
-
-				//vec
-				if (Math.abs(multivec.elements[2]) > tallestSoFar)
-					tallestSoFar = Math.abs(multivec.elements[2])
-
-				//approximates as circle or something
-				let bivectorArea = Math.sqrt(sq(multivec.elements[4]) + sq(multivec.elements[5]) + sq(multivec.elements[6]))
-				let bivectorHeight = 2. * Math.sqrt(bivectorArea / Math.PI)
-				if (bivectorHeight > tallestSoFar)
-					tallestSoFar = bivectorHeight
-
-				let padding = .4
-				boundingBox.scale.y = tallestSoFar + padding
 			}
 			updateBoundingBoxSize()
 

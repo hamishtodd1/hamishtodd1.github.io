@@ -269,8 +269,8 @@ function initInputAndOutputGroups()
 			function updateInputGroupIntendedPosition()
 			{
 				inputGroup.intendedPosition.x = -camera.rightAtZZero + inputGroup.background.scale.x / 2.
-				getMultivectorScopePosition(multivectorScope.length - 1, positionGetter)
-				inputGroup.intendedPosition.x += positionGetter.x + .9 + camera.rightAtZZero
+				//THERE MIGHT BE PROBLEMS HERE RE UPDATING THE SCOPE FIRST updateScopePositions
+				inputGroup.intendedPosition.x += multivectorScope[multivectorScope.length-1].scopePosition.x + .9 + camera.rightAtZZero
 
 				inputGroup.intendedPosition.y = camera.topAtZZero - inputGroup.background.scale.y / 2. - .1
 			}
@@ -289,8 +289,9 @@ function initInputAndOutputGroups()
 			scene.add(inputScopeMultivector)
 			clickables.push(inputScopeMultivector.boundingBox)
 
+			updateScopePositions()
 			for (let i = 0; i < multivectorScope.length; i++)
-				getMultivectorScopePosition(i, multivectorScope[i].position)
+				newScopeMultivector.position.copy(newScopeMultivector.scopePosition)
 		}
 	}
 		

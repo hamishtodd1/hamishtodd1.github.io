@@ -11,58 +11,52 @@
 	Could try putting them beneath each one in turn and sliding them left and right
 */
 
-function initPacking()
+function intersectRectangleMeshes(a, b)
 {
-	let rects = []
-	let rectsOrderedBySideRightness = []
-	let rectsOrderedByBottomLowness = []
-	let numRects = 56
-	for(let i = 0; i < numRects; i++)
-	{
-		rects[i] = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: new THREE.Color(i / numRects,0.,0.)}))
-		rects[i].position.x = camera.rightAtZZero
-		rects[i].position.y = -camera.topAtZZero
-		rectsOrderedBySideRightness.push(rects[i])
-		rectsOrderedByBottomLowness.push(rects[i])
-		rects[i].scale.x = .2 + Math.random() * 4.
-		rects[i].scale.y = .2 + Math.random() * 4.
-		rects[i].intendedPosition = new THREE.Vector3(camera.rightAtZZero*1.5,-camera.topAtZZero,0.)
-		scene.add(rects[i])
-	}
+	let aMaxX = a.intendedPosition.x + a.scale.x * .5
+	let aMaxY = a.intendedPosition.y + a.scale.y * .5
+	let bMaxX = b.intendedPosition.x + b.scale.x * .5
+	let bMaxY = b.intendedPosition.y + b.scale.y * .5
+	let aMinX = a.intendedPosition.x - a.scale.x * .5
+	let aMinY = a.intendedPosition.y - a.scale.y * .5
+	let bMinX = b.intendedPosition.x - b.scale.x * .5
+	let bMinY = b.intendedPosition.y - b.scale.y * .5
 
-	function intersect(a,b)
-	{
-		let aMaxX = a.intendedPosition.x + a.scale.x / 2.
-		let aMaxY = a.intendedPosition.y + a.scale.y / 2.
-		let bMaxX = b.intendedPosition.x + b.scale.x / 2.
-		let bMaxY = b.intendedPosition.y + b.scale.y / 2.
-		let aMinX = a.intendedPosition.x - a.scale.x / 2.
-		let aMinY = a.intendedPosition.y - a.scale.y / 2.
-		let bMinX = b.intendedPosition.x - b.scale.x / 2.
-		let bMinY = b.intendedPosition.y - b.scale.y / 2.
+	return !(aMaxX < bMinX || aMinX > bMaxX ||
+			 aMaxY < bMinY || aMinY > bMaxY )
+}
 
-		return	aMaxX < bMinX || aMinX > bMaxX ||
-				aMaxY < bMinY || aMinY > bMaxY ? false : true
+function packRectangles(rects)
+{
+	let numRects = rects.length
+
+	let rectsOrderedBySideRightness = Array(multivectorScope.length)
+	let rectsOrderedByBottomLowness = Array(multivectorScope.length)
+	for (let i = 0; i < multivectorScope.length; i++)
+	{
+		rectsOrderedBySideRightness[i] = rects[i]
+		rectsOrderedByBottomLowness[i] = rects[i]
 	}
 
 	let roundoffPadding = .005
-	for (let i = 0, il = rects.length; i < il; i++)
+	let avoidanceOfSides = .3
+	for (let i = 0, il = multivectorScope.length; i < il; i++)
 	{
 		for(let j = -1; j < i; j++) // put it next to each rect
 		{
 			rects[i].intendedPosition.x = j === -1 ?
-				-camera.rightAtZZero + .1 + rects[i].scale.x / 2. :
+				-camera.rightAtZZero + avoidanceOfSides + rects[i].scale.x / 2. :
 				rectsOrderedBySideRightness[j].intendedPosition.x + rectsOrderedBySideRightness[j].scale.x / 2. + roundoffPadding + rects[i].scale.x / 2.
 			
 			//start at top and move down whenever there's a clash
-			rects[i].intendedPosition.y = camera.topAtZZero - .1 - rects[i].scale.y / 2.
+			rects[i].intendedPosition.y = camera.topAtZZero - avoidanceOfSides - rects[i].scale.y / 2.
 			let goneOffBottom = false
 			for (let k = 0; k < i; k++)
 			{
-				if(intersect(rects[i],rectsOrderedByBottomLowness[k]))
+				if(intersectRectangleMeshes(rects[i],rectsOrderedByBottomLowness[k]))
 				{
 					rects[i].intendedPosition.y = rectsOrderedByBottomLowness[k].intendedPosition.y - rectsOrderedByBottomLowness[k].scale.y / 2. - rects[i].scale.y / 2. - roundoffPadding
-					if (rects[i].intendedPosition.y - rects[i].scale.y / 2. < -camera.topAtZZero)
+					if (rects[i].intendedPosition.y - rects[i].scale.y / 2. < -camera.topAtZZero + avoidanceOfSides)
 					{
 						goneOffBottom = true
 						break;
@@ -138,13 +132,31 @@ function setScope(elementses, operators)
 		ScopeOperator(operators[i], operators.length)
 }
 
-function getMultivectorScopePosition(desiredindex,dest)
+function updateScopePositions()
 {
 	//if you do want to get them all at once (which you do once per frame) can just pass an array in here
+	for(let j = 0; j < multivectorScope.length; j++)
+	{
+		let dest = multivectorScope[j].scopePosition
 
-	let allowedWidth = 2.7
-	dest.x = (desiredindex-1) * 5
-	dest.y = dest.x
+		let allowedWidth = .7
+		dest.x = -camera.rightAtZZero + allowedWidth
+		dest.y = camera.topAtZZero
+		for (let i = 0; i <= j; i++)
+		{
+			let halfMultivectorHeight = multivectorScope[i].boundingBox.scale.y / 2.;
+
+			if (dest.y - halfMultivectorHeight < -camera.topAtZZero)
+			{
+				dest.x += allowedWidth
+				dest.y = camera.topAtZZero
+			}
+
+			dest.y -= halfMultivectorHeight
+			if(j!==i)
+				dest.y -= halfMultivectorHeight
+		}
+	}
 }
 function getOperatorScopeX(desiredindex,eventualScopeSize)
 {
@@ -158,14 +170,11 @@ function getOperatorScopeX(desiredindex,eventualScopeSize)
 function initScope()
 {
 	// better packing http://www.optimization-online.org/DB_FILE/2016/01/5293.pdf
-	let scopePosition = new THREE.Vector3()
 	updateFunctions.push(function()
 	{
-		for(let i = 0; i < multivectorScope.length; i++ ) //n^2 but hey scope sucks
-		{
-			getMultivectorScopePosition(i,scopePosition)
-			multivectorScope[i].position.lerp(scopePosition,.1)
-		}
+		updateScopePositions()
+		for(let i = 0; i < multivectorScope.length; i++ )
+			multivectorScope[i].position.lerp(multivectorScope[i].scopePosition,.1)
 
 		for(let i = 0; i < operatorScope.length; i++)
 			operatorScope[i].position.x += .1 * (getOperatorScopeX(i) - operatorScope[i].position.x)
