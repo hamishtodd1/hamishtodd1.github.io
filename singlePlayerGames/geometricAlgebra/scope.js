@@ -54,7 +54,7 @@ function initPacking()
 				-camera.rightAtZZero + .1 + rects[i].scale.x / 2. :
 				rectsOrderedBySideRightness[j].intendedPosition.x + rectsOrderedBySideRightness[j].scale.x / 2. + roundoffPadding + rects[i].scale.x / 2.
 			
-			//start at top and move down on clashes
+			//start at top and move down whenever there's a clash
 			rects[i].intendedPosition.y = camera.topAtZZero - .1 - rects[i].scale.y / 2.
 			let goneOffBottom = false
 			for (let k = 0; k < i; k++)
@@ -90,100 +90,8 @@ function initPacking()
 		}
 	}
 
-	for(let i = 0; i < rects.length; i++)
-	{
-		log(rectsOrderedBySideRightness[i].position.x + rectsOrderedBySideRightness[i].scale.x )
-	}
-
-	// let nooks = [{
-	// 	x:-camera.rightAtZZero + roundoffPadding + .1,
-	// 	y:camera.topAtZZero + roundoffPadding - .1,
-	// 	height:camera.topAtZZero*2.,
-	// 	width:Infinity}]
-	// for(let i = 0, il = rects.length; i < il; i++)
-	// {
-	// 	for (let n = 0, nl = nooks.length; n < nl; n++)
-	// 	{
-	// 		rects[i].intendedPosition.x = nooks[n].x + rects[i].scale.x / 2. + roundoffPadding
-	// 		rects[i].intendedPosition.y = nooks[n].y - rects[i].scale.y / 2. - roundoffPadding
-
-	// 		let intersection = false
-	// 		for (let j = 0; j < i; j++)
-	// 		{
-	// 			if (intersect(rects[i], rects[j]) ) //even a slight thing poking out just below rules it out
-	// 			{
-	// 				intersection = true
-	// 				break;
-	// 			}
-	// 		}
-	// 		// log(intersection)
-	// 		if(intersection) //success
-	// 		{
-	// 			rects[i].intendedPosition.x = camera.rightAtZZero * 1.5
-	// 			rects[i].intendedPosition.y = -camera.topAtZZero
-	// 		}
-	// 		else
-	// 		{
-	// 			//right
-	// 			if( nooks[n].width > rects[i].scale.x)
-	// 			{
-	// 				nooks.push({
-	// 					x: nooks[n].x + rects[i].scale.x + roundoffPadding,
-	// 					width: nooks[n].width - rects[i].scale.x - roundoffPadding,
-	// 					y: nooks[n].y,
-	// 					height: rects[i].scale.y
-	// 				})
-	// 			}
-	// 			// else
-	// 			// {
-	// 			// 	nooks.push({
-	// 			// 		x: nooks[n].width,
-	// 			// 		width: 0.,
-	// 			// 		y: nooks[n].y,
-	// 					// height: rects[i].scale.y
-	// 			// 	})
-	// 			// }
-	// 			//below
-	// 			if (nooks[n].height > rects[i].scale.y)
-	// 			{
-	// 				nooks.push({
-	// 					x: nooks[n].x,
-	// 					width: rects[i].scale.x,
-	// 					y: nooks[n].y - rects[i].scale.y - roundoffPadding,
-	// 					height: nooks[n].height - rects[i].scale.y - roundoffPadding
-	// 				})
-	// 			}
-
-	// 			removeSingleElementFromArray(nooks, nooks[n])
-
-	// 			nooks.sort(function(a,b)
-	// 			{
-	// 				if (Math.abs(a.x - b.x ) > .01)
-	// 					return a.x - b.x //leftmost first
-	// 				else
-	// 					return a.y - b.y //top one goes first
-	// 			})
-
-	// 			for(let i = 0; i < nooks.length; i++)
-	// 				log(nooks[i].x + camera.rightAtZZero,camera.topAtZZero - nooks[i].y, nooks[i].width, nooks[i].height)
-	// 			log("next")
-
-	// 			break;
-	// 		}
-	// 	}
-	// }
-
-	updateFunctions.push(function ()
-	{
-		for (let i = 0; i < rects.length; i++)
-		{
-			// if( i < frameCount / 30)
-			{
-				rects[i].position.lerp(rects[i].intendedPosition, 1.)
-				rects[i].position.lerp(rects[i].intendedPosition, 1.)
-			}
-		}
-	})
+	delete rectsOrderedBySideRightness
+	delete rectsOrderedByBottomLowness
 }
 
 operatorScope = []
@@ -234,24 +142,9 @@ function getMultivectorScopePosition(desiredindex,dest)
 {
 	//if you do want to get them all at once (which you do once per frame) can just pass an array in here
 
-	let allowedWidth = .7
-	dest.x = -camera.rightAtZZero + allowedWidth
-	dest.y = camera.topAtZZero
-	for(let i = 0; i <= desiredindex; i++ )
-	{
-		let halfMultivectorHeight = multivectorScope[i].boundingBox.scale.y / 2.;
-
-		if( dest.y - halfMultivectorHeight < -camera.topAtZZero)
-		{
-			dest.x += allowedWidth
-			dest.y = camera.topAtZZero
-		}
-
-		dest.y -= halfMultivectorHeight
-		if(i === desiredindex)
-			return dest
-		dest.y -= halfMultivectorHeight
-	}
+	let allowedWidth = 2.7
+	dest.x = (desiredindex-1) * 5
+	dest.y = dest.x
 }
 function getOperatorScopeX(desiredindex,eventualScopeSize)
 {

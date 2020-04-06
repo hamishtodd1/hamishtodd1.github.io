@@ -94,9 +94,31 @@ function initMultivectorAppearances()
 		let multivec = new THREE.Group();
 		scene.add(multivec) //the only point is to be a visualization
 
-		function getScalarBlockDimension()
+		function scalarBlockWidth()
 		{
-			return Math.ceil(Math.sqrt(Math.abs(elements[0])))
+			let min = Infinity
+			let max = -Infinity
+			for (let i = 0, il = scalar.children.length; i < il; i++)
+			{
+				if(!scalar.children[i].visible)
+					break
+				min = Math.min(min, scalar.children[i].position.x)
+				max = Math.max(max, scalar.children[i].position.x)
+			}
+			return max - min + 1.;
+		}
+		function scalarBlockHeight()
+		{
+			let min = Infinity
+			let max = -Infinity
+			for (let i = 0, il = scalar.children.length; i < il; i++)
+			{
+				if(!scalar.children[i].visible)
+					break
+				min = Math.min(min, scalar.children[i].position.y)
+				max = Math.max(max, scalar.children[i].position.y)
+			}
+			return max - min + 1.;
 		}
 
 		multivec.elements = MathematicalMultivector() //identity
@@ -127,8 +149,12 @@ function initMultivectorAppearances()
 			scalar.setIntendedPositionsToSquare = function ()
 			{
 				let currentLayer = 1 //layer n and all below it contain n^2 verts. vertex 0 is layer 1
-				let basicallyTheDimension = getScalarBlockDimension()
-				
+
+				/*
+					456
+					327
+					018
+				*/
 				for (let i = 0, il = scalar.children.length; i < il; i++)
 				{
 					if (sq(currentLayer) <= i)
@@ -139,11 +165,19 @@ function initMultivectorAppearances()
 					let inSecondHalf = i > diagOfThisLayer
 
 					scalar.children[i].intendedPosition
-						.set(.5 - basicallyTheDimension / 2., .5 - basicallyTheDimension / 2., 0.)
+						.set(0.,0.,0.)
 						.addScaledVector(rightDown ? yUnit : xUnit, currentLayer - 1) //get you to the start
 						.addScaledVector(rightDown ? xUnit : yUnit, inSecondHalf ? currentLayer - 1 : i - sq(currentLayer - 1))
 					if (inSecondHalf)
 						scalar.children[i].intendedPosition.addScaledVector(rightDown ? yUnit : xUnit, -1 * (i - diagOfThisLayer))
+				}
+
+				let centerLocationX = scalarBlockWidth() / 2.
+				let centerLocationY = scalarBlockHeight() / 2.
+				for (let i = 0, il = scalar.children.length; i < il; i++)
+				{
+					scalar.children[i].intendedPosition.x -= centerLocationX - .5
+					scalar.children[i].intendedPosition.y -= centerLocationY - .5
 				}
 			}
 
@@ -165,6 +199,9 @@ function initMultivectorAppearances()
 
 		//bivec
 		{
+			multivec.bivectorAppearance = new THREE.Object3D()
+			multivec.add(multivec.bivectorAppearance)
+
 			let numPieces = 60;
 			let piecesPositions = Array(numPieces)
 			let piecesMoreClockwiseEdges = Array(numPieces)
@@ -191,8 +228,6 @@ function initMultivectorAppearances()
 				geo.faces[i * 2 + 1] = new THREE.Face3(i * 4 + 1, i * 4 + 3, i * 4 + 2)
 			}
 
-			multivec.bivectorAppearance = new THREE.Object3D()
-			multivec.add(multivec.bivectorAppearance)
 			let clockwiseSide = new THREE.Mesh(geo, bivecMaterialClockwise)
 			let counterSide = new THREE.Mesh(geo, bivecMaterialCounter)
 			clockwiseSide.castShadow = true
@@ -302,19 +337,45 @@ function initMultivectorAppearances()
 		}
 		multivec.skipAnimation()
 
-		let boundingBox = new THREE.Mesh(unchangingUnitSquareGeometry,new THREE.MeshBasicMaterial({color:0x00FF00,transparent:true,opacity:.2}))
+		let boundingBox = new THREE.Mesh(unchangingUnitSquareGeometry,new THREE.MeshBasicMaterial({color:0x00FF00,transparent:true,opacity:.4}))
 		{
-			boundingBox.visible = false
+			// boundingBox.visible = false
 			multivec.boundingBox = boundingBox
 			multivec.add(boundingBox)
 
 			function updateBoundingBoxSize()
 			{
+				boundingBox.scale.x = scalarBlockWidth()
+				boundingBox.scale.y = scalarBlockHeight()
+
+				boundingBox.scale.x = Math.max(boundingBox.scale.x,Math.abs(elements[1]) )
+				boundingBox.scale.y = Math.max(boundingBox.scale.y,Math.abs(elements[2]) )
+
+				//bivector. Terrible simplification.
+				let minX = Infinity
+				let maxX = -Infinity
+				let minY = Infinity
+				let maxY = -Infinity
+				for (let i = 0., il = multivec.bivectorAppearance.children[0].geometry.vertices.length; i < il; i++)
+				{
+					minX = Math.min(minX,multivec.bivectorAppearance.children[0].geometry.vertices[i].x)
+					maxX = Math.max(maxX,multivec.bivectorAppearance.children[0].geometry.vertices[i].x)
+					minY = Math.min(minY,multivec.bivectorAppearance.children[0].geometry.vertices[i].y)
+					maxY = Math.max(maxY,multivec.bivectorAppearance.children[0].geometry.vertices[i].y)
+				}
+				boundingBox.scale.x = Math.max(boundingBox.scale.x, maxX - minX)
+				boundingBox.scale.y = Math.max(boundingBox.scale.y, maxY - minY)
+
+				let minSize = Math.min(camera.topAtZZero, camera.rightAtZZero) * 2. / 20.
+				boundingBox.scale.x = Math.max(minSize, boundingBox.scale.x)
+				boundingBox.scale.y = Math.max(minSize, boundingBox.scale.y)
+
+				return
+
 				let tallestSoFar = 0.
 
 				//scalar. Doesn't work if they're on a line
-				let scalarHeight = getScalarBlockDimension()
-				if (frameCount < 2) log(elements[0],scalarHeight)
+				let scalarHeight = scalarBlockDimension()
 				if (scalarHeight > tallestSoFar)
 					tallestSoFar = scalarHeight
 

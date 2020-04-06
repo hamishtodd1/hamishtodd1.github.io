@@ -63,8 +63,8 @@
 
 async function init()
 {
-	initPacking()
-	return
+	// initPacking()
+	// return
 
 	initMultivectorAppearances()
 	await initOperatorAppearances()
