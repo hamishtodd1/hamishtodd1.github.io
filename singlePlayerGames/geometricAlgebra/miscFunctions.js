@@ -73,35 +73,6 @@ THREE.Raycaster.prototype.intersectZPlane = function(z)
 	return this.ray.intersectPlane(zPlane,new THREE.Vector3())
 }
 
-RectangleIndicator = function()
-{
-	let material = new THREE.MeshBasicMaterial({color:0xFFFF00})
-	
-	let selectionIndicator = new THREE.Group()
-	let yellowRect = new THREE.Mesh(unchangingUnitSquareGeometry, material)
-	let thickness = .1
-	for(let i = 0; i < 4; i++)
-	{
-		let r = new THREE.Mesh(yellowRect.geometry,yellowRect.material)
-		selectionIndicator.add(r)
-		if(i < 2)
-		{
-			r.position.x = .5 - thickness * .5
-			r.scale.x = thickness
-		}
-		else
-		{
-			r.position.y = .5 - thickness * .5
-			r.scale.y = thickness
-		}
-		if(i%2)
-			r.position.multiplyScalar(-1.);
-		r.position.z = .01
-	}
-
-	return selectionIndicator
-}
-
 {
 	let urConnector = new THREE.Line(new THREE.Geometry(),new THREE.LineBasicMaterial({color:0x0F0FFF}))
 	urConnector.geometry.vertices.push(new THREE.Vector3())

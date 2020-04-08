@@ -63,13 +63,14 @@ function initOperationInterface(restartButton)
 		}
 
 		let newScopeMultivector = MultivectorAppearance(onClick,elements)
-		newScopeMultivector.scopePosition = new THREE.Vector3()
 		multivectorScope.push(newScopeMultivector)
+		newScopeMultivector.scopePosition = new THREE.Vector3()
 
 		if(sendToScopeImmediately)
 		{
 			updateScopePositions()
 			newScopeMultivector.position.copy(newScopeMultivector.scopePosition)
+			log(newScopeMultivector.scopePosition)
 		}
 
 		return newScopeMultivector

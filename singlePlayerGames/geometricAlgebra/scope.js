@@ -11,81 +11,19 @@
 	Could try putting them beneath each one in turn and sliding them left and right
 */
 
-function intersectRectangleMeshes(a, b)
+function intersectBoundingBoxes(a, b)
 {
-	let aMaxX = a.intendedPosition.x + a.scale.x * .5
-	let aMaxY = a.intendedPosition.y + a.scale.y * .5
-	let bMaxX = b.intendedPosition.x + b.scale.x * .5
-	let bMaxY = b.intendedPosition.y + b.scale.y * .5
-	let aMinX = a.intendedPosition.x - a.scale.x * .5
-	let aMinY = a.intendedPosition.y - a.scale.y * .5
-	let bMinX = b.intendedPosition.x - b.scale.x * .5
-	let bMinY = b.intendedPosition.y - b.scale.y * .5
+	let aMaxX = a.scopePosition.x + a.boundingBox.scale.x * .5
+	let aMaxY = a.scopePosition.y + a.boundingBox.scale.y * .5
+	let bMaxX = b.scopePosition.x + b.boundingBox.scale.x * .5
+	let bMaxY = b.scopePosition.y + b.boundingBox.scale.y * .5
+	let aMinX = a.scopePosition.x - a.boundingBox.scale.x * .5
+	let aMinY = a.scopePosition.y - a.boundingBox.scale.y * .5
+	let bMinX = b.scopePosition.x - b.boundingBox.scale.x * .5
+	let bMinY = b.scopePosition.y - b.boundingBox.scale.y * .5
 
 	return !(aMaxX < bMinX || aMinX > bMaxX ||
 			 aMaxY < bMinY || aMinY > bMaxY )
-}
-
-function packRectangles(rects)
-{
-	let numRects = rects.length
-
-	let rectsOrderedBySideRightness = Array(multivectorScope.length)
-	let rectsOrderedByBottomLowness = Array(multivectorScope.length)
-	for (let i = 0; i < multivectorScope.length; i++)
-	{
-		rectsOrderedBySideRightness[i] = rects[i]
-		rectsOrderedByBottomLowness[i] = rects[i]
-	}
-
-	let roundoffPadding = .005
-	let avoidanceOfSides = .3
-	for (let i = 0, il = multivectorScope.length; i < il; i++)
-	{
-		for(let j = -1; j < i; j++) // put it next to each rect
-		{
-			rects[i].intendedPosition.x = j === -1 ?
-				-camera.rightAtZZero + avoidanceOfSides + rects[i].scale.x / 2. :
-				rectsOrderedBySideRightness[j].intendedPosition.x + rectsOrderedBySideRightness[j].scale.x / 2. + roundoffPadding + rects[i].scale.x / 2.
-			
-			//start at top and move down whenever there's a clash
-			rects[i].intendedPosition.y = camera.topAtZZero - avoidanceOfSides - rects[i].scale.y / 2.
-			let goneOffBottom = false
-			for (let k = 0; k < i; k++)
-			{
-				if(intersectRectangleMeshes(rects[i],rectsOrderedByBottomLowness[k]))
-				{
-					rects[i].intendedPosition.y = rectsOrderedByBottomLowness[k].intendedPosition.y - rectsOrderedByBottomLowness[k].scale.y / 2. - rects[i].scale.y / 2. - roundoffPadding
-					if (rects[i].intendedPosition.y - rects[i].scale.y / 2. < -camera.topAtZZero + avoidanceOfSides)
-					{
-						goneOffBottom = true
-						break;
-					}
-				}
-			}
-
-			if (!goneOffBottom)
-			{
-				rectsOrderedByBottomLowness.sort(function(a,b)
-				{
-					let aLowness = a.intendedPosition.y - a.scale.y / 2.
-					let bLowness = b.intendedPosition.y - b.scale.y / 2.
-					return bLowness - aLowness //because larger numbers come first
-				})
-				rectsOrderedBySideRightness.sort(function(a,b)
-				{
-					let aRightness = a.intendedPosition.x + a.scale.x / 2.
-					let bRightness = b.intendedPosition.x + b.scale.x / 2.
-					return aRightness - bRightness
-				})
-
-				break;
-			}
-		}
-	}
-
-	delete rectsOrderedBySideRightness
-	delete rectsOrderedByBottomLowness
 }
 
 operatorScope = []
@@ -132,31 +70,80 @@ function setScope(elementses, operators)
 		ScopeOperator(operators[i], operators.length)
 }
 
+//much to do, big gaps and why the hell is it needed in input crap
 function updateScopePositions()
 {
-	//if you do want to get them all at once (which you do once per frame) can just pass an array in here
-	for(let j = 0; j < multivectorScope.length; j++)
+	let num = multivectorScope.length
+	let orderedBySideRightness = Array(num)
+	let orderedByBottomLowness = Array(num)
+	for (let i = 0, il = num; i < il; i++)
 	{
-		let dest = multivectorScope[j].scopePosition
+		orderedBySideRightness[i] = multivectorScope[i]
+		orderedByBottomLowness[i] = multivectorScope[i]
+	}
 
-		let allowedWidth = .7
-		dest.x = -camera.rightAtZZero + allowedWidth
-		dest.y = camera.topAtZZero
-		for (let i = 0; i <= j; i++)
+	function doSorts()
+	{
+		orderedByBottomLowness.sort(function (a, b)
 		{
-			let halfMultivectorHeight = multivectorScope[i].boundingBox.scale.y / 2.;
+			let aLowness = a.scopePosition.y - a.boundingBox.scale.y / 2.
+			let bLowness = b.scopePosition.y - b.boundingBox.scale.y / 2.
+			return bLowness - aLowness //because larger numbers come first
+		})
+		orderedBySideRightness.sort(function (a, b)
+		{
+			let aRightness = a.scopePosition.x + a.boundingBox.scale.x / 2.
+			let bRightness = b.scopePosition.x + b.boundingBox.scale.x / 2.
+			return aRightness - bRightness
+		})
+	}
 
-			if (dest.y - halfMultivectorHeight < -camera.topAtZZero)
+	let spacing = .1 //needs to be greater than zero because round off errors
+	let avoidanceOfSides = .3
+	for (let i = 0, il = num; i < il; i++)
+	{
+		orderedBySideRightness[i].scopePosition.x = Infinity
+		orderedByBottomLowness[i].scopePosition.y =-Infinity //want the infinities to be at the end
+	}
+	doSorts()
+
+	for (let i = 0, il = num; i < il; i++)
+	{
+		for (let j = -1; j < i; j++) // put it next to each rect
+		{
+			multivectorScope[i].scopePosition.x = j === -1 ?
+				-camera.rightAtZZero + avoidanceOfSides + multivectorScope[i].boundingBox.scale.x / 2. :
+				orderedBySideRightness[j].scopePosition.x + orderedBySideRightness[j].boundingBox.scale.x / 2. + spacing + multivectorScope[i].boundingBox.scale.x / 2.
+
+			//start at top and move down whenever there's a clash
+			multivectorScope[i].scopePosition.y = camera.topAtZZero - avoidanceOfSides - multivectorScope[i].boundingBox.scale.y / 2.
+			let goneOffBottom = false
+			for (let k = 0; k < i; k++)
 			{
-				dest.x += allowedWidth
-				dest.y = camera.topAtZZero
+				if (
+					//TODO completely in-line with vertical first, fuck precalculating
+					// multivectorScope[i].scopePosition.y + multivectorScope[i].boundingBox.scale.y / 2. > orderedByBottomLowness[k].scopePosition.y - orderedByBottomLowness[k].boundingBox.scale.y / 2. &&
+					intersectBoundingBoxes(multivectorScope[i], orderedByBottomLowness[k]))
+				{
+					multivectorScope[i].scopePosition.y = orderedByBottomLowness[k].scopePosition.y - orderedByBottomLowness[k].boundingBox.scale.y / 2. - multivectorScope[i].boundingBox.scale.y / 2. - spacing
+					if (multivectorScope[i].scopePosition.y - multivectorScope[i].boundingBox.scale.y / 2. < -camera.topAtZZero + avoidanceOfSides)
+					{
+						goneOffBottom = true
+						break; //well this is more like double-break
+					}
+				}
 			}
 
-			dest.y -= halfMultivectorHeight
-			if(j!==i)
-				dest.y -= halfMultivectorHeight
+			if (!goneOffBottom)
+			{
+				doSorts()
+				break;
+			}
 		}
 	}
+
+	delete orderedBySideRightness
+	delete orderedByBottomLowness
 }
 function getOperatorScopeX(desiredindex,eventualScopeSize)
 {
@@ -180,8 +167,33 @@ function initScope()
 			operatorScope[i].position.x += .1 * (getOperatorScopeX(i) - operatorScope[i].position.x)
 	})
 
-	let keyboardSelectionIndicator = RectangleIndicator()
+	let keyboardSelectionIndicator = null
+	{
+		let material = new THREE.MeshBasicMaterial({ color: 0xFFFF00 })
 
+		keyboardSelectionIndicator = new THREE.Group()
+		keyboardSelectionIndicator.thickness = .1
+		for (let i = 0; i < 4; i++)
+		{
+			let r = new THREE.Mesh(unchangingUnitSquareGeometry, material)
+			keyboardSelectionIndicator.add(r)
+			if (i < 2)
+			{
+				r.position.x = .5 - keyboardSelectionIndicator.thickness * .5
+				r.scale.x = keyboardSelectionIndicator.thickness
+			}
+			else
+			{
+				r.position.y = .5 - keyboardSelectionIndicator.thickness * .5
+				r.scale.y = keyboardSelectionIndicator.thickness
+			}
+			if (i % 2)
+				r.position.multiplyScalar(-1.);
+			r.position.z = .01
+		}
+	}
+
+	//stuff about finding the nearest in a direction
 	// updateFunctions.push(function()
 	// {
 	// 	if( keyboardSelectionIndicator.parent === null )
@@ -245,10 +257,39 @@ function initScope()
 	{
 		if( !checkIfObjectIsInScene(keyboardSelectionIndicator) )
 		{
+			scene.add(keyboardSelectionIndicator)
+
 			multivectorScopeSelected = false
 			multivectorSelection = 0;
 			operatorSelection = 0;
-			getSelection().add(keyboardSelectionIndicator)
+		}
+	}
+
+	function moveToSelection()
+	{
+		let currentSelection = getSelection()
+		keyboardSelectionIndicator.position.copy(currentSelection.position)
+		if (multivectorScope.indexOf(currentSelection) !== -1)
+		{
+			for (let i = 0; i < keyboardSelectionIndicator.children.length; i++)
+			{
+				keyboardSelectionIndicator.children[i].position.x = Math.sign(keyboardSelectionIndicator.children[i].position.x) * currentSelection.boundingBox.scale.x / 2.
+				keyboardSelectionIndicator.children[i].position.y = Math.sign(keyboardSelectionIndicator.children[i].position.y) * currentSelection.boundingBox.scale.y / 2.
+
+				keyboardSelectionIndicator.children[i].scale.x = keyboardSelectionIndicator.children[i].scale.x === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : currentSelection.boundingBox.scale.x + keyboardSelectionIndicator.thickness
+				keyboardSelectionIndicator.children[i].scale.y = keyboardSelectionIndicator.children[i].scale.y === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : currentSelection.boundingBox.scale.y + keyboardSelectionIndicator.thickness
+			}
+		}
+		else
+		{
+			for (let i = 0; i < keyboardSelectionIndicator.children.length; i++)
+			{
+				keyboardSelectionIndicator.children[i].position.x = Math.sign(keyboardSelectionIndicator.children[i].position.x)
+				keyboardSelectionIndicator.children[i].position.y = Math.sign(keyboardSelectionIndicator.children[i].position.y)
+
+				keyboardSelectionIndicator.children[i].scale.x = keyboardSelectionIndicator.children[i].scale.x === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : 2. + keyboardSelectionIndicator.thickness
+				keyboardSelectionIndicator.children[i].scale.y = keyboardSelectionIndicator.children[i].scale.y === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : 2. + keyboardSelectionIndicator.thickness
+			}
 		}
 	}
 
@@ -270,7 +311,7 @@ function initScope()
 			}
 		}
 
-		getSelection().add(keyboardSelectionIndicator)
+		moveToSelection()
 	})
 	bindButton("down",function()
 	{
@@ -290,7 +331,7 @@ function initScope()
 			}
 		}
 
-		getSelection().add(keyboardSelectionIndicator)
+		moveToSelection()
 	})
 	bindButton("left",function()
 	{
@@ -310,7 +351,7 @@ function initScope()
 			}
 		}
 
-		getSelection().add(keyboardSelectionIndicator)
+		moveToSelection()
 	})
 	bindButton("right",function()
 	{
@@ -330,7 +371,7 @@ function initScope()
 			}
 		}
 
-		getSelection().add(keyboardSelectionIndicator)
+		moveToSelection()
 	})
 
 	bindButton("enter",function()

@@ -270,6 +270,7 @@ function initInputAndOutputGroups()
 			{
 				inputGroup.intendedPosition.x = -camera.rightAtZZero + inputGroup.background.scale.x / 2.
 				//THERE MIGHT BE PROBLEMS HERE RE UPDATING THE SCOPE FIRST updateScopePositions
+				updateScopePositions()
 				inputGroup.intendedPosition.x += multivectorScope[multivectorScope.length-1].scopePosition.x + .9 + camera.rightAtZZero
 
 				inputGroup.intendedPosition.y = camera.topAtZZero - inputGroup.background.scale.y / 2. - .1
