@@ -14,6 +14,32 @@ async function initCrystallography()
 	crystalArea.position.x = -.5
 	scene.add(crystalArea)
 
+	let unitCellDimension = .4
+
+	let indicatorMat = new THREE.LineBasicMaterial({color:0x000000})
+	let unitCellIndicator = new THREE.Group()
+	crystalArea.add(unitCellIndicator)
+	let corners = [
+		new THREE.Vector3(unitCellDimension/2.,unitCellDimension/2.,.001),
+		new THREE.Vector3(unitCellDimension/2.,-unitCellDimension/2.,.001),
+		new THREE.Vector3(-unitCellDimension/2.,-unitCellDimension/2.,.001),
+		new THREE.Vector3(-unitCellDimension/2.,unitCellDimension/2.,.001),
+	]
+	for(let i = 0; i < 4; i++)
+	{
+		let line = new THREE.LineSegments(new THREE.Geometry(),indicatorMat)
+		unitCellIndicator.add(line)
+		let toGoAlong = corners[(i+1)%4].clone().sub(corners[i])
+		log(toGoAlong)
+		for(let j = 0.; j < 10.; j++)
+		{
+			line.geometry.vertices.push(
+				corners[i].clone().addScaledVector(toGoAlong, j / 10.),
+				corners[i].clone().addScaledVector(toGoAlong, (j + .5) / 10.)
+				)
+		}
+	}
+
 	let asymmetricUnitAtoms = []
 	let atomGeometry = new THREE.SphereBufferGeometry(.04)
 	function AsymmetricUnitAtom()
@@ -41,15 +67,17 @@ async function initCrystallography()
 			{
 				atom.position.add(mouse.zZeroPosition)
 				atom.position.sub(mouse.oldZZeroPosition)
+			}
 
-				if(atom.position.x > 0.)
-					atom.position.x -= .4
-				if(atom.position.x < -.4)
-					atom.position.x += .4
-				if(atom.position.y > 0.)
-					atom.position.y -= .4
-				if(atom.position.y < -.4)
-					atom.position.y += .4
+			{
+				if (atom.position.x > 0.)
+					atom.position.x -= unitCellDimension
+				if (atom.position.x < -unitCellDimension)
+					atom.position.x += unitCellDimension
+				if (atom.position.y > 0.)
+					atom.position.y -= unitCellDimension
+				if (atom.position.y < -unitCellDimension)
+					atom.position.y += unitCellDimension
 			}
 		})
 	}
@@ -74,7 +102,7 @@ async function initCrystallography()
 		var amplitudes = new Float32Array(hkWide*hkWide)
 		var phases = new Float32Array(hkWide*hkWide)
 
-		let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(.8, .8), new THREE.MeshBasicMaterial({color:0x000000}));
+		let structureFactorArea = new THREE.Mesh(new THREE.PlaneBufferGeometry(.8, .8), new THREE.MeshBasicMaterial({color:0x000000}));
 		let geo = new THREE.SphereBufferGeometry(.01)
 		var structureFactorMeshes = Array(hkWide)
 		for(let h = 0; h < hkWide; h++)
@@ -84,11 +112,11 @@ async function initCrystallography()
 			{
 				structureFactorMeshes[h][k] = new THREE.Mesh(geo, new THREE.MeshBasicMaterial())
 				structureFactorMeshes[h][k].position.set(h - maxHk, k - maxHk, 0.).multiplyScalar(.4 / maxHk)
-				plane.add(structureFactorMeshes[h][k])
+				structureFactorArea.add(structureFactorMeshes[h][k])
 			}
 		}
-		plane.position.y = 1.1
-		scene.add(plane);
+		structureFactorArea.position.y = .8
+		scene.add(structureFactorArea);
 	}
 
 	{
