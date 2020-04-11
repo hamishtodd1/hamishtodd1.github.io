@@ -115,10 +115,12 @@ async function initCrystallography()
 				structureFactorArea.add(structureFactorMeshes[h][k])
 			}
 		}
-		structureFactorArea.position.y = .8
+		// structureFactorArea.position.y = .8
+		structureFactorArea.position.x = .5
 		scene.add(structureFactorArea);
 	}
 
+	if(0)
 	{
 		let atomCoords = new Float32Array(asymmetricUnitAtoms.length*3); //next thing to do is get an array in there, suuuurely possible
 		//could do it as a texture though, rgb = xyz
@@ -144,9 +146,9 @@ async function initCrystallography()
 			atomCoords[index*3 + 2] = v.z;
 		}
 
-		let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(.8,.8), material);
-		plane.position.x = .5
-		scene.add(plane);
+		let mapArea = new THREE.Mesh(new THREE.PlaneBufferGeometry(.8,.8), material);
+		mapArea.position.x = .5
+		scene.add(mapArea);
 	}
 
 	updateFunctions.push(function ()
@@ -191,9 +193,9 @@ async function initCrystallography()
 			}
 		}
 
-		mapUniforms.numberGoingBetweenZeroAndOne.value = 0.5 + Math.sin(clock.elapsedTime) * 0.5;
+		// mapUniforms.numberGoingBetweenZeroAndOne.value = 0.5 + Math.sin(clock.elapsedTime) * 0.5;
 
-		for (let i = 0; i < asymmetricUnitAtoms.length; i++)
-			assignCoords( i, asymmetricUnitAtoms[i].position )
+		// for (let i = 0; i < asymmetricUnitAtoms.length; i++)
+		// 	assignCoords( i, asymmetricUnitAtoms[i].position )
 	})
 }
