@@ -264,19 +264,29 @@ function initGoals(modeChange,restartButton)
 
 		scopeIsLimited = false
 
+		//CHANGE_SCOPE
 		setScope()
 
-		//CHANGE_SCOPE
+		ScopeMultivector(new Float32Array([0., 1., 1., 0., 0., 0., 0., 0.]), true)
+		ScopeMultivector(new Float32Array([ 1., 0., 0., 0., 0., 0., 0., 0.]), true)
+		ScopeMultivector(new Float32Array([-1., 0., 0., 0., 0., 0., 0., 0.]), true)
+		ScopeMultivector(new Float32Array([2., 0., 0., 0., 0., 0., 0., 0.]), true)
 
-		ScopeMultivector(new Float32Array([0, 1, 0, 0, 0, 0, 0, 0]), true)
-		ScopeMultivector(new Float32Array([0, 0, 2, 0, 0, 0, 0, 0]), true)
-		ScopeMultivector(new Float32Array([0, 0, 4, 0, 0, 0, 0, 0]), true)
-		ScopeMultivector(new Float32Array([0, 2, 0, 0, 0, 0, 0, 0]), true)
 
-		// ScopeMultivector(new Float32Array([0., 1., 1., 0., 0., 0., 0., 0.]), true)
-		// ScopeMultivector(new Float32Array([ 1., 0., 0., 0., 0., 0., 0., 0.]), true)
-		// ScopeMultivector(new Float32Array([-1., 0., 0., 0., 0., 0., 0., 0.]), true)
-		// ScopeMultivector(new Float32Array([2., 0., 0., 0., 0., 0., 0., 0.]), true)
+		ScopeMultivector(new Float32Array([0., 1., 1., 0., 0., 0., 0., 0.]), true)
+		ScopeMultivector(new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.]), true)
+		ScopeMultivector(new Float32Array([-1., 0., 0., 0., 0., 0., 0., 0.]), true)
+		ScopeMultivector(new Float32Array([2., 0., 0., 0., 0., 0., 0., 0.]), true)
+
+		ScopeMultivector(new Float32Array([0., 1., 1., 0., 0., 0., 0., 0.]), true)
+		ScopeMultivector(new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.]), true)
+		ScopeMultivector(new Float32Array([-1., 0., 0., 0., 0., 0., 0., 0.]), true)
+		ScopeMultivector(new Float32Array([2., 0., 0., 0., 0., 0., 0., 0.]), true)
+
+		ScopeMultivector(new Float32Array([0., 1., 1., 0., 0., 0., 0., 0.]), true)
+		ScopeMultivector(new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.]), true)
+		ScopeMultivector(new Float32Array([-1., 0., 0., 0., 0., 0., 0., 0.]), true)
+		ScopeMultivector(new Float32Array([2., 0., 0., 0., 0., 0., 0., 0.]), true)
 
 		// for(let i = 0; i < 3; i++)
 		// {

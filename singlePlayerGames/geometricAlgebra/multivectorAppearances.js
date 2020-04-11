@@ -1,4 +1,6 @@
 /*
+	Scalar vector multiplication: one of the scalar units goes to the end of the vector, and the rest get spaced out too
+
 	Possibly useful model: the operator combines with one of the operands to become a thing that is applied to the other operand
 	A little cartoon character doing everything is surely the way to go. The pieces should be gotten rid of
 
@@ -20,6 +22,7 @@
 		Transparent and glowy and smoky and reflective
 
 	The scalar
+		A circle that can bulge very slightly for when you want to multiply it by a vector
 		For unit circle it will be less than one
 		IS there any reason to not store the scalars in a line? More compact...
 		circle implies no directionality, and distinguishes it nicely from the square which can be used for bivector
@@ -340,7 +343,7 @@ function initMultivectorAppearances()
 
 		let boundingBox = new THREE.Mesh(unchangingUnitSquareGeometry,new THREE.MeshBasicMaterial({color:0x00FF00,transparent:true,opacity:.4}))
 		{
-			// boundingBox.visible = false
+			boundingBox.visible = false
 			multivec.boundingBox = boundingBox
 			multivec.add(boundingBox)
 
@@ -349,6 +352,7 @@ function initMultivectorAppearances()
 				boundingBox.scale.x = scalarBlockWidth()
 				boundingBox.scale.y = scalarBlockHeight()
 
+				//vector
 				boundingBox.scale.x = Math.max(boundingBox.scale.x,Math.abs(elements[1]) )
 				boundingBox.scale.y = Math.max(boundingBox.scale.y,Math.abs(elements[2]) )
 
@@ -371,7 +375,6 @@ function initMultivectorAppearances()
 				boundingBox.scale.x = Math.max(minSize, boundingBox.scale.x)
 				boundingBox.scale.y = Math.max(minSize, boundingBox.scale.y)
 			}
-			updateBoundingBoxSize()
 
 			if (externalOnClick !== undefined)
 			{
@@ -385,6 +388,44 @@ function initMultivectorAppearances()
 			}
 		}
 
+		function updateAppearance()
+		{
+			//scalar
+			{
+				// if (elements[0] != Math.round(elements[0]))
+				// {
+				// 	//cut radially
+				// 	//do it in frag shader
+				// }
+				scalar.material.color.setHex(elements[0] > 0. ? discreteViridis[1].hex : discreteViridis[3].hex)
+				if (Math.abs(elements[0]) > scalar.children.length)
+					console.error("not enough scalar units")
+				for (let i = 0, il = scalar.children.length; i < il; i++)
+					scalar.children[i].visible = i < Math.floor(Math.abs(elements[0]))
+				scalar.setIntendedPositionsToSquare()
+
+				for (let i = 0, il = scalar.children.length; i < il; i++)
+					scalar.children[i].position.lerp(scalar.children[i].intendedPosition, .1)
+			}
+
+			//vec
+			{
+				vecPart.set(multivec.elements[1], multivec.elements[2], multivec.elements[3])
+				randomPerpVector(vecPart, vecOrthX)
+				vecOrthX.normalize()
+				vecOrthZ.copy(vecPart).cross(vecOrthX).normalize().negate();
+				vecAppearance.matrix.makeBasis(vecOrthX, vecPart, vecOrthZ);
+				vecAppearance.matrix.setPosition(vecPart.multiplyScalar(-.5))
+
+				if (vecPart.equals(zeroVector))
+					multivec.remove(vecAppearance)
+				else
+					multivec.add(vecAppearance)
+			}
+		}
+		updateAppearance()
+		updateBoundingBoxSize()
+
 		updateFunctions.push(function()
 		{
 			if (multivec.elements[5] !== 0. || multivec.elements[6] !== 0. || multivec.elements[7] !== 0.)
@@ -395,40 +436,7 @@ function initMultivectorAppearances()
 				multivec.animationOngoing = false
 			}
 
-			{
-				//scalar
-				{
-					// if (elements[0] != Math.round(elements[0]))
-					// {
-					// 	//cut radially
-					// 	//do it in frag shader
-					// }
-					scalar.material.color.setHex(elements[0] > 0. ? discreteViridis[1].hex : discreteViridis[3].hex)
-					if (Math.abs(elements[0]) > scalar.children.length)
-						console.error("not enough scalar units")
-					for (let i = 0, il = scalar.children.length; i < il; i++)
-						scalar.children[i].visible = i < Math.floor(Math.abs(elements[0]))
-					scalar.setIntendedPositionsToSquare()
-
-					for (let i = 0, il = scalar.children.length; i < il; i++)
-						scalar.children[i].position.lerp(scalar.children[i].intendedPosition, .1)
-				}
-
-				//vec
-				{
-					vecPart.set(multivec.elements[1], multivec.elements[2], multivec.elements[3])
-					randomPerpVector(vecPart, vecOrthX)
-					vecOrthX.normalize()
-					vecOrthZ.copy(vecPart).cross(vecOrthX).normalize().negate();
-					vecAppearance.matrix.makeBasis(vecOrthX, vecPart, vecOrthZ);
-					vecAppearance.matrix.setPosition(vecPart.multiplyScalar(-.5))
-
-					if (vecPart.equals(zeroVector))
-						multivec.remove(vecAppearance)
-					else
-						multivec.add(vecAppearance)
-				}
-			}
+			updateAppearance()
 
 			updateBoundingBoxSize()
 

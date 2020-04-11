@@ -265,11 +265,9 @@ function initInputAndOutputGroups()
 		}
 
 		{
-			let positionGetter = new THREE.Vector3()
 			function updateInputGroupIntendedPosition()
 			{
 				inputGroup.intendedPosition.x = -camera.rightAtZZero + inputGroup.background.scale.x / 2.
-				//THERE MIGHT BE PROBLEMS HERE RE UPDATING THE SCOPE FIRST updateScopePositions
 				updateScopePositions()
 				inputGroup.intendedPosition.x += multivectorScope[multivectorScope.length-1].scopePosition.x + .9 + camera.rightAtZZero
 

@@ -70,7 +70,6 @@ function initOperationInterface(restartButton)
 		{
 			updateScopePositions()
 			newScopeMultivector.position.copy(newScopeMultivector.scopePosition)
-			log(newScopeMultivector.scopePosition)
 		}
 
 		return newScopeMultivector

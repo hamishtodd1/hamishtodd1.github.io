@@ -1,4 +1,6 @@
 /*
+	Would be very nice to move the selector there when you hover
+
 	Put the whole scope on the pictures?
 
 	Surely want scope on right because that's the way people hold it
@@ -6,9 +8,9 @@
 	Optimal Arrangement
 		exponential but n is small
 		Except there is one side along which you do want to fill
-		Not really desirable because you want the simple stuff in one place
-
-	Could try putting them beneath each one in turn and sliding them left and right
+		Downsides:
+			the basis isn't in one place
+			"undo" will cause big rearrangements
 */
 
 function intersectBoundingBoxes(a, b)
@@ -22,8 +24,11 @@ function intersectBoundingBoxes(a, b)
 	let bMinX = b.scopePosition.x - b.boundingBox.scale.x * .5
 	let bMinY = b.scopePosition.y - b.boundingBox.scale.y * .5
 
-	return !(aMaxX < bMinX || aMinX > bMaxX ||
-			 aMaxY < bMinY || aMinY > bMaxY )
+	return !(
+		aMaxX < bMinX ||
+		aMinX > bMaxX ||
+		aMaxY < bMinY ||
+		aMinY > bMaxY )
 }
 
 operatorScope = []
@@ -122,7 +127,6 @@ function updateScopePositions()
 			{
 				if (
 					//TODO completely in-line with vertical first, fuck precalculating
-					// multivectorScope[i].scopePosition.y + multivectorScope[i].boundingBox.scale.y / 2. > orderedByBottomLowness[k].scopePosition.y - orderedByBottomLowness[k].boundingBox.scale.y / 2. &&
 					intersectBoundingBoxes(multivectorScope[i], orderedByBottomLowness[k]))
 				{
 					multivectorScope[i].scopePosition.y = orderedByBottomLowness[k].scopePosition.y - orderedByBottomLowness[k].boundingBox.scale.y / 2. - multivectorScope[i].boundingBox.scale.y / 2. - spacing
@@ -193,54 +197,43 @@ function initScope()
 		}
 	}
 
-	//stuff about finding the nearest in a direction
-	// updateFunctions.push(function()
-	// {
-	// 	if( keyboardSelectionIndicator.parent === null )
-			
-	// })
-	// bindButton("enter",function()
-	// {
-	// 	if(scopeIsLimited)
-	// 	{
-	// 		let closestMultivector = multivectorScope[ getClosestObjectToPoint(keyboardSelectionIndicator.position,multivectorScope) ]
-	// 		let closestOperator = operatorScope[ getClosestObjectToPoint(keyboardSelectionIndicator.position,operatorScope) ]
+	//both angle and distance play a part in which one you choose. We threshold the angle and choose the closest
+	let directionChecker = new THREE.Vector3()
+	function checkIfPositionIsInDirection(origin,direction,position)
+	{
+		directionChecker.copy(position).sub(origin)
+		return directionChecker.angleTo(direction) < TAU / 8.
+	}
+	bindButton("k",function()
+	{
+		let selection = getSelection()
 
-	// 		let closerEntity = 
-	// 			closestMultivector.position.distanceToSquared(keyboardSelectionIndicator.position) < 
-	// 			closestOperator.position.distanceToSquared(keyboardSelectionIndicator.position) ?
-	// 			closestMultivector : closestOperator
+		let closestDistSq = Infinity
+		let closestIndex = -1
+		for(let i = 0; i < multivectorScope.length; i++)
+		{
+			//it has to be less than 45 degrees from where you are, otherwise you'd go down to get to it
+			//buuuuut if there's nothing where do you go?
+			if(multivectorScope[i] === selection)
+				continue;
 
-	// 		keyboardSelectionIndicator.position.copy(closerEntity.position)
-	// 	}
-
-	// 	let selection = getSelection()
-	// 	if(operatorScope.indexOf(selection) !== -1)
-	// 		selection.onClick()
-	// 	else if(multivectorScope.indexOf(selection) !== -1)
-	// 		selection.boundingBox.onClick()
-	// })
-
-	// function checkIfPositionIsInDirection(origin,direction,position)
-	// {
-	// 	if()
-	// }
-	// bindButton("right",function()
-	// {
-	// 	let oneOnTheRight = null
-	// 	for(let i = 0; i < multivectorScope.length; i++)
-	// 	{
-	// 		//it has to be less than 45 degrees from where you are, otherwise you'd go down to get to it
-	// 		//buuuuut if there's nothing where do you go/
-	// 		if(multivectorScope[i] === keyboardSelectionIndicator.parent)
-	// 			continue;
-
-	// 		if( checkIfPositionIsInDirection(keyboardSelectionIndicator.parent.position,xUnit,multivectorScope[i].position) )
-	// 		{
-
-	// 		}
-	// 	}
-	// })
+			if( checkIfPositionIsInDirection(selection.position,xUnit,multivectorScope[i].position) )
+			{
+				let distSq = selection.position.distanceToSquared(multivectorScope[i].position)
+				if (distSq < closestDistSq)
+				{
+					closestDistSq = distSq
+					closestIndex = i
+				}
+			}
+		}
+		if(closestIndex !== -1)
+		{
+			multivectorScopeSelected = true
+			multivectorSelection = closestIndex
+			log(multivectorSelection)
+		}
+	})
 	// return;
 
 	let multivectorScopeSelected
@@ -262,34 +255,34 @@ function initScope()
 			multivectorScopeSelected = false
 			multivectorSelection = 0;
 			operatorSelection = 0;
-		}
-	}
 
-	function moveToSelection()
-	{
-		let currentSelection = getSelection()
-		keyboardSelectionIndicator.position.copy(currentSelection.position)
-		if (multivectorScope.indexOf(currentSelection) !== -1)
-		{
-			for (let i = 0; i < keyboardSelectionIndicator.children.length; i++)
+			updateFunctions.push(function ()
 			{
-				keyboardSelectionIndicator.children[i].position.x = Math.sign(keyboardSelectionIndicator.children[i].position.x) * currentSelection.boundingBox.scale.x / 2.
-				keyboardSelectionIndicator.children[i].position.y = Math.sign(keyboardSelectionIndicator.children[i].position.y) * currentSelection.boundingBox.scale.y / 2.
+				let currentSelection = getSelection()
+				keyboardSelectionIndicator.position.copy(currentSelection.position)
+				if (multivectorScope.indexOf(currentSelection) !== -1)
+				{
+					for (let i = 0; i < keyboardSelectionIndicator.children.length; i++)
+					{
+						keyboardSelectionIndicator.children[i].position.x = Math.sign(keyboardSelectionIndicator.children[i].position.x) * currentSelection.boundingBox.scale.x / 2.
+						keyboardSelectionIndicator.children[i].position.y = Math.sign(keyboardSelectionIndicator.children[i].position.y) * currentSelection.boundingBox.scale.y / 2.
 
-				keyboardSelectionIndicator.children[i].scale.x = keyboardSelectionIndicator.children[i].scale.x === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : currentSelection.boundingBox.scale.x + keyboardSelectionIndicator.thickness
-				keyboardSelectionIndicator.children[i].scale.y = keyboardSelectionIndicator.children[i].scale.y === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : currentSelection.boundingBox.scale.y + keyboardSelectionIndicator.thickness
-			}
-		}
-		else
-		{
-			for (let i = 0; i < keyboardSelectionIndicator.children.length; i++)
-			{
-				keyboardSelectionIndicator.children[i].position.x = Math.sign(keyboardSelectionIndicator.children[i].position.x)
-				keyboardSelectionIndicator.children[i].position.y = Math.sign(keyboardSelectionIndicator.children[i].position.y)
+						keyboardSelectionIndicator.children[i].scale.x = keyboardSelectionIndicator.children[i].scale.x === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : currentSelection.boundingBox.scale.x + keyboardSelectionIndicator.thickness
+						keyboardSelectionIndicator.children[i].scale.y = keyboardSelectionIndicator.children[i].scale.y === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : currentSelection.boundingBox.scale.y + keyboardSelectionIndicator.thickness
+					}
+				}
+				else
+				{
+					for (let i = 0; i < keyboardSelectionIndicator.children.length; i++)
+					{
+						keyboardSelectionIndicator.children[i].position.x = Math.sign(keyboardSelectionIndicator.children[i].position.x)
+						keyboardSelectionIndicator.children[i].position.y = Math.sign(keyboardSelectionIndicator.children[i].position.y)
 
-				keyboardSelectionIndicator.children[i].scale.x = keyboardSelectionIndicator.children[i].scale.x === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : 2. + keyboardSelectionIndicator.thickness
-				keyboardSelectionIndicator.children[i].scale.y = keyboardSelectionIndicator.children[i].scale.y === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : 2. + keyboardSelectionIndicator.thickness
-			}
+						keyboardSelectionIndicator.children[i].scale.x = keyboardSelectionIndicator.children[i].scale.x === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : 2. + keyboardSelectionIndicator.thickness
+						keyboardSelectionIndicator.children[i].scale.y = keyboardSelectionIndicator.children[i].scale.y === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : 2. + keyboardSelectionIndicator.thickness
+					}
+				}
+			})
 		}
 	}
 
@@ -310,8 +303,6 @@ function initScope()
 				multivectorSelection = multivectorScope.length-1
 			}
 		}
-
-		moveToSelection()
 	})
 	bindButton("down",function()
 	{
@@ -330,8 +321,6 @@ function initScope()
 				multivectorSelection = 0
 			}
 		}
-
-		moveToSelection()
 	})
 	bindButton("left",function()
 	{
@@ -350,8 +339,6 @@ function initScope()
 				operatorSelection = operatorScope.length - 1
 			}
 		}
-
-		moveToSelection()
 	})
 	bindButton("right",function()
 	{
@@ -370,8 +357,6 @@ function initScope()
 				operatorSelection = 0
 			}
 		}
-
-		moveToSelection()
 	})
 
 	bindButton("enter",function()

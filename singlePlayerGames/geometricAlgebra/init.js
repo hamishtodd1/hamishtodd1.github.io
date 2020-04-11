@@ -63,26 +63,6 @@
 
 async function init()
 {
-	// {
-	// 	let numRects = 56
-	// 	let rects = Array(numRects)
-	// 	for (let i = 0; i < numRects; i++)
-	// 	{
-	// 		rects[i] = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: new THREE.Color(i / numRects, 0., 0.) }))
-	// 		rects[i].scale.x = .2 + Math.random() * 4.
-	// 		rects[i].scale.y = .2 + Math.random() * 4.
-	// 		rects[i].intendedPosition = new THREE.Vector3(camera.rightAtZZero * 1.5, -camera.topAtZZero, 0.)
-	// 		scene.add(rects[i])
-	// 	}
-
-	// 	packRectangles(rects)
-
-	// 	for (let i = 0, il = rects.length; i < il; i++)
-	// 		rects[i].position.copy(rects[i].intendedPosition)
-	// }
-
-	// return
-
 	initMultivectorAppearances()
 	await initOperatorAppearances()
 
