@@ -273,20 +273,20 @@ function initGoals(modeChange,restartButton)
 		ScopeMultivector(new Float32Array([2., 0., 0., 0., 0., 0., 0., 0.]), true)
 
 
-		ScopeMultivector(new Float32Array([0., 1., 1., 0., 0., 0., 0., 0.]), true)
-		ScopeMultivector(new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.]), true)
-		ScopeMultivector(new Float32Array([-1., 0., 0., 0., 0., 0., 0., 0.]), true)
-		ScopeMultivector(new Float32Array([2., 0., 0., 0., 0., 0., 0., 0.]), true)
+		// ScopeMultivector(new Float32Array([0., 1., 1., 0., 0., 0., 0., 0.]), true)
+		// ScopeMultivector(new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.]), true)
+		// ScopeMultivector(new Float32Array([-1., 0., 0., 0., 0., 0., 0., 0.]), true)
+		// ScopeMultivector(new Float32Array([2., 0., 0., 0., 0., 0., 0., 0.]), true)
 
-		ScopeMultivector(new Float32Array([0., 1., 1., 0., 0., 0., 0., 0.]), true)
-		ScopeMultivector(new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.]), true)
-		ScopeMultivector(new Float32Array([-1., 0., 0., 0., 0., 0., 0., 0.]), true)
-		ScopeMultivector(new Float32Array([2., 0., 0., 0., 0., 0., 0., 0.]), true)
+		// ScopeMultivector(new Float32Array([0., 1., 1., 0., 0., 0., 0., 0.]), true)
+		// ScopeMultivector(new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.]), true)
+		// ScopeMultivector(new Float32Array([-1., 0., 0., 0., 0., 0., 0., 0.]), true)
+		// ScopeMultivector(new Float32Array([2., 0., 0., 0., 0., 0., 0., 0.]), true)
 
-		ScopeMultivector(new Float32Array([0., 1., 1., 0., 0., 0., 0., 0.]), true)
-		ScopeMultivector(new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.]), true)
-		ScopeMultivector(new Float32Array([-1., 0., 0., 0., 0., 0., 0., 0.]), true)
-		ScopeMultivector(new Float32Array([2., 0., 0., 0., 0., 0., 0., 0.]), true)
+		// ScopeMultivector(new Float32Array([0., 1., 1., 0., 0., 0., 0., 0.]), true)
+		// ScopeMultivector(new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.]), true)
+		// ScopeMultivector(new Float32Array([-1., 0., 0., 0., 0., 0., 0., 0.]), true)
+		// ScopeMultivector(new Float32Array([2., 0., 0., 0., 0., 0., 0., 0.]), true)
 
 		// for(let i = 0; i < 3; i++)
 		// {

@@ -160,7 +160,6 @@ function getOperatorScopeX(desiredindex,eventualScopeSize)
 
 function initScope()
 {
-	// better packing http://www.optimization-online.org/DB_FILE/2016/01/5293.pdf
 	updateFunctions.push(function()
 	{
 		updateScopePositions()
@@ -171,6 +170,7 @@ function initScope()
 			operatorScope[i].position.x += .1 * (getOperatorScopeX(i) - operatorScope[i].position.x)
 	})
 
+	let selection = null //coz we dunno about operators or mvs
 	let keyboardSelectionIndicator = null
 	{
 		let material = new THREE.MeshBasicMaterial({ color: 0xFFFF00 })
@@ -202,73 +202,84 @@ function initScope()
 	function checkIfPositionIsInDirection(origin,direction,position)
 	{
 		directionChecker.copy(position).sub(origin)
-		return directionChecker.angleTo(direction) < TAU / 8.
+		return directionChecker.angleTo(direction) < TAU / 6.
 	}
-	bindButton("k",function()
+	function changeSelection(direction)
 	{
-		let selection = getSelection()
+		makeSureSelectorIsSetUp()
 
 		let closestDistSq = Infinity
-		let closestIndex = -1
-		for(let i = 0; i < multivectorScope.length; i++)
+		let closestThing = null
+		function checkIfClosest(mvOrOperator,positionToGoFrom)
 		{
-			//it has to be less than 45 degrees from where you are, otherwise you'd go down to get to it
-			//buuuuut if there's nothing where do you go?
-			if(multivectorScope[i] === selection)
-				continue;
-
-			if( checkIfPositionIsInDirection(selection.position,xUnit,multivectorScope[i].position) )
+			if (mvOrOperator === selection)
+				return;
+			if (checkIfPositionIsInDirection(positionToGoFrom, direction, mvOrOperator.position))
 			{
-				let distSq = selection.position.distanceToSquared(multivectorScope[i].position)
+				let distSq = positionToGoFrom.distanceToSquared(mvOrOperator.position)
 				if (distSq < closestDistSq)
 				{
 					closestDistSq = distSq
-					closestIndex = i
+					closestThing = mvOrOperator
 				}
 			}
 		}
-		if(closestIndex !== -1)
-		{
-			multivectorScopeSelected = true
-			multivectorSelection = closestIndex
-			log(multivectorSelection)
-		}
-	})
-	// return;
 
-	let multivectorScopeSelected
-	let multivectorSelection
-	let operatorSelection
-	function getSelection()
-	{
-		if( multivectorScopeSelected && multivectorScope.length > 0 )
-			return multivectorScope[multivectorSelection]
-		else
-			return operatorScope[operatorSelection]
+		for(let i = 0; i < multivectorScope.length; i++)
+			checkIfClosest(multivectorScope[i],selection.position)
+		for(let i = 0; i < operatorScope.length; i++)
+			checkIfClosest(operatorScope[i],selection.position)
+		// if (closestThing === null)
+		// {
+		// 	for (let i = 0; i < multivectorScope.length; i++)
+		// 		checkIfClosest(multivectorScope[i], selection.position)
+		// 	for (let i = 0; i < operatorScope.length; i++)
+		// 		checkIfClosest(operatorScope[i], selection.position)
+		// }
+		if (closestThing !== null)
+			selection = closestThing
 	}
+
+	let negativeY = new THREE.Vector3(0.,-1.,0.)
+	let negativeX = new THREE.Vector3(-1., 0., 0.)
+	bindButton("up", function ()
+	{
+		changeSelection(yUnit)
+	})
+	bindButton("down", function ()
+	{
+		changeSelection(negativeY)
+	})
+	bindButton("left", function ()
+	{
+		changeSelection(negativeX)
+	})
+	bindButton("right", function ()
+	{
+		changeSelection(xUnit)
+	})
+
 	function makeSureSelectorIsSetUp()
 	{
 		if( !checkIfObjectIsInScene(keyboardSelectionIndicator) )
 		{
 			scene.add(keyboardSelectionIndicator)
 
-			multivectorScopeSelected = false
-			multivectorSelection = 0;
-			operatorSelection = 0;
+			console.assert(multivectorScope.length !== 0)
+			selection = multivectorScope[0]
 
 			updateFunctions.push(function ()
 			{
-				let currentSelection = getSelection()
-				keyboardSelectionIndicator.position.copy(currentSelection.position)
-				if (multivectorScope.indexOf(currentSelection) !== -1)
+				keyboardSelectionIndicator.position.copy(selection.position)
+				if (multivectorScope.indexOf(selection) !== -1)
 				{
 					for (let i = 0; i < keyboardSelectionIndicator.children.length; i++)
 					{
-						keyboardSelectionIndicator.children[i].position.x = Math.sign(keyboardSelectionIndicator.children[i].position.x) * currentSelection.boundingBox.scale.x / 2.
-						keyboardSelectionIndicator.children[i].position.y = Math.sign(keyboardSelectionIndicator.children[i].position.y) * currentSelection.boundingBox.scale.y / 2.
+						keyboardSelectionIndicator.children[i].position.x = Math.sign(keyboardSelectionIndicator.children[i].position.x) * selection.boundingBox.scale.x / 2.
+						keyboardSelectionIndicator.children[i].position.y = Math.sign(keyboardSelectionIndicator.children[i].position.y) * selection.boundingBox.scale.y / 2.
 
-						keyboardSelectionIndicator.children[i].scale.x = keyboardSelectionIndicator.children[i].scale.x === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : currentSelection.boundingBox.scale.x + keyboardSelectionIndicator.thickness
-						keyboardSelectionIndicator.children[i].scale.y = keyboardSelectionIndicator.children[i].scale.y === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : currentSelection.boundingBox.scale.y + keyboardSelectionIndicator.thickness
+						keyboardSelectionIndicator.children[i].scale.x = keyboardSelectionIndicator.children[i].scale.x === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : selection.boundingBox.scale.x + keyboardSelectionIndicator.thickness
+						keyboardSelectionIndicator.children[i].scale.y = keyboardSelectionIndicator.children[i].scale.y === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : selection.boundingBox.scale.y + keyboardSelectionIndicator.thickness
 					}
 				}
 				else
@@ -286,82 +297,9 @@ function initScope()
 		}
 	}
 
-	bindButton("up",function()
-	{
-		makeSureSelectorIsSetUp()
-
-		if(!multivectorScopeSelected)
-		{
-			multivectorScopeSelected = true
-			multivectorSelection = multivectorScope.length-1
-		}
-		else
-		{
-			multivectorSelection--
-			if(multivectorSelection < 0)
-			{
-				multivectorSelection = multivectorScope.length-1
-			}
-		}
-	})
-	bindButton("down",function()
-	{
-		makeSureSelectorIsSetUp()
-
-		if(!multivectorScopeSelected)
-		{
-			multivectorScopeSelected = true
-			multivectorSelection = 0
-		}
-		else
-		{
-			multivectorSelection++
-			if(multivectorSelection > multivectorScope.length-1)
-			{
-				multivectorSelection = 0
-			}
-		}
-	})
-	bindButton("left",function()
-	{
-		makeSureSelectorIsSetUp()
-
-		if(multivectorScopeSelected)
-		{
-			multivectorScopeSelected = false
-			operatorSelection = operatorScope.length-1
-		}
-		else
-		{
-			operatorSelection--
-			if(operatorSelection < 0)
-			{
-				operatorSelection = operatorScope.length - 1
-			}
-		}
-	})
-	bindButton("right",function()
-	{
-		makeSureSelectorIsSetUp()
-
-		if(multivectorScopeSelected)
-		{
-			multivectorScopeSelected = false
-			operatorSelection = 0
-		}
-		else
-		{
-			operatorSelection++
-			if(operatorSelection > operatorScope.length-1)
-			{
-				operatorSelection = 0
-			}
-		}
-	})
-
 	bindButton("enter",function()
 	{
-		makeSureSelectorIsSetUp()		
+		makeSureSelectorIsSetUp()
 
 		let closestDistSq = Infinity
 		let closest = null
@@ -380,7 +318,6 @@ function initScope()
 		multivectorScope.forEach(forEachScope)
 		operatorScope.forEach(forEachScope)
 
-		let selection = getSelection()
 		if(operatorScope.indexOf(selection) !== -1)
 			selection.onClick()
 		else if(multivectorScope.indexOf(selection) !== -1)
