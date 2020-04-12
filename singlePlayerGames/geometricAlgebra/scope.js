@@ -202,7 +202,7 @@ function initScope()
 	function checkIfPositionIsInDirection(origin,direction,position)
 	{
 		directionChecker.copy(position).sub(origin)
-		return directionChecker.angleTo(direction) < TAU / 6.
+		return directionChecker.angleTo(direction) < TAU / 4.
 	}
 	function changeSelection(direction)
 	{
@@ -229,13 +229,6 @@ function initScope()
 			checkIfClosest(multivectorScope[i],selection.position)
 		for(let i = 0; i < operatorScope.length; i++)
 			checkIfClosest(operatorScope[i],selection.position)
-		// if (closestThing === null)
-		// {
-		// 	for (let i = 0; i < multivectorScope.length; i++)
-		// 		checkIfClosest(multivectorScope[i], selection.position)
-		// 	for (let i = 0; i < operatorScope.length; i++)
-		// 		checkIfClosest(operatorScope[i], selection.position)
-		// }
 		if (closestThing !== null)
 			selection = closestThing
 	}

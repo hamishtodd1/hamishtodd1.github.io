@@ -112,6 +112,7 @@ function initOperationInterface(restartButton)
 	initScope()
 
 	let animationMultivector = MultivectorAppearance(function(){})
+	log("am id: "+animationMultivector.uuid)
 	animationMultivector.elements[0] = 0.
 	animationMultivector.skipAnimation()
 	let animationStage = -1.;
@@ -126,6 +127,7 @@ function initOperationInterface(restartButton)
 				{
 					let newMultivectorElements = activeOperator.function(operands[0].elements,operands[1].elements)
 					copyMultivector(newMultivectorElements, animationMultivector.elements)
+					// debugger
 					animationMultivector.skipAnimation()
 					scene.remove(animationMultivector)
 
@@ -165,7 +167,7 @@ function initOperationInterface(restartButton)
 				break;
 
 			default:
-				console.error("shouldn't be here!")
+				console.error("shouldn't be here! animationStage: " +animationStage)
 				break;
 		}
 	})

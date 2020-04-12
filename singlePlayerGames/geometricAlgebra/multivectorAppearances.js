@@ -1,4 +1,6 @@
 /*
+
+
 	Scalar vector multiplication: one of the scalar units goes to the end of the vector, and the rest get spaced out too
 
 	Possibly useful model: the operator combines with one of the operands to become a thing that is applied to the other operand
@@ -106,10 +108,11 @@ function initMultivectorAppearances()
 			{
 				if(!scalar.children[i].visible)
 					break
-				min = Math.min(min, scalar.children[i].position.x)
-				max = Math.max(max, scalar.children[i].position.x)
+				min = Math.min(min, scalar.children[i].intendedPosition.x)
+				max = Math.max(max, scalar.children[i].intendedPosition.x)
 			}
-			return max - min + 1.;
+			let size = max - min + 1.
+			return Math.abs(size) < Infinity ? size:0.
 		}
 		function scalarBlockHeight()
 		{
@@ -119,10 +122,11 @@ function initMultivectorAppearances()
 			{
 				if(!scalar.children[i].visible)
 					break
-				min = Math.min(min, scalar.children[i].position.y)
-				max = Math.max(max, scalar.children[i].position.y)
+				min = Math.min(min, scalar.children[i].intendedPosition.y)
+				max = Math.max(max, scalar.children[i].intendedPosition.y)
 			}
-			return max - min + 1.;
+			let size = max - min + 1.
+			return Math.abs(size) < Infinity ? size:0.
 		}
 
 		multivec.elements = MathematicalMultivector() //identity
@@ -168,6 +172,7 @@ function initMultivectorAppearances()
 					let diagOfThisLayer = 2 * currentLayer * (currentLayer - 1) / 2
 					let inSecondHalf = i > diagOfThisLayer
 
+					//
 					scalar.children[i].intendedPosition
 						.set(0.,0.,0.)
 						.addScaledVector(rightDown ? yUnit : xUnit, currentLayer - 1) //get you to the start
@@ -332,6 +337,7 @@ function initMultivectorAppearances()
 
 		multivec.skipAnimation = function()
 		{
+			scalar.setIntendedPositionsToSquare()
 			for (let i = 0, il = scalar.children.length; i < il; i++)
 				scalar.children[i].position.copy(scalar.children[i].intendedPosition)
 

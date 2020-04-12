@@ -267,24 +267,8 @@ function initGoals(modeChange,restartButton)
 		//CHANGE_SCOPE
 		setScope()
 
-		ScopeMultivector(new Float32Array([0., 1., 1., 0., 0., 0., 0., 0.]), true)
-		ScopeMultivector(new Float32Array([ 1., 0., 0., 0., 0., 0., 0., 0.]), true)
-		ScopeMultivector(new Float32Array([-1., 0., 0., 0., 0., 0., 0., 0.]), true)
-		ScopeMultivector(new Float32Array([2., 0., 0., 0., 0., 0., 0., 0.]), true)
-
-
 		// ScopeMultivector(new Float32Array([0., 1., 1., 0., 0., 0., 0., 0.]), true)
-		// ScopeMultivector(new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.]), true)
-		// ScopeMultivector(new Float32Array([-1., 0., 0., 0., 0., 0., 0., 0.]), true)
-		// ScopeMultivector(new Float32Array([2., 0., 0., 0., 0., 0., 0., 0.]), true)
-
-		// ScopeMultivector(new Float32Array([0., 1., 1., 0., 0., 0., 0., 0.]), true)
-		// ScopeMultivector(new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.]), true)
-		// ScopeMultivector(new Float32Array([-1., 0., 0., 0., 0., 0., 0., 0.]), true)
-		// ScopeMultivector(new Float32Array([2., 0., 0., 0., 0., 0., 0., 0.]), true)
-
-		// ScopeMultivector(new Float32Array([0., 1., 1., 0., 0., 0., 0., 0.]), true)
-		// ScopeMultivector(new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.]), true)
+		// ScopeMultivector(new Float32Array([ 1., 0., 0., 0., 0., 0., 0., 0.]), true)
 		// ScopeMultivector(new Float32Array([-1., 0., 0., 0., 0., 0., 0., 0.]), true)
 		// ScopeMultivector(new Float32Array([2., 0., 0., 0., 0., 0., 0., 0.]), true)
 
