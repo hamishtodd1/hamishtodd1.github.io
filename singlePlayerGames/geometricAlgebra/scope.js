@@ -103,7 +103,7 @@ function updateScopePositions()
 		})
 	}
 
-	let spacing = .1 //needs to be greater than zero because round off errors
+	let spacing = .35 //needs to be greater than zero because round off errors
 	let avoidanceOfSides = .3
 	for (let i = 0, il = num; i < il; i++)
 	{
@@ -198,6 +198,8 @@ function initScope()
 	}
 
 	//both angle and distance play a part in which one you choose. We threshold the angle and choose the closest
+	//Whoah, maybe it's the one that creates the smallest bivector with the direction vector. Too cool to not use!
+	//also TODO if you go off the side wrap around. Basically treat the screen as a torus
 	let directionChecker = new THREE.Vector3()
 	function checkIfPositionIsInDirection(origin,direction,position)
 	{

@@ -68,7 +68,25 @@ function initOperationInterface(restartButton)
 
 		if(sendToScopeImmediately)
 		{
-			updateScopePositions()
+			while (true)
+			{
+				updateScopePositions()
+				let overflowedSide = false
+				// for (let i = 0; i < multivectorScope.length; i++)
+				// {
+				// 	if (multivectorScope[i].boundingBox.scale.x > idealScopeWidth)
+				// 	{
+				// 		continue
+				// 	}
+				// 	if (multivectorScope[i].intendedPosition.x > -camera.rightAtZZero + idealScopeWidth)
+				// 	{
+				// 		overflowedSide = true
+				// 	}
+				// }
+				if (overflowedSide === false)
+					break
+				camera.setTopAtZZeroAndAdjustScene(camera.topAtZZero + 1.5)
+			}
 			newScopeMultivector.position.copy(newScopeMultivector.scopePosition)
 		}
 
@@ -98,13 +116,15 @@ function initOperationInterface(restartButton)
 			potentiallyTriggerAnimation()
 		}
 
-		newScopeOperator.position.y = -camera.topAtZZero + .9
-
 		operatorScope.push( newScopeOperator )
 
 		scene.add(newScopeOperator)
 
-		newScopeOperator.position.x = getOperatorScopeX(operatorScope.length-1,eventualScopeSize)
+		updateFunctions.push(function()
+		{
+			newScopeOperator.position.y = -camera.topAtZZero + .9
+			newScopeOperator.position.x = getOperatorScopeX(operatorScope.indexOf(newScopeOperator), eventualScopeSize)
+		})
 
 		return newScopeOperator
 	}
@@ -112,7 +132,6 @@ function initOperationInterface(restartButton)
 	initScope()
 
 	let animationMultivector = MultivectorAppearance(function(){})
-	log("am id: "+animationMultivector.uuid)
 	animationMultivector.elements[0] = 0.
 	animationMultivector.skipAnimation()
 	let animationStage = -1.;
