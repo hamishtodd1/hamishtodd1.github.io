@@ -240,6 +240,6 @@ function Levels()
 		},
 	*/
 	
-	// arr[0] = videoLevels[0]
+	arr[0] = videoLevels[0]
 	return arr
 }
