@@ -1,6 +1,13 @@
 /*
 	Look through "record", lots of stuff in there and things you've done
 
+	TODO Jon
+		Just some levels
+
+	TODO Nicky
+		animations
+		input and output stuff
+
 	TODO calculator (Andy/slack/pontus)
 		Finish scalar and imaginary number stuff
 		Generally get all animations in
@@ -83,7 +90,7 @@ async function init()
 	let modeChange = {}
 	initInputAndOutputGroups()
 	initGoals(modeChange,restartButton)
-	modeChange.calculator()
+	modeChange.campaign()
 
 	await initMenu(modeChange)
 }

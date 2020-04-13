@@ -267,11 +267,14 @@ function initInputAndOutputGroups()
 		{
 			function updateInputGroupIntendedPosition()
 			{
-				inputGroup.intendedPosition.x = -camera.rightAtZZero + inputGroup.background.scale.x / 2.
-				updateScopePositions()
-				inputGroup.intendedPosition.x += multivectorScope[multivectorScope.length-1].scopePosition.x + .9 + camera.rightAtZZero
+				if(checkIfObjectIsInScene(inputGroup))
+				{
+					inputGroup.intendedPosition.x = -camera.rightAtZZero + inputGroup.background.scale.x / 2.
+					updateScopePositions()
+					inputGroup.intendedPosition.x += multivectorScope[multivectorScope.length - 1].scopePosition.x + .9 + camera.rightAtZZero
 
-				inputGroup.intendedPosition.y = camera.topAtZZero - inputGroup.background.scale.y / 2. - .1
+					inputGroup.intendedPosition.y = camera.topAtZZero - inputGroup.background.scale.y / 2. - .1
+				}
 			}
 			updateInputGroupIntendedPosition()
 			inputGroup.position.copy(inputGroup.intendedPosition)
@@ -290,7 +293,7 @@ function initInputAndOutputGroups()
 
 			updateScopePositions()
 			for (let i = 0; i < multivectorScope.length; i++)
-				newScopeMultivector.position.copy(newScopeMultivector.scopePosition)
+				multivectorScope[i].position.copy(multivectorScope[i].scopePosition)
 		}
 	}
 		

@@ -1,6 +1,4 @@
 /*
-
-
 	Scalar vector multiplication: one of the scalar units goes to the end of the vector, and the rest get spaced out too
 
 	Possibly useful model: the operator combines with one of the operands to become a thing that is applied to the other operand
@@ -345,7 +343,6 @@ function initMultivectorAppearances()
 			//scalar maybe becomes the other part of the complex number
 			//trivector relaxes to cuboid
 		}
-		multivec.skipAnimation()
 
 		let boundingBox = new THREE.Mesh(unchangingUnitSquareGeometry,new THREE.MeshBasicMaterial({color:0x00FF00,transparent:true,opacity:.4}))
 		{
@@ -429,8 +426,6 @@ function initMultivectorAppearances()
 					multivec.add(vecAppearance)
 			}
 		}
-		updateAppearance()
-		updateBoundingBoxSize()
 
 		updateFunctions.push(function()
 		{
@@ -443,7 +438,7 @@ function initMultivectorAppearances()
 			}
 
 			updateAppearance()
-
+			multivec.skipAnimation()
 			updateBoundingBoxSize()
 
 			for (let i = 0; i < multivec.children.length; i++)

@@ -73,18 +73,13 @@ function initGoals(modeChange,restartButton)
 		goalBox.add(singularGoalMultivector)
 
 		let defaultText = "Make this:"
-		{
-			goalBox.title = makeTextSign(defaultText)
-			goalBox.title.scale.multiplyScalar(.5)
-			goalBox.title.position.y = .9
-			goalBox.add(goalBox.title)
+		goalBox.title = makeTextSign(defaultText)
+		goalBox.title.scale.multiplyScalar(.5)
+		goalBox.title.position.z = .01
+		goalBox.add(goalBox.title)
 
-			let background = new THREE.Mesh(unchangingUnitSquareGeometry,new THREE.MeshBasicMaterial({color:0xffa500 }))
-			background.scale.set(goalBox.title.scale.x*1.1,goalBox.title.scale.y*4.3,1.)
-			background.position.z -= .001
-			background.position.y += .18
-			goalBox.add(background)
-		}
+		goalBox.background = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0xffa500 }))
+		goalBox.add(goalBox.background)
 
 		updateFunctions.push(function ()
 		{
@@ -102,7 +97,13 @@ function initGoals(modeChange,restartButton)
 					goalBox.title.children[0].material.color.setRGB(1. - oscillating, 1., 1. - oscillating)
 
 				goalBox.position.x = camera.rightAtZZero - 1.4
-				goalBox.position.y = 0.//camera.topAtZZero - 2.2
+				goalBox.position.y = 0.
+
+				goalBox.title.position.y = goalBox.title.scale.y / 2. + singularGoalMultivector.boundingBox.scale.y / 2.
+
+				goalBox.background.scale.x = .2 + Math.max(goalBox.title.scale.x, singularGoalMultivector.boundingBox.scale.x)
+				goalBox.background.scale.y = .2 + goalBox.title.scale.y + singularGoalMultivector.boundingBox.scale.y
+				goalBox.background.position.y = .5 * goalBox.title.scale.y
 			}
 
 			youWinSign.visible = victorySavouringCounter !== Infinity

@@ -75,7 +75,6 @@ function setScope(elementses, operators)
 		ScopeOperator(operators[i], operators.length)
 }
 
-//much to do, big gaps and why the hell is it needed in input crap
 function updateScopePositions()
 {
 	let num = multivectorScope.length
@@ -170,7 +169,7 @@ function initScope()
 			operatorScope[i].position.x += .1 * (getOperatorScopeX(i) - operatorScope[i].position.x)
 	})
 
-	let selection = null //coz we dunno about operators or mvs
+	let selection = null
 	let keyboardSelectionIndicator = null
 	{
 		let material = new THREE.MeshBasicMaterial({ color: 0xFFFF00 })
@@ -197,66 +196,9 @@ function initScope()
 		}
 	}
 
-	//both angle and distance play a part in which one you choose. We threshold the angle and choose the closest
-	//Whoah, maybe it's the one that creates the smallest bivector with the direction vector. Too cool to not use!
-	//also TODO if you go off the side wrap around. Basically treat the screen as a torus
-	let directionChecker = new THREE.Vector3()
-	function checkIfPositionIsInDirection(origin,direction,position)
-	{
-		directionChecker.copy(position).sub(origin)
-		return directionChecker.angleTo(direction) < TAU / 4.
-	}
-	function changeSelection(direction)
-	{
-		makeSureSelectorIsSetUp()
-
-		let closestDistSq = Infinity
-		let closestThing = null
-		function checkIfClosest(mvOrOperator,positionToGoFrom)
-		{
-			if (mvOrOperator === selection)
-				return;
-			if (checkIfPositionIsInDirection(positionToGoFrom, direction, mvOrOperator.position))
-			{
-				let distSq = positionToGoFrom.distanceToSquared(mvOrOperator.position)
-				if (distSq < closestDistSq)
-				{
-					closestDistSq = distSq
-					closestThing = mvOrOperator
-				}
-			}
-		}
-
-		for(let i = 0; i < multivectorScope.length; i++)
-			checkIfClosest(multivectorScope[i],selection.position)
-		for(let i = 0; i < operatorScope.length; i++)
-			checkIfClosest(operatorScope[i],selection.position)
-		if (closestThing !== null)
-			selection = closestThing
-	}
-
-	let negativeY = new THREE.Vector3(0.,-1.,0.)
-	let negativeX = new THREE.Vector3(-1., 0., 0.)
-	bindButton("up", function ()
-	{
-		changeSelection(yUnit)
-	})
-	bindButton("down", function ()
-	{
-		changeSelection(negativeY)
-	})
-	bindButton("left", function ()
-	{
-		changeSelection(negativeX)
-	})
-	bindButton("right", function ()
-	{
-		changeSelection(xUnit)
-	})
-
 	function makeSureSelectorIsSetUp()
 	{
-		if( !checkIfObjectIsInScene(keyboardSelectionIndicator) )
+		if (!checkIfObjectIsInScene(keyboardSelectionIndicator))
 		{
 			scene.add(keyboardSelectionIndicator)
 
@@ -265,6 +207,15 @@ function initScope()
 
 			updateFunctions.push(function ()
 			{
+				if (selection.parent !== scene)
+				{
+					let closest = getClosest()
+					if (closest !== null)
+						selection = closest
+					else
+						return
+				}
+
 				keyboardSelectionIndicator.position.copy(selection.position)
 				if (multivectorScope.indexOf(selection) !== -1)
 				{
@@ -292,19 +243,82 @@ function initScope()
 		}
 	}
 
-	bindButton("enter",function()
+	//both angle and distance play a part in which one you choose
+	function changeSelection(componentIndex,positiveDirection)
 	{
 		makeSureSelectorIsSetUp()
 
+		let max = -Infinity
+		let min = Infinity
+		for (let i = 0; i < multivectorScope.length; i++)
+		{
+			if( multivectorScope[i].position.x < min)
+				min = multivectorScope[i].position.x
+			if (multivectorScope[i].position.x > max)
+				max = multivectorScope[i].position.x
+		}
+		for (let i = 0; i < operatorScope.length; i++)
+		{
+			if (operatorScope[i].position.x < min)
+				min = operatorScope[i].position.x
+			if (operatorScope[i].position.x > max)
+				max = operatorScope[i].position.x
+		}
+		let wholeScopeWidth = max-min
+
+		//urgh but it's also about their bounding box
+		let lowestProximity = Infinity
+		let closestThing = null
+		let relativePosition = new THREE.Vector3()
+		function checkIfClosest(mvOrOperator)
+		{
+			if (mvOrOperator === selection)
+				return;
+
+			relativePosition.copy(mvOrOperator.position).sub(selection.position)
+			let componentValue = relativePosition.getComponent(componentIndex)
+			if (componentValue < 0. && positiveDirection)
+				componentValue += componentIndex ? 2. * camera.topAtZZero : wholeScopeWidth
+			if (componentValue > 0. && !positiveDirection)
+				componentValue -= componentIndex ? 2. * camera.topAtZZero : wholeScopeWidth
+			relativePosition.setComponent(componentIndex,componentValue)
+
+			let nonComponentHandicap = 3. //you have to be this much closer to be equivalently proximate
+			let proximity = Math.abs(componentValue) + nonComponentHandicap * Math.abs( relativePosition.getComponent(1-componentIndex) )
+			if (proximity < lowestProximity)
+			{
+				lowestProximity = proximity
+				closestThing = mvOrOperator
+			}
+		}
+
+		if( multivectorScope.indexOf(selection) !== -1 || componentIndex === 0 )
+		{
+			for (let i = 0; i < operatorScope.length; i++)
+				checkIfClosest(operatorScope[i])
+		}
+		for(let i = 0; i < multivectorScope.length; i++)
+			checkIfClosest(multivectorScope[i])
+		if (closestThing !== null)
+			selection = closestThing
+	}
+
+	bindButton("up", 	function ()	{changeSelection(1,true )})
+	bindButton("down", 	function ()	{changeSelection(1,false)})
+	bindButton("right", function ()	{changeSelection(0,true )})
+	bindButton("left", 	function ()	{changeSelection(0,false)})
+
+	function getClosest()
+	{
 		let closestDistSq = Infinity
 		let closest = null
-		function forEachScope(scopeEntity,index)
+		function forEachScope(scopeEntity)
 		{
-			if( keyboardSelectionIndicator.parent === scopeEntity )
+			if (scopeEntity === selection)
 				return
 
-			let distSq = scopeEntity.position.distanceToSquared(keyboardSelectionIndicator.parent.position)
-			if(distSq < closestDistSq)
+			let distSq = scopeEntity.position.distanceToSquared(keyboardSelectionIndicator.position)
+			if (distSq < closestDistSq)
 			{
 				closest = scopeEntity
 				closestDistSq = distSq
@@ -313,15 +327,21 @@ function initScope()
 		multivectorScope.forEach(forEachScope)
 		operatorScope.forEach(forEachScope)
 
-		if(operatorScope.indexOf(selection) !== -1)
+		return closest
+	}
+
+	bindButton("enter",function()
+	{
+		makeSureSelectorIsSetUp()
+
+		let closest = getClosest()
+		
+		if (operatorScope.indexOf(selection) !== -1)
 			selection.onClick()
-		else if(multivectorScope.indexOf(selection) !== -1)
+		else if (multivectorScope.indexOf(selection) !== -1)
 			selection.boundingBox.onClick()
 
-		if( closest !== null && scopeIsLimited )
-		{
-			closest.add(keyboardSelectionIndicator)
-			multivectorScopeSelected = multivectorScope.indexOf(closest) !== -1
-		}
+		if (closest !== null && scopeIsLimited)
+			selection = closest
 	})
 }

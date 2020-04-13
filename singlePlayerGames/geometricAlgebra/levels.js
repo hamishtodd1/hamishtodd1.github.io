@@ -60,24 +60,24 @@
 function Levels()
 {
 	let arr = [
-		{
-			inputs:[ //"0"
-				new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),
-				new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.]),
-			],
-			options: [
-				new Float32Array([2.,0.,0.,0.,0.,0.,0.,0.]),
-				new Float32Array([3.,0.,0.,0.,0.,0.,0.,0.]),
+		// {
+		// 	inputs:[ //"0"
+		// 		new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),
+		// 		new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.]),
+		// 	],
+		// 	options: [
+		// 		new Float32Array([2.,0.,0.,0.,0.,0.,0.,0.]),
+		// 		new Float32Array([3.,0.,0.,0.,0.,0.,0.,0.]),
 
-				// // new Float32Array([Math.cos(TAU / 8.), 0., 0., 0., Math.sin(TAU / 8.), 0., 0., 0.]),
-			],
-			steps:[
-				//don't worry about them being deleted
-				[geometricSum,0,1], //result is "3"
-				[geometricProduct,2,3],
-			],
-			operators: [geometricSum,geometricProduct]
-		},
+		// 		// // new Float32Array([Math.cos(TAU / 8.), 0., 0., 0., Math.sin(TAU / 8.), 0., 0., 0.]),
+		// 	],
+		// 	steps:[
+		// 		//don't worry about them being deleted
+		// 		[geometricSum,0,1], //result is "3"
+		// 		[geometricProduct,2,3],
+		// 	],
+		// 	operators: [geometricSum,geometricProduct]
+		// },
 		{
 			singularGoal:
 				new Float32Array([0.,1.,1.,0.,0.,0.,0.,0.]),

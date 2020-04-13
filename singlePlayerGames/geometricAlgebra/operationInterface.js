@@ -68,25 +68,27 @@ function initOperationInterface(restartButton)
 
 		if(sendToScopeImmediately)
 		{
-			while (true)
-			{
-				updateScopePositions()
-				let overflowedSide = false
-				// for (let i = 0; i < multivectorScope.length; i++)
-				// {
-				// 	if (multivectorScope[i].boundingBox.scale.x > idealScopeWidth)
-				// 	{
-				// 		continue
-				// 	}
-				// 	if (multivectorScope[i].intendedPosition.x > -camera.rightAtZZero + idealScopeWidth)
-				// 	{
-				// 		overflowedSide = true
-				// 	}
-				// }
-				if (overflowedSide === false)
-					break
-				camera.setTopAtZZeroAndAdjustScene(camera.topAtZZero + 1.5)
-			}
+			updateScopePositions()
+			// while (true)
+			// {
+			// 	updateScopePositions()
+			// 	let overflowedSide = false
+			// 	for (let i = 0; i < multivectorScope.length; i++)
+			// 	{
+			// 		if (multivectorScope[i].boundingBox.scale.x > idealScopeWidth)
+			// 		{
+			// 			continue
+			// 		}
+			// 		if (multivectorScope[i].intendedPosition.x > -camera.rightAtZZero + idealScopeWidth)
+			// 		{
+			// 			overflowedSide = true
+			// 		}
+			// 	}
+			// 	if ( overflowedSide )
+			// 		camera.setTopAtZZeroAndAdjustScene(camera.topAtZZero + 1.5)
+			// 	else
+			// 		break
+			// }
 			newScopeMultivector.position.copy(newScopeMultivector.scopePosition)
 		}
 
