@@ -31,9 +31,6 @@ ThingCollection = function ()
 
 		things.push(thing)
 		group.add(thing)
-		background.scale.y = background.scale.x * things.length
-		for (let i = 0; i < things.length; i++)
-			things[i].position.y = -1.2 * (i - (things.length - 1.) / 2.)
 	}
 
 	group.clear = function ()
@@ -42,20 +39,20 @@ ThingCollection = function ()
 		{
 			things.pop()
 			group.remove(things[i])
-			removeSingleElementFromArray(clickables, things[i].boundingBox)
+			if (things[i] !== undefined &&things[i].boundingBox !== undefined)
+				removeSingleElementFromArray(clickables, things[i].boundingBox)
 		}
 	}
 
 	let background = new THREE.Mesh( unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0xFFFFFF }) )
 	group.background = background
-	background.scale.x = 1.3
 	background.position.z = -.001
 	group.add(background)
 	clickables.push(background)
 	let representationNames = ["multivectors", "surface","line","points"]
 	background.onClick = function()
 	{
-		group.representation = representationNames[1 + representationNames.indexOf(group.representation)]
+		// group.representation = representationNames[1 + representationNames.indexOf(group.representation)]
 	}
 
 	//other representations
@@ -119,6 +116,9 @@ ThingCollection = function ()
 	group.intendedPosition = new THREE.Vector3()
 	updateFunctions.push(function ()
 	{
+		if(group.parent !== scene)
+			return
+
 		group.position.lerp(group.intendedPosition, .1)
 
 		for (let i = 0; i < group.things.length; i++)
@@ -126,6 +126,19 @@ ThingCollection = function ()
 		line.visible = group.representation === "line"
 		surface.visible = group.representation === "surface"
 		points.visible = group.representation === "points"
+
+		if(group.representation === "multivectors")
+		{
+			things[0].position.y = 0.
+			for (let i = 1; i < things.length; i++)
+				things[i].position.y = things[i - 1].position.y - things[i - 1].boundingBox.scale.y / 2. - things[i].boundingBox.scale.y / 2.
+			background.scale.y = .4 + things[0].boundingBox.scale.y / 2. + Math.abs(things[things.length - 1].position.y) + things[things.length - 1].boundingBox.scale.y / 2.
+			for (let i = 0; i < things.length; i++)
+				things[i].position.y += Math.abs(things[things.length - 1].position.y) / 2.
+
+			for (let i = 0; i < things.length; i++)
+				background.scale.x = Math.max(background.scale.x, things[i].boundingBox.scale.x + .2)
+		}
 
 		if (line.visible || points.visible)
 		{
@@ -321,7 +334,7 @@ function initInputAndOutputGroups()
 				return
 
 			outputGroup.position.x = inputGroup.position.x
-			outputGroup.position.y =-inputGroup.position.y
+			outputGroup.position.y = -camera.topAtZZero * .5
 
 			outputGroup.indicator.setStartAndEnd(outputGroup.position, multivectorScope[outputScopeMultivectorIndex].position)
 

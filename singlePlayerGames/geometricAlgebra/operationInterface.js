@@ -168,6 +168,7 @@ function initOperationInterface(restartButton)
 			case 2: //where we animate
 				if (animationMultivector.parent !== scene )
 				{
+					playRandomPop()
 					animationMultivector.animationOngoing = true
 					scene.add(animationMultivector)
 					scene.remove(operands[0], operands[1], activeOperator)
@@ -233,12 +234,6 @@ function initOperationInterface(restartButton)
 		{
 			restartButton.position.x =  camera.rightAtZZero - (halfMenuTitleWidth  + padding)
 			restartButton.position.y = -camera.topAtZZero   + (halfMenuTitleHeight + padding) * 2.
-
-			let levelUncompletable = false
-			if(levelUncompletable)
-				restartButton.material.color.setRGB(Math.sin(frameCount*.01),1.,1.)
-			else
-				restartButton.material.color.setRGB(1.,1.,1.)
 		})
 
 		clickables.push(restartButton)

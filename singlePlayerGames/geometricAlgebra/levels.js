@@ -1,10 +1,10 @@
 /*
 	Focus on the maths and build animations out of that for a while
-	this is not doodling
-	possibly should be able to hotload
+	this is not doodling!
 	definitely want to doodle with process
 
 	Technical
+		possibly should be able to hotload
 		Better to save as JSON (this basically already is?)
 		Level editor is shader programmer?
 
@@ -60,31 +60,24 @@
 function Levels()
 {
 	let arr = [
-		// {
-		// 	inputs:[ //"0"
-		// 		new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),
-		// 		new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.]),
-		// 	],
-		// 	options: [
-		// 		new Float32Array([2.,0.,0.,0.,0.,0.,0.,0.]),
-		// 		new Float32Array([3.,0.,0.,0.,0.,0.,0.,0.]),
-
-		// 		// // new Float32Array([Math.cos(TAU / 8.), 0., 0., 0., Math.sin(TAU / 8.), 0., 0., 0.]),
-		// 	],
-		// 	steps:[
-		// 		//don't worry about them being deleted
-		// 		[geometricSum,0,1], //result is "3"
-		// 		[geometricProduct,2,3],
-		// 	],
-		// 	operators: [geometricSum,geometricProduct]
-		// },
+	/*
+		{
+			singularGoal:
+				new Float32Array([0.,0.,0.,0.,0.,0.,0.,0.]),
+			options: [
+				new Float32Array([0.,0.,0.,0.,0.,0.,0.,0.]),
+				new Float32Array([0.,0.,0.,0.,0.,0.,0.,0.]),
+			],
+			operators: [geometricSum,geometricProduct]
+		},
+	*/
+		
 		{
 			singularGoal:
 				new Float32Array([0.,1.,1.,0.,0.,0.,0.,0.]),
 			options: [
 				new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.]),
 				new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),
-				new Float32Array([1.,0.,0.,0.,0.,0.,0.,0.]),
 			],
 			operators: [geometricSum]
 		},
@@ -125,19 +118,72 @@ function Levels()
 			],
 			operators: [geometricProduct]
 		},
-	]
-	/*
-		,
+
 		{
 			singularGoal:
-				new Float32Array([0.,0.,0.,0.,0.,0.,0.,0.]),
+				new Float32Array([0., -1., -1., 0., 0., 0., 0., 0.]),
 			options: [
-				new Float32Array([0.,0.,0.,0.,0.,0.,0.,0.]),
-				new Float32Array([0.,0.,0.,0.,0.,0.,0.,0.]),
+				new Float32Array([0., 1., 1., 0., 0., 0., 0., 0.]),
+				new Float32Array([0., 0., 0., 0., 1., 0., 0., 0.]),
+				new Float32Array([0., 0., 0., 0., 1., 0., 0., 0.]),
 			],
-			operators: [geometricSum,geometricProduct]
-		}
-	*/
+			operators: [geometricProduct, geometricSum, geometricProduct]
+		},
+		
+		{
+			singularGoal:
+				new Float32Array([0., 3., 2., 0., 0., 0., 0., 0.]),
+			options: [
+				new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]),
+				new Float32Array([0., 0., 1., 0., 0., 0., 0., 0.]),
+				new Float32Array([3., 0., 0., 0., 0., 0., 0., 0.]),
+				new Float32Array([2., 0., 0., 0., 0., 0., 0., 0.]),
+			],
+			operators: [geometricSum, geometricProduct, geometricProduct]
+		},
+		{
+			singularGoal:
+				new Float32Array([0., 3., -2., 0., 0., 0., 0., 0.]),
+			options: [
+				new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]),
+				new Float32Array([0., 0., 1., 0., 0., 0., 0., 0.]),
+				new Float32Array([3., 0., 0., 0., 0., 0., 0., 0.]),
+				new Float32Array([-2., 0., 0., 0., 0., 0., 0., 0.]),
+			],
+			operators: [geometricSum, geometricProduct, geometricProduct]
+		},
+		{
+			singularGoal:
+				new Float32Array([-1., 0., 0., 0., 0., 0., 0., 0.]),
+			options: [
+				new Float32Array([0., 2., 0., 0., 0., 0., 0., 0.]),
+				new Float32Array([0., -3., 0., 0., 0., 0., 0., 0.]),
+
+				new Float32Array([0., 0., 1., 0., 0., 0., 0., 0.]),
+				new Float32Array([0., 0., 0., 0., -1., 0., 0., 0.]),
+			],
+			operators: [geometricSum, geometricProduct, geometricProduct]
+		},
+
+		{
+			inputs: [ //"0"
+				new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]),
+				new Float32Array([0., 0., 1., 0., 0., 0., 0., 0.]),
+			],
+			options: [
+				new Float32Array([2., 0., 0., 0., 0., 0., 0., 0.]),
+				new Float32Array([3., 0., 0., 0., 0., 0., 0., 0.]),
+
+				// // new Float32Array([Math.cos(TAU / 8.), 0., 0., 0., Math.sin(TAU / 8.), 0., 0., 0.]),
+			],
+			steps: [
+				//don't worry about them being deleted
+				[geometricSum, 0, 1], //result is "3"
+				[geometricProduct, 2, 3],
+			],
+			operators: [geometricSum, geometricProduct]
+		},
+	]
 
 	let browserIsChrome = false;
 	for (i = 0; i < navigator.plugins.length; i++)
@@ -159,10 +205,12 @@ function Levels()
 			markerTimes: [4.5,7.2],
 		},
 		options: [
-			new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]),
-			new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.]),
+			new Float32Array([1.,0.,0.,0.,0.,0.,0.,0.]),
 		],
-		operators: [geometricSum,geometricProduct]
+		operators: [
+			geometricSum,
+			geometricProduct
+			]
 	},
 	{
 		videoDetails: {
@@ -192,6 +240,6 @@ function Levels()
 		},
 	*/
 	
-	// arr[0] = videoLevels[0]
+	arr[0] = videoLevels[0]
 	return arr
 }

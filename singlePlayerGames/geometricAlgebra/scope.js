@@ -277,11 +277,12 @@ function initScope()
 
 			relativePosition.copy(mvOrOperator.position).sub(selection.position)
 			let componentValue = relativePosition.getComponent(componentIndex)
+			if(Math.abs(componentValue)<.1)
+				return
 			if (componentValue < 0. && positiveDirection)
 				componentValue += componentIndex ? 2. * camera.topAtZZero : wholeScopeWidth
 			if (componentValue > 0. && !positiveDirection)
 				componentValue -= componentIndex ? 2. * camera.topAtZZero : wholeScopeWidth
-			relativePosition.setComponent(componentIndex,componentValue)
 
 			let nonComponentHandicap = 3. //you have to be this much closer to be equivalently proximate
 			let proximity = Math.abs(componentValue) + nonComponentHandicap * Math.abs( relativePosition.getComponent(1-componentIndex) )

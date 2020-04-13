@@ -28,6 +28,7 @@ function initGoals(modeChange,restartButton)
 
 			goalOutputGroup.intendedPosition.copy(inputGroup.intendedPosition)
 			goalOutputGroup.intendedPosition.x *= -1.
+			goalOutputGroup.intendedPosition.y = camera.topAtZZero - goalOutputGroup.background.scale.y / 2.
 		}
 		updateOutputGroupIntendedPosition()
 		goalOutputGroup.position.copy(goalOutputGroup.intendedPosition)
@@ -80,35 +81,49 @@ function initGoals(modeChange,restartButton)
 
 		goalBox.background = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0xffa500 }))
 		goalBox.add(goalBox.background)
-
-		updateFunctions.push(function ()
-		{
-			if (checkIfObjectIsInScene(goalBox))
-			{
-				let oscillating = .5 + .5 * Math.sin(frameCount * .14)
-
-				goalExcitedness -= frameDelta * .75
-				if (goalExcitedness < 0.)
-					goalExcitedness = 0.
-				singularGoalMultivector.position.x = goalExcitedness * .2 * Math.sin(frameCount * .3)
-				goalBox.title.children[0].material.color.setRGB(1., 1. - goalExcitedness * oscillating, 1. - goalExcitedness * oscillating)
-
-				if (victorySavouringCounter !== Infinity)
-					goalBox.title.children[0].material.color.setRGB(1. - oscillating, 1., 1. - oscillating)
-
-				goalBox.position.x = camera.rightAtZZero - 1.4
-				goalBox.position.y = 0.
-
-				goalBox.title.position.y = goalBox.title.scale.y / 2. + singularGoalMultivector.boundingBox.scale.y / 2.
-
-				goalBox.background.scale.x = .2 + Math.max(goalBox.title.scale.x, singularGoalMultivector.boundingBox.scale.x)
-				goalBox.background.scale.y = .2 + goalBox.title.scale.y + singularGoalMultivector.boundingBox.scale.y
-				goalBox.background.position.y = .5 * goalBox.title.scale.y
-			}
-
-			youWinSign.visible = victorySavouringCounter !== Infinity
-		})
 	}
+
+	let restartInsistenceCounter = 0.
+	updateFunctions.push(function ()
+	{
+		if (checkIfObjectIsInScene(goalBox))
+		{
+			let oscillating = .5 + .5 * Math.sin(frameCount * .14)
+
+			goalExcitedness -= frameDelta * .75
+			if (goalExcitedness < 0.)
+				goalExcitedness = 0.
+			singularGoalMultivector.position.x = goalExcitedness * .2 * Math.sin(frameCount * .3)
+			goalBox.title.children[0].material.color.setRGB(1., 1. - goalExcitedness * oscillating, 1. - goalExcitedness * oscillating)
+
+			if (victorySavouringCounter !== Infinity)
+				goalBox.title.children[0].material.color.setRGB(1. - oscillating, 1., 1. - oscillating)
+
+			goalBox.position.x = camera.rightAtZZero - 1.4
+			goalBox.position.y = 0.
+
+			goalBox.title.position.y = goalBox.title.scale.y / 2. + singularGoalMultivector.boundingBox.scale.y / 2.
+
+			goalBox.background.scale.x = .2 + Math.max(goalBox.title.scale.x, singularGoalMultivector.boundingBox.scale.x)
+			goalBox.background.scale.y = .2 + goalBox.title.scale.y + singularGoalMultivector.boundingBox.scale.y
+			goalBox.background.position.y = .5 * goalBox.title.scale.y
+		}
+
+		if (checkIfObjectIsInScene(restartButton))
+		{
+			if ((multivectorScope.length < 2 || operatorScope.length < 1) && victorySavouringCounter === Infinity) //levelUncompletable
+				restartInsistenceCounter += frameDelta
+			else
+				restartInsistenceCounter = 0.
+
+			if(restartInsistenceCounter > 9.)
+				restartButton.material.color.setRGB(1., .5 + .5 * Math.sin(frameCount * .12), .5 + .5 * Math.sin(frameCount * .12))
+			else
+				restartButton.material.color.setRGB(1., 1., 1.)
+		}
+
+		youWinSign.visible = victorySavouringCounter !== Infinity
+	})
 
 	let levels = Levels()
 	levelSetUp = function()

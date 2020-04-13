@@ -67,7 +67,7 @@ function initWindowResizeSystemAndSurroundings(renderer)
 	}
 
 	//want unit vectors to be a reasonable size
-	camera.setTopAtZZeroAndAdjustScene(9.)
+	camera.setTopAtZZeroAndAdjustScene(7.)
 
 	return stage;
 }
