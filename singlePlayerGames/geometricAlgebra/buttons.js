@@ -19,6 +19,7 @@ function initButtons()
 
 		if(buttonDescription !== undefined)
 			console.log("\n",buttonName + ": " + buttonDescription)
+
 		buttons[buttonName] = {
 			down: false,
 			onDown: onDown
@@ -109,4 +110,21 @@ function initButtons()
 			}
 		}
 	})
+
+	//inputSimulator
+	// if(0)
+	{
+		let timer = 0
+		let framesBetweenInputs = 3
+		let inputsSoFar = 0
+		let inputs = ["enter", "enter", "enter"]
+		updateFunctions.push(function ()
+		{
+			if ( inputsSoFar < inputs.length && frameCount !== 0 && frameCount % framesBetweenInputs === 0)
+			{
+				buttons[inputs[inputsSoFar]].onDown()
+				++inputsSoFar
+			}
+		})
+	}
 }

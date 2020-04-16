@@ -21,6 +21,9 @@ function initSound()
     playRandomPop = function()
     {
         let index = 1 + Math.floor(Math.random()*3)
-        sounds["pop" + index].play()
+
+        //wanna supress that warning
+        let soundPromise = sounds["pop" + index].play()
+        soundPromise.then(function(){}).catch(function(){})
     }
 }

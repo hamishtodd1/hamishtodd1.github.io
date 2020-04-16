@@ -427,6 +427,7 @@ function initMultivectorAppearances()
 			}
 		}
 
+		let animationProgress = 0.
 		updateFunctions.push(function()
 		{
 			if (multivec.elements[5] !== 0. || multivec.elements[6] !== 0. || multivec.elements[7] !== 0.)
@@ -434,8 +435,16 @@ function initMultivectorAppearances()
 
 			if(multivec.animationOngoing)
 			{
-				multivec.animationOngoing = false
+				animationProgress += frameDelta
+
+				if(animationProgress > 1.)
+				{
+					multivec.animationOngoing = false
+					playRandomPop()
+				}
 			}
+			else
+				animationProgress = 0.;
 
 			updateAppearance()
 			multivec.skipAnimation()

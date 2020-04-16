@@ -1,19 +1,16 @@
 /*
 	Look through "record", lots of stuff in there and things you've done
 
-	TODO Jon
-		Just some levels
-
-	TODO Nicky
-		animations
-		input and output stuff
-
 	TODO calculator (Andy/slack/pontus)
 		Finish scalar and imaginary number stuff
 		Generally get all animations in
 		Then you have calculator, interesting tool for thought to impress slack/andy/GA folks
 		Then can move back to nice input and output stuff
 		Unify the various "generating" approaches
+
+	TODO Jon
+		Just some levels
+		Ideally an input/output one
 
 	TODO for live coding / input output sandbox / level editor
 		Differential geometry / turtle
@@ -79,7 +76,7 @@ async function init()
 	// return
 
 	{
-		let restartButtonObj = makeTextSign("Restart")
+		let restartButtonObj = makeTextSign("Restart (r)")
 		var restartButton = restartButtonObj.children[0]
 		restartButton.scale.copy(restartButtonObj.scale)
 		restartButton.scale.multiplyScalar(.4)

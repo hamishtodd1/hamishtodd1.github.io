@@ -168,9 +168,7 @@ function initOperationInterface(restartButton)
 			case 2: //where we animate
 				if (animationMultivector.parent !== scene )
 				{
-					playRandomPop()
 					animationMultivector.animationOngoing = true
-					scene.add(animationMultivector)
 					scene.remove(operands[0], operands[1], activeOperator)
 				}
 				if (!animationMultivector.animationOngoing)
@@ -245,5 +243,7 @@ function initOperationInterface(restartButton)
 				levelSetUp()
 			}
 		}
+
+		bindButton("r", restartButton.onClick)
 	}
 }
