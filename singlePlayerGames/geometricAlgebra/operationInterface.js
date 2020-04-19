@@ -90,6 +90,7 @@ function initOperationInterface(restartButton)
 			// 		break
 			// }
 			newScopeMultivector.position.copy(newScopeMultivector.scopePosition)
+			newScopeMultivector.skipAnimation()
 		}
 
 		return newScopeMultivector
@@ -169,6 +170,8 @@ function initOperationInterface(restartButton)
 				if (animationMultivector.parent !== scene )
 				{
 					animationMultivector.animationOngoing = true
+					animationMultivector.startAnimation(operands,activeOperator.function)
+					scene.add(animationMultivector)
 					scene.remove(operands[0], operands[1], activeOperator)
 				}
 				if (!animationMultivector.animationOngoing)
@@ -214,7 +217,6 @@ function initOperationInterface(restartButton)
 				operandIndices: [howCurrentIsMade.operandIndices[0], howCurrentIsMade.operandIndices[1]],
 				operation: howCurrentIsMade.operation
 			}
-			newMultivector.scalar.setIntendedPositionsToSquare()
 			newMultivector.skipAnimation()
 			reactToNewMultivector(newMultivector)
 		}

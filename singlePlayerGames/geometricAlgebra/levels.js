@@ -71,6 +71,16 @@ function Levels()
 			operators: [geometricSum,geometricProduct]
 		},
 	*/
+		{
+			singularGoal:
+				new Float32Array([5., 0., 0., 0., 0., 0., 0., 0.]),
+			options: [
+				new Float32Array([2.3, 0., 0., 0., 0., 0., 0., 0.]),
+				new Float32Array([-3.8, 0., 0., 0., 0., 0., 0., 0.]),
+			],
+			operators: [geometricSum]
+		},
+
 		
 		{
 			singularGoal:

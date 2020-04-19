@@ -67,7 +67,7 @@
 
 async function init()
 {
-	initMultivectorAppearances()
+	await initMultivectorAppearances()
 	await initOperatorAppearances()
 
 	initSound()

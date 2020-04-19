@@ -1,10 +1,13 @@
 /*
+
 	Scalar vector multiplication: one of the scalar units goes to the end of the vector, and the rest get spaced out too
 
-	Possibly useful model: the operator combines with one of the operands to become a thing that is applied to the other operand
-	A little cartoon character doing everything is surely the way to go. The pieces should be gotten rid of
+	General
+		Possibly useful model: the operator combines with one of the operands to become a thing that is applied to the other operand
+		A little cartoon character doing everything is surely the way to go. The pieces should be gotten rid of.
 
 	Technical
+		There is a question about what you should be parented to but that is tooooo philosophical
 		At short notice, any appearance can change to any other
 		So should react to its value at every frame really
 
@@ -66,32 +69,62 @@
 		For both sum and product of vectors, visualize the parallelogram
 	Vector addition: always one on left and one above. And when they come together the red ends can melt each other or whatever it is, just like bivectors
 
-	Grouping / location
-		Could have the different blades stacked in a column, or around in a circle
-		It is contingent that this vector and this scalar are together
-		This gets into philosophy :)
-		What if you have some things that are enormously larger than others? That's why we have zooming in and out. But some things keep size
-
-	Vector vector
-		Sweep a along b to get a bivector. On is the sweeper, one is the thing it is swept along.
+	Sweep a along b to get a bivector. On is the sweeper, one is the thing it is swept along.
 		Use this to make the addition too. This way, it is a surprise that addition is commutative, rather than a surprise that wedging is not
 		Addition of codirectional vectors and bivectors probably is different from non conditional,
 		and it's probably ok to encourage that idea. Early levels can be just about them. X vector, X vector, 3. You must make an X vector of length 6.
 
+	Grouping / location
+		Could have the different blades stacked in a column, or around in a circle
+		What if you have some things that are enormously larger than others? That's why we have zooming in and out. But some things keep size
+
 */
 
-function initMultivectorAppearances()
+async function initMultivectorAppearances()
 {
 	let vectorRadius = .19
 	let vectorGeometry = new THREE.CylinderBufferGeometry(0.,vectorRadius,1.,16,1,false);
 	vectorGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.,.5,0.))
 
-	let scalarUnitGeometry = new THREE.CircleGeometry(.5, 6)
+	let scalarUnitGeometry = new THREE.CircleGeometry(.5, 8)
 	// for (let i = 0, il = scalarUnitGeometry.vertices.length / 2; i < il; i++)
 	// 	scalarUnitGeometry.vertices[i*2].multiplyScalar(.7)
 
 	let bivecMaterialClockwise = new THREE.MeshBasicMaterial({ color: discreteViridis[0].hex,transparent:true, opacity:1., side:THREE.FrontSide})
 	let bivecMaterialCounter = new THREE.MeshBasicMaterial({ color: discreteViridis[2].hex,transparent:true, opacity:1., side:THREE.BackSide})
+
+	let scalarShaderMaterial = new THREE.ShaderMaterial({
+		uniforms: {
+			theta1:{value:0.},
+			r1: { value: 0. },
+			theta2: { value: 0. },
+			r2: { value: 1000. },
+
+			positive:{value:false}
+		}
+	});
+	await assignShader("scalarVertex",   scalarShaderMaterial, "vertex")
+	await assignShader("scalarFragment", scalarShaderMaterial, "fragment")
+
+	let test = new THREE.Mesh(new THREE.PlaneGeometry(3., 3.), scalarShaderMaterial.clone())
+	scene.add(test)
+	let test2 = new THREE.Mesh(new THREE.PlaneGeometry(3., 3.), scalarShaderMaterial.clone())
+	scene.add(test2)
+	test2.position.x += 7.
+	test2.material.uniforms.positive.value = !test2.material.uniforms.positive.value
+
+	updateFunctions.push( function()
+	{
+		test.material.uniforms.r1.value = Math.sin(frameCount*.05)
+		test.material.uniforms.theta1.value = frameCount * .03
+		while ( test.material.uniforms.theta1.value > TAU/2. )
+			test.material.uniforms.theta1.value -= TAU
+
+		test2.material.uniforms.r1.value = Math.sin((frameCount+3.) * .09)
+		test2.material.uniforms.theta1.value = frameCount * .01
+		while (test2.material.uniforms.theta1.value > TAU / 2.)
+			test2.material.uniforms.theta1.value -= TAU
+	})
 
 	MultivectorAppearance = function(externalOnClick,elements)
 	{
@@ -135,6 +168,21 @@ function initMultivectorAppearances()
 		//scalar
 		{
 			//how about they have a unit-size surroundings but are actually a little bean?
+
+			/*
+				aight so custom shader
+
+				When it's in box formation, it's just a little one at the end
+				Same with a length
+				But when it's a 3.2x2.1 box, slices off all of them
+				And probably want them at an angle
+				So need to control them individually
+				But the slices are straight lines
+				And 2 is fine
+				So each gets 2 cutoffs
+				so you have the coords of the place 
+			*/
+
 			var scalar = new THREE.Group()
 			scalar.position.z = .001
 			multivec.add(scalar)
@@ -152,15 +200,13 @@ function initMultivectorAppearances()
 				scalar.add(newOne)
 			}
 
-			scalar.setIntendedPositionsToSquare = function ()
+			scalar.setIntendedPositionsToCenteredSquare = function ()
 			{
 				let currentLayer = 1 //layer n and all below it contain n^2 verts. vertex 0 is layer 1
 
-				/*
-					456
-					327
-					018
-				*/
+				// 4 5 6
+				// 3 2 7
+				// 0 1 8
 				for (let i = 0, il = scalar.children.length; i < il; i++)
 				{
 					if (sq(currentLayer) <= i)
@@ -170,7 +216,6 @@ function initMultivectorAppearances()
 					let diagOfThisLayer = 2 * currentLayer * (currentLayer - 1) / 2
 					let inSecondHalf = i > diagOfThisLayer
 
-					//
 					scalar.children[i].intendedPosition
 						.set(0.,0.,0.)
 						.addScaledVector(rightDown ? yUnit : xUnit, currentLayer - 1) //get you to the start
@@ -333,17 +378,6 @@ function initMultivectorAppearances()
 			})
 		}
 
-		multivec.skipAnimation = function()
-		{
-			scalar.setIntendedPositionsToSquare()
-			for (let i = 0, il = scalar.children.length; i < il; i++)
-				scalar.children[i].position.copy(scalar.children[i].intendedPosition)
-
-			//bivector relaxes to a rectangle
-			//scalar maybe becomes the other part of the complex number
-			//trivector relaxes to cuboid
-		}
-
 		let boundingBox = new THREE.Mesh(unchangingUnitSquareGeometry,new THREE.MeshBasicMaterial({color:0x00FF00,transparent:true,opacity:.4}))
 		{
 			boundingBox.visible = false
@@ -391,39 +425,55 @@ function initMultivectorAppearances()
 			}
 		}
 
-		function updateAppearance()
 		{
-			//scalar
+			multivec.skipAnimation = function ()
 			{
-				// if (elements[0] != Math.round(elements[0]))
-				// {
-				// 	//cut radially
-				// 	//do it in frag shader
-				// }
-				scalar.material.color.setHex(elements[0] > 0. ? discreteViridis[1].hex : discreteViridis[3].hex)
-				if (Math.abs(elements[0]) > scalar.children.length)
-					console.error("not enough scalar units")
 				for (let i = 0, il = scalar.children.length; i < il; i++)
 					scalar.children[i].visible = i < Math.floor(Math.abs(elements[0]))
-				scalar.setIntendedPositionsToSquare()
-
+				scalar.setIntendedPositionsToCenteredSquare()
 				for (let i = 0, il = scalar.children.length; i < il; i++)
-					scalar.children[i].position.lerp(scalar.children[i].intendedPosition, .1)
+					scalar.children[i].position.copy(scalar.children[i].intendedPosition)
+
+				//bivector relaxes to a rectangle
+				//scalar maybe becomes the other part of the complex number
+				//trivector relaxes to cuboid
 			}
 
-			//vec
+			multivec.startAnimation = function (operands, f)
 			{
-				vecPart.set(multivec.elements[1], multivec.elements[2], multivec.elements[3])
-				randomPerpVector(vecPart, vecOrthX)
-				vecOrthX.normalize()
-				vecOrthZ.copy(vecPart).cross(vecOrthX).normalize().negate();
-				vecAppearance.matrix.makeBasis(vecOrthX, vecPart, vecOrthZ);
-				vecAppearance.matrix.setPosition(vecPart.multiplyScalar(-.5))
+				//just don't think about what the elements are
 
-				if (vecPart.equals(zeroVector))
-					multivec.remove(vecAppearance)
-				else
-					multivec.add(vecAppearance)
+				//replicas vs separate objects with 
+					//what if you have two people, each holding a multivector, who want to do one part of the process each?
+				//could add them? have part of the multivector do one side and part do the other?
+
+				//yeah need to think through fractional and negative numbers
+
+				//pick a planned animation and focus on it
+
+				//aight so less skipping
+
+				if(f === geometricSum)
+				{
+					if (operands[0].elements[0] !== 0. || operands[1].elements[0] !== 0. )
+					{
+						//heh, and if there's .3 and .8 ?
+						let numFromFirst = 0
+						for (let i = 0, il = operands[1].scalar.children.length; i < il; i++)
+						{
+							if (!operands[1].scalar.children[i].visible)
+								break
+							scalar.children[i].position.copy(operands[1].scalar.children[i].position).add(operands[1].position).sub(multivec.position)
+							++numFromFirst
+						}
+						for( let i = 0, il = operands[0].scalar.children.length; i < il; i++)
+						{
+							if (!operands[0].scalar.children[i].visible)
+								break
+							scalar.children[numFromFirst+i].position.copy(operands[0].scalar.children[i].position).add(operands[0].position).sub(multivec.position)
+						}
+					}
+				}
 			}
 		}
 
@@ -446,17 +496,43 @@ function initMultivectorAppearances()
 			else
 				animationProgress = 0.;
 
-			updateAppearance()
-			multivec.skipAnimation()
-			updateBoundingBoxSize()
-
-			for (let i = 0; i < multivec.children.length; i++)
+			//scalar
 			{
-				if (multivec.children[i].matrix.equals(zeroMatrix))
-				{
-					debugger;
-				}
+				// if (elements[0] != Math.round(elements[0]))
+				// {
+				// 	//cut radially
+				// 	//do it in frag shader
+				// }
+				scalar.material.color.setHex(elements[0] > 0. ? discreteViridis[1].hex : discreteViridis[3].hex)
+
+				if (Math.abs(elements[0]) > scalar.children.length)
+					console.error("not enough scalar units")
+
+				for (let i = 0, il = scalar.children.length; i < il; i++)
+					scalar.children[i].visible = i < Math.floor(Math.abs(elements[0]))
+					
+				scalar.setIntendedPositionsToCenteredSquare()
+
+				for (let i = 0, il = scalar.children.length; i < il; i++)
+					scalar.children[i].position.lerp(scalar.children[i].intendedPosition, .1)
 			}
+
+			//vec
+			{
+				vecPart.set(multivec.elements[1], multivec.elements[2], multivec.elements[3])
+				randomPerpVector(vecPart, vecOrthX)
+				vecOrthX.normalize()
+				vecOrthZ.copy(vecPart).cross(vecOrthX).normalize().negate();
+				vecAppearance.matrix.makeBasis(vecOrthX, vecPart, vecOrthZ);
+				vecAppearance.matrix.setPosition(vecPart.multiplyScalar(-.5))
+
+				if (vecPart.equals(zeroVector))
+					multivec.remove(vecAppearance)
+				else
+					multivec.add(vecAppearance)
+			}
+
+			updateBoundingBoxSize()
 		})
 
 		return multivec
