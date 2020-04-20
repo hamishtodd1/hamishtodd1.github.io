@@ -1,11 +1,12 @@
 /*
 	What this is for
-		Showing you a certain goal
+		Showing players of the puzzle game a certain goal
 		Showing frames of footage/animation
 		Showing results of a vertex shader
 		Programming VR interactions? Molecule constraints?
 
 	ideas
+		fire poi throwing sparks!
 		corkscrew
 		sphere
 		tornado particle effect

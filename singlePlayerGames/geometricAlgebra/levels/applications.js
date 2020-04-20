@@ -28,7 +28,8 @@
 
 	Structure based around rocket science
 		Could talk to isaac arthur
-		Classical mechanics / mech eng
+		Classical mechanics / mechanical engineering
+			poi! fire poi with sparks!
 			https://twitter.com/MachinePix/status/1249390426672361472
 			it is very interesting that .5mv^2 works if v is squared using the Clifford product
 			just moving the things around, rockets innit

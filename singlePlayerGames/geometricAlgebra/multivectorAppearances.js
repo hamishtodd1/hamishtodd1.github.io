@@ -25,6 +25,7 @@
 		Transparent and glowy and smoky and reflective
 
 	The scalar
+		how about they have a unit-size surroundings but are actually a little bean?
 		A circle that can bulge very slightly for when you want to multiply it by a vector
 		For unit circle it will be less than one
 		IS there any reason to not store the scalars in a line? More compact...
@@ -89,76 +90,24 @@ async function initMultivectorAppearances()
 	let scalarUnitGeometry = new THREE.CircleGeometry(.5, 8)
 	// for (let i = 0, il = scalarUnitGeometry.vertices.length / 2; i < il; i++)
 	// 	scalarUnitGeometry.vertices[i*2].multiplyScalar(.7)
+	let scalarShaderMaterial = new THREE.ShaderMaterial({
+		uniforms: {
+			theta1: { value: 0. },
+			r1: 	{ value: 1000. },
+			theta2: { value: 0. },
+			r2: 	{ value: 1000. },
+		}
+	});
+	await assignShader("scalarVertex", scalarShaderMaterial, "vertex")
+	await assignShader("scalarFragment", scalarShaderMaterial, "fragment")
 
 	let bivecMaterialClockwise = new THREE.MeshBasicMaterial({ color: discreteViridis[0].hex,transparent:true, opacity:1., side:THREE.FrontSide})
 	let bivecMaterialCounter = new THREE.MeshBasicMaterial({ color: discreteViridis[2].hex,transparent:true, opacity:1., side:THREE.BackSide})
-
-	let scalarShaderMaterial = new THREE.ShaderMaterial({
-		uniforms: {
-			theta1:{value:0.},
-			r1: { value: 0. },
-			theta2: { value: 0. },
-			r2: { value: 1000. },
-
-			positive:{value:false}
-		}
-	});
-	await assignShader("scalarVertex",   scalarShaderMaterial, "vertex")
-	await assignShader("scalarFragment", scalarShaderMaterial, "fragment")
-
-	let test = new THREE.Mesh(new THREE.PlaneGeometry(3., 3.), scalarShaderMaterial.clone())
-	scene.add(test)
-	let test2 = new THREE.Mesh(new THREE.PlaneGeometry(3., 3.), scalarShaderMaterial.clone())
-	scene.add(test2)
-	test2.position.x += 7.
-	test2.material.uniforms.positive.value = !test2.material.uniforms.positive.value
-
-	updateFunctions.push( function()
-	{
-		test.material.uniforms.r1.value = Math.sin(frameCount*.05)
-		test.material.uniforms.theta1.value = frameCount * .03
-		while ( test.material.uniforms.theta1.value > TAU/2. )
-			test.material.uniforms.theta1.value -= TAU
-
-		test2.material.uniforms.r1.value = Math.sin((frameCount+3.) * .09)
-		test2.material.uniforms.theta1.value = frameCount * .01
-		while (test2.material.uniforms.theta1.value > TAU / 2.)
-			test2.material.uniforms.theta1.value -= TAU
-	})
 
 	MultivectorAppearance = function(externalOnClick,elements)
 	{
 		let multivec = new THREE.Group();
 		scene.add(multivec) //the only point is to be a visualization
-
-		function scalarBlockWidth()
-		{
-			let min = Infinity
-			let max = -Infinity
-			for (let i = 0, il = scalar.children.length; i < il; i++)
-			{
-				if(!scalar.children[i].visible)
-					break
-				min = Math.min(min, scalar.children[i].intendedPosition.x)
-				max = Math.max(max, scalar.children[i].intendedPosition.x)
-			}
-			let size = max - min + 1.
-			return Math.abs(size) < Infinity ? size:0.
-		}
-		function scalarBlockHeight()
-		{
-			let min = Infinity
-			let max = -Infinity
-			for (let i = 0, il = scalar.children.length; i < il; i++)
-			{
-				if(!scalar.children[i].visible)
-					break
-				min = Math.min(min, scalar.children[i].intendedPosition.y)
-				max = Math.max(max, scalar.children[i].intendedPosition.y)
-			}
-			let size = max - min + 1.
-			return Math.abs(size) < Infinity ? size:0.
-		}
 
 		multivec.elements = MathematicalMultivector() //identity
 		if(elements !== undefined)
@@ -167,33 +116,52 @@ async function initMultivectorAppearances()
 
 		//scalar
 		{
-			//how about they have a unit-size surroundings but are actually a little bean?
-
 			/*
-				aight so custom shader
-
-				When it's in box formation, it's just a little one at the end
-				Same with a length
-				But when it's a 3.2x2.1 box, slices off all of them
-				And probably want them at an angle
-				So need to control them individually
-				But the slices are straight lines
-				And 2 is fine
-				So each gets 2 cutoffs
-				so you have the coords of the place 
+				Better way might well be with large points
+				Then the r and theta are attributes
 			*/
 
+			function scalarBlockWidth()
+			{
+				let min = Infinity
+				let max = -Infinity
+				for (let i = 0, il = scalar.children.length; i < il; i++)
+				{
+					if (!scalar.children[i].visible)
+						break
+					min = Math.min(min, scalar.children[i].intendedPosition.x)
+					max = Math.max(max, scalar.children[i].intendedPosition.x)
+				}
+				let size = max - min + 1.
+				return Math.abs(size) < Infinity ? size : 0.
+			}
+			function scalarBlockHeight()
+			{
+				let min = Infinity
+				let max = -Infinity
+				for (let i = 0, il = scalar.children.length; i < il; i++)
+				{
+					if (!scalar.children[i].visible)
+						break
+					min = Math.min(min, scalar.children[i].intendedPosition.y)
+					max = Math.max(max, scalar.children[i].intendedPosition.y)
+				}
+				let size = max - min + 1.
+				return Math.abs(size) < Infinity ? size : 0.
+			}
+
 			var scalar = new THREE.Group()
-			scalar.position.z = .001
+			scalar.position.z = .001 //in front of bivector I guess
 			multivec.add(scalar)
 			multivec.scalar = scalar
-			scalar.material = new THREE.MeshBasicMaterial()
+			scalar.positive = { value: false }
 
 			let newOne = null
 			let maxUnits = 256
 			for(let i = 0; i < maxUnits; i++)
 			{
-				newOne = new THREE.Mesh(scalarUnitGeometry, scalar.material)
+				newOne = new THREE.Mesh(scalarUnitGeometry, scalarShaderMaterial.clone())
+				newOne.material.uniforms.positive = scalar.positive
 
 				newOne.intendedPosition = new THREE.Vector3(i,0.,0.) //just there as a default
 				newOne.castShadow = true
@@ -232,9 +200,6 @@ async function initMultivectorAppearances()
 					scalar.children[i].intendedPosition.y -= centerLocationY - .5
 				}
 			}
-
-			if(scalar.children.length !== maxUnits)
-				console.log("lots of infrastructure is based on something you just changed")
 		}
 
 		//vector
@@ -458,19 +423,27 @@ async function initMultivectorAppearances()
 					if (operands[0].elements[0] !== 0. || operands[1].elements[0] !== 0. )
 					{
 						//heh, and if there's .3 and .8 ?
-						let numFromFirst = 0
-						for (let i = 0, il = operands[1].scalar.children.length; i < il; i++)
+						if( (operands[0].elements[0] > 0. && operands[1].elements[0] > 0. ) ||
+							(operands[0].elements[0] < 0. && operands[1].elements[0] < 0. ) )
 						{
-							if (!operands[1].scalar.children[i].visible)
-								break
-							scalar.children[i].position.copy(operands[1].scalar.children[i].position).add(operands[1].position).sub(multivec.position)
-							++numFromFirst
+							let numFromFirst = 0
+							for (let i = 0, il = operands[1].scalar.children.length; i < il; i++)
+							{
+								if (!operands[1].scalar.children[i].visible)
+									break
+								scalar.children[i].position.copy(operands[1].scalar.children[i].position).add(operands[1].position).sub(multivec.position)
+								++numFromFirst
+							}
+							for (let i = 0, il = operands[0].scalar.children.length; i < il; i++)
+							{
+								if (!operands[0].scalar.children[i].visible)
+									break
+								scalar.children[numFromFirst + i].position.copy(operands[0].scalar.children[i].position).add(operands[0].position).sub(multivec.position)
+							}
 						}
-						for( let i = 0, il = operands[0].scalar.children.length; i < il; i++)
+						else
 						{
-							if (!operands[0].scalar.children[i].visible)
-								break
-							scalar.children[numFromFirst+i].position.copy(operands[0].scalar.children[i].position).add(operands[0].position).sub(multivec.position)
+							//what might be good would be that they pair and pop out of existence
 						}
 					}
 				}
@@ -488,28 +461,36 @@ async function initMultivectorAppearances()
 				animationProgress += frameDelta
 
 				if(animationProgress > 1.)
-				{
 					multivec.animationOngoing = false
-					playRandomPop()
-				}
 			}
 			else
 				animationProgress = 0.;
 
 			//scalar
 			{
-				// if (elements[0] != Math.round(elements[0]))
-				// {
-				// 	//cut radially
-				// 	//do it in frag shader
-				// }
-				scalar.material.color.setHex(elements[0] > 0. ? discreteViridis[1].hex : discreteViridis[3].hex)
+				scalar.positive.value = elements[0] >= 0.
 
 				if (Math.abs(elements[0]) > scalar.children.length)
 					console.error("not enough scalar units")
 
+				//scalar = -3.2
+				//flooredAbs = 3.
+				//scalar-flooredAbs = .2
+
+				let flooredAbs = Math.floor(Math.abs(elements[0]))
 				for (let i = 0, il = scalar.children.length; i < il; i++)
-					scalar.children[i].visible = i < Math.floor(Math.abs(elements[0]))
+				{
+					if (i < flooredAbs)
+						scalar.children[i].visible = true
+					else if (i === flooredAbs && elements[0] != Math.round(elements[0]))
+					{
+						scalar.children[i].material.uniforms.r1.value = Math.abs(elements[0]) - flooredAbs - .5
+						scalar.children[i].visible = true
+						// log(scalar.children[i].material.uniforms.r1.value)
+					}
+					else
+						scalar.children[i].visible = false
+				}
 					
 				scalar.setIntendedPositionsToCenteredSquare()
 

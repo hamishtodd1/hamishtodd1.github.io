@@ -9,6 +9,7 @@
 		Level editor is shader programmer?
 
 	Abstract level ideas
+		Fireworks, catherine wheels, including that slow mo guys one where they hold a catherine wheel overhead
 		Early puzzle about separating orth and para parts of vec
 		Make a torus knot
 		Animation of the angles and squares attached to a right triangle and you figure out a2+b2=c2 cos whatever
@@ -75,8 +76,8 @@ function Levels()
 			singularGoal:
 				new Float32Array([5., 0., 0., 0., 0., 0., 0., 0.]),
 			options: [
-				new Float32Array([2.3, 0., 0., 0., 0., 0., 0., 0.]),
-				new Float32Array([-3.8, 0., 0., 0., 0., 0., 0., 0.]),
+				new Float32Array([ -2.3, 0., 0., 0., 0., 0., 0., 0.]),
+				new Float32Array([ -3.8, 0., 0., 0., 0., 0., 0., 0.]),
 			],
 			operators: [geometricSum]
 		},
