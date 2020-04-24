@@ -65,8 +65,13 @@
 		one layer in a NN to another possibly only needs the blade of that dimension in the higher dimension
 */
 
+
+
 async function init()
 {
+	await initMultivectorAppearances_()
+	return
+
 	await initMultivectorAppearances()
 	await initOperatorAppearances()
 

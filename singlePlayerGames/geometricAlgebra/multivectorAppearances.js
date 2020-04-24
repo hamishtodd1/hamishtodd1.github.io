@@ -444,6 +444,7 @@ async function initMultivectorAppearances()
 						else
 						{
 							//what might be good would be that they pair and pop out of existence
+							//alright so if you want this, you need to have "fake" ones that are about to be annihilated
 						}
 					}
 				}
@@ -472,10 +473,6 @@ async function initMultivectorAppearances()
 
 				if (Math.abs(elements[0]) > scalar.children.length)
 					console.error("not enough scalar units")
-
-				//scalar = -3.2
-				//flooredAbs = 3.
-				//scalar-flooredAbs = .2
 
 				let flooredAbs = Math.floor(Math.abs(elements[0]))
 				for (let i = 0, il = scalar.children.length; i < il; i++)

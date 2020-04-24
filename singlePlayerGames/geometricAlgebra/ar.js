@@ -20,6 +20,11 @@
 	People make little things out of lego? Cogs?
 
 	The best CV thing is of course the oculus controllers
+
+	You can have a (rigid) handle and the handle has a small attachment that you can rotate or telescopically extend
+	And sell the things
+
+
 */
 
 function initAr()
