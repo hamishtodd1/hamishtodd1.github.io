@@ -7,6 +7,7 @@
 		A little cartoon character doing everything is surely the way to go. The pieces should be gotten rid of.
 
 	Technical
+		Best not to have the question of the existence of a multivector at all!
 		There is a question about what you should be parented to but that is tooooo philosophical
 		At short notice, any appearance can change to any other
 		So should react to its value at every frame really
@@ -104,7 +105,7 @@ async function initMultivectorAppearances()
 	await assignShader("scalarFragment", scalarShaderMaterial, "fragment")
 
 	let bivecMaterialClockwise = new THREE.MeshBasicMaterial({ color: discreteViridis[0].hex,transparent:true, opacity:1., side:THREE.FrontSide})
-	let bivecMaterialCounter = new THREE.MeshBasicMaterial({ color: discreteViridis[2].hex,transparent:true, opacity:1., side:THREE.BackSide})
+	let bivecMaterialCounter =   new THREE.MeshBasicMaterial({ color: discreteViridis[2].hex,transparent:true, opacity:1., side:THREE.BackSide})
 
 	MultivectorAppearance = function(externalOnClick,elements)
 	{
