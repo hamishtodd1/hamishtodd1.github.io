@@ -1,7 +1,7 @@
-This involves some setting up, maybe half an hour depending. So, might not be worth it for you. I am finding that it feels nicer though, a more fluid experience - basically just not moving the mouse around. If you have a programming background this'll be easier, but if you follow instructions closely it should be ok.
+This involves some setting up, maybe half an hour depending. So, might not be worth it for you. If you have a programming background this'll be easier, but if you follow instructions closely it should be ok.
 1. For this you need autohotkey: https://www.autohotkey.com/
-2. Open notepad. Without adding anything to the file at all, do file>save as and save the file with the name "bindings.ahk" in the folder %APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup
-3. Go to %APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup in File Explorer. Double click the file. You should now have autohotkey running! But it doesn't do anything :) because your file was blank! We need to put some our custom bindings in there. We have a little job to do first though...
+2. Go here: http://hamishtodd1.github.io/personal/okcupid/okcupidBindings.ahk and save the page into a reachable directory
+3. Go to where you saved the file. Right click > open with > notepad
 4. Right click the autohotkey icon ("H" in a green box) that should be on your windows taskbar, and click "window spy". In the window spy, there is a box under "Mouse Position:" and in it it says "Absolute: [some number], [some other number]".
 5. Go to okcupid.com/match (the window spy window should stay on top). Hover your mouse over the top-left profile (don't click it, not yet). Look at the window spy - on a piece of paper, write down the two numbers shown next to "Absolute:". We're going to call these numbers aX and aY
 6. Click on someone's profile. Do NOT scroll down the page. Hover over "Pass". Write down those two numbers - we're going to call them bX and bY. Hover over "Like". Write down the numbers next to "Absolute:" again - those are cX and cY. You can close window spy now

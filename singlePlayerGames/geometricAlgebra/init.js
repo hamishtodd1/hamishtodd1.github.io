@@ -69,8 +69,8 @@
 
 async function init()
 {
-	await initMultivectorAppearances_()
-	return
+	// await initMultivectorAppearances_()
+	// return
 
 	await initMultivectorAppearances()
 	await initOperatorAppearances()

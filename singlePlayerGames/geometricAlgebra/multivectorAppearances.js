@@ -58,6 +58,7 @@
 				This tells you that it is best to think of them all, equally, being taken away from the origin
 
 	Bivectors
+		Along with scalar, could gently rock from side to side
 		bivector-scalar: the scalar units go into a square, disperse, the bivectors get copied, then merge
 		bivector bivector multiplication: just rotate 90 deg
 		Bivector-bivector wedge - do you make the triangle as well?
@@ -86,6 +87,7 @@ async function initMultivectorAppearances()
 	let vectorRadius = .19
 	let vectorGeometry = new THREE.CylinderBufferGeometry(0.,vectorRadius,1.,16,1,false);
 	vectorGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.,.5,0.))
+	let vectorMaterial = new THREE.MeshStandardMaterial()
 
 	let scalarUnitGeometry = new THREE.CircleGeometry(.5, 8)
 	// for (let i = 0, il = scalarUnitGeometry.vertices.length / 2; i < il; i++)
@@ -204,7 +206,7 @@ async function initMultivectorAppearances()
 
 		//vector
 		{
-			var vecAppearance = new THREE.Mesh( vectorGeometry, new THREE.MeshStandardMaterial() );
+			var vecAppearance = new THREE.Mesh( vectorGeometry, vectorMaterial );
 			vecAppearance.matrixAutoUpdate = false;
 			vecAppearance.castShadow = true
 			multivec.add(vecAppearance)

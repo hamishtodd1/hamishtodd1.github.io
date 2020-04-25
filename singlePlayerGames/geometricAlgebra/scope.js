@@ -196,6 +196,20 @@ function initScope()
 		}
 	}
 
+	function setSelectionIndicatorSize(width, height)
+	{
+		width = Math.max(Math.abs(width), .001)
+		height = Math.max(Math.abs(height), .001)
+		for (let i = 0; i < keyboardSelectionIndicator.children.length; i++)
+		{
+			keyboardSelectionIndicator.children[i].position.x = Math.sign(keyboardSelectionIndicator.children[i].position.x) * width  / 2.
+			keyboardSelectionIndicator.children[i].position.y = Math.sign(keyboardSelectionIndicator.children[i].position.y) * height / 2.
+
+			keyboardSelectionIndicator.children[i].scale.x = keyboardSelectionIndicator.children[i].scale.x === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : width  + keyboardSelectionIndicator.thickness
+			keyboardSelectionIndicator.children[i].scale.y = keyboardSelectionIndicator.children[i].scale.y === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : height + keyboardSelectionIndicator.thickness
+		}
+	}
+
 	function makeSureSelectorIsSetUp()
 	{
 		if (!checkIfObjectIsInScene(keyboardSelectionIndicator))
@@ -218,27 +232,9 @@ function initScope()
 
 				keyboardSelectionIndicator.position.copy(selection.position)
 				if (multivectorScope.indexOf(selection) !== -1)
-				{
-					for (let i = 0; i < keyboardSelectionIndicator.children.length; i++)
-					{
-						keyboardSelectionIndicator.children[i].position.x = Math.sign(keyboardSelectionIndicator.children[i].position.x) * selection.boundingBox.scale.x / 2.
-						keyboardSelectionIndicator.children[i].position.y = Math.sign(keyboardSelectionIndicator.children[i].position.y) * selection.boundingBox.scale.y / 2.
-
-						keyboardSelectionIndicator.children[i].scale.x = keyboardSelectionIndicator.children[i].scale.x === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : selection.boundingBox.scale.x + keyboardSelectionIndicator.thickness
-						keyboardSelectionIndicator.children[i].scale.y = keyboardSelectionIndicator.children[i].scale.y === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : selection.boundingBox.scale.y + keyboardSelectionIndicator.thickness
-					}
-				}
+					setSelectionIndicatorSize(selection.boundingBox.scale.x, selection.boundingBox.scale.y)
 				else
-				{
-					for (let i = 0; i < keyboardSelectionIndicator.children.length; i++)
-					{
-						keyboardSelectionIndicator.children[i].position.x = Math.sign(keyboardSelectionIndicator.children[i].position.x)
-						keyboardSelectionIndicator.children[i].position.y = Math.sign(keyboardSelectionIndicator.children[i].position.y)
-
-						keyboardSelectionIndicator.children[i].scale.x = keyboardSelectionIndicator.children[i].scale.x === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : 2. + keyboardSelectionIndicator.thickness
-						keyboardSelectionIndicator.children[i].scale.y = keyboardSelectionIndicator.children[i].scale.y === keyboardSelectionIndicator.thickness ? keyboardSelectionIndicator.thickness : 2. + keyboardSelectionIndicator.thickness
-					}
-				}
+					setSelectionIndicatorSize(2., 2.)
 			})
 		}
 	}

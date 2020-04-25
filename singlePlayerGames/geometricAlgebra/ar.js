@@ -24,6 +24,14 @@
 	You can have a (rigid) handle and the handle has a small attachment that you can rotate or telescopically extend
 	And sell the things
 
+	Probably aim at adults, people you know. And then, kids miiiight like it. That's probably what minecraft did?
+	Make it for yourself
+
+	The kinds of things you make must look cool no matter what
+		Glowy whip
+
+	Input from a song, or audio around you?
+
 
 */
 

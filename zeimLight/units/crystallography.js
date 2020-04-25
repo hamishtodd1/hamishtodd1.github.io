@@ -153,6 +153,7 @@ async function initCrystallography()
 
 	updateFunctions.push(function ()
 	{
+		//don't you need to know the unit cell size?
 		{
 			let r, i, amplitude, phase, a, sfMesh, sfMeshCopy;
 			//could do it on a texture, or a vertex shader?

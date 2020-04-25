@@ -1,16 +1,18 @@
 ;open profile
 CapsLock & a::
 	Send,{Home}
-	MouseMove, matchMousePositionX,matchMousePositionY ;here you put the mouse position of the top-left result on okcupid.com/match. Use the autohotkey "window spy" to get
+	MouseMove, 1190,1080 ;here you put the mouse position of the top-left result Input okcupid.com/match. Use the autohotkey "window spy" to get
 	Click
 
 	Send,{Down}{Down}{Down}{Down}{Down}{Down}{Down}
 	Sleep,2200 ;such a long fucking time but the page must load
 	Send,^f
 	Send,More
+	Send,+{Enter}
+	Sleep,20
 	Send,{Esc}
+	Sleep,20
 	Send,{Enter}
-	; MouseMove, 960,1300
 
 	SetCapsLockState, Off
 Return
@@ -18,9 +20,13 @@ Return
 ;swipe left
 CapsLock & d::
 	Send,{Home}
-	MouseMove, passMousePositionWhenScrolledToTopOfPageX,passMousePositionWhenScrolledToTopOfPageY ;scroll to the top of the page and hover your mouse over "pass". Put in the "absolute" mouse positions listed in the autohotkey window spy
+	MouseMove, 2250,650
 	Sleep,40
 	Click
+	
+	Send,^l
+	SendInput,okcupid.com/match
+	Send,{Enter}
 
 	SetCapsLockState, Off
 Return
@@ -29,24 +35,30 @@ Return
 CapsLock & f::
 	Send,{Home}
 	Sleep,30
-	MouseMove, likeMousePositionWhenScrolledToTopOfPageX,likeMousePositionWhenScrolledToTopOfPageY ;the location of the "like" button, when at the top of the page, must be put here
-	Sleep,20
+	MouseMove, 2650,650
+	Sleep,30
 	Click
 
 	InputBox, greeting,
-	if ErrorLevel = 1
-		Sleep,20
+	if ( ErrorLevel = 0 && greeting) ;write something AND press ok or enter
+	{
+		Sleep,30
 		SendRaw,%greeting%
 
 		;click send
 		MouseMove, 3480,2110
-		Sleep,20
+		Sleep,60
 		Click
-		
-		Sleep,500
+		Sleep,60
+		Click
+		Sleep,60
+		Click
+	}
+	
+	Sleep,500
 
 	Send,^l
-	SendRaw,okcupid.com/match
+	SendInput,okcupid.com/match
 	Send,{Enter}
 
 	SetCapsLockState, Off
