@@ -85,89 +85,72 @@
 
 async function initMultivectorAppearances()
 {
-	let vectorRadius = .19
-	let vectorGeometry = new THREE.CylinderBufferGeometry(0.,vectorRadius,1.,16,1,false);
-	vectorGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.,.5,0.))
-	let vectorMaterial = new THREE.MeshStandardMaterial()
-
-	let scalarUnitGeometry = new THREE.CircleGeometry(.5, 8)
-	// for (let i = 0, il = scalarUnitGeometry.vertices.length / 2; i < il; i++)
-	// 	scalarUnitGeometry.vertices[i*2].multiplyScalar(.7)
-	let scalarShaderMaterial = new THREE.ShaderMaterial({
-		uniforms: {
-			theta1: { value: 0. },
-			r1: 	{ value: 1000. },
-			theta2: { value: 0. },
-			r2: 	{ value: 1000. },
-		}
-	});
-	await assignShader("scalarVertex", scalarShaderMaterial, "vertex")
-	await assignShader("scalarFragment", scalarShaderMaterial, "fragment")
-
-	let bivecMaterialClockwise = new THREE.MeshBasicMaterial({ color: discreteViridis[0].hex,transparent:true, opacity:1., side:THREE.FrontSide})
-	let bivecMaterialCounter =   new THREE.MeshBasicMaterial({ color: discreteViridis[2].hex,transparent:true, opacity:1., side:THREE.BackSide})
-
-	MultivectorAppearance = function(externalOnClick,elements)
 	{
-		let multivec = new THREE.Group();
-		scene.add(multivec) //the only point is to be a visualization
+		let scalarUnitGeometry = new THREE.CircleGeometry(.5, 8)
+		// for (let i = 0, il = scalarUnitGeometry.vertices.length / 2; i < il; i++)
+		// 	scalarUnitGeometry.vertices[i*2].multiplyScalar(.7)
+		let scalarShaderMaterial = new THREE.ShaderMaterial({
+			uniforms: {
+				theta1: { value: 0. },
+				r1: { value: 1000. },
+				theta2: { value: 0. },
+				r2: { value: 1000. },
+			}
+		});
+		await assignShader("scalarVertex",   scalarShaderMaterial, "vertex")
+		await assignShader("scalarFragment", scalarShaderMaterial, "fragment")
 
-		multivec.elements = MathematicalMultivector() //identity
-		if(elements !== undefined)
-			copyMultivector(elements, multivec.elements)
-		elements = multivec.elements
-
-		//scalar
+		function ScalarUnit()
 		{
-			/*
-				Better way might well be with large points
-				Then the r and theta are attributes
-			*/
+			let scalarUnit = new THREE.Mesh(scalarUnitGeometry, scalarShaderMaterial.clone())
+			
+			scalarUnit.intendedPosition = new THREE.Vector3() //just there as a default
+			scalarUnit.castShadow = true
+			return scalarUnit
+		}
 
-			function scalarBlockWidth()
+		function scalarBlockWidth(scalar)
+		{
+			let min = Infinity
+			let max = -Infinity
+			for (let i = 0, il = scalar.children.length; i < il; i++)
 			{
-				let min = Infinity
-				let max = -Infinity
-				for (let i = 0, il = scalar.children.length; i < il; i++)
-				{
-					if (!scalar.children[i].visible)
-						break
-					min = Math.min(min, scalar.children[i].intendedPosition.x)
-					max = Math.max(max, scalar.children[i].intendedPosition.x)
-				}
-				let size = max - min + 1.
-				return Math.abs(size) < Infinity ? size : 0.
+				if (!scalar.children[i].visible)
+					break
+				min = Math.min(min, scalar.children[i].intendedPosition.x)
+				max = Math.max(max, scalar.children[i].intendedPosition.x)
 			}
-			function scalarBlockHeight()
+			let size = max - min + 1.
+			return Math.abs(size) < Infinity ? size : 0.
+		}
+		function scalarBlockHeight(scalar)
+		{
+			let min = Infinity
+			let max = -Infinity
+			for (let i = 0, il = scalar.children.length; i < il; i++)
 			{
-				let min = Infinity
-				let max = -Infinity
-				for (let i = 0, il = scalar.children.length; i < il; i++)
-				{
-					if (!scalar.children[i].visible)
-						break
-					min = Math.min(min, scalar.children[i].intendedPosition.y)
-					max = Math.max(max, scalar.children[i].intendedPosition.y)
-				}
-				let size = max - min + 1.
-				return Math.abs(size) < Infinity ? size : 0.
+				if (!scalar.children[i].visible)
+					break
+				min = Math.min(min, scalar.children[i].intendedPosition.y)
+				max = Math.max(max, scalar.children[i].intendedPosition.y)
 			}
+			let size = max - min + 1.
+			return Math.abs(size) < Infinity ? size : 0.
+		}
 
-			var scalar = new THREE.Group()
+		function ScalarAppearance()
+		{
+			let scalar = new THREE.Group()
 			scalar.position.z = .001 //in front of bivector I guess
-			multivec.add(scalar)
-			multivec.scalar = scalar
 			scalar.positive = { value: false }
 
 			let newOne = null
 			let maxUnits = 256
-			for(let i = 0; i < maxUnits; i++)
+			for (let i = 0; i < maxUnits; i++)
 			{
-				newOne = new THREE.Mesh(scalarUnitGeometry, scalarShaderMaterial.clone())
+				newOne = ScalarUnit()
+				newOne.intendedPosition.set(i, 0., 0.)
 				newOne.material.uniforms.positive = scalar.positive
-
-				newOne.intendedPosition = new THREE.Vector3(i,0.,0.) //just there as a default
-				newOne.castShadow = true
 				scalar.add(newOne)
 			}
 
@@ -188,39 +171,198 @@ async function initMultivectorAppearances()
 					let inSecondHalf = i > diagOfThisLayer
 
 					scalar.children[i].intendedPosition
-						.set(0.,0.,0.)
+						.set(0., 0., 0.)
 						.addScaledVector(rightDown ? yUnit : xUnit, currentLayer - 1) //get you to the start
 						.addScaledVector(rightDown ? xUnit : yUnit, inSecondHalf ? currentLayer - 1 : i - sq(currentLayer - 1))
 					if (inSecondHalf)
 						scalar.children[i].intendedPosition.addScaledVector(rightDown ? yUnit : xUnit, -1 * (i - diagOfThisLayer))
 				}
 
-				let centerLocationX = scalarBlockWidth() / 2.
-				let centerLocationY = scalarBlockHeight() / 2.
+				let centerLocationX = scalarBlockWidth(scalar) / 2.
+				let centerLocationY = scalarBlockHeight(scalar) / 2.
 				for (let i = 0, il = scalar.children.length; i < il; i++)
 				{
 					scalar.children[i].intendedPosition.x -= centerLocationX - .5
 					scalar.children[i].intendedPosition.y -= centerLocationY - .5
 				}
 			}
+
+			scalar.updateAppearance = function (value)
+			{
+				scalar.positive.value = value >= 0.
+
+				if (Math.abs(value) > scalar.children.length)
+					console.error("not enough scalar units")
+
+				let flooredAbs = Math.floor(Math.abs(value))
+				for (let i = 0, il = scalar.children.length; i < il; i++)
+				{
+					if (i < flooredAbs)
+						scalar.children[i].visible = true
+					else if (i === flooredAbs && value != Math.round(value))
+					{
+						scalar.children[i].material.uniforms.r1.value = Math.abs(value) - flooredAbs - .5
+						scalar.children[i].visible = true
+					}
+					else
+						scalar.children[i].visible = false
+				}
+
+				scalar.setIntendedPositionsToCenteredSquare() //TODO it could just be an array, and multivecs may not need intendedPosition
+
+				for (let i = 0, il = scalar.children.length; i < il; i++)
+					scalar.children[i].position.copy(scalar.children[i].intendedPosition)
+			}
+
+			return scalar
+		}
+	}
+
+	{
+		//singleton, and it's ok for that to be a global
+		let group = new THREE.Group()
+		group.add(makeTextSign("animation"))
+		let progress = -1.
+
+		multivectorAnimation = {
+			start: function (operands, activeOperator)
+			{
+				scene.add(group)
+
+				console.assert(progress !== 0.)
+				progress = 0.
+			},
+			ongoing: function () { return group.parent === scene },
+			finish:  function () { scene.remove(group) },
 		}
 
-		//vector
+		updateFunctions.push(function ()
 		{
-			var vecAppearance = new THREE.Mesh( vectorGeometry, vectorMaterial );
-			vecAppearance.matrixAutoUpdate = false;
-			vecAppearance.castShadow = true
-			multivec.add(vecAppearance)
+			if (!multivectorAnimation.ongoing() )
+				return
+			
+			progress += frameDelta
+			if (progress > .4)
+				multivectorAnimation.finish()
+		})
+	}
 
-			var vecPart = new THREE.Vector3()
-			var vecOrthX = new THREE.Vector3()
-			var vecOrthZ = new THREE.Vector3()
+	{
+		let vectorRadius = .19
+		let vectorGeometry = new THREE.CylinderBufferGeometry(0., vectorRadius, 1., 16, 1, false);
+		vectorGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0., .5, 0.))
+		let vectorMaterial = new THREE.MeshStandardMaterial()
+
+		let vecPart = new THREE.Vector3()
+		let vecOrthX = new THREE.Vector3()
+		let vecOrthZ = new THREE.Vector3()
+		function VecAppearance()
+		{
+			let m = new THREE.Mesh(vectorGeometry, vectorMaterial);
+			m.matrixAutoUpdate = false;
+			m.castShadow = true
+
+			m.setVec = function (x, y, z)
+			{
+				vecPart.set(x, y, z)
+				randomPerpVector(vecPart, vecOrthX)
+				vecOrthX.normalize()
+				vecOrthZ.copy(vecPart).cross(vecOrthX).normalize().negate();
+				m.matrix.makeBasis(vecOrthX, vecPart, vecOrthZ);
+				m.matrix.setPosition(vecPart.multiplyScalar(-.5))
+
+				m.visible = !vecPart.equals(zeroVector)
+			}
+
+			return m
 		}
+	}
+
+	let bivecMaterialClockwise = new THREE.MeshBasicMaterial({ color: discreteViridis[0].hex,transparent:true, opacity:1., side:THREE.FrontSide})
+	let bivecMaterialCounter =   new THREE.MeshBasicMaterial({ color: discreteViridis[2].hex,transparent:true, opacity:1., side:THREE.BackSide})
+
+	//animation
+	//plan: make it so there is no animationMultivector, multivectorAppearances are just a certain stable state
+	//aaaaand scalar group is the thing that gets made
+	// {
+	// 	let animationProgress = 0. 
+
+	// 	if(animationOngoing)
+	// 	{
+	// 		animationProgress += frameDelta
+
+	// 		if(animationProgress > 1.)
+	// 			animationOngoing = false
+	// 	}
+	// 	else
+	// 		animationProgress = 0.;
+
+	// 	skipAnimation = function ()
+	// 	{
+	// 		for (let i = 0, il = scalar.children.length; i < il; i++)
+	// 			scalar.children[i].visible = i < Math.floor(Math.abs(elements[0]))
+
+	// 		//bivector relaxes to a rectangle
+	// 		//scalar maybe becomes the other part of the complex number
+	// 		//trivector relaxes to cuboid
+	// 	}
+
+	// 	startAnimation = function (operands, f)
+	// 	{
+	// 		if (f === geometricSum)
+	// 		{
+	// 			if (operands[0].elements[0] !== 0. || operands[1].elements[0] !== 0.)
+	// 			{
+	// 				//heh, and if there's .3 and .8 ?
+	// 				if ((operands[0].elements[0] > 0. && operands[1].elements[0] > 0.) ||
+	// 					(operands[0].elements[0] < 0. && operands[1].elements[0] < 0.))
+	// 				{
+	// 					let numFromFirst = 0
+	// 					for (let i = 0, il = operands[1].scalar.children.length; i < il; i++)
+	// 					{
+	// 						if (!operands[1].scalar.children[i].visible)
+	// 							break
+	// 						scalar.children[i].position.copy(operands[1].scalar.children[i].position).add(operands[1].position).sub(multivec.position)
+	// 						++numFromFirst
+	// 					}
+	// 					for (let i = 0, il = operands[0].scalar.children.length; i < il; i++)
+	// 					{
+	// 						if (!operands[0].scalar.children[i].visible)
+	// 							break
+	// 						scalar.children[numFromFirst + i].position.copy(operands[0].scalar.children[i].position).add(operands[0].position).sub(multivec.position)
+	// 					}
+	// 				}
+	// 				else
+	// 				{
+	// 					//what might be good would be that they pair and pop out of existence
+	// 					//alright so if you want this, you need to have "fake" ones that are about to be annihilated
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
+
+	MultivectorAppearance = function(externalOnClick,elements)
+	{
+		let multivec = new THREE.Group();
+		scene.add(multivec) //the only point is to be a visualization
+
+		multivec.elements = MathematicalMultivector() //identity
+		if(elements !== undefined)
+			copyMultivector(elements, multivec.elements)
+		elements = multivec.elements
+
+		let scalar = ScalarAppearance()
+		multivec.add(scalar)
+		multivec.scalar = scalar
+
+		let vecAppearance = VecAppearance()
+		multivec.add(vecAppearance)
 
 		//bivec
 		{
-			multivec.bivectorAppearance = new THREE.Object3D()
-			multivec.add(multivec.bivectorAppearance)
+			multivec.bivector = new THREE.Object3D()
+			multivec.add(multivec.bivector)
 
 			let numPieces = 60;
 			let piecesPositions = Array(numPieces)
@@ -252,10 +394,10 @@ async function initMultivectorAppearances()
 			let counterSide = new THREE.Mesh(geo, bivecMaterialCounter)
 			clockwiseSide.castShadow = true
 			counterSide.castShadow = true
-			multivec.bivectorAppearance.add(clockwiseSide, counterSide)
-			multivec.bivectorAppearance.piecesPositions = piecesPositions
-			multivec.bivectorAppearance.piecesMoreClockwiseEdges = piecesMoreClockwiseEdges
-			multivec.bivectorAppearance.piecesLessClockwiseEdges = piecesLessClockwiseEdges
+			multivec.bivector.add(clockwiseSide, counterSide)
+			multivec.bivector.piecesPositions = piecesPositions
+			multivec.bivector.piecesMoreClockwiseEdges = piecesMoreClockwiseEdges
+			multivec.bivector.piecesLessClockwiseEdges = piecesLessClockwiseEdges
 
 			//alright so which way is it facing? the convention is that positive = clockwise if you're looking at it. OMFG IS THIS THE SAME THING
 			//Therefore if you're looking at
@@ -265,7 +407,7 @@ async function initMultivectorAppearances()
 			let lessClockwiseEdge = new THREE.Vector3(0.,1., 0.)
 			let position = new THREE.Vector3()
 
-			updateFunctions.push(function ()
+			multivec.bivector.updateAppearance = function ()
 			{
 				let bivectorMagnitude = Math.sqrt( sq(elements[4]) + sq(elements[5]) + sq(elements[6]) )
 				let edgeLen = Math.sqrt(bivectorMagnitude)
@@ -343,7 +485,7 @@ async function initMultivectorAppearances()
 					geo.vertices[i * 4 + 3].lerp(tempVector, 1.)
 				}
 				geo.verticesNeedUpdate = true
-			})
+			}
 		}
 
 		let boundingBox = new THREE.Mesh(unchangingUnitSquareGeometry,new THREE.MeshBasicMaterial({color:0x00FF00,transparent:true,opacity:.4}))
@@ -354,8 +496,8 @@ async function initMultivectorAppearances()
 
 			function updateBoundingBoxSize()
 			{
-				boundingBox.scale.x = scalarBlockWidth()
-				boundingBox.scale.y = scalarBlockHeight()
+				boundingBox.scale.x = scalarBlockWidth(scalar)
+				boundingBox.scale.y = scalarBlockHeight(scalar)
 
 				//vector
 				boundingBox.scale.x = Math.max(boundingBox.scale.x,Math.abs(elements[1]) )
@@ -366,12 +508,12 @@ async function initMultivectorAppearances()
 				let maxX = -Infinity
 				let minY = Infinity
 				let maxY = -Infinity
-				for (let i = 0., il = multivec.bivectorAppearance.children[0].geometry.vertices.length; i < il; i++)
+				for (let i = 0., il = multivec.bivector.children[0].geometry.vertices.length; i < il; i++)
 				{
-					minX = Math.min(minX,multivec.bivectorAppearance.children[0].geometry.vertices[i].x)
-					maxX = Math.max(maxX,multivec.bivectorAppearance.children[0].geometry.vertices[i].x)
-					minY = Math.min(minY,multivec.bivectorAppearance.children[0].geometry.vertices[i].y)
-					maxY = Math.max(maxY,multivec.bivectorAppearance.children[0].geometry.vertices[i].y)
+					minX = Math.min(minX,multivec.bivector.children[0].geometry.vertices[i].x)
+					maxX = Math.max(maxX,multivec.bivector.children[0].geometry.vertices[i].x)
+					minY = Math.min(minY,multivec.bivector.children[0].geometry.vertices[i].y)
+					maxY = Math.max(maxY,multivec.bivector.children[0].geometry.vertices[i].y)
 				}
 				boundingBox.scale.x = Math.max(boundingBox.scale.x, maxX - minX)
 				boundingBox.scale.y = Math.max(boundingBox.scale.y, maxY - minY)
@@ -393,128 +535,23 @@ async function initMultivectorAppearances()
 			}
 		}
 
-		{
-			multivec.skipAnimation = function ()
-			{
-				for (let i = 0, il = scalar.children.length; i < il; i++)
-					scalar.children[i].visible = i < Math.floor(Math.abs(elements[0]))
-				scalar.setIntendedPositionsToCenteredSquare()
-				for (let i = 0, il = scalar.children.length; i < il; i++)
-					scalar.children[i].position.copy(scalar.children[i].intendedPosition)
-
-				//bivector relaxes to a rectangle
-				//scalar maybe becomes the other part of the complex number
-				//trivector relaxes to cuboid
-			}
-
-			multivec.startAnimation = function (operands, f)
-			{
-				//just don't think about what the elements are
-
-				//replicas vs separate objects with 
-					//what if you have two people, each holding a multivector, who want to do one part of the process each?
-				//could add them? have part of the multivector do one side and part do the other?
-
-				//yeah need to think through fractional and negative numbers
-
-				//pick a planned animation and focus on it
-
-				//aight so less skipping
-
-				if(f === geometricSum)
-				{
-					if (operands[0].elements[0] !== 0. || operands[1].elements[0] !== 0. )
-					{
-						//heh, and if there's .3 and .8 ?
-						if( (operands[0].elements[0] > 0. && operands[1].elements[0] > 0. ) ||
-							(operands[0].elements[0] < 0. && operands[1].elements[0] < 0. ) )
-						{
-							let numFromFirst = 0
-							for (let i = 0, il = operands[1].scalar.children.length; i < il; i++)
-							{
-								if (!operands[1].scalar.children[i].visible)
-									break
-								scalar.children[i].position.copy(operands[1].scalar.children[i].position).add(operands[1].position).sub(multivec.position)
-								++numFromFirst
-							}
-							for (let i = 0, il = operands[0].scalar.children.length; i < il; i++)
-							{
-								if (!operands[0].scalar.children[i].visible)
-									break
-								scalar.children[numFromFirst + i].position.copy(operands[0].scalar.children[i].position).add(operands[0].position).sub(multivec.position)
-							}
-						}
-						else
-						{
-							//what might be good would be that they pair and pop out of existence
-							//alright so if you want this, you need to have "fake" ones that are about to be annihilated
-						}
-					}
-				}
-			}
-		}
-
-		let animationProgress = 0.
-		updateFunctions.push(function()
+		//more like a "render" really, if you can 
+		//no state for the things
+		multivec.updateAppearance = function()
 		{
 			if (multivec.elements[5] !== 0. || multivec.elements[6] !== 0. || multivec.elements[7] !== 0.)
 				log("not 3D yet")
 
-			if(multivec.animationOngoing)
-			{
-				animationProgress += frameDelta
+			scalar.updateAppearance(multivec.elements[0])
 
-				if(animationProgress > 1.)
-					multivec.animationOngoing = false
-			}
-			else
-				animationProgress = 0.;
+			vecAppearance.setVec(multivec.elements[1], multivec.elements[2], multivec.elements[3])
 
-			//scalar
-			{
-				scalar.positive.value = elements[0] >= 0.
-
-				if (Math.abs(elements[0]) > scalar.children.length)
-					console.error("not enough scalar units")
-
-				let flooredAbs = Math.floor(Math.abs(elements[0]))
-				for (let i = 0, il = scalar.children.length; i < il; i++)
-				{
-					if (i < flooredAbs)
-						scalar.children[i].visible = true
-					else if (i === flooredAbs && elements[0] != Math.round(elements[0]))
-					{
-						scalar.children[i].material.uniforms.r1.value = Math.abs(elements[0]) - flooredAbs - .5
-						scalar.children[i].visible = true
-						// log(scalar.children[i].material.uniforms.r1.value)
-					}
-					else
-						scalar.children[i].visible = false
-				}
-					
-				scalar.setIntendedPositionsToCenteredSquare()
-
-				for (let i = 0, il = scalar.children.length; i < il; i++)
-					scalar.children[i].position.lerp(scalar.children[i].intendedPosition, .1)
-			}
-
-			//vec
-			{
-				vecPart.set(multivec.elements[1], multivec.elements[2], multivec.elements[3])
-				randomPerpVector(vecPart, vecOrthX)
-				vecOrthX.normalize()
-				vecOrthZ.copy(vecPart).cross(vecOrthX).normalize().negate();
-				vecAppearance.matrix.makeBasis(vecOrthX, vecPart, vecOrthZ);
-				vecAppearance.matrix.setPosition(vecPart.multiplyScalar(-.5))
-
-				if (vecPart.equals(zeroVector))
-					multivec.remove(vecAppearance)
-				else
-					multivec.add(vecAppearance)
-			}
+			multivec.bivector.updateAppearance() //should be down here
 
 			updateBoundingBoxSize()
-		})
+		}
+		
+		updateFunctions.push(multivec.updateAppearance)
 
 		return multivec
 	}

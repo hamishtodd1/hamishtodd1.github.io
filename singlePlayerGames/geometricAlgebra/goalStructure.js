@@ -137,7 +137,7 @@ function initGoals(modeChange,restartButton)
 		{
 			scene.add(goalBox)
 			copyMultivector(l.singularGoal, singularGoalMultivector.elements)
-			singularGoalMultivector.skipAnimation()
+			singularGoalMultivector.updateAppearance()
 
 			scopeIsLimited = true
 		}
@@ -282,6 +282,7 @@ function initGoals(modeChange,restartButton)
 
 		//CHANGE_SCOPE
 		setScope()
+		ScopeMultivector(new Float32Array([3., 1., 1., 0., 0., 0., 0., 0.]), true)
 
 		// ScopeMultivector(new Float32Array([ 3., 1., 1., 0., 0., 0., 0., 0.]), true)
 		// ScopeMultivector(new Float32Array([ 2., 0., 0., 0., 0., 0., 0., 0.]), true)

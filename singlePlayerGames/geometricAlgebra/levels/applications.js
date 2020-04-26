@@ -377,12 +377,12 @@ async function initWheelScene()
 			placeForEndToBe.sub(goalMultivector.position)
 
 			copyMultivector(placeForEndToBe, goalMultivector.elements)
-			goalMultivector.skipAnimation();
+			goalMultivector.updateAppearance();
 			placeForEndToBe.multiplyScalar(.5)
 			goalMultivector.position.add(placeForEndToBe)
 
 			timerMultivector.elements[0] = -wheel.rotation.z / TAU
-			timerMultivector.skipAnimation()
+			timerMultivector.updateAppearance()
 		}
 
 		clown.position.copy(wheel.position)
@@ -455,12 +455,12 @@ async function initTankScene()
 			placeForEndToBe.copy(shell.position)
 
 			copyMultivector(placeForEndToBe, goalMultivector.elements)
-			goalMultivector.skipAnimation();
+			goalMultivector.updateAppearance();
 			placeForEndToBe.multiplyScalar(.5)
 			goalMultivector.position.add(placeForEndToBe)
 
 			timerMultivector.elements[0] = frameCount * frameDelta
-			timerMultivector.skipAnimation()
+			timerMultivector.updateAppearance()
 		}
 	})
 

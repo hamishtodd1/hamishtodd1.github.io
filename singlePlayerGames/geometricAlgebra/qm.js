@@ -5,5 +5,7 @@
 
     What happens when you take the gamma matrices as 
 
-    Dirac stuff
+    Dirac stuff, quite mysterious, projective geometry
+
+    what's the equivalent of variance when the metric is non euclidean?
 */

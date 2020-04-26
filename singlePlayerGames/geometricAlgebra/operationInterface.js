@@ -52,7 +52,7 @@ function initOperationInterface(restartButton)
 			howCurrentIsMade.operandIndices[lastAssignedOperand] = multivectorScope.indexOf(multivecToCopy)
 
 			copyMultivector(multivecToCopy.elements, operandToUse.elements)
-			operandToUse.skipAnimation()
+			operandToUse.updateAppearance()
 			operandToUse.position.copy(multivecToCopy.position)
 			scene.add(operandToUse)
 
@@ -90,7 +90,7 @@ function initOperationInterface(restartButton)
 			// 		break
 			// }
 			newScopeMultivector.position.copy(newScopeMultivector.scopePosition)
-			newScopeMultivector.skipAnimation()
+			newScopeMultivector.updateAppearance()
 		}
 
 		return newScopeMultivector
@@ -134,10 +134,12 @@ function initOperationInterface(restartButton)
 
 	initScope()
 
-	let animationMultivector = MultivectorAppearance(function(){})
-	animationMultivector.elements[0] = 0.
-	animationMultivector.skipAnimation()
 	let animationStage = -1.;
+	let WAITING_TIL_THEY_ARE_IN_PLACE = 0
+	let ANIMATION = WAITING_TIL_THEY_ARE_IN_PLACE + 1
+	let ADMIRING_RESULT = ANIMATION + 1
+	let END = ADMIRING_RESULT + 1
+	
 	updateFunctions.push(function()
 	{
 		for(let i = 0; i < 3; i++)
@@ -145,47 +147,34 @@ function initOperationInterface(restartButton)
 
 		if(animationStage !== -1.) switch(Math.floor(animationStage))
 		{
-			case 0: //creating new thing
-				{
-					let newMultivectorElements = activeOperator.function(operands[0].elements,operands[1].elements)
-					copyMultivector(newMultivectorElements, animationMultivector.elements)
-					// debugger
-					animationMultivector.skipAnimation()
-					scene.remove(animationMultivector)
-
-					// if( searchArray(multivectorScope,newMultivectorElements) ) //already in multivectorScope, could do something here
-
-					animationStage++;
-				}
-				break;
-
-			case 1: //waiting til they get into place then a little staring to clarify what's going to happen
+			case WAITING_TIL_THEY_ARE_IN_PLACE:
 				{
 					let secondsThisSectionTakes = .9;
 					animationStage += frameDelta / secondsThisSectionTakes
+					if (animationStage >= ANIMATION)
+					{
+						scene.remove(operands[0], operands[1], activeOperator)
+						multivectorAnimation.start(operands, activeOperator)
+					}
 				}
 				break;
 
-			case 2: //where we animate
-				if (animationMultivector.parent !== scene )
+			case ANIMATION:
+				if ( !multivectorAnimation.ongoing() )
 				{
-					animationMultivector.animationOngoing = true
-					animationMultivector.startAnimation(operands,activeOperator.function)
-					scene.add(animationMultivector)
-					scene.remove(operands[0], operands[1], activeOperator)
-				}
-				if (!animationMultivector.animationOngoing)
+					makeTheRealNewMultivector()
 					animationStage++;
+				}
 				break;
 
-			case 3: //admiring result
+			case ADMIRING_RESULT: //still the animation
 				{
 					let secondsThisSectionTakes = 1.1;
 					animationStage += frameDelta / secondsThisSectionTakes
 				}
 				break;
 
-			case 4:
+			case END:
 				completeAnimation()
 				break;
 
@@ -195,6 +184,35 @@ function initOperationInterface(restartButton)
 		}
 	})
 
+	function makeTheRealNewMultivector()
+	{
+		let newMultivectorElements = activeOperator.function(operands[0].elements, operands[1].elements)
+		if (!equalsMultivector(zeroMultivector, newMultivectorElements))
+		{
+			let newMultivector = ScopeMultivector(newMultivectorElements)
+			newMultivector.howIWasMade = {
+				operandIndices: [howCurrentIsMade.operandIndices[0], howCurrentIsMade.operandIndices[1]],
+				operation: howCurrentIsMade.operation
+			}
+			newMultivector.updateAppearance()
+			reactToNewMultivector(newMultivector)
+		}
+	}
+
+	function completeAnimation()
+	{
+		//need to make sure everything that might have been done above has been done
+		scene.remove(operands[0],operands[1],activeOperator)
+
+		if(animationStage < ANIMATION)
+			multivectorAnimation.finish()
+
+		if (animationStage < ADMIRING_RESULT)
+			makeTheRealNewMultivector()
+		
+		animationStage = -1.;
+	}
+
 	function potentiallyTriggerAnimation()
 	{
 		animationStage = 0.
@@ -203,24 +221,6 @@ function initOperationInterface(restartButton)
 			if(operandsAndActiveOperator[i].parent !== scene)
 				animationStage = -1.
 		}
-	}
-
-	function completeAnimation()
-	{
-		scene.remove(operands[0],operands[1],activeOperator)
-		scene.remove(animationMultivector)
-
-		if (!equalsMultivector(zeroMultivector,animationMultivector.elements))
-		{
-			let newMultivector = ScopeMultivector(animationMultivector.elements)
-			newMultivector.howIWasMade = {
-				operandIndices: [howCurrentIsMade.operandIndices[0], howCurrentIsMade.operandIndices[1]],
-				operation: howCurrentIsMade.operation
-			}
-			newMultivector.skipAnimation()
-			reactToNewMultivector(newMultivector)
-		}
-		animationStage = -1.;
 	}
 
 	//restart button
@@ -239,7 +239,7 @@ function initOperationInterface(restartButton)
 		clickables.push(restartButton)
 		restartButton.onClick = function()
 		{
-			if(animationStage === -1.) //temporary, better would be to completeAnimation
+			if(animationStage === -1.) //so we're not allowed to restart during this time! Not great, better would be to completeAnimation
 			{
 				scene.remove(operands[0],operands[1],activeOperator)
 				levelSetUp()

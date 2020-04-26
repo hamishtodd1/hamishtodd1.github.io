@@ -239,7 +239,7 @@ function initInputAndOutputGroups()
 			inputIndex = inputGroup.things.indexOf(multivec)
 
 			copyMultivector(multivec.elements, inputScopeMultivector.elements)
-			inputScopeMultivector.skipAnimation()
+			inputScopeMultivector.updateAppearance()
 
 			//probably have it shake a little. Well I mean this is what the pipes were meant to be
 
@@ -254,7 +254,7 @@ function initInputAndOutputGroups()
 						multivectorScope[mv.howIWasMade.operandIndices[1]].elements,
 						mv.elements)
 
-					mv.skipAnimation()
+					mv.updateAppearance()
 				}
 			}
 			//TODO support limited-scope puzzles?
@@ -362,7 +362,7 @@ function initInputAndOutputGroups()
 				}
 
 				copyMultivector(multivectorScopeForSimulation[outputScopeMultivectorIndex], outputGroup.things[i].elements )
-				outputGroup.things[i].skipAnimation()
+				outputGroup.things[i].updateAppearance()
 			}
 		})
 	}
