@@ -92,7 +92,7 @@ async function init()
 	let modeChange = {}
 	initInputAndOutputGroups()
 	initGoals(modeChange,restartButton)
-	modeChange.calculator()
+	modeChange.campaign()
 
 	await initMenu(modeChange)
 }

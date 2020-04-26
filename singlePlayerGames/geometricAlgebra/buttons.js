@@ -112,7 +112,7 @@ function initButtons()
 	})
 
 	//inputSimulator
-	if(0)
+	// if(0)
 	{
 		let timer = 0
 		let framesBetweenInputs = 3
