@@ -1,4 +1,4 @@
-easingFunctions = {
+let easingFunctions = {
 	// no easing, no acceleration
 	linear: t => t,
 	// accelerating from zero velocity

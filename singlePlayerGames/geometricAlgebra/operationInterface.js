@@ -18,12 +18,9 @@
 
 function initOperationInterface(restartButton)
 {
-	var activeOperator = OperatorAppearance()
+	var activeOperator = multivectorAnimation.activeOperator
+	var operands = multivectorAnimation.operands
 
-	var operands = [
-		MultivectorAppearance(function(){}),
-		MultivectorAppearance(function(){}) ]
-	scene.remove(operands[0],operands[1])
 	var operandAndActiveOperatorPositions = [
 		new THREE.Vector3( 0.,activeOperator.scale.y,0.),
 		new THREE.Vector3(activeOperator.scale.x,0.,0.),
@@ -137,8 +134,7 @@ function initOperationInterface(restartButton)
 	let animationStage = -1.;
 	let WAITING_TIL_THEY_ARE_IN_PLACE = 0
 	let ANIMATION = WAITING_TIL_THEY_ARE_IN_PLACE + 1
-	let ADMIRING_RESULT = ANIMATION + 1
-	let END = ADMIRING_RESULT + 1
+	let END = ANIMATION + 1
 	
 	updateFunctions.push(function()
 	{
@@ -153,8 +149,7 @@ function initOperationInterface(restartButton)
 					animationStage += frameDelta / secondsThisSectionTakes
 					if (animationStage >= ANIMATION)
 					{
-						scene.remove(operands[0], operands[1], activeOperator)
-						multivectorAnimation.start(operands, activeOperator)
+						multivectorAnimation.start()
 					}
 				}
 				break;
@@ -164,13 +159,6 @@ function initOperationInterface(restartButton)
 				{
 					makeTheRealNewMultivector()
 					animationStage++;
-				}
-				break;
-
-			case ADMIRING_RESULT: //still the animation
-				{
-					let secondsThisSectionTakes = 1.1;
-					animationStage += frameDelta / secondsThisSectionTakes
 				}
 				break;
 
@@ -205,10 +193,10 @@ function initOperationInterface(restartButton)
 		scene.remove(operands[0],operands[1],activeOperator)
 
 		if(animationStage < ANIMATION)
+		{
 			multivectorAnimation.finish()
-
-		if (animationStage < ADMIRING_RESULT)
 			makeTheRealNewMultivector()
+		}
 		
 		animationStage = -1.;
 	}

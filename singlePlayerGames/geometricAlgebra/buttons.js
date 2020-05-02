@@ -117,6 +117,7 @@ function initButtons()
 		let timer = 0
 		let framesBetweenInputs = 3
 		let inputsSoFar = 0
+		// let inputs = ["enter", "down", "enter", "up", "up"]
 		let inputs = ["enter", "enter", "enter"]
 		updateFunctions.push(function ()
 		{

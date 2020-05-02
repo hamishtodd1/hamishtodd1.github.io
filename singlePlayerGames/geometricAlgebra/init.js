@@ -72,8 +72,8 @@ async function init()
 	// await initMultivectorAppearances_()
 	// return
 
-	await initMultivectorAppearances()
 	await initOperatorAppearances()
+	await initMultivectorAppearances()
 
 	initSound()
 
@@ -92,7 +92,7 @@ async function init()
 	let modeChange = {}
 	initInputAndOutputGroups()
 	initGoals(modeChange,restartButton)
-	modeChange.campaign()
+	1?modeChange.campaign(): modeChange.calculator()
 
 	await initMenu(modeChange)
 }
