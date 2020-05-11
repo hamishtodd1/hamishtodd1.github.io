@@ -1,14 +1,12 @@
 /*
 	Look through "record", lots of stuff in there and things you've done
 
-	TODO calculator (Andy/slack/pontus)
-		Finish scalar and imaginary number stuff
-		Generally get all animations in
-		Then you have calculator, interesting tool for thought to impress slack/andy/GA folks
-		Then can move back to nice input and output stuff
-		Unify the various "generating" approaches
+	TODO calculator (Andy/slack/pontus/alan kay/Steven Der Kenick/Chris Doran)
+		Animations
+		MAYBE reform input and output stuff
+			Unify the various "generating" appro##aches
 
-	TODO Jon
+	TODO Jon (gonna do talk on educational games!)
 		Just some levels
 		Ideally an input/output one
 

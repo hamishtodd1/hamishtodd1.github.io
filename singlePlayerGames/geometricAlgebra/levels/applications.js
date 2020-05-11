@@ -1,5 +1,7 @@
 /*
-	Thoughts
+	https://www.geogebra.org/m/kvy5zksn
+
+	Notes
 		All the multivectors coming from the pictures should stay inside the animation, no need to have a clone of them in the scope
 		so you're modelling the differential apparently
 		A better representation of a thing over time might be its worldline with timestamps labelled

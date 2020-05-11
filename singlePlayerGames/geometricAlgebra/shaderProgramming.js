@@ -5,6 +5,9 @@
 		Showing results of a vertex shader
 		Programming VR interactions? Molecule constraints?
 
+	It would be good to be able to convert say threejs code, with its quaternions and vectors and scalars, into an animation
+	Can you convert matrix algebra into that? homogeneous matrices with just rotation and position, surely yes
+
 	ideas
 		fire poi throwing sparks!
 		corkscrew

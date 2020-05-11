@@ -9,6 +9,8 @@
 		Level editor is shader programmer?
 
 	Abstract level ideas
+		It's a little surprising that adding arrows in any order gets the same result
+			This tells you that it is best to think of them all, equally, being taken away from the origin
 		Fireworks, catherine wheels, including that slow mo guys one where they hold a catherine wheel overhead
 		Early puzzle about separating orth and para parts of vec
 		Make a torus knot
@@ -76,12 +78,22 @@ function Levels()
 			singularGoal:
 				new Float32Array([5., 0., 0., 0., 0., 0., 0., 0.]),
 			options: [
-				new Float32Array([ 2.3, 0., 0., 0., 0., 0., 0., 0.]),
-				new Float32Array([ 3.8, 0., 0., 0., 0., 0., 0., 0.]),
-			],
-			operators: [geometricSum]
-		},
+				// new Float32Array([ -2.3, 0., 0., 0., 0., 0., 0., 0.]),
+				// new Float32Array([ -3.8, 0., 0., 0., 0., 0., 0., 0.]),
 
+				new Float32Array([-9., 0., 0., 0., 0., 0., 0., 0.]),
+				new Float32Array([ 6., 0., 0., 0., 0., 0., 0., 0.]),
+
+				// new Float32Array([-5., 0., 0., 0., 0., 0., 0., 0.]),
+				// new Float32Array([-7., 0., 0., 0., 0., 0., 0., 0.]),
+
+				// new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]),
+				// new Float32Array([0., 0., 1., 0., 0., 0., 0., 0.]),
+			],
+			operators: [
+				// geometricSum,
+				geometricSum]
+		},
 		
 		{
 			singularGoal:

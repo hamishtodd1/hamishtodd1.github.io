@@ -118,13 +118,30 @@ function initButtons()
 		let framesBetweenInputs = 3
 		let inputsSoFar = 0
 		// let inputs = ["enter", "down", "enter", "up", "up"]
+		// let inputs = ["right", "enter", "up", "enter", "enter", ".9",
+		// 	// "enter", "enter", "right", "enter"
+		// ]
 		let inputs = ["enter", "enter", "enter"]
+
+		let counter = -1.
+
 		updateFunctions.push(function ()
 		{
 			if ( inputsSoFar < inputs.length && frameCount !== 0 && frameCount % framesBetweenInputs === 0)
 			{
-				buttons[inputs[inputsSoFar]].onDown()
-				++inputsSoFar
+				if (buttons[inputs[inputsSoFar]] === undefined)
+				{
+					if (counter === -1)
+						counter = 0.
+					counter += frameDelta
+					if (counter > parseFloat(inputs[inputsSoFar]) )
+						++inputsSoFar
+				}
+				else
+				{
+					buttons[inputs[inputsSoFar]].onDown()
+					++inputsSoFar
+				}
 			}
 		})
 	}

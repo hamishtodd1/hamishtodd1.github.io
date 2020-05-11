@@ -1,19 +1,14 @@
 /*
-	If you hover the record, it instantly takes you back to that place, but unless you click, when you let go, you return to your current progress
-
-	Possibly you need no record, it never actually gets that complicated?
-
-	We call this the record because for the time being that's all it is
-		your goal is not to "make the general output for some input", it is to make one thing
+	your actions you can understand. All the complexities of the circuit should just be a visual representation of them
+	So we call this the record because for the time being that's all it is...
 
 	Navigation / debugging
+		If you hover the record, it instantly takes you back to that place, but unless you click, when you let go, you return to your current progress
 		You can zoom in and out
 		Zoomed in, the stuff that is cut off the top must be evaluated
 		Do you want to delete all code below?
 			Probably yes. In puzzlescript games, it's certainly not so bad that when you rewind, you still have some determined future
 			In fact that sounds fairly confusing
-
-	your actions you can understand. All the complexities of the circuit should just be a visual representation of them
 
 	Cartoonish representation (must be secondary to input efficiency)
 		"Bunch of little monsters arranged in a certain way" beats "little dude runs around"
@@ -41,7 +36,7 @@
 			programarbles
 			dynamic diagrams
 			blueprints
-			Claude's thing
+			Claude's livecoding thing (abstract syntax tree I guess)
 			Human Resource Machin
 		How to represent variables
 			Proooobably best for them to be immutable
@@ -57,7 +52,7 @@
 			You are trying to show what can be done with this data structure
 			There are few things in scope
 			There's only one kind of data
-			Loops? urgh
+			Loops? urgh 
 		Try to bear in mind it might change =/ Work on level design!
 
 	Is the cognitive model "every frame, time freezes and this happens"

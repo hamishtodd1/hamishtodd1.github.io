@@ -1,86 +1,43 @@
 /*
-
-	Scalar vector multiplication: one of the scalar units goes to the end of the vector, and the rest get spaced out too
-
 	General
 		Possibly useful model: the operator combines with one of the operands to become a thing that is applied to the other operand
 		A little cartoon character doing everything is surely the way to go. The pieces should be gotten rid of.
+		Things not bound in place like scalars, bivectors, trivectors could gently rock around the axes that don't constrain them
+		Grouping / location: fundamentally we just want them to be compact. Could have the different blades stacked in a column, or around in a circle, but it has no significance
 
-	Technical
-		Best not to have the question of the existence of a multivector at all!
-		There is a question about what you should be parented to but that is tooooo philosophical
-		At short notice, any appearance can change to any other
-		So should react to its value at every frame really
-
-	Maybe the right thing to do is to say what the units look like
-		The unit vector is a vector, with unit length, in a given direction
-		The unit bivector is a quadrilateral, with unit length, in a given plane
-		The unit scalar looks like a circle
-		The unit trivector is a paralellipied
-
-	The trivector
-		You could have the pseudoscalar be a rectangle of width (base) 1, therefore its height is its area (volume)
-		Sphere of certain radius for magnitude, colored according to phase
-		Or a horizontal line and a vertical line
-		Naah, blue or red liquid just like bivector
-		Transparent and glowy and smoky and reflective
+	scalar addn
+	bivec addn
+	vector addn
+	scalar multiplication of all
+	vector bivector multiplication
+	vector vector multiplication
+	bivector bivector multiplication
 
 	The scalar
+		Scalar-anything multiplication: all the scalars transform into the thing they're going to be, then "repeated addition"
 		how about they have a unit-size surroundings but are actually a little bean?
-		A circle that can bulge very slightly for when you want to multiply it by a vector
-		For unit circle it will be less than one
-		IS there any reason to not store the scalars in a line? More compact...
-		circle implies no directionality, and distinguishes it nicely from the square which can be used for bivector
-		Need to know the multiplicative identity is
-		Probably better off as red five versus blue five if you're going to carry it
+		Need to know the multiplicative identity size, hence discrete units
+		Because dot product, they can end up taking up an area, hence having some area. Volume too probably...
 
-	Scalar and trivector could be a single complex number
-		How about, IF both scalar and trivector are nonzero you get the complex number, otherwise just the one
-		Possibly trivector should be a numeral, with different colors
-		How about
-			a numeral equal to the argument, 
-			the numeral/box around the numeral is a certain color
-			And there is a color wheel around it so it is easy to read off the direction
-		visualized differently than the vector. 2D as opposed to 3D
+	Scalar and pseudoscalar (whether bivec or tri...) together = complex number, rectangle and beans viz
 
 	Vectors
-		Maybe for positive and negative vectors, could have something on one side of it, not the end.
-		The bivector situation is confusing and there's no way around that. So whatever confusion you think vector thing introduces, it's maybe already there
-		Arrow
-			Can be anywhere and so long as its length is the same you can think of it as the same thing
-			Tells you which end is which. Useful for adding
-		Centering
-			Don't worry about this. The point is that they can move around.
-			Gets you to think about vectors in a bivector like way
-			You picture a vector as an arrow. But where is that arrow located? Has to originate at origin
-			"Quantity of directed, positive or negative, mass" may be a better way of thinking of vectors than arrows
-				Certainly it generalizes better to higher dimensions
-			It's a little surprising that adding arrows in any order gets the same result
-				This tells you that it is best to think of them all, equally, being taken away from the origin
+		Can be anywhere and so long as its length is the same you can think of it as the same thing
+		Tells you which end is which. Useful for adding
+		Maybe better to have stuff going along it, chevrons?
+		Vector addition: always one on left and one above. And when they come together the red ends can melt each other or whatever it is, just like bivectors
+		vector vector mult
+			Sweep a along b to get a bivector. On is the sweeper, one is the thing it is swept along.
+			Use this to make the addition too. This way, it is a surprise that addition is commutative, rather than a surprise that wedging is not
+			Addition of codirectional vectors and bivectors probably is different from non conditional,
+			and it's probably ok to encourage that idea. Early levels can be just about them. X vector, X vector, 3. You must make an X vector of length 6.
 
 	Bivectors
-		Along with scalar, could gently rock from side to side
-		bivector-scalar: the scalar units go into a square, disperse, the bivectors get copied, then merge
 		bivector bivector multiplication: just rotate 90 deg
-		Bivector-bivector wedge - do you make the triangle as well?
-		So you get the unit vector in the intersection line (dare I ask, the positive or negative one?)
-		Make them rectangles with unit length on side that is the shared line
-		Attach them along that side
-		They "Snap" to the hypotenuse
-
-	Vector addition and multiplication
-		For both sum and product of vectors, visualize the parallelogram
-	Vector addition: always one on left and one above. And when they come together the red ends can melt each other or whatever it is, just like bivectors
-
-	Sweep a along b to get a bivector. On is the sweeper, one is the thing it is swept along.
-		Use this to make the addition too. This way, it is a surprise that addition is commutative, rather than a surprise that wedging is not
-		Addition of codirectional vectors and bivectors probably is different from non conditional,
-		and it's probably ok to encourage that idea. Early levels can be just about them. X vector, X vector, 3. You must make an X vector of length 6.
-
-	Grouping / location
-		Could have the different blades stacked in a column, or around in a circle
-		What if you have some things that are enormously larger than others? That's why we have zooming in and out. But some things keep size
-
+		Bivector-bivector addition in 3D - do you make the triangle as well?
+		little ripples going diagonally?
+		Possibly the positive and negative bivector should have the same color as the positive and negative scalar. Yeah, they are kinda discrete things
+		Hmm in what sense is it positive? Try it as the last thing, see which feeds your intuitions better
 */
 
 async function initMultivectorAppearances()
@@ -196,7 +153,7 @@ async function initMultivectorAppearances()
 			{
 				let center = getZigzagCenter(scalar, { x: 0., y: 0. })
 				
-				for (let i = 0, il = scalar.children.length; i < il; i++)
+				for (let i = 0; i < maxScalarUnits; i++)
 				{
 					if (!scalar.children[i].visible)
 						break
@@ -205,6 +162,14 @@ async function initMultivectorAppearances()
 				}
 
 				delete center
+			}
+			scalar.setIntendedPositionsToLine = function ()
+			{
+				for (let i = 0; i < maxScalarUnits; i++)
+				{
+					scalar.children[i].intendedPosition.x = .5 + i
+					scalar.children[i].intendedPosition.y = 0.
+				}
 			}
 
 			scalar.updateAppearance = function (value)
@@ -487,24 +452,53 @@ async function initMultivectorAppearances()
 		return multivec
 	}
 
+	//fuck this shit about looking at the children. You should deduce it purely from the values of the elements, that's the only "state"
+	//the scalar multiplication animation is just duplicate followed by add animation
 	{
 		//singleton, and it's ok for that to be a global
 		let group = new THREE.Group()
 
 		let positiveScalar = ScalarAppearance()
 		positiveScalar.positive.value = true
+		group.add(positiveScalar)
 		let negativeScalar = ScalarAppearance()
 		negativeScalar.positive.value = false
+		group.add(negativeScalar)
 
 		// let vectorAppearance = VectorAppearance()
 		// group.add(vectorAppearance)
 		// let bivectorAppearance = BivectorAppearance()
 		// group.add(bivectorAppearance)
 
-		let scalarAdditionProgress = -1.
+		let nhProgress = -1. //non homogeneous
 
-		let scalarAdditionDuration = .8
-		let admiringDuration = .8
+		let SCALAR_ADDITION_SECTION = 0
+		let ADMIRING_SECTION = 1 + SCALAR_ADDITION_SECTION
+		let END = 1+ADMIRING_SECTION
+
+		function inSection(querySection)
+		{
+			return Math.floor(nhProgress) === querySection
+		}
+		function goToStartOfNextSection()
+		{
+			nhProgress = 1. + Math.floor(nhProgress)
+		}
+		function progressClampedEased(homogeneousSectionStart,duration)
+		{
+			if (homogeneousSectionStart === undefined) homogeneousSectionStart = Math.floor(nhProgress)
+			if(duration === undefined) duration = 1.
+			let clamped = (nhProgress - homogeneousSectionStart) / duration
+			return easingFunctions.easeInOutQuad( clamped )
+		}
+
+		//alright so one little bit of state, which is the time since commencement
+		//you consider the maximum with all the frills, then skip over them if they're not necessary
+		//buuuuut previous state affects current
+
+		//so depending on a bunch of stuff, it can take any amount of time
+		//some things need to follow others
+		//what's the simplest thing that could possibly work?
 
 		{
 			var activeOperator = OperatorAppearance()
@@ -524,9 +518,21 @@ async function initMultivectorAppearances()
 			{
 				scene.add(group)
 
-				console.assert(scalarAdditionProgress !== 0.)
-				scalarAdditionProgress = 0.
+				console.assert(nhProgress !== 0.)
+				nhProgress = 0.
 			}
+		}
+
+		function copyScalarPart(operand, positiveOrNegativeScalar,indexToStartAt)
+		{
+			for (let i = 0; i < maxScalarUnits; i++)
+			{
+				if (!operand.scalar.children[i].visible) break
+				positiveOrNegativeScalar.children[indexToStartAt].visible = true
+				positiveOrNegativeScalar.children[indexToStartAt].position.copy(operand.scalar.children[i].position).add(operand.position)
+				++indexToStartAt
+			}
+			return indexToStartAt
 		}
 
 		updateFunctions.push(function ()
@@ -534,51 +540,159 @@ async function initMultivectorAppearances()
 			if (!multivectorAnimation.ongoing())
 				return
 
-			scalarAdditionProgress += frameDelta
-			let scalarAdditionProgressEased = easingFunctions.easeInOutQuad( Math.min(1.,scalarAdditionProgress / scalarAdditionDuration) )
-
 			scene.remove(operands[0], operands[1], activeOperator)
 
-			if (activeOperator.function === geometricSum)
+			if (activeOperator.function === geometricSum && inSection(SCALAR_ADDITION_SECTION))
 			{
-				//shouldn't be too hard to have fractional parts
-				if (operands[0].elements[0] > 0. && operands[1].elements[0] > 0.)
-				{
-					group.add(positiveScalar)
-					group.remove(negativeScalar)
+				for (let i = 0; i < maxScalarUnits; i++)
+					positiveScalar.children[i].visible = false
+				for (let i = 0; i < maxScalarUnits; i++)
+					negativeScalar.children[i].visible = false
 
-					for (let i = 0; i < maxScalarUnits; i++)
-						positiveScalar.children[i].visible = false
-					for (let i = 0; i < maxScalarUnits; i++)
-						negativeScalar.children[i].visible = false
+				let scalarCoalescingDuration = .8 
+
+				if ((operands[0].elements[0] > 0. && operands[1].elements[0] > 0.) ||
+					(operands[0].elements[0] < 0. && operands[1].elements[0] < 0.))
+				{
+					//both +ve or -ve
+					//partial ones: I guess you have to add together the partial bits, potentially making a whole
+
+					let oneToUse = (operands[0].elements[0] < 0. && operands[1].elements[0] < 0.) ? negativeScalar : positiveScalar
 
 					let ourUnitIndex = 0;
-					for (let i = 0, il = operands[1].scalar.children.length; i < il; i++)
-					{
-						if (!operands[1].scalar.children[i].visible) break
-						positiveScalar.children[ourUnitIndex].visible = true
-						positiveScalar.children[ourUnitIndex].position.copy(operands[1].scalar.children[i].position).add(operands[1].position)
-						++ourUnitIndex
-					}
-					for (let i = 0, il = operands[0].scalar.children.length; i < il; i++)
-					{
-						if (!operands[0].scalar.children[i].visible) break
-						positiveScalar.children[ourUnitIndex].visible = true
-						positiveScalar.children[ourUnitIndex].position.copy(operands[0].scalar.children[i].position).add(operands[0].position)
-						++ourUnitIndex
-					}
+					ourUnitIndex = copyScalarPart(operands[1], oneToUse, ourUnitIndex)
+					ourUnitIndex = copyScalarPart(operands[0], oneToUse, ourUnitIndex)
 
-					positiveScalar.setIntendedPositionsToCenteredSquare()
+					oneToUse.setIntendedPositionsToCenteredSquare()
 					for (let i = 0; i < maxScalarUnits; i++)
+						oneToUse.children[i].position.lerp(oneToUse.children[i].intendedPosition, progressClampedEased())
+
+					nhProgress += frameDelta / scalarCoalescingDuration
+				}
+				else if (operands[0].elements[0] !== 0. ^ operands[1].elements[0] !== 0.)
+				{
+					//one nonzero, one zero
+
+					let nonzeroOperand = operands[0].elements[0] === 0. ? operands[1] : operands[0]
+					let oneToUse = nonzeroOperand.elements[0] < 0. ? negativeScalar : positiveScalar
+
+					copyScalarPart(nonzeroOperand, oneToUse, 0)
+					oneToUse.setIntendedPositionsToCenteredSquare()
+					for (let i = 0; i < maxScalarUnits; i++)
+						oneToUse.children[i].position.lerp(oneToUse.children[i].intendedPosition, progressClampedEased())
+
+					nhProgress += frameDelta / scalarCoalescingDuration
+				}
+				else if (operands[0].elements[0] !== 0. || operands[1].elements[0] !== 0.)
+				{
+					//one +ve and one -ve
+					//whichever is shorter, that gets cut out of the other with a pop
+					//leaving potentially a ɔoc or something, but then we slide the hiders along
+
+					let liningUpDuration = .9
+					let anticipatingCutDuration = .3
+					let admiringCutDuration = .4
+					let totalSectionTime = liningUpDuration + anticipatingCutDuration + admiringCutDuration + scalarCoalescingDuration
+					let CUT_ANTICIPATING_SECTION = SCALAR_ADDITION_SECTION + liningUpDuration / totalSectionTime
+					let CUT_ADMIRATION_SECTION = CUT_ANTICIPATING_SECTION + anticipatingCutDuration / totalSectionTime
+					let SCALAR_COALESCING_SECTION = CUT_ADMIRATION_SECTION + admiringCutDuration / totalSectionTime
+
+					let result = operands[0].elements[0] + operands[1].elements[0]
+
+					if (nhProgress < CUT_ANTICIPATING_SECTION )
 					{
-						if (!positiveScalar.children[i].visible) break
-						positiveScalar.children[i].position.lerp(positiveScalar.children[i].intendedPosition,scalarAdditionProgressEased)
-						// log(positiveScalar.children[i].position)
+						copyScalarPart(operands[0].elements[0] > 0.?operands[0]:operands[1], positiveScalar, 0)
+						copyScalarPart(operands[0].elements[0] < 0.?operands[0]:operands[1], negativeScalar, 0)
+						positiveScalar.setIntendedPositionsToLine()
+						negativeScalar.setIntendedPositionsToLine()
+
+						let oneOnTop = positiveScalar.children[0].position.y > negativeScalar.children[0].position.y ? positiveScalar : negativeScalar
+						for (let i = 0; i < maxScalarUnits; i++)
+							oneOnTop.children[i].intendedPosition.y += 1.
+						let oneToDisappearCompletely = result < 0. ? positiveScalar : negativeScalar
+						for (let i = 0; i < maxScalarUnits; i++)
+							oneToDisappearCompletely.children[i].intendedPosition.x += Math.abs(result)
+
+						let lerpAmount = progressClampedEased(SCALAR_ADDITION_SECTION, liningUpDuration / totalSectionTime )
+						for (let i = 0; i < maxScalarUnits; i++)
+						{
+							positiveScalar.children[i].position.lerp(positiveScalar.children[i].intendedPosition, lerpAmount)
+							negativeScalar.children[i].position.lerp(negativeScalar.children[i].intendedPosition, lerpAmount)
+						}
+
+						nhProgress += frameDelta / liningUpDuration / 4.
+					}
+					else if (nhProgress < CUT_ADMIRATION_SECTION)
+					{
+						copyScalarPart(operands[0].elements[0] > 0. ? operands[0] : operands[1], positiveScalar, 0)
+						copyScalarPart(operands[0].elements[0] < 0. ? operands[0] : operands[1], negativeScalar, 0)
+						positiveScalar.setIntendedPositionsToLine()
+						negativeScalar.setIntendedPositionsToLine()
+
+						let oneOnTop = positiveScalar.children[0].position.y > negativeScalar.children[0].position.y ? positiveScalar : negativeScalar
+						for (let i = 0; i < maxScalarUnits; i++)
+							oneOnTop.children[i].intendedPosition.y += 1.
+						let oneToDisappearCompletely = result < 0. ? positiveScalar : negativeScalar
+						for (let i = 0; i < maxScalarUnits; i++)
+							oneToDisappearCompletely.children[i].intendedPosition.x += Math.abs(result)
+
+						for (let i = 0; i < maxScalarUnits; i++)
+						{
+							positiveScalar.children[i].position.copy(positiveScalar.children[i].intendedPosition)
+							negativeScalar.children[i].position.copy(negativeScalar.children[i].intendedPosition)
+						}
+
+						nhProgress += frameDelta / anticipatingCutDuration / 4.
+						if (nhProgress >= CUT_ADMIRATION_SECTION)
+							playRandomPop()
+					}
+					else if (nhProgress < SCALAR_COALESCING_SECTION)
+					{
+						let oneRemaining = result > 0. ? positiveScalar : negativeScalar
+						for (let i = 0; i < maxScalarUnits; i++)
+						{
+							if (i >= Math.abs(result) ) break
+							oneRemaining.children[i].visible = true
+							oneRemaining.children[i].position.x = .5 + i
+							oneRemaining.children[i].position.y = 0.
+						}
+
+						nhProgress += frameDelta / admiringCutDuration / 4.
+					}
+					else
+					{
+						let oneRemaining = result > 0. ? positiveScalar : negativeScalar
+						for (let i = 0; i < maxScalarUnits; i++)
+						{
+							if (i >= Math.abs(result) ) break
+							oneRemaining.children[i].visible = true
+							oneRemaining.children[i].position.x = .5 + i
+							oneRemaining.children[i].position.y = 0.
+						}
+
+						oneRemaining.setIntendedPositionsToCenteredSquare()
+
+						let lerpAmount = progressClampedEased(SCALAR_COALESCING_SECTION, scalarCoalescingDuration / totalSectionTime)
+						for (let i = 0; i < maxScalarUnits; i++)
+							oneRemaining.children[i].position.lerp(oneRemaining.children[i].intendedPosition, lerpAmount)
+
+						nhProgress += frameDelta / scalarCoalescingDuration / 4.
 					}
 				}
+				else
+				{
+					//no scalar
+					goToStartOfNextSection()
+				}
+			}
+			
+			if (inSection(ADMIRING_SECTION) )
+			{
+				let admiringDuration = .8
+				nhProgress += frameDelta / admiringDuration
 			}
 
-			if ( scalarAdditionProgress > scalarAdditionDuration + admiringDuration )
+			if(inSection(END))
 				multivectorAnimation.finish()
 		})
 	}

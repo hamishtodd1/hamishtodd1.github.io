@@ -6,21 +6,13 @@
 		Once you have built the function for it, it enters your scope, and when you use it from your scope
 		it can play out that animation again, rather than having to play out all the atomic operations
 
-	Addition sign in the multivectors?
-	Maybe the scalar line wobbles about a lot to show irrelevance of its dir
 	The bivectors should change to being angle shaped when you do exp=
-
-	Things learned due to home quarantine: I drink about a liter of some form of diet cola every day. Previously from assorted pubs and shops, now just from local shop. Optimistically it's £500 a year!
-
-	I kinda feel bad about that... except that cola is my one drink I enjoy (+1 hot chocolate/week). I don't like tea, coffee, or alchohol.
 
 	you may want to put stuff on the left or the right
 	Therefore, "result" needs to be able to switch to right or left
 	Therefore, little t-shaped things showing what results from what
 	There again, who says right- and left- multiplying is the right thing to do?
 	are left and right multiply the same as multiply by conjugate?
-
-	Arguably the add should contain a load of multiplies. Er, other way around surely?
 
 	Other operations, sigh
 		See how far you can get ok
@@ -33,6 +25,7 @@
 		Would be nice if that could emerge
 		Integral?
 		e^ is very good because you don't even have to give two inputs
+			can it do sqrt? Steven said he'd take it to desert island...
 		If you want to exponentiate, how about this feedback thing/
 		Animation:
 			You put in a bivector. It becomes an angle wedge, area conserving obv
