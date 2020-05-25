@@ -1,5 +1,6 @@
 /*
 	Focus on the maths and build animations out of that for a while
+		Complex multiplication, poeple must know!
 	this is not doodling!
 	definitely want to doodle with process
 
@@ -8,7 +9,10 @@
 		Better to save as JSON (this basically already is?)
 		Level editor is shader programmer?
 
-	Abstract level ideas
+	Abstract/mathy level ideas
+		tetartoids?
+		spherical harmonics
+		color space
 		It's a little surprising that adding arrows in any order gets the same result
 			This tells you that it is best to think of them all, equally, being taken away from the origin
 		Fireworks, catherine wheels, including that slow mo guys one where they hold a catherine wheel overhead
@@ -81,8 +85,8 @@ function Levels()
 				// new Float32Array([ -2.3, 0., 0., 0., 0., 0., 0., 0.]),
 				// new Float32Array([ -3.8, 0., 0., 0., 0., 0., 0., 0.]),
 
-				new Float32Array([-9., 0., 0., 0., 0., 0., 0., 0.]),
-				new Float32Array([ 6., 0., 0., 0., 0., 0., 0., 0.]),
+				new Float32Array([ 0., 3., 0., 0., 0., 0., 0., 0.]),
+				new Float32Array([ 0., 0., 2., 0., 0., 0., 0., 0.]),
 
 				// new Float32Array([-5., 0., 0., 0., 0., 0., 0., 0.]),
 				// new Float32Array([-7., 0., 0., 0., 0., 0., 0., 0.]),

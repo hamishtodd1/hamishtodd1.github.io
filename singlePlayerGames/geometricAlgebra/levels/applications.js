@@ -44,6 +44,7 @@
 			telescope optics,
 			telecommunicatio/satellites. No magnets but this may not matter
 			Magneto dynamics! Of the sun or earth!
+			Lightning, it's badass
 		quantum
 			nuclear powered rockets
 			Not putting stuff in the van allen belt
@@ -58,6 +59,7 @@
 		Magnetised needly droplet going around it
 
 	General ideas / mario-esque "areas"/islands
+		How fast does glass crack https://www.youtube.com/watch?v=GIMVge5TYz4
 		Quantum mechanics
 			/Electromagnetism/Optics
 				Reflections
@@ -72,6 +74,7 @@
 		Mechanical engineering
 			Different sized cylinders rolling down straight slope
 			Make a clock! Haha it's literally euler. Grandfather clock would be nice
+			https://twitter.com/raedioisotope/status/1257135705030922240
 			Cogs
 				funky mechanical leg https://youtu.be/wFqnH2iemIc?t=46
 				Another nice cog https://youtu.be/SwVWfrZ3Q50?t=306
@@ -123,6 +126,7 @@
 			Diver
 			Dancer
 			Juggler. Lots of circus skills
+				https://www.youtube.com/watch?v=9GOEz7FEh88 ribbon tutorial, great
 			someone going down a helter skelter
 			Someone is about to set of a spinning top
 				you can change the amount of angular momentum they put into it by changing the size of their bicep

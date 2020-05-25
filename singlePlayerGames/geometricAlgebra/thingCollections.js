@@ -1,24 +1,70 @@
 /*
 	Instead of a specific value, you could have the whole column move and see them all change. Or a whole 2d patch. (what the hell does this mean)
 
-	Here the goals are channelling human resource machine, so probably input varies over one dimension
-	Or, really, you should just see what you find
+	Why one dimension? Why not build in 2D, or arbitrary manifolds?
+		Easy to control
+		Simulates what a computer actually does
+		Can simulate anything else, for example by having "stride"
+		Conceptually simple
+		It worked for human resource machine
 
-	If you change an input while an animation is happening, skip to its end
+	Representations (hopefully not built in, hopefully you make it yourself. Build your operating system)
+		A line you can grab bits of
+		A canvas you can draw on (i.e. a scalar field that starts all 0 and you can make it nonzero in places)
+		Looping all the multivectors (i.e. varying over time)
+		"scatter plot": vectors interpreted
+		contiguous line: vectors only
+		contiguous line, index against scalar part?
+		utah teapots with scalar for sizes
+		points moving aroound due to vector field
+		surface: vectors interpreted as contiguous vertices of triangls
+		orientations and positions: a bunch of utah teapots offset by the vector, oriented by the bivector
+		hmm, how about offset by the bivector, oriented by the vector combined with the pseudoscalar?
+		One standing in for all. In this situation, everything coming from the same one gets the same representation
 
-	it can be a display of multivectors
+	Focus on R as an input. Mayyyybe R2 since C. That's the maximal power of this thing, no need to go as far as Turing complete
+	Eventually you want arbitrary manifolds, but user constructs that themselves!
+		
+	Currently you have one stand in for all, as if you've frozen the debugger partway through a loop
+		Possibly a good idea!
+
+	it's always a display of multivectors
 	or a set of inputs to choose from
 	or a set of outputs that you can link to something in your scope
-	it might even show a single output but vary over time
-	it's flexible
-		could even have a scalar field or some weird orientation based thing
-	Maybe everything should be given the same location and if you want a list of numbers you need to use vectors that are increasingly diagonal
-	and then it needs to be extended. Heh, inheritance... except there are only a few things
-	come on, let's have a parabola
 */
 
 ThingCollection = function ()
 {
+	{
+		// let a = makeTextSign("5")
+		// scene.add(a)
+
+		//so you have the scalars arranged
+
+		//but what was all this about arbitrary functions?
+		//should you give people the ability to make arbitrary arrays? Probably not. Happens in computing but not math/phys.
+		//mapping from N as well, ya know. Not R.
+
+		/*
+			So quite simply it is an ordered set of scalars
+
+			They are all superimposed. It is a "representation"
+			"Animation" is a representation too
+			Even "animation, where this vector is the position of a humming bird" is a representation
+
+			Is this still about making arbitrary functions?
+
+			Want to be able to:
+				Tweak parameters
+				Make 3D shapes
+				Animate particles (glowing points)
+				Move and rotate planes / billboards
+				Make fragment shaders for a quad
+				Simulate the clown scene
+				Take integrals
+		*/
+	}
+
 	let group = new THREE.Group()
 
 	let maxThings = sq(256)
@@ -82,6 +128,8 @@ ThingCollection = function ()
 		
 		surface = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0x0000FF }));
 		{
+			//three contiguous vectors is a triangle
+
 			surface.visible = false
 			group.surface = surface
 			group.add(surface)

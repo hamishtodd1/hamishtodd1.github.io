@@ -1,7 +1,7 @@
 /*
 	Look through "record", lots of stuff in there and things you've done
 
-	TODO calculator (Andy/slack/pontus/alan kay/Steven Der Kenick/Chris Doran)
+	TODO calculator (Andy/slack/pontus/alan kay/Steven Der Kenick/Chris Doran/Joan Lasenby)
 		Animations
 		MAYBE reform input and output stuff
 			Unify the various "generating" appro##aches
@@ -25,12 +25,13 @@
 		If nothing good, try introducing the feedback differential-making thing
 		Don't go 3d, and for now the craziness can be a nice surprise
 
-	Send to
-		The slack
+	Others to send to
 		Marc
+		meurig
+		Penrose too. Graphical notation, cool use of transparencies.
 		Daniel Piker once you have vertex shaders
-		Jon
 		indie fund
+		Robin Green
 		The bivector discord
 
 	TODO for academic course (not much effort)

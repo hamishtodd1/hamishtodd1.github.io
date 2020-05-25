@@ -1,6 +1,9 @@
 There is a separate document called marketing. Probably good to keep it that way
 
 Aesthetics/graphics/non-design
+	A little cartoon character doing everything is surely the way to go. The pieces should be gotten rid of.
+			Maybe the little characters should be animé girls. Customizable
+			Cartoon character can be something fast moving Vs slow. Sloth to cheetah. Let people customize their fairy?
 	Particles matter a lot
 	Seriously, making it look good is someone else's job. Your ideas are not great. Color choice probably matters more than realism
 	Don't need no frustum culling
@@ -72,6 +75,7 @@ Story
 		It is a great story. Hestenes looking back on it as ancient wisdom
 		Clifford on his deathbed thinking the hope will probably die and people will be doing hacky shit forever
 		Tait was evil, full of wishful thinking and idiotic faith. Hating of divorce and secularity, everything  Clifford wasn't. Kicking a man while he was dying
+		If heaviside and Tate could see what happened next, QM spec rel, they'd be v sorry
 	Separate office for Maxwell or faraday, more Victorian plus crackling electricity
 		Faraday: I don't see why you had to bring maths into it
 	The dissenters, after seeing how einstein and dirac and pauli had to emulate multivectors, would be flagellating themselves if you brought them back

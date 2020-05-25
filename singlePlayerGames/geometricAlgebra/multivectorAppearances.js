@@ -1,13 +1,14 @@
 /*
 	General
+		Possibly you should always visualize the hodge dual, it's what you use in the geometric product
 		Possibly useful model: the operator combines with one of the operands to become a thing that is applied to the other operand
-		A little cartoon character doing everything is surely the way to go. The pieces should be gotten rid of.
+		Cartoon character doing movements
 		Things not bound in place like scalars, bivectors, trivectors could gently rock around the axes that don't constrain them
 		Grouping / location: fundamentally we just want them to be compact. Could have the different blades stacked in a column, or around in a circle, but it has no significance
 
 	scalar addn
 	bivec addn
-	vector addn
+	vector addn (SO EASY DO IT NEXT)
 	scalar multiplication of all
 	vector bivector multiplication
 	vector vector multiplication
@@ -214,23 +215,30 @@ async function initMultivectorAppearances()
 		let vecOrthZ = new THREE.Vector3()
 		function VectorAppearance()
 		{
-			let m = new THREE.Mesh(vectorGeometry, vectorMaterial);
-			m.matrixAutoUpdate = false;
-			m.castShadow = true
+			let mesh = new THREE.Mesh(vectorGeometry, vectorMaterial);
+			mesh.matrixAutoUpdate = false;
+			mesh.castShadow = true
 
-			m.setVec = function (x, y, z)
+			mesh.setVec = function (x, y, z)
 			{
+				if(y === undefined)
+				{
+					y = x[2]
+					z = x[3]
+					x = x[1]
+				}
+
 				vecPart.set(x, y, z)
 				randomPerpVector(vecPart, vecOrthX)
 				vecOrthX.normalize()
 				vecOrthZ.copy(vecPart).cross(vecOrthX).normalize().negate();
-				m.matrix.makeBasis(vecOrthX, vecPart, vecOrthZ);
-				m.matrix.setPosition(vecPart.multiplyScalar(-.5))
+				mesh.matrix.makeBasis(vecOrthX, vecPart, vecOrthZ);
+				mesh.matrix.setPosition(vecPart.multiplyScalar(-.5))
 
-				m.visible = !vecPart.equals(zeroVector)
+				mesh.visible = !vecPart.equals(zeroVector)
 			}
 
-			return m
+			return mesh
 		}
 	}
 
@@ -465,6 +473,11 @@ async function initMultivectorAppearances()
 		negativeScalar.positive.value = false
 		group.add(negativeScalar)
 
+		let vec0 = VectorAppearance()
+		group.add(vec0)
+		let vec1 = VectorAppearance()
+		group.add(vec1)
+		
 		// let vectorAppearance = VectorAppearance()
 		// group.add(vectorAppearance)
 		// let bivectorAppearance = BivectorAppearance()
@@ -473,7 +486,8 @@ async function initMultivectorAppearances()
 		let nhProgress = -1. //non homogeneous
 
 		let SCALAR_ADDITION_SECTION = 0
-		let ADMIRING_SECTION = 1 + SCALAR_ADDITION_SECTION
+		let VECTOR_ADDITION_SECTION = 1 + SCALAR_ADDITION_SECTION
+		let ADMIRING_SECTION = 1 + VECTOR_ADDITION_SECTION
 		let END = 1+ADMIRING_SECTION
 
 		function inSection(querySection)
@@ -484,6 +498,14 @@ async function initMultivectorAppearances()
 		{
 			nhProgress = 1. + Math.floor(nhProgress)
 		}
+		// function incrementProgress(semiHomogeneousProgress,subSectionDurations)
+		// {
+		// 	let wayThroughCurrentPart = nhProgress
+		// 	for(let i = 0, il = subSectionDurations.length; i < il; i++)
+		// 	{
+		// 		if(nhProgress)
+		// 	}
+		// }
 		function progressClampedEased(homogeneousSectionStart,duration)
 		{
 			if (homogeneousSectionStart === undefined) homogeneousSectionStart = Math.floor(nhProgress)
@@ -535,6 +557,8 @@ async function initMultivectorAppearances()
 			return indexToStartAt
 		}
 
+		let result = new Float32Array(8)
+
 		updateFunctions.push(function ()
 		{
 			if (!multivectorAnimation.ongoing())
@@ -542,7 +566,67 @@ async function initMultivectorAppearances()
 
 			scene.remove(operands[0], operands[1], activeOperator)
 
-			if (activeOperator.function === geometricSum && inSection(SCALAR_ADDITION_SECTION))
+			if (activeOperator.function === geometricSum && inSection(VECTOR_ADDITION_SECTION) )
+			{
+				geometricSum(operands[0].elements,operands[1].elements,result)
+
+				//this also happens when you scalar multiply vectors
+
+				//stick them end to end, new one pops in, not rocket science
+
+				//seriously going to need instanced geometry at some point
+
+				let noVector0 = (operands[0].elements[1] === 0. && operands[0].elements[2] === 0. && operands[0].elements[3] === 0.)
+				let noVector1 = (operands[1].elements[1] === 0. && operands[1].elements[2] === 0. && operands[1].elements[3] === 0.)
+
+				vec0.visible = false
+				vec1.visible = false
+
+				if (noVector0 && noVector1)
+				{
+					goToStartOfNextSection()
+				}
+				else
+				{
+					let addDuration = 1.
+					
+					vec0.visible = true
+					vec1.visible = true
+
+					vec0.setVec(operands[0].elements)
+					vec1.setVec(operands[1].elements)
+
+					v2.copy(zeroVector) //destination
+					v2.x -= operands[1].elements[1] / 2.
+					v2.y -= operands[1].elements[2] / 2.
+					v2.z -= operands[1].elements[3] / 2.
+
+					v1.copy(operands[0].position)
+					v1.lerp(v2, progressClampedEased(VECTOR_ADDITION_SECTION,addDuration) )
+					v1.x -= operands[0].elements[1] / 2.
+					v1.y -= operands[0].elements[2] / 2.
+					v1.z -= operands[0].elements[3] / 2.
+					vec0.matrix.setPosition(v1)
+
+					v2.copy(zeroVector) //destination
+					v2.x += operands[0].elements[1] / 2.
+					v2.y += operands[0].elements[2] / 2.
+					v2.z += operands[0].elements[3] / 2.
+
+					v1.copy(operands[1].position)
+					v1.lerp(v2, progressClampedEased(VECTOR_ADDITION_SECTION,addDuration) )
+					v1.x -= operands[1].elements[1] / 2.
+					v1.y -= operands[1].elements[2] / 2.
+					v1.z -= operands[1].elements[3] / 2.
+					vec1.matrix.setPosition(v1)
+
+					nhProgress += frameDelta / addDuration
+					if (!inSection(VECTOR_ADDITION_SECTION))
+						playRandomPop()
+				}
+			}
+
+			if (activeOperator.function === geometricSum && inSection(SCALAR_ADDITION_SECTION) )
 			{
 				for (let i = 0; i < maxScalarUnits; i++)
 					positiveScalar.children[i].visible = false
@@ -551,7 +635,12 @@ async function initMultivectorAppearances()
 
 				let scalarCoalescingDuration = .8 
 
-				if ((operands[0].elements[0] > 0. && operands[1].elements[0] > 0.) ||
+				if (operands[0].elements[0] === 0. && operands[1].elements[0] === 0. )
+				{
+					//no scalar
+					goToStartOfNextSection()
+				}
+				else if ((operands[0].elements[0] > 0. && operands[1].elements[0] > 0.) ||
 					(operands[0].elements[0] < 0. && operands[1].elements[0] < 0.))
 				{
 					//both +ve or -ve
@@ -585,104 +674,145 @@ async function initMultivectorAppearances()
 				}
 				else if (operands[0].elements[0] !== 0. || operands[1].elements[0] !== 0.)
 				{
+					goToStartOfNextSection()
+
 					//one +ve and one -ve
 					//whichever is shorter, that gets cut out of the other with a pop
 					//leaving potentially a ɔoc or something, but then we slide the hiders along
 
-					let liningUpDuration = .9
-					let anticipatingCutDuration = .3
-					let admiringCutDuration = .4
-					let totalSectionTime = liningUpDuration + anticipatingCutDuration + admiringCutDuration + scalarCoalescingDuration
-					let CUT_ANTICIPATING_SECTION = SCALAR_ADDITION_SECTION + liningUpDuration / totalSectionTime
-					let CUT_ADMIRATION_SECTION = CUT_ANTICIPATING_SECTION + anticipatingCutDuration / totalSectionTime
-					let SCALAR_COALESCING_SECTION = CUT_ADMIRATION_SECTION + admiringCutDuration / totalSectionTime
+					// let liningUpDuration = .9
+					// let cutAnticipatingDuration = .3
+					// let cutAdmiringDuration = .4
+					// let totalSectionTime = liningUpDuration + cutAnticipatingDuration + cutAdmiringDuration + scalarCoalescingDuration
+					// let CUT_ANTICIPATING_SECTION = SCALAR_ADDITION_SECTION + liningUpDuration / totalSectionTime
+					// let CUT_ADMIRATION_SECTION = CUT_ANTICIPATING_SECTION + cutAnticipatingDuration / totalSectionTime
+					// let SCALAR_COALESCING_SECTION = CUT_ADMIRATION_SECTION + cutAdmiringDuration / totalSectionTime
 
-					let result = operands[0].elements[0] + operands[1].elements[0]
+					// let result = operands[0].elements[0] + operands[1].elements[0]
 
-					if (nhProgress < CUT_ANTICIPATING_SECTION )
-					{
-						copyScalarPart(operands[0].elements[0] > 0.?operands[0]:operands[1], positiveScalar, 0)
-						copyScalarPart(operands[0].elements[0] < 0.?operands[0]:operands[1], negativeScalar, 0)
-						positiveScalar.setIntendedPositionsToLine()
-						negativeScalar.setIntendedPositionsToLine()
+					// // let sectionArray = [
+					// // 	"liningUp", .9,
+					// // 	"cutAnticipating", .3,
+					// // 	"cutAdmiring", .4
+					// // ]
+					// // let section = querySectionAndAdvanceTimeAppropriately(sections)
+					// // delete sections
 
-						let oneOnTop = positiveScalar.children[0].position.y > negativeScalar.children[0].position.y ? positiveScalar : negativeScalar
-						for (let i = 0; i < maxScalarUnits; i++)
-							oneOnTop.children[i].intendedPosition.y += 1.
-						let oneToDisappearCompletely = result < 0. ? positiveScalar : negativeScalar
-						for (let i = 0; i < maxScalarUnits; i++)
-							oneToDisappearCompletely.children[i].intendedPosition.x += Math.abs(result)
+					// // function getSection(sectionsAndTimes)
+					// // {
+					// // 	Math.floor(nhProgress)
 
-						let lerpAmount = progressClampedEased(SCALAR_ADDITION_SECTION, liningUpDuration / totalSectionTime )
-						for (let i = 0; i < maxScalarUnits; i++)
-						{
-							positiveScalar.children[i].position.lerp(positiveScalar.children[i].intendedPosition, lerpAmount)
-							negativeScalar.children[i].position.lerp(negativeScalar.children[i].intendedPosition, lerpAmount)
-						}
 
-						nhProgress += frameDelta / liningUpDuration / 4.
-					}
-					else if (nhProgress < CUT_ADMIRATION_SECTION)
-					{
-						copyScalarPart(operands[0].elements[0] > 0. ? operands[0] : operands[1], positiveScalar, 0)
-						copyScalarPart(operands[0].elements[0] < 0. ? operands[0] : operands[1], negativeScalar, 0)
-						positiveScalar.setIntendedPositionsToLine()
-						negativeScalar.setIntendedPositionsToLine()
+					// // 	let totalSectionTime = 0.
+					// // 	for (let i = 0, il = sectionsAndTimes.length / 2; i < il; i++)
+					// // 		totalSectionTime += sectionsAndTimes[i * 2 + 1]
 
-						let oneOnTop = positiveScalar.children[0].position.y > negativeScalar.children[0].position.y ? positiveScalar : negativeScalar
-						for (let i = 0; i < maxScalarUnits; i++)
-							oneOnTop.children[i].intendedPosition.y += 1.
-						let oneToDisappearCompletely = result < 0. ? positiveScalar : negativeScalar
-						for (let i = 0; i < maxScalarUnits; i++)
-							oneToDisappearCompletely.children[i].intendedPosition.x += Math.abs(result)
+					// // 	let i = 0
+					// // 	let thisSectionBeginning = 0.
+					// // 	for (i; i < sectionsAndTimes.length / 2; i++)
+					// // 	{
+					// // 		if (nhProgress < thisSectionBeginning + sectionsAndTimes[i * 2 + 1] )
+					// // 			break;
+					// // 		thisSectionBeginning += sectionsAndTimes[i * 2 + 1] / totalSectionTime
+					// // 	}
 
-						for (let i = 0; i < maxScalarUnits; i++)
-						{
-							positiveScalar.children[i].position.copy(positiveScalar.children[i].intendedPosition)
-							negativeScalar.children[i].position.copy(negativeScalar.children[i].intendedPosition)
-						}
+					// // 	nhProgress += frameDelta / totalSectionTime * (sectionsAndTimes[i * 2 + 1]  * sectionsAndTimes.length)
+					// // 	return sectionsAndTimes[i * 2]
+					// // }
+					// // function advanceTimeAppropriately( sectionsAndTimes, section)
+					// // {
+					// // 	let totalSectionTime = 0.
+					// // 	for (let i = 0, il = sectionsAndTimes.length / 2; i < il; i++)
+					// // 		totalSectionTime += sectionsAndTimes[i * 2 + 1]
 
-						nhProgress += frameDelta / anticipatingCutDuration / 4.
-						if (nhProgress >= CUT_ADMIRATION_SECTION)
-							playRandomPop()
-					}
-					else if (nhProgress < SCALAR_COALESCING_SECTION)
-					{
-						let oneRemaining = result > 0. ? positiveScalar : negativeScalar
-						for (let i = 0; i < maxScalarUnits; i++)
-						{
-							if (i >= Math.abs(result) ) break
-							oneRemaining.children[i].visible = true
-							oneRemaining.children[i].position.x = .5 + i
-							oneRemaining.children[i].position.y = 0.
-						}
+					// // 	let time = sectionsAndTimes[sectionsAndTimes.indexOf(section)+1]
+						
+					// // 	.3,.3,.4
+					// // 	frameDelta: .2,.2,.2,.2,.2,.
+					// // 	.2
+					// // 	//want the total time to take 1.
+					// // 	nhProgress += frameDelta / totalSectionTime * (sectionsAndTimes[i * 2 + 1] * sectionsAndTimes.length)
+					// // }
 
-						nhProgress += frameDelta / admiringCutDuration / 4.
-					}
-					else
-					{
-						let oneRemaining = result > 0. ? positiveScalar : negativeScalar
-						for (let i = 0; i < maxScalarUnits; i++)
-						{
-							if (i >= Math.abs(result) ) break
-							oneRemaining.children[i].visible = true
-							oneRemaining.children[i].position.x = .5 + i
-							oneRemaining.children[i].position.y = 0.
-						}
+					// if (nhProgress < CUT_ANTICIPATING_SECTION )
+					// {
+					// 	copyScalarPart(operands[0].elements[0] > 0.?operands[0]:operands[1], positiveScalar, 0)
+					// 	copyScalarPart(operands[0].elements[0] < 0.?operands[0]:operands[1], negativeScalar, 0)
+					// 	positiveScalar.setIntendedPositionsToLine()
+					// 	negativeScalar.setIntendedPositionsToLine()
 
-						oneRemaining.setIntendedPositionsToCenteredSquare()
+					// 	let oneOnTop = positiveScalar.children[0].position.y > negativeScalar.children[0].position.y ? positiveScalar : negativeScalar
+					// 	for (let i = 0; i < maxScalarUnits; i++)
+					// 		oneOnTop.children[i].intendedPosition.y += 1.
+					// 	let oneToDisappearCompletely = result < 0. ? positiveScalar : negativeScalar
+					// 	for (let i = 0; i < maxScalarUnits; i++)
+					// 		oneToDisappearCompletely.children[i].intendedPosition.x += Math.abs(result)
 
-						let lerpAmount = progressClampedEased(SCALAR_COALESCING_SECTION, scalarCoalescingDuration / totalSectionTime)
-						for (let i = 0; i < maxScalarUnits; i++)
-							oneRemaining.children[i].position.lerp(oneRemaining.children[i].intendedPosition, lerpAmount)
+					// 	let lerpAmount = progressClampedEased(SCALAR_ADDITION_SECTION, liningUpDuration / totalSectionTime )
+					// 	for (let i = 0; i < maxScalarUnits; i++)
+					// 	{
+					// 		positiveScalar.children[i].position.lerp(positiveScalar.children[i].intendedPosition, lerpAmount)
+					// 		negativeScalar.children[i].position.lerp(negativeScalar.children[i].intendedPosition, lerpAmount)
+					// 	}
 
-						nhProgress += frameDelta / scalarCoalescingDuration / 4.
-					}
-				}
-				else
-				{
-					//no scalar
-					goToStartOfNextSection()
+					// 	nhProgress += frameDelta / liningUpDuration / 4.
+					// }
+					// else if (nhProgress < CUT_ADMIRATION_SECTION)
+					// {
+					// 	copyScalarPart(operands[0].elements[0] > 0. ? operands[0] : operands[1], positiveScalar, 0)
+					// 	copyScalarPart(operands[0].elements[0] < 0. ? operands[0] : operands[1], negativeScalar, 0)
+					// 	positiveScalar.setIntendedPositionsToLine()
+					// 	negativeScalar.setIntendedPositionsToLine()
+
+					// 	let oneOnTop = positiveScalar.children[0].position.y > negativeScalar.children[0].position.y ? positiveScalar : negativeScalar
+					// 	for (let i = 0; i < maxScalarUnits; i++)
+					// 		oneOnTop.children[i].intendedPosition.y += 1.
+					// 	let oneToDisappearCompletely = result < 0. ? positiveScalar : negativeScalar
+					// 	for (let i = 0; i < maxScalarUnits; i++)
+					// 		oneToDisappearCompletely.children[i].intendedPosition.x += Math.abs(result)
+
+					// 	for (let i = 0; i < maxScalarUnits; i++)
+					// 	{
+					// 		positiveScalar.children[i].position.copy(positiveScalar.children[i].intendedPosition)
+					// 		negativeScalar.children[i].position.copy(negativeScalar.children[i].intendedPosition)
+					// 	}
+
+					// 	nhProgress += frameDelta / cutAnticipatingDuration / 4.
+					// 	if (nhProgress >= CUT_ADMIRATION_SECTION)
+					// 		playRandomPop()
+					// }
+					// else if (nhProgress < SCALAR_COALESCING_SECTION)
+					// {
+					// 	let oneRemaining = result > 0. ? positiveScalar : negativeScalar
+					// 	for (let i = 0; i < maxScalarUnits; i++)
+					// 	{
+					// 		if (i >= Math.abs(result) ) break
+					// 		oneRemaining.children[i].visible = true
+					// 		oneRemaining.children[i].position.x = .5 + i
+					// 		oneRemaining.children[i].position.y = 0.
+					// 	}
+
+					// 	nhProgress += frameDelta / cutAdmiringDuration / 4.
+					// }
+					// else
+					// {
+					// 	let oneRemaining = result > 0. ? positiveScalar : negativeScalar
+					// 	for (let i = 0; i < maxScalarUnits; i++)
+					// 	{
+					// 		if (i >= Math.abs(result) ) break
+					// 		oneRemaining.children[i].visible = true
+					// 		oneRemaining.children[i].position.x = .5 + i
+					// 		oneRemaining.children[i].position.y = 0.
+					// 	}
+
+					// 	oneRemaining.setIntendedPositionsToCenteredSquare()
+
+					// 	let lerpAmount = progressClampedEased(SCALAR_COALESCING_SECTION, scalarCoalescingDuration / totalSectionTime)
+					// 	for (let i = 0; i < maxScalarUnits; i++)
+					// 		oneRemaining.children[i].position.lerp(oneRemaining.children[i].intendedPosition, lerpAmount)
+
+					// 	nhProgress += frameDelta / scalarCoalescingDuration / 4.
+					// }
 				}
 			}
 			

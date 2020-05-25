@@ -13,8 +13,8 @@ const zeroMatrix = new THREE.Matrix4().set(0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0
 //-----Fundamental
 const clock = new THREE.Clock( true );
 const debugging = 0;
-var frameCount = 0;
-var logged = 0;
+let frameCount = 0;
+let logged = 0;
 
 const RIGHT_CONTROLLER_INDEX = 0;
 const LEFT_CONTROLLER_INDEX = 1-RIGHT_CONTROLLER_INDEX;
@@ -26,11 +26,14 @@ const camera = new THREE.PerspectiveCamera( 0.,0.,.1, 10.);
 // new THREE.OrthographicCamera( -1.,1.,1.,-1.,0.01, 10);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 const scene = new THREE.Scene().add(camera, camera);
-var mouse = null;
+let mouse = null;
+
+let v1 = new THREE.Vector3()
+let v2 = new THREE.Vector3()
 
 const updateFunctions = [];
 const clickables = [];
-var bindButton;
+let bindButton;
 
 const efficientSphereGeometryWithRadiusOne = new THREE.EfficientSphereGeometry(1);
 const unchangingUnitSquareGeometry = new THREE.PlaneGeometry(1.,1.)

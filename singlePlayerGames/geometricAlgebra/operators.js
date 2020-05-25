@@ -14,6 +14,8 @@
 	There again, who says right- and left- multiplying is the right thing to do?
 	are left and right multiply the same as multiply by conjugate?
 
+	3b1b has nice viz of exp based on the x^k / k!
+
 	Other operations, sigh
 		See how far you can get ok
 		Derivative is taken with respect to whatever is varying them in the output

@@ -1,4 +1,7 @@
 /*
+	controversh: We should get used to having lots of code deleted, fuck rereading and editing, redo everything. Maybe don't sweat the record too much
+	Visualizing the abstract syntax tree is surely good for concurrency?
+
 	your actions you can understand. All the complexities of the circuit should just be a visual representation of them
 	So we call this the record because for the time being that's all it is...
 

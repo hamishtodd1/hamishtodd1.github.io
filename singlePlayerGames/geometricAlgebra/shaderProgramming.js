@@ -1,4 +1,18 @@
 /*
+	Vertex shaders are the special case where the input is any amount of crap and the output is specifically a vertex
+
+	With making tools, good to have one foot in the mathematical elegance room, and one in the pragmatic "languages are underspecified, here is how you set the icon" room
+
+	As usual part of the purpose of making this is to see some small amount of cool patterns behaviour, it is not necessarily the end of the world if you can't make arbitrary complex shaders
+
+	It is kinda cumbersome to take derivatives in normal languages, so don't beat yourself up about not building it in
+
+	Even if you do end up with a convoluted toolbar with all the things a normal game engine has, the unification of them all is still very useful; it makes all the elementscompatible in a predictable way
+
+	Probably switches that are a single scalar, 0 or 1, are sufficient for input with just multiplication
+
+	2D stuff is super important. Webpages, etc. 2D PGA could be really really useful. The null vector is obv pointing towards you. 2D PGA may be enough for lots of useful comp geo. Could maybe have Cl 3,1,1 and never allow more than 3-blades. Including not allowing z to interact with the null or neg vector.
+
 	What this is for
 		Showing players of the puzzle game a certain goal
 		Showing frames of footage/animation
