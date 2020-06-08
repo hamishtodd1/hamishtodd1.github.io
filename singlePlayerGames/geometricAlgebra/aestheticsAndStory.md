@@ -75,7 +75,8 @@ Story
 		It is a great story. Hestenes looking back on it as ancient wisdom
 		Clifford on his deathbed thinking the hope will probably die and people will be doing hacky shit forever
 		Tait was evil, full of wishful thinking and idiotic faith. Hating of divorce and secularity, everything  Clifford wasn't. Kicking a man while he was dying
-		If heaviside and Tate could see what happened next, QM spec rel, they'd be v sorry
+		If heaviside and Tait and gibbs could see what happened next, QM spec rel, they'd be v sorry
+			The story was engineering versus maths fighting over physics
 	Separate office for Maxwell or faraday, more Victorian plus crackling electricity
 		Faraday: I don't see why you had to bring maths into it
 	The dissenters, after seeing how einstein and dirac and pauli had to emulate multivectors, would be flagellating themselves if you brought them back

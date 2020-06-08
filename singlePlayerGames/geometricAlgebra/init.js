@@ -79,6 +79,9 @@ async function init()
 	// initTankScene()
 	// return
 
+	initClickyVideo()
+	return
+
 	{
 		let restartButtonObj = makeTextSign("Restart (r)")
 		var restartButton = restartButtonObj.children[0]

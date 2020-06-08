@@ -75,6 +75,7 @@
 			Different sized cylinders rolling down straight slope
 			Make a clock! Haha it's literally euler. Grandfather clock would be nice
 			https://twitter.com/raedioisotope/status/1257135705030922240
+			programming the spaceX booster landing
 			Cogs
 				funky mechanical leg https://youtu.be/wFqnH2iemIc?t=46
 				Another nice cog https://youtu.be/SwVWfrZ3Q50?t=306
@@ -131,6 +132,73 @@
 			Someone is about to set of a spinning top
 				you can change the amount of angular momentum they put into it by changing the size of their bicep
 */
+
+function initClickyVideo()
+{
+	let video = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial())
+	video.scale.y = 13.
+	video.position.z = .01
+	scene.add(video)
+	video.material.map = new THREE.VideoTexture()
+	video.material.map.minFilter = THREE.LinearFilter
+
+	let startTime = 1.
+	let endTime = 7.7
+	let numFramesAdvanced = 0.
+	
+	let videoDomElement = document.createElement( 'video' )
+	videoDomElement.style = "display:none"
+	videoDomElement.crossOrigin = 'anonymous'
+	videoDomElement.loop = false
+	videoDomElement.muted = true
+	video.material.map.image = videoDomElement
+
+	let outputs = []
+	bindButton("space",function()
+	{
+		log(outputs.toString())
+	})
+
+	videoDomElement.currentTime = startTime
+	videoDomElement.paused = true
+	videoDomElement.src = "data/videos/hoberman.mp4"
+	videoDomElement.load()
+	videoDomElement.onloadeddata = function ()
+	{
+		video.scale.x = video.scale.y / (videoDomElement.videoHeight / videoDomElement.videoWidth)
+
+		updateFunctions.push(function()
+		{
+			if (mouse.clicking && !mouse.oldClicking)
+			{
+				v1.copy(mouse.getZZeroPosition())
+				video.worldToLocal(v1)
+				outputs[numFramesAdvanced * 2 + 0] = v1.x
+				outputs[numFramesAdvanced * 2 + 1] = v1.y
+
+				++numFramesAdvanced
+				videoDomElement.currentTime = startTime + numFramesAdvanced / 29.97
+			}
+		})
+	}
+
+	{
+		let mv = MultivectorAppearance(function () { }, [0., 1., 0., 0., 0., 0., 0., 0.])
+		scene.add(mv)
+		let origin = new THREE.Vector3()
+		let end = new THREE.Vector3()
+		updateFunctions.push(function ()
+		{
+			end.x = 1.2 + Math.sin(frameCount * .02)
+			end.y = 1. + Math.sin(frameCount * .03)
+
+			mv.elements[1] = end.x - origin.x
+			mv.elements[2] = end.y - origin.y
+			mv.position.copy(end).lerp(origin, .5)
+			mv.updateAppearance()
+		})
+	}
+}
 
 setVideo = async function(){console.error("Video can only be played on chrome!")}
 function initVideo(goalOutputGroup)

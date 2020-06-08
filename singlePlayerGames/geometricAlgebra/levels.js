@@ -227,7 +227,7 @@ function Levels()
 	let videoLevels = [{
 		videoDetails: {
 			filename: "hoberman",
-			startTime: .1,
+			startTime: 1.,
 			endTime: 7.7,
 			markerTimes: [4.5,7.2],
 		},

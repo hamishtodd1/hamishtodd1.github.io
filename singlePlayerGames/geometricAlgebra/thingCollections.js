@@ -1,4 +1,6 @@
 /*
+	function vs array. Array is a function from the naturals...
+
 	Instead of a specific value, you could have the whole column move and see them all change. Or a whole 2d patch. (what the hell does this mean)
 
 	Why one dimension? Why not build in 2D, or arbitrary manifolds?
@@ -22,7 +24,7 @@
 		hmm, how about offset by the bivector, oriented by the vector combined with the pseudoscalar?
 		One standing in for all. In this situation, everything coming from the same one gets the same representation
 
-	Focus on R as an input. Mayyyybe R2 since C. That's the maximal power of this thing, no need to go as far as Turing complete
+	Focus on R as an input. Mayyyybe R2 since C and mouse. That's the maximal power of this thing, no need to go as far as Turing complete
 	Eventually you want arbitrary manifolds, but user constructs that themselves!
 		
 	Currently you have one stand in for all, as if you've frozen the debugger partway through a loop

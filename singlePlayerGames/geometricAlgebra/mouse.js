@@ -26,9 +26,6 @@ function initMouse()
 		//don't use too much if clicking is not true - touchscreens. There are other ways to do things, and many people will be on phone
 		raycaster: new THREE.Raycaster(),
 		oldRay:new THREE.Ray(),
-
-		zZeroPosition: new THREE.Vector3(),
-		oldZZeroPosition: new THREE.Vector3()
 	};
 	mouse.raycaster.ray.copy(asynchronous.raycaster.ray)
 	mouse.oldRay.copy( mouse.raycaster.ray)
