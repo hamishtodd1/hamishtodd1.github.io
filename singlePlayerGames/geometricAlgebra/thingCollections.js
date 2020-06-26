@@ -1,5 +1,10 @@
 /*
+	Must the primitives be arbitrary? Can you construct them from elements of the algebra, no need to arbitrarily switch between line and triangle rep for mesh?
+	Is this what steven was talking about?
+
 	function vs array. Array is a function from the naturals...
+
+	Probably want to click and draw a random curve and it takes all the vertices along where your mouse has been
 
 	Instead of a specific value, you could have the whole column move and see them all change. Or a whole 2d patch. (what the hell does this mean)
 

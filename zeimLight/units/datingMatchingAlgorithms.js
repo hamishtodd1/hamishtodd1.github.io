@@ -1,4 +1,7 @@
 /*
+	Love redistribution. Suggested by Ozy https://thingofthings.wordpress.com/2017/04/19/deradicalizing-the-romanceless/ 
+	Better than sex redistribution ala Hanson.
+
 	Need to show matching first. Order is random
 
 	Should be able to adjust number of people

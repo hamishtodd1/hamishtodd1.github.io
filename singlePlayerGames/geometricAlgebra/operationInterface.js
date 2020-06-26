@@ -12,7 +12,8 @@
 
 	There's an argument for lambda calculus style: operation, operand1, operand2
 		"Is the next one I touch going to go up top or on side?" so at least maybe get rid of automation there
-		When it's a little cartoon character, you choose the one you want, and they go to the scope and pick up the thing they want
+		When it's a little cartoon character, you choose the one you want, and they go to the scope and 
+		pick up the thing they want
 
 	Click and hold should probably have the calculation freeze there for a bit
 */

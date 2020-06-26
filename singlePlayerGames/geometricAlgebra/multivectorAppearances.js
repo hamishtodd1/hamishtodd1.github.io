@@ -1,18 +1,24 @@
 /*
+	You WILL have many iterations, you need to speed up iteration time
+
 	General
+		vector should just come from the origin, and in order to pack them, the origin should be in the corner, no biggie
 		Possibly you should always visualize the hodge dual, it's what you use in the geometric product
 		Possibly useful model: the operator combines with one of the operands to become a thing that is applied to the other operand
 		Cartoon character doing movements
 		Things not bound in place like scalars, bivectors, trivectors could gently rock around the axes that don't constrain them
 		Grouping / location: fundamentally we just want them to be compact. Could have the different blades stacked in a column, or around in a circle, but it has no significance
 
-	scalar addn
-	bivec addn
-	vector addn (SO EASY DO IT NEXT)
-	scalar multiplication of all
-	vector bivector multiplication
-	vector vector multiplication
-	bivector bivector multiplication
+	Both scalar and bivec can rotate
+
+	multiplication
+		scalar scalar
+		scalar vector
+		scalar bivector
+		bivector bivector multiplication
+		vector bivector multiplication
+		vector vector multiplication
+		(scalar bivector) vector
 
 	The scalar
 		Scalar-anything multiplication: all the scalars transform into the thing they're going to be, then "repeated addition"
@@ -20,7 +26,7 @@
 		Need to know the multiplicative identity size, hence discrete units
 		Because dot product, they can end up taking up an area, hence having some area. Volume too probably...
 
-	Scalar and pseudoscalar (whether bivec or tri...) together = complex number, rectangle and beans viz
+	Scalar and pseudoscalar (whether bivec or tri...?) together = complex number, rectangle and beans viz
 
 	Vectors
 		Can be anywhere and so long as its length is the same you can think of it as the same thing
@@ -223,9 +229,18 @@ async function initMultivectorAppearances()
 			{
 				if(y === undefined)
 				{
-					y = x[2]
-					z = x[3]
-					x = x[1]
+					if(x.isVector)
+					{
+						y = x.y
+						z = x.z
+						x = x.x
+					}
+					else
+					{
+						y = x[2]
+						z = x[3]
+						x = x[1]
+					}
 				}
 
 				vecPart.set(x, y, z)
@@ -494,7 +509,9 @@ async function initMultivectorAppearances()
 		group.add(vec1)
 
 		let bivector0 = BivectorAppearance()
+		group.add(bivector0)
 		let bivector1 = BivectorAppearance()
+		group.add(bivector1)
 		
 		// let vectorAppearance = VectorAppearance()
 		// group.add(vectorAppearance)
@@ -508,6 +525,20 @@ async function initMultivectorAppearances()
 		let BIVECTOR_ADDITION_SECTION = 1 + VECTOR_ADDITION_SECTION
 		let ADMIRING_SECTION = 1 + BIVECTOR_ADDITION_SECTION
 		let END = 1+ADMIRING_SECTION
+
+		let SCALAR_SCALAR_MULTIPLICATION_SECTION = 1
+		let SCALAR_VECTOR_MULTIPLICATION_SECTION = 1 + SCALAR_SCALAR_MULTIPLICATION_SECTION
+		let SCALAR_BIVECTOR_MULTIPLICATION_SECTION = 1 + SCALAR_VECTOR_MULTIPLICATION_SECTION
+		let SCALAR_TRIVECTOR_MULTIPLICATION_SECTION = 1 + SCALAR_BIVECTOR_MULTIPLICATION_SECTION
+		let VECTOR_VECTOR_MULTIPLICATION_SECTION = 1 + SCALAR_TRIVECTOR_MULTIPLICATION_SECTION
+		let VECTOR_BIVECTOR_MULTIPLICATION_SECTION = 1 + VECTOR_VECTOR_MULTIPLICATION_SECTION
+		let VECTOR_TRIVECTOR_MULTIPLICATION_SECTION = 1 + VECTOR_BIVECTOR_MULTIPLICATION_SECTION
+		let BIVECTOR_VECTOR_MULTIPLICATION_SECTION = 1 + VECTOR_TRIVECTOR_MULTIPLICATION_SECTION
+		let BIVECTOR_BIVECTOR_MULTIPLICATION_SECTION = 1 + BIVECTOR_VECTOR_MULTIPLICATION_SECTION
+		let BIVECTOR_TRIVECTOR_MULTIPLICATION_SECTION = 1 + BIVECTOR_BIVECTOR_MULTIPLICATION_SECTION
+		let TRIVECTOR_VECTOR_MULTIPLICATION_SECTION = 1 + BIVECTOR_TRIVECTOR_MULTIPLICATION_SECTION
+		let TRIVECTOR_BIVECTOR_MULTIPLICATION_SECTION = 1 + TRIVECTOR_VECTOR_MULTIPLICATION_SECTION
+		let TRIVECTOR_TRIVECTOR_MULTIPLICATION_SECTION = 1 + TRIVECTOR_BIVECTOR_MULTIPLICATION_SECTION
 
 		function inSection(querySection)
 		{
@@ -530,6 +561,7 @@ async function initMultivectorAppearances()
 			if (homogeneousSectionStart === undefined) homogeneousSectionStart = Math.floor(nhProgress)
 			if(duration === undefined) duration = 1.
 			let clamped = (nhProgress - homogeneousSectionStart) / duration
+			clamped = Math.min(Math.max(0., clamped), 1.)
 			return easingFunctions.easeInOutQuad( clamped )
 		}
 
@@ -578,6 +610,8 @@ async function initMultivectorAppearances()
 
 		let result = new Float32Array(8)
 
+		let generalMovementDuration = .9
+
 		updateFunctions.push(function ()
 		{
 			if (!multivectorAnimation.ongoing())
@@ -586,7 +620,50 @@ async function initMultivectorAppearances()
 			if(nhProgress>0.)
 				scene.remove(operands[0], operands[1], activeOperator)
 
-			if (activeOperator.function === geometricSum)
+			vec0.visible = false
+			vec1.visible = false
+			//bivector done a bit differently
+
+			if (activeOperator.function === geometricProduct)
+			{
+				let hasVecPart0 = (operands[0].elements[1] !== 0. || operands[0].elements[2] !== 0. || operands[0].elements[3] !== 0.)
+				let hasVecPart1 = (operands[1].elements[1] !== 0. || operands[1].elements[2] !== 0. || operands[1].elements[3] !== 0.)
+
+				let hasBivecPart0 = (operands[0].elements[4] !== 0. || operands[0].elements[5] !== 0. || operands[0].elements[6] !== 0.)
+				let hasBivecPart1 = (operands[1].elements[4] !== 0. || operands[1].elements[5] !== 0. || operands[1].elements[6] !== 0.)
+				log(nhProgress)
+
+				if(inSection(VECTOR_BIVECTOR_MULTIPLICATION_SECTION))
+				{
+					if (hasVecPart0 && hasBivecPart1 )
+					{
+						log("y")
+						nhProgress += frameDelta
+						if (nhProgress > 1.2)
+							goToStartOfNextSection()
+
+						vec0.visible = true
+						vec0.setVec(operands[0].elements)
+						v1.copy(operands[0].position)
+						v1.x -= operands[0].elements[1] * .5
+						v1.y -= operands[0].elements[2] * .5
+						v1.z -= operands[0].elements[3] * .5
+
+						let lerpValue = progressClampedEased(VECTOR_BIVECTOR_MULTIPLICATION_SECTION, generalMovementDuration)
+						v1.lerp(zeroVector, lerpValue)
+
+						vec0.matrix.setPosition(v1)
+
+						nhProgress += frameDelta * generalMovementDuration
+					}
+					else
+					{
+						goToStartOfNextSection()
+					}
+				}
+				else goToStartOfNextSection()
+			}
+			else if (activeOperator.function === geometricSum)
 			{
 				if ( inSection(SCALAR_ADDITION_SECTION))
 				{
@@ -794,54 +871,85 @@ async function initMultivectorAppearances()
 					let noVector0 = (operands[0].elements[1] === 0. && operands[0].elements[2] === 0. && operands[0].elements[3] === 0.)
 					let noVector1 = (operands[1].elements[1] === 0. && operands[1].elements[2] === 0. && operands[1].elements[3] === 0.)
 
-					vec0.visible = false
-					vec1.visible = false
-
 					if (noVector0 && noVector1)
 					{
 						goToStartOfNextSection()
 					}
+					else if ((noVector0 && !noVector1) || (!noVector0 && noVector1) )
+					{
+						//don't have the "operand" multivectors
+
+						let oneItIs = noVector0 ? operands[1] : operands[0]
+
+						vec0.visible = true
+						vec0.setVec(oneItIs.elements)
+
+						v1.copy(oneItIs.position)
+						v1.lerp(zeroVector, progressClampedEased(VECTOR_ADDITION_SECTION, generalMovementDuration))
+						v1.y -= oneItIs.elements[2] / 2.
+						v1.x -= oneItIs.elements[1] / 2.
+						v1.z -= oneItIs.elements[3] / 2.
+						vec0.matrix.setPosition(v1)
+
+						nhProgress += frameDelta / generalMovementDuration
+					}
 					else
 					{
 						let addDuration = 1.
+						let positionedAdmiringDuration = .8
+						let resultAdmiringDuration = .7
+						let totalSectionTime = addDuration + positionedAdmiringDuration + resultAdmiringDuration
 
-						vec0.visible = true
-						vec1.visible = true
+						if (nhProgress-Math.floor(nhProgress) < (totalSectionTime - resultAdmiringDuration) / totalSectionTime ) 
+						{
+							vec0.visible = true
+							vec1.visible = true
 
-						vec0.setVec(operands[0].elements)
-						vec1.setVec(operands[1].elements)
+							vec0.setVec(operands[0].elements)
+							vec1.setVec(operands[1].elements)
 
-						v2.copy(zeroVector) //destination
-						v2.x -= operands[1].elements[1] / 2.
-						v2.y -= operands[1].elements[2] / 2.
-						v2.z -= operands[1].elements[3] / 2.
+							v2.copy(zeroVector) //destination
+							v2.x -= operands[1].elements[1] / 2.
+							v2.y -= operands[1].elements[2] / 2.
+							v2.z -= operands[1].elements[3] / 2.
 
-						v1.copy(operands[0].position)
-						v1.lerp(v2, progressClampedEased(VECTOR_ADDITION_SECTION, addDuration))
-						v1.x -= operands[0].elements[1] / 2.
-						v1.y -= operands[0].elements[2] / 2.
-						v1.z -= operands[0].elements[3] / 2.
-						vec0.matrix.setPosition(v1)
+							v1.copy(operands[0].position)
+							v1.lerp(v2, progressClampedEased(VECTOR_ADDITION_SECTION, addDuration/totalSectionTime))
+							v1.x -= operands[0].elements[1] / 2.
+							v1.y -= operands[0].elements[2] / 2.
+							v1.z -= operands[0].elements[3] / 2.
+							vec0.matrix.setPosition(v1)
 
-						v2.copy(zeroVector) //destination
-						v2.x += operands[0].elements[1] / 2.
-						v2.y += operands[0].elements[2] / 2.
-						v2.z += operands[0].elements[3] / 2.
+							v2.copy(zeroVector) //destination
+							v2.x += operands[0].elements[1] / 2.
+							v2.y += operands[0].elements[2] / 2.
+							v2.z += operands[0].elements[3] / 2.
 
-						v1.copy(operands[1].position)
-						v1.lerp(v2, progressClampedEased(VECTOR_ADDITION_SECTION, addDuration))
-						v1.x -= operands[1].elements[1] / 2.
-						v1.y -= operands[1].elements[2] / 2.
-						v1.z -= operands[1].elements[3] / 2.
-						vec1.matrix.setPosition(v1)
+							v1.copy(operands[1].position)
+							v1.lerp(v2, progressClampedEased(VECTOR_ADDITION_SECTION, addDuration/totalSectionTime))
+							v1.x -= operands[1].elements[1] / 2.
+							v1.y -= operands[1].elements[2] / 2.
+							v1.z -= operands[1].elements[3] / 2.
+							vec1.matrix.setPosition(v1)
+						}
+						else
+						{
+							// playRandomPop()
 
-						nhProgress += frameDelta / addDuration
-						if (!inSection(VECTOR_ADDITION_SECTION))
-							playRandomPop()
+							vec0.visible = true
+
+							v1.x = operands[0].elements[1] + operands[1].elements[1]
+							v1.y = operands[0].elements[2] + operands[1].elements[2]
+							v1.z = operands[0].elements[3] + operands[1].elements[3]
+
+							vec0.setVec(v1.x, v1.y, v1.z)
+						}
+
+						nhProgress += frameDelta / totalSectionTime
 					}
 				}
 
-				if ( inSection(BIVECTOR_ADDITION_SECTION))
+				if ( inSection(BIVECTOR_ADDITION_SECTION) )
 				{
 					//just unit rectangles, stick them together
 					//maybe you wanna slide them in an area conserving way into being unit rectangles?
@@ -867,18 +975,40 @@ async function initMultivectorAppearances()
 					else
 					{
 						//just move into place
+						//can do this at the same time as vector moving into place
 						let oneItIs = noBivector0 ? operands[1] : operands[0]
+						let oneToUse = noBivector0 ? bivector1 : bivector0
 
-						bivector0.position.copy( oneItIs.position )
-						bivector0.position.lerp( zeroVector, easingFunctions.easeInOutQuad(nhProgress))
+						group.add(oneToUse)
+						oneToUse.position.copy( oneItIs.position )
+						oneToUse.position.lerp(zeroVector, easingFunctions.easeInOutQuad(nhProgress - BIVECTOR_ADDITION_SECTION))
+						oneToUse.updateAppearance(oneItIs.elements[4], oneItIs.elements[5], oneItIs.elements[6])
 
-						goToStartOfNextSection()
+						nhProgress += frameDelta
+
+						// goToStartOfNextSection()
 					}
 				}
-			}
-			else if(activeOperator.function === geometricProduct)
-			{
-				goToStartOfNextSection()
+				else if(nhProgress < BIVECTOR_ADDITION_SECTION)
+				{
+					if (operands[0].elements[4] === 0. && operands[0].elements[5] === 0. && operands[0].elements[6] === 0.)
+						bivector0.visible = false
+					else
+					{
+						bivector0.visible = true
+						bivector0.updateAppearance(operands[0].elements[4], operands[0].elements[5], operands[0].elements[6])
+						bivector0.position.copy(operands[0].position)
+					}
+
+					if (operands[1].elements[4] === 0. && operands[1].elements[5] === 0. && operands[1].elements[6] === 0.)
+						bivector1.visible = false
+					else
+					{
+						bivector1.visible = true
+						bivector1.updateAppearance(operands[1].elements[4], operands[1].elements[5], operands[1].elements[6])
+						bivector1.position.copy(operands[1].position)
+					}
+				}
 			}
 			
 			if (inSection(ADMIRING_SECTION) )

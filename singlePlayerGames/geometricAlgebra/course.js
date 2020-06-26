@@ -3,6 +3,13 @@
 
 	Hit all the things you usually would
 
+	Call course:
+		Well really you should make it then name it right?
+		"Applied mathematical physics", "applied geometric algebra"
+		“3D math” or “applied geometry”
+		“geometry for computer scientists/physicists”
+		Something that says “this is practical/related to physics, and also fundamental maths”. Ideally it’s something people seek out that has not been claimed yet
+
 	Hololens 2, camera fixed in place, "transparent screen"
 		When you touch one of them they get pushed in in a springy way
 

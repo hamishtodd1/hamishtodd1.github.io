@@ -10,6 +10,7 @@
 		Level editor is shader programmer?
 
 	Abstract/mathy level ideas
+		should be able to make a basic polynomial function
 		tetartoids?
 		spherical harmonics
 		color space
@@ -78,6 +79,18 @@ function Levels()
 			operators: [geometricSum,geometricProduct]
 		},
 	*/
+
+		// {
+		// 	singularGoal:
+		// 		new Float32Array([0., 1., 1., 0., 0., 0., 0., 0.]),
+		// 	options: [
+		// 		new Float32Array([ 0., 2., 0., 0., 0., 0., 0., 0.]),
+		// 		new Float32Array([ 0., 0., 3., 0., 0., 0., 0., 0.]),
+		// 		new Float32Array([3.2, 0., 0., 0., 0., 0., 0., 0.]),
+		// 	],
+		// 	operators: [geometricSum,geometricProduct]
+		// },
+		
 		{
 			singularGoal:
 				new Float32Array([5., 0., 0., 0., 0., 0., 0., 0.]),
@@ -85,18 +98,20 @@ function Levels()
 				// new Float32Array([ -2.3, 0., 0., 0., 0., 0., 0., 0.]),
 				// new Float32Array([ -3.8, 0., 0., 0., 0., 0., 0., 0.]),
 
-				new Float32Array([ 0., 3., 0., 0., 0., 0., 0., 0.]),
-				new Float32Array([ 0., 0., 2., 0., 0., 0., 0., 0.]),
+				// new Float32Array([ 0., 3., 0., 0., 0., 0., 0., 0.]),
+				// new Float32Array([ 0., 0., 2., 0., 0., 0., 0., 0.]),
 
-				// new Float32Array([-5., 0., 0., 0., 0., 0., 0., 0.]),
-				// new Float32Array([-7., 0., 0., 0., 0., 0., 0., 0.]),
+				new Float32Array([ 0., 0., 0., 0., 1., 0., 0., 0.]),
+				new Float32Array([ 0., 1./Math.sqrt(2.), 1./Math.sqrt(2.), 0., 0., 0., 0., 0.]),
 
 				// new Float32Array([0., 1., 0., 0., 0., 0., 0., 0.]),
 				// new Float32Array([0., 0., 1., 0., 0., 0., 0., 0.]),
 			],
 			operators: [
 				// geometricSum,
-				geometricSum]
+				// geometricSum,
+				geometricProduct
+				]
 		},
 		
 		{

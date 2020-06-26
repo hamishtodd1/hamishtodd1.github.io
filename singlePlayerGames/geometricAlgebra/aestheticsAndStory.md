@@ -39,6 +39,8 @@ Aesthetics/graphics/non-design
 	Do not think hard about the backgrounds, with AR they disappear
 
 Backgrounds - just need a surface
+	Having the cubemap/background versus 3d geometric object/game object/foreground might be really good for braid style readability
+	Background/environment: use tiling bot to make some nice stuff! Well,get artist to do it in blender, and tiling not is their source of mathy stuff
 	Ancient greece - Euclid / Plato / Archimedes
 	India / Iran - https://en.wikipedia.org/wiki/Mathematics_in_medieval_Islam
 	17th century - Newton / Descartes

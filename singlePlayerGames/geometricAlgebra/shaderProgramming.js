@@ -1,5 +1,15 @@
 /*
-	Vertex shaders are the special case where the input is any amount of crap and the output is specifically a vertex
+	Have it on a square snap-to grid like text
+	As you know from pwg, it is important to show and hide stuff (as it is with text!)
+	Need to have an idea of scope that auto hides/shows. Maybe there are certain arrows that only appear when you reach out?
+
+	Brackets are control flow
+	do you need if statements if you have sigmoid and tanh?
+	Could have some vector in scope that always follows your mouse? Eh, better to have a grabbable tip. Humm, bootstrap
+	Currying: instead of 2 you can have "the function that multiplies by 2" and "the function that adds 2"
+	You may be tempted to make visualizations and animations for the other datatypes. Nice that you can but you probably shouldn'ts
+	Fragment shaders are nice but fuck them for now, need to focus, do vertex shaders
+	Vertex shaders are the special case where the input is any amount of crap and the output is specifically a vertex. Hmm, except for geometry
 
 	With making tools, good to have one foot in the mathematical elegance room, and one in the pragmatic "languages are underspecified, here is how you set the icon" room
 

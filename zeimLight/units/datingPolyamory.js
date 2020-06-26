@@ -1,4 +1,6 @@
 /*
+	If you've got 100% stratification, every pair has some fancying in some direction?
+
 	The way to phrase stratification: with two random (heterosexuals of the same gender)
 	Give them both a pile of pictures of N people, what is the probability that they rank their attractiveness in the same order?
 	If stratification is 0, probability is 1/N!

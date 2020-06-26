@@ -1,6 +1,24 @@
 /*
 	https://www.geogebra.org/m/kvy5zksn
 
+	Wanna be able to program your own visualization, then use that to visualize your program
+
+	Have a mode where all the things in your scope have the same origin. I.e. they're on a scene.
+
+	Mocap markers are cheap! https://mocapsolutions.com/collections/mocap-solutions-markers
+
+	These animations- you must make them using the system, the player is to reverse-engineer them
+
+	Little games for kids to make
+		They need a handle with three points
+		Throw frisbees into goals
+		Kids making semi realistic laser guns with limited resources?
+		You know so little about multiplayer design beyond articulate. Keep it simple I guess...
+		Swooshy veil behind sword
+		whip
+
+	They share levels, you just need to know locations
+
 	Notes
 		All the multivectors coming from the pictures should stay inside the animation, no need to have a clone of them in the scope
 		so you're modelling the differential apparently
@@ -46,9 +64,11 @@
 			Magneto dynamics! Of the sun or earth!
 			Lightning, it's badass
 		quantum
+			If you have a vector and bivector together being a wave function with mod squared equal to 1, and vector is determined, what does that mean for bivector?
 			nuclear powered rockets
 			Not putting stuff in the van allen belt
 			ion thrusters?
+			nuclear fusion
 		spec rel
 			super fast rockets
 		Relativistic QM?
@@ -59,6 +79,8 @@
 		Magnetised needly droplet going around it
 
 	General ideas / mario-esque "areas"/islands
+		Lasers may be a better central focus. EM AND QM AND a link to rocketry
+		Could have a major thing about programming robots. It will be pretty important!
 		How fast does glass crack https://www.youtube.com/watch?v=GIMVge5TYz4
 		Quantum mechanics
 			/Electromagnetism/Optics
@@ -72,6 +94,10 @@
 		Planetary motion
 			A bomb going off and lots of pieces of shrapnel. You have to do lots of them
 		Mechanical engineering
+			Bottle rocket
+			A pair of curling stones attached with elastic on an ice rink
+			Two minute paper Sims like the hair water one might be nice to try to replicate
+			Mech engineering wise, you try to simulate Lego.. for eg designing the 4 speed transmission box
 			Different sized cylinders rolling down straight slope
 			Make a clock! Haha it's literally euler. Grandfather clock would be nice
 			https://twitter.com/raedioisotope/status/1257135705030922240
@@ -136,7 +162,6 @@
 function initClickyVideo()
 {
 	let video = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial())
-	video.scale.y = 13.
 	video.position.z = .01
 	scene.add(video)
 	video.material.map = new THREE.VideoTexture()
@@ -145,6 +170,8 @@ function initClickyVideo()
 	let startTime = 1.
 	let endTime = 7.7
 	let numFramesAdvanced = 0.
+
+
 	
 	let videoDomElement = document.createElement( 'video' )
 	videoDomElement.style = "display:none"
@@ -159,16 +186,19 @@ function initClickyVideo()
 		log(outputs.toString())
 	})
 
+	let clickingMode = false
+
 	videoDomElement.currentTime = startTime
 	videoDomElement.paused = true
 	videoDomElement.src = "data/videos/hoberman.mp4"
 	videoDomElement.load()
 	videoDomElement.onloadeddata = function ()
 	{
-		video.scale.x = video.scale.y / (videoDomElement.videoHeight / videoDomElement.videoWidth)
-
 		updateFunctions.push(function()
 		{
+			video.scale.x = camera.rightAtZZero * 2.
+			video.scale.y = video.scale.x * (videoDomElement.videoHeight / videoDomElement.videoWidth)
+
 			if (mouse.clicking && !mouse.oldClicking)
 			{
 				v1.copy(mouse.getZZeroPosition())
@@ -180,21 +210,55 @@ function initClickyVideo()
 				videoDomElement.currentTime = startTime + numFramesAdvanced / 29.97
 			}
 		})
+		if (clickingMode)
+			videoDomElement.play()
 	}
 
+	if (clickingMode)
 	{
+		let realEnd = [0.004872107186358113, 0.002165380971714696, 0.02801461632155912, 0.0010826904858573484, 0.04019488428745435, 0.0021653809717146967, 0.052984165651644335, 0, 0.06333739342265536, 0, 0.07490864799025579, 0, 0.08708891595615101, -0.002165380971714696, 0.0980511571254568, -0.0043307619434293934, 0.1084043848964678, -0.0021653809717146967, 0.11936662606577346, -0.0043307619434293934, 0.1297198538367845, -0.005413452429286794, 0.13946406820950066, -0.006496142915144089, 0.14859926918392213, -0.007578833401001489, 0.15590742996345927, -0.0054134524292867945, 0.1644336175395859, -0.00757883340100149, 0.17113276492082835, -0.00757883340100149, 0.17783191230207074, -0.008661523886858893, 0.1833130328867236, -0.008661523886858891, 0.18940316686967126, -0.008661523886858891, 0.19427527405602923, -0.007578833401001489, 0.19792935444579796, -0.00757883340100149, 0.20036540803897693, -0.00649614291514409, 0.2015834348355665, -0.0054134524292867945, 0.2040194884287455, -0.0043307619434293934, 0.2040194884287455, -0.0043307619434293934, 0.20523751522533507, -0.003248071457572098, 0.20523751522533504, 0, 0.2046285018270403, 0.0010826904858573484, 0.2040194884287455, 0.0021653809717146967, 0.20280146163215607, 0.006496142915144143, 0.20097442143727176, 0.00757883340100149, 0.19853836784409273, 0.007578833401001492, 0.1967113276492084, 0.00757883340100149, 0.1930572472594399, 0.00757883340100149, 0.1906211936662607, 0.010826904858573589, 0.18574908647990263, 0.010826904858573589, 0.18209500609013407, 0.011909595344430937, 0.17783191230207074, 0.014074976316145632, 0.1723507917174178, 0.014074976316145633]
+		let mvEndValues = Array(200)
+		let mvOriginValues = Array(200)
+		for (let i = 0; i < mvOriginValues.length/2.; i++)
+		{
+			mvOriginValues[i * 2 + 0] = 0.
+			mvOriginValues[i * 2 + 1] = 0.
+
+			if (i * 2 + 1 < realEnd.length)
+			{
+				mvEndValues[i * 2 + 0] = realEnd[i * 2 + 0]
+				mvEndValues[i * 2 + 1] = realEnd[i * 2 + 1]
+			}
+			else
+			{
+				mvEndValues[i*2+0] = 1.2 + Math.sin(i * .02)
+				mvEndValues[i*2+1] = 1.0 + Math.sin(i * .03)
+			}
+		}
+
 		let mv = MultivectorAppearance(function () { }, [0., 1., 0., 0., 0., 0., 0., 0.])
 		scene.add(mv)
-		let origin = new THREE.Vector3()
-		let end = new THREE.Vector3()
 		updateFunctions.push(function ()
 		{
-			end.x = 1.2 + Math.sin(frameCount * .02)
-			end.y = 1. + Math.sin(frameCount * .03)
+			if(frameCount*2+1>mvOriginValues.length-1)
+				return
 
-			mv.elements[1] = end.x - origin.x
-			mv.elements[2] = end.y - origin.y
-			mv.position.copy(end).lerp(origin, .5)
+			let frameNumber = Math.round( (videoDomElement.currentTime - startTime) * 29.97 ) //floor?
+			if (!(frameNumber > 0.) || !(frameNumber < mvOriginValues.length / 2. ) )
+				return
+
+			v1.set(
+				mvEndValues[frameNumber * 2 + 0] - mvOriginValues[frameNumber * 2 + 0],
+				mvEndValues[frameNumber * 2 + 1] - mvOriginValues[frameNumber * 2 + 1],
+				0.
+			)
+			video.localToWorld(v1)
+
+			mv.position.x = v1.x / 2.
+			mv.position.y = v1.y / 2.
+
+			mv.elements[1] = v1.x
+			mv.elements[2] = v1.y
 			mv.updateAppearance()
 		})
 	}

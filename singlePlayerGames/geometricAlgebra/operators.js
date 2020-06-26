@@ -36,6 +36,8 @@
 
 	The dotted scalar line (dots should be circles of unit diameter btw) moves around fairly randomly
 
+	kronecker delta
+
 	"i as the circle constant"
 		split complex numbers with polar coordinates
 		2*pi*i is the real thing https://blog.wolfram.com/2015/06/28/2-pi-or-not-2-pi/
@@ -47,6 +49,27 @@
 			and it differentiates better. Or does it? Maybe it is more natural for pi to fall out of differentiating?
 		Look it's ok from a visual standpoint
 		Radians to degrees is just a scalar conversion. You can have radians to a base-4 system as well. Consider .54...+i.84... - that is e^i, the unit of our rotation system. Degrees is asking about the complex number .9998+i.017. possibly e^i makes differentiation easier, that is believable but better check. Point is though, the default base of your power and log can be the pseudoscalar for many cases
+*/
+/*
+	Click the "new function" thing, a yellow frog
+    It gets all the globals, so at least the two basis vectors
+    And some modifyiable multivectors as inputs that you can alter fully
+    Do your thing
+    And whatever the last thing you create is, that's the output?
+
+	base types
+
+	Tensor product is very similar to "product types"
+	Are you reinventing QC here? Maybe you should have QC as fundamental system and have folks build up things just using that
+
+	Man, so goddamn philosophical. Thank christ you can fall back on ignoring this and just making what you need to make
+
+    +:m-->m
+    *:m-->m
+
+    Use cases:
+        dot, wedge
+        normalize
 */
 
 async function initOperatorAppearances()

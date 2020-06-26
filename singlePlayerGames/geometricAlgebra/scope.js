@@ -1,4 +1,6 @@
 /*
+	Your scope duplicates a scene full of multivectors that you're looking at. Can hold on one in your scope and see its duplicate highlighted
+
 	Would be very nice to move the selector there when you hover
 
 	Put the whole scope on the pictures?

@@ -1,4 +1,13 @@
 /*
+	https://opinionator.blogs.nytimes.com/2010/04/25/chances-are/
+	
+	Bayes nets may allow for a method of skimability for scientific papers.
+	List your assumptions / priors. People can easily see which ones they disagree with.
+
+	Two player game where both players get different information
+	Must use bayes nets to get an answer
+	Suppose the goal is to guess the value of a number. One player gets more points if they're over, one if they're under
+
 	TODO Alabama
 		Something fun looking, the things moving around, springs, maybe faces on them
 		working on a phone, vertical, taking account of resolution
