@@ -94,15 +94,13 @@ async function init()
 		bindButton(alphabet[i], function ()
 		{
 			backgroundString = backgroundString.slice(0, caratPositionInString) + alphabet[i] + backgroundString.slice(caratPositionInString, backgroundString.length)
-			++caratPositionInString
-			caratFlashingStart = clock.getElapsedTime()
+			moveCaratAlong(1)
 		})
 	}
 	bindButton("backspace", function ()
 	{
 		backgroundString = backgroundString.slice(0, caratPositionInString - 1) + backgroundString.slice(caratPositionInString, backgroundString.length)
-		--caratPositionInString
-		caratFlashingStart = clock.getElapsedTime()
+		moveCaratAlong(-1)
 	})
 	bindButton("enter", function ()
 	{
@@ -110,9 +108,18 @@ async function init()
 			return
 
 		backgroundString = backgroundString.slice(0, caratPositionInString) + "\n" + backgroundString.slice(caratPositionInString, backgroundString.length)
-		carat.position.x += .5
-		caratFlashingStart = clock.getElapsedTime()
+		moveCaratAlong(1)
 	})
+
+	function moveCaratAlong(amount)
+	{
+		caratPositionInString += amount
+		if (caratPositionInString < 0)
+			caratPositionInString = 0
+		if(caratPositionInString > backgroundString.length)
+			caratPositionInString = backgroundString.length
+		caratFlashingStart = clock.getElapsedTime()
+	}
 
 	//coooooould... type code which is potentially even one letter (they are assigned in a certain order)
 	let maxCopiesOfMv = 16
@@ -131,17 +138,16 @@ async function init()
 	updateFunctions.push(function () { carat.visible = Math.floor((clock.getElapsedTime() - caratFlashingStart) * 2.) % 2 ? false : true })
 	pad.add(carat)
 
-	function addToCaratPosition(x, y)
+	function addToCaratVerticalPosition(y)
 	{
-		carat.position.x += x
 		carat.position.y += y
 		caratFlashingStart = clock.getElapsedTime()
 		overrideCaratPositionInString = true
 	}
-	bindButton(   "up", function () { addToCaratPosition(0., 1.) })
-	bindButton( "down", function () { addToCaratPosition(0., -1.) })
-	bindButton("right", function () { addToCaratPosition(.5, 0.) })
-	bindButton( "left", function () { addToCaratPosition(-.5, 0.) })
+	bindButton(   "up", function () { addToCaratVerticalPosition( 1.) })
+	bindButton( "down", function () { addToCaratVerticalPosition(-1.) })
+	bindButton("right", function () { moveCaratAlong(1) })
+	bindButton("left", function () { moveCaratAlong(-1) })
 	
 	let drawingPosition = new THREE.Vector3()
 	updateFunctions.push(function()
@@ -183,9 +189,12 @@ async function init()
 			if(positionInString >= backgroundStringLength)
 				break
 
-			if (backgroundString[positionInString] == "\n")
+			if (backgroundString[positionInString] === "\n")
 			{
-				
+				drawingPosition.x = 0.
+				drawingPosition.y -= 1.
+				++positionInString
+				continue
 			}
 			
 			if (positionInString + 3 < backgroundStringLength &&
@@ -244,6 +253,8 @@ async function init()
 				continue
 			}
 			
+			//uncaught character?
+			console.warn("Uncaught character, not drawn")
 			++positionInString
 			continue
 		}
