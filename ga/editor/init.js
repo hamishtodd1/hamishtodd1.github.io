@@ -1,18 +1,22 @@
 /*
 	todo
-		backspace
 		visualizing multivectors
-		tweaking the things with mouse
-		windows with previews showing them superimposed
+		altering the things with mouse
+		windows with previews, i.e. superimposed multivectors
 		demonstrate numerical integration and differentiation?
-		functions? Probably not
 
-	You can write your own numerical (dt is small) differentiator and integrator
+	integration and differentiation
+		You can write your own numerical (dt is small) differentiator and integrator
+		https://youtu.be/oUaOucZRlmE?t=1266
+		The epsilon of integration is directly linked to the scale at which you are looking at the thing. dt = width of a pixel
+		You draw a graph (left to right bottom to top say) by evaluating the function at the left side of a pixel, then at the right, then drawing pixels accordingly
+	
 
 	If you want to solve them analytically, it's about using your symbol juggling abilities
 	But that is only because integration and differentiation are defined as infinite serieses. Maybe even unrigorous?
 
 	long term
+		function definition
 		arrays would be nice but you're still unsure of them and can show in abacus
 			Hmm, do physicists have arrays?
 		shift and arrow keys to highlight
@@ -23,7 +27,29 @@
 	Theoretical computer science
 		if you have arrays and functions and recursion you have summation:
 			function sumArrayElementsBelowIndex(arr, index) { return index < 0 ? 0 : arr[index] + sumArrayElementsBelowIndex(arr, index - 1) }
+
+	Algebraic deduction / reduction
+		Most of argumentation for math/phys is showing equalities. Our plan is, instead of a = b, output a - b which is 0
+		Rearranging computer code into a simpler form... sounds like delta reduction?
+		It's not always "reduction" in the sense of reducting the length of the string. Good to do ab -> a.b + a^b
+
+
+	Language name: "Victory" lol
 */
+
+// function differentiate(f,at)
+// {
+// 	let dt = 0.0000001
+// 	return ( f(at) + f(at+dt) ) / dt
+// }
+
+// function integrate(f,at)
+// {
+// 	let dt = .0001 //the width of a pixel
+// 	f()
+// 	//for any approximation of integral of f with given dt, we can scale f such that you get that dt level precision
+// 	//multiply final result by dt... but that is just a scalar multiple, only relevant if you put symbols on the y axis so to speak
+// }
 
 async function init()
 {
@@ -51,7 +77,7 @@ async function init()
 
 	}, false);
 
-	let backgroundString = ""
+	let backgroundString = "ass\nass"
 	let alphabet = "abcdefghijklmnopqrstuvwxyz"
 	let colorCodes = "wbmcrogp"
 	let instancedLetterMeshes = {}
@@ -68,14 +94,23 @@ async function init()
 		bindButton(alphabet[i], function ()
 		{
 			backgroundString = backgroundString.slice(0, caratPositionInString) + alphabet[i] + backgroundString.slice(caratPositionInString, backgroundString.length)
-			carat.position.x += .5
+			++caratPositionInString
 			caratFlashingStart = clock.getElapsedTime()
 		})
 	}
 	bindButton("backspace", function ()
 	{
 		backgroundString = backgroundString.slice(0, caratPositionInString - 1) + backgroundString.slice(caratPositionInString, backgroundString.length)
-		carat.position.x -= .5
+		--caratPositionInString
+		caratFlashingStart = clock.getElapsedTime()
+	})
+	bindButton("enter", function ()
+	{
+		if(frameCount < 15) //because there are some random enters that get sent when you start the page????
+			return
+
+		backgroundString = backgroundString.slice(0, caratPositionInString) + "\n" + backgroundString.slice(caratPositionInString, backgroundString.length)
+		carat.position.x += .5
 		caratFlashingStart = clock.getElapsedTime()
 	})
 
@@ -87,13 +122,43 @@ async function init()
 	pad.add(mv)
 	mv.name = "wbmo"
 	mvs.push(mv)
+
+	let carat = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
+	let overrideCaratPositionInString = true
+	let caratPositionInString = -1
+	carat.scale.x = .1
+	let caratFlashingStart = 0.
+	updateFunctions.push(function () { carat.visible = Math.floor((clock.getElapsedTime() - caratFlashingStart) * 2.) % 2 ? false : true })
+	pad.add(carat)
+
+	function addToCaratPosition(x, y)
+	{
+		carat.position.x += x
+		carat.position.y += y
+		caratFlashingStart = clock.getElapsedTime()
+		overrideCaratPositionInString = true
+	}
+	bindButton(   "up", function () { addToCaratPosition(0., 1.) })
+	bindButton( "down", function () { addToCaratPosition(0., -1.) })
+	bindButton("right", function () { addToCaratPosition(.5, 0.) })
+	bindButton( "left", function () { addToCaratPosition(-.5, 0.) })
 	
 	let drawingPosition = new THREE.Vector3()
 	updateFunctions.push(function()
 	{
-		//gotta display
 		//webgl would be better
-		//we have this thing that maintains consistency. Parser I guess
+		if (mouse.clicking && !mouse.oldClicking)
+		{
+			mouse.getZZeroPosition(v1)
+			pad.worldToLocal(v1)
+
+			carat.position.x = Math.round(v1.x)
+			carat.position.y = Math.round(v1.y)
+
+			caratFlashingStart = clock.getElapsedTime()
+
+			overrideCaratPositionInString = true
+		}
 
 		for(let i = 0, il = alphabet.length; i < il; i++)
 			instancedLetterMeshes[alphabet[i]].count = 0
@@ -106,14 +171,22 @@ async function init()
 		let closestDistanceSqToCarat = Infinity
 		while(positionInString <= backgroundStringLength)
 		{
-			if (drawingPosition.distanceToSquared(carat.position) < closestDistanceSqToCarat)
+			if ( !overrideCaratPositionInString && positionInString === caratPositionInString)
+				carat.position.copy(drawingPosition)
+			if ( overrideCaratPositionInString && drawingPosition.distanceToSquared(carat.position) < closestDistanceSqToCarat)
 			{
-				caratPositionInString = positionInString
 				closestDistanceSqToCarat = drawingPosition.distanceToSquared(carat.position)
+				caratPositionInString = positionInString
 				v1.copy(drawingPosition)
 			}
+
 			if(positionInString >= backgroundStringLength)
 				break
+
+			if (backgroundString[positionInString] == "\n")
+			{
+				
+			}
 			
 			if (positionInString + 3 < backgroundStringLength &&
 				colorCodes.indexOf(backgroundString[positionInString + 0]) !== -1 &&
@@ -175,17 +248,14 @@ async function init()
 			continue
 		}
 
-		carat.position.copy(v1)
+		if(overrideCaratPositionInString)
+		{
+			carat.position.copy(v1)
+			overrideCaratPositionInString = false
+		}
 
 		// log(instancedLetterMeshes["a"].count)
 	})
-	
-	let carat = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
-	let caratPositionInString = -1
-	carat.scale.x = .1
-	let caratFlashingStart = 0.
-	updateFunctions.push(function () { carat.visible = Math.floor((clock.getElapsedTime() - caratFlashingStart) * 2.) % 2 ? false : true })
-	pad.add(carat)
 
 	//irritation involving things going behind it
 	// let lineHighlight = new THREE.Mesh(unchangingUnitSquareGeometry.clone(), new THREE.MeshBasicMaterial({ color: 0x3E3D32 }))
@@ -193,43 +263,6 @@ async function init()
 	// lineHighlight.scale.x = 999999999.
 	// updateFunctions.push(function(){lineHighlight.position.y = carat.position.y})
 	// scene.add(lineHighlight)
-	
-	bindButton("up",function()
-	{
-		carat.position.y += 1.
-		caratFlashingStart = clock.getElapsedTime()
-	})
-	bindButton("down", function ()
-	{
-		carat.position.y -= 1.
-		caratFlashingStart = clock.getElapsedTime()
-	})
-	bindButton("left", function ()
-	{
-		carat.position.x -= .5
-		caratFlashingStart = clock.getElapsedTime()
-	})
-	bindButton("right", function ()
-	{
-		carat.position.x += .5
-		caratFlashingStart = clock.getElapsedTime()
-	})
-
-	//highlightedBlocks 0x575A5A
-
-	updateFunctions.push(function()
-	{
-		if(mouse.clicking )
-		{
-			mouse.getZZeroPosition(v1)
-			pad.worldToLocal(v1)
-
-			carat.position.x = Math.round(v1.x)
-			carat.position.y = Math.round(v1.y)
-
-			caratFlashingStart = clock.getElapsedTime()
-		}
-	})
 }
 
 /*
