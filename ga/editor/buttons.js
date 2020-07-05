@@ -43,7 +43,9 @@ function initButtons()
 		"esc":27,
 
 		"[":219,
-		"]":221
+		"]":221,
+
+		"backspace":8
 	}
 	var keycodeArray = "0123456789abcdefghijklmnopqrstuvwxyz";
 	function getButton(keyCode)
