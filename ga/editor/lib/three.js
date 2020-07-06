@@ -28053,6 +28053,7 @@
 		Mesh.call( this, geometry, material );
 
 		this.instanceMatrix = new BufferAttribute( new Float32Array( count * 16 ), 16 );
+		this.instanceMatrix.setUsage(THREE.DynamicDrawUsage); //HAMISH
 
 		this.count = count;
 

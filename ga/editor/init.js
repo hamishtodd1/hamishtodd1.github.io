@@ -35,6 +35,10 @@
 
 
 	Language name: "Victory" lol
+
+	Optimization
+		https://www.cs.unm.edu/~crowley/papers/sds.pdf
+		https://www.averylaird.com/programming/the%20text%20editor/2017/09/30/the-piece-table/
 */
 
 // function differentiate(f,at)
@@ -77,7 +81,7 @@ async function init()
 
 	}, false);
 
-	let backgroundString = "ass\nass"
+	let backgroundString = ""
 	let alphabet = "abcdefghijklmnopqrstuvwxyz"
 	let colorCodes = "wbmcrogp"
 	let instancedLetterMeshes = {}
@@ -87,7 +91,6 @@ async function init()
 		let material = text(alphabet[i], true)
 
 		instancedLetterMeshes[alphabet[i]] = new THREE.InstancedMesh(unchangingUnitSquareGeometry, material, maxCopiesOfALetter);
-		instancedLetterMeshes[alphabet[i]].instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 		pad.add(instancedLetterMeshes[alphabet[i]])
 		instancedLetterMeshes[alphabet[i]].aspect = material.getAspect()
 
@@ -111,6 +114,34 @@ async function init()
 		moveCaratAlong(1)
 	})
 
+	// if(0)
+	{
+		let materials = {
+			geometricProduct: new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true /*because transparent part of texture*/ }),
+			geometricSum: new THREE.MeshBasicMaterial({ color: 0x80FF00, transparent: true /*because transparent part of texture*/ }),
+		}
+
+		let loader = new THREE.TextureLoader()
+		loader.crossOrigin = true
+		//don't use a promise, shit goes weird
+		loader.load("data/frog.png", function (result)
+		{
+			materials.geometricSum.map = result
+			materials.geometricProduct.map = result
+			materials.geometricProduct.needsUpdate = true
+			materials.geometricSum.needsUpdate = true
+			log("y")
+		})
+
+		var gpSymbolInstanced = new THREE.InstancedMesh(unchangingUnitSquareGeometry, materials.geometricProduct, maxCopiesOfALetter)
+		pad.add(gpSymbolInstanced)
+		var gsSymbolInstanced = new THREE.InstancedMesh(unchangingUnitSquareGeometry, materials.geometricSum, maxCopiesOfALetter)
+		pad.add(gsSymbolInstanced)
+
+		// let animatedGeometricProductSymbol = new THREE.Mesh(unchangingUnitSquareGeometry, materials.geometricProduct)
+		// let animatedGeometricSumSymbol = new THREE.Mesh(unchangingUnitSquareGeometry, materials.geometricSum)
+	}
+
 	function moveCaratAlong(amount)
 	{
 		caratPositionInString += amount
@@ -122,21 +153,23 @@ async function init()
 	}
 
 	//coooooould... type code which is potentially even one letter (they are assigned in a certain order)
+	// let questionMarkMaterial = text("?",true) //can be colored with vertex attributes
 	let maxCopiesOfMv = 16
 	let mvs = []
-	mv = new THREE.InstancedMesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({color:0xFF0000}), maxCopiesOfMv)
-	mv.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-	pad.add(mv)
-	mv.name = "wbmo"
-	mvs.push(mv)
+	{
+		let mv = new THREE.InstancedMesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({color:0xFF0000}), maxCopiesOfMv)
+		pad.add(mv)
+		mv.name = "wbmo"
+		mvs.push(mv)
+	}
 
 	let carat = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
+	pad.add(carat)
 	let overrideCaratPositionInString = true
 	let caratPositionInString = -1
 	carat.scale.x = .1
 	let caratFlashingStart = 0.
 	updateFunctions.push(function () { carat.visible = Math.floor((clock.getElapsedTime() - caratFlashingStart) * 2.) % 2 ? false : true })
-	pad.add(carat)
 
 	function addToCaratVerticalPosition(y)
 	{
@@ -147,7 +180,7 @@ async function init()
 	bindButton(   "up", function () { addToCaratVerticalPosition( 1.) })
 	bindButton( "down", function () { addToCaratVerticalPosition(-1.) })
 	bindButton("right", function () { moveCaratAlong(1) })
-	bindButton("left", function () { moveCaratAlong(-1) })
+	bindButton( "left", function () { moveCaratAlong(-1) })
 	
 	let drawingPosition = new THREE.Vector3()
 	updateFunctions.push(function()
@@ -158,7 +191,7 @@ async function init()
 			mouse.getZZeroPosition(v1)
 			pad.worldToLocal(v1)
 
-			carat.position.x = Math.round(v1.x)
+			carat.position.x = .5*Math.round(v1.x*2.)
 			carat.position.y = Math.round(v1.y)
 
 			caratFlashingStart = clock.getElapsedTime()
@@ -212,6 +245,7 @@ async function init()
 						backgroundString[positionInString + 3] === mvs[i].name[3])
 					{
 						mvFound = true
+						let mv = mvs[i]
 
 						m1.identity()
 						m1.elements[0] = .5 //want it bigger
