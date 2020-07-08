@@ -27,6 +27,7 @@
 	Theoretical computer science
 		if you have arrays and functions and recursion you have summation:
 			function sumArrayElementsBelowIndex(arr, index) { return index < 0 ? 0 : arr[index] + sumArrayElementsBelowIndex(arr, index - 1) }
+		lexical analysis
 
 	Algebraic deduction / reduction
 		Most of argumentation for math/phys is showing equalities. Our plan is, instead of a = b, output a - b which is 0
@@ -82,28 +83,28 @@ async function init()
 	}, false);
 
 	let backgroundString = ""
-	let alphabet = "abcdefghijklmnopqrstuvwxyz"
+	let characters = "abcdefghijklmnopqrstuvwxyz "
 	let colorCodes = "wbmcrogp"
 	let instancedLetterMeshes = {}
 	let maxCopiesOfALetter = 256
-	for(let i = 0; i < alphabet.length; i++)
+	for(let i = 0; i < characters.length; i++)
 	{
-		let material = text(alphabet[i], true)
+		let material = text(characters[i], true)
 
-		instancedLetterMeshes[alphabet[i]] = new THREE.InstancedMesh(unchangingUnitSquareGeometry, material, maxCopiesOfALetter);
-		pad.add(instancedLetterMeshes[alphabet[i]])
-		instancedLetterMeshes[alphabet[i]].aspect = material.getAspect()
+		instancedLetterMeshes[characters[i]] = new THREE.InstancedMesh(unchangingUnitSquareGeometry, material, maxCopiesOfALetter);
+		pad.add(instancedLetterMeshes[characters[i]])
+		instancedLetterMeshes[characters[i]].aspect = material.getAspect()
 
-		bindButton(alphabet[i], function ()
+		bindButton(characters[i] === " " ? "space" : characters[i], function ()
 		{
-			backgroundString = backgroundString.slice(0, caratPositionInString) + alphabet[i] + backgroundString.slice(caratPositionInString, backgroundString.length)
-			moveCaratAlong(1)
+			backgroundString = backgroundString.slice(0, caratPositionInString) + characters[i] + backgroundString.slice(caratPositionInString, backgroundString.length)
+			moveCaratAlongString(1)
 		})
 	}
 	bindButton("backspace", function ()
 	{
 		backgroundString = backgroundString.slice(0, caratPositionInString - 1) + backgroundString.slice(caratPositionInString, backgroundString.length)
-		moveCaratAlong(-1)
+		moveCaratAlongString(-1)
 	})
 	bindButton("enter", function ()
 	{
@@ -111,10 +112,14 @@ async function init()
 			return
 
 		backgroundString = backgroundString.slice(0, caratPositionInString) + "\n" + backgroundString.slice(caratPositionInString, backgroundString.length)
-		moveCaratAlong(1)
+		moveCaratAlongString(1)
 	})
+	bindButton("home",		() => addToCaratPosition(-999., 0.))
+	bindButton( "end",		() => addToCaratPosition( 999., 0.))
+	bindButton("pageUp",  	() => addToCaratPosition(0., 999.))
+	bindButton("pageDown",	() => addToCaratPosition(0.,-999.))
 
-	// if(0)
+	//don't need geometric product for the demo necessarily
 	{
 		let materials = {
 			geometricProduct: new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true /*because transparent part of texture*/ }),
@@ -130,7 +135,6 @@ async function init()
 			materials.geometricProduct.map = result
 			materials.geometricProduct.needsUpdate = true
 			materials.geometricSum.needsUpdate = true
-			log("y")
 		})
 
 		var gpSymbolInstanced = new THREE.InstancedMesh(unchangingUnitSquareGeometry, materials.geometricProduct, maxCopiesOfALetter)
@@ -142,7 +146,7 @@ async function init()
 		// let animatedGeometricSumSymbol = new THREE.Mesh(unchangingUnitSquareGeometry, materials.geometricSum)
 	}
 
-	function moveCaratAlong(amount)
+	function moveCaratAlongString(amount)
 	{
 		caratPositionInString += amount
 		if (caratPositionInString < 0)
@@ -161,6 +165,14 @@ async function init()
 		pad.add(mv)
 		mv.name = "wbmo"
 		mvs.push(mv)
+
+		let vectorRadius = .2
+		let vectorGeometry = new THREE.CylinderBufferGeometry(0., vectorRadius, 1., 16, 1, false);
+		vectorGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0., .5, 0.))
+		let vectorMaterial = new THREE.MeshStandardMaterial({color:0xFF0000})
+		// log(vectorMaterial.program.fragmentShader)
+		let v = new THREE.Mesh(vectorGeometry,vectorMaterial)
+		scene.add(v)
 	}
 
 	let carat = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
@@ -171,16 +183,22 @@ async function init()
 	let caratFlashingStart = 0.
 	updateFunctions.push(function () { carat.visible = Math.floor((clock.getElapsedTime() - caratFlashingStart) * 2.) % 2 ? false : true })
 
-	function addToCaratVerticalPosition(y)
+	function setCaratPosition(x,y)
 	{
-		carat.position.y += y
+		carat.position.set(x,y,0.)
 		caratFlashingStart = clock.getElapsedTime()
 		overrideCaratPositionInString = true
 	}
-	bindButton(   "up", function () { addToCaratVerticalPosition( 1.) })
-	bindButton( "down", function () { addToCaratVerticalPosition(-1.) })
-	bindButton("right", function () { moveCaratAlong(1) })
-	bindButton( "left", function () { moveCaratAlong(-1) })
+	function addToCaratPosition(x,y)
+	{
+		setCaratPosition(
+			carat.position.x + x, 
+			carat.position.y + y)
+	}
+	bindButton(   "up", function () { addToCaratPosition(0., 1.) })
+	bindButton( "down", function () { addToCaratPosition(0.,-1.) })
+	bindButton("right", function () { moveCaratAlongString(1) })
+	bindButton( "left", function () { moveCaratAlongString(-1) })
 	
 	let drawingPosition = new THREE.Vector3()
 	updateFunctions.push(function()
@@ -195,12 +213,11 @@ async function init()
 			carat.position.y = Math.round(v1.y)
 
 			caratFlashingStart = clock.getElapsedTime()
-
 			overrideCaratPositionInString = true
 		}
 
-		for(let i = 0, il = alphabet.length; i < il; i++)
-			instancedLetterMeshes[alphabet[i]].count = 0
+		for(let i = 0, il = characters.length; i < il; i++)
+			instancedLetterMeshes[characters[i]].count = 0
 		for (let i = 0, il = mvs.length; i < il; i++)
 			mvs[i].count = 0
 
@@ -266,7 +283,7 @@ async function init()
 					continue
 			}
 			
-			if( alphabet.indexOf(backgroundString[positionInString]) !== -1 )
+			if( characters.indexOf(backgroundString[positionInString]) !== -1 )
 			{
 				let ilm = instancedLetterMeshes[backgroundString[positionInString]]
 				if (ilm.count >= maxCopiesOfALetter)

@@ -12,7 +12,7 @@
             "webRoot": "${workspaceFolder}",
             
             // "url": "file:///C:/hamishtodd1.github.io/zeimLight/producer.html",
-            "url": "file:///C:/hamishtodd1.github.io/singlePlayerGames/geometricAlgebra/index.html",
+            "url": "file:///C:/hamishtodd1.github.io/ga/editor/index.html",
         }
     ]
 }

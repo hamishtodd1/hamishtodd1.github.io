@@ -77,6 +77,8 @@ async function init()
 	// initTankScene()
 	// return
 
+	console.error("hey")
+
 	initClickyVideo()
 	return
 

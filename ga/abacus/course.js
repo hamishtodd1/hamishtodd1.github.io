@@ -1,4 +1,6 @@
 /*
+	Why would Johannes Kepler be a good janitor? Because he doesn't mind sweeping out the same area every day
+
 	Without sound or particle effects or AR, just you talking in zeimlight style with PowerPoint slides, it can be the best academic course in GA available.
 
 	Hit all the things you usually would

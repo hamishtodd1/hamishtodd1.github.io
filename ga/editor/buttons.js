@@ -45,7 +45,12 @@ function initButtons()
 		"[":219,
 		"]":221,
 
-		"backspace":8
+		"backspace":8,
+
+		"pageUp":33,
+		"pageDown":34,
+		"end":35,
+		"home":36,
 	}
 	var keycodeArray = "0123456789abcdefghijklmnopqrstuvwxyz";
 	function getButton(keyCode)
