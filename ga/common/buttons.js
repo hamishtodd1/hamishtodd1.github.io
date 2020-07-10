@@ -31,59 +31,34 @@ function initButtons()
 	}
 
 	var buttonIndexGivenName = {
-		"enter":13,
-		"alt":18,
-		"shift":16,
+		"enter":"Enter",
+		"alt":"Alt",
+		"shift":"Shift",
 
-		"left":37,
-		"up":38,
-		"right":39,
-		"down":40,
-		"space":32,
-		"esc":27,
+		"left":"ArrowLeft",
+		"up":"ArrowUp",
+		"right":"ArrowRight",
+		"down":"ArrowDown",
+		"space":"(Space character)",
+		"esc":"Escape",
 
 		"[":219,
 		"]":221,
 
-		"backspace":8,
+		"backspace":"Backspace",
 
 		"pageUp":33,
 		"pageDown":34,
 		"end":35,
 		"home":36,
 	}
-	var keycodeArray = "0123456789abcdefghijklmnopqrstuvwxyz";
-	function getButton(keyCode)
-	{
-		for( var buttonName in buttons )
-		{
-			if( keyCode === buttonIndexGivenName[buttonName] )
-			{
-				return buttons[buttonName]
-			}
-		}
-		if( 48 <= keyCode && keyCode <= 57 )
-		{
-			let buttonName = keycodeArray[keyCode - 48]
-			return buttons[buttonName]
-		}
-		if( 65 <= keyCode && keyCode <= 90 )
-		{
-			let buttonName = keycodeArray[keyCode - 55]
-			return buttons[buttonName]
-		}
-		return null
-	}
 
 	//don't use ctrl or other things that conflict
 	document.addEventListener( 'keydown', function(event)
 	{
-		let button = getButton(event.keyCode)
-
-		if(button === null)
-		{
+		let button = buttons[event.key]
+		if(button === undefined)
 			return
-		}
 
 		if(!button.down)
 		{
@@ -93,12 +68,9 @@ function initButtons()
 	}, false );
 	document.addEventListener( 'keyup', function(event)
 	{
-		let button = getButton(event.keyCode)
-
-		if(button === null)
-		{
+		let button = buttons[event.key]
+		if(button === undefined)
 			return
-		}
 
 		if( button.down )
 		{
@@ -112,14 +84,12 @@ function initButtons()
 		for(var buttonName in buttons )
 		{
 			if( buttons[buttonName].down && buttons[buttonName].whileDown )
-			{
 				buttons[buttonName].whileDown()
-			}
 		}
 	})
 
 	//inputSimulator
-	// if(0)
+	if(0)
 	{
 		let timer = 0
 		let framesBetweenInputs = 3

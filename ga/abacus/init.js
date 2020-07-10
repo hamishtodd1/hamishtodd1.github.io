@@ -68,6 +68,8 @@
 
 async function init()
 {
+	console.error("NOW IS THE TIME, SWITCH TO REASONABLE TEXT AND OTHER THINGS IN COMMON")
+
 	// await initMultivectorAppearances_()
 	// return
 
