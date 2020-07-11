@@ -108,7 +108,7 @@ async function init()
 	bindButton("PageUp",  	() => addToCaratPosition(0., 999.))
 	bindButton("PageDown",	() => addToCaratPosition(0.,-999.))
 	
-	let characters = "abcdefghijklmnopqrstuvwxyz +*/-A"
+	let characters = "abcdefghijklmnopqrstuvwxyz /-"
 	function addCharacter(character)
 	{
 		backgroundString = backgroundString.slice(0, caratPositionInString) + character + backgroundString.slice(caratPositionInString, backgroundString.length)
@@ -159,16 +159,16 @@ async function init()
 		gsSymbolInstanced.count = 0
 		pad.add(gsSymbolInstanced)
 
-		m1.identity()
-		m1.elements[0] = .5 //want it bigger
-		m1.elements[5] = m1.elements[0]
-		// m1.setPosition(drawingPosition)
-		m1.elements[12] += .25 //half a space
-		gsSymbolInstanced.getMatrixAt(gsSymbolInstanced.count, m1)
-		log(m1.elements)
-		// gsSymbolInstanced.setMatrixAt(gsSymbolInstanced.count, m1)
-		// gsSymbolInstanced.instanceMatrix.needsUpdate = true
-		// ++gsSymbolInstanced.count
+		// m1.identity()
+		// m1.elements[0] = .5 //want it bigger
+		// m1.elements[5] = m1.elements[0]
+		// // m1.setPosition(drawingPosition)
+		// m1.elements[12] += .25 //half a space
+		// gsSymbolInstanced.getMatrixAt(gsSymbolInstanced.count, m1)
+		// log(m1.elements)
+		// // gsSymbolInstanced.setMatrixAt(gsSymbolInstanced.count, m1)
+		// // gsSymbolInstanced.instanceMatrix.needsUpdate = true
+		// // ++gsSymbolInstanced.count
 
 		// let animatedGeometricProductSymbol = new THREE.Mesh(unchangingUnitSquareGeometry, materials.geometricProduct)
 		// let animatedGeometricSumSymbol = new THREE.Mesh(unchangingUnitSquareGeometry, materials.geometricSum)
@@ -192,7 +192,7 @@ async function init()
 		let vectorMaterial = new THREE.MeshStandardMaterial({color:0xFF0000})
 		// log(vectorMaterial.program.fragmentShader)
 		let v = new THREE.Mesh(vectorGeometry,vectorMaterial)
-		// scene.add(v)
+		scene.add(v)
 	}
 	
 	let drawingPosition = new THREE.Vector3()
@@ -394,25 +394,25 @@ async function init()
 
 	Temporary:
 	a ?auburn (red)
-	b ?black blue?
+	b ?black blue? brown
 	c cyan (blue)
 	d
 	e ?emerald (green)
 	f ?fuscia (purple)
-	g green
+	g green gray
 	h
 	i ?indigo (purple)
 	j
 	k
 	l ?lilac ?lemon
-	m magenta (technical people should know. Colorblindness though)
+	m magenta (technical people should know. Colorblindness though. But so many will call it purple)
 	n
 	o orange
-	p pink ("fuck purple")
+	p pink ("fuck purple") purple
 	q
 	r red
 	s
-	t turquoise or teal "blue green"
+	t turquoise or teal. People just call it blue or green
 	u ultramarine
 	v ?violet ?viridian
 	w white
