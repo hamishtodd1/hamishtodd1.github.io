@@ -181,18 +181,11 @@ async function init()
 	let mvs = []
 	{
 		let mv = new THREE.InstancedMesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({color:0xFF0000}), maxCopiesOfMv)
+		log(mv.count)
 		mv.count = 0
 		pad.add(mv)
 		mv.name = "wbmo"
 		mvs.push(mv)
-
-		let vectorRadius = .2
-		let vectorGeometry = new THREE.CylinderBufferGeometry(0., vectorRadius, 1., 16, 1, false);
-		vectorGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0., .5, 0.))
-		let vectorMaterial = new THREE.MeshStandardMaterial({color:0xFF0000})
-		// log(vectorMaterial.program.fragmentShader)
-		let v = new THREE.Mesh(vectorGeometry,vectorMaterial)
-		scene.add(v)
 	}
 	
 	let drawingPosition = new THREE.Vector3()

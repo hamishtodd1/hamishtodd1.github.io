@@ -30,37 +30,12 @@ function initButtons()
 		}
 	}
 
-	var buttonIndexGivenName = {
-		"enter":"Enter",
-		"alt":"Alt",
-		"shift":"Shift",
-
-		"left":"ArrowLeft",
-		"up":"ArrowUp",
-		"right":"ArrowRight",
-		"down":"ArrowDown",
-		"space":"(Space character)",
-		"esc":"Escape",
-
-		"[":219,
-		"]":221,
-
-		"backspace":"Backspace",
-
-		"pageUp":33,
-		"pageDown":34,
-		"end":35,
-		"home":36,
-	}
-
 	//don't use ctrl or other things that conflict
 	document.addEventListener( 'keydown', function(event)
 	{
 		let button = buttons[event.key]
-		if(button === undefined)
-			return
 
-		if(!button.down)
+		if(button !== undefined && !button.down)
 		{
 			button.onDown()
 			button.down = true
@@ -69,10 +44,8 @@ function initButtons()
 	document.addEventListener( 'keyup', function(event)
 	{
 		let button = buttons[event.key]
-		if(button === undefined)
-			return
 
-		if( button.down )
+		if(button !== undefined &&  button.down )
 		{
 			// button.onUp()
 			button.down = false
@@ -91,6 +64,8 @@ function initButtons()
 	//inputSimulator
 	if(0)
 	{
+		console.warn("Simulating input...")
+
 		let timer = 0
 		let framesBetweenInputs = 3
 		let inputsSoFar = 0

@@ -88,7 +88,7 @@ function initMultivectorAppearances()
         let name = ""
         for (let i = 0; i < correctlyBasedNumberString.length; i++)
             name += correctlyBasedNumberString[i] === "0" ? "" : colorCharacters[correctlyBasedNumberString[i] - 1]
-        log("str: ", correctlyBasedNumberString, " name: ", name)
+        // log("str: ", correctlyBasedNumberString, " name: ", name)
 
         return name
     }

@@ -39,6 +39,7 @@
 	kronecker delta
 
 	"i as the circle constant"
+		alright so you get an extra constant if you differentiate with respect to angle, maybe that's as it should be?
 		split complex numbers with polar coordinates
 		2*pi*i is the real thing https://blog.wolfram.com/2015/06/28/2-pi-or-not-2-pi/
 		d/dt i^(2*t) - suspicious, you might think that that'd be d/dt (-1)^t = 0

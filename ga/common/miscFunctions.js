@@ -1,3 +1,9 @@
+function digitGivenBase(num, base, digitNum)
+{
+	let nearbyIntegerPower = Math.pow(base, digitNum - 1)
+	return Math.floor((num % (nearbyIntegerPower * base)) / nearbyIntegerPower)
+}
+
 function SuperEllipseGeometry()
 {
 	let radius = 1.
