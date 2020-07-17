@@ -39,10 +39,7 @@
 		tornado particle effect
 		That sea wave thing where each point on the surface is a point on a circle
 
-	TODO sandbox / tool for thought / live coding / shader programming / quantum computing sandbox
-	Wanna move mouse/vr controller around area continuously and it updates
 	Helping make shaders
-		This is how you doodle the things that will become goals
 		Inputs
 			linear sequence of numbers
 			2D bunch of vectors in a square - fragment shader
@@ -60,8 +57,3 @@
 				https://www.youtube.com/watch?v=R_Rfkhg7s_M
 				https://www.youtube.com/watch?v=EtEOl-xJTg8
 */
-
-function initShaderProgramming(modeChange,inputGroup,outputGroup)
-{
-	
-}

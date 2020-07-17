@@ -43,9 +43,9 @@ function initMouse()
 		object.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAmount))
 	}
 
-	mouse.getZZeroPosition = function()
+	mouse.getZZeroPosition = function(target)
 	{
-		return mouse.raycaster.intersectZPlane(0.)
+		return mouse.raycaster.intersectZPlane(0.,target)
 	}
 
 	mouse.updateFromAsyncAndCheckClicks = function()

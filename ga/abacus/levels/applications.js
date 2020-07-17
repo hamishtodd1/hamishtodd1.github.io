@@ -159,111 +159,124 @@
 			someone going down a helter skelter
 			Someone is about to set of a spinning top
 				you can change the amount of angular momentum they put into it by changing the size of their bicep
+
+	Useful: these vectors get projected onto a plane. Therefore, you can look at their passage through time in a volume
 */
 
 function initClickyVideo()
 {
-	let video = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial())
-	video.position.z = .01
-	scene.add(video)
-	video.material.map = new THREE.VideoTexture()
-	video.material.map.minFilter = THREE.LinearFilter
-
-	let startTime = 1.
-	let endTime = 7.7
-	let numFramesAdvanced = 0.
-
-
+	//could zoom in closely and auto-move the camera assuming some linearity
 	
-	let videoDomElement = document.createElement( 'video' )
-	videoDomElement.style = "display:none"
-	videoDomElement.crossOrigin = 'anonymous'
-	videoDomElement.loop = false
-	videoDomElement.muted = true
-	video.material.map.image = videoDomElement
+	let startTime = 1.
 
-	let outputs = []
-	bindButton("space",function()
+	let mvEndValues = [0.004872107186358113, 0.002165380971714696, 0.02801461632155912, 0.0010826904858573484, 0.04019488428745435, 0.0021653809717146967, 0.052984165651644335, 0, 0.06333739342265536, 0, 0.07490864799025579, 0, 0.08708891595615101, -0.002165380971714696, 0.0980511571254568, -0.0043307619434293934, 0.1084043848964678, -0.0021653809717146967, 0.11936662606577346, -0.0043307619434293934, 0.1297198538367845, -0.005413452429286794, 0.13946406820950066, -0.006496142915144089, 0.14859926918392213, -0.007578833401001489, 0.15590742996345927, -0.0054134524292867945, 0.1644336175395859, -0.00757883340100149, 0.17113276492082835, -0.00757883340100149, 0.17783191230207074, -0.008661523886858893, 0.1833130328867236, -0.008661523886858891, 0.18940316686967126, -0.008661523886858891, 0.19427527405602923, -0.007578833401001489, 0.19792935444579796, -0.00757883340100149, 0.20036540803897693, -0.00649614291514409, 0.2015834348355665, -0.0054134524292867945, 0.2040194884287455, -0.0043307619434293934, 0.2040194884287455, -0.0043307619434293934, 0.20523751522533507, -0.003248071457572098, 0.20523751522533504, 0, 0.2046285018270403, 0.0010826904858573484, 0.2040194884287455, 0.0021653809717146967, 0.20280146163215607, 0.006496142915144143, 0.20097442143727176, 0.00757883340100149, 0.19853836784409273, 0.007578833401001492, 0.1967113276492084, 0.00757883340100149, 0.1930572472594399, 0.00757883340100149, 0.1906211936662607, 0.010826904858573589, 0.18574908647990263, 0.010826904858573589, 0.18209500609013407, 0.011909595344430937, 0.17783191230207074, 0.014074976316145632, 0.1723507917174178, 0.014074976316145633, 0.1686967113276493, 0.012992285830288285, 0.1626065773447017, 0.01624035728786033, 0.15651644336175402, 0.01624035728786033, 0.15042630937880636, 0.01515766680200298, 0.14555420219244825, 0.01515766680200298, 0.13946406820950072, 0.01515766680200298, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3]
+	let mvOriginValues = Array(mvEndValues.length)
+	for (let i = 0, il = mvOriginValues.length; i < il; i++)
+		mvOriginValues[i] = 0.
+	let arrayBeingWorkedOn = mvEndValues
+
+	let mv = MultivectorAppearance(function () { }, [0., 1., 0., 0., 0., 0., 0., 0.])
+	mv.vectorAppearance.material.transparent = true
+	mv.vectorAppearance.material.opacity = .5
+
+	let videosAndVector = new THREE.Group()
+	videosAndVector.add(mv)
+	scene.add(videosAndVector)
+
+	function setMvFromVid(video)
 	{
-		log(outputs.toString())
-	})
+		let frameNumber = Math.round( (video.$.currentTime - startTime) * 29.97) //floor?
+		frameNumber = Math.min(Math.floor((mvOriginValues.length - 1) / 2.), frameNumber)
+		if (!(frameNumber > 0)) return
+
+		v1.set(
+			mvEndValues[frameNumber * 2 + 0] - mvOriginValues[frameNumber * 2 + 0],
+			mvEndValues[frameNumber * 2 + 1] - mvOriginValues[frameNumber * 2 + 1],
+			0.
+		)
+		video.updateMatrixWorld()
+		v1.applyMatrix4(video.matrix)
+
+		mv.elements[1] = v1.x
+		mv.elements[2] = v1.y
+		mv.position.x = v1.x / 2. //temporary
+		mv.position.y = v1.y / 2.
+		mv.updateAppearance()
+	}
 
 	let clickingMode = false
-
-	videoDomElement.currentTime = startTime
-	videoDomElement.paused = true
-	videoDomElement.src = "data/videos/hoberman.mp4"
-	videoDomElement.load()
-	videoDomElement.onloadeddata = function ()
+	if (clickingMode)
 	{
-		updateFunctions.push(function()
+		let video = VideoScreen("hoberman.mp4")
+		video.$.currentTime = startTime
+		video.$.play()
+		videosAndVector.add(video)
+
+		updateFunctions.push(() =>
 		{
 			video.scale.x = camera.rightAtZZero * 2.
-			video.scale.y = video.scale.x * (videoDomElement.videoHeight / videoDomElement.videoWidth)
+			if( video.loaded )
+				setMvFromVid(video)
+		})
+	}
+	else
+	{
+		let videos = Array(2)
+		for (let i = 0; i < 2; i++)
+		{
+			videos[i] = VideoScreen("hoberman.mp4")
+			videos[i].scale.x = camera.rightAtZZero * 2.
+			videos[i].$.paused = true
+			videos[i].$.currentTime = startTime
+			
+			videosAndVector.add(videos[i])
+		}
+
+		function advanceSomeFrames(increment)
+		{
+			numFramesAdvanced += increment
+
+			let indexToGoInScene = numFramesAdvanced % 2
+			videos[1 - indexToGoInScene].position.y = 999.
+			videos[    indexToGoInScene].position.y = 0.
+
+			videos[    indexToGoInScene].$.currentTime = startTime + numFramesAdvanced / 29.97 //probably already there
+			videos[1 - indexToGoInScene].$.currentTime = startTime + (numFramesAdvanced + 1) / 29.97
+		}
+		let numFramesAdvanced = -1
+
+		bindButton("space", () =>
+		{
+			//could check if there are any gaps, which there might be
+			log(arrayBeingWorkedOn.toString())
+		})
+
+		updateFunctions.push( () =>
+		{
+			if (!videos[0].loaded || !videos[1].loaded)
+				return
+			if(numFramesAdvanced === -1)
+				advanceSomeFrames(1)
+
+			let videoCurrentlyInScene = videos[0].position.y === 0. ? videos[0] : videos[1]
+			setMvFromVid(videoCurrentlyInScene)
+			videoCurrentlyInScene.scale.x = camera.rightAtZZero * 2.
 
 			if (mouse.clicking && !mouse.oldClicking)
 			{
-				v1.copy(mouse.getZZeroPosition())
-				video.worldToLocal(v1)
-				outputs[numFramesAdvanced * 2 + 0] = v1.x
-				outputs[numFramesAdvanced * 2 + 1] = v1.y
+				mouse.getZZeroPosition(v1)
+				log(v1)
+				videoCurrentlyInScene.updateMatrixWorld()
+				videoCurrentlyInScene.worldToLocal(v1)
+				arrayBeingWorkedOn[numFramesAdvanced * 2 + 0] = v1.x
+				arrayBeingWorkedOn[numFramesAdvanced * 2 + 1] = v1.y
 
-				++numFramesAdvanced
-				//god it's slow. Could have two copies of the video and flick back and forth?
-				videoDomElement.currentTime = startTime + numFramesAdvanced / 29.97
+				advanceSomeFrames(1)
 			}
 		})
-		if (clickingMode)
-			videoDomElement.play()
-	}
 
-	if (clickingMode)
-	{
-		let realEnd = [0.004872107186358113, 0.002165380971714696, 0.02801461632155912, 0.0010826904858573484, 0.04019488428745435, 0.0021653809717146967, 0.052984165651644335, 0, 0.06333739342265536, 0, 0.07490864799025579, 0, 0.08708891595615101, -0.002165380971714696, 0.0980511571254568, -0.0043307619434293934, 0.1084043848964678, -0.0021653809717146967, 0.11936662606577346, -0.0043307619434293934, 0.1297198538367845, -0.005413452429286794, 0.13946406820950066, -0.006496142915144089, 0.14859926918392213, -0.007578833401001489, 0.15590742996345927, -0.0054134524292867945, 0.1644336175395859, -0.00757883340100149, 0.17113276492082835, -0.00757883340100149, 0.17783191230207074, -0.008661523886858893, 0.1833130328867236, -0.008661523886858891, 0.18940316686967126, -0.008661523886858891, 0.19427527405602923, -0.007578833401001489, 0.19792935444579796, -0.00757883340100149, 0.20036540803897693, -0.00649614291514409, 0.2015834348355665, -0.0054134524292867945, 0.2040194884287455, -0.0043307619434293934, 0.2040194884287455, -0.0043307619434293934, 0.20523751522533507, -0.003248071457572098, 0.20523751522533504, 0, 0.2046285018270403, 0.0010826904858573484, 0.2040194884287455, 0.0021653809717146967, 0.20280146163215607, 0.006496142915144143, 0.20097442143727176, 0.00757883340100149, 0.19853836784409273, 0.007578833401001492, 0.1967113276492084, 0.00757883340100149, 0.1930572472594399, 0.00757883340100149, 0.1906211936662607, 0.010826904858573589, 0.18574908647990263, 0.010826904858573589, 0.18209500609013407, 0.011909595344430937, 0.17783191230207074, 0.014074976316145632, 0.1723507917174178, 0.014074976316145633]
-		let mvEndValues = Array(200)
-		let mvOriginValues = Array(200)
-		for (let i = 0; i < mvOriginValues.length/2.; i++)
-		{
-			mvOriginValues[i * 2 + 0] = 0.
-			mvOriginValues[i * 2 + 1] = 0.
-
-			if (i * 2 + 1 < realEnd.length)
-			{
-				mvEndValues[i * 2 + 0] = realEnd[i * 2 + 0]
-				mvEndValues[i * 2 + 1] = realEnd[i * 2 + 1]
-			}
-			else
-			{
-				mvEndValues[i*2+0] = 1.2 + Math.sin(i * .02)
-				mvEndValues[i*2+1] = 1.0 + Math.sin(i * .03)
-			}
-		}
-
-		let mv = MultivectorAppearance(function () { }, [0., 1., 0., 0., 0., 0., 0., 0.])
-		scene.add(mv)
-		updateFunctions.push(function ()
-		{
-			if(frameCount*2+1>mvOriginValues.length-1)
-				return
-
-			let frameNumber = Math.round( (videoDomElement.currentTime - startTime) * 29.97 ) //floor?
-			if (!(frameNumber > 0.) || !(frameNumber < mvOriginValues.length / 2. ) )
-				return
-
-			v1.set(
-				mvEndValues[frameNumber * 2 + 0] - mvOriginValues[frameNumber * 2 + 0],
-				mvEndValues[frameNumber * 2 + 1] - mvOriginValues[frameNumber * 2 + 1],
-				0.
-			)
-			video.localToWorld(v1)
-
-			mv.position.x = v1.x / 2.
-			mv.position.y = v1.y / 2.
-
-			mv.elements[1] = v1.x
-			mv.elements[2] = v1.y
-			mv.updateAppearance()
-		})
+		bindButton("right", () => advanceSomeFrames( 1) )
+		bindButton("left",  () => advanceSomeFrames(-1) )
 	}
 }
 
@@ -283,12 +296,12 @@ function initVideo(goalOutputGroup)
 	for(let i = 0; i < outputs.length; i++)
 		outputs[i] = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture() }))
 
-	let videoDomElement = document.createElement( 'video' )
-	videoDomElement.style = "display:none"
-	videoDomElement.crossOrigin = 'anonymous'
-	videoDomElement.loop = false
-	videoDomElement.muted = true
-	// videoDomElement.playbackRate = .5
+	let $video = document.createElement( 'video' )
+	$video.style = "display:none"
+	$video.crossOrigin = 'anonymous'
+	$video.loop = false
+	$video.muted = true
+	// $video.playbackRate = .5
 
 	//hack
 	let notAlreadyUpdating = true
@@ -305,23 +318,23 @@ function initVideo(goalOutputGroup)
 			if( !wantedOnScreen )
 			{
 				wantedOnScreen = true
-				videoDomElement.currentTime = startTime
-				videoDomElement.paused = true
+				$video.currentTime = startTime
+				$video.paused = true
 			}
 		}
 		video.onClick = trigger
 		trigger()
 
-		videoDomElement.src = "data/videos/" + filename + ".mp4"
-		videoDomElement.load()
-		videoDomElement.onloadeddata = function()
+		$video.src = "data/videos/" + filename + ".mp4"
+		$video.load()
+		$video.onloadeddata = function()
 		{
 			scene.add(video)
-			video.scale.y = videoDomElement.videoHeight / videoDomElement.videoWidth
+			video.scale.y = $video.videoHeight / $video.videoWidth
 			video.scale.multiplyScalar(camera.rightAtZZero * .98)
 			offscreenX = camera.rightAtZZero + .5 * video.scale.x - .4
 			video.material.map.minFilter = THREE.LinearFilter
-			video.material.map.image = videoDomElement
+			video.material.map.image = $video
 
 			let intendedPosition = new THREE.Vector3()
 			function update()
@@ -332,13 +345,13 @@ function initVideo(goalOutputGroup)
 
 				if( wantedOnScreen && onscreenness === 1.)
 				{
-					if( videoDomElement.currentTime === startTime )
-						videoDomElement.play()
+					if( $video.currentTime === startTime )
+						$video.play()
 
-					if( videoDomElement.currentTime >= endTime )
-						videoDomElement.pause()
+					if( $video.currentTime >= endTime )
+						$video.pause()
 
-					if( videoDomElement.paused ) //if there's no endTime
+					if( $video.paused ) //if there's no endTime
 						wantedOnScreen = false
 				}
 
@@ -347,11 +360,11 @@ function initVideo(goalOutputGroup)
 
 				for(let i = 0; i < outputTimes.length; i++)
 				{
-					if( videoDomElement.currentTime > outputTimes[i] )
+					if( $video.currentTime > outputTimes[i] )
 					{
 						if(outputs[i].parent === null)
 						{
-							outputs[i].material.map.image = videoDomElement
+							outputs[i].material.map.image = $video
 							outputs[i].material.map.needsUpdate = true
 							outputs[i].scale.copy(video.scale)
 							outputs[i].position.copy(video.position)

@@ -1,14 +1,13 @@
 /*
 	Look through "record", lots of stuff in there and things you've done
 
+	TODO demo next week
+		complex number viz, rectangle and scalar
+
 	TODO calculator (Andy/slack/pontus/alan kay/Steven Der Kenick/Chris Doran/Joan Lasenby)
 		Animations
 		MAYBE reform input and output stuff
 			Unify the various "generating" approaches
-
-	TODO Jon (gonna do talk on educational games!)
-		Just some levels
-		Ideally an input/output one
 
 	TODO for live coding / input output sandbox / level editor
 		Differential geometry / turtle
@@ -69,6 +68,7 @@
 async function init()
 {
 	console.error("NOW IS THE TIME, SWITCH TO REASONABLE TEXT AND OTHER THINGS IN COMMON")
+	console.log("miscfunctions has intersectZPlane and the video thing")
 
 	// await initMultivectorAppearances_()
 	// return
@@ -78,8 +78,6 @@ async function init()
 
 	// initTankScene()
 	// return
-
-	console.error("hey")
 
 	initClickyVideo()
 	return

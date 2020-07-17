@@ -1,25 +1,25 @@
 /*
-	controversh: We should get used to having lots of code deleted, fuck rereading and editing, redo everything. Maybe don't sweat the record too much
-	Visualizing the abstract syntax tree is surely good for concurrency?
-
-	Could be a lot like a spreadsheet. Already is really, you have the data there
-
-	your actions you can understand. All the complexities of the circuit should just be a visual representation of them
-	So we call this the record because for the time being that's all it is...
-
-	Navigation / debugging
+	Misc
+		We should get used to having lots of code deleted, fuck rereading and editing, redo everything. Maybe don't sweat the record too much
+		Concurrency at some point
+		Having wires everywhere is one way of getting rid of action at a distance, kinda saying "these things are the same". But it does make a mess
+		Doesn't matter if you Curry or not
+		
+	Thinking of it as something you do and record
+		This probably should just be thought of as a way to animate things and make the interface understandable for a new programmer
+		your actions, a series of them, you can understand. All the complexities of the circuit should just be a visual representation of them
+		So we call this the record because for the time being that's all it is
 		If you hover the record, it instantly takes you back to that place, but unless you click, when you let go, you return to your current progress
-		You can zoom in and out
 		Zoomed in, the stuff that is cut off the top must be evaluated
 		Do you want to delete all code below?
 			Probably yes. In puzzlescript games, it's certainly not so bad that when you rewind, you still have some determined future
 			In fact that sounds fairly confusing
 
 	Cartoonish representation (must be secondary to input efficiency)
+		Creatures swallow and poop results
 		"Bunch of little monsters arranged in a certain way" beats "little dude runs around"
-		Or is it "a copy of this thing will be made and flow along this line", like a frog that shoots out its tongue to get one of a thing from where it is
-
-	Connection = "these things are the same", quite powerful and you probably need it anyway
+		Maybe the add monster likes apples, you put apples where you want him to go, and multiply likes bananas
+		There is no debug mode (unless it's always debug mode). There is only "these expressions have not been evaluated yet, eg this 2+2 is not yet turned into 4" - The apples and bananas are just part of a 
 
 	Can anything from any point in the past be cloned, or can things be destroyed for ever? "destroyed forever" sounds more like eating
 		To put it another way, does it pay to be selective about what variables you remember? Can scope get crowded?

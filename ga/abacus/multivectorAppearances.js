@@ -419,8 +419,8 @@ async function initMultivectorAppearances()
 		multivec.add(scalar)
 		multivec.scalar = scalar
 
-		let vectorAppearance = VectorAppearance()
-		multivec.add(vectorAppearance)
+		multivec.vectorAppearance = VectorAppearance()
+		multivec.add(multivec.vectorAppearance)
 
 		let bivectorAppearance = BivectorAppearance()
 		multivec.add(bivectorAppearance)
@@ -479,7 +479,7 @@ async function initMultivectorAppearances()
 				log("not 3D yet")
 
 			scalar.updateAppearance(multivec.elements[0])
-			vectorAppearance.setVec(multivec.elements[1], multivec.elements[2], multivec.elements[3])
+			multivec.vectorAppearance.setVec(multivec.elements[1], multivec.elements[2], multivec.elements[3])
 			bivectorAppearance.updateAppearance(multivec.elements[4],multivec.elements[5],multivec.elements[6])
 
 			updateBoundingBoxSize()

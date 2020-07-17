@@ -1,3 +1,27 @@
+function VideoScreen(filename)
+{
+	let video = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial())
+	video.loaded = false
+	
+	video.$ = document.createElement('video')
+	video.$.style = "display:none"
+	video.$.crossOrigin = 'anonymous'
+	video.$.loop = false
+	video.$.muted = true
+	video.$.src = "data/videos/" + filename
+	video.$.load()
+	video.$.onloadeddata = () =>
+	{
+		video.loaded = true
+		updateFunctions.push(() => { video.scale.y = video.scale.x * (video.$.videoHeight / video.$.videoWidth)})
+	}
+	
+	video.material.map = new THREE.VideoTexture(video.$)
+	video.material.map.minFilter = THREE.LinearFilter
+	
+	return video
+}
+
 function SuperEllipseGeometry()
 {
 	let radius = 1.
@@ -67,10 +91,10 @@ THREE.Raycaster.prototype.updateFromClientCoordinates = function(clientX,clientY
 	delete ndc
 }
 
-THREE.Raycaster.prototype.intersectZPlane = function(z)
+THREE.Raycaster.prototype.intersectZPlane = function(z,target)
 {
 	var zPlane = new THREE.Plane(zUnit,-z)
-	return this.ray.intersectPlane(zPlane,new THREE.Vector3())
+	return this.ray.intersectPlane(zPlane, target)
 }
 
 {
