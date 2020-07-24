@@ -2,7 +2,11 @@
 
 ## What is this?
 
-This is, or will be, ["Coot"](https://www2.mrc-lmb.cam.ac.uk/personal/pemsley/coot/) in VR.
+This is an attempt to implement ["Coot"](https://www2.mrc-lmb.cam.ac.uk/personal/pemsley/coot/) in VR.
+
+## How do I try it?
+
+Go here http://hamishtodd1.github.io/cvr
 
 [![Video introduction](https://img.youtube.com/vi/TdyYOWKDpGc/0.jpg)](https://www.youtube.com/watch?v=TdyYOWKDpGc)
 

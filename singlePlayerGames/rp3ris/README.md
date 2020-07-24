@@ -1,0 +1,1 @@
+The design and code of this game are copyright Hamish Todd 2020, all rights reserved. To license it contact hamish.todd1@gmail.com

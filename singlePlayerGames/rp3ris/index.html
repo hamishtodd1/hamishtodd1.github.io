@@ -1,0 +1,93 @@
+<!-- Godel's bulldog logo: start with line inside circle, go to circle inside line -->
+
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				margin: 0px;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- <script src="/socket.io/socket.io.js"></script>
+		<script src="connection.js"></script> -->
+
+		<script src="lib/three.js"></script>
+		<script src="lib/sceneUtils.js"></script>
+
+		<script src="lib/OBJLoader.js"></script>
+
+		<script src="lib/WebVR.js"></script>
+
+		
+		<script src="vr.js"></script>
+
+		<script src="lighting.js"></script>
+		<script src="helmet.js"></script>
+
+		<script src="mockVrInput.js"></script>
+
+		<script src="face.js"></script>
+
+		<script src="recordingAndPlayback.js"></script>
+		<script src="cameraHolder.js"></script>
+		
+		<script src="text.js"></script>
+
+		<script src="keyboard.js"></script>
+
+		<script src="visibox.js"></script>
+		<script src="surroundings.js"></script>
+		
+		<script src="miscFunctions.js"></script>
+		<script src="variables.js"></script>
+
+		<script src="picsAndVideos.js"></script>
+
+		<script src="game.js"></script>
+
+		<script>
+			async function init()
+			{
+				let canvas = document.createElement( 'canvas' );
+				let gl = canvas.getContext( 'webgl2' );
+				console.assert(gl !== null )
+				renderer = new THREE.WebGLRenderer( { canvas: canvas, context: gl,antialias: true } );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.localClippingEnabled = true;
+				document.body.appendChild( renderer.domElement );
+
+				// initMouse()
+				initButtons()
+				initLights()
+				// await initPlaybackAndRecording()			
+				initControllerObjects()
+				await initFloorAndSky()
+				var getVrOrMockVrInput = initVrOrMockVrInput()
+
+				initGame()
+
+				renderer.setAnimationLoop( function()
+				{
+					frameDelta = clock.getDelta()
+
+					getVrOrMockVrInput()
+					
+					for(let i = 0; i < updateFunctions.length; i++)
+					{
+						updateFunctions[i]()
+					}
+
+					ourRender()
+
+					frameCount++;
+				})
+			}
+			init()
+		</script>
+	</body>
+</html>
