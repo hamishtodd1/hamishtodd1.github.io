@@ -1,6 +1,8 @@
 /*
 	You WILL have many iterations, you need to speed up iteration time
 
+	Just like scalar, bivec divides into unit length pieces before multiplication? vec as well? Maybe only think about unit sized things multiplying?
+
 	General
 		vector should just come from the origin, and in order to pack them, the origin should be in the corner, no biggie
 		Possibly you should always visualize the hodge dual, it's what you use in the geometric product
@@ -21,6 +23,7 @@
 		(scalar bivector) vector
 
 	The scalar
+		Use 1 as your scalar picture. Can have it fill up vertically for fractionals
 		Scalar-anything multiplication: all the scalars transform into the thing they're going to be, then "repeated addition"
 		how about they have a unit-size surroundings but are actually a little bean?
 		Need to know the multiplicative identity size, hence discrete units
@@ -243,12 +246,8 @@ async function initMultivectorAppearances()
 					}
 				}
 
-				vecPart.set(x, y, z)
-				randomPerpVector(vecPart, vecOrthX)
-				vecOrthX.normalize()
-				vecOrthZ.copy(vecPart).cross(vecOrthX).normalize().negate();
-				mesh.matrix.makeBasis(vecOrthX, vecPart, vecOrthZ);
-				mesh.matrix.setPosition(vecPart.multiplyScalar(-.5))
+				setRotationallySymmetricMatrix(x,y,z,mesh.matrix)
+				mesh.matrix.setPosition(v1.multiplyScalar(-.5))
 
 				mesh.visible = !vecPart.equals(zeroVector)
 			}
@@ -390,14 +389,14 @@ async function initMultivectorAppearances()
 
 				for (let i = 0; i < numPieces; i++)
 				{
-					tempVector.copy(piecesPositions[i])
-					geo.vertices[i * 4 + 0].lerp(tempVector, 1.)
-					tempVector.copy(piecesPositions[i]).add(piecesMoreClockwiseEdges[i])
-					geo.vertices[i * 4 + 1].lerp(tempVector, 1.)
-					tempVector.copy(piecesPositions[i]).add(piecesLessClockwiseEdges[i])
-					geo.vertices[i * 4 + 2].lerp(tempVector, 1.)
-					tempVector.copy(piecesPositions[i]).add(piecesMoreClockwiseEdges[i]).add(piecesLessClockwiseEdges[i])
-					geo.vertices[i * 4 + 3].lerp(tempVector, 1.)
+					v1.copy(piecesPositions[i])
+					geo.vertices[i * 4 + 0].lerp(v1, 1.)
+					v1.copy(piecesPositions[i]).add(piecesMoreClockwiseEdges[i])
+					geo.vertices[i * 4 + 1].lerp(v1, 1.)
+					v1.copy(piecesPositions[i]).add(piecesLessClockwiseEdges[i])
+					geo.vertices[i * 4 + 2].lerp(v1, 1.)
+					v1.copy(piecesPositions[i]).add(piecesMoreClockwiseEdges[i]).add(piecesLessClockwiseEdges[i])
+					geo.vertices[i * 4 + 3].lerp(v1, 1.)
 				}
 				geo.verticesNeedUpdate = true
 			}

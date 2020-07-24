@@ -1,6 +1,14 @@
 /*
+	veritaseum https://www.youtube.com/watch?v=4tgOyU34D44
+
 	https://www.geogebra.org/m/kvy5zksn
 	Anthony Howe kinetic masterpieces
+
+	fire poi throwing sparks!
+	corkscrew
+	sphere
+	tornado particle effect
+	That sea wave thing where each point on the surface is a point on a circle
 
 	Wanna be able to program your own visualization, then use that to visualize your program
 
@@ -45,11 +53,28 @@
 
 	First example
 		Ball shot from cannon
-		And then a nice step up is 
+
+	Some random ones
+		Visualize wind direction for sailboats
+		Toilet flush mechanism
+		Pastabydesign, parametric equations for pasta
+		Daniel piker stuff
+		Use the appearance of your unshaven neck to talk about hyperbolas/vector fields?
+		Felix colgrave flag animation
+		Go travelling in order to make the videos
+		Go to lots of conferences for fun and to give you deadlines (well blow would argue don't do that) Toy fair, gathering for Gardner, quantum computing
+		Tim's transformers dog car
+		Marble taken up stairs by those staircases where the stairs go up and down
+		Euler disc
+		Blowing into whistles with rotating bits = constant force "Tim whistles" grand illusion
+		led trails on lights
+
 
 	Structure based around rocket science
 		Could talk to isaac arthur
 		Classical mechanics / mechanical engineering
+			https://www.novelty-automation.com/
+			Sewing machine mechanism
 			poi! fire poi with sparks!
 			https://twitter.com/MachinePix/status/1249390426672361472
 			it is very interesting that .5mv^2 works if v is squared using the Clifford product
@@ -153,7 +178,7 @@
 			Bee going from flower to flower
 			Curling stones
 			Diver
-			Dancer
+			Dancer, breakdancing and voguing especially
 			Juggler. Lots of circus skills
 				https://www.youtube.com/watch?v=9GOEz7FEh88 ribbon tutorial, great
 			someone going down a helter skelter
@@ -162,123 +187,6 @@
 
 	Useful: these vectors get projected onto a plane. Therefore, you can look at their passage through time in a volume
 */
-
-function initClickyVideo()
-{
-	//could zoom in closely and auto-move the camera assuming some linearity
-	
-	let startTime = 1.
-
-	let mvEndValues = [0.004872107186358113, 0.002165380971714696, 0.02801461632155912, 0.0010826904858573484, 0.04019488428745435, 0.0021653809717146967, 0.052984165651644335, 0, 0.06333739342265536, 0, 0.07490864799025579, 0, 0.08708891595615101, -0.002165380971714696, 0.0980511571254568, -0.0043307619434293934, 0.1084043848964678, -0.0021653809717146967, 0.11936662606577346, -0.0043307619434293934, 0.1297198538367845, -0.005413452429286794, 0.13946406820950066, -0.006496142915144089, 0.14859926918392213, -0.007578833401001489, 0.15590742996345927, -0.0054134524292867945, 0.1644336175395859, -0.00757883340100149, 0.17113276492082835, -0.00757883340100149, 0.17783191230207074, -0.008661523886858893, 0.1833130328867236, -0.008661523886858891, 0.18940316686967126, -0.008661523886858891, 0.19427527405602923, -0.007578833401001489, 0.19792935444579796, -0.00757883340100149, 0.20036540803897693, -0.00649614291514409, 0.2015834348355665, -0.0054134524292867945, 0.2040194884287455, -0.0043307619434293934, 0.2040194884287455, -0.0043307619434293934, 0.20523751522533507, -0.003248071457572098, 0.20523751522533504, 0, 0.2046285018270403, 0.0010826904858573484, 0.2040194884287455, 0.0021653809717146967, 0.20280146163215607, 0.006496142915144143, 0.20097442143727176, 0.00757883340100149, 0.19853836784409273, 0.007578833401001492, 0.1967113276492084, 0.00757883340100149, 0.1930572472594399, 0.00757883340100149, 0.1906211936662607, 0.010826904858573589, 0.18574908647990263, 0.010826904858573589, 0.18209500609013407, 0.011909595344430937, 0.17783191230207074, 0.014074976316145632, 0.1723507917174178, 0.014074976316145633, 0.1686967113276493, 0.012992285830288285, 0.1626065773447017, 0.01624035728786033, 0.15651644336175402, 0.01624035728786033, 0.15042630937880636, 0.01515766680200298, 0.14555420219244825, 0.01515766680200298, 0.13946406820950072, 0.01515766680200298, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3]
-	let mvOriginValues = Array(mvEndValues.length)
-	for (let i = 0, il = mvOriginValues.length; i < il; i++)
-		mvOriginValues[i] = 0.
-	let arrayBeingWorkedOn = mvEndValues
-
-	let mv = MultivectorAppearance(function () { }, [0., 1., 0., 0., 0., 0., 0., 0.])
-	mv.vectorAppearance.material.transparent = true
-	mv.vectorAppearance.material.opacity = .5
-
-	let videosAndVector = new THREE.Group()
-	videosAndVector.add(mv)
-	scene.add(videosAndVector)
-
-	function setMvFromVid(video)
-	{
-		let frameNumber = Math.round( (video.$.currentTime - startTime) * 29.97) //floor?
-		frameNumber = Math.min(Math.floor((mvOriginValues.length - 1) / 2.), frameNumber)
-		if (!(frameNumber > 0)) return
-
-		v1.set(
-			mvEndValues[frameNumber * 2 + 0] - mvOriginValues[frameNumber * 2 + 0],
-			mvEndValues[frameNumber * 2 + 1] - mvOriginValues[frameNumber * 2 + 1],
-			0.
-		)
-		video.updateMatrixWorld()
-		v1.applyMatrix4(video.matrix)
-
-		mv.elements[1] = v1.x
-		mv.elements[2] = v1.y
-		mv.position.x = v1.x / 2. //temporary
-		mv.position.y = v1.y / 2.
-		mv.updateAppearance()
-	}
-
-	let clickingMode = false
-	if (clickingMode)
-	{
-		let video = VideoScreen("hoberman.mp4")
-		video.$.currentTime = startTime
-		video.$.play()
-		videosAndVector.add(video)
-
-		updateFunctions.push(() =>
-		{
-			video.scale.x = camera.rightAtZZero * 2.
-			if( video.loaded )
-				setMvFromVid(video)
-		})
-	}
-	else
-	{
-		let videos = Array(2)
-		for (let i = 0; i < 2; i++)
-		{
-			videos[i] = VideoScreen("hoberman.mp4")
-			videos[i].scale.x = camera.rightAtZZero * 2.
-			videos[i].$.paused = true
-			videos[i].$.currentTime = startTime
-			
-			videosAndVector.add(videos[i])
-		}
-
-		function advanceSomeFrames(increment)
-		{
-			numFramesAdvanced += increment
-
-			let indexToGoInScene = numFramesAdvanced % 2
-			videos[1 - indexToGoInScene].position.y = 999.
-			videos[    indexToGoInScene].position.y = 0.
-
-			videos[    indexToGoInScene].$.currentTime = startTime + numFramesAdvanced / 29.97 //probably already there
-			videos[1 - indexToGoInScene].$.currentTime = startTime + (numFramesAdvanced + 1) / 29.97
-		}
-		let numFramesAdvanced = -1
-
-		bindButton("space", () =>
-		{
-			//could check if there are any gaps, which there might be
-			log(arrayBeingWorkedOn.toString())
-		})
-
-		updateFunctions.push( () =>
-		{
-			if (!videos[0].loaded || !videos[1].loaded)
-				return
-			if(numFramesAdvanced === -1)
-				advanceSomeFrames(1)
-
-			let videoCurrentlyInScene = videos[0].position.y === 0. ? videos[0] : videos[1]
-			setMvFromVid(videoCurrentlyInScene)
-			videoCurrentlyInScene.scale.x = camera.rightAtZZero * 2.
-
-			if (mouse.clicking && !mouse.oldClicking)
-			{
-				mouse.getZZeroPosition(v1)
-				log(v1)
-				videoCurrentlyInScene.updateMatrixWorld()
-				videoCurrentlyInScene.worldToLocal(v1)
-				arrayBeingWorkedOn[numFramesAdvanced * 2 + 0] = v1.x
-				arrayBeingWorkedOn[numFramesAdvanced * 2 + 1] = v1.y
-
-				advanceSomeFrames(1)
-			}
-		})
-
-		bindButton("right", () => advanceSomeFrames( 1) )
-		bindButton("left",  () => advanceSomeFrames(-1) )
-	}
-}
 
 setVideo = async function(){console.error("Video can only be played on chrome!")}
 function initVideo(goalOutputGroup)
@@ -325,7 +233,7 @@ function initVideo(goalOutputGroup)
 		video.onClick = trigger
 		trigger()
 
-		$video.src = "data/videos/" + filename + ".mp4"
+		$video.src = "../common/data/videos/" + filename + ".mp4"
 		$video.load()
 		$video.onloadeddata = function()
 		{
@@ -417,7 +325,7 @@ async function initWheelScene()
 
 	let wheelRadius = .11
 	let wheel = new THREE.Mesh(new THREE.PlaneGeometry(wheelRadius*6*2.,wheelRadius*6*2.),new THREE.MeshBasicMaterial({transparent:true}))
-	new THREE.TextureLoader().load("data/wheel.png",function(texture){
+	new THREE.TextureLoader().load("../common/data/wheel.png",function(texture){
 		wheel.material.map = texture
 		wheel.material.needsUpdate = true
 	})
@@ -427,7 +335,7 @@ async function initWheelScene()
 
 	//https://imgbin.com/png/gNnWnJyC/clown-unicycle-png
 	let clown = new THREE.Mesh(new THREE.PlaneGeometry(wheelRadius*6*2.,wheelRadius*6*2.),new THREE.MeshBasicMaterial({transparent:true}))
-	new THREE.TextureLoader().load("data/clown.png",function(texture){
+	new THREE.TextureLoader().load("../common/data/clown.png",function(texture){
 		clown.material.map = texture
 		clown.material.needsUpdate = true
 	})
@@ -435,7 +343,7 @@ async function initWheelScene()
 
 	let flowerRadius = wheelRadius * .5
 	let flower = new THREE.Mesh(new THREE.PlaneGeometry(flowerRadius*2.,flowerRadius*2.),new THREE.MeshBasicMaterial({transparent:true}))
-	new THREE.TextureLoader().load("data/flower.png",function(texture){
+	new THREE.TextureLoader().load("../common/data/flower.png",function(texture){
 		flower.material.map = texture
 		flower.material.needsUpdate = true
 	})
@@ -558,7 +466,7 @@ async function initTankScene()
 
 	let tankRadius = .11
 	let tank = new THREE.Mesh(new THREE.PlaneGeometry(tankRadius*6*2.,tankRadius*6*2.),new THREE.MeshBasicMaterial({transparent:true}))
-	new THREE.TextureLoader().load("data/tank.png",function(texture){
+	new THREE.TextureLoader().load("../common/data/tank.png",function(texture){
 		tank.material.map = texture
 		tank.material.needsUpdate = true
 	})

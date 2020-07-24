@@ -1,4 +1,13 @@
 /*
+	separate camera for "asides"
+		History
+		Verbal jokes
+		Larger practical demonstrations?
+
+	To demonstrate equality you can just plot things. Or you could use omega calculus to reduce to 0
+
+	Put hand in leap motion area, hand is large over the text editor, lets you pick stuff with small movements
+
 	Why would Johannes Kepler be a good janitor? Because he doesn't mind sweeping out the same area every day
 
 	Without sound or particle effects or AR, just you talking in zeimlight style with PowerPoint slides, it can be the best academic course in GA available.

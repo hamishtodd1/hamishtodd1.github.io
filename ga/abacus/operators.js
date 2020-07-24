@@ -83,7 +83,7 @@ async function initOperatorAppearances()
 	let loader = new THREE.TextureLoader()
 	loader.crossOrigin = true
 	await new Promise(resolve => {
-		loader.load("data/frog.png",function(result)
+		loader.load("../common/data/frog.png",function(result)
 		{
 			materials.geometricSum.map = result
 			// textures.geometricProduct = result

@@ -75,7 +75,7 @@ async function initMenu(modeChange)
 		{
 			menuMode = !menuMode
 		}
-		bindButton("esc",toggleMenuMode)
+		bindButton("Escape",toggleMenuMode)
 		menuButton.onClick = toggleMenuMode
 		clickables.push(menuButton)
 	}

@@ -1,3 +1,73 @@
+function setRotationallySymmetricMatrix(yX, yY, yZ, matrix)
+{
+	v1.set(yX, yY, yZ)
+	randomPerpVector(v1, v2)
+	v2.normalize()
+	v3.copy(v1).cross(v2).normalize().negate();
+	matrix.makeBasis(v2, v1, v3);
+}
+
+function VideoScreen(filename)
+{
+	let video = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial())
+	video.loaded = false
+
+	video.$ = document.createElement('video')
+	video.$.style = "display:none"
+	video.$.crossOrigin = 'anonymous'
+	video.$.loop = false
+	video.$.muted = true
+	video.$.src = "../common/data/videos/" + filename
+	video.$.load()
+	video.$.onloadeddata = () =>
+	{
+		video.loaded = true
+		updateFunctions.push(() => { video.scale.y = video.scale.x * (video.$.videoHeight / video.$.videoWidth) })
+	}
+
+	video.material.map = new THREE.VideoTexture(video.$)
+	video.material.map.minFilter = THREE.LinearFilter
+
+	return video
+}
+
+THREE.Matrix4.prototype.setUniformScaleAssumingRigid = function (uniformScale)
+{
+	this.elements[0] = uniformScale
+	this.elements[5] = uniformScale
+	this.elements[10] = uniformScale
+
+	return this
+}
+
+function checkAnagram(a,b)
+{
+	if(a.length !== b.length)
+		return false
+
+	let alreadyHadThatOne = Array(a.length)
+	for (let i = 0, il = a.length; i < il; i++)
+		alreadyHadThatOne[i] = false
+
+	let j = 0
+	for(let i = 0, il = a.length; i < il; i++)
+	{
+		for( j = 0; j < il; j++)
+		{
+			if ( !alreadyHadThatOne[j] && a[i] === b[j])
+			{
+				alreadyHadThatOne[j] = true
+				break
+			}
+		}
+
+		if(j === il)
+			return false
+	}
+
+	return true
+}
+
 function digitGivenBase(num, base, digitNum)
 {
 	let nearbyIntegerPower = Math.pow(base, digitNum - 1)
@@ -62,21 +132,9 @@ function checkIfObjectIsInScene(object)
 	return thingWeWantToBecomeUltimateParent
 }
 
-THREE.Raycaster.prototype.updateFromClientCoordinates = function(clientX,clientY)
-{
-	let ndc = new THREE.Vector2()
-	ndc.x = ( clientX / window.innerWidth  ) * 2 - 1;
-	ndc.y =-( clientY / window.innerHeight ) * 2 + 1;
-
-	this.setFromCamera(ndc,camera)
-
-	delete ndc
-}
-
-let pl = new THREE.Plane()
 THREE.Raycaster.prototype.intersectZPlane = function(z,target)
 {
-	pl.normal.copy(zUnit,-z)
+	pl.set(zUnit,-z)
 	return this.ray.intersectPlane(pl, target)
 }
 

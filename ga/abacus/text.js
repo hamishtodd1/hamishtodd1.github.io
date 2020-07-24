@@ -1,5 +1,6 @@
 function makeTextSign(initialText, twoSided, materialOnly, originCornered)
 {
+	console.error("CHANGE THIS TO THE REASONABLE VERSION")
 	if(twoSided == undefined)
 	{
 		twoSided = true;

@@ -21,7 +21,7 @@
 				The Trivector Device
 				A puzzle game that is secretly about quantum mechanics, SSH! APGTISAQM
 				Clifford the frog? Yeah you'll get sued
-					Ada the adder and Molly
+					Ada the adder and Mulder the Mule
 
 				Because you're making machines
 			-->
@@ -59,9 +59,7 @@
 					mouse.updateFromAsyncAndCheckClicks();
 
 					for(var i = 0; i < updateFunctions.length; i++)
-					{
 						updateFunctions[i]();
-					}
 
 					frameCount++;
 
@@ -78,10 +76,12 @@
 		<script src="lib/OBJLoader.js"></script>
 		
 		<script src="windowResizeSystemAndSurroundings.js"></script>
-		<script src="miscFunctions.js"></script>
-		<script src="mouse.js"></script>
+		
+		<script src="../common/miscFunctions.js"></script>
+		<script src="../common/mouse.js"></script>
 		<script src="text.js"></script>
-		<script src="sound.js"></script>
+		<script src="../common/sound.js"></script>
+
 		<script src="menu.js"></script>
 		<script src="levels.js"></script>
 		<script src="goalStructure.js"></script>
@@ -102,10 +102,11 @@
 		<script src="init.js"></script>
 		<script src="record.js"></script>
 
-		<script src="algebra.js"></script>
+		<script src="../common/algebra.js"></script>
  
+		<script src="../common/variables.js"></script>
 		<script src="variables.js"></script>
-		<script src="buttons.js"></script>
+		<script src="../common/buttons.js"></script>
 
 		<script>
 			technicalInit()

@@ -64,11 +64,8 @@
 */
 
 
-
 async function init()
 {
-	console.error("NOW IS THE TIME, SWITCH TO REASONABLE TEXT AND OTHER THINGS IN COMMON")
-	console.log("miscfunctions has intersectZPlane and the video thing")
 
 	// await initMultivectorAppearances_()
 	// return
@@ -78,6 +75,7 @@ async function init()
 
 	// initTankScene()
 	// return
+
 
 	initClickyVideo()
 	return

@@ -5,11 +5,21 @@
 	simulation would be nice
 */
 
+THREE.Raycaster.prototype.updateFromClientCoordinates = function (clientX, clientY)
+{
+	let ndc = new THREE.Vector2()
+	ndc.x = (clientX / window.innerWidth) * 2 - 1;
+	ndc.y = -(clientY / window.innerHeight) * 2 + 1;
+
+	this.setFromCamera(ndc, camera)
+
+	delete ndc
+}
+
 function initMouse() 
 {
 	let asynchronous = {
 		clicking: false,
-		justMoved: false,
 
 		raycaster: new THREE.Raycaster(), //top right is 1,1, bottom left is -1,-1
 	};
@@ -21,32 +31,29 @@ function initMouse()
 		clicking: false,
 		oldClicking: false,
 		oldRightClicking: false,
-		justMoved: false,
 
 		//don't use too much if clicking is not true - touchscreens. There are other ways to do things, and many people will be on phone
 		raycaster: new THREE.Raycaster(),
-		oldRay:new THREE.Ray(),
+		oldRaycaster: new THREE.Raycaster(),
 	};
 	mouse.raycaster.ray.copy(asynchronous.raycaster.ray)
-	mouse.oldRay.copy( mouse.raycaster.ray)
+	mouse.oldRaycaster.ray.copy( mouse.raycaster.ray)
 
 	mouse.rotateObjectByGesture = function(object)
 	{
-		var rotationAmount = mouse.raycaster.ray.direction.angleTo(mouse.oldRay.direction) * 2
-		// console.log(mouse.raycaster.ray.direction,mouse.oldRay.direction)
-		if(rotationAmount === 0)
-		{
+		let rotationAmount = mouse.raycaster.ray.direction.angleTo(mouse.oldRaycaster.ray.direction) * 35.
+		// console.log(mouse.raycaster.ray.direction,mouse.oldRaycaster.ray.direction)
+		if(rotationAmount === 0.)
 			return
-		}
-		var rotationAxis = mouse.raycaster.ray.direction.clone().cross(mouse.oldRay.direction);
+			
+		let rotationAxis = mouse.raycaster.ray.direction.clone().cross(mouse.oldRaycaster.ray.direction);
 		rotationAxis.applyQuaternion(object.quaternion.clone().inverse()).normalize();
 		object.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAmount))
 	}
 
-	mouse.getZZeroPosition = function(target)
-	{
-		return mouse.raycaster.intersectZPlane(0.,target)
-	}
+	mouse.getZZeroPosition = (target) => mouse.raycaster.intersectZPlane(0., target)
+
+	mouse.justMoved = () => !mouse.raycaster.ray.equals(mouse.oldRaycaster.ray)
 
 	mouse.updateFromAsyncAndCheckClicks = function()
 	{
@@ -56,20 +63,16 @@ function initMouse()
 		if(this.oldClicking && !this.clicking && lastClickedObject !== null && lastClickedObject.onNotClicking !== undefined )
 			lastClickedObject.onNotClicking()
 
-		this.justMoved = asynchronous.justMoved;
-		asynchronous.justMoved = false;
-
-		mouse.oldRay.copy(mouse.raycaster.ray);
+		mouse.oldRaycaster.ray.copy(mouse.raycaster.ray);
 		mouse.raycaster.ray.copy( asynchronous.raycaster.ray );
 		
 		if( this.clicking && !this.oldClicking )
 		{
-			var intersections = mouse.raycaster.intersectObjects( clickables );
+			let intersections = mouse.raycaster.intersectObjects( clickables );
 
 			if( intersections.length !== 0 )
 			{
-				if(!checkIfObjectIsInScene(intersections[0].object))
-					console.error("yeah, this is possible")
+				console.assert(checkIfObjectIsInScene(intersections[0].object))
 				intersections[0].object.onClick(intersections[0]);
 				lastClickedObject = intersections[0].object
 			}
@@ -79,8 +82,8 @@ function initMouse()
 	}
 
 	{
-		var currentRawX = 0;
-		var currentRawY = 0;
+		let currentRawX = 0;
+		let currentRawY = 0;
 
 		document.addEventListener( 'mousemove', function(event)
 		{
@@ -88,8 +91,6 @@ function initMouse()
 			//for some bizarre reason this can be called more than once with the same values
 			if(event.clientX !== currentRawX || event.clientY !== currentRawY)
 			{
-				asynchronous.justMoved = true;
-
 				asynchronous.raycaster.updateFromClientCoordinates(event.clientX,event.clientY)
 
 				currentRawX = event.clientX;
@@ -97,10 +98,7 @@ function initMouse()
 			}
 		}, false );
 
-		document.addEventListener('contextmenu', function(event)
-		{
-			event.preventDefault()
-		}, false);
+		document.addEventListener('contextmenu', function(event) { event.preventDefault() }, false);
 
 		document.addEventListener( 'mousedown', function(event) 
 		{

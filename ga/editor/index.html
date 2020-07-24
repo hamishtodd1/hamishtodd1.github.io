@@ -2,7 +2,7 @@
 -->
 <html>
 	<head>
-		<title>Victory</title>
+		<title>Geometric Lambda Calculus</title>
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
 			body {
@@ -19,34 +19,30 @@
 
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.shadowMap.enabled = true;
-				renderer.setClearColor(0x272822)
+				renderer.setClearColor(0x2B2B2B)
 				renderer.shadowMap.type = THREE.BasicShadowMap;
 				document.body.appendChild( renderer.domElement );
 
 				initWindowResizeSystemAndSurroundings(renderer);
 				initMouse()
 				initSound()
-				
-				initMultivectorAppearances()
 
-				// await init()
+				await init()
 
 				function render()
 				{
 					let clockDelta = clock.getDelta()
 					frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
 					
-					mouse.updateFromAsyncAndCheckClicks();
+					mouse.updateFromAsyncAndCheckClicks()
 
 					for(var i = 0; i < updateFunctions.length; i++)
-					{
-						updateFunctions[i]();
-					}
+						updateFunctions[i]()
 
-					frameCount++;
+					++frameCount
 
-					requestAnimationFrame( render );
-					renderer.render( scene, camera );
+					requestAnimationFrame( render )
+					renderer.render( scene, camera )
 				}
 
 				render()
@@ -67,6 +63,13 @@
 
 		<script src="init.js"></script>
 		<script src="multivectorAppearance.js"></script>
+		<script src="renderWindow.js"></script>
+
+		<script src="applications.js"></script>
+
+		<script src="pad.js"></script>
+
+		<script src="../common/variables.js"></script>
 		<script src="variables.js"></script>
 
 		<script>

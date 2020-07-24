@@ -13,10 +13,7 @@
 	4. Those get combined
 */
 let zeroMultivector = new Float32Array(8)
-MathematicalMultivector = function()
-{
-	return new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.,])
-}
+MathematicalMultivector = () => new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.,])
 
 function wedge(a,b) //aka antisymmetric
 {

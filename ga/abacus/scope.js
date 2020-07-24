@@ -302,10 +302,10 @@ function initScope()
 			selection = closestThing
 	}
 
-	bindButton("up", 	function ()	{changeSelection(1,true )})
-	bindButton("down", 	function ()	{changeSelection(1,false)})
-	bindButton("right", function ()	{changeSelection(0,true )})
-	bindButton("left", 	function ()	{changeSelection(0,false)})
+	bindButton("ArrowUp", 		function ()	{changeSelection(1,true )})
+	bindButton("ArrowDown", 	function ()	{changeSelection(1,false)})
+	bindButton("ArrowRight", 	function ()	{changeSelection(0,true )})
+	bindButton("ArrowLeft", 	function ()	{changeSelection(0,false)})
 
 	function getClosest()
 	{
@@ -329,7 +329,7 @@ function initScope()
 		return closest
 	}
 
-	bindButton("enter",function()
+	bindButton("Enter",function()
 	{
 		makeSureSelectorIsSetUp()
 

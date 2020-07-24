@@ -8,7 +8,7 @@
 
 function initButtons()
 {
-	var buttons = {};
+	let buttons = {};
 
 	bindButton = function( buttonName, onDown, buttonDescription,whileDown )
 	{
@@ -39,6 +39,8 @@ function initButtons()
 		{
 			button.onDown()
 			button.down = true
+
+			event.preventDefault()
 		}
 	}, false );
 	document.addEventListener( 'keyup', function(event)
@@ -49,6 +51,8 @@ function initButtons()
 		{
 			// button.onUp()
 			button.down = false
+
+			event.preventDefault()
 		}
 	}, false );
 
@@ -73,7 +77,7 @@ function initButtons()
 		// let inputs = ["right", "enter", "up", "enter", "enter", ".9",
 		// 	// "enter", "enter", "right", "enter"
 		// ]
-		let inputs = ["enter", "enter", "enter"]
+		let inputs = ["Enter", "Enter", "Enter"]
 
 		let counter = -1.
 
