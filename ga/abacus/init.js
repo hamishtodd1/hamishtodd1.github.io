@@ -9,6 +9,7 @@
 	Switch between orthogonal and isometric view
 
 	Keeping to R -> CL(2) might be good
+		Equivalence between shapes and things you see in the world around you
 		If you want spec rel, make a level where a rocket is moving around or whatever and they have to program something to follow it
 
 	Whoah, changing view is precisely changing basis vectors, which are inputs to a function that gives you a certain display
@@ -39,9 +40,7 @@ async function init()
 	// return
 
 	{
-		let restartButtonObj = makeTextSign("Restart (r)")
-		var restartButton = restartButtonObj.children[0]
-		restartButton.scale.copy(restartButtonObj.scale)
+		var restartButton = text("Restart (r)")
 		restartButton.scale.multiplyScalar(.4)
 	}
 

@@ -15,7 +15,7 @@ function initGoals(modeChange,restartButton)
 			reactToVictory()
 	})
 
-	let youWinSign = makeTextSign("Puzzle solved!")
+	let youWinSign = text("Puzzle solved!")
 	youWinSign.scale.multiplyScalar(.6)
 	youWinSign.position.y = camera.topAtZZero - .4
 	scene.add(youWinSign)
@@ -74,7 +74,7 @@ function initGoals(modeChange,restartButton)
 		goalBox.add(singularGoalMultivector)
 
 		let defaultText = "Make this:"
-		goalBox.title = makeTextSign(defaultText)
+		goalBox.title = text(defaultText)
 		goalBox.title.scale.multiplyScalar(.5)
 		goalBox.title.position.z = .01
 		goalBox.add(goalBox.title)
@@ -94,10 +94,10 @@ function initGoals(modeChange,restartButton)
 			if (goalExcitedness < 0.)
 				goalExcitedness = 0.
 			singularGoalMultivector.position.x = goalExcitedness * .2 * Math.sin(frameCount * .3)
-			goalBox.title.children[0].material.color.setRGB(1., 1. - goalExcitedness * oscillating, 1. - goalExcitedness * oscillating)
+			goalBox.title.material.color.setRGB(1., 1. - goalExcitedness * oscillating, 1. - goalExcitedness * oscillating)
 
 			if (victorySavouringCounter !== Infinity)
-				goalBox.title.children[0].material.color.setRGB(1. - oscillating, 1., 1. - oscillating)
+				goalBox.title.material.color.setRGB(1. - oscillating, 1., 1. - oscillating)
 
 			goalBox.position.x = camera.rightAtZZero - 1.4
 			goalBox.position.y = 0.
@@ -241,7 +241,7 @@ function initGoals(modeChange,restartButton)
 		levelIndex++
 		if( levelIndex >= levels.length )
 		{
-			let sign = makeTextSign("Well done! That's all the levels so far :)")
+			let sign = text("Well done! That's all the levels so far :)")
 			sign.scale.multiplyScalar(.4)
 			scene.add(sign)
 			let countDown = 3.2;

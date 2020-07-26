@@ -362,13 +362,15 @@ async function initWheelScene()
 	{	
 		let signSize = .14
 
-		var winSign = makeTextSign("Yum!",false,false,true)
+		console.error("Warning: these two signs were meant to be origin cornered")
+
+		var winSign = text("Yum!")
 		winSign.scale.multiplyScalar(signSize)
 		littleScene.add(winSign)
 		winSign.depthTest
 		winSign.visible = false
 
-		var loseSign = makeTextSign("I'm thirsty!",false,false,true)
+		var loseSign = text("I'm thirsty!")
 		loseSign.scale.multiplyScalar(signSize)
 		littleScene.add(loseSign)
 		loseSign.depthTest

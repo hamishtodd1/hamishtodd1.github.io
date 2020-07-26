@@ -26,9 +26,7 @@ async function initMenu(modeChange)
 	let menuEntries = []
 
 	{
-		let titleObject = makeTextSign("Menu")
-		let menuButton = titleObject.children[0]
-		menuButton.scale.copy(titleObject.scale)
+		let menuButton = text("Menu")
 		menuButton.scale.multiplyScalar(.4)
 		menu.add(menuButton)
 
@@ -81,9 +79,7 @@ async function initMenu(modeChange)
 	}
 
 	{
-		let calculatorObject = makeTextSign("Calculator Mode")
-		let calculator = calculatorObject.children[0]
-		calculator.scale.copy(calculatorObject.scale)
+		let calculator = text("Calculator Mode")
 		menuEntries.push(calculator)
 		calculator.onClick = function()
 		{
@@ -93,10 +89,8 @@ async function initMenu(modeChange)
 	}
 
 	// {
-	// 	let randomObject = makeTextSign("Random Mode")
 	// 	//difficulty scale might be nice
-	// 	let random = randomObject.children[0]
-	// 	random.scale.copy(randomObject.scale)
+	// 	let random = text("Random Mode")
 	// 	menuEntries.push(random)
 	// 	random.onClick = function()
 	// 	{
@@ -106,9 +100,7 @@ async function initMenu(modeChange)
 	// }
 
 	// {
-	// 	let campaignObject = makeTextSign("Campaign")
-	// 	let campaign = campaignObject.children[0]
-	// 	campaign.scale.copy(campaignObject.scale)
+	// 	let campaign = text("Campaign")
 	// 	menuEntries.push(campaign)
 	// 	campaign.onClick = function()
 	// 	{
@@ -118,7 +110,7 @@ async function initMenu(modeChange)
 	// }
 
 	{
-		let fullscreenButton = makeTextSign("Toggle Fullscreen")
+		let fullscreenButton = text("Toggle Fullscreen")
 		menuEntries.push(fullscreenButton)
 
 		function potentiallyToggleFullScreen(clientX,clientY)
@@ -162,15 +154,10 @@ async function initMenu(modeChange)
 
 	//best laid out using markup dude, do NOT think about this any further
 	{
-		let creditsSignObject = makeTextSign("Credits")
-		let creditsSign = creditsSignObject.children[0]
-		creditsSign.scale.copy(creditsSignObject.scale)
+		let creditsSign = text("Credits")
 		menuEntries.push(creditsSign)
 		
-		creditsSign.onClick = function()
-		{
-			credits.position.x = 0.;
-		}
+		creditsSign.onClick = () => { credits.position.x = 0. }
 
 		{
 			var credits = new THREE.Mesh(new THREE.PlaneGeometry(100.,100.))
@@ -199,29 +186,25 @@ async function initMenu(modeChange)
 			{
 				if(strings[i] !== "gap")
 				{
-					let sign = makeTextSign(strings[i])
+					let sign = text(strings[i])
 					credits.add(sign)
 					sign.position.y = ((strings.length-1) / 2. - i)
 					sign.position.z = .001
 
 					let height = camera.topAtZZero * 2. / (strings.length*1.2) * (credits.position.z/camera.position.z)
+					//well that's going to bloody change isn't it
 					sign.scale.multiplyScalar(height)
 					sign.position.y *= height * 1.07
 				}
 			}
 
 			clickables.push(credits)
-			credits.onClick = function()
-			{
-				credits.position.x = 1000;
-			}
+			credits.onClick = () => {credits.position.x = 1000 }
 		}
 	}
 
 	{
-		let backObject = makeTextSign("Back to game")
-		var back = backObject.children[0]
-		back.scale.copy(backObject.scale)
+		let back = text("Back to game")
 		back.onClick = toggleMenuMode
 		menuEntries.push(back)
 	}
