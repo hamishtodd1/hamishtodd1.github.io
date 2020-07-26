@@ -1,43 +1,16 @@
 /*
-	Must the primitives be arbitrary? Can you construct them from elements of the algebra, no need to arbitrarily switch between line and triangle rep for mesh?
-	Is this what steven was talking about?
+	Do triangles and line segments have a natural representation in GA?
 
-	function vs array. Array is a function from the naturals...
-
-	Probably want to click and draw a random curve and it takes all the vertices along where your mouse has been
-
-	Instead of a specific value, you could have the whole column move and see them all change. Or a whole 2d patch. (what the hell does this mean)
+	function vs array
+		Array is a function from the naturals
+		You do have some idea of naturals because the scalars are in little units
 
 	Why one dimension? Why not build in 2D, or arbitrary manifolds?
+		Visualizable plotted along a volume
 		Easy to control
 		Simulates what a computer actually does
-		Can simulate anything else, for example by having "stride"
+		Can simulate anything else, for example by having "stride"?
 		Conceptually simple
-		It worked for human resource machine
-
-	Representations (hopefully not built in, hopefully you make it yourself. Build your operating system)
-		A line you can grab bits of
-		A canvas you can draw on (i.e. a scalar field that starts all 0 and you can make it nonzero in places)
-		Looping all the multivectors (i.e. varying over time)
-		"scatter plot": vectors interpreted
-		contiguous line: vectors only
-		contiguous line, index against scalar part?
-		utah teapots with scalar for sizes
-		points moving aroound due to vector field
-		surface: vectors interpreted as contiguous vertices of triangls
-		orientations and positions: a bunch of utah teapots offset by the vector, oriented by the bivector
-		hmm, how about offset by the bivector, oriented by the vector combined with the pseudoscalar?
-		One standing in for all. In this situation, everything coming from the same one gets the same representation
-
-	Focus on R as an input. Mayyyybe R2 since C and mouse. That's the maximal power of this thing, no need to go as far as Turing complete
-	Eventually you want arbitrary manifolds, but user constructs that themselves!
-		
-	Currently you have one stand in for all, as if you've frozen the debugger partway through a loop
-		Possibly a good idea!
-
-	it's always a display of multivectors
-	or a set of inputs to choose from
-	or a set of outputs that you can link to something in your scope
 */
 
 ThingCollection = function ()

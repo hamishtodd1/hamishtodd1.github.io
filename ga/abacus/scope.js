@@ -1,6 +1,14 @@
 /*
 	Your scope duplicates a scene full of multivectors that you're looking at. Can hold on one in your scope and see its duplicate highlighted
 
+	Deletion; rearrangement?
+
+	"superimpose everything so it's in the same coord system" button
+
+	Zoom out every time multivectorScope gets big
+
+	Could rearrange to put recent ones at top
+
 	Would be very nice to move the selector there when you hover
 
 	Put the whole scope on the pictures?

@@ -1,15 +1,12 @@
 /*
-	Focus on the maths and build animations out of that for a while
-		Complex multiplication, poeple must know!
-	this is not doodling!
-	definitely want to doodle with process
-
-	Technical
+	Technical - make it so you can doodle! There again, editor is level editor
 		possibly should be able to hotload
 		Better to save as JSON (this basically already is?)
 		Level editor is shader programmer?
 
 	Abstract/mathy level ideas
+		dot, wedge
+        normalize
 		should be able to make a basic polynomial function
 		tetartoids?
 		spherical harmonics
@@ -33,36 +30,23 @@
 		Puzzle such that for each vector you must make the bivector of it and the X axis
 		Get in-plane component
 		Make rotor from axis and angle
-
 		Simple input output one: a bunch of vectors and you rotate them a little
 			changing basis vectors
 
-		Simple input output one: a bunch of vectors and you rotate them a little
-
-	Levels:
+	General structure
 		Scalar multiplication is the first aspect of the clifford product to show
 		Add only, diagonal
 		Add only, two along three up
 		"Double the size of this" - shows elegance of scalar multiplication
 		People like animals! Dung beetle rolls dung for the turning
 		it would be funny to have 0 as a goal!
-
-	More aspects of 2D multiplication and addition needs to be visualized
-		Coplanar bivector addition - easy and fun
-		Vector addition - just do something
-		Vector multiplication - need both scalar and bivector part
-		Scalar multiplication - obvious, duplication then addition
-		Coplanar bivector multiplication - complex multiplication!
-		Bivector-vector multiplication
-		Bivector multiplication???
-
-	General structure
-		Addition only, scalars only
-		Addition only, vectors only
-		Addition only, bivectors only
-		multiplication and addition, scalars
-		multiplication and addition, scalars and vectors
-		multiplication and addition, scalars and bivectors
+		Alternatively
+			Addition only, scalars only
+			Addition only, vectors only
+			Addition only, bivectors only
+			multiplication and addition, scalars
+			multiplication and addition, scalars and vectors
+			multiplication and addition, scalars and bivectors
 */
 
 function Levels()

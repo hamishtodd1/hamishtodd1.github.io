@@ -1,34 +1,10 @@
 /*
-	veritaseum https://www.youtube.com/watch?v=4tgOyU34D44
-
-	https://www.geogebra.org/m/kvy5zksn
-	Anthony Howe kinetic masterpieces
-
-	fire poi throwing sparks!
-	corkscrew
-	sphere
-	tornado particle effect
-	That sea wave thing where each point on the surface is a point on a circle
-
-	Wanna be able to program your own visualization, then use that to visualize your program
-
-	Have a mode where all the things in your scope have the same origin. I.e. they're on a scene.
-
-	Mocap markers are cheap! https://mocapsolutions.com/collections/mocap-solutions-markers
-
-	These animations- you must make them using the system, the player is to reverse-engineer them
-
-	Little games for kids to make
-		They need a handle with three points
-		Throw frisbees into goals
-		Kids making semi realistic laser guns with limited resources?
-		You know so little about multiplayer design beyond articulate. Keep it simple I guess...
-		Swooshy veil behind sword
-		whip
-
-	They share levels, you just need to know locations
-
 	Notes
+		These animations- you must make them using the system, the player is to reverse-engineer them
+		Nice how videoing them projects them onto a plane so they can be vizzed in a volume
+		Tech
+			Mocap markers are cheap! https://mocapsolutions.com/collections/mocap-solutions-markers
+			You probably need a high speed camera
 		All the multivectors coming from the pictures should stay inside the animation, no need to have a clone of them in the scope
 		so you're modelling the differential apparently
 		A better representation of a thing over time might be its worldline with timestamps labelled
@@ -39,22 +15,24 @@
 			This tries to avoid numerical analysis. That might be impossible / foolish
 		Maybe you're always modelling the time evolution of something in which case it's a simple number as input.
 		But "reaction to different parameters and events" is interesting which is why getting the differential between two frames may be more versatile
-
-	Properties of ideas
-		Should be "satisfying" stuff. Look at "most satisfying video"
-		Juicey
-		Look to Rhythm Paradise for inspiration
-		you want to put random things in the littlescene. That's how you make cool demoscene stuff
-		It should mostly be about mechanics to be a fun easy thing for people to do in their lives with AR
-			Look through mechanics textbooks for examples
-
-	Main dude for QC tim@energycompression.com
-		You know, you're just barrelling into QC assuming CA is a good fit for it, maybe it isn't. Well. If it isn't, maybe don't work on this.
-
-	First example
-		Ball shot from cannon
+		Properties of ideas
+			Should be "satisfying" stuff. Look at "most satisfying video"
+			Juicey
+			Look to Rhythm Paradise for inspiration
+			you want to put random things in the littlescene. That's how you make cool demoscene stuff
+			It should mostly be about mechanics to be a fun easy thing for people to do in their lives with AR
+				Look through mechanics textbooks for examples
 
 	Some random ones
+		Ball shot from cannon
+		veritaseum https://www.youtube.com/watch?v=4tgOyU34D44
+		https://www.geogebra.org/m/kvy5zksn
+		Anthony Howe kinetic masterpieces
+		fire poi throwing sparks!
+		corkscrew
+		sphere
+		tornado particle effect
+		That sea wave thing where each point on the surface is a point on a circle
 		Visualize wind direction for sailboats
 		Toilet flush mechanism
 		Pastabydesign, parametric equations for pasta
@@ -68,7 +46,8 @@
 		Euler disc
 		Blowing into whistles with rotating bits = constant force "Tim whistles" grand illusion
 		led trails on lights
-
+		Yoyos, Kendama, diabolo.
+		Footage of cycle stunt people going through the air. Sell to RT software
 
 	Structure based around rocket science
 		Could talk to isaac arthur
@@ -90,6 +69,10 @@
 			Magneto dynamics! Of the sun or earth!
 			Lightning, it's badass
 		quantum
+			Main dude for QC tim@energycompression.com
+				You know, you're just barrelling into QC assuming CA is a good fit for it, maybe it isn't. Well. If it isn't, maybe don't work on this.
+			Aharonov-Bohm Effect
+			quantum hall effect
 			If you have a vector and bivector together being a wave function with mod squared equal to 1, and vector is determined, what does that mean for bivector?
 			nuclear powered rockets
 			Not putting stuff in the van allen belt
@@ -184,8 +167,6 @@
 			someone going down a helter skelter
 			Someone is about to set of a spinning top
 				you can change the amount of angular momentum they put into it by changing the size of their bicep
-
-	Useful: these vectors get projected onto a plane. Therefore, you can look at their passage through time in a volume
 */
 
 setVideo = async function(){console.error("Video can only be played on chrome!")}

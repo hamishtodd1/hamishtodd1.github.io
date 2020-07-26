@@ -1,4 +1,13 @@
 /*
+	More aspects of 2D multiplication and addition needs to be visualized
+		Coplanar bivector addition - easy and fun
+		Vector addition - just do something
+		Vector multiplication - need both scalar and bivector part
+		Scalar multiplication - obvious, duplication then addition
+		Coplanar bivector multiplication - complex multiplication!
+		Bivector-vector multiplication
+		Bivector multiplication???
+
 	You WILL have many iterations, you need to speed up iteration time
 
 	Just like scalar, bivec divides into unit length pieces before multiplication? vec as well? Maybe only think about unit sized things multiplying?
@@ -24,6 +33,7 @@
 
 	The scalar
 		Use 1 as your scalar picture. Can have it fill up vertically for fractionals
+		Or Spheres? Jesus christ
 		Scalar-anything multiplication: all the scalars transform into the thing they're going to be, then "repeated addition"
 		how about they have a unit-size surroundings but are actually a little bean?
 		Need to know the multiplicative identity size, hence discrete units
@@ -217,6 +227,7 @@ async function initMultivectorAppearances()
 		let vectorRadius = .19
 		let vectorGeometry = new THREE.CylinderBufferGeometry(0., vectorRadius, 1., 16, 1, false);
 		vectorGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0., .5, 0.))
+		//that is the right way to do it, remove this centering crap
 		let vectorMaterial = new THREE.MeshStandardMaterial()
 
 		let vecPart = new THREE.Vector3()

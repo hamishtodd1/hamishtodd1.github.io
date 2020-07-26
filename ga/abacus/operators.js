@@ -1,20 +1,15 @@
 /*
-	Ideally the animations can concatenate into simpler, elegant, cooler, animations that are aware of some additional geometric analogy that is possible
-		Or, well, maybe that doesn't matter. Point is to make yourself a little machine where you tweak the inputs and see the outputs
-		You're building animations from animations.
+	Building animations from animations
+		Ideally the animations can concatenate into simpler, elegant, cooler, animations
+		that are aware of some additional geometric analogy that is possible
 			With, say, the reflection of a vector on a bivector, that is an animation that you try to model
+		Can detect, for example, that some part is eventually equal to 0. Huh, so it's simplifying the equation
 		Once you have built the function for it, it enters your scope, and when you use it from your scope
 		it can play out that animation again, rather than having to play out all the atomic operations
 
-	The bivectors should change to being angle shaped when you do exp=
-
-	you may want to put stuff on the left or the right
-	Therefore, "result" needs to be able to switch to right or left
-	Therefore, little t-shaped things showing what results from what
-	There again, who says right- and left- multiplying is the right thing to do?
-	are left and right multiply the same as multiply by conjugate?
-
-	3b1b has nice viz of exp based on the x^k / k!
+	exponential viz (should be an example of animation from animation...)
+		The bivectors should change to being angle shaped when you do exp=
+		good viz of complex exponential https://twitter.com/panlepan/status/1286968452306141184
 
 	Other operations, sigh
 		See how far you can get ok
@@ -33,10 +28,7 @@
 			You put in a bivector. It becomes an angle wedge, area conserving obv
 			The wedge is positioned such that the real line cuts it in half
 			If the bivector is red, the resulting complex number is the corner of the wedge clockwise from the real line
-
-	The dotted scalar line (dots should be circles of unit diameter btw) moves around fairly randomly
-
-	kronecker delta
+		kronecker delta
 
 	"i as the circle constant"
 		alright so you get an extra constant if you differentiate with respect to angle, maybe that's as it should be?
@@ -50,27 +42,12 @@
 			and it differentiates better. Or does it? Maybe it is more natural for pi to fall out of differentiating?
 		Look it's ok from a visual standpoint
 		Radians to degrees is just a scalar conversion. You can have radians to a base-4 system as well. Consider .54...+i.84... - that is e^i, the unit of our rotation system. Degrees is asking about the complex number .9998+i.017. possibly e^i makes differentiation easier, that is believable but better check. Point is though, the default base of your power and log can be the pseudoscalar for many cases
-*/
-/*
-	Click the "new function" thing, a yellow frog
-    It gets all the globals, so at least the two basis vectors
-    And some modifyiable multivectors as inputs that you can alter fully
-    Do your thing
-    And whatever the last thing you create is, that's the output?
 
-	base types
-
-	Tensor product is very similar to "product types"
-	Are you reinventing QC here? Maybe you should have QC as fundamental system and have folks build up things just using that
-
-	Man, so goddamn philosophical. Thank christ you can fall back on ignoring this and just making what you need to make
-
-    +:m-->m
-    *:m-->m
-
-    Use cases:
-        dot, wedge
-        normalize
+	"make your own function" = levl editor
+		It gets all the globals, so at least the two basis vectors
+		And some modifyiable multivectors as inputs that you can alter fully
+		Do your thing
+		And whatever the last thing you create is, that's the output?
 */
 
 async function initOperatorAppearances()
