@@ -52,6 +52,8 @@
 			Addition of codirectional vectors and bivectors probably is different from non conditional,
 			and it's probably ok to encourage that idea. Early levels can be just about them. X vector, X vector, 3. You must make an X vector of length 6.
 
+	Trivector is probably that blade bivector thing extruded out of the plane
+
 	Bivectors
 		bivector bivector multiplication: just rotate 90 deg
 		Bivector-bivector addition in 3D - do you make the triangle as well?

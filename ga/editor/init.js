@@ -1,65 +1,49 @@
 /* 
-	TODO for demo to steve der kenick, futureOfCoding, Alan, and Meurig, Martin
+	TODO for demo to steve der kenick, futureOfCoding, Alan, and Meurig, Martin, Chris Deleon, Daniel Piker, bivector discord
+		Compiling and executing basic instructions dude, putting stuff in that column
+		comment-like bits of code that say what vectors should be in the render windows when (/where, heh)
+		function copied into code from drawing in view
+			fourier approximation. If you loop back it's a 2D function, if not 1D
+		Stuff in renderwindow
 		Functions
-		Draw in the preview window. Get eg array of vectors back, array is immediately in editor
-		visualizing multivectors
-		altering the things with mouse
-		windows with previews, i.e. superimposed multivectors
-		demo of making wedge product and "proving it is antisymmetric" by writing ab - ba
-		Basic Omicron reduction
+		altering inputs with mouse
+		Basic Omicron reduction (omicron because if you can demonstrate)
+			demo of making wedge product and "proving it is antisymmetric" by writing ab - ba
 			Enough for basic integration and differentiation
-			
+
+	TODO for programming / bootstrapping
+		Fuller visualization of multivectors
+		built in exp and division etc or implement yourself?
+		Camera and mouse ray visualized and something you deal with
+		Make names consistent
+			One idea: record what names got attributed to what calculations
+		Demos
+			Pong
+			Sphere
+			Mandelbrot
+		shift and arrow keys to highlight
+			Cut and paste
+		Output
+			javascript/glm function containing threejs with its quaternions, vec3s, shaders, matrices
+				detect which things will always be 0
+			webgl/webpage/opengl
+			Unity script?
+			Probably want interface for turning the color code variable names into reasonable names
+
 	TODO for physics course
 		Arbitrary formulae from Geometric Algebra For Physicists
 		Full omicron reduction
 		input latex
 
-	TODO for serious programming / bootstrapping
-		shift and arrow keys to highlight
-			Cut and paste
-		Input
-			latex
-		Output
-			Spit out glsl and vertex array, maybe webgl/threejs with its quaternions, vec3s, shaders, matrices
-			Unity script?
-			Need to name the variables somehow
-
-	You can't visualize the multivector without some theoretical values for it
+	You can't visualize the multivector without some (theoretical values) for it
+		Or can you? Little disk with colors?
 		Both a blessing and a curse? Get people too used to a certain state, unable to think in the abstract?
-		
-	For all variables in mathematical formulae, would be good to state what level of abstraction they are at
-		constant (pi)
-		unknown constant
-		function
-		unknown function
-		Talk to Matt Hare or Ivan or the Slack or Martin about this, there's surely a hierarchy well established
-		Whenever a physicist talks about a function, surely they want it, i.e. they're going through a process that eventually establishes it? Making a library?
-
-	surfaces are parametric, functions from R2
-	If the vertices of a mesh are in a funky order with respect to triangles, they are probably imported from an outside program. That program should put them in a good order.
-	Except that you want to compute vertex normals.
-		Though in order to do that you do have to iterate an array to find
-
-	Phys vs CS
-		Physicists can write eg min( f(x) ) when finding the min is NP hard or whatever. You can't just evaluate things
-		Physics equations are declarative? But a lot of the concern stuff changing over time. They are constraints on the block universe
-			Shaders also declarative, pure functions. That's why this works and why you can expect a useful result
-		If you have a system containing 3 vectors and you show one of them can be derived from the other 2, you've shown your system has one less degree of freedom than might have been thought. Heh, information compression. Derivation is key in algebra too; you show equivalences. Talk to Joel about this, what do physicists want out of algebra? Well maybe you're more interested in engineers...
-		Is it easier to see simplification opportunities in physics notation?
-		Physicists don't really have arrays, only functions? On fields?
-		Notation
-			CS		Phys
-			let		yes, every operation makes a new thing
-			for		either map or integral
-			if		kronecker delta
-				branches: do both then assign one to a vector at the end with result = condition * optionA + (1-condition) * optionB
-				The exception-free thing where you'll get a point or a line depending on what the answer is with no extra code may be analogous to this conditionals thing?
-				condition is kronecker delta! There's an expression for it https://en.wikipedia.org/wiki/Kronecker_delta#Properties
-
-	If you want to solve them analytically, it's about using your symbol juggling abilities
-	But that is only because integration and differentiation are defined as infinite serieses. Maybe even unrigorous?
+		Heh how about making them meander randomly?
+		Hey, it works for debuggers. It's a slice through possibility space
+		Working with the function, maybe represented as an infinite line of mvs, is for the game
 
 	Algebraic deduction / reduction
+		You can use this stuff, simplified equations, to build the animations that get used for operations, see operators.js
 		In addition to jugglings, you can have constraints
 			"always equal", eg check associativity
 			Maxwell's equations, newton's laws of motion
@@ -78,41 +62,41 @@
 			Maybe this is how you say that difference vectors should be put not at the origin?
 
 	integration and differentiation
+		Surely something very GA going on https://en.wikipedia.org/wiki/Integration_using_Euler%27s_formula
 		It needs built in derivatives because it's a language for physics course
 		Bret integration https://youtu.be/oUaOucZRlmE?t=1266
 		The epsilon of integration is directly linked to the scale at which you are looking at the thing. dt = width of a pixel
 		You draw a graph (left to right bottom to top say) by evaluating the function at the left side of a pixel, then at the right, then drawing pixels accordingly
 		In the evaluation system
 			"differentiate(x*x,x)" -> "2*x"
-		Analogy: take a surface, f:R2->R2. Fill it up underneath, i.e. consider the integral. Look at it from above. That is a single colour channel.
+
+	reduction / partial evaluation syntax
+		how to detect opportunities? Regex?
+		Don't necessarily need names. Fuck names, of course
+		if you do give them names then you may be able to spot analogies. Write some weird equation with no geometrical analogue and it pops up "linePlaneIntersection"
+		How to animate the things? if they've got the same symbols can move them around
+		function associativity(a,b,c)
+		{
+			return a*(b*c)
+		}
+		{
+			return (a*b)*c
+		}
+
+		function differentiate(f,at)
+		{
+			let dt = 0.0000001
+			return ( f(at) + f(at+dt) ) / dt
+		}
+
+		function integrate(f,at)
+		{
+			let dt = .0001 //the width of a pixel
+			f()
+			//for any approximation of integral of f with given dt, we can scale f such that you get that dt level precision
+			//multiply final result by dt... but that is just a scalar multiple, only relevant if you put symbols on the y axis so to speak
+		}
 */
-
-//reduction / partial evaluation syntax
-//how to detect opportunities? Regex?
-//Don't necessarily need names. Fuck names, of course
-//if you do give them names then you may be able to spot analogies. Write some weird equation with no geometrical analogue and it pops up "linePlaneIntersection"
-//How to animate the things? if they've got the same symbols can move them around
-// function associativity(a,b,c)
-// {
-// 	return a*(b*c)
-// }
-// {
-// 	return (a*b)*c
-// }
-
-// function differentiate(f,at)
-// {
-// 	let dt = 0.0000001
-// 	return ( f(at) + f(at+dt) ) / dt
-// }
-
-// function integrate(f,at)
-// {
-// 	let dt = .0001 //the width of a pixel
-// 	f()
-// 	//for any approximation of integral of f with given dt, we can scale f such that you get that dt level precision
-// 	//multiply final result by dt... but that is just a scalar multiple, only relevant if you put symbols on the y axis so to speak
-// }
 
 function init()
 {

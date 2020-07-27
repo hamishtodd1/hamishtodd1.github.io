@@ -1,35 +1,68 @@
 /* 
-    comment-like bits of code that say what vectors should be in the render windows where
+    TODO later maybe, pressing TODO is in init.js
+    copy a png or gif or whatever, paste into window, you have a textured quad, or three scalar fields or however you do it
+    Double click something in window, to get to the place where it is made
+    maybe try to make it so that when you change what you see in the window it back solves to change the code?
+        Drawing a curve and geting an array is an example
+        Grab the coord system and rotate; it gives you the quaternion that does that
+        Draw a new vector
+            it could be written in terms of old ones
+            try to snap to the nearest one that's a single operation performed on existing ones
 
-    the below is for showing meshes / animations / vertex shades
-    you will want graphs for functions mapping multivectors to multivectors
-    one case of which is a fragment shader, woo
-
-    maybe try to make it so that when you change what you see in the window it back solves to change the code? Urgh
-
-    change angle on these, with your mouse, and your angle on all the vectors changes
-
-    When you click the things in the columns it makes them appear in the window
-    When you right click them, context menu:
-        "Copy name"
-        "Change name"
-        "Paste at carat"
-        "change representation"
-    
-    One idea to make names consistent: record what names got attributed to what calculations
-
-    Should be able to edit the vectors in the render window too
+    Click the things in the column, what happens?
+        They appear in the window?
+        Probably you can have text in that column, appears when you hover?
+        When you right click them, context menu:
+            "Copy name"
+            "Change name" (changes colors?)
+            "Paste at carat"
+            "change representation"
 
     What's in the render window?
+        Much better than built in rotation is rotating the basis vectors. horizontal rotate around pole, y rotate upwards or downwards
+        Wanna be able to program your own visualization, then use that to visualize your program
         Whatever lines are in the editor. Want more? Scroll up, copy it, paste it down here
         Unless you have some highlighted in which case it's those?
         "What is hightlighted" is a useful bit of state
 
-    Good to think about velocity space or differential space. Like that 3b1b thing with the circular bunch of velocity vectors. What happens when you control velocity with your mouse and watch position change?
+    Representations, from abacus. Can bootstrap some?
+		A line you can grab bits of
+		A canvas you can draw on (i.e. a scalar field that starts all 0 and you can make it nonzero in places)
+		Looping all the multivectors (i.e. varying over time)
+		utah teapots with scalar for sizes
+		points moving aroound due to vector field
+		surface: vectors interpreted as contiguous vertices of triangls
+		orientations and positions: a bunch of utah teapots offset by the vector, oriented by the bivector
+		hmm, how about offset by the bivector, oriented by the vector combined with the pseudoscalar?
+        One standing in for all. In this situation, everything coming from the same one gets the same representation
+        
+    C=R2. H?
+    f:
+    R->R    line graph - black and white line if looked at from above
+    R->R2   line through R2, or through R3 plotted along z axis
+    R->R3   curve through R3, "parametric"
 
-    copy a png or gif or whatever, paste into window, you have a textured quad, or three scalar fields or however you do it
+    R2->R   1 surface
+    R2->R2  set of 2 surfaces - 2 color image if looked at from above, or vector field? Tokieda weirdness?
+    R2->R3  set of 3 surfaces - 3 color image if looked at from above, or parametric surface??
+    surfaces are parametric, functions from R2
+        If the vertices of a mesh are in a funky order with respect to triangles, they are probably imported from an outside program which should put them in a good order
+        Except that you want to compute vertex normals.
+            Though in order to do that you do have to iterate an array to find what faces a vertex is in
 
-    Double click something in window, to get to the part where it is made
+    R3->R   isosurface. Two of them. One at 0 and the other at a controllable level. Between, if you slice it, MRI-style texturing
+    R3->R2  pair of isosurfaces
+    R3->R3  vector field? 3 color isosurface?
+
+    Good to think about velocity space or differential space.
+        Like that 3b1b thing with the circular bunch of velocity vectors. What happens when you control velocity with your mouse and watch position change?
+        Or Hestenes' thing about velocity space
+        Something something integration and differentiation
+        "Look at the system in velocity space", "look at the system in integration/energy space". All fully determined.
+
+    Interesting to compare a scatter plot, statistics game note
+        A scatter plot is for when you have a probability distribution over two variables (R2->R) and it has been sampled a few times.
+        A single color texture, really
 */
 
 function initOutputColumnAndRenderWindows()

@@ -16,7 +16,7 @@
 ThingCollection = function ()
 {
 	{
-		// let a = makeTextSign("5")
+		// let a = text("5")
 		// scene.add(a)
 
 		//so you have the scalars arranged
