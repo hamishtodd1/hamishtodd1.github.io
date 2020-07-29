@@ -95,106 +95,102 @@ async function initPad()
 	})
 
 	let mvs = []
-	for (let i = 0; i < 28; i++)
-	{
-		let blackVector = generateNewVector()
-		pad.add(blackVector)
-		mvs.push(blackVector)
-	}
-	//it would be nice to work on sticking rectangles at the end of lines and having the window be there
 
-	let carat = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
-	carat.position.z = .01
-	pad.add(carat)
-	carat.scale.x = .1
-	let caratFlashingStart = 0.
-	updateFunctions.push(() => { carat.visible = Math.floor((clock.getElapsedTime() - caratFlashingStart) * 2.) % 2 ? false : true })
-	let caratPositionInString = -1
-	function setCaratPosition(x, y)
 	{
-		carat.position.set(x, y, carat.position.z)
-		caratFlashingStart = clock.getElapsedTime()
-		caratPositionInString = -1
-	}
-	function addToCaratPosition(x, y)
-	{
-		setCaratPosition(
-			carat.position.x + x,
-			carat.position.y + y)
-	}
-	function moveCaratAlongString(amount)
-	{
-		caratPositionInString += amount
-		if (caratPositionInString < 0)
-			caratPositionInString = 0
-		if (caratPositionInString > backgroundString.length)
-			caratPositionInString = backgroundString.length
-		caratFlashingStart = clock.getElapsedTime()
-	}
-	bindButton("ArrowRight", () => moveCaratAlongString(1))
-	bindButton("ArrowLeft", () => moveCaratAlongString(-1))
-	bindButton("ArrowUp", () => addToCaratPosition(0., 1.))
-	bindButton("ArrowDown", () => addToCaratPosition(0., -1.))
-	bindButton("Home", () => addToCaratPosition(-999., 0.))
-	bindButton("End", () => addToCaratPosition(999., 0.))
-	bindButton("PageUp", () => addToCaratPosition(0., 999.))
-	bindButton("PageDown", () => addToCaratPosition(0., -999.))
-
-	let characters = "abcdefghijklmnopqrstuvwxyz /-=*!:"
-	function addCharacter(character)
-	{
-		backgroundString = backgroundString.slice(0, caratPositionInString) + character + backgroundString.slice(caratPositionInString, backgroundString.length)
-		moveCaratAlongString(1)
-	}
-	let instancedLetterMeshes = {}
-	let maxCopiesOfALetter = 256
-	function makeCharacterTypeable(character, typedCharacter)
-	{
-		let material = text(character, true)
-
-		instancedLetterMeshes[character] = new THREE.InstancedMesh(unchangingUnitSquareGeometry, material, maxCopiesOfALetter);
-		instancedLetterMeshes[character].count = 0
-		pad.add(instancedLetterMeshes[character])
-		instancedLetterMeshes[character].aspect = material.getAspect()
-
-		if (typedCharacter === undefined)
-			typedCharacter = character
-		else
-			characters += character
-
-		bindButton(typedCharacter, () => addCharacter(character))
-	}
-	for (let i = 0; i < characters.length; i++)
-		makeCharacterTypeable(characters[i])
-	let nablaCharacter = String.fromCharCode("8711")
-	makeCharacterTypeable(nablaCharacter, "@")
-	let integralCharacter = String.fromCharCode("8747")
-	makeCharacterTypeable(integralCharacter, "~")
-	let deltaCharacter = String.fromCharCode("948")
-	makeCharacterTypeable(deltaCharacter, "?")
-	let lambdaCharacter = String.fromCharCode("955")
-	makeCharacterTypeable(lambdaCharacter, "#")
-	//you CAN write "function", but lots of kids don't know "function". In python it's "def"
-	// capital sigma (931) (just integral, whoah), wedge symbol(8743). Still got dollar sign and pound sign
-	//delta is interesting because it's a logical symbol but also a continuous one. Do other logical symbols, AND and OR have equivalents?
-	// brackets probably is fine
-
-
-	bindButton("Delete", () =>
-	{
-		if (caratPositionInString < backgroundString.length)
-			backgroundString = backgroundString.slice(0, caratPositionInString) + backgroundString.slice(caratPositionInString + 1, backgroundString.length)
-	})
-	bindButton("Backspace", () =>
-	{
-		if (caratPositionInString !== 0)
+		let carat = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
+		var caratPositionInString = -1
+		carat.position.z = .01
+		pad.add(carat)
+		carat.scale.x = .1
+		let caratFlashingStart = 0.
+		updateFunctions.push(() => { carat.visible = Math.floor((clock.getElapsedTime() - caratFlashingStart) * 2.) % 2 ? false : true })
+		function setCaratPosition(x, y)
 		{
-			backgroundString = backgroundString.slice(0, caratPositionInString - 1) + backgroundString.slice(caratPositionInString, backgroundString.length)
-			moveCaratAlongString(-1)
+			carat.position.set(x, y, carat.position.z)
+			caratFlashingStart = clock.getElapsedTime()
+			caratPositionInString = -1
 		}
-	})
-	bindButton("Tab", () => { for (let i = 0; i < 4; i++) addCharacter(" ") })
-	bindButton("Enter", () => addCharacter("\n"))
+		function addToCaratPosition(x, y)
+		{
+			setCaratPosition(
+				carat.position.x + x,
+				carat.position.y + y)
+		}
+		function moveCaratAlongString(amount)
+		{
+			caratPositionInString += amount
+			if (caratPositionInString < 0)
+				caratPositionInString = 0
+			if (caratPositionInString > backgroundString.length)
+				caratPositionInString = backgroundString.length
+			caratFlashingStart = clock.getElapsedTime()
+		}
+		bindButton("ArrowRight", () => moveCaratAlongString(1))
+		bindButton("ArrowLeft", () => moveCaratAlongString(-1))
+		bindButton("ArrowUp", () => addToCaratPosition(0., 1.))
+		bindButton("ArrowDown", () => addToCaratPosition(0., -1.))
+		bindButton("Home", () => addToCaratPosition(-999., 0.))
+		bindButton("End", () => addToCaratPosition(999., 0.))
+		bindButton("PageUp", () => addToCaratPosition(0., 999.))
+		bindButton("PageDown", () => addToCaratPosition(0., -999.))
+	}
+
+	{
+		let characters = "abcdefghijklmnopqrstuvwxyz /-=*!:"
+		function addCharacter(character)
+		{
+			backgroundString = backgroundString.slice(0, caratPositionInString) + character + backgroundString.slice(caratPositionInString, backgroundString.length)
+			moveCaratAlongString(1)
+		}
+		let instancedLetterMeshes = {}
+		let maxCopiesOfALetter = 256
+		function makeCharacterTypeable(character, typedCharacter)
+		{
+			let material = text(character, true)
+
+			instancedLetterMeshes[character] = new THREE.InstancedMesh(unchangingUnitSquareGeometry, material, maxCopiesOfALetter);
+			instancedLetterMeshes[character].count = 0
+			pad.add(instancedLetterMeshes[character])
+			instancedLetterMeshes[character].aspect = material.getAspect()
+
+			if (typedCharacter === undefined)
+				typedCharacter = character
+			else
+				characters += character
+
+			bindButton(typedCharacter, () => addCharacter(character))
+		}
+		for (let i = 0; i < characters.length; i++)
+			makeCharacterTypeable(characters[i])
+		let nablaCharacter = String.fromCharCode("8711")
+		makeCharacterTypeable(nablaCharacter, "@")
+		let integralCharacter = String.fromCharCode("8747")
+		makeCharacterTypeable(integralCharacter, "~")
+		let deltaCharacter = String.fromCharCode("948")
+		makeCharacterTypeable(deltaCharacter, "?")
+		let lambdaCharacter = String.fromCharCode("955")
+		makeCharacterTypeable(lambdaCharacter, "#")
+		//you CAN write "function", but lots of kids don't know "function". In python it's "def"
+		// capital sigma (931) (just integral, whoah), wedge symbol(8743). Still got dollar sign and pound sign
+		//delta is interesting because it's a logical symbol but also a continuous one. Do other logical symbols, AND and OR have equivalents?
+		// brackets probably is fine
+
+		bindButton("Delete", () =>
+		{
+			if (caratPositionInString < backgroundString.length)
+				backgroundString = backgroundString.slice(0, caratPositionInString) + backgroundString.slice(caratPositionInString + 1, backgroundString.length)
+		})
+		bindButton("Backspace", () =>
+		{
+			if (caratPositionInString !== 0)
+			{
+				backgroundString = backgroundString.slice(0, caratPositionInString - 1) + backgroundString.slice(caratPositionInString, backgroundString.length)
+				moveCaratAlongString(-1)
+			}
+		})
+		bindButton("Tab", () => { for (let i = 0; i < 4; i++) addCharacter(" ") })
+		bindButton("Enter", () => addCharacter("\n"))
+	}
 
 	//don't need geometric product for the demo necessarily
 	{

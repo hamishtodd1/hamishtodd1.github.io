@@ -31,6 +31,8 @@
 		fire poi throwing sparks!
 		corkscrew
 		sphere
+		flappy bird
+		schrodinger's smoke
 		tornado particle effect
 		That sea wave thing where each point on the surface is a point on a circle
 		Visualize wind direction for sailboats

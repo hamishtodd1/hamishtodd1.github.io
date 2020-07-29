@@ -1,5 +1,5 @@
 /* 
-	TODO for demo to steve der kenick, futureOfCoding, Alan, and Meurig, Martin, Chris Deleon, Daniel Piker, bivector discord
+	TODO for demo to interested parties
 		Compiling and executing basic instructions dude, putting stuff in that column
 		comment-like bits of code that say what vectors should be in the render windows when (/where, heh)
 		function copied into code from drawing in view
@@ -10,6 +10,14 @@
 		Basic Omicron reduction (omicron because if you can demonstrate)
 			demo of making wedge product and "proving it is antisymmetric" by writing ab - ba
 			Enough for basic integration and differentiation
+
+	Interested parties
+		steve der kenick, bivector discord
+		Chris Deleon, Daniel Piker
+		Alan, Meurig, Martin
+		futureOfCoding slack
+		EE slack
+		Media Molecule
 
 	TODO for programming / bootstrapping
 		Fuller visualization of multivectors
@@ -43,6 +51,7 @@
 		Working with the function, maybe represented as an infinite line of mvs, is for the game
 
 	Algebraic deduction / reduction
+		You're defining properties of a thing without knowing the thing. Then you juggle til you have a function describing the thing. Funny way to program?
 		You can use this stuff, simplified equations, to build the animations that get used for operations, see operators.js
 		In addition to jugglings, you can have constraints
 			"always equal", eg check associativity

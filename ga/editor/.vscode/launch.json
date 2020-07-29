@@ -2,13 +2,14 @@
     // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    // don't forget need --remote-debugging-port=9222 in shortcut
     "version": "0.2.0",
     "configurations": [
         {
             "type": "chrome",
             "request": "attach",
             "port":9222,
-            "name": "Attach to Chrome",
+            "name": "editor",
             "webRoot": "${workspaceFolder}",
             
             "url": "file:///C:/hamishtodd1.github.io/ga/editor/index.html",
