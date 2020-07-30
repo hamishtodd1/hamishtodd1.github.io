@@ -133,7 +133,7 @@ function init()
 {
 	// initClickyVideo()
 	initMultivectorAppearances()
-	initOutputColumnAndRenderWindows()
+	initOutputColumnAndDisplayWindows()
 
 	initPad()
 }

@@ -85,15 +85,27 @@
 
 async function initPad()
 {
-	let backgroundString = "b hello\nb \n\n\n\n\n\ndisplay"
+	let backgroundString = " b hello\nb \n\n\n\n\n\ndisplay"
 
 	scene.add(pad)
 
 	let mvs = []
 	mvs.push(generateNewVector())
 	pad.add(mvs[0])
-
 	//pad's scale is precisely line height
+
+	for(let i = 0; i < 3; i++)
+	{
+		let dw = DisplayWindow()
+		dw.screen.bottomY = (i - 1) * 12. - 2.
+		scene.add(dw.screen)
+
+		let gridSize = 8.
+		let axis = new THREE.Line(new THREE.Geometry(), new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
+		axis.geometry.vertices.push(new THREE.Vector3(0., gridSize / 2., 0.), new THREE.Vector3(0., -gridSize / 2., 0.))
+		let grid = new THREE.GridHelper(gridSize, gridSize, axis.material.color)
+		dw.scene.add(grid, axis)
+	}
 
 	{
 		var carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.,1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
@@ -202,7 +214,7 @@ async function initPad()
 		let loader = new THREE.TextureLoader()
 		loader.crossOrigin = true
 		//don't use a promise, shit goes weird
-		loader.load("data/frog.png", function (result)
+		loader.load("../common/data/frog.png", function (result)
 		{
 			materials.geometricSum.map = result
 			materials.geometricSum.needsUpdate = true
@@ -216,8 +228,6 @@ async function initPad()
 		var gsSymbolInstanced = new THREE.InstancedMesh(unchangingUnitSquareGeometry, materials.geometricSum, maxCopiesOfALetter)
 		gsSymbolInstanced.count = 0
 		pad.add(gsSymbolInstanced)
-
-		bindButton
 
 		// let animatedGeometricProductSymbol = new THREE.Mesh(unchangingUnitSquareGeometry, materials.geometricProduct)
 		// let animatedGeometricSumSymbol = new THREE.Mesh(unchangingUnitSquareGeometry, materials.geometricSum)
@@ -349,7 +359,6 @@ async function initPad()
 
 			if (backgroundString.slice(drawingPositionInString, drawingPositionInString+7) === "display")
 			{
-				
 				//gonna get the next things
 			}
 

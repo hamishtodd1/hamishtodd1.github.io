@@ -6,32 +6,22 @@
 
 function initWindowResizeSystemAndSurroundings(renderer)
 {
+	function respondToResize(event)
 	{
-		var stage = new THREE.Mesh( 
-			new THREE.BoxGeometry(1.,1.,1.),
-			new THREE.MeshStandardMaterial({color:0xFFFFFF,side:THREE.BackSide})
-		);
-		stage.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.,0.,-.5))
-		scene.add(stage)
-		stage.visible = false
-		stage.material.metalness = 0.1;
-		stage.material.roughness = 0.2;
-		stage.receiveShadow = true;
-	}
+		if(event!==undefined) event.preventDefault()
 
-	function respondToResize() 
-	{
+		let oldPixelRatioAsUnderstoodByRenderer = renderer.getPixelRatio()
+		renderer.setPixelRatio(window.devicePixelRatio);
+		let newPixelRatioAsUnderstoodByRenderer = renderer.getPixelRatio()
+		pad.scale.multiplyScalar(newPixelRatioAsUnderstoodByRenderer / oldPixelRatioAsUnderstoodByRenderer)
+
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		camera.aspect = window.innerWidth / window.innerHeight;
 		// if(camera.aspect < 9./21. || camera.aspect > 21./9.)
 		// 	log("yep, that's the most extreme (Xperia 1)")
-		// if(camera.aspect > 1.)
-		// 	console.error("Wider than tall: might consider switching side and bottom for this")
 
 		camera.fov = fovGivenCenterToFrameDistance(camera.topAtZZero, camera.position.z )
 		camera.rightAtZZero = camera.topAtZZero * camera.aspect
-
-		stage.scale.x = camera.rightAtZZero*2.
 
 		camera.updateProjectionMatrix();
 	}
@@ -60,17 +50,12 @@ function initWindowResizeSystemAndSurroundings(renderer)
 		pointLight.position.set(-camera.topAtZZero, camera.topAtZZero, camera.topAtZZero * .25)
 		pointLight.position.multiplyScalar(.5)
 
-		stage.scale.z = camera.topAtZZero * 2.
-		stage.scale.y = stage.scale.z
-
-		camera.far = camera.position.z + stage.scale.z + .01
+		camera.far = camera.position.z + 10.
 		respondToResize();
 	}
 
 	//want unit vectors to be a reasonable size
-	camera.setTopAtZZeroAndAdjustScene(10.)
-
-	return stage;
+	camera.setTopAtZZeroAndAdjustScene(20.)
 }
 
 function centerToFrameDistance(fov, cameraDistance)

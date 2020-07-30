@@ -65,7 +65,7 @@
         A single color texture, really
 */
 
-function initOutputColumnAndRenderWindows()
+function initOutputColumnAndDisplayWindows()
 {
     // let inputRow = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), outputColumn.material)
     // inputRow.geometry.translate(-.5,0.,0.)
@@ -73,53 +73,9 @@ function initOutputColumnAndRenderWindows()
     // inputRow.position.x = outputColumn.position.x
     // inputRow.scale.x = 5.
 
-    outputColumn.position.z = -.001 //better would be drawn 1st
-    scene.add(outputColumn)
-    let outputColumnGrabbed = false
-    function getColumnMouseIsIn()
-    {
-        let mouseX = mouse.getZZeroPosition(v1).x
-
-        let columnLeft = outputColumn.position.x - outputColumn.scale.x / 2.
-        let columnRight = outputColumn.position.x + outputColumn.scale.x / 2.
-
-        if (columnLeft > mouseX)
-            return "left"
-        else if (mouseX > columnRight)
-            return "right"
-        else
-            return "center"
-    }
-    updateFunctions.push(() =>
-    {
-        let cursorStyle = "text"
-        let column = getColumnMouseIsIn()
-        if (column === "center")
-            cursorStyle = "col-resize"
-        else if (column === "left")
-            cursorStyle = "grab" //you might like "grabbing" but we can't rely on domElement to change it
-        // "cell" excel
-        // "copy" has little cross
-        renderer.domElement.style.cursor = cursorStyle
-
-        //click output to put it in or take it out of preview. double click to select it as one would select text
-
-        if (!mouse.clicking)
-            outputColumnGrabbed = false
-        else if (!mouse.oldClicking && cursorStyle === "col-resize")
-            outputColumnGrabbed = true
-        if (outputColumnGrabbed)
-            outputColumn.position.x = mouse.getZZeroPosition(v1).x
-        outputColumn.position.x = Math.min(outputColumn.position.x, camera.rightAtZZero - outputColumn.scale.x / 2.)
-        outputColumn.position.x = Math.max(outputColumn.position.x, -camera.rightAtZZero + outputColumn.scale.x / 2.)
-
-        //need to change the resolution of those screens! Except for the fragment shader ones
-    })
-
     let ordinaryClearColor = renderer.getClearColor().clone()
     let ordinaryRenderTarget = renderer.getRenderTarget()
-
-    function RenderWindow()
+    DisplayWindow = function()
     {
         let localScene = new THREE.Scene()
         let localCamera = new THREE.PerspectiveCamera(90., 1., .01, 100.)
@@ -145,6 +101,7 @@ function initOutputColumnAndRenderWindows()
         let localFramebuffer = new THREE.WebGLRenderTarget(dimensionInPixels, dimensionInPixels, params)
 
         let screen = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), new THREE.MeshBasicMaterial({ map: localFramebuffer.texture }))
+        screen.bottomY = 0.
 
         //the idea of this is that we then pop up the array in the code
         //better: doodle on what seems to you like a plane, but it's extruded in z because z is input
@@ -157,13 +114,25 @@ function initOutputColumnAndRenderWindows()
                 mouseTrail.geometry.vertices.push(new THREE.Vector3())
             lastTrailVertexToBeAssigned = 0
         }
+
+        let displayWindow = { screen, scene: localScene, camera: localCamera }
+        displayWindows.push(displayWindow)
         
         let grabbed = false
         updateFunctions.push(() =>
         {
+            screen.scale.setScalar(Math.abs(-camera.rightAtZZero - outputColumn.left()))
+            screen.position.x = (-camera.rightAtZZero + outputColumn.left()) / 2.
+            
+            // let topY = camera.topAtZZero
+            // if()
+            screen.position.y = screen.scale.y / 2. + screen.bottomY
+            //and change resolution
+
             if (!mouse.clicking)
                 grabbed = false
-            if (mouse.clicking && !mouse.oldClicking && getColumnMouseIsIn() === "left")
+            let thingMouseIsOn = getThingMouseIsOn()
+            if (mouse.clicking && !mouse.oldClicking && thingMouseIsOn === displayWindow )
                 grabbed = true
 
             // log(mouse.justMoved())
@@ -171,9 +140,9 @@ function initOutputColumnAndRenderWindows()
             {
                 if (trailMode)
                 {
-                    let ndcOnRenderWindow = screen.worldToLocal(mouse.getZZeroPosition(v1))
+                    let ndcOnDisplayWindow = screen.worldToLocal(mouse.getZZeroPosition(v1))
 
-                    mouseTrail.geometry.vertices[lastTrailVertexToBeAssigned].set(ndcOnRenderWindow.x, ndcOnRenderWindow.y,0.)
+                    mouseTrail.geometry.vertices[lastTrailVertexToBeAssigned].set(ndcOnDisplayWindow.x, ndcOnDisplayWindow.y,0.)
                     mouseTrail.geometry.vertices[lastTrailVertexToBeAssigned].multiplyScalar(8.)
                     for (let i = lastTrailVertexToBeAssigned + 1, il = mouseTrail.geometry.vertices.length; i < il; i++)
                         mouseTrail.geometry.vertices[i].copy(mouseTrail.geometry.vertices[lastTrailVertexToBeAssigned])
@@ -228,48 +197,85 @@ function initOutputColumnAndRenderWindows()
             renderer.setClearColor(ordinaryClearColor)
         })
 
-        return { screen, scene: localScene,camera:localCamera }
+        return displayWindow
     }
 
-    let superimposedWindow = RenderWindow()
-    scene.add(superimposedWindow.screen)
-    updateFunctions.push(() =>
+    document.addEventListener('wheel', (event)=>
     {
-        pad.scale.copy(outputColumn.scale)
+        event.preventDefault()
 
-        let columnLeft = outputColumn.position.x - outputColumn.scale.x / 2.
-        let columnRight = outputColumn.position.x + outputColumn.scale.x / 2.
-
-        pad.position.y = camera.topAtZZero
-        pad.position.x = columnRight
-
-        superimposedWindow.screen.scale.setScalar(Math.abs(-camera.rightAtZZero - columnLeft ) )
-        superimposedWindow.screen.position.x = (-camera.rightAtZZero + columnLeft) / 2.
-    })
-    
-    let gridSize = 8.
-    let axis = new THREE.Line(new THREE.Geometry(), new THREE.MeshBasicMaterial({color:0xFFFFFF}))
-    axis.geometry.vertices.push(new THREE.Vector3(0., gridSize / 2., 0.), new THREE.Vector3(0., -gridSize / 2., 0.))
-    let grid = new THREE.GridHelper(gridSize, gridSize, axis.material.color)
-    superimposedWindow.scene.add(grid,axis)
-
-    document.addEventListener('wheel', (event) =>
-    {
-        let inflationFactor = 1.3
-
-        mouse.getZZeroPosition(v1)
-        superimposedWindow.screen.worldToLocal(v1)
-        if (-.5 < v1.x && v1.x < .5 &&
-            -.5 < v1.y && v1.y < .5 )
-        {
-            let cameraPosition = superimposedWindow.camera.position
-            cameraPosition.setLength(cameraPosition.length() * (event.deltaY < 0 ? inflationFactor : 1./inflationFactor))
-        }
+        if( event.ctrlKey) //handled by window resize
+            return
         else
         {
-            outputColumn.scale.setScalar(pad.scale.x * (event.deltaY < 0 ? inflationFactor : 1./inflationFactor))
-
-            //which should change output column size too
+            let thingMouseIsOn = getThingMouseIsOn()
+            if (displayWindows.indexOf(thingMouseIsOn) === -1)
+                pad.position.y += event.deltaY * -.008
+            else
+            {
+                let displayWindow = thingMouseIsOn
+                let cameraPosition = displayWindow.camera.position
+                let inflationFactor = 1.2
+                cameraPosition.setLength(cameraPosition.length() * (event.deltaY < 0 ? inflationFactor : 1. / inflationFactor))
+            }   
         }
     }, false);
+
+    outputColumn.position.z = -.001 //better would be drawn 1st
+    outputColumn.left = () => outputColumn.position.x - outputColumn.scale.x / 2.
+    outputColumn.right = () => outputColumn.position.x + outputColumn.scale.x / 2.
+    scene.add(outputColumn)
+    let outputColumnGrabbed = false
+    function getThingMouseIsOn()
+    {
+        let mouseX = mouse.getZZeroPosition(v1).x
+
+        if (outputColumn.right() < mouseX)
+            return "pad"
+        else if (outputColumn.left() < mouseX && mouseX < outputColumn.right())
+            return "column"
+
+        for (let i = 0; i < displayWindows.length; i++)
+        {
+            mouse.getZZeroPosition(v1)
+            displayWindows[i].screen.worldToLocal(v1)
+            if (-.5 < v1.x && v1.x < .5 &&
+                -.5 < v1.y && v1.y < .5)
+                return displayWindows[i]
+        }
+
+        return "left"
+    }
+    updateFunctions.push(() =>
+    {
+        let cursorStyle = "default"
+        let thingMouseIsOn = getThingMouseIsOn()
+        if (thingMouseIsOn === "column")
+            cursorStyle = "col-resize"
+        else if (thingMouseIsOn === "pad")
+            cursorStyle = "text"
+        else if (displayWindows.indexOf(thingMouseIsOn) !== -1)
+            cursorStyle = "grab" //you might like "grabbing" but we can't rely on domElement to change it
+        // "cell" excel
+        // "copy" has little cross
+        renderer.domElement.style.cursor = cursorStyle
+
+        //click output to put it in or take it out of preview. double click to select it as one would select text
+
+        if (!mouse.clicking)
+            outputColumnGrabbed = false
+        else if (!mouse.oldClicking && thingMouseIsOn === "column")
+            outputColumnGrabbed = true
+
+        if (outputColumnGrabbed)
+            outputColumn.position.x = mouse.getZZeroPosition(v1).x
+        outputColumn.position.x = clamp(outputColumn.position.x, -camera.rightAtZZero + outputColumn.scale.x / 2., camera.rightAtZZero - outputColumn.scale.x / 2.)
+        //and maybe resize as well?
+
+        outputColumn.scale.copy(pad.scale)
+
+        pad.position.x = outputColumn.right()
+        if (pad.position.y < camera.topAtZZero)
+            pad.position.y = camera.topAtZZero
+    })
 }
