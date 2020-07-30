@@ -85,7 +85,7 @@
 
 async function initPad()
 {
-	let backgroundString = " b hello\nb \n\n\n\n\n\ndisplay"
+	let backgroundString = " b hello\nb \n\n\n\n\n\ndisplay\n\n\n\n\n\ndisplay"
 
 	scene.add(pad)
 
@@ -93,19 +93,6 @@ async function initPad()
 	mvs.push(generateNewVector())
 	pad.add(mvs[0])
 	//pad's scale is precisely line height
-
-	for(let i = 0; i < 3; i++)
-	{
-		let dw = DisplayWindow()
-		dw.screen.bottomY = (i - 1) * 12. - 2.
-		scene.add(dw.screen)
-
-		let gridSize = 8.
-		let axis = new THREE.Line(new THREE.Geometry(), new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
-		axis.geometry.vertices.push(new THREE.Vector3(0., gridSize / 2., 0.), new THREE.Vector3(0., -gridSize / 2., 0.))
-		let grid = new THREE.GridHelper(gridSize, gridSize, axis.material.color)
-		dw.scene.add(grid, axis)
-	}
 
 	{
 		var carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.,1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
@@ -262,6 +249,10 @@ async function initPad()
 
 		let positionInStringClosestToCaratPosition = -1
 
+		let lowestUnusedDisplayWindow = 0
+		for (let i = 0; i < displayWindows.length; i++)
+			displayWindows[i].screen.bottomY = camera.topAtZZero
+
 		while (drawingPositionInString <= backgroundStringLength)
 		{
 			if (caratPositionInString !== -1 && drawingPositionInString === caratPositionInString)
@@ -359,7 +350,25 @@ async function initPad()
 
 			if (backgroundString.slice(drawingPositionInString, drawingPositionInString+7) === "display")
 			{
-				//gonna get the next things
+				v1.copy(drawingPosition)
+				v1.y -= .5
+				let bottomY = pad.localToWorld(v1).y
+				let maxHeight = 2. * getDisplayColumnWidth()
+				if ( -camera.topAtZZero < bottomY + maxHeight && bottomY < camera.topAtZZero )
+				{
+					let dw = displayWindows[lowestUnusedDisplayWindow]
+					dw.screen.bottomY = bottomY
+
+					dw.screen.scale.y = dw.screen.scale.x * 2.
+					//and then chop it off if that overlaps any above
+					for (let i = 0; i < lowestUnusedDisplayWindow; i++)
+					{
+						if (dw.screen.scale.y + bottomY > displayWindows[i].screen.bottomY)
+							dw.screen.scale.y = displayWindows[i].screen.bottomY - bottomY - .1 * pad.scale.y
+					}
+
+					++lowestUnusedDisplayWindow
+				}
 			}
 
 			//just characters
@@ -417,8 +426,27 @@ async function initPad()
 			caratPositionInString = positionInStringClosestToCaratPosition
 		}
 
+		v1.copy(drawingPosition)
+		v1.y -= 1.
+		pad.localToWorld(v1)
+		if(v1.y > camera.topAtZZero)
+			pad.position.y -= v1.y - camera.topAtZZero
+
 		// log(instancedLetterMeshes["a"].count)
 	})
+
+	for (let i = 0; i < 3; i++)
+	{
+		let dw = DisplayWindow()
+		dw.screen.bottomY = (i - 1) * 12. - 2.
+		scene.add(dw.screen)
+
+		let gridSize = 8.
+		let axis = new THREE.Line(new THREE.Geometry(), new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
+		axis.geometry.vertices.push(new THREE.Vector3(0., gridSize / 2., 0.), new THREE.Vector3(0., -gridSize / 2., 0.))
+		let grid = new THREE.GridHelper(gridSize, gridSize, axis.material.color)
+		dw.scene.add(grid, axis)
+	}
 
 	//irritation involving things going behind it
 	// let lineHighlight = new THREE.Mesh(unchangingUnitSquareGeometry.clone(), new THREE.MeshBasicMaterial({ color: 0x3E3D32 }))

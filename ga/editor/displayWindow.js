@@ -1,4 +1,4 @@
-/* 
+/*  
     TODO later maybe, pressing TODO is in init.js
     copy a png or gif or whatever, paste into window, you have a textured quad, or three scalar fields or however you do it
     Double click something in window, to get to the place where it is made
@@ -82,7 +82,7 @@ function initOutputColumnAndDisplayWindows()
         localCamera.position.z = 8.5
         localCamera.rotation.order = "YXZ"
 
-        //may want a "background" thing
+        //TODO Zooming automatically to get the furthest-out vertex
 
         let filter = THREE.NearestFilter
         let wrap = THREE.ClampToEdgeWrapping
@@ -121,13 +121,12 @@ function initOutputColumnAndDisplayWindows()
         let grabbed = false
         updateFunctions.push(() =>
         {
-            screen.scale.setScalar(Math.abs(-camera.rightAtZZero - outputColumn.left()))
+            screen.scale.x = getDisplayColumnWidth()
             screen.position.x = (-camera.rightAtZZero + outputColumn.left()) / 2.
             
-            // let topY = camera.topAtZZero
-            // if()
             screen.position.y = screen.scale.y / 2. + screen.bottomY
-            //and change resolution
+            //and scale.y could be various things
+            //and change resolution, and think about camera bullshit
 
             if (!mouse.clicking)
                 grabbed = false
@@ -186,8 +185,6 @@ function initOutputColumnAndDisplayWindows()
             localCamera.localToWorld(v1.set(0., 0., -currentDistFromCamera ) )
             localCamera.position.sub(v1)
 
-            //probably will want zoom in and out at some point. But zooming to get the furthest-out vertex should be pretty good
-
             renderer.setRenderTarget(localFramebuffer)
             renderer.setClearColor(0x000000)
             renderer.clear()
@@ -224,6 +221,7 @@ function initOutputColumnAndDisplayWindows()
     outputColumn.position.z = -.001 //better would be drawn 1st
     outputColumn.left = () => outputColumn.position.x - outputColumn.scale.x / 2.
     outputColumn.right = () => outputColumn.position.x + outputColumn.scale.x / 2.
+    getDisplayColumnWidth = () => Math.abs(-camera.rightAtZZero - outputColumn.left())
     scene.add(outputColumn)
     let outputColumnGrabbed = false
     function getThingMouseIsOn()
