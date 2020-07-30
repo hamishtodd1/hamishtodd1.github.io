@@ -50,7 +50,38 @@
 		Hey, it works for debuggers. It's a slice through possibility space
 		Working with the function, maybe represented as an infinite line of mvs, is for the game
 
+	integration and differentiation
+		To do Inventing On Principle Style omniscient select-the-time debugging for non-trivial games:
+			Consider the fact that they have a state s and an update function u
+			smoothstep is your differentiable sigmoid
+			If the update function depends on the current state you have a differential equation
+				otherwise(?) just get its antiderivative and you'll
+				Maybe all the current-state-dependent advancements can be socially enforced dynamicland/sport style. Examples of these:
+					"last state was losing condition, so you have a game over screen"
+					"Restart" button
+					win, loss are specific binaries
+			Ideally we can immediately get s given time since initialization and functions over time of what the controller input values were
+			This is asking a lot from game developers... how much do you get from it?
+				Can get super helpful omniscient debugger if everything is differentiable
+				Maybe describe a bug situation then automatically solve the equation to see if it ever happens
+				Gamedevs do want to make nice wobbly physics-y stuff, they should commit to it
+			Maybe this is the difference between physics and games, you do get nice non-differential equations sometimes
+			Ordinary: you have your state/frame s, and your update function u, next state/frame is u(s). S is an array of multivectors
+				u'(s) is your differential
+				Gonna have to simulate many frames forward to get full visualization of a reasonable game
+				We definitely do have u(s,frameDelta), all games do. Can differentiate
+					Are there any nasty differential equations in there? Blow would say yes
+		Surely something very GA going on https://en.wikipedia.org/wiki/Integration_using_Euler%27s_formula
+		They should call integration "accumulation". "Differentiation" is probably fine
+		It needs built in derivatives because it's a language for physics course
+		Bret integration https://youtu.be/oUaOucZRlmE?t=1266
+		The epsilon of integration is directly linked to the scale at which you are looking at the thing. dt = width of a pixel
+		You draw a graph (left to right bottom to top say) by evaluating the function at the left side of a pixel, then at the right, then drawing pixels accordingly
+		In the evaluation system
+			"differentiate(x*x,x)" -> "2*x"
+
 	Algebraic deduction / reduction
+		Is this "constraint programming"?
 		You're defining properties of a thing without knowing the thing. Then you juggle til you have a function describing the thing. Funny way to program?
 		You can use this stuff, simplified equations, to build the animations that get used for operations, see operators.js
 		In addition to jugglings, you can have constraints
@@ -69,15 +100,6 @@
 		The purpose of this is pedagogy, and hey, maybe more
 		Is there any way of turning the subsitution rules into things helpful for the animations or where to put stuff in the pictures???
 			Maybe this is how you say that difference vectors should be put not at the origin?
-
-	integration and differentiation
-		Surely something very GA going on https://en.wikipedia.org/wiki/Integration_using_Euler%27s_formula
-		It needs built in derivatives because it's a language for physics course
-		Bret integration https://youtu.be/oUaOucZRlmE?t=1266
-		The epsilon of integration is directly linked to the scale at which you are looking at the thing. dt = width of a pixel
-		You draw a graph (left to right bottom to top say) by evaluating the function at the left side of a pixel, then at the right, then drawing pixels accordingly
-		In the evaluation system
-			"differentiate(x*x,x)" -> "2*x"
 
 	reduction / partial evaluation syntax
 		how to detect opportunities? Regex?

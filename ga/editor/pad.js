@@ -85,21 +85,21 @@
 
 async function initPad()
 {
-	let backgroundString = " b \n b "
+	let backgroundString = "b hello\nb \n\n\n\n\n\ndisplay"
 
 	scene.add(pad)
-	updateFunctions.push(function ()
-	{
-		pad.position.x = -camera.rightAtZZero + 1. * pad.scale.x
-		pad.position.y = camera.topAtZZero - 1. * pad.scale.y
-	})
 
 	let mvs = []
+	mvs.push(generateNewVector())
+	pad.add(mvs[0])
+
+	//pad's scale is precisely line height
 
 	{
-		let carat = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
+		var carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.,1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
+		carat.geometry.translate(.5,0.,0.)
 		var caratPositionInString = -1
-		carat.position.z = .01
+		carat.position.z = .05
 		pad.add(carat)
 		carat.scale.x = .1
 		let caratFlashingStart = 0.
@@ -136,14 +136,14 @@ async function initPad()
 	}
 
 	{
-		let characters = "abcdefghijklmnopqrstuvwxyz /-=*!:"
+		var characters = "abcdefghijklmnopqrstuvwxyz /-=*!:"
 		function addCharacter(character)
 		{
 			backgroundString = backgroundString.slice(0, caratPositionInString) + character + backgroundString.slice(caratPositionInString, backgroundString.length)
 			moveCaratAlongString(1)
 		}
-		let instancedLetterMeshes = {}
-		let maxCopiesOfALetter = 256
+		var instancedLetterMeshes = {}
+		var maxCopiesOfALetter = 256
 		function makeCharacterTypeable(character, typedCharacter)
 		{
 			let material = text(character, true)
@@ -244,7 +244,8 @@ async function initPad()
 		gsSymbolInstanced.count = 0
 
 		let drawingPositionInString = 0
-		drawingPosition.set(0., 0., 0.)
+		let topPadding = .7
+		drawingPosition.set(0., -.5 - topPadding, 0.)
 		let backgroundStringLength = backgroundString.length
 		let xClosestToCarat = Infinity
 		let yClosestToCarat = Infinity
@@ -344,6 +345,12 @@ async function initPad()
 					// 	// drawingPosition.x += .5
 					// }
 				}
+			}
+
+			if (backgroundString.slice(drawingPositionInString, drawingPositionInString+7) === "display")
+			{
+				
+				//gonna get the next things
 			}
 
 			//just characters

@@ -2,6 +2,9 @@
 	Without sound or particle effects or AR, just you talking in zeimlight style with PowerPoint slides, it can be the best academic course in GA available.
 
 	Setup
+		So that there is resistance when drawing and touching
+			Panel of glass
+			Stylus and somehow machine knows when end is touching surface
 		Hololens 2, camera fixed in place, "transparent screen"
 			When you touch a "symbol" it gets pushed in in a springy way
 			Put hand in leap motion area, hand is large over the text editor, lets you pick stuff with small movements

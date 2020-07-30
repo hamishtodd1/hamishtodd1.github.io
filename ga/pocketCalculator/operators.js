@@ -1,9 +1,4 @@
 /*
-	Might be the only thing you need to hire someone for.
-		Want a skinnable skeletal animation where you can re-impose custom things
-		Waifu, fairy, robot, vampire
-		Customize it yourself I guess
-
 	Building animations from animations
 		Ideally the animations can concatenate into simpler, elegant, cooler, animations
 		that are aware of some additional geometric analogy that is possible
@@ -36,7 +31,6 @@
 		kronecker delta
 
 	"i as the circle constant"
-		In schrodinger equation you have i/2pi
 		alright so you get an extra constant if you differentiate with respect to angle, maybe that's as it should be?
 		split complex numbers with polar coordinates
 		2*pi*i is the real thing https://blog.wolfram.com/2015/06/28/2-pi-or-not-2-pi/

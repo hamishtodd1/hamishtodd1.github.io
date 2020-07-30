@@ -76,7 +76,7 @@ function initOutputColumnAndRenderWindows()
     outputColumn.position.z = -.001 //better would be drawn 1st
     scene.add(outputColumn)
     let outputColumnGrabbed = false
-    function getColumn()
+    function getColumnMouseIsIn()
     {
         let mouseX = mouse.getZZeroPosition(v1).x
 
@@ -88,15 +88,15 @@ function initOutputColumnAndRenderWindows()
         else if (mouseX > columnRight)
             return "right"
         else
-            return "outputColumn"
+            return "center"
     }
     updateFunctions.push(() =>
     {
         let cursorStyle = "text"
-        let column = getColumn()
-        if (column === "outputColumn")
+        let column = getColumnMouseIsIn()
+        if (column === "center")
             cursorStyle = "col-resize"
-        else if (column === "right")
+        else if (column === "left")
             cursorStyle = "grab" //you might like "grabbing" but we can't rely on domElement to change it
         // "cell" excel
         // "copy" has little cross
@@ -163,7 +163,7 @@ function initOutputColumnAndRenderWindows()
         {
             if (!mouse.clicking)
                 grabbed = false
-            if (mouse.clicking && !mouse.oldClicking && getColumn() === "right")
+            if (mouse.clicking && !mouse.oldClicking && getColumnMouseIsIn() === "left")
                 grabbed = true
 
             // log(mouse.justMoved())
@@ -235,8 +235,16 @@ function initOutputColumnAndRenderWindows()
     scene.add(superimposedWindow.screen)
     updateFunctions.push(() =>
     {
-        superimposedWindow.screen.position.x = (camera.rightAtZZero + (outputColumn.position.x + outputColumn.scale.x / 2.)) / 2.
-        superimposedWindow.screen.scale.setScalar(camera.rightAtZZero - (outputColumn.position.x + outputColumn.scale.x / 2.))
+        pad.scale.copy(outputColumn.scale)
+
+        let columnLeft = outputColumn.position.x - outputColumn.scale.x / 2.
+        let columnRight = outputColumn.position.x + outputColumn.scale.x / 2.
+
+        pad.position.y = camera.topAtZZero
+        pad.position.x = columnRight
+
+        superimposedWindow.screen.scale.setScalar(Math.abs(-camera.rightAtZZero - columnLeft ) )
+        superimposedWindow.screen.position.x = (-camera.rightAtZZero + columnLeft) / 2.
     })
     
     let gridSize = 8.
@@ -247,27 +255,21 @@ function initOutputColumnAndRenderWindows()
 
     document.addEventListener('wheel', (event) =>
     {
-        if (getColumn() === "right")
+        let inflationFactor = 1.3
+
+        mouse.getZZeroPosition(v1)
+        superimposedWindow.screen.worldToLocal(v1)
+        if (-.5 < v1.x && v1.x < .5 &&
+            -.5 < v1.y && v1.y < .5 )
         {
             let cameraPosition = superimposedWindow.camera.position
-            cameraPosition.setLength(cameraPosition.length() * (event.deltaY < 0 ? 1.1 : 0.91))
+            cameraPosition.setLength(cameraPosition.length() * (event.deltaY < 0 ? inflationFactor : 1./inflationFactor))
         }
         else
         {
-            mouse.getZZeroPosition(v1)
-            pad.worldToLocal(v1)
+            outputColumn.scale.setScalar(pad.scale.x * (event.deltaY < 0 ? inflationFactor : 1./inflationFactor))
 
-            pad.scale.setScalar(pad.scale.x * (event.deltaY < 0 ? 1.1 : 0.91))
-            pad.updateMatrixWorld()
-
-            pad.localToWorld(v1)
-            mouse.getZZeroPosition(v2)
-
-            pad.position.add(v2).sub(v1)
-            pad.position.x = 0.
-
-            //which changes output column size too
+            //which should change output column size too
         }
-
     }, false);
 }

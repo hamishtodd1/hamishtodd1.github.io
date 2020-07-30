@@ -31,7 +31,13 @@
 		fire poi throwing sparks!
 		corkscrew
 		sphere
-		flappy bird
+		Games
+			flappy bird
+			jetpack joyride
+			grappling hook
+			lunar lander
+			pong
+		damped harmonic oscillator visualization
 		schrodinger's smoke
 		tornado particle effect
 		That sea wave thing where each point on the surface is a point on a circle
