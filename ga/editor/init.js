@@ -1,23 +1,37 @@
 /* 
-	TODO for demo to interested parties
-		Compiling and executing basic instructions dude, putting stuff in that column
-		comment-like bits of code that say what vectors should be in the render windows when (/where, heh)
+	TODO. Seems basic but surely all necessary. Implement, get ideas. Show to Chris, get ideas.
+		Build those visualizations
+		Compiling and executing basic instructions, putting stuff in that column
+		Functions
+		vectors named in the display commands
+		The other multivector visualizations
 		function copied into code from drawing in view
 			fourier approximation. If you loop back it's a 2D function, if not 1D
-		Stuff in renderwindow
-		Functions
+		All different function visualizations
 		altering inputs with mouse
-		Basic Omicron reduction (omicron because if you can demonstrate)
-			demo of making wedge product and "proving it is antisymmetric" by writing ab - ba
-			Enough for basic integration and differentiation
+		Basic Omicron reduction (omicron because 0 is useful)
+			Describe properties of a function then make function
 
-	Interested parties
-		steve der kenick, bivector discord
-		Chris Deleon, Daniel Piker
-		Alan, Meurig, Martin
-		futureOfCoding slack
-		EE slack
-		Media Molecule
+				lunar lander, simple harmonic oscillator
+
+	Plan for demo
+		omicron reduction
+			Do a proof that two things are equal
+				making wedge product and "proving it is antisymmetric" by writing ab - ba
+			integration and differentiation
+			Discussion of differentiable programming
+		Good to think about velocity space or differential space.
+			Like that 3b1b thing with the circular bunch of velocity vectors. What happens when you control velocity with your mouse and watch position change?
+			Or Hestenes' thing about velocity space
+			Something something integration and differentiation
+			"Look at the system in velocity space", "look at the system in integration/energy space". All fully determined.
+		Interested parties
+			steve der kenick, bivector discord
+			Chris Deleon, Daniel Piker
+			Alan, Meurig, Martin
+			futureOfCoding slack
+			EE slack
+			Media Molecule
 
 	TODO for programming / bootstrapping
 		Fuller visualization of multivectors
@@ -43,6 +57,8 @@
 		Full omicron reduction
 		input latex
 
+	An array of vectors is a matrix. Therefore... f:R->R2 sampled at two points is a matrix?
+
 	You can't visualize the multivector without some (theoretical values) for it
 		Or can you? Little disk with colors?
 		Both a blessing and a curse? Get people too used to a certain state, unable to think in the abstract?
@@ -51,6 +67,7 @@
 		Working with the function, maybe represented as an infinite line of mvs, is for the game
 
 	integration and differentiation
+		Don't forget strogatz style. Particle on the line, the curve above it tells it whether to go left or right. f:R->R is a vector field too
 		To do Inventing On Principle Style omniscient select-the-time debugging for non-trivial games:
 			Consider the fact that they have a state s and an update function u
 			smoothstep is your differentiable sigmoid

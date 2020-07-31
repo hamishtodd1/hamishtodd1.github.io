@@ -16,7 +16,7 @@ function initSound()
         "unpress2",
     ];
     for (let i = 0; i < fileNames.length; i++)
-        sounds[fileNames[i]] = new Audio("data/sounds/" + fileNames[i] + ".mp3");
+        sounds[fileNames[i]] = new Audio("../common/data/sounds/" + fileNames[i] + ".mp3");
 
     playRandomPop = function()
     {

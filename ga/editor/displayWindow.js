@@ -1,68 +1,102 @@
 /*  
+    You can type the things, yes, but the line of symbols (/pictures) turns into a picture of the half way point for the operation
+        eg
+            a picture of the vector half way through being multiplied by the scalar
+            or the bivector outlined by the vectors
+        This is the way to specify a visualization for an arbitrary function?
+            1. You have the inputs, arranged arbitrarily
+            2. They move around in some way
+            3. They end up in specific locations that outline/suggest the shape of the output
+            3. The output is put in place (it's not col)
+            4. The inputs disappear
+            Details of step 2 can be computed from step 3
+            Visualization needs to be unique, it's unfortunate that there are many functions that begin the same way
+            In this half way picture, the output is not colored yet
+
+        A given function may have a bunch of stuff going on in it. It can be visualized all in one coord system
+        Maybe this intermediate stage should just be the inputs and outputs in same coord system
+        When you make a function, you make an animation that can be played in one displayWindow
+
+        Functions have inverses. a + b -> c, you get c. But the intermediate representation involves a,b,c as equal participants so you can visually reverse it?
+        Well actually they're not equal participants, because b gets put onto the end of a (or vice versa)
+
+    So you're on a new line
+        There's a displayWindow but nothing in there
+        You type some mvs, say 3 of them, and they appear in there but you don't have an operation yet
+        If you click in the thing you make a new mv. Only got the 2 dimensions soooo
+        System goes through every combination of + and * for... certainly the basis vectors and what you've put in your line, maybe your whole scope
+
+    Exponential growth is very dynamical-system like, it is dependent on where you currently are
+
     TODO later maybe, pressing TODO is in init.js
-    copy a png or gif or whatever, paste into window, you have a textured quad, or three scalar fields or however you do it
-    Double click something in window, to get to the place where it is made
-    maybe try to make it so that when you change what you see in the window it back solves to change the code?
-        Drawing a curve and geting an array is an example
-        Grab the coord system and rotate; it gives you the quaternion that does that
-        Draw a new vector
-            it could be written in terms of old ones
-            try to snap to the nearest one that's a single operation performed on existing ones
+        maybe try to make it so that when you change what you see in the window it back solves to change the free variables above?
+            The same vector may be represented in many displayWindows, but you can grab and affect it in any you like
+            But which free variables?
+            Grab the coord system and rotate; it gives you the quaternion that does that
+            Draw a new vector
+                Triggered by enabling the draw new vector mode? Then you can click anywhere?
+                Maybe if the carat is on a new line
+                Your way of getting velocity is eg snapping to eg v1 - v2, or rather snapping to a vector parallel to v1-v2 while v1-v2 is visualized in place
+                it could be written in terms of old ones
+                try to snap to the nearest one that's a single operation performed on existing ones
+                    If it's a vector and it's in a plane perpendicular to an existing vector and the same length, that's a single bivector multiplication
+        Zooming automatically to get the furthest-out vertex
+        copy a png or gif or whatever, paste into window, you have a textured quad, or three scalar fields or however you do it
+        Double click something in window, to get to the place where it is made
+
+    Probably screw the render target, except for evaluating functions
+        Sounds like a lot of fun to write the shader for the under-over thing
 
     Click the things in the column, what happens?
         They appear in the window?
-        Probably you can have text in that column, appears when you hover?
+        Hovering shows the name, you can edit
         When you right click them, context menu:
             "Copy name"
             "Change name" (changes colors?)
             "Paste at carat"
             "change representation"
 
-    What's in the render window?
-        Much better than built in rotation is rotating the basis vectors. horizontal rotate around pole, y rotate upwards or downwards
-        Wanna be able to program your own visualization, then use that to visualize your program
+    What determines which things go in the display window?
+        Much better than built in rotation is rotating the basis vectors. x or y rotate around y, y rotate upwards or downwards
+        Wanna be able to program your own visualization, then use that to visualize your program. Or we enumerate all?
         Whatever lines are in the editor. Want more? Scroll up, copy it, paste it down here
+        They are your sliders
         Unless you have some highlighted in which case it's those?
         "What is hightlighted" is a useful bit of state
+        Where/how many to have?
+            One for every line makes some sense. Inflate when you're on that line
+            Maybe the output column has what you need too
+            Can have an extra render window which is wherever the carat is, maybe highlighting the multivector it's nearest
+            display is still good but it's kind of a fallback
 
-    Representations, from abacus. Can bootstrap some?
+    Representations, from abacus. Can build some from others?
 		A line you can grab bits of
 		A canvas you can draw on (i.e. a scalar field that starts all 0 and you can make it nonzero in places)
 		Looping all the multivectors (i.e. varying over time)
 		utah teapots with scalar for sizes
-		points moving aroound due to vector field
-		surface: vectors interpreted as contiguous vertices of triangls
 		orientations and positions: a bunch of utah teapots offset by the vector, oriented by the bivector
-		hmm, how about offset by the bivector, oriented by the vector combined with the pseudoscalar?
         One standing in for all. In this situation, everything coming from the same one gets the same representation
         
     C=R2. H?
-    f:
-    R->R    line graph - black and white line if looked at from above
-    R->R2   line through R2, or through R3 plotted along z axis
-    R->R3   curve through R3, "parametric"
+    These all might be dumb, you should focus on the opengl premitives, not on specific stuff like this
+        R->R    line graph, filled underneath - black and white line if looked at from above
+        R->R2   line through R2, or through R3 plotted along z axis
+        R->R3   curve through R3, "parametric", alternatively point moving over time and clickable scalar (slider)
 
-    R2->R   1 surface
-    R2->R2  set of 2 surfaces - 2 color image if looked at from above, or vector field? Tokieda weirdness?
-    R2->R3  set of 3 surfaces - 3 color image if looked at from above, or parametric surface??
-    surfaces are parametric, functions from R2
-        If the vertices of a mesh are in a funky order with respect to triangles, they are probably imported from an outside program which should put them in a good order
-        Except that you want to compute vertex normals.
-            Though in order to do that you do have to iterate an array to find what faces a vertex is in
+        R2->R   1 surface
+        R2->R2  set of 2 surfaces - 2 color image if looked at from above, or vector field(points moving around/arrows)? Tokieda weirdness?
+        R2->R3  set of 3 surfaces - 3 color image if looked at from above, or parametric surface??
+        surfaces are parametric, functions from R2
+            If the vertices of a mesh are in a funky order with respect to triangles, they are probably imported from an outside program which should put them in a good order
+            Except that you want to compute vertex normals.
+                Though in order to do that you do have to iterate an array to find what faces a vertex is in
 
-    R3->R   isosurface. Two of them. One at 0 and the other at a controllable level. Between, if you slice it, MRI-style texturing
-    R3->R2  pair of isosurfaces
-    R3->R3  vector field? 3 color isosurface?
+        R->H    utah teapot at origin
+        R->R3,H utah teapot at position oriented by quaternion
 
-    Good to think about velocity space or differential space.
-        Like that 3b1b thing with the circular bunch of velocity vectors. What happens when you control velocity with your mouse and watch position change?
-        Or Hestenes' thing about velocity space
-        Something something integration and differentiation
-        "Look at the system in velocity space", "look at the system in integration/energy space". All fully determined.
-
-    Interesting to compare a scatter plot, statistics game note
-        A scatter plot is for when you have a probability distribution over two variables (R2->R) and it has been sampled a few times.
-        A single color texture, really
+        R3->R   isosurface. Two of them. One at 0 and the other at a controllable level. Between, if you slice it, MRI-style texturing
+        R3->R2  pair of isosurfaces
+        R3->R3  vector field? 3 color isosurface?
 */
 
 function initOutputColumnAndDisplayWindows()
@@ -78,11 +112,17 @@ function initOutputColumnAndDisplayWindows()
     DisplayWindow = function()
     {
         let localScene = new THREE.Scene()
+        {
+            let gridSize = 8.
+            let axis = new THREE.Line(new THREE.Geometry(), new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
+            axis.geometry.vertices.push(new THREE.Vector3(0., gridSize / 2., 0.), new THREE.Vector3(0., -gridSize / 2., 0.))
+            let grid = new THREE.GridHelper(gridSize, gridSize, axis.material.color)
+            localScene.add(grid, axis)
+        }
+
         let localCamera = new THREE.PerspectiveCamera(90., 1., .01, 100.)
         localCamera.position.z = 8.5
         localCamera.rotation.order = "YXZ"
-
-        //TODO Zooming automatically to get the furthest-out vertex
 
         let filter = THREE.NearestFilter
         let wrap = THREE.ClampToEdgeWrapping
@@ -101,7 +141,10 @@ function initOutputColumnAndDisplayWindows()
         let localFramebuffer = new THREE.WebGLRenderTarget(dimensionInPixels, dimensionInPixels, params)
 
         let screen = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), new THREE.MeshBasicMaterial({ map: localFramebuffer.texture }))
+        scene.add(screen)
         screen.bottomY = 0.
+        let displayWindow = { screen, scene: localScene, camera: localCamera }
+        displayWindows.push(displayWindow)
 
         //the idea of this is that we then pop up the array in the code
         //better: doodle on what seems to you like a plane, but it's extruded in z because z is input
@@ -114,9 +157,6 @@ function initOutputColumnAndDisplayWindows()
                 mouseTrail.geometry.vertices.push(new THREE.Vector3())
             lastTrailVertexToBeAssigned = 0
         }
-
-        let displayWindow = { screen, scene: localScene, camera: localCamera }
-        displayWindows.push(displayWindow)
         
         let grabbed = false
         updateFunctions.push(() =>
@@ -219,6 +259,7 @@ function initOutputColumnAndDisplayWindows()
     }, false);
 
     outputColumn.position.z = -.001 //better would be drawn 1st
+    outputColumn.position.x = -camera.rightAtZZero * .3
     outputColumn.left = () => outputColumn.position.x - outputColumn.scale.x / 2.
     outputColumn.right = () => outputColumn.position.x + outputColumn.scale.x / 2.
     getDisplayColumnWidth = () => Math.abs(-camera.rightAtZZero - outputColumn.left())

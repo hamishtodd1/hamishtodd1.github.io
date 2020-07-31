@@ -1,4 +1,9 @@
 /*
+	Might be the only thing you need to hire someone for.
+		Want a skinnable skeletal animation where you can re-impose custom things
+		Waifu, fairy, robot, vampire
+		Customize it yourself I guess
+
 	Building animations from animations
 		Ideally the animations can concatenate into simpler, elegant, cooler, animations
 		that are aware of some additional geometric analogy that is possible
@@ -31,6 +36,7 @@
 		kronecker delta
 
 	"i as the circle constant"
+		In schrodinger equation you have i/2pi
 		alright so you get an extra constant if you differentiate with respect to angle, maybe that's as it should be?
 		split complex numbers with polar coordinates
 		2*pi*i is the real thing https://blog.wolfram.com/2015/06/28/2-pi-or-not-2-pi/
@@ -53,14 +59,15 @@
 async function initOperatorAppearances()
 {
 	let materials = {
-		geometricProduct:new THREE.MeshBasicMaterial({color:0xFF0000,transparent:true /*because transparent part of texture*/ }),
-		geometricSum:new THREE.MeshBasicMaterial({color:0x80FF00,transparent:true /*because transparent part of texture*/ }),
+		geometricProduct: new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true /*because transparent part of texture*/ }),
+		geometricSum: new THREE.MeshBasicMaterial({ color: 0x80FF00, transparent: true /*because transparent part of texture*/ }),
 	}
 
 	let loader = new THREE.TextureLoader()
 	loader.crossOrigin = true
-	await new Promise(resolve => {
-		loader.load("../common/data/frog.png",function(result)
+	await new Promise(resolve =>
+	{
+		loader.load("../common/data/frog.png", function (result)
 		{
 			materials.geometricSum.map = result
 			// textures.geometricProduct = result
@@ -69,10 +76,10 @@ async function initOperatorAppearances()
 		})
 	})
 
-	OperatorAppearance = function(func)
+	OperatorAppearance = function (func)
 	{
-		let operatorSymbol = new THREE.Mesh( unchangingUnitSquareGeometry, 
-			func===geometricSum ? materials.geometricSum.clone():materials.geometricProduct.clone() )
+		let operatorSymbol = new THREE.Mesh(unchangingUnitSquareGeometry,
+			func === geometricSum ? materials.geometricSum.clone() : materials.geometricProduct.clone())
 		operatorSymbol.function = func
 
 		operatorSymbol.scale.multiplyScalar(2.)

@@ -1,6 +1,3 @@
-const outputColumn = new THREE.Mesh(new THREE.PlaneBufferGeometry(1., 9999999.), new THREE.MeshBasicMaterial({ color: 0x1F1F1F }))
-const displayWindows = []
-
 const generalMatrix = new THREE.Matrix4() //3 is sufficient
 //to be applied to visualized vectors
 
@@ -16,4 +13,8 @@ const colors = {
 }
 for (let color in colors) colorCharacters += color
 
+const outputColumn = new THREE.Mesh(new THREE.PlaneBufferGeometry(1., 9999999.), new THREE.MeshBasicMaterial({ color: 0x1F1F1F }))
+const displayWindows = []
+
 const pad = new THREE.Group()
+scene.add(pad)

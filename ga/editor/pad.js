@@ -87,13 +87,12 @@ async function initPad()
 {
 	let backgroundString = " b hello\nb \n\n\n\n\n\ndisplay\n\n\n\n\n\ndisplay"
 
-	scene.add(pad)
-
 	let mvs = []
 	mvs.push(generateNewVector())
 	pad.add(mvs[0])
 	//pad's scale is precisely line height
 
+	//carat and navigation
 	{
 		var carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.,1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
 		carat.geometry.translate(.5,0.,0.)
@@ -134,8 +133,9 @@ async function initPad()
 		bindButton("PageDown", () => addToCaratPosition(0., -999.))
 	}
 
+	//typing
 	{
-		var characters = "abcdefghijklmnopqrstuvwxyz /-=*!:"
+		var characters = "abcdefghijklmnopqrstuvwxyz /-=*!:{}"
 		function addCharacter(character)
 		{
 			backgroundString = backgroundString.slice(0, caratPositionInString) + character + backgroundString.slice(caratPositionInString, backgroundString.length)
@@ -300,7 +300,7 @@ async function initPad()
 				//maybe function tokens too
 
 				//but also it's not a pictogram if your carat is in it?
-				let caratInPictogram = drawingPositionInString <= caratPositionInString && caratPositionInString <= pictogramEnd
+				let caratInPictogram = drawingPosition.y === carat.position.y
 				if (pictogramEnd > drawingPositionInString && !caratInPictogram)
 				{
 					let pictogramName = backgroundString.slice(drawingPositionInString, pictogramEnd)
@@ -356,19 +356,26 @@ async function initPad()
 				let maxHeight = 2. * getDisplayColumnWidth()
 				if ( -camera.topAtZZero < bottomY + maxHeight && bottomY < camera.topAtZZero )
 				{
+					if (lowestUnusedDisplayWindow >= displayWindows.length)
+						DisplayWindow()
+
 					let dw = displayWindows[lowestUnusedDisplayWindow]
 					dw.screen.bottomY = bottomY
 
 					dw.screen.scale.y = dw.screen.scale.x * 2.
-					//and then chop it off if that overlaps any above
+					let worldPadding = .1 * pad.scale.y
 					for (let i = 0; i < lowestUnusedDisplayWindow; i++)
 					{
-						if (dw.screen.scale.y + bottomY > displayWindows[i].screen.bottomY)
-							dw.screen.scale.y = displayWindows[i].screen.bottomY - bottomY - .1 * pad.scale.y
+						if (dw.screen.scale.y > displayWindows[i].screen.bottomY - bottomY )
+							dw.screen.scale.y = displayWindows[i].screen.bottomY - bottomY - worldPadding
 					}
+					if (dw.screen.scale.y > pad.position.y - bottomY)
+						dw.screen.scale.y = pad.position.y - bottomY - worldPadding
 
 					++lowestUnusedDisplayWindow
 				}
+
+				//then need to eat up the rest of this line really
 			}
 
 			//just characters
@@ -434,19 +441,6 @@ async function initPad()
 
 		// log(instancedLetterMeshes["a"].count)
 	})
-
-	for (let i = 0; i < 3; i++)
-	{
-		let dw = DisplayWindow()
-		dw.screen.bottomY = (i - 1) * 12. - 2.
-		scene.add(dw.screen)
-
-		let gridSize = 8.
-		let axis = new THREE.Line(new THREE.Geometry(), new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
-		axis.geometry.vertices.push(new THREE.Vector3(0., gridSize / 2., 0.), new THREE.Vector3(0., -gridSize / 2., 0.))
-		let grid = new THREE.GridHelper(gridSize, gridSize, axis.material.color)
-		dw.scene.add(grid, axis)
-	}
 
 	//irritation involving things going behind it
 	// let lineHighlight = new THREE.Mesh(unchangingUnitSquareGeometry.clone(), new THREE.MeshBasicMaterial({ color: 0x3E3D32 }))

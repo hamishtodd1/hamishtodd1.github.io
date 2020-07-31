@@ -30,6 +30,8 @@
 		Anthony Howe kinetic masterpieces
 		fire poi throwing sparks!
 		corkscrew
+		Nautilus shell - exponential spiral, e^ipi
+		Clock with plastic wheels with numbers on them to represent time. Fourier series!
 		sphere
 		Games
 			flappy bird
