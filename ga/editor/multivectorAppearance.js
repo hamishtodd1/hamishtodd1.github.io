@@ -7,43 +7,55 @@
 //separate function anyway because you probably want to change it
 function VectorGeometry(name)
 {
-    let vectorRadius = .2
-    let radialSegments = 15
+    //ah no no, you want the end to always be the same size
+    let shaftRadius = .06
+    let headRadius = shaftRadius*3.
+    let shaftLength = .67
     
     let vectorGeometry = new THREE.Geometry()
-
-    let heightSegments = name.length
+    
+    let radialSegments = 15
+    let heightSegments = 20
     vectorGeometry.vertices = Array((radialSegments + 1) * (heightSegments + 1))
     vectorGeometry.faces = Array(radialSegments * heightSegments)
     for (let j = 0; j <= heightSegments; j++)
     {
         for (let i = 0; i <= radialSegments; i++)
         {
-            vectorGeometry.vertices[j * (radialSegments + 1) + i] = new THREE.Vector3()
-            vectorGeometry.vertices[j * (radialSegments + 1) + i].x = vectorRadius * (1. - (j / heightSegments))
-            vectorGeometry.vertices[j * (radialSegments + 1) + i].applyAxisAngle(yUnit, i / radialSegments * TAU)
+            v1.y = j / heightSegments
+            v1.z = 0.
 
-            vectorGeometry.vertices[j * (radialSegments + 1) + i].y = j / heightSegments
-
-            if (i < radialSegments && j < heightSegments)
+            v1.x = shaftRadius
+            if (v1.y >= shaftLength )
             {
+                let proportionAlongHead = 1. - (v1.y - shaftLength) / (1. - shaftLength)
+                v1.x = headRadius * proportionAlongHead
+            }
+
+            v1.applyAxisAngle(yUnit, i / radialSegments * TAU)
+            vectorGeometry.vertices[j * (radialSegments + 1) + i] = v1.clone()
+
+            if (i < radialSegments && j < heightSegments) // there are one fewer triangles along both axes
+            {
+                let color = colors[name[Math.floor(v1.y * name.length) ]]
                 vectorGeometry.faces[(j * radialSegments + i) * 2 + 0] = new THREE.Face3(
                     (j + 0) * (radialSegments + 1) + (i + 0),
                     (j + 0) * (radialSegments + 1) + (i + 1),
                     (j + 1) * (radialSegments + 1) + (i + 1),
                     new THREE.Vector3(),
-                    colors[name[j]]
+                    color
                 )
                 vectorGeometry.faces[(j * radialSegments + i) * 2 + 1] = new THREE.Face3(
                     (j + 0) * (radialSegments + 1) + (i + 0),
                     (j + 1) * (radialSegments + 1) + (i + 1),
                     (j + 1) * (radialSegments + 1) + (i + 0),
                     new THREE.Vector3(),
-                    colors[name[j]]
+                    color
                 )
             }
         }
     }
+    if (name === "bgo")logged = 1
     vectorGeometry.computeFaceNormals()
     vectorGeometry.computeVertexNormals()
 
@@ -88,45 +100,47 @@ function initMultivectorAppearances()
         return name
     }
 
-    generateNewVector = () =>
+    VectorAppearance = () =>
     {
         let name = generateName()
-        let vectorGeometry = VectorGeometry(name)
+        let vectorGeometry = VectorGeometry(name) //TODO should be in material. Can have one geometry for all when you've sorted a shader
 
-        // let 
+        let vectorValue = new THREE.Vector3(Math.random(),Math.random(),Math.random()).normalize()
+        let uniformMatrixWithYOnVector = new THREE.Matrix4()
+        setRotationallySymmetricMatrix(vectorValue.x, vectorValue.y, vectorValue.z, uniformMatrixWithYOnVector)
 
-        let vectorMesh = new THREE.InstancedMesh(vectorGeometry, vectorMaterial, 256)
-        vectorMesh.name = name
+        let instancedMesh = new THREE.InstancedMesh(vectorGeometry, vectorMaterial, 256)
+        // instancedMesh.count = 0
+        instancedMesh.name = name
 
-        vectorMesh.setPositionAt = function(index,x,y)
+        instancedMesh.drawInPlace = function(position)
         {
-            console.assert(vectorMesh.instanceMatrix.count > index)
+            let uniformScale = .5 / vectorValue.length()
+            v2.setScalar(uniformScale)
+            
+            m1.compose(position,generalQuaternion,v2)
+            m2.multiplyMatrices(m1, uniformMatrixWithYOnVector)
+            instancedMesh.setMatrixAt(instancedMesh.count, m2)
+            instancedMesh.instanceMatrix.needsUpdate = true
 
-            m1.copy(generalMatrix)
-            m1.setPosition(x,y,0.)
-            vectorMesh.setMatrixAt(index, m1)
-            // m1.copy(generalMatrix)
-            // vectorMesh.instanceMatrix.array[index * 16 + 12] = x
-            // vectorMesh.instanceMatrix.array[index * 16 + 13] = y
-            vectorMesh.instanceMatrix.needsUpdate = true
+            ++instancedMesh.count
+        }
+        instancedMesh.boxIn = function (index, scale)
+        {
+            console.assert(instancedMesh.instanceMatrix.count > index)
 
-            if (vectorMesh.count < index)
-                vectorMesh.count = index
+            instancedMesh.getMatrixAt(index, m1)
+            let currentUniformScale = getMatrixXAxisScale(m1.elements)
+            m1
+            instancedMesh.setMatrixAt(index, m1)
+            instancedMesh.instanceMatrix.needsUpdate = true
+
+            if (instancedMesh.count < index)
+                instancedMesh.count = index
         }
      
-        return vectorMesh
+        return instancedMesh
     }
-
-    // for(let i = 0; i < 98; i++)
-    // {
-    //     let v = generateNewVector()
-    //     scene.add(v)
-
-    //     v.setPositionAt(0,
-    //         ((i % 10.)/10.-.5) * camera.rightAtZZero * 1.6,
-    //         (Math.floor(i / 10.) / 10. - .5) * camera.topAtZZero * 1.6
-    //     )
-    // }
 
     // let questionMarkMaterial = text("?",true) //can be colored with vertex attributes
 }

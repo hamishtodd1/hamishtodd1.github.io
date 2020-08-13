@@ -6,14 +6,14 @@
 
 function initWindowResizeSystemAndSurroundings(renderer)
 {
+	//the effect of the below is to make it so that the only change is to the viewport, not to the scene itself
 	function respondToResize(event)
 	{
 		if(event!==undefined) event.preventDefault()
 
-		let oldPixelRatioAsUnderstoodByRenderer = renderer.getPixelRatio()
+		let pixelRatioChangeRatio = window.devicePixelRatio / renderer.getPixelRatio()
 		renderer.setPixelRatio(window.devicePixelRatio);
-		let newPixelRatioAsUnderstoodByRenderer = renderer.getPixelRatio()
-		pad.scale.multiplyScalar(newPixelRatioAsUnderstoodByRenderer / oldPixelRatioAsUnderstoodByRenderer)
+		pad.scale.multiplyScalar(pixelRatioChangeRatio)
 
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		camera.aspect = window.innerWidth / window.innerHeight;

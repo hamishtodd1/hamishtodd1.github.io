@@ -1,9 +1,22 @@
+function getMatrixYAxisScale(elements, matrixIndex)
+{
+	if(matrixIndex === undefined)
+		matrixIndex = 0
+	// debugger
+	return Math.sqrt(
+		sq(elements[16*matrixIndex + 4]) +
+		sq(elements[16*matrixIndex + 5]) +
+		sq(elements[16*matrixIndex + 6])
+	)
+}
+
 function setRotationallySymmetricMatrix(yX, yY, yZ, matrix)
 {
+	// debugger
 	v1.set(yX, yY, yZ)
 	randomPerpVector(v1, v2)
 	v2.normalize()
-	v3.copy(v1).cross(v2).normalize().negate();
+	v3.crossVectors(v1,v2).normalize().negate();
 	matrix.makeBasis(v2, v1, v3);
 }
 

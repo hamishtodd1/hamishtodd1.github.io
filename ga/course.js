@@ -1,7 +1,16 @@
 /*
+	webplotdigitizer https://www.youtube.com/watch?time_continue=1&v=QaS49WQsXd4&feature=emb_title
+
+	Would be good if you could find some visually pleasing light effect that requires QM. Rainbow? Sky rendering/rayleigh? HDR/Tone mapping?
+
+	Having the thing as a series of videos explaining this API you've made may be precisely the way to structure all the lectures
+
+	Could have a standard library stuff that, when clicked, show you a video of coding and explaining that function
+
 	Without sound or particle effects or AR, just you talking in zeimlight style with PowerPoint slides, it can be the best academic course in GA available.
 
 	Setup
+		Could have vertical camera to get more resolution (may want to zoom sometimes), skeletal leap motion hand over the editor?
 		So that there is resistance when drawing and touching
 			Panel of glass
 			Stylus and somehow machine knows when end is touching surface

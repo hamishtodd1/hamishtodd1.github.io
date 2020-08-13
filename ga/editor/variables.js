@@ -1,4 +1,4 @@
-const generalMatrix = new THREE.Matrix4() //3 is sufficient
+const generalQuaternion = new THREE.Quaternion() //3 is sufficient
 //to be applied to visualized vectors
 
 let colorCharacters = ""

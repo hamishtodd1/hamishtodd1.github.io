@@ -29,12 +29,14 @@
 
 async function init()
 {
-
 	// await initMultivectorAppearances_()
 	// return
 
 	await initOperatorAppearances()
 	await initMultivectorAppearances()
+
+	initWheelScene()
+	return
 
 	// initTankScene()
 	// return

@@ -226,15 +226,12 @@ async function initMultivectorAppearances()
 	}
 
 	{
-		let vectorRadius = .19
+		let vectorRadius = .11
 		let vectorGeometry = new THREE.CylinderBufferGeometry(0., vectorRadius, 1., 16, 1, false);
 		vectorGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0., .5, 0.))
 		//that is the right way to do it, remove this centering crap
 		let vectorMaterial = new THREE.MeshStandardMaterial()
 
-		let vecPart = new THREE.Vector3()
-		let vecOrthX = new THREE.Vector3()
-		let vecOrthZ = new THREE.Vector3()
 		function VectorAppearance()
 		{
 			let mesh = new THREE.Mesh(vectorGeometry, vectorMaterial);
@@ -260,9 +257,9 @@ async function initMultivectorAppearances()
 				}
 
 				setRotationallySymmetricMatrix(x,y,z,mesh.matrix)
-				mesh.matrix.setPosition(v1.multiplyScalar(-.5))
+				mesh.matrix.setPosition(v1.set(x,y,z).multiplyScalar(-.5))
 
-				mesh.visible = !vecPart.equals(zeroVector)
+				mesh.visible = (x!==0.||y!==0. || z !== 0.)
 			}
 
 			return mesh

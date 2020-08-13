@@ -85,12 +85,31 @@
 
 async function initPad()
 {
-	let backgroundString = " b hello\nb \n\n\n\n\n\ndisplay\n\n\n\n\n\ndisplay"
+	let backgroundString = "\n bog hello\nbog \n\n\n\n\n\ndisplay\n\n\n\n\n\ndisplay"
 
-	let mvs = []
-	mvs.push(generateNewVector())
-	pad.add(mvs[0])
+	let mvs = [] //the ones in the pad
+	for(let i = 0; i < 59; ++i)
+	{
+		let mv = VectorAppearance()
+		mvs.push(mv)
+		pad.add(mv)
+	}
 	//pad's scale is precisely line height
+
+	{
+		let outlineGeometry = new THREE.PlaneGeometry()
+		let outlineMaterial = new THREE.LineBasicMaterial({ color: 0xFFFFFF })
+		v1.copy(outlineGeometry.vertices[3])
+		outlineGeometry.vertices[3].copy(outlineGeometry.vertices[2])
+		outlineGeometry.vertices[2].copy(v1)
+
+		var outlines = Array(256)
+		for(let i = 0; i < outlines.length; ++i)
+		{
+			outlines[i] = new THREE.LineLoop(outlineGeometry, outlineMaterial)
+			pad.add(outlines[i])
+		}
+	}
 
 	//carat and navigation
 	{
@@ -136,6 +155,7 @@ async function initPad()
 	//typing
 	{
 		var characters = "abcdefghijklmnopqrstuvwxyz /-=*!:{}"
+		var alphanumerics = "abcdefghijklmnopqrstuvwxyz0123456789"
 		function addCharacter(character)
 		{
 			backgroundString = backgroundString.slice(0, caratPositionInString) + character + backgroundString.slice(caratPositionInString, backgroundString.length)
@@ -237,6 +257,9 @@ async function initPad()
 			instancedLetterMeshes[characters[i]].count = 0
 		for (let i = 0, il = mvs.length; i < il; i++)
 			mvs[i].count = 0
+		for (let i = 0; i < outlines.length; ++i)
+			outlines[i].visible = false
+		let lowestInvisibleOutline = 0
 		gpSymbolInstanced.count = 0
 		gsSymbolInstanced.count = 0
 
@@ -308,18 +331,18 @@ async function initPad()
 					let pictogramFound = false
 					for (let i = 0, il = mvs.length; i < il; i++)
 					{
-						// debugger
 						if (checkAnagram(pictogramName, mvs[i].name))
 						{
-							mvs[i].setPositionAt(mvs[i].count, drawingPosition.x + .25, drawingPosition.y)
-							++mvs[i].count
+							drawingPosition.x += .5
 
-							// m1.elements[ 0] = uniformScale
-							// m1.elements[ 5] = uniformScale
-							// m1.elements[10] = uniformScale
+							mvs[i].drawInPlace(drawingPosition)
+
+							outlines[lowestInvisibleOutline].visible = true
+							outlines[lowestInvisibleOutline].position.copy(drawingPosition)
+							++lowestInvisibleOutline
 
 							drawingPositionInString = pictogramEnd
-							drawingPosition.x += .5 //well, the width of the thing
+							drawingPosition.x += .5
 							pictogramFound = true
 
 							break

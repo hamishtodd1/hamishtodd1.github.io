@@ -10,18 +10,24 @@ function initClickyVideo()
 ]
 	let shorter = mvOriginValues.length < mvEndValues.length ? mvOriginValues : mvEndValues
 	let longer =  mvOriginValues.length > mvEndValues.length ? mvOriginValues : mvEndValues
-	for (let i = shorter.length/2, il = longer.length/2; i < il; i++)
+	for (let i = shorter.length / 2, il = longer.length / 2; i < il; ++i)
 	{
 		shorter[i * 2 + 0] = shorter[i * 2 - 2]
 		shorter[i * 2 + 1] = shorter[i * 2 - 1]
 	}
 	let arrayBeingWorkedOn = mvEndValues
 
-	let mv = new THREE.Mesh(VectorGeometry("r"), new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors }))
+	let mv = new THREE.Mesh(VectorGeometry("b"), new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors }))
 	mv.matrixAutoUpdate = false
 	// mv.material.transparent = true
 	// mv.material.opacity = .5
 
+
+
+	// mv.visible = false
+
+
+	
 	let videosAndVector = new THREE.Group()
 	videosAndVector.add(mv)
 	scene.add(videosAndVector)

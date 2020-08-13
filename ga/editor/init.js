@@ -1,6 +1,7 @@
 /* 
-	TODO. Seems basic but surely all necessary. Implement, get ideas. Show to Chris, get ideas.
-		Build those visualizations
+	TODO when you move in to Cam, February
+		Visualizations of all multivectors in R*(2,0,1)
+		Having them in the language
 		Compiling and executing basic instructions, putting stuff in that column
 		Functions
 		vectors named in the display commands
@@ -9,6 +10,7 @@
 			fourier approximation. If you loop back it's a 2D function, if not 1D
 		All different function visualizations
 		altering inputs with mouse
+		Build that setup: glass, headset
 		Basic Omicron reduction (omicron because 0 is useful)
 			Describe properties of a function then make function
 
@@ -46,6 +48,7 @@
 		shift and arrow keys to highlight
 			Cut and paste
 		Output
+			hmm, could you compile to the subset of C used by glsl?
 			javascript/glm function containing threejs with its quaternions, vec3s, shaders, matrices
 				detect which things will always be 0
 			webgl/webpage/opengl
@@ -59,6 +62,17 @@
 
 	An array of vectors is a matrix. Therefore... f:R->R2 sampled at two points is a matrix?
 
+	Perhaps the only reason people have mutable data at all is because they picture new symbols
+
+	Hmm with the Bret viz of binary search you give example inputs.
+	But visualizing f(a)=b a,b in R is a graph, an abstraction over all possible inputs.
+	Which do you want when? We can have the latter more often than Bret, set of all R is easier than set of all strings
+
+	Keep coming back to the fact that you can move a vector away from the origin.
+		I mean come on you can move it anywhere so long as you don't change is direction or magnitude
+		Maybe charles is right, vectors are translations and points are the things you're moving around
+		Your intermediate representation is a translated vector? So a + b is sorta not fundamental?
+
 	You can't visualize the multivector without some (theoretical values) for it
 		Or can you? Little disk with colors?
 		Both a blessing and a curse? Get people too used to a certain state, unable to think in the abstract?
@@ -67,6 +81,7 @@
 		Working with the function, maybe represented as an infinite line of mvs, is for the game
 
 	integration and differentiation
+		Jon https://www.youtube.com/watch?v=fdAOPHgW7qM&t=16s Sean https://www.youtube.com/watch?v=jTzIDmjkLQo
 		Don't forget strogatz style. Particle on the line, the curve above it tells it whether to go left or right. f:R->R is a vector field too
 		To do Inventing On Principle Style omniscient select-the-time debugging for non-trivial games:
 			Consider the fact that they have a state s and an update function u
@@ -94,10 +109,21 @@
 		Bret integration https://youtu.be/oUaOucZRlmE?t=1266
 		The epsilon of integration is directly linked to the scale at which you are looking at the thing. dt = width of a pixel
 		You draw a graph (left to right bottom to top say) by evaluating the function at the left side of a pixel, then at the right, then drawing pixels accordingly
+		The derivative of the area function is the function on top of it. That's a 2D -> 1D thing. Can you think about nth derivatives in any other dimensional-kind of way?
+		The more terms you have in a taylor series, the better your numerical approximation will be
 		In the evaluation system
 			"differentiate(x*x,x)" -> "2*x"
-
+			
 	Algebraic deduction / reduction
+		Call it inlining and outlining
+		Isn't it kind of arbitrary what we label as definitions and theorems?
+			Can't you take the theorems and then backsolve to the definitions, meaning that the definitions were kinda theorems?
+			Maybe put in euclidean geometry, intuitive "axioms" describing geometric product like angle(a->b) = -angle(b->a)
+		Can you have counterfactual reasoning? Maybe there's some function f. You have not evaluated f but you assert that f() = 2.
+		Suppose you don't know how to integrate f. but you can *write* / assert that integrate(f) - suspectedValue = 0.
+		Might be very useful for transitioning between coarse grain things and non course grain. Compile-time approximation of a function by a series
+		It's kinda like assertions
+		You want to see if the things you have written are simple geometric operations
 		Is this "constraint programming"?
 		You're defining properties of a thing without knowing the thing. Then you juggle til you have a function describing the thing. Funny way to program?
 		You can use this stuff, simplified equations, to build the animations that get used for operations, see operators.js
@@ -148,7 +174,6 @@
 
 function init()
 {
-	// initClickyVideo()
 	initMultivectorAppearances()
 	initOutputColumnAndDisplayWindows()
 

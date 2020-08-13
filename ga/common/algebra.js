@@ -183,17 +183,17 @@ function copyMultivector(fromElements, toElements)
 {
 	if (fromElements.isVector3)
 	{
-		target[0] = 0.
+		toElements[0] = 0.
 
-		target[1] = from.x
-		target[2] = from.y
-		target[3] = from.z
+		toElements[1] = fromElements.x
+		toElements[2] = fromElements.y
+		toElements[3] = fromElements.z
 
-		target[4] = 0.
-		target[5] = 0.
-		target[6] = 0.
+		toElements[4] = 0.
+		toElements[5] = 0.
+		toElements[6] = 0.
 
-		target[7] = 0.
+		toElements[7] = 0.
 	}
 	else
 	{

@@ -1,4 +1,8 @@
 /*  
+    Could have another that is always at the bottom, that's what you draw in and it creates a new line
+
+    You can maybe even draw things on top of what's already in there, eg a tangent vector on a curve
+
     You can type the things, yes, but the line of symbols (/pictures) turns into a picture of the half way point for the operation
         eg
             a picture of the vector half way through being multiplied by the scalar
@@ -42,6 +46,7 @@
                     If it's a vector and it's in a plane perpendicular to an existing vector and the same length, that's a single bivector multiplication
         Zooming automatically to get the furthest-out vertex
         copy a png or gif or whatever, paste into window, you have a textured quad, or three scalar fields or however you do it
+        Copy a picture of a line graph with marked axes, it interprets that too?
         Double click something in window, to get to the place where it is made
 
     Probably screw the render target, except for evaluating functions
@@ -82,6 +87,26 @@
         R->R    line graph, filled underneath - black and white line if looked at from above
         R->R2   line through R2, or through R3 plotted along z axis
         R->R3   curve through R3, "parametric", alternatively point moving over time and clickable scalar (slider)
+
+        Need to specify function domains for eg R->R2. [0,1]?
+        I don't want to choose an arbitrary cutoff, I want to have [-infinity, infinity]
+        A function can take any damn thing and operate on it, so how to choose which for visualize a given function?
+            We know how to do it for the drawing input things
+        For a given f:R2->R3, can we calculate the function describing the pixel colors of the framebuffer containing that curve? Call it f':R2->R
+            Note that f:R->R3 can be done as well, it's just a tube
+            To make it easier let's say it's black and white and colored by depth
+            Well it's hard enough to get an intersection/depth function from an implicit surface, let alone parametric
+            Assume orthographic camera, if it helps we are only looking for intersections down the z axis between [-1,1]
+            Example: cylinder
+                paratmetric: f(t) = cos(t),sin(t)
+                intersection:f(y) = abs(y)>1 ? infinity : sqrt(1-y*y) - rasterization
+
+        Maybe, er, we can easily take the fourier transform of a mesh?
+            Maybe taking the fourier transform of an image will let you extract what you want: positions of little red things, orientation+position of lines
+        Would parametric/continuous approach be better for raytracing? If so someone would have thought of it
+        Stack machine: default behaviour can be that whatever was on the above line is the first argument
+            Might get rid of this "to delete or copy" question in abacus?
+        Names are good for indexing the things you want to talk in a smaller space; A hash table
 
         R2->R   1 surface
         R2->R2  set of 2 surfaces - 2 color image if looked at from above, or vector field(points moving around/arrows)? Tokieda weirdness?
@@ -148,7 +173,7 @@ function initOutputColumnAndDisplayWindows()
 
         //the idea of this is that we then pop up the array in the code
         //better: doodle on what seems to you like a plane, but it's extruded in z because z is input
-        let trailMode = true
+        let trailMode = false
         if(trailMode)
         {
             var mouseTrail = new THREE.Line(new THREE.Geometry())
@@ -209,16 +234,15 @@ function initOutputColumnAndDisplayWindows()
                     localCamera.rotation.x += verticalDelta * 60.
                     localCamera.rotation.x = clamp(localCamera.rotation.x, -TAU / 4., TAU / 4.)
 
-                    localCamera.updateMatrix()
-                    generalMatrix.getInverse(localCamera.matrix)
-                    generalMatrix.setPosition(0., 0., 0.) //alternatively use matrix3
+                    generalQuaternion.setFromEuler(localCamera.rotation)
+                    generalQuaternion.inverse()
                 }
             }
-            // else //for when you have multiple render windows
-            // {
-            //     localCamera.updateMatrix()
-            //     generalMatrix.getInverse(localCamera.matrix)
-            // }
+            else
+            {
+                localCamera.quaternion.copy(generalQuaternion)
+                localCamera.quaternion.inverse()
+            }
 
             let currentDistFromCamera = localCamera.position.length()
             localCamera.updateMatrixWorld()

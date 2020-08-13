@@ -24,6 +24,7 @@
 				Look through mechanics textbooks for examples
 
 	Some random ones
+		ball and disc integrator
 		Ball shot from cannon
 		veritaseum https://www.youtube.com/watch?v=4tgOyU34D44
 		https://www.geogebra.org/m/kvy5zksn
@@ -292,7 +293,7 @@ function initVideo(goalOutputGroup)
 async function initWheelScene()
 {
 	let littleScene = new THREE.Group()
-	littleScene.scale.setScalar(4.4)
+	littleScene.scale.setScalar(14.)
 	// littleScene.position.y += 3.88
 	scene.add(littleScene)
 
@@ -388,6 +389,7 @@ async function initWheelScene()
 	}
 
 	let goalMultivector = MultivectorAppearance(function(){})
+	scene.add(goalMultivector)
 	let placeForEndToBe = new THREE.Vector3()
 	let timerMultivector = MultivectorAppearance(function(){})
 	//p = (1.,0.,0.) * -i^t + (t.,1.,0.)
@@ -395,13 +397,20 @@ async function initWheelScene()
 	let bases = Array(2)
 	bases[0] = MultivectorAppearance(function(){},new Float32Array([0.,1.,0.,0.,0.,0.,0.,0.]))
 	bases[1] = MultivectorAppearance(function(){},new Float32Array([0.,0.,1.,0.,0.,0.,0.,0.]))
-	bases[0].position.x -= 3.5
-	bases[1].position.x -= 3.5
-	bases[0].position.y -= 1.8
-	bases[1].position.y -= 1.8
-	bases[0].position.x += .5
-	bases[1].position.y += .5
-	timerMultivector.position.set(bases[0].position.x,bases[0].position.y,0.)
+	updateFunctions.push(()=>
+	{
+		bases[0].position.copy(background.geometry.vertices[2])
+		bases[1].position.copy(background.geometry.vertices[2])
+
+		background.updateMatrixWorld()
+		background.localToWorld(bases[0].position)
+		background.localToWorld(bases[1].position)
+
+		bases[0].position.x += .5
+		bases[1].position.y += .5
+
+		timerMultivector.position.set(bases[0].position.x, bases[0].position.y, 0.)
+	})
 
 	updateFunctions.push( function()
 	{
@@ -424,8 +433,8 @@ async function initWheelScene()
 		muddyTrail.visible = muddyTrail.scale.x !== 0.
 
 		{
-			goalMultivector.position.copy(muddyTrail.position)
-			littleScene.localToWorld(goalMultivector.position)
+			goalMultivector.position.copy(background.geometry.vertices[2])
+			background.localToWorld(goalMultivector.position)
 			
 			placeForEndToBe.copy(flower.position)
 			littleScene.localToWorld(placeForEndToBe)

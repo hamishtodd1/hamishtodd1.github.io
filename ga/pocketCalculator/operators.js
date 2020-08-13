@@ -1,4 +1,10 @@
 /*
+	Differential equation / recursion thing:
+		there's a recursive method to find 0s of functions, that's newton's method (taylor would be better).
+		Any differential equation can be expressed as trying to find x such that function on left hand side = function on right hand side, Strogatz/Victor-esque
+		Differential equation vs exponential: If you define e^x as the function solution to d/dx f(x) = f(x), you may be able to make something that converges to that function?
+
+
 	Might be the only thing you need to hire someone for.
 		Want a skinnable skeletal animation where you can re-impose custom things
 		Waifu, fairy, robot, vampire
