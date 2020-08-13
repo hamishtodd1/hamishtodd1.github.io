@@ -74,6 +74,8 @@
 			fireworks
 			Lunar Lander type game
 		Electromagnetism:
+			Lots of fun magnet stuff / toys out there.
+				Prove that perpetual motion machines based on magnetism are dumb, the "pushing" comes from you
 			Electrically powered rockets https://en.wikipedia.org/wiki/Electrically_powered_spacecraft_propulsion
 			telescope optics,
 			telecommunicatio/satellites. No magnets but this may not matter

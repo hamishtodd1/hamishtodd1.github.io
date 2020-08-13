@@ -261,7 +261,7 @@ function initOutputColumnAndDisplayWindows()
         {
             let thingMouseIsOn = getThingMouseIsOn()
             if (displayWindows.indexOf(thingMouseIsOn) === -1)
-                pad.position.y += event.deltaY * -.008
+                pad.position.y += event.deltaY * .008
             else
             {
                 let inflationFactor = 1.2

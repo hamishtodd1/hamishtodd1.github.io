@@ -110,6 +110,7 @@ function initMultivectorAppearances()
         v2.setLength(vectorValue.length())
         v3.crossVectors(vectorValue, v2).normalize().negate().setLength(vectorValue.length())
         let uniformMatrixWithYOnVector = new THREE.Matrix4().makeBasis(v2, vectorValue, v3);
+        //properly scaling the things will have to wait until you have proper colors
 
         let instancedMesh = new THREE.InstancedMesh(vectorGeometry, vectorMaterial, 256)
         // instancedMesh.count = 0

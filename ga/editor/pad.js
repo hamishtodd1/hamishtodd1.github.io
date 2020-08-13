@@ -85,8 +85,7 @@
 
 async function initPad()
 {
-	let backgroundString = "\n bog hello\nbog \n\n\n\n\n\ndisplay\n\n\n\n\n\n\n a"
-
+	let backgroundString = "\n bog hey\nbog \n\n\n\ndisplay\na"
 	let spaceWidth = 1. / 3.
 
 	let mvs = [] //the ones in the pad
@@ -96,7 +95,6 @@ async function initPad()
 		mvs.push(mv)
 		pad.add(mv)
 	}
-	//pad's scale is precisely line height
 
 	{
 		let outlineGeometry = new THREE.PlaneGeometry()
@@ -115,11 +113,11 @@ async function initPad()
 
 	//carat and navigation
 	{
-		var carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.,1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
+		var carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.,1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0, depthTest:false }))
 		carat.geometry.translate(.5,0.,0.)
 		var caratPositionInString = -1
-		carat.position.z = .05
 		pad.add(carat)
+		carat.renderOrder = Infinity
 		carat.scale.x = .1
 		carat.flashingStart = 0.
 		updateFunctions.push(() => 
@@ -155,7 +153,7 @@ async function initPad()
 
 	//typing
 	{
-		var characters = "abcdefghijklmnopqrstuvwxyz /-=*!:{}"
+		var characters = "abcdefghijklmnopqrstuvwxyz /=*+!:{}"
 		var alphanumerics = "abcdefghijklmnopqrstuvwxyz0123456789"
 		function addCharacter(character)
 		{
@@ -188,12 +186,11 @@ async function initPad()
 		makeCharacterTypeable(integralCharacter, "~")
 		let deltaCharacter = String.fromCharCode("948")
 		makeCharacterTypeable(deltaCharacter, "?")
+
 		let lambdaCharacter = String.fromCharCode("955")
 		makeCharacterTypeable(lambdaCharacter, "#")
 		//you CAN write "function", but lots of kids don't know "function". In python it's "def"
-		// capital sigma (931) (just integral, whoah), wedge symbol(8743). Still got dollar sign and pound sign
-		//delta is interesting because it's a logical symbol but also a continuous one. Do other logical symbols, AND and OR have equivalents?
-		// brackets probably is fine
+		// capital sigma (931) (just integral, whoah), wedge symbol(8743). Still got £$%^&
 
 		bindButton("Delete", () =>
 		{
@@ -241,12 +238,13 @@ async function initPad()
 		// let animatedGeometricSumSymbol = new THREE.Mesh(unchangingUnitSquareGeometry, materials.geometricSum)
 	}
 
+	let tokenCharactersleft = 0
+
 	let drawingPosition = new THREE.Vector3()
 	let positionInStringClosestToCaratPosition = -1
-	let positionInStringClosestToCaratPositionPosition = new THREE.Vector3()
+	let positionInStringClosestToCaratPositionVector = new THREE.Vector3()
 	updateFunctions.push(function ()
 	{
-		let drawingPositionInString = 0
 		let yPositionOfVerticalCenterOfTopLine = -.5
 		drawingPosition.set(0., yPositionOfVerticalCenterOfTopLine, 0.)
 		let backgroundStringLength = backgroundString.length
@@ -272,9 +270,9 @@ async function initPad()
 		for (let i = 0; i < displayWindows.length; i++)
 			displayWindows[i].screen.bottomY = camera.topAtZZero
 
-		positionInStringClosestToCaratPositionPosition.set(Infinity,Infinity,0.)
+		positionInStringClosestToCaratPositionVector.set(Infinity,Infinity,0.)
 
-		while (drawingPositionInString <= backgroundStringLength)
+		for(let drawingPositionInString = 0; drawingPositionInString <= backgroundStringLength; ++drawingPositionInString)
 		{
 			if (caratPositionInString !== -1 && drawingPositionInString === caratPositionInString )
 			{
@@ -284,136 +282,102 @@ async function initPad()
 			}
 			if (caratPositionInString === -1)
 			{
-				let closestYDist = Math.abs(positionInStringClosestToCaratPositionPosition.y - carat.position.y)
-				let closestXDist = Math.abs(positionInStringClosestToCaratPositionPosition.x - carat.position.x)
+				let closestYDist = Math.abs(positionInStringClosestToCaratPositionVector.y - carat.position.y)
+				let closestXDist = Math.abs(positionInStringClosestToCaratPositionVector.x - carat.position.x)
 				let drawingYDist = Math.abs(drawingPosition.y - carat.position.y)
 				let drawingXDist = Math.abs(drawingPosition.x - carat.position.x)
 				if ( drawingYDist < closestYDist || (drawingYDist === closestYDist && drawingXDist < closestXDist) )
 				{
 					positionInStringClosestToCaratPosition = drawingPositionInString
-					positionInStringClosestToCaratPositionPosition.copy(drawingPosition)
+					positionInStringClosestToCaratPositionVector.copy(drawingPosition)
 				}
 			}
-
 			if (drawingPositionInString >= backgroundStringLength)
 				break
 
-			if (backgroundString[drawingPositionInString] === "\n")
+			if(tokenCharactersleft === 0)
 			{
-				drawingPosition.x = 0.
-				drawingPosition.y -= 1.
-				++drawingPositionInString
-				continue
-			}
-
-			let couldBeOnFirstCharacterOfPictogram =
-				drawingPositionInString === 0 ||
-				backgroundString[drawingPositionInString - 1] === " " ||
-				backgroundString[drawingPositionInString - 1] === "\n"
-
-			//we want wbo*bo but is bo = b o or bo? hey maybe this is why you have the symbols in between
-			//how about eating up the space?
-
-			if (couldBeOnFirstCharacterOfPictogram)
-			{
-				let pictogramEnd = drawingPositionInString
-				let maxTokenLength = 4
-				while (
-					pictogramEnd < backgroundStringLength &&
-					backgroundString[pictogramEnd] !== " " &&
-					backgroundString[pictogramEnd] !== "\n" &&
-					pictogramEnd < drawingPositionInString + maxTokenLength)
-					++pictogramEnd
-
-				//maybe function tokens too
-
-				//but also it's not a pictogram if your carat is in it?
-				let caratInPictogram = drawingPosition.y === carat.position.y
-				if (pictogramEnd > drawingPositionInString && !caratInPictogram)
+				if ( backgroundString[drawingPositionInString] === "\n" )
 				{
-					let pictogramName = backgroundString.slice(drawingPositionInString, pictogramEnd)
+					drawingPosition.x = 0.
+					drawingPosition.y -= 1.
 
-					let pictogramFound = false
+					//also, stick something in the column
+					//a line that's well-formed gets turned into a declaration
+					
+					continue
+				}
+				else if (colorCharacters.indexOf(backgroundString[drawingPositionInString]) !== -1)
+				{
+					//could use regex
+					let pictogramEnd = drawingPositionInString
+					while (pictogramEnd < backgroundStringLength && colorCharacters.indexOf(backgroundString[pictogramEnd]) !== -1)
+						++pictogramEnd
+					//spaces distinguish black mv then white mv from black and white mv
+
+					let pictogramName = backgroundString.slice(drawingPositionInString, pictogramEnd)
+					let mv = null
 					for (let i = 0, il = mvs.length; i < il; i++)
-					{
 						if (checkAnagram(pictogramName, mvs[i].name))
 						{
-							drawingPosition.x += .5
-
-							mvs[i].drawInPlace(drawingPosition)
-
-							outlines[lowestInvisibleOutline].visible = true
-							outlines[lowestInvisibleOutline].position.copy(drawingPosition)
-							++lowestInvisibleOutline
-
-							drawingPositionInString = pictogramEnd
-							drawingPosition.x += .5
-							pictogramFound = true
-
+							mv = mvs[i]
 							break
 						}
-					}
-					if (pictogramFound)
-						continue
-
-					// let userWantsNew = true
-					// for (let i = 0, il = pictogramName.length; i < il; i++)
-					// {
-					// 	if (colorCharacters.indexOf(pictogramName[0]) === -1)
-					// 		userWantsNew = false
-					// }
-					// if (userWantsNew)
-					// {
-					// 	log("gotta make a new one then break!")
-					// 	//then never delete it because need to reserve that name?
-					// 	//then you associate it with an existing vector somehow?
-
-					// 	//you should only refer to ones defined above you
-
-					// 	// drawingPositionInString = pictogramEnd
-					// 	// drawingPosition.x += .5
-					// }
-				}
-			}
-
-			if (backgroundString.slice(drawingPositionInString, drawingPositionInString+7) === "display")
-			{
-				v1.copy(drawingPosition)
-				v1.y -= .5
-				let lineBottomYWorld = pad.localToWorld(v1).y
-				let maxHeight = 2. * getDisplayColumnWidth()
-				if (maxHeight > pad.position.y - lineBottomYWorld )
-					maxHeight = pad.position.y - lineBottomYWorld
-				if ( -camera.topAtZZero < lineBottomYWorld + maxHeight && lineBottomYWorld < camera.topAtZZero )
-				{
-					if (lowestUnusedDisplayWindow >= displayWindows.length)
-						DisplayWindow()
-
-					let dw = displayWindows[lowestUnusedDisplayWindow]
-					dw.screen.bottomY = lineBottomYWorld
-
-					dw.screen.scale.y = maxHeight
-					let paddingBetweenDws = .1 * getWorldLineHeight()
-					for (let i = 0; i < lowestUnusedDisplayWindow; i++)
+					let caratInPictogram = drawingPositionInString < caratPositionInString && caratPositionInString < pictogramEnd
+					if (caratInPictogram)
+						tokenCharactersleft = pictogramEnd - drawingPositionInString
+					else if (pictogramEnd > drawingPositionInString && mv !== null)
 					{
-						if (dw.screen.scale.y > displayWindows[i].screen.bottomY - lineBottomYWorld )
-							dw.screen.scale.y = displayWindows[i].screen.bottomY - lineBottomYWorld - paddingBetweenDws
+						drawingPosition.x += .5
+
+						mv.drawInPlace(drawingPosition)
+						outlines[lowestInvisibleOutline].visible = true
+						outlines[lowestInvisibleOutline].position.copy(drawingPosition)
+						++lowestInvisibleOutline
+
+						drawingPosition.x += -.5 + spaceWidth * (pictogramEnd - drawingPositionInString)
+						drawingPositionInString = pictogramEnd - 1
+
+						//and push onto the stack
+
+						continue
 					}
-
-					++lowestUnusedDisplayWindow
 				}
+				else if ( backgroundString.slice(drawingPositionInString, drawingPositionInString + 7) === "display" )
+				{
+					v1.copy(drawingPosition)
+					v1.y -= .5
+					let lineBottomYWorld = pad.localToWorld(v1).y
+					let maxHeight = 2. * getDisplayColumnWidth()
+					if (maxHeight > pad.position.y - lineBottomYWorld)
+						maxHeight = pad.position.y - lineBottomYWorld
+					if (-camera.topAtZZero < lineBottomYWorld + maxHeight && lineBottomYWorld < camera.topAtZZero)
+					{
+						if (lowestUnusedDisplayWindow >= displayWindows.length)
+							DisplayWindow()
 
-				//then need to eat up the rest of this line
+						let dw = displayWindows[lowestUnusedDisplayWindow]
+						dw.screen.bottomY = lineBottomYWorld
+
+						dw.screen.scale.y = maxHeight
+						let paddingBetweenDws = .1 * getWorldLineHeight()
+						for (let i = 0; i < lowestUnusedDisplayWindow; i++)
+						{
+							if (dw.screen.scale.y > displayWindows[i].screen.bottomY - lineBottomYWorld)
+								dw.screen.scale.y = displayWindows[i].screen.bottomY - lineBottomYWorld - paddingBetweenDws
+						}
+
+						++lowestUnusedDisplayWindow
+					}
+					
+					tokenCharactersleft = "display".length
+				}
 			}
 
-			//just characters
-			if (characters.indexOf(backgroundString[drawingPositionInString]) !== -1)
+			if (characters.indexOf(backgroundString[drawingPositionInString]) === -1)
+				console.warn("Uncaught character")
+			else
 			{
-				// if (overrideCaratPositionInString && drawingPositionInString === 1)
-				// log("y")
-				// if (backgroundString[drawingPositionInString] !== " ")
-				// 	debugger
-
 				let ilm = instancedLetterMeshes[backgroundString[drawingPositionInString]]
 				if (ilm.count >= maxCopiesOfALetter)
 					console.error("too many copies of a letter!")
@@ -427,39 +391,18 @@ async function initPad()
 				ilm.setMatrixAt(ilm.count, m1)
 				ilm.instanceMatrix.needsUpdate = true
 				++ilm.count
-
-				++drawingPositionInString
-				drawingPosition.x += spaceWidth
-
-				continue
 			}
-			// else if (backgroundString[drawingPositionInString] === "+" || backgroundString[drawingPositionInString] === "*")
-			// {
-			// 	m1.identity()
-			// 	m1.setPosition(drawingPosition)
-			// 	m1.elements[12] += spaceWidth / 2.
-			// 	// m1.setUniformScaleAssumingRigid(spaceWidth)
 
-			// 	let symbol = backgroundString[drawingPositionInString] === "+" ? gsSymbolInstanced : gpSymbolInstanced
-			// 	symbol.setMatrixAt(symbol.count, m1)
-			// 	symbol.instanceMatrix.needsUpdate = true
-			// 	++symbol.count
-
-			// 	++drawingPositionInString
-			// 	drawingPosition.x += spaceWidth
-			// }
-			else
-			{
-				//uncaught character?
-				console.warn("Uncaught character, not drawn")
-				++drawingPositionInString
-			}
+			drawingPosition.x += spaceWidth
+			--tokenCharactersleft
+			if (tokenCharactersleft < 0)
+				tokenCharactersleft = 0
 		}
 
 		if (caratPositionInString === -1)
 		{
 			caratPositionInString = positionInStringClosestToCaratPosition
-			carat.position.copy(positionInStringClosestToCaratPositionPosition)
+			carat.position.copy(positionInStringClosestToCaratPositionVector)
 		}
 
 		//the last line of the pad can be just above the top of the screen, no higher
