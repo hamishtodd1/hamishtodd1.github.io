@@ -87,6 +87,8 @@ async function initPad()
 {
 	let backgroundString = "\n bog hello\nbog \n\n\n\n\n\ndisplay\n\n\n\n\n\n\n a"
 
+	let spaceWidth = 1. / 3.
+
 	let mvs = [] //the ones in the pad
 	for(let i = 0; i < 59; ++i)
 	{
@@ -119,31 +121,30 @@ async function initPad()
 		carat.position.z = .05
 		pad.add(carat)
 		carat.scale.x = .1
-		let caratFlashingStart = 0.
-		updateFunctions.push(() => { carat.visible = Math.floor((clock.getElapsedTime() - caratFlashingStart) * 2.) % 2 ? false : true })
-		function setCaratPosition(x, y)
+		carat.flashingStart = 0.
+		updateFunctions.push(() => 
+		{
+			carat.visible = Math.floor((clock.getElapsedTime() - carat.flashingStart) * 2.) % 2 ? false : true 
+		})
+		function teleportCarat(x, y)
 		{
 			carat.position.set(x, y, carat.position.z)
-			caratFlashingStart = clock.getElapsedTime()
+			carat.flashingStart = clock.getElapsedTime()
 			caratPositionInString = -1
 		}
 		function addToCaratPosition(x, y)
 		{
-			setCaratPosition(
+			teleportCarat(
 				carat.position.x + x,
 				carat.position.y + y)
 		}
 		function moveCaratAlongString(amount)
 		{
-			caratPositionInString += amount
-			if (caratPositionInString < 0)
-				caratPositionInString = 0
-			if (caratPositionInString > backgroundString.length)
-				caratPositionInString = backgroundString.length
-			caratFlashingStart = clock.getElapsedTime()
+			caratPositionInString = clamp(caratPositionInString + amount, 0, backgroundString.length)
 		}
 		bindButton("ArrowRight", () => moveCaratAlongString(1))
 		bindButton("ArrowLeft", () => moveCaratAlongString(-1))
+
 		bindButton("ArrowUp", () => addToCaratPosition(0., 1.))
 		bindButton("ArrowDown", () => addToCaratPosition(0., -1.))
 		bindButton("Home", () => addToCaratPosition(-999., 0.))
@@ -250,7 +251,7 @@ async function initPad()
 		{
 			mouse.getZZeroPosition(v1)
 			pad.worldToLocal(v1)
-			setCaratPosition( v1.x, Math.round(v1.y)) //x rounded below
+			teleportCarat( v1.x, Math.round(v1.y)) //x rounded below
 		}
 
 		for (let i = 0, il = characters.length; i < il; i++)
@@ -276,8 +277,12 @@ async function initPad()
 
 		while (drawingPositionInString <= backgroundStringLength)
 		{
-			if (caratPositionInString !== -1 && drawingPositionInString === caratPositionInString)
+			if (caratPositionInString !== -1 && drawingPositionInString === caratPositionInString )
+			{
+				if (carat.position.x !== drawingPosition.x || carat.position.y !== drawingPosition.y)
+					carat.flashingStart = clock.getElapsedTime()
 				carat.position.set(drawingPosition.x, drawingPosition.y, carat.position.z)
+			}
 			if (caratPositionInString === -1)
 			{
 				let closestYDist = Math.abs(positionInStringClosestToCaratPositionPosition.y - carat.position.y)
@@ -399,7 +404,7 @@ async function initPad()
 					++lowestUnusedDisplayWindow
 				}
 
-				//then need to eat up the rest of this line really
+				//then need to eat up the rest of this line
 			}
 
 			//just characters
@@ -415,34 +420,35 @@ async function initPad()
 					console.error("too many copies of a letter!")
 
 				m1.identity()
-				m1.setPosition(drawingPosition)
-				m1.elements[12] += .25 //half a space
-				m1.elements[0] = .8 * ilm.aspect //tweaked to make overlap rare eg m. i looks shit
+				m1.elements[0] = .4 * ilm.aspect //Width. Currently tweaked to make overlap of m rare. i looks shit
+				//scale of the things is unrelated to how much space they get
 				m1.elements[5] = m1.elements[0] / ilm.aspect
+				m1.elements[12] = drawingPosition.x + spaceWidth / 2.
+				m1.elements[13] = drawingPosition.y
 				ilm.setMatrixAt(ilm.count, m1)
 				ilm.instanceMatrix.needsUpdate = true
 				++ilm.count
 
 				++drawingPositionInString
-				drawingPosition.x += .5
+				drawingPosition.x += spaceWidth
 
 				continue
 			}
-			else if (backgroundString[drawingPositionInString] === "+" || backgroundString[drawingPositionInString] === "*")
-			{
-				m1.identity()
-				m1.setPosition(drawingPosition)
-				m1.elements[12] += .25 //half a space
-				// m1.setUniformScaleAssumingRigid(.5)
+			// else if (backgroundString[drawingPositionInString] === "+" || backgroundString[drawingPositionInString] === "*")
+			// {
+			// 	m1.identity()
+			// 	m1.setPosition(drawingPosition)
+			// 	m1.elements[12] += spaceWidth / 2.
+			// 	// m1.setUniformScaleAssumingRigid(spaceWidth)
 
-				let symbol = backgroundString[drawingPositionInString] === "+" ? gsSymbolInstanced : gpSymbolInstanced
-				symbol.setMatrixAt(symbol.count, m1)
-				symbol.instanceMatrix.needsUpdate = true
-				++symbol.count
+			// 	let symbol = backgroundString[drawingPositionInString] === "+" ? gsSymbolInstanced : gpSymbolInstanced
+			// 	symbol.setMatrixAt(symbol.count, m1)
+			// 	symbol.instanceMatrix.needsUpdate = true
+			// 	++symbol.count
 
-				++drawingPositionInString
-				drawingPosition.x += .5
-			}
+			// 	++drawingPositionInString
+			// 	drawingPosition.x += spaceWidth
+			// }
 			else
 			{
 				//uncaught character?
