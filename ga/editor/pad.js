@@ -85,7 +85,7 @@
 
 async function initPad()
 {
-	let backgroundString = "\n bog hello\nbog \n\n\n\n\n\ndisplay\n\n\n\n\n\ndisplay"
+	let backgroundString = "\n bog hello\nbog \n\n\n\n\n\ndisplay\n\n\n\n\n\n\n a"
 
 	let mvs = [] //the ones in the pad
 	for(let i = 0; i < 59; ++i)
@@ -241,6 +241,8 @@ async function initPad()
 	}
 
 	let drawingPosition = new THREE.Vector3()
+	let positionInStringClosestToCaratPosition = -1
+	let positionInStringClosestToCaratPositionPosition = new THREE.Vector3()
 	updateFunctions.push(function ()
 	{
 		//webgl would be better
@@ -248,9 +250,7 @@ async function initPad()
 		{
 			mouse.getZZeroPosition(v1)
 			pad.worldToLocal(v1)
-			setCaratPosition(
-				.5 * Math.round(v1.x * 2.),
-				Math.round(v1.y))
+			setCaratPosition( v1.x, Math.round(v1.y)) //x rounded below
 		}
 
 		for (let i = 0, il = characters.length; i < il; i++)
@@ -267,14 +267,12 @@ async function initPad()
 		let topPadding = .7
 		drawingPosition.set(0., -.5 - topPadding, 0.)
 		let backgroundStringLength = backgroundString.length
-		let xClosestToCarat = Infinity
-		let yClosestToCarat = Infinity
-
-		let positionInStringClosestToCaratPosition = -1
 
 		let lowestUnusedDisplayWindow = 0
 		for (let i = 0; i < displayWindows.length; i++)
 			displayWindows[i].screen.bottomY = camera.topAtZZero
+
+		positionInStringClosestToCaratPositionPosition.set(Infinity,Infinity,0.)
 
 		while (drawingPositionInString <= backgroundStringLength)
 		{
@@ -282,14 +280,14 @@ async function initPad()
 				carat.position.set(drawingPosition.x, drawingPosition.y, carat.position.z)
 			if (caratPositionInString === -1)
 			{
-				if (Math.abs(drawingPosition.y - carat.position.y) < yClosestToCarat ||
-					(Math.abs(drawingPosition.y - carat.position.y) === yClosestToCarat && Math.abs(drawingPosition.x - carat.position.x) < xClosestToCarat))
+				let closestYDist = Math.abs(positionInStringClosestToCaratPositionPosition.y - carat.position.y)
+				let closestXDist = Math.abs(positionInStringClosestToCaratPositionPosition.x - carat.position.x)
+				let drawingYDist = Math.abs(drawingPosition.y - carat.position.y)
+				let drawingXDist = Math.abs(drawingPosition.x - carat.position.x)
+				if ( drawingYDist < closestYDist || (drawingYDist === closestYDist && drawingXDist < closestXDist) )
 				{
-					yClosestToCarat = Math.abs(drawingPosition.y - carat.position.y)
-					xClosestToCarat = Math.abs(drawingPosition.x - carat.position.x)
-
 					positionInStringClosestToCaratPosition = drawingPositionInString
-					v1.copy(drawingPosition)
+					positionInStringClosestToCaratPositionPosition.copy(drawingPosition)
 				}
 			}
 
@@ -455,15 +453,18 @@ async function initPad()
 
 		if (caratPositionInString === -1)
 		{
-			carat.position.set(v1.x, v1.y, carat.position.z)
 			caratPositionInString = positionInStringClosestToCaratPosition
+			carat.position.copy(positionInStringClosestToCaratPositionPosition)
 		}
 
-		v1.copy(drawingPosition)
-		v1.y -= 1.
-		pad.localToWorld(v1)
-		if(v1.y > camera.topAtZZero)
-			pad.position.y -= v1.y - camera.topAtZZero
+		//the last line of the pad can be just above the top of the screen, no higher
+		{
+			v1.copy(drawingPosition)
+			v1.y -= 1.
+			pad.localToWorld(v1)
+			if (v1.y > camera.topAtZZero)
+				pad.position.y -= v1.y - camera.topAtZZero
+		}
 
 		// log(instancedLetterMeshes["a"].count)
 	})
