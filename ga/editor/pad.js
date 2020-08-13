@@ -246,12 +246,16 @@ async function initPad()
 	let positionInStringClosestToCaratPositionPosition = new THREE.Vector3()
 	updateFunctions.push(function ()
 	{
-		//webgl would be better
+		let drawingPositionInString = 0
+		let yPositionOfVerticalCenterOfTopLine = -.5
+		drawingPosition.set(0., yPositionOfVerticalCenterOfTopLine, 0.)
+		let backgroundStringLength = backgroundString.length
+
 		if (mouse.clicking && !mouse.oldClicking)
 		{
 			mouse.getZZeroPosition(v1)
 			pad.worldToLocal(v1)
-			teleportCarat( v1.x, Math.round(v1.y)) //x rounded below
+			teleportCarat(v1.x, v1.y)
 		}
 
 		for (let i = 0, il = characters.length; i < il; i++)
@@ -263,11 +267,6 @@ async function initPad()
 		let lowestInvisibleOutline = 0
 		gpSymbolInstanced.count = 0
 		gsSymbolInstanced.count = 0
-
-		let drawingPositionInString = 0
-		let yPositionOfVerticalCenterOfTopLine = -.5
-		drawingPosition.set(0., yPositionOfVerticalCenterOfTopLine, 0.)
-		let backgroundStringLength = backgroundString.length
 
 		let lowestUnusedDisplayWindow = 0
 		for (let i = 0; i < displayWindows.length; i++)
