@@ -231,14 +231,13 @@ function initOutputColumnAndDisplayWindows()
                     displayCamera.rotation.x = clamp(displayCamera.rotation.x, -TAU / 4., TAU / 4.)
 
                     displayCamera.quaternion.setFromEuler(displayCamera.rotation)
-                    displayCamera.quaternion.inverse()
+                    
+
+                    let currentDistFromCamera = displayCamera.position.length()
+                    v1.set(0., 0., -currentDistFromCamera).applyQuaternion(displayCamera.quaternion).add(displayCamera.position)
+                    displayCamera.position.sub(v1)
                 }
             }
-
-            let currentDistFromCamera = displayCamera.position.length()
-            displayCamera.updateMatrixWorld()
-            displayCamera.localToWorld(v1.set(0., 0., -currentDistFromCamera ) )
-            displayCamera.position.sub(v1)
 
             renderer.setRenderTarget(localFramebuffer)
             renderer.setClearColor(0x000000)

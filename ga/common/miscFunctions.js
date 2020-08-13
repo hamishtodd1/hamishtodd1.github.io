@@ -12,7 +12,6 @@ function getMatrixYAxisScale(elements, matrixIndex)
 
 function setRotationallySymmetricMatrix(yX, yY, yZ, matrix)
 {
-	// debugger
 	v1.set(yX, yY, yZ)
 	randomPerpVector(v1, v2)
 	v2.normalize()

@@ -8,7 +8,7 @@
 function VectorGeometry(name)
 {
     //ah no no, you want the end to always be the same size
-    let shaftRadius = .06
+    let shaftRadius = .04
     let headRadius = shaftRadius*3.
     let shaftLength = .67
     
@@ -105,9 +105,11 @@ function initMultivectorAppearances()
         let name = generateName()
         let vectorGeometry = VectorGeometry(name) //TODO should be in material. Can have one geometry for all when you've sorted a shader
 
-        let vectorValue = new THREE.Vector3(Math.random(),Math.random(),Math.random())
-        let uniformMatrixWithYOnVector = new THREE.Matrix4()
-        setRotationallySymmetricMatrix(vectorValue.x, vectorValue.y, vectorValue.z, uniformMatrixWithYOnVector)
+        let vectorValue = new THREE.Vector3(Math.random()-.5,Math.random()-.5,Math.random()-.5)
+        randomPerpVector(vectorValue, v2)
+        v2.setLength(vectorValue.length())
+        v3.crossVectors(vectorValue, v2).normalize().negate().setLength(vectorValue.length())
+        let uniformMatrixWithYOnVector = new THREE.Matrix4().makeBasis(v2, vectorValue, v3);
 
         let instancedMesh = new THREE.InstancedMesh(vectorGeometry, vectorMaterial, 256)
         // instancedMesh.count = 0
@@ -116,27 +118,16 @@ function initMultivectorAppearances()
         instancedMesh.drawInPlace = function(position)
         {
             let uniformScale = .5 / vectorValue.length()
-            v2.setScalar(uniformScale)
+            v1.setScalar(uniformScale)
             
-            m1.compose(position,displayCamera.quaternion,v2)
+            q1.copy(displayCamera.quaternion)
+            q1.inverse()
+            m1.compose(position,q1,v1)
             m2.multiplyMatrices(m1, uniformMatrixWithYOnVector)
             instancedMesh.setMatrixAt(instancedMesh.count, m2)
             instancedMesh.instanceMatrix.needsUpdate = true
 
             ++instancedMesh.count
-        }
-        instancedMesh.boxIn = function (index, scale)
-        {
-            console.assert(instancedMesh.instanceMatrix.count > index)
-
-            instancedMesh.getMatrixAt(index, m1)
-            let currentUniformScale = getMatrixXAxisScale(m1.elements)
-            m1
-            instancedMesh.setMatrixAt(index, m1)
-            instancedMesh.instanceMatrix.needsUpdate = true
-
-            if (instancedMesh.count < index)
-                instancedMesh.count = index
         }
      
         return instancedMesh
