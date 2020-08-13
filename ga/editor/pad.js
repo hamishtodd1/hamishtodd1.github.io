@@ -264,8 +264,8 @@ async function initPad()
 		gsSymbolInstanced.count = 0
 
 		let drawingPositionInString = 0
-		let topPadding = .7
-		drawingPosition.set(0., -.5 - topPadding, 0.)
+		let yPositionOfVerticalCenterOfTopLine = -.5
+		drawingPosition.set(0., yPositionOfVerticalCenterOfTopLine, 0.)
 		let backgroundStringLength = backgroundString.length
 
 		let lowestUnusedDisplayWindow = 0
@@ -376,25 +376,25 @@ async function initPad()
 			{
 				v1.copy(drawingPosition)
 				v1.y -= .5
-				let bottomY = pad.localToWorld(v1).y
+				let lineBottomYWorld = pad.localToWorld(v1).y
 				let maxHeight = 2. * getDisplayColumnWidth()
-				if ( -camera.topAtZZero < bottomY + maxHeight && bottomY < camera.topAtZZero )
+				if (maxHeight > pad.position.y - lineBottomYWorld )
+					maxHeight = pad.position.y - lineBottomYWorld
+				if ( -camera.topAtZZero < lineBottomYWorld + maxHeight && lineBottomYWorld < camera.topAtZZero )
 				{
 					if (lowestUnusedDisplayWindow >= displayWindows.length)
 						DisplayWindow()
 
 					let dw = displayWindows[lowestUnusedDisplayWindow]
-					dw.screen.bottomY = bottomY
+					dw.screen.bottomY = lineBottomYWorld
 
-					dw.screen.scale.y = dw.screen.scale.x * 2.
-					let worldPadding = .1 * pad.scale.y
+					dw.screen.scale.y = maxHeight
+					let paddingBetweenDws = .1 * getWorldLineHeight()
 					for (let i = 0; i < lowestUnusedDisplayWindow; i++)
 					{
-						if (dw.screen.scale.y > displayWindows[i].screen.bottomY - bottomY )
-							dw.screen.scale.y = displayWindows[i].screen.bottomY - bottomY - worldPadding
+						if (dw.screen.scale.y > displayWindows[i].screen.bottomY - lineBottomYWorld )
+							dw.screen.scale.y = displayWindows[i].screen.bottomY - lineBottomYWorld - paddingBetweenDws
 					}
-					if (dw.screen.scale.y > pad.position.y - bottomY)
-						dw.screen.scale.y = pad.position.y - bottomY - worldPadding
 
 					++lowestUnusedDisplayWindow
 				}

@@ -324,10 +324,11 @@ function initOutputColumnAndDisplayWindows()
         outputColumn.position.x = clamp(outputColumn.position.x, -camera.rightAtZZero + outputColumn.scale.x / 2., camera.rightAtZZero - outputColumn.scale.x / 2.)
         //and maybe resize as well?
 
-        outputColumn.scale.copy(pad.scale)
+        outputColumn.scale.setScalar(getWorldLineHeight())
 
         pad.position.x = outputColumn.right()
-        if (pad.position.y < camera.topAtZZero)
-            pad.position.y = camera.topAtZZero
+        let paddingAtTopOfPad = .35 * getWorldLineHeight()
+        if (pad.position.y < camera.topAtZZero - paddingAtTopOfPad)
+            pad.position.y = camera.topAtZZero - paddingAtTopOfPad
     })
 }

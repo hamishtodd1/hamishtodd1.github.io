@@ -18,4 +18,6 @@ const outputColumn = new THREE.Mesh(new THREE.PlaneBufferGeometry(1., 9999999.),
 const displayWindows = []
 
 const pad = new THREE.Group()
+pad.position.y = -Infinity //gets put at top
+function getWorldLineHeight(){return pad.scale.y}
 scene.add(pad)
