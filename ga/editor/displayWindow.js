@@ -145,10 +145,6 @@ function initOutputColumnAndDisplayWindows()
             localScene.add(grid, axis)
         }
 
-        let localCamera = new THREE.PerspectiveCamera(90., 1., .01, 100.)
-        localCamera.position.z = 8.5
-        localCamera.rotation.order = "YXZ"
-
         let filter = THREE.NearestFilter
         let wrap = THREE.ClampToEdgeWrapping
         let params = {
@@ -168,7 +164,7 @@ function initOutputColumnAndDisplayWindows()
         let screen = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), new THREE.MeshBasicMaterial({ map: localFramebuffer.texture }))
         scene.add(screen)
         screen.bottomY = 0.
-        let displayWindow = { screen, scene: localScene, camera: localCamera }
+        let displayWindow = { screen, scene: localScene }
         displayWindows.push(displayWindow)
 
         //the idea of this is that we then pop up the array in the code
@@ -230,29 +226,24 @@ function initOutputColumnAndDisplayWindows()
                     v2.x = 0.
                     let verticalDelta = v1.angleTo(v2) * (v1.y > v2.y ? 1. : -1.)
 
-                    localCamera.rotation.y += horizontalDelta * 60.
-                    localCamera.rotation.x += verticalDelta * 60.
-                    localCamera.rotation.x = clamp(localCamera.rotation.x, -TAU / 4., TAU / 4.)
+                    displayCamera.rotation.y += horizontalDelta * 60.
+                    displayCamera.rotation.x += verticalDelta * 60.
+                    displayCamera.rotation.x = clamp(displayCamera.rotation.x, -TAU / 4., TAU / 4.)
 
-                    generalQuaternion.setFromEuler(localCamera.rotation)
-                    generalQuaternion.inverse()
+                    displayCamera.quaternion.setFromEuler(displayCamera.rotation)
+                    displayCamera.quaternion.inverse()
                 }
             }
-            else
-            {
-                localCamera.quaternion.copy(generalQuaternion)
-                localCamera.quaternion.inverse()
-            }
 
-            let currentDistFromCamera = localCamera.position.length()
-            localCamera.updateMatrixWorld()
-            localCamera.localToWorld(v1.set(0., 0., -currentDistFromCamera ) )
-            localCamera.position.sub(v1)
+            let currentDistFromCamera = displayCamera.position.length()
+            displayCamera.updateMatrixWorld()
+            displayCamera.localToWorld(v1.set(0., 0., -currentDistFromCamera ) )
+            displayCamera.position.sub(v1)
 
             renderer.setRenderTarget(localFramebuffer)
             renderer.setClearColor(0x000000)
             renderer.clear()
-            renderer.render(localScene, localCamera)
+            renderer.render(localScene, displayCamera)
 
             renderer.setRenderTarget(ordinaryRenderTarget)
             renderer.setClearColor(ordinaryClearColor)
@@ -274,10 +265,8 @@ function initOutputColumnAndDisplayWindows()
                 pad.position.y += event.deltaY * -.008
             else
             {
-                let displayWindow = thingMouseIsOn
-                let cameraPosition = displayWindow.camera.position
                 let inflationFactor = 1.2
-                cameraPosition.setLength(cameraPosition.length() * (event.deltaY < 0 ? inflationFactor : 1. / inflationFactor))
+                displayCamera.position.setLength(displayCamera.position.length() * (event.deltaY < 0 ? inflationFactor : 1. / inflationFactor))
             }   
         }
     }, false);

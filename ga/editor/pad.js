@@ -309,6 +309,9 @@ async function initPad()
 				backgroundString[drawingPositionInString - 1] === " " ||
 				backgroundString[drawingPositionInString - 1] === "\n"
 
+			//we want wbo*bo but is bo = b o or bo? hey maybe this is why you have the symbols in between
+			//how about eating up the space?
+
 			if (couldBeOnFirstCharacterOfPictogram)
 			{
 				let pictogramEnd = drawingPositionInString

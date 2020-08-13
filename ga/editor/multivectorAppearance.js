@@ -105,7 +105,7 @@ function initMultivectorAppearances()
         let name = generateName()
         let vectorGeometry = VectorGeometry(name) //TODO should be in material. Can have one geometry for all when you've sorted a shader
 
-        let vectorValue = new THREE.Vector3(Math.random(),Math.random(),Math.random()).normalize()
+        let vectorValue = new THREE.Vector3(Math.random(),Math.random(),Math.random())
         let uniformMatrixWithYOnVector = new THREE.Matrix4()
         setRotationallySymmetricMatrix(vectorValue.x, vectorValue.y, vectorValue.z, uniformMatrixWithYOnVector)
 
@@ -118,7 +118,7 @@ function initMultivectorAppearances()
             let uniformScale = .5 / vectorValue.length()
             v2.setScalar(uniformScale)
             
-            m1.compose(position,generalQuaternion,v2)
+            m1.compose(position,displayCamera.quaternion,v2)
             m2.multiplyMatrices(m1, uniformMatrixWithYOnVector)
             instancedMesh.setMatrixAt(instancedMesh.count, m2)
             instancedMesh.instanceMatrix.needsUpdate = true

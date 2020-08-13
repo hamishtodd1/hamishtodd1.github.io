@@ -1,5 +1,6 @@
-const generalQuaternion = new THREE.Quaternion() //3 is sufficient
-//to be applied to visualized vectors
+let displayCamera = new THREE.PerspectiveCamera(90., 1., .01, 100.)
+displayCamera.position.z = 8.5
+displayCamera.rotation.order = "YXZ"
 
 let colorCharacters = ""
 const colors = {
