@@ -83,39 +83,33 @@
 	x,y,z
 */
 
-let backgroundString = "\n bog hey\nbog \n\n\n\n\n\n\n\n\n\n\n\n\ndisplay\na"
+let backgroundString = "\n bog wb  +\nbog \n\n\n\n\n\n\n\n\n\n\n\n\ndisplay\na"
 async function initPad()
 {
+	let stack = Array(3)
+
 	let spaceWidth = 1. / 3.
 
-	let mvs = [] //the ones in the pad
+	let mvs = [] //all in the pad
 	for(let i = 0; i < 59; ++i)
 	{
-		let mv = VectorAppearance()
+		let mv = MultivectorAppearance()
 		mvs.push(mv)
 		pad.add(mv)
 	}
+	//use one unassigned and it'll have random values.
 
-	{
-		let outlineGeometry = new THREE.PlaneGeometry()
-		let outlineMaterial = new THREE.LineBasicMaterial({ color: 0xFFFFFF })
-		v1.copy(outlineGeometry.vertices[3])
-		outlineGeometry.vertices[3].copy(outlineGeometry.vertices[2])
-		outlineGeometry.vertices[2].copy(v1)
-
-		var outlines = Array(256)
-		for(let i = 0; i < outlines.length; ++i)
-		{
-			outlines[i] = new THREE.LineLoop(outlineGeometry, outlineMaterial)
-			pad.add(outlines[i])
-		}
+	let operationSymbols = "+"
+	let operationDictionary = {
+		"+": geometricSum
 	}
 
-	var carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.,1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
+	let outlines = initOutlines()
+
+	let carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.,1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
 	carat.positionInString = -1
 	initCaratAndNavigation(carat)
 
-	//typing
 	let characters = "abcdefghijklmnopqrstuvwxyz /=*+!:{}"
 	let alphanumerics = "abcdefghijklmnopqrstuvwxyz0123456789"
 	let instancedLetterMeshes = {}
@@ -123,7 +117,6 @@ async function initPad()
 	initTyping(carat,characters, instancedLetterMeshes, maxCopiesOfALetter)
 
 	let tokenCharactersleft = 0
-
 	let drawingPosition = new THREE.Vector3()
 	let positionInStringClosestToCaratPosition = -1
 	let positionInStringClosestToCaratPositionVector = new THREE.Vector3()
@@ -146,7 +139,18 @@ async function initPad()
 			mvs[i].count = 0
 		for (let i = 0; i < outlines.length; ++i)
 			outlines[i].visible = false
+
 		let lowestInvisibleOutline = 0
+		//could just have it done as part of drawing multivector
+		function drawOutline(p)
+		{
+			outlines[lowestInvisibleOutline].visible = true
+			outlines[lowestInvisibleOutline].position.copy(p)
+			++lowestInvisibleOutline
+			console.assert( lowestInvisibleOutline < outlines.length )
+		}
+
+		let lowestUndeterminedMv = 0
 
 		let lowestUnusedDisplayWindow = 0
 		for (let i = 0; i < displayWindows.length; i++)
@@ -179,19 +183,32 @@ async function initPad()
 
 			if(tokenCharactersleft === 0)
 			{
+				if( operationSymbols.indexOf(backgroundString[drawingPositionInString]) !== -1 )
+					stack.push(operationDictionary[backgroundString[drawingPositionInString]])
 				if ( backgroundString[drawingPositionInString] === "\n" )
 				{
-					// mv.drawInPlace(drawingPosition)
-					outlines[lowestInvisibleOutline].visible = true
-					v1.copy(outputColumn.position)
-					pad.worldToLocal(v1)
-					outlines[lowestInvisibleOutline].position.x = v1.x
-					outlines[lowestInvisibleOutline].position.y = drawingPosition.y
-					++lowestInvisibleOutline
+					if(stack.length >= 3 )
+					{
+						let func = stack.pop()
+						let parameter2 = stack.pop()
+						let parameter1 = stack.pop()
+						
+						if(typeof func === 'function' && typeof parameter1 !== 'function' && typeof parameter2 !== 'function')
+						{
+							v2.copy(outputColumn.position)
+							pad.worldToLocal(v2)
+							v2.y = drawingPosition.y
+							drawOutline(v2)
+							
+							let mv = mvs[lowestUndeterminedMv]
+							// func(parameter1, parameter2.elements, mv.elements)
+							mv.drawInPlace(v2)
+							stack.push(mv)
+							++lowestUndeterminedMv
+						}
+					}
 
-					//a line that's well-formed gets turned into a declaration
-
-					//also, retro-actively turn this line into a diagram?
+					//also retroactively turn this line into a superimposed diagram? Unless carat is on it I guess
 
 					drawingPosition.x = 0.
 					drawingPosition.y -= 1.
@@ -221,14 +238,11 @@ async function initPad()
 						drawingPosition.x += .5
 
 						mv.drawInPlace(drawingPosition)
-						outlines[lowestInvisibleOutline].visible = true
-						outlines[lowestInvisibleOutline].position.copy(drawingPosition)
-						++lowestInvisibleOutline
+						stack.push(mv)
+						drawOutline(drawingPosition)
 
 						drawingPosition.x += -.5 + spaceWidth * (pictogramEnd - drawingPositionInString)
 						drawingPositionInString = pictogramEnd - 1
-
-						//and push onto the stack
 
 						continue
 					}
@@ -265,7 +279,7 @@ async function initPad()
 			}
 
 			if (characters.indexOf(backgroundString[drawingPositionInString]) === -1)
-				console.warn("Uncaught character, there will just be a space")
+				console.warn("Uncaught character, there will just be a space: ", backgroundString[drawingPositionInString])
 			else
 			{
 				let ilm = instancedLetterMeshes[backgroundString[drawingPositionInString]]
@@ -349,6 +363,7 @@ function initCaratAndNavigation(carat)
 	bindButton("Home", () => carat.addToPosition(-999., 0.))
 	bindButton("End", () => carat.addToPosition(999., 0.))
 
+	//TODO scrolling down too
 	function getNumLinesOnScreen()
 	{
 		return camera.topAtZZero * 2. / getWorldLineHeight()
@@ -413,4 +428,22 @@ function initTyping(carat,characters, instancedLetterMeshes, maxCopiesOfALetter)
 	})
 	bindButton("Tab", () => { for (let i = 0; i < 4; i++) addCharacter(" ") })
 	bindButton("Enter", () => addCharacter("\n"))
+}
+
+function initOutlines()
+{
+	let outlineGeometry = new THREE.PlaneGeometry()
+	let outlineMaterial = new THREE.LineBasicMaterial({ color: 0xFFFFFF })
+	v1.copy(outlineGeometry.vertices[3])
+	outlineGeometry.vertices[3].copy(outlineGeometry.vertices[2])
+	outlineGeometry.vertices[2].copy(v1)
+
+	let outlines = Array(256)
+	for (let i = 0; i < outlines.length; ++i)
+	{
+		outlines[i] = new THREE.LineLoop(outlineGeometry, outlineMaterial)
+		pad.add(outlines[i])
+	}
+
+	return outlines
 }

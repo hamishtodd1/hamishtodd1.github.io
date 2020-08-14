@@ -100,7 +100,7 @@ function initMultivectorAppearances()
         return name
     }
 
-    VectorAppearance = () =>
+    MultivectorAppearance = () =>
     {
         let name = generateName()
         let vectorGeometry = VectorGeometry(name) //TODO should be in material. Can have one geometry for all when you've sorted a shader
