@@ -38,7 +38,8 @@ function initWindowResizeSystemAndSurroundings(renderer)
 	camera.setTopAtZZeroAndAdjustScene = function(newTopAtZZero)
 	{
 		camera.topAtZZero = newTopAtZZero;
-		camera.position.z = camera.topAtZZero * 20.; //subjective
+		camera.position.z = camera.topAtZZero * 20.; //subjective, how much depth do you want?
+		camera.far = camera.position.z * 2.
 
 		pointLight.distance = camera.position.z
 		pointLight.shadow.camera.far = pointLight.distance;
@@ -48,7 +49,6 @@ function initWindowResizeSystemAndSurroundings(renderer)
 		pointLight.position.set(-camera.topAtZZero, camera.topAtZZero, camera.topAtZZero * .25)
 		pointLight.position.multiplyScalar(.5)
 
-		camera.far = camera.position.z + 10.
 		respondToResize();
 	}
 

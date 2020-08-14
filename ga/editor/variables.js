@@ -1,4 +1,4 @@
-let displayCamera = new THREE.PerspectiveCamera(90., 1., .01, 100.)
+let displayCamera = new THREE.PerspectiveCamera(90., 1., .01)
 displayCamera.position.z = 8.5
 displayCamera.rotation.order = "YXZ"
 
@@ -15,6 +15,8 @@ const colors = {
 for (let color in colors) colorCharacters += color
 
 const outputColumn = new THREE.Mesh(new THREE.PlaneBufferGeometry(1., 9999999.), new THREE.MeshBasicMaterial({ color: 0x1F1F1F }))
+outputColumn.renderOrder = 0
+outputColumn.material.depthTest = false
 const displayWindows = []
 
 const pad = new THREE.Group()

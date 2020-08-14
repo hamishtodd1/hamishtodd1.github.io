@@ -83,9 +83,9 @@
 	x,y,z
 */
 
+let backgroundString = "\n bog hey\nbog \n\n\n\n\n\n\n\n\n\n\n\n\ndisplay\na"
 async function initPad()
 {
-	let backgroundString = "\n bog hey\nbog \n\n\n\ndisplay\na"
 	let spaceWidth = 1. / 3.
 
 	let mvs = [] //the ones in the pad
@@ -111,132 +111,16 @@ async function initPad()
 		}
 	}
 
-	//carat and navigation
-	{
-		var carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.,1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0, depthTest:false }))
-		carat.geometry.translate(.5,0.,0.)
-		var caratPositionInString = -1
-		pad.add(carat)
-		carat.renderOrder = Infinity
-		carat.scale.x = .1
-		carat.flashingStart = 0.
-		updateFunctions.push(() => 
-		{
-			carat.visible = Math.floor((clock.getElapsedTime() - carat.flashingStart) * 2.) % 2 ? false : true 
-		})
-		function teleportCarat(x, y)
-		{
-			carat.position.set(x, y, carat.position.z)
-			carat.flashingStart = clock.getElapsedTime()
-			caratPositionInString = -1
-		}
-		function addToCaratPosition(x, y)
-		{
-			teleportCarat(
-				carat.position.x + x,
-				carat.position.y + y)
-		}
-		function moveCaratAlongString(amount)
-		{
-			caratPositionInString = clamp(caratPositionInString + amount, 0, backgroundString.length)
-		}
-		bindButton("ArrowRight", () => moveCaratAlongString(1))
-		bindButton("ArrowLeft", () => moveCaratAlongString(-1))
-
-		bindButton("ArrowUp", () => addToCaratPosition(0., 1.))
-		bindButton("ArrowDown", () => addToCaratPosition(0., -1.))
-		bindButton("Home", () => addToCaratPosition(-999., 0.))
-		bindButton("End", () => addToCaratPosition(999., 0.))
-		bindButton("PageUp", () => addToCaratPosition(0., 999.))
-		bindButton("PageDown", () => addToCaratPosition(0., -999.))
-	}
+	var carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.,1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
+	carat.positionInString = -1
+	initCaratAndNavigation(carat)
 
 	//typing
-	{
-		var characters = "abcdefghijklmnopqrstuvwxyz /=*+!:{}"
-		var alphanumerics = "abcdefghijklmnopqrstuvwxyz0123456789"
-		function addCharacter(character)
-		{
-			backgroundString = backgroundString.slice(0, caratPositionInString) + character + backgroundString.slice(caratPositionInString, backgroundString.length)
-			moveCaratAlongString(1)
-		}
-		var instancedLetterMeshes = {}
-		var maxCopiesOfALetter = 256
-		function makeCharacterTypeable(character, typedCharacter)
-		{
-			let material = text(character, true)
-
-			instancedLetterMeshes[character] = new THREE.InstancedMesh(unchangingUnitSquareGeometry, material, maxCopiesOfALetter);
-			instancedLetterMeshes[character].count = 0
-			pad.add(instancedLetterMeshes[character])
-			instancedLetterMeshes[character].aspect = material.getAspect()
-
-			if (typedCharacter === undefined)
-				typedCharacter = character
-			else
-				characters += character
-
-			bindButton(typedCharacter, () => addCharacter(character))
-		}
-		for (let i = 0; i < characters.length; i++)
-			makeCharacterTypeable(characters[i])
-		let nablaCharacter = String.fromCharCode("8711")
-		makeCharacterTypeable(nablaCharacter, "@")
-		let integralCharacter = String.fromCharCode("8747")
-		makeCharacterTypeable(integralCharacter, "~")
-		let deltaCharacter = String.fromCharCode("948")
-		makeCharacterTypeable(deltaCharacter, "?")
-
-		let lambdaCharacter = String.fromCharCode("955")
-		makeCharacterTypeable(lambdaCharacter, "#")
-		//you CAN write "function", but lots of kids don't know "function". In python it's "def"
-		// capital sigma (931) (just integral, whoah), wedge symbol(8743). Still got £$%^&
-
-		bindButton("Delete", () =>
-		{
-			if (caratPositionInString < backgroundString.length)
-				backgroundString = backgroundString.slice(0, caratPositionInString) + backgroundString.slice(caratPositionInString + 1, backgroundString.length)
-		})
-		bindButton("Backspace", () =>
-		{
-			if (caratPositionInString !== 0)
-			{
-				backgroundString = backgroundString.slice(0, caratPositionInString - 1) + backgroundString.slice(caratPositionInString, backgroundString.length)
-				moveCaratAlongString(-1)
-			}
-		})
-		bindButton("Tab", () => { for (let i = 0; i < 4; i++) addCharacter(" ") })
-		bindButton("Enter", () => addCharacter("\n"))
-	}
-
-	//don't need geometric product for the demo necessarily
-	{
-		let materials = {
-			geometricProduct: new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true /*because transparent part of texture*/ }),
-			geometricSum: new THREE.MeshBasicMaterial({ color: 0x80FF00, transparent: true /*because transparent part of texture*/ }),
-		}
-
-		let loader = new THREE.TextureLoader()
-		loader.crossOrigin = true
-		//don't use a promise, shit goes weird
-		loader.load("../common/data/frog.png", function (result)
-		{
-			materials.geometricSum.map = result
-			materials.geometricSum.needsUpdate = true
-			materials.geometricProduct.map = result
-			materials.geometricProduct.needsUpdate = true
-		})
-
-		var gpSymbolInstanced = new THREE.InstancedMesh(unchangingUnitSquareGeometry, materials.geometricProduct, maxCopiesOfALetter)
-		gpSymbolInstanced.count = 0
-		pad.add(gpSymbolInstanced)
-		var gsSymbolInstanced = new THREE.InstancedMesh(unchangingUnitSquareGeometry, materials.geometricSum, maxCopiesOfALetter)
-		gsSymbolInstanced.count = 0
-		pad.add(gsSymbolInstanced)
-
-		// let animatedGeometricProductSymbol = new THREE.Mesh(unchangingUnitSquareGeometry, materials.geometricProduct)
-		// let animatedGeometricSumSymbol = new THREE.Mesh(unchangingUnitSquareGeometry, materials.geometricSum)
-	}
+	let characters = "abcdefghijklmnopqrstuvwxyz /=*+!:{}"
+	let alphanumerics = "abcdefghijklmnopqrstuvwxyz0123456789"
+	let instancedLetterMeshes = {}
+	let maxCopiesOfALetter = 256
+	initTyping(carat,characters, instancedLetterMeshes, maxCopiesOfALetter)
 
 	let tokenCharactersleft = 0
 
@@ -253,7 +137,7 @@ async function initPad()
 		{
 			mouse.getZZeroPosition(v1)
 			pad.worldToLocal(v1)
-			teleportCarat(v1.x, v1.y)
+			carat.teleport(v1.x, v1.y)
 		}
 
 		for (let i = 0, il = characters.length; i < il; i++)
@@ -263,8 +147,6 @@ async function initPad()
 		for (let i = 0; i < outlines.length; ++i)
 			outlines[i].visible = false
 		let lowestInvisibleOutline = 0
-		gpSymbolInstanced.count = 0
-		gsSymbolInstanced.count = 0
 
 		let lowestUnusedDisplayWindow = 0
 		for (let i = 0; i < displayWindows.length; i++)
@@ -274,13 +156,13 @@ async function initPad()
 
 		for(let drawingPositionInString = 0; drawingPositionInString <= backgroundStringLength; ++drawingPositionInString)
 		{
-			if (caratPositionInString !== -1 && drawingPositionInString === caratPositionInString )
+			if (carat.positionInString !== -1 && drawingPositionInString === carat.positionInString )
 			{
 				if (carat.position.x !== drawingPosition.x || carat.position.y !== drawingPosition.y)
 					carat.flashingStart = clock.getElapsedTime()
 				carat.position.set(drawingPosition.x, drawingPosition.y, carat.position.z)
 			}
-			if (caratPositionInString === -1)
+			if (carat.positionInString === -1)
 			{
 				let closestYDist = Math.abs(positionInStringClosestToCaratPositionVector.y - carat.position.y)
 				let closestXDist = Math.abs(positionInStringClosestToCaratPositionVector.x - carat.position.x)
@@ -299,17 +181,25 @@ async function initPad()
 			{
 				if ( backgroundString[drawingPositionInString] === "\n" )
 				{
+					// mv.drawInPlace(drawingPosition)
+					outlines[lowestInvisibleOutline].visible = true
+					v1.copy(outputColumn.position)
+					pad.worldToLocal(v1)
+					outlines[lowestInvisibleOutline].position.x = v1.x
+					outlines[lowestInvisibleOutline].position.y = drawingPosition.y
+					++lowestInvisibleOutline
+
+					//a line that's well-formed gets turned into a declaration
+
+					//also, retro-actively turn this line into a diagram?
+
 					drawingPosition.x = 0.
 					drawingPosition.y -= 1.
-
-					//also, stick something in the column
-					//a line that's well-formed gets turned into a declaration
 					
 					continue
 				}
 				else if (colorCharacters.indexOf(backgroundString[drawingPositionInString]) !== -1)
 				{
-					//could use regex
 					let pictogramEnd = drawingPositionInString
 					while (pictogramEnd < backgroundStringLength && colorCharacters.indexOf(backgroundString[pictogramEnd]) !== -1)
 						++pictogramEnd
@@ -323,7 +213,7 @@ async function initPad()
 							mv = mvs[i]
 							break
 						}
-					let caratInPictogram = drawingPositionInString < caratPositionInString && caratPositionInString < pictogramEnd
+					let caratInPictogram = drawingPositionInString < carat.positionInString && carat.positionInString < pictogramEnd
 					if (caratInPictogram)
 						tokenCharactersleft = pictogramEnd - drawingPositionInString
 					else if (pictogramEnd > drawingPositionInString && mv !== null)
@@ -375,7 +265,7 @@ async function initPad()
 			}
 
 			if (characters.indexOf(backgroundString[drawingPositionInString]) === -1)
-				console.warn("Uncaught character")
+				console.warn("Uncaught character, there will just be a space")
 			else
 			{
 				let ilm = instancedLetterMeshes[backgroundString[drawingPositionInString]]
@@ -399,9 +289,9 @@ async function initPad()
 				tokenCharactersleft = 0
 		}
 
-		if (caratPositionInString === -1)
+		if (carat.positionInString === -1)
 		{
-			caratPositionInString = positionInStringClosestToCaratPosition
+			carat.positionInString = positionInStringClosestToCaratPosition
 			carat.position.copy(positionInStringClosestToCaratPositionVector)
 		}
 
@@ -413,8 +303,6 @@ async function initPad()
 			if (v1.y > camera.topAtZZero)
 				pad.position.y -= v1.y - camera.topAtZZero
 		}
-
-		// log(instancedLetterMeshes["a"].count)
 	})
 
 	//irritation involving things going behind it
@@ -423,4 +311,106 @@ async function initPad()
 	// lineHighlight.scale.x = 999999999.
 	// updateFunctions.push(function(){lineHighlight.position.y = carat.position.y})
 	// scene.add(lineHighlight)
+}
+
+function initCaratAndNavigation(carat)
+{
+	carat.renderOrder = Infinity
+	carat.material.depthTest = false
+	carat.geometry.translate(.5, 0., 0.)
+	pad.add(carat)
+	carat.scale.x = .1
+	carat.flashingStart = 0.
+	updateFunctions.push(() => 
+	{
+		carat.visible = Math.floor((clock.getElapsedTime() - carat.flashingStart) * 2.) % 2 ? false : true
+	})
+	carat.teleport = function(x, y)
+	{
+		carat.position.set(x, y, carat.position.z)
+		carat.flashingStart = clock.getElapsedTime()
+		carat.positionInString = -1
+	}
+	carat.addToPosition = function(x, y)
+	{
+		carat.teleport(
+			carat.position.x + x,
+			carat.position.y + y)
+	}
+	carat.moveAlongString = function(amount)
+	{
+		carat.positionInString = clamp(carat.positionInString + amount, 0, backgroundString.length)
+	}
+	bindButton("ArrowRight", () => carat.moveAlongString(1))
+	bindButton("ArrowLeft", () => carat.moveAlongString(-1))
+
+	bindButton("ArrowUp", () => carat.addToPosition(0., 1.))
+	bindButton("ArrowDown", () => carat.addToPosition(0., -1.))
+	bindButton("Home", () => carat.addToPosition(-999., 0.))
+	bindButton("End", () => carat.addToPosition(999., 0.))
+
+	function getNumLinesOnScreen()
+	{
+		return camera.topAtZZero * 2. / getWorldLineHeight()
+	}
+	bindButton("PageUp", () => {
+		carat.addToPosition(0., Math.floor(getNumLinesOnScreen()))
+	})
+	bindButton("PageDown", () => {
+		carat.addToPosition(0., -Math.floor(getNumLinesOnScreen()))
+	})
+}
+
+function initTyping(carat,characters, instancedLetterMeshes, maxCopiesOfALetter)
+{
+	function addCharacter(character)
+	{
+		backgroundString = backgroundString.slice(0, carat.positionInString) + character + backgroundString.slice(carat.positionInString, backgroundString.length)
+		carat.moveAlongString(1)
+	}
+	function makeCharacterTypeable(character, typedCharacter)
+	{
+		let material = text(character, true)
+
+		instancedLetterMeshes[character] = new THREE.InstancedMesh(unchangingUnitSquareGeometry, material, maxCopiesOfALetter);
+		instancedLetterMeshes[character].count = 0
+		pad.add(instancedLetterMeshes[character])
+		instancedLetterMeshes[character].aspect = material.getAspect()
+
+		if (typedCharacter === undefined)
+			typedCharacter = character
+		else
+			characters += character
+
+		bindButton(typedCharacter, () => addCharacter(character))
+	}
+	for (let i = 0; i < characters.length; i++)
+		makeCharacterTypeable(characters[i])
+	let nablaCharacter = String.fromCharCode("8711")
+	makeCharacterTypeable(nablaCharacter, "@")
+	let integralCharacter = String.fromCharCode("8747")
+	makeCharacterTypeable(integralCharacter, "~")
+	let deltaCharacter = String.fromCharCode("948")
+	makeCharacterTypeable(deltaCharacter, "?")
+
+	let lambdaCharacter = String.fromCharCode("955")
+	makeCharacterTypeable(lambdaCharacter, "#")
+	//you CAN write "function", but lots of kids don't know "function". In python it's "def"
+	// capital sigma (931) (just integral, whoah), wedge symbol(8743). Still got £$%^&
+
+	bindButton("Delete", () =>
+	{
+		if (carat.positionInString < backgroundString.length)
+			backgroundString = backgroundString.slice(0, carat.positionInString) + backgroundString.slice(carat.positionInString + 1, backgroundString.length)
+	})
+	bindButton("Backspace", () =>
+	{
+		if (carat.positionInString !== 0)
+		{
+			backgroundString = backgroundString.slice(0, carat.positionInString - 1) + backgroundString.slice(carat.positionInString, backgroundString.length)
+			carat.moveAlongString(-1)
+		}
+	})
+	bindButton("Tab", () => { for (let i = 0; i < 4; i++) addCharacter(" ") })
+	bindButton("Enter", () => addCharacter("\n"))
 }
