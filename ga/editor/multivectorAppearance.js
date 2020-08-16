@@ -1,4 +1,8 @@
 /*
+    Need to disentangle what's in the boxes
+
+    Make the background close so you see the shadows
+
     To make them more different from one another for the colorblind, maybe vary order more? Not always black first?
 */
 
@@ -64,6 +68,8 @@ function VectorGeometry(name)
 
 function initMultivectorAppearances()
 {
+    // let a = new THREE.Mesh(new THREE.)
+
     let idNum = 0
     
     let vectorMaterial = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors })
@@ -105,25 +111,35 @@ function initMultivectorAppearances()
         let name = generateName()
         let vectorGeometry = VectorGeometry(name) //TODO should be in material. Can have one geometry for all when you've sorted a shader
 
-        let vectorValue = new THREE.Vector3(Math.random()-.5,Math.random()-.5,Math.random()-.5)
-        randomPerpVector(vectorValue, v2)
-        v2.setLength(vectorValue.length())
-        v3.crossVectors(vectorValue, v2).normalize().negate().setLength(vectorValue.length())
-        let uniformMatrixWithYOnVector = new THREE.Matrix4().makeBasis(v2, vectorValue, v3);
-        //properly scaling the things will have to wait until you have proper colors
-
         let instancedMesh = new THREE.InstancedMesh(vectorGeometry, vectorMaterial, 256)
         // instancedMesh.count = 0
         instancedMesh.name = name
+        instancedMesh.elements = MathematicalMultivector()
+        copyMultivector(zeroMultivector, instancedMesh.elements)
+        instancedMesh.elements[0] = 0.
+        instancedMesh.elements[1] = Math.random() - .5
+        instancedMesh.elements[2] = Math.random() - .5
+        instancedMesh.elements[3] = Math.random() - .5
 
-        instancedMesh.drawInPlace = function(position)
+        let uniformMatrixWithYOnVector = new THREE.Matrix4()
+
+        instancedMesh.drawInPlace = function(x,y)
         {
-            let uniformScale = .5 / vectorValue.length()
+            if(instancedMesh.count === 0)
+            {
+                getVector(instancedMesh.elements, v1)
+                randomPerpVector(v1, v2)
+                v2.setLength(v1.length())
+                v3.crossVectors(v1, v2).normalize().negate().setLength(v1.length())
+                uniformMatrixWithYOnVector.makeBasis(v2, v1, v3);
+                //properly scaling the things will have to wait until you have proper colors
+            }
+
+            let uniformScale = .5 / getVector(instancedMesh.elements,v1).length()
             v1.setScalar(uniformScale)
-            
             q1.copy(displayCamera.quaternion)
             q1.inverse()
-            m1.compose(position,q1,v1)
+            m1.compose(v2.set(x,y,0.),q1,v1)
             m2.multiplyMatrices(m1, uniformMatrixWithYOnVector)
             instancedMesh.setMatrixAt(instancedMesh.count, m2)
             instancedMesh.instanceMatrix.needsUpdate = true

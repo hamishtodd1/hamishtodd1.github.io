@@ -81,6 +81,10 @@
 		Working with the function, maybe represented as an infinite line of mvs, is for the game
 
 	integration and differentiation
+		Stuff about dual numbers in siggraph course notes?
+			sq(ei) =-1 => exp(a*ei) = cos(a) + sin(a) * ei
+			sq(ej) = 0 => exp(a*ej) = 1 + a*e0
+			sq(ek) = 1 => exp(a*ej) = ?
 		Jon https://www.youtube.com/watch?v=fdAOPHgW7qM&t=16s Sean https://www.youtube.com/watch?v=jTzIDmjkLQo
 		Don't forget strogatz style. Particle on the line, the curve above it tells it whether to go left or right. f:R->R is a vector field too
 		To do Inventing On Principle Style omniscient select-the-time debugging for non-trivial games:
@@ -115,6 +119,7 @@
 			"differentiate(x*x,x)" -> "2*x"
 			
 	Algebraic deduction / reduction
+		As joel says, sometimes you want to write a*b = b/a but it's some bunch of things that just cannot be rarranged into a = or b = 
 		Call it inlining and outlining
 		Isn't it kind of arbitrary what we label as definitions and theorems?
 			Can't you take the theorems and then backsolve to the definitions, meaning that the definitions were kinda theorems?

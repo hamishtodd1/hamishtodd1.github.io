@@ -15,6 +15,14 @@
 let zeroMultivector = new Float32Array(8)
 MathematicalMultivector = () => new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.,])
 
+function getVector(mv,target)
+{
+	target.x = mv[1]
+	target.y = mv[2]
+	target.z = mv[3]
+	return target
+}
+
 function wedge(a,b) //aka antisymmetric
 {
 	let p = geometricProduct(a, b)

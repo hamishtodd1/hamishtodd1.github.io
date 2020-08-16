@@ -1,42 +1,35 @@
 /* 
-	Make the background close so you see the shadows and color it like text editor
-	
+
+	Is the location of the carat the place it has exectued up to? Maybe the preview window is dependent on where it is?
+		reverse polish might be pretty good. You see this thing, that thing, now they're in the same coord system, THEN some shit happens
+		Could at least have a mode that enables this
+		reduced and replaced with their actual values
+		Has the benefit of showing you the top of the stack, because the lines get collapsed away
+		Which is a good way of having selective visibility
+		Hmm, and cache coherence
+		could highlight whatever's in the stack where your carat is
+		Maybe when the carat is at the place where a = b - c, 
+		The little cartoon character buzzes around the preview window, animates the line you're on
+		But you see the result of everything anyway
+        
 	Language symbols
-		exponentiation, log, radical, want triangle of power
-		can't you find something that reflects that integration is differentiation backwards
-		for all? There exists? Would you need that?
-		proportional?
-		Parallel, orthogonal?
-        arrays might be nice (you don't have integers though?) but you're still unsure of them and can show in abacus
-            Is an array always ok to think of as a function mapping from natural numbers to things?
-            Maybe a continuous mapping that you just happen to have stored a bunch of results of
-            Hmm, maybe continuous-everywhere is a good idea?
+		capital sigma (931), Parallel, orthogonal?. Still got £$%^
+		exponentiation/log/radical/triangle of power
+		can't you find something that reflects that integration is differentiation backwards?
+		for all? There exists? Would you need that? proportional?
 		Angle brackets ("the part of the mv that has this grade")
-		dagger, conjugate hat
+		dagger, conjugate, hat, reverse, sigh
 		11*11*11 = 8 outputs (pictures) not in decimal, why should inputs be?
 		{} for making a new mv?
 		if you have arrays and functions and recursion you have summation:
-            function sumArrayElementsBelowIndex(arr, index) { return index < 0 ? 0 : arr[index] + sumArrayElementsBelowIndex(arr, index - 1) }
-            
-    Auto hide/show
-		As you know from pwg, it is important to show and hide stuff, as it is with text
-		Need to have an idea of scope that auto hides/shows. Maybe there are certain arrows that only appear when you reach out?
-        windows could go offscreen when you scroll up
-        
-    Brackets
-		You might say brackets are about control flow, but it's about order of operations too. They ain't so bad. Kids don't have to use them at first
-		do you need if statements if you have sigmoid and tanh?
-		Could have some vector in scope that always follows your mouse? Eh, better to have a grabbable tip. Humm, bootstrap
-		Currying: instead of 2 you can have "the function that multiplies by 2" and "the function that adds 2". Does it matter?
-		You may be tempted to make visualizations and animations for the other datatypes. Nice that you can but you probably shouldn'ts
-		Fragment shaders are nice but fuck them for now, need to focus, do vertex shaders
-		Vertex shaders are the special case where the input is any amount of crap and the output is specifically a vertex. Hmm, except for geometry
-	
-	Is the location of the carat the place it has exectued up to? Maybe the preview window is dependent on where it is?
-		Maybe when the carat is at the place where a = b - c, 
-        The little cartoon character buzzes around the preview window
-        
-    Colors
+			function sumArrayElementsBelowIndex(arr, index) { return index < 0 ? 0 : arr[index] + sumArrayElementsBelowIndex(arr, index - 1) }
+		arrays might be nice (you don't have integers though?) but you're still unsure of them and can show in abacus
+            Is an array always ok to think of as a function mapping from natural numbers to things?
+            Maybe a continuous mapping that you just happen to have stored a bunch of results of
+            Hmm, maybe continuous-everywhere is a good idea? requires sigma -> integral
+		https://en.wikipedia.org/wiki/List_of_common_physics_notations
+
+	Colors
         string of color codes = multivector, possibly a new one, initialized to random
         + / *
         lambda a b c . [function body]
@@ -46,9 +39,7 @@
             https://www.reddit.com/r/ColorBlind/comments/hjw6ie/i_am_making_a_game_and_i_want_to_use_a_large/
             https://personal.sron.nl/~pault/
             viridis folks https://www.youtube.com/watch?v=xAoljeRJ3lU
-            mark brown https://www.youtube.com/watch?v=xrqdU4cZaLw
-
-	https://en.wikipedia.org/wiki/List_of_common_physics_notations
+			mark brown https://www.youtube.com/watch?v=xrqdU4cZaLw
 
 	Temporary:
 	a ?auburn (red)
@@ -83,26 +74,40 @@
 	x,y,z
 */
 
-let backgroundString = "\n bog wb  +\nbog \n\n\n\n\n\n\n\n\n\n\n\n\ndisplay\na"
 async function initPad()
 {
-	let stack = Array(3)
+	let stack = []
 
 	let spaceWidth = 1. / 3.
 
-	let mvs = [] //all in the pad
+	let VariableAppearance = MultivectorAppearance
+	let copyVariable = copyMultivector
+
+	let variables = [] //all in the pad
 	for(let i = 0; i < 59; ++i)
 	{
-		let mv = MultivectorAppearance()
-		mvs.push(mv)
-		pad.add(mv)
+		let variable = VariableAppearance()
+		variables.push(variable)
+		pad.add(variable)
+	}
+	function getVariableWithName(name)
+	{
+		for (let i = 0, il = variables.length; i < il; i++)
+			if (checkAnagram(name, variables[i].name))
+				return variables[i]
+
+		return null
 	}
 	//use one unassigned and it'll have random values.
-
-	let operationSymbols = "+"
-	let operationDictionary = {
-		"+": geometricSum
+	function assignNamedVariable(name,vec)
+	{
+		let variable = getVariableWithName(name)
+		if (variable === null)
+			console.error("unrecognized variable name: ", name)
+		copyVariable(vec, variable.elements)
 	}
+	//could have something different, say [1,0,0] in the code that turns these into things
+	//well of course that's the idea of the drawing in coord thing
 
 	let outlines = initOutlines()
 
@@ -110,54 +115,82 @@ async function initPad()
 	carat.positionInString = -1
 	initCaratAndNavigation(carat)
 
-	let characters = "abcdefghijklmnopqrstuvwxyz /=*+!:{}"
-	let alphanumerics = "abcdefghijklmnopqrstuvwxyz0123456789"
-	let instancedLetterMeshes = {}
 	let maxCopiesOfALetter = 256
-	initTyping(carat,characters, instancedLetterMeshes, maxCopiesOfALetter)
+	let characters = initTypeableCharacters(carat, maxCopiesOfALetter)
+	let operationDictionary = {}
+	{
+		characters.add("+")
+		operationDictionary["+"] = geometricSum
 
-	let tokenCharactersleft = 0
+		let asteriskOperatorCharacter = String.fromCharCode("8727")
+		characters.add(asteriskOperatorCharacter, "*")
+		operationDictionary[asteriskOperatorCharacter] = geometricProduct
+
+		let lambdaCharacter = String.fromCharCode("955") //you CAN write "function", but lots of kids don't know "function". In python it's "def"
+		characters.add(lambdaCharacter, "#")
+
+		let nablaCharacter = String.fromCharCode("8711")
+		characters.add(nablaCharacter, "@")
+		let integralCharacter = String.fromCharCode("8747")
+		characters.add(integralCharacter, "~")
+		let deltaCharacter = String.fromCharCode("948")
+		characters.add(deltaCharacter, "?")
+
+		//more marginal
+		let wedgeCharacter = String.fromCharCode("8743")
+		characters.add(wedgeCharacter, "^")
+		let descendingWedgeCharacter = String.fromCharCode("8744")
+		characters.add(descendingWedgeCharacter, "&") // for exponentiate: **? For log, //?
+
+		backgroundString += lambdaCharacter+nablaCharacter+integralCharacter+deltaCharacter+wedgeCharacter+descendingWedgeCharacter
+
+		//./=+!:{}
+	}
+
+	let tokenCharactersLeft = 0
+	let drawCharacters = true
 	let drawingPosition = new THREE.Vector3()
 	let positionInStringClosestToCaratPosition = -1
 	let positionInStringClosestToCaratPositionVector = new THREE.Vector3()
 	updateFunctions.push(function ()
 	{
-		let yPositionOfVerticalCenterOfTopLine = -.5
-		drawingPosition.set(0., yPositionOfVerticalCenterOfTopLine, 0.)
-		let backgroundStringLength = backgroundString.length
-
 		if (mouse.clicking && !mouse.oldClicking)
 		{
 			mouse.getZZeroPosition(v1)
 			pad.worldToLocal(v1)
 			carat.teleport(v1.x, v1.y)
 		}
+		positionInStringClosestToCaratPositionVector.set(Infinity, Infinity, 0.)
 
-		for (let i = 0, il = characters.length; i < il; i++)
-			instancedLetterMeshes[characters[i]].count = 0
-		for (let i = 0, il = mvs.length; i < il; i++)
-			mvs[i].count = 0
+		assignNamedVariable(colorCharacters[0], xUnit)
+		assignNamedVariable(colorCharacters[1], yUnit)
+		assignNamedVariable(colorCharacters[2], zUnit)
+		let lowestUndeterminedVariable = 3
+		for (let i = 0, il = variables.length; i < il; i++)
+			variables[i].count = 0
+
 		for (let i = 0; i < outlines.length; ++i)
 			outlines[i].visible = false
-
-		let lowestInvisibleOutline = 0
+		let lowestUnusedOutline = 0
 		//could just have it done as part of drawing multivector
-		function drawOutline(p)
+		function drawOutline(x,y)
 		{
-			outlines[lowestInvisibleOutline].visible = true
-			outlines[lowestInvisibleOutline].position.copy(p)
-			++lowestInvisibleOutline
-			console.assert( lowestInvisibleOutline < outlines.length )
+			outlines[lowestUnusedOutline].visible = true
+			outlines[lowestUnusedOutline].position.set(x,y,0.)
+			++lowestUnusedOutline
+			console.assert( lowestUnusedOutline < outlines.length )
 		}
-
-		let lowestUndeterminedMv = 0
 
 		let lowestUnusedDisplayWindow = 0
 		for (let i = 0; i < displayWindows.length; i++)
 			displayWindows[i].screen.bottomY = camera.topAtZZero
 
-		positionInStringClosestToCaratPositionVector.set(Infinity,Infinity,0.)
-
+		for (let i = 0, il = characters.array.length; i < il; i++)
+			characters.instancedMeshes[characters.array[i]].count = 0
+			
+		let yPositionOfVerticalCenterOfTopLine = -.5
+		drawingPosition.set(0., yPositionOfVerticalCenterOfTopLine, 0.)
+		let backgroundStringLength = backgroundString.length
 		for(let drawingPositionInString = 0; drawingPositionInString <= backgroundStringLength; ++drawingPositionInString)
 		{
 			if (carat.positionInString !== -1 && drawingPositionInString === carat.positionInString )
@@ -181,32 +214,43 @@ async function initPad()
 			if (drawingPositionInString >= backgroundStringLength)
 				break
 
-			if(tokenCharactersleft === 0)
+			let currentCharacter = backgroundString[drawingPositionInString]
+
+			if(tokenCharactersLeft === 0)
 			{
-				if( operationSymbols.indexOf(backgroundString[drawingPositionInString]) !== -1 )
-					stack.push(operationDictionary[backgroundString[drawingPositionInString]])
-				if ( backgroundString[drawingPositionInString] === "\n" )
+				drawCharacters = true
+
+				if (operationDictionary[currentCharacter] !== undefined )
+					stack.push(operationDictionary[currentCharacter])
+				else if ( currentCharacter === "\n" )
 				{
 					if(stack.length >= 3 )
 					{
-						let func = stack.pop()
-						let parameter2 = stack.pop()
-						let parameter1 = stack.pop()
-						
-						if(typeof func === 'function' && typeof parameter1 !== 'function' && typeof parameter2 !== 'function')
+						let operandsAndOperator = [stack.pop(), stack.pop(), stack.pop()]
+						for(let i = 0; i < 3; i++)
 						{
-							v2.copy(outputColumn.position)
-							pad.worldToLocal(v2)
-							v2.y = drawingPosition.y
-							drawOutline(v2)
-							
-							let mv = mvs[lowestUndeterminedMv]
-							// func(parameter1, parameter2.elements, mv.elements)
-							mv.drawInPlace(v2)
-							stack.push(mv)
-							++lowestUndeterminedMv
+							if (typeof operandsAndOperator[i] === 'function' && 
+								typeof operandsAndOperator[(i+1)%3] !== 'function' && 
+								typeof operandsAndOperator[(i+2)%3] !== 'function')
+							{
+								let operator = operandsAndOperator[i]
+								let operand1 = operandsAndOperator[i===0?1:0]
+								let operand2 = operandsAndOperator[i===2?1:2]
+
+								v2.copy(outputColumn.position)
+								pad.worldToLocal(v2)
+								v2.y = drawingPosition.y - 1. / 3.
+								drawOutline(v2.x, v2.y)
+
+								let mv = variables[lowestUndeterminedVariable]
+								operator(operand1.elements, operand2.elements, mv.elements)
+								mv.drawInPlace(v2.x, v2.y)
+								stack.push(mv)
+								++lowestUndeterminedVariable
+							}
 						}
 					}
+					stack.length = 0
 
 					//also retroactively turn this line into a superimposed diagram? Unless carat is on it I guess
 
@@ -215,39 +259,50 @@ async function initPad()
 					
 					continue
 				}
-				else if (colorCharacters.indexOf(backgroundString[drawingPositionInString]) !== -1)
+				else if (colorCharacters.indexOf(currentCharacter) !== -1)
 				{
-					let pictogramEnd = drawingPositionInString
-					while (pictogramEnd < backgroundStringLength && colorCharacters.indexOf(backgroundString[pictogramEnd]) !== -1)
-						++pictogramEnd
-					//spaces distinguish black mv then white mv from black and white mv
+					let maxNameLength = 1. / spaceWidth
+					
+					let name = ""
+					// debugger
 
-					let pictogramName = backgroundString.slice(drawingPositionInString, pictogramEnd)
-					let mv = null
-					for (let i = 0, il = mvs.length; i < il; i++)
-						if (checkAnagram(pictogramName, mvs[i].name))
-						{
-							mv = mvs[i]
-							break
-						}
-					let caratInPictogram = drawingPositionInString < carat.positionInString && carat.positionInString < pictogramEnd
-					if (caratInPictogram)
-						tokenCharactersleft = pictogramEnd - drawingPositionInString
-					else if (pictogramEnd > drawingPositionInString && mv !== null)
+					let addToName = true
+					for (let i = 0; i < maxNameLength && drawingPositionInString + i < backgroundStringLength; ++i)
 					{
-						drawingPosition.x += .5
+						let character = backgroundString[drawingPositionInString + i]
+						if (colorCharacters.indexOf(character) === -1)
+							addToName = false
+							
+						if (addToName)
+							name += character
+						else if (character !== " " && carat.positionInString !== drawingPositionInString + i)
+						{
+							backgroundString = backgroundString.substring(0, drawingPositionInString + i) + " " + backgroundString.substring(drawingPositionInString + i)
+							if(carat.positionInString >= drawingPositionInString+i)
+								++carat.positionInString
+						} 
+					}
+					tokenCharactersLeft = name.length
 
-						mv.drawInPlace(drawingPosition)
+					let mv = getVariableWithName(name)
+					// debugger
+					if (mv === null)
+					{
+						//new name?
+					}
+					else
+					{
 						stack.push(mv)
-						drawOutline(drawingPosition)
-
-						drawingPosition.x += -.5 + spaceWidth * (pictogramEnd - drawingPositionInString)
-						drawingPositionInString = pictogramEnd - 1
-
-						continue
+						let caratInName = drawingPositionInString < carat.positionInString && carat.positionInString <= drawingPositionInString + name.length
+						if (!caratInName)
+						{
+							mv.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
+							drawOutline(drawingPosition.x + .5, drawingPosition.y)
+							drawCharacters = false
+						}
 					}
 				}
-				else if ( backgroundString.slice(drawingPositionInString, drawingPositionInString + 7) === "display" )
+				else if ( backgroundString.substring(drawingPositionInString, drawingPositionInString + 7) === "display" )
 				{
 					v1.copy(drawingPosition)
 					v1.y -= .5
@@ -274,15 +329,18 @@ async function initPad()
 						++lowestUnusedDisplayWindow
 					}
 					
-					tokenCharactersleft = "display".length
+					tokenCharactersLeft = "display".length
 				}
 			}
 
-			if (characters.indexOf(backgroundString[drawingPositionInString]) === -1)
-				console.warn("Uncaught character, there will just be a space: ", backgroundString[drawingPositionInString])
+			if (characters.array.indexOf(currentCharacter) === -1 || !drawCharacters)
+			{
+				if (currentCharacter !== " " && characters.array.indexOf(currentCharacter) === -1)
+					console.warn("Uncaught character, there will just be a space: ", currentCharacter)
+			}
 			else
 			{
-				let ilm = instancedLetterMeshes[backgroundString[drawingPositionInString]]
+				let ilm = characters.instancedMeshes[currentCharacter]
 				if (ilm.count >= maxCopiesOfALetter)
 					console.error("too many copies of a letter!")
 
@@ -298,9 +356,9 @@ async function initPad()
 			}
 
 			drawingPosition.x += spaceWidth
-			--tokenCharactersleft
-			if (tokenCharactersleft < 0)
-				tokenCharactersleft = 0
+			--tokenCharactersLeft
+			if (tokenCharactersLeft < 0)
+				tokenCharactersLeft = 0
 		}
 
 		if (carat.positionInString === -1)
@@ -318,13 +376,6 @@ async function initPad()
 				pad.position.y -= v1.y - camera.topAtZZero
 		}
 	})
-
-	//irritation involving things going behind it
-	// let lineHighlight = new THREE.Mesh(unchangingUnitSquareGeometry.clone(), new THREE.MeshBasicMaterial({ color: 0x3E3D32 }))
-	// lineHighlight.position.z = -1.
-	// lineHighlight.scale.x = 999999999.
-	// updateFunctions.push(function(){lineHighlight.position.y = carat.position.y})
-	// scene.add(lineHighlight)
 }
 
 function initCaratAndNavigation(carat)
@@ -364,8 +415,7 @@ function initCaratAndNavigation(carat)
 	bindButton("End", () => carat.addToPosition(999., 0.))
 
 	//TODO scrolling down too
-	function getNumLinesOnScreen()
-	{
+	function getNumLinesOnScreen() {
 		return camera.topAtZZero * 2. / getWorldLineHeight()
 	}
 	bindButton("PageUp", () => {
@@ -376,58 +426,54 @@ function initCaratAndNavigation(carat)
 	})
 }
 
-function initTyping(carat,characters, instancedLetterMeshes, maxCopiesOfALetter)
+function initTypeableCharacters(carat,maxCopiesOfALetter)
 {
+	let characters = {
+		array: "",
+		instancedMeshes:{}
+	}
 	function addCharacter(character)
 	{
-		backgroundString = backgroundString.slice(0, carat.positionInString) + character + backgroundString.slice(carat.positionInString, backgroundString.length)
+		backgroundString = backgroundString.substring(0, carat.positionInString) + character + backgroundString.substring(carat.positionInString, backgroundString.length)
 		carat.moveAlongString(1)
 	}
-	function makeCharacterTypeable(character, typedCharacter)
+	characters.add = function(character, pressedKeyboardCharacter)
 	{
 		let material = text(character, true)
 
-		instancedLetterMeshes[character] = new THREE.InstancedMesh(unchangingUnitSquareGeometry, material, maxCopiesOfALetter);
-		instancedLetterMeshes[character].count = 0
-		pad.add(instancedLetterMeshes[character])
-		instancedLetterMeshes[character].aspect = material.getAspect()
+		characters.instancedMeshes[character] = new THREE.InstancedMesh(unchangingUnitSquareGeometry, material, maxCopiesOfALetter);
+		characters.instancedMeshes[character].count = 0
+		pad.add(characters.instancedMeshes[character])
+		characters.instancedMeshes[character].aspect = material.getAspect()
 
-		if (typedCharacter === undefined)
-			typedCharacter = character
-		else
-			characters += character
+		if (pressedKeyboardCharacter === undefined)
+			pressedKeyboardCharacter = character
+		
+		characters.array += character
 
-		bindButton(typedCharacter, () => addCharacter(character))
+		bindButton(pressedKeyboardCharacter, () => addCharacter(character))
 	}
-	for (let i = 0; i < characters.length; i++)
-		makeCharacterTypeable(characters[i])
-	let nablaCharacter = String.fromCharCode("8711")
-	makeCharacterTypeable(nablaCharacter, "@")
-	let integralCharacter = String.fromCharCode("8747")
-	makeCharacterTypeable(integralCharacter, "~")
-	let deltaCharacter = String.fromCharCode("948")
-	makeCharacterTypeable(deltaCharacter, "?")
-
-	let lambdaCharacter = String.fromCharCode("955")
-	makeCharacterTypeable(lambdaCharacter, "#")
-	//you CAN write "function", but lots of kids don't know "function". In python it's "def"
-	// capital sigma (931) (just integral, whoah), wedge symbol(8743). Still got £$%^&
+	let initialCharacters = "abcdefghijklmnopqrstuvwxyz "
+	for (let i = 0; i < initialCharacters.length; i++)
+		characters.add(initialCharacters[i])
 
 	bindButton("Delete", () =>
 	{
 		if (carat.positionInString < backgroundString.length)
-			backgroundString = backgroundString.slice(0, carat.positionInString) + backgroundString.slice(carat.positionInString + 1, backgroundString.length)
+			backgroundString = backgroundString.substring(0, carat.positionInString) + backgroundString.substring(carat.positionInString + 1, backgroundString.length)
 	})
 	bindButton("Backspace", () =>
 	{
 		if (carat.positionInString !== 0)
 		{
-			backgroundString = backgroundString.slice(0, carat.positionInString - 1) + backgroundString.slice(carat.positionInString, backgroundString.length)
+			backgroundString = backgroundString.substring(0, carat.positionInString - 1) + backgroundString.substring(carat.positionInString, backgroundString.length)
 			carat.moveAlongString(-1)
 		}
 	})
 	bindButton("Tab", () => { for (let i = 0; i < 4; i++) addCharacter(" ") })
 	bindButton("Enter", () => addCharacter("\n"))
+
+	return characters
 }
 
 function initOutlines()

@@ -1,5 +1,18 @@
 /*  
+    The display window(s) uses:
+        drawing in
+        displaying animations
+        displaying everything in same coord system without rescaling for the little windows
+        Showing the current execution state
+        Rotating
+        choosing the next thing to happen
+            it'd be crowded to have every single variable. But maybe they only appear in place if you're almost going to snap to them?
+        Displaying the mouse ray in a separate view
+
     Could have another that is always at the bottom, that's what you draw in and it creates a new line
+
+    In order to make it so that it's super easy to draw a circle, could have
+    If you've got projective geometry, i.e. lines = circles with center at infinity, can't you have a square wave represented exactly?
 
     You can maybe even draw things on top of what's already in there, eg a tangent vector on a curve
 

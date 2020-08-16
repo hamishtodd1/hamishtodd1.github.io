@@ -16,6 +16,7 @@ const log = console.log
 const v1 = new THREE.Vector3()
 const v2 = new THREE.Vector3()
 const v3 = new THREE.Vector3()
+const v4 = new THREE.Vector3()
 const m1 = new THREE.Matrix4()
 const m2 = new THREE.Matrix4()
 const q1 = new THREE.Quaternion()

@@ -1,4 +1,6 @@
 /*
+	Contraction axiom sounds very aaronsonian: "any element of the algebra squared is a real number"
+
 	webplotdigitizer https://www.youtube.com/watch?time_continue=1&v=QaS49WQsXd4&feature=emb_title
 
 	Would be good if you could find some visually pleasing light effect that requires QM. Rainbow? Sky rendering/rayleigh? HDR/Tone mapping?
