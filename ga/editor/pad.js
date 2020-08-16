@@ -216,48 +216,14 @@ async function initPad()
 
 			let currentCharacter = backgroundString[drawingPositionInString]
 
-			if(tokenCharactersLeft === 0)
+			if(tokenCharactersLeft <= 0)
 			{
 				drawCharacters = true
 
-				if (operationDictionary[currentCharacter] !== undefined )
-					stack.push(operationDictionary[currentCharacter])
-				else if ( currentCharacter === "\n" )
+				if (operationDictionary[currentCharacter] !== undefined)
 				{
-					if(stack.length >= 3 )
-					{
-						let operandsAndOperator = [stack.pop(), stack.pop(), stack.pop()]
-						for(let i = 0; i < 3; i++)
-						{
-							if (typeof operandsAndOperator[i] === 'function' && 
-								typeof operandsAndOperator[(i+1)%3] !== 'function' && 
-								typeof operandsAndOperator[(i+2)%3] !== 'function')
-							{
-								let operator = operandsAndOperator[i]
-								let operand1 = operandsAndOperator[i===0?1:0]
-								let operand2 = operandsAndOperator[i===2?1:2]
-
-								v2.copy(outputColumn.position)
-								pad.worldToLocal(v2)
-								v2.y = drawingPosition.y - 1. / 3.
-								drawOutline(v2.x, v2.y)
-
-								let mv = variables[lowestUndeterminedVariable]
-								operator(operand1.elements, operand2.elements, mv.elements)
-								mv.drawInPlace(v2.x, v2.y)
-								stack.push(mv)
-								++lowestUndeterminedVariable
-							}
-						}
-					}
-					stack.length = 0
-
-					//also retroactively turn this line into a superimposed diagram? Unless carat is on it I guess
-
-					drawingPosition.x = 0.
-					drawingPosition.y -= 1.
-					
-					continue
+					stack.push(operationDictionary[currentCharacter])
+					tokenCharactersLeft = 1
 				}
 				else if (colorCharacters.indexOf(currentCharacter) !== -1)
 				{
@@ -333,32 +299,71 @@ async function initPad()
 				}
 			}
 
-			if (characters.array.indexOf(currentCharacter) === -1 || !drawCharacters)
+			//individual characters
+			if (currentCharacter === "\n")
 			{
-				if (currentCharacter !== " " && characters.array.indexOf(currentCharacter) === -1)
-					console.warn("Uncaught character, there will just be a space: ", currentCharacter)
+				if (stack.length >= 3)
+				{
+					let operandsAndOperator = [stack.pop(), stack.pop(), stack.pop()]
+					for (let i = 0; i < 3; i++)
+					{
+						if (typeof operandsAndOperator[i] === 'function' &&
+							typeof operandsAndOperator[(i + 1) % 3] !== 'function' &&
+							typeof operandsAndOperator[(i + 2) % 3] !== 'function')
+						{
+							let operator = operandsAndOperator[i]
+							let operand1 = operandsAndOperator[i === 0 ? 1 : 0]
+							let operand2 = operandsAndOperator[i === 2 ? 1 : 2]
+
+							v2.copy(outputColumn.position)
+							pad.worldToLocal(v2)
+							v2.y = drawingPosition.y - 1. / 3.
+							drawOutline(v2.x, v2.y)
+
+							let mv = variables[lowestUndeterminedVariable]
+							operator(operand1.elements, operand2.elements, mv.elements)
+							mv.drawInPlace(v2.x, v2.y)
+							stack.push(mv)
+							++lowestUndeterminedVariable
+						}
+					}
+				}
+				stack.length = 0
+
+				//also retroactively turn this line into a superimposed diagram? Unless carat is on it I guess
+
+				drawingPosition.x = 0.
+				drawingPosition.y -= 1.
 			}
 			else
 			{
-				let ilm = characters.instancedMeshes[currentCharacter]
-				if (ilm.count >= maxCopiesOfALetter)
-					console.error("too many copies of a letter!")
+				if (currentCharacter !== " " && drawCharacters)
+				{
+					if (characters.array.indexOf(currentCharacter) === -1)
+						console.warn("Uncaught character, there will just be a space: ", currentCharacter)
+					else
+					{
+						characters.array.indexOf(currentCharacter) === -1
 
-				m1.identity()
-				m1.elements[0] = .4 * ilm.aspect //Width. Currently tweaked to make overlap of m rare. i looks shit
-				//scale of the things is unrelated to how much space they get
-				m1.elements[5] = m1.elements[0] / ilm.aspect
-				m1.elements[12] = drawingPosition.x + spaceWidth / 2.
-				m1.elements[13] = drawingPosition.y
-				ilm.setMatrixAt(ilm.count, m1)
-				ilm.instanceMatrix.needsUpdate = true
-				++ilm.count
+						let ilm = characters.instancedMeshes[currentCharacter]
+						if (ilm.count >= maxCopiesOfALetter)
+							console.error("too many copies of a letter!")
+
+						m1.identity()
+						m1.elements[0] = .4 * ilm.aspect //Width. Currently tweaked to make overlap of m rare. i looks shit
+						//scale of the things is unrelated to how much space they get
+						m1.elements[5] = m1.elements[0] / ilm.aspect
+						m1.elements[12] = drawingPosition.x + spaceWidth / 2.
+						m1.elements[13] = drawingPosition.y
+						ilm.setMatrixAt(ilm.count, m1)
+						ilm.instanceMatrix.needsUpdate = true
+						++ilm.count
+					}
+				}
+
+				drawingPosition.x += spaceWidth
+				--tokenCharactersLeft
 			}
-
-			drawingPosition.x += spaceWidth
-			--tokenCharactersLeft
-			if (tokenCharactersLeft < 0)
-				tokenCharactersLeft = 0
 		}
 
 		if (carat.positionInString === -1)
