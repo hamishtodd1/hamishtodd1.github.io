@@ -92,6 +92,9 @@ async function initPad()
 	let copyVariable = copyMultivector
 
 	let variables = [] //all in the pad
+	let pictogramWidthInCharacters = 3
+	let outlines = initOutlines(pictogramWidthInCharacters * spaceWidth)
+	let maxVariableNameLength = pictogramWidthInCharacters
 	for(let i = 0; i < 59; ++i)
 	{
 		let variable = VariableAppearance()
@@ -116,8 +119,6 @@ async function initPad()
 	}
 	//could have something different, say [1,0,0] in the code that turns these into things
 	//well of course that's the idea of the drawing in coord thing
-
-	let outlines = initOutlines()
 
 	let carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.,1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
 	carat.positionInString = -1
@@ -167,8 +168,6 @@ async function initPad()
 		//./=+!:{}
 	}
 
-	let tokenCharactersLeft = 0
-	let drawCharacters = true
 	let drawingPosition = new THREE.Vector3()
 	let positionInStringClosestToCaratPosition = -1
 	let positionInStringClosestToCaratPositionVector = new THREE.Vector3()
@@ -207,6 +206,9 @@ async function initPad()
 
 		for (let i = 0, il = characters.array.length; i < il; i++)
 			characters.instancedMeshes[characters.array[i]].count = 0
+
+		let drawCharacters = true
+		let tokenCharactersLeft = 0
 			
 		let yPositionOfVerticalCenterOfTopLine = -.5
 		drawingPosition.set(0., yPositionOfVerticalCenterOfTopLine, 0.)
@@ -236,127 +238,9 @@ async function initPad()
 
 			let currentCharacter = backgroundString[drawingPositionInString]
 
-			if(tokenCharactersLeft <= 0)
-			{
-				drawCharacters = true
-
-				if (functionDictionary[currentCharacter] !== undefined) //yeah this needs to be longer
-				{
-					stack.push(functionDictionary[currentCharacter])
-					tokenCharactersLeft = 1
-
-					//more that you evaluate the function here
-
-					//if you're on the line you see all the operations split up into mvs and symbols
-					//if you have more than one function on a line, and your carat isn't on it, could do the superimposing a little bit
-				}
-				else if (colorCharacters.indexOf(currentCharacter) !== -1)
-				{
-					let maxNameLength = 1. / spaceWidth
-					
-					let name = ""
-					// debugger
-
-					let addToName = true
-					for (let i = 0; i < maxNameLength && drawingPositionInString + i < backgroundStringLength; ++i)
-					{
-						let character = backgroundString[drawingPositionInString + i]
-						if (colorCharacters.indexOf(character) === -1)
-							addToName = false
-							
-						if (addToName)
-							name += character
-						else if (character !== " " && carat.positionInString !== drawingPositionInString + i)
-						{
-							backgroundString = backgroundString.substring(0, drawingPositionInString + i) + " " + backgroundString.substring(drawingPositionInString + i)
-							if(carat.positionInString >= drawingPositionInString+i)
-								++carat.positionInString
-						} 
-					}
-					tokenCharactersLeft = name.length
-
-					let mv = getVariableWithName(name)
-					// debugger
-					if (mv === null)
-					{
-						//new name?
-					}
-					else
-					{
-						stack.push(mv)
-						let caratInName = drawingPositionInString < carat.positionInString && carat.positionInString <= drawingPositionInString + name.length
-						if (!caratInName)
-						{
-							mv.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
-							drawOutline(drawingPosition.x + .5, drawingPosition.y)
-							drawCharacters = false
-						}
-					}
-				}
-				else if ( backgroundString.substring(drawingPositionInString, drawingPositionInString + 7) === "display" )
-				{
-					v1.copy(drawingPosition)
-					v1.y -= .5
-					let lineBottomYWorld = pad.localToWorld(v1).y
-					let maxHeight = 2. * getDisplayColumnWidth()
-					if (maxHeight > pad.position.y - lineBottomYWorld)
-						maxHeight = pad.position.y - lineBottomYWorld
-					if (-camera.topAtZZero < lineBottomYWorld + maxHeight && lineBottomYWorld < camera.topAtZZero)
-					{
-						if (lowestUnusedDisplayWindow >= displayWindows.length)
-							DisplayWindow()
-
-						let dw = displayWindows[lowestUnusedDisplayWindow]
-						dw.screen.bottomY = lineBottomYWorld
-
-						dw.screen.scale.y = maxHeight
-						let paddingBetweenDws = .1 * getWorldLineHeight()
-						for (let i = 0; i < lowestUnusedDisplayWindow; i++)
-						{
-							if (dw.screen.scale.y > displayWindows[i].screen.bottomY - lineBottomYWorld)
-								dw.screen.scale.y = displayWindows[i].screen.bottomY - lineBottomYWorld - paddingBetweenDws
-						}
-
-						++lowestUnusedDisplayWindow
-					}
-					
-					tokenCharactersLeft = "display".length
-				}
-				else if (alphabet.indexOf(currentCharacter) !== -1)
-				{
-					//look ahead til you find a space
-					//it is a function. Potentially just a function that returns an mv but a function nonetheless
-
-					tokenCharactersLeft = 1
-					//a separate stack?
-					//and the next thing you'll encounter is the name
-					//could look ahead
-
-					if (backgroundString[drawingPositionInString + 1] === " ") //well what you need is lambda,space,name,then either { or arguments
-					{
-						//hang on why do you need lambda?
-					}
-					else
-					{
-						if (carat.position.y !== drawingPosition.y)
-						{
-							console.error("improperly defined function, breaking")
-							break; //who knows what this will do
-						}
-					}
-
-					let maxNameLength = 64
-					asdfdsafsadfsadfsadfsadfsadfsadfsadfsadfsadfsadfsadfsdfasadfsadfsadfsadfsafd
-
-					for (let i = 0; i < maxNameLength; ++i)
-					{
-						if ()
-					}
-				}
-			}
-
-			//individual characters
-			if (currentCharacter === "\n")
+			if (currentCharacter === " ")
+				drawingPosition.x += spaceWidth
+			else if (currentCharacter === "\n")
 			{
 				if (stack.length >= 3)
 				{
@@ -393,21 +277,117 @@ async function initPad()
 			}
 			else
 			{
-				if (currentCharacter !== " " && drawCharacters)
+				if (tokenCharactersLeft <= 0)
+				{
+					drawCharacters = true
+
+					let maxTokenLength = 64
+					let token = ""
+					for (let i = 0; i < maxTokenLength && backgroundString[drawingPositionInString + i] !== " " && backgroundString[drawingPositionInString + i] !== "\n"; ++i)
+						token += backgroundString[drawingPositionInString + i]
+					tokenCharactersLeft = token.length
+
+					// debugger
+
+					if (functionDictionary[token] !== undefined)
+					{
+						stack.push(functionDictionary[token])
+						tokenCharactersLeft = 1
+
+						//more that you evaluate the function here
+
+						//if you're on the line you see all the operations split up into mvs and symbols
+						//if you have more than one function on a line, and your carat isn't on it, could do the superimposing a little bit
+					}
+					else if (token === "display")
+					{
+						v1.copy(drawingPosition)
+						v1.y -= .5
+						let lineBottomYWorld = pad.localToWorld(v1).y
+						let maxHeight = 2. * getDisplayColumnWidth()
+						if (maxHeight > pad.position.y - lineBottomYWorld)
+							maxHeight = pad.position.y - lineBottomYWorld
+						if (-camera.topAtZZero < lineBottomYWorld + maxHeight && lineBottomYWorld < camera.topAtZZero)
+						{
+							if (lowestUnusedDisplayWindow >= displayWindows.length)
+								DisplayWindow()
+
+							let dw = displayWindows[lowestUnusedDisplayWindow]
+							dw.screen.bottomY = lineBottomYWorld
+
+							dw.screen.scale.y = maxHeight
+							let paddingBetweenDws = .1 * getWorldLineHeight()
+							for (let i = 0; i < lowestUnusedDisplayWindow; i++)
+							{
+								if (dw.screen.scale.y > displayWindows[i].screen.bottomY - lineBottomYWorld)
+									dw.screen.scale.y = displayWindows[i].screen.bottomY - lineBottomYWorld - paddingBetweenDws
+							}
+
+							++lowestUnusedDisplayWindow
+						}
+
+						tokenCharactersLeft = "display".length
+					}
+					else if (getVariableWithName(token) !== null)
+					{
+						for (let i = 0; i < maxVariableNameLength && drawingPositionInString + i < backgroundStringLength; ++i)
+						{
+							if (i >= token.length && backgroundString[drawingPositionInString + i] !== " " && carat.positionInString !== drawingPositionInString + i)
+							{
+								backgroundString = backgroundString.substring(0, drawingPositionInString + i) + " " + backgroundString.substring(drawingPositionInString + i)
+								if (carat.positionInString >= drawingPositionInString + i)
+									++carat.positionInString
+								backgroundStringLength = backgroundString.length
+							}
+						}
+
+						let mv = getVariableWithName(token)
+						stack.push(mv)
+						let caratInName = drawingPositionInString < carat.positionInString && carat.positionInString <= drawingPositionInString + token.length
+						if (!caratInName)
+						{
+							mv.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
+							drawOutline(drawingPosition.x + .5, drawingPosition.y)
+							drawCharacters = false
+						}
+					}
+					// else if (alphabet.indexOf(currentCharacter) !== -1)
+					// {
+					// 	//look ahead til you find a space
+					// 	//it is a function. Potentially just a function that returns an mv but a function nonetheless
+
+					// 	tokenCharactersLeft = 1
+					// 	//a separate stack?
+					// 	//and the next thing you'll encounter is the name
+					// 	//could look ahead
+
+					// 	if (backgroundString[drawingPositionInString + 1] === " ") //well what you need is lambda,space,name,then either { or arguments
+					// 	{
+					// 		//hang on why do you need lambda?
+					// 	}
+					// 	else
+					// 	{
+					// 		if (carat.position.y !== drawingPosition.y)
+					// 		{
+					// 			console.error("improperly defined function, breaking")
+					// 			break; //who knows what this will do
+					// 		}
+					// 	}
+				}
+
+				if ( drawCharacters )
 				{
 					if (characters.array.indexOf(currentCharacter) === -1)
-						console.warn("Uncaught character, there will just be a space: ", currentCharacter)
+						console.warn("Uncaught character: ", currentCharacter)
 					else
 					{
-						characters.array.indexOf(currentCharacter) === -1
-
 						let ilm = characters.instancedMeshes[currentCharacter]
 						if (ilm.count >= maxCopiesOfALetter)
 							console.error("too many copies of a letter!")
 
 						m1.identity()
 						m1.elements[0] = .4 * ilm.aspect //Width. Currently tweaked to make overlap of m rare. i looks shit
-						//scale of the things is unrelated to how much space they get
+						//scale of the things is currently unrelated to how much space they get
 						m1.elements[5] = m1.elements[0] / ilm.aspect
 						m1.elements[12] = drawingPosition.x + spaceWidth / 2.
 						m1.elements[13] = drawingPosition.y
@@ -416,7 +396,6 @@ async function initPad()
 						++ilm.count
 					}
 				}
-
 				drawingPosition.x += spaceWidth
 				--tokenCharactersLeft
 			}
@@ -537,9 +516,9 @@ function initTypeableCharacters(carat,maxCopiesOfALetter)
 	return characters
 }
 
-function initOutlines()
+function initOutlines(maxVariableNameLength)
 {
-	let outlineGeometry = new THREE.PlaneGeometry()
+	let outlineGeometry = new THREE.PlaneGeometry(maxVariableNameLength,1.)
 	let outlineMaterial = new THREE.LineBasicMaterial({ color: 0xFFFFFF })
 	v1.copy(outlineGeometry.vertices[3])
 	outlineGeometry.vertices[3].copy(outlineGeometry.vertices[2])

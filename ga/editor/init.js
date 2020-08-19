@@ -167,8 +167,3 @@ function init()
 
 	initPad()
 }
-
-sadf wbo
-{
-	return wbo
-}
