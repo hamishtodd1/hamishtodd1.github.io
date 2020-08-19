@@ -1,39 +1,22 @@
 /* 
-	TODO when you move in to Cam, February
-		Visualizations of all multivectors in R*(2,0,1)
-		Having them in the language
-		Compiling and executing basic instructions, putting stuff in that column
+	TODO for demo when you move in to Cam, February
 		Functions
-		vectors named in the display commands
-		The other multivector visualizations
-		function copied into code from drawing in view
-			fourier approximation. If you loop back it's a 2D function, if not 1D
-		All different function visualizations
-		altering inputs with mouse
-		Build that setup: glass, headset
+			Visualized
+			function copied into code from drawing in view
+				fourier approximation. If you loop back it's a 2D function, if not 1D
+		multivectors in R*(2,0,1)
+			Visualized
+			Animated?
+			altering/specifying with mouse
 		Basic Omicron reduction (omicron because 0 is useful)
 			Describe properties of a function then make function
-
-				lunar lander, simple harmonic oscillator
-
-	Plan for demo
-		omicron reduction
-			Do a proof that two things are equal
+			differentiate/integrate polynomials
+			a proof that two things are equal
 				making wedge product and "proving it is antisymmetric" by writing ab - ba
-			integration and differentiation
-			Discussion of differentiable programming
-		Good to think about velocity space or differential space.
-			Like that 3b1b thing with the circular bunch of velocity vectors. What happens when you control velocity with your mouse and watch position change?
-			Or Hestenes' thing about velocity space
-			Something something integration and differentiation
-			"Look at the system in velocity space", "look at the system in integration/energy space". All fully determined.
 		Interested parties
-			steve der kenick, bivector discord
-			Chris Deleon, Daniel Piker
-			Alan, Meurig, Martin
-			futureOfCoding slack
-			EE slack
-			Media Molecule
+			Alan, Meurig, Martin, futureOfCoding, steve der kenick, Dan Holden
+			EE slack, bivector discord
+			Media Molecule, Chris Deleon, Daniel Piker
 
 	TODO for programming / bootstrapping
 		Fuller visualization of multivectors
@@ -62,7 +45,7 @@
 
 	An array of vectors is a matrix. Therefore... f:R->R2 sampled at two points is a matrix?
 
-	Perhaps the only reason people have mutable data at all is because they picture new symbols
+	
 
 	Hmm with the Bret viz of binary search you give example inputs.
 	But visualizing f(a)=b a,b in R is a graph, an abstraction over all possible inputs.
@@ -183,4 +166,9 @@ function init()
 	initOutputColumnAndDisplayWindows()
 
 	initPad()
+}
+
+sadf wbo
+{
+	return wbo
 }

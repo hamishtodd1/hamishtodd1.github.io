@@ -1,20 +1,23 @@
 /*  
-    The display window(s) uses:
-        drawing in
+    Uses:
+        drawing
+            drawing functions from time to multivectors
+            drawing individual multivectors
+            draw on top of what's already in there, eg a tangent vector on a curve
+            Grabbing a multivector and editing it
+                Possibly that can be done just in the boxes? Eh, you want your carat being put there to result from click
         displaying animations
         displaying everything in same coord system without rescaling for the little windows
         Showing the current execution state
         Rotating
         choosing the next thing to happen
             it'd be crowded to have every single variable. But maybe they only appear in place if you're almost going to snap to them?
-        Displaying the mouse ray in a separate view
+        Displaying the mouse ray in a separate view    
 
     Could have another that is always at the bottom, that's what you draw in and it creates a new line
-
-    In order to make it so that it's super easy to draw a circle, could have
-    If you've got projective geometry, i.e. lines = circles with center at infinity, can't you have a square wave represented exactly?
-
-    You can maybe even draw things on top of what's already in there, eg a tangent vector on a curve
+        Fourier or taylor? Well sometimes you join up your loop. Fourier for that
+        It's a particular
+        If you've got projective geometry, i.e. lines = circles with center at infinity, can't you have a square wave represented exactly?
 
     You can type the things, yes, but the line of symbols (/pictures) turns into a picture of the half way point for the operation
         eg
@@ -45,8 +48,8 @@
 
     Exponential growth is very dynamical-system like, it is dependent on where you currently are
 
-    TODO later maybe, pressing TODO is in init.js
-        maybe try to make it so that when you change what you see in the window it back solves to change the free variables above?
+    Long term TODO
+        when you change what you see in the window it back solves to change the free variables above?
             The same vector may be represented in many displayWindows, but you can grab and affect it in any you like
             But which free variables?
             Grab the coord system and rotate; it gives you the quaternion that does that
@@ -62,17 +65,11 @@
         Copy a picture of a line graph with marked axes, it interprets that too?
         Double click something in window, to get to the place where it is made
 
-    Probably screw the render target, except for evaluating functions
-        Sounds like a lot of fun to write the shader for the under-over thing
-
-    Click the things in the column, what happens?
-        They appear in the window?
-        Hovering shows the name, you can edit
-        When you right click them, context menu:
-            "Copy name"
-            "Change name" (changes colors?)
-            "Paste at carat"
-            "change representation"
+    Good to think about velocity space or differential space.
+        lunar lander, simple harmonic oscillator
+        Like that 3b1b thing with the circular bunch of velocity vectors. What happens when you control velocity with your mouse and watch position change?
+        Or Hestenes' thing about velocity space
+        "Look at the system in velocity space", "look at the system in integration/energy space". All fully determined.
 
     What determines which things go in the display window?
         Much better than built in rotation is rotating the basis vectors. x or y rotate around y, y rotate upwards or downwards
@@ -121,7 +118,7 @@
             Might get rid of this "to delete or copy" question in abacus?
         Names are good for indexing the things you want to talk in a smaller space; A hash table
 
-        R2->R   1 surface
+        R2->R   1 surface (with volumetric stuff beneat, sounds like fun!)
         R2->R2  set of 2 surfaces - 2 color image if looked at from above, or vector field(points moving around/arrows)? Tokieda weirdness?
         R2->R3  set of 3 surfaces - 3 color image if looked at from above, or parametric surface??
         surfaces are parametric, functions from R2
@@ -136,6 +133,27 @@
         R3->R2  pair of isosurfaces
         R3->R3  vector field? 3 color isosurface?
 */
+
+//https://www.youtube.com/watch?v=nl9TZanwbBk
+function dft(samples)
+{
+    // let n = samples.length
+    // for (let i = 0; i < n; ++i)
+    // {
+    //     for(let k = 0; k < n; ++k)
+    //     {
+
+    //     }
+    // }
+
+    // samples[n].alpha
+
+    // for(let i = 0; i < fourierCoefficients.length; ++n)
+    // {
+    //     let exponentiatedPart = exp(i * n * t)
+    //     fourierCoefficients[n] = 1. / TAU * integrate(f(t) * exponentiatedPart)
+    // }
+}
 
 function initOutputColumnAndDisplayWindows()
 {

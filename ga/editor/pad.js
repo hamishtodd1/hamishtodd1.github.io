@@ -1,6 +1,6 @@
 /* 
-
 	Is the location of the carat the place it has exectued up to? Maybe the preview window is dependent on where it is?
+		But you see the result of everything anyway. So no, it should just be where you get the thing that's in the carat-associated displayWindow
 		reverse polish might be pretty good. You see this thing, that thing, now they're in the same coord system, THEN some shit happens
 		Could at least have a mode that enables this
 		reduced and replaced with their actual values
@@ -10,7 +10,15 @@
 		could highlight whatever's in the stack where your carat is
 		Maybe when the carat is at the place where a = b - c, 
 		The little cartoon character buzzes around the preview window, animates the line you're on
-		But you see the result of everything anyway
+
+	Click the things in the column, what happens?
+        They appear in the window?
+        Hovering shows the name, you can edit
+        When you right click them, context menu:
+            "Copy name"
+            "Change name" (changes colors?)
+            "Paste at carat"
+            "change representation"
         
 	Language symbols
 		capital sigma (931), Parallel, orthogonal?. Still got £$%^
@@ -117,17 +125,29 @@ async function initPad()
 
 	let maxCopiesOfALetter = 256
 	let characters = initTypeableCharacters(carat, maxCopiesOfALetter)
-	let operationDictionary = {}
+	let functionDictionary = {}
 	{
 		characters.add("+")
-		operationDictionary["+"] = geometricSum
+		functionDictionary["+"] = geometricSum
 
 		let asteriskOperatorCharacter = String.fromCharCode("8727")
 		characters.add(asteriskOperatorCharacter, "*")
-		operationDictionary[asteriskOperatorCharacter] = geometricProduct
+		functionDictionary[asteriskOperatorCharacter] = geometricProduct
 
-		let lambdaCharacter = String.fromCharCode("955") //you CAN write "function", but lots of kids don't know "function". In python it's "def"
+		var lambdaCharacter = String.fromCharCode("955") //you CAN write "function", but lots of kids don't know "function". In python it's "def"
 		characters.add(lambdaCharacter, "#")
+		// functionDictionary[lambdaCharacter] = defineFunction
+		/*
+			Name
+			you have your arguments.
+				You can choose how many
+				Names chosen for you
+				You can grab and edit the example values
+			use indents to say what's part of the function
+				Is there a way to know when the function ends from looking at the stack? Probably not
+				Whatever's at the bottom is the return value
+			extract an array of functions (geometricSum, geometricProduct) and indices of variables
+		*/
 
 		let nablaCharacter = String.fromCharCode("8711")
 		characters.add(nablaCharacter, "@")
@@ -220,10 +240,15 @@ async function initPad()
 			{
 				drawCharacters = true
 
-				if (operationDictionary[currentCharacter] !== undefined)
+				if (functionDictionary[currentCharacter] !== undefined) //yeah this needs to be longer
 				{
-					stack.push(operationDictionary[currentCharacter])
+					stack.push(functionDictionary[currentCharacter])
 					tokenCharactersLeft = 1
+
+					//more that you evaluate the function here
+
+					//if you're on the line you see all the operations split up into mvs and symbols
+					//if you have more than one function on a line, and your carat isn't on it, could do the superimposing a little bit
 				}
 				else if (colorCharacters.indexOf(currentCharacter) !== -1)
 				{
@@ -296,6 +321,37 @@ async function initPad()
 					}
 					
 					tokenCharactersLeft = "display".length
+				}
+				else if (alphabet.indexOf(currentCharacter) !== -1)
+				{
+					//look ahead til you find a space
+					//it is a function. Potentially just a function that returns an mv but a function nonetheless
+
+					tokenCharactersLeft = 1
+					//a separate stack?
+					//and the next thing you'll encounter is the name
+					//could look ahead
+
+					if (backgroundString[drawingPositionInString + 1] === " ") //well what you need is lambda,space,name,then either { or arguments
+					{
+						//hang on why do you need lambda?
+					}
+					else
+					{
+						if (carat.position.y !== drawingPosition.y)
+						{
+							console.error("improperly defined function, breaking")
+							break; //who knows what this will do
+						}
+					}
+
+					let maxNameLength = 64
+					asdfdsafsadfsadfsadfsadfsadfsadfsadfsadfsadfsadfsadfsdfasadfsadfsadfsadfsafd
+
+					for (let i = 0; i < maxNameLength; ++i)
+					{
+						if ()
+					}
 				}
 			}
 
