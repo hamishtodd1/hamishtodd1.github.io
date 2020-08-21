@@ -13,9 +13,9 @@
 
 function initMultivectorAppearances()
 {
-    let zeroMaterial = text("0", true) //something with a slashed 0 would be nice
-    let a = new THREE.Mesh(new THREE.PlaneBufferGeometry(zeroMaterial.getAspect(), 1.), zeroMaterial)
-    scene.add(a)
+    // let zeroMaterial = text("0", true) //something with a slashed 0 would be nice
+    // let a = new THREE.Mesh(new THREE.PlaneBufferGeometry(zeroMaterial.getAspect(), 1.), zeroMaterial)
+    // scene.add(a)
 
     let idNum = 0
     
@@ -63,10 +63,6 @@ function initMultivectorAppearances()
         instancedMesh.name = name
         instancedMesh.elements = MathematicalMultivector()
         copyMultivector(zeroMultivector, instancedMesh.elements)
-        instancedMesh.elements[0] = 0.
-        instancedMesh.elements[1] = Math.random() - .5
-        instancedMesh.elements[2] = Math.random() - .5
-        instancedMesh.elements[3] = Math.random() - .5
 
         let uniformMatrixWithYOnVector = new THREE.Matrix4()
 

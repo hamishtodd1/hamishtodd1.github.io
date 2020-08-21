@@ -1,8 +1,15 @@
-/*  
+/*
+    Maybe better if the free-parameter-generating one is the one that comes with you. Start a new line 
+    Could have another that is always at the bottom, that's what you draw in and it creates a new line
+        Could be the one that has every single variable in it
+        Fourier or taylor? Well sometimes you join up your loop. Fourier for that
+        It's a particular
+        If you've got projective geometry, i.e. lines = circles with center at infinity, can't you have a square wave represented exactly?
+
     Uses:
         drawing
-            drawing functions from time to multivectors
-            drawing individual multivectors
+            functions from time to multivectors
+            individual multivectors
             draw on top of what's already in there, eg a tangent vector on a curve
             Grabbing a multivector and editing it
                 Possibly that can be done just in the boxes? Eh, you want your carat being put there to result from click
@@ -13,11 +20,6 @@
         choosing the next thing to happen
             it'd be crowded to have every single variable. But maybe they only appear in place if you're almost going to snap to them?
         Displaying the mouse ray in a separate view    
-
-    Could have another that is always at the bottom, that's what you draw in and it creates a new line
-        Fourier or taylor? Well sometimes you join up your loop. Fourier for that
-        It's a particular
-        If you've got projective geometry, i.e. lines = circles with center at infinity, can't you have a square wave represented exactly?
 
     You can type the things, yes, but the line of symbols (/pictures) turns into a picture of the half way point for the operation
         eg
@@ -165,7 +167,7 @@ function initOutputColumnAndDisplayWindows()
 
     let ordinaryClearColor = renderer.getClearColor().clone()
     let ordinaryRenderTarget = renderer.getRenderTarget()
-    DisplayWindow = function()
+    DisplayWindow = function(noRotation)
     {
         let localScene = new THREE.Scene()
         {
@@ -207,22 +209,18 @@ function initOutputColumnAndDisplayWindows()
             localScene.add(mouseTrail)
             for (let i = 0; i < 256; i++)
                 mouseTrail.geometry.vertices.push(new THREE.Vector3())
-            lastTrailVertexToBeAssigned = 0
+            var lastTrailVertexToBeAssigned = 0
         }
         
         let grabbed = false
         updateFunctions.push(() =>
         {
-            screen.scale.x = getDisplayColumnWidth()
-            screen.position.x = (-camera.rightAtZZero + outputColumn.left()) / 2.
-            
             screen.position.y = screen.scale.y / 2. + screen.bottomY
             //and scale.y could be various things
             //and change resolution, and think about camera bullshit
 
             if (!mouse.clicking)
                 grabbed = false
-            let thingMouseIsOn = getThingMouseIsOn()
             if (mouse.clicking && !mouse.oldClicking && thingMouseIsOn === displayWindow )
                 grabbed = true
 
@@ -243,7 +241,7 @@ function initOutputColumnAndDisplayWindows()
                     if (lastTrailVertexToBeAssigned >= mouseTrail.geometry.vertices.length)
                         lastTrailVertexToBeAssigned = 0
                 }
-                else
+                else if(!noRotation)
                 {
                     v1.copy(mouse.raycaster.ray.direction)
                     v1.y = 0.
@@ -262,7 +260,6 @@ function initOutputColumnAndDisplayWindows()
                     displayCamera.rotation.x = clamp(displayCamera.rotation.x, -TAU / 4., TAU / 4.)
 
                     displayCamera.quaternion.setFromEuler(displayCamera.rotation)
-                    
 
                     let currentDistFromCamera = displayCamera.position.length()
                     v1.set(0., 0., -currentDistFromCamera).applyQuaternion(displayCamera.quaternion).add(displayCamera.position)
@@ -290,7 +287,6 @@ function initOutputColumnAndDisplayWindows()
             return
         else
         {
-            let thingMouseIsOn = getThingMouseIsOn()
             if (displayWindows.indexOf(thingMouseIsOn) === -1)
                 pad.position.y += event.deltaY * .008
             else
@@ -308,30 +304,9 @@ function initOutputColumnAndDisplayWindows()
     getDisplayColumnWidth = () => Math.abs(-camera.rightAtZZero - outputColumn.left())
     scene.add(outputColumn)
     let outputColumnGrabbed = false
-    function getThingMouseIsOn()
-    {
-        let mouseX = mouse.getZZeroPosition(v1).x
-
-        if (outputColumn.right() < mouseX)
-            return "pad"
-        else if (outputColumn.left() < mouseX && mouseX < outputColumn.right())
-            return "column"
-
-        for (let i = 0; i < displayWindows.length; i++)
-        {
-            mouse.getZZeroPosition(v1)
-            displayWindows[i].screen.worldToLocal(v1)
-            if (-.5 < v1.x && v1.x < .5 &&
-                -.5 < v1.y && v1.y < .5)
-                return displayWindows[i]
-        }
-
-        return "left"
-    }
     updateFunctions.push(() =>
     {
         let cursorStyle = "default"
-        let thingMouseIsOn = getThingMouseIsOn()
         if (thingMouseIsOn === "column")
             cursorStyle = "col-resize"
         else if (thingMouseIsOn === "pad")

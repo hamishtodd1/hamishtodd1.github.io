@@ -10,6 +10,8 @@
 		could highlight whatever's in the stack where your carat is
 		Maybe when the carat is at the place where a = b - c, 
 		The little cartoon character buzzes around the preview window, animates the line you're on
+		We ask computers to remember so many things; we have so many variables in our text files; that's why you need caches
+			Make it so they can relax; make it so that the memory that's in cache is all you can see. So that it's just above where your carat is
 
 	Click the things in the column, what happens?
         They appear in the window?
@@ -88,19 +90,25 @@ async function initPad()
 
 	let spaceWidth = 1. / 3.
 
-	let VariableAppearance = MultivectorAppearance
+	let VariableAppearance = () =>
+	{
+		let mv = MultivectorAppearance()
+		variables.push(mv)
+		pad.add(mv)
+		return mv
+	}
 	let copyVariable = copyMultivector
 
-	let variables = [] //all in the pad
+	let carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.,1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
+	carat.positionInString = -1
+	initCaratAndNavigation(carat)
+
+	let variables = []
+	for(let i = 0; i < 63; i++)
+		VariableAppearance()
 	let pictogramWidthInCharacters = 3
 	let outlines = initOutlines(pictogramWidthInCharacters * spaceWidth)
 	let maxVariableNameLength = pictogramWidthInCharacters
-	for(let i = 0; i < 59; ++i)
-	{
-		let variable = VariableAppearance()
-		variables.push(variable)
-		pad.add(variable)
-	}
 	function getVariableWithName(name)
 	{
 		for (let i = 0, il = variables.length; i < il; i++)
@@ -109,20 +117,60 @@ async function initPad()
 
 		return null
 	}
-	//use one unassigned and it'll have random values.
-	function assignNamedVariable(name,vec)
+	function assignVectorToVariable(name, vec)
 	{
 		let variable = getVariableWithName(name)
 		if (variable === null)
 			console.error("unrecognized variable name: ", name)
 		copyVariable(vec, variable.elements)
 	}
-	//could have something different, say [1,0,0] in the code that turns these into things
-	//well of course that's the idea of the drawing in coord thing
+	assignVectorToVariable(colorCharacters[0], xUnit)
+	assignVectorToVariable(colorCharacters[1], yUnit)
+	assignVectorToVariable(colorCharacters[2], zUnit)
+	let numFreeParameterMultivectors = 3
+	{
+		let inputDw = DisplayWindow(true)
+		inputDw.screen.renderOrder = carat.renderOrder + 1
+		carat.material.depthTest = false
+		inputDw.screen.position.x = 0.
+		scene.add(inputDw.screen)
+		let creatingFreeParameter = false
+		updateFunctions.push(() =>
+		{
+			inputDw.screen.bottomY = -camera.topAtZZero
+			inputDw.screen.scale.x = camera.rightAtZZero * 2.
+			inputDw.screen.scale.y = inputDw.screen.scale.x / 2.
+			if (mouse.clicking && !mouse.oldClicking && thingMouseIsOn === inputDw)
+			{
+				creatingFreeParameter = true
+				++numFreeParameterMultivectors
+				addStringAtCarat(variables[numFreeParameterMultivectors-1].name + " ")
 
-	let carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.,1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
-	carat.positionInString = -1
-	initCaratAndNavigation(carat)
+				//TODO they're getting created permanently
+			}
+
+			if(creatingFreeParameter)
+			{
+				let variable = variables[numFreeParameterMultivectors-1]
+
+				mouse.getZZeroPosition(v1)
+				inputDw.screen.worldToLocal(v1)
+				for (let i = 0, il = variable.elements.length; i < il; ++i)
+					variable.elements[i] = 0.
+				variable.elements[1] = v1.x
+				variable.elements[2] = v1.y
+
+				//COULD use numerals to display the string it as a linear combination of the things, but where would be the fun in that?
+
+				if (!mouse.clicking )
+					creatingFreeParameter = false
+			}
+		})
+	}
+
+	VariableAppearance()
+	VariableAppearance()
+	VariableAppearance()
 
 	let maxCopiesOfALetter = 256
 	let characters = initTypeableCharacters(carat, maxCopiesOfALetter)
@@ -168,12 +216,13 @@ async function initPad()
 		//./=+!:{}
 	}
 
+	let interimDisplayWindows = []
 	let drawingPosition = new THREE.Vector3()
 	let positionInStringClosestToCaratPosition = -1
 	let positionInStringClosestToCaratPositionVector = new THREE.Vector3()
 	updateFunctions.push(function ()
 	{
-		if (mouse.clicking && !mouse.oldClicking)
+		if (mouse.clicking && !mouse.oldClicking && thingMouseIsOn === "pad") //yeah, there's an argument for "onclick"
 		{
 			mouse.getZZeroPosition(v1)
 			pad.worldToLocal(v1)
@@ -181,10 +230,7 @@ async function initPad()
 		}
 		positionInStringClosestToCaratPositionVector.set(Infinity, Infinity, 0.)
 
-		assignNamedVariable(colorCharacters[0], xUnit)
-		assignNamedVariable(colorCharacters[1], yUnit)
-		assignNamedVariable(colorCharacters[2], zUnit)
-		let lowestUndeterminedVariable = 3
+		let lowestUndeterminedVariable = numFreeParameterMultivectors
 		for (let i = 0, il = variables.length; i < il; i++)
 			variables[i].count = 0
 
@@ -201,8 +247,8 @@ async function initPad()
 		}
 
 		let lowestUnusedDisplayWindow = 0
-		for (let i = 0; i < displayWindows.length; i++)
-			displayWindows[i].screen.bottomY = camera.topAtZZero
+		for (let i = 0; i < interimDisplayWindows.length; i++)
+			interimDisplayWindows[i].screen.bottomY = camera.topAtZZero
 
 		for (let i = 0, il = characters.array.length; i < il; i++)
 			characters.instancedMeshes[characters.array[i]].count = 0
@@ -287,8 +333,6 @@ async function initPad()
 						token += backgroundString[drawingPositionInString + i]
 					tokenCharactersLeft = token.length
 
-					// debugger
-
 					if (functionDictionary[token] !== undefined)
 					{
 						stack.push(functionDictionary[token])
@@ -309,18 +353,18 @@ async function initPad()
 							maxHeight = pad.position.y - lineBottomYWorld
 						if (-camera.topAtZZero < lineBottomYWorld + maxHeight && lineBottomYWorld < camera.topAtZZero)
 						{
-							if (lowestUnusedDisplayWindow >= displayWindows.length)
-								DisplayWindow()
+							if (lowestUnusedDisplayWindow >= interimDisplayWindows.length)
+								interimDisplayWindows.push(DisplayWindow())
 
-							let dw = displayWindows[lowestUnusedDisplayWindow]
+							let dw = interimDisplayWindows[lowestUnusedDisplayWindow]
 							dw.screen.bottomY = lineBottomYWorld
 
 							dw.screen.scale.y = maxHeight
 							let paddingBetweenDws = .1 * getWorldLineHeight()
 							for (let i = 0; i < lowestUnusedDisplayWindow; i++)
 							{
-								if (dw.screen.scale.y > displayWindows[i].screen.bottomY - lineBottomYWorld)
-									dw.screen.scale.y = displayWindows[i].screen.bottomY - lineBottomYWorld - paddingBetweenDws
+								if (dw.screen.scale.y > interimDisplayWindows[i].screen.bottomY - lineBottomYWorld)
+									dw.screen.scale.y = interimDisplayWindows[i].screen.bottomY - lineBottomYWorld - paddingBetweenDws
 							}
 
 							++lowestUnusedDisplayWindow
@@ -330,14 +374,18 @@ async function initPad()
 					}
 					else if (getVariableWithName(token) !== null)
 					{
-						for (let i = 0; i < maxVariableNameLength && drawingPositionInString + i < backgroundStringLength; ++i)
+						for (let i = token.length; 
+							i < maxVariableNameLength && 
+							drawingPositionInString + i < backgroundStringLength && 
+							carat.positionInString !== drawingPositionInString + i;
+							++i)
 						{
-							if (i >= token.length && backgroundString[drawingPositionInString + i] !== " " && carat.positionInString !== drawingPositionInString + i)
+							if ( backgroundString[drawingPositionInString + i] !== " " )
 							{
 								backgroundString = backgroundString.substring(0, drawingPositionInString + i) + " " + backgroundString.substring(drawingPositionInString + i)
+								backgroundStringLength = backgroundString.length
 								if (carat.positionInString >= drawingPositionInString + i)
 									++carat.positionInString
-								backgroundStringLength = backgroundString.length
 							}
 						}
 
@@ -351,9 +399,65 @@ async function initPad()
 							drawCharacters = false
 						}
 					}
-					// else if (alphabet.indexOf(currentCharacter) !== -1)
-					// {
-					// 	//look ahead til you find a space
+					else //function definition is next. But undefined names are interesting
+					{
+						//reverse polish function definition? Take whatever's in the stack and... something?
+
+
+						//the stack is a bunch of variable names and function names
+						//if it's a terrible idea, who cares? You're making add ons with the editor features for more familiar contexts anyway
+						//it can be an editor feature to highlight whatever's in the function you just made
+						//ordinary lambda calculus you "swallow up whatever's to the right"
+						//fuck "return", fuck }
+
+						//ok so you're putting it at the end, looking back through the stack, finding the leaves on the tree
+						//then you're taking the argument names that are specified and saying "the tree above actually comes from these"
+
+						//you want to make a new variable sometimes of course
+						//click in the display window, new thing appears at carat
+
+						// function sq(x)
+						// {
+						// 	return x*x
+						// }
+
+						// sq(2)
+						// sq(sq(3))
+						// let a = 3;
+						// sq(a)
+
+						// x -> x*x
+
+						// sq x -> x*x
+
+						// x x * lambda
+
+						// m sq m m * - //everything between the first new parameter and the = is local.
+						//what if you want to declare a variable just before defining the function?
+
+						//people don't like keeping track of the stack. But physicists do it
+
+						//could put a box around the whole thing?
+
+						//"always equals" symbol? Like, "for any multivectors and function names?"
+						//you wanna write stuff like "a*(b+c) = a*b+a*c"
+
+						//it's different for us because...
+						//"=" is for omicron reduction and assignment is done with the column
+						//things are also strange because when you have this "name replaced by picture" thing,
+						//	if you've got the same name used for different things, scope/context-dependent...
+						// 	Different scopes/contexts get their own display window
+						//		some work that is usually done by syntax is done by "change input and see results immediately"
+						//braces maybe aren't so bad. It's like they're making a line that evaluates to one thing
+						//postfix is interesting though. It says "take the preceding but do something to its context"
+						//we also have this "default value" thing everywhere for visualization purposes
+						//you also name things automatically, kinda like variables having indices
+						//you get a visualization of what's in the stack with every line so you're more able to do things in a rpn way
+						//hmm maybe polish notation is ok... if you reverse the whole thing?
+
+						//will you ever want to make an assertion that's only true for certain multivectors?
+
+
 					// 	//it is a function. Potentially just a function that returns an mv but a function nonetheless
 
 					// 	tokenCharactersLeft = 1
@@ -373,6 +477,7 @@ async function initPad()
 					// 			break; //who knows what this will do
 					// 		}
 					// 	}
+					}
 				}
 
 				if ( drawCharacters )
@@ -415,12 +520,18 @@ async function initPad()
 			if (v1.y > camera.topAtZZero)
 				pad.position.y -= v1.y - camera.topAtZZero
 		}
+
+		for (let i = 0; i < lowestUnusedDisplayWindow; ++i)
+		{
+			interimDisplayWindows[i].screen.scale.x = getDisplayColumnWidth()
+			interimDisplayWindows[i].screen.position.x = (-camera.rightAtZZero + outputColumn.left()) / 2.
+		}
 	})
 }
 
 function initCaratAndNavigation(carat)
 {
-	carat.renderOrder = Infinity
+	carat.renderOrder = 9999999
 	carat.material.depthTest = false
 	carat.geometry.translate(.5, 0., 0.)
 	pad.add(carat)
@@ -472,10 +583,10 @@ function initTypeableCharacters(carat,maxCopiesOfALetter)
 		array: "",
 		instancedMeshes:{}
 	}
-	function addCharacter(character)
+	addStringAtCarat = function(str)
 	{
-		backgroundString = backgroundString.substring(0, carat.positionInString) + character + backgroundString.substring(carat.positionInString, backgroundString.length)
-		carat.moveAlongString(1)
+		backgroundString = backgroundString.substring(0, carat.positionInString) + str + backgroundString.substring(carat.positionInString, backgroundString.length)
+		carat.moveAlongString(str.length)
 	}
 	characters.add = function(character, pressedKeyboardCharacter)
 	{
@@ -491,7 +602,7 @@ function initTypeableCharacters(carat,maxCopiesOfALetter)
 		
 		characters.array += character
 
-		bindButton(pressedKeyboardCharacter, () => addCharacter(character))
+		bindButton(pressedKeyboardCharacter, () => addStringAtCarat(character))
 	}
 	let initialCharacters = "abcdefghijklmnopqrstuvwxyz "
 	for (let i = 0; i < initialCharacters.length; i++)
@@ -510,8 +621,8 @@ function initTypeableCharacters(carat,maxCopiesOfALetter)
 			carat.moveAlongString(-1)
 		}
 	})
-	bindButton("Tab", () => { for (let i = 0; i < 4; i++) addCharacter(" ") })
-	bindButton("Enter", () => addCharacter("\n"))
+	bindButton("Tab", () => { for (let i = 0; i < 4; i++) addStringAtCarat(" ") })
+	bindButton("Enter", () => addStringAtCarat("\n"))
 
 	return characters
 }

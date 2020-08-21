@@ -166,4 +166,6 @@ function init()
 	initOutputColumnAndDisplayWindows()
 
 	initPad()
+
+	
 }

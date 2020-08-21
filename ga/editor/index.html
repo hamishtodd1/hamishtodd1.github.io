@@ -35,6 +35,23 @@
 					
 					mouse.updateFromAsyncAndCheckClicks()
 
+					{
+						thingMouseIsOn = "left"
+						let mouseX = mouse.getZZeroPosition(v1).x
+						if (outputColumn.right() < mouseX)
+							thingMouseIsOn = "pad"
+						else if (outputColumn.left() < mouseX && mouseX < outputColumn.right())
+							thingMouseIsOn = "column"
+						for (let i = 0; i < displayWindows.length; i++)
+						{
+							mouse.getZZeroPosition(v1)
+							displayWindows[i].screen.worldToLocal(v1)
+							if (-.5 < v1.x && v1.x < .5 &&
+								-.5 < v1.y && v1.y < .5)
+								thingMouseIsOn = displayWindows[i]
+						}
+					}
+
 					for(var i = 0; i < updateFunctions.length; i++)
 						updateFunctions[i]()
 
