@@ -180,11 +180,18 @@ async function initPad()
 		functionDictionary["+"] = geometricSum
 
 		let asteriskOperatorCharacter = String.fromCharCode("8727")
-		characters.add(asteriskOperatorCharacter, "*")
+		characters.add("*", asteriskOperatorCharacter)
 		functionDictionary[asteriskOperatorCharacter] = geometricProduct
 
+		// var tripleEqualsCharacter = String.fromCharCode("8801") //you CAN write "function", but lots of kids don't know "function". In python it's "def"
+		//could have them be separate
+
+		characters.add("=") 
+		characters.add("(")
+		characters.add(")")
+
 		var lambdaCharacter = String.fromCharCode("955") //you CAN write "function", but lots of kids don't know "function". In python it's "def"
-		characters.add(lambdaCharacter, "#")
+		characters.add("#", lambdaCharacter)
 		// functionDictionary[lambdaCharacter] = defineFunction
 		/*
 			Name
@@ -199,17 +206,17 @@ async function initPad()
 		*/
 
 		let nablaCharacter = String.fromCharCode("8711")
-		characters.add(nablaCharacter, "@")
+		characters.add("@",nablaCharacter)
 		let integralCharacter = String.fromCharCode("8747")
-		characters.add(integralCharacter, "~")
+		characters.add("~",integralCharacter)
 		let deltaCharacter = String.fromCharCode("948")
-		characters.add(deltaCharacter, "?")
+		characters.add("?",deltaCharacter)
 
 		//more marginal
 		let wedgeCharacter = String.fromCharCode("8743")
-		characters.add(wedgeCharacter, "^")
+		characters.add("^",wedgeCharacter)
 		let descendingWedgeCharacter = String.fromCharCode("8744")
-		characters.add(descendingWedgeCharacter, "&") // for exponentiate: **? For log, //?
+		characters.add("&", descendingWedgeCharacter) // for exponentiate: **? For log, //?
 
 		backgroundString += lambdaCharacter+nablaCharacter+integralCharacter+deltaCharacter+wedgeCharacter+descendingWedgeCharacter
 
@@ -220,6 +227,7 @@ async function initPad()
 	let drawingPosition = new THREE.Vector3()
 	let positionInStringClosestToCaratPosition = -1
 	let positionInStringClosestToCaratPositionVector = new THREE.Vector3()
+	let uncaughtCharacters = ""
 	updateFunctions.push(function ()
 	{
 		if (mouse.clicking && !mouse.oldClicking && thingMouseIsOn === "pad") //yeah, there's an argument for "onclick"
@@ -403,7 +411,6 @@ async function initPad()
 					{
 						//reverse polish function definition? Take whatever's in the stack and... something?
 
-
 						//the stack is a bunch of variable names and function names
 						//if it's a terrible idea, who cares? You're making add ons with the editor features for more familiar contexts anyway
 						//it can be an editor feature to highlight whatever's in the function you just made
@@ -413,10 +420,7 @@ async function initPad()
 						//ok so you're putting it at the end, looking back through the stack, finding the leaves on the tree
 						//then you're taking the argument names that are specified and saying "the tree above actually comes from these"
 
-						//you want to make a new variable sometimes of course
-						//click in the display window, new thing appears at carat
-
-						// function sq(x)
+						// def sq(x)
 						// {
 						// 	return x*x
 						// }
@@ -451,9 +455,11 @@ async function initPad()
 						//braces maybe aren't so bad. It's like they're making a line that evaluates to one thing
 						//postfix is interesting though. It says "take the preceding but do something to its context"
 						//we also have this "default value" thing everywhere for visualization purposes
+						//we have this implicit = for what's in the output column
 						//you also name things automatically, kinda like variables having indices
 						//you get a visualization of what's in the stack with every line so you're more able to do things in a rpn way
 						//hmm maybe polish notation is ok... if you reverse the whole thing?
+						//"show this vector, show that vector, do a thing"
 
 						//will you ever want to make an assertion that's only true for certain multivectors?
 
@@ -482,8 +488,14 @@ async function initPad()
 
 				if ( drawCharacters )
 				{
-					if (characters.array.indexOf(currentCharacter) === -1)
-						console.warn("Uncaught character: ", currentCharacter)
+					if (characters.array.indexOf(currentCharacter) === -1 )
+					{
+						if (uncaughtCharacters.indexOf(currentCharacter) === -1)
+						{
+							console.warn("Uncaught character: ", currentCharacter)
+							uncaughtCharacters += currentCharacter
+						}
+					}
 					else
 					{
 						let ilm = characters.instancedMeshes[currentCharacter]
@@ -588,21 +600,33 @@ function initTypeableCharacters(carat,maxCopiesOfALetter)
 		backgroundString = backgroundString.substring(0, carat.positionInString) + str + backgroundString.substring(carat.positionInString, backgroundString.length)
 		carat.moveAlongString(str.length)
 	}
-	characters.add = function(character, pressedKeyboardCharacter)
+	characters.add = function(character, displayedCharacter)
 	{
-		let material = text(character, true)
+		if (displayedCharacter === undefined)
+			displayedCharacter = character
 
-		characters.instancedMeshes[character] = new THREE.InstancedMesh(unchangingUnitSquareGeometry, material, maxCopiesOfALetter);
-		characters.instancedMeshes[character].count = 0
-		pad.add(characters.instancedMeshes[character])
-		characters.instancedMeshes[character].aspect = material.getAspect()
+		let material = text(displayedCharacter, true)
+		if(colors[character] !== undefined)
+		{
+			material.color.r = colors[character].r * .7 + .3
+			material.color.g = colors[character].g * .7 + .3
+			material.color.b = colors[character].b * .7 + .3
+		}
 
-		if (pressedKeyboardCharacter === undefined)
-			pressedKeyboardCharacter = character
-		
+		let instancedMesh = new THREE.InstancedMesh(unchangingUnitSquareGeometry, material, maxCopiesOfALetter);
+		instancedMesh.count = 0
+		pad.add(instancedMesh)
+		instancedMesh.aspect = material.getAspect()
+
+		characters.instancedMeshes[character] = instancedMesh
 		characters.array += character
+		if(displayedCharacter !== character)
+		{
+			characters.instancedMeshes[displayedCharacter] = instancedMesh
+			characters.array += displayedCharacter
+		}
 
-		bindButton(pressedKeyboardCharacter, () => addStringAtCarat(character))
+		bindButton(character, () => addStringAtCarat(character))
 	}
 	let initialCharacters = "abcdefghijklmnopqrstuvwxyz "
 	for (let i = 0; i < initialCharacters.length; i++)

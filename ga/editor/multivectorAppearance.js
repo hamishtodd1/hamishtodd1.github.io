@@ -16,6 +16,7 @@ function initMultivectorAppearances()
     // let zeroMaterial = text("0", true) //something with a slashed 0 would be nice
     // let a = new THREE.Mesh(new THREE.PlaneBufferGeometry(zeroMaterial.getAspect(), 1.), zeroMaterial)
     // scene.add(a)
+    // scene.add(BivectorGroup("obw"))
 
     let idNum = 0
     
@@ -153,4 +154,43 @@ function VectorGeometry(name)
     vectorGeometry.computeVertexNormals()
 
     return vectorGeometry
+}
+
+function BivectorGroup(name)
+{
+    let bivGeometry = new THREE.PlaneGeometry(1., 1., 1, 2)
+    bivGeometry.vertices.forEach((v) => {
+        v.x += .5
+        v.y += .5
+
+        v.x -= v.y
+    })
+    bivGeometry.faces.forEach( (f,i)=>{
+        if (name.length === 1)
+            f.color.copy(colors[name[0]])
+        else if (name.length === 2)
+            f.color.copy(colors[name[Math.floor(i / 2)]])
+        else if (name.length === 3)
+        {
+            if (i === 0)
+                f.color.copy(colors[name[0]])
+            else if (i === bivGeometry.faces.length - 1)
+                f.color.copy(colors[name[2]])
+            else
+                f.color.copy(colors[name[1]])
+        }
+        else
+            console.error("too many letters for a bivector")
+    })
+
+    let bivMaterialClockwise = new THREE.MeshBasicMaterial({ vertexColors: THREE.FaceColors, transparent: true, opacity: 1., side: THREE.FrontSide })
+    let bivMaterialCounter = new THREE.MeshBasicMaterial({ vertexColors: THREE.FaceColors, transparent: true, opacity: 1., side: THREE.BackSide })
+    let bivAppearance = new THREE.Group()
+    scene.add(bivAppearance)
+    bivAppearance.add(
+        new THREE.Mesh(bivGeometry, bivMaterialClockwise),
+        new THREE.Mesh(bivGeometry, bivMaterialCounter),
+    )
+
+    return bivAppearance
 }

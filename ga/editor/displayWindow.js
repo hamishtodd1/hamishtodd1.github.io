@@ -14,6 +14,7 @@
             Grabbing a multivector and editing it
                 Possibly that can be done just in the boxes? Eh, you want your carat being put there to result from click
         displaying animations
+        displaying footage with superimposed mv
         displaying everything in same coord system without rescaling for the little windows
         Showing the current execution state
         Rotating

@@ -8,6 +8,7 @@
 			Visualized
 			Animated?
 			altering/specifying with mouse
+			Navigating code does what is interesting in the displaywindow
 		Basic Omicron reduction (omicron because 0 is useful)
 			Describe properties of a function then make function
 			differentiate/integrate polynomials
@@ -166,6 +167,4 @@ function init()
 	initOutputColumnAndDisplayWindows()
 
 	initPad()
-
-	
 }
