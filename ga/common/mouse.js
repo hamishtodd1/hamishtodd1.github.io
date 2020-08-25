@@ -18,6 +18,7 @@ function initMouse()
 {
 	let asynchronous = {
 		clicking: false,
+		rightClicking:false,
 
 		raycaster: new THREE.Raycaster(), //top right is 1,1, bottom left is -1,-1
 	};
@@ -57,26 +58,11 @@ function initMouse()
 	{
 		this.oldClicking = this.clicking;
 		this.clicking = asynchronous.clicking
-
-		if(this.oldClicking && !this.clicking && lastClickedObject !== null && lastClickedObject.onNotClicking !== undefined )
-			lastClickedObject.onNotClicking()
+		this.oldRightClicking = this.rightClicking
+		this.rightClicking = asynchronous.rightClicking
 
 		mouse.oldRaycaster.ray.copy(mouse.raycaster.ray);
 		mouse.raycaster.ray.copy( asynchronous.raycaster.ray );
-		
-		if( this.clicking && !this.oldClicking )
-		{
-			let intersections = mouse.raycaster.intersectObjects( clickables );
-
-			if( intersections.length !== 0 )
-			{
-				console.assert(checkIfObjectIsInScene(intersections[0].object))
-				intersections[0].object.onClick(intersections[0]);
-				lastClickedObject = intersections[0].object
-			}
-			else
-				lastClickedObject = null
-		}
 	}
 
 	{
@@ -96,17 +82,19 @@ function initMouse()
 			}
 		}, false );
 
-		document.addEventListener('contextmenu', function(event) { event.preventDefault() }, false);
+		document.addEventListener('mousedown', function (event) 
+		{
+			if (event.which === 1) asynchronous.clicking = true;
+			if (event.which === 3) asynchronous.rightClicking = true;
+			asynchronous.raycaster.updateFromClientCoordinates(event.clientX, event.clientY)
+		}, false);
+		document.addEventListener('mouseup', function (event) 
+		{
+			if (event.which === 1) asynchronous.clicking = false;
+			if (event.which === 3) asynchronous.rightClicking = false;
+		}, false);
 
-		document.addEventListener( 'mousedown', function(event) 
-		{
-			asynchronous.clicking = true;
-			asynchronous.raycaster.updateFromClientCoordinates(event.clientX,event.clientY)
-		}, false );
-		document.addEventListener( 'mouseup', function(event) 
-		{
-			asynchronous.clicking = false;
-		}, false );
+		document.addEventListener('contextmenu', (event) => event.preventDefault(), false);
 	}
 
 	//todo buggy with multiple touches

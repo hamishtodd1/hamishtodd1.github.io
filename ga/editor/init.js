@@ -1,5 +1,9 @@
 /* 
-	TODO for demo when you move in to Cam, February
+	Next
+		Superimpose in boxes
+		more multivectors
+
+	TODO for demo when you move in to Cam, February.
 		Functions
 			Visualized
 			function copied into code from drawing in view
@@ -15,9 +19,14 @@
 			a proof that two things are equal
 				making wedge product and "proving it is antisymmetric" by writing ab - ba
 		Interested parties
-			Alan, Meurig, Martin, futureOfCoding, steve der kenick, Dan Holden
-			EE slack, bivector discord
-			Media Molecule, Chris Deleon, Daniel Piker
+			Language people: Alan, Meurig, Martin, futureOfCoding, Yoshiki, Cynthia Solomon, Andy Matuschak
+			GAists: bivector discord, Cam folks, Charles Gunn, Steven Der kenick, Pierre Philipp Denchant, Jonathan Cameron, David Hestenes, , Paul Simeon
+			Graphics/gamedev: Fabrice, inigo quilez, Haxiomic, Dan Holden, Daniel Piker, Ian and Norgg, Media Molecule, Chris Deleon
+			Math/physicist: Ivan and Nina, Florian, Eric stansifer, Matt Hare
+			Misc: London Rationalish, Ben Eater, Coding Train guy, Grant sanderson
+		What to demonstrate
+			Lunar lander/simple harmonic oscillator?
+			velocity space or differential space
 
 	TODO for programming / bootstrapping
 		Fuller visualization of multivectors
@@ -133,6 +142,13 @@
 		Is there any way of turning the subsitution rules into things helpful for the animations or where to put stuff in the pictures???
 			Maybe this is how you say that difference vectors should be put not at the origin?
 
+	Maybe, er, we can easily take the fourier transform of a mesh?
+		Maybe taking the fourier transform of an image will let you extract what you want: positions of little red things, orientation+position of lines
+	Would parametric/continuous approach be better for raytracing? If so someone would have thought of it
+	Stack machine: default behaviour can be that whatever was on the above line is the first argument
+		Might get rid of this "to delete or copy" question in abacus?
+	Names are good for indexing the things you want to talk in a smaller space; A hash table
+
 	reduction / partial evaluation syntax
 		how to detect opportunities? Regex?
 		Don't necessarily need names. Fuck names, of course
@@ -159,6 +175,8 @@
 			//for any approximation of integral of f with given dt, we can scale f such that you get that dt level precision
 			//multiply final result by dt... but that is just a scalar multiple, only relevant if you put symbols on the y axis so to speak
 		}
+
+	Ideally wanna be able to program your own visualization, then use that to visualize your program
 */
 
 function init()
@@ -167,4 +185,6 @@ function init()
 	initOutputColumnAndDisplayWindows()
 
 	initPad()
+
+	// initClickyVideo()
 }

@@ -5,22 +5,29 @@
         Fourier or taylor? Well sometimes you join up your loop. Fourier for that
         It's a particular
         If you've got projective geometry, i.e. lines = circles with center at infinity, can't you have a square wave represented exactly?
+    Carat on newline, nothing in dw, clicking creates new parameter
+    Carat on line with up to 3 mvs, it tries every operation on them. Can't get what you want? Tough, make a new line with a free parameter
 
-    Uses:
-        drawing
-            functions from time to multivectors
-            individual multivectors
-            draw on top of what's already in there, eg a tangent vector on a curve
-            Grabbing a multivector and editing it
-                Possibly that can be done just in the boxes? Eh, you want your carat being put there to result from click
-        displaying animations
-        displaying footage with superimposed mv
-        displaying everything in same coord system without rescaling for the little windows
-        Showing the current execution state
-        Rotating
+    The boxes can display
+        mvs
+        superimposed mvs
+        functions
+        footage (which is a function of t to R3)
+        can have a "scale to fit vs don't" switch
+    dws:
         choosing the next thing to happen
             it'd be crowded to have every single variable. But maybe they only appear in place if you're almost going to snap to them?
-        Displaying the mouse ray in a separate view    
+            drawing
+                functions from time to multivectors
+                individual multivectors
+                draw on top of what's already in there, eg a tangent vector on a curve
+                Grabbing a free parameter and editing it
+        Rotating
+        Displaying the mouse ray in a separate view as you move it... need multiple points of view then?
+            Maybe only set the rotations for the other things once you've let go?
+        displaying animations of the operations, not just moving around
+        When a free variable is in there, display all the "later" mvs that come from that variable
+        Display all mvs that are visible in the code currently scrolled to. Want more? Scroll up, copy it, paste it down here
 
     You can type the things, yes, but the line of symbols (/pictures) turns into a picture of the half way point for the operation
         eg
@@ -63,22 +70,12 @@
                 it could be written in terms of old ones
                 try to snap to the nearest one that's a single operation performed on existing ones
                     If it's a vector and it's in a plane perpendicular to an existing vector and the same length, that's a single bivector multiplication
-        Zooming automatically to get the furthest-out vertex
         copy a png or gif or whatever, paste into window, you have a textured quad, or three scalar fields or however you do it
         Copy a picture of a line graph with marked axes, it interprets that too?
         Double click something in window, to get to the place where it is made
 
-    Good to think about velocity space or differential space.
-        lunar lander, simple harmonic oscillator
-        Like that 3b1b thing with the circular bunch of velocity vectors. What happens when you control velocity with your mouse and watch position change?
-        Or Hestenes' thing about velocity space
-        "Look at the system in velocity space", "look at the system in integration/energy space". All fully determined.
-
     What determines which things go in the display window?
         Much better than built in rotation is rotating the basis vectors. x or y rotate around y, y rotate upwards or downwards
-        Wanna be able to program your own visualization, then use that to visualize your program. Or we enumerate all?
-        Whatever lines are in the editor. Want more? Scroll up, copy it, paste it down here
-        They are your sliders
         Unless you have some highlighted in which case it's those?
         "What is hightlighted" is a useful bit of state
         Where/how many to have?
@@ -113,13 +110,6 @@
             Example: cylinder
                 paratmetric: f(t) = cos(t),sin(t)
                 intersection:f(y) = abs(y)>1 ? infinity : sqrt(1-y*y) - rasterization
-
-        Maybe, er, we can easily take the fourier transform of a mesh?
-            Maybe taking the fourier transform of an image will let you extract what you want: positions of little red things, orientation+position of lines
-        Would parametric/continuous approach be better for raytracing? If so someone would have thought of it
-        Stack machine: default behaviour can be that whatever was on the above line is the first argument
-            Might get rid of this "to delete or copy" question in abacus?
-        Names are good for indexing the things you want to talk in a smaller space; A hash table
 
         R2->R   1 surface (with volumetric stuff beneat, sounds like fun!)
         R2->R2  set of 2 surfaces - 2 color image if looked at from above, or vector field(points moving around/arrows)? Tokieda weirdness?
@@ -168,7 +158,7 @@ function initOutputColumnAndDisplayWindows()
 
     let ordinaryClearColor = renderer.getClearColor().clone()
     let ordinaryRenderTarget = renderer.getRenderTarget()
-    DisplayWindow = function(noRotation)
+    DisplayWindow = function()
     {
         let localScene = new THREE.Scene()
         {
@@ -214,6 +204,7 @@ function initOutputColumnAndDisplayWindows()
         }
         
         let grabbed = false
+        let rotating = false
         updateFunctions.push(() =>
         {
             screen.position.y = screen.scale.y / 2. + screen.bottomY
@@ -222,10 +213,8 @@ function initOutputColumnAndDisplayWindows()
 
             if (!mouse.clicking)
                 grabbed = false
-            if (mouse.clicking && !mouse.oldClicking && thingMouseIsOn === displayWindow )
+            else if (!mouse.oldClicking && thingMouseIsOn === displayWindow )
                 grabbed = true
-
-            // log(mouse.justMoved())
             if (grabbed)
             {
                 if (trailMode)
@@ -242,30 +231,35 @@ function initOutputColumnAndDisplayWindows()
                     if (lastTrailVertexToBeAssigned >= mouseTrail.geometry.vertices.length)
                         lastTrailVertexToBeAssigned = 0
                 }
-                else if(!noRotation)
-                {
-                    v1.copy(mouse.raycaster.ray.direction)
-                    v1.y = 0.
-                    v2.copy(mouse.oldRaycaster.ray.direction)
-                    v2.y = 0.
-                    let horizontalDelta = v1.angleTo(v2) * (v1.x < v2.x ? 1. : -1.)
+            }
 
-                    v1.copy(mouse.raycaster.ray.direction)
-                    v1.x = 0.
-                    v2.copy(mouse.oldRaycaster.ray.direction)
-                    v2.x = 0.
-                    let verticalDelta = v1.angleTo(v2) * (v1.y > v2.y ? 1. : -1.)
+            if (!mouse.rightClicking || grabbed)
+                rotating = false
+            else if ( !mouse.oldRightClicking && thingMouseIsOn === displayWindow)
+                rotating = true
+            if (rotating)
+            {
+                v1.copy(mouse.raycaster.ray.direction)
+                v1.y = 0.
+                v2.copy(mouse.oldRaycaster.ray.direction)
+                v2.y = 0.
+                let horizontalDelta = v1.angleTo(v2) * (v1.x < v2.x ? 1. : -1.)
 
-                    displayCamera.rotation.y += horizontalDelta * 60.
-                    displayCamera.rotation.x += verticalDelta * 60.
-                    displayCamera.rotation.x = clamp(displayCamera.rotation.x, -TAU / 4., TAU / 4.)
+                v1.copy(mouse.raycaster.ray.direction)
+                v1.x = 0.
+                v2.copy(mouse.oldRaycaster.ray.direction)
+                v2.x = 0.
+                let verticalDelta = v1.angleTo(v2) * (v1.y > v2.y ? 1. : -1.)
 
-                    displayCamera.quaternion.setFromEuler(displayCamera.rotation)
+                displayCamera.rotation.y += horizontalDelta * 60.
+                displayCamera.rotation.x += verticalDelta * 60.
+                displayCamera.rotation.x = clamp(displayCamera.rotation.x, -TAU / 4., TAU / 4.)
 
-                    let currentDistFromCamera = displayCamera.position.length()
-                    v1.set(0., 0., -currentDistFromCamera).applyQuaternion(displayCamera.quaternion).add(displayCamera.position)
-                    displayCamera.position.sub(v1)
-                }
+                displayCamera.quaternion.setFromEuler(displayCamera.rotation)
+
+                let currentDistFromCamera = displayCamera.position.length()
+                v1.set(0., 0., -currentDistFromCamera).applyQuaternion(displayCamera.quaternion).add(displayCamera.position)
+                displayCamera.position.sub(v1)
             }
 
             renderer.setRenderTarget(localFramebuffer)

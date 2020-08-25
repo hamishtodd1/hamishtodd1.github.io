@@ -31,8 +31,6 @@
 		dagger, conjugate, hat, reverse, sigh
 		11*11*11 = 8 outputs (pictures) not in decimal, why should inputs be?
 		{} for making a new mv?
-		if you have arrays and functions and recursion you have summation:
-			function sumArrayElementsBelowIndex(arr, index) { return index < 0 ? 0 : arr[index] + sumArrayElementsBelowIndex(arr, index - 1) }
 		arrays might be nice (you don't have integers though?) but you're still unsure of them and can show in abacus
             Is an array always ok to think of as a function mapping from natural numbers to things?
             Maybe a continuous mapping that you just happen to have stored a bunch of results of
@@ -129,7 +127,7 @@ async function initPad()
 	assignVectorToVariable(colorCharacters[2], zUnit)
 	let numFreeParameterMultivectors = 3
 	{
-		let inputDw = DisplayWindow(true)
+		let inputDw = DisplayWindow()
 		inputDw.screen.renderOrder = carat.renderOrder + 1
 		carat.material.depthTest = false
 		inputDw.screen.position.x = 0.
