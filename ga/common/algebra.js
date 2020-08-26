@@ -22,6 +22,13 @@ function getVector(mv,target)
 	target.z = mv[3]
 	return target
 }
+function getBivec(mv, target)
+{
+	target.x = mv[4]
+	target.y = mv[5]
+	target.z = mv[6]
+	return target
+}
 
 function wedge(a,b) //aka antisymmetric
 {

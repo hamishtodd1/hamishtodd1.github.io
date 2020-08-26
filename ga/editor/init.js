@@ -182,10 +182,12 @@
 
 function init()
 {
-	initMultivectorAppearances()
+	let characterMeshHeight = .4
+
+	initMultivectorAppearances(characterMeshHeight)
 	initOutputColumnAndDisplayWindows()
 
-	initPad()
+	initPad(characterMeshHeight)
 
 	// initClickyVideo()
 }

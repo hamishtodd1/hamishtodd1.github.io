@@ -13,19 +13,20 @@
         Checkerboard?
 */
 
-function initMultivectorAppearances()
+function initMultivectorAppearances(characterMeshHeight)
 {
+    let vecMaterial = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors })
+    let scaMaterial = new THREE.MeshBasicMaterial({ vertexColors: THREE.FaceColors })
+    let pointMaterial = new THREE.MeshLambertMaterial({ vertexColors: THREE.FaceColors })
+    let lineMaterial = new THREE.LineBasicMaterial({ vertexColors: true })
+    let zeroMaterial = text("0", true) //something with a slashed 0 would be nice
+    let zeroGeometry = new THREE.PlaneBufferGeometry(zeroMaterial.getAspect(), 1.)
+
     //not yet integrated
     {
         let name = "wbo"
 
-        // let zeroMaterial = text("0", true) //something with a slashed 0 would be nice
-        // let a = new THREE.Mesh(new THREE.PlaneBufferGeometry(zeroMaterial.getAspect(), 1.), zeroMaterial)
-        // scene.add(a)
-
-        // scene.add(BivectorGroup("obw"))
-
-        // let p = new THREE.Mesh(new THREE.SphereGeometry(1., 18), new THREE.MeshLambertMaterial({ vertexColors: THREE.FaceColors}))
+        // let p = new THREE.Mesh(new THREE.SphereGeometry(1., 18), pointMaterial)
         // p.geometry.rotateX(TAU/4.)
         // let il = p.geometry.faces.length
         // p.geometry.faces.forEach((f, i) =>
@@ -53,7 +54,7 @@ function initMultivectorAppearances()
         // p.scale.setScalar(.16)
         
         //thickness might be good, tell you where it is
-        // let a = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ vertexColors: true }) )
+        // let a = new THREE.LineSegments(new THREE.BufferGeometry(), lineMaterial )
         // let coords = [0.,0.,0.,1./3.,0.,0.,1./3.,0.,0.,2./3.,0.,0.,2./3.,0.,0.,1.,0.,0.]
         // a.geometry.setAttribute('position', new THREE.Float32BufferAttribute(coords, 3));
         // let lineColors = []
@@ -80,14 +81,11 @@ function initMultivectorAppearances()
         //     let index = Math.floor(i / 128) % 3
         //     f.color.copy(colors[name[index]])
         // })
-        // let m = new THREE.Mesh(scalarGeometry, new THREE.MeshBasicMaterial({vertexColors:THREE.FaceColors}))
+        // let m = new THREE.Mesh(scalarGeometry, scaMaterial)
         // scene.add(m)
     }
 
     let idNum = 0
-    
-    let vecMaterial = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors })
-    
     function generateName()
     {
         ++idNum
@@ -120,52 +118,114 @@ function initMultivectorAppearances()
         return name
     }
 
+    let maxInstances = 256
     MultivectorAppearance = () =>
     {
+        let components = [false, false, false, false]
         let mv = new THREE.Group()
         mv.name = generateName()
         mv.elements = MathematicalMultivector()
 
+        let zero = new THREE.InstancedMesh(zeroGeometry, zeroMaterial, maxInstances)
+        mv.add(zero)
+
         //TODO should be in material. Can have one geometry for all when you've sorted a shader
-        let vec = new THREE.InstancedMesh(VecGeometry(mv.name), vecMaterial, 256)
+        let vec = new THREE.InstancedMesh(VecGeometry(mv.name), vecMaterial, maxInstances)
         vec.name = mv.name
         vec.elements = mv.elements
         copyMultivector(zeroMultivector, vec.elements)
         mv.add(vec)
 
-        mv.resetCount = () => {vec.count = 0}
-
-        let uniformMatrixWithYOnVector = new THREE.Matrix4()
-        mv.drawInPlace = function(x,y)
-        {
-            let uniformScale = .5 / getVector(vec.elements,v1).length()
-            v1.setScalar(uniformScale)
-            q1.copy(displayCamera.quaternion)
-            q1.inverse()
-            m1.compose(zeroVector,q1,v1)
-
-            if (vec.count === 0)
-            {
-                getVector(vec.elements, v1)
+        mv.resetCount = () => {
+            mv.children.forEach((child)=>{child.count = 0})
+            
+            getVector(vec.elements, v1)
+            if(v1.equals(zeroVector))
+                components[1] = false
+            else {
+                components[1] = true
                 randomPerpVector(v1, v2)
                 v2.setLength(v1.length())
                 v3.crossVectors(v1, v2).normalize().negate().setLength(v1.length())
                 uniformMatrixWithYOnVector.makeBasis(v2, v1, v3);
+                vec.instanceMatrix.needsUpdate = true
                 //properly scaling the things will have to wait until you have proper colors
             }
+        }
 
-            m2.multiplyMatrices(m1, uniformMatrixWithYOnVector)
-            m2.setPosition(x, y, 0.)
-            vec.setMatrixAt(vec.count, m2)
-            vec.instanceMatrix.needsUpdate = true
+        let uniformMatrixWithYOnVector = new THREE.Matrix4()
+        mv.drawInPlace = function(x,y)
+        {
+            mv.children.forEach((child) => { if (child.count >= maxInstances) console.error("too many") })
 
-            ++vec.count
+            if (!components[0] && !components[1] && !components[2] && !components[3])
+            {
+                m1.identity()
+                m1.scale(v1.setScalar(characterMeshHeight))
+                m1.setPosition(x,y,0.)
+                zero.setMatrixAt(zero.count, m1)
+                ++zero.count
+                zero.instanceMatrix.needsUpdate = true
+            }
+
+            if (components[1])
+            {
+                let uniformScale = .5 / getVector(vec.elements, v1).length()
+                v1.setScalar(uniformScale)
+                q1.copy(displayCamera.quaternion)
+                q1.inverse()
+                m1.compose(zeroVector, q1, v1)
+
+                m2.multiplyMatrices(m1, uniformMatrixWithYOnVector)
+                m2.setPosition(x, y, 0.)
+                vec.setMatrixAt(vec.count, m2)
+                ++vec.count
+            }
         }
      
         return mv
     }
 
-    // let questionMarkMaterial = text("?",true) //can be colored with vertex attributes
+    function BivectorGroup(name)
+    {
+        let bivGeometry = new THREE.PlaneGeometry(1., 1., 1, 2)
+        bivGeometry.vertices.forEach((v) =>
+        {
+            v.x += .5
+            v.y += .5
+
+            v.x -= v.y
+        })
+        bivGeometry.faces.forEach((f, i) =>
+        {
+            if (name.length === 1)
+                f.color.copy(colors[name[0]])
+            else if (name.length === 2)
+                f.color.copy(colors[name[Math.floor(i / 2)]])
+            else if (name.length === 3)
+            {
+                if (i === 0)
+                    f.color.copy(colors[name[0]])
+                else if (i === bivGeometry.faces.length - 1)
+                    f.color.copy(colors[name[2]])
+                else
+                    f.color.copy(colors[name[1]])
+            }
+            else
+                console.error("too many letters for a bivector")
+        })
+
+        let bivMaterialClockwise = new THREE.MeshBasicMaterial({ vertexColors: THREE.FaceColors, transparent: true, opacity: 1., side: THREE.FrontSide })
+        let bivMaterialCounter = new THREE.MeshBasicMaterial({ vertexColors: THREE.FaceColors, transparent: true, opacity: 1., side: THREE.BackSide })
+        let bivAppearance = new THREE.Group()
+        scene.add(bivAppearance)
+        bivAppearance.add(
+            new THREE.Mesh(bivGeometry, bivMaterialClockwise),
+            new THREE.Mesh(bivGeometry, bivMaterialCounter),
+        )
+
+        return bivAppearance
+    }
 }
 
 //better would be generating the vertices first then using them
@@ -225,43 +285,4 @@ function VecGeometry(name)
     vecGeometry.computeVertexNormals()
 
     return vecGeometry
-}
-
-function BivectorGroup(name)
-{
-    let bivGeometry = new THREE.PlaneGeometry(1., 1., 1, 2)
-    bivGeometry.vertices.forEach((v) => {
-        v.x += .5
-        v.y += .5
-
-        v.x -= v.y
-    })
-    bivGeometry.faces.forEach( (f,i)=>{
-        if (name.length === 1)
-            f.color.copy(colors[name[0]])
-        else if (name.length === 2)
-            f.color.copy(colors[name[Math.floor(i / 2)]])
-        else if (name.length === 3)
-        {
-            if (i === 0)
-                f.color.copy(colors[name[0]])
-            else if (i === bivGeometry.faces.length - 1)
-                f.color.copy(colors[name[2]])
-            else
-                f.color.copy(colors[name[1]])
-        }
-        else
-            console.error("too many letters for a bivector")
-    })
-
-    let bivMaterialClockwise = new THREE.MeshBasicMaterial({ vertexColors: THREE.FaceColors, transparent: true, opacity: 1., side: THREE.FrontSide })
-    let bivMaterialCounter = new THREE.MeshBasicMaterial({ vertexColors: THREE.FaceColors, transparent: true, opacity: 1., side: THREE.BackSide })
-    let bivAppearance = new THREE.Group()
-    scene.add(bivAppearance)
-    bivAppearance.add(
-        new THREE.Mesh(bivGeometry, bivMaterialClockwise),
-        new THREE.Mesh(bivGeometry, bivMaterialCounter),
-    )
-
-    return bivAppearance
 }

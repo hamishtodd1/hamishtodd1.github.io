@@ -82,7 +82,7 @@
 	x,y,z
 */
 
-async function initPad()
+async function initPad(characterMeshHeight)
 {
 	let stack = []
 
@@ -125,6 +125,7 @@ async function initPad()
 	assignVectorToVariable(colorCharacters[0], xUnit)
 	assignVectorToVariable(colorCharacters[1], yUnit)
 	assignVectorToVariable(colorCharacters[2], zUnit)
+	assignVectorToVariable("y", new THREE.Vector3(-1.,0.,0.))
 	let numFreeParameterMultivectors = 3
 	{
 		let inputDw = DisplayWindow()
@@ -497,9 +498,9 @@ async function initPad()
 							console.error("too many copies of a letter!")
 
 						m1.identity()
-						m1.elements[0] = .4 * ilm.aspect //Width. Currently tweaked to make overlap of m rare. i looks shit
+						m1.elements[0] = characterMeshHeight * ilm.aspect //Width. Currently tweaked to make overlap of m rare. i looks shit
 						//scale of the things is currently unrelated to how much space they get
-						m1.elements[5] = m1.elements[0] / ilm.aspect
+						m1.elements[5] = characterMeshHeight
 						m1.elements[12] = drawingPosition.x + spaceWidth / 2.
 						m1.elements[13] = drawingPosition.y
 						ilm.setMatrixAt(ilm.count, m1)
