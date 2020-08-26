@@ -86,7 +86,7 @@ function initMultivectorAppearances()
 
     let idNum = 0
     
-    let vectorMaterial = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors })
+    let vecMaterial = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors })
     
     function generateName()
     {
@@ -122,22 +122,31 @@ function initMultivectorAppearances()
 
     MultivectorAppearance = () =>
     {
-        let name = generateName()
-        let vectorGeometry = VectorGeometry(name) //TODO should be in material. Can have one geometry for all when you've sorted a shader
+        let mv = new THREE.Group()
+        mv.name = generateName()
+        mv.elements = MathematicalMultivector()
 
-        let instancedMesh = new THREE.InstancedMesh(vectorGeometry, vectorMaterial, 256)
-        // instancedMesh.count = 0
-        instancedMesh.name = name
-        instancedMesh.elements = MathematicalMultivector()
-        copyMultivector(zeroMultivector, instancedMesh.elements)
+        //TODO should be in material. Can have one geometry for all when you've sorted a shader
+        let vec = new THREE.InstancedMesh(VecGeometry(mv.name), vecMaterial, 256)
+        vec.name = mv.name
+        vec.elements = mv.elements
+        copyMultivector(zeroMultivector, vec.elements)
+        mv.add(vec)
+
+        mv.resetCount = () => {vec.count = 0}
 
         let uniformMatrixWithYOnVector = new THREE.Matrix4()
-
-        instancedMesh.drawInPlace = function(x,y)
+        mv.drawInPlace = function(x,y)
         {
-            if(instancedMesh.count === 0)
+            let uniformScale = .5 / getVector(vec.elements,v1).length()
+            v1.setScalar(uniformScale)
+            q1.copy(displayCamera.quaternion)
+            q1.inverse()
+            m1.compose(zeroVector,q1,v1)
+
+            if (vec.count === 0)
             {
-                getVector(instancedMesh.elements, v1)
+                getVector(vec.elements, v1)
                 randomPerpVector(v1, v2)
                 v2.setLength(v1.length())
                 v3.crossVectors(v1, v2).normalize().negate().setLength(v1.length())
@@ -145,19 +154,15 @@ function initMultivectorAppearances()
                 //properly scaling the things will have to wait until you have proper colors
             }
 
-            let uniformScale = .5 / getVector(instancedMesh.elements,v1).length()
-            v1.setScalar(uniformScale)
-            q1.copy(displayCamera.quaternion)
-            q1.inverse()
-            m1.compose(v2.set(x,y,0.),q1,v1)
             m2.multiplyMatrices(m1, uniformMatrixWithYOnVector)
-            instancedMesh.setMatrixAt(instancedMesh.count, m2)
-            instancedMesh.instanceMatrix.needsUpdate = true
+            m2.setPosition(x, y, 0.)
+            vec.setMatrixAt(vec.count, m2)
+            vec.instanceMatrix.needsUpdate = true
 
-            ++instancedMesh.count
+            ++vec.count
         }
      
-        return instancedMesh
+        return mv
     }
 
     // let questionMarkMaterial = text("?",true) //can be colored with vertex attributes
@@ -165,19 +170,19 @@ function initMultivectorAppearances()
 
 //better would be generating the vertices first then using them
 //but that is barely any better. Really you want a different way of re-using the different arrays in drawing
-function VectorGeometry(name)
+function VecGeometry(name)
 {
     //ah no no, you want the end to always be the same size
     let shaftRadius = .04
     let headRadius = shaftRadius * 3.
     let shaftLength = .67
 
-    let vectorGeometry = new THREE.Geometry()
+    let vecGeometry = new THREE.Geometry()
 
     let radialSegments = 15
     let heightSegments = 20
-    vectorGeometry.vertices = Array((radialSegments + 1) * (heightSegments + 1))
-    vectorGeometry.faces = Array(radialSegments * heightSegments)
+    vecGeometry.vertices = Array((radialSegments + 1) * (heightSegments + 1))
+    vecGeometry.faces = Array(radialSegments * heightSegments)
     for (let j = 0; j <= heightSegments; j++)
     {
         for (let i = 0; i <= radialSegments; i++)
@@ -193,19 +198,19 @@ function VectorGeometry(name)
             }
 
             v1.applyAxisAngle(yUnit, i / radialSegments * TAU)
-            vectorGeometry.vertices[j * (radialSegments + 1) + i] = v1.clone()
+            vecGeometry.vertices[j * (radialSegments + 1) + i] = v1.clone()
 
             if (i < radialSegments && j < heightSegments) // there are one fewer triangles along both axes
             {
                 let color = colors[name[Math.floor(v1.y * name.length)]]
-                vectorGeometry.faces[(j * radialSegments + i) * 2 + 0] = new THREE.Face3(
+                vecGeometry.faces[(j * radialSegments + i) * 2 + 0] = new THREE.Face3(
                     (j + 0) * (radialSegments + 1) + (i + 0),
                     (j + 0) * (radialSegments + 1) + (i + 1),
                     (j + 1) * (radialSegments + 1) + (i + 1),
                     new THREE.Vector3(),
                     color
                 )
-                vectorGeometry.faces[(j * radialSegments + i) * 2 + 1] = new THREE.Face3(
+                vecGeometry.faces[(j * radialSegments + i) * 2 + 1] = new THREE.Face3(
                     (j + 0) * (radialSegments + 1) + (i + 0),
                     (j + 1) * (radialSegments + 1) + (i + 1),
                     (j + 1) * (radialSegments + 1) + (i + 0),
@@ -216,10 +221,10 @@ function VectorGeometry(name)
         }
     }
     if (name === "bgo") logged = 1
-    vectorGeometry.computeFaceNormals()
-    vectorGeometry.computeVertexNormals()
+    vecGeometry.computeFaceNormals()
+    vecGeometry.computeVertexNormals()
 
-    return vectorGeometry
+    return vecGeometry
 }
 
 function BivectorGroup(name)

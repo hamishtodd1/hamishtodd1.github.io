@@ -166,10 +166,6 @@ async function initPad()
 		})
 	}
 
-	VariableAppearance()
-	VariableAppearance()
-	VariableAppearance()
-
 	let maxCopiesOfALetter = 256
 	let characters = initTypeableCharacters(carat, maxCopiesOfALetter)
 	let functionDictionary = {}
@@ -238,7 +234,7 @@ async function initPad()
 
 		let lowestUndeterminedVariable = numFreeParameterMultivectors
 		for (let i = 0, il = variables.length; i < il; i++)
-			variables[i].count = 0
+			variables[i].resetCount()
 
 		for (let i = 0; i < outlines.length; ++i)
 			outlines[i].visible = false

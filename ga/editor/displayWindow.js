@@ -1,4 +1,6 @@
 /*
+    Orthographic camera is probably better. They're super small and you definitely want to see the integrals from above
+
     Maybe better if the free-parameter-generating one is the one that comes with you. Start a new line 
     Could have another that is always at the bottom, that's what you draw in and it creates a new line
         Could be the one that has every single variable in it

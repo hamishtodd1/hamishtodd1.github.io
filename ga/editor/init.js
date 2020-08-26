@@ -2,6 +2,7 @@
 	Next
 		Superimpose in boxes
 		more multivectors
+		graphs of at least scalar vs scalar
 
 	TODO for demo when you move in to Cam, February.
 		Functions
