@@ -24,6 +24,6 @@ pad.position.y = -Infinity //updated later
 function getWorldLineHeight(){return pad.scale.y}
 scene.add(pad)
 
-let backgroundString = "b g o\n\nb   g  +\ny  b  +\n\ni*(j+k)=i*j+i*k\n\n\ndisplay\n"
+let backgroundString = "b g o\nr\nb  g  +\nb  g  *\np  b  +\ni*(j+k)=i*j+i*k\n\n\ndisplay\n"
 
 let thingMouseIsOn = "left"

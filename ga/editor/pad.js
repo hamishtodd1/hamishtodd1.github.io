@@ -122,17 +122,20 @@ async function initPad(characterMeshHeight)
 			console.error("unrecognized variable name: ", name)
 		copyVariable(vec, variable.elements)
 	}
-	assignVectorToVariable(colorCharacters[0], xUnit)
-	assignVectorToVariable(colorCharacters[1], yUnit)
-	assignVectorToVariable(colorCharacters[2], zUnit)
-	assignVectorToVariable("y", new THREE.Vector3(-1.,0.,0.))
-	let numFreeParameterMultivectors = 3
+
+	copyVariable(xUnit,variables[0].elements)
+	copyVariable(yUnit,variables[1].elements)
+	copyVariable(zUnit,variables[2].elements)
+	copyVariable(new THREE.Vector3(-1., 0., 0.),variables[3].elements)
+	variables[4].elements[4] = 1.5
+	let numFreeParameterMultivectors = 5
+
 	{
 		let inputDw = DisplayWindow()
 		inputDw.screen.renderOrder = carat.renderOrder + 1
 		carat.material.depthTest = false
 		inputDw.screen.position.x = 0.
-		scene.add(inputDw.screen)
+		// scene.add(inputDw.screen)
 		let creatingFreeParameter = false
 		updateFunctions.push(() =>
 		{
@@ -176,7 +179,7 @@ async function initPad(characterMeshHeight)
 
 		let asteriskOperatorCharacter = String.fromCharCode("8727")
 		characters.add("*", asteriskOperatorCharacter)
-		functionDictionary[asteriskOperatorCharacter] = geometricProduct
+		functionDictionary["*"] = geometricProduct
 
 		// var tripleEqualsCharacter = String.fromCharCode("8801") //you CAN write "function", but lots of kids don't know "function". In python it's "def"
 		//could have them be separate
@@ -310,6 +313,7 @@ async function initPad(characterMeshHeight)
 							drawOutline(v2.x, v2.y)
 
 							let mv = variables[lowestUndeterminedVariable]
+							// debugger
 							operator(operand1.elements, operand2.elements, mv.elements)
 							mv.drawInPlace(v2.x, v2.y)
 							stack.push(mv)

@@ -13,7 +13,20 @@
 	4. Those get combined
 */
 let zeroMultivector = new Float32Array(8)
-MathematicalMultivector = () => new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.,])
+MathematicalMultivector = function(a,b,c,d,e,f,g,h)
+{
+	let m = new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.,])
+	if (a !== undefined) m[0] = a
+	if (b !== undefined) m[1] = b
+	if (c !== undefined) m[2] = c
+	if (d !== undefined) m[3] = d
+	if (e !== undefined) m[4] = e
+	if (f !== undefined) m[5] = f
+	if (g !== undefined) m[6] = g
+	if (h !== undefined) m[7] = h
+	return m
+}
+let mm = MathematicalMultivector()
 
 function getVector(mv,target)
 {

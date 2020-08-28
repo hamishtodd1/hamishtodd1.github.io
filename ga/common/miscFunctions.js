@@ -471,21 +471,13 @@ function basicallyEqual(a,b)
 function CylinderBufferGeometryUncentered(radius, length, radiusSegments, capped)
 {
 	if(!radius)
-	{
 		radius = 1;
-	}
 	if(!length)
-	{
 		length = 1;
-	}
 	if( !radiusSegments )
-	{
 		radiusSegments = 8;
-	}
 	if(!capped)
-	{
 		capped = false;
-	}
 	var geometry = new THREE.CylinderBufferGeometry(radius, radius, length,radiusSegments,1,!capped);
 	geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,length/2,0))
 	return geometry;
@@ -497,16 +489,11 @@ function randomPerpVector(ourVector,target)
 	if(target === undefined)
 		target = new THREE.Vector3()
 	target.copy(ourVector)
-	target.clone().normalize();
 	
-	if( Math.abs(target.dot(zUnit)-1) < 0.001 || Math.abs(target.dot(zUnit)+1) < 0.001 )
-	{
+	if( Math.abs(target.x) < 0.001 && Math.abs(target.y) < 0.001 )
 		target.crossVectors(ourVector, yUnit);
-	}
 	else
-	{
 		target.crossVectors(ourVector, zUnit);
-	}
 	
 	return target;
 }

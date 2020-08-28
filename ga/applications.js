@@ -29,6 +29,7 @@
 				Look through mechanics textbooks for examples
 
 	Some random ones
+		flipping a bunch of things in a nice pattern https://youtu.be/Hy6vddbQa8Q?t=10
 		ball and disc integrator
 		guitar string in slow motion
 		Ball shot from cannon

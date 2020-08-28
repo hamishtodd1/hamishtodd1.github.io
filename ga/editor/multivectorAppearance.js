@@ -15,7 +15,66 @@
 
 function initMultivectorAppearances(characterMeshHeight)
 {
-    let vecMaterial = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors })
+    // if(0)
+    {
+        let triMaterial = new THREE.MeshPhongMaterial({vertexColors:THREE.FaceColors})
+        let heightSegments = 4
+        let radius = .5 * Math.sqrt(2.)
+        let triGeometry = new THREE.CylinderGeometry(
+            radius, radius,
+            1.,
+            12, //radial seg
+            heightSegments,
+            false)
+
+        let il = triGeometry.vertices.length
+        let nonCornerLength = Math.sin(TAU / 8) * radius / Math.sin(Math.PI - TAU / 8. - TAU / 12.)
+        let ratio = nonCornerLength / radius
+        triGeometry.vertices.forEach((v,i)=>{
+            if(i < il-2 && i%3 !== 0) {
+                let y = v.y
+                v.y = 0.
+                v.multiplyScalar(ratio)
+                v.y = y
+            }
+
+            let rotationAngle = (v.y + .5) * TAU / 4.
+            v.applyAxisAngle(yUnit, rotationAngle)
+        })
+
+        // triGeometry.faces.forEach((f, i) => {
+        //     if (name.length === 1)
+        //         f.color.copy(colors[name[0]])
+        //     else if (name.length === 2)
+        //         f.color.copy(colors[name[Math.floor(i / 2)]])
+        //     else if (name.length === 3)
+        //     {
+        //         if(i<18)
+        //             f.color.copy(colors[name[(Math.floor(i / 6)) % 3]])
+        //         else if(i >= il - 18)
+        //             f.color.copy(colors[name[(Math.floor(i / 6)) % 3]])
+        //         else
+        //             f.color.copy(colors[name[(Math.floor((i+18) / 12)) % 3]])
+        //     }
+        //     else
+        //         console.error("too many letters for a point")
+        // })
+        let tri = new THREE.Mesh(triGeometry, triMaterial)
+        triGeometry.computeFaceNormals()
+        triGeometry.computeVertexNormals()
+        tri.scale.setScalar(3)
+        scene.add(tri)
+        updateFunctions.push(() => {
+            tri.rotation.x += .01
+            tri.rotation.y += .01
+        })
+    }
+
+    let vecMaterial = new THREE.MeshPhongMaterial({ vertexColors: THREE.FaceColors })
+
+    let bivMaterial = new THREE.MeshPhongMaterial({ vertexColors: THREE.FaceColors, side: THREE.DoubleSide })
+    let negativeUnitPseudoScalar = MathematicalMultivector(0., 0., 0., 0., 0., 0., 0., -1.)
+
     let scaMaterial = new THREE.MeshBasicMaterial({ vertexColors: THREE.FaceColors })
     let pointMaterial = new THREE.MeshLambertMaterial({ vertexColors: THREE.FaceColors })
     let lineMaterial = new THREE.LineBasicMaterial({ vertexColors: true })
@@ -125,35 +184,27 @@ function initMultivectorAppearances(characterMeshHeight)
         let mv = new THREE.Group()
         mv.name = generateName()
         mv.elements = MathematicalMultivector()
+        copyMultivector(zeroMultivector, mv.elements)
 
         let zero = new THREE.InstancedMesh(zeroGeometry, zeroMaterial, maxInstances)
         mv.add(zero)
-
-        //TODO should be in material. Can have one geometry for all when you've sorted a shader
         let vec = new THREE.InstancedMesh(VecGeometry(mv.name), vecMaterial, maxInstances)
-        vec.name = mv.name
-        vec.elements = mv.elements
-        copyMultivector(zeroMultivector, vec.elements)
         mv.add(vec)
+        let biv = new THREE.InstancedMesh(BivGeometry(mv.name), bivMaterial, maxInstances)
+        mv.add(biv)
 
+        //yeah too stateful, of coooooourse you are modifying the elements partway through the frame
         mv.resetCount = () => {
             mv.children.forEach((child)=>{child.count = 0})
             
-            getVector(vec.elements, v1)
-            if(v1.equals(zeroVector))
-                components[1] = false
-            else {
-                components[1] = true
-                randomPerpVector(v1, v2)
-                v2.setLength(v1.length())
-                v3.crossVectors(v1, v2).normalize().negate().setLength(v1.length())
-                uniformMatrixWithYOnVector.makeBasis(v2, v1, v3);
-                vec.instanceMatrix.needsUpdate = true
-                //properly scaling the things will have to wait until you have proper colors
-            }
+            components[1] = !getVector(mv.elements, v1).equals(zeroVector)
+            components[2] = !getBivec(mv.elements, v1).equals(zeroVector)
         }
 
-        let uniformMatrixWithYOnVector = new THREE.Matrix4()
+        let vecMat = new THREE.Matrix4()
+        let bivMat = new THREE.Matrix4()
+
+
         mv.drawInPlace = function(x,y)
         {
             mv.children.forEach((child) => { if (child.count >= maxInstances) console.error("too many") })
@@ -167,26 +218,69 @@ function initMultivectorAppearances(characterMeshHeight)
                 ++zero.count
                 zero.instanceMatrix.needsUpdate = true
             }
-
+            
             if (components[1])
             {
-                let uniformScale = .5 / getVector(vec.elements, v1).length()
-                v1.setScalar(uniformScale)
-                q1.copy(displayCamera.quaternion)
-                q1.inverse()
-                m1.compose(zeroVector, q1, v1)
+                if(vec.count === 0)
+                {
+                    getVector(mv.elements, v1)
 
-                m2.multiplyMatrices(m1, uniformMatrixWithYOnVector)
-                m2.setPosition(x, y, 0.)
-                vec.setMatrixAt(vec.count, m2)
+                    q1.copy(displayCamera.quaternion)
+                    q1.inverse()
+                    v1.applyQuaternion(q1)
+
+                    randomPerpVector(v1, v2)
+                    v3.crossVectors(v1, v2).negate()
+                    let uniformScale = .5
+                    v1.setLength(uniformScale)
+                    v2.setLength(uniformScale)
+                    v3.setLength(uniformScale)
+                    vecMat.makeBasis(v2, v1, v3)
+                    //scaling the arrows so the heads are right will have to wait until you have proper colors
+                    
+                    vec.instanceMatrix.needsUpdate = true
+                }
+
+                m1.copy(vecMat)
+                m1.setPosition(x, y, 0.)
+                vec.setMatrixAt(vec.count, m1)
                 ++vec.count
+            }
+
+            if(components[2])
+            {
+                if(biv.count === 0)
+                {
+                    geometricProduct(negativeUnitPseudoScalar, mv.elements, mm)
+                    getVector(mm, v1)
+
+                    randomPerpVector(v1,v2)
+                    v3.crossVectors(v1,v2) //possibly this is inconsistent wrt chirality
+                    v2.setLength(.5)
+                    v3.setLength(.5/v1.length())
+
+                    q1.copy(displayCamera.quaternion)
+                    q1.inverse()
+                    v1.applyQuaternion(q1)
+                    v2.applyQuaternion(q1)
+                    v3.applyQuaternion(q1)
+
+                    bivMat.makeBasis(v3, v2, v1)
+
+                    biv.instanceMatrix.needsUpdate = true
+                }
+
+                m1.copy(bivMat)
+                m1.setPosition(x, y, 0.)
+                biv.setMatrixAt(biv.count, m1)
+                ++biv.count
             }
         }
      
         return mv
     }
 
-    function BivectorGroup(name)
+    function BivGeometry(name)
     {
         let bivGeometry = new THREE.PlaneGeometry(1., 1., 1, 2)
         bivGeometry.vertices.forEach((v) =>
@@ -215,16 +309,7 @@ function initMultivectorAppearances(characterMeshHeight)
                 console.error("too many letters for a bivector")
         })
 
-        let bivMaterialClockwise = new THREE.MeshBasicMaterial({ vertexColors: THREE.FaceColors, transparent: true, opacity: 1., side: THREE.FrontSide })
-        let bivMaterialCounter = new THREE.MeshBasicMaterial({ vertexColors: THREE.FaceColors, transparent: true, opacity: 1., side: THREE.BackSide })
-        let bivAppearance = new THREE.Group()
-        scene.add(bivAppearance)
-        bivAppearance.add(
-            new THREE.Mesh(bivGeometry, bivMaterialClockwise),
-            new THREE.Mesh(bivGeometry, bivMaterialCounter),
-        )
-
-        return bivAppearance
+        return bivGeometry
     }
 }
 

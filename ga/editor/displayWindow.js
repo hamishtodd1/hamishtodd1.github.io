@@ -295,7 +295,7 @@ function initOutputColumnAndDisplayWindows()
     }, false);
 
     outputColumn.position.z = -.001 //better would be drawn 1st
-    outputColumn.position.x = -camera.rightAtZZero * .3
+    outputColumn.position.x = -camera.rightAtZZero * .45
     outputColumn.left = () => outputColumn.position.x - outputColumn.scale.x / 2.
     outputColumn.right = () => outputColumn.position.x + outputColumn.scale.x / 2.
     getDisplayColumnWidth = () => Math.abs(-camera.rightAtZZero - outputColumn.left())
