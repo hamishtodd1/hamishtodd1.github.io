@@ -184,7 +184,7 @@ function initOutputColumnAndDisplayWindows()
             premultiplyAlpha: false,
             type: THREE.FloatType // THREE.HalfFloat for speed
         }
-        let dimensionInPixels = 128
+        let dimensionInPixels = 256
         let localFramebuffer = new THREE.WebGLRenderTarget(dimensionInPixels, dimensionInPixels, params)
 
         let screen = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), new THREE.MeshBasicMaterial({ map: localFramebuffer.texture }))
@@ -193,10 +193,7 @@ function initOutputColumnAndDisplayWindows()
         let displayWindow = { screen, scene: localScene }
         displayWindows.push(displayWindow)
 
-        //the idea of this is that we then pop up the array in the code
-        //better: doodle on what seems to you like a plane, but it's extruded in z because z is input
-        let trailMode = false
-        if(trailMode)
+        //better: doodle on what seems to you like a plane, but it's extruded in z because z is input time
         {
             var mouseTrail = new THREE.Line(new THREE.Geometry())
             localScene.add(mouseTrail)

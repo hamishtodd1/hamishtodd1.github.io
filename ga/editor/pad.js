@@ -135,15 +135,20 @@ async function initPad(characterMeshHeight)
 		let inputDw = DisplayWindow()
 		inputDw.screen.renderOrder = carat.renderOrder + 1
 		carat.material.depthTest = false
-		inputDw.screen.position.x = 0.
-		// scene.add(inputDw.screen)
 		let creatingFreeParameter = false
 		updateFunctions.push(() =>
 		{
-			inputDw.screen.bottomY = -camera.topAtZZero
-			inputDw.screen.scale.x = camera.rightAtZZero * 2.
-			inputDw.screen.scale.y = inputDw.screen.scale.x / 2.
-			if (mouse.clicking && !mouse.oldClicking && thingMouseIsOn === inputDw)
+			inputDw.screen.scale.x = 10.5
+			inputDw.screen.scale.y = inputDw.screen.scale.x
+			
+			v1.copy(carat.position)
+			pad.localToWorld(v1)
+			inputDw.screen.bottomY = v1.y - .5 * pad.scale.y
+			if (inputDw.screen.bottomY > camera.topAtZZero - inputDw.screen.scale.y)
+				inputDw.screen.bottomY = camera.topAtZZero - inputDw.screen.scale.y
+			inputDw.screen.position.x = camera.rightAtZZero - inputDw.screen.scale.x * .5
+			
+			if (!trailMode && mouse.clicking && !mouse.oldClicking && thingMouseIsOn === inputDw)
 			{
 				creatingFreeParameter = true
 				++numFreeParameterMultivectors
@@ -206,8 +211,7 @@ async function initPad(characterMeshHeight)
 
 		let nablaCharacter = String.fromCharCode("8711")
 		characters.add("@",nablaCharacter)
-		let integralCharacter = String.fromCharCode("8747")
-		characters.add("~",integralCharacter)
+
 		let deltaCharacter = String.fromCharCode("948")
 		characters.add("?",deltaCharacter)
 
@@ -217,7 +221,7 @@ async function initPad(characterMeshHeight)
 		let descendingWedgeCharacter = String.fromCharCode("8744")
 		characters.add("&", descendingWedgeCharacter) // for exponentiate: **? For log, //?
 
-		backgroundString += wedgeCharacter+descendingWedgeCharacter+nablaCharacter+integralCharacter+deltaCharacter
+		backgroundString += wedgeCharacter + descendingWedgeCharacter + deltaCharacter + nablaCharacter+"~"
 
 		//./=+!:{}
 	}
@@ -262,32 +266,37 @@ async function initPad(characterMeshHeight)
 
 		let drawCharacters = true
 		let tokenCharactersLeft = 0
+
+		let superimposePosition = new THREE.Vector2(Infinity,Infinity)
 			
 		let yPositionOfVerticalCenterOfTopLine = -.5
 		drawingPosition.set(0., yPositionOfVerticalCenterOfTopLine, 0.)
 		let backgroundStringLength = backgroundString.length
 		for(let drawingPositionInString = 0; drawingPositionInString <= backgroundStringLength; ++drawingPositionInString)
 		{
-			if (carat.positionInString !== -1 && drawingPositionInString === carat.positionInString )
+			//carat position
 			{
-				if (carat.position.x !== drawingPosition.x || carat.position.y !== drawingPosition.y)
-					carat.flashingStart = clock.getElapsedTime()
-				carat.position.set(drawingPosition.x, drawingPosition.y, carat.position.z)
-			}
-			if (carat.positionInString === -1)
-			{
-				let closestYDist = Math.abs(positionInStringClosestToCaratPositionVector.y - carat.position.y)
-				let closestXDist = Math.abs(positionInStringClosestToCaratPositionVector.x - carat.position.x)
-				let drawingYDist = Math.abs(drawingPosition.y - carat.position.y)
-				let drawingXDist = Math.abs(drawingPosition.x - carat.position.x)
-				if ( drawingYDist < closestYDist || (drawingYDist === closestYDist && drawingXDist < closestXDist) )
+				if (carat.positionInString !== -1 && drawingPositionInString === carat.positionInString)
 				{
-					positionInStringClosestToCaratPosition = drawingPositionInString
-					positionInStringClosestToCaratPositionVector.copy(drawingPosition)
+					if (carat.position.x !== drawingPosition.x || carat.position.y !== drawingPosition.y)
+						carat.flashingStart = clock.getElapsedTime()
+					carat.position.set(drawingPosition.x, drawingPosition.y, carat.position.z)
 				}
+				if (carat.positionInString === -1)
+				{
+					let closestYDist = Math.abs(positionInStringClosestToCaratPositionVector.y - carat.position.y)
+					let closestXDist = Math.abs(positionInStringClosestToCaratPositionVector.x - carat.position.x)
+					let drawingYDist = Math.abs(drawingPosition.y - carat.position.y)
+					let drawingXDist = Math.abs(drawingPosition.x - carat.position.x)
+					if (drawingYDist < closestYDist || (drawingYDist === closestYDist && drawingXDist < closestXDist))
+					{
+						positionInStringClosestToCaratPosition = drawingPositionInString
+						positionInStringClosestToCaratPositionVector.copy(drawingPosition)
+					}
+				}
+				if (drawingPositionInString >= backgroundStringLength)
+					break
 			}
-			if (drawingPositionInString >= backgroundStringLength)
-				break
 
 			let currentCharacter = backgroundString[drawingPositionInString]
 
@@ -310,11 +319,10 @@ async function initPad(characterMeshHeight)
 
 							v2.copy(outputColumn.position)
 							pad.worldToLocal(v2)
-							v2.y = drawingPosition.y - 1. / 3.
+							v2.y = drawingPosition.y //- 1. / 3.
 							drawOutline(v2.x, v2.y)
 
 							let mv = variables[lowestUndeterminedVariable]
-							// debugger
 							operator(operand1.elements, operand2.elements, mv.elements)
 							mv.drawInPlace(v2.x, v2.y)
 							stack.push(mv)
@@ -328,6 +336,8 @@ async function initPad(characterMeshHeight)
 
 				drawingPosition.x = 0.
 				drawingPosition.y -= 1.
+
+				superimposePosition.set(Infinity, Infinity)
 			}
 			else
 			{
@@ -337,8 +347,12 @@ async function initPad(characterMeshHeight)
 
 					let maxTokenLength = 64
 					let token = ""
-					for (let i = 0; i < maxTokenLength && backgroundString[drawingPositionInString + i] !== " " && backgroundString[drawingPositionInString + i] !== "\n"; ++i)
-						token += backgroundString[drawingPositionInString + i]
+					if (functionDictionary[currentCharacter]!==undefined)
+						token = currentCharacter
+					else {
+						for (let i = 0; i < maxTokenLength && backgroundString[drawingPositionInString + i] !== " " && backgroundString[drawingPositionInString + i] !== "\n"; ++i)
+							token += backgroundString[drawingPositionInString + i]
+					}
 					tokenCharactersLeft = token.length
 
 					if (functionDictionary[token] !== undefined)
@@ -402,8 +416,22 @@ async function initPad(characterMeshHeight)
 						let caratInName = drawingPositionInString < carat.positionInString && carat.positionInString <= drawingPositionInString + token.length
 						if (!caratInName)
 						{
-							mv.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
-							drawOutline(drawingPosition.x + .5, drawingPosition.y)
+							if (superimposePosition.x === Infinity && superimposePosition.y === Infinity )
+							{
+								superimposePosition.x = drawingPosition.x + .5
+								superimposePosition.y = drawingPosition.y
+							}
+
+							// if (carat.position.y !== drawingPosition.y )
+							// {
+							// 	mv.drawInPlace(superimposePosition.x, superimposePosition.y)
+							// 	drawOutline(superimposePosition.x, superimposePosition.y)
+							// }
+							// else
+							{
+								mv.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
+								drawOutline(drawingPosition.x + .5, drawingPosition.y)
+							}
 							drawCharacters = false
 						}
 					}
@@ -605,7 +633,14 @@ function initTypeableCharacters(carat,maxCopiesOfALetter)
 		if (displayedCharacter === undefined)
 			displayedCharacter = character
 
-		let material = text(displayedCharacter, true)
+		let material = null
+		if (character === "~") {
+			material = new THREE.MeshBasicMaterial()
+			new THREE.TextureLoader().load("data/integral.png", function (result) { material.map = result; material.needsUpdate = true} )
+			material.getAspect = ()=>{return 1.}
+		}
+		else material = text(displayedCharacter, true)
+		
 		if(colors[character] !== undefined)
 		{
 			material.color.r = colors[character].r * .7 + .3
@@ -647,6 +682,8 @@ function initTypeableCharacters(carat,maxCopiesOfALetter)
 	})
 	bindButton("Tab", () => { for (let i = 0; i < 4; i++) addStringAtCarat(" ") })
 	bindButton("Enter", () => addStringAtCarat("\n"))
+
+	characters.add("~")
 
 	return characters
 }

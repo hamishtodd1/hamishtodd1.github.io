@@ -25,6 +25,9 @@ pad.position.y = -Infinity //updated later
 function getWorldLineHeight(){return pad.scale.y}
 scene.add(pad)
 
-let backgroundString = " b g o\n\n w\n r\n\n b  g  +\n b  g  *\n p  b  +\n i*(j+k)=i*j+i*k\n"
+let backgroundString = "b g o\n\nw\nr\n\n  b  +g  \n  b  *g  \n  p  +b  \n\n  i*(j+k)=i*j+i*k\n  "
 
 let thingMouseIsOn = "left"
+
+let trailMode = false //TODO VERY HACKY FOR THIS TO BE GLOBAL
+bindButton("Control", () => { trailMode = !trailMode })
