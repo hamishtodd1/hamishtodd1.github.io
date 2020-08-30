@@ -68,6 +68,7 @@
 		Your intermediate representation is a translated vector? So a + b is sorta not fundamental?
 
 	You can't visualize the multivector without some (theoretical values) for it
+		very Tokiedan though: examples examples examples!
 		Or can you? Little disk with colors?
 		Both a blessing and a curse? Get people too used to a certain state, unable to think in the abstract?
 		Heh how about making them meander randomly?

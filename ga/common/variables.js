@@ -20,6 +20,7 @@ const v4 = new THREE.Vector3()
 const m1 = new THREE.Matrix4()
 const m2 = new THREE.Matrix4()
 const q1 = new THREE.Quaternion()
+const q2 = new THREE.Quaternion()
 const pl = new THREE.Plane()
 
 const unchangingUnitSphereGeometry = new THREE.EfficientSphereGeometry(1.)

@@ -15,65 +15,12 @@
 
 function initMultivectorAppearances(characterMeshHeight)
 {
-    // if(0)
-    {
-        let triMaterial = new THREE.MeshPhongMaterial({vertexColors:THREE.FaceColors})
-        let heightSegments = 4
-        let radius = .5 * Math.sqrt(2.)
-        let triGeometry = new THREE.CylinderGeometry(
-            radius, radius,
-            1.,
-            12, //radial seg
-            heightSegments,
-            false)
-
-        let il = triGeometry.vertices.length
-        let nonCornerLength = Math.sin(TAU / 8) * radius / Math.sin(Math.PI - TAU / 8. - TAU / 12.)
-        let ratio = nonCornerLength / radius
-        triGeometry.vertices.forEach((v,i)=>{
-            if(i < il-2 && i%3 !== 0) {
-                let y = v.y
-                v.y = 0.
-                v.multiplyScalar(ratio)
-                v.y = y
-            }
-
-            let rotationAngle = (v.y + .5) * TAU / 4.
-            v.applyAxisAngle(yUnit, rotationAngle)
-        })
-
-        // triGeometry.faces.forEach((f, i) => {
-        //     if (name.length === 1)
-        //         f.color.copy(colors[name[0]])
-        //     else if (name.length === 2)
-        //         f.color.copy(colors[name[Math.floor(i / 2)]])
-        //     else if (name.length === 3)
-        //     {
-        //         if(i<18)
-        //             f.color.copy(colors[name[(Math.floor(i / 6)) % 3]])
-        //         else if(i >= il - 18)
-        //             f.color.copy(colors[name[(Math.floor(i / 6)) % 3]])
-        //         else
-        //             f.color.copy(colors[name[(Math.floor((i+18) / 12)) % 3]])
-        //     }
-        //     else
-        //         console.error("too many letters for a point")
-        // })
-        let tri = new THREE.Mesh(triGeometry, triMaterial)
-        triGeometry.computeFaceNormals()
-        triGeometry.computeVertexNormals()
-        tri.scale.setScalar(3)
-        scene.add(tri)
-        updateFunctions.push(() => {
-            tri.rotation.x += .01
-            tri.rotation.y += .01
-        })
-    }
-
     let vecMaterial = new THREE.MeshPhongMaterial({ vertexColors: THREE.FaceColors })
 
     let bivMaterial = new THREE.MeshPhongMaterial({ vertexColors: THREE.FaceColors, side: THREE.DoubleSide })
     let negativeUnitPseudoScalar = MathematicalMultivector(0., 0., 0., 0., 0., 0., 0., -1.)
+
+    let triMaterial = new THREE.MeshPhongMaterial({ vertexColors: THREE.FaceColors })
 
     let scaMaterial = new THREE.MeshBasicMaterial({ vertexColors: THREE.FaceColors })
     let pointMaterial = new THREE.MeshLambertMaterial({ vertexColors: THREE.FaceColors })
@@ -180,7 +127,7 @@ function initMultivectorAppearances(characterMeshHeight)
     let maxInstances = 256
     MultivectorAppearance = () =>
     {
-        let components = [false, false, false, false]
+        let nonzeroGrades = [false, false, false, false]
         let mv = new THREE.Group()
         mv.name = generateName()
         mv.elements = MathematicalMultivector()
@@ -192,24 +139,28 @@ function initMultivectorAppearances(characterMeshHeight)
         mv.add(vec)
         let biv = new THREE.InstancedMesh(BivGeometry(mv.name), bivMaterial, maxInstances)
         mv.add(biv)
+        let tri = new THREE.InstancedMesh(TriGeometry(mv.name), triMaterial,maxInstances)
+        mv.add(tri)
 
         //yeah too stateful, of coooooourse you are modifying the elements partway through the frame
         mv.resetCount = () => {
             mv.children.forEach((child)=>{child.count = 0})
             
-            components[1] = !getVector(mv.elements, v1).equals(zeroVector)
-            components[2] = !getBivec(mv.elements, v1).equals(zeroVector)
+            nonzeroGrades[0] = mv.elements[0] ? true : false
+            nonzeroGrades[1] = !getVector(mv.elements, v1).equals(zeroVector)
+            nonzeroGrades[2] = !getBivec(mv.elements, v1).equals(zeroVector)
+            nonzeroGrades[3] = mv.elements[7] ? true:false
         }
 
         let vecMat = new THREE.Matrix4()
         let bivMat = new THREE.Matrix4()
-
+        let triMat = new THREE.Matrix4()
 
         mv.drawInPlace = function(x,y)
         {
             mv.children.forEach((child) => { if (child.count >= maxInstances) console.error("too many") })
 
-            if (!components[0] && !components[1] && !components[2] && !components[3])
+            if (!nonzeroGrades[0] && !nonzeroGrades[1] && !nonzeroGrades[2] && !nonzeroGrades[3])
             {
                 m1.identity()
                 m1.scale(v1.setScalar(characterMeshHeight))
@@ -219,7 +170,7 @@ function initMultivectorAppearances(characterMeshHeight)
                 zero.instanceMatrix.needsUpdate = true
             }
             
-            if (components[1])
+            if (nonzeroGrades[1])
             {
                 if(vec.count === 0)
                 {
@@ -247,7 +198,7 @@ function initMultivectorAppearances(characterMeshHeight)
                 ++vec.count
             }
 
-            if(components[2])
+            if(nonzeroGrades[2])
             {
                 if(biv.count === 0)
                 {
@@ -274,6 +225,33 @@ function initMultivectorAppearances(characterMeshHeight)
                 m1.setPosition(x, y, 0.)
                 biv.setMatrixAt(biv.count, m1)
                 ++biv.count
+            }
+
+            if(nonzeroGrades[3])
+            {
+                if(tri.count === 0)
+                {
+                    tri.instanceMatrix.needsUpdate = true
+
+                    //corner on
+                    // q1.setFromAxisAngle(xUnit, TAU / 8.)
+                    // q2.setFromAxisAngle(yUnit, TAU / 8.)
+                    // q1.multiply(q2)
+
+                    q1.copy(displayCamera.quaternion)
+                    q1.inverse()
+
+                    triMat.makeRotationFromQuaternion(q1)
+                    triMat.elements[4] *= mv.elements[7]
+                    triMat.elements[5] *= mv.elements[7]
+                    triMat.elements[6] *= mv.elements[7]
+                    triMat.scale(v1.setScalar(.5 / mv.elements[7]))
+                }
+
+                m1.copy(triMat)
+                m1.setPosition(x, y, 0.)
+                tri.setMatrixAt(tri.count, m1)
+                ++tri.count
             }
         }
      
@@ -370,4 +348,50 @@ function VecGeometry(name)
     vecGeometry.computeVertexNormals()
 
     return vecGeometry
+}
+
+function TriGeometry(name)
+{
+    let heightSegments = 15
+    let radius = .5 * Math.sqrt(2.)
+    let radialSegments = 12
+    let triGeometry = new THREE.CylinderGeometry(
+        radius, radius,
+        1.,
+        radialSegments,
+        heightSegments,
+        false)
+
+    let il = triGeometry.vertices.length
+    let nonCornerLength = Math.sin(TAU / 8) * radius / Math.sin(Math.PI - TAU / 8. - TAU / 12.)
+    let ratio = nonCornerLength / radius
+    triGeometry.vertices.forEach((v, i) =>
+    {
+        let rotationAngle = v.y * TAU / 4.
+        v.applyAxisAngle(yUnit, rotationAngle)
+
+        if (i < il - 2 && i % 3 !== 0)
+        {
+            let y = v.y
+            v.y = 0.
+            v.multiplyScalar(ratio)
+            v.y = y
+        }
+        // v.y += .5
+    })
+
+    il = triGeometry.faces.length
+    let nameLength = name.length
+    if(nameLength <= 3) triGeometry.faces.forEach((f, i) =>{
+        if (i >= il - 2 * radialSegments)
+            f.color.copy(colors[name[i % nameLength]])
+        else
+            f.color.copy(colors[name[(Math.floor(i / heightSegments / 2)) % nameLength]])
+    })
+    else
+        console.error("too many letters for a tri")
+    triGeometry.computeFaceNormals()
+    triGeometry.computeVertexNormals()
+
+    return triGeometry
 }

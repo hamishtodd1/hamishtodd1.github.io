@@ -17,6 +17,7 @@ for (let color in colors) colorCharacters += color
 const outputColumn = new THREE.Mesh(new THREE.PlaneBufferGeometry(1., 9999999.), new THREE.MeshBasicMaterial({ color: 0x1F1F1F }))
 outputColumn.renderOrder = 0
 outputColumn.material.depthTest = false
+
 const displayWindows = []
 
 const pad = new THREE.Group()
@@ -24,6 +25,6 @@ pad.position.y = -Infinity //updated later
 function getWorldLineHeight(){return pad.scale.y}
 scene.add(pad)
 
-let backgroundString = "b g o\nr\nb  g  +\nb  g  *\np  b  +\ni*(j+k)=i*j+i*k\n\n\ndisplay\n"
+let backgroundString = " b g o\n\n w\n r\n\n b  g  +\n b  g  *\n p  b  +\n i*(j+k)=i*j+i*k\n"
 
 let thingMouseIsOn = "left"

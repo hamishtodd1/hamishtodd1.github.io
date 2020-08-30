@@ -127,8 +127,9 @@ async function initPad(characterMeshHeight)
 	copyVariable(yUnit,variables[1].elements)
 	copyVariable(zUnit,variables[2].elements)
 	copyVariable(new THREE.Vector3(-1., 0., 0.),variables[3].elements)
-	variables[4].elements[4] = 1.5
-	let numFreeParameterMultivectors = 5
+	variables[4].elements[7] = 2.
+	variables[5].elements[4] = 1.5
+	let numFreeParameterMultivectors = 6
 
 	{
 		let inputDw = DisplayWindow()
@@ -216,7 +217,7 @@ async function initPad(characterMeshHeight)
 		let descendingWedgeCharacter = String.fromCharCode("8744")
 		characters.add("&", descendingWedgeCharacter) // for exponentiate: **? For log, //?
 
-		backgroundString += lambdaCharacter+nablaCharacter+integralCharacter+deltaCharacter+wedgeCharacter+descendingWedgeCharacter
+		backgroundString += wedgeCharacter+descendingWedgeCharacter+nablaCharacter+integralCharacter+deltaCharacter
 
 		//./=+!:{}
 	}
