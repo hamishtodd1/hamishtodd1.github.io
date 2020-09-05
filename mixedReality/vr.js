@@ -48,13 +48,9 @@ function initVrOrMockVrInput()
 		}
 
 		if( MODE === NONVR_TESTING_MODE )
-		{
 			mockVrInput()
-		}
 		else
-		{
 			actualVrInput()
-		}		
 
 		for(let i = 0; i < 2; i++ )
 		{

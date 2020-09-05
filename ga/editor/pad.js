@@ -1,4 +1,6 @@
 /* 
+	Add reverse
+
 	Is the location of the carat the place it has exectued up to? Maybe the preview window is dependent on where it is?
 		But you see the result of everything anyway. So no, it should just be where you get the thing that's in the carat-associated displayWindow
 		reverse polish might be pretty good. You see this thing, that thing, now they're in the same coord system, THEN some shit happens
@@ -97,6 +99,12 @@ async function initPad(characterMeshHeight)
 	}
 	let copyVariable = copyMultivector
 
+	// let GraphAppearance = ()=> {
+	// 	let graphAppearance = new THREE.InstancedMesh()
+	// 	scene.add(graphAppearance
+	// }
+	// GraphAppearance()
+
 	let carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.,1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
 	carat.positionInString = -1
 	initCaratAndNavigation(carat)
@@ -143,9 +151,10 @@ async function initPad(characterMeshHeight)
 			
 			v1.copy(carat.position)
 			pad.localToWorld(v1)
-			inputDw.screen.bottomY = v1.y - .5 * pad.scale.y
-			if (inputDw.screen.bottomY > camera.topAtZZero - inputDw.screen.scale.y)
-				inputDw.screen.bottomY = camera.topAtZZero - inputDw.screen.scale.y
+			let bottomYDestination = v1.y - .5 * pad.scale.y
+			if (bottomYDestination > camera.topAtZZero - inputDw.screen.scale.y)
+				bottomYDestination = camera.topAtZZero - inputDw.screen.scale.y
+			inputDw.screen.bottomY += .1 * (bottomYDestination - inputDw.screen.bottomY)
 			inputDw.screen.position.x = camera.rightAtZZero - inputDw.screen.scale.x * .5
 			
 			if (!trailMode && mouse.clicking && !mouse.oldClicking && thingMouseIsOn === inputDw)
@@ -350,7 +359,11 @@ async function initPad(characterMeshHeight)
 					if (functionDictionary[currentCharacter]!==undefined)
 						token = currentCharacter
 					else {
-						for (let i = 0; i < maxTokenLength && backgroundString[drawingPositionInString + i] !== " " && backgroundString[drawingPositionInString + i] !== "\n"; ++i)
+						for ( let i = 0;
+							i < maxTokenLength && backgroundString[drawingPositionInString + i] !== " " && 
+							backgroundString[drawingPositionInString + i] !== "\n" &&
+							drawingPositionInString + i < backgroundStringLength;
+							++i)
 							token += backgroundString[drawingPositionInString + i]
 					}
 					tokenCharactersLeft = token.length
@@ -663,7 +676,7 @@ function initTypeableCharacters(carat,maxCopiesOfALetter)
 
 		bindButton(character, () => addStringAtCarat(character))
 	}
-	let initialCharacters = "abcdefghijklmnopqrstuvwxyz "
+	let initialCharacters = "abcdefghijklmnopqrstuvwxyz ~"
 	for (let i = 0; i < initialCharacters.length; i++)
 		characters.add(initialCharacters[i])
 
@@ -680,10 +693,8 @@ function initTypeableCharacters(carat,maxCopiesOfALetter)
 			carat.moveAlongString(-1)
 		}
 	})
-	bindButton("Tab", () => { for (let i = 0; i < 4; i++) addStringAtCarat(" ") })
+	bindButton("Tab", () => { for (let i = 0; i < 2; i++) addStringAtCarat(" ") })
 	bindButton("Enter", () => addStringAtCarat("\n"))
-
-	characters.add("~")
 
 	return characters
 }

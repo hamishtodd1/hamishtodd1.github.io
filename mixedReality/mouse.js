@@ -50,8 +50,6 @@ function initMouse()
 		object.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAmount))
 	}
 
-	var clickedPoint = new THREE.Vector3();
-	var toyBeingArranged = null;
 	mouse.updateFromAsyncAndCheckClicks = function()
 	{
 		this.oldClicking = this.clicking;
@@ -64,54 +62,6 @@ function initMouse()
 
 		mouse.previousRay.copy(mouse.rayCaster.ray);
 		mouse.rayCaster.setFromCamera( asynchronous.normalizedDevicePosition, camera );
-
-		//"whileClicking"? Naaaaah, "update" keeps things in once place
-		//deffo need onHover
-		
-		if( this.clicking && !this.oldClicking )
-		{
-			var intersections = mouse.rayCaster.intersectObjects( clickables );
-
-			if( intersections.length !== 0 )
-			{
-				this.lastClickedObject = intersections[0].object;
-				if( intersections[0].object.onClick )
-				{
-					intersections[0].object.onClick(intersections[0]);
-				}
-			}
-			else
-			{
-				this.lastClickedObject = null;
-			}
-		}
-
-		if( this.rightClicking )
-		{
-			if( !this.oldRightClicking )
-			{
-				var intersections = mouse.rayCaster.intersectObjects( toysToBeArranged );
-
-				if( intersections.length !== 0 )
-				{
-					toyBeingArranged = intersections[0].object;
-					clickedPoint.copy( intersections[0].point )
-				}
-			}
-			else
-			{
-				if(toyBeingArranged !== null)
-				{
-					var newClickedPoint = this.rayIntersectionWithZPlane(clickedPoint.z)
-					toyBeingArranged.position.sub(clickedPoint).add(newClickedPoint)
-					clickedPoint.copy(newClickedPoint)
-				}
-			}
-		}
-		else
-		{
-			toyBeingArranged = null;
-		}
 	}
 
 	var currentRawX = 0;

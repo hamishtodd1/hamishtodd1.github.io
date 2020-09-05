@@ -1,4 +1,6 @@
 /*
+	
+
 	Differential equation / recursion thing:
 		there's a recursive method to find 0s of functions, that's newton's method (taylor would be better).
 		Any differential equation can be expressed as trying to find x such that function on left hand side = function on right hand side, Strogatz/Victor-esque

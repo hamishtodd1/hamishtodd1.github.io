@@ -1,40 +1,37 @@
 /* 
 	Next
-		Superimpose in boxes
-		more multivectors
-		graphs of at least scalar vs scalar
+		functions to graphs
+		mvs in the dw. Gets you whole thing visualized!
+		shadows
 
-	TODO for demo when you move in to Cam, February.
+	TODO demo / first videos
 		Functions
 			Visualized
-			function copied into code from drawing in view
+			made by drawing in view
 				fourier approximation. If you loop back it's a 2D function, if not 1D
-		multivectors in R*(2,0,1)
-			Visualized
-			Animated?
-			altering/specifying with mouse
-			Navigating code does what is interesting in the displaywindow
-		Basic Omicron reduction (omicron because 0 is useful)
-			Describe properties of a function then make function
+		altering all multivectors with mouse
+		Navigating code does what is interesting in the displaywindow
+		Basic Omicron reduction
+			Describe properties of a variable or function then make function
 			differentiate/integrate polynomials
 			a proof that two things are equal
 				making wedge product and "proving it is antisymmetric" by writing ab - ba
+		What to demonstrate
+			Lunar lander/simple harmonic oscillator?
+			velocity space or differential space
+		Naming system ug
+			One idea: record what names got attributed to what calculations
 		Interested parties
 			Language people: Alan, Meurig, Martin, futureOfCoding, Yoshiki, Cynthia Solomon, Andy Matuschak
 			GAists: bivector discord, Cam folks, Charles Gunn, Steven Der kenick, Pierre Philipp Denchant, Jonathan Cameron, David Hestenes, , Paul Simeon
 			Graphics/gamedev: Fabrice, inigo quilez, Haxiomic, Dan Holden, Daniel Piker, Ian and Norgg, Media Molecule, Chris Deleon
 			Math/physicist: Ivan and Nina, Florian, Eric stansifer, Matt Hare
 			Misc: London Rationalish, Ben Eater, Coding Train guy, Grant sanderson
-		What to demonstrate
-			Lunar lander/simple harmonic oscillator?
-			velocity space or differential space
 
 	TODO for programming / bootstrapping
-		Fuller visualization of multivectors
+		Animated
 		built in exp and division etc or implement yourself?
 		Camera and mouse ray visualized and something you deal with
-		Make names consistent
-			One idea: record what names got attributed to what calculations
 		Demos
 			Pong
 			Sphere
@@ -53,10 +50,9 @@
 		Arbitrary formulae from Geometric Algebra For Physicists
 		Full omicron reduction
 		input latex
+		More of the thingies
 
 	An array of vectors is a matrix. Therefore... f:R->R2 sampled at two points is a matrix?
-
-	
 
 	Hmm with the Bret viz of binary search you give example inputs.
 	But visualizing f(a)=b a,b in R is a graph, an abstraction over all possible inputs.
@@ -113,7 +109,9 @@
 		In the evaluation system
 			"differentiate(x*x,x)" -> "2*x"
 			
-	Algebraic deduction / reduction
+	Algebraic deduction / omicron reduction
+		the fundamental axioms are e1^2 = e2^2= 1 and e1e2 = -e2e1
+		Ivan sutherland had it. You have your algebraic properties (all statements of the form f(...) = 0), but they're applied to pictures and applied gesturally
 		As joel says, sometimes you want to write a*b = b/a but it's some bunch of things that just cannot be rarranged into a = or b = 
 		Call it inlining and outlining
 		Isn't it kind of arbitrary what we label as definitions and theorems?

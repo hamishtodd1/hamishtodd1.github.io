@@ -1,5 +1,5 @@
 /*
-    Orthographic camera is probably better. They're super small and you definitely want to see the integrals from above
+    Orthographic/almost orthographic camera is probably better. They're super small and you definitely want to see the integrals from above
 
     Maybe better if the free-parameter-generating one is the one that comes with you. Start a new line 
     Could have another that is always at the bottom, that's what you draw in and it creates a new line
@@ -93,40 +93,8 @@
 		utah teapots with scalar for sizes
 		orientations and positions: a bunch of utah teapots offset by the vector, oriented by the bivector
         One standing in for all. In this situation, everything coming from the same one gets the same representation
-        
-    C=R2. H?
-    These all might be dumb, you should focus on the opengl premitives, not on specific stuff like this
-        R->R    line graph, filled underneath - black and white line if looked at from above
-        R->R2   line through R2, or through R3 plotted along z axis
-        R->R3   curve through R3, "parametric", alternatively point moving over time and clickable scalar (slider)
 
-        Need to specify function domains for eg R->R2. [0,1]?
-        I don't want to choose an arbitrary cutoff, I want to have [-infinity, infinity]
-        A function can take any damn thing and operate on it, so how to choose which for visualize a given function?
-            We know how to do it for the drawing input things
-        For a given f:R2->R3, can we calculate the function describing the pixel colors of the framebuffer containing that curve? Call it f':R2->R
-            Note that f:R->R3 can be done as well, it's just a tube
-            To make it easier let's say it's black and white and colored by depth
-            Well it's hard enough to get an intersection/depth function from an implicit surface, let alone parametric
-            Assume orthographic camera, if it helps we are only looking for intersections down the z axis between [-1,1]
-            Example: cylinder
-                paratmetric: f(t) = cos(t),sin(t)
-                intersection:f(y) = abs(y)>1 ? infinity : sqrt(1-y*y) - rasterization
-
-        R2->R   1 surface (with volumetric stuff beneat, sounds like fun!)
-        R2->R2  set of 2 surfaces - 2 color image if looked at from above, or vector field(points moving around/arrows)? Tokieda weirdness?
-        R2->R3  set of 3 surfaces - 3 color image if looked at from above, or parametric surface??
-        surfaces are parametric, functions from R2
-            If the vertices of a mesh are in a funky order with respect to triangles, they are probably imported from an outside program which should put them in a good order
-            Except that you want to compute vertex normals.
-                Though in order to do that you do have to iterate an array to find what faces a vertex is in
-
-        R->H    utah teapot at origin
-        R->R3,H utah teapot at position oriented by quaternion
-
-        R3->R   isosurface. Two of them. One at 0 and the other at a controllable level. Between, if you slice it, MRI-style texturing
-        R3->R2  pair of isosurfaces
-        R3->R3  vector field? 3 color isosurface?
+    Alright so juxtaposition f x is "apply function to x". And because your objects, curried with geometric product, are functions...
 */
 
 //https://www.youtube.com/watch?v=nl9TZanwbBk
@@ -152,24 +120,26 @@ function dft(samples)
 
 function initOutputColumnAndDisplayWindows()
 {
-    // let inputRow = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), outputColumn.material)
-    // inputRow.geometry.translate(-.5,0.,0.)
-    // scene.add(inputRow)
-    // inputRow.position.x = outputColumn.position.x
-    // inputRow.scale.x = 5.
+    {
+        let gridSize = 8
+        let gridGeometryCoords = [0., gridSize / 2., 0., 0., -gridSize / 2., 0.]
+        let gridHelperCoords = new THREE.GridHelper(gridSize, gridSize).geometry.attributes.position.array
+        gridHelperCoords.forEach((coord) => { gridGeometryCoords.push(coord) })
+        let gridGeometry = new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(gridGeometryCoords), 3))
+        let gridMaterial = new THREE.LineBasicMaterial({ color: 0xFFFFFF })
+        Grid = function () {
+            return new THREE.LineSegments(gridGeometry, gridMaterial)
+        }
+    }
+
+    initFuncViz()
 
     let ordinaryClearColor = renderer.getClearColor().clone()
     let ordinaryRenderTarget = renderer.getRenderTarget()
     DisplayWindow = function()
     {
         let localScene = new THREE.Scene()
-        {
-            let gridSize = 8.
-            let axis = new THREE.Line(new THREE.Geometry(), new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
-            axis.geometry.vertices.push(new THREE.Vector3(0., gridSize / 2., 0.), new THREE.Vector3(0., -gridSize / 2., 0.))
-            let grid = new THREE.GridHelper(gridSize, gridSize, axis.material.color)
-            localScene.add(grid, axis)
-        }
+        localScene.add(Grid())
 
         let filter = THREE.NearestFilter
         let wrap = THREE.ClampToEdgeWrapping

@@ -5,7 +5,7 @@ const VR_TESTING_MODE = 0;
 const NONVR_TESTING_MODE = 1; //if you want switching to this to be automatic, you need to start with some kind of callback
 const PLAYBACK_MODE = 2;
 
-const MODE = 0;
+const MODE = 1;
 log("Mode: ", MODE===PLAYBACK_MODE?"VR testing, USE FIREFOX!":MODE===VR_TESTING_MODE?"VR testing":"Non VR testing")
 
 const TAU = Math.PI * 2;
@@ -58,3 +58,5 @@ const discreteViridis = [
 	{hex:0x49BE54, color:new THREE.Color(0.28515625,0.7421875,0.328125)},
 	{hex:0x2A477A, color:new THREE.Color(0.1640625,0.27734375,0.4765625)},
 	{hex:0x340042, color:new THREE.Color(0.203125,0.,0.2578125)}];
+
+let v1 = new THREE.Vector3()

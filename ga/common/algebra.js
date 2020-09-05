@@ -43,6 +43,19 @@ function getBivec(mv, target)
 	return target
 }
 
+//"conjugate"
+function reverse(mv,target) {
+	target[0] = mv[0]
+	target[1] = mv[1]
+	target[2] = mv[2]
+	target[3] = mv[3]
+	target[4] = -mv[4]
+	target[5] = -mv[5]
+	target[6] = -mv[6]
+	target[7] = -mv[7]
+	return target
+};
+
 function wedge(a,b) //aka antisymmetric
 {
 	let p = geometricProduct(a, b)

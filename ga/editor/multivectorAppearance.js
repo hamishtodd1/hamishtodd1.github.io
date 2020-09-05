@@ -15,6 +15,8 @@
 
 function initMultivectorAppearances(characterMeshHeight)
 {
+    let maxInstances = 256
+    
     let vecMaterial = new THREE.MeshPhongMaterial({ vertexColors: THREE.FaceColors })
 
     let bivMaterial = new THREE.MeshPhongMaterial({ vertexColors: THREE.FaceColors, side: THREE.DoubleSide })
@@ -58,18 +60,6 @@ function initMultivectorAppearances(characterMeshHeight)
         // p.add(outline)
         // scene.add(p)
         // p.scale.setScalar(.16)
-        
-        //thickness might be good, tell you where it is
-        // let a = new THREE.LineSegments(new THREE.BufferGeometry(), lineMaterial )
-        // let coords = [0.,0.,0.,1./3.,0.,0.,1./3.,0.,0.,2./3.,0.,0.,2./3.,0.,0.,1.,0.,0.]
-        // a.geometry.setAttribute('position', new THREE.Float32BufferAttribute(coords, 3));
-        // let lineColors = []
-        // for (let i = 0; i < 3; ++i) {
-        //     let c = colors[name[i]]
-        //     lineColors.push(c.r, c.g, c.b, c.r, c.g, c.b)
-        // }
-        // a.geometry.setAttribute('color', new THREE.Float32BufferAttribute(lineColors, 3));
-        // scene.add(a)
 
         // let heightSegments = 32
         // let scalarGeometry = new THREE.CylinderGeometry(.5, .5, 1., 18, heightSegments)
@@ -124,7 +114,6 @@ function initMultivectorAppearances(characterMeshHeight)
         return name
     }
 
-    let maxInstances = 256
     MultivectorAppearance = () =>
     {
         let nonzeroGrades = [false, false, false, false]
@@ -135,12 +124,20 @@ function initMultivectorAppearances(characterMeshHeight)
 
         let zero = new THREE.InstancedMesh(zeroGeometry, zeroMaterial, maxInstances)
         mv.add(zero)
+
         let vec = new THREE.InstancedMesh(VecGeometry(mv.name), vecMaterial, maxInstances)
         mv.add(vec)
         let biv = new THREE.InstancedMesh(BivGeometry(mv.name), bivMaterial, maxInstances)
         mv.add(biv)
         let tri = new THREE.InstancedMesh(TriGeometry(mv.name), triMaterial,maxInstances)
         mv.add(tri)
+
+        //but how to know which one you want to see? maybe you're always best off seeing the line!
+        // let line = new THREE.InstancedMesh(LineGeometry(mv.name), lineMaterial, maxInstances)
+        // mv.add(line)
+        // line.count = 1
+        // m1.identity()
+        // line.setMatrixAt(0, m1)
 
         //yeah too stateful, of coooooourse you are modifying the elements partway through the frame
         mv.resetCount = () => {
@@ -343,11 +340,57 @@ function VecGeometry(name)
             }
         }
     }
-    if (name === "bgo") logged = 1
     vecGeometry.computeFaceNormals()
     vecGeometry.computeVertexNormals()
 
     return vecGeometry
+}
+
+//better would be generating the vertices first then using them
+//but that is barely any better. Really you want a different way of re-using the different arrays in drawing
+function LineGeometry(name)
+{
+    let radius = .04
+
+    let lineGeometry = new THREE.Geometry()
+
+    let radialSegments = 15
+    let heightSegments = 20
+    lineGeometry.vertices = Array((radialSegments + 1) * (heightSegments + 1))
+    lineGeometry.faces = Array(radialSegments * heightSegments)
+    for (let j = 0; j <= heightSegments; j++)
+    {
+        for (let i = 0; i <= radialSegments; i++)
+        {
+            v1.y = j / heightSegments
+            v1.z = 0.
+            v1.x = radius
+
+            v1.applyAxisAngle(yUnit, i / radialSegments * TAU)
+            lineGeometry.vertices[j * (radialSegments + 1) + i] = v1.clone()
+
+            if (i < radialSegments && j < heightSegments) // there are one fewer squares than vertices along both axes
+            {
+                let color = colors[name[Math.floor(v1.y * name.length)]]
+                lineGeometry.faces[(j * radialSegments + i) * 2 + 0] = new THREE.Face3(
+                    (j + 0) * (radialSegments + 1) + (i + 0),
+                    (j + 0) * (radialSegments + 1) + (i + 1),
+                    (j + 1) * (radialSegments + 1) + (i + 1),
+                    new THREE.Vector3().set(v1.x,v1.z,0.).normalize(),
+                    color
+                )
+                lineGeometry.faces[(j * radialSegments + i) * 2 + 1] = new THREE.Face3(
+                    (j + 0) * (radialSegments + 1) + (i + 0),
+                    (j + 1) * (radialSegments + 1) + (i + 1),
+                    (j + 1) * (radialSegments + 1) + (i + 0),
+                    new THREE.Vector3().set(v1.x,v1.z,0.).normalize(),
+                    color
+                )
+            }
+        }
+    }
+
+    return lineGeometry
 }
 
 function TriGeometry(name)
