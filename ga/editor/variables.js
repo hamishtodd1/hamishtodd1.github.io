@@ -1,7 +1,3 @@
-let displayCamera = new THREE.PerspectiveCamera(90., 1., .01)
-displayCamera.position.z = 8.5
-displayCamera.rotation.order = "YXZ"
-
 let colorCharacters = ""
 const colors = {
     "b": new THREE.Color(0., 0., 0.),
@@ -14,20 +10,23 @@ const colors = {
 }
 for (let color in colors) colorCharacters += color
 
+let backgroundString = "b g o\n\nw\nr\n\n  b  +g  \n  b  *g  \n  p  +b  \n\n  i*(j+k)=i*j+i*k\n  "
+const carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1., 1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
+const variables = []
+let numFreeParameterMultivectors = 0
+
+const pad = new THREE.Group()
+pad.position.y = -Infinity //updated later
+function getWorldLineHeight() { return pad.scale.y }
+scene.add(pad)
+
 const outputColumn = new THREE.Mesh(new THREE.PlaneBufferGeometry(1., 9999999.), new THREE.MeshBasicMaterial({ color: 0x1F1F1F }))
 outputColumn.renderOrder = 0
 outputColumn.material.depthTest = false
 
 const displayWindows = []
+let displayCamera = new THREE.PerspectiveCamera(90., 1., .01)
+displayCamera.position.z = 8.5
+displayCamera.rotation.order = "YXZ"
 
-const pad = new THREE.Group()
-pad.position.y = -Infinity //updated later
-function getWorldLineHeight(){return pad.scale.y}
-scene.add(pad)
-
-onClicks = []
-
-let backgroundString = "b g o\n\nw\nr\n\n  b  +g  \n  b  *g  \n  p  +b  \n\n  i*(j+k)=i*j+i*k\n  "
-const carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1., 1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
-const variables = []
-let numFreeParameterMultivectors = 0
+const onClicks = []

@@ -1,7 +1,8 @@
 /*
     Orthographic/almost orthographic camera is probably better. They're super small and you definitely want to see the integrals from above
+    Orthogonal from top, perspective from side?
+    "scale to fit vs don't" switch
 
-    Maybe better if the free-parameter-generating one is the one that comes with you. Start a new line 
     Could have another that is always at the bottom, that's what you draw in and it creates a new line
         Could be the one that has every single variable in it
         Fourier or taylor? Well sometimes you join up your loop. Fourier for that
@@ -15,16 +16,7 @@
         superimposed mvs
         functions
         footage (which is a function of t to R3)
-        can have a "scale to fit vs don't" switch
     Uses
-        choosing the next thing to happen
-            it'd be crowded to have every single variable. But maybe they only appear in place if you're almost going to snap to them?
-            drawing
-                functions from time to multivectors
-                individual multivectors
-                draw on top of what's already in there, eg a tangent vector on a curve
-                Grabbing a free parameter and editing it
-        Rotating
         Displaying the mouse ray in a separate view as you move it... need multiple points of view then?
             Maybe only set the rotations for the other things once you've let go?
         displaying animations of the operations, not just moving around
@@ -52,14 +44,6 @@
         Functions have inverses. a + b -> c, you get c. But the intermediate representation involves a,b,c as equal participants so you can visually reverse it?
         Well actually they're not equal participants, because b gets put onto the end of a (or vice versa)
 
-    So you're on a new line
-        There's a displayWindow but nothing in there
-        You type some mvs, say 3 of them, and they appear in there but you don't have an operation yet
-        If you click in the thing you make a new mv. Only got the 2 dimensions soooo
-        System goes through every combination of + and * for... certainly the basis vectors and what you've put in your line, maybe your whole scope
-
-    Exponential growth is very dynamical-system like, it is dependent on where you currently are
-
     Long term TODO
         when you change what you see in the window it back solves to change the free variables above?
             The same vector may be represented in many displayWindows, but you can grab and affect it in any you like
@@ -77,14 +61,8 @@
         Double click something in window, to get to the place where it is made
 
     What determines which things go in the display window?
-        Much better than built in rotation is rotating the basis vectors. x or y rotate around y, y rotate upwards or downwards
         Unless you have some highlighted in which case it's those?
-        "What is hightlighted" is a useful bit of state
-        Where/how many to have?
-            One for every line makes some sense. Inflate when you're on that line
-            Maybe the output column has what you need too
-            Can have an extra render window which is wherever the carat is, maybe highlighting the multivector it's nearest
-            display is still good but it's kind of a fallback
+        "What is hightlighted"?
 
     Representations, from abacus. Can build some from others?
 		A line you can grab bits of
@@ -148,6 +126,8 @@ function initOutputColumnAndDisplayWindows()
 
             if (mouse.rightClicking )
             {
+                // Much better than built in rotation is rotating the basis vectors.x or y rotate around y, y rotate upwards or downwards
+
                 v1.copy(mouse.raycaster.ray.direction)
                 v1.y = 0.
                 v2.copy(mouse.oldRaycaster.ray.direction)

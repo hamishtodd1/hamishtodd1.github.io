@@ -1,5 +1,25 @@
+/*
+    Fairly likely: you want to make one vector in terms of two or three others (Maybe also them-multiplied-by-integer complex numbers).
+
+    choosing the next thing to happen
+            it'd be crowded to have every single variable. But maybe they only appear in place if you're almost going to snap to them?
+            drawing
+                functions from time to multivectors
+                individual multivectors
+                draw on top of what's already in there, eg a tangent vector on a curve
+                Grabbing a free parameter and editing it
+
+    So you're on a new line
+        There's a displayWindow but nothing in there
+        You type some mvs, say 3 of them, and they appear in there but you don't have an operation yet
+        If you click in the thing you make a new mv. Only got the 2 dimensions soooo
+        System goes through every combination of + and * for... certainly the basis vectors and what you've put in your line, maybe your whole scope
+
+    Could put only highlighted ones in there
+*/
+
 function initMainDw() {
-    
+
     let mainDw = DisplayWindow()
     mainDw.scale.x = 10.5
     mainDw.scale.y = mainDw.scale.x
@@ -57,9 +77,21 @@ function initMainDw() {
         start: () => {
             if(selectedFunctionality === "make vector" ) {
                 ++numFreeParameterMultivectors
+                
+                let newlineNeeded = backgroundString[carat.positionInString] !== "\n" || (carat.positionInString !== 0 && backgroundString[carat.positionInString - 1] !== "\n")
+                if ( newlineNeeded ) {
+                    let backgroundStringLength = backgroundString.length
+                    while (backgroundString[carat.positionInString] === "\n" || carat.positionInString === backgroundStringLength - 1)
+                        ++carat.positionInString
+                    addStringAtCarat("\n")
+                }
+
                 let threeCharacterInsertion = variables[numFreeParameterMultivectors - 1].name
                 while (threeCharacterInsertion.length < 3) threeCharacterInsertion += " "
                 addStringAtCarat( threeCharacterInsertion )
+
+                //if there's nothing on this line other than " " and "\n", can go ahead
+                //otherwise, want to put in a \n at the end of this line, stick carat on new line
             }
         },
         during:()=>{

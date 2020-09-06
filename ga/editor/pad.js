@@ -1,6 +1,4 @@
 /* 
-	Add reverse
-
 	Is the location of the carat the place it has exectued up to? Maybe the preview window is dependent on where it is?
 		But you see the result of everything anyway. So no, it should just be where you get the thing that's in the carat-associated displayWindow
 		reverse polish might be pretty good. You see this thing, that thing, now they're in the same coord system, THEN some shit happens
@@ -580,9 +578,15 @@ function initTypeableCharacters(carat,maxCopiesOfALetter)
 		array: "",
 		instancedMeshes:{}
 	}
+	addStringAtPosition = (str,position) => {
+		backgroundString = 
+			backgroundString.substring(0, position) + 
+			str + 
+			backgroundString.substring(position, backgroundString.length)
+	}
 	addStringAtCarat = function(str)
 	{
-		backgroundString = backgroundString.substring(0, carat.positionInString) + str + backgroundString.substring(carat.positionInString, backgroundString.length)
+		addStringAtPosition(str,carat.positionInString)
 		carat.moveAlongString(str.length)
 	}
 	characters.add = function(character, displayedCharacter)
