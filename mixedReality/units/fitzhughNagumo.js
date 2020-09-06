@@ -78,150 +78,7 @@
 
 async function initFitzhughNagumo()
 {
-	let neuronMaterial = new THREE.MeshStandardMaterial();
-
-	let somaRadius = .025
-	let termRadius = .008
-
-	let somaCenter = somaRadius;
-	let axonStart = somaRadius + somaRadius * .35
-	let axonEnd = axonStart + somaRadius * 5
-	let termCenter = axonEnd + termRadius * .35
-	let totalLength = termCenter + termRadius;
-
-	let points = []
-	let placeWhereAxonMeetsSoma = new THREE.Vector2( Math.sqrt( sq(somaRadius) - sq(axonStart - somaCenter) ), axonStart );
-	let placeWhereAxonMeetsTerm = new THREE.Vector2( Math.sqrt( sq(termRadius) - sq(axonEnd   - termCenter) ), axonEnd   );
-	let somaGuide = new THREE.Vector2(0.,somaCenter).sub(placeWhereAxonMeetsSoma).rotateAround(new THREE.Vector2(),-TAU/4)
-	somaGuide.multiplyScalar(1.8)
-	let termGuide = new THREE.Vector2(0.,termCenter).sub(placeWhereAxonMeetsTerm).rotateAround(new THREE.Vector2(), TAU/4)
-	termGuide.multiplyScalar(1.9)
-
-	let curve = new THREE.CubicBezierCurve(
-		placeWhereAxonMeetsSoma,
-		somaGuide.add(placeWhereAxonMeetsSoma),
-		termGuide.add(placeWhereAxonMeetsTerm),
-		placeWhereAxonMeetsTerm)
-	log(placeWhereAxonMeetsSoma,placeWhereAxonMeetsTerm)
-
-	let neuronRadialSegments = 64;
-	let neuronHeightSegments = 100;
-	let neuron = new THREE.Mesh(
-		new THREE.CylinderGeometryUncentered(1.,totalLength,neuronRadialSegments,neuronHeightSegments),
-		neuronMaterial);//should cast shadow on itself
-	scene.add(neuron)
-	neuron.position.copy(rightHand.position)
-
-	log(neuron.geometry.vertices.length-2)
-	let v = null;
-	let radius = -1;
-	for(let i = 0; i < (neuronHeightSegments+1); i++)
-	{
-		v = neuron.geometry.vertices[i*neuronRadialSegments+0];
-
-		if( axonStart <= v.y && v.y < axonEnd)
-		{
-			let proportionThrough = ( v.y - axonStart ) / (axonEnd-axonStart)
-			radius = curve.getPoint(proportionThrough).x;
-		}
-		else if( v.y < axonStart)
-		{
-			let distFromSphereCenterOnAxis = Math.abs(v.y-somaCenter)
-			radius = Math.sqrt(Math.max(0,sq(somaRadius) - sq(distFromSphereCenterOnAxis)));
-		}
-		else
-		{
-			let distFromSphereCenterOnAxis = Math.abs(v.y-termCenter)
-			radius = Math.sqrt(Math.max(0,sq(termRadius) - sq(distFromSphereCenterOnAxis)));
-		}
-
-		for(let j = 0; j < neuronRadialSegments; j++)
-		{
-			v = neuron.geometry.vertices[i*neuronRadialSegments+j];
-			// v.multiplyScalar(1. + Math.random() * .1)
-			v.x *= radius + Math.random() * 0.0014;
-			v.z *= radius + Math.random() * 0.0014;
-		}
-	}
-
-	for(let i = 0, il = neuron.geometry.vertices.length; i < il; i++)
-		neuron.geometry.vertices[i].y -= somaRadius;
-
-	neuron.geometry.computeFaceNormals();
-	neuron.geometry.computeVertexNormals();
-
-	neuron.rotation.z -= TAU*3/8
-
-	let radialSegments = 8;
-	let heightSegments = 4;
-	let dendriteRadius = .01
-	let dendrite = new THREE.Mesh(new THREE.CylinderGeometryUncentered(dendriteRadius,.1,radialSegments,heightSegments,true),neuronMaterial);//should cast shadow on itself
-	scene.add(dendrite)
-	dendrite.position.copy(rightHand.position)
-
-	let intendedDendriteEndPosition = new THREE.Vector3();
-	let direction = new THREE.Vector3()
-
-	rightHand.visible = false
-
-	updateFunctions.push(function()
-	{
-		// neuron.quaternion.copy(rightHand.quaternion)
-		
-		intendedDendriteEndPosition.set(0,1,1).applyAxisAngle(zUnit,frameCount*.06).add(rightHand.position)
-
-		direction.copy( intendedDendriteEndPosition ).sub(neuron.position).setLength(1)
-		dendrite.position.copy(direction).setLength(somaRadius*neuron.scale.x).add(neuron.position)
-		redirectCylinder(dendrite, dendrite.position, direction)
-
-		// let dendriteDirection = intendedDendriteEndPosition.clone().applyMatrix(neuron.matrixWorldInverse);
-		// dendriteDirection.sub()
-
-		dendrite.updateMatrixWorld()
-		neuron.updateMatrixWorld()
-
-		let v = new THREE.Vector3()
-		for(let i = dendrite.geometry.vertices.length - radialSegments, il = dendrite.geometry.vertices.length; i < il; i++)
-		{
-			v.copy(dendrite.geometry.vertices[i-radialSegments])
-			v.y = 0. //"what the bottom vertices are supposed to be"
-			dendrite.localToWorld(v)
-			neuron.worldToLocal(v)
-
-			let closestDistSq = Infinity;
-			let distSq = 0.;
-			let attachingV = new THREE.Vector3()
-			for(let j = 0, jl = neuron.geometry.vertices.length; j < jl; j++)
-			{
-				distSq = v.distanceToSquared(neuron.geometry.vertices[j])
-				if(distSq < closestDistSq)
-				{
-					distSq = closestDistSq
-					attachingV.copy(neuron.geometry.vertices[j])
-				}
-			}
-
-
-			// log(attachingV)
-			neuron.localToWorld(attachingV)
-			dendrite.worldToLocal(attachingV)
-			dendrite.geometry.vertices[i].copy(attachingV)
-		}
-		dendrite.geometry.verticesNeedUpdate = true
-	})
-
-
-	/*
-		Mesh instancing
-		Ehhhhh, ooooor, a few neurons for wiring and a single big mesh
-	*/
-
-	
-
-
-	return
-
-	var dimension = 128; //still kinda works at 180, but uh, best not to go there
+	let dimension = 128; //still kinda works at 180, but uh, best not to go there
 	let textureDimensions = new THREE.Vector2(dimension,dimension*dimension);
 
 	let initialState = new Float32Array( textureDimensions.x * textureDimensions.y * 4 );
@@ -230,10 +87,7 @@ async function initFitzhughNagumo()
 	let layersToExciteV = [dimension / 2 + 12,dimension / 2 + 13,dimension / 2 + 14,dimension / 2 + 15];
 
 	//try it as a blob!
-	function ijkToI(i,j,k)
-	{
-		return i + k*dimension*dimension + dimension*j;
-	}
+	let ijkToI = (i, j, k) => i + k * dimension * dimension + dimension * j
 	let center = new THREE.Vector3(Math.floor(dimension/2),Math.floor(dimension/2),Math.floor(dimension/2));
 	let a = new THREE.Vector3();
 	for(let i = 0; i < dimension; i++)
@@ -270,11 +124,152 @@ async function initFitzhughNagumo()
 	let scalarField = await scalarFieldVisualization({data2d,dimension});
 	updateFunctions.push(function()
 	{
-		brush.copy( scalarField.worldToLocal(rightHand.position.clone()) )
-		log(brush)
+		scalarField.position.copy(rightHand.position)
+
+		if(mouse.clicking)
+			mouse.rotateObjectByGesture(scalarField)
+
+		// brush.copy( scalarField.worldToLocal(rightHand.position.clone()) )
 		// brush.x = -1000
 
 		// scalarField.rotation.y += 0.01
 		// scalarField.rotation.x += 0.01
 	})
+}
+
+function initNeuron() {
+	let neuronMaterial = new THREE.MeshStandardMaterial();
+
+	let somaRadius = .025
+	let termRadius = .008
+
+	let somaCenter = somaRadius;
+	let axonStart = somaRadius + somaRadius * .35
+	let axonEnd = axonStart + somaRadius * 5
+	let termCenter = axonEnd + termRadius * .35
+	let totalLength = termCenter + termRadius;
+
+	let placeWhereAxonMeetsSoma = new THREE.Vector2(Math.sqrt(sq(somaRadius) - sq(axonStart - somaCenter)), axonStart);
+	let placeWhereAxonMeetsTerm = new THREE.Vector2(Math.sqrt(sq(termRadius) - sq(axonEnd - termCenter)), axonEnd);
+	let somaGuide = new THREE.Vector2(0., somaCenter).sub(placeWhereAxonMeetsSoma).rotateAround(new THREE.Vector2(), -TAU / 4)
+	somaGuide.multiplyScalar(1.8)
+	let termGuide = new THREE.Vector2(0., termCenter).sub(placeWhereAxonMeetsTerm).rotateAround(new THREE.Vector2(), TAU / 4)
+	termGuide.multiplyScalar(1.9)
+
+	let curve = new THREE.CubicBezierCurve(
+		placeWhereAxonMeetsSoma,
+		somaGuide.add(placeWhereAxonMeetsSoma),
+		termGuide.add(placeWhereAxonMeetsTerm),
+		placeWhereAxonMeetsTerm)
+	log(placeWhereAxonMeetsSoma, placeWhereAxonMeetsTerm)
+
+	let neuronRadialSegments = 64;
+	let neuronHeightSegments = 100;
+	let neuron = new THREE.Mesh(
+		new THREE.CylinderGeometryUncentered(1., totalLength, neuronRadialSegments, neuronHeightSegments),
+		neuronMaterial);//should cast shadow on itself
+	scene.add(neuron)
+	neuron.position.copy(rightHand.position)
+
+	log(neuron.geometry.vertices.length - 2)
+	let v = null;
+	let radius = -1;
+	for (let i = 0; i < (neuronHeightSegments + 1); i++)
+	{
+		v = neuron.geometry.vertices[i * neuronRadialSegments + 0];
+
+		if (axonStart <= v.y && v.y < axonEnd)
+		{
+			let proportionThrough = (v.y - axonStart) / (axonEnd - axonStart)
+			radius = curve.getPoint(proportionThrough).x;
+		}
+		else if (v.y < axonStart)
+		{
+			let distFromSphereCenterOnAxis = Math.abs(v.y - somaCenter)
+			radius = Math.sqrt(Math.max(0, sq(somaRadius) - sq(distFromSphereCenterOnAxis)));
+		}
+		else
+		{
+			let distFromSphereCenterOnAxis = Math.abs(v.y - termCenter)
+			radius = Math.sqrt(Math.max(0, sq(termRadius) - sq(distFromSphereCenterOnAxis)));
+		}
+
+		for (let j = 0; j < neuronRadialSegments; j++)
+		{
+			v = neuron.geometry.vertices[i * neuronRadialSegments + j];
+			// v.multiplyScalar(1. + Math.random() * .1)
+			v.x *= radius + Math.random() * 0.0014;
+			v.z *= radius + Math.random() * 0.0014;
+		}
+	}
+
+	for (let i = 0, il = neuron.geometry.vertices.length; i < il; i++)
+		neuron.geometry.vertices[i].y -= somaRadius;
+
+	neuron.geometry.computeFaceNormals();
+	neuron.geometry.computeVertexNormals();
+
+	neuron.rotation.z -= TAU * 3 / 8
+
+	let radialSegments = 8;
+	let heightSegments = 4;
+	let dendriteRadius = .01
+	let dendrite = new THREE.Mesh(new THREE.CylinderGeometryUncentered(dendriteRadius, .1, radialSegments, heightSegments, true), neuronMaterial);//should cast shadow on itself
+	scene.add(dendrite)
+	dendrite.position.copy(rightHand.position)
+
+	let intendedDendriteEndPosition = new THREE.Vector3();
+	let direction = new THREE.Vector3()
+
+	rightHand.visible = false
+
+	updateFunctions.push(function ()
+	{
+		// neuron.quaternion.copy(rightHand.quaternion)
+
+		intendedDendriteEndPosition.set(0, 1, 1).applyAxisAngle(zUnit, frameCount * .06).add(rightHand.position)
+
+		direction.copy(intendedDendriteEndPosition).sub(neuron.position).setLength(1)
+		dendrite.position.copy(direction).setLength(somaRadius * neuron.scale.x).add(neuron.position)
+		redirectCylinder(dendrite, dendrite.position, direction)
+
+		// let dendriteDirection = intendedDendriteEndPosition.clone().applyMatrix(neuron.matrixWorldInverse);
+		// dendriteDirection.sub()
+
+		dendrite.updateMatrixWorld()
+		neuron.updateMatrixWorld()
+
+		let v = new THREE.Vector3()
+		for (let i = dendrite.geometry.vertices.length - radialSegments, il = dendrite.geometry.vertices.length; i < il; i++)
+		{
+			v.copy(dendrite.geometry.vertices[i - radialSegments])
+			v.y = 0. //"what the bottom vertices are supposed to be"
+			dendrite.localToWorld(v)
+			neuron.worldToLocal(v)
+
+			let closestDistSq = Infinity;
+			let distSq = 0.;
+			let attachingV = new THREE.Vector3()
+			for (let j = 0, jl = neuron.geometry.vertices.length; j < jl; j++)
+			{
+				distSq = v.distanceToSquared(neuron.geometry.vertices[j])
+				if (distSq < closestDistSq)
+				{
+					distSq = closestDistSq
+					attachingV.copy(neuron.geometry.vertices[j])
+				}
+			}
+
+
+			// log(attachingV)
+			neuron.localToWorld(attachingV)
+			dendrite.worldToLocal(attachingV)
+			dendrite.geometry.vertices[i].copy(attachingV)
+		}
+		dendrite.geometry.verticesNeedUpdate = true
+	})
+	/*
+		Mesh instancing
+		Ehhhhh, ooooor, a few neurons for wiring and a single big mesh
+	*/
 }

@@ -25,8 +25,6 @@ async function initIcerm(gl) {
 	//movement wants to feel pleasant + be understood
 
 	let ellipticCurveSpace = await scalarFieldVisualization({source:2});
-	
-
 	updateFunctions.push(function()
 	{
 		ellipticCurveSpace.quaternion.copy(rightHand.quaternion)

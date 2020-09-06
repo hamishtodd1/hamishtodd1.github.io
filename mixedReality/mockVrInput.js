@@ -36,7 +36,7 @@ function initMockVrInput()
 		// }
 		// p.x = 0.2
 
-		// p.add(visiblePosition)
+		p.add(visiblePosition)
 
 		// rightHand.rotation.x = 1.6*Math.sin(t*0.1)
 		// rightHand.rotation.y = 1.5*Math.sin(t*0.13)

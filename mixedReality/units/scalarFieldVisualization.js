@@ -66,7 +66,6 @@ async function scalarFieldVisualization(params)
 		uniforms.data2d.value.needsUpdate = true;
 	}
 
-	scalarField.position.copy(rightHand.position);
 	alwaysUpdateFunctions.push(function()
 	{
 		scalarField.updateMatrixWorld()
@@ -88,9 +87,8 @@ async function scalarFieldVisualization(params)
 		bindButton("1",function()
 		{
 			uniforms.source.value++;
-			if(uniforms.source.value > 2) {
-				uniforms.source.value = 0;
-			}
+			if(uniforms.source.value > 2)
+				uniforms.source.value = 0
 		})
 
 		bindToggle("5",uniforms.cubeVolume)
@@ -98,42 +96,30 @@ async function scalarFieldVisualization(params)
 		bindButton("2",function()
 		{
 			if( uniforms.doGas.value && uniforms.doIsosurface.value )
-			{
 				uniforms.doGas.value = false;
-			}
 			else if(!uniforms.doGas.value && uniforms.doIsosurface.value )
 			{
 				uniforms.doGas.value = true;
 				uniforms.doIsosurface.value = false;
 			}
 			else if( uniforms.doGas.value &&!uniforms.doIsosurface.value )
-			{
 				uniforms.doIsosurface.value = true;
-			}
 		})
 
 		bindButton("3",function()
 		{
 			if(!uniforms.doGas.value)
-			{
 				uniforms.doGas.value = true;
-			}
 			else
-			{
 				uniforms.bothGasColors.value = !uniforms.bothGasColors.value;
-			}
 		})
 
 		bindButton("4",function()
 		{
 			if(!uniforms.doIsosurface.value)
-			{
 				uniforms.doIsosurface.value = true;
-			}
 			else
-			{
 				uniforms.squarish.value = !uniforms.squarish.value;
-			}
 		})
 	}
 
