@@ -25,13 +25,9 @@ pad.position.y = -Infinity //updated later
 function getWorldLineHeight(){return pad.scale.y}
 scene.add(pad)
 
-let backgroundString = "b g o\n\nw\nr\n\n  b  +g  \n  b  *g  \n  p  +b  \n\n  i*(j+k)=i*j+i*k\n  "
-
-let trailMode = false //TODO VERY HACKY FOR THIS TO BE GLOBAL
-bindButton("Control", () => { trailMode = !trailMode })
-
 onClicks = []
 
+let backgroundString = "b g o\n\nw\nr\n\n  b  +g  \n  b  *g  \n  p  +b  \n\n  i*(j+k)=i*j+i*k\n  "
 const carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1., 1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
 const variables = []
 let numFreeParameterMultivectors = 0
