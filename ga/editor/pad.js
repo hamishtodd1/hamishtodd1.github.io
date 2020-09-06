@@ -99,17 +99,8 @@ async function initPad(characterMeshHeight)
 	}
 	let copyVariable = copyMultivector
 
-	// let GraphAppearance = ()=> {
-	// 	let graphAppearance = new THREE.InstancedMesh()
-	// 	scene.add(graphAppearance
-	// }
-	// GraphAppearance()
+	initCaratAndNavigation()
 
-	let carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1.,1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
-	carat.positionInString = -1
-	initCaratAndNavigation(carat)
-
-	let variables = []
 	for(let i = 0; i < 63; i++)
 		VariableAppearance()
 	let pictogramWidthInCharacters = 3
@@ -130,103 +121,9 @@ async function initPad(characterMeshHeight)
 	copyVariable(new THREE.Vector3(-1., 0., 0.),variables[3].elements)
 	variables[4].elements[7] = 2.
 	variables[5].elements[4] = 1.5
-	let numFreeParameterMultivectors = 6
+	numFreeParameterMultivectors = 6
 
-	{
-		let inputDw = DisplayWindow()
-		inputDw.scale.x = 10.5
-		inputDw.scale.y = inputDw.scale.x
-		inputDw.renderOrder = carat.renderOrder + 1
-		carat.material.depthTest = false
-
-		let buttons = {}
-		function addButton(newLabel)
-		{
-			let index = 0
-			for(label in buttons) ++index
-
-			buttons[newLabel] = text(newLabel)	
-			buttons[newLabel].scale.multiplyScalar(.1)
-			inputDw.add(buttons[newLabel])	
-
-			buttons[newLabel].position.y = -.5 - buttons[newLabel].scale.y * (.5 + index * 1.1)
-			buttons[newLabel].position.z = .01
-
-			onClicks.push({
-				z: () => mouse.checkIfOnScaledUnitSquare(buttons[newLabel]) ? 2. : -Infinity,
-				start: () => { selectedFunctionality = newLabel },
-			})
-		}
-		addButton("make vector")
-		addButton("make R->R2")
-		let selectedFunctionality = null
-
-		//better: doodle on what seems to you like a plane, but it's extruded in z because z is input time
-		//or the doodling stays on the plane and if you look at it three dimensionally it's extruded?
-		{
-			var mouseTrail = new THREE.Line(new THREE.Geometry())
-			inputDw.scene.add(mouseTrail)
-			for (let i = 0; i < 256; i++)
-				mouseTrail.geometry.vertices.push(new THREE.Vector3())
-			var lastTrailVertexToBeAssigned = 0
-		}
-
-		onClicks.push({
-			z: () => mouse.checkIfOnScaledUnitSquare(inputDw) ? 1. : -Infinity,
-			start: () => {
-				if(selectedFunctionality === "make vector" ) {
-					++numFreeParameterMultivectors
-					let threeCharacterInsertion = variables[numFreeParameterMultivectors - 1].name
-					while (threeCharacterInsertion.length < 3) threeCharacterInsertion += " "
-					addStringAtCarat( threeCharacterInsertion )
-				}
-			},
-			during:()=>{
-				if ( selectedFunctionality === "make R->R2") {
-					let ndcOnDisplayWindow = inputDw.worldToLocal(mouse.getZZeroPosition(v1))
-
-					mouseTrail.geometry.vertices[lastTrailVertexToBeAssigned].set(ndcOnDisplayWindow.x, ndcOnDisplayWindow.y, 0.)
-					mouseTrail.geometry.vertices[lastTrailVertexToBeAssigned].multiplyScalar(8.)
-					for (let i = lastTrailVertexToBeAssigned + 1, il = mouseTrail.geometry.vertices.length; i < il; i++)
-						mouseTrail.geometry.vertices[i].copy(mouseTrail.geometry.vertices[lastTrailVertexToBeAssigned])
-					mouseTrail.geometry.verticesNeedUpdate = true
-
-					++lastTrailVertexToBeAssigned
-					if (lastTrailVertexToBeAssigned >= mouseTrail.geometry.vertices.length)
-						lastTrailVertexToBeAssigned = 0
-				}
-
-				if ( selectedFunctionality === "make vector") {
-					//TODO they're getting created permanently
-
-					let variable = variables[numFreeParameterMultivectors - 1]
-
-					mouse.getZZeroPosition(v1)
-					inputDw.worldToLocal(v1)
-					for (let i = 0, il = variable.elements.length; i < il; ++i)
-						variable.elements[i] = 0.
-					variable.elements[1] = v1.x
-					variable.elements[2] = v1.y
-
-					//COULD use numerals to display the string it as a linear combination of the things, but where would be the fun in that?
-				}
-			}
-		})
-
-		updateFunctions.push(() =>
-		{
-			for (functionality in buttons)
-				buttons[functionality].material.color.g = functionality === selectedFunctionality ? 0. : 1.
-
-			v1.copy(carat.position)
-			pad.localToWorld(v1)
-			let bottomYDestination = v1.y - .5 * pad.scale.y
-			if (bottomYDestination > camera.topAtZZero - inputDw.scale.y)
-				bottomYDestination = camera.topAtZZero - inputDw.scale.y
-			inputDw.bottomY += .1 * (bottomYDestination - inputDw.bottomY)
-			inputDw.position.x = camera.rightAtZZero - inputDw.scale.x * .5
-		})
-	}
+	initMainDw()
 
 	let maxCopiesOfALetter = 256
 	let characters = initTypeableCharacters(carat, maxCopiesOfALetter)
@@ -627,8 +524,10 @@ async function initPad(characterMeshHeight)
 	})
 }
 
-function initCaratAndNavigation(carat)
+function initCaratAndNavigation()
 {
+	carat.positionInString = -1
+
 	carat.renderOrder = 9999999
 	carat.material.depthTest = false
 	carat.geometry.translate(.5, 0., 0.)

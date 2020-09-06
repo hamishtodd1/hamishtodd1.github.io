@@ -31,3 +31,7 @@ let trailMode = false //TODO VERY HACKY FOR THIS TO BE GLOBAL
 bindButton("Control", () => { trailMode = !trailMode })
 
 onClicks = []
+
+const carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1., 1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
+const variables = []
+let numFreeParameterMultivectors = 0
