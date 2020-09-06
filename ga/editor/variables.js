@@ -21,8 +21,6 @@ function getWorldLineHeight() { return pad.scale.y }
 scene.add(pad)
 
 const outputColumn = new THREE.Mesh(new THREE.PlaneBufferGeometry(1., 9999999.), new THREE.MeshBasicMaterial({ color: 0x1F1F1F }))
-outputColumn.renderOrder = 0
-outputColumn.material.depthTest = false
 
 const displayWindows = []
 let displayCamera = new THREE.PerspectiveCamera(90., 1., .01)

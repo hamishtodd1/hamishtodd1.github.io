@@ -1,16 +1,15 @@
 /* 
 	Next
-		functions to graphs
-		mvs in the dw. Gets you whole thing visualized!
+		mvs and functions in the dw
 		shadows
 
 	TODO demo / first videos
 		Functions
+			Can be written
 			Visualized
 			made by drawing in view
 				fourier approximation. If you loop back it's a 2D function, if not 1D
 		altering all multivectors with mouse
-		Navigating code does what is interesting in the displaywindow
 		Basic Omicron reduction
 			Describe properties of a variable or function then make function
 			differentiate/integrate polynomials
@@ -19,7 +18,8 @@
 		What to demonstrate
 			Lunar lander/simple harmonic oscillator?
 			velocity space or differential space
-		Naming system ug
+			Footage though
+		Naming system ugh
 			One idea: record what names got attributed to what calculations
 		Interested parties
 			Language people: Alan, Meurig, Martin, futureOfCoding, Yoshiki, Cynthia Solomon, Andy Matuschak
@@ -63,7 +63,7 @@
 		Maybe charles is right, vectors are translations and points are the things you're moving around
 		Your intermediate representation is a translated vector? So a + b is sorta not fundamental?
 
-	You can't visualize the multivector without some (theoretical values) for it
+	You can't visualize the multivector without some theoretical values for it
 		very Tokiedan though: examples examples examples!
 		Or can you? Little disk with colors?
 		Both a blessing and a curse? Get people too used to a certain state, unable to think in the abstract?
@@ -71,7 +71,10 @@
 		Hey, it works for debuggers. It's a slice through possibility space
 		Working with the function, maybe represented as an infinite line of mvs, is for the game
 
+
 	integration and differentiation
+		"Behaviour" is about responses to changes. Changes happen over time. To study changes over time you need calculus
+		Because you can do slicing, should be able to think of all derivatives as spatial derivatives instead of time
 		Stuff about dual numbers in siggraph course notes?
 			sq(ei) =-1 => exp(a*ei) = cos(a) + sin(a) * ei
 			sq(ej) = 0 => exp(a*ej) = 1 + a*e0
@@ -168,8 +171,6 @@
 			//for any approximation of integral of f with given dt, we can scale f such that you get that dt level precision
 			//multiply final result by dt... but that is just a scalar multiple, only relevant if you put symbols on the y axis so to speak
 		}
-
-	Ideally wanna be able to program your own visualization, then use that to visualize your program
 */
 
 function init()
@@ -177,11 +178,12 @@ function init()
 	let characterMeshHeight = .4
 
 	initMultivectorAppearances(characterMeshHeight)
-	initOutputColumnAndDisplayWindows()
+	initDisplayWindows()
+	initOutputColumn()
 
 	initPad(characterMeshHeight)
 
 	// initClickyVideo()
 
-	// initFuncViz()
+	initFuncViz()
 }

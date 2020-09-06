@@ -1,4 +1,14 @@
 /*
+    So you have mv and you have operation, either order
+	We curry the fuckers into a picture of that mv with that symbol on it. Now it's "just" juxtaposition of pictures
+	You can think of all functions as having one argument thanks to all these fucking pairings
+	It's like the geometric product IS function application
+	Philosophically, we are never creating functions that do object1 -> object2.
+		All we are ever doing is currying to get new objects. There's no "vector that I am going to add". There is only "translator, which I got from vector and symbol"
+	So the history is
+		They decided the geometric product is "so natural" that you don't need a symbol
+		This is to say, they made it so any time you see an mv to the left of another mv, you know the first is "being applied" to the second
+
     Is it possible to view these as all the same?
         Countour is "just" slices of volumetric
 
@@ -73,11 +83,11 @@ function initFuncViz()
     //can't do this coordinate-free shit for a graph really, you need an origin
     let curveMaterial = new THREE.LineBasicMaterial({ color: 0xFF0000 })
     let surfaceMaterial = new THREE.MeshPhongMaterial({ color: 0xFF0000, side:THREE.DoubleSide })
-    function FuncViz(func,inputDimension,outputDimension) {
-        let viz = new THREE.Group()
-        // viz.add(Grid())
 
-        let numSamples = 256
+    let maxInstances = 256
+
+    let numSamples = 256
+    function FuncViz(func,inputDimension,outputDimension) {
         let range = [-Math.PI, Math.PI] //ideally -infinity,infinity
         /*
             Could check if f(-pi) = f(pi) and if so use that domain, otherwise something else
@@ -98,84 +108,72 @@ function initFuncViz()
                     intersection:f(y) = abs(y)>1 ? infinity : sqrt(1-y*y) - rasterization
         */
 
-        if(inputDimension === 1 && outputDimension === 1) {
-            let curve = new THREE.Line(new THREE.Geometry(), curveMaterial)
-            for (let i = 0; i <= numSamples; i++) {
-                let p = new THREE.Vector3()
-                p.x = (i / numSamples) * (range[1] - range[0]) + range[0]
-                p.y = func(p.x)
-                curve.geometry.vertices.push(p)
-            }
-            viz.add(curve)
-        }
+        if (inputDimension === 1) {
+            var geo = new THREE.Geometry()
+            for (let i = 0; i <= numSamples; i++) geo.vertices.push(new THREE.Vector3())
 
-        if (inputDimension === 1 && outputDimension === 2) {
-            let curve = new THREE.Line(new THREE.Geometry(), curveMaterial)
-            for (let i = 0; i <= numSamples; i++) {
-                let p = new THREE.Vector3()
-                p.z = (i / numSamples) * (range[1] - range[0]) + range[0]
-                func(p.z,p)
-                curve.geometry.vertices.push(p)
+            if( outputDimension === 1) {
+                geo.vertices.forEach( (p)=> {
+                    p.x = (i / numSamples) * (range[1] - range[0]) + range[0]
+                    p.y = func(p.x)
+                })
             }
-            viz.add(curve)
-        }
+            else if( outputDimension === 2) {
+                geo.vertices.forEach( (p)=> {
+                    p.z = (i / numSamples) * (range[1] - range[0]) + range[0]
+                    func(p.z,p)
+                })
+            }
+            else if( outputDimension === 3) {
+                geo.vertices.forEach( (p)=> {
+                    let t = (i / numSamples) * (range[1] - range[0]) + range[0]
+                    func(t, p)
+                })
+            }
 
-        if (inputDimension === 1 && outputDimension === 3)
+            return new THREE.InstancedMesh(geo, curveMaterial,maxInstances)
+        }
+        else if (inputDimension === 2 && outputDimension === 3)
         {
-            let curve = new THREE.Line(new THREE.Geometry(), curveMaterial)
-            for (let i = 0; i <= numSamples; i++)
-            {
-                let p = new THREE.Vector3()
-                let t = (i / numSamples) * (range[1] - range[0]) + range[0]
-                func(t, p)
-                curve.geometry.vertices.push(p)
-            }
-            viz.add(curve)
-        }
-
-        if (inputDimension === 2 && outputDimension === 3)
-        {
-            let surface = new THREE.Mesh(new THREE.PlaneGeometry(1.,1.,numSamples-1,numSamples-1), surfaceMaterial)
+            let geo = new THREE.PlaneGeometry(1., 1., numSamples - 1, numSamples - 1)
 
             for (let i = 0, il = numSamples * numSamples; i < il; ++i) {
                 let x =             (i % numSamples) / (numSamples - 1)
                 let y = (Math.floor(i / numSamples)) / (numSamples - 1)
                 x = x * (range[1] - range[0]) + range[0]
                 y = y * (range[1] - range[0]) + range[0]
-                func(x,y, surface.geometry.vertices[i])
+                func(x, y, geo.vertices[i])
             }
-            viz.add(surface)
+            
+            return new THREE.InstancedMesh(geo, surfaceMaterial, maxInstances)
         }
-
-        updateFunctions.push(() => { 
-            viz.rotation.y += .05
-            // viz.rotation.x += .05
-        })
-
-        return viz
+        else
+            log("unvisualizable function dimensionalities")
     }
-    let sqFunction = (x) => x * x //shader mofo. Transpile to glsl
-    let graph = FuncViz(sqFunction,1,1)
-    scene.add(graph)
 
-    let helixFunction = (t, target) => {
-        let numTwists = 2.
-        target.x = Math.cos(t*numTwists)
-        target.y = Math.sin(t*numTwists)
-    }
-    scene.add(FuncViz(helixFunction, 1, 2))
+    // let sqFunc = (x) => x * x //shader mofo. Transpile to glsl
+    // scene.add(FuncViz(sqFunc, 1, 1))
 
-    let torusKnotFunc = (t, target) => {
-        let minorAngle = t * 2.
-        let majorAngle = t * 3.
+    // let helixFunction = (t, target) => {
+    //     let numTwists = 2.
+    //     target.x = Math.cos(t*numTwists)
+    //     target.y = Math.sin(t*numTwists)
+    // }
+    // scene.add(FuncViz(helixFunction, 1, 2))
 
-        let majorRadius = 1.
-        let minorRadius = .6
-        target.x = Math.cos(minorAngle) * (majorRadius + minorRadius * Math.cos(majorAngle))
-        target.y = Math.sin(minorAngle) * (majorRadius + minorRadius * Math.cos(majorAngle))
-        target.z = minorRadius * Math.sin(majorAngle)
-    }
-    scene.add(FuncViz(torusKnotFunc, 1, 3))
+    // let torusKnotFunc = (t, target) => {
+    //     let minorAngle = t * 2.
+    //     let majorAngle = t * 3.
+
+    //     let majorRadius = 1.
+    //     let minorRadius = .6
+    //     target.x = Math.cos(minorAngle) * (majorRadius + minorRadius * Math.cos(majorAngle))
+    //     target.y = Math.sin(minorAngle) * (majorRadius + minorRadius * Math.cos(majorAngle))
+    //     target.z = minorRadius * Math.sin(majorAngle)
+    // }
+    // scene.add(FuncViz(torusKnotFunc, 1, 3))
+
+
 
     function torusFunc(minorAngle,majorAngle,target) {
         let majorRadius = 1.
@@ -190,5 +188,9 @@ function initFuncViz()
         target.x = Math.cos(latitude) * Math.sin(longtitude)
         target.z = Math.cos(latitude) * Math.cos(longtitude)
     }
-    scene.add(FuncViz(torusFunc, 2, 3))
+    let torusFuncViz = FuncViz(torusFunc, 2, 3)
+    scene.add(torusFuncViz)
+    m1.identity()
+    torusFuncViz.setMatrixAt(0, m1)
+    torusFuncViz.count = 1
 }

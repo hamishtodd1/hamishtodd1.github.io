@@ -3,20 +3,8 @@
     Orthogonal from top, perspective from side?
     "scale to fit vs don't" switch
 
-    Could have another that is always at the bottom, that's what you draw in and it creates a new line
-        Could be the one that has every single variable in it
-        Fourier or taylor? Well sometimes you join up your loop. Fourier for that
-        It's a particular
-        If you've got projective geometry, i.e. lines = circles with center at infinity, can't you have a square wave represented exactly?
-    Carat on newline, nothing in dw, clicking creates new parameter
-    Carat on line with up to 3 mvs, it tries every operation on them. Can't get what you want? Tough, make a new line with a free parameter
-
-    The boxes can display
-        mvs
-        superimposed mvs
-        functions
-        footage (which is a function of t to R3)
     Uses
+        displaying footage
         Displaying the mouse ray in a separate view as you move it... need multiple points of view then?
             Maybe only set the rotations for the other things once you've let go?
         displaying animations of the operations, not just moving around
@@ -75,7 +63,7 @@
     Alright so juxtaposition f x is "apply function to x". And because your objects, curried with geometric product, are functions...
 */
 
-function initOutputColumnAndDisplayWindows()
+function initDisplayWindows()
 {
     {
         let gridSize = 8
@@ -143,13 +131,21 @@ function initOutputColumnAndDisplayWindows()
                 displayCamera.rotation.y += horizontalDelta * 60.
                 displayCamera.rotation.x += verticalDelta * 60.
                 displayCamera.rotation.x = clamp(displayCamera.rotation.x, -TAU / 4., TAU / 4.)
-
-                displayCamera.quaternion.setFromEuler(displayCamera.rotation)
-
-                let currentDistFromCamera = displayCamera.position.length()
-                v1.set(0., 0., -currentDistFromCamera).applyQuaternion(displayCamera.quaternion).add(displayCamera.position)
-                displayCamera.position.sub(v1)
             }
+            else {
+                let closestIntegerMultipleX = Math.round(displayCamera.rotation.x / (TAU/4.)) * TAU/4
+                let closestIntegerMultipleY = Math.round(displayCamera.rotation.y / (TAU/4.)) * TAU/4
+                if (Math.abs(closestIntegerMultipleX - displayCamera.rotation.x) < .3 && 
+                    Math.abs(closestIntegerMultipleY - displayCamera.rotation.y) < .3) {
+                    displayCamera.rotation.x += getStepTowardDestination(displayCamera.rotation.x, closestIntegerMultipleX)
+                    displayCamera.rotation.y += getStepTowardDestination(displayCamera.rotation.y, closestIntegerMultipleY)
+                }
+            }
+
+            displayCamera.quaternion.setFromEuler(displayCamera.rotation)
+            let currentDistFromCamera = displayCamera.position.length()
+            v1.set(0., 0., -currentDistFromCamera).applyQuaternion(displayCamera.quaternion).add(displayCamera.position)
+            displayCamera.position.sub(v1)
 
             renderer.setRenderTarget(localFramebuffer)
             renderer.setClearColor(0x000000)
@@ -171,53 +167,12 @@ function initOutputColumnAndDisplayWindows()
             return
         else
         {
-            if (mouse.isOnDisplayWindow())
+            if (!mouse.isOnDisplayWindow())
                 pad.position.y += event.deltaY * .008
-            else
-            {
+            else {
                 let inflationFactor = 1.2
                 displayCamera.position.setLength(displayCamera.position.length() * (event.deltaY < 0 ? inflationFactor : 1. / inflationFactor))
             }   
         }
     }, false);
-
-    outputColumn.position.x = -camera.rightAtZZero
-    outputColumn.left = () => outputColumn.position.x - outputColumn.scale.x / 2.
-    outputColumn.right = () => outputColumn.position.x + outputColumn.scale.x / 2.
-    getDisplayColumnWidth = () => Math.abs(-camera.rightAtZZero - outputColumn.left())
-    scene.add(outputColumn)
-    let outputColumnGrabbed = false
-    onClicks.push({
-        z: () => mouse.areaIn() === "column" ? 0. : -Infinity,
-		start: () => { outputColumnGrabbed = true}
-	})
-    updateFunctions.push(() =>
-    {
-        let cursorStyle = "default"
-        let area = mouse.areaIn()
-        if (mouse.isOnDisplayWindow())
-            cursorStyle = "grab" //you might like "grabbing" but we can't rely on domElement to change it
-        else if (area === "column")
-            cursorStyle = "col-resize"
-        else if (area === "pad")
-            cursorStyle = "text"
-        renderer.domElement.style.cursor = cursorStyle
-
-        //click output to put it in or take it out of preview. double click to select it as one would select text
-
-        if (!mouse.clicking)
-            outputColumnGrabbed = false
-
-        if (outputColumnGrabbed)
-            outputColumn.position.x = mouse.getZZeroPosition(v1).x
-        outputColumn.position.x = clamp(outputColumn.position.x, -camera.rightAtZZero + outputColumn.scale.x / 2., camera.rightAtZZero - outputColumn.scale.x / 2.)
-        //and maybe resize as well?
-
-        outputColumn.scale.setScalar(getWorldLineHeight())
-
-        pad.position.x = outputColumn.right()
-        let paddingAtTopOfPad = .35 * getWorldLineHeight()
-        if (pad.position.y < camera.topAtZZero - paddingAtTopOfPad)
-            pad.position.y = camera.topAtZZero - paddingAtTopOfPad
-    })
 }

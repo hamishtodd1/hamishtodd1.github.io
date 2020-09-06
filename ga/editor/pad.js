@@ -1,25 +1,11 @@
 /* 
-	Is the location of the carat the place it has exectued up to? Maybe the preview window is dependent on where it is?
-		But you see the result of everything anyway. So no, it should just be where you get the thing that's in the carat-associated displayWindow
-		reverse polish might be pretty good. You see this thing, that thing, now they're in the same coord system, THEN some shit happens
-		Could at least have a mode that enables this
-		reduced and replaced with their actual values
-		Has the benefit of showing you the top of the stack, because the lines get collapsed away
-		Which is a good way of having selective visibility
-		Hmm, and cache coherence
-		could highlight whatever's in the stack where your carat is
-		Maybe when the carat is at the place where a = b - c, 
-		The little cartoon character buzzes around the preview window, animates the line you're on
-		We ask computers to remember so many things; we have so many variables in our text files; that's why you need caches
-			Make it so they can relax; make it so that the memory that's in cache is all you can see. So that it's just above where your carat is
-
 	Click the things in the column, what happens?
-        They appear in the window?
+		If you click a function it might be nice to zoom in and out
+        They appear in the window? Best if window contents depends on what line you're on
         Hovering shows the name, you can edit
+		Copy the name to paste buffer?
         When you right click them, context menu:
-            "Copy name"
             "Change name" (changes colors?)
-            "Paste at carat"
             "change representation"
         
 	Language symbols
@@ -188,6 +174,11 @@ async function initPad(characterMeshHeight)
 	})
 	updateFunctions.push(function ()
 	{
+		pad.position.x = outputColumn.right()
+		let paddingAtTopOfPad = .35 * getWorldLineHeight()
+		if (pad.position.y < camera.topAtZZero - paddingAtTopOfPad)
+			pad.position.y = camera.topAtZZero - paddingAtTopOfPad
+
 		positionInStringClosestToCaratPositionVector.set(Infinity, Infinity, 0.)
 
 		let lowestUndeterminedVariable = numFreeParameterMultivectors
