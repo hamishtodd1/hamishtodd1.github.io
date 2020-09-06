@@ -123,13 +123,6 @@ async function initPad(characterMeshHeight)
 
 		return null
 	}
-	function assignVectorToVariable(name, vec)
-	{
-		let variable = getVariableWithName(name)
-		if (variable === null)
-			console.error("unrecognized variable name: ", name)
-		copyVariable(vec, variable.elements)
-	}
 
 	copyVariable(xUnit,variables[0].elements)
 	copyVariable(yUnit,variables[1].elements)
@@ -141,47 +134,97 @@ async function initPad(characterMeshHeight)
 
 	{
 		let inputDw = DisplayWindow()
-		inputDw.screen.renderOrder = carat.renderOrder + 1
+		inputDw.scale.x = 10.5
+		inputDw.scale.y = inputDw.scale.x
+		inputDw.renderOrder = carat.renderOrder + 1
 		carat.material.depthTest = false
-		let creatingFreeParameter = false
+
+		let buttons = {}
+		function addButton(newLabel)
+		{
+			let index = 0
+			for(label in buttons) ++index
+
+			buttons[newLabel] = text(newLabel)	
+			buttons[newLabel].scale.multiplyScalar(.1)
+			inputDw.add(buttons[newLabel])	
+
+			buttons[newLabel].position.y = -.5 - buttons[newLabel].scale.y * (.5 + index * 1.1)
+			buttons[newLabel].position.z = .01
+
+			onClicks.push({
+				z: () => mouse.checkIfOnScaledUnitSquare(buttons[newLabel]) ? 2. : -Infinity,
+				start: () => { selectedFunctionality = newLabel },
+			})
+		}
+		addButton("make vector")
+		addButton("make R->R2")
+		let selectedFunctionality = null
+
+		//better: doodle on what seems to you like a plane, but it's extruded in z because z is input time
+		//or the doodling stays on the plane and if you look at it three dimensionally it's extruded?
+		{
+			var mouseTrail = new THREE.Line(new THREE.Geometry())
+			inputDw.scene.add(mouseTrail)
+			for (let i = 0; i < 256; i++)
+				mouseTrail.geometry.vertices.push(new THREE.Vector3())
+			var lastTrailVertexToBeAssigned = 0
+		}
+
+		onClicks.push({
+			z: () => mouse.checkIfOnScaledUnitSquare(inputDw) ? 1. : -Infinity,
+			start: () => {
+				if(selectedFunctionality === "make vector" ) {
+					++numFreeParameterMultivectors
+					let threeCharacterInsertion = variables[numFreeParameterMultivectors - 1].name
+					while (threeCharacterInsertion.length < 3) threeCharacterInsertion += " "
+					addStringAtCarat( threeCharacterInsertion )
+				}
+			},
+			during:()=>{
+				if ( selectedFunctionality === "make R->R2") {
+					let ndcOnDisplayWindow = inputDw.worldToLocal(mouse.getZZeroPosition(v1))
+
+					mouseTrail.geometry.vertices[lastTrailVertexToBeAssigned].set(ndcOnDisplayWindow.x, ndcOnDisplayWindow.y, 0.)
+					mouseTrail.geometry.vertices[lastTrailVertexToBeAssigned].multiplyScalar(8.)
+					for (let i = lastTrailVertexToBeAssigned + 1, il = mouseTrail.geometry.vertices.length; i < il; i++)
+						mouseTrail.geometry.vertices[i].copy(mouseTrail.geometry.vertices[lastTrailVertexToBeAssigned])
+					mouseTrail.geometry.verticesNeedUpdate = true
+
+					++lastTrailVertexToBeAssigned
+					if (lastTrailVertexToBeAssigned >= mouseTrail.geometry.vertices.length)
+						lastTrailVertexToBeAssigned = 0
+				}
+
+				if ( selectedFunctionality === "make vector") {
+					//TODO they're getting created permanently
+
+					let variable = variables[numFreeParameterMultivectors - 1]
+
+					mouse.getZZeroPosition(v1)
+					inputDw.worldToLocal(v1)
+					for (let i = 0, il = variable.elements.length; i < il; ++i)
+						variable.elements[i] = 0.
+					variable.elements[1] = v1.x
+					variable.elements[2] = v1.y
+
+					//COULD use numerals to display the string it as a linear combination of the things, but where would be the fun in that?
+				}
+			}
+		})
+
 		updateFunctions.push(() =>
 		{
-			inputDw.screen.scale.x = 10.5
-			inputDw.screen.scale.y = inputDw.screen.scale.x
-			
+			for (functionality in buttons)
+				buttons[functionality].material.color.g = functionality === selectedFunctionality ? 0. : 1.
+
 			v1.copy(carat.position)
 			pad.localToWorld(v1)
 			let bottomYDestination = v1.y - .5 * pad.scale.y
-			if (bottomYDestination > camera.topAtZZero - inputDw.screen.scale.y)
-				bottomYDestination = camera.topAtZZero - inputDw.screen.scale.y
-			inputDw.screen.bottomY += .1 * (bottomYDestination - inputDw.screen.bottomY)
-			inputDw.screen.position.x = camera.rightAtZZero - inputDw.screen.scale.x * .5
-			
-			if (!trailMode && mouse.clicking && !mouse.oldClicking && thingMouseIsOn === inputDw)
-			{
-				creatingFreeParameter = true
-				++numFreeParameterMultivectors
-				addStringAtCarat(variables[numFreeParameterMultivectors-1].name + " ")
-
-				//TODO they're getting created permanently
-			}
-
-			if(creatingFreeParameter)
-			{
-				let variable = variables[numFreeParameterMultivectors-1]
-
-				mouse.getZZeroPosition(v1)
-				inputDw.screen.worldToLocal(v1)
-				for (let i = 0, il = variable.elements.length; i < il; ++i)
-					variable.elements[i] = 0.
-				variable.elements[1] = v1.x
-				variable.elements[2] = v1.y
-
-				//COULD use numerals to display the string it as a linear combination of the things, but where would be the fun in that?
-
-				if (!mouse.clicking )
-					creatingFreeParameter = false
-			}
+			if (bottomYDestination > camera.topAtZZero - inputDw.scale.y)
+				bottomYDestination = camera.topAtZZero - inputDw.scale.y
+			inputDw.bottomY += .1 * (bottomYDestination - inputDw.bottomY)
+			inputDw.position.x = camera.rightAtZZero - inputDw.scale.x * .5
 		})
 	}
 
@@ -240,14 +283,16 @@ async function initPad(characterMeshHeight)
 	let positionInStringClosestToCaratPosition = -1
 	let positionInStringClosestToCaratPositionVector = new THREE.Vector3()
 	let uncaughtCharacters = ""
-	updateFunctions.push(function ()
-	{
-		if (mouse.clicking && !mouse.oldClicking && thingMouseIsOn === "pad") //yeah, there's an argument for "onclick"
-		{
+	onClicks.push({
+		z: () => mouse.areaIn() === "pad" ? 0. : -Infinity,
+		start: () => {
 			mouse.getZZeroPosition(v1)
 			pad.worldToLocal(v1)
 			carat.teleport(v1.x, v1.y)
 		}
+	})
+	updateFunctions.push(function ()
+	{
 		positionInStringClosestToCaratPositionVector.set(Infinity, Infinity, 0.)
 
 		let lowestUndeterminedVariable = numFreeParameterMultivectors
@@ -268,7 +313,7 @@ async function initPad(characterMeshHeight)
 
 		let lowestUnusedDisplayWindow = 0
 		for (let i = 0; i < interimDisplayWindows.length; i++)
-			interimDisplayWindows[i].screen.bottomY = camera.topAtZZero
+			interimDisplayWindows[i].bottomY = camera.topAtZZero
 
 		for (let i = 0, il = characters.array.length; i < il; i++)
 			characters.instancedMeshes[characters.array[i]].count = 0
@@ -392,14 +437,14 @@ async function initPad(characterMeshHeight)
 								interimDisplayWindows.push(DisplayWindow())
 
 							let dw = interimDisplayWindows[lowestUnusedDisplayWindow]
-							dw.screen.bottomY = lineBottomYWorld
+							dw.bottomY = lineBottomYWorld
 
-							dw.screen.scale.y = maxHeight
+							dw.scale.y = maxHeight
 							let paddingBetweenDws = .1 * getWorldLineHeight()
 							for (let i = 0; i < lowestUnusedDisplayWindow; i++)
 							{
-								if (dw.screen.scale.y > interimDisplayWindows[i].screen.bottomY - lineBottomYWorld)
-									dw.screen.scale.y = interimDisplayWindows[i].screen.bottomY - lineBottomYWorld - paddingBetweenDws
+								if (dw.scale.y > interimDisplayWindows[i].bottomY - lineBottomYWorld)
+									dw.scale.y = interimDisplayWindows[i].bottomY - lineBottomYWorld - paddingBetweenDws
 							}
 
 							++lowestUnusedDisplayWindow
@@ -576,8 +621,8 @@ async function initPad(characterMeshHeight)
 
 		for (let i = 0; i < lowestUnusedDisplayWindow; ++i)
 		{
-			interimDisplayWindows[i].screen.scale.x = getDisplayColumnWidth()
-			interimDisplayWindows[i].screen.position.x = (-camera.rightAtZZero + outputColumn.left()) / 2.
+			interimDisplayWindows[i].scale.x = getDisplayColumnWidth()
+			interimDisplayWindows[i].position.x = (-camera.rightAtZZero + outputColumn.left()) / 2.
 		}
 	})
 }

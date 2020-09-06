@@ -16,7 +16,7 @@
         functions
         footage (which is a function of t to R3)
         can have a "scale to fit vs don't" switch
-    dws:
+    Uses
         choosing the next thing to happen
             it'd be crowded to have every single variable. But maybe they only appear in place if you're almost going to snap to them?
             drawing
@@ -97,27 +97,6 @@
     Alright so juxtaposition f x is "apply function to x". And because your objects, curried with geometric product, are functions...
 */
 
-//https://www.youtube.com/watch?v=nl9TZanwbBk
-function dft(samples)
-{
-    // let n = samples.length
-    // for (let i = 0; i < n; ++i)
-    // {
-    //     for(let k = 0; k < n; ++k)
-    //     {
-
-    //     }
-    // }
-
-    // samples[n].alpha
-
-    // for(let i = 0; i < fourierCoefficients.length; ++n)
-    // {
-    //     let exponentiatedPart = exp(i * n * t)
-    //     fourierCoefficients[n] = 1. / TAU * integrate(f(t) * exponentiatedPart)
-    // }
-}
-
 function initOutputColumnAndDisplayWindows()
 {
     {
@@ -131,8 +110,6 @@ function initOutputColumnAndDisplayWindows()
             return new THREE.LineSegments(gridGeometry, gridMaterial)
         }
     }
-
-    initFuncViz()
 
     let ordinaryClearColor = renderer.getClearColor().clone()
     let ordinaryRenderTarget = renderer.getRenderTarget()
@@ -157,56 +134,19 @@ function initOutputColumnAndDisplayWindows()
         let dimensionInPixels = 256
         let localFramebuffer = new THREE.WebGLRenderTarget(dimensionInPixels, dimensionInPixels, params)
 
-        let screen = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), new THREE.MeshBasicMaterial({ map: localFramebuffer.texture }))
-        scene.add(screen)
-        screen.bottomY = 0.
-        let displayWindow = { screen, scene: localScene }
-        displayWindows.push(displayWindow)
-
-        //better: doodle on what seems to you like a plane, but it's extruded in z because z is input time
-        {
-            var mouseTrail = new THREE.Line(new THREE.Geometry())
-            localScene.add(mouseTrail)
-            for (let i = 0; i < 256; i++)
-                mouseTrail.geometry.vertices.push(new THREE.Vector3())
-            var lastTrailVertexToBeAssigned = 0
-        }
+        let dw = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), new THREE.MeshBasicMaterial({ map: localFramebuffer.texture }))
+        scene.add(dw)
+        dw.bottomY = 0.
+        dw.scene = localScene
+        displayWindows.push(dw)
         
-        let grabbed = false
-        let rotating = false
         updateFunctions.push(() =>
         {
-            screen.position.y = screen.scale.y / 2. + screen.bottomY
+            dw.position.y = dw.scale.y / 2. + dw.bottomY
             //and scale.y could be various things
             //and change resolution, and think about camera bullshit
 
-            if (!mouse.clicking)
-                grabbed = false
-            else if (!mouse.oldClicking && thingMouseIsOn === displayWindow )
-                grabbed = true
-            if (grabbed)
-            {
-                if (trailMode)
-                {
-                    let ndcOnDisplayWindow = screen.worldToLocal(mouse.getZZeroPosition(v1))
-
-                    mouseTrail.geometry.vertices[lastTrailVertexToBeAssigned].set(ndcOnDisplayWindow.x, ndcOnDisplayWindow.y,0.)
-                    mouseTrail.geometry.vertices[lastTrailVertexToBeAssigned].multiplyScalar(8.)
-                    for (let i = lastTrailVertexToBeAssigned + 1, il = mouseTrail.geometry.vertices.length; i < il; i++)
-                        mouseTrail.geometry.vertices[i].copy(mouseTrail.geometry.vertices[lastTrailVertexToBeAssigned])
-                    mouseTrail.geometry.verticesNeedUpdate = true
-
-                    ++lastTrailVertexToBeAssigned
-                    if (lastTrailVertexToBeAssigned >= mouseTrail.geometry.vertices.length)
-                        lastTrailVertexToBeAssigned = 0
-                }
-            }
-
-            if (!mouse.rightClicking || grabbed)
-                rotating = false
-            else if ( !mouse.oldRightClicking && thingMouseIsOn === displayWindow)
-                rotating = true
-            if (rotating)
+            if (mouse.rightClicking )
             {
                 v1.copy(mouse.raycaster.ray.direction)
                 v1.y = 0.
@@ -240,7 +180,7 @@ function initOutputColumnAndDisplayWindows()
             renderer.setClearColor(ordinaryClearColor)
         })
 
-        return displayWindow
+        return dw
     }
 
     document.addEventListener('wheel', (event)=>
@@ -251,7 +191,7 @@ function initOutputColumnAndDisplayWindows()
             return
         else
         {
-            if (displayWindows.indexOf(thingMouseIsOn) === -1)
+            if (mouse.isOnDisplayWindow())
                 pad.position.y += event.deltaY * .008
             else
             {
@@ -267,25 +207,26 @@ function initOutputColumnAndDisplayWindows()
     getDisplayColumnWidth = () => Math.abs(-camera.rightAtZZero - outputColumn.left())
     scene.add(outputColumn)
     let outputColumnGrabbed = false
+    onClicks.push({
+        z: () => mouse.areaIn() === "column" ? 0. : -Infinity,
+		start: () => { outputColumnGrabbed = true}
+	})
     updateFunctions.push(() =>
     {
         let cursorStyle = "default"
-        if (thingMouseIsOn === "column")
-            cursorStyle = "col-resize"
-        else if (thingMouseIsOn === "pad")
-            cursorStyle = "text"
-        else if (displayWindows.indexOf(thingMouseIsOn) !== -1)
+        let area = mouse.areaIn()
+        if (mouse.isOnDisplayWindow())
             cursorStyle = "grab" //you might like "grabbing" but we can't rely on domElement to change it
-        // "cell" excel
-        // "copy" has little cross
+        else if (area === "column")
+            cursorStyle = "col-resize"
+        else if (area === "pad")
+            cursorStyle = "text"
         renderer.domElement.style.cursor = cursorStyle
 
         //click output to put it in or take it out of preview. double click to select it as one would select text
 
         if (!mouse.clicking)
             outputColumnGrabbed = false
-        else if (!mouse.oldClicking && thingMouseIsOn === "column")
-            outputColumnGrabbed = true
 
         if (outputColumnGrabbed)
             outputColumn.position.x = mouse.getZZeroPosition(v1).x

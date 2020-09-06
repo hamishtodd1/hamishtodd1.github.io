@@ -142,13 +142,6 @@
 		Is there any way of turning the subsitution rules into things helpful for the animations or where to put stuff in the pictures???
 			Maybe this is how you say that difference vectors should be put not at the origin?
 
-	Maybe, er, we can easily take the fourier transform of a mesh?
-		Maybe taking the fourier transform of an image will let you extract what you want: positions of little red things, orientation+position of lines
-	Would parametric/continuous approach be better for raytracing? If so someone would have thought of it
-	Stack machine: default behaviour can be that whatever was on the above line is the first argument
-		Might get rid of this "to delete or copy" question in abacus?
-	Names are good for indexing the things you want to talk in a smaller space; A hash table
-
 	reduction / partial evaluation syntax
 		how to detect opportunities? Regex?
 		Don't necessarily need names. Fuck names, of course
@@ -189,4 +182,6 @@ function init()
 	initPad(characterMeshHeight)
 
 	// initClickyVideo()
+
+	// initFuncViz()
 }

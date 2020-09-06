@@ -24,8 +24,6 @@ function initMouse()
 	};
 	asynchronous.raycaster.setFromCamera(new THREE.Vector2(), camera)
 
-	let lastClickedObject = null
-
 	mouse = {
 		clicking: false,
 		oldClicking: false,
@@ -50,9 +48,15 @@ function initMouse()
 		object.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAmount))
 	}
 
-	mouse.getZZeroPosition = (target) => mouse.raycaster.intersectZPlane(0., target)
+	mouse.getZZeroPosition = (target) => {
+		if(target === undefined)
+			console.error("target needed")
+		return mouse.raycaster.intersectZPlane(0., target)
+	}
 
 	mouse.justMoved = () => !mouse.raycaster.ray.equals(mouse.oldRaycaster.ray)
+
+	let currentClick = null
 
 	mouse.updateFromAsyncAndCheckClicks = function()
 	{
@@ -63,6 +67,50 @@ function initMouse()
 
 		mouse.oldRaycaster.ray.copy(mouse.raycaster.ray);
 		mouse.raycaster.ray.copy( asynchronous.raycaster.ray );
+
+		if(this.clicking && !this.oldClicking ) {
+			let topZ = -Infinity
+			for(let i = 0; i < onClicks.length; ++i) {
+				let z = onClicks[i].z()
+				if(z > topZ) {
+					topZ = z
+					currentClick = onClicks[i]
+				}
+			}
+		}
+		
+		if(this.clicking && !this.oldClicking && currentClick !== null)
+			currentClick.start()
+		if(this.clicking && currentClick !== null && currentClick.during !== undefined)
+			currentClick.during()
+		if (!this.clicking && this.oldClicking && currentClick !== null && currentClick.end !== undefined) {
+			currentClick.end()
+			currentClick = null	
+		}
+	}
+
+	mouse.areaIn = function()
+	{
+		let mouseX = mouse.getZZeroPosition(v1).x
+		if (outputColumn.right() < mouseX)
+			return "pad"
+		else if (outputColumn.left() < mouseX && mouseX < outputColumn.right())
+			return "column"
+		else
+			return "left"
+	}
+
+	mouse.isOnDisplayWindow = () => {
+		let onDw = false
+        displayWindows.forEach((dw) => { if (mouse.checkIfOnScaledUnitSquare(dw)) onDw = true })
+        return onDw
+    }
+
+	mouse.checkIfOnScaledUnitSquare = function (scaledSquare) {
+		mouse.getZZeroPosition(v1)
+		scaledSquare.worldToLocal(v1)
+		return  -.5 < v1.x && v1.x < .5 &&
+				-.5 < v1.y && v1.y < .5
 	}
 
 	{

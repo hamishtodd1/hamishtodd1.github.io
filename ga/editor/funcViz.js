@@ -1,4 +1,9 @@
 /*
+    Is it possible to view these as all the same?
+        Countour is "just" slices of volumetric
+
+        Abstracting over any higher dimensional values, you have to make do with slices, i.e. rotate the thing yourself
+        
     So the claim is
         these are the function visualizations. They get colors just like the mvs
         Ok, so they're only one variable to one variable. But you can check
@@ -9,16 +14,12 @@
 
     What if you want more than one argument?
 
+    Going between these things fast may be very beneficial, it's what mathematicians do constantly
     Huh. Who says the functions, these visualizations, aren't things you're trying to "output"? Make a game of them
         Spheres, lines, points, what more do you want?
-        
-    There's visualizing the domain with where the things go to, and there's visualizing the range with where things came from
-        Probably leave it to people to invert functions themselves
-    
+  
     Can you unify them?
-    It should probably be the case that taking a hyperslice of a thing gets you a slice of that thing
-    Maybe wanna treat it differently if it closes up?
-    Going between these things fast may be very beneficial, it's what mathematicians do constantly
+        It should probably be the case that taking a hyperslice of a thing gets you a slice of that thing
     tweening's not so hard. You have the space of inputs and outputs. You put them in the same space, linearly interpolate, make t a sinusoid
     Can you detect which viz to use at runtime? I mean, any transformation can be applied to any mv. Maybe it's a good thing to let folks choose?
 
@@ -63,11 +64,8 @@
         R3->3x3 matrices
             diffusive tensor only has 6 elements. How does it compare with electromagnetic field?
             there's literature
-
-        Is it possible to view these as all the same?
-        Countour is "just" slices of volumetric
-
-        Abstracting over any higher dimensional values, you have to make do with slices, i.e. rotate the thing yourself
+        R2->R3,R3
+            Rasterization and texture mappiiiiiing
 */
 
 function initFuncViz()

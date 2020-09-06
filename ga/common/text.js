@@ -1,5 +1,7 @@
 function text(initialText,materialOnly)
 {
+	if (materialOnly === undefined) materialOnly = false
+
 	let canvas = document.createElement("canvas");
 	let context = canvas.getContext("2d");
 	let material = new THREE.MeshBasicMaterial({map: new THREE.CanvasTexture(canvas)});
@@ -38,7 +40,7 @@ function text(initialText,materialOnly)
 
 		this.map.needsUpdate = true;
 
-		if( materialOnly === undefined || materialOnly === false)
+		if( materialOnly === false)
 			sign.scale.x = material.getAspect() * sign.scale.y;
 
 		//the geometry isn't affected ofc
