@@ -3,6 +3,7 @@
 	We curry the fuckers into a picture of that mv with that symbol on it. Now it's "just" juxtaposition of pictures
 	You can think of all functions as having one argument thanks to all these fucking pairings
 	It's like the geometric product IS function application
+        It's like instead of functions you have modifiers
 	Philosophically, we are never creating functions that do object1 -> object2.
 		All we are ever doing is currying to get new objects. There's no "vector that I am going to add". There is only "translator, which I got from vector and symbol"
 	So the history is
@@ -10,8 +11,7 @@
 		This is to say, they made it so any time you see an mv to the left of another mv, you know the first is "being applied" to the second
 
     Is it possible to view these as all the same?
-        Countour is "just" slices of volumetric
-
+        Countour is "just" slices of volumetric with, let's say, integers
         Abstracting over any higher dimensional values, you have to make do with slices, i.e. rotate the thing yourself
         
     So the claim is
@@ -85,10 +85,13 @@ function initFuncViz()
     let surfaceMaterial = new THREE.MeshPhongMaterial({ color: 0xFF0000, side:THREE.DoubleSide })
 
     let maxInstances = 256
-
     let numSamples = 256
-    function FuncViz(func,inputDimension,outputDimension) {
-        let range = [-Math.PI, Math.PI] //ideally -infinity,infinity
+    let range = [-Math.PI, Math.PI] //ideally -infinity,infinity
+    function numberInRange(i) {
+        return (i / numSamples) * (range[1] - range[0]) + range[0]
+    }
+
+    FuncViz = (func,inputDimension,outputDimension) => {
         /*
             Could check if f(-pi) = f(pi) and if so use that domain, otherwise something else
 
@@ -114,19 +117,19 @@ function initFuncViz()
 
             if( outputDimension === 1) {
                 geo.vertices.forEach( (p)=> {
-                    p.x = (i / numSamples) * (range[1] - range[0]) + range[0]
+                    p.x = numberInRange(i)
                     p.y = func(p.x)
                 })
             }
             else if( outputDimension === 2) {
                 geo.vertices.forEach( (p)=> {
-                    p.z = (i / numSamples) * (range[1] - range[0]) + range[0]
+                    p.z = numberInRange(i)
                     func(p.z,p)
                 })
             }
             else if( outputDimension === 3) {
                 geo.vertices.forEach( (p)=> {
-                    let t = (i / numSamples) * (range[1] - range[0]) + range[0]
+                    let t = numberInRange(i)
                     func(t, p)
                 })
             }
@@ -135,17 +138,34 @@ function initFuncViz()
         }
         else if (inputDimension === 2 && outputDimension === 3)
         {
-            let geo = new THREE.PlaneGeometry(1., 1., numSamples - 1, numSamples - 1)
+            let im = new THREE.InstancedMesh(new THREE.PlaneGeometry(1., 1., numSamples - 1, numSamples - 1), surfaceMaterial, maxInstances)
 
+            let radiusSq = -1
             for (let i = 0, il = numSamples * numSamples; i < il; ++i) {
                 let x =             (i % numSamples) / (numSamples - 1)
                 let y = (Math.floor(i / numSamples)) / (numSamples - 1)
                 x = x * (range[1] - range[0]) + range[0]
                 y = y * (range[1] - range[0]) + range[0]
-                func(x, y, geo.vertices[i])
+                func(x, y, im.geometry.vertices[i])
+
+                radiusSq = Math.max(im.geometry.vertices[i].lengthSq(),radiusSq)
+            }
+            im.radius = Math.sqrt(radiusSq)
+
+            im.drawInPlace = function (x, y) {
+                m1.identity()
+                q1.copy(displayCamera.quaternion)
+                q1.inverse()
+                m1.makeRotationFromQuaternion(q1)
+                m1.scale(v1.setScalar(.5 / im.radius))
+                m1.setPosition(x, y, 0.)
+
+                im.setMatrixAt(im.count, m1)
+                ++im.count
+                im.instanceMatrix.needsUpdate = true
             }
             
-            return new THREE.InstancedMesh(geo, surfaceMaterial, maxInstances)
+            return im
         }
         else
             log("unvisualizable function dimensionalities")
@@ -172,25 +192,4 @@ function initFuncViz()
     //     target.z = minorRadius * Math.sin(majorAngle)
     // }
     // scene.add(FuncViz(torusKnotFunc, 1, 3))
-
-
-
-    function torusFunc(minorAngle,majorAngle,target) {
-        let majorRadius = 1.
-        let minorRadius = .2
-        target.x = Math.cos(minorAngle) * (majorRadius + minorRadius * Math.cos(majorAngle))
-        target.y = Math.sin(minorAngle) * (majorRadius + minorRadius * Math.cos(majorAngle))
-        target.z = minorRadius * Math.sin(majorAngle)
-    }
-    function sphereFunc(longtitude,latitudeTimes2,target){
-        let latitude = latitudeTimes2 / 2.
-        target.y = Math.sin(latitude)
-        target.x = Math.cos(latitude) * Math.sin(longtitude)
-        target.z = Math.cos(latitude) * Math.cos(longtitude)
-    }
-    let torusFuncViz = FuncViz(torusFunc, 2, 3)
-    scene.add(torusFuncViz)
-    m1.identity()
-    torusFuncViz.setMatrixAt(0, m1)
-    torusFuncViz.count = 1
 }

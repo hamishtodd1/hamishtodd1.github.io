@@ -1,3 +1,13 @@
+function getStepTowardDestination(currentValue, destination)
+{
+	let distanceFromDestination = destination - currentValue
+	let sign = distanceFromDestination == 0. ? 0. : distanceFromDestination / Math.abs(distanceFromDestination)
+	let speed = .01
+	if (speed > Math.abs(distanceFromDestination))
+		speed = Math.abs(distanceFromDestination)
+	return sign * speed
+}
+
 function getMatrixYAxisScale(elements, matrixIndex)
 {
 	if(matrixIndex === undefined)

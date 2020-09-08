@@ -70,22 +70,28 @@ function initMouse()
 
 		if(this.clicking && !this.oldClicking ) {
 			let topZ = -Infinity
-			for(let i = 0; i < onClicks.length; ++i) {
-				let z = onClicks[i].z()
+			currentClick = null
+			onClicks.forEach((onClick)=> {
+				let z = onClick.z()
 				if(z > topZ) {
 					topZ = z
-					currentClick = onClicks[i]
+					currentClick = onClick
 				}
+			})
+
+			if (currentClick !== null && currentClick.start !== undefined) {
+				currentClick.start()
+				if (currentClick.during === undefined && currentClick.end === undefined)
+					currentClick = null
 			}
 		}
 		
-		if(this.clicking && !this.oldClicking && currentClick !== null)
-			currentClick.start()
 		if(this.clicking && currentClick !== null && currentClick.during !== undefined)
 			currentClick.during()
-		if (!this.clicking && this.oldClicking && currentClick !== null && currentClick.end !== undefined) {
-			currentClick.end()
-			currentClick = null	
+		if (!this.clicking ) {
+			if (currentClick !== null && currentClick.end !== undefined)
+				currentClick.end()
+			currentClick = null
 		}
 	}
 

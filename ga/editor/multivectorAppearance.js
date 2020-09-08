@@ -1,4 +1,6 @@
 /*
+    A vector that's not coming from the origin is: a vector field evaluated at a single point
+
     velocity/differential space is a reason to have auto zoom/scale
 
     Need to disentangle what's in the boxes
@@ -265,8 +267,7 @@ function initMultivectorAppearances(characterMeshHeight)
 
             v.x -= v.y
         })
-        bivGeometry.faces.forEach((f, i) =>
-        {
+        bivGeometry.faces.forEach((f, i) => {
             if (name.length === 1)
                 f.color.copy(colors[name[0]])
             else if (name.length === 2)

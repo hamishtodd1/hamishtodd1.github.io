@@ -10,7 +10,8 @@ const colors = {
 }
 for (let color in colors) colorCharacters += color
 
-let backgroundString = "b g o\n\nw\nr\n\n  b  +g  \n  b  *g  \n  p  +b  \n\n  i*(j+k)=i*j+i*k\n  "
+let backgroundString = "b g o\n\nw\nr\n\n  b  +g  \n  b  *g  \n  p  +b  \ndisplay\n  i*(j+k)=i*j+i*k\n\ntor\n\n  "
+
 const carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1., 1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
 const variables = []
 let numFreeParameterMultivectors = 0

@@ -112,8 +112,7 @@ function initDisplayWindows()
             //and scale.y could be various things
             //and change resolution, and think about camera bullshit
 
-            if (mouse.rightClicking )
-            {
+            if (mouse.rightClicking ) {
                 // Much better than built in rotation is rotating the basis vectors.x or y rotate around y, y rotate upwards or downwards
 
                 v1.copy(mouse.raycaster.ray.direction)

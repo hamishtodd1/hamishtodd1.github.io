@@ -46,7 +46,8 @@ function initMainDw() {
         buttons[newLabel].scale.multiplyScalar(.1)
         mainDw.add(buttons[newLabel])	
 
-        buttons[newLabel].position.y = -.5 - buttons[newLabel].scale.y * (.5 + index * 1.1)
+        buttons[newLabel].position.y = -.5 - buttons[newLabel].scale.y * .5
+        buttons[newLabel].position.x = (index-1.) * .3
         buttons[newLabel].position.z = .01
 
         onClicks.push({
@@ -57,8 +58,7 @@ function initMainDw() {
         buttons[newLabel].func = func
     }
 
-    updateFunctions.push(() =>
-    {
+    updateFunctions.push(() => {
         for (functionality in buttons)
             buttons[functionality].material.color.g = functionality === selectedFunctionality ? 0. : 1.
 
@@ -71,8 +71,7 @@ function initMainDw() {
         mainDw.position.x = camera.rightAtZZero - mainDw.scale.x * .5
     })
 
-    addButton("vector", () =>
-    {
+    addButton("vector", () => {
         //TODO they're getting created permanently
 
         let variable = variables[numFreeParameterMultivectors - 1]
@@ -85,6 +84,10 @@ function initMainDw() {
         variable.elements[2] = v1.y
 
         //COULD use numerals to display the string it as a linear combination of the things, but where would be the fun in that?
+    })
+
+    addButton("rotor", () => {
+        //bivector always goes up on screen
     })
 
     //better: doodle on what seems to you like a plane, but it's extruded in z because z is input time
@@ -108,6 +111,8 @@ function initMainDw() {
             ++lastTrailVertexToBeAssigned
             if (lastTrailVertexToBeAssigned >= mouseTrail.geometry.vertices.length)
                 lastTrailVertexToBeAssigned = 0
+
+            //bit better would be to have it be flat then set the extrusion once you're done
         })
     }
 
@@ -141,5 +146,5 @@ function initMainDw() {
         }
     })
 
-    let selectedFunctionality = "vector"
+    let selectedFunctionality = "rotor"
 }

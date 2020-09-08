@@ -1,9 +1,12 @@
 /* 
 	Next
 		mvs and functions in the dw
-		shadows
+
+	Bret article http://worrydream.com/DrawingDynamicVisualizationsTalkAddendum/
+	https://en.wikipedia.org/wiki/Binary_expression_tree
 
 	TODO demo / first videos
+		shadows
 		Functions
 			Can be written
 			Visualized
@@ -71,8 +74,20 @@
 		Hey, it works for debuggers. It's a slice through possibility space
 		Working with the function, maybe represented as an infinite line of mvs, is for the game
 
+	y = x^2
+	y' = 2x
+	y'(1) = 2
+	implicit: f(t) = (t,t^2) (the above is a "constraint upon the points", whereas this has some "there exitsts t such that")
+	consider (t,t^2) vs (2t,(2t)^2). They'll look the same
+	Same with (-t,t^2).
+	(1,2t) vs (2,4t). These are the same at the same point though. Implicit functions are not unique
+	vector tangent to f: f'(t) = (1,2x)
+	An implicit function just means it's a curve in a higher dimension
 
 	integration and differentiation
+		For a given vector field, is there some surface for which it is the grad?
+		The "right" way to visualize a derivative wrt one variable (implicit or explicit) is
+			the height of the right angled triangle of base 1 whose hypotenuse is tangent to that
 		"Behaviour" is about responses to changes. Changes happen over time. To study changes over time you need calculus
 		Because you can do slicing, should be able to think of all derivatives as spatial derivatives instead of time
 		Stuff about dual numbers in siggraph course notes?
@@ -177,6 +192,8 @@ function init()
 {
 	let characterMeshHeight = .4
 
+	initFuncViz()
+
 	initMultivectorAppearances(characterMeshHeight)
 	initDisplayWindows()
 	initOutputColumn()
@@ -184,6 +201,4 @@ function init()
 	initPad(characterMeshHeight)
 
 	// initClickyVideo()
-
-	initFuncViz()
 }

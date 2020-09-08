@@ -83,6 +83,24 @@ async function initPad(characterMeshHeight)
 	}
 	let copyVariable = copyMultivector
 
+	function torusFunc(minorAngle, majorAngle, target)
+	{
+		let majorRadius = 1.
+		let minorRadius = .2
+		target.x = Math.cos(minorAngle) * (majorRadius + minorRadius * Math.cos(majorAngle))
+		target.y = Math.sin(minorAngle) * (majorRadius + minorRadius * Math.cos(majorAngle))
+		target.z = minorRadius * Math.sin(majorAngle)
+	}
+	function sphereFunc(longtitude, latitudeTimes2, target)
+	{
+		let latitude = latitudeTimes2 / 2.
+		target.y = Math.sin(latitude)
+		target.x = Math.cos(latitude) * Math.sin(longtitude)
+		target.z = Math.cos(latitude) * Math.cos(longtitude)
+	}
+	let torusFuncIm = FuncViz(torusFunc, 2, 3)
+	pad.add(torusFuncIm)
+
 	initCaratAndNavigation()
 
 	for(let i = 0; i < 63; i++)
@@ -164,14 +182,6 @@ async function initPad(characterMeshHeight)
 	let positionInStringClosestToCaratPosition = -1
 	let positionInStringClosestToCaratPositionVector = new THREE.Vector3()
 	let uncaughtCharacters = ""
-	onClicks.push({
-		z: () => mouse.areaIn() === "pad" ? 0. : -Infinity,
-		start: () => {
-			mouse.getZZeroPosition(v1)
-			pad.worldToLocal(v1)
-			carat.teleport(v1.x, v1.y)
-		}
-	})
 	updateFunctions.push(function ()
 	{
 		pad.position.x = outputColumn.right()
@@ -203,6 +213,8 @@ async function initPad(characterMeshHeight)
 
 		for (let i = 0, il = characters.array.length; i < il; i++)
 			characters.instancedMeshes[characters.array[i]].count = 0
+
+		torusFuncIm.count = 0
 
 		let drawCharacters = true
 		let tokenCharactersLeft = 0
@@ -317,8 +329,8 @@ async function initPad(characterMeshHeight)
 						let maxHeight = 2. * getDisplayColumnWidth()
 						if (maxHeight > pad.position.y - lineBottomYWorld)
 							maxHeight = pad.position.y - lineBottomYWorld
-						if (-camera.topAtZZero < lineBottomYWorld + maxHeight && lineBottomYWorld < camera.topAtZZero)
-						{
+						if (-camera.topAtZZero < lineBottomYWorld + maxHeight && lineBottomYWorld < camera.topAtZZero) {
+
 							if (lowestUnusedDisplayWindow >= interimDisplayWindows.length)
 								interimDisplayWindows.push(DisplayWindow())
 
@@ -327,8 +339,7 @@ async function initPad(characterMeshHeight)
 
 							dw.scale.y = maxHeight
 							let paddingBetweenDws = .1 * getWorldLineHeight()
-							for (let i = 0; i < lowestUnusedDisplayWindow; i++)
-							{
+							for (let i = 0; i < lowestUnusedDisplayWindow; i++) {
 								if (dw.scale.y > interimDisplayWindows[i].bottomY - lineBottomYWorld)
 									dw.scale.y = interimDisplayWindows[i].bottomY - lineBottomYWorld - paddingBetweenDws
 							}
@@ -338,16 +349,20 @@ async function initPad(characterMeshHeight)
 
 						tokenCharactersLeft = "display".length
 					}
-					else if (getVariableWithName(token) !== null)
-					{
+					else if (token === "tor") {
+						torusFuncIm.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
+						drawOutline(drawingPosition.x + .5, drawingPosition.y)
+
+						//the below needs to be a separate function applicable to this
+					}
+					else if (getVariableWithName(token) !== null) {
 						for (let i = token.length; 
 							i < maxVariableNameLength && 
 							drawingPositionInString + i < backgroundStringLength && 
 							carat.positionInString !== drawingPositionInString + i;
 							++i)
 						{
-							if ( backgroundString[drawingPositionInString + i] !== " " )
-							{
+							if ( backgroundString[drawingPositionInString + i] !== " " ) {
 								backgroundString = backgroundString.substring(0, drawingPositionInString + i) + " " + backgroundString.substring(drawingPositionInString + i)
 								backgroundStringLength = backgroundString.length
 								if (carat.positionInString >= drawingPositionInString + i)
@@ -357,6 +372,7 @@ async function initPad(characterMeshHeight)
 
 						let mv = getVariableWithName(token)
 						stack.push(mv)
+
 						let caratInName = drawingPositionInString < carat.positionInString && carat.positionInString <= drawingPositionInString + token.length
 						if (!caratInName)
 						{
@@ -513,56 +529,6 @@ async function initPad(characterMeshHeight)
 	})
 }
 
-function initCaratAndNavigation()
-{
-	carat.positionInString = -1
-
-	carat.renderOrder = 9999999
-	carat.material.depthTest = false
-	carat.geometry.translate(.5, 0., 0.)
-	pad.add(carat)
-	carat.scale.x = .1
-	carat.flashingStart = 0.
-	updateFunctions.push(() => 
-	{
-		carat.visible = Math.floor((clock.getElapsedTime() - carat.flashingStart) * 2.) % 2 ? false : true
-	})
-	carat.teleport = function(x, y)
-	{
-		carat.position.set(x, y, carat.position.z)
-		carat.flashingStart = clock.getElapsedTime()
-		carat.positionInString = -1
-	}
-	carat.addToPosition = function(x, y)
-	{
-		carat.teleport(
-			carat.position.x + x,
-			carat.position.y + y)
-	}
-	carat.moveAlongString = function(amount)
-	{
-		carat.positionInString = clamp(carat.positionInString + amount, 0, backgroundString.length)
-	}
-	bindButton("ArrowRight", () => carat.moveAlongString(1))
-	bindButton("ArrowLeft", () => carat.moveAlongString(-1))
-
-	bindButton("ArrowUp", () => carat.addToPosition(0., 1.))
-	bindButton("ArrowDown", () => carat.addToPosition(0., -1.))
-	bindButton("Home", () => carat.addToPosition(-999., 0.))
-	bindButton("End", () => carat.addToPosition(999., 0.))
-
-	//TODO scrolling down too
-	function getNumLinesOnScreen() {
-		return camera.topAtZZero * 2. / getWorldLineHeight()
-	}
-	bindButton("PageUp", () => {
-		carat.addToPosition(0., Math.floor(getNumLinesOnScreen()))
-	})
-	bindButton("PageDown", () => {
-		carat.addToPosition(0., -Math.floor(getNumLinesOnScreen()))
-	})
-}
-
 function initTypeableCharacters(carat,maxCopiesOfALetter)
 {
 	let characters = {
@@ -575,13 +541,11 @@ function initTypeableCharacters(carat,maxCopiesOfALetter)
 			str + 
 			backgroundString.substring(position, backgroundString.length)
 	}
-	addStringAtCarat = function(str)
-	{
+	addStringAtCarat = function(str) {
 		addStringAtPosition(str,carat.positionInString)
 		carat.moveAlongString(str.length)
 	}
-	characters.add = function(character, displayedCharacter)
-	{
+	characters.add = function(character, displayedCharacter) {
 		if (displayedCharacter === undefined)
 			displayedCharacter = character
 
@@ -619,13 +583,11 @@ function initTypeableCharacters(carat,maxCopiesOfALetter)
 	for (let i = 0; i < initialCharacters.length; i++)
 		characters.add(initialCharacters[i])
 
-	bindButton("Delete", () =>
-	{
+	bindButton("Delete", () => {
 		if (carat.positionInString < backgroundString.length)
 			backgroundString = backgroundString.substring(0, carat.positionInString) + backgroundString.substring(carat.positionInString + 1, backgroundString.length)
 	})
-	bindButton("Backspace", () =>
-	{
+	bindButton("Backspace", () => {
 		if (carat.positionInString !== 0)
 		{
 			backgroundString = backgroundString.substring(0, carat.positionInString - 1) + backgroundString.substring(carat.positionInString, backgroundString.length)
