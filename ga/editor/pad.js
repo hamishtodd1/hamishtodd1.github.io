@@ -78,7 +78,7 @@ async function initPad(characterMeshHeight)
 	{
 		let mv = MultivectorAppearance()
 		variables.push(mv)
-		pad.add(mv)
+		pad.add(mv.padGroup)
 		return mv
 	}
 	let copyVariable = copyMultivector
@@ -125,8 +125,6 @@ async function initPad(characterMeshHeight)
 	variables[4].elements[7] = 2.
 	variables[5].elements[4] = 1.5
 	numFreeParameterMultivectors = 6
-
-	initMainDw()
 
 	let maxCopiesOfALetter = 256
 	let characters = initTypeableCharacters(carat, maxCopiesOfALetter)
@@ -366,12 +364,17 @@ async function initPad(characterMeshHeight)
 						stack.push(mv)
 
 						let caratInName = drawingPositionInString < carat.positionInString && carat.positionInString <= drawingPositionInString + token.length
-						if (!caratInName)
-						{
-							if (superimposePosition.x === Infinity && superimposePosition.y === Infinity )
-							{
+						if (!caratInName) {
+							if (superimposePosition.x === Infinity && superimposePosition.y === Infinity ) {
 								superimposePosition.x = drawingPosition.x + .5
 								superimposePosition.y = drawingPosition.y
+							}
+
+							if (carat.position.y === drawingPosition.y) {
+								mainDw.scene.add(mv.dwGroup)
+
+								// mv.drawInPlace(superimposePosition.x, superimposePosition.y)
+								// outlineCollection.draw(superimposePosition.x, superimposePosition.y, 1.)
 							}
 
 							// if (carat.position.y !== drawingPosition.y )

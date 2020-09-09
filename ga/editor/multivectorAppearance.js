@@ -118,60 +118,77 @@ function initMultivectorAppearances(characterMeshHeight)
 
     MultivectorAppearance = () =>
     {
-        let nonzeroGrades = [false, false, false, false]
-        let mv = new THREE.Group()
-        mv.name = generateName()
+        let mv = {}
+        let name = generateName()
+        mv.name = name
         mv.elements = MathematicalMultivector()
         copyMultivector(zeroMultivector, mv.elements)
+        
+        let vec = new THREE.InstancedMesh(VecGeometry(name), vecMaterial)
+        let biv = new THREE.InstancedMesh(BivGeometry(name), bivMaterial)
+        let tri = new THREE.InstancedMesh(TriGeometry(name), triMaterial)
+        mv.dwGroup = new THREE.Group().add(vec, biv, tri)
+        scene.add(mv.dwGroup)
+        
+        let vecPad = new THREE.InstancedMesh(vec.geometry, vecMaterial, maxInstances)
+        let bivPad = new THREE.InstancedMesh(biv.geometry, bivMaterial, maxInstances)
+        let triPad = new THREE.InstancedMesh(tri.geometry, triMaterial, maxInstances)
+        let zeroPad = new THREE.InstancedMesh(zeroGeometry, zeroMaterial, maxInstances)
+        mv.padGroup = new THREE.Group().add(vecPad, bivPad, triPad, zeroPad)
 
-        let zero = new THREE.InstancedMesh(zeroGeometry, zeroMaterial, maxInstances)
-        mv.add(zero)
+        let inverseBoundingSphereRadius = 1.
 
-        let vec = new THREE.InstancedMesh(VecGeometry(mv.name), vecMaterial, maxInstances)
-        mv.add(vec)
-        let biv = new THREE.InstancedMesh(BivGeometry(mv.name), bivMaterial, maxInstances)
-        mv.add(biv)
-        let tri = new THREE.InstancedMesh(TriGeometry(mv.name), triMaterial,maxInstances)
-        mv.add(tri)
+        function boxDraw(im,dwMatrix,x,y) {
+            m1.copy(dwMatrix)
+            m1.scale(v1.setScalar(inverseBoundingSphereRadius))
+            m1.setPosition(x, y, 0.)
+
+            im.setMatrixAt(im.count, m1)
+            ++im.count
+            im.instanceMatrix.needsUpdate = true
+        }
+
+        //have the matrix that would be applied to their geometry to get them in the dw, which could be position and scale because translation
+        //to get it in boxes, uniformly scale
+        //if there's more than one of them, you want them scaled the same amount, soooo
+
+        //so, 3x3 matrix
 
         //but how to know which one you want to see? maybe you're always best off seeing the line!
         // let line = new THREE.InstancedMesh(LineGeometry(mv.name), lineMaterial, maxInstances)
-        // mv.add(line)
+        // mv.padGroup.add(line)
         // line.count = 1
         // m1.identity()
         // line.setMatrixAt(0, m1)
 
         //yeah too stateful, of coooooourse you are modifying the elements partway through the frame
+        let sca = {visible: false}
         mv.resetCount = () => {
-            mv.children.forEach((child)=>{child.count = 0})
+            mv.padGroup.children.forEach((child)=>{child.count = 0})
             
-            nonzeroGrades[0] = mv.elements[0] ? true : false
-            nonzeroGrades[1] = !getVector(mv.elements, v1).equals(zeroVector)
-            nonzeroGrades[2] = !getBivec(mv.elements, v1).equals(zeroVector)
-            nonzeroGrades[3] = mv.elements[7] ? true:false
+            sca.visible = mv.elements[0] ? true : false
+            vec.visible = !getVector(mv.elements, v1).equals(zeroVector)
+            biv.visible = !getBivec(mv.elements, v1).equals(zeroVector)
+            tri.visible = mv.elements[7] ? true : false
         }
-
-        let vecMat = new THREE.Matrix4()
-        let bivMat = new THREE.Matrix4()
-        let triMat = new THREE.Matrix4()
 
         mv.drawInPlace = function(x,y)
         {
-            mv.children.forEach((child) => { if (child.count >= maxInstances) console.error("too many") })
+            mv.padGroup.children.forEach((child) => { if (child.count >= maxInstances) console.error("too many") })
 
-            if (!nonzeroGrades[0] && !nonzeroGrades[1] && !nonzeroGrades[2] && !nonzeroGrades[3])
+            if (!sca.visible && !vec.visible && !biv.visible && !tri.visible)
             {
                 m1.identity()
                 m1.scale(v1.setScalar(characterMeshHeight))
                 m1.setPosition(x,y,0.)
-                zero.setMatrixAt(zero.count, m1)
-                ++zero.count
-                zero.instanceMatrix.needsUpdate = true
+                zeroPad.setMatrixAt(zeroPad.count, m1)
+                ++zeroPad.count
+                zeroPad.instanceMatrix.needsUpdate = true
             }
             
-            if (nonzeroGrades[1])
+            if (vec.visible)
             {
-                if(vec.count === 0)
+                if(vecPad.count === 0)
                 {
                     getVector(mv.elements, v1)
 
@@ -183,21 +200,21 @@ function initMultivectorAppearances(characterMeshHeight)
                     v1.setLength(uniformScale)
                     v2.setLength(uniformScale)
                     v3.setLength(uniformScale)
-                    vecMat.makeBasis(v2, v1, v3)
+                    vec.matrix.makeBasis(v2, v1, v3)
                     //scaling the arrows so the heads are right will have to wait until you have proper colors
                     
-                    vec.instanceMatrix.needsUpdate = true
+                    vecPad.instanceMatrix.needsUpdate = true
                 }
 
-                m1.copy(vecMat)
+                m1.copy(vec.matrix)
                 m1.setPosition(x, y, 0.)
-                vec.setMatrixAt(vec.count, m1)
-                ++vec.count
+                vecPad.setMatrixAt(vecPad.count, m1)
+                ++vecPad.count
             }
 
-            if(nonzeroGrades[2])
+            if(biv.visible)
             {
-                if(biv.count === 0)
+                if(bivPad.count === 0)
                 {
                     geometricProduct(negativeUnitPseudoScalar, mv.elements, mm)
                     getVector(mm, v1)
@@ -211,41 +228,39 @@ function initMultivectorAppearances(characterMeshHeight)
                     v2.applyQuaternion(displayRotation.q)
                     v3.applyQuaternion(displayRotation.q)
 
-                    bivMat.makeBasis(v3, v2, v1)
 
                     //don't scale it by the length of the thing, scale it uniformly using either the side or the length such that it stays in unit sphere
 
-                    biv.instanceMatrix.needsUpdate = true
+                    bivPad.instanceMatrix.needsUpdate = true
                 }
 
-                m1.copy(bivMat)
                 m1.setPosition(x, y, 0.)
-                biv.setMatrixAt(biv.count, m1)
-                ++biv.count
+                bivPad.setMatrixAt(bivPad.count, m1)
+                ++bivPad.count
             }
 
-            if(nonzeroGrades[3])
+            if(tri.visible)
             {
-                if(tri.count === 0)
+                if(triPad.count === 0)
                 {
-                    tri.instanceMatrix.needsUpdate = true
+                    triPad.instanceMatrix.needsUpdate = true
 
                     //corner on
                     // q1.setFromAxisAngle(xUnit, TAU / 8.)
                     // q2.setFromAxisAngle(yUnit, TAU / 8.)
                     // q1.multiply(q2)
 
-                    triMat.makeRotationFromQuaternion(displayRotation.q)
-                    triMat.elements[4] *= mv.elements[7]
-                    triMat.elements[5] *= mv.elements[7]
-                    triMat.elements[6] *= mv.elements[7]
-                    triMat.scale(v1.setScalar(.5 / mv.elements[7]))
+                    tri.matrix.makeRotationFromQuaternion(displayRotation.q)
+                    tri.matrix.elements[4] *= mv.elements[7]
+                    tri.matrix.elements[5] *= mv.elements[7]
+                    tri.matrix.elements[6] *= mv.elements[7]
+                    tri.matrix.scale(v1.setScalar(.5 / mv.elements[7]))
                 }
 
-                m1.copy(triMat)
+                m1.copy(tri.matrix)
                 m1.setPosition(x, y, 0.)
-                tri.setMatrixAt(tri.count, m1)
-                ++tri.count
+                triPad.setMatrixAt(triPad.count, m1)
+                ++triPad.count
             }
         }
      
@@ -428,7 +443,7 @@ function TriGeometry(name)
             f.color.copy(colors[name[(Math.floor(i / heightSegments / 2)) % nameLength]])
     })
     else
-        console.error("too many letters for a tri")
+        console.error("too many letters for a triPad")
     triGeometry.computeFaceNormals()
     triGeometry.computeVertexNormals()
 

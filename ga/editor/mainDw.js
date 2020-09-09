@@ -30,7 +30,7 @@
 
 function initMainDw() {
 
-    let mainDw = DisplayWindow(false)
+    mainDw = DisplayWindow(false)
     mainDw.scale.x = 10.5
     mainDw.scale.y = mainDw.scale.x
     mainDw.renderOrder = carat.renderOrder + 1
@@ -87,7 +87,9 @@ function initMainDw() {
     })
 
     addButton("rotor", () => {
-        //bivector always goes up on screen
+        //bivector always goes up on screen, always in a certain plane
+
+        //probably the right thing to do is have a stanford teapot and rotate that thing
     })
 
     //better: doodle on what seems to you like a plane, but it's extruded in z because z is input time
@@ -147,4 +149,6 @@ function initMainDw() {
     })
 
     let selectedFunctionality = "rotor"
+
+    return mainDw
 }

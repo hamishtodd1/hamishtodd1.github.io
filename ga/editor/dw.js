@@ -80,8 +80,8 @@ function initDisplayWindows() {
         if (!useScreen)
             dw.add(dw.scene)
         else {
-
-            //is there a way to do this with a fragment shader?
+            //TODO your render target should still be the same.
+            //You just render to a small part of it, with a different transformation matrix. Scissor.
             let filter = THREE.NearestFilter
             let wrap = THREE.ClampToEdgeWrapping
             let params = {

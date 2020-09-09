@@ -194,11 +194,15 @@ function init()
 
 	initFuncViz()
 
-	initMultivectorAppearances(characterMeshHeight)
 	initDisplayWindows()
+	mainDw = initMainDw()
+	
+	initMultivectorAppearances(characterMeshHeight)
 	initOutputColumn()
 
 	initPad(characterMeshHeight)
+
+	//dw, then mainDw, then mv appearances, then pad
 
 	// initClickyVideo()
 }
