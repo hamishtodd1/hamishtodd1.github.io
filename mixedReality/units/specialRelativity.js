@@ -1,3 +1,16 @@
+/*
+    There's a measurement between two points that's always the same
+    But there's another way of looking at them so that it appears to be different
+
+    Maybe there's a manifold that's curved differently for different observers but in the ambient space the points are the same distance apart
+
+    The hyperbola is the set of spacetime points such that their distance from the origin is the same. So consider the set o
+
+    y2 - x2 = 1
+
+    Maybe consider the mapping of hyperbolas to circles. In projective space maybe the "ends" of the hyperbolas connect up. But in such a space, will everyone have spheres? Probably not
+*/
+
 function initSpecialRelativity()
 {
     let viz = new THREE.Group()

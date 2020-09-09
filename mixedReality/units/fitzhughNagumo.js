@@ -116,12 +116,17 @@ async function initFitzhughNagumo()
 
 	let numStepsPerFrame = 4;
 	var data2d = {value:null};
-	await Simulation( textureDimensions, "fitzHughNagumo", "clamped", initialState, numStepsPerFrame, 
+	let simulation = await Simulation( textureDimensions, "fitzHughNagumo", "clamped", initialState, numStepsPerFrame, 
 		data2d,
 		extraUniforms,
 		THREE.LinearFilter )
 
-	let scalarField = await scalarFieldVisualization({data2d,dimension});
+	bindToggle("p",simulation,"paused")
+
+	let scalarField = await scalarFieldVisualization({
+		data2d,
+		dimension
+	});
 	updateFunctions.push(function()
 	{
 		scalarField.position.copy(rightHand.position)

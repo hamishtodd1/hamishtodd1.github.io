@@ -1,5 +1,4 @@
-async function initBasicSimulation()
-{
+async function initBasicSimulation() {
 	let dimensions = new THREE.Vector2(11,7);
 
 	let initialState = new Float32Array( dimensions.x * dimensions.y * 4 );
@@ -14,13 +13,9 @@ async function initBasicSimulation()
 		initialState[ firstIndex + 3 ] = 0.;
 
 		if( column == 1 )
-		{
 			initialState[ firstIndex + 0 ] = 0.;
-		}
 		if( row == 2 )
-		{
 			initialState[ firstIndex + 0 ] = 0.;
-		}
 	}
 
 	let displayMaterial = new THREE.ShaderMaterial( {
@@ -155,9 +150,7 @@ async function Simulation(
 		let numStepsPerFrame = typeof numStepsPerFrameSpecification === "number" ? numStepsPerFrameSpecification:numStepsPerFrameSpecification.value;
 
 		if(simulation.paused || numStepsPerFrame === 0)
-		{
 			return;
-		}
 
 		let nonSimulationRenderTarget = renderer.getRenderTarget();
 		{
