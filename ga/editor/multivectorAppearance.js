@@ -136,23 +136,16 @@ function initMultivectorAppearances(characterMeshHeight)
         let zeroPad = new THREE.InstancedMesh(zeroGeometry, zeroMaterial, maxInstances)
         mv.padGroup = new THREE.Group().add(vecPad, bivPad, triPad, zeroPad)
 
-        let inverseBoundingSphereRadius = 1.
+        let halfInverseBoundingSphereRadius = 1.
 
         function boxDraw(im,dwMatrix,x,y) {
             m1.copy(dwMatrix)
-            m1.scale(v1.setScalar(inverseBoundingSphereRadius))
+            m1.scale(v1.setScalar(halfInverseBoundingSphereRadius))
             m1.setPosition(x, y, 0.)
 
             im.setMatrixAt(im.count, m1)
             ++im.count
-            im.instanceMatrix.needsUpdate = true
         }
-
-        //have the matrix that would be applied to their geometry to get them in the dw, which could be position and scale because translation
-        //to get it in boxes, uniformly scale
-        //if there's more than one of them, you want them scaled the same amount, soooo
-
-        //so, 3x3 matrix
 
         //but how to know which one you want to see? maybe you're always best off seeing the line!
         // let line = new THREE.InstancedMesh(LineGeometry(mv.name), lineMaterial, maxInstances)
@@ -170,6 +163,18 @@ function initMultivectorAppearances(characterMeshHeight)
             vec.visible = !getVector(mv.elements, v1).equals(zeroVector)
             biv.visible = !getBivec(mv.elements, v1).equals(zeroVector)
             tri.visible = mv.elements[7] ? true : false
+
+            let boundingSphereRadius = .0000001
+            if(vec.visible)
+                boundingSphereRadius = Math.max(boundingSphereRadius, getVector(mv.elements, v1).length())
+            if(tri.visible)
+                boundingSphereRadius = Math.max(boundingSphereRadius, mv.elements[7])
+            if(biv.visible) {
+                let bivectorMagnitude = Math.sqrt(sq(mv.elements[4]) + sq(mv.elements[5]) + sq(mv.elements[6]))
+                boundingSphereRadius = Math.max(boundingSphereRadius, bivectorMagnitude < 1. ? 1. : bivectorMagnitude)
+            }
+
+            halfInverseBoundingSphereRadius = .5 / boundingSphereRadius
         }
 
         mv.drawInPlace = function(x,y)
@@ -190,53 +195,52 @@ function initMultivectorAppearances(characterMeshHeight)
             {
                 if(vecPad.count === 0)
                 {
+                    vecPad.instanceMatrix.needsUpdate = true
+
                     getVector(mv.elements, v1)
-
                     v1.applyQuaternion(displayRotation.q)
-
                     randomPerpVector(v1, v2)
                     v3.crossVectors(v1, v2).negate()
-                    let uniformScale = .5
-                    v1.setLength(uniformScale)
-                    v2.setLength(uniformScale)
-                    v3.setLength(uniformScale)
+                    v2.setLength(v1.length())
+                    v3.setLength(v1.length())
                     vec.matrix.makeBasis(v2, v1, v3)
-                    //scaling the arrows so the heads are right will have to wait until you have proper colors
-                    
-                    vecPad.instanceMatrix.needsUpdate = true
+                    //scaling the arrows so the heads are right should wait until you have proper colors
                 }
 
-                m1.copy(vec.matrix)
-                m1.setPosition(x, y, 0.)
-                vecPad.setMatrixAt(vecPad.count, m1)
-                ++vecPad.count
+                boxDraw(vecPad, vec.matrix, x, y)
             }
 
             if(biv.visible)
             {
                 if(bivPad.count === 0)
                 {
-                    geometricProduct(negativeUnitPseudoScalar, mv.elements, mm)
-                    getVector(mm, v1)
+                    bivPad.instanceMatrix.needsUpdate = true
 
-                    randomPerpVector(v1,v2)
-                    v3.crossVectors(v1,v2) //possibly this is inconsistent wrt chirality
-                    v2.setLength(.5)
-                    v3.setLength(.5/v1.length())
+                    let bivectorMagnitude = Math.sqrt(sq(mv.elements[4]) + sq(mv.elements[5]) + sq(mv.elements[6]))
+                    biv.matrix.identity()
+                    biv.matrix.elements[0] = 1.
+                    biv.matrix.elements[5] = bivectorMagnitude
+                    biv.matrix.elements[10] = 1.
 
-                    v1.applyQuaternion(displayRotation.q)
-                    v2.applyQuaternion(displayRotation.q)
-                    v3.applyQuaternion(displayRotation.q)
+                    // geometricProduct(negativeUnitPseudoScalar, mv.elements, mm)
+                    // getVector(mm, v1)
+
+                    // randomPerpVector(v1,v2)
+                    // v3.crossVectors(v1,v2) //possibly this is inconsistent wrt chirality
+                    // v2.setLength(.5)
+                    // v3.setLength(.5/v1.length())
+
+                    // v1.applyQuaternion(displayRotation.q)
+                    // v2.applyQuaternion(displayRotation.q)
+                    // v3.applyQuaternion(displayRotation.q)
 
 
                     //don't scale it by the length of the thing, scale it uniformly using either the side or the length such that it stays in unit sphere
 
-                    bivPad.instanceMatrix.needsUpdate = true
+                    
                 }
 
-                m1.setPosition(x, y, 0.)
-                bivPad.setMatrixAt(bivPad.count, m1)
-                ++bivPad.count
+                boxDraw(bivPad, biv.matrix, x, y)
             }
 
             if(tri.visible)
@@ -254,13 +258,9 @@ function initMultivectorAppearances(characterMeshHeight)
                     tri.matrix.elements[4] *= mv.elements[7]
                     tri.matrix.elements[5] *= mv.elements[7]
                     tri.matrix.elements[6] *= mv.elements[7]
-                    tri.matrix.scale(v1.setScalar(.5 / mv.elements[7]))
                 }
 
-                m1.copy(tri.matrix)
-                m1.setPosition(x, y, 0.)
-                triPad.setMatrixAt(triPad.count, m1)
-                ++triPad.count
+                boxDraw(triPad,tri.matrix,x,y)
             }
         }
      
