@@ -63,8 +63,93 @@
     Alright so juxtaposition f x is "apply function to x". And because your objects, curried with geometric product, are functions...
 */
 
-function initDisplayWindows()
-{
+function initDisplayWindows() {
+    let outlineCollection = OutlineCollection()
+    scene.add(outlineCollection)
+
+    DisplayWindow = ()=>{
+        let dw = new THREE.Group()
+        scene.add(dw)
+        dw.bottomY = 0.
+        displayWindows.push(dw)
+
+        let system = new THREE.Group()
+        dw.system = system
+        system.add(Grid())
+        system.add(new THREE.Mesh(new THREE.BoxGeometry()))
+        dw.add(system)
+
+        updateFunctions.push(() => {
+            dw.scale.copy(pad.scale)
+            dw.scale.multiplyScalar(3.)
+
+            dw.position.y = dw.scale.y / 2. + dw.bottomY
+            outlineCollection.draw(dw.position.x, dw.position.y, dw.scale.x)
+
+            system.quaternion.copy(displayRotation.q)
+            system.scale.setScalar(1./displayDistance) //no idea what the units are
+        })
+
+        return dw
+    }
+
+    // let ordinaryClearColor = renderer.getClearColor().clone()
+    // let ordinaryRenderTarget = renderer.getRenderTarget()
+    // DisplayWindow = function()
+    // {
+    //     let localScene = new THREE.Scene()
+    //     localScene.add(Grid())
+
+    //     let filter = THREE.NearestFilter
+    //     let wrap = THREE.ClampToEdgeWrapping
+    //     let params = {
+    //         minFilter: filter,
+    //         magFilter: filter,
+    //         wrapS: wrap,
+    //         wrapT: wrap,
+    //         format: THREE.RGBAFormat,
+    //         stencilBuffer: false,
+    //         depthBuffer: false,
+    //         premultiplyAlpha: false,
+    //         type: THREE.FloatType // THREE.HalfFloat for speed
+    //     }
+    //     let dimensionInPixels = 256
+    //     let localFramebuffer = new THREE.WebGLRenderTarget(dimensionInPixels, dimensionInPixels, params)
+
+    //     let dw = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), new THREE.MeshBasicMaterial({ map: localFramebuffer.texture }))
+    //     scene.add(dw)
+    //     dw.bottomY = 0.
+    //     dw.scene = localScene
+    //     displayWindows.push(dw)
+
+    //     let displayCamera = new THREE.PerspectiveCamera(90., 1., .01)
+        
+    //     updateFunctions.push(() =>
+    //     {
+    //         displayCamera.quaternion.copy(displayRotation.q)
+    //         displayCamera.quaternion.inverse()
+    //         v1.set(0., 0., -displayDistance).applyQuaternion(displayCamera.quaternion).add(displayCamera.position)
+    //         displayCamera.position.sub(v1)
+    //         displayCamera.position.setLength(displayDistance)
+
+    //         dw.position.y = dw.scale.y / 2. + dw.bottomY
+    //         //and scale.y could be various things
+    //         //and change resolution, and think about camera bullshit
+
+    //         outlineCollection.draw(dw.position.x,dw.position.y,dw.scale.x)
+
+    //         renderer.setRenderTarget(localFramebuffer)
+    //         renderer.setClearColor(0x000000)
+    //         renderer.clear()
+    //         renderer.render(localScene, displayCamera)
+
+    //         renderer.setRenderTarget(ordinaryRenderTarget)
+    //         renderer.setClearColor(ordinaryClearColor)
+    //     })
+
+    //     return dw
+    // }
+
     {
         let gridSize = 8
         let gridGeometryCoords = [0., gridSize / 2., 0., 0., -gridSize / 2., 0.]
@@ -72,90 +157,7 @@ function initDisplayWindows()
         gridHelperCoords.forEach((coord) => { gridGeometryCoords.push(coord) })
         let gridGeometry = new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(gridGeometryCoords), 3))
         let gridMaterial = new THREE.LineBasicMaterial({ color: 0xFFFFFF })
-        Grid = function () {
-            return new THREE.LineSegments(gridGeometry, gridMaterial)
-        }
-    }
-
-    let ordinaryClearColor = renderer.getClearColor().clone()
-    let ordinaryRenderTarget = renderer.getRenderTarget()
-    DisplayWindow = function()
-    {
-        let localScene = new THREE.Scene()
-        localScene.add(Grid())
-
-        let filter = THREE.NearestFilter
-        let wrap = THREE.ClampToEdgeWrapping
-        let params = {
-            minFilter: filter,
-            magFilter: filter,
-            wrapS: wrap,
-            wrapT: wrap,
-            format: THREE.RGBAFormat,
-            stencilBuffer: false,
-            depthBuffer: false,
-            premultiplyAlpha: false,
-            type: THREE.FloatType // THREE.HalfFloat for speed
-        }
-        let dimensionInPixels = 256
-        let localFramebuffer = new THREE.WebGLRenderTarget(dimensionInPixels, dimensionInPixels, params)
-
-        let dw = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), new THREE.MeshBasicMaterial({ map: localFramebuffer.texture }))
-        scene.add(dw)
-        dw.bottomY = 0.
-        dw.scene = localScene
-        displayWindows.push(dw)
-        
-        updateFunctions.push(() =>
-        {
-            dw.position.y = dw.scale.y / 2. + dw.bottomY
-            //and scale.y could be various things
-            //and change resolution, and think about camera bullshit
-
-            if (mouse.rightClicking ) {
-                // Much better than built in rotation is rotating the basis vectors.x or y rotate around y, y rotate upwards or downwards
-
-                v1.copy(mouse.raycaster.ray.direction)
-                v1.y = 0.
-                v2.copy(mouse.oldRaycaster.ray.direction)
-                v2.y = 0.
-                let horizontalDelta = v1.angleTo(v2) * (v1.x < v2.x ? 1. : -1.)
-
-                v1.copy(mouse.raycaster.ray.direction)
-                v1.x = 0.
-                v2.copy(mouse.oldRaycaster.ray.direction)
-                v2.x = 0.
-                let verticalDelta = v1.angleTo(v2) * (v1.y > v2.y ? 1. : -1.)
-
-                displayCamera.rotation.y += horizontalDelta * 60.
-                displayCamera.rotation.x += verticalDelta * 60.
-                displayCamera.rotation.x = clamp(displayCamera.rotation.x, -TAU / 4., TAU / 4.)
-            }
-            else {
-                let closestIntegerMultipleX = Math.round(displayCamera.rotation.x / (TAU/4.)) * TAU/4
-                let closestIntegerMultipleY = Math.round(displayCamera.rotation.y / (TAU/4.)) * TAU/4
-                if (Math.abs(closestIntegerMultipleX - displayCamera.rotation.x) < .3 && 
-                    Math.abs(closestIntegerMultipleY - displayCamera.rotation.y) < .3) {
-                    displayCamera.rotation.x += getStepTowardDestination(displayCamera.rotation.x, closestIntegerMultipleX)
-                    displayCamera.rotation.y += getStepTowardDestination(displayCamera.rotation.y, closestIntegerMultipleY)
-                }
-            }
-
-            displayCamera.quaternion.setFromEuler(displayCamera.rotation)
-            let currentDistFromCamera = displayCamera.position.length()
-            v1.set(0., 0., -currentDistFromCamera).applyQuaternion(displayCamera.quaternion).add(displayCamera.position)
-            displayCamera.position.sub(v1)
-
-            renderer.setRenderTarget(localFramebuffer)
-            renderer.setClearColor(0x000000)
-            renderer.clear()
-            renderer.render(localScene, displayCamera)
-
-            renderer.setRenderTarget(ordinaryRenderTarget)
-            renderer.setClearColor(ordinaryClearColor)
-        })
-
-        return dw
+        Grid = () => new THREE.LineSegments(gridGeometry, gridMaterial)
     }
 
     document.addEventListener('wheel', (event)=>
@@ -170,8 +172,45 @@ function initDisplayWindows()
                 pad.position.y += event.deltaY * .008
             else {
                 let inflationFactor = 1.2
-                displayCamera.position.setLength(displayCamera.position.length() * (event.deltaY < 0 ? inflationFactor : 1. / inflationFactor))
-            }   
+                displayDistance *= event.deltaY < 0 ? inflationFactor : 1. / inflationFactor
+            }
         }
     }, false);
+
+    updateFunctions.push(() =>
+    {
+        if (mouse.rightClicking)
+        {
+            // Much better than built in rotation is rotating the basis vectors.x or y rotate around y, y rotate upwards or downwards
+
+            v1.copy(mouse.raycaster.ray.direction)
+            v1.y = 0.
+            v2.copy(mouse.oldRaycaster.ray.direction)
+            v2.y = 0.
+            let horizontalDelta = v1.angleTo(v2) * (v1.x < v2.x ? -1. : 1.)
+
+            v1.copy(mouse.raycaster.ray.direction)
+            v1.x = 0.
+            v2.copy(mouse.oldRaycaster.ray.direction)
+            v2.x = 0.
+            let verticalDelta = v1.angleTo(v2) * (v1.y > v2.y ? -1. : 1.)
+
+            displayRotation.y += horizontalDelta * 10.
+            displayRotation.x += verticalDelta * 10.
+            displayRotation.x = clamp(displayRotation.x, -TAU / 4., TAU / 4.)
+        }
+        else
+        {
+            let closestIntegerMultipleX = Math.round(displayRotation.x / (TAU / 4.)) * TAU / 4
+            let closestIntegerMultipleY = Math.round(displayRotation.y / (TAU / 4.)) * TAU / 4
+            if (Math.abs(closestIntegerMultipleX - displayRotation.x) < .3 &&
+                Math.abs(closestIntegerMultipleY - displayRotation.y) < .3)
+            {
+                displayRotation.x += getStepTowardDestination(displayRotation.x, closestIntegerMultipleX)
+                displayRotation.y += getStepTowardDestination(displayRotation.y, closestIntegerMultipleY)
+            }
+        }
+
+        displayRotation.q.setFromEuler(displayRotation)
+    })
 }

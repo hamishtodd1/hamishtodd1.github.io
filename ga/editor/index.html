@@ -22,7 +22,7 @@
 				renderer.shadowMap.type = THREE.BasicShadowMap;
 				document.body.appendChild( renderer.domElement );
 
-				initWindowResizeSystemAndSurroundings(renderer);
+				initWindowResizeSystemAndSurroundings();
 				initMouse()
 				initSound()
 
@@ -37,6 +37,9 @@
 
 					for(var i = 0; i < updateFunctions.length; i++)
 						updateFunctions[i]()
+
+					for (var i = 0; i < renderFunctions.length; i++)
+						renderFunctions[i]()
 
 					++frameCount
 
@@ -71,6 +74,8 @@
 
 		<script src="caratAndNavigation.js"></script>
 		<script src="pad.js"></script>
+		<script src="outlines.js"></script>
+		<script src="caratAndKeyboard.js"></script>
 
 		<script src="../common/variables.js"></script>
 		<script src="variables.js"></script>

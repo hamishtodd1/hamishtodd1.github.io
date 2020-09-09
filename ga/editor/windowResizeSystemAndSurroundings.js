@@ -4,27 +4,8 @@
 	so fretting about whether up, down, left, right is positive and negative(except relatively) is silly
 */
 
-function initWindowResizeSystemAndSurroundings(renderer)
+function initWindowResizeSystemAndSurroundings()
 {
-	//the effect of the below is to make it so that the only change is to the viewport, not to the scene itself
-	function respondToResize(event)
-	{
-		if(event!==undefined) event.preventDefault()
-
-		let pixelRatioChangeRatio = window.devicePixelRatio / renderer.getPixelRatio()
-		renderer.setPixelRatio(window.devicePixelRatio);
-		pad.scale.multiplyScalar(pixelRatioChangeRatio)
-
-		renderer.setSize( window.innerWidth, window.innerHeight );
-		camera.aspect = window.innerWidth / window.innerHeight;
-
-		camera.fov = fovGivenCenterToFrameDistance(camera.topAtZZero, camera.position.z )
-		camera.rightAtZZero = camera.topAtZZero * camera.aspect
-
-		camera.updateProjectionMatrix();
-	}
-	window.addEventListener( 'resize', respondToResize, false );
-
 	{
 		var pointLight = new THREE.PointLight(0xFFFFFF, 0.4, 0.);
 		pointLight.shadow.mapSize.width = 1024;
@@ -35,10 +16,9 @@ function initWindowResizeSystemAndSurroundings(renderer)
 		scene.add( new THREE.AmbientLight( 0xFFFFFF, 0.7 ) );
 	}
 
-	camera.setTopAtZZeroAndAdjustScene = function(newTopAtZZero)
+	camera.topAtZZero = 15.; //all derives from this. Tweaked to make 100% look ok on our little preview
 	{
-		camera.topAtZZero = newTopAtZZero;
-		camera.position.z = camera.topAtZZero * 20.; //subjective, how much depth do you want?
+		camera.position.z = camera.topAtZZero * 9.; //subjective, how much depth do you want?
 		camera.far = camera.position.z * 2.
 
 		pointLight.distance = camera.position.z
@@ -47,13 +27,29 @@ function initWindowResizeSystemAndSurroundings(renderer)
 		pointLight.shadow.camera.updateProjectionMatrix()
 
 		pointLight.position.set(-camera.topAtZZero, camera.topAtZZero, camera.topAtZZero * .25)
-		pointLight.position.multiplyScalar(.5)
-
-		respondToResize();
+		pointLight.position.multiplyScalar(.5)	
 	}
 
-	//want unit vectors to be a reasonable size
-	camera.setTopAtZZeroAndAdjustScene(20.)
+	// window.devicePixelRatio, prior to resizing, seems to come from the device. Don't consider it, just changes to it
+	//the effect of the below is to make it so that the only change is to the viewport, not to the scene itself
+	function respondToResize(event)
+	{
+		if (event !== undefined) event.preventDefault()
+
+		let pixelRatioChangeRatio = window.devicePixelRatio / renderer.getPixelRatio()
+		renderer.setPixelRatio(window.devicePixelRatio);
+		pad.scale.multiplyScalar(pixelRatioChangeRatio)
+
+		renderer.setSize(window.innerWidth, window.innerHeight);
+		camera.aspect = window.innerWidth / window.innerHeight;
+
+		camera.fov = fovGivenCenterToFrameDistance(camera.topAtZZero, camera.position.z)
+		camera.rightAtZZero = camera.topAtZZero * camera.aspect
+
+		camera.updateProjectionMatrix();
+	}
+	window.addEventListener('resize', respondToResize, false);
+	respondToResize();
 }
 
 function centerToFrameDistance(fov, cameraDistance)

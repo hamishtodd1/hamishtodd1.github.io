@@ -175,9 +175,7 @@ function initMultivectorAppearances(characterMeshHeight)
                 {
                     getVector(mv.elements, v1)
 
-                    q1.copy(displayCamera.quaternion)
-                    q1.inverse()
-                    v1.applyQuaternion(q1)
+                    v1.applyQuaternion(displayRotation.q)
 
                     randomPerpVector(v1, v2)
                     v3.crossVectors(v1, v2).negate()
@@ -209,13 +207,13 @@ function initMultivectorAppearances(characterMeshHeight)
                     v2.setLength(.5)
                     v3.setLength(.5/v1.length())
 
-                    q1.copy(displayCamera.quaternion)
-                    q1.inverse()
-                    v1.applyQuaternion(q1)
-                    v2.applyQuaternion(q1)
-                    v3.applyQuaternion(q1)
+                    v1.applyQuaternion(displayRotation.q)
+                    v2.applyQuaternion(displayRotation.q)
+                    v3.applyQuaternion(displayRotation.q)
 
                     bivMat.makeBasis(v3, v2, v1)
+
+                    //don't scale it by the length of the thing, scale it uniformly using either the side or the length such that it stays in unit sphere
 
                     biv.instanceMatrix.needsUpdate = true
                 }
@@ -237,10 +235,7 @@ function initMultivectorAppearances(characterMeshHeight)
                     // q2.setFromAxisAngle(yUnit, TAU / 8.)
                     // q1.multiply(q2)
 
-                    q1.copy(displayCamera.quaternion)
-                    q1.inverse()
-
-                    triMat.makeRotationFromQuaternion(q1)
+                    triMat.makeRotationFromQuaternion(displayRotation.q)
                     triMat.elements[4] *= mv.elements[7]
                     triMat.elements[5] *= mv.elements[7]
                     triMat.elements[6] *= mv.elements[7]

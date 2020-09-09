@@ -46,7 +46,7 @@ function initMainDw() {
         buttons[newLabel].scale.multiplyScalar(.1)
         mainDw.add(buttons[newLabel])	
 
-        buttons[newLabel].position.y = -.5 - buttons[newLabel].scale.y * .5
+        buttons[newLabel].position.y = -.5 - buttons[newLabel].scale.y * .5 - .001
         buttons[newLabel].position.x = (index-1.) * .3
         buttons[newLabel].position.z = .01
 
@@ -94,7 +94,7 @@ function initMainDw() {
     //or the doodling stays on the plane and if you look at it three dimensionally it's extruded?
     {
         var mouseTrail = new THREE.Line(new THREE.Geometry())
-        mainDw.scene.add(mouseTrail)
+        mainDw.system.add(mouseTrail)
         for (let i = 0; i < 256; i++)
             mouseTrail.geometry.vertices.push(new THREE.Vector3())
         var lastTrailVertexToBeAssigned = 0

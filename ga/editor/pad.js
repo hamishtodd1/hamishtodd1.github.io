@@ -101,12 +101,13 @@ async function initPad(characterMeshHeight)
 	let torusFuncIm = FuncViz(torusFunc, 2, 3)
 	pad.add(torusFuncIm)
 
-	initCaratAndNavigation()
+	initCarat()
 
 	for(let i = 0; i < 63; i++)
 		VariableAppearance()
 	let pictogramWidthInCharacters = 3
-	let outlines = initOutlines(pictogramWidthInCharacters * spaceWidth)
+	let outlineCollection = OutlineCollection()
+	pad.add(outlineCollection)
 	let maxVariableNameLength = pictogramWidthInCharacters
 	function getVariableWithName(name)
 	{
@@ -195,18 +196,6 @@ async function initPad(characterMeshHeight)
 		for (let i = 0, il = variables.length; i < il; i++)
 			variables[i].resetCount()
 
-		for (let i = 0; i < outlines.length; ++i)
-			outlines[i].visible = false
-		let lowestUnusedOutline = 0
-		//could just have it done as part of drawing multivector
-		function drawOutline(x,y)
-		{
-			outlines[lowestUnusedOutline].visible = true
-			outlines[lowestUnusedOutline].position.set(x,y,0.)
-			++lowestUnusedOutline
-			console.assert( lowestUnusedOutline < outlines.length )
-		}
-
 		let lowestUnusedDisplayWindow = 0
 		for (let i = 0; i < interimDisplayWindows.length; i++)
 			interimDisplayWindows[i].bottomY = camera.topAtZZero
@@ -272,7 +261,7 @@ async function initPad(characterMeshHeight)
 							v2.copy(outputColumn.position)
 							pad.worldToLocal(v2)
 							v2.y = drawingPosition.y //- 1. / 3.
-							drawOutline(v2.x, v2.y)
+							outlineCollection.draw(v2.x, v2.y, 1.)
 
 							let mv = variables[lowestUndeterminedVariable]
 							operator(operand1.elements, operand2.elements, mv.elements)
@@ -337,12 +326,13 @@ async function initPad(characterMeshHeight)
 							let dw = interimDisplayWindows[lowestUnusedDisplayWindow]
 							dw.bottomY = lineBottomYWorld
 
-							dw.scale.y = maxHeight
-							let paddingBetweenDws = .1 * getWorldLineHeight()
-							for (let i = 0; i < lowestUnusedDisplayWindow; i++) {
-								if (dw.scale.y > interimDisplayWindows[i].bottomY - lineBottomYWorld)
-									dw.scale.y = interimDisplayWindows[i].bottomY - lineBottomYWorld - paddingBetweenDws
-							}
+							dw.scale.y = dw.scale.x
+							// dw.scale.y = maxHeight
+							// let paddingBetweenDws = .1 * getWorldLineHeight()
+							// for (let i = 0; i < lowestUnusedDisplayWindow; i++) {
+							// 	if (dw.scale.y > interimDisplayWindows[i].bottomY - lineBottomYWorld)
+							// 		dw.scale.y = interimDisplayWindows[i].bottomY - lineBottomYWorld - paddingBetweenDws
+							// }
 
 							++lowestUnusedDisplayWindow
 						}
@@ -351,7 +341,9 @@ async function initPad(characterMeshHeight)
 					}
 					else if (token === "tor") {
 						torusFuncIm.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
-						drawOutline(drawingPosition.x + .5, drawingPosition.y)
+						outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
+
+						drawCharacters = false
 
 						//the below needs to be a separate function applicable to this
 					}
@@ -385,12 +377,12 @@ async function initPad(characterMeshHeight)
 							// if (carat.position.y !== drawingPosition.y )
 							// {
 							// 	mv.drawInPlace(superimposePosition.x, superimposePosition.y)
-							// 	drawOutline(superimposePosition.x, superimposePosition.y)
+							// 	outlineCollection.draw(superimposePosition.x, superimposePosition.y, 1.)
 							// }
 							// else
 							{
 								mv.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
-								drawOutline(drawingPosition.x + .5, drawingPosition.y)
+								outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
 							}
 							drawCharacters = false
 						}
@@ -527,93 +519,4 @@ async function initPad(characterMeshHeight)
 			interimDisplayWindows[i].position.x = (-camera.rightAtZZero + outputColumn.left()) / 2.
 		}
 	})
-}
-
-function initTypeableCharacters(carat,maxCopiesOfALetter)
-{
-	let characters = {
-		array: "",
-		instancedMeshes:{}
-	}
-	addStringAtPosition = (str,position) => {
-		backgroundString = 
-			backgroundString.substring(0, position) + 
-			str + 
-			backgroundString.substring(position, backgroundString.length)
-	}
-	addStringAtCarat = function(str) {
-		addStringAtPosition(str,carat.positionInString)
-		carat.moveAlongString(str.length)
-	}
-	characters.add = function(character, displayedCharacter) {
-		if (displayedCharacter === undefined)
-			displayedCharacter = character
-
-		let material = null
-		if (character === "~") {
-			material = new THREE.MeshBasicMaterial()
-			new THREE.TextureLoader().load("data/integral.png", function (result) { material.map = result; material.needsUpdate = true} )
-			material.getAspect = ()=>{return 1.}
-		}
-		else material = text(displayedCharacter, true)
-		
-		if(colors[character] !== undefined)
-		{
-			material.color.r = colors[character].r * .7 + .3
-			material.color.g = colors[character].g * .7 + .3
-			material.color.b = colors[character].b * .7 + .3
-		}
-
-		let instancedMesh = new THREE.InstancedMesh(unchangingUnitSquareGeometry, material, maxCopiesOfALetter);
-		instancedMesh.count = 0
-		pad.add(instancedMesh)
-		instancedMesh.aspect = material.getAspect()
-
-		characters.instancedMeshes[character] = instancedMesh
-		characters.array += character
-		if(displayedCharacter !== character)
-		{
-			characters.instancedMeshes[displayedCharacter] = instancedMesh
-			characters.array += displayedCharacter
-		}
-
-		bindButton(character, () => addStringAtCarat(character))
-	}
-	let initialCharacters = "abcdefghijklmnopqrstuvwxyz ~"
-	for (let i = 0; i < initialCharacters.length; i++)
-		characters.add(initialCharacters[i])
-
-	bindButton("Delete", () => {
-		if (carat.positionInString < backgroundString.length)
-			backgroundString = backgroundString.substring(0, carat.positionInString) + backgroundString.substring(carat.positionInString + 1, backgroundString.length)
-	})
-	bindButton("Backspace", () => {
-		if (carat.positionInString !== 0)
-		{
-			backgroundString = backgroundString.substring(0, carat.positionInString - 1) + backgroundString.substring(carat.positionInString, backgroundString.length)
-			carat.moveAlongString(-1)
-		}
-	})
-	bindButton("Tab", () => { for (let i = 0; i < 2; i++) addStringAtCarat(" ") })
-	bindButton("Enter", () => addStringAtCarat("\n"))
-
-	return characters
-}
-
-function initOutlines(maxVariableNameLength)
-{
-	let outlineGeometry = new THREE.PlaneGeometry(maxVariableNameLength,1.)
-	let outlineMaterial = new THREE.LineBasicMaterial({ color: 0xFFFFFF })
-	v1.copy(outlineGeometry.vertices[3])
-	outlineGeometry.vertices[3].copy(outlineGeometry.vertices[2])
-	outlineGeometry.vertices[2].copy(v1)
-
-	let outlines = Array(256)
-	for (let i = 0; i < outlines.length; ++i)
-	{
-		outlines[i] = new THREE.LineLoop(outlineGeometry, outlineMaterial)
-		pad.add(outlines[i])
-	}
-
-	return outlines
 }

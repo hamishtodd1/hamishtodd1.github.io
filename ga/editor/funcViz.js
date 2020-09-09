@@ -154,9 +154,7 @@ function initFuncViz()
 
             im.drawInPlace = function (x, y) {
                 m1.identity()
-                q1.copy(displayCamera.quaternion)
-                q1.inverse()
-                m1.makeRotationFromQuaternion(q1)
+                m1.makeRotationFromQuaternion(displayRotation.q)
                 m1.scale(v1.setScalar(.5 / im.radius))
                 m1.setPosition(x, y, 0.)
 
