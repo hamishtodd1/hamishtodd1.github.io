@@ -30,7 +30,7 @@
 
 function initMainDw() {
 
-    let mainDw = DisplayWindow()
+    let mainDw = DisplayWindow(false)
     mainDw.scale.x = 10.5
     mainDw.scale.y = mainDw.scale.x
     mainDw.renderOrder = carat.renderOrder + 1
@@ -94,7 +94,7 @@ function initMainDw() {
     //or the doodling stays on the plane and if you look at it three dimensionally it's extruded?
     {
         var mouseTrail = new THREE.Line(new THREE.Geometry())
-        mainDw.system.add(mouseTrail)
+        mainDw.scene.add(mouseTrail)
         for (let i = 0; i < 256; i++)
             mouseTrail.geometry.vertices.push(new THREE.Vector3())
         var lastTrailVertexToBeAssigned = 0

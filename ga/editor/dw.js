@@ -67,17 +67,58 @@ function initDisplayWindows() {
     let outlineCollection = OutlineCollection()
     scene.add(outlineCollection)
 
-    DisplayWindow = ()=>{
+    DisplayWindow = (useScreen) => {
         let dw = new THREE.Group()
         scene.add(dw)
         dw.bottomY = 0.
         displayWindows.push(dw)
 
-        let system = new THREE.Group()
-        dw.system = system
-        system.add(Grid())
-        system.add(new THREE.Mesh(new THREE.BoxGeometry()))
-        dw.add(system)
+        dw.scene = new THREE.Group()
+        dw.scene.add(Grid())
+        dw.scene.add(new THREE.Mesh(new THREE.BoxGeometry()))
+
+        if (!useScreen)
+            dw.add(dw.scene)
+        else {
+
+            //is there a way to do this with a fragment shader?
+            let filter = THREE.NearestFilter
+            let wrap = THREE.ClampToEdgeWrapping
+            let params = {
+                minFilter: filter,
+                magFilter: filter,
+                wrapS: wrap,
+                wrapT: wrap,
+                format: THREE.RGBAFormat,
+                stencilBuffer: false,
+                depthBuffer: false,
+                premultiplyAlpha: false,
+                type: THREE.FloatType // THREE.HalfFloat for speed
+            }
+            let dimensionInPixels = 256 //TOOD updated to how big the fucker is
+            let localFramebuffer = new THREE.WebGLRenderTarget(dimensionInPixels, dimensionInPixels, params)
+            dw.screen = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), new THREE.MeshBasicMaterial({ map: localFramebuffer.texture }))
+            dw.add(dw.screen)
+            let displayCamera = new THREE.PerspectiveCamera(70., 1., .01)
+            let ordinaryClearColor = renderer.getClearColor().clone()
+            let ordinaryRenderTarget = renderer.getRenderTarget()
+            dw.screen.draw = () =>
+            {
+                displayCamera.quaternion.copy(displayRotation.q)
+                displayCamera.quaternion.inverse()
+                v1.set(0., 0., -displayDistance).applyQuaternion(displayCamera.quaternion).add(displayCamera.position)
+                displayCamera.position.sub(v1)
+                displayCamera.position.setLength(displayDistance)
+
+                renderer.setRenderTarget(localFramebuffer)
+                renderer.setClearColor(0x000000)
+                renderer.clear()
+                renderer.render(dw.scene, displayCamera)
+
+                renderer.setRenderTarget(ordinaryRenderTarget)
+                renderer.setClearColor(ordinaryClearColor)
+            }
+        }
 
         updateFunctions.push(() => {
             dw.scale.copy(pad.scale)
@@ -86,51 +127,35 @@ function initDisplayWindows() {
             dw.position.y = dw.scale.y / 2. + dw.bottomY
             outlineCollection.draw(dw.position.x, dw.position.y, dw.scale.x)
 
-            system.quaternion.copy(displayRotation.q)
-            system.scale.setScalar(1./displayDistance) //no idea what the units are
+            dw.scene.quaternion.copy(displayRotation.q)
+            dw.scene.scale.setScalar(1./displayDistance) //no idea what the units are
+
+            if(useScreen)
+                dw.screen.draw()
         })
 
         return dw
     }
 
-    // let ordinaryClearColor = renderer.getClearColor().clone()
-    // let ordinaryRenderTarget = renderer.getRenderTarget()
+    
     // DisplayWindow = function()
     // {
     //     let localScene = new THREE.Scene()
     //     localScene.add(Grid())
 
-    //     let filter = THREE.NearestFilter
-    //     let wrap = THREE.ClampToEdgeWrapping
-    //     let params = {
-    //         minFilter: filter,
-    //         magFilter: filter,
-    //         wrapS: wrap,
-    //         wrapT: wrap,
-    //         format: THREE.RGBAFormat,
-    //         stencilBuffer: false,
-    //         depthBuffer: false,
-    //         premultiplyAlpha: false,
-    //         type: THREE.FloatType // THREE.HalfFloat for speed
-    //     }
-    //     let dimensionInPixels = 256
-    //     let localFramebuffer = new THREE.WebGLRenderTarget(dimensionInPixels, dimensionInPixels, params)
-
-    //     let dw = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), new THREE.MeshBasicMaterial({ map: localFramebuffer.texture }))
+    //     let dw = new THREE.Group()
     //     scene.add(dw)
     //     dw.bottomY = 0.
     //     dw.scene = localScene
     //     displayWindows.push(dw)
 
-    //     let displayCamera = new THREE.PerspectiveCamera(90., 1., .01)
+        
+
+        
         
     //     updateFunctions.push(() =>
     //     {
-    //         displayCamera.quaternion.copy(displayRotation.q)
-    //         displayCamera.quaternion.inverse()
-    //         v1.set(0., 0., -displayDistance).applyQuaternion(displayCamera.quaternion).add(displayCamera.position)
-    //         displayCamera.position.sub(v1)
-    //         displayCamera.position.setLength(displayDistance)
+            
 
     //         dw.position.y = dw.scale.y / 2. + dw.bottomY
     //         //and scale.y could be various things
@@ -138,13 +163,8 @@ function initDisplayWindows() {
 
     //         outlineCollection.draw(dw.position.x,dw.position.y,dw.scale.x)
 
-    //         renderer.setRenderTarget(localFramebuffer)
-    //         renderer.setClearColor(0x000000)
-    //         renderer.clear()
-    //         renderer.render(localScene, displayCamera)
-
-    //         renderer.setRenderTarget(ordinaryRenderTarget)
-    //         renderer.setClearColor(ordinaryClearColor)
+    //         if(dw.screen)
+    //             dw.screen.draw()
     //     })
 
     //     return dw
@@ -195,8 +215,8 @@ function initDisplayWindows() {
             v2.x = 0.
             let verticalDelta = v1.angleTo(v2) * (v1.y > v2.y ? -1. : 1.)
 
-            displayRotation.y += horizontalDelta * 10.
-            displayRotation.x += verticalDelta * 10.
+            displayRotation.y += horizontalDelta * 20.
+            displayRotation.x += verticalDelta * 20.
             displayRotation.x = clamp(displayRotation.x, -TAU / 4., TAU / 4.)
         }
         else
