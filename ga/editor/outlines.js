@@ -17,7 +17,7 @@ function OutlineCollection()
 		++outlinesThisFrame
 	}
 
-	renderFunctions.push(()=>{
+	latterUpdateFunctions.push(()=>{
 		if (outlinesThisFrame >= maxOutlines) {
 			console.error("too many outlines")
 			return

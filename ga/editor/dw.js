@@ -74,6 +74,7 @@ function initDisplayWindows() {
         displayWindows.push(dw)
 
         dw.scene = new THREE.Group()
+        // dw.scene.scale.setScalar(.1)
         let ourGrid = Grid()
         dw.scene.add(ourGrid)
 
@@ -84,58 +85,52 @@ function initDisplayWindows() {
             })
         }
 
-        if (!useScreen)
-            dw.add(dw.scene)
-        else {
-            //TODO your render target should still be the same.
-            //You just render to a small part of it, with a different transformation matrix. Scissor.
-            let filter = THREE.NearestFilter
-            let wrap = THREE.ClampToEdgeWrapping
-            let params = {
-                minFilter: filter,
-                magFilter: filter,
-                wrapS: wrap,
-                wrapT: wrap,
-                format: THREE.RGBAFormat,
-                stencilBuffer: false,
-                depthBuffer: false,
-                premultiplyAlpha: false,
-                type: THREE.FloatType // THREE.HalfFloat for speed
-            }
-            let dimensionInPixels = 256 //TOOD updated to how big the fucker is
-            let localFramebuffer = new THREE.WebGLRenderTarget(dimensionInPixels, dimensionInPixels, params)
-            dw.screen = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), new THREE.MeshBasicMaterial({ map: localFramebuffer.texture }))
-            dw.add(dw.screen)
-            let displayCamera = new THREE.PerspectiveCamera(70., 1., .01)
-            let ordinaryClearColor = renderer.getClearColor().clone()
-            let ordinaryRenderTarget = renderer.getRenderTarget()
-            dw.screen.draw = () =>
-            {
-                displayCamera.quaternion.copy(displayRotation.q)
-                displayCamera.quaternion.inverse()
-                v1.set(0., 0., -displayDistance).applyQuaternion(displayCamera.quaternion).add(displayCamera.position)
-                displayCamera.position.sub(v1)
-                displayCamera.position.setLength(displayDistance)
+        dw.add(dw.scene)
+        
+        // {
+        //     //TODO your render target should still be the same.
+        //     //You just render to a small part of it, with a different transformation matrix. Scissor.
+        //     let filter = THREE.NearestFilter
+        //     let wrap = THREE.ClampToEdgeWrapping
+        //     let params = {
+        //         minFilter: filter,
+        //         magFilter: filter,
+        //         wrapS: wrap,
+        //         wrapT: wrap,
+        //         format: THREE.RGBAFormat,
+        //         stencilBuffer: false,
+        //         depthBuffer: false,
+        //         premultiplyAlpha: false,
+        //         type: THREE.FloatType // THREE.HalfFloat for speed
+        //     }
+        //     let dimensionInPixels = 256 //TOOD updated to how big the fucker is
+        //     let localFramebuffer = new THREE.WebGLRenderTarget(dimensionInPixels, dimensionInPixels, params)
+        //     dw.screen = new THREE.Mesh(new THREE.PlaneGeometry(1., 1.), new THREE.MeshBasicMaterial({ map: localFramebuffer.texture }))
+        //     dw.add(dw.screen)
+        //     let displayCamera = new THREE.PerspectiveCamera(70., 1., .01)
+        //     let ordinaryClearColor = renderer.getClearColor().clone()
+        //     let ordinaryRenderTarget = renderer.getRenderTarget()
+        //     dw.screen.draw = () =>
+        //     {
+        //         displayCamera.quaternion.copy(displayRotation.q)
+        //         displayCamera.quaternion.inverse()
+        //         v1.set(0., 0., -displayDistance).applyQuaternion(displayCamera.quaternion).add(displayCamera.position)
+        //         displayCamera.position.sub(v1)
+        //         displayCamera.position.setLength(displayDistance)
 
-                renderer.setRenderTarget(localFramebuffer)
-                renderer.setClearColor(0x000000)
-                renderer.clear()
-                renderer.render(dw.scene, displayCamera) //yay this works, apparently there's no difference between scene and group?
+        //         renderer.setRenderTarget(localFramebuffer)
+        //         renderer.setClearColor(0x000000)
+        //         renderer.clear()
+        //         renderer.render(dw.scene, displayCamera) //yay this works, apparently there's no difference between scene and group?
 
-                renderer.setRenderTarget(ordinaryRenderTarget)
-                renderer.setClearColor(ordinaryClearColor)
-            }
-        }
+        //         renderer.setRenderTarget(ordinaryRenderTarget)
+        //         renderer.setClearColor(ordinaryClearColor)
+        //     }
+        // }
 
         updateFunctions.push(() => {
-            dw.scale.copy(pad.scale)
-            dw.scale.multiplyScalar(3.)
-
             dw.position.y = dw.scale.y / 2. + dw.bottomY
             outlineCollection.draw(dw.position.x, dw.position.y, dw.scale.x)
-
-            ourGrid.quaternion.copy(displayRotation.q)
-            dw.scene.scale.setScalar(1./displayDistance) //no idea what the units are
 
             if(useScreen)
                 dw.screen.draw()
@@ -185,7 +180,13 @@ function initDisplayWindows() {
         gridHelperCoords.forEach((coord) => { gridGeometryCoords.push(coord) })
         let gridGeometry = new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(gridGeometryCoords), 3))
         let gridMaterial = new THREE.LineBasicMaterial({ color: 0xFFFFFF })
-        Grid = () => new THREE.LineSegments(gridGeometry, gridMaterial)
+        Grid = () => {
+            let g = new THREE.LineSegments(gridGeometry, gridMaterial)
+            updateFunctions.push(()=>{
+                g.quaternion.copy(displayRotation.q)
+            })
+            return g
+        }
     }
 
     document.addEventListener('wheel', (event)=>
@@ -196,11 +197,13 @@ function initDisplayWindows() {
             return
         else
         {
-            if (!mouse.isOnDisplayWindow())
+            let dw = mouse.displayWindowMouseIsOn()
+            if (dw === null)
                 pad.position.y += event.deltaY * .008
             else {
                 let inflationFactor = 1.2
-                displayDistance *= event.deltaY < 0 ? inflationFactor : 1. / inflationFactor
+                let multiple = event.deltaY < 0 ? inflationFactor : 1. / inflationFactor
+                dw.scene.scale.multiplyScalar(multiple)
             }
         }
     }, false);

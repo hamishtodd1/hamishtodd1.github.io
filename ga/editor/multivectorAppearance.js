@@ -102,11 +102,9 @@ function initMultivectorAppearances(characterMeshHeight)
         {
             ++digitNum
             let newDigit = digitGivenBase(idNum, colorCharacters.length + 1, digitNum)
+            //you could figure out what to add to idNum such that you get a valid thing next
             if (newDigit === 0 || newDigit >= digit)
-            {
                 return generateName()
-                //you could figure out what to add to idNum such that you get a valid thing next
-            }
 
             digit = newDigit
             correctlyBasedNumberString = digit + correctlyBasedNumberString
@@ -141,15 +139,26 @@ function initMultivectorAppearances(characterMeshHeight)
         mv.dwGroup = new THREE.Group().add(vec, biv, tri)
         // mv.fuck = new THREE.Mesh(new THREE.BoxGeometry())
         // scene.add(mv.dwGroup)
+
+        mv.addToMainDw = () => {
+            mainDw.scene.add(mv.dwGroup)
+            if (carat.movedVerticallySinceLastFrame) {
+                let containingRadius = mv.boundingSphereRadius
+                containingRadius = Math.max(containingRadius, Math.sqrt(2.)) //grid
+                mainDw.scene.scale.setScalar(.5 / containingRadius) 
+            }
+        }
         
         let vecPad = new THREE.InstancedMesh(vec.geometry, vecMaterial.im, maxInstances)
         let bivPad = new THREE.InstancedMesh(biv.geometry, bivMaterial.im, maxInstances)
         let triPad = new THREE.InstancedMesh(tri.geometry, triMaterial.im, maxInstances)
         let zeroPad = new THREE.InstancedMesh(zeroGeometry, zeroMaterial.im, maxInstances)
         mv.padGroup = new THREE.Group().add(vecPad, bivPad, triPad, zeroPad)
+        pad.add(mv.padGroup)
 
         let halfInverseBoundingSphereRadius = 1.
-        //yeah too stateful, of coooooourse you are modifying the elements partway through the frame
+        mv.boundingSphereRadius = .0000001
+        //you are probably modifying the elements partway through the frame so this is too stateful
         mv.beginFrame = () => {
             mv.padGroup.children.forEach((child) => { child.count = 0 })
 
@@ -159,17 +168,17 @@ function initMultivectorAppearances(characterMeshHeight)
             tri.visible = mv.elements[7] ? true : false
             zero.visible = !(sca.visible || vec.visible || biv.visible || tri.visible)
 
-            let boundingSphereRadius = .0000001
+            mv.boundingSphereRadius = .0000001
             if (vec.visible)
-                boundingSphereRadius = Math.max(boundingSphereRadius, getVector(mv.elements, v1).length())
+                mv.boundingSphereRadius = Math.max(mv.boundingSphereRadius, getVector(mv.elements, v1).length())
             if (tri.visible)
-                boundingSphereRadius = Math.max(boundingSphereRadius, mv.elements[7])
+                mv.boundingSphereRadius = Math.max(mv.boundingSphereRadius, mv.elements[7])
             if (biv.visible) {
-                let bivectorMagnitude = Math.sqrt(sq(mv.elements[4]) + sq(mv.elements[5]) + sq(mv.elements[6]))
-                boundingSphereRadius = Math.max(boundingSphereRadius, bivectorMagnitude < 1. ? 1. : bivectorMagnitude)
+                let bivMagnitude = bivectorMagnitude(mv.elements)
+                mv.boundingSphereRadius = Math.max(mv.boundingSphereRadius, bivMagnitude < 1. ? 1. : bivMagnitude)
             }
 
-            halfInverseBoundingSphereRadius = .5 / boundingSphereRadius
+            halfInverseBoundingSphereRadius = .5 / mv.boundingSphereRadius
         }
 
         function boxDraw(im,dwMatrix,x,y) {
@@ -225,17 +234,17 @@ function initMultivectorAppearances(characterMeshHeight)
                 if(bivPad.count === 0) {
                     bivPad.instanceMatrix.needsUpdate = true
 
-                    let bivectorMagnitude = Math.sqrt(sq(mv.elements[4]) + sq(mv.elements[5]) + sq(mv.elements[6]))
+                    let bivMagnitude = bivectorMagnitude(mv.elements)
 
-                    q1.copy(displayRotation.q)
-                    q1.inverse()
-                    v1.copy(yUnit)
-                    v1.applyQuaternion(q1)
+                    v1.set(0.00001,1.,0.)
+                    // q1.copy(displayRotation.q)
+                    // q1.inverse()
+                    // v1.applyQuaternion(q1)
 
                     geometricProduct(negativeUnitPseudoScalar, mv.elements, mm)
                     getVector(mm, v2) //it's sticking out in PRESUMABLY a consistent direction wrt chirality
                     v2.normalize()
-                    v1.projectOnPlane(v2).setLength(bivectorMagnitude) //v1 is now a canonical y vector
+                    v1.projectOnPlane(v2).setLength(bivMagnitude) //v1 is now a canonical y vector
 
                     v3.crossVectors(v1, v2).normalize()
 

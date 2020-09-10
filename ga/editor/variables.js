@@ -10,7 +10,7 @@ const colors = {
 }
 for (let color in colors) colorCharacters += color
 
-let backgroundString = "b g o\n\nw\nr\n\n  b  +g  \n  b  *g  \n  p  +b  \n\n  i*(j+k)=i*j+i*k\n\ntor\n\n  "
+let backgroundString = "  b g o\n\n  w\n  w +w\n  r\n\n  b  +g  \n  b  *o  \n  p  +b  \n\n  i*(j+k)=i*j+i*k\n\ntor\n\n  "
 
 const carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1., 1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
 const variables = []
@@ -26,10 +26,9 @@ const outputColumn = new THREE.Mesh(new THREE.PlaneBufferGeometry(1., 9999999.),
 const displayWindows = []
 const displayRotation = new THREE.Euler()
 displayRotation.q = new THREE.Quaternion()
-let displayDistance = 2.5
 
 const onClicks = []
 
-const renderFunctions = []
+const latterUpdateFunctions = []
 
 let mainDw = null

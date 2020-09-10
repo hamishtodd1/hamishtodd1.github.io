@@ -4,15 +4,15 @@ function initCarat()
 {
 	carat.positionInString = -1
 
+	let oldY = Infinity
+	carat.movedVerticallySinceLastFrame = false
+
 	carat.renderOrder = 9999999
 	carat.material.depthTest = false
 	carat.geometry.translate(.5, 0., 0.)
 	pad.add(carat)
 	carat.scale.x = .1
 	carat.flashingStart = 0.
-	updateFunctions.push(() => {
-		carat.visible = Math.floor((clock.getElapsedTime() - carat.flashingStart) * 2.) % 2 ? false : true
-	})
 	carat.teleport = function(x, y) {
 		carat.position.set(x, y, carat.position.z)
 		carat.flashingStart = clock.getElapsedTime()
@@ -52,6 +52,12 @@ function initCarat()
 	})
 	bindButton("PageDown", () => {
 		carat.addToPosition(0., -Math.floor(getNumLinesOnScreen()))
+	})
+
+	latterUpdateFunctions.push(() => {
+		carat.visible = Math.floor((clock.getElapsedTime() - carat.flashingStart) * 2.) % 2 ? false : true
+		carat.movedVerticallySinceLastFrame = oldY !== carat.position.y
+		oldY = carat.position.y
 	})
 }
 

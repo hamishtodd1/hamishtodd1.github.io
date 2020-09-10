@@ -86,6 +86,9 @@
 	An implicit function just means it's a curve in a higher dimension
 
 	integration and differentiation
+		Picture a curve
+			Smoosh it down to a line, i.e. look at it from above. you might see value along the line represented as transparency
+			Take that line and look at it dead-on. The color you're seeing is proportional to the integral
 		For a given vector field, is there some surface for which it is the grad?
 		The "right" way to visualize a derivative wrt one variable (implicit or explicit) is
 			the height of the right angled triangle of base 1 whose hypotenuse is tangent to that

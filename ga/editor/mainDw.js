@@ -31,8 +31,7 @@
 function initMainDw() {
 
     mainDw = DisplayWindow(false)
-    mainDw.scale.x = 10.5
-    mainDw.scale.y = mainDw.scale.x
+    mainDw.scale.setScalar(8.)
     mainDw.renderOrder = carat.renderOrder + 1
     carat.material.depthTest = false
 

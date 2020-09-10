@@ -17,7 +17,7 @@ function initOutputColumn()
     updateFunctions.push(()=>{
         let cursorStyle = "default"
         let area = mouse.areaIn()
-        if (mouse.isOnDisplayWindow())
+        if (mouse.displayWindowMouseIsOn() === null)
             cursorStyle = "grab" //you might like "grabbing" but we can't rely on domElement to change it
         else if (area === "column")
             cursorStyle = "col-resize"

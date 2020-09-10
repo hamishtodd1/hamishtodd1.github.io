@@ -80,7 +80,6 @@ async function initPad(characterMeshHeight)
 	{
 		let mv = MultivectorAppearance()
 		variables.push(mv)
-		pad.add(mv.padGroup)
 		return mv
 	}
 	let copyVariable = copyMultivector
@@ -100,8 +99,8 @@ async function initPad(characterMeshHeight)
 		target.x = Math.cos(latitude) * Math.sin(longtitude)
 		target.z = Math.cos(latitude) * Math.cos(longtitude)
 	}
-	let torusFuncIm = FuncViz(torusFunc, 2, 3)
-	pad.add(torusFuncIm)
+	let torusViz = FuncViz(torusFunc, 2, 3)
+	pad.add(torusViz)
 
 	initCarat()
 
@@ -203,7 +202,7 @@ async function initPad(characterMeshHeight)
 		for (let i = 0, il = characters.array.length; i < il; i++)
 			characters.instancedMeshes[characters.array[i]].count = 0
 
-		torusFuncIm.count = 0
+		torusViz.count = 0
 
 		let drawCharacters = true
 		let tokenCharactersLeft = 0
@@ -264,12 +263,13 @@ async function initPad(characterMeshHeight)
 							outlineCollection.draw(v2.x, v2.y, 1.)
 
 							let mv = variables[lowestUndeterminedVariable]
-							if (carat.position.y === drawingPosition.y)
-								mainDw.scene.add(mv.dwGroup)
 							operator(operand1.elements, operand2.elements, mv.elements)
 							mv.drawInPlace(v2.x, v2.y)
 							stack.push(mv)
 							++lowestUndeterminedVariable
+
+							if (carat.position.y === drawingPosition.y)
+								mv.addToMainDw()
 						}
 					}
 				}
@@ -342,8 +342,11 @@ async function initPad(characterMeshHeight)
 						tokenCharactersLeft = "display".length
 					}
 					else if (token === "tor") {
-						torusFuncIm.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
+						torusViz.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
 						outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
+
+						// if (carat.position.y === drawingPosition.y)
+						// 	torusViz.addToMainDw()
 
 						drawCharacters = false
 
@@ -374,9 +377,6 @@ async function initPad(characterMeshHeight)
 								superimposePosition.y = drawingPosition.y
 							}
 
-							if (carat.position.y === drawingPosition.y)
-								mainDw.scene.add(mv.dwGroup)
-
 							// if (carat.position.y !== drawingPosition.y )
 							// {
 							// 	mv.drawInPlace(superimposePosition.x, superimposePosition.y)
@@ -388,6 +388,10 @@ async function initPad(characterMeshHeight)
 								mv.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
 								outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
 							}
+
+							if (carat.position.y === drawingPosition.y)
+								mv.addToMainDw()
+
 							drawCharacters = false
 						}
 					}
