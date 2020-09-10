@@ -33,6 +33,9 @@
     tweening's not so hard. You have the space of inputs and outputs. You put them in the same space, linearly interpolate, make t a sinusoid
     Can you detect which viz to use at runtime? I mean, any transformation can be applied to any mv. Maybe it's a good thing to let folks choose?
 
+    Texture mapping: [dual quaternion,R2->R3] -> R3 x R3
+    The shapes we think of most easily: R2 -> R3 x R3
+
     These are "the set of points obeying a constraint"
         R->R     line graph, filled underneath - greyscale line if looked at from above
                     The thing it's filled with is bivectors, anything to be done with that?

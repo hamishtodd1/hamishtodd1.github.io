@@ -1,6 +1,7 @@
 /* 
 	Next
-		mvs and functions in the dw
+		functions in the dw
+		scalars
 
 	Bret article http://worrydream.com/DrawingDynamicVisualizationsTalkAddendum/
 	https://en.wikipedia.org/wiki/Binary_expression_tree
@@ -196,7 +197,7 @@ function init()
 
 	initDisplayWindows()
 	mainDw = initMainDw()
-	
+
 	initMultivectorAppearances(characterMeshHeight)
 	initOutputColumn()
 

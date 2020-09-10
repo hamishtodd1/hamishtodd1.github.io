@@ -1,4 +1,6 @@
 /* 
+	The fastest anyone's typed is 6 characters per second, so in theory you only need to run through it all about that often
+
 	Click the things in the column, what happens?
 		If you click a function it might be nice to zoom in and out
         They appear in the window? Best if window contents depends on what line you're on
@@ -191,12 +193,12 @@ async function initPad(characterMeshHeight)
 		positionInStringClosestToCaratPositionVector.set(Infinity, Infinity, 0.)
 
 		let lowestUndeterminedVariable = numFreeParameterMultivectors
-		for (let i = 0, il = variables.length; i < il; i++)
-			variables[i].resetCount()
+		variables.forEach((v) => v.beginFrame())
+
+		displayWindows.forEach((dw)=>{dw.beginFrame()})
 
 		let lowestUnusedDisplayWindow = 0
-		for (let i = 0; i < interimDisplayWindows.length; i++)
-			interimDisplayWindows[i].bottomY = camera.topAtZZero
+		interimDisplayWindows.forEach((i) => { i.bottomY = camera.topAtZZero})
 
 		for (let i = 0, il = characters.array.length; i < il; i++)
 			characters.instancedMeshes[characters.array[i]].count = 0
@@ -262,6 +264,8 @@ async function initPad(characterMeshHeight)
 							outlineCollection.draw(v2.x, v2.y, 1.)
 
 							let mv = variables[lowestUndeterminedVariable]
+							if (carat.position.y === drawingPosition.y)
+								mainDw.scene.add(mv.dwGroup)
 							operator(operand1.elements, operand2.elements, mv.elements)
 							mv.drawInPlace(v2.x, v2.y)
 							stack.push(mv)
@@ -370,12 +374,8 @@ async function initPad(characterMeshHeight)
 								superimposePosition.y = drawingPosition.y
 							}
 
-							if (carat.position.y === drawingPosition.y) {
+							if (carat.position.y === drawingPosition.y)
 								mainDw.scene.add(mv.dwGroup)
-
-								// mv.drawInPlace(superimposePosition.x, superimposePosition.y)
-								// outlineCollection.draw(superimposePosition.x, superimposePosition.y, 1.)
-							}
 
 							// if (carat.position.y !== drawingPosition.y )
 							// {
@@ -383,6 +383,7 @@ async function initPad(characterMeshHeight)
 							// 	outlineCollection.draw(superimposePosition.x, superimposePosition.y, 1.)
 							// }
 							// else
+							// if(mv.name !=="o")
 							{
 								mv.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
 								outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)

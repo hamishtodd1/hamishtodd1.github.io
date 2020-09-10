@@ -32,6 +32,12 @@ function initMultivectorAppearances(characterMeshHeight)
     let zeroMaterial = text("0", true) //something with a slashed 0 would be nice
     let zeroGeometry = new THREE.PlaneBufferGeometry(zeroMaterial.getAspect(), 1.)
 
+    //bug in threejs seems to stick together the matrices of instanced meshes and non instanced
+    vecMaterial.im = vecMaterial.clone()
+    bivMaterial.im = bivMaterial.clone()
+    triMaterial.im = triMaterial.clone()
+    zeroMaterial.im = zeroMaterial.clone()
+
     //not yet integrated
     {
         let name = "wbo"
@@ -124,19 +130,47 @@ function initMultivectorAppearances(characterMeshHeight)
         mv.elements = MathematicalMultivector()
         copyMultivector(zeroMultivector, mv.elements)
         
-        let vec = new THREE.InstancedMesh(VecGeometry(name), vecMaterial)
-        let biv = new THREE.InstancedMesh(BivGeometry(name), bivMaterial)
-        let tri = new THREE.InstancedMesh(TriGeometry(name), triMaterial)
+        let sca = { visible: false }
+        let vec = new THREE.Mesh(VecGeometry(name), vecMaterial)
+        vec.matrixAutoUpdate = false
+        let biv = new THREE.Mesh(BivGeometry(name), bivMaterial)
+        biv.matrixAutoUpdate = false
+        let tri = new THREE.Mesh(TriGeometry(name), triMaterial)
+        tri.matrixAutoUpdate = false
+        let zero = new THREE.Mesh(zeroGeometry, zeroMaterial)
         mv.dwGroup = new THREE.Group().add(vec, biv, tri)
-        scene.add(mv.dwGroup)
+        // mv.fuck = new THREE.Mesh(new THREE.BoxGeometry())
+        // scene.add(mv.dwGroup)
         
-        let vecPad = new THREE.InstancedMesh(vec.geometry, vecMaterial, maxInstances)
-        let bivPad = new THREE.InstancedMesh(biv.geometry, bivMaterial, maxInstances)
-        let triPad = new THREE.InstancedMesh(tri.geometry, triMaterial, maxInstances)
-        let zeroPad = new THREE.InstancedMesh(zeroGeometry, zeroMaterial, maxInstances)
+        let vecPad = new THREE.InstancedMesh(vec.geometry, vecMaterial.im, maxInstances)
+        let bivPad = new THREE.InstancedMesh(biv.geometry, bivMaterial.im, maxInstances)
+        let triPad = new THREE.InstancedMesh(tri.geometry, triMaterial.im, maxInstances)
+        let zeroPad = new THREE.InstancedMesh(zeroGeometry, zeroMaterial.im, maxInstances)
         mv.padGroup = new THREE.Group().add(vecPad, bivPad, triPad, zeroPad)
 
         let halfInverseBoundingSphereRadius = 1.
+        //yeah too stateful, of coooooourse you are modifying the elements partway through the frame
+        mv.beginFrame = () => {
+            mv.padGroup.children.forEach((child) => { child.count = 0 })
+
+            sca.visible = mv.elements[0] ? true : false
+            vec.visible = !getVector(mv.elements, v1).equals(zeroVector)
+            biv.visible = !getBivec(mv.elements, v1).equals(zeroVector)
+            tri.visible = mv.elements[7] ? true : false
+            zero.visible = !(sca.visible || vec.visible || biv.visible || tri.visible)
+
+            let boundingSphereRadius = .0000001
+            if (vec.visible)
+                boundingSphereRadius = Math.max(boundingSphereRadius, getVector(mv.elements, v1).length())
+            if (tri.visible)
+                boundingSphereRadius = Math.max(boundingSphereRadius, mv.elements[7])
+            if (biv.visible) {
+                let bivectorMagnitude = Math.sqrt(sq(mv.elements[4]) + sq(mv.elements[5]) + sq(mv.elements[6]))
+                boundingSphereRadius = Math.max(boundingSphereRadius, bivectorMagnitude < 1. ? 1. : bivectorMagnitude)
+            }
+
+            halfInverseBoundingSphereRadius = .5 / boundingSphereRadius
+        }
 
         function boxDraw(im,dwMatrix,x,y) {
             m1.copy(dwMatrix)
@@ -144,6 +178,7 @@ function initMultivectorAppearances(characterMeshHeight)
             m1.setPosition(x, y, 0.)
 
             im.setMatrixAt(im.count, m1)
+            m1.setPosition(0.,0.,0.)
             ++im.count
         }
 
@@ -154,49 +189,25 @@ function initMultivectorAppearances(characterMeshHeight)
         // m1.identity()
         // line.setMatrixAt(0, m1)
 
-        //yeah too stateful, of coooooourse you are modifying the elements partway through the frame
-        let sca = {visible: false}
-        mv.resetCount = () => {
-            mv.padGroup.children.forEach((child)=>{child.count = 0})
-            
-            sca.visible = mv.elements[0] ? true : false
-            vec.visible = !getVector(mv.elements, v1).equals(zeroVector)
-            biv.visible = !getBivec(mv.elements, v1).equals(zeroVector)
-            tri.visible = mv.elements[7] ? true : false
-
-            let boundingSphereRadius = .0000001
-            if(vec.visible)
-                boundingSphereRadius = Math.max(boundingSphereRadius, getVector(mv.elements, v1).length())
-            if(tri.visible)
-                boundingSphereRadius = Math.max(boundingSphereRadius, mv.elements[7])
-            if(biv.visible) {
-                let bivectorMagnitude = Math.sqrt(sq(mv.elements[4]) + sq(mv.elements[5]) + sq(mv.elements[6]))
-                boundingSphereRadius = Math.max(boundingSphereRadius, bivectorMagnitude < 1. ? 1. : bivectorMagnitude)
-            }
-
-            halfInverseBoundingSphereRadius = .5 / boundingSphereRadius
-        }
-
         mv.drawInPlace = function(x,y)
         {
             mv.padGroup.children.forEach((child) => { if (child.count >= maxInstances) console.error("too many") })
 
-            if (!sca.visible && !vec.visible && !biv.visible && !tri.visible)
-            {
+            if ( zero.visible ) {
+                zeroPad.instanceMatrix.needsUpdate = true
+
                 m1.identity()
                 m1.scale(v1.setScalar(characterMeshHeight))
                 m1.setPosition(x,y,0.)
                 zeroPad.setMatrixAt(zeroPad.count, m1)
                 ++zeroPad.count
-                zeroPad.instanceMatrix.needsUpdate = true
             }
             
-            if (vec.visible)
-            {
-                if(vecPad.count === 0)
-                {
+            if (vec.visible) {
+                if(vecPad.count === 0) {
                     vecPad.instanceMatrix.needsUpdate = true
 
+                    vec.matrix.identity()
                     getVector(mv.elements, v1)
                     v1.applyQuaternion(displayRotation.q)
                     randomPerpVector(v1, v2)
@@ -210,34 +221,29 @@ function initMultivectorAppearances(characterMeshHeight)
                 boxDraw(vecPad, vec.matrix, x, y)
             }
 
-            if(biv.visible)
-            {
-                if(bivPad.count === 0)
-                {
+            if(biv.visible) {
+                if(bivPad.count === 0) {
                     bivPad.instanceMatrix.needsUpdate = true
 
                     let bivectorMagnitude = Math.sqrt(sq(mv.elements[4]) + sq(mv.elements[5]) + sq(mv.elements[6]))
-                    biv.matrix.identity()
-                    biv.matrix.elements[0] = 1.
-                    biv.matrix.elements[5] = bivectorMagnitude
-                    biv.matrix.elements[10] = 1.
 
-                    // geometricProduct(negativeUnitPseudoScalar, mv.elements, mm)
-                    // getVector(mm, v1)
+                    q1.copy(displayRotation.q)
+                    q1.inverse()
+                    v1.copy(yUnit)
+                    v1.applyQuaternion(q1)
 
-                    // randomPerpVector(v1,v2)
-                    // v3.crossVectors(v1,v2) //possibly this is inconsistent wrt chirality
-                    // v2.setLength(.5)
-                    // v3.setLength(.5/v1.length())
+                    geometricProduct(negativeUnitPseudoScalar, mv.elements, mm)
+                    getVector(mm, v2) //it's sticking out in PRESUMABLY a consistent direction wrt chirality
+                    v2.normalize()
+                    v1.projectOnPlane(v2).setLength(bivectorMagnitude) //v1 is now a canonical y vector
 
-                    // v1.applyQuaternion(displayRotation.q)
-                    // v2.applyQuaternion(displayRotation.q)
-                    // v3.applyQuaternion(displayRotation.q)
+                    v3.crossVectors(v1, v2).normalize()
 
+                    v1.applyQuaternion(displayRotation.q)
+                    v2.applyQuaternion(displayRotation.q)
+                    v3.applyQuaternion(displayRotation.q)
 
-                    //don't scale it by the length of the thing, scale it uniformly using either the side or the length such that it stays in unit sphere
-
-                    
+                    biv.matrix.makeBasis(v3,v1,v2)
                 }
 
                 boxDraw(bivPad, biv.matrix, x, y)
@@ -254,6 +260,7 @@ function initMultivectorAppearances(characterMeshHeight)
                     // q2.setFromAxisAngle(yUnit, TAU / 8.)
                     // q1.multiply(q2)
 
+                    tri.matrix.identity()
                     tri.matrix.makeRotationFromQuaternion(displayRotation.q)
                     tri.matrix.elements[4] *= mv.elements[7]
                     tri.matrix.elements[5] *= mv.elements[7]
@@ -269,9 +276,10 @@ function initMultivectorAppearances(characterMeshHeight)
 
     function BivGeometry(name)
     {
+        //perhaps it should be a right angled triangle with twice the height. There's a factor of two in there...
+
         let bivGeometry = new THREE.PlaneGeometry(1., 1., 1, 2)
-        bivGeometry.vertices.forEach((v) =>
-        {
+        bivGeometry.vertices.forEach((v) => {
             v.x += .5
             v.y += .5
 
@@ -307,33 +315,38 @@ function VecGeometry(name)
     let shaftRadius = .04
     let headRadius = shaftRadius * 3.
     let shaftLength = .67
+    let wholeLength = 1. + shaftRadius //bobble at end
 
     let vecGeometry = new THREE.Geometry()
 
     let radialSegments = 15
-    let heightSegments = 20
+    let heightSegments = 30 //we want two between y = 0 and y = -shaftRadius
     vecGeometry.vertices = Array((radialSegments + 1) * (heightSegments + 1))
     vecGeometry.faces = Array(radialSegments * heightSegments)
-    for (let j = 0; j <= heightSegments; j++)
-    {
-        for (let i = 0; i <= radialSegments; i++)
-        {
-            v1.y = j / heightSegments
-            v1.z = 0.
+
+    for (let j = 0; j <= heightSegments; j++) {
+        for (let i = 0; i <= radialSegments; i++) {
+            v1.y = j <= 8 ?
+                shaftRadius * (-1.+j/8.) :
+                j / heightSegments
 
             v1.x = shaftRadius
-            if (v1.y >= shaftLength)
-            {
+            if (v1.y >= shaftLength) {
                 let proportionAlongHead = 1. - (v1.y - shaftLength) / (1. - shaftLength)
                 v1.x = headRadius * proportionAlongHead
             }
+            else if (v1.y <= 0.)
+                v1.x = Math.sqrt(sq(shaftRadius) - sq(v1.y))
 
+            v1.z = 0.
             v1.applyAxisAngle(yUnit, i / radialSegments * TAU)
             vecGeometry.vertices[j * (radialSegments + 1) + i] = v1.clone()
 
             if (i < radialSegments && j < heightSegments) // there are one fewer triangles along both axes
             {
-                let color = colors[name[Math.floor(v1.y * name.length)]]
+                let letterIndex = Math.floor((v1.y + shaftRadius) / wholeLength * name.length)
+                let color = colors[name[letterIndex]]
+
                 vecGeometry.faces[(j * radialSegments + i) * 2 + 0] = new THREE.Face3(
                     (j + 0) * (radialSegments + 1) + (i + 0),
                     (j + 0) * (radialSegments + 1) + (i + 1),
@@ -351,6 +364,7 @@ function VecGeometry(name)
             }
         }
     }
+
     vecGeometry.computeFaceNormals()
     vecGeometry.computeVertexNormals()
 

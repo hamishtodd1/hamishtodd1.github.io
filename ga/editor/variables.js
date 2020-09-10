@@ -26,8 +26,10 @@ const outputColumn = new THREE.Mesh(new THREE.PlaneBufferGeometry(1., 9999999.),
 const displayWindows = []
 const displayRotation = new THREE.Euler()
 displayRotation.q = new THREE.Quaternion()
-let displayDistance = 10.
+let displayDistance = 2.5
 
 const onClicks = []
 
 const renderFunctions = []
+
+let mainDw = null

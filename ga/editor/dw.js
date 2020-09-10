@@ -74,8 +74,15 @@ function initDisplayWindows() {
         displayWindows.push(dw)
 
         dw.scene = new THREE.Group()
-        dw.scene.add(Grid())
-        dw.scene.add(new THREE.Mesh(new THREE.BoxGeometry()))
+        let ourGrid = Grid()
+        dw.scene.add(ourGrid)
+
+        dw.beginFrame = () => {
+            dw.scene.children.forEach((c) => {
+                if (c !== ourGrid)
+                    dw.scene.remove(c)
+            })
+        }
 
         if (!useScreen)
             dw.add(dw.scene)
@@ -113,7 +120,7 @@ function initDisplayWindows() {
                 renderer.setRenderTarget(localFramebuffer)
                 renderer.setClearColor(0x000000)
                 renderer.clear()
-                renderer.render(dw.scene, displayCamera)
+                renderer.render(dw.scene, displayCamera) //yay this works, apparently there's no difference between scene and group?
 
                 renderer.setRenderTarget(ordinaryRenderTarget)
                 renderer.setClearColor(ordinaryClearColor)
@@ -127,7 +134,7 @@ function initDisplayWindows() {
             dw.position.y = dw.scale.y / 2. + dw.bottomY
             outlineCollection.draw(dw.position.x, dw.position.y, dw.scale.x)
 
-            dw.scene.quaternion.copy(displayRotation.q)
+            ourGrid.quaternion.copy(displayRotation.q)
             dw.scene.scale.setScalar(1./displayDistance) //no idea what the units are
 
             if(useScreen)
@@ -171,9 +178,10 @@ function initDisplayWindows() {
     // }
 
     {
-        let gridSize = 8
-        let gridGeometryCoords = [0., gridSize / 2., 0., 0., -gridSize / 2., 0.]
-        let gridHelperCoords = new THREE.GridHelper(gridSize, gridSize).geometry.attributes.position.array
+        let gridDivisions = 10
+        let gridRadius = 1.
+        let gridGeometryCoords = [0., gridRadius, 0., 0., -gridRadius, 0.]
+        let gridHelperCoords = new THREE.GridHelper(gridRadius*2., gridDivisions).geometry.attributes.position.array
         gridHelperCoords.forEach((coord) => { gridGeometryCoords.push(coord) })
         let gridGeometry = new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(gridGeometryCoords), 3))
         let gridMaterial = new THREE.LineBasicMaterial({ color: 0xFFFFFF })
