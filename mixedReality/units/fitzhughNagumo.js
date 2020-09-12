@@ -116,7 +116,7 @@ async function initFitzhughNagumo()
 
 	let numStepsPerFrame = 4;
 	var data2d = {value:null};
-	let simulation = await Simulation( textureDimensions, "fitzHughNagumo", "clamped", initialState, numStepsPerFrame, 
+	let simulation = await Simulation( textureDimensions, "fitzhughNagumo", "clamped", initialState, numStepsPerFrame, 
 		data2d,
 		extraUniforms,
 		THREE.LinearFilter )
