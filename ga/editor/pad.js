@@ -25,50 +25,19 @@
             Hmm, maybe continuous-everywhere is a good idea? requires sigma -> integral
 		https://en.wikipedia.org/wiki/List_of_common_physics_notations
 
-	Colors
-        string of color codes = multivector, possibly a new one, initialized to random
-        + / *
-        lambda a b c . [function body]
-        string of letters = function name
-	    you are expecting function, variable, variable. Get anything else? Ignore the line
-        Colorblindness
-            https://www.reddit.com/r/ColorBlind/comments/hjw6ie/i_am_making_a_game_and_i_want_to_use_a_large/
-            https://personal.sron.nl/~pault/
-            viridis folks https://www.youtube.com/watch?v=xAoljeRJ3lU
-			mark brown https://www.youtube.com/watch?v=xrqdU4cZaLw
-
-	Temporary:
-	a ?auburn (red)
-	b ?black blue? brown
-	c cyan (blue)
-	d
-	e ?emerald (green)
-	f ?fuscia (purple)
-	g green gray
-	h
-	i ?indigo (purple)
-	j
-	k
-	l ?lilac ?lemon
-	m magenta (technical people should know. Colorblindness though. But so many will call it purple)
-	n
-	o orange
-	p pink ("fuck purple") purple
-	q
-	r red
-	s
-	t turquoise or teal. People just call it blue or green
-	u ultramarine
-	v ?violet ?viridian
-	w white
-	x x axis
-	y y axis yellow? cream? lemon?
-	z z axis
-
-	w, b, m, c, r, o, g, p
-
-	x,y,z
+	
 */
+
+function boxDraw(im, x, y, matrixToCopy, boundingSphereRadius) {
+	m1.copy(matrixToCopy)
+	let halfInverseBoundingSphereRadius = .5 / boundingSphereRadius
+	m1.scale(v1.setScalar(halfInverseBoundingSphereRadius))
+	m1.setPosition(x, y, 0.)
+	im.setMatrixAt(im.count, m1)
+	++im.count
+
+	im.instanceMatrix.needsUpdate = true
+}
 
 async function initPad(characterMeshHeight)
 {
@@ -100,7 +69,8 @@ async function initPad(characterMeshHeight)
 		target.z = Math.cos(latitude) * Math.cos(longtitude)
 	}
 	let torusViz = FuncViz(torusFunc, 2, 3)
-	pad.add(torusViz)
+	// let sqFunc = (x) => x * x //shader mofo. Transpile to glsl
+	// let sqViz = FuncViz(sqFunc, 1, 1)
 
 	initCarat()
 
@@ -184,7 +154,7 @@ async function initPad(characterMeshHeight)
 	let uncaughtCharacters = ""
 	updateFunctions.push(function ()
 	{
-		pad.position.x = outputColumn.right()
+		pad.position.x = outputColumn.right() + pad.scale.x
 		let paddingAtTopOfPad = .35 * getWorldLineHeight()
 		if (pad.position.y < camera.topAtZZero - paddingAtTopOfPad)
 			pad.position.y = camera.topAtZZero - paddingAtTopOfPad
@@ -193,6 +163,7 @@ async function initPad(characterMeshHeight)
 
 		let lowestUndeterminedVariable = numFreeParameterMultivectors
 		variables.forEach((v) => v.beginFrame())
+		torusViz.beginFrame() //it is a variable. Its name is even meant to come from
 
 		displayWindows.forEach((dw)=>{dw.beginFrame()})
 
@@ -201,8 +172,6 @@ async function initPad(characterMeshHeight)
 
 		for (let i = 0, il = characters.array.length; i < il; i++)
 			characters.instancedMeshes[characters.array[i]].count = 0
-
-		torusViz.count = 0
 
 		let drawCharacters = true
 		let tokenCharactersLeft = 0
@@ -345,8 +314,8 @@ async function initPad(characterMeshHeight)
 						torusViz.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
 						outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
 
-						// if (carat.position.y === drawingPosition.y)
-						// 	torusViz.addToMainDw()
+						if (carat.position.y === drawingPosition.y)
+							torusViz.addToMainDw()
 
 						drawCharacters = false
 

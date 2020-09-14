@@ -1,4 +1,23 @@
 /*
+    Scalar
+        How about this opacity thing?
+        So, what, background is grey and positive makes it white and negative makes it black?
+        It offers unity with the way you want to graph things
+        It conveys that scalars are directionless
+        It MIGHT be an advantage that you can't see comparisons that well. "if you want to represent it spatially you have to multiply it by something"
+        Don't change opacity of the objects, you already have a way of knowing their magnitude
+        What and you stick single translucent things together and they get more translucent?
+        Confusing with existing color ideas
+        It's problematic not to know where 1 is.
+        Ehhhh, you do want that nice quaternion visualization
+
+        The radius of the scalar should probably be equal to the vector
+
+        vectors, confined to a LINE,     cannot be turned into their negative, but can in 2D
+        bivectors, confined to a PLANE,    cannot be turned into their negative, but can in 3D
+        trivectors, confined to a 3-SPACE,  cannot be turned into their negative, but can in 4D
+        These determine symmetry "about certain axes"
+
     A vector that's not coming from the origin is: a vector field evaluated at a single point
 
     velocity/differential space is a reason to have auto zoom/scale
@@ -24,19 +43,20 @@ function initMultivectorAppearances(characterMeshHeight)
     let bivMaterial = new THREE.MeshPhongMaterial({ vertexColors: THREE.FaceColors, side: THREE.DoubleSide })
     let negativeUnitPseudoScalar = MathematicalMultivector(0., 0., 0., 0., 0., 0., 0., -1.)
 
-    let triMaterial = new THREE.MeshPhongMaterial({ vertexColors: THREE.FaceColors })
+    let triMaterial = new THREE.MeshPhongMaterial({ vertexColors: THREE.FaceColors, side:THREE.DoubleSide})
 
-    let scaMaterial = new THREE.MeshBasicMaterial({ vertexColors: THREE.FaceColors })
+    let scaMaterial = new THREE.MeshBasicMaterial({ vertexColors: THREE.FaceColors, side:THREE.DoubleSide })
     let pointMaterial = new THREE.MeshLambertMaterial({ vertexColors: THREE.FaceColors })
     let lineMaterial = new THREE.LineBasicMaterial({ vertexColors: true })
     let zeroMaterial = text("0", true) //something with a slashed 0 would be nice
     let zeroGeometry = new THREE.PlaneBufferGeometry(zeroMaterial.getAspect(), 1.)
 
     //bug in threejs seems to stick together the matrices of instanced meshes and non instanced
-    vecMaterial.im = vecMaterial.clone()
-    bivMaterial.im = bivMaterial.clone()
-    triMaterial.im = triMaterial.clone()
-    zeroMaterial.im = zeroMaterial.clone()
+    scaMaterial.im = scaMaterial.clone(); scaMaterial.transparent = true; scaMaterial.opacity = .8
+    vecMaterial.im = vecMaterial.clone(); vecMaterial.transparent = true; vecMaterial.opacity = .8
+    bivMaterial.im = bivMaterial.clone(); bivMaterial.transparent = true; bivMaterial.opacity = .8
+    triMaterial.im = triMaterial.clone(); triMaterial.transparent = true; triMaterial.opacity = .8
+    zeroMaterial.im = zeroMaterial.clone();
 
     //not yet integrated
     {
@@ -68,25 +88,6 @@ function initMultivectorAppearances(characterMeshHeight)
         // p.add(outline)
         // scene.add(p)
         // p.scale.setScalar(.16)
-
-        // let heightSegments = 32
-        // let scalarGeometry = new THREE.CylinderGeometry(.5, .5, 1., 18, heightSegments)
-        // scalarGeometry.vertices.forEach((v)=>{
-        //     if(v.y > 0.)
-        //     {
-        //         let y = v.y
-        //         v.y = 0.
-        //         v.setLength(Math.sqrt(.25 - sq(y)))
-        //         v.y = y
-        //     }
-        // })
-        // log((scalarGeometry.faces.length-36)/32)
-        // scalarGeometry.faces.forEach((f,i)=>{ //strips of 64
-        //     let index = Math.floor(i / 128) % 3
-        //     f.color.copy(colors[name[index]])
-        // })
-        // let m = new THREE.Mesh(scalarGeometry, scaMaterial)
-        // scene.add(m)
     }
 
     let idNum = 0
@@ -128,7 +129,8 @@ function initMultivectorAppearances(characterMeshHeight)
         mv.elements = MathematicalMultivector()
         copyMultivector(zeroMultivector, mv.elements)
         
-        let sca = { visible: false }
+        let sca = new THREE.Mesh(ScaGeometry(name), scaMaterial)
+        sca.matrixAutoUpdate = false
         let vec = new THREE.Mesh(VecGeometry(name), vecMaterial)
         vec.matrixAutoUpdate = false
         let biv = new THREE.Mesh(BivGeometry(name), bivMaterial)
@@ -136,24 +138,26 @@ function initMultivectorAppearances(characterMeshHeight)
         let tri = new THREE.Mesh(TriGeometry(name), triMaterial)
         tri.matrixAutoUpdate = false
         let zero = new THREE.Mesh(zeroGeometry, zeroMaterial)
-        mv.dwGroup = new THREE.Group().add(vec, biv, tri)
-        // mv.fuck = new THREE.Mesh(new THREE.BoxGeometry())
-        // scene.add(mv.dwGroup)
-
+        
+        let dwGroup = new THREE.Group().add(sca, vec, biv, tri)
         mv.addToMainDw = () => {
-            mainDw.scene.add(mv.dwGroup)
+            mainDw.scene.add(dwGroup)
             if (carat.movedVerticallySinceLastFrame) {
                 let containingRadius = mv.boundingSphereRadius
                 containingRadius = Math.max(containingRadius, Math.sqrt(2.)) //grid
                 mainDw.scene.scale.setScalar(.5 / containingRadius) 
             }
+
+            //bivectors need to move to aligning with vectors
+            //hmm, maybe a positioned bivector is a bivector curried with something?
         }
         
+        let scaPad = new THREE.InstancedMesh(sca.geometry, scaMaterial.im, maxInstances)
         let vecPad = new THREE.InstancedMesh(vec.geometry, vecMaterial.im, maxInstances)
         let bivPad = new THREE.InstancedMesh(biv.geometry, bivMaterial.im, maxInstances)
         let triPad = new THREE.InstancedMesh(tri.geometry, triMaterial.im, maxInstances)
-        let zeroPad = new THREE.InstancedMesh(zeroGeometry, zeroMaterial.im, maxInstances)
-        mv.padGroup = new THREE.Group().add(vecPad, bivPad, triPad, zeroPad)
+        let zeroPad = new THREE.InstancedMesh(zeroGeometry, zeroMaterial.im, maxInstances) //actually maybe 0 is just a point?
+        mv.padGroup = new THREE.Group().add(scaPad, vecPad, bivPad, triPad, zeroPad)
         pad.add(mv.padGroup)
 
         let halfInverseBoundingSphereRadius = 1.
@@ -169,26 +173,21 @@ function initMultivectorAppearances(characterMeshHeight)
             zero.visible = !(sca.visible || vec.visible || biv.visible || tri.visible)
 
             mv.boundingSphereRadius = .0000001
+            if (sca.visible)
+                mv.boundingSphereRadius = Math.max(mv.boundingSphereRadius, mv.elements[0])
             if (vec.visible)
                 mv.boundingSphereRadius = Math.max(mv.boundingSphereRadius, getVector(mv.elements, v1).length())
-            if (tri.visible)
-                mv.boundingSphereRadius = Math.max(mv.boundingSphereRadius, mv.elements[7])
+            if (tri.visible) {
+                let originToCorner = Math.sqrt(sq(mv.elements[7]) + .125)
+                mv.boundingSphereRadius = Math.max(mv.boundingSphereRadius, originToCorner)
+            }
             if (biv.visible) {
                 let bivMagnitude = bivectorMagnitude(mv.elements)
-                mv.boundingSphereRadius = Math.max(mv.boundingSphereRadius, bivMagnitude < 1. ? 1. : bivMagnitude)
+                let originToCorner = Math.sqrt(sq(bivMagnitude) + 1.)
+                mv.boundingSphereRadius = Math.max(mv.boundingSphereRadius, originToCorner < 1. ? 1. : originToCorner)
             }
 
             halfInverseBoundingSphereRadius = .5 / mv.boundingSphereRadius
-        }
-
-        function boxDraw(im,dwMatrix,x,y) {
-            m1.copy(dwMatrix)
-            m1.scale(v1.setScalar(halfInverseBoundingSphereRadius))
-            m1.setPosition(x, y, 0.)
-
-            im.setMatrixAt(im.count, m1)
-            m1.setPosition(0.,0.,0.)
-            ++im.count
         }
 
         //but how to know which one you want to see? maybe you're always best off seeing the line!
@@ -211,11 +210,21 @@ function initMultivectorAppearances(characterMeshHeight)
                 zeroPad.setMatrixAt(zeroPad.count, m1)
                 ++zeroPad.count
             }
+
+            if( sca.visible ) {
+                if (scaPad.count === 0) {
+                    sca.matrix.identity()
+                    sca.matrix.makeRotationFromQuaternion(displayRotation.q)
+                    sca.matrix.elements[0] *= mv.elements[0]
+                    sca.matrix.elements[1] *= mv.elements[0]
+                    sca.matrix.elements[2] *= mv.elements[0]
+                }
+
+                boxDraw(scaPad, x, y, sca.matrix, mv.boundingSphereRadius)
+            }
             
             if (vec.visible) {
                 if(vecPad.count === 0) {
-                    vecPad.instanceMatrix.needsUpdate = true
-
                     vec.matrix.identity()
                     getVector(mv.elements, v1)
                     v1.applyQuaternion(displayRotation.q)
@@ -227,13 +236,11 @@ function initMultivectorAppearances(characterMeshHeight)
                     //scaling the arrows so the heads are right should wait until you have proper colors
                 }
 
-                boxDraw(vecPad, vec.matrix, x, y)
+                boxDraw(vecPad, x, y, vec.matrix, mv.boundingSphereRadius)
             }
 
             if(biv.visible) {
                 if(bivPad.count === 0) {
-                    bivPad.instanceMatrix.needsUpdate = true
-
                     let bivMagnitude = bivectorMagnitude(mv.elements)
 
                     v1.set(0.00001,1.,0.)
@@ -255,15 +262,11 @@ function initMultivectorAppearances(characterMeshHeight)
                     biv.matrix.makeBasis(v3,v1,v2)
                 }
 
-                boxDraw(bivPad, biv.matrix, x, y)
+                boxDraw(bivPad, x, y, biv.matrix, mv.boundingSphereRadius)
             }
 
-            if(tri.visible)
-            {
-                if(triPad.count === 0)
-                {
-                    triPad.instanceMatrix.needsUpdate = true
-
+            if(tri.visible) {
+                if(triPad.count === 0) {
                     //corner on
                     // q1.setFromAxisAngle(xUnit, TAU / 8.)
                     // q2.setFromAxisAngle(yUnit, TAU / 8.)
@@ -276,7 +279,7 @@ function initMultivectorAppearances(characterMeshHeight)
                     tri.matrix.elements[6] *= mv.elements[7]
                 }
 
-                boxDraw(triPad,tri.matrix,x,y)
+                boxDraw(triPad, x, y, tri.matrix, mv.boundingSphereRadius)
             }
         }
      
@@ -321,31 +324,30 @@ function initMultivectorAppearances(characterMeshHeight)
 function VecGeometry(name)
 {
     //ah no no, you want the end to always be the same size
-    let shaftRadius = .04
-    let headRadius = shaftRadius * 3.
-    let shaftLength = .67
-    let wholeLength = 1. + shaftRadius //bobble at end
+    let headRadius = SHAFT_RADIUS * 2.5
+    let shaftLength = .75
+    let wholeLength = 1. + SHAFT_RADIUS //bobble at end
 
     let vecGeometry = new THREE.Geometry()
 
     let radialSegments = 15
-    let heightSegments = 30 //we want two between y = 0 and y = -shaftRadius
+    let heightSegments = 30 //we want two between y = 0 and y = -SHAFT_RADIUS
     vecGeometry.vertices = Array((radialSegments + 1) * (heightSegments + 1))
     vecGeometry.faces = Array(radialSegments * heightSegments)
 
     for (let j = 0; j <= heightSegments; j++) {
         for (let i = 0; i <= radialSegments; i++) {
             v1.y = j <= 8 ?
-                shaftRadius * (-1.+j/8.) :
+                SHAFT_RADIUS * (-1.+j/8.) :
                 j / heightSegments
 
-            v1.x = shaftRadius
+            v1.x = SHAFT_RADIUS
             if (v1.y >= shaftLength) {
                 let proportionAlongHead = 1. - (v1.y - shaftLength) / (1. - shaftLength)
                 v1.x = headRadius * proportionAlongHead
             }
             else if (v1.y <= 0.)
-                v1.x = Math.sqrt(sq(shaftRadius) - sq(v1.y))
+                v1.x = Math.sqrt(sq(SHAFT_RADIUS) - sq(v1.y))
 
             v1.z = 0.
             v1.applyAxisAngle(yUnit, i / radialSegments * TAU)
@@ -353,7 +355,7 @@ function VecGeometry(name)
 
             if (i < radialSegments && j < heightSegments) // there are one fewer triangles along both axes
             {
-                let letterIndex = Math.floor((v1.y + shaftRadius) / wholeLength * name.length)
+                let letterIndex = Math.floor((v1.y + SHAFT_RADIUS) / wholeLength * name.length)
                 let color = colors[name[letterIndex]]
 
                 vecGeometry.faces[(j * radialSegments + i) * 2 + 0] = new THREE.Face3(
@@ -454,7 +456,7 @@ function TriGeometry(name)
             v.multiplyScalar(ratio)
             v.y = y
         }
-        // v.y += .5
+        v.y += .5
     })
 
     il = triGeometry.faces.length
@@ -471,4 +473,63 @@ function TriGeometry(name)
     triGeometry.computeVertexNormals()
 
     return triGeometry
+}
+
+function ScaGeometry(name) {
+    let heightSegments = 15
+    let radius = SHAFT_RADIUS
+    let radialSegments = 12
+    let scaGeometry = new THREE.CylinderGeometry(
+        radius, radius,
+        1.,
+        radialSegments,
+        heightSegments,
+        false)
+
+    let il = scaGeometry.vertices.length
+    scaGeometry.vertices.forEach((v, i) => {
+        let rotationAngle = v.y * TAU / 4.
+        v.applyAxisAngle(yUnit, rotationAngle)
+        //might be nice to know orientation when looking from top, need triskelion thing
+    })
+    scaGeometry.translate(0., .5, 0.)
+    scaGeometry.rotateZ(-TAU/4.)
+
+    il = scaGeometry.faces.length
+    let nameLength = name.length
+    if (nameLength <= 3) scaGeometry.faces.forEach((f, i) => {
+        if (i >= il - 2 * radialSegments)
+            f.color.copy(colors[name[i % nameLength]])
+        else
+            f.color.copy(colors[name[(Math.floor(i / heightSegments / 2)) % nameLength]])
+    })
+    else
+        console.error("too many letters for a scaPad")
+    scaGeometry.computeFaceNormals()
+    scaGeometry.computeVertexNormals()
+
+    return scaGeometry
+}
+
+function ScalarMesh(name) {
+    // let radialSegments = 18
+    // let scalarGeometry = new THREE.CylinderGeometry(.5, .5, 1., radialSegments, 3)
+    // scalarGeometry.translate(0.,.5,0.)
+    // scalarGeometry.vertices.forEach((v,i)=>{
+    //     let class = v.y * 3
+    // })
+    // scalarGeometry.faces.forEach((f, i) => { //strips of 64
+    //     if( i < radialSegments * 2 ) {
+    //         let index = Math.floor(i / radialSegments * name.length) % name.length
+    //         f.color.copy(colors[name[index]])
+    //     }
+    // })
+
+    let m = new THREE.Mesh(scalarGeometry, new THREE.MeshBasicMaterial({ vertexColors: THREE.FaceColors}))
+
+    updateFunctions.push(()=>{
+        m.rotation.y += .05
+    })
+
+    return m
 }

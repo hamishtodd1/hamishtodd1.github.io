@@ -1,34 +1,37 @@
 /* 
 	Next
-		functions in the dw
-		scalars
+		Bivectors and scalars rotating properly
+		exp, reverse
+		Naming system
+			One idea: record what names got attributed to what calculations
 
 	Bret article http://worrydream.com/DrawingDynamicVisualizationsTalkAddendum/
 	https://en.wikipedia.org/wiki/Binary_expression_tree
 
-	TODO demo / first videos
+	TODO demo
 		shadows
 		Functions
+			More visualizations
 			Can be written
-			Visualized
 			made by drawing in view
 				fourier approximation. If you loop back it's a 2D function, if not 1D
 		altering all multivectors with mouse
+		Vector fields
+		Can you do anything with automatic differentiation
 		Basic Omicron reduction
 			Describe properties of a variable or function then make function
 			differentiate/integrate polynomials
 			a proof that two things are equal
 				making wedge product and "proving it is antisymmetric" by writing ab - ba
+				
 		What to demonstrate
 			Lunar lander/simple harmonic oscillator?
 			velocity space or differential space
 			Footage though
-		Naming system ugh
-			One idea: record what names got attributed to what calculations
 		Interested parties
 			Language people: Alan, Meurig, Martin, futureOfCoding, Yoshiki, Cynthia Solomon, Andy Matuschak
-			GAists: bivector discord, Cam folks, Charles Gunn, Steven Der kenick, Pierre Philipp Denchant, Jonathan Cameron, David Hestenes, , Paul Simeon
-			Graphics/gamedev: Fabrice, inigo quilez, Haxiomic, Dan Holden, Daniel Piker, Ian and Norgg, Media Molecule, Chris Deleon
+			GAists: bivector discord, Cam folks, Charles Gunn, Steven Der kenick, Pierre Philipp Denchant, Jonathan Cameron, David Hestenes, Paul Simeon
+			Graphics/gamedev: Keenan Crane, Albert Chern, Fabrice, inigo quilez, Haxiomic, Dan Holden, Daniel Piker, Ian and Norgg, Media Molecule, Chris Deleon
 			Math/physicist: Ivan and Nina, Florian, Eric stansifer, Matt Hare
 			Misc: London Rationalish, Ben Eater, Coding Train guy, Grant sanderson
 
@@ -85,7 +88,8 @@
 	vector tangent to f: f'(t) = (1,2x)
 	An implicit function just means it's a curve in a higher dimension
 
-	integration and differentiation
+	Calculus
+		Possibly integration is an example of something with multiple inputs, i.e. currying parts of it might not help?
 		Picture a curve
 			Smoosh it down to a line, i.e. look at it from above. you might see value along the line represented as transparency
 			Take that line and look at it dead-on. The color you're seeing is proportional to the integral
@@ -132,6 +136,7 @@
 			"differentiate(x*x,x)" -> "2*x"
 			
 	Algebraic deduction / omicron reduction
+		Cauchy Riemann is a nice example of something you can put in reductions
 		the fundamental axioms are e1^2 = e2^2= 1 and e1e2 = -e2e1
 		Ivan sutherland had it. You have your algebraic properties (all statements of the form f(...) = 0), but they're applied to pictures and applied gesturally
 		As joel says, sometimes you want to write a*b = b/a but it's some bunch of things that just cannot be rarranged into a = or b = 

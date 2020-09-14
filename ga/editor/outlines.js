@@ -1,3 +1,7 @@
+/*
+	bug: torus viz outline disappears only if you remove something else???
+*/
+
 function OutlineCollection()
 {
 	let maxOutlines = 256

@@ -106,10 +106,13 @@ function initMouse()
 			return "left"
 	}
 
-	mouse.isOnDisplayWindow = () => {
-		let onDw = false
-        displayWindows.forEach((dw) => { if (mouse.checkIfOnScaledUnitSquare(dw)) onDw = true })
-        return onDw
+	mouse.displayWindowMouseIsOn = () => {
+		let oneItsOn = null
+		displayWindows.forEach((dw) => {
+			if (mouse.checkIfOnScaledUnitSquare(dw))
+				oneItsOn = dw
+		})
+		return oneItsOn
     }
 
 	mouse.checkIfOnScaledUnitSquare = function (scaledSquare) {

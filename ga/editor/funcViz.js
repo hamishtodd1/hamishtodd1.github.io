@@ -1,4 +1,6 @@
 /*
+    //color just has completely different meaning for the functions because you haven't bound anything
+
     So you have mv and you have operation, either order
 	We curry the fuckers into a picture of that mv with that symbol on it. Now it's "just" juxtaposition of pictures
 	You can think of all functions as having one argument thanks to all these fucking pairings
@@ -86,6 +88,8 @@ function initFuncViz()
     //can't do this coordinate-free shit for a graph really, you need an origin
     let curveMaterial = new THREE.LineBasicMaterial({ color: 0xFF0000 })
     let surfaceMaterial = new THREE.MeshPhongMaterial({ color: 0xFF0000, side:THREE.DoubleSide })
+    curveMaterial.im = curveMaterial.clone()
+    surfaceMaterial.im = surfaceMaterial.clone()
 
     let maxInstances = 256
     let numSamples = 256
@@ -114,66 +118,90 @@ function initFuncViz()
                     intersection:f(y) = abs(y)>1 ? infinity : sqrt(1-y*y) - rasterization
         */
 
+        let geo = null
+        let mat = null
+
         if (inputDimension === 1) {
-            var geo = new THREE.Geometry()
-            for (let i = 0; i <= numSamples; i++) geo.vertices.push(new THREE.Vector3())
+            geo = new THREE.Geometry()
+            mat = curveMaterial
+            
+            for (let i = 0; i <= numSamples; ++i)
+                geo.vertices.push(new THREE.Vector3())
 
             if( outputDimension === 1) {
-                geo.vertices.forEach( (p)=> {
+                geo.vertices.forEach( (p,i)=> {
                     p.x = numberInRange(i)
                     p.y = func(p.x)
                 })
             }
             else if( outputDimension === 2) {
-                geo.vertices.forEach( (p)=> {
+                geo.vertices.forEach( (p,i)=> {
                     p.z = numberInRange(i)
                     func(p.z,p)
                 })
             }
             else if( outputDimension === 3) {
-                geo.vertices.forEach( (p)=> {
+                geo.vertices.forEach( (p,i)=> {
                     let t = numberInRange(i)
                     func(t, p)
                 })
             }
-
-            return new THREE.InstancedMesh(geo, curveMaterial,maxInstances)
         }
         else if (inputDimension === 2 && outputDimension === 3)
         {
-            let im = new THREE.InstancedMesh(new THREE.PlaneGeometry(1., 1., numSamples - 1, numSamples - 1), surfaceMaterial, maxInstances)
-
+            geo = new THREE.PlaneGeometry(1., 1., numSamples - 1, numSamples - 1)
+            mat = surfaceMaterial
+            
             let radiusSq = -1
-            for (let i = 0, il = numSamples * numSamples; i < il; ++i) {
-                let x =             (i % numSamples) / (numSamples - 1)
+            for (let i = 0, il = numSamples * numSamples; i < il; ++i)
+            {
+                let x = (i % numSamples) / (numSamples - 1)
                 let y = (Math.floor(i / numSamples)) / (numSamples - 1)
                 x = x * (range[1] - range[0]) + range[0]
                 y = y * (range[1] - range[0]) + range[0]
-                func(x, y, im.geometry.vertices[i])
+                func(x, y, geo.vertices[i])
 
-                radiusSq = Math.max(im.geometry.vertices[i].lengthSq(),radiusSq)
+                radiusSq = Math.max(geo.vertices[i].lengthSq(), radiusSq)
             }
-            im.radius = Math.sqrt(radiusSq)
 
-            im.drawInPlace = function (x, y) {
-                m1.identity()
-                m1.makeRotationFromQuaternion(displayRotation.q)
-                m1.scale(v1.setScalar(.5 / im.radius))
-                m1.setPosition(x, y, 0.)
-
-                im.setMatrixAt(im.count, m1)
-                ++im.count
-                im.instanceMatrix.needsUpdate = true
-            }
-            
-            return im
+            geo.computeFaceNormals()
+            geo.computeVertexNormals()
         }
-        else
+        else {
             log("unvisualizable function dimensionalities")
-    }
+            return null
+        }
 
-    // let sqFunc = (x) => x * x //shader mofo. Transpile to glsl
-    // scene.add(FuncViz(sqFunc, 1, 1))
+        let radiusSq = -Infinity
+        geo.vertices.forEach((v) => { radiusSq = Math.max(v.lengthSq(), radiusSq) })
+        let boundingSphereRadius = Math.sqrt(radiusSq)
+
+        let dwMesh = new THREE.Mesh(geo, mat)
+        dwMesh.matrixAutoUpdate = false
+        let im = new THREE.InstancedMesh(geo, mat.im, maxInstances)
+        pad.add(im)
+        viz = {}
+        viz.addToMainDw = () => {
+            mainDw.scene.add(dwMesh)
+            if (carat.movedVerticallySinceLastFrame) {
+                let containingRadius = boundingSphereRadius
+                containingRadius = Math.max(containingRadius, Math.sqrt(2.)) //grid
+                mainDw.scene.scale.setScalar(.5 / containingRadius) 
+            }
+        }
+
+        viz.beginFrame = () =>{
+            im.count = 0
+        }
+
+        viz.drawInPlace = (x, y) => {
+            dwMesh.matrix.makeRotationFromQuaternion(displayRotation.q)
+
+            boxDraw(im, x, y, dwMesh.matrix, boundingSphereRadius)
+        }
+
+        return viz
+    }
 
     // let helixFunction = (t, target) => {
     //     let numTwists = 2.

@@ -64,8 +64,8 @@ function initMainDw() {
         v1.copy(carat.position)
         pad.localToWorld(v1)
         let bottomYDestination = v1.y - .5 * pad.scale.y
-        if (bottomYDestination > camera.topAtZZero - mainDw.scale.y)
-            bottomYDestination = camera.topAtZZero - mainDw.scale.y
+        if (bottomYDestination > camera.topAtZZero - mainDw.scale.y - .3)
+            bottomYDestination = camera.topAtZZero - mainDw.scale.y - .3
         mainDw.bottomY += .1 * (bottomYDestination - mainDw.bottomY)
         mainDw.position.x = camera.rightAtZZero - mainDw.scale.x * .5
     })
@@ -124,6 +124,7 @@ function initMainDw() {
                 ++numFreeParameterMultivectors
 
                 //perhaps it's bad to do this - editing things in the dw should not add to the text, only modify?
+                //perhaps it should be that free parameters get a certain marking, a little handle you can grab
                 
                 let newlineNeeded = backgroundString[carat.positionInString] !== "\n" || (carat.positionInString !== 0 && backgroundString[carat.positionInString - 1] !== "\n")
 

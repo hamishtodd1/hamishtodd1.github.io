@@ -1,4 +1,6 @@
 /*
+	exp() is also a modifier, like reverse() or dual()
+
 	So the animation is...
 
 	all * scalar = enlarge
@@ -12,10 +14,30 @@
 	3. Things get grouped together into the different blades
 	4. Those get combined
 */
+
+
+
+
+function bivectorMagnitude(elements) {
+	return Math.sqrt(sq(elements[4]) + sq(elements[5]) + sq(elements[6]))
+}
+
+function identity(m) {
+	m[0] = 1.
+	m[1] = 0.
+	m[2] = 0.
+	m[3] = 0.
+	m[4] = 0.
+	m[5] = 0.
+	m[6] = 0.
+	m[7] = 0.
+}
+
 let zeroMultivector = new Float32Array(8)
 MathematicalMultivector = function(a,b,c,d,e,f,g,h)
 {
-	let m = new Float32Array([1., 0., 0., 0., 0., 0., 0., 0.,])
+	let m = new Float32Array(8)
+	identity(m)
 	if (a !== undefined) m[0] = a
 	if (b !== undefined) m[1] = b
 	if (c !== undefined) m[2] = c
@@ -27,6 +49,8 @@ MathematicalMultivector = function(a,b,c,d,e,f,g,h)
 	return m
 }
 let mm = MathematicalMultivector()
+let mm1 = MathematicalMultivector()
+let mm2 = MathematicalMultivector()
 
 function getVector(mv,target)
 {
@@ -116,7 +140,12 @@ function generateRandomMultivectorElementsFromScope(scope, seed)
 	return generatorScope[generatorScope.length-1]
 }
 
-function geometricProduct(a,b,target)
+function geometricScalarMultiply(scalar, b, target) {
+	for(let i = 0; i < 8; ++i)
+		target[i] = scalar * b[i]
+}
+
+function geometricProduct(a,b,target) //no aliasing
 {
 	if(target === undefined)
 		target = new Float32Array(8)
@@ -272,3 +301,36 @@ function getMultivectorGrade(e)
 
 	return "compound";
 }
+
+
+function gexp(a,target)
+{
+	if(target ===undefined )
+		target = MathematicalMultivector()
+	identity(target)
+
+	identity(mm1)
+
+	let inverseIFactorial = 1
+	for (let i = 1; i < 15; i++) {
+		inverseIFactorial /= i
+		let aToThePowerOfIMinus1   = i % 2 ? mm1 : mm2
+		let aToThePowerOfI = i % 2 ? mm2 : mm1
+
+		geometricProduct(aToThePowerOfIMinus1, a, aToThePowerOfI)
+		
+		geometricScalarMultiply(inverseIFactorial, aToThePowerOfI, mm)
+
+		geometricSum(target,mm,target)
+
+		copyMultivector(aToThePowerOfI, aToThePowerOfIMinus1)
+	}
+
+	return target
+}
+
+// let test = MathematicalMultivector(1., 0., 0., 0., 0., 0., 0., 0.)
+// log(Math.E,gexp(test))
+
+let test = MathematicalMultivector(0., 0., 0., 0., TAU / 8., 0., 0., 0.)
+log(gexp(test)) //expecting 1.+.5*thingy

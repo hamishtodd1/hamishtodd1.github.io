@@ -5660,9 +5660,11 @@
 					object.parent.remove( object );
 
 				}
-
+				
 				object.parent = this;
+				
 				this.children.push( object );
+				
 
 				object.dispatchEvent( _addedEvent );
 
@@ -7050,7 +7052,6 @@
 
 			if ( target === undefined ) {
 
-				log(numTimes)
 				console.warn( 'THREE.Ray: .at() target is now required' );
 				target = new Vector3();
 

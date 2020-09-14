@@ -1,4 +1,8 @@
 /*
+	This has great footage for thinking about phase, wave functions and interference https://www.youtube.com/watch?v=WTxDyYHaYAI
+
+	Take
+
 	Could do some number theory.
 		prime numbers are ones not on the hyperbolic paraboloid
 		What about the stuff in the minutephysics shor's

@@ -1,16 +1,6 @@
-let colorCharacters = ""
-const colors = {
-    "b": new THREE.Color(0., 0., 0.),
-    "g": new THREE.Color(.4, .4, .4),
-    "o": new THREE.Color(.9, .5, .2),
-    "p": new THREE.Color(.5, 0., .5),
-    "r": new THREE.Color(1., 0., 0.),
-    "w": new THREE.Color(1., 1., 1.),
-    "y": new THREE.Color(1., 1., 0.)
-}
-for (let color in colors) colorCharacters += color
+let backgroundString = "b g o\n\nw\nw +w\nr\n\nb  +g  \nb  *o  \np  +b  \nb *b \n\ni*(j+k)=i*j+i*k\n\ntor\n\n"
 
-let backgroundString = "  b g o\n\n  w\n  w +w\n  r\n\n  b  +g  \n  b  *o  \n  p  +b  \n\n  i*(j+k)=i*j+i*k\n\ntor\n\n  "
+let SHAFT_RADIUS = .06 //how thick an "infinitely thin" thing is, so vectors, lines, scalars
 
 const carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1., 1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
 const variables = []

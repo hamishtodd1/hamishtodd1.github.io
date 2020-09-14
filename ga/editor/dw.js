@@ -44,6 +44,7 @@
                 it could be written in terms of old ones
                 try to snap to the nearest one that's a single operation performed on existing ones
                     If it's a vector and it's in a plane perpendicular to an existing vector and the same length, that's a single bivector multiplication
+                    I guess it's sort of appropriate in how it fosters this "the complement and reverse and whatever are always THERE, you just haven't computed them"
         copy a png or gif or whatever, paste into window, you have a textured quad, or three scalar fields or however you do it
         Copy a picture of a line graph with marked axes, it interprets that too?
         Double click something in window, to get to the place where it is made
