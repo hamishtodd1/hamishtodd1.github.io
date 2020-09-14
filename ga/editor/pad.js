@@ -74,6 +74,8 @@ async function initPad(characterMeshHeight)
 
 	initCarat()
 
+	let alphanumerics = "0123456789abcdefghijklmnopqrstuvwxyz"
+
 	for(let i = 0; i < 63; i++)
 		VariableAppearance()
 	let pictogramWidthInCharacters = 3
@@ -107,6 +109,13 @@ async function initPad(characterMeshHeight)
 		let asteriskOperatorCharacter = String.fromCharCode("8727")
 		characters.add("*", asteriskOperatorCharacter)
 		functionDictionary["*"] = geometricProduct
+
+		functionDictionary["exp"] = () => {
+			// log("yo")
+		}
+		//so you want to take the inner product, i.e. curry . with an mv then product that with an mv. Does that work
+		//does grade selection involve integers? Yeesh
+		//"project on basis multivector"?
 
 		// var tripleEqualsCharacter = String.fromCharCode("8801") //you CAN write "function", but lots of kids don't know "function". In python it's "def"
 		//could have them be separate
@@ -213,11 +222,9 @@ async function initPad(characterMeshHeight)
 				drawingPosition.x += spaceWidth
 			else if (currentCharacter === "\n")
 			{
-				if (stack.length >= 3)
-				{
+				if (stack.length >= 3) {
 					let operandsAndOperator = [stack.pop(), stack.pop(), stack.pop()]
-					for (let i = 0; i < 3; i++)
-					{
+					for (let i = 0; i < 3; i++) {
 						if (typeof operandsAndOperator[i] === 'function' &&
 							typeof operandsAndOperator[(i + 1) % 3] !== 'function' &&
 							typeof operandsAndOperator[(i + 2) % 3] !== 'function')
@@ -229,12 +236,11 @@ async function initPad(characterMeshHeight)
 							v2.copy(outputColumn.position)
 							pad.worldToLocal(v2)
 							v2.y = drawingPosition.y //- 1. / 3.
-							outlineCollection.draw(v2.x, v2.y, 1.)
 
+							outlineCollection.draw(v2.x, v2.y, 1.)
 							let mv = variables[lowestUndeterminedVariable]
 							operator(operand1.elements, operand2.elements, mv.elements)
 							mv.drawInPlace(v2.x, v2.y)
-							stack.push(mv)
 							++lowestUndeterminedVariable
 
 							if (carat.position.y === drawingPosition.y)
@@ -242,6 +248,12 @@ async function initPad(characterMeshHeight)
 						}
 					}
 				}
+				// else if(stack.length === 2) {
+				// 	let operandAndOperator = [stack.pop(), stack.pop()]
+				// 	let operator = typeof operandsAndOperator[0] === "function" ? operandsAndOperator[0] : operandsAndOperator[1]
+				// 	let operand  = typeof operandsAndOperator[0] === "function" ? operandsAndOperator[1] : operandsAndOperator[0]
+
+				// }
 				stack.length = 0
 
 				//also retroactively turn this line into a superimposed diagram? Unless carat is on it I guess
@@ -260,12 +272,14 @@ async function initPad(characterMeshHeight)
 					let maxTokenLength = 64
 					let token = ""
 					if (functionDictionary[currentCharacter]!==undefined)
-						token = currentCharacter
+						token = currentCharacter //contains reserved symbols
 					else {
 						for ( let i = 0;
-							i < maxTokenLength && backgroundString[drawingPositionInString + i] !== " " && 
+							drawingPositionInString + i < backgroundStringLength &&
+							i < maxTokenLength &&
+							backgroundString[drawingPositionInString + i] !== " " && 
 							backgroundString[drawingPositionInString + i] !== "\n" &&
-							drawingPositionInString + i < backgroundStringLength;
+							alphanumerics.indexOf(backgroundString[drawingPositionInString + i]) !== -1;
 							++i)
 							token += backgroundString[drawingPositionInString + i]
 					}

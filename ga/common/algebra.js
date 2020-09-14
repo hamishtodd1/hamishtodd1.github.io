@@ -309,21 +309,24 @@ function gexp(a,target)
 		target = MathematicalMultivector()
 	identity(target)
 
-	identity(mm1)
+	if (getMultivectorGrade(a) === 0)
+		target[0] = Math.exp(a[0])
+	else {
+		identity(mm1) //i = 0
+		let inverseIFactorial = 1
+		for (let i = 1; i < 15; i++) {
+			inverseIFactorial /= i
+			let aToThePowerOfIMinus1 = i % 2 ? mm1 : mm2
+			let aToThePowerOfI = i % 2 ? mm2 : mm1
 
-	let inverseIFactorial = 1
-	for (let i = 1; i < 15; i++) {
-		inverseIFactorial /= i
-		let aToThePowerOfIMinus1   = i % 2 ? mm1 : mm2
-		let aToThePowerOfI = i % 2 ? mm2 : mm1
+			geometricProduct(aToThePowerOfIMinus1, a, aToThePowerOfI)
 
-		geometricProduct(aToThePowerOfIMinus1, a, aToThePowerOfI)
-		
-		geometricScalarMultiply(inverseIFactorial, aToThePowerOfI, mm)
+			geometricScalarMultiply(inverseIFactorial, aToThePowerOfI, mm)
 
-		geometricSum(target,mm,target)
+			geometricSum(target, mm, target)
 
-		copyMultivector(aToThePowerOfI, aToThePowerOfIMinus1)
+			copyMultivector(aToThePowerOfI, aToThePowerOfIMinus1)
+		}
 	}
 
 	return target
