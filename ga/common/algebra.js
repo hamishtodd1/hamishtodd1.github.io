@@ -59,6 +59,18 @@ function getVector(mv,target)
 	target.z = mv[3]
 	return target
 }
+function setVector(v, target)
+{
+	target[0] = 0.
+	target[1] = v.x
+	target[2] = v.y
+	target[3] = v.z
+	target[4] = 0.
+	target[5] = 0.
+	target[6] = 0.
+	target[7] = 0.
+	return target
+}
 function getBivec(mv, target)
 {
 	target.x = mv[4]
@@ -82,9 +94,9 @@ function reverse(mv,target) {
 
 function wedge(a,b) //aka antisymmetric
 {
-	let p = geometricProduct(a, b)
-	let q = geometricProduct(b, a)
-	let ret = geometricSum(p,q)
+	let p = gProduct(a, b)
+	let q = gProduct(b, a)
+	let ret = gSum(p,q)
 	delete p;
 	delete q;
 	for(let i = 0; i < 8; i++)
@@ -107,7 +119,7 @@ function generateRandomMultivectorElementsFromScope(scope, seed)
 
 	let record = Array(numOperations)
 	for(let i = 0; i < numOperations; i++)
-		record[i] = randomSequence.getValue() < .5 ? geometricProduct : geometricSum
+		record[i] = randomSequence.getValue() < .5 ? gProduct : gSum
 
 	let numOperations = 5;
 	let generatorScope = []
@@ -145,7 +157,7 @@ function geometricScalarMultiply(scalar, b, target) {
 		target[i] = scalar * b[i]
 }
 
-function geometricProduct(a,b,target) //no aliasing
+function gProduct(a,b,target) //no aliasing
 {
 	if(target === undefined)
 		target = new Float32Array(8)
@@ -182,7 +194,7 @@ function geometricProduct(a,b,target) //no aliasing
 }
 
 //x is the weird vector
-function geometricProductSpacetime(a, b, target)
+function gProductSpacetime(a, b, target)
 {
 	if(target === undefined)
 		target = new Float32Array(8)
@@ -201,7 +213,7 @@ function geometricProductSpacetime(a, b, target)
 	return target;
 };
 
-function geometricSum(a,b,target)
+function gSum(a,b,target)
 {
 	if(target === undefined)
 		target = new Float32Array(8)
@@ -285,7 +297,7 @@ function areAnyOthersNonZero(arr, elementsToIgnore)
 	}
 	return false;
 }
-function getMultivectorGrade(e)
+function getGrade(e)
 {
 	if (!areAnyOthersNonZero(e, [])) //only blades can have a grade?
 		return -1;
@@ -303,13 +315,13 @@ function getMultivectorGrade(e)
 }
 
 
-function gexp(a,target)
+function gExp(a,target)
 {
 	if(target ===undefined )
 		target = MathematicalMultivector()
 	identity(target)
 
-	if (getMultivectorGrade(a) === 0)
+	if (getGrade(a) === 0)
 		target[0] = Math.exp(a[0])
 	else {
 		identity(mm1) //i = 0
@@ -319,11 +331,11 @@ function gexp(a,target)
 			let aToThePowerOfIMinus1 = i % 2 ? mm1 : mm2
 			let aToThePowerOfI = i % 2 ? mm2 : mm1
 
-			geometricProduct(aToThePowerOfIMinus1, a, aToThePowerOfI)
+			gProduct(aToThePowerOfIMinus1, a, aToThePowerOfI)
 
 			geometricScalarMultiply(inverseIFactorial, aToThePowerOfI, mm)
 
-			geometricSum(target, mm, target)
+			gSum(target, mm, target)
 
 			copyMultivector(aToThePowerOfI, aToThePowerOfIMinus1)
 		}
@@ -333,7 +345,7 @@ function gexp(a,target)
 }
 
 // let test = MathematicalMultivector(1., 0., 0., 0., 0., 0., 0., 0.)
-// log(Math.E,gexp(test))
+// log(Math.E,gExp(test))
 
 let test = MathematicalMultivector(0., 0., 0., 0., TAU / 8., 0., 0., 0.)
-log(gexp(test)) //expecting 1.+.5*thingy
+log(gExp(test)) //expecting 1.+.5*thingy

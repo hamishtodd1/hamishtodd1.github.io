@@ -96,23 +96,22 @@ async function initPad(characterMeshHeight)
 	copyVariable(zUnit,variables[2].elements)
 	copyVariable(new THREE.Vector3(-1., 0., 0.),variables[3].elements)
 	variables[4].elements[7] = 2.
-	variables[5].elements[4] = 1.5
-	numFreeParameterMultivectors = 6
+	variables[5].elements[4] = 2.5
+	numFreeParameterMultivectors = 6 //should probably only be defined each frame!
 
 	let maxCopiesOfALetter = 256
 	let characters = initTypeableCharacters(carat, maxCopiesOfALetter)
 	let functionDictionary = {}
 	{
 		characters.add("+")
-		functionDictionary["+"] = geometricSum
+		functionDictionary["+"] = gSum
 
 		let asteriskOperatorCharacter = String.fromCharCode("8727")
 		characters.add("*", asteriskOperatorCharacter)
-		functionDictionary["*"] = geometricProduct
+		functionDictionary["*"] = gProduct
 
-		functionDictionary["exp"] = () => {
-			// log("yo")
-		}
+		functionDictionary["exp"] = gExp
+
 		//so you want to take the inner product, i.e. curry . with an mv then product that with an mv. Does that work
 		//does grade selection involve integers? Yeesh
 		//"project on basis multivector"?
@@ -136,7 +135,7 @@ async function initPad(characterMeshHeight)
 			use indents to say what's part of the function
 				Is there a way to know when the function ends from looking at the stack? Probably not
 				Whatever's at the bottom is the return value
-			extract an array of functions (geometricSum, geometricProduct) and indices of variables
+			extract an array of functions (gSum, gProduct) and indices of variables
 		*/
 
 		let nablaCharacter = String.fromCharCode("8711")
@@ -230,30 +229,55 @@ async function initPad(characterMeshHeight)
 							typeof operandsAndOperator[(i + 2) % 3] !== 'function')
 						{
 							let operator = operandsAndOperator[i]
-							let operand1 = operandsAndOperator[i === 0 ? 1 : 0]
-							let operand2 = operandsAndOperator[i === 2 ? 1 : 2]
+							let operand1 = operandsAndOperator[i === 0 || i === 1 ? 2 : 1]
+							let operand2 = operandsAndOperator[i === 2 || i === 1 ? 0 : 1]
 
-							v2.copy(outputColumn.position)
-							pad.worldToLocal(v2)
-							v2.y = drawingPosition.y //- 1. / 3.
+							// o o1 o2 //0, 2, 1
+							// o1 o o2 //1, 2, 0
+							// o1 o2 o //2, 1, 0
 
-							outlineCollection.draw(v2.x, v2.y, 1.)
-							let mv = variables[lowestUndeterminedVariable]
-							operator(operand1.elements, operand2.elements, mv.elements)
-							mv.drawInPlace(v2.x, v2.y)
+							let result = variables[lowestUndeterminedVariable]
 							++lowestUndeterminedVariable
+							operator(operand1.elements, operand2.elements, result.elements)
+
+							if (getGrade(operand1.elements) === 1 && getGrade(operand2.elements) === 1 )
+								result.setScalarDirection(getVector(operand1.elements, v1))
+
+							/*
+								exp of bivector: same as that bivector
+							*/
+
+							v1.copy(outputColumn.position)
+							pad.worldToLocal(v1)
+							v1.y = drawingPosition.y
+							outlineCollection.draw(v1.x, v1.y, 1.)
+							result.drawInPlace(v1.x, v1.y)
 
 							if (carat.position.y === drawingPosition.y)
-								mv.addToMainDw()
+								result.addToMainDw()
 						}
 					}
 				}
-				// else if(stack.length === 2) {
-				// 	let operandAndOperator = [stack.pop(), stack.pop()]
-				// 	let operator = typeof operandsAndOperator[0] === "function" ? operandsAndOperator[0] : operandsAndOperator[1]
-				// 	let operand  = typeof operandsAndOperator[0] === "function" ? operandsAndOperator[1] : operandsAndOperator[0]
+				else if(stack.length === 2) {
+					let operandAndOperator = [stack.pop(), stack.pop()]
+					let operator = typeof operandAndOperator[0] === "function" ? operandAndOperator[0] : operandAndOperator[1]
+					if(typeof operator === "function") {
+						let operand = typeof operandAndOperator[0] === "function" ? operandAndOperator[1] : operandAndOperator[0]
 
-				// }
+						let mv = variables[lowestUndeterminedVariable]
+						++lowestUndeterminedVariable
+						operator(operand.elements, mv.elements)
+
+						v1.copy(outputColumn.position)
+						pad.worldToLocal(v1)
+						v1.y = drawingPosition.y
+						outlineCollection.draw(v1.x, v1.y, 1.)
+						mv.drawInPlace(v1.x, v1.y)
+
+						if (carat.position.y === drawingPosition.y)
+							mv.addToMainDw()
+					}
+				}
 				stack.length = 0
 
 				//also retroactively turn this line into a superimposed diagram? Unless carat is on it I guess
@@ -265,8 +289,7 @@ async function initPad(characterMeshHeight)
 			}
 			else
 			{
-				if (tokenCharactersLeft <= 0)
-				{
+				if (tokenCharactersLeft <= 0) {
 					drawCharacters = true
 
 					let maxTokenLength = 64
@@ -285,8 +308,7 @@ async function initPad(characterMeshHeight)
 					}
 					tokenCharactersLeft = token.length
 
-					if (functionDictionary[token] !== undefined)
-					{
+					if (functionDictionary[token] !== undefined) {
 						stack.push(functionDictionary[token])
 						tokenCharactersLeft = 1
 

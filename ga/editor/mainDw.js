@@ -123,6 +123,8 @@ function initMainDw() {
             if(selectedFunctionality === "vector" ) {
                 ++numFreeParameterMultivectors
 
+                //probably want a different colored outline
+
                 //perhaps it's bad to do this - editing things in the dw should not add to the text, only modify?
                 //perhaps it should be that free parameters get a certain marking, a little handle you can grab
                 

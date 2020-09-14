@@ -1,4 +1,6 @@
 /*
+    It's all about constraints, give an interface for making constraints
+
     it would be nice to pick up a value that is a length and compare it to the thing you're looking at
 
     So the kids are drawing clothes on themselves

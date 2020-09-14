@@ -4,6 +4,7 @@
 		exp, reverse
 		Naming system
 			One idea: record what names got attributed to what calculations
+		Fix making of vectors and curves
 
 	Bret article http://worrydream.com/DrawingDynamicVisualizationsTalkAddendum/
 	https://en.wikipedia.org/wiki/Binary_expression_tree

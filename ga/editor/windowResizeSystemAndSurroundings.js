@@ -34,7 +34,8 @@ function initWindowResizeSystemAndSurroundings()
 	//the effect of the below is to make it so that the only change is to the viewport, not to the scene itself
 	function respondToResize(event)
 	{
-		if (event !== undefined) event.preventDefault()
+		if (event !== undefined)
+			event.preventDefault()
 
 		let pixelRatioChangeRatio = window.devicePixelRatio / renderer.getPixelRatio()
 		renderer.setPixelRatio(window.devicePixelRatio);

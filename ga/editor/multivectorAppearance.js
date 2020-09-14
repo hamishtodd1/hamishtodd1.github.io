@@ -128,6 +128,44 @@ function initMultivectorAppearances(characterMeshHeight)
         mv.name = name
         mv.elements = MathematicalMultivector()
         copyMultivector(zeroMultivector, mv.elements)
+
+        let scalarDirection = new THREE.Vector3(1.,0.,0.)
+        let contextMatrix = new THREE.Matrix4().identity()
+
+        function applyContext(mesh,columnAffectedByMagnitude,magnitude) {
+            mesh.matrix.copy(contextMatrix)
+            mesh.matrix.premultiply(m1.makeRotationFromQuaternion(displayRotation.q))
+            mesh.matrix.elements[columnAffectedByMagnitude*4 + 0] *= magnitude
+            mesh.matrix.elements[columnAffectedByMagnitude*4 + 1] *= magnitude
+            mesh.matrix.elements[columnAffectedByMagnitude*4 + 2] *= magnitude
+        }
+
+        mv.setScalarDirection = (newSd) => {
+            scalarDirection.copy(newSd)
+
+            //you probably shouldn't kid yourself that this communicates no information
+            scalarDirection.normalize()
+            if (biv.visible)
+            {
+                //we assume scalarDirection is in bivector plane! We could project it
+                setVector(scalarDirection, mm1)
+
+                copyMultivector(mv.elements, mm2)
+                mm2[0] = 0.; mm2[1] = 0.; mm2[2] = 0.; mm2[3] = 0.; mm2[7] = 0.; //"select grade"
+
+                getVector(gProduct(mm1, mm2, mm), v2).normalize()
+            }
+            else
+            {
+                if (scalarDirection.x !== 0. || scalarDirection.y !== 0.)
+                    v2.crossVectors(zUnit, scalarDirection).normalize() //because camera
+                else
+                    v2.crossVectors(scalarDirection, yUnit).normalize()
+            }
+            v3.crossVectors(scalarDirection, v2).normalize()
+            //I dunno, you might want setTrivectorDirection. Surely you only want that if you have scalar and bivector
+            contextMatrix.makeBasis(scalarDirection, v2, v3)
+        }
         
         let sca = new THREE.Mesh(ScaGeometry(name), scaMaterial)
         sca.matrixAutoUpdate = false
@@ -156,7 +194,7 @@ function initMultivectorAppearances(characterMeshHeight)
         let vecPad = new THREE.InstancedMesh(vec.geometry, vecMaterial.im, maxInstances)
         let bivPad = new THREE.InstancedMesh(biv.geometry, bivMaterial.im, maxInstances)
         let triPad = new THREE.InstancedMesh(tri.geometry, triMaterial.im, maxInstances)
-        let zeroPad = new THREE.InstancedMesh(zeroGeometry, zeroMaterial.im, maxInstances) //actually maybe 0 is just a point?
+        let zeroPad = new THREE.InstancedMesh(zeroGeometry, zeroMaterial.im, maxInstances)
         mv.padGroup = new THREE.Group().add(scaPad, vecPad, bivPad, triPad, zeroPad)
         pad.add(mv.padGroup)
 
@@ -187,6 +225,8 @@ function initMultivectorAppearances(characterMeshHeight)
                 mv.boundingSphereRadius = Math.max(mv.boundingSphereRadius, originToCorner < 1. ? 1. : originToCorner)
             }
 
+            mv.setScalarDirection(scalarDirection)
+
             halfInverseBoundingSphereRadius = .5 / mv.boundingSphereRadius
         }
 
@@ -213,11 +253,10 @@ function initMultivectorAppearances(characterMeshHeight)
 
             if( sca.visible ) {
                 if (scaPad.count === 0) {
-                    sca.matrix.identity()
-                    sca.matrix.makeRotationFromQuaternion(displayRotation.q)
-                    sca.matrix.elements[0] *= mv.elements[0]
-                    sca.matrix.elements[1] *= mv.elements[0]
-                    sca.matrix.elements[2] *= mv.elements[0]
+                    applyContext(sca, 0, mv.elements[0])
+
+                    if (biv.visible) //sure it's that? What about negative/imaginary direction?
+                        sca.matrix.setPosition(0.,bivectorMagnitude(mv.elements),0.)
                 }
 
                 boxDraw(scaPad, x, y, sca.matrix, mv.boundingSphereRadius)
@@ -240,44 +279,15 @@ function initMultivectorAppearances(characterMeshHeight)
             }
 
             if(biv.visible) {
-                if(bivPad.count === 0) {
-                    let bivMagnitude = bivectorMagnitude(mv.elements)
-
-                    v1.set(0.00001,1.,0.)
-                    // q1.copy(displayRotation.q)
-                    // q1.inverse()
-                    // v1.applyQuaternion(q1)
-
-                    geometricProduct(negativeUnitPseudoScalar, mv.elements, mm)
-                    getVector(mm, v2) //it's sticking out in PRESUMABLY a consistent direction wrt chirality
-                    v2.normalize()
-                    v1.projectOnPlane(v2).setLength(bivMagnitude) //v1 is now a canonical y vector
-
-                    v3.crossVectors(v1, v2).normalize()
-
-                    v1.applyQuaternion(displayRotation.q)
-                    v2.applyQuaternion(displayRotation.q)
-                    v3.applyQuaternion(displayRotation.q)
-
-                    biv.matrix.makeBasis(v3,v1,v2)
-                }
+                if(bivPad.count === 0)
+                    applyContext(biv, 1, bivectorMagnitude(mv.elements) )
 
                 boxDraw(bivPad, x, y, biv.matrix, mv.boundingSphereRadius)
             }
 
             if(tri.visible) {
-                if(triPad.count === 0) {
-                    //corner on
-                    // q1.setFromAxisAngle(xUnit, TAU / 8.)
-                    // q2.setFromAxisAngle(yUnit, TAU / 8.)
-                    // q1.multiply(q2)
-
-                    tri.matrix.identity()
-                    tri.matrix.makeRotationFromQuaternion(displayRotation.q)
-                    tri.matrix.elements[4] *= mv.elements[7]
-                    tri.matrix.elements[5] *= mv.elements[7]
-                    tri.matrix.elements[6] *= mv.elements[7]
-                }
+                if(triPad.count === 0)
+                    applyContext(tri, 2, mv.elements[7])
 
                 boxDraw(triPad, x, y, tri.matrix, mv.boundingSphereRadius)
             }
@@ -446,7 +456,7 @@ function TriGeometry(name)
     let ratio = nonCornerLength / radius
     triGeometry.vertices.forEach((v, i) =>
     {
-        let rotationAngle = v.y * TAU / 4.
+        let rotationAngle = v.y * TAU / 2.
         v.applyAxisAngle(yUnit, rotationAngle)
 
         if (i < il - 2 && i % 3 !== 0)
@@ -458,6 +468,7 @@ function TriGeometry(name)
         }
         v.y += .5
     })
+    triGeometry.rotateX(TAU / 4.)
 
     il = triGeometry.faces.length
     let nameLength = name.length
@@ -488,7 +499,7 @@ function ScaGeometry(name) {
 
     let il = scaGeometry.vertices.length
     scaGeometry.vertices.forEach((v, i) => {
-        let rotationAngle = v.y * TAU / 4.
+        let rotationAngle = v.y * TAU / 2.
         v.applyAxisAngle(yUnit, rotationAngle)
         //might be nice to know orientation when looking from top, need triskelion thing
     })
@@ -509,27 +520,4 @@ function ScaGeometry(name) {
     scaGeometry.computeVertexNormals()
 
     return scaGeometry
-}
-
-function ScalarMesh(name) {
-    // let radialSegments = 18
-    // let scalarGeometry = new THREE.CylinderGeometry(.5, .5, 1., radialSegments, 3)
-    // scalarGeometry.translate(0.,.5,0.)
-    // scalarGeometry.vertices.forEach((v,i)=>{
-    //     let class = v.y * 3
-    // })
-    // scalarGeometry.faces.forEach((f, i) => { //strips of 64
-    //     if( i < radialSegments * 2 ) {
-    //         let index = Math.floor(i / radialSegments * name.length) % name.length
-    //         f.color.copy(colors[name[index]])
-    //     }
-    // })
-
-    let m = new THREE.Mesh(scalarGeometry, new THREE.MeshBasicMaterial({ vertexColors: THREE.FaceColors}))
-
-    updateFunctions.push(()=>{
-        m.rotation.y += .05
-    })
-
-    return m
 }
