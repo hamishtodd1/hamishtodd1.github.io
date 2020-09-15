@@ -1,4 +1,4 @@
-let backgroundString = "b g o\n\nw  r\n\nw +w\nb  +g  \ng  *b  \np  +b  \nb *b \nexp w\n\n\ni*(j+k)=i*j+i*k\n\ntor\n\n"
+let backgroundString = "b g o\n\nw  r\n\nw +w\nb  +g  \ng  *b  \np  +b  \nb *b \nexp w\nrev bw\n\ni*(j+k)=i*j+i*k\ntor\n"
 
 let SHAFT_RADIUS = .06 //how thick an "infinitely thin" thing is, so vectors, lines, scalars
 

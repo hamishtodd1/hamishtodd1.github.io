@@ -19,7 +19,8 @@ function initWindowResizeSystemAndSurroundings()
 	camera.topAtZZero = 15.; //all derives from this. Tweaked to make 100% look ok on our little preview
 	{
 		camera.position.z = camera.topAtZZero * 9.; //subjective, how much depth do you want?
-		camera.far = camera.position.z * 2.
+		camera.near = camera.position.z - 5.
+		camera.far  = camera.position.z + 5.
 
 		pointLight.distance = camera.position.z
 		pointLight.shadow.camera.far = pointLight.distance;

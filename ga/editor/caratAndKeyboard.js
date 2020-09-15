@@ -85,7 +85,7 @@ function initTypeableCharacters(carat, maxCopiesOfALetter)
 			displayedCharacter = character
 
 		let material = null
-		if (character === "~")
+		if (character === "|")
 		{
 			material = new THREE.MeshBasicMaterial()
 			new THREE.TextureLoader().load("data/integral.png", function (result) { material.map = result; material.needsUpdate = true })
@@ -115,7 +115,7 @@ function initTypeableCharacters(carat, maxCopiesOfALetter)
 
 		bindButton(character, () => addStringAtCarat(character))
 	}
-	let initialCharacters = "abcdefghijklmnopqrstuvwxyz ~"
+	let initialCharacters = "abcdefghijklmnopqrstuvwxyz |"
 	for (let i = 0; i < initialCharacters.length; i++)
 		characters.add(initialCharacters[i])
 

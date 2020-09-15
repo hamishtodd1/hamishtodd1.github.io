@@ -32,7 +32,8 @@ function boxDraw(im, x, y, matrixToCopy, boundingSphereRadius) {
 	m1.copy(matrixToCopy)
 	let halfInverseBoundingSphereRadius = .5 / boundingSphereRadius
 	m1.scale(v1.setScalar(halfInverseBoundingSphereRadius))
-	m1.setPosition(x, y, 0.)
+	m1.elements[12] += x
+	m1.elements[13] += y
 	im.setMatrixAt(im.count, m1)
 	++im.count
 
@@ -76,6 +77,7 @@ async function initPad(characterMeshHeight)
 
 	let alphanumerics = "0123456789abcdefghijklmnopqrstuvwxyz"
 
+	//up to 63
 	for(let i = 0; i < 63; i++)
 		VariableAppearance()
 	let pictogramWidthInCharacters = 3
@@ -111,6 +113,7 @@ async function initPad(characterMeshHeight)
 		functionDictionary["*"] = gProduct
 
 		functionDictionary["exp"] = gExp
+		functionDictionary["rev"] = reverse
 
 		//so you want to take the inner product, i.e. curry . with an mv then product that with an mv. Does that work
 		//does grade selection involve integers? Yeesh
@@ -150,7 +153,7 @@ async function initPad(characterMeshHeight)
 		let descendingWedgeCharacter = String.fromCharCode("8744")
 		characters.add("&", descendingWedgeCharacter) // for exponentiate: **? For log, //?
 
-		backgroundString += wedgeCharacter + descendingWedgeCharacter + deltaCharacter + nablaCharacter+"~"
+		backgroundString += wedgeCharacter + descendingWedgeCharacter + deltaCharacter + nablaCharacter + "|"
 
 		//./=+!:{}
 	}

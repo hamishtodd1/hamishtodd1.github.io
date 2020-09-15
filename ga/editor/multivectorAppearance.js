@@ -251,17 +251,6 @@ function initMultivectorAppearances(characterMeshHeight)
                 ++zeroPad.count
             }
 
-            if( sca.visible ) {
-                if (scaPad.count === 0) {
-                    applyContext(sca, 0, mv.elements[0])
-
-                    if (biv.visible) //sure it's that? What about negative/imaginary direction?
-                        sca.matrix.setPosition(0.,bivectorMagnitude(mv.elements),0.)
-                }
-
-                boxDraw(scaPad, x, y, sca.matrix, mv.boundingSphereRadius)
-            }
-            
             if (vec.visible) {
                 if(vecPad.count === 0) {
                     vec.matrix.identity()
@@ -276,6 +265,21 @@ function initMultivectorAppearances(characterMeshHeight)
                 }
 
                 boxDraw(vecPad, x, y, vec.matrix, mv.boundingSphereRadius)
+            }
+
+            if( sca.visible ) {
+                if (scaPad.count === 0) {
+                    applyContext(sca, 0, mv.elements[0])
+
+                    // if (biv.visible) {
+                    //     v1.set(0., 1., 0.)
+                    //     v1.applyMatrix4(biv.matrix)
+                    //     sca.matrix.setPosition(v1)
+                    // }
+                }
+                // av
+
+                boxDraw(scaPad, x, y, sca.matrix, mv.boundingSphereRadius)
             }
 
             if(biv.visible) {
@@ -449,26 +453,28 @@ function TriGeometry(name)
         1.,
         radialSegments,
         heightSegments,
-        false)
+        false,TAU/8.)
+    triGeometry.rotateX(TAU / 4.)
 
     let il = triGeometry.vertices.length
     let nonCornerLength = Math.sin(TAU / 8) * radius / Math.sin(Math.PI - TAU / 8. - TAU / 12.)
     let ratio = nonCornerLength / radius
     triGeometry.vertices.forEach((v, i) =>
     {
-        let rotationAngle = v.y * TAU / 2.
-        v.applyAxisAngle(yUnit, rotationAngle)
+        let rotationAngle = v.z * TAU / 2.
+        v.applyAxisAngle(zUnit, rotationAngle)
 
-        if (i < il - 2 && i % 3 !== 0)
+        if (i < il - 2 && i % 3 !== 0) //making it a square
         {
-            let y = v.y
-            v.y = 0.
+            let z = v.z
+            v.z = 0.
             v.multiplyScalar(ratio)
-            v.y = y
+            v.z = z
         }
-        v.y += .5
+        v.z += .5 //grow out of z plane
+        v.x -= v.y //parallelogram
+        v.y += .5 //sit on x axis
     })
-    triGeometry.rotateX(TAU / 4.)
 
     il = triGeometry.faces.length
     let nameLength = name.length

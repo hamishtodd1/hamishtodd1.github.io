@@ -1,10 +1,11 @@
 /* 
 	Next
-		Bivectors and scalars rotating properly
-		exp, reverse
-		Naming system
-			One idea: record what names got attributed to what calculations
 		Fix making of vectors and curves
+		Naming system
+			Shouldn't be possible for their names to change on you. But what is "they"?
+			Every line is a string between two "\n"s.
+			One idea: record what names got attributed to what calculations
+		you have line numbers
 
 	Bret article http://worrydream.com/DrawingDynamicVisualizationsTalkAddendum/
 	https://en.wikipedia.org/wiki/Binary_expression_tree
@@ -137,6 +138,7 @@
 			"differentiate(x*x,x)" -> "2*x"
 			
 	Algebraic deduction / omicron reduction
+		Maybe worth calling them "conjectures", because mightn't they be false?
 		Cauchy Riemann is a nice example of something you can put in reductions
 		the fundamental axioms are e1^2 = e2^2= 1 and e1e2 = -e2e1
 		Ivan sutherland had it. You have your algebraic properties (all statements of the form f(...) = 0), but they're applied to pictures and applied gesturally
