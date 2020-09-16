@@ -100,7 +100,7 @@ function initNamesAndBasis()
             addStringAtCarat("\n")
 
             let lowestUnusedName = -1
-            for (let i = 0, il = orderedNames.length; i < il; ++i) {
+            for (let i = numBuiltInVariables, il = orderedNames.length; i < il; ++i) {
                 let used = false
                 for(let j = 0, jl = lineNames.length; j < jl; ++j)
                     if(lineNames[j] === orderedNames[i])
@@ -112,33 +112,24 @@ function initNamesAndBasis()
             }
 
             lineNames.splice(lineStats.currentCaratLine+1, 0, lowestUnusedName)
-
-            log(lineNames)
         }
     })
-    bindButton("Backspace", () =>
-    {
+    bindButton("Backspace", () => {
         if (carat.positionInString !== 0) {
-            if (backgroundString[carat.positionInString-1] === "\n") {
+            if (backgroundString[carat.positionInString-1] === "\n")
                 lineNames.splice(getLineStats().currentCaratLine, 1)
-                log(lineNames)
-            }
 
             backgroundString =
                 backgroundString.substring(0, carat.positionInString - 1) + 
                 backgroundString.substring(carat.positionInString, backgroundString.length)
+
             carat.moveAlongString(-1)
         }
     })
-    bindButton("Delete", () =>
-    {
+    bindButton("Delete", () => {
         if (carat.positionInString < backgroundString.length) {
-            if (backgroundString[carat.positionInString] === "\n") {
-                lineNames.splice(getLineStats().currentCaratLine, 1)
-                log(lineNames)
-            }
-
-            //next thing: enormous bug when you use this. try backspace then enter
+            if (backgroundString[carat.positionInString] === "\n")
+                lineNames.splice(getLineStats().currentCaratLine+1, 1)
 
             backgroundString = 
                 backgroundString.substring(0, carat.positionInString) + 
