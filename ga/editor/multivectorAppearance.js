@@ -1,4 +1,7 @@
 /*
+    TODO
+        color in 0
+
     Scalar
         How about this opacity thing?
         So, what, background is grey and positive makes it white and negative makes it black?
@@ -90,41 +93,9 @@ function initMultivectorAppearances(characterMeshHeight)
         // p.scale.setScalar(.16)
     }
 
-    let idNum = 0
-    function generateName()
-    {
-        ++idNum
-
-        let digitNum = 0
-        let correctlyBasedNumberString = ""
-        let digit = Infinity
-
-        while (true)
-        {
-            ++digitNum
-            let newDigit = digitGivenBase(idNum, colorCharacters.length + 1, digitNum)
-            //you could figure out what to add to idNum such that you get a valid thing next
-            if (newDigit === 0 || newDigit >= digit)
-                return generateName()
-
-            digit = newDigit
-            correctlyBasedNumberString = digit + correctlyBasedNumberString
-
-            if (Math.pow(colorCharacters.length + 1, digitNum) > idNum) //-1?
-                break
-        }
-        let name = ""
-        for (let i = 0; i < correctlyBasedNumberString.length; i++)
-            name += correctlyBasedNumberString[i] === "0" ? "" : colorCharacters[correctlyBasedNumberString[i] - 1]
-        // log("str: ", correctlyBasedNumberString, " name: ", name)
-
-        return name
-    }
-
-    MultivectorAppearance = () =>
+    MultivectorAppearance = (name) =>
     {
         let mv = {}
-        let name = generateName()
         mv.name = name
         mv.elements = MathematicalMultivector()
         copyMultivector(zeroMultivector, mv.elements)
@@ -216,7 +187,7 @@ function initMultivectorAppearances(characterMeshHeight)
             if (vec.visible)
                 mv.boundingSphereRadius = Math.max(mv.boundingSphereRadius, getVector(mv.elements, v1).length())
             if (tri.visible) {
-                let originToCorner = Math.sqrt(sq(mv.elements[7]) + .125)
+                let originToCorner = Math.sqrt(sq(mv.elements[7]) + 2.)
                 mv.boundingSphereRadius = Math.max(mv.boundingSphereRadius, originToCorner)
             }
             if (biv.visible) {
@@ -231,7 +202,7 @@ function initMultivectorAppearances(characterMeshHeight)
         }
 
         //but how to know which one you want to see? maybe you're always best off seeing the line!
-        // let line = new THREE.InstancedMesh(LineGeometry(mv.name), lineMaterial, maxInstances)
+        // let line = new THREE.InstancedMesh(LineGeometry(name), lineMaterial, maxInstances)
         // mv.padGroup.add(line)
         // line.count = 1
         // m1.identity()
@@ -461,9 +432,6 @@ function TriGeometry(name)
     let ratio = nonCornerLength / radius
     triGeometry.vertices.forEach((v, i) =>
     {
-        let rotationAngle = v.z * TAU / 2.
-        v.applyAxisAngle(zUnit, rotationAngle)
-
         if (i < il - 2 && i % 3 !== 0) //making it a square
         {
             let z = v.z
@@ -472,6 +440,8 @@ function TriGeometry(name)
             v.z = z
         }
         v.z += .5 //grow out of z plane
+        let rotationAngle = v.z * TAU / 4.
+        v.applyAxisAngle(zUnit, rotationAngle)
         v.x -= v.y //parallelogram
         v.y += .5 //sit on x axis
     })

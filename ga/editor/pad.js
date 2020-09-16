@@ -46,13 +46,11 @@ async function initPad(characterMeshHeight)
 
 	let spaceWidth = 1. / 3.
 
-	let VariableAppearance = () =>
-	{
-		let mv = MultivectorAppearance()
-		variables.push(mv)
-		return mv
-	}
-	let copyVariable = copyMultivector
+	initNamesAndBasis()
+	let outlineCollection = OutlineCollection()
+	pad.add(outlineCollection)
+	let pictogramWidthInCharacters = 3
+	let maxVariableNameLength = pictogramWidthInCharacters
 
 	function torusFunc(minorAngle, majorAngle, target)
 	{
@@ -76,30 +74,6 @@ async function initPad(characterMeshHeight)
 	initCarat()
 
 	let alphanumerics = "0123456789abcdefghijklmnopqrstuvwxyz"
-
-	//up to 63
-	for(let i = 0; i < 63; i++)
-		VariableAppearance()
-	let pictogramWidthInCharacters = 3
-	let outlineCollection = OutlineCollection()
-	pad.add(outlineCollection)
-	let maxVariableNameLength = pictogramWidthInCharacters
-	function getVariableWithName(name)
-	{
-		for (let i = 0, il = variables.length; i < il; i++)
-			if (checkAnagram(name, variables[i].name))
-				return variables[i]
-
-		return null
-	}
-
-	copyVariable(xUnit,variables[0].elements)
-	copyVariable(yUnit,variables[1].elements)
-	copyVariable(zUnit,variables[2].elements)
-	copyVariable(new THREE.Vector3(-1., 0., 0.),variables[3].elements)
-	variables[4].elements[7] = 2.
-	variables[5].elements[4] = 2.5
-	numFreeParameterMultivectors = 6 //should probably only be defined each frame!
 
 	let maxCopiesOfALetter = 256
 	let characters = initTypeableCharacters(carat, maxCopiesOfALetter)
@@ -172,8 +146,7 @@ async function initPad(characterMeshHeight)
 
 		positionInStringClosestToCaratPositionVector.set(Infinity, Infinity, 0.)
 
-		let lowestUndeterminedVariable = numFreeParameterMultivectors
-		variables.forEach((v) => v.beginFrame())
+		namedMvs.forEach((v) => v.beginFrame()) //TODO only need those in the frame
 		torusViz.beginFrame() //it is a variable. Its name is even meant to come from
 
 		displayWindows.forEach((dw)=>{dw.beginFrame()})
@@ -239,8 +212,7 @@ async function initPad(characterMeshHeight)
 							// o1 o o2 //1, 2, 0
 							// o1 o2 o //2, 1, 0
 
-							let result = variables[lowestUndeterminedVariable]
-							++lowestUndeterminedVariable
+							let result = getMvNamedByLineAtPosition(drawingPosition.y)
 							operator(operand1.elements, operand2.elements, result.elements)
 
 							if (getGrade(operand1.elements) === 1 && getGrade(operand2.elements) === 1 )
@@ -267,8 +239,7 @@ async function initPad(characterMeshHeight)
 					if(typeof operator === "function") {
 						let operand = typeof operandAndOperator[0] === "function" ? operandAndOperator[1] : operandAndOperator[0]
 
-						let mv = variables[lowestUndeterminedVariable]
-						++lowestUndeterminedVariable
+						let mv = getMvNamedByLineAtPosition(drawingPosition.y)
 						operator(operand.elements, mv.elements)
 
 						v1.copy(outputColumn.position)
@@ -360,7 +331,7 @@ async function initPad(characterMeshHeight)
 
 						//the below needs to be a separate function applicable to this
 					}
-					else if (getVariableWithName(token) !== null) {
+					else if (getNamedMv(token) !== null) {
 						for (let i = token.length; 
 							i < maxVariableNameLength && 
 							drawingPositionInString + i < backgroundStringLength && 
@@ -375,7 +346,7 @@ async function initPad(characterMeshHeight)
 							}
 						}
 
-						let mv = getVariableWithName(token)
+						let mv = getNamedMv(token)
 						stack.push(mv)
 
 						let caratInName = drawingPositionInString < carat.positionInString && carat.positionInString <= drawingPositionInString + token.length
@@ -391,7 +362,6 @@ async function initPad(characterMeshHeight)
 							// 	outlineCollection.draw(superimposePosition.x, superimposePosition.y, 1.)
 							// }
 							// else
-							// if(mv.name !=="o")
 							{
 								mv.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
 								outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)

@@ -4,6 +4,8 @@
 		Naming system
 			Shouldn't be possible for their names to change on you. But what is "they"?
 			Every line is a string between two "\n"s.
+			What if you merge two lines?
+			There needs to be some acknowledgement of what it was last frame certainly
 			One idea: record what names got attributed to what calculations
 		you have line numbers
 
@@ -172,7 +174,8 @@
 		Is there any way of turning the subsitution rules into things helpful for the animations or where to put stuff in the pictures???
 			Maybe this is how you say that difference vectors should be put not at the origin?
 
-	reduction / partial evaluation syntax
+	reduction / partial evaluation / function syntax
+		//you don't get to name functions, the thing does it for you. write a => b with a being free...
 		how to detect opportunities? Regex?
 		Don't necessarily need names. Fuck names, of course
 		if you do give them names then you may be able to spot analogies. Write some weird equation with no geometrical analogue and it pops up "linePlaneIntersection"

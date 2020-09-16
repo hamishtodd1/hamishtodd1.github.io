@@ -73,14 +73,14 @@ function initMainDw() {
     addButton("vector", () => {
         //TODO they're getting created permanently
 
-        let variable = variables[numFreeParameterMultivectors - 1]
+        // let variable = variables[numFreeParameterMultivectors - 1]
 
-        mouse.getZZeroPosition(v1)
-        mainDw.worldToLocal(v1)
-        for (let i = 0, il = variable.elements.length; i < il; ++i)
-            variable.elements[i] = 0.
-        variable.elements[1] = v1.x
-        variable.elements[2] = v1.y
+        // mouse.getZZeroPosition(v1)
+        // mainDw.worldToLocal(v1)
+        // for (let i = 0, il = variable.elements.length; i < il; ++i)
+        //     variable.elements[i] = 0.
+        // variable.elements[1] = v1.x
+        // variable.elements[2] = v1.y
 
         //COULD use numerals to display the string it as a linear combination of the things, but where would be the fun in that?
     })
@@ -121,12 +121,10 @@ function initMainDw() {
         z: () => mouse.checkIfOnScaledUnitSquare(mainDw) ? 1. : -Infinity,
         start: () => {
             if(selectedFunctionality === "vector" ) {
-                ++numFreeParameterMultivectors
-
-                //probably want a different colored outline
-
                 //perhaps it's bad to do this - editing things in the dw should not add to the text, only modify?
-                //perhaps it should be that free parameters get a certain marking, a little handle you can grab
+                //perhaps it should be that free parameters get a certain marking, a little handle you can grab, wherever you see them
+                //a different colored outline
+                //maybe the outputcolumn shows the result but on the line you see controls
                 
                 let newlineNeeded = backgroundString[carat.positionInString] !== "\n" || (carat.positionInString !== 0 && backgroundString[carat.positionInString - 1] !== "\n")
 
@@ -137,7 +135,7 @@ function initMainDw() {
                     addStringAtCarat("\n")
                 }
 
-                let threeCharacterInsertion = variables[numFreeParameterMultivectors - 1].name
+                let threeCharacterInsertion = lineNames[getLineStats().currentCaratLine]
                 while (threeCharacterInsertion.length < 3) threeCharacterInsertion += " "
                 addStringAtCarat( threeCharacterInsertion )
 

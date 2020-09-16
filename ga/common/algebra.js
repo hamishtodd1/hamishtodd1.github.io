@@ -343,9 +343,3 @@ function gExp(a,target)
 
 	return target
 }
-
-// let test = MathematicalMultivector(1., 0., 0., 0., 0., 0., 0., 0.)
-// log(Math.E,gExp(test))
-
-let test = MathematicalMultivector(0., 0., 0., 0., TAU / 8., 0., 0., 0.)
-log(gExp(test)) //expecting 1.+.5*thingy

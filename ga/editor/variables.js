@@ -3,8 +3,7 @@ let backgroundString = "b g o\n\nw  r\n\nw +w\nb  +g  \ng  *b  \np  +b  \nb *b \
 let SHAFT_RADIUS = .06 //how thick an "infinitely thin" thing is, so vectors, lines, scalars
 
 const carat = new THREE.Mesh(new THREE.PlaneBufferGeometry(1., 1.), new THREE.MeshBasicMaterial({ color: 0xF8F8F0 }))
-const variables = []
-let numFreeParameterMultivectors = 0
+const namedMvs = []
 
 const pad = new THREE.Group()
 pad.position.y = -Infinity //updated later

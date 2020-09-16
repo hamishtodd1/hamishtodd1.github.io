@@ -119,21 +119,7 @@ function initTypeableCharacters(carat, maxCopiesOfALetter)
 	for (let i = 0; i < initialCharacters.length; i++)
 		characters.add(initialCharacters[i])
 
-	bindButton("Delete", () =>
-	{
-		if (carat.positionInString < backgroundString.length)
-			backgroundString = backgroundString.substring(0, carat.positionInString) + backgroundString.substring(carat.positionInString + 1, backgroundString.length)
-	})
-	bindButton("Backspace", () =>
-	{
-		if (carat.positionInString !== 0)
-		{
-			backgroundString = backgroundString.substring(0, carat.positionInString - 1) + backgroundString.substring(carat.positionInString, backgroundString.length)
-			carat.moveAlongString(-1)
-		}
-	})
 	bindButton("Tab", () => { for (let i = 0; i < 2; i++) addStringAtCarat(" ") })
-	bindButton("Enter", () => addStringAtCarat("\n"))
 
 	return characters
 }
