@@ -1,3 +1,16 @@
+/*
+    no, it's not just about the line number
+    Some lines are empty
+    Some names are created before you have any lines
+    And sometimes you want to make multiple names in one line, especially if you're making a function
+    For free parameters, you don't need this "output is on the output column, line has a mouse" thing
+
+    Sure, if a line has some stuff on it, evaluate that line
+    And if you have a function, that uses output column too
+
+    so essentially whenever there's anything between \n and \n
+*/
+
 function initNamesAndBasis()
 {
     let MAX_THINGS = 63 //7 choose 1 + 7 choose 2 + 7 choose 3
@@ -71,53 +84,54 @@ function initNamesAndBasis()
             ++lineNum
         }
     }
-    log(lineNames)
 
     getMvNamedByLineAtPosition = (yPositioon) => {
         let name = lineNames[Math.floor(-yPositioon)]
         return getNamedMv(name)
     }
 
-    getLineStats = () => {
+    getNumLines = () => {
         let numLines = 1
-        let currentCaratLine = -1
-        for (let i = 0, il = backgroundString.length; i < il; ++i) {
-            if (currentCaratLine === -1 && i === carat.positionInString)
-                currentCaratLine = numLines - 1
+        for (let i = 0, il = backgroundString.length; i < il; ++i)
             if (backgroundString[i] === "\n")
                 ++numLines
+
+        return numLines
+    }
+
+    makeNewLineAtCaratPosition = () => {
+        addStringAtCarat("\n")
+
+        let lowestUnusedName = -1
+        for (let i = numBuiltInVariables, il = orderedNames.length; i < il; ++i)
+        {
+            let used = false
+            for (let j = 0, jl = lineNames.length; j < jl; ++j)
+                if (lineNames[j] === orderedNames[i])
+                    used = true
+            if (!used)
+            {
+                lowestUnusedName = orderedNames[i]
+                break
+            }
         }
 
-        return { numLines, currentCaratLine }
+        lineNames.splice(carat.lineNumber + 1, 0, lowestUnusedName)
     }
 
     bindButton("Enter", () => {
-        let lineStats = getLineStats()
+        let lineStats = getNumLines()
 
         if (lineStats.numLines >= MAX_THINGS)
             log("too many variables for current system!")
         else {
-            addStringAtCarat("\n")
-
-            let lowestUnusedName = -1
-            for (let i = numBuiltInVariables, il = orderedNames.length; i < il; ++i) {
-                let used = false
-                for(let j = 0, jl = lineNames.length; j < jl; ++j)
-                    if(lineNames[j] === orderedNames[i])
-                        used = true
-                if(!used) {
-                    lowestUnusedName = orderedNames[i]
-                    break
-                }
-            }
-
-            lineNames.splice(lineStats.currentCaratLine+1, 0, lowestUnusedName)
+            makeNewLineAtCaratPosition()
         }
     })
     bindButton("Backspace", () => {
         if (carat.positionInString !== 0) {
             if (backgroundString[carat.positionInString-1] === "\n")
-                lineNames.splice(getLineStats().currentCaratLine, 1)
+                lineNames.splice(carat.lineNumber, 1)
 
             backgroundString =
                 backgroundString.substring(0, carat.positionInString - 1) + 
@@ -129,7 +143,7 @@ function initNamesAndBasis()
     bindButton("Delete", () => {
         if (carat.positionInString < backgroundString.length) {
             if (backgroundString[carat.positionInString] === "\n")
-                lineNames.splice(getLineStats().currentCaratLine+1, 1)
+                lineNames.splice(carat.lineNumber+1, 1)
 
             backgroundString = 
                 backgroundString.substring(0, carat.positionInString) + 

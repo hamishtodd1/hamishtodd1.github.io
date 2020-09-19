@@ -2,7 +2,7 @@
 -->
 <html>
 	<head>
-		<title>Clifford Gate</title>
+		<title>Clifford's Gate</title>
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
 			body {
@@ -13,8 +13,7 @@
 	</head>
 	<body>
 		<script>
-			async function technicalInit()
-			{
+			async function technicalInit() {
 				initButtons()
 
 				renderer.shadowMap.enabled = true;
@@ -43,8 +42,8 @@
 
 					++frameCount
 
-					requestAnimationFrame( render )
-					renderer.render( scene, camera )
+					requestAnimationFrame(render)
+					renderer.render(scene, camera)
 				}
 
 				render()

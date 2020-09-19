@@ -3,6 +3,7 @@
 function initCarat()
 {
 	carat.positionInString = -1
+	carat.lineNumber = -1
 
 	let oldY = Infinity
 	carat.movedVerticallySinceLastFrame = false
@@ -32,8 +33,16 @@ function initCarat()
 			carat.position.x + x,
 			carat.position.y + y)
 	}
+	let multivectorLiteralCharacters = "0123456789];." //decimal point, hmm
 	carat.moveAlongString = function(amount) {
 		carat.positionInString = clamp(carat.positionInString + amount, 0, backgroundString.length)
+		
+		while(multivectorLiteralCharacters.indexOf(backgroundString[carat.positionInString]) !== -1) {
+			if(amount > 0)
+				++carat.positionInString
+			else
+				--carat.positionInString
+		}
 	}
 	bindButton("ArrowRight", () => carat.moveAlongString(1))
 	bindButton("ArrowLeft", () => carat.moveAlongString(-1))

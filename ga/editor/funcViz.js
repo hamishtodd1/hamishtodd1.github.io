@@ -86,8 +86,9 @@
 function initFuncViz()
 {
     //can't do this coordinate-free shit for a graph really, you need an origin?
-    let curveMaterial = new THREE.LineBasicMaterial({ color: 0xFF0000 })
-    let surfaceMaterial = new THREE.MeshPhongMaterial({ color: 0xFF0000, side:THREE.DoubleSide })
+    let funcColor = 0x222222
+    let curveMaterial = new THREE.LineBasicMaterial({ color: funcColor })
+    let surfaceMaterial = new THREE.MeshPhongMaterial({ color: funcColor, side:THREE.DoubleSide })
     curveMaterial.im = curveMaterial.clone()
     surfaceMaterial.im = surfaceMaterial.clone()
 
@@ -169,32 +170,24 @@ function initFuncViz()
             return null
         }
 
-        let radiusSq = -Infinity
-        geo.vertices.forEach((v) => { radiusSq = Math.max(v.lengthSq(), radiusSq) })
-        let boundingSphereRadius = Math.sqrt(radiusSq)
-
-        let dwMesh = new THREE.Mesh(geo, mat)
-        dwMesh.matrixAutoUpdate = false
         let im = new THREE.InstancedMesh(geo, mat.im, maxInstances)
         pad.add(im)
         let viz = {}
-        viz.addToMainDw = () => {
-            mainDw.scene.add(dwMesh)
-            if (carat.movedVerticallySinceLastFrame) {
-                let containingRadius = boundingSphereRadius
-                containingRadius = Math.max(containingRadius, Math.sqrt(2.)) //grid
-                mainDw.scene.scale.setScalar(.5 / containingRadius) 
-            }
-        }
+        viz.dw = new THREE.Mesh(geo, mat)
+        viz.dw.matrixAutoUpdate = false
+
+        let radiusSq = -Infinity
+        geo.vertices.forEach((v) => { radiusSq = Math.max(v.lengthSq(), radiusSq) })
+        viz.boundingSphereRadius = Math.sqrt(radiusSq)
 
         viz.beginFrame = () =>{
             im.count = 0
         }
 
         viz.drawInPlace = (x, y) => {
-            dwMesh.matrix.makeRotationFromQuaternion(displayRotation.q)
+            viz.dw.matrix.makeRotationFromQuaternion(displayRotation.q)
 
-            boxDraw(im, x, y, dwMesh.matrix, boundingSphereRadius)
+            boxDraw(im, x, y, viz.dw.matrix, viz.boundingSphereRadius)
         }
 
         return viz

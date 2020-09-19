@@ -67,27 +67,25 @@ async function initPad(characterMeshHeight)
 
 	let expFunc = (t1, t2, target) =>
 	{
-		//one edge of the thing is exp(x)               t1 = 0
-		//the opposite edge is exp(x+TAU*numTwists)     t1 = 1
-		//one edge is exp(-10) * exp(i*x)               t2 = 0
-		//The opposite is exp(10) * exp(i*x)            t2 = 1
+		//more twisted
+		// let numTwists = 1.5
+		// let angle = lerp(t1, 0., TAU * numTwists)
+		// target.x = lerp(t2, -2., 1.) - angle * .07
 
-		let numTwists = 1.5
-		let angle = lerp(t1, 0., TAU * numTwists)
-		target.x = lerp(t2, -2., 1.) - angle * .07
+		// let r = Math.exp(lerp(t2, -2., 1.))
+		// target.y = Math.cos(angle) * r
+		// target.z = Math.sin(angle) * r
 
-		let r = Math.exp(lerp(t2, -2., 1.))
+		target.x = lerp(t1, -Math.sqrt(sq(Math.E) + 1.), 1.)
+		let angle = lerp(t2, 0., TAU)
+
+		let r = Math.exp(target.x)
 		target.y = Math.cos(angle) * r
 		target.z = Math.sin(angle) * r
 
-		//max x = 1., 
-
-		//t2 = 0 => x = 0  -> TAU*numTwists,     angle = 0-TAU*numTwists, r = exp(-8)
-		//t2 = 1 => x = 8 -> TAU*numTwists + 8, angle = 0-TAU*numTwists, r = exp(8)
-		//t1 = 0 => angle= 0, r = exp(-8)-exp(8), x = -8
-
 	}
 	let expViz = FuncViz(expFunc, 2, 3)
+	//hmm, maybe the builtins don't need color?
 
 	initCarat()
 
@@ -99,6 +97,8 @@ async function initPad(characterMeshHeight)
 	{
 		characters.add("+")
 		functionDictionary["+"] = gSum
+		//hey, could visualize "+"" too, x+y = z
+		//oh but that's a plane, how very dangerous
 
 		let asteriskOperatorCharacter = String.fromCharCode("8727")
 		characters.add("*", asteriskOperatorCharacter)
@@ -163,7 +163,7 @@ async function initPad(characterMeshHeight)
 		result.drawInPlace(v1.x, v1.y)
 
 		if (carat.position.y === drawingPosition.y)
-			result.addToMainDw()
+			mainDw.addToScene(result)
 	}
 
 	let interimDisplayWindows = []
@@ -330,7 +330,7 @@ async function initPad(characterMeshHeight)
 							outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
 
 							if (carat.position.y === drawingPosition.y)
-								expViz.addToMainDw()
+								mainDw.addToScene(expViz)
 
 							drawCharacters = false
 						}
@@ -340,17 +340,18 @@ async function initPad(characterMeshHeight)
 						outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
 
 						if (carat.position.y === drawingPosition.y)
-							torusViz.addToMainDw()
+							mainDw.addToScene(torusViz)
 
 						drawCharacters = false
 
 						//the below needs to be a separate function applicable to this
 					}
 					else if (currentCharacter === "[") {
-						let arr = token.split(",")
+						let arr = token.split(";")
 
 						outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
-						grabberIm.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
+						grabberIm.drawInPlace( drawingPosition.x + .5, drawingPosition.y)
+						//a different colored outline? a mouse in the place you would grab?
 
 						//Heh how about making them meander randomly ?
 
@@ -363,7 +364,11 @@ async function initPad(characterMeshHeight)
 						}
 						outputToColumn(result)
 
-						drawCharacters = false
+						//that you can do this means you can skip over letters
+						drawingPositionInString += 1+token.length
+						tokenCharactersLeft = 0
+						drawingPosition.x += 1.
+						continue
 					}
 					else if (token === "display") {
 						v1.copy(drawingPosition)
@@ -430,7 +435,7 @@ async function initPad(characterMeshHeight)
 							}
 
 							if (carat.position.y === drawingPosition.y)
-								mv.addToMainDw()
+								mainDw.addToScene(mv)
 
 							drawCharacters = false
 						}
@@ -551,6 +556,8 @@ async function initPad(characterMeshHeight)
 			carat.positionInString = positionInStringClosestToCaratPosition
 			carat.position.copy(positionInStringClosestToCaratPositionVector)
 		}
+
+		carat.lineNumber = Math.floor(-carat.position.y)
 
 		//the last line of the pad can be just above the top of the screen, no higher
 		{

@@ -84,6 +84,9 @@ function initDisplayWindows() {
                 if (c !== ourGrid)
                     dw.scene.remove(c)
             })
+
+            if (dw === mainDw && carat.movedVerticallySinceLastFrame)
+                mainDw.scene.scale.setScalar(.5 / Math.sqrt(2.)) //grid
         }
 
         dw.add(dw.scene)

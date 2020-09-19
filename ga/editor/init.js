@@ -203,12 +203,10 @@ function init()
 	initFuncViz()
 
 	initDisplayWindows()
-	mainDw = initMainDw()
+	initMainDw()
 
 	initMultivectorAppearances(characterMeshHeight)
 	initOutputColumn()
-
-	initGrabber()
 
 	initPad(characterMeshHeight)
 

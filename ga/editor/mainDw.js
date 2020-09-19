@@ -50,23 +50,38 @@
 
 function initGrabber() {
     //it is the de-facto "free parameter" symbol. Yuck, symbols
-    let mat = new THREE.MeshBasicMaterial({ transparent: true })
-    grabberIm = new THREE.InstancedMesh(unchangingUnitSquareGeometry,mat,256)
+    grabberIm = new THREE.InstancedMesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ transparent: true }),256)
     pad.add(grabberIm)
+    
+    //cooooooould use the im for these too, maybe easier not to
+    let dwGrabberMat = grabberIm.material.clone()
+    for(let i = 0; i < 4; ++i) {
+        let dwGrabber = new THREE.Mesh(unchangingUnitSquareGeometry, dwGrabberMat)
+        scene.add(dwGrabber)
+        dwGrabber.scale.multiplyScalar(.5)
+
+        dwGrabber.position.x = i * 2.
+
+        onClicks.push({
+            z: () => mouse.checkIfOnScaledUnitSquare(dwGrabber) ? dwGrabber.position.z : -Infinity,
+            start:()=>{dwGrabber.visible = false},
+            during: () =>
+            {
+                mouse.raycaster.intersectZPlane(dwGrabber.position.z, v1)
+                mouse.oldRaycaster.intersectZPlane(dwGrabber.position.z, v2)
+                dwGrabber.position.add(v1).sub(v2)
+            },
+            end: () => { dwGrabber.visible = true }
+        })
+    }
 
     // https://www.vhv.rs/viewpic/iboiwRx_drag-drop-cursor-pointer-position-tool-cursor-all/
     new THREE.TextureLoader().load("data/grabber.png", function (texture) {
-        mat.map = texture;
-        mat.needsUpdate = true
-    })
+        grabberIm.material.map = texture;
+        grabberIm.material.needsUpdate = true
 
-    onClicks.push({
-        z: () => mouse.checkIfOnScaledUnitSquare(grabberIm) ? grabberIm.position.z : -Infinity,
-        during:()=>{
-            mouse.raycaster.intersectZPlane(grabberIm.position.z, v1)
-            mouse.oldRaycaster.intersectZPlane(grabberIm.position.z, v2)
-            grabberIm.position.add(v1).sub(v2)
-        }
+        dwGrabberMat.map = texture
+        dwGrabberMat.needsUpdate = true
     })
 
     grabberIm.beginFrame = () =>{
@@ -83,13 +98,15 @@ function initGrabber() {
 
 function initMainDw() {
 
+    initGrabber()
+
     mainDw = DisplayWindow(false)
     mainDw.scale.setScalar(8.)
     mainDw.renderOrder = carat.renderOrder + 1
     carat.material.depthTest = false
 
     let buttons = {}
-    function addButton(newLabel,func)
+    function addButton(newLabel,onClick)
     {
         let index = 0
         for(label in buttons) ++index
@@ -104,16 +121,11 @@ function initMainDw() {
 
         onClicks.push({
             z: () => mouse.checkIfOnScaledUnitSquare(buttons[newLabel]) ? 2. : -Infinity,
-            start: () => { selectedFunctionality = newLabel },
+            start: onClick,
         })
-
-        buttons[newLabel].func = func
     }
 
     updateFunctions.push(() => {
-        for (functionality in buttons)
-            buttons[functionality].material.color.g = functionality === selectedFunctionality ? 0. : 1.
-
         v1.copy(carat.position)
         pad.localToWorld(v1)
         let bottomYDestination = v1.y - .5 * pad.scale.y
@@ -124,19 +136,23 @@ function initMainDw() {
     })
 
     addButton("vector", () => {
-        // let variable = variables[numFreeParameterMultivectors - 1]
+        let caratNotAtBeginningOfLine = backgroundString[carat.positionInString] !== "\n" ||
+            (carat.positionInString !== 0 && backgroundString[carat.positionInString - 1] !== "\n")
 
-        // mouse.getZZeroPosition(v1)
-        // mainDw.worldToLocal(v1)
-        // for (let i = 0, il = variable.elements.length; i < il; ++i)
-        //     variable.elements[i] = 0.
-        // variable.elements[1] = v1.x
-        // variable.elements[2] = v1.y
+        if (caratNotAtBeginningOfLine) {
+            let backgroundStringLength = backgroundString.length
+            while (backgroundString[carat.positionInString] !== "\n" && carat.positionInString !== backgroundStringLength - 1)
+                ++carat.positionInString
+            makeNewLineAtCaratPosition()
+        }
 
-        //COULD use numerals to display the string it as a linear combination of the things, but where would be the fun in that?
+        let insertion = "[0.,0.,1.,0.,0.,0.,0.,0.]"
+        addStringAtCarat(insertion)
     })
 
     addButton("rotor", () => {
+        log("clicked rotor")
+
         //bivector always goes up on screen, always in a certain plane
 
         //probably the right thing to do is have a stanford teapot and rotate that thing
@@ -152,58 +168,59 @@ function initMainDw() {
         var lastTrailVertexToBeAssigned = 0
         
         addButton("curve", () => {
-            let ndcOnDisplayWindow = mainDw.worldToLocal(mouse.getZZeroPosition(v1))
+            log("clicked curve")
 
-            mouseTrail.geometry.vertices[lastTrailVertexToBeAssigned].set(ndcOnDisplayWindow.x, ndcOnDisplayWindow.y, 0.)
-            mouseTrail.geometry.vertices[lastTrailVertexToBeAssigned].multiplyScalar(8.)
-            for (let i = lastTrailVertexToBeAssigned + 1, il = mouseTrail.geometry.vertices.length; i < il; i++)
-                mouseTrail.geometry.vertices[i].copy(mouseTrail.geometry.vertices[lastTrailVertexToBeAssigned])
-            mouseTrail.geometry.verticesNeedUpdate = true
+            //Curves: click the button and a helix or some other placeholder is made.
+            //Click the window when on the line and it erases that and begins a new one
 
-            ++lastTrailVertexToBeAssigned
-            if (lastTrailVertexToBeAssigned >= mouseTrail.geometry.vertices.length)
-                lastTrailVertexToBeAssigned = 0
+            // let ndcOnDisplayWindow = mainDw.worldToLocal(mouse.getZZeroPosition(v1))
+
+            // mouseTrail.geometry.vertices[lastTrailVertexToBeAssigned].set(ndcOnDisplayWindow.x, ndcOnDisplayWindow.y, 0.)
+            // mouseTrail.geometry.vertices[lastTrailVertexToBeAssigned].multiplyScalar(8.)
+            // for (let i = lastTrailVertexToBeAssigned + 1, il = mouseTrail.geometry.vertices.length; i < il; i++)
+            //     mouseTrail.geometry.vertices[i].copy(mouseTrail.geometry.vertices[lastTrailVertexToBeAssigned])
+            // mouseTrail.geometry.verticesNeedUpdate = true
+
+            // ++lastTrailVertexToBeAssigned
+            // if (lastTrailVertexToBeAssigned >= mouseTrail.geometry.vertices.length)
+            //     lastTrailVertexToBeAssigned = 0
 
             //bit better would be to have it be flat then set the extrusion once you're done
         })
     }
 
+    mainDw.addToScene = (obj)=>{
+        mainDw.scene.add(obj.dw)
+        if (carat.movedVerticallySinceLastFrame) { //or if the bounding sphere radius has changed
+            let maxScaleForContainment = .5 / obj.boundingSphereRadius
+            if (mainDw.scene.scale.x > maxScaleForContainment) {
+                mainDw.scene.scale.setScalar(maxScaleForContainment)
+
+                //wanna stop flick? It's weird
+                // mainDw.scene.updateMatrix()
+                // mainDw.scene.updateMatrixWorld()
+                // obj.dw.updateMatrixWorld()
+            }
+        }
+    }
+
     onClicks.push({
         z: () => mouse.checkIfOnScaledUnitSquare(mainDw) ? 1. : -Infinity,
-        start: () => {
-            if(selectedFunctionality === "vector" ) {
-                //a different colored outline
-                //maybe the outputcolumn shows the result but on the line you see controls
-                
-                let newlineNeeded = backgroundString[carat.positionInString] !== "\n" ||
-                    (carat.positionInString !== 0 && backgroundString[carat.positionInString - 1] !== "\n")
-
-                if ( newlineNeeded ) {
-                    let backgroundStringLength = backgroundString.length
-                    while (backgroundString[carat.positionInString] !== "\n" && carat.positionInString !== backgroundStringLength - 1)
-                        ++carat.positionInString
-                    addStringAtCarat("\n")
-                }
-
-                let insertion = "\n[0.,0.,1.,0.,0.,0.,0.,0.]\n"
-                addStringAtCarat(insertion )
-
-                //Curves: you click the button and a helix is made.
-                //Click the window when on the line and it erases that and begins a new one
-
-                //vectors,rotors: click the window and it follows
-
-
-                // if (newlineNeeded)
-                //     addStringAtPosition("\n", carat.positionInString)
-            }
-        },
         during:()=>{
-            buttons[selectedFunctionality].func()
+            log("yes, we would be editing")
+
+            // let mv = getNamedMv(token)
+
+            //ahh, it's more about getting what's on the line
+
+            // mouse.getZZeroPosition(v1)
+            // mainDw.scene.worldToLocal(v1)
+            // for (let i = 0, il = variable.elements.length; i < il; ++i)
+            //     variable.elements[i] = 0.
+            // variable.elements[1] = v1.x
+            // variable.elements[2] = v1.y
+
+            log(carat)
         }
     })
-
-    let selectedFunctionality = "rotor"
-
-    return mainDw
 }

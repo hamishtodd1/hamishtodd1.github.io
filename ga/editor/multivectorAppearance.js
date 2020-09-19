@@ -148,18 +148,10 @@ function initMultivectorAppearances(characterMeshHeight)
         tri.matrixAutoUpdate = false
         let zero = new THREE.Mesh(zeroGeometry, zeroMaterial)
         
-        let dwGroup = new THREE.Group().add(sca, vec, biv, tri)
-        mv.addToMainDw = () => {
-            mainDw.scene.add(dwGroup)
-            if (carat.movedVerticallySinceLastFrame) {
-                let containingRadius = mv.boundingSphereRadius
-                containingRadius = Math.max(containingRadius, Math.sqrt(2.)) //grid
-                mainDw.scene.scale.setScalar(.5 / containingRadius) 
-            }
+        mv.dw = new THREE.Group().add(sca, vec, biv, tri)
 
-            //bivectors need to move to aligning with vectors
-            //hmm, maybe a positioned bivector is a bivector curried with something?
-        }
+        //bivectors need to move to aligning with vectors
+        //hmm, maybe a positioned bivector is a bivector curried with something?
         
         let scaPad = new THREE.InstancedMesh(sca.geometry, scaMaterial.im, maxInstances)
         let vecPad = new THREE.InstancedMesh(vec.geometry, vecMaterial.im, maxInstances)
