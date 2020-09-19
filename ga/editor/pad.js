@@ -52,24 +52,42 @@ async function initPad(characterMeshHeight)
 	let pictogramWidthInCharacters = 3
 	let maxVariableNameLength = pictogramWidthInCharacters
 
-	function torusFunc(minorAngle, majorAngle, target)
+	function torusFunc(minorAngleT, majorAngleT, target)
 	{
+		let minorAngle = intervalToRadians(minorAngleT)
+		let majorAngle = intervalToRadians(majorAngleT)
+
 		let majorRadius = 1.
 		let minorRadius = .2
 		target.x = Math.cos(minorAngle) * (majorRadius + minorRadius * Math.cos(majorAngle))
 		target.y = Math.sin(minorAngle) * (majorRadius + minorRadius * Math.cos(majorAngle))
 		target.z = minorRadius * Math.sin(majorAngle)
 	}
-	function sphereFunc(longtitude, latitudeTimes2, target)
-	{
-		let latitude = latitudeTimes2 / 2.
-		target.y = Math.sin(latitude)
-		target.x = Math.cos(latitude) * Math.sin(longtitude)
-		target.z = Math.cos(latitude) * Math.cos(longtitude)
-	}
 	let torusViz = FuncViz(torusFunc, 2, 3)
-	// let sqFunc = (x) => x * x //shader mofo. Transpile to glsl
-	// let sqViz = FuncViz(sqFunc, 1, 1)
+
+	let expFunc = (t1, t2, target) =>
+	{
+		//one edge of the thing is exp(x)               t1 = 0
+		//the opposite edge is exp(x+TAU*numTwists)     t1 = 1
+		//one edge is exp(-10) * exp(i*x)               t2 = 0
+		//The opposite is exp(10) * exp(i*x)            t2 = 1
+
+		let numTwists = 1.5
+		let angle = lerp(t1, 0., TAU * numTwists)
+		target.x = lerp(t2, -2., 1.) - angle * .07
+
+		let r = Math.exp(lerp(t2, -2., 1.))
+		target.y = Math.cos(angle) * r
+		target.z = Math.sin(angle) * r
+
+		//max x = 1., 
+
+		//t2 = 0 => x = 0  -> TAU*numTwists,     angle = 0-TAU*numTwists, r = exp(-8)
+		//t2 = 1 => x = 8 -> TAU*numTwists + 8, angle = 0-TAU*numTwists, r = exp(8)
+		//t1 = 0 => angle= 0, r = exp(-8)-exp(8), x = -8
+
+	}
+	let expViz = FuncViz(expFunc, 2, 3)
 
 	initCarat()
 
@@ -100,6 +118,8 @@ async function initPad(characterMeshHeight)
 		characters.add("(")
 		characters.add(")")
 
+		// var rhoCharacter = String.fromCharCode("961")
+
 		var lambdaCharacter = String.fromCharCode("955") //you CAN write "function", but lots of kids don't know "function". In python it's "def"
 		characters.add("#", lambdaCharacter)
 		// functionDictionary[lambdaCharacter] = defineFunction
@@ -114,6 +134,9 @@ async function initPad(characterMeshHeight)
 				Whatever's at the bottom is the return value
 			extract an array of functions (gSum, gProduct) and indices of variables
 		*/
+
+		let mapCharacter = String.fromCharCode("8594")
+		characters.add(">", mapCharacter)
 
 		let nablaCharacter = String.fromCharCode("8711")
 		characters.add("@",nablaCharacter)
@@ -132,6 +155,17 @@ async function initPad(characterMeshHeight)
 		//./=+!:{}
 	}
 
+	function outputToColumn(result) {
+		v1.copy(outputColumn.position)
+		pad.worldToLocal(v1)
+		v1.y = drawingPosition.y
+		outlineCollection.draw(v1.x, v1.y, 1.)
+		result.drawInPlace(v1.x, v1.y)
+
+		if (carat.position.y === drawingPosition.y)
+			result.addToMainDw()
+	}
+
 	let interimDisplayWindows = []
 	let drawingPosition = new THREE.Vector3()
 	let positionInStringClosestToCaratPosition = -1
@@ -148,6 +182,8 @@ async function initPad(characterMeshHeight)
 
 		namedMvs.forEach((v) => v.beginFrame()) //TODO only need those in the frame
 		torusViz.beginFrame() //it is a variable. Its name is even meant to come from
+		expViz.beginFrame()
+		grabberIm.beginFrame()
 
 		displayWindows.forEach((dw)=>{dw.beginFrame()})
 
@@ -222,14 +258,7 @@ async function initPad(characterMeshHeight)
 								exp of bivector: same as that bivector
 							*/
 
-							v1.copy(outputColumn.position)
-							pad.worldToLocal(v1)
-							v1.y = drawingPosition.y
-							outlineCollection.draw(v1.x, v1.y, 1.)
-							result.drawInPlace(v1.x, v1.y)
-
-							if (carat.position.y === drawingPosition.y)
-								result.addToMainDw()
+							outputToColumn(result)
 						}
 					}
 				}
@@ -239,17 +268,10 @@ async function initPad(characterMeshHeight)
 					if(typeof operator === "function") {
 						let operand = typeof operandAndOperator[0] === "function" ? operandAndOperator[1] : operandAndOperator[0]
 
-						let mv = getMvNamedByLineAtPosition(drawingPosition.y)
-						operator(operand.elements, mv.elements)
+						let result = getMvNamedByLineAtPosition(drawingPosition.y)
+						operator(operand.elements, result.elements)
 
-						v1.copy(outputColumn.position)
-						pad.worldToLocal(v1)
-						v1.y = drawingPosition.y
-						outlineCollection.draw(v1.x, v1.y, 1.)
-						mv.drawInPlace(v1.x, v1.y)
-
-						if (carat.position.y === drawingPosition.y)
-							mv.addToMainDw()
+						outputToColumn(result)
 					}
 				}
 				stack.length = 0
@@ -266,11 +288,24 @@ async function initPad(characterMeshHeight)
 				if (tokenCharactersLeft <= 0) {
 					drawCharacters = true
 
-					let maxTokenLength = 64
 					let token = ""
 					if (functionDictionary[currentCharacter]!==undefined)
-						token = currentCharacter //contains reserved symbols
+						token = currentCharacter //currently all reserved symbols are functions
+					else if(currentCharacter === "[" ) {
+						let numSymbolsInArray = 1
+						for (numSymbolsInArray; 
+							backgroundString[drawingPositionInString + numSymbolsInArray] !== "\n" &&
+							drawingPositionInString + numSymbolsInArray < backgroundStringLength;
+							++numSymbolsInArray )
+						{
+							if (backgroundString[drawingPositionInString + numSymbolsInArray] === "]") {
+								token = backgroundString.substr(drawingPositionInString+1, numSymbolsInArray-1)
+								break
+							}
+						}
+					}
 					else {
+						let maxTokenLength = 64
 						for ( let i = 0;
 							drawingPositionInString + i < backgroundStringLength &&
 							i < maxTokenLength &&
@@ -284,15 +319,53 @@ async function initPad(characterMeshHeight)
 
 					if (functionDictionary[token] !== undefined) {
 						stack.push(functionDictionary[token])
-						tokenCharactersLeft = 1
 
 						//more that you evaluate the function here
 
 						//if you're on the line you see all the operations split up into mvs and symbols
 						//if you have more than one function on a line, and your carat isn't on it, could do the superimposing a little bit
+
+						if(token === "exp") {
+							expViz.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
+							outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
+
+							if (carat.position.y === drawingPosition.y)
+								expViz.addToMainDw()
+
+							drawCharacters = false
+						}
 					}
-					else if (token === "display")
-					{
+					else if (token === "tor") {
+						torusViz.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
+						outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
+
+						if (carat.position.y === drawingPosition.y)
+							torusViz.addToMainDw()
+
+						drawCharacters = false
+
+						//the below needs to be a separate function applicable to this
+					}
+					else if (currentCharacter === "[") {
+						let arr = token.split(",")
+
+						outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
+						grabberIm.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
+
+						//Heh how about making them meander randomly ?
+
+						let result = getMvNamedByLineAtPosition(drawingPosition.y)
+						for (let i = 0; i < arr.length; ++i) {
+							if (i < arr.length)
+								result.elements[i] = parseFloat(arr[i])
+							else
+								result.elements[i] = 0.
+						}
+						outputToColumn(result)
+
+						drawCharacters = false
+					}
+					else if (token === "display") {
 						v1.copy(drawingPosition)
 						v1.y -= .5
 						let lineBottomYWorld = pad.localToWorld(v1).y
@@ -319,17 +392,6 @@ async function initPad(characterMeshHeight)
 						}
 
 						tokenCharactersLeft = "display".length
-					}
-					else if (token === "tor") {
-						torusViz.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
-						outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
-
-						if (carat.position.y === drawingPosition.y)
-							torusViz.addToMainDw()
-
-						drawCharacters = false
-
-						//the below needs to be a separate function applicable to this
 					}
 					else if (getNamedMv(token) !== null) {
 						for (let i = token.length; 

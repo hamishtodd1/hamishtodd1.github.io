@@ -1,4 +1,4 @@
-let backgroundString = "b g o\n\nw  r\n\nw +w\nb  +g  \ng  *b  \np  +b  \nb *b \nexp w\nrev bw\n\ni*(j+k)=i*j+i*k\ntor\n"
+let backgroundString = "exp\n[0.,0.,1.,0.,0.,0.,0.,0.]\n\nw  r  p\n\nw +w\nb  +g  \ng  *b  \np  +b  \nb *b \nexp w\nrev bw\n(,)>r+r\ni*(j+k)=i*j+i*k\ntor\n"
 
 let SHAFT_RADIUS = .06 //how thick an "infinitely thin" thing is, so vectors, lines, scalars
 
@@ -21,3 +21,5 @@ const onClicks = []
 const latterUpdateFunctions = []
 
 let mainDw = null
+
+let grabberIm = null

@@ -1,4 +1,24 @@
 /*
+    Sticking textures i.e. pictures i.e. I2->I3 in places will be veeeeeeery useful for giving diagrams character
+
+    Consider a single pixel and only black and white
+    rasterization is minimum
+    The general rasterization thing is  -> I. 
+        The interesting part is ->(I3,I3)
+        The special cases are
+            volumetric, which is integral over I
+            Texture mapped, which is color:min(fragments.z)
+    f:I2->I3 is the uvs
+    g:I2->colorspace is the texture
+    so you have p in I2. f(p) is your color and g(p) is your position
+
+    Continuousness problem.
+        Essentially you want one vertex per pixel.
+        So, everything is points?
+
+    Note that you'll never do more than a curve through n-space because you only have one dimension of time
+    Anything higher and you need combination-based stuff
+
     Fairly likely: you want to make one vector in terms of two or three others (Maybe also them-multiplied-by-integer complex numbers).
 
     choosing the next thing to happen
@@ -27,6 +47,39 @@
     We also want this thing to be able to edit, not just create
         
 */
+
+function initGrabber() {
+    //it is the de-facto "free parameter" symbol. Yuck, symbols
+    let mat = new THREE.MeshBasicMaterial({ transparent: true })
+    grabberIm = new THREE.InstancedMesh(unchangingUnitSquareGeometry,mat,256)
+    pad.add(grabberIm)
+
+    // https://www.vhv.rs/viewpic/iboiwRx_drag-drop-cursor-pointer-position-tool-cursor-all/
+    new THREE.TextureLoader().load("data/grabber.png", function (texture) {
+        mat.map = texture;
+        mat.needsUpdate = true
+    })
+
+    onClicks.push({
+        z: () => mouse.checkIfOnScaledUnitSquare(grabberIm) ? grabberIm.position.z : -Infinity,
+        during:()=>{
+            mouse.raycaster.intersectZPlane(grabberIm.position.z, v1)
+            mouse.oldRaycaster.intersectZPlane(grabberIm.position.z, v2)
+            grabberIm.position.add(v1).sub(v2)
+        }
+    })
+
+    grabberIm.beginFrame = () =>{
+        grabberIm.count = 0
+    }
+
+    grabberIm.drawInPlace = (x, y) => {
+        boxDraw(grabberIm, x, y, m1.identity(), .5)
+    }
+
+    //whenever you have a free parameter, you have that symbol
+    //free parameters... let's assume they get a line to themselves
+}
 
 function initMainDw() {
 
@@ -71,8 +124,6 @@ function initMainDw() {
     })
 
     addButton("vector", () => {
-        //TODO they're getting created permanently
-
         // let variable = variables[numFreeParameterMultivectors - 1]
 
         // mouse.getZZeroPosition(v1)
@@ -121,12 +172,11 @@ function initMainDw() {
         z: () => mouse.checkIfOnScaledUnitSquare(mainDw) ? 1. : -Infinity,
         start: () => {
             if(selectedFunctionality === "vector" ) {
-                //perhaps it's bad to do this - editing things in the dw should not add to the text, only modify?
-                //perhaps it should be that free parameters get a certain marking, a little handle you can grab, wherever you see them
                 //a different colored outline
                 //maybe the outputcolumn shows the result but on the line you see controls
                 
-                let newlineNeeded = backgroundString[carat.positionInString] !== "\n" || (carat.positionInString !== 0 && backgroundString[carat.positionInString - 1] !== "\n")
+                let newlineNeeded = backgroundString[carat.positionInString] !== "\n" ||
+                    (carat.positionInString !== 0 && backgroundString[carat.positionInString - 1] !== "\n")
 
                 if ( newlineNeeded ) {
                     let backgroundStringLength = backgroundString.length
@@ -135,9 +185,14 @@ function initMainDw() {
                     addStringAtCarat("\n")
                 }
 
-                let threeCharacterInsertion = lineNames[getLineStats().currentCaratLine]
-                while (threeCharacterInsertion.length < 3) threeCharacterInsertion += " "
-                addStringAtCarat( threeCharacterInsertion )
+                let insertion = "\n[0.,0.,1.,0.,0.,0.,0.,0.]\n"
+                addStringAtCarat(insertion )
+
+                //Curves: you click the button and a helix is made.
+                //Click the window when on the line and it erases that and begins a new one
+
+                //vectors,rotors: click the window and it follows
+
 
                 // if (newlineNeeded)
                 //     addStringAtPosition("\n", carat.positionInString)

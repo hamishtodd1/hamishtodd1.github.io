@@ -1,3 +1,6 @@
+lerp = (t,start,end) => start + t*(end-start)
+intervalToRadians = (t) => -Math.PI + TAU * t
+
 function getStepTowardDestination(currentValue, destination)
 {
 	let distanceFromDestination = destination - currentValue

@@ -85,7 +85,7 @@
 
 function initFuncViz()
 {
-    //can't do this coordinate-free shit for a graph really, you need an origin
+    //can't do this coordinate-free shit for a graph really, you need an origin?
     let curveMaterial = new THREE.LineBasicMaterial({ color: 0xFF0000 })
     let surfaceMaterial = new THREE.MeshPhongMaterial({ color: 0xFF0000, side:THREE.DoubleSide })
     curveMaterial.im = curveMaterial.clone()
@@ -93,7 +93,7 @@ function initFuncViz()
 
     let maxInstances = 256
     let numSamples = 256
-    let range = [-Math.PI, Math.PI] //ideally -infinity,infinity
+    let range = [0., 1.] //ideally -infinity,infinity
     function numberInRange(i) {
         return (i / numSamples) * (range[1] - range[0]) + range[0]
     }
@@ -152,7 +152,6 @@ function initFuncViz()
             geo = new THREE.PlaneGeometry(1., 1., numSamples - 1, numSamples - 1)
             mat = surfaceMaterial
             
-            let radiusSq = -1
             for (let i = 0, il = numSamples * numSamples; i < il; ++i)
             {
                 let x = (i % numSamples) / (numSamples - 1)
@@ -160,8 +159,6 @@ function initFuncViz()
                 x = x * (range[1] - range[0]) + range[0]
                 y = y * (range[1] - range[0]) + range[0]
                 func(x, y, geo.vertices[i])
-
-                radiusSq = Math.max(geo.vertices[i].lengthSq(), radiusSq)
             }
 
             geo.computeFaceNormals()
@@ -180,7 +177,7 @@ function initFuncViz()
         dwMesh.matrixAutoUpdate = false
         let im = new THREE.InstancedMesh(geo, mat.im, maxInstances)
         pad.add(im)
-        viz = {}
+        let viz = {}
         viz.addToMainDw = () => {
             mainDw.scene.add(dwMesh)
             if (carat.movedVerticallySinceLastFrame) {
@@ -203,11 +200,6 @@ function initFuncViz()
         return viz
     }
 
-    // let helixFunction = (t, target) => {
-    //     let numTwists = 2.
-    //     target.x = Math.cos(t*numTwists)
-    //     target.y = Math.sin(t*numTwists)
-    // }
     // scene.add(FuncViz(helixFunction, 1, 2))
 
     // let torusKnotFunc = (t, target) => {
@@ -221,4 +213,14 @@ function initFuncViz()
     //     target.z = minorRadius * Math.sin(majorAngle)
     // }
     // scene.add(FuncViz(torusKnotFunc, 1, 3))
+
+    function sphereFunc(longtitude, latitudeTimes2, target)
+    {
+        let latitude = latitudeTimes2 / 2.
+        target.y = Math.sin(latitude)
+        target.x = Math.cos(latitude) * Math.sin(longtitude)
+        target.z = Math.cos(latitude) * Math.cos(longtitude)
+    }
+    // let sqFunc = (x) => x * x //shader mofo. Transpile to glsl
+	// let sqViz = FuncViz(sqFunc, 1, 1)
 }

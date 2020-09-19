@@ -1,4 +1,6 @@
 /*
+	nicely visual QM course https://www.youtube.com/watch?v=K4BF7MD69_U
+
 	This has great footage for thinking about phase, wave functions and interference https://www.youtube.com/watch?v=WTxDyYHaYAI
 
 	Take

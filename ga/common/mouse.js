@@ -65,7 +65,7 @@ function initMouse()
 		this.oldRightClicking = this.rightClicking
 		this.rightClicking = asynchronous.rightClicking
 
-		mouse.oldRaycaster.ray.copy(mouse.raycaster.ray);
+		mouse.oldRaycaster.ray.copy(mouse.raycaster.ray); 
 		mouse.raycaster.ray.copy( asynchronous.raycaster.ray );
 
 		if(this.clicking && !this.oldClicking ) {

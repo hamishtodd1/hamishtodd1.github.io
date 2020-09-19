@@ -1,6 +1,6 @@
 /*
     TODO
-        color in 0
+        colors for 0
 
     Scalar
         How about this opacity thing?

@@ -115,7 +115,7 @@ function initTypeableCharacters(carat, maxCopiesOfALetter)
 
 		bindButton(character, () => addStringAtCarat(character))
 	}
-	let initialCharacters = "abcdefghijklmnopqrstuvwxyz |"
+	let initialCharacters = "abcdefghijklmnopqrstuvwxyz |,"
 	for (let i = 0; i < initialCharacters.length; i++)
 		characters.add(initialCharacters[i])
 

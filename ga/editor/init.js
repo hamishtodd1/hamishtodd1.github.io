@@ -1,13 +1,17 @@
 /* 
 	Next
-		Fix making of vectors and curves
-		Naming system
-			Shouldn't be possible for their names to change on you. But what is "they"?
-			Every line is a string between two "\n"s.
-			What if you merge two lines?
-			There needs to be some acknowledgement of what it was last frame certainly
-			One idea: record what names got attributed to what calculations
-		you have line numbers
+		Can make exp into a pic!
+		Most important is editing vectors
+		Fix bug in naming, "wr" not equal to "rw"?
+
+		Superimposed things should be visible. Whichever thing is smaller. Easy peasy if you use webgl
+		Making functions
+			so the function is named by colors, that's good
+			But you want, probably, free variables in the inputs, and their colors come from, what, a new line?
+			Could have {} surrounding the lot, or indents. The first few lines are your free parameters, they get filled in 
+			Then when you leave the indents, those variable names are available again
+			And need to have curve-drawing integrated
+		Naming system should apply to functions. But how to color them...
 
 	Bret article http://worrydream.com/DrawingDynamicVisualizationsTalkAddendum/
 	https://en.wikipedia.org/wiki/Binary_expression_tree
@@ -16,12 +20,13 @@
 		shadows
 		Functions
 			More visualizations
+				Vector fields
 			Can be written
 			made by drawing in view
 				fourier approximation. If you loop back it's a 2D function, if not 1D
-		altering all multivectors with mouse
-		Vector fields
-		Can you do anything with automatic differentiation
+		differentiation
+			Differentiation in time is just flipbooks of slices of differentiation in spaces
+			automatic differentiation/epsilon business?
 		Basic Omicron reduction
 			Describe properties of a variable or function then make function
 			differentiate/integrate polynomials
@@ -33,15 +38,23 @@
 			velocity space or differential space
 			Footage though
 		Interested parties
-			Language people: Alan, Meurig, Martin, futureOfCoding, Yoshiki, Cynthia Solomon, Andy Matuschak
+			Language people: Alan, Meurig, Martin, futureOfCoding, Yoshiki, Cynthia Solomon, Andy Matuschak, Katherine Ye
 			GAists: bivector discord, Cam folks, Charles Gunn, Steven Der kenick, Pierre Philipp Denchant, Jonathan Cameron, David Hestenes, Paul Simeon
 			Graphics/gamedev: Keenan Crane, Albert Chern, Fabrice, inigo quilez, Haxiomic, Dan Holden, Daniel Piker, Ian and Norgg, Media Molecule, Chris Deleon
 			Math/physicist: Ivan and Nina, Florian, Eric stansifer, Matt Hare
 			Misc: London Rationalish, Ben Eater, Coding Train guy, Grant sanderson
 
-	TODO for programming / bootstrapping
-		Animated
-		built in exp and division etc or implement yourself?
+	TODO for a few one-off videos. Let's say it's on even subalgebra/quaternions and complex numbers.
+		integrated with mixedReality
+			Surely you can adjust picture automatically? three points on the controller maybe?
+		Interaction
+			Hand tracking input in displayWindows
+		Setup/desk
+			Glass
+			Camera
+			Mic
+
+	TODO for programming games/shaders
 		Camera and mouse ray visualized and something you deal with
 		Demos
 			Pong
@@ -61,26 +74,12 @@
 		Arbitrary formulae from Geometric Algebra For Physicists
 		Full omicron reduction
 		input latex
-		More of the thingies
+		More function visualizations
 
 	An array of vectors is a matrix. Therefore... f:R->R2 sampled at two points is a matrix?
 
-	Hmm with the Bret viz of binary search you give example inputs.
-	But visualizing f(a)=b a,b in R is a graph, an abstraction over all possible inputs.
-	Which do you want when? We can have the latter more often than Bret, set of all R is easier than set of all strings
-
-	Keep coming back to the fact that you can move a vector away from the origin.
-		I mean come on you can move it anywhere so long as you don't change is direction or magnitude
-		Maybe charles is right, vectors are translations and points are the things you're moving around
-		Your intermediate representation is a translated vector? So a + b is sorta not fundamental?
-
-	You can't visualize the multivector without some theoretical values for it
-		very Tokiedan though: examples examples examples!
-		Or can you? Little disk with colors?
-		Both a blessing and a curse? Get people too used to a certain state, unable to think in the abstract?
-		Heh how about making them meander randomly?
-		Hey, it works for debuggers. It's a slice through possibility space
-		Working with the function, maybe represented as an infinite line of mvs, is for the game
+	You can't visualize the multivector without some theoretical values for it, programming by example
+		A slice through possibility space
 
 	y = x^2
 	y' = 2x
@@ -180,13 +179,7 @@
 		Don't necessarily need names. Fuck names, of course
 		if you do give them names then you may be able to spot analogies. Write some weird equation with no geometrical analogue and it pops up "linePlaneIntersection"
 		How to animate the things? if they've got the same symbols can move them around
-		function associativity(a,b,c)
-		{
-			return a*(b*c)
-		}
-		{
-			return (a*b)*c
-		}
+		(a,b,c) -> a*(b*c) = (a*b)*c
 
 		function differentiate(f,at)
 		{
@@ -214,6 +207,8 @@ function init()
 
 	initMultivectorAppearances(characterMeshHeight)
 	initOutputColumn()
+
+	initGrabber()
 
 	initPad(characterMeshHeight)
 
