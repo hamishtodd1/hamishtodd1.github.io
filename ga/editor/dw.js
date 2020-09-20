@@ -80,13 +80,7 @@ function initDisplayWindows() {
         dw.scene.add(ourGrid)
 
         dw.beginFrame = () => {
-            dw.scene.children.forEach((c) => {
-                if (c !== ourGrid)
-                    dw.scene.remove(c)
-            })
-
-            if (dw === mainDw && carat.movedVerticallySinceLastFrame)
-                mainDw.scene.scale.setScalar(.5 / Math.sqrt(2.)) //grid
+            log("mainDw has this but not this one")
         }
 
         dw.add(dw.scene)

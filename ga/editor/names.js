@@ -73,6 +73,15 @@ function initNamesAndBasis()
     getNamedMv("w").elements[4] = 2.5
     let numBuiltInVariables = 6
 
+    //could build in the above too
+    // let literalNames = []
+    // for(let i = 0; i < backgroundString.length; ++i) {
+    //     if(backgroundString[i] === "[") {
+    //         literalNames.push(orderedNames[numBuiltInVariables])
+    //         ++numBuiltInVariables
+    //     }
+    // }
+
     //the basis vectors are before the lines
     let lineNames = []
     //ideally none for empty lints
@@ -129,25 +138,50 @@ function initNamesAndBasis()
         }
     })
     bindButton("Backspace", () => {
-        if (carat.positionInString !== 0) {
+        if (backgroundString[carat.positionInString-1] === "]") {
+            let arrayStrLength = 2
+            for (arrayStrLength, lengthl = backgroundString.length; arrayStrLength < lengthl; ++arrayStrLength) {
+                if (backgroundString[carat.positionInString - arrayStrLength] === "[")
+                    break
+            }
+
+            backgroundString =
+                backgroundString.substring(0, carat.positionInString - arrayStrLength) +
+                backgroundString.substring(carat.positionInString)
+            
+            carat.moveAlongString(-arrayStrLength)
+        }
+        else if (carat.positionInString !== 0) {
             if (backgroundString[carat.positionInString-1] === "\n")
                 lineNames.splice(carat.lineNumber, 1)
 
             backgroundString =
                 backgroundString.substring(0, carat.positionInString - 1) + 
-                backgroundString.substring(carat.positionInString, backgroundString.length)
+                backgroundString.substring(carat.positionInString)
 
             carat.moveAlongString(-1)
         }
     })
     bindButton("Delete", () => {
-        if (carat.positionInString < backgroundString.length) {
+        if(backgroundString[carat.positionInString] === "["){
+            let arrayStrLength = 1
+            for(arrayStrLength, lengthl = backgroundString.length; arrayStrLength < lengthl; ++arrayStrLength)
+                if(backgroundString[carat.positionInString+arrayStrLength] === "]") {
+                    ++arrayStrLength
+                    break
+                }
+
+            backgroundString =
+                backgroundString.substring(0, carat.positionInString) +
+                backgroundString.substring(carat.positionInString + arrayStrLength)
+        }
+        else {
             if (backgroundString[carat.positionInString] === "\n")
                 lineNames.splice(carat.lineNumber+1, 1)
 
             backgroundString = 
                 backgroundString.substring(0, carat.positionInString) + 
-                backgroundString.substring(carat.positionInString + 1, backgroundString.length)
+                backgroundString.substring(carat.positionInString + 1)
         }
     })
 }

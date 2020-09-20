@@ -52,21 +52,21 @@ function initGrabber() {
     //it is the de-facto "free parameter" symbol. Yuck, symbols
     grabberIm = new THREE.InstancedMesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ transparent: true }),256)
     pad.add(grabberIm)
-    
-    //cooooooould use the im for these too, maybe easier not to
+
+    mainDw.grabbers = []
+    //cooooooould use the im for these too
     let dwGrabberMat = grabberIm.material.clone()
     for(let i = 0; i < 4; ++i) {
         let dwGrabber = new THREE.Mesh(unchangingUnitSquareGeometry, dwGrabberMat)
-        scene.add(dwGrabber)
-        dwGrabber.scale.multiplyScalar(.5)
+        mainDw.add(dwGrabber)
+        dwGrabber.scale.multiplyScalar(.1)
 
-        dwGrabber.position.x = i * 2.
+        mainDw.grabbers.push(dwGrabber)
 
         onClicks.push({
             z: () => mouse.checkIfOnScaledUnitSquare(dwGrabber) ? dwGrabber.position.z : -Infinity,
             start:()=>{dwGrabber.visible = false},
-            during: () =>
-            {
+            during: () => {
                 mouse.raycaster.intersectZPlane(dwGrabber.position.z, v1)
                 mouse.oldRaycaster.intersectZPlane(dwGrabber.position.z, v2)
                 dwGrabber.position.add(v1).sub(v2)
@@ -98,12 +98,12 @@ function initGrabber() {
 
 function initMainDw() {
 
-    initGrabber()
-
     mainDw = DisplayWindow(false)
     mainDw.scale.setScalar(8.)
     mainDw.renderOrder = carat.renderOrder + 1
     carat.material.depthTest = false
+
+    initGrabber()
 
     let buttons = {}
     function addButton(newLabel,onClick)
@@ -189,7 +189,47 @@ function initMainDw() {
         })
     }
 
+    mainDw.setGrabbablePosition = (mvFromString) => {
+        let lowestUnusedGrabber = 0
+        for (lowestUnusedGrabber; lowestUnusedGrabber < mainDw.grabbers.length; ++lowestUnusedGrabber) {
+            if (mainDw.grabbers[lowestUnusedGrabber].visible === false)
+                break
+            if(lowestUnusedGrabber === mainDw.grabbers.length - 1)
+                console.error("need more grabbers")
+        }
+
+        let gr = mainDw.grabbers[lowestUnusedGrabber]
+        gr.visible = true
+        if (getGrade(mvFromString.elements) === 1) {
+            getVector(mvFromString.elements, gr.position)
+            gr.position.applyQuaternion(displayRotation.q)
+            gr.position.applyMatrix4(mainDw.scene.matrix)
+
+            //the location of shit inside the dw is messed up, probably need to work on it
+        }
+    }
+
+    mainDw.beginFrame = () => {
+        mainDw.scene.children.forEach((c,i) => {
+            if ( i ) //0 is the grid
+                mainDw.scene.remove(c)
+        })
+
+        mainDw.grabbers.forEach((g) => { g.visible = false })
+
+        if (carat.movedVerticallySinceLastFrame)
+            mainDw.scene.scale.setScalar(.5 / Math.sqrt(2.)) //grid
+    }
+
     mainDw.addToScene = (obj)=>{
+        // if (obj.name !== undefined && .indexOf(obj.name) elementsPositionInString !== undefined && obj. ) {
+
+        // }
+        //backgroundString has the array
+
+        //0 dimensional projective space: binary. There's the ideal 0, and the anything-else
+
+
         mainDw.scene.add(obj.dw)
         if (carat.movedVerticallySinceLastFrame) { //or if the bounding sphere radius has changed
             let maxScaleForContainment = .5 / obj.boundingSphereRadius

@@ -303,6 +303,7 @@ async function initPad(characterMeshHeight)
 								break
 							}
 						}
+						//
 					}
 					else {
 						let maxTokenLength = 64
@@ -351,8 +352,8 @@ async function initPad(characterMeshHeight)
 
 						outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
 						grabberIm.drawInPlace( drawingPosition.x + .5, drawingPosition.y)
+						
 						//a different colored outline? a mouse in the place you would grab?
-
 						//Heh how about making them meander randomly ?
 
 						let result = getMvNamedByLineAtPosition(drawingPosition.y)
@@ -364,7 +365,11 @@ async function initPad(characterMeshHeight)
 						}
 						outputToColumn(result)
 
-						//that you can do this means you can skip over letters
+						if (carat.position.y === drawingPosition.y){
+							mainDw.setGrabbablePosition(result)
+						}
+
+						//that you can do this means you can skip over letters in other places. It's like tabs
 						drawingPositionInString += 1+token.length
 						tokenCharactersLeft = 0
 						drawingPosition.x += 1.
