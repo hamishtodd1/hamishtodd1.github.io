@@ -40,7 +40,8 @@ function initButtons()
 			button.onDown()
 			button.down = true
 
-			event.preventDefault()
+			if(event.key !== "v") //paste
+				event.preventDefault()
 		}
 	}, false );
 	document.addEventListener( 'keyup', function(event)

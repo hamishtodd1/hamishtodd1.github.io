@@ -83,7 +83,7 @@ function initNamesAndBasis()
     // }
 
     //the basis vectors are before the lines
-    let lineNames = []
+    lineNames = []
     //ideally none for empty lints
     //you only know at compile time which lines have things on them
     let lineNum = 0

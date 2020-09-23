@@ -1,15 +1,6 @@
 /* 
 	The fastest anyone's typed is 6 characters per second, so in theory you only need to run through it all about that often
 
-	Click the things in the column, what happens?
-		If you click a function it might be nice to zoom in and out
-        They appear in the window? Best if window contents depends on what line you're on
-        Hovering shows the name, you can edit
-		Copy the name to paste buffer?
-        When you right click them, context menu:
-            "Change name" (changes colors?)
-            "change representation"
-        
 	Language symbols
 		capital sigma (931), Parallel, orthogonal?. Still got £$%^
 		exponentiation/log/radical/triangle of power
@@ -150,7 +141,7 @@ async function initPad(characterMeshHeight)
 		let descendingWedgeCharacter = String.fromCharCode("8744")
 		characters.add("&", descendingWedgeCharacter) // for exponentiate: **? For log, //?
 
-		backgroundString += wedgeCharacter + descendingWedgeCharacter + deltaCharacter + nablaCharacter + "|"
+		// backgroundString += wedgeCharacter + descendingWedgeCharacter + deltaCharacter + nablaCharacter + "|"
 
 		//./=+!:{}
 	}
@@ -171,7 +162,7 @@ async function initPad(characterMeshHeight)
 	let positionInStringClosestToCaratPosition = -1
 	let positionInStringClosestToCaratPositionVector = new THREE.Vector3()
 	let uncaughtCharacters = ""
-	updateFunctions.push(function ()
+	updateFunctions.push( () =>
 	{
 		pad.position.x = outputColumn.right() + pad.scale.x
 		let paddingAtTopOfPad = .35 * getWorldLineHeight()
@@ -435,6 +426,7 @@ async function initPad(characterMeshHeight)
 							// }
 							// else
 							{
+
 								mv.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
 								outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
 							}

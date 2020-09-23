@@ -1,6 +1,8 @@
 /*
     //color just has completely different meaning for the functions because you haven't bound anything
 
+    Click the things in the column, changes representation
+
     So you have mv and you have operation, either order
 	We curry the fuckers into a picture of that mv with that symbol on it. Now it's "just" juxtaposition of pictures
 	You can think of all functions as having one argument thanks to all these fucking pairings
@@ -37,6 +39,7 @@
 
     Texture mapping: [dual quaternion,R2->R3] -> R3 x R3
     The shapes we think of most easily: R2 -> R3 x R3
+
 
     These are "the set of points obeying a constraint"
         R->R     line graph, filled underneath - greyscale line if looked at from above
@@ -81,10 +84,47 @@
             there's literature
         R2->R3,R3
             Rasterization and texture mappiiiiiing
+
+    Vector->vector
+    For each point in space
 */
 
 function initFuncViz()
 {
+    document.addEventListener('paste', (e) => {
+        if (!e.clipboardData || !e.clipboardData.items)
+            return
+        let items = e.clipboardData.items
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf("image") === -1)
+                continue
+            e.preventDefault();
+            
+            const pastedImage = new Image();
+            const url = window.URL || window.webkitURL;
+            pastedImage.src = url.createObjectURL(items[i].getAsFile());
+
+            pastedImage.onload = () => {
+                const canvas = document.createElement('canvas')
+                canvas.width = pastedImage.width;
+                canvas.height = pastedImage.height;
+                const ctx = canvas.getContext('2d')
+                ctx.drawImage(pastedImage, 0, 0)
+
+                const pastedTextureMesh = new THREE.Mesh(unchangingUnitSquareGeometry,new THREE.MeshBasicMaterial({
+                    map: new THREE.CanvasTexture(canvas)
+                }))
+                pastedTextureMesh.scale.x = pastedImage.width / pastedImage.height
+                scene.add(pastedTextureMesh)
+            }
+
+            return;
+        }
+
+        log("if you think you have an image in there it may be the wrong kind")
+    }, false);
+
+
     //can't do this coordinate-free shit for a graph really, you need an origin?
     let funcColor = 0x222222
     let curveMaterial = new THREE.LineBasicMaterial({ color: funcColor })
