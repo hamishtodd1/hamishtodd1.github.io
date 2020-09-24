@@ -1,5 +1,19 @@
 /*
-    //color just has completely different meaning for the functions because you haven't bound anything
+    Obvious test case: map earth's surface
+        you have the mapping I2->R3:
+            cos(x)sin(y)
+            sin(x)sin(y)
+            cos(y)
+        The texture is a mapping I2->I3
+        Together they map (x,y) to (x,y,z,r,g,b), a "colored point"
+        Ehhh... not rgb but hsv. h is so nice for phase
+        Maybe your colors come from that RP2 thing you thought of?
+        Or colors are directions in R3?
+        Well, they're points in the positive octant of R3, aka I3
+
+    Maybe only visualize functions that are -> points or vectors, others get the characters
+
+    color just has completely different meaning for the functions because you haven't bound anything
 
     Click the things in the column, changes representation
 
@@ -91,6 +105,7 @@
 
 function initFuncViz()
 {
+    //it's a mapping from I2->I3
     document.addEventListener('paste', (e) => {
         if (!e.clipboardData || !e.clipboardData.items)
             return
@@ -123,7 +138,6 @@ function initFuncViz()
 
         log("if you think you have an image in there it may be the wrong kind")
     }, false);
-
 
     //can't do this coordinate-free shit for a graph really, you need an origin?
     let funcColor = 0x222222

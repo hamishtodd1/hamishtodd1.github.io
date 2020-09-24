@@ -53,14 +53,20 @@ function initNamesAndBasis()
     }
 
     getNamedMv = (name) => {
-        let nameLetters = []
+        let nameLettersOrdered = []
         for(let i = 0; i < name.length; ++i)
-            nameLetters.push(name[i])
-        nameLetters.sort((a,b)=>a<b?-1:1)
+            nameLettersOrdered.push(name[i])
+        nameLettersOrdered.sort((a,b)=>a<b?-1:1)
 
-        for (let i = 0; i < MAX_THINGS; i++)
-            if (name === orderedNames[i])
-                return namedMvs[i]
+        for (let i = 0; i < MAX_THINGS; ++i)
+            if(nameLettersOrdered.length === orderedNames[i].length) {
+                for (let j = 0, jl = nameLettersOrdered.length; j < jl; ++j) {
+                    if (nameLettersOrdered[j] !== orderedNames[i][j])
+                        break
+                    else if(j === jl-1)
+                        return namedMvs[i]
+                }
+            }
 
         return null
     }

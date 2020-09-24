@@ -55,10 +55,10 @@ function initMultivectorAppearances(characterMeshHeight)
     let zeroGeometry = new THREE.PlaneBufferGeometry(zeroMaterial.getAspect(), 1.)
 
     //bug in threejs seems to stick together the matrices of instanced meshes and non instanced
-    scaMaterial.im = scaMaterial.clone(); scaMaterial.transparent = true; scaMaterial.opacity = .8
-    vecMaterial.im = vecMaterial.clone(); vecMaterial.transparent = true; vecMaterial.opacity = .8
-    bivMaterial.im = bivMaterial.clone(); bivMaterial.transparent = true; bivMaterial.opacity = .8
-    triMaterial.im = triMaterial.clone(); triMaterial.transparent = true; triMaterial.opacity = .8
+    scaMaterial.im = scaMaterial.clone(); scaMaterial.transparent = true; scaMaterial.opacity = .6
+    vecMaterial.im = vecMaterial.clone(); vecMaterial.transparent = true; vecMaterial.opacity = .6
+    bivMaterial.im = bivMaterial.clone(); bivMaterial.transparent = true; bivMaterial.opacity = .6
+    triMaterial.im = triMaterial.clone(); triMaterial.transparent = true; triMaterial.opacity = .6
     zeroMaterial.im = zeroMaterial.clone();
 
     //not yet integrated
@@ -161,7 +161,6 @@ function initMultivectorAppearances(characterMeshHeight)
         mv.padGroup = new THREE.Group().add(scaPad, vecPad, bivPad, triPad, zeroPad)
         pad.add(mv.padGroup)
 
-        let halfInverseBoundingSphereRadius = 1.
         mv.boundingSphereRadius = .0000001
         //you are probably modifying the elements partway through the frame so this is too stateful
         mv.beginFrame = () => {
@@ -457,7 +456,7 @@ function TriGeometry(name)
 function ScaGeometry(name) {
     let heightSegments = 15
     let radius = SHAFT_RADIUS
-    let radialSegments = 12
+    let radialSegments = 6
     let scaGeometry = new THREE.CylinderGeometry(
         radius, radius,
         1.,

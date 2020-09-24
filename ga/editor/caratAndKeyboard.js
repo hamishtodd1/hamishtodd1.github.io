@@ -81,7 +81,7 @@ function initTypeableCharacters(carat, maxCopiesOfALetter)
 		backgroundString =
 			backgroundString.substring(0, position) +
 			str +
-			backgroundString.substring(position, backgroundString.length)
+			backgroundString.substring(position)
 	}
 	addStringAtCarat = function (str)
 	{

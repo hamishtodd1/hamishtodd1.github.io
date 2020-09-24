@@ -162,8 +162,7 @@ async function initPad(characterMeshHeight)
 	let positionInStringClosestToCaratPosition = -1
 	let positionInStringClosestToCaratPositionVector = new THREE.Vector3()
 	let uncaughtCharacters = ""
-	updateFunctions.push( () =>
-	{
+	updateFunctions.push( () => {
 		pad.position.x = outputColumn.right() + pad.scale.x
 		let paddingAtTopOfPad = .35 * getWorldLineHeight()
 		if (pad.position.y < camera.topAtZZero - paddingAtTopOfPad)
@@ -196,14 +195,12 @@ async function initPad(characterMeshHeight)
 		{
 			//carat position
 			{
-				if (carat.positionInString !== -1 && drawingPositionInString === carat.positionInString)
-				{
+				if (carat.positionInString !== -1 && drawingPositionInString === carat.positionInString) {
 					if (carat.position.x !== drawingPosition.x || carat.position.y !== drawingPosition.y)
 						carat.flashingStart = clock.getElapsedTime()
 					carat.position.set(drawingPosition.x, drawingPosition.y, carat.position.z)
 				}
-				if (carat.positionInString === -1)
-				{
+				if (carat.positionInString === -1) {
 					let closestYDist = Math.abs(positionInStringClosestToCaratPositionVector.y - carat.position.y)
 					let closestXDist = Math.abs(positionInStringClosestToCaratPositionVector.x - carat.position.x)
 					let drawingYDist = Math.abs(drawingPosition.y - carat.position.y)
@@ -256,9 +253,8 @@ async function initPad(characterMeshHeight)
 				else if(stack.length === 2) {
 					let operandAndOperator = [stack.pop(), stack.pop()]
 					let operator = typeof operandAndOperator[0] === "function" ? operandAndOperator[0] : operandAndOperator[1]
-					if(typeof operator === "function") {
-						let operand = typeof operandAndOperator[0] === "function" ? operandAndOperator[1] : operandAndOperator[0]
-
+					let operand = typeof operandAndOperator[0] === "function" ? operandAndOperator[1] : operandAndOperator[0]
+					if( typeof operator === "function" && operand.elements !== undefined ) {
 						let result = getMvNamedByLineAtPosition(drawingPosition.y)
 						operator(operand.elements, result.elements)
 
@@ -282,32 +278,61 @@ async function initPad(characterMeshHeight)
 					let token = ""
 					if (functionDictionary[currentCharacter]!==undefined)
 						token = currentCharacter //currently all reserved symbols are functions
-					else if(currentCharacter === "[" ) {
-						let numSymbolsInArray = 1
-						for (numSymbolsInArray; 
+					else if(currentCharacter === "[" ) { //variable length token whose characters are skipped over
+						for (let numSymbolsInArray = 1;
 							backgroundString[drawingPositionInString + numSymbolsInArray] !== "\n" &&
 							drawingPositionInString + numSymbolsInArray < backgroundStringLength;
 							++numSymbolsInArray )
 						{
 							if (backgroundString[drawingPositionInString + numSymbolsInArray] === "]") {
-								token = backgroundString.substr(drawingPositionInString+1, numSymbolsInArray-1)
+								token = backgroundString.substr(drawingPositionInString+1, numSymbolsInArray-1) //no brackets
 								break
 							}
 						}
-						//
+
+						let arr = token.split(";")
+
+						let result = getMvNamedByLineAtPosition(drawingPosition.y) //this is why it's currently ONE PER LINE
+						for (let i = 0; i < arr.length; ++i) {
+							if (i < arr.length)
+								result.elements[i] = parseFloat(arr[i])
+							else
+								result.elements[i] = 0.
+						}
+
+						result.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
+						outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
+						//a different colored outline? a mouse in the place you would grab? Well, outlines may be used for names
+
+						if (carat.position.y === drawingPosition.y) {
+							mainDw.setGrabbablePosition(result)
+							mainDw.addToScene(result)
+						}
+
+						stack.push(result)
+
+						//that you can do this means you can skip over letters in other places. It's like tabs
+						drawingPositionInString += 1+token.length
+						tokenCharactersLeft = 0
+						drawingPosition.x += 1.
+						continue
 					}
 					else {
 						let maxTokenLength = 64
-						for ( let i = 0;
-							drawingPositionInString + i < backgroundStringLength &&
-							i < maxTokenLength &&
-							backgroundString[drawingPositionInString + i] !== " " && 
-							backgroundString[drawingPositionInString + i] !== "\n" &&
-							alphanumerics.indexOf(backgroundString[drawingPositionInString + i]) !== -1;
-							++i)
-							token += backgroundString[drawingPositionInString + i]
+						for ( let numSymbolsInToken = 0;
+							drawingPositionInString + numSymbolsInToken < backgroundStringLength &&
+							numSymbolsInToken < maxTokenLength &&
+							backgroundString[drawingPositionInString + numSymbolsInToken] !== " " && 
+							backgroundString[drawingPositionInString + numSymbolsInToken] !== "\n" &&
+							alphanumerics.indexOf(backgroundString[drawingPositionInString + numSymbolsInToken]) !== -1;
+							++numSymbolsInToken)
+							token += backgroundString[drawingPositionInString + numSymbolsInToken]
 					}
 					tokenCharactersLeft = token.length
+
+					////////////////////////////////////////
+					//      TOKEN HAS BEEN OBTAINED
+					////////////////////////////////////////
 
 					if (functionDictionary[token] !== undefined) {
 						stack.push(functionDictionary[token])
@@ -337,34 +362,6 @@ async function initPad(characterMeshHeight)
 						drawCharacters = false
 
 						//the below needs to be a separate function applicable to this
-					}
-					else if (currentCharacter === "[") {
-						let arr = token.split(";")
-
-						outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
-						grabberIm.drawInPlace( drawingPosition.x + .5, drawingPosition.y)
-						
-						//a different colored outline? a mouse in the place you would grab?
-						//Heh how about making them meander randomly ?
-
-						let result = getMvNamedByLineAtPosition(drawingPosition.y)
-						for (let i = 0; i < arr.length; ++i) {
-							if (i < arr.length)
-								result.elements[i] = parseFloat(arr[i])
-							else
-								result.elements[i] = 0.
-						}
-						outputToColumn(result)
-
-						if (carat.position.y === drawingPosition.y){
-							mainDw.setGrabbablePosition(result)
-						}
-
-						//that you can do this means you can skip over letters in other places. It's like tabs
-						drawingPositionInString += 1+token.length
-						tokenCharactersLeft = 0
-						drawingPosition.x += 1.
-						continue
 					}
 					else if (token === "display") {
 						v1.copy(drawingPosition)
@@ -412,6 +409,9 @@ async function initPad(characterMeshHeight)
 						let mv = getNamedMv(token)
 						stack.push(mv)
 
+						if (carat.position.y === drawingPosition.y)
+							mainDw.addToScene(mv)
+
 						let caratInName = drawingPositionInString < carat.positionInString && carat.positionInString <= drawingPositionInString + token.length
 						if (!caratInName) {
 							if (superimposePosition.x === Infinity && superimposePosition.y === Infinity ) {
@@ -426,13 +426,9 @@ async function initPad(characterMeshHeight)
 							// }
 							// else
 							{
-
 								mv.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
 								outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
 							}
-
-							if (carat.position.y === drawingPosition.y)
-								mainDw.addToScene(mv)
 
 							drawCharacters = false
 						}

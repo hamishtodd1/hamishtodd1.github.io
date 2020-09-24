@@ -247,20 +247,51 @@ function initMainDw() {
     onClicks.push({
         z: () => mouse.checkIfOnScaledUnitSquare(mainDw) ? 1. : -Infinity,
         during:()=>{
-            log("yes, we would be editing")
+            //what if there are two?
+
 
             // let mv = getNamedMv(token)
 
-            //ahh, it's more about getting what's on the line
+            let name = lineNames[carat.lineNumber] //ONE PER LINE
+            let variable = getNamedMv(name)
 
-            // mouse.getZZeroPosition(v1)
-            // mainDw.scene.worldToLocal(v1)
-            // for (let i = 0, il = variable.elements.length; i < il; ++i)
-            //     variable.elements[i] = 0.
-            // variable.elements[1] = v1.x
-            // variable.elements[2] = v1.y
+            mouse.getZZeroPosition(v1)
+            mainDw.scene.updateMatrixWorld()
+            mainDw.scene.worldToLocal(v1)
+            let elementsString = "0.;" + v1.x.toString() +";"+ v1.y.toString() +";"+ v1.z.toString() + "0.;0.;0.;0.;"
+            
+            // "["
 
-            log(carat)
+            let numberOfThisLine = 0
+            let openBracketPosition = -1
+            let closeBracketPosition = -1
+            for (let i = 0, il = backgroundString.length; i < il; ++i) {
+                if(carat.lineNumber === numberOfThisLine) {
+                    if(backgroundString[i] === "[")
+                        openBracketPosition = i
+                    if(backgroundString[i] === "]")
+                        closeBracketPosition = i
+                }
+
+                if(backgroundString[i] === "\n")
+                    ++numberOfThisLine
+            }
+            backgroundString =
+                backgroundString.substring(0, openBracketPosition+1) +
+                elementsString +
+                backgroundString.substring(closeBracketPosition)
+
+            // for (let numSymbolsInArray = 1;
+            //     backgroundString[drawingPositionInString + numSymbolsInArray] !== "\n" &&
+            //     drawingPositionInString + numSymbolsInArray < backgroundStringLength;
+            //     ++numSymbolsInArray )
+            // {
+            //     if (backgroundString[drawingPositionInString + numSymbolsInArray] === "]") {
+            //         token = backgroundString.substr(drawingPositionInString+1, numSymbolsInArray-1) //no brackets
+            //         break
+            //     }
+            // }
+
         }
     })
 }
