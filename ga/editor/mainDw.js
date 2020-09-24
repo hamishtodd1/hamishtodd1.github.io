@@ -146,7 +146,7 @@ function initMainDw() {
             makeNewLineAtCaratPosition()
         }
 
-        let insertion = "[0.,0.,1.,0.,0.,0.,0.,0.]"
+        let insertion = "[0.;0.;1.;0.;0.;0.;0.;0.]"
         addStringAtCarat(insertion)
     })
 
@@ -216,9 +216,10 @@ function initMainDw() {
         })
 
         mainDw.grabbers.forEach((g) => { g.visible = false })
+    }
 
-        if (carat.movedVerticallySinceLastFrame)
-            mainDw.scene.scale.setScalar(.5 / Math.sqrt(2.)) //grid
+    mainDw.resetScene = ()=>{
+        mainDw.scene.scale.setScalar(.5 / Math.sqrt(2.)) //grid
     }
 
     mainDw.addToScene = (obj)=>{
@@ -228,40 +229,33 @@ function initMainDw() {
         //backgroundString has the array
 
         //0 dimensional projective space: binary. There's the ideal 0, and the anything-else
-
+        //check if the other products are boolean operations?
 
         mainDw.scene.add(obj.dw)
-        if (carat.movedVerticallySinceLastFrame) { //or if the bounding sphere radius has changed
-            let maxScaleForContainment = .5 / obj.boundingSphereRadius
-            if (mainDw.scene.scale.x > maxScaleForContainment) {
-                mainDw.scene.scale.setScalar(maxScaleForContainment)
+        let maxScaleForContainment = .5 / obj.boundingSphereRadius
+        if (mainDw.scene.scale.x > maxScaleForContainment) {
+            mainDw.scene.scale.setScalar(maxScaleForContainment)
 
-                //wanna stop flick? It's weird
-                // mainDw.scene.updateMatrix()
-                // mainDw.scene.updateMatrixWorld()
-                // obj.dw.updateMatrixWorld()
-            }
+            //wanna stop flick? It's weird
+            // mainDw.scene.updateMatrix()
+            // mainDw.scene.updateMatrixWorld()
+            // obj.dw.updateMatrixWorld()
         }
     }
 
     onClicks.push({
-        z: () => mouse.checkIfOnScaledUnitSquare(mainDw) ? 1. : -Infinity,
+        z: () => {
+            return mouse.checkIfOnScaledUnitSquare(mainDw) ? 1. : -Infinity
+        },
         during:()=>{
             //what if there are two?
-
-
-            // let mv = getNamedMv(token)
-
-            let name = lineNames[carat.lineNumber] //ONE PER LINE
-            let variable = getNamedMv(name)
-
             mouse.getZZeroPosition(v1)
             mainDw.scene.updateMatrixWorld()
             mainDw.scene.worldToLocal(v1)
+            q1.copy(displayRotation.q).inverse()
+            v1.applyQuaternion(q1)
             let elementsString = "0.;" + v1.x.toString() +";"+ v1.y.toString() +";"+ v1.z.toString() + "0.;0.;0.;0.;"
             
-            // "["
-
             let numberOfThisLine = 0
             let openBracketPosition = -1
             let closeBracketPosition = -1
@@ -276,22 +270,18 @@ function initMainDw() {
                 if(backgroundString[i] === "\n")
                     ++numberOfThisLine
             }
-            backgroundString =
-                backgroundString.substring(0, openBracketPosition+1) +
-                elementsString +
-                backgroundString.substring(closeBracketPosition)
+            if (openBracketPosition !== -1) {
+                backgroundString =
+                    backgroundString.substring(0, openBracketPosition+1) +
+                    elementsString +
+                    backgroundString.substring(closeBracketPosition)
+            }
 
-            // for (let numSymbolsInArray = 1;
-            //     backgroundString[drawingPositionInString + numSymbolsInArray] !== "\n" &&
-            //     drawingPositionInString + numSymbolsInArray < backgroundStringLength;
-            //     ++numSymbolsInArray )
-            // {
-            //     if (backgroundString[drawingPositionInString + numSymbolsInArray] === "]") {
-            //         token = backgroundString.substr(drawingPositionInString+1, numSymbolsInArray-1) //no brackets
-            //         break
-            //     }
-            // }
+            //want multiple in the window, and want to modify them from anywhere
+            //or maybe there's reasons you'd only want to modify them in place? Remind you where they're from and where else they're used?
 
+            //so you have the grabbers. Click one
+            //maybe the grabbers store an idea of what their value is
         }
     })
 }

@@ -1,5 +1,7 @@
 // No carat when you're recording, probably no names either
 
+//prbably ctrl+
+
 function initCarat()
 {
 	carat.positionInString = -1
@@ -65,7 +67,8 @@ function initCarat()
 
 	latterUpdateFunctions.push(() => {
 		carat.visible = Math.floor((clock.getElapsedTime() - carat.flashingStart) * 2.) % 2 ? false : true
-		carat.movedVerticallySinceLastFrame = oldY !== carat.position.y
+		if( oldY !== carat.position.y )
+			mainDw.resetScene()
 		oldY = carat.position.y
 	})
 }

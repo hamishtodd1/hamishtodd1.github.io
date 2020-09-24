@@ -23,3 +23,6 @@ const latterUpdateFunctions = []
 let mainDw = null
 
 let grabberIm = null
+
+//the basis vectors are before the lines
+allocatedNames = []

@@ -15,7 +15,7 @@ function initNamesAndBasis()
 {
     let MAX_THINGS = 63 //7 choose 1 + 7 choose 2 + 7 choose 3
 
-    let orderedNames = []
+    let alphabeticalNames = []
     let idNum = 0
     generateName = () =>
     {
@@ -47,9 +47,9 @@ function initNamesAndBasis()
         return name
     }
     //for every name there is an mv ready to be used, but we might not use it
-    while (orderedNames.length < MAX_THINGS) {
-        orderedNames.push(generateName())
-        namedMvs.push(MultivectorAppearance(orderedNames[orderedNames.length-1]))
+    while (alphabeticalNames.length < MAX_THINGS) {
+        alphabeticalNames.push(generateName())
+        namedMvs.push(MultivectorAppearance(alphabeticalNames[alphabeticalNames.length-1]))
     }
 
     getNamedMv = (name) => {
@@ -59,9 +59,9 @@ function initNamesAndBasis()
         nameLettersOrdered.sort((a,b)=>a<b?-1:1)
 
         for (let i = 0; i < MAX_THINGS; ++i)
-            if(nameLettersOrdered.length === orderedNames[i].length) {
+            if(nameLettersOrdered.length === alphabeticalNames[i].length) {
                 for (let j = 0, jl = nameLettersOrdered.length; j < jl; ++j) {
-                    if (nameLettersOrdered[j] !== orderedNames[i][j])
+                    if (nameLettersOrdered[j] !== alphabeticalNames[i][j])
                         break
                     else if(j === jl-1)
                         return namedMvs[i]
@@ -83,25 +83,23 @@ function initNamesAndBasis()
     // let literalNames = []
     // for(let i = 0; i < backgroundString.length; ++i) {
     //     if(backgroundString[i] === "[") {
-    //         literalNames.push(orderedNames[numBuiltInVariables])
+    //         literalNames.push(alphabeticalNames[numBuiltInVariables])
     //         ++numBuiltInVariables
     //     }
     // }
 
-    //the basis vectors are before the lines
-    lineNames = []
     //ideally none for empty lints
     //you only know at compile time which lines have things on them
     let lineNum = 0
     for(let i = 0; i < backgroundString.length; ++i) {
         if(backgroundString[i] === "\n") {
-            lineNames.push(orderedNames[numBuiltInVariables + lineNum])
+            allocatedNames.push(alphabeticalNames[numBuiltInVariables + lineNum])
             ++lineNum
         }
     }
 
     getMvNamedByLineAtPosition = (yPositioon) => {
-        let name = lineNames[Math.floor(-yPositioon)]
+        let name = allocatedNames[Math.floor(-yPositioon)]
         return getNamedMv(name)
     }
 
@@ -118,20 +116,20 @@ function initNamesAndBasis()
         addStringAtCarat("\n")
 
         let lowestUnusedName = -1
-        for (let i = numBuiltInVariables, il = orderedNames.length; i < il; ++i)
+        for (let i = numBuiltInVariables, il = alphabeticalNames.length; i < il; ++i)
         {
             let used = false
-            for (let j = 0, jl = lineNames.length; j < jl; ++j)
-                if (lineNames[j] === orderedNames[i])
+            for (let j = 0, jl = allocatedNames.length; j < jl; ++j)
+                if (allocatedNames[j] === alphabeticalNames[i])
                     used = true
             if (!used)
             {
-                lowestUnusedName = orderedNames[i]
+                lowestUnusedName = alphabeticalNames[i]
                 break
             }
         }
 
-        lineNames.splice(carat.lineNumber + 1, 0, lowestUnusedName)
+        allocatedNames.splice(carat.lineNumber + 1, 0, lowestUnusedName)
     }
 
     bindButton("Enter", () => {
@@ -143,6 +141,8 @@ function initNamesAndBasis()
             makeNewLineAtCaratPosition()
         }
     })
+
+    //TODO these should fully remove thingies too
     bindButton("Backspace", () => {
         if (backgroundString[carat.positionInString-1] === "]") {
             let arrayStrLength = 2
@@ -159,7 +159,7 @@ function initNamesAndBasis()
         }
         else if (carat.positionInString !== 0) {
             if (backgroundString[carat.positionInString-1] === "\n")
-                lineNames.splice(carat.lineNumber, 1)
+                allocatedNames.splice(carat.lineNumber, 1)
 
             backgroundString =
                 backgroundString.substring(0, carat.positionInString - 1) + 
@@ -183,7 +183,7 @@ function initNamesAndBasis()
         }
         else {
             if (backgroundString[carat.positionInString] === "\n")
-                lineNames.splice(carat.lineNumber+1, 1)
+                allocatedNames.splice(carat.lineNumber+1, 1)
 
             backgroundString = 
                 backgroundString.substring(0, carat.positionInString) + 

@@ -2,7 +2,7 @@
 	Next
 		Editing
 		
-		crash when you press enter in the middle of the algebra-ish line
+		
 		Superimposed things should be visible. Whichever thing is smaller. Easy peasy if you use webgl
 		Making functions
 			so the function is named by colors, that's good

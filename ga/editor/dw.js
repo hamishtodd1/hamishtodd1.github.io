@@ -195,14 +195,15 @@ function initDisplayWindows() {
             return
         else
         {
-            let dw = mouse.displayWindowMouseIsOn()
-            if (dw === null)
-                pad.position.y += event.deltaY * .008
-            else {
-                let inflationFactor = 1.2
-                let multiple = event.deltaY < 0 ? inflationFactor : 1. / inflationFactor
-                dw.scene.scale.multiplyScalar(multiple)
-            }
+            pad.position.y += event.deltaY * .008
+            // let dw = mouse.displayWindowMouseIsOn()
+            // if (dw === null)
+            //     pad.position.y += event.deltaY * .008
+            // else {
+            //     let inflationFactor = 1.2
+            //     let multiple = event.deltaY < 0 ? inflationFactor : 1. / inflationFactor
+            //     dw.scene.scale.multiplyScalar(multiple)
+            // }
         }
     }, false);
 

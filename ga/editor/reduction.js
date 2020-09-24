@@ -128,7 +128,7 @@ function initReductions()
     reduction.scale.x = 4. * reduction.scale.y
     pad.add(reduction)
     updateFunctions.push(() => {
-        if (lineNames[carat.lineNumber] === "op") {
+        if (allocatedNames[carat.lineNumber] === "op") {
             pad.add(reduction)
             reduction.position.y = carat.position.y - .5
         }
