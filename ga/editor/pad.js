@@ -146,23 +146,14 @@ async function initPad(characterMeshHeight)
 		//./=+!:{}
 	}
 
-	function outputToColumn(result) {
-		v1.copy(outputColumn.position)
-		pad.worldToLocal(v1)
-		v1.y = drawingPosition.y
-		outlineCollection.draw(v1.x, v1.y, 1.)
-		result.drawInPlace(v1.x, v1.y)
-
-		if (carat.position.y === drawingPosition.y)
-			mainDw.addToScene(result)
-	}
-
 	let interimDisplayWindows = []
 	let drawingPosition = new THREE.Vector3()
 	let positionInStringClosestToCaratPosition = -1
 	let positionInStringClosestToCaratPositionVector = new THREE.Vector3()
 	let uncaughtCharacters = ""
 	updateFunctions.push( () => {
+		let drawingPositionInString = 0
+
 		pad.position.x = outputColumn.right() + pad.scale.x
 		let paddingAtTopOfPad = .35 * getWorldLineHeight()
 		if (pad.position.y < camera.topAtZZero - paddingAtTopOfPad)
@@ -187,11 +178,24 @@ async function initPad(characterMeshHeight)
 		let tokenCharactersLeft = 0
 
 		let superimposePosition = new THREE.Vector2(Infinity,Infinity)
+
+		let nextOrderedNameNumber = 0
+		carat.nextOrderedNameNumber = 0
+		function outputToColumn(result) {
+			v1.copy(outputColumn.position)
+			pad.worldToLocal(v1)
+			v1.y = drawingPosition.y
+			outlineCollection.draw(v1.x, v1.y, 1.)
+			result.drawInPlace(v1.x, v1.y)
+
+			if (carat.position.y === drawingPosition.y)
+				mainDw.addToScene(result)
+		}
 			
 		let yPositionOfVerticalCenterOfTopLine = -.5
 		drawingPosition.set(0., yPositionOfVerticalCenterOfTopLine, 0.)
 		let backgroundStringLength = backgroundString.length
-		for(let drawingPositionInString = 0; drawingPositionInString <= backgroundStringLength; ++drawingPositionInString)
+		for(drawingPositionInString; drawingPositionInString <= backgroundStringLength; ++drawingPositionInString)
 		{
 			//carat position
 			{
@@ -200,6 +204,7 @@ async function initPad(characterMeshHeight)
 						carat.flashingStart = clock.getElapsedTime()
 					carat.position.set(drawingPosition.x, drawingPosition.y, carat.position.z)
 				}
+				
 				if (carat.positionInString === -1) {
 					let closestYDist = Math.abs(positionInStringClosestToCaratPositionVector.y - carat.position.y)
 					let closestXDist = Math.abs(positionInStringClosestToCaratPositionVector.x - carat.position.x)
@@ -219,8 +224,7 @@ async function initPad(characterMeshHeight)
 
 			if (currentCharacter === " ")
 				drawingPosition.x += spaceWidth
-			else if (currentCharacter === "\n")
-			{
+			else if (currentCharacter === "\n") {
 				if (stack.length >= 3) {
 					let operandsAndOperator = [stack.pop(), stack.pop(), stack.pop()]
 					for (let i = 0; i < 3; i++) {
@@ -236,17 +240,21 @@ async function initPad(characterMeshHeight)
 							// o1 o o2 //1, 2, 0
 							// o1 o2 o //2, 1, 0
 
-							let result = getMvNamedByLineAtPosition(drawingPosition.y)
+							if(orderedNames[nextOrderedNameNumber] === undefined)
+								debugger
+							let result = getNamedMv(orderedNames[nextOrderedNameNumber])
 							operator(operand1.elements, operand2.elements, result.elements)
 
 							if (getGrade(operand1.elements) === 1 && getGrade(operand2.elements) === 1 )
 								result.setScalarDirection(getVector(operand1.elements, v1))
 
-							/*
-								exp of bivector: same as that bivector
-							*/
-
 							outputToColumn(result)
+
+							/*
+							Scalardirections
+								exp of bivector: same as that bivector
+								vectors a, b, ab -> scalar direction is a
+							*/
 						}
 					}
 				}
@@ -255,7 +263,7 @@ async function initPad(characterMeshHeight)
 					let operator = typeof operandAndOperator[0] === "function" ? operandAndOperator[0] : operandAndOperator[1]
 					let operand = typeof operandAndOperator[0] === "function" ? operandAndOperator[1] : operandAndOperator[0]
 					if( typeof operator === "function" && operand.elements !== undefined ) {
-						let result = getMvNamedByLineAtPosition(drawingPosition.y)
+						let result = getNamedMv(orderedNames[nextOrderedNameNumber])
 						operator(operand.elements, result.elements)
 
 						outputToColumn(result)
@@ -268,6 +276,10 @@ async function initPad(characterMeshHeight)
 				drawingPosition.x = 0.
 				drawingPosition.y -= 1.
 
+				++nextOrderedNameNumber
+				if (carat.positionInString > drawingPositionInString) //possibly >=
+					carat.nextOrderedNameNumber = nextOrderedNameNumber
+
 				superimposePosition.set(Infinity, Infinity)
 			}
 			else
@@ -279,42 +291,28 @@ async function initPad(characterMeshHeight)
 					if (functionDictionary[currentCharacter]!==undefined)
 						token = currentCharacter //currently all reserved symbols are functions
 					else if(currentCharacter === "[" ) { //variable length token whose characters are skipped over
-						for (let numSymbolsInArray = 1;
-							backgroundString[drawingPositionInString + numSymbolsInArray] !== "\n" &&
-							drawingPositionInString + numSymbolsInArray < backgroundStringLength;
-							++numSymbolsInArray )
-						{
-							if (backgroundString[drawingPositionInString + numSymbolsInArray] === "]") {
-								token = backgroundString.substr(drawingPositionInString+1, numSymbolsInArray-1) //no brackets
-								break
-							}
-						}
+						let target = getNamedMv(orderedNames[nextOrderedNameNumber])
+						parseMv(drawingPositionInString,target.elements)
+						stack.push(target)
 
-						let arr = token.split(";")
-
-						let result = getMvNamedByLineAtPosition(drawingPosition.y) //this is why it's currently ONE PER LINE
-						for (let i = 0; i < arr.length; ++i) {
-							if (i < arr.length)
-								result.elements[i] = parseFloat(arr[i])
-							else
-								result.elements[i] = 0.
-						}
-
-						result.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
+						target.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
 						outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
-						//a different colored outline? a mouse in the place you would grab? Well, outlines may be used for names
+						//a different colored outline? Well, outlines may be used for names
 
-						if (carat.position.y === drawingPosition.y) {
-							mainDw.setGrabbablePosition(result)
-							mainDw.addToScene(result)
+						if (carat.position.y === drawingPosition.y ) {
+							mainDw.addToScene(target)
+							if (target.name !== "b" && target.name !== "g" && target.name !== "o")
+								mainDw.setGrabbablePosition(target,drawingPositionInString)
 						}
 
-						stack.push(result)
-
-						//that you can do this means you can skip over letters in other places. It's like tabs
-						drawingPositionInString += 1+token.length
-						tokenCharactersLeft = 0
+						//that you can do this means you can skip over letters in other places. It's like tabs instead of spaces
+						while(backgroundString[drawingPositionInString] !== "]")
+							++drawingPositionInString
 						drawingPosition.x += 1.
+
+						++nextOrderedNameNumber
+						if (carat.positionInString > drawingPositionInString) //>=?
+							carat.nextOrderedNameNumber = nextOrderedNameNumber
 						continue
 					}
 					else {

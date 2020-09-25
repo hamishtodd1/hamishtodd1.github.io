@@ -126,9 +126,10 @@ function initReductions()
     })
     reduction.scale.y = 2. + 32./256.
     reduction.scale.x = 4. * reduction.scale.y
-    pad.add(reduction)
+	pad.add(reduction)
+	let thisIsHereToTellYouThatLineNumberIsNeededHere = -Infinity
     updateFunctions.push(() => {
-        if (allocatedNames[carat.lineNumber] === "op") {
+		if (carat.linNumber === thisIsHereToTellYouThatLineNumberIsNeededHere ) {
             pad.add(reduction)
             reduction.position.y = carat.position.y - .5
         }

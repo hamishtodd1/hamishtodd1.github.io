@@ -136,26 +136,15 @@ function initMainDw() {
     })
 
     addButton("vector", () => {
-        let caratNotAtBeginningOfLine = backgroundString[carat.positionInString] !== "\n" ||
-            (carat.positionInString !== 0 && backgroundString[carat.positionInString - 1] !== "\n")
-
-        if (caratNotAtBeginningOfLine) {
-            let backgroundStringLength = backgroundString.length
-            while (backgroundString[carat.positionInString] !== "\n" && carat.positionInString !== backgroundStringLength - 1)
-                ++carat.positionInString
-            makeNewLineAtCaratPosition()
-        }
-
-        let insertion = "[0.;0.;1.;0.;0.;0.;0.;0.]"
-        addStringAtCarat(insertion)
+        orderedNames.splice(carat.nextOrderedNameNumber, 0, getLowestUnusedName())
+        addStringAtCarat("[0.;0.;1.;0.;0.;0.;0.;0.]")
     })
 
     addButton("rotor", () => {
-        log("clicked rotor")
+        orderedNames.splice(carat.nextOrderedNameNumber, 0, getLowestUnusedName())
+        addStringAtCarat("[1.;0.;0.;0.;1.;0.;0.;0.]")
 
-        //bivector always goes up on screen, always in a certain plane
-
-        //probably the right thing to do is have a stanford teapot and rotate that thing
+        //have a stanford teapot and rotate that thing?
     })
 
     //better: doodle on what seems to you like a plane, but it's extruded in z because z is input time
@@ -189,7 +178,7 @@ function initMainDw() {
         })
     }
 
-    mainDw.setGrabbablePosition = (mvFromString) => {
+    mainDw.setGrabbablePosition = (mvFromString, openBracketPosition) => {
         let lowestUnusedGrabber = 0
         for (lowestUnusedGrabber; lowestUnusedGrabber < mainDw.grabbers.length; ++lowestUnusedGrabber) {
             if (mainDw.grabbers[lowestUnusedGrabber].visible === false)
@@ -199,14 +188,27 @@ function initMainDw() {
         }
 
         let gr = mainDw.grabbers[lowestUnusedGrabber]
+        gr.openBracketPosition = openBracketPosition
         gr.visible = true
-        if (getGrade(mvFromString.elements) === 1) {
-            getVector(mvFromString.elements, gr.position)
-            gr.position.applyQuaternion(displayRotation.q)
-            gr.position.applyMatrix4(mainDw.scene.matrix)
 
-            //the location of shit inside the dw is messed up, probably need to work on it
+        let grade = getGrade(mvFromString.elements)
+        if(grade === 0) {
+            mvFromString.getScalarDirection(gr.position)
+            gr.position.multiplyScalar(mvFromString.elements[0])
         }
+        else if (grade === 1) {
+            getVector(mvFromString.elements, gr.position)
+        }
+        else if(grade === "spinor" ) {
+            mvFromString.getImaginaryDirection(gr.position).multiplyScalar(bivectorMagnitude(mvFromString.elements))
+            gr.position.add(mvFromString.getScalarDirection(v1).multiplyScalar(mvFromString.elements[0]))
+        }
+        else {
+            // log("not able to do editing of these yet")
+        }
+
+        gr.position.applyQuaternion(displayRotation.q)
+        gr.position.applyMatrix4(mainDw.scene.matrix)
     }
 
     mainDw.beginFrame = () => {
@@ -243,45 +245,52 @@ function initMainDw() {
         }
     }
 
+    let grabbedGrabber = null
     onClicks.push({
         z: () => {
             return mouse.checkIfOnScaledUnitSquare(mainDw) ? 1. : -Infinity
         },
-        during:()=>{
-            //what if there are two?
+        start:()=>{
             mouse.getZZeroPosition(v1)
             mainDw.scene.updateMatrixWorld()
             mainDw.scene.worldToLocal(v1)
-            q1.copy(displayRotation.q).inverse()
-            v1.applyQuaternion(q1)
-            let elementsString = "0.;" + v1.x.toString() +";"+ v1.y.toString() +";"+ v1.z.toString() + "0.;0.;0.;0.;"
-            
-            let numberOfThisLine = 0
-            let openBracketPosition = -1
-            let closeBracketPosition = -1
-            for (let i = 0, il = backgroundString.length; i < il; ++i) {
-                if(carat.lineNumber === numberOfThisLine) {
-                    if(backgroundString[i] === "[")
-                        openBracketPosition = i
-                    if(backgroundString[i] === "]")
-                        closeBracketPosition = i
-                }
 
-                if(backgroundString[i] === "\n")
-                    ++numberOfThisLine
-            }
-            if (openBracketPosition !== -1) {
+            grabbedGrabber = null
+            let closestDistSq = Infinity
+            mainDw.grabbers.forEach((gr)=>{
+                let distSq = gr.position.distanceToSquared(v1)
+                if( distSq < closestDistSq ) {
+                    grabbedGrabber = gr
+                    closestDistSq = distSq
+                }
+            })
+        },
+        during:()=>{
+            let grade = getGrade(parseMv(grabbedGrabber.openBracketPosition,mm1))
+
+            if (grade === 1) {
+                mouse.getZZeroPosition(v1)
+                mainDw.scene.updateMatrixWorld(v1)
+                mainDw.scene.worldToLocal(v1)
+                q1.copy(displayRotation.q).inverse()
+                v1.applyQuaternion(q1)
+                let elementsString = "0.;" + v1.x.toString() +";"+ v1.y.toString() +";"+ v1.z.toString() + ";0.;0.;0.;0.;"
+
+                let closeBracketPosition = -1
+                for (let i = grabbedGrabber.openBracketPosition, il = backgroundString.length; i < il; ++i) {
+                    if (backgroundString[i] === "]") {
+                        closeBracketPosition = i
+                        break
+                    }
+                }
                 backgroundString =
-                    backgroundString.substring(0, openBracketPosition+1) +
+                    backgroundString.substring(0, grabbedGrabber.openBracketPosition + 1) +
                     elementsString +
                     backgroundString.substring(closeBracketPosition)
             }
+            else if(grade === "spinor") {
 
-            //want multiple in the window, and want to modify them from anywhere
-            //or maybe there's reasons you'd only want to modify them in place? Remind you where they're from and where else they're used?
-
-            //so you have the grabbers. Click one
-            //maybe the grabbers store an idea of what their value is
+            }
         }
     })
 }

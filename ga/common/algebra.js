@@ -15,7 +15,30 @@
 	4. Those get combined
 */
 
+function parseMv(start, targetElements){
+	let backgroundStringLength = backgroundString.length
+	for (let numSymbolsInArray = 1;
+		backgroundString[start + numSymbolsInArray] !== "\n" &&
+		start + numSymbolsInArray < backgroundStringLength;
+		++numSymbolsInArray)
+	{
+		if (backgroundString[start + numSymbolsInArray] === "]") {
+			let arr = backgroundString.substr(start + 1, numSymbolsInArray - 1).split(";") //no brackets
 
+
+			for (let i = 0; i < arr.length; ++i) {
+				if (i < arr.length)
+					targetElements[i] = parseFloat(arr[i])
+				else
+					targetElements[i] = 0.
+			}
+			return targetElements
+		}
+	}
+
+	console.error("no end to mv")
+	return target
+}
 
 
 function bivectorMagnitude(elements) {
@@ -303,13 +326,15 @@ function getGrade(e)
 		return -1;
 
 	if (e[0] !== 0. && !areAnyOthersNonZero(e, [0]))
-		return 0;
+		return 0
 	if ((e[1] !== 0. || e[2] !== 0. || e[3] !== 0.) && !areAnyOthersNonZero(e, [1, 2, 3]))
-		return 1;
+		return 1
 	if ((e[4] !== 0. || e[5] !== 0. || e[6] !== 0.) && !areAnyOthersNonZero(e, [4, 5, 6]))
-		return 2;
+		return 2
 	if (e[7] !== 0. && !areAnyOthersNonZero(e, [7]))
-		return 3;
+		return 3
+	if (e[0] !== 0. && e[1] === 0. && e[2] === 0. && e[3] === 0. && (e[4] !== 0. || e[5] !== 0. || e[6] !== 0.) && e[7] === 0. )
+		return "spinor"
 
 	return "compound";
 }

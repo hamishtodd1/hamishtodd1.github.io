@@ -4,8 +4,10 @@
 
 function initCarat()
 {
+	//these are what is precisely in front of the carat
 	carat.positionInString = -1
 	carat.lineNumber = -1
+	carat.nextOrderedNameNumber = -1
 
 	let oldY = Infinity
 	carat.movedVerticallySinceLastFrame = false

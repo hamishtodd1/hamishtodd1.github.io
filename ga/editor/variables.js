@@ -1,4 +1,4 @@
-let backgroundString = "[0.;0.;1.;0.;0.;0.;0.;0.]\n\nw  r  p\n\nw +w\nb  +g  \ng  *b  \np  +b  \nb *b \ngp+gp\nexp w\nrev bw\n(,)>r+r\ni*(j+k)=i*j+i*k\ntor\n"
+let backgroundString = "\nw +w\nb  +g  \ng  *b  \np  +b  \nb *b \ngp+gp\nexp w\nrev bw\n(,)>r+r\ni*(j+k)=i*j+i*k\ntor\n"
 
 let SHAFT_RADIUS = .06 //how thick an "infinitely thin" thing is, so vectors, lines, scalars
 
@@ -25,4 +25,4 @@ let mainDw = null
 let grabberIm = null
 
 //the basis vectors are before the lines
-allocatedNames = []
+orderedNames = []

@@ -111,28 +111,31 @@ function initMultivectorAppearances(characterMeshHeight)
             mesh.matrix.elements[columnAffectedByMagnitude*4 + 2] *= magnitude
         }
 
+        mv.getScalarDirection = (target) =>{return target.copy(scalarDirection).normalize()} //fuck you, don't touch it
+        mv.getImaginaryDirection = (target) => {
+            if (biv.visible) {
+                //we assume scalarDirection is in bivector plane. We could project it onto that
+                setVector(scalarDirection, mm1)
+
+                copyMultivector(mv.elements, mm2)
+                mm2[0] = 0.; mm2[1] = 0.; mm2[2] = 0.; mm2[3] = 0.; mm2[7] = 0.; //"select grade"
+                getVector(gProduct(mm1, mm2, mm), target).normalize()
+            }
+            else {
+                if (scalarDirection.x !== 0. || scalarDirection.y !== 0.)
+                    target.crossVectors(zUnit, scalarDirection).normalize() //because camera
+                else
+                    target.crossVectors(scalarDirection, yUnit).normalize()
+            }
+
+            return target
+        }
         mv.setScalarDirection = (newSd) => {
             scalarDirection.copy(newSd)
 
             //you probably shouldn't kid yourself that this communicates no information
             scalarDirection.normalize()
-            if (biv.visible)
-            {
-                //we assume scalarDirection is in bivector plane! We could project it
-                setVector(scalarDirection, mm1)
-
-                copyMultivector(mv.elements, mm2)
-                mm2[0] = 0.; mm2[1] = 0.; mm2[2] = 0.; mm2[3] = 0.; mm2[7] = 0.; //"select grade"
-
-                getVector(gProduct(mm1, mm2, mm), v2).normalize()
-            }
-            else
-            {
-                if (scalarDirection.x !== 0. || scalarDirection.y !== 0.)
-                    v2.crossVectors(zUnit, scalarDirection).normalize() //because camera
-                else
-                    v2.crossVectors(scalarDirection, yUnit).normalize()
-            }
+            mv.getImaginaryDirection(v2)
             v3.crossVectors(scalarDirection, v2).normalize()
             //I dunno, you might want setTrivectorDirection. Surely you only want that if you have scalar and bivector
             contextMatrix.makeBasis(scalarDirection, v2, v3)
