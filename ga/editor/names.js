@@ -16,25 +16,6 @@
     so essentially whenever there's anything between \n and \n
 */
 
-if(0)
-{
-    let somethingOnCurrentLine = false
-    for(let i = 0; i < backgroundString.length; ++i) {
-        if(backgroundString[i] === "\n") {
-            if (somethingOnCurrentLine)
-                //the line we just went through gets a name
-                log("not supposed to run this code")
-            
-            somethingOnCurrentLine = false
-        }
-        else if (backgroundString[i] !== " ") //ehh, it's more about that there was something in the stack
-            somethingOnCurrentLine = true
-    }
-
-    //there's editing the line and there's compiling the line 
-    //The editing creates the ordered list, lineNames, that is read by the compiler
-}
-
 function initNamesAndBasis()
 {
     let MAX_THINGS = 63 //7 choose 1 + 7 choose 2 + 7 choose 3
@@ -95,10 +76,8 @@ function initNamesAndBasis()
 
     backgroundString = 
         "[0.; 1.; 0.; 0.; 0.; 0.; 0.; 0.][0.; 0.; 1.; 0.; 0.; 0.; 0.; 0.][0.; 0.; 0.; 1.; 0.; 0.; 0.; 0.]\n"
-
-        + "[0.;-1.; 0.; 0.; 0.; 0.; 0.; 0.]\n"
-        + "[0.; 0.; 0.; 0.;2.5; 0.; 0.; 0.][1.; 0.; 0.; 0.; 0.; 0.; 0.; 0.]\n"
-        + "[1.; 0.; 0.; 0.;0.5; 0.; 0.; 0.]\n"
+        + "[0.;-1.; 0.; 0.; 0.; 0.; 0.; 0.][0.; 0.; 0.; 0.;2.5; 0.; 0.; 0.][1.; 0.; 0.; 0.; 0.; 0.; 0.; 0.]\n"
+        + "[.7071; 0.; 0.; 0.;.7071; 0.; 0.; 0.]\n"
         + backgroundString
 
     getLowestUnusedName = () => {
@@ -140,7 +119,7 @@ function initNamesAndBasis()
             log("too many variables for current system!")
         else {
             addStringAtCarat("\n")
-            orderedNames.splice(carat.nextOrderedNameNumber, 0, getLowestUnusedName())
+            orderedNames.splice(carat.nextOrderedNameNumber+1, 0, getLowestUnusedName())
             //the deal is that you might have just broken up a line that makes something into two lines that make something
             //it's the same problem with deleting and backspace
             //we can avoid having to add one here, but then where do you add it?
@@ -152,51 +131,48 @@ function initNamesAndBasis()
     })
 
     //TODO these should fully remove mvs too. There's really very little reason to see the name after you've made it
-    // bindButton("Backspace", () => {
-    //     if (backgroundString[carat.positionInString-1] === "]") {
-    //         let arrayStrLength = 2
-    //         for (arrayStrLength, lengthl = backgroundString.length; arrayStrLength < lengthl; ++arrayStrLength) {
-    //             if (backgroundString[carat.positionInString - arrayStrLength] === "[")
-    //                 break
-    //         }
+    bindButton("Backspace", () => {
+        if (carat.positionInString === 0)
+            return
+        
+        let strLength = 1
 
-    //         backgroundString =
-    //             backgroundString.substring(0, carat.positionInString - arrayStrLength) +
-    //             backgroundString.substring(carat.positionInString)
-            
-    //         carat.moveAlongString(-arrayStrLength)
-    //     }
-    //     else if (carat.positionInString !== 0) {
-    //         if (backgroundString[carat.positionInString-1] === "\n")
-    //             orderedNames.splice(carat.lineNumber, 1)
+        if (backgroundString[carat.positionInString - 1] === "\n")
+            orderedNames.splice(carat.nextOrderedNameNumber, 1)
+        else if (backgroundString[carat.positionInString - 1] === "]") {
+            let backgroundStringLength = backgroundString.length
+            for (strLength; strLength < backgroundStringLength; ++strLength) {
+                if (backgroundString[carat.positionInString - strLength] === "[")
+                    break
+            }
+        }
 
-    //         backgroundString =
-    //             backgroundString.substring(0, carat.positionInString - 1) + 
-    //             backgroundString.substring(carat.positionInString)
+        backgroundString =
+            backgroundString.substring(0, carat.positionInString - strLength) +
+            backgroundString.substring(carat.positionInString)
 
-    //         carat.moveAlongString(-1)
-    //     }
-    // })
-    // bindButton("Delete", () => {
-    //     if(backgroundString[carat.positionInString] === "["){
-    //         let arrayStrLength = 1
-    //         for(arrayStrLength, lengthl = backgroundString.length; arrayStrLength < lengthl; ++arrayStrLength)
-    //             if(backgroundString[carat.positionInString+arrayStrLength] === "]") {
-    //                 ++arrayStrLength
-    //                 break
-    //             }
+        carat.moveAlongString(-strLength)
+    })
+    bindButton("Delete", () => {
+        let backgroundStringLength = backgroundString.length
+        if (carat.positionInString === backgroundStringLength-1)
+            return
 
-    //         backgroundString =
-    //             backgroundString.substring(0, carat.positionInString) +
-    //             backgroundString.substring(carat.positionInString + arrayStrLength)
-    //     }
-    //     else {
-    //         if (backgroundString[carat.positionInString] === "\n")
-    //             orderedNames.splice(carat.lineNumber+1, 1)
+        let strLength = 1
 
-    //         backgroundString = 
-    //             backgroundString.substring(0, carat.positionInString) + 
-    //             backgroundString.substring(carat.positionInString + 1)
-    //     }
-    // })
+        if (backgroundString[carat.positionInString] === "\n")
+            orderedNames.splice(carat.nextOrderedNameNumber, 1)
+        else if (backgroundString[carat.positionInString] === "[") {
+            let backgroundStringLength = backgroundString.length
+            for (strLength; strLength < backgroundStringLength; ++strLength)
+                if (backgroundString[carat.positionInString + strLength] === "]") {
+                    ++strLength
+                    break
+                }
+        }
+
+        backgroundString =
+            backgroundString.substring(0, carat.positionInString) +
+            backgroundString.substring(carat.positionInString + strLength)
+    })
 }

@@ -99,16 +99,14 @@ function initTypeableCharacters(carat, maxCopiesOfALetter)
 			displayedCharacter = character
 
 		let material = null
-		if (character === "|")
-		{
+		if (character === "|") {
 			material = new THREE.MeshBasicMaterial()
 			new THREE.TextureLoader().load("data/integral.png", function (result) { material.map = result; material.needsUpdate = true })
 			material.getAspect = () => { return 1. }
 		}
 		else material = text(displayedCharacter, true)
 
-		if (colors[character] !== undefined)
-		{
+		if (colors[character] !== undefined) {
 			material.color.r = colors[character].r * .7 + .3
 			material.color.g = colors[character].g * .7 + .3
 			material.color.b = colors[character].b * .7 + .3
@@ -121,8 +119,7 @@ function initTypeableCharacters(carat, maxCopiesOfALetter)
 
 		characters.instancedMeshes[character] = instancedMesh
 		characters.array += character
-		if (displayedCharacter !== character)
-		{
+		if (displayedCharacter !== character) {
 			characters.instancedMeshes[displayedCharacter] = instancedMesh
 			characters.array += displayedCharacter
 		}

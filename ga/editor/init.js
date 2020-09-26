@@ -1,7 +1,7 @@
 /* 
 	Next
-		Editing
-		
+		More editing
+		Two display windows?
 		
 		Superimposed things should be visible. Whichever thing is smaller. Easy peasy if you use webgl
 		Making functions
@@ -14,6 +14,18 @@
 
 	Bret article http://worrydream.com/DrawingDynamicVisualizationsTalkAddendum/
 	https://en.wikipedia.org/wiki/Binary_expression_tree
+
+	For a worthwhile 6 months
+		Want to know C++ and Unreal, so an add on of some kind
+			Things to hook up
+				dual quaternions -> matrices
+				scalars -> floats
+				vectors -> vectors
+				*sigh* -> cross product
+				parametric functions -> arrays
+		UE is for professionals
+		If you want to target youth, unity is probably the way to go
+
 
 	TODO demo
 		Functions

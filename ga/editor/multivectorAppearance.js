@@ -169,15 +169,16 @@ function initMultivectorAppearances(characterMeshHeight)
         mv.beginFrame = () => {
             mv.padGroup.children.forEach((child) => { child.count = 0 })
 
-            sca.visible = mv.elements[0] ? true : false
+            let eps = .00001
+            sca.visible = Math.abs( mv.elements[0] ) > eps
             vec.visible = !getVector(mv.elements, v1).equals(zeroVector)
             biv.visible = !getBivec(mv.elements, v1).equals(zeroVector)
-            tri.visible = mv.elements[7] ? true : false
+            tri.visible = Math.abs( mv.elements[7] ) > eps
             zero.visible = !(sca.visible || vec.visible || biv.visible || tri.visible)
 
             mv.boundingSphereRadius = .0000001
             if (sca.visible)
-                mv.boundingSphereRadius = Math.max(mv.boundingSphereRadius, mv.elements[0])
+                mv.boundingSphereRadius = Math.max(mv.boundingSphereRadius, Math.abs(mv.elements[0]), 1.)
             if (vec.visible)
                 mv.boundingSphereRadius = Math.max(mv.boundingSphereRadius, getVector(mv.elements, v1).length())
             if (tri.visible) {
@@ -216,6 +217,20 @@ function initMultivectorAppearances(characterMeshHeight)
                 ++zeroPad.count
             }
 
+            if( sca.visible ) {
+                if (scaPad.count === 0) {
+                    applyContext(sca, 0, mv.elements[0])
+
+                    // if (biv.visible) {
+                    //     v1.set(0., 1., 0.)
+                    //     v1.applyMatrix4(biv.matrix)
+                    //     sca.matrix.setPosition(v1)
+                    // }
+                }
+
+                boxDraw(scaPad, x, y, sca.matrix, mv.boundingSphereRadius)
+            }
+
             if (vec.visible) {
                 if(vecPad.count === 0) {
                     vec.matrix.identity()
@@ -230,21 +245,6 @@ function initMultivectorAppearances(characterMeshHeight)
                 }
 
                 boxDraw(vecPad, x, y, vec.matrix, mv.boundingSphereRadius)
-            }
-
-            if( sca.visible ) {
-                if (scaPad.count === 0) {
-                    applyContext(sca, 0, mv.elements[0])
-
-                    // if (biv.visible) {
-                    //     v1.set(0., 1., 0.)
-                    //     v1.applyMatrix4(biv.matrix)
-                    //     sca.matrix.setPosition(v1)
-                    // }
-                }
-                // av
-
-                boxDraw(scaPad, x, y, sca.matrix, mv.boundingSphereRadius)
             }
 
             if(biv.visible) {

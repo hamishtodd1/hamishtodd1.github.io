@@ -189,6 +189,7 @@ function initMainDw() {
 
         let gr = mainDw.grabbers[lowestUnusedGrabber]
         gr.openBracketPosition = openBracketPosition
+        gr.mv = mvFromString
         gr.visible = true
 
         let grade = getGrade(mvFromString.elements)
@@ -198,6 +199,10 @@ function initMainDw() {
         }
         else if (grade === 1) {
             getVector(mvFromString.elements, gr.position)
+        }
+        else if(grade === 2) {
+            gr.position.copy(mvFromString.getImaginaryDirection(v1))
+            gr.position.multiplyScalar(bivectorMagnitude(mvFromString.elements))
         }
         else if(grade === "spinor" ) {
             mvFromString.getImaginaryDirection(gr.position).multiplyScalar(bivectorMagnitude(mvFromString.elements))
@@ -217,7 +222,11 @@ function initMainDw() {
                 mainDw.scene.remove(c)
         })
 
-        mainDw.grabbers.forEach((g) => { g.visible = false })
+        mainDw.grabbers.forEach((gr) => {
+            gr.visible = false
+            gr.openBracketPosition = null
+            gr.mv = null
+        })
     }
 
     mainDw.resetScene = ()=>{
@@ -234,18 +243,30 @@ function initMainDw() {
         //check if the other products are boolean operations?
 
         mainDw.scene.add(obj.dw)
-        let maxScaleForContainment = .5 / obj.boundingSphereRadius
-        if (mainDw.scene.scale.x > maxScaleForContainment) {
-            mainDw.scene.scale.setScalar(maxScaleForContainment)
-
-            //wanna stop flick? It's weird
-            // mainDw.scene.updateMatrix()
-            // mainDw.scene.updateMatrixWorld()
-            // obj.dw.updateMatrixWorld()
+        if (grabbedGrabber === null) {
+            let maxScaleForContainment = .5 / obj.boundingSphereRadius
+            if (mainDw.scene.scale.x > maxScaleForContainment)
+                mainDw.scene.scale.setScalar(maxScaleForContainment)
         }
     }
 
     let grabbedGrabber = null
+    let parsedMv = MathematicalMultivector()
+    function updateBackgroundString() {
+        let closeBracketPosition = -1
+        let backgroundStringLength = backgroundString.length
+        for (let i = grabbedGrabber.openBracketPosition; i < backgroundStringLength; ++i) {
+            if (backgroundString[i] === "]") {
+                closeBracketPosition = i
+                break
+            }
+        }
+        backgroundString =
+            backgroundString.substring(0, grabbedGrabber.openBracketPosition + 1) +
+            parsedMv.join(";") +
+            backgroundString.substring(closeBracketPosition)
+        carat.positionInString = grabbedGrabber.openBracketPosition
+    }
     onClicks.push({
         z: () => {
             return mouse.checkIfOnScaledUnitSquare(mainDw) ? 1. : -Infinity
@@ -266,31 +287,71 @@ function initMainDw() {
             })
         },
         during:()=>{
-            let grade = getGrade(parseMv(grabbedGrabber.openBracketPosition,mm1))
-
-            if (grade === 1) {
-                mouse.getZZeroPosition(v1)
-                mainDw.scene.updateMatrixWorld(v1)
-                mainDw.scene.worldToLocal(v1)
+            mouse.getZZeroPosition(v1)
+            mainDw.scene.updateMatrixWorld(v1)
+            mainDw.scene.worldToLocal(v1)
+            
+            parseMv(grabbedGrabber.openBracketPosition, parsedMv)
+            let grade = getGrade(parsedMv)
+            if (grade === 0)
+                parsedMv[0] = v1.dot(grabbedGrabber.mv.getScalarDirection(v2))
+            else if (grade === 1) {
                 q1.copy(displayRotation.q).inverse()
                 v1.applyQuaternion(q1)
-                let elementsString = "0.;" + v1.x.toString() +";"+ v1.y.toString() +";"+ v1.z.toString() + ";0.;0.;0.;0.;"
 
-                let closeBracketPosition = -1
-                for (let i = grabbedGrabber.openBracketPosition, il = backgroundString.length; i < il; ++i) {
-                    if (backgroundString[i] === "]") {
-                        closeBracketPosition = i
-                        break
-                    }
-                }
-                backgroundString =
-                    backgroundString.substring(0, grabbedGrabber.openBracketPosition + 1) +
-                    elementsString +
-                    backgroundString.substring(closeBracketPosition)
+                setVector(v1, parsedMv)
+                //If mouse is on unit sphere, you have the front
+                //if it's further out we loop around to the back of the sphere
+                //bad idea, you do want that planar thing going on
+            }
+            else if (grade === 2) {
+                let newBivectorMagnitude = v1.dot(grabbedGrabber.mv.getImaginaryDirection(v2))
+                let multiple = newBivectorMagnitude / bivectorMagnitude(parsedMv)
+                parsedMv[4] *= multiple
+                parsedMv[5] *= multiple
+                parsedMv[6] *= multiple
             }
             else if(grade === "spinor") {
+                v1.normalize()
 
+                parsedMv[0] = v1.dot(grabbedGrabber.mv.getScalarDirection(v2))
+                
+                let newBivectorMagnitude = v1.dot(grabbedGrabber.mv.getImaginaryDirection(v2))
+                let multiple = newBivectorMagnitude / bivectorMagnitude(parsedMv)
+                parsedMv[4] *= multiple
+                parsedMv[5] *= multiple
+                parsedMv[6] *= multiple
             }
+            else if(grade === 3)
+                parsedMv[7] = v1.length()
+
+            updateBackgroundString()
+        },
+        end:()=>{
+            let grade = getGrade(parsedMv)
+
+            if(grade === "spinor") {
+                let bvm = bivectorMagnitude(parsedMv)
+                if (bvm < .05 ) {
+                    parsedMv[0] = parsedMv[0] > 0. ? 1. : -1.
+
+                    parsedMv[4] = 0.
+                    parsedMv[5] = 0.
+                    parsedMv[6] = 0.
+                }
+                if(bvm > .95) {
+                    parsedMv[0] = 0.
+
+                    let multiple = 1./bvm
+                    parsedMv[4] *= multiple
+                    parsedMv[5] *= multiple
+                    parsedMv[6] *= multiple
+                }
+            }
+
+            updateBackgroundString()
+
+            grabbedGrabber = null
         }
     })
 }

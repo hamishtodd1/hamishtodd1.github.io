@@ -210,8 +210,7 @@ async function initPad(characterMeshHeight)
 					let closestXDist = Math.abs(positionInStringClosestToCaratPositionVector.x - carat.position.x)
 					let drawingYDist = Math.abs(drawingPosition.y - carat.position.y)
 					let drawingXDist = Math.abs(drawingPosition.x - carat.position.x)
-					if (drawingYDist < closestYDist || (drawingYDist === closestYDist && drawingXDist < closestXDist))
-					{
+					if (drawingYDist < closestYDist || (drawingYDist === closestYDist && drawingXDist < closestXDist)) {
 						positionInStringClosestToCaratPosition = drawingPositionInString
 						positionInStringClosestToCaratPositionVector.copy(drawingPosition)
 					}
@@ -340,15 +339,15 @@ async function initPad(characterMeshHeight)
 						//if you're on the line you see all the operations split up into mvs and symbols
 						//if you have more than one function on a line, and your carat isn't on it, could do the superimposing a little bit
 
-						if(token === "exp") {
-							expViz.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
-							outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
+						// if(token === "exp") {
+						// 	expViz.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
+						// 	outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
 
-							if (carat.position.y === drawingPosition.y)
-								mainDw.addToScene(expViz)
+						// 	if (carat.position.y === drawingPosition.y)
+						// 		mainDw.addToScene(expViz)
 
-							drawCharacters = false
-						}
+						// 	drawCharacters = false
+						// }
 					}
 					else if (token === "tor") {
 						torusViz.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
