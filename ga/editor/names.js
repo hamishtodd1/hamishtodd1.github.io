@@ -119,7 +119,7 @@ function initNamesAndBasis()
             log("too many variables for current system!")
         else {
             addStringAtCarat("\n")
-            orderedNames.splice(carat.nextOrderedNameNumber+1, 0, getLowestUnusedName())
+            orderedNames.splice(carat.nextOrderedNameNumber, 0, getLowestUnusedName())
             //the deal is that you might have just broken up a line that makes something into two lines that make something
             //it's the same problem with deleting and backspace
             //we can avoid having to add one here, but then where do you add it?
@@ -138,7 +138,7 @@ function initNamesAndBasis()
         let strLength = 1
 
         if (backgroundString[carat.positionInString - 1] === "\n")
-            orderedNames.splice(carat.nextOrderedNameNumber, 1)
+            orderedNames.splice(carat.nextOrderedNameNumber-1, 1)
         else if (backgroundString[carat.positionInString - 1] === "]") {
             let backgroundStringLength = backgroundString.length
             for (strLength; strLength < backgroundStringLength; ++strLength) {

@@ -82,7 +82,7 @@
             volume, white gas
             isosurface at 0
             isosurface at controllable level. Between, if you slice it, MRI-style texturing
-        R3->C,R2
+        R3->C orR2
             pair of isosurfaces
             volumetric: hue and brightness
             colored isosurface. You choose a certain complex number magnitude and it uses hue circle
@@ -90,13 +90,13 @@
         R3->R3
             volumetric
             vector field
-            3 color isosurface
+            3 color isosurface. Ehhhh... need darkness for shading
             distorted cubic grid (collection of isosurfaces)
 
         R3->3x3 matrices
             diffusive tensor only has 6 elements. How does it compare with electromagnetic field?
             there's literature
-        R2->R3,R3
+        R2->R3 x R3
             Rasterization and texture mappiiiiiing
 
     Vector->vector
@@ -202,8 +202,10 @@ function initFuncViz()
                 })
             }
         }
-        else if (inputDimension === 2 && outputDimension === 3)
-        {
+        else if (inputDimension === 2 && outputDimension === 2) {
+            
+        }
+        else if (inputDimension === 2 && outputDimension === 3) {
             geo = new THREE.PlaneGeometry(1., 1., numSamples - 1, numSamples - 1)
             mat = surfaceMaterial
             
@@ -269,5 +271,18 @@ function initFuncViz()
         target.z = Math.cos(latitude) * Math.cos(longtitude)
     }
     // let sqFunc = (x) => x * x //shader mofo. Transpile to glsl
-	// let sqViz = FuncViz(sqFunc, 1, 1)
+    // let sqViz = FuncViz(sqFunc, 1, 1)
+    
+    function bubbleFunc(longtitude,latitudeTimes2,target) {
+        let latitude = latitudeTimes2 / 2.
+        target.y = Math.sin(latitude)
+        target.x = Math.cos(latitude) * Math.sin(longtitude)
+        target.z = Math.cos(latitude) * Math.cos(longtitude)
+
+        let numCycles = 6
+        let hue = numCycles * latitude
+        while(hue < TAU)
+            hue -= TAU
+        target.setHSL(hue, 1., 1.)
+    }
 }
