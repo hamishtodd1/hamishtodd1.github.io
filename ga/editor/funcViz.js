@@ -1,5 +1,5 @@
 /*
-    Obvious test case: map earth's surface
+    Test case: earth
         you have the mapping I2->R3:
             cos(x)sin(y)
             sin(x)sin(y)
@@ -10,10 +10,11 @@
         Maybe your colors come from that RP2 thing you thought of?
         Or colors are directions in R3?
         Well, they're points in the positive octant of R3, aka I3
+        Funny how you can map points to the I3 clip space or the I3 color space. What does a photo look like if color space is ordinary space?
 
-    Maybe only visualize functions that are -> points or vectors, others get the characters
+    Maybe only visualize functions that are -> points or vectors or spinors (colors), others get the characters
 
-    color just has completely different meaning for the functions because you haven't bound anything
+    color just has completely different meaning for the functions (because you haven't bound anything)
 
     Click the things in the column, changes representation
 
@@ -285,4 +286,99 @@ function initFuncViz()
             hue -= TAU
         target.setHSL(hue, 1., 1.)
     }
+}
+
+if(0) {
+    let vertexShaderHeader = [
+        'varying vec2 d;', //domain
+        'varying vec3 r;', //range
+
+        //could have these, which you then use:
+        //'attribute mat3 mm1'
+        //but if you're compiling every frame...
+
+        'void main() {',
+        '	d = position.xy;',
+        '	r = vec3(d.xy,0.);', //initialization
+        '   ',
+    ].join("\n")
+    let vertexShaderFooter = [
+        '',
+        '	gl_Position = projectionMatrix * modelViewMatrix * vec4(r, 1.0);',
+        '}',
+    ].join("\n")
+
+    let fragmentShaderHeader = [
+        'varying vec2 d;',
+        'varying vec3 r;',
+        'void main() {',
+        '   float h = 0.;', //hue
+        '   ',
+    ].join("\n")
+    let fragmentShaderFooter = [
+        '',
+        '   h = fract(h);',
+
+        '	gl_FragColor = vec4(0., 0., 0., 1.);',
+        '	float hexant = floor(h * 6.);',
+        '	float factor = h * 6. - hexant;',
+
+        '   gl_FragColor.r = ',
+        '       hexant == 2. || hexant == 3. ? 0. :',
+        '       hexant == 0. || hexant == 5. ? 1. :',
+        '       hexant == 4. ? factor : 1.-factor;',
+        '   gl_FragColor.g = ',
+        '       hexant == 4. || hexant == 5. ? 0. :',
+        '       hexant == 1. || hexant == 2. ? 1. :',
+        '       hexant == 0. ? factor : 1.-factor;',
+        '   gl_FragColor.b = ',
+        '       hexant == 0. || hexant == 1. ? 0. :',
+        '       hexant == 3. || hexant == 4. ? 1. :',
+        '       hexant == 2. ? factor : 1.-factor;',
+        '}'
+
+        //then lerp towards (1.,1.,1.) if you want to reduce saturation
+        //THEN lerp towards (0.,0.,0.) if you want to reduce value
+    ].join("\n")
+
+    let geo = new THREE.PlaneBufferGeometry(1., 1., 255, 255)
+    geo.translate(.5, .5, 0.)
+
+    ShaderMesh = (vertexString, fragmentString) => {
+        let material = new THREE.ShaderMaterial({});
+        material.vertexShader = vertexShaderHeader + (vertexString||"") + vertexShaderFooter
+        material.fragmentShader = fragmentShaderHeader + (fragmentString||"") + fragmentShaderFooter
+        return new THREE.Mesh(geo, material);
+    }
+
+    let mandelbrotShader = [
+        'float threshold = 4.;',
+        'vec2 z = vec2(0.,0.);',
+
+        'float scale = 2.5;',
+        'vec2 center = vec2(0.8,0.5);',
+
+        'float x0 = (d.x - center.x) * scale;',
+        'float y0 = (d.y - center.y) * scale;',
+
+        'float xTemp = 0.;',
+        'float iterations = 0.;',
+        'int maxIterations = 32;',
+        '#pragma unroll_loop_start',
+        'for ( int i = 0; i < maxIterations; ++i ) {',
+        '    iterations += z.x * z.x + z.y * z.y <= threshold ? 1.: 0.;',
+        '    xTemp = z.x * z.x - z.y * z.y + x0;',
+        '    z.y = 2. * z.x * z.y + y0;',
+        '    z.x = xTemp;',
+        '}',
+        '#pragma unroll_loop_end',
+
+        'h = iterations / float(maxIterations);'
+    ].join("\n")
+
+    let m = ShaderMesh(
+        'r.x = 16.*d.x - 8.;\n   r.y = 16.*d.y - 8.;',
+        mandelbrotShader
+    )
+    scene.add(m)
 }

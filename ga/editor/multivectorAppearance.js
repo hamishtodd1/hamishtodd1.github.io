@@ -1,10 +1,11 @@
 /*
+    Scalar could be half circle
+
     TODO
         colors for 0
 
     Scalar
-        How about this opacity thing?
-        So, what, background is grey and positive makes it white and negative makes it black?
+        So, what, background is grey and positive makes it white and negative makes it black?  
         It offers unity with the way you want to graph things
         It conveys that scalars are directionless
         It MIGHT be an advantage that you can't see comparisons that well. "if you want to represent it spatially you have to multiply it by something"
@@ -219,7 +220,9 @@ function initMultivectorAppearances(characterMeshHeight)
 
             if( sca.visible ) {
                 if (scaPad.count === 0) {
-                    applyContext(sca, 0, mv.elements[0])
+                    // m1.identity()
+                    sca.matrix.identity()
+                    // applyContext(sca, 0, mv.elements[0])
 
                     // if (biv.visible) {
                     //     v1.set(0., 1., 0.)

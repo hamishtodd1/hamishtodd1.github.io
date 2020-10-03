@@ -1,6 +1,15 @@
 /* 
 	Next
-		Two display windows?
+		Two display windows? 
+			One where the mouse is and one where the carat is. Hover an mv anywhere and you get the displaywindow and can put your mouse in it
+		remove the "vector" "rotor" "curve" labels
+		Backspace deletes whole mv
+		Bug with names still
+
+		Alright so you have the origin, what happens if you apply your elements to it?
+		What you want is a function/mesh that you then transform with your nice things
+		mesh: You want to give the unit square, which is a set of points, to a function, and see the fuckers mapped
+			Or the unit line, that's nice too
 		
 		Making functions
 			so the function is named by colors, that's good
@@ -9,8 +18,10 @@
 			Then when you leave the indents, those variable names are available again
 			And need to have curve-drawing integrated
 
-	Bret article http://worrydream.com/DrawingDynamicVisualizationsTalkAddendum/
-	https://en.wikipedia.org/wiki/Binary_expression_tree
+	Make videos about
+		maps
+		quaternions and complex numbers
+			For this... a function from points to vectors would be fucking fine
 
 	For a worthwhile 6 months
 		Want to know C++ and Unreal, so an add on of some kind
@@ -25,13 +36,15 @@
 
 	TODO demo
 		Functions
-			More visualizations
-				Vector fields
 			Can be written
 			made by drawing in view
-				fourier approximation. If you loop back it's a 2D function, if not 1D
-		Simple harmonic oscillator
-			time evolution rule, harder on time function
+		Increasing complexity
+			Simple harmonic oscillator
+				time evolution rule
+			Double pendulum
+				Need numerical simulation
+			Heat on a rod, Schrodinger equation
+				Need to compute on a texture
 		Evolution on fields
 		Basic Omicron reduction
 			You highlight
@@ -96,73 +109,7 @@ async function init()
 {
 	let characterMeshHeight = .4
 
-	// https://www.geogebra.org/m/XzSAYB9D
-
-	let material = new THREE.ShaderMaterial({});
-	let shaderHeader = [
-		'varying vec2 pDomain;',
-		'varying vec3 pRange;',
-		'void main() {'
-	].join("\n")
-	let vertexShaderFooter = [
-		'	gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
-		'	pRange = vec3(gl_Position);',
-		'	pDomain = position.xy;',
-		'}',
-	].join("\n")
-	let fragmentShaderFooter = [
-		'	gl_FragColor = vec4(0., 0., 0., 1.);',
-		'	float hexant = floor(hue * 6.);',
-		'	float factor = hue * 6. - hexant;',
-		'	if (hexant == 0.) {',
-		'		gl_FragColor.r = 1.;',
-		'		gl_FragColor.g = factor;',
-		'		gl_FragColor.b = 0.;',
-		'	}',
-		'	else if (hexant == 1.) {',
-		'		gl_FragColor.r = 1.-factor;',
-		'		gl_FragColor.g = 1.;',
-		'		gl_FragColor.b = 0.;',
-		'	}',
-		'	else if (hexant == 2.) {',
-		'		gl_FragColor.b = factor;',
-		'		gl_FragColor.r = 0.;',
-		'		gl_FragColor.g = 1.;',
-		'	}',
-		'	else if (hexant == 3.) {',
-		'		gl_FragColor.b = 1.;',
-		'		gl_FragColor.r = 0.;',
-		'		gl_FragColor.g = 1.-factor;',
-		'	}',
-		'	else if (hexant == 4.) {',
-		'		gl_FragColor.b = 1.;',
-		'		gl_FragColor.r = factor;',
-		'		gl_FragColor.g = 0.;',
-		'	}',
-		'	else if (hexant == 5.) {',
-		'		gl_FragColor.b = 1.-factor;',
-		'		gl_FragColor.r = 1.;',
-		'		gl_FragColor.g = 0.;',
-		'	}',
-		'}'
-	].join("\n")
-	material.vertexShader = [
-		shaderHeader,
-		'	vec3 mappedPosition = position;', //and here you put something interesting
-		vertexShaderFooter
-	].join("\n")
-	material.fragmentShader = [
-		shaderHeader,
-		'	float hue = pDomain.y * pDomain.x;', //strictly less than 1
-		fragmentShaderFooter
-	].join("\n")
-
-	let geo = new THREE.PlaneBufferGeometry(1., 1., 255, 255)
-	geo.translate(.5,.5,0.)
-	let plane = new THREE.Mesh( geo, material );
-	scene.add(plane);
-
-	return
+	//lawson klein https://www.geogebra.org/m/XzSAYB9D
 
 	initFuncViz()
 
