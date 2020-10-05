@@ -1,51 +1,20 @@
 /*
-    Sticking textures i.e. pictures i.e. I2->I3 in places will be veeeeeeery useful for giving diagrams character
-
     Consider a single pixel and only black and white
     rasterization is minimum
-    The general rasterization thing is  -> I. 
-        The interesting part is ->(I3,I3)
-        The special cases are
-            volumetric, which is integral over I
-            Texture mapped, which is color:min(fragments.z)
+    The general rasterization thing is  -> I
     f:I2->I3 is the uvs
     g:I2->colorspace is the texture
     so you have p in I2. f(p) is your color and g(p) is your position
 
-    Continuousness problem.
-        Essentially you want one vertex per pixel.
-        So, everything is points?
-
-    Note that you'll never do more than a curve through n-space because you only have one dimension of time
-    Anything higher and you need combination-based stuff
-
-    Fairly likely: you want to make one vector in terms of two or three others (Maybe also them-multiplied-by-integer complex numbers).
-
-    choosing the next thing to happen
-        it'd be crowded to have every single variable. But maybe they only appear in place if you're almost going to snap to them?
-        drawing
-            functions from time to multivectors
-            individual multivectors
-            draw on top of what's already in there, eg a tangent vector on a curve
-            Grabbing a free parameter and editing it
-    
-    Fourier or taylor? Well sometimes you join up your loop. Fourier for that
-        If you've got projective geometry, i.e. lines = circles with center at infinity, can't you have a square wave represented exactly?
-
-    So you're on a new line
+    How new things get made
+        You're on a new line
         There's a displayWindow but nothing in there
         You type some mvs, say 3 of them, and they appear in there but you don't have an operation yet
         If you click in the thing you make a new mv. Only got the 2 dimensions soooo
-        System goes through every combination of + and * for... certainly the basis vectors and what you've put in your line, maybe your whole scope
-
-    Could put only highlighted ones in there
-
-    making the things with the mouse, in a certain plane
-        Vector, translator
-        "transformation" may roll together many things? Click in one place, unclick in another
-
-    We also want this thing to be able to edit, not just create
-        
+        System goes through every combination of + and * and *[1,2,3] for... certainly the basis vectors and what you've put in your line, maybe your whole scope
+        May want to draw a tangent direction on a surface
+        it'd be crowded to have every single variable. But maybe they only appear in place if you're almost going to snap to them?
+        people know what output they want and what inputs it has so they select it
 */
 
 function initGrabber() {

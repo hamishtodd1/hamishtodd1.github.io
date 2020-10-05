@@ -15,8 +15,6 @@
             Maybe a continuous mapping that you just happen to have stored a bunch of results of
             Hmm, maybe continuous-everywhere is a good idea? requires sigma -> integral
 		https://en.wikipedia.org/wiki/List_of_common_physics_notations
-
-	
 */
 
 function boxDraw(im, x, y, matrixToCopy, boundingSphereRadius) {
@@ -339,15 +337,15 @@ async function initPad(characterMeshHeight)
 						//if you're on the line you see all the operations split up into mvs and symbols
 						//if you have more than one function on a line, and your carat isn't on it, could do the superimposing a little bit
 
-						// if(token === "exp") {
-						// 	expViz.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
-						// 	outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
+						if(token === "exp") {
+							expViz.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
+							outlineCollection.draw(drawingPosition.x + .5, drawingPosition.y, 1.)
 
-						// 	if (carat.position.y === drawingPosition.y)
-						// 		mainDw.addToScene(expViz)
+							if (carat.position.y === drawingPosition.y)
+								mainDw.addToScene(expViz)
 
-						// 	drawCharacters = false
-						// }
+							drawCharacters = false
+						}
 					}
 					else if (token === "tor") {
 						torusViz.drawInPlace(drawingPosition.x + .5, drawingPosition.y)

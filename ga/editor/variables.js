@@ -1,4 +1,4 @@
-let backgroundString = "\nb  +g  \ng  *b  \nr  +b  \nb *b \nexp y\nrev bw\ni*(j+k)=i*j+i*k\ntor\n\n"
+let backgroundString = "\nb  +g  \ng  *b  \nr  +b  \nb *b \nexp y\nrev bw\n\n\n"
     // + "def sq(ow)\n  ow*ow"
     // + "([0.;-1.;0.;0.;0.;0.;0.;0.],[0.;-1.;0.;0.;0.;0.;0.;0.])\npr=or+ow\npr(b,g)"
 

@@ -1,19 +1,10 @@
 /*
+    More generic approach to coloring: stripes are radial spheres. Rotate and it does nothing
+
     We have alphabeticalNames, which is kinda like memory and never changes after initialization
     and we have orderedNames, which is how things are allocated along the code
         Orderednames can have things taken away from it at random places
         When called upon to make a "new" name, we take the lowest unused thing from alphabeticalNames
-
-    no, it's not just about the line number
-    Some lines are empty
-    Some names are created before you have any lines
-    And sometimes you want to make multiple names in one line, especially if you're making a function
-    For free parameters, you don't need this "output is on the output column, line has a mouse" thing
-
-    Sure, if a line has some stuff on it, evaluate that line
-    And if you have a function, that uses output column too
-
-    so essentially whenever there's anything between \n and \n
 */
 
 function initNamesAndBasis()

@@ -1,4 +1,7 @@
 /*
+    Bit useless to visualize these things if you can't trace along and see the result, all ends up like the horn
+    If you do do that, it's a hyperbolic paraboloid for multiplication
+
     Test case: earth
         you have the mapping I2->R3:
             cos(x)sin(y)
@@ -11,52 +14,11 @@
         Or colors are directions in R3?
         Well, they're points in the positive octant of R3, aka I3
         Funny how you can map points to the I3 clip space or the I3 color space. What does a photo look like if color space is ordinary space?
-
-    Maybe only visualize functions that are -> points or vectors or spinors (colors), others get the characters
-
-    color just has completely different meaning for the functions (because you haven't bound anything)
-
-    Click the things in the column, changes representation
-
-    So you have mv and you have operation, either order
-	We curry the fuckers into a picture of that mv with that symbol on it. Now it's "just" juxtaposition of pictures
-	You can think of all functions as having one argument thanks to all these fucking pairings
-	It's like the geometric product IS function application
-        It's like instead of functions you have modifiers
-	Philosophically, we are never creating functions that do object1 -> object2.
-		All we are ever doing is currying to get new objects. There's no "vector that I am going to add". There is only "translator, which I got from vector and symbol"
-	So the history is
-		They decided the geometric product is "so natural" that you don't need a symbol
-		This is to say, they made it so any time you see an mv to the left of another mv, you know the first is "being applied" to the second
-
-    Is it possible to view these as all the same?
-        Countour is "just" slices of volumetric with, let's say, integers
-        Abstracting over any higher dimensional values, you have to make do with slices, i.e. rotate the thing yourself
         
-    So the claim is
-        these are the function visualizations. They get colors just like the mvs
-        Ok, so they're only one variable to one variable. But you can check
+    List
+        GA is just a good way to visualize linear functions
 
-    Deciding which to use
-        You could put in an mv, look at the output, see if anything has changed
-        drop down menus
-
-    What if you want more than one argument?
-
-    Going between these things fast may be very beneficial, it's what mathematicians do constantly
-    Huh. Who says the functions, these visualizations, aren't things you're trying to "output"? Make a game of them
-        Spheres, lines, points, what more do you want?
-  
-    Can you unify them?
-        It should probably be the case that taking a hyperslice of a thing gets you a slice of that thing
-    tweening's not so hard. You have the space of inputs and outputs. You put them in the same space, linearly interpolate, make t a sinusoid
-    Can you detect which viz to use at runtime? I mean, any transformation can be applied to any mv. Maybe it's a good thing to let folks choose?
-
-    Texture mapping: [dual quaternion,R2->R3] -> R3 x R3
-    The shapes we think of most easily: R2 -> R3 x R3
-
-
-    These are "the set of points obeying a constraint"
+        The shapes we think of most easily: R2 -> R3 x R3
         R->R     line graph, filled underneath - greyscale line if looked at from above
                     The thing it's filled with is bivectors, anything to be done with that?
 
@@ -100,8 +62,7 @@
         R2->R3 x R3
             Rasterization and texture mappiiiiiing
 
-    Vector->vector
-    For each point in space
+    //background is white and there are bright white lights on it all, so opacity brings it towards white. Blackness is for lighting
 */
 
 function initFuncViz()

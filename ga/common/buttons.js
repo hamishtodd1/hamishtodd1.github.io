@@ -10,10 +10,8 @@ function initButtons()
 {
 	let buttons = {};
 
-	bindButton = function( buttonName, onDown, buttonDescription,whileDown )
-	{
-		if(buttons[buttonName] !== undefined)
-		{
+	bindButton = function( buttonName, onDown, buttonDescription,whileDown ) {
+		if(buttons[buttonName] !== undefined) {
 			console.error("attempted to bind a button that already has a binding")
 		}
 
@@ -24,19 +22,16 @@ function initButtons()
 			down: false,
 			onDown: onDown
 		}
-		if(whileDown)
-		{
+		if(whileDown) {
 			buttons[buttonName].whileDown = whileDown
 		}
 	}
 
 	//don't use ctrl or other things that conflict
-	document.addEventListener( 'keydown', function(event)
-	{
+	document.addEventListener( 'keydown', function(event) {
 		let button = buttons[event.key]
 
-		if(button !== undefined && !button.down)
-		{
+		if(button !== undefined && !button.down) {
 			button.onDown()
 			button.down = true
 
@@ -44,12 +39,10 @@ function initButtons()
 				event.preventDefault()
 		}
 	}, false );
-	document.addEventListener( 'keyup', function(event)
-	{
+	document.addEventListener( 'keyup', function(event) {
 		let button = buttons[event.key]
 
-		if(button !== undefined &&  button.down )
-		{
+		if(button !== undefined &&  button.down ) {
 			// button.onUp()
 			button.down = false
 
@@ -57,18 +50,15 @@ function initButtons()
 		}
 	}, false );
 
-	updateFunctions.push(function()
-	{
-		for(var buttonName in buttons )
-		{
+	updateFunctions.push(function() {
+		for(var buttonName in buttons ) {
 			if( buttons[buttonName].down && buttons[buttonName].whileDown )
 				buttons[buttonName].whileDown()
 		}
 	})
 
 	//inputSimulator
-	if(0)
-	{
+	if(0) {
 		console.warn("Simulating input...")
 
 		let timer = 0
@@ -82,20 +72,16 @@ function initButtons()
 
 		let counter = -1.
 
-		updateFunctions.push(function ()
-		{
-			if ( inputsSoFar < inputs.length && frameCount !== 0 && frameCount % framesBetweenInputs === 0)
-			{
-				if (buttons[inputs[inputsSoFar]] === undefined)
-				{
+		updateFunctions.push(function () {
+			if ( inputsSoFar < inputs.length && frameCount !== 0 && frameCount % framesBetweenInputs === 0) {
+				if (buttons[inputs[inputsSoFar]] === undefined) {
 					if (counter === -1)
 						counter = 0.
 					counter += frameDelta
 					if (counter > parseFloat(inputs[inputsSoFar]) )
 						++inputsSoFar
 				}
-				else
-				{
+				else {
 					buttons[inputs[inputsSoFar]].onDown()
 					++inputsSoFar
 				}

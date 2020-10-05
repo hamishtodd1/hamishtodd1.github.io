@@ -7,9 +7,18 @@
 	Same with (-t,t^2).
 	(1,2t) vs (2,4t). These are the same at the same point though. Implicit functions are not unique
 	vector tangent to f: f'(t) = (1,2x)
-    An implicit function just means it's a curve in a higher dimension
+	An implicit function just means it's a curve in a higher dimension
+	
+	What for?
+		Simplifying code is something we all know is good. Make tools to help automate that!
+		Make it so people learn these simplifying/geometrical things
+		Ordinary physics and maths is about doing these / teaching theorems
+		Runtime differentiation
+		The maths you write in your notebook then use to derive a single crazy formula that you put in a line of code - that should be in your codebase
+
     
-    Calculus
+	Calculus
+		Find a geometric interpretation of the dual numbers
 		Possibly integration is an example of something with multiple inputs, i.e. currying parts of it might not help?
 		Picture a curve
 			Smoosh it down to a line, i.e. look at it from above. you might see value along the line represented as transparency
@@ -20,9 +29,6 @@
 		"Behaviour" is about responses to changes. Changes happen over time. To study changes over time you need calculus
 		Because you can do slicing, should be able to think of all derivatives as spatial derivatives instead of time
 		Stuff about dual numbers in siggraph course notes?
-			sq(ei) =-1 => exp(a*ei) = cos(a) + sin(a) * ei
-			sq(ej) = 0 => exp(a*ej) = 1 + a*e0
-			sq(ek) = 1 => exp(a*ej) = ?
 		Jon https://www.youtube.com/watch?v=fdAOPHgW7qM&t=16s Sean https://www.youtube.com/watch?v=jTzIDmjkLQo
 		Don't forget strogatz style. Particle on the line, the curve above it tells it whether to go left or right. f:R->R is a vector field too
 		To do Inventing On Principle Style omniscient select-the-time debugging for non-trivial games:
@@ -115,25 +121,3 @@
 			//multiply final result by dt... but that is just a scalar multiple, only relevant if you put symbols on the y axis so to speak
 		}
 */
-
-function initReductions()
-{
-    let reduction = new THREE.Mesh(unchangingUnitSquareGeometry.clone(),new THREE.MeshBasicMaterial())
-    reduction.geometry.translate(.5,-.5,0.)
-    new THREE.TextureLoader().load("data/reduction.png", function (texture) {
-        reduction.material.map = texture;
-        reduction.material.needsUpdate = true
-    })
-    reduction.scale.y = 2. + 32./256.
-    reduction.scale.x = 4. * reduction.scale.y
-	pad.add(reduction)
-	let thisIsHereToTellYouThatLineNumberIsNeededHere = -Infinity
-    updateFunctions.push(() => {
-		if (carat.linNumber === thisIsHereToTellYouThatLineNumberIsNeededHere ) {
-            pad.add(reduction)
-            reduction.position.y = carat.position.y - .5
-        }
-        else
-            pad.remove(reduction)
-    }
-}

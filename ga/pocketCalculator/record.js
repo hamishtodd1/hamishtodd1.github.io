@@ -1,4 +1,9 @@
 /* 
+	When speaking to a person, which we evolved to do, there's no "going back and editing and rearranging"
+	That's for text editors. And Dynamic Visualizer and Apparatus are probably not so good for that.
+	If there was a good way of doing that for language, editors would already use it
+	So if you want gestures, you need a way to turn a gesture into a linguistic record of that gesture
+
 	Currently these notes are frozen while you work on text editor to get the desire for full power/expressiveness out of your system
 		The game version is still probably pocket calculator. 
 		You will probably think more like puzzlescript games, it is too abstract to have coding and multivectors are already interesting enough

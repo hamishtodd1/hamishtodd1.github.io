@@ -3,6 +3,11 @@
 
     it would be nice to pick up a value that is a length and compare it to the thing you're looking at
 
+    Little pics if faces as trackers
+
+    https://twitter.com/MartinSchwab9/status/1289323221049843712
+https://twitter.com/moododd/status/1291594476901863426
+
     So the kids are drawing clothes on themselves
     And giving those clothes behaviour
     Making little games including pong

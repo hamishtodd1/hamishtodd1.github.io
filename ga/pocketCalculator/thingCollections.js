@@ -1,10 +1,4 @@
 /*
-	Do triangles and line segments have a natural representation in GA?
-
-	function vs array
-		Array is a function from the naturals
-		You do have some idea of naturals because the scalars are in little units
-
 	Why one dimension? Why not build in 2D, or arbitrary manifolds?
 		Visualizable plotted along a volume
 		Easy to control

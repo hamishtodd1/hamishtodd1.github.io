@@ -3,7 +3,7 @@
 
 	This has great footage for thinking about phase, wave functions and interference https://www.youtube.com/watch?v=WTxDyYHaYAI
 
-	Take
+	https://twitter.com/MartinSchwab9/status/1289323221049843712
 
 	Could do some number theory.
 		prime numbers are ones not on the hyperbolic paraboloid

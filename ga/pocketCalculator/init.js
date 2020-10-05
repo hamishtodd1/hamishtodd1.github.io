@@ -12,10 +12,6 @@
 		Equivalence between shapes and actions of a kind that you frequently see in the world around you
 		If you want spec rel, make a level where a rocket is moving around or whatever and they have to program something to follow it
 
-	Whoah, changing view is precisely changing basis vectors, which are inputs to a function that gives you a certain display
-		Er, not necessarily, you want all vectors to change. Changing camera position though
-		Maybe you always have two views and you grab and change camera position in one to see other
-
 	TODO for showing to Jon Blow / funders
 		Multiple fun levels
 			Try doodling with the scalar input and see what you get

@@ -1,0 +1,47 @@
+<!--
+-->
+<html>
+	<head>
+		<title>mr2</title>
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				margin: 0px;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<script>
+			async function technicalInit() {
+				initButtons()
+
+				let render = initRenderer()
+
+				function loop() {
+					for(var i = 0; i < updateFunctions.length; i++)
+						updateFunctions[i]()
+
+					++frameCount
+
+					requestAnimationFrame(loop)
+					//render the shit with what you made in renderer
+					render()
+				}
+
+				loop()
+			}
+		</script>
+
+		<script src="../common/variables.js"></script>
+		<script src="variables.js"></script>
+
+		<script src="../common/buttons.js"></script>
+
+		<script src="renderer.js"></script>
+
+		<script>
+			technicalInit()
+		</script>
+	</body>
+</html>

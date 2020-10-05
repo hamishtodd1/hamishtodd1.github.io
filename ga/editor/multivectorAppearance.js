@@ -3,39 +3,6 @@
 
     TODO
         colors for 0
-
-    Scalar
-        So, what, background is grey and positive makes it white and negative makes it black?  
-        It offers unity with the way you want to graph things
-        It conveys that scalars are directionless
-        It MIGHT be an advantage that you can't see comparisons that well. "if you want to represent it spatially you have to multiply it by something"
-        Don't change opacity of the objects, you already have a way of knowing their magnitude
-        What and you stick single translucent things together and they get more translucent?
-        Confusing with existing color ideas
-        It's problematic not to know where 1 is.
-        Ehhhh, you do want that nice quaternion visualization
-
-        The radius of the scalar should probably be equal to the vector
-
-        vectors, confined to a LINE,     cannot be turned into their negative, but can in 2D
-        bivectors, confined to a PLANE,    cannot be turned into their negative, but can in 3D
-        trivectors, confined to a 3-SPACE,  cannot be turned into their negative, but can in 4D
-        These determine symmetry "about certain axes"
-
-    A vector that's not coming from the origin is: a vector field evaluated at a single point
-
-    velocity/differential space is a reason to have auto zoom/scale
-
-    Need to disentangle what's in the boxes
-
-    Make the background close so you see the shadows
-
-    To make them more different from one another for the colorblind, maybe vary order more? Not always black first?
-
-    Scale them such that the biggest one on screen is a certain thickness and the smallest one on screen is a certain thickness
-
-    Shader
-        Checkerboard?
 */
 
 function initMultivectorAppearances(characterMeshHeight)
@@ -221,8 +188,8 @@ function initMultivectorAppearances(characterMeshHeight)
             if( sca.visible ) {
                 if (scaPad.count === 0) {
                     // m1.identity()
-                    sca.matrix.identity()
-                    // applyContext(sca, 0, mv.elements[0])
+                    // sca.matrix.identity()
+                    applyContext(sca, 0, mv.elements[0])
 
                     // if (biv.visible) {
                     //     v1.set(0., 1., 0.)
