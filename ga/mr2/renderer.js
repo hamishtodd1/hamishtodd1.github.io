@@ -8,10 +8,10 @@ async function initWorldMap() {
         uniform float uCameraAspect;
 
         attribute vec4 aPosition;
-        attribute vec2 aUv;
-        
-        varying vec2 vUv;
         varying vec3 vVertexPosition;
+        
+        attribute vec2 aUv;
+        varying vec2 vUv;
 
         void main(void) {
             gl_Position = aPosition;
@@ -44,14 +44,9 @@ async function initWorldMap() {
     const shaderProgram = Program(vsSource, fsSource)
     const texture = await Texture("data/earthColor.png")
 
-
-
     const programInfo = {
         program: shaderProgram,
-        vertexAttribLocations: {
-            position: gl.getAttribLocation(shaderProgram, 'aPosition'),
-            uv: gl.getAttribLocation(shaderProgram, 'aUv'),
-        },
+        vertexAttributes: {},
         uniformLocations: {
             uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
             uCameraAspect: gl.getUniformLocation(shaderProgram, 'uCameraAspect'),
@@ -59,62 +54,61 @@ async function initWorldMap() {
         }
     };
 
-    {
-        const positions = [
-            -.3, .3, 0.,
-            -.3, -.3, 0.,
-            .3, .3, 0.,
+    function addVertexAttribute(name,arr,itemSize) {
+        const buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(arr), gl.STATIC_DRAW)
 
-            -.3, -.3, 0.,
-            .3, -.3, 0.,
-            .3, .3, 0.,
-        ];
-
-        const positionBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-
-        const uvs = [
-            0.0, 0.0,
-            0.0, 1.0,
-            1.0, 0.0,
-            
-            0.0, 1.0,
-            1.0, 1.0,
-            1.0, 0.0,
-        ];
-
-        const uvBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(uvs), gl.STATIC_DRAW);
-
-        programInfo.buffers = {
-            position: positionBuffer,
-            uv: uvBuffer,
-        };
+        programInfo.vertexAttributes[name] = {
+            buffer, itemSize,
+            location: gl.getAttribLocation(shaderProgram, "a"+name)
+        }
     }
-
-    function enableVertexBuffer(numComponents,vertexAttributeName) {
+    function enableVertexBuffer(name) {
         const type = gl.FLOAT;
         const normalize = false;
         const stride = 0;
         const offset = 0;
-        gl.enableVertexAttribArray(programInfo.vertexAttribLocations[vertexAttributeName]);
-        gl.bindBuffer(gl.ARRAY_BUFFER, programInfo.buffers[vertexAttributeName]);
+
+        let va = programInfo.vertexAttributes[name]
+        gl.enableVertexAttribArray(va.location); //weird since you use the location below as well
+        gl.bindBuffer(gl.ARRAY_BUFFER, va.buffer);
         gl.vertexAttribPointer(
-            programInfo.vertexAttribLocations[vertexAttributeName],
-            numComponents,
+            va.location,
+            va.itemSize,
             type,
             normalize,
             stride,
             offset);
     }
 
+    const positionBuffer = [
+        -.3, .3, 0.,
+        -.3, -.3, 0.,
+        .3, .3, 0.,
+
+        -.3, -.3, 0.,
+        .3, -.3, 0.,
+        .3, .3, 0.,
+    ];
+    addVertexAttribute("Position", positionBuffer, 3)
+
+    const uvBuffer = [
+        0.0, 0.0,
+        0.0, 1.0,
+        1.0, 0.0,
+
+        0.0, 1.0,
+        1.0, 1.0,
+        1.0, 0.0,
+    ];
+    addVertexAttribute("Uv", uvBuffer, 2)
+
     renderFunctions.push( () => {
         gl.useProgram(programInfo.program);
 
-        enableVertexBuffer(3, "position")
-        enableVertexBuffer(2, "uv")
+        enableVertexBuffer("Position")
+        enableVertexBuffer("Uv")
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texture);
