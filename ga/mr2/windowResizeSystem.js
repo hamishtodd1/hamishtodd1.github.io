@@ -6,18 +6,25 @@
 
 function initWindowResizeSystem()
 {
-	mainCamera.topAtZZero = 15.; //all derives from this. Tweaked to make 100% look ok on our little preview
+	mainCamera.topAtZZero = 6.; //all derives from this. Tweaked to make 100% look ok on our little preview
 
 	function respondToResize(event) {
 		if (event !== undefined)
 			event.preventDefault()
 
-		canvas.width = window.innerWidth
-		canvas.height = window.innerHeight
-		gl.viewport(0, 0, canvas.width, canvas.height)
+		let pixelRatio = window.devicePixelRatio
+		let width = window.innerWidth
+		let height = window.innerHeight
+
+		gl.canvas.width = Math.ceil(width * pixelRatio);
+		gl.canvas.height = Math.ceil(height * pixelRatio);
+		gl.canvas.style.width = width + 'px';
+		gl.canvas.style.height = height + 'px';
 		
-		mainCamera.aspect = window.innerWidth / window.innerHeight;
-		mainCamera.rightAtZZero = mainCamera.topAtZZero * mainCamera.aspect
+		gl.viewport(0, 0, width * pixelRatio, height * pixelRatio)
+		
+		let aspect = width / height
+		mainCamera.rightAtZZero = mainCamera.topAtZZero * aspect
 	}
 	window.addEventListener('resize', respondToResize, false);
 	respondToResize();
