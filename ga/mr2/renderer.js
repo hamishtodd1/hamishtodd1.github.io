@@ -136,37 +136,44 @@ async function initWorldMap() {
         //sign shit too?
         float tanQuaterPiPlusHalfAngle(float angle) {
             return tan(PI/4.+angle/2.);
-        }
-
+        }`
+        + gaShaderString +
+        `
         void main(void) {
+            float oscillatingNumber = .5 + .5*sin(uFrameCount*.05);
+
             vec3 p = aPosition;
 
             float lon = (p.x - .5) * TAU;
             float lat = (p.y - .5) * PI;
+
+            dualQuaternion dq;
+            dq.scalar = 1.5;
+            dq.pss = -2.;
 
             //ga is useful for bending the faces
             //for sending eg the projection point to infinity
             //for unifying surely
             //for complex analysis?
 
-            // p.xyz = globe(lon,lat);
+            // p = globe(lon,lat);
 
             //octahedral,GA is super useful for unfolding
             // p = globe(lon,lat);
             // vec3 orthogonalVector = normalize(sign(p));
             // float multiple = dot(p,orthogonalVector) / .5;
-            // p /= multiple;
+            // p /= multiple;// + (1.-multiple)*oscillatingNumber;
 
             // mollweide
-            // float theta = lat;
-            // float piSinLat = PI*sin(lat);
-            // for(int i = 0; i < 8; ++i) {
-            //     float numerator = 2.*theta + sin(2.*theta) - piSinLat;
-            //     float denominator = 2. + 2.*cos(2.*theta);
-            //     theta -= numerator / denominator;
-            // }
-            // p.x = 2.*sqrt(2.) / PI * cos(theta) * lon;
-            // p.y = sqrt(2.) * sin(theta);
+            float theta = lat;
+            float piSinLat = PI*sin(lat);
+            for(int i = 0; i < 8; ++i) {
+                float numerator = 2.*theta + sin(2.*theta) - piSinLat;
+                float denominator = 2. + 2.*cos(2.*theta);
+                theta -= numerator / denominator;
+            }
+            p.x = 2.*sqrt(2.) / PI * cos(theta) * lon;
+            p.y = sqrt(2.) * sin(theta);
 
             // Goode Homolosine, basically
             // {
