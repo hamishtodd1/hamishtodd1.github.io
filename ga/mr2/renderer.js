@@ -103,8 +103,8 @@
 */
 
 async function initWorldMap() {
-    const header = 
-        `precision mediump float;
+    const header = `
+        precision mediump float;
         #define PI 3.14159265359
         #define TAU 6.28318530718
         `
@@ -139,17 +139,14 @@ async function initWorldMap() {
         }`
         + gaShaderString +
         `
+
         void main(void) {
             float oscillatingNumber = .5 + .5*sin(uFrameCount*.05);
 
-            vec3 p = aPosition;
+            vec4 p = vec4(aPosition,1.);
 
             float lon = (p.x - .5) * TAU;
             float lat = (p.y - .5) * PI;
-
-            dualQuaternion dq;
-            dq.scalar = 1.5;
-            dq.pss = -2.;
 
             //ga is useful for bending the faces
             //for sending eg the projection point to infinity
@@ -174,6 +171,12 @@ async function initWorldMap() {
             }
             p.x = 2.*sqrt(2.) / PI * cos(theta) * lon;
             p.y = sqrt(2.) * sin(theta);
+
+            dualQuaternion dq;
+            zeroDq(dq);
+            dq.euclideanLine.z = 1.;
+            // dualQuaternion ourRotator = rotator(dq,TAU/4.);
+            sandwich(p, dq);
 
             // Goode Homolosine, basically
             // {
@@ -307,10 +310,12 @@ async function initWorldMap() {
 
             vUv = aUv;
             vPosition = aPosition.xyz;
-            gl_Position.xyz = p;
-            gl_Position.w = 1.;
+            gl_Position = p;
         }
         `
+    let lines = vsSource.split("\n");
+    for(let i = 0; i < lines.length; ++i)
+        log((i+1) + " " + lines[i])
     const fsSource = header + `
         varying vec2 vUv;
         varying vec3 vPosition;
