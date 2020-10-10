@@ -110,7 +110,6 @@ async function initWorldMap() {
         `
 
     const vsSource = header + `
-        uniform vec2 uProgramPosition;
         uniform float uRightAtZZero;
         uniform float uTopAtZZero;
         uniform float uFrameCount;
@@ -125,7 +124,7 @@ async function initWorldMap() {
         + gaShaderString +
         `
 
-        uniform dualQuat transform;
+        uniform dualQuat utransform;
         
         float cot(float theta) {
             return 1./tan(theta);
@@ -297,13 +296,7 @@ async function initWorldMap() {
             //central/gnomic - use GA!
             //surely can have stereographic too, it's just a projection point
 
-
-            dualQuat dq;
-            zeroDq(dq);
-            dq.euclideanLine.z = 1.;
-            dualQuat tempTransform = rotator(dq,uFrameCount * .05);
-            // sandwich(p, tempTransform);
-            sandwich(p, transform); // doesn't work yet, why?
+            sandwich(p, utransform); // doesn't work yet, why?
 
             //camera
             p.x /= uRightAtZZero;
@@ -332,16 +325,17 @@ async function initWorldMap() {
         `
 
     const program = Program(vsSource, fsSource)
-    program.addUniform("RightAtZZero")
-    program.addUniform("TopAtZZero")
-    program.addUniform("FrameCount")
-    program.addUniform("ProgramPosition")
+    program.locateUniform("RightAtZZero")
+    program.locateUniform("TopAtZZero")
+    program.locateUniform("FrameCount")
+    locateUniformDualQuat(program, "transform")
 
     let transform = new DualQuat()
-    transform.euclideanLine[2] = 1.
+    let axis = new DualQuat()
+    axis.euclideanLine[2] = 1.
 
     const texture = await Texture("data/earthColor.png")
-    program.addUniform("Sampler")
+    program.locateUniform("Sampler")
 
     let numDivisions = 256
     const positionBuffer = []
@@ -390,14 +384,15 @@ async function initWorldMap() {
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.uniform1i(program.uniforms.Sampler, 0);
+        gl.uniform1i(program.uniformLocations.Sampler, 0);
 
-        gl.uniform1f(program.uniforms.RightAtZZero, mainCamera.rightAtZZero);
-        gl.uniform1f(program.uniforms.TopAtZZero, mainCamera.topAtZZero);
-        gl.uniform1f(program.uniforms.FrameCount, frameCount);
-        gl.uniform2f(program.uniforms.ProgramPosition, programPosition.x, programPosition.y );
+        gl.uniform1f(program.uniformLocations.RightAtZZero, mainCamera.rightAtZZero);
+        gl.uniform1f(program.uniformLocations.TopAtZZero, mainCamera.topAtZZero);
+        gl.uniform1f(program.uniformLocations.FrameCount, frameCount);
+        gl.uniform2f(program.uniformLocations.ProgramPosition, programPosition.x, programPosition.y );
 
-        transferDualQuat(transform,"transform",program.glProgram)
+        rotator(axis, frameCount * .05, transform)
+        transferDualQuat(transform,"transform",program)
 
         gl.drawArrays(gl.TRIANGLES, 0, numVertices);
     })

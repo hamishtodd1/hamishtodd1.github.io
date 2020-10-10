@@ -53,7 +53,7 @@ function Program(vsSource, fsSource) {
     const program = {
         glProgram,
         vertexAttributes: {},
-        uniforms: {}
+        uniformLocations: {}
     };
 
     const vertexShader = loadShader(gl.VERTEX_SHADER, vsSource);
@@ -65,8 +65,8 @@ function Program(vsSource, fsSource) {
     if (!gl.getProgramParameter(glProgram, gl.LINK_STATUS))
         alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(glProgram));
 
-    program.addUniform = (name) => {
-        program.uniforms[name] = gl.getUniformLocation(glProgram, "u" + name)
+    program.locateUniform = (name) => {
+        program.uniformLocations[name] = gl.getUniformLocation(glProgram, "u" + name)
     }
 
     program.addVertexAttribute = (name, arr, itemSize) => {
