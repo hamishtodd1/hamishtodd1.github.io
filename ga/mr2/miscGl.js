@@ -28,7 +28,7 @@ async function Texture(src) {
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
-        srcFormat, srcType, image);
+        srcFormat, srcType, image); //can you flip it in here?
 
     //no mipmaps
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
@@ -66,7 +66,7 @@ function Program(vsSource, fsSource) {
         alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(glProgram));
 
     program.locateUniform = (name) => {
-        program.uniformLocations[name] = gl.getUniformLocation(glProgram, "u" + name)
+        program.uniformLocations[name] = gl.getUniformLocation(glProgram, name)
     }
 
     program.addVertexAttribute = (name, arr, itemSize) => {
@@ -76,7 +76,7 @@ function Program(vsSource, fsSource) {
 
         program.vertexAttributes[name] = {
             buffer, itemSize,
-            location: gl.getAttribLocation(glProgram, "a" + name)
+            location: gl.getAttribLocation(glProgram, name + "A")
         }
     }
     program.enableVertexAttribute = (name) => {

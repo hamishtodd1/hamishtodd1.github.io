@@ -110,21 +110,19 @@ async function initWorldMap() {
         `
 
     const vsSource = header + `
-        uniform float uRightAtZZero;
-        uniform float uTopAtZZero;
-        uniform float uFrameCount;
+        uniform float rightAtZZero;
+        uniform float topAtZZero;
+        uniform float frameCount;
 
-        attribute vec3 aPosition;
-        varying vec3 vPosition;
-
-        attribute vec2 aUv;
-        varying vec2 vUv;
+        attribute vec2 uvA;
+        varying vec2 uv;
+        varying vec4 p;
 
         `
         + gaShaderString +
         `
 
-        uniform dualQuat utransform;
+        uniform dualQuat transform;
         
         float cot(float theta) {
             return 1./tan(theta);
@@ -144,9 +142,10 @@ async function initWorldMap() {
         }
 
         void main(void) {
-            float oscillatingNumber = .5 + .5*sin(uFrameCount*.05);
+            uv = uvA;
+            p = vec4(uv,0.,1.);
 
-            vec4 p = vec4(aPosition,1.);
+            float oscillatingNumber = .5 + .5 * sin(frameCount*.05);
 
             float lon = (p.x - .5) * TAU;
             float lat = (p.y - .5) * PI;
@@ -176,38 +175,38 @@ async function initWorldMap() {
             // p.y = sqrt(2.) * sin(theta);
 
             // Goode Homolosine, basically
-            // {
-            //     float theta = lat;
-            //     float piSinLat = PI*sin(lat);
-            //     for(int i = 0; i < 8; ++i) {
-            //         float numerator = 2.*theta + sin(2.*theta) - piSinLat;
-            //         float denominator = 2. + 2.*cos(2.*theta);
-            //         theta -= numerator / denominator;
-            //     }
-            //     //if lat = 0, theta = 0.
-            //     p.y = sqrt(2.) * sin(theta);
-            //     float centerIndex = 0.;
-            //     if(lat > 0.) {
-            //         float cutoff = 116.;
-            //         if(aUv.x < cutoff/256. )
-            //             centerIndex = cutoff/2.;
-            //         else
-            //             centerIndex = 158.;
-            //     }
-            //     else {
-            //         float cutoff0 = 116.;
-            //         float cutoff1 = 182.;
-            //         if(aUv.x < cutoff0/256. )
-            //             centerIndex = cutoff0/2.;
-            //         else if(aUv.x < cutoff1/256.)
-            //             centerIndex = (cutoff0+cutoff1)/2.;
-            //         else 
-            //             centerIndex = 256. - (256.-cutoff1)/2.;
-            //     }
-            //     float center = TAU * centerIndex / 256. - PI;
-            //     float centerMapped = 2. * sqrt(2.) / PI * center; //theta = 0 at center
-            //     p.x = 2.*sqrt(2.) / PI * cos(theta) * (lon-center) + centerMapped;
-            // }
+            {
+                float theta = lat;
+                float piSinLat = PI*sin(lat);
+                for(int i = 0; i < 8; ++i) {
+                    float numerator = 2.*theta + sin(2.*theta) - piSinLat;
+                    float denominator = 2. + 2.*cos(2.*theta);
+                    theta -= numerator / denominator;
+                }
+                //if lat = 0, theta = 0.
+                p.y = sqrt(2.) * sin(theta);
+                float centerIndex = 0.;
+                if(lat > 0.) {
+                    float cutoff = 116.;
+                    if(uv.x < cutoff/256. )
+                        centerIndex = cutoff/2.;
+                    else
+                        centerIndex = 158.;
+                }
+                else {
+                    float cutoff0 = 116.;
+                    float cutoff1 = 182.;
+                    if(uv.x < cutoff0/256. )
+                        centerIndex = cutoff0/2.;
+                    else if(uv.x < cutoff1/256.)
+                        centerIndex = (cutoff0+cutoff1)/2.;
+                    else 
+                        centerIndex = 256. - (256.-cutoff1)/2.;
+                }
+                float center = TAU * centerIndex / 256. - PI;
+                float centerMapped = 2. * sqrt(2.) / PI * center; //theta = 0 at center
+                p.x = 2.*sqrt(2.) / PI * cos(theta) * (lon-center) + centerMapped;
+            }
 
             //Winkel III
             // float lat1 = acos(2./PI);
@@ -222,25 +221,7 @@ async function initWorldMap() {
             // p.x = lon - meccaLon;
             // p.y = p.x / sin(p.x) * (sin(lat)*cos(p.x)-tan(meccaLat)*cos(lat));
 
-            //peirce quincuncial
-            //something like this
-            // float F() {
-            //     float k = .5*sqrt(2.); //paper said so
-            //     // https://en.wikipedia.org/wiki/Elliptic_integral#Incomplete_elliptic_integral_of_the_first_kind 
-            //     float numericalIntegral = 0.;
-            //     int i = numDivisions;
-            //     for(int i = 0; i < numDivisions; ++i) {
-            //         float t = something;
-            //         numericalIntegral += 1./sqrt( (1.-t*t) * (1.-k*k*t*t) );
-            //     }
-            // }
-            // float cosLat = cos(lat);
-            // float cosLatSquared = cosLat*cosLat;
-            // float sinLatSquared = 1. - cosLatSquared;
-            // float lineA = cosLatSquared - 2.*sqrt(sinLatSquared+.25*pow(cos(sin(2.*lon)),4.));
-            // float lineB = 2.*sin(lat) + cosLatSquared*cos(2.*lon);
-            // p.x = .5*F(acos(lineA/lineB));
-            // p.y = .5*F(acos(lineB/lineA));
+            //peirce quincuncial, see Ian
 
             //lambert conformal. Easy geometrically! Just a cone!
             {
@@ -257,7 +238,7 @@ async function initWorldMap() {
             }
 
             // Bonne, covers sinusoidal and werner
-            // float lat1 = PI / 2. * (.5+.5*sin(uFrameCount * .05));
+            // float lat1 = PI / 2. * (.5+.5*sin(frameCount * .05));
             // if(abs(lat1) < .01) { //sinusoidal
             //     p.x = lon * cos(lat);
             //     p.y = lat;
@@ -296,14 +277,12 @@ async function initWorldMap() {
             //central/gnomic - use GA!
             //surely can have stereographic too, it's just a projection point
 
-            sandwich(p, utransform); // doesn't work yet, why?
+            sandwich(p, transform);
 
-            //camera
-            p.x /= uRightAtZZero;
-            p.y /= uTopAtZZero;
+            //camera, "just" squashing so it goes on screen
+            p.x /= rightAtZZero;
+            p.y /= topAtZZero;
 
-            vUv = aUv;
-            vPosition = aPosition.xyz;
             gl_Position = p;
         }
         `
@@ -311,100 +290,81 @@ async function initWorldMap() {
     for(let i = 0; i < lines.length; ++i)
         log((i+1) + " " + lines[i])
     const fsSource = header + `
-        varying vec2 vUv;
-        varying vec3 vPosition;
+        varying vec2 uv;
+        varying vec4 p;
 
-        uniform sampler2D uSampler;
+        uniform sampler2D sampler;
 
         void main(void) {
             // .x + 8./256. if you want Asia intact
-            vec4 texelColor = texture2D(uSampler, vUv);
+            vec4 texelColor = texture2D(sampler, vec2(uv.x,1.-uv.y)); //1- because jfc opengl
 
             gl_FragColor = vec4(texelColor.rgb, texelColor.a);
         }
         `
 
     const program = Program(vsSource, fsSource)
-    program.locateUniform("RightAtZZero")
-    program.locateUniform("TopAtZZero")
-    program.locateUniform("FrameCount")
+    program.locateUniform("rightAtZZero")
+    program.locateUniform("topAtZZero")
+    program.locateUniform("frameCount")
     locateUniformDualQuat(program, "transform")
 
     let transform = new DualQuat()
     let axis = new DualQuat()
     axis.euclideanLine[2] = 1.
+    updateFunctions.push(()=>{
+        rotator(axis, frameCount * .0009, transform)
+    })
 
     const texture = await Texture("data/earthColor.png")
-    program.locateUniform("Sampler")
+    program.locateUniform("sampler")
 
     let numDivisions = 256
-    const positionBuffer = []
     const uvBuffer = []
-    function pushPosition(i,j) {
-        positionBuffer.push(i / numDivisions)
-        positionBuffer.push(j / numDivisions)
-        positionBuffer.push(0.)
-    }
     function pushUv(i,j) {
         uvBuffer.push(i / numDivisions)
-        uvBuffer.push((numDivisions-j) / numDivisions)
+        uvBuffer.push(j / numDivisions)
     }
     //you don't want anything on any precise lines like x = .5
     let eps = .00001 //sensetive, ugh
     for(let i = 0.; i < numDivisions; ++i) {
         for(let j = 0.; j < numDivisions; ++j) {
-            pushPosition(i, j)
-            pushUv(i+eps, j+eps)
-            pushPosition(i + 1, j + 1)
-            pushUv(i + 1 - eps, j + 1 - eps)
-            pushPosition(i, j + 1)
-            pushUv(i + eps, j + 1 - eps)
+            pushUv(i + eps, j + eps)
+            pushUv(i + 1. - eps, j + 1. - eps)
+            pushUv(i + eps, j + 1. - eps)
 
-            pushPosition(i, j)
-            pushUv(i+eps, j+eps)
-            pushPosition(i + 1, j)
-            pushUv(i + 1 - eps, j + eps)
-            pushPosition(i + 1, j + 1)
-            pushUv(i + 1 - eps, j + 1 - eps)
+            pushUv(i + eps, j + eps)
+            pushUv(i + 1. - eps, j + eps)
+            pushUv(i + 1. - eps, j + 1. - eps)
         }
     }
+    program.addVertexAttribute("uv", uvBuffer, 2)
+    let numVertices = uvBuffer.length / 2
 
     //dymaxion mesh
     //siiiigh, this wasn't supposed to be about discreteness, that's why you said fuck arrays
 
-    program.addVertexAttribute("Position", positionBuffer, 3)
-    program.addVertexAttribute("Uv", uvBuffer, 2)
-    let numVertices = positionBuffer.length / 3
-
     renderFunctions.push( () => {
         gl.useProgram(program.glProgram);
 
-        program.enableVertexAttribute("Position")
-        program.enableVertexAttribute("Uv")
+        program.enableVertexAttribute("uv")
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.uniform1i(program.uniformLocations.Sampler, 0);
+        gl.uniform1i(program.uniformLocations.sampler, 0);
 
-        gl.uniform1f(program.uniformLocations.RightAtZZero, mainCamera.rightAtZZero);
-        gl.uniform1f(program.uniformLocations.TopAtZZero, mainCamera.topAtZZero);
-        gl.uniform1f(program.uniformLocations.FrameCount, frameCount);
-        gl.uniform2f(program.uniformLocations.ProgramPosition, programPosition.x, programPosition.y );
+        gl.uniform1f(program.uniformLocations.rightAtZZero, mainCamera.rightAtZZero);
+        gl.uniform1f(program.uniformLocations.topAtZZero, mainCamera.topAtZZero);
+        gl.uniform1f(program.uniformLocations.frameCount, frameCount);
 
-        rotator(axis, frameCount * .05, transform)
         transferDualQuat(transform,"transform",program)
 
         gl.drawArrays(gl.TRIANGLES, 0, numVertices);
     })
-
-    const programPosition = { x: 0., y: 0. }
-    updateFunctions.push(() => {
-        // programPosition.y = .05*Math.sin(frameCount * .01)
-    })
 }
 
 {
-    //you have two ico verts' positions in 3D space
+    //you have two ico verts' points in 3D space
     //picture rigid icosahedron derived from them
     //divide into small triangles
     //get uvs by spherically projecting, getting lat and long, then scaling

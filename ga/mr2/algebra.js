@@ -97,6 +97,28 @@ function initAlgebra()
         appendToGaShaderString(replaceSignature(zeroMv,
             "void zeroMv(inout float mv[16])"))
 
+        add = (a,b,mv) =>
+        {
+            mv[ 0] = a[ 0] + b[ 0];
+            mv[ 1] = a[ 1] + b[ 1];
+            mv[ 2] = a[ 2] + b[ 2];
+            mv[ 3] = a[ 3] + b[ 3];
+            mv[ 4] = a[ 4] + b[ 4];
+            mv[ 5] = a[ 5] + b[ 5];
+            mv[ 6] = a[ 6] + b[ 6];
+            mv[ 7] = a[ 7] + b[ 7];
+            mv[ 8] = a[ 8] + b[ 8];
+            mv[ 9] = a[ 9] + b[ 9];
+            mv[10] = a[10] + b[10];
+            mv[11] = a[11] + b[11];
+            mv[12] = a[12] + b[12];
+            mv[13] = a[13] + b[13];
+            mv[14] = a[14] + b[14];
+            mv[15] = a[15] + b[15];
+        }
+        appendToGaShaderString(replaceSignature(add,
+            "void add(float a[16], float b[16], inout float mv[16])"))
+
         inner = (a, b, mv) =>
         {
             mv[ 0] = b[ 0] * a[ 0] + b[ 2] * a[ 2] + b[ 3] * a[ 3] + b[ 4] * a[ 4] - b[ 8] * a[ 8] - b[ 9] * a[ 9] - b[10] * a[10] - b[14] * a[14];
