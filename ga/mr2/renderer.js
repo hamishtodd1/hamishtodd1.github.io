@@ -117,9 +117,19 @@ async function initWorldMap() {
 
         attribute vec3 aPosition;
         varying vec3 vPosition;
-        
+
         attribute vec2 aUv;
         varying vec2 vUv;
+
+        `
+        + gaShaderString +
+        `
+
+        uniform dualQuat transform;
+        
+        float cot(float theta) {
+            return 1./tan(theta);
+        }
 
         vec3 globe(float lon,float lat) {
             return vec3(
@@ -129,16 +139,10 @@ async function initWorldMap() {
             );
         }
 
-        float cot(float theta) {
-            return 1./tan(theta);
-        }
-
         //sign shit too?
         float tanQuaterPiPlusHalfAngle(float angle) {
             return tan(PI/4.+angle/2.);
-        }`
-        + gaShaderString +
-        `
+        }
 
         void main(void) {
             float oscillatingNumber = .5 + .5*sin(uFrameCount*.05);
@@ -162,21 +166,15 @@ async function initWorldMap() {
             // p /= multiple;// + (1.-multiple)*oscillatingNumber;
 
             // mollweide
-            float theta = lat;
-            float piSinLat = PI*sin(lat);
-            for(int i = 0; i < 8; ++i) {
-                float numerator = 2.*theta + sin(2.*theta) - piSinLat;
-                float denominator = 2. + 2.*cos(2.*theta);
-                theta -= numerator / denominator;
-            }
-            p.x = 2.*sqrt(2.) / PI * cos(theta) * lon;
-            p.y = sqrt(2.) * sin(theta);
-
-            dualQuaternion dq;
-            zeroDq(dq);
-            dq.euclideanLine.z = 1.;
-            // dualQuaternion ourRotator = rotator(dq,TAU/4.);
-            sandwich(p, dq);
+            // float theta = lat;
+            // float piSinLat = PI*sin(lat);
+            // for(int i = 0; i < 8; ++i) {
+            //     float numerator = 2.*theta + sin(2.*theta) - piSinLat;
+            //     float denominator = 2. + 2.*cos(2.*theta);
+            //     theta -= numerator / denominator;
+            // }
+            // p.x = 2.*sqrt(2.) / PI * cos(theta) * lon;
+            // p.y = sqrt(2.) * sin(theta);
 
             // Goode Homolosine, basically
             // {
@@ -300,9 +298,12 @@ async function initWorldMap() {
             //surely can have stereographic too, it's just a projection point
 
 
-
-            //"transform"
-            p.xy += uProgramPosition;
+            dualQuat dq;
+            zeroDq(dq);
+            dq.euclideanLine.z = 1.;
+            dualQuat tempTransform = rotator(dq,uFrameCount * .05);
+            // sandwich(p, tempTransform);
+            sandwich(p, transform); // doesn't work yet, why?
 
             //camera
             p.x /= uRightAtZZero;
@@ -335,6 +336,9 @@ async function initWorldMap() {
     program.addUniform("TopAtZZero")
     program.addUniform("FrameCount")
     program.addUniform("ProgramPosition")
+
+    let transform = new DualQuat()
+    transform.euclideanLine[2] = 1.
 
     const texture = await Texture("data/earthColor.png")
     program.addUniform("Sampler")
@@ -392,6 +396,8 @@ async function initWorldMap() {
         gl.uniform1f(program.uniforms.TopAtZZero, mainCamera.topAtZZero);
         gl.uniform1f(program.uniforms.FrameCount, frameCount);
         gl.uniform2f(program.uniforms.ProgramPosition, programPosition.x, programPosition.y );
+
+        transferDualQuat(transform,"transform",program.glProgram)
 
         gl.drawArrays(gl.TRIANGLES, 0, numVertices);
     })
