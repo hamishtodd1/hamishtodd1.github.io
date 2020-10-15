@@ -19,8 +19,19 @@
 
 				initAlgebra()
 
-				await initWorldMap()
-				// await initTest()
+				// await initDymaxion()
+				// await initWorldMap()
+
+				let pointsBuffer = new Float32Array([0.,0.,0.,1.])
+				verticesDisplay(pointsBuffer, gl.POINTS)
+
+				// await initText()
+
+				// initFrameDrawer()
+				// renderFunctions.push(()=>{
+				// 	drawFrame(0.,0.)
+				// 	drawFrame(3.,3.)
+				// })
 
 				function loop() {
 					for(var i = 0; i < updateFunctions.length; i++)
@@ -39,7 +50,9 @@
 
 					++frameCount
 
-					requestAnimationFrame(loop)
+					setTimeout(() => {
+						requestAnimationFrame(loop)
+					}, 1000./60.);
 				}
 
 				loop()
@@ -53,11 +66,17 @@
 
 		<script src="windowResizeSystem.js"></script>
 
-		<script src="renderer.js"></script>
+		<script src="pad.js"></script>
+
+		<script src="maps.js"></script>
 
 		<script src="algebra.js"></script>
 
 		<script src="miscGl.js"></script>
+
+		<script src="text.js"></script>
+
+		<script src="displays.js"></script>
 
 		<!-- <script src="video.js"></script> -->
 

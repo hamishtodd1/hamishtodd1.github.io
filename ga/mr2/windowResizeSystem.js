@@ -7,7 +7,7 @@
 function initWindowResizeSystem()
 {
 	mainCamera.topAtZZero = 6.; //all derives from this. Tweaked to make 100% look ok on our little preview
-
+	
 	function respondToResize(event) {
 		if (event !== undefined)
 			event.preventDefault()
@@ -25,6 +25,7 @@ function initWindowResizeSystem()
 		
 		let aspect = width / height
 		mainCamera.rightAtZZero = mainCamera.topAtZZero * aspect
+		mainCamera.frontAndBackZ = Math.max(mainCamera.topAtZZero, mainCamera.rightAtZZero)
 	}
 	window.addEventListener('resize', respondToResize, false);
 	respondToResize();

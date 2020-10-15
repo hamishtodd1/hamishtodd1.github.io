@@ -69,25 +69,28 @@ function Program(vsSource, fsSource) {
         program.uniformLocations[name] = gl.getUniformLocation(glProgram, name)
     }
 
-    program.addVertexAttribute = (name, arr, itemSize) => {
-        const buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(arr), gl.STATIC_DRAW)
+    program.addVertexAttribute = (name, arr, itemSize, dynamic) => {
+        if ( !(arr instanceof Float32Array) )
+            console.error("needs to be float32Array")
+        const bufferId = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, bufferId);
+        gl.bufferData(gl.ARRAY_BUFFER, arr, dynamic ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW)
 
         program.vertexAttributes[name] = {
-            buffer, itemSize,
+            bufferId, itemSize,
             location: gl.getAttribLocation(glProgram, name + "A")
         }
     }
-    program.enableVertexAttribute = (name) => {
+    program.enableVertexAttribute = (name,updatedArray) => {
+        let va = program.vertexAttributes[name]
+
+        gl.enableVertexAttribArray(va.location); //not sure this is necessary here
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, va.bufferId);
         const type = gl.FLOAT;
         const normalize = false;
         const stride = 0;
         const offset = 0;
-
-        let va = program.vertexAttributes[name]
-        gl.enableVertexAttribArray(va.location); //weird since you use the location below as well
-        gl.bindBuffer(gl.ARRAY_BUFFER, va.buffer);
         gl.vertexAttribPointer(
             va.location,
             va.itemSize,
@@ -95,7 +98,24 @@ function Program(vsSource, fsSource) {
             normalize,
             stride,
             offset);
+
+        if (updatedArray !== undefined)
+            gl.bufferData(gl.ARRAY_BUFFER, updatedArray, gl.DYNAMIC_DRAW)
     }
 
     return program
 }
+
+function initFrameDrawer() {
+    drawFrame = (x,y) => {
+    }
+}
+
+function logShader(source)
+{
+    let lines = source.split("\n");
+    for (let i = 0; i < lines.length; ++i)
+        log((i + 1) + " " + lines[i])
+}
+
+sq = (x) => x * x
