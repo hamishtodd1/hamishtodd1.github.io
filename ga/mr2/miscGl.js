@@ -6,16 +6,21 @@ function initRenderFunctions() {
         if (order === undefined)
             order = "beginning"
 
+        if(order === "beginning") {
+            renderFunctions.splice(0, 0, func)
+            orders.splice(0, 0, order)
+        }
+        else if(order === "end") {
+            renderFunctions.splice(orders.length, 0, func)
+            orders.splice(orders.length, 0, order)
+        }
         for(let i = 0; i < orders.length; ++i) {
-            if(orders[i] === order ) {
+            if(orders[i] === "middle" ) {
                 renderFunctions.splice(i,0,func)
                 orders.splice(i, 0, order)
                 return
             }
         }
-        //nothing with that order yet
-        renderFunctions.push(func)
-        orders.push(order)
     }
 
     return renderFunctions

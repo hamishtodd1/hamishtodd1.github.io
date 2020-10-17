@@ -22,11 +22,13 @@ uniform float topAtZZero;
 uniform float frameCount;
 `
 
-let unchangingUnitSquareVertices = Array()
-let quadBuffer = new Float32Array(6 * 4)
+const unchangingUnitSquareVertices = Array()
+const quadBuffer = new Float32Array(6 * 4)
 
 let backgroundString = "a      \n \n      "
 
-let backgroundColor = [127, 127, 127];
+const backgroundColor = [127, 127, 127];
 
 const characterWidth = 1. / 3.
+
+const mouseResponses = []

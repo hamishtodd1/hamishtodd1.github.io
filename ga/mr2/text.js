@@ -1,22 +1,3 @@
-/*
-    Performance-optimal
-    It's going to cover the whole screen
-
-    You only want to "draw" once so
-
-    You want to batch it
-    Would be nice to have it in one draw call
-    very large number of vertices in the array, but use the "count" argument to give what you need
-
-    every letter in a big tall texture, centered
-    
-
-    canvas https://webglfundamentals.org/webgl/lessons/webgl-text-texture.html
-    a bit more https://webglfundamentals.org/webgl/lessons/webgl-text-glyphs.html
-
-    atlas builder https://github.com/memononen/fontstash
-*/
-
 function initCharacterTexture(typeableCharacters) {
     const maxCharacters = 512 //noticeable load time increase when changed
 
@@ -100,9 +81,6 @@ function initCharacterTexture(typeableCharacters) {
             p.y *= height;
             p.xy += screenPositionA;
 
-            //uv comes from characterIndex
-            // uv = screenPosition + pointA.xy + .5;
-
             //might need to chop off some left and right
             uv.x = pointA.x < .5 ? characterIndexA : characterIndexA+1.;
             uv.x /= totalCharactersInTexture / proportionOfTextureTakenUpByCharacters;
@@ -165,5 +143,5 @@ function initCharacterTexture(typeableCharacters) {
         gl.drawArrays(gl.TRIANGLES, 0, numCharactersToDraw * 6);
 
         numCharactersToDraw = 0
-    })
+    },"beginning")
 }
