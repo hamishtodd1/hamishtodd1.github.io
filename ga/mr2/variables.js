@@ -10,8 +10,6 @@ const mainCamera = {
     frontAndBackZ: 0.,
 }
 
-const renderFunctions = []
-
 const shaderHeader = `
 precision mediump float;
 #define PI 3.14159265359
@@ -27,6 +25,8 @@ uniform float frameCount;
 let unchangingUnitSquareVertices = Array()
 let quadBuffer = new Float32Array(6 * 4)
 
-let backgroundString = "      \n \n      "
+let backgroundString = "a      \n \n      "
 
 let backgroundColor = [127, 127, 127];
+
+const characterWidth = 1. / 3.

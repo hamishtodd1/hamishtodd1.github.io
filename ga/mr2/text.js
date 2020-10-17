@@ -17,83 +17,87 @@
     atlas builder https://github.com/memononen/fontstash
 */
 
-async function initText() {
-    const maxCharacters = 256 //noticeable load time increase when changed
+function initCharacterTexture(typeableCharacters) {
+    const maxCharacters = 512 //noticeable load time increase when changed
 
-    let alphabet = "abcdefghijklmnopqrstuvwxyz"
-    let alphabetIndices = {}
-    for(let i = 0; i < alphabet.length; ++i)
-        alphabetIndices[alphabet[i]] = i
+    let characterIndices = {}
+    for(let i = 0; i < typeableCharacters.length; ++i)
+        characterIndices[typeableCharacters[i]] = i
 
     let characterAttributeBuffer = new Float32Array(maxCharacters*6) //could be 16
     let positionAttributeBuffer = new Float32Array(maxCharacters*6*2)
 
-    function addCharacterToDraw(character,x,y) {
-        let i = numCharactersToDraw * 6
-        for(let j = 0; j < 6; ++j) {
-            characterAttributeBuffer[i+j] = alphabetIndices[character]
-            positionAttributeBuffer[(i+j)*2+0] = x
-            positionAttributeBuffer[(i+j)*2+1] = y
+    addCharacterToDraw = function(character,drawingPosition) {
+        if(numCharactersToDraw >= maxCharacters) {
+            console.error("character limit hit")
         }
-        //can make these uniforms instead for 6x less of this and a 6x smaller buffer in the end
-        //but more draw calls
-        //easy to check difference
-        ++numCharactersToDraw
+        else {
+            let i = numCharactersToDraw * 6
+            for (let j = 0; j < 6; ++j) {
+                characterAttributeBuffer[i + j] = characterIndices[character]
+                positionAttributeBuffer[(i + j) * 2 + 0] = drawingPosition.x
+                positionAttributeBuffer[(i + j) * 2 + 1] = drawingPosition.y
+            }
+            //can make these uniforms instead for 6x less of this and a 6x smaller buffer in the end, but more draw calls
+            //easy to check difference
+            ++numCharactersToDraw
+        }
     }
     let numCharactersToDraw = 0
-    updateFunctions.push(()=>{ //simulating pad
-        numCharactersToDraw = 0
-        addCharacterToDraw("a", 0., 0.)
-        addCharacterToDraw("b", 2., 0.)
-    })
 
+    // https://delphic.me.uk/tutorials/webgl-text
     const texture = gl.createTexture();
-    const fullCharacterString = "abcdefghijklmnopqrstuvwxyz"
     {
         const monospaceHeightOverWidth = 1.8188277087
 
         const textCanvas = document.createElement("canvas")
         var ctx = textCanvas.getContext("2d");
 
-        const height = 32
+        const height = 64
         const fontHeight = Math.floor(height / 1.3) //1.3 was in tutorial. It's the spacing above and below. Probably fine to add more if you want
+        textCanvas.height = height;
 
-        const widthTakenUpByCharacters = Math.ceil(fontHeight / monospaceHeightOverWidth * fullCharacterString.length)
+        const widthTakenUpByCharacters = fontHeight / monospaceHeightOverWidth * typeableCharacters.length
         const width = nextPowerOf2(widthTakenUpByCharacters)
         var proportionOfTextureTakenUpByCharacters = widthTakenUpByCharacters / width
         textCanvas.width = width;
-        textCanvas.height = height;
+
+        let proportionOfTextureTakenUpByOneCharacter = proportionOfTextureTakenUpByCharacters / typeableCharacters.length
+        var singleCharacterHeightOverWidth = height / (width * proportionOfTextureTakenUpByOneCharacter)
 
         ctx.font = fontHeight + "px monospace"; //can't put this before the above because state machine
         ctx.textBaseline = "middle"; //vertical
         ctx.textAlign = "start";
         ctx.fillStyle = "black";
 
-        // ctx.fillStyle = "rgb("+backgroundColor[0]+","+backgroundColor[1]+","+backgroundColor[2]+")";
-        ctx.fillStyle = "rgb(255,0,0)";
+        ctx.fillStyle = "rgb("+backgroundColor[0]+","+backgroundColor[1]+","+backgroundColor[2]+")";
+        // ctx.fillStyle = "rgb(255,0,0)";
         ctx.fillRect(0, 0, width, height);
         ctx.fillStyle = "black";
-        ctx.fillText(fullCharacterString, 0, height / 2);
+        ctx.fillText(typeableCharacters, 0, height / 2);
 
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textCanvas);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     }
 
     const vsSource = shaderHeader + `
         attribute vec4 pointA;
 
         const float proportionOfTextureTakenUpByCharacters = ` + proportionOfTextureTakenUpByCharacters + `;
-        const float totalCharactersInTexture = `+ fullCharacterString.length +`.;
+        const float totalCharactersInTexture = `+ typeableCharacters.length +`.;
         
         attribute float characterIndexA;
         varying vec2 uv;
         attribute vec2 screenPositionA;
 
+        const float width = `+ characterWidth +`;
+        const float height = `+ characterWidth * singleCharacterHeightOverWidth +`;
+
         void main(void) {
             vec4 p = pointA;
+            p.x *= width;
+            p.y *= height;
             p.xy += screenPositionA;
 
             //uv comes from characterIndex
@@ -142,7 +146,7 @@ async function initText() {
     program.locateUniform("topAtZZero")
     program.locateUniform("frontAndBackZ")
 
-    renderFunctions.push(() =>
+    addRenderFunction(() =>
     {
         gl.useProgram(program.glProgram);
 
@@ -159,5 +163,7 @@ async function initText() {
         program.doSomethingWithVertexAttribute("characterIndex",characterAttributeBuffer)
 
         gl.drawArrays(gl.TRIANGLES, 0, numCharactersToDraw * 6);
+
+        numCharactersToDraw = 0
     })
 }

@@ -14,6 +14,8 @@
 	<body>
 		<script>
 			async function technicalInit() {
+				let renderFunctions = initRenderFunctions()
+
 				initAlgebra()
 				
 				initButtons()
@@ -25,15 +27,7 @@
 				// let pointsBuffer = new Float32Array([0.,0.,0.,1.])
 				// verticesDisplay(pointsBuffer, gl.POINTS)
 
-				// initPad()
-
-				await initText()
-
-				// initFrameDrawer()
-				// renderFunctions.push(()=>{
-				// 	drawFrame(0.,0.)
-				// 	drawFrame(3.,3.)
-				// })
+				initPad()
 
 				function loop() {
 					for(var i = 0; i < updateFunctions.length; i++)

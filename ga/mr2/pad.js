@@ -3,22 +3,44 @@
 */
 
 async function initPad() {
+
     let carat = initCarat()
-    initTypeableCharacters(carat)
+
+    let typeableCharacters = ""
+    {
+        function makeCharacterTypeable(character) {
+            typeableCharacters += character
+            bindButton(character, () => addStringAtCarat(character))
+        }
+
+        let initialCharacters = "abcdefghijklmnopqrstuvwxyz"
+        for(let i = 0; i < initialCharacters.length; ++i)
+            makeCharacterTypeable(initialCharacters[i])
+        initCharacterTexture(typeableCharacters)
+
+        addStringAtPosition = (str, position) => {
+            backgroundString =
+                backgroundString.substring(0, position) +
+                str +
+                backgroundString.substring(position)
+        }
+        addStringAtCarat = function (str) {
+            addStringAtPosition(str, carat.positionInString)
+            carat.moveAlongString(str.length)
+        }
+    }
 
     let drawingPosition = new ScreenPosition()
     let positionInStringClosestToCaratPosition = new ScreenPosition()
     updateFunctions.push(() => {   
         let drawingPositionInString = 0
-        let spaceWidth = 1./3.
 
         let positionInStringClosestToCaratPositionInString = -1
         positionInStringClosestToCaratPosition.x = Infinity
         positionInStringClosestToCaratPosition.y = Infinity
         
         drawingPosition.x = 0.
-        let yPositionOfVerticalCenterOfTopLine = -.5
-        drawingPosition.y = yPositionOfVerticalCenterOfTopLine
+        drawingPosition.y = 0.
         let backgroundStringLength = backgroundString.length
         for (drawingPositionInString; drawingPositionInString <= backgroundStringLength; ++drawingPositionInString) {
             //carat position
@@ -45,10 +67,14 @@ async function initPad() {
 
             let currentCharacter = backgroundString[drawingPositionInString]
             if (currentCharacter === " ")
-                drawingPosition.x += spaceWidth
+                drawingPosition.x += characterWidth
             else if (currentCharacter === "\n") {
                 drawingPosition.x = 0.
                 drawingPosition.y -= 1.
+            }
+            else if (typeableCharacters.indexOf(currentCharacter) !== -1) {
+                addCharacterToDraw(currentCharacter, drawingPosition)
+                drawingPosition.x += characterWidth
             }
         }
 

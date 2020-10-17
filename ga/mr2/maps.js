@@ -332,7 +332,7 @@ async function initWorldMap() {
         rotator(axis, 0., transform)
     })
 
-    renderFunctions.push( () => {
+    addRenderFunction( () => {
         gl.useProgram(program.glProgram);
 
         program.doSomethingWithVertexAttribute("uv")
@@ -532,7 +532,7 @@ async function initDymaxion()
 
     let transform = new DualQuat()
 
-    renderFunctions.push( () => {
+    addRenderFunction( () => {
         gl.useProgram(program.glProgram);
 
         program.doSomethingWithVertexAttribute("uv")

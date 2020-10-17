@@ -1,3 +1,26 @@
+function initRenderFunctions() {
+    const orders = []
+    const renderFunctions = []
+
+    addRenderFunction = function(func, order) {
+        if (order === undefined)
+            order = "beginning"
+
+        for(let i = 0; i < orders.length; ++i) {
+            if(orders[i] === order ) {
+                renderFunctions.splice(i,0,func)
+                orders.splice(i, 0, order)
+                return
+            }
+        }
+        //nothing with that order yet
+        renderFunctions.push(func)
+        orders.push(order)
+    }
+
+    return renderFunctions
+}
+
 function getVariableNameAsString(variableWrappedInAnObject){
     if(typeof a !== "object")
         log("needs to be {input}")
@@ -112,11 +135,6 @@ function Program(vsSource, fsSource) {
     }
 
     return program
-}
-
-function initFrameDrawer() {
-    drawFrame = (x,y) => {
-    }
 }
 
 function logShader(source)
