@@ -14,18 +14,20 @@
 	<body>
 		<script>
 			async function technicalInit() {
+				initAlgebra()
+				
 				initButtons()
 				initWindowResizeSystem()
-
-				initAlgebra()
 
 				// await initDymaxion()
 				// await initWorldMap()
 
-				let pointsBuffer = new Float32Array([0.,0.,0.,1.])
-				verticesDisplay(pointsBuffer, gl.POINTS)
+				// let pointsBuffer = new Float32Array([0.,0.,0.,1.])
+				// verticesDisplay(pointsBuffer, gl.POINTS)
 
-				// await initText()
+				// initPad()
+
+				await initText()
 
 				// initFrameDrawer()
 				// renderFunctions.push(()=>{
@@ -38,7 +40,7 @@
 						updateFunctions[i]()
 
 					{
-						gl.clearColor(.5, .5, .5, 1.0);
+						gl.clearColor(backgroundColor[0]/255., backgroundColor[1]/255., backgroundColor[2]/255., 1.0);
 						gl.clearDepth(1.0); //depth buffer(?)
 						gl.enable(gl.DEPTH_TEST);
 						gl.depthFunc(gl.LEQUAL);
@@ -66,7 +68,9 @@
 
 		<script src="windowResizeSystem.js"></script>
 
+		<script src="text.js"></script>
 		<script src="pad.js"></script>
+		<script src="caratAndKeyboard.js"></script>
 
 		<script src="maps.js"></script>
 
@@ -74,9 +78,9 @@
 
 		<script src="miscGl.js"></script>
 
-		<script src="text.js"></script>
-
 		<script src="displays.js"></script>
+
+		<script src="miscFunctions.js"></script>
 
 		<!-- <script src="video.js"></script> -->
 

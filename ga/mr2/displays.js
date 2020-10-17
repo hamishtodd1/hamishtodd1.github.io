@@ -41,7 +41,7 @@ function lineDisplay(line)
     })
 }
 
-async function verticesDisplay(pointsBuffer, mode)
+function verticesDisplay(pointsBuffer, mode)
 {
     if (pointsBuffer.length % 4 !== 0)
         console.error("needs to be 4vecs")
@@ -63,7 +63,7 @@ async function verticesDisplay(pointsBuffer, mode)
         `
     const fsSource = shaderHeader + `
         void main(void) {
-            gl_FragColor = vec4(1.,0.,0.,1.);
+            gl_FragColor = vec4(1.,1.,1.,1.);
         }
         `
 
@@ -74,7 +74,7 @@ async function verticesDisplay(pointsBuffer, mode)
     program.locateUniform("topAtZZero")
     program.locateUniform("frontAndBackZ")
 
-    renderFunctions.push(() =>
+    return function()
     {
         gl.useProgram(program.glProgram);
 
@@ -82,8 +82,66 @@ async function verticesDisplay(pointsBuffer, mode)
         gl.uniform1f(program.uniformLocations.topAtZZero, mainCamera.topAtZZero);
         gl.uniform1f(program.uniformLocations.frontAndBackZ, mainCamera.frontAndBackZ);
 
-        program.enableVertexAttribute("point", pointsBuffer)
+        program.doSomethingWithVertexAttribute("point", pointsBuffer)
 
         gl.drawArrays(mode, 0, pointsBuffer.length / 4);
-    })
+    }
+}
+
+function verticesDisplayWithPosition(pointsBuffer, mode)
+{
+    if (pointsBuffer.length % 4 !== 0)
+        console.error("needs to be 4vecs")
+
+    const screenPosition = new ScreenPosition()
+
+    const vsSource = shaderHeader + `
+        attribute vec4 pointA;
+        uniform vec2 screenPosition;
+
+        void main(void) {
+            vec4 p = pointA;
+
+            p.xy += screenPosition;
+
+            //camera, "just" squashing so it goes on screen
+            p.x /= rightAtZZero;
+            p.y /= topAtZZero;
+            p.z /= frontAndBackZ;
+
+            gl_Position = p;
+            gl_PointSize = 10.;
+        }
+        `
+    const fsSource = shaderHeader + `
+        void main(void) {
+            gl_FragColor = vec4(1.,1.,1.,1.);
+        }
+        `
+
+    const program = Program(vsSource, fsSource)
+    program.addVertexAttribute("point", pointsBuffer, 4, true)
+
+    program.locateUniform("rightAtZZero")
+    program.locateUniform("topAtZZero")
+    program.locateUniform("frontAndBackZ")
+    program.locateUniform("screenPosition")
+
+    return {
+        position: screenPosition,
+        renderFunction: function ()
+        {
+            gl.useProgram(program.glProgram);
+
+            gl.uniform1f(program.uniformLocations.rightAtZZero, mainCamera.rightAtZZero);
+            gl.uniform1f(program.uniformLocations.topAtZZero, mainCamera.topAtZZero);
+            gl.uniform1f(program.uniformLocations.frontAndBackZ, mainCamera.frontAndBackZ);
+
+            gl.uniform2f(program.uniformLocations.screenPosition, screenPosition.x, screenPosition.y);
+
+            program.doSomethingWithVertexAttribute("point", pointsBuffer)
+
+            gl.drawArrays(mode, 0, pointsBuffer.length / 4);
+        }
+    }
 }

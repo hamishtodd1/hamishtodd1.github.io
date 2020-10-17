@@ -1,3 +1,6 @@
+//if you visualize the line as having a length and direction, well, sounds like a vector mate
+//at least it's not a vectors that's stuck at the origin
+
 function initAlgebra()
 {
     function replaceSignature(newSignature,func) {
@@ -350,6 +353,7 @@ function initAlgebra()
         pointY = (mv, newValue) => { if (newValue !== undefined) mv[12] = newValue; return mv[12] }
         pointX = (mv, newValue) => { if (newValue !== undefined) mv[13] = newValue; return mv[13] }
         pointW = (mv, newValue) => { if (newValue !== undefined) mv[14] = newValue; return mv[14] }
+        point = (mv, x, y, z, w) => {zeroMv(mv); mv[11] = z; mv[12] = y; mv[13] = x; mv[14] = w;}
 
         appendToGaShaderString(replaceSignature(
             "void mvToDq(float mv[16], inout dualQuat dq)",
@@ -477,5 +481,29 @@ function initAlgebra()
         copyMv = (mv,target) => {
             mv.forEach((e,i) => {target[i] = e})
         }
+    }
+
+    for (let i = 0; i < 4; ++i)
+    {
+        let p = new Float32Array(16)
+        pointX(p, .5)
+        pointY(p, .5)
+        pointZ(p, 0.)
+        pointW(p, 1.)
+
+        if (i % 2) pointX(p, -.5)
+        if (i < 2) pointY(p, -.5)
+
+        unchangingUnitSquareVertices.push(p)
+    }
+
+
+    let orderedIndices = [0, 2, 1, 3, 1, 2]
+    for (let i = 0; i < orderedIndices.length; ++i)
+    {
+        quadBuffer[i * 4 + 0] = pointX(unchangingUnitSquareVertices[orderedIndices[i]])
+        quadBuffer[i * 4 + 1] = pointY(unchangingUnitSquareVertices[orderedIndices[i]])
+        quadBuffer[i * 4 + 2] = pointZ(unchangingUnitSquareVertices[orderedIndices[i]])
+        quadBuffer[i * 4 + 3] = pointW(unchangingUnitSquareVertices[orderedIndices[i]])
     }
 }

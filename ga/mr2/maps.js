@@ -1,4 +1,6 @@
 /*
+    NOTE SERIOUS CONFUSION: IS Z POSITIVE OR NEGATIVE?
+
     Title
         How racist is your map?
         Which is least racist?
@@ -333,7 +335,7 @@ async function initWorldMap() {
     renderFunctions.push( () => {
         gl.useProgram(program.glProgram);
 
-        program.enableVertexAttribute("uv")
+        program.doSomethingWithVertexAttribute("uv")
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -533,7 +535,7 @@ async function initDymaxion()
     renderFunctions.push( () => {
         gl.useProgram(program.glProgram);
 
-        program.enableVertexAttribute("uv")
+        program.doSomethingWithVertexAttribute("uv")
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texture);
