@@ -143,5 +143,5 @@ function initCharacterTexture(typeableCharacters) {
         gl.drawArrays(gl.TRIANGLES, 0, numCharactersToDraw * 6);
 
         numCharactersToDraw = 0
-    },"beginning")
+    })
 }

@@ -1,31 +1,3 @@
-function initRenderFunctions() {
-    const orders = []
-    const renderFunctions = []
-
-    addRenderFunction = function(func, order) {
-        if (order === undefined)
-            order = "beginning"
-
-        if(order === "beginning") {
-            renderFunctions.splice(0, 0, func)
-            orders.splice(0, 0, order)
-        }
-        else if(order === "end") {
-            renderFunctions.splice(orders.length, 0, func)
-            orders.splice(orders.length, 0, order)
-        }
-        for(let i = 0; i < orders.length; ++i) {
-            if(orders[i] === "middle" ) {
-                renderFunctions.splice(i,0,func)
-                orders.splice(i, 0, order)
-                return
-            }
-        }
-    }
-
-    return renderFunctions
-}
-
 function getVariableNameAsString(variableWrappedInAnObject){
     if(typeof a !== "object")
         log("needs to be {input}")

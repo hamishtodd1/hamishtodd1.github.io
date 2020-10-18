@@ -88,10 +88,17 @@ function verticesDisplay(pointsBuffer, mode)
     }
 }
 
-function verticesDisplayWithPosition(pointsBuffer, mode)
+function verticesDisplayWithPosition(pointsBuffer, mode, r,g,b)
 {
     if (pointsBuffer.length % 4 !== 0)
         console.error("needs to be 4vecs")
+
+    r = r || 1.
+    g = g || 0.
+    b = b || 0.
+    let rStr = r === Math.round(r) ? r.toString() + "." : r.toString()
+    let gStr = g === Math.round(g) ? g.toString() + "." : g.toString()
+    let bStr = b === Math.round(b) ? b.toString() + "." : b.toString()
 
     const screenPosition = new ScreenPosition()
 
@@ -115,7 +122,7 @@ function verticesDisplayWithPosition(pointsBuffer, mode)
         `
     const fsSource = shaderHeader + `
         void main(void) {
-            gl_FragColor = vec4(1.,1.,1.,1.);
+            gl_FragColor = vec4(`+rStr+`,`+gStr+`,`+bStr+`,1.);
         }
         `
 

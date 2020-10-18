@@ -22,13 +22,22 @@ uniform float topAtZZero;
 uniform float frameCount;
 `
 
-const unchangingUnitSquareVertices = Array()
+const unchangingUnitSquareVertices = []
 const quadBuffer = new Float32Array(6 * 4)
 
-let backgroundString = "a      \n \n      "
+let backgroundString = "a \n \n\n\n\n\n\n"
 
 const backgroundColor = [127, 127, 127];
 
 const characterWidth = 1. / 3.
 
 const mouseResponses = []
+
+const namedMvs = []
+const orderedNames = []
+
+const carat = {
+    positionInString: -1,
+    lineNumber: -1,
+    flashingStart: Date.now(),
+}

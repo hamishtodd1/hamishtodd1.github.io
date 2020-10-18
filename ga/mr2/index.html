@@ -14,13 +14,15 @@
 	<body>
 		<script>
 			async function technicalInit() {
-				let renderFunctions = initRenderFunctions()
+				let renderEverything = initRenderFunctions()
 
 				initAlgebra()
 				
 				initButtons()
 				initMouse()
 				initWindowResizeSystem()
+
+				initNamesAndBasis()
 
 				// await initDymaxion()
 				// await initWorldMap()
@@ -38,16 +40,7 @@
 					for(var i = 0; i < updateFunctions.length; i++)
 						updateFunctions[i]()
 
-					{
-						gl.clearColor(backgroundColor[0]/255., backgroundColor[1]/255., backgroundColor[2]/255., 1.0);
-						gl.clearDepth(1.0); //depth buffer(?)
-						gl.enable(gl.DEPTH_TEST);
-						gl.depthFunc(gl.LEQUAL);
-						gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-					}
-	
-					for (var i = 0; i < renderFunctions.length; i++)
-						renderFunctions[i]()
+					renderEverything()
 
 					++frameCount
 
@@ -67,18 +60,26 @@
 
 		<script src="windowResizeSystem.js"></script>
 
+		<script src="names.js"></script>
+
 		<script src="text.js"></script>
 		<script src="pad.js"></script>
 		<script src="carat.js"></script>
 
+		<script src="renderFunctions.js"></script>
+
 		<script src="maps.js"></script>
 
 		<script src="algebra.js"></script>
-		<script src="mv.js"></script>
+		<script src="frames.js"></script>
 
 		<script src="miscGl.js"></script>
 
 		<script src="displays.js"></script>
+
+		<script src="colors.js"></script>
+
+		<script src="names.js"></script>
 
 		<script src="mouse.js"></script>
 
