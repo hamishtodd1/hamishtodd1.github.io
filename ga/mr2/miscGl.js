@@ -78,13 +78,12 @@ function Program(vsSource, fsSource) {
 
         program.vertexAttributes[name] = {
             bufferId, itemSize,
-            location: gl.getAttribLocation(glProgram, name + "A")
+            location: gl.getAttribLocation(glProgram, name + "A") //yeah don't forget that
         }
     }
     program.doSomethingWithVertexAttribute = (name,updatedArray) => {
         let va = program.vertexAttributes[name]
 
-        // debugger
         gl.enableVertexAttribArray(va.location); //not sure this is necessary here
 
         gl.bindBuffer(gl.ARRAY_BUFFER, va.bufferId);
@@ -92,13 +91,6 @@ function Program(vsSource, fsSource) {
         const normalize = false;
         const stride = 0;
         const offset = 0;
-        // log(
-        //     va.location,
-        //     va.itemSize,
-        //     type,
-        //     normalize,
-        //     stride,
-        //     offset);
         gl.vertexAttribPointer(
             va.location,
             va.itemSize,

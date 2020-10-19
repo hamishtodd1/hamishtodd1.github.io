@@ -62,7 +62,7 @@ function initCharacterTexture(typeableCharacters) {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     }
 
-    const vsSource = shaderHeader + `
+    const vsSource = shaderHeaderWithCameraAndFrameCount + `
         attribute vec4 pointA;
 
         const float proportionOfTextureTakenUpByCharacters = ` + proportionOfTextureTakenUpByCharacters + `;
@@ -94,7 +94,7 @@ function initCharacterTexture(typeableCharacters) {
             gl_Position = p;
         }
         `
-    const fsSource = shaderHeader + `
+    const fsSource = shaderHeaderWithCameraAndFrameCount + `
         varying vec2 uv;
         uniform sampler2D sampler;
 

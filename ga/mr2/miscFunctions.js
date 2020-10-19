@@ -30,3 +30,13 @@ function digitGivenBase(num, base, digitNum) {
     let nearbyIntegerPower = Math.pow(base, digitNum - 1)
     return Math.floor((num % (nearbyIntegerPower * base)) / nearbyIntegerPower)
 }
+
+function nameToHexantColors(name, hexantColors) {
+    for (let i = 0; i < 6; ++i) {
+        let letter = name[Math.floor(i / 6. * name.length)]
+        hexantColors[i * 3 + 0] = colors[letter][0]
+        hexantColors[i * 3 + 1] = colors[letter][1]
+        hexantColors[i * 3 + 2] = colors[letter][2]
+    }
+    return hexantColors
+}

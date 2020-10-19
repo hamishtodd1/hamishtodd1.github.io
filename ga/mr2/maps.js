@@ -74,7 +74,7 @@
 */
 
 async function initWorldMap() {
-    const vsSource = shaderHeader + `
+    const vsSource = shaderHeaderWithCameraAndFrameCount + `
         attribute vec2 uvA;
         varying vec2 uv;
         varying vec4 p;
@@ -278,7 +278,7 @@ async function initWorldMap() {
         }
         `
     logShader(vsSource)
-    const fsSource = shaderHeader + `
+    const fsSource = shaderHeaderWithCameraAndFrameCount + `
         varying vec2 uv;
         varying vec4 p;
 
@@ -417,7 +417,7 @@ async function initDymaxion()
         repositionVerts(angle, animatedVertsBuffer)
     })
 
-    const vsSource = shaderHeader + `
+    const vsSource = shaderHeaderWithCameraAndFrameCount + `
         attribute vec2 uvA;
         varying vec4 closedP;
 
@@ -456,7 +456,7 @@ async function initDymaxion()
             gl_Position = animatedP;
         }
         `
-    const fsSource = shaderHeader + `
+    const fsSource = shaderHeaderWithCameraAndFrameCount + `
         varying vec2 uv;
         varying vec4 closedP;
 

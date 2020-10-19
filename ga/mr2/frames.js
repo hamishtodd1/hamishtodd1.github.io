@@ -15,9 +15,9 @@ function initFrames() {
         untriangledVertsBuffer[k * 8 + 2] = pointZ(unchangingUnitSquareVertices[i])
         untriangledVertsBuffer[k * 8 + 3] = pointW(unchangingUnitSquareVertices[i])
 
-        untriangledVertsBuffer[k * 8 + 4] = pointX(unchangingUnitSquareVertices[i]) * .85
-        untriangledVertsBuffer[k * 8 + 5] = pointY(unchangingUnitSquareVertices[i]) * .85
-        untriangledVertsBuffer[k * 8 + 6] = pointZ(unchangingUnitSquareVertices[i]) * .85
+        untriangledVertsBuffer[k * 8 + 4] = pointX(unchangingUnitSquareVertices[i]) * .88
+        untriangledVertsBuffer[k * 8 + 5] = pointY(unchangingUnitSquareVertices[i]) * .88
+        untriangledVertsBuffer[k * 8 + 6] = pointZ(unchangingUnitSquareVertices[i]) * .88
         untriangledVertsBuffer[k * 8 + 7] = pointW(unchangingUnitSquareVertices[i])
     }
     
@@ -29,7 +29,7 @@ function initFrames() {
         vertsBuffer[i * 4 + 3] = untriangledVertsBuffer[indices[i]*4+3]
     }
 
-    const vsSource = shaderHeader + `
+    const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
         attribute vec4 pointA;
         varying vec2 pointV;
 
@@ -50,7 +50,7 @@ function initFrames() {
             gl_PointSize = 10.;
         }
         `
-    const fsSource = shaderHeader + `
+    const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
         varying vec2 pointV;
         uniform vec3 hexantColors[6];
 
@@ -70,44 +70,35 @@ function initFrames() {
     const program = Program(vsSource, fsSource)
     program.addVertexAttribute("point", vertsBuffer, 4, true)
 
-    program.locateUniform("rightAtZZero")
-    program.locateUniform("topAtZZero")
-    program.locateUniform("frontAndBackZ")
+    cameraAndFrameCountShaderStuff.locateUniforms(program)
+
     program.locateUniform("screenPosition")
     program.locateUniform("hexantColors")
 
     let framePositions = []
-    let frameColors = []
-    let numFramesToDraw = 0
+    let names = []
+    let numToDraw = 0
     addFrameToDraw = function(x,y,name) {
-        framePositions[numFramesToDraw*2+0] = x
-        framePositions[numFramesToDraw*2+1] = y
+        framePositions[numToDraw*2+0] = x
+        framePositions[numToDraw*2+1] = y
 
-        if (frameColors[numFramesToDraw] === undefined)
-            frameColors[numFramesToDraw] = new Float32Array(3*6)
-        for(let i = 0; i < 6; ++i) {
-            let letter = name[ Math.floor(i / 6. * name.length) ]
-            frameColors[numFramesToDraw][i*3+0] = colors[letter][0]
-            frameColors[numFramesToDraw][i*3+1] = colors[letter][1]
-            frameColors[numFramesToDraw][i*3+2] = colors[letter][2]
-        }
-        ++numFramesToDraw
+        names[numToDraw] = name
+        ++numToDraw
     }
+
+    let hexantColors = new Float32Array(3 * 6)
 
     addRenderFunction( () => {
         gl.useProgram(program.glProgram);
-
-        gl.uniform1f(program.uniformLocations.rightAtZZero, mainCamera.rightAtZZero);
-        gl.uniform1f(program.uniformLocations.topAtZZero, mainCamera.topAtZZero);
-        gl.uniform1f(program.uniformLocations.frontAndBackZ, mainCamera.frontAndBackZ);
+        cameraAndFrameCountShaderStuff.transfer(program)
 
         program.doSomethingWithVertexAttribute("point", vertsBuffer)
 
-        for(let i = 0; i < numFramesToDraw; ++i) {
-            gl.uniform3fv(program.uniformLocations.hexantColors,frameColors[i])
+        for(let i = 0; i < numToDraw; ++i) {
+            gl.uniform3fv(program.uniformLocations.hexantColors, nameToHexantColors(names[i], hexantColors))
             gl.uniform2f(program.uniformLocations.screenPosition, framePositions[i*2+0], framePositions[i*2+1]);
             gl.drawArrays(gl.TRIANGLES, 0, vertsBuffer.length / 4);
         }
-        numFramesToDraw = 0
+        numToDraw = 0
     },"end")
 }

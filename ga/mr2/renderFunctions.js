@@ -10,12 +10,9 @@ function initRenderFunctions() {
             renderFunctions.splice(orders.length, 0, func)
             orders.splice(orders.length, 0, order)
         }
-        for(let i = 0; i < orders.length; ++i) {
-            if(orders[i] === "middle" ) {
-                renderFunctions.splice(i,0,func)
-                orders.splice(i, 0, order)
-                return
-            }
+        else {
+            renderFunctions.splice(0, 0, func)
+            orders.splice(0, 0, order)
         }
     }
 

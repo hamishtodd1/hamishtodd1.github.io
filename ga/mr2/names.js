@@ -7,7 +7,7 @@
         When called upon to make a "new" name, we take the lowest unused thing from alphabeticalNames
 */
 
-function initNamesAndBasis()
+function initNamesAndBasis(freeVariableCharacters)
 {
     let MAX_THINGS = 63 //7 choose 1 + 7 choose 2 + 7 choose 3
 
@@ -90,7 +90,8 @@ function initNamesAndBasis()
     //ideally none for empty lines
     //you only know at compile time which lines have things on them
     for(let i = 0; i < backgroundString.length; ++i) {
-        if(backgroundString[i] === "\n" || backgroundString[i] === "[")
+        if( backgroundString[i] === "\n" || 
+            freeVariableCharacters.indexOf(backgroundString[i]) !== -1 )
             orderedNames.push(getLowestUnusedName())
     }
 

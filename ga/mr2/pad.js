@@ -2,7 +2,7 @@
 
 */
 
-async function initPad() {
+async function initPad(freeVariableCharacters) {
 
     let carat = initCarat()
     let typeableCharacters = initTypeableCharacters()
@@ -19,6 +19,10 @@ async function initPad() {
     }
     let columnBackground = verticesDisplayWithPosition(pointsBuffer, gl.TRIANGLES, .22, .22, .22)
     addRenderFunction(columnBackground.renderFunction)
+
+    let testPoint = new Float32Array(16)
+    pointX(testPoint, .3)
+    pointW(testPoint, 1.)
 
     let drawingPosition = new ScreenPosition()
     let positionInStringClosestToCaratPosition = new ScreenPosition()
@@ -63,9 +67,7 @@ async function initPad() {
             if (currentCharacter === " ")
                 drawingPosition.x += characterWidth
             else if (currentCharacter === "\n") {
-                let outputColumnName = orderedNames[nextOrderedNameNumber]
-                addFrameToDraw(-mainCamera.rightAtZZero + .5, drawingPosition.y, outputColumnName)
-
+                addFrameToDraw(-mainCamera.rightAtZZero + .5, drawingPosition.y, orderedNames[nextOrderedNameNumber])
                 ++nextOrderedNameNumber
                 
                 drawingPosition.x = -mainCamera.rightAtZZero + 1.
@@ -75,8 +77,35 @@ async function initPad() {
                 addCharacterToDraw(currentCharacter, drawingPosition)
                 drawingPosition.x += characterWidth
             }
+            else if (freeVariableCharacters.indexOf(currentCharacter) !== -1) {
+                // let mv = getNamedMv(token)
+                // mv.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
+                //can be a hue, point
+
+                addFrameToDraw(drawingPosition.x + .5, drawingPosition.y, orderedNames[nextOrderedNameNumber])
+                ++nextOrderedNameNumber
+                drawingPosition.x += 1.
+
+                while (freeVariableCharacters.indexOf(backgroundString[drawingPositionInString+1]) !== -1)
+                    ++drawingPositionInString
+            }
+            else if(currentCharacter === "[") {
+                let numDivisionsStringStart = drawingPositionInString + 1
+                while (backgroundString[drawingPositionInString] !== "]")
+                    ++drawingPositionInString
+                let numDivisionsStringLength = drawingPositionInString - numDivisionsStringStart
+                let numDivisionsString = backgroundString.substr(numDivisionsStringStart, numDivisionsStringLength)
+                // let numDivisions = parseInt(numDivisionsString)
+                drawingPosition.x += .5 - 1./6.
+                addCharacterToDraw(numDivisionsString, drawingPosition)
+                drawingPosition.x -= .5 - 1. / 6.
+                
+                addFrameToDraw(drawingPosition.x + .5, drawingPosition.y, orderedNames[nextOrderedNameNumber])
+                ++nextOrderedNameNumber
+                drawingPosition.x += 1.
+            }
             else
-                console.error("uncaught character")
+                console.error("uncaught character: ", currentCharacter)
         }
 
         if (carat.positionInString === -1) {
@@ -84,5 +113,16 @@ async function initPad() {
             carat.position.copy(positionInStringClosestToCaratPosition)
         }
         carat.lineNumber = Math.floor(-carat.position.y)
+
+        if(0)
+        {
+            addFrameToDraw(0., 0., orderedNames[nextOrderedNameNumber])
+            addMvToRender(testPoint, orderedNames[nextOrderedNameNumber], 0., 0.)
+            ++nextOrderedNameNumber
+
+            addFrameToDraw(3., 3., orderedNames[nextOrderedNameNumber])
+            addMvToRender(testPoint, orderedNames[nextOrderedNameNumber], 3., 3.)
+            ++nextOrderedNameNumber
+        }
     })
 }

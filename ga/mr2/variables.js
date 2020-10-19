@@ -4,28 +4,8 @@ const gl = canvas.getContext("webgl2")
 if (!gl)
     console.error("Failed to get WebGL context, browser or device may not support WebGL.")
 
-const mainCamera = {
-    topAtZZero:0.,
-    rightAtZZero:0.,
-    frontAndBackZ: 0.,
-}
-
-const shaderHeader = `
-precision mediump float;
-#define PI 3.14159265359
-#define TAU 6.28318530718
-#define TETRAHEDRAL_ANGLE 1.9106332362490186
-
-uniform float frontAndBackZ;
-uniform float rightAtZZero;
-uniform float topAtZZero;
-uniform float frameCount;
-`
-
 const unchangingUnitSquareVertices = []
 const quadBuffer = new Float32Array(6 * 4)
-
-let backgroundString = "a \n \n\n\n\n\n\n"
 
 const backgroundColor = [127, 127, 127];
 
@@ -41,3 +21,36 @@ const carat = {
     lineNumber: -1,
     flashingStart: Date.now(),
 }
+
+let backgroundString = 
+`
+earth(0.5e032 + 0.9e013) //color
+
+
+[2]
+`
+//it's more that "earth" gets replaced with the picture. Apply that to
+//a 2D plane is a 3D plane with everything mapped to 0
+
+/*
+    earth //whole map == earth Ie032 + Ie013
+
+    earth(0.2,I) //meridian line
+    earth(line) //new function
+    earth(line)(.5)
+
+    You put a point next to it and it maps to a color
+    An array of points
+
+    Press "[" to create an array. n is adjustable by hovering
+    in the string you could have "[6]" to indicate 0./6.,1./6.,2./6....
+
+    Ie1 = series of points from origin to e1
+    Or I guess e12 + Ie20...
+
+    Outside texture map to 0?
+
+    I = [0,1]
+
+    whole map == earth Ie032 + Ie013
+*/

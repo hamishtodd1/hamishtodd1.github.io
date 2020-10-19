@@ -1,4 +1,14 @@
 <!--
+	Plan
+		Want world maps video dude
+		How are these maps going to appear in your thing?
+		This array / dots on real line thing would be fun to work on
+		How does it get you to maps?
+
+		mv appearance and editing
+		display windows
+		Draw curve, get curve as usable thing. Killer app!
+		Transpiling to javascript
 -->
 <html>
 	<head>
@@ -16,23 +26,28 @@
 			async function technicalInit() {
 				let renderEverything = initRenderFunctions()
 
+				let freeVariableCharacters = "0123456789.,"
+
 				initAlgebra()
 				
 				initButtons()
 				initMouse()
 				initWindowResizeSystem()
 
-				initNamesAndBasis()
+				initNamesAndBasis(freeVariableCharacters)
 
-				// await initDymaxion()
+				initMvAppearances()
+
 				// await initWorldMap()
+				// await initDymaxion()
 
 				// let pointsBuffer = new Float32Array([0.,0.,0.,1.])
 				// verticesDisplay(pointsBuffer, gl.POINTS)
 
-				initPad()
-
+				initPad(freeVariableCharacters)
 				initFrames()
+
+				// initFuncViz()
 
 				function loop() {
 					mouse.updateFromAsyncAndCheckClicks()
@@ -55,6 +70,8 @@
 
 		<script src="../common/variables.js"></script>
 		<script src="variables.js"></script>
+
+		<script src="camera.js"></script>
 
 		<script src="../common/buttons.js"></script>
 
@@ -82,6 +99,10 @@
 		<script src="names.js"></script>
 
 		<script src="mouse.js"></script>
+
+		<script src="mvAppearances.js"></script>
+
+		<script src="funcViz.js"></script>
 
 		<script src="miscFunctions.js"></script>
 

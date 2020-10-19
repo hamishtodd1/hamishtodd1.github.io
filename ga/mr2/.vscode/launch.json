@@ -1,5 +1,10 @@
 {
-    //have chrome
+    //1: open the chrome window
+    //2: open vs code
+    //3: refresh the page
+    //4: ctrl+q
+
+    //try closing other chrome, then breaking the connection, then refreshing the page
 
     // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.
@@ -12,7 +17,7 @@
             "request": "attach",
             "port":9222,
             "name": "mr2",
-            // "webRoot": "${workspaceFolder}",
+            "webRoot": "${workspaceFolder}",
             
             "url": "file:///C:/hamishtodd1.github.io/ga/mr2/index.html",
         }

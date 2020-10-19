@@ -46,7 +46,7 @@ function verticesDisplay(pointsBuffer, mode)
     if (pointsBuffer.length % 4 !== 0)
         console.error("needs to be 4vecs")
 
-    const vsSource = shaderHeader + `
+    const vsSource = shaderHeaderWithCameraAndFrameCount + `
         attribute vec4 pointA;
 
         void main(void) {
@@ -61,7 +61,7 @@ function verticesDisplay(pointsBuffer, mode)
             gl_PointSize = 10.;
         }
         `
-    const fsSource = shaderHeader + `
+    const fsSource = shaderHeaderWithCameraAndFrameCount + `
         void main(void) {
             gl_FragColor = vec4(1.,1.,1.,1.);
         }
@@ -102,7 +102,7 @@ function verticesDisplayWithPosition(pointsBuffer, mode, r,g,b)
 
     const screenPosition = new ScreenPosition()
 
-    const vsSource = shaderHeader + `
+    const vsSource = shaderHeaderWithCameraAndFrameCount + `
         attribute vec4 pointA;
         uniform vec2 screenPosition;
 
@@ -120,7 +120,7 @@ function verticesDisplayWithPosition(pointsBuffer, mode, r,g,b)
             gl_PointSize = 10.;
         }
         `
-    const fsSource = shaderHeader + `
+    const fsSource = shaderHeaderWithCameraAndFrameCount + `
         void main(void) {
             gl_FragColor = vec4(`+rStr+`,`+gStr+`,`+bStr+`,1.);
         }
