@@ -43,7 +43,7 @@
 let colorCharacters = ""
 const colors = {
     "b": new Float32Array([0., 0., 1.]),
-    "g": new Float32Array([.4, .4, .4]),
+    "g": new Float32Array([.3, .3, .3]),
     "o": new Float32Array([.9, .5, .2]),
     "p": new Float32Array([.5, 0., .5]),
     "r": new Float32Array([1., 0., 0.]),

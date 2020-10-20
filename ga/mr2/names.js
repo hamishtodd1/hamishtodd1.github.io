@@ -42,8 +42,9 @@ function initNamesAndBasis(freeVariableCharacters)
     }
     //for every name there is an mv ready to be used, but we might not use it
     while (alphabeticalNames.length < MAX_THINGS) {
-        alphabeticalNames.push(generateName())
-        // namedMvs.push(MultivectorAppearance(alphabeticalNames[alphabeticalNames.length-1]))
+        let newName = generateName()
+        alphabeticalNames.push(newName)
+        namedMvs[newName] = new Float32Array(16)
     }
 
     getNamedMv = (name) => {

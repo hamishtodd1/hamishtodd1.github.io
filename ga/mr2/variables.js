@@ -13,7 +13,7 @@ const characterWidth = 1. / 3.
 
 const mouseResponses = []
 
-const namedMvs = []
+const namedMvs = {}
 const orderedNames = []
 
 const carat = {
@@ -24,15 +24,22 @@ const carat = {
 
 let backgroundString = 
 `
-earth(0.5e032 + 0.9e013) //color
+    0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.4,1.,0.,
+    0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.4,0.,1.,0.,
+    0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.4,0.,0.,1.,0.,
+
+    earth(0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.2,1.,0.,)
 
 
-[2]
+    I0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,1.,0., //should be a series of points from center to there
+
 `
 //it's more that "earth" gets replaced with the picture. Apply that to
 //a 2D plane is a 3D plane with everything mapped to 0
 
 /*
+    earth(0.5e032 + 0.9e013) //color
+
     earth //whole map == earth Ie032 + Ie013
 
     earth(0.2,I) //meridian line

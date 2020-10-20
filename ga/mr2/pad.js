@@ -1,8 +1,20 @@
 /*
+    Surely if you can have infinities visualized you can have infinitesimals
+    Look out for what happens to them when you have your disc model
 
+    z = x*x + 2*x*y
 */
 
 async function initPad(freeVariableCharacters) {
+
+    let stack = []
+    function clearStack() {
+        while(stack.length !== 0) {
+            let thing = stack.pop()
+            if (isMv(thing))
+                delete thing
+        }
+    }
 
     let carat = initCarat()
     let typeableCharacters = initTypeableCharacters()
@@ -67,42 +79,72 @@ async function initPad(freeVariableCharacters) {
             if (currentCharacter === " ")
                 drawingPosition.x += characterWidth
             else if (currentCharacter === "\n") {
-                addFrameToDraw(-mainCamera.rightAtZZero + .5, drawingPosition.y, orderedNames[nextOrderedNameNumber])
-                ++nextOrderedNameNumber
-                
+                if(stack.length !== 0) {
+                    let result = stack.pop()
+                    clearStack()
+
+                    if (isMv(result) ) { //if it's just a name you don't want it
+                        let name = orderedNames[nextOrderedNameNumber]
+                        let outputMv = namedMvs[name]
+                        copyMv(result, outputMv)
+                        
+                        let x = -mainCamera.rightAtZZero + .5
+                        addMvToRender(name, x, drawingPosition.y)
+                        addFrameToDraw(x, drawingPosition.y, name)
+                        ++nextOrderedNameNumber
+                    }
+                }
                 drawingPosition.x = -mainCamera.rightAtZZero + 1.
                 drawingPosition.y -= 1.
             }
-            else if (typeableCharacters.indexOf(currentCharacter) !== -1) {
-                addCharacterToDraw(currentCharacter, drawingPosition)
+            else if (freeVariableCharacters.indexOf(currentCharacter) !== -1) {
+                let tokenStart = drawingPositionInString
+                while (freeVariableCharacters.indexOf(backgroundString[drawingPositionInString + 1]) !== -1)
+                    ++drawingPositionInString
+                let tokenEnd = drawingPositionInString
+                let valuesString = backgroundString.substr(tokenStart, tokenEnd - tokenStart + 1)
+                let valuesArr = valuesString.split(",")
+
+                let name = orderedNames[nextOrderedNameNumber]
+                let outputMv = namedMvs[name]
+                for(let i = 0; i < 16; ++i)
+                    outputMv[i] = parseFloat(valuesArr[i])
+
+                stack.push(name)
+                    
+                let x = drawingPosition.x + .5
+                addMvToRender(name, x, drawingPosition.y)
+                addFrameToDraw(x, drawingPosition.y, name)
+                ++nextOrderedNameNumber
+                
+                drawingPosition.x += 1.
+            }
+            else if(currentCharacter === "I") {
+                addCharacterToDraw("I", drawingPosition)
+                stack.push("I")
                 drawingPosition.x += characterWidth
             }
-            else if (freeVariableCharacters.indexOf(currentCharacter) !== -1) {
-                // let mv = getNamedMv(token)
-                // mv.drawInPlace(drawingPosition.x + .5, drawingPosition.y)
-                //can be a hue, point
+            else if( currentCharacter === ")") {
+                let argument = stack.pop()
+                let func = stack.pop()
+                if ( namedMvs[argument] !== undefined && func === "earth") {
+                    let mv = new Float32Array(16)
+                    pointX(mv,-.2)
+                    pointW(mv,1.)
+                    stack.push(mv)
 
-                addFrameToDraw(drawingPosition.x + .5, drawingPosition.y, orderedNames[nextOrderedNameNumber])
-                ++nextOrderedNameNumber
-                drawingPosition.x += 1.
+                    //somehow make earth(namedMvs[argument])
+                }
 
-                while (freeVariableCharacters.indexOf(backgroundString[drawingPositionInString+1]) !== -1)
-                    ++drawingPositionInString
+                addCharacterToDraw(")", drawingPosition)
+                drawingPosition.x += characterWidth
             }
-            else if(currentCharacter === "[") {
-                let numDivisionsStringStart = drawingPositionInString + 1
-                while (backgroundString[drawingPositionInString] !== "]")
-                    ++drawingPositionInString
-                let numDivisionsStringLength = drawingPositionInString - numDivisionsStringStart
-                let numDivisionsString = backgroundString.substr(numDivisionsStringStart, numDivisionsStringLength)
-                // let numDivisions = parseInt(numDivisionsString)
-                drawingPosition.x += .5 - 1./6.
-                addCharacterToDraw(numDivisionsString, drawingPosition)
-                drawingPosition.x -= .5 - 1. / 6.
-                
-                addFrameToDraw(drawingPosition.x + .5, drawingPosition.y, orderedNames[nextOrderedNameNumber])
-                ++nextOrderedNameNumber
-                drawingPosition.x += 1.
+            else if (typeableCharacters.indexOf(currentCharacter) !== -1) {
+                if(backgroundString.substr(drawingPositionInString,6) === "earth(")
+                    stack.push("earth")
+
+                addCharacterToDraw(currentCharacter, drawingPosition)
+                drawingPosition.x += characterWidth
             }
             else
                 console.error("uncaught character: ", currentCharacter)
@@ -114,15 +156,21 @@ async function initPad(freeVariableCharacters) {
         }
         carat.lineNumber = Math.floor(-carat.position.y)
 
-        if(0)
-        {
-            addFrameToDraw(0., 0., orderedNames[nextOrderedNameNumber])
-            addMvToRender(testPoint, orderedNames[nextOrderedNameNumber], 0., 0.)
-            ++nextOrderedNameNumber
+        clearStack()
 
-            addFrameToDraw(3., 3., orderedNames[nextOrderedNameNumber])
-            addMvToRender(testPoint, orderedNames[nextOrderedNameNumber], 3., 3.)
-            ++nextOrderedNameNumber
-        }
+        // if (0)
+        // {
+        //     addFrameToDraw(0., 0., orderedNames[nextOrderedNameNumber])
+        //     addMvToRender(testPoint, orderedNames[nextOrderedNameNumber], 0., 0.)
+        //     ++nextOrderedNameNumber
+
+        //     addFrameToDraw(3., 3., orderedNames[nextOrderedNameNumber])
+        //     addMvToRender(testPoint, orderedNames[nextOrderedNameNumber], 3., 3.)
+        //     ++nextOrderedNameNumber
+        // }
     })
+}
+
+function isMv(thing) {
+    return thing instanceof Float32Array && thing.length === 16
 }

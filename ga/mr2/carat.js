@@ -73,7 +73,7 @@ function initTypeableCharacters()
         bindButton(character, () => addStringAtCarat(character))
     }
 
-    let initialCharacters = "abcdefghijklmnopqrstuvwxyz()=+-/0123456789"
+    let initialCharacters = "abcdefghijklmnopqrstuvwxyz()=+-/I "
     for (let i = 0; i < initialCharacters.length; ++i)
         makeCharacterTypeable(initialCharacters[i])
     initCharacterTexture(typeableCharacters)
