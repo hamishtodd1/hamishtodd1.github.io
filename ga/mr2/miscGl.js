@@ -20,15 +20,15 @@ async function Texture(src) {
         width, height, border, srcFormat, srcType,
         pixel);
 
-    const image = new Image();
+    const $image = new Image();
     await (new Promise(resolve => {
-        image.src = src;
-        image.onload = resolve
+        $image.src = src;
+        $image.onload = resolve
     }))
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
-        srcFormat, srcType, image); //can you flip it in here?
+        srcFormat, srcType, $image); //can you flip it in here?
 
     //no mipmaps
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);

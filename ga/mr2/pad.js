@@ -7,6 +7,35 @@
 
 async function initPad(freeVariableCharacters) {
 
+    //more generic way to do it is probably render to a 1x1 pixel offscreen canvas that you read from
+    //unperformant but probably the same as this
+    {
+        const $earthImage = new Image();
+        await (new Promise(resolve => {
+            $earthImage.src = "data/earthColor.png"
+            $earthImage.onload = resolve
+        }))
+        let earthImageWidth = $earthImage.width;
+        let earthImageHeight = $earthImage.height;
+
+        let $earthCanvas = document.createElement('canvas');
+        $earthCanvas.width = earthImageWidth;
+        $earthCanvas.height = earthImageHeight;
+        let ctx = $earthCanvas.getContext('2d')
+        ctx.drawImage($earthImage, 0, 0, earthImageWidth, earthImageHeight)
+        let earthPixels = ctx.getImageData(0, 0, earthImageWidth, earthImageHeight).data
+        
+        earth = function(u,v) {
+            let column = Math.floor(u*earthImageWidth)
+            let row = Math.floor(v*earthImageHeight)
+            let index = row * earthImageWidth + column
+
+            earthPixels[index * 4 + 0] / 255.
+            earthPixels[index * 4 + 1] / 255.
+            earthPixels[index * 4 + 2] / 255.
+        }
+    }
+    
     let stack = []
     function clearStack() {
         while(stack.length !== 0) {
@@ -14,6 +43,7 @@ async function initPad(freeVariableCharacters) {
             if (isMv(thing))
                 delete thing
         }
+        stack.length = 0
     }
 
     let carat = initCarat()

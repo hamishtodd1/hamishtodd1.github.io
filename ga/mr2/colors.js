@@ -51,3 +51,78 @@ const colors = {
     "y": new Float32Array([1., 1., 0.])
 }
 for (let color in colors) colorCharacters += color
+
+
+
+
+
+//might be fun to do in the language
+//You care about its angle around that line
+//its angle from red, (1,0,0)
+//project onto the plane
+function rgbToHue(r,g,b) {
+	let huePlane = new Float32Array(16)
+	plane(huePlane, 1., 1., 1., 0.)
+
+	let redDirection = new Float32Array(16)
+	point(redDirection, 1.,0.,0., 1.)
+	projectPointOnPlane(redDirection, huePlane, redDirection)
+	normalizeIdealPoint(redDirection)
+
+	let rgbPoint = new Float32Array(16)
+	point(rgbPoint, r,g,b,1.)
+	let rgbDirection = new Float32Array(16)
+	projectPointOnPlane(rgbPoint, huePlane, rgbDirection)
+	normalizeIdealPoint(rgbDirection)
+
+	join(redDirection,rgbDirection,mv0)
+
+
+
+
+
+	//hues are directions after all!
+
+	debugger
+	// inner(rgbPoint,redPoint,mv0)
+	// let redComponent = mv0[0]
+	// let chatreuseComponent = r * chartreuseVector[0] + g * chartreuseVector[1] + b * chartreuseVector[2]
+	// log(chatreuseComponent)
+	// log(redComponent)
+	// let hue = Math.atan2(chatreuseComponent,redComponent)
+
+	
+
+
+
+	// let centerPoint = new Float32Array(16)
+	// point(centerPoint, 1./3., 1./3., 1./3., 1.)
+
+	// let planeContainingRed = new Float32Array(16)
+	// plane(planeContainingRed, 1.,1.,1.,-1.)
+
+	
+
+	// let hueDirection = new Float32Array(16)
+	// gSub(projectedPoint, centerPoint, hueDirection)
+	// log(hueDirection)
+
+	// delete rgbPoint
+	// delete planeContainingRed
+	// delete planeDotPoint
+	// delete projectedPoint
+}
+//line 
+//dot with red direction
+//dot with chartreuse (.5,1.,0.)
+
+//atan2
+
+function projectPointOnPlane(point,plane,target) {
+	wNormalizePoint(point)
+	let planeDotPoint = mv0
+	inner(point, plane, planeDotPoint)
+	gp(planeDotPoint, plane, target)
+	wNormalizePoint(target)
+	return target
+}

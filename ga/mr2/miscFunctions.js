@@ -1,3 +1,7 @@
+function lerp(a,b,t) {
+    return a + (b-a)*t
+}
+
 clamp = (a, min, max) =>{
     if(a < min)
         return min

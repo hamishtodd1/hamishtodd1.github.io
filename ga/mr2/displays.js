@@ -1,7 +1,6 @@
 function lineDisplay(line)
 {
     let plane = new Float32Array(16)
-
     let p = new Float32Array(16)
 
     let endPoints = [new Float32Array(16), new Float32Array(16)]
@@ -14,23 +13,19 @@ function lineDisplay(line)
     {
         let boxSize = 1000.
         let endPointIndex = 0
-        for (let i = 0; i < 3; ++i)
-        {
-            for (j = -1.; j <= 1. && endPointIndex < 2; j += 2.)
-            {
+        for (let i = 0; i < 3; ++i) {
+            for (j = -1.; j <= 1. && endPointIndex < 2; j += 2.) {
                 zeroMv(plane)
                 planeW(plane, 1.)
                 planeByComponent[i](plane, 1. / (boxSize * j))
                 meet(plane, line, p)
 
-                if (pointW(p) !== 0.)
-                {
+                if (pointW(p) !== 0.) {
                     wNormalizePoint(p)
 
                     if (-boxSize <= pointX(p) && pointX(p) <= boxSize &&
                         -boxSize <= pointY(p) && pointY(p) <= boxSize &&
-                        -boxSize <= pointZ(p) && pointZ(p) <= boxSize)
-                    {
+                        -boxSize <= pointZ(p) && pointZ(p) <= boxSize) {
                         copyMv(p, endPoints[endPointIndex])
                         ++endPointIndex
                     }

@@ -353,7 +353,12 @@ function initAlgebra()
         pointY = (mv, newValue) => { if (newValue !== undefined) mv[12] = newValue; return mv[12] }
         pointX = (mv, newValue) => { if (newValue !== undefined) mv[13] = newValue; return mv[13] }
         pointW = (mv, newValue) => { if (newValue !== undefined) mv[14] = newValue; return mv[14] }
+
         point = (mv, x, y, z, w) => {zeroMv(mv); mv[11] = z; mv[12] = y; mv[13] = x; mv[14] = w;}
+        plane = (mv, x, y, z, w) => {zeroMv(mv); mv[4] = z; mv[3] = y; mv[2] = x; mv[1] = w;}
+
+        lineRealNorm = (mv) => { return Math.sqrt(sq(realLineX(mv)) + sq(realLineY(mv)) + sq(realLineZ(mv)))}
+        lineIdealNorm = (mv) => { return Math.sqrt(sq(idealLineX(mv)) + sq(idealLineY(mv)) + sq(idealLineZ(mv)))}
 
         appendToGaShaderString(replaceSignature(
             "void mvToDq(float mv[16], inout dualQuat dq)",
@@ -401,6 +406,23 @@ function initAlgebra()
             pointY(p, pointY(p) / pointW(p))
             pointZ(p, pointZ(p) / pointW(p))
             pointW(p, 1.)
+        }
+
+        wNormalizePoint = (p) => {
+            let w = pointW(p)
+            pointX(p, pointX(p) / w)
+            pointY(p, pointY(p) / w)
+            pointZ(p, pointZ(p) / w)
+            pointW(p, 1.)
+        }
+
+        pointNorm = (mv) => { return Math.sqrt(sq(pointX(mv)) + sq(pointY(mv)) + sq(pointZ(mv)) ) }
+        normalizeIdealPoint = (mv) => { //"not supposed to do this"?
+            let factor = 1. / pointNorm(mv)
+            pointX(mv, pointX(mv) * factor)
+            pointY(mv, pointY(mv) * factor)
+            pointZ(mv, pointZ(mv) * factor)
+            pointW(mv, 0.)
         }
 
         lineNormalize = (mv) => {
