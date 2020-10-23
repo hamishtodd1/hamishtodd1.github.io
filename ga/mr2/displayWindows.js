@@ -93,9 +93,10 @@ function initDisplayWindows() {
 
         if (visible )
             mouseDw.render()
-        else
+        else {
             mouseDw.position.x = 2000.;
-        mouseDw.numMvs = 0
+            mouseDw.lineToRenderMvsFrom = -1
+        }
     })
 
     let slideStartMv = new Float32Array(16)

@@ -162,6 +162,7 @@ async function initPad() {
 
                 for(let i = 0; i < displayWindows.length; ++i) {
                     if(lineNumber === displayWindows[i].lineToRenderMvsFrom) {
+                        displayWindows[i].numMvs = 0
                         for (let j = 0; j < namesInLine.length; ++j) {
                             if (orderedNames.indexOf(namesInLine[j]) !== -1)
                                 displayWindows[i].addMv(namesInLine[j])
@@ -193,9 +194,8 @@ async function initPad() {
                 addFrameToDraw(x, drawingPosition.y, name)
                 ++drawingPositionInOrderedNames
 
-                if( mouse.inBounds(drawingPosition.x, drawingPosition.x + 1., drawingPosition.y + .5, drawingPosition.y-.5) ) {
+                if( mouse.inBounds(drawingPosition.x, drawingPosition.x + 1., drawingPosition.y + .5, drawingPosition.y-.5) )
                     mouseDw.respondToHover(drawingPosition.x + .5, drawingPosition.y, lineNumber, name)
-                }
                 
                 drawingPosition.x += 1.
             }
