@@ -1,96 +1,56 @@
 function initDisplayWindows() {
     let dimension = 3.;
 
-    const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+    {
+        const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
         attribute vec4 vertA;
         uniform vec2 screenPosition;
 
-        const float dimension = `+ toGlslFloatLiteral(dimension) +`;
+        const float dimension = `+ toGlslFloatLiteral(dimension) + `;
 
         void main(void) {
             gl_Position = vertA;
             gl_Position.xy *= dimension;
             gl_Position.xy += screenPosition;
         `
-        + cameraAndFrameCountShaderStuff.footer
-    const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+            + cameraAndFrameCountShaderStuff.footer
+        const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
         void main(void) {
             gl_FragColor = vec4(.45,.45,.45,1.);
         }
         `
 
-    const program = Program(vsSource, fsSource)
-    program.addVertexAttribute("vert", quadBuffer, 4, true)
-    cameraAndFrameCountShaderStuff.locateUniforms(program)
-    program.locateUniform("screenPosition")
+        const program = Program(vsSource, fsSource)
+        program.addVertexAttribute("vert", quadBuffer, 4, true)
+        cameraAndFrameCountShaderStuff.locateUniforms(program)
+        program.locateUniform("screenPosition")
 
-    function drawDwBackground(x, y)
-    {
-        gl.useProgram(program.glProgram);
+        var drawBackground = function(x, y)
+        {
+            gl.useProgram(program.glProgram);
 
-        cameraAndFrameCountShaderStuff.transfer(program)
+            cameraAndFrameCountShaderStuff.transfer(program)
 
-        program.doSomethingWithVertexAttribute("vert", quadBuffer)
+            program.doSomethingWithVertexAttribute("vert", quadBuffer)
 
-        gl.uniform2f(program.uniformLocations.screenPosition, x, y);
+            gl.uniform2f(program.uniformLocations.screenPosition, x, y);
 
-        gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4)
+            gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4)
+        }
     }
 
-    //------Mouse Dw
     function DisplayWindow() {
         this.position = new ScreenPosition()
         this.numMvs = 0
         this.mvNames = []
         this.slideOngoing = false
+        this.lineToRenderMvsFrom = -1
 
-        let self = this
-        let slideStartMv = new Float32Array(16)
-        let slideCurrentMv = new Float32Array(16)
-        let stringCurrentMv = new Float32Array(16)
-        let mvToChangeTo = new Float32Array(16)
-        mouseResponses.push({
-            z: () => {
-                if (self.numMvs > 0 && self.mouseIsInside())
-                    return Infinity
-            },
-            start: () => {
-                self.getPositionInWindow(slideStartMv)
-                self.slideOngoing = true
-            },
-            end: () => {
-                self.slideOngoing = false
-            },
-            during: () => {
-                let literalStart = literalsPositionsInString[self.mvNames[0]]
-                let literalLength = getLiteralLength(literalStart, namedMvs[name])
-
-                parseMv(backgroundString.substr(literalStart, literalLength),stringCurrentMv)
-                self.getPositionInWindow(slideCurrentMv)
-                
-                let grade = getGrade(stringCurrentMv)
-                if ( grade === 3) {
-                    backgroundStringSplice(literalStart, literalLength, mvToString(slideCurrentMv))
-                }
-                else if(grade === 2) {
-                    // log(frameCount)
-                    if (mvEquals(slideCurrentMv,slideStartMv)) {
-                        let currentLineDotMousePosition = new Float32Array(16);
-                        inner(stringCurrentMv,slideStartMv, currentLineDotMousePosition)
-                        gp(currentLineDotMousePosition, slideStartMv, mvToChangeTo)
-                        delete currentLineDotMousePosition
-                    }
-                    else
-                        join(slideStartMv, slideCurrentMv, mvToChangeTo)
-
-                    backgroundStringSplice(literalStart, literalLength, mvToString(mvToChangeTo))
-                }
-            }
-        })
+        displayWindows.push(this)
     }
     Object.assign( DisplayWindow.prototype, {
         render: function() {
-            drawDwBackground(this.position.x, this.position.y)
+            drawBackground(this.position.x, this.position.y)
             for (let i = 0; i < this.numMvs; ++i)
                 addMvToRender(this.mvNames[i], this.position.x, this.position.y, dimension)
         },
@@ -108,35 +68,90 @@ function initDisplayWindows() {
                 this.position.x + dimension/2.,
                 this.position.y + dimension/2.,
                 this.position.y - dimension/2.)
+        },
+        addMv: function(name) {
+            this.mvNames[this.numMvs] = name
+            ++this.numMvs
         }
     })
     
     //-----Mouse dw
-    let mouseDw = new DisplayWindow()
-    boxHovered = (boxCenterX, boxCenterY, name) => {
-        if (mouseDw.numMvs === 0) {
+    mouseDw = new DisplayWindow()
+    mouseDw.editingName = ""
+    let visible = true
+    mouseDw.respondToHover = (boxCenterX, boxCenterY, lineNumber, name) => {
+        if (!visible) {
             mouseDw.position.x = boxCenterX - .5 + dimension / 2.
             mouseDw.position.y = boxCenterY + .5 - dimension / 2.
 
-            mouseDw.mvNames[mouseDw.numMvs] = name
-            ++mouseDw.numMvs
+            mouseDw.lineToRenderMvsFrom = lineNumber
+            mouseDw.editingName = name
         }
     }
     addRenderFunction( () => {
-        if (mouseDw.numMvs > 0)
-            mouseDw.render()
+        visible = mouseDw.mouseIsInside(mouseDw.position) || mouseDw.slideOngoing
 
-        if (!mouseDw.mouseIsInside(mouseDw.position) && !mouseDw.slideOngoing)
-            mouseDw.numMvs = 0
+        if (visible )
+            mouseDw.render()
+        else
+            mouseDw.position.x = 2000.;
+        mouseDw.numMvs = 0
     })
 
+    let slideStartMv = new Float32Array(16)
+    let slideCurrentMv = new Float32Array(16)
+    let stringCurrentMv = new Float32Array(16)
+    let mvToChangeTo = new Float32Array(16)
+    mouseResponses.push({
+        z: () => {
+            if (mouseDw.mouseIsInside())
+                return Infinity
+            else
+                return -Infinity
+        },
+        start: () => {
+            mouseDw.getPositionInWindow(slideStartMv)
+            mouseDw.slideOngoing = true
+        },
+        end: () => {
+            mouseDw.slideOngoing = false
+        },
+        during: () => {
+            let literalStart = literalsPositionsInString[mouseDw.editingName]
+            let literalLength = getLiteralLength(literalStart)
+
+            parseMv(backgroundString.substr(literalStart, literalLength),stringCurrentMv)
+            mouseDw.getPositionInWindow(slideCurrentMv)
+            
+            let grade = getGrade(stringCurrentMv)
+            if ( grade === 3) {
+                backgroundStringSplice(literalStart, literalLength, mvToString(slideCurrentMv))
+            }
+            else if(grade === 2) {
+                // log(frameCount)
+                if (mvEquals(slideCurrentMv,slideStartMv)) {
+                    let currentLineDotMousePosition = new Float32Array(16);
+                    inner(stringCurrentMv,slideStartMv, currentLineDotMousePosition)
+                    gp(currentLineDotMousePosition, slideStartMv, mvToChangeTo)
+                    delete currentLineDotMousePosition
+                }
+                else
+                    join(slideStartMv, slideCurrentMv, mvToChangeTo)
+
+                backgroundStringSplice(literalStart, literalLength, mvToString(mvToChangeTo))
+            }
+        }
+    })
+    
     //-----Carat dw
-    let caratDw = new DisplayWindow()
+    caratDw = new DisplayWindow()
     updateFunctions.push(()=>{
         caratDw.position.x = mainCamera.rightAtZZero - dimension / 2. - .1
         caratDw.position.y = carat.position.y
     })
     addRenderFunction(()=>{
         caratDw.render()
+
+        caratDw.numMvs = 0
     })
 }

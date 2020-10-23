@@ -58,14 +58,14 @@ async function initPad() {
         }
     }
 
-    let stack = []
+    let lineStack = []
     function clearStack() {
-        while(stack.length !== 0) {
-            let thing = stack.pop()
+        while(lineStack.length !== 0) {
+            let thing = lineStack.pop()
             if (isMv(thing))
                 delete thing
         }
-        stack.length = 0
+        lineStack.length = 0
     }
 
     initCarat()
@@ -104,6 +104,10 @@ async function initPad() {
         let drawingPositionInOrderedNames = 0
         carat.positionInOrderedNames = 0
 
+        let namesInLine = []
+
+        let lineNumber = 0
+
         let backgroundStringLength = backgroundString.length
         for (drawingPositionInString; drawingPositionInString <= backgroundStringLength; ++drawingPositionInString) {
             //carat position
@@ -114,6 +118,7 @@ async function initPad() {
 
                     carat.position.copy(drawingPosition)
                     carat.positionInOrderedNames = drawingPositionInOrderedNames
+                    caratDw.lineToRenderMvsFrom = lineNumber
                 }
 
                 if (carat.positionInString === -1) {
@@ -134,14 +139,19 @@ async function initPad() {
             if (currentCharacter === " ")
                 drawingPosition.x += characterWidth
             else if (currentCharacter === "\n") {
-                if(stack.length !== 0) {
-                    let result = stack.pop()
+
+                //---------End of line
+
+                if(lineStack.length !== 0) {
+                    let result = lineStack.pop()
                     clearStack()
 
                     if (isMv(result) ) { //if it's just a name you don't want it
                         let name = orderedNames[drawingPositionInOrderedNames]
                         let outputMv = namedMvs[name]
                         copyMv(result, outputMv)
+
+                        namesInLine.push(name)
                         
                         let x = -mainCamera.rightAtZZero + .5
                         addMvToRender(name, x, drawingPosition.y)
@@ -149,10 +159,25 @@ async function initPad() {
                         ++drawingPositionInOrderedNames
                     }
                 }
+
+                for(let i = 0; i < displayWindows.length; ++i) {
+                    if(lineNumber === displayWindows[i].lineToRenderMvsFrom) {
+                        for (let j = 0; j < namesInLine.length; ++j) {
+                            if (orderedNames.indexOf(namesInLine[j]) !== -1)
+                                displayWindows[i].addMv(namesInLine[j])
+                        }
+                    }
+                }
+                namesInLine.length = 0
+
                 drawingPosition.x = -mainCamera.rightAtZZero + 1.
                 drawingPosition.y -= 1.
+                ++lineNumber
             }
             else if (freeVariableStartCharacters.indexOf(currentCharacter) !== -1) {
+
+                //---------Free variable
+
                 let name = orderedNames[drawingPositionInOrderedNames]
                 literalsPositionsInString[name] = drawingPositionInString
 
@@ -160,31 +185,39 @@ async function initPad() {
                 parseMv( backgroundString.substr(drawingPositionInString, literalLength), namedMvs[name] )
                 drawingPositionInString += literalLength - 1 //-1 because the loop does a +1
 
-                stack.push(name)
+                lineStack.push(name)
+                namesInLine.push(name)
                     
                 let x = drawingPosition.x + .5
                 addMvToRender(name, x, drawingPosition.y)
                 addFrameToDraw(x, drawingPosition.y, name)
                 ++drawingPositionInOrderedNames
 
-                if( mouse.inBounds(drawingPosition.x, drawingPosition.x + 1., drawingPosition.y + .5, drawingPosition.y-.5) )
-                    boxHovered(drawingPosition.x + .5, drawingPosition.y, name)
+                if( mouse.inBounds(drawingPosition.x, drawingPosition.x + 1., drawingPosition.y + .5, drawingPosition.y-.5) ) {
+                    mouseDw.respondToHover(drawingPosition.x + .5, drawingPosition.y, lineNumber, name)
+                }
                 
                 drawingPosition.x += 1.
             }
             else if(currentCharacter === "I") {
+
+                //---------Interval
+
                 addCharacterToDraw("I", drawingPosition)
-                stack.push("I")
+                lineStack.push("I")
                 drawingPosition.x += characterWidth
             }
             else if( currentCharacter === ")") {
-                let argument = stack.pop()
-                let func = stack.pop()
+
+                //---------Function application
+
+                let argument = lineStack.pop()
+                let func = lineStack.pop()
                 if ( namedMvs[argument] !== undefined && func === "earth") {
                     let mv = new Float32Array(16)
                     pointX(mv,-.2)
                     pointW(mv,1.)
-                    stack.push(mv)
+                    lineStack.push(mv)
 
                     //somehow make earth(namedMvs[argument])
                 }
@@ -193,8 +226,11 @@ async function initPad() {
                 drawingPosition.x += characterWidth
             }
             else if (typeableCharacters.indexOf(currentCharacter) !== -1) {
+
+                //---------Normal character
+
                 if(backgroundString.substr(drawingPositionInString,6) === "earth(")
-                    stack.push("earth")
+                    lineStack.push("earth")
 
                 addCharacterToDraw(currentCharacter, drawingPosition)
                 drawingPosition.x += characterWidth

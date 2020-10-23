@@ -22,6 +22,8 @@ const carat = {
     flashingStart: Date.now(),
 }
 
+const displayWindows = []
+
 let backgroundString = 
 `
    0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.4,1.,0., 0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.4,0.,1.,0.,
