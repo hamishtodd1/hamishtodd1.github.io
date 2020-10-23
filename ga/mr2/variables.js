@@ -4,17 +4,17 @@ const gl = canvas.getContext("webgl2")
 if (!gl)
     console.error("Failed to get WebGL context, browser or device may not support WebGL.")
 
-const unchangingUnitSquareVertices = []
-const quadBuffer = new Float32Array(6 * 4)
-
 const backgroundColor = [127, 127, 127];
 
 const characterWidth = 1. / 3.
 
 const mouseResponses = []
 
+//---------Varying state
+
 const namedMvs = {}
 const orderedNames = []
+const literalsPositionsInString = {}
 
 const carat = {
     positionInString: -1,
@@ -24,16 +24,14 @@ const carat = {
 
 let backgroundString = 
 `
-    0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.4,1.,0.,
-    0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.4,0.,1.,0.,
-    0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.4,0.,0.,1.,0.,
-    
-    0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,0.,0.,0.,0.,0.,
+   0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.4,1.,0., 0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.4,0.,1.,0.,
+   
+   0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,0.,0.,0.,0.,0.,
 
-    earth(0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.2,1.,0.,)
+   earth(0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.2,1.,0.,)
 
 
-    I0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,1.,0., //should be a series of points from center to there
+   I0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,1.,0., //should be a series of points from center to there
 
 `
 //it's more that "earth" gets replaced with the picture. Apply that to

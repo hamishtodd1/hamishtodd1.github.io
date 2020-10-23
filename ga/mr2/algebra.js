@@ -268,6 +268,35 @@ function initAlgebra()
             return target;
         }
 
+        mvToString = (mv) => {
+            return mv.toString() + ","
+        }
+
+        let eps = .00001
+        getGrade = (mv) => {
+            let gradeIPartIsZero = Array(5)
+            gradeIPartIsZero[1] = Math.abs(planeX(mv)) < eps && Math.abs(planeY(mv)) < eps && Math.abs(planeZ(mv)) < eps && Math.abs(planeW(mv)) < eps
+            gradeIPartIsZero[3] = Math.abs(pointX(mv)) < eps && Math.abs(pointY(mv)) < eps && Math.abs(pointZ(mv)) < eps && Math.abs(pointW(mv)) < eps
+            gradeIPartIsZero[2] =
+                Math.abs(realLineX(mv)) < eps && Math.abs(realLineY(mv)) < eps && Math.abs(realLineZ(mv)) < eps &&
+                Math.abs(idealLineX(mv)) < eps && Math.abs(idealLineY(mv)) < eps && Math.abs(idealLineZ(mv)) < eps
+            gradeIPartIsZero[0] = Math.abs(mv[0]) < eps
+            gradeIPartIsZero[4] = Math.abs(mv[15]) < eps
+
+            let blade = true
+            let grade = -1
+            for(let i = 0; i < 5; ++i) {
+                if(!gradeIPartIsZero[i]) {
+                    if (grade === -1)
+                        grade = i
+                    else
+                        blade = false
+                }
+            }
+            if(blade) return grade
+            else return "mix"
+        }
+
         multiplyScalar = (mv,sca) => {
             mv.forEach((e,i)=>mv[i]*=sca)
         }
@@ -306,6 +335,12 @@ function initAlgebra()
                 mv[11] = p[2];
             }
             ))
+        
+        mvEquals = (a,b) => {
+            let allEqual = true
+            a.forEach((e, i) => { if (a[i] !== b[i]) allEqual = false })
+            return allEqual
+        }
 
         appendToGaShaderString(replaceSignature(
             "void mvToPoint(float mv[16], inout vec4 p)",
@@ -503,29 +538,5 @@ function initAlgebra()
         copyMv = (mv,target) => {
             mv.forEach((e,i) => {target[i] = e})
         }
-    }
-
-    for (let i = 0; i < 4; ++i)
-    {
-        let p = new Float32Array(16)
-        pointX(p, .5)
-        pointY(p, .5)
-        pointZ(p, 0.)
-        pointW(p, 1.)
-
-        if (i % 2) pointX(p, -.5)
-        if (i < 2) pointY(p, -.5)
-
-        unchangingUnitSquareVertices.push(p)
-    }
-
-
-    let orderedIndices = [0, 2, 1, 3, 1, 2]
-    for (let i = 0; i < orderedIndices.length; ++i)
-    {
-        quadBuffer[i * 4 + 0] = pointX(unchangingUnitSquareVertices[orderedIndices[i]])
-        quadBuffer[i * 4 + 1] = pointY(unchangingUnitSquareVertices[orderedIndices[i]])
-        quadBuffer[i * 4 + 2] = pointZ(unchangingUnitSquareVertices[orderedIndices[i]])
-        quadBuffer[i * 4 + 3] = pointW(unchangingUnitSquareVertices[orderedIndices[i]])
     }
 }

@@ -7,11 +7,15 @@
 function initMvAppearances() {
     let numToDraw = 0
     let screenPositions = []
+    let spaceScales = []
     let names = []
-    addMvToRender = function(name, x, y) {
+    addMvToRender = function(name, x, y, scale) {
         screenPositions[numToDraw*2+0] = x
         screenPositions[numToDraw*2+1] = y
         names[numToDraw] = name
+        if(scale === undefined)
+            scale = 1.
+        spaceScales[numToDraw] = scale
         ++numToDraw
     }
 
@@ -36,34 +40,9 @@ function initMvAppearances() {
     {
         let radius = .035
         let radialDivisions = 18
+        let vertBuffer = vertBufferFunctions.disc(radius, radialDivisions)
 
-        let circumferencePoints = []
-        for (let i = 0; i < radialDivisions; ++i)
-        {
-            let angle = TAU * i / radialDivisions
-            circumferencePoints.push([Math.cos(angle) * radius, Math.sin(angle) * radius])
-        }
-
-        var pointVertBuffer = new Float32Array(3 * 4 * radialDivisions)
-        for (let i = 0; i < radialDivisions; ++i)
-        {
-            pointVertBuffer[i * 3 * 4 + 0] = 0.
-            pointVertBuffer[i * 3 * 4 + 1] = 0.
-            pointVertBuffer[i * 3 * 4 + 2] = 0.
-            pointVertBuffer[i * 3 * 4 + 3] = 1.
-
-            pointVertBuffer[i * 3 * 4 + 4] = circumferencePoints[i][0]
-            pointVertBuffer[i * 3 * 4 + 5] = circumferencePoints[i][1]
-            pointVertBuffer[i * 3 * 4 + 6] = 0.
-            pointVertBuffer[i * 3 * 4 + 7] = 1.
-
-            pointVertBuffer[i * 3 * 4 + 8] = circumferencePoints[(i + 1) % radialDivisions][0]
-            pointVertBuffer[i * 3 * 4 + 9] = circumferencePoints[(i + 1) % radialDivisions][1]
-            pointVertBuffer[i * 3 * 4 + 10] = 0.
-            pointVertBuffer[i * 3 * 4 + 11] = 1.
-        }
-
-        var pointColorIndexBuffer = new Float32Array(pointVertBuffer.length / 4)
+        var pointColorIndexBuffer = new Float32Array(vertBuffer.length / 4)
         for (let i = 0, il = pointColorIndexBuffer.length; i < il; ++i)
             pointColorIndexBuffer[i] = Math.floor(i / il * 6)
 
@@ -74,6 +53,8 @@ function initMvAppearances() {
             uniform vec4 elements;
             uniform vec2 screenPosition;
 
+            uniform float spaceScale;
+
             attribute float colorIndexA;
             uniform vec3 hexantColors[6];
             varying vec3 color;
@@ -82,7 +63,7 @@ function initMvAppearances() {
                 color = hexantColors[int(colorIndexA)];
 
                 p = vertA;
-                p.xyz += elements.xyz; //hmm
+                p.xyz += elements.xyz * spaceScale; //hmm
                 gl_Position = p;
                 gl_Position.xy += screenPosition;
             `
@@ -91,8 +72,10 @@ function initMvAppearances() {
             varying vec3 color;
             varying vec4 p;
 
+            uniform float spaceScale;
+
             void main(void) {
-                if( abs(p.x)<.5 && abs(p.y)<.5 )
+                if( abs(p.x)<.5*spaceScale && abs(p.y)<.5*spaceScale )
                     gl_FragColor = vec4(color,1.);
                 else
                     discard; //unperformant!
@@ -102,18 +85,20 @@ function initMvAppearances() {
         let program = Program(vsSource, fsSource)
         cameraAndFrameCountShaderStuff.locateUniforms(program)
 
-        program.addVertexAttribute("vert", pointVertBuffer, 4, false)
+        program.addVertexAttribute("vert", vertBuffer, 4, false)
         program.addVertexAttribute("colorIndex", pointColorIndexBuffer, 1, true)
 
         program.locateUniform("screenPosition")
         program.locateUniform("hexantColors")
+
+        program.locateUniform("spaceScale")
 
         program.locateUniform("elements")
 
         var drawPoints = () =>{
             gl.useProgram(program.glProgram);
             cameraAndFrameCountShaderStuff.transfer(program)
-            program.doSomethingWithVertexAttribute("vert", pointVertBuffer)
+            program.doSomethingWithVertexAttribute("vert", vertBuffer)
             program.doSomethingWithVertexAttribute("colorIndex", pointColorIndexBuffer)
 
             drawBladeBatch((index) => {
@@ -124,8 +109,10 @@ function initMvAppearances() {
 
                     gl.uniform4f(program.uniformLocations.elements, pointX(mv), pointY(mv), pointY(mv), pointW(mv))
 
+                    gl.uniform1f(program.uniformLocations.spaceScale, spaceScales[index])
+
                     //probably want a light in the corner of these boxes so you can get angle of plane
-                    gl.drawArrays(gl.TRIANGLES, 0, pointVertBuffer.length / 4)
+                    gl.drawArrays(gl.TRIANGLES, 0, vertBuffer.length / 4)
                 }
             })
         }
@@ -143,10 +130,13 @@ function initMvAppearances() {
             uniform vec3 hexantColors[6];
             varying vec3 color;
 
+            uniform float spaceScale;
+
             void main(void) {
                 color = hexantColors[int(colorIndexA)];
                 
                 gl_Position = vertA;
+                gl_Position.xyz *= spaceScale;
                 gl_Position.xy += screenPosition;
             `
             + cameraAndFrameCountShaderStuff.footer
@@ -176,6 +166,8 @@ function initMvAppearances() {
         }
 
         program.locateUniform("hexantColors")
+
+        program.locateUniform("spaceScale")
 
         let planeByComponent = [planeX, planeY, planeZ]
         let pl = new Float32Array(16)
@@ -230,6 +222,8 @@ function initMvAppearances() {
                     program.doSomethingWithVertexAttribute("colorIndex", indexBuffer)
 
                     gl.uniform3fv(program.uniformLocations.hexantColors, nameToHexantColors(names[index], hexantColors))
+
+                    gl.uniform1f(program.uniformLocations.spaceScale, spaceScales[index])
                 
                     gl.uniform2f(program.uniformLocations.screenPosition, screenPositions[index * 2 + 0], screenPositions[index * 2 + 1])
                     gl.drawArrays(gl.LINES, 0, vertsBuffer.length / 4)
@@ -239,10 +233,65 @@ function initMvAppearances() {
     }
 
     //plane
+    if(0)
     {
         //circular thing, cut it off outside the box
         //light can be built into shader
         //pretty important for points and lines to be poking out of planes they are precisely in
+
+        const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + gaShaderString + `
+            attribute vec4 vertA;
+            varying vec4 p;
+
+            void main(void) {
+                p = vertA;
+
+                gl_Position = p;
+            ` + cameraAndFrameCountShaderStuff.footer
+        const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + gaShaderString + `
+            varying vec4 p;
+
+            uniform vec4 elements;
+
+            void main(void) {
+                //we make a line through this ray
+                zeroMv(mv0); //plane
+                mv0[1] = elements.w;
+                mv0[2] = elements.x;
+                mv0[3] = elements.y;
+                mv0[4] = elements.z;
+
+                meet(viewLine,mv0,mv1);
+                vec4 rayPlaneIntersection;
+                mvToPoint(mv1,rayPlaneIntersection);
+                if( rayPlaneIntersection.w != 0. && abs(rayPlaneIntersection.z)<.5) {
+                    gl_FragColor = vec4(1.,0.,0.,1.);
+                    //and write to the depth buffer urgh
+                }
+                else
+                    discard;
+            }
+        `
+
+        const program = Program(vsSource, fsSource)
+        cameraAndFrameCountShaderStuff.locateUniforms(program)
+
+        program.addVertexAttribute("vert", quadBuffer, 4, true)
+
+        program.locateUniform("elements")
+
+        addRenderFunction( ()=>
+        {
+            gl.useProgram(program.glProgram);
+
+            cameraAndFrameCountShaderStuff.transfer(program)
+
+            program.doSomethingWithVertexAttribute("vert")
+
+            gl.uniform4f(program.uniformLocations.elements, planeX(mv), planeY(mv), planeY(mv), planeW(mv))
+
+            gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4);
+        })
     }
 
     addRenderFunction(() => {
@@ -251,5 +300,5 @@ function initMvAppearances() {
         drawRealLines()
 
         numToDraw = 0
-    })
+    },"end")
 }

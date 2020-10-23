@@ -100,6 +100,8 @@ function initCharacterTexture(typeableCharacters) {
 
         void main(void) {
             gl_FragColor = texture2D(sampler, uv);
+            // if(gl_FragColor.r == .5)
+            //     discard;
         }
         `
 

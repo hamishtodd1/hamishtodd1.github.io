@@ -1,4 +1,13 @@
 <!--
+	TODO to make it so you're not slow thinking about things
+		+, cos, sin, rev, meet, join, exp in pad.js
+		scalar? "It does nothing"
+		pss?
+		mouse altering
+
+	Then arrays/mappings
+	And, thus, world map
+
 	Plan
 		Want world maps video dude
 		How are these maps going to appear in your thing?
@@ -26,26 +35,25 @@
 			async function technicalInit() {
 				let renderEverything = initRenderFunctions()
 
-				let freeVariableCharacters = "0123456789.,"
-
 				initAlgebra()
+
+				initPremadeBuffers()
 				
 				initButtons()
 				initMouse()
 				initWindowResizeSystem()
 
-				initNamesAndBasis(freeVariableCharacters)
+				initNamesAndBasis()
 
 				initMvAppearances()
 
 				// await initWorldMap()
 				// await initDymaxion()
 
-				// let pointsBuffer = new Float32Array([0.,0.,0.,1.])
-				// verticesDisplay(pointsBuffer, gl.POINTS)
-
-				initPad(freeVariableCharacters)
+				await initPad()
 				initFrames()
+
+				initDisplayWindows()
 
 				// initFuncViz()
 
@@ -81,7 +89,7 @@
 
 		<script src="text.js"></script>
 		<script src="pad.js"></script>
-		<script src="carat.js"></script>
+		<script src="caratAndKeyboard.js"></script>
 
 		<script src="renderFunctions.js"></script>
 
@@ -105,6 +113,10 @@
 		<script src="funcViz.js"></script>
 
 		<script src="miscFunctions.js"></script>
+
+		<script src="displayWindows.js"></script>
+
+		<script src="vertBufferFunctions.js"></script>
 
 		<!-- <script src="video.js"></script> -->
 

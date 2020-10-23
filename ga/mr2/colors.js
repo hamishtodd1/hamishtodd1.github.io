@@ -53,7 +53,9 @@ const colors = {
 for (let color in colors) colorCharacters += color
 
 
-
+//ideal points are pure colors
+//mix in some grey and those are real points
+//2D is the color wheel, 3D is black and white
 
 
 //might be fun to do in the language

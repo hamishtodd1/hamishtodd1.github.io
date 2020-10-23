@@ -5,7 +5,29 @@
     z = x*x + 2*x*y
 */
 
-async function initPad(freeVariableCharacters) {
+const freeVariableCharacters = "0123456789.,-e"
+const freeVariableStartCharacters = "0123456789.-"
+function getLiteralLength(literalStart) {
+    let literalLength = 0
+    let numCommasSoFar = 0
+    for (literalLength; 
+        literalStart + literalLength < backgroundString.length && 
+        freeVariableCharacters.indexOf(backgroundString[literalStart + literalLength]) !== -1 &&
+        numCommasSoFar < 16;
+        ++literalLength) {
+        if (backgroundString[literalStart + literalLength] === "," )
+            ++numCommasSoFar
+    }
+
+    return literalLength
+}
+function parseMv(str,target) {
+    let valuesArr = str.split(",")
+    for (let i = 0; i < 16; ++i)
+        target[i] = parseFloat(valuesArr[i])
+}
+
+async function initPad() {
 
     //more generic way to do it is probably render to a 1x1 pixel offscreen canvas that you read from
     //unperformant but probably the same as this
@@ -35,7 +57,7 @@ async function initPad(freeVariableCharacters) {
             earthPixels[index * 4 + 2] / 255.
         }
     }
-    
+
     let stack = []
     function clearStack() {
         while(stack.length !== 0) {
@@ -46,7 +68,7 @@ async function initPad(freeVariableCharacters) {
         stack.length = 0
     }
 
-    let carat = initCarat()
+    initCarat()
     let typeableCharacters = initTypeableCharacters()
 
     let pointsBuffer = new Float32Array(quadBuffer.length)
@@ -67,19 +89,20 @@ async function initPad(freeVariableCharacters) {
     pointW(testPoint, 1.)
 
     let drawingPosition = new ScreenPosition()
-    let positionInStringClosestToCaratPosition = new ScreenPosition()
-    updateFunctions.push(() => {   
+    let gridPositionClosestToCaratPosition = new ScreenPosition()
+    let compile = () => {   
         let drawingPositionInString = 0
 
-        let positionInStringClosestToCaratPositionInString = -1
-        positionInStringClosestToCaratPosition.x = Infinity
-        positionInStringClosestToCaratPosition.y = Infinity
+        let positionInStringClosestToCaratPosition = -1
+        gridPositionClosestToCaratPosition.x = Infinity
+        gridPositionClosestToCaratPosition.y = Infinity
         
         drawingPosition.x =-mainCamera.rightAtZZero + 1.
         drawingPosition.y = mainCamera.topAtZZero - .5
         columnBackground.position.copy(drawingPosition)
 
-        let nextOrderedNameNumber = 0
+        let drawingPositionInOrderedNames = 0
+        carat.positionInOrderedNames = 0
 
         let backgroundStringLength = backgroundString.length
         for (drawingPositionInString; drawingPositionInString <= backgroundStringLength; ++drawingPositionInString) {
@@ -88,17 +111,19 @@ async function initPad(freeVariableCharacters) {
                 if (carat.positionInString !== -1 && drawingPositionInString === carat.positionInString) {
                     if (carat.position.x !== drawingPosition.x || carat.position.y !== drawingPosition.y)
                         carat.flashingStart = Date.now()
+
                     carat.position.copy(drawingPosition)
+                    carat.positionInOrderedNames = drawingPositionInOrderedNames
                 }
 
                 if (carat.positionInString === -1) {
-                    let closestYDist = Math.abs(positionInStringClosestToCaratPosition.y - carat.position.y)
-                    let closestXDist = Math.abs(positionInStringClosestToCaratPosition.x - carat.position.x)
+                    let closestYDist = Math.abs(gridPositionClosestToCaratPosition.y - carat.position.y)
+                    let closestXDist = Math.abs(gridPositionClosestToCaratPosition.x - carat.position.x)
                     let drawingYDist = Math.abs(drawingPosition.y - carat.position.y)
                     let drawingXDist = Math.abs(drawingPosition.x - carat.position.x)
                     if (drawingYDist < closestYDist || (drawingYDist === closestYDist && drawingXDist < closestXDist) ) {
-                        positionInStringClosestToCaratPositionInString = drawingPositionInString
-                        positionInStringClosestToCaratPosition.copy(drawingPosition)
+                        positionInStringClosestToCaratPosition = drawingPositionInString
+                        gridPositionClosestToCaratPosition.copy(drawingPosition)
                     }
                 }
                 if (drawingPositionInString >= backgroundStringLength)
@@ -114,38 +139,36 @@ async function initPad(freeVariableCharacters) {
                     clearStack()
 
                     if (isMv(result) ) { //if it's just a name you don't want it
-                        let name = orderedNames[nextOrderedNameNumber]
+                        let name = orderedNames[drawingPositionInOrderedNames]
                         let outputMv = namedMvs[name]
                         copyMv(result, outputMv)
                         
                         let x = -mainCamera.rightAtZZero + .5
                         addMvToRender(name, x, drawingPosition.y)
                         addFrameToDraw(x, drawingPosition.y, name)
-                        ++nextOrderedNameNumber
+                        ++drawingPositionInOrderedNames
                     }
                 }
                 drawingPosition.x = -mainCamera.rightAtZZero + 1.
                 drawingPosition.y -= 1.
             }
-            else if (freeVariableCharacters.indexOf(currentCharacter) !== -1) {
-                let tokenStart = drawingPositionInString
-                while (freeVariableCharacters.indexOf(backgroundString[drawingPositionInString + 1]) !== -1)
-                    ++drawingPositionInString
-                let tokenEnd = drawingPositionInString
-                let valuesString = backgroundString.substr(tokenStart, tokenEnd - tokenStart + 1)
-                let valuesArr = valuesString.split(",")
+            else if (freeVariableStartCharacters.indexOf(currentCharacter) !== -1) {
+                let name = orderedNames[drawingPositionInOrderedNames]
+                literalsPositionsInString[name] = drawingPositionInString
 
-                let name = orderedNames[nextOrderedNameNumber]
-                let outputMv = namedMvs[name]
-                for(let i = 0; i < 16; ++i)
-                    outputMv[i] = parseFloat(valuesArr[i])
+                let literalLength = getLiteralLength(drawingPositionInString)
+                parseMv( backgroundString.substr(drawingPositionInString, literalLength), namedMvs[name] )
+                drawingPositionInString += literalLength - 1 //-1 because the loop does a +1
 
                 stack.push(name)
                     
                 let x = drawingPosition.x + .5
                 addMvToRender(name, x, drawingPosition.y)
                 addFrameToDraw(x, drawingPosition.y, name)
-                ++nextOrderedNameNumber
+                ++drawingPositionInOrderedNames
+
+                if( mouse.inBounds(drawingPosition.x, drawingPosition.x + 1., drawingPosition.y + .5, drawingPosition.y-.5) )
+                    boxHovered(drawingPosition.x + .5, drawingPosition.y, name)
                 
                 drawingPosition.x += 1.
             }
@@ -181,24 +204,14 @@ async function initPad(freeVariableCharacters) {
         }
 
         if (carat.positionInString === -1) {
-            carat.positionInString = positionInStringClosestToCaratPositionInString
-            carat.position.copy(positionInStringClosestToCaratPosition)
+            carat.positionInString = positionInStringClosestToCaratPosition
+            carat.position.copy(gridPositionClosestToCaratPosition)
         }
         carat.lineNumber = Math.floor(-carat.position.y)
 
         clearStack()
-
-        // if (0)
-        // {
-        //     addFrameToDraw(0., 0., orderedNames[nextOrderedNameNumber])
-        //     addMvToRender(testPoint, orderedNames[nextOrderedNameNumber], 0., 0.)
-        //     ++nextOrderedNameNumber
-
-        //     addFrameToDraw(3., 3., orderedNames[nextOrderedNameNumber])
-        //     addMvToRender(testPoint, orderedNames[nextOrderedNameNumber], 3., 3.)
-        //     ++nextOrderedNameNumber
-        // }
-    })
+    }
+    updateFunctions.splice(0,0,compile)
 }
 
 function isMv(thing) {

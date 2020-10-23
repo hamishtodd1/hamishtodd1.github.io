@@ -36,50 +36,39 @@ function lineDisplay(line)
     })
 }
 
-function verticesDisplay(pointsBuffer, mode)
+function verticesDisplay(vertBuffer, mode)
 {
-    if (pointsBuffer.length % 4 !== 0)
+    if (vertBuffer.length % 4 !== 0)
         console.error("needs to be 4vecs")
 
-    const vsSource = shaderHeaderWithCameraAndFrameCount + `
-        attribute vec4 pointA;
+    const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+        attribute vec4 vertA;
 
         void main(void) {
-            vec4 p = pointA;
-
-            //camera, "just" squashing so it goes on screen
-            p.x /= rightAtZZero;
-            p.y /= topAtZZero;
-            p.z /= frontAndBackZ;
-
-            gl_Position = p;
             gl_PointSize = 10.;
-        }
+            gl_Position = vertA;
         `
-    const fsSource = shaderHeaderWithCameraAndFrameCount + `
+        + cameraAndFrameCountShaderStuff.footer
+    const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
         void main(void) {
             gl_FragColor = vec4(1.,1.,1.,1.);
         }
         `
 
     const program = Program(vsSource, fsSource)
-    program.addVertexAttribute("point", pointsBuffer, 4, true)
+    program.addVertexAttribute("vert", vertBuffer, 4, true)
 
-    program.locateUniform("rightAtZZero")
-    program.locateUniform("topAtZZero")
-    program.locateUniform("frontAndBackZ")
+    cameraAndFrameCountShaderStuff.locateUniforms(program)
 
     return function()
     {
         gl.useProgram(program.glProgram);
 
-        gl.uniform1f(program.uniformLocations.rightAtZZero, mainCamera.rightAtZZero);
-        gl.uniform1f(program.uniformLocations.topAtZZero, mainCamera.topAtZZero);
-        gl.uniform1f(program.uniformLocations.frontAndBackZ, mainCamera.frontAndBackZ);
+        cameraAndFrameCountShaderStuff.transfer(program)
 
-        program.doSomethingWithVertexAttribute("point", pointsBuffer)
+        program.doSomethingWithVertexAttribute("vert", vertBuffer)
 
-        gl.drawArrays(mode, 0, pointsBuffer.length / 4);
+        gl.drawArrays(mode, 0, vertBuffer.length / 4);
     }
 }
 
@@ -95,9 +84,7 @@ function verticesDisplayWithPosition(pointsBuffer, mode, r,g,b)
     let gStr = g === Math.round(g) ? g.toString() + "." : g.toString()
     let bStr = b === Math.round(b) ? b.toString() + "." : b.toString()
 
-    const screenPosition = new ScreenPosition()
-
-    const vsSource = shaderHeaderWithCameraAndFrameCount + `
+    const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
         attribute vec4 pointA;
         uniform vec2 screenPosition;
 
@@ -106,16 +93,12 @@ function verticesDisplayWithPosition(pointsBuffer, mode, r,g,b)
 
             p.xy += screenPosition;
 
-            //camera, "just" squashing so it goes on screen
-            p.x /= rightAtZZero;
-            p.y /= topAtZZero;
-            p.z /= frontAndBackZ;
+            gl_PointSize = 10.;
 
             gl_Position = p;
-            gl_PointSize = 10.;
-        }
         `
-    const fsSource = shaderHeaderWithCameraAndFrameCount + `
+        + cameraAndFrameCountShaderStuff.footer
+    const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
         void main(void) {
             gl_FragColor = vec4(`+rStr+`,`+gStr+`,`+bStr+`,1.);
         }
@@ -124,9 +107,9 @@ function verticesDisplayWithPosition(pointsBuffer, mode, r,g,b)
     const program = Program(vsSource, fsSource)
     program.addVertexAttribute("point", pointsBuffer, 4, true)
 
-    program.locateUniform("rightAtZZero")
-    program.locateUniform("topAtZZero")
-    program.locateUniform("frontAndBackZ")
+    cameraAndFrameCountShaderStuff.locateUniforms(program)
+
+    const screenPosition = new ScreenPosition()
     program.locateUniform("screenPosition")
 
     return {
@@ -135,9 +118,7 @@ function verticesDisplayWithPosition(pointsBuffer, mode, r,g,b)
         {
             gl.useProgram(program.glProgram);
 
-            gl.uniform1f(program.uniformLocations.rightAtZZero, mainCamera.rightAtZZero);
-            gl.uniform1f(program.uniformLocations.topAtZZero, mainCamera.topAtZZero);
-            gl.uniform1f(program.uniformLocations.frontAndBackZ, mainCamera.frontAndBackZ);
+            cameraAndFrameCountShaderStuff.transfer(program)
 
             gl.uniform2f(program.uniformLocations.screenPosition, screenPosition.x, screenPosition.y);
 

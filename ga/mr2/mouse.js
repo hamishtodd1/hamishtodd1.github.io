@@ -21,6 +21,11 @@ function initMouse() {
         asynchronous.position.y *= mainCamera.topAtZZero
     }
 
+    mouse.inBounds = (l,r,t,b) => {
+        return  l <= mouse.position.x && mouse.position.x <= r &&
+                b <= mouse.position.y && mouse.position.y <= t
+    }
+
     mouse.updateFromAsyncAndCheckClicks = () => {
         let oldClicking = mouse.clicking
         mouse.clicking = asynchronous.clicking

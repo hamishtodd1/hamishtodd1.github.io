@@ -7,44 +7,45 @@
         When called upon to make a "new" name, we take the lowest unused thing from alphabeticalNames
 */
 
-function initNamesAndBasis(freeVariableCharacters)
+function initNamesAndBasis()
 {
     let MAX_THINGS = 63 //7 choose 1 + 7 choose 2 + 7 choose 3
 
     let alphabeticalNames = []
-    let idNum = 0
-    generateName = () => {
-        ++idNum
+    {
+        let idNum = 0
+        function generateName() {
+            ++idNum
 
-        let digitNum = 0
-        let correctlyBasedNumberString = ""
-        let digit = Infinity
+            let digitNum = 0
+            let correctlyBasedNumberString = ""
+            let digit = Infinity
 
-        while (true)
-        {
-            ++digitNum
-            let newDigit = digitGivenBase(idNum, colorCharacters.length + 1, digitNum)
-            //you could figure out what to add to idNum such that you get a valid thing next
-            if (newDigit === 0 || newDigit >= digit)
-                return generateName()
+            while (true) {
+                ++digitNum
+                let newDigit = digitGivenBase(idNum, colorCharacters.length + 1, digitNum)
+                //you could figure out what to add to idNum such that you get a valid thing next
+                if (newDigit === 0 || newDigit >= digit)
+                    return generateName()
 
-            digit = newDigit
-            correctlyBasedNumberString = digit + correctlyBasedNumberString
+                digit = newDigit
+                correctlyBasedNumberString = digit + correctlyBasedNumberString
 
-            if (Math.pow(colorCharacters.length + 1, digitNum) > idNum) //-1?
-                break
+                if (Math.pow(colorCharacters.length + 1, digitNum) > idNum) //-1?
+                    break
+            }
+            let name = ""
+            for (let i = 0; i < correctlyBasedNumberString.length; i++)
+                name += correctlyBasedNumberString[i] === "0" ? "" : colorCharacters[correctlyBasedNumberString[i] - 1]
+
+            return name
         }
-        let name = ""
-        for (let i = 0; i < correctlyBasedNumberString.length; i++)
-            name += correctlyBasedNumberString[i] === "0" ? "" : colorCharacters[correctlyBasedNumberString[i] - 1]
-
-        return name
-    }
-    //for every name there is an mv ready to be used, but we might not use it
-    while (alphabeticalNames.length < MAX_THINGS) {
-        let newName = generateName()
-        alphabeticalNames.push(newName)
-        namedMvs[newName] = new Float32Array(16)
+        //for every name there is an mv ready to be used, but we might not use it
+        while (alphabeticalNames.length < MAX_THINGS) {
+            let newName = generateName()
+            alphabeticalNames.push(newName)
+            namedMvs[newName] = new Float32Array(16)
+        }
     }
 
     getNamedMv = (name) => {
@@ -84,6 +85,8 @@ function initNamesAndBasis(freeVariableCharacters)
                 break
             }
         }
+        if(lowestUnusedName === -1)
+            console.error("no unused name")
 
         return lowestUnusedName
     }
@@ -91,9 +94,12 @@ function initNamesAndBasis(freeVariableCharacters)
     //ideally none for empty lines
     //you only know at compile time which lines have things on them
     for(let i = 0; i < backgroundString.length; ++i) {
-        if( backgroundString[i] === "\n" || 
-            freeVariableCharacters.indexOf(backgroundString[i]) !== -1 )
+        if( backgroundString[i] === "\n" )
             orderedNames.push(getLowestUnusedName())
+        if (freeVariableStartCharacters.indexOf(backgroundString[i]) !== -1 ){
+            orderedNames.push(getLowestUnusedName())
+            i += getLiteralLength(i) - 1
+        }
     }
 
     getNumLines = () => {
@@ -106,13 +112,13 @@ function initNamesAndBasis(freeVariableCharacters)
     }
 
     bindButton("Enter", () => {
-        let lineStats = getNumLines()
+        let numLines = getNumLines()
 
-        if (lineStats.numLines >= MAX_THINGS)
+        if (numLines >= MAX_THINGS)
             log("too many variables for current system!")
         else {
             addStringAtCarat("\n")
-            orderedNames.splice(carat.nextOrderedNameNumber, 0, getLowestUnusedName())
+            orderedNames.splice(carat.positionInOrderedNames, 0, getLowestUnusedName())
             //the deal is that you might have just broken up a line that makes something into two lines that make something
             //it's the same problem with deleting and backspace
             //we can avoid having to add one here, but then where do you add it?
@@ -123,6 +129,17 @@ function initNamesAndBasis(freeVariableCharacters)
         }
     })
 
+    bindButton("2", () => {
+        let defaultLineString = "0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,0.,0.,0.,0.,0.,"
+        addStringAtCarat(defaultLineString)
+        orderedNames.splice(carat.positionInOrderedNames, 0, getLowestUnusedName() )
+    })
+    bindButton("3", () => {
+        let defaultPointString = "0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,"
+        addStringAtCarat(defaultPointString)
+        orderedNames.splice(carat.positionInOrderedNames, 0, getLowestUnusedName() )
+    })
+
     //TODO these should fully remove mvs too. There's really very little reason to see the name after you've made it
     bindButton("Backspace", () => {
         if (carat.positionInString === 0)
@@ -131,7 +148,7 @@ function initNamesAndBasis(freeVariableCharacters)
         let strLength = 1
 
         if (backgroundString[carat.positionInString - 1] === "\n")
-            orderedNames.splice(carat.nextOrderedNameNumber-1, 1)
+            orderedNames.splice(carat.positionInOrderedNames-1, 1)
         else if (backgroundString[carat.positionInString - 1] === "]") {
             let backgroundStringLength = backgroundString.length
             for (strLength; strLength < backgroundStringLength; ++strLength) {
@@ -154,7 +171,7 @@ function initNamesAndBasis(freeVariableCharacters)
         let strLength = 1
 
         if (backgroundString[carat.positionInString] === "\n")
-            orderedNames.splice(carat.nextOrderedNameNumber, 1)
+            orderedNames.splice(carat.positionInOrderedNames, 1)
         else if (backgroundString[carat.positionInString] === "[") {
             let backgroundStringLength = backgroundString.length
             for (strLength; strLength < backgroundStringLength; ++strLength)

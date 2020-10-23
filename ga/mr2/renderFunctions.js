@@ -4,7 +4,7 @@ function initRenderFunctions() {
 
     addRenderFunction = function(func, order) {
         if (order === undefined)
-            order = "middle"
+            order = "start"
 
         if(order === "end") {
             renderFunctions.splice(orders.length, 0, func)

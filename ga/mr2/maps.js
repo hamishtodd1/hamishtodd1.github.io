@@ -1,6 +1,8 @@
 /*
     NOTE SERIOUS CONFUSION: IS Z POSITIVE OR NEGATIVE?
 
+    Don't worry, it makes sense that dymaxion is off, the triangle isn't planar
+
     Title
         How racist is your map?
         Which is least racist?
@@ -74,7 +76,7 @@
 */
 
 async function initWorldMap() {
-    const vsSource = shaderHeaderWithCameraAndFrameCount + `
+    const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
         attribute vec2 uvA;
         varying vec2 uv;
         varying vec4 p;
@@ -268,17 +270,12 @@ async function initWorldMap() {
             //surely can have stereographic too, it's just a projection point
 
             sandwich(p, transform);
-
-            //camera, "just" squashing so it goes on screen
-            p.x /= rightAtZZero;
-            p.y /= topAtZZero;
-            p.z /= frontAndBackZ;
-
+            
             gl_Position = p;
-        }
         `
+        + cameraAndFrameCountShaderStuff.footer
     logShader(vsSource)
-    const fsSource = shaderHeaderWithCameraAndFrameCount + `
+    const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
         varying vec2 uv;
         varying vec4 p;
 
@@ -293,9 +290,7 @@ async function initWorldMap() {
         `
 
     const program = Program(vsSource, fsSource)
-    program.locateUniform("rightAtZZero")
-    program.locateUniform("topAtZZero")
-    program.locateUniform("frontAndBackZ")
+    cameraAndFrameCountShaderStuff.locateUniforms(program)
     program.locateUniform("frameCount")
     locateUniformDualQuat(program, "transform")
 
@@ -341,9 +336,7 @@ async function initWorldMap() {
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.uniform1i(program.uniformLocations.sampler, 0);
 
-        gl.uniform1f(program.uniformLocations.rightAtZZero, mainCamera.rightAtZZero);
-        gl.uniform1f(program.uniformLocations.topAtZZero, mainCamera.topAtZZero);
-        gl.uniform1f(program.uniformLocations.frontAndBackZ, mainCamera.frontAndBackZ);
+        cameraAndFrameCountShaderStuff.transfer(program)
         gl.uniform1f(program.uniformLocations.frameCount, frameCount);
 
         transferDualQuat(transform,"transform",program)
@@ -417,7 +410,7 @@ async function initDymaxion()
         repositionVerts(angle, animatedVertsBuffer)
     })
 
-    const vsSource = shaderHeaderWithCameraAndFrameCount + `
+    const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
         attribute vec2 uvA;
         varying vec4 closedP;
 
@@ -448,15 +441,10 @@ async function initDymaxion()
 
             // sandwich(animatedP, transform);
 
-            //camera, "just" squashing so it goes on screen
-            animatedP.x /= rightAtZZero;
-            animatedP.y /= topAtZZero;
-            animatedP.z /= frontAndBackZ;
-
             gl_Position = animatedP;
-        }
         `
-    const fsSource = shaderHeaderWithCameraAndFrameCount + `
+        + cameraAndFrameCountShaderStuff.footer
+    const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
         varying vec2 uv;
         varying vec4 closedP;
 
@@ -490,9 +478,7 @@ async function initDymaxion()
     logShader(fsSource)
 
     const program = Program(vsSource, fsSource)
-    program.locateUniform("rightAtZZero")
-    program.locateUniform("topAtZZero")
-    program.locateUniform("frontAndBackZ")
+    cameraAndFrameCountShaderStuff.locateUniforms(program)
     program.locateUniform("frameCount")
     locateUniformDualQuat(program, "transform")
     
@@ -541,9 +527,7 @@ async function initDymaxion()
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.uniform1i(program.uniformLocations.sampler, 0);
 
-        gl.uniform1f(program.uniformLocations.rightAtZZero, mainCamera.rightAtZZero);
-        gl.uniform1f(program.uniformLocations.topAtZZero, mainCamera.topAtZZero);
-        gl.uniform1f(program.uniformLocations.frontAndBackZ, mainCamera.frontAndBackZ);
+        cameraAndFrameCountShaderStuff.transfer(program)
         gl.uniform1f(program.uniformLocations.frameCount, frameCount);
 
         transferDualQuat(transform,"transform",program)

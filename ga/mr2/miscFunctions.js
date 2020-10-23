@@ -15,15 +15,21 @@ function ScreenPosition()
     this.x = 0.
     this.y = 0.
 }
-ScreenPosition.prototype.copy = function(sp)
-{
+ScreenPosition.prototype.copy = function(sp) {
     this.x = sp.x
     this.y = sp.y
 }
-ScreenPosition.prototype.set = function (x,y)
-{
+ScreenPosition.prototype.set = function (x,y) {
     this.x = x
     this.y = y
+}
+ScreenPosition.prototype.sub = function (sp) {
+    this.x -= sp.x
+    this.y -= sp.y
+}
+ScreenPosition.prototype.add = function (sp) {
+    this.x += sp.x
+    this.y += sp.y
 }
 
 function nextPowerOf2(x) {
@@ -43,4 +49,11 @@ function nameToHexantColors(name, hexantColors) {
         hexantColors[i * 3 + 2] = colors[letter][2]
     }
     return hexantColors
+}
+
+function toGlslFloatLiteral(number) {
+    if(number === Math.round(number))
+        return number.toString() + "."
+    else
+        return number.toString()
 }
