@@ -4,7 +4,8 @@
 
     z = x*x + 2*x*y
 
-    want a debug mode where you just see the characters!
+    want a debug mode where you just see the characters
+    And it goes along and highlights the parts of the text you care about
 */
 
 const freeVariableCharacters = "0123456789.,-e"
@@ -138,7 +139,7 @@ async function initPad() {
                 }
             }
 
-            addMvToRender(name, drawingPosition.x + .5, drawingPosition.y, 1., true)
+            addMvToRender(name, drawingPosition.x + .5, drawingPosition.y, .5, true)
 
             drawingPosition.x += 1.
         }

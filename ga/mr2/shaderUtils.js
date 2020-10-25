@@ -59,3 +59,4 @@ let hueToFragColorChunk = `
         hexagonalPart == 3. || hexagonalPart == 4. ? 1. :
         hexagonalPart == 2. ? factor : 1.-factor;
 `
+

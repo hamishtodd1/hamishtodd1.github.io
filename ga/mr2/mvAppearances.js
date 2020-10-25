@@ -13,13 +13,11 @@ function initMvAppearances() {
     let screenPositions = []
     let spaceScales = []
     let names = []
-    addMvToRender = function(name, x, y, scale, addFrame) {
+    addMvToRender = function(name, x, y, containingBoxRadius, addFrame) {
         screenPositions[numToDraw*2+0] = x
         screenPositions[numToDraw*2+1] = y
         names[numToDraw] = name
-        if(scale === undefined)
-            scale = 1.
-        spaceScales[numToDraw] = scale
+        spaceScales[numToDraw] = containingBoxRadius
 
         if(addFrame)
             addFrameToDraw(x, y, name)
@@ -46,7 +44,7 @@ function initMvAppearances() {
 
     //points
     {
-        let radius = .035
+        let radius = .055
         let radialDivisions = 18
         let vertBuffer = vertBufferFunctions.disc(radius, radialDivisions)
 
@@ -54,7 +52,7 @@ function initMvAppearances() {
         for (let i = 0, il = pointColorIndexBuffer.length; i < il; ++i)
             pointColorIndexBuffer[i] = Math.floor(i / il * 6)
 
-        const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+        const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + gaShaderString + `
             attribute vec4 vertA;
             varying vec4 p;
             
@@ -70,25 +68,12 @@ function initMvAppearances() {
             uniform float visualizeColor;
             uniform float discness;
 
-            vec4 planeToDisc(vec4 p)
-            {
-                float distanceFromOrigin = length(p.xyz);
-                float angle = p.w == 0. ? PI / 2. : atan(distanceFromOrigin/p.w);
-                float angleProportion = 1. - .5 * discness;
-                float newAngle = angleProportion * angle;
-                float newDistanceFromOrigin = tan(newAngle) * p.w;
-                vec4 transformedP = p;
-                transformedP.xyz *= newDistanceFromOrigin / distanceFromOrigin;
-
-                return transformedP;
-            }
-
             void main(void) {
                 color = hexantColors[int(colorIndexA)];
 
                 p = vertA;
 
-                vec4 transformedP = planeToDisc(elements);
+                vec4 transformedP = planeToDisc(elements,discness);
 
                 p.xyz += transformedP.xyz * spaceScale; //hmm
                 gl_Position = p;
@@ -103,11 +88,10 @@ function initMvAppearances() {
             uniform float spaceScale;
 
             uniform float visualizeColor;
-            uniform float discness;
 
             void main(void) {
                 if(visualizeColor == 0.) {
-                    if( abs(p.x)<.5*spaceScale && abs(p.y)<.5*spaceScale )
+                    if( abs(p.x)<spaceScale && abs(p.y)<spaceScale )
                         gl_FragColor = vec4(color,1.);
                     else
                         discard; //unperformant!
@@ -138,7 +122,7 @@ function initMvAppearances() {
 
         program.locateUniform("elements")
 
-        var drawPoints = () =>{
+        var drawPoints = () => {
             gl.useProgram(program.glProgram);
             cameraAndFrameCountShaderStuff.transfer(program)
             program.doSomethingWithVertexAttribute("vert", vertBuffer)
@@ -150,7 +134,7 @@ function initMvAppearances() {
                     gl.uniform3fv(program.uniformLocations.hexantColors, nameToHexantColors(names[index], hexantColors))
                     gl.uniform2f(program.uniformLocations.screenPosition, screenPositions[index * 2 + 0], screenPositions[index * 2 + 1])
 
-                    gl.uniform4f(program.uniformLocations.elements, pointX(mv), pointY(mv), pointY(mv), pointW(mv))
+                    gl.uniform4f(program.uniformLocations.elements, pointX(mv), pointY(mv), pointZ(mv), pointW(mv))
 
                     gl.uniform1f(program.uniformLocations.spaceScale, spaceScales[index])
 
@@ -172,7 +156,7 @@ function initMvAppearances() {
         }
     }
 
-    //realLine
+    //line, both real and ideal apparently
     {
         const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
             attribute vec4 vertA;
@@ -236,21 +220,21 @@ function initMvAppearances() {
                 let mv = namedMvs[names[index]]
 
                 if (realLineX(mv) !== 0. || realLineY(mv) !== 0. || realLineZ(mv) !== 0.) {
-                    let boxSize = .5
+                    let boxRadius = 1.
                     let whichEnd = 0
                     for (let i = 0; i < 3; ++i) {
                         for (j = -1.; j <= 1. && whichEnd < 2; j += 2.) {
                             zeroMv(pl)
                             planeW(pl, 1.)
-                            planeByComponent[i](pl, 1. / (boxSize * j))
+                            planeByComponent[i](pl, 1. / (boxRadius * j))
                             meet(pl, mv, pt)
 
                             if (pointW(pt) !== 0.) {
                                 wNormalizePoint(pt)
 
-                                if (-boxSize <= pointX(pt) && pointX(pt) <= boxSize &&
-                                    -boxSize <= pointY(pt) && pointY(pt) <= boxSize &&
-                                    -boxSize <= pointZ(pt) && pointZ(pt) <= boxSize
+                                if (-boxRadius <= pointX(pt) && pointX(pt) <= boxRadius &&
+                                    -boxRadius <= pointY(pt) && pointY(pt) <= boxRadius &&
+                                    -boxRadius <= pointZ(pt) && pointZ(pt) <= boxRadius
                                  ) {
                                     endPoints[whichEnd][0] = pointX(pt)
                                     endPoints[whichEnd][1] = pointY(pt)

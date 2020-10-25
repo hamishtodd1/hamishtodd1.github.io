@@ -51,13 +51,13 @@ function initDisplayWindows() {
     Object.assign( DisplayWindow.prototype, {
         render: function() {
             drawBackground(this.position.x, this.position.y)
-            
+
             for (let i = 0; i < this.numMvs; ++i)
-                addMvToRender(this.mvNames[i], this.position.x, this.position.y, dimension, false)
+                addMvToRender(this.mvNames[i], this.position.x, this.position.y, dimension / 2., false)
         },
         getPositionInWindow: function(target) {
-            let x = (mouse.position.x - this.position.x) / dimension
-            let y = (mouse.position.y - this.position.y) / dimension
+            let x = (mouse.position.x - this.position.x) / (dimension / 2.)
+            let y = (mouse.position.y - this.position.y) / (dimension / 2.)
             zeroMv(target)
             pointX(target, x)
             pointY(target, y)
@@ -128,7 +128,33 @@ function initDisplayWindows() {
 
                 let grade = getGrade(stringCurrentMv)
                 if (grade === 3) {
-                    backgroundStringSplice(literalStart, literalLength, mvToString(slideCurrentMv))
+                    if (colorPointValues[mouseDw.editingName] )
+                    {
+                        //just rewrite this shit at some point
+                        let discPoint = new Float32Array(16)
+                        copyMv(slideCurrentMv, discPoint)
+                        let norm = pointIdealNorm(discPoint)
+
+                        let angle = Math.atan(norm / pointW(discPoint))
+                        let newAngle = 2. * angle; //mouse on 
+                        let needsToBeClamped = Math.cos(newAngle) <= 0.
+                        if ( needsToBeClamped ) {
+                            pointW(discPoint, 0.)
+                            var factor = 1. / norm
+                        }
+                        else {
+                            pointW(discPoint, 1.)
+                            let newNorm = Math.tan(newAngle) * pointW(discPoint)
+                            var factor = newNorm / norm
+                        }
+                        pointX(discPoint, pointX(discPoint) * factor)
+                        pointY(discPoint, pointY(discPoint) * factor)
+                        pointZ(discPoint, pointZ(discPoint) * factor)
+
+                        backgroundStringSplice(literalStart, literalLength, mvToString(discPoint))
+                    }
+                    else
+                        backgroundStringSplice(literalStart, literalLength, mvToString(slideCurrentMv))
                 }
                 else if (grade === 2) {
                     // log(frameCount)

@@ -272,6 +272,26 @@ function initAlgebra()
             return mv.toString() + ","
         }
 
+        appendToGaShaderString(`
+            vec4 planeToDisc(vec4 p, float ourDiscness)
+            {
+                vec4 transformedP = p;
+                if(p.w == 0.) {
+                    transformedP.w = 1.;
+                    transformedP.xyz *= 1. / length(p.xyz);
+                }
+                else {
+                    float distanceFromOrigin = length(p.xyz);
+                    float angle = p.w == 0. ? PI / 2. : atan(distanceFromOrigin / p.w);
+                    float angleProportion = 1. - .5 * ourDiscness;
+                    float newAngle = angleProportion * angle;
+                    float newDistanceFromOrigin = tan(newAngle) * p.w;
+                    transformedP.xyz *= newDistanceFromOrigin / distanceFromOrigin;
+                }
+
+                return transformedP;
+            }`)
+
         let eps = .00001
         getGrade = (mv) => {
             let gradeIPartIsZero = Array(5)
@@ -394,6 +414,8 @@ function initAlgebra()
 
         lineRealNorm = (mv) => { return Math.sqrt(sq(realLineX(mv)) + sq(realLineY(mv)) + sq(realLineZ(mv)))}
         lineIdealNorm = (mv) => { return Math.sqrt(sq(idealLineX(mv)) + sq(idealLineY(mv)) + sq(idealLineZ(mv)))}
+        
+        pointIdealNorm = (mv) => { return Math.sqrt(sq(pointX(mv)) + sq(pointY(mv)) + sq(pointZ(mv)))}
 
         appendToGaShaderString(replaceSignature(
             "void mvToDq(float mv[16], inout dualQuat dq)",
