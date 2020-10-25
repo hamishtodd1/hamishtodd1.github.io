@@ -9,12 +9,15 @@ const backgroundColor = [127, 127, 127];
 const characterWidth = 1. / 3.
 
 const mouseResponses = []
+const rightMouseResponses = []
 
 //---------Varying state
 
 const namedMvs = {}
 const orderedNames = []
-const literalsPositionsInString = {}
+let literalsPositionsInString = {}
+let declarationsPositionsInString = {}
+const colorPointValues = {}
 
 const carat = {
     positionInString: -1,
@@ -26,12 +29,13 @@ const displayWindows = []
 
 let backgroundString = 
 `
-   0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.4,1.,0., 0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.4,0.,1.,0.,
+   0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.4,1.,0.,color 0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.4,0.,1.,0.,
+   b 
    
    0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,0.,0.,0.,0.,0.,
 
    earth(0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.2,1.,0.,)
-
+color
 
    I0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,1.,0., //should be a series of points from center to there
 

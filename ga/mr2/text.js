@@ -8,7 +8,7 @@ function initCharacterTexture(typeableCharacters) {
     let characterAttributeBuffer = new Float32Array(maxCharacters*6) //could be 16
     let positionAttributeBuffer = new Float32Array(maxCharacters*6*2)
 
-    addCharacterToDraw = function(character,drawingPosition) {
+    addCharacterToDraw = function(character,position) {
         if(numCharactersToDraw >= maxCharacters) {
             console.error("character limit hit")
         }
@@ -16,8 +16,8 @@ function initCharacterTexture(typeableCharacters) {
             let i = numCharactersToDraw * 6
             for (let j = 0; j < 6; ++j) {
                 characterAttributeBuffer[i + j] = characterIndices[character]
-                positionAttributeBuffer[(i + j) * 2 + 0] = drawingPosition.x
-                positionAttributeBuffer[(i + j) * 2 + 1] = drawingPosition.y
+                positionAttributeBuffer[(i + j) * 2 + 0] = position.x
+                positionAttributeBuffer[(i + j) * 2 + 1] = position.y
             }
             //can make these uniforms instead for 6x less of this and a 6x smaller buffer in the end, but more draw calls
             //easy to check difference

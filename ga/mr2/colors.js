@@ -128,3 +128,46 @@ function projectPointOnPlane(point,plane,target) {
 	wNormalizePoint(target)
 	return target
 }
+
+function drawColorWheel()
+{
+	const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+		attribute vec4 vertA;
+		varying vec2 p;
+
+		void main(void) {
+			p = vertA.xy;
+			
+			gl_Position = vertA;
+			gl_Position.xy *= rightAtZZero * 2.;
+		`
+		+ cameraAndFrameCountShaderStuff.footer
+	const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+		varying vec2 p;
+
+		void main(void) {
+			if( .5 < length(p) )
+				discard;
+			float hue = .5 + .5 * atan(p.y,p.x) / PI;
+			
+			` + hueToFragColorChunk + `
+			
+			// gl_FragColor.rgb -= 1. * (1.-length(p.xy)*2.);
+			gl_FragColor.rgb *= length(p.xy) * 2.;
+		}`
+
+	const program = Program(vsSource, fsSource)
+	program.addVertexAttribute("vert", quadBuffer, 4, false)
+
+	cameraAndFrameCountShaderStuff.locateUniforms(program)
+
+	addRenderFunction(() => {
+		gl.useProgram(program.glProgram);
+
+		cameraAndFrameCountShaderStuff.transfer(program)
+
+		program.doSomethingWithVertexAttribute("vert")
+
+		gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4);
+	})
+}

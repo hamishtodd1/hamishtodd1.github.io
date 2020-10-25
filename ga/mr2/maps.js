@@ -4,6 +4,7 @@
     Don't worry, it makes sense that dymaxion is off, the triangle isn't planar
 
     Title
+        Top 10 politically-correct world maps
         How racist is your map?
         Which is least racist?
         Can we make a less racist map? 

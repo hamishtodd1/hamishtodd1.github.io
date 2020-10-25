@@ -40,7 +40,7 @@ function initDisplayWindows() {
     }
 
     function DisplayWindow() {
-        this.position = new ScreenPosition()
+        this.position = new ScreenPosition(2000.,2000.)
         this.numMvs = 0
         this.mvNames = []
         this.slideOngoing = false
@@ -51,8 +51,9 @@ function initDisplayWindows() {
     Object.assign( DisplayWindow.prototype, {
         render: function() {
             drawBackground(this.position.x, this.position.y)
+            
             for (let i = 0; i < this.numMvs; ++i)
-                addMvToRender(this.mvNames[i], this.position.x, this.position.y, dimension)
+                addMvToRender(this.mvNames[i], this.position.x, this.position.y, dimension, false)
         },
         getPositionInWindow: function(target) {
             let x = (mouse.position.x - this.position.x) / dimension
@@ -118,28 +119,30 @@ function initDisplayWindows() {
             mouseDw.slideOngoing = false
         },
         during: () => {
-            let literalStart = literalsPositionsInString[mouseDw.editingName]
-            let literalLength = getLiteralLength(literalStart)
+            if (literalsPositionsInString[mouseDw.editingName] !== undefined) {
+                let literalStart = literalsPositionsInString[mouseDw.editingName]
+                let literalLength = getLiteralLength(literalStart)
 
-            parseMv(backgroundString.substr(literalStart, literalLength),stringCurrentMv)
-            mouseDw.getPositionInWindow(slideCurrentMv)
-            
-            let grade = getGrade(stringCurrentMv)
-            if ( grade === 3) {
-                backgroundStringSplice(literalStart, literalLength, mvToString(slideCurrentMv))
-            }
-            else if(grade === 2) {
-                // log(frameCount)
-                if (mvEquals(slideCurrentMv,slideStartMv)) {
-                    let currentLineDotMousePosition = new Float32Array(16);
-                    inner(stringCurrentMv,slideStartMv, currentLineDotMousePosition)
-                    gp(currentLineDotMousePosition, slideStartMv, mvToChangeTo)
-                    delete currentLineDotMousePosition
+                parseMv(backgroundString.substr(literalStart, literalLength), stringCurrentMv)
+                mouseDw.getPositionInWindow(slideCurrentMv)
+
+                let grade = getGrade(stringCurrentMv)
+                if (grade === 3) {
+                    backgroundStringSplice(literalStart, literalLength, mvToString(slideCurrentMv))
                 }
-                else
-                    join(slideStartMv, slideCurrentMv, mvToChangeTo)
+                else if (grade === 2) {
+                    // log(frameCount)
+                    if (mvEquals(slideCurrentMv, slideStartMv)) {
+                        let currentLineDotMousePosition = new Float32Array(16);
+                        inner(stringCurrentMv, slideStartMv, currentLineDotMousePosition)
+                        gp(currentLineDotMousePosition, slideStartMv, mvToChangeTo)
+                        delete currentLineDotMousePosition
+                    }
+                    else
+                        join(slideStartMv, slideCurrentMv, mvToChangeTo)
 
-                backgroundStringSplice(literalStart, literalLength, mvToString(mvToChangeTo))
+                    backgroundStringSplice(literalStart, literalLength, mvToString(mvToChangeTo))
+                }
             }
         }
     })
@@ -148,11 +151,10 @@ function initDisplayWindows() {
     caratDw = new DisplayWindow()
     updateFunctions.push(()=>{
         caratDw.position.x = mainCamera.rightAtZZero - dimension / 2. - .1
-        caratDw.position.y = carat.position.y
+        caratDw.position.y = carat.position.y - dimension / 2. + .5
     })
     addRenderFunction(()=>{
         caratDw.render()
-
         caratDw.numMvs = 0
     })
 }

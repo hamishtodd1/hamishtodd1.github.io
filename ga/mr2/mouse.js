@@ -5,12 +5,15 @@
 function initMouse() {
     mouse = {
         clicking: false,
+        clickingOld: false,
+        rightClicking: false,
+        rightClickingOld: false,
         position: new ScreenPosition()
     }
-    let currentMouseResponse = null
 
     let asynchronous = {
         clicking: false,
+        rightClicking: false,
         position: new ScreenPosition()
     };
     function updateFromClientCoordinates(clientX, clientY) {
@@ -26,36 +29,46 @@ function initMouse() {
                 b <= mouse.position.y && mouse.position.y <= t
     }
 
-    mouse.updateFromAsyncAndCheckClicks = () => {
-        let oldClicking = mouse.clicking
-        mouse.clicking = asynchronous.clicking
-        mouse.position.copy(asynchronous.position)
-
-        if (mouse.clicking && !oldClicking) {
+    let allMouseResponses = [mouseResponses,rightMouseResponses]
+    let currentResponses = [null,null]
+    function respond(clicking,clickingOld,index) {
+        if (clicking && !clickingOld) {
             let topZ = -Infinity
-            currentMouseResponse = null
-            mouseResponses.forEach((mf) => {
+            currentResponses[index] = null
+            allMouseResponses[index].forEach((mf) => {
                 let z = mf.z()
                 if (z > topZ) {
                     topZ = z
-                    currentMouseResponse = mf
+                    currentResponses[index] = mf
                 }
             })
 
-            if (currentMouseResponse !== null && currentMouseResponse.start !== undefined) {
-                currentMouseResponse.start()
-                if (currentMouseResponse.during === undefined && currentMouseResponse.end === undefined)
-                    currentMouseResponse = null
+            if (currentResponses[index] !== null && currentResponses[index].start !== undefined) {
+                currentResponses[index].start()
+                if (currentResponses[index].during === undefined && currentResponses[index].end === undefined)
+                    currentResponses[index] = null
             }
         }
 
-        if (mouse.clicking && currentMouseResponse !== null && currentMouseResponse.during !== undefined)
-            currentMouseResponse.during()
-        if (!mouse.clicking) {
-            if (currentMouseResponse !== null && currentMouseResponse.end !== undefined)
-                currentMouseResponse.end()
-            currentMouseResponse = null
+        if (clicking && currentResponses[index] !== null && currentResponses[index].during !== undefined)
+            currentResponses[index].during()
+        if (!clicking) {
+            if (currentResponses[index] !== null && currentResponses[index].end !== undefined)
+                currentResponses[index].end()
+            currentResponses[index] = null
         }
+    }
+
+    mouse.updateFromAsyncAndCheckClicks = () => {
+        mouse.position.copy(asynchronous.position)
+
+        mouse.clickingOld = mouse.clicking
+        mouse.clicking = asynchronous.clicking
+        respond(mouse.clicking,mouse.clickingOld,0)
+
+        mouse.rightClickingOld = mouse.rightClicking
+        mouse.rightClicking = asynchronous.rightClicking
+        respond(mouse.rightClicking, mouse.rightClickingOld, 1)
     }
 
     {
@@ -66,15 +79,16 @@ function initMouse() {
 
         document.addEventListener('mousedown', function (event) {
             event.preventDefault()
-            asynchronous.clicking = true
+            asynchronous[event.button === 2 ? "rightClicking" : "clicking"] = true
             updateFromClientCoordinates(event.clientX, event.clientY)
         }, false);
         document.addEventListener('mouseup', function (event) {
             event.preventDefault()
-            asynchronous.clicking = false
+            asynchronous[event.button === 2 ? "rightClicking" : "clicking"] = false
             updateFromClientCoordinates(event.clientX, event.clientY)
         }, false);
-
-        document.addEventListener('contextmenu', (event) => event.preventDefault(), false);
+        document.addEventListener("contextmenu", (event) => {
+            event.preventDefault()
+        })
     }
 }

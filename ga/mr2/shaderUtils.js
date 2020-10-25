@@ -38,3 +38,24 @@ precision mediump float;
 #define TETRAHEDRAL_ANGLE 1.9106332362490186
 `
 const shaderHeaderWithCameraAndFrameCount = shaderHeader + cameraAndFrameCountShaderStuff.header
+
+let hueToFragColorChunk = `
+    hue = fract(hue);
+
+    gl_FragColor = vec4(0., 0., 0., 1.);
+    float hexagonalPart = floor(hue * 6.);
+    float factor = hue * 6. - hexagonalPart;
+
+    gl_FragColor.r = 
+        hexagonalPart == 2. || hexagonalPart == 3. ? 0. :
+        hexagonalPart == 0. || hexagonalPart == 5. ? 1. :
+        hexagonalPart == 4. ? factor : 1.-factor;
+    gl_FragColor.g = 
+        hexagonalPart == 4. || hexagonalPart == 5. ? 0. :
+        hexagonalPart == 1. || hexagonalPart == 2. ? 1. :
+        hexagonalPart == 0. ? factor : 1.-factor;
+    gl_FragColor.b = 
+        hexagonalPart == 0. || hexagonalPart == 1. ? 0. :
+        hexagonalPart == 3. || hexagonalPart == 4. ? 1. :
+        hexagonalPart == 2. ? factor : 1.-factor;
+`

@@ -2,6 +2,10 @@
     The disc / non-disc representation animation would be nice to see too
 
     need to have "make your own visualizations" for the boxes soon
+
+    Color
+        Want to click and select a color, just like with a vector
+        As with normal points, can visualize space as plane or disc. Disc gets you hue circle
 */
 
 function initMvAppearances() {
@@ -9,13 +13,17 @@ function initMvAppearances() {
     let screenPositions = []
     let spaceScales = []
     let names = []
-    addMvToRender = function(name, x, y, scale) {
+    addMvToRender = function(name, x, y, scale, addFrame) {
         screenPositions[numToDraw*2+0] = x
         screenPositions[numToDraw*2+1] = y
         names[numToDraw] = name
         if(scale === undefined)
             scale = 1.
         spaceScales[numToDraw] = scale
+
+        if(addFrame)
+            addFrameToDraw(x, y, name)
+            
         ++numToDraw
     }
 
@@ -58,12 +66,31 @@ function initMvAppearances() {
             attribute float colorIndexA;
             uniform vec3 hexantColors[6];
             varying vec3 color;
+            
+            uniform float visualizeColor;
+            uniform float discness;
+
+            vec4 planeToDisc(vec4 p)
+            {
+                float distanceFromOrigin = length(p.xyz);
+                float angle = p.w == 0. ? PI / 2. : atan(distanceFromOrigin/p.w);
+                float angleProportion = 1. - .5 * discness;
+                float newAngle = angleProportion * angle;
+                float newDistanceFromOrigin = tan(newAngle) * p.w;
+                vec4 transformedP = p;
+                transformedP.xyz *= newDistanceFromOrigin / distanceFromOrigin;
+
+                return transformedP;
+            }
 
             void main(void) {
                 color = hexantColors[int(colorIndexA)];
 
                 p = vertA;
-                p.xyz += elements.xyz * spaceScale; //hmm
+
+                vec4 transformedP = planeToDisc(elements);
+
+                p.xyz += transformedP.xyz * spaceScale; //hmm
                 gl_Position = p;
                 gl_Position.xy += screenPosition;
             `
@@ -72,13 +99,26 @@ function initMvAppearances() {
             varying vec3 color;
             varying vec4 p;
 
+            uniform vec4 elements;
             uniform float spaceScale;
 
+            uniform float visualizeColor;
+            uniform float discness;
+
             void main(void) {
-                if( abs(p.x)<.5*spaceScale && abs(p.y)<.5*spaceScale )
-                    gl_FragColor = vec4(color,1.);
-                else
-                    discard; //unperformant!
+                if(visualizeColor == 0.) {
+                    if( abs(p.x)<.5*spaceScale && abs(p.y)<.5*spaceScale )
+                        gl_FragColor = vec4(color,1.);
+                    else
+                        discard; //unperformant!
+                }
+                else {
+                    float hue = .5 + .5 * atan(p.y,p.x) / PI;
+
+                    ` + hueToFragColorChunk + `
+
+                    // gl_FragColor.rgb *= length(p.xy) * 2.;
+                }
             }
             `
 
@@ -92,6 +132,9 @@ function initMvAppearances() {
         program.locateUniform("hexantColors")
 
         program.locateUniform("spaceScale")
+
+        program.locateUniform("visualizeColor")
+        program.locateUniform("discness")
 
         program.locateUniform("elements")
 
@@ -110,6 +153,17 @@ function initMvAppearances() {
                     gl.uniform4f(program.uniformLocations.elements, pointX(mv), pointY(mv), pointY(mv), pointW(mv))
 
                     gl.uniform1f(program.uniformLocations.spaceScale, spaceScales[index])
+
+                    // if(names[index] === "r")
+                    //     debugger
+                    if (!colorPointValues[names[index]]) {
+                        gl.uniform1f(program.uniformLocations.discness, 0.)
+                        gl.uniform1f(program.uniformLocations.visualizeColor, 0.)
+                    }
+                    else {
+                        gl.uniform1f(program.uniformLocations.discness, 1.)
+                        gl.uniform1f(program.uniformLocations.visualizeColor, 1.)
+                    }
 
                     //probably want a light in the corner of these boxes so you can get angle of plane
                     gl.drawArrays(gl.TRIANGLES, 0, vertBuffer.length / 4)

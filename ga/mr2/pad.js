@@ -3,6 +3,8 @@
     Look out for what happens to them when you have your disc model
 
     z = x*x + 2*x*y
+
+    want a debug mode where you just see the characters!
 */
 
 const freeVariableCharacters = "0123456789.,-e"
@@ -84,10 +86,6 @@ async function initPad() {
     let columnBackground = verticesDisplayWithPosition(pointsBuffer, gl.TRIANGLES, .22, .22, .22)
     addRenderFunction(columnBackground.renderFunction)
 
-    let testPoint = new Float32Array(16)
-    pointX(testPoint, .3)
-    pointW(testPoint, 1.)
-
     let drawingPosition = new ScreenPosition()
     let gridPositionClosestToCaratPosition = new ScreenPosition()
     let compile = () => {   
@@ -106,11 +104,50 @@ async function initPad() {
 
         let namesInLine = []
 
+        //bit memory-leaky
+        literalsPositionsInString = {}
+        declarationPositionsInString = {}
+
         let lineNumber = 0
+
+        function drawMv(name) {
+            namesInLine.push(name)
+
+            let endOfFirstOcurrence = -1
+            if (literalsPositionsInString[name] !== undefined)
+                endOfFirstOcurrence = literalsPositionsInString[name] + getLiteralLength(literalsPositionsInString[name])
+            else
+                endOfFirstOcurrence = declarationPositionsInString[name] + 1
+            colorPointValues[name] = backgroundString.substr(endOfFirstOcurrence, 5) === "color"
+
+            if (mouse.inBounds(drawingPosition.x, drawingPosition.x + 1., drawingPosition.y + .5, drawingPosition.y - .5)) {
+                mouseDw.respondToHover(drawingPosition.x + .5, drawingPosition.y, lineNumber, name)
+
+                if (mouse.rightClicking && !mouse.rightClickingOld) {
+                    if (backgroundString.substr(endOfFirstOcurrence, 5) !== "color" ) {
+                        backgroundStringSplice(endOfFirstOcurrence, 0, "color")
+                        if( drawingPositionInString >= endOfFirstOcurrence )
+                            drawingPositionInString += 5
+                    }
+                    else {
+                        backgroundStringSplice(endOfFirstOcurrence, 5, "")
+                        if( drawingPositionInString >= endOfFirstOcurrence )
+                            drawingPositionInString -= 5
+                    }
+                    backgroundStringLength = backgroundString.length
+                }
+            }
+
+            addMvToRender(name, drawingPosition.x + .5, drawingPosition.y, 1., true)
+
+            drawingPosition.x += 1.
+        }
 
         let backgroundStringLength = backgroundString.length
         for (drawingPositionInString; drawingPositionInString <= backgroundStringLength; ++drawingPositionInString) {
-            //carat position
+            
+            //-------- Carat position
+
             {
                 if (carat.positionInString !== -1 && drawingPositionInString === carat.positionInString) {
                     if (carat.position.x !== drawingPosition.x || carat.position.y !== drawingPosition.y)
@@ -135,12 +172,17 @@ async function initPad() {
                     break
             }
 
+            //-------Bifuricate!
+
             let currentCharacter = backgroundString[drawingPositionInString]
+            
             if (currentCharacter === " ")
                 drawingPosition.x += characterWidth
             else if (currentCharacter === "\n") {
 
                 //---------End of line
+
+                drawingPosition.x = -mainCamera.rightAtZZero
 
                 if(lineStack.length !== 0) {
                     let result = lineStack.pop()
@@ -148,17 +190,19 @@ async function initPad() {
 
                     if (isMv(result) ) { //if it's just a name you don't want it
                         let name = orderedNames[drawingPositionInOrderedNames]
-                        let outputMv = namedMvs[name]
-                        copyMv(result, outputMv)
-
-                        namesInLine.push(name)
-                        
-                        let x = -mainCamera.rightAtZZero + .5
-                        addMvToRender(name, x, drawingPosition.y)
-                        addFrameToDraw(x, drawingPosition.y, name)
                         ++drawingPositionInOrderedNames
+                        declarationPositionsInString[name] = drawingPositionInString
+
+                        drawMv(name)
+                        if (backgroundString.substr(drawingPositionInString + 1, 5) === "color")
+                            drawingPositionInString += 5
+
+                        copyMv(result, namedMvs[name])
                     }
                 }
+
+                drawingPosition.y -= 1.
+                drawingPosition.x = -mainCamera.rightAtZZero + 1.
 
                 for(let i = 0; i < displayWindows.length; ++i) {
                     if(lineNumber === displayWindows[i].lineToRenderMvsFrom) {
@@ -171,33 +215,24 @@ async function initPad() {
                 }
                 namesInLine.length = 0
 
-                drawingPosition.x = -mainCamera.rightAtZZero + 1.
-                drawingPosition.y -= 1.
                 ++lineNumber
             }
             else if (freeVariableStartCharacters.indexOf(currentCharacter) !== -1) {
 
                 //---------Free variable
-
-                let name = orderedNames[drawingPositionInOrderedNames]
-                literalsPositionsInString[name] = drawingPositionInString
-
-                let literalLength = getLiteralLength(drawingPositionInString)
-                parseMv( backgroundString.substr(drawingPositionInString, literalLength), namedMvs[name] )
-                drawingPositionInString += literalLength - 1 //-1 because the loop does a +1
-
-                lineStack.push(name)
-                namesInLine.push(name)
-                    
-                let x = drawingPosition.x + .5
-                addMvToRender(name, x, drawingPosition.y)
-                addFrameToDraw(x, drawingPosition.y, name)
-                ++drawingPositionInOrderedNames
-
-                if( mouse.inBounds(drawingPosition.x, drawingPosition.x + 1., drawingPosition.y + .5, drawingPosition.y-.5) )
-                    mouseDw.respondToHover(drawingPosition.x + .5, drawingPosition.y, lineNumber, name)
                 
-                drawingPosition.x += 1.
+                let name = orderedNames[drawingPositionInOrderedNames]
+                ++drawingPositionInOrderedNames
+                
+                literalsPositionsInString[name] = drawingPositionInString
+                let literalLength = getLiteralLength(drawingPositionInString)
+                parseMv(backgroundString.substr(drawingPositionInString, literalLength), namedMvs[name])
+                drawingPositionInString += literalLength - 1 //-1 because the loop does a +1
+                lineStack.push(name)
+
+                drawMv(name)
+                if (backgroundString.substr(drawingPositionInString + 1, 5) === "color")
+                    drawingPositionInString += 5
             }
             else if(currentCharacter === "I") {
 
@@ -210,12 +245,13 @@ async function initPad() {
             else if( currentCharacter === ")") {
 
                 //---------Function application
+                //yeah this would be better parsed out and turned into reverse polish
 
                 let argument = lineStack.pop()
                 let func = lineStack.pop()
                 if ( namedMvs[argument] !== undefined && func === "earth") {
                     let mv = new Float32Array(16)
-                    pointX(mv,-.2)
+                    pointY(mv,-.2)
                     pointW(mv,1.)
                     lineStack.push(mv)
 
@@ -229,14 +265,27 @@ async function initPad() {
 
                 //---------Normal character
 
-                if(backgroundString.substr(drawingPositionInString,6) === "earth(")
-                    lineStack.push("earth")
+                if (backgroundString.substr(drawingPositionInString, 2) === "b ")
+                // if (colorCharacters.indexOf(currentCharacter) !== -1 )
+                {
+                    let name = "b";
+                    namesInLine.push(name)
+                    lineStack.push(name)
 
-                addCharacterToDraw(currentCharacter, drawingPosition)
-                drawingPosition.x += characterWidth
+                    drawMv(name)
+                }
+                else
+                {
+                    if (backgroundString.substr(drawingPositionInString, 6) === "earth(")
+                        lineStack.push("earth")
+
+                    addCharacterToDraw(currentCharacter, drawingPosition)
+                    drawingPosition.x += characterWidth
+                }
             }
-            else
+            else {
                 console.error("uncaught character: ", currentCharacter)
+            }
         }
 
         if (carat.positionInString === -1) {

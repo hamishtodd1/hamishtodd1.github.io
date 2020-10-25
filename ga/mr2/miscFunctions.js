@@ -10,10 +10,10 @@ clamp = (a, min, max) =>{
     else return max
 }
 
-function ScreenPosition()
+function ScreenPosition(x,y)
 {
-    this.x = 0.
-    this.y = 0.
+    this.x = x || 0.
+    this.y = y || 0.
 }
 ScreenPosition.prototype.copy = function(sp) {
     this.x = sp.x
