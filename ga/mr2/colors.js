@@ -171,3 +171,20 @@ function drawColorWheel()
 		gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4);
 	})
 }
+
+let rgbRotator = new Float32Array(16)
+rgbRotator[0] = 0.8880738339771151
+rgbRotator[8] = 0.
+rgbRotator[9] = 0.32505758367186816
+rgbRotator[10] = -0.32505758367186816
+function rgbCubeToBall(rgbMv, target) {
+	multiplyScalar
+	rgbMv *= 2.
+	rgbMv -= 1.
+	sandwich(rgbMv, rgbRotator, target)
+	let largestCoordAbsoluteValue = max(abs())
+	//if that value is 1 then we're going to an ideal point
+	let ratioGettingCubeSurfaceToSphereSurface = largestCoordAbsoluteValue  / length(rgbPoint)
+
+	return rgbPoint * ratioGettingCubeSurfaceToSphereSurface
+}

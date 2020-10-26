@@ -1,3 +1,5 @@
+// for the colored ones, might be nice to surround them with the circle
+
 function initFrames() {
     let indices = []
     let oneSideIndices = [0,1,2,  1,3,2]

@@ -117,15 +117,23 @@ function initAlgebra()
                 mv[13] *= -1.;
                 mv[14] *= -1.;
             }
-            ))
+        ))
+
+        dual = (mv) => {
+            let temp = 0.
+            for(let i = 0; i < 16; ++i) {
+                temp = mv[i]
+                mv[i] = mv[16 - i]
+                mv[16 - i] = temp
+            }
+        }
 
         appendToGaShaderString(replaceSignature(
             "void zeroMv(inout float mv[16])",
             zeroMv = (mv) =>
             {
                 mv[ 0] = 0.; mv[ 1] = 0.; mv[ 2] = 0.; mv[ 3] = 0.; mv[ 4] = 0.; mv[ 5] = 0.; mv[ 6] = 0.; mv[ 7] = 0.; mv[ 8] = 0.; mv[ 9] = 0.; mv[10] = 0.; mv[11] = 0.; mv[12] = 0.; mv[13] = 0.; mv[14] = 0.; mv[15] = 0.;
-            }
-            ))
+            }))
 
         appendToGaShaderString(replaceSignature(
             "void gAdd(float a[16], float b[16], inout float mv[16])",
@@ -436,9 +444,10 @@ function initAlgebra()
             }
         ))
 
+        //yes, you changed the name
         appendToGaShaderString(replaceSignature(
-            "void sandwich(inout vec4 p, dualQuat dq)",
-            sandwich = (p, dq) =>
+            "void dqSandwich(inout vec4 p, dualQuat dq)",
+            dqSandwich = (p, dq) =>
             {
                 dqToMv(dq, mv0);
                 pointToMv(p, mv1);

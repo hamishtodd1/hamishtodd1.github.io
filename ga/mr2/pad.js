@@ -50,14 +50,26 @@ async function initPad() {
         ctx.drawImage($earthImage, 0, 0, earthImageWidth, earthImageHeight)
         let earthPixels = ctx.getImageData(0, 0, earthImageWidth, earthImageHeight).data
         
-        earth = function(u,v) {
-            let column = Math.floor(u*earthImageWidth)
-            let row = Math.floor(v*earthImageHeight)
-            let index = row * earthImageWidth + column
+        earth = function(u,v, mv) {
+            if (u < 0. || 1. < u ||
+                v < 0. || 1. < v )
+            {
+                zeroMv(mv)
+            }
+            else {
+                let column = Math.floor(u * earthImageWidth)
+                let row = Math.floor(v * earthImageHeight)
+                let index = row * earthImageWidth + column
 
-            earthPixels[index * 4 + 0] / 255.
-            earthPixels[index * 4 + 1] / 255.
-            earthPixels[index * 4 + 2] / 255.
+                let r = earthPixels[index * 4 + 0] / 255.
+                let g = earthPixels[index * 4 + 1] / 255.
+                let b = earthPixels[index * 4 + 2] / 255.
+
+                //extract hue
+                //and fuck the rest
+            }
+
+            return mv
         }
     }
 
@@ -248,15 +260,25 @@ async function initPad() {
                 //---------Function application
                 //yeah this would be better parsed out and turned into reverse polish
 
-                let argument = lineStack.pop()
+                let argumentName = lineStack.pop()
                 let func = lineStack.pop()
-                if ( namedMvs[argument] !== undefined && func === "earth") {
-                    let mv = new Float32Array(16)
-                    pointY(mv,-.2)
-                    pointW(mv,1.)
-                    lineStack.push(mv)
+                if ( namedMvs[argumentName] !== undefined ) {
+                    let argument = namedMvs[argumentName]
+                    if (func === "earth") {
+                        let mv = new Float32Array(16)
+                        pointY(mv, -.2)
+                        pointW(mv, 1.)
+                        lineStack.push(mv)
 
-                    //somehow make earth(namedMvs[argument])
+                        //somehow make earth(namedMvs[argument])
+                        //it maps points to positions
+                    }
+                    if(func === "dual") {
+                        let mv = new Float32Array(16)
+                        copyMv(argument,mv)
+                        dual(mv)
+                        lineStack.push(mv)
+                    }
                 }
 
                 addCharacterToDraw(")", drawingPosition)
@@ -279,6 +301,8 @@ async function initPad() {
                 {
                     if (backgroundString.substr(drawingPositionInString, 6) === "earth(")
                         lineStack.push("earth")
+                    if (backgroundString.substr(drawingPositionInString, 5) === "dual(")
+                        lineStack.push("dual")
 
                     addCharacterToDraw(currentCharacter, drawingPosition)
                     drawingPosition.x += characterWidth

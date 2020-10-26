@@ -80,6 +80,7 @@ function initMvAppearances() {
                 gl_Position.xy += screenPosition;
             `
             + cameraAndFrameCountShaderStuff.footer
+            logShader(vsSource)
         const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
             varying vec3 color;
             varying vec4 p;
