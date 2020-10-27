@@ -1,6 +1,8 @@
 /*
     NOTE SERIOUS CONFUSION: IS Z POSITIVE OR NEGATIVE?
 
+    explain lat and lon
+
     Don't worry, it makes sense that dymaxion is off, the triangle isn't planar
 
     Title
@@ -115,48 +117,7 @@ async function initWorldMap() {
             float lon = (p.x - .5) * TAU;
             float lat = (p.y - .5) * PI;
 
-            //ga is useful for bending the faces
-            //for sending eg the projection point to infinity
-            //for unifying surely
-            //for complex analysis?
-
             // p = globe(lon,lat);
-
-            //dymaxion
-            {
-
-            }
-
-            //tetrahedral
-            // {
-            //     p = globe(lon,lat);
-
-            //     //could get the three points and join them to get the planes
-
-                    //could project onto every face then get dot product to check if it's on that face
-            
-            //     dualQuat xAxis = DualQuat();
-            //     xAxis.realLine[0] = 1.;
-            //     dualQuat yAxis = DualQuat();
-            //     xAxis.realLine[1] = 1.;
-            //     dualQuat tetRotator = DualQuat();
-
-            //     vec4 faceNormal = vec4(0.,1.,0.,0.);
-            //     rotator(xAxis,TETRAHEDRAL_ANGLE,tetRotator);
-            //     dqSandwich(faceNormal,tetRotator);
-
-
-            //     float yRotationAngle = (floor(lon/PI.)-1.) * TAU/3.;
-            //     float angleToFaceNormal = acos(dot(faceNormal,p)); //probably
-            //     if(angleToFaceNormal < TETRAHEDRAL_ANGLE * .5)
-            //         faceNormal = vec4(0.,1.,0.,0.)
-            // }
-
-            //octahedral,GA is super useful for unfolding
-            // p = globe(lon,lat);
-            // vec3 orthogonalVector = normalize(sign(p));
-            // float multiple = dot(p,orthogonalVector) / .5;
-            // p /= multiple;// + (1.-multiple)*oscillatingNumber;
 
             // mollweide
             // float theta = lat;
@@ -169,7 +130,7 @@ async function initWorldMap() {
             // p.x = 2.*sqrt(2.) / PI * cos(theta) * lon;
             // p.y = sqrt(2.) * sin(theta);
 
-            // Homolosine, basically
+            // Homolosine / interrupted mollweide. Maybe change to one easier with GA.
             // {
             //     float theta = lat;
             //     float piSinLat = PI*sin(lat);
@@ -203,7 +164,7 @@ async function initWorldMap() {
             //     p.x = 2.*sqrt(2.) / PI * cos(theta) * (lon-center) + centerMapped;
             // }
 
-            //Winkel III
+            //Winkel III, pill shape. Might be nice to find an easier one
             // float lat1 = acos(2./PI);
             // float alpha = acos(cos(lat) * cos(.5*lon));
             // float sincAlpha = sin(alpha) / alpha;
@@ -275,7 +236,6 @@ async function initWorldMap() {
             gl_Position = p;
         `
         + cameraAndFrameCountShaderStuff.footer
-    logShader(vsSource)
     const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
         varying vec2 uv;
         varying vec4 p;
@@ -326,6 +286,7 @@ async function initWorldMap() {
     updateFunctions.push(()=>{
         rotator(axis, frameCount * .0009, transform)
         rotator(axis, 0., transform)
+        transform.idealLine[0] = Math.sin(frameCount*0.01)
     }) 
 
     addRenderFunction( () => {

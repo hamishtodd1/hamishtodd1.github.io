@@ -1,4 +1,6 @@
 /*
+    Scalar
+
     The disc / non-disc representation animation would be nice to see too
 
     need to have "make your own visualizations" for the boxes soon
@@ -97,11 +99,11 @@ function initMvAppearances() {
                         discard; //unperformant!
                 }
                 else {
-                    float hue = .5 + .5 * atan(p.y,p.x) / PI;
+                    float hue = .5 + .5 * atan(visualPosition.y,visualPosition.x) / PI;
 
                     ` + hueToFragColorChunk + `
 
-                    // gl_FragColor.rgb *= length(p.xy) * 2.;
+                    // gl_FragColor.rgb *= length(visualPosition.xy) * 2.;
                 }
             }
             `

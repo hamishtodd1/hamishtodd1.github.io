@@ -1,17 +1,15 @@
 <!--
-	TODO to make it so you're not slow thinking about things
-		+, cos, sin, rev, meet, join, exp in pad.js
-		will be fun to see dual!
-		scalar viz?
-		pss?
+	TODO for world map
+		Mapping from angles to texture coords, probably based in the thing
+		Slicing system that allows you to see a sliced-open globe
+		mappings/arrays
+		Scalars, certainly ones that can be seen as angles
+		+, cos, sin, exp, in pad.js
+		A lot of it is about projection. Sending projection point to infinity
 
-	Then arrays/mappings
-	And, thus, world map
-
-	Plan for world map video
-		How are these maps going to appear in your thing?
-		This array / dots on real line thing would be fun to work on
-		How does it get you to maps?
+	Fun GA things probably unnecessary to world map so avoid:
+		plane, pss
+		dual, join
 
 	After
 		Videos about projective geometry
@@ -59,6 +57,8 @@
 				initDisplayWindows()
 
 				// initFuncViz()
+
+				// initDrawing()
 
 				function loop() {
 					mouse.updateFromAsyncAndCheckClicks()
@@ -121,6 +121,8 @@
 		<script src="miscFunctions.js"></script>
 
 		<script src="displayWindows.js"></script>
+
+		<script src="drawing.js"></script>
 
 		<script src="vertBufferFunctions.js"></script>
 

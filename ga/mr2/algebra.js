@@ -556,6 +556,10 @@ function initAlgebra()
     function changeAngleAndNormalize(pointMv, angleMultiple) {
         // debugger
         let oldIdealNorm = pointIdealNorm(pointMv)
+        if(oldIdealNorm === 0.) {
+            pointW(pointMv,1.)
+            return
+        }
         let angle = Math.atan2(oldIdealNorm, pointW(pointMv))
         let newAngle = angle * angleMultiple
         let newIdealNorm = Math.sin(newAngle) //we really want this to be 1 when it is. It is 1 when

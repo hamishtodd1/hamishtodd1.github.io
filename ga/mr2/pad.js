@@ -235,6 +235,11 @@ function initPad() {
                         dual(mv)
                         lineStack.push(mv)
                     }
+                    if (func === "sq") {
+                        let mv = new Float32Array(16)
+                        gp(argument,argument,mv)
+                        lineStack.push(mv)
+                    }
                 }
 
                 addCharacterToDraw(")", drawingPosition)
@@ -259,6 +264,8 @@ function initPad() {
                         lineStack.push("earth")
                     if (backgroundString.substr(drawingPositionInString, 5) === "dual(")
                         lineStack.push("dual")
+                    if (backgroundString.substr(drawingPositionInString, 3) === "sq(")
+                        lineStack.push("sq")
 
                     addCharacterToDraw(currentCharacter, drawingPosition)
                     drawingPosition.x += characterWidth
