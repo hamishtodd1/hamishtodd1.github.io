@@ -56,7 +56,7 @@ function initMvAppearances() {
             attribute vec4 vertA;
             varying vec4 p;
             
-            uniform vec4 elements;
+            uniform vec4 visualPosition;
             uniform vec2 screenPosition;
 
             uniform float spaceScale;
@@ -66,26 +66,25 @@ function initMvAppearances() {
             varying vec3 color;
             
             uniform float visualizeColor;
-            uniform float discness;
 
             void main(void) {
                 color = hexantColors[int(colorIndexA)];
 
                 p = vertA;
 
-                vec4 transformedP = planeToDisc(elements,discness);
+                vec3 actualPosition = visualPosition.xyz;
 
-                p.xyz += transformedP.xyz * spaceScale; //hmm
+                p.xyz += actualPosition * spaceScale; //hmm
                 gl_Position = p;
                 gl_Position.xy += screenPosition;
             `
             + cameraAndFrameCountShaderStuff.footer
-            logShader(vsSource)
+            // logShader(vsSource)
         const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
             varying vec3 color;
             varying vec4 p;
 
-            uniform vec4 elements;
+            uniform vec4 visualPosition;
             uniform float spaceScale;
 
             uniform float visualizeColor;
@@ -119,10 +118,10 @@ function initMvAppearances() {
         program.locateUniform("spaceScale")
 
         program.locateUniform("visualizeColor")
-        program.locateUniform("discness")
 
-        program.locateUniform("elements")
+        program.locateUniform("visualPosition")
 
+        let discPosition = new Float32Array(16)
         var drawPoints = () => {
             gl.useProgram(program.glProgram);
             cameraAndFrameCountShaderStuff.transfer(program)
@@ -135,19 +134,17 @@ function initMvAppearances() {
                     gl.uniform3fv(program.uniformLocations.hexantColors, nameToHexantColors(names[index], hexantColors))
                     gl.uniform2f(program.uniformLocations.screenPosition, screenPositions[index * 2 + 0], screenPositions[index * 2 + 1])
 
-                    gl.uniform4f(program.uniformLocations.elements, pointX(mv), pointY(mv), pointZ(mv), pointW(mv))
-
                     gl.uniform1f(program.uniformLocations.spaceScale, spaceScales[index])
 
-                    // if(names[index] === "r")
-                    //     debugger
-                    if (!colorPointValues[names[index]]) {
-                        gl.uniform1f(program.uniformLocations.discness, 0.)
-                        gl.uniform1f(program.uniformLocations.visualizeColor, 0.)
+                    if ( colorPointValues[names[index]]) {
+                        planeToBall(mv, discPosition)
+                        gl.uniform4f(program.uniformLocations.visualPosition, pointX(discPosition) / pointW(discPosition), pointY(discPosition) / pointW(discPosition), pointZ(discPosition) / pointW(discPosition), 1.)
+                        gl.uniform1f(program.uniformLocations.visualizeColor, 1.)
                     }
                     else {
-                        gl.uniform1f(program.uniformLocations.discness, 1.)
-                        gl.uniform1f(program.uniformLocations.visualizeColor, 1.)
+                        //so ideal points just look like points
+                        gl.uniform4f(program.uniformLocations.visualPosition, pointX(mv), pointY(mv), pointZ(mv), pointW(mv))
+                        gl.uniform1f(program.uniformLocations.visualizeColor, 0.)
                     }
 
                     //probably want a light in the corner of these boxes so you can get angle of plane

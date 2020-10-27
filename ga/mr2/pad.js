@@ -10,7 +10,7 @@
 
 const freeVariableCharacters = "0123456789.,-e"
 const freeVariableStartCharacters = "0123456789.-"
-function getLiteralLength(literalStart) {
+function getLiteralLength(literalStart) { //doesn't include "color"
     let literalLength = 0
     let numCommasSoFar = 0
     for (literalLength; 
@@ -30,48 +30,7 @@ function parseMv(str,target) {
         target[i] = parseFloat(valuesArr[i])
 }
 
-async function initPad() {
-
-    //more generic way to do it is probably render to a 1x1 pixel offscreen canvas that you read from
-    //unperformant but probably the same as this
-    {
-        const $earthImage = new Image();
-        await (new Promise(resolve => {
-            $earthImage.src = "data/earthColor.png"
-            $earthImage.onload = resolve
-        }))
-        let earthImageWidth = $earthImage.width;
-        let earthImageHeight = $earthImage.height;
-
-        let $earthCanvas = document.createElement('canvas');
-        $earthCanvas.width = earthImageWidth;
-        $earthCanvas.height = earthImageHeight;
-        let ctx = $earthCanvas.getContext('2d')
-        ctx.drawImage($earthImage, 0, 0, earthImageWidth, earthImageHeight)
-        let earthPixels = ctx.getImageData(0, 0, earthImageWidth, earthImageHeight).data
-        
-        earth = function(u,v, mv) {
-            if (u < 0. || 1. < u ||
-                v < 0. || 1. < v )
-            {
-                zeroMv(mv)
-            }
-            else {
-                let column = Math.floor(u * earthImageWidth)
-                let row = Math.floor(v * earthImageHeight)
-                let index = row * earthImageWidth + column
-
-                let r = earthPixels[index * 4 + 0] / 255.
-                let g = earthPixels[index * 4 + 1] / 255.
-                let b = earthPixels[index * 4 + 2] / 255.
-
-                //extract hue
-                //and fuck the rest
-            }
-
-            return mv
-        }
-    }
+function initPad() {
 
     let lineStack = []
     function clearStack() {
@@ -239,6 +198,7 @@ async function initPad() {
                 
                 literalsPositionsInString[name] = drawingPositionInString
                 let literalLength = getLiteralLength(drawingPositionInString)
+                // debugger
                 parseMv(backgroundString.substr(drawingPositionInString, literalLength), namedMvs[name])
                 drawingPositionInString += literalLength - 1 //-1 because the loop does a +1
                 lineStack.push(name)
@@ -266,12 +226,8 @@ async function initPad() {
                     let argument = namedMvs[argumentName]
                     if (func === "earth") {
                         let mv = new Float32Array(16)
-                        pointY(mv, -.2)
-                        pointW(mv, 1.)
+                        earth(pointX(argument), pointY(argument),mv)
                         lineStack.push(mv)
-
-                        //somehow make earth(namedMvs[argument])
-                        //it maps points to positions
                     }
                     if(func === "dual") {
                         let mv = new Float32Array(16)

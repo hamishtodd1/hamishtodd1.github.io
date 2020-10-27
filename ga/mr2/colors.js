@@ -52,74 +52,6 @@ const colors = {
 }
 for (let color in colors) colorCharacters += color
 
-
-//ideal points are pure colors
-//mix in some grey and those are real points
-//2D is the color wheel, 3D is black and white
-
-
-//might be fun to do in the language
-//You care about its angle around that line
-//its angle from red, (1,0,0)
-//project onto the plane
-function rgbToHue(r,g,b) {
-	let huePlane = new Float32Array(16)
-	plane(huePlane, 1., 1., 1., 0.)
-
-	let redDirection = new Float32Array(16)
-	point(redDirection, 1.,0.,0., 1.)
-	projectPointOnPlane(redDirection, huePlane, redDirection)
-	normalizeIdealPoint(redDirection)
-
-	let rgbPoint = new Float32Array(16)
-	point(rgbPoint, r,g,b,1.)
-	let rgbDirection = new Float32Array(16)
-	projectPointOnPlane(rgbPoint, huePlane, rgbDirection)
-	normalizeIdealPoint(rgbDirection)
-
-	join(redDirection,rgbDirection,mv0)
-
-
-
-
-
-	//hues are directions after all!
-
-	debugger
-	// inner(rgbPoint,redPoint,mv0)
-	// let redComponent = mv0[0]
-	// let chatreuseComponent = r * chartreuseVector[0] + g * chartreuseVector[1] + b * chartreuseVector[2]
-	// log(chatreuseComponent)
-	// log(redComponent)
-	// let hue = Math.atan2(chatreuseComponent,redComponent)
-
-	
-
-
-
-	// let centerPoint = new Float32Array(16)
-	// point(centerPoint, 1./3., 1./3., 1./3., 1.)
-
-	// let planeContainingRed = new Float32Array(16)
-	// plane(planeContainingRed, 1.,1.,1.,-1.)
-
-	
-
-	// let hueDirection = new Float32Array(16)
-	// gSub(projectedPoint, centerPoint, hueDirection)
-	// log(hueDirection)
-
-	// delete rgbPoint
-	// delete planeContainingRed
-	// delete planeDotPoint
-	// delete projectedPoint
-}
-//line 
-//dot with red direction
-//dot with chartreuse (.5,1.,0.)
-
-//atan2
-
 function projectPointOnPlane(point,plane,target) {
 	wNormalizePoint(point)
 	let planeDotPoint = mv0
@@ -170,21 +102,4 @@ function drawColorWheel()
 
 		gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4);
 	})
-}
-
-let rgbRotator = new Float32Array(16)
-rgbRotator[0] = 0.8880738339771151
-rgbRotator[8] = 0.
-rgbRotator[9] = 0.32505758367186816
-rgbRotator[10] = -0.32505758367186816
-function rgbCubeToBall(rgbMv, target) {
-	multiplyScalar
-	rgbMv *= 2.
-	rgbMv -= 1.
-	sandwich(rgbMv, rgbRotator, target)
-	let largestCoordAbsoluteValue = max(abs())
-	//if that value is 1 then we're going to an ideal point
-	let ratioGettingCubeSurfaceToSphereSurface = largestCoordAbsoluteValue  / length(rgbPoint)
-
-	return rgbPoint * ratioGettingCubeSurfaceToSphereSurface
 }

@@ -280,25 +280,7 @@ function initAlgebra()
             return mv.toString() + ","
         }
 
-        appendToGaShaderString(`
-            vec4 planeToDisc(vec4 p, float ourDiscness)
-            {
-                vec4 transformedP = p;
-                if(p.w == 0.) {
-                    transformedP.w = 1.;
-                    transformedP.xyz *= 1. / length(p.xyz);
-                }
-                else {
-                    float distanceFromOrigin = length(p.xyz);
-                    float angle = p.w == 0. ? PI / 2. : atan(distanceFromOrigin / p.w);
-                    float angleProportion = 1. - .5 * ourDiscness;
-                    float newAngle = angleProportion * angle;
-                    float newDistanceFromOrigin = tan(newAngle) * p.w;
-                    transformedP.xyz *= newDistanceFromOrigin / distanceFromOrigin;
-                }
-
-                return transformedP;
-            }`)
+        
 
         let eps = .00001
         getGrade = (mv) => {
@@ -570,4 +552,76 @@ function initAlgebra()
             mv.forEach((e,i) => {target[i] = e})
         }
     }
+
+    function changeAngleAndNormalize(pointMv, angleMultiple) {
+        // debugger
+        let oldIdealNorm = pointIdealNorm(pointMv)
+        let angle = Math.atan2(oldIdealNorm, pointW(pointMv))
+        let newAngle = angle * angleMultiple
+        let newIdealNorm = Math.sin(newAngle) //we really want this to be 1 when it is. It is 1 when
+
+        let xyzMultiplier = newIdealNorm / oldIdealNorm
+        pointX(pointMv, pointX(pointMv) * xyzMultiplier)
+        pointY(pointMv, pointY(pointMv) * xyzMultiplier)
+        pointZ(pointMv, pointZ(pointMv) * xyzMultiplier)
+        pointW(pointMv, Math.sqrt(1. - sq(newIdealNorm)))
+    }
+    appendToGaShaderString(`
+            float sq(float x) {
+                return x*x;
+            }
+
+            void changeAngleAndNormalize(inout vec4 point, float angleMultiple) {
+                float oldIdealNorm = length(point.xyz);
+                float angle = atan(oldIdealNorm, point.w);
+                float newAngle = angle * angleMultiple;
+                float newIdealNorm = sin(newAngle);
+
+                float xyzMultiplier = newIdealNorm / oldIdealNorm;
+                point.x *= xyzMultiplier;
+                point.y *= xyzMultiplier;
+                point.z *= xyzMultiplier;
+                point.w = sqrt(1.-sq(newIdealNorm));
+            }
+        `)
+
+    appendToGaShaderString(`
+            void planeToBall(inout vec4 planePoint) {
+                changeAngleAndNormalize(planePoint, 2.);
+            }
+        `)
+    planeToBall = (planePoint, targetBallPoint) => {
+        copyMv(planePoint, targetBallPoint)
+        changeAngleAndNormalize(targetBallPoint, .5)
+    }
+
+
+
+    ballToPlane = (ballPoint, targetPlanePoint) => {
+        //if the pointIdealNorm is greater than 1...
+        //yes it might be nice to have it go round and round
+        let norm = pointIdealNorm(ballPoint)
+        if (norm > 1.) {
+            pointX(ballPoint, pointX(ballPoint) / norm)
+            pointY(ballPoint, pointY(ballPoint) / norm)
+            pointZ(ballPoint, pointZ(ballPoint) / norm)
+        }
+        copyMv(ballPoint, targetPlanePoint)
+        changeAngleAndNormalize(targetPlanePoint, 2.)
+    }
+        // `
+        // void ballToPlane(inout vec4 p) {
+        //     //if the pointIdealNorm is greater than 1...
+        //     //yes it might be nice to have it go round and round
+        //     let norm = pointIdealNorm(ballPoint)
+        //     log(norm)
+        //     if (norm > 1.) {
+        //         pointX(ballPoint, pointX(ballPoint) / norm)
+        //         pointY(ballPoint, pointY(ballPoint) / norm)
+        //         pointZ(ballPoint, pointZ(ballPoint) / norm)
+        //     }
+        //     copyMv(ballPoint, targetPlanePoint)
+        //     changeAngleAndNormalize(targetPlanePoint, .5)
+        // }
+        // `
 }

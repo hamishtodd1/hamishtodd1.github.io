@@ -130,28 +130,10 @@ function initDisplayWindows() {
                 if (grade === 3) {
                     if (colorPointValues[mouseDw.editingName] )
                     {
-                        //just rewrite this shit at some point
                         let discPoint = new Float32Array(16)
-                        copyMv(slideCurrentMv, discPoint)
-                        let norm = pointIdealNorm(discPoint)
-
-                        let angle = Math.atan(norm / pointW(discPoint))
-                        let newAngle = 2. * angle; //mouse on 
-                        let needsToBeClamped = Math.cos(newAngle) <= 0.
-                        if ( needsToBeClamped ) {
-                            pointW(discPoint, 0.)
-                            var factor = 1. / norm
-                        }
-                        else {
-                            pointW(discPoint, 1.)
-                            let newNorm = Math.tan(newAngle) * pointW(discPoint)
-                            var factor = newNorm / norm
-                        }
-                        pointX(discPoint, pointX(discPoint) * factor)
-                        pointY(discPoint, pointY(discPoint) * factor)
-                        pointZ(discPoint, pointZ(discPoint) * factor)
-
+                        ballToPlane(slideCurrentMv,discPoint)
                         backgroundStringSplice(literalStart, literalLength, mvToString(discPoint))
+                        delete discPoint
                     }
                     else
                         backgroundStringSplice(literalStart, literalLength, mvToString(slideCurrentMv))

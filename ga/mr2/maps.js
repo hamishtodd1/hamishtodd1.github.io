@@ -143,7 +143,7 @@ async function initWorldMap() {
 
             //     vec4 faceNormal = vec4(0.,1.,0.,0.);
             //     rotator(xAxis,TETRAHEDRAL_ANGLE,tetRotator);
-            //     sandwich(faceNormal,tetRotator);
+            //     dqSandwich(faceNormal,tetRotator);
 
 
             //     float yRotationAngle = (floor(lon/PI.)-1.) * TAU/3.;
@@ -270,7 +270,7 @@ async function initWorldMap() {
             //central/gnomic - use GA!
             //surely can have stereographic too, it's just a projection point
 
-            sandwich(p, transform);
+            dqSandwich(p, transform);
             
             gl_Position = p;
         `
@@ -326,7 +326,7 @@ async function initWorldMap() {
     updateFunctions.push(()=>{
         rotator(axis, frameCount * .0009, transform)
         rotator(axis, 0., transform)
-    })
+    }) 
 
     addRenderFunction( () => {
         gl.useProgram(program.glProgram);
@@ -440,7 +440,7 @@ async function initDymaxion()
             if( .5 - .5 * cos(frameCount * .006) < .01)
                 animatedP.xyz /= length(animatedP.xyz);
 
-            // sandwich(animatedP, transform);
+            // dqSandwich(animatedP, transform);
 
             gl_Position = animatedP;
         `
