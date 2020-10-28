@@ -15,6 +15,16 @@ function initAlgebra()
 
     gaShaderString = ""
 
+    isMv = function(thing) {
+        return thing instanceof Float32Array && thing.length === 16
+    }
+
+    parseMv = function (str, target) {
+        let valuesArr = str.split(",")
+        for (let i = 0; i < 16; ++i)
+            target[i] = parseFloat(valuesArr[i])
+    }
+
     //mv
     {
         mv0 = new Float32Array(16)

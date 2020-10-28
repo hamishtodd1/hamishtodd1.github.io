@@ -1,9 +1,9 @@
-function initCharacterTexture(typeableCharacters) {
+function initCharacterTexture(displayableCharacters) {
     const maxCharacters = 512 //noticeable load time increase when changed
 
     let characterIndices = {}
-    for(let i = 0; i < typeableCharacters.length; ++i)
-        characterIndices[typeableCharacters[i]] = i
+    for(let i = 0; i < displayableCharacters.length; ++i)
+        characterIndices[displayableCharacters[i]] = i
 
     let characterAttributeBuffer = new Float32Array(maxCharacters*6) //could be 16
     let positionAttributeBuffer = new Float32Array(maxCharacters*6*2)
@@ -38,12 +38,12 @@ function initCharacterTexture(typeableCharacters) {
         const fontHeight = Math.floor(height / 1.3) //1.3 was in tutorial. It's the spacing above and below. Probably fine to add more if you want
         textCanvas.height = height;
 
-        const widthTakenUpByCharacters = fontHeight / monospaceHeightOverWidth * typeableCharacters.length
+        const widthTakenUpByCharacters = fontHeight / monospaceHeightOverWidth * displayableCharacters.length
         const width = nextPowerOf2(widthTakenUpByCharacters)
         var proportionOfTextureTakenUpByCharacters = widthTakenUpByCharacters / width
         textCanvas.width = width;
 
-        let proportionOfTextureTakenUpByOneCharacter = proportionOfTextureTakenUpByCharacters / typeableCharacters.length
+        let proportionOfTextureTakenUpByOneCharacter = proportionOfTextureTakenUpByCharacters / displayableCharacters.length
         var singleCharacterHeightOverWidth = height / (width * proportionOfTextureTakenUpByOneCharacter)
 
         ctx.font = fontHeight + "px monospace"; //can't put this before the above because state machine
@@ -55,7 +55,7 @@ function initCharacterTexture(typeableCharacters) {
         // ctx.fillStyle = "rgb(255,0,0)";
         ctx.fillRect(0, 0, width, height);
         ctx.fillStyle = "black";
-        ctx.fillText(typeableCharacters, 0, height / 2);
+        ctx.fillText(displayableCharacters, 0, height / 2);
 
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textCanvas);
@@ -66,7 +66,7 @@ function initCharacterTexture(typeableCharacters) {
         attribute vec4 pointA;
 
         const float proportionOfTextureTakenUpByCharacters = ` + proportionOfTextureTakenUpByCharacters + `;
-        const float totalCharactersInTexture = `+ typeableCharacters.length +`.;
+        const float totalCharactersInTexture = `+ displayableCharacters.length +`.;
         
         attribute float characterIndexA;
         varying vec2 uv;

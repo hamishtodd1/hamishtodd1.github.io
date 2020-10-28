@@ -52,6 +52,46 @@ function initCarat() {
         backgroundStringSplice(carat.positionInString, 0, str)
         carat.moveAlongString(str.length)
     }
+
+    let closestGridPosition = new ScreenPosition()
+    let closestStringPosition = -1
+    carat.preParseFunc = function()  {
+        closestGridPosition.x = Infinity
+        closestGridPosition.y = Infinity
+
+        carat.positionInOrderedNames = 0
+    }
+
+    carat.duringParseFunc = function (drawingPosition,drawingPositionInString, drawingPositionInOrderedNames,lineNumber) 
+    {
+        if (this.positionInString !== -1 && drawingPositionInString === this.positionInString) {
+            if (this.position.x !== drawingPosition.x || this.position.y !== drawingPosition.y)
+                this.flashingStart = Date.now()
+
+            this.position.copy(drawingPosition)
+            this.positionInOrderedNames = drawingPositionInOrderedNames
+            caratDw.lineToRenderMvsFrom = lineNumber
+        }
+
+        if (this.positionInString === -1) {
+            let closestYDist = Math.abs(closestGridPosition.y - this.position.y)
+            let closestXDist = Math.abs(closestGridPosition.x - this.position.x)
+            let drawingYDist = Math.abs(drawingPosition.y - this.position.y)
+            let drawingXDist = Math.abs(drawingPosition.x - this.position.x)
+            if (drawingYDist < closestYDist || (drawingYDist === closestYDist && drawingXDist < closestXDist)) {
+                closestStringPosition = drawingPositionInString
+                closestGridPosition.copy(drawingPosition)
+            }
+        }
+    }
+
+    carat.postParseFunc = function()  {
+        if (this.positionInString === -1) {
+            this.positionInString = closestStringPosition
+            this.position.copy(closestGridPosition)
+        }
+        this.lineNumber = Math.floor(-this.position.y)
+    }
 }
 function backgroundStringSplice(start, deleteCount, newString)
 {
@@ -74,10 +114,9 @@ function initTypeableCharacters()
         bindButton(character, () => addStringAtCarat(character))
     }
 
-    let initialCharacters = "abcdefghijklmnopqrstuvwxyz()=+-/I "
+    let initialCharacters = "abcdefghijklmnopqrstuvwxyz()+-I "
     for (let i = 0; i < initialCharacters.length; ++i)
         makeCharacterTypeable(initialCharacters[i])
-    initCharacterTexture(typeableCharacters)
-
+    
     return typeableCharacters
 }

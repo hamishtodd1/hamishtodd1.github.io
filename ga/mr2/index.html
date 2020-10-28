@@ -18,6 +18,7 @@
 		Draw curve, get curve as usable thing. Killer app!
 		Transpiling to javascript
 		If you're serious about people making clothes, think about makeup tutorials
+		transpile to glsl first and foremost. Whole game runs in every shader woo!
 -->
 <html>
 	<head>
@@ -50,15 +51,9 @@
 				// await initWorldMap()
 				// await initDymaxion()
 
-				initPad()
-				await initTextureSampler()
-				initFrames()
+				// initDebugPad()
 
-				initDisplayWindows()
-
-				// initFuncViz()
-
-				// initDrawing()
+				await initPad()
 
 				function loop() {
 					mouse.updateFromAsyncAndCheckClicks()
@@ -91,7 +86,10 @@
 		<script src="names.js"></script>
 
 		<script src="text.js"></script>
+
 		<script src="pad.js"></script>
+		<script src="compiler.js"></script>
+		<script src="debugView.js"></script>
 
 		<script src="textureSampler.js"></script>
 
