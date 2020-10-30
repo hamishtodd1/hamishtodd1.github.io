@@ -17,9 +17,9 @@ function initFrames() {
         untriangledVertsBuffer[k * 8 + 2] = pointZ(unchangingUnitSquareVertices[i])
         untriangledVertsBuffer[k * 8 + 3] = pointW(unchangingUnitSquareVertices[i])
 
-        untriangledVertsBuffer[k * 8 + 4] = pointX(unchangingUnitSquareVertices[i]) * .92
-        untriangledVertsBuffer[k * 8 + 5] = pointY(unchangingUnitSquareVertices[i]) * .92
-        untriangledVertsBuffer[k * 8 + 6] = pointZ(unchangingUnitSquareVertices[i]) * .92
+        untriangledVertsBuffer[k * 8 + 4] = pointX(unchangingUnitSquareVertices[i]) * .95
+        untriangledVertsBuffer[k * 8 + 5] = pointY(unchangingUnitSquareVertices[i]) * .95
+        untriangledVertsBuffer[k * 8 + 6] = pointZ(unchangingUnitSquareVertices[i]) * .95
         untriangledVertsBuffer[k * 8 + 7] = pointW(unchangingUnitSquareVertices[i])
     }
     
