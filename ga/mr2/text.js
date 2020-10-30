@@ -9,9 +9,10 @@ function initCharacterTexture(displayableCharacters) {
     let positionAttributeBuffer = new Float32Array(maxCharacters*6*2)
 
     addCharacterToDraw = function(character,position) {
-        if(numCharactersToDraw >= maxCharacters) {
+        if (displayableCharacters.indexOf(character) === -1)
+            console.error("character not displayable: ", character)
+        if(numCharactersToDraw >= maxCharacters)
             console.error("character limit hit")
-        }
         else {
             let i = numCharactersToDraw * 6
             for (let j = 0; j < 6; ++j) {

@@ -15,8 +15,6 @@ const rightMouseResponses = []
 
 const namedMvs = {}
 const orderedNames = []
-let literalsPositionsInString = {}
-let declarationsPositionsInString = {}
 const colorPointValues = {}
 
 const carat = {
@@ -31,14 +29,13 @@ let backgroundString =
 `
    0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.4,1.,0., 0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.4,0.,1.,0.,color
    b 
-   //this is a comment
    
    0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,0.,0.,0.,0.,0.,
 
    earth(0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,-.3,0.,0.,)
 color
 
-   sq(b )
+   sq(b)
 
 
 

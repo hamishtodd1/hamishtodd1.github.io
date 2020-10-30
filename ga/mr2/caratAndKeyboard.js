@@ -62,15 +62,14 @@ function initCarat() {
         carat.positionInOrderedNames = 0
     }
 
-    carat.duringParseFunc = function (drawingPosition,drawingPositionInString, drawingPositionInOrderedNames,lineNumber) 
+    carat.duringParseFunc = function (drawingPosition,drawingPositionInString) 
     {
         if (this.positionInString !== -1 && drawingPositionInString === this.positionInString) {
             if (this.position.x !== drawingPosition.x || this.position.y !== drawingPosition.y)
                 this.flashingStart = Date.now()
 
             this.position.copy(drawingPosition)
-            this.positionInOrderedNames = drawingPositionInOrderedNames
-            caratDw.lineToRenderMvsFrom = lineNumber
+            caratDw.verticalPositionToRenderMvsFrom = carat.position.y
         }
 
         if (this.positionInString === -1) {
@@ -92,18 +91,6 @@ function initCarat() {
         }
         this.lineNumber = Math.floor(-this.position.y)
     }
-}
-function backgroundStringSplice(start, deleteCount, newString)
-{
-    let distanceFromEnd = backgroundString.length - carat.positionInString
-
-    backgroundString =
-        backgroundString.substring(0, start) +
-        newString +
-        backgroundString.substring(start + deleteCount)
-
-    if(carat.positionInString > start + deleteCount)
-        carat.positionInString = backgroundString.length - distanceFromEnd
 }
 
 function initTypeableCharacters()

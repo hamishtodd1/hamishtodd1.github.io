@@ -1,5 +1,6 @@
 /*
-    Scalar
+    Scalars appearance is context-dependent, sometimes a length, sometimes an area
+    Maybe text really is the right representation. Allows exponential scaling, has innate unit, has minus
 
     The disc / non-disc representation animation would be nice to see too
 
@@ -26,6 +27,24 @@ function initMvAppearances() {
             
         ++numToDraw
     }
+
+    updateFunctions.push(()=>{
+        for (let i = 0; i < numToDraw; ++i) {
+            if (mouse.inBounds(screenPositions[i*2+0] - .5, screenPositions[i*2+0] + .5, screenPositions[i*2+1] + .5, screenPositions[i*2+1] - .5)) {
+                mouseDw.respondToHover(screenPositions[i*2+0], screenPositions[i*2+1], names[i])
+
+                if (mouse.rightClicking && !mouse.rightClickingOld) {
+                    let declarationEnd = getTokenEnd(names[i])
+                    if (backgroundString.substr(declarationEnd - 5, 5) !== "color")
+                        backgroundStringSplice(declarationEnd, 0, "color")
+                    else
+                        backgroundStringSplice(declarationEnd - 5, 5, "")
+                }
+
+                break
+            }
+        }
+    })
 
     let hexantColors = new Float32Array(3 * 6)
     let mvsAlreadyDrawn = []

@@ -22,35 +22,57 @@ function initCompileViewer(displayableCharacters, columnBackground) {
         lineStack.length = 0
     }
 
+    //better as an enum but hey
+    let finiteCategories = {
+        infixFunction: ["+", "/", "-"],
+        separator: ["(", ")", ",", " "],
+        function: ["dual", "earth", "sq"], //and user stuff gets added I guess
+    }
+    let categoryNames = Object.keys(finiteCategories)
+
+    let tokenCategories = []
+    let tokenStarts = []
+    let declarationTokenIndices = {}
+    getTokenEnd = function (tokenInfo) {
+        let tokenIndex = typeof tokenInfo === "number" ? tokenInfo : declarationTokenIndices[tokenInfo]
+        return tokenIndex === tokenStarts.length - 1 ? backgroundString.length : tokenStarts[tokenIndex + 1]
+    }
+    declarationPosition = function (name) {
+        return tokenStarts[declarationTokenIndices[name]]
+    }
+
+    getNewNameAssociatedToTokenIndex = function(tokenIndex) {
+        for (variableName in declarationTokenIndices) {
+            if (declarationTokenIndices[variableName] === tokenIndex)
+                return variableName
+        }
+        return null
+    }
+
     let drawingPosition = new ScreenPosition()
     compileView = () => {
+        let backgroundStringLength = backgroundString.length
         carat.preParseFunc()
-        
-        let drawingPositionInString = 0
-        drawingPosition.x =-mainCamera.rightAtZZero + 1.
-        drawingPosition.y = mainCamera.topAtZZero - .5
-        columnBackground.position.copy(drawingPosition)
 
-        let drawingPositionInOrderedNames = 0
-        let lineNumber = 0
+        let alphabet = "abcdefghijklmnopqrstuvwxyz"
 
-        let namesInLine = []
+        //memory leak?
+        tokenCategories.length = 0
+        tokenStarts.length = 0
 
-        if(frameCount === 3)
+        //////////////////////////
+        ////  TOKENIZINGING   ////
+        //////////////////////////
+
         {
-            let tokenCategories = []
-            let tokenStarts = []
+            function getIndexOfLineEnd(positionInString) {
+                let addition = 0
+                while (backgroundString[positionInString + addition] !== "\n" && positionInString + addition < backgroundStringLength)
+                    ++addition
 
-            //better as an enum but hey
-            let finiteCategories = {
-                infix: ["+", "/", "-"],
-                separator: ["(", ")", ",", " "],
-                function: ["dual", "earth", "sq"], //and user stuff gets added I guess
-                namedMv: orderedNames //possibly these should need to be space-terminated
+                return positionInString + addition
             }
-            let categoryNames = Object.keys(finiteCategories)
 
-            let backgroundStringLength = backgroundString.length
             let positionInString = 0
             while (positionInString < backgroundStringLength) {
                 let tokenStartCharacter = backgroundString[positionInString]
@@ -70,11 +92,7 @@ function initCompileViewer(displayableCharacters, columnBackground) {
                 }
                 else if (freeVariableStartCharacters.indexOf(tokenStartCharacter) !== -1) {
 
-                    // let name = orderedNames[drawingPositionInOrderedNames]
-                    // ++drawingPositionInOrderedNames
-                    // literalsPositionsInString[name] = positionInString //do it later... maybe? Or maybe you can extract this info from tokens?
-
-                    let tokenLength = getLiteralLength(positionInString) //should only need this here
+                    let tokenLength = getLiteralLength(positionInString) //should only need this here 
 
                     if (backgroundString.substr(positionInString + tokenLength, 5) === "color")
                         tokenLength += 5
@@ -83,222 +101,203 @@ function initCompileViewer(displayableCharacters, columnBackground) {
                     positionInString += tokenLength
                 }
                 else if (tokenStartCharacter === "/" && backgroundString[positionInString + 1] === "/") {
-                    let tokenLength = 2
-                    do
-                        ++tokenLength
-                    while (backgroundString[positionInString + tokenLength] !== "\n" && positionInString + tokenLength < backgroundStringLength)
                     tokenCategories.push("comment")
-                    positionInString += tokenLength
+                    positionInString = getIndexOfLineEnd(positionInString)
                 }
                 else {
                     let identified = false
-                    for (let categoryIndex = 0; categoryIndex < categoryNames.length && identified === false; ++categoryIndex) {
+                    for (let categoryIndex = 0, numCategories = categoryNames.length; categoryIndex < numCategories && !identified; ++categoryIndex) {
                         let categoryName = categoryNames[categoryIndex]
-                        let tokenArray = finiteCategories[categoryName]
-                        for (let j = 0, jl = tokenArray.length; j < jl && identified === false; ++j) {
-                            if (backgroundString.substr(positionInString, tokenArray[j].length) === tokenArray[j]) {
+                        let possibleTokenArray = finiteCategories[categoryName]
+                        for (let j = 0, jl = possibleTokenArray.length; j < jl && !identified; ++j) {
+                            if (backgroundString.substr(positionInString, possibleTokenArray[j].length) === possibleTokenArray[j]) {
                                 tokenCategories.push(categoryName)
-                                positionInString += tokenArray[j].length
+                                positionInString += possibleTokenArray[j].length
                                 identified = true
                             }
                         }
                     }
 
-                    if (!identified) {
-                        console.error("uncaught identifier")
-                        debugger
-                        //could keep moving to the next newline and
-                        return
+                    if (!identified && alphabet.indexOf(tokenStartCharacter) !== -1) {
+                        tokenCategories.push("identifier")
+                        while (alphabet.indexOf(backgroundString[positionInString]) !== -1)
+                            ++positionInString
                     }
                 }   
             }
-            log(tokenCategories)
         }
 
+        function forEachToken(func) {
+            for (let tokenIndex = 0, numTokens = tokenCategories.length; tokenIndex < numTokens; ++tokenIndex) {
+                let tokenStart = tokenStarts[tokenIndex]
+                let tokenEnd = getTokenEnd(tokenIndex)
+                let token = backgroundString.substr(tokenStart, tokenEnd - tokenStart)
+                let tokenCategory = tokenCategories[tokenIndex]
 
-
-
-        //bit memory-leaky
-        literalsPositionsInString = {}
-        declarationPositionsInString = {}
-
-        let functionNames = ["dual", "earth", "sq"]
-        function checkForFunctionNameAndAddToLineStack(token) {
-            for(let i = 0; i < functionNames.length; ++i) {
-                if (backgroundString.substr(drawingPositionInString, functionNames[i].length) === functionNames[i])
-                    lineStack.push(functionNames[i])
+                func(tokenIndex,tokenStart,tokenEnd,tokenCategory,token)
             }
         }
 
-        function localDrawMvFunction(name) {
+        /////////////////////////
+        ////  INTERPRETING   ////
+        /////////////////////////
+
+        {
+            let positionInOrderedNames = 0
+            function setName(tokenIndex) {
+                if (positionInOrderedNames >= orderedNames.length )
+                    orderedNames.push(getLowestUnusedName())
+
+                let name = orderedNames[positionInOrderedNames]
+                ++positionInOrderedNames
+                declarationTokenIndices[name] = tokenIndex
+            }
+
+            for (propt in declarationTokenIndices)
+                delete declarationTokenIndices[propt]
+
+            let lineStack = []
+            let ignoreLine = false
+            forEachToken((tokenIndex, tokenStart, tokenEnd, tokenCategory, token) => {
+                if(ignoreLine) {
+                    if(token === "\n")
+                        ignoreLine = false
+                    else
+                        return
+                }
+
+                switch (tokenCategory) {
+                    case "literal":
+                        setName(tokenIndex)
+                        break
+
+                    case "newline":
+                        let result = lineStack.pop()
+                        if (isMv(result))
+                            setName(tokenIndex)
+                        clearStack()
+                        break
+                    
+                    case "identifier":
+                        if(orderedNames.indexOf(token) !== -1) {
+                            //interesting to see what happens when you do stuff with variables above the place where they're defined
+                        }
+                        else if (finiteCategories.function.indexOf(token) !== -1) {
+                            //yeah do some functions
+                        }
+                        else {
+                            console.error("uncaught identifier: ", token)
+                            clearStack()
+                            ignoreLine = true
+                        }
+                        break
+                }
+            })
+        }
+
+        ///////////////////
+        ////  DRAWING  ////
+        ///////////////////
+
+        drawingPosition.x = -mainCamera.rightAtZZero + 1.
+        drawingPosition.y = mainCamera.topAtZZero - .5
+        columnBackground.position.copy(drawingPosition)
+        
+        let namesInLine = []
+        function drawAndMoveAlong(name,tokenStart,tokenEnd) {
+            // if(name === "b" && drawingPosition.y < -4.)
+            //     debugger
             namesInLine.push(name)
-
-            let endOfFirstOcurrence = -1
-            if (literalsPositionsInString[name] !== undefined)
-                endOfFirstOcurrence = literalsPositionsInString[name] + getLiteralLength(literalsPositionsInString[name])
-            else
-                endOfFirstOcurrence = declarationPositionsInString[name] + 1
-            colorPointValues[name] = backgroundString.substr(endOfFirstOcurrence, 5) === "color"
-
-            if (mouse.inBounds(drawingPosition.x, drawingPosition.x + 1., drawingPosition.y + .5, drawingPosition.y - .5)) {
-                mouseDw.respondToHover(drawingPosition.x + .5, drawingPosition.y, lineNumber, name)
-
-                if (mouse.rightClicking && !mouse.rightClickingOld) {
-                    if (backgroundString.substr(endOfFirstOcurrence, 5) !== "color" ) {
-                        backgroundStringSplice(endOfFirstOcurrence, 0, "color")
-                        if( drawingPositionInString >= endOfFirstOcurrence )
-                            drawingPositionInString += 5
-                    }
-                    else {
-                        backgroundStringSplice(endOfFirstOcurrence, 5, "")
-                        if( drawingPositionInString >= endOfFirstOcurrence )
-                            drawingPositionInString -= 5
-                    }
-                    backgroundStringLength = backgroundString.length
-                }
-            }
-
             addMvToRender(name, drawingPosition.x + .5, drawingPosition.y, .5, true)
-
             drawingPosition.x += 1.
+
+            moveCaratOutOfBox(tokenStart, tokenEnd)
         }
 
-        let backgroundStringLength = backgroundString.length
-        for (drawingPositionInString; drawingPositionInString <= backgroundStringLength; ++drawingPositionInString) {
-            
-            carat.duringParseFunc(drawingPosition, drawingPositionInString, drawingPositionInOrderedNames,lineNumber)
-            if (drawingPositionInString >= backgroundStringLength)
-                break
+        function moveCaratOutOfBox(tokenStart,tokenEnd) {
+            if (tokenStart < carat.positionInString && carat.positionInString < tokenEnd) {
+                if (carat.positionInString < tokenStart + (tokenEnd - tokenStart) / 2.)
+                    carat.positionInString = tokenEnd
+                else
+                    carat.positionInString = tokenStart
+            }
+        }
+        
+        function drawTokenCharacters(tokenStart,tokenEnd) {
+            for (let positionInString = tokenStart; positionInString < tokenEnd; ++positionInString) {
+                carat.duringParseFunc(drawingPosition, positionInString)
 
-            //-------Bifuricate!
-
-            let currentCharacter = backgroundString[drawingPositionInString]
-            
-            if (currentCharacter === " ")
+                let currentCharacter = backgroundString[positionInString]
+                if (currentCharacter !== " ")
+                    addCharacterToDraw(currentCharacter, drawingPosition)
                 drawingPosition.x += characterWidth
-            else if (currentCharacter === "\n") {
+            }
+        }
 
-                //---------End of line
+        function potentiallyDrawFirstDeclaration(tokenIndex,tokenStart,tokenEnd) {
+            let variableName = getNewNameAssociatedToTokenIndex(tokenIndex)
+            if (variableName !== null) {
+                colorPointValues[variableName] = backgroundString.substr(tokenEnd - 5, 5) === "color"
+                drawAndMoveAlong(variableName,tokenStart,tokenEnd)
+            }
+            return variableName
+        }
 
-                drawingPosition.x = -mainCamera.rightAtZZero
+        forEachToken((tokenIndex, tokenStart, tokenEnd, tokenCategory, token) => {
 
-                if(lineStack.length !== 0) {
-                    let result = lineStack.pop()
-                    clearStack()
+            carat.duringParseFunc(drawingPosition, tokenStart)
 
-                    if (isMv(result) ) { //if it's just a name you don't want it
-                        let name = orderedNames[drawingPositionInOrderedNames]
-                        ++drawingPositionInOrderedNames
-                        declarationPositionsInString[name] = drawingPositionInString
+            switch (tokenCategory) {
+                case "newline":
+                    drawingPosition.x = -mainCamera.rightAtZZero
+                    potentiallyDrawFirstDeclaration(tokenIndex, tokenStart, tokenEnd)
 
-                        localDrawMvFunction(name)
-                        if (backgroundString.substr(drawingPositionInString + 1, 5) === "color")
-                            drawingPositionInString += 5
-
-                        copyMv(result, namedMvs[name])
-                    }
-                }
-
-                drawingPosition.y -= 1.
-                drawingPosition.x = -mainCamera.rightAtZZero + 1.
-
-                for(let i = 0; i < displayWindows.length; ++i) {
-                    if(lineNumber === displayWindows[i].lineToRenderMvsFrom) {
-                        displayWindows[i].numMvs = 0
-                        for (let j = 0; j < namesInLine.length; ++j) {
-                            if (orderedNames.indexOf(namesInLine[j]) !== -1)
-                                displayWindows[i].addMv(namesInLine[j])
+                    for (let i = 0; i < displayWindows.length; ++i) {
+                        if (drawingPosition.y === displayWindows[i].verticalPositionToRenderMvsFrom) {
+                            // debugger
+                            displayWindows[i].numMvs = 0
+                            for (let j = 0; j < namesInLine.length; ++j) {
+                                if (orderedNames.indexOf(namesInLine[j]) !== -1)
+                                    displayWindows[i].addMv(namesInLine[j]) //TODO shouldn't be any repeats
+                            }
                         }
                     }
-                }
-                namesInLine.length = 0
+                    namesInLine.length = 0
 
-                ++lineNumber
-            }
-            else if (freeVariableStartCharacters.indexOf(currentCharacter) !== -1) {
+                    drawingPosition.y -= 1.
+                    drawingPosition.x = -mainCamera.rightAtZZero + 1.
 
-                //---------Free variable
-                
-                let name = orderedNames[drawingPositionInOrderedNames]
-                ++drawingPositionInOrderedNames
-                
-                literalsPositionsInString[name] = drawingPositionInString
-                let literalLength = getLiteralLength(drawingPositionInString)
-                // debugger
-                parseMv(backgroundString.substr(drawingPositionInString, literalLength), namedMvs[name])
-                drawingPositionInString += literalLength - 1 //-1 because the loop does a +1
-                lineStack.push(name)
+                    break
 
-                localDrawMvFunction(name)
-                if (backgroundString.substr(drawingPositionInString + 1, 5) === "color")
-                    drawingPositionInString += 5
-            }
-            else if(currentCharacter === "I") {
-
-                //---------Interval
-
-                addCharacterToDraw("I", drawingPosition)
-                lineStack.push("I")
-                drawingPosition.x += characterWidth
-            }
-            else if( currentCharacter === ")") {
-
-                //---------Function application
-                //yeah this would be better parsed out and turned into reverse polish
-
-                let argumentName = lineStack.pop()
-                let func = lineStack.pop()
-                if ( namedMvs[argumentName] !== undefined ) {
-                    let argument = namedMvs[argumentName]
-                    if (func === "earth") {
-                        let mv = new Float32Array(16)
-                        earth(pointX(argument), pointY(argument),mv)
-                        lineStack.push(mv)
-                    }
-                    if(func === "dual") {
-                        let mv = new Float32Array(16)
-                        copyMv(argument,mv)
-                        dual(mv)
-                        lineStack.push(mv)
-                    }
-                    if (func === "sq") {
-                        let mv = new Float32Array(16)
-                        gp(argument,argument,mv)
-                        lineStack.push(mv)
-                    }
-                }
-
-                addCharacterToDraw(")", drawingPosition)
-                drawingPosition.x += characterWidth
-            }
-            else if (displayableCharacters.indexOf(currentCharacter) !== -1) {
-
-                //---------Normal character
-
-                if (backgroundString.substr(drawingPositionInString, 2) === "b ")
-                // if (colorCharacters.indexOf(currentCharacter) !== -1 )
-                {
-                    let name = "b";
-                    namesInLine.push(name)
+                case "literal":
+                    let name = potentiallyDrawFirstDeclaration(tokenIndex, tokenStart, tokenEnd)
+                    parseMv(backgroundString.substr(tokenStart, tokenEnd-tokenStart), namedMvs[name])
                     lineStack.push(name)
+                    break
 
-                    localDrawMvFunction(name)
-                }
-                else
-                {
-                    checkForFunctionNameAndAddToLineStack()
+                case "identifier":
+                    if (orderedNames.indexOf(token) !== -1) {
+                        drawAndMoveAlong(token, tokenStart, tokenEnd)
+                        lineStack.push(token)
+                    }
+                    else if (functions.indexOf(token) !== -1)
+                        drawTokenCharacters(tokenStart, tokenEnd)
+                    else
+                        drawTokenCharacters(tokenStart, tokenEnd)
 
-                    addCharacterToDraw(currentCharacter, drawingPosition)
-                    drawingPosition.x += characterWidth
-                }
+                    
+                    break
+
+                default:
+                    drawTokenCharacters(tokenStart,tokenEnd)
             }
-            else {
-                console.error("uncaught character: ", currentCharacter)
-            }
-        }
+        })
 
         carat.postParseFunc()
 
         clearStack()
+
+        delete tokenCategories
+        return
     }
 }

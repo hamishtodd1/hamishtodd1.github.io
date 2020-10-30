@@ -1,24 +1,37 @@
 async function initPad() {
+    
+    let alreadModifiedThisFrame = false
+    backgroundStringSplice = function (start, deleteCount, newString) {
+        if (alreadModifiedThisFrame)
+            console.error("only one modification allowed per frame")
+        else {
+            alreadModifiedThisFrame = true
+
+            let distanceFromEnd = backgroundString.length - carat.positionInString
+
+            backgroundString =
+                backgroundString.substring(0, start) +
+                newString +
+                backgroundString.substring(start + deleteCount)
+
+            if (carat.positionInString > start + deleteCount)
+                carat.positionInString = backgroundString.length - distanceFromEnd
+        }
+    }
+
     initCarat()
     let columnBackground = initColumnBackground()
 
     let typeableCharacters = initTypeableCharacters()
-    let displayableCharacters = typeableCharacters + "=/" + freeVariableCharacters
+    let displayableCharacters = typeableCharacters + "=/ " + freeVariableCharacters
     initCharacterTexture(displayableCharacters)
 
     initCompileViewer(displayableCharacters, columnBackground)
-    initDebugCompileViewer(displayableCharacters, columnBackground)
 
-    let justDebugView = false
     updateFunctions.splice(0, 0, () =>{
-        if (justDebugView)
-            debugCompileView()
-        else
-            compileView()
-    })
-
-    bindButton("6",()=>{
-        justDebugView = !justDebugView
+        alreadModifiedThisFrame = false
+        
+        compileView()
     })
 
     await initTextureSampler()

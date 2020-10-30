@@ -67,12 +67,6 @@ function initNamesAndBasis()
         return null
     }
 
-    // backgroundString = 
-    //     "[0.; 1.; 0.; 0.; 0.; 0.; 0.; 0.][0.; 0.; 1.; 0.; 0.; 0.; 0.; 0.][0.; 0.; 0.; 1.; 0.; 0.; 0.; 0.]\n"
-    //     + "[0.;-1.; 0.; 0.; 0.; 0.; 0.; 0.][0.; 0.; 0.; 0.;2.5; 0.; 0.; 0.][1.; 0.; 0.; 0.; 0.; 0.; 0.; 0.]\n"
-    //     + "[.7071; 0.; 0.; 0.;.7071; 0.; 0.; 0.]\n"
-    //     + backgroundString
-
     getLowestUnusedName = () => {
         let lowestUnusedName = -1
         for (let i = 0, il = alphabeticalNames.length; i < il; ++i) {
@@ -91,17 +85,6 @@ function initNamesAndBasis()
         return lowestUnusedName
     }
 
-    //ideally none for empty lines
-    //you only know at compile time which lines have things on them
-    for(let i = 0; i < backgroundString.length; ++i) {
-        if( backgroundString[i] === "\n" )
-            orderedNames.push(getLowestUnusedName())
-        if (freeVariableStartCharacters.indexOf(backgroundString[i]) !== -1 ){
-            orderedNames.push(getLowestUnusedName())
-            i += getLiteralLength(i) - 1
-        }
-    }
-
     getNumLines = () => {
         let numLines = 1
         for (let i = 0, il = backgroundString.length; i < il; ++i)
@@ -111,78 +94,80 @@ function initNamesAndBasis()
         return numLines
     }
 
-    bindButton("Enter", () => {
-        let numLines = getNumLines()
+    // bindButton("Enter", () => {
+    //     let numLines = getNumLines()
 
-        if (numLines >= MAX_THINGS)
-            log("too many variables for current system!")
-        else {
-            addStringAtCarat("\n")
-            orderedNames.splice(carat.positionInOrderedNames, 0, getLowestUnusedName())
-            //the deal is that you might have just broken up a line that makes something into two lines that make something
-            //it's the same problem with deleting and backspace
-            //we can avoid having to add one here, but then where do you add it?
-            //in pad.js, when deciding what color will be in the column, somehow you know from if the carat is at that place?
-            //does knowing carat.lineNumber help at all?
-            //so ok you have lines that don't have one allocated. Then you allocate one in pad.js when there's something on the line
-            //but you have to
-        }
-    })
+    //     if (numLines >= MAX_THINGS)
+    //         log("too many variables for current system!")
+    //     else {
+    //         addStringAtCarat("\n")
+    //         orderedNames.splice(carat.positionInOrderedNames, 0, getLowestUnusedName())
+    //         //the deal is that you might have just broken up a line that makes something into two lines that make something
+    //         //it's the same problem with deleting and backspace
+    //         //we can avoid having to add one here, but then where do you add it?
+    //         //in pad.js, when deciding what color will be in the column, somehow you know from if the carat is at that place?
+    //         //does knowing carat.lineNumber help at all?
+    //         //so ok you have lines that don't have one allocated. Then you allocate one in pad.js when there's something on the line
+    //         //but you have to
+    //     }
+    // })
 
-    bindButton("2", () => {
-        let defaultLineString = "0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,0.,0.,0.,0.,0.,"
-        addStringAtCarat(defaultLineString)
-        orderedNames.splice(carat.positionInOrderedNames, 0, getLowestUnusedName() )
-    })
-    bindButton("3", () => {
-        let defaultPointString = "0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,"
-        addStringAtCarat(defaultPointString)
-        orderedNames.splice(carat.positionInOrderedNames, 0, getLowestUnusedName() )
-    })
+    // bindButton("2", () => {
+    //     let defaultLineString = "0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,0.,0.,0.,0.,0.,"
+    //     addStringAtCarat(defaultLineString)
+    //     orderedNames.splice(carat.positionInOrderedNames, 0, getLowestUnusedName() )
+    // })
+    // bindButton("3", () => {
+    //     let defaultPointString = "0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,"
+    //     addStringAtCarat(defaultPointString)
+    //     orderedNames.splice(carat.positionInOrderedNames, 0, getLowestUnusedName() )
+    // })
 
     //TODO these should fully remove mvs too. There's really very little reason to see the name after you've made it
-    bindButton("Backspace", () => {
-        if (carat.positionInString === 0)
-            return
+    // bindButton("Backspace", () => {
+    //     if (carat.positionInString === 0)
+    //         return
         
-        let strLength = 1
+    //     let strLength = 1
 
-        if (backgroundString[carat.positionInString - 1] === "\n")
-            orderedNames.splice(carat.positionInOrderedNames-1, 1)
-        else if (backgroundString[carat.positionInString - 1] === "]") {
-            let backgroundStringLength = backgroundString.length
-            for (strLength; strLength < backgroundStringLength; ++strLength) {
-                if (backgroundString[carat.positionInString - strLength] === "[")
-                    break
-            }
-        }
+    //     if (backgroundString[carat.positionInString - 1] === "\n")
+    //         orderedNames.splice(carat.positionInOrderedNames-1, 1)
+    //     else if (backgroundString[carat.positionInString - 1] === "]") {
+    //         let backgroundStringLength = backgroundString.length
+    //         for (strLength; strLength < backgroundStringLength; ++strLength) {
+    //             if (backgroundString[carat.positionInString - strLength] === "[")
+    //                 break
+    //         }
+    //     }
 
-        backgroundString =
-            backgroundString.substring(0, carat.positionInString - strLength) +
-            backgroundString.substring(carat.positionInString)
+    //     log("todo use the splice function")
+    //     // backgroundString =
+    //     //     backgroundString.substring(0, carat.positionInString - strLength) +
+    //     //     backgroundString.substring(carat.positionInString)
 
-        carat.moveAlongString(-strLength)
-    })
-    bindButton("Delete", () => {
-        let backgroundStringLength = backgroundString.length
-        if (carat.positionInString === backgroundStringLength-1)
-            return
+    //     carat.moveAlongString(-strLength)
+    // })
+    // bindButton("Delete", () => {
+    //     let backgroundStringLength = backgroundString.length
+    //     if (carat.positionInString === backgroundStringLength-1)
+    //         return
 
-        let strLength = 1
+    //     let strLength = 1
 
-        if (backgroundString[carat.positionInString] === "\n")
-            orderedNames.splice(carat.positionInOrderedNames, 1)
-        else if (backgroundString[carat.positionInString] === "[") {
-            let backgroundStringLength = backgroundString.length
-            for (strLength; strLength < backgroundStringLength; ++strLength)
-                if (backgroundString[carat.positionInString + strLength] === "]") {
-                    ++strLength
-                    break
-                }
-        }
-
-        backgroundString =
-            backgroundString.substring(0, carat.positionInString) +
-            backgroundString.substring(carat.positionInString + strLength)
-    })
+    //     if (backgroundString[carat.positionInString] === "\n")
+    //         orderedNames.splice(carat.positionInOrderedNames, 1)
+    //     else if (backgroundString[carat.positionInString] === "[") {
+    //         let backgroundStringLength = backgroundString.length
+    //         for (strLength; strLength < backgroundStringLength; ++strLength)
+    //             if (backgroundString[carat.positionInString + strLength] === "]") {
+    //                 ++strLength
+    //                 break
+    //             }
+    //     }
+        
+    //     console.log("TODO use splice")
+    //     // backgroundString =
+    //     //     backgroundString.substring(0, carat.positionInString) +
+    //     //     backgroundString.substring(carat.positionInString + strLength)
+    // })
 }

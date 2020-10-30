@@ -44,7 +44,7 @@ function initDisplayWindows() {
         this.numMvs = 0
         this.mvNames = []
         this.slideOngoing = false
-        this.lineToRenderMvsFrom = -1
+        this.verticalPositionToRenderMvsFrom = Infinity
 
         displayWindows.push(this)
     }
@@ -80,12 +80,12 @@ function initDisplayWindows() {
     mouseDw = new DisplayWindow()
     mouseDw.editingName = ""
     let visible = true
-    mouseDw.respondToHover = (boxCenterX, boxCenterY, lineNumber, name) => {
+    mouseDw.respondToHover = (boxCenterX, boxCenterY, name) => {
         if (!visible) {
             mouseDw.position.x = boxCenterX - .5 + dimension / 2.
             mouseDw.position.y = boxCenterY + .5 - dimension / 2.
 
-            mouseDw.lineToRenderMvsFrom = lineNumber
+            mouseDw.verticalPositionToRenderMvsFrom = boxCenterY
             mouseDw.editingName = name
         }
     }
@@ -96,7 +96,7 @@ function initDisplayWindows() {
             mouseDw.render()
         else {
             mouseDw.position.x = 2000.;
-            mouseDw.lineToRenderMvsFrom = -1
+            mouseDw.verticalPositionToRenderMvsFrom = Infinity
         }
     })
 
@@ -119,8 +119,8 @@ function initDisplayWindows() {
             mouseDw.slideOngoing = false
         },
         during: () => {
-            if (literalsPositionsInString[mouseDw.editingName] !== undefined) {
-                let literalStart = literalsPositionsInString[mouseDw.editingName]
+            if ( declarationPosition(mouseDw.editingName) !== undefined) {
+                let literalStart = declarationPosition(mouseDw.editingName)
                 let literalLength = getLiteralLength(literalStart)
 
                 parseMv(backgroundString.substr(literalStart, literalLength), stringCurrentMv)
