@@ -55,6 +55,113 @@
 
 				initMvAppearances()
 
+				if(0)
+				{
+					function Node(lexeme, parent, indexInParent) {
+						this.lexeme = lexeme
+						this.children = []
+
+						this.parent = parent
+						if(parent !== null)
+							parent.addChild(this, indexInParent)
+
+						if(lexeme === "")
+							this.expectedNumberOfChildren = 1
+						else if( orderedNames.indexOf(lexeme) !== -1 )
+							this.expectedNumberOfChildren = 0
+						else if(functionNames.indexOf(lexeme) === -1) 
+							this.expectedNumberOfChildren = eval(lexeme).length
+						else
+							console.error("unrecognized lexeme: ", lexeme)
+					}
+					Node.prototype.addChild = (child, replacementIndex) => {
+						let index = replacementIndex || this.children.length
+						this.children[replacementIndex] = child
+						child.parent = this
+					}
+
+					let topNode = new Node("", null)
+					let currentNode = topNode
+					let branchCanComplete = false
+					let skipFrom = Infinity
+
+					function adjustToOpenBracket(functionLexeme) {
+						branchCanComplete = false
+						let newNode = new Node(functionLexeme, currentNode)
+						currentNode = newNode
+					}
+					function adjustToInfixNode(infixLexeme) {
+						if (currentNode === topNode) {
+							console.error("shouldn't be here")
+							skipFrom = i
+						}
+
+						let parent = currentNode.parent
+						let indexInParent = parent.children.indexOf(currentNode)
+
+						let infixFunctionNode = new Node(infixLexeme, parent, indexInParent)
+						infixFunctionNode.addChild(currentNode)
+						currentNode = infixFunctionNode
+					}
+
+					for (let i = 0; i < tokenArray.length && skipFrom === Infinity; ++i) {
+						let isMv = orderedNames.indexOf(lexeme) !== -1
+						let isFunction = functionNames.indexOf(lexeme) !== -1
+						let isOpenBracket = lexeme === "("
+
+						if (isMv || isFunction || isOpenBracket) {
+							if(branchCanComplete)
+								adjustToInfixNode("gp")
+							
+							if (isMv) {
+								let newNode = new Node(lexeme, currentNode)
+								branchCanComplete = true
+							}
+							else if (isFunction && tokenArray[i + 1] === "(") {
+								adjustToOpenBracket(lexeme)
+								++i
+							}
+							else if (isOpenBracket)
+								adjustToOpenBracket("")
+							else
+								skipFrom = i
+						}
+						else if (branchCanComplete) {
+							if (lexeme === "," && currentNode.children.length !== currentNode.expectedNumberOfChildren)
+								branchCanComplete = false
+							else if (lexeme === ")" && currentNode.children.length === currentNode.expectedNumberOfChildren)
+								currentNode = currentNode.parent //we move up having finished branch, so this branch is potentially valid too
+							else if (lexeme === "+") {//or other infixes
+								adjustToInfixNode("+")
+								branchCanComplete = false
+							}
+							else {
+								if (lexeme === "," || lexeme === ")")
+									console.error("too few arguments")
+								skipFrom = i
+							}
+						}
+					}
+					if(!branchCanComplete)
+						skipFrom = tokenArray.length
+
+					function parse(node) {
+						let str = node.lexeme
+						if(node.children.length > 0 ) {
+							str += "("
+							node.children.forEach((child, childIndex) => {
+								str += (childIndex === 0 ? "" : ",") + parse(child)
+							})
+							str += ")"
+						}
+						return str
+					}
+					let finalString = parse(topNode)
+					log(finalString)
+				}
+
+				return
+
 				// await initWorldMap()
 				// await initDymaxion()
 

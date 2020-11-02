@@ -32,19 +32,20 @@ let backgroundString =
    0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.4,0.,1.,0.,color //colored
 
    b+g
-   
-   0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,0.,0.,0.,0.,0.,
-
-   earth(0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,-.3,0.,0.,)
-color
-
-   sq(b)
-
-
-
-   I0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,1.,0., //should be a series of points from center to there
-
 `
+// `
+//    0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,0.,0.,0.,0.,0.,
+
+//    earth(0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,-.3,0.,0.,)
+// color
+
+//    sq(b)
+
+
+
+//    I0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,1.,0., //should be a series of points from center to there
+
+// `
 //it's more that "earth" gets replaced with the picture. Apply that to
 //a 2D plane is a 3D plane with everything mapped to 0
 

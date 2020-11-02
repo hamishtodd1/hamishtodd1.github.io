@@ -14,7 +14,7 @@ function initCompileViewer(displayableCharacters, columnBackground) {
 
     //better as an enum but hey
     let finiteCategories = {
-        infix: ["+", "/", "-"],
+        infix: ["*","+"],
         separator: ["(", ")", ",", " "]
     }
     let categoryNames = Object.keys(finiteCategories)
@@ -125,10 +125,11 @@ function initCompileViewer(displayableCharacters, columnBackground) {
             }
         }
 
-        /////////////////////////
-        ////  INTERPRETING   ////
-        /////////////////////////
+        ////////////////////////
+        ////  INTERPRETING  ////
+        ////////////////////////
 
+        //need to convert everything to prefix
         let lineStack = []
         function clearStack() {
             while (lineStack.length !== 0) {
@@ -156,8 +157,9 @@ function initCompileViewer(displayableCharacters, columnBackground) {
         for (propt in declarationTokenIndices)
             delete declarationTokenIndices[propt]
 
+        
+
         let ignoreLine = false
-        log()
         forEachToken( (tokenIndex, tokenStart, tokenEnd, tokenCategory, token) => {
 
             if (ignoreLine) {
@@ -170,12 +172,22 @@ function initCompileViewer(displayableCharacters, columnBackground) {
             switch (tokenCategory) {
                 case "literal":
                     let name = assignMvToName(tokenIndex)
+                    parseMv(backgroundString.substr(tokenStart, tokenEnd - tokenStart), namedMvs[name])
                     lineStack.push(name)
                     break
 
                 case "newline":
-                    if( frameCount === 3 )
+                    if (frameCount === 3)
                         log(lineStack)
+                    {
+                        let lineString = ""
+                        let ourStack = []
+                        lineStack.forEach((myToken)=>{
+                            if (functionNames.indexOf(token) !== -1) {
+                                ourStack.push(token)
+                            }
+                        })
+                    }
                     let result = lineStack.pop()
 
                     //eval()
@@ -187,18 +199,51 @@ function initCompileViewer(displayableCharacters, columnBackground) {
                     break
 
                 case "infix":
-                    lineStack.push(token)
+                    //eventually there will be functions with anu number of arguments
+                    lineStack.push(",")
+                    if(token === "+") {
+                        
+                        //gotta go back however many ")" and "(" you've had
+                        let numCloseBracketsWeNeedToSee = 0
+                        for (let i = lineStack.length-1; i >= 0; --i) {
+                            if(lineStack[i] === ")")
+                                ++numCloseBracketsWeNeedToSee
+                            else if (lineStack[i] === "(")
+                                --numCloseBracketsWeNeedToSee
+                            else if (orderedNames.indexOf(token) !== -1) {
+                                if(numCloseBracketsWeNeedToSee  === 0) {
+                                    //yay, you can do it?
+                                }
+                            }
+                            else if (functionNames.indexOf(token) !== -1) {
+                                //need to check if the function is gp
+                            }
+                                
+                        }
+                        //in the above, everything should be , ( ) functionName variableName
+
+                        lineStack.push("gAdd")
+                        //hmm, well everything in the stack will be prefix at least
+                    }
+                    // gp(a,b)
+                    // a*b+c -> gp(a,b)+c   -> gAdd(gp(a,b),c))
+                    // a+b+c -> gAdd(a,b)+c -> gAdd(gAdd(a,b),c))
+                    // a+b*c -> gAdd(a,b)*c -> gp(gAdd(a,b),c)
+                    //functions all have brackets, there's no "order of operations" 
+
+                    //possibly you should wait until you've parsed the whole line then replace things
+                    break
+
+                case "separator":
+                    if(token !== " ")
+                        lineStack.push(token)
                     break
 
                 case "identifier":
-                    if (orderedNames.indexOf(token) !== -1) {
-                        //interesting to see what happens when you do stuff with variables above the place where they're defined
+                    if (orderedNames.indexOf(token) !== -1)
                         lineStack.push(token)
-                        // lineString += "namedMvs[token]"
-                    }
-                    else if (functionNames.indexOf(token) !== -1) {
+                    else if (functionNames.indexOf(token) !== -1)
                         lineStack.push(token)
-                    }
                     else {
                         console.error("uncaught identifier: ", token)
                         clearStack()
@@ -283,16 +328,12 @@ function initCompileViewer(displayableCharacters, columnBackground) {
                     break
 
                 case "literal":
-                    let name = potentiallyDrawFirstDeclaration(tokenIndex, tokenStart, tokenEnd)
-                    parseMv(backgroundString.substr(tokenStart, tokenEnd-tokenStart), namedMvs[name])
-                    lineStack.push(name)
+                    potentiallyDrawFirstDeclaration(tokenIndex, tokenStart, tokenEnd)
                     break
 
                 case "identifier":
-                    if (orderedNames.indexOf(token) !== -1) {
+                    if (orderedNames.indexOf(token) !== -1)
                         drawAndMoveAlong(token, tokenStart, tokenEnd)
-                        lineStack.push(token)
-                    }
                     else
                         drawTokenCharacters(tokenStart, tokenEnd)
                     break
