@@ -118,30 +118,19 @@ function initCompileViewer(displayableCharacters, columnBackground) {
             for (let tokenIndex = 0, numTokens = tokenCategories.length; tokenIndex < numTokens; ++tokenIndex) {
                 let tokenStart = tokenStarts[tokenIndex]
                 let tokenEnd = getTokenEnd(tokenIndex)
-                let token = backgroundString.substr(tokenStart, tokenEnd - tokenStart)
+                let lexeme = backgroundString.substr(tokenStart, tokenEnd - tokenStart)
                 let tokenCategory = tokenCategories[tokenIndex]
 
-                func(tokenIndex,tokenStart,tokenEnd,tokenCategory,token)
+                func(tokenIndex,tokenStart,tokenEnd,tokenCategory,lexeme)
             }
         }
 
-        ////////////////////////
-        ////  INTERPRETING  ////
-        ////////////////////////
+        ///////////////////////
+        ////  TRANSPILING  ////
+        ///////////////////////
 
-        //need to convert everything to prefix
-        let lineStack = []
-        function clearStack() {
-            while (lineStack.length !== 0) {
-                let thing = lineStack.pop()
-                if (isMv(thing))
-                    delete thing
-            }
-            lineStack.length = 0
-        }
-        
         let positionInOrderedNames = 0
-        function assignMvToName(tokenIndex,newValue) {
+        function assignMvToName(tokenIndex) {
             while(positionInOrderedNames >= orderedNames.length)
                 orderedNames.push(getLowestUnusedName())
 
@@ -152,107 +141,38 @@ function initCompileViewer(displayableCharacters, columnBackground) {
             return name
         }
 
-        let functionNames = ["dual","earth","sq"]
-
         for (propt in declarationTokenIndices)
             delete declarationTokenIndices[propt]
 
-        
+        let lineLexemes = []
 
-        let ignoreLine = false
         forEachToken( (tokenIndex, tokenStart, tokenEnd, tokenCategory, token) => {
-
-            if (ignoreLine) {
-                if (token === "\n")
-                    ignoreLine = false
-                else
-                    return
-            }
-
             switch (tokenCategory) {
                 case "literal":
                     let name = assignMvToName(tokenIndex)
                     parseMv(backgroundString.substr(tokenStart, tokenEnd - tokenStart), namedMvs[name])
-                    lineStack.push(name)
+                    lineLexemes.push(name)
                     break
 
                 case "newline":
-                    if (frameCount === 3)
-                        log(lineStack)
-                    {
-                        let lineString = ""
-                        let ourStack = []
-                        lineStack.forEach((myToken)=>{
-                            if (functionNames.indexOf(token) !== -1) {
-                                ourStack.push(token)
-                            }
-                        })
+                    if (lineLexemes.length > 1) { //if it's 1 or 0, nothing to be made
+
+                        let name = assignMvToName(tokenIndex)
+                        let placeWhereTranspilationFailed = transpile(lineLexemes, namedMvs[name])
+                        if (placeWhereTranspilationFailed !== -1)
+                            log("TODO draw a red line over the rest of it")
                     }
-                    let result = lineStack.pop()
-
-                    //eval()
-
-                    if (isMv(result))
-                        assignMvToName(tokenIndex)
-
-                    clearStack()
+                    lineLexemes.length = 0
                     break
 
-                case "infix":
-                    //eventually there will be functions with anu number of arguments
-                    lineStack.push(",")
-                    if(token === "+") {
-                        
-                        //gotta go back however many ")" and "(" you've had
-                        let numCloseBracketsWeNeedToSee = 0
-                        for (let i = lineStack.length-1; i >= 0; --i) {
-                            if(lineStack[i] === ")")
-                                ++numCloseBracketsWeNeedToSee
-                            else if (lineStack[i] === "(")
-                                --numCloseBracketsWeNeedToSee
-                            else if (orderedNames.indexOf(token) !== -1) {
-                                if(numCloseBracketsWeNeedToSee  === 0) {
-                                    //yay, you can do it?
-                                }
-                            }
-                            else if (functionNames.indexOf(token) !== -1) {
-                                //need to check if the function is gp
-                            }
-                                
-                        }
-                        //in the above, everything should be , ( ) functionName variableName
-
-                        lineStack.push("gAdd")
-                        //hmm, well everything in the stack will be prefix at least
-                    }
-                    // gp(a,b)
-                    // a*b+c -> gp(a,b)+c   -> gAdd(gp(a,b),c))
-                    // a+b+c -> gAdd(a,b)+c -> gAdd(gAdd(a,b),c))
-                    // a+b*c -> gAdd(a,b)*c -> gp(gAdd(a,b),c)
-                    //functions all have brackets, there's no "order of operations" 
-
-                    //possibly you should wait until you've parsed the whole line then replace things
-                    break
-
-                case "separator":
-                    if(token !== " ")
-                        lineStack.push(token)
-                    break
-
-                case "identifier":
-                    if (orderedNames.indexOf(token) !== -1)
-                        lineStack.push(token)
-                    else if (functionNames.indexOf(token) !== -1)
-                        lineStack.push(token)
-                    else {
-                        console.error("uncaught identifier: ", token)
-                        clearStack()
-                        ignoreLine = true
-                    }
+                default:
+                    if(token !== " " && tokenCategory !== "comment" )
+                        lineLexemes.push(token)
                     break
             }
         })
 
+        // debugger
         ///////////////////
         ////  DRAWING  ////
         ///////////////////
@@ -344,8 +264,6 @@ function initCompileViewer(displayableCharacters, columnBackground) {
         })
 
         carat.postParseFunc()
-
-        clearStack()
 
         delete tokenCategories
         return

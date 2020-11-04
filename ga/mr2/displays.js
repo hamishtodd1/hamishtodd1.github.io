@@ -26,7 +26,7 @@ function lineDisplay(line)
                     if (-boxSize <= pointX(p) && pointX(p) <= boxSize &&
                         -boxSize <= pointY(p) && pointY(p) <= boxSize &&
                         -boxSize <= pointZ(p) && pointZ(p) <= boxSize) {
-                        copyMv(p, endPoints[endPointIndex])
+                        assign(p, endPoints[endPointIndex])
                         ++endPointIndex
                     }
                 }

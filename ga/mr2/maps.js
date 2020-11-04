@@ -352,7 +352,7 @@ async function initDymaxion()
         pointX(verts[5], 0.); pointY(verts[5],-HS3/3.*2.); pointZ(verts[5], icoRadius); pointW(verts[5], 1.);
         for (let i = 0, il = indices.length - 1; i < il; ++i) {
             let p = verts[indices[i][0]]
-            copyMv(verts[indices[i][1]], p)
+            assign(verts[indices[i][1]], p)
             join(verts[indices[i][2]], verts[indices[i][3]], axis )
 
             lineNormalize(axis)

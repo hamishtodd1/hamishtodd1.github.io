@@ -38,105 +38,112 @@ function initAlgebra()
             float mv3[16];` )
             
         appendToGaShaderString(replaceSignature(
-            "void gp(float a[16],float b[16],inout float mv[16])",
-            gp = (a, b, mv) =>
+            "void gp(float a[16],float b[16],inout float target[16])",
+            gp = (a, b, target) =>
             {
-                mv[ 0] = b[ 0] * a[ 0] + b[ 2] * a[ 2] + b[ 3] * a[ 3] + b[ 4] * a[ 4] - b[ 8] * a[ 8] - b[ 9] * a[ 9] - b[10] * a[10] - b[14] * a[14];
+                target[ 0] = b[ 0] * a[ 0] + b[ 2] * a[ 2] + b[ 3] * a[ 3] + b[ 4] * a[ 4] - b[ 8] * a[ 8] - b[ 9] * a[ 9] - b[10] * a[10] - b[14] * a[14];
 
-                mv[ 1] = b[ 1] * a[ 0] + b[ 0] * a[ 1] - b[ 5] * a[ 2] - b[ 6] * a[ 3] - b[ 7] * a[ 4] + b[ 2] * a[ 5] + b[ 3] * a[ 6] + b[ 4] * a[ 7] + b[11] * a[ 8] + b[12] * a[ 9] + b[13] * a[10] + b[ 8] * a[11] + b[ 9] * a[12] + b[10] * a[13] + b[15] * a[14] - b[14] * a[15];
-                mv[ 2] = b[ 2] * a[ 0] + b[ 0] * a[ 2] - b[ 8] * a[ 3] + b[ 9] * a[ 4] + b[ 3] * a[ 8] - b[ 4] * a[ 9] - b[14] * a[10] - b[10] * a[14];
-                mv[ 3] = b[ 3] * a[ 0] + b[ 8] * a[ 2] + b[ 0] * a[ 3] - b[10] * a[ 4] - b[ 2] * a[ 8] - b[14] * a[ 9] + b[ 4] * a[10] - b[ 9] * a[14];
-                mv[ 4] = b[ 4] * a[ 0] - b[ 9] * a[ 2] + b[10] * a[ 3] + b[ 0] * a[ 4] - b[14] * a[ 8] + b[ 2] * a[ 9] - b[ 3] * a[10] - b[ 8] * a[14];
+                target[ 1] = b[ 1] * a[ 0] + b[ 0] * a[ 1] - b[ 5] * a[ 2] - b[ 6] * a[ 3] - b[ 7] * a[ 4] + b[ 2] * a[ 5] + b[ 3] * a[ 6] + b[ 4] * a[ 7] + b[11] * a[ 8] + b[12] * a[ 9] + b[13] * a[10] + b[ 8] * a[11] + b[ 9] * a[12] + b[10] * a[13] + b[15] * a[14] - b[14] * a[15];
+                target[ 2] = b[ 2] * a[ 0] + b[ 0] * a[ 2] - b[ 8] * a[ 3] + b[ 9] * a[ 4] + b[ 3] * a[ 8] - b[ 4] * a[ 9] - b[14] * a[10] - b[10] * a[14];
+                target[ 3] = b[ 3] * a[ 0] + b[ 8] * a[ 2] + b[ 0] * a[ 3] - b[10] * a[ 4] - b[ 2] * a[ 8] - b[14] * a[ 9] + b[ 4] * a[10] - b[ 9] * a[14];
+                target[ 4] = b[ 4] * a[ 0] - b[ 9] * a[ 2] + b[10] * a[ 3] + b[ 0] * a[ 4] - b[14] * a[ 8] + b[ 2] * a[ 9] - b[ 3] * a[10] - b[ 8] * a[14];
 
-                mv[ 5] = b[ 5] * a[ 0] + b[ 2] * a[ 1] - b[ 1] * a[ 2] - b[11] * a[ 3] + b[12] * a[ 4] + b[ 0] * a[ 5] - b[ 8] * a[ 6] + b[ 9] * a[ 7] + b[ 6] * a[ 8] - b[ 7] * a[ 9] - b[15] * a[10] - b[ 3] * a[11] + b[ 4] * a[12] + b[14] * a[13] - b[13] * a[14] - b[10] * a[15];
-                mv[ 6] = b[ 6] * a[ 0] + b[ 3] * a[ 1] + b[11] * a[ 2] - b[ 1] * a[ 3] - b[13] * a[ 4] + b[ 8] * a[ 5] + b[ 0] * a[ 6] - b[10] * a[ 7] - b[ 5] * a[ 8] - b[15] * a[ 9] + b[ 7] * a[10] + b[ 2] * a[11] + b[14] * a[12] - b[ 4] * a[13] - b[12] * a[14] - b[ 9] * a[15];
-                mv[ 7] = b[ 7] * a[ 0] + b[ 4] * a[ 1] - b[12] * a[ 2] + b[13] * a[ 3] - b[ 1] * a[ 4] - b[ 9] * a[ 5] + b[10] * a[ 6] + b[ 0] * a[ 7] - b[15] * a[ 8] + b[ 5] * a[ 9] - b[ 6] * a[10] + b[14] * a[11] - b[ 2] * a[12] + b[ 3] * a[13] - b[11] * a[14] - b[ 8] * a[15];
-                mv[ 8] = b[ 8] * a[ 0] + b[ 3] * a[ 2] - b[ 2] * a[ 3] + b[14] * a[ 4] + b[ 0] * a[ 8] + b[10] * a[ 9] - b[ 9] * a[10] + b[ 4] * a[14];
-                mv[ 9] = b[ 9] * a[ 0] - b[ 4] * a[ 2] + b[14] * a[ 3] + b[ 2] * a[ 4] - b[10] * a[ 8] + b[ 0] * a[ 9] + b[ 8] * a[10] + b[ 3] * a[14];
-                mv[10] = b[10] * a[ 0] + b[14] * a[ 2] + b[ 4] * a[ 3] - b[ 3] * a[ 4] + b[ 9] * a[ 8] - b[ 8] * a[ 9] + b[ 0] * a[10] + b[ 2] * a[14];
+                target[ 5] = b[ 5] * a[ 0] + b[ 2] * a[ 1] - b[ 1] * a[ 2] - b[11] * a[ 3] + b[12] * a[ 4] + b[ 0] * a[ 5] - b[ 8] * a[ 6] + b[ 9] * a[ 7] + b[ 6] * a[ 8] - b[ 7] * a[ 9] - b[15] * a[10] - b[ 3] * a[11] + b[ 4] * a[12] + b[14] * a[13] - b[13] * a[14] - b[10] * a[15];
+                target[ 6] = b[ 6] * a[ 0] + b[ 3] * a[ 1] + b[11] * a[ 2] - b[ 1] * a[ 3] - b[13] * a[ 4] + b[ 8] * a[ 5] + b[ 0] * a[ 6] - b[10] * a[ 7] - b[ 5] * a[ 8] - b[15] * a[ 9] + b[ 7] * a[10] + b[ 2] * a[11] + b[14] * a[12] - b[ 4] * a[13] - b[12] * a[14] - b[ 9] * a[15];
+                target[ 7] = b[ 7] * a[ 0] + b[ 4] * a[ 1] - b[12] * a[ 2] + b[13] * a[ 3] - b[ 1] * a[ 4] - b[ 9] * a[ 5] + b[10] * a[ 6] + b[ 0] * a[ 7] - b[15] * a[ 8] + b[ 5] * a[ 9] - b[ 6] * a[10] + b[14] * a[11] - b[ 2] * a[12] + b[ 3] * a[13] - b[11] * a[14] - b[ 8] * a[15];
+                target[ 8] = b[ 8] * a[ 0] + b[ 3] * a[ 2] - b[ 2] * a[ 3] + b[14] * a[ 4] + b[ 0] * a[ 8] + b[10] * a[ 9] - b[ 9] * a[10] + b[ 4] * a[14];
+                target[ 9] = b[ 9] * a[ 0] - b[ 4] * a[ 2] + b[14] * a[ 3] + b[ 2] * a[ 4] - b[10] * a[ 8] + b[ 0] * a[ 9] + b[ 8] * a[10] + b[ 3] * a[14];
+                target[10] = b[10] * a[ 0] + b[14] * a[ 2] + b[ 4] * a[ 3] - b[ 3] * a[ 4] + b[ 9] * a[ 8] - b[ 8] * a[ 9] + b[ 0] * a[10] + b[ 2] * a[14];
 
-                mv[11] = b[11] * a[ 0] - b[ 8] * a[ 1] + b[ 6] * a[ 2] - b[ 5] * a[ 3] + b[15] * a[ 4] - b[ 3] * a[ 5] + b[ 2] * a[ 6] - b[14] * a[ 7] - b[ 1] * a[ 8] + b[13] * a[ 9] - b[12] * a[10] + b[ 0] * a[11] + b[10] * a[12] - b[ 9] * a[13] + b[ 7] * a[14] - b[ 4] * a[15];
-                mv[12] = b[12] * a[ 0] - b[ 9] * a[ 1] - b[ 7] * a[ 2] + b[15] * a[ 3] + b[ 5] * a[ 4] + b[ 4] * a[ 5] - b[14] * a[ 6] - b[ 2] * a[ 7] - b[13] * a[ 8] - b[ 1] * a[ 9] + b[11] * a[10] - b[10] * a[11] + b[ 0] * a[12] + b[ 8] * a[13] + b[ 6] * a[14] - b[ 3] * a[15];
-                mv[13] = b[13] * a[ 0] - b[10] * a[ 1] + b[15] * a[ 2] + b[ 7] * a[ 3] - b[ 6] * a[ 4] - b[14] * a[ 5] - b[ 4] * a[ 6] + b[ 3] * a[ 7] + b[12] * a[ 8] - b[11] * a[ 9] - b[ 1] * a[10] + b[ 9] * a[11] - b[ 8] * a[12] + b[ 0] * a[13] + b[ 5] * a[14] - b[ 2] * a[15];
-                mv[14] = b[14] * a[ 0] + b[10] * a[ 2] + b[ 9] * a[ 3] + b[ 8] * a[ 4] + b[ 4] * a[ 8] + b[ 3] * a[ 9] + b[ 2] * a[10] + b[ 0] * a[14];
+                target[11] = b[11] * a[ 0] - b[ 8] * a[ 1] + b[ 6] * a[ 2] - b[ 5] * a[ 3] + b[15] * a[ 4] - b[ 3] * a[ 5] + b[ 2] * a[ 6] - b[14] * a[ 7] - b[ 1] * a[ 8] + b[13] * a[ 9] - b[12] * a[10] + b[ 0] * a[11] + b[10] * a[12] - b[ 9] * a[13] + b[ 7] * a[14] - b[ 4] * a[15];
+                target[12] = b[12] * a[ 0] - b[ 9] * a[ 1] - b[ 7] * a[ 2] + b[15] * a[ 3] + b[ 5] * a[ 4] + b[ 4] * a[ 5] - b[14] * a[ 6] - b[ 2] * a[ 7] - b[13] * a[ 8] - b[ 1] * a[ 9] + b[11] * a[10] - b[10] * a[11] + b[ 0] * a[12] + b[ 8] * a[13] + b[ 6] * a[14] - b[ 3] * a[15];
+                target[13] = b[13] * a[ 0] - b[10] * a[ 1] + b[15] * a[ 2] + b[ 7] * a[ 3] - b[ 6] * a[ 4] - b[14] * a[ 5] - b[ 4] * a[ 6] + b[ 3] * a[ 7] + b[12] * a[ 8] - b[11] * a[ 9] - b[ 1] * a[10] + b[ 9] * a[11] - b[ 8] * a[12] + b[ 0] * a[13] + b[ 5] * a[14] - b[ 2] * a[15];
+                target[14] = b[14] * a[ 0] + b[10] * a[ 2] + b[ 9] * a[ 3] + b[ 8] * a[ 4] + b[ 4] * a[ 8] + b[ 3] * a[ 9] + b[ 2] * a[10] + b[ 0] * a[14];
 
-                mv[15] = b[15] * a[ 0] + b[14] * a[ 1] + b[13] * a[ 2] + b[12] * a[ 3] + b[11] * a[ 4] + b[10] * a[ 5] + b[ 9] * a[ 6] + b[ 8] * a[ 7] + b[ 7] * a[ 8] + b[ 6] * a[ 9] + b[ 5] * a[10] - b[ 4] * a[11] - b[ 3] * a[12] - b[ 2] * a[13] - b[ 1] * a[14] + b[ 0] * a[15];
+                target[15] = b[15] * a[ 0] + b[14] * a[ 1] + b[13] * a[ 2] + b[12] * a[ 3] + b[11] * a[ 4] + b[10] * a[ 5] + b[ 9] * a[ 6] + b[ 8] * a[ 7] + b[ 7] * a[ 8] + b[ 6] * a[ 9] + b[ 5] * a[10] - b[ 4] * a[11] - b[ 3] * a[12] - b[ 2] * a[13] - b[ 1] * a[14] + b[ 0] * a[15];
             }
             ))
 
         appendToGaShaderString(replaceSignature(
-            "void join(float a[16], float b[16], inout float mv[16])",
-            join = (a, b, mv) =>
+            "void join(float a[16], float b[16], inout float target[16])",
+            join = (a, b, target) =>
             {
-                mv[15] = a[15] * b[15];
-                mv[14] =-a[14] * b[15] - a[15] * b[14];
-                mv[13] =-a[13] * b[15] - a[15] * b[13];
-                mv[12] =-a[12] * b[15] - a[15] * b[12];
-                mv[11] =-a[11] * b[15] - a[15] * b[11];
-                mv[10] = a[10] * b[15] + a[13] * b[14] - a[14] * b[13] + a[15] * b[10];
-                mv[ 9] = a[ 9] * b[15] + a[12] * b[14] - a[14] * b[12] + a[15] * b[ 9];
-                mv[ 8] = a[ 8] * b[15] + a[11] * b[14] - a[14] * b[11] + a[15] * b[ 8];
-                mv[ 7] = a[ 7] * b[15] + a[12] * b[13] - a[13] * b[12] + a[15] * b[ 7];
-                mv[ 6] = a[ 6] * b[15] - a[11] * b[13] + a[13] * b[11] + a[15] * b[ 6];
-                mv[ 5] = a[ 5] * b[15] + a[11] * b[12] - a[12] * b[11] + a[15] * b[ 5];
-                mv[ 4] = a[ 4] * b[15] - a[ 7] * b[14] + a[ 9] * b[13] - a[10] * b[12] + a[12] * b[10] - a[13] * b[ 9] + a[14] * b[ 7] + a[15] * b[ 4];
-                mv[ 3] = a[ 3] * b[15] - a[ 6] * b[14] - a[ 8] * b[13] + a[10] * b[11] - a[11] * b[10] + a[13] * b[ 8] + a[14] * b[ 6] + a[15] * b[ 3];
-                mv[ 2] = a[ 2] * b[15] - a[ 5] * b[14] + a[ 8] * b[12] - a[ 9] * b[11] + a[11] * b[ 9] - a[12] * b[ 8] + a[14] * b[ 5] + a[15] * b[ 2];
-                mv[ 1] = a[ 1] * b[15] + a[ 5] * b[13] + a[ 6] * b[12] + a[ 7] * b[11] - a[11] * b[ 7] - a[12] * b[ 6] - a[13] * b[ 5] + a[15] * b[ 1];
-                mv[ 0] = a[ 0] * b[15] + a[ 1] * b[14] + a[ 2] * b[13] + a[ 3] * b[12] - a[ 4] * b[11] + a[ 5] * b[10] + a[ 6] * b[ 9] + a[ 7] * b[ 8]
+                target[15] = a[15] * b[15];
+                target[14] =-a[14] * b[15] - a[15] * b[14];
+                target[13] =-a[13] * b[15] - a[15] * b[13];
+                target[12] =-a[12] * b[15] - a[15] * b[12];
+                target[11] =-a[11] * b[15] - a[15] * b[11];
+                target[10] = a[10] * b[15] + a[13] * b[14] - a[14] * b[13] + a[15] * b[10];
+                target[ 9] = a[ 9] * b[15] + a[12] * b[14] - a[14] * b[12] + a[15] * b[ 9];
+                target[ 8] = a[ 8] * b[15] + a[11] * b[14] - a[14] * b[11] + a[15] * b[ 8];
+                target[ 7] = a[ 7] * b[15] + a[12] * b[13] - a[13] * b[12] + a[15] * b[ 7];
+                target[ 6] = a[ 6] * b[15] - a[11] * b[13] + a[13] * b[11] + a[15] * b[ 6];
+                target[ 5] = a[ 5] * b[15] + a[11] * b[12] - a[12] * b[11] + a[15] * b[ 5];
+                target[ 4] = a[ 4] * b[15] - a[ 7] * b[14] + a[ 9] * b[13] - a[10] * b[12] + a[12] * b[10] - a[13] * b[ 9] + a[14] * b[ 7] + a[15] * b[ 4];
+                target[ 3] = a[ 3] * b[15] - a[ 6] * b[14] - a[ 8] * b[13] + a[10] * b[11] - a[11] * b[10] + a[13] * b[ 8] + a[14] * b[ 6] + a[15] * b[ 3];
+                target[ 2] = a[ 2] * b[15] - a[ 5] * b[14] + a[ 8] * b[12] - a[ 9] * b[11] + a[11] * b[ 9] - a[12] * b[ 8] + a[14] * b[ 5] + a[15] * b[ 2];
+                target[ 1] = a[ 1] * b[15] + a[ 5] * b[13] + a[ 6] * b[12] + a[ 7] * b[11] - a[11] * b[ 7] - a[12] * b[ 6] - a[13] * b[ 5] + a[15] * b[ 1];
+                target[ 0] = a[ 0] * b[15] + a[ 1] * b[14] + a[ 2] * b[13] + a[ 3] * b[12] - a[ 4] * b[11] + a[ 5] * b[10] + a[ 6] * b[ 9] + a[ 7] * b[ 8]
                        + a[ 8] * b[ 7] + a[ 9] * b[ 6] + a[10] * b[ 5] + a[11] * b[ 4] + a[12] * b[ 3] + a[13] * b[ 2] + a[14] * b[ 1] + a[15] * b[ 0];
             }
             ))
         
         appendToGaShaderString(replaceSignature(
-            "void meet(float a[16], float b[16], inout float mv[16])",
-            meet = (a, b, mv) =>
+            "void meet(float a[16], float b[16], inout float target[16])",
+            meet = (a, b, target) =>
             {
-                mv[0]=b[0]*a[0];
-                mv[1]=b[1]*a[0]+b[0]*a[1];
-                mv[2]=b[2]*a[0]+b[0]*a[2];
-                mv[3]=b[3]*a[0]+b[0]*a[3];
-                mv[4]=b[4]*a[0]+b[0]*a[4];
-                mv[5]=b[5]*a[0]+b[2]*a[1]-b[1]*a[2]+b[0]*a[5];
-                mv[6]=b[6]*a[0]+b[3]*a[1]-b[1]*a[3]+b[0]*a[6];
-                mv[7]=b[7]*a[0]+b[4]*a[1]-b[1]*a[4]+b[0]*a[7];
-                mv[8]=b[8]*a[0]+b[3]*a[2]-b[2]*a[3]+b[0]*a[8];
-                mv[9]=b[9]*a[0]-b[4]*a[2]+b[2]*a[4]+b[0]*a[9];
-                mv[10]=b[10]*a[0]+b[4]*a[3]-b[3]*a[4]+b[0]*a[10];
-                mv[11]=b[11]*a[0]-b[8]*a[1]+b[6]*a[2]-b[5]*a[3]-b[3]*a[5]+b[2]*a[6]-b[1]*a[8]+b[0]*a[11];
-                mv[12]=b[12]*a[0]-b[9]*a[1]-b[7]*a[2]+b[5]*a[4]+b[4]*a[5]-b[2]*a[7]-b[1]*a[9]+b[0]*a[12];
-                mv[13]=b[13]*a[0]-b[10]*a[1]+b[7]*a[3]-b[6]*a[4]-b[4]*a[6]+b[3]*a[7]-b[1]*a[10]+b[0]*a[13];
-                mv[14]=b[14]*a[0]+b[10]*a[2]+b[9]*a[3]+b[8]*a[4]+b[4]*a[8]+b[3]*a[9]+b[2]*a[10]+b[0]*a[14];
-                mv[15]=b[15]*a[0]+b[14]*a[1]+b[13]*a[2]+b[12]*a[3]+b[11]*a[4]+b[10]*a[5]+b[9]*a[6]+b[8]*a[7]+b[7]*a[8]+b[6]*a[9]+b[5]*a[10]-b[4]*a[11]-b[3]*a[12]-b[2]*a[13]-b[1]*a[14]+b[0]*a[15];
+                target[0]=b[0]*a[0];
+                target[1]=b[1]*a[0]+b[0]*a[1];
+                target[2]=b[2]*a[0]+b[0]*a[2];
+                target[3]=b[3]*a[0]+b[0]*a[3];
+                target[4]=b[4]*a[0]+b[0]*a[4];
+                target[5]=b[5]*a[0]+b[2]*a[1]-b[1]*a[2]+b[0]*a[5];
+                target[6]=b[6]*a[0]+b[3]*a[1]-b[1]*a[3]+b[0]*a[6];
+                target[7]=b[7]*a[0]+b[4]*a[1]-b[1]*a[4]+b[0]*a[7];
+                target[8]=b[8]*a[0]+b[3]*a[2]-b[2]*a[3]+b[0]*a[8];
+                target[9]=b[9]*a[0]-b[4]*a[2]+b[2]*a[4]+b[0]*a[9];
+                target[10]=b[10]*a[0]+b[4]*a[3]-b[3]*a[4]+b[0]*a[10];
+                target[11]=b[11]*a[0]-b[8]*a[1]+b[6]*a[2]-b[5]*a[3]-b[3]*a[5]+b[2]*a[6]-b[1]*a[8]+b[0]*a[11];
+                target[12]=b[12]*a[0]-b[9]*a[1]-b[7]*a[2]+b[5]*a[4]+b[4]*a[5]-b[2]*a[7]-b[1]*a[9]+b[0]*a[12];
+                target[13]=b[13]*a[0]-b[10]*a[1]+b[7]*a[3]-b[6]*a[4]-b[4]*a[6]+b[3]*a[7]-b[1]*a[10]+b[0]*a[13];
+                target[14]=b[14]*a[0]+b[10]*a[2]+b[9]*a[3]+b[8]*a[4]+b[4]*a[8]+b[3]*a[9]+b[2]*a[10]+b[0]*a[14];
+                target[15]=b[15]*a[0]+b[14]*a[1]+b[13]*a[2]+b[12]*a[3]+b[11]*a[4]+b[10]*a[5]+b[9]*a[6]+b[8]*a[7]+b[7]*a[8]+b[6]*a[9]+b[5]*a[10]-b[4]*a[11]-b[3]*a[12]-b[2]*a[13]-b[1]*a[14]+b[0]*a[15];
             }
         ))
 
         appendToGaShaderString(replaceSignature(
-            "void reverse(inout float mv[16])",
-            reverse = (mv) =>
+            "void reverse( float mv[16], out float target[16])",
+            reverse = (mv, target) =>
             {
-                mv[ 5] *= -1.;
-                mv[ 6] *= -1.;
-                mv[ 7] *= -1.;
-                mv[ 8] *= -1.;
-                mv[ 9] *= -1.;
-                mv[10] *= -1.;
+                target[ 0] =  mv[ 0];
+                target[ 1] =  mv[ 1];
+                target[ 2] =  mv[ 2];
+                target[ 3] =  mv[ 3];
+                target[ 4] =  mv[ 4];
 
-                mv[11] *= -1.;
-                mv[12] *= -1.;
-                mv[13] *= -1.;
-                mv[14] *= -1.;
+                target[ 5] = -mv[ 5];
+                target[ 6] = -mv[ 6];
+                target[ 7] = -mv[ 7];
+                target[ 8] = -mv[ 8];
+                target[ 9] = -mv[ 9];
+                target[10] = -mv[10];
+                target[11] = -mv[11];
+                target[12] = -mv[12];
+                target[13] = -mv[13];
+                target[14] = -mv[14];
+
+                target[15] =  mv[15];
             }
         ))
 
-        dual = (mv) => {
-            let temp = 0.
-            for(let i = 0; i < 16; ++i) {
-                temp = mv[i]
-                mv[i] = mv[16 - i]
-                mv[16 - i] = temp
-            }
-        }
+        // dual = (mv) => {
+        //     let temp = 0.
+        //     for(let i = 0; i < 16; ++i) {
+        //         temp = mv[i]
+        //         mv[i] = mv[16 - i]
+        //         mv[16 - i] = temp
+        //     }
+        // }
 
         appendToGaShaderString(replaceSignature(
             "void zeroMv(inout float mv[16])",
@@ -146,25 +153,25 @@ function initAlgebra()
             }))
 
         appendToGaShaderString(replaceSignature(
-            "void gAdd(float a[16], float b[16], inout float mv[16])",
-            gAdd = (a,b,mv) =>
+            "void gAdd(float a[16], float b[16], inout float target[16])",
+            gAdd = (a,b,target) =>
             {
-                mv[ 0] = a[ 0] + b[ 0];
-                mv[ 1] = a[ 1] + b[ 1];
-                mv[ 2] = a[ 2] + b[ 2];
-                mv[ 3] = a[ 3] + b[ 3];
-                mv[ 4] = a[ 4] + b[ 4];
-                mv[ 5] = a[ 5] + b[ 5];
-                mv[ 6] = a[ 6] + b[ 6];
-                mv[ 7] = a[ 7] + b[ 7];
-                mv[ 8] = a[ 8] + b[ 8];
-                mv[ 9] = a[ 9] + b[ 9];
-                mv[10] = a[10] + b[10];
-                mv[11] = a[11] + b[11];
-                mv[12] = a[12] + b[12];
-                mv[13] = a[13] + b[13];
-                mv[14] = a[14] + b[14];
-                mv[15] = a[15] + b[15];
+                target[ 0] = a[ 0] + b[ 0];
+                target[ 1] = a[ 1] + b[ 1];
+                target[ 2] = a[ 2] + b[ 2];
+                target[ 3] = a[ 3] + b[ 3];
+                target[ 4] = a[ 4] + b[ 4];
+                target[ 5] = a[ 5] + b[ 5];
+                target[ 6] = a[ 6] + b[ 6];
+                target[ 7] = a[ 7] + b[ 7];
+                target[ 8] = a[ 8] + b[ 8];
+                target[ 9] = a[ 9] + b[ 9];
+                target[10] = a[10] + b[10];
+                target[11] = a[11] + b[11];
+                target[12] = a[12] + b[12];
+                target[13] = a[13] + b[13];
+                target[14] = a[14] + b[14];
+                target[15] = a[15] + b[15];
             }
             ))
 
@@ -280,7 +287,7 @@ function initAlgebra()
 
         mvRotator = (axis, angle, target) =>
         {
-            copyMv(axis,target)
+            assign(axis,target)
             multiplyScalar(target, Math.sin(angle / 2.))
             scalar(target, Math.cos(angle / 2.))
             return target;
@@ -438,6 +445,22 @@ function initAlgebra()
 
         //yes, you changed the name
         appendToGaShaderString(replaceSignature(
+            "void hackyReverse(inout float mv[16])",
+            hackyReverse = (mv) =>
+            {
+                mv[ 5] *= -1.;
+                mv[ 6] *= -1.;
+                mv[ 7] *= -1.;
+                mv[ 8] *= -1.;
+                mv[ 9] *= -1.;
+                mv[10] *= -1.;
+                mv[11] *= -1.;
+                mv[12] *= -1.;
+                mv[13] *= -1.;
+                mv[14] *= -1.;
+            }
+        ))
+        appendToGaShaderString(replaceSignature(
             "void dqSandwich(inout vec4 p, dualQuat dq)",
             dqSandwich = (p, dq) =>
             {
@@ -445,7 +468,7 @@ function initAlgebra()
                 pointToMv(p, mv1);
 
                 gp(mv0, mv1, mv2);
-                reverse(mv0);
+                hackyReverse(mv0);
                 gp(mv2, mv0, mv3);
 
                 mvToPoint(mv3,p);
@@ -454,9 +477,9 @@ function initAlgebra()
 
         mvSandwich = (a,b,target) => {
             gp( b, a, mv0);
-            copyMv(b,mv1)
-            reverse(mv1);
-            gp(mv0, mv1, target);
+            assign(b,mv1)
+            reverse(mv1,mv2);
+            gp(mv0, mv2, target);
         }
 
         wNormalizePoint = (p) => {
@@ -558,7 +581,7 @@ function initAlgebra()
             }
         }
 
-        copyMv = (mv,target) => {
+        assign = (mv,target) => {
             mv.forEach((e,i) => {target[i] = e})
         }
     }
@@ -605,7 +628,7 @@ function initAlgebra()
             }
         `)
     planeToBall = (planePoint, targetBallPoint) => {
-        copyMv(planePoint, targetBallPoint)
+        assign(planePoint, targetBallPoint)
         changeAngleAndNormalize(targetBallPoint, .5)
     }
 
@@ -620,7 +643,7 @@ function initAlgebra()
             pointY(ballPoint, pointY(ballPoint) / norm)
             pointZ(ballPoint, pointZ(ballPoint) / norm)
         }
-        copyMv(ballPoint, targetPlanePoint)
+        assign(ballPoint, targetPlanePoint)
         changeAngleAndNormalize(targetPlanePoint, 2.)
     }
         // `
@@ -634,7 +657,7 @@ function initAlgebra()
         //         pointY(ballPoint, pointY(ballPoint) / norm)
         //         pointZ(ballPoint, pointZ(ballPoint) / norm)
         //     }
-        //     copyMv(ballPoint, targetPlanePoint)
+        //     assign(ballPoint, targetPlanePoint)
         //     changeAngleAndNormalize(targetPlanePoint, .5)
         // }
         // `
