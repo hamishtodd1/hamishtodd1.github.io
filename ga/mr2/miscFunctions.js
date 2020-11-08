@@ -10,28 +10,6 @@ clamp = (a, min, max) =>{
     else return max
 }
 
-function ScreenPosition(x,y)
-{
-    this.x = x || 0.
-    this.y = y || 0.
-}
-ScreenPosition.prototype.copy = function(sp) {
-    this.x = sp.x
-    this.y = sp.y
-}
-ScreenPosition.prototype.set = function (x,y) {
-    this.x = x
-    this.y = y
-}
-ScreenPosition.prototype.sub = function (sp) {
-    this.x -= sp.x
-    this.y -= sp.y
-}
-ScreenPosition.prototype.add = function (sp) {
-    this.x += sp.x
-    this.y += sp.y
-}
-
 function nextPowerOf2(x) {
     return Math.pow(2, Math.ceil(Math.log2(x)))
 }
@@ -41,12 +19,16 @@ function digitGivenBase(num, base, digitNum) {
     return Math.floor((num % (nearbyIntegerPower * base)) / nearbyIntegerPower)
 }
 
-function nameToHexantColors(name, hexantColors) {
+function nameToHexantColors(name, hexantColors, offset) {
+    if (offset === undefined)
+        offset = 0
+    offset *= 18
+
     for (let i = 0; i < 6; ++i) {
         let letter = name[Math.floor(i / 6. * name.length)]
-        hexantColors[i * 3 + 0] = colors[letter][0]
-        hexantColors[i * 3 + 1] = colors[letter][1]
-        hexantColors[i * 3 + 2] = colors[letter][2]
+        hexantColors[offset + i * 3 + 0] = colors[letter][0]
+        hexantColors[offset + i * 3 + 1] = colors[letter][1]
+        hexantColors[offset + i * 3 + 2] = colors[letter][2]
     }
     return hexantColors
 }

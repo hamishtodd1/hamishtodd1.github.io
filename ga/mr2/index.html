@@ -9,6 +9,29 @@
 		+, cos, sin, exp, in pad.js
 		A lot of it is about projection. Sending projection point to infinity
 
+	Mapping system that makes sense
+		It's an array
+		Fuck color, this is about mapping points on the texture to points somewhere else
+		So you're making a function eg mollweide(p)
+			Any one of them can totally
+			mollweide
+		The wiki articles make it all about lat and lon but maybe they shouldn't
+		Yeah you need to translate it, this impassive sining and cosing can go away
+
+	Look it's just an array, just a bunch of points superimposed. And you can have gl.POINTS or gl.LINES
+	You could think of it as little pixels you're repositioning
+
+	Hey, could have "cartesian product" symbol, mathematicians would like you
+		Or tensor product
+		Or, ordinary javascript arrays
+		But this isn't about arrays it's about functions
+
+	General visual algebra
+		New algebra for every video
+		you have a way of defininig literals. Strings (bits really but strings do)
+		you have functions defined on that algebra
+		Sometimes you want different viz for different things. Real view, disc view, color view
+
 	Fun GA things probably unnecessary to world map so avoid:
 		plane, pss
 		dual, join
@@ -46,6 +69,8 @@
 				initAlgebra()
 
 				initPremadeBuffers()
+
+				await initMapsIntegrated()
 				
 				initButtons()
 				initMouse()
@@ -100,6 +125,7 @@
 
 		<script src="pad.js"></script>
 		<script src="compiler.js"></script>
+		<script src="errorHighlight.js"></script>
 
 		<script src="textureSampler.js"></script>
 
@@ -108,9 +134,10 @@
 		<script src="renderFunctions.js"></script>
 
 		<script src="maps.js"></script>
+		<script src="mapsIntegrated.js"></script>
 
 		<script src="algebra.js"></script>
-		<script src="frames.js"></script>
+		<script src="dualQuaternions.js"></script>
 
 		<script src="miscGl.js"></script>
 
@@ -122,11 +149,13 @@
 
 		<script src="mouse.js"></script>
 
+		<script src="frames.js"></script>
 		<script src="mvAppearances.js"></script>
 
 		<script src="funcViz.js"></script>
 
 		<script src="miscFunctions.js"></script>
+		<script src="screenPosition.js"></script>
 
 		<script src="displayWindows.js"></script>
 

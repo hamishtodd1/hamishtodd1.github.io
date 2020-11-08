@@ -8,7 +8,8 @@ function initMouse() {
         clickingOld: false,
         rightClicking: false,
         rightClickingOld: false,
-        position: new ScreenPosition()
+        position: new ScreenPosition(),
+        positionOld: new ScreenPosition()
     }
 
     let asynchronous = {
@@ -29,7 +30,7 @@ function initMouse() {
                 b <= mouse.position.y && mouse.position.y <= t
     }
 
-    let allMouseResponses = [mouseResponses,rightMouseResponses]
+    let allMouseResponses = [mouseResponses,rightMouseResponses] //z, start, during, end
     let currentResponses = [null,null]
     function respond(clicking,clickingOld,index) {
         if (clicking && !clickingOld) {
@@ -60,6 +61,7 @@ function initMouse() {
     }
 
     mouse.updateFromAsyncAndCheckClicks = () => {
+        mouse.positionOld.copy(mouse.position)
         mouse.position.copy(asynchronous.position)
 
         mouse.clickingOld = mouse.clicking

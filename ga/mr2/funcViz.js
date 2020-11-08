@@ -1,4 +1,4 @@
-/*
+/* 
     Features to have:
         change a scalar and you see a point move, but change that scalar to an interval and you see the locus of points
         if your input dimension is 2 or 1 and output is 1 or 2, can trace your finger along and see what's going on
@@ -12,6 +12,8 @@
     You then use the texture to get the hue for those points
 
     but you want to be able to show single points or lines (meridians!) from I2
+
+    It should be more about the sphere. The input is any direction. You normalize that and
 
     so you write the code worldMap(...) where ... is your bunch of points
     earth(0.,0.) = blue, the ocean

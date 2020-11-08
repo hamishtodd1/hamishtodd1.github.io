@@ -1,12 +1,15 @@
 /*
     NOTE SERIOUS CONFUSION: IS Z POSITIVE OR NEGATIVE?
 
-    explain lat and lon
+    Use of the algebra
+        mercator(picture of a globe) = abs(log(centralCylindrical(picture of a globe)))
+        linalg may be sufficient, since you are stuck at the origin
 
     Don't worry, it makes sense that dymaxion is off, the triangle isn't planar
 
     Title
         Top 10 politically-correct world maps
+        Top 10 world maps that avoid being racist
         How racist is your map?
         Which is least racist?
         Can we make a less racist map? 
@@ -16,23 +19,34 @@
     Script
         Intro
             They're beautiful and varied
-            We will get onto the political controversy surrounding the relative sizes of Greenland and Africa (demonstrate it),
+            We will get onto the political controversy surrounding the relative sizes of Greenland and Africa (demonstrate it). greenland is kind of our canary in the coalmine
             but honestly, it's very useful and fun to understand the mathematics first
-        Homolosine and polyhedral first, very intuitive
-            orange peel https://twitter.com/infowetrust/status/967105316272816128
+        Dymaxion
+            One of the simplest to understand maps is this one, even though it ends up looking like a mess.
+            This map can be wrapped up into a solid shape called an icosahedron, which is pretty close to being a sphere
+            Very little distortion to lengths and areas. The angles only screw up at the edges
+            Buckminster fuller was this very cool and eccentric guy in the 1960s who wanted to make a more equal world
+            One of the nice things he did with it was this map of early human migration, where you can see that humans crossed from Russia to Alaska
+            For general purposes though, this map is sort of too rebellious to be useful.
+                It deliberately ignores the fact that the equator and the poles are special, because it wants to mess with your idea of "up and down"
+                This is a very
+            It also very consciously screws around with your idea of "up and down", this is part of the point, 
+                all the other mathematical projections we'll look at treat the equator and the poles as being special
+        Lat and lon (illustrate)
+            Practically all other projections are based on taking the angle of every point from the equator, and the angle from some fixed point around the equator
+
+        homolosine / interrupted sinusoidal
+            Making a slight change now, there are quite a lot of map projections like this one that take more account of the equator
+            It's often said that making a map is like flattenning an orange peel, and this projection essentially takes that literally https://twitter.com/infowetrust/status/967105316272816128
             It so much feels like it shouldn't be hard, because when you look close up the world is flat
             but there's intrinsic curvature, comes about due to topology
-            You HAVE to distort something: probably lengths, probably directions, and if you want to keep them you'll have to distort the hell out of areas, that's the controversial part
-            Dymaxion
-                Buckminster fuller was this eccentric and very right-on guy in the 60s
-                Very little distortion to lengths and areas. Angles only screw up at the edges
-                There is no up or down
-                Gives the impression that south america is far from africa, but it does preserve the arctic circle nicely
-            Tet/oct/butterfly?
-            You can go even further with these severely chopped up ones, but at this point it's really not giving you a sense of what the surface looks like
-                they're not efficient of space
-                paths look weird on them
-                It feels a bit arbitrary to be cutting up oceans. Like what if you find the Indian ocean very interesting?
+            You HAVE to distort the surface somehow: probably lengths, probably directions
+            and if you want to keep either of those you'll have to distort the hell out of areas, that's the controversial part
+        Myriahedral https://www.win.tue.nl/~vanwijk/myriahedral/
+            You can go even further with these severely chopped up ones
+            but at this point it's really not giving you a sense of what the surface looks like
+            It feels a bit arbitrary to be cutting up oceans. Like what if you find the Indian ocean very interesting?
+            Or more likely, what if you're planning a route for a boat or a plane, which is one of the main uses of maps.
         Projection: slightly less intuitive but not too bad
             That part where we squashed the surface onto the flat parts? We're going to be smarter about that
             Can project from points, can move those points
@@ -57,7 +71,8 @@
                 VERY eurocentric
                 sinusoidal, bonne
             Equidistant - rolling pin
-                equirectangular
+                equirectangular - also useful for panoramas https://www.istockphoto.com/photos/equirectangular-panorama-beach?mediatype=photography&phrase=equirectangular%20panorama%20beach&sort=best
+                    Note that it still ends up with a big greenland
                 azimuthal equidstant
             equal area - "tunnel distance", surprisingly! geologists use it
         Leads onto the central controversy: Mercator, Gall Peters
@@ -130,38 +145,31 @@ async function initWorldMap() {
             // p.x = 2.*sqrt(2.) / PI * cos(theta) * lon;
             // p.y = sqrt(2.) * sin(theta);
 
-            // Homolosine / interrupted mollweide. Maybe change to one easier with GA.
+            // Interrupted mollweide. Sinusoidal is better in terms of thinking about the pole, and more compatible with GA, and easier
             // {
-            //     float theta = lat;
-            //     float piSinLat = PI*sin(lat);
-            //     for(int i = 0; i < 8; ++i) {
-            //         float numerator = 2.*theta + sin(2.*theta) - piSinLat;
-            //         float denominator = 2. + 2.*cos(2.*theta);
-            //         theta -= numerator / denominator;
-            //     }
-            //     //if lat = 0, theta = 0.
-            //     p.y = sqrt(2.) * sin(theta);
-            //     float centerIndex = 0.;
+            //     float stripIndex = 0.;
             //     if(lat > 0.) {
             //         float cutoff = 116.;
             //         if(uv.x < cutoff/256. )
-            //             centerIndex = cutoff/2.;
+            //             stripIndex = cutoff/2.;
             //         else
-            //             centerIndex = 158.;
+            //             stripIndex = 158.;
             //     }
             //     else {
             //         float cutoff0 = 116.;
             //         float cutoff1 = 182.;
             //         if(uv.x < cutoff0/256. )
-            //             centerIndex = cutoff0/2.;
+            //             stripIndex = cutoff0/2.;
             //         else if(uv.x < cutoff1/256.)
-            //             centerIndex = (cutoff0+cutoff1)/2.;
+            //             stripIndex = (cutoff0+cutoff1)/2.;
             //         else 
-            //             centerIndex = 256. - (256.-cutoff1)/2.;
+            //             stripIndex = 256. - (256.-cutoff1)/2.;
             //     }
-            //     float center = TAU * centerIndex / 256. - PI;
-            //     float centerMapped = 2. * sqrt(2.) / PI * center; //theta = 0 at center
-            //     p.x = 2.*sqrt(2.) / PI * cos(theta) * (lon-center) + centerMapped;
+            //     float stripCenterAtEquatorLon = TAU * stripIndex / 256. - PI;
+            //     float stripCenterAtEquatorMapped = stripCenterAtEquatorLon;
+
+            //     p.x = (lon-stripCenterAtEquatorLon) * cos(lat) + stripCenterAtEquatorMapped;
+            //     p.y = lat;
             // }
 
             //Winkel III, pill shape. Might be nice to find an easier one
@@ -172,10 +180,15 @@ async function initWorldMap() {
             // p.y = .5 * (lat + sin(lat) / sincAlpha);
 
             // mecca/Craig retroazimuthal. Needs different mesh
-            // float meccaLat = .00001;//0.37331021903;
-            // float meccaLon = .00001;//0.69565158793;
-            // p.x = lon - meccaLon;
-            // p.y = p.x / sin(p.x) * (sin(lat)*cos(p.x)-tan(meccaLat)*cos(lat));
+            float osscilating = .5 + .5 * sin(frameCount * .01);
+            float meccaLat = 0.37331021903; //* oscillating;
+            float meccaLon = 0.69565158793;
+            p.x = lon - meccaLon;
+            p.y = p.x / sin(p.x) * (sin(lat)*cos(p.x)-tan(meccaLat)*cos(lat));
+            p.xy *= 3.;
+            //assume lon = meccalon
+            // sin(lat)-tan(meccaLat)*cos(lat)
+            // 
 
             //lambert conformal. Easy geometrically! Just a cone!
             {
@@ -193,7 +206,7 @@ async function initWorldMap() {
 
             // Bonne, covers sinusoidal and werner
             // float lat1 = PI / 2. * (.5+.5*sin(frameCount * .05));
-            // if(abs(lat1) < .01) { //sinusoidal
+            // if(abs(lat1) < .01) { //sinusoidal. Seems projective!
             //     p.x = lon * cos(lat);
             //     p.y = lat;
             // }
@@ -286,7 +299,7 @@ async function initWorldMap() {
     updateFunctions.push(()=>{
         rotator(axis, frameCount * .0009, transform)
         rotator(axis, 0., transform)
-        transform.idealLine[0] = Math.sin(frameCount*0.01)
+        // transform.idealLine[0] = Math.sin(frameCount*0.01)
     }) 
 
     addRenderFunction( () => {

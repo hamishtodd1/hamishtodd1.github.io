@@ -1,20 +1,34 @@
 /*
-
-    dual(reverse(a,target))
-
-    reverse(a,target)
-    dual(target)
-
-    reverse(a,target)
-    return target
 */
 
 function initTranspiler()
 {
-    let functionNames = ["reverse", "sq", "assign","gAdd"] //"earth"
+    let loggedErrors = []
+    function logErrorIfNew(newError) {
+        if (loggedErrors.indexOf(newError) === -1) {
+            console.error("transpilation error: \n", newError)
+            loggedErrors.push(newError)
+        }
+    }
 
+    let parsedString = ""
+    sigh = () => {
+        log(parsedString)
+    }
     let numberedMvs = Array()
-    
+
+    let infixFunctions = {
+        "+": "gAdd",
+        "=": "def"
+        //wedge
+        //subtract
+        //divide
+    }
+    //then reverse, dual, exponential are single argument
+    let infixSymbols = Object.keys(infixFunctions)
+
+    let functionNames = ["reverse", "assign","gAdd","inner","gp","join"] //"earth", sin, cos, tan, exp, sqrt
+
     let currentNodeBranchingFrom = null
     function Node(lexeme, replaceMostRecent) {
         this.lexeme = lexeme
@@ -43,9 +57,11 @@ function initTranspiler()
         child.parent = this
     }
 
-    transpile = (lexemes,target) => {
+    transpile = (lexemes,target) => {   
+        lowestUnusedMv = 0
+
         currentNodeBranchingFrom = null
-        let topNode = new Node("assign") //TODO don't need to pass parent
+        let topNode = new Node("assign")
         currentNodeBranchingFrom = topNode
 
         function adjustToOpenBracket(functionLexeme) {
@@ -59,9 +75,8 @@ function initTranspiler()
         }
         
         let branchCanComplete = false
-        let skipFrom = -1
         
-        for (let i = 0, il = lexemes.length; i < il && skipFrom === -1; ++i) {
+        for (let i = 0, il = lexemes.length; i < il; ++i) {
             let lexeme = lexemes[i]
 
             let isMvName = orderedNames.indexOf(lexeme) !== -1
@@ -82,32 +97,41 @@ function initTranspiler()
                 }
                 else if (isOpenBracket)
                     adjustToOpenBracket("assign")
-                else
-                    skipFrom = i
+                else {
+                    logErrorIfNew("function " + lexeme + " must be followed by open bracket")
+                    return i
+                }
             }
             else if (branchCanComplete) {
                 if (lexeme === "," && currentNodeBranchingFrom.children.length !== currentNodeBranchingFrom.expectedNumberOfChildren)
                     branchCanComplete = false
                 else if (lexeme === ")" && currentNodeBranchingFrom.children.length === currentNodeBranchingFrom.expectedNumberOfChildren)
                     currentNodeBranchingFrom = currentNodeBranchingFrom.parent //we move up having finished branch, so this branch is potentially valid too
-                else if (lexeme === "+") {//or other infixes
-                    adjustToInfixNode("gAdd")
+                else if (infixSymbols.indexOf(lexeme) === -1) {//or other infixes
+                    adjustToInfixNode(infixFunctions[lexeme])
                     branchCanComplete = false
                 }
-                else
-                    skipFrom = i
+                else {
+                    logErrorIfNew("unexpected symbol " + lexeme)
+                    return i
+                }
             }
-            else
-                skipFrom = i
+            else {
+                logErrorIfNew("unexpected symbol before branch end: " + lexeme)
+                return i
+            }
         }
-        if (!branchCanComplete)
-            skipFrom = lexemes.length
+        if (!branchCanComplete) {
+            logErrorIfNew("unexpected line end after symbol " + lexemes[lexemes.length-1])
+            return lexemes.length - 1
+        }
 
-        lowestUnusedMv = 0
-        let str = parseFunctionNode(topNode) + "target);"
-        eval(str)
+        // if(lexemes.indexOf("inner") !== -1)
+        //     debugger
+        parsedString = parseFunctionNode(topNode) + "target);"
+        eval(parsedString)
 
-        return skipFrom
+        return -1
     }
 
     //since the top node is a "" function it should be ok if there's just a single mv

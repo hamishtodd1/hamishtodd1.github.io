@@ -1,4 +1,11 @@
 /*
+    Other examples of things you'd want to define
+        Adding and multiplying knots
+            How would you construct this? You need an isomorphism from some string of symbols to knot pictures
+        Adding and intersecting SDFs
+        Superimposing / blending textures
+
+
     Scalars appearance is context-dependent, sometimes a length, sometimes an area
     Maybe text really is the right representation. Allows exponential scaling, has innate unit, has minus
 
@@ -12,6 +19,7 @@
 */
 
 function initMvAppearances() {
+
     let numToDraw = 0
     let screenPositions = []
     let spaceScales = []
@@ -23,7 +31,7 @@ function initMvAppearances() {
         spaceScales[numToDraw] = containingBoxRadius
 
         if(addFrame)
-            addFrameToDraw(x, y, name)
+            addNamedFrameToDraw(x, y, name)
             
         ++numToDraw
     }

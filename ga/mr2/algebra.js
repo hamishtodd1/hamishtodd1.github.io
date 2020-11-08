@@ -9,24 +9,28 @@ function initAlgebra()
         let bodyString = jsString.substring(firstLinebreakIndex)
         return newSignature + bodyString
     }
+
+    gaShaderString = ""
     function appendToGaShaderString(glslString) {
         gaShaderString += "\n" + glslString + "\n"
     }
 
-    gaShaderString = ""
-
-    isMv = function(thing) {
-        return thing instanceof Float32Array && thing.length === 16
-    }
-
-    parseMv = function (str, target) {
-        let valuesArr = str.split(",")
-        for (let i = 0; i < 16; ++i)
-            target[i] = parseFloat(valuesArr[i])
-    }
-
     //mv
     {
+        isMv = function(obj) {
+            return obj instanceof Float32Array && obj.length === 16
+        }
+
+        assign = (mv,target) => {
+            mv.forEach((e,i) => {target[i] = e})
+        }
+
+        parseMv = function (str, target) {
+            let valuesArr = str.split(",")
+            for (let i = 0; i < 16; ++i)
+                target[i] = parseFloat(valuesArr[i])
+        }
+
         mv0 = new Float32Array(16)
         mv1 = new Float32Array(16)
         mv2 = new Float32Array(16)
@@ -62,7 +66,7 @@ function initAlgebra()
 
                 target[15] = b[15] * a[ 0] + b[14] * a[ 1] + b[13] * a[ 2] + b[12] * a[ 3] + b[11] * a[ 4] + b[10] * a[ 5] + b[ 9] * a[ 6] + b[ 8] * a[ 7] + b[ 7] * a[ 8] + b[ 6] * a[ 9] + b[ 5] * a[10] - b[ 4] * a[11] - b[ 3] * a[12] - b[ 2] * a[13] - b[ 1] * a[14] + b[ 0] * a[15];
             }
-            ))
+        ))
 
         appendToGaShaderString(replaceSignature(
             "void join(float a[16], float b[16], inout float target[16])",
@@ -86,7 +90,7 @@ function initAlgebra()
                 target[ 0] = a[ 0] * b[15] + a[ 1] * b[14] + a[ 2] * b[13] + a[ 3] * b[12] - a[ 4] * b[11] + a[ 5] * b[10] + a[ 6] * b[ 9] + a[ 7] * b[ 8]
                        + a[ 8] * b[ 7] + a[ 9] * b[ 6] + a[10] * b[ 5] + a[11] * b[ 4] + a[12] * b[ 3] + a[13] * b[ 2] + a[14] * b[ 1] + a[15] * b[ 0];
             }
-            ))
+        ))
         
         appendToGaShaderString(replaceSignature(
             "void meet(float a[16], float b[16], inout float target[16])",
@@ -112,10 +116,34 @@ function initAlgebra()
         ))
 
         appendToGaShaderString(replaceSignature(
+            "void inner(float a[16], float b[16], inout float target[16])",
+            inner = (a, b, target) =>
+            {
+                target[ 0] = b[ 0] * a[ 0] + b[ 2] * a[ 2] + b[ 3] * a[ 3] + b[ 4] * a[ 4] - b[ 8] * a[ 8] - b[ 9] * a[ 9] - b[10] * a[10] - b[14] * a[14];
+                target[ 1] = b[ 1] * a[ 0] + b[ 0] * a[ 1] - b[ 5] * a[ 2] - b[ 6] * a[ 3] - b[ 7] * a[ 4] + b[ 2] * a[ 5] + b[ 3] * a[ 6] + b[ 4] * a[ 7] + b[11] * a[ 8] + b[12] * a[ 9] + b[13] * a[10] + b[ 8] * a[11] + b[ 9] * a[12] + b[10] * a[13] + b[15] * a[14] - b[14] * a[15];
+                target[ 2] = b[ 2] * a[ 0] + b[ 0] * a[ 2] - b[ 8] * a[ 3] + b[ 9] * a[ 4] + b[ 3] * a[ 8] - b[ 4] * a[ 9] - b[14] * a[10] - b[10] * a[14];
+                target[ 3] = b[ 3] * a[ 0] + b[ 8] * a[ 2] + b[ 0] * a[ 3] - b[10] * a[ 4] - b[ 2] * a[ 8] - b[14] * a[ 9] + b[ 4] * a[10] - b[ 9] * a[14];
+                target[ 4] = b[ 4] * a[ 0] - b[ 9] * a[ 2] + b[10] * a[ 3] + b[ 0] * a[ 4] - b[14] * a[ 8] + b[ 2] * a[ 9] - b[ 3] * a[10] - b[ 8] * a[14];
+                target[ 5] = b[ 5] * a[ 0] - b[11] * a[ 3] + b[12] * a[ 4] + b[ 0] * a[ 5] - b[15] * a[10] - b[ 3] * a[11] + b[ 4] * a[12] - b[10] * a[15];
+                target[ 6] = b[ 6] * a[ 0] + b[11] * a[ 2] - b[13] * a[ 4] + b[ 0] * a[ 6] - b[15] * a[ 9] + b[ 2] * a[11] - b[ 4] * a[13] - b[ 9] * a[15];
+                target[ 7] = b[ 7] * a[ 0] - b[12] * a[ 2] + b[13] * a[ 3] + b[ 0] * a[ 7] - b[15] * a[ 8] - b[ 2] * a[12] + b[ 3] * a[13] - b[ 8] * a[15];
+                target[ 8] = b[ 8] * a[ 0] + b[14] * a[ 4] + b[ 0] * a[ 8] + b[ 4] * a[14];
+                target[ 9] = b[ 9] * a[ 0] + b[14] * a[ 3] + b[ 0] * a[ 9] + b[ 3] * a[14];
+                target[10] = b[10] * a[ 0] + b[14] * a[ 2] + b[ 0] * a[10] + b[ 2] * a[14];
+                target[11] = b[11] * a[ 0] + b[15] * a[ 4] + b[ 0] * a[11] - b[ 4] * a[15];
+                target[12] = b[12] * a[ 0] + b[15] * a[ 3] + b[ 0] * a[12] - b[ 3] * a[15];
+                target[13] = b[13] * a[ 0] + b[15] * a[ 2] + b[ 0] * a[13] - b[ 2] * a[15];
+                target[14] = b[14] * a[ 0] + b[ 0] * a[14];
+                target[15] = b[15] * a[ 0] + b[ 0] * a[15];
+            }
+        ))
+
+        appendToGaShaderString(replaceSignature(
             "void reverse( float mv[16], out float target[16])",
             reverse = (mv, target) =>
             {
                 target[ 0] =  mv[ 0];
+                
                 target[ 1] =  mv[ 1];
                 target[ 2] =  mv[ 2];
                 target[ 3] =  mv[ 3];
@@ -127,6 +155,7 @@ function initAlgebra()
                 target[ 8] = -mv[ 8];
                 target[ 9] = -mv[ 9];
                 target[10] = -mv[10];
+
                 target[11] = -mv[11];
                 target[12] = -mv[12];
                 target[13] = -mv[13];
@@ -135,22 +164,6 @@ function initAlgebra()
                 target[15] =  mv[15];
             }
         ))
-
-        // dual = (mv) => {
-        //     let temp = 0.
-        //     for(let i = 0; i < 16; ++i) {
-        //         temp = mv[i]
-        //         mv[i] = mv[16 - i]
-        //         mv[16 - i] = temp
-        //     }
-        // }
-
-        appendToGaShaderString(replaceSignature(
-            "void zeroMv(inout float mv[16])",
-            zeroMv = (mv) =>
-            {
-                mv[ 0] = 0.; mv[ 1] = 0.; mv[ 2] = 0.; mv[ 3] = 0.; mv[ 4] = 0.; mv[ 5] = 0.; mv[ 6] = 0.; mv[ 7] = 0.; mv[ 8] = 0.; mv[ 9] = 0.; mv[10] = 0.; mv[11] = 0.; mv[12] = 0.; mv[13] = 0.; mv[14] = 0.; mv[15] = 0.;
-            }))
 
         appendToGaShaderString(replaceSignature(
             "void gAdd(float a[16], float b[16], inout float target[16])",
@@ -173,7 +186,7 @@ function initAlgebra()
                 target[14] = a[14] + b[14];
                 target[15] = a[15] + b[15];
             }
-            ))
+        ))
 
         appendToGaShaderString(replaceSignature(
             "void gSub(float a[16], float b[16], inout float mv[16])",
@@ -205,86 +218,22 @@ function initAlgebra()
             return Math.sqrt(sq(pointX(mv0)) + sq(pointY(mv0)) + sq(pointZ(mv0)) )
         }
 
+        dual = (mv,target) => {
+            for(let i = 0; i < 16; ++i)
+                target[15 - i] = mv[i]
+            return target
+        }
+
         appendToGaShaderString(replaceSignature(
-            "void inner(float a[16], float b[16], inout float mv[16])",
-            inner = (a, b, mv) =>
+            "void zeroMv(inout float mv[16])",
+            zeroMv = (mv) =>
             {
-                mv[ 0] = b[ 0] * a[ 0] + b[ 2] * a[ 2] + b[ 3] * a[ 3] + b[ 4] * a[ 4] - b[ 8] * a[ 8] - b[ 9] * a[ 9] - b[10] * a[10] - b[14] * a[14];
-                mv[ 1] = b[ 1] * a[ 0] + b[ 0] * a[ 1] - b[ 5] * a[ 2] - b[ 6] * a[ 3] - b[ 7] * a[ 4] + b[ 2] * a[ 5] + b[ 3] * a[ 6] + b[ 4] * a[ 7] + b[11] * a[ 8] + b[12] * a[ 9] + b[13] * a[10] + b[ 8] * a[11] + b[ 9] * a[12] + b[10] * a[13] + b[15] * a[14] - b[14] * a[15];
-                mv[ 2] = b[ 2] * a[ 0] + b[ 0] * a[ 2] - b[ 8] * a[ 3] + b[ 9] * a[ 4] + b[ 3] * a[ 8] - b[ 4] * a[ 9] - b[14] * a[10] - b[10] * a[14];
-                mv[ 3] = b[ 3] * a[ 0] + b[ 8] * a[ 2] + b[ 0] * a[ 3] - b[10] * a[ 4] - b[ 2] * a[ 8] - b[14] * a[ 9] + b[ 4] * a[10] - b[ 9] * a[14];
-                mv[ 4] = b[ 4] * a[ 0] - b[ 9] * a[ 2] + b[10] * a[ 3] + b[ 0] * a[ 4] - b[14] * a[ 8] + b[ 2] * a[ 9] - b[ 3] * a[10] - b[ 8] * a[14];
-                mv[ 5] = b[ 5] * a[ 0] - b[11] * a[ 3] + b[12] * a[ 4] + b[ 0] * a[ 5] - b[15] * a[10] - b[ 3] * a[11] + b[ 4] * a[12] - b[10] * a[15];
-                mv[ 6] = b[ 6] * a[ 0] + b[11] * a[ 2] - b[13] * a[ 4] + b[ 0] * a[ 6] - b[15] * a[ 9] + b[ 2] * a[11] - b[ 4] * a[13] - b[ 9] * a[15];
-                mv[ 7] = b[ 7] * a[ 0] - b[12] * a[ 2] + b[13] * a[ 3] + b[ 0] * a[ 7] - b[15] * a[ 8] - b[ 2] * a[12] + b[ 3] * a[13] - b[ 8] * a[15];
-                mv[ 8] = b[ 8] * a[ 0] + b[14] * a[ 4] + b[ 0] * a[ 8] + b[ 4] * a[14];
-                mv[ 9] = b[ 9] * a[ 0] + b[14] * a[ 3] + b[ 0] * a[ 9] + b[ 3] * a[14];
-                mv[10] = b[10] * a[ 0] + b[14] * a[ 2] + b[ 0] * a[10] + b[ 2] * a[14];
-                mv[11] = b[11] * a[ 0] + b[15] * a[ 4] + b[ 0] * a[11] - b[ 4] * a[15];
-                mv[12] = b[12] * a[ 0] + b[15] * a[ 3] + b[ 0] * a[12] - b[ 3] * a[15];
-                mv[13] = b[13] * a[ 0] + b[15] * a[ 2] + b[ 0] * a[13] - b[ 2] * a[15];
-                mv[14] = b[14] * a[ 0] + b[ 0] * a[14];
-                mv[15] = b[15] * a[ 0] + b[ 0] * a[15];
+                mv[ 0] = 0.; mv[ 1] = 0.; mv[ 2] = 0.; mv[ 3] = 0.; mv[ 4] = 0.; mv[ 5] = 0.; mv[ 6] = 0.; mv[ 7] = 0.; mv[ 8] = 0.; mv[ 9] = 0.; mv[10] = 0.; mv[11] = 0.; mv[12] = 0.; mv[13] = 0.; mv[14] = 0.; mv[15] = 0.;
             }
-            ))
+        ))
     }
 
     {
-        DualQuat = function ()
-        {
-            this.scalar = 0.
-            this.realLine = new Float32Array(3)
-            this.idealLine = new Float32Array(3)
-            this.pss = 0.
-        }
-        appendToGaShaderString(`
-        struct dualQuat {
-            float scalar;
-            vec3 realLine;
-            vec3 idealLine;
-            float pss;
-        };`)
-
-        dq0 = new DualQuat()
-        dq1 = new DualQuat()
-
-        locateUniformDualQuat = function(program,dqName)
-        {
-            program.locateUniform(dqName + "." + "scalar")
-            program.locateUniform(dqName + "." + "realLine")
-            program.locateUniform(dqName + "." + "idealLine")
-            program.locateUniform(dqName + "." + "pss")
-        }
-        transferDualQuat = function (dq, dqName, program)
-        {
-            for (propt in dq)
-            {
-                let nameDotPropt = dqName + "." + propt
-                if (propt === "scalar" || propt === "pss" )
-                    gl.uniform1f(program.uniformLocations[nameDotPropt], dq[propt])
-                else
-                    gl.uniform3fv(program.uniformLocations[nameDotPropt], dq[propt])
-            }
-        }
-
-        appendToGaShaderString(replaceSignature(
-            "void zeroDq(inout dualQuat dq)",
-            zeroDq = (dq) =>
-            {
-                dq.scalar = 0.;
-                dq.idealLine[ 0] = 0.; dq.idealLine[ 1] = 0.; dq.idealLine[ 2] = 0.;
-                dq.realLine[ 0] = 0.; dq.realLine[ 1] = 0.; dq.realLine[ 2] = 0.;
-                dq.pss = 0.;
-            }
-            ))
-
-        appendToGaShaderString(`
-        dualQuat DualQuat(){
-            dualQuat dq;
-            zeroDq(dq);
-            return dq;
-        }`)
-
         mvRotator = (axis, angle, target) =>
         {
             assign(axis,target)
@@ -296,8 +245,6 @@ function initAlgebra()
         mvToString = (mv) => {
             return mv.toString() + ","
         }
-
-        
 
         let eps = .00001
         getGrade = (mv) => {
@@ -328,29 +275,6 @@ function initAlgebra()
             mv.forEach((e,i)=>mv[i]*=sca)
         }
 
-        rotator = ( axis, angle, target) =>
-        {
-            target.scalar = Math.cos(angle / 2.);
-            let sin = Math.sin(angle / 2.);
-            target.realLine[0] = sin * axis.realLine[0];
-            target.realLine[1] = sin * axis.realLine[1];
-            target.realLine[2] = sin * axis.realLine[2];
-            target.idealLine[0] = sin * axis.idealLine[0];
-            target.idealLine[1] = sin * axis.idealLine[1];
-            target.idealLine[2] = sin * axis.idealLine[2];
-            return target;
-        }
-        appendToGaShaderString(`
-        dualQuat rotator(dualQuat axis,float angle) {
-            dualQuat res = DualQuat();
-            res.scalar = cos(angle/2.);
-            float sin = sin(angle/2.);
-            res.realLine.x = sin * axis.realLine.x;
-            res.realLine.y = sin * axis.realLine.y;
-            res.realLine.z = sin * axis.realLine.z;
-            return res;
-        }`)
-
         appendToGaShaderString(replaceSignature(
             "void pointToMv(vec4 p, inout float mv[16])",
             pointToMv = (p,mv) =>
@@ -361,7 +285,7 @@ function initAlgebra()
                 mv[12] = p[1];
                 mv[11] = p[2];
             }
-            ))
+        ))
         
         mvEquals = (a,b) => {
             let allEqual = true
@@ -378,26 +302,7 @@ function initAlgebra()
                 p[2] = mv[11];
                 p[3] = mv[14];
             }
-            ))
-
-        appendToGaShaderString(replaceSignature(
-            "void dqToMv(dualQuat dq, inout float mv[16])",
-            dqToMv = (dq, mv) =>
-            {
-                zeroMv(mv);
-                mv[0] = dq.scalar;
-
-                mv[5] = dq.idealLine[0];
-                mv[6] = dq.idealLine[1];
-                mv[7] = dq.idealLine[2];
-                //errr, don't get too used to this kind of thing
-                mv[8] = dq.realLine[0];
-                mv[9] = dq.realLine[1];
-                mv[10] = dq.realLine[2];
-
-                mv[15] = dq.pss;
-            }
-            ))
+        ))
 
         scalar = (mv,newValue) => {if(newValue !== undefined) mv[0] = newValue; return mv[0]}
         pss = (mv,newValue) => {if(newValue !== undefined) mv[15] = newValue; return mv[15]}
@@ -416,94 +321,16 @@ function initAlgebra()
         pointX = (mv, newValue) => { if (newValue !== undefined) mv[13] = newValue; return mv[13] }
         pointW = (mv, newValue) => { if (newValue !== undefined) mv[14] = newValue; return mv[14] }
 
-        point = (mv, x, y, z, w) => {zeroMv(mv); mv[11] = z; mv[12] = y; mv[13] = x; mv[14] = w;}
         plane = (mv, x, y, z, w) => {zeroMv(mv); mv[4] = z; mv[3] = y; mv[2] = x; mv[1] = w;}
 
         lineRealNorm = (mv) => { return Math.sqrt(sq(realLineX(mv)) + sq(realLineY(mv)) + sq(realLineZ(mv)))}
         lineIdealNorm = (mv) => { return Math.sqrt(sq(idealLineX(mv)) + sq(idealLineY(mv)) + sq(idealLineZ(mv)))}
         
-        pointIdealNorm = (mv) => { return Math.sqrt(sq(pointX(mv)) + sq(pointY(mv)) + sq(pointZ(mv)))}
-
-        appendToGaShaderString(replaceSignature(
-            "void mvToDq(float mv[16], inout dualQuat dq)",
-            mvToDq = (mv,dq) =>
-            {
-                zeroDq(dq);
-
-                dq.scalar = mv[ 0];
-
-                dq.idealLine[0] = mv[ 5];
-                dq.idealLine[1] = mv[ 6];
-                dq.idealLine[2] = mv[ 7];
-                dq.realLine[2] = mv[ 8];
-                dq.realLine[1] = mv[ 9];
-                dq.realLine[0] = mv[10];
-
-                dq.pss = mv[15];
-            }
-        ))
-
-        //yes, you changed the name
-        appendToGaShaderString(replaceSignature(
-            "void hackyReverse(inout float mv[16])",
-            hackyReverse = (mv) =>
-            {
-                mv[ 5] *= -1.;
-                mv[ 6] *= -1.;
-                mv[ 7] *= -1.;
-                mv[ 8] *= -1.;
-                mv[ 9] *= -1.;
-                mv[10] *= -1.;
-                mv[11] *= -1.;
-                mv[12] *= -1.;
-                mv[13] *= -1.;
-                mv[14] *= -1.;
-            }
-        ))
-        appendToGaShaderString(replaceSignature(
-            "void dqSandwich(inout vec4 p, dualQuat dq)",
-            dqSandwich = (p, dq) =>
-            {
-                dqToMv(dq, mv0);
-                pointToMv(p, mv1);
-
-                gp(mv0, mv1, mv2);
-                hackyReverse(mv0);
-                gp(mv2, mv0, mv3);
-
-                mvToPoint(mv3,p);
-            }
-            ))
-
         mvSandwich = (a,b,target) => {
             gp( b, a, mv0);
             assign(b,mv1)
             reverse(mv1,mv2);
             gp(mv0, mv2, target);
-        }
-
-        wNormalizePoint = (p) => {
-            pointX(p, pointX(p) / pointW(p))
-            pointY(p, pointY(p) / pointW(p))
-            pointZ(p, pointZ(p) / pointW(p))
-            pointW(p, 1.)
-        }
-
-        wNormalizePoint = (p) => {
-            let w = pointW(p)
-            pointX(p, pointX(p) / w)
-            pointY(p, pointY(p) / w)
-            pointZ(p, pointZ(p) / w)
-            pointW(p, 1.)
-        }
-
-        pointNorm = (mv) => { return Math.sqrt(sq(pointX(mv)) + sq(pointY(mv)) + sq(pointZ(mv)) ) }
-        normalizeIdealPoint = (mv) => { //"not supposed to do this"?
-            let factor = 1. / pointNorm(mv)
-            pointX(mv, pointX(mv) * factor)
-            pointY(mv, pointY(mv) * factor)
-            pointZ(mv, pointZ(mv) * factor)
-            pointW(mv, 0.)
         }
 
         lineNormalize = (mv) => {
@@ -515,19 +342,28 @@ function initAlgebra()
             idealLineY(mv, idealLineY(mv) * inverseLength)
             idealLineZ(mv, idealLineZ(mv) * inverseLength)
         }
-
-        // let ourDq = new DualQuat()
-        // ourDq.realLine[2] = 1.
-        // let ourRotator = new DualQuat()
-        // rotator(ourDq,TAU/4.,ourRotator)
-        // log(ourRotator)
-        // let ourP = new Float32Array(4)
-        // ourP[1] = 1.
-        // sandwich(ourP, ourRotator)
-        // log(ourP)
     }
 
+    // Points
     {
+        wNormalizePoint = (p) => {
+            let w = pointW(p)
+            pointX(p, pointX(p) / w)
+            pointY(p, pointY(p) / w)
+            pointZ(p, pointZ(p) / w)
+            pointW(p, 1.)
+        }
+
+        point = (mv, x, y, z, w) => { zeroMv(mv); mv[11] = z; mv[12] = y; mv[13] = x; mv[14] = w; }
+        pointIdealNorm = (mv) => { return Math.sqrt(sq(pointX(mv)) + sq(pointY(mv)) + sq(pointZ(mv))) }
+        normalizeIdealPoint = (mv) => { //"not supposed to do this"?
+            let factor = 1. / pointIdealNorm(mv)
+            pointX(mv, pointX(mv) * factor)
+            pointY(mv, pointY(mv) * factor)
+            pointZ(mv, pointZ(mv) * factor)
+            pointW(mv, 0.)
+        }
+
         Point = function()
         {
             this[0] = 0.
@@ -562,16 +398,6 @@ function initAlgebra()
             }
         })
 
-        updateAttribute = function (pointArray, attributeBuffer) {
-            for (let i = 0, il = pointArray.length; i < il; ++i)
-            {
-                attributeBuffer[i * 4 + 0] = pointArray[i][0]
-                attributeBuffer[i * 4 + 1] = pointArray[i][1]
-                attributeBuffer[i * 4 + 2] = pointArray[i][2]
-                attributeBuffer[i * 4 + 3] = pointArray[i][3]
-            }
-        }
-
         mvArrayToPointsBuffer = function (mvArray, attributeBuffer) {
             for (let i = 0, il = mvArray.length; i < il; ++i) {
                 attributeBuffer[i * 4 + 0] = pointX(mvArray[i])
@@ -580,11 +406,9 @@ function initAlgebra()
                 attributeBuffer[i * 4 + 3] = pointW(mvArray[i])
             }
         }
-
-        assign = (mv,target) => {
-            mv.forEach((e,i) => {target[i] = e})
-        }
     }
+
+    initDualQuaternions(appendToGaShaderString, replaceSignature)
 
     function changeAngleAndNormalize(pointMv, angleMultiple) {
         // debugger
@@ -604,35 +428,33 @@ function initAlgebra()
         pointW(pointMv, Math.sqrt(1. - sq(newIdealNorm)))
     }
     appendToGaShaderString(`
-            float sq(float x) {
-                return x*x;
-            }
+        float sq(float x) {
+            return x*x;
+        }
 
-            void changeAngleAndNormalize(inout vec4 point, float angleMultiple) {
-                float oldIdealNorm = length(point.xyz);
-                float angle = atan(oldIdealNorm, point.w);
-                float newAngle = angle * angleMultiple;
-                float newIdealNorm = sin(newAngle);
+        void changeAngleAndNormalize(inout vec4 point, float angleMultiple) {
+            float oldIdealNorm = length(point.xyz);
+            float angle = atan(oldIdealNorm, point.w);
+            float newAngle = angle * angleMultiple;
+            float newIdealNorm = sin(newAngle);
 
-                float xyzMultiplier = newIdealNorm / oldIdealNorm;
-                point.x *= xyzMultiplier;
-                point.y *= xyzMultiplier;
-                point.z *= xyzMultiplier;
-                point.w = sqrt(1.-sq(newIdealNorm));
-            }
-        `)
+            float xyzMultiplier = newIdealNorm / oldIdealNorm;
+            point.x *= xyzMultiplier;
+            point.y *= xyzMultiplier;
+            point.z *= xyzMultiplier;
+            point.w = sqrt(1.-sq(newIdealNorm));
+        }
+    `)
 
     appendToGaShaderString(`
-            void planeToBall(inout vec4 planePoint) {
-                changeAngleAndNormalize(planePoint, 2.);
-            }
-        `)
+        void planeToBall(inout vec4 planePoint) {
+            changeAngleAndNormalize(planePoint, 2.);
+        }
+    `)
     planeToBall = (planePoint, targetBallPoint) => {
         assign(planePoint, targetBallPoint)
         changeAngleAndNormalize(targetBallPoint, .5)
     }
-
-
 
     ballToPlane = (ballPoint, targetPlanePoint) => {
         //if the pointIdealNorm is greater than 1...

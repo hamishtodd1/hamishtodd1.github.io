@@ -48,6 +48,7 @@ function initCharacterTexture(displayableCharacters) {
         var singleCharacterHeightOverWidth = height / (width * proportionOfTextureTakenUpByOneCharacter)
 
         ctx.font = fontHeight + "px monospace"; //can't put this before the above because state machine
+        // -webkit-text-stroke: 10px black //or something. Might let you put text on video.
         ctx.textBaseline = "middle"; //vertical
         ctx.textAlign = "start";
         ctx.fillStyle = "black";

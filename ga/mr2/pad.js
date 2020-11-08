@@ -72,7 +72,7 @@ function initColumnBackground() {
         if (i % 4 === 2)
             vertsBuffer[i] = mainCamera.frontAndBackZ //positive number to move it backwards, so weird
     }
-    let columnBackground = verticesDisplayWithPosition(vertsBuffer, gl.TRIANGLES, .22, .22, .22)
+    let columnBackground = verticesDisplayWithPosition(vertsBuffer, gl.TRIANGLES, .3, .3, .3)
     addRenderFunction(columnBackground.renderFunction)
     return columnBackground
 }

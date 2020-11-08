@@ -36,10 +36,17 @@ function lineDisplay(line)
     })
 }
 
-function verticesDisplay(vertBuffer, mode)
+function verticesDisplay(vertBuffer, mode, r,g,b)
 {
     if (vertBuffer.length % 4 !== 0)
         console.error("needs to be 4vecs")
+
+    r = r || 1.
+    g = g || 0.
+    b = b || 0.
+    let rStr = r === Math.round(r) ? r.toString() + "." : r.toString()
+    let gStr = g === Math.round(g) ? g.toString() + "." : g.toString()
+    let bStr = b === Math.round(b) ? b.toString() + "." : b.toString()
 
     const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
         attribute vec4 vertA;
@@ -51,7 +58,7 @@ function verticesDisplay(vertBuffer, mode)
         + cameraAndFrameCountShaderStuff.footer
     const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
         void main(void) {
-            gl_FragColor = vec4(1.,1.,1.,1.);
+            gl_FragColor = vec4(`+rStr+`,`+gStr+`,`+bStr+`,1.);
         }
         `
 

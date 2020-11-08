@@ -78,13 +78,24 @@ function initFrames() {
     program.locateUniform("hexantColors")
 
     let framePositions = []
-    let names = []
+    let hexantColorses = []
     let numToDraw = 0
-    addFrameToDraw = function(x,y,name) {
-        framePositions[numToDraw*2+0] = x
-        framePositions[numToDraw*2+1] = y
+    addColoredFrameToDraw = function(x,y,r,g,b) {
+        framePositions[numToDraw * 2 + 0] = x
+        framePositions[numToDraw * 2 + 1] = y
 
-        names[numToDraw] = name
+        for(let i = 0; i < 6; ++i) {
+            hexantColorses[numToDraw*18 + i * 3 + 0] = r
+            hexantColorses[numToDraw*18 + i * 3 + 1] = g
+            hexantColorses[numToDraw*18 + i * 3 + 2] = b
+        }
+        ++numToDraw
+    }
+    addNamedFrameToDraw = function(x,y,name) {
+        framePositions[numToDraw * 2 + 0] = x
+        framePositions[numToDraw * 2 + 1] = y
+
+        nameToHexantColors(name, hexantColorses, numToDraw)
         ++numToDraw
     }
 
@@ -97,7 +108,9 @@ function initFrames() {
         program.doSomethingWithVertexAttribute("point", vertsBuffer)
 
         for(let i = 0; i < numToDraw; ++i) {
-            gl.uniform3fv(program.uniformLocations.hexantColors, nameToHexantColors(names[i], hexantColors))
+            for(let j = 0; j < 18; j++)
+                hexantColors[j] = hexantColorses[i*18+j]
+            gl.uniform3fv(program.uniformLocations.hexantColors, hexantColors)
             gl.uniform2f(program.uniformLocations.screenPosition, framePositions[i*2+0], framePositions[i*2+1]);
             gl.drawArrays(gl.TRIANGLES, 0, vertsBuffer.length / 4);
         }

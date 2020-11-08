@@ -12,6 +12,8 @@
 
 function initCompileViewer(displayableCharacters, columnBackground) {
 
+    initErrorHighlight()
+
     //better as an enum but hey
     let finiteCategories = {
         infix: ["*","+"],
@@ -146,6 +148,8 @@ function initCompileViewer(displayableCharacters, columnBackground) {
 
         let lineLexemes = []
 
+        let errorNewLines = []
+
         forEachToken( (tokenIndex, tokenStart, tokenEnd, tokenCategory, token) => {
             switch (tokenCategory) {
                 case "literal":
@@ -159,8 +163,8 @@ function initCompileViewer(displayableCharacters, columnBackground) {
 
                         let name = assignMvToName(tokenIndex)
                         let placeWhereTranspilationFailed = transpile(lineLexemes, namedMvs[name])
-                        if (placeWhereTranspilationFailed !== -1)
-                            log("TODO draw a red line over the rest of it")
+                        if (placeWhereTranspilationFailed !== -1) 
+                            errorNewLines.push(tokenIndex)
                     }
                     lineLexemes.length = 0
                     break
@@ -172,7 +176,6 @@ function initCompileViewer(displayableCharacters, columnBackground) {
             }
         })
 
-        // debugger
         ///////////////////
         ////  DRAWING  ////
         ///////////////////
@@ -189,16 +192,7 @@ function initCompileViewer(displayableCharacters, columnBackground) {
             addMvToRender(name, drawingPosition.x + .5, drawingPosition.y, .5, true)
             drawingPosition.x += 1.
 
-            moveCaratOutOfToken(tokenStart, tokenEnd)
-        }
-
-        function moveCaratOutOfToken(tokenStart,tokenEnd) {
-            if (tokenStart < carat.positionInString && carat.positionInString < tokenEnd) {
-                if (carat.positionInString < tokenStart + (tokenEnd - tokenStart) / 2.)
-                    carat.positionInString = tokenEnd
-                else
-                    carat.positionInString = tokenStart
-            }
+            carat.moveOutOfToken(tokenStart, tokenEnd)
         }
         
         function drawTokenCharacters(tokenStart,tokenEnd) {
@@ -229,7 +223,10 @@ function initCompileViewer(displayableCharacters, columnBackground) {
                 case "newline":
                     drawingPosition.x = -mainCamera.rightAtZZero
                     potentiallyDrawFirstDeclaration(tokenIndex, tokenStart, tokenEnd)
-                    moveCaratOutOfToken(tokenStart, tokenEnd)
+                    carat.moveOutOfToken(tokenStart, tokenEnd)
+
+                    if (errorNewLines.indexOf(tokenIndex) !== -1)
+                        placeErrorHighlight(drawingPosition)
 
                     for (let i = 0; i < displayWindows.length; ++i) {
                         if (drawingPosition.y === displayWindows[i].verticalPositionToRenderMvsFrom) {
@@ -252,7 +249,9 @@ function initCompileViewer(displayableCharacters, columnBackground) {
                     break
 
                 case "identifier":
-                    if (orderedNames.indexOf(token) !== -1)
+                    if (token === "globe")
+                        drawEarth(drawingPosition,tokenStart, tokenEnd)
+                    else if (orderedNames.indexOf(token) !== -1)
                         drawAndMoveAlong(token, tokenStart, tokenEnd)
                     else
                         drawTokenCharacters(tokenStart, tokenEnd)

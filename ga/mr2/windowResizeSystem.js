@@ -6,7 +6,7 @@
 
 function initWindowResizeSystem()
 {
-	mainCamera.topAtZZero = 9. //all derives from this. Tweaked to make 100% look ok on our little preview
+	mainCamera.topAtZZero = 11. //all derives from this. Tweaked to make 100% look ok on our little preview
 	
 	function respondToResize(event) {
 		if (event !== undefined)
