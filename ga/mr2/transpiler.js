@@ -1,4 +1,17 @@
 /*
+    function syntax
+        python indents, last line is return value
+
+    Need to use the built in capabilities, don't be manipulating a string every time you call a function (just when you define it)
+    Yeah, transpile to a proper glsl/javascript function declaration
+        So different signatures (all "in" for glsl)
+
+    You get the function as a string
+    It has its leaves of course, currently namedMvs[]
+    the function arguments need to be put in those leaves, somehow
+
+    When you type the name of an mv, it becomes a number in the backgroundString? Or something?
+
 */
 
 function initTranspiler()
@@ -30,7 +43,7 @@ function initTranspiler()
     let functionNames = ["reverse", "assign","gAdd","inner","gp","join"] //"earth", sin, cos, tan, exp, sqrt
 
     let currentNodeBranchingFrom = null
-    function Node(lexeme, replaceMostRecent) {
+    function Node(lexeme, terminal, replaceMostRecent) {
         this.lexeme = lexeme
 
         this.children = []
@@ -38,13 +51,13 @@ function initTranspiler()
         this.parent = currentNodeBranchingFrom
         if( this.parent !== null )
             this.parent.addChild(this, replaceMostRecent)
-
-        if (orderedNames.indexOf(lexeme) !== -1 )
+        
+        if (terminal)
             this.expectedNumberOfChildren = 0
         else if(functionNames.indexOf(lexeme) !== -1)
             this.expectedNumberOfChildren = eval(lexeme).length - 1 //-1 because target is last
         else
-            console.error("unrecognized lexeme: ", lexeme)
+            console.error("unrecognized function: ", lexeme)
     }
     Node.prototype.addChild = function(child, replaceMostRecent) {
         if (!replaceMostRecent)
@@ -57,20 +70,20 @@ function initTranspiler()
         child.parent = this
     }
 
-    transpile = (lexemes,target) => {   
+    transpileLine = (lexemes) => {   
         lowestUnusedMv = 0
 
         currentNodeBranchingFrom = null
-        let topNode = new Node("assign")
+        let topNode = new Node("assign",false)
         currentNodeBranchingFrom = topNode
 
         function adjustToOpenBracket(functionLexeme) {
             branchCanComplete = false
-            let newNode = new Node(functionLexeme)
+            let newNode = new Node(functionLexeme,false)
             currentNodeBranchingFrom = newNode
         }
         function adjustToInfixNode(infixLexeme) {
-            let infixFunctionNode = new Node(infixLexeme, true)
+            let infixFunctionNode = new Node(infixLexeme,false, true)
             currentNodeBranchingFrom = infixFunctionNode
         }
         
@@ -79,7 +92,7 @@ function initTranspiler()
         for (let i = 0, il = lexemes.length; i < il; ++i) {
             let lexeme = lexemes[i]
 
-            let isMvName = orderedNames.indexOf(lexeme) !== -1
+            let isMvName = namedMvs.indexOf(lexeme) !== -1
             let isFunction = functionNames.indexOf(lexeme) !== -1
             let isOpenBracket = lexeme === "("
 
@@ -88,7 +101,7 @@ function initTranspiler()
                     adjustToInfixNode("gp")
 
                 if (isMvName) {
-                    new Node(lexeme)
+                    new Node('namedMvs["' + child.lexeme + '"],',true)
                     branchCanComplete = true
                 }
                 else if (isFunction && lexemes[i + 1] === "(") {
@@ -126,12 +139,7 @@ function initTranspiler()
             return lexemes.length - 1
         }
 
-        // if(lexemes.indexOf("inner") !== -1)
-        //     debugger
-        parsedString = parseFunctionNode(topNode) + "target);"
-        eval(parsedString)
-
-        return -1
+        return parsedString = parseFunctionNode(topNode)
     }
 
     //since the top node is a "" function it should be ok if there's just a single mv
@@ -141,11 +149,10 @@ function initTranspiler()
         let computationLines = ""
 
         node.children.forEach((child) => {
-            if(child.children.length === 0) {
-                functionLine += 'namedMvs["' + child.lexeme + '"],'
-
-            }
+            if(child.children.length === 0)
+                functionLine += child.lexeme + ","
             else {
+                // You need to have shit between { }, otherwise they'll clash
                 while (numberedMvs.length <= lowestUnusedMv)
                     numberedMvs.push(new Float32Array(16))
                 let mvString = 'numberedMvs[' + lowestUnusedMv + ']'
@@ -157,6 +164,47 @@ function initTranspiler()
         })
 
         return computationLines + functionLine
+    }
+
+    /*
+        Ok so the arguments are just a1, a2, etc
+        The namedMvs that get given to them, well, yes that happens, but that's "just what you see"
+
+        
+    */
+    if(0)
+    {
+        let jsArgumentsString = "( "
+        let glslArgumentsString = "( "
+        for (let i = 0; i < numArguments; ++i) {
+            glslArgumentsString += (i === 0 ? "" : ", ") + "in float " + "argument" + i + "[16]"
+            jsArgumentsString += (i === 0 ? "" : ", ") + "argument" + i
+        }
+        glslArgumentsString += (i === 0 ? "" : ", ") + "in float " + "target"
+        jsArgumentsString += (i === 0 ? "" : ", ") + "target"
+
+        lines.forEach((line, lineIndex) => {
+
+            let intermediateRepresentation = transpileLine(line);
+            jsBodyString +=
+                "const variable" + lineIndex + " = new Float32Array(16); " + + "\n" +
+                transpileLine(lexemes)
+
+            glslBodyString +=
+                "const float variable" + lineIndex + "[16]; " + + "\n" +
+                + "namedMvs[" + name + "]"
+        })
+        let body = something +
+            "return " + somethingElse + "\n}"
+
+        let jsString = "function " + functionName + jsArgumentString + ") {\n" +
+            body +
+            "return variable" + (lines.length - 1).toString() + ";"
+        "\n}"
+        let glslString = "void " + functionName + glslArgumentString + ") {\n" +
+            body +
+            "return " +
+            "\n}"
     }
 }
 

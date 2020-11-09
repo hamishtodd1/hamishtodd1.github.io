@@ -17,6 +17,11 @@ const namedMvs = {}
 const orderedNames = []
 const colorPointValues = {}
 
+const newlineAndLiteralDeclarationNumbers = [] //as in, when you declared it
+//when a literal or newline is inserted, something must happen
+//Those are special events right?
+
+
 const carat = {
     positionInString: -1,
     lineNumber: -1,
@@ -30,12 +35,14 @@ let backgroundString =
    0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,1.,0.,
    0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,1.,0.,
 
-   sinusoidal(globe)
-
+   //sinusoidal(globe)
 
    
+   
+   
 `
-//doubleAndAddFive(0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.5,0.,0.,) = a + a + 5.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,
+//dbl(0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.5,0.,0.,)
+//   a + a
 
 // `
 //    0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.4,0.,1.,0.,color //colored

@@ -5,6 +5,27 @@
     and we have orderedNames, which is how things are allocated along the code
         Orderednames can have things taken away from it at random places
         When called upon to make a "new" name, we take the lowest unused thing from alphabeticalNames
+
+    What you want to see is
+        Lines of code that output to a certain color stay that way
+        But there are many reasons that a line might stop outputting
+        Probably inevitable that you're going to be compiling lines only when they're changed
+        Could just put the
+    Because of function scopes
+
+    For every single line start you have a number. They tell you the order they were created in. They can go high, no reason to reuse them
+    And you get name ascriptions to numbers
+    Line stops working or gets deleted, that name becomes available (top of the stack)
+    Line needs a name, we check if its number has a name already,
+        if so ascribe that one
+        if not it gets the one at the top of the stack
+
+
+    SOOOOO
+        For all newlines and literals, you know when they were made
+        
+
+    you type the color code of the thing, it turns into an index in the background string
 */
 
 function initNamesAndBasis()
@@ -40,31 +61,13 @@ function initNamesAndBasis()
 
             return name
         }
+
         //for every name there is an mv ready to be used, but we might not use it
         while (alphabeticalNames.length < MAX_THINGS) {
             let newName = generateName()
             alphabeticalNames.push(newName)
             namedMvs[newName] = new Float32Array(16)
         }
-    }
-
-    getNamedMv = (name) => {
-        let nameLettersOrdered = []
-        for(let i = 0; i < name.length; ++i)
-            nameLettersOrdered.push(name[i])
-        nameLettersOrdered.sort((a,b)=>a<b?-1:1)
-
-        for (let i = 0; i < MAX_THINGS; ++i)
-            if(nameLettersOrdered.length === alphabeticalNames[i].length) {
-                for (let j = 0, jl = nameLettersOrdered.length; j < jl; ++j) {
-                    if (nameLettersOrdered[j] !== alphabeticalNames[i][j])
-                        break
-                    else if(j === jl-1)
-                        return namedMvs[i]
-                }
-            }
-
-        return null
     }
 
     getLowestUnusedName = () => {
@@ -85,32 +88,59 @@ function initNamesAndBasis()
         return lowestUnusedName
     }
 
-    getNumLines = () => {
-        let numLines = 1
-        for (let i = 0, il = backgroundString.length; i < il; ++i)
-            if (backgroundString[i] === "\n")
-                ++numLines
-
-        return numLines
+    getLowestUnusedName = () => {
+        
     }
 
-    // bindButton("Enter", () => {
-    //     let numLines = getNumLines()
+    let declarationCountSoFar = 0
+    let historicalDeclarationCounts = []
+    let nameHistoricalDeclarationCounts = {}
+    alphabeticalNames.forEach((name) => {
+        nameHistoricalDeclarationCounts[name] = -1
+    })
 
-    //     if (numLines >= MAX_THINGS)
-    //         log("too many variables for current system!")
-    //     else {
-    //         addStringAtCarat("\n")
-    //         orderedNames.splice(carat.positionInOrderedNames, 0, getLowestUnusedName())
-    //         //the deal is that you might have just broken up a line that makes something into two lines that make something
-    //         //it's the same problem with deleting and backspace
-    //         //we can avoid having to add one here, but then where do you add it?
-    //         //in pad.js, when deciding what color will be in the column, somehow you know from if the carat is at that place?
-    //         //does knowing carat.lineNumber help at all?
-    //         //so ok you have lines that don't have one allocated. Then you allocate one in pad.js when there's something on the line
-    //         //but you have to
-    //     }
-    // })
+    // when you make a new literal or a newline
+    if(0) {
+        //this is when you make a literal
+        //Newline, dunno whether that gets one until runtime! So,
+        historicalDeclarationCounts.splice(carat.positionInOrderedNames, 0, declarationCountSoFar)
+
+        //if it's a literal
+        // for (let i = 0, il = alphabeticalNames.length; i < il; ++i) {
+        //     if (historicalDeclarationCounts[alphabeticalNames[i]] === -1) {
+        //         historicalDeclarationCounts[alphabeticalNames[i]] = declarationCountSoFar
+        //         break
+        //     }
+        // }
+        ++declarationCountSoFar
+    }
+    
+    //when you delete a literal or newline
+    if(0) {
+        let declarationCountBeingRemoved = historicalDeclarationCounts.splice(carat.positionInOrderedNames, 1)[0]
+        let nameBeingRemoved = keyOf(historicalDeclarationCounts, declarationCountBeingRemoved)
+        historicalDeclarationCounts[nameBeingRemoved] = -1
+        zeroMv(namedMvs[nameBeingRemoved])
+    }
+
+    
+    
+
+    
+    getDeclarationName = (declarationCountInProgram) => { // either newline or literal. Not all newlines have names and so they don't get ascribed them
+        if(frameCount === 0) {
+            log("yes, this happens")
+            historicalDeclarationCounts.push(declarationCountSoFar)
+            ++declarationCountSoFar
+        }
+        console.assert(declarationCountInProgram < historicalDeclarationCounts.length)
+
+        let historicalDeclarationCount = historicalDeclarationCounts[declarationCountInProgram]
+        let name = keyOf(nameHistoricalDeclarationCounts, historicalDeclarationCount) // and give it a name if it lacks one
+
+        return name
+    }
+
 
     // bindButton("2", () => {
     //     let defaultLineString = "0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,0.,0.,0.,0.,0.,"
@@ -121,53 +151,5 @@ function initNamesAndBasis()
     //     let defaultPointString = "0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,"
     //     addStringAtCarat(defaultPointString)
     //     orderedNames.splice(carat.positionInOrderedNames, 0, getLowestUnusedName() )
-    // })
-
-    //TODO these should fully remove mvs too. There's really very little reason to see the name after you've made it
-    // bindButton("Backspace", () => {
-    //     if (carat.positionInString === 0)
-    //         return
-        
-    //     let strLength = 1
-
-    //     if (backgroundString[carat.positionInString - 1] === "\n")
-    //         orderedNames.splice(carat.positionInOrderedNames-1, 1)
-    //     else if (backgroundString[carat.positionInString - 1] === "]") {
-    //         let backgroundStringLength = backgroundString.length
-    //         for (strLength; strLength < backgroundStringLength; ++strLength) {
-    //             if (backgroundString[carat.positionInString - strLength] === "[")
-    //                 break
-    //         }
-    //     }
-
-    //     log("todo use the splice function")
-    //     // backgroundString =
-    //     //     backgroundString.substring(0, carat.positionInString - strLength) +
-    //     //     backgroundString.substring(carat.positionInString)
-
-    //     carat.moveAlongString(-strLength)
-    // })
-    // bindButton("Delete", () => {
-    //     let backgroundStringLength = backgroundString.length
-    //     if (carat.positionInString === backgroundStringLength-1)
-    //         return
-
-    //     let strLength = 1
-
-    //     if (backgroundString[carat.positionInString] === "\n")
-    //         orderedNames.splice(carat.positionInOrderedNames, 1)
-    //     else if (backgroundString[carat.positionInString] === "[") {
-    //         let backgroundStringLength = backgroundString.length
-    //         for (strLength; strLength < backgroundStringLength; ++strLength)
-    //             if (backgroundString[carat.positionInString + strLength] === "]") {
-    //                 ++strLength
-    //                 break
-    //             }
-    //     }
-        
-    //     console.log("TODO use splice")
-    //     // backgroundString =
-    //     //     backgroundString.substring(0, carat.positionInString) +
-    //     //     backgroundString.substring(carat.positionInString + strLength)
     // })
 }

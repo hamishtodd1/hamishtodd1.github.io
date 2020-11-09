@@ -91,6 +91,7 @@
 
 				function loop() {
 					mouse.updateFromAsyncAndCheckClicks()
+					//may wish to have keyboard too. You could even have >1 letter per frame!
 
 					for(var i = 0; i < updateFunctions.length; i++)
 						updateFunctions[i]()

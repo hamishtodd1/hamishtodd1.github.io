@@ -14,42 +14,38 @@ function initCompileViewer(displayableCharacters, columnBackground) {
 
     initErrorHighlight()
 
-    //better as an enum but hey
     let finiteCategories = {
         infix: ["*","+"],
         separator: ["(", ")", ",", " "]
     }
     let categoryNames = Object.keys(finiteCategories)
-
-    let tokenCategories = []
-    let tokenStarts = []
-    let declarationTokenIndices = {}
-    getTokenEnd = function (tokenInfo) {
-        let tokenIndex = typeof tokenInfo === "number" ? tokenInfo : declarationTokenIndices[tokenInfo]
-        return tokenIndex === tokenStarts.length - 1 ? backgroundString.length : tokenStarts[tokenIndex + 1]
-    }
-    declarationPosition = function (name) {
-        return tokenStarts[declarationTokenIndices[name]]
-    }
-
-    getNewNameAssociatedToTokenIndex = function(tokenIndex) {
-        for (variableName in declarationTokenIndices) {
-            if (declarationTokenIndices[variableName] === tokenIndex)
-                return variableName
-        }
-        return null
-    }
+    let alphabet = "abcdefghijklmnopqrstuvwxyz"
 
     let drawingPosition = new ScreenPosition()
     compileView = () => {
+
+        let tokenCategories = []
+        let tokenStarts = []
+        let declarationTokenIndices = {}
+        getTokenEnd = function (tokenInfo) {
+            let tokenIndex = typeof tokenInfo === "number" ? tokenInfo : declarationTokenIndices[tokenInfo]
+            return tokenIndex === tokenStarts.length - 1 ? backgroundString.length : tokenStarts[tokenIndex + 1]
+        }
+        declarationPosition = function (name) {
+            return tokenStarts[declarationTokenIndices[name]]
+        }
+
+        getNewNameAssociatedToTokenIndex = function (tokenIndex) {
+            for (variableName in declarationTokenIndices) {
+                if (declarationTokenIndices[variableName] === tokenIndex)
+                    return variableName
+            }
+            return null
+        }
+
         let backgroundStringLength = backgroundString.length
+
         carat.preParseFunc()
-
-        let alphabet = "abcdefghijklmnopqrstuvwxyz"
-
-        //memory leak?
-        tokenCategories.length = 0
-        tokenStarts.length = 0
 
         //////////////////////////
         ////  TOKENIZINGING   ////
@@ -131,17 +127,7 @@ function initCompileViewer(displayableCharacters, columnBackground) {
         ////  TRANSPILING  ////
         ///////////////////////
 
-        let positionInOrderedNames = 0
-        function assignMvToName(tokenIndex) {
-            while(positionInOrderedNames >= orderedNames.length)
-                orderedNames.push(getLowestUnusedName())
-
-            let name = orderedNames[positionInOrderedNames]
-            ++positionInOrderedNames
-            declarationTokenIndices[name] = tokenIndex
-
-            return name
-        }
+        let declaration = 0
 
         for (propt in declarationTokenIndices)
             delete declarationTokenIndices[propt]
@@ -153,18 +139,25 @@ function initCompileViewer(displayableCharacters, columnBackground) {
         forEachToken( (tokenIndex, tokenStart, tokenEnd, tokenCategory, token) => {
             switch (tokenCategory) {
                 case "literal":
-                    let name = assignMvToName(tokenIndex)
+                    let name = getDeclarationName(declaration)
+                    ++declaration
+                    declarationTokenIndices[name] = tokenIndex
+
                     parseMv(backgroundString.substr(tokenStart, tokenEnd - tokenStart), namedMvs[name])
                     lineLexemes.push(name)
                     break
 
                 case "newline":
                     if (lineLexemes.length > 1) { //if it's 1 or 0, nothing to be made
+                        let name = getDeclarationName(declaration)
+                        ++declaration
+                        declarationTokenIndices[name] = tokenIndex
 
-                        let name = assignMvToName(tokenIndex)
-                        let placeWhereTranspilationFailed = transpile(lineLexemes, namedMvs[name])
-                        if (placeWhereTranspilationFailed !== -1) 
+                        let transpilationResult = transpileLine(lineLexemes)
+                        if (typeof transpilationResult === "number")
                             errorNewLines.push(tokenIndex)
+                        else
+                            eval(parsedString + "namedMvs[" + name + "])")
                     }
                     lineLexemes.length = 0
                     break
@@ -232,7 +225,7 @@ function initCompileViewer(displayableCharacters, columnBackground) {
                         if (drawingPosition.y === displayWindows[i].verticalPositionToRenderMvsFrom) {
                             displayWindows[i].numMvs = 0
                             for (let j = 0; j < namesInLine.length; ++j) {
-                                if (orderedNames.indexOf(namesInLine[j]) !== -1)
+                                if (namedMvs.indexOf(namesInLine[j]) !== -1)
                                     displayWindows[i].addMv(namesInLine[j]) //TODO shouldn't be any repeats
                             }
                         }
@@ -251,7 +244,7 @@ function initCompileViewer(displayableCharacters, columnBackground) {
                 case "identifier":
                     if (token === "globe")
                         drawEarth(drawingPosition,tokenStart, tokenEnd)
-                    else if (orderedNames.indexOf(token) !== -1)
+                    else if (namedMvs.indexOf(token) !== -1)
                         drawAndMoveAlong(token, tokenStart, tokenEnd)
                     else
                         drawTokenCharacters(tokenStart, tokenEnd)

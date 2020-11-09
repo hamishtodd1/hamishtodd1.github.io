@@ -1,3 +1,20 @@
+keyOf = (obj,thing) => {
+    for (propt in obj) {
+        if (obj[propt] === thing)
+            return propt
+    }
+    return -1
+}
+
+getNumLines = () => {
+    let numLines = 1
+    for (let i = 0, il = backgroundString.length; i < il; ++i)
+        if (backgroundString[i] === "\n")
+            ++numLines
+
+    return numLines
+}
+
 function lerp(a,b,t) {
     return a + (b-a)*t
 }

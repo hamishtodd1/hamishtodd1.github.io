@@ -60,8 +60,6 @@ function initCarat() {
     carat.preParseFunc = function()  {
         closestGridPosition.x = Infinity
         closestGridPosition.y = Infinity
-
-        carat.positionInOrderedNames = 0
     }
 
     carat.duringParseFunc = function (drawingPosition,drawingPositionInString) 
