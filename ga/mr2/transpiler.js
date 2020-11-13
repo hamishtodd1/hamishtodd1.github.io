@@ -25,14 +25,14 @@ function initTranspiler()
     }
 
     let parsedString = ""
-    sigh = () => {
+    logLastParsedString = () => {
         log(parsedString)
     }
     let numberedMvs = Array()
 
     let infixFunctions = {
         "+": "gAdd",
-        "=": "def"
+        "=": "assign"
         //wedge
         //subtract
         //divide
@@ -92,6 +92,7 @@ function initTranspiler()
         for (let i = 0, il = lexemes.length; i < il; ++i) {
             let lexeme = lexemes[i]
 
+            //token categories!
             let isMvName = namedMvs.indexOf(lexeme) !== -1
             let isFunction = functionNames.indexOf(lexeme) !== -1
             let isOpenBracket = lexeme === "("

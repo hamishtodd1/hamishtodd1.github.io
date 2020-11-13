@@ -73,7 +73,7 @@ function verticesDisplay(vertBuffer, mode, r,g,b)
 
         cameraAndFrameCountShaderStuff.transfer(program)
 
-        program.doSomethingWithVertexAttribute("vert", vertBuffer)
+        program.prepareVertexAttribute("vert", vertBuffer)
 
         gl.drawArrays(mode, 0, vertBuffer.length / 4);
     }
@@ -129,7 +129,7 @@ function verticesDisplayWithPosition(pointsBuffer, mode, r,g,b)
 
             gl.uniform2f(program.uniformLocations.screenPosition, screenPosition.x, screenPosition.y);
 
-            program.doSomethingWithVertexAttribute("point", pointsBuffer)
+            program.prepareVertexAttribute("point", pointsBuffer)
 
             gl.drawArrays(mode, 0, pointsBuffer.length / 4);
         }

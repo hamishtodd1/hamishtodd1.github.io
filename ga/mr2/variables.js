@@ -13,14 +13,8 @@ const rightMouseResponses = []
 
 //---------Varying state
 
-const namedMvs = {}
-const orderedNames = []
-const colorPointValues = {}
-
-const newlineAndLiteralDeclarationNumbers = [] //as in, when you declared it
-//when a literal or newline is inserted, something must happen
-//Those are special events right?
-
+const pictogramDrawers = []
+const namedMvs = {} //TODO should be in the above
 
 const carat = {
     positionInString: -1,
@@ -31,16 +25,16 @@ const carat = {
 const displayWindows = []
 
 let backgroundString = 
-`   //basis
-   0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,1.,0.,
-   0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,1.,0.,
-
-   //sinusoidal(globe)
+`
+  //basis
 
    
    
    
 `
+//    0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,1.,0.,
+//    0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,1.,0.,
+
 //dbl(0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.5,0.,0.,)
 //   a + a
 

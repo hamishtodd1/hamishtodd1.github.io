@@ -1,6 +1,13 @@
 // for the colored ones, might be nice to surround them with the circle
 
+let alreadyDone = false
 function initFrames() {
+
+    if(alreadyDone) {
+        console.error("DONE THIS")
+        return
+    }
+
     let indices = []
     let oneSideIndices = [0,1,2,  1,3,2]
     for(let i = 0; i < 4; ++i) {
@@ -80,14 +87,14 @@ function initFrames() {
     let framePositions = []
     let hexantColorses = []
     let numToDraw = 0
-    addColoredFrameToDraw = function(x,y,r,g,b) {
+    addUnnamedFrameToDraw = function(x,y,r,g,b) {
         framePositions[numToDraw * 2 + 0] = x
         framePositions[numToDraw * 2 + 1] = y
 
         for(let i = 0; i < 6; ++i) {
-            hexantColorses[numToDraw*18 + i * 3 + 0] = r
-            hexantColorses[numToDraw*18 + i * 3 + 1] = g
-            hexantColorses[numToDraw*18 + i * 3 + 2] = b
+            hexantColorses[numToDraw*18 + i * 3 + 0] = r || 0.
+            hexantColorses[numToDraw*18 + i * 3 + 1] = g || 0.
+            hexantColorses[numToDraw*18 + i * 3 + 2] = b || 0.
         }
         ++numToDraw
     }
@@ -105,7 +112,7 @@ function initFrames() {
         gl.useProgram(program.glProgram);
         cameraAndFrameCountShaderStuff.transfer(program)
 
-        program.doSomethingWithVertexAttribute("point", vertsBuffer)
+        program.prepareVertexAttribute("point", vertsBuffer)
 
         for(let i = 0; i < numToDraw; ++i) {
             for(let j = 0; j < 18; j++)

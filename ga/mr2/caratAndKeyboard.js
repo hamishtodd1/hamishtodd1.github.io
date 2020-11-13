@@ -13,8 +13,8 @@ function initCarat() {
     Object.assign(carat, verticesDisplayWithPosition(caratVerticesBuffer, gl.TRIANGLES,1.,1.,1.))
     carat.position.x = -1000.
     carat.position.y = 1000.
-    addRenderFunction(() =>
-    {
+    addRenderFunction(() => {
+        
         let msSinceFlashingStart = Date.now() - carat.flashingStart
         if (Math.floor(msSinceFlashingStart / 500.) % 2 === 0)
         {
@@ -110,7 +110,7 @@ function initTypeableCharacters()
         bindButton(character, () => addStringAtCarat(character))
     }
 
-    let initialCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ()+-= "
+    let initialCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ()+-=/ "
     for (let i = 0; i < initialCharacters.length; ++i)
         makeCharacterTypeable(initialCharacters[i])
     

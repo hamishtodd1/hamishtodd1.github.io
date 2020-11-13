@@ -81,7 +81,7 @@ function Program(vsSource, fsSource) {
             location: gl.getAttribLocation(glProgram, name + "A") //yeah don't forget that
         }
     }
-    program.doSomethingWithVertexAttribute = (name,updatedArray) => {
+    program.prepareVertexAttribute = (name,updatedArray) => {
         let va = program.vertexAttributes[name]
 
         gl.enableVertexAttribArray(va.location); //not sure this is necessary here
@@ -109,8 +109,12 @@ function Program(vsSource, fsSource) {
 function logShader(source)
 {
     let lines = source.split("\n");
-    for (let i = 0; i < lines.length; ++i)
-        log((i + 1) + " " + lines[i])
+    for (let i = 0; i < lines.length; ++i) {
+        let startPosition = 0
+        while (startPosition < lines[i].length && (lines[i][startPosition] === " " || lines[i][startPosition] === " ") )
+            ++startPosition
+        log((i + 1) + " " + lines[i].substr(startPosition))
+    }
 }
 
 sq = (x) => x * x

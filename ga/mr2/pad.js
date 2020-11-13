@@ -20,13 +20,12 @@ async function initPad() {
     }
 
     initCarat()
-    let columnBackground = initColumnBackground()
 
     let typeableCharacters = initTypeableCharacters()
-    let displayableCharacters = typeableCharacters + "=/ " + freeVariableCharacters
+    let displayableCharacters = typeableCharacters + freeVariableCharacters
     initCharacterTexture(displayableCharacters)
 
-    initCompileViewer(displayableCharacters, columnBackground)
+    initCompileViewer(displayableCharacters)
 
     updateFunctions.splice(0, 0, () =>{
         alreadModifiedThisFrame = false

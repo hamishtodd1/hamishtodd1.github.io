@@ -48,7 +48,7 @@ function initErrorHighlight() {
 
     addRenderFunction(() => {
         gl.useProgram(program.glProgram);
-        program.doSomethingWithVertexAttribute("point", farBackQuadBuffer)
+        program.prepareVertexAttribute("point", farBackQuadBuffer)
         cameraAndFrameCountShaderStuff.transfer(program)
 
         for(let i = 0; i < numHighlights; ++i) {

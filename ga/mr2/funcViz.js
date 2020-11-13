@@ -85,7 +85,7 @@ function initFuncViz() {
     addRenderFunction(() => {
         gl.useProgram(program.glProgram);
         cameraAndFrameCountShaderStuff.transfer(program)
-        program.doSomethingWithVertexAttribute("domainValue", domainValueBuffer)
+        program.prepareVertexAttribute("domainValue", domainValueBuffer)
         gl.drawArrays(gl.TRIANGLES, 0, domainValueBuffer.length / 4);
     })
 }

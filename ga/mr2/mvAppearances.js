@@ -81,7 +81,7 @@ function initMvAppearances() {
         for (let i = 0, il = pointColorIndexBuffer.length; i < il; ++i)
             pointColorIndexBuffer[i] = Math.floor(i / il * 6)
 
-        const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + gaShaderString + `
+        const vsSource = shaderHeaderWithCameraAndFrameCount + gaShaderString + `
             attribute vec4 vertA;
             varying vec4 p;
             
@@ -109,7 +109,7 @@ function initMvAppearances() {
             `
             + cameraAndFrameCountShaderStuff.footer
             // logShader(vsSource)
-        const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+        const fsSource = shaderHeaderWithCameraAndFrameCount + `
             varying vec3 color;
             varying vec4 p;
 
@@ -154,8 +154,8 @@ function initMvAppearances() {
         var drawPoints = () => {
             gl.useProgram(program.glProgram);
             cameraAndFrameCountShaderStuff.transfer(program)
-            program.doSomethingWithVertexAttribute("vert", vertBuffer)
-            program.doSomethingWithVertexAttribute("colorIndex", pointColorIndexBuffer)
+            program.prepareVertexAttribute("vert", vertBuffer)
+            program.prepareVertexAttribute("colorIndex", pointColorIndexBuffer)
 
             drawBladeBatch((index) => {
                 let mv = namedMvs[names[index]]
@@ -165,7 +165,8 @@ function initMvAppearances() {
 
                     gl.uniform1f(program.uniformLocations.spaceScale, spaceScales[index])
 
-                    if ( colorPointValues[names[index]]) {
+                    let colorPointBasedOnPosition = false
+                    if ( colorPointBasedOnPosition) {
                         planeToBall(mv, discPosition)
                         gl.uniform4f(program.uniformLocations.visualPosition, pointX(discPosition) / pointW(discPosition), pointY(discPosition) / pointW(discPosition), pointZ(discPosition) / pointW(discPosition), 1.)
                         gl.uniform1f(program.uniformLocations.visualizeColor, 1.)
@@ -185,7 +186,7 @@ function initMvAppearances() {
 
     //line, both real and ideal apparently
     {
-        const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+        const vsSource = shaderHeaderWithCameraAndFrameCount + `
             attribute vec4 vertA;
             
             //might be better to work out ends in here
@@ -205,7 +206,7 @@ function initMvAppearances() {
                 gl_Position.xy += screenPosition;
             `
             + cameraAndFrameCountShaderStuff.footer
-        const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+        const fsSource = shaderHeaderWithCameraAndFrameCount + `
             varying vec3 color;
 
             void main(void) {
@@ -283,8 +284,8 @@ function initMvAppearances() {
                         vertsBuffer[i*8+6] = lerp(endPoints[0][2],endPoints[1][2],(i+1.)/6.)
                         vertsBuffer[i*8+7] = lerp(endPoints[0][3],endPoints[1][3],(i+1.)/6.)
                     }
-                    program.doSomethingWithVertexAttribute("vert", vertsBuffer)
-                    program.doSomethingWithVertexAttribute("colorIndex", indexBuffer)
+                    program.prepareVertexAttribute("vert", vertsBuffer)
+                    program.prepareVertexAttribute("colorIndex", indexBuffer)
 
                     gl.uniform3fv(program.uniformLocations.hexantColors, nameToHexantColors(names[index], hexantColors))
 
@@ -304,7 +305,7 @@ function initMvAppearances() {
         //light can be built into shader
         //pretty important for points and lines to be poking out of planes they are precisely in
 
-        const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + gaShaderString + `
+        const vsSource = shaderHeaderWithCameraAndFrameCount + gaShaderString + `
             attribute vec4 vertA;
             varying vec4 p;
 
@@ -313,7 +314,7 @@ function initMvAppearances() {
 
                 gl_Position = p;
             ` + cameraAndFrameCountShaderStuff.footer
-        const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + gaShaderString + `
+        const fsSource = shaderHeaderWithCameraAndFrameCount + gaShaderString + `
             varying vec4 p;
 
             uniform vec4 elements;
@@ -351,7 +352,7 @@ function initMvAppearances() {
 
             cameraAndFrameCountShaderStuff.transfer(program)
 
-            program.doSomethingWithVertexAttribute("vert")
+            program.prepareVertexAttribute("vert")
 
             gl.uniform4f(program.uniformLocations.elements, planeX(mv), planeY(mv), planeY(mv), planeW(mv))
 

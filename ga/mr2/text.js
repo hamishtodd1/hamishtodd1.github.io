@@ -140,9 +140,9 @@ function initCharacterTexture(displayableCharacters) {
         gl.uniform1f(program.uniformLocations.topAtZZero, mainCamera.topAtZZero);
         gl.uniform1f(program.uniformLocations.frontAndBackZ, mainCamera.frontAndBackZ);
 
-        program.doSomethingWithVertexAttribute("point")
-        program.doSomethingWithVertexAttribute("screenPosition",positionAttributeBuffer)
-        program.doSomethingWithVertexAttribute("characterIndex",characterAttributeBuffer)
+        program.prepareVertexAttribute("point")
+        program.prepareVertexAttribute("screenPosition",positionAttributeBuffer)
+        program.prepareVertexAttribute("characterIndex",characterAttributeBuffer)
 
         gl.drawArrays(gl.TRIANGLES, 0, numCharactersToDraw * 6);
 

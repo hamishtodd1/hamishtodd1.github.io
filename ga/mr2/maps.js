@@ -1,6 +1,8 @@
 /*
     NOTE SERIOUS CONFUSION: IS Z POSITIVE OR NEGATIVE?
 
+    Werner is equal-area! Presumably sinusoidal too
+
     Use of the algebra
         mercator(picture of a globe) = abs(log(centralCylindrical(picture of a globe)))
         linalg may be sufficient, since you are stuck at the origin
@@ -305,7 +307,7 @@ async function initWorldMap() {
     addRenderFunction( () => {
         gl.useProgram(program.glProgram);
 
-        program.doSomethingWithVertexAttribute("uv")
+        program.prepareVertexAttribute("uv")
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -496,7 +498,7 @@ async function initDymaxion()
     addRenderFunction( () => {
         gl.useProgram(program.glProgram);
 
-        program.doSomethingWithVertexAttribute("uv")
+        program.prepareVertexAttribute("uv")
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texture);

@@ -70,24 +70,22 @@
 
 				initPremadeBuffers()
 
-				await initMapsIntegrated()
+				// await initMapsIntegrated()
 				
 				initButtons()
 				initMouse()
 				initWindowResizeSystem()
 
-				initNamesAndBasis()
-
 				initMvAppearances()
 
-				initTranspiler()
+				initPictogramDrawers()
+
+				// initTranspiler()
 
 				// await initWorldMap()
 				// await initDymaxion()
 
-				// initDebugPad()
-
-				await initPad()
+				// await initPad()
 
 				function loop() {
 					mouse.updateFromAsyncAndCheckClicks()
@@ -115,17 +113,17 @@
 
 		<script src="shaderUtils.js"></script>
 
+		<script src="pictogramDrawers.js"></script>
+
 		<script src="../common/buttons.js"></script>
 
 		<script src="windowResizeSystem.js"></script>
-
-		<script src="names.js"></script>
 
 		<script src="text.js"></script>
 		
 
 		<script src="pad.js"></script>
-		<script src="compiler.js"></script>
+		<script src="compilerViewer.js"></script>
 		<script src="errorHighlight.js"></script>
 
 		<script src="textureSampler.js"></script>
@@ -145,8 +143,6 @@
 		<script src="displays.js"></script>
 
 		<script src="colors.js"></script>
-
-		<script src="names.js"></script>
 
 		<script src="mouse.js"></script>
 

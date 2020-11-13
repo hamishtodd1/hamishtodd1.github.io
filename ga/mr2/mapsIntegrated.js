@@ -1,5 +1,35 @@
+/*  
+    So there's going to be a function equirectangular(a)
+        if a is a vector, it returns a vector
+        if a is a globe with a texture on it, it returns that globe mapped
+        The globe and the projections are two different kinds of object? One's a texture and one's map projection?
+
+        Aaand it might be the dymaxion
+*/
+
 async function initMapsIntegrated() {
 
+    let glslMappingFunction = `
+        float lat = asin(dot(p,vec3()));
+    `
+
+    {
+        let texturedGlobePictograms = ["cmb", "ball", "earthColor", "jupiter"]
+        texturedGlobePictograms.addToRenderList = () => {
+
+        }
+        pictogramTypeArrays.push(texturedGlobePictograms)
+
+        let mapProjectionPictograms = []
+        //you'll add eg "equirectangular" to that
+        //that gets compiled to a vertex shader
+        //these are a type that can only be output by a vertex mapping function applied to a texturedGlobe
+        mapProjectionPictograms.addToRenderList = (projectionFunction, texturedGlobe) => {
+
+        }
+        pictogramTypeArrays.push(mapProjectionPictograms)
+    }
+    
     const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
         attribute vec2 uvA;
         varying vec2 uv;
@@ -43,7 +73,6 @@ async function initMapsIntegrated() {
         uniform sampler2D sampler;
 
         void main(void) {
-            // .x + 8./256. if you want Asia intact
             vec4 texelColor = texture2D(sampler, vec2(uv.x,1.-uv.y)); //1- because jfc opengl
 
             gl_FragColor = vec4(texelColor.rgb, texelColor.a);
@@ -53,9 +82,14 @@ async function initMapsIntegrated() {
     const program = Program(vsSource, fsSource)
     cameraAndFrameCountShaderStuff.locateUniforms(program)
     program.locateUniform("frameCount")
-    locateUniformDualQuat(program, "transform")
 
-    const texture = await Texture("data/earthColor.png")
+    let sphereTextureFilenames = [
+        "earthColor",
+        "ball",
+        "cmb",
+        "jupiter",
+    ]
+    const texture = await Texture("data/" + sphereTextureFilenames[0] + ".png")
     program.locateUniform("sampler")
 
     let numDivisions = 256
@@ -81,60 +115,61 @@ async function initMapsIntegrated() {
     let numVertices = uvBuffer.length / 2
 
     let transform = new DualQuat()
+    locateUniformDualQuat(program, "transform")
 
-    let axis = new DualQuat()
-    axis.realLine[2] = 1.
-    let ourTranslator = new DualQuat()
-    let ourRotator = new DualQuat()
-    let deltaRotator = new DualQuat()
+    //mouse shit
+    {
+        // let axis = new DualQuat()
+        // axis.realLine[2] = 1.
+        // let ourTranslator = new DualQuat()
+        // let ourRotator = new DualQuat()
+        // let deltaRotator = new DualQuat()
 
-    let mouseDelta = new Float32Array(16)
-    let padPlane = new Float32Array(16)
-    plane(padPlane, 0.,0.,1.,0.)
+        // let mouseDelta = new Float32Array(16)
+        // let padPlane = new Float32Array(16)
+        // plane(padPlane, 0.,0.,1.,0.)
 
-    rightMouseResponses.push({
-        z: () => 0.,
-        during: () => {
-            point(mouseDelta, mouse.position.x - mouse.positionOld.x, mouse.position.y - mouse.positionOld.y, 0.,0.)
-            if (pointIdealNorm(mouseDelta) > 0.) {
-                
-                dqToMv(ourRotator, mv0);
-                reverse(mv0, mv0); //pretty sure reverse is inverse transformation
-                gp(mv0, mouseDelta, mv1);
-                reverse(mv0, mv0);
-                gp(mv1, mv0, mv2); //mv2 is now transformed mouseDelta
-                // debugger
+        // rightMouseResponses.push({
+        //     z: () => 0.,
+        //     during: () => {
+        //         point(mouseDelta, mouse.position.x - mouse.positionOld.x, mouse.position.y - mouse.positionOld.y, 0.,0.)
+        //         if (pointIdealNorm(mouseDelta) > 0.) {
 
-                gp(mv2)
-                debugger
+        //             dqToMv(ourRotator, mv0);
+        //             reverse(mv0, mv0); //pretty sure reverse is inverse transformation
+        //             gp(mv0, mouseDelta, mv1);
+        //             reverse(mv0, mv0);
+        //             gp(mv1, mv0, mv2); //mv2 is now transformed mouseDelta
+        //             // debugger
 
-                meet(dual(mouseDelta, mv2), padPlane, mv1)
-                mvToDq(mv1, axis)
+        //             gp(mv2)
+        //             debugger
 
-                normalizeDq(axis, axis)
-                rotator(axis, -pointIdealNorm(mouseDelta), deltaRotator)
-                normalizeDq(deltaRotator, deltaRotator)
+        //             meet(dual(mouseDelta, mv2), padPlane, mv1)
+        //             mvToDq(mv1, axis)
 
-                multiplyDq(ourRotator, deltaRotator, ourRotator)
-            }
-        }
-    })
+        //             normalizeDq(axis, axis)
+        //             rotator(axis, -pointIdealNorm(mouseDelta), deltaRotator)
+        //             normalizeDq(deltaRotator, deltaRotator)
 
-    drawEarth = (drawingPosition,tokenStart,tokenEnd) => {
-        addColoredFrameToDraw(drawingPosition.x + .5, drawingPosition.y, 0.,0.,0.)
+        //             multiplyDq(ourRotator, deltaRotator, ourRotator)
+        //         }
+        //     }
+        // })
+    }
+
+    drawEarth = (drawingPosition) => {
+        addUnnamedFrameToDraw(drawingPosition.x + .5, drawingPosition.y, 0.,0.,0.)
         
-        ourTranslator.idealLine[0] = -.5 * (drawingPosition.x + .5)
-        ourTranslator.idealLine[1] = -.5 *  drawingPosition.y
-        normalizeDq(ourTranslator,ourTranslator)
-        
-        drawingPosition.x += 1.
-        carat.moveOutOfToken(tokenStart, tokenEnd)
+        transform.idealLine[0] = -.5 * (drawingPosition.x + .5)
+        transform.idealLine[1] = -.5 *  drawingPosition.y
+        normalizeDq(transform,transform)
     }
 
     addRenderFunction(() => {
         gl.useProgram(program.glProgram);
 
-        program.doSomethingWithVertexAttribute("uv")
+        program.prepareVertexAttribute("uv")
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -143,7 +178,7 @@ async function initMapsIntegrated() {
         cameraAndFrameCountShaderStuff.transfer(program)
         gl.uniform1f(program.uniformLocations.frameCount, frameCount);
 
-        multiplyDq(ourTranslator,ourRotator, transform)
+        // multiplyDq(ourTranslator,ourRotator, transform)
         // assignDq(ourRotator,transform)
         transferDualQuat(transform, "transform", program)
 

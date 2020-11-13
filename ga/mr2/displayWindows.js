@@ -31,7 +31,7 @@ function initDisplayWindows() {
 
             cameraAndFrameCountShaderStuff.transfer(program)
 
-            program.doSomethingWithVertexAttribute("vert", quadBuffer)
+            program.prepareVertexAttribute("vert", quadBuffer)
 
             gl.uniform2f(program.uniformLocations.screenPosition, x, y);
 
@@ -71,8 +71,10 @@ function initDisplayWindows() {
                 this.position.y - dimension/2.)
         },
         addMv: function(name) {
-            this.mvNames[this.numMvs] = name
-            ++this.numMvs
+            if(this.mvNames.indexOf(name) !== -1) {
+                this.mvNames[this.numMvs] = name
+                ++this.numMvs
+            }
         }
     })
     

@@ -98,7 +98,7 @@ function drawColorWheel()
 
 		cameraAndFrameCountShaderStuff.transfer(program)
 
-		program.doSomethingWithVertexAttribute("vert")
+		program.prepareVertexAttribute("vert")
 
 		gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4);
 	})
