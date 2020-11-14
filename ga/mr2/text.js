@@ -134,11 +134,11 @@ function initCharacterTexture(displayableCharacters) {
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.uniform1i(program.uniformLocations.sampler, 0);
+        gl.uniform1i(program.getUniformLocation("sampler"), 0);
 
-        gl.uniform1f(program.uniformLocations.rightAtZZero, mainCamera.rightAtZZero);
-        gl.uniform1f(program.uniformLocations.topAtZZero, mainCamera.topAtZZero);
-        gl.uniform1f(program.uniformLocations.frontAndBackZ, mainCamera.frontAndBackZ);
+        gl.uniform1f(program.getUniformLocation("rightAtZZero"), mainCamera.rightAtZZero);
+        gl.uniform1f(program.getUniformLocation("topAtZZero"), mainCamera.topAtZZero);
+        gl.uniform1f(program.getUniformLocation("frontAndBackZ"), mainCamera.frontAndBackZ);
 
         program.prepareVertexAttribute("point")
         program.prepareVertexAttribute("screenPosition",positionAttributeBuffer)

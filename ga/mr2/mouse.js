@@ -29,6 +29,9 @@ function initMouse() {
         return  l <= mouse.position.x && mouse.position.x <= r &&
                 b <= mouse.position.y && mouse.position.y <= t
     }
+    mouse.inSquare = (x,y,radius) => {
+        return mouse.inBounds(x-radius,x+radius,y+radius,y-radius)
+    }
 
     let allMouseResponses = [mouseResponses,rightMouseResponses] //z, start, during, end
     let currentResponses = [null,null]

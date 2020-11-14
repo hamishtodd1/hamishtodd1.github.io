@@ -39,7 +39,7 @@ function initMvAppearances() {
     updateFunctions.push(()=>{
         for (let i = 0; i < numToDraw; ++i) {
             if (mouse.inBounds(screenPositions[i*2+0] - .5, screenPositions[i*2+0] + .5, screenPositions[i*2+1] + .5, screenPositions[i*2+1] - .5)) {
-                mouseDw.respondToHover(screenPositions[i*2+0], screenPositions[i*2+1], names[i])
+                mouseDw.placeBasedOnHover(screenPositions[i*2+0], screenPositions[i*2+1], names[i])
 
                 if (mouse.rightClicking && !mouse.rightClickingOld) {
                     let declarationEnd = getTokenEnd(names[i])
@@ -160,21 +160,21 @@ function initMvAppearances() {
             drawBladeBatch((index) => {
                 let mv = namedMvs[names[index]]
                 if (pointX(mv) !== 0. || pointY(mv) !== 0. || pointZ(mv) !== 0. || pointW(mv) !== 0.) {
-                    gl.uniform3fv(program.uniformLocations.hexantColors, nameToHexantColors(names[index], hexantColors))
-                    gl.uniform2f(program.uniformLocations.screenPosition, screenPositions[index * 2 + 0], screenPositions[index * 2 + 1])
+                    gl.uniform3fv(program.getUniformLocation("hexantColors"), nameToHexantColors(names[index], hexantColors))
+                    gl.uniform2f(program.getUniformLocation("screenPosition"), screenPositions[index * 2 + 0], screenPositions[index * 2 + 1])
 
-                    gl.uniform1f(program.uniformLocations.spaceScale, spaceScales[index])
+                    gl.uniform1f(program.getUniformLocation("spaceScale"), spaceScales[index])
 
                     let colorPointBasedOnPosition = false
                     if ( colorPointBasedOnPosition) {
                         planeToBall(mv, discPosition)
-                        gl.uniform4f(program.uniformLocations.visualPosition, pointX(discPosition) / pointW(discPosition), pointY(discPosition) / pointW(discPosition), pointZ(discPosition) / pointW(discPosition), 1.)
-                        gl.uniform1f(program.uniformLocations.visualizeColor, 1.)
+                        gl.uniform4f(program.getUniformLocation("visualPosition"), pointX(discPosition) / pointW(discPosition), pointY(discPosition) / pointW(discPosition), pointZ(discPosition) / pointW(discPosition), 1.)
+                        gl.uniform1f(program.getUniformLocation("visualizeColor"), 1.)
                     }
                     else {
                         //so ideal points just look like points
-                        gl.uniform4f(program.uniformLocations.visualPosition, pointX(mv), pointY(mv), pointZ(mv), pointW(mv))
-                        gl.uniform1f(program.uniformLocations.visualizeColor, 0.)
+                        gl.uniform4f(program.getUniformLocation("visualPosition"), pointX(mv), pointY(mv), pointZ(mv), pointW(mv))
+                        gl.uniform1f(program.getUniformLocation("visualizeColor"), 0.)
                     }
 
                     //probably want a light in the corner of these boxes so you can get angle of plane
@@ -287,11 +287,11 @@ function initMvAppearances() {
                     program.prepareVertexAttribute("vert", vertsBuffer)
                     program.prepareVertexAttribute("colorIndex", indexBuffer)
 
-                    gl.uniform3fv(program.uniformLocations.hexantColors, nameToHexantColors(names[index], hexantColors))
+                    gl.uniform3fv(program.getUniformLocation("hexantColors"), nameToHexantColors(names[index], hexantColors))
 
-                    gl.uniform1f(program.uniformLocations.spaceScale, spaceScales[index])
+                    gl.uniform1f(program.getUniformLocation("spaceScale"), spaceScales[index])
                 
-                    gl.uniform2f(program.uniformLocations.screenPosition, screenPositions[index * 2 + 0], screenPositions[index * 2 + 1])
+                    gl.uniform2f(program.getUniformLocation("screenPosition"), screenPositions[index * 2 + 0], screenPositions[index * 2 + 1])
                     gl.drawArrays(gl.LINES, 0, vertsBuffer.length / 4)
                 }
             })
@@ -354,7 +354,7 @@ function initMvAppearances() {
 
             program.prepareVertexAttribute("vert")
 
-            gl.uniform4f(program.uniformLocations.elements, planeX(mv), planeY(mv), planeY(mv), planeW(mv))
+            gl.uniform4f(program.getUniformLocation("elements"), planeX(mv), planeY(mv), planeY(mv), planeW(mv))
 
             gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4);
         })

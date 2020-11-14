@@ -311,10 +311,10 @@ async function initWorldMap() {
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.uniform1i(program.uniformLocations.sampler, 0);
+        gl.uniform1i(program.getUniformLocation("sampler"), 0);
 
         cameraAndFrameCountShaderStuff.transfer(program)
-        gl.uniform1f(program.uniformLocations.frameCount, frameCount);
+        gl.uniform1f(program.getUniformLocation("frameCount"), frameCount);
 
         transferDualQuat(transform,"transform",program)
 
@@ -502,20 +502,20 @@ async function initDymaxion()
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.uniform1i(program.uniformLocations.sampler, 0);
+        gl.uniform1i(program.getUniformLocation("sampler"), 0);
 
         cameraAndFrameCountShaderStuff.transfer(program)
-        gl.uniform1f(program.uniformLocations.frameCount, frameCount);
+        gl.uniform1f(program.getUniformLocation("frameCount"), frameCount);
 
         transferDualQuat(transform,"transform",program)
 
-        gl.uniform4fv(program.uniformLocations.animatedVerts, animatedVertsBuffer);
-        gl.uniform4fv(program.uniformLocations.closedVerts, closedVertsBuffer);
+        gl.uniform4fv(program.getUniformLocation("animatedVerts"), animatedVertsBuffer);
+        gl.uniform4fv(program.getUniformLocation("closedVerts"), closedVertsBuffer);
         
         for(let i = 0; i < indices.length; ++i) {
-            gl.uniform1i(program.uniformLocations.blIndex, indices[i][0])
-            gl.uniform1i(program.uniformLocations.brIndex, indices[i][2])
-            gl.uniform1i(program.uniformLocations.tlIndex, indices[i][3])
+            gl.uniform1i(program.getUniformLocation("blIndex"), indices[i][0])
+            gl.uniform1i(program.getUniformLocation("brIndex"), indices[i][2])
+            gl.uniform1i(program.getUniformLocation("tlIndex"), indices[i][3])
 
             gl.drawArrays(gl.TRIANGLES, 0, numVertices);
         }

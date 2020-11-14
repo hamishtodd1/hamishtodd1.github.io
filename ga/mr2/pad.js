@@ -30,7 +30,7 @@ async function initPad() {
     updateFunctions.splice(0, 0, () =>{
         alreadModifiedThisFrame = false
         
-        compileView()
+        // compileView()
     })
 
     await initTextureSampler()

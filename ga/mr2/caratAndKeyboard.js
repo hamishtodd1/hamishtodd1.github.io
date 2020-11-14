@@ -69,7 +69,7 @@ function initCarat() {
                 this.flashingStart = Date.now()
 
             this.position.copy(drawingPosition)
-            caratDw.verticalPositionToRenderMvsFrom = carat.position.y
+            caratDw.verticalPositionToRenderFrom = carat.position.y
         }
 
         if (this.positionInString === -1) {

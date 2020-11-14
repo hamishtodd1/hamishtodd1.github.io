@@ -127,7 +127,7 @@ function verticesDisplayWithPosition(pointsBuffer, mode, r,g,b)
 
             cameraAndFrameCountShaderStuff.transfer(program)
 
-            gl.uniform2f(program.uniformLocations.screenPosition, screenPosition.x, screenPosition.y);
+            gl.uniform2f(program.getUniformLocation("screenPosition"), screenPosition.x, screenPosition.y);
 
             program.prepareVertexAttribute("point", pointsBuffer)
 

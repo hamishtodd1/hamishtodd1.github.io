@@ -263,9 +263,9 @@ function initVideo() {
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
+        gl.uniform1i(programInfo.getUniformLocation("uSampler"), 0);
 
-        gl.uniform1f(programInfo.uniformLocations.uCameraAspect, mainCamera.aspect);
+        gl.uniform1f(programInfo.getUniformLocation("uCameraAspect"), mainCamera.aspect);
 
         const vertexCount = 6;
         const type = gl.UNSIGNED_SHORT;

@@ -52,7 +52,7 @@ function initErrorHighlight() {
         cameraAndFrameCountShaderStuff.transfer(program)
 
         for(let i = 0; i < numHighlights; ++i) {
-            gl.uniform2f(program.uniformLocations.screenPosition, screenPositions[i*2+0], screenPositions[i*2+1]);
+            gl.uniform2f(program.getUniformLocation("screenPosition"), screenPositions[i*2+0], screenPositions[i*2+1]);
             gl.drawArrays(gl.TRIANGLES, 0, farBackQuadBuffer.length / 4);
         }
         numHighlights = 0

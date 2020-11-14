@@ -117,8 +117,8 @@ function initFrames() {
         for(let i = 0; i < numToDraw; ++i) {
             for(let j = 0; j < 18; j++)
                 hexantColors[j] = hexantColorses[i*18+j]
-            gl.uniform3fv(program.uniformLocations.hexantColors, hexantColors)
-            gl.uniform2f(program.uniformLocations.screenPosition, framePositions[i*2+0], framePositions[i*2+1]);
+            gl.uniform3fv(program.getUniformLocation("hexantColors"), hexantColors)
+            gl.uniform2f(program.getUniformLocation("screenPosition"), framePositions[i*2+0], framePositions[i*2+1]);
             gl.drawArrays(gl.TRIANGLES, 0, vertsBuffer.length / 4);
         }
         numToDraw = 0

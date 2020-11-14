@@ -173,10 +173,10 @@ async function initMapsIntegrated() {
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.uniform1i(program.uniformLocations.sampler, 0);
+        gl.uniform1i(program.getUniformLocation("sampler"), 0);
 
         cameraAndFrameCountShaderStuff.transfer(program)
-        gl.uniform1f(program.uniformLocations.frameCount, frameCount);
+        gl.uniform1f(program.getUniformLocation("frameCount"), frameCount);
 
         // multiplyDq(ourTranslator,ourRotator, transform)
         // assignDq(ourRotator,transform)

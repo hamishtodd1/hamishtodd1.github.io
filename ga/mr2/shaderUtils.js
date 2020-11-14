@@ -18,10 +18,10 @@ const cameraAndFrameCountShaderStuff = {
         program.locateUniform("frameCount")
     },
     transfer: function (program) {
-        gl.uniform1f(program.uniformLocations.rightAtZZero, mainCamera.rightAtZZero);
-        gl.uniform1f(program.uniformLocations.topAtZZero, mainCamera.topAtZZero);
-        gl.uniform1f(program.uniformLocations.frontAndBackZ, mainCamera.frontAndBackZ);
-        gl.uniform1f(program.uniformLocations.frameCount, frameCount);
+        gl.uniform1f(program.getUniformLocation("rightAtZZero"), mainCamera.rightAtZZero);
+        gl.uniform1f(program.getUniformLocation("topAtZZero"), mainCamera.topAtZZero);
+        gl.uniform1f(program.getUniformLocation("frontAndBackZ"), mainCamera.frontAndBackZ);
+        gl.uniform1f(program.getUniformLocation("frameCount"), frameCount);
     },
     footer: `
             gl_Position.x /= rightAtZZero;

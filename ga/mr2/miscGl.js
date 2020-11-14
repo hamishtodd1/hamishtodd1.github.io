@@ -69,6 +69,12 @@ function Program(vsSource, fsSource) {
         program.uniformLocations[name] = gl.getUniformLocation(glProgram, name)
     }
 
+    program.getUniformLocation = (name) => {
+        if (program.uniformLocations[name] === undefined)
+            console.error("no uniform named ",name, " have you located it?")
+        return program.uniformLocations[name]
+    }
+
     program.addVertexAttribute = (name, arr, itemSize, dynamic) => {
         if ( !(arr instanceof Float32Array) )
             console.error("needs to be float32Array")

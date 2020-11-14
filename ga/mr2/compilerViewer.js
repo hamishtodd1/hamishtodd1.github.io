@@ -130,7 +130,7 @@ function initCompileViewer(displayableCharacters) {
                         placeErrorHighlight(drawingPosition)
 
                     for (let i = 0; i < displayWindows.length; ++i) {
-                        if (drawingPosition.y === displayWindows[i].verticalPositionToRenderMvsFrom) {
+                        if (drawingPosition.y === displayWindows[i].verticalPositionToRenderFrom) {
                             displayWindows[i].numMvs = 0
                             // for (let j = 0; j < mvNamesInLine.length; ++j) {
                             //     if (namedMvs.indexOf(mvNamesInLine[j]) !== -1)
@@ -156,7 +156,7 @@ function initCompileViewer(displayableCharacters) {
 
                                 //replaces addMvToRender and drawEarth
                                 //also, "mvNamesInLine"
-                                pictogramArray.addToRenderList(lexeme,
+                                pictogramArray.add(lexeme,
                                     drawingPosition.x + .5,
                                     drawingPosition.y,
                                     .5,
