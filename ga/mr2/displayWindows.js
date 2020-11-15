@@ -103,7 +103,7 @@ function initDisplayWindows() {
     function potentiallyEdit(section) {
         if (mouseDw.editingStyle[section] !== undefined) {
             mouseDw.getPositionInWindow(positionInWindow)
-            mouseDw.editingStyle[section](positionInWindow, editingName)
+            mouseDw.editingStyle[section](editingName, positionInWindow.x, positionInWindow.y)
         }
     }
 
