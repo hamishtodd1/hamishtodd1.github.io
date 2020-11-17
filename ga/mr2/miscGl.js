@@ -43,8 +43,23 @@ function loadShader(type, source) {
     const shader = gl.createShader(type);
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
-        alert('An error occurred compiling the shaders: ' + gl.getShaderInfoLog(shader));
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        let infolog = gl.getShaderInfoLog(shader)
+        let lineNumber = (infolog[2]).split(":")
+        
+        let lines = source.split("\n");
+        for (let i = 0; i < lines.length; ++i) {
+            let startPosition = 0
+            while (startPosition < lines[i].length && (lines[i][startPosition] === " " || lines[i][startPosition] === " "))
+                ++startPosition
+            log((i + 1) + " " + lines[i].substr(startPosition))
+
+            if(i === lineNumber)
+                console.error(infolog)
+        }
+
+        alert(infolog);
+    }
 
     return shader;
 }
@@ -62,12 +77,32 @@ function Program(vsSource, fsSource) {
     gl.attachShader(glProgram, fragmentShader);
     gl.linkProgram(glProgram);
 
+    gl.detachShader(glProgram, vertexShader);
+    gl.detachShader(glProgram, fragmentShader);
+    gl.deleteShader(vertexShader)
+    gl.deleteShader(fragmentShader)
+
     if (!gl.getProgramParameter(glProgram, gl.LINK_STATUS))
         alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(glProgram));
 
     program.locateUniform = (name) => {
         program.uniformLocations[name] = gl.getUniformLocation(glProgram, name)
     }
+
+    // program.replaceShader(source,vertexOrFragment /* gl.VERTEX_SHADER | gl.FRAGMENT_SHADER */) {
+    //     const shader = loadShader(vertexOrFragment, source)
+    //     gl.attachShader(glProgram, shader);
+    //     gl.linkProgram(glProgram);
+    //     gl.deleteShader(shader)
+
+    //     //might be unnecessary
+    //     (Object.keys(program.uniformLocations)).forEach((uniformName)=>{
+    //         program.locateUniform(uniformName)
+    //     })
+    //     (Object.keys(program.vertexAttributes)).forEach((vertexAttributeName)=>{
+    //         program.vertexAttributes[vertexAttributeName].location = gl.getAttribLocation(glProgram, name + "A")
+    //     })
+    // }
 
     program.getUniformLocation = (name) => {
         if (program.uniformLocations[name] === undefined)
@@ -110,17 +145,6 @@ function Program(vsSource, fsSource) {
     }
 
     return program
-}
-
-function logShader(source)
-{
-    let lines = source.split("\n");
-    for (let i = 0; i < lines.length; ++i) {
-        let startPosition = 0
-        while (startPosition < lines[i].length && (lines[i][startPosition] === " " || lines[i][startPosition] === " ") )
-            ++startPosition
-        log((i + 1) + " " + lines[i].substr(startPosition))
-    }
 }
 
 sq = (x) => x * x

@@ -49,6 +49,25 @@ function initCarat() {
     bindButton("Home", () => carat.addToPosition(-999., 0.))
     bindButton("End", () => carat.addToPosition(999., 0.))
 
+    let alreadModifiedThisFrame = false
+    backgroundStringSplice = function (start, deleteCount, newString) {
+        if (alreadModifiedThisFrame)
+            console.error("only one modification allowed per frame")
+        else {
+            alreadModifiedThisFrame = true
+
+            let distanceFromEnd = backgroundString.length - carat.positionInString
+
+            backgroundString =
+                backgroundString.substring(0, start) +
+                newString +
+                backgroundString.substring(start + deleteCount)
+
+            if (carat.positionInString > start + deleteCount)
+                carat.positionInString = backgroundString.length - distanceFromEnd
+        }
+    }
+
     addStringAtCarat = function (str)
     {
         backgroundStringSplice(carat.positionInString, 0, str)
@@ -90,6 +109,8 @@ function initCarat() {
             this.position.copy(closestGridPosition)
         }
         this.lineNumber = Math.floor(-this.position.y)
+
+        alreadModifiedThisFrame = false
     }
 
     carat.moveOutOfToken = (tokenStart, tokenEnd) => {

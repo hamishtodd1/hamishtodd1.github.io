@@ -59,3 +59,24 @@ function initPremadeBuffers()
         quadBuffer[i * 4 + 3] = pointW(unchangingUnitSquareVertices[orderedIndices[i]])
     }
 }
+
+function generateDividedUnitSquareBuffer(numDivisions, eps) {
+    const uvBuffer = []
+    function pushUv(i, j) {
+        uvBuffer.push(i / numDivisions)
+        uvBuffer.push(j / numDivisions)
+    }
+    //you don't want anything on any precise lines like x = .5
+    for (let i = 0.; i < numDivisions; ++i) {
+        for (let j = 0.; j < numDivisions; ++j) {
+            pushUv(i + eps, j + eps)
+            pushUv(i + 1. - eps, j + 1. - eps)
+            pushUv(i + eps, j + 1. - eps)
+
+            pushUv(i + eps, j + eps)
+            pushUv(i + 1. - eps, j + eps)
+            pushUv(i + 1. - eps, j + 1. - eps)
+        }
+    }
+    return uvBuffer
+}

@@ -7,38 +7,78 @@
         Aaand it might be the dymaxion
 */
 
-async function initMapsIntegrated() {
+async function initGlobeProjectionPictograms(globeNamedInstantiations) {
+    /*
+        Functions like mollweide are separate objects
+        They have names. They don't themselves receive a visualization because you've not given them a s
 
-    let glslMappingFunction = `
-        float lat = asin(dot(p,vec3()));
-    `
+        What are these functions? For glsl y
+    */
 
     {
-        let texturedGlobePictograms = ["cmb", "ball", "earthColor", "jupiter"]
-        texturedGlobePictograms.addToRenderList = () => {
-
+        function TranspiledFunction() {
+            this.intermediateRepresentation = "" //valid js or glsl
+            this.needsUpdate = true //Can be replaced every frame, just not in the gl
         }
-        pictogramTypeArrays.push(texturedGlobePictograms)
 
-        let mapProjectionPictograms = []
-        //you'll add eg "equirectangular" to that
-        //that gets compiled to a vertex shader
-        //these are a type that can only be output by a vertex mapping function applied to a texturedGlobe
-        mapProjectionPictograms.addToRenderList = (projectionFunction, texturedGlobe) => {
-
+        var transpiledFunctions = {
+            sinusoidal: new TranspiledFunction()
         }
-        pictogramTypeArrays.push(mapProjectionPictograms)
     }
-    
-    const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+
+    //do you give them names that the namedMvs don't have?
+    //Just press the number 1 and it gives you the... lowestUnusedColorName
+    let namedInstantiations = {
+        y: {
+            globe: globeNamedInstantiations["earthColor"],
+            mapping: transpiledFunctions["sinusoidal"]
+        }
+    }
+
+    let vs = `
+        attribute vec4 vertA;
+        void main(void) {
+            gl_Position = vertA;
+        `
+    let fs = `
+        void main(void) {
+            gl_FragColor = vec4(1.,0.,0.,1.);
+        `
+
+    let globeProjectionPictogramDrawer = new PictogramDrawer(vs, fs, {})
+    globeProjectionPictogramDrawer.program.addVertexAttribute("vert", quadBuffer, 4, true)
+    addRenderFunction(() => {
+        gl.useProgram(globeProjectionPictogramDrawer.program.glProgram)
+        globeProjectionPictogramDrawer.program.prepareVertexAttribute("vert", quadBuffer)
+
+        globeProjectionPictogramDrawer.prebatchAndDrawEach((name) => {
+            gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4)
+        })
+    })
+
+    // updateFunctions.push(() => {
+    //     globeProjectionPictogramDrawer.add(.7, -.7, "y")
+    // })
+}
+
+async function initGlobePictograms() {
+    let namedInstantiations = {}
+    {
+        let textureNames = ["earthColor", "ball", "cmb", "jupiter", "latAndLon"]
+
+        for(let i = 0; i < textureNames.length; ++i) {
+            namedInstantiations[textureNames[i]] = {
+                texture: await Texture("data/" + textureNames[i] + ".png"),
+                yaw: 0., pitch: 0.
+            }
+        }
+    }
+
+    let vs = `
         attribute vec2 uvA;
         varying vec2 uv;
-        varying vec4 p;
 
-        `
-        + gaShaderString +
-        `
-
+        `+ gaShaderString +`
         uniform dualQuat transform;
 
         vec4 globe(float lon,float lat) {
@@ -52,136 +92,66 @@ async function initMapsIntegrated() {
 
         void main(void) {
             uv = uvA;
-            p = vec4(uv,0.,1.);
 
-            float lon = (p.x - .5) * TAU;
-            float lat = (p.y - .5) * PI;
+            float lon = (uv.x - .5) * TAU;
+            float lat = (uv.y - .5) * PI;
 
-            p = globe(lon,lat);
-            p.xyz *= .5;
+            vec4 p = globe(lon,lat);
 
             dqSandwich(p, transform);
-            
+
             gl_Position = p;
         `
-        + cameraAndFrameCountShaderStuff.footer
-    // logShader(vsSource)
-    const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+    let fs = `
         varying vec2 uv;
-        varying vec4 p;
-
         uniform sampler2D sampler;
 
         void main(void) {
-            vec4 texelColor = texture2D(sampler, vec2(uv.x,1.-uv.y)); //1- because jfc opengl
-
-            gl_FragColor = vec4(texelColor.rgb, texelColor.a);
-        }
+            gl_FragColor = texture2D(sampler, vec2(uv.x,1.-uv.y));
         `
 
-    const program = Program(vsSource, fsSource)
-    cameraAndFrameCountShaderStuff.locateUniforms(program)
-    program.locateUniform("frameCount")
+    let yawAxis = new DualQuat()
+    yawAxis.realLine[1] = 1.
+    // let pitchAxis = new DualQuat()
+    // pitchAxis.realLine[0] = 1.
 
-    let sphereTextureFilenames = [
-        "earthColor",
-        "ball",
-        "cmb",
-        "jupiter",
-    ]
-    const texture = await Texture("data/" + sphereTextureFilenames[0] + ".png")
-    program.locateUniform("sampler")
-
-    let numDivisions = 256
-    const uvBuffer = []
-    function pushUv(i, j) {
-        uvBuffer.push(i / numDivisions)
-        uvBuffer.push(j / numDivisions)
-    }
-    //you don't want anything on any precise lines like x = .5
-    let eps = .00001 //sensetive, ugh
-    for (let i = 0.; i < numDivisions; ++i) {
-        for (let j = 0.; j < numDivisions; ++j) {
-            pushUv(i + eps, j + eps)
-            pushUv(i + 1. - eps, j + 1. - eps)
-            pushUv(i + eps, j + 1. - eps)
-
-            pushUv(i + eps, j + eps)
-            pushUv(i + 1. - eps, j + eps)
-            pushUv(i + 1. - eps, j + 1. - eps)
+    let globeEditingStyle = {
+        during: (editingName)=>{
+            namedInstantiations[editingName].yaw   += mouse.position.x - mouse.positionOld.x
+            namedInstantiations[editingName].pitch += mouse.position.y - mouse.positionOld.y
         }
     }
-    program.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
-    let numVertices = uvBuffer.length / 2
+
+    let pictogramDrawer = new PictogramDrawer(vs, fs, globeEditingStyle)
+        
+    const eps = .00001 //sensetive, ugh
+    const numDivisions = 256
+    const uvBuffer = generateDividedUnitSquareBuffer(numDivisions, eps)
+    pictogramDrawer.program.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
+    
+    pictogramDrawer.program.locateUniform("sampler")
+    locateUniformDualQuat(pictogramDrawer.program, "transform")
 
     let transform = new DualQuat()
-    locateUniformDualQuat(program, "transform")
-
-    //mouse shit
-    {
-        // let axis = new DualQuat()
-        // axis.realLine[2] = 1.
-        // let ourTranslator = new DualQuat()
-        // let ourRotator = new DualQuat()
-        // let deltaRotator = new DualQuat()
-
-        // let mouseDelta = new Float32Array(16)
-        // let padPlane = new Float32Array(16)
-        // plane(padPlane, 0.,0.,1.,0.)
-
-        // rightMouseResponses.push({
-        //     z: () => 0.,
-        //     during: () => {
-        //         point(mouseDelta, mouse.position.x - mouse.positionOld.x, mouse.position.y - mouse.positionOld.y, 0.,0.)
-        //         if (pointIdealNorm(mouseDelta) > 0.) {
-
-        //             dqToMv(ourRotator, mv0);
-        //             reverse(mv0, mv0); //pretty sure reverse is inverse transformation
-        //             gp(mv0, mouseDelta, mv1);
-        //             reverse(mv0, mv0);
-        //             gp(mv1, mv0, mv2); //mv2 is now transformed mouseDelta
-        //             // debugger
-
-        //             gp(mv2)
-        //             debugger
-
-        //             meet(dual(mouseDelta, mv2), padPlane, mv1)
-        //             mvToDq(mv1, axis)
-
-        //             normalizeDq(axis, axis)
-        //             rotator(axis, -pointIdealNorm(mouseDelta), deltaRotator)
-        //             normalizeDq(deltaRotator, deltaRotator)
-
-        //             multiplyDq(ourRotator, deltaRotator, ourRotator)
-        //         }
-        //     }
-        // })
-    }
-
-    drawEarth = (drawingPosition) => {
-        addUnnamedFrameToDraw(drawingPosition.x + .5, drawingPosition.y, 0.,0.,0.)
-        
-        transform.idealLine[0] = -.5 * (drawingPosition.x + .5)
-        transform.idealLine[1] = -.5 *  drawingPosition.y
-        normalizeDq(transform,transform)
-    }
-
     addRenderFunction(() => {
-        gl.useProgram(program.glProgram);
+        gl.useProgram(pictogramDrawer.program.glProgram)
+        pictogramDrawer.program.prepareVertexAttribute("uv")
 
-        program.prepareVertexAttribute("uv")
+        pictogramDrawer.prebatchAndDrawEach((name) => {
+            rotator(yawAxis, namedInstantiations[name].yaw, transform)
+            transferDualQuat(transform, "transform", pictogramDrawer.program)
 
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.uniform1i(program.getUniformLocation("sampler"), 0);
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, namedInstantiations[name].texture);
+            gl.uniform1i(pictogramDrawer.program.getUniformLocation("sampler"), 0);//hmm, why 0?
 
-        cameraAndFrameCountShaderStuff.transfer(program)
-        gl.uniform1f(program.getUniformLocation("frameCount"), frameCount);
-
-        // multiplyDq(ourTranslator,ourRotator, transform)
-        // assignDq(ourRotator,transform)
-        transferDualQuat(transform, "transform", program)
-
-        gl.drawArrays(gl.TRIANGLES, 0, numVertices);
+            gl.drawArrays(gl.TRIANGLES, 0, uvBuffer.length / 2);
+        })
     })
+
+    updateFunctions.push(() => {
+        pictogramDrawer.add(-.5, .5, "cmb")
+    })
+
+    initGlobeProjectionPictograms(namedInstantiations)
 }

@@ -18,13 +18,13 @@
 
 */
 
-function initCompileViewer(displayableCharacters) {
+function initTokenizeEvaluateDisplay(displayableCharacters) {
 
     initErrorHighlight()
 
     let identifierCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 
-    compileView = () => {
+    tokenizeEvaluateDisplay = () => {
 
         let tokens = []
 
@@ -38,7 +38,7 @@ function initCompileViewer(displayableCharacters) {
         //////////////////////////
         ////  TOKENIZINGING   ////
         //////////////////////////
-        //"just breaking it up into separate things", no sophisticated decisions about what to do
+        //just breaking it up into separate things, no sophisticated decisions about what to do
 
         function moveWhile(condition) {
             while (positionInString < backgroundStringLength && condition() )
@@ -86,8 +86,6 @@ function initCompileViewer(displayableCharacters) {
         let errorNewLines = []
 
         forEachToken((tokenIndex, tokenStart, tokenEnd, token, lexeme) => {
-
-            //want to see... a point that you can move around
 
             if(token === "identifier") {
                 if (namedMvs[lexeme] !== undefined) {
@@ -189,14 +187,6 @@ function initCompileViewer(displayableCharacters) {
             }
         })
 
-        drawingPosition.x = 0.
-        drawingPosition.y = 0.
-        drawEarth(drawingPosition)
-        drawingPosition.x = 1.5
-        point(namedMvs.r,.5,0.,0.,1.)
-        addMvToRender("r", drawingPosition.x + .5, drawingPosition.y, .5, true)
-
         carat.postParseFunc()
     }
-    namedMvs.r = new Float32Array(16)
 }

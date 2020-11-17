@@ -1,4 +1,6 @@
 /*
+    Thank you to Paul Bourke and NASA for these textures
+
     NOTE SERIOUS CONFUSION: IS Z POSITIVE OR NEGATIVE?
 
     Werner is equal-area! Presumably sinusoidal too

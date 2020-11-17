@@ -76,16 +76,37 @@
 				initMouse()
 				initWindowResizeSystem()
 
-				initMvAppearances()
-
 				initPictogramDrawers()
+				initMvPictograms()
+				initGlobePictograms()
 
 				// initTranspiler()
 
 				// await initWorldMap()
 				// await initDymaxion()
 
-				await initPad()
+				initCarat()
+
+				let typeableCharacters = initTypeableCharacters()
+				let displayableCharacters = typeableCharacters + freeVariableCharacters
+				initCharacterTexture(displayableCharacters)
+
+				initTokenizeEvaluateDisplay(displayableCharacters)
+
+				updateFunctions.splice(0, 0, () => {
+					alreadModifiedThisFrame = false
+
+					tokenizeEvaluateDisplay()
+				})
+
+				await initTextureSampler()
+				initFrames()
+
+				initDisplayWindows()
+
+				// initFuncViz()
+
+				// initDrawing()
 
 				function loop() {
 					mouse.updateFromAsyncAndCheckClicks()
@@ -121,9 +142,7 @@
 
 		<script src="text.js"></script>
 		
-
-		<script src="pad.js"></script>
-		<script src="compilerViewer.js"></script>
+		<script src="tokenizeEvaluateDisplay.js"></script>
 		<script src="errorHighlight.js"></script>
 
 		<script src="textureSampler.js"></script>

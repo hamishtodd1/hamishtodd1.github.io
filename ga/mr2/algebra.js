@@ -304,23 +304,23 @@ function initAlgebra()
             }
         ))
 
-        scalar = (mv,newValue) => {if(newValue !== undefined) mv[0] = newValue; return mv[0]}
-        pss = (mv,newValue) => {if(newValue !== undefined) mv[15] = newValue; return mv[15]}
-        planeW = (mv,newValue) => {if(newValue !== undefined) mv[1] = newValue; return mv[1]}
-        planeX = (mv,newValue) => {if(newValue !== undefined) mv[2] = newValue; return mv[2]}
-        planeY = (mv,newValue) => {if(newValue !== undefined) mv[3] = newValue; return mv[3]}
-        planeZ = (mv,newValue) => {if(newValue !== undefined) mv[4] = newValue; return mv[4]}
-        idealLineX = (mv,newValue) => {if(newValue !== undefined) mv[5] = newValue; return mv[5]}
-        idealLineY = (mv,newValue) => {if(newValue !== undefined) mv[6] = newValue; return mv[6]}
-        idealLineZ = (mv,newValue) => {if(newValue !== undefined) mv[7] = newValue; return mv[7]}
-        realLineZ = (mv,newValue) => {if(newValue !== undefined) mv[ 8] = newValue; return mv[ 8]}
-        realLineY = (mv,newValue) => {if(newValue !== undefined) mv[ 9] = newValue; return mv[ 9]}
-        realLineX = (mv,newValue) => {if(newValue !== undefined) mv[10] = newValue; return mv[10]}
-        pointZ = (mv, newValue) => { if (newValue !== undefined) mv[11] = newValue; return mv[11] }
-        pointY = (mv, newValue) => { if (newValue !== undefined) mv[12] = newValue; return mv[12] }
-        pointX = (mv, newValue) => { if (newValue !== undefined) mv[13] = newValue; return mv[13] }
-        pointW = (mv, newValue) => { if (newValue !== undefined) mv[14] = newValue; return mv[14] }
-
+        scalar     = (mv,newValue) => {if(newValue !== undefined) mv[ 0] = newValue; return mv[ 0] }
+        planeW     = (mv,newValue) => {if(newValue !== undefined) mv[ 1] = newValue; return mv[ 1] }
+        planeX     = (mv,newValue) => {if(newValue !== undefined) mv[ 2] = newValue; return mv[ 2] }
+        planeY     = (mv,newValue) => {if(newValue !== undefined) mv[ 3] = newValue; return mv[ 3] }
+        planeZ     = (mv,newValue) => {if(newValue !== undefined) mv[ 4] = newValue; return mv[ 4] }
+        idealLineX = (mv,newValue) => {if(newValue !== undefined) mv[ 5] = newValue; return mv[ 5] }
+        idealLineY = (mv,newValue) => {if(newValue !== undefined) mv[ 6] = newValue; return mv[ 6] }
+        idealLineZ = (mv,newValue) => {if(newValue !== undefined) mv[ 7] = newValue; return mv[ 7] }
+        realLineZ  = (mv,newValue) => {if(newValue !== undefined) mv[ 8] = newValue; return mv[ 8] }
+        realLineY  = (mv,newValue) => {if(newValue !== undefined) mv[ 9] = newValue; return mv[ 9] }
+        realLineX  = (mv,newValue) => {if(newValue !== undefined) mv[10] = newValue; return mv[10] }
+        pointZ     = (mv,newValue) => {if(newValue !== undefined) mv[11] = newValue; return mv[11] }
+        pointY     = (mv,newValue) => {if(newValue !== undefined) mv[12] = newValue; return mv[12] }
+        pointX     = (mv,newValue) => {if(newValue !== undefined) mv[13] = newValue; return mv[13] }
+        pointW     = (mv,newValue) => {if(newValue !== undefined) mv[14] = newValue; return mv[14] }
+        pss        = (mv,newValue) => {if(newValue !== undefined) mv[15] = newValue; return mv[15] }
+        
         plane = (mv, x, y, z, w) => {zeroMv(mv); mv[4] = z; mv[3] = y; mv[2] = x; mv[1] = w;}
 
         lineRealNorm = (mv) => { return Math.sqrt(sq(realLineX(mv)) + sq(realLineY(mv)) + sq(realLineZ(mv)))}
