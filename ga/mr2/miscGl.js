@@ -39,10 +39,16 @@ async function Texture(src) {
     return texture
 }
 
-function loadShader(type, source) {
+function loadShader(type,source) { //more like "initialize"
     const shader = gl.createShader(type);
+    setShaderSourceAndCompile(shader, source)
+    return shader
+}
+
+function setShaderSourceAndCompile(shader,source) {
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
+
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
         let infolog = gl.getShaderInfoLog(shader)
         let lineNumber = (infolog[2]).split(":")
@@ -65,11 +71,11 @@ function loadShader(type, source) {
 }
 function Program(vsSource, fsSource) {
     const glProgram = gl.createProgram()
-    const program = {
-        glProgram,
-        vertexAttributes: {},
-        uniformLocations: {}
-    };
+    this.glProgram = glProgram
+    this.vertexAttributes = {}
+    this.uniformLocations = {}
+
+    let self = this
 
     const vertexShader = loadShader(gl.VERTEX_SHADER, vsSource);
     const fragmentShader = loadShader(gl.FRAGMENT_SHADER, fsSource);
@@ -77,53 +83,53 @@ function Program(vsSource, fsSource) {
     gl.attachShader(glProgram, fragmentShader);
     gl.linkProgram(glProgram);
 
-    gl.detachShader(glProgram, vertexShader);
-    gl.detachShader(glProgram, fragmentShader);
-    gl.deleteShader(vertexShader)
-    gl.deleteShader(fragmentShader)
+    // gl.detachShader(glProgram, vertexShader);
+    // gl.detachShader(glProgram, fragmentShader);
+    // gl.deleteShader(vertexShader)
+    // gl.deleteShader(fragmentShader)
 
     if (!gl.getProgramParameter(glProgram, gl.LINK_STATUS))
         alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(glProgram));
 
-    program.locateUniform = (name) => {
-        program.uniformLocations[name] = gl.getUniformLocation(glProgram, name)
+    self.locateUniform = (name) => {
+        self.uniformLocations[name] = gl.getUniformLocation(glProgram, name)
     }
 
-    // program.replaceShader(source,vertexOrFragment /* gl.VERTEX_SHADER | gl.FRAGMENT_SHADER */) {
-    //     const shader = loadShader(vertexOrFragment, source)
-    //     gl.attachShader(glProgram, shader);
-    //     gl.linkProgram(glProgram);
-    //     gl.deleteShader(shader)
+    self.changeShader = (type,source) => {
+        let shaderToChange = type === gl.VERTEX_SHADER ? vertexShader : fragmentShader
+        setShaderSourceAndCompile(shaderToChange, source)
 
-    //     //might be unnecessary
-    //     (Object.keys(program.uniformLocations)).forEach((uniformName)=>{
-    //         program.locateUniform(uniformName)
-    //     })
-    //     (Object.keys(program.vertexAttributes)).forEach((vertexAttributeName)=>{
-    //         program.vertexAttributes[vertexAttributeName].location = gl.getAttribLocation(glProgram, name + "A")
-    //     })
-    // }
+        gl.linkProgram(glProgram);
 
-    program.getUniformLocation = (name) => {
-        if (program.uniformLocations[name] === undefined)
+        //might be unnecessary
+        (Object.keys(self.uniformLocations)).forEach((uniformName)=>{
+            self.locateUniform(uniformName)
+        })
+        (Object.keys(self.vertexAttributes)).forEach((vertexAttributeName)=>{
+            self.vertexAttributes[vertexAttributeName].location = gl.getAttribLocation(glProgram, name + "A")
+        })
+    }
+
+    self.getUniformLocation = (name) => {
+        if (self.uniformLocations[name] === undefined)
             console.error("no uniform named ",name, " have you located it?")
-        return program.uniformLocations[name]
+        return self.uniformLocations[name]
     }
 
-    program.addVertexAttribute = (name, arr, itemSize, dynamic) => {
+    self.addVertexAttribute = (name, arr, itemSize, dynamic) => {
         if ( !(arr instanceof Float32Array) )
             console.error("needs to be float32Array")
         const bufferId = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, bufferId);
         gl.bufferData(gl.ARRAY_BUFFER, arr, dynamic ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW)
 
-        program.vertexAttributes[name] = {
+        self.vertexAttributes[name] = {
             bufferId, itemSize,
             location: gl.getAttribLocation(glProgram, name + "A") //yeah don't forget that
         }
     }
-    program.prepareVertexAttribute = (name,updatedArray) => {
-        let va = program.vertexAttributes[name]
+    self.prepareVertexAttribute = (name,updatedArray) => {
+        let va = self.vertexAttributes[name]
 
         gl.enableVertexAttribArray(va.location); //not sure this is necessary here
 
@@ -143,8 +149,6 @@ function Program(vsSource, fsSource) {
         if (updatedArray !== undefined)
             gl.bufferData(gl.ARRAY_BUFFER, updatedArray, gl.DYNAMIC_DRAW)
     }
-
-    return program
 }
 
 sq = (x) => x * x

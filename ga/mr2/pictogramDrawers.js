@@ -23,17 +23,22 @@ function initPictogramDrawers() {
     `
     //it's bound by [-1,1]
 
-    PictogramDrawer = function (vsBody, fsBody, editingStyle) {
-        pictogramDrawers.push(this)
-
+    PictogramProgram = function(vsBody,fsBody) {
         let vs = vsHeader + vsBody + vsFooter
         let fs = fsHeader + fsBody + fsFooter
-        let program = Program(vs, fs)
-        this.program = program
-        cameraAndFrameCountShaderStuff.locateUniforms(program)
 
-        program.locateUniform("drawingSquareRadius")
-        program.locateUniform("screenPosition")
+        Program.call(this, vs, fs)
+
+        cameraAndFrameCountShaderStuff.locateUniforms(this)
+        this.locateUniform("drawingSquareRadius")
+        this.locateUniform("screenPosition")
+    }
+
+    PictogramDrawer = function (editingStyle, vsBody, fsBody) {
+        if(fsBody !== undefined)
+            this.program = new PictogramProgram(vsBody, fsBody)
+
+        pictogramDrawers.push(this)
 
         let numToDraw = 0
         let screenPositions = [] //Just screen position, if you want a quat put that in a wrapper
@@ -55,7 +60,13 @@ function initPictogramDrawers() {
         }
 
         //prebatch and useprogram come first
-        this.prebatchAndDrawEach = (draw) => {
+        this.finishPrebatchAndDrawEach = (draw,program) => {
+            if(program === undefined) {
+                if(this.program === undefined)
+                    console.error("no program")
+                program = this.program
+            }
+
             cameraAndFrameCountShaderStuff.transfer(program)
             gl.uniform1f(program.getUniformLocation("drawingSquareRadius"), .5)
 
@@ -106,7 +117,7 @@ function pictogramTest()
         },
     }
 
-    let testPictogramDrawer = new PictogramDrawer(testVs, testFs, testEditingStyle)
+    let testPictogramDrawer = new PictogramDrawer(testEditingStyle, testVs, testFs)
     testPictogramDrawer.program.addVertexAttribute("vert", quadBuffer, 4, true)
     testPictogramDrawer.program.locateUniform("g")
 
@@ -114,13 +125,13 @@ function pictogramTest()
         gl.useProgram(testPictogramDrawer.program.glProgram)
         testPictogramDrawer.program.prepareVertexAttribute("vert", quadBuffer)
 
-        testPictogramDrawer.prebatchAndDrawEach((name) => {
+        testPictogramDrawer.finishPrebatchAndDrawEach((name) => {
             gl.uniform1f(testPictogramDrawer.program.getUniformLocation("g"), namedInstantiations[name])
             gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4)
         })
-    },"end")
+    }, "end" )
 
     updateFunctions.push(() => {
-        testPictogramDrawer.add(.5, -.5, "r")
+        testPictogramDrawer.add(.5, 1.5, "r")
     })
 }

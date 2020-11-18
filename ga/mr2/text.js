@@ -107,7 +107,7 @@ function initCharacterTexture(displayableCharacters) {
         }
         `
 
-    const program = Program(vsSource, fsSource)
+    const program = new Program(vsSource, fsSource)
     program.locateUniform("sampler")
 
     //unit square centered at (.5,0.)

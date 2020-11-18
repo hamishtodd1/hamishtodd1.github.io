@@ -17,13 +17,33 @@ async function initGlobeProjectionPictograms(globeNamedInstantiations) {
 
     {
         function TranspiledFunction() {
-            this.intermediateRepresentation = "" //valid js or glsl
-            this.needsUpdate = true //Can be replaced every frame, just not in the gl
+            let intermediateRepresentation = "" //valid js or glsl
+            this.setIntermediateRepresentation = function(newIr) {
+                if(newIr !== intermediateRepresentation) {
+                    intermediateRepresentation = newIr
+                    this.justUpdated = true
+                }
+            }
+            this.getIntermediateRepresentation = () => intermediateRepresentation
+
+            this.justUpdated = true //Can be replaced every frame, just not in the gl
         }
 
         var transpiledFunctions = {
             sinusoidal: new TranspiledFunction()
         }
+
+        updateFunctions.splice(0,0,() => {
+            (Object.keys(transpiledFunctions)).forEach((key)=>{
+                transpiledFunctions[key].justUpdated = false
+            })
+
+            transpiledFunctions.sinusoidal.setIntermediateRepresentation(
+                Math.floor(frameCount / 50) % 2 ?
+                    `p.x -= .4;` :
+                    ``
+            )
+        })
     }
 
     //do you give them names that the namedMvs don't have?
@@ -35,30 +55,62 @@ async function initGlobeProjectionPictograms(globeNamedInstantiations) {
         }
     }
 
-    let vs = `
+    let vsStart = `
+        attribute vec2 uvA;
+        varying vec2 uv;
+
         attribute vec4 vertA;
         void main(void) {
-            gl_Position = vertA;
-        `
+            uv = uvA;
+            gl_Position = vec4(uvA,0.,1.);
+            `
+    let vsEnd = `
+        // gl_Position = p;
+    `
+    let vs = vsStart + vsEnd
     let fs = `
+        varying vec2 uv;
+        uniform sampler2D sampler;
         void main(void) {
-            gl_FragColor = vec4(1.,0.,0.,1.);
+            // gl_FragColor = vec4(1.,0.,0.,1.);
+            gl_FragColor = texture2D(sampler, vec2(uv.x,1.-uv.y));
         `
 
-    let globeProjectionPictogramDrawer = new PictogramDrawer(vs, fs, {})
-    globeProjectionPictogramDrawer.program.addVertexAttribute("vert", quadBuffer, 4, true)
+    let globeProjectionPictogramDrawer = new PictogramDrawer({})
+    let program = new PictogramProgram(vs, fs)
+
+    const eps = .00001 //sensetive, ugh
+    const numDivisions = 256
+    const uvBuffer = generateDividedUnitSquareBuffer(numDivisions, eps)
+    program.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
+    program.locateUniform("sampler")
+
     addRenderFunction(() => {
-        gl.useProgram(globeProjectionPictogramDrawer.program.glProgram)
-        globeProjectionPictogramDrawer.program.prepareVertexAttribute("vert", quadBuffer)
+        // (Object.keys(transpiledFunctions)).forEach((key) => {
+        //     if (namedInstantiations[name].mapping.justUpdated) {
 
-        globeProjectionPictogramDrawer.prebatchAndDrawEach((name) => {
-            gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4)
-        })
+        //     }
+        // })
+        //so each of these has a different program
+        //the program comes from
+
+        gl.useProgram(program.glProgram)
+        program.prepareVertexAttribute("uv")
+        
+        function draw(name) {
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, namedInstantiations[name].globe.texture);
+            gl.uniform1i(program.getUniformLocation("sampler"), 0);
+
+            gl.drawArrays(gl.TRIANGLES, 0, uvBuffer.length / 2)
+        }
+        
+        globeProjectionPictogramDrawer.finishPrebatchAndDrawEach(draw,program)
+    },"end")
+
+    updateFunctions.push(() => {
+        globeProjectionPictogramDrawer.add(.5, -.5, "y")
     })
-
-    // updateFunctions.push(() => {
-    //     globeProjectionPictogramDrawer.add(.7, -.7, "y")
-    // })
 }
 
 async function initGlobePictograms() {
@@ -122,14 +174,14 @@ async function initGlobePictograms() {
         }
     }
 
-    let pictogramDrawer = new PictogramDrawer(vs, fs, globeEditingStyle)
+    let pictogramDrawer = new PictogramDrawer(globeEditingStyle, vs, fs)
         
     const eps = .00001 //sensetive, ugh
     const numDivisions = 256
     const uvBuffer = generateDividedUnitSquareBuffer(numDivisions, eps)
     pictogramDrawer.program.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
-    
     pictogramDrawer.program.locateUniform("sampler")
+    
     locateUniformDualQuat(pictogramDrawer.program, "transform")
 
     let transform = new DualQuat()
@@ -137,7 +189,7 @@ async function initGlobePictograms() {
         gl.useProgram(pictogramDrawer.program.glProgram)
         pictogramDrawer.program.prepareVertexAttribute("uv")
 
-        pictogramDrawer.prebatchAndDrawEach((name) => {
+        pictogramDrawer.finishPrebatchAndDrawEach((name) => {
             rotator(yawAxis, namedInstantiations[name].yaw, transform)
             transferDualQuat(transform, "transform", pictogramDrawer.program)
 
@@ -150,7 +202,7 @@ async function initGlobePictograms() {
     })
 
     updateFunctions.push(() => {
-        pictogramDrawer.add(-.5, .5, "cmb")
+        pictogramDrawer.add(-.5, .5, "earthColor")
     })
 
     initGlobeProjectionPictograms(namedInstantiations)

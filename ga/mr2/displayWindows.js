@@ -22,7 +22,7 @@ function initDisplayWindows() {
             }
             `
 
-        const program = Program(vsSource, fsSource)
+        const program = new Program(vsSource, fsSource)
         program.addVertexAttribute("vert", quadBuffer, 4, true)
         cameraAndFrameCountShaderStuff.locateUniforms(program)
         program.locateUniform("screenPosition")

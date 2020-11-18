@@ -88,7 +88,7 @@ function drawColorWheel()
 			gl_FragColor.rgb *= length(p.xy) * 2.;
 		}`
 
-	const program = Program(vsSource, fsSource)
+	const program = new Program(vsSource, fsSource)
 	program.addVertexAttribute("vert", quadBuffer, 4, false)
 
 	cameraAndFrameCountShaderStuff.locateUniforms(program)

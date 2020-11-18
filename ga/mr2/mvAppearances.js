@@ -84,7 +84,7 @@ function initMvPictograms() {
                 gl_FragColor = vec4(color,1.);
         `
 
-        var pointPictogramDrawer = new PictogramDrawer(vs, fs, mvEditingStyle)
+        var pointPictogramDrawer = new PictogramDrawer(mvEditingStyle, vs, fs)
         pointPictogramDrawer.program.addVertexAttribute("vert", vertBuffer, 4, false)
         pointPictogramDrawer.program.addVertexAttribute("colorIndex", pointColorIndexBuffer, 1, true)
         pointPictogramDrawer.program.locateUniform("hexantColors")
@@ -95,7 +95,7 @@ function initMvPictograms() {
 
             pointPictogramDrawer.program.prepareVertexAttribute("vert", vertBuffer)
 
-            pointPictogramDrawer.prebatchAndDrawEach((name) => {
+            pointPictogramDrawer.finishPrebatchAndDrawEach((name) => {
                 let mv = namedInstantiations[name]
                 if (pointX(mv) === 0. && pointY(mv) === 0. && pointZ(mv) === 0. && pointW(mv) === 0.)
                     return
@@ -141,7 +141,7 @@ function initMvPictograms() {
             var vertsBuffer = new Float32Array(6 * 2 * 4)
         }
 
-        var linePictogramDrawer = new PictogramDrawer(vs, fs, mvEditingStyle)
+        var linePictogramDrawer = new PictogramDrawer(mvEditingStyle, vs, fs)
         linePictogramDrawer.program.addVertexAttribute("vert", vertsBuffer, 4, true)
         linePictogramDrawer.program.addVertexAttribute("colorIndex", indexBuffer, 1, false)
         linePictogramDrawer.program.locateUniform("hexantColors")
@@ -150,7 +150,7 @@ function initMvPictograms() {
             gl.useProgram(linePictogramDrawer.program.glProgram)
             linePictogramDrawer.program.prepareVertexAttribute("colorIndex", indexBuffer)
 
-            linePictogramDrawer.prebatchAndDrawEach((name) => {
+            linePictogramDrawer.finishPrebatchAndDrawEach((name) => {
                 let mv = namedInstantiations[name]
                 if (realLineX(mv) === 0. && realLineY(mv) === 0. && realLineZ(mv) === 0.)
                     return
@@ -236,7 +236,7 @@ function initMvPictograms() {
             }
         `
 
-        const program = Program(vsSource, fsSource)
+        const program = new Program(vsSource, fsSource)
         cameraAndFrameCountShaderStuff.locateUniforms(program)
 
         program.addVertexAttribute("vert", quadBuffer, 4, true)

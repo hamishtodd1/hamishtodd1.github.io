@@ -267,7 +267,7 @@ async function initWorldMap() {
         }
         `
 
-    const program = Program(vsSource, fsSource)
+    const program = new Program(vsSource, fsSource)
     cameraAndFrameCountShaderStuff.locateUniforms(program)
     program.locateUniform("frameCount")
     locateUniformDualQuat(program, "transform")
@@ -456,7 +456,7 @@ async function initDymaxion()
         `
     logShader(fsSource)
 
-    const program = Program(vsSource, fsSource)
+    const program = new Program(vsSource, fsSource)
     cameraAndFrameCountShaderStuff.locateUniforms(program)
     program.locateUniform("frameCount")
     locateUniformDualQuat(program, "transform")

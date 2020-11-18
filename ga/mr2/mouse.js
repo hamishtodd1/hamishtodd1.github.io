@@ -8,14 +8,14 @@ function initMouse() {
         clickingOld: false,
         rightClicking: false,
         rightClickingOld: false,
-        position: new ScreenPosition(),
+        position: new ScreenPosition(999.,999.),
         positionOld: new ScreenPosition()
     }
 
     let asynchronous = {
         clicking: false,
         rightClicking: false,
-        position: new ScreenPosition()
+        position: new ScreenPosition(mouse.position.x,mouse.position.y)
     };
     function updateFromClientCoordinates(clientX, clientY) {
         asynchronous.position.x = (clientX / window.innerWidth) * 2. - 1.

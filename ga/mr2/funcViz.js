@@ -79,7 +79,7 @@ function initFuncViz() {
         }
         `
 
-    const program = Program(vsSource, fsSource)
+    const program = new Program(vsSource, fsSource)
     cameraAndFrameCountShaderStuff.locateUniforms(program)
     program.addVertexAttribute("domainValue", domainValueBuffer, 4, true)
     addRenderFunction(() => {
