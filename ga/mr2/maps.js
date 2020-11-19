@@ -11,7 +11,9 @@
 
     Don't worry, it makes sense that dymaxion is off, the triangle isn't planar
 
-    Title
+    Title (look at the existing ones...)
+        How map projections ACTUALLY work
+        The actual geometry behind map projections
         Top 10 politically-correct world maps
         Top 10 world maps that avoid being racist
         How racist is your map?
@@ -80,7 +82,8 @@
                 azimuthal equidstant
             equal area - "tunnel distance", surprisingly! geologists use it
         Leads onto the central controversy: Mercator, Gall Peters
-            Mercator most famous, most controversial. We'll get to its mathematical construction in a second, but it's important to understand the story behind it first
+        Mercator most famous, most controversial. We'll get to its mathematical construction in a second, but it's important to understand the story behind it first
+            Transverse mercator: just rotate it 90 degrees
             demonstrate greenland again and madagascar, maybe canada and northern russia
             [improvise. China, his country being undistorted, mercator good for direction but not length/area]
             Let me round off with my personal viewpoint.

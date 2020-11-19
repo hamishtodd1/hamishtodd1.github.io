@@ -91,32 +91,35 @@ function Program(vsSource, fsSource) {
     if (!gl.getProgramParameter(glProgram, gl.LINK_STATUS))
         alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(glProgram));
 
-    self.locateUniform = (name) => {
+    this.locateUniform = (name) => {
         self.uniformLocations[name] = gl.getUniformLocation(glProgram, name)
     }
+    this.locateVertexAttribute = (name) => {
+        self.vertexAttributes[name].location = gl.getAttribLocation(glProgram, name + "A")
+    }
 
-    self.changeShader = (type,source) => {
+    this.changeShader = (type,source) => {
         let shaderToChange = type === gl.VERTEX_SHADER ? vertexShader : fragmentShader
         setShaderSourceAndCompile(shaderToChange, source)
 
         gl.linkProgram(glProgram);
 
-        //might be unnecessary
-        (Object.keys(self.uniformLocations)).forEach((uniformName)=>{
+        //assumes there's no new things!
+        Object.keys(self.uniformLocations).forEach((uniformName)=>{
             self.locateUniform(uniformName)
         })
-        (Object.keys(self.vertexAttributes)).forEach((vertexAttributeName)=>{
-            self.vertexAttributes[vertexAttributeName].location = gl.getAttribLocation(glProgram, name + "A")
+        Object.keys(self.vertexAttributes).forEach((vertexAttributeName)=>{
+            self.locateVertexAttribute(vertexAttributeName)
         })
     }
 
-    self.getUniformLocation = (name) => {
+    this.getUniformLocation = (name) => {
         if (self.uniformLocations[name] === undefined)
             console.error("no uniform named ",name, " have you located it?")
         return self.uniformLocations[name]
     }
 
-    self.addVertexAttribute = (name, arr, itemSize, dynamic) => {
+    this.addVertexAttribute = (name, arr, itemSize, dynamic) => {
         if ( !(arr instanceof Float32Array) )
             console.error("needs to be float32Array")
         const bufferId = gl.createBuffer();
@@ -124,11 +127,11 @@ function Program(vsSource, fsSource) {
         gl.bufferData(gl.ARRAY_BUFFER, arr, dynamic ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW)
 
         self.vertexAttributes[name] = {
-            bufferId, itemSize,
-            location: gl.getAttribLocation(glProgram, name + "A") //yeah don't forget that
+            bufferId, itemSize
         }
+        this.locateVertexAttribute(name)
     }
-    self.prepareVertexAttribute = (name,updatedArray) => {
+    this.prepareVertexAttribute = (name,updatedArray) => {
         let va = self.vertexAttributes[name]
 
         gl.enableVertexAttribArray(va.location); //not sure this is necessary here

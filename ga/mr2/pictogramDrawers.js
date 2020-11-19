@@ -23,8 +23,12 @@ function initPictogramDrawers() {
     `
     //it's bound by [-1,1]
 
+    vertexShaderToPictogramVertexShader = (vsBody) => {
+        return vsHeader + vsBody + vsFooter
+    }
+
     PictogramProgram = function(vsBody,fsBody) {
-        let vs = vsHeader + vsBody + vsFooter
+        let vs = vertexShaderToPictogramVertexShader(vsBody)
         let fs = fsHeader + fsBody + fsFooter
 
         Program.call(this, vs, fs)
@@ -35,9 +39,6 @@ function initPictogramDrawers() {
     }
 
     PictogramDrawer = function (editingStyle, vsBody, fsBody) {
-        if(fsBody !== undefined)
-            this.program = new PictogramProgram(vsBody, fsBody)
-
         pictogramDrawers.push(this)
 
         let numToDraw = 0
@@ -59,33 +60,35 @@ function initPictogramDrawers() {
             ++numToDraw
         }
 
-        //prebatch and useprogram come first
-        this.finishPrebatchAndDrawEach = (draw,program) => {
-            if(program === undefined) {
-                if(this.program === undefined)
-                    console.error("no program")
-                program = this.program
-            }
-
-            cameraAndFrameCountShaderStuff.transfer(program)
-            gl.uniform1f(program.getUniformLocation("drawingSquareRadius"), .5)
-
+        this.drawEach = function(predrawAndReturnProgram,draw) {
             for (let i = 0; i < numToDraw; ++i) {
+                let program = predrawAndReturnProgram(names[i])
+                
+                cameraAndFrameCountShaderStuff.transfer(program)
+
+                gl.uniform1f(program.getUniformLocation("drawingSquareRadius"), .5)
                 gl.uniform2f(program.getUniformLocation("screenPosition"), screenPositions[i * 2 + 0], screenPositions[i * 2 + 1])
                 draw(names[i])
 
                 displayWindows.forEach((dw) => {
                     if (dw.verticalPositionToRenderFrom === screenPositions[i * 2 + 1]) {
-                        gl.uniform1f(program.getUniformLocation("drawingSquareRadius"), dw.dimension / 2.)
+                        gl.uniform1f(program.getUniformLocation("drawingSquareRadius"), dw.dimension * .5)
                         gl.uniform2f(program.getUniformLocation("screenPosition"), dw.position.x, dw.position.y)
                         draw(names[i])
-
-                        gl.uniform1f(program.getUniformLocation("drawingSquareRadius"), .5)
                     }
                 })
             }
 
             numToDraw = 0
+        }
+
+        //prebatch and useprogram come first
+        if (fsBody !== undefined) {
+            this.program = new PictogramProgram(vsBody, fsBody)
+
+            this.finishPrebatchAndDrawEach = (draw) => {
+                this.drawEach(() => { return this.program},draw)
+            }
         }
     }
 

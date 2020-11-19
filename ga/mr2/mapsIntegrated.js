@@ -29,8 +29,9 @@ async function initGlobeProjectionPictograms(globeNamedInstantiations) {
             this.justUpdated = true //Can be replaced every frame, just not in the gl
         }
 
+        //something else you make
         var transpiledFunctions = {
-            sinusoidal: new TranspiledFunction()
+            alternating: new TranspiledFunction()
         }
 
         updateFunctions.splice(0,0,() => {
@@ -38,21 +39,10 @@ async function initGlobeProjectionPictograms(globeNamedInstantiations) {
                 transpiledFunctions[key].justUpdated = false
             })
 
-            transpiledFunctions.sinusoidal.setIntermediateRepresentation(
-                Math.floor(frameCount / 50) % 2 ?
-                    `p.x -= .4;` :
-                    ``
+            transpiledFunctions.alternating.setIntermediateRepresentation(
+                Math.floor(frameCount / 50) % 2 ? `p.x -= .4;` : ``
             )
         })
-    }
-
-    //do you give them names that the namedMvs don't have?
-    //Just press the number 1 and it gives you the... lowestUnusedColorName
-    let namedInstantiations = {
-        y: {
-            globe: globeNamedInstantiations["earthColor"],
-            mapping: transpiledFunctions["sinusoidal"]
-        }
     }
 
     let vsStart = `
@@ -62,10 +52,10 @@ async function initGlobeProjectionPictograms(globeNamedInstantiations) {
         attribute vec4 vertA;
         void main(void) {
             uv = uvA;
-            gl_Position = vec4(uvA,0.,1.);
+            vec4 p = vec4(uvA,0.,1.);
             `
     let vsEnd = `
-        // gl_Position = p;
+        gl_Position = p;
     `
     let vs = vsStart + vsEnd
     let fs = `
@@ -75,41 +65,65 @@ async function initGlobeProjectionPictograms(globeNamedInstantiations) {
             // gl_FragColor = vec4(1.,0.,0.,1.);
             gl_FragColor = texture2D(sampler, vec2(uv.x,1.-uv.y));
         `
-
-    let globeProjectionPictogramDrawer = new PictogramDrawer({})
-    let program = new PictogramProgram(vs, fs)
-
+        
     const eps = .00001 //sensetive, ugh
     const numDivisions = 256
     const uvBuffer = generateDividedUnitSquareBuffer(numDivisions, eps)
-    program.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
-    program.locateUniform("sampler")
 
-    addRenderFunction(() => {
-        // (Object.keys(transpiledFunctions)).forEach((key) => {
-        //     if (namedInstantiations[name].mapping.justUpdated) {
+    {
+        let program = new PictogramProgram(vs, fs)
+        program.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
+        program.locateUniform("sampler")
 
-        //     }
-        // })
-        //so each of these has a different program
-        //the program comes from
+        //do you give them names that the namedMvs don't have?
+        //Just press the number 1 and it gives you the... lowestUnusedColorName
+        var namedInstantiations = {
+            y: {
+                globe: globeNamedInstantiations["earthColor"],
+                mapping: transpiledFunctions["alternating"],
+                program: program
+                //this is made at runtime
+            },
+
+            x: {
+                globe: globeNamedInstantiations["cmb"],
+                mapping: transpiledFunctions["alternating"],
+                program: program
+            }
+        }
+    }
+
+    function predrawAndReturnProgram(name) {
+        let program = namedInstantiations[name].program
+
+        if (namedInstantiations[name].mapping.justUpdated) {
+            let vsSource = vertexShaderToPictogramVertexShader(vsStart + namedInstantiations[name].mapping.getIntermediateRepresentation() + vsEnd)
+            program.changeShader(gl.VERTEX_SHADER, vsSource)
+        }
 
         gl.useProgram(program.glProgram)
         program.prepareVertexAttribute("uv")
-        
-        function draw(name) {
-            gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_2D, namedInstantiations[name].globe.texture);
-            gl.uniform1i(program.getUniformLocation("sampler"), 0);
 
-            gl.drawArrays(gl.TRIANGLES, 0, uvBuffer.length / 2)
-        }
-        
-        globeProjectionPictogramDrawer.finishPrebatchAndDrawEach(draw,program)
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, namedInstantiations[name].globe.texture);
+        gl.uniform1i(program.getUniformLocation("sampler"), 0);
+
+        return program
+    }
+
+    function draw() {
+        gl.drawArrays(gl.TRIANGLES, 0, uvBuffer.length / 2)
+    }
+
+    let editingStyle = {}
+    let globeProjectionPictogramDrawer = new PictogramDrawer(editingStyle)
+    addRenderFunction(() => {
+        globeProjectionPictogramDrawer.drawEach(predrawAndReturnProgram, draw)
     },"end")
 
     updateFunctions.push(() => {
         globeProjectionPictogramDrawer.add(.5, -.5, "y")
+        globeProjectionPictogramDrawer.add(-2.5, -1.5, "x")
     })
 }
 
