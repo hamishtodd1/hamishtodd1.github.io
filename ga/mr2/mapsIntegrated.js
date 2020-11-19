@@ -17,89 +17,95 @@ async function initGlobeProjectionPictograms(globeNamedInstantiations) {
 
     {
         function TranspiledFunction() {
-            let intermediateRepresentation = "" //valid js or glsl
+
+            let intermediateRepresentation = "THIS_SHOULD_NOT_BE_USED" //valid js or glsl
+
+            this.irUpdateFunctionsToCall = []
+
             this.setIntermediateRepresentation = function(newIr) {
                 if(newIr !== intermediateRepresentation) {
                     intermediateRepresentation = newIr
-                    this.justUpdated = true
+                    
+                    for(let i = 0; i < this.irUpdateFunctionsToCall.length; ++i)
+                        this.irUpdateFunctionsToCall[i](this)
                 }
             }
             this.getIntermediateRepresentation = () => intermediateRepresentation
 
-            this.justUpdated = true //Can be replaced every frame, just not in the gl
+            this.globeProjectionProgram = null
         }
 
-        //something else you make
+        let vsStart = `
+            attribute vec2 uvA;
+            varying vec2 uv;
+
+            attribute vec4 vertA;
+            void main(void) {
+                uv = uvA;
+                vec4 p = vec4(uvA,0.,1.);
+                `
+        let vsEnd = `
+            gl_Position = p;
+        `
+        let fs = `
+            varying vec2 uv;
+            uniform sampler2D sampler;
+            void main(void) {
+                // gl_FragColor = vec4(1.,0.,0.,1.);
+                gl_FragColor = texture2D(sampler, vec2(uv.x,1.-uv.y));
+            `
+            
+        const eps = .00001 //sensetive, ugh
+        const numDivisions = 256
+        var uvBuffer = generateDividedUnitSquareBuffer(numDivisions, eps)
+
         var transpiledFunctions = {
             alternating: new TranspiledFunction()
         }
 
-        updateFunctions.splice(0,0,() => {
-            (Object.keys(transpiledFunctions)).forEach((key)=>{
-                transpiledFunctions[key].justUpdated = false
-            })
+        function updateGlobeProjectionProgram(tf) {
 
+            if (tf.globeProjectionProgram === null)
+                tf.globeProjectionProgram = new PictogramProgram(vsStart + vsEnd, fs)
+            else {
+                let vsSource = vertexShaderToPictogramVertexShader(vsStart + tf.getIntermediateRepresentation() + vsEnd)
+                tf.globeProjectionProgram.changeShader(gl.VERTEX_SHADER, vsSource)
+            }
+
+            tf.globeProjectionProgram.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
+            tf.globeProjectionProgram.locateUniform("sampler")
+        }
+        
+        updateGlobeProjectionProgram(transpiledFunctions.alternating)
+        transpiledFunctions.alternating.irUpdateFunctionsToCall.push(updateGlobeProjectionProgram)
+
+        //needs to be done for eall
+        updateFunctions.splice(0,0,() => {
             transpiledFunctions.alternating.setIntermediateRepresentation(
                 Math.floor(frameCount / 50) % 2 ? `p.x -= .4;` : ``
             )
         })
     }
 
-    let vsStart = `
-        attribute vec2 uvA;
-        varying vec2 uv;
-
-        attribute vec4 vertA;
-        void main(void) {
-            uv = uvA;
-            vec4 p = vec4(uvA,0.,1.);
-            `
-    let vsEnd = `
-        gl_Position = p;
-    `
-    let vs = vsStart + vsEnd
-    let fs = `
-        varying vec2 uv;
-        uniform sampler2D sampler;
-        void main(void) {
-            // gl_FragColor = vec4(1.,0.,0.,1.);
-            gl_FragColor = texture2D(sampler, vec2(uv.x,1.-uv.y));
-        `
-        
-    const eps = .00001 //sensetive, ugh
-    const numDivisions = 256
-    const uvBuffer = generateDividedUnitSquareBuffer(numDivisions, eps)
-
     {
-        let program = new PictogramProgram(vs, fs)
-        program.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
-        program.locateUniform("sampler")
-
         //do you give them names that the namedMvs don't have?
         //Just press the number 1 and it gives you the... lowestUnusedColorName
         var namedInstantiations = {
             y: {
                 globe: globeNamedInstantiations["earthColor"],
-                mapping: transpiledFunctions["alternating"],
-                program: program
+                tf: transpiledFunctions["alternating"],
                 //this is made at runtime
             },
 
             x: {
                 globe: globeNamedInstantiations["cmb"],
-                mapping: transpiledFunctions["alternating"],
-                program: program
+                tf: transpiledFunctions["alternating"],
             }
         }
     }
 
     function predrawAndReturnProgram(name) {
-        let program = namedInstantiations[name].program
-
-        if (namedInstantiations[name].mapping.justUpdated) {
-            let vsSource = vertexShaderToPictogramVertexShader(vsStart + namedInstantiations[name].mapping.getIntermediateRepresentation() + vsEnd)
-            program.changeShader(gl.VERTEX_SHADER, vsSource)
-        }
+        let program = namedInstantiations[name].tf.globeProjectionProgram
 
         gl.useProgram(program.glProgram)
         program.prepareVertexAttribute("uv")
