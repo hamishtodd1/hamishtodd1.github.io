@@ -121,6 +121,46 @@ function initCarat() {
                 carat.positionInString = tokenStart
         }
     }
+
+    getNumLines = () => {
+        let numLines = 1
+        for (let i = 0, il = backgroundString.length; i < il; ++i)
+            if (backgroundString[i] === "\n")
+                ++numLines
+
+        return numLines
+    }
+
+    bindButton("Enter", () => {
+        addStringAtCarat("\n")
+    })
+
+    function removeFromString(start, end) {
+        backgroundString =
+            backgroundString.substring(0, start) +
+            backgroundString.substring(end)
+        if (carat.positionInString > start)
+            carat.positionInString = start
+    }
+    
+    //TODO these should fully remove mvs too. There's really very little reason to see the name after you've made it
+    bindButton("Backspace", () => {
+        if (carat.positionInString === 0)
+            return
+
+        // debugger
+        let psLength = getPictogramStringLength(carat.positionInString, true)
+        let strLength = Math.max(psLength, 1)
+        removeFromString(carat.positionInString - strLength, carat.positionInString)
+    })
+    bindButton("Delete", () => {
+        if (carat.positionInString === backgroundString.length - 1)
+            return
+
+        let psLength = getPictogramStringLength(carat.positionInString, false)
+        let strLength = Math.max(psLength, 1)
+        removeFromString(carat.positionInString, carat.positionInString + strLength)
+    })
 }
 
 function initTypeableCharacters()

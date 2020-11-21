@@ -1,5 +1,36 @@
 <!--
-	Mystery: somehow "name" === "r"
+	TODO Bugs
+		Fucking which way is z
+		display windows go on top
+		colored frames
+
+	TODO for progress report
+		integration into typing
+		that means naming system! Think tonight
+		And function-making system, that's fun
+
+	New naming system
+		you can type any colorString at any time. Still max 3 colors.
+		Turns into a pictogram and doesn't turn back. If it's undefined it gets a "?" in there
+		colors apply to all the things
+		array of names, array of types that those names are, array of the data
+		Forget about making them local to a function
+
+
+	Progress report, Nov 2020
+	-more general approach to pictograms, possibly too general
+		I got super into the idea of trying to enumerate every visualizable function
+		That's silly, that's trying to skip ahead
+		You define your own algebras, that's the main innovation of GA and of object oriented programming
+		projective geometric algebra instead of vanilla geometric algebra
+		Currently you have to make new pictograms in javascript, so for the video I'll be kind of faking it
+		But eventually you'll be able to bootstrap your own ones inside this editor
+	-picked maps as a nice example
+	-functions / things that become shader programs
+		globes
+		globe projections as a separate thing
+	-rewritten in webgl, no three.js. Compilation target is javascript and glsl so that's the way it has to be
+	-No output column. Automated naming though
 
 	TODO for world map
 		Mapping from angles to texture coords, probably based in the thing
@@ -8,19 +39,7 @@
 		Scalars, certainly ones that can be seen as angles
 		+, cos, sin, exp, in pad.js
 		A lot of it is about projection. Sending projection point to infinity
-
-	Mapping system that makes sense
-		It's an array
-		Fuck color, this is about mapping points on the texture to points somewhere else
-		So you're making a function eg mollweide(p)
-			Any one of them can totally
-			mollweide
-		The wiki articles make it all about lat and lon but maybe they shouldn't
-		Yeah you need to translate it, this impassive sining and cosing can go away
-
-	Look it's just an array, just a bunch of points superimposed. And you can have gl.POINTS or gl.LINES
-	You could think of it as little pixels you're repositioning
-
+		
 	Hey, could have "cartesian product" symbol, mathematicians would like you
 		Or tensor product
 		Or, ordinary javascript arrays
@@ -33,16 +52,17 @@
 		Sometimes you want different viz for different things. Real view, disc view, color view
 
 	Fun GA things probably unnecessary to world map so avoid:
-		plane, pss
+		pss
 		dual, join
 
 
-
+	
 
 
 
 	After
 		Videos about projective geometry
+		"A different way to visualize calculus"
 		Demo of features of this thing
 		omicron reduction
 		Draw curve, get curve as usable thing. Killer app!
@@ -76,6 +96,7 @@
 				initMouse()
 				initWindowResizeSystem()
 
+				initTranspiledFunctions()
 				initPictogramDrawers()
 				initMvPictograms()
 				initGlobePictograms()
@@ -91,16 +112,13 @@
 				let displayableCharacters = typeableCharacters + freeVariableCharacters
 				initCharacterTexture(displayableCharacters)
 
-				initTokenizeEvaluateDisplay(displayableCharacters)
-
-				updateFunctions.splice(0, 0, () => {
-					alreadModifiedThisFrame = false
-
-					tokenizeEvaluateDisplay()
-				})
+				initTokenizer(displayableCharacters)
+				initTokenDisplay()
 
 				await initTextureSampler()
 				initFrames()
+
+				initNames()
 
 				initDisplayWindows()
 
@@ -111,6 +129,8 @@
 				function loop() {
 					mouse.updateFromAsyncAndCheckClicks()
 					//may wish to have keyboard too. You could even have >1 letter per frame!
+
+					tokenizeEvaluateDisplay()
 
 					for(var i = 0; i < updateFunctions.length; i++)
 						updateFunctions[i]()
@@ -143,6 +163,7 @@
 		<script src="text.js"></script>
 		
 		<script src="tokenizeEvaluateDisplay.js"></script>
+		<script src="displayTokens.js"></script>
 		<script src="errorHighlight.js"></script>
 
 		<script src="textureSampler.js"></script>
@@ -165,6 +186,8 @@
 
 		<script src="mouse.js"></script>
 
+		<script src="names.js"></script>
+
 		<script src="frames.js"></script>
 		<script src="mvAppearances.js"></script>
 
@@ -180,6 +203,7 @@
 		<script src="vertBufferFunctions.js"></script>
 
 		<script src="transpiler.js"></script>
+		<script src="transpiledFunctions.js"></script>
 
 		<!-- <script src="video.js"></script> -->
 		

@@ -18,11 +18,9 @@
 
 */
 
-function initTokenizeEvaluateDisplay(displayableCharacters) {
+function initTokenizer(displayableCharacters) {
 
     initErrorHighlight()
-
-    let identifierCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 
     tokenizeEvaluateDisplay = () => {
 
@@ -64,11 +62,11 @@ function initTokenizeEvaluateDisplay(displayableCharacters) {
             }
             else {
                 tokens.push("identifier")
-                moveWhile(() => identifierCharacters.indexOf(backgroundString[positionInString]) !== -1)
+                moveWhile(() => IDENTIFIER_CHARACTERS.indexOf(backgroundString[positionInString]) !== -1)
             }
         }
 
-        function forEachToken(func) {
+        forEachToken = (func) => {
             for (let tokenIndex = 0, numTokens = tokens.length; tokenIndex < numTokens; ++tokenIndex) {
                 let tokenStart = tokenStarts[tokenIndex]
                 let tokenEnd = getTokenEnd(tokenIndex)
@@ -85,108 +83,13 @@ function initTokenizeEvaluateDisplay(displayableCharacters) {
 
         let errorNewLines = []
 
-        forEachToken((tokenIndex, tokenStart, tokenEnd, token, lexeme) => {
+        // forEachToken((tokenIndex, tokenStart, tokenEnd, token, lexeme) => {
 
-            if(token === "identifier") {
-                if (namedMvs[lexeme] !== undefined) {
+        //     if(token === "identifier") {
 
-                }
+        //     }
+        // })
 
-            }
-        })
-
-        ///////////////////
-        ////  DRAWING  ////
-        ///////////////////
-        carat.preParseFunc()
-
-        let drawingPosition = new ScreenPosition()
-
-        drawingPosition.x =-mainCamera.rightAtZZero
-        drawingPosition.y = mainCamera.topAtZZero - .5
-
-        function drawTokenCharacters(tokenStart, tokenEnd) {
-            for (let positionInString = tokenStart; positionInString < tokenEnd; ++positionInString) {
-                if(positionInString > tokenStart)
-                    carat.duringParseFunc(drawingPosition, positionInString)
-                
-                let currentCharacter = backgroundString[positionInString]
-                if (currentCharacter !== " ")
-                    addCharacterToDraw(currentCharacter, drawingPosition)
-                drawingPosition.x += characterWidth
-            }
-        }
-        
-        let mvNamesInLine = []
-        forEachToken((tokenIndex, tokenStart, tokenEnd, token, lexeme) => {
-
-            carat.duringParseFunc(drawingPosition, tokenStart)
-
-            switch (token) {
-                case "\n":
-                    if (errorNewLines.indexOf(tokenIndex) !== -1)
-                        placeErrorHighlight(drawingPosition)
-
-                    for (let i = 0; i < displayWindows.length; ++i) {
-                        if (drawingPosition.y === displayWindows[i].verticalPositionToRenderFrom) {
-                            displayWindows[i].numMvs = 0
-                            // for (let j = 0; j < mvNamesInLine.length; ++j) {
-                            //     if (namedMvs.indexOf(mvNamesInLine[j]) !== -1)
-                            //         displayWindows[i].addMv(mvNamesInLine[j])
-                            // }
-                            // console.error("pictogram array!")
-                        }
-                    }
-                    mvNamesInLine.length = 0
-
-                    drawingPosition.y -= 1.
-                    drawingPosition.x = -mainCamera.rightAtZZero
-
-                    break
-
-                case "identifier":
-                    // pictogramTypeArrays //namedMvs, 
-                    let found = false
-                    pictogramTypeArrays.forEach((pictogramArray) => { //hash table is probably needed
-                        let names = Object.keys(pictogramArray)
-                        for (let i = 0, il = names; i < il && !found; ++i) {
-                            if (names[i] === lexeme) {
-
-                                //replaces addMvToRender and drawEarth
-                                //also, "mvNamesInLine"
-                                pictogramArray.add(lexeme,
-                                    drawingPosition.x + .5,
-                                    drawingPosition.y,
-                                    .5,
-                                    true )
-
-                                drawingPosition.x += 1.
-                                carat.moveOutOfToken(tokenStart, tokenEnd)
-
-                                found = true
-                                break
-                            }
-                        }
-                    })
-
-                    if(!found)
-                        drawTokenCharacters(tokenStart, tokenEnd)
-
-                    break
-
-                case "comment":
-                    drawTokenCharacters(tokenStart, tokenEnd)
-                    break
-
-                case " ":
-                    drawingPosition.x += characterWidth
-                    break
-
-                default:
-                    console.error("haven't dealt with this token category")
-            }
-        })
-
-        carat.postParseFunc()
+        drawTokens(errorNewLines)
     }
 }

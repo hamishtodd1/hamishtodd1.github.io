@@ -1,3 +1,12 @@
+/*
+    Other examples of things you'd want to define
+        Adding and multiplying knots
+            How would you construct this? You need an isomorphism from some string of symbols to knot pictures
+        Adding and intersecting SDFs
+        Superimposing / blending textures
+        Angles with a from-the-x-axis convention
+*/
+
 function initPictogramDrawers() {
 
     let vsHeader = shaderHeaderWithCameraAndFrameCount + `
@@ -92,18 +101,19 @@ function initPictogramDrawers() {
         }
     }
 
-    pictogramTest()
+    // pictogramTest()
+    initAnglePictograms()
 }
 
 function pictogramTest()
 {
-    let testVs = `
+    let vs = `
         attribute vec4 vertA;
 
         void main(void) {
             gl_Position = vertA;
         `
-    let testFs = `
+    let fs = `
         uniform float g;
 
         void main(void) {
@@ -120,21 +130,21 @@ function pictogramTest()
         },
     }
 
-    let testPictogramDrawer = new PictogramDrawer(testEditingStyle, testVs, testFs)
-    testPictogramDrawer.program.addVertexAttribute("vert", quadBuffer, 4, true)
-    testPictogramDrawer.program.locateUniform("g")
+    let pictogramDrawer = new PictogramDrawer(testEditingStyle, vs, fs)
+    pictogramDrawer.program.addVertexAttribute("vert", quadBuffer, 4, true)
+    pictogramDrawer.program.locateUniform("g")
 
     addRenderFunction(()=>{
-        gl.useProgram(testPictogramDrawer.program.glProgram)
-        testPictogramDrawer.program.prepareVertexAttribute("vert", quadBuffer)
+        gl.useProgram(pictogramDrawer.program.glProgram)
+        pictogramDrawer.program.prepareVertexAttribute("vert", quadBuffer)
 
-        testPictogramDrawer.finishPrebatchAndDrawEach((name) => {
-            gl.uniform1f(testPictogramDrawer.program.getUniformLocation("g"), namedInstantiations[name])
+        pictogramDrawer.finishPrebatchAndDrawEach((name) => {
+            gl.uniform1f(pictogramDrawer.program.getUniformLocation("g"), namedInstantiations[name])
             gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4)
         })
     }, "end" )
 
     updateFunctions.push(() => {
-        testPictogramDrawer.add(.5, 1.5, "r")
+        pictogramDrawer.add(.5, 1.5, "r")
     })
 }

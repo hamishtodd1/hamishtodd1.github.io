@@ -15,26 +15,9 @@ async function initGlobeProjectionPictograms(globeNamedInstantiations) {
         What are these functions? For glsl y
     */
 
+
+
     {
-        function TranspiledFunction() {
-
-            let intermediateRepresentation = "THIS_SHOULD_NOT_BE_USED" //valid js or glsl
-
-            this.irUpdateFunctionsToCall = []
-
-            this.setIntermediateRepresentation = function(newIr) {
-                if(newIr !== intermediateRepresentation) {
-                    intermediateRepresentation = newIr
-                    
-                    for(let i = 0; i < this.irUpdateFunctionsToCall.length; ++i)
-                        this.irUpdateFunctionsToCall[i](this)
-                }
-            }
-            this.getIntermediateRepresentation = () => intermediateRepresentation
-
-            this.globeProjectionProgram = null
-        }
-
         let vsStart = `
             attribute vec2 uvA;
             varying vec2 uv;
@@ -58,13 +41,8 @@ async function initGlobeProjectionPictograms(globeNamedInstantiations) {
         const eps = .00001 //sensetive, ugh
         const numDivisions = 256
         var uvBuffer = generateDividedUnitSquareBuffer(numDivisions, eps)
-
-        var transpiledFunctions = {
-            alternating: new TranspiledFunction()
-        }
-
+        
         function updateGlobeProjectionProgram(tf) {
-
             if (tf.globeProjectionProgram === null)
                 tf.globeProjectionProgram = new PictogramProgram(vsStart + vsEnd, fs)
             else {
@@ -75,32 +53,28 @@ async function initGlobeProjectionPictograms(globeNamedInstantiations) {
             tf.globeProjectionProgram.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
             tf.globeProjectionProgram.locateUniform("sampler")
         }
-        
-        updateGlobeProjectionProgram(transpiledFunctions.alternating)
-        transpiledFunctions.alternating.irUpdateFunctionsToCall.push(updateGlobeProjectionProgram)
 
-        //needs to be done for eall
-        updateFunctions.splice(0,0,() => {
-            transpiledFunctions.alternating.setIntermediateRepresentation(
+        var alternatingTf = new TranspiledFunction("alternating")
+        alternatingTf.addIrUpdater(updateGlobeProjectionProgram)
+
+        //simulates the transpiler
+        updateFunctions.splice(0, 0, () => {
+            alternatingTf.setIntermediateRepresentation(
                 Math.floor(frameCount / 50) % 2 ? `p.x -= .4;` : ``
             )
         })
+        
     }
+    var namedInstantiations = {
+        y: {
+            globe: globeNamedInstantiations["earthColor"],
+            tf: alternatingTf,
+            //this is made at runtime
+        },
 
-    {
-        //do you give them names that the namedMvs don't have?
-        //Just press the number 1 and it gives you the... lowestUnusedColorName
-        var namedInstantiations = {
-            y: {
-                globe: globeNamedInstantiations["earthColor"],
-                tf: transpiledFunctions["alternating"],
-                //this is made at runtime
-            },
-
-            x: {
-                globe: globeNamedInstantiations["cmb"],
-                tf: transpiledFunctions["alternating"],
-            }
+        x: {
+            globe: globeNamedInstantiations["cmb"],
+            tf: alternatingTf,
         }
     }
 
@@ -128,15 +102,15 @@ async function initGlobeProjectionPictograms(globeNamedInstantiations) {
     },"end")
 
     updateFunctions.push(() => {
-        globeProjectionPictogramDrawer.add(.5, -.5, "y")
-        globeProjectionPictogramDrawer.add(-2.5, -1.5, "x")
+        // globeProjectionPictogramDrawer.add(.5, -.5, "y")
+        // globeProjectionPictogramDrawer.add(-2.5, -1.5, "x")
     })
 }
 
 async function initGlobePictograms() {
     let namedInstantiations = {}
     {
-        let textureNames = ["earthColor", "ball", "cmb", "jupiter", "latAndLon"]
+        let textureNames = ["earthColor", "ball", "cmb", "jupiter", "latAndLon2"]
 
         for(let i = 0; i < textureNames.length; ++i) {
             namedInstantiations[textureNames[i]] = {
@@ -222,7 +196,7 @@ async function initGlobePictograms() {
     })
 
     updateFunctions.push(() => {
-        pictogramDrawer.add(-.5, .5, "earthColor")
+        pictogramDrawer.add(-.5, .5, "latAndLon2")
     })
 
     initGlobeProjectionPictograms(namedInstantiations)

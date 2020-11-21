@@ -11,10 +11,11 @@ const characterWidth = 1. / 3.
 const mouseResponses = []
 const rightMouseResponses = []
 
+const IDENTIFIER_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+
 //---------Varying state
 
 const pictogramDrawers = []
-const namedMvs = {} //TODO should be in the above
 
 const carat = {
     positionInString: -1,

@@ -1,10 +1,4 @@
 /*
-    Thank you to Paul Bourke and NASA for these textures
-
-    NOTE SERIOUS CONFUSION: IS Z POSITIVE OR NEGATIVE?
-
-    Werner is equal-area! Presumably sinusoidal too
-
     Use of the algebra
         mercator(picture of a globe) = abs(log(centralCylindrical(picture of a globe)))
         linalg may be sufficient, since you are stuck at the origin
@@ -20,7 +14,13 @@
         Which is least racist?
         Can we make a less racist map? 
         Making the least racist map
-		Top 8 map projections?
+        Top 8 map projections?
+        
+    This is for viewers of:
+        3b1b who don't like putting viz and equation together in their head
+        Viewers of sebastian lague or code parade who, er, don't use unity?
+        Viewers of inigo quilez or chris deleon shader coding videos who want something readable
+        Numberphile viewers who want more viz
 
     Script
         Intro
@@ -75,7 +75,8 @@
             Werner - Show the old pic.
                 Good for the arctic circle!
                 VERY eurocentric
-                sinusoidal, bonne
+                sinusoidal, bonne, bottomley
+                Equal area!!!!
             Equidistant - rolling pin
                 equirectangular - also useful for panoramas https://www.istockphoto.com/photos/equirectangular-panorama-beach?mediatype=photography&phrase=equirectangular%20panorama%20beach&sort=best
                     Note that it still ends up with a big greenland
@@ -98,6 +99,7 @@
                     wasn't that he was falsely claiming to have done something that was impossible
                     it was that he was denying the variety, denying that you should think about projections other the one he came up with. 
                     Ignoring the contributions of the cartographers who came before him, including the Egyptian and Chinese ones
+        Thank you to Paul Bourke and NASA for these textures
 */
 
 async function initWorldMap() {

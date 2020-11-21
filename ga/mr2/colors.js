@@ -61,6 +61,25 @@ function projectPointOnPlane(point,plane,target) {
 	return target
 }
 
+function getPictogramStringLength(beginning, goBackwards) {
+	let backgroundStringLength = backgroundString.length
+	for (let strLength = 0; true; ++strLength) {
+		let positionInString = goBackwards ? beginning - 1 - strLength : beginning + strLength
+		if (positionInString < 0 || positionInString > backgroundStringLength)
+			return strLength
+
+		if (colorCharacters.indexOf(backgroundString[positionInString]) === -1) {
+			if (IDENTIFIER_CHARACTERS.indexOf(backgroundString[positionInString]) !== -1)
+				return 0
+			else
+				return strLength
+
+			//but they can't be longer than three characters
+		}
+	}
+	return 0
+}
+
 function drawColorWheel()
 {
 	const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `

@@ -7,15 +7,13 @@ function initPremadeBuffers()
     vertBufferFunctions.disc = (radius, radialDivisions) =>
     {
         let circumferencePoints = []
-        for (let i = 0; i < radialDivisions; ++i)
-        {
+        for (let i = 0; i < radialDivisions; ++i) {
             let angle = TAU * i / radialDivisions
             circumferencePoints.push([Math.cos(angle) * radius, Math.sin(angle) * radius])
         }
 
         var vertBuffer = new Float32Array(3 * 4 * radialDivisions)
-        for (let i = 0; i < radialDivisions; ++i)
-        {
+        for (let i = 0; i < radialDivisions; ++i) {
             vertBuffer[i * 3 * 4 + 0] = 0.
             vertBuffer[i * 3 * 4 + 1] = 0.
             vertBuffer[i * 3 * 4 + 2] = 0.

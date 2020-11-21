@@ -1,3 +1,7 @@
+/* Would be good to go back to that thing where you are in point-creating mode or line-creating mode
+ * 
+ */
+
 function initDisplayWindows() {
     let dimension = 3.;
 
@@ -7,11 +11,9 @@ function initDisplayWindows() {
             attribute vec4 vertA;
             uniform vec2 screenPosition;
 
-            const float dimension = `+ toGlslFloatLiteral(dimension) + `;
-
             void main(void) {
                 gl_Position = vertA;
-                gl_Position.xy *= dimension;
+                gl_Position.xy *= `+ toGlslFloatLiteral(dimension) + `;
                 gl_Position.xy += screenPosition;
             `
             + cameraAndFrameCountShaderStuff.footer

@@ -1,9 +1,6 @@
 /*
-    Other examples of things you'd want to define
-        Adding and multiplying knots
-            How would you construct this? You need an isomorphism from some string of symbols to knot pictures
-        Adding and intersecting SDFs
-        Superimposing / blending textures
+    Next make an angle visualizer because why not
+    Hmm. If the only context in which you care about the magnitude of the scalar part is if it's an angle...
 
 
     Scalars appearance is context-dependent, sometimes a length, sometimes an area
@@ -17,6 +14,58 @@
         Want to click and select a color, just like with a vector
         As with normal points, can visualize space as plane or disc. Disc gets you hue circle
 */
+
+function initAnglePictograms() {
+    let vs = `
+        attribute vec4 vertA;
+        varying vec2 p;
+        void main(void) {
+            gl_Position = vertA;
+            p = gl_Position.xy;
+        `
+    let fs = `
+        uniform float fullAngle;
+        varying vec2 p;
+        void main(void) {
+            float angle = atan(-p.y,-p.x) + PI;
+            if(angle > fullAngle)
+                discard;
+            gl_FragColor = vec4(.2,.2,.2,1.);
+        `
+
+    let namedInstantiations = {
+        "a": .3
+    }
+
+    let editingStyle = {
+        during: (name, x, y) => {
+            namedInstantiations[name] = clamp(x, -1., 1.)
+        },
+    }
+
+    var vertsBuffer = vertBufferFunctions.disc(.95, 62)
+
+    let pictogramDrawer = new PictogramDrawer(editingStyle, vs, fs)
+    pictogramDrawer.program.addVertexAttribute("vert", vertsBuffer, 4)
+    pictogramDrawer.program.locateUniform("fullAngle")
+
+    addRenderFunction(() => {
+        gl.useProgram(pictogramDrawer.program.glProgram)
+        pictogramDrawer.program.prepareVertexAttribute("vert", vertsBuffer)
+
+        pictogramDrawer.finishPrebatchAndDrawEach((name) => {
+            //If it's from an mv, normalize its magnitude to 1 before taking the scalar part
+            let angle = 2. * Math.acos(namedInstantiations[name])
+            gl.uniform1f(pictogramDrawer.program.getUniformLocation("fullAngle"), angle)
+            gl.drawArrays(gl.TRIANGLES, 0, vertsBuffer.length / 4)
+        })
+    }, "end")
+
+    updateFunctions.push(() => {
+        pictogramDrawer.add(.5, -.5, "a")
+        // globeProjectionPictogramDrawer.add(-2.5, -1.5, "x")
+    })
+}
 
 function initMvPictograms() {
 

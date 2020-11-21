@@ -7,7 +7,7 @@
         So different signatures (all "in" for glsl)
 
     You get the function as a string
-    It has its leaves of course, currently namedMvs[]
+    It has its leaves
     the function arguments need to be put in those leaves, somehow
 
     When you type the name of an mv, it becomes a number in the backgroundString? Or something?
