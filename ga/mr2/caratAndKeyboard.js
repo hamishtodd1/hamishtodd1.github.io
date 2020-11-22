@@ -68,8 +68,7 @@ function initCarat() {
         }
     }
 
-    addStringAtCarat = function (str)
-    {
+    addStringAtCarat = function (str) {
         backgroundStringSplice(carat.positionInString, 0, str)
         carat.moveAlongString(str.length)
     }
@@ -148,32 +147,37 @@ function initCarat() {
         if (carat.positionInString === 0)
             return
 
-        // debugger
         let psLength = getPictogramStringLength(carat.positionInString, true)
-        let strLength = Math.max(psLength, 1)
-        removeFromString(carat.positionInString - strLength, carat.positionInString)
+        removeFromString(carat.positionInString - Math.max(psLength, 1), carat.positionInString)
     })
     bindButton("Delete", () => {
         if (carat.positionInString === backgroundString.length - 1)
             return
 
         let psLength = getPictogramStringLength(carat.positionInString, false)
-        let strLength = Math.max(psLength, 1)
-        removeFromString(carat.positionInString, carat.positionInString + strLength)
+        removeFromString(carat.positionInString, carat.positionInString + Math.max(psLength, 1))
     })
 }
 
 function initTypeableCharacters()
 {
     let typeableCharacters = ""
-    function makeCharacterTypeable(character) {
-        typeableCharacters += character
-        bindButton(character, () => addStringAtCarat(character))
-    }
-
+    
     let initialCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ()+-=/ "
-    for (let i = 0; i < initialCharacters.length; ++i)
-        makeCharacterTypeable(initialCharacters[i])
+    for (let i = 0; i < initialCharacters.length; ++i) {
+        let character = initialCharacters[i]
+
+        typeableCharacters += character
+        
+        bindButton(character, () => {
+            backgroundStringSplice(carat.positionInString, 0, character)
+            carat.moveAlongString(1)
+
+            carat.indexOfLastTypedCharacter = carat.positionInString - 1
+
+            //could capitalize as a way of indicating differet names
+        })
+    }
     
     return typeableCharacters
 }

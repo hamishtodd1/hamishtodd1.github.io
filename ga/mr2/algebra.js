@@ -406,6 +406,15 @@ function initAlgebra()
                 attributeBuffer[i * 4 + 3] = pointW(mvArray[i])
             }
         }
+
+        function projectPointOnPlane(point, plane, target) {
+            wNormalizePoint(point)
+            let planeDotPoint = mv0
+            inner(point, plane, planeDotPoint)
+            gp(planeDotPoint, plane, target)
+            wNormalizePoint(target)
+            return target
+        }
     }
 
     initDualQuaternions(appendToGaShaderString, replaceSignature)

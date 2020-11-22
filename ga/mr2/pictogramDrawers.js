@@ -58,10 +58,10 @@ function initPictogramDrawers() {
             screenPositions[numToDraw * 2 + 1] = y
             names[numToDraw] = name
 
-            addUnnamedFrameToDraw(x, y)
-            // if (name === undefined)
-            // else
-            //     addNamedFrameToDraw(x, y, name)
+            if (coloredNamesAlphabetically.indexOf(name) === -1)
+                addUnnamedFrameToDraw(x, y)
+            else
+                addNamedFrameToDraw(x, y, name)
 
             if (mouse.inSquare(x, y, .5))
                 mouseDw.placeBasedOnHover(x, y, editingStyle, name)
@@ -101,7 +101,7 @@ function initPictogramDrawers() {
         }
     }
 
-    // pictogramTest()
+    pictogramTest()
     initAnglePictograms()
 }
 
@@ -120,13 +120,9 @@ function pictogramTest()
             gl_FragColor = vec4(1.,g,0.,1.);
         `
 
-    let namedInstantiations = {
-        "r": 0.
-    }
-
     let testEditingStyle = {
-        during: (editingName,x,y) => {
-            namedInstantiations[editingName] = Math.abs(x)
+        during: (name,x,y) => {
+            getNameProperties(name).value = Math.abs(x)
         },
     }
 
@@ -134,17 +130,19 @@ function pictogramTest()
     pictogramDrawer.program.addVertexAttribute("vert", quadBuffer, 4, true)
     pictogramDrawer.program.locateUniform("g")
 
+    assignNameToPictogram("r", pictogramDrawer, { value: 0. })
+
     addRenderFunction(()=>{
         gl.useProgram(pictogramDrawer.program.glProgram)
         pictogramDrawer.program.prepareVertexAttribute("vert", quadBuffer)
 
         pictogramDrawer.finishPrebatchAndDrawEach((name) => {
-            gl.uniform1f(pictogramDrawer.program.getUniformLocation("g"), namedInstantiations[name])
+            gl.uniform1f(pictogramDrawer.program.getUniformLocation("g"), getNameProperties(name).value)
             gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4)
         })
     }, "end" )
 
     updateFunctions.push(() => {
-        pictogramDrawer.add(.5, 1.5, "r")
+        drawName("r",.5, 1.5)
     })
 }

@@ -33,13 +33,9 @@ function initAnglePictograms() {
             gl_FragColor = vec4(.2,.2,.2,1.);
         `
 
-    let namedInstantiations = {
-        "a": .3
-    }
-
     let editingStyle = {
         during: (name, x, y) => {
-            namedInstantiations[name] = clamp(x, -1., 1.)
+            getNameProperties(name).value = clamp(x, -1., 1.)
         },
     }
 
@@ -49,32 +45,27 @@ function initAnglePictograms() {
     pictogramDrawer.program.addVertexAttribute("vert", vertsBuffer, 4)
     pictogramDrawer.program.locateUniform("fullAngle")
 
+    assignNameToPictogram("bg", pictogramDrawer, { value: 0. })
+
     addRenderFunction(() => {
         gl.useProgram(pictogramDrawer.program.glProgram)
         pictogramDrawer.program.prepareVertexAttribute("vert", vertsBuffer)
 
         pictogramDrawer.finishPrebatchAndDrawEach((name) => {
             //If it's from an mv, normalize its magnitude to 1 before taking the scalar part
-            let angle = 2. * Math.acos(namedInstantiations[name])
+            let angle = 2. * Math.acos(getNameProperties(name).value)
             gl.uniform1f(pictogramDrawer.program.getUniformLocation("fullAngle"), angle)
             gl.drawArrays(gl.TRIANGLES, 0, vertsBuffer.length / 4)
         })
     }, "end")
 
     updateFunctions.push(() => {
-        pictogramDrawer.add(.5, -.5, "a")
-        // globeProjectionPictogramDrawer.add(-2.5, -1.5, "x")
+        drawName("bg",.5, -.5)
     })
 }
 
 function initMvPictograms() {
 
-    let namedInstantiations = {
-        "bgo": new Float32Array(16),
-        "r": new Float32Array(16)
-    }
-    pointX(namedInstantiations["bgo"], .5);
-    realLineX(namedInstantiations["r"], .5);
     let hexantColors = new Float32Array(3 * 6)
 
     let slideStartMv = new Float32Array(16)
@@ -86,18 +77,18 @@ function initMvPictograms() {
         during: (editingName, x, y) => {
             point(slideCurrentMv, x, y, 0., 1.)
 
-            let grade = getGrade(namedInstantiations[editingName])
+            let grade = getGrade(getNameProperties(editingName))
             if (grade === 3)
-                assign(slideCurrentMv, namedInstantiations[editingName])
+                assign(slideCurrentMv, getNameProperties(editingName))
             else if (grade === 2) {
                 if (mvEquals(slideCurrentMv, slideStartMv)) {
                     let currentLineDotMousePosition = new Float32Array(16);
-                    inner(namedInstantiations[editingName], slideStartMv, currentLineDotMousePosition)
-                    gp(currentLineDotMousePosition, slideStartMv, namedInstantiations[editingName])
+                    inner(getNameProperties(editingName), slideStartMv, currentLineDotMousePosition)
+                    gp(currentLineDotMousePosition, slideStartMv, getNameProperties(editingName))
                     delete currentLineDotMousePosition
                 }
                 else
-                    join(slideStartMv, slideCurrentMv, namedInstantiations[editingName])
+                    join(slideStartMv, slideCurrentMv, getNameProperties(editingName))
             }
         },
     }
@@ -139,13 +130,16 @@ function initMvPictograms() {
         pointPictogramDrawer.program.locateUniform("hexantColors")
         pointPictogramDrawer.program.locateUniform("visualPosition")
 
+        assignNameToPictogram("bgo", pointPictogramDrawer, new Float32Array(16))
+        pointX(getNameProperties("bgo"), .5);
+
         addRenderFunction(() => {
             gl.useProgram(pointPictogramDrawer.program.glProgram)
 
             pointPictogramDrawer.program.prepareVertexAttribute("vert", vertBuffer)
 
             pointPictogramDrawer.finishPrebatchAndDrawEach((name) => {
-                let mv = namedInstantiations[name]
+                let mv = getNameProperties(name)
                 if (pointX(mv) === 0. && pointY(mv) === 0. && pointZ(mv) === 0. && pointW(mv) === 0.)
                     return
 
@@ -195,12 +189,15 @@ function initMvPictograms() {
         linePictogramDrawer.program.addVertexAttribute("colorIndex", indexBuffer, 1, false)
         linePictogramDrawer.program.locateUniform("hexantColors")
 
+        assignNameToPictogram("w", linePictogramDrawer, new Float32Array(16))
+        realLineX(getNameProperties("w"), .5);
+
         addRenderFunction(() => {
             gl.useProgram(linePictogramDrawer.program.glProgram)
             linePictogramDrawer.program.prepareVertexAttribute("colorIndex", indexBuffer)
 
             linePictogramDrawer.finishPrebatchAndDrawEach((name) => {
-                let mv = namedInstantiations[name]
+                let mv = getNameProperties(name)
                 if (realLineX(mv) === 0. && realLineY(mv) === 0. && realLineZ(mv) === 0.)
                     return
 
@@ -246,67 +243,67 @@ function initMvPictograms() {
 
     //plane
     if (0) {
-        //circular thing, cut it off outside the box
-        //maybe target-like
-        //light can be built into shader
-        //pretty important for points and lines to be poking out of planes they are precisely in
+        // //circular thing, cut it off outside the box
+        // //maybe target-like
+        // //light can be built into shader
+        // //pretty important for points and lines to be poking out of planes they are precisely in
 
-        const vsSource = shaderHeaderWithCameraAndFrameCount + gaShaderString + `
-            attribute vec4 vertA;
-            varying vec4 p;
+        // const vsSource = shaderHeaderWithCameraAndFrameCount + gaShaderString + `
+        //     attribute vec4 vertA;
+        //     varying vec4 p;
 
-            void main(void) {
-                p = vertA;
+        //     void main(void) {
+        //         p = vertA;
 
-                gl_Position = p;
-            ` + cameraAndFrameCountShaderStuff.footer
-        const fsSource = shaderHeaderWithCameraAndFrameCount + gaShaderString + `
-            varying vec4 p;
+        //         gl_Position = p;
+        //     ` + cameraAndFrameCountShaderStuff.footer
+        // const fsSource = shaderHeaderWithCameraAndFrameCount + gaShaderString + `
+        //     varying vec4 p;
 
-            uniform vec4 elements;
+        //     uniform vec4 elements;
 
-            void main(void) {
-                //we make a line through this ray
-                zeroMv(mv0); //plane
-                mv0[1] = elements.w;
-                mv0[2] = elements.x;
-                mv0[3] = elements.y;
-                mv0[4] = elements.z;
+        //     void main(void) {
+        //         //we make a line through this ray
+        //         zeroMv(mv0); //plane
+        //         mv0[1] = elements.w;
+        //         mv0[2] = elements.x;
+        //         mv0[3] = elements.y;
+        //         mv0[4] = elements.z;
 
-                meet(viewLine,mv0,mv1);
-                vec4 rayPlaneIntersection;
-                mvToPoint(mv1,rayPlaneIntersection);
-                if( rayPlaneIntersection.w != 0. && abs(rayPlaneIntersection.z)<.5) {
-                    gl_FragColor = vec4(1.,0.,0.,1.);
-                    //and write to the depth buffer urgh
-                }
-                else
-                    discard;
-            }
-        `
+        //         meet(viewLine,mv0,mv1);
+        //         vec4 rayPlaneIntersection;
+        //         mvToPoint(mv1,rayPlaneIntersection);
+        //         if( rayPlaneIntersection.w != 0. && abs(rayPlaneIntersection.z)<.5) {
+        //             gl_FragColor = vec4(1.,0.,0.,1.);
+        //             //and write to the depth buffer urgh
+        //         }
+        //         else
+        //             discard;
+        //     }
+        // `
 
-        const program = new Program(vsSource, fsSource)
-        cameraAndFrameCountShaderStuff.locateUniforms(program)
+        // const program = new Program(vsSource, fsSource)
+        // cameraAndFrameCountShaderStuff.locateUniforms(program)
 
-        program.addVertexAttribute("vert", quadBuffer, 4, true)
+        // program.addVertexAttribute("vert", quadBuffer, 4, true)
 
-        program.locateUniform("elements")
+        // program.locateUniform("elements")
 
-        addRenderFunction(() => {
-            gl.useProgram(program.glProgram);
+        // addRenderFunction(() => {
+        //     gl.useProgram(program.glProgram);
 
-            cameraAndFrameCountShaderStuff.transfer(program)
+        //     cameraAndFrameCountShaderStuff.transfer(program)
 
-            program.prepareVertexAttribute("vert")
+        //     program.prepareVertexAttribute("vert")
 
-            gl.uniform4f(program.getUniformLocation("elements"), planeX(mv), planeY(mv), planeY(mv), planeW(mv))
+        //     gl.uniform4f(program.getUniformLocation("elements"), planeX(mv), planeY(mv), planeY(mv), planeW(mv))
 
-            gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4);
-        })
+        //     gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4);
+        // })
     }
 
     updateFunctions.push(() => {
-        pointPictogramDrawer.add(-.5, -1.5, "bgo")
-        linePictogramDrawer.add(.5, -2.5, "r")
+        drawName("bgo",-.5, -1.5)
+        drawName("w",.5, -2.5)
     })
 }

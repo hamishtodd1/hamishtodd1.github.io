@@ -52,15 +52,6 @@ const colors = {
 }
 for (let color in colors) colorCharacters += color
 
-function projectPointOnPlane(point,plane,target) {
-	wNormalizePoint(point)
-	let planeDotPoint = mv0
-	inner(point, plane, planeDotPoint)
-	gp(planeDotPoint, plane, target)
-	wNormalizePoint(target)
-	return target
-}
-
 function getPictogramStringLength(beginning, goBackwards) {
 	let backgroundStringLength = backgroundString.length
 	for (let strLength = 0; true; ++strLength) {

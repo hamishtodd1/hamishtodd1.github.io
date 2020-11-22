@@ -7,7 +7,7 @@
         Aaand it might be the dymaxion
 */
 
-async function initGlobeProjectionPictograms(globeNamedInstantiations) {
+async function initGlobeProjectionPictograms() {
     /*
         Functions like mollweide are separate objects
         They have names. They don't themselves receive a visualization because you've not given them a s
@@ -65,27 +65,15 @@ async function initGlobeProjectionPictograms(globeNamedInstantiations) {
         })
         
     }
-    var namedInstantiations = {
-        y: {
-            globe: globeNamedInstantiations["earthColor"],
-            tf: alternatingTf,
-            //this is made at runtime
-        },
-
-        x: {
-            globe: globeNamedInstantiations["cmb"],
-            tf: alternatingTf,
-        }
-    }
 
     function predrawAndReturnProgram(name) {
-        let program = namedInstantiations[name].tf.globeProjectionProgram
+        let program = getNameProperties(name).tf.globeProjectionProgram
 
         gl.useProgram(program.glProgram)
         program.prepareVertexAttribute("uv")
 
         gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, namedInstantiations[name].globe.texture);
+        gl.bindTexture(gl.TEXTURE_2D, getNameProperties(name).globeProperties.texture);
         gl.uniform1i(program.getUniformLocation("sampler"), 0);
 
         return program
@@ -96,30 +84,27 @@ async function initGlobeProjectionPictograms(globeNamedInstantiations) {
     }
 
     let editingStyle = {}
-    let globeProjectionPictogramDrawer = new PictogramDrawer(editingStyle)
+    let pictogramDrawer = new PictogramDrawer(editingStyle)
     addRenderFunction(() => {
-        globeProjectionPictogramDrawer.drawEach(predrawAndReturnProgram, draw)
+        pictogramDrawer.drawEach(predrawAndReturnProgram, draw)
     },"end")
 
+    assignNameToPictogram("o", pictogramDrawer, {
+        globeProperties: getNameProperties("go"),
+        tf: alternatingTf,
+    })
+    assignNameToPictogram("b", pictogramDrawer, {
+        globeProperties: getNameProperties("gp"),
+        tf: alternatingTf,
+    })
+
     updateFunctions.push(() => {
-        // globeProjectionPictogramDrawer.add(.5, -.5, "y")
-        // globeProjectionPictogramDrawer.add(-2.5, -1.5, "x")
+        // drawName("o",-1.5, -.5)
+        // drawName("b",-2.5, -1.5)
     })
 }
 
 async function initGlobePictograms() {
-    let namedInstantiations = {}
-    {
-        let textureNames = ["earthColor", "ball", "cmb", "jupiter", "latAndLon2"]
-
-        for(let i = 0; i < textureNames.length; ++i) {
-            namedInstantiations[textureNames[i]] = {
-                texture: await Texture("data/" + textureNames[i] + ".png"),
-                yaw: 0., pitch: 0.
-            }
-        }
-    }
-
     let vs = `
         attribute vec2 uvA;
         varying vec2 uv;
@@ -162,9 +147,10 @@ async function initGlobePictograms() {
     // pitchAxis.realLine[0] = 1.
 
     let globeEditingStyle = {
-        during: (editingName)=>{
-            namedInstantiations[editingName].yaw   += mouse.position.x - mouse.positionOld.x
-            namedInstantiations[editingName].pitch += mouse.position.y - mouse.positionOld.y
+        during: (name)=>{
+            let nameProperties = getNameProperties(name)
+            nameProperties.yaw   += mouse.position.x - mouse.positionOld.x
+            nameProperties.pitch += mouse.position.y - mouse.positionOld.y
         }
     }
 
@@ -178,17 +164,25 @@ async function initGlobePictograms() {
     
     locateUniformDualQuat(pictogramDrawer.program, "transform")
 
+    let textureNames = ["earthColor", "ball", "cmb", "jupiter", "latAndLon2"]
+    for (let i = 0; i < textureNames.length; ++i) {
+        assignNameToPictogram(coloredNamesAlphabetically[13 + i], pictogramDrawer, {
+            texture: await Texture("data/" + textureNames[i] + ".png"),
+            yaw: 0., pitch: 0.
+        })
+    }
+
     let transform = new DualQuat()
     addRenderFunction(() => {
         gl.useProgram(pictogramDrawer.program.glProgram)
         pictogramDrawer.program.prepareVertexAttribute("uv")
 
         pictogramDrawer.finishPrebatchAndDrawEach((name) => {
-            rotator(yawAxis, namedInstantiations[name].yaw, transform)
+            rotator(yawAxis, getNameProperties(name).yaw, transform)
             transferDualQuat(transform, "transform", pictogramDrawer.program)
 
             gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_2D, namedInstantiations[name].texture);
+            gl.bindTexture(gl.TEXTURE_2D, getNameProperties(name).texture);
             gl.uniform1i(pictogramDrawer.program.getUniformLocation("sampler"), 0);//hmm, why 0?
 
             gl.drawArrays(gl.TRIANGLES, 0, uvBuffer.length / 2);
@@ -196,8 +190,8 @@ async function initGlobePictograms() {
     })
 
     updateFunctions.push(() => {
-        pictogramDrawer.add(-.5, .5, "latAndLon2")
+        drawName("gp", -.5, .5,)
     })
 
-    initGlobeProjectionPictograms(namedInstantiations)
+    initGlobeProjectionPictograms()
 }

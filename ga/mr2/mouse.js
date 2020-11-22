@@ -2,7 +2,6 @@
     hover the mouse over a box and it pops up a display window
 */
 
-log("yo")
 function initMouse() {
     mouse = {
         clicking: false,

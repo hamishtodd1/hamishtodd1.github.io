@@ -9,13 +9,6 @@
 		that means naming system! Think tonight
 		And function-making system, that's fun
 
-	New naming system
-		you can type any colorString at any time. Still max 3 colors.
-		Turns into a pictogram and doesn't turn back. If it's undefined it gets a "?" in there
-		colors apply to all the things
-		array of names, array of types that those names are, array of the data
-		Forget about making them local to a function
-
 
 	Progress report, Nov 2020
 	-more general approach to pictograms, possibly too general
@@ -96,6 +89,7 @@
 				initMouse()
 				initWindowResizeSystem()
 
+				initNames()
 				initTranspiledFunctions()
 				initPictogramDrawers()
 				initMvPictograms()
@@ -113,12 +107,10 @@
 				initCharacterTexture(displayableCharacters)
 
 				initTokenizer(displayableCharacters)
-				initTokenDisplay()
+				initPadDisplay()
 
 				await initTextureSampler()
 				initFrames()
-
-				initNames()
 
 				initDisplayWindows()
 
@@ -163,7 +155,7 @@
 		<script src="text.js"></script>
 		
 		<script src="tokenizeEvaluateDisplay.js"></script>
-		<script src="displayTokens.js"></script>
+		<script src="padDisplay.js"></script>
 		<script src="errorHighlight.js"></script>
 
 		<script src="textureSampler.js"></script>
@@ -197,8 +189,6 @@
 		<script src="screenPosition.js"></script>
 
 		<script src="displayWindows.js"></script>
-
-		<script src="drawing.js"></script>
 
 		<script src="vertBufferFunctions.js"></script>
 

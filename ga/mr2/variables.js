@@ -15,6 +15,8 @@ const IDENTIFIER_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVW
 
 //---------Varying state
 
+const coloredNamesAlphabetically = []
+
 const pictogramDrawers = []
 
 const carat = {
@@ -30,7 +32,7 @@ let backgroundString =
   //basis
 
    
-   
+   bog
    
 
 
