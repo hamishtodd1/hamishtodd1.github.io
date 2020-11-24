@@ -13,7 +13,7 @@ function initPadDisplay() {
         }
     }
     
-    drawTokens = function (errorNewLines) {
+    drawTokens = function () {
         drawingPosition.x = -mainCamera.rightAtZZero
         drawingPosition.y = mainCamera.topAtZZero - .5
 
@@ -25,38 +25,44 @@ function initPadDisplay() {
 
             switch (token) {
                 case "\n":
-                    if (errorNewLines.indexOf(tokenIndex) !== -1)
-                        placeErrorHighlight(drawingPosition)
-
                     drawingPosition.y -= 1.
                     drawingPosition.x = -mainCamera.rightAtZZero
 
                     break
 
-                case "identifier":
-                    let alphabetized = lexeme.split('').sort().join('').toLowerCase() //TODO excessive
+                case "coloredName":
+                    let inProgress =
+                        carat.positionInString === tokenEnd &&
+                        carat.indexOfLastTypedCharacter === tokenEnd - 1
 
-                    if (coloredNamesAlphabetically.indexOf(alphabetized) !== -1 ) {
-                        let inProgress =
-                            carat.positionInString === tokenEnd &&
-                            carat.indexOfLastTypedCharacter === tokenEnd - 1
+                    if (inProgress)
+                        drawTokenCharacters(tokenStart, tokenEnd)
+                    else {
+                        drawName(lexeme, drawingPosition.x + .5, drawingPosition.y)
+                        drawingPosition.x += 1.
 
-                        if ( inProgress) 
-                            drawTokenCharacters(tokenStart, tokenEnd)
-                        else {
-                            drawName(alphabetized, drawingPosition.x + .5, drawingPosition.y)
-                            drawingPosition.x += 1.
-
-                            carat.moveOutOfToken(tokenStart, tokenEnd)
-                        }   
-
-                        break
+                        carat.moveOutOfToken(tokenStart, tokenEnd)
                     }
+                    
+                    break
 
+                case "uncoloredName":
                     drawTokenCharacters(tokenStart, tokenEnd)
                     break
 
                 case "comment":
+                    drawTokenCharacters(tokenStart, tokenEnd)
+                    break
+
+                case "separator":
+                    drawTokenCharacters(tokenStart, tokenEnd)
+                    break
+
+                case "infixSymbol":
+                    drawTokenCharacters(tokenStart, tokenEnd)
+                    break
+
+                case "def":
                     drawTokenCharacters(tokenStart, tokenEnd)
                     break
 
@@ -65,7 +71,7 @@ function initPadDisplay() {
                     break
 
                 default:
-                    console.error("haven't dealt with this token category")
+                    console.error("haven't dealt with this token category: ",token )
             }
         })
 

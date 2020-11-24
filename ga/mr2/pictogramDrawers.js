@@ -58,11 +58,6 @@ function initPictogramDrawers() {
             screenPositions[numToDraw * 2 + 1] = y
             names[numToDraw] = name
 
-            if (coloredNamesAlphabetically.indexOf(name) === -1)
-                addUnnamedFrameToDraw(x, y)
-            else
-                addNamedFrameToDraw(x, y, name)
-
             if (mouse.inSquare(x, y, .5))
                 mouseDw.placeBasedOnHover(x, y, editingStyle, name)
 
@@ -71,19 +66,21 @@ function initPictogramDrawers() {
 
         this.drawEach = function(predrawAndReturnProgram,draw) {
             for (let i = 0; i < numToDraw; ++i) {
-                let program = predrawAndReturnProgram(names[i])
+                let nameProperties = getNameProperties(names[i])
+
+                let program = predrawAndReturnProgram(nameProperties)
                 
                 cameraAndFrameCountShaderStuff.transfer(program)
 
                 gl.uniform1f(program.getUniformLocation("drawingSquareRadius"), .5)
                 gl.uniform2f(program.getUniformLocation("screenPosition"), screenPositions[i * 2 + 0], screenPositions[i * 2 + 1])
-                draw(names[i])
+                draw(nameProperties,names[i])
 
                 displayWindows.forEach((dw) => {
                     if (dw.verticalPositionToRenderFrom === screenPositions[i * 2 + 1]) {
                         gl.uniform1f(program.getUniformLocation("drawingSquareRadius"), dw.dimension * .5)
                         gl.uniform2f(program.getUniformLocation("screenPosition"), dw.position.x, dw.position.y)
-                        draw(names[i])
+                        draw(nameProperties,names[i])
                     }
                 })
             }
@@ -130,14 +127,14 @@ function pictogramTest()
     pictogramDrawer.program.addVertexAttribute("vert", quadBuffer, 4, true)
     pictogramDrawer.program.locateUniform("g")
 
-    assignNameToPictogram("r", pictogramDrawer, { value: 0. })
+    assignTypeAndData("r", pictogramDrawer, { value: 0. })
 
     addRenderFunction(()=>{
         gl.useProgram(pictogramDrawer.program.glProgram)
         pictogramDrawer.program.prepareVertexAttribute("vert", quadBuffer)
 
-        pictogramDrawer.finishPrebatchAndDrawEach((name) => {
-            gl.uniform1f(pictogramDrawer.program.getUniformLocation("g"), getNameProperties(name).value)
+        pictogramDrawer.finishPrebatchAndDrawEach((nameProperties,name) => {
+            gl.uniform1f(pictogramDrawer.program.getUniformLocation("g"), nameProperties.value)
             gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4)
         })
     }, "end" )

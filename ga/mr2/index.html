@@ -5,13 +5,11 @@
 		colored frames
 
 	TODO for progress report
-		integration into typing
-		that means naming system! Think tonight
-		And function-making system, that's fun
+		
 
 
 	Progress report, Nov 2020
-	-more general approach to pictograms, possibly too general
+	-more general approach to pictograms. No longer one algebra, now it's "whatever I need"
 		I got super into the idea of trying to enumerate every visualizable function
 		That's silly, that's trying to skip ahead
 		You define your own algebras, that's the main innovation of GA and of object oriented programming
@@ -24,6 +22,7 @@
 		globe projections as a separate thing
 	-rewritten in webgl, no three.js. Compilation target is javascript and glsl so that's the way it has to be
 	-No output column. Automated naming though
+	-don't have writing your own functions yet. When that exists, I might be able to do
 
 	TODO for world map
 		Mapping from angles to texture coords, probably based in the thing
@@ -62,10 +61,11 @@
 		Transpiling to javascript
 		If you're serious about people making clothes, think about makeup tutorials
 		transpile to glsl first and foremost. Whole game runs in every shader woo!
+		Eventually: VR game with conformal transformations. To help build folks' intuition? No! Because they're fun!
 -->
 <html>
 	<head>
-		<title>mr2</title>
+		<title>Projective Clifford Geometry</title>
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
 			body {
@@ -93,9 +93,8 @@
 				initTranspiledFunctions()
 				initPictogramDrawers()
 				initMvPictograms()
-				initGlobePictograms()
-
-				// initTranspiler()
+				// debugger
+				await initGlobePictograms()
 
 				// await initWorldMap()
 				// await initDymaxion()
@@ -103,11 +102,10 @@
 				initCarat()
 
 				let typeableCharacters = initTypeableCharacters()
-				let displayableCharacters = typeableCharacters + freeVariableCharacters
+				let displayableCharacters = typeableCharacters + freeVariableCharacters + "?" + LAMBDA_SYMBOL + JOIN_SYMBOL
 				initCharacterTexture(displayableCharacters)
 
 				initTokenizer(displayableCharacters)
-				initPadDisplay()
 
 				await initTextureSampler()
 				initFrames()

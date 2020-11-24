@@ -20,7 +20,21 @@
 
 function initTokenizer(displayableCharacters) {
 
-    initErrorHighlight()
+    let infixFunctions = {
+        "+": "gAdd",
+        "=": "assign",
+        //wedge
+        //subtract
+        //divide
+    }
+    //then reverse, dual, exponential are single argument
+    let infixSymbols = Object.keys(infixFunctions)
+    let functionNames = ["reverse", "inner", "gp", "join"] //"earth", sin, cos, tan, exp, sqrt
+    infixSymbols.forEach((key)=>{functionNames.push(infixSymbols[key])})
+    initTranspiler(infixFunctions, infixSymbols, functionNames)
+
+    // initErrorHighlight()
+    initPadDisplay()
 
     tokenizeEvaluateDisplay = () => {
 
@@ -43,6 +57,10 @@ function initTokenizer(displayableCharacters) {
                 ++positionInString
         }
 
+        let uniqueTokens = [" ","\n",LAMBDA_SYMBOL]
+        let separators = ["(", ")"]
+        let keywords = ["def"]
+
         let positionInString = 0
         while (positionInString < backgroundStringLength) {
             let tokenStartCharacter = backgroundString[positionInString]
@@ -52,17 +70,48 @@ function initTokenizer(displayableCharacters) {
                 tokens.push("comment")
                 moveWhile(() => backgroundString[positionInString] !== "\n")
             }
-            else if (tokenStartCharacter === " ") {
-                tokens.push(" ")
+            else if ( uniqueTokens.indexOf(tokenStartCharacter) !== -1) {
+                tokens.push(tokenStartCharacter)
                 ++positionInString
             }
-            else if (tokenStartCharacter === "\n") {
-                tokens.push("\n")
+            else if (separators.indexOf(tokenStartCharacter)!== -1) {
+                tokens.push("separator")
                 ++positionInString
+            }
+            else if (infixSymbols.indexOf(tokenStartCharacter) !== -1) {
+                tokens.push("infixSymbol")
+                ++positionInString
+            }
+            else if (IDENTIFIER_CHARACTERS.indexOf(backgroundString[positionInString]) !== -1) {
+                let tokenStart = positionInString
+                moveWhile(() => IDENTIFIER_CHARACTERS.indexOf(backgroundString[positionInString]) !== -1)
+                let lexeme = backgroundString.substr(tokenStart, positionInString-tokenStart)
+                
+                let isKeyword = false
+                keywords.forEach((kw) => {
+                    if (lexeme === kw) {
+                        isKeyword = true
+                        tokens.push(lexeme)
+                    }
+                })
+                if(isKeyword)
+                    return false
+
+                let usableNamePotentially = getAlphabetizedColoredName(lexeme)
+                if(usableNamePotentially === null) 
+                    tokens.push("uncoloredName")
+                else {
+                    let inProgress =
+                        carat.positionInString === positionInString &&
+                        carat.indexOfLastTypedCharacter === positionInString - 1
+                    if(usableNamePotentially !== lexeme && !inProgress)
+                        backgroundStringSplice(tokenStart,positionInString - tokenStart,usableNamePotentially)
+                    tokens.push("coloredName")
+                }
             }
             else {
-                tokens.push("identifier")
-                moveWhile(() => IDENTIFIER_CHARACTERS.indexOf(backgroundString[positionInString]) !== -1)
+                console.error("don't know what to do with this character: ", tokenStartCharacter)
+                ++positionInString
             }
         }
 
@@ -73,7 +122,9 @@ function initTokenizer(displayableCharacters) {
                 let lexeme = backgroundString.substr(tokenStart, tokenEnd - tokenStart)
                 let token = tokens[tokenIndex]
 
-                func(tokenIndex,tokenStart,tokenEnd,token,lexeme)
+                let needToBreak = func(tokenIndex,tokenStart,tokenEnd,token,lexeme)
+                if(needToBreak)
+                    break
             }
         }
 
@@ -81,15 +132,156 @@ function initTokenizer(displayableCharacters) {
         ////  TRANSPILING  ////
         ///////////////////////
 
-        let errorNewLines = []
+        //you probably need to clear a lot of names from the previous run. Could make local!
 
-        // forEachToken((tokenIndex, tokenStart, tokenEnd, token, lexeme) => {
+        //the function, which can be multi-line, can evaluate to a transpiledFunction
+        //eh, need to use them first
 
-        //     if(token === "identifier") {
+        //a function call causes a new thing to be made
+        // a single line with multiple operations preceding an assignment compiles to something you need to execute. 
 
-        //     }
-        // })
+        //for the purposes of this video there are multiple kinds of "=":
+        //those things are DEFINITELY going to have their evaluation deferred until render time
 
-        drawTokens(errorNewLines)
+        //transpilation and evaluation are different.
+        //transpile to IR string. Evaluation happens just before render
+
+        //you compile expressions and assign them to the real names
+        //but you can save out the compiled string
+
+
+        //the job of this thing is to associate names with IR strings
+        //you're going to evaluate the whole lot in js... some of which
+
+        // transpile()
+
+        let unusedNameJustSeen = null
+
+        let nameToAssignTo = null
+        let lineTree = null
+
+        let nextNameIsFunction = false
+        let functionNameToAssignTo = null
+        let functionTree = null
+
+        logLastFewTokens = (tokenIndex) => {
+            let numTokensToCheck = Math.min(tokenIndex, 15)
+            for (let i = tokenIndex - numTokensToCheck; i <= tokenIndex; ++i) {
+                log(tokens[i])
+            }
+        }
+
+        forEachToken((tokenIndex, tokenStart, tokenEnd, token, lexeme) => {
+            if (token === "comment" || token === " " )
+                return false
+           else  if (lexeme === "def") {
+                if (nextNameIsFunction || functionNameToAssignTo !== null || nameToAssignTo !== null)
+                    console.error("misplaced lambda")
+
+                nextNameIsFunction = true
+            }
+            else if ((token === "coloredName" || token === "uncoloredName") && getNameProperties(lexeme) === null) {
+                if (nameToAssignTo !== null || unusedNameJustSeen !== null) {
+                    console.error("misplaced new name: ", lexeme)
+                    debugger
+                }
+                    
+                unusedNameJustSeen = lexeme
+            }
+            else if (lexeme === "=") {
+                if (unusedNameJustSeen === null || nameToAssignTo !== null)
+                    console.error("misplaced =")
+
+                if (nextNameIsFunction) {
+                    if (functionNameToAssignTo !== null)
+                        console.error("misplaced new function name: ",lexeme)
+                    functionNameToAssignTo = unusedNameJustSeen
+                    nextNameIsFunction = false
+                }
+                else {
+                    if (nameToAssignTo !== null)
+                        console.error("misplaced new variable name: ",lexeme)
+                    nameToAssignTo = unusedNameJustSeen
+                }
+
+                unusedNameJustSeen = null
+            }
+
+            ///////////////////////
+            ////  ALL SET UP  ////
+            ///////////////////////
+            
+            else if (nameToAssignTo !== null) {
+
+                //build up the tree, with the transpiler, then...
+
+                //better do it with reverse(a) first
+                //
+
+                if(frameCount === 0)
+                    log(lexeme)
+
+                if (token === "\n") {
+                    
+                    // assignTypeAndData(nameToAssignTo, pictogramDrawer, {
+                    //     globeProperties: getNameProperties("go"),
+                    //     tf: alternatingTf,
+                    // })
+
+                    //somehow assign eval(lineTree), including in the case where it's a globeProj
+
+                    nameToAssignTo = null
+
+                    if (functionNameToAssignTo !== null) {
+                        //need to convert the name too...                    
+                    }
+                }
+            }
+            else if(functionNameToAssignTo !== null) {
+                if (lexeme === "}") {
+                    //time to collect up those lines, and round off
+                    if (functionNameToAssignTo === null)
+                        console.error("misplaced }")
+
+                    functionNameToAssignTo = null
+                }
+            }
+            
+            
+                
+
+                //eventually:
+                // assignTypeAndData(nameToAssignTo, pictogramDrawer, {
+                //     globeProperties: getNameProperties("go"),
+                //     tf: alternatingTf,
+                // })
+                // //the question is, how do you determine the type?
+                // //can you deter
+
+                // if(result.tr)
+
+                //if you want to plumb the result of one visualized function into another, you need to... write it to a texture?
+
+            // switch (token) {
+            //     case "infixSymbol":
+            //         if (lexeme === "=") {
+            //             if (nameToAssignTo !== null)
+            //         }
+
+            //     case "identifier":
+            //         if (transpiledFunctions[lexeme] !== undefined) {
+
+            //         }
+            //         break
+            // })
+        })
+
+        drawTokens()
     }
+
+    // function genericAssign(expectedPictogramDrawer) {
+    //     if (expectedPictogramDrawer === )
+
+    //     //what kinds of things do you assign to?
+    // }
 }

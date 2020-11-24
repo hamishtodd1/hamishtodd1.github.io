@@ -54,26 +54,26 @@ async function initGlobeProjectionPictograms() {
             tf.globeProjectionProgram.locateUniform("sampler")
         }
 
-        var alternatingTf = new TranspiledFunction("alternating")
+        var alternatingTf = new TranspiledFunction("alternatingProj")
         alternatingTf.addIrUpdater(updateGlobeProjectionProgram)
 
         //simulates the transpiler
         updateFunctions.splice(0, 0, () => {
             alternatingTf.setIntermediateRepresentation(
-                Math.floor(frameCount / 50) % 2 ? `p.x -= .4;` : ``
+                Math.floor(frameCount / 50) % 2 ? `p.x -= .03;` : ``
             )
         })
         
     }
 
-    function predrawAndReturnProgram(name) {
-        let program = getNameProperties(name).tf.globeProjectionProgram
+    function predrawAndReturnProgram(nameProperties) {
+        let program = nameProperties.tf.globeProjectionProgram
 
         gl.useProgram(program.glProgram)
         program.prepareVertexAttribute("uv")
 
         gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, getNameProperties(name).globeProperties.texture);
+        gl.bindTexture(gl.TEXTURE_2D, nameProperties.globeProperties.texture);
         gl.uniform1i(program.getUniformLocation("sampler"), 0);
 
         return program
@@ -89,18 +89,18 @@ async function initGlobeProjectionPictograms() {
         pictogramDrawer.drawEach(predrawAndReturnProgram, draw)
     },"end")
 
-    assignNameToPictogram("o", pictogramDrawer, {
+    assignTypeAndData("o", pictogramDrawer, {
         globeProperties: getNameProperties("go"),
         tf: alternatingTf,
     })
-    assignNameToPictogram("b", pictogramDrawer, {
+    assignTypeAndData("b", pictogramDrawer, {
         globeProperties: getNameProperties("gp"),
         tf: alternatingTf,
     })
 
     updateFunctions.push(() => {
-        // drawName("o",-1.5, -.5)
-        // drawName("b",-2.5, -1.5)
+        drawName("o",-1.5, -.5)
+        drawName("b",-2.5, -1.5)
     })
 }
 
@@ -166,10 +166,13 @@ async function initGlobePictograms() {
 
     let textureNames = ["earthColor", "ball", "cmb", "jupiter", "latAndLon2"]
     for (let i = 0; i < textureNames.length; ++i) {
-        assignNameToPictogram(coloredNamesAlphabetically[13 + i], pictogramDrawer, {
-            texture: await Texture("data/" + textureNames[i] + ".png"),
-            yaw: 0., pitch: 0.
+        let texture = await Texture("data/" + textureNames[i] + ".png")
+        assignTypeAndData(coloredNamesAlphabetically[13 + i], pictogramDrawer, {
+            texture,
+            yaw: 0.,
+            pitch: 0.
         })
+        //this could compile to glsl, it's a struct
     }
 
     let transform = new DualQuat()
@@ -177,12 +180,12 @@ async function initGlobePictograms() {
         gl.useProgram(pictogramDrawer.program.glProgram)
         pictogramDrawer.program.prepareVertexAttribute("uv")
 
-        pictogramDrawer.finishPrebatchAndDrawEach((name) => {
-            rotator(yawAxis, getNameProperties(name).yaw, transform)
+        pictogramDrawer.finishPrebatchAndDrawEach((nameProperties,name) => {
+            rotator(yawAxis, nameProperties.yaw, transform)
             transferDualQuat(transform, "transform", pictogramDrawer.program)
 
             gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_2D, getNameProperties(name).texture);
+            gl.bindTexture(gl.TEXTURE_2D, nameProperties.texture);
             gl.uniform1i(pictogramDrawer.program.getUniformLocation("sampler"), 0);//hmm, why 0?
 
             gl.drawArrays(gl.TRIANGLES, 0, uvBuffer.length / 2);

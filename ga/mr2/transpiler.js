@@ -1,4 +1,6 @@
 /*
+    Below is based on the naieve assumption of
+
     function syntax
         python indents, last line is return value
 
@@ -14,8 +16,8 @@
 
 */
 
-function initTranspiler()
-{
+function initTranspiler(infixFunctions, infixSymbols, functionNames) {
+
     let loggedErrors = []
     function logErrorIfNew(newError) {
         if (loggedErrors.indexOf(newError) === -1) {
@@ -28,19 +30,7 @@ function initTranspiler()
     logLastParsedString = () => {
         log(parsedString)
     }
-    let numberedMvs = Array()
-
-    let infixFunctions = {
-        "+": "gAdd",
-        "=": "assign"
-        //wedge
-        //subtract
-        //divide
-    }
-    //then reverse, dual, exponential are single argument
-    let infixSymbols = Object.keys(infixFunctions)
-
-    let functionNames = ["reverse", "assign","gAdd","inner","gp","join"] //"earth", sin, cos, tan, exp, sqrt
+    let numberedMvs = []
 
     let currentNodeBranchingFrom = null
     function Node(lexeme, terminal, replaceMostRecent) {
@@ -70,27 +60,27 @@ function initTranspiler()
         child.parent = this
     }
 
-    transpileLine = (lexemes) => {   
-        lowestUnusedMv = 0
+    transpileMv = () => {   
+        lowestUntranscribedMv = 0
 
         currentNodeBranchingFrom = null
         let topNode = new Node("assign",false)
+
         currentNodeBranchingFrom = topNode
 
+        let branchCanComplete = false
         function adjustToOpenBracket(functionLexeme) {
             branchCanComplete = false
-            let newNode = new Node(functionLexeme,false)
-            currentNodeBranchingFrom = newNode
+            currentNodeBranchingFrom = new Node(functionLexeme,false)
         }
         function adjustToInfixNode(infixLexeme) {
-            let infixFunctionNode = new Node(infixLexeme,false, true)
-            currentNodeBranchingFrom = infixFunctionNode
+            currentNodeBranchingFrom = new Node(infixLexeme, false, true)
         }
         
-        let branchCanComplete = false
-        
-        for (let i = 0, il = lexemes.length; i < il; ++i) {
-            let lexeme = lexemes[i]
+        //You're only going to transpile part of it!
+        forEachToken((tokenIndex, tokenStart, tokenEnd, token, lexeme) => {
+            if(token === "comment" || token === " " || token === "\n")
+                return false
 
             //token categories!
             let isMvName = namedMvs.indexOf(lexeme) !== -1
@@ -102,7 +92,9 @@ function initTranspiler()
                     adjustToInfixNode("gp")
 
                 if (isMvName) {
-                    new Node('namedMvs["' + child.lexeme + '"],',true)
+                    //instead it could be getNameProperties(child.lexeme).value
+                    //OR coloredNamesAlphabetically
+                    new Node('getNameProperties("' + child.lexeme + '").value,',true)
                     branchCanComplete = true
                 }
                 else if (isFunction && lexemes[i + 1] === "(") {
@@ -134,7 +126,7 @@ function initTranspiler()
                 logErrorIfNew("unexpected symbol before branch end: " + lexeme)
                 return i
             }
-        }
+        })
         if (!branchCanComplete) {
             logErrorIfNew("unexpected line end after symbol " + lexemes[lexemes.length-1])
             return lexemes.length - 1
@@ -144,7 +136,7 @@ function initTranspiler()
     }
 
     //since the top node is a "" function it should be ok if there's just a single mv
-    let lowestUnusedMv = 0
+    let lowestUntranscribedMv = 0
     function parseFunctionNode(node) {
         let functionLine = node.lexeme + "("
         let computationLines = ""
@@ -154,10 +146,10 @@ function initTranspiler()
                 functionLine += child.lexeme + ","
             else {
                 // You need to have shit between { }, otherwise they'll clash
-                while (numberedMvs.length <= lowestUnusedMv)
+                while (numberedMvs.length <= lowestUntranscribedMv)
                     numberedMvs.push(new Float32Array(16))
-                let mvString = 'numberedMvs[' + lowestUnusedMv + ']'
-                ++lowestUnusedMv
+                let mvString = 'numberedMvs[' + lowestUntranscribedMv + ']'
+                ++lowestUntranscribedMv
                 
                 computationLines += parseFunctionNode(child) + mvString + ');\n'
                 functionLine += mvString + ','
@@ -170,8 +162,6 @@ function initTranspiler()
     /*
         Ok so the arguments are just a1, a2, etc
         The namedMvs that get given to them, well, yes that happens, but that's "just what you see"
-
-        
     */
     if(0)
     {

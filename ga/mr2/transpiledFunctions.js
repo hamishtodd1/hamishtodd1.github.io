@@ -1,16 +1,9 @@
 function initTranspiledFunctions() {
 
-    let transpiledFunctions = []
-    let transpiledFunctionNames = []
-
-    getTranspiledFunction = (name) => {
-        return transpiledFunctions[transpiledFunctionNames.indexOf(name)]
-    }
-
+    //type as well?
     TranspiledFunction = function(name){
 
-        transpiledFunctions.push(this)
-        transpiledFunctionNames.push(name)
+        transpiledFunctions[name] = this
 
         let intermediateRepresentation = "" //eventually valid js or glsl
 

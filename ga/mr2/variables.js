@@ -15,7 +15,8 @@ const IDENTIFIER_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVW
 
 //---------Varying state
 
-const coloredNamesAlphabetically = []
+const coloredNamesAlphabetically = Array(63)  //7 choose 1 + 7 choose 2 + 7 choose 3
+const transpiledFunctions = {}
 
 const pictogramDrawers = []
 
@@ -27,18 +28,22 @@ const carat = {
 
 const displayWindows = []
 
+const LAMBDA_SYMBOL = String.fromCharCode("955") //you CAN write "function", but lots of kids don't know "function". In python it's "def"
+const JOIN_SYMBOL = String.fromCharCode("8744")
+
 let backgroundString = 
 `
-  //basis
+//need mvs working for demo
+// y = w`+JOIN_SYMBOL+`b
 
-   
-   bog
-   
-
+// y = alternatingProj(pg)
 
 
 
-  
+
+
+
+
 `
 //    0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,1.,0.,
 //    0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,1.,0.,

@@ -1,4 +1,6 @@
 /*
+    could press "?" to get simplest unused name
+
     More generic approach to coloring: stripes are radial spheres. Rotate and it does nothing
 
     New naming system
@@ -11,7 +13,7 @@
 
 function initNames() {
 
-    let NUM_NAMES = 63 //7 choose 1 + 7 choose 2 + 7 choose 3
+    let NUM_NAMES = coloredNamesAlphabetically.length
 
     let idNum = 0
     generateName = () => {
@@ -41,29 +43,45 @@ function initNames() {
         return name
     }
     //for every name there is an mv ready to be used, but we might not use it
-    while (coloredNamesAlphabetically.length < NUM_NAMES)
-        coloredNamesAlphabetically.push(generateName())
 
-    let pictogramDrawers = Array(NUM_NAMES)
-    let properties = Array(NUM_NAMES)
-
-    isName = function(str) {
-        if(str.length > 3)
-            return false
-        let alphabetized = str.split('').sort().join('').toLowerCase() //TODO shouldn't have to do this
-        return coloredNamesAlphabetically.indexOf(alphabetized) !== -1
+    let drawingDetailses = Array(NUM_NAMES)
+    for(let i = 0; i < NUM_NAMES; ++i) {
+        coloredNamesAlphabetically[i] = generateName()
+        drawingDetailses[i] = null
     }
 
-    assignNameToPictogram = function(name,drawer,drawingDetails) {
+    getAlphabetizedColoredName = (str) => {
+        if (str.length > 3)
+            return null
+        let alphabetized = str.split('').sort().join('').toLowerCase() //TODO shouldn't have to do this
+        if ( coloredNamesAlphabetically.indexOf(alphabetized) !== -1)
+            return alphabetized
+        else
+            return null
+    }
+
+    assignTypeAndData = function(name,drawer,drawingDetails) {
         let index = coloredNamesAlphabetically.indexOf(name)
-        pictogramDrawers[index] = drawer
-        properties[index] = drawingDetails
+        drawingDetailses[index] = drawingDetails
+        drawingDetailses[index].drawer = drawer
     }
     drawName = function(name,x,y) {
         let index = coloredNamesAlphabetically.indexOf(name)
-        pictogramDrawers[index].add(x,y,name)
+
+        if ( index === -1 ) {
+            addUnnamedFrameToDraw(x, y)
+            addCharacterToDraw("?", x - characterWidth / 2., y)
+        }
+        else {
+            addNamedFrameToDraw(x, y, name)
+
+            if (drawingDetailses[index] === null)
+                addCharacterToDraw("?", x - characterWidth / 2., y)
+            else
+                drawingDetailses[index].drawer.add(x, y, name)
+        }
     }
     getNameProperties = function (name) {
-        return properties[coloredNamesAlphabetically.indexOf(name)]
+        return drawingDetailses[coloredNamesAlphabetically.indexOf(name)]
     }
 }

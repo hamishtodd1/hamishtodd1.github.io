@@ -45,15 +45,15 @@ function initAnglePictograms() {
     pictogramDrawer.program.addVertexAttribute("vert", vertsBuffer, 4)
     pictogramDrawer.program.locateUniform("fullAngle")
 
-    assignNameToPictogram("bg", pictogramDrawer, { value: 0. })
+    assignTypeAndData("bg", pictogramDrawer, { value: 0. })
 
     addRenderFunction(() => {
         gl.useProgram(pictogramDrawer.program.glProgram)
         pictogramDrawer.program.prepareVertexAttribute("vert", vertsBuffer)
 
-        pictogramDrawer.finishPrebatchAndDrawEach((name) => {
+        pictogramDrawer.finishPrebatchAndDrawEach((nameProperties) => {
             //If it's from an mv, normalize its magnitude to 1 before taking the scalar part
-            let angle = 2. * Math.acos(getNameProperties(name).value)
+            let angle = 2. * Math.acos(nameProperties.value)
             gl.uniform1f(pictogramDrawer.program.getUniformLocation("fullAngle"), angle)
             gl.drawArrays(gl.TRIANGLES, 0, vertsBuffer.length / 4)
         })
@@ -77,18 +77,18 @@ function initMvPictograms() {
         during: (editingName, x, y) => {
             point(slideCurrentMv, x, y, 0., 1.)
 
-            let grade = getGrade(getNameProperties(editingName))
+            let grade = getGrade(getNameProperties(editingName).value)
             if (grade === 3)
-                assign(slideCurrentMv, getNameProperties(editingName))
+                assign(slideCurrentMv, getNameProperties(editingName).value)
             else if (grade === 2) {
                 if (mvEquals(slideCurrentMv, slideStartMv)) {
                     let currentLineDotMousePosition = new Float32Array(16);
-                    inner(getNameProperties(editingName), slideStartMv, currentLineDotMousePosition)
-                    gp(currentLineDotMousePosition, slideStartMv, getNameProperties(editingName))
+                    inner(getNameProperties(editingName).value, slideStartMv, currentLineDotMousePosition)
+                    gp(currentLineDotMousePosition, slideStartMv, getNameProperties(editingName).value)
                     delete currentLineDotMousePosition
                 }
                 else
-                    join(slideStartMv, slideCurrentMv, getNameProperties(editingName))
+                    join(slideStartMv, slideCurrentMv, getNameProperties(editingName).value)
             }
         },
     }
@@ -130,16 +130,16 @@ function initMvPictograms() {
         pointPictogramDrawer.program.locateUniform("hexantColors")
         pointPictogramDrawer.program.locateUniform("visualPosition")
 
-        assignNameToPictogram("bgo", pointPictogramDrawer, new Float32Array(16))
-        pointX(getNameProperties("bgo"), .5);
+        assignTypeAndData("bgo", pointPictogramDrawer, {value:new Float32Array(16)})
+        pointX(getNameProperties("bgo").value, .5);
 
         addRenderFunction(() => {
             gl.useProgram(pointPictogramDrawer.program.glProgram)
 
             pointPictogramDrawer.program.prepareVertexAttribute("vert", vertBuffer)
 
-            pointPictogramDrawer.finishPrebatchAndDrawEach((name) => {
-                let mv = getNameProperties(name)
+            pointPictogramDrawer.finishPrebatchAndDrawEach((nameProperties,name) => {
+                let mv = nameProperties.value
                 if (pointX(mv) === 0. && pointY(mv) === 0. && pointZ(mv) === 0. && pointW(mv) === 0.)
                     return
 
@@ -189,15 +189,15 @@ function initMvPictograms() {
         linePictogramDrawer.program.addVertexAttribute("colorIndex", indexBuffer, 1, false)
         linePictogramDrawer.program.locateUniform("hexantColors")
 
-        assignNameToPictogram("w", linePictogramDrawer, new Float32Array(16))
-        realLineX(getNameProperties("w"), .5);
+        assignTypeAndData("w", linePictogramDrawer, {value:new Float32Array(16)})
+        realLineX(getNameProperties("w").value, .5);
 
         addRenderFunction(() => {
             gl.useProgram(linePictogramDrawer.program.glProgram)
             linePictogramDrawer.program.prepareVertexAttribute("colorIndex", indexBuffer)
 
-            linePictogramDrawer.finishPrebatchAndDrawEach((name) => {
-                let mv = getNameProperties(name)
+            linePictogramDrawer.finishPrebatchAndDrawEach((nameProperties,name) => {
+                let mv = nameProperties.value
                 if (realLineX(mv) === 0. && realLineY(mv) === 0. && realLineZ(mv) === 0.)
                     return
 
