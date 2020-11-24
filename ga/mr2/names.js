@@ -60,10 +60,13 @@ function initNames() {
             return null
     }
 
-    assignTypeAndData = function(name,drawer,drawingDetails) {
+    assignTypeAndData = function(name,drawers,drawingDetails) {
+        if (drawers.length === undefined)
+            drawers = [drawers]
+
         let index = coloredNamesAlphabetically.indexOf(name)
         drawingDetailses[index] = drawingDetails
-        drawingDetailses[index].drawer = drawer
+        drawingDetailses[index].drawers = drawers
     }
     drawName = function(name,x,y) {
         let index = coloredNamesAlphabetically.indexOf(name)
@@ -77,8 +80,11 @@ function initNames() {
 
             if (drawingDetailses[index] === null)
                 addCharacterToDraw("?", x - characterWidth / 2., y)
-            else
-                drawingDetailses[index].drawer.add(x, y, name)
+            else {
+                let drawers = drawingDetailses[index].drawers
+                for(let i = 0; i < drawers.length; ++i)
+                    drawers[i].add(x, y, name)
+            }
         }
     }
     getNameProperties = function (name) {

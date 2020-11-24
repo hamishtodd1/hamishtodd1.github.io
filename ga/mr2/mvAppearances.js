@@ -130,9 +130,6 @@ function initMvPictograms() {
         pointPictogramDrawer.program.locateUniform("hexantColors")
         pointPictogramDrawer.program.locateUniform("visualPosition")
 
-        assignTypeAndData("bgo", pointPictogramDrawer, {value:new Float32Array(16)})
-        pointX(getNameProperties("bgo").value, .5);
-
         addRenderFunction(() => {
             gl.useProgram(pointPictogramDrawer.program.glProgram)
 
@@ -189,9 +186,6 @@ function initMvPictograms() {
         linePictogramDrawer.program.addVertexAttribute("colorIndex", indexBuffer, 1, false)
         linePictogramDrawer.program.locateUniform("hexantColors")
 
-        assignTypeAndData("w", linePictogramDrawer, {value:new Float32Array(16)})
-        realLineX(getNameProperties("w").value, .5);
-
         addRenderFunction(() => {
             gl.useProgram(linePictogramDrawer.program.glProgram)
             linePictogramDrawer.program.prepareVertexAttribute("colorIndex", indexBuffer)
@@ -238,6 +232,25 @@ function initMvPictograms() {
 
                 gl.drawArrays(gl.LINES, 0, vertsBuffer.length / 4)
             })
+
+
+
+            // gl.useProgram(pointPictogramDrawer.program.glProgram)
+
+            // pointPictogramDrawer.program.prepareVertexAttribute("vert", vertBuffer)
+
+            // pointPictogramDrawer.finishPrebatchAndDrawEach((nameProperties, name) => {
+            //     let mv = nameProperties.value
+            //     if (pointX(mv) === 0. && pointY(mv) === 0. && pointZ(mv) === 0. && pointW(mv) === 0.)
+            //         return
+
+            //     pointPictogramDrawer.program.prepareVertexAttribute("colorIndex", pointColorIndexBuffer)
+            //     gl.uniform3fv(pointPictogramDrawer.program.getUniformLocation("hexantColors"), nameToHexantColors(name, hexantColors))
+            //     gl.uniform4f(pointPictogramDrawer.program.getUniformLocation("visualPosition"), pointX(mv), pointY(mv), pointZ(mv), pointW(mv))
+            //     gl.drawArrays(gl.TRIANGLES, 0, vertBuffer.length / 4)
+            // })
+
+            //and you do the point here too
         }, "end")
     }
 
@@ -301,6 +314,18 @@ function initMvPictograms() {
         //     gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4);
         // })
     }
+
+    function assignMv(name) {
+        assignTypeAndData(name, [pointPictogramDrawer, linePictogramDrawer], { value: new Float32Array(16) })
+    }
+
+    assignMv("w")
+    realLineX(getNameProperties("w").value, .5);
+    assignMv("bgo")
+    pointX(getNameProperties("bgo").value, .5);
+    realLineY(getNameProperties("bgo").value, .5);
+
+    //when you use the "add" function, it should not necessarily be associated with a single pictogram drawer
 
     updateFunctions.push(() => {
         drawName("bgo",-.5, -1.5)

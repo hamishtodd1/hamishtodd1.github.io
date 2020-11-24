@@ -227,6 +227,7 @@ function initTokenizer(displayableCharacters) {
                     //     globeProperties: getNameProperties("go"),
                     //     tf: alternatingTf,
                     // })
+                    //the question is, how do you determine the type?
 
                     //somehow assign eval(lineTree), including in the case where it's a globeProj
 
@@ -250,15 +251,7 @@ function initTokenizer(displayableCharacters) {
             
                 
 
-                //eventually:
-                // assignTypeAndData(nameToAssignTo, pictogramDrawer, {
-                //     globeProperties: getNameProperties("go"),
-                //     tf: alternatingTf,
-                // })
-                // //the question is, how do you determine the type?
-                // //can you deter
 
-                // if(result.tr)
 
                 //if you want to plumb the result of one visualized function into another, you need to... write it to a texture?
 

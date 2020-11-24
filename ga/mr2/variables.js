@@ -33,9 +33,10 @@ const JOIN_SYMBOL = String.fromCharCode("8744")
 
 let backgroundString = 
 `
-//need mvs working for demo
+//need mvs unified + doing stuff
 // y = w`+JOIN_SYMBOL+`b
 
+//then figure out = for types
 // y = alternatingProj(pg)
 
 
