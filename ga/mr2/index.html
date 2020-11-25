@@ -116,6 +116,19 @@
 
 				// initDrawing()
 
+				{
+					assignTypeAndData("bg", pictogramDrawers.angle, { value: 0. })
+
+					assignMv("w")
+					realLineX(getNamePropertiesAndReturnNullIfNoDrawers("w").value, .5);
+					assignMv("bgo")
+					pointX(getNamePropertiesAndReturnNullIfNoDrawers("bgo").value, .5);
+					pointW(getNamePropertiesAndReturnNullIfNoDrawers("bgo").value, 1.);
+					assignMv("p")
+					pointY(getNamePropertiesAndReturnNullIfNoDrawers("p").value, .5);
+					pointW(getNamePropertiesAndReturnNullIfNoDrawers("p").value, 1.);
+				}
+
 				function loop() {
 					mouse.updateFromAsyncAndCheckClicks()
 					//may wish to have keyboard too. You could even have >1 letter per frame!

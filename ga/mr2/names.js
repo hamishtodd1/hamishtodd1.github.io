@@ -47,7 +47,29 @@ function initNames() {
     let drawingDetailses = Array(NUM_NAMES)
     for(let i = 0; i < NUM_NAMES; ++i) {
         coloredNamesAlphabetically[i] = generateName()
-        drawingDetailses[i] = null
+        drawingDetailses[i] = {drawers:[]}
+    }
+
+    clearNames = function(names) {
+        names.forEach((name)=>{
+            let index = coloredNamesAlphabetically.indexOf(name)
+            Object.keys(drawingDetailses[index]).forEach((key) => {
+                if (key === "drawers")
+                    drawingDetailses[index][key].length = 0
+                else
+                    delete drawingDetailses[index][key]; 
+            })
+        })
+    }
+    assignTypeAndData = function (name, drawers, drawingDetails) {
+        let index = coloredNamesAlphabetically.indexOf(name)
+        Object.assign(drawingDetailses[index], drawingDetails)
+
+        if (drawers.length === undefined)
+            drawers = [drawers]
+        drawers.forEach((drawer) => {
+            drawingDetailses[index].drawers.push(drawer)
+        })
     }
 
     getAlphabetizedColoredName = (str) => {
@@ -60,14 +82,6 @@ function initNames() {
             return null
     }
 
-    assignTypeAndData = function(name,drawers,drawingDetails) {
-        if (drawers.length === undefined)
-            drawers = [drawers]
-
-        let index = coloredNamesAlphabetically.indexOf(name)
-        drawingDetailses[index] = drawingDetails
-        drawingDetailses[index].drawers = drawers
-    }
     drawName = function(name,x,y) {
         let index = coloredNamesAlphabetically.indexOf(name)
 
@@ -87,7 +101,9 @@ function initNames() {
             }
         }
     }
-    getNameProperties = function (name) {
+    getNamePropertiesAndReturnNullIfNoDrawers = function (name) {
+        if (drawingDetailses[coloredNamesAlphabetically.indexOf(name)].drawers.length === 0)
+            return null
         return drawingDetailses[coloredNamesAlphabetically.indexOf(name)]
     }
 }

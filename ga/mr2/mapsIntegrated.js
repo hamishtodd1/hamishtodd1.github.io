@@ -85,18 +85,10 @@ async function initGlobeProjectionPictograms() {
 
     let editingStyle = {}
     let pictogramDrawer = new PictogramDrawer(editingStyle)
+    pictogramDrawers.globeProjection = pictogramDrawer
     addRenderFunction(() => {
         pictogramDrawer.drawEach(predrawAndReturnProgram, draw)
     },"end")
-
-    assignTypeAndData("o", pictogramDrawer, {
-        globeProperties: getNameProperties("go"),
-        tf: alternatingTf,
-    })
-    assignTypeAndData("b", pictogramDrawer, {
-        globeProperties: getNameProperties("gp"),
-        tf: alternatingTf,
-    })
 
     updateFunctions.push(() => {
         drawName("o",-1.5, -.5)
@@ -148,14 +140,15 @@ async function initGlobePictograms() {
 
     let globeEditingStyle = {
         during: (name)=>{
-            let nameProperties = getNameProperties(name)
+            let nameProperties = getNamePropertiesAndReturnNullIfNoDrawers(name)
             nameProperties.yaw   += mouse.position.x - mouse.positionOld.x
             nameProperties.pitch += mouse.position.y - mouse.positionOld.y
         }
     }
 
     let pictogramDrawer = new PictogramDrawer(globeEditingStyle, vs, fs)
-        
+    pictogramDrawers.globe = pictogramDrawer
+    
     const eps = .00001 //sensetive, ugh
     const numDivisions = 256
     const uvBuffer = generateDividedUnitSquareBuffer(numDivisions, eps)
@@ -167,7 +160,7 @@ async function initGlobePictograms() {
     let textureNames = ["earthColor", "ball", "cmb", "jupiter", "latAndLon2"]
     for (let i = 0; i < textureNames.length; ++i) {
         let texture = await Texture("data/" + textureNames[i] + ".png")
-        assignTypeAndData(coloredNamesAlphabetically[13 + i], pictogramDrawer, {
+        assignTypeAndData(coloredNamesAlphabetically[13 + i], pictogramDrawers.globe, {
             texture,
             yaw: 0.,
             pitch: 0.

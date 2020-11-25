@@ -16,7 +16,7 @@
 
 */
 
-function initTranspiler(infixFunctions, infixSymbols, functionNames) {
+function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
 
     let loggedErrors = []
     function logErrorIfNew(newError) {
@@ -26,137 +26,147 @@ function initTranspiler(infixFunctions, infixSymbols, functionNames) {
         }
     }
 
-    let parsedString = ""
-    logLastParsedString = () => {
-        log(parsedString)
-    }
     let numberedMvs = []
 
-    let currentNodeBranchingFrom = null
-    function Node(lexeme, terminal, replaceMostRecent) {
-        this.lexeme = lexeme
 
-        this.children = []
 
-        this.parent = currentNodeBranchingFrom
-        if( this.parent !== null )
-            this.parent.addChild(this, replaceMostRecent)
-        
-        if (terminal)
-            this.expectedNumberOfChildren = 0
-        else if(functionNames.indexOf(lexeme) !== -1)
-            this.expectedNumberOfChildren = eval(lexeme).length - 1 //-1 because target is last
-        else
-            console.error("unrecognized function: ", lexeme)
-    }
-    Node.prototype.addChild = function(child, replaceMostRecent) {
-        if (!replaceMostRecent)
-            this.children.push(child)
-        else {
-            let oldChild = this.children.pop()
-            this.children.push(child)
-            child.addChild(oldChild,false)
+    AbstractSyntaxTree = function() {
+        let currentNodeBranchingFrom = null
+        function Node(lexeme, terminal, replaceMostRecent) {
+            this.lexeme = lexeme
+
+            this.children = []
+
+            this.parent = currentNodeBranchingFrom
+            if (this.parent !== null)
+                this.parent.addChild(this, replaceMostRecent)
+
+            if (terminal)
+                this.expectedNumberOfChildren = 0
+            else if (builtInFunctionNames.indexOf(lexeme) !== -1)
+                this.expectedNumberOfChildren = eval(lexeme).length - 1 //-1 because target is last
+            else
+                console.error("unrecognized function: ", lexeme)
         }
-        child.parent = this
-    }
+        Node.prototype.addChild = function (child, replaceMostRecent) {
+            if (!replaceMostRecent)
+                this.children.push(child)
+            else {
+                // debugger
+                let oldChild = this.children.pop()
+                this.children.push(child)
+                child.addChild(oldChild, false)
+            }
+            child.parent = this
+        }
+        Node.prototype.deleteProperties = function () {
+            delete this.children
+            delete this.lexeme
+            delete this.parent
+            delete this.expectedNumberOfChildren
+        }
 
-    transpileMv = () => {   
-        lowestUntranscribedMv = 0
-
-        currentNodeBranchingFrom = null
-        let topNode = new Node("assign",false)
-
+        let topNode = new Node("assign", false)
         currentNodeBranchingFrom = topNode
 
         let branchCanComplete = false
         function adjustToOpenBracket(functionLexeme) {
             branchCanComplete = false
-            currentNodeBranchingFrom = new Node(functionLexeme,false)
+            currentNodeBranchingFrom = new Node(functionLexeme, false)
         }
         function adjustToInfixNode(infixLexeme) {
             currentNodeBranchingFrom = new Node(infixLexeme, false, true)
         }
-        
-        //You're only going to transpile part of it!
-        forEachToken((tokenIndex, tokenStart, tokenEnd, token, lexeme) => {
-            if(token === "comment" || token === " " || token === "\n")
-                return false
 
-            //token categories!
-            let isMvName = namedMvs.indexOf(lexeme) !== -1
-            let isFunction = functionNames.indexOf(lexeme) !== -1
+        let functionNameJustSeen = null
+        this.addLexeme = function(token,lexeme) {
+            if (token === "comment" || token === " " || token === "\n")
+                return false
+            if (functionNameJustSeen !== null)
+                logErrorIfNew("function " + lexeme + " must be followed by open bracket")
+
+            let isMvLexeme = (token === "coloredName" || token === "uncoloredName") && isNameMv(lexeme)
+            let isFunction = builtInFunctionNames.indexOf(lexeme) !== -1 //TODO transpiledFunction
             let isOpenBracket = lexeme === "("
 
-            if (isMvName || isFunction || isOpenBracket) {
+            if (isMvLexeme || isFunction || isOpenBracket) {
                 if (branchCanComplete)
                     adjustToInfixNode("gp")
 
-                if (isMvName) {
-                    //instead it could be getNameProperties(child.lexeme).value
+                if (isMvLexeme) {
+                    //instead it could be getNamePropertiesAndReturnNullIfNoDrawers(child.lexeme).value
                     //OR coloredNamesAlphabetically
-                    new Node('getNameProperties("' + child.lexeme + '").value,',true)
+                    new Node('getNamePropertiesAndReturnNullIfNoDrawers("' + lexeme + '").value', true)
                     branchCanComplete = true
                 }
-                else if (isFunction && lexemes[i + 1] === "(") {
-                    adjustToOpenBracket(lexeme)
-                    ++i
+                else if (isOpenBracket) {
+                    if(functionNameJustSeen) {
+                        adjustToOpenBracket(functionNameJustSeen)
+                        functionNameJustSeen = null
+                    }
+                    else
+                        adjustToOpenBracket("assign")
                 }
-                else if (isOpenBracket)
-                    adjustToOpenBracket("assign")
-                else {
-                    logErrorIfNew("function " + lexeme + " must be followed by open bracket")
-                    return i
-                }
+                else if (isFunction )
+                    functionNameJustSeen = lexeme
             }
             else if (branchCanComplete) {
                 if (lexeme === "," && currentNodeBranchingFrom.children.length !== currentNodeBranchingFrom.expectedNumberOfChildren)
                     branchCanComplete = false
                 else if (lexeme === ")" && currentNodeBranchingFrom.children.length === currentNodeBranchingFrom.expectedNumberOfChildren)
                     currentNodeBranchingFrom = currentNodeBranchingFrom.parent //we move up having finished branch, so this branch is potentially valid too
-                else if (infixSymbols.indexOf(lexeme) === -1) {//or other infixes
-                    adjustToInfixNode(infixFunctions[lexeme])
+                else if (infixSymbols.indexOf(lexeme) !== -1) {//or other infixes
+                    adjustToInfixNode(infixOperators[lexeme])
                     branchCanComplete = false
                 }
-                else {
+                else
                     logErrorIfNew("unexpected symbol " + lexeme)
-                    return i
-                }
             }
-            else {
+            else
                 logErrorIfNew("unexpected symbol before branch end: " + lexeme)
-                return i
-            }
-        })
-        if (!branchCanComplete) {
-            logErrorIfNew("unexpected line end after symbol " + lexemes[lexemes.length-1])
-            return lexemes.length - 1
         }
 
-        return parsedString = parseFunctionNode(topNode)
-    }
+        //since the top node is a "" function it should be ok if there's just a single mv
+        function parseFunctionNode(node) {
+            let lowestUntranscribedMv = 0
+            
+            let finalLine = node.lexeme + "("
+            let computationLines = ""
 
-    //since the top node is a "" function it should be ok if there's just a single mv
-    let lowestUntranscribedMv = 0
-    function parseFunctionNode(node) {
-        let functionLine = node.lexeme + "("
-        let computationLines = ""
+            node.children.forEach((child) => {
+                if (child.children.length === 0)
+                    finalLine += child.lexeme + ","
+                else {
+                    // You need to have shit between { }, otherwise they'll clash
+                    while (numberedMvs.length <= lowestUntranscribedMv)
+                        numberedMvs.push(new Float32Array(16))
+                    let mvString = 'numberedMvs[' + lowestUntranscribedMv + ']'
+                    ++lowestUntranscribedMv
 
-        node.children.forEach((child) => {
-            if(child.children.length === 0)
-                functionLine += child.lexeme + ","
-            else {
-                // You need to have shit between { }, otherwise they'll clash
-                while (numberedMvs.length <= lowestUntranscribedMv)
-                    numberedMvs.push(new Float32Array(16))
-                let mvString = 'numberedMvs[' + lowestUntranscribedMv + ']'
-                ++lowestUntranscribedMv
-                
-                computationLines += parseFunctionNode(child) + mvString + ');\n'
-                functionLine += mvString + ','
-            }
-        })
+                    computationLines += parseFunctionNode(child) + mvString + ');\n'
+                    finalLine += mvString + ','
+                }
 
-        return computationLines + functionLine
+                //should be ok to reuse the numbered mvs across lines, you're not doing anything with them after
+            })
+
+            while(node.children.length)
+                delete node.children.pop()
+
+            return computationLines + finalLine
+        }
+
+        this.parseAndAssign = function(nameToAssignTo) {
+            if (!branchCanComplete)
+                logErrorIfNew("unexpected line end")
+            // topNode.deleteProperties()
+            // delete topNode
+            let str = parseFunctionNode(topNode) + `getNamePropertiesAndReturnNullIfNoDrawers("` + nameToAssignTo + `").value);`
+            eval(str)
+
+            branchCanComplete = false
+            currentNodeBranchingFrom = topNode
+        }
     }
 
     /*

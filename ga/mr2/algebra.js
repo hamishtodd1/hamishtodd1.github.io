@@ -42,8 +42,8 @@ function initAlgebra()
             float mv3[16];` )
             
         appendToGaShaderString(replaceSignature(
-            "void gp(float a[16],float b[16],inout float target[16])",
-            gp = (a, b, target) =>
+            "void gProduct(float a[16],float b[16],inout float target[16])",
+            gProduct = (a, b, target) =>
             {
                 target[ 0] = b[ 0] * a[ 0] + b[ 2] * a[ 2] + b[ 3] * a[ 3] + b[ 4] * a[ 4] - b[ 8] * a[ 8] - b[ 9] * a[ 9] - b[10] * a[10] - b[14] * a[14];
 
@@ -327,10 +327,10 @@ function initAlgebra()
         lineIdealNorm = (mv) => { return Math.sqrt(sq(idealLineX(mv)) + sq(idealLineY(mv)) + sq(idealLineZ(mv)))}
         
         mvSandwich = (a,b,target) => {
-            gp( b, a, mv0);
+            gProduct( b, a, mv0);
             assign(b,mv1)
             reverse(mv1,mv2);
-            gp(mv0, mv2, target);
+            gProduct(mv0, mv2, target);
         }
 
         lineNormalize = (mv) => {
@@ -411,7 +411,7 @@ function initAlgebra()
             wNormalizePoint(point)
             let planeDotPoint = mv0
             inner(point, plane, planeDotPoint)
-            gp(planeDotPoint, plane, target)
+            gProduct(planeDotPoint, plane, target)
             wNormalizePoint(target)
             return target
         }

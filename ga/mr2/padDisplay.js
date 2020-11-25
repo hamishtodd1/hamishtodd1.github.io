@@ -39,6 +39,10 @@ function initPadDisplay() {
                         drawTokenCharacters(tokenStart, tokenEnd)
                     else {
                         drawName(lexeme, drawingPosition.x + .5, drawingPosition.y)
+                        // if(frameCount === 5)
+                        //     log(lexeme)
+                        // if(frameCount === 6)
+                        //     debugger
                         drawingPosition.x += 1.
 
                         carat.moveOutOfToken(tokenStart, tokenEnd)

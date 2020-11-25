@@ -51,7 +51,7 @@ function initDualQuaternions(appendToGaShaderString, replaceSignature)
     normDq = (a) => {
         dqToMv(a,mv0)
         reverse(mv0, mv1)
-        gp(mv0,mv1,mv2)
+        gProduct(mv0,mv1,mv2)
         return Math.sqrt(mv2[0])
     }
 
@@ -69,7 +69,7 @@ function initDualQuaternions(appendToGaShaderString, replaceSignature)
     multiplyDq = (a,b,target) => {
         dqToMv(a,mv0)
         dqToMv(b,mv1)
-        gp(mv0,mv1,mv2)
+        gProduct(mv0,mv1,mv2)
         mvToDq(mv2,target)
         return target
     }
@@ -175,9 +175,9 @@ function initDualQuaternions(appendToGaShaderString, replaceSignature)
             dqToMv(dq, mv0);
             pointToMv(p, mv1);
 
-            gp(mv0, mv1, mv2);
+            gProduct(mv0, mv1, mv2);
             reverse(mv0,mv1);
-            gp(mv2, mv1, mv3);
+            gProduct(mv2, mv1, mv3);
 
             mvToPoint(mv3,p);
         }

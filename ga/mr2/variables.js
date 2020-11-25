@@ -18,7 +18,7 @@ const IDENTIFIER_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVW
 const coloredNamesAlphabetically = Array(63)  //7 choose 1 + 7 choose 2 + 7 choose 3
 const transpiledFunctions = {}
 
-const pictogramDrawers = []
+const pictogramDrawers = {}
 
 const carat = {
     positionInString: -1,
@@ -33,8 +33,7 @@ const JOIN_SYMBOL = String.fromCharCode("8744")
 
 let backgroundString = 
 `
-//need mvs unified + doing stuff
-// y = w`+JOIN_SYMBOL+`b
+y = bgo`+JOIN_SYMBOL+`p
 
 //then figure out = for types
 // y = alternatingProj(pg)

@@ -35,26 +35,25 @@ function initAnglePictograms() {
 
     let editingStyle = {
         during: (name, x, y) => {
-            getNameProperties(name).value = clamp(x, -1., 1.)
+            getNamePropertiesAndReturnNullIfNoDrawers(name).value = clamp(x, -1., 1.)
         },
     }
 
     var vertsBuffer = vertBufferFunctions.disc(.95, 62)
 
-    let pictogramDrawer = new PictogramDrawer(editingStyle, vs, fs)
-    pictogramDrawer.program.addVertexAttribute("vert", vertsBuffer, 4)
-    pictogramDrawer.program.locateUniform("fullAngle")
-
-    assignTypeAndData("bg", pictogramDrawer, { value: 0. })
+    let pd = new PictogramDrawer(editingStyle, vs, fs)
+    pictogramDrawers.angle = pd
+    pd.program.addVertexAttribute("vert", vertsBuffer, 4)
+    pd.program.locateUniform("fullAngle")
 
     addRenderFunction(() => {
-        gl.useProgram(pictogramDrawer.program.glProgram)
-        pictogramDrawer.program.prepareVertexAttribute("vert", vertsBuffer)
+        gl.useProgram(pd.program.glProgram)
+        pd.program.prepareVertexAttribute("vert", vertsBuffer)
 
-        pictogramDrawer.finishPrebatchAndDrawEach((nameProperties) => {
+        pd.finishPrebatchAndDrawEach((nameProperties) => {
             //If it's from an mv, normalize its magnitude to 1 before taking the scalar part
             let angle = 2. * Math.acos(nameProperties.value)
-            gl.uniform1f(pictogramDrawer.program.getUniformLocation("fullAngle"), angle)
+            gl.uniform1f(pd.program.getUniformLocation("fullAngle"), angle)
             gl.drawArrays(gl.TRIANGLES, 0, vertsBuffer.length / 4)
         })
     }, "end")
@@ -77,18 +76,18 @@ function initMvPictograms() {
         during: (editingName, x, y) => {
             point(slideCurrentMv, x, y, 0., 1.)
 
-            let grade = getGrade(getNameProperties(editingName).value)
+            let grade = getGrade(getNamePropertiesAndReturnNullIfNoDrawers(editingName).value)
             if (grade === 3)
-                assign(slideCurrentMv, getNameProperties(editingName).value)
+                assign(slideCurrentMv, getNamePropertiesAndReturnNullIfNoDrawers(editingName).value)
             else if (grade === 2) {
                 if (mvEquals(slideCurrentMv, slideStartMv)) {
                     let currentLineDotMousePosition = new Float32Array(16);
-                    inner(getNameProperties(editingName).value, slideStartMv, currentLineDotMousePosition)
-                    gp(currentLineDotMousePosition, slideStartMv, getNameProperties(editingName).value)
+                    inner(getNamePropertiesAndReturnNullIfNoDrawers(editingName).value, slideStartMv, currentLineDotMousePosition)
+                    gProduct(currentLineDotMousePosition, slideStartMv, getNamePropertiesAndReturnNullIfNoDrawers(editingName).value)
                     delete currentLineDotMousePosition
                 }
                 else
-                    join(slideStartMv, slideCurrentMv, getNameProperties(editingName).value)
+                    join(slideStartMv, slideCurrentMv, getNamePropertiesAndReturnNullIfNoDrawers(editingName).value)
             }
         },
     }
@@ -315,20 +314,18 @@ function initMvPictograms() {
         // })
     }
 
-    function assignMv(name) {
-        assignTypeAndData(name, [pointPictogramDrawer, linePictogramDrawer], { value: new Float32Array(16) })
+    pictogramDrawers.mv = [pointPictogramDrawer, linePictogramDrawer]
+    assignMv = function(name) {
+        assignTypeAndData(name, pictogramDrawers.mv, { value: new Float32Array(16) })
     }
-
-    assignMv("w")
-    realLineX(getNameProperties("w").value, .5);
-    assignMv("bgo")
-    pointX(getNameProperties("bgo").value, .5);
-    realLineY(getNameProperties("bgo").value, .5);
+    isNameMv = function(name) {
+        return getNamePropertiesAndReturnNullIfNoDrawers(name).drawers[0] === pointPictogramDrawer
+    }
 
     //when you use the "add" function, it should not necessarily be associated with a single pictogram drawer
 
     updateFunctions.push(() => {
         drawName("bgo",-.5, -1.5)
-        drawName("w",.5, -2.5)
+        drawName("w", .5, -2.5)
     })
 }

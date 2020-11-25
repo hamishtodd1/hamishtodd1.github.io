@@ -20,21 +20,27 @@
 
 function initTokenizer(displayableCharacters) {
 
-    let infixFunctions = {
+    //there's even postfix: dagger and star
+    let infixOperators = {
         "+": "gAdd",
         "=": "assign",
+        // JOIN_SYMBOL:"join"
         //wedge
         //subtract
         //divide
     }
+    infixOperators[JOIN_SYMBOL] = "join" //TODO sure this works across browsers?
     //then reverse, dual, exponential are single argument
-    let infixSymbols = Object.keys(infixFunctions)
-    let functionNames = ["reverse", "inner", "gp", "join"] //"earth", sin, cos, tan, exp, sqrt
-    infixSymbols.forEach((key)=>{functionNames.push(infixSymbols[key])})
-    initTranspiler(infixFunctions, infixSymbols, functionNames)
+    let infixSymbols = Object.keys(infixOperators)
+    let builtInFunctionNames = ["reverse", "inner", "gp", "join"] //"earth", sin, cos, tan, exp, sqrt
+    infixSymbols.forEach((key)=>{builtInFunctionNames.push(infixOperators[key])})
+    initTranspiler(infixOperators, infixSymbols, builtInFunctionNames)
+    let lineTree = new AbstractSyntaxTree()
 
     // initErrorHighlight()
     initPadDisplay()
+
+    const namesNeedingToBeCleared = []
 
     tokenizeEvaluateDisplay = () => {
 
@@ -158,7 +164,6 @@ function initTokenizer(displayableCharacters) {
         let unusedNameJustSeen = null
 
         let nameToAssignTo = null
-        let lineTree = null
 
         let nextNameIsFunction = false
         let functionNameToAssignTo = null
@@ -171,6 +176,18 @@ function initTokenizer(displayableCharacters) {
             }
         }
 
+        clearNames(namesNeedingToBeCleared)
+        namesNeedingToBeCleared.length = 0
+        // assignTypeAndData("o", pictogramDrawers.globeProjection, {
+        //     globeProperties: getNamePropertiesAndReturnNullIfNoDrawers("go"),
+        //     tf: alternatingTf,
+        // })
+        // assignTypeAndData("b", pictogramDrawers.globeProjection, {
+        //     globeProperties: getNamePropertiesAndReturnNullIfNoDrawers("gp"),
+        //     tf: alternatingTf,
+        // })
+        //then have all the things that are currently in the separate files done here
+
         forEachToken((tokenIndex, tokenStart, tokenEnd, token, lexeme) => {
             if (token === "comment" || token === " " )
                 return false
@@ -180,7 +197,7 @@ function initTokenizer(displayableCharacters) {
 
                 nextNameIsFunction = true
             }
-            else if ((token === "coloredName" || token === "uncoloredName") && getNameProperties(lexeme) === null) {
+            else if ((token === "coloredName" || token === "uncoloredName") && getNamePropertiesAndReturnNullIfNoDrawers(lexeme) === null) {
                 if (nameToAssignTo !== null || unusedNameJustSeen !== null) {
                     console.error("misplaced new name: ", lexeme)
                     debugger
@@ -189,8 +206,10 @@ function initTokenizer(displayableCharacters) {
                 unusedNameJustSeen = lexeme
             }
             else if (lexeme === "=") {
-                if (unusedNameJustSeen === null || nameToAssignTo !== null)
+                if (unusedNameJustSeen === null || nameToAssignTo !== null) {
                     console.error("misplaced =")
+                    debugger
+                }
 
                 if (nextNameIsFunction) {
                     if (functionNameToAssignTo !== null)
@@ -207,29 +226,25 @@ function initTokenizer(displayableCharacters) {
                 unusedNameJustSeen = null
             }
 
-            ///////////////////////
+            //////////////////////
             ////  ALL SET UP  ////
-            ///////////////////////
+            //////////////////////
             
             else if (nameToAssignTo !== null) {
 
-                //build up the tree, with the transpiler, then...
-
-                //better do it with reverse(a) first
-                //
-
-                if(frameCount === 0)
-                    log(lexeme)
-
-                if (token === "\n") {
+                if (token !== "\n")
+                    lineTree.addLexeme(token,lexeme)
+                else {
+                    assignMv(nameToAssignTo)
+                    lineTree.parseAndAssign(nameToAssignTo)
+                    namesNeedingToBeCleared.push(nameToAssignTo)
                     
+                    //want this in the case where it's a globeProj
                     // assignTypeAndData(nameToAssignTo, pictogramDrawer, {
-                    //     globeProperties: getNameProperties("go"),
+                    //     globeProperties: getNamePropertiesAndReturnNullIfNoDrawers("go"),
                     //     tf: alternatingTf,
                     // })
                     //the question is, how do you determine the type?
-
-                    //somehow assign eval(lineTree), including in the case where it's a globeProj
 
                     nameToAssignTo = null
 

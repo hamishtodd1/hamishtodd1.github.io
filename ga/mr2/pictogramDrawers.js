@@ -48,8 +48,6 @@ function initPictogramDrawers() {
     }
 
     PictogramDrawer = function (editingStyle, vsBody, fsBody) {
-        pictogramDrawers.push(this)
-
         let numToDraw = 0
         let screenPositions = [] //Just screen position, if you want a quat put that in a wrapper
         let names = []
@@ -66,7 +64,7 @@ function initPictogramDrawers() {
 
         this.drawEach = function(predrawAndReturnProgram,draw) {
             for (let i = 0; i < numToDraw; ++i) {
-                let nameProperties = getNameProperties(names[i])
+                let nameProperties = getNamePropertiesAndReturnNullIfNoDrawers(names[i])
 
                 let program = predrawAndReturnProgram(nameProperties)
                 
@@ -119,15 +117,16 @@ function pictogramTest()
 
     let testEditingStyle = {
         during: (name,x,y) => {
-            getNameProperties(name).value = Math.abs(x)
+            getNamePropertiesAndReturnNullIfNoDrawers(name).value = Math.abs(x)
         },
     }
 
     let pictogramDrawer = new PictogramDrawer(testEditingStyle, vs, fs)
+    pictogramDrawers.test = pictogramDrawer 
     pictogramDrawer.program.addVertexAttribute("vert", quadBuffer, 4, true)
     pictogramDrawer.program.locateUniform("g")
 
-    assignTypeAndData("r", pictogramDrawer, { value: 0. })
+    assignTypeAndData("r", pictogramDrawers.test, { value: 0. })
 
     addRenderFunction(()=>{
         gl.useProgram(pictogramDrawer.program.glProgram)
