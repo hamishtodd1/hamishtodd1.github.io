@@ -28,11 +28,13 @@ function initTokenizer(displayableCharacters) {
         //wedge
         //subtract
         //divide
+        //reverse: dagger
+        //normalize: superscript 1
     }
     infixOperators[JOIN_SYMBOL] = "join" //TODO sure this works across browsers?
     //then reverse, dual, exponential are single argument
     let infixSymbols = Object.keys(infixOperators)
-    let builtInFunctionNames = ["reverse", "inner", "gp", "join"] //"earth", sin, cos, tan, exp, sqrt
+    let builtInFunctionNames = ["reverse", "inner", "gProduct", "join"] //"earth", sin, cos, tan, exp, sqrt
     infixSymbols.forEach((key)=>{builtInFunctionNames.push(infixOperators[key])})
     initTranspiler(infixOperators, infixSymbols, builtInFunctionNames)
     let lineTree = new AbstractSyntaxTree()
@@ -138,23 +140,11 @@ function initTokenizer(displayableCharacters) {
         ////  TRANSPILING  ////
         ///////////////////////
 
-        //you probably need to clear a lot of names from the previous run. Could make local!
-
-        //the function, which can be multi-line, can evaluate to a transpiledFunction
-        //eh, need to use them first
-
         //a function call causes a new thing to be made
         // a single line with multiple operations preceding an assignment compiles to something you need to execute. 
 
         //for the purposes of this video there are multiple kinds of "=":
         //those things are DEFINITELY going to have their evaluation deferred until render time
-
-        //transpilation and evaluation are different.
-        //transpile to IR string. Evaluation happens just before render
-
-        //you compile expressions and assign them to the real names
-        //but you can save out the compiled string
-
 
         //the job of this thing is to associate names with IR strings
         //you're going to evaluate the whole lot in js... some of which
@@ -178,26 +168,22 @@ function initTokenizer(displayableCharacters) {
 
         clearNames(namesNeedingToBeCleared)
         namesNeedingToBeCleared.length = 0
-        // assignTypeAndData("o", pictogramDrawers.globeProjection, {
-        //     globeProperties: getNamePropertiesAndReturnNullIfNoDrawers("go"),
-        //     tf: alternatingTf,
-        // })
-        // assignTypeAndData("b", pictogramDrawers.globeProjection, {
-        //     globeProperties: getNamePropertiesAndReturnNullIfNoDrawers("gp"),
-        //     tf: alternatingTf,
-        // })
         //then have all the things that are currently in the separate files done here
 
         forEachToken((tokenIndex, tokenStart, tokenEnd, token, lexeme) => {
             if (token === "comment" || token === " " )
                 return false
-           else  if (lexeme === "def") {
+            else  if (lexeme === "def") {
                 if (nextNameIsFunction || functionNameToAssignTo !== null || nameToAssignTo !== null)
                     console.error("misplaced lambda")
 
                 nextNameIsFunction = true
             }
-            else if ((token === "coloredName" || token === "uncoloredName") && getNamePropertiesAndReturnNullIfNoDrawers(lexeme) === null) {
+            else if ((token === "coloredName" || token === "uncoloredName") 
+                && getNameDrawerProperties(lexeme) === null 
+                && transpiledFunctions[lexeme] === undefined
+                && builtInFunctionNames.indexOf(lexeme) === -1 )
+            {
                 if (nameToAssignTo !== null || unusedNameJustSeen !== null) {
                     console.error("misplaced new name: ", lexeme)
                     debugger
@@ -229,27 +215,22 @@ function initTokenizer(displayableCharacters) {
             //////////////////////
             ////  ALL SET UP  ////
             //////////////////////
+
+            //all you can do is apply the function to the globe
+            //we might like it to be the case that eg "t Proj tDagger" gives you proj rotated by t. But eh
             
             else if (nameToAssignTo !== null) {
-
                 if (token !== "\n")
                     lineTree.addLexeme(token,lexeme)
                 else {
-                    assignMv(nameToAssignTo)
                     lineTree.parseAndAssign(nameToAssignTo)
-                    namesNeedingToBeCleared.push(nameToAssignTo)
                     
-                    //want this in the case where it's a globeProj
-                    // assignTypeAndData(nameToAssignTo, pictogramDrawer, {
-                    //     globeProperties: getNamePropertiesAndReturnNullIfNoDrawers("go"),
-                    //     tf: alternatingTf,
-                    // })
-                    //the question is, how do you determine the type?
-
+                    namesNeedingToBeCleared.push(nameToAssignTo)
                     nameToAssignTo = null
 
                     if (functionNameToAssignTo !== null) {
-                        //need to convert the name too...                    
+                        // globeProjectionPictogramPrograms["simpleAlternating"].setIr()
+                        // something = new GlobeProjectionIr()                 
                     }
                 }
             }
@@ -277,7 +258,7 @@ function initTokenizer(displayableCharacters) {
             //         }
 
             //     case "identifier":
-            //         if (transpiledFunctions[lexeme] !== undefined) {
+            //         if (intermediateRepresentations[lexeme] !== undefined) {
 
             //         }
             //         break

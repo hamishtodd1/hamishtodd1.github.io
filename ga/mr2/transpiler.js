@@ -24,14 +24,62 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
             console.error("transpilation error: \n", newError)
             loggedErrors.push(newError)
         }
+        debugger
     }
 
     let numberedMvs = []
 
+    transpiledFunctions["alternatingProj"] = {
+        glslString: "", //maaaaaybe we'll have the actual js function
+        length: 2 //num arguments, including target
+    }
+    let updateAlternatingFunction = () => {
+        transpiledFunctions["alternatingProj"].glslString =
+            Math.floor(frameCount / 50) % 2 ?
+                `
+                void alternatingProj(in float argument1[16], out float target[16])
+                {
+                    assign(argument1,target);
+                }
+                `
+                :
+                // `
+                // assign(pointOnGlobe,outputMv);
+                // outputMv[12] -= .09;
+                // `
+                // `
+                // point(outputMv,
+                // 	lon * cos(lat) * .3,
+                // 	lat * .3,
+                // 	0.,1.);
+                // `
+                `
+                void alternatingProj(in float argument1[16], out float target[16])
+                {
+                    float reflector[16];
+                    plane(reflector,1.,0.,0.,0.);
+
+                    float numberedMvs0[16];
+                    gProduct(reflector,argument1,numberedMvs0);
+                    gProduct(numberedMvs0,reflector,target);
+                }
+                `
+        //what you want next is putting mv into this function and it friggin works
+    }
+    updateFunctions.splice(0, 0, updateAlternatingFunction)
+    updateAlternatingFunction()
 
 
     AbstractSyntaxTree = function() {
         let currentNodeBranchingFrom = null
+        let functionNameJustSeen = null
+        let branchCanComplete = false
+        let glslStuff = {
+            globeProperties: null,
+            main: "",
+            header: ""
+        }
+
         function Node(lexeme, terminal, replaceMostRecent) {
             this.lexeme = lexeme
 
@@ -45,6 +93,9 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
                 this.expectedNumberOfChildren = 0
             else if (builtInFunctionNames.indexOf(lexeme) !== -1)
                 this.expectedNumberOfChildren = eval(lexeme).length - 1 //-1 because target is last
+            else if (transpiledFunctions[lexeme] !== undefined) {
+                this.expectedNumberOfChildren = transpiledFunctions[lexeme].length - 1
+            }
             else
                 console.error("unrecognized function: ", lexeme)
         }
@@ -69,7 +120,6 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
         let topNode = new Node("assign", false)
         currentNodeBranchingFrom = topNode
 
-        let branchCanComplete = false
         function adjustToOpenBracket(functionLexeme) {
             branchCanComplete = false
             currentNodeBranchingFrom = new Node(functionLexeme, false)
@@ -78,26 +128,33 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
             currentNodeBranchingFrom = new Node(infixLexeme, false, true)
         }
 
-        let functionNameJustSeen = null
         this.addLexeme = function(token,lexeme) {
             if (token === "comment" || token === " " || token === "\n")
                 return false
-            if (functionNameJustSeen !== null)
-                logErrorIfNew("function " + lexeme + " must be followed by open bracket")
 
-            let isMvLexeme = (token === "coloredName" || token === "uncoloredName") && isNameMv(lexeme)
-            let isFunction = builtInFunctionNames.indexOf(lexeme) !== -1 //TODO transpiledFunction
+            let isFunction = builtInFunctionNames.indexOf(lexeme) !== -1 || transpiledFunctions[lexeme] !== undefined
             let isOpenBracket = lexeme === "("
+            let isTerminalColoredName = token === "coloredName" && !isFunction
+            //ok but it's NOT an mv, it's a globe! that changes everything!
 
-            if (isMvLexeme || isFunction || isOpenBracket) {
+            if (!isOpenBracket && functionNameJustSeen !== null)
+                logErrorIfNew("function " + functionNameJustSeen + " must be followed by (, instead got " + lexeme)
+
+            if (isTerminalColoredName || isFunction || isOpenBracket) {
                 if (branchCanComplete)
-                    adjustToInfixNode("gp")
+                    adjustToInfixNode("gProduct")
 
-                if (isMvLexeme) {
-                    //instead it could be getNamePropertiesAndReturnNullIfNoDrawers(child.lexeme).value
-                    //OR coloredNamesAlphabetically
-                    new Node('getNamePropertiesAndReturnNullIfNoDrawers("' + lexeme + '").value', true)
+                if (isTerminalColoredName) {
                     branchCanComplete = true
+
+                    let nameDrawers = getNameDrawerProperties(lexeme).drawers
+                    if (nameDrawers[0] === pictogramDrawers.mv[0])
+                        new Node('getNameDrawerProperties("' + lexeme + '").value', true)
+
+                    if (nameDrawers[0] === pictogramDrawers.globe) { //that's a type thing, it's an array
+                        glslStuff.globeProperties = getNameDrawerProperties(lexeme)
+                        new Node('pointOnGlobe', true)
+                    }
                 }
                 else if (isOpenBracket) {
                     if(functionNameJustSeen) {
@@ -107,8 +164,12 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
                     else
                         adjustToOpenBracket("assign")
                 }
-                else if (isFunction )
+                else if (isFunction ) {
                     functionNameJustSeen = lexeme
+
+                    if (transpiledFunctions[functionNameJustSeen] !== undefined)
+                        glslStuff.header += transpiledFunctions[functionNameJustSeen].glslString
+                }
             }
             else if (branchCanComplete) {
                 if (lexeme === "," && currentNodeBranchingFrom.children.length !== currentNodeBranchingFrom.expectedNumberOfChildren)
@@ -127,8 +188,8 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
         }
 
         //since the top node is a "" function it should be ok if there's just a single mv
-        function parseFunctionNode(node) {
-            let lowestUntranscribedMv = 0
+        function parseFunctionNode(node,glslInsteadOfJs) {
+            let lowestUnusedMv = 0
             
             let finalLine = node.lexeme + "("
             let computationLines = ""
@@ -138,10 +199,17 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
                     finalLine += child.lexeme + ","
                 else {
                     // You need to have shit between { }, otherwise they'll clash
-                    while (numberedMvs.length <= lowestUntranscribedMv)
-                        numberedMvs.push(new Float32Array(16))
-                    let mvString = 'numberedMvs[' + lowestUntranscribedMv + ']'
-                    ++lowestUntranscribedMv
+                    let mvString = ``
+                    if(glslInsteadOfJs) {
+                        mvString = 'numberedMvs' + lowestUnusedMv
+                        computationLines = `float ` + mvString + `[16];\n` + computationLines
+                    }
+                    else {
+                        while (numberedMvs.length <= lowestUnusedMv)
+                            numberedMvs.push(new Float32Array(16))
+                        mvString = 'numberedMvs[' + lowestUnusedMv + ']'
+                    }
+                    ++lowestUnusedMv
 
                     computationLines += parseFunctionNode(child) + mvString + ');\n'
                     finalLine += mvString + ','
@@ -159,13 +227,30 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
         this.parseAndAssign = function(nameToAssignTo) {
             if (!branchCanComplete)
                 logErrorIfNew("unexpected line end")
-            // topNode.deleteProperties()
-            // delete topNode
-            let str = parseFunctionNode(topNode) + `getNamePropertiesAndReturnNullIfNoDrawers("` + nameToAssignTo + `").value);`
-            eval(str)
+            
+            if (glslStuff.globeProperties !== null) {
+                assignTypeAndData(nameToAssignTo, pictogramDrawers.globeProjection, {
+                    globeProperties: glslStuff.globeProperties,
+                    main: parseFunctionNode(topNode,true) + `outputMv);`,
+                    header: glslStuff.header
+                })
+
+                glslStuff.globeProperties = null
+                glslStuff.main = ""
+                glslStuff.header = ""
+            }
+            else 
+            {
+                assignMv(nameToAssignTo) //creates a new array, which kinda sucks. Probably better passing in the array here
+                let parsed = parseFunctionNode(topNode) + `getNameDrawerProperties("` + nameToAssignTo + `").value);`
+                // log(parsed)
+                // debugger
+                eval(parsed) //easy because it does something to variables in scope here
+            }
 
             branchCanComplete = false
             currentNodeBranchingFrom = topNode
+            functionNameJustSeen = null
         }
     }
 
@@ -175,37 +260,42 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
     */
     if(0)
     {
-        let jsArgumentsString = "( "
-        let glslArgumentsString = "( "
-        for (let i = 0; i < numArguments; ++i) {
-            glslArgumentsString += (i === 0 ? "" : ", ") + "in float " + "argument" + i + "[16]"
-            jsArgumentsString += (i === 0 ? "" : ", ") + "argument" + i
+        let jsArgumentsString = `( `
+        let glslArgumentsString = `( `
+        function addArgument(argumentName) {
+            glslArgumentsString += (i === 0 ? `` : `, `) + `in float ` + `target`
+            jsArgumentsString += (i === 0 ? `` : `, `) + `target`
         }
-        glslArgumentsString += (i === 0 ? "" : ", ") + "in float " + "target"
-        jsArgumentsString += (i === 0 ? "" : ", ") + "target"
+
+        for (let i = 0; i < numArguments; ++i) {
+            glslArgumentsString += `in float ` + `argument` + i + `[16],`
+            jsArgumentsString += `argument` + i + `,`
+        }
+        glslArgumentsString += `out float target[16]`
+        jsArgumentsString += `target`
 
         lines.forEach((line, lineIndex) => {
 
             let intermediateRepresentation = transpileLine(line);
             jsBodyString +=
-                "const variable" + lineIndex + " = new Float32Array(16); " + + "\n" +
+                `const variable` + lineIndex + ` = new Float32Array(16); ` + + `\n` +
                 transpileLine(lexemes)
 
             glslBodyString +=
-                "const float variable" + lineIndex + "[16]; " + + "\n" +
-                + "namedMvs[" + name + "]"
+                `const float variable` + lineIndex + `[16]; ` + + `\n` +
+                + `namedMvs[` + name + `]`
         })
         let body = something +
-            "return " + somethingElse + "\n}"
+            `return ` + somethingElse + `\n}`
 
-        let jsString = "function " + functionName + jsArgumentString + ") {\n" +
+        let jsString = `function ` + functionName + jsArgumentString + `) {\n` +
             body +
-            "return variable" + (lines.length - 1).toString() + ";"
-        "\n}"
-        let glslString = "void " + functionName + glslArgumentString + ") {\n" +
+            `return variable` + (lines.length - 1).toString() + `;`
+            `\n}`
+        let glslString = `void ` + functionName + glslArgumentString + `) {\n` +
             body +
-            "return " +
-            "\n}"
+            `return ` +
+            `\n}`
     }
 }
 

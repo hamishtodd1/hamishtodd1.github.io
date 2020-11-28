@@ -21,9 +21,29 @@ function initAlgebra()
             return obj instanceof Float32Array && obj.length === 16
         }
 
-        assign = (mv,target) => {
-            mv.forEach((e,i) => {target[i] = e})
-        }
+        //urgh, should target be first?
+        appendToGaShaderString(replaceSignature(
+            "void assign(float mv[16], out float target[16])",
+            assign = (mv,target) =>
+            {
+                target[ 0] = mv[ 0];
+                target[ 1] = mv[ 1];
+                target[ 2] = mv[ 2];
+                target[ 3] = mv[ 3];
+                target[ 4] = mv[ 4];
+                target[ 5] = mv[ 5];
+                target[ 6] = mv[ 6];
+                target[ 7] = mv[ 7];
+                target[ 8] = mv[ 8];
+                target[ 9] = mv[ 9];
+                target[10] = mv[10];
+                target[11] = mv[11];
+                target[12] = mv[12];
+                target[13] = mv[13];
+                target[14] = mv[14];
+                target[15] = mv[15];
+            }
+        ))
 
         parseMv = function (str, target) {
             let valuesArr = str.split(",")
@@ -42,7 +62,7 @@ function initAlgebra()
             float mv3[16];` )
             
         appendToGaShaderString(replaceSignature(
-            "void gProduct(float a[16],float b[16],inout float target[16])",
+            "void gProduct(float a[16],float b[16],out float target[16])",
             gProduct = (a, b, target) =>
             {
                 target[ 0] = b[ 0] * a[ 0] + b[ 2] * a[ 2] + b[ 3] * a[ 3] + b[ 4] * a[ 4] - b[ 8] * a[ 8] - b[ 9] * a[ 9] - b[10] * a[10] - b[14] * a[14];
@@ -69,7 +89,7 @@ function initAlgebra()
         ))
 
         appendToGaShaderString(replaceSignature(
-            "void join(float a[16], float b[16], inout float target[16])",
+            "void join(float a[16], float b[16], out float target[16])",
             join = (a, b, target) =>
             {
                 target[15] = a[15] * b[15];
@@ -93,7 +113,7 @@ function initAlgebra()
         ))
         
         appendToGaShaderString(replaceSignature(
-            "void meet(float a[16], float b[16], inout float target[16])",
+            "void meet(float a[16], float b[16], out float target[16])",
             meet = (a, b, target) =>
             {
                 target[0]=b[0]*a[0];
@@ -116,7 +136,7 @@ function initAlgebra()
         ))
 
         appendToGaShaderString(replaceSignature(
-            "void inner(float a[16], float b[16], inout float target[16])",
+            "void inner(float a[16], float b[16], out float target[16])",
             inner = (a, b, target) =>
             {
                 target[ 0] = b[ 0] * a[ 0] + b[ 2] * a[ 2] + b[ 3] * a[ 3] + b[ 4] * a[ 4] - b[ 8] * a[ 8] - b[ 9] * a[ 9] - b[10] * a[10] - b[14] * a[14];
@@ -166,7 +186,7 @@ function initAlgebra()
         ))
 
         appendToGaShaderString(replaceSignature(
-            "void gAdd(float a[16], float b[16], inout float target[16])",
+            "void gAdd(float a[16], float b[16], out float target[16])",
             gAdd = (a,b,target) =>
             {
                 target[ 0] = a[ 0] + b[ 0];
@@ -275,34 +295,11 @@ function initAlgebra()
             mv.forEach((e,i)=>mv[i]*=sca)
         }
 
-        appendToGaShaderString(replaceSignature(
-            "void pointToMv(vec4 p, inout float mv[16])",
-            pointToMv = (p,mv) =>
-            {
-                zeroMv(mv);
-                mv[14] = p[3];
-                mv[13] = p[0];
-                mv[12] = p[1];
-                mv[11] = p[2];
-            }
-        ))
-        
         mvEquals = (a,b) => {
             let allEqual = true
             a.forEach((e, i) => { if (a[i] !== b[i]) allEqual = false })
             return allEqual
         }
-
-        appendToGaShaderString(replaceSignature(
-            "void mvToPoint(float mv[16], inout vec4 p)",
-            mvToPoint = (mv,p) =>
-            {
-                p[0] = mv[13];
-                p[1] = mv[12];
-                p[2] = mv[11];
-                p[3] = mv[14];
-            }
-        ))
 
         scalar     = (mv,newValue) => {if(newValue !== undefined) mv[ 0] = newValue; return mv[ 0] }
         planeW     = (mv,newValue) => {if(newValue !== undefined) mv[ 1] = newValue; return mv[ 1] }
@@ -320,8 +317,6 @@ function initAlgebra()
         pointX     = (mv,newValue) => {if(newValue !== undefined) mv[13] = newValue; return mv[13] }
         pointW     = (mv,newValue) => {if(newValue !== undefined) mv[14] = newValue; return mv[14] }
         pss        = (mv,newValue) => {if(newValue !== undefined) mv[15] = newValue; return mv[15] }
-        
-        plane = (mv, x, y, z, w) => {zeroMv(mv); mv[4] = z; mv[3] = y; mv[2] = x; mv[1] = w;}
 
         lineRealNorm = (mv) => { return Math.sqrt(sq(realLineX(mv)) + sq(realLineY(mv)) + sq(realLineZ(mv)))}
         lineIdealNorm = (mv) => { return Math.sqrt(sq(idealLineX(mv)) + sq(idealLineY(mv)) + sq(idealLineZ(mv)))}
@@ -344,6 +339,22 @@ function initAlgebra()
         }
     }
 
+    // Planes
+    {
+        plane = (mv, x, y, z, w) => {zeroMv(mv); mv[4] = z; mv[3] = y; mv[2] = x; mv[1] = w;}
+        appendToGaShaderString(replaceSignature(
+            "void plane(inout float mv[16], float x, float y, float z, float w )",
+            plane = (mv,x,y,z,w) =>
+            {
+                zeroMv(mv);
+                mv[4] = z;
+                mv[3] = y;
+                mv[2] = x;
+                mv[1] = w;
+            }
+        ))
+    }
+
     // Points
     {
         wNormalizePoint = (p) => {
@@ -354,7 +365,41 @@ function initAlgebra()
             pointW(p, 1.)
         }
 
-        point = (mv, x, y, z, w) => { zeroMv(mv); mv[11] = z; mv[12] = y; mv[13] = x; mv[14] = w; }
+        appendToGaShaderString(replaceSignature(
+            "void point(inout float mv[16], float x, float y, float z, float w )",
+            point = (mv,x,y,z,w) =>
+            {
+                zeroMv(mv);
+                mv[11] = z;
+                mv[12] = y;
+                mv[13] = x;
+                mv[14] = w;
+            }
+        ))
+
+        appendToGaShaderString(replaceSignature(
+            "void pointToMv(vec4 p, inout float mv[16])",
+            pointToMv = (p,mv) =>
+            {
+                zeroMv(mv);
+                mv[14] = p[3];
+                mv[13] = p[0];
+                mv[12] = p[1];
+                mv[11] = p[2];
+            }
+        ))
+
+        appendToGaShaderString(replaceSignature(
+            "void mvToVec4(float mv[16], inout vec4 p)",
+            mvToVec4 = (mv,p) =>
+            {
+                p[0] = mv[13];
+                p[1] = mv[12];
+                p[2] = mv[11];
+                p[3] = mv[14];
+            }
+        ))
+
         pointIdealNorm = (mv) => { return Math.sqrt(sq(pointX(mv)) + sq(pointY(mv)) + sq(pointZ(mv))) }
         normalizeIdealPoint = (mv) => { //"not supposed to do this"?
             let factor = 1. / pointIdealNorm(mv)
@@ -363,40 +408,6 @@ function initAlgebra()
             pointZ(mv, pointZ(mv) * factor)
             pointW(mv, 0.)
         }
-
-        Point = function()
-        {
-            this[0] = 0.
-            this[1] = 0.
-            this[2] = 0.
-            this[3] = 1.
-        }
-        Object.assign(Point.prototype, {
-            copy: function (p)
-            {
-                this[0] = p[0]
-                this[1] = p[1]
-                this[2] = p[2]
-                this[3] = p[3]
-            },
-
-            normalize: function ()
-            {
-                let invLength = 1. / Math.sqrt(sq(this[0]) + sq(this[2]) + sq(this[2]) + sq(this[3]))
-                this[0] *= invLength
-                this[1] *= invLength
-                this[2] *= invLength
-                this[3] *= invLength
-            },
-
-            wNormalize: function ()
-            {
-                this[0] /= this[3]
-                this[1] /= this[3]
-                this[2] /= this[3]
-                this[3] = 1.
-            }
-        })
 
         mvArrayToPointsBuffer = function (mvArray, attributeBuffer) {
             for (let i = 0, il = mvArray.length; i < il; ++i) {

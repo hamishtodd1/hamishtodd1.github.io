@@ -101,7 +101,9 @@ function initNames() {
             }
         }
     }
-    getNamePropertiesAndReturnNullIfNoDrawers = function (name) {
+    getNameDrawerProperties = function (name) {
+        if (coloredNamesAlphabetically.indexOf(name) === -1)
+            return null
         if (drawingDetailses[coloredNamesAlphabetically.indexOf(name)].drawers.length === 0)
             return null
         return drawingDetailses[coloredNamesAlphabetically.indexOf(name)]

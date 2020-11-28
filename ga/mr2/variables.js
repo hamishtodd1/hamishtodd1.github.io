@@ -32,12 +32,16 @@ const LAMBDA_SYMBOL = String.fromCharCode("955") //you CAN write "function", but
 const JOIN_SYMBOL = String.fromCharCode("8744")
 
 let backgroundString = 
-`
-y = bgo`+JOIN_SYMBOL+`p
+`bg w
+r gp
+// b o
+bgo p
 
-//then figure out = for types
-// y = alternatingProj(pg)
+y = reverse(bgo)
+ry = bgo`+JOIN_SYMBOL+`p
 
+by = alternatingProj(pg)
+// by = alternatingProj(reflect(pg))
 
 
 

@@ -35,7 +35,7 @@ function initAnglePictograms() {
 
     let editingStyle = {
         during: (name, x, y) => {
-            getNamePropertiesAndReturnNullIfNoDrawers(name).value = clamp(x, -1., 1.)
+            getNameDrawerProperties(name).value = clamp(x, -1., 1.)
         },
     }
 
@@ -57,10 +57,6 @@ function initAnglePictograms() {
             gl.drawArrays(gl.TRIANGLES, 0, vertsBuffer.length / 4)
         })
     }, "end")
-
-    updateFunctions.push(() => {
-        drawName("bg",.5, -.5)
-    })
 }
 
 function initMvPictograms() {
@@ -76,18 +72,18 @@ function initMvPictograms() {
         during: (editingName, x, y) => {
             point(slideCurrentMv, x, y, 0., 1.)
 
-            let grade = getGrade(getNamePropertiesAndReturnNullIfNoDrawers(editingName).value)
+            let grade = getGrade(getNameDrawerProperties(editingName).value)
             if (grade === 3)
-                assign(slideCurrentMv, getNamePropertiesAndReturnNullIfNoDrawers(editingName).value)
+                assign(slideCurrentMv, getNameDrawerProperties(editingName).value)
             else if (grade === 2) {
                 if (mvEquals(slideCurrentMv, slideStartMv)) {
                     let currentLineDotMousePosition = new Float32Array(16);
-                    inner(getNamePropertiesAndReturnNullIfNoDrawers(editingName).value, slideStartMv, currentLineDotMousePosition)
-                    gProduct(currentLineDotMousePosition, slideStartMv, getNamePropertiesAndReturnNullIfNoDrawers(editingName).value)
+                    inner(getNameDrawerProperties(editingName).value, slideStartMv, currentLineDotMousePosition)
+                    gProduct(currentLineDotMousePosition, slideStartMv, getNameDrawerProperties(editingName).value)
                     delete currentLineDotMousePosition
                 }
                 else
-                    join(slideStartMv, slideCurrentMv, getNamePropertiesAndReturnNullIfNoDrawers(editingName).value)
+                    join(slideStartMv, slideCurrentMv, getNameDrawerProperties(editingName).value)
             }
         },
     }
@@ -284,7 +280,7 @@ function initMvPictograms() {
 
         //         meet(viewLine,mv0,mv1);
         //         vec4 rayPlaneIntersection;
-        //         mvToPoint(mv1,rayPlaneIntersection);
+        //         mvToVec4(mv1,rayPlaneIntersection);
         //         if( rayPlaneIntersection.w != 0. && abs(rayPlaneIntersection.z)<.5) {
         //             gl_FragColor = vec4(1.,0.,0.,1.);
         //             //and write to the depth buffer urgh
@@ -318,14 +314,6 @@ function initMvPictograms() {
     assignMv = function(name) {
         assignTypeAndData(name, pictogramDrawers.mv, { value: new Float32Array(16) })
     }
-    isNameMv = function(name) {
-        return getNamePropertiesAndReturnNullIfNoDrawers(name).drawers[0] === pointPictogramDrawer
-    }
 
     //when you use the "add" function, it should not necessarily be associated with a single pictogram drawer
-
-    updateFunctions.push(() => {
-        drawName("bgo",-.5, -1.5)
-        drawName("w", .5, -2.5)
-    })
 }

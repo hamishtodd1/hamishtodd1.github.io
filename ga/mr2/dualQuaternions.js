@@ -179,7 +179,7 @@ function initDualQuaternions(appendToGaShaderString, replaceSignature)
             reverse(mv0,mv1);
             gProduct(mv2, mv1, mv3);
 
-            mvToPoint(mv3,p);
+            mvToVec4(mv3,p);
         }
     ))
 }

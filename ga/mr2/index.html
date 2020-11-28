@@ -9,20 +9,33 @@
 
 
 	Progress report, Nov 2020
-	-more general approach to pictograms. No longer one algebra, now it's "whatever I need"
-		I got super into the idea of trying to enumerate every visualizable function
-		That's silly, that's trying to skip ahead
-		You define your own algebras, that's the main innovation of GA and of object oriented programming
-		projective geometric algebra instead of vanilla geometric algebra
-		Currently you have to make new pictograms in javascript, so for the video I'll be kind of faking it
-		But eventually you'll be able to bootstrap your own ones inside this editor
-	-picked maps as a nice example
+	I feel good about this project. The pictograms thing is working well. Comic-book inbetweening
+	I like how they make the editor fun to look at, and I like how intuitive it feels to change something and see all of its results
 	-functions / things that become shader programs
 		globes
 		globe projections as a separate thing
 	-rewritten in webgl, no three.js. Compilation target is javascript and glsl so that's the way it has to be
 	-No output column. Automated naming though
 	-don't have writing your own functions yet. When that exists, I might be able to do
+	-more general approach to pictograms. No longer one algebra, now it's "whatever I need"
+		I got super into the idea of trying to enumerate every visualizable function
+		That's silly, that's trying to skip ahead, that's premature generalization and that's bad in code so it's bad in design too
+	-picked maps as a nice example
+		You need a customer to make things concrete, otherwise you're just scrwng around making presumptions about what other people MIGHT like
+		See also direct2D, UML diagrams, my master's project, the first year of my phd, entity component systems, "solutions looking for problem"
+		You can talk to andy hall about this as well
+		You define your own algebras, that's the main innovation of GA and of object oriented programming
+		projective geometric algebra instead of vanilla geometric algebra
+		Currently you have to make new pictograms in javascript, so for the video I'll be kind of faking it
+		But eventually you'll be able to bootstrap your own ones inside this editor
+
+	Interested parties
+		Language people: Alan, Meurig, Martin, futureOfCoding, Yoshiki, Cynthia Solomon, Andy Matuschak, Katherine Ye, Glench, Ken Perlin, Josh Horowitz
+		GAists: bivector discord, Cam folks, Charles Gunn, Steven Der kenick, Pierre Philipp Denchant, Jonathan Cameron, David Hestenes, Paul Simeon
+		Graphics/gamedev: Keenan Crane, Albert Chern, Fabrice, Haxiomic, Dan Holden, Daniel Piker, Ian and Norgg, Media Molecule, Chris Deleon, Senthuran
+		Math/physicist: Ivan and Nina, Florian, Eric stansifer, Matt Hare
+		Misc: London Rationalish, 
+		Youtubers: Code parade, sebastian thingy, inigo quilez, Ben Eater, Coding Train guy, Grant sanderson
 
 	TODO for world map
 		Mapping from angles to texture coords, probably based in the thing
@@ -90,7 +103,6 @@
 				initWindowResizeSystem()
 
 				initNames()
-				initTranspiledFunctions()
 				initPictogramDrawers()
 				initMvPictograms()
 				// debugger
@@ -117,16 +129,38 @@
 				// initDrawing()
 
 				{
-					assignTypeAndData("bg", pictogramDrawers.angle, { value: 0. })
+					assignTypeAndData("bg", pictogramDrawers.angle, { value: .5 })
 
 					assignMv("w")
-					realLineX(getNamePropertiesAndReturnNullIfNoDrawers("w").value, .5);
+					realLineX(getNameDrawerProperties("w").value, .5);
 					assignMv("bgo")
-					pointX(getNamePropertiesAndReturnNullIfNoDrawers("bgo").value, .5);
-					pointW(getNamePropertiesAndReturnNullIfNoDrawers("bgo").value, 1.);
+					pointX(getNameDrawerProperties("bgo").value, .5);
+					pointW(getNameDrawerProperties("bgo").value, 1.);
 					assignMv("p")
-					pointY(getNamePropertiesAndReturnNullIfNoDrawers("p").value, .5);
-					pointW(getNamePropertiesAndReturnNullIfNoDrawers("p").value, 1.);
+					pointY(getNameDrawerProperties("p").value, .5);
+					pointW(getNameDrawerProperties("p").value, 1.);
+
+					let textureNames = ["earthColor", "ball", "cmb", "jupiter", "latAndLon2"]
+					for (let i = 0; i < textureNames.length; ++i) {
+						let texture = await Texture("data/" + textureNames[i] + ".png")
+						assignTypeAndData(coloredNamesAlphabetically[13 + i], pictogramDrawers.globe, {
+							texture,
+							yaw: 0.,
+							pitch: 0.
+						})
+						//this could compile to glsl, it's a struct
+					}
+
+					// assignTypeAndData("b", pictogramDrawers.globeProjection, {
+					// 	pictogramProgram: globeProjectionPictogramPrograms["simpleAlternating"].pictogramProgram,
+					// 	globeProperties: getNameDrawerProperties("gp"),
+					// })
+					// assignTypeAndData("o", pictogramDrawers.globeProjection, {
+					// 	pictogramProgram: globeProjectionPictogramPrograms["simpleAlternating"].pictogramProgram,
+					// 	globeProperties: getNameDrawerProperties("go"),
+					// })
+					
+					assignTypeAndData("r", pictogramDrawers.test, { value: 0. })
 				}
 
 				function loop() {
@@ -204,7 +238,6 @@
 		<script src="vertBufferFunctions.js"></script>
 
 		<script src="transpiler.js"></script>
-		<script src="transpiledFunctions.js"></script>
 
 		<!-- <script src="video.js"></script> -->
 		
