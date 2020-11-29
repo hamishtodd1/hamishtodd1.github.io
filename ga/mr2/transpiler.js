@@ -27,58 +27,12 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
         debugger
     }
 
-    let numberedMvs = []
-
-    transpiledFunctions["alternatingProj"] = {
-        glslString: "", //maaaaaybe we'll have the actual js function
-        length: 2 //num arguments, including target
-    }
-    let updateAlternatingFunction = () => {
-        transpiledFunctions["alternatingProj"].glslString =
-            Math.floor(frameCount / 50) % 2 ?
-                `
-                void alternatingProj(in float argument1[16], out float target[16])
-                {
-                    assign(argument1,target);
-                }
-                `
-                :
-                // `
-                // assign(pointOnGlobe,outputMv);
-                // outputMv[12] -= .09;
-                // `
-                // `
-                // point(outputMv,
-                // 	lon * cos(lat) * .3,
-                // 	lat * .3,
-                // 	0.,1.);
-                // `
-                `
-                void alternatingProj(in float argument1[16], out float target[16])
-                {
-                    float reflector[16];
-                    plane(reflector,1.,0.,0.,0.);
-
-                    float numberedMvs0[16];
-                    gProduct(reflector,argument1,numberedMvs0);
-                    gProduct(numberedMvs0,reflector,target);
-                }
-                `
-        //what you want next is putting mv into this function and it friggin works
-    }
-    updateFunctions.splice(0, 0, updateAlternatingFunction)
-    updateAlternatingFunction()
-
-
     AbstractSyntaxTree = function() {
         let currentNodeBranchingFrom = null
         let functionNameJustSeen = null
         let branchCanComplete = false
-        let glslStuff = {
-            globeProperties: null,
-            main: "",
-            header: ""
-        }
+        let globeProperties = null
+        let functionsNeeded = []
 
         function Node(lexeme, terminal, replaceMostRecent) {
             this.lexeme = lexeme
@@ -93,8 +47,8 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
                 this.expectedNumberOfChildren = 0
             else if (builtInFunctionNames.indexOf(lexeme) !== -1)
                 this.expectedNumberOfChildren = eval(lexeme).length - 1 //-1 because target is last
-            else if (transpiledFunctions[lexeme] !== undefined) {
-                this.expectedNumberOfChildren = transpiledFunctions[lexeme].length - 1
+            else if (functionsWithIr[lexeme] !== undefined) {
+                this.expectedNumberOfChildren = functionsWithIr[lexeme].length - 1
             }
             else
                 console.error("unrecognized function: ", lexeme)
@@ -117,7 +71,7 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
             delete this.expectedNumberOfChildren
         }
 
-        let topNode = new Node("assign", false)
+        let topNode = new Node("assign", false) //probably doesn't need to be this
         currentNodeBranchingFrom = topNode
 
         function adjustToOpenBracket(functionLexeme) {
@@ -132,10 +86,9 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
             if (token === "comment" || token === " " || token === "\n")
                 return false
 
-            let isFunction = builtInFunctionNames.indexOf(lexeme) !== -1 || transpiledFunctions[lexeme] !== undefined
+            let isFunction = builtInFunctionNames.indexOf(lexeme) !== -1 || functionsWithIr[lexeme] !== undefined
             let isOpenBracket = lexeme === "("
             let isTerminalColoredName = token === "coloredName" && !isFunction
-            //ok but it's NOT an mv, it's a globe! that changes everything!
 
             if (!isOpenBracket && functionNameJustSeen !== null)
                 logErrorIfNew("function " + functionNameJustSeen + " must be followed by (, instead got " + lexeme)
@@ -151,8 +104,8 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
                     if (nameDrawers[0] === pictogramDrawers.mv[0])
                         new Node('getNameDrawerProperties("' + lexeme + '").value', true)
 
-                    if (nameDrawers[0] === pictogramDrawers.globe) { //that's a type thing, it's an array
-                        glslStuff.globeProperties = getNameDrawerProperties(lexeme)
+                    if (nameDrawers[0] === pictogramDrawers.globe) {
+                        globeProperties = getNameDrawerProperties(lexeme)
                         new Node('pointOnGlobe', true)
                     }
                 }
@@ -167,8 +120,8 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
                 else if (isFunction ) {
                     functionNameJustSeen = lexeme
 
-                    if (transpiledFunctions[functionNameJustSeen] !== undefined)
-                        glslStuff.header += transpiledFunctions[functionNameJustSeen].glslString
+                    if (functionsWithIr[functionNameJustSeen] !== undefined)
+                        functionsNeeded.push(functionNameJustSeen)
                 }
             }
             else if (branchCanComplete) {
@@ -188,9 +141,7 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
         }
 
         //since the top node is a "" function it should be ok if there's just a single mv
-        function parseFunctionNode(node,glslInsteadOfJs) {
-            let lowestUnusedMv = 0
-            
+        function parseFunctionNode(node, numTmvsUsed) {
             let finalLine = node.lexeme + "("
             let computationLines = ""
 
@@ -198,24 +149,12 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
                 if (child.children.length === 0)
                     finalLine += child.lexeme + ","
                 else {
-                    // You need to have shit between { }, otherwise they'll clash
-                    let mvString = ``
-                    if(glslInsteadOfJs) {
-                        mvString = 'numberedMvs' + lowestUnusedMv
-                        computationLines = `float ` + mvString + `[16];\n` + computationLines
-                    }
-                    else {
-                        while (numberedMvs.length <= lowestUnusedMv)
-                            numberedMvs.push(new Float32Array(16))
-                        mvString = 'numberedMvs[' + lowestUnusedMv + ']'
-                    }
-                    ++lowestUnusedMv
+                    let transpilationMvName = 'tMv' + numTmvsUsed.value
+                    ++numTmvsUsed.value
 
-                    computationLines += parseFunctionNode(child) + mvString + ');\n'
-                    finalLine += mvString + ','
+                    computationLines += parseFunctionNode(child,numTmvsUsed) + transpilationMvName + ');\n'
+                    finalLine += transpilationMvName + ','
                 }
-
-                //should be ok to reuse the numbered mvs across lines, you're not doing anything with them after
             })
 
             while(node.children.length)
@@ -224,29 +163,47 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
             return computationLines + finalLine
         }
 
-        this.parseAndAssign = function(nameToAssignTo) {
+        this.parseAndAssign = function(nameToAssignTo, lineNumber) {
             if (!branchCanComplete)
                 logErrorIfNew("unexpected line end")
-            
-            if (glslStuff.globeProperties !== null) {
-                assignTypeAndData(nameToAssignTo, pictogramDrawers.globeProjection, {
-                    globeProperties: glslStuff.globeProperties,
-                    main: parseFunctionNode(topNode,true) + `outputMv);`,
-                    header: glslStuff.header
+
+            let numTmvsUsed = { value: 0 }
+            let body = parseFunctionNode(topNode, numTmvsUsed)
+
+            if (globeProperties !== null) {
+                body += `outputMv);`
+
+                body = addTmvs(body, true, numTmvsUsed.value)
+
+                let header = ""
+                functionsNeeded.forEach((name)=>{
+                    header += functionsWithIr[name].glslString + "\n"
                 })
 
-                glslStuff.globeProperties = null
-                glslStuff.main = ""
-                glslStuff.header = ""
+                // debugger
+
+                assignTypeAndData(nameToAssignTo, pictogramDrawers.globeProjection, {
+                    globeProperties, header, body
+                })
             }
             else 
             {
-                assignMv(nameToAssignTo) //creates a new array, which kinda sucks. Probably better passing in the array here
-                let parsed = parseFunctionNode(topNode) + `getNameDrawerProperties("` + nameToAssignTo + `").value);`
-                // log(parsed)
-                // debugger
-                eval(parsed) //easy because it does something to variables in scope here
+                body += `getNameDrawerProperties("` + nameToAssignTo + `").value);`
+
+                body = addTmvs(body, false, numTmvsUsed.value)
+
+                let header = ""
+                functionsNeeded.forEach((name)=>{
+                    header += functionsWithIr[name].jsString + "\n"
+                })
+
+                assignMv(nameToAssignTo)
+                
+                eval(header + body) //easy because it does something to variables in scope here
             }
+
+            globeProperties = null
+            functionsNeeded.length = 0
 
             branchCanComplete = false
             currentNodeBranchingFrom = topNode
@@ -254,48 +211,91 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
         }
     }
 
-    /*
-        Ok so the arguments are just a1, a2, etc
-        The namedMvs that get given to them, well, yes that happens, but that's "just what you see"
-    */
-    if(0)
-    {
-        let jsArgumentsString = `( `
-        let glslArgumentsString = `( `
-        function addArgument(argumentName) {
-            glslArgumentsString += (i === 0 ? `` : `, `) + `in float ` + `target`
-            jsArgumentsString += (i === 0 ? `` : `, `) + `target`
+    function TranspiledFunction(name) {
+        this.irString = ""
+        this.glslString = ""
+        this.jsString = ""
+
+        this.length = -1
+        this.numTmvsUsed = -1
+        
+        this.name = name
+        functionsWithIr[name] = this
+    }
+    TranspiledFunction.prototype.setIr = function(numArgumentsIncludingTarget,numTmvsUsed,newIr) {
+        this.numTmvsUsed = numTmvsUsed
+        this.length = numArgumentsIncludingTarget
+        this.irString = newIr
+        this.glslString = irToExecutable( true, this.name)
+        this.jsString   = irToExecutable(false, this.name)
+    }
+    new TranspiledFunction("alternatingProj")
+    let updateAlternatingFunction = () => {
+        if (Math.floor(frameCount / 50) % 2)
+            functionsWithIr["alternatingProj"].setIr(2,0,`assign(arg0,target);`)
+        else {
+            functionsWithIr["alternatingProj"].setIr(2,2,
+            `
+            plane(tMv0,1.,0.,0.,0.);
+
+            gProduct(tMv0,arg0,tMv1);
+            gProduct(tMv1,tMv0,target);
+            `)
         }
 
-        for (let i = 0; i < numArguments; ++i) {
-            glslArgumentsString += `in float ` + `argument` + i + `[16],`
-            jsArgumentsString += `argument` + i + `,`
+        // `
+        // assign(pointOnGlobe,outputMv);
+        // outputMv[12] -= .09;
+        // `
+        // `
+        // point(outputMv,
+        // 	lon * cos(lat) * .3,
+        // 	lat * .3,
+        // 	0.,1.);
+        // `
+    }
+    updateFunctions.splice(0, 0, updateAlternatingFunction)
+    updateAlternatingFunction()
+
+    function addTmvs(body,glslInsteadOfJs, numTmvsUsed) {
+        let ret = body
+        if (glslInsteadOfJs) {
+            for (let i = 0; i < numTmvsUsed; ++i)
+                ret = `float tMv` + i.toString() + `[16];\n` + ret
         }
-        glslArgumentsString += `out float target[16]`
-        jsArgumentsString += `target`
+        else {
+            for (let i = 0; i < numTmvsUsed; ++i)
+                ret = `let tMv` + i.toString() + ` = new Float32Array(16);\n` + ret + `\ndelete tMv` + i.toString() + `;`
+        }
 
-        lines.forEach((line, lineIndex) => {
+        return ret
+    }
 
-            let intermediateRepresentation = transpileLine(line);
-            jsBodyString +=
-                `const variable` + lineIndex + ` = new Float32Array(16); ` + + `\n` +
-                transpileLine(lexemes)
+    function irToExecutable(glslInsteadOfJs, functionName) {
+        let f = functionsWithIr[functionName]
 
-            glslBodyString +=
-                `const float variable` + lineIndex + `[16]; ` + + `\n` +
-                + `namedMvs[` + name + `]`
-        })
-        let body = something +
-            `return ` + somethingElse + `\n}`
+        let body = addTmvs(f.irString, glslInsteadOfJs,f.numTmvsUsed)
 
-        let jsString = `function ` + functionName + jsArgumentString + `) {\n` +
-            body +
-            `return variable` + (lines.length - 1).toString() + `;`
-            `\n}`
-        let glslString = `void ` + functionName + glslArgumentString + `) {\n` +
-            body +
-            `return ` +
-            `\n}`
+        let isFunction = true
+        if(!isFunction)
+            return body
+        
+        let numNonTargetArguments = f.length - 1
+        let signature = ""
+        if (glslInsteadOfJs) {
+            signature += `void ` + functionName + `(`
+            for (let i = 0; i < numNonTargetArguments; ++i)
+                signature += `in float arg` + i.toString() + `[16],`
+            signature += `out float target[16])`
+        }
+        else {
+            signature += `function ` + functionName + `(`
+            for (let i = 0; i < numNonTargetArguments; ++i)
+                signature += `arg` + i.toString() + `,`
+            signature += `target)`
+        }
+
+        return signature + "\n{" + body + "\n}"
     }
 }
 

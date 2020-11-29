@@ -16,7 +16,7 @@ const IDENTIFIER_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVW
 //---------Varying state
 
 const coloredNamesAlphabetically = Array(63)  //7 choose 1 + 7 choose 2 + 7 choose 3
-const transpiledFunctions = {}
+const functionsWithIr = {}
 
 const pictogramDrawers = {}
 
@@ -37,9 +37,10 @@ r gp
 // b o
 bgo p
 
-y = reverse(bgo)
+y = reverse(bgo) //point ref. in origin?
 ry = bgo`+JOIN_SYMBOL+`p
 
+b = alternatingProj(bgo)
 by = alternatingProj(pg)
 // by = alternatingProj(reflect(pg))
 

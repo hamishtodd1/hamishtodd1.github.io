@@ -60,7 +60,7 @@ async function initGlobeProjectionPictograms() {
             }
         }
         this.currentHeader = ""
-        this.currentMain
+        this.currentBody
         this.pictogramProgram = new PictogramProgram(gaShaderString + vsStart + vsEnd, fs)
 
         this.usedThisFrame = true
@@ -70,7 +70,7 @@ async function initGlobeProjectionPictograms() {
     function predrawAndReturnProgram(nameProperties) {
         let ourPpWrapper = ppWrappers.find((ppWrapper) => 
             ppWrapper.currentHeader === nameProperties.header &&
-            ppWrapper.currentMain === nameProperties.main ) //bit costly. Maybe turn the string into a single number or something?
+            ppWrapper.currentBody === nameProperties.body ) //bit costly. Maybe turn the string into a single number or something?
         if (ourPpWrapper === undefined) {
             ourPpWrapper = ppWrappers.find((ppWrapper) => {
                 return ppWrapper.usedLastFrame === false
@@ -78,14 +78,16 @@ async function initGlobeProjectionPictograms() {
             if(ourPpWrapper === undefined)
                 ourPpWrapper = new PpWrapper()
                 
-            let vsSource = vertexShaderToPictogramVertexShader(gaShaderString + nameProperties.header + vsStart + nameProperties.main + vsEnd)
+            // log(nameProperties.body)
+            // debugger
+            let vsSource = vertexShaderToPictogramVertexShader(gaShaderString + nameProperties.header + vsStart + nameProperties.body + vsEnd)
             ourPpWrapper.pictogramProgram.changeShader(gl.VERTEX_SHADER, vsSource)
 
             ourPpWrapper.pictogramProgram.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
             ourPpWrapper.pictogramProgram.locateUniform("sampler")
 
             ourPpWrapper.currentHeader = nameProperties.header
-            ourPpWrapper.currentMain = nameProperties.main
+            ourPpWrapper.currentBody = nameProperties.body
         }
         ourPpWrapper.usedThisFrame = true
 

@@ -170,7 +170,11 @@ function initTokenizer(displayableCharacters) {
         namesNeedingToBeCleared.length = 0
         //then have all the things that are currently in the separate files done here
 
+        let lineNumber = 0
         forEachToken((tokenIndex, tokenStart, tokenEnd, token, lexeme) => {
+            if(token === "\n")
+                ++lineNumber
+
             if (token === "comment" || token === " " )
                 return false
             else  if (lexeme === "def") {
@@ -181,7 +185,7 @@ function initTokenizer(displayableCharacters) {
             }
             else if ((token === "coloredName" || token === "uncoloredName") 
                 && getNameDrawerProperties(lexeme) === null 
-                && transpiledFunctions[lexeme] === undefined
+                && functionsWithIr[lexeme] === undefined
                 && builtInFunctionNames.indexOf(lexeme) === -1 )
             {
                 if (nameToAssignTo !== null || unusedNameJustSeen !== null) {
@@ -223,7 +227,7 @@ function initTokenizer(displayableCharacters) {
                 if (token !== "\n")
                     lineTree.addLexeme(token,lexeme)
                 else {
-                    lineTree.parseAndAssign(nameToAssignTo)
+                    lineTree.parseAndAssign(nameToAssignTo,lineNumber)
                     
                     namesNeedingToBeCleared.push(nameToAssignTo)
                     nameToAssignTo = null
