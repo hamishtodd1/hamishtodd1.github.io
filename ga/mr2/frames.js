@@ -9,11 +9,10 @@ function initFrames() {
     }
 
     let indices = []
-    let oneSideIndices = [0,1,2,  1,3,2]
+    let oneSideIndices = [0,2,1,  1,2,3]
     for(let i = 0; i < 4; ++i) {
-        for(let j = 0; j < oneSideIndices.length; ++j) {
+        for(let j = 0; j < oneSideIndices.length; ++j)
             indices.push((i * 2 + oneSideIndices[j])%8)
-        }
     }
 
     let untriangledVertsBuffer = Array()
@@ -122,5 +121,5 @@ function initFrames() {
             gl.drawArrays(gl.TRIANGLES, 0, vertsBuffer.length / 4);
         }
         numToDraw = 0
-    },"end")
+    })
 }

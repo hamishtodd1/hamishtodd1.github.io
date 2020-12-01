@@ -39,7 +39,7 @@ function initTokenizer(displayableCharacters) {
     initTranspiler(infixOperators, infixSymbols, builtInFunctionNames)
     let lineTree = new AbstractSyntaxTree()
 
-    // initErrorHighlight()
+    initErrorHighlight()
     initPadDisplay()
 
     const namesNeedingToBeCleared = []
@@ -117,10 +117,8 @@ function initTokenizer(displayableCharacters) {
                     tokens.push("coloredName")
                 }
             }
-            else {
-                console.error("don't know what to do with this character: ", tokenStartCharacter)
-                ++positionInString
-            }
+            else
+                handleError(tokenIndex, "don't know what to do with this character: ", tokenStartCharacter)
         }
 
         forEachToken = (func) => {
@@ -153,6 +151,8 @@ function initTokenizer(displayableCharacters) {
 
         let unusedNameJustSeen = null
 
+        let evaluateLine = true
+
         let nameToAssignTo = null
 
         let nextNameIsFunction = false
@@ -172,14 +172,22 @@ function initTokenizer(displayableCharacters) {
 
         let lineNumber = 0
         forEachToken((tokenIndex, tokenStart, tokenEnd, token, lexeme) => {
-            if(token === "\n")
+            if(token === "\n") {
                 ++lineNumber
+
+                evaluateLine = true
+
+                nameToAssignTo = null
+                unusedNameJustSeen = null
+            }
+            else if(!evaluateLine)
+                return
 
             if (token === "comment" || token === " " )
                 return false
             else  if (lexeme === "def") {
                 if (nextNameIsFunction || functionNameToAssignTo !== null || nameToAssignTo !== null)
-                    console.error("misplaced lambda")
+                    handleError(tokenIndex, "misplaced lambda")
 
                 nextNameIsFunction = true
             }
@@ -188,28 +196,24 @@ function initTokenizer(displayableCharacters) {
                 && functionsWithIr[lexeme] === undefined
                 && builtInFunctionNames.indexOf(lexeme) === -1 )
             {
-                if (nameToAssignTo !== null || unusedNameJustSeen !== null) {
-                    console.error("misplaced new name: ", lexeme)
-                    debugger
-                }
+                if (nameToAssignTo !== null || unusedNameJustSeen !== null)
+                    handleError(tokenIndex, "misplaced new name: " + lexeme)
                     
                 unusedNameJustSeen = lexeme
             }
             else if (lexeme === "=") {
-                if (unusedNameJustSeen === null || nameToAssignTo !== null) {
-                    console.error("misplaced =")
-                    debugger
-                }
+                if (unusedNameJustSeen === null || nameToAssignTo !== null)
+                    handleError(tokenIndex, "misplaced =")
 
                 if (nextNameIsFunction) {
                     if (functionNameToAssignTo !== null)
-                        console.error("misplaced new function name: ",lexeme)
+                        handleError(tokenIndex, "misplaced new function name: " + lexeme)
                     functionNameToAssignTo = unusedNameJustSeen
                     nextNameIsFunction = false
                 }
                 else {
                     if (nameToAssignTo !== null)
-                        console.error("misplaced new variable name: ",lexeme)
+                        handleError(tokenIndex, "misplaced new variable name: " + lexeme)
                     nameToAssignTo = unusedNameJustSeen
                 }
 
@@ -224,10 +228,14 @@ function initTokenizer(displayableCharacters) {
             //we might like it to be the case that eg "t Proj tDagger" gives you proj rotated by t. But eh
             
             else if (nameToAssignTo !== null) {
-                if (token !== "\n")
-                    lineTree.addLexeme(token,lexeme)
+                // log(lexeme)
+                if (token !== "\n"){
+                    let result = lineTree.addLexeme(tokenIndex, token, lexeme)
+                    if (result === false)
+                        evaluateLine = false
+                }
                 else {
-                    lineTree.parseAndAssign(nameToAssignTo,lineNumber)
+                    let result = lineTree.parseAndAssign(tokenIndex, nameToAssignTo, lineNumber)
                     
                     namesNeedingToBeCleared.push(nameToAssignTo)
                     nameToAssignTo = null
@@ -238,43 +246,14 @@ function initTokenizer(displayableCharacters) {
                     }
                 }
             }
-            else if(functionNameToAssignTo !== null) {
-                if (lexeme === "}") {
-                    //time to collect up those lines, and round off
-                    if (functionNameToAssignTo === null)
-                        console.error("misplaced }")
-
-                    functionNameToAssignTo = null
-                }
+            else if (functionNameToAssignTo !== null && lexeme === "}" && nameToAssignTo === null) {
+                //time to collect up those lines and round off
+                functionNameToAssignTo = null
             }
-            
-            
-                
-
-
-
-                //if you want to plumb the result of one visualized function into another, you need to... write it to a texture?
-
-            // switch (token) {
-            //     case "infixSymbol":
-            //         if (lexeme === "=") {
-            //             if (nameToAssignTo !== null)
-            //         }
-
-            //     case "identifier":
-            //         if (intermediateRepresentations[lexeme] !== undefined) {
-
-            //         }
-            //         break
-            // })
         })
 
         drawTokens()
+
+        errorHighlightTokenIndices.length = 0
     }
-
-    // function genericAssign(expectedPictogramDrawer) {
-    //     if (expectedPictogramDrawer === )
-
-    //     //what kinds of things do you assign to?
-    // }
 }

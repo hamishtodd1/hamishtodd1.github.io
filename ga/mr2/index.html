@@ -1,52 +1,39 @@
 <!--
 	TODO Bugs
 		Fucking which way is z
-		display windows go on top
-		colored frames
 
-	TODO for progress report
-		
+	Maybe you do want helmet / VR?
+		Pros:
+			Can see and touch the things in front of you
+			Specify points on the globes in 3D
+		Cons: Keyboard is useful for:
+			changing the name of a globe
+	Maybe... the lines of code create an animation, step through it using your cursor
+		Or, you have certain lines where you display what's in each frame of the animation, then ctrl up and down to get between them
+		If you know how the value was derived, you know what tweening animation to have? Professionalism is all just tweening
+		Well you want to be able to make things gesturally, Bret style, right? Animations simulate that
+
+	Needed to make the maps / geometric interpretation
+		+, cos, sin, exp
+		Whenever you see "sin lat", that's projection onto line
+		Extract lat and lon
+		Slice lat and lon
+		Unwrapping to
+		Geometrically interpret the functions (stare at maps.js):
+			Slicing system that allows you to see a sliced-open globe
+				Just a different uvBuffer, gl.LINE
+			A lot of it is about projection. Sending projection point to infinity
 
 
-	Progress report, Nov 2020
-	I feel good about this project. The pictograms thing is working well. Comic-book inbetweening
-	I like how they make the editor fun to look at, and I like how intuitive it feels to change something and see all of its results
-	-functions / things that become shader programs
-		globes
-		globe projections as a separate thing
-	-rewritten in webgl, no three.js. Compilation target is javascript and glsl so that's the way it has to be
-	-No output column. Automated naming though
-	-don't have writing your own functions yet. When that exists, I might be able to do
-	-more general approach to pictograms. No longer one algebra, now it's "whatever I need"
-		I got super into the idea of trying to enumerate every visualizable function
-		That's silly, that's trying to skip ahead, that's premature generalization and that's bad in code so it's bad in design too
-	-picked maps as a nice example
-		You need a customer to make things concrete, otherwise you're just scrwng around making presumptions about what other people MIGHT like
-		See also direct2D, UML diagrams, my master's project, the first year of my phd, entity component systems, "solutions looking for problem"
-		You can talk to andy hall about this as well
-		You define your own algebras, that's the main innovation of GA and of object oriented programming
-		projective geometric algebra instead of vanilla geometric algebra
-		Currently you have to make new pictograms in javascript, so for the video I'll be kind of faking it
-		But eventually you'll be able to bootstrap your own ones inside this editor
+	Filming setup
+		Semi transparent background to pad
+		Want nice light and camera
+		Go from relevant line to relevant line. Sounds like you're cutting stuff out though
+		Don't necessarily need
 
-	Interested parties
-		Language people: Alan, Meurig, Martin, futureOfCoding, Yoshiki, Cynthia Solomon, Andy Matuschak, Katherine Ye, Glench, Ken Perlin, Josh Horowitz
-		GAists: bivector discord, Cam folks, Charles Gunn, Steven Der kenick, Pierre Philipp Denchant, Jonathan Cameron, David Hestenes, Paul Simeon
-		Graphics/gamedev: Keenan Crane, Albert Chern, Fabrice, Haxiomic, Dan Holden, Daniel Piker, Ian and Norgg, Media Molecule, Chris Deleon, Senthuran
-		Math/physicist: Ivan and Nina, Florian, Eric stansifer, Matt Hare
-		Misc: London Rationalish, 
-		Youtubers: Code parade, sebastian thingy, inigo quilez, Ben Eater, Coding Train guy, Grant sanderson
-
-	TODO for world map
-		Mapping from angles to texture coords, probably based in the thing
-		Slicing system that allows you to see a sliced-open globe
-		mappings/arrays
-		Scalars, certainly ones that can be seen as angles
-		+, cos, sin, exp, in pad.js
-		A lot of it is about projection. Sending projection point to infinity
-		
 	Hey, could have "cartesian product" symbol, mathematicians would like you
 		Or tensor product
+		f x g = {(x,y) : there exists A,B s.t. f(A), g(B) }
 		Or, ordinary javascript arrays
 		But this isn't about arrays it's about functions
 
@@ -63,15 +50,22 @@
 
 	
 
-
+	Interested parties
+		Language people: Alan, Meurig, Martin, futureOfCoding, Yoshiki, Cynthia Solomon, Andy Matuschak, Katherine Ye, Glench, Ken Perlin, Josh Horowitz, 
+		GAists: bivector discord, Cam folks, Charles Gunn, Steven Der kenick, Pierre Philipp Denchant, Jonathan Cameron, David Hestenes, Paul Simeon
+		Graphics/gamedev: Keenan Crane, Albert Chern, Fabrice, Haxiomic, Dan Holden, Daniel Piker, Ian and Norgg, Media Molecule, Chris Deleon, Senthuran
+		Math/physicist: Ivan and Nina, Florian, Eric stansifer, Matt Hare
+		Misc: London Rationalish, 
+		Youtubers: Code parade, sebastian lague, inigo quilez, Ben Eater, Coding Train guy, Grant sanderson
 
 	After
 		Videos about projective geometry
-		"A different way to visualize calculus"
+		Oi, "demonstrations" / footage. Classical mechanics. But better to wait for built in AR?
 		Demo of features of this thing
 		omicron reduction
+		"A different way to visualize calculus" - there's a lot of fun to be had with weird algebras (SR, QC) before you get to this
 		Draw curve, get curve as usable thing. Killer app!
-		Transpiling to javascript
+		Convert to single visualization (for Brilliant)
 		If you're serious about people making clothes, think about makeup tutorials
 		transpile to glsl first and foremost. Whole game runs in every shader woo!
 		Eventually: VR game with conformal transformations. To help build folks' intuition? No! Because they're fun!

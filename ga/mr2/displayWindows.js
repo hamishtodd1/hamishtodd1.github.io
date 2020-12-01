@@ -15,6 +15,7 @@ function initDisplayWindows() {
                 gl_Position = vertA;
                 gl_Position.xy *= `+ toGlslFloatLiteral(dimension) + `;
                 gl_Position.xy += screenPosition;
+                gl_Position.z = -3.; //or 3.
             `
             + cameraAndFrameCountShaderStuff.footer
         const fsSource = 
@@ -24,22 +25,10 @@ function initDisplayWindows() {
             }
             `
 
-        const program = new Program(vsSource, fsSource)
+        var program = new Program(vsSource, fsSource)
         program.addVertexAttribute("vert", quadBuffer, 4, true)
         cameraAndFrameCountShaderStuff.locateUniforms(program)
         program.locateUniform("screenPosition")
-
-        function drawBackground(x, y) {
-            gl.useProgram(program.glProgram);
-
-            cameraAndFrameCountShaderStuff.transfer(program)
-
-            program.prepareVertexAttribute("vert", quadBuffer)
-
-            gl.uniform2f(program.getUniformLocation("screenPosition"), x, y);
-
-            gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4)
-        }
     }
 
     function DisplayWindow() {
@@ -54,7 +43,11 @@ function initDisplayWindows() {
     }
     Object.assign( DisplayWindow.prototype, {
         render: function() {
-            drawBackground(this.position.x, this.position.y)
+            gl.useProgram(program.glProgram)
+            cameraAndFrameCountShaderStuff.transfer(program)
+            program.prepareVertexAttribute("vert", quadBuffer)
+            gl.uniform2f(program.getUniformLocation("screenPosition"), this.position.x, this.position.y);
+            gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4)
 
             for (let i = 0; i < this.numMvs; ++i)
                 addMvToRender(this.mvNames[i], this.position.x, this.position.y, dimension / 2., false)

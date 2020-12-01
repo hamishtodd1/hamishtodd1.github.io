@@ -1,31 +1,19 @@
 /*
-    Below is based on the naieve assumption of
-
     function syntax
         python indents, last line is return value
-
-    Need to use the built in capabilities, don't be manipulating a string every time you call a function (just when you define it)
-    Yeah, transpile to a proper glsl/javascript function declaration
-        So different signatures (all "in" for glsl)
-
-    You get the function as a string
-    It has its leaves
-    the function arguments need to be put in those leaves, somehow
-
-    When you type the name of an mv, it becomes a number in the backgroundString? Or something?
-
+        arrow notation
 */
 
-function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
-
-    let loggedErrors = []
-    function logErrorIfNew(newError) {
-        if (loggedErrors.indexOf(newError) === -1) {
-            console.error("transpilation error: \n", newError)
-            loggedErrors.push(newError)
-        }
-        debugger
+let loggedErrors = []
+function handleError(tokenIndex, newError) {
+    errorHighlightTokenIndices.push(tokenIndex)
+    if (loggedErrors.indexOf(newError) === -1) {
+        console.error("transpilation error: \n", newError)
+        loggedErrors.push(newError)
     }
+}
+
+function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
 
     AbstractSyntaxTree = function() {
         let currentNodeBranchingFrom = null
@@ -82,7 +70,7 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
             currentNodeBranchingFrom = new Node(infixLexeme, false, true)
         }
 
-        this.addLexeme = function(token,lexeme) {
+        this.addLexeme = function(tokenIndex,token,lexeme) {
             if (token === "comment" || token === " " || token === "\n")
                 return false
 
@@ -90,8 +78,10 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
             let isOpenBracket = lexeme === "("
             let isTerminalColoredName = token === "coloredName" && !isFunction
 
-            if (!isOpenBracket && functionNameJustSeen !== null)
-                logErrorIfNew("function " + functionNameJustSeen + " must be followed by (, instead got " + lexeme)
+            if (!isOpenBracket && functionNameJustSeen !== null) {
+                handleError(tokenIndex,"function " + functionNameJustSeen + " must be followed by (, instead got " + lexeme)
+                return false
+            }
 
             if (isTerminalColoredName || isFunction || isOpenBracket) {
                 if (branchCanComplete)
@@ -133,11 +123,17 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
                     adjustToInfixNode(infixOperators[lexeme])
                     branchCanComplete = false
                 }
-                else
-                    logErrorIfNew("unexpected symbol " + lexeme)
+                else {
+                    handleError(tokenIndex,"unexpected symbol " + lexeme)
+                    return false
+                }
             }
-            else
-                logErrorIfNew("unexpected symbol before branch end: " + lexeme)
+            else {
+                handleError(tokenIndex,"unexpected symbol before branch end: " + lexeme)
+                return false
+            }
+
+            return true
         }
 
         //since the top node is a "" function it should be ok if there's just a single mv
@@ -163,9 +159,11 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
             return computationLines + finalLine
         }
 
-        this.parseAndAssign = function(nameToAssignTo, lineNumber) {
-            if (!branchCanComplete)
-                logErrorIfNew("unexpected line end")
+        this.parseAndAssign = function(tokenIndex,nameToAssignTo, lineNumber) {
+            if (!branchCanComplete) {
+                handleError(tokenIndex,"unexpected line end")
+                return false
+            }
 
             let numTmvsUsed = { value: 0 }
             let body = parseFunctionNode(topNode, numTmvsUsed)
@@ -208,6 +206,8 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
             branchCanComplete = false
             currentNodeBranchingFrom = topNode
             functionNameJustSeen = null
+
+            return true
         }
     }
 
@@ -229,12 +229,13 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
         this.glslString = irToExecutable( true, this.name)
         this.jsString   = irToExecutable(false, this.name)
     }
-    new TranspiledFunction("alternatingProj")
+    new TranspiledFunction("reflectHorizontally")
     let updateAlternatingFunction = () => {
-        if (Math.floor(frameCount / 50) % 2)
-            functionsWithIr["alternatingProj"].setIr(2,0,`assign(arg0,target);`)
-        else {
-            functionsWithIr["alternatingProj"].setIr(2,2,
+        // if (Math.floor(frameCount / 50) % 2)
+        //     functionsWithIr["reflectHorizontally"].setIr(2,0,`assign(arg0,target);`)
+        // else 
+        {
+            functionsWithIr["reflectHorizontally"].setIr(2,2,
             `
             plane(tMv0,1.,0.,0.,0.);
 
@@ -254,7 +255,7 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
         // 	0.,1.);
         // `
     }
-    updateFunctions.splice(0, 0, updateAlternatingFunction)
+    // updateFunctions.splice(0, 0, updateAlternatingFunction)
     updateAlternatingFunction()
 
     function addTmvs(body,glslInsteadOfJs, numTmvsUsed) {

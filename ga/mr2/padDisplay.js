@@ -21,6 +21,9 @@ function initPadDisplay() {
 
         forEachToken((tokenIndex, tokenStart, tokenEnd, token, lexeme) => {
 
+            if(errorHighlightTokenIndices.indexOf(tokenIndex) !== -1)
+                placeErrorHighlight(drawingPosition)
+
             carat.duringParseFunc(drawingPosition, tokenStart)
 
             switch (token) {

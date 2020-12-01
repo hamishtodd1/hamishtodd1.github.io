@@ -7,6 +7,7 @@
 
     Title (look at the existing ones...)
         How map projections ACTUALLY work
+        Can we use math to make a non-racist map? (this video is mostly not about racism...)
         The actual geometry behind map projections
         Top 10 politically-correct world maps
         Top 10 world maps that avoid being racist
@@ -181,12 +182,17 @@ async function initWorldMap() {
             //     p.y = lat;
             // }
 
-            //Winkel III, pill shape. Might be nice to find an easier one
+            //Winkel III, pill shape. Might be nice to find an easier one. K
             // float lat1 = acos(2./PI);
             // float alpha = acos(cos(lat) * cos(.5*lon));
             // float sincAlpha = sin(alpha) / alpha;
             // p.x = .5 * (lon*cos(lat1) + 2.*cos(lat)*sin(.5*lon) / sincAlpha);
             // p.y = .5 * (lat + sin(lat) / sincAlpha);
+
+            //Simpler: Wagner VI
+            p.x = lon * sqrt(1.-3.*sq(lat/PI))
+
+            //al-biruni
 
             // mecca/Craig retroazimuthal. Needs different mesh
             float osscilating = .5 + .5 * sin(frameCount * .01);

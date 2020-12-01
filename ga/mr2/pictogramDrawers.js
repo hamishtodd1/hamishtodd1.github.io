@@ -79,9 +79,13 @@ function initPictogramDrawers() {
 
                 displayWindows.forEach((dw) => {
                     if (dw.verticalPositionToRenderFrom === screenPositions[i * 2 + 1]) {
+                        gl.disable(gl.DEPTH_TEST);
+
                         gl.uniform1f(program.getUniformLocation("drawingSquareRadius"), dw.dimension * .5)
                         gl.uniform2f(program.getUniformLocation("screenPosition"), dw.position.x, dw.position.y)
                         draw(nameProperties,names[i])
+
+                        gl.enable(gl.DEPTH_TEST);
                     }
                 })
             }

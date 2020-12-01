@@ -23,6 +23,9 @@ function initRenderFunctions() {
         gl.depthFunc(gl.LEQUAL);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+        gl.enable(gl.CULL_FACE);
+        gl.cullFace(gl.BACK);
+
         let depthTestEnabled = true
         for(let i = 0; i < renderFunctions.length; ++i) {
             if(orders[i] === "end" && depthTestEnabled)

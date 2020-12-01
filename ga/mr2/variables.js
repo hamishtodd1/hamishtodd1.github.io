@@ -28,21 +28,27 @@ const carat = {
 
 const displayWindows = []
 
+const errorHighlightTokenIndices = []
+
 const LAMBDA_SYMBOL = String.fromCharCode("955") //you CAN write "function", but lots of kids don't know "function". In python it's "def"
 const JOIN_SYMBOL = String.fromCharCode("8744")
 
 let backgroundString = 
-`bg w
-r gp
-// b o
+`//variables / literals
+bg
+w
+r
+gp
 bgo p
 
-y = reverse(bgo) //point ref. in origin?
+//functions
+y = reverse(bgo)
 ry = bgo`+JOIN_SYMBOL+`p
 
-b = alternatingProj(bgo)
-by = alternatingProj(pg)
-// by = alternatingProj(reflect(pg))
+//function compiled to js...
+b = reflectHorizontally(bgo)
+//function compiled to glsl+webgl...
+by = reflectHorizontally(go)
 
 
 

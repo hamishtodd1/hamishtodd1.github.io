@@ -56,7 +56,7 @@ function initAnglePictograms() {
             gl.uniform1f(pd.program.getUniformLocation("fullAngle"), angle)
             gl.drawArrays(gl.TRIANGLES, 0, vertsBuffer.length / 4)
         })
-    }, "end")
+    })
 }
 
 function initMvPictograms() {
@@ -140,7 +140,7 @@ function initMvPictograms() {
                 gl.uniform4f(pointPictogramDrawer.program.getUniformLocation("visualPosition"), pointX(mv), pointY(mv), pointZ(mv), pointW(mv))
                 gl.drawArrays(gl.TRIANGLES, 0, vertBuffer.length / 4)
             })
-        }, "end")
+        })
     }
 
     //line, both real and ideal apparently?
@@ -246,7 +246,7 @@ function initMvPictograms() {
             // })
 
             //and you do the point here too
-        }, "end")
+        })
     }
 
     //plane
