@@ -141,5 +141,5 @@ function pictogramTest()
             gl.uniform1f(pictogramDrawer.program.getUniformLocation("g"), nameProperties.value)
             gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4)
         })
-    }, "end" )
+    })
 }

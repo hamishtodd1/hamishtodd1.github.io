@@ -55,11 +55,13 @@ function initAlgebra()
         mv1 = new Float32Array(16)
         mv2 = new Float32Array(16)
         mv3 = new Float32Array(16)
+        mv4 = new Float32Array(16)
         appendToGaShaderString( `
             float mv0[16];
             float mv1[16];
             float mv2[16];
-            float mv3[16];` )
+            float mv3[16];
+            float mv4[16];` )
             
         appendToGaShaderString(replaceSignature(
             "void gProduct(float a[16],float b[16],out float target[16])",
@@ -186,6 +188,45 @@ function initAlgebra()
         ))
 
         appendToGaShaderString(replaceSignature(
+            "void sandwichBab(in float a[16],in float b[16],out float target[16])",
+            sandwichBab = (a, b, target) =>
+            {
+                assign(b, mv1);
+                reverse(mv1, mv2);
+                
+                gProduct(b, a, mv0);
+                gProduct(mv0, mv2, target);
+            }
+        ))
+
+        appendToGaShaderString(replaceSignature(
+            "void dual( float mv[16], out float target[16])",
+            dual = (mv, target) =>
+            {
+                target[ 0] =  mv[15];
+                
+                target[ 1] =  mv[14];
+                target[ 2] =  mv[13];
+                target[ 3] =  mv[12];
+                target[ 4] =  mv[11];
+
+                target[ 5] =  mv[10];
+                target[ 6] =  mv[ 9];
+                target[ 7] =  mv[ 8];
+                target[ 8] =  mv[ 7];
+                target[ 9] =  mv[ 6];
+                target[10] =  mv[ 5];
+
+                target[11] =  mv[ 4];
+                target[12] =  mv[ 3];
+                target[13] =  mv[ 2];
+                target[14] =  mv[ 1];
+
+                target[15] =  mv[ 0];
+            }
+        ))
+
+        appendToGaShaderString(replaceSignature(
             "void gAdd(float a[16], float b[16], out float target[16])",
             gAdd = (a,b,target) =>
             {
@@ -236,12 +277,6 @@ function initAlgebra()
             wNormalizePoint(p2)
             gSub(p1,p2,mv0)
             return Math.sqrt(sq(pointX(mv0)) + sq(pointY(mv0)) + sq(pointZ(mv0)) )
-        }
-
-        dual = (mv,target) => {
-            for(let i = 0; i < 16; ++i)
-                target[15 - i] = mv[i]
-            return target
         }
 
         appendToGaShaderString(replaceSignature(
@@ -321,15 +356,8 @@ function initAlgebra()
         lineRealNorm = (mv) => { return Math.sqrt(sq(realLineX(mv)) + sq(realLineY(mv)) + sq(realLineZ(mv)))}
         lineIdealNorm = (mv) => { return Math.sqrt(sq(idealLineX(mv)) + sq(idealLineY(mv)) + sq(idealLineZ(mv)))}
         
-        mvSandwich = (a,b,target) => {
-            gProduct( b, a, mv0);
-            assign(b,mv1)
-            reverse(mv1,mv2);
-            gProduct(mv0, mv2, target);
-        }
-
         lineNormalize = (mv) => {
-            let inverseLength = 1. / Math.sqrt(sq(realLineX(mv)) + sq(realLineY(mv)) + sq(realLineZ(mv)))
+            let inverseLength = 1. / lineRealNorm(mv)
             realLineX(mv, realLineX(mv) * inverseLength)
             realLineY(mv, realLineY(mv) * inverseLength)
             realLineZ(mv, realLineZ(mv) * inverseLength)
@@ -341,7 +369,6 @@ function initAlgebra()
 
     // Planes
     {
-        plane = (mv, x, y, z, w) => {zeroMv(mv); mv[4] = z; mv[3] = y; mv[2] = x; mv[1] = w;}
         appendToGaShaderString(replaceSignature(
             "void plane(inout float mv[16], float x, float y, float z, float w )",
             plane = (mv,x,y,z,w) =>
@@ -390,8 +417,8 @@ function initAlgebra()
         ))
 
         appendToGaShaderString(replaceSignature(
-            "void mvToVec4(float mv[16], inout vec4 p)",
-            mvToVec4 = (mv,p) =>
+            "void mvToPoint(float mv[16], inout vec4 p)",
+            mvToPoint = (mv,p) =>
             {
                 p[0] = mv[13];
                 p[1] = mv[12];

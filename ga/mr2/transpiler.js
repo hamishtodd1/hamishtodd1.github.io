@@ -4,16 +4,16 @@
         arrow notation
 */
 
-let loggedErrors = []
-function handleError(tokenIndex, newError) {
-    errorHighlightTokenIndices.push(tokenIndex)
-    if (loggedErrors.indexOf(newError) === -1) {
-        console.error("transpilation error: \n", newError)
-        loggedErrors.push(newError)
-    }
-}
+function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) {
 
-function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
+    let loggedErrors = []
+    handleError = function(tokenIndex, newError) {
+        errorHighlightTokenIndices.push(tokenIndex)
+        if (loggedErrors.indexOf(newError) === -1) {
+            console.error("transpilation error: \n", newError)
+            loggedErrors.push(newError)
+        }
+    }
 
     AbstractSyntaxTree = function() {
         let currentNodeBranchingFrom = null
@@ -27,10 +27,6 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
 
             this.children = []
 
-            this.parent = currentNodeBranchingFrom
-            if (this.parent !== null)
-                this.parent.addChild(this, replaceMostRecent)
-
             if (terminal)
                 this.expectedNumberOfChildren = 0
             else if (builtInFunctionNames.indexOf(lexeme) !== -1)
@@ -40,6 +36,11 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
             }
             else
                 console.error("unrecognized function: ", lexeme)
+
+            if (currentNodeBranchingFrom !== null)
+                currentNodeBranchingFrom.addChild(this, replaceMostRecent)
+            else
+                this.parent = null
         }
         Node.prototype.addChild = function (child, replaceMostRecent) {
             if (!replaceMostRecent)
@@ -49,6 +50,7 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
                 let oldChild = this.children.pop()
                 this.children.push(child)
                 child.addChild(oldChild, false)
+                currentNodeBranchingFrom = child
             }
             child.parent = this
         }
@@ -66,8 +68,8 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
             branchCanComplete = false
             currentNodeBranchingFrom = new Node(functionLexeme, false)
         }
-        function adjustToInfixNode(infixLexeme) {
-            currentNodeBranchingFrom = new Node(infixLexeme, false, true)
+        function injectNodeWithCurrentAsChild(infixLexeme) {
+            new Node(infixLexeme, false, true)
         }
 
         this.addLexeme = function(tokenIndex,token,lexeme) {
@@ -85,7 +87,7 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
 
             if (isTerminalColoredName || isFunction || isOpenBracket) {
                 if (branchCanComplete)
-                    adjustToInfixNode("gProduct")
+                    injectNodeWithCurrentAsChild("gProduct")
 
                 if (isTerminalColoredName) {
                     branchCanComplete = true
@@ -119,10 +121,12 @@ function initTranspiler(infixOperators, infixSymbols, builtInFunctionNames) {
                     branchCanComplete = false
                 else if (lexeme === ")" && currentNodeBranchingFrom.children.length === currentNodeBranchingFrom.expectedNumberOfChildren)
                     currentNodeBranchingFrom = currentNodeBranchingFrom.parent //we move up having finished branch, so this branch is potentially valid too
-                else if (infixSymbols.indexOf(lexeme) !== -1) {//or other infixes
-                    adjustToInfixNode(infixOperators[lexeme])
+                else if (token === "infixSymbol") {
+                    injectNodeWithCurrentAsChild(infixOperators[lexeme])
                     branchCanComplete = false
                 }
+                else if (token === "postfixSymbol")
+                    injectNodeWithCurrentAsChild(postfixOperators[lexeme])
                 else {
                     handleError(tokenIndex,"unexpected symbol " + lexeme)
                     return false

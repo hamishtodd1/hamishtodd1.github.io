@@ -11,11 +11,14 @@
         The actual geometry behind map projections
         Top 10 politically-correct world maps
         Top 10 world maps that avoid being racist
+        Top 5 anti-racist world maps
         How racist is your map?
         Which is least racist?
         Can we make a less racist map? 
         Making the least racist map
         Top 8 map projections?
+
+    
         
     This is for viewers of:
         3b1b who don't like putting viz and equation together in their head
@@ -386,7 +389,7 @@ async function initDymaxion()
             lineNormalize(axis)
             
             mvRotator(axis, angle, ourRotator)
-            mvSandwich(p, ourRotator, p)
+            sandwichBab(p, ourRotator, p)
         }
         mvArrayToPointsBuffer(verts, vertsBuffer)
 

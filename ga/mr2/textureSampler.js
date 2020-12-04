@@ -51,7 +51,7 @@ async function initTextureSampler() {
         let ratioGettingCubeSurfaceToSphereSurface = largestCoordAbsoluteValue / pointIdealNorm(target)
         multiplyScalar(target, ratioGettingCubeSurfaceToSphereSurface)
 
-        mvSandwich(target, rgbRotator, target) //y is now white
+        sandwichBab(target, rgbRotator, target) //y is now white
         pointW(target, 1.) //if largestCoordAbsoluteValue !== 1., yes it's an ideal point, but we're visualizing it in a ball
 
         return target

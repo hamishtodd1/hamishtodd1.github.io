@@ -1,3 +1,8 @@
+function checkIfTokenIsInProgress(tokenEnd) {
+    return  carat.positionInString === tokenEnd &&
+            carat.indexOfLastTypedCharacter === tokenEnd - 1
+}
+
 function initCarat() {
     const caratVerticesBuffer = new Float32Array(quadBuffer.length)
     for (let i = 0; i < quadBuffer.length; ++i)
@@ -132,6 +137,16 @@ function initCarat() {
 
     bindButton("Enter", () => {
         addStringAtCarat("\n")
+    })
+
+    bindButton("1",()=>{
+        let lowestUnusedName = ""
+        for(let i = 0; i < coloredNamesAlphabetically.length; ++i)
+            if( getNameDrawerProperties(coloredNamesAlphabetically[i]) === null) {
+                lowestUnusedName = coloredNamesAlphabetically[i]
+                break
+            }
+        addStringAtCarat(lowestUnusedName)
     })
 
     function removeFromString(start, end) {

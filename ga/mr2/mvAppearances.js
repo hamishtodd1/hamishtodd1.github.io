@@ -227,90 +227,86 @@ function initMvPictograms() {
 
                 gl.drawArrays(gl.LINES, 0, vertsBuffer.length / 4)
             })
-
-
-
-            // gl.useProgram(pointPictogramDrawer.program.glProgram)
-
-            // pointPictogramDrawer.program.prepareVertexAttribute("vert", vertBuffer)
-
-            // pointPictogramDrawer.finishPrebatchAndDrawEach((nameProperties, name) => {
-            //     let mv = nameProperties.value
-            //     if (pointX(mv) === 0. && pointY(mv) === 0. && pointZ(mv) === 0. && pointW(mv) === 0.)
-            //         return
-
-            //     pointPictogramDrawer.program.prepareVertexAttribute("colorIndex", pointColorIndexBuffer)
-            //     gl.uniform3fv(pointPictogramDrawer.program.getUniformLocation("hexantColors"), nameToHexantColors(name, hexantColors))
-            //     gl.uniform4f(pointPictogramDrawer.program.getUniformLocation("visualPosition"), pointX(mv), pointY(mv), pointZ(mv), pointW(mv))
-            //     gl.drawArrays(gl.TRIANGLES, 0, vertBuffer.length / 4)
-            // })
-
-            //and you do the point here too
         })
     }
 
     //plane
-    if (0) {
-        // //circular thing, cut it off outside the box
-        // //maybe target-like
-        // //light can be built into shader
-        // //pretty important for points and lines to be poking out of planes they are precisely in
+    {
+        //circular thing, cut it off outside the box
+        //maybe target-like
+        //light can be built into shader
+        //pretty important for points and lines to be poking out of planes they are precisely in
 
-        // const vsSource = shaderHeaderWithCameraAndFrameCount + gaShaderString + `
-        //     attribute vec4 vertA;
-        //     varying vec4 p;
+        //buffers
+        {
+            let radius = .8
+            let radialDivisions = 18
+            var planeVertBuffer = vertBufferFunctions.disc(radius, radialDivisions)
+        }
 
-        //     void main(void) {
-        //         p = vertA;
+        let vs = gaShaderString + `
+            attribute vec4 vertA;
+            uniform float motorFromZPlane[16];
 
-        //         gl_Position = p;
-        //     ` + cameraAndFrameCountShaderStuff.footer
-        // const fsSource = shaderHeaderWithCameraAndFrameCount + gaShaderString + `
-        //     varying vec4 p;
+            void main(void) {
+                pointToMv(vertA,mv3);
+                sandwichBab(mv3,motorFromZPlane,mv4);
 
-        //     uniform vec4 elements;
+                mvToPoint(mv4,gl_Position);
+        `
+        let fs = `
+            void main(void) {
+                gl_FragColor = vec4(0.,0.,0.,1.);
+        `
 
-        //     void main(void) {
-        //         //we make a line through this ray
-        //         zeroMv(mv0); //plane
-        //         mv0[1] = elements.w;
-        //         mv0[2] = elements.x;
-        //         mv0[3] = elements.y;
-        //         mv0[4] = elements.z;
+        //first click is where in the z-plane it'll intersect
+        //If you don't move mouse it's just angled toward camera
+        //otherwise you can spin it around
+        //so one point for the start
+        //a line orthogonal to where your mouse goes to
+        //and an ideal point pointing towards your mouse
+        var planePictogramDrawer = new PictogramDrawer({}, vs, fs)
+        planePictogramDrawer.program.addVertexAttribute("vert", planeVertBuffer, 4, false)
+        planePictogramDrawer.program.locateUniform("motorFromZPlane")
 
-        //         meet(viewLine,mv0,mv1);
-        //         vec4 rayPlaneIntersection;
-        //         mvToVec4(mv1,rayPlaneIntersection);
-        //         if( rayPlaneIntersection.w != 0. && abs(rayPlaneIntersection.z)<.5) {
-        //             gl_FragColor = vec4(1.,0.,0.,1.);
-        //             //and write to the depth buffer urgh
-        //         }
-        //         else
-        //             discard;
-        //     }
-        // `
+        let motorFromZPlane = new Float32Array(16)
+        let zPlane = new Float32Array(16) //what the disc is at
+        plane(zPlane,0.,0.,1.,0.)
+        addRenderFunction(() => {
+            gl.useProgram(planePictogramDrawer.program.glProgram)
 
-        // const program = new Program(vsSource, fsSource)
-        // cameraAndFrameCountShaderStuff.locateUniforms(program)
+            planePictogramDrawer.program.prepareVertexAttribute("vert", planeVertBuffer)
 
-        // program.addVertexAttribute("vert", quadBuffer, 4, true)
+            planePictogramDrawer.finishPrebatchAndDrawEach((nameProperties, name) => {
+                let mv = nameProperties.value
+                if (planeX(mv) === 0. && planeY(mv) === 0. && planeZ(mv) === 0. && planeW(mv) === 0.)
+                    return
 
-        // program.locateUniform("elements")
+                meet(zPlane, mv, mv0)
+                let angle = Math.asin(lineRealNorm(mv0))
+                lineNormalize(mv0)
+                mvRotator(mv0, angle, motorFromZPlane)
 
-        // addRenderFunction(() => {
-        //     gl.useProgram(program.glProgram);
+                gl.uniform1fv(planePictogramDrawer.program.getUniformLocation("motorFromZPlane"), motorFromZPlane)
 
-        //     cameraAndFrameCountShaderStuff.transfer(program)
-
-        //     program.prepareVertexAttribute("vert")
-
-        //     gl.uniform4f(program.getUniformLocation("elements"), planeX(mv), planeY(mv), planeY(mv), planeW(mv))
-
-        //     gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4);
-        // })
+                gl.drawArrays(gl.TRIANGLES, 0, planeVertBuffer.length / 4)
+            })
+        })
     }
 
-    pictogramDrawers.mv = [pointPictogramDrawer, linePictogramDrawer]
+    // let dualDirection = new Float32Array(16)
+    updateFunctions.push(()=>{
+        let mv = getNameDrawerProperties("g").value
+        let sqrt2Over3 = Math.sqrt(2./3.)
+        plane(mv,
+            sqrt2Over3 * Math.cos(frameCount * .01),
+            sqrt2Over3 * Math.sin(frameCount * .01),
+            1 / Math.sqrt(3.),
+            0.)
+        // plane(getNameDrawerProperties("g").value, 0., 0., 1., 0.);
+    })
+
+    pictogramDrawers.mv = [pointPictogramDrawer, linePictogramDrawer, planePictogramDrawer]
     assignMv = function(name) {
         assignTypeAndData(name, pictogramDrawers.mv, { value: new Float32Array(16) })
     }

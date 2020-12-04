@@ -13,6 +13,9 @@ function initPadDisplay() {
         }
     }
     
+    let tokensWhoseCharactersGetDrawn = [
+        "uncoloredName","comment","separator","infixSymbol","def","=","postfixSymbol"
+    ]
     drawTokens = function () {
         drawingPosition.x = -mainCamera.rightAtZZero
         drawingPosition.y = mainCamera.topAtZZero - .5
@@ -26,7 +29,15 @@ function initPadDisplay() {
 
             carat.duringParseFunc(drawingPosition, tokenStart)
 
+            if (tokensWhoseCharactersGetDrawn.indexOf(token) !== -1) {
+                drawTokenCharacters(tokenStart, tokenEnd)
+                return
+            }
+
             switch (token) {
+                case " ":
+                    drawingPosition.x += characterWidth
+                    break
                 case "\n":
                     drawingPosition.y -= 1.
                     drawingPosition.x = -mainCamera.rightAtZZero
@@ -34,11 +45,7 @@ function initPadDisplay() {
                     break
 
                 case "coloredName":
-                    let inProgress =
-                        carat.positionInString === tokenEnd &&
-                        carat.indexOfLastTypedCharacter === tokenEnd - 1
-
-                    if (inProgress)
+                    if (checkIfTokenIsInProgress(tokenEnd))
                         drawTokenCharacters(tokenStart, tokenEnd)
                     else {
                         drawName(lexeme, drawingPosition.x + .5, drawingPosition.y)
@@ -51,30 +58,6 @@ function initPadDisplay() {
                         carat.moveOutOfToken(tokenStart, tokenEnd)
                     }
                     
-                    break
-
-                case "uncoloredName":
-                    drawTokenCharacters(tokenStart, tokenEnd)
-                    break
-
-                case "comment":
-                    drawTokenCharacters(tokenStart, tokenEnd)
-                    break
-
-                case "separator":
-                    drawTokenCharacters(tokenStart, tokenEnd)
-                    break
-
-                case "infixSymbol":
-                    drawTokenCharacters(tokenStart, tokenEnd)
-                    break
-
-                case "def":
-                    drawTokenCharacters(tokenStart, tokenEnd)
-                    break
-
-                case " ":
-                    drawingPosition.x += characterWidth
                     break
 
                 default:

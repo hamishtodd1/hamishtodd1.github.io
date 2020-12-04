@@ -32,22 +32,22 @@ const errorHighlightTokenIndices = []
 
 const LAMBDA_SYMBOL = String.fromCharCode("955") //you CAN write "function", but lots of kids don't know "function". In python it's "def"
 const JOIN_SYMBOL = String.fromCharCode("8744")
+const DAGGER_SYMBOL = String.fromCharCode("8224")
+const specialTypeableSymbols = [LAMBDA_SYMBOL, JOIN_SYMBOL, DAGGER_SYMBOL, "?","*"]
 
 let backgroundString = 
-`//variables / literals
-bg
+`bg
 w
 r
 gp
 bgo p
 
-//functions
-y = reverse(bgo)
-ry = bgo`+JOIN_SYMBOL+`p
+// `+ DAGGER_SYMBOL +`*
+g
 
-//function compiled to js...
+y = bgo`+ DAGGER_SYMBOL +`
+ry = bgo`+JOIN_SYMBOL+`p
 b = reflectHorizontally(bgo)
-//function compiled to glsl+webgl...
 by = reflectHorizontally(go)
 
 

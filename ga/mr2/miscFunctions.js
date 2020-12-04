@@ -1,19 +1,19 @@
-const freeVariableCharacters = "0123456789.,-e"
-const freeVariableStartCharacters = "0123456789.-"
-function getLiteralLength(literalStart) { //doesn't include "color"
-    let literalLength = 0
-    let numCommasSoFar = 0
-    for (literalLength;
-        literalStart + literalLength < backgroundString.length &&
-        freeVariableCharacters.indexOf(backgroundString[literalStart + literalLength]) !== -1 &&
-        numCommasSoFar < 16;
-        ++literalLength) {
-        if (backgroundString[literalStart + literalLength] === ",")
-            ++numCommasSoFar
-    }
+// const freeVariableCharacters = "0123456789.,-e"
+// const freeVariableStartCharacters = "0123456789.-"
+// function getLiteralLength(literalStart) { //doesn't include "color"
+//     let literalLength = 0
+//     let numCommasSoFar = 0
+//     for (literalLength;
+//         literalStart + literalLength < backgroundString.length &&
+//         freeVariableCharacters.indexOf(backgroundString[literalStart + literalLength]) !== -1 &&
+//         numCommasSoFar < 16;
+//         ++literalLength) {
+//         if (backgroundString[literalStart + literalLength] === ",")
+//             ++numCommasSoFar
+//     }
 
-    return literalLength
-}
+//     return literalLength
+// }
 
 keyOf = (obj,thing) => {
     for (propt in obj) {

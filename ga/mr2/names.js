@@ -92,7 +92,7 @@ function initNames() {
         else {
             addNamedFrameToDraw(x, y, name)
 
-            if (drawingDetailses[index] === null)
+            if (drawingDetailses[index].drawers.length === 0)
                 addCharacterToDraw("?", x - characterWidth / 2., y)
             else {
                 let drawers = drawingDetailses[index].drawers

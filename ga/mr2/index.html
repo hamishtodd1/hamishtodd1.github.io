@@ -1,6 +1,18 @@
 <!--
 	TODO Bugs
 		Fucking which way is z
+		Bug with your mind: you want to reinvent calculus
+
+	So you have your algebra, you have your visualizations
+		And for one visualization, you can change is algebraic, er, significance. I.e. its type?
+			Eg arrow left arrow up. Add the arrows.
+				If they're PGA elements, you get the point inbetween.
+				If LA elements, get the arrows concatenated
+		And for one type / algebraic structure, you can change its visualization
+			Eg crowd of people
+				The visualization of the people
+				The number of them that are infected
+		Pong game states are an algebraic structure, with only maybe 3 dimensions
 
 	Maybe you do want helmet / VR?
 		Pros:
@@ -18,18 +30,21 @@
 		Whenever you see "sin lat", that's projection onto line
 		Extract lat and lon
 		Slice lat and lon
-		Unwrapping to
+		Unwrapping lon
 		Geometrically interpret the functions (stare at maps.js):
 			Slicing system that allows you to see a sliced-open globe
 				Just a different uvBuffer, gl.LINE
+				You could draw on the globe and see results of that!
 			A lot of it is about projection. Sending projection point to infinity
 
+	General TODO
+		Function syntax
+		Planes
 
 	Filming setup
 		Semi transparent background to pad
-		Want nice light and camera
+		Nice camera
 		Go from relevant line to relevant line. Sounds like you're cutting stuff out though
-		Don't necessarily need
 
 	Hey, could have "cartesian product" symbol, mathematicians would like you
 		Or tensor product
@@ -108,7 +123,9 @@
 				initCarat()
 
 				let typeableCharacters = initTypeableCharacters()
-				let displayableCharacters = typeableCharacters + freeVariableCharacters + "?" + LAMBDA_SYMBOL + JOIN_SYMBOL
+				let displayableCharacters = typeableCharacters
+				for(let i = 0; i < specialTypeableSymbols.length; ++i)
+					displayableCharacters += specialTypeableSymbols[i]
 				initCharacterTexture(displayableCharacters)
 
 				initTokenizer(displayableCharacters)
@@ -127,12 +144,17 @@
 
 					assignMv("w")
 					realLineX(getNameDrawerProperties("w").value, .5);
+					
 					assignMv("bgo")
-					pointX(getNameDrawerProperties("bgo").value, .5);
-					pointW(getNameDrawerProperties("bgo").value, 1.);
+					point(getNameDrawerProperties("bgo").value, .5,.5,0.,1.);
+
 					assignMv("p")
-					pointY(getNameDrawerProperties("p").value, .5);
-					pointW(getNameDrawerProperties("p").value, 1.);
+					point(getNameDrawerProperties("p").value, 0.,.5,0.,1.);
+
+					assignMv("rw")
+
+					assignMv("g")
+					plane(getNameDrawerProperties("g").value, 0., 0., 1., 0.);
 
 					let textureNames = ["earthColor", "ball", "cmb", "jupiter", "latAndLon2"]
 					for (let i = 0; i < textureNames.length; ++i) {
@@ -144,15 +166,6 @@
 						})
 						//this could compile to glsl, it's a struct
 					}
-
-					// assignTypeAndData("b", pictogramDrawers.globeProjection, {
-					// 	pictogramProgram: globeProjectionPictogramPrograms["simpleAlternating"].pictogramProgram,
-					// 	globeProperties: getNameDrawerProperties("gp"),
-					// })
-					// assignTypeAndData("o", pictogramDrawers.globeProjection, {
-					// 	pictogramProgram: globeProjectionPictogramPrograms["simpleAlternating"].pictogramProgram,
-					// 	globeProperties: getNameDrawerProperties("go"),
-					// })
 					
 					assignTypeAndData("r", pictogramDrawers.test, { value: 0. })
 				}

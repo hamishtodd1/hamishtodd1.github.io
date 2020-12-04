@@ -20,23 +20,30 @@
 
 function initTokenizer(displayableCharacters) {
 
-    //there's even postfix: dagger and star
+    let postfixOperators = {
+        "*": "dual"
+        //"inverse", "transpose"
+        //exponential? It's single argument
+        //length / magnitude?
+        //normalize. But maybe everything is always normalized?
+    }
+    postfixOperators[DAGGER_SYMBOL] = "reverse"
+    let postfixSymbols = Object.keys(postfixOperators)
+    
     let infixOperators = {
-        "+": "gAdd",
-        "=": "assign",
-        // JOIN_SYMBOL:"join"
+        "+": "gAdd"
         //wedge
         //subtract
         //divide
-        //reverse: dagger
-        //normalize: superscript 1
     }
     infixOperators[JOIN_SYMBOL] = "join" //TODO sure this works across browsers?
-    //then reverse, dual, exponential are single argument
     let infixSymbols = Object.keys(infixOperators)
-    let builtInFunctionNames = ["reverse", "inner", "gProduct", "join"] //"earth", sin, cos, tan, exp, sqrt
+
+    let builtInFunctionNames = ["inner", "gProduct", "join","assign"] //"earth", sin, cos, tan, exp, sqrt
     infixSymbols.forEach((key)=>{builtInFunctionNames.push(infixOperators[key])})
-    initTranspiler(infixOperators, infixSymbols, builtInFunctionNames)
+    postfixSymbols.forEach((key)=>{builtInFunctionNames.push(postfixOperators[key])})
+
+    initTranspiler(infixOperators, postfixOperators, builtInFunctionNames)
     let lineTree = new AbstractSyntaxTree()
 
     initErrorHighlight()
@@ -65,7 +72,7 @@ function initTokenizer(displayableCharacters) {
                 ++positionInString
         }
 
-        let uniqueTokens = [" ","\n",LAMBDA_SYMBOL]
+        let uniqueTokens = [" ","\n",LAMBDA_SYMBOL,"="]
         let separators = ["(", ")"]
         let keywords = ["def"]
 
@@ -90,6 +97,10 @@ function initTokenizer(displayableCharacters) {
                 tokens.push("infixSymbol")
                 ++positionInString
             }
+            else if (postfixSymbols.indexOf(tokenStartCharacter) !== -1) {
+                tokens.push("postfixSymbol")
+                ++positionInString
+            }
             else if (IDENTIFIER_CHARACTERS.indexOf(backgroundString[positionInString]) !== -1) {
                 let tokenStart = positionInString
                 moveWhile(() => IDENTIFIER_CHARACTERS.indexOf(backgroundString[positionInString]) !== -1)
@@ -109,16 +120,13 @@ function initTokenizer(displayableCharacters) {
                 if(usableNamePotentially === null) 
                     tokens.push("uncoloredName")
                 else {
-                    let inProgress =
-                        carat.positionInString === positionInString &&
-                        carat.indexOfLastTypedCharacter === positionInString - 1
-                    if(usableNamePotentially !== lexeme && !inProgress)
+                    if(usableNamePotentially !== lexeme && !checkIfTokenIsInProgress(positionInString))
                         backgroundStringSplice(tokenStart,positionInString - tokenStart,usableNamePotentially)
                     tokens.push("coloredName")
                 }
             }
             else
-                handleError(tokenIndex, "don't know what to do with this character: ", tokenStartCharacter)
+                handleError(tokenStarts.length, "don't know what to do with this character: ", tokenStartCharacter)
         }
 
         forEachToken = (func) => {
@@ -151,7 +159,7 @@ function initTokenizer(displayableCharacters) {
 
         let unusedNameJustSeen = null
 
-        let evaluateLine = true
+        let skipLine = false
 
         let nameToAssignTo = null
 
@@ -175,13 +183,24 @@ function initTokenizer(displayableCharacters) {
             if(token === "\n") {
                 ++lineNumber
 
-                evaluateLine = true
+                if (nameToAssignTo !== null && skipLine === false) {
+                    lineTree.parseAndAssign(tokenIndex, nameToAssignTo, lineNumber)
+
+                    namesNeedingToBeCleared.push(nameToAssignTo)
+
+                    if (functionNameToAssignTo !== null) {
+                        // globeProjectionPictogramPrograms["simpleAlternating"].setIr()
+                        // something = new GlobeProjectionIr()                 
+                    }
+                }
 
                 nameToAssignTo = null
                 unusedNameJustSeen = null
+
+                skipLine = false
             }
-            else if(!evaluateLine)
-                return
+            else if(skipLine)
+                return false
 
             if (token === "comment" || token === " " )
                 return false
@@ -228,23 +247,11 @@ function initTokenizer(displayableCharacters) {
             //we might like it to be the case that eg "t Proj tDagger" gives you proj rotated by t. But eh
             
             else if (nameToAssignTo !== null) {
-                // log(lexeme)
-                if (token !== "\n"){
-                    let result = lineTree.addLexeme(tokenIndex, token, lexeme)
-                    if (result === false)
-                        evaluateLine = false
-                }
-                else {
-                    let result = lineTree.parseAndAssign(tokenIndex, nameToAssignTo, lineNumber)
-                    
-                    namesNeedingToBeCleared.push(nameToAssignTo)
-                    nameToAssignTo = null
-
-                    if (functionNameToAssignTo !== null) {
-                        // globeProjectionPictogramPrograms["simpleAlternating"].setIr()
-                        // something = new GlobeProjectionIr()                 
-                    }
-                }
+                // if (nameToAssignTo === "y")
+                //     debugger
+                let result = lineTree.addLexeme(tokenIndex, token, lexeme)
+                if (result === false)
+                    skipLine = true
             }
             else if (functionNameToAssignTo !== null && lexeme === "}" && nameToAssignTo === null) {
                 //time to collect up those lines and round off
