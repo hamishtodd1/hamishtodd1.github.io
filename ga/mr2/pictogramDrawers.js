@@ -47,10 +47,7 @@ function initPictogramDrawers() {
         this.locateUniform("screenPosition")
     }
 
-    PictogramDrawer = function (editingStyle, vsBody, fsBody) {
-        editingStyle = editingStyle || {}
-
-
+    PictogramDrawer = function (vsBody, fsBody) {
         let numToDraw = 0
         let screenPositions = [] //Just screen position, if you want a quat put that in a wrapper
         let names = []
@@ -58,9 +55,6 @@ function initPictogramDrawers() {
             screenPositions[numToDraw * 2 + 0] = x
             screenPositions[numToDraw * 2 + 1] = y
             names[numToDraw] = name
-
-            if (mouse.inSquare(x, y, .5))
-                mouseDw.placeBasedOnHover(x, y, editingStyle, name)
 
             ++numToDraw
         }
@@ -128,8 +122,8 @@ function pictogramTest()
         },
     }
 
-    let pictogramDrawer = new PictogramDrawer(testEditingStyle, vs, fs)
-    pictogramDrawers.test = pictogramDrawer 
+    let pictogramDrawer = new PictogramDrawer(vs, fs)
+    addType("test", pictogramDrawer, testEditingStyle)
     pictogramDrawer.program.addVertexAttribute("vert", quadBuffer, 4, true)
     pictogramDrawer.program.locateUniform("g")
 

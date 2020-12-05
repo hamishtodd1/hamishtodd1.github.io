@@ -47,29 +47,31 @@ function initNames() {
     let drawingDetailses = Array(NUM_NAMES)
     for(let i = 0; i < NUM_NAMES; ++i) {
         coloredNamesAlphabetically[i] = generateName()
-        drawingDetailses[i] = {drawers:[]}
+        drawingDetailses[i] = { type:"unassigned" }
+    }
+
+    let types = []
+    addType = function (typeName,drawers,editingStyle) {
+        if(drawers.forEach === undefined )
+            drawers = [drawers]
+        types[typeName] = {editingStyle,drawers}
     }
 
     clearNames = function(names) {
         names.forEach((name)=>{
             let index = coloredNamesAlphabetically.indexOf(name)
             Object.keys(drawingDetailses[index]).forEach((key) => {
-                if (key === "drawers")
-                    drawingDetailses[index][key].length = 0
+                if (key === "type")
+                    drawingDetailses[index][key] = "unassigned"
                 else
                     delete drawingDetailses[index][key]; 
             })
         })
     }
-    assignTypeAndData = function (name, drawers, drawingDetails) {
+    assignTypeAndData = function (name, type, drawingDetails) {
         let index = coloredNamesAlphabetically.indexOf(name)
         Object.assign(drawingDetailses[index], drawingDetails)
-
-        if (drawers.length === undefined)
-            drawers = [drawers]
-        drawers.forEach((drawer) => {
-            drawingDetailses[index].drawers.push(drawer)
-        })
+        drawingDetailses[index].type = type
     }
 
     getAlphabetizedColoredName = (str) => {
@@ -92,19 +94,22 @@ function initNames() {
         else {
             addNamedFrameToDraw(x, y, name)
 
-            if (drawingDetailses[index].drawers.length === 0)
+            let type = types[drawingDetailses[index].type]
+            if ( drawingDetailses[index].type === "unassigned")
                 addCharacterToDraw("?", x - characterWidth / 2., y)
             else {
-                let drawers = drawingDetailses[index].drawers
-                for(let i = 0; i < drawers.length; ++i)
-                    drawers[i].add(x, y, name)
+                for(let i = 0; i < type.drawers.length; ++i)
+                    type.drawers[i].add(x, y, name)
+
+                if (mouse.inSquare(x, y, .5))
+                    mouseDw.placeBasedOnHover(x, y, type.editingStyle, name)
             }
         }
     }
     getNameDrawerProperties = function (name) {
         if (coloredNamesAlphabetically.indexOf(name) === -1)
             return null
-        if (drawingDetailses[coloredNamesAlphabetically.indexOf(name)].drawers.length === 0)
+        if (drawingDetailses[coloredNamesAlphabetically.indexOf(name)].type === "unassigned")
             return null
         return drawingDetailses[coloredNamesAlphabetically.indexOf(name)]
     }

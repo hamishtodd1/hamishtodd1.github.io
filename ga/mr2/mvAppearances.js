@@ -41,8 +41,8 @@ function initAnglePictograms() {
 
     var vertsBuffer = vertBufferFunctions.disc(.95, 62)
 
-    let pd = new PictogramDrawer(editingStyle, vs, fs)
-    pictogramDrawers.angle = pd
+    let pd = new PictogramDrawer(vs, fs)
+    addType("angle", pd, editingStyle)
     pd.program.addVertexAttribute("vert", vertsBuffer, 4)
     pd.program.locateUniform("fullAngle")
 
@@ -70,20 +70,45 @@ function initMvPictograms() {
             point(slideStartMv, x, y, 0., 1.)
         },
         during: (editingName, x, y) => {
+            let mv = getNameDrawerProperties(editingName).value
+
             point(slideCurrentMv, x, y, 0., 1.)
 
-            let grade = getGrade(getNameDrawerProperties(editingName).value)
+            let grade = getGrade(mv)
             if (grade === 3)
-                assign(slideCurrentMv, getNameDrawerProperties(editingName).value)
+                assign(slideCurrentMv, mv)
             else if (grade === 2) {
                 if (mvEquals(slideCurrentMv, slideStartMv)) {
                     let currentLineDotMousePosition = new Float32Array(16);
-                    inner(getNameDrawerProperties(editingName).value, slideStartMv, currentLineDotMousePosition)
-                    gProduct(currentLineDotMousePosition, slideStartMv, getNameDrawerProperties(editingName).value)
+                    inner(mv, slideStartMv, currentLineDotMousePosition)
+                    gProduct(currentLineDotMousePosition, slideStartMv, mv)
                     delete currentLineDotMousePosition
                 }
                 else
-                    join(slideStartMv, slideCurrentMv, getNameDrawerProperties(editingName).value)
+                    join(slideStartMv, slideCurrentMv, mv)
+            }
+            else if(grade === 1) {
+
+                if (mvEquals(slideCurrentMv, slideStartMv))
+                    plane(mv, 0., 0., 1., 0.);
+                else {
+                    gSub(slideCurrentMv, slideStartMv, mv0)
+                    pointZ(mv0, 1.)
+                    dual(mv0, mv1) //mv1 is the plane, but it's at the origin
+                    //better would be it spinning around and around
+
+                    //project
+                    inner(mv1, slideStartMv, mv2)
+                    gProduct(mv2, slideStartMv, mv)
+                }
+
+                // // let dualDirection = new Float32Array(16)
+                // let sqrt2Over3 = Math.sqrt(2. / 3.)
+                // plane(mv,
+                //     sqrt2Over3 * Math.cos(frameCount * .01),
+                //     sqrt2Over3 * Math.sin(frameCount * .01),
+                //     1 / Math.sqrt(3.),
+                //     0.)
             }
         },
     }
@@ -119,7 +144,7 @@ function initMvPictograms() {
                 gl_FragColor = vec4(color,1.);
         `
 
-        var pointPictogramDrawer = new PictogramDrawer(mvEditingStyle, vs, fs)
+        var pointPictogramDrawer = new PictogramDrawer(vs, fs)
         pointPictogramDrawer.program.addVertexAttribute("vert", vertBuffer, 4, false)
         pointPictogramDrawer.program.addVertexAttribute("colorIndex", pointColorIndexBuffer, 1, true)
         pointPictogramDrawer.program.locateUniform("hexantColors")
@@ -132,7 +157,7 @@ function initMvPictograms() {
 
             pointPictogramDrawer.finishPrebatchAndDrawEach((nameProperties,name) => {
                 let mv = nameProperties.value
-                if (pointX(mv) === 0. && pointY(mv) === 0. && pointZ(mv) === 0. && pointW(mv) === 0.)
+                if (!containsGrade(mv, 3))
                     return
 
                 pointPictogramDrawer.program.prepareVertexAttribute("colorIndex", pointColorIndexBuffer)
@@ -176,7 +201,7 @@ function initMvPictograms() {
             var vertsBuffer = new Float32Array(6 * 2 * 4)
         }
 
-        var linePictogramDrawer = new PictogramDrawer(mvEditingStyle, vs, fs)
+        var linePictogramDrawer = new PictogramDrawer(vs, fs)
         linePictogramDrawer.program.addVertexAttribute("vert", vertsBuffer, 4, true)
         linePictogramDrawer.program.addVertexAttribute("colorIndex", indexBuffer, 1, false)
         linePictogramDrawer.program.locateUniform("hexantColors")
@@ -187,7 +212,7 @@ function initMvPictograms() {
 
             linePictogramDrawer.finishPrebatchAndDrawEach((nameProperties,name) => {
                 let mv = nameProperties.value
-                if (realLineX(mv) === 0. && realLineY(mv) === 0. && realLineZ(mv) === 0.)
+                if (!containsGrade(mv, 2))
                     return
 
                 //update buffer
@@ -232,14 +257,11 @@ function initMvPictograms() {
 
     //plane
     {
-        //circular thing, cut it off outside the box
-        //maybe target-like
-        //light can be built into shader
-        //pretty important for points and lines to be poking out of planes they are precisely in
+        //important for points and lines to be poking out of planes they are precisely in
 
         //buffers
         {
-            let radius = .8
+            let radius = 1.2
             let radialDivisions = 18
             var planeVertBuffer = vertBufferFunctions.disc(radius, radialDivisions)
         }
@@ -256,16 +278,12 @@ function initMvPictograms() {
         `
         let fs = `
             void main(void) {
+                // vec3 lightPosition
+
                 gl_FragColor = vec4(0.,0.,0.,1.);
         `
 
-        //first click is where in the z-plane it'll intersect
-        //If you don't move mouse it's just angled toward camera
-        //otherwise you can spin it around
-        //so one point for the start
-        //a line orthogonal to where your mouse goes to
-        //and an ideal point pointing towards your mouse
-        var planePictogramDrawer = new PictogramDrawer({}, vs, fs)
+        var planePictogramDrawer = new PictogramDrawer(vs, fs) //shouldn't it be a pictogram program? Bit unfortunate to do so much adding
         planePictogramDrawer.program.addVertexAttribute("vert", planeVertBuffer, 4, false)
         planePictogramDrawer.program.locateUniform("motorFromZPlane")
 
@@ -279,13 +297,20 @@ function initMvPictograms() {
 
             planePictogramDrawer.finishPrebatchAndDrawEach((nameProperties, name) => {
                 let mv = nameProperties.value
-                if (planeX(mv) === 0. && planeY(mv) === 0. && planeZ(mv) === 0. && planeW(mv) === 0.)
+                if (!containsGrade(mv,1))
                     return
 
-                meet(zPlane, mv, mv0)
-                let angle = Math.asin(lineRealNorm(mv0))
-                lineNormalize(mv0)
-                mvRotator(mv0, angle, motorFromZPlane)
+                //sigh, may want to normalize mv first
+                if (!mvEquals(zPlane, mv)) {
+                    meet(zPlane, mv, mv0)
+                    let angle = Math.asin(lineRealNorm(mv0))
+                    lineNormalize(mv0)
+                    mvRotator(mv0, angle, motorFromZPlane)
+                }
+                else {
+                    zeroMv(motorFromZPlane)
+                    motorFromZPlane[0] = 1.
+                }
 
                 gl.uniform1fv(planePictogramDrawer.program.getUniformLocation("motorFromZPlane"), motorFromZPlane)
 
@@ -296,20 +321,14 @@ function initMvPictograms() {
 
     // let dualDirection = new Float32Array(16)
     updateFunctions.push(()=>{
-        let mv = getNameDrawerProperties("g").value
-        let sqrt2Over3 = Math.sqrt(2./3.)
-        plane(mv,
-            sqrt2Over3 * Math.cos(frameCount * .01),
-            sqrt2Over3 * Math.sin(frameCount * .01),
-            1 / Math.sqrt(3.),
-            0.)
+        // let mv = getNameDrawerProperties("g").value
+        // let sqrt2Over3 = Math.sqrt(2./3.)
+        // plane(mv,0.,0.,1.,0.)
         // plane(getNameDrawerProperties("g").value, 0., 0., 1., 0.);
     })
 
-    pictogramDrawers.mv = [pointPictogramDrawer, linePictogramDrawer, planePictogramDrawer]
+    addType("mv", [pointPictogramDrawer, linePictogramDrawer, planePictogramDrawer], mvEditingStyle)
     assignMv = function(name) {
-        assignTypeAndData(name, pictogramDrawers.mv, { value: new Float32Array(16) })
+        assignTypeAndData(name, "mv", { value: new Float32Array(16) })
     }
-
-    //when you use the "add" function, it should not necessarily be associated with a single pictogram drawer
 }

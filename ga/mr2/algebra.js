@@ -303,27 +303,41 @@ function initAlgebra()
 
         let eps = .00001
         getGrade = (mv) => {
-            let gradeIPartIsZero = Array(5)
-            gradeIPartIsZero[1] = Math.abs(planeX(mv)) < eps && Math.abs(planeY(mv)) < eps && Math.abs(planeZ(mv)) < eps && Math.abs(planeW(mv)) < eps
-            gradeIPartIsZero[3] = Math.abs(pointX(mv)) < eps && Math.abs(pointY(mv)) < eps && Math.abs(pointZ(mv)) < eps && Math.abs(pointW(mv)) < eps
-            gradeIPartIsZero[2] =
-                Math.abs(realLineX(mv)) < eps && Math.abs(realLineY(mv)) < eps && Math.abs(realLineZ(mv)) < eps &&
-                Math.abs(idealLineX(mv)) < eps && Math.abs(idealLineY(mv)) < eps && Math.abs(idealLineZ(mv)) < eps
-            gradeIPartIsZero[0] = Math.abs(mv[0]) < eps
-            gradeIPartIsZero[4] = Math.abs(mv[15]) < eps
-
-            let blade = true
             let grade = -1
+            // debugger
             for(let i = 0; i < 5; ++i) {
-                if(!gradeIPartIsZero[i]) {
+                if( containsGrade(mv,i) ) {
                     if (grade === -1)
                         grade = i
                     else
-                        blade = false
+                        return [grade,i]
                 }
             }
-            if(blade) return grade
-            else return "mix"
+            return grade === -1 ? 0 : grade
+        }
+        containsGrade = (mv,grade) => {
+            switch(grade) {
+                case 0:
+                    return Math.abs(mv[0]) > eps
+                    break
+
+                case 1: 
+                    return Math.abs(planeX(mv)) > eps || Math.abs(planeY(mv)) > eps || Math.abs(planeZ(mv)) > eps || Math.abs(planeW(mv)) > eps
+                    break
+
+                case 2:
+                    return Math.abs(realLineX(mv)) > eps || Math.abs(realLineY(mv)) > eps || Math.abs(realLineZ(mv)) > eps ||
+                    Math.abs(idealLineX(mv)) > eps || Math.abs(idealLineY(mv)) > eps || Math.abs(idealLineZ(mv)) > eps
+                    break
+
+                case 3:
+                    return Math.abs(pointX(mv)) > eps || Math.abs(pointY(mv)) > eps || Math.abs(pointZ(mv)) > eps || Math.abs(pointW(mv)) > eps
+                    break
+
+                case 4:
+                    return Math.abs(mv[15]) > eps
+                    break
+            }
         }
 
         multiplyScalar = (mv,sca) => {

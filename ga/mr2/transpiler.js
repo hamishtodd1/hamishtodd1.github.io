@@ -92,13 +92,18 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
                 if (isTerminalColoredName) {
                     branchCanComplete = true
 
-                    let nameDrawers = getNameDrawerProperties(lexeme).drawers
-                    if (nameDrawers[0] === pictogramDrawers.mv[0])
-                        new Node('getNameDrawerProperties("' + lexeme + '").value', true)
+                    switch (getNameDrawerProperties(lexeme).type) {
+                        case "mv":
+                            new Node('getNameDrawerProperties("' + lexeme + '").value', true)
+                            break
 
-                    if (nameDrawers[0] === pictogramDrawers.globe) {
-                        globeProperties = getNameDrawerProperties(lexeme)
-                        new Node('pointOnGlobe', true)
+                        case "globe":
+                            globeProperties = getNameDrawerProperties(lexeme)
+                            new Node('pointOnGlobe', true)
+                            break
+                        
+                        default:
+                            handleError(tokenIndex, "unrecognized type: " + getNameDrawerProperties(lexeme).type)
                     }
                 }
                 else if (isOpenBracket) {
@@ -184,7 +189,7 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
 
                 // debugger
 
-                assignTypeAndData(nameToAssignTo, pictogramDrawers.globeProjection, {
+                assignTypeAndData(nameToAssignTo, "globeProjection", {
                     globeProperties, header, body
                 })
             }

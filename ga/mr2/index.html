@@ -58,10 +58,6 @@
 		you have functions defined on that algebra
 		Sometimes you want different viz for different things. Real view, disc view, color view
 
-	Fun GA things probably unnecessary to world map so avoid:
-		pss
-		dual, join
-
 
 	
 
@@ -140,8 +136,9 @@
 				// initDrawing()
 
 				{
-					assignTypeAndData("bg", pictogramDrawers.angle, { value: .5 })
+					assignTypeAndData("bg", "angle", { value: .5 })
 
+					// debugger
 					assignMv("w")
 					realLineX(getNameDrawerProperties("w").value, .5);
 					
@@ -159,7 +156,7 @@
 					let textureNames = ["earthColor", "ball", "cmb", "jupiter", "latAndLon2"]
 					for (let i = 0; i < textureNames.length; ++i) {
 						let texture = await Texture("data/" + textureNames[i] + ".png")
-						assignTypeAndData(coloredNamesAlphabetically[13 + i], pictogramDrawers.globe, {
+						assignTypeAndData(coloredNamesAlphabetically[13 + i], "globe", {
 							texture,
 							yaw: 0.,
 							pitch: 0.
@@ -167,7 +164,7 @@
 						//this could compile to glsl, it's a struct
 					}
 					
-					assignTypeAndData("r", pictogramDrawers.test, { value: 0. })
+					assignTypeAndData("r", "test", { value: 0. })
 				}
 
 				function loop() {

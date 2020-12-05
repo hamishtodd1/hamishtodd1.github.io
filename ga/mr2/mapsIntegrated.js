@@ -103,7 +103,7 @@ async function initGlobeProjectionPictograms() {
     }
 
     let pictogramDrawer = new PictogramDrawer()
-    pictogramDrawers.globeProjection = pictogramDrawer
+    addType("globeProjection", pictogramDrawer, {})
     function draw() {
         gl.drawArrays(gl.TRIANGLES, 0, uvBuffer.length / 2)
     }
@@ -164,8 +164,8 @@ async function initGlobePictograms() {
         }
     }
 
-    let pictogramDrawer = new PictogramDrawer(globeEditingStyle, vs, fs)
-    pictogramDrawers.globe = pictogramDrawer
+    let pictogramDrawer = new PictogramDrawer(vs, fs)
+    addType("globe", pictogramDrawer, globeEditingStyle)
     
     const eps = .00001 //sensetive, ugh
     const numDivisions = 256
