@@ -65,7 +65,7 @@ function initMvPictograms() {
 
     let slideStartMv = new Float32Array(16)
     let slideCurrentMv = new Float32Array(16)
-    var mvEditingStyle = {
+    let editingStyle = {
         start: (editingName, x, y) => {
             point(slideStartMv, x, y, 0., 1.)
         },
@@ -75,40 +75,35 @@ function initMvPictograms() {
             point(slideCurrentMv, x, y, 0., 1.)
 
             let grade = getGrade(mv)
-            if (grade === 3)
-                assign(slideCurrentMv, mv)
-            else if (grade === 2) {
-                if (mvEquals(slideCurrentMv, slideStartMv)) {
-                    let currentLineDotMousePosition = new Float32Array(16);
-                    inner(mv, slideStartMv, currentLineDotMousePosition)
-                    gProduct(currentLineDotMousePosition, slideStartMv, mv)
-                    delete currentLineDotMousePosition
-                }
-                else
-                    join(slideStartMv, slideCurrentMv, mv)
-            }
-            else if(grade === 1) {
+            switch(grade) {
+                case 3:
+                    assign(slideCurrentMv, mv)
+                    break
 
-                if (mvEquals(slideCurrentMv, slideStartMv))
-                    plane(mv, 0., 0., 1., 0.);
-                else {
-                    gSub(slideCurrentMv, slideStartMv, mv0)
-                    pointZ(mv0, 1.)
-                    dual(mv0, mv1) //mv1 is the plane, but it's at the origin
-                    //better would be it spinning around and around
+                case 2: 
+                    if (mvEquals(slideCurrentMv, slideStartMv)) {
+                        let currentLineDotMousePosition = new Float32Array(16);
+                        inner(mv, slideStartMv, currentLineDotMousePosition)
+                        gProduct(currentLineDotMousePosition, slideStartMv, mv)
+                        delete currentLineDotMousePosition
+                    }
+                    else
+                        join(slideStartMv, slideCurrentMv, mv)
+                    break
 
-                    //project
-                    inner(mv1, slideStartMv, mv2)
-                    gProduct(mv2, slideStartMv, mv)
-                }
+                case 1:
+                    if (mvEquals(slideCurrentMv, slideStartMv))
+                        plane(mv, 0., 0., 1., 0.);
+                    else {
+                        gSub(slideCurrentMv, slideStartMv, mv0)
+                        pointZ(mv0, 1.)
+                        dual(mv0, mv1) //mv1 is the plane, but it's at the origin
+                        //better would be it spinning around and around
 
-                // // let dualDirection = new Float32Array(16)
-                // let sqrt2Over3 = Math.sqrt(2. / 3.)
-                // plane(mv,
-                //     sqrt2Over3 * Math.cos(frameCount * .01),
-                //     sqrt2Over3 * Math.sin(frameCount * .01),
-                //     1 / Math.sqrt(3.),
-                //     0.)
+                        //project
+                        inner(mv1, slideStartMv, mv2)
+                        gProduct(mv2, slideStartMv, mv)
+                    }
             }
         },
     }
@@ -261,8 +256,8 @@ function initMvPictograms() {
 
         //buffers
         {
-            let radius = 1.2
-            let radialDivisions = 18
+            let radius = 1.
+            let radialDivisions = 32
             var planeVertBuffer = vertBufferFunctions.disc(radius, radialDivisions)
         }
 
@@ -270,22 +265,36 @@ function initMvPictograms() {
             attribute vec4 vertA;
             uniform float motorFromZPlane[16];
 
+            varying vec3 p;
+
             void main(void) {
                 pointToMv(vertA,mv3);
                 sandwichBab(mv3,motorFromZPlane,mv4);
 
                 mvToPoint(mv4,gl_Position);
+
+                p = gl_Position.xyz;
         `
         let fs = `
+            varying vec3 p;
+                
+            uniform vec3 normal;
             void main(void) {
-                // vec3 lightPosition
+                vec3 lightPosition = vec3(-1.,1.,1.);
+                vec3 l = lightPosition - p;
+                vec3 r = normalize(2. * dot(l,normal) * normal - l);
+                
+                vec3 v = vec3(0.,0.,1.);
+                float shininessConstant = 12.;
+                float specularContribution = pow(dot(r,v),shininessConstant);
 
-                gl_FragColor = vec4(0.,0.,0.,1.);
+                gl_FragColor = vec4(specularContribution,specularContribution,specularContribution,1.);
         `
 
         var planePictogramDrawer = new PictogramDrawer(vs, fs) //shouldn't it be a pictogram program? Bit unfortunate to do so much adding
         planePictogramDrawer.program.addVertexAttribute("vert", planeVertBuffer, 4, false)
         planePictogramDrawer.program.locateUniform("motorFromZPlane")
+        planePictogramDrawer.program.locateUniform("normal")
 
         let motorFromZPlane = new Float32Array(16)
         let zPlane = new Float32Array(16) //what the disc is at
@@ -301,33 +310,31 @@ function initMvPictograms() {
                     return
 
                 //sigh, may want to normalize mv first
-                if (!mvEquals(zPlane, mv)) {
+                if (planeX(mv) === 0. && planeY(mv) === 0. && planeW(mv) === 0.) {
+                    zeroMv(motorFromZPlane)
+                    motorFromZPlane[0] = 1.
+                }
+                else {
                     meet(zPlane, mv, mv0)
                     let angle = Math.asin(lineRealNorm(mv0))
                     lineNormalize(mv0)
                     mvRotator(mv0, angle, motorFromZPlane)
                 }
-                else {
-                    zeroMv(motorFromZPlane)
-                    motorFromZPlane[0] = 1.
-                }
 
                 gl.uniform1fv(planePictogramDrawer.program.getUniformLocation("motorFromZPlane"), motorFromZPlane)
+                let inverseNormalLength = 1./Math.sqrt(sq(planeX(mv)) + sq(planeY(mv)) + sq(planeZ(mv)) )
+                gl.uniform3f(planePictogramDrawer.program.getUniformLocation("normal"), planeX(mv)*inverseNormalLength,planeY(mv)*inverseNormalLength,planeZ(mv)*inverseNormalLength)
 
+                // gl.disable(gl.CULL_FACE)
+                // gl.cullFace(gl.FRONT_AND_BACK)
                 gl.drawArrays(gl.TRIANGLES, 0, planeVertBuffer.length / 4)
+                // gl.cullFace(gl.BACK)
+                // gl.enable(gl.CULL_FACE)
             })
         })
     }
 
-    // let dualDirection = new Float32Array(16)
-    updateFunctions.push(()=>{
-        // let mv = getNameDrawerProperties("g").value
-        // let sqrt2Over3 = Math.sqrt(2./3.)
-        // plane(mv,0.,0.,1.,0.)
-        // plane(getNameDrawerProperties("g").value, 0., 0., 1., 0.);
-    })
-
-    addType("mv", [pointPictogramDrawer, linePictogramDrawer, planePictogramDrawer], mvEditingStyle)
+    addType("mv", [pointPictogramDrawer, linePictogramDrawer, planePictogramDrawer], editingStyle)
     assignMv = function(name) {
         assignTypeAndData(name, "mv", { value: new Float32Array(16) })
     }
