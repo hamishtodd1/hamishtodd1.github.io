@@ -145,7 +145,7 @@ function initMvPictograms() {
         pointPictogramDrawer.program.locateUniform("hexantColors")
         pointPictogramDrawer.program.locateUniform("visualPosition")
 
-        addRenderFunction(() => {
+        function renderPoints() {
             gl.useProgram(pointPictogramDrawer.program.glProgram)
 
             pointPictogramDrawer.program.prepareVertexAttribute("vert", vertBuffer)
@@ -160,7 +160,7 @@ function initMvPictograms() {
                 gl.uniform4f(pointPictogramDrawer.program.getUniformLocation("visualPosition"), pointX(mv), pointY(mv), pointZ(mv), pointW(mv))
                 gl.drawArrays(gl.TRIANGLES, 0, vertBuffer.length / 4)
             })
-        })
+        }
     }
 
     //line, both real and ideal apparently?
@@ -201,7 +201,7 @@ function initMvPictograms() {
         linePictogramDrawer.program.addVertexAttribute("colorIndex", indexBuffer, 1, false)
         linePictogramDrawer.program.locateUniform("hexantColors")
 
-        addRenderFunction(() => {
+        function renderLines() {
             gl.useProgram(linePictogramDrawer.program.glProgram)
             linePictogramDrawer.program.prepareVertexAttribute("colorIndex", indexBuffer)
 
@@ -247,7 +247,7 @@ function initMvPictograms() {
 
                 gl.drawArrays(gl.LINES, 0, vertsBuffer.length / 4)
             })
-        })
+        }
     }
 
     //plane
@@ -299,7 +299,7 @@ function initMvPictograms() {
         let motorFromZPlane = new Float32Array(16)
         let zPlane = new Float32Array(16) //what the disc is at
         plane(zPlane,0.,0.,1.,0.)
-        addRenderFunction(() => {
+        function renderPlanes() {
             gl.useProgram(planePictogramDrawer.program.glProgram)
 
             planePictogramDrawer.program.prepareVertexAttribute("vert", planeVertBuffer)
@@ -331,11 +331,17 @@ function initMvPictograms() {
                 // gl.cullFace(gl.BACK)
                 // gl.enable(gl.CULL_FACE)
             })
-        })
+        }
     }
 
     addType("mv", [pointPictogramDrawer, linePictogramDrawer, planePictogramDrawer], editingStyle)
     assignMv = function(name) {
         assignTypeAndData(name, "mv", { value: new Float32Array(16) })
     }
+
+    addRenderFunction(() => {
+        renderPoints()
+        renderLines()
+        renderPlanes()
+    })
 }

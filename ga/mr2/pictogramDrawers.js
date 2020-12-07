@@ -5,6 +5,8 @@
         Adding and intersecting SDFs
         Superimposing / blending textures
         Angles with a from-the-x-axis convention
+        solutions to PDEs
+        zeroes of polynomials
 */
 
 function initPictogramDrawers() {
@@ -99,6 +101,7 @@ function initPictogramDrawers() {
 
     pictogramTest()
     initAnglePictograms()
+    initSliderPictograms()
 }
 
 function pictogramTest()

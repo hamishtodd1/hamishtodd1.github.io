@@ -16,9 +16,8 @@ const IDENTIFIER_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVW
 //---------Varying state
 
 const coloredNamesAlphabetically = Array(63)  //7 choose 1 + 7 choose 2 + 7 choose 3
-const functionsWithIr = {}
 
-const pictogramDrawers = {}
+const functionsWithIr = {}
 
 const carat = {
     positionInString: -1,
@@ -36,22 +35,21 @@ const DAGGER_SYMBOL = String.fromCharCode("8224")
 const specialTypeableSymbols = [LAMBDA_SYMBOL, JOIN_SYMBOL, DAGGER_SYMBOL, "?","*"]
 
 let backgroundString = 
-`bg
-w
-r
-gp
-bgo p
-
-// `+ DAGGER_SYMBOL +`*
-g
+`bg w r
+o gp bgo
+p g
 
 y = bgo`+ DAGGER_SYMBOL +`
 ry = bgo`+JOIN_SYMBOL+`p
 b = reflectHorizontally(bgo)
 by = reflectHorizontally(go)
 
-
-
+// def stereographic() {
+// bo //projectionOrigin
+// bg //plane
+// o = bo`+ JOIN_SYMBOL +`p //line
+// projection = o meet bg
+// }
 
 
 

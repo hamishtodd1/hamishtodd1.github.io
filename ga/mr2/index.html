@@ -3,16 +3,7 @@
 		Fucking which way is z
 		Bug with your mind: you want to reinvent calculus
 
-	So you have your algebra, you have your visualizations
-		And for one visualization, you can change is algebraic, er, significance. I.e. its type?
-			Eg arrow left arrow up. Add the arrows.
-				If they're PGA elements, you get the point inbetween.
-				If LA elements, get the arrows concatenated
-		And for one type / algebraic structure, you can change its visualization
-			Eg crowd of people
-				The visualization of the people
-				The number of them that are infected
-		Pong game states are an algebraic structure, with only maybe 3 dimensions
+	
 
 	Maybe you do want helmet / VR?
 		Pros:
@@ -25,21 +16,8 @@
 		If you know how the value was derived, you know what tweening animation to have? Professionalism is all just tweening
 		Well you want to be able to make things gesturally, Bret style, right? Animations simulate that
 
-	Needed to make the maps / geometric interpretation
-		+, cos, sin, exp
-		Whenever you see "sin lat", that's projection onto line
-		Extract lat and lon
-		Slice lat and lon
-		Unwrapping lon
-		Geometrically interpret the functions (stare at maps.js):
-			Slicing system that allows you to see a sliced-open globe
-				Just a different uvBuffer, gl.LINE
-				You could draw on the globe and see results of that!
-			A lot of it is about projection. Sending projection point to infinity
-
 	General TODO
 		Function syntax
-		Planes
 
 	Filming setup
 		Semi transparent background to pad
@@ -52,13 +30,21 @@
 		Or, ordinary javascript arrays
 		But this isn't about arrays it's about functions
 
-	General visual algebra
+	General/universal visual algebra
 		New algebra for every video
 		you have a way of defininig literals. Strings (bits really but strings do)
 		you have functions defined on that algebra
 		Sometimes you want different viz for different things. Real view, disc view, color view
-
-
+		So you have your algebra, you have your visualizations
+			And for one visualization, you can change is algebraic, er, significance. I.e. its type?
+				Eg arrow left arrow up. Add the arrows.
+					If they're PGA elements, you get the point inbetween.
+					If LA elements, get the arrows concatenated
+			And for one type / algebraic structure, you can change its visualization
+				Eg crowd of people
+					The visualization of the people
+					The number of them that are infected
+			Pong game states are an algebraic structure, with only maybe 3 dimensions
 	
 
 	Interested parties
@@ -97,15 +83,16 @@
 			async function technicalInit() {
 				let renderEverything = initRenderFunctions()
 
+				
 				initAlgebra()
 
 				initPremadeBuffers()
 
-				// await initMapsIntegrated()
-				
 				initButtons()
 				initMouse()
 				initWindowResizeSystem()
+
+				// await initWorldMap()
 
 				initNames()
 				initPictogramDrawers()
@@ -113,7 +100,6 @@
 				// debugger
 				await initGlobePictograms()
 
-				// await initWorldMap()
 				// await initDymaxion()
 
 				initCarat()
@@ -140,7 +126,7 @@
 
 					// debugger
 					assignMv("w")
-					realLineX(getNameDrawerProperties("w").value, .5);
+					realLineX(getNameDrawerProperties("w").value, 1.);
 					
 					assignMv("bgo")
 					point(getNameDrawerProperties("bgo").value, .5,.5,0.,1.);
@@ -148,10 +134,12 @@
 					assignMv("p")
 					point(getNameDrawerProperties("p").value, 0.,.5,0.,1.);
 
-					assignMv("rw")
-
 					assignMv("g")
 					plane(getNameDrawerProperties("g").value, 0., 0., 1., 0.);
+
+					assignTypeAndData("r", "slider", { value: 0. })
+
+					assignTypeAndData("o", "test", { value: 0. })
 
 					let textureNames = ["earthColor", "ball", "cmb", "jupiter", "latAndLon2"]
 					for (let i = 0; i < textureNames.length; ++i) {
@@ -163,8 +151,6 @@
 						})
 						//this could compile to glsl, it's a struct
 					}
-					
-					assignTypeAndData("r", "test", { value: 0. })
 				}
 
 				function loop() {
@@ -196,6 +182,8 @@
 		<script src="shaderUtils.js"></script>
 
 		<script src="pictogramDrawers.js"></script>
+
+		<script src="slider.js"></script>
 
 		<script src="../common/buttons.js"></script>
 

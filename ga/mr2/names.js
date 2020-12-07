@@ -1,14 +1,5 @@
 /*
-    could press "?" to get simplest unused name
-
     More generic approach to coloring: stripes are radial spheres. Rotate and it does nothing
-
-    New naming system
-		you can type any colorString at any time. Still max 3 colors.
-		Turns into a pictogram and doesn't turn back. If it's undefined it gets a "?" in there
-		colors apply to all the things
-		array of names, array of types that those names are, array of the data
-		Forget about making them local to a function
 */
 
 function initNames() {

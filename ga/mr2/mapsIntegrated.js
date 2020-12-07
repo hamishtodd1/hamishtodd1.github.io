@@ -5,6 +5,50 @@
         The globe and the projections are two different kinds of object? One's a texture and one's map projection?
 
         Aaand it might be the dymaxion
+
+    So dymaxion, and the conic one, are functions of [0,1] that are flat at 1 and wrapped up at 0
+
+    
+    a = join(p,projectionPoint)
+    b = meet(a,manifold) (point pair, jeez!)
+    manifold (to be unwrapped by a separate function):
+        icosahedron: dymaxion
+        Cone: lambert
+        Orth/stereo/gnomic: plane
+
+    Ones not accounted for with unrolling or projection:
+        Sinusoidal/Bonne/werner
+            Think of peeling off strips
+            And the strips are curved by how far they are from a center
+            because they're keeping their length
+        interuppted
+            cut intro rectangles before doing sinusoidal
+
+    Conformal unroll (stretches!) to your half cylinder. This is pretty much one of the dumbest things you can possibly do
+        cylindrical: project
+        Mercator: project then the exp thing (non-trivial)
+        equirectangular: conformal unroll
+        Kavrayskiy: bring them in like circles
+        Gall-Peters: orth
+        craig retroazimuthal:
+            jeez
+
+    TODO
+		+, cos, sin, exp
+		Whenever you see "sin lat", that's projection onto line
+		Extract lat and lon
+		Slice lat and lon
+        Unwrapping lon
+        
+    Geometrically interpret the functions (stare at maps.js):
+        Slicing system that allows you to see a sliced-open globe
+            Just a different uvBuffer, gl.LINE
+            You could draw on the globe and see results of that!
+        A lot of it is about projection. Sending projection point to infinity
+
+
+    So you have a slider that controls how open a thing is
+        conic is easier than dymaxion
 */
 
 async function initGlobeProjectionPictograms() {
@@ -14,7 +58,6 @@ async function initGlobeProjectionPictograms() {
 
         What are these functions? For glsl y
     */
-
 
 
     let vsStart =  `

@@ -73,15 +73,13 @@
             While we've been looking at a lot of mathematically elegant things, in reality a lot of these maps are made by people deciding what they want and drawing a map off that
             mecca one, later comparison with gall peters
             Winkel III, national geographic
-            Mollweide
-                And here's what climate scientists use to show temperature change! pretty important to see the poles :)
-                CMB. When I was a kid I never realized this was a sky map that wraps up like this
             Werner - Show the old pic.
                 Good for the arctic circle!
                 VERY eurocentric
                 sinusoidal, bonne, bottomley
                 Equal area!!!!
             Equidistant - rolling pin
+                invented by al biruni, useful for showing North Korea's missile radii
                 equirectangular - also useful for panoramas https://www.istockphoto.com/photos/equirectangular-panorama-beach?mediatype=photography&phrase=equirectangular%20panorama%20beach&sort=best
                     Note that it still ends up with a big greenland
                 azimuthal equidstant
@@ -91,6 +89,7 @@
             Transverse mercator: just rotate it 90 degrees
             demonstrate greenland again and madagascar, maybe canada and northern russia
             [improvise. China, his country being undistorted, mercator good for direction but not length/area]
+            Greeks, Chinese, Persians, Egyptian, Russian
             Let me round off with my personal viewpoint.
                 It is true that map projection is a combination of mathematics and social context. No, there's no one perfect map.
                 But for a given task, there probably is one map that's perfect,
@@ -147,63 +146,46 @@ async function initWorldMap() {
 
             // p = globe(lon,lat);
 
-            // mollweide
-            // float theta = lat;
-            // float piSinLat = PI*sin(lat);
-            // for(int i = 0; i < 8; ++i) {
-            //     float numerator = 2.*theta + sin(2.*theta) - piSinLat;
-            //     float denominator = 2. + 2.*cos(2.*theta);
-            //     theta -= numerator / denominator;
-            // }
-            // p.x = 2.*sqrt(2.) / PI * cos(theta) * lon;
-            // p.y = sqrt(2.) * sin(theta);
+            // Interrupted sinusoidal is better in terms of thinking about the pole, and more compatible with GA, and easier
+            {
+                float stripIndex = 0.;
+                if(lat > 0.) {
+                    float cutoff = 116.;
+                    if(uv.x < cutoff/256. )
+                        stripIndex = cutoff/2.;
+                    else
+                        stripIndex = 158.;
+                }
+                else {
+                    float cutoff0 = 116.;
+                    float cutoff1 = 182.;
+                    if(uv.x < cutoff0/256. )
+                        stripIndex = cutoff0/2.;
+                    else if(uv.x < cutoff1/256.)
+                        stripIndex = (cutoff0+cutoff1)/2.;
+                    else 
+                        stripIndex = 256. - (256.-cutoff1)/2.;
+                }
+                float stripCenterAtEquatorLon = TAU * stripIndex / 256. - PI;
+                float stripCenterAtEquatorMapped = stripCenterAtEquatorLon;
 
-            // Interrupted mollweide. Sinusoidal is better in terms of thinking about the pole, and more compatible with GA, and easier
-            // {
-            //     float stripIndex = 0.;
-            //     if(lat > 0.) {
-            //         float cutoff = 116.;
-            //         if(uv.x < cutoff/256. )
-            //             stripIndex = cutoff/2.;
-            //         else
-            //             stripIndex = 158.;
-            //     }
-            //     else {
-            //         float cutoff0 = 116.;
-            //         float cutoff1 = 182.;
-            //         if(uv.x < cutoff0/256. )
-            //             stripIndex = cutoff0/2.;
-            //         else if(uv.x < cutoff1/256.)
-            //             stripIndex = (cutoff0+cutoff1)/2.;
-            //         else 
-            //             stripIndex = 256. - (256.-cutoff1)/2.;
-            //     }
-            //     float stripCenterAtEquatorLon = TAU * stripIndex / 256. - PI;
-            //     float stripCenterAtEquatorMapped = stripCenterAtEquatorLon;
+                p.x = (lon-stripCenterAtEquatorLon) * cos(lat) + stripCenterAtEquatorMapped;
+                p.y = lat;
+            }
 
-            //     p.x = (lon-stripCenterAtEquatorLon) * cos(lat) + stripCenterAtEquatorMapped;
-            //     p.y = lat;
-            // }
+            //Wagner VI
+            // p.x = lon * sqrt(1.-1.*sq(lat/PI));
+            // p.y = lat;
 
-            //Winkel III, pill shape. Might be nice to find an easier one. K
-            // float lat1 = acos(2./PI);
-            // float alpha = acos(cos(lat) * cos(.5*lon));
-            // float sincAlpha = sin(alpha) / alpha;
-            // p.x = .5 * (lon*cos(lat1) + 2.*cos(lat)*sin(.5*lon) / sincAlpha);
-            // p.y = .5 * (lat + sin(lat) / sincAlpha);
-
-            //Simpler: Wagner VI
-            p.x = lon * sqrt(1.-3.*sq(lat/PI))
-
-            //al-biruni
+            //al-biruni: azimuthal equidistant
 
             // mecca/Craig retroazimuthal. Needs different mesh
-            float osscilating = .5 + .5 * sin(frameCount * .01);
-            float meccaLat = 0.37331021903; //* oscillating;
-            float meccaLon = 0.69565158793;
-            p.x = lon - meccaLon;
-            p.y = p.x / sin(p.x) * (sin(lat)*cos(p.x)-tan(meccaLat)*cos(lat));
-            p.xy *= 3.;
+            // float osscilating = .5 + .5 * sin(frameCount * .01);
+            // float meccaLat = 0.37331021903; //* oscillating;
+            // float meccaLon = 0.69565158793;
+            // p.x = lon - meccaLon;
+            // p.y = p.x / sin(p.x) * (sin(lat)*cos(p.x)-tan(meccaLat)*cos(lat));
+            // p.xy *= 3.;
             //assume lon = meccalon
             // sin(lat)-tan(meccaLat)*cos(lat)
             // 
@@ -222,7 +204,7 @@ async function initWorldMap() {
                 // p.y = rho0 - rho * cos(n*lon);
             }
 
-            // Bonne, covers sinusoidal and werner
+            // Bonne, sinusoidal, werner
             // float lat1 = PI / 2. * (.5+.5*sin(frameCount * .05));
             // if(abs(lat1) < .01) { //sinusoidal. Seems projective!
             //     p.x = lon * cos(lat);

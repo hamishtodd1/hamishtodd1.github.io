@@ -178,7 +178,7 @@ function initTypeableCharacters()
 {
     let typeableCharacters = ""
     
-    let initialCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ()+-=/ "
+    let initialCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ(){}+-=/ "
     for (let i = 0; i < initialCharacters.length; ++i) {
         let character = initialCharacters[i]
 
