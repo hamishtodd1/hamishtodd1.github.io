@@ -1,4 +1,11 @@
 function initErrorHighlight() {
+    handleError = function(tokenIndex, newError) {
+        errorHighlightTokenIndices.push(tokenIndex)
+        if (loggedErrors.indexOf(newError) === -1) {
+            console.error("transpilation error: \n", newError)
+            loggedErrors.push(newError)
+        }
+    }
 
     let farBackQuadBuffer = new Float32Array(quadBuffer.length)
     for(let i = 0; i < quadBuffer.length; ++i) {

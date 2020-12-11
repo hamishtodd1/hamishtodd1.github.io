@@ -72,9 +72,8 @@ function initTokenizer(displayableCharacters) {
                 ++positionInString
         }
 
-        let uniqueTokens = [" ","\n",LAMBDA_SYMBOL,"="]
-        let separators = ["(", ")"]
-        let keywords = ["def"]
+        let uniqueMonoSymbols = [" ", "\n", "=", "(", ")","{","}",","]
+        let uniqueMultiSymbols = ["def"]
 
         let positionInString = 0
         while (positionInString < backgroundStringLength) {
@@ -85,12 +84,8 @@ function initTokenizer(displayableCharacters) {
                 tokens.push("comment")
                 moveWhile(() => backgroundString[positionInString] !== "\n")
             }
-            else if ( uniqueTokens.indexOf(tokenStartCharacter) !== -1) {
+            else if ( uniqueMonoSymbols.indexOf(tokenStartCharacter) !== -1) {
                 tokens.push(tokenStartCharacter)
-                ++positionInString
-            }
-            else if (separators.indexOf(tokenStartCharacter)!== -1) {
-                tokens.push("separator")
                 ++positionInString
             }
             else if (infixSymbols.indexOf(tokenStartCharacter) !== -1) {
@@ -106,15 +101,10 @@ function initTokenizer(displayableCharacters) {
                 moveWhile(() => IDENTIFIER_CHARACTERS.indexOf(backgroundString[positionInString]) !== -1)
                 let lexeme = backgroundString.substr(tokenStart, positionInString-tokenStart)
                 
-                let isKeyword = false
-                keywords.forEach((kw) => {
-                    if (lexeme === kw) {
-                        isKeyword = true
-                        tokens.push(lexeme)
-                    }
-                })
-                if(isKeyword)
-                    return false
+                if (uniqueMultiSymbols.indexOf(lexeme) !== -1) {
+                    tokens.push(lexeme)
+                    continue
+                }
 
                 let usableNamePotentially = getAlphabetizedColoredName(lexeme)
                 if(usableNamePotentially === null) 
@@ -125,9 +115,12 @@ function initTokenizer(displayableCharacters) {
                     tokens.push("coloredName")
                 }
             }
-            else
-                handleError(tokenStarts.length, "don't know what to do with this character: ", tokenStartCharacter)
+            else {
+                console.error("don't know what to do with this character: " + tokenStartCharacter)
+                debugger
+            }
         }
+        // log(tokens)
 
         forEachToken = (func) => {
             for (let tokenIndex = 0, numTokens = tokens.length; tokenIndex < numTokens; ++tokenIndex) {
@@ -163,20 +156,40 @@ function initTokenizer(displayableCharacters) {
 
         let nameToAssignTo = null
 
-        let nextNameIsFunction = false
-        let functionNameToAssignTo = null
-        let functionTree = null
+        let transpilingFunctionProperties = {
+            name: null,
+            numArguments: 0,
+            numDeclarations: 0,
+            ir: "",
+        }
+        
+        const functionSignatureTokens = ["uncoloredName", "(",",","{"]
+        let nextFunctionSignatureTokenIndex = 99999
+
 
         logLastFewTokens = (tokenIndex) => {
             let numTokensToCheck = Math.min(tokenIndex, 15)
-            for (let i = tokenIndex - numTokensToCheck; i <= tokenIndex; ++i) {
+            for (let i = tokenIndex - numTokensToCheck; i <= tokenIndex; ++i)
                 log(tokens[i])
-            }
         }
 
         clearNames(namesNeedingToBeCleared)
         namesNeedingToBeCleared.length = 0
         //then have all the things that are currently in the separate files done here
+
+        function checkNameIsUnused(lexeme) {
+            return getNameDrawerProperties(lexeme) === null
+                    && functionsWithIr[lexeme] === undefined
+                    && builtInFunctionNames.indexOf(lexeme) === -1
+        }
+
+        Object.keys(functionsWithIr).forEach((key) => {
+            if (!functionsWithIr[key].stillDefinedInProgram) {
+                if (key !== "reflectHorizontally")
+                    delete functionsWithIr[key]
+            }
+            else functionsWithIr[key].stillDefinedInProgram = false
+        })
 
         let lineNumber = 0
         forEachToken((tokenIndex, tokenStart, tokenEnd, token, lexeme) => {
@@ -184,78 +197,91 @@ function initTokenizer(displayableCharacters) {
                 ++lineNumber
 
                 if (nameToAssignTo !== null && skipLine === false) {
-                    lineTree.parseAndAssign(tokenIndex, nameToAssignTo, lineNumber)
+                    lineTree.parseAndAssign(tokenIndex, nameToAssignTo, lineNumber, transpilingFunctionProperties)
 
                     namesNeedingToBeCleared.push(nameToAssignTo)
-
-                    if (functionNameToAssignTo !== null) {
-                        // globeProjectionPictogramPrograms["simpleAlternating"].setIr()
-                        // something = new GlobeProjectionIr()                 
-                    }
                 }
 
                 nameToAssignTo = null
-                unusedNameJustSeen = null
-
                 skipLine = false
             }
             else if(skipLine)
                 return false
 
-            if (token === "comment" || token === " " )
+            if (token === "comment" || token === " ")
                 return false
-            else  if (lexeme === "def") {
-                if (nextNameIsFunction || functionNameToAssignTo !== null || nameToAssignTo !== null)
-                    handleError(tokenIndex, "misplaced lambda")
 
-                nextNameIsFunction = true
-            }
-            else if ((token === "coloredName" || token === "uncoloredName") 
-                && getNameDrawerProperties(lexeme) === null 
-                && functionsWithIr[lexeme] === undefined
-                && builtInFunctionNames.indexOf(lexeme) === -1 )
-            {
-                if (nameToAssignTo !== null || unusedNameJustSeen !== null)
-                    handleError(tokenIndex, "misplaced new name: " + lexeme)
-                    
-                unusedNameJustSeen = lexeme
-            }
-            else if (lexeme === "=") {
-                if (unusedNameJustSeen === null || nameToAssignTo !== null)
-                    handleError(tokenIndex, "misplaced =")
+            //----------------------
+            if(nextFunctionSignatureTokenIndex < functionSignatureTokens.length) {
+                let expectation = functionSignatureTokens[nextFunctionSignatureTokenIndex]
 
-                if (nextNameIsFunction) {
-                    if (functionNameToAssignTo !== null)
-                        handleError(tokenIndex, "misplaced new function name: " + lexeme)
-                    functionNameToAssignTo = unusedNameJustSeen
-                    nextNameIsFunction = false
+                if(expectation === ",") {
+                    if(token === ")")
+                        ++nextFunctionSignatureTokenIndex
+                    else if (token === "coloredName" && checkNameIsUnused(lexeme)) {
+                        ++transpilingFunctionProperties.numArguments
+                        log("no")
+                        //arg0, arg1 etc
+                        debugger
+                    }
+
+                    return false
                 }
-                else {
-                    if (nameToAssignTo !== null)
-                        handleError(tokenIndex, "misplaced new variable name: " + lexeme)
+                else if (token === expectation) {
+                    ++nextFunctionSignatureTokenIndex
+
+                    if (token === "uncoloredName")
+                        transpilingFunctionProperties.name = lexeme
+
+                    return false
+                }
+
+                handleError(tokenIndex, "unexpected symbol in function signature: " + lexeme + ", was expecting " + expectation)
+            }
+            else {
+                if (token === "def") {
+                    if (nameToAssignTo !== null || unusedNameJustSeen !== null)
+                        handleError(tokenIndex, "misplaced lambda")
+
+                    nextFunctionSignatureTokenIndex = 0
+                }
+                else if ((token === "coloredName" || token === "uncoloredName")
+                    && checkNameIsUnused(lexeme)) {
+                    if (nameToAssignTo !== null || unusedNameJustSeen !== null)
+                        handleError(tokenIndex, "misplaced new name: " + lexeme)
+
+                    unusedNameJustSeen = lexeme
+                }
+                else if (lexeme === "=") {
+                    if (nameToAssignTo !== null || unusedNameJustSeen === null  ) {
+                        debugger
+                        handleError(tokenIndex, "misplaced =")
+                    }
+
                     nameToAssignTo = unusedNameJustSeen
+                    unusedNameJustSeen = null
                 }
+                else if (nameToAssignTo !== null) {
+                    let lexemeSuccessfullyAdded = lineTree.addLexeme(tokenIndex, token, lexeme)
+                    if (!lexemeSuccessfullyAdded )
+                        skipLine = true
+                }
+                else if (lexeme === "}") {
+                    let tfp = transpilingFunctionProperties
 
-                unusedNameJustSeen = null
-            }
+                    if (tfp.name === null)
+                        handleError(tokenIndex, "misplaced }")
+                    
+                    if (functionsWithIr[tfp.name] === undefined)
+                        functionsWithIr[tfp.name] = new FunctionWithIr(tfp.name)
 
-            //////////////////////
-            ////  ALL SET UP  ////
-            //////////////////////
+                    functionsWithIr[tfp.name].setIr(tfp)
 
-            //all you can do is apply the function to the globe
-            //we might like it to be the case that eg "t Proj tDagger" gives you proj rotated by t. But eh
-            
-            else if (nameToAssignTo !== null) {
-                // if (nameToAssignTo === "y")
-                //     debugger
-                let result = lineTree.addLexeme(tokenIndex, token, lexeme)
-                if (result === false)
-                    skipLine = true
-            }
-            else if (functionNameToAssignTo !== null && lexeme === "}" && nameToAssignTo === null) {
-                //time to collect up those lines and round off
-                functionNameToAssignTo = null
+                    tfp.numDeclarations = 0
+                    tfp.numArguments = 0
+                    tfp.ir = ""
+                    tfp.name = null
+                }
             }
         })
 

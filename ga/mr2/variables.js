@@ -27,6 +27,8 @@ const carat = {
 
 const displayWindows = []
 
+const loggedErrors = []
+
 const errorHighlightTokenIndices = []
 
 const LAMBDA_SYMBOL = String.fromCharCode("955") //you CAN write "function", but lots of kids don't know "function". In python it's "def"
@@ -41,10 +43,13 @@ p g
 
 y = bgo`+ DAGGER_SYMBOL +`
 ry = bgo`+JOIN_SYMBOL+`p
-b = reflectHorizontally(bgo)
-by = reflectHorizontally(go)
 
-// def stereographic() {
+def stereographic() {
+    bo = p
+}
+b = reflectHorizontally(bgo)
+// br = reflectHorizontally(go)
+by = stereographic()
 // bo //projectionOrigin
 // bg //plane
 // o = bo`+ JOIN_SYMBOL +`p //line

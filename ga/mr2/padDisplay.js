@@ -14,7 +14,7 @@ function initPadDisplay() {
     }
     
     let tokensWhoseCharactersGetDrawn = [
-        "uncoloredName","comment","separator","infixSymbol","def","=","postfixSymbol"
+        "uncoloredName","comment","separator","infixSymbol","def","=","postfixSymbol","(",")","{","}",","
     ]
     drawTokens = function () {
         drawingPosition.x = -mainCamera.rightAtZZero
@@ -23,7 +23,6 @@ function initPadDisplay() {
         carat.preParseFunc()
 
         forEachToken((tokenIndex, tokenStart, tokenEnd, token, lexeme) => {
-
             if(errorHighlightTokenIndices.indexOf(tokenIndex) !== -1)
                 placeErrorHighlight(drawingPosition)
 

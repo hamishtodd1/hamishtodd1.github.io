@@ -4,9 +4,9 @@
 function initAlgebra()
 {
     function replaceSignature(newSignature,func) {
-        let jsString = func.toString()
-        let firstLinebreakIndex = jsString.indexOf("\n")
-        let bodyString = jsString.substring(firstLinebreakIndex)
+        let gaFunctionJsString = func.toString()
+        let firstLinebreakIndex = gaFunctionJsString.indexOf("\n")
+        let bodyString = gaFunctionJsString.substring(firstLinebreakIndex)
         return newSignature + bodyString
     }
 

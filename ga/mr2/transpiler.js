@@ -6,21 +6,12 @@
 
 function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) {
 
-    let loggedErrors = []
-    handleError = function(tokenIndex, newError) {
-        errorHighlightTokenIndices.push(tokenIndex)
-        if (loggedErrors.indexOf(newError) === -1) {
-            console.error("transpilation error: \n", newError)
-            loggedErrors.push(newError)
-        }
-    }
-
     AbstractSyntaxTree = function() {
         let currentNodeBranchingFrom = null
         let functionNameJustSeen = null
         let branchCanComplete = false
         let globeProperties = null
-        let functionsNeeded = []
+        let functionsWithIrNeeded = []
 
         function Node(lexeme, terminal, replaceMostRecent) {
             this.lexeme = lexeme
@@ -28,11 +19,11 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
             this.children = []
 
             if (terminal)
-                this.expectedNumberOfChildren = 0
+                this.expectedNumberOfArguments = 0
             else if (builtInFunctionNames.indexOf(lexeme) !== -1)
-                this.expectedNumberOfChildren = eval(lexeme).length - 1 //-1 because target is last
+                this.expectedNumberOfArguments = eval(lexeme).length //-1 because target is last
             else if (functionsWithIr[lexeme] !== undefined) {
-                this.expectedNumberOfChildren = functionsWithIr[lexeme].length - 1
+                this.expectedNumberOfArguments = functionsWithIr[lexeme].length //wanna remove that -1. How come reflect works?
             }
             else
                 console.error("unrecognized function: ", lexeme)
@@ -58,7 +49,7 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
             delete this.children
             delete this.lexeme
             delete this.parent
-            delete this.expectedNumberOfChildren
+            delete this.expectedNumberOfArguments
         }
 
         let topNode = new Node("assign", false) //probably doesn't need to be this
@@ -72,9 +63,14 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
             new Node(infixLexeme, false, true)
         }
 
+        let seen = false
+
         this.addLexeme = function(tokenIndex,token,lexeme) {
             if (token === "comment" || token === " " || token === "\n")
                 return false
+
+            if (lexeme === "stereographic" || lexeme === "reflectHorizontally" )
+                seen = true
 
             let isFunction = builtInFunctionNames.indexOf(lexeme) !== -1 || functionsWithIr[lexeme] !== undefined
             let isOpenBracket = lexeme === "("
@@ -110,6 +106,8 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
                     if(functionNameJustSeen) {
                         adjustToOpenBracket(functionNameJustSeen)
                         functionNameJustSeen = null
+                        if(currentNodeBranchingFrom.expectedNumberOfArguments === 1) //bit hacky
+                            branchCanComplete = true
                     }
                     else
                         adjustToOpenBracket("assign")
@@ -118,14 +116,18 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
                     functionNameJustSeen = lexeme
 
                     if (functionsWithIr[functionNameJustSeen] !== undefined)
-                        functionsNeeded.push(functionNameJustSeen)
+                        functionsWithIrNeeded.push(functionNameJustSeen)
                 }
             }
             else if (branchCanComplete) {
-                if (lexeme === "," && currentNodeBranchingFrom.children.length !== currentNodeBranchingFrom.expectedNumberOfChildren)
+                if (lexeme === "," && currentNodeBranchingFrom.children.length !== currentNodeBranchingFrom.expectedNumberOfArguments - 1)
                     branchCanComplete = false
-                else if (lexeme === ")" && currentNodeBranchingFrom.children.length === currentNodeBranchingFrom.expectedNumberOfChildren)
-                    currentNodeBranchingFrom = currentNodeBranchingFrom.parent //we move up having finished branch, so this branch is potentially valid too
+                else if (lexeme === ")" ) {
+                    if (currentNodeBranchingFrom.children.length === currentNodeBranchingFrom.expectedNumberOfArguments - 1)
+                        currentNodeBranchingFrom = currentNodeBranchingFrom.parent //we move up having finished branch, so this branch is potentially valid too
+                    else
+                        handleError(tokenIndex, "wrong number of non-target arguments for function '" + currentNodeBranchingFrom.lexeme + "' should be " + (currentNodeBranchingFrom.expectedNumberOfArguments-1)+", got " + currentNodeBranchingFrom.children.length)
+                }
                 else if (token === "infixSymbol") {
                     injectNodeWithCurrentAsChild(infixOperators[lexeme])
                     branchCanComplete = false
@@ -139,6 +141,7 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
             }
             else {
                 handleError(tokenIndex,"unexpected symbol before branch end: " + lexeme)
+                // debugger
                 return false
             }
 
@@ -146,18 +149,18 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
         }
 
         //since the top node is a "" function it should be ok if there's just a single mv
-        function parseFunctionNode(node, numTmvsUsed) {
+        function parseFunctionNode(node, numTmvs) {
             let finalLine = node.lexeme + "("
             let computationLines = ""
 
             node.children.forEach((child) => {
-                if (child.children.length === 0)
+                if (child.expectedNumberOfArguments === 0)
                     finalLine += child.lexeme + ","
                 else {
-                    let transpilationMvName = 'tMv' + numTmvsUsed.value
-                    ++numTmvsUsed.value
+                    let transpilationMvName = 'tMv' + numTmvs.value
+                    ++numTmvs.value
 
-                    computationLines += parseFunctionNode(child,numTmvsUsed) + transpilationMvName + ');\n'
+                    computationLines += parseFunctionNode(child,numTmvs) + transpilationMvName + ');\n'
                     finalLine += transpilationMvName + ','
                 }
             })
@@ -168,144 +171,81 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
             return computationLines + finalLine
         }
 
-        this.parseAndAssign = function(tokenIndex,nameToAssignTo, lineNumber) {
+        this.parseAndAssign = function(
+            tokenIndex,nameToAssignTo,lineNumber,
+            transpilingFunctionProperties
+            ) {
             if (!branchCanComplete) {
                 handleError(tokenIndex,"unexpected line end")
                 return false
             }
 
-            let numTmvsUsed = { value: 0 }
-            let body = parseFunctionNode(topNode, numTmvsUsed)
-
-            if (globeProperties !== null) {
-                body += `outputMv);`
-
-                body = addTmvs(body, true, numTmvsUsed.value)
-
-                let header = ""
-                functionsNeeded.forEach((name)=>{
-                    header += functionsWithIr[name].glslString + "\n"
-                })
-
+            if (seen) {
                 // debugger
-
-                assignTypeAndData(nameToAssignTo, "globeProjection", {
-                    globeProperties, header, body
-                })
             }
-            else 
+
+            let numTmvs = { value: 0 }
+            let bodySansFinalAssignmentTarget = parseFunctionNode(topNode, numTmvs)
+
+            let targetGlsl = globeProperties !== null
+            if (targetGlsl) {
+                alert("compiling to shader temporarily turned off!")
+                debugger
+
+                // bodySansFinalAssignmentTarget += `outputMv);` //valid javascript...
+
+                // bodySansFinalAssignmentTarget = addMvDeclarations(bodySansFinalAssignmentTarget, true, numTmvs.value,"t")
+
+                // functionsWithIrNeeded.forEach((name) => {
+                //     header += functionsWithIr[name].glslString + "\n"
+                // })
+
+                //these are the thing that let you see it on screen
+                // assignTypeAndData(nameToAssignTo, "globeProjection", {
+                //     globeProperties, header, bodySansFinalAssignmentTarget
+                // })
+            }
+
+            //js
             {
-                body += `getNameDrawerProperties("` + nameToAssignTo + `").value);`
-
-                body = addTmvs(body, false, numTmvsUsed.value)
-
-                let header = ""
-                functionsNeeded.forEach((name)=>{
-                    header += functionsWithIr[name].jsString + "\n"
-                })
-
                 assignMv(nameToAssignTo)
-                
-                eval(header + body) //easy because it does something to variables in scope here
+                let body = bodySansFinalAssignmentTarget + `getNameDrawerProperties("` + nameToAssignTo + `").value);`
+
+                body = addMvDeclarations(body, false, numTmvs.value, "t")
+
+                let functionLocalizer = ""
+                functionsWithIrNeeded.forEach((name) => {
+                    functionLocalizer += "let " + name + " = functionsWithIr." + name + ".jsFunction;\n"
+                })
+                eval(functionLocalizer + body )
             }
 
-            globeProperties = null
-            functionsNeeded.length = 0
+            let tfp = transpilingFunctionProperties
+            if (tfp.name !== null) {
+                functionsWithIrNeeded.forEach((functionNeeded) => {
+                    if (tfp.functionsWithIrNeeded.indexOf(functionNeeded) === -1) //mmm, make sure you don't have a load of leftover shit
+                        tfp.functionsWithIrNeeded.push(functionNeeded)
+                })
 
-            branchCanComplete = false
-            currentNodeBranchingFrom = topNode
-            functionNameJustSeen = null
+                tfp.ir += 
+                    "{\n" +
+                        bodySansFinalAssignmentTarget + "fMv" + tfp.numDeclarations.toString() + ");" + 
+                    "\n}\n"
+                ++tfp.numDeclarations
+            }
+
+            //Resetting the tree
+            {
+                globeProperties = null
+                functionsWithIrNeeded.length = 0
+
+                branchCanComplete = false
+                currentNodeBranchingFrom = topNode
+                functionNameJustSeen = null
+            }
 
             return true
         }
-    }
-
-    function TranspiledFunction(name) {
-        this.irString = ""
-        this.glslString = ""
-        this.jsString = ""
-
-        this.length = -1
-        this.numTmvsUsed = -1
-        
-        this.name = name
-        functionsWithIr[name] = this
-    }
-    TranspiledFunction.prototype.setIr = function(numArgumentsIncludingTarget,numTmvsUsed,newIr) {
-        this.numTmvsUsed = numTmvsUsed
-        this.length = numArgumentsIncludingTarget
-        this.irString = newIr
-        this.glslString = irToExecutable( true, this.name)
-        this.jsString   = irToExecutable(false, this.name)
-    }
-    new TranspiledFunction("reflectHorizontally")
-    let updateAlternatingFunction = () => {
-        // if (Math.floor(frameCount / 50) % 2)
-        //     functionsWithIr["reflectHorizontally"].setIr(2,0,`assign(arg0,target);`)
-        // else 
-        {
-            functionsWithIr["reflectHorizontally"].setIr(2,2,
-            `
-            plane(tMv0,1.,0.,0.,0.);
-
-            gProduct(tMv0,arg0,tMv1);
-            gProduct(tMv1,tMv0,target);
-            `)
-        }
-
-        // `
-        // assign(pointOnGlobe,outputMv);
-        // outputMv[12] -= .09;
-        // `
-        // `
-        // point(outputMv,
-        // 	lon * cos(lat) * .3,
-        // 	lat * .3,
-        // 	0.,1.);
-        // `
-    }
-    // updateFunctions.splice(0, 0, updateAlternatingFunction)
-    updateAlternatingFunction()
-
-    function addTmvs(body,glslInsteadOfJs, numTmvsUsed) {
-        let ret = body
-        if (glslInsteadOfJs) {
-            for (let i = 0; i < numTmvsUsed; ++i)
-                ret = `float tMv` + i.toString() + `[16];\n` + ret
-        }
-        else {
-            for (let i = 0; i < numTmvsUsed; ++i)
-                ret = `let tMv` + i.toString() + ` = new Float32Array(16);\n` + ret + `\ndelete tMv` + i.toString() + `;`
-        }
-
-        return ret
-    }
-
-    function irToExecutable(glslInsteadOfJs, functionName) {
-        let f = functionsWithIr[functionName]
-
-        let body = addTmvs(f.irString, glslInsteadOfJs,f.numTmvsUsed)
-
-        let isFunction = true
-        if(!isFunction)
-            return body
-        
-        let numNonTargetArguments = f.length - 1
-        let signature = ""
-        if (glslInsteadOfJs) {
-            signature += `void ` + functionName + `(`
-            for (let i = 0; i < numNonTargetArguments; ++i)
-                signature += `in float arg` + i.toString() + `[16],`
-            signature += `out float target[16])`
-        }
-        else {
-            signature += `function ` + functionName + `(`
-            for (let i = 0; i < numNonTargetArguments; ++i)
-                signature += `arg` + i.toString() + `,`
-            signature += `target)`
-        }
-
-        return signature + "\n{" + body + "\n}"
     }
 }
 
