@@ -21,9 +21,9 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
             if (terminal)
                 this.expectedNumberOfArguments = 0
             else if (builtInFunctionNames.indexOf(lexeme) !== -1)
-                this.expectedNumberOfArguments = eval(lexeme).length //-1 because target is last
+                this.expectedNumberOfArguments = eval(lexeme).length
             else if (functionsWithIr[lexeme] !== undefined) {
-                this.expectedNumberOfArguments = functionsWithIr[lexeme].length //wanna remove that -1. How come reflect works?
+                this.expectedNumberOfArguments = functionsWithIr[lexeme].length
             }
             else
                 console.error("unrecognized function: ", lexeme)
@@ -37,12 +37,14 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
             if (!replaceMostRecent)
                 this.children.push(child)
             else {
+                // console.error("b")
                 // debugger
                 let oldChild = this.children.pop()
                 this.children.push(child)
                 child.addChild(oldChild, false)
                 currentNodeBranchingFrom = child
             }
+            
             child.parent = this
         }
         Node.prototype.deleteProperties = function () {
@@ -63,14 +65,11 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
             new Node(infixLexeme, false, true)
         }
 
-        let seen = false
-
         this.addLexeme = function(tokenIndex,token,lexeme) {
             if (token === "comment" || token === " " || token === "\n")
                 return false
 
-            if (lexeme === "stereographic" || lexeme === "reflectHorizontally" )
-                seen = true
+            // log(lexeme)
 
             let isFunction = builtInFunctionNames.indexOf(lexeme) !== -1 || functionsWithIr[lexeme] !== undefined
             let isOpenBracket = lexeme === "("
@@ -89,7 +88,7 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
                     branchCanComplete = true
 
                     switch (getNameDrawerProperties(lexeme).type) {
-                        case "mv":
+                        case "mv": //arg0, arg1
                             new Node('getNameDrawerProperties("' + lexeme + '").value', true)
                             break
 
@@ -149,18 +148,24 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
         }
 
         //since the top node is a "" function it should be ok if there's just a single mv
-        function parseFunctionNode(node, numTmvs) {
+        function parseFunctionNode(node, numTmvs, argumentNames) {
             let finalLine = node.lexeme + "("
             let computationLines = ""
 
+            //terminal symbols get transformed into arg0, arg1
+
             node.children.forEach((child) => {
-                if (child.expectedNumberOfArguments === 0)
-                    finalLine += child.lexeme + ","
+                if (child.expectedNumberOfArguments === 0) {
+                    if(argumentNames.indexOf(child.lexeme) !== -1)
+                        finalLine += "arg" + argumentNames.indexOf(child.lexeme) + ","
+                    else
+                        finalLine += child.lexeme + ","
+                }
                 else {
                     let transpilationMvName = 'tMv' + numTmvs.value
                     ++numTmvs.value
 
-                    computationLines += parseFunctionNode(child,numTmvs) + transpilationMvName + ');\n'
+                    computationLines += parseFunctionNode(child,numTmvs,argumentNames) + transpilationMvName + ');\n'
                     finalLine += transpilationMvName + ','
                 }
             })
@@ -180,47 +185,56 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
                 return false
             }
 
-            if (seen) {
-                // debugger
-            }
+            let tfp = transpilingFunctionProperties
 
             let numTmvs = { value: 0 }
-            let bodySansFinalAssignmentTarget = parseFunctionNode(topNode, numTmvs)
+            let bodySansFinalAssignmentTarget = parseFunctionNode(topNode, numTmvs, tfp.arguments)
 
             let targetGlsl = globeProperties !== null
             if (targetGlsl) {
-                alert("compiling to shader temporarily turned off!")
-                debugger
+                let body = bodySansFinalAssignmentTarget + `target);`
 
-                // bodySansFinalAssignmentTarget += `outputMv);` //valid javascript...
+                if(tfp.arguments.length !== 0) {
+                    console.error("not sure what to do here")
+                    debugger
+                    // tfp.arguments.forEach((argument, i) => {
+                    //     body = "float arg" + i + " = " + argument + ";\n" + body
+                    // })
+                }
 
-                // bodySansFinalAssignmentTarget = addMvDeclarations(bodySansFinalAssignmentTarget, true, numTmvs.value,"t")
+                //at some point shit needs to be sent in here as uniforms
 
-                // functionsWithIrNeeded.forEach((name) => {
-                //     header += functionsWithIr[name].glslString + "\n"
-                // })
+                body = addMvDeclarations(body, true, numTmvs.value,"t")
 
-                //these are the thing that let you see it on screen
-                // assignTypeAndData(nameToAssignTo, "globeProjection", {
-                //     globeProperties, header, bodySansFinalAssignmentTarget
-                // })
+                let header = ""
+                functionsWithIrNeeded.forEach((name) => {
+                    header += functionsWithIr[name].glslString + "\n"
+                })
+
+                // "just" the things that let you see it on screen
+                assignTypeAndData(nameToAssignTo, "globeProjection", {
+                    globeProperties, header, body
+                })
             }
+            else {
+                let body = bodySansFinalAssignmentTarget + `target);`
 
-            //js
-            {
-                assignMv(nameToAssignTo)
-                let body = bodySansFinalAssignmentTarget + `getNameDrawerProperties("` + nameToAssignTo + `").value);`
+                tfp.arguments.forEach((argument,i)=>{
+                    body = "let arg" + i + ` = getNameDrawerProperties("` + argument + `").value;\n` + body
+                })
 
                 body = addMvDeclarations(body, false, numTmvs.value, "t")
 
-                let functionLocalizer = ""
+                let localizer = `\nlet target = getNameDrawerProperties("` + nameToAssignTo + `").value;\n`
                 functionsWithIrNeeded.forEach((name) => {
-                    functionLocalizer += "let " + name + " = functionsWithIr." + name + ".jsFunction;\n"
+                    localizer += "let " + name + " = functionsWithIr." + name + ".jsFunction;\n"
                 })
-                eval(functionLocalizer + body )
+                // debugger
+
+                assignMv(nameToAssignTo)
+                eval(localizer + body )
             }
 
-            let tfp = transpilingFunctionProperties
             if (tfp.name !== null) {
                 functionsWithIrNeeded.forEach((functionNeeded) => {
                     if (tfp.functionsWithIrNeeded.indexOf(functionNeeded) === -1) //mmm, make sure you don't have a load of leftover shit
@@ -229,7 +243,7 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
 
                 tfp.ir += 
                     "{\n" +
-                        bodySansFinalAssignmentTarget + "fMv" + tfp.numDeclarations.toString() + ");" + 
+                        bodySansFinalAssignmentTarget + "fMv" + tfp.numDeclarations.toString() + ");" +
                     "\n}\n"
                 ++tfp.numDeclarations
             }

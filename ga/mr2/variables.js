@@ -44,12 +44,12 @@ p g
 y = bgo`+ DAGGER_SYMBOL +`
 ry = bgo`+JOIN_SYMBOL+`p
 
-def stereographic() {
+def stereographic(bp) {
     bo = p
 }
 b = reflectHorizontally(bgo)
-// br = reflectHorizontally(go)
-by = stereographic()
+br = reflectHorizontally(go)
+by = stereographic(bgo)
 // bo //projectionOrigin
 // bg //plane
 // o = bo`+ JOIN_SYMBOL +`p //line

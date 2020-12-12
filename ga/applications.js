@@ -1,7 +1,11 @@
 /*
-	nicely visual QM course https://www.youtube.com/watch?v=K4BF7MD69_U
+	https://twitter.com/MachinePix/status/1323759584390033408
 
-	This has great footage for thinking about phase, wave functions and interference https://www.youtube.com/watch?v=WTxDyYHaYAI
+	This animation except in 3D, the points are rotating on circles https://www.reddit.com/r/math/comments/jdns19/circles_moving_in_a_straight_line_with_sin/
+
+	nicely visual QM course https://www.youtube.com/watch?v=K4BF7MD69_U
+	Nice footage of bubbles https://www.youtube.com/watch?v=WTxDyYHaYAI
+	Probably interestingly shaped magnetic field https://www.youtube.com/watch?v=c2h60hCJh2U
 
 	https://twitter.com/MartinSchwab9/status/1289323221049843712
 

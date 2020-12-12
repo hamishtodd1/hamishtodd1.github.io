@@ -17,7 +17,8 @@ function initFunctionWithIrs() {
     function irToExecutable(glslInsteadOfJs, functionName) {
         let f = functionsWithIr[functionName]
 
-        let body = f.ir + "\nassign(fMv" + (f.numDeclarations-1).toString() + ",target);"
+        let body = f.ir + "\nassign(fMv" + (f.numDeclarations-1).toString() + ",target);" 
+        // makes more sense than "return", because you deffo want to see the result
         body = addMvDeclarations(body, glslInsteadOfJs, f.numDeclarations, "f")
 
         let numNonTargetArguments = f.length - 1
@@ -64,17 +65,19 @@ function initFunctionWithIrs() {
             
         if(tfp.numDeclarations < 1)
             return
+
+        log(transpilingFunctionProperties)
         
         this.numDeclarations = tfp.numDeclarations
-        this.length = tfp.numArguments + 1 // because target
+        this.length = tfp.arguments.length + 1 // because target
 
         this.ir = tfp.ir
 
         this.glslString = irToExecutable(true, this.name)
 
         //fairly insane
-        // debugger
         let str = irToExecutable(false, this.name)
+        // debugger
         eval(str)
         this.jsFunction = eval(this.name)
 
@@ -90,7 +93,7 @@ function initFunctionWithIrs() {
         {
             functionsWithIr["reflectHorizontally"].setIr({
                 numDeclarations: 3,
-                numArguments: 1,
+                arguments: ["input"],
                 ir: 
                 `
             plane(fMv0,1.,0.,0.,0.);

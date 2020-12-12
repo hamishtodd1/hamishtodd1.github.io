@@ -1,4 +1,8 @@
 /*
+	In an ordinary editor, one problem you'd encounter with an automatic inliner is that if you had any variables with same name...
+	Not such a problem for us because auto-renaming, you really don't give a shit about the name, it's just the shit you type
+
+
     y = x^2
 	y' = 2x
 	y'(1) = 2
@@ -15,7 +19,8 @@
 		Ordinary physics and maths is about doing these / teaching theorems
 		Runtime differentiation
 		The maths you write in your notebook then use to derive a single crazy formula that you put in a line of code - that should be in your codebase
-
+		What it says about this system
+			Algebra can be useful to a computer scientist if you stay consistent
     
 	Calculus
 		Find a geometric interpretation of the dual numbers

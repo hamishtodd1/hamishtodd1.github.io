@@ -77,10 +77,10 @@ async function initGlobeProjectionPictograms() {
                 cos(-lon + PI) * cos(lat),
                 1.);
 
-            float outputMv[16];
+            float target[16];
             `
     let vsEnd = `
-        mvToPoint(outputMv,gl_Position);
+        mvToPoint(target,gl_Position);
     `
     let fs = `
         varying vec2 uv;

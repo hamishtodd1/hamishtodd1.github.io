@@ -79,13 +79,6 @@
 			automatic differentiation/epsilon business?
 		shadows
 		Superimposed things should be visible. Whichever thing is smaller. Easy peasy if you use webgl
-				
-		Interested parties
-			Language people: Alan, Meurig, Martin, futureOfCoding, Yoshiki, Cynthia Solomon, Andy Matuschak, Katherine Ye, Glench, Ken Perlin, Josh Horowitz
-			GAists: bivector discord, Cam folks, Charles Gunn, Steven Der kenick, Pierre Philipp Denchant, Jonathan Cameron, David Hestenes, Paul Simeon
-			Graphics/gamedev: Keenan Crane, Albert Chern, Fabrice, inigo quilez, Haxiomic, Dan Holden, Daniel Piker, Ian and Norgg, Media Molecule, Chris Deleon
-			Math/physicist: Ivan and Nina, Florian, Eric stansifer, Matt Hare
-			Misc: London Rationalish, Ben Eater, Coding Train guy, Grant sanderson
 
 	TODO for programming games/shaders
 		Camera and mouse ray visualized and something you deal with

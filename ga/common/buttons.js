@@ -8,11 +8,11 @@
 
 function initButtons()
 {
-	let buttons = {};
+	let buttons = {}
 
 	bindButton = function( buttonName, onDown, buttonDescription,whileDown ) {
 		if(buttons[buttonName] !== undefined) {
-			console.error("attempted to bind a button that already has a binding")
+			console.error("attempted to bind a button that already has a binding: ", buttonName)
 		}
 
 		if(buttonDescription !== undefined)

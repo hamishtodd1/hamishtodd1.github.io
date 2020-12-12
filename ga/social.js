@@ -1,4 +1,16 @@
 /*
+    They're carrying a pad around with them.
+    The whole environment is the final dw
+    Remember to consider the Bret-like interaction, not just typing
+
+    Do they need the pad?
+        Choose a visible thing. We could show all the other things that determine its appearance, including your debug visualizations
+        Order-unimportant
+
+    Put faces on everything, people's brains are transformed into supercomputers when you recast maths in a social context
+
+    Photo editing
+
     It's all about constraints, give an interface for making constraints
 
     it would be nice to pick up a value that is a length and compare it to the thing you're looking at
