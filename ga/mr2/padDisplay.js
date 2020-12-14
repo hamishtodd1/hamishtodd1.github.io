@@ -1,4 +1,6 @@
 function initPadDisplay() {
+    let toolbarHeight = 1.5
+    
     let drawingPosition = new ScreenPosition()
 
     function drawTokenCharacters(tokenStart, tokenEnd) {
@@ -18,7 +20,7 @@ function initPadDisplay() {
     ]
     drawTokens = function () {
         drawingPosition.x = -mainCamera.rightAtZZero
-        drawingPosition.y = mainCamera.topAtZZero - .5
+        drawingPosition.y = mainCamera.topAtZZero - .5 - toolbarHeight
 
         carat.preParseFunc()
 

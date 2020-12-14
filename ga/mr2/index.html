@@ -3,7 +3,10 @@
 		Fucking which way is z
 		Bug with your mind: you want to reinvent calculus
 
-	
+	if you get tired of elephant shaving, implement those manifold animations	
+
+	Saving
+		Could save it to "downloads"
 
 	Maybe you do want helmet / VR?
 		Pros:
@@ -87,6 +90,9 @@
 			async function technicalInit() {
 				let renderEverything = initRenderFunctions()
 
+				initWindowResizeSystem()
+				initClickableTextBoxes()
+				await loadBackgroundStringAndInitSave()
 				
 				initAlgebra()
 
@@ -94,7 +100,6 @@
 
 				initButtons()
 				initMouse()
-				initWindowResizeSystem()
 
 				// await initWorldMap()
 
@@ -112,6 +117,7 @@
 
 				let typeableCharacters = initTypeableCharacters()
 				let displayableCharacters = typeableCharacters
+				let specialTypeableSymbols = [LAMBDA_SYMBOL, JOIN_SYMBOL,MEET_SYMBOL, DAGGER_SYMBOL, "?", "*", MEET_SYMBOL]
 				for(let i = 0; i < specialTypeableSymbols.length; ++i)
 					displayableCharacters += specialTypeableSymbols[i]
 				initCharacterTexture(displayableCharacters)
@@ -145,6 +151,22 @@
 
 					assignMv("bp")
 					plane(getNameDrawerProperties("bp").value, 0.5, 0.5, 1., 0.);
+
+					//basis
+					{
+						//angle between our normal vectors and z axis (pointing towards us) is 
+						let angleToZAxis = Math.acos(1. / Math.sqrt(3.))
+						let z = Math.cos(angleToZAxis)
+						let triangleRadius = Math.sin(angleToZAxis)
+						assignMv("bw")
+						plane(getNameDrawerProperties("bw").value, 0., triangleRadius, z, 0.);
+						assignMv("op")
+						plane(getNameDrawerProperties("op").value,-HS3 * triangleRadius, -.5 * triangleRadius, z, 0.);
+						assignMv("or")
+						plane(getNameDrawerProperties("or").value, HS3 * triangleRadius, -.5 * triangleRadius, z, 0.);
+
+						//and ow for the e0 plane
+					}
 
 					assignTypeAndData("r", "slider", { value: 0. })
 
@@ -240,6 +262,10 @@
 
 		<script src="transpiler.js"></script>
 		<script src="transpiledFunctions.js"></script>
+
+		<script src="clickableTextBoxes.js"></script>
+
+		<script src="toolbar.js"></script>
 
 		<!-- <script src="video.js"></script> -->
 		

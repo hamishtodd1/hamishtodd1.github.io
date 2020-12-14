@@ -21,6 +21,7 @@ const functionsWithIr = {}
 
 const carat = {
     positionInString: -1,
+    positionInStringOld: -1,
     lineNumber: -1,
     flashingStart: Date.now(),
 }
@@ -34,62 +35,10 @@ const errorHighlightTokenIndices = []
 const LAMBDA_SYMBOL = String.fromCharCode("955") //you CAN write "function", but lots of kids don't know "function". In python it's "def"
 const JOIN_SYMBOL = String.fromCharCode("8744")
 const DAGGER_SYMBOL = String.fromCharCode("8224")
-const specialTypeableSymbols = [LAMBDA_SYMBOL, JOIN_SYMBOL, DAGGER_SYMBOL, "?","*"]
+const MEET_SYMBOL = String.fromCharCode("8743")
 
-let backgroundString = 
-`bg w r
-o gp bgo
-p g
+let backgroundString = ""
 
-y = bgo`+ DAGGER_SYMBOL +`
-ry = bgo`+JOIN_SYMBOL+`p
-
-def stereographic(bp) {
-    bo = p
-}
-b = reflectHorizontally(bgo)
-br = reflectHorizontally(go)
-by = stereographic(bgo)
-// bo //projectionOrigin
-// bg //plane
-// o = bo`+ JOIN_SYMBOL +`p //line
-// projection = o meet bg
-// }
-
-
-
-`
-//    0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,1.,0.,
-//    0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,1.,0.,
-
-//dbl(0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.5,0.,0.,)
-//   a + a
-
-// `
-//    0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.4,0.,1.,0.,color //colored
-
-//    join(g,b)
-//    g+b
-
-//    0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,.5,0.,1.,0.,
-//    inner(p,w)p
-//    p
-
-
-// `
-// `
-//    0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,0.,0.,0.,0.,0.,
-
-//    earth(0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,-.3,0.,0.,)
-// color
-
-
-
-//    I0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,1.,0., //should be a series of points from center to there
-
-// `
-//it's more that "earth" gets replaced with the picture. Apply that to
-//a 2D plane is a 3D plane with everything mapped to 0
 
 /*
     earth(0.5e032 + 0.9e013) //color
@@ -115,3 +64,29 @@ by = stereographic(bgo)
 
     whole map == earth Ie032 + Ie013
 */
+
+// `bw op or
+// ow = op`+ MEET_SYMBOL + `or
+
+// oy
+
+// y = bgo`+ DAGGER_SYMBOL + `
+// ry = bgo`+ JOIN_SYMBOL + `p
+
+// def stereographic(bp) {
+//     bo = p
+// }
+// b = reflectHorizontally(bgo)
+// br = reflectHorizontally(go)
+// by = stereographic(bgo)
+// // bo //projectionOrigin
+// // bg //plane
+// // o = bo`+ JOIN_SYMBOL + `p //line
+// // projection = o meet bg
+// // }
+
+// bg w r
+// o gp bgo
+// p g
+
+// `

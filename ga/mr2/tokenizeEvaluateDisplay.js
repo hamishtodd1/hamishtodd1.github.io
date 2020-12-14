@@ -37,6 +37,7 @@ function initTokenizer(displayableCharacters) {
         //divide
     }
     infixOperators[JOIN_SYMBOL] = "join" //TODO sure this works across browsers?
+    infixOperators[MEET_SYMBOL] = "meet" //TODO sure this works across browsers?
     let infixSymbols = Object.keys(infixOperators)
 
     let builtInFunctionNames = ["inner", "gProduct", "join","assign"] //"earth", sin, cos, tan, exp, sqrt
@@ -166,7 +167,6 @@ function initTokenizer(displayableCharacters) {
         const functionSignatureTokens = ["uncoloredName", "(",",","{"]
         let nextFunctionSignatureTokenIndex = 99999
 
-
         logLastFewTokens = (tokenIndex) => {
             let numTokensToCheck = Math.min(tokenIndex, 15)
             for (let i = tokenIndex - numTokensToCheck; i <= tokenIndex; ++i)
@@ -204,6 +204,7 @@ function initTokenizer(displayableCharacters) {
 
                 nameToAssignTo = null
                 skipLine = false
+                unusedNameJustSeen = null
             }
             else if(skipLine)
                 return false

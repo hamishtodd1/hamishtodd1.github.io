@@ -20,8 +20,8 @@ function initCharacterTexture(displayableCharacters) {
             let i = numCharactersToDraw * 6
             for (let j = 0; j < 6; ++j) {
                 characterAttributeBuffer[i + j] = characterIndices[character]
-                positionAttributeBuffer[(i + j) * 2 + 0] = y?position:position.x
-                positionAttributeBuffer[(i + j) * 2 + 1] = y?y:position.y
+                positionAttributeBuffer[(i + j) * 2 + 0] = y !== undefined ? position:position.x
+                positionAttributeBuffer[(i + j) * 2 + 1] = y !== undefined ? y:position.y
             }
             //can make these uniforms instead for 6x less of this and a 6x smaller buffer in the end, but more draw calls
             //easy to check difference

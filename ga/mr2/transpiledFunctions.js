@@ -65,8 +65,6 @@ function initFunctionWithIrs() {
             
         if(tfp.numDeclarations < 1)
             return
-
-        log(transpilingFunctionProperties)
         
         this.numDeclarations = tfp.numDeclarations
         this.length = tfp.arguments.length + 1 // because target

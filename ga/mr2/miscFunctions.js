@@ -1,3 +1,18 @@
+function presentJsonFile(string, filename) {
+    let data = new Blob([string], { type: 'text/plain' });
+    let url = window.URL.createObjectURL(data);
+
+    let download = document.createElement('a');
+    download.href = url
+    download.setAttribute('download', filename);
+    download.style.display = 'none';
+    document.body.appendChild(download);
+    download.click();
+    document.body.removeChild(download);
+
+    window.URL.revokeObjectURL(url)
+}
+
 // const freeVariableCharacters = "0123456789.,-e"
 // const freeVariableStartCharacters = "0123456789.-"
 // function getLiteralLength(literalStart) { //doesn't include "color"

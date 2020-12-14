@@ -17,8 +17,6 @@
         Can we make a less racist map? 
         Making the least racist map
         Top 8 map projections?
-
-    
         
     This is for viewers of:
         3b1b who don't like putting viz and equation together in their head
@@ -31,6 +29,7 @@
             They're beautiful and varied
             We will get onto the political controversy surrounding the relative sizes of Greenland and Africa (demonstrate it). greenland is kind of our canary in the coalmine
             but honestly, it's very useful and fun to understand the mathematics first
+            And for each of these, on the right you can see the code
         Dymaxion
             One of the simplest to understand maps is this one, even though it ends up looking like a mess.
             This map can be wrapped up into a solid shape called an icosahedron, which is pretty close to being a sphere

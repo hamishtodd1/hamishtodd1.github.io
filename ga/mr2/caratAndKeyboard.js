@@ -19,13 +19,11 @@ function initCarat() {
     carat.position.x = -1000.
     carat.position.y = 1000.
     addRenderFunction(() => {
-        
         let msSinceFlashingStart = Date.now() - carat.flashingStart
         if (Math.floor(msSinceFlashingStart / 500.) % 2 === 0)
-        {
-            //turn off depth test?
             carat.renderFunction()
-        }
+
+        carat.positionInStringOld = carat.positionInString
     },"end")
 
     carat.moveAlongString = function (amount) {
@@ -116,13 +114,11 @@ function initCarat() {
 
         alreadModifiedThisFrame = false
     }
-
+    
     carat.moveOutOfToken = (tokenStart, tokenEnd) => {
         if (tokenStart < carat.positionInString && carat.positionInString < tokenEnd) {
-            if (carat.positionInString < tokenStart + (tokenEnd - tokenStart) / 2.)
-                carat.positionInString = tokenEnd
-            else
-                carat.positionInString = tokenStart
+            let directionGoingIn = carat.positionInString - carat.positionInStringOld > 0
+            carat.positionInString = directionGoingIn ? tokenEnd : tokenStart
         }
     }
 
@@ -137,16 +133,6 @@ function initCarat() {
 
     bindButton("Enter", () => {
         addStringAtCarat("\n")
-    })
-
-    bindButton("1",()=>{
-        let lowestUnusedName = ""
-        for(let i = 0; i < coloredNamesAlphabetically.length; ++i)
-            if( getNameDrawerProperties(coloredNamesAlphabetically[i]) === null) {
-                lowestUnusedName = coloredNamesAlphabetically[i]
-                break
-            }
-        addStringAtCarat(lowestUnusedName)
     })
 
     function removeFromString(start, end) {

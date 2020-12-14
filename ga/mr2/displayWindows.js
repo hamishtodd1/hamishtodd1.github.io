@@ -125,11 +125,66 @@ function initDisplayWindows() {
     //-----Carat dw
     caratDw = new DisplayWindow()
     updateFunctions.push(()=>{
-        caratDw.position.x = mainCamera.rightAtZZero - dimension / 2. - .1
+        caratDw.position.x = mainCamera.rightAtZZero - dimension / 2. - .4
         caratDw.position.y = carat.position.y - dimension / 2. + .5
     })
-    addRenderFunction(()=>{
+    addRenderFunction(() => {
         caratDw.render()
         caratDw.numMvs = 0
     })
+
+    let freeVariableButtons = []
+    function FreeVariableButton(name, maker) {
+        let btn = new ClickableTextBox(name, () => {
+            let lowestUnusedName = coloredNamesAlphabetically.find((cna) => getNameDrawerProperties(cna) === null)
+            maker(lowestUnusedName)
+            addStringAtCarat(lowestUnusedName)
+        })
+
+        btn.relativePosition = new ScreenPosition(0., -dimension / 2. - .75 - freeVariableButtons.length)
+        freeVariableButtons.push(btn)
+    }
+    updateFunctions.push(() => {
+        freeVariableButtons.forEach((btn) => {
+            btn.position.copy(caratDw.position)
+            btn.position.add(btn.relativePosition)
+        })
+    })
+
+    FreeVariableButton("point",(name)=>{
+        assignMv(name)
+        point(getNameDrawerProperties(name).value, 0., 0., 0., 1.);
+    })
+    FreeVariableButton("line", (name) => {
+        assignMv(name)
+        realLineX(getNameDrawerProperties(name).value, 1.);
+    })
+
+    function rectangleWithPosition(halfFrameWidth, halfFrameHeight) {
+        const frameVertsBuffer = new Float32Array([
+            halfFrameWidth, halfFrameHeight, 0., 1.,
+            -halfFrameWidth, halfFrameHeight, 0., 1.,
+            -halfFrameWidth, halfFrameHeight, 0., 1.,
+            -halfFrameWidth, -halfFrameHeight, 0., 1.,
+
+            -halfFrameWidth, -halfFrameHeight, 0., 1.,
+            halfFrameWidth, -halfFrameHeight, 0., 1.,
+            halfFrameWidth, -halfFrameHeight, 0., 1.,
+            halfFrameWidth, halfFrameHeight, 0., 1.,
+        ])
+        return verticesDisplayWithPosition(frameVertsBuffer, gl.LINES, 0., 0., 0.)
+    }
+    let wholeFrame = rectangleWithPosition(1.8, 1.8 + .5 * freeVariableButtons.length)
+
+    addRenderFunction(() => {
+        wholeFrame.position.copy(caratDw.position)
+        wholeFrame.position.y -= .5 * freeVariableButtons.length
+
+        wholeFrame.renderFunction()
+    })
+
+    // let littleFrame = rectangleWithPosition(1., .5)
+    // addRenderFunction(() => {
+    //     littleFrame.renderFunction()
+    // })
 }
