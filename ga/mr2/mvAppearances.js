@@ -76,11 +76,11 @@ function initMvPictograms() {
 
             let grade = getGrade(mv)
             switch(grade) {
-                case 3:
+                case 3: //point
                     assign(slideCurrentMv, mv)
                     break
 
-                case 2: 
+                case 2: //line
                     if (mvEquals(slideCurrentMv, slideStartMv)) {
                         let currentLineDotMousePosition = new Float32Array(16);
                         inner(mv, slideStartMv, currentLineDotMousePosition)
@@ -91,7 +91,7 @@ function initMvPictograms() {
                         join(slideStartMv, slideCurrentMv, mv)
                     break
 
-                case 1:
+                case 1: //plane
                     if (mvEquals(slideCurrentMv, slideStartMv))
                         plane(mv, 0., 0., 1., 0.);
                     else {

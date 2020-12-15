@@ -65,6 +65,21 @@ function initNames() {
         drawingDetailses[index].type = type
     }
 
+    getMvNames = () =>{
+        //errrm so this is all of them, not just the ones
+        let ret = []
+        coloredNamesAlphabetically.forEach((name)=>{
+            let dd = drawingDetailses[coloredNamesAlphabetically.indexOf(name)]
+            if (dd.type === "mv" && derivedNames.indexOf(name) === -1)
+                ret.push(name)
+        })
+        return ret
+    }
+
+    getLowestUnusedName = () => {
+        return coloredNamesAlphabetically.find((cna) => getNameDrawerProperties(cna) === null)
+    }
+
     getAlphabetizedColoredName = (str) => {
         if (str.length > 3)
             return null

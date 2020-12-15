@@ -50,8 +50,6 @@ function initTokenizer(displayableCharacters) {
     initErrorHighlight()
     initPadDisplay()
 
-    const namesNeedingToBeCleared = []
-
     tokenizeEvaluateDisplay = () => {
 
         let tokens = []
@@ -173,8 +171,8 @@ function initTokenizer(displayableCharacters) {
                 log(tokens[i])
         }
 
-        clearNames(namesNeedingToBeCleared)
-        namesNeedingToBeCleared.length = 0
+        clearNames(derivedNames)
+        derivedNames.length = 0
         //then have all the things that are currently in the separate files done here
 
         function checkNameIsUnused(lexeme) {
@@ -199,7 +197,7 @@ function initTokenizer(displayableCharacters) {
                 if (nameToAssignTo !== null && skipLine === false) {
                     lineTree.parseAndAssign(tokenIndex, nameToAssignTo, lineNumber, transpilingFunctionProperties)
 
-                    namesNeedingToBeCleared.push(nameToAssignTo)
+                    derivedNames.push(nameToAssignTo)
                 }
 
                 nameToAssignTo = null
@@ -274,6 +272,8 @@ function initTokenizer(displayableCharacters) {
                     
                     if (functionsWithIr[tfp.name] === undefined)
                         functionsWithIr[tfp.name] = new FunctionWithIr(tfp.name)
+
+                    // debugger
 
                     functionsWithIr[tfp.name].setIr(tfp)
 

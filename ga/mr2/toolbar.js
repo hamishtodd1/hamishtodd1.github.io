@@ -3,15 +3,41 @@ async function loadBackgroundStringAndInitSave() {
     xhr.open("GET", "../../../Users/hamis/Downloads/glc.txt");
     xhr.send();
     await (new Promise(resolve => {
+        xhr.onerror = function() {
+            backgroundString = "//couldn't load saved code"
+            resolve()
+        }
         xhr.onload = function () {
-            backgroundString = xhr.responseText
+            // backgroundString = xhr.responseText
+            let fullJson = JSON.parse(xhr.responseText)
+
+            backgroundString = fullJson.backgroundString
+
+            fullJson.freeMvNames.forEach((name, i) => {
+                assignMv(name)
+                for (let j = 0; j < 16; ++j)
+                    getNameDrawerProperties(name).value[j] = fullJson.freeMvValues[i][j]
+            })
+            log(fullJson.freeMvNames)
+
             resolve()
         }
     }))
 
     let saveButton = new ClickableTextBox("save", () => {
-        presentJsonFile(backgroundString, "glc")
+        let fullJson = {
+            backgroundString, 
+            freeMvNames: getMvNames(),
+            freeMvValues:[]
+        }
+        fullJson.freeMvNames.forEach((name)=>{
+            fullJson.freeMvValues.push(getNameDrawerProperties(name).value)
+        })
+
+        presentJsonFile(JSON.stringify(fullJson), "glc")
     })
-    saveButton.position.y = mainCamera.topAtZZero - .5
-    saveButton.position.x = -mainCamera.rightAtZZero + saveButton.width / 2.
+    updateFunctions.push(()=>{
+        saveButton.position.y = mainCamera.topAtZZero - .5
+        saveButton.position.x = -mainCamera.rightAtZZero + saveButton.width / 2.
+    })
 }

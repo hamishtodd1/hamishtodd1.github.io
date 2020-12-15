@@ -135,6 +135,10 @@ function initCarat() {
         addStringAtCarat("\n")
     })
 
+    bindButton("1", () => {
+        addStringAtCarat(getLowestUnusedName())
+    })
+
     function removeFromString(start, end) {
         backgroundString =
             backgroundString.substring(0, start) +
@@ -164,7 +168,7 @@ function initTypeableCharacters()
 {
     let typeableCharacters = ""
     
-    let initialCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ(){}+-=/ "
+    let initialCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ(){}+-=/ ,"
     for (let i = 0; i < initialCharacters.length; ++i) {
         let character = initialCharacters[i]
 

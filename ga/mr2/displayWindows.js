@@ -136,9 +136,9 @@ function initDisplayWindows() {
     let freeVariableButtons = []
     function FreeVariableButton(name, maker) {
         let btn = new ClickableTextBox(name, () => {
-            let lowestUnusedName = coloredNamesAlphabetically.find((cna) => getNameDrawerProperties(cna) === null)
-            maker(lowestUnusedName)
+            let lowestUnusedName = getLowestUnusedName()
             addStringAtCarat(lowestUnusedName)
+            maker(lowestUnusedName)
         })
 
         btn.relativePosition = new ScreenPosition(0., -dimension / 2. - .75 - freeVariableButtons.length)

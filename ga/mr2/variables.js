@@ -39,6 +39,8 @@ const MEET_SYMBOL = String.fromCharCode("8743")
 
 let backgroundString = ""
 
+const derivedNames = []
+
 
 /*
     earth(0.5e032 + 0.9e013) //color
