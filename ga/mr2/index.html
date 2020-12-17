@@ -139,9 +139,11 @@
 					assignTypeAndData("r", "slider", { value: 0. })
 					assignTypeAndData("o", "test", { value: 0. })
 
+					assignMv("oy")
+
 					//basis
 					{
-						//angle between our normal vectors and z axis (pointing towards us) is 
+						//angle between our normal vectors and z axis (pointing towards us) is ti
 						let angleToZAxis = Math.acos(1. / Math.sqrt(3.))
 						let z = Math.cos(angleToZAxis)
 						let triangleRadius = Math.sin(angleToZAxis)

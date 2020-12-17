@@ -2,11 +2,14 @@ function addMvDeclarations(body, glslInsteadOfJs, num, precedingCharacter) {
     let ret = body
     if (glslInsteadOfJs) {
         for (let i = 0; i < num; ++i)
-            ret = `float `+precedingCharacter+`Mv` + i.toString() + `[16];\n` + ret
+            ret = `float `+precedingCharacter+`Mv` + i.toString() + `[16];\n`
+             + ret
     }
     else {
         for (let i = 0; i < num; ++i)
-            ret = `let `+precedingCharacter+`Mv` + i.toString() + ` = new Float32Array(16);\n` + ret + `\ndelete `+precedingCharacter+`Mv` + i.toString() + `;`
+            ret = `let `+precedingCharacter+`Mv` + i.toString() + ` = new Float32Array(16);\n`
+             + ret
+             + `\ndelete `+precedingCharacter+`Mv` + i.toString() + `;`
     }
 
     return ret
@@ -14,23 +17,49 @@ function addMvDeclarations(body, glslInsteadOfJs, num, precedingCharacter) {
 
 function initFunctionWithIrs() {
 
-    function irToExecutable(glslInsteadOfJs, functionName) {
-        let f = functionsWithIr[functionName]
+    //ok so you want to have fMv0 used as py
 
-        let body = f.ir + "\nassign(fMv" + (f.numDeclarations-1).toString() + ",target);" 
+    function irToExecutable(glslInsteadOfJs, f) {
+        let body = f.ir + "\nassign(" + f.internalDeclarations[f.internalDeclarations.length-1] + ",target);" 
         // makes more sense than "return", because you deffo want to see the result
-        body = addMvDeclarations(body, glslInsteadOfJs, f.numDeclarations, "f")
+        body = addMvDeclarations(body, glslInsteadOfJs, f.maxTmvs, "t")
+
+        if(glslInsteadOfJs) {
+            f.internalDeclarations.forEach( (declaredName) => {
+                body = `float `+ declaredName + `[16];\n`
+                    + body
+            })
+
+            //yyyyyyeeeeeeeeeeeeah not so sure about this, you needs uniforms!
+            // f.namesWithLocalizationNeeded.forEach((name)=>{
+            //     body = `let ` + name + ` = getNameDrawerProperties("` + name + `").value;\n`
+            //         + body
+            // })
+        }
+        else {
+            f.internalDeclarations.forEach( (declaredName) => {
+                body = `let `+ declaredName + ` = new Float32Array(16);\n`
+                    + body
+                    + `\ndelete `+ declaredName + `;`
+            })
+
+            // debugger
+            f.namesWithLocalizationNeeded.forEach((name)=>{
+                body = `let ` + name + ` = getNameDrawerProperties("` + name + `").value;\n`
+                    + body
+            })
+        }
 
         let numNonTargetArguments = f.length - 1
         let signature = ""
         if (glslInsteadOfJs) {
-            signature += `void ` + functionName + `(`
+            signature += `void ` + f.name + `(`
             for (let i = 0; i < numNonTargetArguments; ++i)
                 signature += `in float arg` + i.toString() + `[16],`
             signature += `out float target[16])`
         }
         else {
-            signature += `function ` + functionName + `(`
+            signature += `function ` + f.name + `(`
             for (let i = 0; i < numNonTargetArguments; ++i)
                 signature += `arg` + i.toString() + `,`
             signature += `target)`
@@ -48,8 +77,11 @@ function initFunctionWithIrs() {
         this.glslString = ""
         this.jsFunction = null
 
+        this.maxTmvs = -1,
+
         this.length = -1
-        this.numDeclarations = -1
+        this.internalDeclarations = []
+        this.namesWithLocalizationNeeded = []
 
         this.name = name
         functionsWithIr[name] = this
@@ -57,30 +89,45 @@ function initFunctionWithIrs() {
         this.functionsWithIrNeeded = []
     }
     FunctionWithIr.prototype.setIr = function (transpilingFunctionProperties) {
+        // debugger
         this.stillDefinedInProgram = true
 
         let tfp = transpilingFunctionProperties
         if (tfp.ir === this.ir)
             return
             
-        if(tfp.numDeclarations < 1)
+        if(tfp.internalDeclarations.length < 1)
             return
         
-        this.numDeclarations = tfp.numDeclarations
+        this.internalDeclarations.length = tfp.internalDeclarations.length
+        tfp.internalDeclarations.forEach((name,i)=>{
+            this.internalDeclarations[i] = name
+        })
+        // debugger
+        this.namesWithLocalizationNeeded.length = tfp.namesWithLocalizationNeeded.length
+        tfp.namesWithLocalizationNeeded.forEach((name,i)=>{
+            this.namesWithLocalizationNeeded[i] = name
+        })
+        
         this.length = tfp.arguments.length + 1 // because target
 
         this.ir = tfp.ir
 
-        this.glslString = irToExecutable(true, this.name)
+        this.maxTmvs = tfp.maxTmvs
+
+        this.glslString = irToExecutable(true, this)
 
         //fairly insane
-        let str = irToExecutable(false, this.name)
-        // debugger
+        // if(this.name === "stereographic")
+        //     debugger
+        let str = irToExecutable(false, this)
         eval(str)
         this.jsFunction = eval(this.name)
 
         //and rewrite the stuff it gets used in?
         //the shaders should know where they're getting it from
+
+        //for more aribtrary types defined in the editor, you could compile the function into a string containing stuff like "gl.uniform1f" and so on
     }
 
     new FunctionWithIr("reflectHorizontally")
@@ -90,7 +137,9 @@ function initFunctionWithIrs() {
         // else 
         {
             functionsWithIr["reflectHorizontally"].setIr({
-                numDeclarations: 3,
+                internalDeclarations: ["fMv0","fMv1","fMv2"],
+                namesWithLocalizationNeeded:[],
+                maxTmvs: 0,
                 arguments: ["input"],
                 ir: 
                 `

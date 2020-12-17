@@ -1,24 +1,35 @@
 function initPadDisplay() {
-    let toolbarHeight = 1.5
+    let toolbarHeight = 0.//1.5
     
     let drawingPosition = new ScreenPosition()
 
+    let lineNumber = 0
+
     function drawTokenCharacters(tokenStart, tokenEnd) {
         for (let positionInString = tokenStart; positionInString < tokenEnd; ++positionInString) {
-            if(positionInString > tokenStart)
-                carat.duringParseFunc(drawingPosition, positionInString)
+            if(positionInString >= tokenStart)
+                carat.duringParseFunc(drawingPosition, positionInString,lineNumber)
             
             let currentCharacter = backgroundString[positionInString]
-            if (currentCharacter !== " ")
+            if (proxyPairs.indexOf(currentCharacter) === -1)
                 addCharacterToDraw(currentCharacter, drawingPosition)
+            else {
+                let index = proxyPairs.indexOf(currentCharacter)
+                index += 1-(index%2)
+                addCharacterToDraw(proxyPairs[index], drawingPosition)
+            }
             drawingPosition.x += characterWidth
         }
     }
+
+    let proxyPairs = ["&",JOIN_SYMBOL,"^",MEET_SYMBOL,"~",DAGGER_SYMBOL]
     
-    let tokensWhoseCharactersGetDrawn = [
-        "uncoloredName","comment","separator","infixSymbol","def","=","postfixSymbol","(",")","{","}",","
+    let tokensWhoseCharactersDontGetDrawn = [
+        "coloredName","\n"
     ]
     drawTokens = function () {
+        lineNumber = 0
+
         drawingPosition.x = -mainCamera.rightAtZZero
         drawingPosition.y = mainCamera.topAtZZero - .5 - toolbarHeight
 
@@ -28,20 +39,19 @@ function initPadDisplay() {
             if(errorHighlightTokenIndices.indexOf(tokenIndex) !== -1)
                 placeErrorHighlight(drawingPosition)
 
-            carat.duringParseFunc(drawingPosition, tokenStart)
-
-            if (tokensWhoseCharactersGetDrawn.indexOf(token) !== -1) {
+            if (tokensWhoseCharactersDontGetDrawn.indexOf(token) === -1) {
                 drawTokenCharacters(tokenStart, tokenEnd)
                 return
             }
 
+            carat.duringParseFunc(drawingPosition, tokenStart,lineNumber)
+
             switch (token) {
-                case " ":
-                    drawingPosition.x += characterWidth
-                    break
                 case "\n":
                     drawingPosition.y -= 1.
                     drawingPosition.x = -mainCamera.rightAtZZero
+
+                    ++lineNumber
 
                     break
 
@@ -60,9 +70,6 @@ function initPadDisplay() {
                     }
                     
                     break
-
-                default:
-                    console.error("haven't dealt with this token category: ",token )
             }
         })
 

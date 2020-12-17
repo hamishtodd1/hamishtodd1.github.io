@@ -21,23 +21,23 @@
 function initTokenizer(displayableCharacters) {
 
     let postfixOperators = {
-        "*": "dual"
+        "*": "dual",
+        "~": "reverse"
         //"inverse", "transpose"
         //exponential? It's single argument
         //length / magnitude?
         //normalize. But maybe everything is always normalized?
     }
-    postfixOperators[DAGGER_SYMBOL] = "reverse"
     let postfixSymbols = Object.keys(postfixOperators)
     
     let infixOperators = {
-        "+": "gAdd"
+        "+": "gAdd",
+        "&": "join",
+        "^": "meet"
         //wedge
         //subtract
         //divide
     }
-    infixOperators[JOIN_SYMBOL] = "join" //TODO sure this works across browsers?
-    infixOperators[MEET_SYMBOL] = "meet" //TODO sure this works across browsers?
     let infixSymbols = Object.keys(infixOperators)
 
     let builtInFunctionNames = ["inner", "gProduct", "join","assign"] //"earth", sin, cos, tan, exp, sqrt
@@ -79,7 +79,7 @@ function initTokenizer(displayableCharacters) {
             let tokenStartCharacter = backgroundString[positionInString]
             tokenStarts.push(positionInString)
 
-            if (tokenStartCharacter === "/" && backgroundString[positionInString + 1] === "/") {
+            if (tokenStartCharacter === "/" ) { // && backgroundString[positionInString + 1] === "/") { //don't have divide yet
                 tokens.push("comment")
                 moveWhile(() => backgroundString[positionInString] !== "\n")
             }
@@ -155,10 +155,13 @@ function initTokenizer(displayableCharacters) {
 
         let nameToAssignTo = null
 
+        //probably completely unnecessary to store this, just use the function itself
         let transpilingFunctionProperties = {
+            maxTmvs: 0,
             name: null,
             arguments: [],
-            numDeclarations: 0,
+            internalDeclarations: [],
+            namesWithLocalizationNeeded:[],
             ir: "",
         }
         
@@ -192,17 +195,20 @@ function initTokenizer(displayableCharacters) {
         let lineNumber = 0
         forEachToken((tokenIndex, tokenStart, tokenEnd, token, lexeme) => {
             if(token === "\n") {
-                ++lineNumber
-
                 if (nameToAssignTo !== null && skipLine === false) {
-                    lineTree.parseAndAssign(tokenIndex, nameToAssignTo, lineNumber, transpilingFunctionProperties)
+                    // if(nameToAssignTo === "pw")
+                    //     log(carat.lineNumber !== lineNumber)
+                    if (carat.lineNumber !== lineNumber)
+                        lineTree.parseAndAssign(tokenIndex, nameToAssignTo, lineNumber, transpilingFunctionProperties)
 
-                    derivedNames.push(nameToAssignTo)
+                    derivedNames.push(nameToAssignTo) //because what if you save
                 }
 
                 nameToAssignTo = null
                 skipLine = false
                 unusedNameJustSeen = null
+
+                ++lineNumber
             }
             else if(skipLine)
                 return false
@@ -252,7 +258,6 @@ function initTokenizer(displayableCharacters) {
                 }
                 else if (lexeme === "=") {
                     if (nameToAssignTo !== null || unusedNameJustSeen === null  ) {
-                        debugger
                         handleError(tokenIndex, "misplaced =")
                     }
 
@@ -260,9 +265,11 @@ function initTokenizer(displayableCharacters) {
                     unusedNameJustSeen = null
                 }
                 else if (nameToAssignTo !== null) {
-                    let lexemeSuccessfullyAdded = lineTree.addLexeme(tokenIndex, token, lexeme)
-                    if (!lexemeSuccessfullyAdded )
-                        skipLine = true
+                    if(carat.lineNumber !== lineNumber) {
+                        let lexemeSuccessfullyAdded = lineTree.addLexeme(tokenIndex, token, lexeme)
+                        if (!lexemeSuccessfullyAdded)
+                            skipLine = true
+                    }
                 }
                 else if (lexeme === "}") {
                     let tfp = transpilingFunctionProperties
@@ -277,10 +284,12 @@ function initTokenizer(displayableCharacters) {
 
                     functionsWithIr[tfp.name].setIr(tfp)
 
-                    tfp.numDeclarations = 0
+                    tfp.internalDeclarations.length = 0
+                    tfp.namesWithLocalizationNeeded.length = 0
                     tfp.arguments.length = 0
                     tfp.ir = ""
                     tfp.name = null
+                    tfp.maxTmvs = 0
                 }
             }
         })

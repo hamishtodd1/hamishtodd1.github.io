@@ -32,6 +32,10 @@ function initCarat() {
     bindButton("ArrowRight", () => carat.moveAlongString(1))
     bindButton("ArrowLeft", () => carat.moveAlongString(-1))
 
+    bindButton("Tab", () => {
+        addStringAtCarat("    ")
+    })
+
     mouseResponses.push({
         z: () => 0., //if it's in the pad
         start: () => { carat.teleport(mouse.position.x, mouse.position.y) }
@@ -55,20 +59,19 @@ function initCarat() {
     let alreadModifiedThisFrame = false
     backgroundStringSplice = function (start, deleteCount, newString) {
         if (alreadModifiedThisFrame)
-            console.error("only one modification allowed per frame")
-        else {
-            alreadModifiedThisFrame = true
+            console.error("multiple modifications in this frame")
 
-            let distanceFromEnd = backgroundString.length - carat.positionInString
+        alreadModifiedThisFrame = true
 
-            backgroundString =
-                backgroundString.substring(0, start) +
-                newString +
-                backgroundString.substring(start + deleteCount)
+        let distanceFromEnd = backgroundString.length - carat.positionInString
 
-            if (carat.positionInString > start + deleteCount)
-                carat.positionInString = backgroundString.length - distanceFromEnd
-        }
+        backgroundString =
+            backgroundString.substring(0, start) +
+            newString +
+            backgroundString.substring(start + deleteCount)
+
+        if (carat.positionInString > start + deleteCount)
+            carat.positionInString = backgroundString.length - distanceFromEnd
     }
 
     addStringAtCarat = function (str) {
@@ -83,7 +86,7 @@ function initCarat() {
         closestGridPosition.y = Infinity
     }
 
-    carat.duringParseFunc = function (drawingPosition,drawingPositionInString) 
+    carat.duringParseFunc = function (drawingPosition,drawingPositionInString,lineNumber) 
     {
         if (this.positionInString !== -1 && drawingPositionInString === this.positionInString) {
             if (this.position.x !== drawingPosition.x || this.position.y !== drawingPosition.y)
@@ -91,6 +94,7 @@ function initCarat() {
 
             this.position.copy(drawingPosition)
             caratDw.verticalPositionToRenderFrom = carat.position.y
+            this.lineNumber = lineNumber
         }
 
         if (this.positionInString === -1) {
@@ -110,7 +114,6 @@ function initCarat() {
             this.positionInString = closestStringPosition
             this.position.copy(closestGridPosition)
         }
-        this.lineNumber = Math.floor(-this.position.y)
 
         alreadModifiedThisFrame = false
     }
@@ -168,7 +171,7 @@ function initTypeableCharacters()
 {
     let typeableCharacters = ""
     
-    let initialCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ(){}+-=/ ,"
+    let initialCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ(){}+-=/ ,&*^"
     for (let i = 0; i < initialCharacters.length; ++i) {
         let character = initialCharacters[i]
 

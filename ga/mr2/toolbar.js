@@ -1,3 +1,12 @@
+/**
+ * Want:
+ *      Export to
+ *          WebGL
+ *          OpenGL
+ *          shadertoy / glsl
+ *          Latex
+ */
+
 async function loadBackgroundStringAndInitSave() {
     let xhr = new XMLHttpRequest();
     xhr.open("GET", "../../../Users/hamis/Downloads/glc.txt");
@@ -18,26 +27,27 @@ async function loadBackgroundStringAndInitSave() {
                 for (let j = 0; j < 16; ++j)
                     getNameDrawerProperties(name).value[j] = fullJson.freeMvValues[i][j]
             })
-            log(fullJson.freeMvNames)
 
             resolve()
         }
     }))
 
-    let saveButton = new ClickableTextBox("save", () => {
+    function saveFunction() {
         let fullJson = {
-            backgroundString, 
+            backgroundString,
             freeMvNames: getMvNames(),
-            freeMvValues:[]
+            freeMvValues: []
         }
-        fullJson.freeMvNames.forEach((name)=>{
+        fullJson.freeMvNames.forEach((name) => {
             fullJson.freeMvValues.push(getNameDrawerProperties(name).value)
         })
 
         presentJsonFile(JSON.stringify(fullJson), "glc")
-    })
-    updateFunctions.push(()=>{
-        saveButton.position.y = mainCamera.topAtZZero - .5
-        saveButton.position.x = -mainCamera.rightAtZZero + saveButton.width / 2.
-    })
+    }
+    bindButton("s", () => { saveFunction()}, undefined, ()=>{}, true)
+    // let saveButton = new ClickableTextBox("save", saveFunction)
+    // updateFunctions.push(()=>{
+    //     saveButton.position.y = mainCamera.topAtZZero - .5
+    //     saveButton.position.x = -mainCamera.rightAtZZero + saveButton.width / 2.
+    // })
 }

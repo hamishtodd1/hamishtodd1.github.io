@@ -11,7 +11,9 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
         let functionNameJustSeen = null
         let branchCanComplete = false
         let globeProperties = null
+
         let functionsWithIrNeeded = []
+        let namesWithLocalizationNeeded = []
 
         function Node(lexeme, terminal, replaceMostRecent) {
             this.lexeme = lexeme
@@ -89,7 +91,8 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
 
                     switch (getNameDrawerProperties(lexeme).type) {
                         case "mv": //arg0, arg1
-                            new Node('getNameDrawerProperties("' + lexeme + '").value', true)
+                            new Node(lexeme, true)
+                            namesWithLocalizationNeeded.push(lexeme)
                             break
 
                         case "globe":
@@ -226,13 +229,32 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
                 body = addMvDeclarations(body, false, numTmvs.value, "t")
 
                 let localizer = `\nlet target = getNameDrawerProperties("` + nameToAssignTo + `").value;\n`
+                namesWithLocalizationNeeded.forEach((name)=>{
+                    localizer += `let ` + name + ` = getNameDrawerProperties("` + name + `").value;\n`
+                })
+                //you could also do this for the named things
                 functionsWithIrNeeded.forEach((name) => {
                     localizer += "let " + name + " = functionsWithIr." + name + ".jsFunction;\n"
                 })
+
+                // if(nameToAssignTo === "by" && frameCount % 300 === 0)
+                // {
+                //     debugger
+                //     assignMv(nameToAssignTo)
+                //     let target = getNameDrawerProperties("by").value;
+                //     let stereographic = functionsWithIr.stereographic.jsFunction;
+                //     let tMv0 = new Float32Array(16);
+                //     stereographic(getNameDrawerProperties("p").value, tMv0);
+                //     assign(tMv0, target);
+                //     delete tMv0;
+                // }
                 // debugger
 
                 assignMv(nameToAssignTo)
-                eval(localizer + body )
+                eval( localizer + body )
+
+                // if (nameToAssignTo === "by")
+                //     log(getNameDrawerProperties("by").value)
             }
 
             if (tfp.name !== null) {
@@ -241,17 +263,26 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
                         tfp.functionsWithIrNeeded.push(functionNeeded)
                 })
 
+                tfp.maxTmvs = Math.max(tfp.maxTmvs,numTmvs.value)
                 tfp.ir += 
                     "{\n" +
-                        bodySansFinalAssignmentTarget + "fMv" + tfp.numDeclarations.toString() + ");" +
+                        bodySansFinalAssignmentTarget + nameToAssignTo + ");" +
                     "\n}\n"
-                ++tfp.numDeclarations
+                tfp.internalDeclarations.push(nameToAssignTo)
+                
+                namesWithLocalizationNeeded.forEach((name)=>{
+                    if(tfp.internalDeclarations.indexOf(name) === -1)
+                        tfp.namesWithLocalizationNeeded.push(name)
+                })
+                //you're building up that list that's declared internally, what about the ones that aren't?
             }
 
             //Resetting the tree
             {
                 globeProperties = null
                 functionsWithIrNeeded.length = 0
+
+                namesWithLocalizationNeeded.length = 0
 
                 branchCanComplete = false
                 currentNodeBranchingFrom = topNode
