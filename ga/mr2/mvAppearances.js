@@ -123,7 +123,7 @@ function initMvPictograms() {
 
         let vs = `
             attribute vec4 vertA;
-            uniform vec4 visualPosition;
+            uniform vec3 visualPosition;
 
             attribute float colorIndexA;
             uniform vec3 hexantColors[6];
@@ -131,7 +131,7 @@ function initMvPictograms() {
 
             void main(void) {
                 color = hexantColors[int(colorIndexA)];
-                gl_Position = vec4( visualPosition.xyz + vertA.xyz, 1.);
+                gl_Position = vec4( visualPosition + vertA.xyz, 1.);
         `
         let fs = `
             varying vec3 color;
@@ -157,7 +157,7 @@ function initMvPictograms() {
 
                 pointPictogramDrawer.program.prepareVertexAttribute("colorIndex", pointColorIndexBuffer)
                 gl.uniform3fv(pointPictogramDrawer.program.getUniformLocation("hexantColors"), nameToHexantColors(name, hexantColors))
-                gl.uniform4f(pointPictogramDrawer.program.getUniformLocation("visualPosition"), pointX(mv), pointY(mv), pointZ(mv), pointW(mv))
+                gl.uniform3f(pointPictogramDrawer.program.getUniformLocation("visualPosition"), pointX(mv)/pointW(mv), pointY(mv)/pointW(mv), pointZ(mv)/pointW(mv))
                 gl.drawArrays(gl.TRIANGLES, 0, vertBuffer.length / 4)
             })
         }
@@ -321,9 +321,15 @@ function initMvPictograms() {
                     mvRotator(mv0, angle, motorFromZPlane)
                 }
 
+                // if(name === "bgr" && frameCount === 200)
+                //     debugger
+
                 gl.uniform1fv(planePictogramDrawer.program.getUniformLocation("motorFromZPlane"), motorFromZPlane)
                 let inverseNormalLength = 1./Math.sqrt(sq(planeX(mv)) + sq(planeY(mv)) + sq(planeZ(mv)) )
-                gl.uniform3f(planePictogramDrawer.program.getUniformLocation("normal"), planeX(mv)*inverseNormalLength,planeY(mv)*inverseNormalLength,planeZ(mv)*inverseNormalLength)
+                gl.uniform3f(planePictogramDrawer.program.getUniformLocation("normal"), 
+                    planeX(mv)*inverseNormalLength,
+                    planeY(mv)*inverseNormalLength,
+                    planeZ(mv)*inverseNormalLength)
 
                 // gl.disable(gl.CULL_FACE)
                 // gl.cullFace(gl.FRONT_AND_BACK)

@@ -28,7 +28,7 @@ function initPictogramDrawers() {
         varying vec3 preBoxPosition;
     `
     let fsFooter = `
-        if( abs(preBoxPosition.x) > 1. || abs(preBoxPosition.y) > 1. || abs(preBoxPosition.z) > 1. )
+        if( abs(preBoxPosition.x) > 1. || abs(preBoxPosition.y) > 1. ) //|| abs(preBoxPosition.z) > 1.
             discard; //unperformant!
     }
     `
@@ -75,13 +75,16 @@ function initPictogramDrawers() {
 
                 displayWindows.forEach((dw) => {
                     if (dw.verticalPositionToRenderFrom === screenPositions[i * 2 + 1]) {
-                        gl.disable(gl.DEPTH_TEST);
+                        let previouslyDepthTesting = gl.getParameter(gl.DEPTH_TEST)
+                        if(previouslyDepthTesting)
+                            gl.disable(gl.DEPTH_TEST);
 
                         gl.uniform1f(program.getUniformLocation("drawingSquareRadius"), dw.dimension * .5)
                         gl.uniform2f(program.getUniformLocation("screenPosition"), dw.position.x, dw.position.y)
                         draw(nameProperties,names[i])
 
-                        gl.enable(gl.DEPTH_TEST);
+                        if (previouslyDepthTesting)
+                            gl.enable(gl.DEPTH_TEST);
                     }
                 })
             }

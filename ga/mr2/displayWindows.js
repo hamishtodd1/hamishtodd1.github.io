@@ -159,6 +159,10 @@ function initDisplayWindows() {
         assignMv(name)
         realLineX(getNameDrawerProperties(name).value, 1.);
     })
+    FreeVariableButton("plane", (name) => {
+        assignMv(name)
+        planeZ(getNameDrawerProperties(name).value, 1.)
+    })
 
     function rectangleWithPosition(halfFrameWidth, halfFrameHeight) {
         const frameVertsBuffer = new Float32Array([

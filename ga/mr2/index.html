@@ -116,7 +116,7 @@
 
 				let typeableCharacters = initTypeableCharacters()
 				let displayableCharacters = typeableCharacters
-				let specialTypeableSymbols = [LAMBDA_SYMBOL, JOIN_SYMBOL,MEET_SYMBOL, DAGGER_SYMBOL, "?", "*", MEET_SYMBOL]
+				let specialTypeableSymbols = [DAGGER_SYMBOL,LAMBDA_SYMBOL, JOIN_SYMBOL, "?", "*", MEET_SYMBOL] //meet goes last, it can be wide
 				for(let i = 0; i < specialTypeableSymbols.length; ++i)
 					displayableCharacters += specialTypeableSymbols[i]
 				initCharacterTexture(displayableCharacters)

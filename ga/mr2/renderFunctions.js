@@ -18,11 +18,12 @@ function initRenderFunctions() {
 
     function renderEverything() {
         gl.clearColor(backgroundColor[0] / 255., backgroundColor[1] / 255., backgroundColor[2] / 255., 1.0);
-        gl.clearDepth(1.0); //depth buffer(?)
-        gl.enable(gl.DEPTH_TEST);
-        gl.depthFunc(gl.LEQUAL);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        
+        gl.enable(gl.DEPTH_TEST);
+        gl.depthFunc(gl.LESS); //is this the reason z is reversed?
 
+        //this is what's been found to work with the globes
         gl.enable(gl.CULL_FACE);
         gl.cullFace(gl.BACK);
 
