@@ -1,3 +1,16 @@
+function copyStringArray(arr, target) {
+    target.length = arr.length
+    arr.forEach((str, i) => {
+        target[i] = str
+    })
+}
+function unionStringArray(arr, target) {
+    arr.forEach((str) => {
+        if (target.indexOf(str) === -1)
+            target.push(str)
+    })
+}
+
 function presentJsonFile(string, filename) {
     let data = new Blob([string], { type: 'text/plain' });
     let url = window.URL.createObjectURL(data);

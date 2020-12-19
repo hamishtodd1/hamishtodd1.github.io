@@ -137,16 +137,6 @@ function initAlgebra()
             }
         ))
 
-        {
-            //x-z+1 = 0
-            let a = [0, 1., -1., 0., -1, 0, 0, 0, 0, 0, 0, 0., 0, 0, 0, 0]
-            a.forEach((e)=>{e *= 4.})
-            let b = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
-            let target = []
-            meet(a,b,target)
-            log(target)
-        }
-
 
         appendToGaShaderString(replaceSignature(
             "void inner(float a[16], float b[16], out float target[16])",

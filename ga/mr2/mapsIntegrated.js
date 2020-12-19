@@ -11,27 +11,25 @@
     
     a = join(p,projectionPoint)
     b = meet(a,manifold) (point pair, jeez!)
-    manifold (to be unwrapped by a separate function):
+    project to manifold (to be unwrapped by a separate function):
         icosahedron: dymaxion
         Cone: lambert
         Orth/stereo/gnomic: plane
 
     Ones not accounted for with unrolling or projection:
-        Sinusoidal/Bonne/werner
-            Think of peeling off strips
-            And the strips are curved by how far they are from a center
-            because they're keeping their length
-        interuppted
-            cut intro rectangles before doing sinusoidal
+        Sinusoidal/Bonne/werner: look in notebook
+        interuppted: several sinusoidals (that then become 1)
 
-    Conformal unroll (stretches!) to your half cylinder. This is pretty much one of the dumbest things you can possibly do
-        cylindrical: project
-        Mercator: project then the exp thing (non-trivial)
+    craig retroazimuthal: not sure
+    Kavrayskiy: Something to do with circles, possibly can conformally unroll first
+
+    azimuthal equal area: another kind of conformally unroll
+
+    Stretchy conformal unroll (stretches!) to your half cylinder, then do these
         equirectangular: conformal unroll
-        Kavrayskiy: bring them in like circles
+        cylindrical: project (but better to unroll first?)
+        Mercator: project then the exp thing (non-trivial)
         Gall-Peters: orth
-        craig retroazimuthal:
-            jeez
 
     TODO
 		+, cos, sin, exp
@@ -102,7 +100,6 @@ async function initGlobeProjectionPictograms() {
                 break
             }
         }
-        this.currentHeader = ""
         this.currentBody
         this.pictogramProgram = new PictogramProgram(gaShaderString + vsStart + vsEnd, fs)
 
@@ -112,7 +109,6 @@ async function initGlobeProjectionPictograms() {
 
     function predrawAndReturnProgram(nameProperties) {
         let ourPpWrapper = ppWrappers.find((ppWrapper) => 
-            ppWrapper.currentHeader === nameProperties.header &&
             ppWrapper.currentBody === nameProperties.body ) //bit costly. Maybe turn the string into a single number or something?
         if (ourPpWrapper === undefined) {
             ourPpWrapper = ppWrappers.find((ppWrapper) => {
@@ -120,16 +116,19 @@ async function initGlobeProjectionPictograms() {
             })
             if(ourPpWrapper === undefined)
                 ourPpWrapper = new PpWrapper()
-                
-            // log(nameProperties.body)
-            // debugger
-            let vsSource = vertexShaderToPictogramVertexShader(gaShaderString + nameProperties.header + vsStart + nameProperties.body + vsEnd)
+
+            let allFwI = ""
+            let fwiNames = Object.keys(functionsWithIr)
+            fwiNames.forEach((f)=>{
+                if(f !== "stereographic")
+                    allFwI += functionsWithIr[f].glslString
+            })
+            let vsSource = vertexShaderToPictogramVertexShader(gaShaderString + allFwI + vsStart + nameProperties.body + vsEnd)
             ourPpWrapper.pictogramProgram.changeShader(gl.VERTEX_SHADER, vsSource)
 
             ourPpWrapper.pictogramProgram.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
             ourPpWrapper.pictogramProgram.locateUniform("sampler")
 
-            ourPpWrapper.currentHeader = nameProperties.header
             ourPpWrapper.currentBody = nameProperties.body
         }
         ourPpWrapper.usedThisFrame = true

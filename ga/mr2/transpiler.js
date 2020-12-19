@@ -12,7 +12,6 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
         let branchCanComplete = false
         let globeProperties = null
 
-        let functionsWithIrNeeded = []
         let namesWithLocalizationNeeded = []
 
         function Node(lexeme, terminal, replaceMostRecent) {
@@ -114,12 +113,8 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
                     else
                         adjustToOpenBracket("assign")
                 }
-                else if (isFunction ) {
+                else if (isFunction )
                     functionNameJustSeen = lexeme
-
-                    if (functionsWithIr[functionNameJustSeen] !== undefined)
-                        functionsWithIrNeeded.push(functionNameJustSeen)
-                }
             }
             else if (branchCanComplete) {
                 if (lexeme === "," && currentNodeBranchingFrom.children.length !== currentNodeBranchingFrom.expectedNumberOfArguments - 1)
@@ -191,97 +186,59 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
             let tfp = transpilingFunctionProperties
 
             let numTmvs = { value: 0 }
-            let bodySansFinalAssignmentTarget = parseFunctionNode(topNode, numTmvs, tfp.arguments)
+            let bodySansFinalAssignmentTarget = parseFunctionNode(topNode, numTmvs, tfp.argumentsInSignature)
 
             let targetGlsl = globeProperties !== null
             if (targetGlsl) {
                 let body = bodySansFinalAssignmentTarget + `target);`
 
-                if(tfp.arguments.length !== 0) {
+                if(tfp.argumentsInSignature.length !== 0) {
                     console.error("not sure what to do here")
                     debugger
-                    // tfp.arguments.forEach((argument, i) => {
+                    // tfp.argumentsInSignature.forEach((argument, i) => {
                     //     body = "float arg" + i + " = " + argument + ";\n" + body
                     // })
                 }
 
-                //at some point shit needs to be sent in here as uniforms
-
-                body = addMvDeclarations(body, true, numTmvs.value,"t")
-
-                let header = ""
-                functionsWithIrNeeded.forEach((name) => {
-                    header += functionsWithIr[name].glslString + "\n"
-                })
+                body = addMvDeclarations(body,  true, numTmvs.value, namesWithLocalizationNeeded)
 
                 // "just" the things that let you see it on screen
                 assignTypeAndData(nameToAssignTo, "globeProjection", {
-                    globeProperties, header, body
+                    globeProperties, body
                 })
             }
             else {
-                let body = bodySansFinalAssignmentTarget + `target);`
-
-                tfp.arguments.forEach((argument,i)=>{
+                let body = bodySansFinalAssignmentTarget + `getNameDrawerProperties("` + nameToAssignTo + `").value);\n`
+                
+                tfp.argumentsInSignature.forEach((argument,i)=>{
                     body = "let arg" + i + ` = getNameDrawerProperties("` + argument + `").value;\n` + body
                 })
 
-                body = addMvDeclarations(body, false, numTmvs.value, "t")
+                body = addMvDeclarations(body, false, numTmvs.value, namesWithLocalizationNeeded)
 
-                let localizer = `\nlet target = getNameDrawerProperties("` + nameToAssignTo + `").value;\n`
-                namesWithLocalizationNeeded.forEach((name)=>{
-                    localizer += `let ` + name + ` = getNameDrawerProperties("` + name + `").value;\n`
-                })
-                //you could also do this for the named things
-                functionsWithIrNeeded.forEach((name) => {
-                    localizer += "let " + name + " = functionsWithIr." + name + ".jsFunction;\n"
-                })
-
-                // if(nameToAssignTo === "by" && frameCount % 300 === 0)
-                // {
-                //     debugger
-                //     assignMv(nameToAssignTo)
-                //     let target = getNameDrawerProperties("by").value;
-                //     let stereographic = functionsWithIr.stereographic.jsFunction;
-                //     let tMv0 = new Float32Array(16);
-                //     stereographic(getNameDrawerProperties("p").value, tMv0);
-                //     assign(tMv0, target);
-                //     delete tMv0;
-                // }
-                // debugger
-
-                assignMv(nameToAssignTo)
-                eval( localizer + body )
-
-                // if (nameToAssignTo === "by")
-                //     log(getNameDrawerProperties("by").value)
+                assignMv( nameToAssignTo )
+                eval( body )
             }
 
             if (tfp.name !== null) {
-                functionsWithIrNeeded.forEach((functionNeeded) => {
-                    if (tfp.functionsWithIrNeeded.indexOf(functionNeeded) === -1) //mmm, make sure you don't have a load of leftover shit
-                        tfp.functionsWithIrNeeded.push(functionNeeded)
-                })
-
-                tfp.maxTmvs = Math.max(tfp.maxTmvs,numTmvs.value)
-                tfp.ir += 
-                    "{\n" +
-                        bodySansFinalAssignmentTarget + nameToAssignTo + ");" +
-                    "\n}\n"
-                tfp.internalDeclarations.push(nameToAssignTo)
-                
-                namesWithLocalizationNeeded.forEach((name)=>{
-                    if(tfp.internalDeclarations.indexOf(name) === -1)
+                namesWithLocalizationNeeded.forEach((name) => {
+                    if (tfp.internalDeclarations.indexOf(name) === -1 && tfp.namesWithLocalizationNeeded.indexOf(name) === -1)
                         tfp.namesWithLocalizationNeeded.push(name)
                 })
+
+                tfp.maxTmvs = Math.max(tfp.maxTmvs, numTmvs.value)
+                tfp.ir += 
+                    "   {\n" +
+                    "       "+bodySansFinalAssignmentTarget + nameToAssignTo + ");\n" +
+                    "   }\n"
+                tfp.internalDeclarations.push(nameToAssignTo)
                 //you're building up that list that's declared internally, what about the ones that aren't?
             }
 
             //Resetting the tree
             {
                 globeProperties = null
-                functionsWithIrNeeded.length = 0
-
+                
                 namesWithLocalizationNeeded.length = 0
 
                 branchCanComplete = false

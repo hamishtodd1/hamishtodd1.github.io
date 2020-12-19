@@ -6,6 +6,7 @@
     Don't worry, it makes sense that dymaxion is off, the triangle isn't planar
 
     Title (look at the existing ones...)
+        5 ways of making a politically correct map (and two ways of making a politically incorrect one!)
         How map projections ACTUALLY work
         Can we use math to make a non-racist map? (this video is mostly not about racism...)
         The actual geometry behind map projections
@@ -64,7 +65,7 @@
             Gnomic/central
                 Great circles are straight lines. Draw some.
             Lambert conformal conic
-                Screws up the southern hemisphere
+                Screws up the southern hemisphere. It's certainly big though!
             Central cylindrical
                 Some of you might have been expecting this to look a bit different by the way, for reasons we'll get to later
             Conformal maps are generally much better at preserving the shape of a country,  generally less good at preserving size, but we'll get to that soon

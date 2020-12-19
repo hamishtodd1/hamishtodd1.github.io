@@ -159,7 +159,7 @@ function initTokenizer(displayableCharacters) {
         let transpilingFunctionProperties = {
             maxTmvs: 0,
             name: null,
-            arguments: [],
+            argumentsInSignature: [],
             internalDeclarations: [],
             namesWithLocalizationNeeded:[],
             ir: "",
@@ -224,9 +224,9 @@ function initTokenizer(displayableCharacters) {
                     if(token === ")")
                         ++nextFunctionSignatureTokenIndex
                     else if (token === "coloredName" ) { //intuition was that it shouldn't be a used one. But, er, the word "used", what does it mean?
-                        if (transpilingFunctionProperties.arguments.indexOf(lexeme) !== -1)
+                        if (transpilingFunctionProperties.argumentsInSignature.indexOf(lexeme) !== -1)
                             handleError(tokenIndex,"same argument twice")
-                        transpilingFunctionProperties.arguments.push(lexeme)
+                        transpilingFunctionProperties.argumentsInSignature.push(lexeme)
                     }
 
                     return false
@@ -286,7 +286,7 @@ function initTokenizer(displayableCharacters) {
 
                     tfp.internalDeclarations.length = 0
                     tfp.namesWithLocalizationNeeded.length = 0
-                    tfp.arguments.length = 0
+                    tfp.argumentsInSignature.length = 0
                     tfp.ir = ""
                     tfp.name = null
                     tfp.maxTmvs = 0
