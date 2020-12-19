@@ -89,7 +89,7 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
                     branchCanComplete = true
 
                     switch (getNameDrawerProperties(lexeme).type) {
-                        case "mv": //arg0, arg1
+                        case "mv":
                             new Node(lexeme, true)
                             namesWithLocalizationNeeded.push(lexeme)
                             break
@@ -153,12 +153,8 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
             //terminal symbols get transformed into arg0, arg1
 
             node.children.forEach((child) => {
-                if (child.expectedNumberOfArguments === 0) {
-                    if(argumentNames.indexOf(child.lexeme) !== -1)
-                        finalLine += "arg" + argumentNames.indexOf(child.lexeme) + ","
-                    else
-                        finalLine += child.lexeme + ","
-                }
+                if (child.expectedNumberOfArguments === 0)
+                    finalLine += child.lexeme + ","
                 else {
                     let transpilationMvName = 'tMv' + numTmvs.value
                     ++numTmvs.value
@@ -209,11 +205,6 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
             }
             else {
                 let body = bodySansFinalAssignmentTarget + `getNameDrawerProperties("` + nameToAssignTo + `").value);\n`
-                
-                tfp.argumentsInSignature.forEach((argument,i)=>{
-                    body = "let arg" + i + ` = getNameDrawerProperties("` + argument + `").value;\n` + body
-                })
-
                 body = addMvDeclarations(body, false, numTmvs.value, namesWithLocalizationNeeded)
 
                 assignMv( nameToAssignTo )
@@ -222,14 +213,18 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
 
             if (tfp.name !== null) {
                 namesWithLocalizationNeeded.forEach((name) => {
-                    if (tfp.internalDeclarations.indexOf(name) === -1 && tfp.namesWithLocalizationNeeded.indexOf(name) === -1)
+                    let externalMvNotKnownToFunctionYet = 
+                        tfp.internalDeclarations.indexOf(name) === -1 &&
+                        tfp.namesWithLocalizationNeeded.indexOf(name) === -1 &&
+                        tfp.argumentsInSignature.indexOf(name) === -1
+                    if (externalMvNotKnownToFunctionYet)
                         tfp.namesWithLocalizationNeeded.push(name)
                 })
 
                 tfp.maxTmvs = Math.max(tfp.maxTmvs, numTmvs.value)
                 tfp.ir += 
                     "   {\n" +
-                    "       "+bodySansFinalAssignmentTarget + nameToAssignTo + ");\n" +
+                    bodySansFinalAssignmentTarget + nameToAssignTo + ");\n" +
                     "   }\n"
                 tfp.internalDeclarations.push(nameToAssignTo)
                 //you're building up that list that's declared internally, what about the ones that aren't?

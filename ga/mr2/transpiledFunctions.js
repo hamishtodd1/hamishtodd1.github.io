@@ -40,10 +40,6 @@ function addMvDeclarations(body,glslInsteadOfJs, numTmvs, namesWithLocalizationN
         }
     }
 
-    //why not call the arguments by their real names?
-    //potential answer: because there's the name of the argument and the current visualized value of that thing
-    //Sounds like crap. well, TODO, sort that out
-
     return body
 }
 
@@ -63,18 +59,18 @@ function initFunctionWithIrs() {
         //     debugger
         body = addMvDeclarations(body, glslInsteadOfJs, f.maxTmvs, f.namesWithLocalizationNeeded, f.internalDeclarations)
 
-        let numNonTargetArguments = f.length - 1
+        let numNonTargetArguments = f.argumentsInSignature.length
         let signature = ""
         if (glslInsteadOfJs) {
             signature += `void ` + f.name + `(`
             for (let i = 0; i < numNonTargetArguments; ++i)
-                signature += `in float arg` + i.toString() + `[16],` //altenratively, the actual names
+                signature += `in float ` + f.argumentsInSignature[i] + `[16],` //altenratively, the actual names
             signature += `out float target[16])`
         }
         else {
             signature += `function ` + f.name + `(`
             for (let i = 0; i < numNonTargetArguments; ++i)
-                signature += `arg` + i.toString() + `,`
+                signature += f.argumentsInSignature[i] + `,`
             signature += `target)`
         }
 
@@ -95,6 +91,7 @@ function initFunctionWithIrs() {
         this.length = -1
         this.internalDeclarations = []
         this.namesWithLocalizationNeeded = []
+        this.argumentsInSignature = []
 
         this.name = name
         functionsWithIr[name] = this
@@ -112,8 +109,9 @@ function initFunctionWithIrs() {
         
         copyStringArray(tfp.internalDeclarations, this.internalDeclarations)
         copyStringArray(tfp.namesWithLocalizationNeeded, this.namesWithLocalizationNeeded)
+        copyStringArray(tfp.argumentsInSignature, this.argumentsInSignature)
         
-        this.length = tfp.argumentsInSignature.length + 1 // because target
+        this.length = tfp.argumentsInSignature.length + 1 // because target. Urgh, fairly dumb name
 
         this.ir = tfp.ir
 
@@ -142,13 +140,13 @@ function initFunctionWithIrs() {
             functionsWithIr["reflectHorizontally"].setIr({
                 internalDeclarations: ["fMv0","fMv1","fMv2"],
                 namesWithLocalizationNeeded:[],
-                argumentsInSignature: ["input"],
+                argumentsInSignature: ["ourInput"],
                 maxTmvs: 0,
                 ir: 
                 `
             plane(fMv0,1.,0.,0.,0.);
 
-            gProduct(fMv0,arg0,fMv1);
+            gProduct(fMv0,ourInput,fMv1);
             gProduct(fMv1,fMv0,fMv2);
             `
             })
