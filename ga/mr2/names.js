@@ -4,8 +4,6 @@
 
 function initNames() {
 
-    let NUM_NAMES = coloredNamesAlphabetically.length
-
     let idNum = 0
     generateName = () => {
         ++idNum
@@ -35,7 +33,6 @@ function initNames() {
     }
     //for every name there is an mv ready to be used, but we might not use it
 
-    let drawingDetailses = Array(NUM_NAMES)
     for(let i = 0; i < NUM_NAMES; ++i) {
         coloredNamesAlphabetically[i] = generateName()
         drawingDetailses[i] = { type:"unassigned" }
@@ -63,6 +60,11 @@ function initNames() {
         let index = coloredNamesAlphabetically.indexOf(name)
         Object.assign(drawingDetailses[index], drawingDetails)
         drawingDetailses[index].type = type
+    }
+
+    getNameType = (name) => {
+        let index = coloredNamesAlphabetically.indexOf(name)
+        return drawingDetailses[index].type
     }
 
     getMvNames = () =>{

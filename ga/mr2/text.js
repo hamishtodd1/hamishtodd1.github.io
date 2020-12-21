@@ -1,4 +1,9 @@
-function initCharacterTexture(displayableCharacters) {
+function initCharacterTexture(typeableCharacters) {
+    let displayableCharacters = typeableCharacters
+    let specialTypeableSymbols = [DAGGER_SYMBOL,LAMBDA_SYMBOL, JOIN_SYMBOL, INNER_SYMBOL, "?", "*", MEET_SYMBOL] //meet goes last, it can be wide
+    for(let i = 0; i < specialTypeableSymbols.length; ++i)
+        displayableCharacters += specialTypeableSymbols[i]
+
     const maxCharacters = 512 //noticeable load time increase when changed
 
     let characterIndices = {}

@@ -11,8 +11,8 @@ function initAlgebra()
     }
 
     gaShaderString = ""
-    function appendToGaShaderString(glslString) {
-        gaShaderString += "\n" + glslString + "\n"
+    function appendToGaShaderString(glslBody) {
+        gaShaderString += "\n" + glslBody + "\n"
     }
 
     //mv

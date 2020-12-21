@@ -1,89 +1,53 @@
-function addMvDeclarations(body,glslInsteadOfJs, numTmvs, namesWithLocalizationNeeded, internalDeclarations) {
+function irToCode(bodyAndMaybeMore,glslInsteadOfJs, numTmvs, namesWithLocalizationNeeded, internalDeclarations) {
     if (glslInsteadOfJs) {
 
         for (let i = 0; i < numTmvs; ++i)
-            body = `float tMv` + i.toString() + `[16];\n`
-                + body
+            bodyAndMaybeMore.body = `float tMv` + i.toString() + `[16];\n`
+                + bodyAndMaybeMore.body
+
+        copyStringArray(namesWithLocalizationNeeded, bodyAndMaybeMore.namesWithLocalizationNeeded)
 
         if (internalDeclarations !== undefined) {
             internalDeclarations.forEach((declaredName) => {
-                body = `float ` + declaredName + `[16];\n`
-                    + body
+                bodyAndMaybeMore.body = `float ` + declaredName + `[16];\n`
+                    + bodyAndMaybeMore.body
             })
         }
-
-        //for namesWithLocalizationNeeded, you needs uniforms! Yeesh, could send everything in
     }
     else {
-        (Object.keys(functionsWithIr)).forEach((name) => {
-            body = "let " + name + " = functionsWithIr." + name + ".jsFunction;\n"
-                + body
-        })
-
         for (let i = 0; i < numTmvs; ++i)
-            body = `let tMv` + i.toString() + ` = new Float32Array(16);\n`
-                + body
+            bodyAndMaybeMore.body = `let tMv` + i.toString() + ` = new Float32Array(16);\n`
+                + bodyAndMaybeMore.body
                 + `\ndelete tMv` + i.toString() + `;`
 
-
         namesWithLocalizationNeeded.forEach((name) => {
-            body = `let ` + name + ` = getNameDrawerProperties("` + name + `").value;\n`
-                + body
+            bodyAndMaybeMore.body = `let ` + name + ` = getNameDrawerProperties("` + name + `").value;\n`
+                + bodyAndMaybeMore.body
         })
 
         if (internalDeclarations !== undefined) {
             internalDeclarations.forEach((declaredName) => {
-                body = `let ` + declaredName + ` = new Float32Array(16);\n`
-                    + body
+                bodyAndMaybeMore.body = `let ` + declaredName + ` = new Float32Array(16);\n`
+                    + bodyAndMaybeMore.body
                     + `\ndelete ` + declaredName + `;`
             })
         }
-    }
 
-    return body
+        (Object.keys(functionsWithIr)).forEach((name) => {
+            bodyAndMaybeMore.body = "let " + name + " = functionsWithIr." + name + ".jsFunction;\n"
+                + bodyAndMaybeMore.body
+        })
+    }
 }
 
 function initFunctionWithIrs() {
 
     //ok so you want to have fMv0 used as py
 
-    function irToFunction(glslInsteadOfJs, f) {
-
-        let finalAssignment = f.internalDeclarations.length !== 0 ? 
-            "\nassign(" + f.internalDeclarations[f.internalDeclarations.length - 1] + ",target);" :
-            "\nzeroMv(target);"
-
-        let body = f.ir + finalAssignment
-        //using the last declared variable makes more sense than "return", because you deffo want to see the result
-        // if(f.name === "stereographic" &&glslInsteadOfJs === false)
-        //     debugger
-        body = addMvDeclarations(body, glslInsteadOfJs, f.maxTmvs, f.namesWithLocalizationNeeded, f.internalDeclarations)
-
-        let numNonTargetArguments = f.argumentsInSignature.length
-        let signature = ""
-        if (glslInsteadOfJs) {
-            signature += `void ` + f.name + `(`
-            for (let i = 0; i < numNonTargetArguments; ++i)
-                signature += `in float ` + f.argumentsInSignature[i] + `[16],` //altenratively, the actual names
-            signature += `out float target[16])`
-        }
-        else {
-            signature += `function ` + f.name + `(`
-            for (let i = 0; i < numNonTargetArguments; ++i)
-                signature += f.argumentsInSignature[i] + `,`
-            signature += `target)`
-        }
-
-        return signature + 
-            "\n{\n" +
-                body +
-            "\n}"
-    }
-
     FunctionWithIr = function(name) {
         this.ir = "UNUSED"
         this.stillDefinedInProgram = true
-        this.glslString = ""
+        this.glslBody = ""
         this.jsFunction = null
 
         this.maxTmvs = -1,
@@ -108,7 +72,6 @@ function initFunctionWithIrs() {
             return
         
         copyStringArray(tfp.internalDeclarations, this.internalDeclarations)
-        copyStringArray(tfp.namesWithLocalizationNeeded, this.namesWithLocalizationNeeded)
         copyStringArray(tfp.argumentsInSignature, this.argumentsInSignature)
         
         this.length = tfp.argumentsInSignature.length + 1 // because target. Urgh, fairly dumb name
@@ -117,18 +80,59 @@ function initFunctionWithIrs() {
 
         this.maxTmvs = tfp.maxTmvs
 
-        this.glslString = irToFunction(true, this)
-
-        //fairly insane
-        // debugger
-        let str = irToFunction(false, this)
-        eval(str)
-        this.jsFunction = eval(this.name)
+        this.irToFunctionString(true, tfp.namesWithLocalizationNeeded)
+        this.irToFunctionString(false, tfp.namesWithLocalizationNeeded)
 
         //and rewrite the stuff it gets used in?
         //the shaders should know where they're getting it from
 
         //for more aribtrary types defined in the editor, you could compile the function into a string containing stuff like "gl.uniform1f" and so on
+    }
+    FunctionWithIr.prototype.irToFunctionString = function(glslInsteadOfJs, namesWithLocalizationNeeded) {
+
+        let finalAssignment = this.internalDeclarations.length !== 0 ?
+            "\nassign(" + this.internalDeclarations[this.internalDeclarations.length - 1] + ",target);" :
+            "\nzeroMv(target);"
+
+        let self = this
+        let chunks = {
+            body: self.ir + finalAssignment,
+            namesWithLocalizationNeeded: self.namesWithLocalizationNeeded
+        }
+        //using the last declared variable makes more sense than "return", because you deffo want to see the result
+        // if(this.name === "stereographic" &&glslInsteadOfJs === false)
+        //     debugger
+        irToCode(chunks, glslInsteadOfJs, this.maxTmvs, namesWithLocalizationNeeded, this.internalDeclarations)
+
+        let numNonTargetArguments = this.argumentsInSignature.length
+        let signature = ""
+        if (glslInsteadOfJs) {
+            signature += `void ` + this.name + `(`
+            for (let i = 0; i < numNonTargetArguments; ++i)
+                signature += `in float ` + this.argumentsInSignature[i] + `[16],` //altenratively, the actual names
+            signature += `out float target[16])`
+        }
+        else {
+            signature += `function ` + this.name + `(`
+            for (let i = 0; i < numNonTargetArguments; ++i)
+                signature += this.argumentsInSignature[i] + `,`
+            signature += `target)`
+        }
+
+        let str = signature +
+            "\n{\n" +
+            chunks.body +
+            "\n}"
+
+        if(glslInsteadOfJs) {
+            this.glslBody = str
+        }
+        else {
+            //fairly insane
+            // debugger
+            eval(str)
+            this.jsFunction = eval(this.name)
+        }
     }
 
     new FunctionWithIr("reflectHorizontally")

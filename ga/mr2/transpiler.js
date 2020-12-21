@@ -91,7 +91,8 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
                     switch (getNameDrawerProperties(lexeme).type) {
                         case "mv":
                             new Node(lexeme, true)
-                            namesWithLocalizationNeeded.push(lexeme)
+                            if (namesWithLocalizationNeeded.indexOf(lexeme) === -1)
+                                namesWithLocalizationNeeded.push(lexeme)
                             break
 
                         case "globe":
@@ -106,6 +107,10 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
                 else if (isOpenBracket) {
                     if(functionNameJustSeen) {
                         adjustToOpenBracket(functionNameJustSeen)
+
+                        if(functionsWithIr[functionNameJustSeen] !== undefined)
+                            unionStringArray(functionsWithIr[functionNameJustSeen].namesWithLocalizationNeeded,namesWithLocalizationNeeded)
+
                         functionNameJustSeen = null
                         if(currentNodeBranchingFrom.expectedNumberOfArguments === 1) //bit hacky
                             branchCanComplete = true
@@ -146,11 +151,9 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
         }
 
         //since the top node is a "" function it should be ok if there's just a single mv
-        function parseFunctionNode(node, numTmvs, argumentNames) {
+        function parseFunctionNode(node, numTmvs) {
             let finalLine = node.lexeme + "("
             let computationLines = ""
-
-            //terminal symbols get transformed into arg0, arg1
 
             node.children.forEach((child) => {
                 if (child.expectedNumberOfArguments === 0)
@@ -159,7 +162,7 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
                     let transpilationMvName = 'tMv' + numTmvs.value
                     ++numTmvs.value
 
-                    computationLines += parseFunctionNode(child,numTmvs,argumentNames) + transpilationMvName + ');\n'
+                    computationLines += parseFunctionNode(child,numTmvs) + transpilationMvName + ');\n'
                     finalLine += transpilationMvName + ','
                 }
             })
@@ -182,52 +185,50 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
             let tfp = transpilingFunctionProperties
 
             let numTmvs = { value: 0 }
-            let bodySansFinalAssignmentTarget = parseFunctionNode(topNode, numTmvs, tfp.argumentsInSignature)
+            let bodySansFinalAssignmentTarget = parseFunctionNode(topNode, numTmvs)
 
+            //----------------Calculate the value and make it so they can be seen
             let targetGlsl = globeProperties !== null
             if (targetGlsl) {
-                let body = bodySansFinalAssignmentTarget + `target);`
-
-                if(tfp.argumentsInSignature.length !== 0) {
-                    console.error("not sure what to do here")
-                    debugger
-                    // tfp.argumentsInSignature.forEach((argument, i) => {
-                    //     body = "float arg" + i + " = " + argument + ";\n" + body
-                    // })
+                let nameProperties = {
+                    body: bodySansFinalAssignmentTarget + `target);`,
+                    namesWithLocalizationNeeded: [],
+                    globeProperties
+                    //then what? All of this gets deleted at the end of the frame? Let's hope!
                 }
+                
+                irToCode(nameProperties,  true, numTmvs.value, namesWithLocalizationNeeded)
 
-                body = addMvDeclarations(body,  true, numTmvs.value, namesWithLocalizationNeeded)
-
-                // "just" the things that let you see it on screen
-                assignTypeAndData(nameToAssignTo, "globeProjection", {
-                    globeProperties, body
-                })
+                assignTypeAndData(nameToAssignTo, "globeProjection", nameProperties)
             }
             else {
-                let body = bodySansFinalAssignmentTarget + `getNameDrawerProperties("` + nameToAssignTo + `").value);\n`
-                body = addMvDeclarations(body, false, numTmvs.value, namesWithLocalizationNeeded)
+                let chunks = {
+                    body: bodySansFinalAssignmentTarget + `getNameDrawerProperties("` + nameToAssignTo + `").value);\n`
+                }
+                irToCode(chunks, false, numTmvs.value, namesWithLocalizationNeeded)
 
                 assignMv( nameToAssignTo )
-                eval( body )
+                eval( chunks.body )
             }
 
+            //---------------For a function we might be building
             if (tfp.name !== null) {
-                namesWithLocalizationNeeded.forEach((name) => {
-                    let externalMvNotKnownToFunctionYet = 
-                        tfp.internalDeclarations.indexOf(name) === -1 &&
-                        tfp.namesWithLocalizationNeeded.indexOf(name) === -1 &&
-                        tfp.argumentsInSignature.indexOf(name) === -1
-                    if (externalMvNotKnownToFunctionYet)
-                        tfp.namesWithLocalizationNeeded.push(name)
-                })
-
-                tfp.maxTmvs = Math.max(tfp.maxTmvs, numTmvs.value)
                 tfp.ir += 
                     "   {\n" +
                     bodySansFinalAssignmentTarget + nameToAssignTo + ");\n" +
                     "   }\n"
+
+                tfp.maxTmvs = Math.max(tfp.maxTmvs, numTmvs.value)
                 tfp.internalDeclarations.push(nameToAssignTo)
-                //you're building up that list that's declared internally, what about the ones that aren't?
+
+                namesWithLocalizationNeeded.forEach((name) => {
+                    let externalMvNotKnownToFunctionYet =
+                        tfp.internalDeclarations.indexOf(name) === -1 &&
+                        tfp.argumentsInSignature.indexOf(name) === -1 &&
+                        tfp.namesWithLocalizationNeeded.indexOf(name) === -1
+                    if (externalMvNotKnownToFunctionYet)
+                        tfp.namesWithLocalizationNeeded.push(name)
+                })
             }
 
             //Resetting the tree

@@ -1,5 +1,6 @@
 <!--
 	TODO Bugs
+		Make it so we can rotate
 		Fucking which way is z
 		Bug with your mind: you want to reinvent calculus. Just wait for calculus shit to come up then ask people how to do it
 
@@ -115,13 +116,9 @@
 				initCarat()
 
 				let typeableCharacters = initTypeableCharacters()
-				let displayableCharacters = typeableCharacters
-				let specialTypeableSymbols = [DAGGER_SYMBOL,LAMBDA_SYMBOL, JOIN_SYMBOL, "?", "*", MEET_SYMBOL] //meet goes last, it can be wide
-				for(let i = 0; i < specialTypeableSymbols.length; ++i)
-					displayableCharacters += specialTypeableSymbols[i]
-				initCharacterTexture(displayableCharacters)
+				initCharacterTexture(typeableCharacters)
 
-				initTokenizer(displayableCharacters)
+				initEvaluate()
 
 				await initTextureSampler()
 				initFrames()
@@ -173,7 +170,7 @@
 					mouse.updateFromAsyncAndCheckClicks()
 					//may wish to have keyboard too. You could even have >1 letter per frame!
 
-					tokenizeEvaluateDisplay()
+					tokenizeEvaluateDrawTokens()
 
 					for(var i = 0; i < updateFunctions.length; i++)
 						updateFunctions[i]()
@@ -207,8 +204,9 @@
 
 		<script src="text.js"></script>
 		
-		<script src="tokenizeEvaluateDisplay.js"></script>
-		<script src="padDisplay.js"></script>
+		<script src="tokenize.js"></script>
+		<script src="evaluate.js"></script>
+		<script src="drawTokens.js"></script>
 		<script src="errorHighlight.js"></script>
 
 		<script src="textureSampler.js"></script>

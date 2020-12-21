@@ -15,7 +15,9 @@ const IDENTIFIER_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVW
 
 //---------Varying state
 
-const coloredNamesAlphabetically = Array(63)  //7 choose 1 + 7 choose 2 + 7 choose 3
+const NUM_NAMES = 63 //7 choose 1 + 7 choose 2 + 7 choose 3
+const coloredNamesAlphabetically = Array(NUM_NAMES)
+const drawingDetailses = Array(NUM_NAMES)
 
 const functionsWithIr = {}
 
@@ -34,6 +36,7 @@ const errorHighlightTokenIndices = []
 
 const LAMBDA_SYMBOL = String.fromCharCode("955") //you CAN write "function", but lots of kids don't know "function". In python it's "def"
 const JOIN_SYMBOL = String.fromCharCode("8744") //could change to v. But that is a letter you need to type
+const INNER_SYMBOL = String.fromCharCode("8226") //could change to v. But that is a letter you need to type
 const DAGGER_SYMBOL = String.fromCharCode("8224")
 const MEET_SYMBOL = "^" //String.fromCharCode("8743") //for some reason this symbol is wide!
 

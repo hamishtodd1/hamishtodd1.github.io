@@ -20,20 +20,23 @@
         Sinusoidal/Bonne/werner: look in notebook
         interuppted: several sinusoidals (that then become 1)
 
-    craig retroazimuthal: not sure
+    craig retroazimuthal
+        sin phi is projection onto the axis
+        cos phi is projection onto the equatorial plane
+        Maybe multiply out the two terms and visualize them
+
     Kavrayskiy: Something to do with circles, possibly can conformally unroll first
 
     azimuthal equal area: another kind of conformally unroll
 
     Stretchy conformal unroll (stretches!) to your half cylinder, then do these
         equirectangular: conformal unroll
-        cylindrical: project (but better to unroll first?)
+        cylindrical: project (but better to unroll first? Where else do you projecting from a line? If nowhere, project then unroll)
         Mercator: project then the exp thing (non-trivial)
-        Gall-Peters: orth
+        Gall-Peters: orth (project from a line)
 
     TODO
 		+, cos, sin, exp
-		Whenever you see "sin lat", that's projection onto line
 		Extract lat and lon
 		Slice lat and lon
         Unwrapping lon
@@ -92,6 +95,7 @@ async function initGlobeProjectionPictograms() {
     const numDivisions = 256
     var uvBuffer = generateDividedUnitSquareBuffer(numDivisions, eps)
 
+    //better name might be "reusable"
     var ppWrappers = []
     function PpWrapper() {
         for (let i = 0; i < ppWrappers.length + 1; ++i) {
@@ -108,26 +112,45 @@ async function initGlobeProjectionPictograms() {
     }
 
     function predrawAndReturnProgram(nameProperties) {
-        let ourPpWrapper = ppWrappers.find((ppWrapper) => 
-            ppWrapper.currentBody === nameProperties.body ) //bit costly. Maybe turn the string into a single number or something?
-        if (ourPpWrapper === undefined) {
+        let ourPpWrapper = ppWrappers.find((ppWrapper) => {
+            if( ppWrapper.currentBody !== nameProperties.body ) //bit costly. Maybe turn the string into a single number or something?
+                return false
+            else {
+                //go through nameProperties.namesWithLocalizationNeeded too, if there's a mismatch there this is no good either
+                return true
+            }
+        })
+        if (ourPpWrapper === undefined ) { //it'll also change if you're
             ourPpWrapper = ppWrappers.find((ppWrapper) => {
                 return ppWrapper.usedLastFrame === false
             })
             if(ourPpWrapper === undefined)
                 ourPpWrapper = new PpWrapper()
 
+            //TODO needs to be updated whenever shit changes. Could have a variable called "version" that you check
             let allFwI = ""
             let fwiNames = Object.keys(functionsWithIr)
             fwiNames.forEach((f)=>{
                 if(f !== "stereographic")
-                    allFwI += functionsWithIr[f].glslString
+                    allFwI += functionsWithIr[f].glslBody
             })
-            let vsSource = vertexShaderToPictogramVertexShader(gaShaderString + allFwI + vsStart + nameProperties.body + vsEnd)
+
+            let uniformDeclarations = ""
+            nameProperties.namesWithLocalizationNeeded.forEach((name) => {
+                `uniform float ` + name + `[16];\n`
+            })
+            
+            let fullString = gaShaderString + allFwI + uniformDeclarations + vsStart + nameProperties.body + vsEnd
+            let vsSource = vertexShaderToPictogramVertexShader(fullString)
             ourPpWrapper.pictogramProgram.changeShader(gl.VERTEX_SHADER, vsSource)
 
             ourPpWrapper.pictogramProgram.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
             ourPpWrapper.pictogramProgram.locateUniform("sampler")
+
+            //sampler could be in this too
+            nameProperties.namesWithLocalizationNeeded.forEach((name) => {
+                ourPpWrapper.pictogramProgram.locateUniform(name)
+            })
 
             ourPpWrapper.currentBody = nameProperties.body
         }
@@ -140,6 +163,10 @@ async function initGlobeProjectionPictograms() {
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, nameProperties.globeProperties.texture);
         gl.uniform1i(program.getUniformLocation("sampler"), 0);
+
+        nameProperties.namesWithLocalizationNeeded.forEach((name)=>{
+            gl.uniform1fv(planePictogramDrawer.program.getUniformLocation(name), getNameDrawerProperties(name).value)
+        })
 
         return program
     }

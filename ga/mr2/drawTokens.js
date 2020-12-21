@@ -1,4 +1,4 @@
-function initPadDisplay() {
+function initDrawTokens() {
     let toolbarHeight = 0.//1.5
     
     let drawingPosition = new ScreenPosition()
@@ -22,7 +22,7 @@ function initPadDisplay() {
         }
     }
 
-    let proxyPairs = ["&",JOIN_SYMBOL,"^",MEET_SYMBOL,"~",DAGGER_SYMBOL]
+    let proxyPairs = ["&",JOIN_SYMBOL,"^",MEET_SYMBOL,"~",DAGGER_SYMBOL,".",INNER_SYMBOL]
     
     let tokensWhoseCharactersDontGetDrawn = [
         "coloredName","\n"
