@@ -5,7 +5,6 @@
 
         projection functions:
             When given a single vec as input, they 
-        
 
     Types:
         world map
@@ -15,7 +14,6 @@
         color
         function from positions to colors
         inverse trig function
-
 */
 
 function initEvaluate() {
@@ -52,6 +50,20 @@ function initEvaluate() {
     initDrawTokens()
 
     let lineTree = new AbstractSyntaxTree()
+
+    let tfp = {} //transpilingFunctionProperties
+    tfp.internalDeclarations = []
+    tfp.namesWithLocalizationNeeded = []
+    tfp.argumentsInSignature = []
+    function resetTfp() {
+        tfp.internalDeclarations.length = 0
+        tfp.namesWithLocalizationNeeded.length = 0
+        tfp.argumentsInSignature.length = 0
+        tfp.ir = ""
+        tfp.name = null
+        tfp.maxTmvs = 0
+    }
+    resetTfp()
     
     tokenizeEvaluateDrawTokens = () => {
 
@@ -62,14 +74,7 @@ function initEvaluate() {
         let nameToAssignTo = null
 
         //probably completely unnecessary to store this, just use the function itself
-        let transpilingFunctionProperties = {
-            maxTmvs: 0,
-            name: null,
-            argumentsInSignature: [],
-            internalDeclarations: [],
-            namesWithLocalizationNeeded:[],
-            ir: "",
-        }
+        resetTfp()
         
         const functionSignatureTokens = ["uncoloredName", "(",",","{"]
         let nextFunctionSignatureTokenIndex = 99999
@@ -105,7 +110,7 @@ function initEvaluate() {
                     // if(nameToAssignTo === "pw")
                     //     log(carat.lineNumber !== lineNumber)
                     if (carat.lineNumber !== lineNumber)
-                        lineTree.parseAndAssign(tokenIndex, nameToAssignTo, lineNumber, transpilingFunctionProperties)
+                        lineTree.parseAndAssign(tokenIndex, nameToAssignTo, lineNumber, tfp)
 
                     derivedNames.push(nameToAssignTo) //because what if you save
                 }
@@ -130,9 +135,9 @@ function initEvaluate() {
                     if(token === ")")
                         ++nextFunctionSignatureTokenIndex
                     else if (token === "coloredName" ) { //intuition was that it shouldn't be a used one. But, er, the word "used", what does it mean?
-                        if (transpilingFunctionProperties.argumentsInSignature.indexOf(lexeme) !== -1)
+                        if (tfp.argumentsInSignature.indexOf(lexeme) !== -1)
                             handleError(tokenIndex,"same argument twice")
-                        transpilingFunctionProperties.argumentsInSignature.push(lexeme)
+                        tfp.argumentsInSignature.push(lexeme)
                     }
 
                     return false
@@ -141,7 +146,7 @@ function initEvaluate() {
                     ++nextFunctionSignatureTokenIndex
 
                     if (token === "uncoloredName")
-                        transpilingFunctionProperties.name = lexeme
+                        tfp.name = lexeme
 
                     return false
                 }
@@ -178,8 +183,6 @@ function initEvaluate() {
                     }
                 }
                 else if (lexeme === "}") {
-                    let tfp = transpilingFunctionProperties
-
                     if (tfp.name === null)
                         handleError(tokenIndex, "misplaced }")
                     
@@ -188,12 +191,7 @@ function initEvaluate() {
 
                     functionsWithIr[tfp.name].setIr(tfp)
 
-                    tfp.internalDeclarations.length = 0
-                    tfp.namesWithLocalizationNeeded.length = 0
-                    tfp.argumentsInSignature.length = 0
-                    tfp.ir = ""
-                    tfp.name = null
-                    tfp.maxTmvs = 0
+                    resetTfp()
                 }
             }
         })

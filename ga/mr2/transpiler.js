@@ -207,7 +207,8 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
                 }
                 irToCode(chunks, false, numTmvs.value, namesWithLocalizationNeeded)
 
-                assignMv( nameToAssignTo )
+                if(getNameType(nameToAssignTo) !== "mv")
+                    assignMv( nameToAssignTo )
                 eval( chunks.body )
             }
 

@@ -153,5 +153,3 @@ function Program(vsSource, fsSource) {
             gl.bufferData(gl.ARRAY_BUFFER, updatedArray, gl.DYNAMIC_DRAW)
     }
 }
-
-sq = (x) => x * x

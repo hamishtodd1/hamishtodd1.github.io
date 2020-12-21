@@ -103,6 +103,8 @@
                     it was that he was denying the variety, denying that you should think about projections other the one he came up with. 
                     Ignoring the contributions of the cartographers who came before him, including the Egyptian and Chinese ones
         Thank you to Paul Bourke and NASA for these textures
+
+        Gall Peters distorts Colombia
 */
 
 async function initWorldMap() {

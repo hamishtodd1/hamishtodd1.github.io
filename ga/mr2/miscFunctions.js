@@ -11,6 +11,8 @@ function unionStringArray(arr, target) {
     })
 }
 
+sq = (x) => x * x
+
 function presentJsonFile(string, filename) {
     let data = new Blob([string], { type: 'text/plain' });
     let url = window.URL.createObjectURL(data);
