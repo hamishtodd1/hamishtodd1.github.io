@@ -74,6 +74,10 @@ function initMvPictograms() {
 
             point(slideCurrentMv, x, y, 0., 1.)
 
+            //to rotate shit, what you need is a rotor, realLine plus scalar
+            //What's quite interesting is the "pad plane", which takes the plane z = 0 to the plane you're looking at
+            //by the way you can take a lot from the pitch and yaw
+
             let grade = getGrade(mv)
             switch(grade) {
                 case 3: //point
@@ -92,18 +96,15 @@ function initMvPictograms() {
                     break
 
                 case 1: //plane
-                    if (mvEquals(slideCurrentMv, slideStartMv))
-                        plane(mv, 0., 0., 1., 0.);
-                    else {
-                        gSub(slideCurrentMv, slideStartMv, mv0)
-                        pointZ(mv0, 1.)
-                        dual(mv0, mv1) //mv1 is the plane, but it's at the origin
-                        //better would be it spinning around and around
+                    let normalDirection = mv0
+                    gSub(slideCurrentMv, slideStartMv, normalDirection)
+                    pointZ(normalDirection, 1.) //urgh, -
+                    dual(normalDirection, mv1) //mv1 is the plane, but it's at the origin
+                    //better would be it continue to spin around as your mouse gets further and further away
 
-                        //project
-                        inner(mv1, slideStartMv, mv2)
-                        gProduct(mv2, slideStartMv, mv)
-                    }
+                    //project onto the starting point
+                    inner(mv1, slideStartMv, mv2)
+                    gProduct(mv2, slideStartMv, mv)
             }
         },
     }
@@ -280,13 +281,13 @@ function initMvPictograms() {
                 
             uniform vec3 normal;
             void main(void) {
-                vec3 lightPosition = vec3(-1.,1.,1.);
-                vec3 l = lightPosition - p;
-                vec3 r = normalize(2. * dot(l,normal) * normal - l);
+                vec3 lightPosition = vec3(-1.,1.,-.5);
+                vec3 lightDirectionFromHere = lightPosition - p;
+                vec3 r = normalize(2. * dot(lightDirectionFromHere,normal) * normal - lightDirectionFromHere);
                 
-                vec3 v = vec3(0.,0.,1.);
-                float shininessConstant = 12.;
-                float specularContribution = pow(dot(r,v),shininessConstant);
+                vec3 viewerDirection = vec3(0.,0.,-1.); //sigh
+                float shininessConstant = 8.;
+                float specularContribution = pow(dot(r,viewerDirection),shininessConstant);
 
                 gl_FragColor = vec4(specularContribution,specularContribution,specularContribution,1.);
         `
@@ -316,7 +317,7 @@ function initMvPictograms() {
                 }
                 else {
                     meet(zPlane, mv, mv0)
-                    let angle = Math.asin(lineRealNorm(mv0))
+                    let angle = -Math.asin(lineRealNorm(mv0)) //dunno why it's -, possibly relates to z flip
                     lineNormalize(mv0)
                     mvRotator(mv0, angle, motorFromZPlane)
                 }

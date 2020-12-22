@@ -16,11 +16,13 @@ function initPictogramDrawers() {
         uniform vec2 screenPosition;
 
         uniform float drawingSquareRadius;
+        uniform float zAdditionForDw;
     `
     let vsFooter = `
         preBoxPosition = gl_Position.xyz;
         gl_Position.xyz *= drawingSquareRadius;
         gl_Position.xy += screenPosition;
+        gl_Position.z += -zAdditionForDw; //or +, one day
     `
     + cameraAndFrameCountShaderStuff.footer
 
@@ -46,6 +48,7 @@ function initPictogramDrawers() {
 
         cameraAndFrameCountShaderStuff.locateUniforms(this)
         this.locateUniform("drawingSquareRadius")
+        this.locateUniform("zAdditionForDw")
         this.locateUniform("screenPosition")
     }
 
@@ -70,21 +73,16 @@ function initPictogramDrawers() {
                 cameraAndFrameCountShaderStuff.transfer(program)
 
                 gl.uniform1f(program.getUniformLocation("drawingSquareRadius"), .5)
+                gl.uniform1f(program.getUniformLocation("zAdditionForDw"), 0.)
                 gl.uniform2f(program.getUniformLocation("screenPosition"), screenPositions[i * 2 + 0], screenPositions[i * 2 + 1])
                 draw(nameProperties,names[i])
 
                 displayWindows.forEach((dw) => {
                     if (dw.verticalPositionToRenderFrom === screenPositions[i * 2 + 1]) {
-                        // let previouslyDepthTesting = gl.getParameter(gl.DEPTH_TEST)
-                        // if(previouslyDepthTesting)
-                        //     gl.disable(gl.DEPTH_TEST);
-
                         gl.uniform1f(program.getUniformLocation("drawingSquareRadius"), dw.dimension * .5)
+                        gl.uniform1f(program.getUniformLocation("zAdditionForDw"), mainCamera.frontAndBackZ * .5)
                         gl.uniform2f(program.getUniformLocation("screenPosition"), dw.position.x, dw.position.y)
                         draw(nameProperties,names[i])
-
-                        // if (previouslyDepthTesting)
-                        //     gl.enable(gl.DEPTH_TEST);
                     }
                 })
             }
@@ -102,7 +100,6 @@ function initPictogramDrawers() {
         }
     }
 
-    pictogramTest2()
     pictogramTest()
 
     initAnglePictograms()
@@ -141,58 +138,6 @@ function pictogramTest() {
         pictogramDrawer.finishPrebatchAndDrawEach((nameProperties, name) => {
             gl.uniform1f(pictogramDrawer.program.getUniformLocation("g"), nameProperties.value)
             gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4)
-        })
-    })
-}
-
-function pictogramTest2()
-{
-    let vs = `
-        attribute vec4 vertA;
-
-        void main(void) {
-            gl_Position = vertA;
-        `
-    let fs = `
-        uniform float g;
-
-        void main(void) {
-            gl_FragColor = vec4(0.,0.,1.,1.);
-        `
-
-    let testEditingStyle = {
-        during: (name,x,y) => {
-            getNameDrawerProperties(name).value = Math.abs(x)
-        },
-    }
-
-    let quadBuffer2 = new Float32Array(quadBuffer.length)
-    quadBuffer.forEach((val,i)=>{
-        if(i%4 === 0)
-            val *= .7
-        if (i % 4 === 1)
-            val *= 1.2
-        if (i % 4 === 2) {
-            if(quadBuffer2[i-1] > 0.)
-                val += .1
-            else
-                val += -.1
-        }
-        quadBuffer2[i] = val
-    })
-
-    let pictogramDrawer = new PictogramDrawer(vs, fs)
-    addType("test2", pictogramDrawer, testEditingStyle)
-    pictogramDrawer.program.addVertexAttribute("vert", quadBuffer2, 4, true)
-    pictogramDrawer.program.locateUniform("g")
-
-    addRenderFunction(()=>{
-        gl.useProgram(pictogramDrawer.program.glProgram)
-        pictogramDrawer.program.prepareVertexAttribute("vert", quadBuffer2)
-
-        pictogramDrawer.finishPrebatchAndDrawEach((nameProperties,name) => {
-            gl.uniform1f(pictogramDrawer.program.getUniformLocation("g"), nameProperties.value)
-            gl.drawArrays(gl.TRIANGLES, 0, quadBuffer2.length / 4)
         })
     })
 }

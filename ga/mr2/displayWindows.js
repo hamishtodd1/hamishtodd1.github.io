@@ -15,7 +15,7 @@ function initDisplayWindows() {
                 gl_Position = vertA;
                 gl_Position.xy *= `+ toGlslFloatLiteral(dimension) + `;
                 gl_Position.xy += screenPosition;
-                gl_Position.z = -3.; //or 3.
+                gl_Position.z = ` + toGlslFloatLiteral(mainCamera.frontAndBackZ * -.25) +`; //or -
             `
             + cameraAndFrameCountShaderStuff.footer
         const fsSource = 
@@ -25,10 +25,10 @@ function initDisplayWindows() {
             }
             `
 
-        var program = new Program(vsSource, fsSource)
-        program.addVertexAttribute("vert", quadBuffer, 4, true)
-        cameraAndFrameCountShaderStuff.locateUniforms(program)
-        program.locateUniform("screenPosition")
+        var backgroundProgram = new Program(vsSource, fsSource)
+        backgroundProgram.addVertexAttribute("vert", quadBuffer, 4, true)
+        cameraAndFrameCountShaderStuff.locateUniforms(backgroundProgram)
+        backgroundProgram.locateUniform("screenPosition")
     }
 
     function DisplayWindow() {
@@ -43,10 +43,11 @@ function initDisplayWindows() {
     }
     Object.assign( DisplayWindow.prototype, {
         render: function() {
-            gl.useProgram(program.glProgram)
-            cameraAndFrameCountShaderStuff.transfer(program)
-            program.prepareVertexAttribute("vert", quadBuffer)
-            gl.uniform2f(program.getUniformLocation("screenPosition"), this.position.x, this.position.y);
+            
+            gl.useProgram(backgroundProgram.glProgram)
+            cameraAndFrameCountShaderStuff.transfer(backgroundProgram)
+            backgroundProgram.prepareVertexAttribute("vert", quadBuffer)
+            gl.uniform2f(backgroundProgram.getUniformLocation("screenPosition"), this.position.x, this.position.y);
             gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4)
 
             for (let i = 0; i < this.numMvs; ++i)
