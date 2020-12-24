@@ -12,14 +12,14 @@
 function initPictogramDrawers() {
 
     let vsHeader = shaderHeaderWithCameraAndFrameCount + `
-        varying vec3 preBoxPosition;
+        varying vec2 preBoxPosition;
         uniform vec2 screenPosition;
 
         uniform float drawingSquareRadius;
         uniform float zAdditionForDw;
     `
     let vsFooter = `
-        preBoxPosition = gl_Position.xyz;
+        preBoxPosition = gl_Position.xy / gl_Position.w;
         gl_Position.xyz *= drawingSquareRadius;
         gl_Position.xy += screenPosition;
         gl_Position.z += -zAdditionForDw; //or +, one day
@@ -27,9 +27,10 @@ function initPictogramDrawers() {
     + cameraAndFrameCountShaderStuff.footer
 
     let fsHeader = shaderHeaderWithCameraAndFrameCount + `
-        varying vec3 preBoxPosition;
+        varying vec2 preBoxPosition;
     `
     let fsFooter = `
+    
         if( abs(preBoxPosition.x) > 1. || abs(preBoxPosition.y) > 1. ) //|| abs(preBoxPosition.z) > 1.
             discard; //unperformant!
     }

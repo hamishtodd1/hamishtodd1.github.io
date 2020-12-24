@@ -56,6 +56,11 @@ function initAlgebra()
         mv2 = new Float32Array(16)
         mv3 = new Float32Array(16)
         mv4 = new Float32Array(16)
+        nonAlgebraTempMv0 = new Float32Array(16)
+        nonAlgebraTempMv1 = new Float32Array(16)
+        nonAlgebraTempMv2 = new Float32Array(16)
+        nonAlgebraTempMv3 = new Float32Array(16)
+        nonAlgebraTempMv4 = new Float32Array(16)
         appendToGaShaderString( `
             float mv0[16];
             float mv1[16];
@@ -368,6 +373,10 @@ function initAlgebra()
         pointW     = (mv,newValue) => {if(newValue !== undefined) mv[14] = newValue; return mv[14] }
         pss        = (mv,newValue) => {if(newValue !== undefined) mv[15] = newValue; return mv[15] }
 
+        realLine = (mv,newX,newY,newZ) => { zeroMv(mv); mv[8] = newZ, mv[9] = newY, mv[10] = newX }
+
+        planeNorm = (mv) => { return Math.sqrt(sq(planeX(mv)) + sq(planeY(mv)) + sq(planeZ(mv)))}
+
         lineRealNorm = (mv) => { return Math.sqrt(sq(realLineX(mv)) + sq(realLineY(mv)) + sq(realLineZ(mv)))}
         lineIdealNorm = (mv) => { return Math.sqrt(sq(idealLineX(mv)) + sq(idealLineY(mv)) + sq(idealLineZ(mv)))}
         
@@ -406,6 +415,17 @@ function initAlgebra()
             pointZ(p, pointZ(p) / w)
             pointW(p, 1.)
         }
+
+        appendToGaShaderString(replaceSignature(
+            "void wNormalizePoint(inout float mv[16] )",
+            wNormalizePoint = (mv) =>
+            {
+                mv[11] = mv[11] / mv[14];
+                mv[12] = mv[12] / mv[14];
+                mv[13] = mv[13] / mv[14];
+                mv[14] = 1.;
+            }
+        ))
 
         appendToGaShaderString(replaceSignature(
             "void point(inout float mv[16], float x, float y, float z, float w )",

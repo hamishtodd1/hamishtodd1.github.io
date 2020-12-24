@@ -33,7 +33,6 @@ async function loadBackgroundStringAndInitSave() {
     }))
 
     function saveFunction() {
-        log("yo")
         let fullJson = {
             backgroundString,
             freeMvNames: getMvNames(),

@@ -105,6 +105,7 @@ async function initGlobeProjectionPictograms() {
             }
         }
         this.currentBody
+        // debugger
         this.pictogramProgram = new PictogramProgram(gaShaderString + vsStart + vsEnd, fs)
 
         this.usedThisFrame = true
@@ -124,23 +125,30 @@ async function initGlobeProjectionPictograms() {
             ourPpWrapper = ppWrappers.find((ppWrapper) => {
                 return ppWrapper.usedLastFrame === false
             })
-            if(ourPpWrapper === undefined)
+            if(ourPpWrapper === undefined) {
+                // debugger
                 ourPpWrapper = new PpWrapper()
+            }
+
+            // debugger
+
+            let uniformDeclarations = ""
+            // nameProperties.namesWithLocalizationNeeded.forEach((name) => {
+            //     uniformDeclarations += `uniform float ` + name + `[16];\n`
+            // })
 
             //TODO needs to be updated whenever shit changes. Could have a variable called "version" that you check
             let allFwI = ""
             let fwiNames = Object.keys(functionsWithIr)
-            fwiNames.forEach((f)=>{
-                if(f !== "stereographic")
-                    allFwI += functionsWithIr[f].glslBody
-            })
-
-            let uniformDeclarations = ""
-            nameProperties.namesWithLocalizationNeeded.forEach((name) => {
-                `uniform float ` + name + `[16];\n`
+            fwiNames.forEach((fwiName)=>{
+                let fwi = functionsWithIr[fwiName]
+                fwi.namesWithLocalizationNeeded.forEach((name)=>{
+                    uniformDeclarations += `uniform float ` + name + `[16];\n`
+                })
+                allFwI += fwi.glslBody + "\n\n"
             })
             
-            let fullString = gaShaderString + allFwI + uniformDeclarations + vsStart + nameProperties.body + vsEnd
+            let fullString = gaShaderString + uniformDeclarations + allFwI + vsStart + nameProperties.body + vsEnd
             let vsSource = vertexShaderToPictogramVertexShader(fullString)
             ourPpWrapper.pictogramProgram.changeShader(gl.VERTEX_SHADER, vsSource)
 
@@ -165,7 +173,7 @@ async function initGlobeProjectionPictograms() {
         gl.uniform1i(program.getUniformLocation("sampler"), 0);
 
         nameProperties.namesWithLocalizationNeeded.forEach((name)=>{
-            gl.uniform1fv(planePictogramDrawer.program.getUniformLocation(name), getNameDrawerProperties(name).value)
+            gl.uniform1fv(program.getUniformLocation(name), getNameDrawerProperties(name).value)
         })
 
         return program

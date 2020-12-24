@@ -122,6 +122,22 @@ function initDisplayWindows() {
             mouseDw.slideOngoing = false
         },
     })
+
+    rightMouseResponses.push({
+        z: () => {
+            if (mouseDw.mouseIsInside())
+                return Infinity
+            else
+                return -Infinity
+        },
+        start: () => {
+            mouseDw.slideOngoing = true
+        },
+        during: adjustViewOnMvs,
+        end: () => {
+            mouseDw.slideOngoing = false
+        },
+    })
     
     //-----Carat dw
     caratDw = new DisplayWindow()

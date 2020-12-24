@@ -191,11 +191,13 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
             let targetGlsl = globeProperties !== null
             if (targetGlsl) {
                 let nameProperties = {
-                    body: bodySansFinalAssignmentTarget + `target);`,
+                    body: bodySansFinalAssignmentTarget + `target);\nwNormalizePoint(target);`,
                     namesWithLocalizationNeeded: [],
                     globeProperties
                     //then what? All of this gets deleted at the end of the frame? Let's hope!
                 }
+
+                // debugger
                 
                 irToCode(nameProperties,  true, numTmvs.value, namesWithLocalizationNeeded)
 

@@ -63,6 +63,31 @@ function initMvPictograms() {
 
     let hexantColors = new Float32Array(3 * 6)
 
+    {
+        adjustViewOnMvs = () => {
+            let axis = nonAlgebraTempMv1
+            // realLine(untransformedAxis, mouse.positionDelta.y, -mouse.positionDelta.x, 0.)
+            // realLine(untransformedAxis, 0., -mouse.positionDelta.x, 0.)
+            realLine(axis, mouse.positionDelta.y, 0., 0.)
+
+            let angle = mouse.positionDelta.length() * 1.7
+            let increment = nonAlgebraTempMv2
+            mvRotator(axis, angle, increment)
+
+            coloredNamesAlphabetically.forEach((name)=>{
+                if(getNameType(name) === "mv") {
+                    sandwichBab(getNameDrawerProperties(name).value,increment,mv0)
+                    assign(mv0,getNameDrawerProperties(name).value)
+                }
+            })
+        }
+
+        rightMouseResponses.push({
+            z: () => 0.,
+            during: adjustViewOnMvs
+        })
+    }
+
     let slideStartMv = new Float32Array(16)
     let slideCurrentMv = new Float32Array(16)
     let editingStyle = {
@@ -74,7 +99,6 @@ function initMvPictograms() {
 
             point(slideCurrentMv, x, y, 0., 1.)
 
-            //to rotate shit, what you need is a rotor, realLine plus scalar
             //What's quite interesting is the "pad plane", which takes the plane z = 0 to the plane you're looking at
             //by the way you can take a lot from the pitch and yaw
 
@@ -156,9 +180,10 @@ function initMvPictograms() {
                 if (!containsGrade(mv, 3))
                     return
 
+                gl.uniform3f(pointPictogramDrawer.program.getUniformLocation("visualPosition"), pointX(mv)/pointW(mv), pointY(mv)/pointW(mv), pointZ(mv)/pointW(mv))
+
                 pointPictogramDrawer.program.prepareVertexAttribute("colorIndex", pointColorIndexBuffer)
                 gl.uniform3fv(pointPictogramDrawer.program.getUniformLocation("hexantColors"), nameToHexantColors(name, hexantColors))
-                gl.uniform3f(pointPictogramDrawer.program.getUniformLocation("visualPosition"), pointX(mv)/pointW(mv), pointY(mv)/pointW(mv), pointZ(mv)/pointW(mv))
                 gl.drawArrays(gl.TRIANGLES, 0, vertBuffer.length / 4)
             })
         }
@@ -184,10 +209,10 @@ function initMvPictograms() {
             `
 
         {
-            var indexBuffer = new Float32Array(6 * 2)
+            var colorIndexBuffer = new Float32Array(6 * 2)
             for (let i = 0; i < 6; ++i) {
-                indexBuffer[i * 2 + 0] = i
-                indexBuffer[i * 2 + 1] = i
+                colorIndexBuffer[i * 2 + 0] = i
+                colorIndexBuffer[i * 2 + 1] = i
             }
 
             var planeByComponent = [planeX, planeY, planeZ]
@@ -199,12 +224,12 @@ function initMvPictograms() {
 
         var linePictogramDrawer = new PictogramDrawer(vs, fs)
         linePictogramDrawer.program.addVertexAttribute("vert", vertsBuffer, 4, true)
-        linePictogramDrawer.program.addVertexAttribute("colorIndex", indexBuffer, 1, false)
+        linePictogramDrawer.program.addVertexAttribute("colorIndex", colorIndexBuffer, 1, false)
         linePictogramDrawer.program.locateUniform("hexantColors")
 
         function renderLines() {
             gl.useProgram(linePictogramDrawer.program.glProgram)
-            linePictogramDrawer.program.prepareVertexAttribute("colorIndex", indexBuffer)
+            linePictogramDrawer.program.prepareVertexAttribute("colorIndex", colorIndexBuffer)
 
             linePictogramDrawer.finishPrebatchAndDrawEach((nameProperties,name) => {
                 let mv = nameProperties.value
@@ -278,8 +303,10 @@ function initMvPictograms() {
         `
         let fs = `
             varying vec3 p;
-                
+
+            uniform vec3 col;
             uniform vec3 normal;
+                
             void main(void) {
                 vec3 lightPosition = vec3(-1.,1.,-.5);
                 vec3 lightDirectionFromHere = lightPosition - p;
@@ -289,13 +316,14 @@ function initMvPictograms() {
                 float shininessConstant = 8.;
                 float specularContribution = pow(dot(r,viewerDirection),shininessConstant);
 
-                gl_FragColor = vec4(specularContribution,specularContribution,specularContribution,1.);
+                gl_FragColor = vec4(col + (1.-col) * specularContribution,1.);
         `
 
         var planePictogramDrawer = new PictogramDrawer(vs, fs) //shouldn't it be a pictogram program? Bit unfortunate to do so much adding
         planePictogramDrawer.program.addVertexAttribute("vert", planeVertBuffer, 4, false)
         planePictogramDrawer.program.locateUniform("motorFromZPlane")
         planePictogramDrawer.program.locateUniform("normal")
+        planePictogramDrawer.program.locateUniform("col")
 
         let motorFromZPlane = new Float32Array(16)
         let zPlane = new Float32Array(16) //what the disc is at
@@ -310,20 +338,23 @@ function initMvPictograms() {
                 if (!containsGrade(mv,1))
                     return
 
-                //sigh, may want to normalize mv first
+                let magnitude = planeNorm(mv)
+                plane(mv,
+                    planeX(mv)/magnitude,
+                    planeY(mv)/magnitude,
+                    planeZ(mv)/magnitude,
+                    planeW(mv)/magnitude)
+
                 if (planeX(mv) === 0. && planeY(mv) === 0. && planeW(mv) === 0.) {
                     zeroMv(motorFromZPlane)
                     motorFromZPlane[0] = 1.
                 }
                 else {
                     meet(zPlane, mv, mv0)
-                    let angle = -Math.asin(lineRealNorm(mv0)) //dunno why it's -, possibly relates to z flip
+                    let angle = Math.asin(lineRealNorm(mv0))
                     lineNormalize(mv0)
                     mvRotator(mv0, angle, motorFromZPlane)
                 }
-
-                // if(name === "bgr" && frameCount === 200)
-                //     debugger
 
                 gl.uniform1fv(planePictogramDrawer.program.getUniformLocation("motorFromZPlane"), motorFromZPlane)
                 let inverseNormalLength = 1./Math.sqrt(sq(planeX(mv)) + sq(planeY(mv)) + sq(planeZ(mv)) )
@@ -332,10 +363,13 @@ function initMvPictograms() {
                     planeY(mv)*inverseNormalLength,
                     planeZ(mv)*inverseNormalLength)
 
+                gl.uniform3f(planePictogramDrawer.program.getUniformLocation("col"), .2,.2,.2)
+
+                //for performance, could do this disabling in the predraw
                 // gl.disable(gl.CULL_FACE)
                 // gl.cullFace(gl.FRONT_AND_BACK)
-                gl.drawArrays(gl.TRIANGLES, 0, planeVertBuffer.length / 4)
                 // gl.cullFace(gl.BACK)
+                gl.drawArrays(gl.TRIANGLES, 0, planeVertBuffer.length / 4)
                 // gl.enable(gl.CULL_FACE)
             })
         }
