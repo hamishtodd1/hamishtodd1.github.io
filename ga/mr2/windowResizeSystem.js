@@ -6,8 +6,8 @@
 
 function initWindowResizeSystem()
 {
-	mainCamera.topAtZZero = 11.8 //all derives from this. Tweaked to make 100% look ok on our little preview
-	
+	mainCamera.topAtZZero = 7.//11.8 //all derives from this. Tweaked to make 100% look ok on our little preview
+
 	let oldPixelRatio = window.devicePixelRatio
 	function respondToResize(event) {
 		if (event !== undefined)

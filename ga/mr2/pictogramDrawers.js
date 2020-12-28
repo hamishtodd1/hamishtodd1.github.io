@@ -28,10 +28,11 @@ function initPictogramDrawers() {
 
     let fsHeader = shaderHeaderWithCameraAndFrameCount + `
         varying vec2 preBoxPosition;
+        uniform int clipSides;
     `
     let fsFooter = `
     
-        if( abs(preBoxPosition.x) > 1. || abs(preBoxPosition.y) > 1. ) //|| abs(preBoxPosition.z) > 1.
+        if( clipSides == 1 && (abs(preBoxPosition.x) > 1. || abs(preBoxPosition.y) > 1. ) ) //|| abs(preBoxPosition.z) > 1.
             discard; //unperformant!
     }
     `
@@ -50,6 +51,7 @@ function initPictogramDrawers() {
         cameraAndFrameCountShaderStuff.locateUniforms(this)
         this.locateUniform("drawingSquareRadius")
         this.locateUniform("zAdditionForDw")
+        this.locateUniform("clipSides")
         this.locateUniform("screenPosition")
     }
 
@@ -75,6 +77,7 @@ function initPictogramDrawers() {
 
                 gl.uniform1f(program.getUniformLocation("drawingSquareRadius"), .5)
                 gl.uniform1f(program.getUniformLocation("zAdditionForDw"), 0.)
+                gl.uniform1i(program.getUniformLocation("clipSides"), 1)
                 gl.uniform2f(program.getUniformLocation("screenPosition"), screenPositions[i * 2 + 0], screenPositions[i * 2 + 1])
                 draw(nameProperties,names[i])
 
@@ -82,6 +85,7 @@ function initPictogramDrawers() {
                     if (dw.verticalPositionToRenderFrom === screenPositions[i * 2 + 1]) {
                         gl.uniform1f(program.getUniformLocation("drawingSquareRadius"), dw.dimension * .5)
                         gl.uniform1f(program.getUniformLocation("zAdditionForDw"), mainCamera.frontAndBackZ * .5)
+                        gl.uniform1i(program.getUniformLocation("clipSides"), 0)
                         gl.uniform2f(program.getUniformLocation("screenPosition"), dw.position.x, dw.position.y)
                         draw(nameProperties,names[i])
                     }

@@ -464,10 +464,10 @@ function initAlgebra()
 
         pointIdealNorm = (mv) => { return Math.sqrt(sq(pointX(mv)) + sq(pointY(mv)) + sq(pointZ(mv))) }
         normalizeIdealPoint = (mv) => { //"not supposed to do this"?
-            let factor = 1. / pointIdealNorm(mv)
-            pointX(mv, pointX(mv) * factor)
-            pointY(mv, pointY(mv) * factor)
-            pointZ(mv, pointZ(mv) * factor)
+            let inverseIdealNorm = 1. / pointIdealNorm(mv)
+            pointX(mv, pointX(mv) * inverseIdealNorm)
+            pointY(mv, pointY(mv) * inverseIdealNorm)
+            pointZ(mv, pointZ(mv) * inverseIdealNorm)
             pointW(mv, 0.)
         }
 

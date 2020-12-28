@@ -1,5 +1,6 @@
 <!--
 	TODO Bugs
+		Come on, time to have arrows for directions
 		Highlight multiple lines to make it all appear in hovering dw
 		Fucking which way is z
 		Bug with your mind: you want to reinvent calculus. Just wait for calculus shit to come up then ask people how to do it
@@ -16,9 +17,6 @@
 		Or, you have certain lines where you display what's in each frame of the animation, then ctrl up and down to get between them
 		If you know how the value was derived, you know what tweening animation to have? Professionalism is all just tweening
 		Well you want to be able to make things gesturally, Bret style, right? Animations simulate that
-
-	General TODO
-		Function syntax
 
 	Filming setup
 		Remember, every word a piece of origami!
@@ -74,7 +72,7 @@
 -->
 <html>
 	<head>
-		<title>Projective Clifford Geometry</title>
+		<title>Unrig</title>
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
 			body {
@@ -108,8 +106,6 @@
 				await initGlobePictograms()
 
 				initFunctionWithIrs()
-
-				// await initDymaxion()
 
 				initCarat()
 
@@ -150,14 +146,12 @@
 					let textureNames = ["earthColor", "ball", "cmb", "jupiter", "latAndLon2"]
 					for (let i = 0; i < textureNames.length; ++i) {
 						let texture = await Texture("data/" + textureNames[i] + ".png")
-						assignTypeAndData(coloredNamesAlphabetically[13 + i], "globe", {
-							texture,
-							yaw: 0.,
-							pitch: 0.
-						})
+						assignTypeAndData(coloredNamesAlphabetically[13 + i], "globe", {texture})
 						//this could compile to glsl, it's a struct
 					}
 				}
+
+				await initDymaxion()
 
 				function loop() {
 

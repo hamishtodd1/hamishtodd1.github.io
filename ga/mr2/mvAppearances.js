@@ -63,22 +63,34 @@ function initMvPictograms() {
 
     let hexantColors = new Float32Array(3 * 6)
 
+    mvsToBeAffectedByRotation = []
     {
         adjustViewOnMvs = () => {
             let axis = nonAlgebraTempMv1
-            // realLine(untransformedAxis, mouse.positionDelta.y, -mouse.positionDelta.x, 0.)
+            realLine(axis, mouse.positionDelta.y, -mouse.positionDelta.x, 0.)
             // realLine(untransformedAxis, 0., -mouse.positionDelta.x, 0.)
-            realLine(axis, mouse.positionDelta.y, 0., 0.)
+            // realLine(axis, mouse.positionDelta.y, 0., 0.)
 
             let angle = mouse.positionDelta.length() * 1.7
             let increment = nonAlgebraTempMv2
             mvRotator(axis, angle, increment)
+            
+            let magnitudeInverse = 1. / Math.sqrt(sq(lineRealNorm(increment)) + sq(increment[0]))
+            increment[0] *= magnitudeInverse
+            realLineX(increment, realLineX(increment) * magnitudeInverse)
+            realLineY(increment, realLineY(increment) * magnitudeInverse)
+            realLineZ(increment, realLineZ(increment) * magnitudeInverse)
 
             coloredNamesAlphabetically.forEach((name)=>{
                 if(getNameType(name) === "mv") {
                     sandwichBab(getNameDrawerProperties(name).value,increment,mv0)
                     assign(mv0,getNameDrawerProperties(name).value)
+                    //Bug: they seem to get smaller
                 }
+            })
+            mvsToBeAffectedByRotation.forEach((mv)=>{
+                sandwichBab(mv, increment, mv0)
+                assign(mv0, mv)
             })
         }
 
