@@ -1,12 +1,9 @@
 /*
-	every part of this goes out the window in VR
-	It should be the case that if you turn the whole thing upside down it should feel ok
-	so fretting about whether up, down, left, right is positive and negative(except relatively) is silly
 */
 
 function initWindowResizeSystem()
 {
-	mainCamera.topAtZZero = 7.//11.8 //all derives from this. Tweaked to make 100% look ok on our little preview
+	//all derives from mainCamera.topAtZZero. Tweaked to make 100% look ok on our little preview
 
 	let oldPixelRatio = window.devicePixelRatio
 	function respondToResize(event) {

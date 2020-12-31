@@ -6,7 +6,7 @@
     Don't worry, it makes sense that dymaxion is off, the triangle isn't planar
 
     Title (look at the existing ones...)
-        5 ways of making a politically correct map (and two ways of making a politically incorrect one!)
+        7 ways to make a politically correct map (and 2 [mercator, gall peters] ways to make a politically incorrect one!)
         How map projections ACTUALLY work
         Can we use math to make a non-racist map? (this video is mostly not about racism...)
         The actual geometry behind map projections
@@ -25,12 +25,17 @@
         Viewers of inigo quilez or chris deleon shader coding videos who want something readable
         Numberphile viewers who want more viz
 
-    Script
+    Script 2
         Intro
             They're beautiful and varied
             We will get onto the political controversy surrounding the relative sizes of Greenland and Africa (demonstrate it). greenland is kind of our canary in the coalmine
             but honestly, it's very useful and fun to understand the mathematics first
             And for each of these, on the right you can see the code
+
+        The rectangles
+            I've sa
+
+    Script
         Dymaxion
             One of the simplest to understand maps is this one, even though it ends up looking like a mess.
             This map can be wrapped up into a solid shape called an icosahedron, which is pretty close to being a sphere
@@ -72,7 +77,6 @@
         Specific purpose / compromise / mathematically inelegant
             While we've been looking at a lot of mathematically elegant things, in reality a lot of these maps are made by people deciding what they want and drawing a map off that
             mecca one, later comparison with gall peters
-            Winkel III, national geographic
             Werner - Show the old pic.
                 Good for the arctic circle!
                 VERY eurocentric

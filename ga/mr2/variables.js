@@ -4,7 +4,7 @@ const gl = canvas.getContext("webgl2")
 if (!gl)
     console.error("Failed to get WebGL context, browser or device may not support WebGL.")
 
-const backgroundColor = [127, 127, 127];
+const backgroundColor = [.5, .5, .5]
 
 const characterWidth = 1. / 3.
 
@@ -29,8 +29,6 @@ const carat = {
 }
 
 const displayWindows = []
-
-const loggedErrors = []
 
 const errorHighlightTokenIndices = []
 

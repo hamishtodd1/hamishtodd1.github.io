@@ -1,6 +1,8 @@
 /*  
     So dymaxion, and the conic one, are functions of [0,1] that are flat at 1 and wrapped up at 0
 
+
+
     TODOs for projection
         plane projection
             Stereo: done!
@@ -9,9 +11,9 @@
                 But what if you want to view it the other way? Maybe by drawing twice depending on which way you're looking at it?
         lambert: transcribe from notebook
         Sinusoidal/Bonne/werner: look in notebook
-        interuppted: several sinusoidals (that then become 1)
-        Dymaxion: min()
+        Dymaxion: just show it
         craig retroazimuthal: crazy
+            Doesn't matter because it's probably quite a procedure... and nobody is going to use it to get an idea of the
             sin phi is projection onto the axis
             cos phi is projection onto the equatorial plane
             Maybe multiply out the two terms and visualize them
@@ -261,9 +263,6 @@ async function initDymaxion() {
     point(verts[5], -0.35578140, -0.40223423, 0.84358000, 1.);
     point(verts[0], -0.42015243, -0.90408255, -0.07814525, 1.);
     point(verts[1], -0.99500944, -0.04014717, 0.09134780, 1.);
-    mvsToBeAffectedByRotation.push(verts[0])
-    mvsToBeAffectedByRotation.push(verts[1])
-    mvsToBeAffectedByRotation.push(verts[5])
 
     let axis = new Float32Array(16)
     let ourRotator = new Float32Array(16)
@@ -284,8 +283,11 @@ async function initDymaxion() {
     }
     repositionVerts(icosahedronDihedralAngle, closedVertsBuffer)
 
+    //hacky / doesn't work
+    mvsToBeAffectedByRotation.push(verts[0])
+    mvsToBeAffectedByRotation.push(verts[1])
+    mvsToBeAffectedByRotation.push(verts[5])
     updateFunctions.push(() => {
-        //hacky / doesn't work
         let invMag = 1. / Math.sqrt(sq(pointX(verts[0])) + sq(pointY(verts[0])) + sq(pointZ(verts[0])))
         point(verts[0], pointX(verts[0]) * invMag, pointY(verts[0]) * invMag, pointZ(verts[0]) * invMag, 1.)
         invMag = 1. / Math.sqrt(sq(pointX(verts[1])) + sq(pointY(verts[1])) + sq(pointZ(verts[1])))
@@ -293,8 +295,8 @@ async function initDymaxion() {
         invMag = 1. / Math.sqrt(sq(pointX(verts[5])) + sq(pointY(verts[5])) + sq(pointZ(verts[5])))
         point(verts[5], pointX(verts[5]) * invMag, pointY(verts[5]) * invMag, pointZ(verts[5]) * invMag, 1.)
 
-        let angle = icosahedronDihedralAngle + (Math.PI - icosahedronDihedralAngle) * (.5 - .5 * Math.cos(frameCount * .03))
-        repositionVerts(angle, animatedVertsBuffer)
+        let currentDihedralAngle = icosahedronDihedralAngle + (Math.PI - icosahedronDihedralAngle) * (.5 - .5 * Math.cos(frameCount * .03))
+        repositionVerts(currentDihedralAngle, animatedVertsBuffer)
     })
 
     const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `

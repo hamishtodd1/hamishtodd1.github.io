@@ -69,6 +69,7 @@ function setShaderSourceAndCompile(shader,source) {
 
     return shader;
 }
+
 function Program(vsSource, fsSource) {
     const glProgram = gl.createProgram()
     this.glProgram = glProgram

@@ -1,13 +1,14 @@
 <!--
-	TODO Bugs
-		Come on, time to have arrows for directions
+	Mkay just something to try out: 
+		arrows, and when you edit them, they're on surface of sphere
+		useful for globe?
+
+	TODO
+		Arrows for directions
 		Highlight multiple lines to make it all appear in hovering dw
 		Fucking which way is z
 		Bug with your mind: you want to reinvent calculus. Just wait for calculus shit to come up then ask people how to do it
 
-	if you get tired of elephant shaving, implement those manifold animations
-
-	Maybe you do want helmet / VR?
 		Pros:
 			Can see and touch the things in front of you
 			Specify points on the globes in 3D
@@ -56,6 +57,7 @@
 		Youtubers: Code parade, sebastian lague, inigo quilez, Ben Eater, Coding Train guy, Grant sanderson
 
 	After
+		Back to basics, you want to make a thing
 		Videos about projective geometry
 		Oi, "demonstrations" / footage. Classical mechanics. But better to wait for built in AR?
 		Demo of features of this thing
@@ -86,15 +88,16 @@
 			async function technicalInit() {
 				let renderEverything = initRenderFunctions()
 
+				initButtons()
+				let loadedJson = await loadBackgroundStringAndInitSave()
 				initWindowResizeSystem()
 				
-				initClickableTextBoxes()
+				initTextboxes()
 				
 				initAlgebra()
 
 				initPremadeBuffers()
 
-				initButtons()
 				initMouse()
 
 				// await initWorldMap()
@@ -119,9 +122,13 @@
 
 				initDisplayWindows()
 
-				await loadBackgroundStringAndInitSave()
-
 				{
+					loadedJson.freeMvNames.forEach((name, i) => {
+						assignMv(name)
+						for (let j = 0; j < 16; ++j)
+							getNameDrawerProperties(name).value[j] = loadedJson.freeMvValues[i][j]
+					})
+
 					assignTypeAndData("bg", "angle", { value: .5 })
 					assignTypeAndData("r", "slider", { value: 0. })
 
@@ -151,7 +158,7 @@
 					}
 				}
 
-				await initDymaxion()
+				// await initDymaxion()
 
 				function loop() {
 
@@ -233,7 +240,7 @@
 		<script src="transpiler.js"></script>
 		<script src="transpiledFunctions.js"></script>
 
-		<script src="clickableTextBoxes.js"></script>
+		<script src="ClickableTextboxes.js"></script>
 
 		<script src="toolbar.js"></script>
 

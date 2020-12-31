@@ -1,10 +1,10 @@
 function initErrorHighlight() {
+    let errorReportText = new Textbox("boog",1.,0.,0.)
+
     handleError = function(tokenIndex, newError) {
         errorHighlightTokenIndices.push(tokenIndex)
-        if (loggedErrors.indexOf(newError) === -1) {
-            console.error("transpilation error: \n", newError)
-            loggedErrors.push(newError)
-        }
+        // errorReportText.visible = true
+        errorReportText.setText("transpilation error: \n + newError")
     }
 
     let farBackQuadBuffer = new Float32Array(quadBuffer.length)
@@ -63,5 +63,7 @@ function initErrorHighlight() {
             gl.drawArrays(gl.TRIANGLES, 0, farBackQuadBuffer.length / 4);
         }
         numHighlights = 0
-    })
+
+        // errorReportText.visible = false
+    },"end")
 }

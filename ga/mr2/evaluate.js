@@ -1,19 +1,5 @@
 /*
-    Plan
-        Generic framework for the types, visualizations, literals
-        Note that type does not govern viz method though, can have multiple
-
-        projection functions:
-            When given a single vec as input, they 
-
-    Types:
-        world map
-        pga element. Different kind of PGA element?
-        angle... / bivector...
-            bring back that thing about bivectors being adjusted to a certain thing / looked at from a certain angle
-        color
-        function from positions to colors
-        inverse trig function
+    
 */
 
 function initEvaluate() {
@@ -21,9 +7,10 @@ function initEvaluate() {
     let postfixOperators = {
         "*": "dual",
         "~": "reverse"
-        //"inverse", "transpose"
+        //"inverse", i.e. ^-1 / "transpose"
         //exponential
         //length / magnitude?
+        //polarity / "orthogonal"
         //normalize. But maybe everything is always normalized?
     }
     let postfixSymbols = Object.keys(postfixOperators)
@@ -35,7 +22,7 @@ function initEvaluate() {
         ".": "inner",
         //wedge
         //subtract
-        //divide = Multiplication by the normalized thing???
+        //divide = Multiplication by the normalized thing according to leo???
     }
     let infixSymbols = Object.keys(infixOperators)
 
@@ -52,18 +39,26 @@ function initEvaluate() {
     let lineTree = new AbstractSyntaxTree()
 
     let tfp = {} //transpilingFunctionProperties
-    tfp.internalDeclarations = []
-    tfp.namesWithLocalizationNeeded = []
-    tfp.argumentsInSignature = []
-    function resetTfp() {
-        tfp.internalDeclarations.length = 0
-        tfp.namesWithLocalizationNeeded.length = 0
-        tfp.argumentsInSignature.length = 0
-        tfp.ir = ""
-        tfp.name = null
-        tfp.maxTmvs = 0
+    {
+        tfp.internalDeclarations = []
+        tfp.namesWithLocalizationNeeded = []
+        tfp.argumentsInSignature = []
+        function resetTfp() {
+            tfp.internalDeclarations.length = 0
+            tfp.namesWithLocalizationNeeded.length = 0
+            tfp.argumentsInSignature.length = 0
+            tfp.ir = ""
+            tfp.name = null
+            tfp.maxTmvs = 0
+        }
+        resetTfp()
     }
-    resetTfp()
+
+    function checkNameIsUnused(lexeme) {
+        return getNameDrawerProperties(lexeme) === null
+            && functionsWithIr[lexeme] === undefined
+            && builtInFunctionNames.indexOf(lexeme) === -1
+    }
     
     tokenizeEvaluateDrawTokens = () => {
 
@@ -87,13 +82,6 @@ function initEvaluate() {
 
         clearNames(derivedNames)
         derivedNames.length = 0
-        //then have all the things that are currently in the separate files done here
-
-        function checkNameIsUnused(lexeme) {
-            return getNameDrawerProperties(lexeme) === null
-                    && functionsWithIr[lexeme] === undefined
-                    && builtInFunctionNames.indexOf(lexeme) === -1
-        }
 
         Object.keys(functionsWithIr).forEach((key) => {
             if (!functionsWithIr[key].stillDefinedInProgram) {
@@ -128,35 +116,32 @@ function initEvaluate() {
                 return false
 
             //----------------------
+
             if(nextFunctionSignatureTokenIndex < functionSignatureTokens.length) {
                 let expectation = functionSignatureTokens[nextFunctionSignatureTokenIndex]
 
                 if(expectation === ",") {
                     if(token === ")")
                         ++nextFunctionSignatureTokenIndex
-                    else if (token === "coloredName" ) { //intuition was that it shouldn't be a used one. But, er, the word "used", what does it mean?
+                    else if (token === "coloredName" ) { //possibly it shouldn't be a used name
                         if (tfp.argumentsInSignature.indexOf(lexeme) !== -1)
                             handleError(tokenIndex,"same argument twice")
                         tfp.argumentsInSignature.push(lexeme)
                     }
-
-                    return false
                 }
                 else if (token === expectation) {
                     ++nextFunctionSignatureTokenIndex
 
                     if (token === "uncoloredName")
                         tfp.name = lexeme
-
-                    return false
                 }
-
-                handleError(tokenIndex, "unexpected symbol in function signature: " + lexeme + ", was expecting " + expectation)
+                else
+                    handleError(tokenIndex, "unexpected symbol in function signature: " + lexeme + ", was expecting " + expectation)
             }
             else {
                 if (token === "def") {
                     if (nameToAssignTo !== null || unusedNameJustSeen !== null)
-                        handleError(tokenIndex, "misplaced lambda")
+                        handleError(tokenIndex, "misplaced def")
 
                     nextFunctionSignatureTokenIndex = 0
                 }
@@ -168,9 +153,8 @@ function initEvaluate() {
                     unusedNameJustSeen = lexeme
                 }
                 else if (lexeme === "=") {
-                    if (nameToAssignTo !== null || unusedNameJustSeen === null  ) {
+                    if (nameToAssignTo !== null || unusedNameJustSeen === null )
                         handleError(tokenIndex, "misplaced =")
-                    }
 
                     nameToAssignTo = unusedNameJustSeen
                     unusedNameJustSeen = null
@@ -194,6 +178,8 @@ function initEvaluate() {
                     resetTfp()
                 }
             }
+
+            return false
         })
 
         drawTokens()

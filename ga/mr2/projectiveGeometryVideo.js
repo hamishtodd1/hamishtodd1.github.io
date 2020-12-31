@@ -24,6 +24,7 @@
     Script for second video
         Dual, meet, join
 
-        
+    For sure the right way to project from 4-sphere is orthographic
+        People are used to looking at half-spheres, it'll be like that
         
  */

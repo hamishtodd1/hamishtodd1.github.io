@@ -16,17 +16,21 @@ function initDrawTokens() {
             
             let currentCharacter = backgroundString[positionInString]
             if (proxyPairs.indexOf(currentCharacter) === -1)
-                addCharacterToDraw(currentCharacter, drawingPosition)
+                addCharacterToDraw(currentCharacter, 0., 0., 0., drawingPosition)
             else {
                 let index = proxyPairs.indexOf(currentCharacter)
                 index += 1-(index%2)
-                addCharacterToDraw(proxyPairs[index], drawingPosition)
+                addCharacterToDraw(proxyPairs[index], 0., 0., 0., drawingPosition)
             }
             drawingPosition.x += characterWidth
         }
     }
 
-    let proxyPairs = ["&",JOIN_SYMBOL,"^",MEET_SYMBOL,"~",DAGGER_SYMBOL,".",INNER_SYMBOL]
+    let proxyPairs = [
+        "&",JOIN_SYMBOL,
+        "^",MEET_SYMBOL,
+        "~",DAGGER_SYMBOL,
+        ".",INNER_SYMBOL]
     
     let tokensWhoseCharactersDontGetDrawn = [
         "coloredName","\n"
@@ -34,7 +38,8 @@ function initDrawTokens() {
     drawTokens = function () {
         lineNumber = 0
 
-        drawingPosition.x = -mainCamera.rightAtZZero
+        const column0Position = mainCamera.rightAtZZero - 15.
+        drawingPosition.x = column0Position
         drawingPosition.y = mainCamera.topAtZZero - .5 - toolbarHeight
 
         carat.preParseFunc()
@@ -53,7 +58,7 @@ function initDrawTokens() {
             switch (token) {
                 case "\n":
                     drawingPosition.y -= 1.
-                    drawingPosition.x = -mainCamera.rightAtZZero
+                    drawingPosition.x = column0Position
 
                     ++lineNumber
 
