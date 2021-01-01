@@ -166,26 +166,3 @@ function initCarat() {
         removeFromString(carat.positionInString, carat.positionInString + Math.max(psLength, 1))
     })
 }
-
-function initTypeableCharacters()
-{
-    let typeableCharacters = ""
-    
-    let initialCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ(){}+-=/ ,&*^.~"
-    for (let i = 0; i < initialCharacters.length; ++i) {
-        let character = initialCharacters[i]
-
-        typeableCharacters += character
-        
-        bindButton(character, () => {
-            backgroundStringSplice(carat.positionInString, 0, character)
-            carat.moveAlongString(1)
-
-            carat.indexOfLastTypedCharacter = carat.positionInString - 1
-
-            //could capitalize as a way of indicating differet names
-        })
-    }
-    
-    return typeableCharacters
-}

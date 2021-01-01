@@ -11,12 +11,26 @@ const characterWidth = 1. / 3.
 const mouseResponses = []
 const rightMouseResponses = []
 
-const IDENTIFIER_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+const IDENTIFIER_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-//---------Varying state
+// const LAMBDA_SYMBOL = String.fromCharCode("955") //you CAN write "function", but lots of kids don't know "function". In python it's "def"
+const JOIN_SYMBOL = String.fromCharCode("8744") //could change to v. But that is a letter you need to type
+const INNER_SYMBOL = String.fromCharCode("8226")
+const DAGGER_SYMBOL = String.fromCharCode("8224")
+const MEET_SYMBOL = "^" //String.fromCharCode("8743") //for some reason this symbol is wide!
+let proxyPairs = [
+    "&", JOIN_SYMBOL,
+    "~", DAGGER_SYMBOL,
+    ".", INNER_SYMBOL,
+    "^", MEET_SYMBOL,] //meet goes last, it can be wide
+
+const displayWindows = []
 
 const NUM_NAMES = 63 //7 choose 1 + 7 choose 2 + 7 choose 3
 const coloredNamesAlphabetically = Array(NUM_NAMES)
+
+//---------Varying state
+
 const drawingDetailses = Array(NUM_NAMES)
 
 const functionsWithIr = {}
@@ -27,16 +41,6 @@ const carat = {
     lineNumber: -1,
     flashingStart: Date.now(),
 }
-
-const displayWindows = []
-
-const errorHighlightTokenIndices = []
-
-const LAMBDA_SYMBOL = String.fromCharCode("955") //you CAN write "function", but lots of kids don't know "function". In python it's "def"
-const JOIN_SYMBOL = String.fromCharCode("8744") //could change to v. But that is a letter you need to type
-const INNER_SYMBOL = String.fromCharCode("8226") //could change to v. But that is a letter you need to type
-const DAGGER_SYMBOL = String.fromCharCode("8224")
-const MEET_SYMBOL = "^" //String.fromCharCode("8743") //for some reason this symbol is wide!
 
 let backgroundString = ""
 

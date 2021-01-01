@@ -34,6 +34,22 @@ function initEvaluate() {
     initTokenize(infixSymbols, postfixSymbols)
 
     initErrorHighlight()
+
+    let errorReport = new Textbox("INITIAL TEXT FOR ERROR MESSAGE", 1., 0., 0.)
+    {
+        errorReport.tokenIndex = -1
+
+        handleError = function (tokenIndex, newError) {
+            errorReport.setText(newError)
+            errorReport.tokenIndex = tokenIndex
+            errorReport.visible = true
+        }
+
+        addRenderFunction(() => {
+            errorReport.visible = false
+        }, "end")
+    }
+
     initDrawTokens()
 
     let lineTree = new AbstractSyntaxTree()
@@ -97,8 +113,11 @@ function initEvaluate() {
                 if (nameToAssignTo !== null && skipLine === false) {
                     // if(nameToAssignTo === "pw")
                     //     log(carat.lineNumber !== lineNumber)
-                    if (carat.lineNumber !== lineNumber)
-                        lineTree.parseAndAssign(tokenIndex, nameToAssignTo, lineNumber, tfp)
+                    if (carat.lineNumber !== lineNumber) {
+                        let errorMessage = lineTree.parseAndAssign(tokenIndex, nameToAssignTo, lineNumber, tfp)
+                        if(errorMessage !== "")
+                            handleError(tokenIndex, errorMessage)
+                    }
 
                     derivedNames.push(nameToAssignTo) //because what if you save
                 }
@@ -161,9 +180,12 @@ function initEvaluate() {
                 }
                 else if (nameToAssignTo !== null) {
                     if(carat.lineNumber !== lineNumber) {
-                        let lexemeSuccessfullyAdded = lineTree.addLexeme(tokenIndex, token, lexeme)
-                        if (!lexemeSuccessfullyAdded)
+                        let errorMessage = lineTree.addLexeme(tokenIndex, token, lexeme)
+                        if(errorMessage !== "") {
+                            handleError(tokenIndex, errorMessage)
                             skipLine = true
+                            //and clear up the tree surely
+                        }
                     }
                 }
                 else if (lexeme === "}") {
@@ -182,8 +204,8 @@ function initEvaluate() {
             return false
         })
 
-        drawTokens()
+        drawTokens(errorReport)
 
-        errorHighlightTokenIndices.length = 0
+        // errorHighlightTokenIndices.length = 0
     }
 }

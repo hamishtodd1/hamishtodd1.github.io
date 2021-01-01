@@ -68,18 +68,14 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
 
         this.addLexeme = function(tokenIndex,token,lexeme) {
             if (token === "comment" || token === " " || token === "\n")
-                return false
-
-            // log(lexeme)
+                return ""
 
             let isFunction = builtInFunctionNames.indexOf(lexeme) !== -1 || functionsWithIr[lexeme] !== undefined
             let isOpenBracket = lexeme === "("
             let isTerminalColoredName = token === "coloredName" && !isFunction
 
-            if (!isOpenBracket && functionNameJustSeen !== null) {
-                handleError(tokenIndex,"function " + functionNameJustSeen + " must be followed by (, instead got " + lexeme)
-                return false
-            }
+            if (!isOpenBracket && functionNameJustSeen !== null)
+                return "function " + functionNameJustSeen + " must be followed by (, instead got " + lexeme
 
             if (isTerminalColoredName || isFunction || isOpenBracket) {
                 if (branchCanComplete)
@@ -101,7 +97,7 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
                             break
                         
                         default:
-                            handleError(tokenIndex, "unrecognized type: " + getNameDrawerProperties(lexeme).type)
+                            return "unrecognized type: " + getNameDrawerProperties(lexeme).type
                     }
                 }
                 else if (isOpenBracket) {
@@ -128,7 +124,7 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
                     if (currentNodeBranchingFrom.children.length === currentNodeBranchingFrom.expectedNumberOfArguments - 1)
                         currentNodeBranchingFrom = currentNodeBranchingFrom.parent //we move up having finished branch, so this branch is potentially valid too
                     else
-                        handleError(tokenIndex, "wrong number of non-target arguments for function '" + currentNodeBranchingFrom.lexeme + "' should be " + (currentNodeBranchingFrom.expectedNumberOfArguments-1)+", got " + currentNodeBranchingFrom.children.length)
+                        return "wrong number of non-target arguments for function '" + currentNodeBranchingFrom.lexeme + "' should be " + (currentNodeBranchingFrom.expectedNumberOfArguments - 1) + ", got " + currentNodeBranchingFrom.children.length
                 }
                 else if (token === "infixSymbol") {
                     injectNodeWithCurrentAsChild(infixOperators[lexeme])
@@ -136,18 +132,13 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
                 }
                 else if (token === "postfixSymbol")
                     injectNodeWithCurrentAsChild(postfixOperators[lexeme])
-                else {
-                    handleError(tokenIndex,"unexpected symbol " + lexeme)
-                    return false
-                }
+                else
+                    return "unexpected symbol " + lexeme
             }
-            else {
-                handleError(tokenIndex,"unexpected symbol before branch end: " + lexeme)
-                // debugger
-                return false
-            }
+            else
+                return "unexpected symbol before branch end: " + lexeme
 
-            return true
+            return ""
         }
 
         //since the top node is a "" function it should be ok if there's just a single mv
@@ -177,10 +168,8 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
             tokenIndex,nameToAssignTo,lineNumber,
             transpilingFunctionProperties
             ) {
-            if (!branchCanComplete) {
-                handleError(tokenIndex,"unexpected line end")
-                return false
-            }
+            if (!branchCanComplete)
+                return "unexpected line end"
 
             let tfp = transpilingFunctionProperties
 
@@ -245,7 +234,7 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
                 functionNameJustSeen = null
             }
 
-            return true
+            return ""
         }
     }
 }

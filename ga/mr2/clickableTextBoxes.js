@@ -20,7 +20,6 @@ function initTextboxes() {
             this.width = newStr.length * characterWidth
         }
     }
-    // debugger
 
     addRenderFunction(() => {
         textboxes.forEach((tb) => {

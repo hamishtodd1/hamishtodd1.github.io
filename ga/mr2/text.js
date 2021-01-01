@@ -1,8 +1,25 @@
-function initCharacterTexture(typeableCharacters) {
+function initCharacterTexture() {
+    let typeableCharacters = IDENTIFIER_CHARACTERS +
+        " (){},=" + //structuring
+        "+-/*" + //operations
+        "?:;" //just for comments and errors
     let displayableCharacters = typeableCharacters
-    let specialTypeableSymbols = [DAGGER_SYMBOL,LAMBDA_SYMBOL, JOIN_SYMBOL, INNER_SYMBOL, "?", "*", MEET_SYMBOL] //meet goes last, it can be wide
-    for(let i = 0; i < specialTypeableSymbols.length; ++i)
-        displayableCharacters += specialTypeableSymbols[i]
+    for (let i = 0; i < proxyPairs.length / 2; ++i) {
+        typeableCharacters += proxyPairs[i * 2 + 0]
+        displayableCharacters += proxyPairs[i * 2 + 1]
+    }
+    for (let i = 0, il = typeableCharacters.length; i < il; ++i) {
+        let character = typeableCharacters[i]
+
+        bindButton(character, () => {
+            backgroundStringSplice(carat.positionInString, 0, character)
+            carat.moveAlongString(1)
+
+            carat.indexOfLastTypedCharacter = carat.positionInString - 1
+
+            //could capitalize as a way of indicating differet names
+        })
+    }
 
     const maxCharacters = 512 //noticeable load time increase when changed
 
@@ -21,6 +38,7 @@ function initCharacterTexture(typeableCharacters) {
         if (warningNeeded) {
             displayableCharactersWarnedAbout.push(character)
             console.error("character not displayable: ", character)
+            debugger
         }
         else if(numCharactersToDraw >= maxCharacters)
             console.error("character limit hit")

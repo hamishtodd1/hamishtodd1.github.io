@@ -25,17 +25,11 @@ function initDrawTokens() {
             drawingPosition.x += characterWidth
         }
     }
-
-    let proxyPairs = [
-        "&",JOIN_SYMBOL,
-        "^",MEET_SYMBOL,
-        "~",DAGGER_SYMBOL,
-        ".",INNER_SYMBOL]
     
     let tokensWhoseCharactersDontGetDrawn = [
         "coloredName","\n"
     ]
-    drawTokens = function () {
+    drawTokens = function (errorReportText) {
         lineNumber = 0
 
         const column0Position = mainCamera.rightAtZZero - 15.
@@ -45,8 +39,8 @@ function initDrawTokens() {
         carat.preParseFunc()
 
         forEachToken((tokenIndex, tokenStart, tokenEnd, token, lexeme) => {
-            if(errorHighlightTokenIndices.indexOf(tokenIndex) !== -1)
-                placeErrorHighlight(drawingPosition)
+            if( tokenIndex === errorReportText.tokenIndex)
+                errorReportText.position.copy(drawingPosition)
 
             if (tokensWhoseCharactersDontGetDrawn.indexOf(token) === -1) {
                 drawTokenCharacters(tokenStart, tokenEnd)
