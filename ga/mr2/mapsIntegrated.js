@@ -38,6 +38,8 @@ async function initGlobePictograms() {
         varying vec2 uv;
         uniform float globeTransform[16];
 
+        uniform float viewRotor[16];
+
         void main(void) {
             uv = uvA;
             float lon = (uvA.x - .5) * TAU;
@@ -52,10 +54,11 @@ async function initGlobePictograms() {
 
             float pointOnGlobe[16];
             sandwichBab(untransformedPointOnGlobe,globeTransform,pointOnGlobe);
-            // assign(untransformedPointOnGlobe,pointOnGlobe);
         `
 
-    let vs = gaShaderString + globeVsStart + `\nmvToPoint(pointOnGlobe,gl_Position);`
+    let vs = gaShaderString + globeVsStart + `
+        sandwichBab(pointOnGlobe,viewRotor,nonAlgebraTempMv0);
+        mvToPoint(nonAlgebraTempMv0,gl_Position);`
     let fs = `
         varying vec2 uv;
         uniform sampler2D sampler;
@@ -95,6 +98,7 @@ async function initGlobePictograms() {
     pictogramDrawer.program.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
     pictogramDrawer.program.locateUniform("sampler")
     pictogramDrawer.program.locateUniform("globeTransform")
+    pictogramDrawer.program.locateUniform("viewRotor")
 
     addRenderFunction(() => {
         gl.useProgram(pictogramDrawer.program.glProgram)
@@ -103,28 +107,33 @@ async function initGlobePictograms() {
         pictogramDrawer.finishPrebatchAndDrawEach((nameProperties,name) => {
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, nameProperties.texture);
-            gl.uniform1i(pictogramDrawer.program.getUniformLocation("sampler"), 0);//hmm, why 0?
+            gl.uniform1i(pictogramDrawer.program.getUniformLocation("sampler"), 0); //hmm, why 0?
             gl.uniform1fv(pictogramDrawer.program.getUniformLocation("globeTransform"), globeTransform)
+            gl.uniform1fv(pictogramDrawer.program.getUniformLocation("viewRotor"), viewRotor)
 
             gl.drawArrays(gl.TRIANGLES, 0, uvBuffer.length / 2);
         })
     })
 
     {
-        let vsStart = globeVsStart + `\nfloat target[16];`
+        let vsStart = globeVsStart + `\nfloat target[16];
+            `
         let vsEnd = `
-            mvToPoint(target,gl_Position);
+            sandwichBab(target,viewRotor,nonAlgebraTempMv0);
+            mvToPoint(nonAlgebraTempMv0,gl_Position);
         `
         let projectionFs = `
             varying vec2 uv;
             uniform sampler2D sampler;
+
             void main(void) {
                 // gl_FragColor = vec4(1.,0.,0.,1.);
                 gl_FragColor = texture2D(sampler, vec2(uv.x,1.-uv.y));
             `
 
-        const eps = .00001 //sensetive, ugh
-        const numDivisions = 256
+        //simpler: just one program, with them all being functions. Ok so you have to recompile them all, but you put so many in there anyway
+
+        
 
         //better name might be "reusable"
         var ppWrappers = []
@@ -157,11 +166,8 @@ async function initGlobePictograms() {
                     return ppWrapper.usedLastFrame === false
                 })
                 if (ourPpWrapper === undefined) {
-                    // debugger
                     ourPpWrapper = new PpWrapper()
                 }
-
-                // debugger
 
                 let uniformDeclarations = ""
                 // nameProperties.namesWithLocalizationNeeded.forEach((name) => {
@@ -187,6 +193,8 @@ async function initGlobePictograms() {
                 ourPpWrapper.pictogramProgram.locateUniform("sampler")
                 ourPpWrapper.pictogramProgram.locateUniform("globeTransform")
 
+                ourPpWrapper.pictogramProgram.locateUniform("viewRotor")
+
                 //sampler could be in this too
                 nameProperties.namesWithLocalizationNeeded.forEach((name) => {
                     ourPpWrapper.pictogramProgram.locateUniform(name)
@@ -204,6 +212,8 @@ async function initGlobePictograms() {
             gl.bindTexture(gl.TEXTURE_2D, nameProperties.globeProperties.texture);
             gl.uniform1i(program.getUniformLocation("sampler"), 0);
             gl.uniform1fv(program.getUniformLocation("globeTransform"), globeTransform)
+
+            gl.uniform1fv(program.getUniformLocation("viewRotor"), viewRotor)
 
             nameProperties.namesWithLocalizationNeeded.forEach((name) => {
                 gl.uniform1fv(program.getUniformLocation(name), getNameDrawerProperties(name).value)
@@ -283,23 +293,9 @@ async function initDymaxion() {
     }
     repositionVerts(icosahedronDihedralAngle, closedVertsBuffer)
 
-    //hacky / doesn't work
-    mvsToBeAffectedByRotation.push(verts[0])
-    mvsToBeAffectedByRotation.push(verts[1])
-    mvsToBeAffectedByRotation.push(verts[5])
-    updateFunctions.push(() => {
-        let invMag = 1. / Math.sqrt(sq(pointX(verts[0])) + sq(pointY(verts[0])) + sq(pointZ(verts[0])))
-        point(verts[0], pointX(verts[0]) * invMag, pointY(verts[0]) * invMag, pointZ(verts[0]) * invMag, 1.)
-        invMag = 1. / Math.sqrt(sq(pointX(verts[1])) + sq(pointY(verts[1])) + sq(pointZ(verts[1])))
-        point(verts[1], pointX(verts[1]) * invMag, pointY(verts[1]) * invMag, pointZ(verts[1]) * invMag, 1.)
-        invMag = 1. / Math.sqrt(sq(pointX(verts[5])) + sq(pointY(verts[5])) + sq(pointZ(verts[5])))
-        point(verts[5], pointX(verts[5]) * invMag, pointY(verts[5]) * invMag, pointZ(verts[5]) * invMag, 1.)
+    
 
-        let currentDihedralAngle = icosahedronDihedralAngle + (Math.PI - icosahedronDihedralAngle) * (.5 - .5 * Math.cos(frameCount * .03))
-        repositionVerts(currentDihedralAngle, animatedVertsBuffer)
-    })
-
-    const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+    const vsSource = cameraAndFrameCountShaderStuff.header + `
         attribute vec2 uvA;
         varying vec4 closedP;
 
@@ -335,7 +331,7 @@ async function initDymaxion() {
             mvToPoint(transformed,gl_Position);
         `
         + cameraAndFrameCountShaderStuff.footer
-    const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+    const fsSource = cameraAndFrameCountShaderStuff.header + `
         varying vec2 uv;
         varying vec4 closedP;
 

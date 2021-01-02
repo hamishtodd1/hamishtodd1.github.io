@@ -73,7 +73,7 @@ function getPictogramStringLength(beginning, goBackwards) {
 
 function drawColorWheel()
 {
-	const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+	const vsSource = cameraAndFrameCountShaderStuff.header + `
 		attribute vec4 vertA;
 		varying vec2 p;
 
@@ -84,7 +84,7 @@ function drawColorWheel()
 			gl_Position.xy *= rightAtZZero * 2.;
 		`
 		+ cameraAndFrameCountShaderStuff.footer
-	const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+	const fsSource = cameraAndFrameCountShaderStuff.header + `
 		varying vec2 p;
 
 		void main(void) {

@@ -36,6 +36,7 @@ function initEvaluate() {
     initErrorHighlight()
 
     let errorReport = new Textbox("INITIAL TEXT FOR ERROR MESSAGE", 1., 0., 0.)
+    errorReport.visible = false
     {
         errorReport.tokenIndex = -1
 

@@ -11,7 +11,7 @@
 
 function initPictogramDrawers() {
 
-    let vsHeader = shaderHeaderWithCameraAndFrameCount + `
+    let vsHeader = cameraAndFrameCountShaderStuff.header + `
         varying vec2 preBoxPosition;
         uniform vec2 screenPosition;
 
@@ -26,7 +26,7 @@ function initPictogramDrawers() {
     `
     + cameraAndFrameCountShaderStuff.footer
 
-    let fsHeader = shaderHeaderWithCameraAndFrameCount + `
+    let fsHeader = cameraAndFrameCountShaderStuff.header + `
         varying vec2 preBoxPosition;
         uniform int clipSides;
     `
@@ -84,7 +84,8 @@ function initPictogramDrawers() {
                 displayWindows.forEach((dw) => {
                     if (dw.verticalPositionToRenderFrom === screenPositions[i * 2 + 1]) {
                         gl.uniform1f(program.getUniformLocation("drawingSquareRadius"), dw.dimension * .5)
-                        gl.uniform1f(program.getUniformLocation("zAdditionForDw"), mainCamera.frontAndBackZ * .5)
+
+                        gl.uniform1f(program.getUniformLocation("zAdditionForDw"), dwOriginZ())
                         gl.uniform1i(program.getUniformLocation("clipSides"), 0)
                         gl.uniform2f(program.getUniformLocation("screenPosition"), dw.position.x, dw.position.y)
                         draw(nameProperties,names[i])

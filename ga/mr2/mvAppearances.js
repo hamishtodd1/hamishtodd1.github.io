@@ -1,5 +1,8 @@
 /*
-    Next make an angle visualizer because why not
+    A good control scheme might be to turn the points into ideal points if the mouse is taken outside the frame
+
+    You're gonna make little boxes
+
     Hmm. If the only context in which you care about the magnitude of the scalar part is if it's an angle...
 
 
@@ -61,37 +64,54 @@ function initAnglePictograms() {
 
 function initMvPictograms() {
 
-    let hexantColors = new Float32Array(3 * 6)
-
-    mvsToBeAffectedByRotation = []
     {
+        let xAxis = new Float32Array(16)
+        let yawAngle = 0.
+        realLineX(xAxis,1.)
+        let yAxis = new Float32Array(16)
+        let pitchAngle = 0.
+        realLineY(yAxis,1.)
+
         adjustViewOnMvs = () => {
-            let axis = nonAlgebraTempMv1
-            realLine(axis, mouse.positionDelta.y, -mouse.positionDelta.x, 0.)
+            // let axis = nonAlgebraTempMv1
+            // realLine(axis, mouse.positionDelta.y, -mouse.positionDelta.x, 0.)
             // realLine(untransformedAxis, 0., -mouse.positionDelta.x, 0.)
             // realLine(axis, mouse.positionDelta.y, 0., 0.)
 
-            let angle = mouse.positionDelta.length() * 1.7
-            let increment = nonAlgebraTempMv2
-            mvRotator(axis, angle, increment)
+            // let angle = mouse.positionDelta.length() * 1.7
+            // mvRotator(axis, angle, increment)
             
-            let magnitudeInverse = 1. / Math.sqrt(sq(lineRealNorm(increment)) + sq(increment[0]))
-            increment[0] *= magnitudeInverse
-            realLineX(increment, realLineX(increment) * magnitudeInverse)
-            realLineY(increment, realLineY(increment) * magnitudeInverse)
-            realLineZ(increment, realLineZ(increment) * magnitudeInverse)
+            pitchAngle += mouse.positionDelta.y * -0.27
+            pitchAngle = clamp(pitchAngle, -TAU / 4., TAU / 4.)
+            let pitchRotator = nonAlgebraTempMv1
+            mvRotator(xAxis, pitchAngle, pitchRotator)
 
-            coloredNamesAlphabetically.forEach((name)=>{
-                if(getNameType(name) === "mv") {
-                    sandwichBab(getNameDrawerProperties(name).value,increment,mv0)
-                    assign(mv0,getNameDrawerProperties(name).value)
-                    //Bug: they seem to get smaller
-                }
-            })
-            mvsToBeAffectedByRotation.forEach((mv)=>{
-                sandwichBab(mv, increment, mv0)
-                assign(mv0, mv)
-            })
+            yawAngle += mouse.positionDelta.x * 0.27
+            let yawRotator = nonAlgebraTempMv2
+            mvRotator(yAxis, yawAngle, yawRotator)
+
+            gProduct(pitchRotator, yawRotator, viewRotor)
+
+            //the viewRotor needs to be applied to, well, everything really, urgh
+            
+            // let increment = nonAlgebraTempMv0
+            // //normalizing
+            // let magnitudeInverse = 1. / Math.sqrt(sq(lineRealNorm(increment)) + sq(increment[0]))
+            // increment[0] *= magnitudeInverse
+            // realLineX(increment, realLineX(increment) * magnitudeInverse)
+            // realLineY(increment, realLineY(increment) * magnitudeInverse)
+            // realLineZ(increment, realLineZ(increment) * magnitudeInverse)
+
+            // gProduct(viewRotor, increment, mv0)
+            // assign(mv0, viewRotor)
+
+            // coloredNamesAlphabetically.forEach((name)=>{
+            //     if(getNameType(name) === "mv") {
+            //         sandwichBab(getNameDrawerProperties(name).value,increment,mv0)
+            //         assign(mv0,getNameDrawerProperties(name).value)
+            //         //Bug: they seem to get smaller
+            //     }
+            // })
         }
 
         rightMouseResponses.push({
@@ -145,6 +165,8 @@ function initMvPictograms() {
         },
     }
 
+    let hexantColors = new Float32Array(3 * 6)
+
     //point
     {
         //buffers
@@ -192,7 +214,10 @@ function initMvPictograms() {
                 if (!containsGrade(mv, 3))
                     return
 
-                gl.uniform3f(pointPictogramDrawer.program.getUniformLocation("visualPosition"), pointX(mv)/pointW(mv), pointY(mv)/pointW(mv), pointZ(mv)/pointW(mv))
+                let transformedMv = nonAlgebraTempMv1
+                sandwichBab(mv,viewRotor,transformedMv)
+
+                gl.uniform3f(pointPictogramDrawer.program.getUniformLocation("visualPosition"), pointX(transformedMv)/pointW(transformedMv), pointY(transformedMv)/pointW(transformedMv), pointZ(transformedMv)/pointW(transformedMv))
 
                 pointPictogramDrawer.program.prepareVertexAttribute("colorIndex", pointColorIndexBuffer)
                 gl.uniform3fv(pointPictogramDrawer.program.getUniformLocation("hexantColors"), nameToHexantColors(name, hexantColors))
@@ -201,7 +226,7 @@ function initMvPictograms() {
         }
     }
 
-    //line, both real and ideal apparently?
+    //LINE, both real and ideal apparently?
     {
         const vs = `
             attribute vec4 vertA;
@@ -248,6 +273,9 @@ function initMvPictograms() {
                 if (!containsGrade(mv, 2))
                     return
 
+                let transformedMv = nonAlgebraTempMv1
+                sandwichBab(mv,viewRotor,transformedMv)
+
                 //update buffer
                 {
                     let boxRadius = 1.
@@ -257,7 +285,7 @@ function initMvPictograms() {
                             zeroMv(pl)
                             planeW(pl, 1.)
                             planeByComponent[i](pl, 1. / (boxRadius * j))
-                            meet(pl, mv, pt)
+                            meet(pl, transformedMv, pt)
 
                             if (pointW(pt) !== 0.) {
                                 wNormalizePoint(pt)
@@ -350,30 +378,33 @@ function initMvPictograms() {
                 if (!containsGrade(mv,1))
                     return
 
-                let magnitude = planeNorm(mv)
-                plane(mv,
-                    planeX(mv)/magnitude,
-                    planeY(mv)/magnitude,
-                    planeZ(mv)/magnitude,
-                    planeW(mv)/magnitude)
+                let transformedMv = nonAlgebraTempMv1
+                sandwichBab(mv, viewRotor, transformedMv)
 
-                if (planeX(mv) === 0. && planeY(mv) === 0. && planeW(mv) === 0.) {
+                let magnitude = planeNorm(transformedMv)
+                plane(transformedMv,
+                    planeX(transformedMv)/magnitude,
+                    planeY(transformedMv)/magnitude,
+                    planeZ(transformedMv)/magnitude,
+                    planeW(transformedMv)/magnitude)
+
+                if (planeX(transformedMv) === 0. && planeY(transformedMv) === 0. && planeW(transformedMv) === 0.) {
                     zeroMv(motorFromZPlane)
                     motorFromZPlane[0] = 1.
                 }
                 else {
-                    meet(zPlane, mv, mv0)
+                    meet(zPlane, transformedMv, mv0)
                     let angle = Math.asin(lineRealNorm(mv0))
                     lineNormalize(mv0)
                     mvRotator(mv0, angle, motorFromZPlane)
                 }
 
                 gl.uniform1fv(planePictogramDrawer.program.getUniformLocation("motorFromZPlane"), motorFromZPlane)
-                let inverseNormalLength = 1./Math.sqrt(sq(planeX(mv)) + sq(planeY(mv)) + sq(planeZ(mv)) )
+                let inverseNormalLength = 1./Math.sqrt(sq(planeX(transformedMv)) + sq(planeY(transformedMv)) + sq(planeZ(transformedMv)) )
                 gl.uniform3f(planePictogramDrawer.program.getUniformLocation("normal"), 
-                    planeX(mv)*inverseNormalLength,
-                    planeY(mv)*inverseNormalLength,
-                    planeZ(mv)*inverseNormalLength)
+                    planeX(transformedMv)*inverseNormalLength,
+                    planeY(transformedMv)*inverseNormalLength,
+                    planeZ(transformedMv)*inverseNormalLength)
 
                 gl.uniform3f(planePictogramDrawer.program.getUniformLocation("col"), .2,.2,.2)
 

@@ -66,14 +66,14 @@ function initFuncViz() {
 
     let domainValueBuffer = quadBuffer
 
-    const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+    const vsSource = cameraAndFrameCountShaderStuff.header + `
         attribute vec4 domainValueA; //"uv"
 
         void main(void) {
             gl_Position = domainValueA;
         `
         + cameraAndFrameCountShaderStuff.footer
-    const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+    const fsSource = cameraAndFrameCountShaderStuff.header + `
         void main(void) {
             gl_FragColor = vec4(0.,0.,0.,1.);
         }

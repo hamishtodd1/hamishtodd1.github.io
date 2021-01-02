@@ -31,6 +31,9 @@ const coloredNamesAlphabetically = Array(NUM_NAMES)
 
 //---------Varying state
 
+const viewRotor = new Float32Array(16);
+viewRotor[0] = 1.
+
 const drawingDetailses = Array(NUM_NAMES)
 
 const functionsWithIr = {}

@@ -113,7 +113,7 @@
 */
 
 async function initWorldMap() {
-    const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+    const vsSource = cameraAndFrameCountShaderStuff.header + `
         attribute vec2 uvA;
         varying vec2 uv;
         varying vec4 p;
@@ -256,7 +256,7 @@ async function initWorldMap() {
             gl_Position = p;
         `
         + cameraAndFrameCountShaderStuff.footer
-    const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+    const fsSource = cameraAndFrameCountShaderStuff.header + `
         varying vec2 uv;
         varying vec4 p;
 

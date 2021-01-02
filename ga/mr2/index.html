@@ -100,64 +100,8 @@
 
 				initMouse()
 
-				// await initWorldMap()
-
-				initNames()
-				initPictogramDrawers()
-				initMvPictograms()
-				// debugger
-				await initGlobePictograms()
-
-				initFunctionWithIrs()
-
-				initCarat()
-
-				initCharacterTexture()
-
-				initEvaluate()
-
-				await initTextureSampler()
-				initFrames()
-
-				initDisplayWindows()
-
-				{
-					loadedJson.freeMvNames.forEach((name, i) => {
-						assignMv(name)
-						for (let j = 0; j < 16; ++j)
-							getNameDrawerProperties(name).value[j] = loadedJson.freeMvValues[i][j]
-					})
-
-					assignTypeAndData("bg", "angle", { value: .5 })
-					assignTypeAndData("r", "slider", { value: 0. })
-
-					assignTypeAndData("o", "test",   { value: 0. })
-
-					//basis
-					{
-						//angle between our normal vectors and z axis (pointing towards us) is ti
-						let angleToZAxis = Math.acos(1. / Math.sqrt(3.))
-						let z = Math.cos(angleToZAxis)
-						let triangleRadius = Math.sin(angleToZAxis)
-						assignMv("bw")
-						plane(getNameDrawerProperties("bw").value, 0., triangleRadius, z, 0.);
-						assignMv("op")
-						plane(getNameDrawerProperties("op").value,-HS3 * triangleRadius, -.5 * triangleRadius, z, 0.);
-						assignMv("or")
-						plane(getNameDrawerProperties("or").value, HS3 * triangleRadius, -.5 * triangleRadius, z, 0.);
-
-						//and ow for the e0 plane
-					}
-
-					let textureNames = ["earthColor", "ball", "cmb", "jupiter", "latAndLon2"]
-					for (let i = 0; i < textureNames.length; ++i) {
-						let texture = await Texture("data/" + textureNames[i] + ".png")
-						assignTypeAndData(coloredNamesAlphabetically[13 + i], "globe", {texture})
-						//this could compile to glsl, it's a struct
-					}
-				}
-
 				// await initDymaxion()
+				// initExperiment()
 
 				function loop() {
 
@@ -165,7 +109,7 @@
 
 					tokenizeEvaluateDrawTokens()
 
-					for(let i = 0; i < updateFunctions.length; i++)
+					for (let i = 0; i < updateFunctions.length; i++)
 						updateFunctions[i]()
 
 					renderEverything()
@@ -174,7 +118,67 @@
 
 					setTimeout(() => {
 						requestAnimationFrame(loop)
-					}, 1000./60.);
+					}, 1000. / 60.);
+				}
+
+				// if(0)
+				{
+					// await initWorldMap()
+
+					initNames()
+					initPictogramDrawers()
+					initMvPictograms()
+					// debugger
+					await initGlobePictograms()
+
+					initFunctionWithIrs()
+
+					initCarat()
+
+					initCharacterTexture()
+
+					initEvaluate()
+
+					await initTextureSampler()
+					initFrames()
+
+					initDisplayWindows()
+
+					{
+						loadedJson.freeMvNames.forEach((name, i) => {
+							assignMv(name)
+							for (let j = 0; j < 16; ++j)
+								getNameDrawerProperties(name).value[j] = loadedJson.freeMvValues[i][j]
+						})
+
+						assignTypeAndData("bg", "angle", { value: .5 })
+						assignTypeAndData("r", "slider", { value: 0. })
+
+						assignTypeAndData("o", "test",   { value: 0. })
+
+						//basis
+						{
+							//angle between our normal vectors and z axis (pointing towards us) is ti
+							let angleToZAxis = Math.acos(1. / Math.sqrt(3.))
+							let z = Math.cos(angleToZAxis)
+							let triangleRadius = Math.sin(angleToZAxis)
+							assignMv("bw")
+							plane(getNameDrawerProperties("bw").value, 0., triangleRadius, z, 0.);
+							assignMv("op")
+							plane(getNameDrawerProperties("op").value,-HS3 * triangleRadius, -.5 * triangleRadius, z, 0.);
+							assignMv("or")
+							plane(getNameDrawerProperties("or").value, HS3 * triangleRadius, -.5 * triangleRadius, z, 0.);
+
+							//and ow for the e0 plane
+						}
+
+						let textureNames = ["earthColor", "ball", "cmb", "jupiter", "latAndLon2"]
+						for (let i = 0; i < textureNames.length; ++i) {
+							let texture = await Texture("data/" + textureNames[i] + ".png")
+							assignTypeAndData(coloredNamesAlphabetically[13 + i], "globe", {texture})
+							//this could compile to glsl, it's a struct
+						}
+					}
 				}
 
 				loop()

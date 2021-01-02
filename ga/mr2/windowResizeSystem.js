@@ -1,6 +1,10 @@
 /*
 */
 
+function dwOriginZ() {
+	return mainCamera.frontAndBackZ * .5
+}
+
 function initWindowResizeSystem()
 {
 	//all derives from mainCamera.topAtZZero. Tweaked to make 100% look ok on our little preview

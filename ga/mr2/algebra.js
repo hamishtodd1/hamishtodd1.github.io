@@ -66,7 +66,30 @@ function initAlgebra()
             float mv1[16];
             float mv2[16];
             float mv3[16];
-            float mv4[16];` )
+            float mv4[16];
+            
+            float nonAlgebraTempMv0[16];
+            float nonAlgebraTempMv1[16];
+            float nonAlgebraTempMv2[16];
+            float nonAlgebraTempMv3[16];
+            float nonAlgebraTempMv4[16];
+            
+            vec4 tempVec4;` )
+
+
+        // t[11] = p[11] * r[0] + p[13] * r[9] - p[12] * r[10]
+        // t[12] = p[12] * r[0] - p[13] * r[8] + p[11] * r[10]
+        // t[13] = p[13] * r[0] + p[12] * r[8] - p[11] * r[9]
+        // t[14] = p[14] * r[0]
+        //next one is reversed a and b AND conjugated
+        // appendToGaShaderString(replaceSignature(
+        //     "void pointRotorSandwich(in vec4 p,in vec4 r,out vec4 t)",
+        //     pointRotorSandwich = (p,r,t) => {
+        //         //rotor: 0 = the scalar part of the rotor
+        //         // / the homogenous part
+        //         //one day do this
+        //     }
+        // ))
             
         appendToGaShaderString(replaceSignature(
             "void gProduct(float a[16],float b[16],out float target[16])",

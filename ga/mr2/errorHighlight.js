@@ -1,6 +1,4 @@
 function initErrorHighlight() {
-    // let errorReportText = new Textbox("INITIAL TEXT FOR ERROR MESSAGE",1.,0.,0.)
-
     // let farBackQuadBuffer = new Float32Array(quadBuffer.length)
     // for(let i = 0; i < quadBuffer.length; ++i) {
     //     farBackQuadBuffer[i] = quadBuffer[i]
@@ -14,7 +12,7 @@ function initErrorHighlight() {
     //     }
     // }
 
-    // const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+    // const vsSource = cameraAndFrameCountShaderStuff.header + `
     //     attribute vec4 pointA;
     //     uniform vec2 screenPosition;
 
@@ -26,7 +24,7 @@ function initErrorHighlight() {
     //         gl_Position = p;
     //     `
     //     + cameraAndFrameCountShaderStuff.footer
-    // const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+    // const fsSource = cameraAndFrameCountShaderStuff.header + `
     //     void main(void) {
     //         gl_FragColor = vec4(1.,0.,0.,1.);
     //     }

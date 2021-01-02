@@ -33,6 +33,8 @@ function initPremadeBuffers()
         return vertBuffer;
     }
 
+    // vertBufferFunctions.cylinder
+
     for (let i = 0; i < 4; ++i)
     {
         let p = new Float32Array(16)

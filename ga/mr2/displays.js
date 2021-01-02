@@ -10,7 +10,7 @@ function verticesDisplay(vertBuffer, mode, r,g,b)
     let gStr = g === Math.round(g) ? g.toString() + "." : g.toString()
     let bStr = b === Math.round(b) ? b.toString() + "." : b.toString()
 
-    const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+    const vsSource = cameraAndFrameCountShaderStuff.header + `
         attribute vec4 vertA;
 
         void main(void) {
@@ -18,7 +18,7 @@ function verticesDisplay(vertBuffer, mode, r,g,b)
             gl_Position = vertA;
         `
         + cameraAndFrameCountShaderStuff.footer
-    const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+    const fsSource = cameraAndFrameCountShaderStuff.header + `
         void main(void) {
             gl_FragColor = vec4(`+rStr+`,`+gStr+`,`+bStr+`,1.);
         }
@@ -53,7 +53,7 @@ function verticesDisplayWithPosition(pointsBuffer, mode, r,g,b)
     let gStr = g === Math.round(g) ? g.toString() + "." : g.toString()
     let bStr = b === Math.round(b) ? b.toString() + "." : b.toString()
 
-    const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+    const vsSource = cameraAndFrameCountShaderStuff.header + `
         attribute vec4 pointA;
         uniform vec2 screenPosition;
 
@@ -67,7 +67,7 @@ function verticesDisplayWithPosition(pointsBuffer, mode, r,g,b)
             gl_Position = p;
         `
         + cameraAndFrameCountShaderStuff.footer
-    const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+    const fsSource = cameraAndFrameCountShaderStuff.header + `
         void main(void) {
             gl_FragColor = vec4(`+rStr+`,`+gStr+`,`+bStr+`,1.);
         }

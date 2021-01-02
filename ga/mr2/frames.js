@@ -37,7 +37,7 @@ function initFrames() {
         vertsBuffer[i * 4 + 3] = untriangledVertsBuffer[indices[i]*4+3]
     }
 
-    const vsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+    const vsSource = cameraAndFrameCountShaderStuff.header + `
         attribute vec4 pointA;
         varying vec2 pointV;
 
@@ -58,7 +58,7 @@ function initFrames() {
             gl_PointSize = 10.;
         }
         `
-    const fsSource = shaderHeader + cameraAndFrameCountShaderStuff.header + `
+    const fsSource = cameraAndFrameCountShaderStuff.header + `
         varying vec2 pointV;
         uniform vec3 hexantColors[6];
 
