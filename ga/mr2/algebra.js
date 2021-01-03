@@ -90,6 +90,13 @@ function initAlgebra()
         //         //one day do this
         //     }
         // ))
+
+        normalizeMotor = (motor) => {
+            reverse(motor, mv0);
+            gProduct(motor, mv0, mv1);
+            let norm = Math.sqrt( mv1[0] );
+            multiplyScalar(motor, 1. / norm);
+        }
             
         appendToGaShaderString(replaceSignature(
             "void gProduct(float a[16],float b[16],out float target[16])",
@@ -404,13 +411,19 @@ function initAlgebra()
         lineIdealNorm = (mv) => { return Math.sqrt(sq(idealLineX(mv)) + sq(idealLineY(mv)) + sq(idealLineZ(mv)))}
         
         lineNormalize = (mv) => {
-            let inverseLength = 1. / lineRealNorm(mv)
-            realLineX(mv, realLineX(mv) * inverseLength)
-            realLineY(mv, realLineY(mv) * inverseLength)
-            realLineZ(mv, realLineZ(mv) * inverseLength)
-            idealLineX(mv, idealLineX(mv) * inverseLength)
-            idealLineY(mv, idealLineY(mv) * inverseLength)
-            idealLineZ(mv, idealLineZ(mv) * inverseLength)
+            let inverseRealNorm = 1. / lineRealNorm(mv)
+            realLineX(mv, realLineX(mv) * inverseRealNorm)
+            realLineY(mv, realLineY(mv) * inverseRealNorm)
+            realLineZ(mv, realLineZ(mv) * inverseRealNorm)
+            idealLineX(mv, idealLineX(mv) * inverseRealNorm)
+            idealLineY(mv, idealLineY(mv) * inverseRealNorm)
+            idealLineZ(mv, idealLineZ(mv) * inverseRealNorm)
+
+            //?
+            // let inverseIdealNorm = 1. / lineIdealNorm(mv)
+            // idealLineX(mv, idealLineX(mv) * inverseIdealNorm)
+            // idealLineY(mv, idealLineY(mv) * inverseIdealNorm)
+            // idealLineZ(mv, idealLineZ(mv) * inverseIdealNorm)
         }
     }
 

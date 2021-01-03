@@ -33,7 +33,7 @@ function initExperiment() {
 function initDisplayWindows() {
     
 
-    let dimension = 4.;
+    let dimension = 5.;
 
     //background
     {
@@ -189,6 +189,8 @@ function initDisplayWindows() {
         const numDivisions = 4
         let gridBuffer = new Float32Array(4 * 2 * (numDivisions+1) * 2 + 8)
 
+        let gridSize = dimension / 4.
+
         let vertIndex = 0
         for (let horizontal = 0; horizontal < 2; ++horizontal) {
             for(let i = 0; i <= numDivisions; ++i) {
@@ -199,9 +201,9 @@ function initDisplayWindows() {
                     gridBuffer[vertIndex * 4 + 3] = 1.
 
                     let coordIndexEnds = horizontal ? 0 : 2
-                    gridBuffer[vertIndex*4+coordIndexEnds] = end ? -1. : 1.
+                    gridBuffer[vertIndex*4+coordIndexEnds] = (end ? -1. : 1.) * gridSize
                     let coordIndexLayer = horizontal ? 2 : 0
-                    gridBuffer[vertIndex*4+coordIndexLayer] = (i / numDivisions - .5) * 2.
+                    gridBuffer[vertIndex * 4 + coordIndexLayer] = ((i / numDivisions - .5) * 2.) * gridSize
 
                     ++vertIndex
                 }
@@ -209,12 +211,12 @@ function initDisplayWindows() {
         }
 
         gridBuffer[vertIndex * 4 + 0] = 0.
-        gridBuffer[vertIndex * 4 + 1] = 1.
+        gridBuffer[vertIndex * 4 + 1] = 1. * gridSize
         gridBuffer[vertIndex * 4 + 2] = 0.
         gridBuffer[vertIndex * 4 + 3] = 1.
         ++vertIndex
         gridBuffer[vertIndex * 4 + 0] = 0.
-        gridBuffer[vertIndex * 4 + 1] =-1.
+        gridBuffer[vertIndex * 4 + 1] =-1. * gridSize
         gridBuffer[vertIndex * 4 + 2] = 0.
         gridBuffer[vertIndex * 4 + 3] = 1.
 

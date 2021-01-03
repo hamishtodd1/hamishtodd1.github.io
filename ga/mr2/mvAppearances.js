@@ -73,14 +73,6 @@ function initMvPictograms() {
         realLineY(yAxis,1.)
 
         adjustViewOnMvs = () => {
-            // let axis = nonAlgebraTempMv1
-            // realLine(axis, mouse.positionDelta.y, -mouse.positionDelta.x, 0.)
-            // realLine(untransformedAxis, 0., -mouse.positionDelta.x, 0.)
-            // realLine(axis, mouse.positionDelta.y, 0., 0.)
-
-            // let angle = mouse.positionDelta.length() * 1.7
-            // mvRotator(axis, angle, increment)
-            
             pitchAngle += mouse.positionDelta.y * -0.27
             pitchAngle = clamp(pitchAngle, -TAU / 4., TAU / 4.)
             let pitchRotator = nonAlgebraTempMv1
@@ -91,27 +83,6 @@ function initMvPictograms() {
             mvRotator(yAxis, yawAngle, yawRotator)
 
             gProduct(pitchRotator, yawRotator, viewRotor)
-
-            //the viewRotor needs to be applied to, well, everything really, urgh
-            
-            // let increment = nonAlgebraTempMv0
-            // //normalizing
-            // let magnitudeInverse = 1. / Math.sqrt(sq(lineRealNorm(increment)) + sq(increment[0]))
-            // increment[0] *= magnitudeInverse
-            // realLineX(increment, realLineX(increment) * magnitudeInverse)
-            // realLineY(increment, realLineY(increment) * magnitudeInverse)
-            // realLineZ(increment, realLineZ(increment) * magnitudeInverse)
-
-            // gProduct(viewRotor, increment, mv0)
-            // assign(mv0, viewRotor)
-
-            // coloredNamesAlphabetically.forEach((name)=>{
-            //     if(getNameType(name) === "mv") {
-            //         sandwichBab(getNameDrawerProperties(name).value,increment,mv0)
-            //         assign(mv0,getNameDrawerProperties(name).value)
-            //         //Bug: they seem to get smaller
-            //     }
-            // })
         }
 
         rightMouseResponses.push({
@@ -324,7 +295,7 @@ function initMvPictograms() {
         {
             let radius = 1.
             let radialDivisions = 32
-            var planeVertBuffer = vertBufferFunctions.disc(radius, radialDivisions)
+            var planeVertBuffer = vertBufferFunctions.disc(radius, radialDivisions)//quadBuffer
         }
 
         let vs = gaShaderString + `
@@ -334,12 +305,14 @@ function initMvPictograms() {
             varying vec3 p;
 
             void main(void) {
-                pointToMv(vertA,mv3);
-                sandwichBab(mv3,motorFromZPlane,mv4);
+                pointToMv(vertA,nonAlgebraTempMv3);
+                sandwichBab(nonAlgebraTempMv3,motorFromZPlane,nonAlgebraTempMv4);
 
-                mvToPoint(mv4,gl_Position);
+                mvToPoint(nonAlgebraTempMv4,gl_Position);
 
-                p = gl_Position.xyz;
+                gl_Position /= gl_Position.w;
+
+                p = gl_Position.xyz; 
         `
         let fs = `
             varying vec3 p;
@@ -373,12 +346,14 @@ function initMvPictograms() {
 
             planePictogramDrawer.program.prepareVertexAttribute("vert", planeVertBuffer)
 
+            gl.disable(gl.CULL_FACE)
+
             planePictogramDrawer.finishPrebatchAndDrawEach((nameProperties, name) => {
                 let mv = nameProperties.value
                 if (!containsGrade(mv,1))
                     return
 
-                let transformedMv = nonAlgebraTempMv1
+                let transformedMv = nonAlgebraTempMv0
                 sandwichBab(mv, viewRotor, transformedMv)
 
                 let magnitude = planeNorm(transformedMv)
@@ -393,14 +368,14 @@ function initMvPictograms() {
                     motorFromZPlane[0] = 1.
                 }
                 else {
-                    meet(zPlane, transformedMv, mv0)
-                    let angle = Math.asin(lineRealNorm(mv0))
-                    lineNormalize(mv0)
-                    mvRotator(mv0, angle, motorFromZPlane)
+                    gProduct(transformedMv,zPlane,motorFromZPlane)
+                    motorFromZPlane[0] += 1.
+                    normalizeMotor(motorFromZPlane)
                 }
 
                 gl.uniform1fv(planePictogramDrawer.program.getUniformLocation("motorFromZPlane"), motorFromZPlane)
-                let inverseNormalLength = 1./Math.sqrt(sq(planeX(transformedMv)) + sq(planeY(transformedMv)) + sq(planeZ(transformedMv)) )
+
+                let inverseNormalLength = 1. / Math.sqrt( sq(planeX(transformedMv)) + sq(planeY(transformedMv)) + sq(planeZ(transformedMv)) )
                 gl.uniform3f(planePictogramDrawer.program.getUniformLocation("normal"), 
                     planeX(transformedMv)*inverseNormalLength,
                     planeY(transformedMv)*inverseNormalLength,
@@ -408,13 +383,9 @@ function initMvPictograms() {
 
                 gl.uniform3f(planePictogramDrawer.program.getUniformLocation("col"), .2,.2,.2)
 
-                //for performance, could do this disabling in the predraw
-                // gl.disable(gl.CULL_FACE)
-                // gl.cullFace(gl.FRONT_AND_BACK)
-                // gl.cullFace(gl.BACK)
                 gl.drawArrays(gl.TRIANGLES, 0, planeVertBuffer.length / 4)
-                // gl.enable(gl.CULL_FACE)
             })
+            gl.enable(gl.CULL_FACE)
         }
     }
 

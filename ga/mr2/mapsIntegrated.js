@@ -293,7 +293,10 @@ async function initDymaxion() {
     }
     repositionVerts(icosahedronDihedralAngle, closedVertsBuffer)
 
-    
+    updateFunctions.push(() => {
+        let angle = icosahedronDihedralAngle + (Math.PI - icosahedronDihedralAngle) * (.5 - .5 * Math.cos(frameCount * .006))
+        repositionVerts(angle, animatedVertsBuffer)
+    })
 
     const vsSource = cameraAndFrameCountShaderStuff.header + `
         attribute vec2 uvA;
@@ -416,21 +419,22 @@ async function initDymaxion() {
         gl.uniform1i(program.getUniformLocation("sampler"), 0);
 
         cameraAndFrameCountShaderStuff.transfer(program)
-        gl.uniform1f(program.getUniformLocation("frameCount"), frameCount);
 
         gl.uniform1fv(program.getUniformLocation("transform"), transform)
 
         gl.uniform4fv(program.getUniformLocation("animatedVerts"), animatedVertsBuffer);
+        // log(animatedVertsBuffer)
+        // debugger
         gl.uniform4fv(program.getUniformLocation("closedVerts"), closedVertsBuffer);
 
+        gl.disable(gl.CULL_FACE);
         for (let i = 0; i < indices.length; ++i) {
             gl.uniform1i(program.getUniformLocation("blIndex"), indices[i][0])
             gl.uniform1i(program.getUniformLocation("brIndex"), indices[i][2])
             gl.uniform1i(program.getUniformLocation("tlIndex"), indices[i][3])
 
-            gl.disable(gl.CULL_FACE);
             gl.drawArrays(gl.TRIANGLES, 0, numVertices);
-            gl.enable(gl.CULL_FACE);
         }
+        gl.enable(gl.CULL_FACE);
     })
 }
