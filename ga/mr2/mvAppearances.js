@@ -368,9 +368,23 @@ function initMvPictograms() {
                     motorFromZPlane[0] = 1.
                 }
                 else {
-                    gProduct(transformedMv,zPlane,motorFromZPlane)
-                    motorFromZPlane[0] += 1.
-                    normalizeMotor(motorFromZPlane)
+                    //you want the center of the disc to be on the normal line going to the origin
+                    let orientedPlane = nonAlgebraTempMv1
+                    assign(transformedMv,orientedPlane)
+                    planeW(orientedPlane,0.)
+
+                    let rotationMotor = nonAlgebraTempMv2
+                    gProduct(orientedPlane,zPlane,rotationMotor)
+                    rotationMotor[0] += 1.
+                    normalizeMotor(rotationMotor)
+
+                    let translationMotor = nonAlgebraTempMv3
+                    gProduct(transformedMv, orientedPlane, translationMotor)
+                    translationMotor[0] += 1.
+                    normalizeMotor(translationMotor)
+
+                    gProduct(translationMotor,rotationMotor,motorFromZPlane)
+                    normalizeMotor(motorFromZPlane) //probably unnecessary
                 }
 
                 gl.uniform1fv(planePictogramDrawer.program.getUniformLocation("motorFromZPlane"), motorFromZPlane)

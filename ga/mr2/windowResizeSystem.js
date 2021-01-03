@@ -33,7 +33,7 @@ function initWindowResizeSystem()
 		
 		let aspect = width / height
 		mainCamera.rightAtZZero = mainCamera.topAtZZero * aspect
-		mainCamera.frontAndBackZ = Math.max(mainCamera.topAtZZero, mainCamera.rightAtZZero)
+		mainCamera.frontAndBackZ = Math.max(mainCamera.topAtZZero * 2., mainCamera.rightAtZZero * 2.)
 	}
 	window.addEventListener('resize', respondToResize, false);
 	respondToResize();
