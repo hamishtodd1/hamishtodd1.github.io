@@ -406,6 +406,14 @@ function initAlgebra()
         realLine = (mv,newX,newY,newZ) => { zeroMv(mv); mv[8] = newZ, mv[9] = newY, mv[10] = newX }
 
         planeNorm = (mv) => { return Math.sqrt(sq(planeX(mv)) + sq(planeY(mv)) + sq(planeZ(mv)))}
+        planeNormalize = (mv) => {
+            let inverseMagnitude = 1./planeNorm(mv)
+            plane(mv,
+                planeX(mv) * inverseMagnitude,
+                planeY(mv) * inverseMagnitude,
+                planeZ(mv) * inverseMagnitude,
+                planeW(mv) * inverseMagnitude)
+        }
 
         lineRealNorm = (mv) => { return Math.sqrt(sq(realLineX(mv)) + sq(realLineY(mv)) + sq(realLineZ(mv)))}
         lineIdealNorm = (mv) => { return Math.sqrt(sq(idealLineX(mv)) + sq(idealLineY(mv)) + sq(idealLineZ(mv)))}

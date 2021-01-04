@@ -239,7 +239,7 @@ function initDisplayWindows() {
             ` + cameraAndFrameCountShaderStuff.footer
         const fs = cameraAndFrameCountShaderStuff.header + `
             void main(void) {
-                gl_FragColor = vec4(1.,1.,1.,1.);
+                gl_FragColor = vec4(0.,1.,0.,1.);
             }
             `
 
@@ -315,6 +315,7 @@ function initDisplayWindows() {
             assignMv(name)
             planeZ(getNameDrawerProperties(name).value, 1.)
         })
+        //could also have rotation and translation, click and drag for both
 
         // function rectangleWithPosition(halfFrameWidth, halfFrameHeight) {
         //     const frameVertsBuffer = new Float32Array([

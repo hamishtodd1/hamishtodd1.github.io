@@ -102,13 +102,17 @@ function initMvPictograms() {
 
             point(slideCurrentMv, x, y, 0., 1.)
 
-            //What's quite interesting is the "pad plane", which takes the plane z = 0 to the plane you're looking at
-            //by the way you can take a lot from the pitch and yaw
 
             let grade = getGrade(mv)
             switch(grade) {
                 case 3: //point
-                    assign(slideCurrentMv, mv)
+                    //could keep it in whatever plane it's in?
+                    //if you want to solve the problem that the dual plane is
+
+                    if(pointW(mv) === 0.)
+                        assign(slideCurrentMv, mv)
+                    else
+                        assign(slideCurrentMv, mv)
                     break
 
                 case 2: //line
@@ -123,22 +127,23 @@ function initMvPictograms() {
                     break
 
                 case 1: //plane
-                    let normalDirection = mv0
+                    let normalDirection = nonAlgebraTempMv0
                     gSub(slideCurrentMv, slideStartMv, normalDirection)
-                    pointZ(normalDirection, 1.) //urgh, -
-                    dual(normalDirection, mv1) //mv1 is the plane, but it's at the origin
+                    pointZ(normalDirection, -1.) //urgh, -
+                    let planeAtOrigin = nonAlgebraTempMv1
+                    dual(normalDirection, planeAtOrigin) //mv1 is the plane, but it's at the origin
                     //better would be it continue to spin around as your mouse gets further and further away
 
                     //project onto the starting point
-                    inner(mv1, slideStartMv, mv2)
-                    gProduct(mv2, slideStartMv, mv)
+                    inner(nonAlgebraTempMv1, slideStartMv, nonAlgebraTempMv2)
+                    gProduct(nonAlgebraTempMv2, slideStartMv, mv)
             }
         },
     }
 
     let hexantColors = new Float32Array(3 * 6)
 
-    //point
+    //POINT
     {
         //buffers
         {
@@ -182,7 +187,8 @@ function initMvPictograms() {
 
             pointPictogramDrawer.finishPrebatchAndDrawEach((nameProperties,name) => {
                 let mv = nameProperties.value
-                if (!containsGrade(mv, 3))
+                
+                if (!containsGrade(mv, 3) || pointW(mv) === 0. )
                     return
 
                 let transformedMv = nonAlgebraTempMv1
@@ -197,7 +203,158 @@ function initMvPictograms() {
         }
     }
 
+    //DIRECTION
+    //translation and rotation could be visualized differently than lines
+    //One idea for translation line is a circle with direction lines
+    //TODO need perspective though seriously
+    //there's kinda two things you're thinking about, controlling a direction and controling a point on the surface of a sphere
+    //Is there some kind of thing where you could  grab a point and it backsolves to the direction it derives from and you edit that direction?
+    {
+        //buffers
+        {
+            //lathe this
+            let vertsCoords = [
+                0.,     0.,
+                .05,   0.,
+                .05,   .75,
+                .1,     .75,
+                0.,     1.
+            ]
+            let s2i = 1. / Math.sqrt(2.)
+            let normalsCoords = [
+                0.,  -1.,
+                1.,   0.,
+                1.,   0.,
+                s2i, s2i,
+                s2i, s2i,
+            ]
+            let radialSegments = 16
+            let n = vertsCoords.length / 2
+            var directionVertsBuffer = new Float32Array(radialSegments * n * 4 * 6)
+            var directionNormalsBuffer = new Float32Array(radialSegments * n * 4 * 6)
+
+            let p = nonAlgebraTempMv0
+            let rotator = nonAlgebraTempMv1
+            let result = nonAlgebraTempMv2
+            let axis = nonAlgebraTempMv3
+            realLineY(axis,1.)
+
+            let index = 0
+            function pushToBuffer(i,j,isNormals) {
+                let coords = isNormals ? normalsCoords : vertsCoords
+                let buffer = isNormals ? directionNormalsBuffer : directionVertsBuffer
+
+                point(p, coords[i * 2 + 0], coords[i * 2 + 1], 0., 1.)
+
+                mvRotator(axis, j / radialSegments * TAU, rotator)
+                sandwichBab(p, rotator, result)
+
+                buffer[index * 4 + 0] = pointX(result)
+                buffer[index * 4 + 1] = pointY(result)
+                buffer[index * 4 + 2] = pointZ(result)
+                buffer[index * 4 + 3] = isNormals ? 0. : 1.
+            }
+
+            function doBoth(i,j) {
+                pushToBuffer(i, j, true)
+                pushToBuffer(i, j, false)
+                ++index
+            }
+
+            for(let i = 0; i < n; ++i) {
+                for(let j = 0; j < radialSegments; ++j) {
+                    doBoth(i,j)
+                    doBoth(i,j+1)
+                    doBoth(i+1,j+1)
+
+                    doBoth(i, j)
+                    doBoth(i+1,j+1)
+                    doBoth(i+1, j)
+                }
+            }
+        }
+
+        let vs = gaShaderString + `
+            attribute vec4 vertA;
+            attribute vec4 normalA;
+
+            uniform float rotor[16];
+
+            varying vec3 p;
+            varying vec4 normal;
+
+            void main(void) {
+                pointToMv(vertA,nonAlgebraTempMv0);
+                sandwichBab(nonAlgebraTempMv0,rotor,nonAlgebraTempMv1);
+                mvToPoint(nonAlgebraTempMv1,gl_Position);
+
+                p = gl_Position.xyz;
+
+                pointToMv(normalA,nonAlgebraTempMv0);
+                sandwichBab(nonAlgebraTempMv0,rotor,nonAlgebraTempMv1);
+                mvToPoint(nonAlgebraTempMv1,normal);
+        `
+        let fs = `
+            varying vec3 p;
+            varying vec4 normal;
+
+            void main(void) {
+                // gl_FragColor = vec4(1.,0.,0.,1.);
+
+
+                vec3 lightPosition = vec3(-1.,1.,-.5);
+                vec3 lightDirectionFromHere = lightPosition - p;
+                vec3 r = normalize(2. * dot(lightDirectionFromHere,normal.xyz) * normal.xyz - lightDirectionFromHere);
+                
+                vec3 viewerDirection = vec3(0.,0.,-1.); //sigh
+                float shininessConstant = 8.;
+                float specularContribution = pow(dot(r,viewerDirection),shininessConstant);
+
+                vec3 col = vec3(1.,0.,0.);
+                gl_FragColor = vec4(col + (1.-col) * specularContribution,1.);
+        `
+
+        var directionPictogramDrawer = new PictogramDrawer(vs, fs)
+        directionPictogramDrawer.program.addVertexAttribute("vert", directionVertsBuffer, 4, false)
+        directionPictogramDrawer.program.addVertexAttribute("normal", directionNormalsBuffer, 4, false)
+        directionPictogramDrawer.program.locateUniform("rotor")
+
+        let yDirectionDual = new Float32Array(16)
+        planeY(yDirectionDual,1.)
+        function renderDirections() {
+            gl.useProgram(directionPictogramDrawer.program.glProgram)
+
+            directionPictogramDrawer.program.prepareVertexAttribute("vert", directionVertsBuffer)
+            directionPictogramDrawer.program.prepareVertexAttribute("normal", directionNormalsBuffer)
+
+            directionPictogramDrawer.finishPrebatchAndDrawEach((nameProperties, name) => {
+                let mv = nameProperties.value
+
+                if (!containsGrade(mv, 3) || pointW(mv) !== 0. )
+                    return
+
+                let mvDualNormalized = nonAlgebraTempMv0
+                dual(mv,mvDualNormalized)
+                planeNormalize(mvDualNormalized)
+
+                //"motor between planes"
+                let toValueRotor = nonAlgebraTempMv1
+                gProduct(mvDualNormalized, yDirectionDual, toValueRotor)
+                toValueRotor[0] += 1.
+                normalizeMotor(toValueRotor)
+                
+                let rotor = nonAlgebraTempMv2
+                gProduct(viewRotor,toValueRotor,rotor)
+                gl.uniform1fv(directionPictogramDrawer.program.getUniformLocation("rotor"), rotor)
+
+                gl.drawArrays(gl.TRIANGLES, 0, directionVertsBuffer.length / 4)
+            })
+        }
+    }
+
     //LINE, both real and ideal apparently?
+    //Lines are a subset of motors
+    //The way to visualize motors is... a pair of reflec
     {
         const vs = `
             attribute vec4 vertA;
@@ -356,12 +513,7 @@ function initMvPictograms() {
                 let transformedMv = nonAlgebraTempMv0
                 sandwichBab(mv, viewRotor, transformedMv)
 
-                let magnitude = planeNorm(transformedMv)
-                plane(transformedMv,
-                    planeX(transformedMv)/magnitude,
-                    planeY(transformedMv)/magnitude,
-                    planeZ(transformedMv)/magnitude,
-                    planeW(transformedMv)/magnitude)
+                planeNormalize(transformedMv)
 
                 if (planeX(transformedMv) === 0. && planeY(transformedMv) === 0. && planeW(transformedMv) === 0.) {
                     zeroMv(motorFromZPlane)
@@ -389,11 +541,10 @@ function initMvPictograms() {
 
                 gl.uniform1fv(planePictogramDrawer.program.getUniformLocation("motorFromZPlane"), motorFromZPlane)
 
-                let inverseNormalLength = 1. / Math.sqrt( sq(planeX(transformedMv)) + sq(planeY(transformedMv)) + sq(planeZ(transformedMv)) )
                 gl.uniform3f(planePictogramDrawer.program.getUniformLocation("normal"), 
-                    planeX(transformedMv)*inverseNormalLength,
-                    planeY(transformedMv)*inverseNormalLength,
-                    planeZ(transformedMv)*inverseNormalLength)
+                    planeX(transformedMv),
+                    planeY(transformedMv),
+                    planeZ(transformedMv))
 
                 gl.uniform3f(planePictogramDrawer.program.getUniformLocation("col"), .2,.2,.2)
 
@@ -403,13 +554,14 @@ function initMvPictograms() {
         }
     }
 
-    addType("mv", [pointPictogramDrawer, linePictogramDrawer, planePictogramDrawer], editingStyle)
+    addType("mv", [pointPictogramDrawer, linePictogramDrawer, planePictogramDrawer,directionPictogramDrawer], editingStyle)
     assignMv = function(name) {
         assignTypeAndData(name, "mv", { value: new Float32Array(16) })
     }
 
     addRenderFunction(() => {
         renderPoints()
+        renderDirections()
         renderLines()
         renderPlanes()
     })
