@@ -81,6 +81,8 @@ function initEvaluate() {
 
         tokenize()
 
+        const caratLineNumber = getLineNumberOfPositionInString(carat.positionInString)
+
         let unusedNameJustSeen = null
         let skipLine = false
         let nameToAssignTo = null
@@ -109,18 +111,30 @@ function initEvaluate() {
         })
 
         let lineNumber = 0
+        let currentLineStart = 0
+        
         forEachToken((tokenIndex, tokenStart, tokenEnd, token, lexeme) => {
             if(token === "\n") {
                 if (nameToAssignTo !== null && skipLine === false) {
-                    // if(nameToAssignTo === "pw")
-                    //     log(carat.lineNumber !== lineNumber)
-                    if (carat.lineNumber !== lineNumber) {
+                    const currentlyEditingThisLine = caratLineNumber === lineNumber &&
+                                                    currentLineStart <= carat.indexOfLastTypedCharacter && 
+                                                    carat.indexOfLastTypedCharacter <= tokenEnd
+
+                    if ( !currentlyEditingThisLine ) {
                         let errorMessage = lineTree.parseAndAssign(tokenIndex, nameToAssignTo, lineNumber, tfp)
                         if(errorMessage !== "")
                             handleError(tokenIndex, errorMessage)
                     }
+                    else {
+                        log("y")
+                        lineTree.clear()
+                        log("b")
+                        logged = 1
+                    }
 
                     derivedNames.push(nameToAssignTo) //because what if you save
+
+                    //TODO wanna remove those non-derived names that don't appear in the code
                 }
 
                 nameToAssignTo = null
@@ -128,6 +142,7 @@ function initEvaluate() {
                 unusedNameJustSeen = null
 
                 ++lineNumber
+                currentLineStart = tokenStart
             }
             else if(skipLine)
                 return false
@@ -180,13 +195,10 @@ function initEvaluate() {
                     unusedNameJustSeen = null
                 }
                 else if (nameToAssignTo !== null) {
-                    if(carat.lineNumber !== lineNumber) {
-                        let errorMessage = lineTree.addLexeme(tokenIndex, token, lexeme)
-                        if(errorMessage !== "") {
-                            handleError(tokenIndex, errorMessage)
-                            skipLine = true
-                            //and clear up the tree surely
-                        }
+                    let errorMessage = lineTree.addLexeme(tokenIndex, token, lexeme)
+                    if (errorMessage !== "") {
+                        handleError(tokenIndex, errorMessage)
+                        skipLine = true
                     }
                 }
                 else if (lexeme === "}") {

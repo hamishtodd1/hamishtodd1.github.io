@@ -1,8 +1,6 @@
 /*
     A good control scheme might be to turn the points into ideal points if the mouse is taken outside the frame
 
-    You're gonna make little boxes
-
     Hmm. If the only context in which you care about the magnitude of the scalar part is if it's an angle...
 
 
@@ -13,9 +11,10 @@
 
     need to have "make your own visualizations" for the boxes soon
 
-    Color
-        Want to click and select a color, just like with a vector
-        As with normal points, can visualize space as plane or disc. Disc gets you hue circle
+
+    Control scheme
+        You want different things for different contexts
+        Backsolving: could do one step. For example, you want a certain point to stay on a line.
 */
 
 function initAnglePictograms() {
@@ -83,6 +82,7 @@ function initMvPictograms() {
             mvRotator(yAxis, yawAngle, yawRotator)
 
             gProduct(pitchRotator, yawRotator, viewRotor)
+            reverse(viewRotor, inverseViewRotor)
         }
 
         rightMouseResponses.push({
@@ -91,28 +91,54 @@ function initMvPictograms() {
         })
     }
 
+    function dwXyTo3dDirection(x, y, target) {
+        let mouseDistFromCenter = Math.sqrt(sq(x) + sq(y))
+        let placeInWaveRing = mouseDistFromCenter
+        while (placeInWaveRing > 4.)
+            placeInWaveRing -= 4.
+
+        if (1. < placeInWaveRing && placeInWaveRing < 3.) {
+            var onscreenDistFromCenter = 2. - placeInWaveRing
+            var z = Math.sqrt(1. - sq(onscreenDistFromCenter))
+        }
+        else {
+            var onscreenDistFromCenter = placeInWaveRing > 3. ? placeInWaveRing - 4. : placeInWaveRing
+            var z = -Math.sqrt(1. - sq(onscreenDistFromCenter))
+        }
+
+        let ratio = mouseDistFromCenter === 0 ? 1. : onscreenDistFromCenter / mouseDistFromCenter
+
+        let untransformed = nonAlgebraTempMv0
+        point(untransformed, x * ratio, y * ratio, z, 0.)
+        sandwichBab(nonAlgebraTempMv0, inverseViewRotor, target)
+    }
+
+    //snapping is extremely important, wanna make the vector (1,0,0) easily
     let slideStartMv = new Float32Array(16)
+    let slideStartXy = {x: 0., y: 0.}
     let slideCurrentMv = new Float32Array(16)
     let editingStyle = {
         start: (editingName, x, y) => {
-            point(slideStartMv, x, y, 0., 1.)
+            point(nonAlgebraTempMv0, x, y, 0., 1.)
+            sandwichBab(nonAlgebraTempMv0, inverseViewRotor, slideStartMv)
+            slideStartXy.x = x
+            slideStartXy.y = y
         },
         during: (editingName, x, y) => {
             let mv = getNameDrawerProperties(editingName).value
 
-            point(slideCurrentMv, x, y, 0., 1.)
-
+            point(nonAlgebraTempMv0, x, y, 0., 1.)
+            sandwichBab(nonAlgebraTempMv0, inverseViewRotor, slideCurrentMv)
 
             let grade = getGrade(mv)
             switch(grade) {
                 case 3: //point
-                    //could keep it in whatever plane it's in?
-                    //if you want to solve the problem that the dual plane is
-
-                    if(pointW(mv) === 0.)
+                    if(pointW(mv) !== 0.) {
+                        //alternatively, could keep it in whatever plane it's in?
                         assign(slideCurrentMv, mv)
+                    }
                     else
-                        assign(slideCurrentMv, mv)
+                        dwXyTo3dDirection(x,y,mv)
                     break
 
                 case 2: //line
@@ -128,11 +154,11 @@ function initMvPictograms() {
 
                 case 1: //plane
                     let normalDirection = nonAlgebraTempMv0
-                    gSub(slideCurrentMv, slideStartMv, normalDirection)
-                    pointZ(normalDirection, -1.) //urgh, -
+                    dwXyTo3dDirection(x - slideStartXy.x, y - slideStartXy.y, normalDirection)
+                    
                     let planeAtOrigin = nonAlgebraTempMv1
-                    dual(normalDirection, planeAtOrigin) //mv1 is the plane, but it's at the origin
-                    //better would be it continue to spin around as your mouse gets further and further away
+                    dual(normalDirection, planeAtOrigin)
+                    assign(planeAtOrigin,mv)
 
                     //project onto the starting point
                     inner(nonAlgebraTempMv1, slideStartMv, nonAlgebraTempMv2)
@@ -147,7 +173,7 @@ function initMvPictograms() {
     {
         //buffers
         {
-            let radius = .055
+            let radius = .1
             let radialDivisions = 18
             var vertBuffer = vertBufferFunctions.disc(radius, radialDivisions)
 
@@ -355,6 +381,7 @@ function initMvPictograms() {
     //LINE, both real and ideal apparently?
     //Lines are a subset of motors
     //The way to visualize motors is... a pair of reflec
+    //need an indication of the order too
     {
         const vs = `
             attribute vec4 vertA;
@@ -406,21 +433,20 @@ function initMvPictograms() {
 
                 //update buffer
                 {
-                    let boxRadius = 1.
                     let whichEnd = 0
                     for (let i = 0; i < 3; ++i) {
                         for (j = -1.; j <= 1. && whichEnd < 2; j += 2.) {
                             zeroMv(pl)
                             planeW(pl, 1.)
-                            planeByComponent[i](pl, 1. / (boxRadius * j))
+                            planeByComponent[i](pl, 1. / (RADIUS_IN_BOX * j))
                             meet(pl, transformedMv, pt)
 
                             if (pointW(pt) !== 0.) {
                                 wNormalizePoint(pt)
 
-                                if (-boxRadius <= pointX(pt) && pointX(pt) <= boxRadius &&
-                                    -boxRadius <= pointY(pt) && pointY(pt) <= boxRadius &&
-                                    -boxRadius <= pointZ(pt) && pointZ(pt) <= boxRadius
+                                if (-RADIUS_IN_BOX <= pointX(pt) && pointX(pt) <= RADIUS_IN_BOX &&
+                                    -RADIUS_IN_BOX <= pointY(pt) && pointY(pt) <= RADIUS_IN_BOX &&
+                                    -RADIUS_IN_BOX <= pointZ(pt) && pointZ(pt) <= RADIUS_IN_BOX
                                 ) {
                                     endPoints[whichEnd][0] = pointX(pt)
                                     endPoints[whichEnd][1] = pointY(pt)

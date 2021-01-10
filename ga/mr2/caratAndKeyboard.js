@@ -41,6 +41,18 @@ function initCarat() {
         start: () => { carat.teleport(mouse.position.x, mouse.position.y) }
     })
 
+    carat.sendToLine = function(lineNumber) {
+        let lineGottenTo = 0
+        for (let i = 0, il = backgroundString.length; i < il; ++i) {
+            if (lineGottenTo === lineNumber) {
+                carat.positionInString = i
+                break
+            }
+            if (backgroundString[i] === "\n")
+                ++lineGottenTo
+        }
+    }
+
     carat.teleport = function (x, y) {
         carat.position.set(x, y)
         carat.flashingStart = Date.now()
@@ -94,7 +106,6 @@ function initCarat() {
 
             this.position.copy(drawingPosition)
             caratDw.verticalPositionToRenderFrom = carat.position.y
-            this.lineNumber = lineNumber
         }
 
         if (this.positionInString === -1) {
@@ -123,15 +134,6 @@ function initCarat() {
             let directionGoingIn = carat.positionInString - carat.positionInStringOld > 0
             carat.positionInString = directionGoingIn ? tokenEnd : tokenStart
         }
-    }
-
-    getNumLines = () => {
-        let numLines = 1
-        for (let i = 0, il = backgroundString.length; i < il; ++i)
-            if (backgroundString[i] === "\n")
-                ++numLines
-
-        return numLines
     }
 
     bindButton("Enter", () => {

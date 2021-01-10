@@ -1,12 +1,23 @@
 function initCharacterTexture() {
+    // const LAMBDA_SYMBOL = String.fromCharCode("955") //you CAN write "function", but lots of kids don't know "function". In python it's "def"
+    const JOIN_SYMBOL = String.fromCharCode("8744") //could change to v. But that is a letter you need to type
+    const INNER_SYMBOL = String.fromCharCode("8226")
+    const DAGGER_SYMBOL = String.fromCharCode("8224")
+    const MEET_SYMBOL = "^" //String.fromCharCode("8743") //for some reason this symbol is wide!
+    PROXY_PAIRS = [
+        "&", JOIN_SYMBOL,
+        "~", DAGGER_SYMBOL,
+        ".", INNER_SYMBOL,
+        "^", MEET_SYMBOL,] //meet goes last, it can be wide
+
     let typeableCharacters = IDENTIFIER_CHARACTERS +
         " (){},=" + //structuring
         "+-/*" + //operations
         "?:;" //just for comments and errors
     let displayableCharacters = typeableCharacters
-    for (let i = 0; i < proxyPairs.length / 2; ++i) {
-        typeableCharacters += proxyPairs[i * 2 + 0]
-        displayableCharacters += proxyPairs[i * 2 + 1]
+    for (let i = 0; i < PROXY_PAIRS.length / 2; ++i) {
+        typeableCharacters += PROXY_PAIRS[i * 2 + 0]
+        displayableCharacters += PROXY_PAIRS[i * 2 + 1]
     }
     for (let i = 0, il = typeableCharacters.length; i < il; ++i) {
         let character = typeableCharacters[i]

@@ -31,9 +31,7 @@ function initExperiment() {
 }
 
 function initDisplayWindows() {
-    
-
-    let dimension = 5.;
+    let dimension = 5.; //hacky, no reason for 
 
     //background
     {
@@ -141,7 +139,7 @@ function initDisplayWindows() {
     function potentiallyEdit(section) {
         if (mouseDw.editingStyle[section] !== undefined) {
             mouseDw.getPositionInWindow(positionInWindow)
-            mouseDw.editingStyle[section](editingName, positionInWindow.x, positionInWindow.y)
+            mouseDw.editingStyle[section](editingName, positionInWindow.x * RADIUS_IN_BOX, positionInWindow.y * RADIUS_IN_BOX)
         }
     }
 
@@ -286,11 +284,11 @@ function initDisplayWindows() {
 
     if (PRESENTATION_MODE === false) {
         let freeVariableButtons = []
-        function FreeVariableButton(name, makerFunc) {
+        function FreeVariableButton(name, assignName) {
             let btn = new ClickableTextbox(name, () => {
                 let lowestUnusedName = getLowestUnusedName()
                 addStringAtCarat(lowestUnusedName)
-                makerFunc(lowestUnusedName)
+                assignName(lowestUnusedName)
             })
 
             btn.relativePosition = new ScreenPosition(0., -dimension / 2. - .75 - freeVariableButtons.length)
@@ -307,6 +305,10 @@ function initDisplayWindows() {
             assignMv(name)
             point(getNameDrawerProperties(name).value, 0., 0., 0., 1.);
         })
+        FreeVariableButton("direction", (name) => {
+            assignMv(name)
+            point(getNameDrawerProperties(name).value, 0., 0., -1., 0.);
+        })
         FreeVariableButton("line", (name) => {
             assignMv(name)
             realLineX(getNameDrawerProperties(name).value, 1.);
@@ -315,6 +317,7 @@ function initDisplayWindows() {
             assignMv(name)
             planeZ(getNameDrawerProperties(name).value, 1.)
         })
+        //ideal plane?
         //could also have rotation and translation, click and drag for both
 
         // function rectangleWithPosition(halfFrameWidth, halfFrameHeight) {

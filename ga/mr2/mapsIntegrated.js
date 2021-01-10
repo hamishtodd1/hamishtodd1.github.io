@@ -1,10 +1,13 @@
 /*  
     So dymaxion, and the conic one, are functions of [0,1] that are flat at 1 and wrapped up at 0
 
-
+    Depth crap
+        What you want: the thing is visible from both sides
+        Another way of getting around it is to say fuck it and assume all projections get the right side all the time
+        I mean the point of these things is to show the surface and if there's some surface missing it's not a projection, sooo
 
     TODOs for projection
-        plane projection
+        plane projection (but nobody uses these...)
             Stereo: done!
             Ortho: project from infinity
             gnomic: Fix bug. It's about winding order! Just cull face back
@@ -19,6 +22,7 @@
             Maybe multiply out the two terms and visualize them
         Kavrayskiy
             Something to do with circles, possibly can conformally unroll first
+            Or maybe it's like azimuthal equidistant somehow?
         azimuthal equal area: in notebook
         Stretchy conformal unroll to your half cylinder
             equirectangular: conformal unroll
@@ -47,9 +51,9 @@ async function initGlobePictograms() {
             
             float untransformedPointOnGlobe[16];
             point(untransformedPointOnGlobe,
-                sin(-lon + PI) * cos(lat) * .5,
-                sin(lat) * .5,
-                cos(-lon + PI) * cos(lat) * .5,
+                sin(-lon + PI) * cos(lat),
+                sin(lat),
+                cos(-lon + PI) * cos(lat),
                 1.);
 
             float pointOnGlobe[16];
@@ -228,9 +232,11 @@ async function initGlobePictograms() {
             gl.drawArrays(gl.TRIANGLES, 0, uvBuffer.length / 2)
         }
         addRenderFunction(() => {
+            gl.disable(gl.CULL_FACE);
             ppWrappers.forEach((ppWrapper) => { ppWrapper.usedThisFrame = false })
             pictogramDrawer.drawEach(predrawAndReturnProgram, draw)
             ppWrappers.forEach((ppWrapper) => { ppWrapper.usedLastFrame = ppWrapper.usedThisFrame })
+            gl.enable(gl.CULL_FACE);
         })
     }
 }

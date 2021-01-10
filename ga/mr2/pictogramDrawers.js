@@ -1,26 +1,18 @@
 /*
-    Other examples of things you'd want to define
-        Adding and multiplying knots
-            How would you construct this? You need an isomorphism from some string of symbols to knot pictures
-        Adding and intersecting SDFs
-        Superimposing / blending textures
-        Angles with a from-the-x-axis convention
-        solutions to PDEs
-        zeroes of polynomials
+    Could have a rule to prevent z fighting: whatever is further along the line, that gets drawn on top
 */
 
 function initPictogramDrawers() {
-
     let vsHeader = cameraAndFrameCountShaderStuff.header + `
         varying vec2 preBoxPosition;
         uniform vec2 screenPosition;
 
-        uniform float drawingSquareRadius;
+        uniform float uniformScale;
         uniform float zAdditionForDw;
     `
     let vsFooter = `
+        gl_Position.xyz *= uniformScale;
         preBoxPosition = gl_Position.xy / gl_Position.w;
-        gl_Position.xyz *= drawingSquareRadius;
         gl_Position.xy += screenPosition;
         gl_Position.z += -zAdditionForDw; //or +, one day
     `
@@ -28,11 +20,10 @@ function initPictogramDrawers() {
 
     let fsHeader = cameraAndFrameCountShaderStuff.header + `
         varying vec2 preBoxPosition;
-        uniform int clipSides;
+        uniform float clipBoxRadius;
     `
-    let fsFooter = `
-    
-        if( clipSides == 1 && (abs(preBoxPosition.x) > 1. || abs(preBoxPosition.y) > 1. ) ) //|| abs(preBoxPosition.z) > 1.
+    let fsFooter = `    
+        if( (abs(preBoxPosition.x) > clipBoxRadius || abs(preBoxPosition.y) > clipBoxRadius ) ) //|| abs(preBoxPosition.z) > clipBoxRadius
             discard; //unperformant!
     }
     `
@@ -49,9 +40,9 @@ function initPictogramDrawers() {
         Program.call(this, vs, fs)
 
         cameraAndFrameCountShaderStuff.locateUniforms(this)
-        this.locateUniform("drawingSquareRadius")
+        this.locateUniform("uniformScale")
         this.locateUniform("zAdditionForDw")
-        this.locateUniform("clipSides")
+        this.locateUniform("clipBoxRadius")
         this.locateUniform("screenPosition")
     }
 
@@ -75,18 +66,19 @@ function initPictogramDrawers() {
                 
                 cameraAndFrameCountShaderStuff.transfer(program)
 
-                gl.uniform1f(program.getUniformLocation("drawingSquareRadius"), .5)
+                gl.uniform1f(program.getUniformLocation("uniformScale"), .5 / RADIUS_IN_BOX)
                 gl.uniform1f(program.getUniformLocation("zAdditionForDw"), 0.)
-                gl.uniform1i(program.getUniformLocation("clipSides"), 1)
+                gl.uniform1f(program.getUniformLocation("clipBoxRadius"), .5)
                 gl.uniform2f(program.getUniformLocation("screenPosition"), screenPositions[i * 2 + 0], screenPositions[i * 2 + 1])
                 draw(nameProperties,names[i])
 
                 displayWindows.forEach((dw) => {
                     if (dw.verticalPositionToRenderFrom === screenPositions[i * 2 + 1]) {
-                        gl.uniform1f(program.getUniformLocation("drawingSquareRadius"), dw.dimension * .5)
+                        gl.uniform1f(program.getUniformLocation("uniformScale"), dw.dimension * .5 / RADIUS_IN_BOX)
 
                         gl.uniform1f(program.getUniformLocation("zAdditionForDw"), dwOriginZ())
-                        gl.uniform1i(program.getUniformLocation("clipSides"), 0)
+                        const overflowMultiple = 2.
+                        gl.uniform1f(program.getUniformLocation("clipBoxRadius"), .5 * dw.dimension * overflowMultiple)
                         gl.uniform2f(program.getUniformLocation("screenPosition"), dw.position.x, dw.position.y)
                         draw(nameProperties,names[i])
                     }

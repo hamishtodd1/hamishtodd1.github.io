@@ -25,7 +25,6 @@ function initRenderFunctions() {
 
         //this is just what was found to work with the globes
         gl.enable(gl.CULL_FACE);
-        // gl.cullFace(gl.BACK);
 
         let depthTestEnabled = true
         for(let i = 0; i < renderFunctions.length; ++i) {

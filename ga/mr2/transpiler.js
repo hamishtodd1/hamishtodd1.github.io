@@ -11,6 +11,15 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
         let functionNameJustSeen = null
         let branchCanComplete = false
         let globeProperties = null
+        this.reset = function () {
+            globeProperties = null
+
+            namesWithLocalizationNeeded.length = 0
+
+            branchCanComplete = false
+            currentNodeBranchingFrom = topNode
+            functionNameJustSeen = null
+        }
 
         let namesWithLocalizationNeeded = []
 
@@ -164,14 +173,17 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
             return computationLines + finalLine
         }
 
+        this.clear = function () {
+            parseFunctionNode(topNode, { value: 0 })
+            this.reset()
+        }
+
         this.parseAndAssign = function(
             tokenIndex,nameToAssignTo,lineNumber,
             transpilingFunctionProperties
             ) {
             if (!branchCanComplete)
                 return "unexpected line end"
-
-            let tfp = transpilingFunctionProperties
 
             let numTmvs = { value: 0 }
             let bodySansFinalAssignmentTarget = parseFunctionNode(topNode, numTmvs)
@@ -204,6 +216,7 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
             }
 
             //---------------For a function we might be building
+            let tfp = transpilingFunctionProperties
             if (tfp.name !== null) {
                 tfp.ir += 
                     "   {\n" +
@@ -224,15 +237,7 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
             }
 
             //Resetting the tree
-            {
-                globeProperties = null
-                
-                namesWithLocalizationNeeded.length = 0
-
-                branchCanComplete = false
-                currentNodeBranchingFrom = topNode
-                functionNameJustSeen = null
-            }
+            this.reset()
 
             return ""
         }

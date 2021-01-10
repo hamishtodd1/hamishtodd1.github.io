@@ -15,12 +15,12 @@ function initDrawTokens() {
                 carat.duringParseFunc(drawingPosition, positionInString,lineNumber)
             
             let currentCharacter = backgroundString[positionInString]
-            if (proxyPairs.indexOf(currentCharacter) === -1)
+            if (PROXY_PAIRS.indexOf(currentCharacter) === -1)
                 addCharacterToDraw(currentCharacter, 0., 0., 0., drawingPosition)
             else {
-                let index = proxyPairs.indexOf(currentCharacter)
+                let index = PROXY_PAIRS.indexOf(currentCharacter)
                 index += 1-(index%2)
-                addCharacterToDraw(proxyPairs[index], 0., 0., 0., drawingPosition)
+                addCharacterToDraw(PROXY_PAIRS[index], 0., 0., 0., drawingPosition)
             }
             drawingPosition.x += characterWidth
         }

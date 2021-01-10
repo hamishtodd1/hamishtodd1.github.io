@@ -53,6 +53,16 @@ keyOf = (obj,thing) => {
     return -1
 }
 
+getLineNumberOfPositionInString = function (positionInString) {
+    let lineGottenTo = 0
+    for (let i = 0, il = backgroundString.length; i < il; ++i) {
+        if (i === positionInString)
+            return lineGottenTo
+        if (backgroundString[i] === "\n")
+            ++lineGottenTo
+    }
+}
+
 getNumLines = () => {
     let numLines = 1
     for (let i = 0, il = backgroundString.length; i < il; ++i)

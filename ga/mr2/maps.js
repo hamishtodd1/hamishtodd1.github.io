@@ -3,37 +3,24 @@
         mercator(picture of a globe) = abs(log(centralCylindrical(picture of a globe)))
         linalg may be sufficient, since you are stuck at the origin
 
-    Don't worry, it makes sense that dymaxion is off, the triangle isn't planar
+    Could just... show the things, then say at the end, here's where you can find the code
+    A single "step forward" button like powerpoint
+    And have a separate video for patrons where you step through the code
 
-    Title (look at the existing ones...)
-        7 ways to make a politically correct map (and 2 [mercator, gall peters] ways to make a politically incorrect one!)
-        How map projections ACTUALLY work
-        Can we use math to make a non-racist map? (this video is mostly not about racism...)
-        The actual geometry behind map projections
-        Top 10 politically-correct world maps
-        Top 10 world maps that avoid being racist
-        Top 5 anti-racist world maps
-        How racist is your map?
-        Which is least racist?
-        Can we make a less racist map? 
-        Making the least racist map
-        Top 8 map projections?
-        
-    This is for viewers of:
-        3b1b who don't like putting viz and equation together in their head
-        Viewers of sebastian lague or code parade who, er, don't use unity?
-        Viewers of inigo quilez or chris deleon shader coding videos who want something readable
-        Numberphile viewers who want more viz
+    Distortion circle should have a cross in it. A little flying saucer beams it. It spins.
+
 
     Script 2
         Intro
             They're beautiful and varied
             We will get onto the political controversy surrounding the relative sizes of Greenland and Africa (demonstrate it). greenland is kind of our canary in the coalmine
             but honestly, it's very useful and fun to understand the mathematics first
-            And for each of these, on the right you can see the code
+        Dymaxion
+        I want to start with my favourite map which is this one, the Dymaxion
+        The problem is that people don't want to have maps like the 
 
         The rectangles
-            I've sa
+            Let me emphasize that this is a really awful idea
 
     Script
         Dymaxion
@@ -50,11 +37,8 @@
         Lat and lon (illustrate)
             Practically all other projections are based on taking the angle of every point from the equator, and the angle from some fixed point around the equator
 
-        homolosine / interrupted sinusoidal
-            Making a slight change now, there are quite a lot of map projections like this one that take more account of the equator
-            It's often said that making a map is like flattenning an orange peel, and this projection essentially takes that literally https://twitter.com/infowetrust/status/967105316272816128
+        It's often said that making a map is like flattenning an orange peel https://twitter.com/infowetrust/status/967105316272816128
             It so much feels like it shouldn't be hard, because when you look close up the world is flat
-            but there's intrinsic curvature, comes about due to topology
             You HAVE to distort the surface somehow: probably lengths, probably directions
             and if you want to keep either of those you'll have to distort the hell out of areas, that's the controversial part
         Myriahedral https://www.win.tue.nl/~vanwijk/myriahedral/
@@ -110,6 +94,26 @@
         Christopher Kitrick Dymaxion https://www.researchgate.net/publication/334307604_Dymaxion_Map_Transformations_-_Technical_White_Paper
 
         Gall Peters distorts Colombia
+
+    Title (look at the existing ones...)
+        4 ways to make a politically correct map - and 4 ways to make a politically incorrect one!
+        How map projections ACTUALLY work
+        Can we use math to make a non-racist map? (this video is mostly not about racism...)
+        The actual geometry behind map projections
+        Top 10 politically-correct world maps
+        Top 10 world maps that avoid being racist
+        Top 5 anti-racist world maps
+        How racist is your map?
+        Which is least racist?
+        Can we make a less racist map?
+        Making the least racist map
+        Top 8 map projections?
+
+    This is for viewers of:
+        3b1b who don't like putting viz and equation together in their head
+        Viewers of sebastian lague or code parade who, er, don't use unity?
+        Viewers of inigo quilez or chris deleon shader coding videos who want something readable
+        Numberphile viewers who want more viz
 */
 
 async function initWorldMap() {

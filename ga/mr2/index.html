@@ -1,27 +1,23 @@
 <!--
-	Mkay just something to try out: 
-		arrows, and when you edit them, they're on surface of sphere
-		useful for globe?
-
 	TODO
-		Arrows for directions
+		Clicker to go through them
+		Two dws, side by side
+		flight path
+
 		Highlight multiple lines to make it all appear in hovering dw
 		Fucking which way is z
-		Bug with your mind: you want to reinvent calculus. Just wait for calculus shit to come up then ask people how to do it
+		Bug with your mind: you want to reinvent calculus. Just wait for calculus shit to come up in the course of the project, then ask people how to do it
 
-		Pros:
-			Can see and touch the things in front of you
-			Specify points on the globes in 3D
-		Cons: Keyboard is useful for:
-			changing the name of a globe
 	Maybe... the lines of code create an animation, step through it using your cursor
 		Or, you have certain lines where you display what's in each frame of the animation, then ctrl up and down to get between them
 		If you know how the value was derived, you know what tweening animation to have? Professionalism is all just tweening
 		Well you want to be able to make things gesturally, Bret style, right? Animations simulate that
 
 	Filming setup
-		Remember, every word a piece of origami!
-		Semi transparent background to pad
+		Need two screens for when you have two things you're comparing, eg madagascar
+		zooming, probably
+		Remember, every word a piece of origami! Let's have less umming
+		All your interactions need to be on the thingy window? No, maybe the hover window is great and the way to control what's seen in front of you
 		Nice camera
 		Go from relevant line to relevant line. Sounds like you're cutting stuff out though
 
@@ -48,12 +44,24 @@
 			Pong game states are an algebraic structure, with only maybe 3 dimensions
 
 	Other examples of things that can have an algebra associated with their juxtaposition instead of just being pictures
+		Caches
+		Trees
+		Functions from R3 to R3
+		Functions from I2 
 		elliptic curves
-		SDFs
+		Adding and intersecting SDFs
 		algebraic varieties
 		Complex functions
 		Wave functions? QC stuff?
 		There were more examples of this somewhere
+		Adding and multiplying knots
+            How would you construct this? You need an isomorphism from some string of symbols to knot pictures
+		Superimposing / blending textures (scalar fields). Functions really, ordinary multiply and add
+		solutions to PDEs. I.e. vector fields?
+		
+	Parser optimization: 
+		https://www.cs.unm.edu/~crowley/papers/sds.pdf 
+		https://www.averylaird.com/programming/the%20text%20editor/2017/09/30/the-piece-table/
 
 	Interested parties
 		Language people: Alan, Meurig, Martin, futureOfCoding, Yoshiki, Cynthia Solomon, Andy Matuschak, Katherine Ye, Glench, Ken Perlin, Josh Horowitz, 
@@ -96,6 +104,7 @@
 				let renderEverything = initRenderFunctions()
 
 				initButtons()
+
 				let loadedJson = await loadBackgroundStringAndInitSave()
 				initWindowResizeSystem()
 				
@@ -106,6 +115,26 @@
 				initPremadeBuffers()
 
 				initMouse()
+
+				//advance
+				//can take out a whole bunch of code and load in a new one
+				{
+					let lineNumbers = [ 1, 4, 5]
+
+					let foilNumber = 0
+					bindButton("[", () => {
+						foilNumber -= 1
+						foilNumber = clamp(foilNumber,0,lineNumbers.length - 1)
+
+						carat.sendToLine(lineNumbers[foilNumber])
+					})
+					bindButton("]", () => {
+						foilNumber += 1
+						foilNumber = clamp(foilNumber,0,lineNumbers.length - 1)
+
+						carat.sendToLine(lineNumbers[foilNumber])
+					})
+				}
 
 				// await initDymaxion()
 				// initExperiment()

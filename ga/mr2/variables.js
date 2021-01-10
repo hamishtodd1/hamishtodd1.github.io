@@ -7,22 +7,12 @@ if (!gl)
 const backgroundColor = [.5, .5, .5]
 
 const characterWidth = 1. / 3.
+const RADIUS_IN_BOX = 2.
 
 const mouseResponses = []
 const rightMouseResponses = []
 
 const IDENTIFIER_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-// const LAMBDA_SYMBOL = String.fromCharCode("955") //you CAN write "function", but lots of kids don't know "function". In python it's "def"
-const JOIN_SYMBOL = String.fromCharCode("8744") //could change to v. But that is a letter you need to type
-const INNER_SYMBOL = String.fromCharCode("8226")
-const DAGGER_SYMBOL = String.fromCharCode("8224")
-const MEET_SYMBOL = "^" //String.fromCharCode("8743") //for some reason this symbol is wide!
-let proxyPairs = [
-    "&", JOIN_SYMBOL,
-    "~", DAGGER_SYMBOL,
-    ".", INNER_SYMBOL,
-    "^", MEET_SYMBOL,] //meet goes last, it can be wide
 
 const displayWindows = []
 
@@ -33,6 +23,8 @@ const coloredNamesAlphabetically = Array(NUM_NAMES)
 
 const viewRotor = new Float32Array(16);
 viewRotor[0] = 1.
+const inverseViewRotor = new Float32Array(16)
+inverseViewRotor[0] = 1.
 
 const drawingDetailses = Array(NUM_NAMES)
 
@@ -43,6 +35,7 @@ const carat = {
     positionInStringOld: -1,
     lineNumber: -1,
     flashingStart: Date.now(),
+    indexOfLastTypedCharacter: 99999999999
 }
 
 let backgroundString = ""
