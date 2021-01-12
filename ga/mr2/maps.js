@@ -7,93 +7,74 @@
     A single "step forward" button like powerpoint
     And have a separate video for patrons where you step through the code
 
-    Distortion circle should have a cross in it. A little flying saucer beams it. It spins.
 
+    TODO
+        General
+            Two dws side by side
+            Clicker to go through them
+            flight path
+            make sure greenland works nicely
+            ordinary pictures showing up
+        Dymaxion
 
     Script 2
         Intro
-            They're beautiful and varied
-            We will get onto the political controversy surrounding the relative sizes of Greenland and Africa (demonstrate it). greenland is kind of our canary in the coalmine
+            Very varied. Tell you something about geometry and about the different things people use maths for
+            We will get onto the political controversy surrounding the relative sizes of Greenland and Africa (demonstrate it)
             but honestly, it's very useful and fun to understand the mathematics first
+
+        ---------------------------------------
+        NOT SURE WHAT ORDER
+
         Dymaxion
-        I want to start with my favourite map which is this one, the Dymaxion
-        The problem is that people don't want to have maps like the 
+            Consciously ignores up/down, equator/poles
+            Goode homolosine, myriahedral
+            But people want unbroken
+        Azimuthal equidistant
+            invented by al biruni
+            North Korea's missile radii
+        Sinusoidal-derived
+            Length and area preserving
+            old pics
+        Stereographic
+            15th century thing, astrolabe
+            probably known to the ancient egyptians
+            Conformal: Wonderful for shapes+directions, crap for lengths and areas
+        Lambert Conic
+            conformal like stereographic
+        Lambert cylindrical equal area
+            Rectangular, terrible idea
+            Equator is the only place that it's right
+            Arctic circle
+            equirectangular - used for panoramas https://www.istockphoto.com/photos/equirectangular-panorama-beach?mediatype=photography&phrase=equirectangular%20panorama%20beach&sort=best
+                Big greenland
 
-        The rectangles
-            Let me emphasize that this is a really awful idea
-
-    Script
-        Dymaxion
-            One of the simplest to understand maps is this one, even though it ends up looking like a mess.
-            This map can be wrapped up into a solid shape called an icosahedron, which is pretty close to being a sphere
-            Very little distortion to lengths and areas. The angles only screw up at the edges
-            Buckminster fuller was this very cool and eccentric guy in the 1960s who wanted to make a more equal world
-            One of the nice things he did with it was this map of early human migration, where you can see that humans crossed from Russia to Alaska
-            For general purposes though, this map is sort of too rebellious to be useful.
-                It deliberately ignores the fact that the equator and the poles are special, because it wants to mess with your idea of "up and down"
-                This is a very
-            It also very consciously screws around with your idea of "up and down", this is part of the point, 
-                all the other mathematical projections we'll look at treat the equator and the poles as being special
-        Lat and lon (illustrate)
-            Practically all other projections are based on taking the angle of every point from the equator, and the angle from some fixed point around the equator
-
-        It's often said that making a map is like flattenning an orange peel https://twitter.com/infowetrust/status/967105316272816128
-            It so much feels like it shouldn't be hard, because when you look close up the world is flat
-            You HAVE to distort the surface somehow: probably lengths, probably directions
-            and if you want to keep either of those you'll have to distort the hell out of areas, that's the controversial part
-        Myriahedral https://www.win.tue.nl/~vanwijk/myriahedral/
-            You can go even further with these severely chopped up ones
-            but at this point it's really not giving you a sense of what the surface looks like
-            It feels a bit arbitrary to be cutting up oceans. Like what if you find the Indian ocean very interesting?
-            Or more likely, what if you're planning a route for a boat or a plane, which is one of the main uses of maps.
-        Projection: slightly less intuitive but not too bad
-            That part where we squashed the surface onto the flat parts? We're going to be smarter about that
-            Can project from points, can move those points
-            Ancient egyptians knew stereographic. They knew the world was round
-            Geometric proof of conformality http://www.quadibloc.com/maps/maz0202.htm
-            Gnomic/central
-                Great circles are straight lines. Draw some.
-            Lambert conformal conic
-                Screws up the southern hemisphere. It's certainly big though!
-            Central cylindrical
-                Some of you might have been expecting this to look a bit different by the way, for reasons we'll get to later
-            Conformal maps are generally much better at preserving the shape of a country,  generally less good at preserving size, but we'll get to that soon
-        Specific purpose / compromise / mathematically inelegant
-            While we've been looking at a lot of mathematically elegant things, in reality a lot of these maps are made by people deciding what they want and drawing a map off that
-            mecca one, later comparison with gall peters
-            Werner - Show the old pic.
-                Good for the arctic circle!
-                VERY eurocentric
-                sinusoidal, bonne, bottomley
-                Equal area!!!!
-            Equidistant - rolling pin
-                invented by al biruni, useful for showing North Korea's missile radii
-                equirectangular - also useful for panoramas https://www.istockphoto.com/photos/equirectangular-panorama-beach?mediatype=photography&phrase=equirectangular%20panorama%20beach&sort=best
-                    Note that it still ends up with a big greenland
-                azimuthal equidstant
-            equal area - "tunnel distance", surprisingly! geologists use it
-        Leads onto the central controversy: Mercator, Gall Peters
-        Mercator most famous, most controversial. We'll get to its mathematical construction in a second, but it's important to understand the story behind it first
-            Transverse mercator: just rotate it 90 degrees
-            demonstrate greenland again and madagascar, maybe canada and northern russia
-            [improvise. China, his country being undistorted, mercator good for direction but not length/area]
-            Greeks, Chinese, Persians, Egyptian, Russian
-            Let me round off with my personal viewpoint.
-                It is true that map projection is a combination of mathematics and social context. No, there's no one perfect map.
-                But for a given task, there probably is one map that's perfect,
-                    whether you're trying to see how humans spread across the world,
-                    or find the direction to Mecca
-                    or showing climate or epidemeological data
-                    or navigate a boat or plane
-                All of these things are mathematically perfect *for the task they do*, perfect in a way that can teach us some maths, and something about the people who made it
-                And at the end of the day, Arno Peters' real crime
-                    wasn't that he was falsely claiming to have done something that was impossible
-                    it was that he was denying the variety, denying that you should think about projections other the one he came up with. 
-                    Ignoring the contributions of the cartographers who came before him, including the Egyptian and Chinese ones
-        Thank you to Paul Bourke and NASA for these textures
-        Christopher Kitrick Dymaxion https://www.researchgate.net/publication/334307604_Dymaxion_Map_Transformations_-_Technical_White_Paper
-
-        Gall Peters distorts Colombia
+        -----------------------------------
+                
+        Central cylindrical
+            Greenland huge, not what you were expecting
+        Mercator
+            Conformal. 
+            "Default"
+            Greenland, madagascar, maybe canada Russia
+        Gall-Peters
+            Hugely distorts shapes. Back to mercator, they're ok
+            There was a white guy who wanted to make a quick buck
+            Instead of equator being correct, equator gets stretched and the one place it's ok is Germany
+        equirectangular
+            Not great
+            Used by the chinese
+        Wagner / Kavrayskiy
+            Pills are a "compromise", no equal area
+        Craig retroazimuthal
+            Very good for one purpose
+        Doesn't aspire to realistically depict the earth
+        Just be aware that there are different ways of doing it,
+            whether you're trying to see how humans spread across the world,
+            or find the direction to Mecca
+            or showing climate or epidemeological data
+            or navigate a boat or plane
+        
 
     Title (look at the existing ones...)
         4 ways to make a politically correct map - and 4 ways to make a politically incorrect one!
@@ -108,12 +89,15 @@
         Can we make a less racist map?
         Making the least racist map
         Top 8 map projections?
+    Credits
+        stereographic https://www.oldworldauctions.com/catalog/lot/171/13
+        Paul Bourke and NASA for these textures
+        https://alchetron.com/Arno-Peters
+        https://www.pbs.org/wnet/americanmasters/r-buckminster-fuller-about-r-buckminster-fuller/599/
+        Christopher Kitrick Dymaxion https://www.researchgate.net/publication/334307604_Dymaxion_Map_Transformations_-_Technical_White_Paper
 
     This is for viewers of:
-        3b1b who don't like putting viz and equation together in their head
-        Viewers of sebastian lague or code parade who, er, don't use unity?
-        Viewers of inigo quilez or chris deleon shader coding videos who want something readable
-        Numberphile viewers who want more viz
+        3b1b, Sebastian lague, Code parade, Inigo quilez, Chris deleon, Numberphile viewers
 */
 
 async function initWorldMap() {

@@ -1,6 +1,8 @@
 /*  
     So dymaxion, and the conic one, are functions of [0,1] that are flat at 1 and wrapped up at 0
 
+    To rotate the thing, maybe change at the uv level
+
     Depth crap
         What you want: the thing is visible from both sides
         Another way of getting around it is to say fuck it and assume all projections get the right side all the time
@@ -12,23 +14,28 @@
             Ortho: project from infinity
             gnomic: Fix bug. It's about winding order! Just cull face back
                 But what if you want to view it the other way? Maybe by drawing twice depending on which way you're looking at it?
-        lambert: transcribe from notebook
-        Sinusoidal/Bonne/werner: look in notebook
         Dymaxion: just show it
-        craig retroazimuthal: crazy
-            Doesn't matter because it's probably quite a procedure... and nobody is going to use it to get an idea of the
-            sin phi is projection onto the axis
-            cos phi is projection onto the equatorial plane
-            Maybe multiply out the two terms and visualize them
+            It's often said that making a map is like flattenning an orange peel https://twitter.com/infowetrust/status/967105316272816128
+            It so much feels like it shouldn't be hard, because when you look close up the world is flat
+        Sinusoidal/Bonne/werner: look in notebook
         Kavrayskiy
             Something to do with circles, possibly can conformally unroll first
             Or maybe it's like azimuthal equidistant somehow?
-        azimuthal equal area: in notebook
-        Stretchy conformal unroll to your half cylinder
+        lambert conic: transcribe from notebook
+        lambert azimuthal equal area: in notebook
+            introduces "unroll"
+            still area preserving! Only good around one point though.
+        Lambert equal area -> gall-peters
+        Stretchy conformal unroll to a half cylinder
             equirectangular: conformal unroll
             cylindrical: project (but better to unroll first? Where else do you projecting from a line? If nowhere, project then unroll)
             Mercator: project then the exp thing (non-trivial)
             Gall-Peters: orth (project from a line)
+        craig retroazimuthal: I like this one because it's not trying to tell you everything about the globe, it's just trying to answer one question
+            Doesn't matter because it's probably quite a procedure... and nobody is going to use it to get an idea of the
+            sin phi is projection onto the axis
+            cos phi is projection onto the equatorial plane
+            Maybe multiply out the two terms and visualize them
 
     TODO
 		+, cos, sin, exp
@@ -37,6 +44,33 @@
 */
 
 async function initGlobePictograms() {
+
+    //flight path
+    {
+        //Could have a full circle but just cut it off in places
+
+        //how to handle thickness on a texture?
+        //could have it be a series of little 747s instead of a line
+
+        //are you using this language? Worry about that later, it should be robust to challenges (it may be!)
+
+        //texture:
+            //dymaxion cuts up vertices, everything at the top too
+
+        //vertices:
+            //
+
+        let endPoints = [
+            { lat: 0., lon: 0. }, 
+            { lat: 0., lon: 0. } ]
+
+        //wanna interpolate
+        //urgh how to make it so that it's above the thing? Could hack it in
+
+        let numVerts = 16
+        let pathVertsBuffer = new Float32Array()
+    }
+
     let globeVsStart = `
         attribute vec2 uvA;
         varying vec2 uv;

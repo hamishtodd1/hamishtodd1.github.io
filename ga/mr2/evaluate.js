@@ -116,20 +116,17 @@ function initEvaluate() {
         forEachToken((tokenIndex, tokenStart, tokenEnd, token, lexeme) => {
             if(token === "\n") {
                 if (nameToAssignTo !== null && skipLine === false) {
-                    const currentlyEditingThisLine = caratLineNumber === lineNumber &&
-                                                    currentLineStart <= carat.indexOfLastTypedCharacter && 
-                                                    carat.indexOfLastTypedCharacter <= tokenEnd
+                    const currentlyEditingThisLine =
+                        caratLineNumber === lineNumber &&
+                        currentLineStart <= carat.indexOfLastTypedCharacter && 
+                        carat.indexOfLastTypedCharacter <= tokenEnd
 
-                    if ( !currentlyEditingThisLine ) {
+                    if ( currentlyEditingThisLine )
+                        lineTree.clear()
+                    else {
                         let errorMessage = lineTree.parseAndAssign(tokenIndex, nameToAssignTo, lineNumber, tfp)
                         if(errorMessage !== "")
                             handleError(tokenIndex, errorMessage)
-                    }
-                    else {
-                        log("y")
-                        lineTree.clear()
-                        log("b")
-                        logged = 1
                     }
 
                     derivedNames.push(nameToAssignTo) //because what if you save
