@@ -29,32 +29,31 @@
         Dymaxion
             Consciously ignores up/down, equator/poles
             Goode homolosine, myriahedral
-            But people want unbroken
+            Flight path. People want one unbroken
         Azimuthal equidistant
-            invented by al biruni
-            North Korea's missile radii
+            Al biruni
+            North Korea's missile radii, UN
+            Distorts shapes
         Sinusoidal-derived
-            Length and area preserving
+            Area preserving, and length preserving along the parallels and meridians
             old pics
         Stereographic
-            15th century thing, astrolabe
-            probably known to the ancient egyptians
+            15th century map, astrolabe
+            probably known to ancient egyptians
             Conformal: Wonderful for shapes+directions, crap for lengths and areas
         Lambert Conic
-            conformal like stereographic
+            Conformal like stereographic
         Lambert cylindrical equal area
             Rectangular, terrible idea
             Equator is the only place that it's right
             Arctic circle
-            equirectangular - used for panoramas https://www.istockphoto.com/photos/equirectangular-panorama-beach?mediatype=photography&phrase=equirectangular%20panorama%20beach&sort=best
-                Big greenland
 
         -----------------------------------
-                
+        Let's have a look at some politically incorrect ones.
         Central cylindrical
             Greenland huge, not what you were expecting
         Mercator
-            Conformal. 
+            Conformal, show flight path
             "Default"
             Greenland, madagascar, maybe canada Russia
         Gall-Peters
@@ -62,13 +61,16 @@
             There was a white guy who wanted to make a quick buck
             Instead of equator being correct, equator gets stretched and the one place it's ok is Germany
         equirectangular
-            Not great
-            Used by the chinese
+            Simple
+            Flight path
+            Panorama, probably Siena, see below
+            Show unwrap of panorama
+            At least used by the chinese
         Wagner / Kavrayskiy
             Pills are a "compromise", no equal area
         Craig retroazimuthal
-            Very good for one purpose
-        Doesn't aspire to realistically depict the earth
+            Good for one purpose
+            Doesn't aspire to realistically depict the earth
         Just be aware that there are different ways of doing it,
             whether you're trying to see how humans spread across the world,
             or find the direction to Mecca
@@ -90,6 +92,7 @@
         Making the least racist map
         Top 8 map projections?
     Credits
+        https://www.istockphoto.com/photo/360-degree-equirectangularl-panorama-of-piazza-del-campo-siena-gm1209474588-350003697
         stereographic https://www.oldworldauctions.com/catalog/lot/171/13
         Paul Bourke and NASA for these textures
         https://alchetron.com/Arno-Peters

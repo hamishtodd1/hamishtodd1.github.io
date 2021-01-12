@@ -403,6 +403,23 @@ function initAlgebra()
         pointW     = (mv,newValue) => {if(newValue !== undefined) mv[14] = newValue; return mv[14] }
         pss        = (mv,newValue) => {if(newValue !== undefined) mv[15] = newValue; return mv[15] }
 
+        appendToGaShaderString(`
+            float pointZ(in float mv[16]) { return mv[11]; }
+            void pointZ(inout float mv[16], in float newValue) { mv[11] = newValue; }
+            `)
+        appendToGaShaderString(`
+            float pointY(in float mv[16]) { return mv[12]; }
+            void pointY(inout float mv[16], in float newValue) { mv[12] = newValue; }
+            `)
+        appendToGaShaderString(`
+            float pointX(in float mv[16]) { return mv[13]; }
+            void pointX(inout float mv[16], in float newValue) { mv[13] = newValue; }
+            `)
+        appendToGaShaderString(`
+            float pointW(in float mv[16]) { return mv[14]; }
+            void pointW(inout float mv[16], in float newValue) { mv[14] = newValue; }
+            `)
+
         realLine = (mv,newX,newY,newZ) => { zeroMv(mv); mv[8] = newZ, mv[9] = newY, mv[10] = newX }
 
         planeNorm = (mv) => { return Math.sqrt(sq(planeX(mv)) + sq(planeY(mv)) + sq(planeZ(mv)))}

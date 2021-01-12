@@ -1,8 +1,4 @@
 /*  
-    So dymaxion, and the conic one, are functions of [0,1] that are flat at 1 and wrapped up at 0
-
-    To rotate the thing, maybe change at the uv level
-
     Depth crap
         What you want: the thing is visible from both sides
         Another way of getting around it is to say fuck it and assume all projections get the right side all the time
@@ -36,11 +32,6 @@
             sin phi is projection onto the axis
             cos phi is projection onto the equatorial plane
             Maybe multiply out the two terms and visualize them
-
-    TODO
-		+, cos, sin, exp
-        Slice lat and lon
-        Flight paths
 */
 
 async function initGlobePictograms() {
@@ -48,6 +39,7 @@ async function initGlobePictograms() {
     //flight path
     {
         //Could have a full circle but just cut it off in places
+        //yes, just an equator, but with uv you can choose where to get shit from
 
         //how to handle thickness on a texture?
         //could have it be a series of little 747s instead of a line
@@ -74,7 +66,7 @@ async function initGlobePictograms() {
     let globeVsStart = `
         attribute vec2 uvA;
         varying vec2 uv;
-        uniform float globeTransform[16];
+        uniform float globeRotor[16];
 
         uniform float viewRotor[16];
 
@@ -84,6 +76,8 @@ async function initGlobePictograms() {
             float lat = (uvA.y - .5) * PI;
             
             float untransformedPointOnGlobe[16];
+            //earth's axis is y axis
+            //null island is at (0.,0.,-1.)
             point(untransformedPointOnGlobe,
                 sin(-lon + PI) * cos(lat),
                 sin(lat),
@@ -91,7 +85,19 @@ async function initGlobePictograms() {
                 1.);
 
             float pointOnGlobe[16];
-            sandwichBab(untransformedPointOnGlobe,globeTransform,pointOnGlobe);
+            assign(untransformedPointOnGlobe,pointOnGlobe);
+
+            {
+                float uvPointOnGlobe[16];
+                sandwichBab(untransformedPointOnGlobe,globeRotor,uvPointOnGlobe);
+
+                float transformedLat = asin(pointY(uvPointOnGlobe));
+                vec2 neq = normalize(vec2(pointZ(uvPointOnGlobe), -pointX(uvPointOnGlobe)));
+                //normalized and in equatorial plane with null island at (1,0) instead of (0,0,-1)
+                float transformedLon = atan(neq.y,neq.x);
+                uv.x = (transformedLon / TAU) + .5;
+                uv.y = (transformedLat / PI) + .5;
+            }
         `
 
     let vs = gaShaderString + globeVsStart + `
@@ -111,19 +117,20 @@ async function initGlobePictograms() {
     let pitchAxis = new Float32Array(16)
     realLine(pitchAxis, 1., 0., 0.)
     let pitch = 0.
-    let globeTransform = new Float32Array(16)
-    globeTransform[0] = 1.
+    let globeRotor = new Float32Array(16)
+    globeRotor[0] = 1.
 
     let globeEditingStyle = {
         during: (name)=>{
-            yaw += mouse.positionDelta.x * .6
+            yaw -= mouse.positionDelta.x * .6
+            pitch = clamp(pitch, -TAU/2.,TAU/2.)
             mvRotator(yawAxis, yaw, mv0)
 
-            pitch -= mouse.positionDelta.y * .6
+            pitch += mouse.positionDelta.y * .6
             pitch = clamp(pitch, -TAU/4.,TAU/4.)
             mvRotator(pitchAxis, pitch, mv1)
 
-            gProduct(mv1, mv0, globeTransform)
+            gProduct(mv0, mv1, globeRotor)
         }
     }
 
@@ -135,7 +142,7 @@ async function initGlobePictograms() {
     const uvBuffer = generateDividedUnitSquareBuffer(numDivisions, eps)
     pictogramDrawer.program.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
     pictogramDrawer.program.locateUniform("sampler")
-    pictogramDrawer.program.locateUniform("globeTransform")
+    pictogramDrawer.program.locateUniform("globeRotor")
     pictogramDrawer.program.locateUniform("viewRotor")
 
     addRenderFunction(() => {
@@ -146,7 +153,7 @@ async function initGlobePictograms() {
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, nameProperties.texture);
             gl.uniform1i(pictogramDrawer.program.getUniformLocation("sampler"), 0); //hmm, why 0?
-            gl.uniform1fv(pictogramDrawer.program.getUniformLocation("globeTransform"), globeTransform)
+            gl.uniform1fv(pictogramDrawer.program.getUniformLocation("globeRotor"), globeRotor)
             gl.uniform1fv(pictogramDrawer.program.getUniformLocation("viewRotor"), viewRotor)
 
             gl.drawArrays(gl.TRIANGLES, 0, uvBuffer.length / 2);
@@ -229,7 +236,7 @@ async function initGlobePictograms() {
 
                 ourPpWrapper.pictogramProgram.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
                 ourPpWrapper.pictogramProgram.locateUniform("sampler")
-                ourPpWrapper.pictogramProgram.locateUniform("globeTransform")
+                ourPpWrapper.pictogramProgram.locateUniform("globeRotor")
 
                 ourPpWrapper.pictogramProgram.locateUniform("viewRotor")
 
@@ -249,7 +256,7 @@ async function initGlobePictograms() {
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, nameProperties.globeProperties.texture);
             gl.uniform1i(program.getUniformLocation("sampler"), 0);
-            gl.uniform1fv(program.getUniformLocation("globeTransform"), globeTransform)
+            gl.uniform1fv(program.getUniformLocation("globeRotor"), globeRotor)
 
             gl.uniform1fv(program.getUniformLocation("viewRotor"), viewRotor)
 

@@ -1,5 +1,18 @@
 /*
     Could have a rule to prevent z fighting: whatever is further along the line, that gets drawn on top
+
+    People maybe need to make their own pictograms maybe with an external tool
+
+    The right way to do all of this is a single gl program
+        You load in the state of every single javascript-side multivector
+        Ok but what about attributes
+            You might not be putting anything serious in the attributes? Just samples from an interval?
+            It's ok if the attribute is
+        It will surely increase compile time
+
+    The compile minimizing design plan:
+        when you start hitting the keyboard, we don't compile until you've gone for more than .5 seconds without hitting another key
+        If there's compiler errors, nothing is changed. Values aren't changed anywhere, gl programs aren't recompiled anywhere
 */
 
 function initPictogramDrawers() {
