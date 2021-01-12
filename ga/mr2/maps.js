@@ -1,14 +1,7 @@
-/*
-    Use of the algebra
-        mercator(picture of a globe) = abs(log(centralCylindrical(picture of a globe)))
-        linalg may be sufficient, since you are stuck at the origin
-
-    Could just... show the things, then say at the end, here's where you can find the code
-    A single "step forward" button like powerpoint
-    And have a separate video for patrons where you step through the code
-
-
+/*  
     TODO
+        With some exceptions you're at least going to implement this stuff in the editor
+        That gets across the idea: this is an editor where the things you program automatically have an explanation of how they work
         General
             Two dws side by side
             Clicker to go through them

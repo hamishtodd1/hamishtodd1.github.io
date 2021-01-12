@@ -41,9 +41,9 @@ function verticesDisplay(vertBuffer, mode, r,g,b)
     }
 }
 
-function verticesDisplayWithPosition(pointsBuffer, mode, r,g,b)
+function verticesDisplayWithPosition(vertsBuffer, mode, r,g,b)
 {
-    if (pointsBuffer.length % 4 !== 0)
+    if (vertsBuffer.length % 4 !== 0)
         console.error("needs to be 4vecs")
 
     r = r || 1.
@@ -54,15 +54,15 @@ function verticesDisplayWithPosition(pointsBuffer, mode, r,g,b)
     let bStr = b === Math.round(b) ? b.toString() + "." : b.toString()
 
     const vsSource = cameraAndFrameCountShaderStuff.header + `
-        attribute vec4 pointA;
+        attribute vec4 vertA;
         uniform vec2 screenPosition;
 
         void main(void) {
-            vec4 p = pointA;
+            vec4 p = vertA;
 
             p.xy += screenPosition;
 
-            gl_PointSize = 10.;
+            gl_vertSize = 10.;
 
             gl_Position = p;
         `
@@ -74,7 +74,7 @@ function verticesDisplayWithPosition(pointsBuffer, mode, r,g,b)
         `
 
     const program = new Program(vsSource, fsSource)
-    program.addVertexAttribute("point", pointsBuffer, 4, true)
+    program.addVertexAttribute("vert", vertsBuffer, 4, true)
 
     cameraAndFrameCountShaderStuff.locateUniforms(program)
 
@@ -91,9 +91,9 @@ function verticesDisplayWithPosition(pointsBuffer, mode, r,g,b)
 
             gl.uniform2f(program.getUniformLocation("screenPosition"), screenPosition.x, screenPosition.y);
 
-            program.prepareVertexAttribute("point", pointsBuffer)
+            program.prepareVertexAttribute("vert", vertsBuffer)
 
-            gl.drawArrays(mode, 0, pointsBuffer.length / 4);
+            gl.drawArrays(mode, 0, vertsBuffer.length / 4);
         }
     }
 }

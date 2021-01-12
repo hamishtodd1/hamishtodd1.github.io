@@ -38,6 +38,11 @@ async function initGlobePictograms() {
 
     //flight path
     {
+        //isn't this meant to be simple? for sure you should be able to write it as
+        //what if you phrase it as "the set of points satisfying ___"?
+
+        //points motherfucker
+
         //Could have a full circle but just cut it off in places
         //yes, just an equator, but with uv you can choose where to get shit from
 
@@ -60,7 +65,21 @@ async function initGlobePictograms() {
         //urgh how to make it so that it's above the thing? Could hack it in
 
         let numVerts = 16
-        let pathVertsBuffer = new Float32Array()
+        let numVerts = 1024
+        let exponentScalarBuffer = new Float32Array(numVerts)
+        for(let i = 0; i < numVerts; ++i)
+            exponentScalarBuffer[i] = i / numVerts
+        let arcMotor = new Float32Array(16)
+
+        {
+            let start = new Float32Array(16)
+            let end = new Float32Array(16)
+            
+        }
+
+        `
+            attribute float exponent;
+        `
     }
 
     let globeVsStart = `
@@ -71,7 +90,6 @@ async function initGlobePictograms() {
         uniform float viewRotor[16];
 
         void main(void) {
-            uv = uvA;
             float lon = (uvA.x - .5) * TAU;
             float lat = (uvA.y - .5) * PI;
             
@@ -92,8 +110,8 @@ async function initGlobePictograms() {
                 sandwichBab(untransformedPointOnGlobe,globeRotor,uvPointOnGlobe);
 
                 float transformedLat = asin(pointY(uvPointOnGlobe));
-                vec2 neq = normalize(vec2(pointZ(uvPointOnGlobe), -pointX(uvPointOnGlobe)));
-                //normalized and in equatorial plane with null island at (1,0) instead of (0,0,-1)
+                vec2 neq = normalize( vec2(pointZ(uvPointOnGlobe), -pointX(uvPointOnGlobe) ) );
+                //normalized and in equatorial plane with null island at (1,0) (instead of (0,0,-1))
                 float transformedLon = atan(neq.y,neq.x);
                 uv.x = (transformedLon / TAU) + .5;
                 uv.y = (transformedLat / PI) + .5;
@@ -190,7 +208,6 @@ async function initGlobePictograms() {
                 }
             }
             this.currentBody
-            // debugger
             this.pictogramProgram = new PictogramProgram(gaShaderString + vsStart + vsEnd, projectionFs)
 
             this.usedThisFrame = true
