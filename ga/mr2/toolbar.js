@@ -11,12 +11,25 @@ async function loadBackgroundStringAndInitSave() {
     function saveFunction() {
         let fullJson = {
             backgroundString,
-            freeMvNames: getMvNames(),
             freeMvValues: [],
             mainCameraTopAtZZero: mainCamera.topAtZZero
         }
-        fullJson.freeMvNames.forEach((name) => {
-            fullJson.freeMvValues.push(getNameDrawerProperties(name).value)
+        let potentiallyUnusedMvNames = getMvNames()
+        fullJson.freeMvNames = []
+        potentiallyUnusedMvNames.forEach((name) => {
+            let usedSomewhereInFile = false
+            forEachToken( (tokenIndex, tokenStart, tokenEnd, token, lexeme) => {
+                if(lexeme === name) {
+                    usedSomewhereInFile = true
+                    return true
+                }
+                else
+                    return false
+            })
+            if (usedSomewhereInFile) {
+                fullJson.freeMvNames.push(name)
+                fullJson.freeMvValues.push(getNameDrawerProperties(name).value)
+            }
         })
 
         presentJsonFile(JSON.stringify(fullJson), "glc")

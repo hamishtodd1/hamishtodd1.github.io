@@ -38,33 +38,9 @@ async function initGlobePictograms() {
 
     //flight path
     {
-        //isn't this meant to be simple? for sure you should be able to write it as
-        //what if you phrase it as "the set of points satisfying ___"?
+        //spacing can help indicate length distortion
+        //so probably you want them equally spaced along the globe
 
-        //points motherfucker
-
-        //Could have a full circle but just cut it off in places
-        //yes, just an equator, but with uv you can choose where to get shit from
-
-        //how to handle thickness on a texture?
-        //could have it be a series of little 747s instead of a line
-
-        //are you using this language? Worry about that later, it should be robust to challenges (it may be!)
-
-        //texture:
-            //dymaxion cuts up vertices, everything at the top too
-
-        //vertices:
-            //
-
-        let endPoints = [
-            { lat: 0., lon: 0. }, 
-            { lat: 0., lon: 0. } ]
-
-        //wanna interpolate
-        //urgh how to make it so that it's above the thing? Could hack it in
-
-        let numVerts = 16
         let numVerts = 1024
         let exponentScalarBuffer = new Float32Array(numVerts)
         for(let i = 0; i < numVerts; ++i)
@@ -74,7 +50,6 @@ async function initGlobePictograms() {
         {
             let start = new Float32Array(16)
             let end = new Float32Array(16)
-            
         }
 
         `
@@ -85,7 +60,7 @@ async function initGlobePictograms() {
     let globeVsStart = `
         attribute vec2 uvA;
         varying vec2 uv;
-        uniform float globeRotor[16];
+        uniform float ourRotor[16];
 
         uniform float viewRotor[16];
 
@@ -107,7 +82,7 @@ async function initGlobePictograms() {
 
             {
                 float uvPointOnGlobe[16];
-                sandwichBab(untransformedPointOnGlobe,globeRotor,uvPointOnGlobe);
+                sandwichBab(untransformedPointOnGlobe,ourRotor,uvPointOnGlobe);
 
                 float transformedLat = asin(pointY(uvPointOnGlobe));
                 vec2 neq = normalize( vec2(pointZ(uvPointOnGlobe), -pointX(uvPointOnGlobe) ) );
@@ -160,7 +135,7 @@ async function initGlobePictograms() {
     const uvBuffer = generateDividedUnitSquareBuffer(numDivisions, eps)
     pictogramDrawer.program.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
     pictogramDrawer.program.locateUniform("sampler")
-    pictogramDrawer.program.locateUniform("globeRotor")
+    pictogramDrawer.program.locateUniform("ourRotor")
     pictogramDrawer.program.locateUniform("viewRotor")
 
     addRenderFunction(() => {
@@ -168,13 +143,18 @@ async function initGlobePictograms() {
         pictogramDrawer.program.prepareVertexAttribute("uv")
 
         pictogramDrawer.finishPrebatchAndDrawEach((nameProperties,name) => {
-            gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_2D, nameProperties.texture);
-            gl.uniform1i(pictogramDrawer.program.getUniformLocation("sampler"), 0); //hmm, why 0?
-            gl.uniform1fv(pictogramDrawer.program.getUniformLocation("globeRotor"), globeRotor)
             gl.uniform1fv(pictogramDrawer.program.getUniformLocation("viewRotor"), viewRotor)
+            
+            {
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, nameProperties.texture);
+                gl.uniform1i(pictogramDrawer.program.getUniformLocation("sampler"), 0); //hmm, why 0?
 
-            gl.drawArrays(gl.TRIANGLES, 0, uvBuffer.length / 2);
+                gl.uniform1fv(pictogramDrawer.program.getUniformLocation("ourRotor"), globeRotor)
+                gl.drawArrays(gl.TRIANGLES, 0, uvBuffer.length / 2);
+
+                //different buffer
+            }
         })
     })
 
@@ -253,7 +233,7 @@ async function initGlobePictograms() {
 
                 ourPpWrapper.pictogramProgram.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
                 ourPpWrapper.pictogramProgram.locateUniform("sampler")
-                ourPpWrapper.pictogramProgram.locateUniform("globeRotor")
+                ourPpWrapper.pictogramProgram.locateUniform("ourRotor")
 
                 ourPpWrapper.pictogramProgram.locateUniform("viewRotor")
 
@@ -273,7 +253,7 @@ async function initGlobePictograms() {
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, nameProperties.globeProperties.texture);
             gl.uniform1i(program.getUniformLocation("sampler"), 0);
-            gl.uniform1fv(program.getUniformLocation("globeRotor"), globeRotor)
+            gl.uniform1fv(program.getUniformLocation("ourRotor"), globeRotor)
 
             gl.uniform1fv(program.getUniformLocation("viewRotor"), viewRotor)
 

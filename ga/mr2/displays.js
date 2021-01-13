@@ -62,7 +62,7 @@ function verticesDisplayWithPosition(vertsBuffer, mode, r,g,b)
 
             p.xy += screenPosition;
 
-            gl_vertSize = 10.;
+            gl_PointSize = 10.;
 
             gl_Position = p;
         `
