@@ -1,14 +1,18 @@
 /*
-    Could have a rule to prevent z fighting: whatever is further along the line, that gets drawn on top
+    A rule to prevent z fighting: whatever is further along the line of code, that gets drawn on top
 
-    People maybe need to make their own pictograms maybe with an external tool
+    People need to make their own pictograms, maybe with an external tool
 
     The right way to do all of this is a single gl program
+        Run this idea by someone else
         You load in the state of every single javascript-side multivector
         Ok but what about attributes
-            You might not be putting anything serious in the attributes? Just samples from an interval?
-            It's ok if the attribute is
-        It will surely increase compile time
+            You might not be putting anything serious in the attributes?
+            The assumption we're going on is that the only attributes you need might be samples from interval or I2
+        It will surely increase compile time to have everything recompiled. On the other hand, you're recompiling the rest all the time too
+        compile time flags in glsl could help
+
+    You kinda want to have eg points. But that doesn't sit perfectly with the rest
 
     The compile minimizing design plan:
         when you start hitting the keyboard, we don't compile until you've gone for more than .5 seconds without hitting another key
@@ -76,17 +80,19 @@ function initPictogramDrawers() {
                 let nameProperties = getNameDrawerProperties(names[i])
 
                 let program = predrawAndReturnProgram(nameProperties)
-                
+
                 cameraAndFrameCountShaderStuff.transfer(program)
 
-                gl.uniform1f(program.getUniformLocation("uniformScale"), .5 / RADIUS_IN_BOX)
-                gl.uniform1f(program.getUniformLocation("zAdditionForDw"), 0.)
-                gl.uniform1f(program.getUniformLocation("clipBoxRadius"), .5)
-                gl.uniform2f(program.getUniformLocation("screenPosition"), screenPositions[i * 2 + 0], screenPositions[i * 2 + 1])
-                draw(nameProperties,names[i])
+                if (MODE !== PRESENTATION_MODE) {
+                    gl.uniform1f(program.getUniformLocation("uniformScale"), .5 / RADIUS_IN_BOX)
+                    gl.uniform1f(program.getUniformLocation("zAdditionForDw"), 0.)
+                    gl.uniform1f(program.getUniformLocation("clipBoxRadius"), .5)
+                    gl.uniform2f(program.getUniformLocation("screenPosition"), screenPositions[i * 2 + 0], screenPositions[i * 2 + 1])
+                    draw(nameProperties, names[i])
+                }
 
                 displayWindows.forEach((dw) => {
-                    if (dw.verticalPositionToRenderFrom === screenPositions[i * 2 + 1]) {
+                    if (dw.collectionY === screenPositions[i * 2 + 1]) {
                         gl.uniform1f(program.getUniformLocation("uniformScale"), dw.dimension * .5 / RADIUS_IN_BOX)
 
                         gl.uniform1f(program.getUniformLocation("zAdditionForDw"), dwOriginZ())

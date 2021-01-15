@@ -85,15 +85,22 @@ function initMouse() {
             updateFromClientCoordinates(event.clientX, event.clientY)
         }, false);
 
-        document.addEventListener('mousedown', function (event) {
+        function updateAsynchronous(event,downAsOpposedToUp, rightAsOpposedToNormal) {
             event.preventDefault()
-            asynchronous[event.button === 2 ? "rightClicking" : "clicking"] = true
+            asynchronous[rightAsOpposedToNormal?"rightClicking":"clicking"] = downAsOpposedToUp
             updateFromClientCoordinates(event.clientX, event.clientY)
+        }
+        document.addEventListener('mousedown', function (event) {
+            if(event.button === 2)
+                updateAsynchronous(event, true, true)
+            if (event.button === 0)
+                updateAsynchronous(event, true, false)
         }, false);
         document.addEventListener('mouseup', function (event) {
-            event.preventDefault()
-            asynchronous[event.button === 2 ? "rightClicking" : "clicking"] = false
-            updateFromClientCoordinates(event.clientX, event.clientY)
+            if (event.button === 2)
+                updateAsynchronous(event, false, true)
+            if (event.button === 0)
+                updateAsynchronous(event, false, false)
         }, false);
         document.addEventListener("contextmenu", (event) => {
             event.preventDefault()

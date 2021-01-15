@@ -91,28 +91,6 @@ function initMvPictograms() {
         })
     }
 
-    function dwXyTo3dDirection(x, y, target) {
-        let mouseDistFromCenter = Math.sqrt(sq(x) + sq(y))
-        let placeInWaveRing = mouseDistFromCenter
-        while (placeInWaveRing > 4.)
-            placeInWaveRing -= 4.
-
-        if (1. < placeInWaveRing && placeInWaveRing < 3.) {
-            var onscreenDistFromCenter = 2. - placeInWaveRing
-            var z = Math.sqrt(1. - sq(onscreenDistFromCenter))
-        }
-        else {
-            var onscreenDistFromCenter = placeInWaveRing > 3. ? placeInWaveRing - 4. : placeInWaveRing
-            var z = -Math.sqrt(1. - sq(onscreenDistFromCenter))
-        }
-
-        let ratio = mouseDistFromCenter === 0 ? 1. : onscreenDistFromCenter / mouseDistFromCenter
-
-        let untransformed = nonAlgebraTempMv0
-        point(untransformed, x * ratio, y * ratio, z, 0.)
-        sandwichBab(nonAlgebraTempMv0, inverseViewRotor, target)
-    }
-
     //snapping is extremely important, wanna make the vector (1,0,0) easily
     let slideStartMv = new Float32Array(16)
     let slideStartXy = {x: 0., y: 0.}
@@ -138,7 +116,7 @@ function initMvPictograms() {
                         assign(slideCurrentMv, mv)
                     }
                     else
-                        dwXyTo3dDirection(x,y,mv)
+                        displayWindowXyTo3dDirection(x,y,mv)
                     break
 
                 case 2: //line
@@ -154,7 +132,7 @@ function initMvPictograms() {
 
                 case 1: //plane
                     let normalDirection = nonAlgebraTempMv0
-                    dwXyTo3dDirection(x - slideStartXy.x, y - slideStartXy.y, normalDirection)
+                    displayWindowXyTo3dDirection(x - slideStartXy.x, y - slideStartXy.y, normalDirection)
                     
                     let planeAtOrigin = nonAlgebraTempMv1
                     dual(normalDirection, planeAtOrigin)
@@ -367,7 +345,7 @@ function initMvPictograms() {
                 let toValueRotor = nonAlgebraTempMv1
                 gProduct(mvDualNormalized, yDirectionDual, toValueRotor)
                 toValueRotor[0] += 1.
-                normalizeMotor(toValueRotor)
+                euclideanNormalizeWhole(toValueRotor)
                 
                 let rotor = nonAlgebraTempMv2
                 gProduct(viewRotor,toValueRotor,rotor)
@@ -554,15 +532,15 @@ function initMvPictograms() {
                     let rotationMotor = nonAlgebraTempMv2
                     gProduct(orientedPlane,zPlane,rotationMotor)
                     rotationMotor[0] += 1.
-                    normalizeMotor(rotationMotor)
+                    euclideanNormalizeWhole(rotationMotor)
 
                     let translationMotor = nonAlgebraTempMv3
                     gProduct(transformedMv, orientedPlane, translationMotor)
                     translationMotor[0] += 1.
-                    normalizeMotor(translationMotor)
+                    euclideanNormalizeWhole(translationMotor)
 
                     gProduct(translationMotor,rotationMotor,motorFromZPlane)
-                    normalizeMotor(motorFromZPlane) //probably unnecessary
+                    euclideanNormalizeWhole(motorFromZPlane) //probably unnecessary
                 }
 
                 gl.uniform1fv(planePictogramDrawer.program.getUniformLocation("motorFromZPlane"), motorFromZPlane)

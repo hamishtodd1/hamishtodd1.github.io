@@ -91,11 +91,19 @@ function initAlgebra()
         //     }
         // ))
 
-        normalizeMotor = (motor) => {
-            reverse(motor, mv0);
-            gProduct(motor, mv0, mv1);
-            let norm = Math.sqrt( mv1[0] );
-            multiplyScalar(motor, 1. / norm);
+        euclideanNormWhole = (mv) =>{
+            reverse(mv, mv0);
+            gProduct(mv, mv0, mv1);
+            return Math.sqrt(mv1[0]);
+        }
+        euclideanNormalizeWhole = (mv) => {
+            let norm = euclideanNormWhole(mv)
+            multiplyScalar(mv, 1. / norm);
+        }
+
+        sqrtMotor = (mv) => {
+            mv[0] += 1.
+            euclideanNormalizeWhole(mv)
         }
             
         appendToGaShaderString(replaceSignature(

@@ -10,19 +10,21 @@ function initDrawTokens() {
     let lineNumber = 0
 
     function drawTokenCharacters(tokenStart, tokenEnd) {
-        for (let positionInString = tokenStart; positionInString < tokenEnd; ++positionInString) {
-            if(positionInString >= tokenStart)
-                carat.duringParseFunc(drawingPosition, positionInString,lineNumber)
-            
-            let currentCharacter = backgroundString[positionInString]
-            if (PROXY_PAIRS.indexOf(currentCharacter) === -1)
-                addCharacterToDraw(currentCharacter, 0., 0., 0., drawingPosition)
-            else {
-                let index = PROXY_PAIRS.indexOf(currentCharacter)
-                index += 1-(index%2)
-                addCharacterToDraw(PROXY_PAIRS[index], 0., 0., 0., drawingPosition)
+        if (MODE !== PRESENTATION_MODE) {
+            for (let positionInString = tokenStart; positionInString < tokenEnd; ++positionInString) {
+                if (positionInString >= tokenStart)
+                    carat.duringParseFunc(drawingPosition, positionInString, lineNumber)
+
+                let currentCharacter = backgroundString[positionInString]
+                if (PROXY_PAIRS.indexOf(currentCharacter) === -1)
+                    addCharacterToDraw(currentCharacter, 0., 0., 0., drawingPosition)
+                else {
+                    let index = PROXY_PAIRS.indexOf(currentCharacter)
+                    index += 1 - (index % 2)
+                    addCharacterToDraw(PROXY_PAIRS[index], 0., 0., 0., drawingPosition)
+                }
+                drawingPosition.x += characterWidth
             }
-            drawingPosition.x += characterWidth
         }
     }
     

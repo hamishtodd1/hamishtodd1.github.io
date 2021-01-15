@@ -8,8 +8,7 @@ function initCarat() {
     for (let i = 0; i < quadBuffer.length; ++i)
     {
         caratVerticesBuffer[i] = quadBuffer[i]
-        if (i % 4 === 0)
-        {
+        if (i % 4 === 0) {
             caratVerticesBuffer[i] *= .1
             if (caratVerticesBuffer[i] < 0.)
                 caratVerticesBuffer[i] = 0.
@@ -20,7 +19,7 @@ function initCarat() {
     carat.position.y = 1000.
     addRenderFunction(() => {
         let msSinceFlashingStart = Date.now() - carat.flashingStart
-        if (Math.floor(msSinceFlashingStart / 500.) % 2 === 0)
+        if( Math.floor(msSinceFlashingStart / 500.) % 2 === 0 && MODE !== PRESENTATION_MODE )
             carat.renderFunction()
 
         carat.positionInStringOld = carat.positionInString
@@ -105,7 +104,6 @@ function initCarat() {
                 this.flashingStart = Date.now()
 
             this.position.copy(drawingPosition)
-            caratDw.verticalPositionToRenderFrom = carat.position.y
         }
 
         if (this.positionInString === -1) {

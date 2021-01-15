@@ -96,11 +96,14 @@ function initNames() {
         let index = coloredNamesAlphabetically.indexOf(name)
 
         if ( index === -1 ) {
-            addUnnamedFrameToDraw(x, y)
-            addCharacterToDraw("?",0.,0.,0., x - characterWidth / 2., y)
+            if(MODE !== PRESENTATION_MODE){
+                addUnnamedFrameToDraw(x, y)
+                addCharacterToDraw("?", 0., 0., 0., x - characterWidth / 2., y)
+            }
         }
         else {
-            addNamedFrameToDraw(x, y, name)
+            if(MODE !== PRESENTATION_MODE)
+                addNamedFrameToDraw(x, y, name)
 
             let type = types[drawingDetailses[index].type]
             if ( drawingDetailses[index].type === "unassigned")
@@ -109,7 +112,7 @@ function initNames() {
                 for(let i = 0; i < type.drawers.length; ++i)
                     type.drawers[i].add(x, y, name)
 
-                if (mouse.inSquare(x, y, .5))
+                if (mouse.inSquare(x, y, .5) && MODE !== PRESENTATION_MODE)
                     mouseDw.placeBasedOnHover(x, y, type.editingStyle, name)
             }
         }

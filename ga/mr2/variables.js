@@ -14,6 +14,11 @@ const rightMouseResponses = []
 
 const IDENTIFIER_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+const CODING_MODE = 0
+const PRESENTATION_MODE = 1
+const PRESENTATION_EDITING_MODE = 2
+const MODE = CODING_MODE // PRESENTATION_MODE
+
 const displayWindows = []
 
 const NUM_NAMES = 63 //7 choose 1 + 7 choose 2 + 7 choose 3

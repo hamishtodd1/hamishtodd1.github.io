@@ -6,6 +6,7 @@
 		Bug with your mind: you want to reinvent calculus. Just wait for calculus shit to come up in the course of the project, then ask people how to do it
 
 	Maybe... the lines of code create an animation, step through it using your cursor
+
 		Or, you have certain lines where you display what's in each frame of the animation, then ctrl up and down to get between them
 		If you know how the value was derived, you know what tweening animation to have? Professionalism is all just tweening
 		Well you want to be able to make things gesturally, Bret style, right? Animations simulate that
@@ -112,26 +113,6 @@
 
 				initMouse()
 
-				//advance
-				//can take out a whole bunch of code and load in a new one
-				{
-					let lineNumbers = [ 1, 4, 5]
-
-					let foilNumber = 0
-					bindButton("[", () => {
-						foilNumber -= 1
-						foilNumber = clamp(foilNumber,0,lineNumbers.length - 1)
-
-						carat.sendToLine(lineNumbers[foilNumber])
-					})
-					bindButton("]", () => {
-						foilNumber += 1
-						foilNumber = clamp(foilNumber,0,lineNumbers.length - 1)
-
-						carat.sendToLine(lineNumbers[foilNumber])
-					})
-				}
-
 				// await initDymaxion()
 				// initExperiment()
 
@@ -184,15 +165,31 @@
 							}
 						})
 
-						// assignTypeAndData("bg", "angle", { value: .5 })
-						// assignTypeAndData("r", "slider", { value: 0. })
-						// assignTypeAndData("o", "test",   { value: 0. })
+						assignTypeAndData("bg", "angle", { value: .5 })
+						assignTypeAndData("r", "slider", { value: 0. })
+						assignTypeAndData("o", "test",   { value: 0. })
 
-						let textureNames = ["earthColor", "ball", "cmb", "jupiter", "latAndLon2"]
+						let textureNames = [
+							"earthColor",
+
+							// "ball",
+							// "cmb",
+							// "jupiter",
+							// "latAndLon2"
+							"countryColombia",
+							"countryGreenland",
+							"countryMadagascar",
+							"countryRussia",
+						]
 						for (let i = 0; i < textureNames.length; ++i) {
 							let texture = await Texture("data/" + textureNames[i] + ".png")
-							assignTypeAndData(coloredNamesAlphabetically[13 + i], "globe", {texture})
+							assignTypeAndData(coloredNamesAlphabetically[13 + i], "globe", {
+								texture,
+								isPoints: false,
+								transparent: i ? true : false
+							})
 						}
+						//
 					}
 				}
 

@@ -189,7 +189,8 @@ function initTranspiler(infixOperators, postfixOperators, builtInFunctionNames) 
             let bodySansFinalAssignmentTarget = parseFunctionNode(topNode, numTmvs)
 
             //----------------Calculate the value and make it so they can be seen
-            let targetGlsl = globeProperties !== null
+
+            let targetGlsl = globeProperties !== null //one day it'll be more complex
             if (targetGlsl) {
                 let nameProperties = {
                     body: bodySansFinalAssignmentTarget + `target);\nwNormalizePoint(target);`,

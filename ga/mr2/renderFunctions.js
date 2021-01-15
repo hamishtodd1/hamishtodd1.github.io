@@ -17,11 +17,14 @@ function initRenderFunctions() {
     }
 
     function renderEverything() {
-        gl.clearColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.clearColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], 1. );
         
         gl.enable(gl.DEPTH_TEST);
         gl.depthFunc(gl.LESS); //is this the reason z is reversed?
+
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+        gl.enable(gl.BLEND)
 
         //this is just what was found to work with the globes
         gl.enable(gl.CULL_FACE);
