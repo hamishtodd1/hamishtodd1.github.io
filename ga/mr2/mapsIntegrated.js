@@ -147,7 +147,7 @@ async function initGlobePictograms() {
         void main(void) {
             gl_FragColor = texture2D(sampler, vec2(uv.x,1.-uv.y));
 
-            if( transparent != 0. && gl_FragColor.r < .891 )
+            if( transparent != 0. && gl_FragColor.r == 0. )
                 discard;//gl_FragColor.a = (gl_FragColor.r - .891) * 9.11; //because it's black and white, they're all the same
         `
 
@@ -223,7 +223,7 @@ async function initGlobePictograms() {
                 // gl_FragColor = vec4(1.,0.,0.,1.);
                 gl_FragColor = texture2D(sampler, vec2(uv.x,1.-uv.y));
 
-                if( transparent != 0. && gl_FragColor.r < .891 )
+                if( transparent != 0. && gl_FragColor.r == 0. )
                     discard;//gl_FragColor.a = (gl_FragColor.r - .891) * 9.11; //because it's black and white, they're all the same
             `
 
