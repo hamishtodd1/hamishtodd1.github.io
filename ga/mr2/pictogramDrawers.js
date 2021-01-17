@@ -3,7 +3,7 @@
 
     People need to make their own pictograms, maybe with an external tool
 
-    The right way to do all of this is a single gl program
+    Redesign: The right way to do all of this is a single gl program
         Run this idea by someone else
         You load in the state of every single javascript-side multivector
         Ok but what about attributes
@@ -11,6 +11,7 @@
             The assumption we're going on is that the only attributes you need might be samples from interval or I2
         It will surely increase compile time to have everything recompiled. On the other hand, you're recompiling the rest all the time too
         compile time flags in glsl could help
+        Maybe no pictograms at all between starting typing and... what's a signal you're done, arrow keys maybe? Leaving the line?
 
     You kinda want to have eg points. But that doesn't sit perfectly with the rest
 
@@ -145,12 +146,12 @@ function pictogramTest() {
 
     let pictogramDrawer = new PictogramDrawer(vs, fs)
     addType("test", pictogramDrawer, testEditingStyle)
-    pictogramDrawer.program.addVertexAttribute("vert", quadBuffer, 4, true)
+    pictogramDrawer.program.addVertexAttribute("vert", 4, quadBuffer)
     pictogramDrawer.program.locateUniform("g")
 
     addRenderFunction(() => {
         gl.useProgram(pictogramDrawer.program.glProgram)
-        pictogramDrawer.program.prepareVertexAttribute("vert", quadBuffer)
+        pictogramDrawer.program.prepareVertexAttribute("vert")
 
         pictogramDrawer.finishPrebatchAndDrawEach((nameProperties, name) => {
             gl.uniform1f(pictogramDrawer.program.getUniformLocation("g"), nameProperties.value)

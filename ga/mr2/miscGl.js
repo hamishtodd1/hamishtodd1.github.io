@@ -120,12 +120,15 @@ function Program(vsSource, fsSource) {
         return self.uniformLocations[name]
     }
 
-    this.addVertexAttribute = (name, arr, itemSize, dynamic) => {
-        if ( !(arr instanceof Float32Array) )
-            console.error("needs to be float32Array")
+    this.addVertexAttribute = (name, itemSize, arr) => {
         const bufferId = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, bufferId);
-        gl.bufferData(gl.ARRAY_BUFFER, arr, dynamic ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW)
+        
+        if(arr) {
+            if ( !(arr instanceof Float32Array) )
+                console.error("needs to be float32Array")
+            gl.bufferData(gl.ARRAY_BUFFER, arr, gl.STATIC_DRAW)
+        }
 
         self.vertexAttributes[name] = {
             bufferId, itemSize
@@ -150,7 +153,7 @@ function Program(vsSource, fsSource) {
             stride,
             offset);
 
-        if (updatedArray !== undefined)
+        if (updatedArray !== undefined) //i.e. it's dynamic
             gl.bufferData(gl.ARRAY_BUFFER, updatedArray, gl.DYNAMIC_DRAW)
     }
 }

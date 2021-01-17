@@ -174,11 +174,11 @@ function initCharacterTexture() {
                 pBuffer[j * quadBuffer.length +i] += .5
         }
     }
-    program.addVertexAttribute("vert", pBuffer, 4, false)
+    program.addVertexAttribute("vert", 4, pBuffer)
 
-    program.addVertexAttribute("characterIndex", characterAttributeBuffer, 1, true)
-    program.addVertexAttribute("screenPosition", positionAttributeBuffer, 2, true)
-    program.addVertexAttribute("textColor", textColorAttributeBuffer, 3, true)
+    program.addVertexAttribute("characterIndex", 1)
+    program.addVertexAttribute("screenPosition", 2)
+    program.addVertexAttribute("textColor", 3)
 
     cameraAndFrameCountShaderStuff.locateUniforms(program)
 

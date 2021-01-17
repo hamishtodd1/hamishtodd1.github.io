@@ -99,7 +99,7 @@ function drawColorWheel()
 		}`
 
 	const program = new Program(vsSource, fsSource)
-	program.addVertexAttribute("vert", quadBuffer, 4, false)
+	program.addVertexAttribute("vert", 4, quadBuffer)
 
 	cameraAndFrameCountShaderStuff.locateUniforms(program)
 

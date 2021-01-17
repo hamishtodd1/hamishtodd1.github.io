@@ -83,7 +83,7 @@ function initDisplayWindows() {
             `
 
         var backgroundProgram = new Program(vsSource, fsSource)
-        backgroundProgram.addVertexAttribute("vert", quadBuffer, 4, true)
+        backgroundProgram.addVertexAttribute("vert", 4, quadBuffer)
         cameraAndFrameCountShaderStuff.locateUniforms(backgroundProgram)
         backgroundProgram.locateUniform("screenPosition")
 
@@ -137,7 +137,7 @@ function initDisplayWindows() {
             if ( drawBackground ) {
                 gl.useProgram(backgroundProgram.glProgram)
                 cameraAndFrameCountShaderStuff.transfer(backgroundProgram)
-                backgroundProgram.prepareVertexAttribute("vert", quadBuffer)
+                backgroundProgram.prepareVertexAttribute("vert")
                 gl.uniform2f(backgroundProgram.getUniformLocation("screenPosition"), this.position.x, this.position.y);
 
                 gl.uniform1f(backgroundProgram.getUniformLocation("dwOriginZ"), dwOriginZ())
@@ -222,7 +222,7 @@ function initDisplayWindows() {
             `
 
         let program = new Program(vs, fs)
-        program.addVertexAttribute("vert", gridBuffer, 4, true)
+        program.addVertexAttribute("vert", 4,gridBuffer)
         cameraAndFrameCountShaderStuff.locateUniforms(program)
 
         program.locateUniform("viewRotor")
@@ -233,7 +233,7 @@ function initDisplayWindows() {
         function renderAxes(x, y) {
             gl.useProgram(program.glProgram)
             cameraAndFrameCountShaderStuff.transfer(program)
-            program.prepareVertexAttribute("vert", gridBuffer)
+            program.prepareVertexAttribute("vert")
 
             gl.uniform1fv(program.getUniformLocation("viewRotor"), viewRotor)
             gl.uniform2f(program.getUniformLocation("screenPosition"), x, y)

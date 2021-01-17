@@ -23,19 +23,21 @@
             Consciously ignores up/down, equator/poles
             Goode homolosine, myriahedral
             Flight path. People want one unbroken
+        Sinusoidal-derived
+            Area preserving, and length preserving along the parallels and meridians
+            old pics
         Azimuthal equidistant
             Al biruni
             North Korea's missile radii, UN
             Distorts shapes
-        Sinusoidal-derived
-            Area preserving, and length preserving along the parallels and meridians
-            old pics
         Stereographic
             15th century map, astrolabe
             probably known to ancient egyptians
             Conformal: Wonderful for shapes+directions, crap for lengths and areas
         Lambert Conic
             Conformal like stereographic
+
+        ------------
         Lambert cylindrical equal area
             Rectangular, terrible idea
             Equator is the only place that it's right
@@ -281,7 +283,7 @@ async function initWorldMap() {
             pushUv(i + 1. - eps, j + 1. - eps)
         }
     }
-    program.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
+    program.addVertexAttribute("uv", 2, new Float32Array(uvBuffer))
     let numVertices = uvBuffer.length / 2
 
     let transform = new DualQuat()

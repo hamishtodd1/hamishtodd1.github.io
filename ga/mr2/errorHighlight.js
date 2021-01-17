@@ -31,7 +31,7 @@ function initErrorHighlight() {
     //     `
 
     // const program = new Program(vsSource, fsSource)
-    // program.addVertexAttribute("point", farBackQuadBuffer, 4, true)
+    // program.addVertexAttribute("point", 4)
 
     // cameraAndFrameCountShaderStuff.locateUniforms(program)
 

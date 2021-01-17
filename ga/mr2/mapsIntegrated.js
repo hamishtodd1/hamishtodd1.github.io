@@ -95,7 +95,16 @@ async function initGlobePictograms() {
 
     const eps = .00001 //sensetive, ugh
     const numDivisions = 256
-    const uvBuffer = generateDividedUnitSquareBuffer(numDivisions, eps)
+    const uvBuffer = new Float32Array(generateDividedUnitSquareBuffer(numDivisions, eps))
+
+    const numPathPoints = 60
+    const pathBuffer = new Float32Array(numPathPoints * 2) //equator by default, equirectangularly
+    {
+        for (let i = 0; i < numPathPoints; ++i) {
+            pathBuffer[i*2+0] = i / numPathPoints
+            pathBuffer[i*2+1] = .5
+        }
+    }
 
     let globeVsStart = `
         attribute vec2 uvA;
@@ -105,6 +114,8 @@ async function initGlobePictograms() {
         uniform float viewRotor[16];
 
         void main(void) {
+            gl_PointSize = 4.;
+
             float lon = (uvA.x - .5) * TAU;
             float lat = (uvA.y - .5) * PI;
             
@@ -133,23 +144,31 @@ async function initGlobePictograms() {
             }
         `
 
+    let fs = `
+        varying vec2 uv;
+        uniform sampler2D sampler;
+
+        uniform int transparent;
+
+        uniform int isPoints;
+
+        void main(void) {
+            if( isPoints == 0 ) {
+                gl_FragColor = texture2D(sampler, vec2(uv.x,1.-uv.y));
+
+                if( transparent != 0 && gl_FragColor.g == 0. )
+                    discard;
+            }
+            else {
+                gl_FragColor = vec4(1.,0.,0.,1.);
+            }
+        `
+
     //GLOBE
     {
         let vs = gaShaderString + globeVsStart + `
         sandwichBab(pointOnGlobe,viewRotor,nonAlgebraTempMv0);
         mvToPoint(nonAlgebraTempMv0,gl_Position);`
-        let fs = `
-        varying vec2 uv;
-        uniform sampler2D sampler;
-
-        uniform float transparent;
-
-        void main(void) {
-            gl_FragColor = texture2D(sampler, vec2(uv.x,1.-uv.y));
-
-            if( transparent != 0. && gl_FragColor.r == 0. )
-                discard;//gl_FragColor.a = (gl_FragColor.r - .891) * 9.11; //because it's black and white, they're all the same
-        `
 
         let yawAxis = new Float32Array(16)
         realLine(yawAxis, 0., 1., 0.)
@@ -175,15 +194,15 @@ async function initGlobePictograms() {
         let pictogramDrawer = new PictogramDrawer(vs, fs)
         addType("globe", pictogramDrawer, globeEditingStyle)
 
-        pictogramDrawer.program.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
+        pictogramDrawer.program.addVertexAttribute("uv", 2)
         pictogramDrawer.program.locateUniform("sampler")
         pictogramDrawer.program.locateUniform("ourRotor")
         pictogramDrawer.program.locateUniform("viewRotor")
         pictogramDrawer.program.locateUniform("transparent")
+        pictogramDrawer.program.locateUniform("isPoints")
 
         addRenderFunction(() => {
             gl.useProgram(pictogramDrawer.program.glProgram)
-            pictogramDrawer.program.prepareVertexAttribute("uv")
 
             pictogramDrawer.finishPrebatchAndDrawEach((nameProperties, name) => {
                 gl.uniform1fv(pictogramDrawer.program.getUniformLocation("viewRotor"), viewRotor)
@@ -194,14 +213,20 @@ async function initGlobePictograms() {
                     gl.uniform1i(pictogramDrawer.program.getUniformLocation("sampler"), 0); //hmm, why 0?
                 }
 
-                gl.uniform1f(pictogramDrawer.program.getUniformLocation("transparent"), nameProperties.transparent)
+                gl.uniform1i(pictogramDrawer.program.getUniformLocation("transparent"), nameProperties.transparent ? 1 : 0)
+                gl.uniform1i(pictogramDrawer.program.getUniformLocation("isPoints"), nameProperties.isPoints ? 1 : 0)
 
                 gl.uniform1fv(pictogramDrawer.program.getUniformLocation("ourRotor"), globeRotor)
 
-                const glMode = nameProperties.isPoints ? gl.POINTS : gl.TRIANGLES
-                gl.drawArrays(glMode, 0, uvBuffer.length / 2)
+                if( nameProperties.isPoints ) {
+                    pictogramDrawer.program.prepareVertexAttribute("uv",pathBuffer)
+                    gl.drawArrays(gl.POINTS, 0, pathBuffer.length / 2)
+                }
+                else {
+                    pictogramDrawer.program.prepareVertexAttribute("uv",uvBuffer)
+                    gl.drawArrays(gl.TRIANGLES, 0, uvBuffer.length / 2)
+                }
             })
-
         })
     }
 
@@ -213,23 +238,6 @@ async function initGlobePictograms() {
             sandwichBab(target,viewRotor,nonAlgebraTempMv0);
             mvToPoint(nonAlgebraTempMv0,gl_Position);
         `
-        let projectionFs = `
-            varying vec2 uv;
-            uniform sampler2D sampler;
-
-            uniform float transparent;
-
-            void main(void) {
-                // gl_FragColor = vec4(1.,0.,0.,1.);
-                gl_FragColor = texture2D(sampler, vec2(uv.x,1.-uv.y));
-
-                if( transparent != 0. && gl_FragColor.r == 0. )
-                    discard;//gl_FragColor.a = (gl_FragColor.r - .891) * 9.11; //because it's black and white, they're all the same
-            `
-
-        //simpler: just one program, with them all being functions. Ok so you have to recompile them all, but you put so many in there anyway
-
-        
 
         //better name might be "reusable"
         var ppWrappers = []
@@ -241,7 +249,7 @@ async function initGlobePictograms() {
                 }
             }
             this.currentBody
-            this.pictogramProgram = new PictogramProgram(gaShaderString + vsStart + vsEnd, projectionFs)
+            this.pictogramProgram = new PictogramProgram(gaShaderString + vsStart + vsEnd, fs)
 
             this.usedThisFrame = true
             this.usedLastFrame = false
@@ -284,12 +292,11 @@ async function initGlobePictograms() {
                 let vsSource = vertexShaderToPictogramVertexShader(fullString)
                 ourPpWrapper.pictogramProgram.changeShader(gl.VERTEX_SHADER, vsSource)
 
-                ourPpWrapper.pictogramProgram.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
+                ourPpWrapper.pictogramProgram.addVertexAttribute("uv",2)
                 ourPpWrapper.pictogramProgram.locateUniform("sampler")
                 ourPpWrapper.pictogramProgram.locateUniform("ourRotor")
-
                 ourPpWrapper.pictogramProgram.locateUniform("transparent")
-
+                ourPpWrapper.pictogramProgram.locateUniform("isPoints")
                 ourPpWrapper.pictogramProgram.locateUniform("viewRotor")
 
                 //sampler could be in this too
@@ -303,7 +310,13 @@ async function initGlobePictograms() {
 
             let program = ourPpWrapper.pictogramProgram
             gl.useProgram(program.glProgram)
-            program.prepareVertexAttribute("uv")
+
+            if( nameProperties.globeProperties.isPoints ) {
+                program.prepareVertexAttribute("uv",pathBuffer)
+            }
+            else {
+                program.prepareVertexAttribute("uv",uvBuffer)
+            }
 
             if (!nameProperties.globeProperties.isPoints) {
                 gl.activeTexture(gl.TEXTURE0)
@@ -311,7 +324,8 @@ async function initGlobePictograms() {
                 gl.uniform1i(program.getUniformLocation("sampler"), 0)
             }
 
-            gl.uniform1f(program.getUniformLocation("transparent"), nameProperties.globeProperties.transparent ? 1. : 0. )
+            gl.uniform1i(program.getUniformLocation("transparent"), nameProperties.globeProperties.transparent ? 1 : 0 )
+            gl.uniform1i(program.getUniformLocation("isPoints"), nameProperties.globeProperties.isPoints ? 1 : 0)
             
             gl.uniform1fv(program.getUniformLocation("ourRotor"), globeRotor)
             gl.uniform1fv(program.getUniformLocation("viewRotor"), viewRotor)
@@ -327,8 +341,12 @@ async function initGlobePictograms() {
         addType("globeProjection", pictogramDrawer, {})
 
         function draw(nameProperties,name) {
-            const glMode = nameProperties.globeProperties.isPoints ? gl.POINTS : gl.TRIANGLES
-            gl.drawArrays(glMode, 0, uvBuffer.length / 2)
+            if (nameProperties.globeProperties.isPoints) {
+                gl.drawArrays(gl.POINTS, 0, pathBuffer.length / 2)
+            }
+            else {
+                gl.drawArrays(gl.TRIANGLES, 0, uvBuffer.length / 2)
+            }
         }
         
         addRenderFunction(() => {
@@ -511,7 +529,7 @@ async function initDymaxion() {
         }
         var numVertices = uvBuffer.length / 2
 
-        program.addVertexAttribute("uv", new Float32Array(uvBuffer), 2)
+        program.addVertexAttribute("uv",2, new Float32Array(uvBuffer))
     }
 
     let transform = new Float32Array(16)
@@ -531,8 +549,6 @@ async function initDymaxion() {
         gl.uniform1fv(program.getUniformLocation("transform"), transform)
 
         gl.uniform4fv(program.getUniformLocation("animatedVerts"), animatedVertsBuffer);
-        // log(animatedVertsBuffer)
-        // debugger
         gl.uniform4fv(program.getUniformLocation("closedVerts"), closedVertsBuffer);
 
         gl.disable(gl.CULL_FACE);

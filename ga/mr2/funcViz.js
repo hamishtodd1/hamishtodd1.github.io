@@ -81,7 +81,7 @@ function initFuncViz() {
 
     const program = new Program(vsSource, fsSource)
     cameraAndFrameCountShaderStuff.locateUniforms(program)
-    program.addVertexAttribute("domainValue", domainValueBuffer, 4, true)
+    program.addVertexAttribute("domainValue", 4)
     addRenderFunction(() => {
         gl.useProgram(program.glProgram);
         cameraAndFrameCountShaderStuff.transfer(program)

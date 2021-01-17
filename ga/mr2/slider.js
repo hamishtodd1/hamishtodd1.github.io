@@ -26,11 +26,11 @@ function initSliderPictograms() {
 
         let pictogramDrawer = new PictogramDrawer(vs, fs)
         drawers.push(pictogramDrawer)
-        pictogramDrawer.program.addVertexAttribute("vert", rectBuffer, 4, false)
+        pictogramDrawer.program.addVertexAttribute("vert",4, rectBuffer)
 
         function renderRect() {
             gl.useProgram(pictogramDrawer.program.glProgram)
-            pictogramDrawer.program.prepareVertexAttribute("vert", rectBuffer)
+            pictogramDrawer.program.prepareVertexAttribute("vert")
 
             pictogramDrawer.finishPrebatchAndDrawEach(() => {
                 gl.drawArrays(gl.TRIANGLES, 0, rectBuffer.length / 4)
@@ -60,12 +60,12 @@ function initSliderPictograms() {
 
         let pictogramDrawer = new PictogramDrawer(vs, fs)
         drawers.push(pictogramDrawer)
-        pictogramDrawer.program.addVertexAttribute("vert", buff, 4, false)
+        pictogramDrawer.program.addVertexAttribute("vert", 4, buff)
         pictogramDrawer.program.locateUniform("visualPosition")
 
         function renderPointer() {
             gl.useProgram(pictogramDrawer.program.glProgram)
-            pictogramDrawer.program.prepareVertexAttribute("vert", buff)
+            pictogramDrawer.program.prepareVertexAttribute("vert")
 
             pictogramDrawer.finishPrebatchAndDrawEach((nameProperties) => {
                 let visualX = width * (nameProperties.value - .5)

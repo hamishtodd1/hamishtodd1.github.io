@@ -25,7 +25,7 @@ function verticesDisplay(vertBuffer, mode, r,g,b)
         `
 
     const program = new Program(vsSource, fsSource)
-    program.addVertexAttribute("vert", vertBuffer, 4, true)
+    program.addVertexAttribute("vert", 4)
 
     cameraAndFrameCountShaderStuff.locateUniforms(program)
 
@@ -74,7 +74,7 @@ function verticesDisplayWithPosition(vertsBuffer, mode, r,g,b)
         `
 
     const program = new Program(vsSource, fsSource)
-    program.addVertexAttribute("vert", vertsBuffer, 4, true)
+    program.addVertexAttribute("vert", 4)
 
     cameraAndFrameCountShaderStuff.locateUniforms(program)
 

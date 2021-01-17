@@ -45,7 +45,7 @@ function initAnglePictograms() {
 
     let pd = new PictogramDrawer(vs, fs)
     addType("angle", pd, editingStyle)
-    pd.program.addVertexAttribute("vert", vertsBuffer, 4)
+    pd.program.addVertexAttribute("vert",4, vertsBuffer)
     pd.program.locateUniform("fullAngle")
 
     addRenderFunction(() => {
@@ -179,15 +179,15 @@ function initMvPictograms() {
         `
 
         var pointPictogramDrawer = new PictogramDrawer(vs, fs)
-        pointPictogramDrawer.program.addVertexAttribute("vert", vertBuffer, 4, false)
-        pointPictogramDrawer.program.addVertexAttribute("colorIndex", pointColorIndexBuffer, 1, true)
+        pointPictogramDrawer.program.addVertexAttribute("vert", 4, vertBuffer)
+        pointPictogramDrawer.program.addVertexAttribute("colorIndex", 1)
         pointPictogramDrawer.program.locateUniform("hexantColors")
         pointPictogramDrawer.program.locateUniform("visualPosition")
 
         function renderPoints() {
             gl.useProgram(pointPictogramDrawer.program.glProgram)
 
-            pointPictogramDrawer.program.prepareVertexAttribute("vert", vertBuffer)
+            pointPictogramDrawer.program.prepareVertexAttribute("vert")
 
             pointPictogramDrawer.finishPrebatchAndDrawEach((nameProperties,name) => {
                 let mv = nameProperties.value
@@ -319,8 +319,8 @@ function initMvPictograms() {
         `
 
         var directionPictogramDrawer = new PictogramDrawer(vs, fs)
-        directionPictogramDrawer.program.addVertexAttribute("vert", directionVertsBuffer, 4, false)
-        directionPictogramDrawer.program.addVertexAttribute("normal", directionNormalsBuffer, 4, false)
+        directionPictogramDrawer.program.addVertexAttribute("vert", 4, directionVertsBuffer)
+        directionPictogramDrawer.program.addVertexAttribute("normal", 4, directionNormalsBuffer)
         directionPictogramDrawer.program.locateUniform("rotor")
 
         let yDirectionDual = new Float32Array(16)
@@ -328,8 +328,8 @@ function initMvPictograms() {
         function renderDirections() {
             gl.useProgram(directionPictogramDrawer.program.glProgram)
 
-            directionPictogramDrawer.program.prepareVertexAttribute("vert", directionVertsBuffer)
-            directionPictogramDrawer.program.prepareVertexAttribute("normal", directionNormalsBuffer)
+            directionPictogramDrawer.program.prepareVertexAttribute("vert")
+            directionPictogramDrawer.program.prepareVertexAttribute("normal")
 
             directionPictogramDrawer.finishPrebatchAndDrawEach((nameProperties, name) => {
                 let mv = nameProperties.value
@@ -393,13 +393,13 @@ function initMvPictograms() {
         }
 
         var linePictogramDrawer = new PictogramDrawer(vs, fs)
-        linePictogramDrawer.program.addVertexAttribute("vert", vertsBuffer, 4, true)
-        linePictogramDrawer.program.addVertexAttribute("colorIndex", colorIndexBuffer, 1, false)
+        linePictogramDrawer.program.addVertexAttribute("vert", 4)
+        linePictogramDrawer.program.addVertexAttribute("colorIndex", 1, colorIndexBuffer)
         linePictogramDrawer.program.locateUniform("hexantColors")
 
         function renderLines() {
             gl.useProgram(linePictogramDrawer.program.glProgram)
-            linePictogramDrawer.program.prepareVertexAttribute("colorIndex", colorIndexBuffer)
+            linePictogramDrawer.program.prepareVertexAttribute("colorIndex")
 
             linePictogramDrawer.finishPrebatchAndDrawEach((nameProperties,name) => {
                 let mv = nameProperties.value
@@ -494,7 +494,7 @@ function initMvPictograms() {
         `
 
         var planePictogramDrawer = new PictogramDrawer(vs, fs) //shouldn't it be a pictogram program? Bit unfortunate to do so much adding
-        planePictogramDrawer.program.addVertexAttribute("vert", planeVertBuffer, 4, false)
+        planePictogramDrawer.program.addVertexAttribute("vert",4, planeVertBuffer)
         planePictogramDrawer.program.locateUniform("motorFromZPlane")
         planePictogramDrawer.program.locateUniform("normal")
         planePictogramDrawer.program.locateUniform("col")
@@ -505,7 +505,7 @@ function initMvPictograms() {
         function renderPlanes() {
             gl.useProgram(planePictogramDrawer.program.glProgram)
 
-            planePictogramDrawer.program.prepareVertexAttribute("vert", planeVertBuffer)
+            planePictogramDrawer.program.prepareVertexAttribute("vert")
 
             gl.disable(gl.CULL_FACE)
 

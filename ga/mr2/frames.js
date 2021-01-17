@@ -76,7 +76,7 @@ function initFrames() {
     // logShader(fsSource)
 
     const program = new Program(vsSource, fsSource)
-    program.addVertexAttribute("point", vertsBuffer, 4, true)
+    program.addVertexAttribute("point", 4)
 
     cameraAndFrameCountShaderStuff.locateUniforms(program)
 
