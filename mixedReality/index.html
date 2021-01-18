@@ -67,8 +67,12 @@
 		<!-- <script src="units/turing.js"></script> -->
 		<!-- <script src="units/grayScott.js"></script> -->
 		<script src="units/simulation.js"></script>
-		<script src="units/barkley.js"></script> 
-		<script src="units/fitzhughNagumo.js"></script>
+		<!-- <script src="units/barkley.js"></script> 
+		<script src="units/fitzhughNagumo.js"></script> -->
+
+		<script src="units/grayScott.js"></script>
+
+		<script src="units/fluid.js"></script>
 
 		<!-- <script src="units/escher.js"></script>
 
@@ -111,7 +115,7 @@
 
 				// await initMaps();
 
-				await initFitzhughNagumo(gl)
+				// await initFitzhughNagumo(gl)
 				// await initBarkley(gl)
 				// await initIcerm(gl);
 				
@@ -121,6 +125,7 @@
 				// 	ellipticCurveSpace.position.copy(rightHand.position)
 				// })
 
+				await initFluid(gl)
 
 				// initDynamicalSystems()
 
@@ -128,6 +133,7 @@
 
 				// await initTuring(gl)
 				
+				// await initGrayScottSimulation(gl)
 				// await initBasicSimulation()
 				// await initLayeredSimulation()
 

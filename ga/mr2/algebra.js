@@ -91,21 +91,21 @@ function initAlgebra()
         //     }
         // ))
 
-        euclideanNormWhole = (mv) =>{
+        euclideanNormMotor = (mv) =>{
             reverse(mv, mv0);
             gProduct(mv, mv0, mv1);
             return Math.sqrt(mv1[0]);
         }
-        euclideanNormalizeWhole = (mv) => {
-            let norm = euclideanNormWhole(mv)
+        euclideanNormalizeMotor = (mv) => {
+            let norm = euclideanNormMotor(mv)
             multiplyScalar(mv, 1. / norm);
         }
 
         sqrtMotor = (mv) => {
             mv[0] += 1.
-            euclideanNormalizeWhole(mv)
+            euclideanNormalizeMotor(mv)
         }
-            
+
         appendToGaShaderString(replaceSignature(
             "void gProduct(float a[16],float b[16],out float target[16])",
             gProduct = (a, b, target) =>
@@ -316,6 +316,17 @@ function initAlgebra()
             }
         ))
 
+        angleBetweenLines = (a, b) => {
+            inner(a, b, mv0)
+            return Math.acos(mv0[0])
+        }
+        appendToGaShaderString(`
+        float angleBetweenLines(in float a[16], in float b[16])
+        {
+            inner(a,b,mv0);
+            return acos(mv0[0]);
+        }`)
+
         distance = (p1,p2) => {
             wNormalizePoint(p1)
             wNormalizePoint(p2)
@@ -507,6 +518,8 @@ function initAlgebra()
                 mv[14] = w;
             }
         ))
+        origin = new Float32Array(16)
+        point(origin,0.,0.,0.,1.)
 
         appendToGaShaderString(replaceSignature(
             "void pointToMv(vec4 p, inout float mv[16])",

@@ -1,4 +1,7 @@
 /*
+	// bayes nets would let you identify circular arguments
+	// Could let people choose two nodes and say "these are completely equivalent"
+	
 	Reserved words
 		Arrow creating
 			"Therefore"

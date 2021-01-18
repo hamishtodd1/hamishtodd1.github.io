@@ -10,26 +10,30 @@ function initButtons()
 {
 	let buttons = {}
 
-	bindButton = function( buttonName, onDown, buttonDescription,whileDown ) {
-		if(buttons[buttonName] !== undefined) {
+	let modifiedButtons = {}
+	bindButton = function( buttonName, onDown, buttonDescription,whileDown,ctrlKey ) {
+		let collectionToAddTo = ctrlKey ? modifiedButtons : buttons
+
+		if(collectionToAddTo[buttonName] !== undefined)
 			console.error("attempted to bind a button that already has a binding: ", buttonName)
-		}
 
 		if(buttonDescription !== undefined)
 			console.log("\n",buttonName + ": " + buttonDescription)
 
-		buttons[buttonName] = {
+		collectionToAddTo[buttonName] = {
 			down: false,
 			onDown: onDown
 		}
 		if(whileDown) {
-			buttons[buttonName].whileDown = whileDown
+			collectionToAddTo[buttonName].whileDown = whileDown
 		}
 	}
 
 	//don't use ctrl or other things that conflict
 	document.addEventListener( 'keydown', function(event) {
-		let button = buttons[event.key]
+		let button = event.ctrlKey ? modifiedButtons[event.key] : buttons[event.key]
+
+		event.preventDefault()
 
 		if(button !== undefined && !button.down) {
 			button.onDown()
@@ -40,14 +44,10 @@ function initButtons()
 		}
 	}, false );
 	document.addEventListener( 'keyup', function(event) {
-		let button = buttons[event.key]
-
-		if(button !== undefined &&  button.down ) {
-			// button.onUp()
-			button.down = false
-
-			event.preventDefault()
-		}
+		if (buttons[event.key] !== undefined)
+			buttons[event.key].down = false
+		if (modifiedButtons[event.key] !== undefined)
+			modifiedButtons[event.key].down = false
 	}, false );
 
 	updateFunctions.push(function() {

@@ -5,10 +5,12 @@ const mainCamera = {
 }
 
 const shaderHeader = `
-precision mediump float;
-#define PI 3.14159265359
-#define TAU 6.28318530718
-#define TETRAHEDRAL_ANGLE 1.9106332362490186
+    precision mediump float;
+    precision mediump int;
+    
+    #define PI 3.14159265359
+    #define TAU 6.28318530718
+    #define TETRAHEDRAL_ANGLE 1.9106332362490186
 `
 
 const cameraAndFrameCountShaderStuff = {
@@ -31,10 +33,10 @@ const cameraAndFrameCountShaderStuff = {
         gl.uniform1f(program.getUniformLocation("frameCount"), frameCount);
     },
     footer: `
-            gl_Position.x /= rightAtZZero;
-            gl_Position.y /= topAtZZero;
-            gl_Position.z /= frontAndBackZ;
-        }
+        gl_Position.x /= rightAtZZero;
+        gl_Position.y /= topAtZZero;
+        gl_Position.z /= frontAndBackZ;
+    }
     `
 }
 

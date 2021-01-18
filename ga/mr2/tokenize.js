@@ -33,6 +33,8 @@ function initTokenize(infixSymbols, postfixSymbols) {
             if (tokenStartCharacter === "/" ) { // && backgroundString[positionInString + 1] === "/") { //don't have divide yet
                 tokens.push("comment")
                 moveWhile(() => backgroundString[positionInString] !== "\n")
+
+                //TODO: you DO want to see pictograms in a comment
             }
             else if ( uniqueMonoSymbols.indexOf(tokenStartCharacter) !== -1) {
                 tokens.push(tokenStartCharacter)

@@ -1,5 +1,5 @@
 /*
- * We distinguish between "draw" and "render": render is for-real, draw is registering what is to be rendered
+    We distinguish between "draw" and "render": render is for-real, draw is registering what is to be rendered
  */
 
 function initDrawTokens() {

@@ -1,4 +1,21 @@
 /*
+	Picture making functions. Eg closest point on plane to other point. You get the inputs, that is your start. Just picture reaching out and doing shit to them. Everything in scope you have a list of in the order it gets created. And a bunch of tools on your panel from which you pick dot product, bivector, etc
+
+	Making vertex shades is the perfect thing for this. Maybe try making that stack of cubes with infinite area but finite volume
+
+	Frame by frame updating with balls shut back and forth. Sped up into blur
+
+
+	Lots of functions, each a black box. Click on the black box and you see what it does with inputs and outputs as an animation. You can do chalk talk style concatenation with arrows. Then all the animations can be compiled into one.
+
+	Drawing in phase space might go a long way. It's a wide input space and it defines a relationship between two variables.
+
+	Normal code is like a notebook, sequential. This can be like a canvas
+
+	Probably you do want things executing in some direction. Time is down, as in programarbles
+
+	Any equation can be animated. It'll be constructing those animations with your hand
+
 	The main point of this is to make something that visualizes how your shit works, show it to the audience, and it's not code, all geometrical
 		The way you show things should be similar to the way you program them; otherwise illustrating how they were made is extra work
 	Another point is to let you make geometries with specific behaviour

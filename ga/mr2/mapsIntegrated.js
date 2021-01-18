@@ -63,11 +63,8 @@ async function initGlobePictograms() {
         // }
 
         //you only need the line I guess
-        let flightPathEditingStyle = {
+        var flightPathEditingStyle = {
             start: (name,x,y) => {
-                // let startOnSphere = new Float32Array(16)
-                // displayWindowXyTo3dDirection(x, y, startOnSphere)
-                // pointW(startOnSphere,1.)                
 
 
                 // //you put them all here
@@ -76,6 +73,8 @@ async function initGlobePictograms() {
                 // lineNormalize(start)
             },
             during: (name,x,y) => {
+
+
                 // let dir = nonAlgebraTempMv0
                 // displayWindowXyTo3dDirection(x, y, dir)
                 // join(origin,dir,end)
@@ -109,13 +108,17 @@ async function initGlobePictograms() {
     let globeVsStart = `
         attribute vec2 uvA;
         varying vec2 uv;
-        uniform float ourRotor[16];
+        varying float discardWhole;
 
+        uniform float ourRotor[16];
         uniform float viewRotor[16];
 
-        void main(void) {
-            gl_PointSize = 4.;
+        uniform int isPoints;
 
+        uniform vec3 startDirection;
+        uniform vec3 endDirection;
+
+        void main(void) {
             float lon = (uvA.x - .5) * TAU;
             float lat = (uvA.y - .5) * PI;
             
@@ -129,9 +132,25 @@ async function initGlobePictograms() {
                 1.);
 
             float pointOnGlobe[16];
-            assign(untransformedPointOnGlobe,pointOnGlobe);
 
-            {
+            //if it's a point, we transform the vertex, otherwise we transform the uv
+            if(isPoints == 1) {
+                sandwichBab(untransformedPointOnGlobe,ourRotor,pointOnGlobe);
+
+                vec3 pointDirection = normalize(vec3( pointX(pointOnGlobe), pointY(pointOnGlobe), pointZ(pointOnGlobe) ));
+                float angleToStart = acos(dot(startDirection,pointDirection));
+                float angleToEnd = acos(dot(startDirection,pointDirection));
+                float startEndAngle = acos(dot(startDirection,endDirection));
+
+                if( startEndAngle == 0. || angleToStart + angleToEnd > startEndAngle + .05)
+                    discardWhole = 1.;
+                else
+                    discardWhole = 0.;
+
+                gl_PointSize = 4.;
+            }
+            else {
+                assign(untransformedPointOnGlobe,pointOnGlobe);
                 float uvPointOnGlobe[16];
                 sandwichBab(untransformedPointOnGlobe,ourRotor,uvPointOnGlobe);
 
@@ -146,6 +165,8 @@ async function initGlobePictograms() {
 
     let fs = `
         varying vec2 uv;
+        varying float discardWhole;
+
         uniform sampler2D sampler;
 
         uniform int transparent;
@@ -156,19 +177,80 @@ async function initGlobePictograms() {
             if( isPoints == 0 ) {
                 gl_FragColor = texture2D(sampler, vec2(uv.x,1.-uv.y));
 
-                if( transparent != 0 && gl_FragColor.g == 0. )
+                if( transparent != 0 && gl_FragColor.g == 0.)
                     discard;
             }
             else {
                 gl_FragColor = vec4(1.,0.,0.,1.);
+                
+                if(discardWhole == 1.)
+                    discard;
             }
         `
 
+    function locateAll(program) {
+        program.addVertexAttribute("uv", 2)
+        program.locateUniform("sampler")
+        program.locateUniform("ourRotor")
+        program.locateUniform("viewRotor")
+        program.locateUniform("transparent")
+        program.locateUniform("isPoints")
+
+        program.locateUniform("startDirection")
+        program.locateUniform("endDirection")
+    }
+
+    function transferAll(program,globeProperties) {
+        if( globeProperties.isPoints ) {
+            program.prepareVertexAttribute("uv", pathBuffer)
+
+            gl.uniform3f(program.getUniformLocation("startDirection"), pointX(startDirection), pointY(startDirection), pointZ(startDirection));
+            gl.uniform3f(program.getUniformLocation("endDirection"), pointX(endDirection), pointY(endDirection), pointZ(endDirection));
+
+            // debugger
+            const startLine = nonAlgebraTempMv0
+            join(origin, startDirection, startLine)
+            let pathPlane = nonAlgebraTempMv1
+            join(startLine, endDirection, pathPlane)
+            planeNormalize(pathPlane)
+
+            const yPlane = nonAlgebraTempMv2
+            plane(yPlane, 0., 1., 0., 0.)
+            const pathRotor = nonAlgebraTempMv4
+            gProduct(yPlane, pathPlane, pathRotor)
+            sqrtMotor(pathRotor)
+
+            gl.uniform1fv(program.getUniformLocation("ourRotor"), pathRotor)
+            log(pathRotor)
+        }
+        else {
+            program.prepareVertexAttribute("uv",uvBuffer)
+
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, globeProperties.texture);
+            gl.uniform1i(program.getUniformLocation("sampler"), 0); //hmm, why 0?
+
+            gl.uniform1fv(program.getUniformLocation("ourRotor"), globeRotor)
+        }
+
+        gl.uniform1i(program.getUniformLocation("transparent"), globeProperties.transparent ? 1 : 0)
+        gl.uniform1i(program.getUniformLocation("isPoints"), globeProperties.isPoints ? 1 : 0)
+
+        gl.uniform1fv(program.getUniformLocation("viewRotor"), viewRotor)
+    }
+
     //GLOBE
     {
+        //can just be float32Arrays
+        var startDirection = new Float32Array(16)
+        pointY(startDirection,1.)
+        var endDirection = new Float32Array(16)
+        pointX(endDirection,1./Math.sqrt(2.))
+        pointY(endDirection,1./Math.sqrt(2.))
+
         let vs = gaShaderString + globeVsStart + `
-        sandwichBab(pointOnGlobe,viewRotor,nonAlgebraTempMv0);
-        mvToPoint(nonAlgebraTempMv0,gl_Position);`
+            sandwichBab(pointOnGlobe,viewRotor,nonAlgebraTempMv0);
+            mvToPoint(nonAlgebraTempMv0,gl_Position);`
 
         let yawAxis = new Float32Array(16)
         realLine(yawAxis, 0., 1., 0.)
@@ -178,54 +260,47 @@ async function initGlobePictograms() {
         let pitch = 0.
 
         let globeEditingStyle = {
-            during: (name) => {
-                yaw -= mouse.positionDelta.x * .6
-                pitch = clamp(pitch, -TAU / 2., TAU / 2.)
-                mvRotator(yawAxis, yaw, mv0)
+            start: (name,x,y) => {
+                if(getNameDrawerProperties(name).isPoints) {
+                    displayWindowXyTo3dDirection(x, y, startDirection)
+                    assign(startDirection, getNameDrawerProperties("bp").value)`INDG >SbcV|xll
+                    `
+                }
+            },
+            during: (name,x,y) => {
+                if (getNameDrawerProperties(name).isPoints) {
+                    displayWindowXyTo3dDirection(x, y, endDirection)
+                    assign(endDirection,getNameDrawerProperties("oy").value)
+                }
+                else {
+                    yaw -= mouse.positionDelta.x * .6
+                    pitch = clamp(pitch, -TAU / 2., TAU / 2.)
+                    mvRotator(yawAxis, yaw, mv0)
 
-                pitch += mouse.positionDelta.y * .6
-                pitch = clamp(pitch, -TAU / 4., TAU / 4.)
-                mvRotator(pitchAxis, pitch, mv1)
+                    pitch += mouse.positionDelta.y * .6
+                    pitch = clamp(pitch, -TAU / 4., TAU / 4.)
+                    mvRotator(pitchAxis, pitch, mv1)
 
-                gProduct(mv0, mv1, globeRotor)
+                    gProduct(mv0, mv1, globeRotor)
+                }
             }
         }
 
         let pictogramDrawer = new PictogramDrawer(vs, fs)
         addType("globe", pictogramDrawer, globeEditingStyle)
 
-        pictogramDrawer.program.addVertexAttribute("uv", 2)
-        pictogramDrawer.program.locateUniform("sampler")
-        pictogramDrawer.program.locateUniform("ourRotor")
-        pictogramDrawer.program.locateUniform("viewRotor")
-        pictogramDrawer.program.locateUniform("transparent")
-        pictogramDrawer.program.locateUniform("isPoints")
+        locateAll(pictogramDrawer.program)
 
         addRenderFunction(() => {
             gl.useProgram(pictogramDrawer.program.glProgram)
 
             pictogramDrawer.finishPrebatchAndDrawEach((nameProperties, name) => {
-                gl.uniform1fv(pictogramDrawer.program.getUniformLocation("viewRotor"), viewRotor)
+                transferAll(pictogramDrawer.program,nameProperties)
 
-                if (!nameProperties.isPoints) {
-                    gl.activeTexture(gl.TEXTURE0);
-                    gl.bindTexture(gl.TEXTURE_2D, nameProperties.texture);
-                    gl.uniform1i(pictogramDrawer.program.getUniformLocation("sampler"), 0); //hmm, why 0?
-                }
-
-                gl.uniform1i(pictogramDrawer.program.getUniformLocation("transparent"), nameProperties.transparent ? 1 : 0)
-                gl.uniform1i(pictogramDrawer.program.getUniformLocation("isPoints"), nameProperties.isPoints ? 1 : 0)
-
-                gl.uniform1fv(pictogramDrawer.program.getUniformLocation("ourRotor"), globeRotor)
-
-                if( nameProperties.isPoints ) {
-                    pictogramDrawer.program.prepareVertexAttribute("uv",pathBuffer)
+                if( nameProperties.isPoints )
                     gl.drawArrays(gl.POINTS, 0, pathBuffer.length / 2)
-                }
-                else {
-                    pictogramDrawer.program.prepareVertexAttribute("uv",uvBuffer)
+                else
                     gl.drawArrays(gl.TRIANGLES, 0, uvBuffer.length / 2)
-                }
             })
         })
     }
@@ -292,14 +367,8 @@ async function initGlobePictograms() {
                 let vsSource = vertexShaderToPictogramVertexShader(fullString)
                 ourPpWrapper.pictogramProgram.changeShader(gl.VERTEX_SHADER, vsSource)
 
-                ourPpWrapper.pictogramProgram.addVertexAttribute("uv",2)
-                ourPpWrapper.pictogramProgram.locateUniform("sampler")
-                ourPpWrapper.pictogramProgram.locateUniform("ourRotor")
-                ourPpWrapper.pictogramProgram.locateUniform("transparent")
-                ourPpWrapper.pictogramProgram.locateUniform("isPoints")
-                ourPpWrapper.pictogramProgram.locateUniform("viewRotor")
+                locateAll(ourPpWrapper.pictogramProgram)
 
-                //sampler could be in this too
                 nameProperties.namesWithLocalizationNeeded.forEach((name) => {
                     ourPpWrapper.pictogramProgram.locateUniform(name)
                 })
@@ -311,24 +380,7 @@ async function initGlobePictograms() {
             let program = ourPpWrapper.pictogramProgram
             gl.useProgram(program.glProgram)
 
-            if( nameProperties.globeProperties.isPoints ) {
-                program.prepareVertexAttribute("uv",pathBuffer)
-            }
-            else {
-                program.prepareVertexAttribute("uv",uvBuffer)
-            }
-
-            if (!nameProperties.globeProperties.isPoints) {
-                gl.activeTexture(gl.TEXTURE0)
-                gl.bindTexture(gl.TEXTURE_2D, nameProperties.globeProperties.texture)
-                gl.uniform1i(program.getUniformLocation("sampler"), 0)
-            }
-
-            gl.uniform1i(program.getUniformLocation("transparent"), nameProperties.globeProperties.transparent ? 1 : 0 )
-            gl.uniform1i(program.getUniformLocation("isPoints"), nameProperties.globeProperties.isPoints ? 1 : 0)
-            
-            gl.uniform1fv(program.getUniformLocation("ourRotor"), globeRotor)
-            gl.uniform1fv(program.getUniformLocation("viewRotor"), viewRotor)
+            transferAll(program,nameProperties.globeProperties)
 
             nameProperties.namesWithLocalizationNeeded.forEach((name) => {
                 gl.uniform1fv(program.getUniformLocation(name), getNameDrawerProperties(name).value)
@@ -341,12 +393,10 @@ async function initGlobePictograms() {
         addType("globeProjection", pictogramDrawer, {})
 
         function draw(nameProperties,name) {
-            if (nameProperties.globeProperties.isPoints) {
+            if (nameProperties.globeProperties.isPoints)
                 gl.drawArrays(gl.POINTS, 0, pathBuffer.length / 2)
-            }
-            else {
+            else
                 gl.drawArrays(gl.TRIANGLES, 0, uvBuffer.length / 2)
-            }
         }
         
         addRenderFunction(() => {

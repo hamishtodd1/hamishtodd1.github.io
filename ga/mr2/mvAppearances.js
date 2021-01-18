@@ -345,7 +345,7 @@ function initMvPictograms() {
                 let toValueRotor = nonAlgebraTempMv1
                 gProduct(mvDualNormalized, yDirectionDual, toValueRotor)
                 toValueRotor[0] += 1.
-                euclideanNormalizeWhole(toValueRotor)
+                euclideanNormalizeMotor(toValueRotor)
                 
                 let rotor = nonAlgebraTempMv2
                 gProduct(viewRotor,toValueRotor,rotor)
@@ -532,15 +532,15 @@ function initMvPictograms() {
                     let rotationMotor = nonAlgebraTempMv2
                     gProduct(orientedPlane,zPlane,rotationMotor)
                     rotationMotor[0] += 1.
-                    euclideanNormalizeWhole(rotationMotor)
+                    euclideanNormalizeMotor(rotationMotor)
 
                     let translationMotor = nonAlgebraTempMv3
                     gProduct(transformedMv, orientedPlane, translationMotor)
                     translationMotor[0] += 1.
-                    euclideanNormalizeWhole(translationMotor)
+                    euclideanNormalizeMotor(translationMotor)
 
                     gProduct(translationMotor,rotationMotor,motorFromZPlane)
-                    euclideanNormalizeWhole(motorFromZPlane) //probably unnecessary
+                    euclideanNormalizeMotor(motorFromZPlane) //probably unnecessary
                 }
 
                 gl.uniform1fv(planePictogramDrawer.program.getUniformLocation("motorFromZPlane"), motorFromZPlane)

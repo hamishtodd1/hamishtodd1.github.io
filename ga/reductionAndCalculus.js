@@ -1,7 +1,16 @@
 /*
-	In an ordinary editor, one problem you'd encounter with an automatic inliner is that if you had any variables with same name...
-	Not such a problem for us because auto-renaming, you really don't give a shit about the name, it's just the shit you type
+	Autodiff
+		it's just nice if a function returns, not only its value at a point, but also the direction you're going in in the codomain
+		
 
+	What for?
+		Simplifying code is something we all know is good. Make tools to help automate that!
+		Make it so people learn these simplifying/geometrical things
+		Ordinary physics and maths is about doing these / teaching theorems
+		Runtime differentiation
+		The maths you write in your notebook then use to derive a single crazy formula that you put in a line of code - that should be in your codebase
+		What it says about this system
+			Algebra can be useful to a computer scientist if you stay consistent
 
     y = x^2
 	y' = 2x
@@ -12,15 +21,6 @@
 	(1,2t) vs (2,4t). These are the same at the same point though. Implicit functions are not unique
 	vector tangent to f: f'(t) = (1,2x)
 	An implicit function just means it's a curve in a higher dimension
-	
-	What for?
-		Simplifying code is something we all know is good. Make tools to help automate that!
-		Make it so people learn these simplifying/geometrical things
-		Ordinary physics and maths is about doing these / teaching theorems
-		Runtime differentiation
-		The maths you write in your notebook then use to derive a single crazy formula that you put in a line of code - that should be in your codebase
-		What it says about this system
-			Algebra can be useful to a computer scientist if you stay consistent
     
 	Calculus
 		Find a geometric interpretation of the dual numbers
@@ -68,6 +68,9 @@
 			"differentiate(x*x,x)" -> "2*x"
 
 	Algebraic deduction / omicron reduction
+		In an ordinary editor, one problem you'd encounter with an automatic inliner is that if you had any variables with same name...
+		Not such a problem for us because auto-renaming, you really don't give a shit about the name, it's just the shit you type
+		law of sines proof, doable with reduction: https://slides.com/labs810/ga4science#/28/0/4
 		Maybe worth calling them "conjectures", because mightn't they be false?
 		Cauchy Riemann is a nice example of something you can put in reductions
 		the fundamental axioms are e1^2 = e2^2= 1 and e1e2 = -e2e1

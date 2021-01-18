@@ -14,10 +14,6 @@
 		Probably can get the lag such that it's on-frame
 		Deadline is 23rd I guess. Nice as it would be to "go viral" in time
 
-	"How do things rotate in 4D? in VR" Thumbnail: nice MR thing, "4 space dimensions??"
-	Description
-		Tags: flatland
-
 	Send to
 		Vi
 		Grant

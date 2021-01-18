@@ -1,19 +1,4 @@
 /*
-	https://twitter.com/MachinePix/status/1323759584390033408
-
-	This animation except in 3D, the points are rotating on circles https://www.reddit.com/r/math/comments/jdns19/circles_moving_in_a_straight_line_with_sin/
-
-	nicely visual QM course https://www.youtube.com/watch?v=K4BF7MD69_U
-	Nice footage of bubbles https://www.youtube.com/watch?v=WTxDyYHaYAI
-	Probably interestingly shaped magnetic field https://www.youtube.com/watch?v=c2h60hCJh2U
-
-	https://twitter.com/MartinSchwab9/status/1289323221049843712
-
-	Could do some number theory.
-		prime numbers are ones not on the hyperbolic paraboloid
-		What about the stuff in the minutephysics shor's
-		Enough for cryptography, then elliptic curve cryptography
-
 	Notes
 		These animations- you must make them using the system, the player is to reverse-engineer them
 		Nice how videoing them projects them onto a plane so they can be vizzed in a volume
@@ -38,7 +23,25 @@
 			It should mostly be about mechanics to be a fun easy thing for people to do in their lives with AR
 				Look through mechanics textbooks for examples
 
-	Some random ones
+	Re electromagnetism: look at "magnetic core memory", that's something you can do a shader simulation of
+
+	Random ones
+		total internal reflection https://www.youtube.com/watch?v=Lic3gCS_bKo Boyd Edwards is apparently the guy
+		Number theory
+			prime numbers are ones not on the hyperbolic paraboloid
+			What about the stuff in the minutephysics shor's
+			Enough for cryptography, then elliptic curve cryptography
+		pbr https://www.youtube.com/watch?v=RZiTJCxb9Ts
+		auroroa borealis
+			https://www.nasa.gov/feature/goddard/2019/nasa-launches-two-rockets-studying-auroras/
+			https://www.esa.int/Applications/Observing_the_Earth/Swarm/Energy_from_solar_wind_favours_the_north
+		Cool rainbow thing https://twitter.com/MachinePix/status/1323759584390033408
+		nicely visual QM course https://www.youtube.com/watch?v=K4BF7MD69_U
+		Nice footage of bubbles https://www.youtube.com/watch?v=WTxDyYHaYAI
+		This animation except in 3D, the points are rotating on circles https://www.reddit.com/r/math/comments/jdns19/circles_moving_in_a_straight_line_with_sin/
+		Probably interestingly shaped magnetic field https://www.youtube.com/watch?v=c2h60hCJh2U
+		hoberman esque https://twitter.com/MartinSchwab9/status/1289323221049843712
+		hockey practice https://twitter.com/SportsCenter/status/1340131112119627776
 		windmills (guess you need fluid mechanics)
 		flipping a bunch of things in a nice pattern https://youtu.be/Hy6vddbQa8Q?t=10
 		ball and disc integrator

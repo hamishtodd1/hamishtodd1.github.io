@@ -55,7 +55,11 @@ async function initBasicSimulation() {
 		new THREE.PlaneBufferGeometry( 0.3 * dimensions.x / dimensions.y, 0.3 ),
 		displayMaterial );
 	scene.add( displayMesh );
-	displayMesh.position.copy(hands[0].position)
+	log(displayMesh)
+	
+	updateFunctions.push(()=>{
+		displayMesh.position.copy(hands[0].position)
+	})
 }
 
 async function Simulation( 

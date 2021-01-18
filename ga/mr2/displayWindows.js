@@ -6,6 +6,9 @@
     Urgh, I guess nobody was going for QUITE this market before?
 
     Would be nice if: the function signature puts into the dw the inputs and outputs and probably the constants it uses too
+
+    If you edit in the carat dw, the edits apply to whatever the carat is immediately after
+        ie, potentially, the thing you just created by clicking
  */
 
 function displayWindowXyTo3dDirection(x, y, target) {

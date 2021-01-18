@@ -10,4 +10,5 @@
 		there are only a few points on these things that can be reached
 
 	https://arstechnica.com/information-technology/2013/10/a-relatively-easy-to-understand-primer-on-elliptic-curve-cryptography/
+	https://www.allaboutcircuits.com/technical-articles/elliptic-curve-cryptography-in-embedded-systems/
 */

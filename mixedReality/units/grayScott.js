@@ -426,6 +426,10 @@ async function initGrayScottSimulation(gl)
 	displayMesh.position.y -= displayMesh.scale.y/2
 
 	initGrayScottParticles(displayMesh, simulation, numStepsPerFrame)
+
+	updateFunctions.push(() => {
+		displayMesh.position.copy(hands[0].position)
+	})
 }
 
 //Quadtree

@@ -1,57 +1,7 @@
 /*
-	https://twitter.com/infowetrust/status/967105316272816128
-
-	Old:
-		"Have a handheld “projector” that snaps to certain positions. And a “canvas” to record projection on."
-		A page with a geometric proof of conformality http://www.quadibloc.com/maps/maz0202.htm 
-
-	Title
-		How racist is your map? Which is least racist?
-		Top 8 map projections?
-
-	Script
-		Yeah, this took ages, thanks for asking
-		Hey, heckling is very unfair, these eyes do not actually work. From my point of view the world looks like this
-		And here's what climate scientists use to show temperature change! pretty important to see the poles :)
-		Mercator
-			So let's say you are a sea captain(Put on a sea captain hat)
-			Wanting to make your fortune by acquiring spices in the bahamas and delivering them to royalty in sweden
-			Literally all you have is a compass. You don't know where you are, you don't know how fast you're going
-			The simplest course you can have is one where your compass is always pointing in the same direction
-
-		Polyhedral
-			"this one is great because it minimizes distortion of area and shape, like Africa here is basically the same size and shape as it really is" (or with a different one, early on)
-			These ones have line discontinuities at the edges. If you know how to do complex analysis you can get rid of these!
-		End:
-			You might say that the ultimate projection is this, a globe
-				And how often do you turn it up this way and look at the artic circle?
-				Well, don't be so fast. You have to show global information (human migration, gdp) *somehow*
-				perspective projection, pick up the "clone" and show them it's a flat picture - it's still a projection folks, mind blown!
-				But look, you do want to see the whole thing at once. And do you ever really look at it from all angles?
-			Topology
-				It so much feels like it shouldn't be hard, because when you look close up the world is flat
-				but there's intrinsic curvature, comes about due to topology
-				You HAVE to distort something: area, direction, length
-				And then it gets more complex than that, like with navigators wanting to make rhumb lines straight
-				Really, all these things are so beautiful and he was denying that beauty - "one map for one world", fascistic really
-			Arno Peters
-				It's important to be unambiguous: when people say that maps are racist, they are abusing the word racist
-				He raised an important objection
-				Let's imagine a parallel universe where Peters parents had raised him to believe that while pointing out structural oppression is important, it doesn't justify talking bollocks
-				I would have loved Peters for ever, if he had recommended everyone use a non-piece of shit projection like Dymaxion I'd have loved him!
-				Even if he had plaigarized Dymaxion!
-				It's that he falsely claimed to have done something mathematically impossible...
-				and implied that the reason that nobody had done what he had done before (even though they had done it before!)
-				was that cartographers and publishers were biased europeans
-				And in doing that, he was taking a massive shit on the Egyptians and the Chinese folks that first worked this stuff out
-		Take helmet off and hold at side for bow
-		
-	Probably crap
-		1-manifolds
-
 	"The general interface"
 		Do individual triangles
-
+		"Have a handheld “projector” that snaps to certain positions. And a “canvas” to record projection on."
 		Remember your first idea was cross section of the earth
 		Goal
 			People want to hear the PURPOSE of a given projection, what it achieves
@@ -89,46 +39,6 @@
 			Projection bulb
 			Have their names at the bottom
 			Reorient to a chosen orientation
-
-	Projections
-		Polyhedral
-			Tet
-			Oct
-			Dymaxion
-		azimuthal
-			equidistant = rolling pin!
-			central
-			equal area - "tunnel distance", surprisingly! geologists use it
-		Retroazimuthal
-			??? Littrow - simple! Application though?
-			"The direction from any point to the center of the map is the angle that a straight line connecting the two points makes with a vertical line."
-				You're looking at a point on the sphere, there is a line connecting that point with its opposite pole
-				For each point connect it to that opposite pole and look at the angle it makes,
-			??? NEED the mecca one, to compare with gall peters
-			??? Two point equidistant
-				Might be interesting, gotten in an ellipse-drawing-like way
-		Axial - means you start out by turning the globe into a half-cylinder
-			Central cylindrical
-			Mercator
-				Central point, peel out rhumb lines ending at the meridian opposite the point
-				If you have to just reach in and stretch it, fine
-				But how about an exponential curve away from the globe
-				underrated, talk about directions (first! and then tell them it's mercator!)
-				Buuuut pick up greenland too
-			Gall peters!
-			equirectangular
-			Sinusoidal is very easy out of these dull diamond shaped ones
-				Can do interrupted too! different distortion in different places, yuck
-		Misc
-			Conic - cone involved
-				One of the ones that fan out
-				polyconics
-					Buncha cones
-				Werner isn't there some way to connect to normal conic?
-					p = TAU/4 - lat				[0,TAU/2]
-					E = long * cos(lat) / p		[-TAU/2*]
-					x = p * sin(E)
-					y =-p * cos(E)
 
 	HOW FAR DOES PROJECTING ONTO MESHES GET YOU?
 		Polyhedral, central cyl, mercator, equirect, conic, 
