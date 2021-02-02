@@ -496,6 +496,14 @@ function initAlgebra()
             pointW(p, 1.)
         }
 
+        directionNormalize = (mv)=> {
+            let inv = 1. / Math.sqrt(sq(pointX(mv)) + sq(pointY(mv)) + sq(pointZ(mv)))
+            pointX(mv, pointX(mv) * inv)
+            pointY(mv, pointY(mv) * inv)
+            pointZ(mv, pointZ(mv) * inv)
+            pointW(mv, 0.)
+        }
+
         appendToGaShaderString(replaceSignature(
             "void wNormalizePoint(inout float mv[16] )",
             wNormalizePoint = (mv) =>

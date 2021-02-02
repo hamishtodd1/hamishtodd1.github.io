@@ -1,3 +1,31 @@
+function initViewRotor() {
+    let xAxis = new Float32Array(16)
+    let yawAngle = 0.
+    realLineX(xAxis, 1.)
+    let yAxis = new Float32Array(16)
+    let pitchAngle = 0.
+    realLineY(yAxis, 1.)
+
+    adjustViewOnMvs = () => {
+        pitchAngle += mouse.positionDelta.y * -0.27
+        pitchAngle = clamp(pitchAngle, -TAU / 4., TAU / 4.)
+        let pitchRotator = nonAlgebraTempMv1
+        mvRotator(xAxis, pitchAngle, pitchRotator)
+
+        yawAngle += mouse.positionDelta.x * 0.27
+        let yawRotator = nonAlgebraTempMv2
+        mvRotator(yAxis, yawAngle, yawRotator)
+
+        gProduct(pitchRotator, yawRotator, viewRotor)
+        reverse(viewRotor, inverseViewRotor)
+    }
+
+    rightMouseResponses.push({
+        z: () => 0.,
+        during: adjustViewOnMvs
+    })
+}
+
 function copyStringArray(arr, target) {
     target.length = arr.length
     arr.forEach((str, i) => {

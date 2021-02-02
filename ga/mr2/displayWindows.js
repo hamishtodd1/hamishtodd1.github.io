@@ -14,8 +14,10 @@
 function displayWindowXyTo3dDirection(x, y, target) {
     let mouseDistFromCenter = Math.sqrt(sq(x) + sq(y))
     let placeInWaveRing = mouseDistFromCenter
-    while (placeInWaveRing > 4.)
-        placeInWaveRing -= 4.
+    
+    placeInWaveRing = clamp(placeInWaveRing,0.,1.)
+    // while (placeInWaveRing > 4.)
+    //     placeInWaveRing -= 4.
 
     if (1. < placeInWaveRing && placeInWaveRing < 3.) {
         var onscreenDistFromCenter = 2. - placeInWaveRing

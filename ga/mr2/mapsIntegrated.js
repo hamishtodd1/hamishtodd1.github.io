@@ -96,11 +96,11 @@ async function initGlobePictograms() {
     const numDivisions = 256
     const uvBuffer = new Float32Array(generateDividedUnitSquareBuffer(numDivisions, eps))
 
-    const numPathPoints = 60
-    const pathBuffer = new Float32Array(numPathPoints * 2) //equator by default, equirectangularly
+    const numPathVertices = 60
+    const pathBuffer = new Float32Array(numPathVertices * 2) //equator by default, equirectangularly
     {
-        for (let i = 0; i < numPathPoints; ++i) {
-            pathBuffer[i*2+0] = i / numPathPoints
+        for (let i = 0; i < numPathVertices; ++i) {
+            pathBuffer[i*2+0] = i / numPathVertices
             pathBuffer[i*2+1] = .5
         }
     }
@@ -108,13 +108,12 @@ async function initGlobePictograms() {
     let globeVsStart = `
         attribute vec2 uvA;
         varying vec2 uv;
-        varying float discardWhole;
+        varying float discardPoint;
 
         uniform float ourRotor[16];
         uniform float viewRotor[16];
 
         uniform int isPoints;
-
         uniform vec3 startDirection;
         uniform vec3 endDirection;
 
@@ -139,13 +138,13 @@ async function initGlobePictograms() {
 
                 vec3 pointDirection = normalize(vec3( pointX(pointOnGlobe), pointY(pointOnGlobe), pointZ(pointOnGlobe) ));
                 float angleToStart = acos(dot(startDirection,pointDirection));
-                float angleToEnd = acos(dot(startDirection,pointDirection));
+                float angleToEnd = acos(dot(endDirection,pointDirection));
                 float startEndAngle = acos(dot(startDirection,endDirection));
 
-                if( startEndAngle == 0. || angleToStart + angleToEnd > startEndAngle + .05)
-                    discardWhole = 1.;
+                if( startEndAngle == 0. || angleToStart + angleToEnd > startEndAngle + .01)
+                    discardPoint = 1.;
                 else
-                    discardWhole = 0.;
+                    discardPoint = 0.;
 
                 gl_PointSize = 4.;
             }
@@ -165,13 +164,12 @@ async function initGlobePictograms() {
 
     let fs = `
         varying vec2 uv;
-        varying float discardWhole;
-
         uniform sampler2D sampler;
-
+        
         uniform int transparent;
 
         uniform int isPoints;
+        varying float discardPoint;
 
         void main(void) {
             if( isPoints == 0 ) {
@@ -183,7 +181,7 @@ async function initGlobePictograms() {
             else {
                 gl_FragColor = vec4(1.,0.,0.,1.);
                 
-                if(discardWhole == 1.)
+                if(discardPoint > .5)
                     discard;
             }
         `
@@ -194,8 +192,8 @@ async function initGlobePictograms() {
         program.locateUniform("ourRotor")
         program.locateUniform("viewRotor")
         program.locateUniform("transparent")
+        
         program.locateUniform("isPoints")
-
         program.locateUniform("startDirection")
         program.locateUniform("endDirection")
     }
@@ -207,6 +205,9 @@ async function initGlobePictograms() {
             gl.uniform3f(program.getUniformLocation("startDirection"), pointX(startDirection), pointY(startDirection), pointZ(startDirection));
             gl.uniform3f(program.getUniformLocation("endDirection"), pointX(endDirection), pointY(endDirection), pointZ(endDirection));
 
+            assign(startDirection, getNameDrawerProperties("bp").value)
+            assign(endDirection, getNameDrawerProperties("oy").value)
+
             // debugger
             const startLine = nonAlgebraTempMv0
             join(origin, startDirection, startLine)
@@ -216,12 +217,14 @@ async function initGlobePictograms() {
 
             const yPlane = nonAlgebraTempMv2
             plane(yPlane, 0., 1., 0., 0.)
-            const pathRotor = nonAlgebraTempMv4
-            gProduct(yPlane, pathPlane, pathRotor)
+            
+            const pathRotor = nonAlgebraTempMv3
+            gProduct(pathPlane, yPlane, pathRotor)
             sqrtMotor(pathRotor)
 
             gl.uniform1fv(program.getUniformLocation("ourRotor"), pathRotor)
-            log(pathRotor)
+
+            gl.uniform1i(program.getUniformLocation("isPoints"), 1)
         }
         else {
             program.prepareVertexAttribute("uv",uvBuffer)
@@ -231,10 +234,11 @@ async function initGlobePictograms() {
             gl.uniform1i(program.getUniformLocation("sampler"), 0); //hmm, why 0?
 
             gl.uniform1fv(program.getUniformLocation("ourRotor"), globeRotor)
+
+            gl.uniform1i(program.getUniformLocation("isPoints"), 0)
         }
 
         gl.uniform1i(program.getUniformLocation("transparent"), globeProperties.transparent ? 1 : 0)
-        gl.uniform1i(program.getUniformLocation("isPoints"), globeProperties.isPoints ? 1 : 0)
 
         gl.uniform1fv(program.getUniformLocation("viewRotor"), viewRotor)
     }
@@ -243,10 +247,11 @@ async function initGlobePictograms() {
     {
         //can just be float32Arrays
         var startDirection = new Float32Array(16)
-        pointY(startDirection,1.)
+        point(startDirection, Math.random() - .5, Math.random() - .5, Math.random() - .5, 0.)
+        directionNormalize(startDirection)
         var endDirection = new Float32Array(16)
-        pointX(endDirection,1./Math.sqrt(2.))
-        pointY(endDirection,1./Math.sqrt(2.))
+        point(endDirection,Math.random() - .5,Math.random() - .5,Math.random() - .5,0.)
+        directionNormalize(endDirection)
 
         let vs = gaShaderString + globeVsStart + `
             sandwichBab(pointOnGlobe,viewRotor,nonAlgebraTempMv0);
@@ -263,8 +268,7 @@ async function initGlobePictograms() {
             start: (name,x,y) => {
                 if(getNameDrawerProperties(name).isPoints) {
                     displayWindowXyTo3dDirection(x, y, startDirection)
-                    assign(startDirection, getNameDrawerProperties("bp").value)`INDG >SbcV|xll
-                    `
+                    assign(startDirection, getNameDrawerProperties("bp").value)
                 }
             },
             during: (name,x,y) => {
@@ -409,206 +413,4 @@ async function initGlobePictograms() {
             gl.enable(gl.CULL_FACE);
         })
     }
-}
-
-async function initDymaxion() {
-    let indices = [
-        //the one to rotate, the one opposing it, the two between them
-        [6, 0, 1, 5],
-        [12, 1, 6, 5],
-        [11, 6, 12, 5],
-        [13, 5, 6, 12],
-        [18, 6, 13, 12],
-        [17, 13, 18, 12],
-        [19, 12, 13, 18],
-        [7, 12, 6, 13],
-        [2, 13, 6, 7],
-        [14, 6, 7, 13],
-        [8, 13, 7, 14],
-        [3, 14, 7, 8],
-        [4, 7, 3, 8],
-        [15, 7, 8, 14],
-        [20, 8, 15, 14],
-        [9, 14, 8, 15],
-        [16, 8, 9, 15],
-        [10, 15, 9, 16],
-        [21, 9, 16, 15],
-        [0, -1, 5, 1],
-    ]
-
-    let numVerts = 22
-    let animatedVertsBuffer = new Float32Array(numVerts * 4)
-    // verticesDisplay(animatedVertsBuffer, gl.POINTS)
-    let closedVertsBuffer = new Float32Array(numVerts * 4)
-
-    let icosahedronDihedralAngle = Math.acos(-Math.sqrt(5.) / 3.)
-
-    let verts = Array(numVerts)
-    for (let i = 0; i < numVerts; ++i)
-        verts[i] = new Float32Array(16)
-    point(verts[5], -0.35578140, -0.40223423, 0.84358000, 1.);
-    point(verts[0], -0.42015243, -0.90408255, -0.07814525, 1.);
-    point(verts[1], -0.99500944, -0.04014717, 0.09134780, 1.);
-
-    let axis = new Float32Array(16)
-    let ourRotator = new Float32Array(16)
-    function repositionVerts(angle, vertsBuffer) {
-        // https://www.researchgate.net/publication/334307604_Dymaxion_Map_Transformations_-_Technical_White_Paper
-
-        for (let i = 0, il = indices.length - 1; i < il; ++i) {
-            let p = verts[indices[i][0]]
-            assign(verts[indices[i][1]], p)
-            join(verts[indices[i][2]], verts[indices[i][3]], axis)
-
-            lineNormalize(axis)
-
-            mvRotator(axis, angle, ourRotator)
-            sandwichBab(p, ourRotator, p)
-        }
-        mvArrayToPointsBuffer(verts, vertsBuffer)
-    }
-    repositionVerts(icosahedronDihedralAngle, closedVertsBuffer)
-
-    updateFunctions.push(() => {
-        let angle = icosahedronDihedralAngle + (Math.PI - icosahedronDihedralAngle) * (.5 - .5 * Math.cos(frameCount * .006))
-        repositionVerts(angle, animatedVertsBuffer)
-    })
-
-    const vsSource = cameraAndFrameCountShaderStuff.header + `
-        attribute vec2 uvA;
-        varying vec4 closedP;
-
-        `
-        + gaShaderString +
-        `
-
-        uniform vec4 animatedVerts[22];
-        uniform vec4 closedVerts[22];
-
-        uniform int blIndex;
-        uniform int brIndex;
-        uniform int tlIndex;
-
-        uniform float transform[16];
-
-        void main(void) {
-            vec4 animatedP = animatedVerts[blIndex] +
-                uvA.x * (animatedVerts[brIndex] - animatedVerts[blIndex]) +
-                uvA.y * (animatedVerts[tlIndex] - animatedVerts[blIndex]);
-
-            closedP = closedVerts[blIndex] +
-                uvA.x * (closedVerts[brIndex] - closedVerts[blIndex]) +
-                uvA.y * (closedVerts[tlIndex] - closedVerts[blIndex]);
-
-            // if( .5 - .5 * cos(frameCount * .006) < .01)
-            //     animatedP.xyz /= length(animatedP.xyz);
-
-            float animatedPMv[16];
-            pointToMv(animatedP,animatedPMv);
-            float transformed[16];
-            sandwichBab(animatedPMv, transform, transformed);
-            mvToPoint(transformed,gl_Position);
-        `
-        + cameraAndFrameCountShaderStuff.footer
-    const fsSource = cameraAndFrameCountShaderStuff.header + `
-        varying vec2 uv;
-        varying vec4 closedP;
-
-        uniform sampler2D sampler;
-
-        void main(void) {
-            vec3 positionOnUnitSphere = closedP.xyz / length(closedP.xyz);
-
-            float lat = 0.;
-            float lon = 0.;
-            {
-                vec3 equatorialPlaneNormal = vec3(0.,1.,0.);
-
-                vec3 projectionOntoNormal = equatorialPlaneNormal * dot(equatorialPlaneNormal,positionOnUnitSphere);
-                projectionOntoNormal /= length(projectionOntoNormal);
-
-                float angleFromNorthPole = acos(dot(equatorialPlaneNormal,positionOnUnitSphere));
-                lat = PI/2. - angleFromNorthPole;
-
-                vec3 projectionOntoPlane = positionOnUnitSphere - projectionOntoNormal;
-                projectionOntoPlane /= length(projectionOntoPlane);
-                //z is central meridian
-                lon = atan(projectionOntoPlane.z,projectionOntoPlane.x);
-            }
-
-            gl_FragColor = texture2D(sampler, vec2(
-                .5 + lon / PI / 2.,
-                .5 - lat / PI));
-        }
-        `
-
-    const program = new Program(vsSource, fsSource)
-    cameraAndFrameCountShaderStuff.locateUniforms(program)
-    program.locateUniform("transform")
-
-    program.locateUniform("animatedVerts")
-    program.locateUniform("closedVerts")
-
-    program.locateUniform("blIndex")
-    program.locateUniform("brIndex")
-    program.locateUniform("tlIndex")
-
-    const texture = await Texture("data/earthColor.png")
-    program.locateUniform("sampler")
-
-    {
-        let numDivisions = 16
-        const uvBuffer = []
-        function pushUv(i, j) {
-            uvBuffer.push(i / numDivisions)
-            uvBuffer.push(j / numDivisions)
-        }
-        let eps = .00001
-        for (let i = 0.; i < numDivisions; ++i) {
-            for (let j = 0.; j < numDivisions - i; ++j) {
-                pushUv(i + eps, j + eps)
-                pushUv(i + eps, j + 1. - eps)
-                pushUv(i + 1. - eps, j + eps)
-
-                if (j + 1 < numDivisions - i) {
-                    pushUv(i + eps, j + 1. - eps)
-                    pushUv(i + 1. - eps, j + 1. - eps)
-                    pushUv(i + 1. - eps, j + eps)
-                }
-            }
-        }
-        var numVertices = uvBuffer.length / 2
-
-        program.addVertexAttribute("uv",2, new Float32Array(uvBuffer))
-    }
-
-    let transform = new Float32Array(16)
-    transform[0] = 1.
-
-    addRenderFunction(() => {
-        gl.useProgram(program.glProgram);
-
-        program.prepareVertexAttribute("uv")
-
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.uniform1i(program.getUniformLocation("sampler"), 0);
-
-        cameraAndFrameCountShaderStuff.transfer(program)
-
-        gl.uniform1fv(program.getUniformLocation("transform"), transform)
-
-        gl.uniform4fv(program.getUniformLocation("animatedVerts"), animatedVertsBuffer);
-        gl.uniform4fv(program.getUniformLocation("closedVerts"), closedVertsBuffer);
-
-        gl.disable(gl.CULL_FACE);
-        for (let i = 0; i < indices.length; ++i) {
-            gl.uniform1i(program.getUniformLocation("blIndex"), indices[i][0])
-            gl.uniform1i(program.getUniformLocation("brIndex"), indices[i][2])
-            gl.uniform1i(program.getUniformLocation("tlIndex"), indices[i][3])
-
-            gl.drawArrays(gl.TRIANGLES, 0, numVertices);
-        }
-        gl.enable(gl.CULL_FACE);
-    })
 }

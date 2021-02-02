@@ -5,6 +5,8 @@
 		lines and plane at infinity visualization
 		Bug with your mind: you want to reinvent calculus. Just wait for calculus shit to come up in the course of the project, then ask people how to do it
 
+	what you change with mouse is continuous but what you type is discrete
+
 	Maybe... the lines of code create an animation, step through it using your cursor
 
 		Or, you have certain lines where you display what's in each frame of the animation, then ctrl up and down to get between them
@@ -24,6 +26,9 @@
 		f x g = {(x,y) : there exists A,B s.t. f(A), g(B) }
 		Or, ordinary javascript arrays
 		But this isn't about arrays it's about functions
+
+	For YOU to export snippets
+		Have a button that save out the ir
 
 	General/universal visual algebra
 		New algebra for every video
@@ -99,6 +104,11 @@
 	<body>
 		<script>
 			async function technicalInit() {
+
+				/************************
+					Framework
+				************************/
+
 				let renderEverything = initRenderFunctions()
 
 				initButtons()
@@ -114,8 +124,7 @@
 
 				initMouse()
 
-				// await initDymaxion()
-				// initExperiment()
+				initViewRotor()
 
 				function loop() {
 
@@ -135,6 +144,12 @@
 					}, 1000. / 60.);
 				}
 
+				// await initDymaxion()
+				// await initWorldMap()
+
+				/************************
+					The specific project
+				************************/
 				// if(0)
 				{
 					// await initWorldMap()
@@ -228,6 +243,7 @@
 
 		<script src="maps.js"></script>
 		<script src="mapsIntegrated.js"></script>
+		<script src="dymaxion.js"></script>
 
 		<script src="algebra.js"></script>
 		<script src="dualQuaternions.js"></script>

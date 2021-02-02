@@ -12,60 +12,70 @@
 
     Script 2
         Intro
-            Very varied. Tell you something about geometry and about the different things people use maths for
-            We will get onto the political controversy surrounding the relative sizes of Greenland and Africa (demonstrate it)
-            but honestly, it's very useful and fun to understand the mathematics first
+            Very varied and fun.
+            Tell you something about geometry and about the different things people use maps for
+            We will get onto the political controversy surrounding the "Default" map, and the relative sizes of Greenland and Africa (demonstrate it)
 
         ---------------------------------------
-        NOT SURE WHAT ORDER
+        NOT SURE WHAT ORDER - MAYBE DOESN'T MATTER
+
+        Fuck lambert, white dude, they'll kill you. Probably Bucky too.
+        This is about area preservation versus shape. Distance shmistance, direction shmirection
+        The only white dude to show is peters
 
         Dymaxion
             Consciously ignores up/down, equator/poles
             Goode homolosine, myriahedral
-            Flight path. People want one unbroken
-        Sinusoidal-derived
-            Area preserving, and length preserving along the parallels and meridians
-            old pics
-        Azimuthal equidistant
+            Flight path
+            Human migration
+            People want unbroken
+            Flattening orange peel
+            Preserves nothing completely
+        Azimuthal equidistant (opposite, super-connected, common sense directions)
+            DIRECTION and DISTANCE preserving, to the AZIMUTH
             Al biruni
-            North Korea's missile radii, UN
-            Distorts shapes
-        Stereographic
-            15th century map, astrolabe
-            probably known to ancient egyptians
-            Conformal: Wonderful for shapes+directions, crap for lengths and areas
-        Lambert Conic
-            Conformal like stereographic
+            North Korea's missile radii, flight length
+            area-preserving enough for the UN
+            Priveleges one spot
+        Sinusoidal-derived (so you want to preserve area)
+            AREA preserving, even though it was invented by white dudes
+            old pics
+            Don't believe the pill-shaped ones
+                they engage in area distortion AND shape
+        Stereographic (shapes have been preserved)
+            SHAPE preserving everywhere, unlike dymaxion which has kinks
+            Egyptians, starmap, not sure. 15th century map
+            Al zarkali astrolabe
+            Conformal
 
-        ------------
-        Lambert cylindrical equal area
-            Rectangular, terrible idea
-            Equator is the only place that it's right
-            Arctic circle
+        ------------ Rectangular
 
-        -----------------------------------
-        Let's have a look at some politically incorrect ones.
-        Central cylindrical
-            Greenland huge, not what you were expecting
-        Mercator
-            Conformal, show flight path
-            "Default"
-            Greenland, madagascar, maybe canada Russia
-        Gall-Peters
-            Hugely distorts shapes. Back to mercator, they're ok
-            There was a white guy who wanted to make a quick buck
-            Instead of equator being correct, equator gets stretched and the one place it's ok is Germany
-        equirectangular
+        Terrible idea
+        Equator is nice but really
+        
+        equirectangular?
             Simple
             Flight path
             Panorama, probably Siena, see below
             Show unwrap of panorama
             At least used by the chinese
-        Wagner / Kavrayskiy
-            Pills are a "compromise", no equal area
+        Cylindrical equal area
+            Elegant way of making a rectangle that preserves area
+            Rectangular, terrible idea - Gets us onto the politically incorrect ones
+            Equator is the only place that it's right
+            Arctic circle
+        Mercator
+            Loxodromes Urgh
+            Sizes
+        Gall-Peters
+            There was a white guy who wanted to make a quick buck
+            Instead of equator being correct, equator gets stretched and the one place it's ok is Germany
+            Become insufferable at parties
+            Colombia
         Craig retroazimuthal
             Good for one purpose
-            Doesn't aspire to realistically depict the earth
+            Doesn't aspire to realistically depict the earth, doesn't preserve shit
+            But it does help people
         Just be aware that there are different ways of doing it,
             whether you're trying to see how humans spread across the world,
             or find the direction to Mecca
@@ -132,7 +142,7 @@ async function initWorldMap() {
             uv = uvA;
             p = vec4(uv,0.,1.);
 
-            float oscillatingNumber = .5 + .5 * sin(frameCount*.05);
+            float oscillatingNumber = .5 - .5 * cos(frameCount*.01);
 
             float lon = (p.x - .5) * TAU;
             float lat = (p.y - .5) * PI;
@@ -141,29 +151,29 @@ async function initWorldMap() {
 
             // Interrupted sinusoidal is better in terms of thinking about the pole, and more compatible with GA, and easier
             {
-                float stripIndex = 0.;
-                if(lat > 0.) {
-                    float cutoff = 116.;
-                    if(uv.x < cutoff/256. )
-                        stripIndex = cutoff/2.;
-                    else
-                        stripIndex = 158.;
-                }
-                else {
-                    float cutoff0 = 116.;
-                    float cutoff1 = 182.;
-                    if(uv.x < cutoff0/256. )
-                        stripIndex = cutoff0/2.;
-                    else if(uv.x < cutoff1/256.)
-                        stripIndex = (cutoff0+cutoff1)/2.;
-                    else 
-                        stripIndex = 256. - (256.-cutoff1)/2.;
-                }
-                float stripCenterAtEquatorLon = TAU * stripIndex / 256. - PI;
-                float stripCenterAtEquatorMapped = stripCenterAtEquatorLon;
+                // float stripIndex = 0.;
+                // if(lat > 0.) {
+                //     float cutoff = 116.;
+                //     if(uv.x < cutoff/256. )
+                //         stripIndex = cutoff/2.;
+                //     else
+                //         stripIndex = 158.;
+                // }
+                // else {
+                //     float cutoff0 = 116.;
+                //     float cutoff1 = 182.;
+                //     if(uv.x < cutoff0/256. )
+                //         stripIndex = cutoff0/2.;
+                //     else if(uv.x < cutoff1/256.)
+                //         stripIndex = (cutoff0+cutoff1)/2.;
+                //     else 
+                //         stripIndex = 256. - (256.-cutoff1)/2.;
+                // }
+                // float stripCenterAtEquatorLon = TAU * stripIndex / 256. - PI;
+                // float stripCenterAtEquatorMapped = stripCenterAtEquatorLon;
 
-                p.x = (lon-stripCenterAtEquatorLon) * cos(lat) + stripCenterAtEquatorMapped;
-                p.y = lat;
+                // p.x = (lon-stripCenterAtEquatorLon) * cos(lat) + stripCenterAtEquatorMapped;
+                // p.y = lat;
             }
 
             //Wagner VI
@@ -220,22 +230,15 @@ async function initWorldMap() {
             // p.x = lon;
             // p.y = lat;
 
-            //orthographic, mercator, central cylindrical, gnomonic, stereographic should all be unified
-
-            //central cylindrical
-            // p.x = lon;
-            // p.y = sign(lat) * tan(abs(lat));
-
             //Gall peters
             // p.x = lon;
             // p.y = 2. * sin(lat);
-
-            //mercator
-            // p.x = lon;
-            // p.y = sign(lat) * log(tan(PI / 4. + abs(lat) / 2.));
-
-            //central/gnomic - use GA!
-            //surely can have stereographic too, it's just a projection point
+            
+            p.x = lon;
+            float upperHalfPipe = (TAU / 4. + lat)/2.;
+            float mercTan = tan(upperHalfPipe);
+            float merc = log(mercTan);
+            p.y = merc;
 
             dqSandwich(p, transform);
             
