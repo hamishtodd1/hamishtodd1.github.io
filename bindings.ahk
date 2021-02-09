@@ -64,6 +64,28 @@ PositionBothWindows()
 	}
 }
 
+#UseHook, On
+AddToPlaybackRate(amt)
+{
+	Send,^l
+	SendInput,javascript:document.querySelector('video').playbackRate
+	SendInput,{+}
+	SendInput,=%amt%
+	Send,{Enter}
+}
+]::
+	IfWinActive, ahk_exe Chrome.exe
+		AddToPlaybackRate(0.25)
+	else
+		Send,]
+Return
+[::
+	IfWinActive, ahk_exe Chrome.exe
+		AddToPlaybackRate(-0.25)
+	else
+		Send,[
+Return
+
 ;might be nice to bring up both windows. Can check for a non-maximized version of chrome
 !CapsLock::Return
 +CapsLock::Return
@@ -106,7 +128,7 @@ Left::
 Return
 
 ^!t::
-    run, cmd.exe, C:\hamishtodd1.github.io\ga\mr2
+    run, cmd.exe, C:\rustPractice
 return
 
 ;For when you edit this!
