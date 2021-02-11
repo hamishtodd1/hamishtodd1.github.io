@@ -87,7 +87,7 @@ function initPictogramDrawers() {
                 if (MODE !== PRESENTATION_MODE) {
                     gl.uniform1f(program.getUniformLocation("uniformScale"), .5 / RADIUS_IN_BOX)
                     gl.uniform1f(program.getUniformLocation("zAdditionForDw"), 0.)
-                    gl.uniform1f(program.getUniformLocation("clipBoxRadius"), .5)
+                    gl.uniform1f(program.getUniformLocation("clipBoxRadius"), .5) 
                     gl.uniform2f(program.getUniformLocation("screenPosition"), screenPositions[i * 2 + 0], screenPositions[i * 2 + 1])
                     draw(nameProperties, names[i])
                 }
@@ -155,6 +155,74 @@ function pictogramTest() {
 
         pictogramDrawer.finishPrebatchAndDrawEach((nameProperties, name) => {
             gl.uniform1f(pictogramDrawer.program.getUniformLocation("g"), nameProperties.value)
+            gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4)
+        })
+    })
+
+    assignTypeAndData("o", "test",  { value: 0. })
+}
+
+async function initImagesDisplayer() {
+    let vs = `
+        attribute vec4 vertA;
+        varying vec2 uv;
+
+        uniform float aspect;
+
+        void main(void) {
+            uv.x = vertA.x + .5;
+            uv.y = 1.-(vertA.y + .5);
+
+            gl_Position = vertA;
+            gl_Position.xy *= 4.;
+            gl_Position.x *= aspect;
+        `
+    let fs = `
+        uniform sampler2D sampler;
+        varying vec2 uv;
+
+        void main(void) {
+            gl_FragColor = texture2D(sampler, uv);
+        `
+
+    let currentImageIndex = 0
+    let fileNames = [
+        "arnoPeters.jpeg",
+        "al-biruni.png",
+        "bonne.png",
+        "Map-heart-054.jpg"
+    ]
+    const textures = Array(fileNames.length)
+    const aspects = Array(fileNames.length)
+    for (let i = 0; i < fileNames.length; ++i) {
+        aspects[i] = {value:1.}
+        textures[i] = await Texture("data/" + fileNames[i],aspects[i])
+    }
+
+    let pictogramDrawer = new PictogramDrawer(vs, fs)
+    addType("imageDisplayer", pictogramDrawer, {
+        start: () => {
+            ++currentImageIndex
+            currentImageIndex = clamp(currentImageIndex,0,textures.length-1)
+        },
+    })
+    assignTypeAndData("brw", "imageDisplayer", {})
+    
+    pictogramDrawer.program.addVertexAttribute("vert", 4, quadBuffer)
+    pictogramDrawer.program.locateUniform("sampler")
+    pictogramDrawer.program.locateUniform("aspect")
+
+    addRenderFunction(() => {
+        gl.useProgram(pictogramDrawer.program.glProgram)
+        pictogramDrawer.program.prepareVertexAttribute("vert")
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, textures[currentImageIndex]);
+        gl.uniform1i(pictogramDrawer.program.getUniformLocation("sampler"), 0);
+
+        gl.uniform1f(pictogramDrawer.program.getUniformLocation("aspect"), aspects[currentImageIndex].value)
+
+        pictogramDrawer.finishPrebatchAndDrawEach(() => {
             gl.drawArrays(gl.TRIANGLES, 0, quadBuffer.length / 4)
         })
     })

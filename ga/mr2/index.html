@@ -7,25 +7,20 @@
 
 	what you change with mouse is continuous but what you type is discrete
 
-	Maybe... the lines of code create an animation, step through it using your cursor
+	could ctrl up and down to get between relevant "slides"
 
-		Or, you have certain lines where you display what's in each frame of the animation, then ctrl up and down to get between them
-		If you know how the value was derived, you know what tweening animation to have? Professionalism is all just tweening
-		Well you want to be able to make things gesturally, Bret style, right? Animations simulate that
+	Tweening
+		Professionalism is all just tweening, 3b1b, Primer
+		If you know how the value was derived, theoretically you CAN do tweening
+		Tweening animations simulate making things gesturally, Bret style
+		Sounds nice, pity it's almost certainly bullshit
 
 	Filming setup
 		COLOMBIA COLOMBIA COLOMBIA
-		zooming, probably
 		Remember, every word a piece of origami! Let's have less umming
 		All your interactions need to be on the thingy window? No, maybe the hover window is great and the way to control what's seen in front of you
 		Nice camera
 		Go from relevant line to relevant line. Sounds like you're cutting stuff out though
-
-	Hey, could have "cartesian product" symbol, mathematicians would like you
-		Or tensor product
-		f x g = {(x,y) : there exists A,B s.t. f(A), g(B) }
-		Or, ordinary javascript arrays
-		But this isn't about arrays it's about functions
 
 	For YOU to export snippets
 		Have a button that save out the ir
@@ -76,11 +71,10 @@
 
 	After
 		Back to basics, you want to make a thing
-		Videos about projective geometry
-		Oi, "demonstrations" / footage. Classical mechanics. But better to wait for built in AR?
+		Oi, reproducing footage! Classical mechanics. But better to wait for built in AR?
 		Demo of features of this thing
 		omicron reduction
-		"A different way to visualize calculus" - there's a lot of fun to be had with weird algebras (SR, QC) before you get to this
+		"A different way to visualize calculus" - there's a lot of fun to be had with weird algebras before you get to this
 		Draw curve, get curve as usable thing. Killer app!
 		Music video https://www.youtube.com/watch?v=wfkid5mpgWI
 			first stanzas are making little machines
@@ -144,16 +138,11 @@
 					}, 1000. / 60.);
 				}
 
-				// await initDymaxion()
-				// await initWorldMap()
-
 				/************************
 					The specific project
 				************************/
 				// if(0)
 				{
-					// await initWorldMap()
-
 					initNames()
 					initPictogramDrawers()
 					initMvPictograms()
@@ -173,41 +162,18 @@
 
 					initDisplayWindows()
 
-					{
-						loadedJson.freeMvNames.forEach((name, i) => {
-							assignMv(name)
-							for (let j = 0; j < 16; ++j) {
-								getNameDrawerProperties(name).value[j] = loadedJson.freeMvValues[i][j]
-							}
-						})
-
-						assignTypeAndData("bg", "angle", { value: .5 })
-						assignTypeAndData("r", "slider", { value: 0. })
-						assignTypeAndData("o", "test",   { value: 0. })
-
-						let textureNames = [
-							"earthColor",
-
-							"ball",
-							"jupiter",
-							"latAndLon2",
-							"countries"
-						]
-						for (let i = 0; i < textureNames.length; ++i) {
-							let texture = await Texture("data/" + textureNames[i] + ".png")
-							assignTypeAndData(coloredNamesAlphabetically[13 + i], "globe", {
-								texture,
-								isPoints: false,
-								transparent: i ? true : false
-							})
+					loadedJson.freeMvNames.forEach((name, i) => {
+						assignMv(name)
+						for (let j = 0; j < 16; ++j) {
+							getNameDrawerProperties(name).value[j] = loadedJson.freeMvValues[i][j]
 						}
-						assignTypeAndData("bo", "globe", {
-							texture: null,
-							isPoints: true,
-							transparent: false
-						})
-						//you don't actually need that blend shit since it's discard
-					}
+					})
+
+					await initDymaxion()
+
+					await initWorldMap()
+
+					await initImagesDisplayer()
 				}
 
 				loop()

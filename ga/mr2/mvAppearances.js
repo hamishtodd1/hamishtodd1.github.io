@@ -59,6 +59,8 @@ function initAnglePictograms() {
             gl.drawArrays(gl.TRIANGLES, 0, vertsBuffer.length / 4)
         })
     })
+
+    assignTypeAndData("bg", "angle", { value: .5 })
 }
 
 function initMvPictograms() {

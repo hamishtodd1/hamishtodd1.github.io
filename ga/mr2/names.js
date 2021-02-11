@@ -45,6 +45,14 @@ function initNames() {
         types[typeName] = {editingStyle,drawers}
     }
 
+    addOneOffPictogramDrawer = function(pictogramDrawer,name) {
+        let typeName = "oneOff" + Object.keys(types).length
+        addType(typeName, pictogramDrawer, {})
+        // let name = getLowestUnusedName()
+        assignTypeAndData(name, typeName, {})
+        return name
+    }
+
     clearNames = function(names) {
         names.forEach((name)=>{
             let index = coloredNamesAlphabetically.indexOf(name)

@@ -136,37 +136,40 @@ function initFunctionWithIrs() {
     }
 
     new FunctionWithIr("reflectHorizontally")
-    let updateAlternatingFunction = () => {
-        // if (Math.floor(frameCount / 50) % 2)
-        //     functionsWithIr["reflectHorizontally"].setIr(1,0,`assign(arg0,target);`)
-        // else 
-        {
-            functionsWithIr["reflectHorizontally"].setIr({
-                internalDeclarations: ["fMv0","fMv1","fMv2"],
-                namesWithLocalizationNeeded:[],
-                argumentsInSignature: ["ourInput"],
-                maxTmvs: 0,
-                ir: 
-                `
+    functionsWithIr["reflectHorizontally"].setIr({
+        internalDeclarations: ["fMv0", "fMv1", "fMv2"],
+        namesWithLocalizationNeeded: [],
+        argumentsInSignature: ["ourInput"],
+        maxTmvs: 0,
+        ir:
+            `
             plane(fMv0,1.,0.,0.,0.);
-
             gProduct(fMv0,ourInput,fMv1);
             gProduct(fMv1,fMv0,fMv2);
             `
-            })
-        }
+    })
 
-        // `
-        // assign(pointOnGlobe,outputMv);
-        // outputMv[12] -= .09;
-        // `
-        // `
-        // point(outputMv,
-        // 	lon * cos(lat) * .3,
-        // 	lat * .3,
-        // 	0.,1.);
-        // `
-    }
-    // updateFunctions.splice(0, 0, updateAlternatingFunction)
-    updateAlternatingFunction()
+    // new FunctionWithIr("craig")
+    // functionsWithIr["craig"].setIr({
+    //     internalDeclarations: ["fMv0"],
+    //     namesWithLocalizationNeeded: [],
+    //     argumentsInSignature: ["ourInput"],
+    //     maxTmvs: 0,
+    //     ir:
+    //         `
+    //     //need lat and lon
+
+    //         pointX(fMv0,lon - 0.69565158793); //meccaLon
+    //         pointY(fMv0,pointX(tMv2) / sin(pointX(tMv2)) * (sin(lat)*cos(pointX(tMv2))-tan(0.37331021903)*cos(lat)))
+
+
+    //         // float osscilating = .5 + .5 * sin(frameCount * .01);
+    //         // float meccaLat = 0.37331021903; //* oscillating;
+    //         // float meccaLon = 0.69565158793;
+    //         // p.x = lon - meccaLon;
+    //         // p.y = p.x / sin(p.x) * (sin(lat)*cos(p.x)-tan(meccaLat)*cos(lat));
+    //         // p.xy *= 3.;
+    //         // 
+    //         `
+    // })
 }

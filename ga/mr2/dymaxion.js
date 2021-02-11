@@ -99,13 +99,8 @@ async function initDymaxion() {
     }
     repositionVerts(icosahedronDihedralAngle, closedVertsBuffer)
 
-    updateFunctions.push(() => {
-        let angle = icosahedronDihedralAngle + (Math.PI - icosahedronDihedralAngle) * (.5 - .5 * Math.cos(frameCount * .006))
-        repositionVerts(angle, animatedVertsBuffer)
-    })
-
-    const vsSource = cameraAndFrameCountShaderStuff.header + `
-        attribute vec2 uvA;
+    const vs = `
+        attribute vec2 uvInBigTriangleA;
         varying vec2 uv;
 
         uniform int isPoints;
@@ -128,43 +123,63 @@ async function initDymaxion() {
 
         void main(void) {
             vec4 animatedP = animatedVerts[blIndex] +
-                uvA.x * (animatedVerts[brIndex] - animatedVerts[blIndex]) +
-                uvA.y * (animatedVerts[tlIndex] - animatedVerts[blIndex]);
+                uvInBigTriangleA.x * (animatedVerts[brIndex] - animatedVerts[blIndex]) +
+                uvInBigTriangleA.y * (animatedVerts[tlIndex] - animatedVerts[blIndex]);
 
-            vec4 closedP = closedVerts[blIndex] +
-                uvA.x * (closedVerts[brIndex] - closedVerts[blIndex]) +
-                uvA.y * (closedVerts[tlIndex] - closedVerts[blIndex]);
-            positionOnSphere = closedP.xyz / length(closedP.xyz)
+            if(isPoints == 0) {
+                vec4 closedP = closedVerts[blIndex] +
+                    uvInBigTriangleA.x * (closedVerts[brIndex] - closedVerts[blIndex]) +
+                    uvInBigTriangleA.y * (closedVerts[tlIndex] - closedVerts[blIndex]);
 
-            float lat = 0.;
-            float lon = 0.;
-            {
+                vec3 positionOnSphere = closedP.xyz / length(closedP.xyz);
+                
                 vec3 equatorialPlaneNormal = vec3(0.,1.,0.);
 
                 vec3 projectionOntoNormal = equatorialPlaneNormal * dot(equatorialPlaneNormal,positionOnSphere);
                 projectionOntoNormal /= length(projectionOntoNormal);
 
                 float angleFromNorthPole = acos(dot(equatorialPlaneNormal,positionOnSphere));
-                lat = PI/2. - angleFromNorthPole;
+                float lat = PI/2. - angleFromNorthPole;
 
                 vec3 projectionOntoPlane = positionOnSphere - projectionOntoNormal;
                 projectionOntoPlane /= length(projectionOntoPlane);
                 //z is central meridian
-                lon = atan(projectionOntoPlane.z,projectionOntoPlane.x);
+                float lon = atan(projectionOntoPlane.z,projectionOntoPlane.x);
+
+                uv = vec2(
+                    .5 + lon / PI / 2.,
+                    .5 - lat / PI);
             }
+            else {
+                // gl_PointSize = 4.;
 
-            uv = vec2(
-                .5 + lon / PI / 2.,
-                .5 - lat / PI);
+                // //except now, uvInBigTriangle is NOT uvInBigTriangle, it's on the globe's surface
+                // //ok the core problem is that you get coords on a sphere and the place they're mapped to
+                // //depends on
+
+                // float lon = (uvInBigTriangleA.x - .5) * TAU;
+                // float lat = (uvInBigTriangleA.y - .5) * PI;
+                // vec3 closedP = vec3(
+                //     sin(-lon + PI) * cos(lat),
+                //     sin(lat),
+                //     cos(-lon + PI) * cos(lat)
+                //     );
+
+                // //Your dual quat takes points from the closed triangle to the animated triangle
+                // //"just" apply that dq to closedP
                 
+                // vec2 backsolved;
 
+                // discardPoint = 0.;
+                // if(abs(.z) > .1)
+                //     discardPoint = 1;
+                // if(backsolved.x < 0. || backsolved.y < 0. || backsolved.y > 1. - backsolved.x)
+                //     discardPoint = 1.;
 
-
-            if(isPoints == 1) {
-                gl_PointSize = 4.;
-
-                //so you have to find it in terms of animatedVerts
-                //thereby to get animatedP
+                //maybe unnecessary
+                // vec4 animatedP = animatedVerts[blIndex] +
+                // backsolved.x * (animatedVerts[brIndex] - animatedVerts[blIndex]) +
+                // backsolved.y * (animatedVerts[tlIndex] - animatedVerts[blIndex]);
             }
 
             float animatedPMv[16];
@@ -174,12 +189,9 @@ async function initDymaxion() {
             mvToPoint(transformed,gl_Position);
 
         `
-        + cameraAndFrameCountShaderStuff.footer
-    const fsSource = cameraAndFrameCountShaderStuff.header + `
+    const fs = `
         varying vec2 uv;
         uniform sampler2D sampler;
-
-        varying vec2 uv;
 
         uniform int isPoints;
         varying float discardPoint;
@@ -191,14 +203,20 @@ async function initDymaxion() {
             else {
                 gl_FragColor = vec4(1.,0.,0.,1.);
                 
-                // if(discardPoint > .5)
-                //     discard;
+                if(discardPoint > .5)
+                    discard;
             }
-        }
         `
 
-    const program = new Program(vsSource, fsSource)
-    cameraAndFrameCountShaderStuff.locateUniforms(program)
+    let pictogramDrawer = new PictogramDrawer(vs, fs)
+    addOneOffPictogramDrawer(pictogramDrawer, "bpy")
+    const program = pictogramDrawer.program
+
+    // const program = new Program(
+    //     cameraAndFrameCountShaderStuff.header + vs + cameraAndFrameCountShaderStuff.footer,
+    //     cameraAndFrameCountShaderStuff.header + fs + `}`)
+    // cameraAndFrameCountShaderStuff.locateUniforms(program)
+
     program.locateUniform("transform")
 
     program.locateUniform("animatedVerts")
@@ -238,7 +256,7 @@ async function initDymaxion() {
         }
 
         var uvBuffer = new Float32Array(uvBufferArray)
-        program.addVertexAttribute("uv",2)
+        program.addVertexAttribute("uvInBigTriangle",2)
 
         const numPathVertices = 10
         var pathBuffer = new Float32Array(numPathVertices * 2) //equator by default, equirectangularly
@@ -253,7 +271,7 @@ async function initDymaxion() {
     let transform = new Float32Array(16)
     transform[0] = 1.
 
-    let isPoints = true
+    let isPoints = false
 
     addRenderFunction(() => {
         gl.useProgram(program.glProgram);
@@ -262,18 +280,21 @@ async function initDymaxion() {
 
         gl.uniform1fv(program.getUniformLocation("transform"), viewRotor)
 
+        let angle = icosahedronDihedralAngle + (Math.PI - icosahedronDihedralAngle) * (.5 - .5 * Math.cos(frameCount * .006))
+        repositionVerts(angle, animatedVertsBuffer)
+
         gl.uniform4fv(program.getUniformLocation("animatedVerts"), animatedVertsBuffer);
         gl.uniform4fv(program.getUniformLocation("closedVerts"), closedVertsBuffer);
 
         if(isPoints) {
             gl.uniform1i(program.getUniformLocation("isPoints"), 1)
 
-            program.prepareVertexAttribute("uv", pathBuffer)
+            program.prepareVertexAttribute("uvInBigTriangle", pathBuffer)
         }
         else {
             gl.uniform1i(program.getUniformLocation("isPoints"), 0)
 
-            program.prepareVertexAttribute("uv", uvBuffer)
+            program.prepareVertexAttribute("uvInBigTriangle", uvBuffer)
 
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -281,16 +302,20 @@ async function initDymaxion() {
         }
 
         gl.disable(gl.CULL_FACE);
-        for (let i = 0; i < indices.length; ++i) {
-            gl.uniform1i(program.getUniformLocation("blIndex"), indices[i][0])
-            gl.uniform1i(program.getUniformLocation("brIndex"), indices[i][2])
-            gl.uniform1i(program.getUniformLocation("tlIndex"), indices[i][3])
+        pictogramDrawer.finishPrebatchAndDrawEach((nameProperties, name) => {
+            for (let i = 0; i < indices.length; ++i) {
+                gl.uniform1i(program.getUniformLocation("blIndex"), indices[i][0])
+                gl.uniform1i(program.getUniformLocation("brIndex"), indices[i][2])
+                gl.uniform1i(program.getUniformLocation("tlIndex"), indices[i][3])
 
-            if(isPoints)
-                gl.drawArrays(gl.POINTS, 0, pathBuffer.length / 2);
-            else
-                gl.drawArrays(gl.TRIANGLES, 0, uvBuffer.length / 2);
-        }
+                //new plan: send in the dq between closed triangle's vertices and animated one's
+
+                if (isPoints)
+                    gl.drawArrays(gl.POINTS, 0, pathBuffer.length / 2);
+                else
+                    gl.drawArrays(gl.TRIANGLES, 0, uvBuffer.length / 2);
+            }
+        })
         gl.enable(gl.CULL_FACE);
     })
 }

@@ -1,37 +1,8 @@
 /*  
-    Depth crap
+    Depth crap (what is this?)
         What you want: the thing is visible from both sides
         Another way of getting around it is to say fuck it and assume all projections get the right side all the time
         I mean the point of these things is to show the surface and if there's some surface missing it's not a projection, sooo
-
-    TODOs for projection
-        plane projection (but nobody uses these...)
-            Stereo: done!
-            Ortho: project from infinity
-            gnomic: Fix bug. It's about winding order! Just cull face back
-                But what if you want to view it the other way? Maybe by drawing twice depending on which way you're looking at it?
-        Dymaxion: just show it
-            It's often said that making a map is like flattenning an orange peel https://twitter.com/infowetrust/status/967105316272816128
-            It so much feels like it shouldn't be hard, because when you look close up the world is flat
-        Sinusoidal/Bonne/werner: look in notebook
-        Kavrayskiy
-            Something to do with circles, possibly can conformally unroll first
-            Or maybe it's like azimuthal equidistant somehow?
-        lambert conic: transcribe from notebook
-        lambert azimuthal equal area: in notebook
-            introduces "unroll"
-            still area preserving! Only good around one point though.
-        Lambert equal area -> gall-peters
-        Stretchy conformal unroll to a half cylinder
-            equirectangular: conformal unroll
-            cylindrical: project (but better to unroll first? Where else do you projecting from a line? If nowhere, project then unroll)
-            Mercator: project then the exp thing (non-trivial)
-            Gall-Peters: orth (project from a line)
-        craig retroazimuthal: I like this one because it's not trying to tell you everything about the globe, it's just trying to answer one question
-            Doesn't matter because it's probably quite a procedure... and nobody is going to use it to get an idea of the
-            sin phi is projection onto the axis
-            cos phi is projection onto the equatorial plane
-            Maybe multiply out the two terms and visualize them
 */
 
 async function initGlobePictograms() {
@@ -412,5 +383,30 @@ async function initGlobePictograms() {
             ppWrappers.forEach((ppWrapper) => { ppWrapper.usedLastFrame = ppWrapper.usedThisFrame })
             gl.enable(gl.CULL_FACE);
         })
+    }
+
+    {
+        let textureNames = [
+            "earthColor",
+
+            "ball",
+            "jupiter",
+            "latAndLon2",
+            "countries"
+        ]
+        for (let i = 0; i < textureNames.length; ++i) {
+            let texture = await Texture("data/" + textureNames[i] + ".png")
+            assignTypeAndData(coloredNamesAlphabetically[13 + i], "globe", {
+                texture,
+                isPoints: false,
+                transparent: i ? true : false
+            })
+        }
+        assignTypeAndData("bo", "globe", {
+            texture: null,
+            isPoints: true,
+            transparent: false
+        })
+        //you don't actually need that blend shit since it's discard
     }
 }

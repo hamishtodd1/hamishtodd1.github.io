@@ -1,14 +1,16 @@
 /*  
     TODO
-        With some exceptions you're at least going to implement this stuff in the editor
-        That gets across the idea: this is an editor where the things you program automatically have an explanation of how they work
-        General
-            Two dws side by side
-            Clicker to go through them
-            flight path
-            make sure greenland works nicely
-            ordinary pictures showing up
+        Hack in loxodromes, only straight lines. Boat? Yeah right
+        mercator "flattening onto curve" crap
+            So you have the y-from-0-to-infinity stage
+            p += exp(p . y)
+        Two dws side by side
+        Clicker to go through them
+        flight path
+        unrolling!
         Dymaxion
+            line
+            Putting in box
 
     Script 2
         Intro
@@ -19,11 +21,8 @@
         ---------------------------------------
         NOT SURE WHAT ORDER - MAYBE DOESN'T MATTER
 
-        Fuck lambert, white dude, they'll kill you. Probably Bucky too.
-        This is about area preservation versus shape. Distance shmistance, direction shmirection
-        The only white dude to show is peters
-
         Dymaxion
+            orange https://twitter.com/infowetrust/status/967105316272816128
             Consciously ignores up/down, equator/poles
             Goode homolosine, myriahedral
             Flight path
@@ -53,12 +52,6 @@
         Terrible idea
         Equator is nice but really
         
-        equirectangular?
-            Simple
-            Flight path
-            Panorama, probably Siena, see below
-            Show unwrap of panorama
-            At least used by the chinese
         Cylindrical equal area
             Elegant way of making a rectangle that preserves area
             Rectangular, terrible idea - Gets us onto the politically incorrect ones
@@ -67,6 +60,7 @@
         Mercator
             Loxodromes Urgh
             Sizes
+            Panorama, probably Siena, see below
         Gall-Peters
             There was a white guy who wanted to make a quick buck
             Instead of equator being correct, equator gets stretched and the one place it's ok is Germany
@@ -109,14 +103,11 @@
 */
 
 async function initWorldMap() {
-    const vsSource = cameraAndFrameCountShaderStuff.header + `
+    const vs = gaShaderString +
+        `
         attribute vec2 uvA;
         varying vec2 uv;
         varying vec4 p;
-
-        `
-        + gaShaderString +
-        `
 
         uniform dualQuat transform;
         
@@ -147,7 +138,7 @@ async function initWorldMap() {
             float lon = (p.x - .5) * TAU;
             float lat = (p.y - .5) * PI;
 
-            // p = globe(lon,lat);
+            p = globe(lon,lat);
 
             // Interrupted sinusoidal is better in terms of thinking about the pole, and more compatible with GA, and easier
             {
@@ -188,10 +179,7 @@ async function initWorldMap() {
             // float meccaLon = 0.69565158793;
             // p.x = lon - meccaLon;
             // p.y = p.x / sin(p.x) * (sin(lat)*cos(p.x)-tan(meccaLat)*cos(lat));
-            // p.xy *= 3.;
-            //assume lon = meccalon
-            // sin(lat)-tan(meccaLat)*cos(lat)
-            // 
+            
 
             //lambert conformal. Easy geometrically! Just a cone!
             {
@@ -234,18 +222,17 @@ async function initWorldMap() {
             // p.x = lon;
             // p.y = 2. * sin(lat);
             
-            p.x = lon;
-            float upperHalfPipe = (TAU / 4. + lat)/2.;
-            float mercTan = tan(upperHalfPipe);
-            float merc = log(mercTan);
-            p.y = merc;
+            // p.x = lon;
+            // float upperHalfPipe = (TAU / 4. + lat)/2.;
+            // float mercTan = tan(upperHalfPipe);
+            // float merc = log(mercTan);
+            // p.y = merc;
 
             dqSandwich(p, transform);
             
             gl_Position = p;
         `
-        + cameraAndFrameCountShaderStuff.footer
-    const fsSource = cameraAndFrameCountShaderStuff.header + `
+    const fs = `
         varying vec2 uv;
         varying vec4 p;
 
@@ -256,10 +243,16 @@ async function initWorldMap() {
             vec4 texelColor = texture2D(sampler, vec2(uv.x,1.-uv.y)); //1- because jfc opengl
 
             gl_FragColor = vec4(texelColor.rgb, texelColor.a);
-        }
+        // }
         `
 
-    const program = new Program(vsSource, fsSource)
+    let pictogramDrawer = new PictogramDrawer(vs, fs)
+    addOneOffPictogramDrawer(pictogramDrawer,"pw")
+    const program = pictogramDrawer.program
+    // const program = new Program(
+    //     cameraAndFrameCountShaderStuff.header + vs + cameraAndFrameCountShaderStuff.footer, 
+    //     cameraAndFrameCountShaderStuff.header + fs)
+
     cameraAndFrameCountShaderStuff.locateUniforms(program)
     program.locateUniform("frameCount")
     locateUniformDualQuat(program, "transform")
@@ -312,7 +305,8 @@ async function initWorldMap() {
 
         transferDualQuat(transform,"transform",program)
 
-        gl.drawArrays(gl.TRIANGLES, 0, numVertices);
+        pictogramDrawer.finishPrebatchAndDrawEach((nameProperties, name) => {
+            gl.drawArrays(gl.TRIANGLES, 0, numVertices);
+        })
     })
 }
-

@@ -4,7 +4,7 @@ function getVariableNameAsString(variableWrappedInAnObject){
     return Object.keys(variableWrappedInAnObject)[0]
 }
 
-async function Texture(src) {
+async function Texture(src,aspect) {
     const texture = gl.createTexture();
     
     const level = 0;
@@ -25,6 +25,9 @@ async function Texture(src) {
         $image.src = src;
         $image.onload = resolve
     }))
+
+    if (aspect)
+        aspect.value = $image.width / $image.height
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,

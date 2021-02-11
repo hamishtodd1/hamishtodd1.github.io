@@ -17,7 +17,9 @@ const IDENTIFIER_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVW
 const CODING_MODE = 0
 const PRESENTATION_MODE = 1
 const PRESENTATION_EDITING_MODE = 2
-const MODE = CODING_MODE // PRESENTATION_MODE
+const MODE = 
+    CODING_MODE 
+    // PRESENTATION_MODE
 
 const displayWindows = []
 

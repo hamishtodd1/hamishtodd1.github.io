@@ -86,4 +86,6 @@ function initSliderPictograms() {
             getNameDrawerProperties(name).value = clamp(getNameDrawerProperties(name).value,0.,1.)
         },
     })
+
+    assignTypeAndData("r", "slider", { value: 0. })
 }

@@ -15,6 +15,34 @@ function initAlgebra()
         gaShaderString += "\n" + glslBody + "\n"
     }
 
+    appendToGaShaderString( `
+        void mercatorLog(inout float mv[16]) {
+            mv[11] = log(mv[12]);
+        }
+        `
+    )
+    mercatorLog = function(mv) {
+        mv[11] = Math.log(mv[12]);
+    }
+
+    // dqToAlignThreePoints(p0,p1,p2, q0,q1,q2) {
+    //     let P = new Float32Array(16)
+    //     let Q = new Float32Array(16)
+    //     P[15] = 1.
+    //     Q[15] = 1.
+
+    //     let M = new Float32Array(16)
+    //     M[0] = 1.
+
+    //     sandwichBab(p0,M,mv0)
+    //     join(Q,mv0,P)
+    //     join(Q,q0,Q)
+    //     //need the inverse of P for the next line. Involute?
+
+    //     // euclideanNormalizeMotor(mv)
+    //     // gProduct()
+    // }
+
     //mv
     {
         isMv = function(obj) {
