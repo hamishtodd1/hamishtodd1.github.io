@@ -75,7 +75,11 @@ AddToPlaybackRate(amt)
 	Send,{Enter}
 }
 ]::
-	IfWinActive, ahk_exe Chrome.exe
+	SetTitleMatchMode 2
+
+	if WinActive("ouTube")
+		AddToPlaybackRate(0.25)
+	else if WinActive("imeo")
 		AddToPlaybackRate(0.25)
 	else
 		Send,]
