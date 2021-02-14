@@ -27,11 +27,12 @@ XButton2::XButton1
 	ControlClick, x210 y136, ahk_exe chrome.exe
 	WinActivate, ahk_exe Code.exe
 
+	Sleep,10
 	Send,^+{'} ;clear debug console
-
-	Send,^' ;focus debug. ' is the generic thing for this kind of vscode navigation
-	Sleep,50
-	Send,^' ;and back to editor
+	Sleep,10
+	Send,^' ;unfocus debug
+	; Sleep,10
+	; Send,^' ;and back to editor
 Return
 ; ^s::
 ; 	IfWinActive, ahk_exe Code.exe
@@ -80,7 +81,11 @@ AddToPlaybackRate(amt)
 		Send,]
 Return
 [::
-	IfWinActive, ahk_exe Chrome.exe
+	SetTitleMatchMode 2
+
+	if WinActive("ouTube")
+		AddToPlaybackRate(-0.25)
+	else if WinActive("imeo")
 		AddToPlaybackRate(-0.25)
 	else
 		Send,[
