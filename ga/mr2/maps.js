@@ -1,16 +1,17 @@
 /*  
     TODO
         Hack in loxodromes, only straight lines. Boat? Yeah right
+        Need rather better "put point on globe and move it around"
+
+        make the things
         mercator "flattening onto curve" crap
             So you have the y-from-0-to-infinity stage
             p += exp(p . y)
         Two dws side by side
         Clicker to go through them
-        flight path
-        unrolling!
-        Dymaxion
-            line
-            Putting in box
+        dymaxion flight path
+        unrolling
+        
 
     Script 2
         Intro

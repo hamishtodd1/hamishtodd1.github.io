@@ -15,15 +15,38 @@ function initAlgebra()
         gaShaderString += "\n" + glslBody + "\n"
     }
 
-    appendToGaShaderString( `
-        void mercatorLog(inout float mv[16]) {
-            mv[11] = log(mv[12]);
-        }
-        `
-    )
-    mercatorLog = function(mv) {
-        mv[11] = Math.log(mv[12]);
+    // appendToGaShaderString( `
+    //     void mercatorLog(inout float mv[16], inout float target[16]) {
+    //         zeroMv(target);
+    //         target[14] = mv[14];
+    //         target[13] = mv[13];
+    //         target[12] = mv[12];
+    //         target[11] = log(mv[12]);
+    //     }
+    //     `
+    // )
+    // mercatorLog = function(mv,target) {
+    //     zeroMv(target);
+    //     target[14] = mv[14];
+    //     target[13] = mv[13];
+    //     target[12] = mv[12];
+    //     mv[11] = Math.log(mv[12]);
+    // }
+
+    let ourPss = new Float32Array(16)
+    ourPss[15] = 1.
+    polarize = function(mv,target)
+    {
+        gProduct(mv,ourPss,target);
     }
+
+    
+
+    // gAsin = function(mv,target) {
+    //     zeroMv(target)
+
+    //     target[0] = Math.asin()
+    // }
 
     // dqToAlignThreePoints(p0,p1,p2, q0,q1,q2) {
     //     let P = new Float32Array(16)

@@ -2,8 +2,9 @@
     More Bret Victorian
         The idea of the buttons is that, one day, you go into point-creating mode and click on an intersection and it creates the code that does that
 
-    IF IT WAS POSSIBLE TO SIMPLIFY EVERYTHING WHY WOULDN'T IT ALREADY BE RESEARCHED? YOU ARE TAKING A BIG RISK
-    Urgh, I guess nobody was going for QUITE this market before?
+    You want to specify which objects your thing is a result of
+    Also specify what type the thing you want has
+    Ok, 
 
     Would be nice if: the function signature puts into the dw the inputs and outputs and probably the constants it uses too
 
@@ -100,7 +101,9 @@ function initDisplayWindows() {
         this.position = new ScreenPosition(2000.,2000.)
         this.dimension = dimension
         this.slideOngoing = false
-        this.collectionY = Infinity //vertical position, that a carat would have, of the place from which we will get the things we will render
+
+        this.collectionY = Infinity
+        this.collection = []
 
         this.editingStyle = null
         this.editingName = ""
@@ -344,51 +347,79 @@ function initDisplayWindows() {
     //////////////
     if (MODE !== PRESENTATION_MODE) {
 
+        {
+            const dividerCoords = new Float32Array(quadBuffer.length)
+            for (let i = 0; i < quadBuffer.length; ++i) {
+                dividerCoords[i] = quadBuffer[i]
+                if (i % 4 === 0)
+                    dividerCoords[i] *= .1
+                if (i % 4 === 1)
+                    dividerCoords[i] *= 9999999.
+            }
+            var divider = verticesDisplayWithPosition(dividerCoords, gl.TRIANGLES, 0.0001, 0., 0.)
+            addRenderFunction(divider.renderFunction)
+        }
+
         const caratDw = new DisplayWindow()
         updateFunctions.push(() => {
             caratDw.collectionY = carat.position.y
 
-            caratDw.position.x = mainCamera.rightAtZZero - dimension / 2. - .4
-            caratDw.position.y = carat.position.y - dimension / 2. + .5
+            let padding = 1.4
+            divider.position.x = mainCamera.rightAtZZero - dimension - padding
+            
+            caratDw.position.x = mainCamera.rightAtZZero - dimension / 2. - padding / 2.
+            caratDw.position.y = mainCamera.topAtZZero - dimension / 2. - padding / 2.
         })
         addRenderFunction(() => {
             caratDw.render(true)
         })
 
-        let freeVariableButtons = []
-        function FreeVariableButton(name, assignName) {
-            let btn = new ClickableTextbox(name, () => {
-                let lowestUnusedName = getLowestUnusedName()
-                addStringAtCarat(lowestUnusedName)
-                assignName(lowestUnusedName)
-            })
+        let dwButtons = []
+        function DwButton(name, onClick) {
+            let btn = new ClickableTextbox(name, onClick)
 
-            btn.relativePosition = new ScreenPosition(0., -dimension / 2. - .75 - freeVariableButtons.length)
-            freeVariableButtons.push(btn)
+            btn.relativePosition = new ScreenPosition(0., -dimension / 2. - .75 - dwButtons.length)
+            dwButtons.push(btn)
+
+            return btn
         }
         updateFunctions.push(() => {
-            freeVariableButtons.forEach((btn) => {
+            dwButtons.forEach((btn) => {
                 btn.position.copy(caratDw.position)
                 btn.position.add(btn.relativePosition)
             })
         })
 
-        FreeVariableButton("point", (name) => {
-            assignMv(name)
+        function FreeVariableDwButton(name,assignValueToName) {
+            DwButton("free " + name, () => {
+                let lowestUnusedName = getLowestUnusedName()
+                addStringAtCarat(lowestUnusedName)
+
+                assignMv(lowestUnusedName)
+                assignValueToName(lowestUnusedName)
+            })
+        }
+
+        let testMvDds = { value: new Float32Array(16), type: "mv" }
+        point(testMvDds.value, .4, .4, 0., 1.)
+        for (let i = 0, il = types["mv"].drawers.length; i < il; ++i)
+            types["mv"].drawers[i].add(0)
+        
+
+        FreeVariableDwButton("point", (name) => {
             point(getNameDrawerProperties(name).value, 0., 0., 0., 1.);
         })
-        FreeVariableButton("direction", (name) => {
-            assignMv(name)
+        FreeVariableDwButton("direction", (name) => {
             point(getNameDrawerProperties(name).value, 0., 0., -1., 0.);
         })
-        FreeVariableButton("line", (name) => {
-            assignMv(name)
+        FreeVariableDwButton("line", (name) => {
             realLineX(getNameDrawerProperties(name).value, 1.);
         })
-        FreeVariableButton("plane", (name) => {
-            assignMv(name)
+        FreeVariableDwButton("plane", (name) => {
             planeZ(getNameDrawerProperties(name).value, 1.)
         })
+
+        
 
         // function rectangleWithPosition(halfFrameWidth, halfFrameHeight) {
         //     const frameVertsBuffer = new Float32Array([
@@ -404,13 +435,128 @@ function initDisplayWindows() {
         //     ])
         //     return verticesDisplayWithPosition(frameVertsBuffer, gl.LINES, 0., 0., 0.)
         // }
-        // const enclosingFrame = rectangleWithPosition(1.8, 1.8 + .5 * freeVariableButtons.length)
+        // const enclosingFrame = rectangleWithPosition(1.8, 1.8 + .5 * dwButtons.length)
 
         // addRenderFunction(() => {
         //     enclosingFrame.position.copy(caratDw.position)
-        //     enclosingFrame.position.y -= .5 * freeVariableButtons.length
+        //     enclosingFrame.position.y -= .5 * dwButtons.length
 
         //     enclosingFrame.renderFunction()
         // })
+
+        let modeButtons = []
+
+        let singleOperations = [dual, reverse, polarize]
+        //magnitude is relevant only if you're wanting a scalar
+
+        dwSuggestionDrawingDetailses.push(testMvDds)
+
+        let selectedModeButton = null
+        updateFunctions.push(()=>{
+            // Perhaps this should only occur if you have a line with some mvs on it and nothing else
+
+            modeButtons.forEach((modeButton)=>{
+                modeButton.r = 0.
+            })
+            if(selectedModeButton !== null)
+                selectedModeButton.r = 1.
+
+            caratDw.collection.push(0)
+                
+            caratDw.collection.forEach((name)=>{
+                // if (drawingDetailses[coloredNamesAlphabetically.indexOf(name)].type !== "mv")
+                //     return
+                    
+                // let potentialMv = nonAlgebraTempMv0
+                // singleOperations.forEach((op) => {
+                //     if(selectedModeButton === null)
+                //         return
+
+                //     op(getNameDrawerProperties(name).value, potentialMv)
+                    
+                    // if (selectedModeButton.qualifier(potentialMv) ) {
+                    //     if(dwSuggestionDrawingDetailses.length <= lowestUnusedDwSuggestionDrawingDetailses)
+                    //         dwSuggestionDrawingDetailses.push({ value: new Float32Array(16) })
+
+                    //     assign(potentialMv, dwSuggestionDrawingDetailses[lowestUnusedDwSuggestionDrawingDetailses].value)
+                    //     caratDw.collection.push(lowestUnusedDwSuggestionDrawingDetailses)
+                    //     ++lowestUnusedDwSuggestionDrawingDetailses
+                    // }
+                // })
+            })
+
+            /*
+                Pull in all the objects in the dw. Say there are n of them
+                each one has a grade
+                There are o operations possible. n(n-1)*o options. With
+
+                Operations:
+                    one (start here)
+                        -right-multiply by pss
+                        -dual
+                        -reverse
+                    Outputting Scalar: norms
+                    exp and log of course...
+                    on two
+                        -Project
+                        -Inner product
+                        -Meet
+                        -Join
+                        -sandwich
+                        -gp
+                        -commutator?
+                    On three - volume of tetrahedron?
+
+
+                TODO
+                    detecting what you've clicked...
+                    motor viz - utah teapot?
+                    scalar viz
+                    line at infinity viz
+                    plane at infinity viz
+            */
+        })
+
+        function ModeButton(name, qualifier){
+            let btn = DwButton("constrained " + name, (self) => {
+                if (selectedModeButton === self)
+                    selectedModeButton = null
+                else
+                    selectedModeButton = self
+            })
+
+            btn.qualifier = qualifier
+
+            modeButtons.push(btn)
+        }
+
+        // sqrt(x) = exp(.5 log(x))
+
+        //note that grade might be confused if there's some very low numbers
+        ModeButton("scalar",(mv)=>{
+            return getGrade(mv) === 0
+        })
+        ModeButton("plane", (mv) => {
+            return getGrade(mv) === 1
+        })
+        ModeButton("line", (mv) => {
+            return getGrade(mv) === 2
+        })
+        ModeButton("point", (mv) => {
+            return getGrade(mv) === 3
+        })
+
+        ModeButton("motor", (mv) => {
+            for(let i = 1; i <= 4; ++i)
+                if(mv[i] !== 0)
+                    return false
+            for(let i = 11; i <= 14; ++i)
+                if(mv[i] !== 0)
+                    return false
+            for (let i = 0; i <= 16; ++i)
+                if (mv[i] !== 0)
+                    return true
+            return false
+        })
     }
 }

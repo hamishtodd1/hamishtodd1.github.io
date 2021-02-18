@@ -38,7 +38,6 @@ function initNames() {
         drawingDetailses[i] = { type:"unassigned" }
     }
 
-    let types = []
     addType = function (typeName,drawers,editingStyle) {
         if(drawers.forEach === undefined )
             drawers = [drawers]
@@ -117,19 +116,30 @@ function initNames() {
             if ( drawingDetailses[index].type === "unassigned")
                 addCharacterToDraw("?", 0., 0., 0., x - characterWidth / 2., y)
             else {
-                for(let i = 0; i < type.drawers.length; ++i)
-                    type.drawers[i].add(x, y, name)
+                for (let i = 0, il = type.drawers.length; i < il; ++i)
+                    type.drawers[i].add(name, x, y)
 
                 if (mouse.inSquare(x, y, .5) && MODE !== PRESENTATION_MODE)
                     mouseDw.placeBasedOnHover(x, y, type.editingStyle, name)
+
+                displayWindows.forEach((dw) => {
+                    if (dw.collectionY === y && dw.collection.indexOf(name) === -1)
+                        dw.collection.push(name)
+                })
             }
         }
     }
+
+    //pretty crap
     getNameDrawerProperties = function (name) {
-        if (coloredNamesAlphabetically.indexOf(name) === -1)
-            return null
-        if (drawingDetailses[coloredNamesAlphabetically.indexOf(name)].type === "unassigned")
-            return null
-        return drawingDetailses[coloredNamesAlphabetically.indexOf(name)]
+        if (coloredNamesAlphabetically.indexOf(name) !== -1  ) {
+            if (drawingDetailses[coloredNamesAlphabetically.indexOf(name)].type !== "unassigned")
+                return drawingDetailses[coloredNamesAlphabetically.indexOf(name)]
+        }
+        else if(dwSuggestionDrawingDetailses[name] !== undefined) { //the name is a number
+            return dwSuggestionDrawingDetailses[name]
+        }
+
+        return null
     }
 }

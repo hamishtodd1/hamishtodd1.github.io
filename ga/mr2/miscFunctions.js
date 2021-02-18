@@ -126,12 +126,22 @@ function nameToHexantColors(name, hexantColors, offset) {
         offset = 0
     offset *= 18
 
-    for (let i = 0; i < 6; ++i) {
-        let letter = name[Math.floor(i / 6. * name.length)]
-        hexantColors[offset + i * 3 + 0] = colors[letter][0]
-        hexantColors[offset + i * 3 + 1] = colors[letter][1]
-        hexantColors[offset + i * 3 + 2] = colors[letter][2]
+    if (Number.isInteger(name)) {
+        for (let i = 0; i < 6; ++i) {
+            hexantColors[offset + i * 3 + 0] = 0.
+            hexantColors[offset + i * 3 + 1] = 0.
+            hexantColors[offset + i * 3 + 2] = 0.
+        }
     }
+    else {
+        for (let i = 0; i < 6; ++i) {
+            let letter = name[Math.floor(i / 6. * name.length)]
+            hexantColors[offset + i * 3 + 0] = colors[letter][0]
+            hexantColors[offset + i * 3 + 1] = colors[letter][1]
+            hexantColors[offset + i * 3 + 2] = colors[letter][2]
+        }
+    }
+
     return hexantColors
 }
 

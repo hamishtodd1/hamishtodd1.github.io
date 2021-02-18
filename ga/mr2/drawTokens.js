@@ -34,7 +34,7 @@ function initDrawTokens() {
     drawTokens = function (errorReportText) {
         lineNumber = 0
 
-        const column0Position = mainCamera.rightAtZZero - 15.
+        const column0Position = -mainCamera.rightAtZZero + characterWidth / 2.
         drawingPosition.x = column0Position
         drawingPosition.y = mainCamera.topAtZZero - .5 - toolbarHeight
 

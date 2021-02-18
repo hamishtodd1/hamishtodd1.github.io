@@ -62,7 +62,7 @@
 		https://www.averylaird.com/programming/the%20text%20editor/2017/09/30/the-piece-table/
 
 	Interested parties
-		Language people: Alan, Meurig, Martin, futureOfCoding, Yoshiki, Cynthia Solomon, Andy Matuschak, Katherine Ye, Glench, Ken Perlin, Josh Horowitz, 
+		Language people: Alan, Meurig, Martin, futureOfCoding, Yoshiki, Cynthia Solomon, Andy Matuschak, Katherine Ye, Glench, Ken Perlin, Josh Horowitz, Andrew kennedy (units in PLs guy, big!)
 		GAists: bivector discord, Cam folks, Charles Gunn, Steven Der kenick, Pierre Philipp Denchant, Jonathan Cameron, David Hestenes, Paul Simeon
 		Graphics/gamedev: Keenan Crane, Albert Chern, Fabrice, Haxiomic, Dan Holden, Daniel Piker, Ian and Norgg, Media Molecule, Chris Deleon, Senthuran
 		Math/physicist: Ivan and Nina, Florian, Eric stansifer, Matt Hare
@@ -86,7 +86,7 @@
 -->
 <html>
 	<head>
-		<title>Unrig</title>
+		<title>Unrigged</title>
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
 			body {
@@ -130,6 +130,10 @@
 						updateFunctions[i]()
 
 					renderEverything()
+
+					displayWindows.forEach( (dw) => {
+						dw.collection.length = 0
+					})
 
 					++frameCount
 

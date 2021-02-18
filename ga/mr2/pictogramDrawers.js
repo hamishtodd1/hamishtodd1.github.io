@@ -65,50 +65,61 @@ function initPictogramDrawers() {
     }
 
     PictogramDrawer = function (vsBody, fsBody) {
-        let numToDraw = 0
-        let screenPositions = [] //Just screen position, if you want a quat put that in a wrapper
-        let names = []
-        this.add = function (x, y, name) {
-            screenPositions[numToDraw * 2 + 0] = x
-            screenPositions[numToDraw * 2 + 1] = y
-            names[numToDraw] = name
-
-            ++numToDraw
+        const namesDrawnWithThisDrawer = []
+        let screenPositions = []
+        this.add = function (name, x, y) {
+            let index = namesDrawnWithThisDrawer.indexOf(name)
+            if(index === -1) {
+                index = namesDrawnWithThisDrawer.length
+                namesDrawnWithThisDrawer.push(name)
+                screenPositions[index] = []
+            }
+            if(x !== undefined)
+                screenPositions[index].push(x,y)
         }
 
         this.drawEach = function(predrawAndReturnProgram,draw) {
-            for (let i = 0; i < numToDraw; ++i) {
-                let nameProperties = getNameDrawerProperties(names[i])
+            namesDrawnWithThisDrawer.forEach((name,index)=>{
+                let nameProperties = getNameDrawerProperties(name)
 
+                //usually this is the same program again and again, sometimes not (map projections)
                 let program = predrawAndReturnProgram(nameProperties)
 
                 cameraAndFrameCountShaderStuff.transfer(program)
 
-                if (MODE !== PRESENTATION_MODE) {
+                if (MODE !== PRESENTATION_MODE && screenPositions[index] !== undefined) {
                     gl.uniform1f(program.getUniformLocation("uniformScale"), .5 / RADIUS_IN_BOX)
                     gl.uniform1f(program.getUniformLocation("zAdditionForDw"), 0.)
-                    gl.uniform1f(program.getUniformLocation("clipBoxRadius"), .5) 
-                    gl.uniform2f(program.getUniformLocation("screenPosition"), screenPositions[i * 2 + 0], screenPositions[i * 2 + 1])
-                    draw(nameProperties, names[i])
+                    gl.uniform1f(program.getUniformLocation("clipBoxRadius"), .5)
+
+                    for (let i = 0, il = screenPositions[index].length / 2; i < il; ++i) {
+                        let x = screenPositions[index][i * 2 + 0]
+                        let y = screenPositions[index][i * 2 + 1]
+
+                        gl.uniform2f(program.getUniformLocation("screenPosition"), x, y)
+                        draw(nameProperties, name)
+                    }
                 }
+                screenPositions[index].length = 0
 
+                //TODO
+                //this should only happen if you're sure this name is drawn with this pictogram drawer
+                //and it might have been reassigned. And type is kinda orthogonal to visualization
                 displayWindows.forEach((dw) => {
-                    if (dw.collectionY === screenPositions[i * 2 + 1]) {
+                    if (dw.collection.indexOf(name) !== -1) {
                         gl.uniform1f(program.getUniformLocation("uniformScale"), dw.dimension * .5 / RADIUS_IN_BOX)
-
                         gl.uniform1f(program.getUniformLocation("zAdditionForDw"), dwOriginZ())
+
                         const overflowMultiple = 2.
                         gl.uniform1f(program.getUniformLocation("clipBoxRadius"), .5 * dw.dimension * overflowMultiple)
                         gl.uniform2f(program.getUniformLocation("screenPosition"), dw.position.x, dw.position.y)
-                        draw(nameProperties,names[i])
+                        draw(nameProperties, name)
                     }
                 })
-            }
-
-            numToDraw = 0
+            })
         }
 
-        //prebatch and useprogram come first
+        //prebatch and useprogram will come first in their render functions
         if (fsBody !== undefined) {
             this.program = new PictogramProgram(vsBody, fsBody)
 

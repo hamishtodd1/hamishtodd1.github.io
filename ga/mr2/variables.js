@@ -9,9 +9,6 @@ const backgroundColor = [.5, .5, .5]
 const characterWidth = 1. / 3.
 const RADIUS_IN_BOX = 2.
 
-const mouseResponses = []
-const rightMouseResponses = []
-
 const IDENTIFIER_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 const CODING_MODE = 0
@@ -20,6 +17,12 @@ const PRESENTATION_EDITING_MODE = 2
 const MODE = 
     CODING_MODE 
     // PRESENTATION_MODE
+
+//---------Constant by the time we're finished initializing
+const types = []
+
+const mouseResponses = []
+const rightMouseResponses = []
 
 const displayWindows = []
 
@@ -34,6 +37,7 @@ const inverseViewRotor = new Float32Array(16)
 inverseViewRotor[0] = 1.
 
 const drawingDetailses = Array(NUM_NAMES)
+const dwSuggestionDrawingDetailses = []
 
 const functionsWithIr = {}
 

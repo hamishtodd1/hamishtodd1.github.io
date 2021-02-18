@@ -49,7 +49,9 @@ function initTextboxes() {
                     else
                         return -Infinity
                 },
-                start: onClick
+                start: ()=>{
+                    onClick(self)
+                }
             })
         }
     }
