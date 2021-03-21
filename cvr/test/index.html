@@ -13,12 +13,9 @@
 			(Oculus Browser with #webxr-hands flag enabled)
 		</div>
 
-		<script type="module">
+		<script src="../xrStuff.js"></script>
 
-			/*
-				Plan
-					we still have init in index
-			*/
+		<script type="module">
 
 			import * as THREE from './lib/three.module.js';
 			import { VRButton } from './lib/VRButton.js';
@@ -68,45 +65,8 @@
 				camera.position.set(0, 1.6, 3);
 			}
 
-			//what we need
-			{
-				renderer.xr.enabled = true;
-				document.body.appendChild(VRButton.createButton(renderer));
-
-				let controller1 = renderer.xr.getController(0);
-				scene.add(controller1);
-
-				let controller2 = renderer.xr.getController(1);
-				scene.add(controller2);
-
-				// const controllerModelFactory = new XRControllerModelFactory();
-				// const handModelFactory = new XRHandModelFactory().setPath( "models/" );
-
-				// Hand 1
-				let controllerGrip1 = renderer.xr.getControllerGrip(0);
-				controllerGrip1.add(new THREE.Mesh(new THREE.BoxGeometry(.1, .1, .1)));
-				scene.add(controllerGrip1);
-
-				let hand1 = renderer.xr.getHand(0);
-				hand1.addEventListener('pinchstart', () => {
-					controller1.scale.setScalar(1.1)
-				});
-				hand1.addEventListener('pinchend', () => {
-					controller1.scale.setScalar(1.)
-				});
-				hand1.add(new THREE.Mesh(new THREE.BoxGeometry(.3)));
-				scene.add(hand1);
-
-				// Hand 2
-				let controllerGrip2 = renderer.xr.getControllerGrip(1);
-				controllerGrip2.add(new THREE.Mesh(new THREE.BoxGeometry(.1, .1, .1)));
-				scene.add(controllerGrip2);
-
-				let hand2 = renderer.xr.getHand(1);
-				hand2.add(new THREE.Mesh(new THREE.BoxGeometry(.3)));
-				scene.add(hand2);
-
-			}
+			initXrRendering()
+			initXrHands()
 
 			renderer.setAnimationLoop(() => {
 				renderer.render(scene, camera)
