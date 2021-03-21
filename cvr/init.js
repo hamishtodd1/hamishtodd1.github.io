@@ -118,7 +118,6 @@ function init()
 	renderer.localClippingEnabled = true;
 	renderer.sortObjects = false;
 	document.body.appendChild( renderer.domElement );
-	renderer.vr.enabled = true;
 
 	// initSocket();
 	// socket.commandReactions["you aren't connected to coot"] = function()
