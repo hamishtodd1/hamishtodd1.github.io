@@ -23,15 +23,8 @@
 			import * as THREE from './lib/three.module.js';
 			import { VRButton } from './lib/VRButton.js';
 
-			let container;
-			let camera, scene, renderer;
-			let hand1, hand2;
-			let controller1, controller2;
-			let controllerGrip1, controllerGrip2;
-
-			function init() {
-
-				container = document.createElement( 'div' );
+			{
+				let container = document.createElement( 'div' );
 				document.body.appendChild( container );
 
 				scene = new THREE.Scene();
@@ -64,60 +57,57 @@
 				
 				container.appendChild( renderer.domElement );
 
-				//what we need
-				{
-					camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 10);
-					camera.position.set(0, 1.6, 3);
+				window.addEventListener('resize', () => {
+					camera.aspect = window.innerWidth / window.innerHeight;
+					camera.updateProjectionMatrix();
 
-					renderer.xr.enabled = true;
-					document.body.appendChild(VRButton.createButton(renderer));
+					renderer.setSize(window.innerWidth, window.innerHeight);
+				});
 
-					// controllers
-
-					controller1 = renderer.xr.getController(0);
-					scene.add(controller1);
-
-					controller2 = renderer.xr.getController(1);
-					scene.add(controller2);
-
-					// const controllerModelFactory = new XRControllerModelFactory();
-					// const handModelFactory = new XRHandModelFactory().setPath( "models/" );
-
-					// Hand 1
-					controllerGrip1 = renderer.xr.getControllerGrip(0);
-					controllerGrip1.add(new THREE.Mesh(new THREE.BoxGeometry(.1, .1, .1)));
-					scene.add(controllerGrip1);
-
-					hand1 = renderer.xr.getHand(0);
-					hand1.addEventListener('pinchstart', () => {
-						controller1.scale.setScalar(1.1)
-					});
-					hand1.addEventListener('pinchend', () => {
-						controller1.scale.setScalar(1.)
-					});
-					hand1.add(new THREE.Mesh(new THREE.BoxGeometry(.3)));
-					scene.add(hand1);
-
-					// Hand 2
-					controllerGrip2 = renderer.xr.getControllerGrip(1);
-					controllerGrip2.add(new THREE.Mesh(new THREE.BoxGeometry(.1, .1, .1)));
-					scene.add(controllerGrip2);
-
-					hand2 = renderer.xr.getHand(1);
-					hand2.add(new THREE.Mesh(new THREE.BoxGeometry(.3)));
-					scene.add(hand2);
-
-					window.addEventListener('resize', () => {
-						camera.aspect = window.innerWidth / window.innerHeight;
-						camera.updateProjectionMatrix();
-
-						renderer.setSize(window.innerWidth, window.innerHeight);
-					});
-				}
+				camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 10);
+				camera.position.set(0, 1.6, 3);
 			}
 
-			init();
-			
+			//what we need
+			{
+				renderer.xr.enabled = true;
+				document.body.appendChild(VRButton.createButton(renderer));
+
+				let controller1 = renderer.xr.getController(0);
+				scene.add(controller1);
+
+				let controller2 = renderer.xr.getController(1);
+				scene.add(controller2);
+
+				// const controllerModelFactory = new XRControllerModelFactory();
+				// const handModelFactory = new XRHandModelFactory().setPath( "models/" );
+
+				// Hand 1
+				let controllerGrip1 = renderer.xr.getControllerGrip(0);
+				controllerGrip1.add(new THREE.Mesh(new THREE.BoxGeometry(.1, .1, .1)));
+				scene.add(controllerGrip1);
+
+				let hand1 = renderer.xr.getHand(0);
+				hand1.addEventListener('pinchstart', () => {
+					controller1.scale.setScalar(1.1)
+				});
+				hand1.addEventListener('pinchend', () => {
+					controller1.scale.setScalar(1.)
+				});
+				hand1.add(new THREE.Mesh(new THREE.BoxGeometry(.3)));
+				scene.add(hand1);
+
+				// Hand 2
+				let controllerGrip2 = renderer.xr.getControllerGrip(1);
+				controllerGrip2.add(new THREE.Mesh(new THREE.BoxGeometry(.1, .1, .1)));
+				scene.add(controllerGrip2);
+
+				let hand2 = renderer.xr.getHand(1);
+				hand2.add(new THREE.Mesh(new THREE.BoxGeometry(.3)));
+				scene.add(hand2);
+
+			}
+
 			renderer.setAnimationLoop(() => {
 				renderer.render(scene, camera)
 			})
