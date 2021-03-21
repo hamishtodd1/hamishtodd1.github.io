@@ -184,22 +184,15 @@ function init()
 
 	setCurrentHeadPositionAsCenter = function()
 	{
-		renderer.vr.setPositionAsOrigin( camera.position )
+		// renderer.vr.setPositionAsOrigin( camera.position )
+		//yeah, need to do this
 	}
 	// console.log(renderer.vr)
 	addSingleFunctionToPanel(setCurrentHeadPositionAsCenter,6.05,5.38)
 	setCurrentHeadPositionAsCenter() //wanna be accessible from behind the panel?
 
-	let vrButton = WEBVR.createButton( renderer )
-	document.body.appendChild( vrButton );
-	document.addEventListener( 'keydown', function( event )
-	{
-		if(event.keyCode === 69 )
-		{
-			vrButton.onclick()
-			window.removeEventListener('resize', windowResize)
-		}
-	}, false );
+	renderer.xr.enabled = true;
+	document.body.appendChild(VRButton.createButton(renderer))
 
 	// socket.onopen = function()
 	{

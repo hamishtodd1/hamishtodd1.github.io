@@ -1,5 +1,3 @@
-console.log("yo")
-
 function initXrRendering() {
     renderer.xr.enabled = true;
     document.body.appendChild(VRButton.createButton(renderer));
