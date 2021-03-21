@@ -102,20 +102,6 @@ VR Games to get maybe
 	Both
 		Lone echo
 
-Maya
-	Admin
-	reddit/bluecollarwomen
-	http://www.nts.org.uk/wildlifesurvey/
-	http://www.wildlifeinformation.co.uk/about_volunteering.php
-	
-	Humane extermination?
-	Who counts the badgers? Conducts the surveys for the government?
-	RSPCA inspector. Possibly too traumatic
-	Police dog handler
-	Lab animal caretaker
-
-	Park naturalist
-	Rehabilitator?
 
 */
 
@@ -237,10 +223,9 @@ function init()
 		// initRamachandran()
 
 		let loopCallString = getStandardFunctionCallString(loop);
-		renderer.setAnimationLoop( function()
-		{
-			eval(loopCallString);
-			renderer.render( scene, camera );
+		renderer.setAnimationLoop( () => {
+			eval(loopCallString)
+			renderer.render( scene, camera )
 		} )
 	}
 }
