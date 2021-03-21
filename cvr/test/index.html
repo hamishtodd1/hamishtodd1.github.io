@@ -20,11 +20,12 @@
 			import * as THREE from './lib/three.module.js';
 			import { VRButton } from './lib/VRButton.js';
 
+			scene = new THREE.Scene();
+
 			{
 				let container = document.createElement( 'div' );
 				document.body.appendChild( container );
 
-				scene = new THREE.Scene();
 				scene.background = new THREE.Color( 0x444444 );
 
 				const floorGeometry = new THREE.PlaneGeometry( 4, 4 );
