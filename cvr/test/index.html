@@ -20,7 +20,8 @@
 			import * as THREE from './lib/three.module.js';
 			import { VRButton } from './lib/VRButton.js';
 
-			const scene = new THREE.Scene();
+			scene = new THREE.Scene();
+			renderer = new THREE.WebGLRenderer({ antialias: true });
 
 			{
 				let container = document.createElement( 'div' );
@@ -47,7 +48,6 @@
 				light.shadow.mapSize.set( 4096, 4096 );
 				scene.add( light );
 
-				renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.outputEncoding = THREE.sRGBEncoding;
