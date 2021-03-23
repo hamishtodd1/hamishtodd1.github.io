@@ -142,6 +142,8 @@ function initHands()
 
 	readHandInput = function()
 	{
+		return
+		
 		// var device = renderer.vr.getDevice()
 		// if(device)
 		// 	console.log(device.stageParameters.sittingToStandingTransform)
