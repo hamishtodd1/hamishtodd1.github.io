@@ -1,4 +1,3 @@
-log("yo")
 class VRButton {
 
 	static createButton( renderer, options ) {
@@ -166,3 +165,4 @@ class VRButton {
 	}
 
 }
+log(VRButton)
