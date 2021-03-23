@@ -165,4 +165,4 @@ class VRButton {
 	}
 
 }
-log(VRButton)
+console.log(VRButton)
