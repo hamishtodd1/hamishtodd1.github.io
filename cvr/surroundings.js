@@ -78,7 +78,7 @@ function initSurroundings()
 	var shadowsPresent = false;
 	if(shadowsPresent)
 	{
-		// var shadowSurface = new THREE.Mesh(new THREE.SphereBufferGeometry( 1 ).applyMatrix(new THREE.Matrix4().makeScale(panelDimensions.x,panelDimensions.y,panelDimensions.z)), new THREE.MeshBasicMaterial({side:THREE.DoubleSide}) )
+		// var shadowSurface = new THREE.Mesh(new THREE.SphereBufferGeometry( 1 ).applyMatrix4(new THREE.Matrix4().makeScale(panelDimensions.x,panelDimensions.y,panelDimensions.z)), new THREE.MeshBasicMaterial({side:THREE.DoubleSide}) )
 		// scene.add(shadowSurface) // want to use it for intersection and for shadow. Necessary to be in scene for former?
 		//there's an argument for having the shadow of the panel on the floor
 

@@ -13,8 +13,8 @@ function initControllers()
 			{
 				handControllers[  i ].controllerModel.geometry = object.children[0].geometry;
 			
-				handControllers[  i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeRotationAxis(xUnit,0.5) );
-				handControllers[  i ].controllerModel.geometry.applyMatrix( new THREE.Matrix4().makeTranslation((i==LEFT_CONTROLLER_INDEX?1:-1)*0.002,0.036,-0.039) );
+				handControllers[  i ].controllerModel.geometry.applyMatrix4( new THREE.Matrix4().makeRotationAxis(xUnit,0.5) );
+				handControllers[  i ].controllerModel.geometry.applyMatrix4( new THREE.Matrix4().makeTranslation((i==LEFT_CONTROLLER_INDEX?1:-1)*0.002,0.036,-0.039) );
 				handControllers[  i ].controllerModel.geometry.computeBoundingSphere();
 			},
 			function ( xhr ) {}, function ( xhr ) { console.error( "couldn't load OBJ" ); } );

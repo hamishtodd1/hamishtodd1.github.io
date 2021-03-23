@@ -121,6 +121,7 @@ function initPanel()
 			// opacity:0.01
 		})
 	);
+	
 	for(let i = 0; i < panel.geometry.vertices.length; i++)
 	{
 		panel.geometry.vertices[i].y -= downness / 2;

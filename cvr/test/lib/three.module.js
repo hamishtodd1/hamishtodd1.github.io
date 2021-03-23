@@ -47671,7 +47671,7 @@ Object3D.prototype.getWorldRotation = function () {
 
 Object3D.prototype.applyMatrix = function ( matrix ) {
 
-	console.warn( 'THREE.Object3D: .applyMatrix() has been renamed to .applyMatrix4().' );
+	console.warn( 'THREE.Object3D: .applyMatrix4() has been renamed to .applyMatrix4().' );
 	return this.applyMatrix4( matrix );
 
 };
@@ -48019,7 +48019,7 @@ BufferGeometry.prototype.removeAttribute = function ( name ) {
 
 BufferGeometry.prototype.applyMatrix = function ( matrix ) {
 
-	console.warn( 'THREE.BufferGeometry: .applyMatrix() has been renamed to .applyMatrix4().' );
+	console.warn( 'THREE.BufferGeometry: .applyMatrix4() has been renamed to .applyMatrix4().' );
 	return this.applyMatrix4( matrix );
 
 };

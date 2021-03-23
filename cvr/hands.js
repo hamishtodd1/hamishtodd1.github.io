@@ -52,7 +52,7 @@ function initHands()
 				{
 					m.makeRotationFromQuaternion(q)
 					m.setPosition(new THREE.Vector3(-0.012547648553172985,0.03709224605844833,-0.038470991285082676))
-					handControllers[ i ].controllerModel.geometry.applyMatrix( m )
+					handControllers[ i ].controllerModel.geometry.applyMatrix4( m )
 				}
 				else
 				{
@@ -65,7 +65,7 @@ function initHands()
 
 					m.makeRotationFromQuaternion(otherQ)
 					m.setPosition(new THREE.Vector3(0.012547648553172985,0.03709224605844833,-0.038470991285082676))
-					handControllers[i].controllerModel.geometry.applyMatrix( m )
+					handControllers[i].controllerModel.geometry.applyMatrix4( m )
 				}
 				}
 
