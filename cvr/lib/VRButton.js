@@ -1,3 +1,4 @@
+log("yo")
 class VRButton {
 
 	static createButton( renderer, options ) {
