@@ -188,7 +188,7 @@ function init()
 		currentPos.setFromMatrixPosition(vrOffsetMatrix)
 
 		let currentPositionCorrection = new THREE.Vector3().setFromMatrixPosition(vrOffsetMatrix).negate()
-		currentPositionCorrection.add(cameraPosition).negate()
+		currentPositionCorrection.add(camera.position).negate()
 		vrOffsetMatrix.setPosition(currentPositionCorrection)
 
 		delete currentPositionCorrection
