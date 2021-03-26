@@ -181,12 +181,18 @@ function init()
 	initHands()
 	initDisplayManager()
 
-	setCurrentHeadPositionAsCenter = function()
+	let offsetToPutInPlace = new THREE.Vector3()
+	function setCurrentHeadPositionAsCenter()
 	{
-		// renderer.vr.setPositionAsOrigin( camera.position )
-		//yeah, need to do this
+		let currentPos = new THREE.Vector3()
+		currentPos.setFromMatrixPosition(vrOffsetMatrix)
+
+		let currentPositionCorrection = new THREE.Vector3().setFromMatrixPosition(vrOffsetMatrix).negate()
+		currentPositionCorrection.add(cameraPosition).negate()
+		vrOffsetMatrix.setPosition(currentPositionCorrection)
+
+		delete currentPositionCorrection
 	}
-	// console.log(renderer.vr)
 	addSingleFunctionToPanel(setCurrentHeadPositionAsCenter,6.05,5.38)
 	setCurrentHeadPositionAsCenter() //wanna be accessible from behind the panel?
 
