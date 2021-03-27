@@ -2,6 +2,22 @@
 
 function initHands()
 {
+	{
+		let xrishControllers = [
+			renderer.xr.getController(0), 
+			renderer.xr.getController(1)
+		]
+		xrishControllers.forEach((c)=>{
+			c.addEventListener('select', ()=>{log("select")})
+			c.addEventListener('selectstart', ()=>{log("selectstart")})
+			c.addEventListener('selectend', ()=>{log("selectend")})
+			c.addEventListener('squeeze', ()=>{log("squeeze")})
+			c.addEventListener('squeezestart', ()=>{log("squeezestart")})
+			c.addEventListener('squeezeend', ()=>{log("squeezeend")})
+		})
+	}
+
+
 	function overlappingHoldable(holdable)
 	{
 		if(holdable === assemblage)
