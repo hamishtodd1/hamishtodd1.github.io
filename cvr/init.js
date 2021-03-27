@@ -182,7 +182,7 @@ function init()
 	initDisplayManager()
 
 	let offsetToPutInPlace = new THREE.Vector3()
-	function setCurrentHeadPositionAsCenter()
+	setCurrentHeadPositionAsCenter = function()
 	{
 		let currentPos = new THREE.Vector3()
 		currentPos.setFromMatrixPosition(vrOffsetMatrix)

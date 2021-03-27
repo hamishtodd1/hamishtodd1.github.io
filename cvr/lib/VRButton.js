@@ -23,6 +23,8 @@ class VRButton {
 
 				currentSession = session;
 
+				setCurrentHeadPositionAsCenter()
+
 			}
 
 			function onSessionEnded( /*event*/ ) {
