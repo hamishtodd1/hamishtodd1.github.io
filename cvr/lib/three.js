@@ -16982,6 +16982,9 @@
 
 
 			camera.matrixWorld.copy(cameraVR.matrixWorld);
+			camera.rotation.setFromRotationMatrix(cameraVR.matrixWorld)
+			camera.quaternion.setFromRotationMatrix(cameraVR.matrixWorld)
+			camera.position.setFromMatrixPosition(cameraVR.matrixWorld)
 			var children = camera.children;
 
 			for (var _i3 = 0, l = children.length; _i3 < l; _i3++) {
