@@ -2,22 +2,6 @@
 
 function initHands()
 {
-	{
-		let xrishControllers = [
-			renderer.xr.getController(0), 
-			renderer.xr.getController(1)
-		]
-		xrishControllers.forEach((c)=>{
-			c.addEventListener('select', ()=>{log("select")})
-			c.addEventListener('selectstart', ()=>{log("selectstart")})
-			c.addEventListener('selectend', ()=>{log("selectend")})
-			c.addEventListener('squeeze', ()=>{log("squeeze")})
-			c.addEventListener('squeezestart', ()=>{log("squeezestart")})
-			c.addEventListener('squeezeend', ()=>{log("squeezeend")})
-		})
-	}
-
-
 	function overlappingHoldable(holdable)
 	{
 		if(holdable === assemblage)
@@ -156,16 +140,19 @@ function initHands()
 		loadControllerModel(i);
 	}
 
+	let gamepads = Array(2)
 	readHandInput = function()
 	{
-		return
+		let inputSources = renderer.xr.getSession().inputSources
+		gamepads[0] = inputSources[0].gamepad
+		gamepads[1] = inputSources[1].gamepad
 		
 		// var device = renderer.vr.getDevice()
 		// if(device)
 		// 	console.log(device.stageParameters.sittingToStandingTransform)
 
-		var gamepads = navigator.getGamepads();
-		var standingMatrix = renderer.vr.getStandingMatrix()
+		// var gamepads = navigator.getGamepads();
+		// var standingMatrix = renderer.vr.getStandingMatrix()
 
 		//If handControllers aren't getting input even from XX-vr-handControllers,
 		//Try restarting computer. Urgh. Just browser isn't enough. Maybe oculus app?
@@ -224,7 +211,7 @@ function initHands()
 
 			controller.position.fromArray( gamepads[k].pose.position );
 			// controller.position.add(HACKY_HAND_ADDITION_REMOVE)
-			controller.position.applyMatrix4( standingMatrix );
+			// controller.position.applyMatrix4( standingMatrix ); // hopefully irrelevant
 			controller.quaternion.fromArray( gamepads[k].pose.orientation );
 			controller.updateMatrixWorld();
 

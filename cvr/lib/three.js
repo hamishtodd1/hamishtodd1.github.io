@@ -16634,7 +16634,7 @@
 							if (jointPose !== null) {
 								joint.matrix.fromArray(jointPose.transform.matrix);
 								//so, maybe you need to decompose it
-								targetRay.matrix.multiply(vrOffsetMatrix)
+								targetRay.matrix.premultiply(vrOffsetMatrix)
 								joint.matrix.decompose(joint.position, joint.rotation, joint.scale);
 								joint.jointRadius = jointPose.radius;
 							}
@@ -16673,7 +16673,7 @@
 							targetRay.matrix.fromArray(inputPose.transform.matrix);
 
 							//so, maybe you need to decompose it
-							targetRay.matrix.multiply(vrOffsetMatrix)
+							targetRay.matrix.premultiply(vrOffsetMatrix)
 
 							targetRay.matrix.decompose(targetRay.position, targetRay.rotation, targetRay.scale);
 						}
@@ -16686,7 +16686,7 @@
 							grip.matrix.fromArray(gripPose.transform.matrix);
 
 							//so, maybe you need to decompose it
-							grip.matrix.multiply(vrOffsetMatrix)
+							grip.matrix.premultiply(vrOffsetMatrix)
 
 							grip.matrix.decompose(grip.position, grip.rotation, grip.scale);
 						}
