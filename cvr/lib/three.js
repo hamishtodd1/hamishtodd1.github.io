@@ -16983,8 +16983,6 @@
 				updateCamera(cameras[i], parent);
 			} // update camera and its children
 
-			// added by HAMISH
-
 			camera.matrixWorld.copy(cameraVR.matrixWorld);
 			camera.matrix.copy(cameraVR.matrix);
 			camera.matrix.decompose(camera.position, camera.quaternion, camera.scale);
@@ -17037,7 +17035,7 @@
 					// camera.matrix.getInverse(camera.matrix)
 
 					// added by HAMISH
-					// camera.matrix.multiply(vrOffsetMatrix)
+					camera.matrix.multiply(vrOffsetMatrix)
 					//it's bad because it gets attached to something else
 
 

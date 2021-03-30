@@ -181,7 +181,6 @@ function init()
 	initHands()
 	initDisplayManager()
 
-	let offsetToPutInPlace = new THREE.Vector3()
 	setCurrentHeadPositionAsCenter = function()
 	{
 		let currentPos = new THREE.Vector3()
