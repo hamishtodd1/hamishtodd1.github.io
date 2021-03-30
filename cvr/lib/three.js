@@ -16983,11 +16983,12 @@
 				updateCamera(cameras[i], parent);
 			} // update camera and its children
 
+			// added by HAMISH
 
 			camera.matrixWorld.copy(cameraVR.matrixWorld);
-			camera.rotation.setFromRotationMatrix(cameraVR.matrix)
-			camera.quaternion.setFromRotationMatrix(cameraVR.matrix)
-			camera.position.setFromMatrixPosition(cameraVR.matrix)
+			camera.matrix.copy(cameraVR.matrix);
+			camera.matrix.decompose(camera.position, camera.quaternion, camera.scale);
+
 			var children = camera.children;
 
 			for (var _i3 = 0, l = children.length; _i3 < l; _i3++) {
@@ -17033,7 +17034,7 @@
 					
 					camera.matrix.fromArray(view.transform.matrix);
 
-					camera.matrix.getInverse(camera.matrix)
+					// camera.matrix.getInverse(camera.matrix)
 
 					// added by HAMISH
 					// camera.matrix.multiply(vrOffsetMatrix)
