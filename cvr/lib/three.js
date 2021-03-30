@@ -17035,7 +17035,7 @@
 					// camera.matrix.getInverse(camera.matrix)
 
 					// added by HAMISH
-					camera.matrix.multiply(vrOffsetMatrix)
+					camera.matrix.premultiply(vrOffsetMatrix)
 					//it's bad because it gets attached to something else
 
 
