@@ -16633,6 +16633,7 @@
 
 							if (jointPose !== null) {
 								joint.matrix.fromArray(jointPose.transform.matrix);
+								//so, maybe you need to decompose it
 								targetRay.matrix.multiply(vrOffsetMatrix)
 								joint.matrix.decompose(joint.position, joint.rotation, joint.scale);
 								joint.jointRadius = jointPose.radius;
@@ -16671,6 +16672,7 @@
 						if (inputPose !== null) {
 							targetRay.matrix.fromArray(inputPose.transform.matrix);
 
+							//so, maybe you need to decompose it
 							targetRay.matrix.multiply(vrOffsetMatrix)
 
 							targetRay.matrix.decompose(targetRay.position, targetRay.rotation, targetRay.scale);
@@ -16683,6 +16685,7 @@
 						if (gripPose !== null) {
 							grip.matrix.fromArray(gripPose.transform.matrix);
 
+							//so, maybe you need to decompose it
 							grip.matrix.multiply(vrOffsetMatrix)
 
 							grip.matrix.decompose(grip.position, grip.rotation, grip.scale);
@@ -17007,6 +17010,7 @@
 
 		function onAnimationFrame(time, frame) {
 			pose = frame.getViewerPose(referenceSpace);
+			//possibly this referencespace is worth prodding
 
 			if (pose !== null) {
 				var views = pose.views;
@@ -17022,11 +17026,31 @@
 				for (var i = 0; i < views.length; i++) {
 					var view = views[i];
 					var viewport = baseLayer.getViewport(view);
+
 					var camera = cameras[i];
+
+
+					
 					camera.matrix.fromArray(view.transform.matrix);
 
+					camera.matrix.getInverse(camera.matrix)
+
 					// added by HAMISH
-					camera.matrix.multiply(vrOffsetMatrix)
+					// camera.matrix.multiply(vrOffsetMatrix)
+					//it's bad because it gets attached to something else
+
+
+					//from old version
+					// {
+					// 	var viewMatrix = pose.getViewMatrix( view );
+
+					// 	let actualViewMatrix = new THREE.Matrix4().fromArray( viewMatrix )
+					// 	// actualViewMatrix.multiply(userHackMatrixAffectingStandingMatrix)
+
+					// 	camera.matrix.copy( actualViewMatrix ).getInverse( camera.matrix );
+					// }
+
+
 
 					camera.projectionMatrix.fromArray(view.projectionMatrix);
 					camera.viewport.set(viewport.x, viewport.y, viewport.width, viewport.height);
