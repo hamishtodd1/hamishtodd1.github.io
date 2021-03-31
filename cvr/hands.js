@@ -143,9 +143,11 @@ function initHands()
 	let gamepads = Array(2)
 	readHandInput = function()
 	{
-		let inputSources = renderer.xr.getSession().inputSources
-		gamepads[0] = inputSources[0].gamepad
-		gamepads[1] = inputSources[1].gamepad
+		let session = renderer.xr.getSession()
+		if( !session )
+			return
+		gamepads[0] = session.inputSources[0].gamepad
+		gamepads[1] = session.inputSources[1].gamepad
 		
 		// var device = renderer.vr.getDevice()
 		// if(device)
