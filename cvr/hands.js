@@ -144,10 +144,12 @@ function initHands()
 	readHandInput = function()
 	{
 		let session = renderer.xr.getSession()
-		if( !session )
+		if( !session || !session.inputSources )
 			return
 		gamepads[0] = session.inputSources[0].gamepad
 		gamepads[1] = session.inputSources[1].gamepad
+
+		log(gamepads[0])
 		
 		// var device = renderer.vr.getDevice()
 		// if(device)
