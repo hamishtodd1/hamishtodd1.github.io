@@ -66,8 +66,17 @@
 			initXrRendering()
 			initXrHands()
 
+			let boywox = new THREE.Mesh(new THREE.SphereGeometry(.4),new THREE.MeshBasicMaterial({color:0xFF0000}))
+			scene.add(boywox)
+
+			let v1 = new THREE.Vector3()
 			renderer.setAnimationLoop(() => {
-				console.log(hand)
+				boywox.matrixWorld.copy(box.matrixWorld)
+				boywox.matrixWorld.decompose(boywox.position,boywox.quaternion,boywox.scale)
+
+				console.log("matrix world", box.matrixWorld.elements)
+				box.getWorldPosition(v1)
+				console.log("world position",v1)
 
 				renderer.render(scene, camera)
 			})
