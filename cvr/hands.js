@@ -142,6 +142,7 @@ function initHands()
 
 	let gamepads = Array(2)
 	let inputSources = Array(2)
+	let transformSources = [renderer.xr.getControllerGrip(0), renderer.xr.getControllerGrip(1)]
 	readHandInput = function()
 	{
 		let session = renderer.xr.getSession()
@@ -169,6 +170,7 @@ function initHands()
 			// {
 			// 	continue;
 			// }
+			
 
 
 			var affectedControllerIndex = -1;
@@ -187,10 +189,12 @@ function initHands()
 			controller.oldPosition.copy(controller.position);
 			controller.oldQuaternion.copy(controller.quaternion);
 
-			controller.position.fromArray( gamepads[k].pose.position );
+			controller.matrix.copy(transformSources[k])
+			controller.matrix.decompose(controller.position,controller.quaternion,controller.scale)
+			// controller.position.fromArray( gamepads[k].pose.position );
 			// controller.position.add(HACKY_HAND_ADDITION_REMOVE)
 			// controller.position.applyMatrix4( standingMatrix ); // hopefully irrelevant
-			controller.quaternion.fromArray( gamepads[k].pose.orientation );
+			// controller.quaternion.fromArray( gamepads[k].pose.orientation );
 			controller.updateMatrixWorld();
 
 			controller.deltaPosition.copy(controller.position).sub(controller.oldPosition);
