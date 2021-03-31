@@ -175,7 +175,7 @@ function initHands()
 
 			var affectedControllerIndex = -1;
 
-			if(inputSources[i].handedness === "right")
+			if(inputSources[k].handedness === "right")
 				affectedControllerIndex = RIGHT_CONTROLLER_INDEX
 			else
 				affectedControllerIndex = LEFT_CONTROLLER_INDEX
