@@ -13,6 +13,8 @@ function initXrHands() {
     // const controllerModelFactory = new XRControllerModelFactory();
     // const handModelFactory = new XRHandModelFactory().setPath( "models/" );
 
+    box = new THREE.Mesh(new THREE.BoxGeometry(.1, .1, .1))
+
     // Hand 1
     let controllerGrip1 = renderer.xr.getControllerGrip(0);
     controllerGrip1.add(new THREE.Mesh(new THREE.BoxGeometry(.1, .1, .1)));
@@ -25,8 +27,10 @@ function initXrHands() {
     hand1.addEventListener('pinchend', () => {
         controller1.scale.setScalar(1.)
     });
-    hand1.add(new THREE.Mesh(new THREE.BoxGeometry(.3)));
+    hand1.add(box);
     scene.add(hand1);
+
+    
 
     // Hand 2
     let controllerGrip2 = renderer.xr.getControllerGrip(1);
