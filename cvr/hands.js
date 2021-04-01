@@ -189,7 +189,7 @@ function initHands()
 			controller.oldPosition.copy(controller.position);
 			controller.oldQuaternion.copy(controller.quaternion);
 
-			controller.matrix.copy(transformSources[k])
+			controller.matrix.copy(transformSources[k].matrix)
 			controller.matrix.decompose(controller.position,controller.quaternion,controller.scale)
 			// controller.position.fromArray( gamepads[k].pose.position );
 			// controller.position.add(HACKY_HAND_ADDITION_REMOVE)
