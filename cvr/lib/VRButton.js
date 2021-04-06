@@ -23,7 +23,7 @@ class VRButton {
 
 				currentSession = session;
 
-				setCurrentHeadPositionAsCenter()
+				// setCurrentHeadPositionAsCenter()
 
 			}
 

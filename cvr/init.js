@@ -193,6 +193,7 @@ function init()
 		delete currentPositionCorrection
 	}
 	addSingleFunctionToPanel(setCurrentHeadPositionAsCenter,6.05,5.38)
+	// camera.position.y = 1.6
 	setCurrentHeadPositionAsCenter() //wanna be accessible from behind the panel?
 
 	renderer.xr.enabled = true;
