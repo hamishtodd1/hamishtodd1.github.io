@@ -150,7 +150,7 @@ function initHands()
 			return
 		inputSources[0] = session.inputSources[0]
 		inputSources[1] = session.inputSources[1]
-		if(inputSources[0] === undefined) {
+		if (inputSources[0] === undefined || inputSources[1] === undefined) {
 			if(frameCount % 40 === 0)
 				console.error("no inputSource")
 			return
