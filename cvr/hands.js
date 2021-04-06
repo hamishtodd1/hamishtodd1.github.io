@@ -150,6 +150,11 @@ function initHands()
 			return
 		inputSources[0] = session.inputSources[0]
 		inputSources[1] = session.inputSources[1]
+		if(inputSources[0] === undefined) {
+			if(frameCount % 40 === 0)
+				console.error("no inputSource")
+			return
+		}
 		gamepads[0] = inputSources[0].gamepad
 		gamepads[1] = inputSources[1].gamepad
 
@@ -198,7 +203,7 @@ function initHands()
 			controller.updateMatrixWorld();
 
 			controller.deltaPosition.copy(controller.position).sub(controller.oldPosition);
-			controller.deltaQuaternion.copy(controller.oldQuaternion).inverse().multiply(controller.quaternion);
+			controller.deltaQuaternion.copy(controller.oldQuaternion).invert().multiply(controller.quaternion);
 
 			if( gamepads[k].id === "Oculus Touch (Right)" || gamepads[k].id === "Oculus Touch (Left)" )
 			{
