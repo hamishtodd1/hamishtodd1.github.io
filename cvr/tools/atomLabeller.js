@@ -1,6 +1,6 @@
 function initAtomLabeller()
 {
-	let atomLabeller = Tool(0x0000FF)
+	let atomLabeller = Tool(0x0000FF,"Atom Labeller")
 
 	atomLabeller.whileHeld = function(positionInAssemblage)
 	{

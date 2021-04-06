@@ -64,7 +64,7 @@ function initProteinPainter()
 
 	let proteinPainterMesh = new THREE.Mesh(new THREE.CylinderBufferGeometry(0.08,0.08,0.002,32), new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.5}))
 	proteinPainterMesh.geometry.applyMatrix4(new THREE.Matrix4().makeRotationX(TAU/4))
-	let proteinPainter = Tool(proteinPainterMesh)
+	let proteinPainter = Tool(proteinPainterMesh, "Protein Painter")
 
 	proteinPainter.onPickUp = function()
 	{

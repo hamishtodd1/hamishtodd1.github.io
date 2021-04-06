@@ -2,7 +2,7 @@
 
 function initEnvironmentDistances()
 {
-	var environmentDistancer = Tool(0xFFFFFF)
+	var environmentDistancer = Tool(0xFFFFFF, "Environment Distances")
 
 	var connectionMeshes = [];
 	

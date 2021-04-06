@@ -1,7 +1,7 @@
 //TODO turning white is a bad way to highlight, they're inside a ball
 function initAtomDeleter()
 {
-	var atomDeleter = Tool(0xFF0000)
+	var atomDeleter = Tool(0xFF0000,"Atom Deleter")
 
 	var highlightColor = new THREE.Color(1,1,1);
 
@@ -81,7 +81,7 @@ function initAtomDeleter()
 //seems to have a bug if you delete two residues at the same time
 function initResidueDeleter()
 {
-	var residueDeleter = Tool(0xFF0000)
+	var residueDeleter = Tool(0xFF0000,"Residue Deleter")
 
 	residueDeleter.onLetGo = turnOffAllHighlights;	
 

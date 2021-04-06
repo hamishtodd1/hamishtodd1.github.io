@@ -547,7 +547,7 @@ function initPanel()
 		MenuOnPanel([{string:processedFunctionName, buttonFunction:f}],polar, azimuthal)
 	}
 
-	Tool = function(colorOrMesh)
+	Tool = function(colorOrMesh,name)
 	{
 		let tool = new THREE.Object3D();
 		
@@ -574,20 +574,6 @@ function initPanel()
 				assemblage.worldToLocal(positionInAssemblage);
 
 				tool.whileHeld(positionInAssemblage)
-			}
-		}
-
-		let fakeError = new Error()
-		if(fakeError.stack)
-		{
-			var chromeStyleSplit = (fakeError.stack.split("at init"))
-			if(chromeStyleSplit.length > 1)
-			{
-				var name = chromeStyleSplit[1].split("(file")[0]
-			}
-			else
-			{
-				var name = (fakeError.stack.split("\ninit"))[1].split("@")[0]
 			}
 		}
 
