@@ -91,6 +91,13 @@ function initHands()
 		button1: 0,
 		button2:0
 	}
+	var questControllerKeys = {
+		grippingTop: 0,
+		grippingSide: 1,
+		button1: 4,
+		button2: 5,
+		thumbstickButton: 3
+	}
 
 	for(var i = 0; i < 2; i++)
 	{
@@ -204,6 +211,15 @@ function initHands()
 					controller[propt] = gamepad.buttons[controllerKeys[propt]].pressed;
 				}
 				controller["grippingSide"] = gamepad.buttons[controllerKeys["grippingSide"]].value > 0.7;
+			}
+			else if(gamepad.mapping === "xr-standard")
+			{
+				for (var propt in questControllerKeys)
+				{
+					controller[propt + "Old"] = controller[propt];
+					controller[propt] = gamepad.buttons[questControllerKeys[propt]].pressed;
+				}
+				controller["grippingSide"] = gamepad.buttons[questControllerKeys["grippingSide"]].value > 0.7;
 			}
 			else if( gamepad.id === "OpenVR Gamepad" )
 			{
