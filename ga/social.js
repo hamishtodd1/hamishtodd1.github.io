@@ -12,8 +12,6 @@
 
     Put faces on everything, people's brains are transformed into supercomputers when you recast maths in a social context
 
-    Photo editing
-
     Philosophical-sounding
         It's all about constraints, give an interface for making constraints
 
@@ -24,13 +22,45 @@
         And giving those clothes behaviour, so the clothes respond to what their friends do
         Making little games including pong
 
-    The kids could make games for each other. No need to download them, they just implement them themselves
+    No need to download a game, you implement it yourself
+        You can modify it, debug it to suit your needs
     
     "You need to be able to make"
         pong
-        a rope
+        rope-like things
         a bouncing ball
-        a phong shader
+        Weights
+        Skinning (dual quat fields)
+            "Animation" is too broad, everything is animation. You want a kind of animation s.t. dual quat field is natural
+        Minimization
+            Well that's just a ball getting to the bottom of a valley
+        Rigid body dynamics
+        Texture/normal mapping
+            Motor manifolds, probably mappings from I^2 -> motors in 3D
+        Fields 
+            of force
+            of velocity
+            the slicing of them
+            their action on objects
+        Curves
+            1D
+            2D
+        Back to classical mechanics
+        A little cartoon character that
+            knows what direction to look in
+        Import
+            1D textures
+            2D textures
+            3D models
+
+    Jesus fucking christ dude, stop with the cutting edge research!
+        Consider leaving bivector discord! You're at the level of understanding of others there now!
+        You're trying to make something that lets kids make things comparable with
+        Fragment shaders are just colorers. Color might be good eventually for the jewelery. For now, movement
+
+
+    "You probably don't need to, even though most game engines would let you,"
+        Create objects at runtime
 
     Business
         Maybe you can send one another stuff to be seen in the browser version but only make it in the paid version?

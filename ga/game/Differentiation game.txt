@@ -1,0 +1,92 @@
+make the curve MASSIVE, we're zoomed in on a point on it
+Maybe the curve is now out at infinity, smooshed onto that sphere?
+
+it's surely interesting that, at any given time, you get a transformation instead of an addition.
+Pretty sure that "function which will be applied this frame" beats "number that will be added this frame"
+
+Multiplication and division are best visualised on the projective line
+
+Hopefully fields will be enough to get you wobbly toys
+
+Getting too into continuum mechanics may be a mistake, probably springs is fine. Still, continuous function around a surface, sounds fun!
+
+So let's say scalars are always lengths, and always scaled by some constant you control because you have "measurement". 
+Your scalars are always on a bar chart pallett you can pick up and move around, so you can pick it up and compare it, in place, with something. 
+Or, maybe you can pick them up individually and attach them?
+Can they be negative? Probably not, that's too much like direction, these are magnitudes. There are arguments on both sides
+
+Rigid body dynamics, force fields, and skinning, is likely enough to be getting along with, for sure enough for much of animation. After that, listen
+
+Need clever stuff about hiding and showing again
+    Maybe select what objects your thing is based on, everything else disappears. Maybe they're not in your hands, they're just there
+
+The "curve -> stack of infinity copies of the manifold getting bigger (and inverted, past 0) in both directions" idea of a metric is sticking
+
+Crazy: a movement of your hand through the air is precisely R->motors. And a mesh is precisely R2->motors
+What does it look like if you just cross two of them?
+	
+
+What if you think of every PGA element as a pair (normalized geometric object, magnitude). 
+Gproduct becomes (ag,am)(bg,bm)=(agbg,ambm). Isn't meet and join, practically speaking, scalar part clobbered to 0?
+
+The reason it's pretty darn useful to focus on differential stuff
+    is because if you can get the kids to determine a differential at a point in time
+    well, that's all you need to make things with behaviour
+    You do want folks to be able to think about curves, and things happenning over time
+
+Platformer control scheme:
+    you've got your finger, on the dome, from above.
+    The avatar is in the center, always going around the (w=1 version of the) point indicated by your finger,
+    osculating-circle-style
+    What for?
+        Nice how it generalizes to more dimensions?
+
+How about getting intuition for colored forcefields
+    Hue is direction, darkness is magnitude. And you have a big hue circle around it to remind
+    Although, the right way to visualize forcefields in 2D is just height... right?
+
+Prototype: 
+    Just points and lines and, ok, the line at infinity and the directions. 
+    Grab them and press your button chords.
+    Maybe pinch to zoom is a good interface to get to your differentials?
+
+The "boundary of the sphere" for 1D is just 1 and -1, or rather, "towards infinity or -infinity", and then you get a magnitude. It is on the eps = 0 line.
+
+You're drawing paths.
+These paths are in direction space.
+A point traces out where it'll go in actual space
+But, that's only 2D. The ball actually has to explore in 3D
+So you have to do two paths, one for a point at the top, one at the bottom
+They both trace out what they do. They are joined by a line, and you have to make the line avoid obstacles and hit treasures
+It's a tube/rail shooter
+
+How do you know what moment in time maps to the thing?
+    So it is in 3D. While your finger is down, time moves forwards
+    You can "backtrack" though, i.e. move the slice down
+    You have a limited amount of "fuel", i.e. the integral can't go beyond a certain value
+    Maybe you're trying to minimize that integral, the action
+
+There are obstacles and goodies in the velocity space too?
+
+Adding up a series of line segment lengths - that is much more like actual fucking integration
+
+Colored possibilities, by viridis. All in the same space. When they're together, that's white
+You have to deal with all the possibilities
+
+
+Defining a motor (so just a hand movement), even defining a curve, maps all of 3-space, quite powerful
+Differentiate that, and you have, instantaneously, a velocity field everywhere
+    In 3D looks like a cylinder with all the arrows going around it, potentially one infinitely far away
+And a force field? 
+Is it a velocity? Don't you have second derivative too?
+
+Are you about to just reinvent 3D modelling?
+To be fair you're trying to make it so you can do stuff like that but in a way that can be programmed
+
+The purpose of this is to try to make a single gesture control a vector field? Or a bunch of behaviour?
+A general rigid-body path can be visualized with a ruled surface. That's nice
+Something else you might want is
+
+Doing it with gaze is probably right.
+    Hold the "I want to grab what I'm looking at" button and look from thing to thing; what you look at will appear in your hand
+    Once you definitely have what you want in your hand, let go of the button and now it's stuck there

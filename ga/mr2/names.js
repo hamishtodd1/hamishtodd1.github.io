@@ -136,8 +136,8 @@ function initNames() {
             if (drawingDetailses[coloredNamesAlphabetically.indexOf(name)].type !== "unassigned")
                 return drawingDetailses[coloredNamesAlphabetically.indexOf(name)]
         }
-        else if(dwSuggestionDrawingDetailses[name] !== undefined) { //the name is a number
-            return dwSuggestionDrawingDetailses[name]
+        else if(suggestionDrawingDetails[name] !== undefined) { //the name is a number
+            return suggestionDrawingDetails[name]
         }
 
         return null

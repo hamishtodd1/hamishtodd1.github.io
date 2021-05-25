@@ -37,7 +37,7 @@ const inverseViewRotor = new Float32Array(16)
 inverseViewRotor[0] = 1.
 
 const drawingDetailses = Array(NUM_NAMES)
-const dwSuggestionDrawingDetailses = []
+const suggestionDrawingDetails = []
 
 const functionsWithIr = {}
 
