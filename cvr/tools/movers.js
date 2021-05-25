@@ -10,7 +10,7 @@
  	var ball = new THREE.LineSegments( 
  		new THREE.WireframeGeometry(new THREE.EfficientSphereGeometry(0.05) ),
  		new THREE.LineBasicMaterial({color:0xFFFFFF, linewidth:3 }) );
- 	var rigidMover = Tool(ball)
+ 	var rigidMover = Tool(ball, "Rigid Mover")
 
  	var capturedAtoms = [];
  	var localCapturedAtomPositions = [];
@@ -104,7 +104,7 @@ function initRigidSphereMover()
 	var ball = new THREE.LineSegments( 
 		new THREE.WireframeGeometry(new THREE.EfficientSphereGeometry(0.05) ),
 		new THREE.LineBasicMaterial({color:0xFFFFFF, linewidth:3 }) );
-	var rigidMover = Tool(ball)
+	var rigidMover = Tool(ball, "Rigid Mover")
 
 	rigidMover.onLetGo = turnOffAllHighlights;
 
@@ -180,7 +180,7 @@ function initAutoRotamer()
 	 * This is a specific tool because Coot has specific suggestions. But why shouldn't it have suggestions for an arbitrary atom?
 	 */
 
-	var autoRotamer = Tool(0x00FF00)
+	var autoRotamer = Tool(0x00FF00,"Auto Rotamer")
 	
 	autoRotamer.onLetGo = turnOffAllHighlights;
 

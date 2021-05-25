@@ -16,7 +16,7 @@
  */
 function initMutator()
 {
-	let mutator = Tool(0xFFFF00);
+	let mutator = Tool(0xFFFF00, "Mutator");
 
 	//could read these from a directory
 	let aaNames = ["leucine","alanine","serine","glycine","valine","glutamic acid","arginine","threonine", //most common

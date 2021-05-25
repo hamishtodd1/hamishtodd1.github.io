@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js vr - handinput - cubes</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+		<link type="text/css" rel="stylesheet" href="main.css">
+	</head>
+	<body>
+
+		<script src="../xrStuff.js"></script>
+
+		<script src="lib/three.js"></script>
+		<script src="lib/VRButton.js"></script>
+
+		<script>
+
+			debugger
+
+			const scene = new THREE.Scene();
+			const renderer = new THREE.WebGLRenderer({ antialias: true });
+			const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 10)
+
+			{
+				let container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				scene.background = new THREE.Color( 0x444444 );
+
+				const floorGeometry = new THREE.PlaneGeometry( 4, 4 );
+				const floorMaterial = new THREE.MeshStandardMaterial( { color: 0x222222 } );
+				const floor = new THREE.Mesh( floorGeometry, floorMaterial );
+				floor.rotation.x = - Math.PI / 2;
+				floor.receiveShadow = true;
+				scene.add( floor );
+
+				scene.add( new THREE.HemisphereLight( 0x808080, 0x606060 ) );
+
+				const light = new THREE.DirectionalLight( 0xffffff );
+				light.position.set( 0, 6, 0 );
+				light.castShadow = true;
+				light.shadow.camera.top = 2;
+				light.shadow.camera.bottom = - 2;
+				light.shadow.camera.right = 2;
+				light.shadow.camera.left = - 2;
+				light.shadow.mapSize.set( 4096, 4096 );
+				scene.add( light );
+
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.outputEncoding = THREE.sRGBEncoding;
+				renderer.shadowMap.enabled = true;
+				
+				container.appendChild( renderer.domElement );
+
+				window.addEventListener('resize', () => {
+					camera.aspect = window.innerWidth / window.innerHeight;
+					camera.updateProjectionMatrix();
+
+					renderer.setSize(window.innerWidth, window.innerHeight);
+				});
+
+				camera.position.set(0, 1.6, 3);
+			}
+
+			initXrRendering()
+			initXrHands()
+
+			let boywox = new THREE.Mesh(new THREE.SphereGeometry(.4),new THREE.MeshBasicMaterial({color:0xFF0000}))
+			scene.add(boywox)
+
+			let v1 = new THREE.Vector3()
+			renderer.setAnimationLoop(() => {
+				boywox.matrixWorld.copy(box.matrixWorld)
+				boywox.matrixWorld.decompose(boywox.position,boywox.quaternion,boywox.scale)
+
+				console.log("matrix world", box.matrixWorld.elements)
+				box.getWorldPosition(v1)
+				console.log("world position",v1)
+
+				renderer.render(scene, camera)
+			})
+
+		</script>
+	</body>
+</html>

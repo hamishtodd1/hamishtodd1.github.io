@@ -5,6 +5,8 @@ if( !window.Worker )
 	console.error("Missing dependency")
 }
 
+const vrOffsetMatrix = new THREE.Matrix4().identity()
+
 const TAU = Math.PI * 2;
 const HS3 = Math.sqrt(3)/2;
 let zVector = new THREE.Vector3(0,0,1); //also used as a placeholder normal

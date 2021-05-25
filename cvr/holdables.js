@@ -16,5 +16,5 @@
 //	this.geometry.computeBoundingSphere();
 //	var radiusChange = this.geometry.boundingSphere.radius / oldRadius;
 //	//update the appearance of the bounding sphere TODO including position
-//	this.children[0].geometry.applyMatrix(new THREE.Matrix4().makeScale( radiusChange, radiusChange, radiusChange ));
+//	this.children[0].geometry.applyMatrix4(new THREE.Matrix4().makeScale( radiusChange, radiusChange, radiusChange ));
 //}

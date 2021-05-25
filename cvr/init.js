@@ -102,20 +102,6 @@ VR Games to get maybe
 	Both
 		Lone echo
 
-Maya
-	Admin
-	reddit/bluecollarwomen
-	http://www.nts.org.uk/wildlifesurvey/
-	http://www.wildlifeinformation.co.uk/about_volunteering.php
-	
-	Humane extermination?
-	Who counts the badgers? Conducts the surveys for the government?
-	RSPCA inspector. Possibly too traumatic
-	Police dog handler
-	Lab animal caretaker
-
-	Park naturalist
-	Rehabilitator?
 
 */
 
@@ -132,7 +118,6 @@ function init()
 	renderer.localClippingEnabled = true;
 	renderer.sortObjects = false;
 	document.body.appendChild( renderer.domElement );
-	renderer.vr.enabled = true;
 
 	// initSocket();
 	// socket.commandReactions["you aren't connected to coot"] = function()
@@ -198,22 +183,21 @@ function init()
 
 	setCurrentHeadPositionAsCenter = function()
 	{
-		renderer.vr.setPositionAsOrigin( camera.position )
+		let currentPos = new THREE.Vector3()
+		currentPos.setFromMatrixPosition(vrOffsetMatrix)
+
+		let currentPositionCorrection = new THREE.Vector3().setFromMatrixPosition(vrOffsetMatrix).negate()
+		currentPositionCorrection.add(camera.position).negate()
+		vrOffsetMatrix.setPosition(currentPositionCorrection)
+
+		delete currentPositionCorrection
 	}
-	// console.log(renderer.vr)
 	addSingleFunctionToPanel(setCurrentHeadPositionAsCenter,6.05,5.38)
+	// camera.position.y = 1.6
 	setCurrentHeadPositionAsCenter() //wanna be accessible from behind the panel?
 
-	let vrButton = WEBVR.createButton( renderer )
-	document.body.appendChild( vrButton );
-	document.addEventListener( 'keydown', function( event )
-	{
-		if(event.keyCode === 69 )
-		{
-			vrButton.onclick()
-			window.removeEventListener('resize', windowResize)
-		}
-	}, false );
+	renderer.xr.enabled = true;
+	document.body.appendChild(VRButton.createButton(renderer))
 
 	// socket.onopen = function()
 	{
@@ -237,10 +221,9 @@ function init()
 		// initRamachandran()
 
 		let loopCallString = getStandardFunctionCallString(loop);
-		renderer.setAnimationLoop( function()
-		{
-			eval(loopCallString);
-			renderer.render( scene, camera );
+		renderer.setAnimationLoop( () => {
+			eval(loopCallString)
+			renderer.render( scene, camera )
 		} )
 	}
 }

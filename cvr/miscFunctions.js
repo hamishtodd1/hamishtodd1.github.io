@@ -1,3 +1,5 @@
+
+
 //assumes homogeneous
 function eigenvector(m)
 {
@@ -210,15 +212,15 @@ THREE.Object3D.prototype.getUnitVectorInObjectSpace = function(axis)
 THREE.OriginCorneredPlaneBufferGeometry = function(width,height)
 {
 	var g = new THREE.PlaneBufferGeometry(1,1);
-	g.applyMatrix(new THREE.Matrix4().makeTranslation(0.5,0.5,0))
+	g.applyMatrix4(new THREE.Matrix4().makeTranslation(0.5,0.5,0))
 
 	if(width)
 	{
-		g.applyMatrix(new THREE.Matrix4().makeScale(width,1,1))
+		g.applyMatrix4(new THREE.Matrix4().makeScale(width,1,1))
 	}
 	if(height)
 	{
-		g.applyMatrix(new THREE.Matrix4().makeScale(1,height,1))
+		g.applyMatrix4(new THREE.Matrix4().makeScale(1,height,1))
 	}
 
 	return g;
@@ -227,15 +229,15 @@ THREE.OriginCorneredPlaneBufferGeometry = function(width,height)
 THREE.OriginCorneredPlaneGeometry = function(width,height)
 {
 	var g = new THREE.PlaneGeometry(1,1);
-	g.applyMatrix(new THREE.Matrix4().makeTranslation(0.5,0.5,0))
+	g.applyMatrix4(new THREE.Matrix4().makeTranslation(0.5,0.5,0))
 
 	if(width)
 	{
-		g.applyMatrix(new THREE.Matrix4().makeScale(width,1,1))
+		g.applyMatrix4(new THREE.Matrix4().makeScale(width,1,1))
 	}
 	if(height)
 	{
-		g.applyMatrix(new THREE.Matrix4().makeScale(1,height,1))
+		g.applyMatrix4(new THREE.Matrix4().makeScale(1,height,1))
 	}
 
 	return g;
@@ -489,3 +491,6 @@ function tetrahedronTops(P1,P2,P3, r1,r2,r3)
 	
 	return solutions
 }
+
+
+
