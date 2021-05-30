@@ -1,0 +1,190 @@
+/*
+Imagine the dances to the good music. Making the things, defining the relations
+Probably you DO change the state of things rather than just creating new things, because shit needs to know what the next thing it's based on is
+Sounds like you've invented symbols / references
+
+Two mvs with the same value is very serious business. Probably the thing to do is stripes, moving across it
+
+
+
+In general the 
+
+ab = the union
+avb = thing in a and b
+a.b = thing in a that's orthogonal to b
+a^b = thing that's orthogonal to a and b. Um, no
+
+"switch visualization method" as a part of the animation, three planes -> point
+
+maybe only lines need their orientation shown? Not so hard, ridges along it
+	For sure, quite useful for "which side of plane is point on?"
+	Makes sense because double cover shit
+
+If you can't find a way to make the point go the exact place you want it, an iterative improvement each frame would look fine
+
+
+You make your constructions based on the previous frame, then you perform assignments; a = aNew
+A frame is a cycle of assignments
+What about things of the form "We have A from previous frame, we construct B, based on B we construct C"?
+
+
+1. You choose a grade
+2. You move your hand around
+The function is differentiable WRT inputs, which it wouldn't be if it had "if" statements
+
+Mirror in mirror. Exclusively in there, it doesn't appear in the real world
+That's quite interesting and cool as a game mechanic
+You wanna raytrace?
+https://www.shadertoy.com/view/XsXXDB
+
+One for the list
+https://twitter.com/Pamchenkova/status/1396535440237334528
+
+
+Possibly CGA nice: direction point-pair MAYBE doesn't need its magnitude to matter,
+	or at least you get a viz of the magnitude
+	Which is nice because these things were gonna be your differentials / velocities
+
+
+Maybe it's a good thing to have points with magnitudes because you can choose locations for your scalars?
+
+Tis silly in PGA your line intersecting with infinity is a point pair really
+
+When we have BCIs taking your mental images: very easy to imagine circles, spheres, flats
+Nothing else? What kind of shapes are easy to imagine? Rectangles, cuboids, capsules
+
+
+You're going to be switching between infinity-view and normal view often
+
+So you use the analogue stick to choose which thingy you'd like.
+Oh come ooooon, people would prefer to just pick where the point is and it gets snapped
+Can have a slight pattern to where you put stuff around the stick? Eg right for inner product, left for outer?
+
+Don't let the popularity of unity, unreal, roblox get you down. You are playing a different game to them.
+In PGA you imagine 2 points intersecting the sphere at infinity anyway
+You're going to have undo and redo, but when you undo-undo-undo then do something, it gets rid of your undo buffer
+"Isolate these objects so they and nothing else can be seen" can be a move.
+Another thing for conformal: Probably you will get bored with it unless there's some cool geometry you can make
+
+With your view of PGA where you have infinity on the unit sphere: that is the frickin conformal view idiot. You might as well do it properly
+It'll probably be fun making SDF CGA objects
+Do ask Chris whether it's still useful if you really only care about euclidean
+The way CGA would connect to graphics is that people would want the black boxes for doing things that they know should work because they're used to picturing them
+
+Since the important bit is in a shader, maybe don't worry about platform?
+
+Any object can be EITHER a THING OR a TRANSFORMATION. You can turn a ball reflective
+
+Maps is not what this is for. You've learned the kind of thing you want to make at least
+
+Fortunately you are far away from the AR-everywhere-time-for-a-tool scenario. In the meantime you can make a game
+
+There's a fun game to be made about sizes of shadows
+
+Circle inversion gives you a great interface for putting points at infinity: take a sphere and put them at the center
+
+Excel doesn't really do function syntax in a way you can rip off
+Excel function syntax works as: "you have these three cells, you're going to act on them"
+With your thing, you can designate function inputs: you can "isolate" the variables you want as input
+Then that just gets added to your joypad directions
+But the point of the game version is you won't be making new functions willy-nilly
+Each one will be introduced with a level
+
+
+
+There's the game view, and then there's the "currently doing something" view in which you spend most of your time
+The game view is extremely faded and in the background. Like, render it to a texture and fade it.
+Except "globals"
+Every function is a box, somewhere in your control panel, enlarge the box to work on it? Yeah sounds like shadercore
+So the question is whether they can make their own functions. Iff voice control really
+The key thing is that you can look at the current frame and, from annotations, predict what'll happen next
+
+CGA PROGRAMMING BY EXAMPLE TO BEGIN WITH
+HOW WOULD YOU MAKE AN ANIMATED THING IN EXCEL?
+
+
+Maybe when you move your mouse near a motor (coz they're mirrors) you see the reflection of your mouse in the motor
+
+
+Every value has a currentVal an f such that every frame you do currentVal = f(currentVal,everythingElse)
+You can freeze every other object and see how this one reacts
+	Which is like taking a 2D slice of 3D, then 1D slice of 2D, and seeing
+Play to your strengths: GA lets you make things, others don't know this
+	The idea of manipulating all the points in a curve, seeing how your solution performs in general, is surely good. It's an even better idea than GA
+	Eh, but you do kinda need to skip to 3D to build this interface
+	Probably you do the lighting yourself. Kids manipulate geometry and pick hue
+
+Shoot all the balls with all the guns
+Just make human resource machine in parallel in 3D with time handled differently
+Two argument functions is a big limit. But no big deal! The Witness is a big limit! See what can be done!
+
+An abstract idea you have is that a fundamental thing is "data" and "action I can perform that transforms data".
+
+Oi, you DO want spheres of different sizes, because you want little objects to move around.
+If you don't have GA they'll be implemented in a normal way
+More important than spheres, really, is cuboids
+
+Different values are viewed differently in different contexts. Their units give you info about that. And to make the most of visual intuition they need to be seen differently in the different contexts
+
+The game should be about crafting trajectories for objects using whatever
+	Then you can have nice shit in the levels on top of that, rendered with whatever hotness makes sense
+	Maybe it should be completely about making loops, no beginning or end, no worry about controls / seeing the whole thing when it's embedded in an article
+
+So you have a point p, which is game-visible. And a point q, which is just meant to be rotated around by p. What to do?
+Construct point r
+Make r visible, destroy p?
+Bearing in mind r may be constructed based on p,
+So you're making a visualization of the next frame
+Hasn't someone already sorted this? 
+
+
+----------SHOWING / HIDING
+	Let's assume everything is visible to start with
+
+	Visibility modes:
+	all visible
+	Only your starting points
+	only those in scope visible
+	only those in final game visible
+
+	So showing and hiding is a big deal
+		You could, by default, hide everything that lead up to the final thing you've made
+		Then people have to make those things again. Er, why is this a good idea?
+
+	This is very much the "literal terms" approach. In sport, people do talk about spaces. They DON'T construct elaborate non-literal things then talk about THOSE.
+
+	Conformal argument: you do kinda like general mathy elegance if it gives you a bit of geometric elegance
+
+------------RECORDLESS PROGRAMMING
+
+Every frame, you update the state
+you can derive many visual things from from the state you've recorded
+
+Way of defining a function:
+	"Gather" all the things you want as inputs
+	select what the output is
+	Now that's in the library of things that'll be run through when you have that bunch of types
+	Is it a problem that f(point2,point1) can't be distinguished from f(pointB,pointA)? Not really because both would have to be generated from you unordered pile anyway
+	
+
+It "should" be the case that frameDelta = 0 gives 0 change to something. It should be differentiable
+
+For the list: https://twitter.com/MachinePix/status/1395150947719032835
+
+Hubmap = good
+Segmentation = good
+How-to = good
+Animation timeline GUI=good, kinda what Maryam Mirzakhani video had
+
+
+The ruler, which has all your scalars on it, is powerful. You can put it in a certain place, at a certain angle, and measure a distance
+
+How you show the "formulae within": when you make object X based on objects A, B, C, it briefly flashes up all the intermediate objects
+
+Any temptation towards fields, 
+
+Infrastructure is boring, eg "keeping score: score += 1 if ball in net". Kids can do it themselves
+
+If statements: there are loads of ways of making something crash to 0, i.e. "make it so nothing happens". Try to use that?
+
+Fine to have curves, you can trace them through space, probably want to be able to record smoothed hand movements. Surfaces are too complex though

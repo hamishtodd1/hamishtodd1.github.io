@@ -126,12 +126,10 @@ function initMouse()
 		let currentRawX = 0;
 		let currentRawY = 0;
 
-		document.addEventListener( 'mousemove', function(event)
-		{
+		document.addEventListener( 'mousemove', function(event) {
 			event.preventDefault();
 			//for some bizarre reason this can be called more than once with the same values
-			if(event.clientX !== currentRawX || event.clientY !== currentRawY)
-			{
+			if(event.clientX !== currentRawX || event.clientY !== currentRawY) {
 				asynchronous.raycaster.updateFromClientCoordinates(event.clientX,event.clientY)
 
 				currentRawX = event.clientX;
@@ -139,14 +137,12 @@ function initMouse()
 			}
 		}, false );
 
-		document.addEventListener('mousedown', function (event) 
-		{
+		document.addEventListener('mousedown', function (event)  {
 			if (event.which === 1) asynchronous.clicking = true;
 			if (event.which === 3) asynchronous.rightClicking = true;
 			asynchronous.raycaster.updateFromClientCoordinates(event.clientX, event.clientY)
 		}, false);
-		document.addEventListener('mouseup', function (event) 
-		{
+		document.addEventListener('mouseup', function (event)  {
 			if (event.which === 1) asynchronous.clicking = false;
 			if (event.which === 3) asynchronous.rightClicking = false;
 		}, false);
@@ -156,23 +152,20 @@ function initMouse()
 
 	//todo buggy with multiple touches
 	{
-		document.addEventListener( 'touchstart', function(event)
-		{
+		document.addEventListener( 'touchstart', function(event) {
 			event.preventDefault();
 
 			asynchronous.clicking = true;
 
 			asynchronous.raycaster.updateFromClientCoordinates(event.changedTouches[0].clientX,event.changedTouches[0].clientY)
 		}, { passive: false } );
-		document.addEventListener( 'touchmove', function( event )
-		{
+		document.addEventListener( 'touchmove', function( event ) {
 			event.preventDefault();
 
 			//apparently this can come even if touch has ended
 			asynchronous.raycaster.updateFromClientCoordinates(event.changedTouches[0].clientX,event.changedTouches[0].clientY)
 		}, { passive: false } );
-		document.addEventListener( 'touchend', function(event)
-		{
+		document.addEventListener( 'touchend', function(event) {
 			event.preventDefault();
 
 			asynchronous.clicking = false;
