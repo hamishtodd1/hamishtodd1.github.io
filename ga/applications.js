@@ -25,7 +25,16 @@
 
 	Re electromagnetism: look at "magnetic core memory", that's something you can do a shader simulation of
 
+	Kids don't care about the precise exact colour of some shit, when it's just meant to look realistic anyway, they want to play.
+		Fuck electromagnetism, fuck QM, fuck waves. Fields, i.e. fluid/aerodynamics is much more useful
+		BEHAVIOUR, not color. Maybe one day. They get hue, MAYBE alpha
+		Probably colors are accounted for by NNs eventually anyway.
+		Probably the game designer works with a blocky, analytically simple representation, then NNs turn that into nice graphics
+
+	
+
 	Random ones
+		guy pouring while spinning https://www.reddit.com/r/blackmagicfuckery/comments/dxm12f/fluid_dynamics_god_mode/
 		total internal reflection https://www.youtube.com/watch?v=Lic3gCS_bKo Boyd Edwards is apparently the guy
 		Number theory
 			prime numbers are ones not on the hyperbolic paraboloid
@@ -101,8 +110,13 @@
 			telescope optics,
 			telecommunicatio/satellites. No magnets but this may not matter
 			Magneto dynamics! Of the sun or earth!
+				Surface of the sun: https://www.youtube.com/watch?v=znBesUwVOok&ab_channel=SciNews
 			Lightning, it's badass
 		quantum
+			ultraviolet catastrophe
+				If you want to know how things glow or how long it takes for heat to radiate off them, need qm
+			Could base a lot of it around color changing chemicals? Nice for reac diffusion too?
+			https://sustainable-nano.com/2019/11/12/gold-nanoparticles-color/
 			Main dude for QC tim@energycompression.com
 				You know, you're just barrelling into QC assuming CA is a good fit for it, maybe it isn't. Well. If it isn't, maybe don't work on this.
 			Aharonov-Bohm Effect

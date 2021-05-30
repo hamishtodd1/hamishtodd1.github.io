@@ -354,7 +354,7 @@ function initDisplayWindows() {
                 if (i % 4 === 0)
                     dividerCoords[i] *= .1
                 if (i % 4 === 1)
-                    dividerCoords[i] *= 9999999.
+                    dividerCoords[i] *= 9999.
             }
             var divider = verticesDisplayWithPosition(dividerCoords, gl.TRIANGLES, 0.0001, 0., 0.)
             addRenderFunction(divider.renderFunction)
@@ -364,7 +364,7 @@ function initDisplayWindows() {
         updateFunctions.push(() => {
             caratDw.collectionY = carat.position.y
 
-            let padding = 1.4
+            let padding = 2.2
             divider.position.x = mainCamera.rightAtZZero - dimension - padding
             
             caratDw.position.x = mainCamera.rightAtZZero - dimension / 2. - padding / 2.
@@ -399,12 +399,6 @@ function initDisplayWindows() {
                 assignValueToName(lowestUnusedName)
             })
         }
-
-        let testMvDds = { value: new Float32Array(16), type: "mv" }
-        point(testMvDds.value, .4, .4, 0., 1.)
-        for (let i = 0, il = types["mv"].drawers.length; i < il; ++i)
-            types["mv"].drawers[i].add(0)
-        
 
         FreeVariableDwButton("point", (name) => {
             point(getNameDrawerProperties(name).value, 0., 0., 0., 1.);
@@ -449,9 +443,8 @@ function initDisplayWindows() {
         let singleOperations = [dual, reverse, polarize]
         //magnitude is relevant only if you're wanting a scalar
 
-        dwSuggestionDrawingDetailses.push(testMvDds)
-
         let selectedModeButton = null
+        let potentialSuggestions = []
         updateFunctions.push(()=>{
             // Perhaps this should only occur if you have a line with some mvs on it and nothing else
 
@@ -460,35 +453,45 @@ function initDisplayWindows() {
             })
             if(selectedModeButton !== null)
                 selectedModeButton.r = 1.
+            if (selectedModeButton === null)
+                return
 
-            caratDw.collection.push(0)
+            let lowestUnusedDwSuggestionDrawingDetailses = 0
+            let lowestUnusedPotentialMv = 0
+            let numSuggestions = 0
                 
             caratDw.collection.forEach((name)=>{
-                // if (drawingDetailses[coloredNamesAlphabetically.indexOf(name)].type !== "mv")
-                //     return
+                let nameDp = getNameDrawerProperties(name).value
+                if (nameDp.type !== "mv")
+                    return
                     
-                // let potentialMv = nonAlgebraTempMv0
-                // singleOperations.forEach((op) => {
-                //     if(selectedModeButton === null)
-                //         return
-
-                //     op(getNameDrawerProperties(name).value, potentialMv)
+                singleOperations.forEach((op) => {
+                    while (potentialSuggestions.length <= lowestUnusedPotentialMv)
+                        potentialSuggestions.push(new Float32Array(16))
+                    op(nameDp.value, potentialSuggestions[lowestUnusedPotentialMv])
                     
-                    // if (selectedModeButton.qualifier(potentialMv) ) {
-                    //     if(dwSuggestionDrawingDetailses.length <= lowestUnusedDwSuggestionDrawingDetailses)
-                    //         dwSuggestionDrawingDetailses.push({ value: new Float32Array(16) })
-
-                    //     assign(potentialMv, dwSuggestionDrawingDetailses[lowestUnusedDwSuggestionDrawingDetailses].value)
-                    //     caratDw.collection.push(lowestUnusedDwSuggestionDrawingDetailses)
-                    //     ++lowestUnusedDwSuggestionDrawingDetailses
-                    // }
-                // })
+                    if (selectedModeButton.qualifier(potentialMv) === true ) {
+                        ++lowestUnusedPotentialMv
+                        ++numSuggestions
+                    }
+                })
             })
+            if(numSuggestions > 0) {
+                //yeah so, under this interface there's only one suggestion, not much need for this infrastructure
+                if (suggestionDrawingDetails.length <= lowestUnusedDwSuggestionDrawingDetailses) {
+                    suggestionDrawingDetails.push({ value: new Float32Array(16), type: "mv" })
+                    for (let i = 0, il = types["mv"].drawers.length; i < il; ++i)
+                        types["mv"].drawers[i].add(lowestUnusedDwSuggestionDrawingDetailses)
+                }
+                let suggestionToShow = unModdedSuggestionToShow % numSuggestions
+                assign(potentialSuggestions[suggestionToShow], suggestionDrawingDetails[lowestUnusedDwSuggestionDrawingDetailses].value )
+
+                caratDw.collection.push(lowestUnusedDwSuggestionDrawingDetailses)
+            }
+            //the place we're at is that the above is untested
 
             /*
-                Pull in all the objects in the dw. Say there are n of them
-                each one has a grade
-                There are o operations possible. n(n-1)*o options. With
+                n in dw, o operations possible, n(n-1)*o options, each has a grade
 
                 Operations:
                     one (start here)
@@ -517,12 +520,17 @@ function initDisplayWindows() {
             */
         })
 
+        let unModdedSuggestionToShow = -1
+        updateFunctions.push(()=>{
+            if (carat.positionInString !== carat.positionInStringOld) {
+                unModdedSuggestionToShow = -1
+                selectedModeButton = null
+            }
+        })
         function ModeButton(name, qualifier){
             let btn = DwButton("constrained " + name, (self) => {
-                if (selectedModeButton === self)
-                    selectedModeButton = null
-                else
-                    selectedModeButton = self
+                selectedModeButton = self
+                ++unModdedSuggestionToShow //show the suggestion modulo the max number
             })
 
             btn.qualifier = qualifier
@@ -543,7 +551,10 @@ function initDisplayWindows() {
             return getGrade(mv) === 2
         })
         ModeButton("point", (mv) => {
-            return getGrade(mv) === 3
+            return getGrade(mv) === 3 && pointW(mv) !== 0.
+        })
+        ModeButton("direction", (mv) => {
+            return getGrade(mv) === 3 && pointW(mv) === 0.
         })
 
         ModeButton("motor", (mv) => {

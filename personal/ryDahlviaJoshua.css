@@ -1,0 +1,98 @@
+/* this is mostly jacked straight from ry dahl's css
+   he, in turn, says he stole a bunch of it from http://www.stanford.edu/~paskin/
+   (shouldn't every css have an apologetic little geneology?)
+*/
+
+body {
+  width: 30em;
+	margin: 0em auto 3em auto;
+	padding: 0em 0em 0em 0em;
+	text-align: justify;
+}
+
+B, BODY, DL, DT, DD, DIR, EM, H1, H2, H3, H4, H5, H6,LI, OL, UL, P, SPAN, STRONG, TABLE, TH, TD, TR
+{
+  /*color: #333; */
+  font-size: 12pt;
+  /*line-height: 12pt;*/
+  font-family: "Palatino", "Book Antiqua", "URW Palladio L", "Georgia", serif;
+}
+
+
+h1 {
+  text-align:center;
+  font-variant: small-caps;
+  font-size: 32pt;
+  line-height: 28pt;
+}
+
+h2 {
+  text-align:left;
+  font-variant: small-caps;
+  font-size: 28pt;
+  line-height: 24pt;
+}
+
+h3 {
+  text-align: left;
+  font-variant: small-caps;
+  font-size: 16pt;
+  line-height: 12pt;
+  }
+
+ul, dt {
+  list-style-type: circle;
+}
+
+dt {
+    display: list-item;
+}
+
+img.displayed {
+	display: block;
+	margin: 0em auto;
+}
+
+img {
+    border-style: none;
+    margin-right: 10px;
+}
+
+i.right {
+	text-align: right;
+}
+
+/* the following was for a tabular schedule thing I used to have
+   it is saved here, because I am a sentimental fellow
+*/
+
+th.day {
+	text-align: center;
+	width: 20%;
+}
+
+th.time {
+	text-align: right;
+}
+
+table.schedule td {
+	padding-top: 0.5em;
+	text-align: center;
+	color: black;
+	vertical-align: top;
+}
+
+td.lecture {
+	background: gray;
+	font-weight: bold;
+}
+
+td.recitation {
+	background: gray;
+	font-style: italic;
+}
+
+table.schedule td a {
+	color: inherit;
+	text-decoration: none;
+}

@@ -7,8 +7,6 @@
         mercator "flattening onto curve" crap
             So you have the y-from-0-to-infinity stage
             p += exp(p . y)
-        Two dws side by side
-        Clicker to go through them
         dymaxion flight path
         unrolling
         
@@ -31,13 +29,13 @@
             People want unbroken
             Flattening orange peel
             Preserves nothing completely
-        Azimuthal equidistant (opposite, super-connected, common sense directions)
+        **Azimuthal equidistant (opposite, super-connected, common sense directions)
             DIRECTION and DISTANCE preserving, to the AZIMUTH
             Al biruni
             North Korea's missile radii, flight length
             area-preserving enough for the UN
             Priveleges one spot
-        Sinusoidal-derived (so you want to preserve area)
+        **Sinusoidal-derived (so you want to preserve area)
             AREA preserving, even though it was invented by white dudes
             old pics
             Don't believe the pill-shaped ones
@@ -53,16 +51,16 @@
         Terrible idea
         Equator is nice but really
         
-        Cylindrical equal area
+        **Cylindrical equal area
             Elegant way of making a rectangle that preserves area
             Rectangular, terrible idea - Gets us onto the politically incorrect ones
             Equator is the only place that it's right
             Arctic circle
-        Mercator
+        **Mercator
             Loxodromes Urgh
             Sizes
             Panorama, probably Siena, see below
-        Gall-Peters
+        **Gall-Peters
             There was a white guy who wanted to make a quick buck
             Instead of equator being correct, equator gets stretched and the one place it's ok is Germany
             Become insufferable at parties
