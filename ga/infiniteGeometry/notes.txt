@@ -1,44 +1,60 @@
 /*
+
+The purpose of differentiable programming is to make it so you can fast-forward an iterative thing to the end, "find inputs for a given output". Grab a thing in a current state and move it around, even if it wasn't a free variable, and find those sets of free variables that would lead to it being in the configuration you put it in
+
+Consider: the points and lines could be like stars in the sense that they look no different how close or far they are. In that situation you need neither a mesh nor an sdf? You just need a way of computing where they'll appear to be?
+
+So these mirrors. They reflect the "background". But NOT the objects, unless you use 'em that way. Probably they're also transparent mirrors, urgh.
+Well transparency, aside from being a nightmare, is also nutty to look at if it's a reflection
+SOME mirrors reflect each other!
+Probably they're not pure mirrors, you really need some ripples on them or whatever. Scratches?
+By the way maybe they can have fading at the edges
+
+Need more time to think. Mirrors are transparent planes for now
+
+Do not sweat curves. The only import differential is over time
+
+Move your hand up and down and record the scalar to create phrases in the music
+
+There are multiple little areas you work on concurrently
+Need to be able to have something like a function: "what I just did for this, except with this input"
+And deleting things easily
+Ability to "record" a motion of the hand
+Maybe the ruler is visualized using the same stuff? Just an infinite line with planes along it as notches and a point in the center as its origin. Yes, still special case, getting transformed together
+
+Best not to use sdf because when you do your funky transform with finitized infinity it's not closed form
+
+You're working with two superimposed frames so you can get differential
+	This is also how you conceptualized "based on frame n we are affecting n+1". Things in frame n are un-alterable
+"switch visualization method" as a part of the animation, three planes -> point
+Lines have their direction visualized, not the other things.
+	Plane and point, no because that's awkward and apparently useless because you extract stuff from the motor algebra
+	Plus they have the double cover shit
+	We do want "which side of plane is point on?"
+If you can't find a way to make the point go the exact place you want it, an iterative improvement each frame would look fine
+Mirror in mirror. Exclusively in there, it doesn't appear in the real world
+	You wanna raytrace?
+	https://www.shadertoy.com/view/XsXXDB
+
 Imagine the dances to the good music. Making the things, defining the relations
 Probably you DO change the state of things rather than just creating new things, because shit needs to know what the next thing it's based on is
 Sounds like you've invented symbols / references
 
 Two mvs with the same value is very serious business. Probably the thing to do is stripes, moving across it
 
+Ohhhh, to make 2D simulations: you "zoom in on a point", i.e. one pixel, and from your five-point stencil you know the derivatives at this point and it becomes linear
+Operate within that linear, i.e. euclidean, space
+This is essentially how you were thinking of making a Reaction Diffusion maker
 
 
-In general the 
-
-ab = the union
-avb = thing in a and b
-a.b = thing in a that's orthogonal to b
-a^b = thing that's orthogonal to a and b. Um, no
-
-"switch visualization method" as a part of the animation, three planes -> point
-
-maybe only lines need their orientation shown? Not so hard, ridges along it
-	For sure, quite useful for "which side of plane is point on?"
-	Makes sense because double cover shit
-
-If you can't find a way to make the point go the exact place you want it, an iterative improvement each frame would look fine
 
 
-You make your constructions based on the previous frame, then you perform assignments; a = aNew
-A frame is a cycle of assignments
-What about things of the form "We have A from previous frame, we construct B, based on B we construct C"?
 
 
 1. You choose a grade
 2. You move your hand around
 The function is differentiable WRT inputs, which it wouldn't be if it had "if" statements
 
-Mirror in mirror. Exclusively in there, it doesn't appear in the real world
-That's quite interesting and cool as a game mechanic
-You wanna raytrace?
-https://www.shadertoy.com/view/XsXXDB
-
-One for the list
-https://twitter.com/Pamchenkova/status/1396535440237334528
 
 
 Possibly CGA nice: direction point-pair MAYBE doesn't need its magnitude to matter,
@@ -101,6 +117,11 @@ The key thing is that you can look at the current frame and, from annotations, p
 
 CGA PROGRAMMING BY EXAMPLE TO BEGIN WITH
 HOW WOULD YOU MAKE AN ANIMATED THING IN EXCEL?
+
+
+Should be able to make
+	Pong
+	Bullet hell shmup
 
 
 Maybe when you move your mouse near a motor (coz they're mirrors) you see the reflection of your mouse in the motor
@@ -169,7 +190,7 @@ Way of defining a function:
 
 It "should" be the case that frameDelta = 0 gives 0 change to something. It should be differentiable
 
-For the list: https://twitter.com/MachinePix/status/1395150947719032835
+
 
 Hubmap = good
 Segmentation = good

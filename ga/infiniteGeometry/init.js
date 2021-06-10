@@ -49,7 +49,7 @@ function init() {
 
     initXr(camera, container)
 
-    initShaderExperimentation(gl)
+    // initShaderExperimentation(gl)
 
     renderer.setAnimationLoop(() => {
         let clockDelta = clock.getDelta()

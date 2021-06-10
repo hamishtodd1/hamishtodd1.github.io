@@ -7,12 +7,12 @@ uniform float mvs[32];
 
 void main() {
 
-	vec2 circleCenter = vec2(0.,0.);
-	float circleRadius = mvs[0][0];
-	float circleThickness = .01;
-	float distToCenter = length(worldP.xy - circleCenter);
-	if( abs(distToCenter-circleRadius) > circleThickness )
-		discard;
+	// vec2 circleCenter = vec2(0.,0.);
+	// float circleRadius = mvs[0][0];
+	// float circleThickness = .01;
+	// float distToCenter = length(worldP.xy - circleCenter);
+	// if( abs(distToCenter-circleRadius) > circleThickness )
+	// 	discard;
 
 	gl_FragColor = vec4(0.,0.,0., 1.0);
 }
