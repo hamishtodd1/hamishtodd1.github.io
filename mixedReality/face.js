@@ -6,8 +6,8 @@ function initFaceMaker()
 	let eyeWhiteGeometry = new THREE.SphereBufferGeometry(1, 32, 32, 0, TAU, pupilAngle, TAU/2-pupilAngle)
 	let pupilGeometry = new THREE.SphereBufferGeometry(1, 32, 32, 0, TAU, 0, pupilAngle)
 	let m = new THREE.Matrix4().makeRotationX(TAU/4)
-	eyeWhiteGeometry.applyMatrix(m)
-	pupilGeometry.applyMatrix(m)
+	eyeWhiteGeometry.applyMatrix4(m)
+	pupilGeometry.applyMatrix4(m)
 	Eyeball = function(radius)
 	{
 		var eyeWhite = new THREE.Mesh(eyeWhiteGeometry, new THREE.MeshPhongMaterial({color:0xFFFFFF}) );

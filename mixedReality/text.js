@@ -59,22 +59,23 @@ function makeTextSign(originalText, twoSided, materialOnly, originCornered)
 	}
 	let geo = originCornered ? new THREE.OriginCorneredPlaneGeometry(textWidth/canvas.height, 1) : new THREE.PlaneGeometry(textWidth/canvas.height, 1)
 
-	let trimOff = 0.5 - (textWidth/canvas.width)/2
-	for(let i = 0; i < 2; i++)
-	{
-		for(let j = 0; j < 3; j++)
-		{
-			if( geo.faceVertexUvs[0][i][j].x == 0)
-			{
-				geo.faceVertexUvs[0][i][j].x = trimOff
-			}
-			else
-			{
-				geo.faceVertexUvs[0][i][j].x = 1 - trimOff
-			}
-		}
-	}
-	geo.uvsNeedUpdate = true
+	//yes, you need to find another way to do this
+	// let trimOff = 0.5 - (textWidth/canvas.width)/2
+	// for(let i = 0; i < 2; i++)
+	// {
+	// 	for(let j = 0; j < 3; j++)
+	// 	{
+	// 		if( geo.faceVertexUvs[0][i][j].x == 0)
+	// 		{
+	// 			geo.faceVertexUvs[0][i][j].x = trimOff
+	// 		}
+	// 		else
+	// 		{
+	// 			geo.faceVertexUvs[0][i][j].x = 1 - trimOff
+	// 		}
+	// 	}
+	// }
+	// geo.uvsNeedUpdate = true
 	
 	let sign = null
 	if(twoSided)

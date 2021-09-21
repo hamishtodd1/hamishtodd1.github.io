@@ -8,7 +8,7 @@ async function initFloorAndSky()
 	}) );
 	floorTile.position.y = 0;
 	floorTile.rotation.x = -TAU / 4;
-	scene.add(floorTile);
+	// scene.add(floorTile);
 	new THREE.TextureLoader().setCrossOrigin(true).load(
 		"data/floor.png",
 		function(texture)
@@ -28,7 +28,8 @@ async function initFloorAndSky()
 	};
 	let skyMaterial = new THREE.ShaderMaterial({
 		uniforms,
-		side:THREE.BackSide
+		side:THREE.BackSide,
+		depthWrite: false
 	});
 	await assignShader("skyVertex", skyMaterial, "vertex");
 	await assignShader("skyFragment", skyMaterial, "fragment");

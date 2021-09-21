@@ -56,7 +56,7 @@ function initVrOrMockVrInput()
 		{
 			let hand = hands[i]
 			hand.deltaPosition.copy(hand.position).sub(hand.positionOld);
-			hand.deltaQuaternion.copy(hand.quaternionOld).inverse().multiply(hand.quaternion);
+			hand.deltaQuaternion.copy(hand.quaternionOld).invert().multiply(hand.quaternion);
 		}
 	}
 
@@ -216,7 +216,7 @@ function initControllerObjects()
 
 		hand.getDeltaQuaternion = function()
 		{
-			return new THREE.Quaternion().copy(this.quaternionOld).inverse().multiply(this.quaternion)
+			return new THREE.Quaternion().copy(this.quaternionOld).invert().multiply(this.quaternion)
 		}
 	}
 
@@ -233,7 +233,7 @@ function initControllerObjects()
 			{
 				m.makeRotationFromQuaternion(q)
 				m.setPosition(new THREE.Vector3(-0.012547648553172985,0.03709224605844833,-0.038470991285082676))
-				hands[ i ].controllerModel.geometry.applyMatrix( m )
+				hands[ i ].controllerModel.geometry.applyMatrix4( m )
 			}
 			else
 			{
@@ -246,7 +246,7 @@ function initControllerObjects()
 				
 				m.makeRotationFromQuaternion(otherQ)
 				m.setPosition(new THREE.Vector3(0.012547648553172985,0.03709224605844833,-0.038470991285082676))
-				hands[i].controllerModel.geometry.applyMatrix( m )
+				hands[i].controllerModel.geometry.applyMatrix4( m )
 			}
 
 			hands[ i ].controllerModel.geometry.computeBoundingSphere()

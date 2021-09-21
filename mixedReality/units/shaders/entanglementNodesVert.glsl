@@ -1,6 +1,3 @@
-//there was something here and below about opacity but wasn't being used
-//"transparent" was there in the material. 
-
 varying vec3 coordinates_of_this_pixel; //where you are in world (screen?) coordinates? clip space?
 
 void main() 

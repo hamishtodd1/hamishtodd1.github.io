@@ -31967,7 +31967,7 @@
 
 		this.defines = { 'PHYSICAL': '' };
 
-		this.reflectivity = source.reflectivity;
+		this.reflectivity = source.reflectivity; 
 
 		this.clearCoat = source.clearCoat;
 		this.clearCoatRoughness = source.clearCoatRoughness;

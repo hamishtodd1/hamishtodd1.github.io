@@ -779,18 +779,18 @@ THREE.BufferAttribute.prototype.getXYZ = function(i, target)
 	}
 }
 
-THREE.Face3.prototype.getCorner = function(i)
-{
-	switch(i)
-	{
-	case 0:
-		return this.a;
-	case 1:
-		return this.b;
-	case 2:
-		return this.c;
-	}
-}
+// THREE.Face3.prototype.getCorner = function(i)
+// {
+// 	switch(i)
+// 	{
+// 	case 0:
+// 		return this.a;
+// 	case 1:
+// 		return this.b;
+// 	case 2:
+// 		return this.c;
+// 	}
+// }
 
 function sq(x)
 {
@@ -812,12 +812,12 @@ THREE.Vector3.prototype.addArray = function(array)
 	this.z += array[2];
 }
 
-THREE.Face3.prototype.addOffset = function(offset)
-{
-	this.a += offset;
-	this.b += offset;
-	this.c += offset;
-}
+// THREE.Face3.prototype.addOffset = function(offset)
+// {
+// 	this.a += offset;
+// 	this.b += offset;
+// 	this.c += offset;
+// }
 
 function getStandardFunctionCallString(myFunc)
 {

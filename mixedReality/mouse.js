@@ -31,10 +31,14 @@ function initMouse()
 	mouse.rayCaster.setFromCamera(asynchronous.normalizedDevicePosition, camera)
 	mouse.previousRay = mouse.rayCaster.ray.clone()
 
-	mouse.rayIntersectionWithZPlane = function(z)
+	var zPlane = new THREE.Plane()
+	mouse.rayIntersectionWithZPlane = function(z, target)
 	{
-		var zPlane = new THREE.Plane(zUnit,-z)
-		return mouse.rayCaster.ray.intersectPlane(zPlane,new THREE.Vector3())
+		if(target === undefined)
+			target = new THREE.Vector3()
+
+		zPlane.set(zUnit, -z)
+		return mouse.rayCaster.ray.intersectPlane(zPlane, target)
 	}
 
 	mouse.rotateObjectByGesture = function(object)
@@ -61,7 +65,26 @@ function initMouse()
 		asynchronous.justMoved = false;
 
 		mouse.previousRay.copy(mouse.rayCaster.ray);
-		mouse.rayCaster.setFromCamera( asynchronous.normalizedDevicePosition, camera );
+		mouse.rayCaster.setFromCamera( asynchronous.normalizedDevicePosition, camera )
+
+		if( rectangles !== undefined ) {
+			let justClicked = this.clicking && !this.oldClicking
+			if (justClicked) {
+				rectangles.forEach( (rect) => {
+					if(rect.onClick ) {
+						mouse.rayIntersectionWithZPlane(rect.position.z, v1)
+						v1.x -= rect.position.x
+						v1.y -= rect.position.y
+						v1.x /= rect.scale.x
+						v1.y /= rect.scale.y
+	
+						if (-.5 < v1.x && v1.x < .5 &&
+							-.5 < v1.y && v1.y < .5)
+							rect.onClick()
+					}
+				})
+			}
+		}
 	}
 
 	var currentRawX = 0;

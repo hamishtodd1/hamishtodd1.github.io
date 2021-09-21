@@ -15,7 +15,10 @@
 		<!-- <script src="/socket.io/socket.io.js"></script>
 		<script src="connection.js"></script> -->
 
-		<script src="lib/three.js"></script>
+		<!-- <script src="lib/three.js"></script> -->
+		<script src="lib/threeEntanglement.js"></script>
+		<script src="rectangles.js"></script>
+		<!-- <script src="lib/ExtendMaterial.js"></script> -->
 		<script src="lib/sceneUtils.js"></script>
 
 		<script src="lib/OBJLoader.js"></script>
@@ -46,10 +49,9 @@
 		<script src="variables.js"></script>
 
 		<script src="picsAndVideos.js"></script>
-
-		<script src="juggling.js"></script>
 		
 		<script src="mouse.js"></script>
+
 
 		<!-- <script src="units/mobiusTransformations.js"></script> -->
 
@@ -60,19 +62,22 @@
 		<!-- <script src="units/threeSphereExploration.js"></script>
 		<script src="units/twoSphereExploration.js"></script> -->
 
-		<script src="units/scalarFieldVisualization.js"></script>
+		<!-- <script src="units/scalarFieldVisualization.js"></script> -->
 
 		<!-- <script src="units/icerm.js"></script> -->
 
 		<!-- <script src="units/turing.js"></script> -->
 		<!-- <script src="units/grayScott.js"></script> -->
-		<script src="units/simulation.js"></script>
+		<!-- <script src="units/simulation.js"></script> -->
 		<!-- <script src="units/barkley.js"></script> 
 		<script src="units/fitzhughNagumo.js"></script> -->
 
-		<script src="units/grayScott.js"></script>
+		<!-- <script src="units/grayScott.js"></script> -->
 
-		<script src="units/fluid.js"></script>
+		<!-- <script src="units/fluid.js"></script> -->
+
+		<script src="lib/epga.js"></script>
+		<script src="units/entanglement.js"></script>
 
 		<!-- <script src="units/escher.js"></script>
 
@@ -101,6 +106,7 @@
 					window.addEventListener( 'resize', windowResize)
 				}
 
+				initAlgebra()
 				initMouse()
 				initButtons()
 				initFaceMaker()
@@ -125,7 +131,9 @@
 				// 	ellipticCurveSpace.position.copy(rightHand.position)
 				// })
 
-				await initFluid(gl)
+				// await initFluid(gl)
+
+				await initEntanglement()
 
 				// initDynamicalSystems()
 
