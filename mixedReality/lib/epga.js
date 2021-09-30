@@ -121,7 +121,7 @@ function initAlgebra() {
 			return cl
 		}
 
-		log(msg) {
+		log(label) {
 			let str = ""
 			for (let i = 0; i < basisNames.length; ++i) {
 				if (this[i] !== 0.) {
@@ -136,8 +136,8 @@ function initAlgebra() {
 				}
 			}
 
-			if (msg !== undefined)
-				str = msg + ": " + str
+			if (label !== undefined)
+				str = label + ": " + str
 
 			log(str)
 		}
@@ -238,6 +238,12 @@ function initAlgebra() {
 			return this
 		}
 
+		isIdealLine() {
+			let hasEuclideanLinePart = this[8] !== 0. || this[9] !== 0. || this[10] !== 0.
+			let hasIdealLinePart = this[5] !== 0. || this[6] !== 0. || this[7] !== 0.
+			return !hasEuclideanLinePart && hasIdealLinePart
+		}
+
 		fromVector(v) {
 			this.copy(zeroMv)
 			this.point(
@@ -248,13 +254,13 @@ function initAlgebra() {
 			return this
 		}
 
-		point(x, y, z) {
+		point(x, y, z, w) {
 			this.copy(zeroMv)
 			this[13] = x
 			this[12] = y
 			this[11] = z
 
-			this[14] = 1.
+			this[14] = w === undefined ? 1. : w
 
 			return this
 		}
@@ -323,6 +329,14 @@ function initAlgebra() {
 			return target
 		}
 
+		fromQuaternion(q) {
+			this[0] = q.w
+			this[10] = q.x
+			this[9] = q.y
+			this[8] = q.z
+			return this
+		}
+
 		//threejs has the same setup of quaternions
 		// {
 		// 	// let epgaDir = new Mv().direction(1., 0., 0.)
@@ -339,6 +353,15 @@ function initAlgebra() {
 		// 	// log("with THREE:")
 		// 	// log(threeDir)
         // }
+
+		equals(mv) {
+			let ret = true
+			for(let i = 0; i < 16; ++i) {
+				if(mv[i] !== this[i])
+					ret = false
+			}
+			return ret
+		}
 
 		norm() {
 			this.conjugate(localMv0)
@@ -389,8 +412,8 @@ function initAlgebra() {
 	projectPointOnLine = (p, l, target) => {
 		if (target === undefined)
 			target = new Mv()
-		cleave(l, p, localMv3)
-		product(localMv3, l, target)
+		cleave(l, p, lv2LocalMv0)
+		product(lv2LocalMv0, l, target)
 
 		return target
 	}
@@ -399,18 +422,40 @@ function initAlgebra() {
 		if (target === undefined)
 			target = new Mv()
 
-		cleave(l, p, localMv0)
-		product(localMv0, p, target)
+		cleave(l, p, lv2LocalMv0)
+		product(lv2LocalMv0, p, target)
 
 		return target
 	}
 
-	distancePointPoint = (p1,p2) => {
-		localMv3.copy(p1).normalize()
-		localMv4.copy(p2).normalize()
+	rotorFromAxisAngle = (axis,angle,target) => {
+		if (target === undefined)
+			target = new Mv()
 
-		join(localMv3,localMv4,localMv5)
-		return localMv5.norm()
+		target.copy(axis)
+		target.normalize()
+		target.multiplyScalar(Math.sin(angle / 2.))
+		
+		target[0] = Math.cos(angle / 2.)
+
+		return target
+	}
+
+	orientedDistancePointPlane = (pt, pl) => {
+		lv2LocalMv0.copy(pt).normalize()
+		lv2LocalMv1.copy(pl).normalize()
+		join(lv2LocalMv0, lv2LocalMv1, lv2LocalMv2)
+		return lv2LocalMv2[0]
+	}
+	distancePointPlane = (pt,pl) => {
+		return Math.abs(orientedDistancePointPlane(pt,pl))
+	}
+
+	distancePointPoint = (pt1, pt2) => {
+		lv2LocalMv0.copy(pt1).normalize()
+		lv2LocalMv1.copy(pt2).normalize()
+		join(lv2LocalMv0, lv2LocalMv1, lv2LocalMv2)
+		return Math.abs(lv2LocalMv2.norm())
 	}
 
 	window.Mv = Mv
@@ -445,8 +490,11 @@ function initAlgebra() {
 	let localMv1 = new Mv()
 	let localMv2 = new Mv()
 	let localMv3 = new Mv()
-	let localMv4 = new Mv()
-	let localMv5 = new Mv()
+
+	let lv2LocalMv0 = new Mv()
+	let lv2LocalMv1 = new Mv()
+	let lv2LocalMv2 = new Mv()
+	let lv2LocalMv3 = new Mv()
 
 	mv0 = new Mv()
 	mv1 = new Mv()

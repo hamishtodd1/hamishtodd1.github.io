@@ -34,8 +34,8 @@ async function initFloorAndSky()
 	await assignShader("skyVertex", skyMaterial, "vertex");
 	await assignShader("skyFragment", skyMaterial, "fragment");
 
-	scene.add( new THREE.Mesh( 
-		new THREE.SphereGeometry( camera.far*0.5, 32, 15 ),
-		skyMaterial
-	) );
+	// scene.add( new THREE.Mesh( 
+	// 	new THREE.SphereGeometry( camera.far*0.5, 32, 15 ),
+	// 	skyMaterial
+	// ) );
 }

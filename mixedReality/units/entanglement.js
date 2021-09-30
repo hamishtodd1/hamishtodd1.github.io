@@ -1,12 +1,42 @@
 /*
-	Gates
-        CNOT
-
-    Ambitions
-        Show:
+	Ambitions
+        Definitely show:
+            CNOT
+            Bell basis, rotational invariance
+            NOT
+            square root of not
+            A "basis" is a way of looking at things and taking measurements on them
+            "if Alice measures her qubit in any basis, the state of Bob’s qubit collapses to whichever state she got for her qubit"
+        Would be nice to show:
             no-cloning
             teleportation
             free will
+
+    Script - "But what does quantum entanglement LOOK LIK?"
+        Quantum entanglement is, without exaggeration, one of the strangest things ever discovered.
+        It's central to quantum physics so it's important if you want to understand why the periodic table has this shape, or how computer chips are made,
+        But for me entanglement most intriguing because of its implications for philosophy, metaphysics, and epistemology. In a sense you can resolve the schrodinger's cat paradox
+        In this video I want to give an intuitive sense for what entanglement is, which I'll do using this visualization of it
+
+        If we take an ordinary sphere and imagine an ant on its surface, 
+
+    Coooool: the fact that the dof grows quadratically rather than exponentially
+
+
+    Volume-preserving transformations are nice for interpretability because you can always interpret the thing as a probability
+    So maybe even ML shouldn't use matrices?
+
+    The connection between circular exponential and scalar exponential might be illustrated by those large-gear-ratio things?
+
+    Yes you can always find a change of basis such that it's a tensor product
+
+    Maybe the series of qubits is like a long robot arm? each qubit a joint?
+    Or like those gyroscopes where you control the gibals
+
+    so it's still a complex 4-vector. It's just not a 4-vector that can be written as the tensor product of 2 2-vectors
+
+    what's the inner product?
+    cos(t) is defined by e(t) - e(-t), or maybe +
 
     Surely, surely as part of this you have a visualization of taking the squared norm of the probabilities
     Sphere to equilateral triangle
@@ -51,10 +81,32 @@
     https://en.wikipedia.org/wiki/Monogamy_of_entanglement
 */
 
-
+centerToFrameDistance = (fov, cameraDistance) => Math.tan(fov / 2. * (TAU / 360.)) * cameraDistance
+fovGivenCenterToFrameDistance = (centerToFrame, cameraDistance) => 2. * Math.atan(centerToFrame / cameraDistance) * (360. / TAU)
+function otherFov(inputFov, aspectRatio, inputIsVertical) {
+    var centerToFrameInput = centerToFrameDistance(inputFov, 1.)
+    var centerToFrameOutput = centerToFrameInput
+    if (inputIsVertical)
+        centerToFrameOutput *= aspectRatio
+    else
+        centerToFrameOutput /= aspectRatio
+    var outputFov = fovGivenCenterToFrameDistance(centerToFrameOutput, 1.)
+    return outputFov
+}
 
 async function initEntanglement()
 {
+    // initCircuit()
+    // return
+
+    camera.position.z += 3.
+    camera.position.y -= 1.
+    camera.position.x += .2
+
+    updateFunctions.push(()=>{
+        rightHandPosition.fromVector(rightHand.position)
+    })
+
     let v0 = new THREE.Vector3()
     let v1 = new THREE.Vector3()
     let v2 = new THREE.Vector3()
@@ -62,53 +114,88 @@ async function initEntanglement()
 
     let rightHandPosition = new Mv()
 
-    let planeCameraIsLookingAt = new Mv()
-    updateFunctions.push(()=>{
-        v0.set(0.,0.,-1.)
-        v0.applyQuaternion( camera.quaternion )
-
-        planeCameraIsLookingAt.fromVector(v0).dualSelf()
-
-        rightHandPosition.fromVector(rightHand.position)
-    })
-
-    // initCircuit()
-
-	//array of vector4s
-
-    //could do cylinders and balls with instanced shit
-    //balls (vertices) is simple, same for cylinders
-
-    camera.position.z += 3.
-    camera.position.y -= 1.
-    camera.position.x += .2
-
-
-    //current goal: face-on 16-cell
-    let controlsArray = [
-        e31,"j","l",
-        e12,"a","d",
-        e23,"t","g",
-
-        e01,"f","h",
-        e02,"i","k",
-        e03,"w","s",
-    ]
-
-    for(let i = 0, il = controlsArray.length / 3; i < il; ++i) {
-        let gate = controlsArray[i * 3].sqrtSimpleMotor().sqrtSimpleMotor()
-        bindButton(controlsArray[i*3+1], () => {
-            product(motor, gate, mv0)
-            motor.copy(mv0)
-        })
-        bindButton(controlsArray[i*3+2], () => {
-            let reverseGate = gate.reverse(mv1)
-            product(motor, reverseGate, mv0)
-            motor.copy(mv0)
-        })
+    let cameraPoint = new Mv()
+    let frustumPlanes = {
+        left: new Mv(),
+        right: new Mv(),
+        top: new Mv(),
+        bottom: new Mv(),
+        far: new Mv(),
+        near: new Mv()
     }
+    //take the forwards direction, and rotate it by half a fov up, down, left, right
+    
+    let rotator = new Mv()
+    let cameraRotor = new Mv()
+    let cameraMotor = new Mv()
+    let cameraTranslation = new Mv()
 
-    //so there are 600 * 6 / 5 = 720 edges, / 10 = 72 great circles
+    function updateCamera() {
+        
+        cameraPoint.fromVector(camera.position)
+
+        product(cameraPoint, e123, mv0).sqrtSimpleMotor(cameraTranslation)
+        cameraRotor.fromQuaternion(camera.quaternion)
+        product( cameraRotor, cameraTranslation, cameraMotor )
+
+        let horizontalFov = otherFov(camera.fov, camera.aspect, false)
+        
+        rotorFromAxisAngle(e23, camera.fov / 2., rotator)
+        rotator.sandwich(e2,frustumPlanes.top)
+        frustumPlanes.top.multiplyScalar(-1.)
+        rotorFromAxisAngle(e23,-camera.fov / 2., rotator)
+        rotator.sandwich(e2,frustumPlanes.bottom)
+        rotorFromAxisAngle(e31, horizontalFov / 2., rotator)
+        rotator.sandwich(e1,frustumPlanes.right)
+        rotorFromAxisAngle(e31,-horizontalFov / 2., rotator)
+        rotator.sandwich(e1,frustumPlanes.left)
+        frustumPlanes.left.multiplyScalar(-1.)
+
+        frustumPlanes.far.copy(zeroMv)
+        frustumPlanes.far[1] = -(camera.far * .99)
+        frustumPlanes.far[4] = 1.
+        frustumPlanes.far.normalize()
+        frustumPlanes.near.copy(zeroMv)
+        frustumPlanes.near[1] = camera.near
+        frustumPlanes.near[4] = 1.
+        frustumPlanes.near.normalize()
+
+        for (let pl in frustumPlanes) {
+            cameraMotor.sandwich(frustumPlanes[pl], mv0)
+            frustumPlanes[pl].copy(mv0)
+        }
+    }
+    
+    updateFunctions.push( updateCamera)
+
+    // function pointInFrontOfCamera(pt) {
+    //     return orientedDistancePointPlane(pt,cameraLookingPlane) > 0.
+    // }
+
+    {
+        let controlsArray = [
+            e31, "j", "l",
+            e12, "a", "d",
+            e23, "t", "g",
+
+            e01, "f", "h",
+            e02, "i", "k",
+            e03, "w", "s",
+        ]
+
+        for (let i = 0, il = controlsArray.length / 3; i < il; ++i) {
+            let gate = controlsArray[i * 3].sqrtSimpleMotor().sqrtSimpleMotor()
+            bindButton(controlsArray[i * 3 + 1], () => {
+                product(motor, gate, mv0)
+                motor.copy(mv0)
+            })
+            bindButton(controlsArray[i * 3 + 2], () => {
+                let reverseGate = gate.reverse(mv1)
+                product(motor, reverseGate, mv0)
+                motor.copy(mv0)
+            })
+        }
+    }
 
     let initialEdgeMvs = []
     let initialVertexMvs = []
@@ -121,6 +208,37 @@ async function initEntanglement()
         meet(e3, planeJustOff, initialEdgeMvs[1])
     }
 
+    const motor = new Mv()
+    motor[0] = 1.
+    const displayedMotor = new Mv()
+    const mvGettingVisualized = new Mv()
+
+    updateFunctions.push(() => {
+        for (let i = 0; i < 16; ++i)
+            displayedMotor[i] += .03 * (motor[i] - displayedMotor[i])
+        displayedMotor.normalize()
+    })
+
+    //so there'll be controlled not which is a screw motion, and the other screw motions are maybe controlled OR or something?
+    {
+        let radius = .07
+        let pointGeo = new THREE.SphereBufferGeometry(radius)
+
+        function visiblePoint(persistentPoint, color) {
+            if (color === undefined)
+                color = new THREE.Color(0., 0., 0.)
+
+            let mesh = new THREE.Mesh(pointGeo, new THREE.MeshPhongMaterial({ color }))
+            scene.add(mesh)
+            updateFunctions.push(() => {
+                displayedMotor.sandwich(persistentPoint, mvGettingVisualized)
+
+                mesh.visible = mvGettingVisualized[14] > 0.
+                mvGettingVisualized.toVector(mesh.position)
+            })
+        }
+    }
+
     //24-cell
     //hexagonal equators
     //24*12/3/6 = 16
@@ -131,9 +249,92 @@ async function initEntanglement()
 
     }
 
-    //600 cell (maybe)
+    //truncating the lines to the frustum
+    //could check their distance from the camera? No
+    //Ok so you get this series of points
+
+    //how about, for an intersection point, check which side of all the other planes it is on?
     {
-        let icoVerts = Array(12)
+        // initialEdgeMvs.push(e31)
+
+        // let pointMvs = [new Mv(), new Mv()]
+        // visiblePoint(pointMvs[0])
+        // visiblePoint(pointMvs[1])
+        // updateFunctions.push(()=>{
+        //     let currentLine = displayedMotor.sandwich(initialEdgeMvs[i], mv0)
+        //     pointMvs[0].point( 999999999999.,0.,0.)
+        //     pointMvs[1].point(-999999999999.,0.,0.)
+
+        //     //no, this doesn't work. You probably need to check distance from the center
+
+
+        //     for(let i = 0; i < 2; ++i) {
+        //         let pointMv = pointMvs[i]
+        //         let otherPointMv = pointMvs[1-i]
+        //         for (let pl in frustumPlanes) {
+        //             let currentDistToOther = distancePointPoint(pointMv, otherPointMv)
+
+        //             meet(currentLine, frustumPlanes[pl], mv1)
+        //             let distToOther = distancePointPoint(mv1, otherPointMv)
+        //             if (distToOther < currentDistToOther)
+        //                 pointMv.copy(mv1)
+        //         }
+        //     }
+        // })
+    }
+
+    //48-cell
+    {
+        let coords0 = [2. + Math.sqrt(2.), 2. + Math.sqrt(2.), 0., 2. + 2. * Math.sqrt(2.)]
+        let coords1 = [1. + Math.sqrt(2.), 1. + Math.sqrt(2.), 1., 3. + 2. * Math.sqrt(2.)]
+        let index = 0
+        for (let i = 0; i < 4; ++i) {
+            for (let j = 0; j < 4; ++j) {
+                if(j === i)
+                    continue
+                for (let k = 0; k < 4; ++k) {
+                    if (k === i || k === j)
+                        continue
+                    for (let l = 0; l < 4; ++l) {
+                        if (l === i || l === j || l === k)
+                            continue
+                        
+                        //if you've done 0,1,2,3 you don't need 1,0,2,3
+                        //if you've done 3,1,2,0 you don't need 3,0,2,1
+                        let indexThatIs0 = i === 0 ? 0 : j === 0 ? 1 : k === 0 ? 2 : 3
+                        let indexThatIs1 = i === 1 ? 0 : j === 1 ? 1 : k === 1 ? 2 : 3
+                        if(indexThatIs1 > indexThatIs0)
+                            continue
+
+                        for(let signs = 0; signs < 16; ++signs) {
+
+                            initialVertexMvs.push(new Mv().point(
+                                (signs & 1 ? -1.:1.) * coords1[i], 
+                                (signs & 2 ? -1.:1.) * coords1[j], 
+                                (signs & 4 ? -1.:1.) * coords1[k], 
+                                (signs & 8 ? -1.:1.) * coords1[l]).normalize())
+
+                            if ((coords0[i] === 0. && signs & 1) ||
+                                (coords0[j] === 0. && signs & 2) ||
+                                (coords0[k] === 0. && signs & 4) ||
+                                (coords0[l] === 0. && signs & 8) )
+                                continue
+                            initialVertexMvs.push(new Mv().point(
+                                (signs & 1 ? -1.:1.) * coords0[i], 
+                                (signs & 2 ? -1.:1.) * coords0[j], 
+                                (signs & 4 ? -1.:1.) * coords0[k], 
+                                (signs & 8 ? -1.:1.) * coords0[l]).normalize())
+                        }
+                    }
+                }
+            }
+        }
+        log(initialVertexMvs.length)
+    }
+
+    //600 cell
+    if(0)
+    {
         let gr = (Math.sqrt(5.) + 1.) / 2.
         let lengthOfTheseVertsWithoutMul = Math.sqrt(1.+gr*gr)
         // Edge length in the 4D sphere is 360 / 10 = 36 degrees
@@ -151,16 +352,17 @@ async function initEntanglement()
             0., 1.,-gr,
             0.,-1.,-gr,
         ])
+        let verts = Array(coords.length/3)
         let mul = Math.tan(TAU / 10.) / lengthOfTheseVertsWithoutMul
-        for(let i = 0; i < icoVerts.length; ++i)
-            icoVerts[i] = new Mv().point(coords[i*3+0] * mul, coords[i*3+1] * mul, coords[i*3+2] * mul).normalize()
-        let edgeLen = distancePointPoint(icoVerts[0],icoVerts[2])
+        for(let i = 0; i < verts.length; ++i)
+            verts[i] = new Mv().point(coords[i*3+0] * mul, coords[i*3+1] * mul, coords[i*3+2] * mul).normalize()
+        let edgeLen = distancePointPoint(verts[0],verts[2])
 
         //maybe all you're doing is making a nice interface for blender? Definitely worthwhile
         
         {
-            initialVertexMvs.length = icoVerts.length
-            icoVerts.forEach((v,i)=>{
+            initialVertexMvs.length = verts.length
+            verts.forEach((v,i)=>{
                 initialVertexMvs[i] = v.clone()
             })
             //aaaaand the other 120 - 12?
@@ -177,117 +379,95 @@ async function initEntanglement()
             initialEdgeMvs.push(theJoin.dual().normalize())
         }
 
-        for (let i = 0, il = icoVerts.length; i < il; ++i) {
-            let coordSum = icoVerts[i].x() + icoVerts[i].y() + icoVerts[i].z()
+        for (let i = 0, il = verts.length; i < il; ++i) {
+            let coordSum = verts[i].x() + verts[i].y() + verts[i].z()
             if(coordSum > 0.)
-                addLineAndItsDual(e123,icoVerts[i])
+                addLineAndItsDual(e123,verts[i])
 
-            for(let j = i+1, jl = icoVerts.length; j < jl; ++j) {
-                if (distancePointPoint(icoVerts[i],icoVerts[j]) < edgeLen * 1.1)
-                    addLineAndItsDual(icoVerts[i], icoVerts[j])
+            for(let j = i+1, jl = verts.length; j < jl; ++j) {
+                if (distancePointPoint(verts[i],verts[j]) < edgeLen * 1.1)
+                    addLineAndItsDual(verts[i], verts[j])
             }
         }
     }
 
-    const motor = new Mv()
-    motor[0] = 1.
-
-    //so there'll be controlled not which is a screw motion, and the other screw motions are maybe controlled OR or something?
-
     {
-        const displayedMotor = new Mv()
-        updateFunctions.push(() => {
-            for (let i = 0; i < 16; ++i)
-                displayedMotor[i] += .03 * (motor[i] - displayedMotor[i])
-            displayedMotor.normalize()
-        })
-
-        const mvGettingVisualized = new Mv()
         const dummy = new THREE.Object3D()
 
-        {
-            let radius = .07
-            let geo = new THREE.SphereBufferGeometry(radius)
-            const NUM_SPHERES = initialVertexMvs.length
-            // let mesh = new THREE.InstancedMesh(geo, mat, NUM_SPHERES)
-            let meshes = []
-            // mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
-            
-            for(let i = 0; i < NUM_SPHERES; ++i) {
-                let angle = Math.atan2(initialVertexMvs[i].y(), initialVertexMvs[i].z())
-                let hue = (angle + Math.PI) / TAU
-                let xNormalized = (initialVertexMvs[i].x() + 1.) / 2.
-                let easedToReduceBlackAndWhite = Math.acos(-(xNormalized * 2. - 1.)) * 2. / TAU
-                let lightness = easedToReduceBlackAndWhite
-                let color = new THREE.Color().setHSL(hue, 1., lightness)
-                
-                meshes[i] = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ color }))
-                scene.add(meshes[i])
-            }
+        let radius = .003
+        let geo = new THREE.CylinderBufferGeometry(radius, radius, 9999., 15, 1, true)
+        let mat = new THREE.MeshPhongMaterial({ color: 0x888888 })
+        const NUM_CYLINDERS = initialEdgeMvs.length
+        let mesh = new THREE.InstancedMesh(geo, mat, NUM_CYLINDERS)
+        scene.add(mesh)
+        mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
 
-            updateFunctions.push(() => {
-                for (let i = 0; i < NUM_SPHERES; i++) {
-                    displayedMotor.sandwich(initialVertexMvs[i], mvGettingVisualized)
+        updateFunctions.push(() => {
+            for (let i = 0; i < NUM_CYLINDERS; i++) {
 
-                    mvGettingVisualized.toVector(meshes[i].position)
+                displayedMotor.sandwich(initialEdgeMvs[i], mvGettingVisualized)
 
-                    // if (mvGettingVisualized[14] !== 0.) {
-                    //     mvGettingVisualized.toVector(dummy.position)
-                    //     dummy.quaternion.identity()
+                //line at infinity
+                // if (mvGettingVisualized[8] == 0. && mvGettingVisualized[9] == 0. && mvGettingVisualized[10] == 0.) {
+                //     mvGettingVisualized.copy(e12)
+
+                    
+                // }
+
+                {
+                    //so what you want are the five planes defining the camera's pyramid
+                    //And you want to get the start and end points of your line
+                    //initialize them to being very far away
+
+                    //for each of the 4 camera planes, meet with line, get the meet-points closest to the camera
+                    //for those two points, get the lines joining them with cameraPoint
+                    //meet those lines with the far plane. If meet points are closer, they override
+
+                    let thisLineAtOrigin = projectLineOnPoint(mvGettingVisualized, e123, mv1)
+                    thisLineAtOrigin.normalize()
+                    let rotorToThisLineAtOrigin = product(thisLineAtOrigin, e31, mv2).sqrtSimpleMotor(mv3)
+                    rotorToThisLineAtOrigin.toQuaternion(dummy.quaternion)
+
+                    let pos = projectPointOnLine(cameraPoint, mvGettingVisualized, mv4)
+                     //works even if e123 part == 0.
+                    // log(dummy.position)
+
+                    // let orientedDistanceFromCamera = orientedDistancePointPlane( pos, cameraLookingPlane )
+                    // let isInFrontOfCameraAndMightBeTooFarToSee = orientedDistanceFromCamera > camera.far - .1
+                    // let isIdealLine = pos.equals(zeroMv)
+
+                    // if ( mvGettingVisualized.isIdealLine() || isInFrontOfCameraAndMightBeTooFarToSee ) {
+                    //     let planeAtOriginThroughLine = join(cameraPoint, mvGettingVisualized, mv5)
+                    //     meet(cameraLookingPlane, planeAtOriginThroughLine, mvGettingVisualized)
+
+                    //     //yoooooou're gonna have a discontinuity
+                    //     //could turn it into a single pixel wide line
+
+                    //     // mvGettingVisualized.normalize()
                     // }
                     // else {
-                    //     dummy.position.set(0.,0.,0.)
                     // }
-                    // dummy.updateMatrix()
-                    // mesh.setMatrixAt(i, dummy.matrix)
+                    pos.toVector(dummy.position)
                 }
 
-                // mesh.instanceMatrix.needsUpdate = true;
-            })
-        }
 
-        {
-            let radius = .003
-            let geo = new THREE.CylinderBufferGeometry(radius, radius, 9999., 15, 1, true)
-            let mat = new THREE.MeshPhongMaterial({ color: 0x888888 })
-            const NUM_CYLINDERS = initialEdgeMvs.length
-            let mesh = new THREE.InstancedMesh(geo, mat, NUM_CYLINDERS)
-            scene.add(mesh)
-            mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
+                dummy.updateMatrix()
+                mesh.setMatrixAt(i, dummy.matrix)
+            }
 
-            updateFunctions.push(() => {
-                for (let i = 0; i < NUM_CYLINDERS; i++) {
+            mesh.instanceMatrix.needsUpdate = true;
+        })
+    }
+    
+    for (let i = 0, il = initialVertexMvs.length; i < il; ++i) {
+        let angle = Math.atan2(initialVertexMvs[i].y(), initialVertexMvs[i].z())
+        let hue = (angle + Math.PI) / TAU
+        let xNormalized = (initialVertexMvs[i].x() + 1.) / 2.
+        let easedToReduceBlackAndWhite = Math.acos(-(xNormalized * 2. - 1.)) * 2. / TAU
+        let lightness = easedToReduceBlackAndWhite
+        let color = new THREE.Color().setHSL(hue, 1., lightness)
 
-                    displayedMotor.sandwich(initialEdgeMvs[i], mvGettingVisualized)
-
-                    //line at infinity
-                    if (mvGettingVisualized[8] == 0. && mvGettingVisualized[9] == 0. && mvGettingVisualized[10] == 0.) {
-                        mvGettingVisualized.copy(e12)
-
-                        // let planeAtOriginThroughLine = join(e123, mvGettingVisualized, mv1)
-                        // meet(planeCameraIsLookingAt, planeAtOriginThroughLine, mvGettingVisualized)
-
-                        // mvGettingVisualized.normalize()
-                    }
-
-                    {
-                        let thisLineAtOrigin = projectLineOnPoint(mvGettingVisualized, e123, mv1)
-                        thisLineAtOrigin.normalize()
-                        let rotorToThisLineAtOrigin = product(thisLineAtOrigin, e31, mv2).sqrtSimpleMotor(mv3)
-                        rotorToThisLineAtOrigin.toQuaternion(dummy.quaternion)
-
-                        let pos = projectPointOnLine(e123, mvGettingVisualized, mv4)
-                        pos.toVector(dummy.position) //it works even if e123 part == 0.
-                    }
-
-
-                    dummy.updateMatrix()
-                    mesh.setMatrixAt(i, dummy.matrix)
-                }
-
-                mesh.instanceMatrix.needsUpdate = true;
-            })
-        }
+        visiblePoint(initialVertexMvs[i], color)
     }
 
 
@@ -333,36 +513,32 @@ function initCircuit() {
     // percentageDisplay.textMeshes[0].material.setText(
 
     let gridDimension = .04
-    function gridBoxLabelled(label, onClick) {
-        let rect = Rectangle({
-            frameThickness: .002,
-            label,
-            onClick: onClick === undefined ? null : onClick,
-            w: gridDimension, h: gridDimension
-        })
-
-        rect.setText = function (t) {
-            rect.textMeshes[0].material.setText(t)
-        }
-
-        return rect
+    function SymbolRectangle(params) {
+        params.frameThickness = .002
+        params.w = gridDimension
+        params.h = gridDimension
+        return Rectangle(params)
     }
 
-    let strings = [
-        "|0>", "|1>", "H", "S", "T", "⊕"
-    ]
-    let symbolBoxes = []
+    function setRectText(rect,t) {
+        rect.textMeshes[0].material.setText(t)
+    }
 
-    strings.forEach((str, i) => {
-        let rect = gridBoxLabelled(str)
-        symbolBoxes.push(rect)
-    })
-    updateFunctions.push(() => {
-        symbolBoxes.forEach((sb, i) => {
-            sb.position.copy(rightHand.position)
-            sb.position.x += .12 * i
-        })
-    })
+    // let strings = [
+    //     "|0>", "|1>", "H", "S", "T", "⊕"
+    // ]
+    // let symbolBoxes = []
+
+    // strings.forEach((str, i) => {
+    //     let rect = SymbolRectangle(str)
+    //     symbolBoxes.push(rect)
+    // })
+    // updateFunctions.push(() => {
+    //     symbolBoxes.forEach((sb, i) => {
+    //         sb.position.copy(rightHand.position)
+    //         sb.position.x += .12 * i
+    //     })
+    // })
 
     //keep this out of the way. It causes the outlines above to work. What the fuck.
     let hadamard = Rectangle({
@@ -375,28 +551,43 @@ function initCircuit() {
         }
     })
 
-    // let NUM_QUBITS = 4
-    // let wires = Array(NUM_QUBITS)
-    // let padding = .04
-    // let wireSpacing = (bgHeight - padding * 2.) / (NUM_QUBITS-1)
-    // let wireThickness = .003
-    // let wireLength = .25
-    // let wireMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 })
-    // for(let i = 0; i < NUM_QUBITS; ++i) {
-    //     wires[i] = Rectangle({
-    //         h: wireThickness,
-    //         w: wireLength,
-    //         mat: wireMaterial,
-    //         getPosition: (p) => {
-    //             p.copy(rightHand.position)
+    let NUM_QUBITS = 2
+    let wires = Array(NUM_QUBITS)
+    let padding = .04
+    let wireSpacing = (bgHeight - padding * 2.) / (NUM_QUBITS-1)
+    let wireThickness = .003
+    let wireLength = .25
+    let wireMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 })
+    for(let i = 0; i < NUM_QUBITS; ++i) {
+        wires[i] = Rectangle({
+            h: wireThickness,
+            w: wireLength,
+            mat: wireMaterial,
+            getPosition: (p) => {
+                p.copy(rightHand.position)
 
-    //             p.y -= wireSpacing * (wire.i - (NUM_QUBITS-1) / 2.)
-    //         }
-    //     })
+                p.y -= wireSpacing * (wire.i - (NUM_QUBITS-1) / 2.)
+            }
+        })
 
-    //     let wire = wires[i]
-    //     wire.i = i
-    // }
+        let wire = wires[i]
+        wire.i = i
+
+        wire.initialState = SymbolRectangle({
+            label:"|0>",
+            onClick: ()=>{
+
+                wire.initialState.val = 1 - wire.initialState.val
+                setRectText(wire.initialState, "|" + wire.initialState.val + ">")
+            },
+            getPosition:(v)=>{
+                v.copy(rightHand.position)
+                v.x = wire.position.x - wire.scale.x / 2.
+                v.y = wire.position.y
+            }
+        })
+        wire.initialState.val = 0
+    }
 
     roundOffRectangleCreation()
 }
