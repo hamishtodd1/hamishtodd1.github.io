@@ -1,98 +1,67 @@
 // Written by a generator written by enki, modified by Hamish Todd
 
-class ComplexVector extends Float32Array {
-	constructor(n) {
-		if(n === undefined)
-			console.error("need to know how many there are!")
-		if(typeof n === 'number')
-			super(n*2)
-		else {
-			//it's an array
-			super(n.length)
-			this.fromArray(n)
-		}
-	}
+//we surely want it to be the case that the un-entangled is defined by two points on the 2-sphere
+//A rotation around the line connected to that point, and a "translation" to that point, eg a 90 degree rotation towards it
 
-	fromArray(arr) {
-		for(let i = 0; i < this.length; ++i) {
-			this[i] = arr[i]
-		}
-	}
+// non-entangled states have x3 = x4 = 0
+// maximally entangled states have x0 = x1 = x2 = 0
+// it's always 90 degrees around some line pair maybe?
+//if you have to throw one away, rotating around the camera's axis is obvious candidate
 
-	re(index) {
-		return this[index * 2 + 0]
-	}
+//translation rotation is 6-dof, put it in a place, rotate it. If the rotation is deffo 180 degrees, that's 5
+//if you have the 4, you know the 5th because unit length, apart from sign
+//so, they're the coefficients of e01, e23,   e02, e13 and x0 is scalar part
 
-	im(index) {
-		return this[index * 2 + 1]
-	}
+// Equatorial trick.For any Sn, there is Sn - 1 as its equator.If Sn corresponds to some set of rotations, Sn - 1 is probably the subset of those rotations that are at 180 degrees
 
-	setRe(index,val) {
-		this[index * 2 + 0] = val
-	}
-	setIm(index,val) {
-		this[index * 2 + 1] = val
-	}
+/**
+If it was going to be PGA fuelling your interpretation...
+Each S3 arranged in the S7 is like a line at infinity. They're grade-4 elements, eg e1234
+Each one is an R4 in the larger R8
+If you're inside the S7 they're not at infinity, they do take up the interior
 
-	multiplyOneEntry(input, ourIndex, inputIndex, target, targetIndex) {
-		let a = this.re(ourIndex)
-		let b = this.im(ourIndex)
+so their a + bj thing is like... call i=e12, j=e23, k=e31
+a = x + yi, b = z + wi
+x + ye12 + be23 + we12e23 = x + ye12 + be23 + we13
 
-		let c = input.re(inputIndex)
-		let d = input.im(inputIndex)
+In an ordinary hopf fibration, you've got R2s in R4
+Forget stereographic
 
-		target.setRe(targetIndex,(a*c - b*d))
-		target.setIm(targetIndex,(c*b + a*d))
-	}
+"Complex structure"
+Is the exponential of a real-imaginary pair kinda like a rotation-translation around a line pair?
+Maybe it's the screw motions of Cl(3,1)
 
-	log(msg) {
-		let str = ""
-		for (let i = 0; i < this.length / 2; ++i) {
 
-			let rePart = this.re(i)
-			let imPart = this.im(i)
-			if (rePart !== 0. || imPart !== 0.) {
-				if (str !== "")
-					str += " + \n"
+Unit complex numbers in 3D are simulated by exp(alpha*e12)
 
-				str += "(" + rePart.toFixed(1) + "+i" + imPart.toFixed(1) + ") " + "|" + toBinary(i) + ">"
-			}
-		}
+What's the relationship of the EPGA hopf fibration to the pair of complex numbers?
+	Well of course if you have (1,0) it's the line through the origin, if it's (0,1) it's the dual of that line, at infinity
+	And if they are equally balanced it's probably one of a few lines which can be rotated around the line through the origin if you change the phase
+		Hmm, maybe it's eg (e01 + e23). Although where the hell does the phase come in?
+	And yes you can also view this as interpolating between two 180 degree turns
 
-		if (msg !== undefined)
-			str = msg + ": " + str
+Maybe it's that the equator is an entirely isoclinic rotation whereas
 
-		console.log(str)
-	}
+Actually a motor should always have both lines
+It is always both?
+A screw then is both where one is doing the job differently?
+It's a buncha arrows that turn around the thing. They can be animated to be on either, turning around like little circles
+A pure translation you miiiight make as a translation from point to point, if you were an awful vector algebra person
+Throw it in their face: it initially looks like a line, but then it breaks into arrows that all fan out from the line over to this thing at infinity
 
-	tensorProduct(b) {
-		let a = this
-		let ret = new ComplexVector(a.length * b.length / 4)
-		for (let i = 0, il = a.length / 2; i < il; ++i) {
-			for (let j = 0, jl = b.length / 2; j < jl; ++j) {
-				a.multiplyOneEntry(b, i, j, ret, i * jl + j)
-			}
-		}
 
-		return ret
-	}
-}
+With x0 = 1 or -1, it's a bloch sphere for the first qubit
+A bloch sphere is more like a bunch of 90 degree turns. Not 180, because there axes a and -a are the same
 
-function toBinary(x) {
-	let log2x = Math.log2(x)
-	let str = ""
-	for (let i = 0; i < log2x; ++i) {
-		str = (x & i)?"1":"0" + str
-	}
+Why not just take those two quaternions and...
 
-	return str
-}
+Suppose you started education with the bloch sphere.
+You talked about applying the pauli matrices to it. 
+*/
+
+
 
 function initAlgebra() {
-
-	let a = new ComplexVector([1,0,0,0])
-	let b = new ComplexVector([1,0,0,0])
-	a.tensorProduct(b).log()
 
 	//errrr obv you want to count up in binary, but does that correspond... we'll find out
 
@@ -101,6 +70,8 @@ function initAlgebra() {
 
 	let effectiveOrigin = new THREE.Vector3(0.,0.,0.)//(0 - .1, 1.6 - .1, -0.5)
 	//could have scale too
+
+	const GRADES_OF_ELEMENTS = [0, 1,1,1,1, 2,2,2,2,2,2, 3,3,3,3, 4]
 
 	class Mv extends Float32Array {
 		constructor() {
@@ -140,6 +111,11 @@ function initAlgebra() {
 				str = label + ": " + str
 
 			log(str)
+		}
+
+		add(mvToAdd) {
+			add(this, mvToAdd, localMv0)
+			this.copy(localMv0)
 		}
 
 		reverse(target) {
@@ -387,7 +363,7 @@ function initAlgebra() {
 		}
 
 		//aliasing works
-		sqrtSimpleMotor(target) {
+		sqrtBiReflection(target) {
 			if (target === undefined)
 				target = new Mv()
 			target.copy(this)
@@ -397,6 +373,41 @@ function initAlgebra() {
 			target.normalize()
 			return target
 		}
+		sqrtQuadReflection(target) {
+			if (target === undefined)
+				target = new Mv()
+			target.copy(this)
+
+			localMv0.copy(this)
+			localMv2.copy(this)
+			localMv0[0] += 1.
+			localMv2[0] += 1.
+			localMv2.reverse(localMv3)
+
+			localMv3[15] -= .5 * this[15]
+			product( localMv0, localMv3, target )
+
+			return target
+		}
+
+		selectGrade(grade,target) {
+			target.copy(this)
+			for(let i = 0; i < 16; ++i) {
+				if(grade !== GRADES_OF_ELEMENTS[i])
+					target[i] = 0.
+			}
+
+			return target
+		}
+
+		// logarithm(target) {
+		// 	let b = this.selectGrade(2, lv2LocalMv0)
+		// 	let minusBSquared = (b.cleave(b, lv2LocalMv1)).multiplyScalar(-1.)
+		// 	let s = Math.sqrt(minusBSquared)
+		// 	let p = meet(b, b, lv2LocalMv3).multiplyScalar(2. * s)
+
+		// 	let scalarInBrackets = Math.atan(s/this[0]) + 
+		// }
 
 		sandwich(mvToBeSandwiched, target) {
 			if (target === undefined)
@@ -408,6 +419,7 @@ function initAlgebra() {
 			product(localMv1,localMv0,target)
 		}
 	}
+	window.Mv = Mv
 
 	projectPointOnLine = (p, l, target) => {
 		if (target === undefined)
@@ -457,8 +469,6 @@ function initAlgebra() {
 		join(lv2LocalMv0, lv2LocalMv1, lv2LocalMv2)
 		return Math.abs(lv2LocalMv2.norm())
 	}
-
-	window.Mv = Mv
 
 	function MvFromIndexAndFloat(float, index) {
 		let mv = new Mv()

@@ -1,3 +1,7 @@
+function lerp(a,b,t) {
+	return a + t * (b-a);
+}
+
 function SuperEllipseGeometry()
 {
 	let radius = 1.
@@ -59,17 +63,17 @@ THREE.Matrix3.prototype.setPosition = function()
 // 	const u = perlinFade(x -= xi), v = perlinFade(y -= yi), w = perlinFade(z -= zi);
 // 	const A = perlinNoiseArray[X] + Y, AA = perlinNoiseArray[A] + Z, AB = perlinNoiseArray[A + 1] + Z;
 // 	const B = perlinNoiseArray[X + 1] + Y, BA = perlinNoiseArray[B] + Z, BB = perlinNoiseArray[B + 1] + Z;
-// 	return lerp(
+// 	return lerpWithTFirst(
 // 		w,
-// 		lerp(
+// 		lerpWithTFirst(
 // 			v,
-// 			lerp(u, grad3(perlinNoiseArray[AA], x, y, z), grad3(perlinNoiseArray[BA], x - 1, y, z)),
-// 			lerp(u, grad3(perlinNoiseArray[AB], x, y - 1, z), grad3(perlinNoiseArray[BB], x - 1, y - 1, z))
+// 			lerpWithTFirst(u, grad3(perlinNoiseArray[AA], x, y, z), grad3(perlinNoiseArray[BA], x - 1, y, z)),
+// 			lerpWithTFirst(u, grad3(perlinNoiseArray[AB], x, y - 1, z), grad3(perlinNoiseArray[BB], x - 1, y - 1, z))
 // 		),
-// 		lerp(
+// 		lerpWithTFirst(
 // 			v,
-// 			lerp(u, grad3(perlinNoiseArray[AA + 1], x, y, z - 1), grad3(perlinNoiseArray[BA + 1], x - 1, y, z - 1)),
-// 			lerp(u, grad3(perlinNoiseArray[AB + 1], x, y - 1, z - 1), grad3(perlinNoiseArray[BB + 1], x - 1, y - 1, z - 1))
+// 			lerpWithTFirst(u, grad3(perlinNoiseArray[AA + 1], x, y, z - 1), grad3(perlinNoiseArray[BA + 1], x - 1, y, z - 1)),
+// 			lerpWithTFirst(u, grad3(perlinNoiseArray[AB + 1], x, y - 1, z - 1), grad3(perlinNoiseArray[BB + 1], x - 1, y - 1, z - 1))
 // 		)
 // 	);
 // }
