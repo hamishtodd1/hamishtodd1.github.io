@@ -24,6 +24,7 @@ function initMouse()
 	};
 	asynchronous.raycaster.setFromCamera(new THREE.Vector2(), camera)
 
+	onClicks = []
 	mouse = {
 		clicking: false,
 		oldClicking: false,

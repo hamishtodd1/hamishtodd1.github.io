@@ -1,14 +1,34 @@
 /*
+	Tools for thought for everyday life
+		People generally want to show off
+			The fact that they care for their loved ones
+				Family members
+				Friends
+				Toys and games for pets
+				Cooking
+			Their athletic ability
+				Dancing
+				Circus stuff
+				Pushing game; help define elaborate rules
+			Their ability to work in a team, either as a leader or a collaborator
+				Sports
+			Their investment in their culture, eg history, religion
+			How much time they've put into something
+		Maths and physics is more about showing your intellect i.e.
+			Your grasp of difficult things
+			Your grasp of "important" things
+		Their aesthetic appreciation
+		Bridges is highly informative about this. Games.
+
+	Inertia tensor-wise, is there a way for PGA to do (a,b,c) * (x,y,z) = (ax,by,cz)? Would give you all the trivial ones
+
 	Notes
-		These animations- you must make them using the system, the player is to reverse-engineer them
-		Nice how videoing them projects them onto a plane so they can be vizzed in a volume
 		Tech
 			Mocap markers are cheap! https://mocapsolutions.com/collections/mocap-solutions-markers
 			You probably need a high speed camera
 		All the multivectors coming from the pictures should stay inside the animation, no need to have a clone of them in the scope
-		so you're modelling the differential apparently
+		often you're modelling the differential
 		A better representation of a thing over time might be its worldline with timestamps labelled
-		the basis vectors should be inside the scene
 		is there an elegant way to feed back into the scene?
 			the "real" ones are frozen in place, when you click them they're cloned
 		The thinking is: you are trying to go from t = a to t = a + epsilon
@@ -34,6 +54,10 @@
 	
 
 	Random ones
+		those toys where you have paper rolled around a stick, swing the stick and the paper extends
+		Ribbon olympic gymnasts https://www.youtube.com/watch?v=j0MpdyFDr5Q
+		https://twitter.com/MachinePix/status/1395150947719032835
+		https://twitter.com/Pamchenkova/status/1396535440237334528
 		guy pouring while spinning https://www.reddit.com/r/blackmagicfuckery/comments/dxm12f/fluid_dynamics_god_mode/
 		total internal reflection https://www.youtube.com/watch?v=Lic3gCS_bKo Boyd Edwards is apparently the guy
 		Number theory

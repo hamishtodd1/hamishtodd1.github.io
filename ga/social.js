@@ -25,33 +25,6 @@
     No need to download a game, you implement it yourself
         You can modify it, debug it to suit your needs
     
-    "You need to be able to make"
-        pong
-        rope-like things
-        a bouncing ball
-        Weights
-        Skinning (dual quat fields)
-            "Animation" is too broad, everything is animation. You want a kind of animation s.t. dual quat field is natural
-        Minimization
-            Well that's just a ball getting to the bottom of a valley
-        Rigid body dynamics
-        Texture/normal mapping
-            Motor manifolds, probably mappings from I^2 -> motors in 3D
-        Fields 
-            of force
-            of velocity
-            the slicing of them
-            their action on objects
-        Curves
-            1D
-            2D
-        Back to classical mechanics
-        A little cartoon character that
-            knows what direction to look in
-        Import
-            1D textures
-            2D textures
-            3D models
 
     Jesus fucking christ dude, stop with the cutting edge research!
         Consider leaving bivector discord! You're at the level of understanding of others there now!

@@ -1,24 +1,33 @@
 Dude there are so many other kinds of geometric/algebraic object you want, and here you are spending time thinking about something you're not sure if you need. You could be focussing on eg fourier / taylor series shit, which you know get used in physics
 
-Not necessarily much lost if you change your mind
-
 Zeeman three spheres https://www.youtube.com/watch?v=QKmucx1gjlQ
 
-Maybe the point pairs aren't so bad? They're line segments? Better than frickin PGA magnitudes
-
 The task is not necessarily "Pick the best algebra, then find a visualization of that"
-	It is "figure out the maximal thing you can find visualizations of, then get the algebra for that"
-	Do people have intuitions about sphere inversion? Not really
+	It is more like "figure out the maximal thing you can find visualizations of, then get the algebra for that"
+	Or rather, figure out what you want the users to do, then algebra for that
+	Do people have intuitions about sphere inversion? Not really. Bit like division?
 	What do we have intuitions about? Everything in PGA, sure
-	How about differentiation? What's the GA of R2->R3, the "texture mapping" algebra?
+	How about differentiation? What's the GA of R2->R3, the "texture mapping" algebra? Motors manifold I guess
 	Eh, why do you want dynamics? Fuck you, maybe you don't, build the damn thing first mofo
 	You probably really shouldn't bother with the puzzle game
 
-The purpose of this MUST NOT BE to impress Jon or other video game folks
-	It must be to try to make the dw-only version of what you eventually make
-	There again, what you eventually make will be significantly based on the CV capabilities existing at that point
+	
 
-Reasons why conformal mappings are interesting
+Reasons
+	Spherical video
+	You DO want spheres of different sizes, because you want little objects to move around.
+	In PGA you imagine 2 points intersecting the sphere at infinity anyway
+	The way CGA would connect to graphics is that people would want the black boxes for doing things that they know should work because they're used to picturing them
+	Circle inversion gives you a great interface for putting points at infinity: take a sphere and put them at the center
+	Conformal argument: you do kinda like general mathy elegance if it gives you a bit of geometric elegance
+	Maybe the point pairs aren't so bad? They're line segments?
+	Possibly CGA nice: direction point-pair MAYBE doesn't need its magnitude to matter,
+		or at least you get a viz of the magnitude
+		Which is nice because these things were gonna be your differentials / velocities
+	Tis silly in PGA your line intersecting with infinity is a point pair really
+	When we have BCIs taking your mental images: very easy to imagine circles, spheres, flats
+		Nothing else? What kind of shapes are easy to imagine? Rectangles, cuboids, capsules
+	Probably you will get bored with it unless there's some cool geometry you can make
 	we can form intuitions about these things, even though they're exotic, and that is nice. Why turn down the opportunity?
 	All invertible+analytic functions are conformal	
 		You can say "eh, dunno what these parameters are. I know what I'd like the result to be, though"

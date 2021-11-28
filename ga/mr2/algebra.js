@@ -28,7 +28,7 @@ function initAlgebra()
     // mercatorLog = function(mv,target) {
     //     zeroMv(target);
     //     target[14] = mv[14];
-    //     target[13] = mv[13];
+    //     target[13] = mv[13];g
     //     target[12] = mv[12];
     //     mv[11] = Math.log(mv[12]);
     // }

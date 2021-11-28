@@ -1,0 +1,96 @@
+make the curve MASSIVE, we're zoomed in on a point on it
+Maybe the curve is now out at infinity, smooshed onto that sphere?
+
+Multiplication and division are best visualised on the projective line. Erm, why?
+
+
+
+Need clever stuff about hiding and showing again
+    Maybe select what objects your thing is based on, everything else disappears. Maybe they're not in your hands, they're just there
+
+The "curve -> stack of infinity copies of the manifold getting bigger (and inverted, past 0) in both directions" idea of a metric is sticking
+
+
+You're drawing paths.
+These paths are in direction space.
+A point traces out where it'll go in actual space
+But, that's only 2D. The ball actually has to explore in 3D
+So you have to do two paths, one for a point at the top, one at the bottom
+They both trace out what they do. They are joined by a line, and you have to make the line avoid obstacles and hit treasures
+It's a tube/rail shooter
+
+How do you know what moment in time maps to the thing?
+    So it is in 3D. While your finger is down, time moves forwards
+    You can "backtrack" though, i.e. move the slice down
+    You have a limited amount of "fuel", i.e. the integral can't go beyond a certain value
+    Maybe you're trying to minimize that integral, the action
+
+There are obstacles and goodies in the velocity space too?
+
+Colored possibilities, by viridis. All in the same space. When they're together, that's white. Many worlds flappy bird
+You have to deal with all the possibilities
+
+
+
+
+
+Defining a motor (so just a hand movement), even defining a curve, maps all of 3-space, quite powerful
+Differentiate that, and you have, instantaneously, a velocity field everywhere
+    In 3D looks like a cylinder with all the arrows going around it, potentially one infinitely far away
+And a force field? 
+Is it a velocity? Don't you have second derivative too?
+
+The purpose of this is to try to make a single gesture control a vector field? Or a bunch of behaviour?
+A general rigid-body path can be visualized with a ruled surface. That's nice
+Something else you might want is
+
+Doing it with gaze is probably right.
+    Hold the "I want to grab what I'm looking at" button and look from thing to thing; what you look at will appear in your hand
+    Once you definitely have what you want in your hand, let go of the button and now it's stuck there
+
+consider (t,t^2) vs (2t,(2t)^2). They'll look the same
+	Same with (-t,t^2).
+	(1,2t) vs (2,4t). These are the same at the same point though. Implicit functions are not unique
+	That's homogeneity at work
+	vector tangent to f: f'(t) = (1,2x)
+
+Calculus / dual numbers viz
+    it's just nice if a function returns, not only its value at a point, but also the direction you're going in in the codomain
+    Possibly integration is an example of something with multiple inputs, i.e. currying parts of it might not help?
+    Volume rendering is a good viz of integral
+    The "right" way to visualize a derivative wrt one variable (implicit or explicit) is
+        the height of the right angled triangle of base 1 whose hypotenuse is tangent to that
+    "Behaviour" is about responses to changes. Changes happen over time. To study changes over time you need calculus
+    Because you can do slicing, should be able to think of all derivatives as spatial derivatives instead of time
+    Don't forget strogatz style
+        Particle on the line, the curve above it tells it whether to go left or right. f:R->R is a vector field too
+        Er, so in 2D?
+    To do Inventing On Principle Style omniscient select-the-time debugging for non-trivial games:
+        Consider the fact that they have a state s and an update function u
+        smoothstep is your differentiable sigmoid
+        If the update function depends on the current state you have a differential equation
+            otherwise(?) just get its antiderivative and you'll
+            Maybe all the current-state-dependent advancements can be socially enforced dynamicland/sport style. Examples of these:
+                "last state was losing condition, so you have a game over screen"
+                "Restart" button
+                win, loss are specific binaries
+        Ideally we can immediately get s given time since initialization and functions over time of what the controller input values were
+        This is asking a lot from game developers... how much do you get from it?
+            Can get super helpful omniscient debugger if everything is differentiable
+            Maybe describe a bug situation then automatically solve the equation to see if it ever happens
+            Gamedevs do want to make nice wobbly physics-y stuff, they should commit to it
+        Maybe this is the difference between physics and games, you do get nice non-differential equations sometimes
+        Ordinary: you have your state/frame s, and your update function u, next state/frame is u(s). S is an array of multivectors
+            u'(s) is your differential
+            Gonna have to simulate many frames forward to get full visualization of a reasonable game
+            We definitely do have u(s,frameDelta), all games do. Can differentiate
+                Are there any nasty differential equations in there? Blow would say yes
+    They should call integration "accumulation". "Differentiation" is probably fine
+    It needs built in derivatives because it's a language for physics course
+    Bret integration https://youtu.be/oUaOucZRlmE?t=1266
+    The epsilon of integration is directly linked to the scale at which you are looking at the thing. dt = width of a pixel
+    You draw a graph (left to right bottom to top say) by evaluating the function at the left side of a pixel, then at the right, then drawing pixels accordingly
+    The derivative of the area function is the function on top of it. That's a 2D -> 1D thing. Can you think about nth derivatives in any other dimensional-kind of way?
+    The more terms you have in a taylor series, the better your numerical approximation will be
+
+Surely something very GA going on https://en.wikipedia.org/wiki/Integration_using_Euler%27s_formula

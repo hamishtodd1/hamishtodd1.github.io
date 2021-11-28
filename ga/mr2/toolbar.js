@@ -44,7 +44,7 @@ async function loadBackgroundStringAndInitSave() {
     let loadedJson = null
 
     let xhr = new XMLHttpRequest();
-    xhr.open("GET", "../../../Users/hamis/Downloads/glc.txt");
+    xhr.open("GET", "C:/Users/Hamish.todd/Downloads/glc.txt");
     xhr.send();
     await (new Promise(resolve => {
         xhr.onerror = function() {

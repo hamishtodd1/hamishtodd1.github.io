@@ -194,7 +194,7 @@ async function initDymaxion() {
         uniform sampler2D sampler;
 
         uniform int isPoints;
-        varying float discardPoint;
+;        varying float discardPoint;
 
         void main(void) {
             if( isPoints == 0 ) {

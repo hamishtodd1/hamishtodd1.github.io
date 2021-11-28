@@ -1,5 +1,5 @@
 /*  
-    Depth crap (what is this?)
+    Depth crap relating to which side is shown
         What you want: the thing is visible from both sides
         Another way of getting around it is to say fuck it and assume all projections get the right side all the time
         I mean the point of these things is to show the surface and if there's some surface missing it's not a projection, sooo
