@@ -207,6 +207,29 @@ function initAlgebra() {
 			return target;
 		}
 
+		add(b, target) {
+			if (target === undefined)
+				target = new Mv()
+
+			target[0] = this[0] + b[0];
+			target[1] = this[1] + b[1];
+			target[2] = this[2] + b[2];
+			target[3] = this[3] + b[3];
+			target[4] = this[4] + b[4];
+			target[5] = this[5] + b[5];
+			target[6] = this[6] + b[6];
+			target[7] = this[7] + b[7];
+			target[8] = this[8] + b[8];
+			target[9] = this[9] + b[9];
+			target[10] = this[10] + b[10];
+			target[11] = this[11] + b[11];
+			target[12] = this[12] + b[12];
+			target[13] = this[13] + b[13];
+			target[14] = this[14] + b[14];
+			target[15] = this[15] + b[15];
+			return target;
+		}
+
 		dualSelf() {
 			this.dual(localMv0)
 			this.copy(localMv0)
@@ -409,6 +432,21 @@ function initAlgebra() {
 		// 	let scalarInBrackets = Math.atan(s/this[0]) + 
 		// }
 
+		grade() {
+			let ret = -1
+			if(this[0] !== 0.)
+				return 0
+			else if (this[1] !== 0. || this[2] !== 0. || this[3] !== 0. || this[4] !== 0. )
+				return 1
+			else if (this[5] !== 0. || this[6] !== 0. || this[7] !== 0. || this[8] !== 0. || this[9] !== 0. || this[10] !== 0. )
+				return 2
+			else if (this[11] !== 0. || this[12] !== 0. || this[13] !== 0. || this[14] !== 0.)
+				return 3
+			else if (this[15] !== 0.)
+				return 4
+			return -1
+		}
+
 		sandwich(mvToBeSandwiched, target) {
 			if (target === undefined)
 				target = new Mv()
@@ -417,6 +455,12 @@ function initAlgebra() {
 
 			product(this, mvToBeSandwiched, localMv1)
 			product(localMv1,localMv0,target)
+
+			// let ks = mvToBeSandwiched.grade() * this.grade()
+			// if(ks % 2 === 0)
+			// 	target.multiplyScalar(-1.)
+
+			return target
 		}
 	}
 	window.Mv = Mv
@@ -609,29 +653,7 @@ function cleave( a, b, target)
 	return target;
 }
 
-function add( a, b, target)
-{
-	if(target === undefined)
-		target = new Mv()
-		
-	target[0] = a[0]+b[0];
-	target[1] = a[1]+b[1];
-	target[2] = a[2]+b[2];
-	target[3] = a[3]+b[3];
-	target[4] = a[4]+b[4];
-	target[5] = a[5]+b[5];
-	target[6] = a[6]+b[6];
-	target[7] = a[7]+b[7];
-	target[8] = a[8]+b[8];
-	target[9] = a[9]+b[9];
-	target[10] = a[10]+b[10];
-	target[11] = a[11]+b[11];
-	target[12] = a[12]+b[12];
-	target[13] = a[13]+b[13];
-	target[14] = a[14]+b[14];
-	target[15] = a[15]+b[15];
-	return target;
-}
+
 
 function subtract( a, b, target)
 {

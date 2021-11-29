@@ -28,6 +28,9 @@ async function initOneQubit() {
 
     let globeRadius = 1.
 
+    stateMv = new Mv()
+    stateMv[0] = 1.
+
     //surroundings
     {
         let portholeRadius = .17
@@ -66,6 +69,8 @@ async function initOneQubit() {
         var anticlockwiseMesh = new THREE.Mesh(geo, anticlockwiseMat)
         mousePosIndicator.add( clockwiseMesh, anticlockwiseMesh )
     }
+    let clockwise = true
+    bindButton("w",()=>{clockwise = !clockwise})
     let mousePosZZero = new THREE.Vector3()
     let mouseMv = e12.clone()
     scene.add(mousePosIndicator)
@@ -85,20 +90,31 @@ async function initOneQubit() {
         v.copy(mousePosIndicator.position).sub(camera.position)
         v.setLength(1.)
 
-        mouseMv.copy(zeroMv)
-        if (!doingStuffAtInfinity) {
-            //e1 is x axis, e2 is y, e3 is z
-            mouseMv[ 8] =-v.z
-            mouseMv[ 9] = v.y
-            mouseMv[10] = v.x
-        }
-        else {
-            mouseMv[ 8] =0.
-            mouseMv[ 9] = v.y
-            mouseMv[10] = v.x
-        }
-        mouseMv.log()
+        ourVecToMv(v, mouseMv, doingStuffAtInfinity)
+        if(!clockwise)
+            mouseMv.multiplyScalar(-1.)
+
+        clockwiseMesh.visible = clockwise
+        anticlockwiseMesh.visible = !clockwise
     })
+
+    function ourMvToVec(pointMv,targetVec) {
+        //could have the thing about being inside thingy
+        targetVec.z = -pointMv[8]
+        targetVec.y = pointMv[9]
+        targetVec.x = pointMv[10]
+    }
+    function ourVecToMv(vec, targetMv, ideal) {
+        targetMv.copy(zeroMv)
+
+        //e1 is x axis, e2 is y, e3 is z
+        targetMv[9] = vec.y
+        targetMv[10] = vec.x
+        if (!ideal)
+            targetMv[8] = -vec.z
+        else
+            targetMv[8] = 0.
+    }
 
     {
         //really feels like an epicycle, but maybe when you perform a line reflection WHILE THINKING ABOUT A PLANE THE LINE IS IN
@@ -145,7 +161,42 @@ async function initOneQubit() {
             globe.position.z += (dest - globe.position.z) * .1
             fadeyGlobe.material.opacity += .03 * (inside ? -1. : 1.)
             fadeyGlobe.material.opacity = clamp(fadeyGlobe.material.opacity, 0., 1.)
-        })    
+        })
+
+        let myMatrix = new THREE.Matrix4()
+        let xColumn = new THREE.Vector3()
+        let yColumn = new THREE.Vector3()
+        let zColumn = new THREE.Vector3()
+        let columns = [xColumn,yColumn,zColumn]
+        // stateMv.copy(e12)
+        updateFunctions.push(()=>{
+            xColumn.set(1., 0., 0.)
+            yColumn.set(0., 1., 0.)
+            zColumn.set(0., 0., 1.)           
+
+            columns.forEach((column,i)=>{
+                // debugger
+                // if(i===2)
+                //     debugger
+                ourVecToMv(column, mv1, false)
+                stateMv.sandwich(mv1, mv2)
+                if(stateMv.grade() === 1)
+                    mv2.multiplyScalar(-1.)
+                ourMvToVec(mv2, column)
+
+                myMatrix.elements[i*4+0] = column.x
+                myMatrix.elements[i*4+1] = column.y
+                myMatrix.elements[i*4+2] = column.z
+                // log(column)
+            })
+            // log(xColumn)
+
+            myMatrix.elements[3 * 4 + 0] = globe.position.x
+            myMatrix.elements[3 * 4 + 1] = globe.position.y
+            myMatrix.elements[3 * 4 + 2] = globe.position.z
+
+            myMatrix.decompose(globe.position, globe.quaternion, globe.scale) //xColumn unused
+        })
     }
 
     {
@@ -166,6 +217,18 @@ async function initOneQubit() {
             if (!(mouseMv.equals(initialMouseMv)))
                 mvToJoinTo.copy(mouseMv)
             join(e0MeetInitialMouse, mvToJoinTo, torusLine)
+        },false,()=>{
+            log("let go")
+
+            product(torusLine,stateMv,mv1)
+            // torusLine.sandwich(stateMv,mv1)
+            //yeah shit's still going wrong
+            stateMv.copy(mv1)
+
+            //oh great, now scale the shit
+            //if you've got some way of applying your thing to the three columns of the matrix
+            //could take the points e12, e23, e31, sandwich them with your state vector, those are your columns
+            //then just lerp? It doesn't deserve any better
         })
 
         updateFunctions.push(() => {
