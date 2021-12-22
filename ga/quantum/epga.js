@@ -68,7 +68,9 @@ function initAlgebra() {
 	let basisNames = ["", "0", "1", "2", "3", "01", "02", "03", "12", "31", "23", "021", "013", "032", "123", "0123"]
 	let onesWithMinus = ["31", "021", "032"] //yes you could reverse the orders in the string but it's established
 
-	let effectiveOrigin = new THREE.Vector3(0.,0.,0.)//(0 - .1, 1.6 - .1, -0.5)
+	effectiveOrigin = new THREE.Vector3(
+		// 0.,0.,0.)
+		-.29, -.67, 0.)
 	//could have scale too
 
 	const GRADES_OF_ELEMENTS = [0, 1,1,1,1, 2,2,2,2,2,2, 3,3,3,3, 4]
@@ -111,11 +113,6 @@ function initAlgebra() {
 				str = label + ": " + str
 
 			log(str)
-		}
-
-		add(mvToAdd) {
-			add(this, mvToAdd, localMv0)
-			this.copy(localMv0)
 		}
 
 		reverse(target) {
@@ -207,6 +204,20 @@ function initAlgebra() {
 			return target;
 		}
 
+		mul(a, target) {
+			if (target === undefined)
+				target = new Mv()
+
+			this.mul(a, target)
+
+			return target
+		}
+
+		add(mvToAdd) {
+			add(this, mvToAdd, localMv0)
+			this.copy(localMv0)
+		}
+
 		add(b, target) {
 			if (target === undefined)
 				target = new Mv()
@@ -262,6 +273,130 @@ function initAlgebra() {
 			this[14] = w === undefined ? 1. : w
 
 			return this
+		}
+
+		cleave(b, target) {
+			if (target === undefined)
+				target = new Mv()
+
+			target[0] = b[0] * this[0] + b[1] * this[1] + b[2] * this[2] + b[3] * this[3] + b[4] * this[4] - b[5] * this[5] - b[6] * this[6] - b[7] * this[7] - b[8] * this[8] - b[9] * this[9] - b[10] * this[10] - b[11] * this[11] - b[12] * this[12] - b[13] * this[13] - b[14] * this[14] + b[15] * this[15];
+			target[1] = b[1] * this[0] + b[0] * this[1] - b[5] * this[2] - b[6] * this[3] - b[7] * this[4] + b[2] * this[5] + b[3] * this[6] + b[4] * this[7] - b[11] * this[8] - b[12] * this[9] - b[13] * this[10] - b[8] * this[11] - b[9] * this[12] - b[10] * this[13] + b[15] * this[14] - b[14] * this[15];
+			target[2] = b[2] * this[0] + b[5] * this[1] + b[0] * this[2] - b[8] * this[3] - b[9] * this[4] - b[1] * this[5] + b[11] * this[6] + b[12] * this[7] + b[3] * this[8] + b[4] * this[9] - b[14] * this[10] + b[6] * this[11] + b[7] * this[12] - b[15] * this[13] - b[10] * this[14] + b[13] * this[15];
+			target[3] = b[3] * this[0] + b[6] * this[1] + b[8] * this[2] + b[0] * this[3] - b[10] * this[4] - b[11] * this[5] - b[1] * this[6] + b[13] * this[7] - b[2] * this[8] + b[14] * this[9] + b[4] * this[10] - b[5] * this[11] + b[15] * this[12] + b[7] * this[13] + b[9] * this[14] - b[12] * this[15];
+			target[4] = b[4] * this[0] + b[7] * this[1] + b[9] * this[2] + b[10] * this[3] + b[0] * this[4] - b[12] * this[5] - b[13] * this[6] - b[1] * this[7] - b[14] * this[8] - b[2] * this[9] - b[3] * this[10] - b[15] * this[11] - b[5] * this[12] - b[6] * this[13] - b[8] * this[14] + b[11] * this[15];
+			target[5] = b[5] * this[0] + b[11] * this[3] + b[12] * this[4] + b[0] * this[5] - b[15] * this[10] + b[3] * this[11] + b[4] * this[12] - b[10] * this[15];
+			target[6] = b[6] * this[0] - b[11] * this[2] + b[13] * this[4] + b[0] * this[6] + b[15] * this[9] - b[2] * this[11] + b[4] * this[13] + b[9] * this[15];
+			target[7] = b[7] * this[0] - b[12] * this[2] - b[13] * this[3] + b[0] * this[7] - b[15] * this[8] - b[2] * this[12] - b[3] * this[13] - b[8] * this[15];
+			target[8] = b[8] * this[0] + b[11] * this[1] + b[14] * this[4] - b[15] * this[7] + b[0] * this[8] + b[1] * this[11] + b[4] * this[14] - b[7] * this[15];
+			target[9] = b[9] * this[0] + b[12] * this[1] - b[14] * this[3] + b[15] * this[6] + b[0] * this[9] + b[1] * this[12] - b[3] * this[14] + b[6] * this[15];
+			target[10] = b[10] * this[0] + b[13] * this[1] + b[14] * this[2] - b[15] * this[5] + b[0] * this[10] + b[1] * this[13] + b[2] * this[14] - b[5] * this[15];
+			target[11] = b[11] * this[0] - b[15] * this[4] + b[0] * this[11] + b[4] * this[15];
+			target[12] = b[12] * this[0] + b[15] * this[3] + b[0] * this[12] - b[3] * this[15];
+			target[13] = b[13] * this[0] - b[15] * this[2] + b[0] * this[13] + b[2] * this[15];
+			target[14] = b[14] * this[0] + b[15] * this[1] + b[0] * this[14] - b[1] * this[15];
+			target[15] = b[15] * this[0] + b[0] * this[15];
+			return target;
+		}
+
+		mul(b, target) {
+			if (target === undefined)
+				target = new Mv()
+
+			target[0] = b[0] * this[0] + b[1] * this[1] + b[2] * this[2] + b[3] * this[3] + b[4] * this[4] - b[5] * this[5] - b[6] * this[6] - b[7] * this[7] - b[8] * this[8] - b[9] * this[9] - b[10] * this[10] - b[11] * this[11] - b[12] * this[12] - b[13] * this[13] - b[14] * this[14] + b[15] * this[15];
+			target[1] = b[1] * this[0] + b[0] * this[1] - b[5] * this[2] - b[6] * this[3] - b[7] * this[4] + b[2] * this[5] + b[3] * this[6] + b[4] * this[7] - b[11] * this[8] - b[12] * this[9] - b[13] * this[10] - b[8] * this[11] - b[9] * this[12] - b[10] * this[13] + b[15] * this[14] - b[14] * this[15];
+			target[2] = b[2] * this[0] + b[5] * this[1] + b[0] * this[2] - b[8] * this[3] - b[9] * this[4] - b[1] * this[5] + b[11] * this[6] + b[12] * this[7] + b[3] * this[8] + b[4] * this[9] - b[14] * this[10] + b[6] * this[11] + b[7] * this[12] - b[15] * this[13] - b[10] * this[14] + b[13] * this[15];
+			target[3] = b[3] * this[0] + b[6] * this[1] + b[8] * this[2] + b[0] * this[3] - b[10] * this[4] - b[11] * this[5] - b[1] * this[6] + b[13] * this[7] - b[2] * this[8] + b[14] * this[9] + b[4] * this[10] - b[5] * this[11] + b[15] * this[12] + b[7] * this[13] + b[9] * this[14] - b[12] * this[15];
+			target[4] = b[4] * this[0] + b[7] * this[1] + b[9] * this[2] + b[10] * this[3] + b[0] * this[4] - b[12] * this[5] - b[13] * this[6] - b[1] * this[7] - b[14] * this[8] - b[2] * this[9] - b[3] * this[10] - b[15] * this[11] - b[5] * this[12] - b[6] * this[13] - b[8] * this[14] + b[11] * this[15];
+			target[5] = b[5] * this[0] + b[2] * this[1] - b[1] * this[2] + b[11] * this[3] + b[12] * this[4] + b[0] * this[5] - b[8] * this[6] - b[9] * this[7] + b[6] * this[8] + b[7] * this[9] - b[15] * this[10] + b[3] * this[11] + b[4] * this[12] - b[14] * this[13] + b[13] * this[14] - b[10] * this[15];
+			target[6] = b[6] * this[0] + b[3] * this[1] - b[11] * this[2] - b[1] * this[3] + b[13] * this[4] + b[8] * this[5] + b[0] * this[6] - b[10] * this[7] - b[5] * this[8] + b[15] * this[9] + b[7] * this[10] - b[2] * this[11] + b[14] * this[12] + b[4] * this[13] - b[12] * this[14] + b[9] * this[15];
+			target[7] = b[7] * this[0] + b[4] * this[1] - b[12] * this[2] - b[13] * this[3] - b[1] * this[4] + b[9] * this[5] + b[10] * this[6] + b[0] * this[7] - b[15] * this[8] - b[5] * this[9] - b[6] * this[10] - b[14] * this[11] - b[2] * this[12] - b[3] * this[13] + b[11] * this[14] - b[8] * this[15];
+			target[8] = b[8] * this[0] + b[11] * this[1] + b[3] * this[2] - b[2] * this[3] + b[14] * this[4] - b[6] * this[5] + b[5] * this[6] - b[15] * this[7] + b[0] * this[8] - b[10] * this[9] + b[9] * this[10] + b[1] * this[11] - b[13] * this[12] + b[12] * this[13] + b[4] * this[14] - b[7] * this[15];
+			target[9] = b[9] * this[0] + b[12] * this[1] + b[4] * this[2] - b[14] * this[3] - b[2] * this[4] - b[7] * this[5] + b[15] * this[6] + b[5] * this[7] + b[10] * this[8] + b[0] * this[9] - b[8] * this[10] + b[13] * this[11] + b[1] * this[12] - b[11] * this[13] - b[3] * this[14] + b[6] * this[15];
+			target[10] = b[10] * this[0] + b[13] * this[1] + b[14] * this[2] + b[4] * this[3] - b[3] * this[4] - b[15] * this[5] - b[7] * this[6] + b[6] * this[7] - b[9] * this[8] + b[8] * this[9] + b[0] * this[10] - b[12] * this[11] + b[11] * this[12] + b[1] * this[13] + b[2] * this[14] - b[5] * this[15];
+			target[11] = b[11] * this[0] + b[8] * this[1] - b[6] * this[2] + b[5] * this[3] - b[15] * this[4] + b[3] * this[5] - b[2] * this[6] + b[14] * this[7] + b[1] * this[8] - b[13] * this[9] + b[12] * this[10] + b[0] * this[11] - b[10] * this[12] + b[9] * this[13] - b[7] * this[14] + b[4] * this[15];
+			target[12] = b[12] * this[0] + b[9] * this[1] - b[7] * this[2] + b[15] * this[3] + b[5] * this[4] + b[4] * this[5] - b[14] * this[6] - b[2] * this[7] + b[13] * this[8] + b[1] * this[9] - b[11] * this[10] + b[10] * this[11] + b[0] * this[12] - b[8] * this[13] + b[6] * this[14] - b[3] * this[15];
+			target[13] = b[13] * this[0] + b[10] * this[1] - b[15] * this[2] - b[7] * this[3] + b[6] * this[4] + b[14] * this[5] + b[4] * this[6] - b[3] * this[7] - b[12] * this[8] + b[11] * this[9] + b[1] * this[10] - b[9] * this[11] + b[8] * this[12] + b[0] * this[13] - b[5] * this[14] + b[2] * this[15];
+			target[14] = b[14] * this[0] + b[15] * this[1] + b[10] * this[2] - b[9] * this[3] + b[8] * this[4] - b[13] * this[5] + b[12] * this[6] - b[11] * this[7] + b[4] * this[8] - b[3] * this[9] + b[2] * this[10] + b[7] * this[11] - b[6] * this[12] + b[5] * this[13] + b[0] * this[14] - b[1] * this[15];
+			target[15] = b[15] * this[0] + b[14] * this[1] - b[13] * this[2] + b[12] * this[3] - b[11] * this[4] + b[10] * this[5] - b[9] * this[6] + b[8] * this[7] + b[7] * this[8] - b[6] * this[9] + b[5] * this[10] + b[4] * this[11] - b[3] * this[12] + b[2] * this[13] - b[1] * this[14] + b[0] * this[15];
+			return target;
+		}
+
+		meet(b, target) {
+			if (target === undefined)
+				target = new Mv()
+
+			target[0] = b[0] * this[0];
+			target[1] = b[1] * this[0] + b[0] * this[1];
+			target[2] = b[2] * this[0] + b[0] * this[2];
+			target[3] = b[3] * this[0] + b[0] * this[3];
+			target[4] = b[4] * this[0] + b[0] * this[4];
+			target[5] = b[5] * this[0] + b[2] * this[1] - b[1] * this[2] + b[0] * this[5];
+			target[6] = b[6] * this[0] + b[3] * this[1] - b[1] * this[3] + b[0] * this[6];
+			target[7] = b[7] * this[0] + b[4] * this[1] - b[1] * this[4] + b[0] * this[7];
+			target[8] = b[8] * this[0] + b[3] * this[2] - b[2] * this[3] + b[0] * this[8];
+			target[9] = b[9] * this[0] + b[4] * this[2] - b[2] * this[4] + b[0] * this[9];
+			target[10] = b[10] * this[0] + b[4] * this[3] - b[3] * this[4] + b[0] * this[10];
+			target[11] = b[11] * this[0] + b[8] * this[1] - b[6] * this[2] + b[5] * this[3] + b[3] * this[5] - b[2] * this[6] + b[1] * this[8] + b[0] * this[11];
+			target[12] = b[12] * this[0] + b[9] * this[1] - b[7] * this[2] + b[5] * this[4] + b[4] * this[5] - b[2] * this[7] + b[1] * this[9] + b[0] * this[12];
+			target[13] = b[13] * this[0] + b[10] * this[1] - b[7] * this[3] + b[6] * this[4] + b[4] * this[6] - b[3] * this[7] + b[1] * this[10] + b[0] * this[13];
+			target[14] = b[14] * this[0] + b[10] * this[2] - b[9] * this[3] + b[8] * this[4] + b[4] * this[8] - b[3] * this[9] + b[2] * this[10] + b[0] * this[14];
+			target[15] = b[15] * this[0] + b[14] * this[1] - b[13] * this[2] + b[12] * this[3] - b[11] * this[4] + b[10] * this[5] - b[9] * this[6] + b[8] * this[7] + b[7] * this[8] - b[6] * this[9] + b[5] * this[10] + b[4] * this[11] - b[3] * this[12] + b[2] * this[13] - b[1] * this[14] + b[0] * this[15];
+			return target;
+		}
+
+		join(b, target) {
+			if (target === undefined)
+				target = new Mv()
+
+			target[15] = 1. * (this[15] * b[15]);
+			target[14] = -1. * (this[14] * -1. * b[15] + this[15] * b[14] * -1);
+			target[13] = 1. * (this[13] * b[15] + this[15] * b[13]);
+			target[12] = -1. * (this[12] * -1. * b[15] + this[15] * b[12] * -1);
+			target[11] = 1. * (this[11] * b[15] + this[15] * b[11]);
+			target[10] = 1. * (this[10] * b[15] + this[13] * b[14] * -1 - this[14] * -1. * b[13] + this[15] * b[10]);
+			target[9] = -1. * (this[9] * -1. * b[15] + this[12] * -1. * b[14] * -1 - this[14] * -1. * b[12] * -1 + this[15] * b[9] * -1);
+			target[8] = 1. * (this[8] * b[15] + this[11] * b[14] * -1 - this[14] * -1. * b[11] + this[15] * b[8]);
+			target[7] = 1. * (this[7] * b[15] + this[12] * -1. * b[13] - this[13] * b[12] * -1 + this[15] * b[7]);
+			target[6] = -1. * (this[6] * -1. * b[15] + this[11] * b[13] - this[13] * b[11] + this[15] * b[6] * -1);
+			target[5] = 1. * (this[5] * b[15] + this[11] * b[12] * -1 - this[12] * -1. * b[11] + this[15] * b[5]);
+			target[4] = -1. * (this[4] * -1. * b[15] + this[7] * b[14] * -1 - this[9] * -1. * b[13] + this[10] * b[12] * -1 + this[12] * -1. * b[10] - this[13] * b[9] * -1 + this[14] * -1. * b[7] + this[15] * b[4] * -1);
+			target[3] = 1. * (this[3] * b[15] + this[6] * -1. * b[14] * -1 - this[8] * b[13] + this[10] * b[11] + this[11] * b[10] - this[13] * b[8] + this[14] * -1. * b[6] * -1 + this[15] * b[3]);
+			target[2] = -1. * (this[2] * -1. * b[15] + this[5] * b[14] * -1 - this[8] * b[12] * -1 + this[9] * -1. * b[11] + this[11] * b[9] * -1 - this[12] * -1. * b[8] + this[14] * -1. * b[5] + this[15] * b[2] * -1);
+			target[1] = 1. * (this[1] * b[15] + this[5] * b[13] - this[6] * -1. * b[12] * -1 + this[7] * b[11] + this[11] * b[7] - this[12] * -1. * b[6] * -1 + this[13] * b[5] + this[15] * b[1]);
+			target[0] = 1. * (this[0] * b[15] + this[1] * b[14] * -1 - this[2] * -1. * b[13] + this[3] * b[12] * -1 - this[4] * -1. * b[11] + this[5] * b[10] - this[6] * -1. * b[9] * -1 + this[7] * b[8] + this[8] * b[7] - this[9] * -1. * b[6] * -1 + this[10] * b[5] + this[11] * b[4] * -1 - this[12] * -1. * b[3] + this[13] * b[2] * -1 - this[14] * -1. * b[1] + this[15] * b[0]);
+			return target;
+		}
+
+		subtract(b, target) {
+			if (target === undefined)
+				target = new Mv()
+
+			target[0] = this[0] - b[0];
+			target[1] = this[1] - b[1];
+			target[2] = this[2] - b[2];
+			target[3] = this[3] - b[3];
+			target[4] = this[4] - b[4];
+			target[5] = this[5] - b[5];
+			target[6] = this[6] - b[6];
+			target[7] = this[7] - b[7];
+			target[8] = this[8] - b[8];
+			target[9] = this[9] - b[9];
+			target[10] = this[10] - b[10];
+			target[11] = this[11] - b[11];
+			target[12] = this[12] - b[12];
+			target[13] = this[13] - b[13];
+			target[14] = this[14] - b[14];
+			target[15] = this[15] - b[15];
+			return target;
+		}
+
+		similarTo(m) {
+			let ret = true
+			for(let i = 0; i < 16; ++i) {
+				if (Math.abs(m[i] - this[i]) > 0.01)
+					ret = false
+			}
+			return ret
 		}
 
 		x() {
@@ -364,7 +499,7 @@ function initAlgebra() {
 
 		norm() {
 			this.conjugate(localMv0)
-			product(this, localMv0,localMv1)
+			this.mul(localMv0,localMv1)
 			return Math.sqrt(Math.abs(localMv1[0]))
 		}
 
@@ -408,7 +543,7 @@ function initAlgebra() {
 			localMv2.reverse(localMv3)
 
 			localMv3[15] -= .5 * this[15]
-			product( localMv0, localMv3, target )
+			localMv0.mul(localMv3, target )
 
 			return target
 		}
@@ -453,8 +588,8 @@ function initAlgebra() {
 
 			this.reverse(localMv0)
 
-			product(this, mvToBeSandwiched, localMv1)
-			product(localMv1,localMv0,target)
+			this.mul(mvToBeSandwiched, localMv1)
+			localMv1.mul(localMv0,target)
 
 			// let ks = mvToBeSandwiched.grade() * this.grade()
 			// if(ks % 2 === 0)
@@ -468,8 +603,8 @@ function initAlgebra() {
 	projectPointOnLine = (p, l, target) => {
 		if (target === undefined)
 			target = new Mv()
-		cleave(l, p, lv2LocalMv0)
-		product(lv2LocalMv0, l, target)
+		l.cleave( p, lv2LocalMv0)
+		lv2LocalMv0.mul(l, target)
 
 		return target
 	}
@@ -478,8 +613,8 @@ function initAlgebra() {
 		if (target === undefined)
 			target = new Mv()
 
-		cleave(l, p, lv2LocalMv0)
-		product(lv2LocalMv0, p, target)
+		l.cleave(p, lv2LocalMv0)
+		lv2LocalMv0.mul(p, target)
 
 		return target
 	}
@@ -528,17 +663,17 @@ function initAlgebra() {
 	e1 = MvFromIndexAndFloat(1.0, 2)
 	e2 = MvFromIndexAndFloat(1.0, 3)
 	e3 = MvFromIndexAndFloat(1.0, 4)
-	e01 = product(e0, e1)
-	e02 = product(e0, e2)
-	e03 = product(e0, e3)
-	e12 = product(e1, e2)
-	e31 = product(e3, e1)
-	e23 = product(e2, e3)
-	e021 = product(e02, e1)
-	e013 = product(e01, e3)
-	e032 = product(e03, e2)
-	e123 = product(e12, e3)
-	e0123 = product(e0, e123)
+	e01 = e0.mul(e1)
+	e02 = e0.mul(e2)
+	e03 = e0.mul(e3)
+	e12 = e1.mul(e2)
+	e31 = e3.mul(e1)
+	e23 = e2.mul(e3)
+	e021 = e0.mul( e1)
+	e013 = e0.mul( e3)
+	e032 = e0.mul( e2)
+	e123 = e1.mul( e3)
+	e0123 = e0.mul(e123)
 
 	let localMv0 = new Mv()
 	let localMv1 = new Mv()
@@ -555,126 +690,4 @@ function initAlgebra() {
 	mv2 = new Mv()
 	mv3 = new Mv()
 	mv4 = new Mv()
-}
-
-function product( a, b, target)
-{
-	if(target === undefined)
-		target = new Mv()
-		
-	target[0]=b[0]*a[0]+b[1]*a[1]+b[2]*a[2]+b[3]*a[3]+b[4]*a[4]-b[5]*a[5]-b[6]*a[6]-b[7]*a[7]-b[8]*a[8]-b[9]*a[9]-b[10]*a[10]-b[11]*a[11]-b[12]*a[12]-b[13]*a[13]-b[14]*a[14]+b[15]*a[15];
-	target[1]=b[1]*a[0]+b[0]*a[1]-b[5]*a[2]-b[6]*a[3]-b[7]*a[4]+b[2]*a[5]+b[3]*a[6]+b[4]*a[7]-b[11]*a[8]-b[12]*a[9]-b[13]*a[10]-b[8]*a[11]-b[9]*a[12]-b[10]*a[13]+b[15]*a[14]-b[14]*a[15];
-	target[2]=b[2]*a[0]+b[5]*a[1]+b[0]*a[2]-b[8]*a[3]-b[9]*a[4]-b[1]*a[5]+b[11]*a[6]+b[12]*a[7]+b[3]*a[8]+b[4]*a[9]-b[14]*a[10]+b[6]*a[11]+b[7]*a[12]-b[15]*a[13]-b[10]*a[14]+b[13]*a[15];
-	target[3]=b[3]*a[0]+b[6]*a[1]+b[8]*a[2]+b[0]*a[3]-b[10]*a[4]-b[11]*a[5]-b[1]*a[6]+b[13]*a[7]-b[2]*a[8]+b[14]*a[9]+b[4]*a[10]-b[5]*a[11]+b[15]*a[12]+b[7]*a[13]+b[9]*a[14]-b[12]*a[15];
-	target[4]=b[4]*a[0]+b[7]*a[1]+b[9]*a[2]+b[10]*a[3]+b[0]*a[4]-b[12]*a[5]-b[13]*a[6]-b[1]*a[7]-b[14]*a[8]-b[2]*a[9]-b[3]*a[10]-b[15]*a[11]-b[5]*a[12]-b[6]*a[13]-b[8]*a[14]+b[11]*a[15];
-	target[5]=b[5]*a[0]+b[2]*a[1]-b[1]*a[2]+b[11]*a[3]+b[12]*a[4]+b[0]*a[5]-b[8]*a[6]-b[9]*a[7]+b[6]*a[8]+b[7]*a[9]-b[15]*a[10]+b[3]*a[11]+b[4]*a[12]-b[14]*a[13]+b[13]*a[14]-b[10]*a[15];
-	target[6]=b[6]*a[0]+b[3]*a[1]-b[11]*a[2]-b[1]*a[3]+b[13]*a[4]+b[8]*a[5]+b[0]*a[6]-b[10]*a[7]-b[5]*a[8]+b[15]*a[9]+b[7]*a[10]-b[2]*a[11]+b[14]*a[12]+b[4]*a[13]-b[12]*a[14]+b[9]*a[15];
-	target[7]=b[7]*a[0]+b[4]*a[1]-b[12]*a[2]-b[13]*a[3]-b[1]*a[4]+b[9]*a[5]+b[10]*a[6]+b[0]*a[7]-b[15]*a[8]-b[5]*a[9]-b[6]*a[10]-b[14]*a[11]-b[2]*a[12]-b[3]*a[13]+b[11]*a[14]-b[8]*a[15];
-	target[8]=b[8]*a[0]+b[11]*a[1]+b[3]*a[2]-b[2]*a[3]+b[14]*a[4]-b[6]*a[5]+b[5]*a[6]-b[15]*a[7]+b[0]*a[8]-b[10]*a[9]+b[9]*a[10]+b[1]*a[11]-b[13]*a[12]+b[12]*a[13]+b[4]*a[14]-b[7]*a[15];
-	target[9]=b[9]*a[0]+b[12]*a[1]+b[4]*a[2]-b[14]*a[3]-b[2]*a[4]-b[7]*a[5]+b[15]*a[6]+b[5]*a[7]+b[10]*a[8]+b[0]*a[9]-b[8]*a[10]+b[13]*a[11]+b[1]*a[12]-b[11]*a[13]-b[3]*a[14]+b[6]*a[15];
-	target[10]=b[10]*a[0]+b[13]*a[1]+b[14]*a[2]+b[4]*a[3]-b[3]*a[4]-b[15]*a[5]-b[7]*a[6]+b[6]*a[7]-b[9]*a[8]+b[8]*a[9]+b[0]*a[10]-b[12]*a[11]+b[11]*a[12]+b[1]*a[13]+b[2]*a[14]-b[5]*a[15];
-	target[11]=b[11]*a[0]+b[8]*a[1]-b[6]*a[2]+b[5]*a[3]-b[15]*a[4]+b[3]*a[5]-b[2]*a[6]+b[14]*a[7]+b[1]*a[8]-b[13]*a[9]+b[12]*a[10]+b[0]*a[11]-b[10]*a[12]+b[9]*a[13]-b[7]*a[14]+b[4]*a[15];
-	target[12]=b[12]*a[0]+b[9]*a[1]-b[7]*a[2]+b[15]*a[3]+b[5]*a[4]+b[4]*a[5]-b[14]*a[6]-b[2]*a[7]+b[13]*a[8]+b[1]*a[9]-b[11]*a[10]+b[10]*a[11]+b[0]*a[12]-b[8]*a[13]+b[6]*a[14]-b[3]*a[15];
-	target[13]=b[13]*a[0]+b[10]*a[1]-b[15]*a[2]-b[7]*a[3]+b[6]*a[4]+b[14]*a[5]+b[4]*a[6]-b[3]*a[7]-b[12]*a[8]+b[11]*a[9]+b[1]*a[10]-b[9]*a[11]+b[8]*a[12]+b[0]*a[13]-b[5]*a[14]+b[2]*a[15];
-	target[14]=b[14]*a[0]+b[15]*a[1]+b[10]*a[2]-b[9]*a[3]+b[8]*a[4]-b[13]*a[5]+b[12]*a[6]-b[11]*a[7]+b[4]*a[8]-b[3]*a[9]+b[2]*a[10]+b[7]*a[11]-b[6]*a[12]+b[5]*a[13]+b[0]*a[14]-b[1]*a[15];
-	target[15]=b[15]*a[0]+b[14]*a[1]-b[13]*a[2]+b[12]*a[3]-b[11]*a[4]+b[10]*a[5]-b[9]*a[6]+b[8]*a[7]+b[7]*a[8]-b[6]*a[9]+b[5]*a[10]+b[4]*a[11]-b[3]*a[12]+b[2]*a[13]-b[1]*a[14]+b[0]*a[15];
-	return target;
-}
-
-function meet( a, b, target)
-{
-	if(target === undefined)
-		target = new Mv()
-		
-	target[0]=b[0]*a[0];
-	target[1]=b[1]*a[0]+b[0]*a[1];
-	target[2]=b[2]*a[0]+b[0]*a[2];
-	target[3]=b[3]*a[0]+b[0]*a[3];
-	target[4]=b[4]*a[0]+b[0]*a[4];
-	target[5]=b[5]*a[0]+b[2]*a[1]-b[1]*a[2]+b[0]*a[5];
-	target[6]=b[6]*a[0]+b[3]*a[1]-b[1]*a[3]+b[0]*a[6];
-	target[7]=b[7]*a[0]+b[4]*a[1]-b[1]*a[4]+b[0]*a[7];
-	target[8]=b[8]*a[0]+b[3]*a[2]-b[2]*a[3]+b[0]*a[8];
-	target[9]=b[9]*a[0]+b[4]*a[2]-b[2]*a[4]+b[0]*a[9];
-	target[10]=b[10]*a[0]+b[4]*a[3]-b[3]*a[4]+b[0]*a[10];
-	target[11]=b[11]*a[0]+b[8]*a[1]-b[6]*a[2]+b[5]*a[3]+b[3]*a[5]-b[2]*a[6]+b[1]*a[8]+b[0]*a[11];
-	target[12]=b[12]*a[0]+b[9]*a[1]-b[7]*a[2]+b[5]*a[4]+b[4]*a[5]-b[2]*a[7]+b[1]*a[9]+b[0]*a[12];
-	target[13]=b[13]*a[0]+b[10]*a[1]-b[7]*a[3]+b[6]*a[4]+b[4]*a[6]-b[3]*a[7]+b[1]*a[10]+b[0]*a[13];
-	target[14]=b[14]*a[0]+b[10]*a[2]-b[9]*a[3]+b[8]*a[4]+b[4]*a[8]-b[3]*a[9]+b[2]*a[10]+b[0]*a[14];
-	target[15]=b[15]*a[0]+b[14]*a[1]-b[13]*a[2]+b[12]*a[3]-b[11]*a[4]+b[10]*a[5]-b[9]*a[6]+b[8]*a[7]+b[7]*a[8]-b[6]*a[9]+b[5]*a[10]+b[4]*a[11]-b[3]*a[12]+b[2]*a[13]-b[1]*a[14]+b[0]*a[15];
-	return target;
-}
-
-function join( a, b, target)
-{
-	if(target === undefined)
-		target = new Mv()
-		
-	target[15]=1*(a[15]*b[15]);
-	target[14]=-1*(a[14]*-1*b[15]+a[15]*b[14]*-1);
-	target[13]=1*(a[13]*b[15]+a[15]*b[13]);
-	target[12]=-1*(a[12]*-1*b[15]+a[15]*b[12]*-1);
-	target[11]=1*(a[11]*b[15]+a[15]*b[11]);
-	target[10]=1*(a[10]*b[15]+a[13]*b[14]*-1-a[14]*-1*b[13]+a[15]*b[10]);
-	target[9]=-1*(a[9]*-1*b[15]+a[12]*-1*b[14]*-1-a[14]*-1*b[12]*-1+a[15]*b[9]*-1);
-	target[8]=1*(a[8]*b[15]+a[11]*b[14]*-1-a[14]*-1*b[11]+a[15]*b[8]);
-	target[7]=1*(a[7]*b[15]+a[12]*-1*b[13]-a[13]*b[12]*-1+a[15]*b[7]);
-	target[6]=-1*(a[6]*-1*b[15]+a[11]*b[13]-a[13]*b[11]+a[15]*b[6]*-1);
-	target[5]=1*(a[5]*b[15]+a[11]*b[12]*-1-a[12]*-1*b[11]+a[15]*b[5]);
-	target[4]=-1*(a[4]*-1*b[15]+a[7]*b[14]*-1-a[9]*-1*b[13]+a[10]*b[12]*-1+a[12]*-1*b[10]-a[13]*b[9]*-1+a[14]*-1*b[7]+a[15]*b[4]*-1);
-	target[3]=1*(a[3]*b[15]+a[6]*-1*b[14]*-1-a[8]*b[13]+a[10]*b[11]+a[11]*b[10]-a[13]*b[8]+a[14]*-1*b[6]*-1+a[15]*b[3]);
-	target[2]=-1*(a[2]*-1*b[15]+a[5]*b[14]*-1-a[8]*b[12]*-1+a[9]*-1*b[11]+a[11]*b[9]*-1-a[12]*-1*b[8]+a[14]*-1*b[5]+a[15]*b[2]*-1);
-	target[1]=1*(a[1]*b[15]+a[5]*b[13]-a[6]*-1*b[12]*-1+a[7]*b[11]+a[11]*b[7]-a[12]*-1*b[6]*-1+a[13]*b[5]+a[15]*b[1]);
-	target[0]=1*(a[0]*b[15]+a[1]*b[14]*-1-a[2]*-1*b[13]+a[3]*b[12]*-1-a[4]*-1*b[11]+a[5]*b[10]-a[6]*-1*b[9]*-1+a[7]*b[8]+a[8]*b[7]-a[9]*-1*b[6]*-1+a[10]*b[5]+a[11]*b[4]*-1-a[12]*-1*b[3]+a[13]*b[2]*-1-a[14]*-1*b[1]+a[15]*b[0]);
-	return target;
-}
-
-function cleave( a, b, target)
-{
-	if(target === undefined)
-		target = new Mv()
-		
-	target[0]=b[0]*a[0]+b[1]*a[1]+b[2]*a[2]+b[3]*a[3]+b[4]*a[4]-b[5]*a[5]-b[6]*a[6]-b[7]*a[7]-b[8]*a[8]-b[9]*a[9]-b[10]*a[10]-b[11]*a[11]-b[12]*a[12]-b[13]*a[13]-b[14]*a[14]+b[15]*a[15];
-	target[1]=b[1]*a[0]+b[0]*a[1]-b[5]*a[2]-b[6]*a[3]-b[7]*a[4]+b[2]*a[5]+b[3]*a[6]+b[4]*a[7]-b[11]*a[8]-b[12]*a[9]-b[13]*a[10]-b[8]*a[11]-b[9]*a[12]-b[10]*a[13]+b[15]*a[14]-b[14]*a[15];
-	target[2]=b[2]*a[0]+b[5]*a[1]+b[0]*a[2]-b[8]*a[3]-b[9]*a[4]-b[1]*a[5]+b[11]*a[6]+b[12]*a[7]+b[3]*a[8]+b[4]*a[9]-b[14]*a[10]+b[6]*a[11]+b[7]*a[12]-b[15]*a[13]-b[10]*a[14]+b[13]*a[15];
-	target[3]=b[3]*a[0]+b[6]*a[1]+b[8]*a[2]+b[0]*a[3]-b[10]*a[4]-b[11]*a[5]-b[1]*a[6]+b[13]*a[7]-b[2]*a[8]+b[14]*a[9]+b[4]*a[10]-b[5]*a[11]+b[15]*a[12]+b[7]*a[13]+b[9]*a[14]-b[12]*a[15];
-	target[4]=b[4]*a[0]+b[7]*a[1]+b[9]*a[2]+b[10]*a[3]+b[0]*a[4]-b[12]*a[5]-b[13]*a[6]-b[1]*a[7]-b[14]*a[8]-b[2]*a[9]-b[3]*a[10]-b[15]*a[11]-b[5]*a[12]-b[6]*a[13]-b[8]*a[14]+b[11]*a[15];
-	target[5]=b[5]*a[0]+b[11]*a[3]+b[12]*a[4]+b[0]*a[5]-b[15]*a[10]+b[3]*a[11]+b[4]*a[12]-b[10]*a[15];
-	target[6]=b[6]*a[0]-b[11]*a[2]+b[13]*a[4]+b[0]*a[6]+b[15]*a[9]-b[2]*a[11]+b[4]*a[13]+b[9]*a[15];
-	target[7]=b[7]*a[0]-b[12]*a[2]-b[13]*a[3]+b[0]*a[7]-b[15]*a[8]-b[2]*a[12]-b[3]*a[13]-b[8]*a[15];
-	target[8]=b[8]*a[0]+b[11]*a[1]+b[14]*a[4]-b[15]*a[7]+b[0]*a[8]+b[1]*a[11]+b[4]*a[14]-b[7]*a[15];
-	target[9]=b[9]*a[0]+b[12]*a[1]-b[14]*a[3]+b[15]*a[6]+b[0]*a[9]+b[1]*a[12]-b[3]*a[14]+b[6]*a[15];
-	target[10]=b[10]*a[0]+b[13]*a[1]+b[14]*a[2]-b[15]*a[5]+b[0]*a[10]+b[1]*a[13]+b[2]*a[14]-b[5]*a[15];
-	target[11]=b[11]*a[0]-b[15]*a[4]+b[0]*a[11]+b[4]*a[15];
-	target[12]=b[12]*a[0]+b[15]*a[3]+b[0]*a[12]-b[3]*a[15];
-	target[13]=b[13]*a[0]-b[15]*a[2]+b[0]*a[13]+b[2]*a[15];
-	target[14]=b[14]*a[0]+b[15]*a[1]+b[0]*a[14]-b[1]*a[15];
-	target[15]=b[15]*a[0]+b[0]*a[15];
-	return target;
-}
-
-
-
-function subtract( a, b, target)
-{
-	if(target === undefined)
-		target = new Mv()
-		
-	target[0] = a[0]-b[0];
-	target[1] = a[1]-b[1];
-	target[2] = a[2]-b[2];
-	target[3] = a[3]-b[3];
-	target[4] = a[4]-b[4];
-	target[5] = a[5]-b[5];
-	target[6] = a[6]-b[6];
-	target[7] = a[7]-b[7];
-	target[8] = a[8]-b[8];
-	target[9] = a[9]-b[9];
-	target[10] = a[10]-b[10];
-	target[11] = a[11]-b[11];
-	target[12] = a[12]-b[12];
-	target[13] = a[13]-b[13];
-	target[14] = a[14]-b[14];
-	target[15] = a[15]-b[15];
-	return target;
 }

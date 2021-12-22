@@ -4,6 +4,8 @@
     a line reflection
     a glide reflection even
 
+    Figure out what the squared amplitudes look like in this view
+
     Current plan
     Work on viz of paulis and rotations and hadamard applied to one gate
     See what phase shift looks like
@@ -33,7 +35,7 @@ async function initOneQubit() {
 
     //surroundings
     {
-        let portholeRadius = .17
+        let portholeRadius = .147
         let hiderGeo = new THREE.RingGeometry(portholeRadius * 1.06, 20., 128, 1)
         var hider = new THREE.Mesh(hiderGeo, new THREE.MeshBasicMaterial({ color: 0xCCCCCC }))
         scene.add(hider)
@@ -114,6 +116,64 @@ async function initOneQubit() {
             targetMv[8] = -vec.z
         else
             targetMv[8] = 0.
+    }
+
+    {
+        //want rotations really
+        let ops = [
+            "pauliX",
+            "pauliX",
+            "pauliY",
+            "pauliY",
+            "pauliX",
+            "pauliZ",
+            "hadamard",
+            "hadamard",
+            "hadamard",
+            "pauliX",
+            "pauliZ",
+        ]
+        let equivalents = {
+            "pauliX": e1.clone(),
+            "pauliY": e2.clone(),
+            "pauliZ": e3.clone(),
+            "hadamard": new Mv().copy(e1).add(e3).normalize(),
+        }
+        let stateMat = new ComplexMat(2, [
+            [1., 0.], [0., 0.],
+            [0., 0.], [1., 0.],
+        ])
+        let oldStateMats = Array(ops.length)
+        for (let i = 0; i < ops.length; ++i)
+            oldStateMats[i] = new ComplexMat(2)
+
+        let oldStateMvs = Array(ops.length)
+        for (let i = 0; i < ops.length; ++i)
+            oldStateMvs[i] = new Mv()
+            
+        let stateMv = new Mv()
+        stateMv[0] = 1.
+        for(let i = 0; i < ops.length; ++i) {
+            stateMat.mul(eval(ops[i]), oldStateMats[i])
+            stateMat.copy(oldStateMats[i])
+
+            // equivalents[ops[i]].sandwich(stateMv,mv0)
+            stateMv.mul(equivalents[ops[i]],oldStateMvs[i])
+            stateMv.copy(oldStateMvs[i])
+
+            for(let j = 0; j < i; ++j) {
+                if( stateMat.similarTo(oldStateMats[j]) &&
+                    !stateMv.similarTo(oldStateMvs[j]) ) {
+                    log("ERROR: Matrix multivector discrepancy. Current state:")
+                    stateMat.log()
+                    stateMv.log()
+
+                    log("A previous state:")
+                    oldStateMats[j].log()
+                    oldStateMvs[j].log()
+                }
+            }
+        }
     }
 
     {
@@ -218,17 +278,12 @@ async function initOneQubit() {
                 mvToJoinTo.copy(mouseMv)
             join(e0MeetInitialMouse, mvToJoinTo, torusLine)
         },false,()=>{
-            log("let go")
-
             product(torusLine,stateMv,mv1)
-            // torusLine.sandwich(stateMv,mv1)
-            //yeah shit's still going wrong
             stateMv.copy(mv1)
-
-            //oh great, now scale the shit
-            //if you've got some way of applying your thing to the three columns of the matrix
-            //could take the points e12, e23, e31, sandwich them with your state vector, those are your columns
-            //then just lerp? It doesn't deserve any better
+            
+            //sooooo, next might be visualizing the circuit
+            //or the points being transformed by it
+            //the mapping is:
         })
 
         updateFunctions.push(() => {
@@ -244,8 +299,6 @@ async function initOneQubit() {
             if (e3Component === 1. || e3Component === -1.) {
                 //maybe it's the rim
             }
-
-            //can have a little "if it's e3"
 
             let torusRotorSquared = mv1
             torusRotorSquared.copy(e3)

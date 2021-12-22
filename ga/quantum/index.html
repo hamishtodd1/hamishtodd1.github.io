@@ -22,16 +22,18 @@
 				document.body.appendChild( renderer.domElement );
 				renderer.localClippingEnabled = true
 
-				initAlgebra()
+				// initAlgebra()
+				init31()
 
 				initWindowResizeSystemAndSurroundings();
 				initMouse()
 				initSound()
 
-				initOneQubit()
+				// initOneQubit()
 
 				// await initCircuit()
 				// await initEntanglement()
+				initMobTransState()
 
 				function render() {
 					let clockDelta = clock.getDelta()
@@ -70,6 +72,8 @@
 		<script src="oneQubit.js"></script>
 		<script src="entanglement.js"></script>
 		<script src="epga.js"></script>
+		<script src="31.js"></script>
+		<script src="quantumStereographicProjection.js"></script>
 		<script src="complexLinAlg.js"></script>
 		<script src="circuit.js"></script>
 

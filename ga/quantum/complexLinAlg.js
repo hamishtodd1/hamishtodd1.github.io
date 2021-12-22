@@ -59,10 +59,11 @@ class ComplexVector {
 
                 str += this.elements[i].toString()
 
-                let twoDigitBinaryRepOfThisIndex = ""
-                for (let j = 0; j < 2; ++j)
-                    twoDigitBinaryRepOfThisIndex = ((i & (1 << j)) ? "1" : "0") + twoDigitBinaryRepOfThisIndex
-                str += " |" + twoDigitBinaryRepOfThisIndex + ">"
+                let binaryRepOfThisIndex = ""
+                let numBinaryDigits = Math.log2(this.elements.length)
+                for (let j = 0; j < numBinaryDigits; ++j)
+                    binaryRepOfThisIndex = ((i & (1 << j)) ? "1" : "0") + binaryRepOfThisIndex
+                str += " |" + binaryRepOfThisIndex + ">"
             }
         }
 
@@ -70,6 +71,25 @@ class ComplexVector {
             str = msg + ": " + str
 
         log(str)
+    }
+
+    applyMatrix(m, target) {
+        if (target === undefined)
+            target = new ComplexVector(this.elements.length)
+
+        let temp = new Complex()
+        for(let i = 0; i < this.elements.length; ++i) {
+            //i is the column in the matrix, the row in the vector
+            target.elements[i].set(0.,0.)
+            for(let j = 0; j < this.elements.length; ++j) {
+                let matEl = m.get(j,i)
+                matEl.mul(this.elements[j],temp)
+                // log(i, j, temp)
+                target.elements[i].add(temp)
+            }
+        }
+
+        return target
     }
 
 	// multiplyOneEntry(input, ourIndex, inputIndex, target, targetIndex) {
@@ -135,6 +155,12 @@ class ComplexMat {
 			el.im *= scalar
 		})
 	}
+
+    transpose(target) {
+        this.forEachElement((row, col, el)=>{
+            target.get(col,row).copy(el)
+        })
+    }
 
     forEachElement(func) {
         for(let row = 0; row < this.dim; ++row) {
@@ -294,6 +320,29 @@ class ComplexMat {
 
         return target
     }
+
+    similarTo(m) {
+        let ret = true
+        this.forEachElement(( row, col, el)=>{
+            let elM = m.get(row, col)
+            if( Math.abs(el.re - elM.re ) > 0.01 ||
+                Math.abs(el.im - elM.im ) > 0.01 )
+                ret = false
+        })
+        return ret
+    }
+
+    logEffect(val1,val2) {
+        if(val1 === undefined) {
+            val1 = 0
+            val2 = 0
+        }
+
+        let v = new ComplexVector(4)
+        v.elements[val2 + val1 * 2].re = 1.
+
+        v.applyMatrix(this).log()
+    }
 }
 
 // xti = pauliX.tensor(identity2x2)
@@ -346,6 +395,16 @@ class Complex {
 		this.im = im
 	}
 
+    setRTheta(r,theta) {
+        this.re = r * Math.cos(theta)
+        this.im = r * Math.sin(theta)
+    }
+
+    lerp(t,start,end) {
+        this.re = lerp(t, start.re, end.re)
+        this.im = lerp(t, start.im, end.im)
+    }
+
 	getConjugate(target) {
 		if(target === undefined)
 			target = new Complex()
@@ -373,6 +432,16 @@ class Complex {
         return target
 	}
 
+    div(c,target) {
+        if (target === undefined)
+            target = new Complex()
+
+        let multiplicand = 1./(c.re*c.re + c.im*c.im)
+        
+        target.re = multiplicand * (c.re*this.re + c.im*this.im)
+        target.im = multiplicand * (this.im*c.re - this.re*c.im)
+    }
+
     log() {
         console.log(this.toString())
     }
@@ -385,20 +454,6 @@ const c4 = new Complex()
 const c5 = new Complex()
 const c6 = new Complex()
 
-cnot = new ComplexMat(4, [
-    [1., 0.], [0., 0.], [0., 0.], [0., 0.],
-    [0., 0.], [1., 0.], [0., 0.], [0., 0.],
-    [0., 0.], [0., 0.], [0., 0.], [1., 0.],
-    [0., 0.], [0., 0.], [1., 0.], [0., 0.],
-])
-
-swap = new ComplexMat(4, [
-    [1., 0.], [0., 0.], [0., 0.], [0., 0.],
-    [0., 0.], [0., 0.], [1., 0.], [0., 0.],
-    [0., 0.], [1., 0.], [0., 0.], [0., 0.],
-    [0., 0.], [0., 0.], [0., 0.], [1., 0.],
-])
-
 function ps(theta) {
     return new ComplexMat(2,[
         [1., 0.], [0., 0.],
@@ -406,11 +461,16 @@ function ps(theta) {
     ])
 }
 
-function rx(theta) {
+function rx(theta, target) {
+    if(target === undefined)
+        target = new ComplexMat(2)
+
     return new ComplexMat(2, [
         [Math.cos(theta/2.), 0.], [0.,-Math.sin(theta/2.)],
         [0.,-Math.sin(theta/2.)], [ Math.cos(theta/2.), 0.],
     ])
+
+    return target
 }
 
 function ry(theta) {
@@ -448,3 +508,67 @@ hadamard = new ComplexMat(2, [
     [1. / Math.SQRT2, 0.], [1. / Math.SQRT2, 0.],
     [1. / Math.SQRT2, 0.], [-1. / Math.SQRT2, 0.],
 ])
+
+cnot = new ComplexMat(4, [
+    [1., 0.], [0., 0.], [0., 0.], [0., 0.],
+    [0., 0.], [1., 0.], [0., 0.], [0., 0.],
+    [0., 0.], [0., 0.], [0., 0.], [1., 0.],
+    [0., 0.], [0., 0.], [1., 0.], [0., 0.],
+])
+
+swap = new ComplexMat(4, [
+    [1., 0.], [0., 0.], [0., 0.], [0., 0.],
+    [0., 0.], [0., 0.], [1., 0.], [0., 0.],
+    [0., 0.], [1., 0.], [0., 0.], [0., 0.],
+    [0., 0.], [0., 0.], [0., 0.], [1., 0.],
+])
+
+sqrtSwap = new ComplexMat(4, [
+    [1., 0.], [0., 0.], [0., 0.], [0., 0.],
+    [0., 0.], [.5, .5], [.5,-.5], [0., 0.],
+    [0., 0.], [.5,-.5], [.5, .5], [0., 0.],
+    [0., 0.], [0., 0.], [0., 0.], [1., 0.],
+])
+
+
+g0 = new ComplexMat(4, [
+    [1., 0.], [0., 0.], [0., 0.], [0., 0.],
+    [0., 0.], [1., 0.], [0., 0.], [0., 0.],
+    [0., 0.], [0., 0.], [-1.,0.], [0., 0.],
+    [0., 0.], [0., 0.], [0., 0.], [-1.,0.],
+])
+g1 = new ComplexMat(4, [
+    [0., 0.], [0., 0.], [0., 0.], [1., 0.],
+    [0., 0.], [0., 0.], [1., 0.], [0., 0.],
+    [0., 0.], [-1.,0.], [0., 0.], [0., 0.],
+    [-1.,0.], [0., 0.], [0., 0.], [0., 0.],
+])
+g2 = new ComplexMat(4, [
+    [0., 0.], [0., 0.], [0., 0.], [0.,-1.],
+    [0., 0.], [0., 0.], [0., 1.], [0., 0.],
+    [0., 0.], [0., 1.], [0., 0.], [0., 0.],
+    [0.,-1.], [0., 0.], [0., 0.], [0., 0.],
+])
+g3 = new ComplexMat(4, [
+    [0., 0.], [0., 0.], [1., 0.], [0., 0.],
+    [0., 0.], [0., 0.], [0., 0.], [-1.,0.],
+    [-1.,0.], [0., 0.], [0., 0.], [0., 0.],
+    [0., 0.], [1., 0.], [0., 0.], [0., 0.],
+])
+function multiplyMatrixByI(m){
+    m.forEachElement((r,c,el)=>{
+    let temp = el.re
+    el.re = el.im
+    el.im = temp
+    })
+}
+multiplyMatrixByI(g0)
+multiplyMatrixByI(g1)
+multiplyMatrixByI(g2)
+multiplyMatrixByI(g3)
+// g5 = new ComplexMat(4, [
+//     [0., 0.], [0., 0.], [0., 0.], [0., 0.],
+//     [0., 0.], [0., 0.], [0., 0.], [0., 0.],
+//     [0., 0.], [0., 0.], [0., 0.], [0., 0.],
+//     [0., 0.], [0., 0.], [0., 0.], [0., 0.],
+// ])

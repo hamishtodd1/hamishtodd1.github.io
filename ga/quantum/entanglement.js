@@ -25,6 +25,9 @@
 
     Hadamard matrix should look like the map is flattened to gnomonic and doing a flip
 
+    Think of it as... a nice spikey jewel, like a henry segerman thing
+    Aaaaand it does have volumes, and when it's rested they're solid. But when you change it they fade in and out
+
     we want G such that G appears to be a reflection and G*swap = something you suspect is a rotation
     Problem is, it's probably a reflection that DOESN'T combine to become the X x I etc
     Though hmm, maybe hadamard is
@@ -46,6 +49,9 @@
     If this was going to work, wouldn't it work in CGA? And wouldn't Chris have found it?
     "vectors are points" would have to be quite toxic
     
+    Dodecahedral honeycomb
+        So you're making trivectors with, what, the five-fold and threefold rotation of the dodecahedron?
+        Aaaaaand then you have a translation as well?
 
     Metaphysics
         Is it that everything appears in experiment to be a rotation when actually some things are reflections?
@@ -85,7 +91,8 @@
         Need some cute portable thing that's only ever 00 or 11. A pair of teenage girls where one of them has said she liked/didn't like the movie
         We're going to make a single object that exists in two separate pieces, like a pair of semi-matching socks
 
-
+        "When" "you" measure "your" qubit, you join the universe where your qubit was that result,
+        and you know what universe that's going to be for your partner
 
         
 
@@ -205,20 +212,14 @@ function otherFov(inputFov, aspectRatio, inputIsVertical) {
 
 async function initEntanglement()
 {
-    camera.position.z += 3.
-    camera.position.y -= 1.
-    camera.position.x += .2
-
-    updateFunctions.push(()=>{
-        rightHandPosition.fromVector(rightHand.position)
-    })
+    // camera.position.z += 3.
+    // camera.position.y -= 1.
+    // camera.position.x += .2
 
     let v0 = new THREE.Vector3()
     let v1 = new THREE.Vector3()
     let v2 = new THREE.Vector3()
     let v3 = new THREE.Vector3()
-
-    let rightHandPosition = new Mv()
 
     let cameraPoint = new Mv()
     let frustumPlanes = {
@@ -240,9 +241,9 @@ async function initEntanglement()
         
         cameraPoint.fromVector(camera.position)
 
-        product(cameraPoint, e123, mv0).sqrtBiReflection(cameraTranslation)
+        cameraPoint.mul(e123, mv0).sqrtBiReflection(cameraTranslation)
         cameraRotator.fromQuaternion(camera.quaternion)
-        product( cameraRotator, cameraTranslation, cameraEvenReflection )
+        cameraRotator.mul( cameraTranslation, cameraEvenReflection )
 
         let horizontalFov = otherFov(camera.fov, camera.aspect, false)
         
@@ -466,7 +467,7 @@ async function initEntanglement()
 
                     let thisLineAtOrigin = projectLineOnPoint(mvGettingVisualized, e123, mv1)
                     thisLineAtOrigin.normalize()
-                    let rotorToThisLineAtOrigin = product(thisLineAtOrigin, e31, mv2).sqrtBiReflection(mv3)
+                    let rotorToThisLineAtOrigin = thisLineAtOrigin.mul(e31, mv2).sqrtBiReflection(mv3)
                     rotorToThisLineAtOrigin.toQuaternion(dummy.quaternion)
 
                     let pos = projectPointOnLine(cameraPoint, mvGettingVisualized, mv4)
@@ -687,23 +688,25 @@ function createS3Scene(initialVertexMvs)
 function initDirectControlOfMotor(stateMotor) {
     let controlsArray = [
         e31, "j", "l",
-        e12, "a", "d",
         e23, "t", "g",
-
+        e03, "w", "s",
+        
+        e12, "a", "d",
         e01, "f", "h",
         e02, "i", "k",
-        e03, "w", "s",
+        // 
     ]
 
     for (let i = 0, il = controlsArray.length / 3; i < il; ++i) {
         let gate = controlsArray[i * 3].sqrtBiReflection().sqrtBiReflection()
         bindButton(controlsArray[i * 3 + 1], () => {
-            product(stateMotor, gate, mv0)
+            stateMotor.mul(gate, mv0)
             stateMotor.copy(mv0)
+            // stateMotor.log()
         })
         bindButton(controlsArray[i * 3 + 2], () => {
             let reverseGate = gate.reverse(mv1)
-            product(stateMotor, reverseGate, mv0)
+            stateMotor.mul(reverseGate, mv0)
             stateMotor.copy(mv0)
         })
     }

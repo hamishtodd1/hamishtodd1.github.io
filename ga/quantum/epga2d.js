@@ -382,25 +382,6 @@ function initAlgebra() {
     }
     window.Mv = Mv
 
-    projectPointOnLine = (p, l, target) => {
-        if (target === undefined)
-            target = new Mv()
-        cleave(l, p, lv2LocalMv0)
-        product(lv2LocalMv0, l, target)
-
-        return target
-    }
-
-    projectLineOnPoint = (l, p, target) => {
-        if (target === undefined)
-            target = new Mv()
-
-        cleave(l, p, lv2LocalMv0)
-        product(lv2LocalMv0, p, target)
-
-        return target
-    }
-
     rotorFromAxisAngle = (axis, angle, target) => {
         if (target === undefined)
             target = new Mv()
