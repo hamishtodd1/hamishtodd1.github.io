@@ -39,7 +39,7 @@ function initMouse()
 
 	mouse.rotateObjectByGesture = function(object)
 	{
-		let rotationAmount = mouse.raycaster.ray.direction.angleTo(mouse.oldRaycaster.ray.direction) * 35.
+		let rotationAmount = mouse.raycaster.ray.direction.angleTo(mouse.oldRaycaster.ray.direction) * .8
 		// console.log(mouse.raycaster.ray.direction,mouse.oldRaycaster.ray.direction)
 		if(rotationAmount === 0.)
 			return

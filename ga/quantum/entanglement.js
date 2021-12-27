@@ -1,6 +1,5 @@
 /*
     Definitely show:
-        Reference many worlds?
         No hidden variables
             Bell basis, rotational invariance
             Maximal entanglement

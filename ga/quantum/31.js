@@ -1,12 +1,14 @@
 function init31() {
 
-    let basisNames = ["", "0", "1", "2", "3", "01", "02", "03", "12", "31", "23", "021", "013", "032", "123", "0123"]
+    let basisNames = ["", "1", "2", "3", "4", "12", "13", "14", "23", "24", "34", "123", "412", "341", "234", "0123"]
 	let onesWithMinus = ["31", "021", "032"] //yes you could reverse the orders in the string but it's established
 
-	effectiveOrigin = new THREE.Vector3(
-		// 0.,0.,0.)
-		-.29, -.67, 0.)
-	
+	let indexForXPartOfQuaternion = 8
+	let indexForYPartOfQuaternion = 6
+	let indexForZPartOfQuaternion = 5
+
+
+
 	const GRADES_OF_ELEMENTS = [0, 1,1,1,1, 2,2,2,2,2,2, 3,3,3,3, 4]
 
 	class Mv extends Float32Array {
@@ -278,22 +280,6 @@ function init31() {
 			return this
 		}
 
-		isIdealLine() {
-			let hasEuclideanLinePart = this[8] !== 0. || this[9] !== 0. || this[10] !== 0.
-			let hasIdealLinePart = this[5] !== 0. || this[6] !== 0. || this[7] !== 0.
-			return !hasEuclideanLinePart && hasIdealLinePart
-		}
-
-		fromVector(v) {
-			this.copy(zeroMv)
-			this.point(
-				v.x - effectiveOrigin.x,
-				v.y - effectiveOrigin.y,
-				v.z - effectiveOrigin.z)
-
-			return this
-		}
-
 		point(x, y, z, w) {
 			this.copy(zeroMv)
 			this[13] = x
@@ -339,28 +325,10 @@ function init31() {
 			if(target === undefined)
 				target = new THREE.Vector3()
 
-			if(this[14] > 0) {
-				target.x = this[13] / this[14]
-				target.y = this[12] / this[14]
-				target.z = this[11] / this[14]
-			}
-			else if(this[14] === 0.) {
-				//better to put it at the skybox really.
-				target.x = this[13]
-				target.y = this[12]
-				target.z = this[11]
-			}
-			else {
-				target.x = this[13] / this[14]
-				target.y = this[12] / this[14]
-				target.z = this[11] / this[14]
-				//or this?
-				// target.x = 0.
-				// target.y = 0.
-				// target.z = 0.
-			}
-
-			target.add(effectiveOrigin)
+			this.normalize()
+			target.x = this[14] / this[11]
+			target.y = this[13] / this[11]
+			target.z = this[12] / this[11]
 
 			return target
 		}
@@ -373,7 +341,11 @@ function init31() {
 			if(target === undefined)
 				target = new THREE.Quaternion()
 
-			target.set(this[10], this[9], this[8], this[0])
+			target.set(
+				this[indexForXPartOfQuaternion], 
+				this[indexForYPartOfQuaternion], 
+				this[indexForZPartOfQuaternion], 
+				this[0])
 			target.normalize()
 			return target
 		}
@@ -422,21 +394,8 @@ function init31() {
 			return Math.sqrt(Math.abs(localMv1[0]))
 		}
 
-		idealNorm() {
-			return this[1] != 0. ?
-				this[1] :
-				this[15] != 0. ?
-					this[15] :
-					(this.dual(localMv3)).norm();
-		}
-
 		normalize() {
-			let normToUse = this.norm()
-			// log(normToUse)
-			if (normToUse == 0.)
-				normToUse = this.idealNorm()
-			this.multiplyScalar(1. / normToUse)
-			//what does the ideal norm even mean in this context though?
+			this.multiplyScalar(1. / this.norm() )
 			return this
 		}
 
@@ -579,22 +538,21 @@ function init31() {
 	oneMv = new Mv()
 	oneMv[0] = 1.
 
-	e0 = MvFromIndexAndFloat(1., 1)
-	e1 = MvFromIndexAndFloat(1., 2)
-	e2 = MvFromIndexAndFloat(1., 3)
-	e3 = MvFromIndexAndFloat(1., 4)
-    log(e0)
-	e01 = e0.mul(e1)
-	e02 = e0.mul(e2)
-	e03 = e0.mul(e3)
+	e1 = MvFromIndexAndFloat(1., 1)
+	e2 = MvFromIndexAndFloat(1., 2)
+	e3 = MvFromIndexAndFloat(1., 3)
+	e4 = MvFromIndexAndFloat(1., 4)
+	e41 = e4.mul(e1)
+	e42 = e4.mul(e2)
+	e43 = e4.mul(e3)
 	e12 = e1.mul(e2)
 	e31 = e3.mul(e1)
 	e23 = e2.mul(e3)
-	e021 = e02.mul(e1)
-	e013 = e01.mul(e3)
-	e032 = e03.mul(e2)
+	e421 = e42.mul(e1)
+	e413 = e41.mul(e3)
+	e432 = e43.mul(e2)
 	e123 = e12.mul(e3)
-	e0123 = e0.mul(e123)
+	e4123 = e4.mul(e123)
 
     // static R310 e1(1.0f, 1);
     // static R310 e2(1.0f, 2);

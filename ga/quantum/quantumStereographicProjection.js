@@ -1,7 +1,21 @@
 /*
+Rendering
+    disks, maybe chop off fragments wiht fragment shader?
+*/
+
+
+/*
 
 Make a thing showing the sphere
 Aaaaand then the bloch vector. Might be simple
+
+
+Could project it back onto the riemann sphere at the origin
+If it's unentangled it'll be a single point, it'll be the bloch sphere
+You're picking up the plane and moving it around
+Where do you move it such that it goes back to being a bloch sphere? Maybe make it and try to find that
+
+Transpose sounds a lot like a reflection
 
 
 You have the operator space and the planar space
@@ -75,13 +89,14 @@ If you'd only chosen another
 
 function initMobTransState() {
     //yo maybe the gates should be rank 4
+    //or 2x2 with quaternions?
 
     let mobiusMat = new ComplexMat(2)
 
     let s = 1./Math.sqrt(2.)
     mobiusTarget = new ComplexMat(2, [
         [0., 0.], [1., 0.],
-        [1., 0.], [0., 0.],
+        [0., 0.], [0., 0.],
     ])
 
     let mat1 = new ComplexMat(2)
@@ -122,39 +137,38 @@ function initMobTransState() {
     bindButton("y",()=>{paused = !paused})
     bindButton("t",()=>{transpose = !transpose})
     function meanderComplex(c, revsPerSecond, wobblesPerSecond) {
-        if (!paused)
-            timeSinceStart += frameDelta
-
         let theta = revsPerSecond * TAU * timeSinceStart
         let r = Math.cos(wobblesPerSecond * timeSinceStart)
         c.setRTheta(r, theta)
     }
 
-    let rands = Array(8)
+    let rands = []
     for(let i = 0; i < 8; ++i)
         rands[i] = Math.random()
 
     let cm = new ComplexMat(2)
 
-    let myRx = rz(.04)
-    updateFunctions.push(()=>{
+    let myRot = rz(.04)
+    updateFunctions.push(() => {
+        if (paused)
+            return
+
         cm.copy(mobiusMat)
-        // cm.mul(myRx,mobiusMat)
+        // cm.mul(myRot,mobiusMat)
         
-        // let zeroToOne = Math.sin(frameCount*.02) * .5 + .5
-        // if(zeroToOne < .01)
-        //     log("this is about it")
-        // mobiusMat.forEachElement((row,col,el)=>{
-        //     el.lerp(zeroToOne, mobiusTarget.get(row, col),identity2x2.get(row,col))
-        // })
+        let zeroToOne = Math.sin(frameCount*.02) * .5 + .5
+        if(zeroToOne < .01)
+            log("this is about it")
+        mobiusMat.forEachElement( (row,col,el) => {
+            el.lerp(zeroToOne, mobiusTarget.get(row, col),identity2x2.get(row,col))
+        })
 
-        for(let i = 0; i < 4; ++i)
-            meanderComplex(mobiusMat.elements[i], (rands[i * 2 + 0] + .3) * 0.3, (rands[i * 2 + 0] + .3) * .3 )
-
-        if(transpose) {
-            mobiusMat.transpose(mat1)
-            mobiusMat.copy(mat1)
-        }
+        // for(let i = 0; i < 4; ++i)
+        //     meanderComplex(mobiusMat.elements[i], (rands[i * 2 + 0] + .3) * 0.3, (rands[i * 2 + 0] + .3) * .3 )
+        // if(transpose) {
+        //     mobiusMat.transpose(mat1)
+        //     mobiusMat.copy(mat1)
+        // }
     })
 
     let cv0 = new ComplexVector(2)
@@ -166,8 +180,30 @@ function initMobTransState() {
 
     let pts = []
 
+    let fullThing = new THREE.Object3D()
+    fullThing.add(new THREE.Mesh(new THREE.BoxGeometry(.25,.25,.25),new THREE.MeshPhongMaterial({color:0xF0FF00})))
+    scene.add(fullThing)
+
+    let sphere = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(1.,3),new THREE.MeshPhongMaterial({
+        transparent: true,
+        opacity: .2,
+        color: 0x90FF90
+    }))
+    fullThing.add(sphere)
+
+    //if you know where infinity, 1, and 0 are, you're good
+    
+    onClicks.push({
+        start:() => {},
+        during:() => {
+            mouse.rotateObjectByGesture(fullThing)
+        },
+        end: () => {},
+        z:() => 0.
+    })
+
     let dim = 20
-    let spacing = .2
+    let spacing = .4
     for (let i = 0; i < dim; ++i) {
         for(let j = 0; j < dim; ++j) {
             let x = (i - dim / 2. + .5) * spacing
@@ -175,13 +211,13 @@ function initMobTransState() {
 
             let angle = Math.atan2(y, x)
             let hue = (angle + Math.PI) / TAU
-            let lightness = 1. - Math.sqrt(x*x+y*y) * .3
+            let lightness = 1. - Math.sqrt(x*x+y*y) * .15
             let color = new THREE.Color().setHSL(hue, 1., lightness)
 
             let mesh = new THREE.Mesh(pointGeo, new THREE.MeshPhongMaterial({color}))
             mesh.initial = new Complex(x,y)
             pts.push(mesh)
-            scene.add(mesh)
+            fullThing.add(mesh)
             updateFunctions.push(() => {
                 // if (pts.indexOf(mesh) === 15)
                 //     debugger

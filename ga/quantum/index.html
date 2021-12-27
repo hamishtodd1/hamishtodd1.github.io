@@ -18,22 +18,20 @@
 
 				renderer.shadowMap.enabled = true;
 				renderer.setClearColor(0x2F2F2F)
-				renderer.shadowMap.type = THREE.BasicShadowMap;
-				document.body.appendChild( renderer.domElement );
-				renderer.localClippingEnabled = true
+				document.body.appendChild( renderer.domElement )
 
 				// initAlgebra()
 				init31()
 
-				initWindowResizeSystemAndSurroundings();
+				initWindowResizeSystemAndSurroundings()
 				initMouse()
 				initSound()
 
 				// initOneQubit()
-
+				await initKleinBall()
 				// await initCircuit()
 				// await initEntanglement()
-				initMobTransState()
+				// initMobTransState()
 
 				function render() {
 					let clockDelta = clock.getDelta()
@@ -57,6 +55,8 @@
 		<script src="../common/lib/three.js"></script>
 		<script src="../common/lib/OBJLoader.js"></script>
 
+		<script src="../common/lib/RGBELoader.js"></script>
+
 		<script src="../common/miscFunctions.js"></script>
 		<script src="../common/variables.js"></script>
 		<script src="../common/threejsVariables.js"></script>
@@ -71,9 +71,10 @@
 
 		<script src="oneQubit.js"></script>
 		<script src="entanglement.js"></script>
-		<script src="epga.js"></script>
+		<!-- <script src="epga.js"></script> -->
 		<script src="31.js"></script>
-		<script src="quantumStereographicProjection.js"></script>
+		<script src="kleinBall.js"></script>
+		<!-- <script src="quantumStereographicProjection.js"></script> -->
 		<script src="complexLinAlg.js"></script>
 		<script src="circuit.js"></script>
 

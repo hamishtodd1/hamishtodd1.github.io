@@ -1,0 +1,1 @@
+v0 = new THREE.Vector3()
