@@ -95,7 +95,7 @@ function initMobTransState() {
 
     let s = 1./Math.sqrt(2.)
     mobiusTarget = new ComplexMat(2, [
-        [0., 0.], [1., 0.],
+        [1., 0.], [0., 0.],
         [0., 0.], [0., 0.],
     ])
 
@@ -153,18 +153,32 @@ function initMobTransState() {
         if (paused)
             return
 
-        cm.copy(mobiusMat)
+        // cm.copy(mobiusMat)
         // cm.mul(myRot,mobiusMat)
         
-        let zeroToOne = Math.sin(frameCount*.02) * .5 + .5
-        if(zeroToOne < .01)
-            log("this is about it")
-        mobiusMat.forEachElement( (row,col,el) => {
-            el.lerp(zeroToOne, mobiusTarget.get(row, col),identity2x2.get(row,col))
-        })
+        // let zeroToOne = Math.sin(frameCount*.02) * .5 + .5
+        // if(zeroToOne < .01)
+        //     log("this is about it")
+        // mobiusMat.forEachElement( (row,col,el) => {
+        //     el.lerp(zeroToOne, mobiusTarget.get(row, col),identity2x2.get(row,col))
+        // })
 
         // for(let i = 0; i < 4; ++i)
         //     meanderComplex(mobiusMat.elements[i], (rands[i * 2 + 0] + .3) * 0.3, (rands[i * 2 + 0] + .3) * .3 )
+
+        // mobiusMat.copy(identity2x2)
+        mobiusMat.copy(zero2x2)
+        // meanderComplex(mobiusMat.elements[1], (rands[0] + .6) * .5, (rands[0] + .3) * .4 )
+        let r = Math.tan(frameCount * .01)
+        let theta = frameCount * 0.05
+        mobiusMat.elements[0].setRTheta(1.,theta+TAU/4.)
+        mobiusMat.elements[1].setRTheta(1.,theta)
+        mobiusMat.elements[2].setRTheta(1.,theta+TAU/4.)
+        mobiusMat.elements[3].setRTheta(1.,theta)
+        mobiusMat.log()
+
+        
+
         // if(transpose) {
         //     mobiusMat.transpose(mat1)
         //     mobiusMat.copy(mat1)
@@ -210,11 +224,13 @@ function initMobTransState() {
             let y = (j - dim / 2. + .5) * spacing
 
             let angle = Math.atan2(y, x)
+            log(angle)
             let hue = (angle + Math.PI) / TAU
             let lightness = 1. - Math.sqrt(x*x+y*y) * .15
             let color = new THREE.Color().setHSL(hue, 1., lightness)
 
-            let mesh = new THREE.Mesh(pointGeo, new THREE.MeshPhongMaterial({color}))
+            let mesh = new THREE.Mesh(pointGeo, new THREE.MeshBasicMaterial({color:color}))
+            log(mesh.material.color)
             mesh.initial = new Complex(x,y)
             pts.push(mesh)
             fullThing.add(mesh)
@@ -234,7 +250,7 @@ function initMobTransState() {
                 // if (pts.indexOf(mesh) === 15)
                 //     cv1.log()
 
-                mesh.position.set(c.re, c.im, 0.)
+                mesh.position.set(c.re * .35, c.im * .35, 0.)
             })
         }
     }

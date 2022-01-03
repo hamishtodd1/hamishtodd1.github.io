@@ -68,9 +68,6 @@ async function initLights(shadowCaster) {
 	ground.receiveShadow = true
 	scene.add(ground)
 
-	// const hemiLight = new THREE.HemisphereLight(0x333333, 0x111122)
-	// scene.add(hemiLight)
-
 	const spotLight = new THREE.SpotLight()
 	spotLight.target = shadowCaster
 	spotLight.angle = Math.PI / 14.
@@ -78,18 +75,6 @@ async function initLights(shadowCaster) {
 	spotLight.castShadow = true
 	spotLight.position.set(-3, 7., 3.)
 	scene.add(spotLight)
-
-
-
-	let particleLight = new THREE.Mesh(new THREE.SphereGeometry(0.04, 0.08, 0.08), new THREE.MeshBasicMaterial({ color: 0xffffff }));
-	scene.add(particleLight);
-
-	updateFunctions.push(() => {
-		let t = 17.//frameCount * .05
-		particleLight.position.x = Math.sin(t) * 3.
-		particleLight.position.y = Math.cos(t) * 4.
-		particleLight.position.z = Math.cos(t) * 3.
-	})
 
 	scene.add(new THREE.AmbientLight(0x222222))
 

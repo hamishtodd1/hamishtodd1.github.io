@@ -7,8 +7,6 @@ function init31() {
 	let indexForYPartOfQuaternion = 6
 	let indexForZPartOfQuaternion = 5
 
-
-
 	const GRADES_OF_ELEMENTS = [0, 1,1,1,1, 2,2,2,2,2,2, 3,3,3,3, 4]
 
 	class Mv extends Float32Array {
@@ -227,6 +225,29 @@ function init31() {
 			return target;
 		}
 
+		possiblyProperDual(target){
+			if (target === undefined)
+				target = new Mv()
+
+			target[0] = this[15]
+			target[1] = this[14]
+			target[2] = this[13]
+			target[3] = this[12]
+			target[4] = this[11]
+			target[5] = this[10]
+			target[6] = this[9]
+			target[7] = this[8]
+			target[8] = this[7]
+			target[9] = this[6]
+			target[10] = this[5]
+			target[11] = this[4]
+			target[12] = this[3]
+			target[13] = this[2]
+			target[14] = this[1]
+			target[15] = this[0]
+			return target
+		}
+
 		mul(b, target) {
 			if(target === undefined)
 				target = new Mv()
@@ -282,11 +303,11 @@ function init31() {
 
 		point(x, y, z, w) {
 			this.copy(zeroMv)
-			this[13] = x
-			this[12] = y
-			this[11] = z
+			this[14] = x
+			this[13] = y
+			this[12] = z 
 
-			this[14] = w === undefined ? 1. : w
+			this[11] = w === undefined ? 1. : w
 
 			return this
 		}
@@ -301,13 +322,13 @@ function init31() {
 		}
 
 		x() {
-			return this[13]
+			return this[14]
 		}
 		y() {
-			return this[12]
+			return this[13]
 		}
 		z() {
-			return this[11]
+			return this[12]
 		}
 
 		direction(x,y,z) {
@@ -524,7 +545,7 @@ function init31() {
 	distancePointPoint = (pt1, pt2) => {
 		lv2LocalMv0.copy(pt1).normalize()
 		lv2LocalMv1.copy(pt2).normalize()
-		join(lv2LocalMv0, lv2LocalMv1, lv2LocalMv2)
+		lv2LocalMv0.join(lv2LocalMv1, lv2LocalMv2)
 		return Math.abs(lv2LocalMv2.norm())
 	}
 

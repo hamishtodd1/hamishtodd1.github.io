@@ -22,6 +22,20 @@
         "negative probabilities" formulation https://cognitivemedium.com/assets/qm-interpretation/Feynman.pdf
         free will
 
+    
+
+    Wikipedia articles to add animation to:
+        Cross ratio
+        Entanglement
+        CGA
+        Mobius transformations
+        Riemann sphere
+        Bloch sphere
+        Klein Disk
+        Models of hyperbolic space.
+
+    Talk to Grant Sanderson, Steve Mould, Dominic about script
+
     Hadamard matrix should look like the map is flattened to gnomonic and doing a flip
 
     Think of it as... a nice spikey jewel, like a henry segerman thing
@@ -79,6 +93,8 @@
         A measurement device that works across all of these?
 
     Script - "But what does quantum entanglement LOOK LIKE?"
+        What is truth? What is reality?
+
         Quantum entanglement is, without exaggeration, one of the strangest things ever discovered.
         It's central to quantum physics so it's important if you want to understand why the periodic table has this shape, or how computer chips are made,
         But for me entanglement most intriguing because of its implications for philosophy, metaphysics, and epistemology. In a sense you can resolve the schrodinger's cat paradox
