@@ -1,13 +1,18 @@
 /*
 People to send to
+    Michael Nielsen
+    Gavin Crooks
+    Andrew Steane
+    Martti
+    Alan Kay
     Emily Adlam
     Sean Carroll
-    Tim Blaise!
+    Tim Blaise
     Grant Sanderson
     Henry minutephysics
     Henry Segerman, Sabetta Matsumoto
     Simon Newey
-    Andy, absolutely Michael
+    Andy Matuschak
     Hestenes
     Dude you met that pontus told you the name of
 
@@ -42,52 +47,152 @@ The function you're trying to make is...
 
 */
 
+function planeToSphere(numerator, denominator, target) {
+    if(target === undefined)
+        target = new Mv()
+
+    let x,y,z
+    if(denominator.re === 0. && denominator.im === 0.) {
+        //result is point at infinity
+        x = 0.
+        y = 1.
+        z = 0.
+    }
+    else {
+        let temp = new Complex()
+        numerator.div(denominator, temp)
+        let re = temp.re
+        let im = temp.im
+        delete temp
+        let denom = 1. / (1. + re * re + im * im)
+
+        x = (2. * re) * denom
+        y = (1. - re * re - im * im) * denom
+        z = (2. * im) * denom
+    }
+    
+    //should you normalize here? Current situation is that they're normalized and have e123 = 1.
+    return target.point(x, y, z, 0.) // these are points on the "light cone"
+}
+
+function matrixToMotor(mat, target) {
+    if(target === undefined)
+        target = new Mv()
+
+    //can just transpose
+    let a = mat.get(0, 0), b = mat.get(0, 1)
+    let c = mat.get(1, 0), d = mat.get(1, 1)
+
+    let infinityPrimed = planeToSphere(a,c,mv3)
+    
+    let aPlusB = c0.copy(a).add(b)
+    let cPlusD = c1.copy(c).add(d)
+    let onePrimed = planeToSphere(
+        aPlusB,
+        cPlusD)
+    delete aPlusB
+    delete cPlusD
+
+    let aIPlusB = new Complex().copy(b).add(a.mul(iComplex, c0))
+    let cIPlusD = new Complex().copy(d).add(c.mul(iComplex, c0))
+    let iPrimed = planeToSphere(aIPlusB, cIPlusD)
+    delete aIPlusB
+    delete cIPlusD
+
+    let q = [
+        onePrimed, 
+        infinityPrimed, 
+        iPrimed]
+    //bloch sphere / complex numbers convention: z is up. Project from up onto (x,y) = (re,im)
+    //computer graphics convention: y is up
+    //our convention: project from y onto (x,z) = (re,im)
+    
+    // xyzNullPoints.forEach((qi)=>{qi.log()})
+    // q.forEach((qi)=>{qi.log()})
+    motorFromPsToQs(xyzNullPoints, q, target)
+
+    delete q
+    delete infinityPrimed
+    delete onePrimed
+    delete iPrimed
+
+    return target
+}
+
 let stateMotor = null
 async function initKleinBall() {
+
+    // matrixToMotor(identity2x2).log()
+    // return
+    //hooray, it works at least with identity
+
+    stateMotor = new Mv()
+    stateMotor[0] = 1.
+
     {
-        stateMotor = new Mv()
-        stateMotor[0] = 1.
+        let ams = Array(arsenovichMatrices.length)
+        arsenovichMatrices.forEach((matArray, i) => {
+            ams[i] = new ComplexMat(2, matArray)
+        })
 
-        updateFunctions.push(() => {
+        // ams[0].log("complex mat")
 
-            let timeSpentOnEach = 9.
-            let numPossibilities = 2
+        // matrixToMotor(ams[0], mv0).log()
 
-            let currentPossibility = Math.floor( (clock.elapsedTime / timeSpentOnEach) % numPossibilities )
-            let timeThroughCurrent = clock.elapsedTime % timeSpentOnEach
+        updateFunctions.push(()=>{
+            let amIndex = frameCount % ams.length
+            matrixToMotor(ams[amIndex], mv0).log(amIndex)
 
-            if (currentPossibility === 1 ) {
-                let phase = Math.sin(timeThroughCurrent * .7 )
-
-                let slightlyOffOrigin = e4.clone().multiplyScalar(phase).add(e3)
-                slightlyOffOrigin.normalize()
-                let translator = new Mv()
-                slightlyOffOrigin.mul(e3, translator)
-
-                stateMotor.copy(oneMv)
-                stateMotor.mul(translator, mv0)
-                stateMotor.copy(mv0)
-                stateMotor.normalize()
+            let problematic = false
+            for(let i = 0; i < 16; ++i) {
+                if (isNaN(mv0[i])) {
+                    problematic = true
+                    debugger
+                    matrixToMotor(ams[amIndex], mv0)
+                }
             }
-            if (currentPossibility === 0) {
-                let ourTime = timeThroughCurrent * .7
-                let phase = Math.sin(ourTime)
-
-                let lineSlightlyOffOrigin = e41.clone().multiplyScalar(0.8).add(e31)
-                lineSlightlyOffOrigin.normalize()
-                lineSlightlyOffOrigin.multiplyScalar(phase)
-                lineSlightlyOffOrigin[0] = Math.cos(ourTime)
-
-                stateMotor.copy(oneMv)
-                stateMotor.mul(lineSlightlyOffOrigin, mv0)
+            if (!problematic)
                 stateMotor.copy(mv0)
-                stateMotor.normalize()
-            }
-            
-            // log(stateMotor.norm())
-            // stateMotor.log()
         })
     }
+
+    //niceish animations
+    // updateFunctions.push(() => {
+
+    //     let timeSpentOnEach = 9.
+    //     let numPossibilities = 2
+
+    //     let currentPossibility = Math.floor( (clock.elapsedTime / timeSpentOnEach) % numPossibilities )
+    //     let timeThroughCurrent = clock.elapsedTime % timeSpentOnEach
+
+    //     if (currentPossibility === 1 ) {
+    //         let phase = Math.sin(timeThroughCurrent * .7 )
+
+    //         let slightlyOffOrigin = e4.clone().multiplyScalar(phase).add(e3)
+    //         slightlyOffOrigin.normalize()
+    //         let translator = new Mv()
+    //         slightlyOffOrigin.mul(e3, translator)
+
+    //         stateMotor.copy(oneMv)
+    //         stateMotor.mul(translator, mv0)
+    //         stateMotor.copy(mv0)
+    //         stateMotor.normalize()
+    //     }
+    //     if (currentPossibility === 0) {
+    //         let ourTime = timeThroughCurrent * .7
+    //         let phase = Math.sin(ourTime)
+
+    //         let lineSlightlyOffOrigin = e41.clone().multiplyScalar(0.8).add(e31)
+    //         lineSlightlyOffOrigin.normalize()
+    //         lineSlightlyOffOrigin.multiplyScalar(phase)
+    //         lineSlightlyOffOrigin[0] = Math.cos(ourTime)
+
+    //         stateMotor.copy(oneMv)
+    //         stateMotor.mul(lineSlightlyOffOrigin, mv0)
+    //         stateMotor.copy(mv0)
+    //         stateMotor.normalize()
+    //     }
+    // })
 
     let wholeThing = new THREE.Object3D()
     {
@@ -174,6 +279,11 @@ async function initKleinBall() {
         pt.toVector(m.position)
         wholeThing.add(m)
     }
+
+    // putSphereHereAtFrameCountZero(new Mv().point(1.,0.,0.,1.))
+    // putSphereHereAtFrameCountZero(new Mv().point(0.,1.,0.,1.))
+    // putSphereHereAtFrameCountZero(new Mv().point(0.,0.,1.,1.))
+    // return
 
     {
         let disks = []

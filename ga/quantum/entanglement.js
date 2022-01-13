@@ -1,5 +1,14 @@
 /*
+    Could it be that something inside the ball gives you the probability?
+
+    Mandelbrot
+        https://www.youtube.com/watch?v=FFftmWSzgmk
+        Put mandelbrot set on the sphere, repeatedly apply with 1 as denominator, the black goes to one place
+
+    The rotation is steiner's porism
+
     Definitely show:
+        The action of H x H
         No hidden variables
             Bell basis, rotational invariance
             Maximal entanglement
@@ -18,6 +27,9 @@
         teleportation - possibly only needs the two?
             And it allows you to connect to quantum cryptography
         Grover's algorithm
+        Shor's alg
+            https://en.wikipedia.org/wiki/Modular_exponentiation visualizable
+            mn = g^p - 1 visualizable
     Would be nice to show (maybe more qubits needed):
         "negative probabilities" formulation https://cognitivemedium.com/assets/qm-interpretation/Feynman.pdf
         free will
@@ -84,6 +96,9 @@
 
     Separable = isoclinic?
 
+    Kinda like an accordion
+    Or like some crossed pieces of wood
+
     Visualizations
         The thing itself
         The gates. Even if you only have two qubit gates, nice for them to know notation / have something to keep track of what you've done
@@ -95,10 +110,11 @@
     Script - "But what does quantum entanglement LOOK LIKE?"
         What is truth? What is reality?
 
-        Quantum entanglement is, without exaggeration, one of the strangest things ever discovered.
-        It's central to quantum physics so it's important if you want to understand why the periodic table has this shape, or how computer chips are made,
-        But for me entanglement most intriguing because of its implications for philosophy, metaphysics, and epistemology. In a sense you can resolve the schrodinger's cat paradox
-        In this video I want to give an intuitive sense for what entanglement is, which I'll do using this visualization of it
+        This is a visualization of quantum entanglement, which is one of the most strange and important rules of rules of how the universe works
+        Without quantum entanglement there would be no periodic table and so no chemistry able to support living things
+        And without our understanding of it, we'd be unable to create MRI machines, or small microchips for use in computers
+        Even philosophy has a use for entanglement. In the schrodinger's cat paradox, two pieces of information become, somehow, linked to one another
+        In the schrodinger's cat paradox that means the decay state of an atom and your knowledge of whether your cat has died have become related, which they aren't before you open the box
 
         The gnomonic projection is simply what you see if you're at the center of the globe (so maybe zoom in on the real viz?)
         We can do a sequence of moves on the surface of the globe by rotating around different points on it
@@ -112,6 +128,15 @@
         
 
         If we take an ordinary sphere and imagine an ant on its surface, 
+
+        You can say thank you for this video on patreon. It's actually taken more than two years of research to create this,
+        and I have no academic position and support myself as a software engineer, so if you feel like
+
+        Usually, two things can know about each other without impacting each other.
+        Let's say you have Alice lives in Paris and Bob lives in New York
+        Suppose someone says to Alice "there's a guy called Bob who lives in New York"
+        And someone else says to Bob "there's a woman called Alice who lives in Paris"
+        These two aren't necessarily impacted by that information (er, not the best example)
 
     Coooool: the fact that the dof grows quadratically rather than exponentially
 

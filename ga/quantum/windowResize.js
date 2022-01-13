@@ -93,6 +93,18 @@ async function initLights(shadowCaster) {
 			niceMat = (hue) => {
 				const diffuseColor = new THREE.Color().setHSL(hue, 0.5, 0.25)
 
+				// let beta = .4 // https://github.com/mrdoob/three.js/blob/master/examples/webgl_materials_variations_phong.html
+				// let mat = new THREE.MeshPhongMaterial({
+				// 	shininess: 90.,
+				// 	reflectivity: beta,
+				// 	specular: new THREE.Color(beta * 0.2, beta * 0.2, beta * 0.2),
+				// 	color: diffuseColor,
+
+				// 	envMap: texture,
+					
+				// 	side: THREE.DoubleSide
+				// })
+
 				let mat = new THREE.MeshPhysicalMaterial({
 					color: diffuseColor,
 					metalness: 0,

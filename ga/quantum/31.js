@@ -1,6 +1,6 @@
 function init31() {
 
-    let basisNames = ["", "1", "2", "3", "4", "12", "13", "14", "23", "24", "34", "123", "412", "341", "234", "0123"]
+    let basisNames = ["", "1", "2", "3", "4", "12", "13", "14", "23", "24", "34", "123", "412", "413", "423", "0123"]
 	let onesWithMinus = ["31", "021", "032"] //yes you could reverse the orders in the string but it's established
 
 	let indexForXPartOfQuaternion = 8
@@ -45,6 +45,9 @@ function init31() {
 
 			if (label !== undefined)
 				str = label + ": " + str
+
+			if (str === "")
+				str += "0."
 
 			log(str)
 		}
@@ -321,6 +324,22 @@ function init31() {
 			return ret
 		}
 
+		simpleInverse(target) {
+			if (target === undefined)
+				target = new Mv()
+
+			localMv0.copy(zeroMv)
+			this.mul(this,localMv0)
+			for(let i = 1; i < 16; ++i) {
+				if (Math.abs(localMv0[i]) > .00001)
+					console.error("trying to take inverse of a non-simple multivector")
+			}
+			let thisSquaredReciprocal = 1. / localMv0[0]
+			target.copy(this)
+			target.multiplyScalar(thisSquaredReciprocal)
+			return target
+		}
+
 		x() {
 			return this[14]
 		}
@@ -346,10 +365,16 @@ function init31() {
 			if(target === undefined)
 				target = new THREE.Vector3()
 
-			this.normalize()
-			target.x = this[14] / this[11]
-			target.y = this[13] / this[11]
-			target.z = this[12] / this[11]
+			if(this[11] === 0.) {
+				target.x = this[14]
+				target.y = this[13]
+				target.z = this[12]
+			}
+			else {
+				target.x = this[14] / this[11]
+				target.y = this[13] / this[11]
+				target.z = this[12] / this[11]
+			}
 
 			return target
 		}
@@ -407,8 +432,7 @@ function init31() {
 
 		norm() {
 			// float norm() { return sqrt(std:: abs(((* this) * Conjugate())[0]); }
-    // float inorm() { return (!(* this)).norm(); }
-    // R310 normalized() { return (* this) * (1 / norm()); }
+    		// float inorm() { return (!(* this)).norm(); }
 
 			this.conjugate(localMv0)
 			this.mul( localMv0,localMv1)
@@ -416,7 +440,10 @@ function init31() {
 		}
 
 		normalize() {
-			this.multiplyScalar(1. / this.norm() )
+			let ourNorm = this.norm()
+			if(ourNorm === 0.)
+				debugger
+			this.multiplyScalar(1. / ourNorm )
 			return this
 		}
 
@@ -549,6 +576,62 @@ function init31() {
 		return Math.abs(lv2LocalMv2.norm())
 	}
 
+	motorFromPsToQs = (p, q, target) => {
+		// debugger
+
+		let bigM = new Mv()
+		bigM[0] = 1.
+		let bigQ = new Mv() //The ending mv, slowly built up
+		bigQ[15] = 1.
+		let bigP = new Mv() //The starting mv, slowly built up
+		bigP[15] = 1.
+
+		let pTransformedByCurrentM = new Mv()
+
+		for (let i = 0, il = p.length; i < il; ++i) {
+			
+			bigM.sandwich(p[i], pTransformedByCurrentM)
+			bigQ.join(pTransformedByCurrentM, bigP)
+			
+			// if (pTransformedByCurrentM.equals(q[i]))
+			// 	continue //optimistic hack until enki replies
+
+			bigQ.join(q[i], lv2LocalMv0)
+			bigQ.copy(lv2LocalMv0)
+
+			//last line
+			{
+				let bigQNormalized = new Mv()
+				bigQNormalized.copy(bigQ)
+				if(i > 0) //big hack, wait for steven
+					bigQNormalized.normalize()
+
+				let bigPInverse = new Mv()
+				bigP.simpleInverse(bigPInverse)
+				if (i > 0) //big hack, wait for steven
+					bigPInverse.normalize()
+
+				let motorTakingPToQ = new Mv()
+				bigQNormalized.mul(bigPInverse, motorTakingPToQ)
+				motorTakingPToQ.sqrtBiReflection(motorTakingPToQ)
+
+				motorTakingPToQ.mul(bigM, lv2LocalMv4)
+				bigM.copy(lv2LocalMv4)
+
+				delete bigQNormalized
+				delete bigPInverse
+				delete motorTakingPToQ
+			}
+		}
+
+		delete pTransformedByCurrentM
+		delete bigM
+		delete bigQ
+		delete bigP
+
+		return target.copy(bigM)
+	}
+
 	function MvFromIndexAndFloat(float, index) {
 		let mv = new Mv()
 		mv[index] = float
@@ -569,11 +652,18 @@ function init31() {
 	e12 = e1.mul(e2)
 	e31 = e3.mul(e1)
 	e23 = e2.mul(e3)
-	e421 = e42.mul(e1)
+	e412 = e41.mul(e2)
 	e413 = e41.mul(e3)
-	e432 = e43.mul(e2)
+	e423 = e42.mul(e3)
 	e123 = e12.mul(e3)
 	e4123 = e4.mul(e123)
+
+	xyzNullPoints = [
+		e423.clone(),
+		e413.clone(),
+		e412.clone()] //actually these should probably have a w part!
+
+	// let infinityOnSphere
 
     // static R310 e1(1.0f, 1);
     // static R310 e2(1.0f, 2);
@@ -600,10 +690,19 @@ function init31() {
 	let lv2LocalMv1 = new Mv()
 	let lv2LocalMv2 = new Mv()
 	let lv2LocalMv3 = new Mv()
+	let lv2LocalMv4 = new Mv()
+	let lv2LocalMv5 = new Mv()
+	let lv2LocalMv6 = new Mv()
+	let lv2LocalMv7 = new Mv()
+	let lv2LocalMv8 = new Mv()
 
 	mv0 = new Mv()
 	mv1 = new Mv()
 	mv2 = new Mv()
 	mv3 = new Mv()
 	mv4 = new Mv()
+	mv5 = new Mv()
+	mv6 = new Mv()
+	mv7 = new Mv()
+	mv8 = new Mv()
 }

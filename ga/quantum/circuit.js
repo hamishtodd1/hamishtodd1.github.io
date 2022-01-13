@@ -4,7 +4,7 @@ async function initCircuit() {
     {
         await new Promise(resolve => {
             let xhr = new XMLHttpRequest()
-            xhr.open("GET", "units/quirkExample.json", true)
+            xhr.open("GET", "quirkExample.json", true)
             xhr.onload = function (e) {
                 circuitJson = JSON.parse(xhr.response)
                 resolve()
@@ -21,7 +21,10 @@ async function initCircuit() {
 
     // }
 
-    initRectangles()
+    let myThing = new THREE.Object3D()
+    scene.add(myThing)
+    myThing.scale.setScalar(10.)
+    initRectangles(myThing)
 
     let bgWidth = .3
     let bgHeight = .2
@@ -29,8 +32,7 @@ async function initCircuit() {
         haveFrame: true,
         w: bgWidth, h: bgHeight,
         getPosition: (p) => {
-            p.copy(rightHand.position)
-            p.z -= .001
+            p.set(0., 0., -.001)
         },
         onClick: () => {
             // log("yo")
@@ -97,7 +99,7 @@ async function initCircuit() {
             w: wireLength,
             mat: wireMaterial,
             getPosition: (p) => {
-                p.copy(rightHand.position)
+                p.set(0.,0.,0.)
 
                 p.x += .01
                 p.y -= wireSpacing * (wire.i - (NUM_QUBITS-1) / 2.)
@@ -115,7 +117,7 @@ async function initCircuit() {
                 setRectText(wire.initialState, "|" + wire.initialState.val + ">")
             },
             getPosition:(v)=>{
-                v.z = rightHand.position.z
+                v.z = 0.
                 v.x = wire.position.x - wire.scale.x / 2. - gridDimension / 2.
                 v.y = wire.position.y
             }

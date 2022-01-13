@@ -67,6 +67,9 @@ class ComplexVector {
             }
         }
 
+        if(str === "")
+            str += "0."
+
         if (msg !== undefined)
             str = msg + ": " + str
 
@@ -170,7 +173,10 @@ class ComplexMat {
         }
     }
 
-    log() {
+    log(msg) {
+        if(msg !== undefined)
+            log(msg)
+            
         for (let row = 0; row < this.dim; ++row) {
             let str = ""
             for (let col = 0; col < this.dim; ++col ) {
@@ -178,6 +184,10 @@ class ComplexMat {
                 if(col < this.dim - 1)
                     str += ", "
             }
+
+            if (str === "")
+                str += "0."
+
             log(str)
         }
     }
@@ -417,10 +427,12 @@ class Complex {
 	add(c) {
 		this.re += c.re
 		this.im += c.im
+        return this
 	}
 	sub(c) {
 		this.re -= c.re
 		this.im -= c.im
+        return this
 	}
 
 	mul(c,target) {
@@ -440,6 +452,8 @@ class Complex {
         
         target.re = multiplicand * (c.re*this.re + c.im*this.im)
         target.im = multiplicand * (this.im*c.re - this.re*c.im)
+
+        return target
     }
 
     log() {
@@ -447,12 +461,16 @@ class Complex {
     }
 }
 
+const iComplex = new Complex(0., 1.)
+const c0 = new Complex()
 const c1 = new Complex()
 const c2 = new Complex()
 const c3 = new Complex()
 const c4 = new Complex()
 const c5 = new Complex()
 const c6 = new Complex()
+const c7 = new Complex()
+const c8 = new Complex()
 
 function ps(theta) {
     return new ComplexMat(2,[
