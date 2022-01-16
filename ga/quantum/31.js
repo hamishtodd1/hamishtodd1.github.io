@@ -274,6 +274,16 @@ function init31() {
 			return target
 		}
 
+		simpleDiv(b, target) {
+			if (target === undefined)
+				target = new Mv()
+
+			b.simpleInverse(localMv0)
+			this.mul(localMv0,target)
+
+			return target
+		}
+
 		add(b, target) {
 			if (target !== undefined)
 				console.error("no target for this")
@@ -334,6 +344,8 @@ function init31() {
 				if (Math.abs(localMv0[i]) > .00001)
 					console.error("trying to take inverse of a non-simple multivector")
 			}
+			if(localMv0[0] === 0.)
+				console.error("trying to take inverse of null multivector")
 			let thisSquaredReciprocal = 1. / localMv0[0]
 			target.copy(this)
 			target.multiplyScalar(thisSquaredReciprocal)
@@ -424,7 +436,7 @@ function init31() {
 		equals(mv) {
 			let ret = true
 			for(let i = 0; i < 16; ++i) {
-				if(mv[i] !== this[i])
+				if(Math.abs(mv[i] !== this[i]) > .0001)
 					ret = false
 			}
 			return ret
@@ -576,61 +588,7 @@ function init31() {
 		return Math.abs(lv2LocalMv2.norm())
 	}
 
-	motorFromPsToQs = (p, q, target) => {
-		// debugger
-
-		let bigM = new Mv()
-		bigM[0] = 1.
-		let bigQ = new Mv() //The ending mv, slowly built up
-		bigQ[15] = 1.
-		let bigP = new Mv() //The starting mv, slowly built up
-		bigP[15] = 1.
-
-		let pTransformedByCurrentM = new Mv()
-
-		for (let i = 0, il = p.length; i < il; ++i) {
-			
-			bigM.sandwich(p[i], pTransformedByCurrentM)
-			bigQ.join(pTransformedByCurrentM, bigP)
-			
-			// if (pTransformedByCurrentM.equals(q[i]))
-			// 	continue //optimistic hack until enki replies
-
-			bigQ.join(q[i], lv2LocalMv0)
-			bigQ.copy(lv2LocalMv0)
-
-			//last line
-			{
-				let bigQNormalized = new Mv()
-				bigQNormalized.copy(bigQ)
-				if(i > 0) //big hack, wait for steven
-					bigQNormalized.normalize()
-
-				let bigPInverse = new Mv()
-				bigP.simpleInverse(bigPInverse)
-				if (i > 0) //big hack, wait for steven
-					bigPInverse.normalize()
-
-				let motorTakingPToQ = new Mv()
-				bigQNormalized.mul(bigPInverse, motorTakingPToQ)
-				motorTakingPToQ.sqrtBiReflection(motorTakingPToQ)
-
-				motorTakingPToQ.mul(bigM, lv2LocalMv4)
-				bigM.copy(lv2LocalMv4)
-
-				delete bigQNormalized
-				delete bigPInverse
-				delete motorTakingPToQ
-			}
-		}
-
-		delete pTransformedByCurrentM
-		delete bigM
-		delete bigQ
-		delete bigP
-
-		return target.copy(bigM)
-	}
+	
 
 	function MvFromIndexAndFloat(float, index) {
 		let mv = new Mv()
@@ -659,9 +617,9 @@ function init31() {
 	e4123 = e4.mul(e123)
 
 	xyzNullPoints = [
-		e423.clone(),
-		e413.clone(),
-		e412.clone()] //actually these should probably have a w part!
+		e423.clone().add(e123),
+		e413.clone().add(e123),
+		e412.clone().add(e123)] //actually these should probably have a w part!
 
 	// let infinityOnSphere
 

@@ -4,6 +4,7 @@ People to send to
     Gavin Crooks
     Andrew Steane
     Martti
+    A prof who could get you a frickin visa
     Alan Kay
     Emily Adlam
     Sean Carroll
@@ -47,80 +48,13 @@ The function you're trying to make is...
 
 */
 
-function planeToSphere(numerator, denominator, target) {
-    if(target === undefined)
-        target = new Mv()
 
-    let x,y,z
-    if(denominator.re === 0. && denominator.im === 0.) {
-        //result is point at infinity
-        x = 0.
-        y = 1.
-        z = 0.
-    }
-    else {
-        let temp = new Complex()
-        numerator.div(denominator, temp)
-        let re = temp.re
-        let im = temp.im
-        delete temp
-        let denom = 1. / (1. + re * re + im * im)
 
-        x = (2. * re) * denom
-        y = (1. - re * re - im * im) * denom
-        z = (2. * im) * denom
-    }
-    
-    //should you normalize here? Current situation is that they're normalized and have e123 = 1.
-    return target.point(x, y, z, 0.) // these are points on the "light cone"
-}
 
-function matrixToMotor(mat, target) {
-    if(target === undefined)
-        target = new Mv()
-
-    //can just transpose
-    let a = mat.get(0, 0), b = mat.get(0, 1)
-    let c = mat.get(1, 0), d = mat.get(1, 1)
-
-    let infinityPrimed = planeToSphere(a,c,mv3)
-    
-    let aPlusB = c0.copy(a).add(b)
-    let cPlusD = c1.copy(c).add(d)
-    let onePrimed = planeToSphere(
-        aPlusB,
-        cPlusD)
-    delete aPlusB
-    delete cPlusD
-
-    let aIPlusB = new Complex().copy(b).add(a.mul(iComplex, c0))
-    let cIPlusD = new Complex().copy(d).add(c.mul(iComplex, c0))
-    let iPrimed = planeToSphere(aIPlusB, cIPlusD)
-    delete aIPlusB
-    delete cIPlusD
-
-    let q = [
-        onePrimed, 
-        infinityPrimed, 
-        iPrimed]
-    //bloch sphere / complex numbers convention: z is up. Project from up onto (x,y) = (re,im)
-    //computer graphics convention: y is up
-    //our convention: project from y onto (x,z) = (re,im)
-    
-    // xyzNullPoints.forEach((qi)=>{qi.log()})
-    // q.forEach((qi)=>{qi.log()})
-    motorFromPsToQs(xyzNullPoints, q, target)
-
-    delete q
-    delete infinityPrimed
-    delete onePrimed
-    delete iPrimed
-
-    return target
-}
 
 let stateMotor = null
 async function initKleinBall() {
+
 
     // matrixToMotor(identity2x2).log()
     // return
@@ -129,70 +63,71 @@ async function initKleinBall() {
     stateMotor = new Mv()
     stateMotor[0] = 1.
 
-    {
-        let ams = Array(arsenovichMatrices.length)
-        arsenovichMatrices.forEach((matArray, i) => {
-            ams[i] = new ComplexMat(2, matArray)
-        })
+    // if(0)
+    // {
+    //     let ams = Array(arsenovichMatrices.length)
+    //     arsenovichMatrices.forEach((matArray, i) => {
+    //         ams[i] = new ComplexMat(2, matArray)
+    //     })
 
-        // ams[0].log("complex mat")
+    //     // ams[0].log("complex mat")
 
-        // matrixToMotor(ams[0], mv0).log()
+    //     // matrixToMotor(ams[0], mv0).log()
 
-        updateFunctions.push(()=>{
-            let amIndex = frameCount % ams.length
-            matrixToMotor(ams[amIndex], mv0).log(amIndex)
+    //     updateFunctions.push(()=>{
+    //         let amIndex = frameCount % ams.length
+    //         matrixToMotor(ams[amIndex], mv0).log(amIndex)
 
-            let problematic = false
-            for(let i = 0; i < 16; ++i) {
-                if (isNaN(mv0[i])) {
-                    problematic = true
-                    debugger
-                    matrixToMotor(ams[amIndex], mv0)
-                }
-            }
-            if (!problematic)
-                stateMotor.copy(mv0)
-        })
-    }
+    //         let problematic = false
+    //         for(let i = 0; i < 16; ++i) {
+    //             if (isNaN(mv0[i])) {
+    //                 problematic = true
+    //                 debugger
+    //                 matrixToMotor(ams[amIndex], mv0)
+    //             }
+    //         }
+    //         if (!problematic)
+    //             stateMotor.copy(mv0)
+    //     })
+    // }
 
     //niceish animations
-    // updateFunctions.push(() => {
+    updateFunctions.push(() => {
 
-    //     let timeSpentOnEach = 9.
-    //     let numPossibilities = 2
+        let timeSpentOnEach = 9.
+        let numPossibilities = 2
 
-    //     let currentPossibility = Math.floor( (clock.elapsedTime / timeSpentOnEach) % numPossibilities )
-    //     let timeThroughCurrent = clock.elapsedTime % timeSpentOnEach
+        let currentPossibility = Math.floor( (clock.elapsedTime / timeSpentOnEach) % numPossibilities )
+        let timeThroughCurrent = clock.elapsedTime % timeSpentOnEach
 
-    //     if (currentPossibility === 1 ) {
-    //         let phase = Math.sin(timeThroughCurrent * .7 )
+        if (currentPossibility === 1 ) {
+            let phase = Math.sin(timeThroughCurrent * .7 )
 
-    //         let slightlyOffOrigin = e4.clone().multiplyScalar(phase).add(e3)
-    //         slightlyOffOrigin.normalize()
-    //         let translator = new Mv()
-    //         slightlyOffOrigin.mul(e3, translator)
+            let slightlyOffOrigin = e4.clone().multiplyScalar(phase).add(e3)
+            slightlyOffOrigin.normalize()
+            let translator = new Mv()
+            slightlyOffOrigin.mul(e3, translator)
 
-    //         stateMotor.copy(oneMv)
-    //         stateMotor.mul(translator, mv0)
-    //         stateMotor.copy(mv0)
-    //         stateMotor.normalize()
-    //     }
-    //     if (currentPossibility === 0) {
-    //         let ourTime = timeThroughCurrent * .7
-    //         let phase = Math.sin(ourTime)
+            stateMotor.copy(oneMv)
+            stateMotor.mul(translator, mv0)
+            stateMotor.copy(mv0)
+            stateMotor.normalize()
+        }
+        if (currentPossibility === 0) {
+            let ourTime = timeThroughCurrent * .7
+            let phase = Math.sin(ourTime)
 
-    //         let lineSlightlyOffOrigin = e41.clone().multiplyScalar(0.8).add(e31)
-    //         lineSlightlyOffOrigin.normalize()
-    //         lineSlightlyOffOrigin.multiplyScalar(phase)
-    //         lineSlightlyOffOrigin[0] = Math.cos(ourTime)
+            let lineSlightlyOffOrigin = e41.clone().multiplyScalar(0.8).add(e31)
+            lineSlightlyOffOrigin.normalize()
+            lineSlightlyOffOrigin.multiplyScalar(phase)
+            lineSlightlyOffOrigin[0] = Math.cos(ourTime)
 
-    //         stateMotor.copy(oneMv)
-    //         stateMotor.mul(lineSlightlyOffOrigin, mv0)
-    //         stateMotor.copy(mv0)
-    //         stateMotor.normalize()
-    //     }
-    // })
+            stateMotor.copy(oneMv)
+            stateMotor.mul(lineSlightlyOffOrigin, mv0)
+            stateMotor.copy(mv0)
+            stateMotor.normalize()
+        }
+    })
 
     let wholeThing = new THREE.Object3D()
     {
