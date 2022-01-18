@@ -16,10 +16,15 @@ People to send to
     Andy Matuschak
     Hestenes
     Dude you met that pontus told you the name of
+    Future of coding community. Could do one on geometric algebra, one on
 
 What's the motor taking C to C
     Easy enough to find, for a given point, the point it is sent to
     so you take two copies of point and rotate and move them up, and then add
+
+For marketing QC companies
+    make it so you can make a SUPER nice demo of your alg
+    Make it so you can have an array of matrices and can embed a threejs demo
 
 az + b and cz + d are both rotation/translations
 Well, what's 1/(cz+d)?
@@ -63,73 +68,72 @@ async function initKleinBall() {
     stateMotor = new Mv()
     stateMotor[0] = 1.
 
+    
+
     // if(0)
-    // {
-    //     let ams = Array(arsenovichMatrices.length)
-    //     arsenovichMatrices.forEach((matArray, i) => {
-    //         ams[i] = new ComplexMat(2, matArray)
-    //     })
+    {
+        let ams = Array(arsenovichMatrices.length)
+        arsenovichMatrices.forEach((matArray, i) => {
+            ams[i] = new ComplexMat(2, matArray)
+        })
 
-    //     // ams[0].log("complex mat")
+        updateFunctions.push(()=>{
+            let amIndex = frameCount % ams.length
+            matrixToMotor(ams[amIndex], mv0)
 
-    //     // matrixToMotor(ams[0], mv0).log()
-
-    //     updateFunctions.push(()=>{
-    //         let amIndex = frameCount % ams.length
-    //         matrixToMotor(ams[amIndex], mv0).log(amIndex)
-
-    //         let problematic = false
-    //         for(let i = 0; i < 16; ++i) {
-    //             if (isNaN(mv0[i])) {
-    //                 problematic = true
-    //                 debugger
-    //                 matrixToMotor(ams[amIndex], mv0)
-    //             }
-    //         }
-    //         if (!problematic)
-    //             stateMotor.copy(mv0)
-    //     })
-    // }
+            let problematic = false
+            for(let i = 0; i < 16; ++i) {
+                if (isNaN(mv0[i])) {
+                    problematic = true
+                    debugger
+                    matrixToMotor(ams[amIndex], mv0)
+                }
+            }
+            if (!problematic)
+                stateMotor.copy(mv0)
+        })
+    }
 
     //niceish animations
-    updateFunctions.push(() => {
+    // updateFunctions.push(() => {
 
-        let timeSpentOnEach = 9.
-        let numPossibilities = 2
+    //     let timeSpentOnEach = 9.
+    //     let numPossibilities = 2
 
-        let currentPossibility = Math.floor( (clock.elapsedTime / timeSpentOnEach) % numPossibilities )
-        let timeThroughCurrent = clock.elapsedTime % timeSpentOnEach
+    //     let currentPossibility = Math.floor( (clock.elapsedTime / timeSpentOnEach) % numPossibilities )
+    //     let timeThroughCurrent = clock.elapsedTime % timeSpentOnEach
 
-        if (currentPossibility === 1 ) {
-            let phase = Math.sin(timeThroughCurrent * .7 )
+    //     if (currentPossibility === 1 ) {
+    //         let phase = Math.sin(timeThroughCurrent * .7 )
 
-            let slightlyOffOrigin = e4.clone().multiplyScalar(phase).add(e3)
-            slightlyOffOrigin.normalize()
-            let translator = new Mv()
-            slightlyOffOrigin.mul(e3, translator)
+    //         let slightlyOffOrigin = e4.clone().multiplyScalar(phase).add(e3)
+    //         slightlyOffOrigin.normalize()
+    //         let translator = new Mv()
+    //         slightlyOffOrigin.mul(e3, translator)
 
-            stateMotor.copy(oneMv)
-            stateMotor.mul(translator, mv0)
-            stateMotor.copy(mv0)
-            stateMotor.normalize()
-        }
-        if (currentPossibility === 0) {
-            let ourTime = timeThroughCurrent * .7
-            let phase = Math.sin(ourTime)
+    //         stateMotor.copy(oneMv)
+    //         stateMotor.mul(translator, mv0)
+    //         stateMotor.copy(mv0)
+    //         stateMotor.normalize()
+    //     }
+    //     if (currentPossibility === 0) {
+    //         let ourTime = timeThroughCurrent * .7
+    //         let phase = Math.sin(ourTime)
 
-            let lineSlightlyOffOrigin = e41.clone().multiplyScalar(0.8).add(e31)
-            lineSlightlyOffOrigin.normalize()
-            lineSlightlyOffOrigin.multiplyScalar(phase)
-            lineSlightlyOffOrigin[0] = Math.cos(ourTime)
+    //         let lineSlightlyOffOrigin = e41.clone().multiplyScalar(0.8).add(e31)
+    //         lineSlightlyOffOrigin.normalize()
+    //         lineSlightlyOffOrigin.multiplyScalar(phase)
+    //         lineSlightlyOffOrigin[0] = Math.cos(ourTime)
 
-            stateMotor.copy(oneMv)
-            stateMotor.mul(lineSlightlyOffOrigin, mv0)
-            stateMotor.copy(mv0)
-            stateMotor.normalize()
-        }
-    })
+    //         stateMotor.copy(oneMv)
+    //         stateMotor.mul(lineSlightlyOffOrigin, mv0)
+    //         stateMotor.copy(mv0)
+    //         stateMotor.normalize()
+    //     }
+    // })
 
     let wholeThing = new THREE.Object3D()
+    wholeThing.rotation.y += -TAU / 4.
     {
         scene.add(wholeThing)
     

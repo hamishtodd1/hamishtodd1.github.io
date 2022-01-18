@@ -1,6 +1,8 @@
 /*
     Could it be that something inside the ball gives you the probability?
 
+    Lean in to the metaphysics: yes, it's useful for these things, but they're super boring
+
     Mandelbrot
         https://www.youtube.com/watch?v=FFftmWSzgmk
         Put mandelbrot set on the sphere, repeatedly apply with 1 as denominator, the black goes to one place

@@ -49,7 +49,7 @@ function init31() {
 			if (str === "")
 				str += "0."
 
-			log(str)
+			console.error(str)
 		}
 
 		reverse(target) {
@@ -228,28 +228,28 @@ function init31() {
 			return target;
 		}
 
-		possiblyProperDual(target){
-			if (target === undefined)
-				target = new Mv()
+		// possiblyProperDual(target){
+		// 	if (target === undefined)
+		// 		target = new Mv()
 
-			target[0] = this[15]
-			target[1] = this[14]
-			target[2] = this[13]
-			target[3] = this[12]
-			target[4] = this[11]
-			target[5] = this[10]
-			target[6] = this[9]
-			target[7] = this[8]
-			target[8] = this[7]
-			target[9] = this[6]
-			target[10] = this[5]
-			target[11] = this[4]
-			target[12] = this[3]
-			target[13] = this[2]
-			target[14] = this[1]
-			target[15] = this[0]
-			return target
-		}
+		// 	target[0] = this[15]
+		// 	target[1] = this[14]
+		// 	target[2] = this[13]
+		// 	target[3] = this[12]
+		// 	target[4] = this[11]
+		// 	target[5] = this[10]
+		// 	target[6] = this[9]
+		// 	target[7] = this[8]
+		// 	target[8] = this[7]
+		// 	target[9] = this[6]
+		// 	target[10] = this[5]
+		// 	target[11] = this[4]
+		// 	target[12] = this[3]
+		// 	target[13] = this[2]
+		// 	target[14] = this[1]
+		// 	target[15] = this[0]
+		// 	return target
+		// }
 
 		mul(b, target) {
 			if(target === undefined)
@@ -616,10 +616,8 @@ function init31() {
 	e123 = e12.mul(e3)
 	e4123 = e4.mul(e123)
 
-	xyzNullPoints = [
-		e423.clone().add(e123),
-		e413.clone().add(e123),
-		e412.clone().add(e123)] //actually these should probably have a w part!
+	nInfinity = e3.clone().add(e4)
+	nOrigin = e3.clone().multiplyScalar(-1.).add(e4)
 
 	// let infinityOnSphere
 
@@ -663,4 +661,15 @@ function init31() {
 	mv6 = new Mv()
 	mv7 = new Mv()
 	mv8 = new Mv()
+
+	xyzNullPoints = [
+		e423.clone().add(e123),
+		e413.clone().add(e123),
+		e412.clone().add(e123)] //actually these should probably have a w part!
+
+	oneInfinityIPoints = [
+		complexToHorosphere(new Complex(1., 0.), new Complex(1., 0.)),
+		complexToHorosphere(new Complex(1., 0.), new Complex(1., 0.)),
+		complexToHorosphere(new Complex(0., 1.), new Complex(0., 0.)),
+	]
 }
