@@ -276,7 +276,7 @@ function initRectangles(thingToAddTo) {
 
             if (params.getPosition) {
                 updateFunctions.push(() => {
-                    params.getPosition(rect.position)
+                    params.getPosition(rect.position,rect)
                 })
             }
             if (params.getScale) {
@@ -303,12 +303,13 @@ function initRectangles(thingToAddTo) {
             }
         }
 
-        if (params.frameThickness || params.haveFrame) {
-            rect.frameThickness = params.frameThickness || .01
+        if (params.frameThickness || params.haveFrame !== false ) {
+            rect.frameThickness = params.frameThickness || .02
             rect.edges = Array(4)
             for (let i = 0; i < 4; ++i) {
                 const edge = tblr[i]
                 let frameR = Rectangle({
+                    haveFrame: false,
                     mat: blackMaterial
                 })
                 rect.edges[i] = frameR
@@ -333,25 +334,26 @@ function initRectangles(thingToAddTo) {
         }
 
         {
-            if (params.onClick)
-                rect.onClick = params.onClick
+            if (params.onClick){
+                onClicks.push({
+                    z: () => {
+                        mouse.raycaster.intersectZPlane(rect.position.z, v0)
 
-            rect.pointInside = (p) => {
-                v0.copy(p)
+                        v0.x -= rect.position.x
+                        v0.y -= rect.position.y
+                        v0.x /= rect.scale.x
+                        v0.y /= rect.scale.y
+                        
+                        let inside = -.5 < v0.x && v0.x < .5 &&
+                            -.5 < v0.y && v0.y < .5
 
-                v0.x -= rect.position.x
-                v0.y -= rect.position.y
-                v0.x /= rect.scale.x
-                v0.y /= rect.scale.y
-
-                if (-.5 < v0.x && v0.x < .5 &&
-                    -.5 < v0.y && v0.y < .5)
-                    return true
-                else
-                    return false
-            }
-            rect.mouseInside = () => {
-                return rect.pointInside(mouse.position)
+                        if (inside)
+                            return rect.position.z
+                        else
+                            return -Infinity 
+                    },
+                    start: params.onClick
+                })
             }
         }
 

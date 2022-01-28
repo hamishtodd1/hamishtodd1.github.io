@@ -19,13 +19,7 @@
         How to read off the expectation values
             A "basis" is a way of looking at things and taking measurements on them
             Measuring device is probably some kind of angle-measurer-looking-thing
-        Gates
-            NOT ("Pauli Z" or w/e)
-            CNOT
-            Ising coupling
-            square root of not
-            Tensor product of two states
-            CNOT a->b, CNOT b->a, CNOT a->b = swap somehow
+        
         teleportation - possibly only needs the two?
             And it allows you to connect to quantum cryptography
         Grover's algorithm

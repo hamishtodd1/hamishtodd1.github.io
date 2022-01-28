@@ -23,13 +23,15 @@
 				// initAlgebra()
 				init31()
 
-				initWindowResizeSystemAndSurroundings()
+				initWindowResize()
 				initMouse()
 				initSound()
 
+				await initSurroundingsAndMaterial()
+
 				// initOneQubit()
-				await initKleinBall()
-				// await initCircuit()
+				// await initKleinBall()
+				await initCircuit()
 				// await initEntanglement()
 				// initMobTransState()
 
@@ -68,6 +70,8 @@
 		<script src="../common/buttons.js"></script>
 
 		<script src="windowResize.js"></script>
+
+		<script src="surroundingsAndMaterial.js"></script>
 
 		<script src="arsenovichMatrices.js"></script>
 

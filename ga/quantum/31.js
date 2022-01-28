@@ -614,7 +614,7 @@ function init31() {
 	e413 = e41.mul(e3)
 	e423 = e42.mul(e3)
 	e123 = e12.mul(e3)
-	e4123 = e4.mul(e123)
+	e1234 = e123.mul(e4)
 
 	nInfinity = e3.clone().add(e4)
 	nOrigin = e3.clone().multiplyScalar(-1.).add(e4)

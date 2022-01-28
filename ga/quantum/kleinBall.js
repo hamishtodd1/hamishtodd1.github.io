@@ -1,57 +1,3 @@
-/*
-People to send to
-    Michael Nielsen
-    Gavin Crooks
-    Andrew Steane
-    Martti
-    A prof who could get you a frickin visa
-    Alan Kay
-    Emily Adlam
-    Sean Carroll
-    Tim Blaise
-    Grant Sanderson
-    Henry minutephysics
-    Henry Segerman, Sabetta Matsumoto
-    Simon Newey
-    Andy Matuschak
-    Hestenes
-    Dude you met that pontus told you the name of
-    Future of coding community. Could do one on geometric algebra, one on
-
-What's the motor taking C to C
-    Easy enough to find, for a given point, the point it is sent to
-    so you take two copies of point and rotate and move them up, and then add
-
-For marketing QC companies
-    make it so you can make a SUPER nice demo of your alg
-    Make it so you can have an array of matrices and can embed a threejs demo
-
-az + b and cz + d are both rotation/translations
-Well, what's 1/(cz+d)?
-
-Maybe think about its action on the unit circle
-
-Does taking the transpose correspond to measuring the same thing in a different way? Surely
-
-
-
-
-Two points are on the riemann sphere
-
-as a bivector it'll be a point pair, you're exponentiating that
-
-So picture 
-
-f(4x4 C) {
-    let mv = new Mv() //it's a quadreflection
-    return mv
-}
-
-Could consider the circle on the boundary getting mapped from a certain thing on the plane
-
-The function you're trying to make is... 
-
-*/
 
 
 
@@ -68,9 +14,7 @@ async function initKleinBall() {
     stateMotor = new Mv()
     stateMotor[0] = 1.
 
-    
-
-    // if(0)
+    if(0)
     {
         let ams = Array(arsenovichMatrices.length)
         arsenovichMatrices.forEach((matArray, i) => {
@@ -133,19 +77,8 @@ async function initKleinBall() {
     // })
 
     let wholeThing = new THREE.Object3D()
-    wholeThing.rotation.y += -TAU / 4.
-    {
-        scene.add(wholeThing)
-    
-        onClicks.push({
-            start: () => { },
-            during: () => {
-                mouse.rotateObjectByGesture(wholeThing)
-            },
-            end: () => { },
-            z: () => 0.
-        })
-    }
+    scene.add(wholeThing)
+    thingsToRotate.push(wholeThing)
 
     {
         let shadowCaster = new THREE.Mesh(new THREE.IcosahedronGeometry(1., 2), new THREE.MeshBasicMaterial({
@@ -155,7 +88,6 @@ async function initKleinBall() {
         shadowCaster.castShadow = true
         shadowCaster.receiveShadow = false
         wholeThing.add(shadowCaster)
-        await initLights(shadowCaster)
     }
 
     {

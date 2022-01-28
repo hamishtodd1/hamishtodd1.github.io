@@ -44,7 +44,7 @@ function getReciprocalFrame(frame) {
 }
 
 function motorFromPsToQsChrisStyle(p, q, target) {
-    //soooooo, could very well be using the wrong sort of dual. Check after
+    //soooooo, could very well be using the wrong sort of dual. Check!
 
     function frameFromThreePoints(dualPts) {
         let frameVecs = []
