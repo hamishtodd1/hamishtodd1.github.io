@@ -333,27 +333,39 @@ function initRectangles(thingToAddTo) {
             }
         }
 
+        rect.mousePosInOurScaledSpace = (target) => {
+            mouse.raycaster.intersectZPlane(rect.position.z + thingToAddTo.position.z, target)
+
+            target.x -= rect.position.x + thingToAddTo.position.x
+            target.y -= rect.position.y + thingToAddTo.position.y
+            target.x /= rect.scale.x
+            target.y /= rect.scale.y
+
+            return target
+        }
         {
+            let zFunc = () => {
+                rect.mousePosInOurScaledSpace(v0)
+
+                let inside = -.5 < v0.x && v0.x < .5 &&
+                    -.5 < v0.y && v0.y < .5
+
+                if (inside)
+                    return rect.position.z
+                else
+                    return -Infinity
+            }
             if (params.onClick){
-                onClicks.push({
-                    z: () => {
-                        mouse.raycaster.intersectZPlane(rect.position.z, v0)
-
-                        v0.x -= rect.position.x
-                        v0.y -= rect.position.y
-                        v0.x /= rect.scale.x
-                        v0.y /= rect.scale.y
-                        
-                        let inside = -.5 < v0.x && v0.x < .5 &&
-                            -.5 < v0.y && v0.y < .5
-
-                        if (inside)
-                            return rect.position.z
-                        else
-                            return -Infinity 
-                    },
-                    start: params.onClick
-                })
+                if(typeof params.onClick === 'function') {
+                    onClicks.push({
+                        z: zFunc,
+                        start: params.onClick
+                    })
+                }
+                else {
+                    params.onClick.z = zFunc
+                    onClicks.push(params.onClick)
+                }
             }
         }
 

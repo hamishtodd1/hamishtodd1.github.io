@@ -63,19 +63,19 @@ async function initSurroundingsAndMaterial() {
 				// 	side: THREE.DoubleSide
 				// })
 
-				let mat = new THREE.MeshPhongMaterial({color:diffuseColor, side:THREE.DoubleSide})
+				// let mat = new THREE.MeshPhongMaterial({color:diffuseColor, side:THREE.DoubleSide})
 
-				// let mat = new THREE.MeshPhysicalMaterial({
-				// 	color: diffuseColor,
-				// 	metalness: 0,
-				// 	roughness: 0.5,
-				// 	clearcoat: 1.,
-				// 	clearcoatRoughness: 0.,
-				// 	reflectivity: 1.,
-				// 	envMap: texture,
+				let mat = new THREE.MeshPhysicalMaterial({
+					color: diffuseColor,
+					metalness: 0,
+					roughness: 0.5,
+					clearcoat: 1.,
+					clearcoatRoughness: 0.,
+					reflectivity: 1.,
+					envMap: texture,
 
-				// 	side:THREE.DoubleSide
-				// })
+					side:THREE.DoubleSide
+				})
 
 				return mat
 			}

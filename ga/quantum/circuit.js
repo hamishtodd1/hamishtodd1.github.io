@@ -87,101 +87,122 @@ async function initCircuit() {
     //     scene.add(a)
     // }
 
-    // let circuitGates = [[],[]]
-    // let gatesPerWire = 4
-    // for(let i = 0; i < gatesPerWire; ++i) {
-    //     circuitGates[0][i] = null
-    //     circuitGates[1][i] = null
-    // }
+    let circuitGates = [[],[]]
+    let gatesPerWire = 4
+    for(let i = 0; i < gatesPerWire; ++i) {
+        circuitGates[0][i] = null
+        circuitGates[1][i] = null
+    }
+    function getWire(gate) {
+        if (circuitGates[0].indexOf(gate) !== -1)
+            return 0
+        else if (circuitGates[1].indexOf(gate) !== -1)
+            return 1
+        else
+            return -1
+    }
+
+    function getGatePosition(v, rect) {
+        let wireIndex = getWire(rect)
+        if (wireIndex === -1)
+            return
+
+        // v.x = 0.
+        v.z = wires[wireIndex].position.z
+        v.y = wires[wireIndex].position.y
+
+        let ourIndexAlong = circuitGates[wireIndex].indexOf(rect)
+        let lengthWeUse = wireLength * .94
+        let intendedX = (ourIndexAlong + .5) * (lengthWeUse / gatesPerWire) - lengthWeUse / 2.
+        v.x += (intendedX - v.x) * .1
+    }
 
     let holder = new THREE.Object3D()
     scene.add(holder)
+    holder.position.y = .4
     // holder.scale.setScalar(10.)
     initRectangles(holder)
     let gateDimension = .4
-    let ag = arrowGeometry()
+    let ag = arrowGeometry2()
     let am = new THREE.MeshPhongMaterial({ color: 0xFFA500 })
     let shellMat = new THREE.MeshPhongMaterial({ color: 0xAFEEEE, transparent: true, opacity: .5 })
     let shellRadius = gateDimension * .9 * .5
     let shellGeo = new THREE.IcosahedronBufferGeometry(shellRadius, 3)
-    function SquareRectangle(wire,params) {
+    function SquareRectangle(params) {
+
         params.w = gateDimension
         params.h = gateDimension
 
-        params.getPosition = (v,rect) => {
-            if (rect.wire === null)
-                return
-
-            // v.x = 0.
-            v.z = rect.wire.position.z
-            v.y = rect.wire.position.y
-        }
+        params.getPosition = getGatePosition
 
         let rect = Rectangle(params)
-        rect.wire = wire
         return rect
     }
 
-    //ROTATION
-    // let rotators = Array(12)
-    // {
-    //     let truncatedDiskGeo = new THREE.CircleGeometry(shellRadius,31)
-    //     let width = shellRadius / 2.
-    //     truncatedDiskGeo.vertices.forEach((v,i)=>{
-    //         if (Math.abs(v.x) > width)
-    //             v.x = Math.sign(v.x) * width
-    //     })
+    //-----------ROTATION
+    let rotators = Array(12)
+    {
+        let truncatedDiskGeo = new THREE.CircleGeometry(shellRadius,31)
+        let truncatedDiskMat = niceMat(0.)
+        let width = shellRadius / 2.
+        truncatedDiskGeo.vertices.forEach((v,i)=>{
+            if (Math.abs(v.x) > width)
+                v.x = Math.sign(v.x) * width
+        })
 
-    //     let a = new THREE.Mesh(truncatedDiskGeo)
-    //     scene.add(a)
+        for (let i = 0; i < rotators.length; ++i) {
+            let rotator = SquareRectangle({
+                onClick: () => {
+                    log("this is a rotation")
+                }
+            })
+            rotator.position.y = -999.
 
-    //     let mat = new THREE.MeshPhongMaterial({ side: THREE.DoubleSide })
+            let shell = BlochShell(rotator, {
+                during: () => {
+                    shell.intersectMouseRay(v1)
+                    sp.position.copy(v1)
+                }
+            })
+            let p1 = new THREE.Mesh(truncatedDiskGeo, truncatedDiskMat)
+            p1.rotation.x = TAU / 8.
+            shell.add(p1)
+            let p2 = new THREE.Mesh(truncatedDiskGeo, truncatedDiskMat)
+            p2.rotation.x = TAU / 8.
+            p2.rotation.y = TAU / 16.
+            shell.add(p2)
 
-    //     for (let i = 0; i < rotators.length; ++i) {
-    //         let gate = SquareRectangle(null,{
-    //             onClick: () => {
-    //                 log("this is a rotation")
-    //             }
-    //         })
-    //         gate.position.y = -999.
-
-    //         let shell = BlochShell(gate, {
-    //             during: () => {
-    //                 shell.intersectMouseRay(v1)
-    //                 sp.position.copy(v1)
-    //             }
-    //         })
-    //         let plane = new THREE.Mesh(diskGeometry, mat)
-    //         plane.rotation.x = TAU / 8.
-    //         shell.add(plane)
-
-    //         rotators[i] = gate
-    //     }
-    // }
-    // return
-
-    function putLowestUnusedGateOnWire(gateArray, wire) {
-        let newGate = gateArray.find(p => p.wire === null)
-        newGate.wire = wire
-        mouse.raycaster.intersectZPlane(0., newGate.position)
-
-        return newGate
+            rotators[i] = rotator
+        }
     }
 
-    let bgWidth = 3.
+    function putLowestUnusedGateOnWire(gateArray, wire) {
+        mouse.raycaster.intersectZPlane(0., v0)
+        let positionAlongWire = v0.x + wireLength / 2.
+        let indexInArray = Math.floor( (positionAlongWire / wireLength) * gatesPerWire )
+        if (circuitGates[wires.indexOf(wire)][indexInArray] === null) {
+            let newGate = gateArray.find(p => getWire(p) === -1 )
+            newGate.position.copy(v0)
+            circuitGates[wires.indexOf(wire)][indexInArray] = newGate
+
+            if(gateArray === tqgs) {
+                circuitGates[1-wires.indexOf(wire)][indexInArray] = newGate
+            }
+
+            log(circuitGates)
+
+            return newGate
+        }
+
+        return null
+    }
+
+    let bgWidth = 3.2
     let bgHeight = 1.5
     let bg = Rectangle({
         w: bgWidth, h: bgHeight,
         getPosition: (p) => {
             p.set(0., 0., -.001)
-        },
-        onClick: () => {
-            mouse.raycaster.intersectZPlane(wires[0].position.z , v0)
-            if (Math.abs(v0.x) < wires[0].scale.x / 2.) {
-                let closerWireIndex = Math.abs(v0.y - wires[0].position.y) < Math.abs(v0.y - wires[1].position.y) ? 0 : 1
-                let newTqg = putLowestUnusedGateOnWire(tqgs, wires[closerWireIndex])
-                newTqg.position.y = bg.position.y
-            }
         }
     })
 
@@ -193,6 +214,7 @@ async function initCircuit() {
 
         updateFunctions.push(() => {
             shell.position.copy(rect.position)
+            shell.position.add(holder.position)
             shell.position.add(v0.copy(camera.position).sub(rect.position).setLength(shellRadius))
         })
 
@@ -252,7 +274,7 @@ async function initCircuit() {
     let padding = .42
     let wireSpacing = (bgHeight - padding * 2.) / (NUM_QUBITS - 1)
     let wireThickness = .03
-    let wireLength = 2.
+    let wireLength = 2.2
     let wireMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 })
     for (let i = 0; i < NUM_QUBITS; ++i) {
         let wire = Rectangle({
@@ -263,45 +285,62 @@ async function initCircuit() {
             getPosition: (p) => {
                 p.set(0., 0., 0.)
 
-                p.x += .01
                 p.y -= wireSpacing * (wire.i - (NUM_QUBITS - 1) / 2.)
                 p.z = bg.position.z / 2.
+
+                initialStateBox.position.set(
+                    wire.position.x - (wire.scale.x / 2. + gateDimension / 2.),
+                    wire.position.y,
+                    wire.position.z)
+                finalStateBox.position.set(
+                    wire.position.x + (wire.scale.x / 2. + gateDimension / 2.),
+                    wire.position.y,
+                    wire.position.z)
             },
 
             onClick: () => {
-                putLowestUnusedGateOnWire(paulis, wire)
+                log("yes, clicked wire")
             }
         })
         wire.i = i
         wires[i] = wire
 
-        let initialStateBox = SquareRectangle(wire,{
+        let initialStateBox = Rectangle({
+            w: gateDimension,
+            h: gateDimension,
             onClick: () => {
-                if (initialState.getLat() > 0.)
-                    initialState.setLatLon(-TAU / 4., 0.)
+                if (wire.initialState.getLat() > 0.)
+                    wire.initialState.setLatLon(-TAU / 4., 0.)
                 else
-                    initialState.setLatLon(TAU / 4., 0.)
+                    wire.initialState.setLatLon(TAU / 4., 0.)
             }
         })
-        initialStateBox.position.x = wire.position.x - (wire.scale.x / 2. + gateDimension / 2.)
-        let initialState = blochSphere(initialStateBox)
+        wire.initialState = blochSphere(initialStateBox)
 
-        let finalStateBox = SquareRectangle(wire, {})
-        finalStateBox.position.x = wire.position.x + (wire.scale.x / 2. + gateDimension / 2.)
-        let finalState = blochSphere(finalStateBox)
-        updateFunctions.push(() => {
-            finalState.setLatLon(initialState.getLat(), initialState.getLon(),)
+        let finalStateBox = Rectangle({
+            w: gateDimension,
+            h: gateDimension
         })
+        wire.finalState = blochSphere(finalStateBox)
     }
+
+    let actualState = new ComplexVector(4) //or, matrix? but how to apply?
+    updateFunctions.push(() => {
+        // actualState[0] = 
+
+        wires.forEach((w)=>{
+            w.finalState.setLatLon(w.initialState.getLat(), w.initialState.getLon(),)
+        })
+    })
 
     //--------PAULI
     let paulis = Array(12)
-    {
+    { 
         //you want instaaaaaanced
         let diskGeometry = new THREE.CircleBufferGeometry(shellRadius * .96, 31)
-        let diskMat = new THREE.MeshPhongMaterial({ side: THREE.DoubleSide })
+        let diskMat = niceMat(0.)
         for (let i = 0; i < paulis.length; ++i) {
-            let pauli = SquareRectangle(null,{
+            let pauli = SquareRectangle({
                 onClick: () => {
                     log("edit it as a pauli")
                 }
@@ -322,10 +361,9 @@ async function initCircuit() {
         }
     }
 
-    let sp = new THREE.Mesh(new THREE.SphereGeometry(shellRadius / 7.), new THREE.MeshBasicMaterial({color:0xFF0000}))
+    let indicatorGeometry = new THREE.SphereGeometry(shellRadius / 7.)
+    let sp = new THREE.Mesh(indicatorGeometry, new THREE.MeshBasicMaterial({color:0xFF0000}))
     scene.add(sp)
-
-    //1 to place pauli, 2 to place rotation, 3 for thingy
 
     //-------------TWO QUBITS
     //Are these directional in any sense? Unentangled A,B -> controlled not -> changing B impacts A?
@@ -334,9 +372,46 @@ async function initCircuit() {
         for (let i = 0; i < tqgs.length; ++i) {
             let tqg = Rectangle({
                 h: wireSpacing + gateDimension,
-                w: gateDimension
+                w: gateDimension,
+                getPosition: (v,rect)=>{
+                    getGatePosition(v,rect)
+                    if(getWire(rect) !== -1)
+                        v.y = 0.
+                }
             })
-            tqg.wire = null
+
+            tqg.x = 0.
+            tqg.y = 0.
+            //identity, swap, cnot, iSwap/dcnot
+            //on way to iSwap you have QFT, Sycamore, 
+
+            let width = gateDimension * .9
+            let thingOnTop = Rectangle({
+                w: width,
+                h: width * Math.sqrt(2.),
+                col: 0xFF0000,
+                haveFrame: false,
+                getPosition: (v) => {
+                    v.copy(tqg.position)
+                    v.z += .001
+                },
+                onClick: {
+                    during: () => {
+                        thingOnTop.mousePosInOurScaledSpace(v0)
+                        tqg.x = clamp(v0.x + .5, 0.,1.)
+                        tqg.y = clamp(v0.y + .5, 0., 1.)
+                    }
+                }
+            })
+
+            let indicator = new THREE.Mesh(indicatorGeometry, new THREE.MeshBasicMaterial({ color: 0x0000FF }))
+            scene.add(indicator)
+            updateFunctions.push(() => {
+                indicator.position.x = (tqg.x - .5) * thingOnTop.scale.x + thingOnTop.position.x
+                indicator.position.y = (tqg.y - .5) * thingOnTop.scale.y + thingOnTop.position.y
+
+                indicator.position.add(holder.position)
+            })
 
             tqg.position.y = -9999.
 
@@ -344,62 +419,21 @@ async function initCircuit() {
         }
     }
 
+    let gateLayingButtons = ["a", "s", "d"]
+    let gateTypes = [paulis, rotators, tqgs]
+    gateLayingButtons.forEach((key, i)=>{
+        let gateArray = gateTypes[i]
+        bindButton(key,()=>{
+            mouse.raycaster.intersectZPlane(wires[0].position.z , v0)
+            v0.y -= holder.position.y
+            if (Math.abs(v0.x) < wires[0].scale.x / 2.) {
+                let closerWireIndex = Math.abs(v0.y - wires[0].position.y) < Math.abs(v0.y - wires[1].position.y) ? 0 : 1
+                let newTqg = putLowestUnusedGateOnWire(gateArray, wires[closerWireIndex])
+                if(newTqg !== null)
+                    newTqg.position.y = bg.position.y
+            }
+        })
+    })
+
     roundOffRectangleCreation()
-}
-
-//better would be generating the vertices first then using them
-//but that is barely any better. Really you want a different way of re-using the different arrays in drawing
-function arrowGeometry() {
-    let shaftRadius = .06
-
-    //ah no no, you want the end to always be the same size
-    let headRadius = shaftRadius * 2.5
-    let shaftLength = .75
-
-    let vecGeometry = new THREE.Geometry()
-
-    let radialSegments = 15
-    let heightSegments = 30 //we want two between y = 0 and y = -shaftRadius
-    vecGeometry.vertices = Array((radialSegments + 1) * (heightSegments + 1))
-    vecGeometry.faces = Array(radialSegments * heightSegments)
-
-    for (let j = 0; j <= heightSegments; j++) {
-        for (let i = 0; i <= radialSegments; i++) {
-            v1.y = j <= 8 ?
-                shaftRadius * (-1. + j / 8.) :
-                j / heightSegments
-
-            v1.x = shaftRadius
-            if (v1.y >= shaftLength) {
-                let proportionAlongHead = 1. - (v1.y - shaftLength) / (1. - shaftLength)
-                v1.x = headRadius * proportionAlongHead
-            }
-            else if (v1.y <= 0.)
-                v1.x = Math.sqrt(sq(shaftRadius) - sq(v1.y))
-
-            v1.z = 0.
-            v1.applyAxisAngle(yUnit, i / radialSegments * TAU)
-            vecGeometry.vertices[j * (radialSegments + 1) + i] = v1.clone()
-
-            if (i < radialSegments && j < heightSegments) { // there are one fewer triangles along both axes
-                vecGeometry.faces[(j * radialSegments + i) * 2 + 0] = new THREE.Face3(
-                    (j + 0) * (radialSegments + 1) + (i + 0),
-                    (j + 0) * (radialSegments + 1) + (i + 1),
-                    (j + 1) * (radialSegments + 1) + (i + 1),
-                    new THREE.Vector3()
-                )
-                vecGeometry.faces[(j * radialSegments + i) * 2 + 1] = new THREE.Face3(
-                    (j + 0) * (radialSegments + 1) + (i + 0),
-                    (j + 1) * (radialSegments + 1) + (i + 1),
-                    (j + 1) * (radialSegments + 1) + (i + 0),
-                    new THREE.Vector3()
-                )
-            }
-        }
-    }
-
-    vecGeometry.computeFaceNormals()
-    vecGeometry.computeVertexNormals()
-
-    return vecGeometry
 }
