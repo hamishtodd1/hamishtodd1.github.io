@@ -174,6 +174,17 @@ function initRectangles(thingToAddTo) {
             }
             materialRects[materials.indexOf(mat)].push(rect)
 
+            if(params.textureUrl) {
+                new THREE.TextureLoader().load(params.textureUrl,(texture)=>{
+                    mat.map = texture
+                    mat.needsUpdate = true
+                }),
+                undefined,
+                (err)=>{
+                    console.error(err)
+                }
+            }
+
             if (params.label) {
                 let labelLines = typeof params.label === "string" ? [params.label] : params.label
 

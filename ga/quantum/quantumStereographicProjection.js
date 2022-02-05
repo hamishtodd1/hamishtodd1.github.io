@@ -242,13 +242,13 @@ function initMobTransState() {
 
                 // if (pts.indexOf(mesh) === 15)
                 //     cv0.log()
-                cv0.applyMatrix(mobiusMat, cv1)
+                cv0.applyMatrix(mobiusMat)
 
                 //so elements[1] could be 0!
-                cv1.elements[0].div(cv1.elements[1],c)
+                cv0.elements[0].div(cv0.elements[1],c)
 
                 // if (pts.indexOf(mesh) === 15)
-                //     cv1.log()
+                //     cv0.log()
 
                 mesh.position.set(c.re * .35, c.im * .35, 0.)
             })

@@ -76,23 +76,24 @@ class ComplexVector {
         log(str)
     }
 
-    applyMatrix(m, target) {
-        if (target === undefined)
-            target = new ComplexVector(this.elements.length)
+    applyMatrix(m) {
+        let tempVec = new ComplexVector(this.elements.length)
 
-        let temp = new Complex()
+        let tempComplex = new Complex()
         for(let i = 0; i < this.elements.length; ++i) {
             //i is the column in the matrix, the row in the vector
-            target.elements[i].set(0.,0.)
+            tempVec.elements[i].set(0.,0.)
             for(let j = 0; j < this.elements.length; ++j) {
                 let matEl = m.get(j,i)
-                matEl.mul(this.elements[j],temp)
-                // log(i, j, temp)
-                target.elements[i].add(temp)
+                matEl.mul(this.elements[j],tempComplex)
+                // log(i, j, tempComplex)
+                tempVec.elements[i].add(tempComplex)
             }
         }
+        
+        this.copy(tempVec)
 
-        return target
+        return this
     }
 
 	// multiplyOneEntry(input, ourIndex, inputIndex, target, targetIndex) {
@@ -118,6 +119,19 @@ class ComplexVector {
 	// 	return ret
 	// }
 }
+
+// function svd2x2(a,b,c,d) {
+//     z0.absoluteSquare() + z1.absoluteSquare() + z2.absoluteSquare() + z3.absoluteSquare()
+
+//     //this looks extremely geometric algebra
+//     let secondPart = 
+//         z0.mul(z1.getConjugate(c0), c1).re +
+//         z0.mul(z2.getConjugate(c0), c1).re +
+//         z0.mul(z3.getConjugate(c0), c1).re +
+//         z1.mul(z2.getConjugate(c0), c1).im +
+//         z2.mul(z3.getConjugate(c0), c1).im +
+//         z3.mul(z1.getConjugate(c0), c1).im
+// }
 
 class ComplexMat {
 
@@ -150,7 +164,14 @@ class ComplexMat {
 		this.forEachElement((row,col,el)=>{
 			el.copy(m.get(row,col))
 		})
+        return this
 	}
+
+    clone() {
+        let newMat = new ComplexMat(this.dim)
+        newMat.copy(this)
+        return newMat
+    }
 
 	multiplyScalar(scalar) {
 		this.forEachElement((row, col, el) => {
@@ -392,9 +413,19 @@ class Complex {
 			return "0.0"
 	}
 
+    approximatelyEquals(c) {
+        const eps = .00001
+        return  Math.abs(this.re - c.re) < eps &&
+                Math.abs(this.im - c.im) < eps
+    }
+
 	squaredMagnitude() {
 		return this.re * this.re + this.im * this.im
 	}
+
+    absoluteSquare() {
+        return this.squaredMagnitude()
+    }
 
 	magnitude() {
 		return Math.sqrt(this.squaredMagnitude())
@@ -456,12 +487,17 @@ class Complex {
         return target
     }
 
-    log() {
-        console.log(this.toString())
+    log(msg) {
+        let str = this.toString()
+        if (msg !== undefined)
+            str = msg + ": " + str
+        console.log(str)
     }
 }
 
 const iComplex = new Complex(0., 1.)
+const oneComplex = new Complex(1., 0.)
+const zeroComplex = new Complex(0., 0.)
 const c0 = new Complex()
 const c1 = new Complex()
 const c2 = new Complex()
@@ -538,10 +574,24 @@ cnot = new ComplexMat(4, [
     [0., 0.], [0., 0.], [1., 0.], [0., 0.],
 ])
 
+identity4x4 = new ComplexMat(4, [
+    [1., 0.], [0., 0.], [0., 0.], [0., 0.],
+    [0., 0.], [1., 0.], [0., 0.], [0., 0.],
+    [0., 0.], [0., 0.], [1., 0.], [0., 0.],
+    [0., 0.], [0., 0.], [0., 0.], [1., 0.],
+])
+
 swap = new ComplexMat(4, [
     [1., 0.], [0., 0.], [0., 0.], [0., 0.],
     [0., 0.], [0., 0.], [1., 0.], [0., 0.],
     [0., 0.], [1., 0.], [0., 0.], [0., 0.],
+    [0., 0.], [0., 0.], [0., 0.], [1., 0.],
+])
+
+iSwap = new ComplexMat(4, [
+    [1., 0.], [0., 0.], [0., 0.], [0., 0.],
+    [0., 0.], [0., 0.], [0., 1.], [0., 0.],
+    [0., 0.], [0., 1.], [0., 0.], [0., 0.],
     [0., 0.], [0., 0.], [0., 0.], [1., 0.],
 ])
 
@@ -594,3 +644,8 @@ multiplyMatrixByI(g3)
 //     [0., 0.], [0., 0.], [0., 0.], [0., 0.],
 //     [0., 0.], [0., 0.], [0., 0.], [0., 0.],
 // ])
+
+c4m0 = new ComplexMat(4)
+c4m1 = new ComplexMat(4)
+c2m0 = new ComplexMat(2)
+c2m1 = new ComplexMat(2)

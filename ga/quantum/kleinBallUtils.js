@@ -156,8 +156,10 @@ function complexToSphere(numerator, denominator, target) {
         let denom = 1. / (1. + re * re + im * im)
 
         x = (2. * re) * denom
-        y = (1. - re * re - im * im) * denom
+        y = -(1. - re * re - im * im) * denom
         z = (2. * im) * denom
+
+        //convention is below
     }
 
     //should you normalize here? Current situation is that they're normalized and have e123 = 1.
@@ -193,14 +195,7 @@ function complexToHorosphere(numerator, denominator, target) {
     return target
 }
 
-function matrixToMotor(mat, target) {
-    if (target === undefined)
-        target = new Mv()
-
-    //can just transpose
-    let a = mat.get(0, 0), b = mat.get(0, 1)
-    let c = mat.get(1, 0), d = mat.get(1, 1)
-
+function abcdToMotor(a,b,c,d,target) {
     let infinityPrimed = complexToSphere(a, c, mv3)
 
     let aPlusB = c0.copy(a).add(b)
@@ -224,6 +219,7 @@ function matrixToMotor(mat, target) {
     //bloch sphere / complex numbers convention: z is up. Project from up onto (x,y) = (re,im)
     //computer graphics convention: y is up
     //our convention: project from y onto (x,z) = (re,im)
+    //wikipedia convention: z is out of complex plane and -1 is point at infinity. We have y=1 is point at infinity
 
     motorFromPsToQsChrisStyle(xyzNullPoints, q, target)
     // motorFromPsToQs(oneInfinityIPoints, q, target)
@@ -232,6 +228,19 @@ function matrixToMotor(mat, target) {
     delete infinityPrimed
     delete onePrimed
     delete iPrimed
+
+    return target
+}
+
+function matrixToMotor(mat, target) {
+    if (target === undefined)
+        target = new Mv()
+
+    //can just transpose
+    let a = mat.get(0, 0), b = mat.get(0, 1)
+    let c = mat.get(1, 0), d = mat.get(1, 1)
+
+    abcdToMotor(a,b,c,d,target)
 
     return target
 }

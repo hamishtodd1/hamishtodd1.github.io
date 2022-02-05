@@ -55,9 +55,13 @@ For marketing QC companies
 
 Does taking the transpose correspond to measuring the same thing in a different way? Surely
 
+Could run your mouse continuously along a wire and see an animation
 
-
-
+Philosophizing
+    When you apply a pauli, the qubit has become entangled with the fact that there was a pauli-applier there and with that configuration
+    That IS surely another kind of entanglement, which from your point of view looks like the qubit has continued to be mundane
+    So ok you have a nutty 3+ qubit circuit of many kinds of weird entanglement.
+    Could send the wires through a thingy to get you visualizing the qubits as klein balls 
 
 
 Could consider the circle on the boundary getting mapped from a certain thing on the plane
@@ -88,8 +92,8 @@ async function initCircuit() {
     // }
 
     let circuitGates = [[],[]]
-    let gatesPerWire = 4
-    for(let i = 0; i < gatesPerWire; ++i) {
+    let maxGatesPerWire = 4
+    for(let i = 0; i < maxGatesPerWire; ++i) {
         circuitGates[0][i] = null
         circuitGates[1][i] = null
     }
@@ -113,7 +117,7 @@ async function initCircuit() {
 
         let ourIndexAlong = circuitGates[wireIndex].indexOf(rect)
         let lengthWeUse = wireLength * .94
-        let intendedX = (ourIndexAlong + .5) * (lengthWeUse / gatesPerWire) - lengthWeUse / 2.
+        let intendedX = (ourIndexAlong + .5) * (lengthWeUse / maxGatesPerWire) - lengthWeUse / 2.
         v.x += (intendedX - v.x) * .1
     }
 
@@ -158,6 +162,14 @@ async function initCircuit() {
             })
             rotator.position.y = -999.
 
+            rotator.getMatrix = (target) => {
+                target.copy(identity2x2)
+
+                //maybe you want to exponentiate?
+
+                return target
+            }
+
             let shell = BlochShell(rotator, {
                 during: () => {
                     shell.intersectMouseRay(v1)
@@ -176,20 +188,25 @@ async function initCircuit() {
         }
     }
 
-    function putLowestUnusedGateOnWire(gateArray, wire) {
+    function putLowestUnusedGateOnWire(gateArray, wireIndex) {
+
+        //HACK because we don't understand how to reverse a 4x4 we say all tqgs are in a certain direction
+        if(gateArray === tqgs && wireIndex === 1)
+            wireIndex = 0
+
         mouse.raycaster.intersectZPlane(0., v0)
         let positionAlongWire = v0.x + wireLength / 2.
-        let indexInArray = Math.floor( (positionAlongWire / wireLength) * gatesPerWire )
-        if (circuitGates[wires.indexOf(wire)][indexInArray] === null) {
+        let indexInArray = Math.floor( (positionAlongWire / wireLength) * maxGatesPerWire )
+        if (circuitGates[wireIndex][indexInArray] === null) {
             let newGate = gateArray.find(p => getWire(p) === -1 )
-            newGate.position.copy(v0)
-            circuitGates[wires.indexOf(wire)][indexInArray] = newGate
+            circuitGates[wireIndex][indexInArray] = newGate
 
-            if(gateArray === tqgs) {
-                circuitGates[1-wires.indexOf(wire)][indexInArray] = newGate
+            if(gateArray === tqgs)
+                circuitGates[1-wireIndex][indexInArray] = null
+            else {
+                if (tqgs.indexOf(circuitGates[1 - wireIndex][indexInArray]) !== -1)
+                    circuitGates[1 - wireIndex][indexInArray] = null
             }
-
-            log(circuitGates)
 
             return newGate
         }
@@ -251,22 +268,74 @@ async function initCircuit() {
         return shell
     }
 
-    function blochSphere(rect) {
+    function BlochSphere(rect) {
 
         let bs = BlochShell(rect)
 
         let blochVec = new THREE.Mesh(ag, am)
-        blochVec.scale.multiplyScalar(shellRadius)
+        // blochVec.scale.multiplyScalar(shellRadius)
+        blochVec.matrixAutoUpdate = false
+        blochVec.matrix.multiplyScalar(shellRadius)
+        blochVec.matrix.elements[15] = 1.
         bs.add(blochVec)
 
-        bs.setLatLon = (lat, lon) => {
-            blochVec.rotation.x = TAU / 4. + lat
-            blochVec.rotation.y = lon
+        bs.setVisibility = (newVisibility) => {
+            bs.visible = newVisibility
+            blochVec.visible = newVisibility
         }
-        bs.getLat = () => blochVec.rotation.x - TAU / 4.
-        bs.getLon = () => blochVec.rotation.y
+        
+        bs.setFrom2Vec = (numerator,denominator) => {
+            complexToSphere(numerator, denominator, mv0)
+            
+            //maybe better way to do it
+            // mv0[11] = 1.
+            // let arrowPointingUpMv = mv1.point(0., 1., 0., 1.)
+            // let ourRotor = mv2
+            // arrowPointingUpMv.mul(mv0, ourRotor)
+            // ourRotor.sqrtBiReflection(ourRotor)
+            // ourRotor.toQuaternion(blochVec.quaternion)
+
+            setRotationallySymmetricMatrix(mv0[14], mv0[13], mv0[12], blochVec.matrix)
+            blochVec.matrix.multiplyScalar(shellRadius)
+            blochVec.matrix.elements[15] = 1.
+        }
 
         return bs
+    }
+
+    function CombinedBsKb(rect) {
+        let bsKb = {}
+
+        let kb = KleinBall()
+        let bs = BlochSphere(rect)
+
+        scene.add(kb)
+        kb.scale.setScalar(shellRadius)
+        updateFunctions.push(() => {
+            kb.position.copy(rect.position)
+            kb.position.add(holder.position)
+            kb.position.add(v0.copy(camera.position).sub(rect.position).setLength(shellRadius))
+        })
+
+        bsKb.setFromAbcd = (a,b,c,d) => {
+            let det = a.mul(d, c0).sub(b.mul(c, c1))
+            if(frameCount === 1)
+                log(det, det.approximatelyEquals(zeroComplex))
+            if (det.approximatelyEquals(zeroComplex)) {
+                bs.setVisibility(true)
+                kb.setVisibility(false)
+
+                bs.setFrom2Vec(a,c)
+            }
+            else {
+                bs.setVisibility(false)
+                kb.setVisibility(true)
+
+                // abcdToMotor(a, b, c, d, kb.stateMotor)
+            }
+        }
+
+        return bsKb
     }
 
     let NUM_QUBITS = 2
@@ -309,28 +378,109 @@ async function initCircuit() {
             w: gateDimension,
             h: gateDimension,
             onClick: () => {
-                if (wire.initialState.getLat() > 0.)
-                    wire.initialState.setLatLon(-TAU / 4., 0.)
-                else
-                    wire.initialState.setLatLon(TAU / 4., 0.)
+                // if (initialStateBs.getLat() > 0.)
+                //     initialStateBs.setLatLon(-TAU / 4., 0.)
+                // else
+                //     initialStateBs.setLatLon(TAU / 4., 0.)
+
+                if (initialState.elements[0].re === 0. ) {
+                    initialState.elements[0].re = 1.
+                    initialState.elements[1].re = 0.
+                }
+                else {
+                    initialState.elements[0].re = 0.
+                    initialState.elements[1].re = 1.
+                }
             }
         })
-        wire.initialState = blochSphere(initialStateBox)
+        let initialState = new ComplexVector(2)
+        wire.initialState = initialState
+        initialState.elements[0].re = 1.
+        let initialStateBs = new BlochSphere(initialStateBox)
+
+        updateFunctions.push(()=>{
+            initialStateBs.setFrom2Vec(initialState.elements[0], initialState.elements[1])
+        })
 
         let finalStateBox = Rectangle({
             w: gateDimension,
             h: gateDimension
         })
-        wire.finalState = blochSphere(finalStateBox)
+        wire.finalStateViz = new CombinedBsKb(finalStateBox)
     }
 
-    let actualState = new ComplexVector(4) //or, matrix? but how to apply?
+    let circuitState = new ComplexVector(4) //or, matrix? but how to apply?
+    let stepMat = identity4x4.clone()
     updateFunctions.push(() => {
-        // actualState[0] = 
+        let q1 = wires[0].initialState.elements
+        let q2 = wires[1].initialState.elements
+        q1[0].mul(q2[0], circuitState.elements[0])
+        q1[0].mul(q2[1], circuitState.elements[1])
+        q1[1].mul(q2[0], circuitState.elements[2])
+        q1[1].mul(q2[1], circuitState.elements[3])
 
-        wires.forEach((w)=>{
-            w.finalState.setLatLon(w.initialState.getLat(), w.initialState.getLon(),)
-        })
+        circuitState.log("before")
+
+        for(let i = 0; i < maxGatesPerWire; ++i) {
+            if (tqgs.indexOf(circuitGates[0][i]) !== -1 || 
+                tqgs.indexOf(circuitGates[1][i]) !== -1 ) {
+                //TODO allow them to be applied in the opposite direction
+                //problem: need to show in the gate that it's from one wire to the other
+                //for now A always controls B
+                //note that A is unaffected by CNOT to B
+                //haha, swap and swap back
+                // debugger
+                circuitGates[0][i].getMatrix(stepMat)
+                // stepMat.copy(cnot)
+            }
+            else {
+                let a = circuitGates[0][i] === null ? identity2x2 : circuitGates[0][i].getMatrix(c2m0)
+                let b = circuitGates[1][i] === null ? identity2x2 : circuitGates[1][i].getMatrix(c2m1)
+                a.tensor(b, stepMat)
+            }
+            
+            circuitState.applyMatrix(stepMat)
+        }
+
+        circuitState.log("after")
+
+        
+        
+        /*
+            00 01
+            10 11
+            left qubit:
+                00 / 10 if right qubit is 0, 
+                01 / 11 if right qubit is 1
+                and maybe even something else if superposition
+
+            right qubit: 
+
+            a/c is only the projected bloch vector of left qubit if right qubit is 0
+            Oooooookay. So find the basis in which the right qubit is indeed 0 (or "+")
+            But in the entangled case, what is that qubit? If you're allowed to change basis, 
+
+            
+            "a change of basis such that the result is separated if possible"            
+                MAYBE schmidt decomposition? See SVD in complex
+                    Really sounds like you have 
+                Take the 4-vec and divide by c?
+
+            is it definitely the case that you can extract |0>A / |1>A and |0>B / |1>B from the 4-vec?
+
+            There's surely no definitive answer to "did A impact B or vice versa?"
+
+            Qubit A doesn't care about what you've labelled as "up" and "down" for qubit B.
+        */
+
+        wires[0].finalStateViz.setFromAbcd(
+            circuitState.elements[0], circuitState.elements[1],
+            circuitState.elements[2], circuitState.elements[3]
+        )
+        wires[1].finalStateViz.setFromAbcd(
+            circuitState.elements[0], circuitState.elements[2],
+            circuitState.elements[1], circuitState.elements[3]
+        )
     })
 
     //--------PAULI
@@ -347,6 +497,18 @@ async function initCircuit() {
             })
             pauli.position.y = -999.
 
+            let reflection = e3.clone()
+
+            pauli.getMatrix = (target) => {
+                target.copy(identity2x2)
+
+                // reflection.inner(e1,mv0)[0]
+
+                //probably... get the plane as a*e1 + b*e2 + c*e3, then just e's become paulis
+
+                return target
+            }
+
             let shell = BlochShell(pauli, {
                 during: () => {
                     shell.intersectMouseRay(v1)
@@ -356,14 +518,15 @@ async function initCircuit() {
             let plane = new THREE.Mesh(diskGeometry, diskMat)
             plane.rotation.x = TAU / 8.
             shell.add(plane)
+            //you need an orientation for it, a ring of thingies
             
             paulis[i] = pauli
         }
     }
 
-    let indicatorGeometry = new THREE.SphereGeometry(shellRadius / 7.)
-    let sp = new THREE.Mesh(indicatorGeometry, new THREE.MeshBasicMaterial({color:0xFF0000}))
-    scene.add(sp)
+    let littleBallGeometry = new THREE.SphereGeometry(shellRadius / 7.)
+    // let sp = new THREE.Mesh(littleBallGeometry, new THREE.MeshBasicMaterial({color:0xFF0000}))
+    // scene.add(sp)
 
     //-------------TWO QUBITS
     //Are these directional in any sense? Unentangled A,B -> controlled not -> changing B impacts A?
@@ -380,16 +543,23 @@ async function initCircuit() {
                 }
             })
 
-            tqg.x = 0.
-            tqg.y = 0.
-            //identity, swap, cnot, iSwap/dcnot
-            //on way to iSwap you have QFT, Sycamore, 
+            tqg.pX = 0.
+            tqg.pY = 0.
+            let indicator = new THREE.Mesh(littleBallGeometry, new THREE.MeshBasicMaterial({ color: 0x0000FF }))
+            scene.add(indicator)
+            updateFunctions.push(() => {
+                indicator.position.x = (tqg.pX - .5) * lieAlgSpace.scale.x + lieAlgSpace.position.x
+                indicator.position.y = (tqg.pY - .5) * lieAlgSpace.scale.y + lieAlgSpace.position.y
 
-            let width = gateDimension * .9
-            let thingOnTop = Rectangle({
-                w: width,
-                h: width * Math.sqrt(2.),
-                col: 0xFF0000,
+                indicator.position.add(holder.position)
+            })
+
+            let lieAlgSpaceWidth = gateDimension * .9
+            let lieAlgSpace = Rectangle({
+                w: lieAlgSpaceWidth,
+                h: lieAlgSpaceWidth, // * Math.sqrt(2.),
+                // col: 0xFF0000,
+                textureUrl: "C:/hamishtodd1.github.io/ga/quantum/data/lieAlg.png",
                 haveFrame: false,
                 getPosition: (v) => {
                     v.copy(tqg.position)
@@ -397,21 +567,28 @@ async function initCircuit() {
                 },
                 onClick: {
                     during: () => {
-                        thingOnTop.mousePosInOurScaledSpace(v0)
-                        tqg.x = clamp(v0.x + .5, 0.,1.)
-                        tqg.y = clamp(v0.y + .5, 0., 1.)
+                        lieAlgSpace.mousePosInOurScaledSpace(v0)
+                        tqg.pX = clamp(v0.x + .5, 0.,1.)
+                        tqg.pY = clamp(v0.y + .5, 0., 1.)
                     }
                 }
             })
 
-            let indicator = new THREE.Mesh(indicatorGeometry, new THREE.MeshBasicMaterial({ color: 0x0000FF }))
-            scene.add(indicator)
-            updateFunctions.push(() => {
-                indicator.position.x = (tqg.x - .5) * thingOnTop.scale.x + thingOnTop.position.x
-                indicator.position.y = (tqg.y - .5) * thingOnTop.scale.y + thingOnTop.position.y
+            tqg.getMatrix = (target) => {
 
-                indicator.position.add(holder.position)
-            })
+                if(tqg.pX < 0.5 && tqg.pY < 0.5)
+                    target.copy(identity4x4)
+                if (tqg.pX > 0.5 && tqg.pY < 0.5)
+                    target.copy(cnot)
+                if (tqg.pX < 0.5 && tqg.pY > 0.5)
+                    target.copy(iSwap)
+                if (tqg.pX > 0.5 && tqg.pY > 0.5)
+                    target.copy(swap)
+
+                // target.log("here it is:")
+
+                //maybe you want to exponentiate?
+            }
 
             tqg.position.y = -9999.
 
@@ -428,7 +605,7 @@ async function initCircuit() {
             v0.y -= holder.position.y
             if (Math.abs(v0.x) < wires[0].scale.x / 2.) {
                 let closerWireIndex = Math.abs(v0.y - wires[0].position.y) < Math.abs(v0.y - wires[1].position.y) ? 0 : 1
-                let newTqg = putLowestUnusedGateOnWire(gateArray, wires[closerWireIndex])
+                let newTqg = putLowestUnusedGateOnWire(gateArray, closerWireIndex)
                 if(newTqg !== null)
                     newTqg.position.y = bg.position.y
             }

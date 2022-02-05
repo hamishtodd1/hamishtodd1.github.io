@@ -1,42 +1,6 @@
 
-
-
-
-
 let stateMotor = null
-async function initKleinBall() {
-
-
-    // matrixToMotor(identity2x2).log()
-    // return
-    //hooray, it works at least with identity
-
-    stateMotor = new Mv()
-    stateMotor[0] = 1.
-
-    if(0)
-    {
-        let ams = Array(arsenovichMatrices.length)
-        arsenovichMatrices.forEach((matArray, i) => {
-            ams[i] = new ComplexMat(2, matArray)
-        })
-
-        updateFunctions.push(()=>{
-            let amIndex = frameCount % ams.length
-            matrixToMotor(ams[amIndex], mv0)
-
-            let problematic = false
-            for(let i = 0; i < 16; ++i) {
-                if (isNaN(mv0[i])) {
-                    problematic = true
-                    debugger
-                    matrixToMotor(ams[amIndex], mv0)
-                }
-            }
-            if (!problematic)
-                stateMotor.copy(mv0)
-        })
-    }
+async function initKleinBalls() {
 
     //niceish animations
     // updateFunctions.push(() => {
@@ -75,20 +39,6 @@ async function initKleinBall() {
     //         stateMotor.normalize()
     //     }
     // })
-
-    let wholeThing = new THREE.Object3D()
-    scene.add(wholeThing)
-    thingsToRotate.push(wholeThing)
-
-    {
-        let shadowCaster = new THREE.Mesh(new THREE.IcosahedronGeometry(1., 2), new THREE.MeshBasicMaterial({
-            transparent: true,
-            opacity: .00001
-        }))
-        shadowCaster.castShadow = true
-        shadowCaster.receiveShadow = false
-        wholeThing.add(shadowCaster)
-    }
 
     {
         var initialMvs = []
@@ -142,39 +92,46 @@ async function initKleinBall() {
         })
     }
 
-    function putSphereHereAtFrameCountZero(pt) {
-        if(frameCount !== 0)
-            return
+    let shadowCasterGeo = new THREE.IcosahedronGeometry(1., 2)
+    let shadowCasterMat = new THREE.MeshBasicMaterial({
+        transparent: true,
+        opacity: .00001
+    })
 
-        let m = new THREE.Mesh(new THREE.SphereGeometry(.05))
-        pt.toVector(m.position)
-        wholeThing.add(m)
-    }
+    let diskGeometry = new THREE.CircleGeometry(1., 126)
+    let diskMats = []
+    let numPlanes = initialMvs.length
+    for (let i = 0; i < numPlanes; ++i)
+        diskMats[i] = niceMat(i / (numPlanes - 1.))
 
-    // putSphereHereAtFrameCountZero(new Mv().point(1.,0.,0.,1.))
-    // putSphereHereAtFrameCountZero(new Mv().point(0.,1.,0.,1.))
-    // putSphereHereAtFrameCountZero(new Mv().point(0.,0.,1.,1.))
-    // return
-
+    KleinBall = () =>
     {
+        let kb = new THREE.Object3D()
+        thingsToRotate.push(kb)
+        let stateMotor = new Mv()
+        stateMotor[0] = 1.
+        kb.stateMotor = stateMotor
+
         let disks = []
-        let diskGeometry = new THREE.CircleGeometry(1., 126)
 
-        // let sph = new THREE.Mesh(new THREE.SphereBufferGeometry(1.,64,64),new THREE.MeshPhongMaterial({
-        //     transparent: true,
-        //     opacity: .4
-        // }))
-        // wholeThing.add(sph)
-        // wholeThing.rotation.y += Math.PI
+        kb.setVisibility = (newVisibility) => {
+            for (let i = 0; i < numPlanes; ++i) {
+                disks[i].visible = newVisibility
+            }    
+        }
 
-        let numPlanes = initialMvs.length
         for (let i = 0; i < numPlanes; ++i) {
             // let colorHex = numPlanes
-            let disk = new THREE.Mesh(diskGeometry, niceMat(i / (numPlanes - 1.)))
+            let disk = new THREE.Mesh(diskGeometry, diskMats[i])
             disk.castShadow = false
             disk.receiveShadow = false
             disks[i] = disk
-            wholeThing.add(disk)
+            kb.add(disk)
+
+            let shadowCaster = new THREE.Mesh(shadowCasterGeo, shadowCasterMat)
+            shadowCaster.castShadow = true
+            shadowCaster.receiveShadow = false
+            kb.add(shadowCaster)
 
             disk.initialMv = initialMvs[i]
 
@@ -209,5 +166,7 @@ async function initKleinBall() {
                 disk.scale.setScalar(diskRadius)
             })
         }
+
+        return kb
     }
 }

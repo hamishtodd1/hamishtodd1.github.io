@@ -465,8 +465,15 @@ function init31() {
 				target = new Mv()
 			target.copy(this)
 
-			let scalarAddition = target[0] == -1. ? -1. : 1.
-			target[0] += scalarAddition
+			if(target.equals(zeroMv))
+				return target
+
+			// target.normalize()
+
+			if (target[0] !== -1.)
+				target[0] += 1.
+			else
+				target[5] += 1.
 			target.normalize()
 			return target
 		}
@@ -530,9 +537,9 @@ function init31() {
 			this.mul(mvToBeSandwiched, localMv1)
 			localMv1.mul(localMv0,target)
 
-			// let ks = mvToBeSandwiched.grade() * this.grade()
-			// if(ks % 2 === 0)
-			// 	target.multiplyScalar(-1.)
+			let ks = mvToBeSandwiched.grade() * this.grade()
+			if(ks % 2 === 0)
+				target.multiplyScalar(-1.)
 
 			return target
 		}

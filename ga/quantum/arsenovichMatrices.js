@@ -1,3 +1,19 @@
+function arsenovichDemo() {
+    let centralKb = KleinBall()
+    scene.add(centralKb)
+
+    let ams = Array(arsenovichMatrices.length)
+    arsenovichMatrices.forEach((matArray, i) => {
+        ams[i] = new ComplexMat(2, matArray)
+    })
+
+    updateFunctions.push(() => {
+        let amIndex = frameCount % ams.length
+        matrixToMotor(ams[amIndex], mv0)
+        centralKb.stateMotor.copy(mv0)
+    })
+}
+
 let arsenovichMatrices = [
     [[-0.50372318,0.4578448],[ 0.6134571,0.36678139],
     [ 0.6134571,0.36678139],[-0.19958433,0.6483347]],
