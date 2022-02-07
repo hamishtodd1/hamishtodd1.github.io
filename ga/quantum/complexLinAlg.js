@@ -10,9 +10,9 @@
 
 function initChangingQuantumState(state) {
     // let controlsArray = [
-    //     pauliX, "t", "g",
-    //     pauliY, "i", "k",
-    //     pauliZ, "w", "s",
+    //     pauli1, "t", "g",
+    //     pauli2, "i", "k",
+    //     pauli3, "w", "s",
     // ]
 
     // let dummy4x4 = new ComplexMat(4)
@@ -338,18 +338,16 @@ class ComplexMat {
         return target
     }
 
-    add(a, target) {
-        if (target === undefined)
-            target = new ComplexMat(this.dim)
+    add(a, target) { //to self!!
+        if (target !== undefined)
+            console.error("no target! Gonna add to this!")
         
-        let temp = new Complex()
         this.forEachElement((row,col,val)=>{
-            temp.re = val.re + a.get(row,col).re
-            temp.im = val.im + a.get(row,col).im
-            target.set(row,col,temp)
+            val.re += a.get(row,col).re
+            val.im += a.get(row,col).im
         })
 
-        return target
+        return this
     }
 
     similarTo(m) {
@@ -376,12 +374,12 @@ class ComplexMat {
     }
 }
 
-// xti = pauliX.tensor(identity2x2)
-// yti = pauliY.tensor(identity2x2)
-// zti = pauliZ.tensor(identity2x2)
-// itx = identity2x2.tensor(pauliX)
-// ity = identity2x2.tensor(pauliY)
-// itz = identity2x2.tensor(pauliZ)
+// xti = pauli1.tensor(identity2x2)
+// yti = pauli2.tensor(identity2x2)
+// zti = pauli3.tensor(identity2x2)
+// itx = identity2x2.tensor(pauli1)
+// ity = identity2x2.tensor(pauli2)
+// itz = identity2x2.tensor(pauli3)
 
 
 
@@ -549,15 +547,19 @@ zero2x2 = new ComplexMat(2, [
     [0., 0.], [0., 0.],
     [0., 0.], [0., 0.],
 ])
-pauliX = new ComplexMat(2, [
+
+//"X"
+pauli1 = new ComplexMat(2, [
     [0., 0.], [1., 0.],
     [1., 0.], [0., 0.],
 ])
-pauliY = new ComplexMat(2, [
+//"Y"
+pauli2 = new ComplexMat(2, [
     [0., 0.], [0., -1.],
     [0., 1.], [0., 0.],
 ])
-pauliZ = new ComplexMat(2, [
+//"Z"
+pauli3 = new ComplexMat(2, [
     [1., 0.], [0., 0.],
     [0., 0.], [-1., 0.],
 ])

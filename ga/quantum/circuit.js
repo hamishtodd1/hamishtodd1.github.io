@@ -77,6 +77,7 @@ For "actual tool", things to try to do:
 
 
 async function initCircuit() {
+    
 
     // {
     //     let segmentsAroundTube = 15
@@ -142,6 +143,10 @@ async function initCircuit() {
         let rect = Rectangle(params)
         return rect
     }
+
+    let littleBallGeometry = new THREE.SphereGeometry(shellRadius / 7.)
+    let sp = new THREE.Mesh(littleBallGeometry, new THREE.MeshBasicMaterial({ color: 0xFF0000 }))
+    scene.add(sp)
 
     //-----------ROTATION
     let rotators = Array(12)
@@ -325,13 +330,21 @@ async function initCircuit() {
                 bs.setVisibility(true)
                 kb.setVisibility(false)
 
-                bs.setFrom2Vec(a,c)
+                c0.copy(a).add(b)
+                c1.copy(c).add(d)
+                // log("new")
+                // log(a,b,c,d)
+                // log(frameCount)
+                // c0.log()
+                // c1.log()
+                bs.setFrom2Vec(c1,c0)
+                //sounds more like what z = 1 gets sent to
             }
             else {
                 bs.setVisibility(false)
                 kb.setVisibility(true)
 
-                // abcdToMotor(a, b, c, d, kb.stateMotor)
+                abcdToMotor(a, b, c, d, kb.stateMotor)
             }
         }
 
@@ -391,6 +404,7 @@ async function initCircuit() {
                     initialState.elements[0].re = 0.
                     initialState.elements[1].re = 1.
                 }
+                initialState.log()
             }
         })
         let initialState = new ComplexVector(2)
@@ -399,7 +413,7 @@ async function initCircuit() {
         let initialStateBs = new BlochSphere(initialStateBox)
 
         updateFunctions.push(()=>{
-            initialStateBs.setFrom2Vec(initialState.elements[0], initialState.elements[1])
+            initialStateBs.setFrom2Vec(initialState.elements[1], initialState.elements[0])
         })
 
         let finalStateBox = Rectangle({
@@ -409,8 +423,10 @@ async function initCircuit() {
         wire.finalStateViz = new CombinedBsKb(finalStateBox)
     }
 
-    let circuitState = new ComplexVector(4) //or, matrix? but how to apply?
+    circuitState = new ComplexVector(4) //or, matrix? but how to apply?
     let stepMat = identity4x4.clone()
+    let cm2a = new ComplexMat(2)
+    let cm2b = new ComplexMat(2)
     updateFunctions.push(() => {
         let q1 = wires[0].initialState.elements
         let q2 = wires[1].initialState.elements
@@ -419,7 +435,7 @@ async function initCircuit() {
         q1[1].mul(q2[0], circuitState.elements[2])
         q1[1].mul(q2[1], circuitState.elements[3])
 
-        circuitState.log("before")
+        // circuitState.log("before")
 
         for(let i = 0; i < maxGatesPerWire; ++i) {
             if (tqgs.indexOf(circuitGates[0][i]) !== -1 || 
@@ -434,15 +450,18 @@ async function initCircuit() {
                 // stepMat.copy(cnot)
             }
             else {
-                let a = circuitGates[0][i] === null ? identity2x2 : circuitGates[0][i].getMatrix(c2m0)
-                let b = circuitGates[1][i] === null ? identity2x2 : circuitGates[1][i].getMatrix(c2m1)
+                // if (circuitGates[0][i] !== null )
+                //     debugger
+                let a = circuitGates[0][i] === null ? identity2x2 : circuitGates[0][i].getMatrix(cm2a)
+                let b = circuitGates[1][i] === null ? identity2x2 : circuitGates[1][i].getMatrix(cm2b)
+                // a.log("a")
                 a.tensor(b, stepMat)
             }
             
             circuitState.applyMatrix(stepMat)
         }
 
-        circuitState.log("after")
+        // circuitState.log("after")
 
         
         
@@ -452,7 +471,6 @@ async function initCircuit() {
             left qubit:
                 00 / 10 if right qubit is 0, 
                 01 / 11 if right qubit is 1
-                and maybe even something else if superposition
 
             right qubit: 
 
@@ -460,6 +478,7 @@ async function initCircuit() {
             Oooooookay. So find the basis in which the right qubit is indeed 0 (or "+")
             But in the entangled case, what is that qubit? If you're allowed to change basis, 
 
+            Have to figure out how to break them apart in the separable case anyway, so 
             
             "a change of basis such that the result is separated if possible"            
                 MAYBE schmidt decomposition? See SVD in complex
@@ -483,50 +502,94 @@ async function initCircuit() {
         )
     })
 
+    let landmarkframe = new THREE.Object3D()
+    {
+        let landmarkMat = new THREE.MeshBasicMaterial({color:0x00FFFF})
+        scene.add(landmarkframe)
+        thingsToRotate.push(landmarkframe)
+        landmarkframe.position.set(0., -999999., 0.)
+        let coordNames = ["x", "y", "z"]
+        for (let i = 0; i < 3; ++i) {
+            for (let j = 0; j < 2; ++j) {
+                let landmark = new THREE.Mesh(littleBallGeometry, landmarkMat)
+                landmark.scale.setScalar(.9)
+                landmark.position[coordNames[i]] = shellRadius * (j ? 1. : -1.)
+                landmarkframe.add(landmark)
+            }
+        }
+    }
+
     //--------PAULI
     let paulis = Array(12)
-    { 
+    {
         //you want instaaaaaanced
         let diskGeometry = new THREE.CircleBufferGeometry(shellRadius * .96, 31)
+        diskGeometry.rotateX(TAU/4.)
+        //TODO should maybe have two different sides
         let diskMat = niceMat(0.)
         for (let i = 0; i < paulis.length; ++i) {
-            let pauli = SquareRectangle({
-                onClick: () => {
-                    log("edit it as a pauli")
-                }
+            let pauliBox = SquareRectangle({})
+            pauliBox.position.y = -999.
+
+            // let reflection = e3.clone()
+
+            let pauliCoefficients = new THREE.Vector3(0.,1.,1.) //initialized to hadamard
+            updateFunctions.push(()=>{
+                pauliCoefficients.normalize()
+                setRotationallySymmetricMatrix(pauliCoefficients.x, pauliCoefficients.y, pauliCoefficients.z, plane.matrix)
             })
-            pauli.position.y = -999.
 
-            let reflection = e3.clone()
+            pauliBox.getMatrix = (target) => {
+                target.copy(pauli1).multiplyScalar(pauliCoefficients.y)
+                c2m1.copy(pauli2).multiplyScalar(pauliCoefficients.x)
+                target.add(c2m1)
+                c2m1.copy(pauli3).multiplyScalar(pauliCoefficients.z)
+                target.add(c2m1)
 
-            pauli.getMatrix = (target) => {
-                target.copy(identity2x2)
+                //decide on this AFTER you've sorted out whether pauli multiplication of a vector
 
                 // reflection.inner(e1,mv0)[0]
-
-                //probably... get the plane as a*e1 + b*e2 + c*e3, then just e's become paulis
 
                 return target
             }
 
-            let shell = BlochShell(pauli, {
-                during: () => {
-                    shell.intersectMouseRay(v1)
-                    sp.position.copy(v1)
+            //pauli 1: flips to 0. on sphere, does flip
+            //pauli 2: flips to -i|1>. On sphere, nothing!
+
+
+
+            //to |1>
+            //pauli3: nothing to worry about
+
+            let shell = BlochShell(pauliBox, {
+                during: () => {                    
+                    shell.intersectMouseRay(pauliCoefficients)
+                    log(pauliCoefficients)
+                    
+                    landmarkframe.position.copy(shell.position)
+                    landmarkframe.updateMatrixWorld()
+                    landmarkframe.worldToLocal(pauliCoefficients)
+                    landmarkframe.children.forEach((landmark)=>{
+                        if (pauliCoefficients.distanceTo(landmark.position) < shellRadius / 3.)
+                            pauliCoefficients.copy(landmark.position)
+                    })
+
+                    // sp.position.copy(pauliCoefficients)
+                    // landmarkframe.localToWorld(sp.position)
+                },
+                end: ()=>{
+                    landmarkframe.position.set(0.,-999999.,0.)
                 }
             })
             let plane = new THREE.Mesh(diskGeometry, diskMat)
-            plane.rotation.x = TAU / 8.
+            plane.matrixAutoUpdate = false
             shell.add(plane)
-            //you need an orientation for it, a ring of thingies
+
+            //TODO visualize orientation for it
             
-            paulis[i] = pauli
+            paulis[i] = pauliBox
         }
     }
-
-    let littleBallGeometry = new THREE.SphereGeometry(shellRadius / 7.)
-    // let sp = new THREE.Mesh(littleBallGeometry, new THREE.MeshBasicMaterial({color:0xFF0000}))
-    // scene.add(sp)
 
     //-------------TWO QUBITS
     //Are these directional in any sense? Unentangled A,B -> controlled not -> changing B impacts A?

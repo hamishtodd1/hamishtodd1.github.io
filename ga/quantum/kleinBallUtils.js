@@ -1,4 +1,11 @@
 /*
+Conventions
+    bloch sphere / complex numbers convention: z is up. Project from up onto (x,y) = (re,im)
+    pauli: x gate reflects up/down, eg z
+    computer graphics convention: y is up
+    our convention: project from y onto (x,z) = (re,im)
+    wikipedia convention: z is out of complex plane and -1 is point at infinity. We have y=1 is point at infinity
+
 You need to convert both sets of 3 points to a canonical form, which you do as follows:
 
 - The 3 points are null vectors in 4D (ie the 2d conformal algebra).
@@ -141,10 +148,11 @@ function complexToSphere(numerator, denominator, target) {
         target = new Mv()
 
     let x, y, z
-    if (denominator.re === 0. && denominator.im === 0.) {
-        //result is point at infinity
+    if (denominator.re === 0. && denominator.im === 0. ) {
+        // if(numerator.re === 1.)
+        //result is point at infinity. It's DEFINITELY in that state
         x = 0.
-        y = 1.
+        y = -1.
         z = 0.
     }
     else {
@@ -153,13 +161,11 @@ function complexToSphere(numerator, denominator, target) {
         let re = temp.re
         let im = temp.im
         delete temp
-        let denom = 1. / (1. + re * re + im * im)
+        let normalizer = 1. / (1. + re * re + im * im)
 
-        x = (2. * re) * denom
-        y = -(1. - re * re - im * im) * denom
-        z = (2. * im) * denom
-
-        //convention is below
+        x = (2. * re) * normalizer
+        y = (1. - re * re - im * im) * normalizer
+        z = (2. * im) * normalizer
     }
 
     //should you normalize here? Current situation is that they're normalized and have e123 = 1.
@@ -216,10 +222,6 @@ function abcdToMotor(a,b,c,d,target) {
         onePrimed,
         infinityPrimed,
         iPrimed]
-    //bloch sphere / complex numbers convention: z is up. Project from up onto (x,y) = (re,im)
-    //computer graphics convention: y is up
-    //our convention: project from y onto (x,z) = (re,im)
-    //wikipedia convention: z is out of complex plane and -1 is point at infinity. We have y=1 is point at infinity
 
     motorFromPsToQsChrisStyle(xyzNullPoints, q, target)
     // motorFromPsToQs(oneInfinityIPoints, q, target)

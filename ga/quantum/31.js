@@ -391,6 +391,15 @@ function init31() {
 			return target
 		}
 
+		fromVector(vec) {
+			this.copy(zeroMv)
+			this[14] = target.x
+			this[13] = target.y
+			this[12] = target.z
+
+			return this
+		}
+
 		// fromQuaternion(q) {
 
 		// }
