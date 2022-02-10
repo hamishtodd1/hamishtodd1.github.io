@@ -213,6 +213,27 @@ class ComplexMat {
         }
     }
 
+    exp4x4(target) {
+        //first two terms
+        target.copy(this)
+        target.add(identity4x4)
+
+        let increasingPower = localC4m0
+        increasingPower.copy(this)
+        let standIn = localC4m1
+        let oneThatGetsScalarMultiple = localC4m2
+        prepreparedReciprocalFactorials.forEach((rf) => {
+            standIn.copy(increasingPower)
+            standIn.mul(this, increasingPower)
+
+            oneThatGetsScalarMultiple.copy(increasingPower)
+            oneThatGetsScalarMultiple.multiplyScalar(rf)
+            target.add(oneThatGetsScalarMultiple)
+        })
+
+        return target
+    }
+
     tensor(m2, target) {
         if(target === undefined)
             target = new ComplexMat(this.dim * m2.dim)
@@ -381,7 +402,9 @@ class ComplexMat {
 // ity = identity2x2.tensor(pauli2)
 // itz = identity2x2.tensor(pauli3)
 
-
+let prepreparedReciprocalFactorials = [
+    1. / 2., 1. / 6., 1. / 24., 1. / 120., 1. / 720., 1. / 5040., 1. / 40320., 1. / 362880., 1. / 3628800., 1. / 39916800., 1. / 479001600., 1. / 6227020800., 1. / 87178291200., 1. / 1307674368000.,
+]
 
 class Complex {
 
@@ -553,20 +576,30 @@ pauli1 = new ComplexMat(2, [
     [0., 0.], [1., 0.],
     [1., 0.], [0., 0.],
 ])
+XxX = pauli1.tensor(pauli1)
 //"Y"
 pauli2 = new ComplexMat(2, [
     [0., 0.], [0., -1.],
     [0., 1.], [0., 0.],
 ])
+YxY = pauli2.tensor(pauli2)
 //"Z"
 pauli3 = new ComplexMat(2, [
     [1., 0.], [0., 0.],
     [0., 0.], [-1., 0.],
 ])
+ZxZ = pauli3.tensor(pauli3)
 
 hadamard = new ComplexMat(2, [
     [1. / Math.SQRT2, 0.], [1. / Math.SQRT2, 0.],
     [1. / Math.SQRT2, 0.], [-1. / Math.SQRT2, 0.],
+])
+
+zero4x4 = new ComplexMat(4, [
+    [0., 0.], [0., 0.], [0., 0.], [0., 0.],
+    [0., 0.], [0., 0.], [0., 0.], [0., 0.],
+    [0., 0.], [0., 0.], [0., 0.], [0., 0.],
+    [0., 0.], [0., 0.], [0., 0.], [0., 0.],
 ])
 
 cnot = new ComplexMat(4, [
@@ -602,6 +635,19 @@ sqrtSwap = new ComplexMat(4, [
     [0., 0.], [.5, .5], [.5,-.5], [0., 0.],
     [0., 0.], [.5,-.5], [.5, .5], [0., 0.],
     [0., 0.], [0., 0.], [0., 0.], [1., 0.],
+])
+
+magic = new ComplexMat(4, [
+    [1., 0.], [0., 1.], [0., 0.], [0., 0.],
+    [0., 0.], [0., 0.], [0., 1.], [1., 0.],
+    [0., 0.], [0., 0.], [0., 1.], [-1.,0.],
+    [1., 0.], [0., 1.], [0., 0.], [0., 0.],
+])
+magicConjugateTranspose = new ComplexMat(4, [
+    [1., 0.], [0., 0.], [0., 0.], [1., 0.],
+    [0.,-1.], [0., 0.], [0., 0.], [0.,-1.],
+    [0., 0.], [0.,-1.], [0.,-1.], [0., 0.],
+    [0., 0.], [1., 0.], [-1.,0.], [0., 0.],
 ])
 
 
@@ -651,3 +697,9 @@ c4m0 = new ComplexMat(4)
 c4m1 = new ComplexMat(4)
 c2m0 = new ComplexMat(2)
 c2m1 = new ComplexMat(2)
+localC4m0 = new ComplexMat(4)
+localC4m1 = new ComplexMat(4)
+localC4m2 = new ComplexMat(4)
+localC4m3 = new ComplexMat(4)
+localC2m0 = new ComplexMat(2)
+localC2m1 = new ComplexMat(2)

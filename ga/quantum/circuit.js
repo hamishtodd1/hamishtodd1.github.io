@@ -32,6 +32,9 @@ People to show when got controls
     Andrew Steane
     Michael Nielsen
     Gavin Crooks
+    Cambridge
+        Jeremy Butterfield jb56@cam.ac.uk
+        Ask Emily for others
 
 When video done
     A prof who could get you a frickin visa
@@ -77,6 +80,7 @@ For "actual tool", things to try to do:
 
 
 async function initCircuit() {
+    
     
 
     // {
@@ -147,6 +151,7 @@ async function initCircuit() {
     let littleBallGeometry = new THREE.SphereGeometry(shellRadius / 7.)
     let sp = new THREE.Mesh(littleBallGeometry, new THREE.MeshBasicMaterial({ color: 0xFF0000 }))
     scene.add(sp)
+    sp.position.y -= 999.
 
     //-----------ROTATION
     let rotators = Array(12)
@@ -171,6 +176,7 @@ async function initCircuit() {
                 target.copy(identity2x2)
 
                 //maybe you want to exponentiate?
+
 
                 return target
             }
@@ -326,6 +332,9 @@ async function initCircuit() {
             let det = a.mul(d, c0).sub(b.mul(c, c1))
             if(frameCount === 1)
                 log(det, det.approximatelyEquals(zeroComplex))
+
+            //but look, if you do a hadamard and a cnot, surely the top bit hasn't been affected?
+
             if (det.approximatelyEquals(zeroComplex)) {
                 bs.setVisibility(true)
                 kb.setVisibility(false)
@@ -522,28 +531,37 @@ async function initCircuit() {
     //--------PAULI
     let paulis = Array(12)
     {
-        //you want instaaaaaanced
-        let diskGeometry = new THREE.CircleBufferGeometry(shellRadius * .96, 31)
-        diskGeometry.rotateX(TAU/4.)
+        let verts = []
+        let numSnowflakes = 10
+        for (let i = 0; i < numSnowflakes; ++i) {
+            for (let j = 0; j < 3; ++j) {
+                let vert1 = new THREE.Vector3(0., (i / (numSnowflakes - 1.)) * shellRadius * 2. - shellRadius, shellRadius / 10.)
+                let vert2 = vert1.clone()
+                vert1.applyAxisAngle(yUnit, TAU / 6. * j)
+                vert2.applyAxisAngle(yUnit, TAU / 6. * j + TAU / 2.)
+                verts.push(vert1)
+                verts.push(vert2)
+            }
+        }
+        let lineReflectionGeo = new THREE.BufferGeometry().setFromPoints(verts)
+        let lineReflectionMat = new THREE.LineBasicMaterial({ color: 0x000000 })
+        
         //TODO should maybe have two different sides
-        let diskMat = niceMat(0.)
         for (let i = 0; i < paulis.length; ++i) {
             let pauliBox = SquareRectangle({})
             pauliBox.position.y = -999.
 
-            // let reflection = e3.clone()
-
-            let pauliCoefficients = new THREE.Vector3(0.,1.,1.) //initialized to hadamard
+            let pauliCoefficients = new THREE.Vector3(1.,1.,0.) //initialized to hadamard
             updateFunctions.push(()=>{
                 pauliCoefficients.normalize()
-                setRotationallySymmetricMatrix(pauliCoefficients.x, pauliCoefficients.y, pauliCoefficients.z, plane.matrix)
+                setRotationallySymmetricMatrix(pauliCoefficients.x, pauliCoefficients.y, pauliCoefficients.z, pipeCleaner.matrix)
             })
 
             pauliBox.getMatrix = (target) => {
-                target.copy(pauli1).multiplyScalar(pauliCoefficients.y)
-                c2m1.copy(pauli2).multiplyScalar(pauliCoefficients.x)
+                target.copy(pauli1).multiplyScalar(pauliCoefficients.x)
+                c2m1.copy(pauli2).multiplyScalar(pauliCoefficients.z)
                 target.add(c2m1)
-                c2m1.copy(pauli3).multiplyScalar(pauliCoefficients.z)
+                c2m1.copy(pauli3).multiplyScalar(pauliCoefficients.y)
                 target.add(c2m1)
 
                 //decide on this AFTER you've sorted out whether pauli multiplication of a vector
@@ -553,24 +571,15 @@ async function initCircuit() {
                 return target
             }
 
-            //pauli 1: flips to 0. on sphere, does flip
-            //pauli 2: flips to -i|1>. On sphere, nothing!
-
-
-
-            //to |1>
-            //pauli3: nothing to worry about
-
             let shell = BlochShell(pauliBox, {
                 during: () => {                    
                     shell.intersectMouseRay(pauliCoefficients)
-                    log(pauliCoefficients)
                     
                     landmarkframe.position.copy(shell.position)
                     landmarkframe.updateMatrixWorld()
                     landmarkframe.worldToLocal(pauliCoefficients)
                     landmarkframe.children.forEach((landmark)=>{
-                        if (pauliCoefficients.distanceTo(landmark.position) < shellRadius / 3.)
+                        if (pauliCoefficients.distanceTo(landmark.position) < shellRadius / 6.)
                             pauliCoefficients.copy(landmark.position)
                     })
 
@@ -581,9 +590,9 @@ async function initCircuit() {
                     landmarkframe.position.set(0.,-999999.,0.)
                 }
             })
-            let plane = new THREE.Mesh(diskGeometry, diskMat)
-            plane.matrixAutoUpdate = false
-            shell.add(plane)
+            let pipeCleaner = new THREE.LineSegments(lineReflectionGeo, lineReflectionMat)
+            shell.add(pipeCleaner)
+            pipeCleaner.matrixAutoUpdate = false
 
             //TODO visualize orientation for it
             
@@ -595,6 +604,7 @@ async function initCircuit() {
     //Are these directional in any sense? Unentangled A,B -> controlled not -> changing B impacts A?
     let tqgs = Array(5)
     {
+        let matToBeExponentiated = new ComplexMat(4)
         for (let i = 0; i < tqgs.length; ++i) {
             let tqg = Rectangle({
                 h: wireSpacing + gateDimension,
@@ -633,22 +643,68 @@ async function initCircuit() {
                         lieAlgSpace.mousePosInOurScaledSpace(v0)
                         tqg.pX = clamp(v0.x + .5, 0.,1.)
                         tqg.pY = clamp(v0.y + .5, 0., 1.)
+
+                        if (Math.abs(tqg.pX-.5) < .05)
+                            tqg.pX = 0.5
+                        if (Math.abs(tqg.pY-.5) < .05)
+                            tqg.pY = 0.5
                     }
                 }
             })
 
             tqg.getMatrix = (target) => {
 
-                if(tqg.pX < 0.5 && tqg.pY < 0.5)
-                    target.copy(identity4x4)
-                if (tqg.pX > 0.5 && tqg.pY < 0.5)
-                    target.copy(cnot)
-                if (tqg.pX < 0.5 && tqg.pY > 0.5)
-                    target.copy(iSwap)
-                if (tqg.pX > 0.5 && tqg.pY > 0.5)
-                    target.copy(swap)
+                // if(tqg.pX < 0.5 && tqg.pY < 0.5)
+                //     target.copy(identity4x4)
+                // if (tqg.pX > 0.5 && tqg.pY < 0.5)
+                //     target.copy(cnot)
+                // if (tqg.pX < 0.5 && tqg.pY > 0.5)
+                //     target.copy(iSwap)
+                // if (tqg.pX > 0.5 && tqg.pY > 0.5)
+                //     target.copy(swap)
 
-                // target.log("here it is:")
+                let tX = tqg.pX / 2. //goes half way into the cube
+                let tY = tqg.pY / 2.
+                let tZ = tqg.pY / 2.
+                log(tX,tY,tZ)
+
+                let sumOfIxIs = c4m1
+                sumOfIxIs.copy(zero4x4)
+
+                c4m0.copy(XxX)
+                c4m0.multiplyScalar(tX)
+                sumOfIxIs.add(c4m0)
+                c4m0.copy(YxY)
+                c4m0.multiplyScalar(tY)
+                sumOfIxIs.add(c4m0)
+                c4m0.copy(ZxZ)
+                c4m0.multiplyScalar(tZ)
+                sumOfIxIs.add(c4m0)
+
+                c4m0.copy(zero4x4)
+                c4m0.elements[0].im = 1.
+                c4m0.elements[5].im = 1.
+                c4m0.elements[10].im = 1.
+                c4m0.elements[15].im = 1.
+                c4m0.multiplyScalar(-TAU / 4.)
+                if(frameCount === 400)
+                    c4m0.log()
+                c4m0.mul(sumOfIxIs, matToBeExponentiated)
+
+                matToBeExponentiated.exp4x4(target)
+                // magic.mul(c4m0,c4m1).mul(magicConjugateTranspose,target)
+                // target.log("here it is")
+
+                //just try it with three orthogonal disks, might be enough
+                //then, an octahedron with corners at infinity
+                //octahedron plus disks parallel to faces and through origin
+                /*
+                    Nice to have:
+                        some that are parallel
+                        some that meet
+
+                    make something so you can build the thing
+                */
 
                 //maybe you want to exponentiate?
             }
@@ -676,4 +732,6 @@ async function initCircuit() {
     })
 
     roundOffRectangleCreation()
+
+    putLowestUnusedGateOnWire(tqgs, 0)
 }

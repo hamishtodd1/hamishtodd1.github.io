@@ -314,6 +314,17 @@ function init31() {
 			return this
 		}
 
+		plane(x, y, z, w) {
+			this.copy(zeroMv)
+			this[1] = x
+			this[2] = y
+			this[3] = z
+
+			this[4] = w === undefined ? 1. : w
+
+			return this
+		}
+
 		point(x, y, z, w) {
 			this.copy(zeroMv)
 			this[14] = x

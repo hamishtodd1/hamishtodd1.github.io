@@ -1,7 +1,8 @@
 /*
-    Could it be that something inside the ball gives you the probability?
+    Titles
+        Visual quantum computing
+        Is this what entanglement looks like?
 
-    Lean in to the metaphysics: yes, it's useful for these things, but they're super boring
 
     Mandelbrot
         https://www.youtube.com/watch?v=FFftmWSzgmk
@@ -26,11 +27,10 @@
         Shor's alg
             https://en.wikipedia.org/wiki/Modular_exponentiation visualizable
             mn = g^p - 1 visualizable
+        Lean in to the metaphysics: yes, it's useful for MRI and crypto, but they're boring. "What is the world made of" is better
     Would be nice to show (maybe more qubits needed):
         "negative probabilities" formulation https://cognitivemedium.com/assets/qm-interpretation/Feynman.pdf
         free will
-
-    
 
     Wikipedia articles to add animation to:
         Cross ratio

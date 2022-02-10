@@ -67,29 +67,98 @@ async function initKleinBalls() {
             [ 1.,0.,-PHI],
             [-1.,0.,-PHI]]
 
-        let translator = new Mv()
-        icoverts.forEach((v)=>{
-            // if(initialMvs.length !== 0)
-            //     return
+        let octaVerts = [
+            [ 1.,0.,0.],
+            [-1.,0.,0.],
+            [0., 1.,0.],
+            [0.,-1.,0.],
+            [0.,0., 1.],
+            [0.,0.,-1.],
+        ]
+        let octaTris = [ //counter clockwise
+            [0,2,4],
+            [1,4,2],
+            [4,3,0],
+            [2,0,5],
 
-            let im = new Mv()
-            im[1] = v[0]
-            im[2] = v[1]
-            im[3] = v[2]
-            im.normalize()
+            [1,5,3],
+            [0,3,5],
+            [3,4,1],
+            [5,1,2]
+        ]
 
-            for(let i = 0; i < 2; ++i) {
+        function pointFromVertIndex(vertArray,i,target) {
+            let v = vertArray[i]
+            target.point(v[0], v[1], v[2],1.)
+            return target
+        }
+
+        function pushFromTri(vertArray,t, i) {
+            pointFromVertIndex(vertArray,t[0], mv0)
+            pointFromVertIndex(vertArray,t[1], mv1)
+            pointFromVertIndex(vertArray,t[2], mv2)
+            mv0.join(mv1, mv3).join(mv2, mv4)
+
+            initialMvs.push(mv4.clone())
+        }
+
+        // octaTris.forEach((t, i) => { pushFromTri(octaVerts,t,i)})
+
+        // initialMvs.push(new Mv().plane(1.,1.,1.,0.))
+        // initialMvs.push(new Mv().plane(-1.,1.,1.,0.))
+        // initialMvs.push(new Mv().plane(1.,-1.,1.,0.))
+        // initialMvs.push(new Mv().plane(1.,1.,-1.,0.))
+
+        let cubeVerts = [
+            [1.,1.,1.],
+
+            [-1.,1.,1.],
+            [1.,-1.,1.],
+            [1.,1.,-1.],
+
+            [1.,-1.,-1.],
+            [-1.,1.,-1.],
+            [-1.,-1.,1.],
+
+            [-1.,-1.,-1.],
+        ]
+        cubeVerts.forEach((v) => { v[0] /= Math.sqrt(3.); v[1] /= Math.sqrt(3.); v[2] /= Math.sqrt(3.)})
+        let cubeTris = [
+            [0,1,2],
+            [0,2,3],
+            [0,3,1],
+
+            [7,5,4],
+            [7,6,5],
+            [7,4,6]
+        ]
+
+        cubeTris.forEach((t, i) => { pushFromTri(cubeVerts,t,i)})
+
+        // initialMvs.push(new Mv().plane(1., 0., 0., 0.))
+        // initialMvs.push(new Mv().plane(0., 1., 0., 0.))
+        // initialMvs.push(new Mv().plane(0., 0., 1., 0.))
+
+        // let translator = new Mv()
+        // icoverts.forEach((v)=>{
+        //     let im = new Mv()
+        //     im[1] = v[0]
+        //     im[2] = v[1]
+        //     im[3] = v[2]
+        //     im.normalize()
+
+        //     for(let i = 0; i < 2; ++i) {
                 
-                e4.mul(im,translator)
-                translator.normalize()
-                translator.multiplyScalar(.11 * (i+.5))
-                translator[0] += 1.
+        //         e4.mul(im,translator)
+        //         translator.normalize()
+        //         translator.multiplyScalar(.11 * (i+.5))
+        //         translator[0] += 1.
 
-                let translated = translator.sandwich(im)
+        //         let translated = translator.sandwich(im)
 
-                initialMvs.push(translated)
-            }
-        })
+        //         initialMvs.push(translated)
+        //     }
+        // })
     }
 
     let shadowCasterGeo = new THREE.IcosahedronGeometry(1., 2)
