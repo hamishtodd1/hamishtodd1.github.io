@@ -1,3 +1,7 @@
+/*
+    a/c - (ad-bc) / (c*c * (z+d/c))
+*/
+
 
 let stateMotor = null
 async function initKleinBalls() {
@@ -132,8 +136,9 @@ async function initKleinBalls() {
             [7,6,5],
             [7,4,6]
         ]
+        // cubeTris.forEach((t, i) => { pushFromTri(cubeVerts,t,i)})
 
-        cubeTris.forEach((t, i) => { pushFromTri(cubeVerts,t,i)})
+        //do that grid. Maybe octagon or hexagon
 
         // initialMvs.push(new Mv().plane(1., 0., 0., 0.))
         // initialMvs.push(new Mv().plane(0., 1., 0., 0.))
@@ -159,6 +164,11 @@ async function initKleinBalls() {
         //         initialMvs.push(translated)
         //     }
         // })
+
+        for(let i = 0.; i < 6.; ++i) {
+            initialMvs.push(new Mv().plane(Math.cos(TAU*i/12.), 0., Math.sin(TAU*i/12.), 0.))
+        }
+        initialMvs.push(e2.clone())
     }
 
     let shadowCasterGeo = new THREE.IcosahedronGeometry(1., 2)

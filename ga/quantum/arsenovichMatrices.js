@@ -7,11 +7,11 @@ function arsenovichDemo() {
         ams[i] = new ComplexMat(2, matArray)
     })
 
-    updateFunctions.push(() => {
-        let amIndex = frameCount % ams.length
-        matrixToMotor(ams[amIndex], mv0)
-        centralKb.stateMotor.copy(mv0)
-    })
+    // updateFunctions.push(() => {
+    //     let amIndex = frameCount % ams.length
+    //     matrixToMotor(ams[amIndex], mv0)
+    //     centralKb.stateMotor.copy(mv0)
+    // })
 }
 
 let arsenovichMatrices = [

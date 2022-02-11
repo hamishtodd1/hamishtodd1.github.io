@@ -178,6 +178,15 @@ class ComplexMat {
 			el.re *= scalar
 			el.im *= scalar
 		})
+        return this
+	}
+    multiplyComplex(c) {
+        let temp = new Complex()
+		this.forEachElement((row, col, el) => {
+            el.mul(c,temp)
+            el.copy(temp)
+		})
+        return this
 	}
 
     transpose(target) {

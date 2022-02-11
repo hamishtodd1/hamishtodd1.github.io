@@ -1,3 +1,7 @@
+Choose your point on the curve and perform a mobius transformation
+such that that point is blown up and everything else about the curve gets sent to infinity
+What is that as an MT?
+
 make the curve MASSIVE, we're zoomed in on a point on it
 Maybe the curve is now out at infinity, smooshed onto that sphere?
 

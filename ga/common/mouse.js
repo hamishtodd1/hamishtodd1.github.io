@@ -39,7 +39,7 @@ function initMouse()
 
 	mouse.rotateObjectByGesture = function(object)
 	{
-		let rotationAmount = mouse.raycaster.ray.direction.angleTo(mouse.oldRaycaster.ray.direction) * .8
+		let rotationAmount = mouse.raycaster.ray.direction.angleTo(mouse.oldRaycaster.ray.direction) * 1.8
 		// console.log(mouse.raycaster.ray.direction,mouse.oldRaycaster.ray.direction)
 		if(rotationAmount === 0.)
 			return
@@ -55,6 +55,15 @@ function initMouse()
 		return mouse.raycaster.intersectZPlane(0., target)
 	}
 
+	mouse.get2dDiff = (target) => {
+		mouse.raycaster.intersectZPlane(0., v0)
+		mouse.oldRaycaster.intersectZPlane(0., v1)
+		target.x = v1.x - v0.x
+		target.y = v1.y - v0.y
+
+		return target
+	}
+
 	mouse.justMoved = () => !mouse.raycaster.ray.equals(mouse.oldRaycaster.ray)
 
 	let currentClick = null
@@ -68,6 +77,8 @@ function initMouse()
 
 		mouse.oldRaycaster.ray.copy(mouse.raycaster.ray); 
 		mouse.raycaster.ray.copy( asynchronous.raycaster.ray );
+		// log(mouse.raycaster.ray.origin)
+		// log(mouse.raycaster.ray.direction)
 
 		if(this.clicking && !this.oldClicking ) {
 			let topZ = -Infinity

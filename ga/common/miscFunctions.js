@@ -394,6 +394,63 @@ function ArrowGeometry()
 	diamond.add(geo);
 }
 
+//better would be generating the vertices first then using them
+//but that is barely any better. Really you want a different way of re-using the different arrays in drawing
+function arrowGeometry2() {
+	let shaftRadius = .06
+
+	//ah no no, you want the end to always be the same size
+	let headRadius = shaftRadius * 2.5
+	let shaftLength = .75
+
+	let vecGeometry = new THREE.Geometry()
+
+	let radialSegments = 15
+	let heightSegments = 30 //we want two between y = 0 and y = -shaftRadius
+	vecGeometry.vertices = Array((radialSegments + 1) * (heightSegments + 1))
+	vecGeometry.faces = Array(radialSegments * heightSegments)
+
+	for (let j = 0; j <= heightSegments; j++) {
+		for (let i = 0; i <= radialSegments; i++) {
+			v1.y = j <= 8 ?
+				shaftRadius * (-1. + j / 8.) :
+				j / heightSegments
+
+			v1.x = shaftRadius
+			if (v1.y >= shaftLength) {
+				let proportionAlongHead = 1. - (v1.y - shaftLength) / (1. - shaftLength)
+				v1.x = headRadius * proportionAlongHead
+			}
+			else if (v1.y <= 0.)
+				v1.x = Math.sqrt(sq(shaftRadius) - sq(v1.y))
+
+			v1.z = 0.
+			v1.applyAxisAngle(yUnit, i / radialSegments * TAU)
+			vecGeometry.vertices[j * (radialSegments + 1) + i] = v1.clone()
+
+			if (i < radialSegments && j < heightSegments) { // there are one fewer triangles along both axes
+				vecGeometry.faces[(j * radialSegments + i) * 2 + 0] = new THREE.Face3(
+					(j + 0) * (radialSegments + 1) + (i + 0),
+					(j + 0) * (radialSegments + 1) + (i + 1),
+					(j + 1) * (radialSegments + 1) + (i + 1),
+					new THREE.Vector3()
+				)
+				vecGeometry.faces[(j * radialSegments + i) * 2 + 1] = new THREE.Face3(
+					(j + 0) * (radialSegments + 1) + (i + 0),
+					(j + 1) * (radialSegments + 1) + (i + 1),
+					(j + 1) * (radialSegments + 1) + (i + 0),
+					new THREE.Vector3()
+				)
+			}
+		}
+	}
+
+	vecGeometry.computeFaceNormals()
+	vecGeometry.computeVertexNormals()
+
+	return vecGeometry
+}
+
 function getRandomColor()
 {
 	return new THREE.Color(Math.random(),Math.random(),Math.random())

@@ -333,7 +333,8 @@ async function initCircuit() {
             if(frameCount === 1)
                 log(det, det.approximatelyEquals(zeroComplex))
 
-            //but look, if you do a hadamard and a cnot, surely the top bit hasn't been affected?
+            //infinity gets mapped to a/c, 0 gets mapped to b/d
+            //is it a choice of projection which one is infinity and which is 0?
 
             if (det.approximatelyEquals(zeroComplex)) {
                 bs.setVisibility(true)
@@ -341,11 +342,7 @@ async function initCircuit() {
 
                 c0.copy(a).add(b)
                 c1.copy(c).add(d)
-                // log("new")
-                // log(a,b,c,d)
-                // log(frameCount)
-                // c0.log()
-                // c1.log()
+                //under what circumstances is and isn't this equal to a/c?
                 bs.setFrom2Vec(c1,c0)
                 //sounds more like what z = 1 gets sent to
             }
@@ -605,6 +602,8 @@ async function initCircuit() {
     let tqgs = Array(5)
     {
         let matToBeExponentiated = new ComplexMat(4)
+        let plusVector = new Complex(1./Math.sqrt(2.),1./Math.sqrt(2.))
+        let minusITauOver4 = new Complex(0., -TAU / 4.)
         for (let i = 0; i < tqgs.length; ++i) {
             let tqg = Rectangle({
                 h: wireSpacing + gateDimension,
@@ -666,34 +665,25 @@ async function initCircuit() {
                 let tX = tqg.pX / 2. //goes half way into the cube
                 let tY = tqg.pY / 2.
                 let tZ = tqg.pY / 2.
-                log(tX,tY,tZ)
+                // log(tX,tY,tZ)
 
-                let sumOfIxIs = c4m1
-                sumOfIxIs.copy(zero4x4)
+                matToBeExponentiated.copy(zero4x4)
 
                 c4m0.copy(XxX)
                 c4m0.multiplyScalar(tX)
-                sumOfIxIs.add(c4m0)
+                matToBeExponentiated.add(c4m0)
                 c4m0.copy(YxY)
                 c4m0.multiplyScalar(tY)
-                sumOfIxIs.add(c4m0)
+                matToBeExponentiated.add(c4m0)
                 c4m0.copy(ZxZ)
                 c4m0.multiplyScalar(tZ)
-                sumOfIxIs.add(c4m0)
+                matToBeExponentiated.add(c4m0)
 
-                c4m0.copy(zero4x4)
-                c4m0.elements[0].im = 1.
-                c4m0.elements[5].im = 1.
-                c4m0.elements[10].im = 1.
-                c4m0.elements[15].im = 1.
-                c4m0.multiplyScalar(-TAU / 4.)
-                if(frameCount === 400)
-                    c4m0.log()
-                c4m0.mul(sumOfIxIs, matToBeExponentiated)
-
+                matToBeExponentiated.multiplyComplex(minusITauOver4)
                 matToBeExponentiated.exp4x4(target)
+
                 // magic.mul(c4m0,c4m1).mul(magicConjugateTranspose,target)
-                // target.log("here it is")
+                target.log("here it is")
 
                 //just try it with three orthogonal disks, might be enough
                 //then, an octahedron with corners at infinity

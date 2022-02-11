@@ -1,4 +1,13 @@
 /*
+	So it's actually a 2D game
+		You're looking at a nice desktop surface
+		Making 2D shit happen but with the benefit of 3D visualization
+
+	Where was all the stuff about puppets?
+	Something about "you should be able to make". Air hockey, breakout
+	You record a hand motion
+	The philosophy should probably be: If it feels good to do, and it's understandable, and you can use it to make nice things, it's a good feature
+
 	Tools for thought for everyday life
 		People generally want to show off
 			The fact that they care for their loved ones
@@ -19,8 +28,6 @@
 			Your grasp of "important" things
 		Their aesthetic appreciation
 		Bridges is highly informative about this. Games.
-
-	Inertia tensor-wise, is there a way for PGA to do (a,b,c) * (x,y,z) = (ax,by,cz)? Would give you all the trivial ones
 
 	Notes
 		Tech

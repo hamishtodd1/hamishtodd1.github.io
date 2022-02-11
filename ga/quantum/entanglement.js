@@ -1,7 +1,11 @@
 /*
     Titles
-        Visual quantum computing
-        Is this what entanglement looks like?
+        A visual introduction to quantum computing
+        Quantum weirdness: how to take the square root of... swapping?
+        Einstein's bane: why this quantum state broke physics (EPR visualized)
+        What entanglement (bell pairs?) looks like
+        Superdense coding: squeezing information out of the universe that it doesn't want to give us
+
 
 
     Mandelbrot
@@ -11,24 +15,24 @@
     The rotation is steiner's porism
 
     Definitely show:
-        The action of H x H
         No hidden variables
             Bell basis, rotational invariance
             Maximal entanglement
             "if Alice measures her qubit in any basis, the state of Bob’s qubit collapses to whichever state she got for her qubit"
+        Kochen specker "Not determined until you observe it"?
+            How to read off the expectation values
+                A "basis" is a way of looking at things and taking measurements on them
+                Measuring device is probably some kind of angle-measurer-looking-thing
         no-cloning (ab != 0 <=> can't copy, very simple)
-        How to read off the expectation values
-            A "basis" is a way of looking at things and taking measurements on them
-            Measuring device is probably some kind of angle-measurer-looking-thing
-        
+        Lean in to the metaphysics: yes, it's useful for MRI and crypto, but they're boring. "What is the world made of" is better
+    Would be nice, if commisssioned, to show:
         teleportation - possibly only needs the two?
             And it allows you to connect to quantum cryptography
+        Superdense coding
         Grover's algorithm
         Shor's alg
             https://en.wikipedia.org/wiki/Modular_exponentiation visualizable
             mn = g^p - 1 visualizable
-        Lean in to the metaphysics: yes, it's useful for MRI and crypto, but they're boring. "What is the world made of" is better
-    Would be nice to show (maybe more qubits needed):
         "negative probabilities" formulation https://cognitivemedium.com/assets/qm-interpretation/Feynman.pdf
         free will
 
