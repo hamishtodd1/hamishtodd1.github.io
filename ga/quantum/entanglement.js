@@ -1,10 +1,10 @@
 /*
     Titles
         A visual introduction to quantum computing
-        Quantum weirdness: how to take the square root of... swapping?
         Einstein's bane: why this quantum state broke physics (EPR visualized)
         What entanglement (bell pairs?) looks like
-        Superdense coding: squeezing information out of the universe that it doesn't want to give us
+        A visual introduction to quantum teleportation
+        Quantum weirdness: how to take the square root of... swapping?
 
 
 

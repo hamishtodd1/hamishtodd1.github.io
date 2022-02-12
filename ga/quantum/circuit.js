@@ -31,7 +31,7 @@ People to show when got controls
     QC discord
     Andrew Steane
     Michael Nielsen
-    Gavin Crooks
+    Basil Hiley
     Cambridge
         Jeremy Butterfield jb56@cam.ac.uk
         Ask Emily for others
@@ -155,7 +155,46 @@ async function initCircuit() {
 
     //-----------ROTATION
     let rotators = Array(12)
-    {
+    {        
+        if(0)
+        {
+            let axisVerts = [new THREE.Vector3(0., -1., 0.), new THREE.Vector3(0., 1., 0.)]
+            let axis = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(axisVerts), new THREE.LineBasicMaterial({ color: 0xFFFFFF }))
+
+            let currentAngle = TAU / 4.
+            let numSegments = 14
+            let fanVerts = Array(numSegments)
+            let fanGeo = new THREE.Geometry()
+            fanGeo.vertices = fanVerts
+            for (let i = 0; i < numSegments + 2; ++i) {
+                fanVerts[i] = new THREE.Vector3()
+                if (i >= 2)
+                    fanGeo.faces.push(new THREE.Face3(i, i - 1, 0))
+            }
+            updateFunctions.push(() => {
+                currentAngle = TAU / 3. * Math.sin(frameCount * .16)
+                for (let i = 0; i < numSegments + 1; ++i) {
+                    let ourAngle = i / numSegments * currentAngle
+                    fanVerts[i + 1].set(1., 0., 0.)
+                    fanVerts[i + 1].applyAxisAngle(yUnit, ourAngle)
+                }
+                fanGeo.verticesNeedUpdate = true
+            })
+
+            let fan = new THREE.Object3D()
+            fan.add(
+                new THREE.Mesh(fanGeo, new THREE.MeshBasicMaterial({ color: 0xFF0000, side: THREE.DoubleSide })),
+                new THREE.Mesh(fanGeo, new THREE.MeshBasicMaterial({ color: 0x0000FF, side: THREE.DoubleSide })),
+                axis
+            )
+            fan.children[1].position.y -= .001
+            scene.add(fan)
+            updateFunctions.push(() => {
+                fan.rotation.x += .025
+            })
+            return
+        }
+
         let truncatedDiskGeo = new THREE.CircleGeometry(shellRadius,31)
         let truncatedDiskMat = niceMat(0.)
         let width = shellRadius / 2.
@@ -176,6 +215,7 @@ async function initCircuit() {
                 target.copy(identity2x2)
 
                 //maybe you want to exponentiate?
+
 
 
                 return target
@@ -199,7 +239,7 @@ async function initCircuit() {
         }
     }
 
-    function putLowestUnusedGateOnWire(gateArray, wireIndex) {
+    function putLowestUnusedGateOnWire(gateArray, wireIndex, indexInArray) {
 
         //HACK because we don't understand how to reverse a 4x4 we say all tqgs are in a certain direction
         if(gateArray === tqgs && wireIndex === 1)
@@ -207,7 +247,9 @@ async function initCircuit() {
 
         mouse.raycaster.intersectZPlane(0., v0)
         let positionAlongWire = v0.x + wireLength / 2.
-        let indexInArray = Math.floor( (positionAlongWire / wireLength) * maxGatesPerWire )
+
+        if(indexInArray === undefined)
+            indexInArray = Math.floor( (positionAlongWire / wireLength) * maxGatesPerWire )
         if (circuitGates[wireIndex][indexInArray] === null) {
             let newGate = gateArray.find(p => getWire(p) === -1 )
             circuitGates[wireIndex][indexInArray] = newGate
@@ -683,7 +725,7 @@ async function initCircuit() {
                 matToBeExponentiated.exp4x4(target)
 
                 // magic.mul(c4m0,c4m1).mul(magicConjugateTranspose,target)
-                target.log("here it is")
+                // target.log("here it is")
 
                 //just try it with three orthogonal disks, might be enough
                 //then, an octahedron with corners at infinity
@@ -723,5 +765,6 @@ async function initCircuit() {
 
     roundOffRectangleCreation()
 
-    putLowestUnusedGateOnWire(tqgs, 0)
+    putLowestUnusedGateOnWire(tqgs, 0, 2)
+    putLowestUnusedGateOnWire(paulis, 0,1)
 }

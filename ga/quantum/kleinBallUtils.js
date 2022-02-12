@@ -242,6 +242,8 @@ function matrixToMotor(mat, target) {
     let a = mat.get(0, 0), b = mat.get(0, 1)
     let c = mat.get(1, 0), d = mat.get(1, 1)
 
+    //switching around left and right column is kinda like rotating
+
     abcdToMotor(a,b,c,d,target)
 
     return target
