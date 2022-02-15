@@ -384,8 +384,13 @@ async function initCircuit() {
 
                 c0.copy(a).add(b)
                 c1.copy(c).add(d)
+                //so this is a density matrix
                 //under what circumstances is and isn't this equal to a/c?
                 bs.setFrom2Vec(c1,c0)
+                if(ARGH) {
+                    c1.log()
+                    c0.log()
+                }
                 //sounds more like what z = 1 gets sent to
             }
             else {
@@ -483,6 +488,10 @@ async function initCircuit() {
         q1[1].mul(q2[0], circuitState.elements[2])
         q1[1].mul(q2[1], circuitState.elements[3])
 
+        // let a = new Complex()
+        // for(let )
+        // log(circuitState.elements[])
+
         // circuitState.log("before")
 
         for(let i = 0; i < maxGatesPerWire; ++i) {
@@ -509,7 +518,11 @@ async function initCircuit() {
             circuitState.applyMatrix(stepMat)
         }
 
-        // circuitState.log("after")
+        circuitState.log("after")
+        circuitState.elements[0].log()
+        circuitState.elements[1].log()
+        circuitState.elements[2].log()
+        circuitState.elements[3].log()
 
         
         
@@ -540,10 +553,12 @@ async function initCircuit() {
             Qubit A doesn't care about what you've labelled as "up" and "down" for qubit B.
         */
 
+        ARGH = false
         wires[0].finalStateViz.setFromAbcd(
             circuitState.elements[0], circuitState.elements[1],
             circuitState.elements[2], circuitState.elements[3]
         )
+        ARGH = true
         wires[1].finalStateViz.setFromAbcd(
             circuitState.elements[0], circuitState.elements[2],
             circuitState.elements[1], circuitState.elements[3]
@@ -673,7 +688,7 @@ async function initCircuit() {
                 w: lieAlgSpaceWidth,
                 h: lieAlgSpaceWidth, // * Math.sqrt(2.),
                 // col: 0xFF0000,
-                textureUrl: "C:/hamishtodd1.github.io/ga/quantum/data/lieAlg.png",
+                textureUrl: "data/lieAlg.png",
                 haveFrame: false,
                 getPosition: (v) => {
                     v.copy(tqg.position)
@@ -763,8 +778,11 @@ async function initCircuit() {
         })
     })
 
+    // wires[0].initialState.elements[0].re = 0.
+    // wires[0].initialState.elements[1].re = 1.
+
     roundOffRectangleCreation()
 
+    putLowestUnusedGateOnWire(paulis, 0, 1)
     putLowestUnusedGateOnWire(tqgs, 0, 2)
-    putLowestUnusedGateOnWire(paulis, 0,1)
 }
