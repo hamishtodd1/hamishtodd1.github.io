@@ -1,7 +1,7 @@
 // function initChangingParallelStates() {
 //     // initialized to 00
 //     let state = new ComplexVector(4)
-//     state.elements[0].re = 1.
+//     state.el[0].re = 1.
 
     
     
@@ -39,28 +39,28 @@ class ComplexVector {
 		if(n === undefined)
 			console.error("need to know how many there are!")
 		else {
-            this.elements = Array(n)
+            this.el = Array(n)
 			for(let i = 0; i < n; ++i)
-				this.elements[i] = new Complex(0.,0.)
+				this.el[i] = new Complex(0.,0.)
 		}
 	}
 
     copy(toBeCopied) {
-        for(let i = 0, il = this.elements.length; i < il; ++i)
-            this.elements[i].copy(toBeCopied.elements[i])
+        for(let i = 0, il = this.el.length; i < il; ++i)
+            this.el[i].copy(toBeCopied.el[i])
     }
 
     log(msg) {
         let str = ""
-        for (let i = 0; i < this.elements.length; ++i) {
-            if (this.elements[i].re !== 0. || this.elements[i].im !== 0.) {
+        for (let i = 0; i < this.el.length; ++i) {
+            if (this.el[i].re !== 0. || this.el[i].im !== 0.) {
                 if (str !== "")
                     str += " +\n"
 
-                str += this.elements[i].toString()
+                str += this.el[i].toString()
 
                 let binaryRepOfThisIndex = ""
-                let numBinaryDigits = Math.log2(this.elements.length)
+                let numBinaryDigits = Math.log2(this.el.length)
                 for (let j = 0; j < numBinaryDigits; ++j)
                     binaryRepOfThisIndex = ((i & (1 << j)) ? "1" : "0") + binaryRepOfThisIndex
                 str += " |" + binaryRepOfThisIndex + ">"
@@ -77,17 +77,17 @@ class ComplexVector {
     }
 
     applyMatrix(m) {
-        let tempVec = new ComplexVector(this.elements.length)
+        let tempVec = new ComplexVector(this.el.length)
 
         let tempComplex = new Complex()
-        for(let i = 0; i < this.elements.length; ++i) {
+        for(let i = 0; i < this.el.length; ++i) {
             //i is the column in the matrix, the row in the vector
-            tempVec.elements[i].set(0.,0.)
-            for(let j = 0; j < this.elements.length; ++j) {
+            tempVec.el[i].set(0.,0.)
+            for(let j = 0; j < this.el.length; ++j) {
                 let matEl = m.get(j,i)
-                matEl.mul(this.elements[j],tempComplex)
+                matEl.mul(this.el[j],tempComplex)
                 // log(i, j, tempComplex)
-                tempVec.elements[i].add(tempComplex)
+                tempVec.el[i].add(tempComplex)
             }
         }
         
@@ -138,10 +138,10 @@ class ComplexMat {
     constructor(dim,values) {
         this.dim = dim
 
-        this.elements = Array(dim*dim)
+        this.el = Array(dim*dim)
         for (let i = 0; i < this.dim; ++i) {
             for (let j = 0; j < this.dim; ++j) {
-                this.elements[i * this.dim + j] = new Complex()
+                this.el[i * this.dim + j] = new Complex()
             }
         }
         
@@ -154,10 +154,10 @@ class ComplexMat {
     }
 
     get(row, col) {
-        return this.elements[col * this.dim + row]
+        return this.el[col * this.dim + row]
     }
     set(row, col, val) {
-        this.elements[col * this.dim + row].copy(val)
+        this.el[col * this.dim + row].copy(val)
     }
 
 	copy(m) {
@@ -222,15 +222,15 @@ class ComplexMat {
         }
     }
 
-    exp4x4(target) {
+    exp(target) {
         //first two terms
         target.copy(this)
-        target.add(identity4x4)
+        target.add(this.dim === 4 ? identity4x4 : identity2x2)
 
-        let increasingPower = localC4m0
+        let increasingPower = this.dim === 4 ? localC4m0 : localC2m0
         increasingPower.copy(this)
-        let standIn = localC4m1
-        let oneThatGetsScalarMultiple = localC4m2
+        let standIn = this.dim === 4 ? localC4m1 : localC2m1
+        let oneThatGetsScalarMultiple = this.dim === 4 ? localC4m2 : localC2m2
         prepreparedReciprocalFactorials.forEach((rf) => {
             standIn.copy(increasingPower)
             standIn.mul(this, increasingPower)
@@ -288,20 +288,20 @@ class ComplexMat {
     }
 
     multiplyColumnVector(v, target) {
-        let dim = v.elements.length
-        if (this.elements.length !== dim * dim)
-            console.error("matrix size mismatch!", dim, this.elements.length)
+        let dim = v.el.length
+        if (this.el.length !== dim * dim)
+            console.error("matrix size mismatch!", dim, this.el.length)
 
         if (target === undefined)
             target = new ComplexVector(dim)
 
         for (let i = 0; i < dim; ++i)
-            target.elements[i].set(0., 0.)
+            target.el[i].set(0., 0.)
 
         const dummy = new Complex()
         this.forEachElement((row, col, element) => {
-            element.mul(v.elements[col], dummy)
-            target.elements[row].add(dummy)
+            element.mul(v.el[col], dummy)
+            target.el[row].add(dummy)
         })
 
         return target
@@ -398,7 +398,7 @@ class ComplexMat {
         }
 
         let v = new ComplexVector(4)
-        v.elements[val2 + val1 * 2].re = 1.
+        v.el[val2 + val1 * 2].re = 1.
 
         v.applyMatrix(this).log()
     }
@@ -586,13 +586,13 @@ pauli1 = new ComplexMat(2, [
     [1., 0.], [0., 0.],
 ])
 XxX = pauli1.tensor(pauli1)
-//"Y"
+//"Y" but for us Z
 pauli2 = new ComplexMat(2, [
     [0., 0.], [0., -1.],
     [0., 1.], [0., 0.],
 ])
 YxY = pauli2.tensor(pauli2)
-//"Z"
+//"Z", but for us Y
 pauli3 = new ComplexMat(2, [
     [1., 0.], [0., 0.],
     [0., 0.], [-1., 0.],
@@ -618,6 +618,13 @@ cnot = new ComplexMat(4, [
     [0., 0.], [0., 0.], [1., 0.], [0., 0.],
 ])
 
+logCnotOverMinusIHalfPi = new ComplexMat(4, [
+    [0., 0.], [0., 0.], [0., 0.], [0., 0.],
+    [0., 0.], [0., 0.], [0., 0.], [0., 0.],
+    [0., 0.], [0., 0.], [-1.,0.], [ 1.,0.],
+    [0., 0.], [0., 0.], [ 1.,0.], [-1.,0.],
+])
+
 identity4x4 = new ComplexMat(4, [
     [1., 0.], [0., 0.], [0., 0.], [0., 0.],
     [0., 0.], [1., 0.], [0., 0.], [0., 0.],
@@ -630,6 +637,13 @@ swap = new ComplexMat(4, [
     [0., 0.], [0., 0.], [1., 0.], [0., 0.],
     [0., 0.], [1., 0.], [0., 0.], [0., 0.],
     [0., 0.], [0., 0.], [0., 0.], [1., 0.],
+])
+
+logSwapOverMinusIHalfPi = new ComplexMat(4, [
+    [0., 0.], [0., 0.], [0., 0.], [0., 0.],
+    [0., 0.], [-1.,0.], [1., 0.], [0., 0.],
+    [0., 0.], [1., 0.], [-1.,0.], [0., 0.],
+    [0., 0.], [0., 0.], [0., 0.], [0., 0.],
 ])
 
 iSwap = new ComplexMat(4, [
@@ -712,3 +726,5 @@ localC4m2 = new ComplexMat(4)
 localC4m3 = new ComplexMat(4)
 localC2m0 = new ComplexMat(2)
 localC2m1 = new ComplexMat(2)
+localC2m2 = new ComplexMat(2)
+localC2m3 = new ComplexMat(2)

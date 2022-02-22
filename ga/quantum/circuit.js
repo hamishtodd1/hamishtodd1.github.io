@@ -1,18 +1,11 @@
 /*
 TODO
     hover the wire and the main view is the klein ball for that point
-    Klein balls at the ends of the things
-    Just need a little grid on the wires for a few gates
-    Two bloch spheres, can just click and edit, ideally snapping to equator, 1, and poles
+        Maybe even an animation
     Paulis/reflection planes. Click down somewhere and that's one point on the sphere, can drag around and put it somewhere
-        Snapping to X, Y, Z, H
-    Maaaaaybe phase shift. Circle, snapping to pi/8s
-    Rotation of whole thing, including podium, using right mouse
-    Then two-qubit gates: the unfolded square from the weyl chamber. Top left of this https://threeplusone.com/pubs/on_weyl.pdf
-        Corners are swap, cnot, identity, 
-        Come on, probably they'll preserve a screw axis. Signify with that
-
-Futarchy: exceptionally good for transparency
+    Phase shift. Circle, snapping to pi/8s
+    Talk to Grant Sanderson, Steve Mould, Dominic about script
+    Measurement gate
 
 TOSEE (exciting!)
     The bell basis
@@ -25,8 +18,39 @@ TOSEE (exciting!)
         CNOT a->b, CNOT b->a, CNOT a->b = swap somehow
         Wasn't there a 3/5 one or something?
 
+Maybe what you really want is an animation, or something that accentuates
+What do "changes of basis" look like for the klein ball?
+Might be good to make, from arsenovich's gates, direct controls
+You probably will need some that kiss on the boundary
+Why no sqrt(Y)? Probably because there is one, but it rotates in a way where you can't see it
+In some sense you might want a transformation such that you can do particular things with sets of bloch vectors
+
+Futarchy: exceptionally good for transparency
+
+For marketing QC companies
+    make it so they can make a SUPER nice demo of their alg
+    Make it so you can have an array of matrices and can embed a threejs demo
+
+Does taking the transpose correspond to measuring the same thing in a different way? Surely
+
+Philosophizing
+    When you apply a pauli, the qubit has become entangled with the fact that there was a pauli-applier there and with that configuration
+        That IS surely another kind of entanglement, which from your point of view looks like the qubit has continued to be mundane
+    The sphere is... so featureless. True and false really are "just" directions
+    A way to test that this is a good idea:
+        known qubit a, unknown b, known entangling gate G. Apply G to (a,b) = known (c,d). Should be able to guess b
+    Bell pairs seem focussed on one qubit too
+    it's also like crossed pieces of wood for fencing that you can flex
+    That the world is made of entanglements tells you that knowledge in your head is not there at a particular time due to computational complexity
+        Every line in a logical argument is another fact becoming entangled with the facts already there
+        Your mind has to expend energy to have the series of thoughts
+        Yes, the thought process is probably logical (except you do make errors!).
+        But that doesn't mean that the maths applies "all at once"
+        In hardware design we have this function called "fetch". You wouldn't encounter fetch.
+
 People to show when got controls
     Martti
+        Ask him if he knows anyone in Cam
     Chris, Anthony
     QC discord
     Andrew Steane
@@ -34,7 +58,7 @@ People to show when got controls
     Basil Hiley
     Cambridge
         Jeremy Butterfield jb56@cam.ac.uk
-        Ask Emily for others
+        Ask Emily Adlam for others in town
 
 When video done
     A prof who could get you a frickin visa
@@ -50,31 +74,6 @@ When video done
     Hestenes
     Paul Simeon
     Future of coding community. Could do one on geometric algebra, one on
-
-
-For marketing QC companies
-    make it so they can make a SUPER nice demo of their alg
-    Make it so you can have an array of matrices and can embed a threejs demo
-
-Does taking the transpose correspond to measuring the same thing in a different way? Surely
-
-Could run your mouse continuously along a wire and see an animation
-
-Philosophizing
-    When you apply a pauli, the qubit has become entangled with the fact that there was a pauli-applier there and with that configuration
-    That IS surely another kind of entanglement, which from your point of view looks like the qubit has continued to be mundane
-    So ok you have a nutty 3+ qubit circuit of many kinds of weird entanglement.
-    Could send the wires through a thingy to get you visualizing the qubits as klein balls 
-
-
-Could consider the circle on the boundary getting mapped from a certain thing on the plane
-
-
-Bell pairs are focussed on one qubit too...
-
-For "actual tool", things to try to do:
-    known qubit a, unknown b, known entangling gate G. Apply G to (a,b) = known (c,d). Should be able to guess b
-    
 
 */
 
@@ -128,7 +127,7 @@ async function initCircuit() {
 
     let holder = new THREE.Object3D()
     scene.add(holder)
-    holder.position.y = .4
+    // holder.position.y = .4
     // holder.scale.setScalar(10.)
     initRectangles(holder)
     let gateDimension = .4
@@ -155,54 +154,28 @@ async function initCircuit() {
 
     //-----------ROTATION
     let rotators = Array(12)
-    {        
-        if(0)
-        {
-            let axisVerts = [new THREE.Vector3(0., -1., 0.), new THREE.Vector3(0., 1., 0.)]
-            let axis = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(axisVerts), new THREE.LineBasicMaterial({ color: 0xFFFFFF }))
-
-            let currentAngle = TAU / 4.
-            let numSegments = 14
-            let fanVerts = Array(numSegments)
-            let fanGeo = new THREE.Geometry()
-            fanGeo.vertices = fanVerts
-            for (let i = 0; i < numSegments + 2; ++i) {
-                fanVerts[i] = new THREE.Vector3()
-                if (i >= 2)
-                    fanGeo.faces.push(new THREE.Face3(i, i - 1, 0))
-            }
-            updateFunctions.push(() => {
-                currentAngle = TAU / 3. * Math.sin(frameCount * .16)
-                for (let i = 0; i < numSegments + 1; ++i) {
-                    let ourAngle = i / numSegments * currentAngle
-                    fanVerts[i + 1].set(1., 0., 0.)
-                    fanVerts[i + 1].applyAxisAngle(yUnit, ourAngle)
-                }
-                fanGeo.verticesNeedUpdate = true
-            })
-
-            let fan = new THREE.Object3D()
-            fan.add(
-                new THREE.Mesh(fanGeo, new THREE.MeshBasicMaterial({ color: 0xFF0000, side: THREE.DoubleSide })),
-                new THREE.Mesh(fanGeo, new THREE.MeshBasicMaterial({ color: 0x0000FF, side: THREE.DoubleSide })),
-                axis
-            )
-            fan.children[1].position.y -= .001
-            scene.add(fan)
-            updateFunctions.push(() => {
-                fan.rotation.x += .025
-            })
-            return
-        }
-
-        let truncatedDiskGeo = new THREE.CircleGeometry(shellRadius,31)
-        let truncatedDiskMat = niceMat(0.)
-        let width = shellRadius / 2.
-        truncatedDiskGeo.vertices.forEach((v,i)=>{
-            if (Math.abs(v.x) > width)
-                v.x = Math.sign(v.x) * width
+    {
+        // if(0)
+        //drag moves it around, it's a 180/axis. Hold spacebar and it holds the thing in place and becomes a rotation
+        let editingAngle = false
+        bindButton("q",()=>{
+            editingAngle = true
+        },"",()=>{},false,()=>{
+            editingAngle = false
         })
 
+        let axisGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., -shellRadius, 0.), new THREE.Vector3(0., shellRadius, 0.)])
+        let axisMat = new THREE.LineBasicMaterial({ color: 0x000000 })
+        let fanTopMat = new THREE.MeshBasicMaterial({ color: 0xFF0000, side: THREE.DoubleSide })
+        let fanBottomMat = new THREE.MeshBasicMaterial({ color: 0x0000FF, side: THREE.DoubleSide })
+
+        let numSegments = 14
+        let fanFaces = []
+        //using the clockwiseness of this may well make sense
+        for (let i = 0; i < numSegments; ++i) {
+            fanFaces.push(new THREE.Face3(i+2, i+1, 0))
+        }
+        
         for (let i = 0; i < rotators.length; ++i) {
             let rotator = SquareRectangle({
                 onClick: () => {
@@ -210,32 +183,100 @@ async function initCircuit() {
                 }
             })
             rotator.position.y = -999.
+            rotators[i] = rotator
+
+            let pauliCoords = new THREE.Vector3(1., 1., 0.) //initialized to hadamard
+            let thetaOverTau = .5
+            updateFunctions.push(() => {
+                pauliCoords.normalize()
+                setRotationallySymmetricMatrix(pauliCoords.x, pauliCoords.y, pauliCoords.z, axisAndFan.matrix)
+            })
 
             rotator.getMatrix = (target) => {
-                target.copy(identity2x2)
+                
+                c2m1.copy(zero2x2)
+
+                c2m0.copy(pauli1)
+                c2m0.multiplyScalar(-pauliCoords.x)
+                c2m1.add(c2m0)
+
+                c2m0.copy(pauli2)
+                c2m0.multiplyScalar(pauliCoords.z)
+                c2m1.add(c2m0)
+
+                c2m0.copy(pauli3)
+                c2m0.multiplyScalar(-pauliCoords.y)
+                c2m1.add(c2m0)
+
+                let theta = thetaOverTau * TAU
+                let minusHalfthetaI = new Complex(0., -theta / 2.)
+                c2m1.multiplyComplex(minusHalfthetaI)
+                delete minusHalfthetaI
+
+                c2m1.exp(target)
 
                 //maybe you want to exponentiate?
-
-
-
                 return target
             }
 
             let shell = BlochShell(rotator, {
                 during: () => {
-                    shell.intersectMouseRay(v1)
-                    sp.position.copy(v1)
+                    if(!editingAngle) {
+                        shell.intersectMouseRay(pauliCoords)
+    
+                        landmarkframe.position.copy(shell.position)
+                        landmarkframe.updateMatrixWorld()
+                        landmarkframe.worldToLocal(pauliCoords)
+                        landmarkframe.children.forEach((landmark) => {
+                            if (pauliCoords.distanceTo(landmark.position) < shellRadius / 6.)
+                                pauliCoords.copy(landmark.position)
+                        })
+                    }
+                    else {
+                        mouse.getZZeroPosition(v1)
+                        thetaOverTau = 1.4 * v1.distanceTo(rotator.position)
+                        while (thetaOverTau < -.5)
+                            thetaOverTau += 1.
+                        while (thetaOverTau > .4)
+                            thetaOverTau -= 1.
+                        for(let i = -.5; i <= .5; i += .125) {
+                            if (Math.abs(thetaOverTau -i) < .04)
+                                thetaOverTau = i
+                        }
+                    }
+                },
+                end: () => {
+                    landmarkframe.position.set(0., -999999., 0.)
                 }
             })
-            let p1 = new THREE.Mesh(truncatedDiskGeo, truncatedDiskMat)
-            p1.rotation.x = TAU / 8.
-            shell.add(p1)
-            let p2 = new THREE.Mesh(truncatedDiskGeo, truncatedDiskMat)
-            p2.rotation.x = TAU / 8.
-            p2.rotation.y = TAU / 16.
-            shell.add(p2)
 
-            rotators[i] = rotator
+            let fanVerts = Array(numSegments)
+            let fanGeo = new THREE.Geometry()
+            fanGeo.vertices = fanVerts
+            fanGeo.faces = fanFaces
+            for (let i = 0; i < numSegments + 2; ++i)
+                fanVerts[i] = new THREE.Vector3()
+
+            let axisAndFan = new THREE.Object3D()
+            scene.add(axisAndFan)
+            updateFunctions.push(() => {
+                let theta = thetaOverTau * TAU
+                for (let i = 0; i < numSegments + 1; ++i) {
+                    let ourAngle = i / numSegments * theta
+                    fanVerts[i + 1].set(shellRadius, 0., 0.)
+                    fanVerts[i + 1].applyAxisAngle(yUnit, ourAngle)
+                }
+                fanGeo.verticesNeedUpdate = true
+            })
+            let axis = new THREE.LineSegments(axisGeo, axisMat)
+            axisAndFan.add(
+                new THREE.Mesh(fanGeo, fanTopMat),
+                // new THREE.Mesh(fanGeo, fanBottomMat),
+                axis
+            )
+            axisAndFan.children[0].position.y += .001
+            shell.add(axisAndFan)
+            axisAndFan.matrixAutoUpdate = false
         }
     }
 
@@ -378,20 +419,49 @@ async function initCircuit() {
             //infinity gets mapped to a/c, 0 gets mapped to b/d
             //is it a choice of projection which one is infinity and which is 0?
 
+            //it's problematic to have an if statement
             if (det.approximatelyEquals(zeroComplex)) {
                 bs.setVisibility(true)
                 kb.setVisibility(false)
 
-                c0.copy(a).add(b)
-                c1.copy(c).add(d)
-                //so this is a density matrix
-                //under what circumstances is and isn't this equal to a/c?
-                bs.setFrom2Vec(c1,c0)
-                if(ARGH) {
-                    c1.log()
-                    c0.log()
+                //ad = bc
+                //a/b=c/d
+
+                //ordinary:
+                // 00 01
+                // 10 11
+
+                //here:
+                // 00 10
+                // 01 11
+
+                //what you usually have:
+                // 00 + 01 //probability of 0a
+                // 10 + 11 //probability of 1a
+                //what you want:
+                // 00 + 10 //probability of 0b - should be 1. Square and add? Probably. This is why you have the silliness
+                // 01 + 11 //probability of 1b
+
+                //could use a/c or b/d. They're equal unless B is 100% known
+                //Want whichever will give the most precision. That's probably the one where the magnitudes are higher
+
+                //this is a temporary measure until we find a change of basis that puts more variability in a/c
+                //but it "should" work because they should be the same
+                if (a.squaredMagnitude() + c.squaredMagnitude() > b.squaredMagnitude() + d.squaredMagnitude() ) {
+                    bs.setFrom2Vec(c, a)
                 }
-                //sounds more like what z = 1 gets sent to
+                else {
+                    bs.setFrom2Vec(d, b)
+                }
+
+                // let aPlusB = new Complex().copy(a).add(b)
+                // let cPlusD = new Complex().copy(c).add(d)
+                // //so this is a density matrix
+                // //under what circumstances is and isn't this equal to a/c?
+                // bs.setFrom2Vec(cPlusD,aPlusB)
+                // delete aPlusB
+                // delete cPlusD
+                // //sounds more like what z = 1 gets sent to
             }
             else {
                 bs.setVisibility(false)
@@ -449,24 +519,27 @@ async function initCircuit() {
                 // else
                 //     initialStateBs.setLatLon(TAU / 4., 0.)
 
-                if (initialState.elements[0].re === 0. ) {
-                    initialState.elements[0].re = 1.
-                    initialState.elements[1].re = 0.
-                }
-                else {
-                    initialState.elements[0].re = 0.
-                    initialState.elements[1].re = 1.
-                }
+                // if (initialState.el[0].re === 0. ) {
+                //     initialState.el[0].re = 1.
+                //     initialState.el[1].re = 0.
+                // }
+                // else {
+                //     initialState.el[0].re = 0.
+                //     initialState.el[1].re = 1.
+                // }
+                initialState.applyMatrix(pauli1)
                 initialState.log()
             }
         })
         let initialState = new ComplexVector(2)
         wire.initialState = initialState
-        initialState.elements[0].re = 1.
+        // initialState.el[1].im = 1./Math.SQRT2
+        // initialState.el[0].re = 1./Math.SQRT2
+        initialState.el[0].re = 1.
         let initialStateBs = new BlochSphere(initialStateBox)
 
         updateFunctions.push(()=>{
-            initialStateBs.setFrom2Vec(initialState.elements[1], initialState.elements[0])
+            initialStateBs.setFrom2Vec(initialState.el[1], initialState.el[0])
         })
 
         let finalStateBox = Rectangle({
@@ -481,16 +554,16 @@ async function initCircuit() {
     let cm2a = new ComplexMat(2)
     let cm2b = new ComplexMat(2)
     updateFunctions.push(() => {
-        let q1 = wires[0].initialState.elements
-        let q2 = wires[1].initialState.elements
-        q1[0].mul(q2[0], circuitState.elements[0])
-        q1[0].mul(q2[1], circuitState.elements[1])
-        q1[1].mul(q2[0], circuitState.elements[2])
-        q1[1].mul(q2[1], circuitState.elements[3])
+        let q1 = wires[0].initialState.el
+        let q2 = wires[1].initialState.el
+        q1[0].mul(q2[0], circuitState.el[0])
+        q1[0].mul(q2[1], circuitState.el[1])
+        q1[1].mul(q2[0], circuitState.el[2])
+        q1[1].mul(q2[1], circuitState.el[3])
 
         // let a = new Complex()
         // for(let )
-        // log(circuitState.elements[])
+        // log(circuitState.el[])
 
         // circuitState.log("before")
 
@@ -518,11 +591,11 @@ async function initCircuit() {
             circuitState.applyMatrix(stepMat)
         }
 
-        circuitState.log("after")
-        circuitState.elements[0].log()
-        circuitState.elements[1].log()
-        circuitState.elements[2].log()
-        circuitState.elements[3].log()
+        // circuitState.log("after")
+        // circuitState.el[0].log()
+        // circuitState.el[1].log()
+        // circuitState.el[2].log()
+        // circuitState.el[3].log()
 
         
         
@@ -553,33 +626,58 @@ async function initCircuit() {
             Qubit A doesn't care about what you've labelled as "up" and "down" for qubit B.
         */
 
-        ARGH = false
         wires[0].finalStateViz.setFromAbcd(
-            circuitState.elements[0], circuitState.elements[1],
-            circuitState.elements[2], circuitState.elements[3]
+            circuitState.el[0], circuitState.el[1],
+            circuitState.el[2], circuitState.el[3]
         )
-        ARGH = true
+        // q1[1].div(q1[0]).log("about to see NaN or")
+        // circuitState.el[3].div(circuitState.el[1]).log() // d/b
+        // circuitState.el[2].div(circuitState.el[0]).log() // c/a
+        
         wires[1].finalStateViz.setFromAbcd(
-            circuitState.elements[0], circuitState.elements[2],
-            circuitState.elements[1], circuitState.elements[3]
+            circuitState.el[0], circuitState.el[2],
+            circuitState.el[1], circuitState.el[3]
         )
+        // circuitState.log()
+        
+        // q2[1].div(q2[0]).log("about to see NaN or")
+        // circuitState.el[3].div(circuitState.el[2]).log() // d/b
+        // circuitState.el[1].div(circuitState.el[0]).log() // c/a
     })
 
     let landmarkframe = new THREE.Object3D()
     {
         let landmarkMat = new THREE.MeshBasicMaterial({color:0x00FFFF})
+        let landmarkMat2 = new THREE.MeshBasicMaterial({ color: 0xFF00FF })
         scene.add(landmarkframe)
         thingsToRotate.push(landmarkframe)
         landmarkframe.position.set(0., -999999., 0.)
         let coordNames = ["x", "y", "z"]
+        function makeLandmark(mat) {
+            let landmark = new THREE.Mesh(littleBallGeometry, mat ? landmarkMat : landmarkMat2)
+            landmark.scale.setScalar(.9)
+            landmarkframe.add(landmark)
+            return landmark
+        }
         for (let i = 0; i < 3; ++i) {
             for (let j = 0; j < 2; ++j) {
-                let landmark = new THREE.Mesh(littleBallGeometry, landmarkMat)
-                landmark.scale.setScalar(.9)
+                let landmark = makeLandmark(0)
                 landmark.position[coordNames[i]] = shellRadius * (j ? 1. : -1.)
-                landmarkframe.add(landmark)
             }
         }
+        let coord = shellRadius / Math.SQRT2
+        makeLandmark(1).position.set(coord,coord,0.)
+        makeLandmark(1).position.set(coord,-coord,0.)
+        makeLandmark(1).position.set(-coord,coord,0.)
+        makeLandmark(1).position.set(-coord,-coord,0.)
+        makeLandmark(1).position.set(coord,0.,coord)
+        makeLandmark(1).position.set(coord,0.,-coord)
+        makeLandmark(1).position.set(-coord,0.,coord)
+        makeLandmark(1).position.set(-coord,0.,-coord)
+        makeLandmark(1).position.set(0.,coord,coord)
+        makeLandmark(1).position.set(0.,coord,-coord)
+        makeLandmark(1).position.set(0.,-coord,coord)
+        makeLandmark(1).position.set(0.,-coord,-coord)
     }
 
     //--------PAULI
@@ -605,17 +703,17 @@ async function initCircuit() {
             let pauliBox = SquareRectangle({})
             pauliBox.position.y = -999.
 
-            let pauliCoefficients = new THREE.Vector3(1.,1.,0.) //initialized to hadamard
+            let pauliCoords = new THREE.Vector3(1.,1.,0.) //initialized to hadamard
             updateFunctions.push(()=>{
-                pauliCoefficients.normalize()
-                setRotationallySymmetricMatrix(pauliCoefficients.x, pauliCoefficients.y, pauliCoefficients.z, pipeCleaner.matrix)
+                pauliCoords.normalize()
+                setRotationallySymmetricMatrix(pauliCoords.x, pauliCoords.y, pauliCoords.z, pipeCleaner.matrix)
             })
 
             pauliBox.getMatrix = (target) => {
-                target.copy(pauli1).multiplyScalar(pauliCoefficients.x)
-                c2m1.copy(pauli2).multiplyScalar(pauliCoefficients.z)
+                target.copy(pauli1).multiplyScalar(-pauliCoords.x)
+                c2m1.copy(pauli2).multiplyScalar(pauliCoords.z)
                 target.add(c2m1)
-                c2m1.copy(pauli3).multiplyScalar(pauliCoefficients.y)
+                c2m1.copy(pauli3).multiplyScalar(-pauliCoords.y)
                 target.add(c2m1)
 
                 //decide on this AFTER you've sorted out whether pauli multiplication of a vector
@@ -627,17 +725,17 @@ async function initCircuit() {
 
             let shell = BlochShell(pauliBox, {
                 during: () => {                    
-                    shell.intersectMouseRay(pauliCoefficients)
+                    shell.intersectMouseRay(pauliCoords)
                     
                     landmarkframe.position.copy(shell.position)
                     landmarkframe.updateMatrixWorld()
-                    landmarkframe.worldToLocal(pauliCoefficients)
+                    landmarkframe.worldToLocal(pauliCoords)
                     landmarkframe.children.forEach((landmark)=>{
-                        if (pauliCoefficients.distanceTo(landmark.position) < shellRadius / 6.)
-                            pauliCoefficients.copy(landmark.position)
+                        if (pauliCoords.distanceTo(landmark.position) < shellRadius / 6.)
+                            pauliCoords.copy(landmark.position)
                     })
 
-                    // sp.position.copy(pauliCoefficients)
+                    // sp.position.copy(pauliCoords)
                     // landmarkframe.localToWorld(sp.position)
                 },
                 end: ()=>{
@@ -719,25 +817,36 @@ async function initCircuit() {
                 // if (tqg.pX > 0.5 && tqg.pY > 0.5)
                 //     target.copy(swap)
 
-                let tX = tqg.pX / 2. //goes half way into the cube
-                let tY = tqg.pY / 2.
-                let tZ = tqg.pY / 2.
-                // log(tX,tY,tZ)
-
                 matToBeExponentiated.copy(zero4x4)
 
-                c4m0.copy(XxX)
-                c4m0.multiplyScalar(tX)
-                matToBeExponentiated.add(c4m0)
-                c4m0.copy(YxY)
-                c4m0.multiplyScalar(tY)
-                matToBeExponentiated.add(c4m0)
-                c4m0.copy(ZxZ)
-                c4m0.multiplyScalar(tZ)
-                matToBeExponentiated.add(c4m0)
+                let crazyMode = true
+                if (!crazyMode)
+                {
+                    let tX = tqg.pX / 2. //goes half way into the cube
+                    let tY = tqg.pY / 2.
+                    let tZ = tqg.pY / 2.
+
+                    c4m0.copy(XxX)
+                    c4m0.multiplyScalar(tX)
+                    matToBeExponentiated.add(c4m0)
+                    c4m0.copy(YxY)
+                    c4m0.multiplyScalar(tY)
+                    matToBeExponentiated.add(c4m0)
+                    c4m0.copy(ZxZ)
+                    c4m0.multiplyScalar(tZ)
+                    matToBeExponentiated.add(c4m0)
+                }
+                else {
+                    c4m0.copy(logCnotOverMinusIHalfPi)
+                    c4m0.multiplyScalar(tqg.pX)
+                    matToBeExponentiated.add(c4m0)
+                    c4m0.copy(logSwapOverMinusIHalfPi)
+                    c4m0.multiplyScalar(tqg.pY)
+                    matToBeExponentiated.add(c4m0)
+                }
 
                 matToBeExponentiated.multiplyComplex(minusITauOver4)
-                matToBeExponentiated.exp4x4(target)
+                matToBeExponentiated.exp(target)
 
                 // magic.mul(c4m0,c4m1).mul(magicConjugateTranspose,target)
                 // target.log("here it is")
@@ -778,11 +887,12 @@ async function initCircuit() {
         })
     })
 
-    // wires[0].initialState.elements[0].re = 0.
-    // wires[0].initialState.elements[1].re = 1.
+    // wires[0].initialState.el[0].re = 0.
+    // wires[0].initialState.el[1].re = 1.
 
     roundOffRectangleCreation()
 
-    putLowestUnusedGateOnWire(paulis, 0, 1)
-    putLowestUnusedGateOnWire(tqgs, 0, 2)
+    // putLowestUnusedGateOnWire(paulis, 0, 1)
+    // putLowestUnusedGateOnWire(rotators, 0, 1)
+    // putLowestUnusedGateOnWire(tqgs, 0, 2)
 }

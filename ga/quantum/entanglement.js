@@ -1,18 +1,41 @@
 /*
     Titles
-        A visual introduction to quantum computing
-        Einstein's bane: why this quantum state broke physics (EPR visualized)
-        What entanglement (bell pairs?) looks like
-        A visual introduction to quantum teleportation
-        Quantum weirdness: how to take the square root of... swapping?
-
-
+        Einstein's bane: how this quantum state broke physics (EPR visualized)
+        Einstein: quantum has to be nonsense, because you can do THIS
+        This is what quantum entanglement looks like (devilish smile, pointing at it)
+            The cool philosophy is: measurement is entanglement. An offhand remark! You're not in a place to give a full treatment
+        Lean in to the metaphysics: yes, it's useful for MRI and crypto, but they're boring. "What is the world made of" is better
+        
+        Propose a numberphile vid:
+            Hyperbolic geometry of quantum physics
+        "Shorts", < 2m, "visual quantum computing" series. Some of these you dunno what they're for:
+            X,Y,Z
+            Other 1-qubit
+            Hadamard
+            Rotations
+            CNOT classical, CNOT with craziness - direct to the entanglement video which talks about bell basis
+            CNOT "effect is two way" thing https://en.wikipedia.org/wiki/Controlled_NOT_gate#Behaviour_in_the_Hadamard_transformed_basis 
+            Each controlled gate
+            Google's sycamore gate
+            Teleportation
+            Quantum weirdness: how to take the square root of... swapping?
+            QFT on two qubits (just show it)
+            CNOT + reverse CNOT + CNOT = Swap
+            what does the conjugate transpose of a gate look like?
+            Dis-entanglement?
+            Measurement gate (!)
+            Mike and ike, no idea what they're for
+                198
+                385 "phase damping"
+                256 Oracle??
+                3 qubit QFT 220
+            Toffoli/Deutsch (eh, bit nuts)
 
     Mandelbrot
         https://www.youtube.com/watch?v=FFftmWSzgmk
         Put mandelbrot set on the sphere, repeatedly apply with 1 as denominator, the black goes to one place
 
-    The rotation is steiner's porism
+    
 
     Definitely show:
         No hidden variables
@@ -24,7 +47,7 @@
                 A "basis" is a way of looking at things and taking measurements on them
                 Measuring device is probably some kind of angle-measurer-looking-thing
         no-cloning (ab != 0 <=> can't copy, very simple)
-        Lean in to the metaphysics: yes, it's useful for MRI and crypto, but they're boring. "What is the world made of" is better
+        
     Would be nice, if commisssioned, to show:
         teleportation - possibly only needs the two?
             And it allows you to connect to quantum cryptography
@@ -44,9 +67,7 @@
         Riemann sphere
         Bloch sphere
         Klein Disk
-        Models of hyperbolic space.
-
-    Talk to Grant Sanderson, Steve Mould, Dominic about script
+        Models of hyperbolic space
 
     Hadamard matrix should look like the map is flattened to gnomonic and doing a flip
 
@@ -67,10 +88,6 @@
         Yes it works if e1 becomes e14 and pss is e1234 instead of e123
         Problem is this "stealing" thing, plus, e14 squares to -1, not 1
 
-    Presentation style:
-        Split screen
-        Do have oculus tracker. Try doing it as if in a mirror. 
-
     If this was going to work, wouldn't it work in CGA? And wouldn't Chris have found it?
     "vectors are points" would have to be quite toxic
     
@@ -78,56 +95,30 @@
         So you're making trivectors with, what, the five-fold and threefold rotation of the dodecahedron?
         Aaaaaand then you have a translation as well?
 
-    Metaphysics
-        Is it that everything appears in experiment to be a rotation when actually some things are reflections?
-
-    A problem might be that the CNOT is not a reflection in the unitary representation of pin
-    In which case you're back to the previous square, because you don't know if unitary reps are 
-
-    Take the quaternion pair. one is 1,e12,e23,e31 the other is that * I.
-
-    How about showing ordinary logic? A classical CNOT
-
     People have this idea of "the controlled not gate", and it's a particular set of 0s and 1s
     But clearly you should be able to change some -1s and "i"s or whatever and it's essentially doing the same thing
     i.e. surround it with some paulis
     And really what's going on is this rotational relation you can show
     I mean if you have some crazy business affecting qubit A, and after all that you apply it to the untouched B, what happens?
 
-    Separable = isoclinic?
-
-    Kinda like an accordion
-    Or like some crossed pieces of wood
-
-    Visualizations
-        The thing itself
-        The gates. Even if you only have two qubit gates, nice for them to know notation / have something to keep track of what you've done
-        Show ordinary hopf fibration obv. Quite interesting in pga view, set of lines
-        Ordinary bloch sphere
-        Ordinary 2D elliptic PGA sphere which you maniupulate by moving its projection around. Most informative thing you can have is probably latitude lines
-        A measurement device that works across all of these?
 
     Script - "But what does quantum entanglement LOOK LIKE?"
         What is truth? What is reality?
 
         This is a visualization of quantum entanglement, which is one of the most strange and important rules of rules of how the universe works
-        Without quantum entanglement there would be no periodic table and so no chemistry able to support living things
+        Without quantum entanglement there would be no atoms
         And without our understanding of it, we'd be unable to create MRI machines, or small microchips for use in computers
         Even philosophy has a use for entanglement. In the schrodinger's cat paradox, two pieces of information become, somehow, linked to one another
         In the schrodinger's cat paradox that means the decay state of an atom and your knowledge of whether your cat has died have become related, which they aren't before you open the box
 
-        The gnomonic projection is simply what you see if you're at the center of the globe (so maybe zoom in on the real viz?)
-        We can do a sequence of moves on the surface of the globe by rotating around different points on it
-
+        
         Need some cute portable thing that's only ever 00 or 11. A pair of teenage girls where one of them has said she liked/didn't like the movie
         We're going to make a single object that exists in two separate pieces, like a pair of semi-matching socks
 
         "When" "you" measure "your" qubit, you join the universe where your qubit was that result,
         and you know what universe that's going to be for your partner
 
-        
 
-        If we take an ordinary sphere and imagine an ant on its surface, 
 
         You can say thank you for this video on patreon. It's actually taken more than two years of research to create this,
         and I have no academic position and support myself as a software engineer, so if you feel like
@@ -139,10 +130,6 @@
         These two aren't necessarily impacted by that information (er, not the best example)
 
     Coooool: the fact that the dof grows quadratically rather than exponentially
-
-    "Partial trace" is one way of separating out states
-
-
 
 
     Volume-preserving transformations are nice for interpretability because you can always interpret the thing as a probability
@@ -160,81 +147,24 @@
     what's the inner product?
     cos(t) is defined by e(t) - e(-t), or maybe +
 
-    Surely, surely as part of this you have a visualization of taking the squared norm of the probabilities
-    Sphere to equilateral triangle
-
-    No idea what controlled-not will look like as a rotation. It has to be something.
-
-    Look, when you use any gate on the state, isn't the system now entangled with the machine because it knows you used that gate on it?
-
     Maybe a measurement is another thing that "splits" the state? You can summarize all the universes you aren't in...
 
     It's kinda like euler angles to have these damn complex numbers everywhere
 
-    Two copies of the hue circle, one light one dark, connected by brightness variation
 
-    "In 2D, if you give me some rotation around the origin and followed by movement in some direction...
-        there is always some point I can find which, if rotated around that point, it gives you that full movement"
-    That's true in 2D. In 3D...
-    that's CLOSE to being true, but actually there is a way that you can fuck me over
-
-    Laves graph https://blogs.ams.org/visualinsight/2016/10/15/laves-graph/
-    Hypercube of monkeys
-    Wanna have a complete set of quantum gates
-    The 48-cell is interesting. Has 8-fold so long as you have the extra translation
-    If you want to have a T-gate it's probably not one of the nice polytopes
-    You want to rotate it around a line by 1/8 and have it look the same?
-    Consider 16-cell, double the
-    Whatever is dual to the truncated tesseract?
-
-    You want something such that all the edges form great circles
-    Something such that 
-    Seems like a disphenoidal 288 cell, although it doesn't QUITE have that 8-fold symmetry
-    Maybe if you're hiding alternate things?
-
-    For the faces
-
-
-    if it were 3D, an octahedron
-    Each opposing point pair corresponds to a single point in plane
-
-
-    Gonna have extracting the actual bits
-    https://en.wikipedia.org/wiki/Monogamy_of_entanglement
 
 
 
 
     Is it actually true?
-        Imagine an object superimposed on its rotation by 90 degrees. That is the unit complex number. No phase necessary because you haven't had to choose "where the unit is". It does somewhat become that way because you say "well, *I* am looking at it at this angle...
+        Imagine an object superimposed on its rotation by 90 degrees. That is the unit complex number. 
+        No phase necessary because you haven't had to choose "where the unit is". It does somewhat become that way because you say "well, *I* am looking at it at this angle...
 
-        Multiple dofs are probably tied up in "your choice of what the identity looks like"
-
-        For each complex number, choose a screw axis, the phase gives the rotation around that axis and the magnitude gives the translation along it? HUUUUGE problem with magnitude is it has this bullshit about starting from 0 (from a "corner of the room". You're probably better off thinking about the real part and the imaginary part
-
-        *****The real parts are constrained to a 3-sphere in 4D. The imaginary parts, well one of them doesn't exist. Sooooo, 3 imaginary parts = 3 euler angles ***** NO, 3 *PHASES*, YOU DO HAVE 4 IMAGINARY PARTS
-        p1 = (Re(c1), Re(c2), Re(c3), Re(c4))
-        p2 = (Im(c1), Im(c2), Im(c3), Im(c4))
-        Both points in 4D. Magnitude constraint. Probably their magnitudes are like p1^2 + p2^2 = 1
         Maybe, Magnitude of p1 is angle1, magnitude of p2 is angle2? Buuuuut probably there's only one dof between them since they're on a circle, like they're sin and cos of some angle
         Leftover are 2 unit 4-vectors (unless one of them is zero!!!)
         Which correspond to points in your space
         Join those points, get a line, take the rotation by angle 1 and "translation" by angle 2 along that line?
 
-
-
-        The effect of the magnitude constraint is going to have some split between impacting the real part and the imaginary part
-        So, this whole shit will have some non-visualizable-as-a-motor part that you'll need to shift around to make it visualizable as a motor
-        The hope is that in the case of unentangled that looks like translation or rotation, whereas if entangled, not so much
-
-
-
-
-
-        In 4D, you have the 4 basis planes (of the 6!). Can distinguish eg
-
-
-        Projectivizing: taking a space like R2 and adding a boundary to it that you can be on
 */
 
 centerToFrameDistance = (fov, cameraDistance) => Math.tan(fov / 2. * (TAU / 360.)) * cameraDistance
