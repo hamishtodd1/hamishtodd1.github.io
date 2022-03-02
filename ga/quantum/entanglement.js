@@ -11,6 +11,7 @@
         "Shorts", < 2m, "visual quantum computing" series. Some of these you dunno what they're for:
             X,Y,Z
             Other 1-qubit
+            what does the conjugate transpose of a gate look like? Answer: rotation in the opposite direction
             Hadamard
             Rotations
             CNOT classical, CNOT with craziness - direct to the entanglement video which talks about bell basis
@@ -19,9 +20,9 @@
             Google's sycamore gate
             Teleportation
             Quantum weirdness: how to take the square root of... swapping?
+            Wow, eraser with 2? https://quantumcomputing.stackexchange.com/questions/1568/what-is-the-quantum-circuit-equivalent-of-a-delayed-choice-quantum-eraser
             QFT on two qubits (just show it)
             CNOT + reverse CNOT + CNOT = Swap
-            what does the conjugate transpose of a gate look like?
             Dis-entanglement?
             Measurement gate (!)
             Mike and ike, no idea what they're for

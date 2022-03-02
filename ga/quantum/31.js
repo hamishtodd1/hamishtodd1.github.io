@@ -228,6 +228,16 @@ function init31() {
 			return target;
 		}
 
+		// exp(target) {
+		// 	let bivPart = this.selectGrade(2, localMv0)
+
+		// 	let lambda = bivPart.mul(bivPart)[0]
+
+		// 	function generalized
+
+		// 	//cos and sin for the e12 etc part
+		// }
+
 		// possiblyProperDual(target){
 		// 	if (target === undefined)
 		// 		target = new Mv()
@@ -515,6 +525,9 @@ function init31() {
 		}
 
 		selectGrade(grade,target) {
+			if(target === undefined)
+				target = new Mv()
+				
 			target.copy(this)
 			for(let i = 0; i < 16; ++i) {
 				if(grade !== GRADES_OF_ELEMENTS[i])
@@ -699,4 +712,8 @@ function init31() {
 		complexToHorosphere(new Complex(1., 0.), new Complex(1., 0.)),
 		complexToHorosphere(new Complex(0., 1.), new Complex(0., 0.)),
 	]
+}
+
+function cleave(l, p, target) {
+	return l.inner(p,target)
 }

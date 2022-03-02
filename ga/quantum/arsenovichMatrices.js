@@ -12,6 +12,43 @@ function arsenovichDemo() {
     //     matrixToMotor(ams[amIndex], mv0)
     //     centralKb.stateMotor.copy(mv0)
     // })
+
+    let controlsArray = [
+        e31, "a", "d",
+        e23, "g", "t",
+        e12, "j", "l",
+        
+        e43, "k", "i",
+        e41, "h", "f", 
+        e42, "s", "w",
+    ]
+
+    for (let i = 0, il = controlsArray.length / 3; i < il; ++i) {
+        let gate = new Mv()
+        if (i < 3) {
+            gate.copy(controlsArray[i * 3])
+            for(let i = 0; i < 6; ++i) {
+                gate.sqrtBiReflection(mv0)
+                gate.copy(mv0)
+            }
+        }
+        else {
+            gate.copy(controlsArray[i * 3])
+            gate[0] += 64.
+            gate.multiplyScalar(1./gate[0])
+            // gate.normalize()
+        }
+
+        bindButton(controlsArray[i * 3 + 1], ()=>{},"",() => {
+            centralKb.stateMotor.mul(gate, mv0)
+            centralKb.stateMotor.copy(mv0)
+        })
+        bindButton(controlsArray[i * 3 + 2], ()=>{},"",() => {
+            let reverseGate = gate.reverse(mv1)
+            centralKb.stateMotor.mul(reverseGate, mv0)
+            centralKb.stateMotor.copy(mv0)
+        })
+    }
 }
 
 let arsenovichMatrices = [

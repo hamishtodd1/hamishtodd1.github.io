@@ -8,6 +8,10 @@
 //     return state
 // }
 
+function det2x2() {
+    
+}
+
 function initChangingQuantumState(state) {
     // let controlsArray = [
     //     pauli1, "t", "g",
@@ -94,6 +98,18 @@ class ComplexVector {
         this.copy(tempVec)
 
         return this
+    }
+
+    densityMat(vec) {
+        let dim = vec.el.length
+
+        let ret = new ComplexMat(dim)
+        for (let i = 0; i < dim; ++i) {
+            for (let j = 0; j < dim; ++j)
+                vec.el[i].mul(vec.el[j], ret.get(i, j))
+        }
+
+        return ret
     }
 
 	// multiplyOneEntry(input, ourIndex, inputIndex, target, targetIndex) {
@@ -190,8 +206,20 @@ class ComplexMat {
 	}
 
     transpose(target) {
+        if (target === undefined)
+            target = new ComplexMat(this.dim)
+
         this.forEachElement((row, col, el)=>{
             target.get(col,row).copy(el)
+        })
+    }
+
+    conjugateTranspose(target) {
+        if (target === undefined)
+            target = new ComplexMat(this.dim)
+
+        this.forEachElement((row, col, el) => {
+            el.getConjugate(target.get(col, row))
         })
     }
 

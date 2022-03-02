@@ -48,7 +48,7 @@ async function initSurroundingsAndMaterial() {
 
 			texture.mapping = THREE.EquirectangularReflectionMapping;
 
-			niceMat = (hue) => {
+			niceMat = (hue,extraParams) => {
 				const diffuseColor = new THREE.Color().setHSL(hue, 0.5, 0.25)
 
 				// let beta = .4 // https://github.com/mrdoob/three.js/blob/master/examples/webgl_materials_variations_phong.html
@@ -65,7 +65,7 @@ async function initSurroundingsAndMaterial() {
 
 				// let mat = new THREE.MeshPhongMaterial({color:diffuseColor, side:THREE.DoubleSide})
 
-				let mat = new THREE.MeshPhysicalMaterial({
+				let params = {
 					color: diffuseColor,
 					metalness: 0,
 					roughness: 0.5,
@@ -74,8 +74,10 @@ async function initSurroundingsAndMaterial() {
 					reflectivity: 1.,
 					envMap: texture,
 
-					side:THREE.DoubleSide
-				})
+					side: THREE.DoubleSide
+				}
+				Object.assign(params,extraParams)
+				let mat = new THREE.MeshPhysicalMaterial(params)
 
 				return mat
 			}

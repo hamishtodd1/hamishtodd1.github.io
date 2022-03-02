@@ -2,7 +2,7 @@
 -->
 <html>
 	<head>
-		<title>Quantum Accordion</title>
+		<title>Quantum Accordion/Vortex</title>
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
 			body {
@@ -29,13 +29,15 @@
 
 				await initSurroundingsAndMaterial()
 
+				// initCga()
+
 				// initOneQubit()
 				await initKleinBalls()
-				await initCircuit()
+				// await initCircuit()
 				// await initEntanglement()
 				// initMobTransState()
 
-				// arsenovichDemo()
+				arsenovichDemo()
 
 				function render() {
 					let clockDelta = clock.getDelta()
@@ -86,7 +88,12 @@
 		<script src="quantumStereographicProjection.js"></script>
 		<script src="complexLinAlg.js"></script>
 
+		<!-- <script src="svd.js"></script> -->
+
+		<script src="cga.js"></script>
+
 		<script src="rectangles.js"></script>
+		<script src="gates.js"></script>
 		<script src="circuit.js"></script>
 
 		<script>
