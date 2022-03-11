@@ -476,7 +476,8 @@ function init31() {
 			// float norm() { return sqrt(std:: abs(((* this) * Conjugate())[0]); }
     		// float inorm() { return (!(* this)).norm(); }
 
-			this.conjugate(localMv0)
+			//previously this was the conjugate. They reformulated in plane_and_simple
+			this.reverse(localMv0)
 			this.mul( localMv0,localMv1)
 			return Math.sqrt(Math.abs(localMv1[0]))
 		}
@@ -537,14 +538,21 @@ function init31() {
 			return target
 		}
 
-		// logarithm(target) {
-		// 	let b = this.selectGrade(2, lv2LocalMv0)
-		// 	let minusBSquared = (b.cleave(b, lv2LocalMv1)).multiplyScalar(-1.)
-		// 	let s = Math.sqrt(minusBSquared)
-		// 	let p = meet(b, b, lv2LocalMv3).multiplyScalar(2. * s)
+		logarithm(target) {
+			let b = this.selectGrade(2, lv2LocalMv0)
+			let minusBSquared = (b.cleave(b, lv2LocalMv1)).multiplyScalar(-1.)
+			let s = Math.sqrt(minusBSquared[0])
+			let p = b.meet(b, lv2LocalMv3).multiplyScalar(2. * s)
 
-		// 	let scalarInBrackets = Math.atan(s/this[0]) + 
-		// }
+			// let scalarInBrackets = Math.atan(s/this[0]) + 
+
+			//is it this though?
+			// let bDotB = this.inner(this, localMv0)
+			// let bMeetB = this.meet(this, localMv1)
+			// let lambdas = [
+
+			// ]
+		}
 
 		grade() {
 			let ret = -1

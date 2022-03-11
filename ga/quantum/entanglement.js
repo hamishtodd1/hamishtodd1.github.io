@@ -1,4 +1,12 @@
 /*
+    Might make a good cover for New Scientist
+    Klem/Piotr can probably hook you up with quantum folks
+    It'd be good to have the bloch vec superimposed on the pauli while you're editing it
+
+    two subsystems that partition a pure state are entangled if and only if their reduced states are mixed states
+    The “Schmidt coefficients” are the square roots of the eigenvalues of the reduced density matrix and the states its eigenstates
+    Are the schmidt coefficients
+
     Titles
         Einstein's bane: how this quantum state broke physics (EPR visualized)
         Einstein: quantum has to be nonsense, because you can do THIS
@@ -31,6 +39,7 @@
                 256 Oracle??
                 3 qubit QFT 220
             Toffoli/Deutsch (eh, bit nuts)
+            lots of 3-qubit gates https://arxiv.org/pdf/1712.05642.pdf
 
     Mandelbrot
         https://www.youtube.com/watch?v=FFftmWSzgmk

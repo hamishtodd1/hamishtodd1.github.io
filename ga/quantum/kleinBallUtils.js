@@ -22,6 +22,166 @@ To get the reciprocal frame you just wedge the n-1 other vectors together, duali
 The formula is in my book. It's quite standard linear algebra - doesn't require anything more complicated.
 */
 
+function insertPlanes(initialPlaneMvs) {
+    let translator = new Mv()
+    function insertSeriesOfPlanes(startingPlane, n, sep) {
+        for (let i = 0; i < n; ++i) {
+            e4.mul(startingPlane, translator)
+            translator.normalize()
+            translator.multiplyScalar(sep * (i + .5 - n / 2.))
+            translator[0] += 1.
+
+            initialPlaneMvs.push(translator.sandwich(startingPlane).normalize())
+        }
+    }
+
+    function pushFromTri(vertArray, t, i) {
+        pointFromVertIndex(vertArray, t[0], mv0)
+        pointFromVertIndex(vertArray, t[1], mv1)
+        pointFromVertIndex(vertArray, t[2], mv2)
+        mv0.join(mv1, mv3).join(mv2, mv4)
+
+        initialPlaneMvs.push(mv4.clone())
+    }
+
+    let icoverts = [
+        [0., PHI, -1.],
+        [0., PHI, 1.],
+        [0., -PHI, -1.],
+        [0., -PHI, 1.],
+        [PHI, -1., 0.],
+        [PHI, 1., 0.],
+        [-PHI, -1., 0.],
+        [-PHI, 1., 0.],
+        [1., 0., PHI],
+        [-1., 0., PHI],
+        [1., 0., -PHI],
+        [-1., 0., -PHI]]
+
+    icoverts.forEach((v, i) => {
+        if (i % 2)
+            return
+
+        let im = new Mv()
+        im[1] = v[0]
+        im[2] = v[1]
+        im[3] = v[2]
+        im.normalize()
+
+        insertSeriesOfPlanes(im, 4, .11)
+    })
+
+    let octaVerts = [
+        [1., 0., 0.],
+        [-1., 0., 0.],
+        [0., 1., 0.],
+        [0., -1., 0.],
+        [0., 0., 1.],
+        [0., 0., -1.],
+    ]
+    let octaTris = [ //counter clockwise
+        [0, 2, 4],
+        [1, 4, 2],
+        [4, 3, 0],
+        [2, 0, 5],
+
+        [1, 5, 3],
+        [0, 3, 5],
+        [3, 4, 1],
+        [5, 1, 2]
+    ]
+
+    function pointFromVertIndex(vertArray, i, target) {
+        if (target === undefined)
+            target = new Mv()
+
+        let v = vertArray[i]
+        target.point(v[0], v[1], v[2], 1.)
+        return target
+    }
+
+    // octaTris.forEach((t, i) => { pushFromTri(octaVerts,t,i)})
+
+    // initialPlaneMvs.push(new Mv().plane(1.,1.,1.,0.))
+    // initialPlaneMvs.push(new Mv().plane(-1.,1.,1.,0.))
+    // initialPlaneMvs.push(new Mv().plane(1.,-1.,1.,0.))
+    // initialPlaneMvs.push(new Mv().plane(1.,1.,-1.,0.))
+
+    let cubeVerts = [
+        [1., 1., 1.],
+
+        [-1., 1., 1.],
+        [1., -1., 1.],
+        [1., 1., -1.],
+
+        [1., -1., -1.],
+        [-1., 1., -1.],
+        [-1., -1., 1.],
+
+        [-1., -1., -1.],
+    ]
+    cubeVerts.forEach((v) => { v[0] /= Math.sqrt(3.); v[1] /= Math.sqrt(3.); v[2] /= Math.sqrt(3.) })
+    let cubeTris = [
+        [0, 1, 2],
+        [0, 2, 3],
+        [0, 3, 1],
+
+        [7, 5, 4],
+        [7, 6, 5],
+        [7, 4, 6]
+    ]
+    // cubeTris.forEach((t, i) => { pushFromTri(cubeVerts,t,i)})
+
+    //----------------THREE ORTHOGONAL PLANES
+    // initialPlaneMvs.push(new Mv().plane(1., 0., 0., 0.))
+    // initialPlaneMvs.push(new Mv().plane(0., 1., 0., 0.))
+    // initialPlaneMvs.push(new Mv().plane(0., 0., 1., 0.))
+
+    //----------------LATITUDE AND LONGTITUDE
+    // let numMeridians = 12
+    // for (let i = 0.; i < numMeridians / 2.; ++i)
+    //     initialPlaneMvs.push(new Mv().plane(Math.cos(TAU * i / numMeridians), 0., Math.sin(TAU * i / numMeridians), 0.))
+    // insertSeriesOfPlanes(e2, 7, .18)
+
+    //---------------SYMMETRY PLANES OF OCTAHEDRON
+    // let numMeridians = 8
+    // for (let i = 0; i < numMeridians / 2; ++i) {
+    //     initialPlaneMvs.push(new Mv().plane(Math.cos(TAU * i / numMeridians), 0., Math.sin(TAU * i / numMeridians), 0.))
+    //     initialPlaneMvs.push(new Mv().plane(0., Math.cos(TAU * i / numMeridians), Math.sin(TAU * i / numMeridians), 0.))
+    //     initialPlaneMvs.push(new Mv().plane(Math.cos(TAU * i / numMeridians), Math.sin(TAU * i / numMeridians), 0., 0.))
+    // }
+
+    //----------------SMITH CHART
+    if (0) {
+        let tri1 = pointFromVertIndex(octaVerts, 2).join(pointFromVertIndex(octaVerts, 0)).join(pointFromVertIndex(octaVerts, 4)).normalize()
+        let tri2 = pointFromVertIndex(octaVerts, 2).join(pointFromVertIndex(octaVerts, 1)).join(pointFromVertIndex(octaVerts, 5)).normalize()
+
+        let surfaceMotor = tri2.mul(tri1)
+        for (let i = 0; i < 28; ++i)
+            surfaceMotor = surfaceMotor.sqrtBiReflection()
+        surfaceMotor.log()
+
+        let spineRotor = e31.sqrtBiReflection()
+
+        let central = e1.clone().add(e3).normalize()
+        for (let l = 0; l < 2; ++l) {
+            for (let k = 0; k < 2; ++k) {
+                for (let i = 0; i < 11; ++i) {
+                    let im = central.clone()
+                    for (let j = 0; j < i; ++j) {
+                        surfaceMotor.sandwich(im, mv0).normalize()
+                        im.copy(mv0)
+                    }
+                    if (l)
+                        im.copy(spineRotor.sandwich(im, mv0).normalize())
+                    initialPlaneMvs.push(im)
+                }
+                surfaceMotor[0] *= -1.
+            }
+        }
+    }
+}
+
 function getReciprocalFrame(frame) {
     let rf = []
 

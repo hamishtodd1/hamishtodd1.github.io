@@ -1,5 +1,7 @@
 //could have everything be mesh-y, made of lines
 //or, planes with thickness but it comes apart
+//definitely want the crossover/intersection line to be in the middle of the thing rather than tangent to the cone
+//  because, you want to be able to rotate and see the true origin, from whence all the true lines come
 
 function initCga() {
 
@@ -85,6 +87,8 @@ function initCga() {
 
         //altering rotation.y will change it
     }
+
+    // 
 
     //-------------CURVES
     if(0)

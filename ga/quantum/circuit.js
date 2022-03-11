@@ -1,11 +1,13 @@
 /*
 TODO
-    hover the wire and the main view is the klein ball for that point
-        Maybe even an animation
-    Paulis/reflection planes. Click down somewhere and that's one point on the sphere, can drag around and put it somewhere
+    Redo the entire thing using GA?
+        Less translateable
+        And who knows what the two-qubit gates are
     Phase shift. Circle, snapping to pi/8s
     Talk to Grant Sanderson, Steve Mould, Dominic about script
     Measurement gate
+    hover the wire and the main view is the klein ball for that point
+        Maybe even an animation
 
 TOSEE (exciting!)
     The bell basis
@@ -52,7 +54,9 @@ People to show when working consistently
     Martti
         Ask him if he knows anyone in Cam
     Chris, Anthony
+    Prathyush
     QC discord
+    tai-danae bradley tai.danae@math3ma.com
     Andrew Steane
     Michael Nielsen
     Basil Hiley
@@ -63,6 +67,7 @@ People to show when working consistently
 When video done
     A prof who could get you a frickin visa
     Alan Kay
+    Jess Riedel
     Emily Adlam
     Sean Carroll
     Tim Blaise

@@ -8,8 +8,18 @@
 //     return state
 // }
 
-function det2x2() {
-    
+
+
+function partialTrace(oneOrTwo,vec4,target) {
+    if(vec4.dim !== 4)
+        console.error("wrong vector length")
+
+    let m4x4 = localC4m0
+    vec4.outerProductWithSelfConjugate(m4x4)
+
+    if(oneOrTwo === 1){
+
+    }
 }
 
 function initChangingQuantumState(state) {
@@ -47,6 +57,8 @@ class ComplexVector {
 			for(let i = 0; i < n; ++i)
 				this.el[i] = new Complex(0.,0.)
 		}
+
+        this.dim = n
 	}
 
     copy(toBeCopied) {
@@ -100,16 +112,19 @@ class ComplexVector {
         return this
     }
 
-    densityMat(vec) {
-        let dim = vec.el.length
+    outerProductWithSelfConjugate(target) {
+        if(target === undefined)
+            target = new ComplexMat(this.dim)
 
-        let ret = new ComplexMat(dim)
-        for (let i = 0; i < dim; ++i) {
-            for (let j = 0; j < dim; ++j)
-                vec.el[i].mul(vec.el[j], ret.get(i, j))
-        }
+        if(target.dim !== this.dim)
+            console.error("bad target")
 
-        return ret
+        target.forEachElement((row, col, el) => {
+            let columnEntryConjugate = this.el[col].getConjugate(c0)
+            this.el[row].mul(columnEntryConjugate, el)
+        })
+
+        return target
     }
 
 	// multiplyOneEntry(input, ourIndex, inputIndex, target, targetIndex) {
