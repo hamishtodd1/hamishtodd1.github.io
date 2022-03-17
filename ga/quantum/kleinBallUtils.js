@@ -58,19 +58,6 @@ function insertPlanes(initialPlaneMvs) {
         [1., 0., -PHI],
         [-1., 0., -PHI]]
 
-    icoverts.forEach((v, i) => {
-        if (i % 2)
-            return
-
-        let im = new Mv()
-        im[1] = v[0]
-        im[2] = v[1]
-        im[3] = v[2]
-        im.normalize()
-
-        insertSeriesOfPlanes(im, 4, .11)
-    })
-
     let octaVerts = [
         [1., 0., 0.],
         [-1., 0., 0.],
@@ -99,6 +86,19 @@ function insertPlanes(initialPlaneMvs) {
         target.point(v[0], v[1], v[2], 1.)
         return target
     }
+
+    // icoverts.forEach((v, i) => {
+    //     if (i % 2)
+    //         return
+
+    //     let im = new Mv()
+    //     im[1] = v[0]
+    //     im[2] = v[1]
+    //     im[3] = v[2]
+    //     im.normalize()
+
+    //     insertSeriesOfPlanes(im, 4, .11)
+    // })
 
     // octaTris.forEach((t, i) => { pushFromTri(octaVerts,t,i)})
 
@@ -138,10 +138,10 @@ function insertPlanes(initialPlaneMvs) {
     // initialPlaneMvs.push(new Mv().plane(0., 0., 1., 0.))
 
     //----------------LATITUDE AND LONGTITUDE
-    // let numMeridians = 12
-    // for (let i = 0.; i < numMeridians / 2.; ++i)
-    //     initialPlaneMvs.push(new Mv().plane(Math.cos(TAU * i / numMeridians), 0., Math.sin(TAU * i / numMeridians), 0.))
-    // insertSeriesOfPlanes(e2, 7, .18)
+    let numMeridians = 12
+    for (let i = 0.; i < numMeridians / 2.; ++i)
+        initialPlaneMvs.push(new Mv().plane(Math.cos(TAU * i / numMeridians), 0., Math.sin(TAU * i / numMeridians), 0.))
+    insertSeriesOfPlanes(e2, 7, .18)
 
     //---------------SYMMETRY PLANES OF OCTAHEDRON
     // let numMeridians = 8
@@ -361,7 +361,19 @@ function complexToHorosphere(numerator, denominator, target) {
     return target
 }
 
-function abcdToMotor(a,b,c,d,target) {
+//but does the ad-bc thing apply to the partial traces in any sense?
+//er, no not really? 
+
+function abcdToMotorLiteral(mat,target) {
+    
+}
+
+function abcdToMotor(mat,target) {
+    let a = mat.get(0, 0) 
+    let b = mat.get(0, 1)
+    let c = mat.get(1, 0)
+    let d = mat.get(1, 1)
+
     let infinityPrimed = complexToSphere(a, c, mv3)
 
     let aPlusB = c0.copy(a).add(b)

@@ -100,63 +100,55 @@ function initGates(paulis,rotators,tqgs) {
             kb.position.add(v0.copy(camera.position).sub(rect.position).setLength(SHELL_RADIUS))
         })
 
-        bsKb.setFromAbcd = (a, b, c, d) => {
-            let det = a.mul(d, c0).sub(b.mul(c, c1))
+        bsKb.setFromAbcd = (mat) => {
+            let det = det2x2(mat,c0)
+            
             if (frameCount === 1)
                 log(det, det.approximatelyEquals(zeroComplex))
 
             //infinity gets mapped to a/c, 0 gets mapped to b/d
             //is it a choice of projection which one is infinity and which is 0?
 
+            //actually in principle, do you need this if statement?
+            //Maybe it's still a valid motor. Check.
+            //And if it's not a better alternative to the below would be applying the matrix to (0,1)
+
             //it's problematic to have an if statement
             if (det.approximatelyEquals(zeroComplex)) {
                 bs.setVisibility(true)
                 kb.setVisibility(false)
 
-                //yeah it's schmidt
+                let a = mat.get(0, 0)
+                let b = mat.get(0, 1)
+                let c = mat.get(1, 0)
+                let d = mat.get(1, 1)
 
-                //ad = bc
-                //a/b=c/d
+                // a.div(c).log("bloch")
+                a.log("a")
+                c.log("c")
 
-                //ordinary:
-                // 00 01
-                // 10 11
-
-                //here:
-                // 00 10
-                // 01 11
-
-                //what you usually have:
-                // 00 + 01 //probability of 0a
-                // 10 + 11 //probability of 1a
-                //what you want:
-                // 00 + 10 //probability of 0b - should be 1. Square and add? Probably. This is why you have the silliness
-                // 01 + 11 //probability of 1b
-
-                //could use a/c or b/d. They're equal unless B is 100% known
-                //Want whichever will give the most precision. That's probably the one where the magnitudes are higher
+                let aPlusB = new Complex().copy(a).add(b)
+                let cPlusD = new Complex().copy(c).add(d)
+                bs.setFrom2Vec(cPlusD, aPlusB)
 
                 //this is a temporary measure until we find a change of basis that puts more variability in a/c
                 //but it "should" work because they should be the same
-                if (a.squaredMagnitude() + c.squaredMagnitude() > b.squaredMagnitude() + d.squaredMagnitude())
-                    bs.setFrom2Vec(c, a)
-                else
-                    bs.setFrom2Vec(d, b)
-
-                // let aPlusB = new Complex().copy(a).add(b)
-                // let cPlusD = new Complex().copy(c).add(d)
-                // //so this is a density matrix
-                // //under what circumstances is and isn't this equal to a/c?
-                // bs.setFrom2Vec(cPlusD,aPlusB)
-                // delete aPlusB
-                // delete cPlusD
-                // //sounds more like what z = 1 gets sent to
+                // if (a.squaredMagnitude() + c.squaredMagnitude() > b.squaredMagnitude() + d.squaredMagnitude())
+                //     bs.setFrom2Vec(c,a)
+                // else
+                //     bs.setFrom2Vec(d,b)
             }
             else {
                 bs.setVisibility(false)
                 kb.setVisibility(true)
 
-                abcdToMotor(a, b, c, d, kb.stateMotor)
+                // mat.log(frameCount)
+
+                let a = mat.get(0, 0)
+                let c = mat.get(1, 0)
+                a.div(c).log("klein")
+
+                abcdToMotor(mat, kb.stateMotor)
             }
         }
 

@@ -3,50 +3,121 @@
 //     let state = new ComplexVector(4)
 //     state.el[0].re = 1.
 
-    
-    
+
+
 //     return state
 // }
 
-
-
-function partialTrace(oneOrTwo,vec4,target) {
+//possibly it should be thought of as always taking a 4x4 and giving two 2x2s
+function partialTrace(secondQubit,vec4,target) {
     if(vec4.dim !== 4)
-        console.error("wrong vector length")
-
+    console.error("wrong vector length")
+    
     let m4x4 = localC4m0
     vec4.outerProductWithSelfConjugate(m4x4)
+    
+    // m4x4.log()
+    
+    // http://www.thphy.uni-duesseldorf.de/~ls3/teaching/1515-QOQI/Additional/partial_trace.pdf
+    for(let i=0;i<2;++i)
+    for(let j=0;j<2;++j)
+    for(let k=0;k<2;++k)
+    for(let l=0;l<2;++l) {
 
-    if(oneOrTwo === 1){
+    }
 
+    //hackyyyyy
+    let el
+    if(!secondQubit){
+        el = target.get(0, 0)
+        el.copy(m4x4.get(0, 0))
+        el.add(m4x4.get(1, 1))
+
+        el = target.get(1, 0)
+        el.copy(m4x4.get(2, 0))
+        el.add(m4x4.get(3, 1))
+
+        el = target.get(0, 1)
+        el.copy(m4x4.get(0, 2))
+        el.add(m4x4.get(1, 3))
+
+        el = target.get(1, 1)
+        el.copy(m4x4.get(2, 2))
+        el.add(m4x4.get(3, 3))
+    }
+    else {
+        for(let i = 0; i < 2; ++i) {
+            for(let j = 0; j < 2; ++j) {
+                el = target.get(i, j)
+                el.copy(m4x4.get(i, j))
+                el.add(m4x4.get(i + 2, j + 2))
+            }
+        }
     }
 }
 
-function initChangingQuantumState(state) {
-    // let controlsArray = [
-    //     pauli1, "t", "g",
-    //     pauli2, "i", "k",
-    //     pauli3, "w", "s",
-    // ]
+function det2x2(mat, target) {
+    let ad = mat.get(0, 0).mul(mat.get(1, 1))
+    let bc = mat.get(0, 1).mul(mat.get(1, 0))
 
-    // let dummy4x4 = new ComplexMat(4)
-    // let dummyState = new ComplexVector(4)
-
-    // for (let j = 0, jl = controlsArray.length / 3; j < jl; ++j) {
-    //     bindButton(controlsArray[j * 3 + 1], () => {
-    //         dummy4x4.fromTensorProduct(controlsArray[j*3], identity2x2)
-    //         dummy4x4.multiplyColumnVector( state, dummyState )
-    //         state.copy(dummyState)
-    //         // state.log()
-    //     })
-    //     bindButton(controlsArray[j * 3 + 2], () => {
-    //         dummy4x4.fromTensorProduct(identity2x2, controlsArray[j*3])
-    //         dummy4x4.multiplyColumnVector( state, dummyState )
-    //         state.copy(dummyState)
-    //         // state.log()
-    //     })
-    // }
+    target.copy(ad).sub(bc)
+    delete ad
+    delete bc
+    return target
 }
+
+function getPauliVector(mat, target) {
+    //target is a vector of 4 complex numbers
+
+    let mSigmaI = localC2m0
+    allPaulis.forEach((p, i) => {
+        mat.mul(p, mSigmaI)
+        mSigmaI.trace(target[i])
+        target[i].re *= .5
+        target[i].im *= .5
+    })
+
+    return target
+}
+
+//Analytic solution from wikipedia https://en.wikipedia.org/wiki/Singular_value_decomposition#Analytic_result_of_2_%C3%97_2_SVD
+function svd2x2(mat, target) {
+    const pauliVector = new ComplexVector(4)
+    mat.getPauliVector(pauliVector)
+
+    //it's a float
+    let sumOfAbsoluteSquares = z0.absoluteSquare() + z1.absoluteSquare() + z2.absoluteSquare() + z3.absoluteSquare()
+
+    let thingToGetAbsoluteSquareOf = new Complex()
+    for (let i = 0; i < 4; ++i) {
+        pauliVector[i].sq(c0)
+        if (i !== 0)
+            c0.multiplyScalar(-1.)
+        thingToGetAbsoluteSquareOf.add(c0)
+    }
+    let thingToSqrt = sq(sumOfAbsoluteSquares) - thingToGetAbsoluteSquareOf.absoluteSquare()
+
+    target.copy(zero2x2)
+    let possiblyComplexThingToSqrt = new Complex()
+    for (let i = 0; i < 2; ++i) {
+        possiblyComplexThingToSqrt.setFromSqrt(thingToSqrt)
+        if (i)
+            possiblyComplexThingToSqrt.multiplyScalar(-1.)
+        possiblyComplexThingToSqrt.re += sumOfAbsoluteSquares
+
+        possiblyComplexThingToSqrt.pow(.5, target.get(i, i))
+    }
+    //er, which one at top and which at bottom?
+
+    //the more important thing is the more visualizable matrix to spinor
+
+    delete thingToGetAbsoluteSquareOf
+
+    return target
+}
+
+//this guy https://www.youtube.com/watch?v=AUm0AWRNqSg
+//get partial trace. Get eigenvalues of those via characteristic polynomial
 
 class ComplexVector {
 	constructor(n) {
@@ -64,6 +135,17 @@ class ComplexVector {
     copy(toBeCopied) {
         for(let i = 0, il = this.el.length; i < il; ++i)
             this.el[i].copy(toBeCopied.el[i])
+    }
+
+    setAll(arr) {
+        arr.forEach((s,i)=>{
+            let isIm = i%2
+            let theEl = this.el[(i-isIm)/2]
+            if(isIm)
+                theEl.im = s
+            else
+                theEl.re = s
+        })
     }
 
     log(msg) {
@@ -112,6 +194,7 @@ class ComplexVector {
         return this
     }
 
+    //aka ketbra, aka density matrix
     outerProductWithSelfConjugate(target) {
         if(target === undefined)
             target = new ComplexMat(this.dim)
@@ -151,18 +234,7 @@ class ComplexVector {
 	// }
 }
 
-// function svd2x2(a,b,c,d) {
-//     z0.absoluteSquare() + z1.absoluteSquare() + z2.absoluteSquare() + z3.absoluteSquare()
 
-//     //this looks extremely geometric algebra
-//     let secondPart = 
-//         z0.mul(z1.getConjugate(c0), c1).re +
-//         z0.mul(z2.getConjugate(c0), c1).re +
-//         z0.mul(z3.getConjugate(c0), c1).re +
-//         z1.mul(z2.getConjugate(c0), c1).im +
-//         z2.mul(z3.getConjugate(c0), c1).im +
-//         z3.mul(z1.getConjugate(c0), c1).im
-// }
 
 class ComplexMat {
 
@@ -182,6 +254,14 @@ class ComplexMat {
                 element.set(values[pairIndex][0], values[pairIndex][1])
             })
         }
+    }
+
+    trace(target) {
+        target.copy(zeroComplex)
+        for (let i = 0; i < this.dim; ++i)
+            target.add(this.get(i,i))
+
+        return target
     }
 
     get(row, col) {
@@ -492,6 +572,10 @@ class Complex {
                 Math.abs(this.im - c.im) < eps
     }
 
+    equals(c) {
+        return this.re === c.re && this.im === c.im
+    }
+
 	squaredMagnitude() {
 		return this.re * this.re + this.im * this.im
 	}
@@ -503,6 +587,15 @@ class Complex {
 	magnitude() {
 		return Math.sqrt(this.squaredMagnitude())
 	}
+
+    pow(power,target) {
+        let r = this.magnitude()
+        let theta = Math.atan2(this.im,this.re)
+
+        let rPowed = Math.abs(r-1.) > .01 ? Math.pow(r,power) : 1.
+        target.re = rPowed * Math.cos(theta*power)
+        target.im = rPowed * Math.sin(theta*power)
+    }
 
 	set(re,im) {
 		this.re = re
@@ -547,6 +640,15 @@ class Complex {
 
         return target
 	}
+
+    sq(target) {
+        return this.mul(this,target)
+    }
+
+    multiplyScalar(scalar) {
+        this.re *= scalar
+        this.im *= scalar
+    }
 
     div(c,target) {
         if (target === undefined)
@@ -641,6 +743,8 @@ pauli3 = new ComplexMat(2, [
     [0., 0.], [-1., 0.],
 ])
 ZxZ = pauli3.tensor(pauli3)
+
+let allPaulis = [identity2x2,pauli1,pauli2,pauli3]
 
 hadamard = new ComplexMat(2, [
     [1. / Math.SQRT2, 0.], [1. / Math.SQRT2, 0.],

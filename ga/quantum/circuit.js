@@ -246,9 +246,8 @@ async function initCircuit() {
         let initialStateBs = new CombinedBsKb(initialStateBox)
 
         updateFunctions.push(()=>{
-            c0.set(0.,0.)
-            c1.set(0.,0.)
-            initialStateBs.setFromAbcd(initialState.el[0], c0, initialState.el[1],c1)
+            initialState.outerProductWithSelfConjugate(c2m0)
+            initialStateBs.setFromAbcd(c2m0)
         })
 
         let finalStateBox = Rectangle({
@@ -306,6 +305,15 @@ async function initCircuit() {
         // circuitState.el[2].log()
         // circuitState.el[3].log()
 
+        let mrh = 1./Math.SQRT2
+        //bell states (all real part): 1001, 100-1, 0110, 01-10
+        // circuitState.setAll([
+        //     mrh,0.,
+        //     0.,0.,
+        //     0.,0.,
+        //     0.,0.,
+        // ])
+
         
         
         /*
@@ -335,15 +343,12 @@ async function initCircuit() {
             Qubit A doesn't care about what you've labelled as "up" and "down" for qubit B.
         */
 
-        WIRES[0].finalStateViz.setFromAbcd(
-            circuitState.el[0], circuitState.el[1],
-            circuitState.el[2], circuitState.el[3]
-        )
-        
-        WIRES[1].finalStateViz.setFromAbcd(
-            circuitState.el[0], circuitState.el[2],
-            circuitState.el[1], circuitState.el[3]
-        )
+        partialTrace(false, circuitState, c2m0)
+        // c2m0.log("upper")
+        WIRES[0].finalStateViz.setFromAbcd(c2m0)
+        partialTrace(true, circuitState, c2m0)
+        // c2m0.log("lower")
+        WIRES[1].finalStateViz.setFromAbcd(c2m0)
     })
 
     let gateLayingButtons = ["a", "s", "d"]

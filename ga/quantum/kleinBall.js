@@ -7,6 +7,69 @@
 let stateMotor = null
 async function initKleinBalls() {
 
+    KleinBall = () => {
+        //could just have cones for spikes
+        //do you want the ridges?
+        
+        //buncha points in sphere. Line segments connecting them to where they get mapped? Naaah, need arcs
+        //consider if it was just rotation
+        //"the" four mirrors?
+        /*
+            NOT a mapping of something which looks a certain way under the identity
+
+            Maybe it's iterated
+
+            Need some spine to start with
+
+            M*M different from M
+
+            rotn / no-rotn
+            mvmt / no-mvmt
+            
+               rotn    mvmt = Lots of spines
+            no-rotn    mvmt = spines on one ridge?
+               rotn no-mvmt = spines on many lines
+            no-rotn no-mvmt = identity. A big 1 on the screen?
+
+
+            The thing you were gonna do was check/ask whether changing the "global" phase of one qubit gets you difference in outcome
+        */
+        let spineGeo = new THREE.ConeGeometry(.05,1.,13,1,false)
+        spineGeo.translate(0.,.5,0.)
+        let spineMesh = new THREE.Mesh(spineGeo, niceMat(0))
+
+        let numSpines = 50
+        let spines = new THREE.InstancedMesh(spineGeo, niceMat(0), numSpines)
+        
+        let dummyMat = new THREE.Matrix4()
+        for (let i = 0; i < numSpines; ++i) {
+            spines.setMatrixAt(i, dummyMat)
+        }
+        setRotationallySymmetricMatrix(0.,-1.,0., dummyMat)
+        spines.setMatrixAt(0, dummyMat)
+
+        let kb = new THREE.Object3D()
+        thingsToRotate.push(kb)
+        let stateMotor = new Mv()
+        stateMotor[0] = 1.
+        kb.stateMotor = stateMotor
+
+        kb.add(spines)
+
+        let toAimAt = new Mv()
+        let initial = new Mv().point(0., 0., 1. / Math.SQRT2, 1. / Math.SQRT2)
+        updateFunctions.push( () => {
+
+            kb.stateMotor.sandwich(initial,)
+
+            delete initial
+        })
+
+        return kb
+    }
+    return
+
+
     //niceish animations
     // updateFunctions.push(() => {
 
@@ -47,7 +110,6 @@ async function initKleinBalls() {
 
     var initialPlaneMvs = []
     insertPlanes(initialPlaneMvs)
-    
 
     let shadowCasterGeo = new THREE.IcosahedronGeometry(1., 2)
     let shadowCasterMat = new THREE.MeshBasicMaterial({
@@ -61,43 +123,74 @@ async function initKleinBalls() {
     for (let i = 0; i < numPlanes; ++i)
         diskMats[i] = niceMat(i / (numPlanes - 1.))
 
+    function initDisks(kb) {
+        let disks = []
 
-    function updateDisks(disks, stateMotor) {
-        disks.forEach((d) => {
-            // if (disk.initialMv[1] !== 0.)
-            //     debugger
-
-            let mvToVisualize = mv4
-            stateMotor.sandwich(d.initialMv, mvToVisualize)
-            mvToVisualize.normalize()
-
-            let lineThroughOriginOrthogonalToPlane = mv0
-            e123.inner(mvToVisualize, lineThroughOriginOrthogonalToPlane)
-
-            let planeAtOrigin = mv1
-            lineThroughOriginOrthogonalToPlane.mul(e123, planeAtOrigin)
-            if (planeAtOrigin.equals(zeroMv))
-                d.visible = false
-            else {
-                d.visible = true
-
-                planeAtOrigin.normalize()
-                //alternatively, e4 part = 0.
-
-                let zToMvRotor = mv2
-                planeAtOrigin.mul(e3, zToMvRotor)
-                zToMvRotor.sqrtBiReflection(zToMvRotor)
-                zToMvRotor.toQuaternion(d.quaternion)
-
-                let planePosition = mv3
-                lineThroughOriginOrthogonalToPlane.mul(mvToVisualize, planePosition)
-                planePosition.normalize()
-                // putSphereHereAtFrameCountZero(planePosition)
-                planePosition.toVector(d.position)
-
-                let diskRadius = Math.sqrt(1. - d.position.lengthSq())
-                d.scale.setScalar(diskRadius)
+        kb.setVisibility = (newVisibility) => {
+            for (let i = 0; i < numPlanes; ++i) {
+                disks[i].visible = newVisibility
             }
+        }
+
+        for (let i = 0; i < numPlanes; ++i) {
+            // let colorHex = numPlanes
+            let disk = new THREE.Mesh(diskGeometry, diskMats[i])
+            disk.castShadow = false
+            disk.receiveShadow = false
+            disks[i] = disk
+            kb.add(disk)
+
+            let shadowCaster = new THREE.Mesh(shadowCasterGeo, shadowCasterMat)
+            shadowCaster.castShadow = true
+            shadowCaster.receiveShadow = false
+            kb.add(shadowCaster)
+
+            // disk.initialMv = initialPlaneMvs[i]
+        }
+
+        updateFunctions.push(() => {
+            disks.forEach((d) => {
+                // if (disk.initialMv[1] !== 0.)
+                //     debugger
+
+                let mvToVisualize = mv4
+                kb.stateMotor.sandwich(d.initialMv, mvToVisualize)
+                mvToVisualize.normalize()
+                
+                // mvToVisualize.copy(e3)
+                // for (let i = 0; i < diskIndex; ++i) {
+                //     kb.stateMotor.sandwich(mvToVisualize, mv0)
+                //     mvToVisualize.copy(mv0)
+                // }
+
+                let lineThroughOriginOrthogonalToPlane = mv0
+                e123.inner(mvToVisualize, lineThroughOriginOrthogonalToPlane)
+
+                let planeAtOrigin = mv1
+                lineThroughOriginOrthogonalToPlane.mul(e123, planeAtOrigin)
+                if (planeAtOrigin.equals(zeroMv))
+                    d.visible = false
+                else {
+                    d.visible = true
+
+                    planeAtOrigin.normalize()
+                    //alternatively, e4 part = 0.
+
+                    let zToMvRotor = mv2
+                    planeAtOrigin.mul(e3, zToMvRotor)
+                    zToMvRotor.sqrtBiReflection(zToMvRotor)
+                    zToMvRotor.toQuaternion(d.quaternion)
+
+                    let planePosition = mv3
+                    lineThroughOriginOrthogonalToPlane.mul(mvToVisualize, planePosition)
+                    planePosition.normalize()
+                    // putSphereHereAtFrameCountZero(planePosition)
+                    planePosition.toVector(d.position)
+
+                    let diskRadius = Math.sqrt(1. - d.position.lengthSq())
+                    d.scale.setScalar(diskRadius)
+                }
+            })
         })
     }
 
@@ -173,35 +266,7 @@ async function initKleinBalls() {
 
         //----------DISKS
         // if(0)
-        {
-            let disks = []
-
-            kb.setVisibility = (newVisibility) => {
-                for (let i = 0; i < numPlanes; ++i) {
-                    disks[i].visible = newVisibility
-                }
-            }
-
-            for (let i = 0; i < numPlanes; ++i) {
-                // let colorHex = numPlanes
-                let disk = new THREE.Mesh(diskGeometry, diskMats[i])
-                disk.castShadow = false
-                disk.receiveShadow = false
-                disks[i] = disk
-                kb.add(disk)
-
-                let shadowCaster = new THREE.Mesh(shadowCasterGeo, shadowCasterMat)
-                shadowCaster.castShadow = true
-                shadowCaster.receiveShadow = false
-                kb.add(shadowCaster)
-
-                disk.initialMv = initialPlaneMvs[i]
-            }
-
-            updateFunctions.push(() => {
-                updateDisks(disks, stateMotor)
-            })
-        }
+        initDisks(kb)
 
         // {
         //     dumbell = {}

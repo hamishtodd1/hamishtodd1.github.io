@@ -1,7 +1,29 @@
-//could have everything be mesh-y, made of lines
-//or, planes with thickness but it comes apart
-//definitely want the crossover/intersection line to be in the middle of the thing rather than tangent to the cone
-//  because, you want to be able to rotate and see the true origin, from whence all the true lines come
+
+
+/*
+    Hello, this is a visual guide to ADS/CFT
+    Timeglobey thing
+
+    I'm actually not an expert on AdS/CFT
+
+    Short: "the visual intuition behind AdS/CFT". Make webpage, with checkboxes, then make video
+
+    Side-by-side
+
+    Then do a 1-hr lecture on the various connections it has
+    
+    Script
+        Desitter space IS this hyperboloid. And it can be seen in a certain way
+
+    For sure, the 
+
+    could have everything be mesh-y, made of lines
+    or, planes with thickness but it comes apart
+    definitely want the crossover/intersection line to be in the middle of the thing rather than tangent to the cone
+    because, you want to be able to rotate and see the true origin, from whence all the true lines come
+
+    
+*/
 
 function initCga() {
 
