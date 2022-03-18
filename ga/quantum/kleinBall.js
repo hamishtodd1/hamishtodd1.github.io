@@ -7,68 +7,82 @@
 let stateMotor = null
 async function initKleinBalls() {
 
-    KleinBall = () => {
-        //could just have cones for spikes
-        //do you want the ridges?
-        
-        //buncha points in sphere. Line segments connecting them to where they get mapped? Naaah, need arcs
-        //consider if it was just rotation
-        //"the" four mirrors?
-        /*
-            NOT a mapping of something which looks a certain way under the identity
-
-            Maybe it's iterated
-
-            Need some spine to start with
-
-            M*M different from M
-
-            rotn / no-rotn
-            mvmt / no-mvmt
+    // KleinBall = async function() {
+    //     /*
             
-               rotn    mvmt = Lots of spines
-            no-rotn    mvmt = spines on one ridge?
-               rotn no-mvmt = spines on many lines
-            no-rotn no-mvmt = identity. A big 1 on the screen?
+    //     */
+
+    //     // let lineGeo = new THREE.Geometry()
+    //     // for(let i = 0; i < 10; ++i) {
+    //     //     let vec = new THREE.Vector3(
+    //     //         (Math.random() - .5) * 2.,
+    //     //         (Math.random() - .5) * 2.,
+    //     //         (Math.random() - .5) * 2.
+    //     //     )
+    //     //     lineGeo.vertices.push(vec)
+    //     // }
+    //     // let a = new THREE.LineSegments()
 
 
-            The thing you were gonna do was check/ask whether changing the "global" phase of one qubit gets you difference in outcome
-        */
-        let spineGeo = new THREE.ConeGeometry(.05,1.,13,1,false)
-        spineGeo.translate(0.,.5,0.)
-        let spineMesh = new THREE.Mesh(spineGeo, niceMat(0))
+    //     // {
+    //     //     let start = new THREE.Vector3()
+    //     //     let currentLength = Infinity
+    //     //     while (currentLength >= 1.) {
+    //     //         start.x = (Math.random() - .5) * 2.
+    //     //         start.y = (Math.random() - .5) * 2.
+    //     //         start.z = (Math.random() - .5) * 2.
 
-        let numSpines = 50
-        let spines = new THREE.InstancedMesh(spineGeo, niceMat(0), numSpines)
-        
-        let dummyMat = new THREE.Matrix4()
-        for (let i = 0; i < numSpines; ++i) {
-            spines.setMatrixAt(i, dummyMat)
-        }
-        setRotationallySymmetricMatrix(0.,-1.,0., dummyMat)
-        spines.setMatrixAt(0, dummyMat)
+    //     //         currentLength = start.lengthSq()
+    //     //     }
 
-        let kb = new THREE.Object3D()
-        thingsToRotate.push(kb)
-        let stateMotor = new Mv()
-        stateMotor[0] = 1.
-        kb.stateMotor = stateMotor
+    //     //     var material = new THREE.ShaderMaterial({
+    //     //         uniforms: {
+    //     //             "start": {value: start},
+    //     //             "mot": { value: new Float32Array(16) },
+    //     //             "motReverse": { value: new Float32Array(16) }
+    //     //         },
+    //     //     });
+    //     //     await assignShader("basicVertex", material, "vertex")
+    //     //     await assignShader("basicFragment", material, "fragment")
 
-        kb.add(spines)
+    //     //     let numVerts = 32
+    //     //     let arcGeo = new THREE.BufferGeometry()
+            
+    //     //     const vertices = new Float32Array(numVerts*3);
+    //     //     arcGeo.setAttribute('position', new THREE.BufferAttribute(vertices, 3))
 
-        let toAimAt = new Mv()
-        let initial = new Mv().point(0., 0., 1. / Math.SQRT2, 1. / Math.SQRT2)
-        updateFunctions.push( () => {
+    //     //     let interp = new Float32Array(numVerts)
+    //     //     for (let i = 0; i < numVerts; i++)
+    //     //         interp[i] = i/(numVerts-1)
+    //     //     arcGeo.addAttribute('interp', new THREE.BufferAttribute(interp, 1))
 
-            kb.stateMotor.sandwich(initial,)
+    //     //     var ourLine = new THREE.Line(arcGeo, material)
 
-            delete initial
-        })
+    //     //     material.uniforms.start.value.set
 
-        return kb
-    }
-    return
+    //     // }
 
+    //     let kb = new THREE.Object3D()
+    //     thingsToRotate.push(kb)
+    //     let stateMotor = new Mv()
+    //     stateMotor[0] = 1.
+    //     kb.stateMotor = stateMotor
+
+    //     // kb.add(ourLine)
+
+    //     updateFunctions.push(() => {
+    //         //so you have stateMotor
+    //         //so it would appear that you need to log that motor, 
+    //         //you get the norm of that
+
+    //         for (let i = 0; i < 16; ++i)
+    //             material.uniforms.mot.value[i] = kb.mot[i]
+    //         kb.mot.reverse(material.uniforms.motReverse.value)
+    //     })
+
+    //     return kb
+    // }
+    // return
 
     //niceish animations
     // updateFunctions.push(() => {
@@ -145,7 +159,7 @@ async function initKleinBalls() {
             shadowCaster.receiveShadow = false
             kb.add(shadowCaster)
 
-            // disk.initialMv = initialPlaneMvs[i]
+            disk.initialMv = initialPlaneMvs[i]
         }
 
         updateFunctions.push(() => {

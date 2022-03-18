@@ -1,5 +1,5 @@
-function arsenovichDemo() {
-    let centralKb = KleinBall()
+async function arsenovichDemo() {
+    let centralKb = await KleinBall()
     scene.add(centralKb)
 
     let ams = Array(arsenovichMatrices.length)

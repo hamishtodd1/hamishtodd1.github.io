@@ -52,6 +52,7 @@ function init31() {
 			console.error(str)
 		}
 
+		//aliasing allowed
 		reverse(target) {
 			if (target === undefined)
 				target = new Mv()
@@ -399,6 +400,7 @@ function init31() {
 				target = new THREE.Vector3()
 
 			if(this[11] === 0.) {
+				console.error("you shouldn't be able to see this in this space")
 				target.x = this[14]
 				target.y = this[13]
 				target.z = this[12]
@@ -414,9 +416,10 @@ function init31() {
 
 		fromVector(vec) {
 			this.copy(zeroMv)
-			this[14] = target.x
-			this[13] = target.y
-			this[12] = target.z
+			this[14] = vec.x
+			this[13] = vec.y
+			this[12] = vec.z
+			this[11] = 1. //yeah, we're taking a vertical slice at this level, no biggie
 
 			return this
 		}
