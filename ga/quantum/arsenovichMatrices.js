@@ -2,52 +2,61 @@ async function arsenovichDemo() {
     let centralKb = await KleinBall()
     scene.add(centralKb)
 
-    let ams = Array(arsenovichMatrices.length)
-    arsenovichMatrices.forEach((matArray, i) => {
-        ams[i] = new ComplexMat(2, matArray)
-    })
-
+    // let myMat = new ComplexMat(2)
     // updateFunctions.push(() => {
-    //     let amIndex = frameCount % ams.length
-    //     matrixToMotor(ams[amIndex], mv0)
-    //     centralKb.stateMotor.copy(mv0)
+    //     myMat.copy(identity2x2)
+    //     myMat.get(0, 1).re = 5. * Math.sin(frameCount * .05)
+
+    //     matToMotVisualStyle(myMat,centralKb.stateMotor)
     // })
 
-    let controlsArray = [
-        e31, "a", "d",
-        e23, "g", "t",
-        e12, "j", "l",
-        
-        e43, "k", "i",
-        e41, "h", "f", 
-        e42, "s", "w",
-    ]
-
-    for (let i = 0, il = controlsArray.length / 3; i < il; ++i) {
-        let gate = new Mv()
-        if (i < 3) {
-            gate.copy(controlsArray[i * 3])
-            for(let i = 0; i < 6; ++i) {
-                gate.sqrtBiReflection(mv0)
-                gate.copy(mv0)
-            }
-        }
-        else {
-            gate.copy(controlsArray[i * 3])
-            gate[0] += 64.
-            gate.multiplyScalar(1./gate[0])
-            // gate.normalize()
-        }
-
-        bindButton(controlsArray[i * 3 + 1], ()=>{},"",() => {
-            centralKb.stateMotor.mul(gate, mv0)
+    if(0)
+    {
+        let ams = Array(arsenovichMatrices.length)
+        arsenovichMatrices.forEach((matArray, i) => {
+            ams[i] = new ComplexMat(2, matArray)
+        })
+        updateFunctions.push(() => {
+            let amIndex = frameCount % ams.length
+            matrixToMotor(ams[amIndex], mv0)
             centralKb.stateMotor.copy(mv0)
         })
-        bindButton(controlsArray[i * 3 + 2], ()=>{},"",() => {
-            let reverseGate = gate.reverse(mv1)
-            centralKb.stateMotor.mul(reverseGate, mv0)
-            centralKb.stateMotor.copy(mv0)
-        })
+    }
+
+    // if(0)
+    {
+        let controlsArray = [
+            e31.clone(), "a", "d",
+            e23.clone(), "g", "t",
+            e12.clone(), "j", "l",
+            
+            e43.clone(), "k", "i",
+            e41.clone(), "h", "f", 
+            e42.clone(), "s", "w",
+        ]
+    
+        for (let i = 0, il = controlsArray.length / 3; i < il; ++i) {
+            let gate = new Mv()
+    
+            if (i < 3)
+                controlsArray[i * 3].multiplyScalar( 1. / 64. )
+            else
+                controlsArray[i * 3].multiplyScalar( 1. / 64. )
+    
+            controlsArray[i * 3].exp(gate)
+            let reverseGate = gate.reverse(new Mv())
+    
+            bindButton(controlsArray[i * 3 + 1], ()=>{},"",() => {
+                centralKb.stateMotor.mul(gate, mv0)
+                mv0.normalize()
+                centralKb.stateMotor.copy(mv0)
+            })
+            bindButton(controlsArray[i * 3 + 2], ()=>{},"",() => {
+                centralKb.stateMotor.mul(reverseGate, mv0)
+                mv0.normalize()
+                centralKb.stateMotor.copy(mv0)
+            })
+        }
     }
 }
 

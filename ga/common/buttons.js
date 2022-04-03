@@ -30,8 +30,18 @@ function initButtons()
 			collectionToAddTo[buttonName].onUp = onUp
 	}
 
+	bindToggle = function(buttonName,objectContainingValue) {
+		bindButton(buttonName, () => {
+			objectContainingValue.value = !objectContainingValue.value
+		}, "", () => {}, false, () => {
+			objectContainingValue.value = !objectContainingValue.value
+		})
+		return objectContainingValue
+	}
+
 	//don't use ctrl or other things that conflict
 	document.addEventListener( 'keydown', function(event) {
+
 		let button = event.ctrlKey ? modifiedButtons[event.key] : buttons[event.key]
 
 		// event.preventDefault()

@@ -1,4 +1,10 @@
 /*
+    Finish figuring out how to visualize measurements
+
+    For sure superdense coding
+        https://www.youtube.com/watch?v=w5rCn593Dig 
+        alice is putting a gate into the two-qubit state depending on what pair of bits she wants to send
+
     Might make a good cover for New Scientist
     Klem/Piotr can probably hook you up with quantum folks
     It'd be good to have the bloch vec superimposed on the pauli while you're editing it
@@ -19,8 +25,10 @@
         "Shorts", < 2m, "visual quantum computing" series. Some of these you dunno what they're for:
             X,Y,Z
             Other 1-qubit
+            "Quantum weirdness: the square root of the NOT logic gate"
             what does the conjugate transpose of a gate look like? Answer: rotation in the opposite direction
             Hadamard
+                Figure out, with a classical result, whether an input was i or -i
             Rotations
             CNOT classical, CNOT with craziness - direct to the entanglement video which talks about bell basis
             CNOT "effect is two way" thing https://en.wikipedia.org/wiki/Controlled_NOT_gate#Behaviour_in_the_Hadamard_transformed_basis 

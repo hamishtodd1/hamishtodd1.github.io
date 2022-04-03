@@ -1,4 +1,4 @@
-function text(initialText,materialOnly)
+function text(initialText,materialOnly,textColorHex)
 {
 	if (materialOnly === undefined) materialOnly = false
 
@@ -26,7 +26,7 @@ function text(initialText,materialOnly)
 		context.textAlign = "center";
 		context.textBaseline = "middle";
 		
-		let backGroundColor = "#" + renderer.getClearColor().getHexString()
+		let backGroundColor = "#" + renderer.getClearColor(new THREE.Color()).getHexString()
 		context.fillStyle = backGroundColor;
 		context.fillRect(
 			canvas.width / 2 - textWidth / 2 - backgroundMargin / 2, 
@@ -34,7 +34,7 @@ function text(initialText,materialOnly)
 			textWidth + backgroundMargin, 
 			textSize + backgroundMargin);
 		
-		let textColor = "#D3D1D3"
+		let textColor = textColorHex || "#D3D1D3"
 		context.fillStyle = textColor;
 		context.fillText(text, canvas.width / 2, canvas.height / 2);
 

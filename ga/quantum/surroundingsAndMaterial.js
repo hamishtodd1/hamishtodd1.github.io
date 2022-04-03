@@ -1,15 +1,22 @@
 async function initSurroundingsAndMaterial() {
 
-	bindButton("1", () => { }, "rotate everything", () => {
+	let rotating = false
+	bindButton("1", () => { rotating = true }, "rotate everything", () => {
+		rotating = false
+	},false)
 
-		mouse.get2dDiff(v0)
-		thingsToRotate.forEach((thing) => {
-			thing.rotation.y -= v0.x
-			thing.rotation.x += v0.y
-		})
+	updateFunctions.push(() => {
+		rotating = mouse.clicking
+		if(rotating) {
+			mouse.get2dDiff(v0)
+			thingsToRotate.forEach((thing) => {
+				thing.rotation.y -= v0.x
+				thing.rotation.x += v0.y
+			})
 
-		spotLight.position.applyAxisAngle(yUnit, -v0.x)
-		pedestal.rotation.y += -v0.x
+			spotLight.position.applyAxisAngle(yUnit, -v0.x)
+			pedestal.rotation.y += -v0.x
+		}
 	})
 
 	// camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 2500);

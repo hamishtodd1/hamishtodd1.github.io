@@ -86,13 +86,13 @@ function initGates(paulis,rotators,tqgs) {
         return bs
     }
 
-    CombinedBsKb = function(rect) {
+    CombinedBsKb = async function(rect) {
         let bsKb = {}
 
-        let kb = KleinBall()
+        let kb = await KleinBall()
         let bs = BlochSphere(rect)
 
-        scene.add(kb)
+        scene.add( kb)
         kb.scale.setScalar(SHELL_RADIUS)
         updateFunctions.push(() => {
             kb.position.copy(rect.position)
@@ -124,8 +124,8 @@ function initGates(paulis,rotators,tqgs) {
                 let d = mat.get(1, 1)
 
                 // a.div(c).log("bloch")
-                a.log("a")
-                c.log("c")
+                // a.log("a")
+                // c.log("c")
 
                 let aPlusB = new Complex().copy(a).add(b)
                 let cPlusD = new Complex().copy(c).add(d)

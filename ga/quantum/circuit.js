@@ -129,6 +129,7 @@ async function initCircuit() {
         for(let i = 0; i < maxGatesPerWire; ++i)
             circuitGates[j][i] = null
     }
+    
     getWire = function(gate) {
         if (circuitGates[0].indexOf(gate) !== -1)
             return 0
@@ -243,7 +244,7 @@ async function initCircuit() {
         // initialState.el[1].im = 1./Math.SQRT2
         // initialState.el[0].re = 1./Math.SQRT2
         initialState.el[0].re = 1.
-        let initialStateBs = new CombinedBsKb(initialStateBox)
+        let initialStateBs = await CombinedBsKb(initialStateBox)
 
         updateFunctions.push(()=>{
             initialState.outerProductWithSelfConjugate(c2m0)
@@ -254,7 +255,7 @@ async function initCircuit() {
             w: GATE_DIMENSION,
             h: GATE_DIMENSION
         })
-        wire.finalStateViz = new CombinedBsKb(finalStateBox)
+        wire.finalStateViz = await CombinedBsKb(finalStateBox)
     }
 
     circuitState = new ComplexVector(4) //or, matrix? but how to apply?

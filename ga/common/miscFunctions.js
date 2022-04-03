@@ -23,13 +23,15 @@ function getMatrixYAxisScale(elements, matrixIndex)
 	)
 }
 
-function setRotationallySymmetricMatrix(yX, yY, yZ, matrix)
+function setRotationallySymmetricMatrix(yX, yY, yZ, target)
 {
 	v1.set(yX, yY, yZ)
 	randomPerpVector(v1, v2)
 	v2.normalize()
 	v3.crossVectors(v1,v2).normalize().negate();
-	matrix.makeBasis(v2, v1, v3);
+	target.makeBasis(v2, v1, v3);
+
+	return target
 }
 
 function VideoScreen(filename)
@@ -163,27 +165,28 @@ THREE.Raycaster.prototype.intersectZPlane = function(z,target)
 	return this.ray.intersectPlane(pl, target)
 }
 
-{
-	let urConnector = new THREE.Line(new THREE.Geometry(),new THREE.LineBasicMaterial({color:0x0F0FFF}))
-	urConnector.geometry.vertices.push(new THREE.Vector3())
-	urConnector.geometry.vertices.push(new THREE.Vector3(1.,1.,0.))
-	Connector = function(obj1,obj2)
-	{
-		let connector = new THREE.Line(urConnector.geometry,urConnector.material)
-		scene.add(connector)
+let urConnector = "uhhh, were you actually using this?"
+// {
+// 	let urConnector = new THREE.Line(new THREE.Geometry(),new THREE.LineBasicMaterial({color:0x0F0FFF}))
+// 	urConnector.geometry.vertices.push(new THREE.Vector3())
+// 	urConnector.geometry.vertices.push(new THREE.Vector3(1.,1.,0.))
+// 	Connector = function(obj1,obj2)
+// 	{
+// 		let connector = new THREE.Line(urConnector.geometry,urConnector.material)
+// 		scene.add(connector)
 
-		updateFunctions.push(function()
-		{
-			obj1.getWorldPosition(connector.position)
+// 		updateFunctions.push(function()
+// 		{
+// 			obj1.getWorldPosition(connector.position)
 
-			obj2.getWorldPosition(connector.scale)
-			connector.scale.sub(connector.position)
-			connector.scale.z = 1.
-		})
+// 			obj2.getWorldPosition(connector.scale)
+// 			connector.scale.sub(connector.position)
+// 			connector.scale.z = 1.
+// 		})
 
-		return connector
-	}
-}
+// 		return connector
+// 	}
+// }
 
 function randomSeeded(seed)
 {
@@ -208,7 +211,7 @@ function RandomSequenceSeeded(seed)
 function assignShader(fileName, materialToReceiveAssignment, vertexOrFragment)
 {
 	let propt = vertexOrFragment + "Shader"
-	let fullFileName = "shaders/" + fileName + ".glsl"
+	let fullFileName = fileName + ".glsl"
 
 	return new Promise(resolve =>
 	{
@@ -620,16 +623,63 @@ THREE.Vector4.prototype.fromQuaternion = function(q)
 	this.w = q.w;
 }
 
-THREE.Face3.prototype.getCorner = function(i)
-{
-	switch(i)
+if(THREE.Face3 !== undefined) {
+	THREE.Face3.prototype.getCorner = function(i)
 	{
-	case 0:
-		return this.a;
-	case 1:
-		return this.b;
-	case 2:
-		return this.c;
+		switch(i)
+		{
+		case 0:
+			return this.a;
+		case 1:
+			return this.b;
+		case 2:
+			return this.c;
+		}
+	}
+
+	THREE.Face3.prototype.addOffset = function (offset) {
+		this.a += offset;
+		this.b += offset;
+		this.c += offset;
+	}
+
+	THREE.Face3.prototype.cornerFromIndex = function (i) {
+		switch (i) {
+			case 0:
+				return this.a;
+				break;
+			case 1:
+				return this.b;
+				break;
+			case 2:
+				return this.c;
+				break;
+		}
+	}
+
+	THREE.Face3.prototype.indexOfCorner = function (vertexIndexYouWant) {
+		for (var i = 0; i < 3; i++) {
+			if (this.cornerFromIndex(i) === vertexIndexYouWant) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	THREE.Face3.prototype.set = function (a, b, c) {
+		this.a = a;
+		this.b = b;
+		this.c = c;
+		return this;
+	}
+
+	THREE.Face3.prototype.indexOfThirdCorner = function (notThisOne, orThisOne) {
+		for (var i = 0; i < 3; i++) {
+			if (this.cornerFromIndex(i) !== notThisOne &&
+				this.cornerFromIndex(i) !== orThisOne) {
+				return this.cornerFromIndex(i);
+			}
+		}
+		return -1;
 	}
 }
 
@@ -670,12 +720,7 @@ THREE.Vector3.prototype.worldToLocal = function(object)
 	object.worldToLocal(this);
 }
 
-THREE.Face3.prototype.addOffset = function(offset)
-{
-	this.a += offset;
-	this.b += offset;
-	this.c += offset;
-}
+
 
 function getStandardFunctionCallString(myFunc)
 {
@@ -788,53 +833,7 @@ THREE.OriginCorneredPlaneBufferGeometry = function(width,height)
 	return g;
 }
 
-THREE.Face3.prototype.cornerFromIndex = function(i)
-{
-	switch(i)
-	{
-	case 0:
-		return this.a;
-		break;
-	case 1:
-		return this.b;
-		break;
-	case 2:
-		return this.c;
-		break;
-	}
-}
 
-THREE.Face3.prototype.indexOfCorner = function(vertexIndexYouWant)
-{
-	for(var i = 0; i < 3; i++)
-	{
-		if( this.cornerFromIndex(i) === vertexIndexYouWant)
-		{
-			return i;
-		}
-	}
-	return -1;
-}
-THREE.Face3.prototype.set = function(a,b,c)
-{
-	this.a = a;
-	this.b = b;
-	this.c = c;
-	return this;
-}
-
-THREE.Face3.prototype.indexOfThirdCorner = function(notThisOne,orThisOne)
-{
-	for(var i = 0; i < 3; i++)
-	{
-		if( this.cornerFromIndex(i) !== notThisOne && 
-			this.cornerFromIndex(i) !== orThisOne )
-		{
-			return this.cornerFromIndex(i);
-		}
-	}
-	return -1;
-}
 
 function worldClone(vecToBeCloned,object)
 {

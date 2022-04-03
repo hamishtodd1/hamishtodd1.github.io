@@ -92,8 +92,15 @@ function Program(vsSource, fsSource) {
     // gl.deleteShader(vertexShader)
     // gl.deleteShader(fragmentShader)
 
-    if (!gl.getProgramParameter(glProgram, gl.LINK_STATUS))
-        alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(glProgram));
+    if (!gl.getProgramParameter(glProgram, gl.LINK_STATUS)) {
+
+        let fullString = 'Unable to initialize the shader program, error is: ' + gl.getProgramInfoLog(glProgram)
+        alert(fullString);
+        console.error("here's vsSource:")
+        console.log(vsSource)
+        console.error("and here's fsSource:")
+        console.log(fsSource)
+    }
 
     this.locateUniform = (name) => {
         self.uniformLocations[name] = gl.getUniformLocation(glProgram, name)

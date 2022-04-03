@@ -8,8 +8,8 @@
 THREE.Raycaster.prototype.updateFromClientCoordinates = function (clientX, clientY)
 {
 	v1.z = 0.
-	v1.x = (clientX / window.innerWidth) * 2 - 1;
-	v1.y = -(clientY / window.innerHeight) * 2 + 1;
+	v1.x = (clientX / window.innerWidth) * 2. - 1.
+	v1.y = -(clientY / window.innerHeight) * 2. + 1.
 
 	this.setFromCamera(v1, camera)
 }

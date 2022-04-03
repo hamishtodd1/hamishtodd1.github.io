@@ -6,28 +6,39 @@ attribute float interp;
 uniform vec3 start;
 varying float interpV;
 
-uniform float[16] motAxis;
-uniform float motMultiple;
+uniform float[16] stateMotorLogged;
 
-void bqExp(in float[16] axis, in float ourPow, out float[16] target) {
-	float ourSinh = sinh(ourPow);
+void mvExp(in float[16] mv, out float[16] target) {
+	float S = -mv[5] * mv[5] - mv[6] * mv[6] + mv[7] * mv[7] - mv[8] * mv[8] + mv[9] * mv[9] + mv[10] * mv[10];
+	float T = 2. * (mv[5] * mv[10] - mv[6] * mv[9] + mv[7] * mv[8]);
+	// ||B*B||
+	float norm = sqrt(S * S + T * T);
 
-	target[ 0] = cosh(ourPow);
-	target[ 1] = 0.;
-	target[ 2] = 0.;
-	target[ 3] = 0.;
-	target[ 4] = 0.;
-	target[ 5] = ourSinh * axis[ 5];
-	target[ 6] = ourSinh * axis[ 6];
-	target[ 7] = ourSinh * axis[ 7];
-	target[ 8] = ourSinh * axis[ 8];
-	target[ 9] = ourSinh * axis[ 9];
-	target[10] = ourSinh * axis[10];
-	target[11] = 0.;
-	target[12] = 0.;
-	target[13] = 0.;
-	target[14] = 0.;
-	target[15] = 0.;	
+	// P_+ = xB + y*e1234*B
+	float x = 0.5 * (1. + S / norm);
+	float y = -0.5 * T / norm;
+	float lp = sqrt(0.5 * S + 0.5 * norm);
+	float lm = sqrt(-0.5 * S + 0.5 * norm);
+	float cp = cosh(lp);
+	float sp = lp == 0. ? 1. : sinh(lp) / lp;
+	float cm = cos(lm);
+	float sm = lm == 0. ? 1. : sin(lm) / lm;
+	float cmsp = cm * sp;
+	float cpsm = cp * sm;
+	float alpha = (cmsp - cpsm) * x + cpsm;
+	float beta = (cmsp - cpsm) * y;
+
+	// Combine the two Euler's formulas together.
+	target[ 0] = norm == 0. ? 1. : cp * cm;
+	target[ 1] = 0.; target[ 2] = 0.; target[ 3] = 0.; target[ 4] = 0.;
+	target[ 5] = norm == 0. ? 0. : (mv[5] * alpha + mv[10] * beta);
+	target[ 6] = norm == 0. ? 0. : (mv[6] * alpha - mv[9] * beta);
+	target[ 7] = norm == 0. ? 0. : (mv[7] * alpha - mv[8] * beta);
+	target[ 8] = norm == 0. ? 0. : (mv[8] * alpha + mv[7] * beta);
+	target[ 9] = norm == 0. ? 0. : (mv[9] * alpha + mv[6] * beta);
+	target[10] = norm == 0. ? 0. : (mv[10] * alpha - mv[5] * beta);
+	target[11] = 0.; target[12] = 0.; target[13] = 0.; target[14] = 0.;
+	target[15] = norm == 0. ? 0. : sp * sm * T / 2.;
 }
 
 void gp( in float[16] a, in float[16] b, out float[16] target) {
@@ -50,56 +61,74 @@ void gp( in float[16] a, in float[16] b, out float[16] target) {
 }
 
 void vec3ToMv(in vec3 ourVec, out float[16] ourMv) {
-	ourMv[14] = ourMv.x;
-	ourMv[13] = ourMv.y;
-	ourMv[12] = ourMv.z;
+	ourMv[14] = ourVec.x;
+	ourMv[13] = ourVec.y;
+	ourMv[12] = ourVec.z;
 	ourMv[11] = 1.;
 }
 void mvToVec3(in float[16] ourMv, out vec3 ourVec) {
-	ourMv.x = ourMv[14] / ourMv[11];
-	ourMv.y = ourMv[13] / ourMv[11];
-	ourMv.z = ourMv[12] / ourMv[11];
+	ourVec.x = ourMv[14] / ourMv[11];
+	ourVec.y = ourMv[13] / ourMv[11];
+	ourVec.z = ourMv[12] / ourMv[11];
 }
 
 void reverse(in float[16] mv, out float[16] target) {
+	target[0] = mv[0];
+	target[1] = mv[1];
+	target[2] = mv[2];
+	target[3] = mv[3];
+	target[4] = mv[4];
+	target[5] = -mv[5];
+	target[6] = -mv[6];
+	target[7] = -mv[7];
+	target[8] = -mv[8];
+	target[9] = -mv[9];
+	target[10] = -mv[10];
+	target[11] = -mv[11];
+	target[12] = -mv[12];
+	target[13] = -mv[13];
+	target[14] = -mv[14];
+	target[15] = mv[15];
+}
 
-	target[0] = mv[0]
-	target[1] = mv[1]
-	target[2] = mv[2]
-	target[3] = mv[3]
-	target[4] = mv[4]
-	target[5] = -mv[5]
-	target[6] = -mv[6]
-	target[7] = -mv[7]
-	target[8] = -mv[8]
-	target[9] = -mv[9]
-	target[10] = -mv[10]
-	target[11] = -mv[11]
-	target[12] = -mv[12]
-	target[13] = -mv[13]
-	target[14] = -mv[14]
-	target[15] = mv[15]
-	return target
+void mvMultiplyScalar(in float[16] mv, in float scalar, out float target[16]) {
+	target[ 0] = mv[ 0] * scalar;
+	target[ 1] = mv[ 1] * scalar;
+	target[ 2] = mv[ 2] * scalar;
+	target[ 3] = mv[ 3] * scalar;
+	target[ 4] = mv[ 4] * scalar;
+	target[ 5] = mv[ 5] * scalar;
+	target[ 6] = mv[ 6] * scalar;
+	target[ 7] = mv[ 7] * scalar;
+	target[ 8] = mv[ 8] * scalar;
+	target[ 9] = mv[ 9] * scalar;
+	target[10] = mv[10] * scalar;
+	target[11] = mv[11] * scalar;
+	target[12] = mv[12] * scalar;
+	target[13] = mv[13] * scalar;
+	target[14] = mv[14] * scalar;
+	target[15] = mv[15] * scalar;
 }
 
 void main() 
 {
 	interpV = interp;
 
-	vec3 p = start;
-	p.x += interp;
-
 	float[16] m;
 	float[16] mReverse;
-	bqExp(motAxis, interp, m);
+
+	float[16] bivToBeExponentiated;
+	mvMultiplyScalar(stateMotorLogged, interp, bivToBeExponentiated);
+	mvExp(bivToBeExponentiated, m);
 	reverse(m,mReverse);
 
 	float[16] pt;
 	float[16] intermediate;
 
-	vec3ToMv(p, pt);
+	vec3ToMv(start, pt);
 	gp(m, pt, intermediate);
 	gp(intermediate, mReverse, pt);
+	vec3 p = vec3(0.,0.,0.);
 	mvToVec3(pt, p);
 
 	vec4 modelViewPosition = modelViewMatrix * vec4(p, 1.0);

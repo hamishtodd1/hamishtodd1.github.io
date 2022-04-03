@@ -21,13 +21,12 @@ const unchangingUnitSphereGeometry = new THREE.EfficientSphereGeometry(1.)
 const unchangingUnitSquareGeometry = new THREE.PlaneGeometry(1., 1.)
 
 const debugging = 0
-var logged = 0
+let logged = 0
 
-const camera = new THREE.PerspectiveCamera(0., 0., 1., 10.)
-// new THREE.OrthographicCamera( -1.,1.,1.,-1.,0.01, 10)
+
 const renderer = new THREE.WebGLRenderer({ antialias: true })
 const scene = new THREE.Scene().add(camera)
-var mouse = null
+let mouse = null
 
 const discreteViridis = [
 	{ hex: 0xFCE51E, color: new THREE.Color(0.984375, 0.89453125, 0.1171875) },

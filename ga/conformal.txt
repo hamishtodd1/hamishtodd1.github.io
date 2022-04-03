@@ -14,6 +14,8 @@ The task is not necessarily "Pick the best algebra, then find a visualization of
 	
 
 Reasons
+	Frequently with scalars you do "is value between m and n". Sounds like sphere containment
+	You want something as powerful as possible. You're not giving code itself but something less powerful, might as well make it as powerful as possible while still being visualized algebra
 	Spherical video
 	You DO want spheres of different sizes, because you want little objects to move around.
 	In PGA you imagine 2 points intersecting the sphere at infinity anyway

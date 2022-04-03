@@ -229,38 +229,95 @@ function init31() {
 			return target;
 		}
 
-		// exp(target) {
-		// 	let bivPart = this.selectGrade(2, localMv0)
+		exp(target) {
+			if (!this.hasGrade(2))
+				return target.copy(oneMv)
+				
+			let S = -this[5] * this[5] - this[6] * this[6] + this[7] * this[7] - this[8] * this[8] + this[9] * this[9] + this[10] * this[10]
+			let T = 2. * (this[5] * this[10] - this[6] * this[9] + this[7] * this[8])
+			// ||B*B||
+			let norm = Math.sqrt(S * S + T * T)
 
-		// 	let lambda = bivPart.mul(bivPart)[0]
 
-		// 	function generalized
+			// P_+ = xB + y*e1234*B
+			let [x, y] = [0.5 * (1. + S / norm), -0.5 * T / norm];
+			let [lp, lm] = [Math.sqrt(0.5 * S + 0.5 * norm), Math.sqrt(-0.5 * S + 0.5 * norm)]
+			let [cp, sp] = [Math.cosh(lp), lp === 0. ? 1. : Math.sinh(lp) / lp]
+			let [cm, sm] = [Math.cos(lm), lm === 0. ? 1. : Math.sin(lm) / lm]
+			let [cmsp, cpsm] = [cm * sp, cp * sm]
+			let [alpha, beta] = [(cmsp - cpsm) * x + cpsm, (cmsp - cpsm) * y]
 
-		// 	//cos and sin for the e12 etc part
-		// }
+			// Combine the two Euler's formulas together.
+			target.rotor(
+				cp * cm,
+				(this[5] * alpha + this[10] * beta), (this[6] * alpha - this[9] * beta),
+				(this[7] * alpha - this[8] * beta), (this[8] * alpha + this[7] * beta),
+				(this[9] * alpha + this[6] * beta), (this[10] * alpha - this[5] * beta),
+				sp * sm * T / 2.
+			)
 
-		// possiblyProperDual(target){
-		// 	if (target === undefined)
-		// 		target = new Mv()
+			return target
+		}
 
-		// 	target[0] = this[15]
-		// 	target[1] = this[14]
-		// 	target[2] = this[13]
-		// 	target[3] = this[12]
-		// 	target[4] = this[11]
-		// 	target[5] = this[10]
-		// 	target[6] = this[9]
-		// 	target[7] = this[8]
-		// 	target[8] = this[7]
-		// 	target[9] = this[6]
-		// 	target[10] = this[5]
-		// 	target[11] = this[4]
-		// 	target[12] = this[3]
-		// 	target[13] = this[2]
-		// 	target[14] = this[1]
-		// 	target[15] = this[0]
-		// 	return target
-		// }
+		normalize() {
+			let ourGrade = this.grade()
+			if(0) {
+				let isRotor = ourGrade !== 1 && ourGrade !== 3
+				if (isRotor) {
+					// this.log()
+					// debugger
+					let S = this[0] * this[0] + this[5] * this[5] + this[6] * this[6] - this[7] * this[7] + this[8] * this[8] - this[9] * this[9] - this[10] * this[10] - this[15] * this[15]
+					let T = 2 * (this[0] * this[15] - this[5] * this[10] + this[6] * this[9] - this[7] * this[8])
+					let N = ((S * S + T * T) ** .5 + S) ** .5, N2 = N * N
+					let denom = (N2 * N2 + T * T)
+					if(denom === 0.)
+						debugger
+	
+					let ND = 2 ** .5 * N / denom
+					let C = N2 * ND, D = -T * ND
+	
+					return this.rotor(
+						C * this[0] - D * this[15], C * this[5] + D * this[10], C * this[6] - D * this[9], C * this[7] - D * this[8],
+						C * this[8] + D * this[7], C * this[9] + D * this[6], C * this[10] - D * this[5], C * this[15] + D * this[0]
+					)
+				}
+			}
+			 
+			{
+				let ourNorm = this.norm()
+				if (ourNorm === 0.)
+					debugger
+				//some things are meant to be null. Maybe they should get w = 1. But they shouldn't be here
+				this.multiplyScalar(1. / ourNorm)
+				return this
+			}
+		}
+
+		
+
+		logarithm(target) {
+
+			if(this.hasGrade(0) && !this.hasGrade(2))
+				return target.copy(zeroMv)
+			
+			// B*B = S + T*e1234
+			let S = this[0] * this[0] - this[15] * this[15] - 1;
+			let T = 2 * (this[0] * this[15])
+			let norm = Math.sqrt(S * S + T * T)
+
+			let [x, y] = [0.5 * (1 + S / norm), -0.5 * T / norm];
+			// lp is always a boost, lm a rotation
+			let [lp, lm] = [Math.sqrt(0.5 * S + 0.5 * norm), Math.sqrt(-0.5 * S + 0.5 * norm)]
+			let theta2 = lm == 0 ? 0 : Math.atan2(lm, this[0]);
+			let theta1 = Math.atanh(lp / this[0]);
+			let [w1, w2] = [lp == 0 ? 0 : theta1 / lp, lm == 0 ? 0 : theta2 / lm]
+			let [A, B] = [(w1 - w2) * x + w2, w1 == 0 ? Math.atanh(-this[15] / lm) / lm : (w1 - w2) * y];
+			
+			return target.line(
+				this[5] * A + this[10] * B, this[6] * A - this[9] * B, this[7] * A - this[8] * B,
+				this[8] * A + this[7] * B, this[9] * A + this[6] * B, this[10] * A - this[5] * B
+			)
+		}
 
 		mul(b, target) {
 			if(target === undefined)
@@ -347,6 +404,38 @@ function init31() {
 			return this
 		}
 
+		rotor(m0, m1, m2, m3, m4, m5, m6, m7) {
+			this[0] = 0. || m0
+
+			this[1] = 0.
+			this[2] = 0.
+			this[3] = 0.
+			this[4] = 0.
+
+			this[5] = 0. || m1
+			this[6] = 0. || m2
+			this[7] = 0. || m3
+
+			this[8] = 0. || m4
+			this[9] = 0. || m5
+			this[10] = 0. || m6
+
+			this[11] = 0.
+			this[12] = 0.
+			this[13] = 0.
+			this[14] = 0.
+
+			this[15] = 0. || m7
+
+			return this
+		}
+
+		line( m0, m1, m2, m3, m4, m5 ) {
+			this.rotor(0., m0, m1, m2, m3, m4, m5, 0.)
+
+			return this
+		}
+
 		similarTo(m) {
 			let ret = true
 			for(let i = 0; i < 16; ++i) {
@@ -400,10 +489,7 @@ function init31() {
 				target = new THREE.Vector3()
 
 			if(this[11] === 0.) {
-				console.error("you shouldn't be able to see this in this space")
-				target.x = this[14]
-				target.y = this[13]
-				target.z = this[12]
+				console.error("direction. No reason to turn this into a position")
 			}
 			else {
 				target.x = this[14] / this[11]
@@ -485,46 +571,14 @@ function init31() {
 			return Math.sqrt(Math.abs(localMv1[0]))
 		}
 
-		normalize() {
-			let ourNorm = this.norm()
-			if(ourNorm === 0.)
-				debugger
-			this.multiplyScalar(1. / ourNorm )
-			return this
-		}
-
 		//aliasing works
-		sqrtBiReflection(target) {
-			if (target === undefined)
+		sqrt(target) {
+			if(target === undefined)
 				target = new Mv()
+
 			target.copy(this)
-
-			if(target.equals(zeroMv))
-				return target
-
-			// target.normalize()
-
-			if (target[0] !== -1.)
-				target[0] += 1.
-			else
-				target[5] += 1.
+			target[0] += 1.
 			target.normalize()
-			return target
-		}
-		sqrtQuadReflection(target) {
-			if (target === undefined)
-				target = new Mv()
-			target.copy(this)
-
-			localMv0.copy(this)
-			localMv2.copy(this)
-			localMv0[0] += 1.
-			localMv2[0] += 1.
-			localMv2.reverse(localMv3)
-
-			localMv3[15] -= .5 * this[15]
-			localMv0.mul( localMv3, target )
-
 			return target
 		}
 
@@ -541,35 +595,24 @@ function init31() {
 			return target
 		}
 
-		logarithm(target) {
-			let b = this.selectGrade(2, lv2LocalMv0)
-			let minusBSquared = (b.cleave(b, lv2LocalMv1)).multiplyScalar(-1.)
-			let s = Math.sqrt(minusBSquared[0])
-			let p = b.meet(b, lv2LocalMv3).multiplyScalar(2. * s)
-
-			// let scalarInBrackets = Math.atan(s/this[0]) + 
-
-			//is it this though?
-			// let bDotB = this.inner(this, localMv0)
-			// let bMeetB = this.meet(this, localMv1)
-			// let lambdas = [
-
-			// ]
+		hasGrade(grade) {
+			if (grade === 0 )
+				return this[0] !== 0.
+			if (grade === 1)
+				return (this[1] !== 0. || this[2] !== 0. || this[3] !== 0. || this[4] !== 0.)
+			if (grade === 2)
+				return (this[5] !== 0. || this[6] !== 0. || this[7] !== 0. || this[8] !== 0. || this[9] !== 0. || this[10] !== 0.)
+			if (grade === 3)
+				return (this[11] !== 0. || this[12] !== 0. || this[13] !== 0. || this[14] !== 0.)
+			if (grade === 4)
+				return this[15] !== 0.
 		}
 
 		grade() {
-			let ret = -1
-			if(this[0] !== 0.)
-				return 0
-			else if (this[1] !== 0. || this[2] !== 0. || this[3] !== 0. || this[4] !== 0. )
-				return 1
-			else if (this[5] !== 0. || this[6] !== 0. || this[7] !== 0. || this[8] !== 0. || this[9] !== 0. || this[10] !== 0. )
-				return 2
-			else if (this[11] !== 0. || this[12] !== 0. || this[13] !== 0. || this[14] !== 0.)
-				return 3
-			else if (this[15] !== 0.)
-				return 4
-			return -1
+			for(let i = 0; i < 5; ++i) {
+				if (this.hasGrade(i))
+					return i
+			}
 		}
 
 		sandwich(mvToBeSandwiched, target) {
@@ -718,11 +761,11 @@ function init31() {
 		e413.clone().add(e123),
 		e412.clone().add(e123)] //actually these should probably have a w part!
 
-	oneInfinityIPoints = [
-		complexToHorosphere(new Complex(1., 0.), new Complex(1., 0.)),
-		complexToHorosphere(new Complex(1., 0.), new Complex(1., 0.)),
-		complexToHorosphere(new Complex(0., 1.), new Complex(0., 0.)),
-	]
+	// oneInfinityIPoints = [
+	// 	complexToHorosphere(new Complex(1., 0.), new Complex(1., 0.)),
+	// 	complexToHorosphere(new Complex(1., 0.), new Complex(1., 0.)),
+	// 	complexToHorosphere(new Complex(0., 1.), new Complex(0., 0.)),
+	// ]
 }
 
 function cleave(l, p, target) {

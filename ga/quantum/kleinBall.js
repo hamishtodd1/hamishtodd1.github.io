@@ -1,5 +1,20 @@
 /*
     a/c - (ad-bc) / (c*c * (z+d/c))
+
+    see what these looks like for mob trans:
+        unitarity
+        outer product
+        transpose
+        transpose for a vector
+        Conjugate
+        Eigenvectors and eigenvalues
+        special, non-special
+        Hermitian
+        Orthogonal
+        1, -1 determinant
+        Completeness relation: for any basis, the sum of the outer products of the elements with themselves is the identity
+
+    ...and this is tremendously worthwhile, a visual perspective on much of abstract algebra
 */
 
 
@@ -7,120 +22,148 @@
 let stateMotor = null
 async function initKleinBalls() {
 
-    // KleinBall = async function() {
-    //     /*
+    let boogle = e12.clone()
+    boogle.add(e41)
+    projectPointOnLine(e123,boogle).log()
+
+    
+
+    function lineToCylinderTransform(line, targetObject3d) {
+        let thisLineAtOrigin = projectLineOnPoint(line, e123, mv1)
+        thisLineAtOrigin.normalize()
+        let rotorToThisLineAtOrigin = thisLineAtOrigin.mul(e31, mv2).sqrt(mv3)
+        rotorToThisLineAtOrigin.toQuaternion(targetObject3d.quaternion)
+
+        let pos = projectPointOnLine(e123, line, mv4)
+        pos.normalize()
+        pos.toVector(targetObject3d.position)
+        indicSphere.position.copy(targetObject3d.position)
+        // log(indicSphere.position)
+    }
+    
+    let dumbellMat = new THREE.MeshPhongMaterial({ color: 0x000000 })
+    let indicSphere = new THREE.Mesh(new THREE.SphereGeometry(.06), dumbellMat)
+    function makeDumbell(kb)
+    {
+        kb.add(indicSphere)
+
+        let dumbellRadius = .02
+
+        dumbell = {}
+        // let end1 = new THREE.Mesh(new THREE.SphereGeometry(dumbellRadius * 2.), dumbellMat)
+        // kb.add(end1)
+        // dumbell.end1 = end1
+        // let end2 = new THREE.Mesh(new THREE.SphereGeometry(dumbellRadius * 2.), dumbellMat)
+        // kb.add(end2)
+        // dumbell.end2 = end2
+        let handle = new THREE.Mesh(new THREE.CylinderGeometry(dumbellRadius, dumbellRadius, 1.), dumbellMat)
+        kb.add(handle)
+        dumbell.handle = handle
+        dumbell.setVisibility = (newVisibility) => {
+            handle.visible = newVisibility
+            // end1.visible = newVisibility
+            // end2.visible = newVisibility
+        }
+        
+        updateFunctions.push(() => {
+            // kb.stateMotorLogged.log()
+            let hasBivectorPart = kb.stateMotorLogged.hasGrade(2)
+
+            dumbell.setVisibility(hasBivectorPart)
+            if (hasBivectorPart)
+                lineToCylinderTransform(kb.stateMotorLogged, dumbell.handle)
+        })
+
+        return dumbell
+    }
+
+    
+
+    async function makeTrails(kb) {
+        
+        let numArcs = 60
+        let arcs = Array(numArcs)
+
+        //very instance-able
+        let headMat = new THREE.MeshPhongMaterial({ color: 0xFF00FF })
+        let headGeo = new THREE.SphereGeometry(.02)
+        // let headExtent = .05
+        // let headGeo = new THREE.ConeGeometry(headExtent/3., headExtent)
+        // headGeo.translate(0.,-headExtent*.5,0.)
+
+        var arcMat = new THREE.ShaderMaterial({
+            uniforms: {
+                "start": { value: new THREE.Vector3() },
+                "stateMotorLogged": { value: new Float32Array(16) }
+            },
+        });
+        await assignShader("basicVertex", arcMat, "vertex")
+        await assignShader("basicFragment", arcMat, "fragment")
+
+        for (let i = 0; i < numArcs; ++i) {
+            let am = arcMat.clone()
+
+            let start = am.uniforms.start.value
+            let currentLength = Infinity
+            while (currentLength >= 1.) {
+                start.x = (Math.random() - .5) * 2.
+                start.y = (Math.random() - .5) * 2.
+                start.z = (Math.random() - .5) * 2.
+
+                currentLength = start.lengthSq()
+            }
+
+            if (Math.random() < .3) //proportion of them that you want on the boundary
+                start.normalize()
+
+            let numVerts = 32
+            let arcGeo = new THREE.BufferGeometry()
+
+            const vertices = new Float32Array(numVerts * 3);
+            arcGeo.setAttribute('position', new THREE.BufferAttribute(vertices, 3))
+
+            let interp = new Float32Array(numVerts)
+            for (let i = 0; i < numVerts; i++)
+                interp[i] = i / (numVerts - 1)
+            arcGeo.addAttribute('interp', new THREE.BufferAttribute(interp, 1))
             
-    //     */
-
-    //     // let lineGeo = new THREE.Geometry()
-    //     // for(let i = 0; i < 10; ++i) {
-    //     //     let vec = new THREE.Vector3(
-    //     //         (Math.random() - .5) * 2.,
-    //     //         (Math.random() - .5) * 2.,
-    //     //         (Math.random() - .5) * 2.
-    //     //     )
-    //     //     lineGeo.vertices.push(vec)
-    //     // }
-    //     // let a = new THREE.LineSegments()
-
-
-    //     // {
-    //     //     let start = new THREE.Vector3()
-    //     //     let currentLength = Infinity
-    //     //     while (currentLength >= 1.) {
-    //     //         start.x = (Math.random() - .5) * 2.
-    //     //         start.y = (Math.random() - .5) * 2.
-    //     //         start.z = (Math.random() - .5) * 2.
-
-    //     //         currentLength = start.lengthSq()
-    //     //     }
-
-    //     //     var material = new THREE.ShaderMaterial({
-    //     //         uniforms: {
-    //     //             "start": {value: start},
-    //     //             "mot": { value: new Float32Array(16) },
-    //     //             "motReverse": { value: new Float32Array(16) }
-    //     //         },
-    //     //     });
-    //     //     await assignShader("basicVertex", material, "vertex")
-    //     //     await assignShader("basicFragment", material, "fragment")
-
-    //     //     let numVerts = 32
-    //     //     let arcGeo = new THREE.BufferGeometry()
+            let arc = new THREE.Line(arcGeo, am)
+            arcs[i] = arc
+            kb.add(arc)
             
-    //     //     const vertices = new Float32Array(numVerts*3);
-    //     //     arcGeo.setAttribute('position', new THREE.BufferAttribute(vertices, 3))
+            arc.head = new THREE.Mesh(headGeo, headMat)
+            kb.add(arc.head)
+        }
 
-    //     //     let interp = new Float32Array(numVerts)
-    //     //     for (let i = 0; i < numVerts; i++)
-    //     //         interp[i] = i/(numVerts-1)
-    //     //     arcGeo.addAttribute('interp', new THREE.BufferAttribute(interp, 1))
+        let almostStateMotor = new Mv()
+        let tip = new Mv()
+        let almostTip = new Mv()
+        updateFunctions.push(() => {
+            //need to figure out the 
 
-    //     //     var ourLine = new THREE.Line(arcGeo, material)
+            mv0.copy(kb.stateMotorLogged)
+            mv0.multiplyScalar(.97)
+            mv0.exp(almostStateMotor)
+            
+            arcs.forEach((arc) => {
+                let logCopy = arc.material.uniforms.stateMotorLogged.value
+                for (let i = 0; i < 16; ++i)
+                    logCopy[i] = kb.stateMotorLogged[i]
 
-    //     //     material.uniforms.start.value.set
 
-    //     // }
+                // head part
+                let start = arc.material.uniforms.start.value
+                let arcInitialPoint = mv0.fromVector(start)
 
-    //     let kb = new THREE.Object3D()
-    //     thingsToRotate.push(kb)
-    //     let stateMotor = new Mv()
-    //     stateMotor[0] = 1.
-    //     kb.stateMotor = stateMotor
+                kb.stateMotor.sandwich(arcInitialPoint, tip)
+                almostStateMotor.sandwich(arcInitialPoint, almostTip)
 
-    //     // kb.add(ourLine)
+                tip.toVector(arc.head.position)
 
-    //     updateFunctions.push(() => {
-    //         //so you have stateMotor
-    //         //so it would appear that you need to log that motor, 
-    //         //you get the norm of that
-
-    //         for (let i = 0; i < 16; ++i)
-    //             material.uniforms.mot.value[i] = kb.mot[i]
-    //         kb.mot.reverse(material.uniforms.motReverse.value)
-    //     })
-
-    //     return kb
-    // }
-    // return
-
-    //niceish animations
-    // updateFunctions.push(() => {
-
-    //     let timeSpentOnEach = 9.
-    //     let numPossibilities = 2
-
-    //     let currentPossibility = Math.floor( (clock.elapsedTime / timeSpentOnEach) % numPossibilities )
-    //     let timeThroughCurrent = clock.elapsedTime % timeSpentOnEach
-
-    //     if (currentPossibility === 1 ) {
-    //         let phase = Math.sin(timeThroughCurrent * .7 )
-
-    //         let slightlyOffOrigin = e4.clone().multiplyScalar(phase).add(e3)
-    //         slightlyOffOrigin.normalize()
-    //         let translator = new Mv()
-    //         slightlyOffOrigin.mul(e3, translator)
-
-    //         stateMotor.copy(oneMv)
-    //         stateMotor.mul(translator, mv0)
-    //         stateMotor.copy(mv0)
-    //         stateMotor.normalize()
-    //     }
-    //     if (currentPossibility === 0) {
-    //         let ourTime = timeThroughCurrent * .7
-    //         let phase = Math.sin(ourTime)
-
-    //         let lineSlightlyOffOrigin = e41.clone().multiplyScalar(0.8).add(e31)
-    //         lineSlightlyOffOrigin.normalize()
-    //         lineSlightlyOffOrigin.multiplyScalar(phase)
-    //         lineSlightlyOffOrigin[0] = Math.cos(ourTime)
-
-    //         stateMotor.copy(oneMv)
-    //         stateMotor.mul(lineSlightlyOffOrigin, mv0)
-    //         stateMotor.copy(mv0)
-    //         stateMotor.normalize()
-    //     }
-    // })
+                //theeeeeen, put the cone at almostTip, pointing towards tip
+            })
+        })
+    }
 
     var initialPlaneMvs = []
     insertPlanes(initialPlaneMvs)
@@ -137,7 +180,7 @@ async function initKleinBalls() {
     for (let i = 0; i < numPlanes; ++i)
         diskMats[i] = niceMat(i / (numPlanes - 1.))
 
-    function initDisks(kb) {
+    function makeDisks(kb) {
         let disks = []
 
         kb.setVisibility = (newVisibility) => {
@@ -163,7 +206,7 @@ async function initKleinBalls() {
         }
 
         updateFunctions.push(() => {
-            disks.forEach((d) => {
+            disks.forEach((d,i) => {
                 // if (disk.initialMv[1] !== 0.)
                 //     debugger
 
@@ -189,16 +232,15 @@ async function initKleinBalls() {
 
                     planeAtOrigin.normalize()
                     //alternatively, e4 part = 0.
-
+                    
                     let zToMvRotor = mv2
                     planeAtOrigin.mul(e3, zToMvRotor)
-                    zToMvRotor.sqrtBiReflection(zToMvRotor)
+                    zToMvRotor.sqrt(zToMvRotor)
                     zToMvRotor.toQuaternion(d.quaternion)
 
                     let planePosition = mv3
                     lineThroughOriginOrthogonalToPlane.mul(mvToVisualize, planePosition)
                     planePosition.normalize()
-                    // putSphereHereAtFrameCountZero(planePosition)
                     planePosition.toVector(d.position)
 
                     let diskRadius = Math.sqrt(1. - d.position.lengthSq())
@@ -228,100 +270,59 @@ async function initKleinBalls() {
     let ptsMat = new THREE.PointsMaterial({
         size: .03
     })
+    function makePts(kb) {
+        let ptsGeo = new THREE.Geometry()
 
-    KleinBall = () =>
+        let numPts = 1024
+        let initialPts = Array(numPts)
+        for (let i = 0; i < numPts; ++i) {
+            ptsGeo.vertices.push(new THREE.Vector3())
+
+            let pt = new Mv().point(0., 0., 0., 1.)
+
+            let currentLength = Infinity
+            while (currentLength >= 1.) {
+                pt[14] = (Math.random() - .5) * 2.
+                pt[13] = (Math.random() - .5) * 2.
+                pt[12] = (Math.random() - .5) * 2.
+
+                currentLength = sq(pt[14]) + sq(pt[13]) + sq(pt[12])
+            }
+
+            initialPts[i] = pt
+        }
+
+        updateFunctions.push(() => {
+            initialPts.forEach((pt, i) => {
+                kb.stateMotor.sandwich(pt, mv0)
+                mv0.toVector(ptsGeo.vertices[i])
+            })
+            ptsGeo.verticesNeedUpdate = true
+        })
+
+        let flowPts = new THREE.Points(ptsGeo, ptsMat)
+        kb.add(flowPts)
+    }
+
+    KleinBall = async function()
     {
         let kb = new THREE.Object3D()
         thingsToRotate.push(kb)
         let stateMotor = new Mv()
         stateMotor[0] = 1.
+        e12.exp(stateMotor)
         kb.stateMotor = stateMotor
 
-        //-----------PTS
-        if(0)
-        {
-            let ptsGeo = new THREE.Geometry()
+        kb.stateMotorLogged = new Mv()
+        updateFunctions.push(() => {
+            stateMotor.logarithm(kb.stateMotorLogged)
+            kb.stateMotorLogged.normalize()
+        })
 
-            let numPts = 1024
-            let initialPts = Array(numPts)
-            for (let i = 0; i < numPts; ++i) {
-                ptsGeo.vertices.push(new THREE.Vector3())
-
-                let pt = new Mv().point(0., 0., 0., 1.)
-
-                let currentLength = Infinity
-                while (currentLength >= 1.) {
-                    pt[14] = (Math.random() - .5) * 2.
-                    pt[13] = (Math.random() - .5) * 2.
-                    pt[12] = (Math.random() - .5) * 2.
-
-                    currentLength = sq(pt[14]) + sq(pt[13]) + sq(pt[12])
-                }
-
-                initialPts[i] = pt
-            }
-
-            updateFunctions.push(() => {
-                //want motor M such that after one second, pt has done M
-
-                frameDelta
-
-
-                initialPts.forEach((pt, i) => {
-                    stateMotor.sandwich(pt, mv0)
-                    mv0.toVector(ptsGeo.vertices[i])
-                })
-                ptsGeo.verticesNeedUpdate = true
-            })
-
-            let flowPts = new THREE.Points(ptsGeo, ptsMat)
-            scene.add(flowPts)
-        }
-
-        //----------DISKS
-        // if(0)
-        initDisks(kb)
-
-        // {
-        //     dumbell = {}
-        //     let dumbellMat = new THREE.MeshPhongMaterial({ color: 0x000000 })
-        //     let dumbellRadius = .05
-        //     let end1 = new THREE.Mesh(new THREE.SphereGeometry(dumbellRadius * 2.), dumbellMat)
-        //     scene.add(end1)
-        //     dumbell.end1 = end1
-        //     let end2 = new THREE.Mesh(new THREE.SphereGeometry(dumbellRadius * 2.), dumbellMat)
-        //     scene.add(end2)
-        //     dumbell.end2 = end2
-        //     let handle = new THREE.Mesh(new THREE.CylinderGeometry(dumbellRadius, dumbellRadius, 1.), dumbellMat)
-        //     scene.add(handle)
-        //     dumbell.handle = handle
-        //     dumbell.setVisibility = (newVisibility)=>{
-        //         handle.visible = newVisibility
-            //     end1.visible = newVisibility
-            //     end2.visible = newVisibility
-            // }
-            // let stateMotorAxis = new Mv()
-            // updateFunctions.push(() => {
-            //     stateMotor.selectGrade(2, stateMotorAxis)
-            //     let hasBivectorPart = !(stateMotorAxis.equals(zeroMv))
-            //     dumbell.setVisibility(hasBivectorPart)
-            //     if (hasBivectorPart) {
-            //         motorToThreejs(stateMotorAxis, dumbell.handle)
-
-            //         // function motorToThreejs(line,targetObject3d) {
-            //         //     let thisLineAtOrigin = projectLineOnPoint(line, e123, mv1)
-            //         //     // thisLineAtOrigin.normalize()
-            //         //     let rotorToThisLineAtOrigin = thisLineAtOrigin.mul(e31, mv2).sqrtBiReflection(mv3)
-            //         //     rotorToThisLineAtOrigin.toQuaternion(targetObject3d.quaternion)
-            //         //     log(targetObject3d.quaternion)
-
-            //         //     let pos = projectPointOnLine(e123, line, mv4)
-            //         //     pos.toVector(targetObject3d.position)
-            //         // }
-            //     }
-
-            // })
-        // }
+        // makeDumbell(kb)
+        // await makeTrails(kb)
+        makeDisks(kb)
+        // makePts(kb)
         
         return kb
     }

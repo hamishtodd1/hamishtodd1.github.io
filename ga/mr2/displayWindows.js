@@ -391,7 +391,7 @@ function initDisplayWindows() {
         })
 
         function FreeVariableDwButton(name,assignValueToName) {
-            DwButton("free " + name, () => {
+            DwButton(name, () => {
                 let lowestUnusedName = getLowestUnusedName()
                 addStringAtCarat(lowestUnusedName)
 
@@ -541,33 +541,33 @@ function initDisplayWindows() {
         // sqrt(x) = exp(.5 log(x))
 
         //note that grade might be confused if there's some very low numbers
-        ModeButton("scalar",(mv)=>{
-            return getGrade(mv) === 0
-        })
-        ModeButton("plane", (mv) => {
-            return getGrade(mv) === 1
-        })
-        ModeButton("line", (mv) => {
-            return getGrade(mv) === 2
-        })
-        ModeButton("point", (mv) => {
-            return getGrade(mv) === 3 && pointW(mv) !== 0.
-        })
-        ModeButton("direction", (mv) => {
-            return getGrade(mv) === 3 && pointW(mv) === 0.
-        })
+        // ModeButton("scalar",(mv)=>{
+        //     return getGrade(mv) === 0
+        // })
+        // ModeButton("plane", (mv) => {
+        //     return getGrade(mv) === 1
+        // })
+        // ModeButton("line", (mv) => {
+        //     return getGrade(mv) === 2
+        // })
+        // ModeButton("point", (mv) => {
+        //     return getGrade(mv) === 3 && pointW(mv) !== 0.
+        // })
+        // ModeButton("direction", (mv) => {
+        //     return getGrade(mv) === 3 && pointW(mv) === 0.
+        // })
 
-        ModeButton("motor", (mv) => {
-            for(let i = 1; i <= 4; ++i)
-                if(mv[i] !== 0)
-                    return false
-            for(let i = 11; i <= 14; ++i)
-                if(mv[i] !== 0)
-                    return false
-            for (let i = 0; i <= 16; ++i)
-                if (mv[i] !== 0)
-                    return true
-            return false
-        })
+        // ModeButton("motor", (mv) => {
+        //     for(let i = 1; i <= 4; ++i)
+        //         if(mv[i] !== 0)
+        //             return false
+        //     for(let i = 11; i <= 14; ++i)
+        //         if(mv[i] !== 0)
+        //             return false
+        //     for (let i = 0; i <= 16; ++i)
+        //         if (mv[i] !== 0)
+        //             return true
+        //     return false
+        // })
     }
 }
