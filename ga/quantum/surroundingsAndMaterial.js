@@ -1,13 +1,12 @@
 async function initSurroundingsAndMaterial() {
 
-	let rotating = false
-	bindButton("1", () => { rotating = true }, "rotate everything", () => {
-		rotating = false
-	},false)
+	// let rotating = false
+	// bindButton("1", () => { rotating = true }, "rotate everything", () => {
+	// 	rotating = false
+	// },false)
 
 	updateFunctions.push(() => {
-		rotating = mouse.clicking
-		if(rotating) {
+		if (mouse.rightClicking) {
 			mouse.get2dDiff(v0)
 			thingsToRotate.forEach((thing) => {
 				thing.rotation.y -= v0.x
