@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div>
+        <textarea id="editing" spellcheck="false"
+            oninput="updateSyntaxHighlighting(this.value); updateSyntaxHighlightingScroll(this);"
+            onscroll="updateSyntaxHighlightingScroll(this);"
+            onkeydown="checkIfKeyIsTab(this, event);"></textarea>
+    <pre id="highlighting" aria-hidden="true">
+        <code class="language-glsl" id="highlighting-content">
+        </code>
+    </pre>
+    </div>
+    
+    <!-- <p>
+        Syntax Highlighting by <a href="https://prismjs.com/">Prism.js</a><br />
+        Font from <a href="https://fonts.google.com/">Google Fonts</a><br />
+        Some code from <a href="https://codepen.io/WebCoder49/">WebCoder49</a><br />
+    </p> -->
+
+    <canvas id="topRightWindow">
+    </canvas>
+    
+    <script src="prism.js"></script>
+    <script src="syntaxHighlighting.js"></script>
+
+    <script src="init.js"></script>
+
+    <script>
+        init()
+    </script>
+
+</body>
+
+</html>
