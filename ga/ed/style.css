@@ -13,6 +13,19 @@
   left: 0;
 }
 
+#renderingCanvas{
+  
+  width: 100vw;
+  height: 100vh;
+  
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  display: block;
+  z-index: 1;
+}
+
 #topRightWindow {
   margin: 10px;
   padding: 10px;
@@ -24,9 +37,19 @@
   position: absolute;
   top: 0;
   right: 0px;
+}
 
+#inlineWindow {
+  margin: 0px;
+  padding: 0px;
+  border: 0px;
 
-  border:1px solid #000000;
+  width: 100px;
+  height: 100px;
+
+  position: absolute;
+  top: calc(50% - 50px);
+  left: calc(50% - 50px);
 }
 
 #editing, #highlighting, #highlighting * {

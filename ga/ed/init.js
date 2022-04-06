@@ -6,14 +6,19 @@ Accepts glsl and threejs. glsl first
 write "vec4" and specify it to be a point and it suggests a bunch of things in the window
     which you can click and it sticks "a wedge b" or whatever
 
-The reason not to do this as a vscode extension is...
+
+Against vscode:
     they'll have their own weird internal representation of the code
     it might run slowly
     not all computer graphics people use vscode
-    you want to make something like shadertoy where people can just get in and go
+    you want to make something like shadertoy where people can just get in and go    
+    May be hard to draw windows over the code
+In favor of vscode:
+    built in parser
+    maybe more people use it
+    has the home comforts you like
 
-Parsing
-    It may be better to use vscode parser. Here's what you need to do if not:
+Parser
     figure out what variables are what
     potentially take excerpts of the code and run it, eg they've written a function
         you want the output of that though, so not in a shader
@@ -63,19 +68,114 @@ function init() {
     textarea.value = initial
     updateSyntaxHighlighting(textarea.value)
 
-    compileAndRun(textarea.value)
-
-    document.addEventListener( 'keydown', (event) =>{
-        if (event.key === "Enter" && event.altKey === true) {
-            compileAndRun(textarea.value)
-        }
-    })  
+//     // compileAndRun(textarea.value)
+//     // document.addEventListener( 'keydown', (event) =>{
+//     //     if (event.key === "Enter" && event.altKey === true) {
+//     //         compileAndRun(textarea.value)
+//     //     }
+//     // })
     
-    document.addEventListener('dblclick',(event)=>{
-        console.log(document.getSelection().toString())
-    })
-}
+//     document.addEventListener('dblclick',(event)=>{
+//         console.log(document.getSelection().toString())
+//     })
 
-function compileAndRun(str) {
-    str.split()
+
+  
+
+    // initSound()
+    // initMouse()
+
+    // function render() {
+    //     let clockDelta = clock.getDelta()
+    //     frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
+
+    //     // mouse.updateFromAsyncAndCheckClicks()
+
+    //     // for (var i = 0; i < updateFunctions.length; i++)
+    //     //     updateFunctions[i]()
+
+    //     ++frameCount
+    // }
+
+
+
+    function makeScene(elem) {
+        const scene = new THREE.Scene();
+
+        const fov = 45;
+        const aspect = 1.; //POTENTIALLY TO BE CHANGED
+        const near = 0.1;
+        const far = 5;
+        const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+        camera.position.set(0, 1, 2);
+        camera.lookAt(0, 0, 0);
+
+        return { scene, camera, elem };
+    }
+
+    function setupScene1() {
+        const sceneInfo = makeScene(document.querySelector('#topRightWindow'));
+        const geometry = new THREE.SphereBufferGeometry(.8, 4, 2);
+        const material = new THREE.MeshBasicMaterial({ color: 0xFF0000 });
+        const mesh = new THREE.Mesh(geometry, material);
+        sceneInfo.scene.add(mesh);
+        sceneInfo.mesh = mesh;
+        return sceneInfo;
+    }
+
+    function setupScene2() {
+        const sceneInfo = makeScene(document.querySelector('#inlineWindow'));
+        const geometry = new THREE.BoxBufferGeometry(1., 1., 1.);
+        const material = new THREE.MeshBasicMaterial({ color: 0x0000FF });
+        const mesh = new THREE.Mesh(geometry, material);
+        sceneInfo.scene.add(mesh);
+        sceneInfo.mesh = mesh;
+        return sceneInfo;
+    }
+
+    const sceneInfo1 = setupScene1();
+    const sceneInfo2 = setupScene2();
+
+    function renderSceneInfo(sceneInfo) {
+        const { scene, camera, elem } = sceneInfo;
+
+        // get the viewport relative position of this element
+        const { left, right, top, bottom, width, height } =
+            elem.getBoundingClientRect();
+
+        const isOffscreen =
+            bottom < 0 ||
+            top > renderer.domElement.clientHeight ||
+            right < 0 ||
+            left > renderer.domElement.clientWidth;
+
+        if (isOffscreen)
+            return
+
+        const positiveYUpBottom = renderer.domElement.clientHeight - bottom;
+        renderer.setScissor(left, positiveYUpBottom, width, height);
+        renderer.setViewport(left, positiveYUpBottom, width, height);
+
+        renderer.render(scene, camera);
+    }
+
+    function render() {
+
+        const canvas = renderer.domElement;
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        if (canvas.width !== width || canvas.height !== height)
+            renderer.setSize(width, height, false);
+
+        renderer.setScissorTest(false);
+        renderer.clear(true, true);
+        renderer.setScissorTest(true);
+
+        renderSceneInfo(sceneInfo1);
+        renderSceneInfo(sceneInfo2);
+
+        requestAnimationFrame(render);
+    }
+
+    requestAnimationFrame(render);
 }
