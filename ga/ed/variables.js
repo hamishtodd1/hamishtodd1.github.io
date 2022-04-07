@@ -1,0 +1,1 @@
+const textarea = document.getElementById("editing")

@@ -23,8 +23,8 @@ const unchangingUnitSquareGeometry = new THREE.PlaneGeometry(1., 1.)
 const debugging = 0
 let logged = 0
 
-
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, canvas: document.getElementById('renderingCanvas') })
+const canvas = document.getElementById('renderingCanvas')
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, canvas })
 renderer.shadowMap.enabled = true
 let mouse = null
 

@@ -1,11 +1,41 @@
 /*
+TODO
+    Short term
+        compiling and going into one window which is always the final result
+        a window for holding a non-ideal point
+            it compiles the entire shader up until the line you want it from
+            then, it takes that particular vec3 as the 
+    Medium term
+        (2,1) halfplane window
+            write some numbers on a line
+            They appear in a  if my carat is on that line
+            I can click or drag or whatever, and find the number I know I want
+            Maybe move my carat through the line (4*8+5*2)/2 and see it animate
+    Long term
+        "Suggestions" eg snapping
+
+        Above is for fragment shaders(!)
+            vertex shaders
+            javascript eg threejs
+            Bootstrapping new visualizations
+        Export(/import?):
+            threejs
+            unity
+            export threejs function creating the thing it is with the appropriate uniforms
+
+Probably every variable sent into the shader has an "override"
+
+You have a scrollable series of visualizations
+    Can scroll up and down, make a new one, delete them, drag them down, maybe merge them
+    Which state does it represent, given state is mutable
+        So for a given window, you have given variable values? Naah
+
 Initially: you click a thing, it puts that thing in a window
 Heh, you have to actually run the code!
 Hover a variable, shows that variable in the current window
 Accepts glsl and threejs. glsl first
 write "vec4" and specify it to be a point and it suggests a bunch of things in the window
     which you can click and it sticks "a wedge b" or whatever
-
 
 Against vscode:
     they'll have their own weird internal representation of the code
@@ -24,6 +54,9 @@ Parser
         you want the output of that though, so not in a shader
 
 Fuck labelling things in the window. You want lables? Hover
+
+Maybe you have some point that goes weird places in 3D when you change some 1d or 2d variable
+    Hold a button to make it so that the thing gets a trail
     
 
 The right rep for colors is probably the RGB cube with three cutting planes
@@ -37,10 +70,31 @@ hopefully you can get away with only parsing from a newline to a semicolon?
 Oh who are you kidding, you have to compile the whole program
 It's not the end of the world to not faithfully compile the whole thing
 
+Don't write your own compiler. If you have to do that, something has gone wrong
+how do you do your snapping/suggestions when it's all on the gpu?
+    Say you have two lines in 2D. One's one shader, one's another
+    Could... render coords, whatever they may be, to a rendertarget
+
 If you have a matrix that is tagged as "known to have det=0"
     That's different from usual. That's 3 points at infinity maybe, instead of
 
 Projective geometry lets you give points in space as rationals easily
+
+If we were making a vertex shader (which we're probably not), dropdown defining what this shader goes into:
+    line, with 
+    So there's a single variable that you could call "input", which is the vertex buffer
+    Make your own bloody normals
+
+Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
+
+
+
+
+
+
+
+Slightly philosophical:
+    throwing away the magnitudes might be bad because it's not reversible. Nature seems to want reversibility
 
 Old notes
     So if you were to make a threejs livecoding thing...
@@ -57,30 +111,24 @@ Old notes
     But you don't LIKE text!!! This is a bit compromised, a last resort
 */
 
-function init() {
-    let textarea = document.getElementById("editing")
-
-    let initial = 
+async function init() {
+    let initialText = 
     `void main() 
 {
-    gl_FragColor = vec4(1.,0.,0.,1.);
+    gl_FragColor = vec4(0.,1.,0.,1.);
 }`
-    textarea.value = initial
+    textarea.value = initialText
     updateSyntaxHighlighting(textarea.value)
-
-//     // compileAndRun(textarea.value)
-//     // document.addEventListener( 'keydown', (event) =>{
-//     //     if (event.key === "Enter" && event.altKey === true) {
-//     //         compileAndRun(textarea.value)
-//     //     }
-//     // })
     
-//     document.addEventListener('dblclick',(event)=>{
-//         console.log(document.getSelection().toString())
-//     })
+    textarea.addEventListener('dblclick',(event)=>{
+        console.log(document.getSelection().toString())
+    })
 
+    const inlineWindow = document.getElementById("inlineWindow")
+    inlineWindow.addEventListener("mousedown",(event)=>{
+        log("yay")
+    })
 
-  
 
     // initSound()
     // initMouse()
@@ -97,85 +145,15 @@ function init() {
     //     ++frameCount
     // }
 
+    // canvas.addEventListener()
 
-
-    function makeScene(elem) {
-        const scene = new THREE.Scene();
-
-        const fov = 45;
-        const aspect = 1.; //POTENTIALLY TO BE CHANGED
-        const near = 0.1;
-        const far = 5;
-        const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-        camera.position.set(0, 1, 2);
-        camera.lookAt(0, 0, 0);
-
-        return { scene, camera, elem };
-    }
-
-    function setupScene1() {
-        const sceneInfo = makeScene(document.querySelector('#topRightWindow'));
-        const geometry = new THREE.SphereBufferGeometry(.8, 4, 2);
-        const material = new THREE.MeshBasicMaterial({ color: 0xFF0000 });
-        const mesh = new THREE.Mesh(geometry, material);
-        sceneInfo.scene.add(mesh);
-        sceneInfo.mesh = mesh;
-        return sceneInfo;
-    }
-
-    function setupScene2() {
-        const sceneInfo = makeScene(document.querySelector('#inlineWindow'));
-        const geometry = new THREE.BoxBufferGeometry(1., 1., 1.);
-        const material = new THREE.MeshBasicMaterial({ color: 0x0000FF });
-        const mesh = new THREE.Mesh(geometry, material);
-        sceneInfo.scene.add(mesh);
-        sceneInfo.mesh = mesh;
-        return sceneInfo;
-    }
-
-    const sceneInfo1 = setupScene1();
-    const sceneInfo2 = setupScene2();
-
-    function renderSceneInfo(sceneInfo) {
-        const { scene, camera, elem } = sceneInfo;
-
-        // get the viewport relative position of this element
-        const { left, right, top, bottom, width, height } =
-            elem.getBoundingClientRect();
-
-        const isOffscreen =
-            bottom < 0 ||
-            top > renderer.domElement.clientHeight ||
-            right < 0 ||
-            left > renderer.domElement.clientWidth;
-
-        if (isOffscreen)
-            return
-
-        const positiveYUpBottom = renderer.domElement.clientHeight - bottom;
-        renderer.setScissor(left, positiveYUpBottom, width, height);
-        renderer.setViewport(left, positiveYUpBottom, width, height);
-
-        renderer.render(scene, camera);
-    }
-
-    function render() {
-
-        const canvas = renderer.domElement;
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
-        if (canvas.width !== width || canvas.height !== height)
-            renderer.setSize(width, height, false);
-
-        renderer.setScissorTest(false);
-        renderer.clear(true, true);
-        renderer.setScissorTest(true);
-
-        renderSceneInfo(sceneInfo1);
-        renderSceneInfo(sceneInfo2);
-
-        requestAnimationFrame(render);
-    }
-
-    requestAnimationFrame(render);
+    let render = await initRenderers()
+    compile()
+    document.addEventListener('keydown', (event) => {
+        if (event.key === "Enter" && event.altKey === true) {
+            compile()
+        }
+    })
+    
+    requestAnimationFrame(render)
 }

@@ -1,3 +1,52 @@
+#renderingCanvas {
+  width: 100vw;
+  height: 100vh;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  
+  z-index: 1;
+
+  display: block;
+
+  pointer-events: none;
+}
+
+#topRightWindow {
+  margin: 10px;
+  padding: 10px;
+
+  position: absolute;
+  top: 0;
+  right: 0px;
+
+  z-index: 2;
+  
+  border: 0px;/*1px solid black; */
+
+  width: 270px;
+  height: 270px;
+}
+
+#inlineWindow {
+  margin: 0px;
+  padding: 0px;
+
+  position: absolute;
+  top: calc(30% - 50px);
+  left: calc(50% - 50px);
+
+  z-index: 3;
+  
+  border: 0px;/*1px solid black; */
+
+  width: 100px;
+  height: 100px;
+}
+
+/* TEXT WINDOW */
+
 #editing, #highlighting {
   /* Both elements need the same text and space styling so they are directly on top of each other */
   margin: 10px;
@@ -13,45 +62,6 @@
   left: 0;
 }
 
-#renderingCanvas{
-  
-  width: 100vw;
-  height: 100vh;
-  
-  position: fixed;
-  top: 0;
-  left: 0;
-
-  display: block;
-  z-index: 1;
-}
-
-#topRightWindow {
-  margin: 10px;
-  padding: 10px;
-  border: 0;
-
-  width: 270px;
-  height: 270px;
-
-  position: absolute;
-  top: 0;
-  right: 0px;
-}
-
-#inlineWindow {
-  margin: 0px;
-  padding: 0px;
-  border: 0px;
-
-  width: 100px;
-  height: 100px;
-
-  position: absolute;
-  top: calc(50% - 50px);
-  left: calc(50% - 50px);
-}
-
 #editing, #highlighting, #highlighting * {
   /* Also add text styles to highlighing tokens */
   font-size: 10pt;
@@ -59,8 +69,6 @@
   line-height: 14pt;
   tab-size: 2;
 }
-
-
 
 /* Move the textarea in front of the result */
 
