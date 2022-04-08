@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<link rel="stylesheet" href="prism-monokai.css">
 <link rel="stylesheet" href="style.css">
 </head>
 
@@ -16,6 +17,11 @@
         </code>
     </pre>
     </div>
+
+    <!-- Do you want lines connecting the things? Maybe unneeded. Hey, wait until you NEEEEED one!
+        <svg height="210" width="500">
+        <line x1="0" y1="0" x2="200" y2="200" style="stroke:rgb(255,0,0);stroke-width:2" />
+    </svg> -->
     
     <!-- <p>
         Syntax Highlighting by <a href="https://prismjs.com/">Prism.js</a><br />
@@ -24,8 +30,10 @@
     </p> -->
 
     <canvas id="renderingCanvas"></canvas>
-    <span id="inlineWindow"></span>
-    <span id="topRightWindow"></span>
+
+    <span id="inlineDwElem"></span>
+    <span id="topRightDwElem"></span>
+    <span id="bottomRightDwElem"></span>
     
     <script src="prism.js"></script>
     <script src="syntaxHighlighting.js"></script>
@@ -37,7 +45,7 @@
     <script src="../common/variables.js"></script>
     <script src="variables.js"></script>
 
-    <script src="renderers.js"></script>
+    <script src="dws.js"></script>
     <script src="init.js"></script>
 
     <script>

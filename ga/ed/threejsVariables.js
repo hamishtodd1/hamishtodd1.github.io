@@ -5,8 +5,6 @@ const xUnit = new THREE.Vector3(1, 0, 0)
 const zeroVector = new THREE.Vector3(0., 0., 0.)
 const zeroMatrix = new THREE.Matrix4().set(0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.)
 
-const clock = new THREE.Clock(true)
-
 const v1 = new THREE.Vector3()
 const v2 = new THREE.Vector3()
 const v3 = new THREE.Vector3()

@@ -30,6 +30,6 @@ function checkIfKeyIsTab(element, event) {
     // move cursor
     element.selectionStart = cursor_pos;
     element.selectionEnd = cursor_pos;
-    update(element.value); // Update text to include indent
+    updateSyntaxHighlighting(element.value); // Update text to include indent
   }
 }

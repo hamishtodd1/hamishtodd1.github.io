@@ -1,7 +1,6 @@
 /*
 TODO
     Short term
-        compiling and going into one window which is always the final result
         a window for holding a non-ideal point
             it compiles the entire shader up until the line you want it from
             then, it takes that particular vec3 as the 
@@ -22,6 +21,26 @@ TODO
             threejs
             unity
             export threejs function creating the thing it is with the appropriate uniforms
+
+You have a single shader calculate the whole lot of them
+
+Have an "export html page" button, and make everyone
+
+Since it's all in one shader anyway, could use sdfs. Nice lighting, including on plane
+
+So, you've made a variable, a free point. You want to move it
+
+Maybe no dw inline. Maybe just menu choosing what kind of object it is, plus a color picker
+
+The state of a given variable, if changing, is only changed on lines where that variable is mentioned (coz no globals!)
+So, a GIVEN picture of a variable can be ascribed to a certain line on which it is mentioned
+    Addendum! a given line AND A GIVEN VALUE FOR THE INDEX OF A FOR LOOP!
+        This can potentially work because it's unrolled!
+        So, for every for loop, if you have an index, that index has a "visualize early" index
+        By default it's set to 0. Its maximum is the end of the loop
+
+WHILE you're moving a free variable, you're overriding. It's just a picture. Fuck the calculation of anything in the shader
+Except for a couple of things - the things in the window. Their values get calculated. In the vertex shader for your thing, too!
 
 Probably every variable sent into the shader has an "override"
 
@@ -72,8 +91,9 @@ It's not the end of the world to not faithfully compile the whole thing
 
 Don't write your own compiler. If you have to do that, something has gone wrong
 how do you do your snapping/suggestions when it's all on the gpu?
-    Say you have two lines in 2D. One's one shader, one's another
-    Could... render coords, whatever they may be, to a rendertarget
+    A single shader calculates all the shapes
+    It then makes a list, yes, of all the suggestions
+    And writes the correct one to a single pixel!   
 
 If you have a matrix that is tagged as "known to have det=0"
     That's different from usual. That's 3 points at infinity maybe, instead of
@@ -113,9 +133,11 @@ Old notes
 
 async function init() {
     let initialText = 
-    `void main() 
+`void mainImage( out vec4 fragColor )
 {
-    gl_FragColor = vec4(0.,1.,0.,1.);
+    vec4 myPoint = vec4(0.1,0.,0.,1.);
+    
+    fragColor = vec4( 1., 0., 0., 1.);
 }`
     textarea.value = initialText
     updateSyntaxHighlighting(textarea.value)
@@ -124,11 +146,11 @@ async function init() {
         console.log(document.getSelection().toString())
     })
 
-    const inlineWindow = document.getElementById("inlineWindow")
-    inlineWindow.addEventListener("mousedown",(event)=>{
+    inlineDwElem.addEventListener("mousedown",(event)=>{
         log("yay")
     })
 
+    
 
     // initSound()
     // initMouse()
@@ -147,7 +169,7 @@ async function init() {
 
     // canvas.addEventListener()
 
-    let render = await initRenderers()
+    let render = await initDws()
     compile()
     document.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === true) {
