@@ -1,17 +1,7 @@
 async function initDws() {
 
-    let mainImageToFragColorSuffix = `
-void main() {
-    mainImage(gl_FragColor);
-}`
-    let mainImageToSpherePositionSuffix = `
-void main() 
-{
-    vec4 myVec4;
-    mainImage(myVec4);
-
-    gl_Position = projectionMatrix * modelViewMatrix * (vec4(position, 1.) + myVec4);
-}`
+    const standardDwElem = document.getElementById('topRightDwElem')
+    const generalDwAspect = eval(getComputedStyle(standardDwElem).aspectRatio)
 
     // let skyBgGeo = new THREE.SphereGeometry(50.)
     // let skyBgMat = new THREE.MeshBasicMaterial({color:0x88CEEC, side:THREE.BackSide })
@@ -25,45 +15,14 @@ void main()
 
         var perspectiveCamera = new THREE.PerspectiveCamera(fov, aspect, near, far)
         perspectiveCamera.position.set(.6, .7, 2.2)
-        perspectiveCamera.position.multiplyScalar(1.4)
+        perspectiveCamera.position.multiplyScalar(1.5)
         perspectiveCamera.lookAt(0., 0., 0.)
 
         var orthographicCamera = new THREE.OrthographicCamera(-aspect,aspect,1.,-1.,near,far)
         orthographicCamera.position.z = 10.
     }
 
-    let pointGeo = new THREE.SphereBufferGeometry(.04, 32, 16)
-    class Viz {
-        name;
-        lineIndex;
-
-        stillExists = false;
-
-        mat = new THREE.ShaderMaterial();
-        meshes = [];
-        
-        addMeshToDw(dw) {
-            let mesh = new THREE.Mesh(pointGeo, this.mat)
-            mesh.castShadow = true
-            mesh.visible = false
-            dw.scene.add(mesh)
-            this.meshes.push(mesh)
-        };
-
-        constructor() {
-            let self = this
-            dws.forEach((dw)=>{
-                self.addMeshToDw(dw)
-            })
-        }
-    }
-    function destroyViz(viz) {
-        viz.meshes.forEach((mesh) => { mesh.visible = false })
-    }
-
-    let vizes = fixedLengthArray(Viz,destroyViz)
-
-    const dws = []
+    const dws = {}
     function Dw(elem,isOrthographic) {
         const scene = new THREE.Scene()
 
@@ -95,24 +54,22 @@ void main()
             }
         }
 
-        dws.push(dw)
-
-        vizes.arr.forEach( (viz) => {
+        vizes.forEach( (viz) => {
             viz.addMeshToDw(dw)
         })
         return dw
     }
     
-    const inlineDw = Dw(inlineDwElem)
+    dws.inline = Dw(document.getElementById("inlineDwElem"))
     {
         var inlineDwVisible = false
 
-        inlineDw.scene.add(new THREE.Mesh(
+        dws.inline.scene.add(new THREE.Mesh(
             new THREE.SphereBufferGeometry(.8, 4, 2),
             new THREE.MeshBasicMaterial({ color: 0xFF0000 })))
     }
-
-    const standardDw = Dw(topRightDwElem)
+    
+    dws.standard = Dw(standardDwElem)
     {
         let pedestalDimension = 4.
         const pedestal = new THREE.Mesh(
@@ -121,151 +78,37 @@ void main()
         )
         pedestal.position.y = -1.
         pedestal.receiveShadow = true
-        standardDw.scene.add(pedestal)
+        dws.standard.scene.add(pedestal)
 
         const spotLight = new THREE.SpotLight()
         spotLight.penumbra = 0.5
         spotLight.castShadow = true
         spotLight.position.set(-.5, .5, .5)
         spotLight.lookAt(0.,0.,0.)
-        standardDw.scene.add(spotLight)
+        dws.standard.scene.add(spotLight)
 
         let grid = GridAndSpike(8, 8, 1./4.)
         // grid.position.y = -1. + .01
         grid.rotation.x = TAU / 4.
-        standardDw.scene.add(grid)
+        dws.standard.scene.add(grid)
 
-        standardDw.scene.add(new THREE.AmbientLight(0x666666))
+        dws.standard.scene.add(new THREE.AmbientLight(0x666666))
 
         let skyBgGeo = new THREE.SphereGeometry(50.)
         let skyBgMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(.18431372, .18431372, .18431372), side:THREE.BackSide })
         const skyBg = new THREE.Mesh(skyBgGeo, skyBgMat)
-        standardDw.scene.add(skyBg)
+        dws.standard.scene.add(skyBg)
 
         // renderer.outputEncoding = THREE.sRGBEncoding
     }
 
-    const finalShaderDw = Dw(document.getElementById('bottomRightDwElem'),true)
-    {
-        let planeMat = new THREE.PlaneGeometry(1., 1.)
+    dws.final = Dw(document.getElementById('bottomRightDwElem'),true)
+    let planeGeo = new THREE.PlaneGeometry(1., 1.)
+    let finalMesh = new THREE.Mesh(planeGeo, new THREE.ShaderMaterial())
+    finalMesh.material.vertexShader = basicVertex
+    dws.final.scene.add(finalMesh)
 
-        let currentMesh = null
-
-        // let declarationRegex = new RegExp("\s*vec4\s*[^\(]")
-        // let nameRegex = new RegExp("[a-zA-Z_$][a-zA-Z_$0-9]*")
-        let findNewNameRegex = /\s*vec4\s*([a-zA-Z_$][a-zA-Z_$0-9]*)/
-        
-        compile = async () => {
-
-            {
-                /*
-                    You're going to scan the thing for every single new variable
-                    Well let's say every vec4
-
-                    Currently we want:
-                        To get the name
-                        Make a subset of the shader which cuts off the shader on the line the user wants
-
-                    Bultins:
-                        Hand motor
-                        Things that shadertoy has:
-                            uniform vec3 iResolution;
-                            uniform float iTime;
-                            uniform float iTimeDelta;
-                            uniform float iFrame;
-                            uniform float iChannelTime[4];
-                            uniform vec4 iMouse;
-                            uniform vec4 iDate;
-                            uniform float iSampleRate;
-                            uniform vec3 iChannelResolution[4];
-                            uniform samplerXX iChanneli;
-                */
-
-                let lines = textarea.value.match(/^.*(\r?\n|$)/mg)
-                // log(lines)
-                let bracesDeep = 0
-
-                vizes.arr.forEach((viz)=>{viz.stillExists = false})
-
-                let strSoFar = ""
-                lines.forEach((l,lineIndex)=>{
-                    strSoFar += l
-
-                    if(l.indexOf("{") !== -1)
-                        ++bracesDeep
-                    if (l.indexOf("}") !== -1)
-                        --bracesDeep
-
-                    let matchResult = l.match(findNewNameRegex)
-                    if (matchResult !== null && matchResult[1] !== "fragColor") {
-                        
-                        //we're going to ASSUME this is a declaration line, no more, no less
-                        //we can do WHATEVER WE LIKE with it when user lets go of mouse
-                        
-                        let name = matchResult[1]
-                        let viz = vizes.arr.find( (viz) =>
-                            viz.name === name &&
-                            viz.lineIndex === lineIndex
-                            //maybe it should be mentionIndex. 
-                            //You want it to be probable that you don't have to recompile
-                            //Various ways to improve this eg take away whitespace
-                        )
-                        if( viz === undefined ) {
-                            viz = vizes.getNew()
-                            viz.name = name
-                            viz.lineIndex = lineIndex
-                        }
-
-                        viz.stillExists = true                        
-                        
-                        {
-                            let vertexShader = strSoFar
-                            vertexShader += `\nfragColor = ` + name + `;\n`
-                            for (let i = 0; i < bracesDeep; ++i)
-                                vertexShader += "}\n"
-                            
-                            vertexShader += mainImageToSpherePositionSuffix
-
-                            if(vertexShader !== viz.mat.vertexShader) {
-                                viz.mat.fragmentShader = basicFragment
-                                viz.mat.vertexShader = vertexShader
-                                viz.mat.needsUpdate = true
-                            }
-                        }
-
-                        viz.meshes.forEach( (mesh)=>{
-                            if (mesh.parent === standardDw.scene)
-                                mesh.visible = true
-                        })
-                    }
-                })
-
-                vizes.arr.forEach((viz)=>{
-                    if( !viz.stillExists )
-                        vizes.free(viz)
-                })
-                //this doesn't guarantee that you're using them as much as possible, just that they'll be cleared up on the next one
-            }
-
-            if(currentMesh !== null) {
-                finalShaderDw.scene.remove(currentMesh)
-
-                let mat = currentMesh.material
-                mat.dispose()
-            }
-
-            let mat = new THREE.ShaderMaterial({
-                uniforms: {
-                },
-            })
-            mat.vertexShader = basicVertex
-            mat.fragmentShader = textarea.value + mainImageToFragColorSuffix
-
-
-            currentMesh = new THREE.Mesh(planeMat, mat)
-            finalShaderDw.scene.add(currentMesh)
-        }
-    }
+    initCompilation(dws,finalMesh)
 
     function render() {
 
@@ -278,11 +121,11 @@ void main()
         renderer.clear(true, true)
         renderer.setScissorTest(true)
 
-        finalShaderDw.render()
-        standardDw.render()
+        dws.final.render()
+        dws.standard.render()
         
         if(inlineDwVisible)
-            inlineDw.render()
+            dws.inline.render()
 
         requestAnimationFrame(render)
     }
