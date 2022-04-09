@@ -71,9 +71,9 @@
 
 #editing, #highlighting, #highlighting * {
   /* Also add text styles to highlighing tokens */
-  font-size: 10pt;
+  font-size: 9pt;
   font-family: monospace;
-  line-height: 14pt;
+  line-height: 12pt;
   tab-size: 4;
 }
 

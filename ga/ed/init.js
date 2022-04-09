@@ -135,7 +135,7 @@ async function init() {
     let initialText = 
 `void mainImage( out vec4 fragColor )
 {
-    vec4 myPoint = vec4(0.1,0.,0.,1.);
+    vec4 myPoint = vec4(0.9,0.,0.,1.);
     
     fragColor = vec4( 1., 0., 0., 1.);
 }`
