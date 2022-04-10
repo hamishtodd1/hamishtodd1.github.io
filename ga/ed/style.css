@@ -13,30 +13,29 @@
   pointer-events: none;
 }
 
-#topRightDwElem, #bottomRightDwElem {
+#topRightDw, #bottomRightDw {
   margin: 10px;
-  padding: 10px;
+  padding: 0px;
+  border: 0px;/*5px solid rgb(0, 0, 0);*/
 
   position: absolute;
   right: 0px;
 
   z-index: 2;
-  
-  border: 0px;/*5px solid rgb(0, 0, 0);*/
 
   width: 270px;
   aspect-ratio: 16/9;
   /* height: 270px; */
 }
 
-#topRightDwElem {
+#topRightDw {
   top: 0;
 }
-#bottomRightDwElem {
+#bottomRightDw {
   bottom: 0;
 }
 
-#inlineDwElem {
+#inlineDw {
   margin: 0px;
   padding: 0px;
 
@@ -54,13 +53,22 @@
 
 /* TEXT WINDOW */
 
+#highlightRect {
+  width:500px;
+  height:100px;
+
+  z-index: 40;
+  
+  border:1px solid rgb(37, 175, 37);
+}
+
 #editing, #highlighting {
   /* Both elements need the same text and space styling so they are directly on top of each other */
   margin: 10px;
   padding: 10px;
   border: 0;
 
-  width: calc(100% - 345px);
+  width: calc(100% - 324px);
   height: calc(100% - 40px);
 
   /* In the same place */

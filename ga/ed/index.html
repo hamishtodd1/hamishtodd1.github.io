@@ -18,22 +18,35 @@
     </pre>
     </div>
 
-    <!-- Do you want lines connecting the things? Maybe unneeded. Hey, wait until you NEEEEED one!
-        <svg height="210" width="500">
+    <!-- Do you want lines connecting the things? Maybe unneeded. Hey, wait until you NEEEEED one! -->
+        <!-- <svg height="210" width="500">
         <line x1="0" y1="0" x2="200" y2="200" style="stroke:rgb(255,0,0);stroke-width:2" />
     </svg> -->
+
+    <!-- <svg width="150" height="150" id="highlightRect">
+        <rect x="250" y="120" rx="20" ry="20" width="150" height="150"
+            style="fill:red;stroke:black;stroke-width:5;opacity:0.5" />
+    </svg> -->
+
+    <!-- then next interesting thing to do would be, from the compiler, making the rectangle pop up
+    if mouse is over that area -->
+
+
     
     <!-- <p>
         Syntax Highlighting by <a href="https://prismjs.com/">Prism.js</a><br />
         Font from <a href="https://fonts.google.com/">Google Fonts</a><br />
-        Some code from <a href="https://codepen.io/WebCoder49/">WebCoder49</a><br />
+        Some code from <a href="https://css-tricks.com/creating-an-editable-textarea-that-supports-syntax-highlighted-code/">Here</a><br />
     </p> -->
 
     <canvas id="renderingCanvas"></canvas>
 
-    <span id="inlineDwElem"></span>
-    <span id="topRightDwElem"></span>
-    <span id="bottomRightDwElem"></span>
+    <span id="inlineW"></span>
+
+    <span id="inlineDw"></span>
+
+    <span id="topRightDw"></span>
+    <span id="bottomRightDw"></span>
     
     <script src="prism.js"></script>
     <script src="syntaxHighlighting.js"></script>
@@ -54,5 +67,4 @@
     </script>
 
 </body>
-
 </html>

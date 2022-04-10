@@ -1,7 +1,6 @@
 async function initDws() {
 
-    const standardDwElem = document.getElementById('topRightDwElem')
-    const generalDwAspect = eval(getComputedStyle(standardDwElem).aspectRatio)
+    const allVariablesDwElem = document.getElementById('topRightDw')
 
     // let skyBgGeo = new THREE.SphereGeometry(50.)
     // let skyBgMat = new THREE.MeshBasicMaterial({color:0x88CEEC, side:THREE.BackSide })
@@ -9,7 +8,7 @@ async function initDws() {
 
     {
         const fov = 60.
-        const aspect = generalDwAspect //defined in css I guess
+        const aspect = eval(getComputedStyle(allVariablesDwElem).aspectRatio)
         const near = 1.
         const far = 100.
 
@@ -54,13 +53,13 @@ async function initDws() {
             }
         }
 
-        vizes.forEach( (viz) => {
+        mentions.forEach( (viz) => {
             viz.addMeshToDw(dw)
         })
         return dw
     }
     
-    dws.inline = Dw(document.getElementById("inlineDwElem"))
+    dws.inline = Dw(document.getElementById("inlineDw"))
     {
         var inlineDwVisible = false
 
@@ -69,7 +68,7 @@ async function initDws() {
             new THREE.MeshBasicMaterial({ color: 0xFF0000 })))
     }
     
-    dws.standard = Dw(standardDwElem)
+    dws.allVariables = Dw(allVariablesDwElem)
     {
         let pedestalDimension = 4.
         const pedestal = new THREE.Mesh(
@@ -78,39 +77,47 @@ async function initDws() {
         )
         pedestal.position.y = -1.
         pedestal.receiveShadow = true
-        dws.standard.scene.add(pedestal)
+        dws.allVariables.scene.add(pedestal)
 
         const spotLight = new THREE.SpotLight()
         spotLight.penumbra = 0.5
         spotLight.castShadow = true
         spotLight.position.set(-.5, .5, .5)
         spotLight.lookAt(0.,0.,0.)
-        dws.standard.scene.add(spotLight)
+        dws.allVariables.scene.add(spotLight)
 
         let grid = GridAndSpike(8, 8, 1./4.)
         // grid.position.y = -1. + .01
         grid.rotation.x = TAU / 4.
-        dws.standard.scene.add(grid)
+        dws.allVariables.scene.add(grid)
 
-        dws.standard.scene.add(new THREE.AmbientLight(0x666666))
+        dws.allVariables.scene.add(new THREE.AmbientLight(0x666666))
 
         let skyBgGeo = new THREE.SphereGeometry(50.)
         let skyBgMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(.18431372, .18431372, .18431372), side:THREE.BackSide })
         const skyBg = new THREE.Mesh(skyBgGeo, skyBgMat)
-        dws.standard.scene.add(skyBg)
+        dws.allVariables.scene.add(skyBg)
 
         // renderer.outputEncoding = THREE.sRGBEncoding
     }
 
-    dws.final = Dw(document.getElementById('bottomRightDwElem'),true)
+    dws.final = Dw(document.getElementById('bottomRightDw'),true)
     let planeGeo = new THREE.PlaneGeometry(1., 1.)
     let finalMesh = new THREE.Mesh(planeGeo, new THREE.ShaderMaterial())
     finalMesh.material.vertexShader = basicVertex
     dws.final.scene.add(finalMesh)
 
-    initCompilation(dws,finalMesh)
-
     function render() {
+
+        //     let clockDelta = clock.getDelta()
+        //     frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
+    
+        //     // mouse.updateFromAsyncAndCheckClicks()
+    
+        //     // for (var i = 0; i < updateFunctions.length; i++)
+        //     //     updateFunctions[i]()
+    
+        //     ++frameCount
 
         const width = canvas.clientWidth
         const height = canvas.clientHeight
@@ -121,14 +128,16 @@ async function initDws() {
         renderer.clear(true, true)
         renderer.setScissorTest(true)
 
+        dws.allVariables.render()
         dws.final.render()
-        dws.standard.render()
         
         if(inlineDwVisible)
             dws.inline.render()
 
         requestAnimationFrame(render)
     }
+
+    initCompilation(dws, finalMesh)
 
     return render
 }
