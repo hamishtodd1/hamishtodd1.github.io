@@ -13,16 +13,53 @@ async function initDws() {
         const far = 100.
 
         var perspectiveCamera = new THREE.PerspectiveCamera(fov, aspect, near, far)
-        perspectiveCamera.position.set(.6, .7, 2.2)
-        perspectiveCamera.position.multiplyScalar(1.5)
+        perspectiveCamera.position.set(0.,0.,1.)//.6, .7, 2.2)
+        perspectiveCamera.position.setLength(3.7)
         perspectiveCamera.lookAt(0., 0., 0.)
+
+        let frameHeightAtNearPlane = Math.tan(fov/2. / 360. * TAU) * near * 2.
+
+        FullScreenQuad = (mat) => {
+            mat.vertexShader = basicVertex
+
+            let fullScreenQuadGeo = new THREE.PlaneGeometry(frameHeightAtNearPlane * 2. * aspect, frameHeightAtNearPlane * 2.)
+            fullScreenQuadGeo.translate(0., 0., -near * 2.)
+            let fullScreenQuad = new THREE.Mesh(fullScreenQuadGeo, mat)
+            fullScreenQuad.matrixAutoUpdate = false
+            fullScreenQuad.matrix = perspectiveCamera.matrix
+
+            return fullScreenQuad
+        }
 
         var orthographicCamera = new THREE.OrthographicCamera(-aspect,aspect,1.,-1.,near,far)
         orthographicCamera.position.z = 10.
     }
 
+    {
+        let rtScene = new THREE.Scene()
+
+        let rtFsq = FullScreenQuad(new THREE.ShaderMaterial())
+        rtScene.add(rtFsq)
+
+        let pixelsWide = 1
+        let rt = new THREE.WebGLRenderTarget(pixelsWide, 1)
+        let outputsArray = new Uint8Array(pixelsWide * 4)
+        getShaderOutput = (fragmentShader) => {
+            rtFsq.material.fragmentShader = fragmentShader
+            rtFsq.material.needsUpdate = true
+
+            renderer.setRenderTarget(rt)
+            renderer.render(rtScene, perspectiveCamera)
+            
+            renderer.readRenderTargetPixels(rt, 0, 0, pixelsWide, 1, outputsArray)
+            renderer.setRenderTarget(null)
+
+            return [outputsArray[0]/255.,outputsArray[1]/255.]
+        }
+    }
+
     const dws = {}
-    function Dw(elem,isOrthographic) {
+    function Dw(elem) {
         const scene = new THREE.Scene()
 
         let dw = {
@@ -46,10 +83,7 @@ async function initDws() {
                 renderer.setScissor(left, positiveYUpBottom, width, height)
                 renderer.setViewport(left, positiveYUpBottom, width, height)
 
-                if(isOrthographic)
-                    renderer.render(scene, orthographicCamera)
-                else
-                    renderer.render(scene, perspectiveCamera)
+                renderer.render(scene, perspectiveCamera)
             }
         }
 
@@ -59,16 +93,9 @@ async function initDws() {
         return dw
     }
     
-    dws.inline = Dw(document.getElementById("inlineDw"))
-    {
-        var inlineDwVisible = false
-
-        dws.inline.scene.add(new THREE.Mesh(
-            new THREE.SphereBufferGeometry(.8, 4, 2),
-            new THREE.MeshBasicMaterial({ color: 0xFF0000 })))
-    }
     
     dws.allVariables = Dw(allVariablesDwElem)
+    
     {
         let pedestalDimension = 4.
         const pedestal = new THREE.Mesh(
@@ -101,11 +128,7 @@ async function initDws() {
         // renderer.outputEncoding = THREE.sRGBEncoding
     }
 
-    dws.final = Dw(document.getElementById('bottomRightDw'),true)
-    let planeGeo = new THREE.PlaneGeometry(1., 1.)
-    let finalMesh = new THREE.Mesh(planeGeo, new THREE.ShaderMaterial())
-    finalMesh.material.vertexShader = basicVertex
-    dws.final.scene.add(finalMesh)
+    dws.final = Dw(document.getElementById('bottomRightDw'))
 
     function render() {
 
@@ -119,9 +142,9 @@ async function initDws() {
     
         //     ++frameCount
 
-        const width = canvas.clientWidth
-        const height = canvas.clientHeight
-        if (canvas.width !== width || canvas.height !== height)
+        const width = canvas3d.clientWidth
+        const height = canvas3d.clientHeight
+        if (canvas3d.width !== width || canvas3d.height !== height)
             renderer.setSize(width, height, false)
 
         renderer.setScissorTest(false)
@@ -130,14 +153,11 @@ async function initDws() {
 
         dws.allVariables.render()
         dws.final.render()
-        
-        if(inlineDwVisible)
-            dws.inline.render()
 
         requestAnimationFrame(render)
     }
 
-    initCompilation(dws, finalMesh)
+    initCompilation(dws)
 
     return render
 }

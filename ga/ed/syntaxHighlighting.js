@@ -19,22 +19,23 @@ function updateSyntaxHighlightingScroll(element) {
 }
 
 //you're fucked if you want to ctrl+z though
-function checkIfKeyIsTab(element, event) {
-    let code = element.value;
+function checkIfKeyIsTab(event) {
     if (event.key == "Tab") {
+        log("y")
         /* Tab key pressed */
-
+        
         //for the time being you just can't tab
         //the right thing to do is have spaces (ugh) and just make sure it's the right amount
-
+        
         event.preventDefault(); // stop normal
-        // let before_tab = code.slice(0, element.selectionStart); // text before tab
-        // let after_tab = code.slice(element.selectionEnd, element.value.length); // text after tab
-        // let cursor_pos = element.selectionEnd + 1; // where cursor moves after tab - moving forward by 1 char to after tab
-        // element.value = before_tab + "\t" + after_tab; // add tab char
+        // let code = textarea.value;
+        // let before_tab = code.slice(0, textarea.selectionStart); // text before tab
+        // let after_tab = code.slice(textarea.selectionEnd, textarea.value.length); // text after tab
+        // let cursor_pos = textarea.selectionEnd + 1; // where cursor moves after tab - moving forward by 1 char to after tab
+        // textarea.value = before_tab + "\t" + after_tab; // add tab char
         // // move cursor
-        // element.selectionStart = cursor_pos;
-        // element.selectionEnd = cursor_pos;
-        // updateSyntaxHighlighting(element.value); // Update text to include indent
+        // textarea.selectionStart = cursor_pos;
+        // textarea.selectionEnd = cursor_pos;
+        // updateSyntaxHighlighting(textarea.value); // Update text to include indent
     }
 }

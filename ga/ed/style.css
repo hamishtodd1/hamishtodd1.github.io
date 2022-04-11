@@ -1,16 +1,20 @@
-#renderingCanvas {
+#canvas3d, #ourSvg {
   width: 100vw;
   height: 100vh;
 
   position: fixed;
   top: 0;
   left: 0;
-  
-  z-index: 1;
 
   display: block;
 
   pointer-events: none;
+}
+#canvas3d {
+  z-index: 1;
+}
+#ourSvg {
+  z-index: 2;
 }
 
 #topRightDw, #bottomRightDw {
@@ -33,22 +37,6 @@
 }
 #bottomRightDw {
   bottom: 0;
-}
-
-#inlineDw {
-  margin: 0px;
-  padding: 0px;
-
-  position: absolute;
-  top: calc(30% - 50px);
-  left: calc(50% - 50px);
-
-  z-index: 3;
-  
-  border: 0px;/*1px solid black; */
-
-  width: 100px;
-  aspect-ratio: 1;
 }
 
 /* TEXT WINDOW */
@@ -77,12 +65,18 @@
   left: 0;
 }
 
-#editing, #highlighting, #highlighting * {
+#editing, #highlighting, #measurer, #highlighting * {
   /* Also add text styles to highlighing tokens */
   font-size: 9pt;
   font-family: monospace;
   line-height: 12pt;
   tab-size: 4;
+}
+
+#measurer {
+  position: absolute;
+  top: -100px;
+  padding: 0px;
 }
 
 /* Move the textarea in front of the result */

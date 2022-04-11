@@ -98,22 +98,31 @@ async function init() {
     let initialText = 
 `void mainImage( out vec4 fragColor )
 {
-    vec4 myPoint = vec4(0.9,0.,0.,1.);
-    myPoint.y += 1.;
-    
-    fragColor = vec4( 1., 0., 0., 1.);
+    vec4 myPoint = vec4(1.2,1.9,0.,1.);
+
+    fragColor = vec4( 1., .5, 0., 1.);
 }`
+//half way 1.0653362070468535, 0.8803922415546626, 1.7062327591717965
     textarea.value = initialText
     updateSyntaxHighlighting(textarea.value)
+
+    textarea.oninput = () => {
+        updateSyntaxHighlighting(textarea.value)
+        updateSyntaxHighlightingScroll(textarea)
+    }
+    textarea.onscroll = () => {updateSyntaxHighlightingScroll(textarea)}
+    textarea.addEventListener('keydown', checkIfKeyIsTab)
+
+    // while ((index = str.indexOf(searchStr, startIndex)) > -1) {
+    //     indices.push(index);
+    //     startIndex = index + searchStrLen;
+    // }
     
-    let inlineW = document.getElementById("inlineW")
     textarea.addEventListener('dblclick',(event)=>{
         // log(document.getSelection().toString())
-        // let selection = document.getSelection()
-        let rect = selection.getRangeAt(0).getBoundingClientRect()
-
-        // highlightRect.style.
     })
+
+    
 
     // initSound()
     // initMouse()
