@@ -21,7 +21,6 @@ const unchangingUnitSquareGeometry = new THREE.PlaneGeometry(1., 1.)
 const debugging = 0
 let logged = 0
 
-const canvas3d = document.getElementById('canvas3d')
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, canvas: canvas3d })
 renderer.shadowMap.enabled = true
 let mouse = null
@@ -31,3 +30,10 @@ const discreteViridis = [
 	{ hex: 0x49BE54, color: new THREE.Color(0.28515625, 0.7421875, 0.328125) },
 	{ hex: 0x2A477A, color: new THREE.Color(0.1640625, 0.27734375, 0.4765625) },
 	{ hex: 0x340042, color: new THREE.Color(0.203125, 0., 0.2578125) }]
+randomToViridis = (rand) =>{
+	rand *= 3.
+	let dv0 = discreteViridis[Math.floor(rand)].color
+	let dv1 = discreteViridis[Math.ceil(rand)].color
+	let t = rand-Math.floor(rand)
+	return [lerp(t,dv0.r,dv1.r),lerp(t,dv0.g,dv1.g),lerp(t,dv0.b,dv1.b)]
+}

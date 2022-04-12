@@ -48,6 +48,8 @@ function initCompilation(dws)
 
         presenceLevel = PRESENCE_LEVEL_DELETED;
 
+        col = {r:0,g:0,b:0}
+
         mat = new THREE.ShaderMaterial();
         meshes = [];
 
@@ -62,17 +64,21 @@ function initCompilation(dws)
 
         constructor() {
             this.mat.fragmentShader = basicFragment
+
+            let [r,g,b] = randomToViridis(.53 * Math.random())
+            this.col.r = r*255.;this.col.g = g*255.;this.col.b = b*255.;
+
             let self = this
             for(let dwName in dws)
                 self.addMeshToDw(dws[dwName])
         }
     }
 
-    let mainImageToFragColorSuffix = `
+    let toFragColorSuffix = `
 void main() {
     mainImage(gl_FragColor);
 }`
-    let mainImageToSpherePositionSuffix = `
+    let toSpherePositionSuffix = `
 void main() 
 {
     vec4 myVec4;
@@ -80,7 +86,7 @@ void main()
 
     gl_Position = projectionMatrix * modelViewMatrix * (vec4(position, 0.) + myVec4);
 }`
-    let mainImagePointToFragColorSuffix = `
+    let pointToReadoutSuffix = `
 uniform mat4 projectionMatrix;
 
 void main() {
@@ -102,13 +108,14 @@ void main() {
 //And camera x and y lines, which these planes pass th
 
     {
-        let measurer = document.getElementById("measurer")
-        var characterWidth = parseInt(window.getComputedStyle(measurer).width) / 40.
+        var characterWidth = parseInt(window.getComputedStyle(textMeasurer).width) / 40.
 
         let style = window.getComputedStyle(textarea)
         let lineHeight = parseInt(style.lineHeight)
 
         let textAreaOffset = parseInt(style.padding) + parseInt(style.margin) // can add some fudge to this if you like
+
+        let svgLines = [labelLine,labelSide1,labelSide2,labelSide3,labelSide4]
 
         function setSvgLine(svgLine,x1,y1,x2,y2) {
             svgLine.x1.baseVal.value = x1
@@ -123,20 +130,19 @@ void main() {
         }
 
         textarea.addEventListener('mousemove', (event) => {
-            setSvgLine(labelLine,  -10, -10, -10, -10)
-            setSvgLine(labelSide1, -10, -10, -10, -10)
-            setSvgLine(labelSide2, -10, -10, -10, -10)
-            setSvgLine(labelSide3, -10, -10, -10, -10)
-            setSvgLine(labelSide4, -10, -10, -10, -10)
+            svgLines.forEach((svgLine)=>{setSvgLine(svgLine, -10, -10, -10, -10)})
             
             mentions.every((mention) => {
                 let mb = mention.box
                 let mouseInBox =
                     mb.x <= event.clientX && event.clientX < mb.x + mb.w &&
-                    mb.y <= event.clientY && event.clientY < mb.y + lineHeight
+                    mb.y <= event.clientY && event.clientY < mb.y + lineHeight                
 
                 if (mouseInBox) {
-                    let [xOnCanvas,yOnCanvas] = getShaderOutput(mention.shader + mainImagePointToFragColorSuffix)
+                    let c = mention.col
+                    svgLines.forEach((svgLine) => { svgLine.style.stroke = "rgb("+c.r+","+c.g+","+c.b+")" })
+
+                    let [xOnCanvas,yOnCanvas] = getShaderOutput(mention.shader + pointToReadoutSuffix)
                     let allVariablesRect = dws.allVariables.elem.getBoundingClientRect()
 
                     setSvgLine(labelLine, 
@@ -160,7 +166,7 @@ void main() {
 
         //could use this as a check for problems with the shader - don't do the below if it's bad
         //triggering a recompile isn't easy though
-        finalMesh.material.fragmentShader = textarea.value + mainImageToFragColorSuffix
+        finalMesh.material.fragmentShader = textarea.value + toFragColorSuffix
         finalMesh.material.needsUpdate = true
 
         
@@ -230,8 +236,8 @@ void main() {
 
         mentions.forEach((mention) => {
             if(mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED) {
-                if (mention.mat.vertexShader !== mention.shader + mainImageToSpherePositionSuffix) {
-                    mention.mat.vertexShader = mention.shader + mainImageToSpherePositionSuffix
+                if (mention.mat.vertexShader !== mention.shader + toSpherePositionSuffix) {
+                    mention.mat.vertexShader = mention.shader + toSpherePositionSuffix
                     mention.mat.needsUpdate = true
                 }
                 mention.meshes.forEach((mesh) => {

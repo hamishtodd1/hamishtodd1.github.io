@@ -50,7 +50,7 @@
   border:1px solid rgb(37, 175, 37);
 }
 
-#editing, #highlighting {
+#textarea, #highlighting {
   /* Both elements need the same text and space styling so they are directly on top of each other */
   margin: 10px;
   padding: 10px;
@@ -65,7 +65,7 @@
   left: 0;
 }
 
-#editing, #highlighting, #measurer, #highlighting * {
+#textarea, #highlighting, #textMeasurer, #highlighting * {
   /* Also add text styles to highlighing tokens */
   font-size: 9pt;
   font-family: monospace;
@@ -73,7 +73,7 @@
   tab-size: 4;
 }
 
-#measurer {
+#textMeasurer {
   position: absolute;
   top: -100px;
   padding: 0px;
@@ -81,7 +81,7 @@
 
 /* Move the textarea in front of the result */
 
-#editing {
+#textarea {
   z-index: 1;
 }
 #highlighting {
@@ -91,20 +91,20 @@
 
 /* Make textarea almost completely transparent */
 
-#editing {
+#textarea {
   color: transparent;
   background: transparent;
   caret-color: white; /* Or choose your favourite color */
 }
 
 /* Can be scrolled */
-#editing, #highlighting {
+#textarea, #highlighting {
   overflow: auto;
   white-space: nowrap; /* Allows textarea to scroll horizontally */
 }
 
 /* No resize on textarea */
-#editing {
+#textarea {
   resize: none;
 }
 

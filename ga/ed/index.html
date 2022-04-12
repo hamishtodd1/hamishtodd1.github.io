@@ -8,32 +8,20 @@
 <body>
 
     <div>
-        <textarea id="editing" spellcheck="false"></textarea>
-    <pre id="highlighting" aria-hidden="true">
-        <code class="language-glsl" id="highlighting-content">
-        </code>
-    </pre>
+        <textarea id="textarea" spellcheck="false"></textarea>
+        <pre id="highlighting" aria-hidden="true">
+            <code class="language-glsl" id="highlighting-content"></code>
+        </pre>
     </div>
 
-    <!-- Do you want lines connecting the things? Maybe unneeded. Hey, wait until you NEEEEED one! -->
     <svg id="ourSvg">
-        <line id="labelLine" x1="-100" y1="-100" x2="-100" y2="-100" style="stroke:rgb(255,0,0);stroke-width:1" />
+        <line id="labelLine" x1="-100" y1="-100" x2="-100" y2="-100" style="stroke-width:2" />
 
-        <line id="labelSide1" x1="-100" y1="-100" x2="-100" y2="-100" style="stroke:rgb(255,0,0);stroke-width:1" />
-        <line id="labelSide2" x1="-100" y1="-100" x2="-100" y2="-100" style="stroke:rgb(255,0,0);stroke-width:1" />
-        <line id="labelSide3" x1="-100" y1="-100" x2="-100" y2="-100" style="stroke:rgb(255,0,0);stroke-width:1" />
-        <line id="labelSide4" x1="-100" y1="-100" x2="-100" y2="-100" style="stroke:rgb(255,0,0);stroke-width:1" />
+        <line id="labelSide1" x1="-100" y1="-100" x2="-100" y2="-100" style="stroke-width:2" />
+        <line id="labelSide2" x1="-100" y1="-100" x2="-100" y2="-100" style="stroke-width:2" />
+        <line id="labelSide3" x1="-100" y1="-100" x2="-100" y2="-100" style="stroke-width:2" />
+        <line id="labelSide4" x1="-100" y1="-100" x2="-100" y2="-100" style="stroke-width:2" />
     </svg>
-
-    <!-- <svg width="100%" height="100%">
-        <rect x="250" y="120" rx="20" ry="20" width="150" height="150"
-            style="fill:red;stroke:black;stroke-width:5;opacity:0.5" />
-    </svg> -->
-
-    <!-- then next interesting thing to do would be, from the compiler, making the rectangle pop up
-    if mouse is over that area -->
-
-
     
     <!-- <p>
         Syntax Highlighting by <a href="https://prismjs.com/">Prism.js</a><br />
@@ -47,7 +35,7 @@
     <span id="topRightDw"></span>
     <span id="bottomRightDw"></span>
 
-    <span id="measurer">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span> <!-- contains 40 characters -->
+    <span id="textMeasurer">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span> <!-- contains 40 characters -->
     
     <script src="prism.js"></script>
     <script src="syntaxHighlighting.js"></script>
@@ -60,6 +48,7 @@
     <script src="variables.js"></script>
 
     <script src="compilation.js"></script>
+    <script src="camera.js"></script>
     <script src="dws.js"></script>
     <script src="init.js"></script>
 

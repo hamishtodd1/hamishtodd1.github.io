@@ -1,5 +1,3 @@
-const textarea = document.getElementById("editing")
-
 let mentions = []
 
 const basicVertex = `void main()

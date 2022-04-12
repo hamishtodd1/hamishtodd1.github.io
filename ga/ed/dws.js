@@ -1,39 +1,10 @@
 async function initDws() {
 
-    const allVariablesDwElem = document.getElementById('topRightDw')
-
     // let skyBgGeo = new THREE.SphereGeometry(50.)
     // let skyBgMat = new THREE.MeshBasicMaterial({color:0x88CEEC, side:THREE.BackSide })
     // const skyBg = new THREE.Mesh(skyBgGeo, skyBgMat)
 
-    {
-        const fov = 60.
-        const aspect = eval(getComputedStyle(allVariablesDwElem).aspectRatio)
-        const near = 1.
-        const far = 100.
-
-        var perspectiveCamera = new THREE.PerspectiveCamera(fov, aspect, near, far)
-        perspectiveCamera.position.set(0.,0.,1.)//.6, .7, 2.2)
-        perspectiveCamera.position.setLength(3.7)
-        perspectiveCamera.lookAt(0., 0., 0.)
-
-        let frameHeightAtNearPlane = Math.tan(fov/2. / 360. * TAU) * near * 2.
-
-        FullScreenQuad = (mat) => {
-            mat.vertexShader = basicVertex
-
-            let fullScreenQuadGeo = new THREE.PlaneGeometry(frameHeightAtNearPlane * 2. * aspect, frameHeightAtNearPlane * 2.)
-            fullScreenQuadGeo.translate(0., 0., -near * 2.)
-            let fullScreenQuad = new THREE.Mesh(fullScreenQuadGeo, mat)
-            fullScreenQuad.matrixAutoUpdate = false
-            fullScreenQuad.matrix = perspectiveCamera.matrix
-
-            return fullScreenQuad
-        }
-
-        var orthographicCamera = new THREE.OrthographicCamera(-aspect,aspect,1.,-1.,near,far)
-        orthographicCamera.position.z = 10.
-    }
+    let perspectiveCamera = initCamera()
 
     {
         let rtScene = new THREE.Scene()
@@ -93,8 +64,8 @@ async function initDws() {
         return dw
     }
     
-    
-    dws.allVariables = Dw(allVariablesDwElem)
+    dws.final = Dw(bottomRightDw)
+    dws.allVariables = Dw(topRightDw)
     
     {
         let pedestalDimension = 4.
@@ -127,8 +98,6 @@ async function initDws() {
 
         // renderer.outputEncoding = THREE.sRGBEncoding
     }
-
-    dws.final = Dw(document.getElementById('bottomRightDw'))
 
     function render() {
 

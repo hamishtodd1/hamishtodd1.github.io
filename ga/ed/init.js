@@ -1,18 +1,18 @@
 /*
 TODO
     Short term
-        Hovering
-            indicates, with lines, which mention is which visualization
-            menu for:
-                color
-                what kind of object it is
+        panning with mouse
+        Drawing system for multivectors
         3,0,1 multivectors
-            Since it's all in one shader anyway, could use sdfs. Nice lighting, including on plane
+            Since it's all in one shader anyway. Nice lighting, including on plane
             {
                 //do everything in the shader, calculating pts, lines, planes along the way
                 //pass those to an sdf function that does spheres cylinders planes
             }
         Editing from the window
+        Hovering menu for:
+            color
+            what kind of object it is
         suggestions
             You have a single shader calculate the whole lot of them
             Player is dragging eg a point around
@@ -21,15 +21,14 @@ TODO
             When player lets go, we do a special render, where we do not render the point
                 instead we render, to a target, some pixels that can be read as "here's the line of code you want"
             When you snap it into place, what it's based on is highlighted (using the diagram things)
+        Shadertoy-inspired uniforms
         3,0,1 sphere at infinity
     Medium term
         You don't necessarily want every single thing in one dw, you have to have
             Controlling what is in what dws
             Maybe making new dws
             Auto-scrolling to the correct dw?
-        Compilation with a webworker
-        Being selective about what 
-        A dw that only shows the line your caret is on
+            A dw that only shows the line your caret is on
         (2,1) halfplane window
             lerp as an example of a simple function to try it out with
             write some numbers on a line
@@ -42,6 +41,7 @@ TODO
         Maybe you have some point that goes weird places in 3D when you change some 1d or 2d variable
             Hold a button to make it so that the thing gets a trail
     Long term
+        Compilation with a webworker
         Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
         Above is for fragment shaders(!)
             vertex shaders
@@ -98,7 +98,8 @@ async function init() {
     let initialText = 
 `void mainImage( out vec4 fragColor )
 {
-    vec4 myPoint = vec4(1.2,1.9,0.,1.);
+    vec4 myPoint = vec4(1.2,1.5,0.,1.);
+    vec4 myPoint2 = vec4(-.2,.4,0.,1.);
 
     fragColor = vec4( 1., .5, 0., 1.);
 }`
