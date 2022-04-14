@@ -6,7 +6,7 @@ async function initSurroundingsAndMaterial() {
 	// },false)
 
 	updateFunctions.push(() => {
-		if (mouse.rightClicking) {
+		if (mouse.clicking) {
 			mouse.get2dDiff(v0)
 			thingsToRotate.forEach((thing) => {
 				thing.rotation.y -= v0.x

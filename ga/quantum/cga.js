@@ -62,8 +62,8 @@ function initCga() {
 
     let tubeRadius = .014
 
-    let unitCylinderGeo = new THREE.CylinderGeometry(tubeRadius, tubeRadius, 1.)
-    unitCylinderGeo.translate(0., .5, 0.)
+    let unitHeightCylinderGeo = new THREE.CylinderGeometry(tubeRadius, tubeRadius, 1.)
+    unitHeightCylinderGeo.translate(0., .5, 0.)
     
     let generalSphereGeometry = new THREE.SphereGeometry(tubeRadius * 3.)
 
@@ -135,7 +135,7 @@ function initCga() {
 
     //-----------------transforming
     {
-        let rotationAxisMesh = new THREE.Mesh(unitCylinderGeo,niceMat(.4))
+        let rotationAxisMesh = new THREE.Mesh(unitHeightCylinderGeo,niceMat(.4))
         rotationAxisMesh.scale.y = tubeRadius * 8.
         wholeThing.add(rotationAxisMesh)
         let diskPlane = new THREE.Plane()
@@ -153,6 +153,23 @@ function initCga() {
                 rotationAxisMesh.position.copy(v1)
             }
         })
+    }
+
+    //------------CYLINDER
+    {
+        let radius = Math.sqrt(2.) * nO.y
+        let cyl = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, 1., 32, 1,true, TAU / 2., TAU / 2.), niceMat(.3))
+        cyl.geometry.translate(0., .5, 0.)
+        cyl.scale.y = Math.sqrt(2.) * coneTopRadius
+        cyl.material.transparent = true
+        cyl.material.opacity = .3
+        cyl.rotation.z = -TAU / 8.
+        wholeThing.add(cyl)
+
+        let rim = new THREE.Mesh(new THREE.TorusGeometry(radius, tubeRadius, 7, 16, TAU / 2.), niceMat(.3))
+        rim.geometry.rotateY(TAU / 4.)
+        rim.geometry.rotateZ(TAU / 8.)
+        wholeThing.add(rim)
     }
 
     //------------CONE
@@ -236,7 +253,7 @@ function initCga() {
     //------------------SPINE
     {
         let spineMat = niceMat(.5)
-        var spine = new THREE.Mesh(unitCylinderGeo,spineMat)
+        var spine = new THREE.Mesh(unitHeightCylinderGeo,spineMat)
         spine.scale.y = coneDiagonalLength
         spine.rotation.z = -TAU / 8.
         wholeThing.add(spine)
@@ -258,14 +275,14 @@ function initCga() {
         let boundaryIntersection = new THREE.Mesh(generalSphereGeometry, intersectionsMat)
         wholeThing.add(boundaryIntersection)
 
-        let homogeneousLine = new THREE.Mesh(unitCylinderGeo, homogeneousLinesMat)
+        let homogeneousLine = new THREE.Mesh(unitHeightCylinderGeo, homogeneousLinesMat)
         homogeneousLine.scale.y = coneDiagonalLength
         wholeThing.add(homogeneousLine)
 
-        let stereographicProjectionLine = new THREE.Mesh(unitCylinderGeo, homogeneousLinesMat)
+        let stereographicProjectionLine = new THREE.Mesh(unitHeightCylinderGeo, homogeneousLinesMat)
         wholeThing.add(stereographicProjectionLine)
 
-        let heightLine = new THREE.Mesh(unitCylinderGeo, homogeneousLinesMat)
+        let heightLine = new THREE.Mesh(unitHeightCylinderGeo, homogeneousLinesMat)
         wholeThing.add(heightLine)
 
         plane.addToHorosphereIntersection = (diff) => {
