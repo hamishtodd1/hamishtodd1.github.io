@@ -3,17 +3,18 @@ function initCamera() {
 
     const fov = 60.
     const aspect = eval(getComputedStyle(allVariablesDwElem).aspectRatio)
-    const near = 1.
-    const far = 100.
+    const near = .1
+    const far = 50.
 
     var perspectiveCamera = new THREE.PerspectiveCamera(fov, aspect, near, far)
 
     FullScreenQuad = (mat) => {
         mat.vertexShader = basicVertex
 
-        let frameHeightAtNearPlane = Math.tan(fov / 2. / 360. * TAU) * near * 2.
-        let fullScreenQuadGeo = new THREE.PlaneGeometry(frameHeightAtNearPlane * 2. * aspect, frameHeightAtNearPlane * 2.)
-        fullScreenQuadGeo.translate(0., 0., -near * 2.)
+        let frameHeightOneAway = Math.tan(fov / 2. / 360. * TAU) * 2.
+        log(frameHeightOneAway)
+        let fullScreenQuadGeo = new THREE.PlaneGeometry(frameHeightOneAway * aspect, frameHeightOneAway)
+        fullScreenQuadGeo.translate(0., 0., -1.)
         let fullScreenQuad = new THREE.Mesh(fullScreenQuadGeo, mat)
         fullScreenQuad.matrixAutoUpdate = false
         fullScreenQuad.matrix = perspectiveCamera.matrix

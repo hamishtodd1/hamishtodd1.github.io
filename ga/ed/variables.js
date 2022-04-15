@@ -1,7 +1,14 @@
 let mentions = []
 
-const basicVertex = `void main()
+const basicVertex = `
+varying vec4 coord; //fragcoord is 
+varying vec2 frameCoord;
+
+void main()
 {
+	coord = modelMatrix * vec4(position, 1.);
+	frameCoord = position.xy * 2. + 1.;
+
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
 }`
 

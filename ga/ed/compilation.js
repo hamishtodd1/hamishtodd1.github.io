@@ -76,13 +76,12 @@ function initCompilation(dws)
 
     let toFragColorSuffix = `
 void main() {
-    mainImage(gl_FragColor);
+    gl_FragColor = mainImage();
 }`
     let toSpherePositionSuffix = `
 void main() 
 {
-    vec4 myVec4;
-    mainImage(myVec4);
+    vec4 myVec4 = mainImage();
 
     gl_Position = projectionMatrix * modelViewMatrix * (vec4(position, 0.) + myVec4);
 }`
@@ -90,8 +89,7 @@ void main()
 uniform mat4 projectionMatrix;
 
 void main() {
-    vec4 myVec4;
-    mainImage(myVec4);
+    vec4 myVec4 = mainImage();
 
     vec4 clipspacePos = projectionMatrix * viewMatrix * myVec4;
 
@@ -102,10 +100,10 @@ void main() {
 
     gl_FragColor = vec4((minusOneToOne + vec2(1.))/2.,0.,0.);
 }`
-//alternatively: have camera X and Y axes. They're at its position
-//and camera viewing direction. Join lines with that point to get two planes
-//for a point, join it with those lines too. Take 
-//And camera x and y lines, which these planes pass th
+//alternatively: have camera X and Y axes. Perpendicular lines that cross at its position
+//and then two points defining bottom left and top right corner of frustum
+//Join both lines with both directions to get four planes
+//for a point, join it with those lines too. Take angles between those planes and frustum planes
 
     {
         var characterWidth = parseInt(window.getComputedStyle(textMeasurer).width) / 40.
@@ -230,7 +228,7 @@ void main() {
                 //this assumes, of course, that type is "point"
                 //type has been specified by the user, along with the color
 
-                mention.shader = strSoFar + `\nfragColor = ` + name + `;\n` + "}\n".repeat(bracesDeep)
+                mention.shader = strSoFar + `\n return ` + name + `;\n` + "}\n".repeat(bracesDeep)
             })
         })
 

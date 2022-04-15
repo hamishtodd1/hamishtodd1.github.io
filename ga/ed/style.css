@@ -41,15 +41,6 @@
 
 /* TEXT WINDOW */
 
-#highlightRect {
-  width:500px;
-  height:100px;
-
-  z-index: 40;
-  
-  border:1px solid rgb(37, 175, 37);
-}
-
 #textarea, #highlighting {
   /* Both elements need the same text and space styling so they are directly on top of each other */
   margin: 10px;

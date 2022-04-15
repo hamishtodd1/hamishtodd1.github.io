@@ -25,6 +25,8 @@ async function initDws() {
             renderer.readRenderTargetPixels(rt, 0, 0, pixelsWide, 1, outputsArray)
             renderer.setRenderTarget(null)
 
+            //so what about when you want a point that's in a function call?
+
             return [outputsArray[0]/255.,outputsArray[1]/255.]
         }
     }
@@ -68,14 +70,14 @@ async function initDws() {
     dws.allVariables = Dw(topRightDw)
     
     {
-        let pedestalDimension = 4.
-        const pedestal = new THREE.Mesh(
-            new THREE.BoxGeometry(pedestalDimension, .01, pedestalDimension),
-            new THREE.MeshPhongMaterial({ color: 0x999999, specular: 0x101010 })
-        )
-        pedestal.position.y = -1.
-        pedestal.receiveShadow = true
-        dws.allVariables.scene.add(pedestal)
+        // let pedestalDimension = 4.
+        // const pedestal = new THREE.Mesh(
+        //     new THREE.BoxGeometry(pedestalDimension, .01, pedestalDimension),
+        //     new THREE.MeshPhongMaterial({ color: 0x999999, specular: 0x101010 })
+        // )
+        // pedestal.position.y = -1.
+        // pedestal.receiveShadow = true
+        // dws.allVariables.scene.add(pedestal)
 
         const spotLight = new THREE.SpotLight()
         spotLight.penumbra = 0.5
@@ -84,17 +86,24 @@ async function initDws() {
         spotLight.lookAt(0.,0.,0.)
         dws.allVariables.scene.add(spotLight)
 
-        let grid = GridAndSpike(8, 8, 1./4.)
-        // grid.position.y = -1. + .01
-        grid.rotation.x = TAU / 4.
-        dws.allVariables.scene.add(grid)
-
         dws.allVariables.scene.add(new THREE.AmbientLight(0x666666))
 
-        let skyBgGeo = new THREE.SphereGeometry(50.)
+        // let grid = GridAndSpike(8, 8, 1./4.)
+        // // grid.position.y = -1. + .01
+        // grid.rotation.x = TAU / 4.
+        // dws.allVariables.scene.add(grid)
+
+        let skyBgGeo = new THREE.SphereGeometry(perspectiveCamera.far * .9)
         let skyBgMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(.18431372, .18431372, .18431372), side:THREE.BackSide })
         const skyBg = new THREE.Mesh(skyBgGeo, skyBgMat)
         dws.allVariables.scene.add(skyBg)
+
+        {
+            let mvsFsq = FullScreenQuad(new THREE.ShaderMaterial())
+            await assignShader('mv',mvsFsq.material,'fragment')
+            mvsFsq.material.depthTest = true
+            dws.allVariables.scene.add(mvsFsq)
+        }
 
         // renderer.outputEncoding = THREE.sRGBEncoding
     }

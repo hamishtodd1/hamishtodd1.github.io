@@ -1,10 +1,10 @@
 /*
 TODO
     Short term
-        panning with mouse
         Drawing system for multivectors
+            No need for sdf, you can just do exacts and then look at the closest
         3,0,1 multivectors
-            Since it's all in one shader anyway. Nice lighting, including on plane
+            Sdf, since it's all in one shader anyway. Nice lighting, including on plane
             {
                 //do everything in the shader, calculating pts, lines, planes along the way
                 //pass those to an sdf function that does spheres cylinders planes
@@ -22,25 +22,32 @@ TODO
                 instead we render, to a target, some pixels that can be read as "here's the line of code you want"
             When you snap it into place, what it's based on is highlighted (using the diagram things)
         Shadertoy-inspired uniforms
+            And mouse ray in final dw is a variable
+            And VR hand
         3,0,1 sphere at infinity
     Medium term
-        You don't necessarily want every single thing in one dw, you have to have
-            Controlling what is in what dws
-            Maybe making new dws
-            Auto-scrolling to the correct dw?
-            A dw that only shows the line your caret is on
-        (2,1) halfplane window
+        (2,1) halfplane window - v. important, lets you program with mouse
             lerp as an example of a simple function to try it out with
             write some numbers on a line
             They appear in a  if my carat is on that line
             I can click or drag or whatever, and find the number I know I want
             Maybe move my carat through the line (4*8+5*2)/2 and see it animate
+        You don't necessarily want every single thing in one dw, you have to have
+            Controlling what is in what dws
+            Maybe making new dws
+            Auto-scrolling to the correct dw?
+            A dw that only shows the line your caret is on
         mentions are sensetive to for loops
             For loops have an early-escape integer
             For every mention in the loop body, we're cutting off the shader after that integer
         Maybe you have some point that goes weird places in 3D when you change some 1d or 2d variable
             Hold a button to make it so that the thing gets a trail
     Long term
+        Optimization:
+            threejs shaders have uv and normal built in. Irrelevant, use RawShader
+        Demonstration videos
+            Volumetric rendering, can march through texture
+        A puzzle game that is a series of "code this shader" challenges
         Compilation with a webworker
         Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
         Above is for fragment shaders(!)
@@ -96,12 +103,12 @@ In favor of vscode:
 
 async function init() {
     let initialText = 
-`void mainImage( out vec4 fragColor )
+`vec4 mainImage()
 {
     vec4 myPoint = vec4(1.2,1.5,0.,1.);
     vec4 myPoint2 = vec4(-.2,.4,0.,1.);
 
-    fragColor = vec4( 1., .5, 0., 1.);
+    return vec4( 1., .5, 0., 1.);
 }`
 //half way 1.0653362070468535, 0.8803922415546626, 1.7062327591717965
     textarea.value = initialText
