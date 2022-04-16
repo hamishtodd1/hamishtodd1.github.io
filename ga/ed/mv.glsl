@@ -1,5 +1,26 @@
 //from https://www.iquilezles.org/www/articles/intersectors/intersectors.htm
 
+//the plane/sphere at infinity is a different kind of window
+//is it a sphere or is it a plane dead ahead?
+//the same thing can be seen in multiple window, eg a plane is a line in the infinity window
+
+//a bunch of scalars, with a choice of "horizon", probably can be visualized in your PGA space
+//null points... they are both the points-at-infinity of PGA, and the points of CGA
+//the 2D version is
+
+/*
+    is it overkill to try to render them all in one?
+        You get to do nice lighting on them
+        It's faster
+        You need to get arrays of them all for the snapping comparison anyway
+    On the other hand
+        You might need their values on the CPU anyway
+        It's a pain to inject all this code. Sad how it gets inlined anyway...
+        Could even compare in javascript. Would let you update the textarea in realtime
+        You may want to visualize things in a way that's better done with a mesh
+        It'd be a nightmare to debug the suggester in glsl
+*/
+
 varying vec4 coord;
 varying vec2 frameCoord;
 
@@ -129,8 +150,10 @@ float capIntersect( in vec3 ro, in vec3 rd, in vec3 pa, in vec3 pb, in float ra 
     }
     return 999.;
 }
+
+
             
-void main()
+void raycast()
 {
     vec3 rayOrigin = vec3(coord);
     vec3 rayDirection = normalize( rayOrigin - cameraPosition );
@@ -145,21 +168,21 @@ void main()
         updateFromDist( dist, lowestDist, vec3(1.,1.,0.), lowestDistColor );
     }
 
-    {
-        vec3 planeNormal = normalize( vec3(1.,1.,0.) );
-        float planeExtra = 0.;
-        float dist = patchyPlaneIntersect( rayOrigin, rayDirection, vec4(planeNormal, planeExtra) );
+    // {
+    //     vec3 planeNormal = normalize( vec3(1.,1.,0.) );
+    //     float planeExtra = 0.;
+    //     float dist = patchyPlaneIntersect( rayOrigin, rayDirection, vec4(planeNormal, planeExtra) );
 
-        updateFromDist( dist, lowestDist, vec3(0.,1.,1.), lowestDistColor );
-    }
+    //     updateFromDist( dist, lowestDist, vec3(0.,1.,1.), lowestDistColor );
+    // }
 
-    {
-        vec3 cylAxis = normalize( vec3(0.,1.,0.) );
-        vec3 cylBasePoint = normalize( vec3(.3,0.,0.) );
-        float dist = cylIntersect( rayOrigin, rayDirection, cylBasePoint, cylAxis );
+    // {
+    //     vec3 cylAxis = normalize( vec3(0.,1.,0.) );
+    //     vec3 cylBasePoint = normalize( vec3(.3,0.,0.) );
+    //     float dist = cylIntersect( rayOrigin, rayDirection, cylBasePoint, cylAxis );
 
-        updateFromDist( dist, lowestDist, vec3(1.,0.,1.), lowestDistColor );
-    }
+    //     updateFromDist( dist, lowestDist, vec3(1.,0.,1.), lowestDistColor );
+    // }
 
     {
         vec3 floorDimensions = vec3(2.,.001,2.);
@@ -186,3 +209,7 @@ void main()
     else
         gl_FragColor = vec4(lowestDistColor, 1.);
 }
+
+//the above will have your entered shader tacked onto the end
+//that shader will then have, below the mentions:
+// pointsToBeVisualized()

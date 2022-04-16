@@ -10,9 +10,10 @@ TODO
                 //pass those to an sdf function that does spheres cylinders planes
             }
         Editing from the window
-        Hovering menu for:
+        Double click menu for:
             color
-            what kind of object it is
+            what kind of object it is (changes the code?)
+            causes camera to whirl around so it is centered, whatever it is
         suggestions
             You have a single shader calculate the whole lot of them
             Player is dragging eg a point around

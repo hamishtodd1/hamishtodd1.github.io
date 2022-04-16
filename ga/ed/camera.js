@@ -8,16 +8,20 @@ function initCamera() {
 
     var perspectiveCamera = new THREE.PerspectiveCamera(fov, aspect, near, far)
 
+    let fsqMatrix = new THREE.Matrix4()
+    
+    let fsqMatrixPreCamera = new THREE.Matrix4()
+    let frameHeightOneAway = Math.tan(fov / 2. / 360. * TAU) * 2.
+    fsqMatrixPreCamera.makeScale(frameHeightOneAway * aspect, frameHeightOneAway,1.)
+
     FullScreenQuad = (mat) => {
         mat.vertexShader = basicVertex
 
-        let frameHeightOneAway = Math.tan(fov / 2. / 360. * TAU) * 2.
-        log(frameHeightOneAway)
-        let fullScreenQuadGeo = new THREE.PlaneGeometry(frameHeightOneAway * aspect, frameHeightOneAway)
+        let fullScreenQuadGeo = new THREE.PlaneGeometry(1.,1.)
         fullScreenQuadGeo.translate(0., 0., -1.)
         let fullScreenQuad = new THREE.Mesh(fullScreenQuadGeo, mat)
         fullScreenQuad.matrixAutoUpdate = false
-        fullScreenQuad.matrix = perspectiveCamera.matrix
+        fullScreenQuad.matrix = fsqMatrix
 
         return fullScreenQuad
     }
@@ -50,6 +54,12 @@ function initCamera() {
         perspectiveCamera.position.applyAxisAngle(yUnit, cameraLon)
         perspectiveCamera.position.setLength(3.7)
         perspectiveCamera.lookAt(0., 0., 0.)
+
+        perspectiveCamera.updateMatrix()
+        perspectiveCamera.updateProjectionMatrix()
+
+        fsqMatrix.copy(fsqMatrixPreCamera)
+        fsqMatrix.premultiply(perspectiveCamera.matrix)
     }
     addToCamerLonLat(0., 0.)
 

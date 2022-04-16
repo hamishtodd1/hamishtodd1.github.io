@@ -18,7 +18,7 @@
             uniform samplerXX iChanneli;
 */
 
-function initCompilation(dws)
+async function initCompilation(dws)
 {
     let finalMesh = FullScreenQuad(new THREE.ShaderMaterial())
     dws.final.scene.add(finalMesh)
@@ -33,44 +33,20 @@ function initCompilation(dws)
     //some amount of "you have to click it" is ok
     //or maybe, "if you've scrolled away from all those mentions". Maybe we go from top of window
 
-    let pointGeo = new THREE.SphereBufferGeometry(.07, 32, 16)
     const PRESENCE_LEVEL_UNCONFIRMED = -1
     const PRESENCE_LEVEL_CONFIRMED = 1
     const PRESENCE_LEVEL_DELETED = 0
     class Mention {
         name;
-        
         mentionsFromStart;
-
         box = {x:0.,y:0.,w:0.};
-
-        shader = "";
-
+        canvasPosReadoutShader = "";
         presenceLevel = PRESENCE_LEVEL_DELETED;
-
-        col = {r:0,g:0,b:0}
-
-        mat = new THREE.ShaderMaterial();
-        meshes = [];
-
-        addMeshToDw(dw) {
-            let mesh = new THREE.Mesh(pointGeo, this.mat)
-            mesh.castShadow = true
-            mesh.visible = false
-            mesh.matrixAutoUpdate = false
-            dw.scene.add(mesh)
-            this.meshes.push(mesh)
-        };
+        col = {r:0,g:0,b:0};
 
         constructor() {
-            this.mat.fragmentShader = basicFragment
-
             let [r,g,b] = randomToViridis(.53 * Math.random())
             this.col.r = r*255.;this.col.g = g*255.;this.col.b = b*255.;
-
-            let self = this
-            for(let dwName in dws)
-                self.addMeshToDw(dws[dwName])
         }
     }
 
@@ -88,17 +64,23 @@ void main()
     let pointToReadoutSuffix = `
 uniform mat4 projectionMatrix;
 
+varying vec2 frameCoord;
+
 void main() {
     vec4 myVec4 = mainImage();
 
     vec4 clipspacePos = projectionMatrix * viewMatrix * myVec4;
-
-    //you get 4 values, each 8-bit
-
     vec2 minusOneToOne = clipspacePos.xy / clipspacePos.w;
-    //the z value is correct but we don't need it
+    vec2 zeroToOne = (minusOneToOne + vec2(1.))/2.;
 
-    gl_FragColor = vec4((minusOneToOne + vec2(1.))/2.,0.,0.);
+    int pixelIndex = int(round(frameCoord.x * 8. - .5));
+    float pixelFloat = 0.;
+    for (int k = 0; k < 2; ++k) {
+        if (pixelIndex == k)
+            pixelFloat = zeroToOne[k];
+    }
+
+    gl_FragColor = encodeFloat(pixelFloat);
 }`
 //alternatively: have camera X and Y axes. Perpendicular lines that cross at its position
 //and then two points defining bottom left and top right corner of frustum
@@ -140,11 +122,11 @@ void main() {
                     let c = mention.col
                     svgLines.forEach((svgLine) => { svgLine.style.stroke = "rgb("+c.r+","+c.g+","+c.b+")" })
 
-                    let [xOnCanvas,yOnCanvas] = getShaderOutput(mention.shader + pointToReadoutSuffix)
+                    let [xOnCanvas,yOnCanvas] = getShaderOutput(mention.canvasPosReadoutShader, Array(2))
                     let allVariablesRect = dws.allVariables.elem.getBoundingClientRect()
 
                     setSvgLine(labelLine, 
-                        mb.x + mb.w, 
+                        mb.x + mb.w,
                         mb.y + lineHeight / 2.,
                         allVariablesRect.x + allVariablesRect.width * xOnCanvas,
                         allVariablesRect.y + allVariablesRect.height * (1.-yOnCanvas))
@@ -166,7 +148,6 @@ void main() {
         //triggering a recompile isn't easy though
         finalMesh.material.fragmentShader = textarea.value + toFragColorSuffix
         finalMesh.material.needsUpdate = true
-
         
         mentions.forEach((mention) => {
             if (mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED)
@@ -180,6 +161,8 @@ void main() {
         let bracesDeep = 0
         let strSoFar = ""
         let lines = textarea.value.match(lineDividingRegex)
+
+        //even with the suggestyou could get everything out of the
 
         lines.forEach((l,lineIndex) => {
             strSoFar += l
@@ -217,36 +200,24 @@ void main() {
                     }
 
                     mention.name = name
-                    mention.mentionsFromStart = nameNumMentions[name]
+                    mention.mentionsFromStart = nameNumMentions[name] - 1
                 }
                 
                 mention.presenceLevel = PRESENCE_LEVEL_CONFIRMED
 
-                stringToScreen(match.index, lineIndex,mention.box)
+                stringToScreen(match.index, lineIndex, mention.box)
                 mention.box.w = name.length * characterWidth
 
-                //this assumes, of course, that type is "point"
-                //type has been specified by the user, along with the color
-
-                mention.shader = strSoFar + `\n return ` + name + `;\n` + "}\n".repeat(bracesDeep)
+                mention.canvasPosReadoutShader = 
+                    strSoFar + 
+                    `\n return `+name+`;\n` + "}\n".repeat(bracesDeep) + 
+                    pointToReadoutSuffix
             })
         })
 
         mentions.forEach((mention) => {
-            if(mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED) {
-                if (mention.mat.vertexShader !== mention.shader + toSpherePositionSuffix) {
-                    mention.mat.vertexShader = mention.shader + toSpherePositionSuffix
-                    mention.mat.needsUpdate = true
-                }
-                mention.meshes.forEach((mesh) => {
-                    if (mesh.parent === dws.allVariables.scene)
-                        mesh.visible = true
-                })
-            }
-            else if (mention.presenceLevel === PRESENCE_LEVEL_UNCONFIRMED) {
-                mention.meshes.forEach((mesh) => { mesh.visible = false })
+            if (mention.presenceLevel === PRESENCE_LEVEL_UNCONFIRMED)
                 mention.presenceLevel = PRESENCE_LEVEL_DELETED
-            }
         })
         //this doesn't guarantee that you're using them as much as possible, just that they'll be cleared up on the next one
 

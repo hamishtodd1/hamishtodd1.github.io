@@ -12,11 +12,13 @@ async function initDws() {
         let rtFsq = FullScreenQuad(new THREE.ShaderMaterial())
         rtScene.add(rtFsq)
 
-        let pixelsWide = 1
+        let pixelsWide = 8
         let rt = new THREE.WebGLRenderTarget(pixelsWide, 1)
         let outputsArray = new Uint8Array(pixelsWide * 4)
-        getShaderOutput = (fragmentShader) => {
-            rtFsq.material.fragmentShader = fragmentShader
+        let outputterPrefix = await getTextFile('floatOutputter.glsl')
+        getShaderOutput = (fragmentShader, target) => {
+
+            rtFsq.material.fragmentShader = outputterPrefix + fragmentShader
             rtFsq.material.needsUpdate = true
 
             renderer.setRenderTarget(rt)
@@ -27,7 +29,14 @@ async function initDws() {
 
             //so what about when you want a point that's in a function call?
 
-            return [outputsArray[0]/255.,outputsArray[1]/255.]
+            let floatArray = new Float32Array(outputsArray.buffer)
+
+            for(let i = 0; i < target.length; ++i)
+                target[i] = floatArray[i]
+
+            delete floatArray
+
+            return target
         }
     }
 
@@ -59,10 +68,7 @@ async function initDws() {
                 renderer.render(scene, perspectiveCamera)
             }
         }
-
-        mentions.forEach( (viz) => {
-            viz.addMeshToDw(dw)
-        })
+        
         return dw
     }
     
@@ -100,7 +106,12 @@ async function initDws() {
 
         {
             let mvsFsq = FullScreenQuad(new THREE.ShaderMaterial())
-            await assignShader('mv',mvsFsq.material,'fragment')
+            mvsFsq.material.fragmentShader = await getTextFile('mv.glsl') + `
+                void main() {
+                    raycast();
+                }`
+            
+            // mvsFsq.material.lights = true
             mvsFsq.material.depthTest = true
             dws.allVariables.scene.add(mvsFsq)
         }
@@ -135,7 +146,7 @@ async function initDws() {
         requestAnimationFrame(render)
     }
 
-    initCompilation(dws)
+    await initCompilation(dws)
 
     return render
 }
