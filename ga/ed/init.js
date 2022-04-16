@@ -1,6 +1,7 @@
 /*
 TODO
     Short term
+        RGB cube dw
         Drawing system for multivectors
             No need for sdf, you can just do exacts and then look at the closest
         3,0,1 multivectors
@@ -11,7 +12,7 @@ TODO
             }
         Editing from the window
         Double click menu for:
-            color
+            diagram line color
             what kind of object it is (changes the code?)
             causes camera to whirl around so it is centered, whatever it is
         suggestions
@@ -22,10 +23,11 @@ TODO
             When player lets go, we do a special render, where we do not render the point
                 instead we render, to a target, some pixels that can be read as "here's the line of code you want"
             When you snap it into place, what it's based on is highlighted (using the diagram things)
-        Shadertoy-inspired uniforms
+        Uniforms
+            Shadertoy-inspired
             And mouse ray in final dw is a variable
             And VR hand
-        3,0,1 sphere at infinity
+        Sphere at infinity dw
     Medium term
         (2,1) halfplane window - v. important, lets you program with mouse
             lerp as an example of a simple function to try it out with

@@ -151,7 +151,7 @@ void main() {
         
         mentions.forEach((mention) => {
             if (mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED)
-            mention.presenceLevel = PRESENCE_LEVEL_UNCONFIRMED
+                mention.presenceLevel = PRESENCE_LEVEL_UNCONFIRMED
         })
         
         let nameNumMentions = {}    

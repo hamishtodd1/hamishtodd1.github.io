@@ -1,24 +1,24 @@
-//from https://www.iquilezles.org/www/articles/intersectors/intersectors.htm
-
-//the plane/sphere at infinity is a different kind of window
-//is it a sphere or is it a plane dead ahead?
-//the same thing can be seen in multiple window, eg a plane is a line in the infinity window
-
-//a bunch of scalars, with a choice of "horizon", probably can be visualized in your PGA space
-//null points... they are both the points-at-infinity of PGA, and the points of CGA
-//the 2D version is
-
 /*
+    from https://www.iquilezles.org/www/articles/intersectors/intersectors.htm
+
+    the plane/sphere at infinity is a different kind of window
+    is it a sphere or is it a plane dead ahead?
+    the same thing can be seen in multiple window, eg a plane is a line in the infinity window
+
+    a bunch of scalars, with a choice of "horizon", probably can be visualized in your PGA space
+    null points... they are both the points-at-infinity of PGA, and the points of CGA
+    the 2D version is
+
     is it overkill to try to render them all in one?
-        You get to do nice lighting on them
+        You get may get ambient occlusion on them  (but do you? Also threejs has lighting)
         It's faster
         You need to get arrays of them all for the snapping comparison anyway
     On the other hand
         You might need their values on the CPU anyway
-        It's a pain to inject all this code. Sad how it gets inlined anyway...
-        Could even compare in javascript. Would let you update the textarea in realtime
-        You may want to visualize things in a way that's better done with a mesh
-        It'd be a nightmare to debug the suggester in glsl
+        It's a pain to inject code
+        Could compare in javascript. Would let you update the textarea in realtime
+            It'll be a nightmare to debug the suggester in glsl
+        You may want to visualize things in a way that's better done with a mesh than an sdf
 */
 
 varying vec4 coord;
