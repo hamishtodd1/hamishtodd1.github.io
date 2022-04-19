@@ -1,10 +1,9 @@
+/*
+    Hover a color variable and dw switches to that kind of visualization
+    Same with 
+ */
+
 async function initDws() {
-
-    // let skyBgGeo = new THREE.SphereGeometry(50.)
-    // let skyBgMat = new THREE.MeshBasicMaterial({color:0x88CEEC, side:THREE.BackSide })
-    // const skyBg = new THREE.Mesh(skyBgGeo, skyBgMat)
-
-    let perspectiveCamera = initCamera()
 
     {
         let rtScene = new THREE.Scene()
@@ -22,12 +21,10 @@ async function initDws() {
             rtFsq.material.needsUpdate = true
 
             renderer.setRenderTarget(rt)
-            renderer.render(rtScene, perspectiveCamera)
+            renderer.render(rtScene, camera)
             
             renderer.readRenderTargetPixels(rt, 0, 0, pixelsWide, 1, outputsArray)
             renderer.setRenderTarget(null)
-
-            //so what about when you want a point that's in a function call?
 
             let floatArray = new Float32Array(outputsArray.buffer)
 
@@ -40,7 +37,6 @@ async function initDws() {
         }
     }
 
-    const dws = {}
     function Dw(elem) {
         const scene = new THREE.Scene()
 
@@ -65,58 +61,36 @@ async function initDws() {
                 renderer.setScissor(left, positiveYUpBottom, width, height)
                 renderer.setViewport(left, positiveYUpBottom, width, height)
 
-                renderer.render(scene, perspectiveCamera)
+                renderer.render(scene, camera)
             }
         }
         
         return dw
     }
     
-    dws.final = Dw(bottomRightDw)
-    dws.allVariables = Dw(topRightDw)
-    
+    let skyBgGeo = new THREE.SphereGeometry(camera.far * .9)
+    let skyBgMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(.18431372, .18431372, .18431372), side: THREE.BackSide })
+    let pedestalDimension = 4.
+    let pedestalGeo = new THREE.BoxGeometry(pedestalDimension, .01, pedestalDimension)
+    let pedestalMat = new THREE.MeshPhongMaterial({ color: 0x999999, specular: 0x101010 })
+    async function add3dStuffToDw(dw)
     {
-        // let pedestalDimension = 4.
-        // const pedestal = new THREE.Mesh(
-        //     new THREE.BoxGeometry(pedestalDimension, .01, pedestalDimension),
-        //     new THREE.MeshPhongMaterial({ color: 0x999999, specular: 0x101010 })
-        // )
-        // pedestal.position.y = -1.
-        // pedestal.receiveShadow = true
-        // dws.allVariables.scene.add(pedestal)
+        const pedestal = new THREE.Mesh( pedestalGeo, pedestalMat)
+        pedestal.position.y = -1.
+        pedestal.receiveShadow = true
+        dw.scene.add(pedestal)
 
         const spotLight = new THREE.SpotLight()
         spotLight.penumbra = 0.5
         spotLight.castShadow = true
         spotLight.position.set(-.5, .5, .5)
         spotLight.lookAt(0.,0.,0.)
-        dws.allVariables.scene.add(spotLight)
+        dw.scene.add(spotLight)
 
-        dws.allVariables.scene.add(new THREE.AmbientLight(0x666666))
-
-        // let grid = GridAndSpike(8, 8, 1./4.)
-        // // grid.position.y = -1. + .01
-        // grid.rotation.x = TAU / 4.
-        // dws.allVariables.scene.add(grid)
-
-        let skyBgGeo = new THREE.SphereGeometry(perspectiveCamera.far * .9)
-        let skyBgMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(.18431372, .18431372, .18431372), side:THREE.BackSide })
+        dw.scene.add(new THREE.AmbientLight(0x666666))
+        
         const skyBg = new THREE.Mesh(skyBgGeo, skyBgMat)
-        dws.allVariables.scene.add(skyBg)
-
-        {
-            let mvsFsq = FullScreenQuad(new THREE.ShaderMaterial())
-            mvsFsq.material.fragmentShader = await getTextFile('mv.glsl') + `
-                void main() {
-                    raycast();
-                }`
-            
-            // mvsFsq.material.lights = true
-            mvsFsq.material.depthTest = true
-            dws.allVariables.scene.add(mvsFsq)
-        }
-
-        // renderer.outputEncoding = THREE.sRGBEncoding
+        dw.scene.add(skyBg)
     }
 
     function render() {
@@ -140,13 +114,25 @@ async function initDws() {
         renderer.clear(true, true)
         renderer.setScissorTest(true)
 
-        dws.allVariables.render()
-        dws.final.render()
+        for(dwName in dws)
+            dws[dwName].render()
 
         requestAnimationFrame(render)
     }
 
-    await initCompilation(dws)
+    dws.final = Dw(bottomDwEl)
+
+    dws.second = Dw(secondDwEl)
+    add3dStuffToDw(dws.second)
+    let hsvApparatus = await initHsv()
+    dws.second.scene.add(hsvApparatus)
+
+    dws.top = Dw(topDwEl)
+    add3dStuffToDw(dws.top)
+    let pgaApparatus = await initPga()
+    dws.top.scene.add(pgaApparatus)
+
+    await initCompilation()
 
     return render
 }
@@ -158,8 +144,8 @@ function GridAndSpike(numWide, numTall, spacing) {
     let verticalExtent = numTall / 2 * spacing
     let horizontalExtent = numWide / 2 * spacing
     let vertices = []
-    vertices.push(new THREE.Vector3(0.,0.,-1.))
-    vertices.push(new THREE.Vector3(0.,0.,1.))
+    vertices.push(new THREE.Vector3(0., 0., -1.))
+    vertices.push(new THREE.Vector3(0., 0., 1.))
     for (let i = 0; i < numWide + 1; i++) {
         let x = (i - numWide / 2) * spacing
         vertices.push(new THREE.Vector3(x, -verticalExtent, 0), new THREE.Vector3(x, verticalExtent, 0))

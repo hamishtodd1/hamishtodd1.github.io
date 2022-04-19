@@ -23,6 +23,7 @@ let logged = 0
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, canvas: canvas3d })
 renderer.shadowMap.enabled = true
+let camera = null
 let mouse = null
 
 const discreteViridis = [

@@ -15,14 +15,20 @@
         You need to get arrays of them all for the snapping comparison anyway
     On the other hand
         You might need their values on the CPU anyway
-        It's a pain to inject code
+        How much code to inject?
+            Can apparently have globals to push to
+        Probably it's not faster actually, because every pixel has to do the suggestion-finding
         Could compare in javascript. Would let you update the textarea in realtime
             It'll be a nightmare to debug the suggester in glsl
         You may want to visualize things in a way that's better done with a mesh than an sdf
+
+        When the whole thing is compiled,
 */
 
 varying vec4 coord;
 varying vec2 frameCoord;
+
+vec3 foo;
 
 float boxIntersection( in vec3 rayOrigin, in vec3 rayDirection, vec3 boxSize ) //normal you figure out
 {
@@ -168,40 +174,40 @@ void raycast()
         updateFromDist( dist, lowestDist, vec3(1.,1.,0.), lowestDistColor );
     }
 
-    // {
-    //     vec3 planeNormal = normalize( vec3(1.,1.,0.) );
-    //     float planeExtra = 0.;
-    //     float dist = patchyPlaneIntersect( rayOrigin, rayDirection, vec4(planeNormal, planeExtra) );
-
-    //     updateFromDist( dist, lowestDist, vec3(0.,1.,1.), lowestDistColor );
-    // }
-
-    // {
-    //     vec3 cylAxis = normalize( vec3(0.,1.,0.) );
-    //     vec3 cylBasePoint = normalize( vec3(.3,0.,0.) );
-    //     float dist = cylIntersect( rayOrigin, rayDirection, cylBasePoint, cylAxis );
-
-    //     updateFromDist( dist, lowestDist, vec3(1.,0.,1.), lowestDistColor );
-    // }
-
     {
-        vec3 floorDimensions = vec3(2.,.001,2.);
-        vec3 floorPosition = vec3(0.,-1.,0.);
-        float dist = boxIntersection( rayOrigin - floorPosition, rayDirection, floorDimensions );
+        vec3 planeNormal = normalize( vec3(1.,1.,0.) );
+        float planeExtra = 0.;
+        float dist = patchyPlaneIntersect( rayOrigin, rayDirection, vec4(planeNormal, planeExtra) );
 
-        updateFromDist( dist, lowestDist, vec3(.5,.5,.5), lowestDistColor );
+        updateFromDist( dist, lowestDist, vec3(0.,1.,1.), lowestDistColor );
     }
 
     {
-        vec3 ySquareDimensions = vec3(1.,.01,1.);
-        vec3 ySquarePosition = vec3(0.,0.,0.);
+        vec3 cylAxis = normalize( vec3(0.,1.,0.) );
+        vec3 cylBasePoint = normalize( vec3(.3,0.,0.) );
+        float dist = cylIntersect( rayOrigin, rayDirection, cylBasePoint, cylAxis );
 
-        float dist = boxIntersection( rayOrigin - ySquarePosition, rayDirection, ySquareDimensions );
-        updateFromDist( dist, lowestDist, vec3(.7,.7,.7), lowestDistColor );
-
-        dist = capIntersect( rayOrigin, rayDirection, vec3(0.,1.,0.), vec3(0.,-1.,0.), .03 );
-        updateFromDist( dist, lowestDist, vec3(.6,.6,.6), lowestDistColor );
+        updateFromDist( dist, lowestDist, vec3(1.,0.,1.), lowestDistColor );
     }
+
+    // {
+    //     vec3 floorDimensions = vec3(2.,.001,2.);
+    //     vec3 floorPosition = vec3(0.,-1.,0.);
+    //     float dist = boxIntersection( rayOrigin - floorPosition, rayDirection, floorDimensions );
+
+    //     updateFromDist( dist, lowestDist, vec3(.5,.5,.5), lowestDistColor );
+    // }
+
+    // {
+    //     vec3 ySquareDimensions = vec3(1.,.01,1.);
+    //     vec3 ySquarePosition = vec3(0.,0.,0.);
+
+    //     float dist = boxIntersection( rayOrigin - ySquarePosition, rayDirection, ySquareDimensions );
+    //     updateFromDist( dist, lowestDist, vec3(.7,.7,.7), lowestDistColor );
+
+    //     dist = capIntersect( rayOrigin, rayDirection, vec3(0.,1.,0.), vec3(0.,-1.,0.), .03 );
+    //     updateFromDist( dist, lowestDist, vec3(.6,.6,.6), lowestDistColor );
+    // }
     
     // res = rayOrigin + distAlongRay * rayDirection;
     if(lowestDist == 998.)

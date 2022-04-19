@@ -32,3 +32,4 @@ vec4 encodeFloat (float val) {
     float byte1 = (sign * 128. + remaining_bits_of_biased_exponent) / 255.; 
     return vec4(byte4, byte3, byte2, byte1); 
 }
+

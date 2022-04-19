@@ -1,4 +1,13 @@
-let mentions = []
+const mentions = []
+const variables = []
+
+const TYPES_POINT = 0
+const TYPES_COLOR = 1
+
+let oldClientX = 0
+let oldClientY = 0
+
+const dws = {}
 
 const basicVertex = `
 varying vec4 coord; //fragcoord is 

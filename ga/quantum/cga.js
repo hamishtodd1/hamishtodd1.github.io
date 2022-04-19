@@ -155,7 +155,7 @@ function initCga() {
         })
     }
 
-    //------------CYLINDER
+    //------------CYLINDER eg visualization of PGA
     {
         let radius = Math.sqrt(2.) * nO.y
         let cyl = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, 1., 32, 1,true, TAU / 2., TAU / 2.), niceMat(.3))
@@ -167,9 +167,18 @@ function initCga() {
         wholeThing.add(cyl)
 
         let rim = new THREE.Mesh(new THREE.TorusGeometry(radius, tubeRadius, 7, 16, TAU / 2.), niceMat(.3))
+        wholeThing.add(rim)
+
+        //bottom of cylinder
         rim.geometry.rotateY(TAU / 4.)
         rim.geometry.rotateZ(TAU / 8.)
-        wholeThing.add(rim)
+
+        //stretched to go with disk
+        // rim.geometry.rotateY(TAU / 4.)
+        // rim.geometry.rotateZ(TAU / 4.)
+        // rim.position.y = nO.y
+        // rim.position.x = rim.position.y
+        // rim.scale.x *= Math.SQRT2
     }
 
     //------------CONE

@@ -1,21 +1,19 @@
 /*
 TODO
     Short term
-        RGB cube dw
-        Drawing system for multivectors
-            No need for sdf, you can just do exacts and then look at the closest
-        3,0,1 multivectors
-            Sdf, since it's all in one shader anyway. Nice lighting, including on plane
-            {
-                //do everything in the shader, calculating pts, lines, planes along the way
-                //pass those to an sdf function that does spheres cylinders planes
-            }
+        3D PGA
         Editing from the window
+            For colors
+            For points
+            Drag to a different space's window to change its type
+        3D PGA apparatus
         Double click menu for:
             diagram line color
-            what kind of object it is (changes the code?)
             causes camera to whirl around so it is centered, whatever it is
         suggestions
+            When you move something, it could leave its current value behind
+                And thereby be based on that, like +=
+                Alternatively, maybe you're defining a transform
             You have a single shader calculate the whole lot of them
             Player is dragging eg a point around
             If a suggestion is close enough to snap, then you do that to the point
@@ -25,10 +23,11 @@ TODO
             When you snap it into place, what it's based on is highlighted (using the diagram things)
         Uniforms
             Shadertoy-inspired
-            And mouse ray in final dw is a variable
-            And VR hand
+            Mouse ray in final dw is a variable
+            VR hand
         Sphere at infinity dw
     Medium term
+        If you have a nice pile of dws, and you go from line to line so different ones become relevant, nice transition
         (2,1) halfplane window - v. important, lets you program with mouse
             lerp as an example of a simple function to try it out with
             write some numbers on a line
@@ -46,12 +45,13 @@ TODO
         Maybe you have some point that goes weird places in 3D when you change some 1d or 2d variable
             Hold a button to make it so that the thing gets a trail
     Long term
+        Making your own spaces
         Optimization:
             threejs shaders have uv and normal built in. Irrelevant, use RawShader
         Demonstration videos
             Volumetric rendering, can march through texture
         A puzzle game that is a series of "code this shader" challenges
-        Compilation with a webworker
+        Webworkers?
         Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
         Above is for fragment shaders(!)
             vertex shaders
@@ -64,14 +64,14 @@ TODO
         Export(/import?):
             threejs
             unity
-            html page
+            html page - EE
             export threejs function creating the thing it is with the appropriate uniforms
-            Do a workshop for kids at makespace
+            Workshop for kids at makespace. Everyone's stuff goes into a VR sim
 
 
 
 For now, 
-    "allVariables" dw and 
+    "top" dw and 
     "just this line" dw, which you can engineer by mentioning several variables in a line
     And some are different "types" 
         (3,1)
@@ -105,13 +105,14 @@ In favor of vscode:
 */
 
 async function init() {
-    let initialText = 
-`vec4 mainImage()
-{
-    vec4 myPoint = vec4(1.2,1.5,0.,1.);
-    vec4 myPoint2 = vec4(-.2,.4,0.,1.);
 
-    return vec4( 1., .5, 0., 1.);
+    initCamera()
+
+    let initialText = 
+`void mainImage( out vec4 fragColor ) {
+
+    vec4 myPoint = vec4(1.2,1.5,0.,1.);
+    fragColor = vec4( 1., .5, 0., 1. );
 }`
 //half way 1.0653362070468535, 0.8803922415546626, 1.7062327591717965
     textarea.value = initialText
@@ -127,13 +128,7 @@ async function init() {
     // while ((index = str.indexOf(searchStr, startIndex)) > -1) {
     //     indices.push(index);
     //     startIndex = index + searchStrLen;
-    // }
-    
-    textarea.addEventListener('dblclick',(event)=>{
-        // log(document.getSelection().toString())
-    })
-
-    
+    // }    
 
     // initSound()
     // initMouse()

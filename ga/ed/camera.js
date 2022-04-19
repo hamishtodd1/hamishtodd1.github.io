@@ -1,12 +1,10 @@
 function initCamera() {
-    const allVariablesDwElem = topRightDw
-
     const fov = 60.
-    const aspect = eval(getComputedStyle(allVariablesDwElem).aspectRatio)
+    const aspect = eval(getComputedStyle(topDwEl).aspectRatio)
     const near = .1
     const far = 50.
 
-    var perspectiveCamera = new THREE.PerspectiveCamera(fov, aspect, near, far)
+    camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
 
     let fsqMatrix = new THREE.Matrix4()
     
@@ -49,22 +47,20 @@ function initCamera() {
 
         cameraLat = Math.sign(cameraLat) * Math.min(Math.abs(cameraLat), TAU / 4.01)
 
-        perspectiveCamera.position.set(0., 0., 1.)
-        perspectiveCamera.position.applyAxisAngle(xUnit, cameraLat)
-        perspectiveCamera.position.applyAxisAngle(yUnit, cameraLon)
-        perspectiveCamera.position.setLength(3.7)
-        perspectiveCamera.lookAt(0., 0., 0.)
+        camera.position.set(0., 0., 1.)
+        camera.position.applyAxisAngle(xUnit, cameraLat)
+        camera.position.applyAxisAngle(yUnit, cameraLon)
+        camera.position.setLength(3.7)
+        camera.lookAt(0., 0., 0.)
 
-        perspectiveCamera.updateMatrix()
-        perspectiveCamera.updateProjectionMatrix()
+        camera.updateMatrix()
+        camera.updateProjectionMatrix()
 
         fsqMatrix.copy(fsqMatrixPreCamera)
-        fsqMatrix.premultiply(perspectiveCamera.matrix)
+        fsqMatrix.premultiply(camera.matrix)
     }
     addToCamerLonLat(0., 0.)
 
-    let oldClientX = 0
-    let oldClientY = 0
     document.addEventListener('mousemove', (event) => {
         if (rightClicking) {
             let lonDiff = -.004 * (event.clientX - oldClientX)
@@ -78,5 +74,5 @@ function initCamera() {
         oldClientY = event.clientY
     })
 
-    return perspectiveCamera
+    return camera
 }

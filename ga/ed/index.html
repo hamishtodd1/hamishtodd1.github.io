@@ -14,6 +14,12 @@
         </pre>
     </div>
 
+    <!-- 
+        Webgl instead of css?
+            You may want to do zany stuff, animated radial menus with little animations
+            It's more code but no insane problems
+     -->
+
     <svg id="ourSvg">
         <line id="labelLine" x1="-100" y1="-100" x2="-100" y2="-100" style="stroke-width:2" />
 
@@ -23,17 +29,36 @@
         <line id="labelSide4" x1="-100" y1="-100" x2="-100" y2="-100" style="stroke-width:2" />
     </svg>
     
-    <!-- <p>
-        Syntax Highlighting by <a href="https://prismjs.com/">Prism.js</a><br />
-        Font from <a href="https://fonts.google.com/">Google Fonts</a><br />
-        Some code from <a href="https://css-tricks.com/creating-an-editable-textarea-that-supports-syntax-highlighted-code/">Here</a><br />
-    </p> -->
-
     <canvas id="canvas3d"></canvas>
     <canvas id="canvas2d"></canvas>
 
-    <span id="topRightDw"></span>
-    <span id="bottomRightDw"></span>
+    <span id="topDwEl"></span>
+    <span id="secondDwEl"></span>
+    <span id="bottomDwEl"></span>
+
+    <!-- <ul class="dropdown">
+        <li><a href="#">Menu</a>
+            <ul>
+                <li><a href="">Nice Dropdown Menu</a></li>
+                <li><a href="">Submenu - 1</a></li>
+                <li><a href="#">Dropdown</a>
+                    <ul>
+                        <li><a href="">Submenu - 1</a></li>
+                        <li><a href="">Submenu - 2</a></li>
+                        <li><a href="#">Dropdown</a>
+                            <ul>
+                                <li><a href="">Submenu - 1</a></li>
+                                <li><a href="">Submenu - 2</a></li>
+                                <li><a href="">Submenu - 3</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="">Submenu - 3</a></li>
+                    </ul>
+                </li>
+                <li><a href="">Submenu - 2</a></li>
+            </ul>
+        </li>
+    </ul> -->
 
     <span id="textMeasurer">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span> <!-- contains 40 characters -->
     
@@ -47,14 +72,23 @@
     <script src="../common/variables.js"></script>
     <script src="variables.js"></script>
 
+    <script src="hover.js"></script>
     <script src="compilation.js"></script>
     <script src="camera.js"></script>
+    <script src="hsv.js"></script>
+    <script src="pga.js"></script>
     <script src="dws.js"></script>
     <script src="init.js"></script>
 
     <script>
         init()
     </script>
+
+    <!-- <p>
+        Syntax Highlighting by <a href="https://prismjs.com/">Prism.js</a><br />
+        Font from <a href="https://fonts.google.com/">Google Fonts</a><br />
+        Some code from <a href="https://css-tricks.com/creating-an-editable-textarea-that-supports-syntax-highlighted-code/">Here</a><br />
+    </p> -->
 
 </body>
 </html>

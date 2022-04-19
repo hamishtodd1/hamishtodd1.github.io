@@ -1,3 +1,32 @@
+
+//fixed length array
+function fixedLengthArray(elementConstructor, elementDestructor) {
+	let arr = []
+	let usages = []
+
+	return {
+		arr,
+		getNew: () => {
+			log(usages)
+			let lowestUnused = usages.indexOf(false)
+			if(lowestUnused === -1) {
+				let newEl = new elementConstructor()
+				arr.push(newEl)
+				usages.push(true)
+				return newEl
+			}
+			else {
+				usages[lowestUnused] = true
+				return arr[lowestUnused]
+			}
+		},
+		free: (el) => {
+			usages[arr.indexOf(el)] = false
+			elementDestructor(el)
+		}
+	}
+}
+
 lerp = (t,start,end) => start + t*(end-start)
 intervalToRadians = (t) => -Math.PI + TAU * t
 
@@ -206,6 +235,33 @@ function RandomSequenceSeeded(seed)
 	}
 
 	return generator
+}
+
+function forEachVecInAttribute(arr, func) {
+	for (let i = 0, il = arr.length / 3; i < il; ++i) {
+		v1.set(arr[i * 3 + 0], arr[i * 3 + 1], arr[i * 3 + 2])
+		func(v1, i)
+		arr[i * 3 + 0] = v1.x; arr[i * 3 + 1] = v1.y; arr[i * 3 + 2] = v1.z;
+	}
+}
+
+async function getTextFile(fileName) {
+	let ret = null
+
+	await new Promise(resolve => {
+		let xhr = new XMLHttpRequest();
+		xhr.open("GET", fileName, true);
+		xhr.onload = function (e) {
+			ret = xhr.response
+			resolve();
+		};
+		xhr.onerror = function () {
+			console.error(fileName, "didn't load");
+		};
+		xhr.send();
+	})
+
+	return ret
 }
 
 function assignShader(fileName, materialToReceiveAssignment, vertexOrFragment)
