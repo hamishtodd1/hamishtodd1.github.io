@@ -59,6 +59,10 @@ async function initCompilation()
     const PRESENCE_LEVEL_UNCONFIRMED = -1
     const PRESENCE_LEVEL_CONFIRMED = 1
     const PRESENCE_LEVEL_DELETED = 0
+    addMentionToAssociatedWindow = (mention) =>{
+        let dwToAddTo = mention.type === TYPES_POINT ? dws.top : dws.second
+        dwToAddTo.scene.add(mention.mesh)
+    }
     class Mention {
         variable;
 
@@ -106,6 +110,9 @@ void main() {
 
     compile = async () => {
 
+        lowestChangedLineSinceCompile = Infinity
+        setSvgLine(changedLineIndicator, -10, -10, -10, -10)
+
         // let sansComments = textarea.value.replace(commentRemovalRegex, " ")
 
         //could use this as a check for problems with the shader - don't do the below if it's bad
@@ -118,23 +125,10 @@ void main() {
                 mention.presenceLevel = PRESENCE_LEVEL_UNCONFIRMED
         })
         
-        let nameNumMentions = {}    
+        let variableNumMentions = {} //TODO should be in the Variable
         
-        let bracesDeep = 0
-        let strSoFar = ""
-        let lines = textarea.value.match(lineDividingRegex)
-
-        //even with the suggestyou could get everything out of the
-
+        let lines = textarea.value.split("\n")
         lines.forEach((l,lineIndex) => {
-            strSoFar += l
-
-            //this doesn't even necessarily work
-            //could break up by {,},;,
-            if (l.indexOf("{") !== -1)
-                ++bracesDeep
-            if (l.indexOf("}") !== -1)
-                --bracesDeep            
 
             let matches = [...l.matchAll(nameRegex)]
             if(matches === null)
@@ -148,11 +142,11 @@ void main() {
                 //All that's relevant is on it
                 //If we change it in its entirety, nothing will be lost
 
-                if (nameNumMentions[name] === undefined)
-                    nameNumMentions[name] = 0
+                if (variableNumMentions[name] === undefined)
+                    variableNumMentions[name] = 0
 
                 //in *theory* you could avoid having to recompile stuff that's below an edit. Hard!
-                let mention = mentions.find((m) => m.variable.name === name && m.mentionsFromStart === nameNumMentions[name])
+                let mention = mentions.find((m) => m.variable.name === name && m.mentionsFromStart === variableNumMentions[name])
                 if (mention === undefined) {
                     let variable = variables.find((v) => v.name === name )
                     if(variable === undefined)
@@ -162,7 +156,7 @@ void main() {
                     if (mention === undefined)
                         mention = new Mention(variable)
 
-                    mention.mentionsFromStart = nameNumMentions[name]
+                    mention.mentionsFromStart = variableNumMentions[name]
                 }
 
                 mention.lineIndex = lineIndex
@@ -172,12 +166,14 @@ void main() {
 
                 updateBox(match.index, lineIndex, name.length, mention.box)
 
-                ++nameNumMentions[name]
+                ++variableNumMentions[name]
             })
         })
-        log(nameNumMentions)
 
         mentions.forEach((mention) => {
+
+            if (mention.presenceLevel === PRESENCE_LEVEL_UNCONFIRMED)
+                mention.presenceLevel = PRESENCE_LEVEL_DELETED
 
             let withMentionReadout = ""
             withMentionReadout += readoutPrefix
@@ -203,24 +199,76 @@ void main() {
             }
             withMentionReadout += readoutSuffix
 
-            getShaderOutput(withMentionReadout, mention.canvasPosWorldSpace)
+            getShaderOutput( withMentionReadout, mention.canvasPosWorldSpace )
 
-            mention.mesh.position.set(mention.canvasPosWorldSpace[0] / mention.canvasPosWorldSpace[3], mention.canvasPosWorldSpace[1] / mention.canvasPosWorldSpace[3], mention.canvasPosWorldSpace[2] / mention.canvasPosWorldSpace[3])
-            let dwToAddTo = mention.type === TYPES_POINT ? dws.top : dws.second
-            dwToAddTo.scene.add(mention.mesh)
-
-            if (mention.presenceLevel === PRESENCE_LEVEL_UNCONFIRMED) {
-                mention.presenceLevel = PRESENCE_LEVEL_DELETED
-                mention.mesh.parent.remove(mention.mesh)
-            }
+            mention.mesh.position.set(
+                mention.canvasPosWorldSpace[0] / mention.canvasPosWorldSpace[3], 
+                mention.canvasPosWorldSpace[1] / mention.canvasPosWorldSpace[3],
+                mention.canvasPosWorldSpace[2] / mention.canvasPosWorldSpace[3] )
         })
         //this doesn't guarantee that you're using them as much as possible, just that they'll be cleared up on the next one
 
-        //so, you're going to save this out
-        //with information about the locations, on the page, of the mentions,
-        //for the hover stuff
-        //because what if you compile, it makes a picture, you change the code but don't compile, hover the picture...
-
-        delete nameNumMentions
+        delete variableNumMentions
     }
+
+    let lowestChangedLineSinceCompile = Infinity
+
+    function updateDwContents() {
+
+        if(caretLine > lowestChangedLineSinceCompile) {
+            dws.top.elem.style.display = 'none'
+            dws.second.elem.style.display = 'none'
+        }
+        else {
+            dws.top.elem.style.display = ''
+            dws.second.elem.style.display = ''
+
+            mentions.forEach((mention) => {
+                if(mention.lineIndex === caretLine) {
+                    addMentionToAssociatedWindow(mention)
+                }
+                else if (mention.mesh.parent !== null)
+                    mention.mesh.parent.remove(mention.mesh)
+            })
+        }
+    }
+
+    changedLineIndicator.style.stroke = "rgb(" + 180 + "," + 180 + "," + 180 + ")"
+    textarea.addEventListener('input', ()=>{
+        lowestChangedLineSinceCompile = caretLine
+        let textareaComputedStyle = textarea.getBoundingClientRect()
+        let y = lineToScreenY(caretLine+1)
+        setSvgLine(changedLineIndicator, 
+            textareaComputedStyle.x, y, 
+            textareaComputedStyle.width + textareaComputedStyle.x, y)
+        
+        //oh yeah and you should add the mesh when you hover
+
+        updateDwContents()
+    })
+
+    let caretPositionOld = -1
+    let caretLine = -1
+    updateFunctions.push( () => {
+        let caretPosition = textarea.selectionStart
+        if (caretPosition !== caretPositionOld) {
+            
+            let lineIndex = 0
+            for(let i = 0, il = textarea.value.length; i < il; ++i) {
+                if (i === caretPosition ) {
+                    //lineIndex is new caret line
+                    
+                    if(lineIndex !== caretLine) {
+                        caretLine = lineIndex
+                        updateDwContents()
+                    }
+                }
+
+                if (textarea.value[i] === "\n")
+                    ++lineIndex
+            }
+
+            caretPositionOld = caretPosition
+        }
+    })
 }

@@ -101,7 +101,7 @@ ul li:hover>ul {
   top: 0;
 }
 #secondDwEl {
-  top: 155px
+  top: calc(9/16*270px + 10px)
 }
 #bottomDwEl {
   bottom: 0;

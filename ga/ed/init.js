@@ -1,19 +1,32 @@
 /*
 TODO
     Short term
-        3D PGA
+        Dw shows only what's on the line your caret is on
+            And maybe also something you've hovered
+        After you've edited a line but before you've compiled...
+            You probably don't want to see annotations from after that point
+        Complex numbers window which allows you to see what's up with a motor
+            Note that it's different from the conformal 2D euclidean space window
+                because it's more about MULTIPLY by the complex number
+                translations are ADDITIONS
+        3D PGA code (for editing)
         Editing from the window
-            For colors
-            For points
             Drag to a different space's window to change its type
-        3D PGA apparatus
-        Double click menu for:
-            diagram line color
-            causes camera to whirl around so it is centered, whatever it is
-        suggestions
+            For points
+            For colors
             When you move something, it could leave its current value behind
-                And thereby be based on that, like +=
-                Alternatively, maybe you're defining a transform
+                And thereby have a suggestion based on that, like +=
+                And maybe you're defining a transform
+            When the user moves a point to an arbitrary place, you get the say in how it got there
+                Probably the best way to do it is not "now it is this" but rather "+= that"
+                Or maybe even r*p*~r
+                    If r*p*~r did not come from a suggestion, it probably makes r as well
+        3D PGA apparatus
+            Want oriented elements
+                Planes that are colored on a side or not colored, comma or not comma
+                Lines that have arrow along or around them
+                Same with points
+        Suggestions
             You have a single shader calculate the whole lot of them
             Player is dragging eg a point around
             If a suggestion is close enough to snap, then you do that to the point
@@ -21,6 +34,11 @@ TODO
             When player lets go, we do a special render, where we do not render the point
                 instead we render, to a target, some pixels that can be read as "here's the line of code you want"
             When you snap it into place, what it's based on is highlighted (using the diagram things)
+            They should take into account downstream stuff, if it's in the window
+                eg:
+                    I am editing p. p affects q but p does not affect b
+                    p can take value p' is such that q == b. 
+                This is tricky though
         Uniforms
             Shadertoy-inspired
             Mouse ray in final dw is a variable
@@ -34,16 +52,14 @@ TODO
             They appear in a  if my carat is on that line
             I can click or drag or whatever, and find the number I know I want
             Maybe move my carat through the line (4*8+5*2)/2 and see it animate
-        You don't necessarily want every single thing in one dw, you have to have
-            Controlling what is in what dws
-            Maybe making new dws
-            Auto-scrolling to the correct dw?
-            A dw that only shows the line your caret is on
+        Got many dws? they auto-rearrange
+        Double click causes camera to whirl around so clicked variable is centered, whatever it is
         mentions are sensetive to for loops
             For loops have an early-escape integer
             For every mention in the loop body, we're cutting off the shader after that integer
         Maybe you have some point that goes weird places in 3D when you change some 1d or 2d variable
             Hold a button to make it so that the thing gets a trail
+        Errors appear on lines they're referring to
     Long term
         Making your own spaces
         Optimization:
@@ -111,7 +127,10 @@ async function init() {
     let initialText = 
 `void mainImage( out vec4 fragColor ) {
 
-    vec4 myPoint = vec4(1.2,1.5,0.,1.);
+    vec4 myPoint1 = vec4(1.2,1.5,0.,1.);
+    vec4 myPoint2 = vec4(0.2,1.,0.,1.);
+    vec4 a = myPoint1 + myPoint2;
+
     fragColor = vec4( 1., .5, 0., 1. );
 }`
 //half way 1.0653362070468535, 0.8803922415546626, 1.7062327591717965

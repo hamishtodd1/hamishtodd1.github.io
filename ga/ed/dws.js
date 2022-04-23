@@ -114,6 +114,8 @@ async function initDws() {
         renderer.clear(true, true)
         renderer.setScissorTest(true)
 
+        updateFunctions.forEach((uf)=>uf())
+
         for(dwName in dws)
             dws[dwName].render()
 
@@ -129,8 +131,8 @@ async function initDws() {
 
     dws.top = Dw(topDwEl)
     add3dStuffToDw(dws.top)
-    let pgaApparatus = await initPga()
-    dws.top.scene.add(pgaApparatus)
+    // let pgaApparatus = await initPga()
+    // dws.top.scene.add(pgaApparatus)
 
     await initCompilation()
 

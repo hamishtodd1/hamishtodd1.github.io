@@ -8,16 +8,10 @@ function initHover() {
 
     let svgLines = [labelLine, labelSide1, labelSide2, labelSide3, labelSide4]
 
-    function setSvgLine(svgLine, x1, y1, x2, y2) {
-        svgLine.x1.baseVal.value = x1
-        svgLine.y1.baseVal.value = y1
-        svgLine.x2.baseVal.value = x2
-        svgLine.y2.baseVal.value = y2
-    }
-
+    lineToScreenY = (line) => line * lineHeight + textAreaOffset
     updateBox = (index, line, nameLength, target) => {
         target.x = index * characterWidth + textAreaOffset
-        target.y = line * lineHeight + textAreaOffset
+        target.y = lineToScreenY(line)
 
         target.w = nameLength * characterWidth
     }
@@ -44,14 +38,13 @@ function initHover() {
         return toElementCoord(mention.type, canvasX, canvasY)
     }
 
-    function highlightMention(mention, elemX, elemY) {
+    function highlightMention(mention) {
         hoveredMention = mention
 
         let c = mention.variable.col
         svgLines.forEach((svgLine) => { svgLine.style.stroke = "rgb(" + c.r * 255. + "," + c.g * 255. + "," + c.b * 255. + ")" })
 
-        if(elemX === undefined)
-            [elemX, elemY] = canvasPos(mention)
+        let [elemX, elemY] = canvasPos(mention)
 
         let mb = mention.box
 
@@ -64,6 +57,8 @@ function initHover() {
         setSvgLine(labelSide2, mb.x + mb.w, mb.y, mb.x + mb.w, mb.y + lineHeight)
         setSvgLine(labelSide3, mb.x + mb.w, mb.y + lineHeight, mb.x, mb.y + lineHeight)
         setSvgLine(labelSide4, mb.x, mb.y + lineHeight, mb.x, mb.y)
+
+        addMentionToAssociatedWindow(mention)
     }
 
     function resetHover() {
@@ -96,39 +91,43 @@ function initHover() {
         onTextAreaHover(event.clientX,event.clientY)
     })
 
-    textarea.addEventListener('dblclick', (event) => {
+    dws.top.elem.addEventListener('dblclick', (event) => {
         if (hoveredMention.type === TYPES_COLOR)
             hoveredMention.type = TYPES_POINT
         else if (hoveredMention.type === TYPES_POINT)
             hoveredMention.type = TYPES_COLOR
 
-        onTextAreaHover(oldClientX,oldClientY)
+        resetHover()
     })
 
-    function onDwHover(clientX,clientY) {
+    function onDwHover(dw, clientX,clientY) {
         camera.updateMatrixWorld()
         worldToCanvas.copy(camera.projectionMatrix).multiply(camera.matrixWorldInverse)
 
         resetHover()
 
-        let boxSize = 6
+        let closestIndex = -1
+        let closestDist = Infinity
+        mentions.forEach((mention,i) => {
+            if(mention.mesh.parent !== dw.scene)
+                return
 
-        mentions.every((mention) => {
             let [elemX, elemY] = canvasPos(mention)
-            let mouseProximate =
-                -boxSize < clientX - elemX && clientX - elemX < boxSize &&
-                -boxSize < clientY - elemY && clientY - elemY < boxSize
+            let dist = Math.sqrt(sq(clientX - elemX) + sq(clientY - elemY))
 
-            if (mouseProximate)
-                highlightMention(mention, elemX, elemY)
-
-            return !mouseProximate
+            if(dist < closestDist) {
+                closestIndex = i
+                closestDist = dist
+            }
         })
+        if(closestIndex !== -1)
+            highlightMention(mentions[closestIndex])
     }
 
     for(dwName in dws ) {
-        dws[dwName].elem.addEventListener('mousemove',(event)=>{
-            onDwHover(event.clientX,event.clientY)
+        let dw = dws[dwName]
+        dw.elem.addEventListener('mousemove',(event)=>{
+            onDwHover(dw, event.clientX,event.clientY)
         })
     }
 }
