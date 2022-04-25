@@ -109,19 +109,28 @@ ul li:hover>ul {
 
 /* TEXT WINDOW */
 
-#textarea, #highlighting {
+#textarea, #highlighting, #errorBox {
   /* Both elements need the same text and space styling so they are directly on top of each other */
   margin: 10px;
-  padding: 10px;
   border: 0;
 
   width: calc(100% - 324px);
-  height: calc(100% - 40px);
 
   /* In the same place */
   position: absolute;
-  top: 0;
   left: 0;
+}
+
+#errorBox {
+  padding: 0px;
+  background-color: rgb(106, 106, 106);
+  top: 100;
+}
+
+#textarea, #highlighting {
+  padding: 10px;
+  top: 0;
+  height: calc(100% - 40px);
 }
 
 #textarea, #highlighting, #textMeasurer, #highlighting * {

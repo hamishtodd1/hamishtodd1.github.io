@@ -24,6 +24,8 @@
 async function initCompilation()
 {
     initHover()
+
+    let lowestChangedLineSinceCompile = Infinity
     
     let finalFsq = FullScreenQuad(new THREE.ShaderMaterial())
     dws.final.scene.add(finalFsq)
@@ -106,7 +108,25 @@ void main() {
         pixelFloat += pixelIndex == k ? outputFloats[k] : 0.;
 
     gl_FragColor = encodeFloat(pixelFloat);
-}`    
+}`
+
+    let listeningForShaderErrors = false
+    webglErrorThrower = (errorLine) => {
+
+        if(!listeningForShaderErrors)
+            return
+
+        let errorParts = errorLine.split(":")
+        //this could be a crazy number because who knows what's been prefixed for the first call
+        const haphazardlyChosenNumber = 71
+        let lineNumber = parseInt(errorParts[2]) - haphazardlyChosenNumber
+
+        let errorContent = errorParts.slice(3).join(":")
+        errorBox.textContent = errorContent
+        errorBox.style.top = (lineToScreenY(.4 + lineNumber)).toString() + "px"
+
+        listeningForShaderErrors = false
+    }
 
     compile = async () => {
 
@@ -115,10 +135,12 @@ void main() {
 
         // let sansComments = textarea.value.replace(commentRemovalRegex, " ")
 
-        //could use this as a check for problems with the shader - don't do the below if it's bad
         //triggering a recompile isn't easy though
-        finalFsq.material.fragmentShader = textarea.value + toFragColorSuffix
-        finalFsq.material.needsUpdate = true
+        {
+            listeningForShaderErrors = true
+            finalFsq.material.fragmentShader = textarea.value + toFragColorSuffix
+            finalFsq.material.needsUpdate = true
+        }
         
         mentions.forEach((mention) => {
             if (mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED)
@@ -177,26 +199,23 @@ void main() {
 
             let withMentionReadout = ""
             withMentionReadout += readoutPrefix
-            for (let i = 0, il = lines.length; i < il; ++i) {
-                withMentionReadout += lines[i] //possibly there's a faster way to do this
+            withMentionReadout += lines.slice(0,mention.lineIndex+1).join("\n")
 
-                if( i === mention.lineIndex) {
-
-                    if (mention.type === TYPES_POINT) {
-                        withMentionReadout +=
-                            `     outputFloats[0] = ` + mention.variable.name + `.x;\n` +
-                            `     outputFloats[1] = ` + mention.variable.name + `.y;\n` +
-                            `     outputFloats[2] = ` + mention.variable.name + `.z;\n` +
-                            `     outputFloats[3] = ` + mention.variable.name + `.w;\n`
-                    }
-                    else if (mention.type === TYPES_COLOR) {
-                        withMentionReadout +=
-                            `     outputFloats[0] = ` + mention.variable.name + `.r;\n` +
-                            `     outputFloats[1] = ` + mention.variable.name + `.g;\n` +
-                            `     outputFloats[2] = ` + mention.variable.name + `.b;\n`
-                    }
-                }
+            if (mention.type === TYPES_POINT) {
+                withMentionReadout +=
+                    `     outputFloats[0] = ` + mention.variable.name + `.x;\n` +
+                    `     outputFloats[1] = ` + mention.variable.name + `.y;\n` +
+                    `     outputFloats[2] = ` + mention.variable.name + `.z;\n` +
+                    `     outputFloats[3] = ` + mention.variable.name + `.w;\n`
             }
+            else if (mention.type === TYPES_COLOR) {
+                withMentionReadout +=
+                    `     outputFloats[0] = ` + mention.variable.name + `.r;\n` +
+                    `     outputFloats[1] = ` + mention.variable.name + `.g;\n` +
+                    `     outputFloats[2] = ` + mention.variable.name + `.b;\n`
+            }
+
+            withMentionReadout += lines.slice(mention.lineIndex+1).join("\n")
             withMentionReadout += readoutSuffix
 
             getShaderOutput( withMentionReadout, mention.canvasPosWorldSpace )
@@ -210,8 +229,6 @@ void main() {
 
         delete variableNumMentions
     }
-
-    let lowestChangedLineSinceCompile = Infinity
 
     function updateDwContents() {
 
@@ -234,15 +251,16 @@ void main() {
     }
 
     changedLineIndicator.style.stroke = "rgb(" + 180 + "," + 180 + "," + 180 + ")"
-    textarea.addEventListener('input', ()=>{
-        lowestChangedLineSinceCompile = caretLine
-        let textareaComputedStyle = textarea.getBoundingClientRect()
-        let y = lineToScreenY(caretLine+1)
-        setSvgLine(changedLineIndicator, 
-            textareaComputedStyle.x, y, 
-            textareaComputedStyle.width + textareaComputedStyle.x, y)
-        
-        //oh yeah and you should add the mesh when you hover
+    textarea.addEventListener('input', () => {
+        errorBox.style.top = "-200px"
+
+        if (caretLine+1 < lowestChangedLineSinceCompile)
+            lowestChangedLineSinceCompile = caretLine+1
+        let textareaBox = textarea.getBoundingClientRect()
+        let y = lineToScreenY(lowestChangedLineSinceCompile)
+        setSvgLine(changedLineIndicator,
+            textareaBox.x, y, 
+            textareaBox.x + textareaBox.width, y)
 
         updateDwContents()
     })

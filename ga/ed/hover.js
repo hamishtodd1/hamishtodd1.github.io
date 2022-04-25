@@ -62,6 +62,11 @@ function initHover() {
     }
 
     function resetHover() {
+        //you don't know if it was there just due to mouse
+        //and hey mayybe you do want them all+
+        // if(hoveredMention!==null)
+        //     hoveredMention.mesh.parent.remove(hoveredMention.mesh)
+            
         hoveredMention = null
         svgLines.forEach((svgLine) => { setSvgLine(svgLine, -10, -10, -10, -10) })
     }

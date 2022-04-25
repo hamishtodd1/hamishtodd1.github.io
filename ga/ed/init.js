@@ -5,6 +5,7 @@ TODO
             And maybe also something you've hovered
         After you've edited a line but before you've compiled...
             You probably don't want to see annotations from after that point
+        If the variable hasn't changed value, would be nice if the versions of it that are the same as it are all hgighlighted
         Complex numbers window which allows you to see what's up with a motor
             Note that it's different from the conformal 2D euclidean space window
                 because it's more about MULTIPLY by the complex number
