@@ -9,6 +9,8 @@ let oldClientY = 0
 
 const dws = {}
 
+let hoveredMention = null
+
 const basicVertex = `
 varying vec4 coord; //fragcoord is 
 varying vec2 frameCoord;

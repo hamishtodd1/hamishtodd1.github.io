@@ -8,15 +8,17 @@ function initHover() {
 
     let svgLines = [labelLine, labelSide1, labelSide2, labelSide3, labelSide4]
 
-    lineToScreenY = (line) => line * lineHeight + textAreaOffset
-    updateBox = (index, line, nameLength, target) => {
+    let lastClientX = 100
+    let lastClientY = 100
+
+    lineToScreenY = (line) => {
+        return line * lineHeight + textAreaOffset - textarea.scrollTop
+    }
+    updateHorizontalBounds = (index, nameLength, target) => {
         target.x = index * characterWidth + textAreaOffset
-        target.y = lineToScreenY(line)
 
         target.w = nameLength * characterWidth
     }
-
-    let hoveredMention = null
 
     function toElementCoord(type,x,y) {
         let dwRect = type === TYPES_POINT ? dws.top.elem.getBoundingClientRect() : dws.second.elem.getBoundingClientRect()
@@ -35,7 +37,7 @@ function initHover() {
         let canvasX = transformedV.x / transformedV.w
         let canvasY = transformedV.y / transformedV.w
 
-        return toElementCoord(mention.type, canvasX, canvasY)
+        return toElementCoord(mention.variable.type, canvasX, canvasY)
     }
 
     function highlightMention(mention) {
@@ -46,63 +48,75 @@ function initHover() {
 
         let [elemX, elemY] = canvasPos(mention)
 
-        let mb = mention.box
+        let mb = mention.horizontalBounds
+        let mby = lineToScreenY(mention.lineIndex)
 
         setSvgLine(labelLine,
             mb.x + mb.w,
-            mb.y + lineHeight / 2.,
+            mby + lineHeight / 2.,
             elemX, elemY)
 
-        setSvgLine(labelSide1, mb.x, mb.y, mb.x + mb.w, mb.y)
-        setSvgLine(labelSide2, mb.x + mb.w, mb.y, mb.x + mb.w, mb.y + lineHeight)
-        setSvgLine(labelSide3, mb.x + mb.w, mb.y + lineHeight, mb.x, mb.y + lineHeight)
-        setSvgLine(labelSide4, mb.x, mb.y + lineHeight, mb.x, mb.y)
-
-        addMentionToAssociatedWindow(mention)
+        setSvgLine(labelSide1, mb.x, mby, mb.x + mb.w, mby)
+        setSvgLine(labelSide2, mb.x + mb.w, mby, mb.x + mb.w, mby + lineHeight)
+        setSvgLine(labelSide3, mb.x + mb.w, mby + lineHeight, mb.x, mby + lineHeight)
+        setSvgLine(labelSide4, mb.x, mby + lineHeight, mb.x, mby)
     }
 
-    function resetHover() {
-        //you don't know if it was there just due to mouse
-        //and hey mayybe you do want them all+
-        // if(hoveredMention!==null)
-        //     hoveredMention.mesh.parent.remove(hoveredMention.mesh)
-            
+    function resetHover() {            
         hoveredMention = null
         svgLines.forEach((svgLine) => { setSvgLine(svgLine, -10, -10, -10, -10) })
     }
 
-    function onTextAreaHover(clientX,clientY) {
+    function updateTextAreaHover(clientX,clientY) {
+        if(clientX !== undefined)
+            lastClientX = clientX
+        else
+            clientX = lastClientX
+        if (clientY !== undefined)
+            lastClientY = clientY
+        else
+            clientY = lastClientY
+
         resetHover()
 
         camera.updateMatrixWorld()
         worldToCanvas.copy(camera.projectionMatrix).multiply(camera.matrixWorldInverse)
 
         mentions.every((mention) => {
-            let mb = mention.box
+            let mb = mention.horizontalBounds
+            let mby = lineToScreenY(mention.lineIndex)
             let mouseInBox =
                 mb.x <= clientX && clientX < mb.x + mb.w &&
-                mb.y <= clientY && clientY < mb.y + lineHeight
+                mby <= clientY && clientY < mby + lineHeight
 
             if (mouseInBox)
                 highlightMention(mention)
 
             return !mouseInBox
         })
+
+        updateDwContents()
     }
 
     let worldToCanvas = new THREE.Matrix4()
     let transformedV = new THREE.Vector4()
     textarea.addEventListener('mousemove', (event)=>{
-        onTextAreaHover(event.clientX,event.clientY)
+        updateTextAreaHover(event.clientX,event.clientY)
     })
 
-    dws.top.elem.addEventListener('dblclick', (event) => {
-        if (hoveredMention.type === TYPES_COLOR)
-            hoveredMention.type = TYPES_POINT
-        else if (hoveredMention.type === TYPES_POINT)
-            hoveredMention.type = TYPES_COLOR
+    function onDblClick() {
+        if(hoveredMention !== null) {
+            let vari = hoveredMention.variable
+            vari.changeType(1 - vari.type)
+        }
+    }
+    textarea.addEventListener('dblclick', (event)=>{
+        onDblClick()
+        updateTextAreaHover(event.clientX,event.clientY)
+    })
 
-        resetHover()
+    textarea.addEventListener('scroll', (event) =>{
+        updateTextAreaHover()
     })
 
     function onDwHover(dw, clientX,clientY) {
@@ -114,7 +128,7 @@ function initHover() {
         let closestIndex = -1
         let closestDist = Infinity
         mentions.forEach((mention,i) => {
-            if(mention.mesh.parent !== dw.scene)
+            if (!mention.mesh.visible || mention.mesh.parent !== dw.scene)
                 return
 
             let [elemX, elemY] = canvasPos(mention)
@@ -133,6 +147,10 @@ function initHover() {
         let dw = dws[dwName]
         dw.elem.addEventListener('mousemove',(event)=>{
             onDwHover(dw, event.clientX,event.clientY)
+        })
+        dw.elem.addEventListener('dblclick', (event) => {
+            onDblClick()
+            onDwHover(event.clientX, event.clientY)
         })
     }
 }

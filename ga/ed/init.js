@@ -1,15 +1,6 @@
 /*
 TODO
     Short term
-        Dw shows only what's on the line your caret is on
-            And maybe also something you've hovered
-        After you've edited a line but before you've compiled...
-            You probably don't want to see annotations from after that point
-        If the variable hasn't changed value, would be nice if the versions of it that are the same as it are all hgighlighted
-        Complex numbers window which allows you to see what's up with a motor
-            Note that it's different from the conformal 2D euclidean space window
-                because it's more about MULTIPLY by the complex number
-                translations are ADDITIONS
         3D PGA code (for editing)
         Editing from the window
             Drag to a different space's window to change its type
@@ -27,6 +18,10 @@ TODO
                 Planes that are colored on a side or not colored, comma or not comma
                 Lines that have arrow along or around them
                 Same with points
+        Complex numbers window which allows you to see what's up with a motor
+            Note that it's different from the conformal 2D euclidean space window
+                because it's more about MULTIPLY by the complex number
+                translations are ADDITIONS
         Suggestions
             You have a single shader calculate the whole lot of them
             Player is dragging eg a point around
@@ -46,6 +41,7 @@ TODO
             VR hand
         Sphere at infinity dw
     Medium term
+        If the variable hasn't changed value, would be nice if the versions of it that are the same as it are all highlighted
         If you have a nice pile of dws, and you go from line to line so different ones become relevant, nice transition
         (2,1) halfplane window - v. important, lets you program with mouse
             lerp as an example of a simple function to try it out with
@@ -127,7 +123,6 @@ async function init() {
 
     let initialText = 
 `void mainImage( out vec4 fragColor ) {
-
     vec4 myPoint1 = vec4(1.2,1.5,0.,1.);
     vec4 myPoint2 = vec4(0.2,1.,0.,1.);
     vec4 a = myPoint1 + myPoint2;

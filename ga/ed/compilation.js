@@ -19,6 +19,8 @@
             uniform float iSampleRate;
             uniform vec3 iChannelResolution[4];
             uniform samplerXX iChanneli;
+
+        Also have the frag point in *3D* space
 */
 
 async function initCompilation()
@@ -47,6 +49,15 @@ async function initCompilation()
         col = new THREE.Color(0., 0., 0.);
         type = TYPES_POINT;
 
+        changeType(newType) {
+            this.type = newType
+
+            mentions.forEach((mention)=>{
+                if(mention.variable === this)
+                    mention.putInCorrectWindow()
+            })
+        }
+
         constructor(newName) {
             this.name = newName
 
@@ -61,25 +72,28 @@ async function initCompilation()
     const PRESENCE_LEVEL_UNCONFIRMED = -1
     const PRESENCE_LEVEL_CONFIRMED = 1
     const PRESENCE_LEVEL_DELETED = 0
-    addMentionToAssociatedWindow = (mention) =>{
-        let dwToAddTo = mention.type === TYPES_POINT ? dws.top : dws.second
-        dwToAddTo.scene.add(mention.mesh)
-    }
     class Mention {
         variable;
 
         mentionsFromStart;
-        box = {x:0.,y:0.,w:0.};
+        horizontalBounds = {x:0.,w:0.};
         canvasPosWorldSpace = new Float32Array([0.,0.,0.,0.])
         presenceLevel = PRESENCE_LEVEL_DELETED;
         lineIndex = -1;
+
+        putInCorrectWindow() {
+            let dw = this.variable.type === TYPES_POINT ? dws.top : dws.second
+            dw.scene.add(this.mesh)
+        }
 
         constructor(associatedVariable) {
             this.variable = associatedVariable
 
             this.mesh = new THREE.Mesh(pointGeo, new THREE.MeshBasicMaterial({color:this.variable.col}));
             this.mesh.castShadow = true
-            // this.mesh.visible = false
+            this.mesh.visible = false
+
+            this.putInCorrectWindow()
 
             mentions.push(this)
         }
@@ -173,6 +187,7 @@ void main() {
                     let variable = variables.find((v) => v.name === name )
                     if(variable === undefined)
                         variable = new Variable(name)
+                    //TODO and type???
 
                     mention = mentions.find((m) => m.presenceLevel === PRESENCE_LEVEL_DELETED)
                     if (mention === undefined)
@@ -184,9 +199,7 @@ void main() {
                 mention.lineIndex = lineIndex
                 mention.presenceLevel = PRESENCE_LEVEL_CONFIRMED
 
-                mention.type = TYPES_POINT
-
-                updateBox(match.index, lineIndex, name.length, mention.box)
+                updateHorizontalBounds(match.index, name.length, mention.horizontalBounds)
 
                 ++variableNumMentions[name]
             })
@@ -201,14 +214,14 @@ void main() {
             withMentionReadout += readoutPrefix
             withMentionReadout += lines.slice(0,mention.lineIndex+1).join("\n")
 
-            if (mention.type === TYPES_POINT) {
+            if (mention.variable.type === TYPES_POINT) {
                 withMentionReadout +=
                     `     outputFloats[0] = ` + mention.variable.name + `.x;\n` +
                     `     outputFloats[1] = ` + mention.variable.name + `.y;\n` +
                     `     outputFloats[2] = ` + mention.variable.name + `.z;\n` +
                     `     outputFloats[3] = ` + mention.variable.name + `.w;\n`
             }
-            else if (mention.type === TYPES_COLOR) {
+            else if (mention.variable.type === TYPES_COLOR) {
                 withMentionReadout +=
                     `     outputFloats[0] = ` + mention.variable.name + `.r;\n` +
                     `     outputFloats[1] = ` + mention.variable.name + `.g;\n` +
@@ -230,7 +243,7 @@ void main() {
         delete variableNumMentions
     }
 
-    function updateDwContents() {
+    updateDwContents = () => {
 
         if(caretLine > lowestChangedLineSinceCompile) {
             dws.top.elem.style.display = 'none'
@@ -241,11 +254,9 @@ void main() {
             dws.second.elem.style.display = ''
 
             mentions.forEach((mention) => {
-                if(mention.lineIndex === caretLine) {
-                    addMentionToAssociatedWindow(mention)
-                }
-                else if (mention.mesh.parent !== null)
-                    mention.mesh.parent.remove(mention.mesh)
+                mention.mesh.visible = 
+                    mention.lineIndex === caretLine || 
+                    mention === hoveredMention
             })
         }
     }
