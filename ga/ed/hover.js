@@ -21,7 +21,9 @@ function initHover() {
     }
 
     function toElementCoord(type,x,y) {
-        let dwRect = type === TYPES_POINT ? dws.top.elem.getBoundingClientRect() : dws.second.elem.getBoundingClientRect()
+        let dw = type === TYPES_POINT ? dws.top : dws.second
+        // dw.elem.style.display = ''
+        let dwRect = dw.elem.getBoundingClientRect()
         
         let ndc = { 
             x: x / 2. + .5,

@@ -47,7 +47,7 @@ async function initCompilation()
     class Variable {
         name;
         col = new THREE.Color(0., 0., 0.);
-        type = TYPES_POINT;
+        type;
 
         changeType(newType) {
             this.type = newType
@@ -58,8 +58,10 @@ async function initCompilation()
             })
         }
 
-        constructor(newName) {
+        constructor(newName, type) {
             this.name = newName
+
+            this.type = type
 
             let [r, g, b] = randomToViridis(.53 * Math.random())
             this.col.r = r; this.col.g = g; this.col.b = b;
@@ -77,7 +79,7 @@ async function initCompilation()
 
         mentionsFromStart;
         horizontalBounds = {x:0.,w:0.};
-        canvasPosWorldSpace = new Float32Array([0.,0.,0.,0.])
+        canvasPosWorldSpace = new Float32Array([0.,0.,0.,0.]);
         presenceLevel = PRESENCE_LEVEL_DELETED;
         lineIndex = -1;
 
@@ -181,13 +183,12 @@ void main() {
                 if (variableNumMentions[name] === undefined)
                     variableNumMentions[name] = 0
 
-                //in *theory* you could avoid having to recompile stuff that's below an edit. Hard!
+                //in *theory* you could avoid having to recompile stuff that's above an edit. Hard!
                 let mention = mentions.find((m) => m.variable.name === name && m.mentionsFromStart === variableNumMentions[name])
                 if (mention === undefined) {
                     let variable = variables.find((v) => v.name === name )
                     if(variable === undefined)
-                        variable = new Variable(name)
-                    //TODO and type???
+                        variable = new Variable(name, TYPES_POINT)
 
                     mention = mentions.find((m) => m.presenceLevel === PRESENCE_LEVEL_DELETED)
                     if (mention === undefined)
@@ -244,20 +245,24 @@ void main() {
     }
 
     updateDwContents = () => {
+        
+        mentions.forEach((mention) => {
+            mention.mesh.visible =
+                caretLine < lowestChangedLineSinceCompile &&
+                (mention.lineIndex === caretLine ||
+                mention === hoveredMention)
+        })
 
-        if(caretLine > lowestChangedLineSinceCompile) {
-            dws.top.elem.style.display = 'none'
-            dws.second.elem.style.display = 'none'
-        }
-        else {
-            dws.top.elem.style.display = ''
-            dws.second.elem.style.display = ''
+        for(dwName in dws) {
+            let dw = dws[dwName]
+            let hasMentionChild = false
+            dw.scene.children.every((child)=>{
+                if (child.visible === true && dw.nonMentionChildren.indexOf(child) === -1 )
+                    hasMentionChild = true
 
-            mentions.forEach((mention) => {
-                mention.mesh.visible = 
-                    mention.lineIndex === caretLine || 
-                    mention === hoveredMention
+                return !hasMentionChild
             })
+            // dw.elem.style.display = hasMentionChild ? '' : 'none'
         }
     }
 

@@ -37,35 +37,38 @@ async function initDws() {
         }
     }
 
-    function Dw(elem) {
-        const scene = new THREE.Scene()
-
-        let dw = {
-            scene,
-            elem,
-            render: () => {
-                // get the viewport relative position of this element
-                const { left, right, top, bottom, width, height } =
-                    elem.getBoundingClientRect()
-
-                const isOffscreen =
-                    bottom < 0 ||
-                    top > renderer.domElement.clientHeight ||
-                    right < 0 ||
-                    left > renderer.domElement.clientWidth;
-
-                if (isOffscreen)
-                    return
-
-                const positiveYUpBottom = renderer.domElement.clientHeight - bottom
-                renderer.setScissor(left, positiveYUpBottom, width, height)
-                renderer.setViewport(left, positiveYUpBottom, width, height)
-
-                renderer.render(scene, camera)
-            }
-        }
+    class Dw {
+        constructor(newElem) {
+            this.elem = newElem
+        };
+        scene = new THREE.Scene();
+        elem;
+        nonMentionChildren = [];
         
-        return dw
+        addNonMentionChild (ch) {
+            this.nonMentionChildren.push(ch)
+            this.scene.add(ch)
+        }
+        render() {
+            // get the viewport relative position of this element
+            const { left, right, top, bottom, width, height } =
+                this.elem.getBoundingClientRect()
+
+            const isOffscreen =
+                bottom < 0 ||
+                top > renderer.domElement.clientHeight ||
+                right < 0 ||
+                left > renderer.domElement.clientWidth;
+
+            if (isOffscreen)
+                return
+
+            const positiveYUpBottom = renderer.domElement.clientHeight - bottom
+            renderer.setScissor(left, positiveYUpBottom, width, height)
+            renderer.setViewport(left, positiveYUpBottom, width, height)
+
+            renderer.render(this.scene, camera)
+        }
     }
     
     let skyBgGeo = new THREE.SphereGeometry(camera.far * .9)
@@ -78,19 +81,19 @@ async function initDws() {
         const pedestal = new THREE.Mesh( pedestalGeo, pedestalMat)
         pedestal.position.y = -1.
         pedestal.receiveShadow = true
-        dw.scene.add(pedestal)
+        dw.addNonMentionChild(pedestal)
 
         const spotLight = new THREE.SpotLight()
         spotLight.penumbra = 0.5
         spotLight.castShadow = true
         spotLight.position.set(-.5, .5, .5)
         spotLight.lookAt(0.,0.,0.)
-        dw.scene.add(spotLight)
+        dw.addNonMentionChild(spotLight)
 
-        dw.scene.add(new THREE.AmbientLight(0x666666))
+        dw.addNonMentionChild(new THREE.AmbientLight(0x666666))
         
         const skyBg = new THREE.Mesh(skyBgGeo, skyBgMat)
-        dw.scene.add(skyBg)
+        dw.addNonMentionChild(skyBg)
     }
 
     function render() {
@@ -122,17 +125,17 @@ async function initDws() {
         requestAnimationFrame(render)
     }
 
-    dws.final = Dw(bottomDwEl)
+    dws.final = new Dw(bottomDwEl)
 
-    dws.second = Dw(secondDwEl)
+    dws.second = new Dw(secondDwEl)
     add3dStuffToDw(dws.second)
     let hsvApparatus = await initHsv()
-    dws.second.scene.add(hsvApparatus)
+    dws.second.addNonMentionChild(hsvApparatus)
 
-    dws.top = Dw(topDwEl)
+    dws.top = new Dw(topDwEl)
     add3dStuffToDw(dws.top)
     // let pgaApparatus = await initPga()
-    // dws.top.scene.add(pgaApparatus)
+    // dws.top.addNonMentionChild(pgaApparatus)
 
     await initCompilation()
 
