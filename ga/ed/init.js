@@ -123,21 +123,23 @@ async function init() {
 
     let initialText = 
 `void mainImage( out vec4 fragColor ) {
+    
     vec4 myPoint1 = vec4(1.2,1.5,0.,1.);
     vec4 myPoint2 = vec4(0.2,1.,0.,1.);
-    vec4 a = myPoint1 + myPoint2;
 
     fragColor = vec4( 1., .5, 0., 1. );
 }`
-//half way 1.0653362070468535, 0.8803922415546626, 1.7062327591717965
+
     textarea.value = initialText
     updateSyntaxHighlighting(textarea.value)
 
-    textarea.oninput = () => {
+    textarea.addEventListener('input', () => {
         updateSyntaxHighlighting(textarea.value)
         updateSyntaxHighlightingScroll(textarea)
-    }
-    textarea.onscroll = () => {updateSyntaxHighlightingScroll(textarea)}
+    })
+    textarea.addEventListener('scroll', () => {
+        updateSyntaxHighlightingScroll(textarea)
+    })
     textarea.addEventListener('keydown', checkIfKeyIsTab)
 
     // while ((index = str.indexOf(searchStr, startIndex)) > -1) {
@@ -149,6 +151,11 @@ async function init() {
     // initMouse()
 
     let render = await initDws()
+
+    initMouseInteractions()
+
+    await initCompilation()
+
     compile()
     document.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === true)

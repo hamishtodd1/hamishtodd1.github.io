@@ -25,10 +25,6 @@
 
 async function initCompilation()
 {
-    initHover()
-
-    let lowestChangedLineSinceCompile = Infinity
-    
     let finalFsq = FullScreenQuad(new THREE.ShaderMaterial())
     dws.final.scene.add(finalFsq)
 
@@ -208,8 +204,10 @@ void main() {
 
         mentions.forEach((mention) => {
 
-            if (mention.presenceLevel === PRESENCE_LEVEL_UNCONFIRMED)
+            if (mention.presenceLevel === PRESENCE_LEVEL_UNCONFIRMED) {
                 mention.presenceLevel = PRESENCE_LEVEL_DELETED
+                return
+            }
 
             let withMentionReadout = ""
             withMentionReadout += readoutPrefix
@@ -248,9 +246,9 @@ void main() {
         
         mentions.forEach((mention) => {
             mention.mesh.visible =
-                caretLine < lowestChangedLineSinceCompile &&
-                (mention.lineIndex === caretLine ||
-                mention === hoveredMention)
+                mention === hoveredMention ||
+                (caretLine < lowestChangedLineSinceCompile && 
+                mention.lineIndex === caretLine )
         })
 
         for(dwName in dws) {
@@ -266,17 +264,25 @@ void main() {
         }
     }
 
-    changedLineIndicator.style.stroke = "rgb(" + 180 + "," + 180 + "," + 180 + ")"
+    changedLineIndicator.style.stroke = "rgb(180,180,180)"
+    function updateCli() {
+        if(lowestChangedLineSinceCompile !== Infinity) {
+            let textareaBox = textarea.getBoundingClientRect()
+            let y = lineToScreenY(lowestChangedLineSinceCompile)
+            setSvgLine(changedLineIndicator,
+                textareaBox.x, y,
+                textareaBox.x + textareaBox.width, y)
+        }
+    }
+    textarea.addEventListener('scroll', updateCli)
+
     textarea.addEventListener('input', () => {
         errorBox.style.top = "-200px"
 
         if (caretLine+1 < lowestChangedLineSinceCompile)
             lowestChangedLineSinceCompile = caretLine+1
-        let textareaBox = textarea.getBoundingClientRect()
-        let y = lineToScreenY(lowestChangedLineSinceCompile)
-        setSvgLine(changedLineIndicator,
-            textareaBox.x, y, 
-            textareaBox.x + textareaBox.width, y)
+        
+        updateCli()
 
         updateDwContents()
     })

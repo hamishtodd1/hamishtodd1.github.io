@@ -137,8 +137,6 @@ async function initDws() {
     // let pgaApparatus = await initPga()
     // dws.top.addNonMentionChild(pgaApparatus)
 
-    await initCompilation()
-
     return render
 }
 

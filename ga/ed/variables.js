@@ -11,6 +11,8 @@ const dws = {}
 
 let hoveredMention = null
 
+let lowestChangedLineSinceCompile = Infinity
+
 const basicVertex = `
 varying vec4 coord; //fragcoord is 
 varying vec2 frameCoord;

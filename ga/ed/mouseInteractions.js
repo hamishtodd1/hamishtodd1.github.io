@@ -1,5 +1,17 @@
-function initHover() {
+function initMouseInteractions() {
     var characterWidth = parseInt(window.getComputedStyle(textMeasurer).width) / 40.
+
+    let grabbedMention = null
+    document.addEventListener('mouseup',(event)=>{
+        grabbedMention = null
+    })
+    document.addEventListener('mousemove', (event) => {
+        //note that you can put the changeType thing in here too
+        //should change smoothly into the variable of the other type
+        // if (grabbedMention !== null ) {
+            
+        // }
+    })
 
     let style = window.getComputedStyle(textarea)
     let lineHeight = parseInt(style.lineHeight)
@@ -85,6 +97,9 @@ function initHover() {
         worldToCanvas.copy(camera.projectionMatrix).multiply(camera.matrixWorldInverse)
 
         mentions.every((mention) => {
+            if (mention.lineIndex > lowestChangedLineSinceCompile)
+                return false
+
             let mb = mention.horizontalBounds
             let mby = lineToScreenY(mention.lineIndex)
             let mouseInBox =
@@ -103,6 +118,8 @@ function initHover() {
     let worldToCanvas = new THREE.Matrix4()
     let transformedV = new THREE.Vector4()
     textarea.addEventListener('mousemove', (event)=>{
+        if (grabbedMention)
+            return
         updateTextAreaHover(event.clientX,event.clientY)
     })
 
@@ -148,11 +165,18 @@ function initHover() {
     for(dwName in dws ) {
         let dw = dws[dwName]
         dw.elem.addEventListener('mousemove',(event)=>{
+            if(grabbedMention)
+                return
+
             onDwHover(dw, event.clientX,event.clientY)
         })
         dw.elem.addEventListener('dblclick', (event) => {
             onDblClick()
             onDwHover(event.clientX, event.clientY)
+        })
+        dw.elem.addEventListener('mousedown',(event)=>{
+            if(hoveredMention !== null)
+                grabbedMention = hoveredMention
         })
     }
 }
