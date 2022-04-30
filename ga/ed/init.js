@@ -10,8 +10,7 @@ TODO
                 And thereby have a suggestion based on that, like +=
                 And maybe you're defining a transform
             When the user moves a point to an arbitrary place, you get the say in how it got there
-                Probably the best way to do it is not "now it is this" but rather "+= that"
-                Or maybe even r*p*~r
+                it's r*p*~r
                     If r*p*~r did not come from a suggestion, it probably makes r as well
         3D PGA apparatus
             Want oriented elements
@@ -57,8 +56,13 @@ TODO
         Maybe you have some point that goes weird places in 3D when you change some 1d or 2d variable
             Hold a button to make it so that the thing gets a trail
         Errors appear on lines they're referring to
+        Draw curves in the window
+            take fourier series etc
+            Always recorded as an array with, say, 256 samples. Makes it easy to add them
     Long term
-        Making your own spaces
+        Compiling from latex
+            Someone else's thing to draw and display it. Maybe desmos
+        Making your own window visualizations
         Optimization:
             threejs shaders have uv and normal built in. Irrelevant, use RawShader
         Demonstration videos
@@ -81,6 +85,17 @@ TODO
             export threejs function creating the thing it is with the appropriate uniforms
             Workshop for kids at makespace. Everyone's stuff goes into a VR sim
 
+0D CGA = boolean logic?
+    There's origin and infinity
+    Origin is true, infinity false?
+        Or maybe identity operation is true, 0 is false. Eg true is the operation that changes nothing, false changes to crap
+            p AND q = p*q
+            p OR q = 
+    p = your value
+    NOT p = inversion
+
+
+Huh you are sort of making a desmos killer
 
 
 For now, 
@@ -149,6 +164,8 @@ async function init() {
 
     // initSound()
     // initMouse()
+
+    init301()
 
     let render = await initDws()
 

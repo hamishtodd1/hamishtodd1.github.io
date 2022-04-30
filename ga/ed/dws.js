@@ -15,6 +15,10 @@ async function initDws() {
         let rt = new THREE.WebGLRenderTarget(pixelsWide, 1)
         let outputsArray = new Uint8Array(pixelsWide * 4)
         let outputterPrefix = await getTextFile('floatOutputter.glsl')
+
+        //potential optimization if shader compilation is a bottleneck:
+        //  a single shader, with a little thing added under every mention,
+        //  and an integer uniform that just says "run the shader making sure this is the output"
         getShaderOutput = (fragmentShader, target) => {
 
             rtFsq.material.fragmentShader = outputterPrefix + fragmentShader
@@ -78,6 +82,26 @@ async function initDws() {
     let pedestalMat = new THREE.MeshPhongMaterial({ color: 0x999999, specular: 0x101010 })
     async function add3dStuffToDw(dw)
     {
+        {
+            /*
+                point:
+                    chiral/externally oriented:
+                        three intersecting planes!
+                        wavy octahedron?
+                    achiral/Internally oriented:
+                        pointy parts and bulgy parts, opposite of each other
+                plane:
+                    ninja stars punched out of it
+                line:
+                    join:
+                        arrows going along it
+                    meet:
+                        serrations going around it. Four! intersection of two planes
+             */
+            let geo = new THREE.CylinderGeometry
+            let a = new THREE.Mesh(geo,new THREE.MeshPhongMaterial({color:0xFF0000}))
+        }
+
         const pedestal = new THREE.Mesh( pedestalGeo, pedestalMat)
         pedestal.position.y = -1.
         pedestal.receiveShadow = true

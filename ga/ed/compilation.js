@@ -34,7 +34,6 @@ async function initCompilation()
     const notConsideredNamesRegex = /\b(?:mainImage|x|y|z|w)\b/
     const commentRemovalRegex = /(?:\/\/(?:\\\n|[^\n])*\n)|(?:\/\*(?:\n|\r|.)*?\*\/)|(("|')(?:\\\\|\\\2|\\\n|[^\2])*?\2)/g;
 
-    //it's totally impractical to have a "mention" for literally every mention
     //at the same time, EVEN IF YOU DO make a "variable has been edited on this line"
     //  just because it's not edited on that line doesn't mean you don't want to see it!
     //some amount of "you have to click it" is ok
@@ -66,7 +65,13 @@ async function initCompilation()
         }
     }
 
-    let pointGeo = new THREE.SphereBufferGeometry(.07, 32, 16)
+    const pointRadius = .07
+    let pointGeo = new THREE.SphereBufferGeometry(pointRadius, 32, 16)
+    /*
+        line viz
+        has 
+    */
+
     const PRESENCE_LEVEL_UNCONFIRMED = -1
     const PRESENCE_LEVEL_CONFIRMED = 1
     const PRESENCE_LEVEL_DELETED = 0
