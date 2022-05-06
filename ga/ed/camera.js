@@ -39,8 +39,8 @@ function initCamera() {
         }
     })
 
-    let cameraLat = -TAU * .05
-    let cameraLon = TAU * .05
+    let cameraLat = 0.//-TAU * .05
+    let cameraLon = 0.//TAU * .05
     function addToCamerLonLat(lonDiff, latDiff) {
         cameraLat += latDiff
         cameraLon += lonDiff

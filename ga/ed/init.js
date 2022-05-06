@@ -39,7 +39,11 @@ TODO
             Mouse ray in final dw is a variable
             VR hand
         Sphere at infinity dw
+        Nicer thing might be
     Medium term
+        Mobius strip dw because necessary to show double cover
+            Intermediate between complex plane view of rotors
+            Or maybe there's a clever strip showing whole thing
         If the variable hasn't changed value, would be nice if the versions of it that are the same as it are all highlighted
         If you have a nice pile of dws, and you go from line to line so different ones become relevant, nice transition
         (2,1) halfplane window - v. important, lets you program with mouse
@@ -134,13 +138,17 @@ In favor of vscode:
 
 async function init() {
 
+    init301()
+
     initCamera()
 
+
+    // float myBiv[6] = float[6](3.4, 4.2, 5.0, 5.2, 0.3, 1.1);
     let initialText = 
 `void mainImage( out vec4 fragColor ) {
     
     vec4 myPoint1 = vec4(1.2,1.5,0.,1.);
-    vec4 myPoint2 = vec4(0.2,1.,0.,1.);
+    vec4 myPoint2 = vec4(0.2,1.,0.,1.);    
 
     fragColor = vec4( 1., .5, 0., 1. );
 }`
@@ -164,8 +172,6 @@ async function init() {
 
     // initSound()
     // initMouse()
-
-    init301()
 
     let render = await initDws()
 

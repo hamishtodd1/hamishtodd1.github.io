@@ -3,15 +3,117 @@ function initMouseInteractions() {
 
     let grabbedMention = null
     document.addEventListener('mouseup',(event)=>{
-        grabbedMention = null
-    })
-    document.addEventListener('mousemove', (event) => {
-        //note that you can put the changeType thing in here too
-        //should change smoothly into the variable of the other type
-        // if (grabbedMention !== null ) {
+        if(grabbedMention !== null) {
+
+            let newLine = "\n    " + grabbedMention.variable.name + " = vec4(" +
+                grabbedMention.mesh.position.x.toFixed(2) + "," +
+                grabbedMention.mesh.position.y.toFixed(2) + "," +
+                grabbedMention.mesh.position.z.toFixed(2) + ",1.);\n"
+
+            let lines = textarea.value.split("\n")
+            let pre  = lines.slice(0, grabbedMention.lineIndex+1).join("\n")
+            let post = lines.slice(grabbedMention.lineIndex+1).join("\n")
             
-        // }
+            textarea.value = pre + newLine + post
+            updateSyntaxHighlighting(textarea.value)
+            compile()
+
+            let newCaretPosition = textarea.value.length - post.length - 1
+            textarea.focus()
+            textarea.setSelectionRange(newCaretPosition, newCaretPosition)
+
+            grabbedMention = null
+        }
+
+        updateBasedOnCaret()
     })
+    {
+        //actually possibly unwanted, what you really need are the camera left-right and up-down axes
+        //and your mouse movements make motors using those
+        
+        let cameraMotor = new Mv()
+        let e12Camera = new Mv()
+        let e23Camera = new Mv()
+
+        // you get the two ideal lines that are where the
+        //there's the ideal line e02. rotate it around e23 by fov/2
+        //there's the ideal line e01. rotate it around e12 by horizontal fov/2
+
+        let cameraQuat = new Mv()
+
+        let cameraFovHorizontal = otherFov(camera.fov, camera.aspect, true)
+        let cameraFrameQuatHorizontal = new Mv().fromAxisAngle(e31, camera.fov / 2. * (TAU / 360.))
+        let cameraFrameQuatVertical = new Mv().fromAxisAngle(e31, cameraFovHorizontal / 2. * (TAU / 360.))
+        let cameraFrameLeft = cameraFrameQuatHorizontal.sandwich(e1,new Mv())
+        let cameraFrameBottom = cameraFrameQuatHorizontal.sandwich(e2, new Mv())
+
+        //wanting to test the above
+        let lineMv = add(add(e23,e12).multiplyScalar(.2),e01)
+        let displayedLineMv = new Mv()
+        {
+            displayedLineMv.copy(lineMv)
+            let hasEuclideanPart = displayedLineMv.normSquared() > .00001
+            if(!hasEuclideanPart) {
+                console.error("put stuff here about projecting on camera plane")
+                // let zPlaneNotFarFromCamera = e3.clone()
+                // meet( cameraFrameLeft, zPlaneNotFarFromCamera, displayedLineMv )
+            }
+
+            let projectedOnOrigin = displayedLineMv.projectOn(e123,mv0)
+            //usual line is e31
+
+            let quatToProjOnOrigin = mul(projectedOnOrigin, e31, mv1)
+            quatToProjOnOrigin.sqrtSelf()
+            quatToProjOnOrigin.log()
+
+            let pos = e123.projectOn( lineMv, mv2 )
+
+            let lineGeo = new THREE.CylinderGeometry(.05, .05, 100.)
+            let lineMesh = new THREE.Mesh(lineGeo, new THREE.MeshPhongMaterial({ color: 0xFFFFFF }))
+            dws.top.scene.add(lineMesh)
+            quatToProjOnOrigin.toQuaternion(lineMesh.quaternion)
+            log(lineMesh.quaternion)
+            pos.toVector(lineMesh.position)
+        }
+
+
+
+        updateFunctions.push(()=>{
+            if(frameCount === 2) {
+
+                cameraQuat.fromQuaternion(camera.quaternion)
+
+                cameraQuat.sandwich(e12, e12Camera)
+                cameraQuat.sandwich(e23, e23Camera)
+
+                
+
+                
+
+            //     cameraMotor.fromPosQuat(camera.position, camera.quaternion)
+            //     cameraMotor.log()
+                
+            //     cameraMotor.sandwich(e12, e12Camera)
+            //     cameraMotor.sandwich(e23, e23Camera)
+            //     e23Camera.log("e23Camera")
+
+            //     cameraMotor.sandwich(e123, mv0)
+            //     mv0.log()
+            }
+        })
+
+        document.addEventListener('mousemove', (event) => {
+            
+            if (grabbedMention !== null ) {    
+                
+                //aaaaaaand yeah you don't 
+                
+            }
+
+            oldClientX = event.clientX
+            oldClientY = event.clientY
+        })
+    }
 
     let style = window.getComputedStyle(textarea)
     let lineHeight = parseInt(style.lineHeight)
@@ -20,8 +122,8 @@ function initMouseInteractions() {
 
     let svgLines = [labelLine, labelSide1, labelSide2, labelSide3, labelSide4]
 
-    let lastClientX = 100
-    let lastClientY = 100
+    let oldClientX = 100
+    let oldClientY = 100
 
     lineToScreenY = (line) => {
         return line * lineHeight + textAreaOffset - textarea.scrollTop
@@ -82,14 +184,6 @@ function initMouseInteractions() {
     }
 
     function updateTextAreaHover(clientX,clientY) {
-        if(clientX !== undefined)
-            lastClientX = clientX
-        else
-            clientX = lastClientX
-        if (clientY !== undefined)
-            lastClientY = clientY
-        else
-            clientY = lastClientY
 
         resetHover()
 
@@ -123,19 +217,8 @@ function initMouseInteractions() {
         updateTextAreaHover(event.clientX,event.clientY)
     })
 
-    function onDblClick() {
-        if(hoveredMention !== null) {
-            let vari = hoveredMention.variable
-            vari.changeType(1 - vari.type)
-        }
-    }
-    textarea.addEventListener('dblclick', (event)=>{
-        onDblClick()
-        updateTextAreaHover(event.clientX,event.clientY)
-    })
-
     textarea.addEventListener('scroll', (event) =>{
-        updateTextAreaHover()
+        updateTextAreaHover(oldClientX,oldClientY)
     })
 
     function onDwHover(dw, clientX,clientY) {
@@ -170,13 +253,17 @@ function initMouseInteractions() {
 
             onDwHover(dw, event.clientX,event.clientY)
         })
-        dw.elem.addEventListener('dblclick', (event) => {
-            onDblClick()
-            onDwHover(event.clientX, event.clientY)
-        })
         dw.elem.addEventListener('mousedown',(event)=>{
-            if(hoveredMention !== null)
+            if( lowestChangedLineSinceCompile !== Infinity) {
+                changedLineIndicator.style.stroke = "rgb(255,255,255)"
+                setTimeout(()=>{
+                    changedLineIndicator.style.stroke = "rgb(180,180,180)"
+                }, 500)
+            }
+            else {
                 grabbedMention = hoveredMention
+                hoveredMention = null
+            }
         })
     }
 }

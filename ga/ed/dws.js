@@ -82,26 +82,6 @@ async function initDws() {
     let pedestalMat = new THREE.MeshPhongMaterial({ color: 0x999999, specular: 0x101010 })
     async function add3dStuffToDw(dw)
     {
-        {
-            /*
-                point:
-                    chiral/externally oriented:
-                        three intersecting planes!
-                        wavy octahedron?
-                    achiral/Internally oriented:
-                        pointy parts and bulgy parts, opposite of each other
-                plane:
-                    ninja stars punched out of it
-                line:
-                    join:
-                        arrows going along it
-                    meet:
-                        serrations going around it. Four! intersection of two planes
-             */
-            let geo = new THREE.CylinderGeometry
-            let a = new THREE.Mesh(geo,new THREE.MeshPhongMaterial({color:0xFF0000}))
-        }
-
         const pedestal = new THREE.Mesh( pedestalGeo, pedestalMat)
         pedestal.position.y = -1.
         pedestal.receiveShadow = true
@@ -122,15 +102,10 @@ async function initDws() {
 
     function render() {
 
-        //     let clockDelta = clock.getDelta()
-        //     frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
+        // let clockDelta = clock.getDelta()
+        // frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
     
-        //     // mouse.updateFromAsyncAndCheckClicks()
-    
-        //     // for (var i = 0; i < updateFunctions.length; i++)
-        //     //     updateFunctions[i]()
-    
-        //     ++frameCount
+        ++frameCount
 
         const width = canvas3d.clientWidth
         const height = canvas3d.clientHeight

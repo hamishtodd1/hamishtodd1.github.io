@@ -43,6 +43,7 @@ async function initCompilation()
         name;
         col = new THREE.Color(0., 0., 0.);
         type;
+        declaredType;
 
         changeType(newType) {
             this.type = newType
@@ -169,6 +170,10 @@ void main() {
         let lines = textarea.value.split("\n")
         lines.forEach((l,lineIndex) => {
 
+            //ignores code that isn't a comment but is on the same line as one
+            if(l.indexOf("//") !== -1)
+                return
+
             let matches = [...l.matchAll(nameRegex)]
             if(matches === null)
                 return
@@ -184,7 +189,6 @@ void main() {
                 if (variableNumMentions[name] === undefined)
                     variableNumMentions[name] = 0
 
-                //in *theory* you could avoid having to recompile stuff that's above an edit. Hard!
                 let mention = mentions.find((m) => m.variable.name === name && m.mentionsFromStart === variableNumMentions[name])
                 if (mention === undefined) {
                     let variable = variables.find((v) => v.name === name )
@@ -196,6 +200,17 @@ void main() {
                         mention = new Mention(variable)
 
                     mention.mentionsFromStart = variableNumMentions[name]
+                }
+
+                if (variableNumMentions[name] === 0) {
+                    let partUpToName = l.slice(0, l.indexOf(name) - 1)
+                    let splitByWhitespace = partUpToName.split(/\s+/)
+                    let declaredType = splitByWhitespace[splitByWhitespace.length-1]
+                    log(declaredType)
+                    // if(declaredType !== 'vec4')
+                    //     debugger;//log(tokens)
+                    
+                    mention.variable.declaredType = declaredType
                 }
 
                 mention.lineIndex = lineIndex
@@ -251,9 +266,10 @@ void main() {
         
         mentions.forEach((mention) => {
             mention.mesh.visible =
-                mention === hoveredMention ||
+                mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED &&
+                (mention === hoveredMention ||
                 (caretLine < lowestChangedLineSinceCompile && 
-                mention.lineIndex === caretLine )
+                mention.lineIndex === caretLine ) )
         })
 
         for(dwName in dws) {
@@ -294,16 +310,16 @@ void main() {
 
     let caretPositionOld = -1
     let caretLine = -1
-    updateFunctions.push( () => {
+    updateBasedOnCaret = function() {
         let caretPosition = textarea.selectionStart
         if (caretPosition !== caretPositionOld) {
-            
+
             let lineIndex = 0
-            for(let i = 0, il = textarea.value.length; i < il; ++i) {
-                if (i === caretPosition ) {
+            for (let i = 0, il = textarea.value.length; i < il; ++i) {
+                if (i === caretPosition) {
                     //lineIndex is new caret line
-                    
-                    if(lineIndex !== caretLine) {
+
+                    if (lineIndex !== caretLine) {
                         caretLine = lineIndex
                         updateDwContents()
                     }
@@ -315,5 +331,8 @@ void main() {
 
             caretPositionOld = caretPosition
         }
-    })
+    }
+
+    //quite difficult to find a comprehensive set of eventlisteners
+    updateFunctions.push(updateBasedOnCaret)
 }
