@@ -75,8 +75,8 @@ async function initDws() {
         }
     }
     
-    let skyBgGeo = new THREE.SphereGeometry(camera.far * .9)
-    let skyBgMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(.18431372, .18431372, .18431372), side: THREE.BackSide })
+    // let skyBgGeo = new THREE.SphereGeometry(camera.far * .9)
+    // let skyBgMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(.18431372, .18431372, .18431372), side: THREE.BackSide })
     let pedestalDimension = 4.
     let pedestalGeo = new THREE.BoxGeometry(pedestalDimension, .01, pedestalDimension)
     let pedestalMat = new THREE.MeshPhongMaterial({ color: 0x999999, specular: 0x101010 })
@@ -94,10 +94,10 @@ async function initDws() {
         spotLight.lookAt(0.,0.,0.)
         dw.addNonMentionChild(spotLight)
 
-        dw.addNonMentionChild(new THREE.AmbientLight(0x666666))
+        dw.addNonMentionChild(new THREE.AmbientLight(0x888888))
         
-        const skyBg = new THREE.Mesh(skyBgGeo, skyBgMat)
-        dw.addNonMentionChild(skyBg)
+        // const skyBg = new THREE.Mesh(skyBgGeo, skyBgMat)
+        // dw.addNonMentionChild(skyBg)
     }
 
     function render() {
@@ -113,11 +113,13 @@ async function initDws() {
             renderer.setSize(width, height, false)
 
         renderer.setScissorTest(false)
+        renderer.setClearColor(0xFFFFFF,0)
         renderer.clear(true, true)
         renderer.setScissorTest(true)
 
         updateFunctions.forEach((uf)=>uf())
 
+        renderer.setClearColor(3026478,1)
         for(dwName in dws)
             dws[dwName].render()
 

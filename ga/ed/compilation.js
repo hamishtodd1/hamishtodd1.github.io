@@ -66,13 +66,7 @@ async function initCompilation()
         }
     }
 
-    const pointRadius = .07
-    let pointGeo = new THREE.SphereBufferGeometry(pointRadius, 32, 16)
-    /*
-        line viz
-        has 
-    */
-
+    
     const PRESENCE_LEVEL_UNCONFIRMED = -1
     const PRESENCE_LEVEL_CONFIRMED = 1
     const PRESENCE_LEVEL_DELETED = 0
@@ -87,15 +81,14 @@ async function initCompilation()
 
         putInCorrectWindow() {
             let dw = this.variable.type === TYPES_POINT ? dws.top : dws.second
-            dw.scene.add(this.mesh)
+            dw.scene.add(this.viz)
         }
 
         constructor(associatedVariable) {
             this.variable = associatedVariable
 
-            this.mesh = new THREE.Mesh(pointGeo, new THREE.MeshBasicMaterial({color:this.variable.col}));
-            this.mesh.castShadow = true
-            this.mesh.visible = false
+            this.viz = new PointViz(this.variable.col)
+            this.viz.visible = false
 
             this.putInCorrectWindow()
 
@@ -206,7 +199,6 @@ void main() {
                     let partUpToName = l.slice(0, l.indexOf(name) - 1)
                     let splitByWhitespace = partUpToName.split(/\s+/)
                     let declaredType = splitByWhitespace[splitByWhitespace.length-1]
-                    log(declaredType)
                     // if(declaredType !== 'vec4')
                     //     debugger;//log(tokens)
                     
@@ -252,10 +244,9 @@ void main() {
 
             getShaderOutput( withMentionReadout, mention.canvasPosWorldSpace )
 
-            mention.mesh.position.set(
-                mention.canvasPosWorldSpace[0] / mention.canvasPosWorldSpace[3], 
-                mention.canvasPosWorldSpace[1] / mention.canvasPosWorldSpace[3],
-                mention.canvasPosWorldSpace[2] / mention.canvasPosWorldSpace[3] )
+            let temp = mention.canvasPosWorldSpace
+            mv0.point(temp[0],temp[1],temp[2],temp[3])
+            mention.viz.setMv(mv0)
         })
         //this doesn't guarantee that you're using them as much as possible, just that they'll be cleared up on the next one
 
@@ -265,7 +256,7 @@ void main() {
     updateDwContents = () => {
         
         mentions.forEach((mention) => {
-            mention.mesh.visible =
+            mention.viz.visible =
                 mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED &&
                 (mention === hoveredMention ||
                 (caretLine < lowestChangedLineSinceCompile && 

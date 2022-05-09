@@ -6,9 +6,9 @@ function initMouseInteractions() {
         if(grabbedMention !== null) {
 
             let newLine = "\n    " + grabbedMention.variable.name + " = vec4(" +
-                grabbedMention.mesh.position.x.toFixed(2) + "," +
-                grabbedMention.mesh.position.y.toFixed(2) + "," +
-                grabbedMention.mesh.position.z.toFixed(2) + ",1.);\n"
+                grabbedMention.viz.position.x.toFixed(2) + "," +
+                grabbedMention.viz.position.y.toFixed(2) + "," +
+                grabbedMention.viz.position.z.toFixed(2) + ",1.);\n"
 
             let lines = textarea.value.split("\n")
             let pre  = lines.slice(0, grabbedMention.lineIndex+1).join("\n")
@@ -28,79 +28,149 @@ function initMouseInteractions() {
         updateBasedOnCaret()
     })
     {
-        //actually possibly unwanted, what you really need are the camera left-right and up-down axes
-        //and your mouse movements make motors using those
-        
         let cameraMotor = new Mv()
-        let e12Camera = new Mv()
-        let e23Camera = new Mv()
-
-        // you get the two ideal lines that are where the
-        //there's the ideal line e02. rotate it around e23 by fov/2
-        //there's the ideal line e01. rotate it around e12 by horizontal fov/2
-
         let cameraQuat = new Mv()
+        let cameraPos = new Mv()
 
-        let cameraFovHorizontal = otherFov(camera.fov, camera.aspect, true)
-        let cameraFrameQuatHorizontal = new Mv().fromAxisAngle(e31, camera.fov / 2. * (TAU / 360.))
-        let cameraFrameQuatVertical = new Mv().fromAxisAngle(e31, cameraFovHorizontal / 2. * (TAU / 360.))
-        let cameraFrameLeft = cameraFrameQuatHorizontal.sandwich(e1,new Mv())
-        let cameraFrameBottom = cameraFrameQuatHorizontal.sandwich(e2, new Mv())
-
-        //wanting to test the above
-        let lineMv = add(add(e23,e12).multiplyScalar(.2),e01)
-        let displayedLineMv = new Mv()
+        let mouseRay = new Mv()
+        let frustum = {
+            left: new Mv(),
+            right: new Mv(),
+            bottom: new Mv(),
+            top: new Mv(),
+            far: new Mv()
+        }
         {
-            displayedLineMv.copy(lineMv)
-            let hasEuclideanPart = displayedLineMv.normSquared() > .00001
-            if(!hasEuclideanPart) {
-                console.error("put stuff here about projecting on camera plane")
-                // let zPlaneNotFarFromCamera = e3.clone()
-                // meet( cameraFrameLeft, zPlaneNotFarFromCamera, displayedLineMv )
-            }
+            let fovHorizontal = otherFov(camera.fov, camera.aspect, true)
+            let frameQuatHorizontal = new Mv().fromAxisAngle(e31, -fovHorizontal / 2. * (TAU / 360.))
+            let frameQuatVertical = new Mv().fromAxisAngle(e23, -camera.fov / 2. * (TAU / 360.))
 
-            let projectedOnOrigin = displayedLineMv.projectOn(e123,mv0)
-            //usual line is e31
+            let frustumUntransformed = {}
+            for (let planeName in frustum)
+                frustumUntransformed[planeName] = new Mv()
 
-            let quatToProjOnOrigin = mul(projectedOnOrigin, e31, mv1)
-            quatToProjOnOrigin.sqrtSelf()
-            quatToProjOnOrigin.log()
+            frustumUntransformed.far.plane(camera.far * .97, 0., 0., 1.)
+            frameQuatHorizontal.sandwich(e1, frustumUntransformed.left)
+            frameQuatVertical.sandwich(e2, frustumUntransformed.bottom)
+            frameQuatHorizontal[0] *= -1.
+            frameQuatVertical[0] *= -1.
+            frameQuatHorizontal.sandwich(e1, frustumUntransformed.right)
+            frameQuatVertical.sandwich(e2, frustumUntransformed.top)
 
-            let pos = e123.projectOn( lineMv, mv2 )
+            updateFunctions.push(()=>{
+                cameraPos.fromVector(camera.position)
+                cameraQuat.fromQuaternion(camera.quaternion)
+                cameraMotor.fromPosQuat(camera.position, camera.quaternion)
 
-            let lineGeo = new THREE.CylinderGeometry(.05, .05, 100.)
-            let lineMesh = new THREE.Mesh(lineGeo, new THREE.MeshPhongMaterial({ color: 0xFFFFFF }))
-            dws.top.scene.add(lineMesh)
-            quatToProjOnOrigin.toQuaternion(lineMesh.quaternion)
-            log(lineMesh.quaternion)
-            pos.toVector(lineMesh.position)
+                for(let planeName in frustum) {
+                    cameraMotor.sandwich(frustumUntransformed[planeName], frustum[planeName])    
+                    frustum[planeName].normalize()
+                }
+
+                {
+                    let clientRect = dws.top.elem.getBoundingClientRect()
+                    let xProportion = (oldClientX - clientRect.x) / clientRect.width
+                    let yProportion = (oldClientY - clientRect.y) / clientRect.height
+
+                    let xPlane = mv0.fromLerp(frustum.left, frustum.right, xProportion)
+                    let yPlane = mv1.fromLerp(frustum.bottom, frustum.top, yProportion)
+
+                    meet(yPlane, xPlane, mouseRay).normalize()
+                }
+
+                meet(e0, mouseRay, mv0)
+                ourPointViz.setMv(mv0)
+            })
         }
 
+        let lineMv = e01.clone()
+        if(0)
+        {
+            let lineGeo = new THREE.CylinderGeometry(.05, .05, 500.)
+            let lineMesh = new THREE.Mesh(lineGeo, new THREE.MeshPhongMaterial({ color: 0xFFFFFF }))
+            dws.top.scene.add(lineMesh)
+            let displayedLineMv = new Mv()
 
-
-        updateFunctions.push(()=>{
-            if(frameCount === 2) {
-
-                cameraQuat.fromQuaternion(camera.quaternion)
-
-                cameraQuat.sandwich(e12, e12Camera)
-                cameraQuat.sandwich(e23, e23Camera)
-
+            updateFunctions.push(() => {
                 
+                if (lineMv.hasEuclideanPart())
+                    displayedLineMv.copy(lineMv)
+                else {
+                    let planeContainingCameraAndLine = mv0
+                    join(lineMv, cameraPos, planeContainingCameraAndLine)
+                    meet(frustum.far, planeContainingCameraAndLine, displayedLineMv)
+                    //order here has not been thought through, may screw up orientation
+                    //actually you maybe want it intersected with
+                }
 
-                
+                let pos = e123.projectOn(displayedLineMv, mv2)
+                pos.toVector(lineMesh.position)
 
-            //     cameraMotor.fromPosQuat(camera.position, camera.quaternion)
-            //     cameraMotor.log()
-                
-            //     cameraMotor.sandwich(e12, e12Camera)
-            //     cameraMotor.sandwich(e23, e23Camera)
-            //     e23Camera.log("e23Camera")
+                let projectedOnOrigin = displayedLineMv.projectOn(e123, mv0).normalize()
+                let quatToProjOnOrigin = mul(projectedOnOrigin, e31, mv1)
+                quatToProjOnOrigin.log()
+                quatToProjOnOrigin.sqrtSelf()
+                quatToProjOnOrigin.toQuaternion(lineMesh.quaternion)
+            })
+        }
 
-            //     cameraMotor.sandwich(e123, mv0)
-            //     mv0.log()
+        {
+            const pointRadius = .1
+            let pointGeo = new THREE.SphereBufferGeometry(pointRadius, 32, 16)
+            let displayedPointMv = new Mv()
+            class PointViz extends THREE.Mesh {
+                #mv = new Mv()
+
+                constructor(col){
+                    if(col === undefined)
+                        col = 0xFFFFFF
+                    super(pointGeo, new THREE.MeshBasicMaterial({ color: col }))
+                    this.castShadow = true
+                }
+
+                setMv(newMv) {
+                    this.#mv.copy(newMv)
+
+                    if (this.#mv.hasEuclideanPart())
+                        this.#mv.toVector(this.position)
+                    else {
+                        let cameraJoin = mv0
+                        join(this.#mv, cameraPos, cameraJoin)
+                        meet(frustum.far, cameraJoin, displayedPointMv)
+                        displayedPointMv.toVector(this.position)
+                    }
+                    //and scale its size with distance to camera
+                }
             }
-        })
+            window.PointViz = PointViz
+        }
+        let ourPointViz = new PointViz()
+        dws.top.addNonMentionChild(ourPointViz)
+
+        if(0)
+        {
+            let planeMesh = new THREE.Mesh(new THREE.CircleGeometry(2.), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }))
+            dws.top.scene.add(planeMesh)
+
+            let planeMv = new Mv().plane(2., 1., 1., 1.)
+            planeMv.normalize()
+            updateFunctions.push(() => {
+                e123.projectOn(planeMv, mv0).toVector(planeMesh.position)
+
+                let planeOnOrigin = planeMv.projectOn(e123,mv0)
+                let e3ToPlaneMotor = mul(planeOnOrigin, e3, mv2).sqrt(mv3)
+                e3ToPlaneMotor.toQuaternion(planeMesh.quaternion)
+
+                {
+                    let vec = new THREE.Vector3(1.,0.,0.)
+
+                    let transformedByOrdinary = vec.clone().applyQuaternion(camera.quaternion)
+                    
+                    let mrh = new Mv().fromVector(vec)
+                    let transformedByUs = cameraQuat.sandwich(mrh).toVector(new THREE.Vector3())
+                }
+            })
+        }
 
         document.addEventListener('mousemove', (event) => {
             
@@ -230,7 +300,7 @@ function initMouseInteractions() {
         let closestIndex = -1
         let closestDist = Infinity
         mentions.forEach((mention,i) => {
-            if (!mention.mesh.visible || mention.mesh.parent !== dw.scene)
+            if (!mention.viz.visible || mention.viz.parent !== dw.scene)
                 return
 
             let [elemX, elemY] = canvasPos(mention)

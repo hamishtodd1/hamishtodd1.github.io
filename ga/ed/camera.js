@@ -2,7 +2,7 @@ function initCamera() {
     const fov = 60.
     const aspect = eval(getComputedStyle(topDwEl).aspectRatio)
     const near = .1
-    const far = 50.
+    const far = 20.
 
     camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
 

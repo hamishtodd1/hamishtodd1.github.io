@@ -9,6 +9,9 @@ function init301() {
     const N_BIVECTOR_COEFS = 6
 
     class Biv extends Float32Array {
+        constructor() {
+            super(N_BIVECTOR_COEFS)
+        }
 
         copy(a) {
             for (let i = 0; i < N_BIVECTOR_COEFS; ++i)
@@ -163,6 +166,13 @@ function init301() {
             return this
         }
 
+        fromLerp(a,b,proportion) {
+            for (let i = 0; i < N_COEFS; ++i)
+                this[i] = a[i] + proportion * (b[i] - a[i])
+
+            return this
+        }
+
         fromVector(v) {
             this.copy(zeroMv)
 
@@ -186,29 +196,23 @@ function init301() {
             return v
         }
 
-        sqrtSelf() {
-            localDq0.fromMv(this).sqrtSelf().toMv(this)
-
-            return this
-        }
-
-        toQuaternion(target) {
-            if (target === undefined)
-                target = new THREE.Quaternion()
-
-            target.set(this[10], this[9], this[8], this[0])
-            target.normalize()
-            return target
-        }
-
-        fromQuaternion(q) {
+        plane(e0Coef, e1Coef,e2Coef, e3Coef) {
             this.copy(zeroMv)
+            this[1] = e0Coef
+            this[2] = e1Coef
+            this[3] = e2Coef
+            this[4] = e3Coef
 
-            this[0] = q.w
-            this[10] = q.x
-            this[9] = q.y
-            this[8] = q.z
             return this
+        }
+
+        point(x,y,z,w) {
+            if(w === undefined)
+                w = 1.
+            this[14] = w
+            this[13] = x
+            this[12] = y
+            this[11] = z
         }
 
         toQuaternion(target) {
@@ -216,12 +220,22 @@ function init301() {
                 target = new THREE.Quaternion()
 
             target.set(
-                this[10],
-                this[9],
-                this[8],
+                -this[10],
+                -this[9], 
+                -this[8], 
                 this[0])
-                
+            target.normalize()
             return target
+        }
+
+        fromQuaternion(q) {
+            this.copy(zeroMv)
+
+            this[10] = -q.x
+            this[9] = -q.y
+            this[8] = -q.z
+            this[0] = q.w
+            return this
         }
 
         sandwich(mv, target) {
@@ -234,10 +248,17 @@ function init301() {
             return mul(intermediate,thisReversed,target)
         }
 
-        log(label) {
+        distanceToOtherPoint(p) {
+            return join(this, p, localMv0).eNorm()
+        }
+
+        log(label,numDecimalPlaces) {
+            if (numDecimalPlaces === undefined)
+                numDecimalPlaces = 1
+
             let str = ""
             for (let i = 0; i < basisNames.length; ++i) {
-                if (this[i] !== 0.) {
+                if (this[i] !== 0.){ // && this[i].toFixed() != 0) {
                     if (str !== "")
                         str += " + "
 
@@ -245,15 +266,21 @@ function init301() {
                     // if (onesWithMinus.indexOf(basisNames[i]) !== -1)
                     //     sign = -1.
 
-                    str += (sign * this[i]).toFixed(1) + (i !== 0 ? "e" : "") + basisNames[i]
+                    str += (sign * this[i]).toFixed(numDecimalPlaces) + (i !== 0 ? "e" : "") + basisNames[i]
                 }
             }
 
-            if (label !== undefined)
-                str = label + ": " + str
-
             if (str === "")
                 str += "0."
+
+            if (label !== undefined)
+                str = label + ": " + str
+            else {
+                let lineOfStackTrace = Error().stack.split("\n")[2]
+                let split = lineOfStackTrace.split("/")
+                label = split[split.length-1]
+                str = label + ": " + str
+            }
 
             console.log(str)
         }
@@ -265,17 +292,27 @@ function init301() {
             return localDq0.toMv(this)
         }
 
-        normSquared() {
+        eNormSquared() {
             //TODO optimizable, probably with enki's page
-            let temp = new Mv()
+            let temp = localMv0Lv2
             let ret = Math.abs(mul(this, this, temp)[0])
-            temp = null //do this more often!
 
             return ret
         }
 
-        norm() {
-            return Math.sqrt(this.normSquared())
+        eNorm() {
+            return Math.sqrt(this.eNormSquared())
+        }
+
+        normalize() {
+            //dunno if this achieves the same thing as dq above, hopefully does
+            let ourNorm = this.eNorm()
+            if(ourNorm === 0.)
+                console.error("can't normalize null object")
+            else
+                this.multiplyScalar(1./ourNorm)
+
+            return this
         }
 
         invert(target) {
@@ -283,7 +320,7 @@ function init301() {
                 target = new Mv()
 
             reverse(this, target)
-            target.multiplyScalar(1. / this.normSquared() )
+            target.multiplyScalar(1. / this.eNormSquared() )
 
             return target
         }
@@ -292,22 +329,35 @@ function init301() {
             //if you want to project on anything at infinity, different matter
             //take out the euclidean part I guess
 
-            let intermediate = inner(this, mv, localMv0)
+            let intermediate = inner(mv, this, localMv0)
             let inverse = mv.invert(localMv1)
             return mul(intermediate,inverse,target)
+        }
+
+        sqrt(target) {
+            if (target === undefined)
+                target = new Mv()
+
+            localDq0.fromMv(this).sqrtSelf().toMv(target)
+
+            return target
+        }
+
+        sqrtSelf() {
+            localDq0.fromMv(this).sqrtSelf().toMv(this)
+
+            return this
         }
 
         fromPosQuat(p, q) {
             let quat = localMv0Lv2
             quat.fromQuaternion(q)
             
-            let doubleTrans = localMv1Lv2
-            let pPoint = localMv2Lv2.fromVector(p)
-            mul(e123, pPoint, doubleTrans)
-            // debugger
-            let trans = localDq0.fromMv(doubleTrans).sqrtSelf().toMv(localMv3Lv2)
+            let pPoint = localMv1Lv2.fromVector(p)
+            let doubleTrans = mul(pPoint, e123, localMv2Lv2)
+            let trans = doubleTrans.sqrt(localMv3Lv2)
             
-            mul(quat, trans, this)
+            mul(trans,quat, this)
 
             return this
         }
@@ -319,6 +369,10 @@ function init301() {
                     doesEqual = false
             }
             return doesEqual
+        }
+
+        hasEuclideanPart() {
+            return this.eNormSquared() > .00001
         }
     }
     window.Mv = Mv
@@ -367,6 +421,9 @@ function init301() {
     mv1 = new Mv()
     mv2 = new Mv()
     mv3 = new Mv()
+    mv4 = new Mv()
+    mv5 = new Mv()
+    mv6 = new Mv()
 
     let localDq0 = new Dq()
     let localBiv0 = new Biv()
@@ -504,6 +561,24 @@ function createVariousFunctions()
     target[13] = a[13] + b[13];
     target[14] = a[14] + b[14];
     target[15] = a[15] + b[15];`)
+
+    createFunction(`sub`, [`a`, `b`], `
+    target[ 0] = a[ 0] - b[ 0];
+    target[ 1] = a[ 1] - b[ 1];
+    target[ 2] = a[ 2] - b[ 2];
+    target[ 3] = a[ 3] - b[ 3];
+    target[ 4] = a[ 4] - b[ 4];
+    target[ 5] = a[ 5] - b[ 5];
+    target[ 6] = a[ 6] - b[ 6];
+    target[ 7] = a[ 7] - b[ 7];
+    target[ 8] = a[ 8] - b[ 8];
+    target[ 9] = a[ 9] - b[ 9];
+    target[10] = a[10] - b[10];
+    target[11] = a[11] - b[11];
+    target[12] = a[12] - b[12];
+    target[13] = a[13] - b[13];
+    target[14] = a[14] - b[14];
+    target[15] = a[15] - b[15];`)
 
     createFunction(`reverse`, [`mv`], `
     target[ 0] =  mv[ 0];
