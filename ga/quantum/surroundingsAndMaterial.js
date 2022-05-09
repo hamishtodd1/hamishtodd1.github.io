@@ -5,18 +5,18 @@ async function initSurroundingsAndMaterial() {
 	// 	rotating = false
 	// },false)
 
-	updateFunctions.push(() => {
-		if (mouse.clicking) {
-			mouse.get2dDiff(v0)
-			thingsToRotate.forEach((thing) => {
-				thing.rotation.y -= v0.x
-				thing.rotation.x += v0.y
-			})
+	// updateFunctions.push(() => {
+	// 	if (mouse.clicking) {
+	// 		mouse.get2dDiff(v0)
+	// 		thingsToRotate.forEach((thing) => {
+	// 			thing.rotation.y -= v0.x
+	// 			thing.rotation.x += v0.y
+	// 		})
 
-			spotLight.position.applyAxisAngle(yUnit, -v0.x)
-			pedestal.rotation.y += -v0.x
-		}
-	})
+	// 		spotLight.position.applyAxisAngle(yUnit, -v0.x)
+	// 		pedestal.rotation.y += -v0.x
+	// 	}
+	// })
 
 	// camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 2500);
 	// camera.position.set(0.0, 4, 4 * 3.5);

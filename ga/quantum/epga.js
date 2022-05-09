@@ -673,6 +673,8 @@ function initAlgebra() {
 	e013 = e0.mul( e3)
 	e032 = e0.mul( e2)
 	e123 = e1.mul( e3)
+	console.error("LOOK AT THE LINE ABOVE THIS!!!")
+	return
 	e0123 = e0.mul(e123)
 
 	let localMv0 = new Mv()
