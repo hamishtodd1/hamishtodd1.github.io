@@ -1,7 +1,6 @@
 /*
 TODO
     Short term
-        Make it so no shitty lv2LocalMv
         Editing from the window
             Drag to a different space's window to change its type
             For points

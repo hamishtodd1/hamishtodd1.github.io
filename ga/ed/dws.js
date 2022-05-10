@@ -134,7 +134,6 @@ async function initDws() {
     dws.second = new Dw(secondDwEl, true)
     let hsvApparatus = await initHsv()
     dws.second.addNonMentionChild(hsvApparatus)
-    dws.second.elem.style.display = 'none'
 
     dws.top = new Dw(topDwEl, true)
 

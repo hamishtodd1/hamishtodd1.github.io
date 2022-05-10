@@ -2,7 +2,7 @@
     Points square to -1. Suggests they're rotations. Which, yes
  */
 
-function init301() {
+function init301Unhoisted() {
 
     const N_COEFS = 16
     const N_ROTOR_COEFS = 8
@@ -239,17 +239,17 @@ function init301() {
         }
 
         sandwich(mv, target) {
-            let thisReversed = localMv0
+            let thisReversed = newMv
             reverse(this, thisReversed)
             
-            let intermediate = localMv1
+            let intermediate = newMv
             mul(this,mv,intermediate) //sigh, is there a -?
 
             return mul(intermediate,thisReversed,target)
         }
 
         distanceToOtherPoint(p) {
-            return join(this, p, localMv0).eNorm()
+            return join(this, p, newMv).eNorm()
         }
 
         log(label,numDecimalPlaces) {
@@ -294,7 +294,7 @@ function init301() {
 
         eNormSquared() {
             //TODO optimizable, probably with enki's page
-            let temp = localMv0Lv2
+            let temp = newMv
             let ret = Math.abs(mul(this, this, temp)[0])
 
             return ret
@@ -329,8 +329,8 @@ function init301() {
             //if you want to project on anything at infinity, different matter
             //take out the euclidean part I guess
 
-            let intermediate = inner(mv, this, localMv0)
-            let inverse = mv.invert(localMv1)
+            let intermediate = inner(mv, this, newMv)
+            let inverse = mv.invert(newMv)
             return mul(intermediate,inverse,target)
         }
 
@@ -350,12 +350,12 @@ function init301() {
         }
 
         fromPosQuat(p, q) {
-            let quat = localMv0Lv2
+            let quat = newMv
             quat.fromQuaternion(q)
             
-            let pPoint = localMv1Lv2.fromVector(p)
-            let doubleTrans = mul(pPoint, e123, localMv2Lv2)
-            let trans = doubleTrans.sqrt(localMv3Lv2)
+            let pPoint = newMv.fromVector(p)
+            let doubleTrans = mul(pPoint, e123, newMv)
+            let trans = doubleTrans.sqrt(newMv)
             
             mul(trans,quat, this)
 
@@ -412,11 +412,6 @@ function init301() {
 
     const basisNames = ["", "0", "1", "2", "3", "01", "02", "03", "12", "31", "23", "021", "013", "032", "123", "0123"]
 
-    let localMv0 = new Mv()
-    let localMv1 = new Mv()
-    let localMv2 = new Mv()
-    let localMv3 = new Mv()
-
     mv0 = new Mv()
     mv1 = new Mv()
     mv2 = new Mv()
@@ -428,14 +423,27 @@ function init301() {
     let localDq0 = new Dq()
     let localBiv0 = new Biv()
 
-    let localMv0Lv2 = new Mv()
-    let localMv1Lv2 = new Mv()
-    let localMv2Lv2 = new Mv()
-    let localMv3Lv2 = new Mv()
+    /*THIS_GETS_REMOVED*/
+}
 
-    // createFunction(`vec4ToPt`,)
+function init301() {
+    let funcString = init301Unhoisted.toString()
 
-    
+    let i = 0
+    let declarations = ""
+    let withoutDeclarations = funcString.replace(/newMv/g, () => {
+        declarations += "    let newMv" + i + " = new Mv()\n"
+        return "newMv" + i++
+    })
+    let topLineEnd = withoutDeclarations.indexOf("/*THIS_GETS_REMOVED*/")
+    let strToEval =
+        "(" +
+        withoutDeclarations.slice(0, topLineEnd) +
+        declarations +
+        withoutDeclarations.slice(topLineEnd) +
+        ")()"
+
+    eval(strToEval)
 }
 
 function createVariousFunctions()
@@ -465,7 +473,6 @@ function createVariousFunctions()
         glslString += glslVersion
         jsString += jsVersion
     }
-
 
     createFunction(`mul`, [`a`, `b`], `
     target[ 0] = b[ 0] * a[ 0] + b[ 2] * a[ 2] + b[ 3] * a[ 3] + b[ 4] * a[ 4] - b[ 8] * a[ 8] - b[ 9] * a[ 9] - b[10] * a[10] - b[14] * a[14];
