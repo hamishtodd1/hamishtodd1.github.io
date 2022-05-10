@@ -1,6 +1,8 @@
 function initMouseInteractions() {
     var characterWidth = parseInt(window.getComputedStyle(textMeasurer).width) / 40.
 
+    let dragPlane = new Mv()
+
     let grabbedMention = null
     document.addEventListener('mouseup',(event)=>{
         if(grabbedMention !== null) {
@@ -9,6 +11,10 @@ function initMouseInteractions() {
                 grabbedMention.viz.position.x.toFixed(2) + "," +
                 grabbedMention.viz.position.y.toFixed(2) + "," +
                 grabbedMention.viz.position.z.toFixed(2) + ",1.);\n"
+
+            //so that you can see things respond in real time, a better situation would be:
+            //you have a single array of floats that is a uniform, called "override"
+            //and another, an integer that is lineThatIsAffectedByOverride
 
             let lines = textarea.value.split("\n")
             let pre  = lines.slice(0, grabbedMention.lineIndex+1).join("\n")
@@ -27,163 +33,26 @@ function initMouseInteractions() {
 
         updateBasedOnCaret()
     })
-    {
-        let cameraMotor = new Mv()
-        let cameraQuat = new Mv()
-        let cameraPos = new Mv()
+    getMouseRay = (dw,target)=>{
+        let clientRect = dw.elem.getBoundingClientRect()
+        let xProportion = (oldClientX - clientRect.x) / clientRect.width
+        let yProportion = (oldClientY - clientRect.y) / clientRect.height
 
-        let mouseRay = new Mv()
-        let frustum = {
-            left: new Mv(),
-            right: new Mv(),
-            bottom: new Mv(),
-            top: new Mv(),
-            far: new Mv()
-        }
-        {
-            let fovHorizontal = otherFov(camera.fov, camera.aspect, true)
-            let frameQuatHorizontal = new Mv().fromAxisAngle(e31, -fovHorizontal / 2. * (TAU / 360.))
-            let frameQuatVertical = new Mv().fromAxisAngle(e23, -camera.fov / 2. * (TAU / 360.))
+        let xPlane = mv3.fromLerp(camera.frustum.left, camera.frustum.right, xProportion)
+        let yPlane = mv4.fromLerp(camera.frustum.bottom, camera.frustum.top, yProportion)
 
-            let frustumUntransformed = {}
-            for (let planeName in frustum)
-                frustumUntransformed[planeName] = new Mv()
-
-            frustumUntransformed.far.plane(camera.far * .97, 0., 0., 1.)
-            frameQuatHorizontal.sandwich(e1, frustumUntransformed.left)
-            frameQuatVertical.sandwich(e2, frustumUntransformed.bottom)
-            frameQuatHorizontal[0] *= -1.
-            frameQuatVertical[0] *= -1.
-            frameQuatHorizontal.sandwich(e1, frustumUntransformed.right)
-            frameQuatVertical.sandwich(e2, frustumUntransformed.top)
-
-            updateFunctions.push(()=>{
-                cameraPos.fromVector(camera.position)
-                cameraQuat.fromQuaternion(camera.quaternion)
-                cameraMotor.fromPosQuat(camera.position, camera.quaternion)
-
-                for(let planeName in frustum) {
-                    cameraMotor.sandwich(frustumUntransformed[planeName], frustum[planeName])    
-                    frustum[planeName].normalize()
-                }
-
-                {
-                    let clientRect = dws.top.elem.getBoundingClientRect()
-                    let xProportion = (oldClientX - clientRect.x) / clientRect.width
-                    let yProportion = (oldClientY - clientRect.y) / clientRect.height
-
-                    let xPlane = mv0.fromLerp(frustum.left, frustum.right, xProportion)
-                    let yPlane = mv1.fromLerp(frustum.bottom, frustum.top, yProportion)
-
-                    meet(yPlane, xPlane, mouseRay).normalize()
-                }
-
-                meet(e0, mouseRay, mv0)
-                ourPointViz.setMv(mv0)
-            })
-        }
-
-        let lineMv = e01.clone()
-        if(0)
-        {
-            let lineGeo = new THREE.CylinderGeometry(.05, .05, 500.)
-            let lineMesh = new THREE.Mesh(lineGeo, new THREE.MeshPhongMaterial({ color: 0xFFFFFF }))
-            dws.top.scene.add(lineMesh)
-            let displayedLineMv = new Mv()
-
-            updateFunctions.push(() => {
-                
-                if (lineMv.hasEuclideanPart())
-                    displayedLineMv.copy(lineMv)
-                else {
-                    let planeContainingCameraAndLine = mv0
-                    join(lineMv, cameraPos, planeContainingCameraAndLine)
-                    meet(frustum.far, planeContainingCameraAndLine, displayedLineMv)
-                    //order here has not been thought through, may screw up orientation
-                    //actually you maybe want it intersected with
-                }
-
-                let pos = e123.projectOn(displayedLineMv, mv2)
-                pos.toVector(lineMesh.position)
-
-                let projectedOnOrigin = displayedLineMv.projectOn(e123, mv0).normalize()
-                let quatToProjOnOrigin = mul(projectedOnOrigin, e31, mv1)
-                quatToProjOnOrigin.log()
-                quatToProjOnOrigin.sqrtSelf()
-                quatToProjOnOrigin.toQuaternion(lineMesh.quaternion)
-            })
-        }
-
-        {
-            const pointRadius = .1
-            let pointGeo = new THREE.SphereBufferGeometry(pointRadius, 32, 16)
-            let displayedPointMv = new Mv()
-            class PointViz extends THREE.Mesh {
-                #mv = new Mv()
-
-                constructor(col){
-                    if(col === undefined)
-                        col = 0xFFFFFF
-                    super(pointGeo, new THREE.MeshBasicMaterial({ color: col }))
-                    this.castShadow = true
-                }
-
-                setMv(newMv) {
-                    this.#mv.copy(newMv)
-
-                    if (this.#mv.hasEuclideanPart())
-                        this.#mv.toVector(this.position)
-                    else {
-                        let cameraJoin = mv0
-                        join(this.#mv, cameraPos, cameraJoin)
-                        meet(frustum.far, cameraJoin, displayedPointMv)
-                        displayedPointMv.toVector(this.position)
-                    }
-                    //and scale its size with distance to camera
-                }
-            }
-            window.PointViz = PointViz
-        }
-        let ourPointViz = new PointViz()
-        dws.top.addNonMentionChild(ourPointViz)
-
-        if(0)
-        {
-            let planeMesh = new THREE.Mesh(new THREE.CircleGeometry(2.), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }))
-            dws.top.scene.add(planeMesh)
-
-            let planeMv = new Mv().plane(2., 1., 1., 1.)
-            planeMv.normalize()
-            updateFunctions.push(() => {
-                e123.projectOn(planeMv, mv0).toVector(planeMesh.position)
-
-                let planeOnOrigin = planeMv.projectOn(e123,mv0)
-                let e3ToPlaneMotor = mul(planeOnOrigin, e3, mv2).sqrt(mv3)
-                e3ToPlaneMotor.toQuaternion(planeMesh.quaternion)
-
-                {
-                    let vec = new THREE.Vector3(1.,0.,0.)
-
-                    let transformedByOrdinary = vec.clone().applyQuaternion(camera.quaternion)
-                    
-                    let mrh = new Mv().fromVector(vec)
-                    let transformedByUs = cameraQuat.sandwich(mrh).toVector(new THREE.Vector3())
-                }
-            })
-        }
-
-        document.addEventListener('mousemove', (event) => {
-            
-            if (grabbedMention !== null ) {    
-                
-                //aaaaaaand yeah you don't 
-                
-            }
-
-            oldClientX = event.clientX
-            oldClientY = event.clientY
-        })
+        meet(yPlane, xPlane, target)
+        target.normalize()
+        return target
     }
+    document.addEventListener('mousemove', (event) => {       
+        if (grabbedMention !== null ) {    
+            
+            let mouseRay = getMouseRay(dws.top,mv0)
+            meet(dragPlane,mouseRay,mv1)
+            mv1.toVector(grabbedMention.viz.position)
+        }
+    })
 
     let style = window.getComputedStyle(textarea)
     let lineHeight = parseInt(style.lineHeight)
@@ -191,9 +60,6 @@ function initMouseInteractions() {
     let textAreaOffset = parseInt(style.padding) + parseInt(style.margin) // can add some fudge to this if you like
 
     let svgLines = [labelLine, labelSide1, labelSide2, labelSide3, labelSide4]
-
-    let oldClientX = 100
-    let oldClientY = 100
 
     lineToScreenY = (line) => {
         return line * lineHeight + textAreaOffset - textarea.scrollTop
@@ -248,7 +114,7 @@ function initMouseInteractions() {
         setSvgLine(labelSide4, mb.x, mby + lineHeight, mb.x, mby)
     }
 
-    function resetHover() {            
+    function resetHover() {
         hoveredMention = null
         svgLines.forEach((svgLine) => { setSvgLine(svgLine, -10, -10, -10, -10) })
     }
@@ -333,6 +199,12 @@ function initMouseInteractions() {
             else {
                 grabbedMention = hoveredMention
                 hoveredMention = null
+
+                let initialPosition = mv0
+                initialPosition.fromVector(grabbedMention.viz.position)
+                camera.frustum.far.projectOn(initialPosition, dragPlane)
+
+                //project camera far plane onto initialPosition
             }
         })
     }

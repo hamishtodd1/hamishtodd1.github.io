@@ -42,8 +42,11 @@ async function initDws() {
     }
 
     class Dw {
-        constructor(newElem) {
+        constructor(newElem, have3dStuff) {
             this.elem = newElem
+
+            if(have3dStuff)
+                add3dStuffToDw(this)
         };
         scene = new THREE.Scene();
         elem;
@@ -128,15 +131,12 @@ async function initDws() {
 
     dws.final = new Dw(bottomDwEl)
 
-    dws.second = new Dw(secondDwEl)
-    add3dStuffToDw(dws.second)
+    dws.second = new Dw(secondDwEl, true)
     let hsvApparatus = await initHsv()
     dws.second.addNonMentionChild(hsvApparatus)
+    dws.second.elem.style.display = 'none'
 
-    dws.top = new Dw(topDwEl)
-    add3dStuffToDw(dws.top)
-    // let pgaApparatus = await initPga()
-    // dws.top.addNonMentionChild(pgaApparatus)
+    dws.top = new Dw(topDwEl, true)
 
     return render
 }

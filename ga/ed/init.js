@@ -1,7 +1,7 @@
 /*
 TODO
     Short term
-        3D PGA code (for editing)
+        Make it so no shitty lv2LocalMv
         Editing from the window
             Drag to a different space's window to change its type
             For points
@@ -148,7 +148,7 @@ async function init() {
 `void mainImage( out vec4 fragColor ) {
     
     vec4 myPoint1 = vec4(1.2,1.5,0.,1.);
-    vec4 myPoint2 = vec4(0.2,1.,0.,1.);    
+    vec4 myPoint2 = vec4(0.2,1.,0.,1.);
 
     fragColor = vec4( 1., .5, 0., 1. );
 }`
@@ -175,6 +175,7 @@ async function init() {
 
     let render = await initDws()
 
+    initPgaDw()
     initMouseInteractions()
 
     await initCompilation()

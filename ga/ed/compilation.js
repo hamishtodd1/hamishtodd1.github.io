@@ -163,10 +163,6 @@ void main() {
         let lines = textarea.value.split("\n")
         lines.forEach((l,lineIndex) => {
 
-            //ignores code that isn't a comment but is on the same line as one
-            if(l.indexOf("//") !== -1)
-                return
-
             let matches = [...l.matchAll(nameRegex)]
             if(matches === null)
                 return
@@ -221,7 +217,7 @@ void main() {
                 return
             }
 
-            let withMentionReadout = ""
+            let withMentionReadout = ``
             withMentionReadout += readoutPrefix
             withMentionReadout += lines.slice(0,mention.lineIndex+1).join("\n")
 
@@ -243,7 +239,6 @@ void main() {
             withMentionReadout += readoutSuffix
 
             getShaderOutput( withMentionReadout, mention.canvasPosWorldSpace )
-
             let temp = mention.canvasPosWorldSpace
             mv0.point(temp[0],temp[1],temp[2],temp[3])
             mention.viz.setMv(mv0)
