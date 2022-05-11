@@ -374,6 +374,25 @@ function init301Unhoisted() {
         hasEuclideanPart() {
             return this.eNormSquared() > .00001
         }
+
+        getDisplayableVersion(target) {
+            if (this.hasEuclideanPart())
+                target.copy(this)
+            else {
+                let cameraJoin = newMv
+                join(this, camera.mvs.pos, cameraJoin)
+                meet(camera.frustum.far, cameraJoin, target)
+            }
+
+            return target
+        }
+
+        toVectorDisplayable(target) {
+            let displayableVersion = newMv
+            this.getDisplayableVersion(displayableVersion)
+            displayableVersion.toVector(target)
+            return target
+        }
     }
     window.Mv = Mv
 

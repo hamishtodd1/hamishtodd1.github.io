@@ -32,6 +32,8 @@ async function initCompilation()
     const glslReservedRegex = Prism.languages.glsl.keyword
     const lineDividingRegex = /^.*(\r?\n|$)/mg
     const notConsideredNamesRegex = /\b(?:mainImage|x|y|z|w)\b/
+
+    //if you want to use this, should probably replace with whitespace
     const commentRemovalRegex = /(?:\/\/(?:\\\n|[^\n])*\n)|(?:\/\*(?:\n|\r|.)*?\*\/)|(("|')(?:\\\\|\\\2|\\\n|[^\2])*?\2)/g;
 
     //at the same time, EVEN IF YOU DO make a "variable has been edited on this line"
@@ -67,9 +69,6 @@ async function initCompilation()
     }
 
     
-    const PRESENCE_LEVEL_UNCONFIRMED = -1
-    const PRESENCE_LEVEL_CONFIRMED = 1
-    const PRESENCE_LEVEL_DELETED = 0
     class Mention {
         variable;
 
@@ -120,6 +119,8 @@ void main() {
 
     gl_FragColor = encodeFloat(pixelFloat);
 }`
+
+    let settingPointMv = new Mv()
 
     let listeningForShaderErrors = false
     webglErrorThrower = (errorLine) => {
@@ -240,8 +241,8 @@ void main() {
 
             getShaderOutput( withMentionReadout, mention.canvasPosWorldSpace )
             let temp = mention.canvasPosWorldSpace
-            mv0.point(temp[0],temp[1],temp[2],temp[3])
-            mention.viz.setMv(mv0)
+            settingPointMv.point(temp[0],temp[1],temp[2],temp[3])
+            mention.viz.setMv(settingPointMv)
         })
         //this doesn't guarantee that you're using them as much as possible, just that they'll be cleared up on the next one
 

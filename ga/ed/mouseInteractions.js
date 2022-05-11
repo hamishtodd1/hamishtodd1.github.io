@@ -46,12 +46,20 @@ function initMouseInteractions() {
         target.normalize()
         return target
     }
+    let mouseRay = new Mv()
+    let draggedPoint = new Mv()
     document.addEventListener('mousemove', (event) => {       
         if (grabbedMention !== null ) {    
             
-            let mouseRay = getMouseRay(dws.top,mv0)
-            meet(dragPlane,mouseRay,mv1)
-            mv1.toVector(grabbedMention.viz.position)
+            getMouseRay(dws.top, mouseRay)
+            meet(dragPlane,mouseRay,draggedPoint)
+            draggedPoint.toVectorDisplayable(grabbedMention.viz.position)
+        }
+    })
+
+    document.addEventListener('keydown', (event)=>{
+        if(event.key === " " && grabbedMention !== null) {
+            dragPlane.copy(e0)
         }
     })
 
@@ -128,7 +136,8 @@ function initMouseInteractions() {
         worldToCanvas.copy(camera.projectionMatrix).multiply(camera.matrixWorldInverse)
 
         mentions.every((mention) => {
-            if (mention.lineIndex > lowestChangedLineSinceCompile)
+            if( mention.presenceLevel === PRESENCE_LEVEL_DELETED ||
+                mention.lineIndex > lowestChangedLineSinceCompile )
                 return false
 
             let mb = mention.horizontalBounds
@@ -185,7 +194,7 @@ function initMouseInteractions() {
     for(dwName in dws ) {
         let dw = dws[dwName]
         dw.elem.addEventListener('mousemove',(event)=>{
-            if(grabbedMention)
+            if(grabbedMention !== null)
                 return
 
             onDwHover(dw, event.clientX,event.clientY)
@@ -204,8 +213,6 @@ function initMouseInteractions() {
                 let initialPosition = mv0
                 initialPosition.fromVector(grabbedMention.viz.position)
                 camera.frustum.far.projectOn(initialPosition, dragPlane)
-
-                //project camera far plane onto initialPosition
             }
         })
     }

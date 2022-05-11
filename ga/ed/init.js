@@ -1,21 +1,18 @@
 /*
 TODO
     Short term
+        Currently, if a variable is uninitialized, you still get shown a point at 0,0,0 in the window
         Editing from the window
-            Drag to a different space's window to change its type
             For points
             For colors
+            Drag to a different space's window to change its type
             When you move something, it could leave its current value behind
                 And thereby have a suggestion based on that, like +=
                 And maybe you're defining a transform
             When the user moves a point to an arbitrary place, you get the say in how it got there
                 it's r*p*~r
                     If r*p*~r did not come from a suggestion, it probably makes r as well
-        3D PGA apparatus
-            Want oriented elements
-                Planes that are colored on a side or not colored, comma or not comma
-                Lines that have arrow along or around them
-                Same with points
+        Spruce up PGA meshes
         Complex numbers window which allows you to see what's up with a motor
             Note that it's different from the conformal 2D euclidean space window
                 because it's more about MULTIPLY by the complex number
@@ -38,7 +35,8 @@ TODO
             Mouse ray in final dw is a variable
             VR hand
         Sphere at infinity dw
-        Nicer thing might be
+        Ordinary vectors dw
+            Nice that you can get practically everything good from 2D vectors
     Medium term
         Mobius strip dw because necessary to show double cover
             Intermediate between complex plane view of rotors
@@ -53,6 +51,7 @@ TODO
             Maybe move my carat through the line (4*8+5*2)/2 and see it animate
         Got many dws? they auto-rearrange
         Double click causes camera to whirl around so clicked variable is centered, whatever it is
+        Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
         mentions are sensetive to for loops
             For loops have an early-escape integer
             For every mention in the loop body, we're cutting off the shader after that integer
@@ -60,19 +59,12 @@ TODO
             Hold a button to make it so that the thing gets a trail
         Errors appear on lines they're referring to
         Draw curves in the window
-            take fourier series etc
+            It's just the same thing as painting a texture, it just gets recorded as vec2s in a 1D texture
             Always recorded as an array with, say, 256 samples. Makes it easy to add them
-    Long term
-        Compiling from latex
-            Someone else's thing to draw and display it. Maybe desmos
-        Making your own window visualizations
-        Optimization:
-            threejs shaders have uv and normal built in. Irrelevant, use RawShader
+            Fourier series to interpolate or whatever
+        A puzzle game that is a series of "code this shader" challenges
         Demonstration videos
             Volumetric rendering, can march through texture
-        A puzzle game that is a series of "code this shader" challenges
-        Webworkers?
-        Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
         Above is for fragment shaders(!)
             vertex shaders
             dropdown defining what this shader goes into:
@@ -81,6 +73,14 @@ TODO
                 Make your own bloody normals
             javascript eg threejs
             Bootstrapping new visualizations
+    Long term
+        
+        Compiling from latex
+            Someone else's thing to draw and display it. Maybe desmos
+        Optimization:
+            threejs shaders have uv and normal built in. Irrelevant, use RawShader
+        Documented API for making your own window visualizations
+        Webworkers?
         Export(/import?):
             threejs
             unity
@@ -122,6 +122,8 @@ Vague/philosophical
     Projective geometry lets you give points in space as rationals easily
     throwing away the magnitudes might be bad because it's not reversible. Nature seems to want reversibility
     The right rep for colors is probably the RGB cube with three cutting planes
+    An argument for the "numbers are divided into adders and multipliers" thing:
+        sometimes you take geometric mean, sometimes arithmetic
 
 Against vscode:
     they'll have their own weird internal representation of the code

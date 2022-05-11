@@ -4,6 +4,10 @@ const variables = []
 const TYPES_POINT = 0
 const TYPES_COLOR = 1
 
+const PRESENCE_LEVEL_UNCONFIRMED = -1
+const PRESENCE_LEVEL_CONFIRMED = 1
+const PRESENCE_LEVEL_DELETED = 0
+
 let oldClientX = 0
 let oldClientY = 0
 
