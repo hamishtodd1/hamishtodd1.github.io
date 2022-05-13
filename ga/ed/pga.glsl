@@ -25,10 +25,9 @@
         When the whole thing is compiled,
 */
 
+
 varying vec4 coord;
 varying vec2 frameCoord;
-
-vec3 foo;
 
 float boxIntersection( in vec3 rayOrigin, in vec3 rayDirection, vec3 boxSize ) //normal you figure out
 {

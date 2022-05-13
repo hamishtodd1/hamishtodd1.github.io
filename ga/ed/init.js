@@ -17,6 +17,9 @@ TODO
             Note that it's different from the conformal 2D euclidean space window
                 because it's more about MULTIPLY by the complex number
                 translations are ADDITIONS
+        Sphere at infinity dw
+        Ordinary vectors dw
+            Nice that you can get practically everything good from 2D vectors
         Suggestions
             You have a single shader calculate the whole lot of them
             Player is dragging eg a point around
@@ -34,9 +37,7 @@ TODO
             Shadertoy-inspired
             Mouse ray in final dw is a variable
             VR hand
-        Sphere at infinity dw
-        Ordinary vectors dw
-            Nice that you can get practically everything good from 2D vectors
+        Deal with struct definitions... somehow?
     Medium term
         Mobius strip dw because necessary to show double cover
             Intermediate between complex plane view of rotors
@@ -135,6 +136,19 @@ In favor of vscode:
     built in parser
     maybe more people use it
     has the home comforts you like
+
+the rules seem to be:
+    NOT allowed to just have them be arrays, that requires [] crap
+    you have to have your thing be a struct, not an array
+    a vec4 we can cast to a point, fine
+    vec2 is probably going to become a complex number
+    float is on the 1D CGA
+
+Because it helps portability to ordinary shaders:
+    vec4 is a point
+    vec3 is a vector/rgb color
+    vec2 is complex number
+
 */
 
 async function init() {
@@ -146,13 +160,26 @@ async function init() {
 
     // float myBiv[6] = float[6](3.4, 4.2, 5.0, 5.2, 0.3, 1.1);
     let initialText = 
-`void mainImage( out vec4 fragColor ) {
+// `struct Biv {
+//     float e01; float e02; float e03;
+//     float e12; float e31; float e23;
+//     bool extrinsic;
+// };
+
+//     Biv myBiv = Biv(0.,0.,0.,  0.,0.,0., true);
+// `
+`
+void mainImage( out vec4 fragColor ) {
     
     vec4 myPoint1 = vec4(1.2,1.5,0.,1.);
-    vec4 myPoint2 = vec4(0.2,1.,0.,1.);
+    vec4 myPoint2 = vec4(0.2, 1.,0.,1.);
+    myPoint1; myPoint2;
 
-    fragColor = vec4( 1., .5, 0., 1. );
-}`
+    //vec3 myVec = vec3(1.,1.,0.);
+
+    fragColor = myPoint1 + myPoint2;
+}
+`
 
     textarea.value = initialText
     updateSyntaxHighlighting(textarea.value)
@@ -176,15 +203,18 @@ async function init() {
 
     let render = await initDws()
 
-    initPgaDw()
+    initPgaDw(topDwEl)
+    initVec3Dw(secondDwEl)
     initMouseInteractions()
 
     await initCompilation()
 
     compile()
     document.addEventListener('keydown', (event) => {
-        if (event.key === "Enter" && event.altKey === true)
+        if (event.key === "Enter" && event.altKey === true) {
             compile()
+            updateDwContents()
+        }
     })
     
     requestAnimationFrame(render)

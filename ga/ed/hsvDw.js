@@ -1,6 +1,13 @@
-async function initHsv()
+async function initHsv($dwEl)
 {
+    log("yo")
+    dws.hsv = new Dw($dwEl, true)
+    
     var apparatus = new THREE.Object3D()
+    dws.hsv.addNonMentionChild(apparatus)
+
+    //TODO should actually be the cone, not double cone
+    //or maybe hsl cylinder
 
     //your different "spaces" can have a specific thing in the background, eg a grid or rgb cube
     
@@ -33,6 +40,4 @@ async function initHsv()
     // rgbCube.material.vertexShader = basicVertex
     // rgbCube.material.fragmentShader = await getTextFile('rgbCube.glsl')
     // apparatus.add(rgbCube)
-    
-    return apparatus
 }

@@ -32,9 +32,10 @@ async function initCompilation()
     const glslReservedRegex = Prism.languages.glsl.keyword
     const lineDividingRegex = /^.*(\r?\n|$)/mg
     const notConsideredNamesRegex = /\b(?:mainImage|x|y|z|w)\b/
+    const structRegex = /struct\s+([a-zA-Z_$][a-zA-Z_$0-9]*)\s+{[^}]*}/gm
 
     //if you want to use this, should probably replace with whitespace
-    const commentRemovalRegex = /(?:\/\/(?:\\\n|[^\n])*\n)|(?:\/\*(?:\n|\r|.)*?\*\/)|(("|')(?:\\\\|\\\2|\\\n|[^\2])*?\2)/g;
+    const commentNotNewlineRegex = /\/\/[^\n]*/gm
 
     //at the same time, EVEN IF YOU DO make a "variable has been edited on this line"
     //  just because it's not edited on that line doesn't mean you don't want to see it!
@@ -45,21 +46,11 @@ async function initCompilation()
         name;
         col = new THREE.Color(0., 0., 0.);
         type;
-        declaredType;
 
-        changeType(newType) {
-            this.type = newType
-
-            mentions.forEach((mention)=>{
-                if(mention.variable === this)
-                    mention.putInCorrectWindow()
-            })
-        }
-
-        constructor(newName, type) {
+        constructor(newName, newType) {
             this.name = newName
 
-            this.type = type
+            this.type = newType
 
             let [r, g, b] = randomToViridis(.53 * Math.random())
             this.col.r = r; this.col.g = g; this.col.b = b;
@@ -67,29 +58,22 @@ async function initCompilation()
             variables.push(this)
         }
     }
-
     
     class Mention {
         variable;
 
         mentionsFromStart;
         horizontalBounds = {x:0.,w:0.};
-        canvasPosWorldSpace = new Float32Array([0.,0.,0.,0.]);
+        canvasPosWorldSpace = new THREE.Vector4(0.,0.,0.,1.);
         presenceLevel = PRESENCE_LEVEL_DELETED;
         lineIndex = -1;
-
-        putInCorrectWindow() {
-            let dw = this.variable.type === TYPES_POINT ? dws.top : dws.second
-            dw.scene.add(this.viz)
-        }
 
         constructor(associatedVariable) {
             this.variable = associatedVariable
 
-            this.viz = new PointViz(this.variable.col)
+            this.viz = this.variable.type.getFreshViz(this.variable.col)
+            this.variable.type.dw.scene.add(this.viz)
             this.viz.visible = false
-
-            this.putInCorrectWindow()
 
             mentions.push(this)
         }
@@ -120,12 +104,11 @@ void main() {
     gl_FragColor = encodeFloat(pixelFloat);
 }`
 
-    let settingPointMv = new Mv()
-
-    let listeningForShaderErrors = false
+    //used by three.js
+    let threejsIsCheckingForShaderErrors = false
     webglErrorThrower = (errorLine) => {
 
-        if(!listeningForShaderErrors)
+        if(!threejsIsCheckingForShaderErrors)
             return
 
         let errorParts = errorLine.split(":")
@@ -137,20 +120,25 @@ void main() {
         errorBox.textContent = errorContent
         errorBox.style.top = (lineToScreenY(.4 + lineNumber)).toString() + "px"
 
-        listeningForShaderErrors = false
+        threejsIsCheckingForShaderErrors = false
     }
 
     compile = async () => {
 
+        let text = textarea.value
+        if (text.indexOf("/*") !== -1 || text.indexOf("*/") !== -1) {
+            console.error("multi-line comments not supported")
+            return
+        }
+
         lowestChangedLineSinceCompile = Infinity
-        setSvgLine(changedLineIndicator, -10, -10, -10, -10)
+        setSvgLine($changedLineIndicator, -10, -10, -10, -10)
 
-        // let sansComments = textarea.value.replace(commentRemovalRegex, " ")
+        text = text.replace(commentNotNewlineRegex,"")
 
-        //triggering a recompile isn't easy though
         {
-            listeningForShaderErrors = true
-            finalFsq.material.fragmentShader = textarea.value + toFragColorSuffix
+            threejsIsCheckingForShaderErrors = true
+            finalFsq.material.fragmentShader = text + toFragColorSuffix
             finalFsq.material.needsUpdate = true
         }
         
@@ -159,10 +147,19 @@ void main() {
                 mention.presenceLevel = PRESENCE_LEVEL_UNCONFIRMED
         })
         
-        let variableNumMentions = {} //TODO should be in the Variable
+        let variableNumMentions = {}
+
+        let ignoringDueToStruct = false
         
-        let lines = textarea.value.split("\n")
+        let lines = text.split("\n")
         lines.forEach((l,lineIndex) => {
+
+            if (!ignoringDueToStruct && l.indexOf("struct") !== -1)
+                ignoringDueToStruct = true
+            else if (l.indexOf("}") !== -1)
+                ignoringDueToStruct = false
+            if(ignoringDueToStruct)
+                return
 
             let matches = [...l.matchAll(nameRegex)]
             if(matches === null)
@@ -179,27 +176,35 @@ void main() {
                 if (variableNumMentions[name] === undefined)
                     variableNumMentions[name] = 0
 
-                let mention = mentions.find((m) => m.variable.name === name && m.mentionsFromStart === variableNumMentions[name])
+                let mention = mentions.find((m) => 
+                    m.variable.name === name && 
+                    m.mentionsFromStart === variableNumMentions[name])
                 if (mention === undefined) {
-                    let variable = variables.find((v) => v.name === name )
-                    if(variable === undefined)
-                        variable = new Variable(name, TYPES_POINT)
 
-                    mention = mentions.find((m) => m.presenceLevel === PRESENCE_LEVEL_DELETED)
+                    let variable = variables.find((v) => v.name === name )
+                    if(variable === undefined) {
+                        let partUpToName = l.slice(0, l.indexOf(name) - 1)
+                        let splitByWhitespace = partUpToName.split(/\s+/)
+                        let declaredType = splitByWhitespace[splitByWhitespace.length - 1]
+                        switch(declaredType) {
+                            case 'vec4':
+                                variable = new Variable(name, types.point)
+                                break;
+                            case 'vec3':
+                                variable = new Variable(name, types.vec3)
+                                break;
+                            default:
+                                console.error("unrecognized type") //could put it in the thingy
+                        }
+                    }
+
+                    mention = mentions.find((m) => 
+                        m.presenceLevel === PRESENCE_LEVEL_DELETED && 
+                        m.variable === variable)
                     if (mention === undefined)
                         mention = new Mention(variable)
 
                     mention.mentionsFromStart = variableNumMentions[name]
-                }
-
-                if (variableNumMentions[name] === 0) {
-                    let partUpToName = l.slice(0, l.indexOf(name) - 1)
-                    let splitByWhitespace = partUpToName.split(/\s+/)
-                    let declaredType = splitByWhitespace[splitByWhitespace.length-1]
-                    // if(declaredType !== 'vec4')
-                    //     debugger;//log(tokens)
-                    
-                    mention.variable.declaredType = declaredType
                 }
 
                 mention.lineIndex = lineIndex
@@ -218,31 +223,22 @@ void main() {
                 return
             }
 
-            let withMentionReadout = ``
-            withMentionReadout += readoutPrefix
-            withMentionReadout += lines.slice(0,mention.lineIndex+1).join("\n")
+            let shaderWithMentionReadout = ``
+            shaderWithMentionReadout += readoutPrefix
+            shaderWithMentionReadout += lines.slice(0,mention.lineIndex+1).join("\n")
 
-            if (mention.variable.type === TYPES_POINT) {
-                withMentionReadout +=
-                    `     outputFloats[0] = ` + mention.variable.name + `.x;\n` +
-                    `     outputFloats[1] = ` + mention.variable.name + `.y;\n` +
-                    `     outputFloats[2] = ` + mention.variable.name + `.z;\n` +
-                    `     outputFloats[3] = ` + mention.variable.name + `.w;\n`
-            }
-            else if (mention.variable.type === TYPES_COLOR) {
-                withMentionReadout +=
-                    `     outputFloats[0] = ` + mention.variable.name + `.r;\n` +
-                    `     outputFloats[1] = ` + mention.variable.name + `.g;\n` +
-                    `     outputFloats[2] = ` + mention.variable.name + `.b;\n`
-            }
+            shaderWithMentionReadout += mention.variable.type.getOutputFloatString(mention.variable.name)
 
-            withMentionReadout += lines.slice(mention.lineIndex+1).join("\n")
-            withMentionReadout += readoutSuffix
+            shaderWithMentionReadout += lines.slice(mention.lineIndex+1).join("\n")
+            shaderWithMentionReadout += readoutSuffix
 
-            getShaderOutput( withMentionReadout, mention.canvasPosWorldSpace )
-            let temp = mention.canvasPosWorldSpace
-            settingPointMv.point(temp[0],temp[1],temp[2],temp[3])
-            mention.viz.setMv(settingPointMv)
+            //probably terrible to have a shader for every mention
+            //just have the "readout shader". A uniform controls which line is being read out
+            //compiler optimization number 1!
+            
+            //also when you do sphere at infinity dw, have the frustum and its view rect on there
+
+            mention.variable.type.updateVizAndCanvasPos(mention, shaderWithMentionReadout)
         })
         //this doesn't guarantee that you're using them as much as possible, just that they'll be cleared up on the next one
 
@@ -272,12 +268,12 @@ void main() {
         }
     }
 
-    changedLineIndicator.style.stroke = "rgb(180,180,180)"
+    $changedLineIndicator.style.stroke = "rgb(180,180,180)"
     function updateCli() {
         if(lowestChangedLineSinceCompile !== Infinity) {
             let textareaBox = textarea.getBoundingClientRect()
-            let y = lineToScreenY(lowestChangedLineSinceCompile)
-            setSvgLine(changedLineIndicator,
+            let y = lineToScreenY(lowestChangedLineSinceCompile - 1)
+            setSvgLine($changedLineIndicator,
                 textareaBox.x, y,
                 textareaBox.x + textareaBox.width, y)
         }
@@ -298,11 +294,13 @@ void main() {
     let caretPositionOld = -1
     let caretLine = -1
     updateBasedOnCaret = function() {
+        
         let caretPosition = textarea.selectionStart
         if (caretPosition !== caretPositionOld) {
+            let text = textarea.value
 
             let lineIndex = 0
-            for (let i = 0, il = textarea.value.length; i < il; ++i) {
+            for (let i = 0, il = text.length; i < il; ++i) {
                 if (i === caretPosition) {
                     //lineIndex is new caret line
 
@@ -312,7 +310,7 @@ void main() {
                     }
                 }
 
-                if (textarea.value[i] === "\n")
+                if (text[i] === "\n")
                     ++lineIndex
             }
 
@@ -320,6 +318,5 @@ void main() {
         }
     }
 
-    //quite difficult to find a comprehensive set of eventlisteners
-    updateFunctions.push(updateBasedOnCaret)
+    document.addEventListener('selectionchange', updateBasedOnCaret)
 }

@@ -1,8 +1,9 @@
 const mentions = []
 const variables = []
 
-const TYPES_POINT = 0
-const TYPES_COLOR = 1
+let grabbedMention = null
+
+const types = []
 
 const PRESENCE_LEVEL_UNCONFIRMED = -1
 const PRESENCE_LEVEL_CONFIRMED = 1
@@ -12,6 +13,8 @@ let oldClientX = 0
 let oldClientY = 0
 
 const dws = {}
+
+let glslGaString = ""
 
 let hoveredMention = null
 

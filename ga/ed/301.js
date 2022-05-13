@@ -186,8 +186,19 @@ function init301Unhoisted() {
             return this
         }
 
+        fromVector4(v) {
+            this.copy(zeroMv)
+
+            this[11] = v.z
+            this[12] = v.y
+            this[13] = v.x
+            this[14] = v.w
+
+            return this
+        }
+
         toVector(v) {
-            let thingToDivideBy = this[14] === 0. ? 1. :this[14]
+            let thingToDivideBy = this[14] === 0. ? 1. : this[14]
 
             v.z = this[11] / thingToDivideBy
             v.y = this[12] / thingToDivideBy
@@ -396,10 +407,14 @@ function init301Unhoisted() {
     }
     window.Mv = Mv
 
-    let [jsString, glslString] = createVariousFunctions()
+    let jsString = createVariousFunctions()
     eval(jsString)
 
-    // log(glslString)
+    prefixWithGlslGa = () => {
+
+    }
+
+    // log(glslGaString)
 
     function MvFromFloatAndIndex(float, index) {
         let mv = new Mv()
@@ -468,7 +483,6 @@ function init301() {
 function createVariousFunctions()
 {
     let jsString = ""
-    let glslString = ""
 
     function createFunction(funcName, argNames, body) {
         let glslVersion = "void " + funcName + "( "
@@ -487,9 +501,8 @@ function createVariousFunctions()
             ` + body + `
             return target
         }
-            `
-
-        glslString += glslVersion
+        `
+        glslGaString += glslVersion
         jsString += jsVersion
     }
 
@@ -516,22 +529,22 @@ function createVariousFunctions()
     target[15] = b[15] * a[ 0] + b[14] * a[ 1] + b[13] * a[ 2] + b[12] * a[ 3] + b[11] * a[ 4] + b[10] * a[ 5] + b[ 9] * a[ 6] + b[ 8] * a[ 7] + b[ 7] * a[ 8] + b[ 6] * a[ 9] + b[ 5] * a[10] - b[ 4] * a[11] - b[ 3] * a[12] - b[ 2] * a[13] - b[ 1] * a[14] + b[ 0] * a[15];`)
 
     createFunction(`meet`, [`a`, `b`], `
-    target[0]=b[0]*a[0];
-    target[1]=b[1]*a[0]+b[0]*a[1];
-    target[2]=b[2]*a[0]+b[0]*a[2];
-    target[3]=b[3]*a[0]+b[0]*a[3];
-    target[4]=b[4]*a[0]+b[0]*a[4];
-    target[5]=b[5]*a[0]+b[2]*a[1]-b[1]*a[2]+b[0]*a[5];
-    target[6]=b[6]*a[0]+b[3]*a[1]-b[1]*a[3]+b[0]*a[6];
-    target[7]=b[7]*a[0]+b[4]*a[1]-b[1]*a[4]+b[0]*a[7];
-    target[8]=b[8]*a[0]+b[3]*a[2]-b[2]*a[3]+b[0]*a[8];
-    target[9]=b[9]*a[0]-b[4]*a[2]+b[2]*a[4]+b[0]*a[9];
-    target[10]=b[10]*a[0]+b[4]*a[3]-b[3]*a[4]+b[0]*a[10];
-    target[11]=b[11]*a[0]-b[8]*a[1]+b[6]*a[2]-b[5]*a[3]-b[3]*a[5]+b[2]*a[6]-b[1]*a[8]+b[0]*a[11];
-    target[12]=b[12]*a[0]-b[9]*a[1]-b[7]*a[2]+b[5]*a[4]+b[4]*a[5]-b[2]*a[7]-b[1]*a[9]+b[0]*a[12];
-    target[13]=b[13]*a[0]-b[10]*a[1]+b[7]*a[3]-b[6]*a[4]-b[4]*a[6]+b[3]*a[7]-b[1]*a[10]+b[0]*a[13];
-    target[14]=b[14]*a[0]+b[10]*a[2]+b[9]*a[3]+b[8]*a[4]+b[4]*a[8]+b[3]*a[9]+b[2]*a[10]+b[0]*a[14];
-    target[15]=b[15]*a[0]+b[14]*a[1]+b[13]*a[2]+b[12]*a[3]+b[11]*a[4]+b[10]*a[5]+b[9]*a[6]+b[8]*a[7]+b[7]*a[8]+b[6]*a[9]+b[5]*a[10]-b[4]*a[11]-b[3]*a[12]-b[2]*a[13]-b[1]*a[14]+b[0]*a[15];`)
+    target[ 0] = b[ 0] * a[ 0];
+    target[ 1] = b[ 1] * a[ 0] + b[ 0] * a[ 1];
+    target[ 2] = b[ 2] * a[ 0] + b[ 0] * a[ 2];
+    target[ 3] = b[ 3] * a[ 0] + b[ 0] * a[ 3];
+    target[ 4] = b[ 4] * a[ 0] + b[ 0] * a[ 4];
+    target[ 5] = b[ 5] * a[ 0] + b[ 2] * a[ 1] - b[ 1] * a[ 2] + b[ 0] * a[ 5];
+    target[ 6] = b[ 6] * a[ 0] + b[ 3] * a[ 1] - b[ 1] * a[ 3] + b[ 0] * a[ 6];
+    target[ 7] = b[ 7] * a[ 0] + b[ 4] * a[ 1] - b[ 1] * a[ 4] + b[ 0] * a[ 7];
+    target[ 8] = b[ 8] * a[ 0] + b[ 3] * a[ 2] - b[ 2] * a[ 3] + b[ 0] * a[ 8];
+    target[ 9] = b[ 9] * a[ 0] - b[ 4] * a[ 2] + b[ 2] * a[ 4] + b[ 0] * a[ 9];
+    target[10] = b[10] * a[ 0] + b[ 4] * a[ 3] - b[ 3] * a[ 4] + b[ 0] * a[10];
+    target[11] = b[11] * a[ 0] - b[ 8] * a[ 1] + b[ 6] * a[ 2] - b[ 5] * a[ 3] - b[ 3] * a[ 5] + b[ 2] * a[ 6] - b[ 1] * a[ 8] + b[ 0] * a[11];
+    target[12] = b[12] * a[ 0] - b[ 9] * a[ 1] - b[ 7] * a[ 2] + b[ 5] * a[ 4] + b[ 4] * a[ 5] - b[ 2] * a[ 7] - b[ 1] * a[ 9] + b[ 0] * a[12];
+    target[13] = b[13] * a[ 0] - b[10] * a[ 1] + b[ 7] * a[ 3] - b[ 6] * a[ 4] - b[ 4] * a[ 6] + b[ 3] * a[ 7] - b[ 1] * a[10] + b[ 0] * a[13];
+    target[14] = b[14] * a[ 0] + b[10] * a[ 2] + b[ 9] * a[ 3] + b[ 8] * a[ 4] + b[ 4] * a[ 8] + b[ 3] * a[ 9] + b[ 2] * a[10] + b[ 0] * a[14];
+    target[15] = b[15] * a[ 0] + b[14] * a[ 1] + b[13] * a[ 2] + b[12] * a[ 3] + b[11] * a[ 4] + b[10] * a[ 5] + b[ 9] * a[ 6] + b[ 8] * a[ 7] + b[ 7] * a[ 8] + b[ 6] * a[ 9] + b[ 5] * a[10] - b[ 4] * a[11] - b[ 3] * a[12] - b[ 2] * a[13] - b[ 1] * a[14] + b[ 0] * a[15];`)
 
     createFunction(`inner`, [`a`, `b`], `
     target[ 0] = b[ 0] * a[ 0] + b[ 2] * a[ 2] + b[ 3] * a[ 3] + b[ 4] * a[ 4] - b[ 8] * a[ 8] - b[ 9] * a[ 9] - b[10] * a[10] - b[14] * a[14];
@@ -568,7 +581,7 @@ function createVariousFunctions()
     target[ 2] = a[ 2] * b[15] - a[ 5] * b[14] + a[ 8] * b[12] - a[ 9] * b[11] + a[11] * b[ 9] - a[12] * b[ 8] + a[14] * b[ 5] + a[15] * b[ 2];
     target[ 1] = a[ 1] * b[15] + a[ 5] * b[13] + a[ 6] * b[12] + a[ 7] * b[11] - a[11] * b[ 7] - a[12] * b[ 6] - a[13] * b[ 5] + a[15] * b[ 1];
     target[ 0] = a[ 0] * b[15] + a[ 1] * b[14] + a[ 2] * b[13] + a[ 3] * b[12] - a[ 4] * b[11] + a[ 5] * b[10] + a[ 6] * b[ 9] + a[ 7] * b[ 8]
-            + a[ 8] * b[ 7] + a[ 9] * b[ 6] + a[10] * b[ 5] + a[11] * b[ 4] + a[12] * b[ 3] + a[13] * b[ 2] + a[14] * b[ 1] + a[15] * b[ 0];`)
+               + a[ 8] * b[ 7] + a[ 9] * b[ 6] + a[10] * b[ 5] + a[11] * b[ 4] + a[12] * b[ 3] + a[13] * b[ 2] + a[14] * b[ 1] + a[15] * b[ 0];`)
 
     createFunction(`add`, [`a`, `b`], `
     target[ 0] = a[ 0] + b[ 0];
@@ -628,5 +641,5 @@ function createVariousFunctions()
 
     target[15] =  mv[15];`)
 
-    return [jsString,glslString]
+    return jsString
 }

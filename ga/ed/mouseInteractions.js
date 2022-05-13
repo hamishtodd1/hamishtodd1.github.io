@@ -1,16 +1,10 @@
 function initMouseInteractions() {
     var characterWidth = parseInt(window.getComputedStyle(textMeasurer).width) / 40.
 
-    let dragPlane = new Mv()
-
-    let grabbedMention = null
     document.addEventListener('mouseup',(event)=>{
         if(grabbedMention !== null) {
 
-            let newLine = "\n    " + grabbedMention.variable.name + " = vec4(" +
-                grabbedMention.viz.position.x.toFixed(2) + "," +
-                grabbedMention.viz.position.y.toFixed(2) + "," +
-                grabbedMention.viz.position.z.toFixed(2) + ",1.);\n"
+            let newLine = grabbedMention.variable.type.getReassignmentText()
 
             //so that you can see things respond in real time, a better situation would be:
             //you have a single array of floats that is a uniform, called "override"
@@ -34,7 +28,9 @@ function initMouseInteractions() {
 
         updateBasedOnCaret()
     })
-    getMouseRay = (dw,target)=>{
+
+    let mouseRay = new Mv()
+    getMouseRay = (dw) => {
         let clientRect = dw.elem.getBoundingClientRect()
         let xProportion = (oldClientX - clientRect.x) / clientRect.width
         let yProportion = (oldClientY - clientRect.y) / clientRect.height
@@ -42,25 +38,14 @@ function initMouseInteractions() {
         let xPlane = mv3.fromLerp(camera.frustum.left, camera.frustum.right, xProportion)
         let yPlane = mv4.fromLerp(camera.frustum.bottom, camera.frustum.top, yProportion)
 
-        meet(yPlane, xPlane, target)
-        target.normalize()
-        return target
+        meet(yPlane, xPlane, mouseRay)
+        mouseRay.normalize()
+        return mouseRay
     }
-    let mouseRay = new Mv()
-    let draggedPoint = new Mv()
+    
     document.addEventListener('mousemove', (event) => {       
-        if (grabbedMention !== null ) {    
-            
-            getMouseRay(dws.top, mouseRay)
-            meet(dragPlane,mouseRay,draggedPoint)
-            draggedPoint.toVectorDisplayable(grabbedMention.viz.position)
-        }
-    })
-
-    document.addEventListener('keydown', (event)=>{
-        if(event.key === " " && grabbedMention !== null) {
-            dragPlane.copy(e0)
-        }
+        if (grabbedMention !== null )
+            grabbedMention.variable.type.respondToDrag()
     })
 
     let style = window.getComputedStyle(textarea)
@@ -68,7 +53,7 @@ function initMouseInteractions() {
 
     let textAreaOffset = parseInt(style.padding) + parseInt(style.margin) // can add some fudge to this if you like
 
-    let svgLines = [labelLine, labelSide1, labelSide2, labelSide3, labelSide4]
+    let svgLines = [$labelLine, $labelSide1, $labelSide2, $labelSide3, $labelSide4]
 
     lineToScreenY = (line) => {
         return line * lineHeight + textAreaOffset - textarea.scrollTop
@@ -80,7 +65,7 @@ function initMouseInteractions() {
     }
 
     function toElementCoord(type,x,y) {
-        let dw = type === TYPES_POINT ? dws.top : dws.second
+        let dw = type.dw
         // dw.elem.style.display = ''
         let dwRect = dw.elem.getBoundingClientRect()
         
@@ -93,7 +78,7 @@ function initMouseInteractions() {
     }
 
     function canvasPos(mention) {
-        transformedV.set(mention.canvasPosWorldSpace[0], mention.canvasPosWorldSpace[1], mention.canvasPosWorldSpace[2], mention.canvasPosWorldSpace[3])
+        transformedV.copy(mention.canvasPosWorldSpace)
         transformedV.applyMatrix4(worldToCanvas)
         let canvasX = transformedV.x / transformedV.w
         let canvasY = transformedV.y / transformedV.w
@@ -112,15 +97,15 @@ function initMouseInteractions() {
         let mb = mention.horizontalBounds
         let mby = lineToScreenY(mention.lineIndex)
 
-        setSvgLine(labelLine,
+        setSvgLine($labelLine,
             mb.x + mb.w,
             mby + lineHeight / 2.,
             elemX, elemY)
 
-        setSvgLine(labelSide1, mb.x, mby, mb.x + mb.w, mby)
-        setSvgLine(labelSide2, mb.x + mb.w, mby, mb.x + mb.w, mby + lineHeight)
-        setSvgLine(labelSide3, mb.x + mb.w, mby + lineHeight, mb.x, mby + lineHeight)
-        setSvgLine(labelSide4, mb.x, mby + lineHeight, mb.x, mby)
+        setSvgLine($labelSide1, mb.x, mby, mb.x + mb.w, mby)
+        setSvgLine($labelSide2, mb.x + mb.w, mby, mb.x + mb.w, mby + lineHeight)
+        setSvgLine($labelSide3, mb.x + mb.w, mby + lineHeight, mb.x, mby + lineHeight)
+        setSvgLine($labelSide4, mb.x, mby + lineHeight, mb.x, mby)
     }
 
     function resetHover() {
@@ -201,18 +186,16 @@ function initMouseInteractions() {
         })
         dw.elem.addEventListener('mousedown',(event)=>{
             if( lowestChangedLineSinceCompile !== Infinity) {
-                changedLineIndicator.style.stroke = "rgb(255,255,255)"
+                $changedLineIndicator.style.stroke = "rgb(255,255,255)"
                 setTimeout(()=>{
-                    changedLineIndicator.style.stroke = "rgb(180,180,180)"
+                    $changedLineIndicator.style.stroke = "rgb(180,180,180)"
                 }, 500)
             }
             else if (event.which === 1 && hoveredMention !== null ) {
                 grabbedMention = hoveredMention
-                hoveredMention = null
+                resetHover()
 
-                let initialPosition = mv0
-                initialPosition.fromVector(grabbedMention.viz.position)
-                camera.frustum.far.projectOn(initialPosition, dragPlane)
+                grabbedMention.variable.type.onGrab()
             }
         })
     }

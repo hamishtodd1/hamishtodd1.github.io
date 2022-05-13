@@ -102,9 +102,9 @@ function initCamera() {
 
     document.addEventListener('mousemove', (event) => {
         if (rightClicking) {
-            let lonDiff = -.004 * (event.clientX - oldClientX)
+            let lonDiff = -.006 * (event.clientX - oldClientX)
             lonDiff = Math.sign(lonDiff) * (Math.min(Math.abs(lonDiff), 1.8))
-            let latDiff = -.004 * (event.clientY - oldClientY)
+            let latDiff = -.006 * (event.clientY - oldClientY)
             latDiff = Math.sign(latDiff) * (Math.min(Math.abs(latDiff), 1.8))
             addToCamerLonLat(lonDiff, latDiff)
         }
