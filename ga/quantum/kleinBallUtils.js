@@ -262,26 +262,7 @@ function complexToHorosphere(numerator, denominator, target) {
 //but does the ad-bc thing apply to the partial traces in any sense?
 //er, no not really? 
 
-function abcdToMotorLiteral(mat,target) {
-    
-}
 
-
-
-function matrixToMotor(mat, target) {
-    if (target === undefined)
-        target = new Mv()
-
-    //can just transpose
-    let a = mat.get(0, 0), b = mat.get(0, 1)
-    let c = mat.get(1, 0), d = mat.get(1, 1)
-
-    //switching around left and right column is kinda like rotating
-
-    abcdToMotor(a,b,c,d,target)
-
-    return target
-}
 
 function insertPlanes(initialPlaneMvs) {
     let translator = new Mv()
@@ -451,7 +432,7 @@ function insertPlanes(initialPlaneMvs) {
     // cubeTris.forEach((t, i) => { pushFromTri(cubeVerts,t,i)})
     // octaTris.forEach((t, i) => { pushFromTri(octaVerts, t, i) })
     // smithChart()
-    octaBunch()
+    // octaBunch()
     // latAndLon()
-    // geodesics()
+    geodesics()
 }

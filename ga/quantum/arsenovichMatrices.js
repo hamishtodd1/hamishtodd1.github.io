@@ -10,20 +10,25 @@ async function arsenovichDemo() {
     //     matToMotVisualStyle(myMat,centralKb.stateMotor)
     // })
 
-    if(0)
+    // if(0)
     {
+        let cameraAngle = TAU * .25
+        camera.rotation.y += cameraAngle
+        camera.position.applyAxisAngle(yUnit,cameraAngle)
+
         let ams = Array(arsenovichMatrices.length)
         arsenovichMatrices.forEach((matArray, i) => {
             ams[i] = new ComplexMat(2, matArray)
         })
         updateFunctions.push(() => {
             let amIndex = frameCount % ams.length
-            matrixToMotor(ams[amIndex], mv0)
+            ams[amIndex].log()
+            abcdToMotor(ams[amIndex], mv0)
             centralKb.stateMotor.copy(mv0)
         })
     }
 
-    // if(0)
+    if(0)
     {
         let controlsArray = [
             e31.clone(), "a", "d",
