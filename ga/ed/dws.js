@@ -10,11 +10,17 @@ async function initDws() {
     await initShaderOutput()
 
     class Dw {
-        constructor(newElem, have3dStuff) {
+        constructor(name, newElem, haveAll3dStuff, haveLights) {
             this.elem = newElem
 
-            if(have3dStuff)
-                add3dStuffToDw(this)
+            dws[name] = this
+
+            if(haveAll3dStuff) {
+                addPedestal(this)
+                addLights(this)
+            }
+            else if(haveLights)
+                addLights(this)
         };
         scene = new THREE.Scene();
         elem;
@@ -52,13 +58,15 @@ async function initDws() {
     let pedestalDimension = 4.
     let pedestalGeo = new THREE.BoxGeometry(pedestalDimension, .01, pedestalDimension)
     let pedestalMat = new THREE.MeshPhongMaterial({ color: 0x999999, specular: 0x101010 })
-    async function add3dStuffToDw(dw)
+    function addPedestal(dw)
     {
         const pedestal = new THREE.Mesh( pedestalGeo, pedestalMat)
         pedestal.position.y = -1.
         pedestal.receiveShadow = true
         dw.addNonMentionChild(pedestal)
-
+    }
+    function addLights(dw)
+    {
         const spotLight = new THREE.SpotLight()
         spotLight.penumbra = 0.5
         spotLight.castShadow = true
@@ -97,8 +105,6 @@ async function initDws() {
 
         requestAnimationFrame(render)
     }
-
-    dws.final = new Dw(bottomDwEl)
 
     return render
 }

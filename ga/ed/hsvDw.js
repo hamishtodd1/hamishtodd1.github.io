@@ -1,10 +1,9 @@
 async function initHsv($dwEl)
 {
-    log("yo")
-    dws.hsv = new Dw($dwEl, true)
+    let dw = new Dw("hsv",$dwEl, true)
     
     var apparatus = new THREE.Object3D()
-    dws.hsv.addNonMentionChild(apparatus)
+    dw.addNonMentionChild(apparatus)
 
     //TODO should actually be the cone, not double cone
     //or maybe hsl cylinder

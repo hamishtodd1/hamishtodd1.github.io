@@ -18,6 +18,12 @@ function initCamera() {
         motor: new Mv(),
     }
 
+    camera.worldToCanvas = new THREE.Matrix4()
+    camera.updateWorldToCanvas = () => {
+        camera.updateMatrixWorld()
+        camera.worldToCanvas.copy(camera.projectionMatrix).multiply(camera.matrixWorldInverse)
+    }
+
     {
         var fsqMatrix = new THREE.Matrix4()
 
@@ -97,6 +103,8 @@ function initCamera() {
             camera.mvs.motor.sandwich(frustumUntransformed[planeName], camera.frustum[planeName])
             camera.frustum[planeName].normalize()
         }
+
+        camera.updateWorldToCanvas()
     }
     addToCamerLonLat(0.,0.)
 

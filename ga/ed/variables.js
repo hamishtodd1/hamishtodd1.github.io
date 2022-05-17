@@ -1,9 +1,7 @@
 const mentions = []
 const variables = []
 
-let grabbedMention = null
-
-const types = []
+const types = {}
 
 const PRESENCE_LEVEL_UNCONFIRMED = -1
 const PRESENCE_LEVEL_CONFIRMED = 1

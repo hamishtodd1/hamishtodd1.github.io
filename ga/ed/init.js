@@ -1,25 +1,33 @@
 /*
 TODO
-    Short term
-        Currently, if a variable is uninitialized, you still get shown a point at 0,0,0 in the window
-        Editing from the window
-            For points
-            For colors
-            Drag to a different space's window to change its type
-            When you move something, it could leave its current value behind
-                And thereby have a suggestion based on that, like +=
-                And maybe you're defining a transform
-            When the user moves a point to an arbitrary place, you get the say in how it got there
-                it's r*p*~r
-                    If r*p*~r did not come from a suggestion, it probably makes r as well
-        Spruce up PGA meshes
+    Very short term (team presentation)
+        It's about exp!
+            Drag something, wiht some line specified, it creates an exp
+            point to point
+                Can drag euclidean points and it emits a translation
+                Can drag ideal points and it emits a rotation 
+            plane to plane
+
+            line to line
+        Sphere at infinity dw
+            Is the algebra of stuff met with e0 isomorphic to Cl(3)?
         Complex numbers window which allows you to see what's up with a motor
             Note that it's different from the conformal 2D euclidean space window
                 because it's more about MULTIPLY by the complex number
                 translations are ADDITIONS
-        Sphere at infinity dw
-        Ordinary vectors dw
-            Nice that you can get practically everything good from 2D vectors
+        Dome dw
+        PGA viz orientations
+        Could have vec3 connect to points at infinity too
+            Hmm well the way that you interpret stuff affects how it creates suggestions
+    Short term
+        Currently, if a variable is uninitialized, you still get shown a point at 0,0,0 in the window
+        Hsv window
+        When you move something, it could leave its current value behind
+            And thereby have a suggestion based on that, like +=
+            And maybe you're defining a transform
+        When the user moves a point to an arbitrary place, you get the say in how it got there
+            it's r*p*~r
+                If r*p*~r did not come from a suggestion, it probably makes r as well
         Suggestions
             You have a single shader calculate the whole lot of them
             Player is dragging eg a point around
@@ -38,12 +46,15 @@ TODO
             Mouse ray in final dw is a variable
             VR hand
         Deal with struct definitions... somehow?
+        Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
+            move the mouse around
+            make some mentions then delete them
+        You could do with updating clientX more often
     Medium term
-        Mobius strip dw because necessary to show double cover
+        Mobius strip dw because for double cover
+            The unit complex numbers are the edge
             Intermediate between complex plane view of rotors
-            Or maybe there's a clever strip showing whole thing
-        If the variable hasn't changed value, would be nice if the versions of it that are the same as it are all highlighted
-        If you have a nice pile of dws, and you go from line to line so different ones become relevant, nice transition
+            Or maybe there's a clever strip showing whole thing        
         (2,1) halfplane window - v. important, lets you program with mouse
             lerp as an example of a simple function to try it out with
             write some numbers on a line
@@ -52,10 +63,10 @@ TODO
             Maybe move my carat through the line (4*8+5*2)/2 and see it animate
         Got many dws? they auto-rearrange
         Double click causes camera to whirl around so clicked variable is centered, whatever it is
-        Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
         mentions are sensetive to for loops
             For loops have an early-escape integer
             For every mention in the loop body, we're cutting off the shader after that integer
+        If you have a nice pile of dws, and you go from line to line so different ones become relevant, nice transition
         Maybe you have some point that goes weird places in 3D when you change some 1d or 2d variable
             Hold a button to make it so that the thing gets a trail
         Errors appear on lines they're referring to
@@ -63,10 +74,11 @@ TODO
             It's just the same thing as painting a texture, it just gets recorded as vec2s in a 1D texture
             Always recorded as an array with, say, 256 samples. Makes it easy to add them
             Fourier series to interpolate or whatever
+        If the variable hasn't changed value, would be nice if the versions of it that are the same as it are all highlighted
         A puzzle game that is a series of "code this shader" challenges
         Demonstration videos
             Volumetric rendering, can march through texture
-        Above is for fragment shaders(!)
+        Things other than fragment shaders
             vertex shaders
             dropdown defining what this shader goes into:
                 line, with 
@@ -88,6 +100,17 @@ TODO
             html page - EE
             export threejs function creating the thing it is with the appropriate uniforms
             Workshop for kids at makespace. Everyone's stuff goes into a VR sim
+
+As a tablet notes-in-the-margin app... and if you were going to buy a tablet... want to:
+    Say things into a mic
+    Equation handwriting recognition
+    Some way to hover?
+    9.7 inch is pocketable. 10.3 is a stretch
+    Searchability is nice
+    Paste in images
+        Edit
+        Recognize their separate R G B channels as fields
+            Edge detection
 
 0D CGA = boolean logic?
     There's origin and infinity
@@ -123,8 +146,12 @@ Vague/philosophical
     Projective geometry lets you give points in space as rationals easily
     throwing away the magnitudes might be bad because it's not reversible. Nature seems to want reversibility
     The right rep for colors is probably the RGB cube with three cutting planes
-    An argument for the "numbers are divided into adders and multipliers" thing:
-        sometimes you take geometric mean, sometimes arithmetic
+
+"Numbers are divided into adders and multipliers" thing:
+    sometimes you take geometric mean, sometimes arithmetic
+    you can visualize a point on the line. You can also picture a movement along that line. Two different things
+    One's a blade and one's a versor
+
 
 Against vscode:
     they'll have their own weird internal representation of the code
@@ -168,15 +195,13 @@ async function init() {
 
 //     Biv myBiv = Biv(0.,0.,0.,  0.,0.,0., true);
 // `
-`
-void mainImage( out vec4 fragColor ) {
+`void mainImage( out vec4 fragColor ) {
+
+    vec3 myVec = vec3(1.,1.,0.);
     
     vec4 myPoint1 = vec4(1.2,1.5,0.,1.);
     vec4 myPoint2 = vec4(0.2, 1.,0.,1.);
     myPoint1; myPoint2;
-
-    //vec3 myVec = vec3(1.,1.,0.);
-
     fragColor = myPoint1 + myPoint2;
 }
 `
@@ -184,7 +209,11 @@ void mainImage( out vec4 fragColor ) {
     textarea.value = initialText
     updateSyntaxHighlighting(textarea.value)
 
-    textarea.addEventListener('input', () => {
+    textarea.addEventListener('input', (event) => {
+        // if(event.keyCode === "Enter")
+        //     log("yo")
+        // log(event.keyCode)
+
         updateSyntaxHighlighting(textarea.value)
         updateSyntaxHighlightingScroll(textarea)
     })
@@ -199,12 +228,28 @@ void mainImage( out vec4 fragColor ) {
     // }    
 
     // initSound()
-    // initMouse()
 
     let render = await initDws()
 
-    initPgaDw(topDwEl)
-    initVec3Dw(secondDwEl)
+    initMention()
+
+    initEuclideanDw(topDwEl)
+    initVectorSpaceDw(secondDwEl)
+    // initInfinityDw(thirdDwEl)
+    initFinalDw(bottomDwEl)
+
+    initPgaVizes()
+
+    {
+        let mousePoint = new THREE.Mesh(new THREE.SphereBufferGeometry(.1, 32, 16), new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
+        dws.euclidean.addNonMentionChild(mousePoint)
+        dws.euclidean.elem.addEventListener('mousemove', (event) => {
+            let mouseRay = getMouseRay(dws.euclidean)
+
+            meet(e0, mouseRay, mv0).toVectorDisplayable(mousePoint.position)
+        })
+    }
+
     initMouseInteractions()
 
     await initCompilation()

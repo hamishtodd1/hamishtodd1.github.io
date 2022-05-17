@@ -25,8 +25,22 @@
 
 async function initCompilation()
 {
-    let finalFsq = FullScreenQuad(new THREE.ShaderMaterial())
-    dws.final.scene.add(finalFsq)
+    class Variable {
+        name;
+        col = new THREE.Color(0., 0., 0.);
+        class;
+
+        constructor(newName, newClass) {
+            this.name = newName
+
+            this.class = newClass
+
+            let [r, g, b] = randomToViridis(.53 * Math.random())
+            this.col.r = r; this.col.g = g; this.col.b = b;
+
+            variables.push(this)
+        }
+    }
 
     const nameRegex = /([a-zA-Z_$][a-zA-Z_$0-9]*)/g
     const glslReservedRegex = Prism.languages.glsl.keyword
@@ -42,50 +56,6 @@ async function initCompilation()
     //some amount of "you have to click it" is ok
     //or maybe, "if you've scrolled away from all those mentions". Maybe we go from top of window
 
-    class Variable {
-        name;
-        col = new THREE.Color(0., 0., 0.);
-        type;
-
-        constructor(newName, newType) {
-            this.name = newName
-
-            this.type = newType
-
-            let [r, g, b] = randomToViridis(.53 * Math.random())
-            this.col.r = r; this.col.g = g; this.col.b = b;
-
-            variables.push(this)
-        }
-    }
-    
-    class Mention {
-        variable;
-
-        mentionsFromStart;
-        horizontalBounds = {x:0.,w:0.};
-        canvasPosWorldSpace = new THREE.Vector4(0.,0.,0.,1.);
-        presenceLevel = PRESENCE_LEVEL_DELETED;
-        lineIndex = -1;
-
-        constructor(associatedVariable) {
-            this.variable = associatedVariable
-
-            this.viz = this.variable.type.getFreshViz(this.variable.col)
-            this.variable.type.dw.scene.add(this.viz)
-            this.viz.visible = false
-
-            mentions.push(this)
-        }
-    }
-
-    let toFragColorSuffix = `
-void main() {
-    vec4 myCol = vec4(0.,0.,0.,1.);
-    mainImage(myCol);
-
-    gl_FragColor = vec4(myCol);
-}`
     let readoutPrefix = `
 float[8] outputFloats;
     `
@@ -138,8 +108,7 @@ void main() {
 
         {
             threejsIsCheckingForShaderErrors = true
-            finalFsq.material.fragmentShader = text + toFragColorSuffix
-            finalFsq.material.needsUpdate = true
+            updateOutputDw(text)
         }
         
         mentions.forEach((mention) => {
@@ -188,10 +157,10 @@ void main() {
                         let declaredType = splitByWhitespace[splitByWhitespace.length - 1]
                         switch(declaredType) {
                             case 'vec4':
-                                variable = new Variable(name, types.point)
+                                variable = new Variable(name, types.Point)
                                 break;
                             case 'vec3':
-                                variable = new Variable(name, types.vec3)
+                                variable = new Variable(name, types.Vec)
                                 break;
                             default:
                                 console.error("unrecognized type") //could put it in the thingy
@@ -202,7 +171,7 @@ void main() {
                         m.presenceLevel === PRESENCE_LEVEL_DELETED && 
                         m.variable === variable)
                     if (mention === undefined)
-                        mention = new Mention(variable)
+                        mention = new variable.class(variable)
 
                     mention.mentionsFromStart = variableNumMentions[name]
                 }
@@ -227,7 +196,7 @@ void main() {
             shaderWithMentionReadout += readoutPrefix
             shaderWithMentionReadout += lines.slice(0,mention.lineIndex+1).join("\n")
 
-            shaderWithMentionReadout += mention.variable.type.getOutputFloatString(mention.variable.name)
+            shaderWithMentionReadout += mention.getShaderOutputFloatString()
 
             shaderWithMentionReadout += lines.slice(mention.lineIndex+1).join("\n")
             shaderWithMentionReadout += readoutSuffix
@@ -238,7 +207,7 @@ void main() {
             
             //also when you do sphere at infinity dw, have the frustum and its view rect on there
 
-            mention.variable.type.updateVizAndCanvasPos(mention, shaderWithMentionReadout)
+            mention.updateViz(shaderWithMentionReadout)
         })
         //this doesn't guarantee that you're using them as much as possible, just that they'll be cleared up on the next one
 
@@ -248,11 +217,13 @@ void main() {
     updateDwContents = () => {
         
         mentions.forEach((mention) => {
-            mention.viz.visible =
+            let visibility =
                 mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED &&
                 (mention === hoveredMention ||
                 (caretLine < lowestChangedLineSinceCompile && 
                 mention.lineIndex === caretLine ) )
+
+            mention.setVisibility(visibility)
         })
 
         for(dwName in dws) {

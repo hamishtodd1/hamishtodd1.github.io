@@ -1,10 +1,14 @@
 function initMouseInteractions() {
+    let grabbedMention = null
+    
     var characterWidth = parseInt(window.getComputedStyle(textMeasurer).width) / 40.
+
+    let grabbedDw = null
 
     document.addEventListener('mouseup',(event)=>{
         if(grabbedMention !== null) {
 
-            let newLine = grabbedMention.variable.type.getReassignmentText()
+            let newLine = grabbedMention.getReassignmentText()
 
             //so that you can see things respond in real time, a better situation would be:
             //you have a single array of floats that is a uniform, called "override"
@@ -24,6 +28,7 @@ function initMouseInteractions() {
             textarea.setSelectionRange(newCaretPosition, newCaretPosition)
 
             grabbedMention = null
+            grabbedDw = null
         }
 
         updateBasedOnCaret()
@@ -45,7 +50,7 @@ function initMouseInteractions() {
     
     document.addEventListener('mousemove', (event) => {       
         if (grabbedMention !== null )
-            grabbedMention.variable.type.respondToDrag()
+            grabbedMention.respondToDrag(grabbedDw)
     })
 
     let style = window.getComputedStyle(textarea)
@@ -54,6 +59,11 @@ function initMouseInteractions() {
     let textAreaOffset = parseInt(style.padding) + parseInt(style.margin) // can add some fudge to this if you like
 
     let svgLines = [$labelLine, $labelSide1, $labelSide2, $labelSide3, $labelSide4]
+    setSvgHighlightColor = (c) => {
+        svgLines.forEach((svgLine) => { 
+            svgLine.style.stroke = "rgb(" + c.r * 255. + "," + c.g * 255. + "," + c.b * 255. + ")" 
+        })
+    }
 
     lineToScreenY = (line) => {
         return line * lineHeight + textAreaOffset - textarea.scrollTop
@@ -64,48 +74,10 @@ function initMouseInteractions() {
         target.w = nameLength * characterWidth
     }
 
-    function toElementCoord(type,x,y) {
-        let dw = type.dw
-        // dw.elem.style.display = ''
-        let dwRect = dw.elem.getBoundingClientRect()
-        
-        let ndc = { 
-            x: x / 2. + .5,
-            y: y / 2. + .5
-        }
-
-        return [dwRect.x + dwRect.width * ndc.x, dwRect.y + dwRect.height * (1. - ndc.y)]
-    }
-
-    function canvasPos(mention) {
-        transformedV.copy(mention.canvasPosWorldSpace)
-        transformedV.applyMatrix4(worldToCanvas)
-        let canvasX = transformedV.x / transformedV.w
-        let canvasY = transformedV.y / transformedV.w
-
-        return toElementCoord(mention.variable.type, canvasX, canvasY)
-    }
-
     function highlightMention(mention) {
         hoveredMention = mention
 
-        let c = mention.variable.col
-        svgLines.forEach((svgLine) => { svgLine.style.stroke = "rgb(" + c.r * 255. + "," + c.g * 255. + "," + c.b * 255. + ")" })
-
-        let [elemX, elemY] = canvasPos(mention)
-
-        let mb = mention.horizontalBounds
-        let mby = lineToScreenY(mention.lineIndex)
-
-        setSvgLine($labelLine,
-            mb.x + mb.w,
-            mby + lineHeight / 2.,
-            elemX, elemY)
-
-        setSvgLine($labelSide1, mb.x, mby, mb.x + mb.w, mby)
-        setSvgLine($labelSide2, mb.x + mb.w, mby, mb.x + mb.w, mby + lineHeight)
-        setSvgLine($labelSide3, mb.x + mb.w, mby + lineHeight, mb.x, mby + lineHeight)
-        setSvgLine($labelSide4, mb.x, mby + lineHeight, mb.x, mby)
+        mention.highlight()
     }
 
     function resetHover() {
@@ -116,9 +88,6 @@ function initMouseInteractions() {
     function updateTextAreaHover(clientX,clientY) {
 
         resetHover()
-
-        camera.updateMatrixWorld()
-        worldToCanvas.copy(camera.projectionMatrix).multiply(camera.matrixWorldInverse)
 
         mentions.every((mention) => {
             if( mention.presenceLevel === PRESENCE_LEVEL_DELETED ||
@@ -140,7 +109,6 @@ function initMouseInteractions() {
         updateDwContents()
     }
 
-    let worldToCanvas = new THREE.Matrix4()
     let transformedV = new THREE.Vector4()
     textarea.addEventListener('mousemove', (event)=>{
         if (grabbedMention)
@@ -153,18 +121,16 @@ function initMouseInteractions() {
     })
 
     function onDwHover(dw, clientX,clientY) {
-        camera.updateMatrixWorld()
-        worldToCanvas.copy(camera.projectionMatrix).multiply(camera.matrixWorldInverse)
 
         resetHover()
 
         let closestIndex = -1
         let closestDist = Infinity
         mentions.forEach((mention,i) => {
-            if (!mention.viz.visible || mention.viz.parent !== dw.scene)
+            if (!mention.isVisibleInDw(dw) )
                 return
 
-            let [elemX, elemY] = canvasPos(mention)
+            let [elemX, elemY] = mention.getCanvasPosition(dw)
             let dist = Math.sqrt(sq(clientX - elemX) + sq(clientY - elemY))
 
             if(dist < closestDist) {
@@ -193,9 +159,10 @@ function initMouseInteractions() {
             }
             else if (event.which === 1 && hoveredMention !== null ) {
                 grabbedMention = hoveredMention
+                grabbedDw = dw
                 resetHover()
 
-                grabbedMention.variable.type.onGrab()
+                grabbedMention.onGrab()
             }
         })
     }

@@ -1,7 +1,6 @@
-function initVec3Dw($dwEl)
+function initVectorSpaceDw($dwEl)
 {
-    let dw = new Dw($dwEl, true)
-    dws.second = dw
+    let dw = new Dw("vectorSpace",$dwEl, true)
 
     //want an RGB cube
     //also, matrices in here. little parallelipipeds with their edges extended past the corners
@@ -16,11 +15,16 @@ function initVec3Dw($dwEl)
     let asVec = new THREE.Vector3()
     let dragPlane = new Mv()
     let draggedPoint = new Mv()
-    types.vec3 = {
-        dw,
-        getFreshViz: (col) => {
+    class Vec extends Mention {
+        #viz
+
+        constructor(variable) {
+            super(variable)
 
             let viz = new THREE.Object3D()
+            this.#viz = viz
+            viz.visible = false
+            dws.vectorSpace.scene.add(viz)
 
             viz.updateFromAsVec = () => {
                 let shaftVec = v1.copy(asVec).setLength(asVec.length() - headHeight)
@@ -29,46 +33,62 @@ function initVec3Dw($dwEl)
                 setRotationallySymmetricMatrix(headVec.x, headVec.y, headVec.z, viz.head.matrix)
                 viz.head.matrix.setPosition(asVec)
             }
-            
-            let mat = new THREE.MeshPhongMaterial({ color: col })
+
+            let mat = new THREE.MeshPhongMaterial({ color: variable.col })
             viz.head = new THREE.Mesh(headGeo, mat)
+            viz.head.castShadow = true
             viz.head.matrixAutoUpdate = false
             viz.shaft = new THREE.Mesh(shaftGeo, mat)
             viz.shaft.matrixAutoUpdate = false
+            viz.shaft.castShadow = true
             viz.add(viz.head, viz.shaft)
+        }
 
-            return viz
-        },
-        getOutputFloatString: (variableName) => {
-            return getFloatArrayAssignmentString(variableName, 3)
-        },
-        respondToDrag: () => {
+        getCanvasPositionWorldSpace(target, dw) {
+            asVec.setFromMatrixPosition(this.#viz.head.matrix)
+            target.copy(asVec)
+            target.w = 1.
+
+            if (dw !== dws.vectorSpace)
+                console.error("not in that dw")
+        }
+
+        getShaderOutputFloatString(variableName) {
+            return getFloatArrayAssignmentString(this.variable.name, 3)
+        }
+
+        respondToDrag(dw) {
             camera.frustum.far.projectOn(e123, dragPlane)
             let mouseRay = getMouseRay(dw)
             meet(dragPlane, mouseRay, draggedPoint)
             draggedPoint.toVector(asVec)
             grabbedMention.viz.updateFromAsVec()
-        },
-        onGrab: () => {
-            log("grabbed")
-        },
-        updateVizAndCanvasPos: (mention, shaderWithMentionReadout) => {
-            
+        }
+
+        onGrab() {
+        }
+
+        updateViz(shaderWithMentionReadout) {
             getShaderOutput(shaderWithMentionReadout, newValues)
-            mention.canvasPosWorldSpace.fromArray(newValues)
-            mention.canvasPosWorldSpace.w = 1.
-
             asVec.fromArray(newValues)
-            mention.viz.updateFromAsVec()
+            this.#viz.updateFromAsVec()
+        }
 
-            //!! bug !! try having it initially commented out then uncomment it
-        },
-        getReassignmentText: () => {
-            asVec.setFromMatrixPosition(grabbedMention.viz.head.matrix)
-            return "\n    " + grabbedMention.variable.name + " = vec3(" +
+        getReassignmentText() {
+            asVec.setFromMatrixPosition(this.#viz.head.matrix)
+            return "\n    " + this.variable.name + " = vec3(" +
                 asVec.x.toFixed(2) + "," +
                 asVec.y.toFixed(2) + "," +
                 asVec.z.toFixed(2) + ");\n"
         }
+
+        setVisibility(newVisibility) {
+            this.#viz.visible = newVisibility
+        }
+
+        isVisibleInDw(dw) {
+            return this.#viz.visible && this.#viz.parent === dw.scene
+        }
     }
+    types.Vec = Vec
 }
