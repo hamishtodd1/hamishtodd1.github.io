@@ -15,6 +15,7 @@ let oldClientY = 0
 const dws = {}
 
 let glslGaString = ""
+let generalShaderPrefix = ""
 
 let hoveredMention = null
 

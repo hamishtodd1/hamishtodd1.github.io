@@ -1,7 +1,6 @@
 function initPgaVizes() {
 
     let dragPlane = new Mv()
-
     
     let toHaveUpdateMvCalled = []
     camera.onMovementFunctions.push(()=>{
@@ -64,9 +63,9 @@ function initPgaVizes() {
 
         onGrab(dw) {
             if(dw === dws.euclidean) {
-                let initialPosition = mv0
-                initialPosition.fromVector(this.#eMesh.position)
-                camera.frustum.far.projectOn(initialPosition, dragPlane)
+                if(this.#mv.eNorm() !== 0.)
+                    camera.frustum.far.projectOn(this.#mv, dragPlane)
+                else dragPlane.copy(e0)
             }
         }
 
@@ -75,8 +74,8 @@ function initPgaVizes() {
 
             if(dw === dws.euclidean) {
                 let mouseRay = getMouseRay(dw)
-                meet(dragPlane, mouseRay, draggedPoint)
-                draggedPoint.toVector(this.#eMesh.position)
+                meet(dragPlane, mouseRay, this.#mv) //so, #mv is not what's in the shader! Override goes here
+                this.updateFromMv()
             }
             else if(dw === dws.infinity) {
                 console.log("handle this!")
@@ -124,22 +123,57 @@ function initPgaVizes() {
     /////////
     // DQs //
     /////////
-    let lineGeo = new THREE.CylinderGeometry(.03, .03, 500.)
+    generalShaderPrefix += `
+struct Dq {
+    float scalar;
+    float e12; float e31; float e23;
+    float e01; float e02; float e03;
+    float e0123;
+};`
+
+    let projectedOnOrigin = new Mv()
+    let quatToOriginVersion = new Mv()
+    let joinedWithOrigin = new Mv()
+    function getQuaternionToProjectionOnOrigin(model, target) {
+        model.projectOn(e123, projectedOnOrigin).normalize()
+        mul(projectedOnOrigin, e31, quatToOriginVersion)
+        quatToOriginVersion.sqrtSelf()
+        quatToOriginVersion.toQuaternion(target)
+    }
+
+    let eLineGeo = new THREE.CylinderGeometry(.03, .03, 500.)
+    let iLineGeo = new THREE.CylinderGeometry(.03, .03, INFINITY_RADIUS*2.)
+    let ringGeo = new THREE.TorusGeometry(INFINITY_RADIUS, .05, 7, 62)
     let dwNewValues = new Float32Array(8)
     let newDq = new Dq()
     let displayedLineMv = new Mv()
     let linePart = new Mv() //bivector?
     class DqMention extends Mention {
-        #lineMesh;
+        #eMesh;
+        #iMesh;
+        #ringMesh;
         #mv = new Mv();
         
         constructor(variable) {
             super(variable)
 
-            this.#lineMesh = new THREE.Mesh(lineGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
-            this.#lineMesh.visible = false
-            dws.euclidean.scene.add(this.#lineMesh)
-            this.castShadow = true
+            this.#iMesh = new THREE.Mesh(iLineGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
+            this.#iMesh.visible = false
+            dws.infinity.scene.add(this.#iMesh)
+            this.#iMesh.castShadow = true
+
+            this.#eMesh = new THREE.Mesh(eLineGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
+            this.#eMesh.visible = false
+            dws.euclidean.scene.add(this.#eMesh)
+            this.#eMesh.castShadow = true
+
+            this.#ringMesh = new THREE.Mesh(ringGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
+            this.#ringMesh.visible = false
+            dws.infinity.scene.add(this.#ringMesh)
+            this.#ringMesh.castShadow = true
+
+            //there was some bug involving hovering the variable just under the grey line
+            //and that showed up but no others did
 
             toHaveUpdateMvCalled.push(this)
         }
@@ -148,15 +182,22 @@ function initPgaVizes() {
             linePart.copy(this.#mv)
             linePart[0] = 0.
             linePart[15] = 0.
+
+            if(linePart.eNorm() !== 0.) {
+                getQuaternionToProjectionOnOrigin(linePart, this.#iMesh.quaternion)
+            }
+            else {
+                // getQuaternionToProjectionOnOrigin(linePart, this.#iMesh.quaternion)
+                //default mv is e02
+                join(e123,linePart,joinedWithOrigin)
+                mul(joinedWithOrigin, e3, quatToOriginVersion)
+                quatToOriginVersion.sqrtSelf()
+                quatToOriginVersion.toQuaternion(this.#ringMesh.quaternion)
+            }
+
             linePart.getDisplayableVersion(displayedLineMv)
-
-            let pos = e123.projectOn(displayedLineMv, mv2)
-            pos.toVector(this.#lineMesh.position)
-
-            let projectedOnOrigin = displayedLineMv.projectOn(e123, mv0).normalize()
-            let quatToProjOnOrigin = mul(projectedOnOrigin, e31, mv1)
-            quatToProjOnOrigin.sqrtSelf()
-            quatToProjOnOrigin.toQuaternion(this.#lineMesh.quaternion)
+            getQuaternionToProjectionOnOrigin(displayedLineMv, this.#eMesh.quaternion)
+            e123.projectOn(displayedLineMv, mv0).toVector(this.#eMesh.position)
         }
 
         updateViz(shaderWithMentionReadout) {
@@ -164,10 +205,17 @@ function initPgaVizes() {
             newDq.copy(dwNewValues)
             newDq.toMv(this.#mv)
 
+            this.setVisibility(this.#eMesh.visible)
+
             this.updateFromMv()
         }
 
+        onGrab() {
+            log("grab started")
+        }
+
         respondToDrag(dw) {
+            log("dragging")
             //line editing controls
             //move mouse left right up down and it translates
             //press a toggle and 
@@ -175,30 +223,46 @@ function initPgaVizes() {
             //Alternatively, it pivots around where you grabbed it
             //unless you move the mouse to the edge of the window
             //if moving mouse outside window, it's the pivot joined with that point at infinity
+
+            //will be cool to edit at infinity. Probably yes, one point of it is stuck, an
         }
 
         getCanvasPositionWorldSpace(target, dw) {
             if (dw === dws.euclidean) {
-                target.copy(this.#lineMesh.position)
+                target.copy(this.#eMesh.position)
                 target.w = 1.
             }
             else if (dw === dws.infinity) {
-                
+                target.set(0.,0.,0.)
+                target.w = 1.
+
+                if(this.#mv.hasEuclideanPart()) {
+                    //probably want something about its intersection with the top
+                }
+                else {
+                    //you kinda want the closest point on the sphere
+                }
             }
             else
                 console.error("not in that dw")
         }
 
         setVisibility(newVisibility) {
-            this.#lineMesh.visible = newVisibility
+            this.#eMesh.visible = newVisibility
+
+            let hasEuclideanPart = this.#mv.eNorm() !== 0.
+            this.#iMesh.visible = hasEuclideanPart && newVisibility
+            this.#ringMesh.visible = !hasEuclideanPart && newVisibility
         }
 
         isVisibleInDw(dw) {
-            return this.#lineMesh.visible && this.#lineMesh.parent === dw.scene
+            return  this.#eMesh.parent === dw.scene && this.#eMesh.visible ||
+                    (this.#iMesh.parent === dw.scene && (this.#iMesh.visible || this.#ringMesh.visible) )
         }
 
         getReassignmentText() {
-            return generateReassignmentText(this.variable.name, "Dq", 1., 0., 0., 0., 0., 0., 0., 0.)
+            let m = this.#mv
+            return generateReassignmentText(this.variable.name, "Dq", m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7])
         }
 
         getShaderOutputFloatString() {
@@ -216,12 +280,22 @@ function initPgaVizes() {
         }
     }
     types.Dq = DqMention
+
+    if(0)
+    {
+        let mousePoint = new THREE.Mesh(new THREE.SphereBufferGeometry(.1, 32, 16), new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
+        mousePoint.position.copy(outOfTheWayPosition)
+        dws.euclidean.addNonMentionChild(mousePoint)
+        dws.euclidean.elem.addEventListener('mousemove', (event) => {
+            let mouseRay = getMouseRay(dws.euclidean)
+
+            meet(e0, mouseRay, mv0).toVectorDisplayable(mousePoint.position)
+        })
+    }
 }
 
 function initEuclideanDw($dwEl)
 {
-    let dw = new Dw("euclidean", $dwEl, true)
-
     
 
     // if(0)
@@ -232,18 +306,18 @@ function initEuclideanDw($dwEl)
         //But mouse in what plane? Some plane parallel to camera, tweak its distance from the point
         //move mouse out of dw and the plane is, still through the same point, rotating to face pts at infinity
 
-        let planeMesh = new THREE.Mesh(new THREE.CircleGeometry(2.), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }))
-        dw.scene.add(planeMesh)
+        // let planeMesh = new THREE.Mesh(new THREE.CircleGeometry(2.), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }))
+        // dw.scene.add(planeMesh)
 
-        let planeMv = new Mv().plane(2., 1., 1., 1.)
-        planeMv.normalize()
-        updateFunctions.push(() => {
+        // let planeMv = new Mv().plane(2., 1., 1., 1.)
+        // planeMv.normalize()
+        // updateFunctions.push(() => {
 
-            e123.projectOn(planeMv, mv0).toVector(planeMesh.position)
+        //     e123.projectOn(planeMv, mv0).toVector(planeMesh.position)
 
-            let planeOnOrigin = planeMv.projectOn(e123, mv0)
-            let e3ToPlaneMotor = mul(planeOnOrigin, e3, mv2).sqrt(mv3)
-            e3ToPlaneMotor.toQuaternion(planeMesh.quaternion)
-        })
+        //     let planeOnOrigin = planeMv.projectOn(e123, mv0)
+        //     let e3ToPlaneMotor = mul(planeOnOrigin, e3, mv2).sqrt(mv3)
+        //     e3ToPlaneMotor.toQuaternion(planeMesh.quaternion)
+        // })
     }
 }

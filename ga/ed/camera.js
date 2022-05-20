@@ -2,7 +2,7 @@ function initCamera() {
     const fov = 60.
     const aspect = eval(getComputedStyle(topDwEl).aspectRatio)
     const near = .1
-    const far = 20.
+    const far = 10.
 
     camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
     camera.frustum = {
@@ -119,6 +119,8 @@ function initCamera() {
             let latDiff = -.006 * (event.clientY - oldClientY)
             latDiff = Math.sign(latDiff) * (Math.min(Math.abs(latDiff), 1.8))
             addToCamerLonLat(lonDiff, latDiff)
+
+            //and need to update labels
         }
 
         oldClientX = event.clientX

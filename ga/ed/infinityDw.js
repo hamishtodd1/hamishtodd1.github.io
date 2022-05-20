@@ -15,8 +15,4 @@ function initInfinityDw($dwEl)
     let euclideanHider = new THREE.Mesh(sphereGeo, new THREE.MeshPhongMaterial({color:0x000000}))
     euclideanHider.scale.setScalar(.1)
     dw.scene.add(euclideanHider)
-
-    let ringGeo = new THREE.TorusGeometry(INFINITY_RADIUS,.05, 7, 62)
-    let ring = new THREE.Mesh(ringGeo, new THREE.MeshPhongMaterial({color:0xFF0000}))
-    dw.scene.add(ring)
 }

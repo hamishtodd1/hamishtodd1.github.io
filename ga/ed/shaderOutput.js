@@ -14,7 +14,7 @@ async function initShaderOutput() {
     //  and an integer uniform that just says "run the shader making sure this is the output"
     getShaderOutput = (fragmentShader, target) => {
 
-        rtFsq.material.fragmentShader = outputterPrefix + fragmentShader
+        rtFsq.material.fragmentShader = generalShaderPrefix + outputterPrefix + fragmentShader
         rtFsq.material.needsUpdate = true
 
         renderer.setRenderTarget(rt)

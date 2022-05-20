@@ -1,7 +1,7 @@
 function initMouseInteractions() {
     let grabbedMention = null
     
-    var characterWidth = parseInt(window.getComputedStyle(textMeasurer).width) / 40.
+    let characterWidth = parseInt(window.getComputedStyle(textMeasurer).width) / 40.
 
     let grabbedDw = null
 
@@ -43,7 +43,7 @@ function initMouseInteractions() {
         let xPlane = mv3.fromLerp(camera.frustum.left, camera.frustum.right, xProportion)
         let yPlane = mv4.fromLerp(camera.frustum.bottom, camera.frustum.top, yProportion)
 
-        meet(yPlane, xPlane, mouseRay)
+        meet(xPlane, yPlane, mouseRay)
         mouseRay.normalize()
         return mouseRay
     }
@@ -57,13 +57,6 @@ function initMouseInteractions() {
     let lineHeight = parseInt(style.lineHeight)
 
     let textAreaOffset = parseInt(style.padding) + parseInt(style.margin) // can add some fudge to this if you like
-
-    let svgLines = [$labelLine, $labelSide1, $labelSide2, $labelSide3, $labelSide4]
-    setSvgHighlightColor = (c) => {
-        svgLines.forEach((svgLine) => { 
-            svgLine.style.stroke = "rgb(" + c.r * 255. + "," + c.g * 255. + "," + c.b * 255. + ")" 
-        })
-    }
 
     lineToScreenY = (line) => {
         return line * lineHeight + textAreaOffset - textarea.scrollTop
@@ -82,7 +75,7 @@ function initMouseInteractions() {
 
     function resetHover() {
         hoveredMention = null
-        svgLines.forEach((svgLine) => { setSvgLine(svgLine, -10, -10, -10, -10) })
+        hideLabelLines()
     }
 
     function updateTextAreaHover(clientX,clientY) {
@@ -109,7 +102,6 @@ function initMouseInteractions() {
         updateDwContents()
     }
 
-    let transformedV = new THREE.Vector4()
     textarea.addEventListener('mousemove', (event)=>{
         if (grabbedMention)
             return
@@ -152,10 +144,11 @@ function initMouseInteractions() {
         })
         dw.elem.addEventListener('mousedown',(event)=>{
             if( lowestChangedLineSinceCompile !== Infinity) {
+                //you've changed it? This is to let them know no editing from the window allowed
                 $changedLineIndicator.style.stroke = "rgb(255,255,255)"
                 setTimeout(()=>{
                     $changedLineIndicator.style.stroke = "rgb(180,180,180)"
-                }, 500)
+                }, 350)
             }
             else if (event.which === 1 && hoveredMention !== null ) {
                 grabbedMention = hoveredMention

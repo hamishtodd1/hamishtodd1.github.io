@@ -2,10 +2,7 @@
     If you were to make a GA-products fighting game, what would it be like?
     Your avatars are flailing tentacle/cloud things, but there are bits you can lock onto
 
-    When you compile, you could get the values onto the cpu (without await!)
-    When you edit the thing, and let go, you could edit the textarea and recompile
-    And re-get all the values in these things
-
+    
     Bultins:
         Hand motor
         Things that shadertoy has:
@@ -110,7 +107,7 @@ void main() {
 
         {
             threejsIsCheckingForShaderErrors = true
-            updateOutputDw(text)
+            updateOutputDw(generalShaderPrefix + text)
         }
         
         mentions.forEach((mention) => {

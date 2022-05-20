@@ -53,6 +53,7 @@ TODO
             make some mentions then delete them
         You could do with updating clientX more often
     Medium term
+        When you're moving camera, label lines update when mouse is in dw, but not otherwise
         Mobius strip dw because for double cover
             The unit complex numbers are the edge
             Intermediate between complex plane view of rotors
@@ -176,16 +177,29 @@ async function init() {
 
     initCamera()
 
-    // float myBiv[6] = float[6](3.4, 4.2, 5.0, 5.2, 0.3, 1.1);
-    let initialText = 
-`struct Dq {
-    float scalar;
-    float e12; float e31; float e23;
-    float e01; float e02; float e03;
-    float e0123;
-};
+    // while ((index = str.indexOf(searchStr, startIndex)) > -1) {
+    //     indices.push(index);
+    //     startIndex = index + searchStrLen;
+    // }    
 
-void mainImage( out vec4 fragColor ) {
+    // initSound()
+
+    let render = await initDws()
+
+    initMention()
+
+    initVectorSpaceDw(topDwEl)
+    new Dw("euclidean", secondDwEl, true)
+    initInfinityDw(thirdDwEl)
+    initFinalDw(bottomDwEl)
+
+    initPgaVizes()
+
+    initMouseInteractions()
+
+    // float myBiv[6] = float[6](3.4, 4.2, 5.0, 5.2, 0.3, 1.1);
+    let initialText =
+`void mainImage( out vec4 fragColor ) {
     
     vec3 myVec = vec3(1.,1.,0.);
     
@@ -193,8 +207,9 @@ void mainImage( out vec4 fragColor ) {
     //try eg 1 + e12 + e01234
     
     vec4 myPoint1 = vec4(1.2,1.5,0.,1.);
-    vec4 myPoint2 = vec4(0.2, 1.,0.,1.);
+    vec4 myPoint2 = vec4(.2,0.,-1.,0.);
     myPoint1; myPoint2;
+
     fragColor = vec4(vec3(myDq.e12),1.);
 }
 `
@@ -214,36 +229,6 @@ void mainImage( out vec4 fragColor ) {
         updateSyntaxHighlightingScroll(textarea)
     })
     textarea.addEventListener('keydown', checkIfKeyIsTab)
-
-    // while ((index = str.indexOf(searchStr, startIndex)) > -1) {
-    //     indices.push(index);
-    //     startIndex = index + searchStrLen;
-    // }    
-
-    // initSound()
-
-    let render = await initDws()
-
-    initMention()
-
-    initVectorSpaceDw(topDwEl)
-    initEuclideanDw(secondDwEl)
-    initInfinityDw(thirdDwEl)
-    initFinalDw(bottomDwEl)
-
-    initPgaVizes()
-
-    {
-        let mousePoint = new THREE.Mesh(new THREE.SphereBufferGeometry(.1, 32, 16), new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
-        dws.euclidean.addNonMentionChild(mousePoint)
-        dws.euclidean.elem.addEventListener('mousemove', (event) => {
-            let mouseRay = getMouseRay(dws.euclidean)
-
-            meet(e0, mouseRay, mv0).toVectorDisplayable(mousePoint.position)
-        })
-    }
-
-    initMouseInteractions()
 
     await initCompilation()
 
