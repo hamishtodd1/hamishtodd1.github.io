@@ -198,13 +198,37 @@ function init301Unhoisted() {
         }
 
         toVector(v) {
-            let thingToDivideBy = this[14] === 0. ? 1. : this[14]
-
-            v.z = this[11] / thingToDivideBy
-            v.y = this[12] / thingToDivideBy
-            v.x = this[13] / thingToDivideBy
+            if(this[14] === 0.) {
+                v.z = this[11]
+                v.y = this[12]
+                v.x = this[13]                
+            }
+            else {
+                v.z = this[11] / this[14]
+                v.y = this[12] / this[14]
+                v.x = this[13] / this[14]
+            }
 
             return v
+        }
+
+        getDisplayableVersion(target) {
+            if (this.hasEuclideanPart())
+                target.copy(this)
+            else {
+                let cameraJoin = newMv
+                join(this, camera.mvs.pos, cameraJoin)
+                meet(camera.frustum.far, cameraJoin, target)
+            }
+
+            return target
+        }
+
+        toVectorDisplayable(target) {
+            let displayableVersion = newMv
+            this.getDisplayableVersion(displayableVersion)
+            displayableVersion.toVector(target)
+            return target
         }
 
         plane(e0Coef, e1Coef,e2Coef, e3Coef) {
@@ -386,24 +410,7 @@ function init301Unhoisted() {
             return this.eNormSquared() > .00001
         }
 
-        getDisplayableVersion(target) {
-            if (this.hasEuclideanPart())
-                target.copy(this)
-            else {
-                let cameraJoin = newMv
-                join(this, camera.mvs.pos, cameraJoin)
-                meet(camera.frustum.far, cameraJoin, target)
-            }
-
-            return target
-        }
-
-        toVectorDisplayable(target) {
-            let displayableVersion = newMv
-            this.getDisplayableVersion(displayableVersion)
-            displayableVersion.toVector(target)
-            return target
-        }
+        
     }
     window.Mv = Mv
 

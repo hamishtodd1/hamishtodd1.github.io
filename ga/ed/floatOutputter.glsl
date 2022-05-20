@@ -1,5 +1,7 @@
 //from https://stackoverflow.com/questions/17981163/webgl-read-pixels-from-floating-point-render-target
 
+//takes the 32 bits of a float and puts them into the 32 bits spread between 8 of R, G, B, A
+
 float shiftRight (float v, float amt) { 
     v = floor(v) + 0.5; 
     return floor(v / exp2(amt)); 
@@ -32,4 +34,3 @@ vec4 encodeFloat (float val) {
     float byte1 = (sign * 128. + remaining_bits_of_biased_exponent) / 255.; 
     return vec4(byte4, byte3, byte2, byte1); 
 }
-

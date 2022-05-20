@@ -1,3 +1,12 @@
+function generateReassignmentText() {
+    let ret = "\n    " + arguments[0] + " = " + arguments[1] + "("
+    for (let i = 2, il = arguments.length; i < il; ++i)
+        ret += arguments[i].toFixed(2) + (i === il - 1 ? "" : ",")
+    ret += ");\n"
+
+    return ret
+}
+
 function initMention()
 {
     let canvasPos = new THREE.Vector4()
@@ -16,6 +25,10 @@ function initMention()
             mentions.push(this) //maybe better as mentions of a certain subclass
 
             this.variable = variable
+        }
+
+        onGrab(dw) {
+
         }
 
         getCanvasPosition(dw) {

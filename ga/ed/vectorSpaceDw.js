@@ -15,7 +15,7 @@ function initVectorSpaceDw($dwEl)
     let asVec = new THREE.Vector3()
     let dragPlane = new Mv()
     let draggedPoint = new Mv()
-    class Vec extends Mention {
+    class Arrow extends Mention {
         #viz
 
         constructor(variable) {
@@ -44,6 +44,20 @@ function initVectorSpaceDw($dwEl)
             viz.add(viz.head, viz.shaft)
         }
 
+        updateViz(shaderWithMentionReadout) {
+            getShaderOutput(shaderWithMentionReadout, newValues)
+            asVec.fromArray(newValues)
+            this.#viz.updateFromAsVec()
+        }
+
+        respondToDrag(dw) {
+            camera.frustum.far.projectOn(e123, dragPlane)
+            let mouseRay = getMouseRay(dw)
+            meet(dragPlane, mouseRay, draggedPoint)
+            draggedPoint.toVector(asVec)
+            this.#viz.updateFromAsVec()
+        }
+
         getCanvasPositionWorldSpace(target, dw) {
             asVec.setFromMatrixPosition(this.#viz.head.matrix)
             target.copy(asVec)
@@ -57,29 +71,9 @@ function initVectorSpaceDw($dwEl)
             return getFloatArrayAssignmentString(this.variable.name, 3)
         }
 
-        respondToDrag(dw) {
-            camera.frustum.far.projectOn(e123, dragPlane)
-            let mouseRay = getMouseRay(dw)
-            meet(dragPlane, mouseRay, draggedPoint)
-            draggedPoint.toVector(asVec)
-            grabbedMention.viz.updateFromAsVec()
-        }
-
-        onGrab() {
-        }
-
-        updateViz(shaderWithMentionReadout) {
-            getShaderOutput(shaderWithMentionReadout, newValues)
-            asVec.fromArray(newValues)
-            this.#viz.updateFromAsVec()
-        }
-
         getReassignmentText() {
             asVec.setFromMatrixPosition(this.#viz.head.matrix)
-            return "\n    " + this.variable.name + " = vec3(" +
-                asVec.x.toFixed(2) + "," +
-                asVec.y.toFixed(2) + "," +
-                asVec.z.toFixed(2) + ");\n"
+            return generateReassignmentText(this.variable.name,"vec3", asVec.x, asVec.y, asVec.z)
         }
 
         setVisibility(newVisibility) {
@@ -90,5 +84,5 @@ function initVectorSpaceDw($dwEl)
             return this.#viz.visible && this.#viz.parent === dw.scene
         }
     }
-    types.Vec = Vec
+    types.vec3 = Arrow
 }

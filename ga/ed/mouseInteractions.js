@@ -162,7 +162,8 @@ function initMouseInteractions() {
                 grabbedDw = dw
                 resetHover()
 
-                grabbedMention.onGrab()
+                if (grabbedMention.onGrab !== undefined)
+                    grabbedMention.onGrab(dw)
             }
         })
     }

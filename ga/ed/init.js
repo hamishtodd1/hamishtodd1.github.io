@@ -20,7 +20,9 @@ TODO
         Could have vec3 connect to points at infinity too
             Hmm well the way that you interpret stuff affects how it creates suggestions
     Short term
+        mvs that you get a displayable version of need to be updated with camera
         Currently, if a variable is uninitialized, you still get shown a point at 0,0,0 in the window
+        When you click window, if not close to anything, perhaps point should be created?
         Hsv window
         When you move something, it could leave its current value behind
             And thereby have a suggestion based on that, like +=
@@ -124,17 +126,6 @@ As a tablet notes-in-the-margin app... and if you were going to buy a tablet... 
 
 Huh you are sort of making a desmos killer
 
-
-For now, 
-    "top" dw and 
-    "just this line" dw, which you can engineer by mentioning several variables in a line
-    And some are different "types" 
-        (3,1)
-        (3,0,1)
-        Shader
-    But, may want a scrollable series of dws
-        Can scroll up and down, make a new one, delete them, drag them down, maybe merge them
-
 Parser
     potentially take excerpts of the code and run it, eg they've written a function
         you want the output of that though, so not in a shader    
@@ -180,29 +171,31 @@ Because it helps portability to ordinary shaders:
 
 async function init() {
 
+    // init41()
     init301()
 
     initCamera()
 
-
     // float myBiv[6] = float[6](3.4, 4.2, 5.0, 5.2, 0.3, 1.1);
     let initialText = 
-// `struct Biv {
-//     float e01; float e02; float e03;
-//     float e12; float e31; float e23;
-//     bool extrinsic;
-// };
+`struct Dq {
+    float scalar;
+    float e12; float e31; float e23;
+    float e01; float e02; float e03;
+    float e0123;
+};
 
-//     Biv myBiv = Biv(0.,0.,0.,  0.,0.,0., true);
-// `
-`void mainImage( out vec4 fragColor ) {
-
+void mainImage( out vec4 fragColor ) {
+    
     vec3 myVec = vec3(1.,1.,0.);
+    
+    Dq myDq = Dq(0., 0.,0.,0., 1.,0.,0., 0.);
+    //try eg 1 + e12 + e01234
     
     vec4 myPoint1 = vec4(1.2,1.5,0.,1.);
     vec4 myPoint2 = vec4(0.2, 1.,0.,1.);
     myPoint1; myPoint2;
-    fragColor = myPoint1 + myPoint2;
+    fragColor = vec4(vec3(myDq.e12),1.);
 }
 `
 
@@ -233,9 +226,9 @@ async function init() {
 
     initMention()
 
-    initEuclideanDw(topDwEl)
-    initVectorSpaceDw(secondDwEl)
-    // initInfinityDw(thirdDwEl)
+    initVectorSpaceDw(topDwEl)
+    initEuclideanDw(secondDwEl)
+    initInfinityDw(thirdDwEl)
     initFinalDw(bottomDwEl)
 
     initPgaVizes()

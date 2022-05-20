@@ -74,7 +74,7 @@ async function initDws() {
         spotLight.lookAt(0.,0.,0.)
         dw.addNonMentionChild(spotLight)
 
-        dw.addNonMentionChild(new THREE.AmbientLight(0x888888))
+        dw.addNonMentionChild(new THREE.AmbientLight(0xA0A0A0,1.))
         
         // const skyBg = new THREE.Mesh(skyBgGeo, skyBgMat)
         // dw.addNonMentionChild(skyBg)

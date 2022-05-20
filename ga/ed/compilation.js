@@ -25,6 +25,8 @@
 
 async function initCompilation()
 {
+    let randomColor = new THREE.Color()
+
     class Variable {
         name;
         col = new THREE.Color(0., 0., 0.);
@@ -35,14 +37,14 @@ async function initCompilation()
 
             this.class = newClass
 
-            let [r, g, b] = randomToViridis(.53 * Math.random())
-            this.col.r = r; this.col.g = g; this.col.b = b;
+            randomColor.setHSL(Math.random(), 1., .5)
+            this.col.r = randomColor.r; this.col.g = randomColor.g; this.col.b = randomColor.b;
 
             variables.push(this)
         }
     }
 
-    const nameRegex = /([a-zA-Z_$][a-zA-Z_$0-9]*)/g
+    const nameRegex = /(?<=[\s\(\)])([a-zA-Z_$][a-zA-Z_$0-9]*)/g
     const glslReservedRegex = Prism.languages.glsl.keyword
     const lineDividingRegex = /^.*(\r?\n|$)/mg
     const notConsideredNamesRegex = /\b(?:mainImage|x|y|z|w)\b/
@@ -68,7 +70,7 @@ void main() {
 
     int pixelIndex = int(round(frameCoord.x * 8. - .5));
     float pixelFloat = 0.;
-    for (int k = 0; k < 4; ++k)
+    for (int k = 0; k < 8; ++k)
         pixelFloat += pixelIndex == k ? outputFloats[k] : 0.;
 
     gl_FragColor = encodeFloat(pixelFloat);
@@ -135,7 +137,7 @@ void main() {
                 return
             matches.forEach((match)=>{
                 let name = match[0] //it's in 1 as well
-                if (glslReservedRegex.test(name) || notConsideredNamesRegex.test(name))
+                if (glslReservedRegex.test(name) || notConsideredNamesRegex.test(name) || types[name] !== undefined)
                     return
 
                 //we assume that stuff is limited to a line
@@ -152,18 +154,19 @@ void main() {
 
                     let variable = variables.find((v) => v.name === name )
                     if(variable === undefined) {
-                        let partUpToName = l.slice(0, l.indexOf(name) - 1)
+                        let partUpToName = l.slice(0, l.indexOf(name))
                         let splitByWhitespace = partUpToName.split(/\s+/)
-                        let declaredType = splitByWhitespace[splitByWhitespace.length - 1]
-                        switch(declaredType) {
-                            case 'vec4':
-                                variable = new Variable(name, types.Point)
-                                break;
-                            case 'vec3':
-                                variable = new Variable(name, types.Vec)
-                                break;
-                            default:
-                                console.error("unrecognized type") //could put it in the thingy
+                        let declaredType = splitByWhitespace[splitByWhitespace.length - 2]
+                        if( types[declaredType] === undefined ) {
+                            // debugger
+                            console.error(
+                                "unrecognized type: " + declaredType +
+                                "\nname:" + name +
+                                "\nline:" + l +
+                                "\nsplit:" + splitByWhitespace.join(","))
+                        }
+                        else {
+                            variable = new Variable(name, types[declaredType])
                         }
                     }
 
@@ -192,20 +195,16 @@ void main() {
                 return
             }
 
-            let shaderWithMentionReadout = ``
-            shaderWithMentionReadout += readoutPrefix
-            shaderWithMentionReadout += lines.slice(0,mention.lineIndex+1).join("\n")
-
-            shaderWithMentionReadout += mention.getShaderOutputFloatString()
-
-            shaderWithMentionReadout += lines.slice(mention.lineIndex+1).join("\n")
-            shaderWithMentionReadout += readoutSuffix
+            let shaderWithMentionReadout = 
+                readoutPrefix +
+                lines.slice(0,mention.lineIndex+1).join("\n") +
+                mention.getShaderOutputFloatString() +
+                lines.slice(mention.lineIndex+1).join("\n") + 
+                readoutSuffix
 
             //probably terrible to have a shader for every mention
             //just have the "readout shader". A uniform controls which line is being read out
             //compiler optimization number 1!
-            
-            //also when you do sphere at infinity dw, have the frustum and its view rect on there
 
             mention.updateViz(shaderWithMentionReadout)
         })
