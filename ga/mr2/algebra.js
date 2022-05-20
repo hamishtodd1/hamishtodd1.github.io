@@ -10,7 +10,7 @@ function initAlgebra()
         return newSignature + bodyString
     }
 
-    gaShaderString = ""
+    gaShaderString = ``
     function appendToGaShaderString(glslBody) {
         gaShaderString += "\n" + glslBody + "\n"
     }

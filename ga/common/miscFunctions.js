@@ -1,3 +1,28 @@
+function centerToFrameDistanceAtOneUnitAway(fov) {
+	return Math.tan(fov / 2. * (TAU / 360.))
+}
+function fovGivenCenterToFrameDistanceAtOneUnitAway(centerToFrame) {
+	return 2. * Math.atan(centerToFrame) * (360. / TAU);
+}
+
+function otherFov(inputFov, aspectRatio, inputIsVertical) {
+	var centerToFrameInput = centerToFrameDistanceAtOneUnitAway(inputFov, 1)
+	var centerToFrameOutput = centerToFrameInput;
+	if (inputIsVertical)
+		centerToFrameOutput *= aspectRatio;
+	else
+		centerToFrameOutput /= aspectRatio;
+	var outputFov = fovGivenCenterToFrameDistanceAtOneUnitAway(centerToFrameOutput)
+	return outputFov;
+}
+
+function setSvgLine(svgLine, x1, y1, x2, y2) {
+	svgLine.setAttribute('x1', x1)
+	svgLine.setAttribute('y1', y1)
+	svgLine.setAttribute('x2', x2)
+	svgLine.setAttribute('y2', y2)
+}
+
 
 //fixed length array
 function fixedLengthArray(elementConstructor, elementDestructor) {
@@ -608,7 +633,7 @@ function CylinderBufferGeometryUncentered(radius, length, radiusSegments, capped
 	if(!capped)
 		capped = false;
 	var geometry = new THREE.CylinderBufferGeometry(radius, radius, length,radiusSegments,1,!capped);
-	geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,length/2,0))
+	geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0,length/2,0))
 	return geometry;
 }
 
