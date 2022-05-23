@@ -1,0 +1,79 @@
+<!--
+-->
+<html>
+	<head>
+		<title>Quantum Accordion/Vortex</title>
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				margin: 0px;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<script>
+			async function technicalInit() {
+				initButtons()
+
+				renderer.shadowMap.enabled = true
+				renderer.setClearColor(0x2F2F2F)
+				document.body.appendChild( renderer.domElement )
+
+				initAlgebra()
+
+				initWindowResize()
+				initMouse()
+
+				initOneQubit()
+				// await initEntanglement()
+
+				function render() {
+					let clockDelta = clock.getDelta()
+					frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
+					
+					mouse.updateFromAsyncAndCheckClicks()
+
+					for(var i = 0; i < updateFunctions.length; i++)
+						updateFunctions[i]()
+
+					++frameCount
+
+					requestAnimationFrame(render)
+					renderer.render(scene, camera)
+				}
+
+				render()
+			}
+		</script>
+
+		
+		<script src="../common/lib/three.js"></script>
+
+		
+		<script src="../common/miscFunctions.js"></script>
+		<script src="../common/variables.js"></script>
+		
+
+		<script src="variables.js"></script>
+		<script src="../common/threejsVariables.js"></script>
+
+
+		<script src="../common/mouse.js"></script>
+		<script src="../common/text.js"></script>
+		<script src="../common/buttons.js"></script>
+
+		<script src="windowResize.js"></script>
+
+		<script src="surroundingsAndMaterial.js"></script>
+
+		<script src="oneQubit.js"></script>
+		<script src="entanglement.js"></script>
+		<script src="epga.js"></script>
+		<script src="quantumStereographicProjection.js"></script>
+
+		<script>
+			technicalInit()
+		</script>
+	</body>
+</html>
