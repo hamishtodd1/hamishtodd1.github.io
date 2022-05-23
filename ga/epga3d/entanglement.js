@@ -284,113 +284,10 @@ async function initEntanglement()
 
     initDirectControlOfMotor(stateMotor)
     
-    // initialized to 00
-    let state = new ComplexVector(4)
-    state.elements[0].re = 1.
-
-    //parallel control
-    {
-        let equivalents = {
-            cnot: new Mv(),
-            pauliXFirstQubit: new Mv(),
-            pauliYFirstQubit: new Mv(),
-            pauliZFirstQubit: new Mv(),
-            pauliXSecondQubit: new Mv(),
-            pauliYSecondQubit: new Mv(),
-            pauliZSecondQubit: new Mv(),
-            hadamard: new Mv(),
-            //not sure what to do about phase shift
-            //If it all works discretely it's probably fine
-        }
-
-        //pretty sure it's this, check notes
-        equivalents.cnot.copy(e1)
-        equivalents.cnot.add(e2)
-        equivalents.cnot.multiplyScalar(1./Math.sqrt(2.))
-
-        // equivalents.pauliXFirstQubit.copy()
-        // e12, etc
-
-        //maybe worthwhile thinking about CL(3) and one qubit
-
-        //how to check they're keeping up with each other?
-        //maintain an array of all the states they've both been in
-        //for all new states, compare with old ones. If matrix was same but mv is different, uh-oh
-
-        //how to make a bell state with paulis and cnot?
-    }
     
     //intuition is that the paulis should be rotations
     //so find a mapping that does that
 
-    let mv0 = new Mv()
-    updateFunctions.push(() => {
-        
-        //naieve
-        if(0) {
-            stateMotor.copy(zeroMv)
-
-            stateMotor[0] = state.elements[0].re
-            stateMotor[15] = state.elements[0].im
-            stateMotor.add(mv0.copy(e12).multiplyScalar(state.elements[1].re))
-            stateMotor.add(mv0.copy(e12).dualSelf().multiplyScalar(state.elements[1].im))
-            stateMotor.add(mv0.copy(e23).multiplyScalar(state.elements[2].re))
-            stateMotor.add(mv0.copy(e23).dualSelf().multiplyScalar(state.elements[2].im))
-            stateMotor.add(mv0.copy(e31).multiplyScalar(state.elements[3].re))
-            stateMotor.add(mv0.copy(e31).dualSelf().multiplyScalar(state.elements[3].im))
-            stateMotor.normalize()
-            // stateMotor.log()
-        }
-
-        if(0) {
-            //from the thingy
-            let alpha = state.elements[0]; let beta = state.elements[1]; let gamma = state.elements[2]; let delta = state.elements[3]
-
-            let sinOmega = Math.sqrt(gamma.squaredMagnitude())
-            let omega = Math.asin(sinOmega)
-
-            alpha.getConjugate(c1)
-            beta.getConjugate(c2)
-            c1.mul(gamma,c3)
-            c3.add(c2.mul(delta,c4))
-
-            alpha.mul(delta, c5)
-            c5.sub(beta.mul(gamma, c1))
-
-            // stateMotor.add(mv0.copy(e12).dualSelf() .multiplyScalar( Math.cos(omega) ))
-            // stateMotor.add(mv0.copy(e23)            .multiplyScalar( 2. * c3.re ))
-            // stateMotor.add(mv0.copy(e23).dualSelf() .multiplyScalar( 2. * c3.im ))
-            // stateMotor.add(mv0.copy(e31)            .multiplyScalar( 2. * c5.re ))
-            // stateMotor.add(mv0.copy(e31).dualSelf() .multiplyScalar( 2. * c5.im ))
-
-            stateMotor.copy(zeroMv)
-            stateMotor[0] = Math.cos(omega)
-            stateMotor.add(mv0.copy(e23)            .multiplyScalar( 2. * c3.re ))
-            stateMotor.add(mv0.copy(e23).dualSelf() .multiplyScalar( 2. * c3.im ))
-            stateMotor.add(mv0.copy(e31)            .multiplyScalar( 2. * c5.re ))
-            stateMotor.add(mv0.copy(e31).dualSelf() .multiplyScalar( 2. * c5.im ))
-            // stateMotor.log()
-            // log(stateMotor)
-            state.log()
-            log(Math.cos(omega))
-            c3.log()
-            c5.log()
-
-            
-
-            //the e12 part of stateMotor is unchanged
-
-        }
-        
-        //qubit 1 is known, you're at a pole: rotations by 180 around the origin
-        //qubit 1= 0 or 1 is rotations clockwise or counterclockwise
-        //qubit 2 is 0: 
-        
-        // for(let i = 1; i < 7; ++i) {
-            //     let amplitude = state[Math.floor(i / 2)]
-            //     stateMotor[i + 4] = i % 2 ? amplitude.im : amplitude.re
-            // }
-    })
     
     updateFunctions.push(() => {
         for (let i = 0; i < 16; ++i)
@@ -408,7 +305,7 @@ async function initEntanglement()
             if (color === undefined)
                 color = new THREE.Color(0., 0., 0.)
 
-            let mesh = new THREE.Mesh(pointGeo, new THREE.MeshPhongMaterial({ color }))
+            let mesh = new THREE.Mesh(pointGeo, new THREE.MeshBasicMaterial({ color }))
             scene.add(mesh)
             updateFunctions.push(() => {
                 displayedMotor.sandwich(persistentPoint, mvGettingVisualized)
@@ -615,7 +512,8 @@ function createS3Scene(initialVertexMvs)
     }
 
     //600 cell
-    if (0) {
+    if (0) 
+    {
         let gr = (Math.sqrt(5.) + 1.) / 2.
         let lengthOfTheseVertsWithoutMul = Math.sqrt(1. + gr * gr)
         // Edge length in the 4D sphere is 360 / 10 = 36 degrees
