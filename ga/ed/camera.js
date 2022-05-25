@@ -33,16 +33,24 @@ function initCamera() {
         let frameHeightOneAway = Math.tan(fov / 2. / 360. * TAU) * 2.
         fsqMatrixPreCamera.makeScale(frameHeightOneAway * aspect, frameHeightOneAway, 1.)
 
-        FullScreenQuad = (mat) => {
+        let fullScreenQuadGeo = new THREE.PlaneGeometry(1., 1.)
+        fullScreenQuadGeo.translate(0., 0., -1.)
+
+        FullScreenQuad = () => {
+            let mat = new THREE.ShaderMaterial()
+
             mat.vertexShader = basicVertex
 
-            let fullScreenQuadGeo = new THREE.PlaneGeometry(1., 1.)
-            fullScreenQuadGeo.translate(0., 0., -1.)
-            let fullScreenQuad = new THREE.Mesh(fullScreenQuadGeo, mat)
-            fullScreenQuad.matrixAutoUpdate = false
-            fullScreenQuad.matrix = fsqMatrix
+            let fsq = new THREE.Mesh(fullScreenQuadGeo, mat)
+            fsq.matrixAutoUpdate = false
+            fsq.matrix = fsqMatrix
 
-            return fullScreenQuad
+            fsq.updateFragmentShader = (text) => {
+                fsq.material.fragmentShader = text
+                fsq.material.needsUpdate = true
+            }
+
+            return fsq
         }
     }
 

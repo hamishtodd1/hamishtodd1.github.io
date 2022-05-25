@@ -34,9 +34,4 @@ async function initHsv($dwEl)
     cone.material.vertexShader = await getTextFile('hsvConeVert.glsl')
     cone.material.fragmentShader = await getTextFile('hsvCone.glsl')
     apparatus.add(cone)
-
-    // let rgbCube = new THREE.Mesh(new THREE.BoxGeometry(2.,2.,2.), new THREE.ShaderMaterial())
-    // rgbCube.material.vertexShader = basicVertex
-    // rgbCube.material.fragmentShader = await getTextFile('rgbCube.glsl')
-    // apparatus.add(rgbCube)
 }

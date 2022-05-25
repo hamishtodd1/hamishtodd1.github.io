@@ -10,7 +10,6 @@ TODO
             Dragging in it affects the line
         Dragging in the window itself moves the line as if it were a 180 / line reflection
         Overrides
-        An rgb cube for the vector window
         Applying dqs to lines
     Short term
         mvs that you get a displayable version of need to be updated with camera
@@ -181,37 +180,47 @@ async function init() {
 
     initMention()
 
-    initVectorSpaceDw(topDwEl)
-    new Dw("euclidean", secondDwEl, true)
-    initInfinityDw(fourthDwEl)
-    initStudyDw(thirdDwEl)
     initFinalDw(bottomDwEl)
+    // dws.final.elem.style.display = 'none'
+    await initVectorSpaceDw(topDwEl)
 
+    new Dw("euclidean", thirdDwEl, true)
+    dws.euclidean.elem.style.display = 'none'
+    initStudyDw(fourthDwEl)
+    dws.study.elem.style.display = 'none'
+    initInfinityDw(secondDwEl)
+    // dws.infinity.elem.style.display = 'none'
     initPgaVizes()
 
     initMouseInteractions()
 
     // float myBiv[6] = float[6](3.4, 4.2, 5.0, 5.2, 0.3, 1.1);
-    let initialText =
-`void mainImage( out vec4 fragColor ) {
-    
+    let initialText =`
+void mainImage( out vec4 fragColor ) {
     vec3 myVec = vec3(1.,1.,0.);
 
-    // float a, b;
-    
-    //try eg 1 + e12 + e01234
-
-    Dq originL   = Dq(0., 0.,0.,0., 0.,1.,0., 0.);
-    Dq idealL = Dq(0., 1.,0.,0., 0.,0.,0., 0.);
-    
-    vec4 idealPt = vec4( .2,0.,-1.,0.);
-    vec4 realPt = vec4( .2,0., 1.,1.);
-
-    vec4 transformedPt = applyDqToPt(originL, realPt);
-
-    fragColor = vec4(0.,0.,0.,1.);
+    fragColor = vec4(myVec,1.);
 }
-`
+    `
+// `void mainImage( out vec4 fragColor ) {
+    
+//     vec3 myVec = vec3(1.,1.,0.);
+
+//     // float a, b;
+    
+//     //try eg 1 + e12 + e01234
+
+//     Dq originL   = Dq(0., 0.,0.,0., 0.,1.,0., 0.);
+//     Dq idealL = Dq(0., 1.,0.,0., 0.,0.,0., 0.);
+    
+//     vec4 idealPt = vec4( .2,0.,-1.,0.);
+//     vec4 realPt = vec4( .2,0., 1.,1.);
+
+//     vec4 transformedPt = applyDqToPt(originL, realPt);
+
+//     fragColor = vec4(0.,0.,0.,1.);
+// }
+// `
 
     textarea.value = initialText
     updateSyntaxHighlighting(textarea.value)

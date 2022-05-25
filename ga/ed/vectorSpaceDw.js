@@ -1,4 +1,4 @@
-function initVectorSpaceDw($dwEl)
+async function initVectorSpaceDw($dwEl)
 {
     let dw = new Dw("vectorSpace",$dwEl, true)
 
@@ -10,6 +10,13 @@ function initVectorSpaceDw($dwEl)
     var headGeo = new THREE.ConeBufferGeometry(shaftRadius * 3., 1.)
     headGeo.translate(0.,-.5,0.)
     var shaftGeo = CylinderBufferGeometryUncentered(shaftRadius, 1., 8, true)
+
+    let rgbCube = new THREE.Mesh(new THREE.BoxGeometry(1.,1.,1.), new THREE.ShaderMaterial())
+    rgbCube.geometry.translate(.5, .5, .5)
+    rgbCube.material.vertexShader = basicVertex
+    rgbCube.material.fragmentShader = await getTextFile('rgbCube.glsl')
+    rgbCube.material.transparent = true
+    dw.scene.add(rgbCube)
     
     let newValues = new Float32Array(3)
     let asVec = new THREE.Vector3()
@@ -94,6 +101,10 @@ function initVectorSpaceDw($dwEl)
         getReassignmentText() {
             asVec.setFromMatrixPosition(this.#vMesh.head.matrix)
             return generateReassignmentText(this.variable.name,"vec3", asVec.x, asVec.y, asVec.z)
+        }
+
+        getOverrideText(name) {
+            return name + ` = vec3(overrideFloats[0],overrideFloats[1],overrideFloats[2]);`
         }
 
         setVisibility(newVisibility) {

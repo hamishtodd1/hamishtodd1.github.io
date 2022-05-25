@@ -10,11 +10,6 @@ function initMouseInteractions() {
 
             let newLine = grabbedMention.getReassignmentText()
 
-            //so that you can see things respond in real time, a better situation would be:
-            //you have a single array of floats that is a uniform, called "override"
-            //and another, an integer that is lineThatIsAffectedByOverride
-            //a = b + c; if(lineToOverride == 10) a[0] = override[0];a[1] = override[1]; ...
-
             let lines = textarea.value.split("\n")
             let pre  = lines.slice(0, grabbedMention.lineIndex+1).join("\n")
             let post = lines.slice(grabbedMention.lineIndex+1).join("\n")

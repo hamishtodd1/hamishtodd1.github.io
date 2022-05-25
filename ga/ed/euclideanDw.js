@@ -170,6 +170,8 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
     );
     return ret;
 }
+
+uniform float[16] overrideFloats;
 `
 
     let projectedOnOrigin = new Mv()

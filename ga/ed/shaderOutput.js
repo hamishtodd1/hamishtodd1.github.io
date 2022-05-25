@@ -1,11 +1,11 @@
 async function initShaderOutput() {
     let rtScene = new THREE.Scene()
 
-    let rtFsq = FullScreenQuad(new THREE.ShaderMaterial())
+    let rtFsq = FullScreenQuad()
     rtScene.add(rtFsq)
 
     let pixelsWide = 8
-    let rt = new THREE.WebGLRenderTarget(pixelsWide, 1)
+    let renderTarget = new THREE.WebGLRenderTarget(pixelsWide, 1)
     let outputsArray = new Uint8Array(pixelsWide * 4)
     let outputterPrefix = await getTextFile('floatOutputter.glsl')
 
@@ -14,13 +14,12 @@ async function initShaderOutput() {
     //  and an integer uniform that just says "run the shader making sure this is the output"
     getShaderOutput = (fragmentShader, target) => {
 
-        rtFsq.material.fragmentShader = generalShaderPrefix + outputterPrefix + fragmentShader
-        rtFsq.material.needsUpdate = true
+        rtFsq.updateFragmentShader(generalShaderPrefix + outputterPrefix + fragmentShader)
 
-        renderer.setRenderTarget(rt)
+        renderer.setRenderTarget(renderTarget)
         renderer.render(rtScene, camera)
 
-        renderer.readRenderTargetPixels(rt, 0, 0, pixelsWide, 1, outputsArray)
+        renderer.readRenderTargetPixels(renderTarget, 0, 0, pixelsWide, 1, outputsArray)
         renderer.setRenderTarget(null)
 
         let floatArray = new Float32Array(outputsArray.buffer)

@@ -2,6 +2,11 @@
     If you were to make a GA-products fighting game, what would it be like?
     Your avatars are flailing tentacle/cloud things, but there are bits you can lock onto
 
+    Override
+        At each line, you
+        you have a single array of floats that is a uniform, called "override"
+        and another, an integer that is lineThatIsAffectedByOverride
+        a = b + c; if(lineToOverride == 10) a[0] = override[0];a[1] = override[1]; ...
     
     Bultins:
         Hand motor
@@ -44,7 +49,7 @@ async function initCompilation()
     const nameRegex = /(?<=[\s\(\)])([a-zA-Z_$][a-zA-Z_$0-9]*)/g
     const glslReservedRegex = Prism.languages.glsl.keyword
     const lineDividingRegex = /^.*(\r?\n|$)/mg
-    const notConsideredNamesRegex = /\b(?:mainImage|x|y|z|w|applyDqToPt)\b/
+    const notConsideredNamesRegex = /\b(?:mainImage|x|y|z|w|fragColor|applyDqToPt)\b/
     const structRegex = /struct\s+([a-zA-Z_$][a-zA-Z_$0-9]*)\s+{[^}]*}/gm
 
     //if you want to use this, should probably replace with whitespace
@@ -100,25 +105,15 @@ void main() {
             return
         }
 
-        lowestChangedLineSinceCompile = Infinity
-        setSvgLine($changedLineIndicator, -10, -10, -10, -10)
-
         text = text.replace(commentNotNewlineRegex,"")
-
-        {
-            threejsIsCheckingForShaderErrors = true
-            updateOutputDw(generalShaderPrefix + text)
-        }
         
         mentions.forEach((mention) => {
             if (mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED)
                 mention.presenceLevel = PRESENCE_LEVEL_UNCONFIRMED
         })
-        
         let variableNumMentions = {}
-
-        let ignoringDueToStruct = false
         
+        let ignoringDueToStruct = false
         let lines = text.split("\n")
         lines.forEach((l,lineIndex) => {
 
@@ -206,6 +201,12 @@ void main() {
             mention.updateViz(shaderWithMentionReadout)
         })
         //this doesn't guarantee that you're using them as much as possible, just that they'll be cleared up on the next one
+
+        threejsIsCheckingForShaderErrors = true
+        updateFinalDw(generalShaderPrefix + text)
+
+        lowestChangedLineSinceCompile = Infinity
+        setSvgLine($changedLineIndicator, -10, -10, -10, -10)
 
         delete variableNumMentions
     }

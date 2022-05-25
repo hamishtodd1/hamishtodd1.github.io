@@ -1,8 +1,7 @@
 function initFinalDw($dwEl) {
     let dw = new Dw("final",$dwEl, false)
-    dw.elem.style.display = 'none'
 
-    let finalFsq = FullScreenQuad(new THREE.ShaderMaterial())
+    let finalFsq = FullScreenQuad()
     dw.scene.add(finalFsq)
 
     let toFragColorSuffix = `
@@ -12,8 +11,7 @@ void main() {
 
     gl_FragColor = vec4(myCol);
 }`
-    updateOutputDw = (text) => {
-        finalFsq.material.fragmentShader = text + toFragColorSuffix
-        finalFsq.material.needsUpdate = true
+    updateFinalDw = (text) => {
+        finalFsq.updateFragmentShader(text + toFragColorSuffix)
     }
 }
