@@ -12,6 +12,7 @@ async function initDws() {
     class Dw {
         constructor(name, newElem, haveAll3dStuff, haveLights) {
             this.elem = newElem
+            this.elem.style.display = 'none'
 
             dws[name] = this
 

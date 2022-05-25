@@ -41,6 +41,7 @@ function initMention()
         horizontalBounds = { x: 0., w: 0. };
         presenceLevel = PRESENCE_LEVEL_DELETED;
         lineIndex = -1;
+        mentionIndex = -1;
 
         constructor(variable) {
             mentions.push(this) //maybe better as mentions of a certain subclass

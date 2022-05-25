@@ -12,6 +12,7 @@ TODO
         Overrides
         Applying dqs to lines
     Short term
+        It's a bit of a mess with the points
         mvs that you get a displayable version of need to be updated with camera
         Currently, if a variable is uninitialized, you still get shown a point at 0,0,0 in the window
         When you click window, if not close to anything, perhaps point should be created?
@@ -181,27 +182,24 @@ async function init() {
     initMention()
 
     initFinalDw(bottomDwEl)
-    // dws.final.elem.style.display = 'none'
+    dws.final.elem.style.display = ''
     await initVectorSpaceDw(topDwEl)
 
     new Dw("euclidean", thirdDwEl, true)
-    dws.euclidean.elem.style.display = 'none'
     initStudyDw(fourthDwEl)
-    dws.study.elem.style.display = 'none'
     initInfinityDw(secondDwEl)
-    // dws.infinity.elem.style.display = 'none'
     initPgaVizes()
 
     initMouseInteractions()
 
     // float myBiv[6] = float[6](3.4, 4.2, 5.0, 5.2, 0.3, 1.1);
-    let initialText =`
-void mainImage( out vec4 fragColor ) {
-    vec3 myVec = vec3(1.,1.,0.);
+    let initialText =
+`void mainImage( out vec4 fragColor ) {
+    vec4 pt = vec4(.5,1.,0.,1.);
+    vec3 pt2 = vec3(.5,1.,0.);
 
-    fragColor = vec4(myVec,1.);
-}
-    `
+    fragColor = pt;
+}`
 // `void mainImage( out vec4 fragColor ) {
     
 //     vec3 myVec = vec3(1.,1.,0.);

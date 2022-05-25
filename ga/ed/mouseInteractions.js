@@ -44,8 +44,10 @@ function initMouseInteractions() {
     }
     
     document.addEventListener('mousemove', (event) => {       
-        if (grabbedMention !== null )
+        if (grabbedMention !== null ) {
             grabbedMention.respondToDrag(grabbedDw)
+            setOverride(grabbedMention)
+        }
     })
 
     let style = window.getComputedStyle(textarea)

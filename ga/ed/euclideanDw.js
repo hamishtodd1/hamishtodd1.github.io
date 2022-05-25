@@ -10,7 +10,7 @@ function initStudyDw($dwEl) {
     const mat = new THREE.LineBasicMaterial({
         color: 0x0000ff
     })
-    dw.scene.add(new THREE.Line(geo, mat))
+    dw.addNonMentionChild(new THREE.Line(geo, mat))
 
     //there's a circle marked, and perhaps you always get the projection onto there
     //for the study number: cylinder
@@ -24,7 +24,7 @@ function initPgaVizes() {
     // POINTS //
     ////////////
     
-    let ray = new THREE.Ray()
+    let threeRay = new THREE.Ray()
     let threeSphere = new THREE.Sphere(new THREE.Vector3(), INFINITY_RADIUS)
     let draggedPoint = new Mv()
     let ptNewValues = new Float32Array(4)
@@ -55,17 +55,16 @@ function initPgaVizes() {
         updateFromMv() {
             if (this.#mv[14] !== 0.) {
                 this.#mv.toVector(this.#euclideanDwMesh.position)
-
-                this.#infinityDwMesh.position.copy(outOfTheWayPosition)
             }
             else {
                 this.#mv.toVector(this.#infinityDwMesh.position)
                 this.#infinityDwMesh.position.setLength(INFINITY_RADIUS)
+
+                this.#infinityDwMesh.visible = true
                 
                 this.#mv.getDisplayableVersion(mv0)
-                if (mv0[14] > 0.) {
+                if (mv0[14] > 0.)
                     mv0.toVectorDisplayable(this.#euclideanDwMesh.position)
-                }
                 else {
                     //actually should be a differently oriented point!
                     this.#euclideanDwMesh.position.copy(outOfTheWayPosition)
@@ -96,14 +95,18 @@ function initPgaVizes() {
                 this.updateFromMv()
             }
             else if(dw === dws.infinity) {
-                ray.origin.copy(camera.position)
+                threeRay.origin.copy(camera.position)
                 let mouseRay = getMouseRay(dw)
-                meet(e0, mouseRay, draggedPoint).toVector(ray.direction)
-                ray.direction.normalize()
+                meet(e0, mouseRay, draggedPoint).toVector(threeRay.direction)
+                threeRay.direction.normalize()
 
-                ray.intersectSphere(threeSphere,v1)
-                this.#mv.fromVector(v1)
-                this.#mv[14] = 0.
+                let intersectionResult = threeRay.intersectSphere(threeSphere,v1)
+                if(intersectionResult !== null) {
+                    this.#mv.fromVector(v1)
+                    this.#mv[14] = 0.
+
+                    this.updateFromMv()
+                }
             }
             else console.error("not in that dw")
         }
@@ -121,24 +124,32 @@ function initPgaVizes() {
                 console.error("not in that dw")
         }
 
+        getReassignmentText() {
+            return generateReassignmentText(this.variable.name, "vec4", this.#mv[13], this.#mv[12], this.#mv[11], this.#mv[14])
+        }
+
+        getOverrideValues(overrideFloats) {
+            overrideFloats[0] = this.#mv[13]; overrideFloats[1] = this.#mv[12]; overrideFloats[2] = this.#mv[11]; overrideFloats[3] = this.#mv[14]
+        }
+
+        getShaderOutputFloatString() {
+            return getFloatArrayAssignmentString(this.variable.name, 4)
+        }
+
+        getOverrideText() {
+            return `vec4(overrideFloats[0],overrideFloats[1],overrideFloats[2],overrideFloats[3]);`
+        }
+
         setVisibility(newVisibility) {
             this.#euclideanDwMesh.visible = newVisibility
-            this.#infinityDwMesh.visible = newVisibility
+            this.#infinityDwMesh.visible = newVisibility && this.#mv[14] === 0.
         }
 
         isVisibleInDw(dw) {
             if (dw !== dws.euclidean && dw !== dws.infinity)
                 return false
             let m = dw === dws.euclidean ? this.#euclideanDwMesh : this.#infinityDwMesh
-            return m.visible && !m.position.equals(outOfTheWayPosition)
-        }
-
-        getReassignmentText() {
-            return generateReassignmentText(this.variable.name, "vec4", this.#mv[13], this.#mv[12], this.#mv[11], this.#mv[14])
-        }
-
-        getShaderOutputFloatString() {
-            return getFloatArrayAssignmentString(this.variable.name, 4)
+            return m.visible
         }
     }
     types.vec4 = Point
@@ -170,8 +181,6 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
     );
     return ret;
 }
-
-uniform float[16] overrideFloats;
 `
 
     let projectedOnOrigin = new Mv()

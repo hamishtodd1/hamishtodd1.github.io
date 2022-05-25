@@ -2,12 +2,6 @@
     If you were to make a GA-products fighting game, what would it be like?
     Your avatars are flailing tentacle/cloud things, but there are bits you can lock onto
 
-    Override
-        At each line, you
-        you have a single array of floats that is a uniform, called "override"
-        and another, an integer that is lineThatIsAffectedByOverride
-        a = b + c; if(lineToOverride == 10) a[0] = override[0];a[1] = override[1]; ...
-    
     Bultins:
         Hand motor
         Things that shadertoy has:
@@ -106,6 +100,7 @@ void main() {
         }
 
         text = text.replace(commentNotNewlineRegex,"")
+        let finalText = ""
         
         mentions.forEach((mention) => {
             if (mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED)
@@ -114,8 +109,10 @@ void main() {
         let variableNumMentions = {}
         
         let ignoringDueToStruct = false
-        let lines = text.split("\n")
-        lines.forEach((l,lineIndex) => {
+        let textLines = text.split("\n")
+        let finalLines = Array(textLines.length)
+        let mentionIndex = 0
+        textLines.forEach((l,lineIndex) => {
 
             if (!ignoringDueToStruct && l.indexOf("struct") !== -1)
                 ignoringDueToStruct = true
@@ -125,9 +122,10 @@ void main() {
                 return
 
             let matches = [...l.matchAll(nameRegex)]
+            finalLines[lineIndex] = l
             if(matches === null)
                 return
-            matches.forEach((match)=>{
+            else matches.forEach((match)=>{
                 let name = match[0] //it's in 1 as well
                 if (glslReservedRegex.test(name) || notConsideredNamesRegex.test(name) || types[name] !== undefined)
                     return
@@ -173,6 +171,11 @@ void main() {
 
                 mention.lineIndex = lineIndex
                 mention.presenceLevel = PRESENCE_LEVEL_CONFIRMED
+                mention.mentionIndex = mentionIndex++
+
+                finalLines[lineIndex] += 
+                    ` if( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` + 
+                        mention.variable.name + " = " + mention.getOverrideText()
 
                 updateHorizontalBounds(match.index, name.length, mention.horizontalBounds)
 
@@ -189,9 +192,9 @@ void main() {
 
             let shaderWithMentionReadout = 
                 readoutPrefix +
-                lines.slice(0,mention.lineIndex+1).join("\n") +
+                finalLines.slice(0,mention.lineIndex+1).join("\n") +
                 mention.getShaderOutputFloatString() +
-                lines.slice(mention.lineIndex+1).join("\n") + 
+                finalLines.slice(mention.lineIndex+1).join("\n") + 
                 readoutSuffix
 
             //probably terrible to have a shader for every mention
@@ -203,7 +206,7 @@ void main() {
         //this doesn't guarantee that you're using them as much as possible, just that they'll be cleared up on the next one
 
         threejsIsCheckingForShaderErrors = true
-        updateFinalDw(generalShaderPrefix + text)
+        updateFinalDw(generalShaderPrefix + finalLines.join("\n"))
 
         lowestChangedLineSinceCompile = Infinity
         setSvgLine($changedLineIndicator, -10, -10, -10, -10)
@@ -232,7 +235,7 @@ void main() {
 
                 return !hasMentionChild
             })
-            // dw.elem.style.display = hasMentionChild ? '' : 'none'
+            dw.elem.style.display = hasMentionChild ? '' : 'none'
         }
     }
 

@@ -16,7 +16,10 @@ let oldClientY = 0
 const dws = {}
 
 let glslGaString = ""
-let generalShaderPrefix = ""
+let generalShaderPrefix = `
+uniform float[16] overrideFloats;
+uniform int overrideMentionIndex;
+`
 
 let hoveredMention = null
 
