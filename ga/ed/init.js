@@ -1,24 +1,17 @@
 /*
-TODO
-    Very short term (team presentation)
-        It's about exp!
-            Drag something, wiht some line specified, it creates an exp
-            point to point
-                Can drag euclidean points and it emits a translation
-                Can drag ideal points and it emits a rotation 
-            plane to plane
+Script
+    "Why you should care"
+    explain homogeneous coordinates using vec dw
+    Just want to emphasize the fact that it's an exponentiation of an axis
 
-            line to line
-        Sphere at infinity dw
-            Is the algebra of stuff met with e0 isomorphic to Cl(3)?
-        Complex numbers window which allows you to see what's up with a motor
-            Note that it's different from the conformal 2D euclidean space window
-                because it's more about MULTIPLY by the complex number
-                translations are ADDITIONS
-        Dome dw
-        PGA viz orientations
-        Could have vec3 connect to points at infinity too
-            Hmm well the way that you interpret stuff affects how it creates suggestions
+TODO
+    Team presentation
+        Study window
+            Dragging in it affects the line
+        Dragging in the window itself moves the line as if it were a 180 / line reflection
+        Overrides
+        An rgb cube for the vector window
+        Applying dqs to lines
     Short term
         mvs that you get a displayable version of need to be updated with camera
         Currently, if a variable is uninitialized, you still get shown a point at 0,0,0 in the window
@@ -190,7 +183,8 @@ async function init() {
 
     initVectorSpaceDw(topDwEl)
     new Dw("euclidean", secondDwEl, true)
-    initInfinityDw(thirdDwEl)
+    initInfinityDw(fourthDwEl)
+    initStudyDw(thirdDwEl)
     initFinalDw(bottomDwEl)
 
     initPgaVizes()
@@ -202,15 +196,20 @@ async function init() {
 `void mainImage( out vec4 fragColor ) {
     
     vec3 myVec = vec3(1.,1.,0.);
-    
-    Dq myDq = Dq(0., 0.,0.,0., 1.,0.,0., 0.);
-    //try eg 1 + e12 + e01234
-    
-    vec4 myPoint1 = vec4(1.2,1.5,0.,1.);
-    vec4 myPoint2 = vec4(.2,0.,-1.,0.);
-    myPoint1; myPoint2;
 
-    fragColor = vec4(vec3(myDq.e12),1.);
+    // float a, b;
+    
+    //try eg 1 + e12 + e01234
+
+    Dq originL   = Dq(0., 0.,0.,0., 0.,1.,0., 0.);
+    Dq idealL = Dq(0., 1.,0.,0., 0.,0.,0., 0.);
+    
+    vec4 idealPt = vec4( .2,0.,-1.,0.);
+    vec4 realPt = vec4( .2,0., 1.,1.);
+
+    vec4 transformedPt = applyDqToPt(originL, realPt);
+
+    fragColor = vec4(0.,0.,0.,1.);
 }
 `
 

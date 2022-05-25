@@ -99,7 +99,7 @@ async function initDws() {
 
         updateFunctions.forEach((uf)=>uf())
 
-        renderer.setClearColor(3026478,1)
+        renderer.setClearColor(0x404040,1)
         for(dwName in dws)
             dws[dwName].render()
 

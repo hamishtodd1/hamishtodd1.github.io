@@ -18,7 +18,7 @@ function initCamera() {
         motor: new Mv(),
     }
 
-    camera.onMovementFunctions = []
+    camera.toHaveUpdateFromMvCalled = []
 
     camera.worldToCanvas = new THREE.Matrix4()
     camera.updateWorldToCanvas = () => {
@@ -108,7 +108,8 @@ function initCamera() {
 
         camera.updateWorldToCanvas()
 
-        camera.onMovementFunctions.forEach((func)=>func())
+        for (let i = 0, il = camera.toHaveUpdateFromMvCalled.length; i < il; ++i)
+            camera.toHaveUpdateFromMvCalled[i].updateFromMv()
     }
     addToCamerLonLat(0.,0.)
 

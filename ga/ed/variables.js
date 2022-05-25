@@ -4,6 +4,7 @@ const variables = []
 const types = {}
 
 const INFINITY_RADIUS = 1.7
+const pointGeo = new THREE.SphereBufferGeometry(.1, 32, 16)
 
 const PRESENCE_LEVEL_UNCONFIRMED = -1
 const PRESENCE_LEVEL_CONFIRMED = 1

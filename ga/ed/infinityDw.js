@@ -15,4 +15,15 @@ function initInfinityDw($dwEl)
     let euclideanHider = new THREE.Mesh(sphereGeo, new THREE.MeshPhongMaterial({color:0x000000}))
     euclideanHider.scale.setScalar(.1)
     dw.scene.add(euclideanHider)
+
+    //this isn't quite right because the angleHeight is based on latitude lines,
+    // let angleWidth = (TAU/360.)*otherFov(camera.fov, camera.aspect, true)
+    // let angleHeight = (TAU/360.)*camera.fov
+    // let screenImitationGeometry = new THREE.SphereBufferGeometry(INFINITY_RADIUS*.98,31,31,
+    //     -TAU/4. - angleWidth/2., angleWidth,
+    //     TAU/4. - angleHeight/2., angleHeight )
+    // let extra = new THREE.Mesh(screenImitationGeometry,new THREE.MeshBasicMaterial({
+    //     color:0xCCCCCC, side:THREE.DoubleSide
+    // }))
+    // dw.scene.add(extra)
 }

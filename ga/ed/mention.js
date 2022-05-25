@@ -1,7 +1,7 @@
 function generateReassignmentText() {
     let ret = "\n    " + arguments[0] + " = " + arguments[1] + "("
     for (let i = 2, il = arguments.length; i < il; ++i)
-        ret += arguments[i].toFixed(1) + (i === il - 1 ? "" : ",")
+        ret += arguments[i].toFixed(2) + (i === il - 1 ? "" : ",")
     ret += ");\n"
 
     return ret
@@ -62,6 +62,9 @@ function initMention()
 
             let ndcX = canvasX / 2. + .5
             let ndcY = canvasY / 2. + .5
+
+            let actuallyOnScreen =  0. <= ndcX && ndcX <= 1. &&
+                                    0. <= ndcY && ndcY <= 1.
 
             return [
                 dwRect.x + dwRect.width * ndcX,

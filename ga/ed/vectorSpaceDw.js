@@ -16,13 +16,14 @@ function initVectorSpaceDw($dwEl)
     let dragPlane = new Mv()
     let draggedPoint = new Mv()
     class Arrow extends Mention {
-        #viz
+        #vMesh
+        #iMesh
 
         constructor(variable) {
             super(variable)
 
             let viz = new THREE.Object3D()
-            this.#viz = viz
+            this.#vMesh = viz
             viz.visible = false
             dws.vectorSpace.scene.add(viz)
 
@@ -42,12 +43,21 @@ function initVectorSpaceDw($dwEl)
             viz.shaft.matrixAutoUpdate = false
             viz.shaft.castShadow = true
             viz.add(viz.head, viz.shaft)
+
+            let iMesh = new THREE.Mesh(pointGeo, mat)
+            this.#iMesh = iMesh
+            iMesh.castShadow = true
+            iMesh.visible = false
+            dws.infinity.scene.add(iMesh)
         }
 
         updateViz(shaderWithMentionReadout) {
             getShaderOutput(shaderWithMentionReadout, newValues)
             asVec.fromArray(newValues)
-            this.#viz.updateFromAsVec()
+            this.#vMesh.updateFromAsVec()
+
+            this.#iMesh.position.fromArray(newValues)
+            this.#iMesh.position.setLength(INFINITY_RADIUS)
         }
 
         respondToDrag(dw) {
@@ -55,15 +65,25 @@ function initVectorSpaceDw($dwEl)
             let mouseRay = getMouseRay(dw)
             meet(dragPlane, mouseRay, draggedPoint)
             draggedPoint.toVector(asVec)
-            this.#viz.updateFromAsVec()
+            this.#vMesh.updateFromAsVec()
+
+            this.#iMesh.position.fromArray(asVec)
+            this.#iMesh.position.setLength(INFINITY_RADIUS)
         }
 
         getCanvasPositionWorldSpace(target, dw) {
-            asVec.setFromMatrixPosition(this.#viz.head.matrix)
-            target.copy(asVec)
-            target.w = 1.
-
-            if (dw !== dws.vectorSpace)
+            
+            if (dw === dws.vectorSpace) {
+                asVec.setFromMatrixPosition(this.#vMesh.head.matrix)
+                target.copy(asVec)
+                target.multiplyScalar(.5)
+                target.w = 1.
+            }
+            else if (dw === dws.infinity) {
+                target.copy(this.#iMesh.position)
+                target.w = 1.
+            }
+            else
                 console.error("not in that dw")
         }
 
@@ -72,16 +92,18 @@ function initVectorSpaceDw($dwEl)
         }
 
         getReassignmentText() {
-            asVec.setFromMatrixPosition(this.#viz.head.matrix)
+            asVec.setFromMatrixPosition(this.#vMesh.head.matrix)
             return generateReassignmentText(this.variable.name,"vec3", asVec.x, asVec.y, asVec.z)
         }
 
         setVisibility(newVisibility) {
-            this.#viz.visible = newVisibility
+            this.#vMesh.visible = newVisibility
+            this.#iMesh.visible = newVisibility
         }
 
         isVisibleInDw(dw) {
-            return this.#viz.visible && this.#viz.parent === dw.scene
+            return (this.#vMesh.visible && this.#vMesh.parent === dw.scene) ||
+                   (this.#iMesh.visible && this.#iMesh.parent === dw.scene)
         }
     }
     types.vec3 = Arrow

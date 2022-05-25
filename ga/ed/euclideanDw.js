@@ -1,25 +1,37 @@
+function initStudyDw($dwEl) {
+    let dw = new Dw("study", $dwEl, false)
+
+    const points = []
+    points.push(new THREE.Vector3(-10., 0., 0.))
+    points.push(new THREE.Vector3( 10., 0., 0.))
+
+    const geo = new THREE.BufferGeometry().setFromPoints(points)
+
+    const mat = new THREE.LineBasicMaterial({
+        color: 0x0000ff
+    })
+    dw.scene.add(new THREE.Line(geo, mat))
+
+    //there's a circle marked, and perhaps you always get the projection onto there
+    //for the study number: cylinder
+}
+
 function initPgaVizes() {
 
     let dragPlane = new Mv()
     
-    let toHaveUpdateMvCalled = []
-    camera.onMovementFunctions.push(()=>{
-        for(let i = 0, il = toHaveUpdateMvCalled.length; i < il; ++i)
-            toHaveUpdateMvCalled[i].updateFromMv()
-    })
-    
     ////////////
     // POINTS //
     ////////////
-    const pointRadius = .1
-    let pointGeo = new THREE.SphereBufferGeometry(pointRadius, 32, 16)
-
+    
+    let ray = new THREE.Ray()
+    let threeSphere = new THREE.Sphere(new THREE.Vector3(), INFINITY_RADIUS)
     let draggedPoint = new Mv()
     let ptNewValues = new Float32Array(4)
     let outOfTheWayPosition = new THREE.Vector3(camera.far * 999., camera.far * 999., camera.far * 999.)
     class Point extends Mention {
-        #eMesh;
-        #iMesh;
+        #euclideanDwMesh;
+        #infinityDwMesh;
         #mv = new Mv();
 
         constructor(variable) {
@@ -27,31 +39,37 @@ function initPgaVizes() {
 
             let mat = new THREE.MeshBasicMaterial({ color: variable.col })
             let eMesh = new THREE.Mesh(pointGeo, mat)
-            this.#eMesh = eMesh
+            this.#euclideanDwMesh = eMesh
             eMesh.castShadow = true
             eMesh.visible = false
             dws.euclidean.scene.add(eMesh)
+            camera.toHaveUpdateFromMvCalled.push(this)
 
             let iMesh = new THREE.Mesh(pointGeo, mat)
-            this.#iMesh = iMesh
+            this.#infinityDwMesh = iMesh
             iMesh.castShadow = true
             iMesh.visible = false
             dws.infinity.scene.add(iMesh)
-
-            toHaveUpdateMvCalled.push(this)
         }
 
         updateFromMv() {
             if (this.#mv[14] !== 0.) {
-                this.#mv.toVector(this.#eMesh.position)
+                this.#mv.toVector(this.#euclideanDwMesh.position)
 
-                this.#iMesh.position.copy(outOfTheWayPosition)
+                this.#infinityDwMesh.position.copy(outOfTheWayPosition)
             }
             else {
-                this.#mv.toVectorDisplayable(this.#eMesh.position)
-
-                this.#mv.toVector(this.#iMesh.position)
-                this.#iMesh.position.setLength(INFINITY_RADIUS)
+                this.#mv.toVector(this.#infinityDwMesh.position)
+                this.#infinityDwMesh.position.setLength(INFINITY_RADIUS)
+                
+                this.#mv.getDisplayableVersion(mv0)
+                if (mv0[14] > 0.) {
+                    mv0.toVectorDisplayable(this.#euclideanDwMesh.position)
+                }
+                else {
+                    //actually should be a differently oriented point!
+                    this.#euclideanDwMesh.position.copy(outOfTheWayPosition)
+                }
             }
         }
 
@@ -78,18 +96,25 @@ function initPgaVizes() {
                 this.updateFromMv()
             }
             else if(dw === dws.infinity) {
-                console.log("handle this!")
+                ray.origin.copy(camera.position)
+                let mouseRay = getMouseRay(dw)
+                meet(e0, mouseRay, draggedPoint).toVector(ray.direction)
+                ray.direction.normalize()
+
+                ray.intersectSphere(threeSphere,v1)
+                this.#mv.fromVector(v1)
+                this.#mv[14] = 0.
             }
             else console.error("not in that dw")
         }
 
         getCanvasPositionWorldSpace(target, dw) {
             if (dw === dws.euclidean) {
-                target.copy(this.#eMesh.position)
+                target.copy(this.#euclideanDwMesh.position)
                 target.w = 1.
             }
             else if (dw === dws.infinity) {
-                target.copy(this.#iMesh.position)
+                target.copy(this.#infinityDwMesh.position)
                 target.w = 1.
             }
             else
@@ -97,21 +122,19 @@ function initPgaVizes() {
         }
 
         setVisibility(newVisibility) {
-            this.#eMesh.visible = newVisibility
-            this.#iMesh.visible = newVisibility
+            this.#euclideanDwMesh.visible = newVisibility
+            this.#infinityDwMesh.visible = newVisibility
         }
 
         isVisibleInDw(dw) {
-            if(dw === dws.euclidean)
-                return this.#eMesh.visible
-            else if(dw === dws.infinity)
-                return this.#iMesh.visible && !this.#iMesh.position.equals(outOfTheWayPosition)
+            if (dw !== dws.euclidean && dw !== dws.infinity)
+                return false
+            let m = dw === dws.euclidean ? this.#euclideanDwMesh : this.#infinityDwMesh
+            return m.visible && !m.position.equals(outOfTheWayPosition)
         }
 
         getReassignmentText() {
-            let isIdeal = this.#eMesh.position.equals(outOfTheWayPosition)
-            let p = isIdeal ? this.#iMesh.position : this.#eMesh.position
-            return generateReassignmentText(this.variable.name, "vec4", p.x, p.y, p.z, isIdeal ? 0. : 1.)
+            return generateReassignmentText(this.variable.name, "vec4", this.#mv[13], this.#mv[12], this.#mv[11], this.#mv[14])
         }
 
         getShaderOutputFloatString() {
@@ -126,10 +149,28 @@ function initPgaVizes() {
     generalShaderPrefix += `
 struct Dq {
     float scalar;
-    float e12; float e31; float e23;
     float e01; float e02; float e03;
+    float e12; float e31; float e23;
     float e0123;
-};`
+};
+
+vec4 applyDqToPt(in Dq dq, in vec4 pt) {
+    float a1 = dq.e01, a2 = dq.e02, a3 = dq.e03, a4 = dq.e12, a5 = dq.e31, a6 = dq.e23;
+    float _2a0 = 2. * dq.scalar, _2a4 = 2. * a4, _2a5 = 2. * a5, a0a0 = dq.scalar * dq.scalar, a4a4 = a4 * a4, a5a5 = a5 * a5, a6a6 = a6 * a6, _2a6 = 2. * a6, _2a0a4 = _2a0 * a4, _2a0a5 = _2a0 * a5, _2a0a6 = _2a0 * a6, _2a4a5 = _2a4 * a5, _2a4a6 = _2a4 * a6, _2a5a6 = _2a5 * a6;
+    float n0 = (_2a0 * a3 + _2a4 * dq.e0123 - _2a6 * a2 - _2a5 * a1), x0 = (a0a0 + a4a4 - a5a5 - a6a6), y0 = (_2a4a5 + _2a0a6), z0 = (_2a4a6 - _2a0a5);
+    float n1 = (_2a4 * a1 - _2a0 * a2 - _2a6 * a3 + _2a5 * dq.e0123), x1 = (_2a4a5 - _2a0a6), y1 = (a0a0 - a4a4 + a5a5 - a6a6), z1 = (_2a0a4 + _2a5a6);
+    float n2 = (_2a0 * a1 + _2a4 * a2 + _2a5 * a3 + _2a6 * dq.e0123), x2 = (_2a0a5 + _2a4a6), y2 = (_2a5a6 - _2a0a4), z2 = (a0a0 - a4a4 - a5a5 + a6a6);
+    float n3 = (a0a0 + a4a4 + a5a5 + a6a6);
+
+    vec4 ret = vec4(
+        x0*pt.x + y0*pt.y + z0*pt.z + n0*pt.w,
+        x1*pt.x + y1*pt.y + z1*pt.z + n1*pt.w,
+        x2*pt.x + y2*pt.y + z2*pt.z + n2*pt.w,
+        n3*pt.w
+    );
+    return ret;
+}
+`
 
     let projectedOnOrigin = new Mv()
     let quatToOriginVersion = new Mv()
@@ -148,24 +189,27 @@ struct Dq {
     let newDq = new Dq()
     let displayedLineMv = new Mv()
     let linePart = new Mv() //bivector?
+    let cameraPosProjectedOnSphere = e021.clone()
+    let idealLineDual = new Mv()
+    let labelPoint = new Mv()
     class DqMention extends Mention {
-        #eMesh;
-        #iMesh;
+        #euclideanDwMesh;
+        #infinityDwMesh;
         #ringMesh;
         #mv = new Mv();
         
         constructor(variable) {
             super(variable)
 
-            this.#iMesh = new THREE.Mesh(iLineGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
-            this.#iMesh.visible = false
-            dws.infinity.scene.add(this.#iMesh)
-            this.#iMesh.castShadow = true
+            this.#infinityDwMesh = new THREE.Mesh(iLineGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
+            this.#infinityDwMesh.visible = false
+            dws.infinity.scene.add(this.#infinityDwMesh)
+            this.#infinityDwMesh.castShadow = true
 
-            this.#eMesh = new THREE.Mesh(eLineGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
-            this.#eMesh.visible = false
-            dws.euclidean.scene.add(this.#eMesh)
-            this.#eMesh.castShadow = true
+            this.#euclideanDwMesh = new THREE.Mesh(eLineGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
+            this.#euclideanDwMesh.visible = false
+            dws.euclidean.scene.add(this.#euclideanDwMesh)
+            this.#euclideanDwMesh.castShadow = true
 
             this.#ringMesh = new THREE.Mesh(ringGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
             this.#ringMesh.visible = false
@@ -175,7 +219,7 @@ struct Dq {
             //there was some bug involving hovering the variable just under the grey line
             //and that showed up but no others did
 
-            toHaveUpdateMvCalled.push(this)
+            camera.toHaveUpdateFromMvCalled.push(this)
         }
 
         updateFromMv() {
@@ -184,10 +228,9 @@ struct Dq {
             linePart[15] = 0.
 
             if(linePart.eNorm() !== 0.) {
-                getQuaternionToProjectionOnOrigin(linePart, this.#iMesh.quaternion)
+                getQuaternionToProjectionOnOrigin(linePart, this.#infinityDwMesh.quaternion)
             }
             else {
-                // getQuaternionToProjectionOnOrigin(linePart, this.#iMesh.quaternion)
                 //default mv is e02
                 join(e123,linePart,joinedWithOrigin)
                 mul(joinedWithOrigin, e3, quatToOriginVersion)
@@ -196,8 +239,8 @@ struct Dq {
             }
 
             linePart.getDisplayableVersion(displayedLineMv)
-            getQuaternionToProjectionOnOrigin(displayedLineMv, this.#eMesh.quaternion)
-            e123.projectOn(displayedLineMv, mv0).toVector(this.#eMesh.position)
+            getQuaternionToProjectionOnOrigin(displayedLineMv, this.#euclideanDwMesh.quaternion)
+            e123.projectOn(displayedLineMv, mv0).toVector(this.#euclideanDwMesh.position)
         }
 
         updateViz(shaderWithMentionReadout) {
@@ -205,7 +248,7 @@ struct Dq {
             newDq.copy(dwNewValues)
             newDq.toMv(this.#mv)
 
-            this.setVisibility(this.#eMesh.visible)
+            this.setVisibility(this.#euclideanDwMesh.visible)
 
             this.updateFromMv()
         }
@@ -229,18 +272,31 @@ struct Dq {
 
         getCanvasPositionWorldSpace(target, dw) {
             if (dw === dws.euclidean) {
-                target.copy(this.#eMesh.position)
+                target.copy(this.#euclideanDwMesh.position)
                 target.w = 1.
             }
             else if (dw === dws.infinity) {
-                target.set(0.,0.,0.)
-                target.w = 1.
 
                 if(this.#mv.hasEuclideanPart()) {
                     //probably want something about its intersection with the top
+                    //ideally taking account of directedness
+                    //probably e12 corresponds to e012
+                    meet(this.#mv, e0, labelPoint)
+                    labelPoint.multiplyScalar(-1.)
+                    let vec3Part = labelPoint.toVector(v1)
+                    vec3Part.setLength(INFINITY_RADIUS)
+                    target.copy(vec3Part)
+                    target.multiplyScalar(.5)
+                    target.w = 1.
                 }
                 else {
-                    //you kinda want the closest point on the sphere
+                    dual(this.#mv, idealLineDual)
+                    let planeToIntersect = join(camera.mvs.pos, idealLineDual, mv0)
+                    meet(planeToIntersect, this.#mv, labelPoint)
+                    let vec3Part = labelPoint.toVector(v1)
+                    vec3Part.setLength(INFINITY_RADIUS)
+                    target.copy(vec3Part)
+                    target.w = 1.
                 }
             }
             else
@@ -248,16 +304,16 @@ struct Dq {
         }
 
         setVisibility(newVisibility) {
-            this.#eMesh.visible = newVisibility
+            this.#euclideanDwMesh.visible = newVisibility
 
-            let hasEuclideanPart = this.#mv.eNorm() !== 0.
-            this.#iMesh.visible = hasEuclideanPart && newVisibility
+            let hasEuclideanPart = this.#mv.hasEuclideanPart()
+            this.#infinityDwMesh.visible = hasEuclideanPart && newVisibility
             this.#ringMesh.visible = !hasEuclideanPart && newVisibility
         }
 
         isVisibleInDw(dw) {
-            return  this.#eMesh.parent === dw.scene && this.#eMesh.visible ||
-                    (this.#iMesh.parent === dw.scene && (this.#iMesh.visible || this.#ringMesh.visible) )
+            return  this.#euclideanDwMesh.parent === dw.scene && this.#euclideanDwMesh.visible ||
+                    (this.#infinityDwMesh.parent === dw.scene && (this.#infinityDwMesh.visible || this.#ringMesh.visible) )
         }
 
         getReassignmentText() {
@@ -292,11 +348,6 @@ struct Dq {
             meet(e0, mouseRay, mv0).toVectorDisplayable(mousePoint.position)
         })
     }
-}
-
-function initEuclideanDw($dwEl)
-{
-    
 
     // if(0)
     {
@@ -305,16 +356,16 @@ function initEuclideanDw($dwEl)
         //move mouse around, rotates to face mouse
         //But mouse in what plane? Some plane parallel to camera, tweak its distance from the point
         //move mouse out of dw and the plane is, still through the same point, rotating to face pts at infinity
-
+    
         // let planeMesh = new THREE.Mesh(new THREE.CircleGeometry(2.), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }))
         // dw.scene.add(planeMesh)
-
+    
         // let planeMv = new Mv().plane(2., 1., 1., 1.)
         // planeMv.normalize()
         // updateFunctions.push(() => {
-
+    
         //     e123.projectOn(planeMv, mv0).toVector(planeMesh.position)
-
+    
         //     let planeOnOrigin = planeMv.projectOn(e123, mv0)
         //     let e3ToPlaneMotor = mul(planeOnOrigin, e3, mv2).sqrt(mv3)
         //     e3ToPlaneMotor.toQuaternion(planeMesh.quaternion)

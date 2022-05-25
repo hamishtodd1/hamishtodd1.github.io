@@ -217,8 +217,8 @@ function init301Unhoisted() {
                 target.copy(this)
             else {
                 let cameraJoin = newMv
-                join(this, camera.mvs.pos, cameraJoin)
-                meet(camera.frustum.far, cameraJoin, target)
+                join(camera.mvs.pos, this, cameraJoin)
+                meet(cameraJoin,camera.frustum.far, target)
             }
 
             return target
@@ -337,6 +337,12 @@ function init301Unhoisted() {
 
         eNorm() {
             return Math.sqrt(this.eNormSquared())
+        }
+        iNorm() {
+            log(this)
+            let pointNorm = Math.sqrt(sq(this[11]) + sq(this[12]) + sq(this[13]))
+            let lineNorm = Math.sqrt(sq(this[5]) + sq(this[6]) + sq(this[7]))
+            return this[1] + this[15] + pointNorm + lineNorm
         }
 
         normalize() {
@@ -490,6 +496,8 @@ function init301() {
 function createVariousFunctions()
 {
     let jsString = ""
+
+    
 
     function createFunction(funcName, argNames, body) {
         let glslVersion = "void " + funcName + "( "
@@ -647,6 +655,28 @@ function createVariousFunctions()
     target[14] = -mv[14];
 
     target[15] =  mv[15];`)
+
+    createFunction(`dual`, [`mv`], `
+    target[ 0] = mv[15];
+                
+    target[ 1] = mv[14];
+    target[ 2] = mv[13];
+    target[ 3] = mv[12];
+    target[ 4] = mv[11];
+
+    target[ 5] = mv[10];
+    target[ 6] = mv[ 9];
+    target[ 7] = mv[ 8];
+    target[ 8] = mv[ 7];
+    target[ 9] = mv[ 8];
+    target[10] = mv[ 5];
+
+    target[11] = mv[ 4];
+    target[12] = mv[ 3];
+    target[13] = mv[ 2];
+    target[14] = mv[ 1];
+
+    target[15] = mv[ 0];`)
 
     return jsString
 }
