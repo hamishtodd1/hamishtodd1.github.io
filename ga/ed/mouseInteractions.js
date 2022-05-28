@@ -1,10 +1,12 @@
 function initMouseInteractions() {
-    let grabbedMention = null
-    
+    let style = window.getComputedStyle(textarea)
+    let lineHeight = parseInt(style.lineHeight)
     let characterWidth = parseInt(window.getComputedStyle(textMeasurer).width) / 40.
-
+    let textAreaOffset = parseInt(style.padding) + parseInt(style.margin) // can add some fudge to this if you like
+    
+    let grabbedMention = null
     let grabbedDw = null
-
+    
     document.addEventListener('mouseup',(event)=>{
         if(grabbedMention !== null) {
 
@@ -42,18 +44,6 @@ function initMouseInteractions() {
         mouseRay.normalize()
         return mouseRay
     }
-    
-    document.addEventListener('mousemove', (event) => {       
-        if (grabbedMention !== null ) {
-            grabbedMention.respondToDrag(grabbedDw)
-            setOverride(grabbedMention)
-        }
-    })
-
-    let style = window.getComputedStyle(textarea)
-    let lineHeight = parseInt(style.lineHeight)
-
-    let textAreaOffset = parseInt(style.padding) + parseInt(style.margin) // can add some fudge to this if you like
 
     lineToScreenY = (line) => {
         return line * lineHeight + textAreaOffset - textarea.scrollTop
@@ -64,81 +54,111 @@ function initMouseInteractions() {
         target.w = nameLength * characterWidth
     }
 
-    function highlightMention(mention) {
-        hoveredMention = mention
-
-        mention.highlight()
-    }
-
-    function resetHover() {
-        hoveredMention = null
-        hideLabelLines()
-    }
-
-    function updateTextAreaHover(clientX,clientY) {
-
-        resetHover()
-
-        mentions.every((mention) => {
-            if( mention.presenceLevel === PRESENCE_LEVEL_DELETED ||
-                mention.lineIndex > lowestChangedLineSinceCompile )
+    function getTextAreaHoveredMention(clientX, clientY) {
+        let res = mentions.find((mention) => {
+            if (mention.presenceLevel === PRESENCE_LEVEL_DELETED ||
+                mention.lineIndex > lowestChangedLineSinceCompile)
                 return false
 
             let mb = mention.horizontalBounds
             let mby = lineToScreenY(mention.lineIndex)
             let mouseInBox =
                 mb.x <= clientX && clientX < mb.x + mb.w &&
-                mby <= clientY && clientY < mby + lineHeight
+                mby  <= clientY && clientY < mby + lineHeight
 
-            if (mouseInBox)
-                highlightMention(mention)
-
-            return !mouseInBox
+            return mouseInBox
         })
 
-        updateDwContents()
+        return res === undefined ? null : res
     }
 
-    textarea.addEventListener('mousemove', (event)=>{
-        if (grabbedMention)
-            return
-        updateTextAreaHover(event.clientX,event.clientY)
-    })
+    let mouseAreaOld = null
+    updateHighlightingAndDws = (mouseArea,clientX,clientY) => {
 
-    textarea.addEventListener('scroll', (event) =>{
-        updateTextAreaHover(oldClientX,oldClientY)
-    })
+        if(mouseArea === undefined) {
+            mouseArea = mouseAreaOld
+            clientX = oldClientX
+            clientY = oldClientY
+        }
+        else
+            mouseAreaOld = mouseArea
 
-    function onDwHover(dw, clientX,clientY) {
+        let oldHoveredMention = hoveredMention
+        if(mouseArea === null)
+            hoveredMention = null
+        else if (mouseArea === textarea)
+            hoveredMention = getTextAreaHoveredMention(clientX, clientY)
+        else{
+            debugger
+            mouseArea.getHoveredMention(clientX, clientY)
+        }
 
-        resetHover()
+        mentions.forEach((mention) => {
+            let visibility = mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED &&
+                (mention === hoveredMention || mentionVisibleDueToCaret(mention))
 
-        let closestIndex = -1
-        let closestDist = Infinity
-        mentions.forEach((mention,i) => {
-            if (!mention.isVisibleInDw(dw) )
-                return
+            mention.setVisibility(visibility)
+        })
 
-            let [elemX, elemY] = mention.getCanvasPosition(dw)
-            let dist = Math.sqrt(sq(clientX - elemX) + sq(clientY - elemY))
+        let visibilityIndex = 0
+        forVizDws( (dw) => {
+            let hasMentionChild = false
+            dw.scene.children.every((child) => {
+                if (child.visible === true && dw.nonMentionChildren.indexOf(child) === -1)
+                    hasMentionChild = true
 
-            if(dist < closestDist) {
-                closestIndex = i
-                closestDist = dist
+                return !hasMentionChild
+            })
+
+            if (hasMentionChild) {
+                dw.elem.style.display = ''
+                dw.setVerticalPosition(visibilityIndex++)
             }
+            else
+                dw.elem.style.display = 'none'
         })
-        if(closestIndex !== -1)
-            highlightMention(mentions[closestIndex])
+
+        if (hoveredMention !== oldHoveredMention) {
+            if (hoveredMention === null)
+                hideHighlight()
+            else
+                hoveredMention.highlight()
+        }
     }
 
-    for(dwName in dws ) {
-        let dw = dws[dwName]
-        dw.elem.addEventListener('mousemove',(event)=>{
-            if(grabbedMention !== null)
-                return
+    let rightClicking = false
+    window.addEventListener('mousedown', (event) => {
+        if (event.which === 3) {
+            event.preventDefault()
+            rightClicking = true
+        }
+    })
+    window.addEventListener('mouseup', (event) => {
+        if (event.which === 3) {
+            event.preventDefault()
+            rightClicking = false
+        }
+    })
 
-            onDwHover(dw, event.clientX,event.clientY)
-        })
+    function onMouseMove(mouseArea, event) {
+        if (!rightClicking) {
+            if(grabbedDw !== null) {
+                grabbedMention.respondToDrag(grabbedDw)
+                updateOverride(grabbedMention)
+    
+                grabbedMention.highlight()
+            }
+            else if(mouseArea !== null)
+                updateHighlightingAndDws(mouseArea, event.clientX, event.clientY)
+        }
+        else
+            addToCamerLonLat(event.clientX, event.clientY)
+
+        oldClientX = event.clientX
+        oldClientY = event.clientY
+    }
+
+    forVizDws( (dw,dwName) => {
         dw.elem.addEventListener('mousedown',(event)=>{
             if( lowestChangedLineSinceCompile !== Infinity) {
                 //you've changed it? This is to let them know no editing from the window allowed
@@ -150,11 +170,16 @@ function initMouseInteractions() {
             else if (event.which === 1 && hoveredMention !== null ) {
                 grabbedMention = hoveredMention
                 grabbedDw = dw
-                resetHover()
 
-                if (grabbedMention.onGrab !== undefined)
-                    grabbedMention.onGrab(dw)
+                grabbedMention.onGrab(dw)
             }
         })
-    }
+        dw.elem.addEventListener('mousemove', (event) => {
+            // onMouseMove(dw, event)
+            log(dwName)
+        })
+    })
+    document.addEventListener('mousemove',    (event) => onMouseMove(null,     event))
+    textarea.addEventListener('mousemove',    (event) => onMouseMove(textarea, event))
+    textarea.addEventListener('scroll',       (event) => onMouseMove(textarea, event))
 }

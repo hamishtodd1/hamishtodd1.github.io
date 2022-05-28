@@ -1,5 +1,5 @@
-function initStudyDw($dwEl) {
-    let dw = new Dw("study", $dwEl, false)
+function initStudyDw() {
+    let dw = new Dw("study", false)
 
     const points = []
     points.push(new THREE.Vector3(-10., 0., 0.))
@@ -111,7 +111,7 @@ function initPgaVizes() {
             else console.error("not in that dw")
         }
 
-        getCanvasPositionWorldSpace(target, dw) {
+        getWorldSpaceCanvasPosition(target, dw) {
             if (dw === dws.euclidean) {
                 target.copy(this.#euclideanDwMesh.position)
                 target.w = 1.
@@ -281,7 +281,7 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
             //will be cool to edit at infinity. Probably yes, one point of it is stuck, an
         }
 
-        getCanvasPositionWorldSpace(target, dw) {
+        getWorldSpaceCanvasPosition(target, dw) {
             if (dw === dws.euclidean) {
                 target.copy(this.#euclideanDwMesh.position)
                 target.w = 1.

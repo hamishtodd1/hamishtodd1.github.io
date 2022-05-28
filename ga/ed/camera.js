@@ -1,6 +1,6 @@
 function initCamera() {
     const fov = 60.
-    const aspect = eval(getComputedStyle(topDwEl).aspectRatio)
+    const aspect = 16./9.
     const near = .1
     const far = 10.
 
@@ -38,7 +38,7 @@ function initCamera() {
 
         let overrideMentionIndex = {value:-1}
         let overrideFloats = { value: new Float32Array(16) }
-        setOverride = (mention)=>{
+        updateOverride = (mention)=>{
             overrideMentionIndex.value = mention.mentionIndex
 
             mention.getOverrideValues(overrideFloats.value)
@@ -89,24 +89,16 @@ function initCamera() {
     frameQuatHorizontal.sandwich(e1, frustumUntransformed.right)
     frameQuatVertical.sandwich(e2, frustumUntransformed.top)
 
-    let rightClicking = false
     window.oncontextmenu = () => { return false }
-    window.addEventListener('mousedown', (event) => {
-        if (event.which === 3) {
-            event.preventDefault()
-            rightClicking = true
-        }
-    })
-    window.addEventListener('mouseup', (event) => {
-        if (event.which === 3) {
-            event.preventDefault()
-            rightClicking = false
-        }
-    })
 
     let cameraLat = 0.//-TAU * .05
     let cameraLon = 0.//TAU * .05
-    function addToCamerLonLat(lonDiff, latDiff) {
+    addToCamerLonLat = (clientX, clientY) => {
+        let lonDiff = -.006 * (clientX - oldClientX)
+        lonDiff = Math.sign(lonDiff) * (Math.min(Math.abs(lonDiff), 1.8))
+        let latDiff = -.006 * (clientY - oldClientY)
+        latDiff = Math.sign(latDiff) * (Math.min(Math.abs(latDiff), 1.8))
+
         cameraLat += latDiff
         cameraLon += lonDiff
 
@@ -123,7 +115,7 @@ function initCamera() {
 
         fsqMatrix.copy(fsqMatrixPreCamera)
         fsqMatrix.premultiply(camera.matrix)
-        
+
         camera.mvs.pos.fromVector(camera.position)
         camera.mvs.quat.fromQuaternion(camera.quaternion)
         camera.mvs.motor.fromPosQuat(camera.position, camera.quaternion)
@@ -139,21 +131,6 @@ function initCamera() {
             camera.toHaveUpdateFromMvCalled[i].updateFromMv()
     }
     addToCamerLonLat(0.,0.)
-
-    document.addEventListener('mousemove', (event) => {
-        if (rightClicking) {
-            let lonDiff = -.006 * (event.clientX - oldClientX)
-            lonDiff = Math.sign(lonDiff) * (Math.min(Math.abs(lonDiff), 1.8))
-            let latDiff = -.006 * (event.clientY - oldClientY)
-            latDiff = Math.sign(latDiff) * (Math.min(Math.abs(latDiff), 1.8))
-            addToCamerLonLat(lonDiff, latDiff)
-
-            //and need to update labels
-        }
-
-        oldClientX = event.clientX
-        oldClientY = event.clientY
-    })
 
     return camera
 }

@@ -1,5 +1,7 @@
-function initFinalDw($dwEl) {
-    let dw = new Dw("final",$dwEl, false)
+function initFinalDw() {
+    let dw = new Dw("final", false)
+
+    dw.elem.style.bottom = "0px"
 
     let finalFsq = FullScreenQuad()
     dw.scene.add(finalFsq)

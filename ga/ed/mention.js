@@ -26,13 +26,15 @@ function initMention()
     for(let i = 0; i < 4; ++i)
         $labelSides[i] = LabelLine()
     let $labelConnectors = []
+    $labelConnectors.push(LabelLine())
+    $labelConnectors.push(LabelLine())
+    //want 3? add a third
 
-    hideLabelLines = () => {
+    hideHighlight = () => {
         $labelLines.forEach((svgLine) => { 
             setSvgLine(svgLine, -10, -10, -10, -10)
         })
     }
-    hideLabelLines()
 
     class Mention {
         variable;
@@ -54,7 +56,8 @@ function initMention()
         }
 
         getCanvasPosition(dw) {
-            this.getCanvasPositionWorldSpace(canvasPos,dw)
+            this.getWorldSpaceCanvasPosition(canvasPos,dw)
+
             canvasPos.applyMatrix4(camera.worldToCanvas)
             let canvasX = canvasPos.x / canvasPos.w
             let canvasY = canvasPos.y / canvasPos.w
@@ -74,6 +77,8 @@ function initMention()
         }
 
         highlight() {
+            this.setVisibility(true)
+
             let col = this.variable.col
             $labelLines.forEach((svgLine) => {
                 svgLine.style.stroke = "rgb(" + col.r * 255. + "," + col.g * 255. + "," + col.b * 255. + ")"
@@ -82,30 +87,27 @@ function initMention()
             let mb = this.horizontalBounds
             let mby = lineToScreenY(this.lineIndex)
 
-            let lowestUnusedLabelConnector = 0
-            this.setVisibility(true)
-            for(dwName in dws) {
-                let dw = dws[dwName]
-                
-                if(this.isVisibleInDw(dw)) {
-
-                    if (lowestUnusedLabelConnector === $labelConnectors.length )
-                        $labelConnectors.push(LabelLine())
-
-                    let [elemX, elemY] = this.getCanvasPosition(dw)
-                    setSvgLine($labelConnectors[lowestUnusedLabelConnector],
-                        mb.x + mb.w,
-                        mby + lineHeight / 2.,
-                        elemX, elemY)
-                    
-                    ++lowestUnusedLabelConnector
-                }
-            }
-
             setSvgLine($labelSides[0], mb.x, mby, mb.x + mb.w, mby)
             setSvgLine($labelSides[1], mb.x + mb.w, mby, mb.x + mb.w, mby + lineHeight)
             setSvgLine($labelSides[2], mb.x + mb.w, mby + lineHeight, mb.x, mby + lineHeight)
             setSvgLine($labelSides[3], mb.x, mby + lineHeight, mb.x, mby)
+
+            //Connect to the visualizations of the thing
+            let lowestUnusedLabelConnector = 0
+            this.setVisibility(true)
+            forVizDws((dw)=>{
+                if (this.isVisibleInDw(dw)) {
+
+                    let [elemX, elemY] = this.getCanvasPosition(dw)
+
+                    setSvgLine($labelConnectors[lowestUnusedLabelConnector++],
+                        mb.x + mb.w,
+                        mby + lineHeight / 2.,
+                        elemX, elemY)
+                }
+            })
+            for(let i = lowestUnusedLabelConnector; i < $labelConnectors.length; ++i)
+                setSvgLine($labelConnectors[i],-10,-10,-10,-10)
         }
     }
     window.Mention = Mention

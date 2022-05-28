@@ -10,9 +10,10 @@ async function initDws() {
     await initShaderOutput()
 
     class Dw {
-        constructor(name, newElem, haveAll3dStuff, haveLights) {
-            this.elem = newElem
-            this.elem.style.display = 'none'
+        constructor(name, haveAll3dStuff, haveLights) {
+            this.elem = document.createElement('div')
+            this.elem.className = 'dwEl'
+            document.body.appendChild(this.elem)
 
             dws[name] = this
 
@@ -31,6 +32,7 @@ async function initDws() {
             this.nonMentionChildren.push(ch)
             this.scene.add(ch)
         }
+
         render() {
             // get the viewport relative position of this element
             const { left, right, top, bottom, width, height } =
@@ -50,6 +52,29 @@ async function initDws() {
             renderer.setViewport(left, positiveYUpBottom, width, height)
 
             renderer.render(this.scene, camera)
+        }
+
+        setVerticalPosition(i) {
+            this.elem.style.top = "calc(" + i + "*(9/16*270px + 10px))"
+        }
+
+        getHoveredMention(clientX, clientY) {
+            let closestIndex = -1
+            let closestDist = Infinity
+            mentions.forEach((mention, i) => {
+                if (!mention.isVisibleInDw(self))
+                    return
+
+                let [elemX, elemY] = mention.getCanvasPosition(this)
+                let dist = Math.sqrt(sq(clientX - elemX) + sq(clientY - elemY))
+
+                if (dist < closestDist) {
+                    closestIndex = i
+                    closestDist = dist
+                }
+            })
+
+            return closestIndex === -1 ? null : mentions[closestIndex]
         }
     }
     window.Dw = Dw
@@ -105,6 +130,14 @@ async function initDws() {
             dws[dwName].render()
 
         requestAnimationFrame(render)
+    }
+
+    forVizDws = (func) => {
+        for(dwName in dws) {
+            if(dwName === "final")
+                continue
+            func(dws[dwName],dwName)
+        }
     }
 
     return render

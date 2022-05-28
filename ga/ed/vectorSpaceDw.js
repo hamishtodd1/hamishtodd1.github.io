@@ -1,9 +1,7 @@
-async function initVectorSpaceDw($dwEl)
+// matrices in here. little parallelipipeds with their edges extended past the corners
+async function initVectorSpaceDw()
 {
-    let dw = new Dw("vectorSpace",$dwEl, true)
-
-    //want an RGB cube
-    //also, matrices in here. little parallelipipeds with their edges extended past the corners
+    let dw = new Dw("vectorSpace", true)
     
     let shaftRadius = .06
     let headHeight = shaftRadius * 5.
@@ -102,7 +100,7 @@ async function initVectorSpaceDw($dwEl)
             }
         }
 
-        getCanvasPositionWorldSpace(target, dw) {
+        getWorldSpaceCanvasPosition(target, dw) {
             
             if (dw === dws.vectorSpace) {
                 asVec.setFromMatrixPosition(this.#vMesh.head.matrix)

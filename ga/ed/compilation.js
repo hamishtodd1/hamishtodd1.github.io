@@ -173,9 +173,9 @@ void main() {
                 mention.presenceLevel = PRESENCE_LEVEL_CONFIRMED
                 mention.mentionIndex = mentionIndex++
 
-                finalLines[lineIndex] += 
-                    ` if( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` + 
-                        mention.variable.name + " = " + mention.getOverrideText()
+                // finalLines[lineIndex] += 
+                //     ` if( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` + 
+                //         mention.variable.name + " = " + mention.getOverrideText()
 
                 updateHorizontalBounds(match.index, name.length, mention.horizontalBounds)
 
@@ -209,38 +209,17 @@ void main() {
         updateFinalDw(generalShaderPrefix + finalLines.join("\n"))
 
         lowestChangedLineSinceCompile = Infinity
-        setSvgLine($changedLineIndicator, -10, -10, -10, -10)
+        updateChangedLineIndicator()
 
         delete variableNumMentions
+
+        updateHighlightingAndDws()
     }
 
-    updateDwContents = () => {
-        
-        mentions.forEach((mention) => {
-            let visibility =
-                mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED &&
-                (mention === hoveredMention ||
-                (caretLine < lowestChangedLineSinceCompile && 
-                mention.lineIndex === caretLine ) )
-
-            mention.setVisibility(visibility)
-        })
-
-        for(dwName in dws) {
-            let dw = dws[dwName]
-            let hasMentionChild = false
-            dw.scene.children.every((child)=>{
-                if (child.visible === true && dw.nonMentionChildren.indexOf(child) === -1 )
-                    hasMentionChild = true
-
-                return !hasMentionChild
-            })
-            dw.elem.style.display = hasMentionChild ? '' : 'none'
-        }
-    }
-
+    let $changedLineIndicator = document.createElementNS('http://www.w3.org/2000/svg', 'line') //weblink refers to a standard
+    ourSvg.appendChild($changedLineIndicator)
     $changedLineIndicator.style.stroke = "rgb(180,180,180)"
-    function updateCli() {
+    function updateChangedLineIndicator() {
         if(lowestChangedLineSinceCompile !== Infinity) {
             let textareaBox = textarea.getBoundingClientRect()
             let y = lineToScreenY(lowestChangedLineSinceCompile - 1)
@@ -248,8 +227,10 @@ void main() {
                 textareaBox.x, y,
                 textareaBox.x + textareaBox.width, y)
         }
+        else
+            setSvgLine($changedLineIndicator, -10, -10, -10, -10)
     }
-    textarea.addEventListener('scroll', updateCli)
+    textarea.addEventListener('scroll', updateChangedLineIndicator)
 
     textarea.addEventListener('input', () => {
         errorBox.style.top = "-200px"
@@ -257,9 +238,9 @@ void main() {
         if (caretLine+1 < lowestChangedLineSinceCompile)
             lowestChangedLineSinceCompile = caretLine+1
         
-        updateCli()
+        updateChangedLineIndicator()
 
-        updateDwContents()
+        updateHighlightingAndDws()
     })
 
     let caretPositionOld = -1
@@ -272,13 +253,10 @@ void main() {
 
             let lineIndex = 0
             for (let i = 0, il = text.length; i < il; ++i) {
-                if (i === caretPosition) {
-                    //lineIndex is new caret line
-
-                    if (lineIndex !== caretLine) {
-                        caretLine = lineIndex
-                        updateDwContents()
-                    }
+                let caretIsNewlyOnThisLine = i === caretPosition && lineIndex !== caretLine
+                if (caretIsNewlyOnThisLine) {
+                    caretLine = lineIndex
+                    updateHighlightingAndDws()
                 }
 
                 if (text[i] === "\n")
@@ -288,6 +266,8 @@ void main() {
             caretPositionOld = caretPosition
         }
     }
+
+    mentionVisibleDueToCaret = (mention) => mention.lineIndex === caretLine && caretLine < lowestChangedLineSinceCompile
 
     document.addEventListener('selectionchange', updateBasedOnCaret)
 }

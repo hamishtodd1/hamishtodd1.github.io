@@ -1,6 +1,12 @@
+let hoveredMention = null
+let lowestChangedLineSinceCompile = Infinity
+
+let oldClientX = 0
+let oldClientY = 0
+
 const mentions = []
 const variables = []
-
+const dws = {}
 const types = {}
 
 const INFINITY_RADIUS = 1.7
@@ -10,20 +16,11 @@ const PRESENCE_LEVEL_UNCONFIRMED = -1
 const PRESENCE_LEVEL_CONFIRMED = 1
 const PRESENCE_LEVEL_DELETED = 0
 
-let oldClientX = 0
-let oldClientY = 0
-
-const dws = {}
-
 let glslGaString = ""
 let generalShaderPrefix = `
 uniform float[16] overrideFloats;
 uniform int overrideMentionIndex;
 `
-
-let hoveredMention = null
-
-let lowestChangedLineSinceCompile = Infinity
 
 const basicVertex = `
 varying vec4 coord; //fragcoord is 

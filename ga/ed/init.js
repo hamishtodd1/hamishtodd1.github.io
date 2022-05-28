@@ -181,44 +181,44 @@ async function init() {
 
     initMention()
 
-    initFinalDw(bottomDwEl)
-    dws.final.elem.style.display = ''
-    await initVectorSpaceDw(topDwEl)
+    initFinalDw()
 
-    new Dw("euclidean", thirdDwEl, true)
-    initStudyDw(fourthDwEl)
-    initInfinityDw(secondDwEl)
+    await initVectorSpaceDw()
+
+    new Dw("euclidean", true)
+    initInfinityDw()
+    // initStudyDw()
     initPgaVizes()
 
     initMouseInteractions()
 
     // float myBiv[6] = float[6](3.4, 4.2, 5.0, 5.2, 0.3, 1.1);
     let initialText =
-`void mainImage( out vec4 fragColor ) {
-    vec4 pt = vec4(.5,1.,0.,1.);
-    vec3 pt2 = vec3(.5,1.,0.);
-
-    fragColor = pt;
-}`
 // `void mainImage( out vec4 fragColor ) {
+//     vec4 pt = vec4(.5,1.,0.,1.);
+//     // vec3 pt2 = vec3(.5,1.,0.);
+
+//     fragColor = pt;
+// }`
+`void mainImage( out vec4 fragColor ) {
     
-//     vec3 myVec = vec3(1.,1.,0.);
+    vec3 myVec = vec3(1.,1.,0.);
 
-//     // float a, b;
+    // float a, b;
     
-//     //try eg 1 + e12 + e01234
+    //try eg 1 + e12 + e01234
 
-//     Dq originL   = Dq(0., 0.,0.,0., 0.,1.,0., 0.);
-//     Dq idealL = Dq(0., 1.,0.,0., 0.,0.,0., 0.);
+    Dq originL = Dq(0., 0.,0.,0., 0.,1.,0., 0.);
+    Dq idealL  = Dq(0., 1.,0.,0., 0.,0.,0., 0.);
     
-//     vec4 idealPt = vec4( .2,0.,-1.,0.);
-//     vec4 realPt = vec4( .2,0., 1.,1.);
+    vec4 idealPt = vec4( .2,0.,-1.,0.);
+    vec4 realPt = vec4( .2,0., 1.,1.);
 
-//     vec4 transformedPt = applyDqToPt(originL, realPt);
+    vec4 transformedPt = applyDqToPt(originL, realPt);
 
-//     fragColor = vec4(0.,0.,0.,1.);
-// }
-// `
+    fragColor = vec4(0.,1.,0.,1.);
+}
+`
 
     textarea.value = initialText
     updateSyntaxHighlighting(textarea.value)
@@ -240,10 +240,8 @@ async function init() {
 
     compile()
     document.addEventListener('keydown', (event) => {
-        if (event.key === "Enter" && event.altKey === true) {
+        if (event.key === "Enter" && event.altKey === true)
             compile()
-            updateDwContents()
-        }
     })
     
     requestAnimationFrame(render)

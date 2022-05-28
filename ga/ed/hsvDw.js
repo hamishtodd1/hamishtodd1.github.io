@@ -1,6 +1,6 @@
-async function initHsv($dwEl)
+async function initHsv()
 {
-    let dw = new Dw("hsv",$dwEl, true)
+    let dw = new Dw("hsv", true)
     
     var apparatus = new THREE.Object3D()
     dw.addNonMentionChild(apparatus)

@@ -1,8 +1,8 @@
 //have the frustum and its view rect on there
 
-function initInfinityDw($dwEl)
+function initInfinityDw()
 {
-    let dw = new Dw("infinity",$dwEl, false, true)
+    let dw = new Dw("infinity", false, true)
 
     let exteriorMat = new THREE.MeshPhongMaterial({ transparent:true, opacity:.6, side:THREE.FrontSide})
     let interiorMat = new THREE.MeshPhongMaterial({ transparent:false, side:THREE.BackSide})

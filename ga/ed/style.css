@@ -82,7 +82,7 @@ ul li:hover>ul {
   z-index: 2;
 }
 
-#topDwEl, #bottomDwEl, #secondDwEl, #thirdDwEl, #fourthDwEl {
+.dwEl {
   margin: 10px;
   padding: 0px;
   border: 0px;/*5px solid rgb(0, 0, 0);*/
@@ -93,24 +93,8 @@ ul li:hover>ul {
   z-index: 2;
 
   width: 270px;
-  aspect-ratio: 16/9;
+  aspect-ratio: 16/9; /* IF YOU WANT TO CHANGE THIS YOU MUST ALSO DO SO IN CAMERA!!! */
   /* height: 270px; */
-}
-
-#topDwEl {
-  top: 0;
-}
-#secondDwEl {
-  top: calc(1*(9/16*270px + 10px))
-}
-#thirdDwEl {
-  top: calc(2*(9/16*270px + 10px))
-}
-#fourthDwEl {
-  top: calc(3*(9/16*270px + 10px))
-}
-#bottomDwEl {
-  bottom: 0;
 }
 
 /* TEXT WINDOW */
