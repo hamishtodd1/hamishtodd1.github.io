@@ -62,7 +62,7 @@ async function initDws() {
             let closestIndex = -1
             let closestDist = Infinity
             mentions.forEach((mention, i) => {
-                if (!mention.isVisibleInDw(self))
+                if (!mention.isVisibleInDw(this))
                     return
 
                 let [elemX, elemY] = mention.getCanvasPosition(this)

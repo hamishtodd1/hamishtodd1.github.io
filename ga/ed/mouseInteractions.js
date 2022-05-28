@@ -88,9 +88,9 @@ function initMouseInteractions() {
             hoveredMention = null
         else if (mouseArea === textarea)
             hoveredMention = getTextAreaHoveredMention(clientX, clientY)
-        else{
-            debugger
-            mouseArea.getHoveredMention(clientX, clientY)
+        else {
+            // debugger
+            hoveredMention = mouseArea.getHoveredMention(clientX, clientY)
         }
 
         mentions.forEach((mention) => {
@@ -158,7 +158,7 @@ function initMouseInteractions() {
         oldClientY = event.clientY
     }
 
-    forVizDws( (dw,dwName) => {
+    forVizDws( (dw) => {
         dw.elem.addEventListener('mousedown',(event)=>{
             if( lowestChangedLineSinceCompile !== Infinity) {
                 //you've changed it? This is to let them know no editing from the window allowed
@@ -175,8 +175,7 @@ function initMouseInteractions() {
             }
         })
         dw.elem.addEventListener('mousemove', (event) => {
-            // onMouseMove(dw, event)
-            log(dwName)
+            onMouseMove(dw, event)
         })
     })
     document.addEventListener('mousemove',    (event) => onMouseMove(null,     event))
