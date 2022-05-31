@@ -6,30 +6,6 @@ function initMouseInteractions() {
     
     let grabbedMention = null
     let grabbedDw = null
-    
-    document.addEventListener('mouseup',(event)=>{
-        if(grabbedMention !== null) {
-
-            let newLine = grabbedMention.getReassignmentText()
-
-            let lines = textarea.value.split("\n")
-            let pre  = lines.slice(0, grabbedMention.lineIndex+1).join("\n")
-            let post = lines.slice(grabbedMention.lineIndex+1).join("\n")
-            
-            textarea.value = pre + newLine + post
-            updateSyntaxHighlighting(textarea.value)
-            compile()
-
-            let newCaretPosition = textarea.value.length - post.length - 1
-            textarea.focus()
-            textarea.setSelectionRange(newCaretPosition, newCaretPosition)
-
-            grabbedMention = null
-            grabbedDw = null
-        }
-
-        updateBasedOnCaret()
-    })
 
     let mouseRay = new Mv()
     getMouseRay = (dw) => {
@@ -129,12 +105,33 @@ function initMouseInteractions() {
 
     let rightClicking = false
 
-    function onMouseMove(mouseArea, event) {
+    function onMouseEvent(mouseArea, event) {
         if(event.button === 2 ) {
             if( event.type === 'mousedown')
                 rightClicking = true
             else if (event.type === 'mouseup')
                 rightClicking = false
+        }
+        if (event.type === 'mouseup' && grabbedMention !== null) {
+            let newLine = grabbedMention.getReassignmentText()
+
+            let lines = textarea.value.split("\n")
+            let pre = lines.slice(0, grabbedMention.lineIndex + 1).join("\n")
+            let post = lines.slice(grabbedMention.lineIndex + 1).join("\n")
+
+            textarea.value = pre + newLine + post
+            updateSyntaxHighlighting(textarea.value)
+            compile()
+
+            grabbedMention = null
+            grabbedDw = null
+
+            let newCaretPosition = textarea.value.length - post.length - 1
+            textarea.focus()
+            textarea.setSelectionRange(newCaretPosition, newCaretPosition)
+            //current bug:
+            //that triggers the selection change event
+            //but, it's still the case that you need to move the mouse again to make the shit from the previous line disappear
         }
 
         if (!rightClicking) {
@@ -151,7 +148,6 @@ function initMouseInteractions() {
             event.preventDefault()
 
             addToCameraLonLat(event.clientX - oldClientX, event.clientY - oldClientY)
-            log("y")
             
             if(hoveredMention !== null)
                 hoveredMention.highlight()
@@ -181,14 +177,14 @@ function initMouseInteractions() {
 
     function addMousemoveMouseup(area) {
         let elem = area.elem ? area.elem : area
-        elem.addEventListener('mousemove', (event) => onMouseMove(area, event))
-        elem.addEventListener('mouseup', (event) => onMouseMove(area, event))
+        elem.addEventListener('mousemove', (event) => onMouseEvent(area, event))
+        elem.addEventListener('mouseup', (event) => onMouseEvent(area, event))
     }
     
-    textarea.addEventListener('mousedown', (event) => onMouseMove(textarea, event))
+    textarea.addEventListener('mousedown', (event) => onMouseEvent(textarea, event))
     addMousemoveMouseup(textarea)
     
-    document.addEventListener('mousedown', (event) => onMouseMove(document, event))
+    document.addEventListener('mousedown', (event) => onMouseEvent(document, event))
     addMousemoveMouseup(document)
     
     forVizDws( (dw) => {
@@ -196,6 +192,6 @@ function initMouseInteractions() {
         addMousemoveMouseup(dw)
     })
 
-    textarea.addEventListener('scroll',    (event) => onMouseMove(textarea, event))
+    textarea.addEventListener('scroll',    (event) => onMouseEvent(textarea, event))
     //and one day, scrolling = zooming for dws!
 }

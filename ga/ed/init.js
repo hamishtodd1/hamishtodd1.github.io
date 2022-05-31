@@ -238,6 +238,8 @@ async function init() {
 
     await initCompilation()
 
+    initCaretInteractions()
+
     compile()
     document.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === true)
