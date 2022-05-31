@@ -69,11 +69,14 @@ function initMention()
 
             let actuallyOnScreen =  0. <= ndcX && ndcX <= 1. &&
                                     0. <= ndcY && ndcY <= 1.
-
-            return [
-                dwRect.x + dwRect.width * ndcX,
-                dwRect.y + dwRect.height * (1. - ndcY)
-            ]
+            if (actuallyOnScreen) {
+                return [
+                    dwRect.x + dwRect.width * ndcX,
+                    dwRect.y + dwRect.height * (1. - ndcY)
+                ]
+            }
+            else
+                return [Infinity,Infinity]
         }
 
         highlight() {
@@ -94,7 +97,6 @@ function initMention()
 
             //Connect to the visualizations of the thing
             let lowestUnusedLabelConnector = 0
-            this.setVisibility(true)
             forVizDws((dw)=>{
                 if (this.isVisibleInDw(dw)) {
 

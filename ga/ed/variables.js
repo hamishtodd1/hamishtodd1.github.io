@@ -4,6 +4,8 @@ let lowestChangedLineSinceCompile = Infinity
 let oldClientX = 0
 let oldClientY = 0
 
+const FULL_SCREEN_QUAD_MATRIX = new THREE.Matrix4()
+
 const mentions = []
 const variables = []
 const dws = {}

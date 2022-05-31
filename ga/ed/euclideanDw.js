@@ -59,8 +59,6 @@ function initPgaVizes() {
             else {
                 this.#mv.toVector(this.#infinityDwMesh.position)
                 this.#infinityDwMesh.position.setLength(INFINITY_RADIUS)
-
-                this.#infinityDwMesh.visible = true
                 
                 this.#mv.getDisplayableVersion(mv0)
                 if (mv0[14] > 0.)
@@ -142,7 +140,7 @@ function initPgaVizes() {
 
         setVisibility(newVisibility) {
             this.#euclideanDwMesh.visible = newVisibility
-            this.#infinityDwMesh.visible = newVisibility && this.#mv[14] === 0.
+            this.#infinityDwMesh.visible  = newVisibility && this.#mv[14] === 0.
         }
 
         isVisibleInDw(dw) {
@@ -319,6 +317,7 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
 
             let hasEuclideanPart = this.#mv.hasEuclideanPart()
             this.#infinityDwMesh.visible = hasEuclideanPart && newVisibility
+            
             this.#ringMesh.visible = !hasEuclideanPart && newVisibility
         }
 
@@ -348,17 +347,17 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
     }
     types.Dq = DqMention
 
-    if(0)
-    {
-        let mousePoint = new THREE.Mesh(new THREE.SphereBufferGeometry(.1, 32, 16), new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
-        mousePoint.position.copy(outOfTheWayPosition)
-        dws.euclidean.addNonMentionChild(mousePoint)
-        dws.euclidean.elem.addEventListener('mousemove', (event) => {
-            let mouseRay = getMouseRay(dws.euclidean)
+    // if(0)
+    // {
+        // let mousePoint = new THREE.Mesh(new THREE.SphereBufferGeometry(.1, 32, 16), new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
+        // mousePoint.position.copy(outOfTheWayPosition)
+        // dws.euclidean.addNonMentionChild(mousePoint)
+        // dws.euclidean.elem.addEventListener('mousemove', (event) => {
+        //     let mouseRay = getMouseRay(dws.euclidean)
 
-            meet(e0, mouseRay, mv0).toVectorDisplayable(mousePoint.position)
-        })
-    }
+        //     meet(e0, mouseRay, mv0).toVectorDisplayable(mousePoint.position)
+        // })
+    // }
 
     // if(0)
     {

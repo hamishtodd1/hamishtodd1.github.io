@@ -75,15 +75,16 @@ function initMouseInteractions() {
     let mouseAreaOld = null
     updateHighlightingAndDws = (mouseArea,clientX,clientY) => {
 
-        if(mouseArea === undefined) {
+        if(mouseArea === undefined)
             mouseArea = mouseAreaOld
-            clientX = oldClientX
-            clientY = oldClientY
-        }
         else
             mouseAreaOld = mouseArea
 
-        let oldHoveredMention = hoveredMention
+        if(clientX === undefined) {
+            clientX = oldClientX
+            clientY = oldClientY
+        }
+
         if(mouseArea === null)
             hoveredMention = null
         else if (mouseArea === textarea)
@@ -92,11 +93,13 @@ function initMouseInteractions() {
             // debugger
             hoveredMention = mouseArea.getHoveredMention(clientX, clientY)
         }
+        // log(hoveredMention)
 
         mentions.forEach((mention) => {
             let visibility = mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED &&
                 (mention === hoveredMention || mentionVisibleDueToCaret(mention))
 
+            // if (visibility)log(mention.variable.name)
             mention.setVisibility(visibility)
         })
 
@@ -118,29 +121,22 @@ function initMouseInteractions() {
                 dw.elem.style.display = 'none'
         })
 
-        if (hoveredMention !== oldHoveredMention) {
-            if (hoveredMention === null)
-                hideHighlight()
-            else
-                hoveredMention.highlight()
-        }
+        if (hoveredMention === null)
+            hideHighlight()
+        else
+            hoveredMention.highlight()
     }
 
     let rightClicking = false
-    window.addEventListener('mousedown', (event) => {
-        if (event.which === 3) {
-            event.preventDefault()
-            rightClicking = true
-        }
-    })
-    window.addEventListener('mouseup', (event) => {
-        if (event.which === 3) {
-            event.preventDefault()
-            rightClicking = false
-        }
-    })
 
     function onMouseMove(mouseArea, event) {
+        if(event.button === 2 ) {
+            if( event.type === 'mousedown')
+                rightClicking = true
+            else if (event.type === 'mouseup')
+                rightClicking = false
+        }
+
         if (!rightClicking) {
             if(grabbedDw !== null) {
                 grabbedMention.respondToDrag(grabbedDw)
@@ -148,37 +144,58 @@ function initMouseInteractions() {
     
                 grabbedMention.highlight()
             }
-            else if(mouseArea !== null)
+            else if(mouseArea !== document)
                 updateHighlightingAndDws(mouseArea, event.clientX, event.clientY)
         }
-        else
-            addToCamerLonLat(event.clientX, event.clientY)
+        else {
+            event.preventDefault()
+
+            addToCameraLonLat(event.clientX - oldClientX, event.clientY - oldClientY)
+            log("y")
+            
+            if(hoveredMention !== null)
+                hoveredMention.highlight()
+        }
 
         oldClientX = event.clientX
         oldClientY = event.clientY
+
+        event.stopPropagation()
     }
 
-    forVizDws( (dw) => {
-        dw.elem.addEventListener('mousedown',(event)=>{
-            if( lowestChangedLineSinceCompile !== Infinity) {
-                //you've changed it? This is to let them know no editing from the window allowed
-                $changedLineIndicator.style.stroke = "rgb(255,255,255)"
-                setTimeout(()=>{
-                    $changedLineIndicator.style.stroke = "rgb(180,180,180)"
-                }, 350)
-            }
-            else if (event.which === 1 && hoveredMention !== null ) {
-                grabbedMention = hoveredMention
-                grabbedDw = dw
+    function onDwClick(dw,event) {
+        if (lowestChangedLineSinceCompile !== Infinity) {
+            //you've changed it? This is to let them know no editing from the window allowed
+            $changedLineIndicator.style.stroke = "rgb(255,255,255)"
+            setTimeout(() => {
+                $changedLineIndicator.style.stroke = "rgb(180,180,180)"
+            }, 350)
+        }
+        else if (event.which === 1 && hoveredMention !== null) {
+            grabbedMention = hoveredMention
+            grabbedDw = dw
 
-                grabbedMention.onGrab(dw)
-            }
-        })
-        dw.elem.addEventListener('mousemove', (event) => {
-            onMouseMove(dw, event)
-        })
+            grabbedMention.onGrab(dw)
+        }
+    }
+
+    function addMousemoveMouseup(area) {
+        let elem = area.elem ? area.elem : area
+        elem.addEventListener('mousemove', (event) => onMouseMove(area, event))
+        elem.addEventListener('mouseup', (event) => onMouseMove(area, event))
+    }
+    
+    textarea.addEventListener('mousedown', (event) => onMouseMove(textarea, event))
+    addMousemoveMouseup(textarea)
+    
+    document.addEventListener('mousedown', (event) => onMouseMove(document, event))
+    addMousemoveMouseup(document)
+    
+    forVizDws( (dw) => {
+        dw.elem.addEventListener('mousedown', (event)=>{onDwClick(dw,event)})
+        addMousemoveMouseup(dw)
     })
-    document.addEventListener('mousemove',    (event) => onMouseMove(null,     event))
-    textarea.addEventListener('mousemove',    (event) => onMouseMove(textarea, event))
-    textarea.addEventListener('scroll',       (event) => onMouseMove(textarea, event))
+
+    textarea.addEventListener('scroll',    (event) => onMouseMove(textarea, event))
+    //and one day, scrolling = zooming for dws!
 }

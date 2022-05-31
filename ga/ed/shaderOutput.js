@@ -1,4 +1,45 @@
 async function initShaderOutput() {
+    {
+        let fullScreenQuadGeo = new THREE.PlaneGeometry(1., 1.)
+        fullScreenQuadGeo.translate(0., 0., -1.)
+
+        let overrideMentionIndex = { value: -1 }
+        let overrideFloats = { value: new Float32Array(16) }
+        updateOverride = (mention) => {
+            overrideMentionIndex.value = mention.mentionIndex
+
+            mention.getOverrideValues(overrideFloats.value)
+
+            for (let i = 0, il = materials.length; i < il; ++i)
+                materials[i].needsUpdate = true
+        }
+
+        let materials = []
+
+        FullScreenQuad = () => {
+            let mat = new THREE.ShaderMaterial({
+                uniforms: {
+                    overrideMentionIndex,
+                    overrideFloats
+                }
+            })
+            materials.push(mat)
+
+            mat.vertexShader = basicVertex
+
+            let fsq = new THREE.Mesh(fullScreenQuadGeo, mat)
+            fsq.matrixAutoUpdate = false
+            fsq.matrix = FULL_SCREEN_QUAD_MATRIX
+
+            fsq.updateFragmentShader = (text) => {
+                fsq.material.fragmentShader = text
+                fsq.material.needsUpdate = true
+            }
+
+            return fsq
+        }
+    }
+
     let rtScene = new THREE.Scene()
 
     let rtFsq = FullScreenQuad()

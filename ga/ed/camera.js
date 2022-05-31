@@ -4,6 +4,10 @@ function initCamera() {
     const near = .1
     const far = 10.
 
+    var fsqMatrixPreCamera = new THREE.Matrix4()
+    let frameHeightOneAway = Math.tan(fov / 2. / 360. * TAU) * 2.
+    fsqMatrixPreCamera.makeScale(frameHeightOneAway * aspect, frameHeightOneAway, 1.)
+
     camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
     camera.frustum = {
         left: new Mv(),
@@ -26,53 +30,6 @@ function initCamera() {
         camera.worldToCanvas.copy(camera.projectionMatrix).multiply(camera.matrixWorldInverse)
     }
 
-    {
-        var fsqMatrix = new THREE.Matrix4()
-
-        var fsqMatrixPreCamera = new THREE.Matrix4()
-        let frameHeightOneAway = Math.tan(fov / 2. / 360. * TAU) * 2.
-        fsqMatrixPreCamera.makeScale(frameHeightOneAway * aspect, frameHeightOneAway, 1.)
-
-        let fullScreenQuadGeo = new THREE.PlaneGeometry(1., 1.)
-        fullScreenQuadGeo.translate(0., 0., -1.)
-
-        let overrideMentionIndex = {value:-1}
-        let overrideFloats = { value: new Float32Array(16) }
-        updateOverride = (mention)=>{
-            overrideMentionIndex.value = mention.mentionIndex
-
-            mention.getOverrideValues(overrideFloats.value)
-
-            for(let i = 0, il = materials.length; i < il; ++i)
-                materials[i].needsUpdate = true
-        }
-
-        let materials = []
-
-        FullScreenQuad = () => {
-            let mat = new THREE.ShaderMaterial({
-                uniforms: {
-                    overrideMentionIndex,
-                    overrideFloats
-                }
-            })
-            materials.push(mat)
-
-            mat.vertexShader = basicVertex
-
-            let fsq = new THREE.Mesh(fullScreenQuadGeo, mat)
-            fsq.matrixAutoUpdate = false
-            fsq.matrix = fsqMatrix
-
-            fsq.updateFragmentShader = (text) => {
-                fsq.material.fragmentShader = text
-                fsq.material.needsUpdate = true
-            }
-
-            return fsq
-        }
-    }
-
     let fovHorizontal = otherFov(camera.fov, camera.aspect, true)
     let frameQuatHorizontal = new Mv().fromAxisAngle(e31, -fovHorizontal / 2. * (TAU / 360.))
     let frameQuatVertical = new Mv().fromAxisAngle(e23, -camera.fov / 2. * (TAU / 360.))
@@ -93,10 +50,10 @@ function initCamera() {
 
     let cameraLat = 0.//-TAU * .05
     let cameraLon = 0.//TAU * .05
-    addToCamerLonLat = (clientX, clientY) => {
-        let lonDiff = -.006 * (clientX - oldClientX)
+    addToCameraLonLat = (changeX, changeY) => {
+        let lonDiff = -.006 * changeX
         lonDiff = Math.sign(lonDiff) * (Math.min(Math.abs(lonDiff), 1.8))
-        let latDiff = -.006 * (clientY - oldClientY)
+        let latDiff = -.006 * changeY
         latDiff = Math.sign(latDiff) * (Math.min(Math.abs(latDiff), 1.8))
 
         cameraLat += latDiff
@@ -113,8 +70,8 @@ function initCamera() {
         camera.updateMatrix()
         camera.updateProjectionMatrix()
 
-        fsqMatrix.copy(fsqMatrixPreCamera)
-        fsqMatrix.premultiply(camera.matrix)
+        FULL_SCREEN_QUAD_MATRIX.copy(fsqMatrixPreCamera)
+        FULL_SCREEN_QUAD_MATRIX.premultiply(camera.matrix)
 
         camera.mvs.pos.fromVector(camera.position)
         camera.mvs.quat.fromQuaternion(camera.quaternion)
@@ -130,7 +87,7 @@ function initCamera() {
         for (let i = 0, il = camera.toHaveUpdateFromMvCalled.length; i < il; ++i)
             camera.toHaveUpdateFromMvCalled[i].updateFromMv()
     }
-    addToCamerLonLat(0.,0.)
+    addToCameraLonLat(0.,0.)
 
     return camera
 }
