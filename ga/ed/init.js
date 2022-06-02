@@ -187,7 +187,7 @@ async function init() {
 
     new Dw("euclidean", true)
     initInfinityDw()
-    initStudyDw()
+    // initStudyDw()
     initPgaVizes()
 
     initMouseInteractions()
