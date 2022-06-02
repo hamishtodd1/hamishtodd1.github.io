@@ -27,11 +27,7 @@ function initCaretInteractions() {
         updateHighlightingAndDws()
     })
 
-    let caretPositionOld = -1
-    let caretLine = -1
-    document.addEventListener('selectionchange', () => {
-        log("caret part")
-        
+    onCaretMove = () => {
         let caretPosition = textarea.selectionStart
         if (caretPosition !== caretPositionOld) {
             let text = textarea.value
@@ -50,7 +46,11 @@ function initCaretInteractions() {
 
             caretPositionOld = caretPosition
         }
-    })
+    }
+
+    let caretPositionOld = -1
+    let caretLine = -1
+    document.addEventListener('selectionchange', onCaretMove)
 
     mentionVisibleDueToCaret = (mention) => mention.lineIndex === caretLine && caretLine < lowestChangedLineSinceCompile
 }

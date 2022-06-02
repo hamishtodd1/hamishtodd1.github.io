@@ -212,7 +212,5 @@ void main() {
         updateChangedLineIndicator()
 
         delete variableNumMentions
-
-        updateHighlightingAndDws()
     }
 }

@@ -7,6 +7,8 @@ function initMouseInteractions() {
     let grabbedMention = null
     let grabbedDw = null
 
+    let rightClicking = false
+
     let mouseRay = new Mv()
     getMouseRay = (dw) => {
         let clientRect = dw.elem.getBoundingClientRect()
@@ -50,7 +52,6 @@ function initMouseInteractions() {
 
     let mouseAreaOld = null
     updateHighlightingAndDws = (mouseArea,clientX,clientY) => {
-
         if(mouseArea === undefined)
             mouseArea = mouseAreaOld
         else
@@ -61,23 +62,20 @@ function initMouseInteractions() {
             clientY = oldClientY
         }
 
+        mentions.forEach((mention) => {
+            let visibility = mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED && mentionVisibleDueToCaret(mention)
+            mention.setVisibility(visibility)
+        })
+
         if(mouseArea === null)
             hoveredMention = null
         else if (mouseArea === textarea)
             hoveredMention = getTextAreaHoveredMention(clientX, clientY)
-        else {
-            // debugger
+        else
             hoveredMention = mouseArea.getHoveredMention(clientX, clientY)
-        }
-        // log(hoveredMention)
 
-        mentions.forEach((mention) => {
-            let visibility = mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED &&
-                (mention === hoveredMention || mentionVisibleDueToCaret(mention))
-
-            // if (visibility)log(mention.variable.name)
-            mention.setVisibility(visibility)
-        })
+        if(hoveredMention !== null)
+            hoveredMention.setVisibility(true)
 
         let visibilityIndex = 0
         forVizDws( (dw) => {
@@ -103,37 +101,7 @@ function initMouseInteractions() {
             hoveredMention.highlight()
     }
 
-    let rightClicking = false
-
-    function onMouseEvent(mouseArea, event) {
-        if(event.button === 2 ) {
-            if( event.type === 'mousedown')
-                rightClicking = true
-            else if (event.type === 'mouseup')
-                rightClicking = false
-        }
-        if (event.type === 'mouseup' && grabbedMention !== null) {
-            let newLine = grabbedMention.getReassignmentText()
-
-            let lines = textarea.value.split("\n")
-            let pre = lines.slice(0, grabbedMention.lineIndex + 1).join("\n")
-            let post = lines.slice(grabbedMention.lineIndex + 1).join("\n")
-
-            textarea.value = pre + newLine + post
-            updateSyntaxHighlighting(textarea.value)
-            compile()
-
-            grabbedMention = null
-            grabbedDw = null
-
-            let newCaretPosition = textarea.value.length - post.length - 1
-            textarea.focus()
-            textarea.setSelectionRange(newCaretPosition, newCaretPosition)
-            //current bug:
-            //that triggers the selection change event
-            //but, it's still the case that you need to move the mouse again to make the shit from the previous line disappear
-        }
-
+    function onMouseMove(mouseArea, event) {
         if (!rightClicking) {
             if(grabbedDw !== null) {
                 grabbedMention.respondToDrag(grabbedDw)
@@ -175,23 +143,50 @@ function initMouseInteractions() {
         }
     }
 
-    function addMousemoveMouseup(area) {
-        let elem = area.elem ? area.elem : area
-        elem.addEventListener('mousemove', (event) => onMouseEvent(area, event))
-        elem.addEventListener('mouseup', (event) => onMouseEvent(area, event))
-    }
-    
-    textarea.addEventListener('mousedown', (event) => onMouseEvent(textarea, event))
-    addMousemoveMouseup(textarea)
-    
-    document.addEventListener('mousedown', (event) => onMouseEvent(document, event))
-    addMousemoveMouseup(document)
-    
-    forVizDws( (dw) => {
-        dw.elem.addEventListener('mousedown', (event)=>{onDwClick(dw,event)})
-        addMousemoveMouseup(dw)
+    document.addEventListener('mousedown',(event)=>{
+        if (event.button === 2) 
+            rightClicking = true
+        
+        onMouseMove(document,event)
+    })
+    document.addEventListener('mouseup',(event)=>{
+        if (event.button === 2)
+            rightClicking = false
+        
+        if (event.button === 0 && grabbedMention !== null) {
+            let newLine = grabbedMention.getReassignmentText()
+            
+            let lines = textarea.value.split("\n")
+            let pre = lines.slice(0, grabbedMention.lineIndex + 1).join("\n")
+            let post = lines.slice(grabbedMention.lineIndex + 1).join("\n")
+            
+            textarea.value = pre + newLine + post
+            updateSyntaxHighlighting(textarea.value)
+
+            grabbedMention = null
+            grabbedDw = null
+            hoveredMention = null
+
+            let newCaretPosition = textarea.value.length - post.length - 1
+            textarea.focus()
+            textarea.setSelectionRange(newCaretPosition, newCaretPosition)
+
+            compile()
+            onCaretMove()
+            
+            //possibly go back to just all windows visible
+            //but if not that, would be nice not to have the ones already visible move when you hover
+        }
+
+        //be aware, an extra mousemove will happen. There is nothing you can do about this
     })
 
-    textarea.addEventListener('scroll',    (event) => onMouseEvent(textarea, event))
-    //and one day, scrolling = zooming for dws!
+    textarea.addEventListener('scroll', (event) => onMouseMove(textarea, event))
+    textarea.addEventListener('mousemove', (event) => onMouseMove(textarea, event))
+    document.addEventListener('mousemove', (event) => onMouseMove(document, event))
+    
+    forVizDws( (dw) => {
+        dw.elem.addEventListener('mousedown', (event) => onDwClick(dw,event))
+        dw.elem.addEventListener('mousemove', (event) => onMouseMove(dw, event))
+    })
 }

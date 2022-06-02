@@ -311,9 +311,7 @@ function init301Unhoisted() {
             if (label !== undefined)
                 str = label + ": " + str
             else {
-                let lineOfStackTrace = Error().stack.split("\n")[2]
-                let split = lineOfStackTrace.split("/")
-                label = split[split.length-1]
+                label = getWhereThisWasCalledFrom()
                 str = label + ": " + str
             }
 

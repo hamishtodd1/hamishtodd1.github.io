@@ -241,9 +241,13 @@ async function init() {
     initCaretInteractions()
 
     compile()
+    updateHighlightingAndDws()
+    
     document.addEventListener('keydown', (event) => {
-        if (event.key === "Enter" && event.altKey === true)
+        if (event.key === "Enter" && event.altKey === true) {
             compile()
+            updateHighlightingAndDws()
+        }
     })
     
     requestAnimationFrame(render)

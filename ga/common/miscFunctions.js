@@ -1,3 +1,13 @@
+function getWhereThisWasCalledFrom(depth) {
+	let actualDepth = (depth || 0) + 3
+	let splitIntoLines = Error().stack.split("\n")
+	if(actualDepth >= splitIntoLines.length )
+		actualDepth = splitIntoLines.length - 1
+	let lineOfStackTrace = splitIntoLines[actualDepth]
+	let split = lineOfStackTrace.split("/")
+	return split[split.length - 1]
+}
+
 function centerToFrameDistanceAtOneUnitAway(fov) {
 	return Math.tan(fov / 2. * (TAU / 360.))
 }
@@ -17,10 +27,18 @@ function otherFov(inputFov, aspectRatio, inputIsVertical) {
 }
 
 function setSvgLine(svgLine, x1, y1, x2, y2) {
-	svgLine.setAttribute('x1', x1)
-	svgLine.setAttribute('y1', y1)
-	svgLine.setAttribute('x2', x2)
-	svgLine.setAttribute('y2', y2)
+	if (x1 === Infinity || y1 === Infinity || x2 === Infinity || y2 === Infinity ) {
+		svgLine.setAttribute('x1', -10 )
+		svgLine.setAttribute('y1', -10 )
+		svgLine.setAttribute('x2', -10 )
+		svgLine.setAttribute('y2', -10 )
+	}
+	else {
+		svgLine.setAttribute('x1', x1)
+		svgLine.setAttribute('y1', y1)
+		svgLine.setAttribute('x2', x2)
+		svgLine.setAttribute('y2', y2)
+	}
 }
 
 

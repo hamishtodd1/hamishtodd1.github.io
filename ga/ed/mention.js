@@ -80,8 +80,6 @@ function initMention()
         }
 
         highlight() {
-            this.setVisibility(true)
-
             let col = this.variable.col
             $labelLines.forEach((svgLine) => {
                 svgLine.style.stroke = "rgb(" + col.r * 255. + "," + col.g * 255. + "," + col.b * 255. + ")"

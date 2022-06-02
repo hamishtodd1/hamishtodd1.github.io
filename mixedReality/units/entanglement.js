@@ -272,6 +272,8 @@ async function initEntanglement()
     const stateMotor = new Mv()
     stateMotor[0] = 1.
     const displayedMotor = new Mv()
+
+    initDirectControlOfMotor(stateMotor)
     
     // initialized to 00
     let state = new ComplexVector(4)
@@ -451,21 +453,21 @@ async function initEntanglement()
                      //works even if e123 part == 0.
                     // log(dummy.position)
 
-                    // let orientedDistanceFromCamera = orientedDistancePointPlane( pos, cameraLookingPlane )
-                    // let isInFrontOfCameraAndMightBeTooFarToSee = orientedDistanceFromCamera > camera.far - .1
-                    // let isIdealLine = pos.equals(zeroMv)
+                    let orientedDistanceFromCamera = orientedDistancePointPlane( pos, cameraLookingPlane )
+                    let isInFrontOfCameraAndMightBeTooFarToSee = orientedDistanceFromCamera > camera.far - .1
+                    let isIdealLine = pos.equals(zeroMv)
 
-                    // if ( mvGettingVisualized.isIdealLine() || isInFrontOfCameraAndMightBeTooFarToSee ) {
-                    //     let planeAtOriginThroughLine = join(cameraPoint, mvGettingVisualized, mv5)
-                    //     meet(cameraLookingPlane, planeAtOriginThroughLine, mvGettingVisualized)
+                    if ( mvGettingVisualized.isIdealLine() || isInFrontOfCameraAndMightBeTooFarToSee ) {
+                        let planeAtOriginThroughLine = join(cameraPoint, mvGettingVisualized, mv5)
+                        meet(cameraLookingPlane, planeAtOriginThroughLine, mvGettingVisualized)
 
-                    //     //yoooooou're gonna have a discontinuity
-                    //     //could turn it into a single pixel wide line
+                        //yoooooou're gonna have a discontinuity
+                        //could turn it into a single pixel wide line
 
-                    //     // mvGettingVisualized.normalize()
-                    // }
-                    // else {
-                    // }
+                        // mvGettingVisualized.normalize()
+                    }
+                    else {
+                    }
                     pos.toVector(dummy.position)
                 }
 
@@ -704,6 +706,13 @@ function generateEvenPermutations(A)
 //if this were 3D... could take the dual
 //every pair of opposing points should has a dual plane
 
+function createH3Scene(initialVertexMvs)
+{
+    //well you need the rotate-around-vertex rotor and the rotate-around-face rotor
+    //aaaaand then, the translate-along rotor, which is the dual of the first one
+    //which incidentally are your controls
+}
+
 function createS3Scene(initialVertexMvs)
 {
     //24-cell
@@ -858,7 +867,7 @@ function createS3Scene(initialVertexMvs)
     }
 }
 
-function initDirectControlOfMotor() {
+function initDirectControlOfMotor(stateMotor) {
     let controlsArray = [
         e31, "j", "l",
         e12, "a", "d",
