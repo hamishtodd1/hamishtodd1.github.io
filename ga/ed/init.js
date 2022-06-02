@@ -44,7 +44,7 @@ TODO
         Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
             move the mouse around
             make some mentions then delete them
-        You could do with updating clientX more often
+        Highlight when carat is on mention
     Medium term
         When you're moving camera, label lines update when mouse is in dw, but not otherwise
         Mobius strip dw because for double cover
@@ -187,7 +187,7 @@ async function init() {
 
     new Dw("euclidean", true)
     initInfinityDw()
-    // initStudyDw()
+    initStudyDw()
     initPgaVizes()
 
     initMouseInteractions()
@@ -219,15 +219,10 @@ async function init() {
     fragColor = vec4(0.,1.,0.,1.);
 }
 `
-
     textarea.value = initialText
     updateSyntaxHighlighting(textarea.value)
 
     textarea.addEventListener('input', (event) => {
-        // if(event.keyCode === "Enter")
-        //     log("yo")
-        // log(event.keyCode)
-
         updateSyntaxHighlighting(textarea.value)
         updateSyntaxHighlightingScroll(textarea)
     })

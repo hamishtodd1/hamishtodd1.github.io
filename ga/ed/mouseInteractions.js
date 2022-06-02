@@ -87,12 +87,12 @@ function initMouseInteractions() {
                 return !hasMentionChild
             })
 
-            if (hasMentionChild) {
-                dw.elem.style.display = ''
-                dw.setVerticalPosition(visibilityIndex++)
-            }
-            else
-                dw.elem.style.display = 'none'
+            // if (hasMentionChild) {
+            //     dw.elem.style.display = ''
+            //     dw.setVerticalPosition(visibilityIndex++)
+            // }
+            // else
+            //     dw.elem.style.display = 'none'
         })
 
         if (hoveredMention === null)

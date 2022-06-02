@@ -7,13 +7,23 @@
 
 async function initDws() {
 
+    let DW_WIDTH = 180 //it really is a pain to try to extract it
+    // parseInt(getComputedStyle(document.querySelector('.dwEl')).width)
+
     await initShaderOutput()
 
     class Dw {
+        scene = new THREE.Scene();
+        elem;
+        nonMentionChildren = [];
+
         constructor(name, haveAll3dStuff, haveLights) {
             this.elem = document.createElement('div')
             this.elem.className = 'dwEl'
             document.body.appendChild(this.elem)
+
+            if(name !== "final")
+                this.setVerticalPosition(Object.keys(dws).length-1)
 
             dws[name] = this
 
@@ -24,9 +34,6 @@ async function initDws() {
             else if(haveLights)
                 addLights(this)
         };
-        scene = new THREE.Scene();
-        elem;
-        nonMentionChildren = [];
         
         addNonMentionChild (ch) {
             this.nonMentionChildren.push(ch)
@@ -55,7 +62,7 @@ async function initDws() {
         }
 
         setVerticalPosition(i) {
-            this.elem.style.top = "calc(" + i + "*(9/16*270px + 10px))"
+            this.elem.style.top = "calc(" + i + "*(9/16*"+DW_WIDTH+"px + 10px))"
         }
 
         getHoveredMention(clientX, clientY) {

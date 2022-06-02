@@ -92,7 +92,7 @@ ul li:hover>ul {
 
   z-index: 2;
 
-  width: 270px;
+  width: 180px; /* IF YOU WANT TO CHANGE THIS, CHECK ALL REFERENCES TO THIS NUMBER! */
   aspect-ratio: 16/9; /* IF YOU WANT TO CHANGE THIS YOU MUST ALSO DO SO IN CAMERA!!! */
   /* height: 270px; */
 }
@@ -104,7 +104,7 @@ ul li:hover>ul {
   margin: 10px;
   border: 0;
 
-  width: calc(100% - 324px);
+  width: calc(100% - 51px - 180px);
 
   /* In the same place */
   position: absolute;

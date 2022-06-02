@@ -1,4 +1,5 @@
 function initStudyDw() {
+    
     let dw = new Dw("study", false)
 
     const points = []
