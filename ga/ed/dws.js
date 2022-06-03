@@ -16,11 +16,15 @@ async function initDws() {
         scene = new THREE.Scene();
         elem;
         nonMentionChildren = [];
+        camera;
+        hasLights;
 
-        constructor(name, haveAll3dStuff, haveLights) {
+        constructor(name, haveAll3dStuff, haveLights, ourCamera) {
             this.elem = document.createElement('div')
             this.elem.className = 'dwEl'
             document.body.appendChild(this.elem)
+
+            this.camera = ourCamera || camera
 
             if(name !== "final")
                 this.setVerticalPosition(Object.keys(dws).length-1)
@@ -33,11 +37,36 @@ async function initDws() {
             }
             else if(haveLights)
                 addLights(this)
+
+            this.hasLights = ((haveAll3dStuff||false) && (haveLights||false)) || false
         };
+
+        NewObject3D() {
+            let ret = new THREE.Object3D()
+            ret.visible = false
+            this.scene.add(ret)
+            return ret
+        }
+
+        NewMesh(geo,mat) {
+            let ret = new THREE.Mesh(geo,mat)
+            ret.visible = false
+            this.scene.add(ret)
+            ret.castShadow = this.hasLights
+
+            return ret
+        }
         
         addNonMentionChild (ch) {
             this.nonMentionChildren.push(ch)
             this.scene.add(ch)
+        }
+
+        oldClientToProportion() {
+            let clientRect = this.elem.getBoundingClientRect()
+            let xProportion = (oldClientX - clientRect.x) / clientRect.width
+            let yProportion = (oldClientY - clientRect.y) / clientRect.height
+            return [xProportion, yProportion]
         }
 
         render() {
@@ -58,7 +87,7 @@ async function initDws() {
             renderer.setScissor(left, positiveYUpBottom, width, height)
             renderer.setViewport(left, positiveYUpBottom, width, height)
 
-            renderer.render(this.scene, camera)
+            renderer.render(this.scene, this.camera)
         }
 
         setVerticalPosition(i) {

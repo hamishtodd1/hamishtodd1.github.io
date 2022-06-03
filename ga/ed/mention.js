@@ -36,6 +36,21 @@ function initMention()
         })
     }
 
+    ndcToWindow = (ndcX,ndcY,dw) => {
+        let dwRect = dw.elem.getBoundingClientRect()
+
+        let actuallyOnScreen = 0. <= ndcX && ndcX <= 1. &&
+                               0. <= ndcY && ndcY <= 1.
+        if (actuallyOnScreen) {
+            return [
+                dwRect.x + dwRect.width * ndcX,
+                dwRect.y + dwRect.height * (1. - ndcY)
+            ]
+        }
+        else
+            return [Infinity, Infinity]
+    }
+
     class Mention {
         variable;
 
@@ -55,6 +70,7 @@ function initMention()
 
         }
 
+        //this may well get overridden
         getCanvasPosition(dw) {
             this.getWorldSpaceCanvasPosition(canvasPos,dw)
 
@@ -62,21 +78,10 @@ function initMention()
             let canvasX = canvasPos.x / canvasPos.w
             let canvasY = canvasPos.y / canvasPos.w
 
-            let dwRect = dw.elem.getBoundingClientRect()
-
             let ndcX = canvasX / 2. + .5
             let ndcY = canvasY / 2. + .5
 
-            let actuallyOnScreen =  0. <= ndcX && ndcX <= 1. &&
-                                    0. <= ndcY && ndcY <= 1.
-            if (actuallyOnScreen) {
-                return [
-                    dwRect.x + dwRect.width * ndcX,
-                    dwRect.y + dwRect.height * (1. - ndcY)
-                ]
-            }
-            else
-                return [Infinity,Infinity]
+            return ndcToWindow(ndcX,ndcY,dw)
         }
 
         highlight() {

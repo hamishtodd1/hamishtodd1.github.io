@@ -30,10 +30,19 @@ async function initVectorSpaceDw()
         constructor(variable) {
             super(variable)
 
-            let viz = new THREE.Object3D()
+            let mat = new THREE.MeshPhongMaterial({ color: variable.col })
+            this.#iMesh = dws.infinity.NewMesh(pointGeo, mat)    
+            
+            let viz = dws.vectorSpace.NewObject3D()
             this.#vMesh = viz
-            viz.visible = false
-            dws.vectorSpace.scene.add(viz)
+
+            viz.head = new THREE.Mesh(headGeo, mat)
+            viz.shaft = new THREE.Mesh(shaftGeo, mat)
+            viz.add(viz.head, viz.shaft)
+            viz.head.castShadow = true
+            viz.shaft.castShadow = true
+            viz.head.matrixAutoUpdate = false
+            viz.shaft.matrixAutoUpdate = false
 
             viz.updateFromAsVec = () => {
                 let shaftVec = v1.copy(asVec).setLength(asVec.length() - headHeight)
@@ -42,21 +51,6 @@ async function initVectorSpaceDw()
                 setRotationallySymmetricMatrix(headVec.x, headVec.y, headVec.z, viz.head.matrix)
                 viz.head.matrix.setPosition(asVec)
             }
-
-            let mat = new THREE.MeshPhongMaterial({ color: variable.col })
-            viz.head = new THREE.Mesh(headGeo, mat)
-            viz.head.castShadow = true
-            viz.head.matrixAutoUpdate = false
-            viz.shaft = new THREE.Mesh(shaftGeo, mat)
-            viz.shaft.matrixAutoUpdate = false
-            viz.shaft.castShadow = true
-            viz.add(viz.head, viz.shaft)
-
-            let iMesh = new THREE.Mesh(pointGeo, mat)
-            this.#iMesh = iMesh
-            iMesh.castShadow = true
-            iMesh.visible = false
-            dws.infinity.scene.add(iMesh)
         }
 
         updateViz(shaderWithMentionReadout) {

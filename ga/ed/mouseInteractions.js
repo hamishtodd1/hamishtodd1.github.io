@@ -11,9 +11,7 @@ function initMouseInteractions() {
 
     let mouseRay = new Mv()
     getMouseRay = (dw) => {
-        let clientRect = dw.elem.getBoundingClientRect()
-        let xProportion = (oldClientX - clientRect.x) / clientRect.width
-        let yProportion = (oldClientY - clientRect.y) / clientRect.height
+        let [xProportion,yProportion] = dw.oldClientToProportion()
 
         let xPlane = mv3.fromLerp(camera.frustum.left, camera.frustum.right, xProportion)
         let yPlane = mv4.fromLerp(camera.frustum.bottom, camera.frustum.top, yProportion)
@@ -104,7 +102,7 @@ function initMouseInteractions() {
     function onMouseMove(mouseArea, event) {
         if (!rightClicking) {
             if(grabbedDw !== null) {
-                grabbedMention.respondToDrag(grabbedDw)
+                grabbedMention.respondToDrag(grabbedDw,event)
                 updateOverride(grabbedMention)
     
                 grabbedMention.highlight()

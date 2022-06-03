@@ -187,7 +187,7 @@ async function init() {
 
     new Dw("euclidean", true)
     initInfinityDw()
-    // initStudyDw()
+    initStudyDw()
     initPgaVizes()
 
     initMouseInteractions()
@@ -200,13 +200,12 @@ async function init() {
 
 //     fragColor = pt;
 // }`
+//try eg 1 + e12 + e01234
 `void mainImage( out vec4 fragColor ) {
+
+    float myFloat = 1.5;
     
     vec3 myVec = vec3(1.,1.,0.);
-
-    // float a, b;
-    
-    //try eg 1 + e12 + e01234
 
     Dq originL = Dq(0., 0.,0.,0., 0.,1.,0., 0.);
     Dq idealL  = Dq(0., 1.,0.,0., 0.,0.,0., 0.);

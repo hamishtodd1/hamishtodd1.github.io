@@ -1,22 +1,3 @@
-function initStudyDw() {
-    
-    let dw = new Dw("study", false)
-
-    const points = []
-    points.push(new THREE.Vector3(-10., 0., 0.))
-    points.push(new THREE.Vector3( 10., 0., 0.))
-
-    const geo = new THREE.BufferGeometry().setFromPoints(points)
-
-    const mat = new THREE.LineBasicMaterial({
-        color: 0x0000ff
-    })
-    dw.addNonMentionChild(new THREE.Line(geo, mat))
-
-    //there's a circle marked, and perhaps you always get the projection onto there
-    //for the study number: cylinder
-}
-
 function initPgaVizes() {
 
     let dragPlane = new Mv()
@@ -39,24 +20,15 @@ function initPgaVizes() {
             super(variable)
 
             let mat = new THREE.MeshBasicMaterial({ color: variable.col })
-            let eMesh = new THREE.Mesh(pointGeo, mat)
-            this.#euclideanDwMesh = eMesh
-            eMesh.castShadow = true
-            eMesh.visible = false
-            dws.euclidean.scene.add(eMesh)
+            this.#euclideanDwMesh = dws.euclidean.NewMesh(pointGeo, mat)
+            this.#infinityDwMesh = dws.infinity.NewMesh(pointGeo, mat)
+            
             camera.toHaveUpdateFromMvCalled.push(this)
-
-            let iMesh = new THREE.Mesh(pointGeo, mat)
-            this.#infinityDwMesh = iMesh
-            iMesh.castShadow = true
-            iMesh.visible = false
-            dws.infinity.scene.add(iMesh)
         }
 
         updateFromMv() {
-            if (this.#mv[14] !== 0.) {
+            if (this.#mv[14] !== 0.)
                 this.#mv.toVector(this.#euclideanDwMesh.position)
-            }
             else {
                 this.#mv.toVector(this.#infinityDwMesh.position)
                 this.#infinityDwMesh.position.setLength(INFINITY_RADIUS)
@@ -206,25 +178,15 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
         #euclideanDwMesh;
         #infinityDwMesh;
         #ringMesh;
+        #scalarMesh;
         #mv = new Mv();
         
         constructor(variable) {
             super(variable)
 
-            this.#infinityDwMesh = new THREE.Mesh(iLineGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
-            this.#infinityDwMesh.visible = false
-            dws.infinity.scene.add(this.#infinityDwMesh)
-            this.#infinityDwMesh.castShadow = true
-
-            this.#euclideanDwMesh = new THREE.Mesh(eLineGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
-            this.#euclideanDwMesh.visible = false
-            dws.euclidean.scene.add(this.#euclideanDwMesh)
-            this.#euclideanDwMesh.castShadow = true
-
-            this.#ringMesh = new THREE.Mesh(ringGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
-            this.#ringMesh.visible = false
-            dws.infinity.scene.add(this.#ringMesh)
-            this.#ringMesh.castShadow = true
+            this.#infinityDwMesh = dws.infinity.NewMesh(iLineGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
+            this.#euclideanDwMesh = dws.euclidean.NewMesh(eLineGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
+            this.#ringMesh = dws.infinity.NewMesh(ringGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
 
             //there was some bug involving hovering the variable just under the grey line
             //and that showed up but no others did
