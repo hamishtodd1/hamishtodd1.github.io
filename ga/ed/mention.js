@@ -1,8 +1,17 @@
 function generateReassignmentText() {
-    let ret = "\n    " + arguments[0] + " = " + arguments[1] + "("
-    for (let i = 2, il = arguments.length; i < il; ++i)
-        ret += arguments[i].toFixed(2) + (i === il - 1 ? "" : ",")
-    ret += ");\n"
+    let ret = arguments[0] + "("
+
+    let useLiteralValues = arguments[1] !== true
+    if (useLiteralValues) {
+        for (let i = 1, il = arguments.length; i < il; ++i)
+            ret += arguments[i].toFixed(2) + (i === il - 1 ? "" : ",")
+    }
+    else {
+        for (let i = 0, il = arguments[2]; i < il; ++i)
+            ret += "overrideFloats["+i+"]" + (i === il - 1 ? "" : ",")
+    }
+
+    ret += ")"
 
     return ret
 }
@@ -64,6 +73,10 @@ function initMention()
             mentions.push(this) //maybe better as mentions of a certain subclass
 
             this.variable = variable
+        }
+
+        getReassignmentNew(useOverrideFloats) {
+            return this.variable.name + " = " + this.getReassignmentPostEquals(useOverrideFloats)
         }
 
         onGrab(dw) {

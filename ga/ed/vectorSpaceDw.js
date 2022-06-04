@@ -114,18 +114,18 @@ async function initVectorSpaceDw()
             return getFloatArrayAssignmentString(this.variable.name, 3)
         }
 
-        getReassignmentText() {
-            asVec.setFromMatrixPosition(this.#vMesh.head.matrix)
-            return generateReassignmentText(this.variable.name,"vec3", asVec.x, asVec.y, asVec.z)
-        }
-
-        getOverrideValues(overrideFloats) {
+        getOverrideFloats(overrideFloats) {
             asVec.setFromMatrixPosition(this.#vMesh.head.matrix)
             asVec.toArray(overrideFloats)
         }
 
-        getOverrideText() {
-            return `vec3(overrideFloats[0],overrideFloats[1],overrideFloats[2]);`
+        getReassignmentPostEquals(useOverrideFloats) {
+            if (useOverrideFloats)
+                return generateReassignmentText("vec3", true, 3)
+            else {
+                asVec.setFromMatrixPosition(this.#vMesh.head.matrix)
+                return generateReassignmentText("vec3", asVec.x, asVec.y, asVec.z)
+            }
         }
 
         setVisibility(newVisibility) {

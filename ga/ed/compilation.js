@@ -148,7 +148,6 @@ void main() {
                         let splitByWhitespace = partUpToName.split(/\s+/)
                         let declaredType = splitByWhitespace[splitByWhitespace.length - 2]
                         if( types[declaredType] === undefined ) {
-                            // debugger
                             console.error(
                                 "unrecognized type: " + declaredType +
                                 "\nname:" + name +
@@ -173,9 +172,9 @@ void main() {
                 mention.presenceLevel = PRESENCE_LEVEL_CONFIRMED
                 mention.mentionIndex = mentionIndex++
 
-                // finalLines[lineIndex] += 
-                //     ` if( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` + 
-                //         mention.variable.name + " = " + mention.getOverrideText()
+                finalLines[lineIndex] += 
+                    ` if( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` + 
+                        mention.getReassignmentNew(true) + ";"
 
                 updateHorizontalBounds(match.index, name.length, mention.horizontalBounds)
 
@@ -196,6 +195,9 @@ void main() {
                 mention.getShaderOutputFloatString() +
                 finalLines.slice(mention.lineIndex+1).join("\n") + 
                 readoutSuffix
+
+            // if(mention.variable.name === "myVec")
+            //     log(shaderWithMentionReadout)
 
             //probably terrible to have a shader for every mention
             //just have the "readout shader". A uniform controls which line is being read out

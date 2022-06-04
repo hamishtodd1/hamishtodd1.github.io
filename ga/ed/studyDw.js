@@ -75,20 +75,19 @@ function initStudyDw() {
             return ndcToWindow(ndcX,ndcY,dw)
         }
 
-        getReassignmentText() {
-            return "\n    " + this.variable.name + " = " + this.#mesh.position.x.toFixed(2) + ";\n"
-        }
-
-        getOverrideValues(overrideFloats) {
+        getOverrideFloats(overrideFloats) {
             overrideFloats[0] = this.#mesh.position.x;
         }
 
         getShaderOutputFloatString() {
-            return `     outputFloats[0] = ` + this.variable.name + `;\n`
+            return `\n     outputFloats[0] = ` + this.variable.name + `;\n`
         }
 
-        getOverrideText() {
-            return `overrideFloats[0];`
+        getReassignmentPostEquals(useOverrideFloats) {
+            if (useOverrideFloats)
+                return "overrideFloats[0]"
+            else
+                return this.#mesh.position.x.toFixed(2)
         }
 
         setVisibility(newVisibility) {

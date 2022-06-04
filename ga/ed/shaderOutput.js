@@ -6,9 +6,12 @@ async function initShaderOutput() {
         let overrideMentionIndex = { value: -1 }
         let overrideFloats = { value: new Float32Array(16) }
         updateOverride = (mention) => {
-            overrideMentionIndex.value = mention.mentionIndex
-
-            mention.getOverrideValues(overrideFloats.value)
+            if(mention === null)
+                overrideMentionIndex.value = -1
+            else {
+                overrideMentionIndex.value = mention.mentionIndex
+                mention.getOverrideFloats(overrideFloats.value)
+            }
 
             for (let i = 0, il = materials.length; i < il; ++i)
                 materials[i].needsUpdate = true
@@ -74,9 +77,9 @@ async function initShaderOutput() {
     }
 
     getFloatArrayAssignmentString = (variableName, len) => {
-        let ret = ""
+        let ret = "\n"
         for (let i = 0; i < len; ++i)
-            ret += `     outputFloats[` + i + `] = ` + variableName + `[` + i + `];\n`
+            ret += `    outputFloats[` + i + `] = ` + variableName + `[` + i + `];\n`
         return ret
     }
 }

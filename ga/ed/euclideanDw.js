@@ -95,20 +95,21 @@ function initPgaVizes() {
                 console.error("not in that dw")
         }
 
-        getReassignmentText() {
-            return generateReassignmentText(this.variable.name, "vec4", this.#mv[13], this.#mv[12], this.#mv[11], this.#mv[14])
+        getOverrideFloats(overrideFloats) {
+            overrideFloats[0] = this.#mv[13]; overrideFloats[1] = this.#mv[12]; overrideFloats[2] = this.#mv[11]; overrideFloats[3] = this.#mv[14]
         }
 
-        getOverrideValues(overrideFloats) {
-            overrideFloats[0] = this.#mv[13]; overrideFloats[1] = this.#mv[12]; overrideFloats[2] = this.#mv[11]; overrideFloats[3] = this.#mv[14]
+        getReassignmentPostEquals(useOverrideFloats) {
+            if (useOverrideFloats)
+                return generateReassignmentText("vec4", true, 4)
+            else {
+                let m = this.#mv
+                return generateReassignmentText("vec4", m[13], m[12], m[11], m[14])
+            }
         }
 
         getShaderOutputFloatString() {
             return getFloatArrayAssignmentString(this.variable.name, 4)
-        }
-
-        getOverrideText() {
-            return `vec4(overrideFloats[0],overrideFloats[1],overrideFloats[2],overrideFloats[3]);`
         }
 
         setVisibility(newVisibility) {
@@ -289,9 +290,13 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
                     (this.#infinityDwMesh.parent === dw.scene && (this.#infinityDwMesh.visible || this.#ringMesh.visible) )
         }
 
-        getReassignmentText() {
-            let m = this.#mv
-            return generateReassignmentText(this.variable.name, "Dq", m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7])
+        getReassignmentPostEquals(useOverrideFloats) {
+            if (!useOverrideFloats) 
+                return generateReassignmentText("Dq", true, 8)
+            else {
+                let m = this.#mv
+                return generateReassignmentText("Dq", m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7])
+            }
         }
 
         getShaderOutputFloatString() {

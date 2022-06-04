@@ -24,7 +24,7 @@ function initCaretInteractions() {
         
         updateChangedLineIndicator()
 
-        updateHighlightingAndDws()
+        onCaretMove()
     })
 
     onCaretMove = () => {

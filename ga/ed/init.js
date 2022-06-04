@@ -215,7 +215,7 @@ async function init() {
 
     vec4 transformedPt = applyDqToPt(originL, realPt);
 
-    fragColor = vec4(0.,1.,0.,1.);
+    fragColor = vec4(0.,myFloat,0.,1.);
 }
 `
     textarea.value = initialText

@@ -152,10 +152,11 @@ function initMouseInteractions() {
             rightClicking = false
         
         if (event.button === 0 && grabbedMention !== null) {
-            let newLine = grabbedMention.getReassignmentText()
+            updateOverride(null)
             
+            let newLine = "\n    " + grabbedMention.getReassignmentNew(false) + ";\n"
             let lines = textarea.value.split("\n")
-            let pre = lines.slice(0, grabbedMention.lineIndex + 1).join("\n")
+            let pre  = lines.slice(0, grabbedMention.lineIndex + 1).join("\n")
             let post = lines.slice(grabbedMention.lineIndex + 1).join("\n")
             
             textarea.value = pre + newLine + post
