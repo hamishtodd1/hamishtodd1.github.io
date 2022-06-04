@@ -48,6 +48,46 @@ function initMouseInteractions() {
         return res === undefined ? null : res
     }
 
+    {
+        // const NOT_CLICKED = 0
+        // const AWAITING = 1
+        // const DBL_DISCONFIRMED = 2
+        // let timeToWaitForDbl = 250
+        // let dblClickCheckerState = NOT_CLICKED
+        // let timeOfLastClick = -1
+        // textarea.addEventListener('mousedown', (event) => {
+        //     log(dblClickCheckerState)
+        //     if (dblClickCheckerState === NOT_CLICKED) {
+        //         dblClickCheckerState = AWAITING
+        //         event.preventDefault()
+
+        //         timeOfLastClick = Date.now()
+        //         setTimeout(() => {
+        //             if (dblClickCheckerState === AWAITING) {
+        //                 dblClickCheckerState = NOT_CLICKED
+        //                 log("would start doing the movements")
+        //             }
+        //         }, timeToWaitForDbl)
+        //     }
+        //     else if (dblClickCheckerState === AWAITING) {
+        //         dblClickCheckerState = NOT_CLICKED
+        //     }
+        // })
+
+
+
+        //alternative:
+        //  it's a single click that you use to modify
+        //and double click that
+
+        textarea.addEventListener('mousedown', (event) => {
+            if(hoveredMention !== null) {
+                event.preventDefault()
+                log("would do stuff")
+            }
+        })
+    }
+
     let mouseAreaOld = null
     updateHighlightingAndDws = (mouseArea,clientX,clientY) => {
         if(mouseArea === undefined)
@@ -180,10 +220,18 @@ function initMouseInteractions() {
         //be aware, an extra mousemove will happen. There is nothing you can do about this
     })
 
+    function onTextAreaDoubleClick(event) {
+        log("dbl")
+        event.preventDefault()
+
+        if(hoveredMention !== null) {
+            log(hoveredMention.variable.name)
+        }
+    }
+    
     textarea.addEventListener('scroll', (event) => onMouseMove(textarea, event))
     textarea.addEventListener('mousemove', (event) => onMouseMove(textarea, event))
     document.addEventListener('mousemove', (event) => onMouseMove(document, event))
-    
     forVizDws( (dw) => {
         dw.elem.addEventListener('mousedown', (event) => onDwClick(dw,event))
         dw.elem.addEventListener('mousemove', (event) => onMouseMove(dw, event))

@@ -22,6 +22,14 @@ function initCamera() {
         motor: new Mv(),
     }
 
+    let rightSideDist = 4.;
+    orthCamera = new THREE.OrthographicCamera(
+        -rightSideDist,
+        rightSideDist,
+        rightSideDist / camera.aspect, -rightSideDist / camera.aspect,
+        camera.near, camera.far)
+    orthCamera.position.z = camera.position.length()
+
     camera.toHaveUpdateFromMvCalled = []
 
     camera.worldToCanvas = new THREE.Matrix4()

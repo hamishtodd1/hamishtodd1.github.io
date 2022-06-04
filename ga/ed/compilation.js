@@ -43,7 +43,7 @@ async function initCompilation()
     const nameRegex = /(?<=[\s\(\)])([a-zA-Z_$][a-zA-Z_$0-9]*)/g
     const glslReservedRegex = Prism.languages.glsl.keyword
     const lineDividingRegex = /^.*(\r?\n|$)/mg
-    const notConsideredNamesRegex = /\b(?:mainImage|x|y|z|w|fragColor|applyDqToPt)\b/
+    const notConsideredNamesRegex = /\b(?:mainImage|x|y|z|w|fragColor|applyDqToPt|cos|sin)\b/
     const structRegex = /struct\s+([a-zA-Z_$][a-zA-Z_$0-9]*)\s+{[^}]*}/gm
 
     //if you want to use this, should probably replace with whitespace
