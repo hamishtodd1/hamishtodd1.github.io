@@ -64,8 +64,9 @@ async function initDws() {
 
         oldClientToProportion() {
             let clientRect = this.elem.getBoundingClientRect()
-            let xProportion = (oldClientX - clientRect.x) / clientRect.width
-            let yProportion = (oldClientY - clientRect.y) / clientRect.height
+            let [clientPossiblyOffsetX, clientPossiblyOffsetY] = getAdjustedClient()
+            let xProportion = (clientPossiblyOffsetX - clientRect.x) / clientRect.width
+            let yProportion = (clientPossiblyOffsetY - clientRect.y) / clientRect.height
             return [xProportion, yProportion]
         }
 

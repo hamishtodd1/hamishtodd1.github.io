@@ -110,7 +110,7 @@ async function initVectorSpaceDw()
                 console.error("not in that dw")
         }
 
-        getShaderOutputFloatString(variableName) {
+        getShaderOutputFloatString() {
             return getFloatArrayAssignmentString(this.variable.name, 3)
         }
 

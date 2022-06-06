@@ -44,8 +44,8 @@ function initStudyDw() {
         dw.addNonMentionChild(bg)
     }
 
-    let newValues = Array(1)
-    class Float extends Mention {
+    let newValues = Array(2)
+    class Vec2 extends Mention {
         #mesh;
 
         constructor(variable) {
@@ -58,36 +58,41 @@ function initStudyDw() {
         updateViz(shaderWithMentionReadout) {
             getShaderOutput(shaderWithMentionReadout, newValues)
             this.#mesh.position.x = newValues[0]
+            this.#mesh.position.y = newValues[1]
         }
 
         respondToDrag(dw) {
             if (dw === dws.study) {
                 let [xProportion, yProportion] = dw.oldClientToProportion()
-                this.#mesh.position.x = orthCamera.left + xProportion * (orthCamera.right - orthCamera.left )
+                this.#mesh.position.x = orthCamera.left   +      xProportion * (orthCamera.right - orthCamera.left )
+                this.#mesh.position.y = orthCamera.bottom + (1.-yProportion) * (orthCamera.top - orthCamera.bottom)
+                // this.#mesh.position
             }
             else console.error("not in that dw")
         }
 
         getCanvasPosition(dw) {
-            let ndcX = (this.#mesh.position.x-orthCamera.left) / (orthCamera.right - orthCamera.left)
-            let ndcY = .5
+            let ndcX = (this.#mesh.position.x-orthCamera.left  ) / (orthCamera.right - orthCamera.left)
+            let ndcY = (this.#mesh.position.y-orthCamera.bottom) / (orthCamera.top - orthCamera.bottom)
 
             return ndcToWindow(ndcX,ndcY,dw)
         }
 
         getOverrideFloats(overrideFloats) {
             overrideFloats[0] = this.#mesh.position.x;
+            overrideFloats[1] = this.#mesh.position.y;
         }
 
         getShaderOutputFloatString() {
-            return `\n     outputFloats[0] = ` + this.variable.name + `;\n`
+            return getFloatArrayAssignmentString(this.variable.name, 2)
         }
 
         getReassignmentPostEquals(useOverrideFloats) {
             if (useOverrideFloats)
-                return "overrideFloats[0]"
-            else
-                return this.#mesh.position.x.toFixed(2)
+                return generateReassignmentText("vec2", true, 2)
+            else {
+                return generateReassignmentText("vec2", this.#mesh.position.x, this.#mesh.position.y )
+            }
         }
 
         setVisibility(newVisibility) {
@@ -100,5 +105,5 @@ function initStudyDw() {
             return this.#mesh.visible
         }
     }
-    types.float = Float
+    types.vec2 = Vec2
 }

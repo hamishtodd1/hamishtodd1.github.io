@@ -1,3 +1,9 @@
+/* 
+    Suppose you wanted to generalize to fields
+    Well, sort of already there!
+    But, point might be: For any given 
+ */
+
 async function initShaderOutput() {
     {
         let fullScreenQuadGeo = new THREE.PlaneGeometry(1., 1.)

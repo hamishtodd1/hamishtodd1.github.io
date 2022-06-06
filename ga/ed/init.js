@@ -204,21 +204,22 @@ async function init() {
 //vec2 is a complex number
 `void mainImage( out vec4 fragColor ) {
 
-    float angle = 2.;
+    vec2 complex = vec2(1.,1.);
+    vec2 complex2 = complex * 1./length(complex);
     
     vec3 myVec = vec3(1.,1.,0.);
 
     Dq originL = Dq(0., 0.,0.,0., 0.,1.,0., 0.);
     Dq idealL  = Dq(0., 1.,0.,0., 0.,0.,0., 0.);
 
-    Dq rotation = Dq(cos(angle), 0.,0.,0., 0.,sin(angle),0., 0.);
+    Dq rotation = Dq(complex.x, 0.,0.,0., 0.,complex.y,0., 0.);
     
     vec4 idealPt = vec4( .2,0.,-1.,0.);
     vec4 realPt = vec4( .2,0., 1.,1.);
 
     vec4 transformedPt = applyDqToPt(rotation, realPt);
 
-    fragColor = vec4(0.,angle,0.,1.);
+    fragColor = vec4(0.,complex.x,complex.y,1.);
 }
 `
     textarea.value = initialText

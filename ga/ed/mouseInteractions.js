@@ -9,6 +9,15 @@ function initMouseInteractions() {
 
     let rightClicking = false
 
+    let textareaGrabAddition = [0.,0.]
+    getAdjustedClient = () => {
+        //want these to be 0 in the (basically impossible) situation where the point is under the mention box
+        return [
+            oldClientX + textareaGrabAddition[0], 
+            oldClientY + textareaGrabAddition[1]
+        ]
+    }
+
     let mouseRay = new Mv()
     getMouseRay = (dw) => {
         let [xProportion,yProportion] = dw.oldClientToProportion()
@@ -46,46 +55,6 @@ function initMouseInteractions() {
         })
 
         return res === undefined ? null : res
-    }
-
-    {
-        // const NOT_CLICKED = 0
-        // const AWAITING = 1
-        // const DBL_DISCONFIRMED = 2
-        // let timeToWaitForDbl = 250
-        // let dblClickCheckerState = NOT_CLICKED
-        // let timeOfLastClick = -1
-        // textarea.addEventListener('mousedown', (event) => {
-        //     log(dblClickCheckerState)
-        //     if (dblClickCheckerState === NOT_CLICKED) {
-        //         dblClickCheckerState = AWAITING
-        //         event.preventDefault()
-
-        //         timeOfLastClick = Date.now()
-        //         setTimeout(() => {
-        //             if (dblClickCheckerState === AWAITING) {
-        //                 dblClickCheckerState = NOT_CLICKED
-        //                 log("would start doing the movements")
-        //             }
-        //         }, timeToWaitForDbl)
-        //     }
-        //     else if (dblClickCheckerState === AWAITING) {
-        //         dblClickCheckerState = NOT_CLICKED
-        //     }
-        // })
-
-
-
-        //alternative:
-        //  it's a single click that you use to modify
-        //and double click that
-
-        textarea.addEventListener('mousedown', (event) => {
-            if(hoveredMention !== null) {
-                event.preventDefault()
-                log("would do stuff")
-            }
-        })
     }
 
     let mouseAreaOld = null
@@ -165,15 +134,17 @@ function initMouseInteractions() {
         event.stopPropagation()
     }
 
-    function onDwClick(dw,event) {
-        if (lowestChangedLineSinceCompile !== Infinity) {
-            //you've changed it? This is to let them know no editing from the window allowed
-            $changedLineIndicator.style.stroke = "rgb(255,255,255)"
-            setTimeout(() => {
-                $changedLineIndicator.style.stroke = "rgb(180,180,180)"
-            }, 350)
-        }
-        else if (event.which === 1 && hoveredMention !== null) {
+    function onPotentialHoveredMentionGrab(dw,event) {
+        // if (lowestChangedLineSinceCompile !== Infinity) {
+        //     //you've changed it? This is to let them know no editing from the window allowed
+        //     $changedLineIndicator.style.stroke = "rgb(255,255,255)"
+        //     setTimeout(() => {
+        //         $changedLineIndicator.style.stroke = "rgb(180,180,180)"
+        //     }, 350)
+        // }
+        // else 
+        
+        if (hoveredMention !== null && event.which === 1 && lowestChangedLineSinceCompile === Infinity) {
             grabbedMention = hoveredMention
             grabbedDw = dw
 
@@ -205,6 +176,8 @@ function initMouseInteractions() {
             grabbedMention = null
             grabbedDw = null
             hoveredMention = null
+            textareaGrabAddition[0] = 0.
+            textareaGrabAddition[1] = 0.
 
             let newCaretPosition = textarea.value.length - post.length - 1
             textarea.focus()
@@ -220,20 +193,23 @@ function initMouseInteractions() {
         //be aware, an extra mousemove will happen. There is nothing you can do about this
     })
 
-    function onTextAreaDoubleClick(event) {
-        log("dbl")
-        event.preventDefault()
+    textarea.addEventListener('mousedown', (event) => {
+        if ( hoveredMention !== null && hoveredMention.constructor === types.vec2 ) {
+            event.preventDefault()
+            textareaGrabAddition = hoveredMention.getCanvasPosition(dws.study)
+            textareaGrabAddition[0] -= oldClientX
+            textareaGrabAddition[1] -= oldClientY
+            onPotentialHoveredMentionGrab(dws.study, event)
 
-        if(hoveredMention !== null) {
-            log(hoveredMention.variable.name)
+            //ohh, when you mousemove while grabbing, you need to update all mentions that are visible in the window
         }
-    }
+    })
     
     textarea.addEventListener('scroll', (event) => onMouseMove(textarea, event))
     textarea.addEventListener('mousemove', (event) => onMouseMove(textarea, event))
     document.addEventListener('mousemove', (event) => onMouseMove(document, event))
     forVizDws( (dw) => {
-        dw.elem.addEventListener('mousedown', (event) => onDwClick(dw,event))
+        dw.elem.addEventListener('mousedown', (event) => onPotentialHoveredMentionGrab(dw,event))
         dw.elem.addEventListener('mousemove', (event) => onMouseMove(dw, event))
     })
 }
