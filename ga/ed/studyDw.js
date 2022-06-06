@@ -55,8 +55,8 @@ function initStudyDw() {
             this.#mesh = dws.study.NewMesh(pointGeo, mat)
         }
 
-        updateViz(shaderWithMentionReadout) {
-            getShaderOutput(shaderWithMentionReadout, newValues)
+        updateViz() {
+            this.getShaderOutput(newValues)
             this.#mesh.position.x = newValues[0]
             this.#mesh.position.y = newValues[1]
         }

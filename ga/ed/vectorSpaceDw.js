@@ -53,8 +53,8 @@ async function initVectorSpaceDw()
             }
         }
 
-        updateViz(shaderWithMentionReadout) {
-            getShaderOutput(shaderWithMentionReadout, valuesArray)
+        updateViz() {
+            this.getShaderOutput( valuesArray)
             asVec.fromArray(valuesArray)
             this.#vMesh.updateFromAsVec()
 

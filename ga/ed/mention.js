@@ -83,6 +83,10 @@ function initMention()
 
         }
 
+        getShaderOutput(target) {
+            return getOutput(this.mentionIndex,target)
+        }
+
         //this may well get overridden
         getCanvasPosition(dw) {
             this.getWorldSpaceCanvasPosition(canvasPos,dw)

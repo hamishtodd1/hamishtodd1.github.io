@@ -54,24 +54,6 @@ async function initCompilation()
     //some amount of "you have to click it" is ok
     //or maybe, "if you've scrolled away from all those mentions". Maybe we go from top of window
 
-    let readoutPrefix = `
-float[8] outputFloats;
-    `
-    let readoutSuffix = `
-varying vec2 frameCoord;
-
-void main() {
-    vec4 myCol = vec4(0.,0.,0.,1.); //do nothing with this, just making sure outputFloats gets filled
-    mainImage(myCol);
-
-    int pixelIndex = int(round(frameCoord.x * 8. - .5));
-    float pixelFloat = 0.;
-    for (int k = 0; k < 8; ++k)
-        pixelFloat += pixelIndex == k ? outputFloats[k] : 0.;
-
-    gl_FragColor = encodeFloat(pixelFloat);
-}`
-
     //used by three.js
     let threejsIsCheckingForShaderErrors = false
     webglErrorThrower = (errorLine) => {
@@ -91,6 +73,7 @@ void main() {
         threejsIsCheckingForShaderErrors = false
     }
 
+    let variableNumMentions = {}
     compile = async () => {
 
         let text = textarea.value
@@ -106,11 +89,11 @@ void main() {
             if (mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED)
                 mention.presenceLevel = PRESENCE_LEVEL_UNCONFIRMED
         })
-        let variableNumMentions = {}
         
         let ignoringDueToStruct = false
         let textLines = text.split("\n")
-        let finalLines = Array(textLines.length)
+        let finalChunks = Array(textLines.length)
+        let outputterChunks = Array(textLines.length)
         let mentionIndex = 0
         textLines.forEach((l,lineIndex) => {
 
@@ -122,7 +105,8 @@ void main() {
                 return
 
             let matches = [...l.matchAll(nameRegex)]
-            finalLines[lineIndex] = l
+            finalChunks[lineIndex] = l
+            outputterChunks[lineIndex] = l
             if(matches === null)
                 return
             else matches.forEach((match)=>{
@@ -172,9 +156,12 @@ void main() {
                 mention.presenceLevel = PRESENCE_LEVEL_CONFIRMED
                 mention.mentionIndex = mentionIndex++
 
-                finalLines[lineIndex] += 
-                    ` if( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` + 
-                        mention.getReassignmentNew(true) + ";"
+                let overrideAddition = `\n               if( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` + 
+                    mention.getReassignmentNew(true) + "; " 
+                let outputAddition   = `\n               if( outputMentionIndex == ` + mention.mentionIndex + ` ) {\n` +
+                    mention.getShaderOutputFloatString() + `}`
+                finalChunks[lineIndex] += overrideAddition
+                outputterChunks[lineIndex] += outputAddition
 
                 updateHorizontalBounds(match.index, name.length, mention.horizontalBounds)
 
@@ -182,37 +169,23 @@ void main() {
             })
         })
 
-        mentions.forEach((mention) => {
+        threejsIsCheckingForShaderErrors = true
+        
+        updateOutputterFragmentShader(outputterChunks.join("\n"))
+        updateFinalDw(generalShaderPrefix + finalChunks.join("\n"))
 
+        lowestChangedLineSinceCompile = Infinity
+        updateChangedLineIndicator()
+
+        variableNumMentions = {}
+
+        mentions.forEach((mention) => {
             if (mention.presenceLevel === PRESENCE_LEVEL_UNCONFIRMED) {
                 mention.presenceLevel = PRESENCE_LEVEL_DELETED
                 return
             }
 
-            let shaderWithMentionReadout = 
-                readoutPrefix +
-                finalLines.slice(0,mention.lineIndex+1).join("\n") +
-                mention.getShaderOutputFloatString() +
-                finalLines.slice(mention.lineIndex+1).join("\n") + 
-                readoutSuffix
-
-            // if(mention.variable.name === "myVec")
-            //     log(shaderWithMentionReadout)
-
-            //probably terrible to have a shader for every mention
-            //just have the "readout shader". A uniform controls which line is being read out
-            //compiler optimization number 1!
-
-            mention.updateViz(shaderWithMentionReadout)
+            mention.updateViz()
         })
-        //this doesn't guarantee that you're using them as much as possible, just that they'll be cleared up on the next one
-
-        threejsIsCheckingForShaderErrors = true
-        updateFinalDw(generalShaderPrefix + finalLines.join("\n"))
-
-        lowestChangedLineSinceCompile = Infinity
-        updateChangedLineIndicator()
-
-        delete variableNumMentions
     }
 }

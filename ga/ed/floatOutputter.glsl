@@ -2,6 +2,9 @@
 
 //takes the 32 bits of a float and puts them into the 32 bits spread between 8 of R, G, B, A
 
+float[8] outputFloats;
+uniform int outputMentionIndex;
+
 float shiftRight (float v, float amt) { 
     v = floor(v) + 0.5; 
     return floor(v / exp2(amt)); 

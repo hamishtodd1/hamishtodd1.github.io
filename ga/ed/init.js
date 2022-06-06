@@ -177,9 +177,8 @@ async function init() {
 
     // initSound()
 
-    let render = await initDws()
-
     initMention()
+    let render = await initDws()
 
     initFinalDw()
 

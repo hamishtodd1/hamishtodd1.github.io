@@ -43,8 +43,8 @@ function initPgaVizes() {
             }
         }
 
-        updateViz(shaderWithMentionReadout) {
-            getShaderOutput(shaderWithMentionReadout, ptNewValues)
+        updateViz() {
+            this.getShaderOutput(ptNewValues)
             this.#mv.point(ptNewValues[0], ptNewValues[1], ptNewValues[2], ptNewValues[3])
             this.updateFromMv()
         }
@@ -216,8 +216,8 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
             e123.projectOn(displayedLineMv, mv0).toVector(this.#euclideanDwMesh.position)
         }
 
-        updateViz(shaderWithMentionReadout) {
-            getShaderOutput(shaderWithMentionReadout, dwNewValues)
+        updateViz() {
+            this.getShaderOutput(dwNewValues)
             newDq.copy(dwNewValues)
             newDq.toMv(this.#mv)
 
