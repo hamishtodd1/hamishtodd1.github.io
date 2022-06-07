@@ -21,6 +21,7 @@ function initScalarDw() {
     let newValues = Array(1)
     class Float extends Mention {
         #mesh;
+        textareaManipulationDw = dw;
 
         constructor(variable) {
             super(variable)

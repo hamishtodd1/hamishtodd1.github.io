@@ -193,32 +193,13 @@ async function init() {
 
     // float myBiv[6] = float[6](3.4, 4.2, 5.0, 5.2, 0.3, 1.1);
     let initialText =
-// `void mainImage( out vec4 fragColor ) {
-//     vec4 pt = vec4(.5,1.,0.,1.);
-//     // vec3 pt2 = vec3(.5,1.,0.);
-
-//     fragColor = pt;
-// }`
 //try eg 1 + e12 + e01234
 //vec2 is a complex number
 `void mainImage( out vec4 fragColor ) {
 
-    vec2 complex = vec2(1.,1.);
-    vec2 complex2 = complex * 1./length(complex);
-    
-    vec3 myVec = vec3(1.,1.,0.);
+    Dq originL   = Dq(0., 0.,0.,0., 1.,1.,0., 0.);
 
-    Dq originL = Dq(0., 0.,0.,0., 0.,1.,0., 0.);
-    Dq idealL  = Dq(0., 1.,0.,0., 0.,0.,0., 0.);
-
-    Dq rotation = Dq(complex2.x, 0.,0.,0., 0.,complex2.y,0., 0.);
-    
-    vec4 idealPt = vec4( .2,0.,-1.,0.);
-    vec4 realPt = vec4( .2,0., 1.,1.);
-
-    vec4 transformedPt = applyDqToPt(rotation, realPt);
-
-    fragColor = vec4(0.,complex.x,complex.y,1.);
+    fragColor = vec4(0.,1.,1.,1.);
 }
 `
     textarea.value = initialText

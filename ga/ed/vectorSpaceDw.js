@@ -26,6 +26,7 @@ async function initVectorSpaceDw()
     class Arrow extends Mention {
         #vMesh
         #iMesh
+        textareaManipulationDw = dws.infinity;
 
         constructor(variable) {
             super(variable)
@@ -58,7 +59,6 @@ async function initVectorSpaceDw()
 
         updateFromShader() {
             this.getShaderOutput( valuesArray)
-            // log(valuesArray)
             asVec.fromArray(valuesArray)
             this.updateFromAsVec()
         }
@@ -109,7 +109,7 @@ async function initVectorSpaceDw()
                 target.w = 1.
             }
             else
-                console.error("not in that dw")
+                console.error("not in dw: " + keyOfProptInObject(dw, dws))
         }
 
         getShaderOutputFloatString() {

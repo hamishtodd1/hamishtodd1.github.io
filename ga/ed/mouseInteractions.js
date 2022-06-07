@@ -11,7 +11,6 @@ function initMouseInteractions() {
 
     let textareaGrabAddition = [0.,0.]
     getAdjustedClient = () => {
-        //want these to be 0 in the (basically impossible) situation where the point is under the mention box
         return [
             oldClientX + textareaGrabAddition[0], 
             oldClientY + textareaGrabAddition[1]
@@ -81,7 +80,7 @@ function initMouseInteractions() {
         else
             hoveredMention = mouseArea.getHoveredMention(clientX, clientY)
 
-        if(hoveredMention !== null)
+        if( hoveredMention !== null)
             hoveredMention.setVisibility(true)
 
         // let visibilityIndex = 0
@@ -141,7 +140,8 @@ function initMouseInteractions() {
         renderAll()
     }
 
-    function onPotentialHoveredMentionGrab(dw,event) {
+    function onHoveredMentionGrab(dw,event,fromTextArea) {
+        
         // if (lowestChangedLineSinceCompile !== Infinity) {
         //     //you've changed it? This is to let them know no editing from the window allowed
         //     $changedLineIndicator.style.stroke = "rgb(255,255,255)"
@@ -151,7 +151,18 @@ function initMouseInteractions() {
         // }
         // else 
         
-        if (hoveredMention !== null && event.which === 1 && lowestChangedLineSinceCompile === Infinity) {
+        if (event.which === 1 && lowestChangedLineSinceCompile === Infinity) {
+            if (fromTextArea) {
+                event.preventDefault()
+                textareaGrabAddition = hoveredMention.getCanvasPosition(dw)
+                textareaGrabAddition[0] -= oldClientX
+                textareaGrabAddition[1] -= oldClientY
+            }
+            else {
+                textareaGrabAddition[0] = 0.
+                textareaGrabAddition[1] = 0.
+            }
+
             grabbedMention = hoveredMention
             grabbedDw = dw
 
@@ -183,8 +194,6 @@ function initMouseInteractions() {
             grabbedMention = null
             grabbedDw = null
             hoveredMention = null
-            textareaGrabAddition[0] = 0.
-            textareaGrabAddition[1] = 0.
 
             let newCaretPosition = textarea.value.length - post.length - 1
             textarea.focus()
@@ -201,20 +210,18 @@ function initMouseInteractions() {
     })
 
     textarea.addEventListener('mousedown', (event) => {
-        if ( hoveredMention !== null && hoveredMention.constructor === types.vec2 ) {
-            event.preventDefault()
-            textareaGrabAddition = hoveredMention.getCanvasPosition(dws.study)
-            textareaGrabAddition[0] -= oldClientX
-            textareaGrabAddition[1] -= oldClientY
-            onPotentialHoveredMentionGrab(dws.study, event)
-        }
+        if ( hoveredMention !== null )
+            onHoveredMentionGrab(hoveredMention.textareaManipulationDw, event, true)
     })
     
     textarea.addEventListener('scroll', (event) => onMouseMove(textarea, event))
     textarea.addEventListener('mousemove', (event) => onMouseMove(textarea, event))
     document.addEventListener('mousemove', (event) => onMouseMove(document, event))
     forVizDws( (dw) => {
-        dw.elem.addEventListener('mousedown', (event) => onPotentialHoveredMentionGrab(dw,event))
+        dw.elem.addEventListener('mousedown', (event) => {
+            if(hoveredMention!==null)
+                onHoveredMentionGrab(dw,event,false)
+        })
         dw.elem.addEventListener('mousemove', (event) => onMouseMove(dw, event))
     })
 }

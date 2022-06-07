@@ -483,6 +483,8 @@ function init301Unhoisted() {
     mv5 = new Mv()
     mv6 = new Mv()
 
+    dq0 = new Dq()
+
     let localDq0 = new Dq()
     let localBiv0 = new Biv()
 

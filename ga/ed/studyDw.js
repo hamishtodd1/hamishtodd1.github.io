@@ -47,6 +47,7 @@ function initStudyDw() {
     let newValues = Array(2)
     class Vec2 extends Mention {
         #mesh;
+        textareaManipulationDw = dw;
 
         constructor(variable) {
             super(variable)

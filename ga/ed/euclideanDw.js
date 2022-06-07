@@ -14,6 +14,7 @@ function initPgaVizes() {
     class Point extends Mention {
         #euclideanDwMesh;
         #infinityDwMesh;
+        textareaManipulationDw = dws.euclidean;
         #mv = new Mv();
 
         constructor(variable) {
@@ -130,31 +131,6 @@ function initPgaVizes() {
     /////////
     // DQs //
     /////////
-    generalShaderPrefix += `
-struct Dq {
-    float scalar;
-    float e01; float e02; float e03;
-    float e12; float e31; float e23;
-    float e0123;
-};
-
-vec4 applyDqToPt(in Dq dq, in vec4 pt) {
-    float a1 = dq.e01, a2 = dq.e02, a3 = dq.e03, a4 = dq.e12, a5 = dq.e31, a6 = dq.e23;
-    float _2a0 = 2. * dq.scalar, _2a4 = 2. * a4, _2a5 = 2. * a5, a0a0 = dq.scalar * dq.scalar, a4a4 = a4 * a4, a5a5 = a5 * a5, a6a6 = a6 * a6, _2a6 = 2. * a6, _2a0a4 = _2a0 * a4, _2a0a5 = _2a0 * a5, _2a0a6 = _2a0 * a6, _2a4a5 = _2a4 * a5, _2a4a6 = _2a4 * a6, _2a5a6 = _2a5 * a6;
-    float n0 = (_2a0 * a3 + _2a4 * dq.e0123 - _2a6 * a2 - _2a5 * a1), x0 = (a0a0 + a4a4 - a5a5 - a6a6), y0 = (_2a4a5 + _2a0a6), z0 = (_2a4a6 - _2a0a5);
-    float n1 = (_2a4 * a1 - _2a0 * a2 - _2a6 * a3 + _2a5 * dq.e0123), x1 = (_2a4a5 - _2a0a6), y1 = (a0a0 - a4a4 + a5a5 - a6a6), z1 = (_2a0a4 + _2a5a6);
-    float n2 = (_2a0 * a1 + _2a4 * a2 + _2a5 * a3 + _2a6 * dq.e0123), x2 = (_2a0a5 + _2a4a6), y2 = (_2a5a6 - _2a0a4), z2 = (a0a0 - a4a4 - a5a5 + a6a6);
-    float n3 = (a0a0 + a4a4 + a5a5 + a6a6);
-
-    vec4 ret = vec4(
-        x0*pt.x + y0*pt.y + z0*pt.z + n0*pt.w,
-        x1*pt.x + y1*pt.y + z1*pt.z + n1*pt.w,
-        x2*pt.x + y2*pt.y + z2*pt.z + n2*pt.w,
-        n3*pt.w
-    );
-    return ret;
-}
-`
 
     let projectedOnOrigin = new Mv()
     let quatToOriginVersion = new Mv()
@@ -181,6 +157,7 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
         #infinityDwMesh;
         #ringMesh;
         #scalarMesh;
+        textareaManipulationDw = dws.euclidean;
         #mv = new Mv();
         
         constructor(variable) {
@@ -201,9 +178,9 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
             //     debugger
                 
             this.#mv.selectGrade(2,linePart)
-            if(linePart.eNorm() !== 0.)
+            if(linePart.eNorm() !== 0.) //ring / infinity mesh
                 getQuaternionToProjectionOnOrigin(linePart, this.#infinityDwMesh.quaternion)
-            else {
+            else { // euclidean mesh
                 //default mv is e02
                 join(e123,linePart,joinedWithOrigin)
                 mul(joinedWithOrigin, e3, quatToOriginVersion)
@@ -211,6 +188,8 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
                 quatToOriginVersion.toQuaternion(this.#ringMesh.quaternion)
             }
 
+            // if(this.variable.name === "originL")
+            //     debugger
             linePart.getDisplayableVersion(displayedLineMv)
             getQuaternionToProjectionOnOrigin(displayedLineMv, this.#euclideanDwMesh.quaternion)
             e123.projectOn(displayedLineMv, mv0).toVector(this.#euclideanDwMesh.position)
@@ -226,15 +205,39 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
             this.updateFromMv()
         }
 
-        onGrab() {
-            log("grab started")
-        }
-
         overrideFromDrag(dw) {
-            log("dragging")
+
+            if (dw === dws.euclidean) {
+                let mouseRay = getMouseRay(dw)
+                
+                this.#mv.projectOn(mouseRay,mv0)
+                this.#mv.copy(mv0)
+
+                //you want to project the line
+            }
+            else if (dw === dws.infinity) {
+                
+                // threeRay.origin.copy(camera.position)
+                // let mouseRay = getMouseRay(dw)
+                // meet(e0, mouseRay, draggedPoint).toVector(threeRay.direction)
+                // threeRay.direction.normalize()
+
+                // let intersectionResult = threeRay.intersectSphere(threeSphere, v1)
+                // if (intersectionResult !== null) {
+                //     this.#mv.fromVector(v1)
+                //     this.#mv[14] = 0.
+
+                //     updateOverride(this, getFloatsForOverride)
+                // }
+            }
+            else console.error("not in that dw")
+
             //line editing controls
             //move mouse left right up down and it translates
             //press a toggle and 
+
+            //want to project line onto the point
+            //what's the point? How far down the mouse ray?
 
             //Alternatively, it pivots around where you grabbed it
             //unless you move the mouse to the edge of the window
@@ -243,10 +246,9 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
             //will be cool to edit at infinity. Probably yes, one point of it is stuck, an
 
             updateOverride(this, (overrideFloats) => {
-                overrideFloats[0] = this.#mv[0];
-                overrideFloats[1] = this.#mv[5]; overrideFloats[2] = this.#mv[6]; overrideFloats[3] = this.#mv[7];
-                overrideFloats[4] = this.#mv[8]; overrideFloats[5] = this.#mv[9]; overrideFloats[6] = this.#mv[10];
-                overrideFloats[7] = this.#mv[15];
+                dq0.fromMv(this.#mv)
+                for(let i = 0; i < 8; ++i)
+                    overrideFloats[i] = this.#mv[i]
             })
         }
 
@@ -298,11 +300,11 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
         }
 
         getReassignmentPostEquals(useOverrideFloats) {
-            if (!useOverrideFloats) 
+            if (useOverrideFloats) 
                 return generateReassignmentText("Dq", true, 8)
             else {
-                let m = this.#mv
-                return generateReassignmentText("Dq", m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7])
+                dq0.fromMv(this.#mv)
+                return generateReassignmentText("Dq", dq0[0], dq0[1], dq0[2], dq0[3], dq0[4], dq0[5], dq0[6], dq0[7])
             }
         }
 
@@ -321,6 +323,32 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
         }
     }
     types.Dq = DqMention
+
+    generalShaderPrefix += `
+struct Dq {
+    float scalar;
+    float e01; float e02; float e03;
+    float e12; float e31; float e23;
+    float e0123;
+};
+
+vec4 applyDqToPt(in Dq dq, in vec4 pt) {
+    float a1 = dq.e01, a2 = dq.e02, a3 = dq.e03, a4 = dq.e12, a5 = dq.e31, a6 = dq.e23;
+    float _2a0 = 2. * dq.scalar, _2a4 = 2. * a4, _2a5 = 2. * a5, a0a0 = dq.scalar * dq.scalar, a4a4 = a4 * a4, a5a5 = a5 * a5, a6a6 = a6 * a6, _2a6 = 2. * a6, _2a0a4 = _2a0 * a4, _2a0a5 = _2a0 * a5, _2a0a6 = _2a0 * a6, _2a4a5 = _2a4 * a5, _2a4a6 = _2a4 * a6, _2a5a6 = _2a5 * a6;
+    float n0 = (_2a0 * a3 + _2a4 * dq.e0123 - _2a6 * a2 - _2a5 * a1), x0 = (a0a0 + a4a4 - a5a5 - a6a6), y0 = (_2a4a5 + _2a0a6), z0 = (_2a4a6 - _2a0a5);
+    float n1 = (_2a4 * a1 - _2a0 * a2 - _2a6 * a3 + _2a5 * dq.e0123), x1 = (_2a4a5 - _2a0a6), y1 = (a0a0 - a4a4 + a5a5 - a6a6), z1 = (_2a0a4 + _2a5a6);
+    float n2 = (_2a0 * a1 + _2a4 * a2 + _2a5 * a3 + _2a6 * dq.e0123), x2 = (_2a0a5 + _2a4a6), y2 = (_2a5a6 - _2a0a4), z2 = (a0a0 - a4a4 - a5a5 + a6a6);
+    float n3 = (a0a0 + a4a4 + a5a5 + a6a6);
+
+    vec4 ret = vec4(
+        x0*pt.x + y0*pt.y + z0*pt.z + n0*pt.w,
+        x1*pt.x + y1*pt.y + z1*pt.z + n1*pt.w,
+        x2*pt.x + y2*pt.y + z2*pt.z + n2*pt.w,
+        n3*pt.w
+    );
+    return ret;
+}
+`
 
     // if(0)
     // {
