@@ -40,10 +40,10 @@ async function initCompilation()
         }
     }
 
-    const nameRegex = /(?<=[\s\(\)])([a-zA-Z_$][a-zA-Z_$0-9]*)/g
+    const nameRegex = /(?<=[^a-zA-Z_$0-9])([a-zA-Z_$][a-zA-Z_$0-9]*)/g
     const glslReservedRegex = Prism.languages.glsl.keyword
     const lineDividingRegex = /^.*(\r?\n|$)/mg
-    const notConsideredNamesRegex = /\b(?:mainImage|x|y|z|w|fragColor|applyDqToPt|cos|sin)\b/
+    const notConsideredNamesRegex = /\b(?:mainImage|x|y|z|w|fragColor|applyDqToPt|cos|sin|length)\b/
     const structRegex = /struct\s+([a-zA-Z_$][a-zA-Z_$0-9]*)\s+{[^}]*}/gm
 
     //if you want to use this, should probably replace with whitespace
@@ -83,7 +83,6 @@ async function initCompilation()
         }
 
         text = text.replace(commentNotNewlineRegex,"")
-        let finalText = ""
         
         mentions.forEach((mention) => {
             if (mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED)
@@ -104,6 +103,8 @@ async function initCompilation()
             if(ignoringDueToStruct)
                 return
 
+            // if (l.indexOf("complex") !== -1 )
+            //     debugger
             let matches = [...l.matchAll(nameRegex)]
             finalChunks[lineIndex] = l
             outputterChunks[lineIndex] = l
