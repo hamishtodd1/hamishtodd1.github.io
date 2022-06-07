@@ -197,13 +197,12 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
         }
 
         updateFromMv() {
-            linePart.copy(this.#mv)
-            linePart[0] = 0.
-            linePart[15] = 0.
-
-            if(linePart.eNorm() !== 0.) {
+            // if(this.variable.name === "rotation")
+            //     debugger
+                
+            this.#mv.selectGrade(2,linePart)
+            if(linePart.eNorm() !== 0.)
                 getQuaternionToProjectionOnOrigin(linePart, this.#infinityDwMesh.quaternion)
-            }
             else {
                 //default mv is e02
                 join(e123,linePart,joinedWithOrigin)
@@ -215,14 +214,14 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
             linePart.getDisplayableVersion(displayedLineMv)
             getQuaternionToProjectionOnOrigin(displayedLineMv, this.#euclideanDwMesh.quaternion)
             e123.projectOn(displayedLineMv, mv0).toVector(this.#euclideanDwMesh.position)
+
+            this.setVisibility(this.#euclideanDwMesh.visible)
         }
 
         updateFromShader() {
             this.getShaderOutput(dwNewValues)
             newDq.copy(dwNewValues)
             newDq.toMv(this.#mv)
-
-            this.setVisibility(this.#euclideanDwMesh.visible)
 
             this.updateFromMv()
         }
@@ -294,8 +293,8 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
         }
 
         isVisibleInDw(dw) {
-            return  this.#euclideanDwMesh.parent === dw.scene && this.#euclideanDwMesh.visible ||
-                    (this.#infinityDwMesh.parent === dw.scene && (this.#infinityDwMesh.visible || this.#ringMesh.visible) )
+            return  (dw === dws.euclidean && this.#euclideanDwMesh.visible) ||
+                    (dw === dws.infinity  && (this.#infinityDwMesh.visible || this.#ringMesh.visible) )
         }
 
         getReassignmentPostEquals(useOverrideFloats) {

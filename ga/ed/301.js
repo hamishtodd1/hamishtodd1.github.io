@@ -326,9 +326,11 @@ function init301Unhoisted() {
         }
 
         eNormSquared() {
-            //TODO optimizable, probably with enki's page
-            let temp = newMv
-            let ret = Math.abs(mul(this, this, temp)[0])
+            let rev = newMv
+            reverse(this, rev)
+            let studyNumber = newMv
+            mul(this, rev, studyNumber)
+            let ret = Math.abs(studyNumber[0])
 
             return ret
         }
@@ -410,11 +412,29 @@ function init301Unhoisted() {
             return doesEqual
         }
 
+        selectGrade(grade,target) {
+            target.copy(this)
+            for(let i = 0; i < 16; ++i) {
+                if (indexGrades[i] !== grade)
+                    target[i] = 0.
+            }
+
+            return target
+        }
+
         hasEuclideanPart() {
             return this.eNormSquared() > .00001
         }
     }
     window.Mv = Mv
+
+    let indexGrades = [
+        0,
+        1,1,1,1,
+        2,2,2,2,2,2,
+        3,3,3,3,
+        4
+    ]
 
     let jsString = createVariousFunctions()
     eval(jsString)

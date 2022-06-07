@@ -202,22 +202,12 @@ async function init() {
 //vec2 is a complex number
 `void mainImage( out vec4 fragColor ) {
 
-    vec2 complex = vec2(1.,1.);
-    vec2 complex2 = complex * 1./length(complex);
-    
-    vec3 myVec = vec3(1.,1.,0.);
-
     Dq originL = Dq(0., 0.,0.,0., 0.,1.,0., 0.);
     Dq idealL  = Dq(0., 1.,0.,0., 0.,0.,0., 0.);
 
-    Dq rotation = Dq(complex2.x, 0.,0.,0., 0.,complex2.y,0., 0.);
-    
-    vec4 idealPt = vec4( .2,0.,-1.,0.);
-    vec4 realPt = vec4( .2,0., 1.,1.);
+    Dq rotation = Dq(1., 0.,0.,0., 0.,1.,0., 0.);
 
-    vec4 transformedPt = applyDqToPt(rotation, realPt);
-
-    fragColor = vec4(0.,complex.x,complex.y,1.);
+    fragColor = vec4(0.,1.,1.,1.);
 }
 `
     textarea.value = initialText
@@ -231,6 +221,8 @@ async function init() {
         updateSyntaxHighlightingScroll(textarea)
     })
     textarea.addEventListener('keydown', checkIfKeyIsTab)
+
+    window.addEventListener('resize', renderAll)
 
     await initCompilation()
 

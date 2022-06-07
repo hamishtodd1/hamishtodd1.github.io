@@ -1,3 +1,8 @@
+function keyOfProptInObject(propt,obj) {
+	let keys = Object.keys(obj)
+	return keys.find((key)=>propt===obj[key])
+}
+
 function getWhereThisWasCalledFrom(depth) {
 	let actualDepth = (depth || 0) + 3
 	let splitIntoLines = Error().stack.split("\n")
