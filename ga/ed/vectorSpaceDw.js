@@ -44,38 +44,42 @@ async function initVectorSpaceDw()
             viz.head.matrixAutoUpdate = false
             viz.shaft.matrixAutoUpdate = false
 
-            viz.updateFromAsVec = () => {
+            this.updateFromAsVec = () => {
                 let shaftVec = v1.copy(asVec).setLength(asVec.length() - headHeight)
                 setRotationallySymmetricMatrix(shaftVec.x, shaftVec.y, shaftVec.z, viz.shaft.matrix)
                 let headVec = v1.copy(asVec).setLength(headHeight)
                 setRotationallySymmetricMatrix(headVec.x, headVec.y, headVec.z, viz.head.matrix)
                 viz.head.matrix.setPosition(asVec)
+
+                this.#iMesh.position.copy(asVec)
+                this.#iMesh.position.setLength(INFINITY_RADIUS)
             }
         }
 
-        updateViz() {
+        updateFromShader() {
             this.getShaderOutput( valuesArray)
+            // log(valuesArray)
             asVec.fromArray(valuesArray)
-            this.#vMesh.updateFromAsVec()
-
-            this.#iMesh.position.fromArray(valuesArray)
-            this.#iMesh.position.setLength(INFINITY_RADIUS)
+            this.updateFromAsVec()
         }
 
         onGrab() {
             lengthWhenGrabbed = asVec.setFromMatrixPosition(this.#vMesh.head.matrix).length()
         }
 
-        respondToDrag(dw) {
+        overrideFromDrag(dw) {
+
+            function getFloatsForOverride(overrideFloats) {
+                asVec.toArray(overrideFloats)
+            }
+
             if(dw === dws.vectorSpace) {
                 camera.frustum.far.projectOn(e123, dragPlane)
                 let mouseRay = getMouseRay(dw)
                 meet(dragPlane, mouseRay, draggedPoint)
                 draggedPoint.toVector(asVec)
-                this.#vMesh.updateFromAsVec()
-
-                this.#iMesh.position.copy(asVec)
-                this.#iMesh.position.setLength(INFINITY_RADIUS)
+                
+                updateOverride(this, getFloatsForOverride)
             }
             else if(dw === dws.infinity) {
                 threeRay.origin.copy(camera.position)
@@ -86,10 +90,8 @@ async function initVectorSpaceDw()
                 let intersectionResult = threeRay.intersectSphere(threeSphere, asVec)
                 if(intersectionResult !== null) {
                     asVec.setLength(lengthWhenGrabbed)
-                    this.#vMesh.updateFromAsVec()
                     
-                    this.#iMesh.position.copy(asVec)
-                    this.#iMesh.position.setLength(INFINITY_RADIUS)
+                    updateOverride(this, getFloatsForOverride)
                 }
             }
         }
@@ -112,11 +114,6 @@ async function initVectorSpaceDw()
 
         getShaderOutputFloatString() {
             return getFloatArrayAssignmentString(this.variable.name, 3)
-        }
-
-        getOverrideFloats(overrideFloats) {
-            asVec.setFromMatrixPosition(this.#vMesh.head.matrix)
-            asVec.toArray(overrideFloats)
         }
 
         getReassignmentPostEquals(useOverrideFloats) {

@@ -84,7 +84,7 @@ function initMouseInteractions() {
         if(hoveredMention !== null)
             hoveredMention.setVisibility(true)
 
-        let visibilityIndex = 0
+        // let visibilityIndex = 0
         forVizDws( (dw) => {
             let hasMentionChild = false
             dw.scene.children.every((child) => {
@@ -111,9 +111,14 @@ function initMouseInteractions() {
     function onMouseMove(mouseArea, event) {
         if (!rightClicking) {
             if(grabbedDw !== null) {
-                grabbedMention.respondToDrag(grabbedDw,event)
-                updateOverride(grabbedMention)
+                grabbedMention.overrideFromDrag(grabbedDw,event)
     
+                mentions.forEach((mention) => {
+                    let visible = mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED && (mentionVisibleDueToCaret(mention) || mention === grabbedMention )
+                    if (visible)
+                        mention.updateFromShader()
+                })
+
                 grabbedMention.highlight()
             }
             else if(mouseArea !== document)
@@ -132,6 +137,8 @@ function initMouseInteractions() {
         oldClientY = event.clientY
 
         event.stopPropagation()
+
+        renderAll()
     }
 
     function onPotentialHoveredMentionGrab(dw,event) {
@@ -200,8 +207,6 @@ function initMouseInteractions() {
             textareaGrabAddition[0] -= oldClientX
             textareaGrabAddition[1] -= oldClientY
             onPotentialHoveredMentionGrab(dws.study, event)
-
-            //ohh, when you mousemove while grabbing, you need to update all mentions that are visible in the window
         }
     })
     

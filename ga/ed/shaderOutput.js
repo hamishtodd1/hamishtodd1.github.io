@@ -11,12 +11,12 @@ async function initShaderOutput() {
     let overrideMentionIndex = { value: -1 }
     let overrideFloats = { value: new Float32Array(16) }
     let outputMentionIndex = { value: -1 }
-    updateOverride = (mention) => {
+    updateOverride = (mention, getFloatsForOverride) => {
         if(mention === null)
             overrideMentionIndex.value = -1
         else {
             overrideMentionIndex.value = mention.mentionIndex
-            mention.getOverrideFloats(overrideFloats.value)
+            getFloatsForOverride(overrideFloats.value)
         }
 
         for (let i = 0, il = materials.length; i < il; ++i)
@@ -51,8 +51,8 @@ async function initShaderOutput() {
 
     let rtScene = new THREE.Scene()
 
-    let rtFsq = FullScreenQuad()
-    rtScene.add(rtFsq)
+    let outputFsq = FullScreenQuad()
+    rtScene.add(outputFsq)
 
     let pixelsWide = 8
     let renderTarget = new THREE.WebGLRenderTarget(pixelsWide, 1)
@@ -75,7 +75,7 @@ void main() {
 }`
 
     updateOutputterFragmentShader = (fragmentShader) => {
-        rtFsq.updateFragmentShader(generalShaderPrefix + outputterPrefix + fragmentShader + readoutSuffix)        
+        outputFsq.updateFragmentShader(generalShaderPrefix + outputterPrefix + fragmentShader + readoutSuffix)        
     }
 
     //potential optimization if shader compilation is a bottleneck:
@@ -84,14 +84,14 @@ void main() {
     getOutput = (mentionIndex,target) => {
 
         outputMentionIndex.value = mentionIndex
-        rtFsq.material.needsUpdate = true
-
+        outputFsq.material.needsUpdate = true
+        
         renderer.setRenderTarget(renderTarget)
         renderer.render(rtScene, camera)
-
+        
         renderer.readRenderTargetPixels(renderTarget, 0, 0, pixelsWide, 1, outputsArray)
         renderer.setRenderTarget(null)
-
+        
         let floatArray = new Float32Array(outputsArray.buffer)
 
         for (let i = 0; i < target.length; ++i)

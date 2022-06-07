@@ -413,8 +413,6 @@ function init301Unhoisted() {
         hasEuclideanPart() {
             return this.eNormSquared() > .00001
         }
-
-        
     }
     window.Mv = Mv
 

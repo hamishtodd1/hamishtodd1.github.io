@@ -46,6 +46,8 @@ function initCaretInteractions() {
 
             caretPositionOld = caretPosition
         }
+
+        renderAll()
     }
 
     let caretPositionOld = -1

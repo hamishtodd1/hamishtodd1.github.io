@@ -29,15 +29,19 @@ function initScalarDw() {
             this.#mesh = dws.study.NewMesh(pointGeo, mat)
         }
 
-        updateViz() {
+        updateFromShader() {
             this.getShaderOutput( newValues)
             this.#mesh.position.x = newValues[0]
         }
 
-        respondToDrag(dw) {
+        overrideFromDrag(dw) {
             if (dw === dws.study) {
                 let [xProportion, yProportion] = dw.oldClientToProportion()
                 this.#mesh.position.x = orthCamera.left + xProportion * (orthCamera.right - orthCamera.left )
+                
+                updateOverride(this, (overrideFloats) => {
+                    overrideFloats[0] = this.#mesh.position.x
+                })
             }
             else console.error("not in that dw")
         }
@@ -47,10 +51,6 @@ function initScalarDw() {
             let ndcY = .5
 
             return ndcToWindow(ndcX,ndcY,dw)
-        }
-
-        getOverrideFloats(overrideFloats) {
-            overrideFloats[0] = this.#mesh.position.x;
         }
 
         getShaderOutputFloatString() {

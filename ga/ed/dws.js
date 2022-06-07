@@ -143,7 +143,7 @@ async function initDws() {
         // dw.addNonMentionChild(skyBg)
     }
 
-    function render() {
+    renderAll = () => {
 
         // let clockDelta = clock.getDelta()
         // frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
@@ -166,7 +166,7 @@ async function initDws() {
         for(dwName in dws)
             dws[dwName].render()
 
-        requestAnimationFrame(render)
+        requestAnimationFrame(()=>{})
     }
 
     forVizDws = (func) => {
@@ -176,8 +176,6 @@ async function initDws() {
             func(dws[dwName],dwName)
         }
     }
-
-    return render
 }
 
 function GridAndSpike(numWide, numTall, spacing) {

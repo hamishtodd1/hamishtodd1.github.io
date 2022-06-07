@@ -4,12 +4,11 @@ Script
     explain homogeneous coordinates using vec dw
     Just want to emphasize the fact that it's an exponentiation of an axis
 
+Bug!!! Hover "rotation" and look at infinity Dw
+
 TODO
     Team presentation
-        Study window
-            Dragging in it affects the line
         Dragging in the window itself moves the line as if it were a 180 / line reflection
-        Overrides
         Applying dqs to lines
     Short term
         It's a bit of a mess with the points
@@ -178,7 +177,7 @@ async function init() {
     // initSound()
 
     initMention()
-    let render = await initDws()
+    await initDws()
 
     initFinalDw()
 
@@ -211,7 +210,7 @@ async function init() {
     Dq originL = Dq(0., 0.,0.,0., 0.,1.,0., 0.);
     Dq idealL  = Dq(0., 1.,0.,0., 0.,0.,0., 0.);
 
-    Dq rotation = Dq(complex.x, 0.,0.,0., 0.,complex.y,0., 0.);
+    Dq rotation = Dq(complex2.x, 0.,0.,0., 0.,complex2.y,0., 0.);
     
     vec4 idealPt = vec4( .2,0.,-1.,0.);
     vec4 realPt = vec4( .2,0., 1.,1.);
@@ -237,15 +236,16 @@ async function init() {
 
     initCaretInteractions()
 
+    //these are best kept separate. There are various things you sometimes need to do between
     compile()
     updateHighlightingAndDws()
-    
+    renderAll()
+
     document.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === true) {
             compile()
             updateHighlightingAndDws()
+            renderAll()
         }
     })
-    
-    requestAnimationFrame(render)
 }

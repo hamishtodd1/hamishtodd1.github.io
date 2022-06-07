@@ -161,7 +161,7 @@ async function initCompilation()
                 let outputAddition   = `\n               if( outputMentionIndex == ` + mention.mentionIndex + ` ) {\n` +
                     mention.getShaderOutputFloatString() + `}`
                 finalChunks[lineIndex] += overrideAddition
-                outputterChunks[lineIndex] += outputAddition
+                outputterChunks[lineIndex] += overrideAddition + outputAddition
 
                 updateHorizontalBounds(match.index, name.length, mention.horizontalBounds)
 
@@ -185,7 +185,7 @@ async function initCompilation()
                 return
             }
 
-            mention.updateViz()
+            mention.updateFromShader()
         })
     }
 }

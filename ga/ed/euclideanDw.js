@@ -43,7 +43,7 @@ function initPgaVizes() {
             }
         }
 
-        updateViz() {
+        updateFromShader() {
             this.getShaderOutput(ptNewValues)
             this.#mv.point(ptNewValues[0], ptNewValues[1], ptNewValues[2], ptNewValues[3])
             this.updateFromMv()
@@ -57,13 +57,18 @@ function initPgaVizes() {
             }
         }
 
-        respondToDrag(dw) {
+        overrideFromDrag(dw) {
             //might be nice to snap to a grid
+
+            let self = this
+            function getFloatsForOverride(overrideFloats) {
+                overrideFloats[0] = self.#mv[13]; overrideFloats[1] = self.#mv[12]; overrideFloats[2] = self.#mv[11]; overrideFloats[3] = self.#mv[14]
+            }
 
             if(dw === dws.euclidean) {
                 let mouseRay = getMouseRay(dw)
-                meet(dragPlane, mouseRay, this.#mv) //so, #mv is not what's in the shader! Override goes here
-                this.updateFromMv()
+                meet(dragPlane, mouseRay, this.#mv)
+                updateOverride(this, getFloatsForOverride)
             }
             else if(dw === dws.infinity) {
                 threeRay.origin.copy(camera.position)
@@ -76,7 +81,7 @@ function initPgaVizes() {
                     this.#mv.fromVector(v1)
                     this.#mv[14] = 0.
 
-                    this.updateFromMv()
+                    updateOverride(this, getFloatsForOverride)
                 }
             }
             else console.error("not in that dw")
@@ -93,10 +98,6 @@ function initPgaVizes() {
             }
             else
                 console.error("not in that dw")
-        }
-
-        getOverrideFloats(overrideFloats) {
-            overrideFloats[0] = this.#mv[13]; overrideFloats[1] = this.#mv[12]; overrideFloats[2] = this.#mv[11]; overrideFloats[3] = this.#mv[14]
         }
 
         getReassignmentPostEquals(useOverrideFloats) {
@@ -216,7 +217,7 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
             e123.projectOn(displayedLineMv, mv0).toVector(this.#euclideanDwMesh.position)
         }
 
-        updateViz() {
+        updateFromShader() {
             this.getShaderOutput(dwNewValues)
             newDq.copy(dwNewValues)
             newDq.toMv(this.#mv)
@@ -230,7 +231,7 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
             log("grab started")
         }
 
-        respondToDrag(dw) {
+        overrideFromDrag(dw) {
             log("dragging")
             //line editing controls
             //move mouse left right up down and it translates
@@ -241,6 +242,13 @@ vec4 applyDqToPt(in Dq dq, in vec4 pt) {
             //if moving mouse outside window, it's the pivot joined with that point at infinity
 
             //will be cool to edit at infinity. Probably yes, one point of it is stuck, an
+
+            updateOverride(this, (overrideFloats) => {
+                overrideFloats[0] = this.#mv[0];
+                overrideFloats[1] = this.#mv[5]; overrideFloats[2] = this.#mv[6]; overrideFloats[3] = this.#mv[7];
+                overrideFloats[4] = this.#mv[8]; overrideFloats[5] = this.#mv[9]; overrideFloats[6] = this.#mv[10];
+                overrideFloats[7] = this.#mv[15];
+            })
         }
 
         getWorldSpaceCanvasPosition(target, dw) {

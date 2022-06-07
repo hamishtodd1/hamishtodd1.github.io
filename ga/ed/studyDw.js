@@ -55,18 +55,22 @@ function initStudyDw() {
             this.#mesh = dws.study.NewMesh(pointGeo, mat)
         }
 
-        updateViz() {
+        updateFromShader() {
             this.getShaderOutput(newValues)
             this.#mesh.position.x = newValues[0]
             this.#mesh.position.y = newValues[1]
         }
 
-        respondToDrag(dw) {
+        overrideFromDrag(dw) {
             if (dw === dws.study) {
                 let [xProportion, yProportion] = dw.oldClientToProportion()
                 this.#mesh.position.x = orthCamera.left   +      xProportion * (orthCamera.right - orthCamera.left )
                 this.#mesh.position.y = orthCamera.bottom + (1.-yProportion) * (orthCamera.top - orthCamera.bottom)
-                // this.#mesh.position
+                
+                updateOverride(this, (overrideFloats) => {
+                    overrideFloats[0] = this.#mesh.position.x;
+                    overrideFloats[1] = this.#mesh.position.y;
+                })
             }
             else console.error("not in that dw")
         }
@@ -76,11 +80,6 @@ function initStudyDw() {
             let ndcY = (this.#mesh.position.y-orthCamera.bottom) / (orthCamera.top - orthCamera.bottom)
 
             return ndcToWindow(ndcX,ndcY,dw)
-        }
-
-        getOverrideFloats(overrideFloats) {
-            overrideFloats[0] = this.#mesh.position.x;
-            overrideFloats[1] = this.#mesh.position.y;
         }
 
         getShaderOutputFloatString() {
