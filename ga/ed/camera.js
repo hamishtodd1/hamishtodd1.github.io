@@ -81,7 +81,7 @@ function initCamera() {
         FULL_SCREEN_QUAD_MATRIX.copy(fsqMatrixPreCamera)
         FULL_SCREEN_QUAD_MATRIX.premultiply(camera.matrix)
 
-        camera.mvs.pos.fromVector(camera.position)
+        camera.mvs.pos.fromVec(camera.position)
         camera.mvs.quat.fromQuaternion(camera.quaternion)
         camera.mvs.motor.fromPosQuat(camera.position, camera.quaternion)
 

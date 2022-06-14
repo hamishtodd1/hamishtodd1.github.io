@@ -2,7 +2,7 @@
     Points square to -1. Suggests they're rotations. Which, yes
  */
 
-function init301Unhoisted() {
+function init301WithoutDeclarations() {
 
     const N_COEFS = 16
     const N_ROTOR_COEFS = 8
@@ -173,7 +173,7 @@ function init301Unhoisted() {
             return this
         }
 
-        fromVector(v) {
+        fromVec(v) {
             this.copy(zeroMv)
 
             //possibly it would be better to derive the e12s and so on from taking your vectors
@@ -186,7 +186,7 @@ function init301Unhoisted() {
             return this
         }
 
-        fromVector4(v) {
+        fromVec4(v) {
             this.copy(zeroMv)
 
             this[11] = v.z
@@ -274,13 +274,7 @@ function init301Unhoisted() {
         }
 
         sandwich(mv, target) {
-            let thisReversed = newMv
-            reverse(this, thisReversed)
-            
-            let intermediate = newMv
-            mul(this,mv,intermediate) //sigh, is there a -?
-
-            return mul(intermediate,thisReversed,target)
+            return sandwich(this, mv, target)
         }
 
         distanceToOtherPoint(p) {
@@ -325,24 +319,16 @@ function init301Unhoisted() {
             return localDq0.toMv(this)
         }
 
-        eNormSquared() {
-            let rev = newMv
-            reverse(this, rev)
-            let studyNumber = newMv
-            mul(this, rev, studyNumber)
-            let ret = Math.abs(studyNumber[0])
-
-            return ret
-        }
-
         eNorm() {
-            return Math.sqrt(this.eNormSquared())
+            return Math.sqrt(eNormSquared(this))
         }
         iNorm() {
-            log(this)
-            let pointNorm = Math.sqrt(sq(this[11]) + sq(this[12]) + sq(this[13]))
-            let lineNorm = Math.sqrt(sq(this[5]) + sq(this[6]) + sq(this[7]))
-            return this[1] + this[15] + pointNorm + lineNorm
+            let thisDual = newMv
+            dual(this,thisDual)
+            return thisDual.eNorm()
+            // let pointNorm = Math.sqrt(  sq(this[11]) + sq(this[12]) + sq(this[13]))
+            // let lineNorm = Math.sqrt(   sq(this[ 5]) + sq(this[ 6]) + sq(this[ 7]))
+            // return Math.max(Math.abs(this[1]), Math.abs(this[15]), pointNorm, lineNorm)
         }
 
         normalize() {
@@ -360,8 +346,10 @@ function init301Unhoisted() {
             if(target === undefined)
                 target = new Mv()
 
-            reverse(this, target)
-            target.multiplyScalar(1. / this.eNormSquared() )
+            if (eNormSquared(this) === 0.)
+                console.error("trying to invert a null element, something has gone wrong")
+            else
+                invert(this,target)
 
             return target
         }
@@ -370,9 +358,7 @@ function init301Unhoisted() {
             //if you want to project on anything at infinity, different matter
             //take out the euclidean part I guess
 
-            let intermediate = inner(mv, this, newMv)
-            let inverse = mv.invert(newMv)
-            return mul(intermediate,inverse,target)
+            return projectAOnB(this,mv,target)
         }
 
         sqrt(target) {
@@ -394,7 +380,7 @@ function init301Unhoisted() {
             let quat = newMv
             quat.fromQuaternion(q)
             
-            let pPoint = newMv.fromVector(p)
+            let pPoint = newMv.fromVec(p)
             let doubleTrans = mul(pPoint, e123, newMv)
             let trans = doubleTrans.sqrt(newMv)
             
@@ -423,27 +409,46 @@ function init301Unhoisted() {
         }
 
         hasEuclideanPart() {
-            return this.eNormSquared() > .00001
+            return eNormSquared(this) > .00001
         }
     }
     window.Mv = Mv
 
+    const basisNames = ["", "0", "1", "2", "3", "01", "02", "03", "12", "31", "23", "021", "013", "032", "123", "0123"]
+
     let indexGrades = [
         0,
         1,1,1,1,
-        2,2,2,2,2,2,
+        2,2,2, 2,2,2,
         3,3,3,3,
         4
     ]
 
-    let jsString = createVariousFunctions()
-    eval(jsString)
+    let localDq0 = new Dq()
+    let localBiv0 = new Biv()
 
-    prefixWithGlslGa = () => {
+/*END*/}
 
-    }
+async function init301() {
+    let fullFuncString = init301WithoutDeclarations.toString()
+    let funcString = fullFuncString.slice(0, fullFuncString.indexOf("/*END*/}")) 
+        + createSharedFunctionDeclarationsStrings()
+    
+    //newMv is not a variable name. It is equivalent to "new Mv()"
 
-    // log(glslGaString)
+    let i = 0
+    let declarations = ""
+    let withoutDeclarations = funcString.replace(/newMv/g, () => {
+        declarations += "\n    let newMv" + i + " = new Mv()"
+        return "newMv" + (i++)
+    })
+    let strToEval =
+        "(" +
+        withoutDeclarations +
+        declarations +
+        "})()"
+        
+    eval(strToEval)
 
     function MvFromFloatAndIndex(float, index) {
         let mv = new Mv()
@@ -461,19 +466,17 @@ function init301Unhoisted() {
     e1 = MvFromFloatAndIndex(1., 2)
     e2 = MvFromFloatAndIndex(1., 3)
     e3 = MvFromFloatAndIndex(1., 4)
-    e01 = mul(e0,e1)
-    e02 = mul(e0,e2)
-    e03 = mul(e0,e3)
-    e12 = mul(e1,e2)
-    e31 = mul(e3,e1)
-    e23 = mul(e2,e3)
-    e032 = mul(e03,e2)
-    e013 = mul(e01,e3)
-    e021 = mul(e02,e1)
-    e123 = mul(e1,e23)
-    e0123 = mul(e0,e123)
-
-    const basisNames = ["", "0", "1", "2", "3", "01", "02", "03", "12", "31", "23", "021", "013", "032", "123", "0123"]
+    e01 = mul(e0, e1)
+    e02 = mul(e0, e2)
+    e03 = mul(e0, e3)
+    e12 = mul(e1, e2)
+    e31 = mul(e3, e1)
+    e23 = mul(e2, e3)
+    e021 = mul(e02, e1)
+    e013 = mul(e01, e3)
+    e032 = mul(e03, e2)
+    e123 = mul(e1, e23)
+    e0123 = mul(e0, e123)
 
     mv0 = new Mv()
     mv1 = new Mv()
@@ -484,61 +487,103 @@ function init301Unhoisted() {
     mv6 = new Mv()
 
     dq0 = new Dq()
-
-    let localDq0 = new Dq()
-    let localBiv0 = new Biv()
-
-    /*THIS_GETS_REMOVED*/
-}
-
-function init301() {
-    let funcString = init301Unhoisted.toString()
-
-    let i = 0
-    let declarations = ""
-    let withoutDeclarations = funcString.replace(/newMv/g, () => {
-        declarations += "    let newMv" + i + " = new Mv()\n"
-        return "newMv" + i++
-    })
-    let topLineEnd = withoutDeclarations.indexOf("/*THIS_GETS_REMOVED*/")
-    let strToEval =
-        "(" +
-        withoutDeclarations.slice(0, topLineEnd) +
-        declarations +
-        withoutDeclarations.slice(topLineEnd) +
-        ")()"
-
-    eval(strToEval)
-}
-
-function createVariousFunctions()
-{
-    let jsString = ""
-
     
+        
+    generalShaderPrefix += await getTextFile('301.glsl') //it's purely the dual quaternion part
+}
 
-    function createFunction(funcName, argNames, body) {
-        let glslVersion = "void " + funcName + "( "
+function createSharedFunctionDeclarationsStrings()
+{
+    let jsString = "\n\n"
+    let glslGaString = ""
+
+    //this function takes something written in a weird combination of js and glsl and spits out both
+    function createFunction(funcName, funcArgs, body, type) {
+        let fillInTarget = type === undefined
+
+        let glslVersion = (fillInTarget?`void`:type) + " " + funcName + "( "
         let jsVersion = funcName + " = function( "
 
-        argNames.forEach((n) => {
-            glslVersion += "in float " + n + "[16], "
-            jsVersion += n + ", "
+        funcArgs.forEach((funcArg, i) => {
+            if (funcArg.indexOf(" ") === -1) {
+                jsVersion += funcArg    
+                glslVersion += "in float[16] " + funcArg
+            }
+            else {
+                let splitBySpace = funcArg.split(" ")
+                jsVersion += splitBySpace[splitBySpace.length-1]
+                glslVersion += funcArg
+            }
+
+            if (i !== funcArgs.length - 1 || fillInTarget) {
+                jsVersion += `, `
+                glslVersion += `, `
+            }
         })
 
-        glslVersion += "out float target[16] ) {\n" + body + "\n}\n\n"
+        let jsBody = body.replace(/(float\[16\])|(float )|(int )/g, "let")
+        let glslBody = body.replace(/(\s+=\s+(newMv))|(Math\.)/g, "")
 
-        jsVersion += `target ) {
-            if(target === undefined)
-			    target = new Mv()
-            ` + body + `
-            return target
+        if (fillInTarget) {
+            glslVersion += `out float[16] target ) {` + glslBody + `\n}\n`
+            //might be nice to check if you are allowed to return an inout
+
+            jsVersion += `target ) {\n    if(target === undefined)\n        target = new Mv()\n` + 
+                jsBody + `\n    return target\n}\n\n`
         }
-        `
+        else {
+            glslVersion += ` ) {` + glslBody + `\n}\n\n`
+            jsVersion += ` ) {` + jsBody + `\n}\n\n`
+        }
+        
         glslGaString += glslVersion
         jsString += jsVersion
     }
 
+    createVerboseFunctions(createFunction)
+
+    createFunction(`sandwich`,[`m`,`a`],`
+    float[16] mReverse = newMv;
+    reverse(m, mReverse);
+    
+    float[16] intermediate = newMv;
+    mul(m,a,intermediate); //sigh, is there a -?
+
+    mul(intermediate,mReverse,target);`)
+
+    createFunction(`eNormSquared`,[`a`],`
+    float[16] rev = newMv;
+    reverse(a, rev);
+    float[16] studyNumber = newMv;
+    mul(a, rev, studyNumber);
+    return Math.abs(studyNumber[0]);`,
+    `float`)
+
+    createFunction(`multiplyScalar`,[`inout float[16] a`,`in float scalar`],`
+    for(int i = 0; i < 16; ++i) {
+        a[i] *= scalar;
+    }`,
+    `void`)
+
+    createFunction(`invert`, [`a`],`
+    reverse(a, target);
+    multiplyScalar(target, 1. / eNormSquared(target) );`)
+
+    createFunction(`projectAOnB`, [`a`, `b`], `
+    float[16] intermediate = newMv;
+    inner(b, a, intermediate);
+    float[16] inverse = newMv;
+    invert(b,inverse);
+    mul(intermediate, inverse, target);`)
+
+    //maybe try to do better than this, geometrically
+
+    generalShaderPrefix = glslGaString + generalShaderPrefix
+
+    return jsString
+}
+
+function createVerboseFunctions(createFunction) {
     createFunction(`mul`, [`a`, `b`], `
     target[ 0] = b[ 0] * a[ 0] + b[ 2] * a[ 2] + b[ 3] * a[ 3] + b[ 4] * a[ 4] - b[ 8] * a[ 8] - b[ 9] * a[ 9] - b[10] * a[10] - b[14] * a[14];
 
@@ -686,7 +731,7 @@ function createVariousFunctions()
     target[ 6] = mv[ 9];
     target[ 7] = mv[ 8];
     target[ 8] = mv[ 7];
-    target[ 9] = mv[ 8];
+    target[ 9] = mv[ 6];
     target[10] = mv[ 5];
 
     target[11] = mv[ 4];
@@ -695,6 +740,4 @@ function createVariousFunctions()
     target[14] = mv[ 1];
 
     target[15] = mv[ 0];`)
-
-    return jsString
 }

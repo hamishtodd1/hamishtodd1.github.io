@@ -1,19 +1,12 @@
 /*
-Script
-    "Why you should care"
-    explain homogeneous coordinates using vec dw
-    Just want to emphasize the fact that it's an exponentiation of an axis
-
-Bug!!! Hover "rotation" and look at infinity Dw
 
 TODO
     Team presentation
         Dragging in the window itself moves the line as if it were a 180 / line reflection
         Applying dqs to lines
-        Would be nice to have numbered axes
+        Would be nice to have 
+            numbered axes
     Short term
-        It's a bit of a mess with the points
-        mvs that you get a displayable version of need to be updated with camera
         Currently, if a variable is uninitialized, you still get shown a point at 0,0,0 in the window
         When you click window, if not close to anything, perhaps point should be created?
         Hsv window
@@ -46,6 +39,8 @@ TODO
             make some mentions then delete them
         Highlight when carat is on mention
     Medium term
+        When you do vr version, probably you'll have a single button to cycle through variable after variable
+        When hovering something in dw, its name in text window inflates
         When you're moving camera, label lines update when mouse is in dw, but not otherwise
         Mobius strip dw because for double cover
             The unit complex numbers are the edge
@@ -195,13 +190,65 @@ async function init() {
     let initialText =
 //try eg 1 + e12 + e01234
 //vec2 is a complex number
+// `void mainImage( out vec4 fragColor ) {
+//     Dq a = Dq(0.,  0., 0.,0., 0.,1.,0., 0.);
+//     Dq b = Dq(0., -1.,-1.,0., 1.,0.,0., 0.);
+//     a; b;
+//     //Dq c = add(a,b);
+
+//     vec3 myVec = vec3(1.,1.,0.);
+    
+//     fragColor = vec4(0.,0.,0.,1.);
+// }`
+
+
 `void mainImage( out vec4 fragColor ) {
+    vec3 controlVector = vec3(1.,0.,0.);
 
-    Dq originL   = Dq(0., 0.,0.,0., 1.,1.,0., 0.);
+    vec4 A = vec4(0.,1.,0.,1.);
+    vec4 B = vec4(-1.,-0.5,1.,1.);
 
-    fragColor = vec4(0.,1.,1.,1.);
-}
-`
+    // The Meet product, A ∧ B gives the shared space contained within both A and B
+
+    // The Geometric product, AB, is transformation concatenation
+    // The meet is part of the geometric product!
+
+    // Addition gives the thing halfway between A and B (they need to be normalized)
+    vec4 A_B_Added = A + B;
+
+    // The Join product, A ∨ B, gives the linear space that contains A and B
+    // Dq A_B_joined = join(A,B);
+
+    Dq axis = Dq(0., 0.,0.,0., controlVector.z*B.x,controlVector.y*B.x,controlVector.x*B.x, 0.);
+    Dq transformation = Dq(0., 0.,0.,0., 0.,0.,1., 0.);
+    Dq transformation2 = Dq(0., 0.,0.,0., 1.,0.,0., 0.);
+    dqExp(axis, transformation);
+    vec4 transformedB = sandwichDqPt(transformation, A);
+
+    // ignore this ;)
+    fragColor = vec4(0.,0.,0.,1.);
+}`
+
+
+//eventually/GDC
+//full thing for looking at 2D PGA, with dome
+
+// `void mainImage( out vec4 fragColor ) {
+//     vec2 complex = vec2(1.,1.);
+//     vec2 complex2 = complex * 1./length(complex);
+    
+//     vec3 myVec = vec3(1.,1.,0.);
+
+//     Dq rotation = Dq(myVec.x, 0.,0.,0., 0.,myVec.y,0., myVec.z);
+    
+//     vec4 idealPt = vec4( .2,0.,-1.,0.);
+//     vec4 realPt = vec4( .2,0., 1.,1.);
+//     vec4 transformedReal = sandwichDqPt(rotation, realPt);
+//     vec4 transformedIdeal = sandwichDqPt(rotation, idealPt);
+    
+//     fragColor = vec4(0.,complex.x,complex.y,1.);
+// }
+// `
     textarea.value = initialText
     updateSyntaxHighlighting(textarea.value)
 
@@ -220,10 +267,14 @@ async function init() {
 
     initCaretInteractions()
 
+    
     //these are best kept separate. There are various things you sometimes need to do between
     compile()
+    textarea.focus()
+    textarea.setSelectionRange(129,129)
     updateHighlightingAndDws()
     renderAll()
+    textarea.focus()
 
     document.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === true) {

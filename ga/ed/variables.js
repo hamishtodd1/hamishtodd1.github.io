@@ -18,7 +18,6 @@ const PRESENCE_LEVEL_UNCONFIRMED = -1
 const PRESENCE_LEVEL_CONFIRMED = 1
 const PRESENCE_LEVEL_DELETED = 0
 
-let glslGaString = ""
 let generalShaderPrefix = `
 uniform float[16] overrideFloats;
 uniform int overrideMentionIndex;
