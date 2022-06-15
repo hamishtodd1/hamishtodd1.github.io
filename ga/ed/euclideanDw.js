@@ -1,6 +1,31 @@
 function initPgaVizes() {
 
     let dragPlane = new Mv()
+
+    ////////////
+    // PLANES //
+    ////////////
+
+    //what're your plane-editing controls?
+    //grab a plane somewhere. That point is kept in place
+    //move mouse around, rotates to face mouse
+    //But mouse in what plane? Some plane parallel to camera, tweak its distance from the point
+    //move mouse out of dw and the plane is, still through the same point, rotating to face pts at infinity
+
+    // let planeMesh = new THREE.Mesh(new THREE.CircleGeometry(2.), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }))
+    // dw.scene.add(planeMesh)
+
+    // let planeMv = new Mv().plane(2., 1., 1., 1.)
+    // planeMv.normalize()
+    // updateFunctions.push(() => {
+
+    //     e123.projectOn(planeMv, mv0).toVector(planeMesh.position)
+
+    //     let planeOnOrigin = planeMv.projectOn(e123, mv0)
+    //     let e3ToPlaneMotor = mul(planeOnOrigin, e3, mv2).sqrt(mv3)
+    //     e3ToPlaneMotor.toQuaternion(planeMesh.quaternion)
+    // })
+
     
     ////////////
     // POINTS //
@@ -149,14 +174,12 @@ function initPgaVizes() {
     let newDq = new Dq()
     let displayedLineMv = new Mv()
     let linePart = new Mv() //bivector?
-    let cameraPosProjectedOnSphere = e021.clone()
     let idealLineDual = new Mv()
     let labelPoint = new Mv()
     class DqMention extends Mention {
         #euclideanDwMesh;
         #infinityDwMesh;
         #ringMesh;
-        #scalarMesh;
         textareaManipulationDw = dws.euclidean;
         #mv = new Mv();
         
@@ -176,13 +199,20 @@ function initPgaVizes() {
         updateFromMv() {
             // if(this.variable.name === "rotation")
             //     debugger
+
+            //visibility is about two things
                 
             this.#mv.selectGrade(2,linePart)
-            if(linePart.eNorm() !== 0.) //ring / infinity mesh
+            if(linePart.approxEquals(zeroMv)) {
+                
+                return
+            }
+
+            if (linePart.eNorm() !== 0.) //ring / infinity mesh
                 getQuaternionToProjectionOnOrigin(linePart, this.#infinityDwMesh.quaternion)
             else { // euclidean mesh
                 //default mv is e02
-                join(e123,linePart,joinedWithOrigin)
+                join(e123, linePart, joinedWithOrigin)
                 mul(joinedWithOrigin, e3, quatToOriginVersion)
                 quatToOriginVersion.sqrtSelf()
                 quatToOriginVersion.toQuaternion(this.#ringMesh.quaternion)
@@ -334,27 +364,4 @@ function initPgaVizes() {
         //     meet(e0, mouseRay, mv0).toVectorDisplayable(mousePoint.position)
         // })
     // }
-
-    // if(0)
-    {
-        //what're your plane-editing controls?
-        //grab a plane somewhere. That point is kept in place
-        //move mouse around, rotates to face mouse
-        //But mouse in what plane? Some plane parallel to camera, tweak its distance from the point
-        //move mouse out of dw and the plane is, still through the same point, rotating to face pts at infinity
-    
-        // let planeMesh = new THREE.Mesh(new THREE.CircleGeometry(2.), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }))
-        // dw.scene.add(planeMesh)
-    
-        // let planeMv = new Mv().plane(2., 1., 1., 1.)
-        // planeMv.normalize()
-        // updateFunctions.push(() => {
-    
-        //     e123.projectOn(planeMv, mv0).toVector(planeMesh.position)
-    
-        //     let planeOnOrigin = planeMv.projectOn(e123, mv0)
-        //     let e3ToPlaneMotor = mul(planeOnOrigin, e3, mv2).sqrt(mv3)
-        //     e3ToPlaneMotor.toQuaternion(planeMesh.quaternion)
-        // })
-    }
 }

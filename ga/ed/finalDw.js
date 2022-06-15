@@ -1,5 +1,6 @@
 function initFinalDw() {
     let dw = new Dw("final", false)
+    dw.elem.style.display = 'none'
 
     dw.elem.style.bottom = "0px"
 

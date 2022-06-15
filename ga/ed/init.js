@@ -1,15 +1,18 @@
 /*
 
+Mobius strip?
+Planes?
+Floats...
+
 TODO
     Team presentation
         Dragging in the window itself moves the line as if it were a 180 / line reflection
         Applying dqs to lines
-        Would be nice to have 
-            numbered axes
     Short term
         Currently, if a variable is uninitialized, you still get shown a point at 0,0,0 in the window
         When you click window, if not close to anything, perhaps point should be created?
         Hsv window
+        Highlight when carat is on mention
         When you move something, it could leave its current value behind
             And thereby have a suggestion based on that, like +=
             And maybe you're defining a transform
@@ -37,7 +40,6 @@ TODO
         Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
             move the mouse around
             make some mentions then delete them
-        Highlight when carat is on mention
     Medium term
         When you do vr version, probably you'll have a single button to cycle through variable after variable
         When hovering something in dw, its name in text window inflates
@@ -201,29 +203,40 @@ async function init() {
 //     fragColor = vec4(0.,0.,0.,1.);
 // }`
 
+//it's really ; that separates, not newline
 
 `void mainImage( out vec4 fragColor ) {
-    vec3 controlVector = vec3(1.,0.,0.);
 
-    vec4 A = vec4(0.,1.,0.,1.);
-    vec4 B = vec4(-1.,-0.5,1.,1.);
+    vec3 exampleVector = vec3(1.,1.,1.);
 
-    // The Meet product, A ∧ B gives the shared space contained within both A and B
+    // Some examples of euclidean points (not exactly "vectors"!)
+    vec4 A = vec4(0.,-1.,0.,1.);
+    vec4 B = vec4(exampleVector,1.);
 
-    // The Geometric product, AB, is transformation concatenation
-    // The meet is part of the geometric product!
+    // An IDEAL point
+    vec4 myIdealPoint = vec4(1.,1.,0.,0.);
 
     // Addition gives the thing halfway between A and B (they need to be normalized)
     vec4 A_B_Added = A + B;
 
-    // The Join product, A ∨ B, gives the linear space that contains A and B
-    // Dq A_B_joined = join(A,B);
+    // The Join product gives the line that contains A and B
+    Dq A_B_joined = joinPtsInDq(A,B);
 
-    Dq axis = Dq(0., 0.,0.,0., controlVector.z*B.x,controlVector.y*B.x,controlVector.x*B.x, 0.);
-    Dq transformation = Dq(0., 0.,0.,0., 0.,0.,1., 0.);
-    Dq transformation2 = Dq(0., 0.,0.,0., 1.,0.,0., 0.);
+
+    // Create an axis using coefficients from a vec3
+    vec3 controlVec3 = vec3(1.,0.,0.);
+    Dq axis = Dq(0., 0.,0.,0., controlVec3.z,controlVec3.y,controlVec3.x, 0.);
+    // Control the angle with x coordinate of another vec3
+    vec3 angleController = vec3(1.,1.,0.);
+    axis.e12 *= angleController.x; axis.e23 *= angleController.x; axis.e31 *= angleController.x;
+
+    // Create a transformation by exponentiating the axis
+    Dq transformation;
     dqExp(axis, transformation);
-    vec4 transformedB = sandwichDqPt(transformation, A);
+
+    // Apply transformation to the point
+    vec4 transformedA = sandwichDqPt(transformation, A);
+
 
     // ignore this ;)
     fragColor = vec4(0.,0.,0.,1.);
@@ -266,7 +279,6 @@ async function init() {
     await initCompilation()
 
     initCaretInteractions()
-
     
     //these are best kept separate. There are various things you sometimes need to do between
     compile()

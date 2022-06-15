@@ -48,13 +48,21 @@ void vec4FromMv(in float[16] target, out vec4 v) {
 }
 void dqToMv(in Dq ourDq, out float[16] target) {
     target[ 0] = ourDq.scalar;
-    target[ 5] = ourDq.e01;
-    target[ 6] = ourDq.e02;
-    target[ 7] = ourDq.e03;
-    target[ 8] = ourDq.e12;
-    target[ 9] = ourDq.e31;
-    target[10] = ourDq.e23;
+    target[ 1] = 0.;        target[ 2] = 0.;        target[ 3] = 0.;        target[ 4] = 0.;
+    target[ 5] = ourDq.e01; target[ 6] = ourDq.e02; target[ 7] = ourDq.e03;
+    target[ 8] = ourDq.e12; target[ 9] = ourDq.e31; target[10] = ourDq.e23;
+    target[11] = 0.;        target[12] = 0.;        target[13] = 0.;        target[14] = 0.;
     target[15] = ourDq.e0123;
+}
+void mvToDq(in float[16] mv, out Dq target) {
+    target.scalar= mv[ 0];
+    target.e01   = mv[ 5];
+    target.e02   = mv[ 6];
+    target.e03   = mv[ 7];
+    target.e12   = mv[ 8];
+    target.e31   = mv[ 9];
+    target.e23   = mv[10];
+    target.e0123 = mv[15];
 }
 
 vec4 sandwichDqPt(in Dq dq, in vec4 pt) {
@@ -72,6 +80,20 @@ vec4 sandwichDqPt(in Dq dq, in vec4 pt) {
     return ret;
 }
 
+Dq joinPtsInDq(in vec4 a, in vec4 b) {
+    float[16] aAsMv;
+    mvFromVec(a, aAsMv);
+    float[16] bAsMv;
+    mvFromVec(b, bAsMv);
+
+    float[16] retAsMv;
+    join(aAsMv,bAsMv,retAsMv);
+    
+    Dq ret;
+    mvToDq(retAsMv,ret);
+    return ret;
+}
+
 
 
 float sinc(in float a) {
@@ -79,8 +101,8 @@ float sinc(in float a) {
 }
 void dqExp(in Dq B, out Dq target) {
     float l = (B.e12*B.e12 + B.e31*B.e31 + B.e23*B.e23);  float m = (B.e01*B.e23 + B.e02*B.e31 + B.e03*B.e12);
-    float a = sqrt(l); float b = m/l;
-    float c = cos(a); float s = sinc(a); // if output is a translation, l=0, therefore c=1, s=0
+    float a = sqrt(l);                                    float b = m/l;
+    float c = cos(a);                                     float s = sinc(a); // if output is a translation, l=0, therefore c=1, s=0
 
     float t = b*(c-s); // 0 if translation
 

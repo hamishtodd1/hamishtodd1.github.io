@@ -70,7 +70,7 @@ function initScalarDw() {
         }
 
         isVisibleInDw(dw) {
-            if (dw !== dws.study )
+            if (dw !== dws.scalar )
                 return false
             return this.#mesh.visible
         }

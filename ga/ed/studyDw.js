@@ -19,6 +19,7 @@ function initStudyDw() {
     orthCamera.position.z = camera.position.length()
 
     let dw = new Dw("study", false, false, orthCamera)
+    dw.elem.style.display = 'none'
 
     {
         const axisMat = new THREE.LineBasicMaterial({
