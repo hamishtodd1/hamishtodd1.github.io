@@ -36,8 +36,8 @@ async function initVectorSpaceDw()
         let axisNames = ["x","y","z"]
         let markerHeight = .3
 
-        let markerExtent = 8
-        for(let i = -markerExtent; i <= markerExtent; ++i) {
+        let furthestMarkers = 8
+        for(let i = -furthestMarkers; i <= furthestMarkers; ++i) {
             for(let j = 0; j < (i===0?1:3); ++j) {
                 let marker = text(i.toString())
                 marker.scale.multiplyScalar(markerHeight)
@@ -48,7 +48,7 @@ async function initVectorSpaceDw()
             }
         }
         updateFunctions.push(()=>{
-            markers.forEach((marker)=>{
+            markers.forEach((marker) => {
                 marker.quaternion.copy(camera.quaternion)
             })
         })

@@ -1,4 +1,6 @@
 /*
+    //it's really ; that separates, not newline
+
     If you were to make a GA-products fighting game, what would it be like?
     Your avatars are flailing tentacle/cloud things, but there are bits you can lock onto
 

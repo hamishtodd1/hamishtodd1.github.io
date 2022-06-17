@@ -41,6 +41,7 @@ TODO
             move the mouse around
             make some mentions then delete them
     Medium term
+        full thing for looking at 2D PGA, with dome
         When you do vr version, probably you'll have a single button to cycle through variable after variable
         When hovering something in dw, its name in text window inflates
         When you're moving camera, label lines update when mouse is in dw, but not otherwise
@@ -189,62 +190,8 @@ async function init() {
     initMouseInteractions()
 
     // float myBiv[6] = float[6](3.4, 4.2, 5.0, 5.2, 0.3, 1.1);
-    let initialText =
-//try eg 1 + e12 + e01234
-//vec2 is a complex number
-// `void mainImage( out vec4 fragColor ) {
-//     Dq a = Dq(0.,  0., 0.,0., 0.,1.,0., 0.);
-//     Dq b = Dq(0., -1.,-1.,0., 1.,0.,0., 0.);
-//     a; b;
-//     //Dq c = add(a,b);
+    let initialText = await getTextFile('initialText.glsl')
 
-//     vec3 myVec = vec3(1.,1.,0.);
-    
-//     fragColor = vec4(0.,0.,0.,1.);
-// }`
-
-//it's really ; that separates, not newline
-
-`void mainImage( out vec4 fragColor ) {
-
-    vec3 exampleVector = vec3(1.,1.,1.);
-
-    // Some examples of euclidean points (not exactly "vectors"!)
-    vec4 A = vec4(0.,-1.,0.,1.);
-    vec4 B = vec4(exampleVector,1.);
-
-    // An IDEAL point
-    vec4 myIdealPoint = vec4(1.,1.,0.,0.);
-
-    // Addition gives the thing halfway between A and B (they need to be normalized)
-    vec4 A_B_Added = A + B;
-
-    // The Join product gives the line that contains A and B
-    Dq A_B_joined = joinPtsInDq(A,B);
-
-
-    // Create an axis using coefficients from a vec3
-    vec3 controlVec3 = vec3(1.,0.,0.);
-    Dq axis = Dq(0., 0.,0.,0., controlVec3.z,controlVec3.y,controlVec3.x, 0.);
-    // Control the angle with x coordinate of another vec3
-    vec3 angleController = vec3(1.,1.,0.);
-    axis.e12 *= angleController.x; axis.e23 *= angleController.x; axis.e31 *= angleController.x;
-
-    // Create a transformation by exponentiating the axis
-    Dq transformation;
-    dqExp(axis, transformation);
-
-    // Apply transformation to the point
-    vec4 transformedA = sandwichDqPt(transformation, A);
-
-
-    // ignore this ;)
-    fragColor = vec4(0.,0.,0.,1.);
-}`
-
-
-//eventually/GDC
-//full thing for looking at 2D PGA, with dome
 
 // `void mainImage( out vec4 fragColor ) {
 //     vec2 complex = vec2(1.,1.);
