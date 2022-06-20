@@ -20,6 +20,10 @@ function init301WithoutDeclarations() {
             return this
         }
 
+        set() {
+            return this.copy(arguments)
+        }
+
         clone() {
             let cl = new Mv()
             cl.copy(this)
@@ -71,8 +75,7 @@ function init301WithoutDeclarations() {
         }
 
         set() {
-            for (let i = 0; i < N_ROTOR_COEFS; ++i)
-                this[i] = arguments[i]
+            return this.copy(arguments)
         }
 
         multiplyScalar(s) {
@@ -82,19 +85,23 @@ function init301WithoutDeclarations() {
             return this
         }
 
-        
-        //yes, you want to have a dw that's a mobius strip
-        //as the transition between the complex plane and the projective plane
+        getNormalization(target) {
+            var A = 1. / Math.sqrt(this[0] * this[0] + this[4] * this[4] + this[5] * this[5] + this[6] * this[6])
+            var B = (this[7] * this[0] - (this[1] * this[6] + this[2] * this[5] + this[3] * this[4])) * A * A * A
+            return target.set(
+                A * this[0], 
+                A * this[1] + B * this[6], 
+                A * this[2] + B * this[5], 
+                A * this[3] + B * this[4],
+                A * this[4], 
+                A * this[5], 
+                A * this[6], 
+                A * this[7] - B * this[0])
+        }
 
         normalize() {
-            var s = 1. / Math.sqrt((this[0] * this[0] + this[4] * this[4] + this[5] * this[5] + this[6] * this[6]));
-            var d = (this[7] * this[0] - (this[1] * this[6] + this[2] * this[5] + this[3] * this[4])) * s * s;
-            this.multiplyScalar(s)
-            this[1] += this[6] * d;
-            this[2] += this[5] * d;
-            this[3] += this[4] * d;
-            this[7] -= this[0] * d;
-            return this;
+            this.getNormalization(localDq0)
+            return this.copy(localDq0)
         }
 
         fromMv(mv) {
@@ -150,6 +157,10 @@ function init301WithoutDeclarations() {
                 this[i] = a[i]
 
             return this
+        }
+
+        set() {
+            return this.copy(arguments)
         }
 
         clone() {
@@ -273,6 +284,95 @@ function init301WithoutDeclarations() {
             return this
         }
 
+        logarithm(target) {
+            //TODO: ONLY WORKS FOR DQ, SO USE DQ!
+
+            if(target === undefined)
+                target = new Mv()
+
+            if (this[0] == 1.)
+                return target.set( 
+                    0., 0.,0.,0.,0.,
+                    this[5], this[6], this[7], 0., 0., 0.,
+                    0.,0.,0.,0., 0.)
+                    
+            let a = 1. / (1. - this[0] * this[0])     // inv squared length. 
+            let rotationScale = Math.acos(this[0]) * Math.sqrt(a)
+            let translationScale = a * this[15] * (1. - this[0] * rotationScale)
+            return target.set(
+                0., 0.,0.,0.,0.,
+                rotationScale * this[5] + translationScale * this[10],
+                rotationScale * this[6] + translationScale * this[9],
+                rotationScale * this[7] + translationScale * this[8],
+                rotationScale * this[8],
+                rotationScale * this[9],
+                rotationScale * this[10],
+                0.,0.,0.,0., 0.)
+        }
+
+        //if it's a euclidean point, doesn't work
+        //there's an intuitive sense in which e0.angleTo(e1) === TAU / 4
+        angleTo(that) {
+            //if either are ideal points or lines, need to join with the origin
+
+
+
+            //does the "half the angle of the motor from this to its reflection in that" work?
+            // get_angl(plane, plane) Yes
+            // get_angl(plane, line) Yes
+            // get_angl(line, line)
+
+            let elems = [this,that]
+            let grades = Array(2)
+            let squares = Array(2)
+            let euclideans = Array(2)
+            elems.forEach((elem,i)=>{
+                squares[i] = mul(elem, elem, newMv)
+                let isBlade = squares[i].getGrade() === 0
+                if (!isBlade)
+                    console.error("not shape!")
+
+                euclideans[i] = squares[i][0] !== 0. ? elem : join(elem, e123, newMv)
+                grades[i] = euclideans[i].getGrade()
+                if (grades[i] !== 1 && grades[i] !== 2)
+                    return 0. //this isn't defined for euclidean points
+            })
+
+            let transformBetween = mul(euclideans[0], euclideans[1], newMv)
+            function getRatioOfNormsOfGrades(gradeN,gradeD) {
+                let selectedGrade = newMv
+                let normN = transformBetween.selectGrade(gradeN,selectedGrade).eNorm()
+                let normD = transformBetween.selectGrade(gradeD,selectedGrade).eNorm()
+                return normN / normD
+            }
+            
+            let sumGrade = grades[0] + grades[1]
+            switch (sumGrade) {
+                case 2: //Plane-plane
+                    return Math.atan(getRatioOfNormsOfGrades(2,0))
+                case 3: //point-line or line-point
+                    return Math.atan(getRatioOfNormsOfGrades(3,1))
+                case 4: //line-line
+                    console.error("need to do this!")
+            }
+        }
+
+        //returns infinity if they're not both euclidean
+        distanceTo(mv) {
+
+            //or, half of the distance it goes when it's reflected by the thing!
+            //dist A->B: 
+            // A' = BA~B
+            // AA' = logarithm(ABA~B)
+
+            // get_dist(point, point)
+            // get_dist(point, line) 
+            // get_dist(point, plane)
+            // get_dist(line, line)   // 0 unless parallel
+            // get_dist(plane, line)  // 0 unless parallel
+            // get_dist(plane, plane) // 0 unless parallel
+        }
+
         sandwich(mv, target) {
             return sandwich(this, mv, target)
         }
@@ -330,14 +430,15 @@ function init301WithoutDeclarations() {
             // let lineNorm = Math.sqrt(   sq(this[ 5]) + sq(this[ 6]) + sq(this[ 7]))
             // return Math.max(Math.abs(this[1]), Math.abs(this[15]), pointNorm, lineNorm)
         }
+        norm() {
+            if(this.hasEuclideanPart())
+                return this.eNorm()
+            else
+                return this.iNorm()
+        }
 
         normalize() {
-            //dunno if this achieves the same thing as dq above, hopefully does
-            let ourNorm = this.eNorm()
-            if(ourNorm === 0.)
-                console.error("can't normalize null object")
-            else
-                this.multiplyScalar(1./ourNorm)
+            this.multiplyScalar(1./this.norm())
 
             return this
         }
@@ -398,6 +499,15 @@ function init301WithoutDeclarations() {
             return doesEqual
         }
 
+        equals(mv) {
+            let doesEqual = true
+            for (let i = 0; i < N_COEFS; ++i) {
+                if( this[i] !== mv[i])
+                    doesEqual = false
+            }
+            return doesEqual
+        }
+
         selectGrade(grade,target) {
             target.copy(this)
             for(let i = 0; i < 16; ++i) {
@@ -406,6 +516,46 @@ function init301WithoutDeclarations() {
             }
 
             return target
+        }
+
+        getGrade() {
+            //if you want to use this function elsewhere, note that because 0 is a scalar, the grade == 0 case isn't quite true
+            let self = this
+            function hasGrade(grade) {
+                switch (grade) {
+                    case 0:
+                        return self[0] !== 0.
+                    case 1:
+                        return (self[1] !== 0. || self[2] !== 0. || self[3] !== 0. || self[4] !== 0.)
+                    case 2:
+                        return (self[5] !== 0. || self[6] !== 0. || self[7] !== 0. || self[8] !== 0. || self[9] !== 0. || self[10] !== 0.)
+                    case 3:
+                        return (self[11] !== 0. || self[12] !== 0. || self[13] !== 0. || self[14] !== 0.)
+                    case 4:
+                        return self[15] !== 0.
+                }
+            }
+
+            let alreadyFilledIn = false
+            let grade = 0 //because 0 is a scalar
+            for(let i = 0; i < 5; ++i) {
+                if (hasGrade(i) ) {
+                    if (!alreadyFilledIn) {
+                        grade = i
+                        alreadyFilledIn = true
+                    }
+                    else
+                        grade = i%2 === 0 ? "motor" : "flection"
+                }
+            }
+            return grade
+        }
+
+        squaresToScalar() {
+            let square = mul(this,this,newMv)
+            // log(this,square,square.getGrade())
+            let grade = square.getGrade()
+            return grade === 0
         }
 
         hasEuclideanPart() {
@@ -486,10 +636,23 @@ async function init301() {
     mv5 = new Mv()
     mv6 = new Mv()
 
-    dq0 = new Dq()
-    
+    dq0 = new Dq()    
         
     generalShaderPrefix += await getTextFile('301.glsl') //it's purely the dual quaternion part
+
+    //testAllMetricFormulae
+    {
+        function doIt(mvName1,mvName2, angleShouldBe, distanceShouldBe) {
+            let mv_1 = eval(mvName1)
+            let mv_2 = eval(mvName2)
+            log( mvName1 + "," + mvName2 + " angle should be " + angleShouldBe + ", actual result is: " + 
+                mv_1.angleTo(mv_2) )
+        }
+        doIt("e1","e2",TAU / 4.,0.)
+        doIt("e1","e0",TAU / 4.,"infinity")
+        // debugger
+        doIt("e021","e3",TAU / 4.,"infinity")
+    }
 }
 
 function createSharedFunctionDeclarationsStrings()

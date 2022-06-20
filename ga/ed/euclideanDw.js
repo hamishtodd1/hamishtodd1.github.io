@@ -1,3 +1,12 @@
+/**
+ * Study part
+ *  1 + e12 is (1,1)
+ *  1 + e01? Surely still (1,1)
+ *  1 + e12 + e0123 ?
+ * 
+ * Or maybe squaring the thing
+ */
+
 function initPgaVizes() {
 
     let dragPlane = new Mv()

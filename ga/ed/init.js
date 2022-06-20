@@ -41,6 +41,18 @@ TODO
             move the mouse around
             make some mentions then delete them
     Medium term
+        Clickable "field" / texture / initial state
+            Can click on the thing and it changes the attribute values to those at that point
+            May want to draw or copypaste
+            Time works like this: you can click "iterate" or "play" or "draw initial"
+                Iterate takes what's in your final window and makes it your initial state
+                Progress just simulates forward until you click it again
+            1D line
+            2D field/texture
+                for fluid
+            3D Mesh/manifold
+                Click at an arbitrary point and get the varyings at that point on that triangle
+            Could have an output buffer that says: "and assign the new values"
         full thing for looking at 2D PGA, with dome
         When you do vr version, probably you'll have a single button to cycle through variable after variable
         When hovering something in dw, its name in text window inflates
@@ -190,25 +202,9 @@ async function init() {
     initMouseInteractions()
 
     // float myBiv[6] = float[6](3.4, 4.2, 5.0, 5.2, 0.3, 1.1);
-    let initialText = await getTextFile('initialText.glsl')
-
-
-// `void mainImage( out vec4 fragColor ) {
-//     vec2 complex = vec2(1.,1.);
-//     vec2 complex2 = complex * 1./length(complex);
+    let initialTextFull = await getTextFile('initialText.glsl')
+    let initialText = initialTextFull.slice(0, initialTextFull.indexOf(`//END//`))
     
-//     vec3 myVec = vec3(1.,1.,0.);
-
-//     Dq rotation = Dq(myVec.x, 0.,0.,0., 0.,myVec.y,0., myVec.z);
-    
-//     vec4 idealPt = vec4( .2,0.,-1.,0.);
-//     vec4 realPt = vec4( .2,0., 1.,1.);
-//     vec4 transformedReal = sandwichDqPt(rotation, realPt);
-//     vec4 transformedIdeal = sandwichDqPt(rotation, idealPt);
-    
-//     fragColor = vec4(0.,complex.x,complex.y,1.);
-// }
-// `
     textarea.value = initialText
     updateSyntaxHighlighting(textarea.value)
 
@@ -230,7 +226,7 @@ async function init() {
     //these are best kept separate. There are various things you sometimes need to do between
     compile()
     textarea.focus()
-    textarea.setSelectionRange(129,129)
+    textarea.setSelectionRange(3,3)
     updateHighlightingAndDws()
     renderAll()
     textarea.focus()
