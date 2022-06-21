@@ -1,12 +1,15 @@
 void mainImage( out vec4 fragColor ) {
+    vec3 myVec = vec3(1.,1.,0.);
 
-    vec3 myVec = vec3(1.,0.,0.);
-    Dq axis = Dq(0., 0.,0.,0., myVec.z,myVec.y,myVec.x, 0.);
-
-    fragColor = vec4(0.,0.,0.,1.);
+    Dq rotation = Dq(myVec.x, 0.,0.,0., 0.,myVec.y,0., myVec.z);
+    
+    vec4 idealPt = vec4( .2,0.,-1.,0.);
+    vec4 realPt = vec4( .2,0., 1.,1.);
+    vec4 transformedReal = sandwichDqPt(rotation, realPt);
+    vec4 transformedIdeal = sandwichDqPt(rotation, idealPt);
+    
+    fragColor = vec4(0.,myVec.x,myVec.y,1.);
 }
-
-
 
 //END//
 
@@ -52,19 +55,3 @@ void mainImage( out vec4 fragColor ) {
 
 
 
-
-// `void mainImage( out vec4 fragColor ) {
-//     vec2 complex = vec2(1.,1.);
-//     vec2 complex2 = complex * 1./length(complex);
-    
-//     vec3 myVec = vec3(1.,1.,0.);
-
-//     Dq rotation = Dq(myVec.x, 0.,0.,0., 0.,myVec.y,0., myVec.z);
-    
-//     vec4 idealPt = vec4( .2,0.,-1.,0.);
-//     vec4 realPt = vec4( .2,0., 1.,1.);
-//     vec4 transformedReal = sandwichDqPt(rotation, realPt);
-//     vec4 transformedIdeal = sandwichDqPt(rotation, idealPt);
-    
-//     fragColor = vec4(0.,complex.x,complex.y,1.);
-// }

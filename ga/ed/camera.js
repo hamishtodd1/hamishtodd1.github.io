@@ -22,14 +22,6 @@ function initCamera() {
         motor: new Mv(),
     }
 
-    let rightSideDist = 4.;
-    orthCamera = new THREE.OrthographicCamera(
-        -rightSideDist,
-        rightSideDist,
-        rightSideDist / camera.aspect, -rightSideDist / camera.aspect,
-        camera.near, camera.far)
-    orthCamera.position.z = camera.position.length()
-
     camera.toHaveUpdateFromMvCalled = []
 
     camera.worldToCanvas = new THREE.Matrix4()
@@ -56,8 +48,8 @@ function initCamera() {
 
     window.oncontextmenu = () => { return false }
 
-    let cameraLat = 0.//-TAU * .05
-    let cameraLon = 0.//TAU * .05
+    let cameraLat = -TAU * .05
+    let cameraLon = TAU * .05
     addToCameraLonLat = (changeX, changeY) => {
         let lonDiff = -.006 * changeX
         lonDiff = Math.sign(lonDiff) * (Math.min(Math.abs(lonDiff), 1.8))
@@ -97,5 +89,11 @@ function initCamera() {
     }
     addToCameraLonLat(0.,0.)
 
-    return camera
+    let rightSideDist = 4.;
+    orthCamera = new THREE.OrthographicCamera(
+        -rightSideDist,
+        rightSideDist,
+        rightSideDist / camera.aspect, -rightSideDist / camera.aspect,
+        camera.near, camera.far)
+    orthCamera.position.z = camera.position.length()
 }

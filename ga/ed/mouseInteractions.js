@@ -32,28 +32,13 @@ function initMouseInteractions() {
     lineToScreenY = (line) => {
         return line * lineHeight + textAreaOffset - textarea.scrollTop
     }
-    updateHorizontalBounds = (index, nameLength, target) => {
-        target.x = index * characterWidth + textAreaOffset
+    columnToScreenX = (column) => {
+        return column * characterWidth + textAreaOffset
+    }
+    updateHorizontalBounds = (column, nameLength, target) => {
+        target.x = columnToScreenX(column)
 
         target.w = nameLength * characterWidth
-    }
-
-    function getTextAreaHoveredMention(clientX, clientY) {
-        let res = mentions.find((mention) => {
-            if (mention.presenceLevel === PRESENCE_LEVEL_DELETED ||
-                mention.lineIndex > lowestChangedLineSinceCompile)
-                return false
-
-            let mb = mention.horizontalBounds
-            let mby = lineToScreenY(mention.lineIndex)
-            let mouseInBox =
-                mb.x <= clientX && clientX < mb.x + mb.w &&
-                mby  <= clientY && clientY < mby + lineHeight
-
-            return mouseInBox
-        })
-
-        return res === undefined ? null : res
     }
 
     let mouseAreaOld = null
@@ -76,7 +61,7 @@ function initMouseInteractions() {
         if(mouseArea === null)
             hoveredMention = null
         else if (mouseArea === textarea)
-            hoveredMention = getTextAreaHoveredMention(clientX, clientY)
+            hoveredMention = getClosestTextAreaMention(clientX, clientY)
         else
             hoveredMention = mouseArea.getHoveredMention(clientX, clientY)
 
@@ -128,6 +113,7 @@ function initMouseInteractions() {
 
             addToCameraLonLat(event.clientX - oldClientX, event.clientY - oldClientY)
             
+            //we do not change hoveredmention, we merely update the lines
             if(hoveredMention !== null)
                 hoveredMention.highlight()
         }
@@ -170,12 +156,6 @@ function initMouseInteractions() {
         }
     }
 
-    document.addEventListener('mousedown',(event)=>{
-        if (event.button === 2) 
-            rightClicking = true
-        
-        onMouseMove(document,event)
-    })
     document.addEventListener('mouseup',(event)=>{
         if (event.button === 2)
             rightClicking = false
@@ -207,6 +187,14 @@ function initMouseInteractions() {
         }
 
         //be aware, an extra mousemove will happen. There is nothing you can do about this
+    })
+
+    document.addEventListener('mousedown', (event) => {
+        if (event.button === 2)
+            rightClicking = true
+
+        // when you do this, it makes it so that clicking and unclicking creates a new line, which is annoying
+        // onMouseMove(document, event)
     })
 
     textarea.addEventListener('mousedown', (event) => {

@@ -36,13 +36,29 @@ function initMention()
         $labelSides[i] = LabelLine()
     let $labelConnectors = []
     $labelConnectors.push(LabelLine())
-    $labelConnectors.push(LabelLine())
-    //want 3? add a third
 
     hideHighlight = () => {
         $labelLines.forEach((svgLine) => { 
             setSvgLine(svgLine, -10, -10, -10, -10)
         })
+    }
+
+    getClosestTextAreaMention = (screenX, screenY) => {
+        let ret = mentions.find((mention) => {
+            if (mention.presenceLevel === PRESENCE_LEVEL_DELETED ||
+                mention.lineIndex > lowestChangedLineSinceCompile)
+                return false
+
+            let mb = mention.horizontalBounds
+            let mby = lineToScreenY(mention.lineIndex)
+            let mouseInBox =
+                mb.x <= screenX && screenX <= mb.x + mb.w &&
+                mby  <= screenY && screenY < mby + lineHeight
+
+            return mouseInBox
+        })
+
+        return ret === undefined ? null : ret
     }
 
     ndcToWindow = (ndcX,ndcY,dw) => {
@@ -121,6 +137,9 @@ function initMention()
                 if (this.isVisibleInDw(dw)) {
 
                     let [elemX, elemY] = this.getCanvasPosition(dw)
+
+                    if ($labelConnectors.length <= lowestUnusedLabelConnector)
+                        $labelConnectors.push(LabelLine())
 
                     setSvgLine($labelConnectors[lowestUnusedLabelConnector++],
                         mb.x + mb.w,

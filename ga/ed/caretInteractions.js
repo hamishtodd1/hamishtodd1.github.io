@@ -29,19 +29,31 @@ function initCaretInteractions() {
 
     onCaretMove = () => {
         let caretPosition = textarea.selectionStart
+
         if (caretPosition !== caretPositionOld) {
             let text = textarea.value
 
             let lineIndex = 0
+            let columnIndex = 0
             for (let i = 0, il = text.length; i < il; ++i) {
-                let caretIsNewlyOnThisLine = i === caretPosition && lineIndex !== caretLine
-                if (caretIsNewlyOnThisLine) {
+                if ( i === caretPosition ) {
+                    if (caretLine !== lineIndex || caretColumn !== columnIndex ) {
+                        let caretX = columnToScreenX(columnIndex)
+                        let caretY = lineToScreenY(lineIndex)
+                        updateHighlightingAndDws(textarea, caretX,caretY)
+                    }
+
                     caretLine = lineIndex
-                    updateHighlightingAndDws()
+                    caretColumn = columnIndex
+
+                    break
                 }
 
-                if (text[i] === "\n")
+                ++columnIndex
+                if (text[i] === "\n") {
                     ++lineIndex
+                    columnIndex = 0
+                }
             }
 
             caretPositionOld = caretPosition
@@ -52,6 +64,7 @@ function initCaretInteractions() {
 
     let caretPositionOld = -1
     let caretLine = -1
+    let caretColumn = -1
     document.addEventListener('selectionchange', onCaretMove)
 
     mentionVisibleDueToCaret = (mention) => mention.lineIndex === caretLine && caretLine < lowestChangedLineSinceCompile

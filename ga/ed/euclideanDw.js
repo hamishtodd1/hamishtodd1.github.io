@@ -7,7 +7,10 @@
  * Or maybe squaring the thing
  */
 
-function initPgaVizes() {
+function initPgaMentions() {
+
+    let eDw = dws.euclidean
+    let iDw = dws.infinity
 
     let dragPlane = new Mv()
 
@@ -48,15 +51,15 @@ function initPgaVizes() {
     class Point extends Mention {
         #euclideanDwMesh;
         #infinityDwMesh;
-        textareaManipulationDw = dws.euclidean;
+        textareaManipulationDw = eDw;
         #mv = new Mv();
 
         constructor(variable) {
             super(variable)
 
             let mat = new THREE.MeshBasicMaterial({ color: variable.col })
-            this.#euclideanDwMesh = dws.euclidean.NewMesh(pointGeo, mat)
-            this.#infinityDwMesh = dws.infinity.NewMesh(pointGeo, mat)
+            this.#euclideanDwMesh = eDw.NewMesh(pointGeo, mat)
+            this.#infinityDwMesh = iDw.NewMesh(pointGeo, mat)
             
             camera.toHaveUpdateFromMvCalled.push(this)
         }
@@ -85,7 +88,7 @@ function initPgaVizes() {
         }
 
         onGrab(dw) {
-            if(dw === dws.euclidean) {
+            if(dw === eDw) {
                 if (this.#mv.hasEuclideanPart())
                     camera.frustum.far.projectOn(this.#mv, dragPlane)
                 else dragPlane.copy(e0)
@@ -100,12 +103,12 @@ function initPgaVizes() {
                 overrideFloats[0] = self.#mv[13]; overrideFloats[1] = self.#mv[12]; overrideFloats[2] = self.#mv[11]; overrideFloats[3] = self.#mv[14]
             }
 
-            if(dw === dws.euclidean) {
+            if(dw === eDw) {
                 let mouseRay = getMouseRay(dw)
                 meet(dragPlane, mouseRay, this.#mv)
                 updateOverride(this, getFloatsForOverride)
             }
-            else if(dw === dws.infinity) {
+            else if(dw === iDw) {
                 threeRay.origin.copy(camera.position)
                 let mouseRay = getMouseRay(dw)
                 meet(e0, mouseRay, draggedPoint).toVector(threeRay.direction)
@@ -123,11 +126,11 @@ function initPgaVizes() {
         }
 
         getWorldSpaceCanvasPosition(target, dw) {
-            if (dw === dws.euclidean) {
+            if (dw === eDw) {
                 target.copy(this.#euclideanDwMesh.position)
                 target.w = 1.
             }
-            else if (dw === dws.infinity) {
+            else if (dw === iDw) {
                 target.copy(this.#infinityDwMesh.position)
                 target.w = 1.
             }
@@ -154,9 +157,9 @@ function initPgaVizes() {
         }
 
         isVisibleInDw(dw) {
-            if (dw !== dws.euclidean && dw !== dws.infinity)
+            if (dw !== eDw && dw !== iDw)
                 return false
-            let m = dw === dws.euclidean ? this.#euclideanDwMesh : this.#infinityDwMesh
+            let m = dw === eDw ? this.#euclideanDwMesh : this.#infinityDwMesh
             return m.visible
         }
     }
@@ -189,15 +192,15 @@ function initPgaVizes() {
         #euclideanDwMesh;
         #infinityDwMesh;
         #ringMesh;
-        textareaManipulationDw = dws.euclidean;
+        textareaManipulationDw = eDw;
         #mv = new Mv();
         
         constructor(variable) {
             super(variable)
 
-            this.#infinityDwMesh = dws.infinity.NewMesh(iLineGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
-            this.#euclideanDwMesh = dws.euclidean.NewMesh(eLineGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
-            this.#ringMesh = dws.infinity.NewMesh(ringGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
+            this.#infinityDwMesh = iDw.NewMesh(iLineGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
+            this.#euclideanDwMesh = eDw.NewMesh(eLineGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
+            this.#ringMesh = iDw.NewMesh(ringGeo, new THREE.MeshPhongMaterial({ color: variable.col }))
 
             //there was some bug involving hovering the variable just under the grey line
             //and that showed up but no others did
@@ -246,14 +249,14 @@ function initPgaVizes() {
 
         overrideFromDrag(dw) {
 
-            if (dw === dws.euclidean) {
+            if (dw === eDw) {
                 let mouseRay = getMouseRay(dw)
                 
                 this.#mv.projectOn(mouseRay,mv0)
                 this.#mv.copy(mv0)
                 //interested in lines projected on lines? Gee, if only you had some kind of platform for doing that!
             }
-            else if (dw === dws.infinity) {
+            else if (dw === iDw) {
                 
                 // threeRay.origin.copy(camera.position)
                 // let mouseRay = getMouseRay(dw)
@@ -291,11 +294,11 @@ function initPgaVizes() {
         }
 
         getWorldSpaceCanvasPosition(target, dw) {
-            if (dw === dws.euclidean) {
+            if (dw === eDw) {
                 target.copy(this.#euclideanDwMesh.position)
                 target.w = 1.
             }
-            else if (dw === dws.infinity) {
+            else if (dw === iDw) {
 
                 if(this.#mv.hasEuclideanPart()) {
                     //probably want something about its intersection with the top
@@ -333,8 +336,8 @@ function initPgaVizes() {
         }
 
         isVisibleInDw(dw) {
-            return  (dw === dws.euclidean && this.#euclideanDwMesh.visible) ||
-                    (dw === dws.infinity  && (this.#infinityDwMesh.visible || this.#ringMesh.visible) )
+            return  (dw === eDw && this.#euclideanDwMesh.visible) ||
+                    (dw === iDw  && (this.#infinityDwMesh.visible || this.#ringMesh.visible) )
         }
 
         getReassignmentPostEquals(useOverrideFloats) {
@@ -366,9 +369,9 @@ function initPgaVizes() {
     // {
         // let mousePoint = new THREE.Mesh(new THREE.SphereBufferGeometry(.1, 32, 16), new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
         // mousePoint.position.copy(outOfTheWayPosition)
-        // dws.euclidean.addNonMentionChild(mousePoint)
-        // dws.euclidean.elem.addEventListener('mousemove', (event) => {
-        //     let mouseRay = getMouseRay(dws.euclidean)
+        // eDw.addNonMentionChild(mousePoint)
+        // eDw.elem.addEventListener('mousemove', (event) => {
+        //     let mouseRay = getMouseRay(eDw)
 
         //     meet(e0, mouseRay, mv0).toVectorDisplayable(mousePoint.position)
         // })

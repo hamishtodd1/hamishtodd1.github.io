@@ -284,95 +284,6 @@ function init301WithoutDeclarations() {
             return this
         }
 
-        logarithm(target) {
-            //TODO: ONLY WORKS FOR DQ, SO USE DQ!
-
-            if(target === undefined)
-                target = new Mv()
-
-            if (this[0] == 1.)
-                return target.set( 
-                    0., 0.,0.,0.,0.,
-                    this[5], this[6], this[7], 0., 0., 0.,
-                    0.,0.,0.,0., 0.)
-                    
-            let a = 1. / (1. - this[0] * this[0])     // inv squared length. 
-            let rotationScale = Math.acos(this[0]) * Math.sqrt(a)
-            let translationScale = a * this[15] * (1. - this[0] * rotationScale)
-            return target.set(
-                0., 0.,0.,0.,0.,
-                rotationScale * this[5] + translationScale * this[10],
-                rotationScale * this[6] + translationScale * this[9],
-                rotationScale * this[7] + translationScale * this[8],
-                rotationScale * this[8],
-                rotationScale * this[9],
-                rotationScale * this[10],
-                0.,0.,0.,0., 0.)
-        }
-
-        //if it's a euclidean point, doesn't work
-        //there's an intuitive sense in which e0.angleTo(e1) === TAU / 4
-        angleTo(that) {
-            //if either are ideal points or lines, need to join with the origin
-
-
-
-            //does the "half the angle of the motor from this to its reflection in that" work?
-            // get_angl(plane, plane) Yes
-            // get_angl(plane, line) Yes
-            // get_angl(line, line)
-
-            let elems = [this,that]
-            let grades = Array(2)
-            let squares = Array(2)
-            let euclideans = Array(2)
-            elems.forEach((elem,i)=>{
-                squares[i] = mul(elem, elem, newMv)
-                let isBlade = squares[i].getGrade() === 0
-                if (!isBlade)
-                    console.error("not shape!")
-
-                euclideans[i] = squares[i][0] !== 0. ? elem : join(elem, e123, newMv)
-                grades[i] = euclideans[i].getGrade()
-                if (grades[i] !== 1 && grades[i] !== 2)
-                    return 0. //this isn't defined for euclidean points
-            })
-
-            let transformBetween = mul(euclideans[0], euclideans[1], newMv)
-            function getRatioOfNormsOfGrades(gradeN,gradeD) {
-                let selectedGrade = newMv
-                let normN = transformBetween.selectGrade(gradeN,selectedGrade).eNorm()
-                let normD = transformBetween.selectGrade(gradeD,selectedGrade).eNorm()
-                return normN / normD
-            }
-            
-            let sumGrade = grades[0] + grades[1]
-            switch (sumGrade) {
-                case 2: //Plane-plane
-                    return Math.atan(getRatioOfNormsOfGrades(2,0))
-                case 3: //point-line or line-point
-                    return Math.atan(getRatioOfNormsOfGrades(3,1))
-                case 4: //line-line
-                    console.error("need to do this!")
-            }
-        }
-
-        //returns infinity if they're not both euclidean
-        distanceTo(mv) {
-
-            //or, half of the distance it goes when it's reflected by the thing!
-            //dist A->B: 
-            // A' = BA~B
-            // AA' = logarithm(ABA~B)
-
-            // get_dist(point, point)
-            // get_dist(point, line) 
-            // get_dist(point, plane)
-            // get_dist(line, line)   // 0 unless parallel
-            // get_dist(plane, line)  // 0 unless parallel
-            // get_dist(plane, plane) // 0 unless parallel
-        }
-
         sandwich(mv, target) {
             return sandwich(this, mv, target)
         }
@@ -640,19 +551,7 @@ async function init301() {
         
     generalShaderPrefix += await getTextFile('301.glsl') //it's purely the dual quaternion part
 
-    //testAllMetricFormulae
-    {
-        function doIt(mvName1,mvName2, angleShouldBe, distanceShouldBe) {
-            let mv_1 = eval(mvName1)
-            let mv_2 = eval(mvName2)
-            log( mvName1 + "," + mvName2 + " angle should be " + angleShouldBe + ", actual result is: " + 
-                mv_1.angleTo(mv_2) )
-        }
-        doIt("e1","e2",TAU / 4.,0.)
-        doIt("e1","e0",TAU / 4.,"infinity")
-        // debugger
-        doIt("e021","e3",TAU / 4.,"infinity")
-    }
+    e1.log()
 }
 
 function createSharedFunctionDeclarationsStrings()

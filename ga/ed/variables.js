@@ -1,6 +1,8 @@
 let hoveredMention = null
 let lowestChangedLineSinceCompile = Infinity
 
+
+
 let oldClientX = 0
 let oldClientY = 0
 

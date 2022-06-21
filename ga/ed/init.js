@@ -1,24 +1,20 @@
 /*
-
 Mobius strip?
 Planes?
 Floats...
 
 TODO
-    Team presentation
+    Bugs
+        Currently, if a variable is uninitialized, you still get shown a point at 0,0,0 in the window
+        When you're finished changing something, caret goes on a line that allows you to see your handiwork
+        Got many dws? they auto-rearrange
+    For next presentation
         Dragging in the window itself moves the line as if it were a 180 / line reflection
         Applying dqs to lines
-    Short term
-        Currently, if a variable is uninitialized, you still get shown a point at 0,0,0 in the window
-        When you click window, if not close to anything, perhaps point should be created?
-        Hsv window
-        Highlight when carat is on mention
-        When you move something, it could leave its current value behind
-            And thereby have a suggestion based on that, like +=
-            And maybe you're defining a transform
-        When the user moves a point to an arbitrary place, you get the say in how it got there
-            it's r*p*~r
-                If r*p*~r did not come from a suggestion, it probably makes r as well
+        Mobius strip dw for double cover
+            The unit complex numbers are the edge
+            Intermediate between complex plane view of rotors
+            Or maybe there's a clever strip showing whole thing        
         Suggestions
             You have a single shader calculate the whole lot of them
             Player is dragging eg a point around
@@ -32,15 +28,14 @@ TODO
                     I am editing p. p affects q but p does not affect b
                     p can take value p' is such that q == b. 
                 This is tricky though
-        Uniforms
-            Shadertoy-inspired
-            Mouse ray in final dw is a variable
-            VR hand
-        Deal with struct definitions... somehow?
-        Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
-            move the mouse around
-            make some mentions then delete them
-    Medium term
+            When you click window, if not close to anything, perhaps point should be created?
+        Grab and drag could be implemented by creating a motor and then applying it
+            For this, should think of a manipulation method that works for point, line and plane
+        When hovering something in dw, its name in text window inflates?
+    GDC
+        mentions are sensetive to for loops
+            For loops have an early-escape integer
+            For every mention in the loop body, we're cutting off the shader after that integer
         Clickable "field" / texture / initial state
             Can click on the thing and it changes the attribute values to those at that point
             May want to draw or copypaste
@@ -53,37 +48,37 @@ TODO
             3D Mesh/manifold
                 Click at an arbitrary point and get the varyings at that point on that triangle
             Could have an output buffer that says: "and assign the new values"
-        full thing for looking at 2D PGA, with dome
-        When you do vr version, probably you'll have a single button to cycle through variable after variable
-        When hovering something in dw, its name in text window inflates
-        When you're moving camera, label lines update when mouse is in dw, but not otherwise
-        Mobius strip dw because for double cover
-            The unit complex numbers are the edge
-            Intermediate between complex plane view of rotors
-            Or maybe there's a clever strip showing whole thing        
+            Draw curves in the window
+                It's just the same thing as painting a texture, it just gets recorded as vec2s in a 1D texture
+                Always recorded as an array with, say, 256 samples. Makes it easy to add them
+                Fourier series to interpolate or whatever
+        Struct and function definitions
         (2,1) halfplane window - v. important, lets you program with mouse
+            This is the eventual destiny of the "float" window
             lerp as an example of a simple function to try it out with
             write some numbers on a line
             They appear in a  if my carat is on that line
             I can click or drag or whatever, and find the number I know I want
             Maybe move my carat through the line (4*8+5*2)/2 and see it animate
-        Got many dws? they auto-rearrange
-        Double click causes camera to whirl around so clicked variable is centered, whatever it is
-        mentions are sensetive to for loops
-            For loops have an early-escape integer
-            For every mention in the loop body, we're cutting off the shader after that integer
-        If you have a nice pile of dws, and you go from line to line so different ones become relevant, nice transition
-        Maybe you have some point that goes weird places in 3D when you change some 1d or 2d variable
-            Hold a button to make it so that the thing gets a trail
-        Errors appear on lines they're referring to
-        Draw curves in the window
-            It's just the same thing as painting a texture, it just gets recorded as vec2s in a 1D texture
-            Always recorded as an array with, say, 256 samples. Makes it easy to add them
-            Fourier series to interpolate or whatever
-        If the variable hasn't changed value, would be nice if the versions of it that are the same as it are all highlighted
+        Uniforms
+            Mouse ray in final dw
+            Shadertoy-inspired
+        VR
+            Single button to cycle through mentions
+            Hand as a uniform
+        Dome window for 2D PGA
+        Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
+            move the mouse around
+            make some mentions then delete them
+        Export(/import?):
+            threejs
+            unity
+            html page - EE
+            export threejs function creating the thing it is with the appropriate uniforms
+            Workshop for kids at makespace. Everyone's stuff goes into a VR sim
         A puzzle game that is a series of "code this shader" challenges
-        Demonstration videos
-            Volumetric rendering, can march through texture
+        Documented API for making your own window visualizations
+    Long term
         Things other than fragment shaders
             vertex shaders
             dropdown defining what this shader goes into:
@@ -92,20 +87,20 @@ TODO
                 Make your own bloody normals
             javascript eg threejs
             Bootstrapping new visualizations
-    Long term
-        
+        Demonstration videos
+            Volumetric rendering, can march through texture
+        Hsv window
+        Double click causes camera to whirl around so clicked variable is centered, whatever it is
+        When things appear and reappear in dws, have a nice transition
+            Eg they're of to the side and they come in
+        Maybe you have some point that goes weird places in 3D when you change some 1d or 2d variable
+            Hold a button to make it so that the thing gets a trail
+        If the variable hasn't changed value, would be nice if the versions of it that are the same as it are all highlighted
         Compiling from latex
             Someone else's thing to draw and display it. Maybe desmos
         Optimization:
             threejs shaders have uv and normal built in. Irrelevant, use RawShader
-        Documented API for making your own window visualizations
         Webworkers?
-        Export(/import?):
-            threejs
-            unity
-            html page - EE
-            export threejs function creating the thing it is with the appropriate uniforms
-            Workshop for kids at makespace. Everyone's stuff goes into a VR sim
 
 As a tablet notes-in-the-margin app... and if you were going to buy a tablet... want to:
     Say things into a mic
@@ -191,13 +186,17 @@ async function init() {
     await initDws()
 
     initFinalDw()
-
     await initVectorSpaceDw()
-
     new Dw("euclidean", true)
+    new Dw("scalar", false, false, orthCamera)
+    new Dw( "study", false, false, orthCamera)
     initStudyDw()
     initInfinityDw()
-    initPgaVizes()
+    
+    initVec3s()
+    initFloats()
+    initStudyNumbers()
+    initPgaMentions()
 
     initMouseInteractions()
 

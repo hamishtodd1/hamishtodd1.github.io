@@ -1,11 +1,11 @@
 function initFinalDw() {
-    let dw = new Dw("final", false)
-    dw.elem.style.display = 'none'
+    let ourDw = new Dw("final", false)
+    // ourDw.elem.style.display = 'none'
 
-    dw.elem.style.bottom = "0px"
+    ourDw.elem.style.bottom = "0px"
 
     let finalFsq = FullScreenQuad()
-    dw.scene.add(finalFsq)
+    ourDw.scene.add(finalFsq)
 
     let toFragColorSuffix = `
 void main() {

@@ -1,7 +1,54 @@
 // matrices in here. little parallelipipeds with their edges extended past the corners
-async function initVectorSpaceDw()
+
+async function initVectorSpaceDw() {
+
+    let ourDw = new Dw("vectorSpace", true)
+
+    // let rgbCube = new THREE.Mesh(new THREE.BoxGeometry(1.,1.,1.), new THREE.ShaderMaterial())
+    // rgbCube.geometry.translate(.5, .5, .5)
+    // rgbCube.material.vertexShader = basicVertex
+    // rgbCube.material.fragmentShader = await getTextFile('rgbCube.glsl')
+    // rgbCube.material.transparent = true
+    // dw.addNonMentionChild(rgbCube)
+
+    let axisRadius = .02
+    let axisMat = new THREE.MeshPhongMaterial({ color: 0xCCCCCC })
+    let axisGeo = new THREE.CylinderBufferGeometry(axisRadius, axisRadius, 20.,);
+
+    let yAxis = new THREE.Mesh(axisGeo, axisMat)
+    ourDw.addNonMentionChild(yAxis)
+    let xAxis = new THREE.Mesh(axisGeo, axisMat)
+    xAxis.rotation.x = TAU / 4.
+    ourDw.addNonMentionChild(xAxis)
+    let zAxis = new THREE.Mesh(axisGeo, axisMat)
+    zAxis.rotation.z = TAU / 4.
+    ourDw.addNonMentionChild(zAxis)
+
+    let markers = []
+    let axisNames = ["x", "y", "z"]
+    let markerHeight = .3
+
+    let furthestMarkers = 8
+    for (let i = -furthestMarkers; i <= furthestMarkers; ++i) {
+        for (let j = 0; j < (i === 0 ? 1 : 3); ++j) {
+            let marker = text(i.toString())
+            marker.scale.multiplyScalar(markerHeight)
+            marker.position[axisNames[j]] = i
+            marker.position.y -= .5 * markerHeight
+            ourDw.addNonMentionChild(marker)
+            markers.push(marker)
+        }
+    }
+    updateFunctions.push(() => {
+        markers.forEach((marker) => {
+            marker.quaternion.copy(camera.quaternion)
+        })
+    })
+}
+
+function initVec3s()
 {
-    let dw = new Dw("vectorSpace", true)
+    let ourDw = dws.vectorSpace
     
     let shaftRadius = .06
     let headHeight = shaftRadius * 5.
@@ -11,49 +58,6 @@ async function initVectorSpaceDw()
 
     let dashedLineMat = new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: .1, gapSize: .1 })
 
-    // let rgbCube = new THREE.Mesh(new THREE.BoxGeometry(1.,1.,1.), new THREE.ShaderMaterial())
-    // rgbCube.geometry.translate(.5, .5, .5)
-    // rgbCube.material.vertexShader = basicVertex
-    // rgbCube.material.fragmentShader = await getTextFile('rgbCube.glsl')
-    // rgbCube.material.transparent = true
-    // dw.addNonMentionChild(rgbCube)
-
-    {
-        let axisRadius = .02
-        let axisMat = new THREE.MeshPhongMaterial({color:0xCCCCCC})
-        let axisGeo = new THREE.CylinderBufferGeometry(axisRadius,axisRadius,20.,);
-
-        let yAxis = new THREE.Mesh(axisGeo, axisMat)
-        dw.addNonMentionChild(yAxis)
-        let xAxis = new THREE.Mesh(axisGeo, axisMat)
-        xAxis.rotation.x = TAU / 4.
-        dw.addNonMentionChild(xAxis)
-        let zAxis = new THREE.Mesh(axisGeo, axisMat)
-        zAxis.rotation.z = TAU / 4.
-        dw.addNonMentionChild(zAxis)
-
-        let markers = []
-        let axisNames = ["x","y","z"]
-        let markerHeight = .3
-
-        let furthestMarkers = 8
-        for(let i = -furthestMarkers; i <= furthestMarkers; ++i) {
-            for(let j = 0; j < (i===0?1:3); ++j) {
-                let marker = text(i.toString())
-                marker.scale.multiplyScalar(markerHeight)
-                marker.position[axisNames[j]] = i
-                marker.position.y -= .5 * markerHeight
-                dw.addNonMentionChild(marker)
-                markers.push(marker)
-            }
-        }
-        updateFunctions.push(()=>{
-            markers.forEach((marker) => {
-                marker.quaternion.copy(camera.quaternion)
-            })
-        })
-    }
-    
     let valuesArray = new Float32Array(3)
     let asVec = new THREE.Vector3()
     let dragPlane = new Mv()
@@ -64,7 +68,7 @@ async function initVectorSpaceDw()
     class Arrow extends Mention {
         #vMesh
         #iMesh
-        textareaManipulationDw = dws.vectorSpace;
+        textareaManipulationDw = ourDw;
 
         constructor(variable) {
             super(variable)
@@ -72,7 +76,7 @@ async function initVectorSpaceDw()
             let mat = new THREE.MeshPhongMaterial({ color: variable.col })
             this.#iMesh = dws.infinity.NewMesh(pointGeo, mat)    
             
-            let viz = dws.vectorSpace.NewObject3D()
+            let viz = ourDw.NewObject3D()
             this.#vMesh = viz
 
             let dashedLines = [[],[],[]]
@@ -145,7 +149,7 @@ async function initVectorSpaceDw()
                 asVec.toArray(overrideFloats)
             }
 
-            if(dw === dws.vectorSpace) {
+            if(dw === ourDw) {
                 camera.frustum.far.projectOn(e123, dragPlane)
                 let mouseRay = getMouseRay(dw)
                 meet(dragPlane, mouseRay, draggedPoint)
@@ -170,7 +174,7 @@ async function initVectorSpaceDw()
 
         getWorldSpaceCanvasPosition(target, dw) {
             
-            if (dw === dws.vectorSpace) {
+            if (dw === ourDw) {
                 asVec.setFromMatrixPosition(this.#vMesh.head.matrix)
                 target.copy(asVec)
                 target.multiplyScalar(.5)

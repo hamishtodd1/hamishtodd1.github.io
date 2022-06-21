@@ -10,51 +10,47 @@
     Thereby to find out the impact of this shit
 */
 function initStudyDw() {
-    let rightSideDist = 4.;
-    let orthCamera = new THREE.OrthographicCamera(
-        -rightSideDist,
-        rightSideDist,
-        rightSideDist / camera.aspect, -rightSideDist / camera.aspect,
-        camera.near,camera.far)
-    orthCamera.position.z = camera.position.length()
 
-    let dw = new Dw("study", false, false, orthCamera)
-    dw.elem.style.display = 'none'
+    let ourDw = dws.study
+    // ourDw.elem.style.display = 'none'
 
-    {
-        const axisMat = new THREE.LineBasicMaterial({
-            color: 0x964B00
-        })
-        dw.addNonMentionChild(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(-10., 0., 0.),
-            new THREE.Vector3( 10., 0., 0.)]), axisMat))
-        dw.addNonMentionChild(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(0., 10., 0.),
-            new THREE.Vector3(0.,-10., 0.)]), axisMat))
-        let circlePoints = []
-        for(let i = 0; i < 32; ++i) {
-            let v = new THREE.Vector3(1., 0., 0.)
-            v.applyAxisAngle(zUnit,TAU/32.*i)
-            circlePoints.push(v)
-        }
-        dw.addNonMentionChild(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(circlePoints), axisMat))
-
-        let bg = new THREE.Mesh(unchangingUnitSquareGeometry,new THREE.MeshBasicMaterial({color:0xFFFDD0}))
-        bg.position.z = -1.
-        bg.scale.setScalar(999.)
-        dw.addNonMentionChild(bg)
+    const axisMat = new THREE.LineBasicMaterial({
+        color: 0x964B00
+    })
+    ourDw.addNonMentionChild(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(-10., 0., 0.),
+        new THREE.Vector3( 10., 0., 0.)]), axisMat))
+    ourDw.addNonMentionChild(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0., 10., 0.),
+        new THREE.Vector3(0.,-10., 0.)]), axisMat))
+    let circlePoints = []
+    for(let i = 0; i < 32; ++i) {
+        let v = new THREE.Vector3(1., 0., 0.)
+        v.applyAxisAngle(zUnit,TAU/32.*i)
+        circlePoints.push(v)
     }
+    ourDw.addNonMentionChild(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(circlePoints), axisMat))
+
+    let bg = new THREE.Mesh(unchangingUnitSquareGeometry,new THREE.MeshBasicMaterial({color:0xFFFDD0}))
+    bg.position.z = -1.
+    bg.scale.setScalar(999.)
+    ourDw.addNonMentionChild(bg)
+}
+
+function initStudyNumbers() {
+
+    let geo = new THREE.CircleBufferGeometry(.1, 32)
 
     let newValues = Array(2)
     class Vec2 extends Mention {
         #mesh;
-        textareaManipulationDw = dw;
+        textareaManipulationDw = ourDw;
 
         constructor(variable) {
             super(variable)
 
             let mat = new THREE.MeshBasicMaterial({ color: variable.col })
-            this.#mesh = dws.study.NewMesh(pointGeo, mat)
+            this.#mesh = ourDw.NewMesh(geo, mat)
         }
 
         updateFromShader() {
@@ -64,7 +60,7 @@ function initStudyDw() {
         }
 
         overrideFromDrag(dw) {
-            if (dw === dws.study) {
+            if (dw === ourDw) {
                 let [xProportion, yProportion] = dw.oldClientToProportion()
                 this.#mesh.position.x = orthCamera.left   +      xProportion * (orthCamera.right - orthCamera.left )
                 this.#mesh.position.y = orthCamera.bottom + (1.-yProportion) * (orthCamera.top - orthCamera.bottom)
@@ -101,7 +97,7 @@ function initStudyDw() {
         }
 
         isVisibleInDw(dw) {
-            if (dw !== dws.study )
+            if (dw !== ourDw )
                 return false
             return this.#mesh.visible
         }

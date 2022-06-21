@@ -1,33 +1,49 @@
 //could have two or three lines, lower ones are zoom-ins
+//possibly when you hover .x, .y .z, you can manipulate them individually here
 
-function initScalarDw() {
+function initFloats() {
     
-    let dw = new Dw("scalar", false, false, orthCamera)
+    let ourDw = dws.scalar
 
     {
         const axisMat = new THREE.LineBasicMaterial({
-            color: 0x964B00
+            color: 0x000000
         })
-        dw.addNonMentionChild(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+        ourDw.addNonMentionChild(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
             new THREE.Vector3(-10., 0., 0.),
             new THREE.Vector3( 10., 0., 0.)]), axisMat))
 
         let bg = new THREE.Mesh( unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({color:0xFFFDD0}) )
         bg.position.z = -1.
         bg.scale.setScalar(999.)
-        dw.addNonMentionChild(bg)
+        ourDw.addNonMentionChild(bg)
+
+        let furthestMarkers = 3
+        for (let i = -furthestMarkers; i <= furthestMarkers; ++i) {
+            let marker = text(i.toString())
+            marker.position.x = i
+            marker.scale.multiplyScalar(.5)
+            marker.position.y -= marker.scale.y * .7
+            ourDw.addNonMentionChild(marker)
+        }
     }
+
+    let geo = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0., 0., 0.),
+        new THREE.Vector3( .3, .3, 0.),
+        new THREE.Vector3(-.3, .3, 0.),
+    ])
 
     let newValues = Array(1)
     class Float extends Mention {
-        #mesh;
-        textareaManipulationDw = dw;
+        #mesh
+        textareaManipulationDw = ourDw
 
         constructor(variable) {
             super(variable)
 
             let mat = new THREE.MeshBasicMaterial({ color: variable.col })
-            this.#mesh = dws.study.NewMesh(pointGeo, mat)
+            this.#mesh = ourDw.NewMesh(geo, mat)
         }
 
         updateFromShader() {
@@ -36,7 +52,7 @@ function initScalarDw() {
         }
 
         overrideFromDrag(dw) {
-            if (dw === dws.study) {
+            if (dw === ourDw) {
                 let [xProportion, yProportion] = dw.oldClientToProportion()
                 this.#mesh.position.x = orthCamera.left + xProportion * (orthCamera.right - orthCamera.left )
                 
@@ -70,7 +86,7 @@ function initScalarDw() {
         }
 
         isVisibleInDw(dw) {
-            if (dw !== dws.scalar )
+            if (dw !== ourDw )
                 return false
             return this.#mesh.visible
         }
