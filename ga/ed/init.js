@@ -8,6 +8,7 @@ TODO
         Currently, if a variable is uninitialized, you still get shown a point at 0,0,0 in the window
         When you're finished changing something, caret goes on a line that allows you to see your handiwork
         Got many dws? they auto-rearrange
+        When you grab an ideal point, should be dragged on the infinity dw
     For next presentation
         Dragging in the window itself moves the line as if it were a 180 / line reflection
         Applying dqs to lines
@@ -31,11 +32,13 @@ TODO
             When you click window, if not close to anything, perhaps point should be created?
         Grab and drag could be implemented by creating a motor and then applying it
             For this, should think of a manipulation method that works for point, line and plane
+            Rotations is done by grabbing the infinity window
         When hovering something in dw, its name in text window inflates?
     GDC
         mentions are sensetive to for loops
             For loops have an early-escape integer
             For every mention in the loop body, we're cutting off the shader after that integer
+        Needs to be able to take any set of uniforms from something you paste in, and create guesses
         Clickable "field" / texture / initial state
             Can click on the thing and it changes the attribute values to those at that point
             May want to draw or copypaste
@@ -79,6 +82,11 @@ TODO
         A puzzle game that is a series of "code this shader" challenges
         Documented API for making your own window visualizations
     Long term
+        Other events
+            Live coding
+            Festival of the spoken nerd
+            Green man
+        ctrl+z gets rid of stuff stuck in there
         Things other than fragment shaders
             vertex shaders
             dropdown defining what this shader goes into:
@@ -226,14 +234,14 @@ async function init() {
     compile()
     textarea.focus()
     textarea.setSelectionRange(3,3)
-    updateHighlightingAndDws()
+    updateMentionVisibilityAndIndication()
     renderAll()
     textarea.focus()
 
     document.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === true) {
             compile()
-            updateHighlightingAndDws()
+            updateMentionVisibilityAndIndication()
             renderAll()
         }
     })

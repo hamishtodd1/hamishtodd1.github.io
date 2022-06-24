@@ -259,6 +259,8 @@ function init301WithoutDeclarations() {
             this[13] = x
             this[12] = y
             this[11] = z
+
+            return this
         }
 
         toQuaternion(target) {
@@ -328,6 +330,13 @@ function init301WithoutDeclarations() {
             localBiv0.multiplyScalar(angle / 2.)
             localBiv0.exp(localDq0)
             return localDq0.toMv(this)
+        }
+
+        fromAxisDistance(axis, distance) {
+            this.copy(axis)
+            this.multiplyScalar(distance/2.)
+            this[0] = 1.
+            return this
         }
 
         eNorm() {

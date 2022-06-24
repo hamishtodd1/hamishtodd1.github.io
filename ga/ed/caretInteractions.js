@@ -30,36 +30,33 @@ function initCaretInteractions() {
     onCaretMove = () => {
         let caretPosition = textarea.selectionStart
 
-        if (caretPosition !== caretPositionOld) {
-            let text = textarea.value
+        if (caretPosition === caretPositionOld) 
+            return
+            
+        let text = textarea.value
 
-            let lineIndex = 0
-            let columnIndex = 0
-            for (let i = 0, il = text.length; i < il; ++i) {
-                if ( i === caretPosition ) {
-                    if (caretLine !== lineIndex || caretColumn !== columnIndex ) {
-                        let caretX = columnToScreenX(columnIndex)
-                        let caretY = lineToScreenY(lineIndex)
-                        updateHighlightingAndDws(textarea, caretX,caretY)
-                    }
-
-                    caretLine = lineIndex
-                    caretColumn = columnIndex
-
-                    break
-                }
-
-                ++columnIndex
-                if (text[i] === "\n") {
-                    ++lineIndex
-                    columnIndex = 0
-                }
+        let lineIndex = 0
+        let columnIndex = 0
+        for (let i = 0, il = text.length; i < il; ++i) {
+            if ( i === caretPosition ) {
+                caretLine = lineIndex
+                caretColumn = columnIndex
+                break
             }
 
-            caretPositionOld = caretPosition
+            ++columnIndex
+            if (text[i] === "\n") {
+                ++lineIndex
+                columnIndex = 0
+            }
         }
 
+        let caretX = columnToScreenX(columnIndex)
+        let caretY = lineToScreenY(lineIndex)
+        updateMentionVisibilityAndIndication(textarea, caretX, caretY)
         renderAll()
+
+        caretPositionOld = caretPosition
     }
 
     let caretPositionOld = -1

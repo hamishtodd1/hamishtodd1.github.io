@@ -2,6 +2,8 @@ void mainImage( out vec4 fragColor ) {
     vec3 myVec = vec3(1.,1.,0.);
 
     Dq rotation = Dq(myVec.x, 0.,0.,0., 0.,myVec.y,0., myVec.z);
+
+    vec2 boog = vec2(1.,1.);
     
     vec4 idealPt = vec4( .2,0.,-1.,0.);
     vec4 realPt = vec4( .2,0., 1.,1.);

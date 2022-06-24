@@ -166,7 +166,10 @@ async function initDws() {
         for(dwName in dws)
             dws[dwName].render()
 
-        requestAnimationFrame(()=>{})
+        requestAnimationFrame(()=>{
+            if ( keyOfProptInObject(true, animationStates) !== undefined )
+                renderAll()
+        })
     }
 
     forVizDws = (func) => {

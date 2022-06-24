@@ -1,7 +1,6 @@
-let hoveredMention = null
 let lowestChangedLineSinceCompile = Infinity
 
-
+let animationStates = {}
 
 let oldClientX = 0
 let oldClientY = 0

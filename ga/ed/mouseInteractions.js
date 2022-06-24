@@ -1,11 +1,6 @@
 function initMouseInteractions() {
-    let style = window.getComputedStyle(textarea)
-    let lineHeight = parseInt(style.lineHeight)
-    let characterWidth = parseInt(window.getComputedStyle(textMeasurer).width) / 40.
-    let textAreaOffset = parseInt(style.padding) + parseInt(style.margin) // can add some fudge to this if you like
-    
-    let grabbedMention = null
-    let grabbedDw = null
+    let indicatedMention = null
+    let grabbedDw = null // if this isn't null, indicatedMention is grabbed
 
     let rightClicking = false
 
@@ -29,28 +24,19 @@ function initMouseInteractions() {
         return mouseRay
     }
 
-    lineToScreenY = (line) => {
-        return line * lineHeight + textAreaOffset - textarea.scrollTop
-    }
-    columnToScreenX = (column) => {
-        return column * characterWidth + textAreaOffset
-    }
-    updateHorizontalBounds = (column, nameLength, target) => {
-        target.x = columnToScreenX(column)
-
-        target.w = nameLength * characterWidth
-    }
-
     let mouseAreaOld = null
-    updateHighlightingAndDws = (mouseArea,clientX,clientY) => {
+    updateMentionVisibilityAndIndication = (mouseArea, userIndicationX, userIndicationY) => {
+        //moving the mouse should not get rid of the caret's indication
+        let indicatedMentionOld = indicatedMention
+
         if(mouseArea === undefined)
             mouseArea = mouseAreaOld
         else
             mouseAreaOld = mouseArea
 
-        if(clientX === undefined) {
-            clientX = oldClientX
-            clientY = oldClientY
+        if(userIndicationX === undefined) {
+            userIndicationX = oldClientX
+            userIndicationY = oldClientY
         }
 
         mentions.forEach((mention) => {
@@ -59,71 +45,55 @@ function initMouseInteractions() {
         })
 
         if(mouseArea === null)
-            hoveredMention = null
+            indicatedMention = null
         else if (mouseArea === textarea)
-            hoveredMention = getClosestTextAreaMention(clientX, clientY)
+            indicatedMention = getClosestTextAreaMention(userIndicationX, userIndicationY)
         else
-            hoveredMention = mouseArea.getHoveredMention(clientX, clientY)
+            indicatedMention = mouseArea.getHoveredMention(userIndicationX, userIndicationY)
+            
+        if (indicatedMention !== null)
+            indicatedMention.setVisibility(true)
 
-        if( hoveredMention !== null)
-            hoveredMention.setVisibility(true)
-
-        // let visibilityIndex = 0
-        forVizDws( (dw) => {
-            let hasMentionChild = false
-            dw.scene.children.every((child) => {
-                if (child.visible === true && dw.nonMentionChildren.indexOf(child) === -1)
-                    hasMentionChild = true
-
-                return !hasMentionChild
-            })
-
-            // if (hasMentionChild) {
-            //     dw.elem.style.display = ''
-            //     dw.setVerticalPosition(visibilityIndex++)
-            // }
-            // else
-            //     dw.elem.style.display = 'none'
-        })
-
-        if (hoveredMention === null)
-            hideHighlight()
-        else
-            hoveredMention.highlight()
+        if(indicatedMentionOld !== indicatedMention) {
+            if (indicatedMention === null)
+                hideHighlight()
+            else
+                indicatedMention.highlight()
+        }
     }
 
     function onMouseMove(mouseArea, event) {
         if (!rightClicking) {
             if(grabbedDw !== null) {
-                grabbedMention.overrideFromDrag(grabbedDw,event)
+                indicatedMention.overrideFromDrag(grabbedDw,event)
     
                 mentions.forEach((mention) => {
-                    let visible = mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED && (mentionVisibleDueToCaret(mention) || mention === grabbedMention )
+                    let visible = mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED && (mentionVisibleDueToCaret(mention) || mention === indicatedMention )
                     if (visible)
                         mention.updateFromShader()
                 })
 
-                grabbedMention.highlight()
+                indicatedMention.highlight()
             }
             else if(mouseArea !== document)
-                updateHighlightingAndDws(mouseArea, event.clientX, event.clientY)
+                updateMentionVisibilityAndIndication(mouseArea, event.clientX, event.clientY)
         }
         else {
             event.preventDefault()
 
             addToCameraLonLat(event.clientX - oldClientX, event.clientY - oldClientY)
             
-            //we do not change hoveredmention, we merely update the lines
-            if(hoveredMention !== null)
-                hoveredMention.highlight()
+            //we do NOT change hoveredmention, we merely update the lines
+            if(indicatedMention !== null)
+                indicatedMention.highlight()
         }
+
+        renderAll()
 
         oldClientX = event.clientX
         oldClientY = event.clientY
 
         event.stopPropagation()
-
-        renderAll()
     }
 
     function onHoveredMentionGrab(dw,event,fromTextArea) {
@@ -140,7 +110,7 @@ function initMouseInteractions() {
         if (event.which === 1 && lowestChangedLineSinceCompile === Infinity) {
             if (fromTextArea) {
                 event.preventDefault()
-                textareaGrabAddition = hoveredMention.getCanvasPosition(dw)
+                textareaGrabAddition = indicatedMention.getCanvasPosition(dw)
                 textareaGrabAddition[0] -= oldClientX
                 textareaGrabAddition[1] -= oldClientY
             }
@@ -149,10 +119,9 @@ function initMouseInteractions() {
                 textareaGrabAddition[1] = 0.
             }
 
-            grabbedMention = hoveredMention
             grabbedDw = dw
 
-            grabbedMention.onGrab(dw)
+            indicatedMention.onGrab(dw)
         }
     }
 
@@ -160,20 +129,19 @@ function initMouseInteractions() {
         if (event.button === 2)
             rightClicking = false
         
-        if (event.button === 0 && grabbedMention !== null) {
+        if (event.button === 0 && grabbedDw !== null) {
             updateOverride(null)
             
-            let newLine = "\n    " + grabbedMention.getReassignmentNew(false) + ";\n"
+            let newLine = "\n    " + indicatedMention.getReassignmentNew(false) + ";\n"
             let lines = textarea.value.split("\n")
-            let pre  = lines.slice(0, grabbedMention.lineIndex + 1).join("\n")
-            let post = lines.slice(grabbedMention.lineIndex + 1).join("\n")
+            let pre  = lines.slice(0, indicatedMention.lineIndex + 1).join("\n")
+            let post = lines.slice(indicatedMention.lineIndex + 1).join("\n")
             
             textarea.value = pre + newLine + post
             updateSyntaxHighlighting(textarea.value)
 
-            grabbedMention = null
             grabbedDw = null
-            hoveredMention = null
+            indicatedMention = null
 
             let newCaretPosition = textarea.value.length - post.length - 1
             textarea.focus()
@@ -198,8 +166,8 @@ function initMouseInteractions() {
     })
 
     textarea.addEventListener('mousedown', (event) => {
-        if ( hoveredMention !== null )
-            onHoveredMentionGrab(hoveredMention.textareaManipulationDw, event, true)
+        if ( indicatedMention !== null )
+            onHoveredMentionGrab(indicatedMention.textareaManipulationDw, event, true)
     })
     
     textarea.addEventListener('scroll', (event) => onMouseMove(textarea, event))
@@ -207,7 +175,7 @@ function initMouseInteractions() {
     document.addEventListener('mousemove', (event) => onMouseMove(document, event))
     forVizDws( (dw) => {
         dw.elem.addEventListener('mousedown', (event) => {
-            if(hoveredMention!==null)
+            if(indicatedMention!==null)
                 onHoveredMentionGrab(dw,event,false)
         })
         dw.elem.addEventListener('mousemove', (event) => onMouseMove(dw, event))

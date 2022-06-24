@@ -21,6 +21,8 @@ function initMention()
     let canvasPos = new THREE.Vector4()
     let style = window.getComputedStyle(textarea)
     let lineHeight = parseInt(style.lineHeight)
+    let textAreaOffset = parseInt(style.padding) + parseInt(style.margin) // can add some fudge to this if you like
+    let characterWidth = parseInt(window.getComputedStyle(textMeasurer).width) / 40.
 
     let $labelLines = []
     function LabelLine() {
@@ -35,7 +37,19 @@ function initMention()
     for(let i = 0; i < 4; ++i)
         $labelSides[i] = LabelLine()
     let $labelConnectors = []
-    $labelConnectors.push(LabelLine())
+    $labelConnectors.push(LabelLine(), LabelLine(), LabelLine())
+
+    lineToScreenY = (line) => {
+        return line * lineHeight + textAreaOffset - textarea.scrollTop
+    }
+    columnToScreenX = (column) => {
+        return column * characterWidth + textAreaOffset
+    }
+    updateHorizontalBounds = (column, nameLength, target) => {
+        target.x = columnToScreenX(column)
+
+        target.w = nameLength * characterWidth
+    }
 
     hideHighlight = () => {
         $labelLines.forEach((svgLine) => { 
@@ -137,9 +151,6 @@ function initMention()
                 if (this.isVisibleInDw(dw)) {
 
                     let [elemX, elemY] = this.getCanvasPosition(dw)
-
-                    if ($labelConnectors.length <= lowestUnusedLabelConnector)
-                        $labelConnectors.push(LabelLine())
 
                     setSvgLine($labelConnectors[lowestUnusedLabelConnector++],
                         mb.x + mb.w,

@@ -32,7 +32,7 @@ function initCamera() {
 
     let fovHorizontal = otherFov(camera.fov, camera.aspect, true)
     let frameQuatHorizontal = new Mv().fromAxisAngle(e31, -fovHorizontal / 2. * (TAU / 360.))
-    let frameQuatVertical = new Mv().fromAxisAngle(e23, -camera.fov / 2. * (TAU / 360.))
+    let frameQuatVertical   = new Mv().fromAxisAngle(e23, -camera.fov / 2. * (TAU / 360.))
 
     let frustumUntransformed = {}
     for (let planeName in camera.frustum)
@@ -96,4 +96,11 @@ function initCamera() {
         rightSideDist / camera.aspect, -rightSideDist / camera.aspect,
         camera.near, camera.far)
     orthCamera.position.z = camera.position.length()
+
+    orthCamera.oldClientToPosition = (dw) => {
+        let [xProportion, yProportion] = dw.oldClientToProportion()
+        let x = orthCamera.left + xProportion * (orthCamera.right - orthCamera.left)
+        let y = orthCamera.bottom + (1. - yProportion) * (orthCamera.top - orthCamera.bottom)
+        return [x,y]
+    }
 }
