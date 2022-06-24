@@ -11,7 +11,7 @@
 */
 function initStudyDw() {
 
-    let ourDw = dws.study
+    let ourDw = new Dw("study", false, false, orthCamera)
     // ourDw.elem.style.display = 'none'
 
     const axisMat = new THREE.LineBasicMaterial({

@@ -197,10 +197,11 @@ async function init() {
     initFinalDw()
     await initVectorSpaceDw()
     new Dw("euclidean", true)
-    new Dw("scalar", false, false, orthCamera)
-    new Dw( "study", false, false, orthCamera)
-    initStudyDw()
     initInfinityDw()
+    new Dw("scalar", false, false, orthCamera)
+    // dws.scalar.elem.style.display = 'none'
+    initStudyDw()
+    // dws.study.elem.style.display = 'none'
     
     initVec3s()
     initFloats()
@@ -209,31 +210,28 @@ async function init() {
 
     initMouseInteractions()
 
-    // float myBiv[6] = float[6](3.4, 4.2, 5.0, 5.2, 0.3, 1.1);
     let initialTextFull = await getTextFile('initialText.glsl')
-    let initialText = initialTextFull.slice(0, initialTextFull.indexOf(`//END//`))
-    
+    let initialText = initialTextFull.slice(0, initialTextFull.indexOf(`//END//`))    
     textarea.value = initialText
-    updateSyntaxHighlighting(textarea.value)
+    updateSyntaxHighlighting()
 
     window.addEventListener('resize', renderAll)
 
     await initCompilation()
 
     initCaretInteractions()
+    setCaretPosition(38)
     
-    //these are best kept separate. There are various things you sometimes need to do between
-    compile()
-    setCaretPosition(3)
-    updateMentionVisibilitiesAndIndication()
-    renderAll()
-    textarea.focus()
+    function compileAndUpdate() {
+        compile()
+        updateMentionVisibilitiesAndIndication()
+        renderAll()
+    }
+
+    compileAndUpdate()
 
     document.addEventListener('keydown', (event) => {
-        if (event.key === "Enter" && event.altKey === true) {
-            compile()
-            updateMentionVisibilitiesAndIndication()
-            renderAll()
-        }
+        if (event.key === "Enter" && event.altKey === true)
+            compileAndUpdate()
     })
 }

@@ -138,7 +138,7 @@ function initMouseInteractions() {
             let post = lines.slice(indicatedMention.lineIndex + 1).join("\n")
             
             textarea.value = pre + newLine + post
-            updateSyntaxHighlighting(textarea.value)
+            updateSyntaxHighlighting()
 
             grabbedDw = null
             indicatedMention = null

@@ -25,18 +25,18 @@ function initCaretInteractions() {
         setCaretPosition(cursorPos + text.length)
     }
 
-    function setCaretPosition(pos) {
+    setCaretPosition = (pos) => {
         // Modern browsers
         if (textarea.setSelectionRange) {
-            textarea.focus();
-            textarea.setSelectionRange(pos, pos);
+            textarea.focus()
+            textarea.setSelectionRange(pos, pos)
         }
         else if (textarea.createTextRange) {
-            var range = textarea.createTextRange();
-            range.collapse(true);
-            range.moveEnd('character', pos);
-            range.moveStart('character', pos);
-            range.select();
+            var range = textarea.createTextRange()
+            range.collapse(true)
+            range.moveEnd('character', pos)
+            range.moveStart('character', pos)
+            range.select()
         }
     }
     
@@ -47,7 +47,7 @@ function initCaretInteractions() {
             lowestChangedLineSinceCompile = caretLine
         updateChangedLineIndicator()
 
-        updateSyntaxHighlighting(textarea.value)
+        updateSyntaxHighlighting()
         updateSyntaxHighlightingScroll(textarea)
 
         onCaretMove()
