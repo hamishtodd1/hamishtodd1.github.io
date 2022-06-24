@@ -9,6 +9,7 @@ TODO
         When you're finished changing something, caret goes on a line that allows you to see your handiwork
         Got many dws? they auto-rearrange
         When you grab an ideal point, should be dragged on the infinity dw
+        Tab and enter make it so you can't ctrl+z
     For next presentation
         Dragging in the window itself moves the line as if it were a 180 / line reflection
         Applying dqs to lines
@@ -215,15 +216,6 @@ async function init() {
     textarea.value = initialText
     updateSyntaxHighlighting(textarea.value)
 
-    textarea.addEventListener('input', (event) => {
-        updateSyntaxHighlighting(textarea.value)
-        updateSyntaxHighlightingScroll(textarea)
-    })
-    textarea.addEventListener('scroll', () => {
-        updateSyntaxHighlightingScroll(textarea)
-    })
-    textarea.addEventListener('keydown', checkIfKeyIsTab)
-
     window.addEventListener('resize', renderAll)
 
     await initCompilation()
@@ -232,16 +224,15 @@ async function init() {
     
     //these are best kept separate. There are various things you sometimes need to do between
     compile()
-    textarea.focus()
-    textarea.setSelectionRange(3,3)
-    updateMentionVisibilityAndIndication()
+    setCaretPosition(3)
+    updateMentionVisibilitiesAndIndication()
     renderAll()
     textarea.focus()
 
     document.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === true) {
             compile()
-            updateMentionVisibilityAndIndication()
+            updateMentionVisibilitiesAndIndication()
             renderAll()
         }
     })

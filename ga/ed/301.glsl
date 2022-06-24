@@ -80,6 +80,21 @@ vec4 sandwichDqPt(in Dq dq, in vec4 pt) {
     return ret;
 }
 
+Dq sandwichDqDq(in Dq a, in Dq b) {
+    float[16] aAsMv;
+    dqToMv(a, aAsMv);
+
+    float[16] bAsMv;
+    dqToMv(b, bAsMv);
+
+    float[16] retAsMv;
+    sandwich(aAsMv, bAsMv, retAsMv);
+    
+    Dq ret;
+    mvToDq(retAsMv,ret);
+    return ret;
+}
+
 Dq joinPtsInDq(in vec4 a, in vec4 b) {
     float[16] aAsMv;
     mvFromVec(a, aAsMv);

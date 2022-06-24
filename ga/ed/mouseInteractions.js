@@ -25,7 +25,7 @@ function initMouseInteractions() {
     }
 
     let mouseAreaOld = null
-    updateMentionVisibilityAndIndication = (mouseArea, userIndicationX, userIndicationY) => {
+    updateMentionVisibilitiesAndIndication = (mouseArea, userIndicationX, userIndicationY) => {
         //moving the mouse should not get rid of the caret's indication
         let indicatedMentionOld = indicatedMention
 
@@ -76,7 +76,7 @@ function initMouseInteractions() {
                 indicatedMention.highlight()
             }
             else if(mouseArea !== document)
-                updateMentionVisibilityAndIndication(mouseArea, event.clientX, event.clientY)
+                updateMentionVisibilitiesAndIndication(mouseArea, event.clientX, event.clientY)
         }
         else {
             event.preventDefault()

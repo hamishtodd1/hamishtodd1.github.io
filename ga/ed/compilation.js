@@ -57,6 +57,14 @@ async function initCompilation()
     //or maybe, "if you've scrolled away from all those mentions". Maybe we go from top of window
 
     //used by three.js
+    let errorBoxHidden = true
+    hideErrorBoxIfNeeded = () => {
+        if (!errorBoxHidden) {
+            errorBox.style.top = "-200px" //TODO this is more for when you recompile
+            errorBoxHidden = true
+        }
+    }
+
     let threejsIsCheckingForShaderErrors = false
     webglErrorThrower = (errorLine) => {
 
@@ -69,8 +77,10 @@ async function initCompilation()
         let lineNumber = parseInt(errorParts[2]) - haphazardlyChosenNumber
 
         let errorContent = errorParts.slice(3).join(":")
+        log("yo")
         errorBox.textContent = errorContent
         errorBox.style.top = (lineToScreenY(.4 + lineNumber)).toString() + "px"
+        errorBoxHidden = false
 
         threejsIsCheckingForShaderErrors = false
     }

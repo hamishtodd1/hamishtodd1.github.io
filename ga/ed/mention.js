@@ -60,7 +60,7 @@ function initMention()
     getClosestTextAreaMention = (screenX, screenY) => {
         let ret = mentions.find((mention) => {
             if (mention.presenceLevel === PRESENCE_LEVEL_DELETED ||
-                mention.lineIndex > lowestChangedLineSinceCompile)
+                mention.lineIndex >= lowestChangedLineSinceCompile)
                 return false
 
             let mb = mention.horizontalBounds
