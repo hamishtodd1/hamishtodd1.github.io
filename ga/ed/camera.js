@@ -42,14 +42,14 @@ function initCamera() {
     frameQuatHorizontal.sandwich(e1, frustumUntransformed.left)
     frameQuatVertical.sandwich(e2, frustumUntransformed.bottom)
     frameQuatHorizontal[0] *= -1.
-    frameQuatVertical[0] *= -1.
+    frameQuatVertical[0]   *= -1.
     frameQuatHorizontal.sandwich(e1, frustumUntransformed.right)
     frameQuatVertical.sandwich(e2, frustumUntransformed.top)
 
     window.oncontextmenu = () => { return false }
 
-    let cameraLat = -TAU * .05
-    let cameraLon = TAU * .05
+    let cameraLat = 0.//-TAU * .05
+    let cameraLon = TAU * .125
     addToCameraLonLat = (changeX, changeY) => {
         let lonDiff = -.006 * changeX
         lonDiff = Math.sign(lonDiff) * (Math.min(Math.abs(lonDiff), 1.8))
@@ -90,17 +90,35 @@ function initCamera() {
     addToCameraLonLat(0.,0.)
 
     let rightSideDist = 4.;
-    orthCamera = new THREE.OrthographicCamera(
+    camera2d = new THREE.OrthographicCamera(
         -rightSideDist,
         rightSideDist,
         rightSideDist / camera.aspect, -rightSideDist / camera.aspect,
         camera.near, camera.far)
-    orthCamera.position.z = camera.position.length()
+    camera2d.position.z = camera.position.length()
 
-    orthCamera.oldClientToPosition = (dw) => {
+    camera2d.oldClientToPosition = (dw,target) => {
         let [xProportion, yProportion] = dw.oldClientToProportion()
-        let x = orthCamera.left + xProportion * (orthCamera.right - orthCamera.left)
-        let y = orthCamera.bottom + (1. - yProportion) * (orthCamera.top - orthCamera.bottom)
-        return [x,y]
+        target.x = camera2d.left + xProportion * (camera2d.right - camera2d.left)
+        target.y = camera2d.bottom + (1. - yProportion) * (camera2d.top - camera2d.bottom)
+        return target
+    }
+
+    camera2d.positionToWindow = (position, dw) => {
+        let ndcX = (position.x - camera2d.left) / (camera2d.right - camera2d.left)
+        let ndcY = (position.y - camera2d.bottom) / (camera2d.top - camera2d.bottom)
+
+        return ndcToWindow(ndcX, ndcY, dw)
+    }
+
+    camera.positionToWindow = (worldSpacePosition, dw)=>{
+        worldSpacePosition.applyMatrix4(camera.worldToCanvas)
+        let canvasX = worldSpacePosition.x / worldSpacePosition.w
+        let canvasY = worldSpacePosition.y / worldSpacePosition.w
+
+        let ndcX = canvasX / 2. + .5
+        let ndcY = canvasY / 2. + .5
+
+        return ndcToWindow(ndcX, ndcY, dw)
     }
 }

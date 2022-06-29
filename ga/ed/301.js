@@ -41,6 +41,16 @@ function init301WithoutDeclarations() {
         fromMv(mv) {
             for(let i = 0; i < N_BIVECTOR_COEFS; ++i)
                 this[i] = mv[i+5]
+
+            return this
+        }
+
+        toMv(target) {
+            target.copy(zeroMv)
+            for (let i = 0; i < N_BIVECTOR_COEFS; ++i)
+                target[i + 5] = this[i]
+
+            return target
         }
 
         exp(target) {
@@ -136,13 +146,13 @@ function init301WithoutDeclarations() {
             return this.normalize()
         }
 
-        log(target) {
-            if (r[0] == 1.)
-                return target.set(this[1], this[2], this[3], 0., 0., 0.);
-            var a = 1. / (1. - this[0] * this[0]),                 // inv squared length. 
-                b = Math.acos(this[0]) * Math.sqrt(a),                // rotation scale
-                c = a * this[7] * (1. - this[0] * b);               // translation scale
-            return target.set(c * this[6] + b * this[1], c * this[5] + b * this[2], c * this[4] + b * this[3], b * this[4], b * this[5], b * this[6]);
+        logarithm(target) {
+            if (this[0] == 1.)
+                return target.set(this[1], this[2], this[3], 0., 0., 0.)
+            let a = 1. / (1. - this[0] * this[0])     // inv squared length. 
+            let b = Math.acos(this[0]) * Math.sqrt(a) // rotation scale
+            let c = a * this[7] * (1. - this[0] * b)  // translation scale
+            return target.set(c * this[6] + b * this[1], c * this[5] + b * this[2], c * this[4] + b * this[3], b * this[4], b * this[5], b * this[6])
         }
     }
     window.Dq = Dq
@@ -325,6 +335,28 @@ function init301WithoutDeclarations() {
             console.log(str)
         }
 
+        dqLog(target) {
+            if(target === undefined)
+                target = new Mv()
+            localDq0.fromMv(this)
+            localDq0.logarithm(localBiv0)
+            localBiv0.toMv(target)
+            return target
+        }
+
+        extractTranslation(target) {
+            let normalized = this.getNormalization(newMv)
+
+            let linePart = normalized.selectGrade(2, newMv)
+            let linePartInversion = linePart.invert(newMv)
+
+            let pssPart  = normalized.selectGrade(4, newMv)
+            mul(pssPart, linePartInversion,target)
+            target[0] += 1.
+
+            return target
+        }
+
         fromAxisAngle(axis,angle) {
             localBiv0.fromMv(axis)
             localBiv0.multiplyScalar(angle / 2.)
@@ -346,9 +378,6 @@ function init301WithoutDeclarations() {
             let thisDual = newMv
             dual(this,thisDual)
             return thisDual.eNorm()
-            // let pointNorm = Math.sqrt(  sq(this[11]) + sq(this[12]) + sq(this[13]))
-            // let lineNorm = Math.sqrt(   sq(this[ 5]) + sq(this[ 6]) + sq(this[ 7]))
-            // return Math.max(Math.abs(this[1]), Math.abs(this[15]), pointNorm, lineNorm)
         }
         norm() {
             if(this.hasEuclideanPart())
@@ -359,8 +388,12 @@ function init301WithoutDeclarations() {
 
         normalize() {
             this.multiplyScalar(1./this.norm())
-
             return this
+        }
+
+        getNormalization(target) {
+            target.copy(this)
+            return target.normalize()
         }
 
         invert(target) {
@@ -436,6 +469,10 @@ function init301WithoutDeclarations() {
             }
 
             return target
+        }
+
+        reverse(target) {
+            reverse(this,target)
         }
 
         getGrade() {
@@ -559,8 +596,6 @@ async function init301() {
     dq0 = new Dq()    
         
     generalShaderPrefix += await getTextFile('301.glsl') //it's purely the dual quaternion part
-
-    e1.log()
 }
 
 function createSharedFunctionDeclarationsStrings()

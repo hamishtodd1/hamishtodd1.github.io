@@ -11,7 +11,7 @@
 */
 function initStudyDw() {
 
-    let ourDw = new Dw("study", false, false, orthCamera)
+    let ourDw = new Dw("study", false, false, camera2d)
     // ourDw.elem.style.display = 'none'
 
     const axisMat = new THREE.LineBasicMaterial({
@@ -39,7 +39,7 @@ function initStudyDw() {
 
 function initStudyNumbers() {
 
-    let geo = new THREE.CircleBufferGeometry(.1, 32)
+    let dotGeo = new THREE.CircleBufferGeometry(.1, 32)
 
     let ourDw = dws.study
 
@@ -52,7 +52,7 @@ function initStudyNumbers() {
             super(variable)
 
             let mat = new THREE.MeshBasicMaterial({ color: variable.col })
-            this.#mesh = ourDw.NewMesh(geo, mat)
+            this.#mesh = ourDw.NewMesh(dotGeo, mat)
         }
 
         updateFromShader() {
@@ -63,9 +63,7 @@ function initStudyNumbers() {
 
         overrideFromDrag(dw) {
             if (dw === ourDw) {
-                let [x, y] = orthCamera.oldClientToPosition(dw)
-                this.#mesh.position.x = x
-                this.#mesh.position.y = y
+                camera2d.oldClientToPosition(dw, this.#mesh.position)
                 
                 updateOverride(this, (overrideFloats) => {
                     overrideFloats[0] = this.#mesh.position.x
@@ -76,10 +74,7 @@ function initStudyNumbers() {
         }
 
         getCanvasPosition(dw) {
-            let ndcX = (this.#mesh.position.x-orthCamera.left  ) / (orthCamera.right - orthCamera.left)
-            let ndcY = (this.#mesh.position.y-orthCamera.bottom) / (orthCamera.top - orthCamera.bottom)
-
-            return ndcToWindow(ndcX,ndcY,dw)
+            return camera2d.positionToWindow(this.#mesh.position,dw)
         }
 
         getShaderOutputFloatString() {

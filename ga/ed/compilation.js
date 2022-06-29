@@ -100,12 +100,15 @@ async function initCompilation()
             if (mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED)
                 mention.presenceLevel = PRESENCE_LEVEL_UNCONFIRMED
         })
-        
+
         let ignoringDueToStruct = false
         let textLines = text.split("\n")
         let finalChunks = Array(textLines.length)
         let outputterChunks = Array(textLines.length)
         let mentionIndex = 0
+        //we assume that stuff is limited to a line
+        //All that's relevant is on it
+        //If we change it in its entirety, nothing will be lost
         textLines.forEach((l,lineIndex) => {
 
             if (!ignoringDueToStruct && l.indexOf("struct") !== -1)
@@ -115,8 +118,15 @@ async function initCompilation()
             if(ignoringDueToStruct)
                 return
 
-            // if (l.indexOf("complex") !== -1 )
-            //     debugger
+            
+            //-----------NEW
+            
+            //the idea is to first look for declarations eg vec4 myVec
+            //those registered, scan for those specific names in the lines after
+            
+
+                
+            //-----------OLD
             let matches = [...l.matchAll(nameRegex)]
             finalChunks[lineIndex] = l
             outputterChunks[lineIndex] = l
@@ -127,9 +137,9 @@ async function initCompilation()
                 if (glslReservedRegex.test(name) || notConsideredNamesRegex.test(name) || types[name] !== undefined)
                     return
 
-                //we assume that stuff is limited to a line
-                //All that's relevant is on it
-                //If we change it in its entirety, nothing will be lost
+
+
+            //-----------ORDINARY
 
                 if (variableNumMentions[name] === undefined)
                     variableNumMentions[name] = 0

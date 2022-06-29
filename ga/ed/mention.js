@@ -120,15 +120,7 @@ function initMention()
         //this may well get overridden
         getCanvasPosition(dw) {
             this.getWorldSpaceCanvasPosition(canvasPos,dw)
-
-            canvasPos.applyMatrix4(camera.worldToCanvas)
-            let canvasX = canvasPos.x / canvasPos.w
-            let canvasY = canvasPos.y / canvasPos.w
-
-            let ndcX = canvasX / 2. + .5
-            let ndcY = canvasY / 2. + .5
-
-            return ndcToWindow(ndcX,ndcY,dw)
+            return camera.positionToWindow(canvasPos,dw)
         }
 
         highlight() {

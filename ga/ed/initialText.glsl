@@ -1,7 +1,10 @@
 void mainImage( out vec4 fragColor ) {
-    vec3 myVec = vec3(1.,1.,0.);
+    vec3 myVec = vec3(1.,1.,1.);
 
-    Dq rotation = Dq(myVec.x, 0.,0.,0., 0.,myVec.y,0., myVec.z);
+    Dq rotation = Dq(myVec.x, 0.,0.,0., 0.,myVec.y,0., 0.);
+
+    Dq idealLine = Dq(0., 0.,1.,0., 0.,0.,0., 0.);
+    Dq eucliLine = Dq(0., 0.,0.,0., 0.,1.,0., 0.);
 
     vec2 boog = vec2(1.,1.);
     

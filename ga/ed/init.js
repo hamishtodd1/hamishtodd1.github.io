@@ -3,20 +3,16 @@ Mobius strip?
 Planes?
 Floats...
 
+
 TODO
-    Bugs
-        Currently, if a variable is uninitialized, you still get shown a point at 0,0,0 in the window
-        When you're finished changing something, caret goes on a line that allows you to see your handiwork
-        Got many dws? they auto-rearrange
-        When you grab an ideal point, should be dragged on the infinity dw
-        Tab and enter make it so you can't ctrl+z
     For next presentation
+        Applying dqs to lines (need to test!)
         Dragging in the window itself moves the line as if it were a 180 / line reflection
-        Applying dqs to lines
-        Mobius strip dw for double cover
-            The unit complex numbers are the edge
-            Intermediate between complex plane view of rotors
-            Or maybe there's a clever strip showing whole thing        
+        Double cover dw
+            Instead of points, arcs from (1,0)
+            It's a mobius strip
+            If it's a translation, it cuts up differently?
+                It'll be up and down the lines s = 1 or s = -1
         Suggestions
             You have a single shader calculate the whole lot of them
             Player is dragging eg a point around
@@ -35,11 +31,36 @@ TODO
             For this, should think of a manipulation method that works for point, line and plane
             Rotations is done by grabbing the infinity window
         When hovering something in dw, its name in text window inflates?
+        3D print some blades
+    Bugs
+        Currently, if a variable is uninitialized, you still get shown a point at 0,0,0 in the window
+        When you're finished changing something, caret goes on a line that allows you to see your handiwork
+            Could make it so that when a new line is added, the whole thing scrolls so that that line is in place
+            Or perhaps check whether the current line is just a straight redefinition like a = 5 - REPLACE lines like that
+        Got many dws? they auto-rearrange
+        When you grab an ideal point, should be dragged on the infinity dw
+        Tab and enter make it so you can't ctrl+z
     GDC
         mentions are sensetive to for loops
             For loops have an early-escape integer
             For every mention in the loop body, we're cutting off the shader after that integer
-        Needs to be able to take any set of uniforms from something you paste in, and create guesses
+        Take any bunch of uniforms from something you paste in, and create guesses / input fields
+            Stanford bunny for example. Click somewhere on it, get the vertex close to their on its surface
+        Dome window for 2D PGA
+        Export(/import?):
+            threejs
+            unity
+            html page - EE
+            export threejs function creating the thing it is with the appropriate uniforms
+            Workshop for kids at makespace. Everyone's stuff goes into a VR sim
+        VR
+            Single button to cycle through mentions
+            Hand as a uniform
+            Gestures: 
+                Pointing motion for an ideal point, pinch for a euclidean point
+                grip for a line, 
+                flat palm for plane
+        A puzzle game that is a series of "code this shader" challenges
         Clickable "field" / texture / initial state
             Can click on the thing and it changes the attribute values to those at that point
             May want to draw or copypaste
@@ -57,6 +78,9 @@ TODO
                 Always recorded as an array with, say, 256 samples. Makes it easy to add them
                 Fourier series to interpolate or whatever
         Struct and function definitions
+            Maybe even visualized functions as curves for R^n -> R^m for (m+n) < 4
+            Same with I^2 -> I^3 or less. Need windows for these
+            This is fun but not necessarily useful for PGA
         (2,1) halfplane window - v. important, lets you program with mouse
             This is the eventual destiny of the "float" window
             lerp as an example of a simple function to try it out with
@@ -67,20 +91,9 @@ TODO
         Uniforms
             Mouse ray in final dw
             Shadertoy-inspired
-        VR
-            Single button to cycle through mentions
-            Hand as a uniform
-        Dome window for 2D PGA
         Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
             move the mouse around
             make some mentions then delete them
-        Export(/import?):
-            threejs
-            unity
-            html page - EE
-            export threejs function creating the thing it is with the appropriate uniforms
-            Workshop for kids at makespace. Everyone's stuff goes into a VR sim
-        A puzzle game that is a series of "code this shader" challenges
         Documented API for making your own window visualizations
     Long term
         Other events
@@ -198,15 +211,16 @@ async function init() {
     await initVectorSpaceDw()
     new Dw("euclidean", true)
     initInfinityDw()
-    new Dw("scalar", false, false, orthCamera)
-    // dws.scalar.elem.style.display = 'none'
+    new Dw("scalar", false, false, camera2d)
     initStudyDw()
-    // dws.study.elem.style.display = 'none'
+    dws.study.elem.style.display = 'none'
+    // dws.scalar.elem.style.display = 'none'
     
     initVec3s()
     initFloats()
     initStudyNumbers()
-    initPgaMentions()
+    initPoints()
+    initDqs()
 
     initMouseInteractions()
 
@@ -220,7 +234,7 @@ async function init() {
     await initCompilation()
 
     initCaretInteractions()
-    setCaretPosition(38)
+    setCaretPosition(198)
     
     function compileAndUpdate() {
         compile()

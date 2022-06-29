@@ -112,7 +112,7 @@ Dq joinPtsInDq(in vec4 a, in vec4 b) {
 
 
 float sinc(in float a) {
-    return a == 0. ? 1. : sin(a);
+    return a == 0. ? 1. : sin(a)/a;
 }
 void dqExp(in Dq B, out Dq target) {
     float l = (B.e12*B.e12 + B.e31*B.e31 + B.e23*B.e23);  float m = (B.e01*B.e23 + B.e02*B.e31 + B.e03*B.e12);

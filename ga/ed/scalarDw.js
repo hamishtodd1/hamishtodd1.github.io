@@ -54,7 +54,7 @@ function initFloats() {
         overrideFromDrag(dw) {
             if (dw === ourDw) {
                 let [xProportion, yProportion] = dw.oldClientToProportion()
-                this.#mesh.position.x = orthCamera.left + xProportion * (orthCamera.right - orthCamera.left )
+                this.#mesh.position.x = camera2d.left + xProportion * (camera2d.right - camera2d.left )
                 
                 updateOverride(this, (overrideFloats) => {
                     overrideFloats[0] = this.#mesh.position.x
@@ -64,7 +64,7 @@ function initFloats() {
         }
 
         getCanvasPosition(dw) {
-            let ndcX = (this.#mesh.position.x-orthCamera.left) / (orthCamera.right - orthCamera.left)
+            let ndcX = (this.#mesh.position.x-camera2d.left) / (camera2d.right - camera2d.left)
             let ndcY = .5
 
             return ndcToWindow(ndcX,ndcY,dw)
