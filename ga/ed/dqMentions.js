@@ -4,6 +4,8 @@ function initDqs() {
     let iDw = dws.infinity
     let sDw = dws.study
 
+    let outOfTheWayPosition = new THREE.Vector3(camera.far * 999., camera.far * 999., camera.far * 999.)
+
     let projectedOnOrigin = new Mv()
     let quatToOriginVersion = new Mv()
     let joinedWithOrigin = new Mv()
@@ -24,7 +26,6 @@ function initDqs() {
     let linePart = new Mv() //bivector?
     let dragPlane = new Mv() //maybe two drag planes
     let newLinePart = new Mv()
-    let dragPoint = new Mv()
     let idealLineDual = new Mv()
     let labelPoint = new Mv()
     let worldSpaceCameraPosition = new THREE.Vector4()
@@ -84,13 +85,13 @@ function initDqs() {
                 this.#eDwMesh.position.copy(outOfTheWayPosition)
                 this.#iDwRingMesh.position.copy(outOfTheWayPosition)
                 this.#iDwLineMesh.position.copy(outOfTheWayPosition)
-                //and the motor window is the only place you see this
+                //and the motor window is the only place you see that this thing has a scalar value
                 return
             }
 
             if (linePart.eNorm() !== 0.) //ring / infinity mesh
                 getQuaternionToProjectionOnOrigin(linePart, this.#iDwLineMesh.quaternion)
-            else { // euclidean mesh
+            else {
                 //default mv is e02
                 join(e123, linePart, joinedWithOrigin)
                 mul(joinedWithOrigin, e3, quatToOriginVersion)
@@ -107,73 +108,76 @@ function initDqs() {
             this.getShaderOutput(dwNewValues)
             newDq.copy(dwNewValues)
             newDq.toMv(this.#mv)
-            // if (this.variable.name === "infRotation")  {
-            //     log(dwNewValues)
-            //     log(newDq)
-            //     log(this.#mv)
-            // }
 
             this.updateFromMv()
         }
 
         onGrab(dw) {
             if (dw === eDw) {
-                if (this.#mv.hasEuclideanPart())
-                    camera.frustum.far.projectOn(this.#mv, dragPlane)
+                this.#mv.selectGrade(2, linePart)
+                if (linePart.hasEuclideanPart())
+                    camera.frustum.far.projectOn(linePart, dragPlane)
                 else dragPlane.copy(e0)
             }
         }
 
         overrideFromDrag(dw) {
+            const self = this
+            function updateFromNewLinePart(overrideFloats) {
+                let normalizer = linePart.norm() / newLinePart.norm()
+                overrideFloats[0] = self.#mv[0]
+                overrideFloats[8] = self.#mv[15]
+                for (let i = 0; i < 6; ++i)
+                    overrideFloats[i + 1] = newLinePart[i + 5] * normalizer
+            }
+
+            this.#mv.selectGrade(2, linePart)
 
             if (dw === sDw) {
                 camera2d.oldClientToPosition(dw, this.#sDwMesh.position)
                 console.error("TODO figure out how to change #mv!")
             }
             else if (dw === eDw) {
-                this.#mv.selectGrade(2, linePart)
-                let oldENorm = linePart.eNorm()
-                if(oldENorm !== 0.) {
-                    let mouseRay = getMouseRay(dw)
-
-                    meet(dragPlane,mouseRay,dragPoint)
-                    mv0.copy(linePart).projectOn(dragPoint,newLinePart)
-                    newLinePart.normalize()
-                    
-                    for (let i = 5; i < 11; ++i)
-                        this.#mv[i] = newLinePart[i] * oldENorm
-
-                    //if mouse goes somewhere more than 45 degrees from the line, translate it
-                    //if less than 45, turn it
-                }
-                else {
-                    //it's at infinity
-                }
+                let oldJoinedWithCamera = join(linePart, camera.mvs.pos, mv0)
+                let joinedWithCamera = oldJoinedWithCamera.projectOn(getMouseRay(dw), mv1)
+                meet(joinedWithCamera, dragPlane, newLinePart)
+                
+                updateOverride(this, updateFromNewLinePart)
             }
             else if (dw === iDw) {
                 
-                // threeRay.origin.copy(camera.position)
-                // let mouseRay = getMouseRay(dw)
-                // meet(e0, mouseRay, draggedPoint).toVector(threeRay.direction)
-                // threeRay.direction.normalize()
+                let iDwIntersection = new Mv()
+                let draggingOnSphere = iDw.mouseRayIntersection(iDwIntersection) !== null
+                let lineIsInfinite = !linePart.hasEuclideanPart()
 
-                // let intersectionResult = threeRay.intersectSphere(threeSphere, v1)
-                // if (intersectionResult !== null) {
-                //     this.#mv.fromVec(v1)
-                //     this.#mv[14] = 0.
+                if ( !draggingOnSphere && lineIsInfinite) {
+                    meet(camera.frustum.far, e0, newLinePart)
+                    //COULD negate it if that's closer to the current value
+                }
 
-                //     updateOverride(this, getFloatsForOverride)
-                // }
+                if (draggingOnSphere && lineIsInfinite) {
+                    let intersectionJoinedWithOrigin = join(iDwIntersection, e123)
+
+                    let oldJoinedWithOrigin = join(linePart, e123, mv1)
+                    let joinedWithOrigin = oldJoinedWithOrigin.projectOn(intersectionJoinedWithOrigin, mv2)
+
+                    meet(joinedWithOrigin, e0, newLinePart)
+                }
+                
+                if( draggingOnSphere && !lineIsInfinite ) {
+                    let currentOrthPlane = inner(linePart,e123,  mv0).normalize()
+                    let intendedOrthPlane = dual(iDwIntersection,mv1).normalize()
+                    mul(intendedOrthPlane, currentOrthPlane, mv2)
+                    mv2.sqrtSelf()
+                    mv2.sandwich(linePart,newLinePart)
+                    newLinePart.log()
+                }
+
+                //if it's euclidean and you're not on the sphere, want it to be in the plane really
+
+                updateOverride(this, updateFromNewLinePart)
             }
             else console.error("not in that dw")
-
-            //will be cool to edit at infinity. Probably yes, one point of it is stuck, an
-
-            updateOverride(this, (overrideFloats) => {
-                dq0.fromMv(this.#mv)
-                for(let i = 0; i < 8; ++i)
-                    overrideFloats[i] = dq0[i]
-            })
         }
 
         setVisibility(newVisibility) {
@@ -251,7 +255,7 @@ function initDqs() {
             return ret
         }
     }
-    types.Dq = DqMention
+    mentionClasses.Dq = DqMention
 
     // if(0)
     // {

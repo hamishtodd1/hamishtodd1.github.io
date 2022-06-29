@@ -13,6 +13,8 @@ function initPoints() {
     let iDw = dws.infinity
     let sDw = dws.study
 
+    let outOfTheWayPosition = new THREE.Vector3(camera.far * 999., camera.far * 999., camera.far * 999.)
+
     let dragPlane = new Mv()
 
     ////////////
@@ -44,11 +46,8 @@ function initPoints() {
     // POINTS //
     ////////////
     
-    let threeRay = new THREE.Ray()
-    let threeSphere = new THREE.Sphere(new THREE.Vector3(), INFINITY_RADIUS)
     let draggedPoint = new Mv()
     let ptNewValues = new Float32Array(4)
-    let outOfTheWayPosition = new THREE.Vector3(camera.far * 999., camera.far * 999., camera.far * 999.)
     class Point extends Mention {
         #eDwMesh;
         #iDwMesh;
@@ -110,18 +109,10 @@ function initPoints() {
                 updateOverride(this, getFloatsForOverride)
             }
             else if(dw === iDw) {
-                threeRay.origin.copy(camera.position)
-                let mouseRay = getMouseRay(dw)
-                meet(e0, mouseRay, draggedPoint).toVector(threeRay.direction)
-                threeRay.direction.normalize()
 
-                let intersectionResult = threeRay.intersectSphere(threeSphere,v1)
-                if(intersectionResult !== null) {
-                    this.#mv.fromVec(v1)
-                    this.#mv[14] = 0.
-
+                let intersectionResult = iDw.mouseRayIntersection(this.#mv)
+                if(intersectionResult !== null)
                     updateOverride(this, getFloatsForOverride)
-                }
             }
             else console.error("not in that dw")
         }
@@ -164,5 +155,5 @@ function initPoints() {
             return m.visible
         }
     }
-    types.vec4 = Point
+    mentionClasses.vec4 = Point
 }

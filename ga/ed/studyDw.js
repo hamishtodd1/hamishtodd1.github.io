@@ -99,5 +99,5 @@ function initStudyNumbers() {
             return this.#mesh.visible
         }
     }
-    types.vec2 = Vec2
+    mentionClasses.vec2 = Vec2
 }

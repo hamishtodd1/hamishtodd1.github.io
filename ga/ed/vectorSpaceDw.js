@@ -211,5 +211,5 @@ function initVec3s()
                    (this.#iMesh.visible && this.#iMesh.parent === dw.scene)
         }
     }
-    types.vec3 = Arrow
+    mentionClasses.vec3 = Arrow
 }

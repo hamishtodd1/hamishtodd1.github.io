@@ -231,7 +231,7 @@ async function init() {
 
     window.addEventListener('resize', renderAll)
 
-    await initCompilation()
+    await initCompilation() //after creation of mention classes
 
     initCaretInteractions()
     setCaretPosition(198)

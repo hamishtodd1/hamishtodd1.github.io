@@ -26,9 +26,11 @@ async function initCompilation()
     let randomColor = new THREE.Color()
 
     class Variable {
-        name;
-        col = new THREE.Color(0., 0., 0.);
-        class;
+        name
+        col = new THREE.Color(0., 0., 0.)
+        class
+        lowestUnusedMention = 0
+        mentions = []
 
         constructor(newName, newClass) {
             this.name = newName
@@ -40,13 +42,18 @@ async function initCompilation()
 
             variables.push(this)
         }
+
+        getLowestUnusedMention() {
+            while(this.mentions.length <= this.lowestUnusedMention) {
+                let newMention = new this.class(this)
+                this.mentions.push(newMention)
+            }
+
+            return this.mentions[this.lowestUnusedMention++]
+        }
     }
 
     const nameRegex = /(?<=[^a-zA-Z_$0-9])([a-zA-Z_$][a-zA-Z_$0-9]*)/g
-    const glslReservedRegex = Prism.languages.glsl.keyword
-    const lineDividingRegex = /^.*(\r?\n|$)/mg
-    const notConsideredNamesRegex = /\b(?:mainImage|e12|e23|e31|joinPtsInDq|x|y|z|w|xy|xz|yz|yx|zy|zx|fragColor|dqExp|sandwichDqPt|cos|sin|length)\b/
-    const structRegex = /struct\s+([a-zA-Z_$][a-zA-Z_$0-9]*)\s+{[^}]*}/gm
 
     //if you want to use this, should probably replace with whitespace
     const commentNotNewlineRegex = /\/\/[^\n]*/gm
@@ -77,7 +84,6 @@ async function initCompilation()
         let lineNumber = parseInt(errorParts[2]) - haphazardlyChosenNumber
 
         let errorContent = errorParts.slice(3).join(":")
-        log("yo")
         errorBox.textContent = errorContent
         errorBox.style.top = (lineToScreenY(.4 + lineNumber)).toString() + "px"
         errorBoxHidden = false
@@ -85,7 +91,12 @@ async function initCompilation()
         threejsIsCheckingForShaderErrors = false
     }
 
-    let variableNumMentions = {}
+    let types = Object.keys(mentionClasses)
+    let declRegexes = {}
+    types.forEach((type)=>{
+        declRegexes[type] = new RegExp('(?<=[^a-zA-Z_$0-9])(' + type + ')\\s*[a-zA-Z_$][a-zA-Z_$0-9]*', 'gm')
+    })
+
     compile = async () => {
 
         let text = textarea.value
@@ -96,11 +107,6 @@ async function initCompilation()
 
         text = text.replace(commentNotNewlineRegex,"")
         
-        mentions.forEach((mention) => {
-            if (mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED)
-                mention.presenceLevel = PRESENCE_LEVEL_UNCONFIRMED
-        })
-
         let ignoringDueToStruct = false
         let textLines = text.split("\n")
         let finalChunks = Array(textLines.length)
@@ -118,65 +124,33 @@ async function initCompilation()
             if(ignoringDueToStruct)
                 return
 
-            
-            //-----------NEW
-            
-            //the idea is to first look for declarations eg vec4 myVec
-            //those registered, scan for those specific names in the lines after
-            
-
-                
-            //-----------OLD
-            let matches = [...l.matchAll(nameRegex)]
             finalChunks[lineIndex] = l
             outputterChunks[lineIndex] = l
-            if(matches === null)
-                return
-            else matches.forEach((match)=>{
-                let name = match[0] //it's in 1 as well
-                if (glslReservedRegex.test(name) || notConsideredNamesRegex.test(name) || types[name] !== undefined)
+
+            types.forEach((type) => {
+                let indicesOfResults = [...l.matchAll(declRegexes[type])].map(a => a.index) //maybe don't make the regex anew every time...
+                //bit concerned about types inside eg variable names
+                indicesOfResults.forEach((index)=>{
+                    let name = l.slice(index + type.length).match(nameRegex)[0]
+
+                    let variable = variables.find((v) => v.name === name)
+                    if (variable === undefined)
+                        variable = new Variable(name, mentionClasses[type])
+                    variable.lowestUnusedMention = 0
+                })
+            })
+
+            //want a regex for each name you've found
+            let matches = [...l.matchAll(nameRegex)]
+            matches.forEach((match)=>{
+                let name = match[0]
+                let variable = variables.find((v) => v.name === name)
+                if( variable === undefined)
                     return
 
-
-
-            //-----------ORDINARY
-
-                if (variableNumMentions[name] === undefined)
-                    variableNumMentions[name] = 0
-
-                let mention = mentions.find((m) => 
-                    m.variable.name === name && 
-                    m.mentionsFromStart === variableNumMentions[name])
-                if (mention === undefined) {
-
-                    let variable = variables.find((v) => v.name === name )
-                    if(variable === undefined) {
-                        let partUpToName = l.slice(0, l.indexOf(name))
-                        let splitByWhitespace = partUpToName.split(/\s+/)
-                        let declaredType = splitByWhitespace[splitByWhitespace.length - 2]
-                        if( types[declaredType] === undefined ) {
-                            console.error(
-                                "unrecognized type: " + declaredType +
-                                "\nname:" + name +
-                                "\nline:" + l +
-                                "\nsplit:" + splitByWhitespace.join(","))
-                        }
-                        else {
-                            variable = new Variable(name, types[declaredType])
-                        }
-                    }
-
-                    mention = mentions.find((m) => 
-                        m.presenceLevel === PRESENCE_LEVEL_DELETED && 
-                        m.variable === variable)
-                    if (mention === undefined)
-                        mention = new variable.class(variable)
-
-                    mention.mentionsFromStart = variableNumMentions[name]
-                }
+                let mention = variable.getLowestUnusedMention()
 
                 mention.lineIndex = lineIndex
-                mention.presenceLevel = PRESENCE_LEVEL_CONFIRMED
                 mention.mentionIndex = mentionIndex++
 
                 let overrideAddition = `\n               if( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` + 
@@ -187,8 +161,6 @@ async function initCompilation()
                 outputterChunks[lineIndex] += overrideAddition + outputAddition
 
                 updateHorizontalBounds(match.index, name.length, mention.horizontalBounds)
-
-                ++variableNumMentions[name]
             })
         })
 
@@ -200,14 +172,7 @@ async function initCompilation()
         lowestChangedLineSinceCompile = Infinity
         updateChangedLineIndicator()
 
-        variableNumMentions = {}
-
         mentions.forEach((mention) => {
-            if (mention.presenceLevel === PRESENCE_LEVEL_UNCONFIRMED) {
-                mention.presenceLevel = PRESENCE_LEVEL_DELETED
-                return
-            }
-
             mention.updateFromShader()
         })
     }

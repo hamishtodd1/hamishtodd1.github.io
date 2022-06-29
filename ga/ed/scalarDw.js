@@ -91,5 +91,5 @@ function initFloats() {
             return this.#mesh.visible
         }
     }
-    types.float = Float
+    mentionClasses.float = Float
 }

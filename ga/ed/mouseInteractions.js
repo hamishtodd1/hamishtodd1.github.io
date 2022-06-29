@@ -40,7 +40,7 @@ function initMouseInteractions() {
         }
 
         mentions.forEach((mention) => {
-            let visibility = mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED && mentionVisibleDueToCaret(mention)
+            let visibility = mention.isBeingUsed() && mentionVisibleDueToCaret(mention)
             mention.setVisibility(visibility)
         })
 
@@ -68,7 +68,7 @@ function initMouseInteractions() {
                 indicatedMention.overrideFromDrag(grabbedDw,event)
     
                 mentions.forEach((mention) => {
-                    let visible = mention.presenceLevel === PRESENCE_LEVEL_CONFIRMED && (mentionVisibleDueToCaret(mention) || mention === indicatedMention )
+                    let visible = mention.isBeingUsed() && (mentionVisibleDueToCaret(mention) || mention === indicatedMention )
                     if (visible)
                         mention.updateFromShader()
                 })

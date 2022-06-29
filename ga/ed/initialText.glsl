@@ -4,14 +4,10 @@ void mainImage( out vec4 fragColor ) {
     Dq rotation = Dq(myVec.x, 0.,0.,0., 0.,myVec.y,0., 0.);
 
     Dq idealLine = Dq(0., 0.,1.,0., 0.,0.,0., 0.);
-    Dq eucliLine = Dq(0., 0.,0.,0., 0.,1.,0., 0.);
-
-    vec2 boog = vec2(1.,1.);
+    Dq eucliLine = Dq(0., 0.,0.,0., 0.,1.,1., 0.);
+    Dq myRotor = Dq(1., 0.,0.,0.,  1.,0.,0.,  0.);
     
-    vec4 idealPt = vec4( .2,0.,-1.,0.);
-    vec4 realPt = vec4( .2,0., 1.,1.);
-    vec4 transformedReal = sandwichDqPt(rotation, realPt);
-    vec4 transformedIdeal = sandwichDqPt(rotation, idealPt);
+    //Dq transformedEucliLine = sandwichDqDq( myRotor, eucliLine);
     
     fragColor = vec4(0.,myVec.x,myVec.y,1.);
 }

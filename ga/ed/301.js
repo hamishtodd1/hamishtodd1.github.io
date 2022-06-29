@@ -95,25 +95,6 @@ function init301WithoutDeclarations() {
             return this
         }
 
-        getNormalization(target) {
-            var A = 1. / Math.sqrt(this[0] * this[0] + this[4] * this[4] + this[5] * this[5] + this[6] * this[6])
-            var B = (this[7] * this[0] - (this[1] * this[6] + this[2] * this[5] + this[3] * this[4])) * A * A * A
-            return target.set(
-                A * this[0], 
-                A * this[1] + B * this[6], 
-                A * this[2] + B * this[5], 
-                A * this[3] + B * this[4],
-                A * this[4], 
-                A * this[5], 
-                A * this[6], 
-                A * this[7] - B * this[0])
-        }
-
-        normalize() {
-            this.getNormalization(localDq0)
-            return this.copy(localDq0)
-        }
-
         fromMv(mv) {
             this[0] = mv[0]
             this[7] = mv[15]
@@ -134,6 +115,29 @@ function init301WithoutDeclarations() {
             return target
         }
 
+        ///////////////////////
+        // INTERESTING STUFF //
+        ///////////////////////
+
+        getNormalization(target) {
+            var A = 1. / Math.sqrt(this[0] * this[0] + this[4] * this[4] + this[5] * this[5] + this[6] * this[6])
+            var B = (this[7] * this[0] - (this[1] * this[6] + this[2] * this[5] + this[3] * this[4])) * A * A * A
+            return target.set(
+                A * this[0],
+                A * this[1] + B * this[6],
+                A * this[2] + B * this[5],
+                A * this[3] + B * this[4],
+                A * this[4],
+                A * this[5],
+                A * this[6],
+                A * this[7] - B * this[0])
+        }
+
+        normalize() {
+            this.getNormalization(localDq0)
+            return this.copy(localDq0)
+        }
+
         sqrt(target) {
             if(target === undefined)
                 console.error("use sqrtSelf")
@@ -142,7 +146,7 @@ function init301WithoutDeclarations() {
         }
 
         sqrtSelf() {
-            this[0] += this[0] < 0. ? -1. : 1.
+            this[0] += this[0] < 0. ? -1. : 1. //really you should be adding its norm
             return this.normalize()
         }
 
@@ -419,9 +423,7 @@ function init301WithoutDeclarations() {
             if (target === undefined)
                 target = new Mv()
 
-            localDq0.fromMv(this).sqrtSelf().toMv(target)
-
-            return target
+            return target.copy(this).sqrtSelf()
         }
 
         sqrtSelf() {

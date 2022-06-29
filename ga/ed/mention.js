@@ -59,7 +59,7 @@ function initMention()
 
     getClosestTextAreaMention = (screenX, screenY) => {
         let ret = mentions.find((mention) => {
-            if (mention.presenceLevel === PRESENCE_LEVEL_DELETED ||
+            if (!mention.isBeingUsed() ||
                 mention.lineIndex >= lowestChangedLineSinceCompile)
                 return false
 
@@ -91,13 +91,12 @@ function initMention()
     }
 
     class Mention {
-        variable;
+        variable
 
-        mentionsFromStart;
-        horizontalBounds = { x: 0., w: 0. };
-        presenceLevel = PRESENCE_LEVEL_DELETED;
-        lineIndex = -1;
-        mentionIndex = -1;
+        mentionsFromStart
+        horizontalBounds = { x: 0., w: 0. }
+        lineIndex = -1
+        mentionIndex = -1
 
         constructor(variable) {
             mentions.push(this) //maybe better as mentions of a certain subclass
@@ -111,6 +110,11 @@ function initMention()
 
         onGrab(dw) {
 
+        }
+
+        isBeingUsed() {
+            let ourIndex = this.variable.mentions.indexOf(this)
+            return ourIndex < this.variable.lowestUnusedMention
         }
 
         getShaderOutput(target) {

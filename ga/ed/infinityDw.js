@@ -16,6 +16,30 @@ function initInfinityDw()
     euclideanHider.scale.setScalar(.1)
     dw.addNonMentionChild(euclideanHider)
 
+    let threeRay = new THREE.Ray()
+    let threeSphere = new THREE.Sphere(new THREE.Vector3(), INFINITY_RADIUS)
+    let mouseRayDirection = new Mv()
+
+    //possibly needed for vectorspace too
+    dw.mouseRayIntersection = (mv) => {
+        //mouseRay to threeRay
+        threeRay.origin.copy(camera.position)
+        let mouseRay = getMouseRay(dw)
+        meet(e0, mouseRay, mouseRayDirection).toVector(threeRay.direction)
+        threeRay.direction.normalize()
+
+        let result = threeRay.intersectSphere(threeSphere, v1)
+        if(result === null) {
+            //take the direction from the center
+            return null
+        }
+        else {
+            mv.fromVec(v1)
+            mv[14] = 0.
+            return mv
+        }
+    }
+
     //this isn't quite right because the angleHeight is based on latitude lines,
     // let angleWidth = (TAU/360.)*otherFov(camera.fov, camera.aspect, true)
     // let angleHeight = (TAU/360.)*camera.fov

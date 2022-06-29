@@ -12,14 +12,10 @@ const FULL_SCREEN_QUAD_MATRIX = new THREE.Matrix4()
 const mentions = []
 const variables = []
 const dws = {}
-const types = {}
+const mentionClasses = {}
 
 const INFINITY_RADIUS = 1.7
 const pointGeo = new THREE.SphereBufferGeometry(.1, 32, 16)
-
-const PRESENCE_LEVEL_UNCONFIRMED = -1
-const PRESENCE_LEVEL_CONFIRMED = 1
-const PRESENCE_LEVEL_DELETED = 0
 
 let generalShaderPrefix = `
 uniform float[16] overrideFloats;
