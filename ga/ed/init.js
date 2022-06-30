@@ -211,10 +211,10 @@ async function init() {
     await initVectorSpaceDw()
     new Dw("euclidean", true)
     initInfinityDw()
-    new Dw("scalar", false, false, camera2d)
     initStudyDw()
-    dws.study.elem.style.display = 'none'
-    // dws.scalar.elem.style.display = 'none'
+    new Dw("scalar", false, false, camera2d)
+    // dws.study.elem.style.display = 'none'
+    dws.scalar.elem.style.display = 'none'
     
     initVec3s()
     initFloats()

@@ -4,7 +4,7 @@ function generateReassignmentText() {
     let useLiteralValues = arguments[1] !== true
     if (useLiteralValues) {
         for (let i = 1, il = arguments.length; i < il; ++i)
-            ret += arguments[i].toFixed(2) + (i === il - 1 ? "" : ",")
+            ret += parseFloat(arguments[i].toFixed(2)) + (i === il - 1 ? "" : ",")
     }
     else {
         for (let i = 0, il = arguments[2]; i < il; ++i)

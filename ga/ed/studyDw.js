@@ -12,7 +12,6 @@
 function initStudyDw() {
 
     let ourDw = new Dw("study", false, false, camera2d)
-    // ourDw.elem.style.display = 'none'
 
     const axisMat = new THREE.LineBasicMaterial({
         color: 0x964B00
