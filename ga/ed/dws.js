@@ -13,11 +13,11 @@ async function initDws() {
     await initShaderOutput()
 
     class Dw {
-        scene = new THREE.Scene();
-        elem;
-        nonMentionChildren = [];
-        camera;
-        hasLights;
+        scene = new THREE.Scene()
+        elem
+        nonMentionChildren = []
+        camera
+        hasLights
 
         constructor(name, haveAll3dStuff, haveLights, ourCamera) {
             this.elem = document.createElement('div')
