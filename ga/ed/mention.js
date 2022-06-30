@@ -3,8 +3,12 @@ function generateReassignmentText() {
 
     let useLiteralValues = arguments[1] !== true
     if (useLiteralValues) {
-        for (let i = 1, il = arguments.length; i < il; ++i)
-            ret += parseFloat(arguments[i].toFixed(2)) + (i === il - 1 ? "" : ",")
+        for (let i = 1, il = arguments.length; i < il; ++i) {
+            let asStr = parseFloat(arguments[i].toFixed(2))
+            if( asStr === Math.round(asStr) )
+                asStr += "."
+            ret += asStr + (i === il - 1 ? "" : ",")
+        }
     }
     else {
         for (let i = 0, il = arguments[2]; i < il; ++i)
