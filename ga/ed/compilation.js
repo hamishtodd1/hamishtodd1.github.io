@@ -24,6 +24,8 @@
 async function initCompilation()
 {
     let randomColor = new THREE.Color()
+    let currentHue = 0.
+    let goldenRatio = (Math.sqrt(5.)+1.)/2.
 
     class Variable {
         name
@@ -37,7 +39,10 @@ async function initCompilation()
 
             this.class = newClass
 
-            randomColor.setHSL(Math.random(), 1., .5)
+            randomColor.setHSL(currentHue, 1., .5)
+            currentHue += 1./goldenRatio
+            while (currentHue > 1.)
+                currentHue -= 1.
             this.col.r = randomColor.r; this.col.g = randomColor.g; this.col.b = randomColor.b;
 
             variables.push(this)

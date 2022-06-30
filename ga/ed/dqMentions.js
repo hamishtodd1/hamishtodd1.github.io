@@ -251,16 +251,4 @@ function initDqs() {
         }
     }
     mentionClasses.Dq = DqMention
-
-    // if(0)
-    // {
-        // let mousePoint = new THREE.Mesh(new THREE.SphereBufferGeometry(.1, 32, 16), new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
-        // mousePoint.position.copy(outOfTheWayPosition)
-        // eDw.addNonMentionChild(mousePoint)
-        // eDw.elem.addEventListener('mousemove', (event) => {
-        //     let mouseRay = getMouseRay(eDw)
-
-        //     meet(e0, mouseRay, mv0).toVectorDisplayable(mousePoint.position)
-        // })
-    // }
 }

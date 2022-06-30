@@ -57,7 +57,7 @@ async function initShaderOutput() {
     let pixelsWide = 8
     let renderTarget = new THREE.WebGLRenderTarget(pixelsWide, 1)
     let outputsArray = new Uint8Array(pixelsWide * 4)
-    let outputterPrefix = await getTextFile('floatOutputter.glsl')
+    let outputterPrefix = await getTextFile('shaders/floatOutputter.glsl')
 
     let readoutSuffix = `
 varying vec2 frameCoord;

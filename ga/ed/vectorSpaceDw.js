@@ -7,7 +7,7 @@ async function initVectorSpaceDw() {
     // let rgbCube = new THREE.Mesh(new THREE.BoxGeometry(1.,1.,1.), new THREE.ShaderMaterial())
     // rgbCube.geometry.translate(.5, .5, .5)
     // rgbCube.material.vertexShader = basicVertex
-    // rgbCube.material.fragmentShader = await getTextFile('rgbCube.glsl')
+    // rgbCube.material.fragmentShader = await getTextFile('shaders/rgbCube.glsl')
     // rgbCube.material.transparent = true
     // dw.addNonMentionChild(rgbCube)
 

@@ -597,7 +597,7 @@ async function init301() {
 
     dq0 = new Dq()    
         
-    generalShaderPrefix += await getTextFile('301.glsl') //it's purely the dual quaternion part
+    generalShaderPrefix += await getTextFile('shaders/301.glsl') //it's purely the dual quaternion part
 }
 
 function createSharedFunctionDeclarationsStrings()

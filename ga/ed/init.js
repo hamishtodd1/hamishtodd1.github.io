@@ -3,7 +3,6 @@ Mobius strip?
 Planes?
 Floats...
 
-
 TODO
     For next presentation
         Planes
@@ -12,20 +11,18 @@ TODO
             It's a mobius strip
             If it's a translation, it cuts up differently?
                 It'll be up and down the lines s = 1 or s = -1
-        Things other than fragment shaders
-            vertex shaders
-            dropdown defining what this shader goes into:
-                line, with 
-                So there's a single variable that you could call "input", which is the vertex buffer
-                Make your own bloody normals
-            javascript eg threejs
-            Bootstrapping new visualizations
-        Take any bunch of uniforms from something you paste in, and create guesses / input fields
-            Stanford bunny for example. Click somewhere on it, get the vertex close to there on its surface
-        Grab and drag could be implemented by creating a motor and then applying it
-            For this, should think of a manipulation method that works for point, line and plane
-            Rotations is done by grabbing the infinity window
-        When hovering something in dw, its name in text window inflates?
+        Vertex shaders            
+        Mesh window, containing stanford bunny
+            Has an indicator on it: "where attributes are currently coming from". Can move indicator with mouse
+            Has a slider on it too, for animating
+        Uniforms / attributes
+            Mouse ray in final dw
+            Shadertoy-inspired
+            Window for texture attributes
+                May want to draw or copypaste
+                Considered as Initial state of a simulation
+                    "step" "play/pause" buttons. Can draw when paused
+                2D texture
     Bugs
         Currently, if a variable is uninitialized, you still get shown a point at 0,0,0 in the window
         When you're finished changing something, caret goes on a line that allows you to see your handiwork
@@ -45,27 +42,8 @@ TODO
             html page - EE
             export threejs function creating the thing it is with the appropriate uniforms
             Workshop for kids at makespace. Everyone's stuff goes into a VR sim
-        Clickable "field" / texture / initial state
-            Can click on the thing and it changes the attribute values to those at that point
-            May want to draw or copypaste
-            Time works like this: you can click "iterate" or "play" or "draw initial"
-                Iterate takes what's in your final window and makes it your initial state
-                Progress just simulates forward until you click it again
-            1D line
-            2D field/texture
-                for fluid
-            3D Mesh/manifold
-                Click at an arbitrary point and get the varyings at that point on that triangle
-            Could have an output buffer that says: "and assign the new values"
-            Draw curves in the window
-                It's just the same thing as painting a texture, it just gets recorded as vec2s in a 1D texture
-                Always recorded as an array with, say, 256 samples. Makes it easy to add them
-                Fourier series to interpolate or whatever
         Optional "teardrops" visualization. Once you've sorted out the meaning of that shit!
             3D print the shapes
-        Uniforms
-            Mouse ray in final dw
-            Shadertoy-inspired
         VR
             Single button to cycle through mentions
             Hand as a uniform
@@ -104,6 +82,11 @@ TODO
             make some mentions then delete them
         Documented API for making your own window visualizations
     Long term
+        Generate javascript game. Or maybe your own windows
+        Grab and drag could be implemented by creating a motor and then applying it
+            For this, should think of a manipulation method that works for point, line and plane
+            Rotations is done by grabbing the infinity window
+        When hovering something in dw, its name in text window inflates
         Other events
             Live coding
             Festival of the spoken nerd
@@ -208,6 +191,7 @@ async function init() {
     await initDws()
 
     initFinalDw()
+    let meshloadPromise = initMeshDw()
     await initVectorSpaceDw()
     new Dw("euclidean", true)
     initInfinityDw()
@@ -216,6 +200,7 @@ async function init() {
     // dws.study.elem.style.display = 'none'
     dws.scalar.elem.style.display = 'none'
     
+
     initVec3s()
     initFloats()
     initStudyNumbers()
@@ -224,7 +209,7 @@ async function init() {
 
     initMouseInteractions()
 
-    let initialTextFull = await getTextFile('initialText.glsl')
+    let initialTextFull = await getTextFile('shaders/initialText.glsl')
     let initialText = initialTextFull.slice(0, initialTextFull.indexOf(`//END//`))    
     textarea.value = initialText
     updateSyntaxHighlighting()
@@ -242,6 +227,7 @@ async function init() {
         renderAll()
     }
 
+    await meshloadPromise
     compileAndUpdate()
 
     document.addEventListener('keydown', (event) => {

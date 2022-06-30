@@ -4,6 +4,8 @@ function initMouseInteractions() {
 
     let rightClicking = false
 
+    let dragOccurred = false
+
     let textareaGrabAddition = [0.,0.]
     getAdjustedClient = () => {
         return [
@@ -65,6 +67,7 @@ function initMouseInteractions() {
     function onMouseMove(mouseArea, event) {
         if (!rightClicking) {
             if(grabbedDw !== null) {
+                dragOccurred = true
                 indicatedMention.overrideFromDrag(grabbedDw,event)
     
                 mentions.forEach((mention) => {
@@ -96,40 +99,36 @@ function initMouseInteractions() {
         event.stopPropagation()
     }
 
-    function onHoveredMentionGrab(dw,event,fromTextarea) {
-        
-        // if (lowestChangedLineSinceCompile !== Infinity) {
-        //     //you've changed it? This is to let them know no editing from the window allowed
-        //     $changedLineIndicator.style.stroke = "rgb(255,255,255)"
-        //     setTimeout(() => {
-        //         $changedLineIndicator.style.stroke = "rgb(180,180,180)"
-        //     }, 350)
-        // }
-        // else 
-        
-        if (event.which === 1 && lowestChangedLineSinceCompile === Infinity) {
-            if (fromTextarea) {
-                event.preventDefault()
-                textareaGrabAddition = indicatedMention.getCanvasPosition(dw)
-                textareaGrabAddition[0] -= oldClientX
-                textareaGrabAddition[1] -= oldClientY
-            }
-            else {
-                textareaGrabAddition[0] = 0.
-                textareaGrabAddition[1] = 0.
-            }
+    function onPotentialHoveredMentionGrab(event,dw) {
+        if (indicatedMention === null || event.which !== 1 )
+            return
 
-            grabbedDw = dw
-
-            indicatedMention.onGrab(dw)
+        let fromTextarea = dw === undefined
+        
+        if (fromTextarea) {
+            dw = indicatedMention.getTextareaManipulationDw()
+            
+            event.preventDefault()
+            textareaGrabAddition = indicatedMention.getCanvasPosition(dw)
+            textareaGrabAddition[0] -= oldClientX
+            textareaGrabAddition[1] -= oldClientY
         }
+        else {
+            textareaGrabAddition[0] = 0.
+            textareaGrabAddition[1] = 0.
+        }
+
+        grabbedDw = dw
+
+        indicatedMention.onGrab(dw)
     }
 
     document.addEventListener('mouseup',(event)=>{
         if (event.button === 2)
             rightClicking = false
         
-        if (event.button === 0 && grabbedDw !== null) {
+        if (event.button === 0 && dragOccurred) {
+            dragOccurred = false
             updateOverride(null)
             
             let newLine = "\n    " + indicatedMention.getReassignmentNew(false) + ";\n"
@@ -149,9 +148,6 @@ function initMouseInteractions() {
 
             compile()
             onCaretMove()
-            
-            //possibly go back to just all windows visible
-            //but if not that, would be nice not to have the ones already visible move when you hover
         }
 
         //be aware, an extra mousemove will happen. There is nothing you can do about this
@@ -166,8 +162,7 @@ function initMouseInteractions() {
     })
 
     textarea.addEventListener('mousedown', (event) => {
-        if ( indicatedMention !== null )
-            onHoveredMentionGrab(indicatedMention.getTextareaManipulationDw(), event, true)
+        onPotentialHoveredMentionGrab( event )
     })
     
     textarea.addEventListener('scroll', (event) => onMouseMove(textarea, event))
@@ -175,8 +170,7 @@ function initMouseInteractions() {
     document.addEventListener('mousemove', (event) => onMouseMove(document, event))
     forVizDws( (dw) => {
         dw.elem.addEventListener('mousedown', (event) => {
-            if(indicatedMention!==null)
-                onHoveredMentionGrab(dw,event,false)
+            onPotentialHoveredMentionGrab( event, dw)
         })
         dw.elem.addEventListener('mousemove', (event) => onMouseMove(dw, event))
     })

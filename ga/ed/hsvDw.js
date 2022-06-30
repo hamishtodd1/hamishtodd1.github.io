@@ -31,7 +31,7 @@ async function initHsv()
     coneGeo.rotateY(TAU / 4.)
 
     let cone = new THREE.Mesh(coneGeo, new THREE.ShaderMaterial())
-    cone.material.vertexShader = await getTextFile('hsvConeVert.glsl')
-    cone.material.fragmentShader = await getTextFile('hsvCone.glsl')
+    cone.material.vertexShader = await getTextFile('shaders/hsvConeVert.glsl')
+    cone.material.fragmentShader = await getTextFile('shaders/hsvCone.glsl')
     apparatus.add(cone)
 }
