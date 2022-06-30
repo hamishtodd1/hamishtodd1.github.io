@@ -68,7 +68,6 @@ function initVec3s()
     class Arrow extends Mention {
         #vMesh
         #iMesh
-        textareaManipulationDw = ourDw;
 
         constructor(variable) {
             super(variable)
@@ -157,18 +156,11 @@ function initVec3s()
                 
                 updateOverride(this, getFloatsForOverride)
             }
-            else if(dw === dws.infinity) {
-                threeRay.origin.copy(camera.position)
-                let mouseRay = getMouseRay(dw)
-                meet(e0, mouseRay, draggedPoint).toVector(threeRay.direction)
-                threeRay.direction.normalize()
-
-                let intersectionResult = threeRay.intersectSphere(threeSphere, asVec)
-                if(intersectionResult !== null) {
-                    asVec.setLength(lengthWhenGrabbed)
-                    
-                    updateOverride(this, getFloatsForOverride)
-                }
+            else if (dw === dws.infinity) {
+                dws.infinity.mouseRayIntersection(mv0)
+                mv0.toVector(asVec)
+                asVec.setLength(lengthWhenGrabbed)
+                updateOverride(this, getFloatsForOverride)
             }
         }
 
@@ -209,6 +201,10 @@ function initVec3s()
         isVisibleInDw(dw) {
             return (this.#vMesh.visible && this.#vMesh.parent === dw.scene) ||
                    (this.#iMesh.visible && this.#iMesh.parent === dw.scene)
+        }
+
+        getTextareaManipulationDw() {
+            return ourDw
         }
     }
     mentionClasses.vec3 = Arrow

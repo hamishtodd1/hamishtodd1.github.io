@@ -47,7 +47,7 @@ function initMouseInteractions() {
         if(mouseArea === null)
             indicatedMention = null
         else if (mouseArea === textarea)
-            indicatedMention = getClosestTextAreaMention(userIndicationX, userIndicationY)
+            indicatedMention = getClosestTextareaMention(userIndicationX, userIndicationY)
         else
             indicatedMention = mouseArea.getHoveredMention(userIndicationX, userIndicationY)
             
@@ -96,7 +96,7 @@ function initMouseInteractions() {
         event.stopPropagation()
     }
 
-    function onHoveredMentionGrab(dw,event,fromTextArea) {
+    function onHoveredMentionGrab(dw,event,fromTextarea) {
         
         // if (lowestChangedLineSinceCompile !== Infinity) {
         //     //you've changed it? This is to let them know no editing from the window allowed
@@ -108,7 +108,7 @@ function initMouseInteractions() {
         // else 
         
         if (event.which === 1 && lowestChangedLineSinceCompile === Infinity) {
-            if (fromTextArea) {
+            if (fromTextarea) {
                 event.preventDefault()
                 textareaGrabAddition = indicatedMention.getCanvasPosition(dw)
                 textareaGrabAddition[0] -= oldClientX
@@ -167,7 +167,7 @@ function initMouseInteractions() {
 
     textarea.addEventListener('mousedown', (event) => {
         if ( indicatedMention !== null )
-            onHoveredMentionGrab(indicatedMention.textareaManipulationDw, event, true)
+            onHoveredMentionGrab(indicatedMention.getTextareaManipulationDw(), event, true)
     })
     
     textarea.addEventListener('scroll', (event) => onMouseMove(textarea, event))

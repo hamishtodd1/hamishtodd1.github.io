@@ -37,7 +37,6 @@ function initFloats() {
     let newValues = Array(1)
     class Float extends Mention {
         #mesh
-        textareaManipulationDw = ourDw
 
         constructor(variable) {
             super(variable)
@@ -89,6 +88,10 @@ function initFloats() {
             if (dw !== ourDw )
                 return false
             return this.#mesh.visible
+        }
+
+        getTextareaManipulationDw() {
+            return ourDw
         }
     }
     mentionClasses.float = Float

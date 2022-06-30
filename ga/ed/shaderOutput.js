@@ -63,7 +63,7 @@ async function initShaderOutput() {
 varying vec2 frameCoord;
 
 void main() {
-    vec4 myCol = vec4(0.,0.,0.,1.); //do nothing with this, just making sure outputFloats gets filled
+    vec3 myCol; //do nothing with this, just making sure outputFloats gets filled
     mainImage(myCol);
 
     int pixelIndex = int(round(frameCoord.x * 8. - .5));

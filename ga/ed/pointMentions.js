@@ -51,7 +51,6 @@ function initPoints() {
     class Point extends Mention {
         #eDwMesh;
         #iDwMesh;
-        textareaManipulationDw = eDw;
         #mv = new Mv();
 
         constructor(variable) {
@@ -98,21 +97,18 @@ function initPoints() {
         overrideFromDrag(dw) {
             //might be nice to snap to a grid
 
-            let self = this
             function getFloatsForOverride(overrideFloats) {
-                overrideFloats[0] = self.#mv[13]; overrideFloats[1] = self.#mv[12]; overrideFloats[2] = self.#mv[11]; overrideFloats[3] = self.#mv[14]
+                overrideFloats[0] = mv0[13]; overrideFloats[1] = mv0[12]; overrideFloats[2] = mv0[11]; overrideFloats[3] = mv0[14]
             }
 
             if(dw === eDw) {
                 let mouseRay = getMouseRay(dw)
-                meet(dragPlane, mouseRay, this.#mv)
+                meet(dragPlane, mouseRay, mv0)
                 updateOverride(this, getFloatsForOverride)
             }
             else if(dw === iDw) {
-
-                let intersectionResult = iDw.mouseRayIntersection(this.#mv)
-                if(intersectionResult !== null)
-                    updateOverride(this, getFloatsForOverride)
+                iDw.mouseRayIntersection(mv0)
+                updateOverride(this, getFloatsForOverride)
             }
             else console.error("not in that dw")
         }
@@ -153,6 +149,13 @@ function initPoints() {
                 return false
             let m = dw === eDw ? this.#eDwMesh : this.#iDwMesh
             return m.visible
+        }
+
+        getTextareaManipulationDw() {
+            if(this.#mv[14] === 0.)
+                return iDw
+            else
+                return eDw
         }
     }
     mentionClasses.vec4 = Point

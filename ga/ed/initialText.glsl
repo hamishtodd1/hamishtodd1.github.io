@@ -1,15 +1,22 @@
-void mainImage( out vec4 fragColor ) {
+void mainImage( out vec3 fragColor ) {
     vec3 myVec = vec3(1.,1.,1.);
 
     Dq rotation = Dq(myVec.x, 0.,0.,0., 0.,myVec.y,0., 0.);
 
     Dq idealLine = Dq(0., 0.,1.,0., 0.,0.,0., 0.);
     Dq eucliLine = Dq(0., 0.,0.,0., 0.,1.,1., 0.);
-    Dq myRotor = Dq(1., 0.,0.,0.,  1.,0.,0.,  0.);
+    Dq myRotor = Dq(.28, 0.,0.,0.,  .96,0.,0.,  0.);
     
-    //Dq transformedEucliLine = sandwichDqDq( myRotor, eucliLine);
+    Dq transformedEucliLine = sandwichDqDq(myRotor,eucliLine);
+
+    vec2 boog = vec2(1.,1.);
     
-    fragColor = vec4(0.,myVec.x,myVec.y,1.);
+    vec4 idealPt = vec4( .2,0.,-1.,0.);
+    vec4 realPt = vec4( .2,0., 1.,1.);
+    vec4 transformedReal = sandwichDqPt(rotation, realPt);
+    vec4 transformedIdeal = sandwichDqPt(rotation, idealPt);
+    
+    fragColor = vec3(0.,myVec.x,myVec.y);
 }
 
 //END//

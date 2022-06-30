@@ -46,7 +46,6 @@ function initStudyNumbers() {
     let newValues = Array(2)
     class Vec2 extends Mention {
         #mesh;
-        textareaManipulationDw = ourDw;
 
         constructor(variable) {
             super(variable)
@@ -97,6 +96,10 @@ function initStudyNumbers() {
             if (dw !== ourDw )
                 return false
             return this.#mesh.visible
+        }
+
+        getTextareaManipulationDw() {
+            return ourDw
         }
     }
     mentionClasses.vec2 = Vec2

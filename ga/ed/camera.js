@@ -48,8 +48,8 @@ function initCamera() {
 
     window.oncontextmenu = () => { return false }
 
-    let cameraLat = 0.//-TAU * .05
-    let cameraLon = TAU * .125
+    let cameraLat = -TAU * .05
+    let cameraLon = TAU * .05
     addToCameraLonLat = (changeX, changeY) => {
         let lonDiff = -.006 * changeX
         lonDiff = Math.sign(lonDiff) * (Math.min(Math.abs(lonDiff), 1.8))

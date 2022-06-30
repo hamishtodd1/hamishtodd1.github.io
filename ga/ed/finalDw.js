@@ -9,10 +9,10 @@ function initFinalDw() {
 
     let toFragColorSuffix = `
 void main() {
-    vec4 myCol = vec4(0.,0.,0.,1.);
+    vec3 myCol = vec3(0.,0.,0.);
     mainImage(myCol);
 
-    gl_FragColor = vec4(myCol);
+    gl_FragColor = vec4(myCol,1.);
 }`
     updateFinalDw = (text) => {
         finalFsq.updateFragmentShader(text + toFragColorSuffix)

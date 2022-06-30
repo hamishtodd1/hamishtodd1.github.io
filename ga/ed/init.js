@@ -6,8 +6,7 @@ Floats...
 
 TODO
     For next presentation
-        Applying dqs to lines (need to test!)
-        Dragging in the window itself moves the line as if it were a 180 / line reflection
+        Planes
         Double cover dw
             Instead of points, arcs from (1,0)
             It's a mobius strip
@@ -41,12 +40,13 @@ TODO
         When you grab an ideal point, should be dragged on the infinity dw
         Tab and enter make it so you can't ctrl+z
     GDC
+        Optional "teardrops" visualization. Once you've sorted out the meaning of that shit!
         mentions are sensetive to for loops
             For loops have an early-escape integer
             For every mention in the loop body, we're cutting off the shader after that integer
         Take any bunch of uniforms from something you paste in, and create guesses / input fields
-            Stanford bunny for example. Click somewhere on it, get the vertex close to their on its surface
-        Dome window for 2D PGA
+            Stanford bunny for example. Click somewhere on it, get the vertex close to there on its surface
+        Dome window for 2D PGA. Overlay for vectorspace Dw?
         Export(/import?):
             threejs
             unity

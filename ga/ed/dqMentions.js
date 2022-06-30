@@ -29,12 +29,12 @@ function initDqs() {
     let idealLineDual = new Mv()
     let labelPoint = new Mv()
     let worldSpaceCameraPosition = new THREE.Vector4()
+    let iDwIntersection = new Mv()
     class DqMention extends Mention {
         #eDwMesh;
         #sDwMesh;
         #iDwLineMesh;
         #iDwRingMesh;
-        textareaManipulationDw = eDw;
         #mv = new Mv();
         
         constructor(variable) {
@@ -146,16 +146,10 @@ function initDqs() {
             }
             else if (dw === iDw) {
                 
-                let iDwIntersection = new Mv()
-                let draggingOnSphere = iDw.mouseRayIntersection(iDwIntersection) !== null
+                iDw.mouseRayIntersection(iDwIntersection)
                 let lineIsInfinite = !linePart.hasEuclideanPart()
 
-                if ( !draggingOnSphere && lineIsInfinite) {
-                    meet(camera.frustum.far, e0, newLinePart)
-                    //COULD negate it if that's closer to the current value
-                }
-
-                if (draggingOnSphere && lineIsInfinite) {
+                if ( lineIsInfinite) {
                     let intersectionJoinedWithOrigin = join(iDwIntersection, e123)
 
                     let oldJoinedWithOrigin = join(linePart, e123, mv1)
@@ -163,18 +157,15 @@ function initDqs() {
 
                     meet(joinedWithOrigin, e0, newLinePart)
                 }
-                
-                if( draggingOnSphere && !lineIsInfinite ) {
+                else {
                     let currentOrthPlane = inner(linePart,e123,  mv0).normalize()
                     let intendedOrthPlane = dual(iDwIntersection,mv1).normalize()
                     mul(intendedOrthPlane, currentOrthPlane, mv2)
                     mv2.sqrtSelf()
                     mv2.sandwich(linePart,newLinePart)
-                    newLinePart.log()
                 }
-
-                //if it's euclidean and you're not on the sphere, want it to be in the plane really
-
+                
+                newLinePart.normalize()
                 updateOverride(this, updateFromNewLinePart)
             }
             else console.error("not in that dw")
@@ -253,6 +244,10 @@ function initDqs() {
             outputFloats[7] = ` + this.variable.name + `.e0123;
                 `
             return ret
+        }
+
+        getTextareaManipulationDw() {
+            return iDw
         }
     }
     mentionClasses.Dq = DqMention
