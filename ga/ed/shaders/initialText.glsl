@@ -1,4 +1,4 @@
-void mainImage( out vec3 fragColor ) {
+vec3 getFragmentColor() {
     vec3 myVec = vec3(1.,1.,1.);
 
     Dq rotation = Dq(myVec.x, 0.,0.,0., 0.,myVec.y,0., 0.);
@@ -16,7 +16,8 @@ void mainImage( out vec3 fragColor ) {
     vec4 transformedReal = sandwichDqPt(rotation, realPt);
     vec4 transformedIdeal = sandwichDqPt(rotation, idealPt);
     
-    fragColor = vec3(0.,myVec.x,myVec.y);
+    vec3 fragColor = vec3(0.,myVec.x,myVec.y);
+    return fragColor;
 }
 
 //END//
@@ -26,7 +27,7 @@ void mainImage( out vec3 fragColor ) {
 
 
 
-// void mainImage( out vec4 fragColor ) {
+// vec3 getFragmentColor( out vec4 fragColor ) {
 
 //     vec3 exampleVector = vec3(1.,1.,1.);
 

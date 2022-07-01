@@ -9,7 +9,6 @@ let oldClientY = 0
 
 const FULL_SCREEN_QUAD_MATRIX = new THREE.Matrix4()
 
-const mentions = []
 const variables = []
 const dws = {}
 const mentionClasses = {}
@@ -32,11 +31,6 @@ void main()
 	frameCoord = position.xy + .5;
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
-}`
-
-const basicFragment = `void main()
-{
-    gl_FragColor = vec4(1., 0., 0., 1.);
 }`
 
 const noiseFragment = `

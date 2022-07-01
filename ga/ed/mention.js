@@ -28,6 +28,13 @@ function initMention()
     let textareaOffset = parseInt(style.padding) + parseInt(style.margin) // can add some fudge to this if you like
     let characterWidth = parseInt(window.getComputedStyle(textMeasurer).width) / 40.
 
+    forEachUsedMention = (func) => {
+        variables.forEach((v) => {
+            for (let i = 0; i < v.lowestUnusedMention; ++i)
+                func(v.mentions[i])
+        })
+    }
+
     let $labelLines = []
     function LabelLine() {
         let l = document.createElementNS('http://www.w3.org/2000/svg','line') //weblink refers to a standard
@@ -61,22 +68,23 @@ function initMention()
         })
     }
 
-    getClosestTextareaMention = (screenX, screenY) => {
-        let ret = mentions.find((mention) => {
-            if (!mention.isBeingUsed() ||
-                mention.lineIndex >= lowestChangedLineSinceCompile)
+    getIndicatedTextareaMention = (screenX, screenY) => {
+        let ret = null
+        forEachUsedMention((mention)=>{
+            if (mention.lineIndex >= lowestChangedLineSinceCompile)
                 return false
 
             let mb = mention.horizontalBounds
             let mby = lineToScreenY(mention.lineIndex)
             let mouseInBox =
                 mb.x <= screenX && screenX <= mb.x + mb.w &&
-                mby  <= screenY && screenY < mby + lineHeight
+                mby <= screenY && screenY < mby + lineHeight
 
-            return mouseInBox
+            if(mouseInBox)
+                ret = mention
         })
 
-        return ret === undefined ? null : ret
+        return ret
     }
 
     ndcToWindow = (ndcX,ndcY,dw) => {
@@ -97,14 +105,11 @@ function initMention()
     class Mention {
         variable
 
-        mentionsFromStart
         horizontalBounds = { x: 0., w: 0. }
         lineIndex = -1
         mentionIndex = -1
 
         constructor(variable) {
-            mentions.push(this) //maybe better as mentions of a certain subclass
-
             this.variable = variable
         }
 

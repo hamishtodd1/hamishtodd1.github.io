@@ -1,3 +1,13 @@
+/*
+    the shader just has vertices, a p
+
+    the shader takes inputs and gives outputs
+    Could just focus on the vertices
+    Texture mapping is no big deal
+
+    Yeah you want to have a vertex shader, that's what current project is about!
+ */
+
 function initMeshDw() {
     let dw = new Dw("mesh", false,true)
     
@@ -5,7 +15,10 @@ function initMeshDw() {
     let texture
     function whenBothLoaded() {
         object.geometry.scale(1.9, 1.9, 1.9)
-        object.geometry.rotateY(TAU / 4.)
+        object.geometry.rotateY(TAU *.5)
+
+        log(object.material)
+        log(object.geometry)
 
         object.material.map = texture
 
@@ -19,7 +32,7 @@ function initMeshDw() {
                 console.log('model ' + Math.round(percentComplete, 2) + '% downloaded')
             }
         }
-        
+
         function onManagerFinish() {
             whenBothLoaded()
             resolve()

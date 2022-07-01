@@ -1,20 +1,47 @@
 function initFinalDw() {
-    let ourDw = new Dw("final", false)
-    // ourDw.elem.style.display = 'none'
+    let dw = new Dw("final", false)
+    dw.elem.style.bottom = "0px"
+    // dw.elem.style.display = 'none'
 
-    ourDw.elem.style.bottom = "0px"
+    //vertex version
+    if(0)
+    {
+        let mat = new THREE.ShaderMaterial({
+            uniforms: {
+            }
+        })
+        mat.vertexShader = `
+varying vec4 coord;
+varying vec2 frameCoord;
 
-    let finalFsq = FullScreenQuad()
-    ourDw.scene.add(finalFsq)
+void main()
+{
+	coord = modelMatrix * vec4(position, 1.);
+	frameCoord = position.xy + .5;
 
-    let toFragColorSuffix = `
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
+}`
+        mat.fragmentShader = `
 void main() {
-    vec3 myCol = vec3(0.,0.,0.);
-    mainImage(myCol);
+    gl_FragColor = vec4(1., 1., 1., 1.);
+}`
+        let ourPoints = new THREE.Points(geo,mat)
+        dw.addNonMentionChild(ourPoints)
+    }
+
+    // fragment version
+    {
+        let finalFsq = FullScreenQuad()
+        dw.addNonMentionChild(finalFsq)
+
+        let toFragColorSuffix = `
+void main() {
+    vec3 myCol = getFragmentColor();
 
     gl_FragColor = vec4(myCol,1.);
 }`
-    updateFinalDw = (text) => {
-        finalFsq.updateFragmentShader(text + toFragColorSuffix)
+        updateFinalDw = (text) => {
+            finalFsq.updateFragmentShader(text + toFragColorSuffix)
+        }
     }
 }

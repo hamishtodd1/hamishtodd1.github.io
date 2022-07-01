@@ -28,7 +28,7 @@ function initPoints() {
     //move mouse out of dw and the plane is, still through the same point, rotating to face pts at infinity
 
     // let planeMesh = new THREE.Mesh(new THREE.CircleGeometry(2.), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }))
-    // dw.scene.add(planeMesh)
+    // dw.addMesh(planeMesh)
 
     // let planeMv = new Mv().plane(2., 1., 1., 1.)
     // planeMv.normalize()

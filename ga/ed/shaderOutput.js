@@ -63,8 +63,7 @@ async function initShaderOutput() {
 varying vec2 frameCoord;
 
 void main() {
-    vec3 myCol; //do nothing with this, just making sure outputFloats gets filled
-    mainImage(myCol);
+    vec3 myCol = getFragmentColor();
 
     int pixelIndex = int(round(frameCoord.x * 8. - .5));
     float pixelFloat = 0.;

@@ -177,8 +177,6 @@ async function initCompilation()
         lowestChangedLineSinceCompile = Infinity
         updateChangedLineIndicator()
 
-        mentions.forEach((mention) => {
-            mention.updateFromShader()
-        })
+        forEachUsedMention((m) => { m.updateFromShader() })
     }
 }

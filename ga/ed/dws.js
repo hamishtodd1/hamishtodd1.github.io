@@ -13,7 +13,7 @@ async function initDws() {
     await initShaderOutput()
 
     class Dw {
-        scene = new THREE.Scene()
+        #scene = new THREE.Scene()
         elem
         nonMentionChildren = []
         camera
@@ -39,19 +39,19 @@ async function initDws() {
                 addLights(this)
 
             this.hasLights = ((haveAll3dStuff||false) && (haveLights||false)) || false
-        };
+        }
 
         NewObject3D() {
             let ret = new THREE.Object3D()
             ret.visible = false
-            this.scene.add(ret)
+            this.#scene.add(ret)
             return ret
         }
 
         NewMesh(geo,mat) {
             let ret = new THREE.Mesh(geo,mat)
             ret.visible = false
-            this.scene.add(ret)
+            this.#scene.add(ret)
             ret.castShadow = this.hasLights
 
             return ret
@@ -59,7 +59,7 @@ async function initDws() {
         
         addNonMentionChild (ch) {
             this.nonMentionChildren.push(ch)
-            this.scene.add(ch)
+            this.#scene.add(ch)
         }
 
         oldClientToProportion() {
@@ -88,7 +88,7 @@ async function initDws() {
             renderer.setScissor(left, positiveYUpBottom, width, height)
             renderer.setViewport(left, positiveYUpBottom, width, height)
 
-            renderer.render(this.scene, this.camera)
+            renderer.render(this.#scene, this.camera)
         }
 
         setVerticalPosition(i) {
@@ -96,22 +96,22 @@ async function initDws() {
         }
 
         getHoveredMention(clientX, clientY) {
-            let closestIndex = -1
+            let closestMention = null
             let closestDist = Infinity
-            mentions.forEach((mention, i) => {
-                if (!mention.isVisibleInDw(this))
+            forEachUsedMention((mention) => {
+                if (!mention.isVisibleInDw(this)) //some of isVisible is about being used, which might be pointless checking
                     return
 
                 let [elemX, elemY] = mention.getCanvasPosition(this)
                 let dist = Math.sqrt(sq(clientX - elemX) + sq(clientY - elemY))
 
                 if (dist < closestDist) {
-                    closestIndex = i
+                    closestMention = mention
                     closestDist = dist
                 }
             })
 
-            return closestIndex === -1 ? null : mentions[closestIndex]
+            return closestMention
         }
     }
     window.Dw = Dw

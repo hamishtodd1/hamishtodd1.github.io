@@ -2,7 +2,7 @@
 
 async function initVectorSpaceDw() {
 
-    let ourDw = new Dw("vectorSpace", true)
+    let vDw = new Dw("vectorSpace", true)
 
     // let rgbCube = new THREE.Mesh(new THREE.BoxGeometry(1.,1.,1.), new THREE.ShaderMaterial())
     // rgbCube.geometry.translate(.5, .5, .5)
@@ -16,13 +16,13 @@ async function initVectorSpaceDw() {
     let axisGeo = new THREE.CylinderBufferGeometry(axisRadius, axisRadius, 20.,);
 
     let yAxis = new THREE.Mesh(axisGeo, axisMat)
-    ourDw.addNonMentionChild(yAxis)
+    vDw.addNonMentionChild(yAxis)
     let xAxis = new THREE.Mesh(axisGeo, axisMat)
     xAxis.rotation.x = TAU / 4.
-    ourDw.addNonMentionChild(xAxis)
+    vDw.addNonMentionChild(xAxis)
     let zAxis = new THREE.Mesh(axisGeo, axisMat)
     zAxis.rotation.z = TAU / 4.
-    ourDw.addNonMentionChild(zAxis)
+    vDw.addNonMentionChild(zAxis)
 
     let markers = []
     let axisNames = ["x", "y", "z"]
@@ -35,7 +35,7 @@ async function initVectorSpaceDw() {
             marker.scale.multiplyScalar(markerHeight)
             marker.position[axisNames[j]] = i
             marker.position.y -= .5 * markerHeight
-            ourDw.addNonMentionChild(marker)
+            vDw.addNonMentionChild(marker)
             markers.push(marker)
         }
     }
@@ -48,7 +48,8 @@ async function initVectorSpaceDw() {
 
 function initVec3s()
 {
-    let ourDw = dws.vectorSpace
+    let vDw = dws.vectorSpace
+    let iDw = dws.infinity
     
     let shaftRadius = .06
     let headHeight = shaftRadius * 5.
@@ -73,9 +74,9 @@ function initVec3s()
             super(variable)
 
             let mat = new THREE.MeshPhongMaterial({ color: variable.col })
-            this.#iMesh = dws.infinity.NewMesh(pointGeo, mat)    
+            this.#iMesh = iDw.NewMesh(pointGeo, mat)    
             
-            let viz = ourDw.NewObject3D()
+            let viz = vDw.NewObject3D()
             this.#vMesh = viz
 
             let dashedLines = [[],[],[]]
@@ -148,7 +149,7 @@ function initVec3s()
                 asVec.toArray(overrideFloats)
             }
 
-            if(dw === ourDw) {
+            if(dw === vDw) {
                 camera.frustum.far.projectOn(e123, dragPlane)
                 let mouseRay = getMouseRay(dw)
                 meet(dragPlane, mouseRay, draggedPoint)
@@ -156,8 +157,8 @@ function initVec3s()
                 
                 updateOverride(this, getFloatsForOverride)
             }
-            else if (dw === dws.infinity) {
-                dws.infinity.mouseRayIntersection(mv0)
+            else if (dw === iDw) {
+                iDw.mouseRayIntersection(mv0)
                 mv0.toVector(asVec)
                 asVec.setLength(lengthWhenGrabbed)
                 updateOverride(this, getFloatsForOverride)
@@ -166,13 +167,13 @@ function initVec3s()
 
         getWorldSpaceCanvasPosition(target, dw) {
             
-            if (dw === ourDw) {
+            if (dw === vDw) {
                 asVec.setFromMatrixPosition(this.#vMesh.head.matrix)
                 target.copy(asVec)
                 target.multiplyScalar(.5)
                 target.w = 1.
             }
-            else if (dw === dws.infinity) {
+            else if (dw === iDw) {
                 target.copy(this.#iMesh.position)
                 target.w = 1.
             }
@@ -199,12 +200,12 @@ function initVec3s()
         }
 
         isVisibleInDw(dw) {
-            return (this.#vMesh.visible && this.#vMesh.parent === dw.scene) ||
-                   (this.#iMesh.visible && this.#iMesh.parent === dw.scene)
+            return (this.#vMesh.visible && dw === vDw) ||
+                   (this.#iMesh.visible && dw === iDw)
         }
 
         getTextareaManipulationDw() {
-            return ourDw
+            return vDw
         }
     }
     mentionClasses.vec3 = Arrow

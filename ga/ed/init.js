@@ -11,7 +11,7 @@ TODO
             It's a mobius strip
             If it's a translation, it cuts up differently?
                 It'll be up and down the lines s = 1 or s = -1
-        Vertex shaders            
+        Vertex shaders
         Mesh window, containing stanford bunny
             Has an indicator on it: "where attributes are currently coming from". Can move indicator with mouse
             Has a slider on it too, for animating
@@ -24,6 +24,8 @@ TODO
                     "step" "play/pause" buttons. Can draw when paused
                 2D texture
     Bugs
+        dragging ideal point, it can point somewhere very weird in the eDw
+        minus sign with sandwich
         Currently, if a variable is uninitialized, you still get shown a point at 0,0,0 in the window
         When you're finished changing something, caret goes on a line that allows you to see your handiwork
             Could make it so that when a new line is added, the whole thing scrolls so that that line is in place

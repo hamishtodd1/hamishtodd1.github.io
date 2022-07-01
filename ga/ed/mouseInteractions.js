@@ -41,15 +41,14 @@ function initMouseInteractions() {
             userIndicationY = oldClientY
         }
 
-        mentions.forEach((mention) => {
-            let visibility = mention.isBeingUsed() && mentionVisibleDueToCaret(mention)
-            mention.setVisibility(visibility)
+        forEachUsedMention((mention) => {
+            mention.setVisibility(mentionVisibleDueToCaret(mention))
         })
 
         if(mouseArea === null)
             indicatedMention = null
         else if (mouseArea === textarea)
-            indicatedMention = getClosestTextareaMention(userIndicationX, userIndicationY)
+            indicatedMention = getIndicatedTextareaMention(userIndicationX, userIndicationY)
         else
             indicatedMention = mouseArea.getHoveredMention(userIndicationX, userIndicationY)
             
@@ -70,8 +69,8 @@ function initMouseInteractions() {
                 dragOccurred = true
                 indicatedMention.overrideFromDrag(grabbedDw,event)
     
-                mentions.forEach((mention) => {
-                    let visible = mention.isBeingUsed() && (mentionVisibleDueToCaret(mention) || mention === indicatedMention )
+                forEachUsedMention((mention) => {
+                    let visible = mentionVisibleDueToCaret(mention) || mention === indicatedMention
                     if (visible)
                         mention.updateFromShader()
                 })
