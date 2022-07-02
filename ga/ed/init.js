@@ -84,6 +84,7 @@ TODO
             make some mentions then delete them
         Documented API for making your own window visualizations
     Long term
+        Rawshadermaterial
         Generate javascript game. Or maybe your own windows
         Grab and drag could be implemented by creating a motor and then applying it
             For this, should think of a manipulation method that works for point, line and plane
@@ -190,6 +191,7 @@ async function init() {
     // initSound()
 
     initMention()
+    await initShaderOutput()
     await initDws()
 
     initFinalDw()
@@ -199,7 +201,7 @@ async function init() {
     initInfinityDw()
     initStudyDw()
     new Dw("scalar", false, false, camera2d)
-    // dws.study.elem.style.display = 'none'
+    dws.study.elem.style.display = 'none'
     dws.scalar.elem.style.display = 'none'
     
 

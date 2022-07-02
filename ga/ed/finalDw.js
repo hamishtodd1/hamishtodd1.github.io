@@ -1,44 +1,52 @@
 function initFinalDw() {
-    let dw = new Dw("final", false)
-    dw.elem.style.bottom = "0px"
+    let dw = new Dw("final", false, false, camera, false)
     // dw.elem.style.display = 'none'
 
-    //vertex version
-    if(0)
+    if (VERTEX_MODE)
     {
         let mat = new THREE.ShaderMaterial({
             uniforms: {
-            }
-        })
-        mat.vertexShader = `
-varying vec4 coord;
-varying vec2 frameCoord;
-
-void main()
-{
-	coord = modelMatrix * vec4(position, 1.);
-	frameCoord = position.xy + .5;
-
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
-}`
-        mat.fragmentShader = `
+            },
+            fragmentShader: `
 void main() {
-    gl_FragColor = vec4(1., 1., 1., 1.);
+    gl_FragColor = vec4(1., 0., 0., 1.);
 }`
-        let ourPoints = new THREE.Points(geo,mat)
-        dw.addNonMentionChild(ourPoints)
+        })
+
+        let toVertexSuffix = `
+void main() {
+    gl_PointSize = 2.0;
+	gl_Position = projectionMatrix * modelViewMatrix * getVertex();
+}`
+
+        let test = `
+vec4 getVertex() {
+    return vec4(position,1.);
+}`
+
+        //getColor needs a vec2 input, the fragCoord
+        //this one gets a uv from a 1x1 rect
+        //and they are a special kind of manipulation
+        //their windows go at the top
+        
+        let geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., 1., 0.)])
+        let a = new THREE.PointsMaterial({ size: .5 })
+        dw.addNonMentionChild(new THREE.Points(geo, mat))
+
+        updateFinalDw = (text) => {
+            mat.vertexShader = test + toVertexSuffix
+            mat.needsUpdate = true
+        }
     }
 
-    // fragment version
+    if (!VERTEX_MODE)
     {
         let finalFsq = FullScreenQuad()
         dw.addNonMentionChild(finalFsq)
 
         let toFragColorSuffix = `
 void main() {
-    vec3 myCol = getFragmentColor();
-
-    gl_FragColor = vec4(myCol,1.);
+    gl_FragColor = vec4(getColor(),1.);
 }`
         updateFinalDw = (text) => {
             finalFsq.updateFragmentShader(text + toFragColorSuffix)

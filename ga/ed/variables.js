@@ -2,8 +2,6 @@ let lowestChangedLineSinceCompile = Infinity
 
 let animationStates = {}
 
-
-
 let oldClientX = 0
 let oldClientY = 0
 
@@ -16,13 +14,14 @@ const mentionClasses = {}
 const INFINITY_RADIUS = 1.7
 const pointGeo = new THREE.SphereBufferGeometry(.1, 32, 16)
 
+const VERTEX_MODE = false
+
 let generalShaderPrefix = `
 uniform float[16] overrideFloats;
-uniform int overrideMentionIndex;
-`
+uniform int overrideMentionIndex;`
 
 const basicVertex = `
-varying vec4 coord; //fragcoord is 
+varying vec4 coord;
 varying vec2 frameCoord;
 
 void main()

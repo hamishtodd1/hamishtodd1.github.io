@@ -1,6 +1,6 @@
 function initCamera() {
     const fov = 60.
-    const aspect = 16./9.
+    const aspect = eval(getCssVar('dwAspect'))
     const near = .1
     const far = 10.
 

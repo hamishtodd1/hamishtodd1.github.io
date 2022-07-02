@@ -1,3 +1,119 @@
+/*  */
+
+:root {
+  --dwWidth: 180px;
+  --dwAspect: 16/9;
+  --dwHeight: calc(var(--dwWidth) / (var(--dwAspect)));
+  --generalGap: 10px;
+}
+
+#canvas3d, #ourSvg {
+  width: 100vw;
+  height: 100vh;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  display: block;
+
+  pointer-events: none;
+}
+
+.dwEl {
+  margin: var(--generalGap);
+  padding: 0px;
+  border: 0px;
+
+  position: absolute;
+
+  width: var(--dwWidth);
+  height: var(--dwHeight);
+}
+
+#ourSvg {
+  z-index: 2;
+}
+#canvas3d {
+  z-index: 1;
+}
+#textarea {
+  z-index: 1;
+}
+#highlighting {
+  z-index: 0;
+}
+
+/* TEXT WINDOW */
+
+#textarea, #highlighting, #errorBox {
+  margin: var(--generalGap);
+  border: 0;
+
+  width: calc(100% - 5 * var(--generalGap) - var(--dwWidth));
+
+  position: absolute;
+  left: 0;
+}
+
+#textarea, #highlighting {
+  padding: var(--generalGap);
+  bottom: 0;
+  height: calc(100% - 5 * var(--generalGap) - var(--dwHeight));
+}
+
+#errorBox {
+  padding: 0px;
+  top: 100;
+  background-color: rgb(106, 106, 106);
+}
+
+#textarea, #highlighting, #textMeasurer, #highlighting * {
+  /* Also add text styles to highlighing tokens */
+  font-size: 9pt;
+  font-family: monospace;
+  line-height: 12pt;
+  tab-size: 4;
+}
+
+#textMeasurer {
+  position: absolute;
+  top: -100px;
+  padding: 0px;
+}
+
+/* Make textarea almost completely transparent */
+
+#textarea {
+  color: transparent;
+  background: transparent;
+  caret-color: white; /* Or choose your favourite color */
+}
+
+/* Can be scrolled */
+#textarea, #highlighting {
+  overflow: auto;
+  white-space: nowrap; /* Allows textarea to scroll horizontally */
+}
+
+/* No resize on textarea */
+#textarea {
+  resize: none;
+}
+
+/* Paragraphs; First Image */
+* {
+  font-family: "Fira Code", monospace;
+}
+p code {
+  border-radius: 2px;
+  background-color: #eee;
+  color: #111;
+}
+
+
+/* Drodown */
+
 /* .dropdown {
   margin: 0;
   padding: 0;
@@ -58,123 +174,6 @@ ul li:hover>a {
 ul li:hover>ul {
   display: block;
 } */
-
-
-
-
-
-#canvas3d, #ourSvg {
-  width: 100vw;
-  height: 100vh;
-
-  position: fixed;
-  top: 0;
-  left: 0;
-
-  display: block;
-
-  pointer-events: none;
-}
-#canvas3d {
-  z-index: 1;
-}
-#ourSvg {
-  z-index: 2;
-}
-
-.dwEl {
-  margin: 10px;
-  padding: 0px;
-  border: 0px;/*5px solid rgb(0, 0, 0);*/
-
-  position: absolute;
-  right: 0px;
-
-  z-index: 2;
-
-  width: 180px; /* IF YOU WANT TO CHANGE THIS, CHECK ALL REFERENCES TO THIS NUMBER! */
-  aspect-ratio: 16/9; /* IF YOU WANT TO CHANGE THIS YOU MUST ALSO DO SO IN CAMERA!!! */
-  /* height: 270px; */
-}
-
-/* TEXT WINDOW */
-
-#textarea, #highlighting, #errorBox {
-  /* Both elements need the same text and space styling so they are directly on top of each other */
-  margin: 10px;
-  border: 0;
-
-  width: calc(100% - 51px - 180px);
-
-  /* In the same place */
-  position: absolute;
-  left: 0;
-}
-
-#errorBox {
-  padding: 0px;
-  background-color: rgb(106, 106, 106);
-  top: 100;
-}
-
-#textarea, #highlighting {
-  padding: 10px;
-  top: 0;
-  height: calc(100% - 40px);
-}
-
-#textarea, #highlighting, #textMeasurer, #highlighting * {
-  /* Also add text styles to highlighing tokens */
-  font-size: 9pt;
-  font-family: monospace;
-  line-height: 12pt;
-  tab-size: 4;
-}
-
-#textMeasurer {
-  position: absolute;
-  top: -100px;
-  padding: 0px;
-}
-
-/* Move the textarea in front of the result */
-
-#textarea {
-  z-index: 1;
-}
-#highlighting {
-  z-index: 0;
-}
-
-
-/* Make textarea almost completely transparent */
-
-#textarea {
-  color: transparent;
-  background: transparent;
-  caret-color: white; /* Or choose your favourite color */
-}
-
-/* Can be scrolled */
-#textarea, #highlighting {
-  overflow: auto;
-  white-space: nowrap; /* Allows textarea to scroll horizontally */
-}
-
-/* No resize on textarea */
-#textarea {
-  resize: none;
-}
-
-/* Paragraphs; First Image */
-* {
-  font-family: "Fira Code", monospace;
-}
-p code {
-  border-radius: 2px;
-  background-color: #eee;
-  color: #111;
-}
 
 
 /* Syntax Highlighting from prism.js starts below, partly modified: */

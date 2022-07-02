@@ -7,10 +7,12 @@
 
 async function initDws() {
 
-    let DW_WIDTH = 180 //it really is a pain to try to extract it
-    // parseInt(getComputedStyle(document.querySelector('.dwEl')).width)
+    let DW_WIDTH = parseInt( getCssVar('dwWidth') )
+    let DW_HEIGHT = parseInt( getCssVar('dwWidth') ) / eval(getCssVar('dwAspect'))
+    let GENERAL_GAP = parseInt(getCssVar('generalGap'))
 
-    await initShaderOutput()
+    let numDownSide = 0
+    let numAlongTop = 0
 
     class Dw {
         #scene = new THREE.Scene()
@@ -19,15 +21,30 @@ async function initDws() {
         camera
         hasLights
 
-        constructor(name, haveAll3dStuff, haveLights, ourCamera) {
+        constructor(name, haveAll3dStuff, haveLights, ourCamera, mentionDw) { //do it as a "params" thing
             this.elem = document.createElement('div')
             this.elem.className = 'dwEl'
             document.body.appendChild(this.elem)
 
-            this.camera = ourCamera || camera
+            if(mentionDw === undefined)
+                mentionDw = true
+            
+            if(mentionDw) {
+                let verticalPosition = numDownSide++
+                this.elem.style.bottom = (verticalPosition * (DW_HEIGHT+GENERAL_GAP) ).toString() + "px"
+                this.elem.style.right = "0px"
+            }
+            else if(name === "final") {
+                this.elem.style.top = "0px"
+                this.elem.style.right = "0px"
+            }
+            else {
+                let horizontalPosition = numAlongTop++
+                this.elem.style.left = (horizontalPosition * (DW_WIDTH+GENERAL_GAP) ).toString() + "px"
+                this.elem.style.top = "0px"
+            }
 
-            if(name !== "final")
-                this.setVerticalPosition(Object.keys(dws).length-1)
+            this.camera = ourCamera || camera
 
             dws[name] = this
 
@@ -85,14 +102,10 @@ async function initDws() {
                 return
 
             const positiveYUpBottom = renderer.domElement.clientHeight - bottom
-            renderer.setScissor(left, positiveYUpBottom, width, height)
+            renderer.setScissor( left, positiveYUpBottom, width, height)
             renderer.setViewport(left, positiveYUpBottom, width, height)
 
             renderer.render(this.#scene, this.camera)
-        }
-
-        setVerticalPosition(i) {
-            this.elem.style.top = "calc(" + i + "*(9/16*"+DW_WIDTH+"px + 10px))"
         }
 
         getHoveredMention(clientX, clientY) {

@@ -1,4 +1,4 @@
-vec3 getFragmentColor() {
+vec3 getColor() {
     vec3 myVec = vec3(1.,1.,1.);
 
     Dq rotation = Dq(myVec.x, 0.,0.,0., 0.,myVec.y,0., 0.);
@@ -27,7 +27,7 @@ vec3 getFragmentColor() {
 
 
 
-// vec3 getFragmentColor( out vec4 fragColor ) {
+// vec3 getColor( out vec4 fragColor ) {
 
 //     vec3 exampleVector = vec3(1.,1.,1.);
 

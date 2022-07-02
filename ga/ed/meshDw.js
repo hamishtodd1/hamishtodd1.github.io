@@ -9,7 +9,7 @@
  */
 
 function initMeshDw() {
-    let dw = new Dw("mesh", false,true)
+    let dw = new Dw("mesh", false,true, camera, false)
     
     let object
     let texture

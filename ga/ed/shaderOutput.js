@@ -1,9 +1,3 @@
-/* 
-    Suppose you wanted to generalize to fields
-    Well, sort of already there!
-    But, point might be: For any given 
- */
-
 async function initShaderOutput() {
     let fullScreenQuadGeo = new THREE.PlaneGeometry(1., 1.)
     fullScreenQuadGeo.translate(0., 0., -1.)
@@ -27,6 +21,7 @@ async function initShaderOutput() {
 
     FullScreenQuad = () => {
         let mat = new THREE.ShaderMaterial({
+            vertexShader: basicVertex,
             uniforms: {
                 overrideMentionIndex,
                 overrideFloats,
@@ -34,8 +29,6 @@ async function initShaderOutput() {
             }
         })
         materials.push(mat)
-
-        mat.vertexShader = basicVertex
 
         let fsq = new THREE.Mesh(fullScreenQuadGeo, mat)
         fsq.matrixAutoUpdate = false
@@ -63,7 +56,7 @@ async function initShaderOutput() {
 varying vec2 frameCoord;
 
 void main() {
-    vec3 myCol = getFragmentColor();
+    vec3 myCol = getColor();
 
     int pixelIndex = int(round(frameCoord.x * 8. - .5));
     float pixelFloat = 0.;
@@ -74,12 +67,9 @@ void main() {
 }`
 
     updateOutputterFragmentShader = (fragmentShader) => {
-        outputFsq.updateFragmentShader(generalShaderPrefix + outputterPrefix + fragmentShader + readoutSuffix)        
+        outputFsq.updateFragmentShader(outputterPrefix + generalShaderPrefix + fragmentShader + readoutSuffix)        
     }
 
-    //potential optimization if shader compilation is a bottleneck:
-    //  a single shader, with a little thing added under every mention,
-    //  and an integer uniform that just says "run the shader making sure this is the output"
     getOutput = (mentionIndex,target) => {
 
         outputMentionIndex.value = mentionIndex

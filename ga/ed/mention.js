@@ -25,7 +25,8 @@ function initMention()
     let canvasPos = new THREE.Vector4()
     let style = window.getComputedStyle(textarea)
     let lineHeight = parseInt(style.lineHeight)
-    let textareaOffset = parseInt(style.padding) + parseInt(style.margin) // can add some fudge to this if you like
+    let textareaOffsetHorizontal = parseInt(style.padding) + parseInt(style.margin) // can add some fudge to this if you like
+    let textareaOffsetVertical = parseInt(style.top) + parseInt(style.padding) + parseInt(style.margin)
     let characterWidth = parseInt(window.getComputedStyle(textMeasurer).width) / 40.
 
     forEachUsedMention = (func) => {
@@ -51,10 +52,10 @@ function initMention()
     $labelConnectors.push(LabelLine(), LabelLine(), LabelLine())
 
     lineToScreenY = (line) => {
-        return line * lineHeight + textareaOffset - textarea.scrollTop
+        return line * lineHeight + textareaOffsetVertical - textarea.scrollTop
     }
     columnToScreenX = (column) => {
-        return column * characterWidth + textareaOffset
+        return column * characterWidth + textareaOffsetHorizontal
     }
     updateHorizontalBounds = (column, nameLength, target) => {
         target.x = columnToScreenX(column)
@@ -76,11 +77,11 @@ function initMention()
 
             let mb = mention.horizontalBounds
             let mby = lineToScreenY(mention.lineIndex)
-            let mouseInBox =
+            let xyInBox =
                 mb.x <= screenX && screenX <= mb.x + mb.w &&
                 mby <= screenY && screenY < mby + lineHeight
 
-            if(mouseInBox)
+            if(xyInBox)
                 ret = mention
         })
 
