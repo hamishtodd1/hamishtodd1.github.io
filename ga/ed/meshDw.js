@@ -9,16 +9,13 @@
  */
 
 function initMeshDw() {
-    let dw = new Dw("mesh", false,true, camera, false)
+    let dw = new Dw("mesh", false, true, camera, false)
     
     let object
     let texture
     function whenBothLoaded() {
         object.geometry.scale(1.9, 1.9, 1.9)
         object.geometry.rotateY(TAU *.5)
-
-        log(object.material)
-        log(object.geometry)
 
         object.material.map = texture
 
@@ -46,8 +43,12 @@ function initMeshDw() {
         })
         objLoader.load('data/spot_control_mesh.obj', function (obj) {
             obj.traverse(function (child) {
-                if (child.isMesh)
+                if (child.isMesh) {
+                    // object = new THREE.LineSegments(new THREE.WireframeGeometry(child.geometry),new THREE.MeshBasicMaterial({color:0xFFFFFF}))
                     object = child
+                    // child.geometry.computeVertexNormals()
+                    // child.geometry.normalizeNormals()
+                }
             })            
         }, onModelLoadProgress, (err) => {
             log(err)

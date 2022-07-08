@@ -1,11 +1,12 @@
 /*
-Mobius strip?
-Planes?
-Floats...
 
 TODO
     For next presentation
+        Any variable that is different across manifold can be seen in thingy window
+        Vec3 gets a scalar part as well, which you can use to adjust length
+            Drag it to negative and it's off in the other direction
         Planes
+            it's a new struct: vec3 normal, float displacement. So not a vec4. This is ok since you rarely add them
         Double cover dw
             Instead of points, arcs from (1,0)
             It's a mobius strip
@@ -34,6 +35,9 @@ TODO
         When you grab an ideal point, should be dragged on the infinity dw
         Tab and enter make it so you can't ctrl+z
     GDC
+        Definitely need it to be that if you edit the "b" in "a = b + 1", you change the a in there
+        Declarations should be visualized too, eg return vec4(0.,0.,0.,1); is still a point
+        Maybe: if you move mouse over a window and there's nothing on the line
         mentions are sensetive to for loops
             For loops have an early-escape integer
             For every mention in the loop body, we're cutting off the shader after that integer
@@ -178,6 +182,12 @@ Because it helps portability to ordinary shaders:
 
 async function init() {
 
+    let initialTextFull = await getTextFile('shaders/initialText.glsl')
+    let initialText = initialTextFull.slice(0, initialTextFull.indexOf(`//END//`))    
+    textarea.value = initialText
+    VERTEX_MODE = initialText.indexOf("getColor") === -1
+    updateSyntaxHighlighting()
+
     // init41()
     init301()
 
@@ -191,19 +201,18 @@ async function init() {
     // initSound()
 
     initMention()
-    await initShaderOutput()
     await initDws()
 
-    initFinalDw()
+    await initShaderOutputAndFinalDw()
+
     let meshloadPromise = initMeshDw()
     await initVectorSpaceDw()
     new Dw("euclidean", true)
     initInfinityDw()
     initStudyDw()
     new Dw("scalar", false, false, camera2d)
-    dws.study.elem.style.display = 'none'
-    dws.scalar.elem.style.display = 'none'
-    
+    // dws.study.elem.style.display = 'none'
+    // dws.scalar.elem.style.display = 'none'
 
     initVec3s()
     initFloats()
@@ -213,29 +222,23 @@ async function init() {
 
     initMouseInteractions()
 
-    let initialTextFull = await getTextFile('shaders/initialText.glsl')
-    let initialText = initialTextFull.slice(0, initialTextFull.indexOf(`//END//`))    
-    textarea.value = initialText
-    updateSyntaxHighlighting()
-
     window.addEventListener('resize', renderAll)
 
     await initCompilation() //after creation of mention classes
 
     initCaretInteractions()
-    setCaretPosition(198)
     
-    function compileAndUpdate() {
-        compile()
-        updateMentionVisibilitiesAndIndication()
-        renderAll()
-    }
-
+    compile()
+    updateMentionVisibilitiesAndIndication()
+    setCaretPosition(198)
     await meshloadPromise
-    compileAndUpdate()
+    renderAll()
 
     document.addEventListener('keydown', (event) => {
-        if (event.key === "Enter" && event.altKey === true)
-            compileAndUpdate()
+        if (event.key === "Enter" && event.altKey === true) {
+            compile()
+            updateMentionVisibilitiesAndIndication()
+            renderAll()
+        }
     })
 }

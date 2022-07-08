@@ -1,27 +1,5 @@
-function generateReassignmentText() {
-    let ret = arguments[0] + "("
-
-    let useLiteralValues = arguments[1] !== true
-    if (useLiteralValues) {
-        for (let i = 1, il = arguments.length; i < il; ++i) {
-            let asStr = parseFloat(arguments[i].toFixed(2))
-            if( asStr === Math.round(asStr) )
-                asStr += "."
-            ret += asStr + (i === il - 1 ? "" : ",")
-        }
-    }
-    else {
-        for (let i = 0, il = arguments[2]; i < il; ++i)
-            ret += "overrideFloats["+i+"]" + (i === il - 1 ? "" : ",")
-    }
-
-    ret += ")"
-
-    return ret
-}
-
-function initMention()
-{
+function initMention() {
+    
     let canvasPos = new THREE.Vector4()
     let style = window.getComputedStyle(textarea)
     let lineHeight = parseInt(style.lineHeight)
@@ -57,12 +35,7 @@ function initMention()
     columnToScreenX = (column) => {
         return column * characterWidth + textareaOffsetHorizontal
     }
-    updateHorizontalBounds = (column, nameLength, target) => {
-        target.x = columnToScreenX(column)
-
-        target.w = nameLength * characterWidth
-    }
-
+    
     hideHighlight = () => {
         $labelLines.forEach((svgLine) => { 
             setSvgLine(svgLine, -10, -10, -10, -10)
@@ -137,6 +110,11 @@ function initMention()
             return camera.positionToWindow(canvasPos,dw)
         }
 
+        updateHorizontalBounds = (column, nameLength) => {
+            this.horizontalBounds.x = columnToScreenX(column)
+            this.horizontalBounds.w = nameLength * characterWidth
+        }
+
         highlight() {
             let col = this.variable.col
             $labelLines.forEach((svgLine) => {
@@ -169,4 +147,33 @@ function initMention()
         }
     }
     window.Mention = Mention
+
+    getFloatArrayAssignmentString = (variableName, len) => {
+        let ret = "\n"
+        for (let i = 0; i < len; ++i)
+            ret += `    outputFloats[` + i + `] = ` + variableName + `[` + i + `];\n`
+        return ret
+    }
+
+    generateReassignmentText = function() {
+        let ret = arguments[0] + "("
+
+        let useLiteralValues = arguments[1] !== true
+        if (useLiteralValues) {
+            for (let i = 1, il = arguments.length; i < il; ++i) {
+                let asStr = parseFloat(arguments[i].toFixed(2))
+                if (asStr === Math.round(asStr))
+                    asStr += "."
+                ret += asStr + (i === il - 1 ? "" : ",")
+            }
+        }
+        else {
+            for (let i = 0, il = arguments[2]; i < il; ++i)
+                ret += "overrideFloats[" + i + "]" + (i === il - 1 ? "" : ",")
+        }
+
+        ret += ")"
+
+        return ret
+    }
 }

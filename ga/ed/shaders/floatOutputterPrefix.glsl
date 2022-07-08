@@ -4,6 +4,7 @@
 
 float[8] outputFloats;
 uniform int outputMentionIndex;
+varying vec2 frameCoord;
 
 float shiftRight (float v, float amt) { 
     v = floor(v) + 0.5; 
@@ -36,4 +37,13 @@ vec4 encodeFloat (float val) {
     float byte2 = (last_bit_of_biased_exponent * 128. + extractBits(fraction, 16., 23.)) / 255.; 
     float byte1 = (sign * 128. + remaining_bits_of_biased_exponent) / 255.; 
     return vec4(byte4, byte3, byte2, byte1); 
+}
+
+vec4 encodeRgbaOfOutputFloatForOurPixel() {
+    int pixelIndex = int(round(frameCoord.x * 8. - .5));
+    float pixelFloat = 0.;
+    for (int k = 0; k < 8; ++k)
+        pixelFloat += pixelIndex == k ? outputFloats[k] : 0.;
+
+    return encodeFloat(pixelFloat);
 }

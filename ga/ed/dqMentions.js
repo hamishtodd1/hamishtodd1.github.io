@@ -51,6 +51,8 @@ function initDqs() {
         }
 
         updateFromMv() {
+
+            this.#mv.selectGrade(2, linePart)
             
             //but the problem with study space is that eg (1+e12)'s study number is just a scalar
             // this.#mv.reverse(mv0)
@@ -58,9 +60,15 @@ function initDqs() {
             // this.#sDwMesh.position.x = studyPart[0]
             // this.#sDwMesh.position.y = studyPart[15]
 
-            //more like: it's a mobius strip. 
+            this.#sDwMesh.position.x = this.#mv[0]
+            this.#sDwMesh.position.y = linePart.norm()
+
+            //more like: it's a mobius strip
             //And by the way, it's angled in 3D space such that your line is through it
-            //But when you hover that window, the mobius strip unravels
+            //when you hover the window, it switches to being a "top" down view
+            //where the top is the view such that the rotation is anticlockwise from the identity
+            
+            //But click a checkbox and the mobius strip unravels
             //The full circle is more about creating rotations than looking at current ones
 
             // this.#mv.getNormalization(normalization)
@@ -80,7 +88,6 @@ function initDqs() {
             //     log(this.#sDwMesh.position)
             // }
 
-            this.#mv.selectGrade(2, linePart)
             if(linePart.approxEquals(zeroMv)) {
                 this.#eDwMesh.position.copy(outOfTheWayPosition)
                 this.#iDwRingMesh.position.copy(outOfTheWayPosition)
@@ -173,7 +180,8 @@ function initDqs() {
 
         setVisibility(newVisibility) {
             this.#eDwMesh.visible = newVisibility
-            this.#sDwMesh.visible = newVisibility
+            
+            this.#sDwMesh.visible = newVisibility && this.#mv[0] !== 0.
 
             this.#mv.selectGrade(2, linePart)
             let hasEuclideanPart = linePart.hasEuclideanPart()

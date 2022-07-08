@@ -34,10 +34,10 @@ async function initDws() {
                 this.elem.style.bottom = (verticalPosition * (DW_HEIGHT+GENERAL_GAP) ).toString() + "px"
                 this.elem.style.right = "0px"
             }
-            else if(name === "final") {
-                this.elem.style.top = "0px"
-                this.elem.style.right = "0px"
-            }
+            // else if(name === "final") {
+            //     this.elem.style.top = "0px"
+            //     this.elem.style.right = "0px"
+            // }
             else {
                 let horizontalPosition = numAlongTop++
                 this.elem.style.left = (horizontalPosition * (DW_WIDTH+GENERAL_GAP) ).toString() + "px"

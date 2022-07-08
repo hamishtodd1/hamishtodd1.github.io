@@ -132,12 +132,3 @@ void dqExp(in Dq B, out Dq target) {
         s * m
     );
 }
-
-// Dq join(in vec4 a, in vec4 b) {
-
-// }
-
-// float[16] ToMv(in vec4) {
-
-// }
-

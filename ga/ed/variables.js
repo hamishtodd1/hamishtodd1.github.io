@@ -11,10 +11,10 @@ const variables = []
 const dws = {}
 const mentionClasses = {}
 
+let VERTEX_MODE = false
+
 const INFINITY_RADIUS = 1.7
 const pointGeo = new THREE.SphereBufferGeometry(.1, 32, 16)
-
-const VERTEX_MODE = false
 
 let generalShaderPrefix = `
 uniform float[16] overrideFloats;

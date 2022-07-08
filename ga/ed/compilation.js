@@ -1,5 +1,5 @@
 /*
-    //it's really ; that separates, not newline
+    it's really ; that separates, not newline
 
     If you were to make a GA-products fighting game, what would it be like?
     Your avatars are flailing tentacle/cloud things, but there are bits you can lock onto
@@ -16,6 +16,7 @@
             uniform vec4 iDate;
             uniform float iSampleRate;
             uniform vec3 iChannelResolution[4];
+            
             uniform samplerXX iChanneli;
 
         Also have the frag point in *3D* space
@@ -33,6 +34,8 @@ async function initCompilation()
         class
         lowestUnusedMention = 0
         mentions = []
+        isAttribute
+        isTrueUniform
 
         constructor(newName, newClass) {
             this.name = newName
@@ -97,9 +100,15 @@ async function initCompilation()
     }
 
     let types = Object.keys(mentionClasses)
-    let declRegexes = {}
+    let allTypeRegexes = {}
+    let inRegexes = {}
+    let uniformRegexes = {}
+    let functionRegexes = {}
     types.forEach((type)=>{
-        declRegexes[type] = new RegExp('(?<=[^a-zA-Z_$0-9])(' + type + ')\\s*[a-zA-Z_$][a-zA-Z_$0-9]*', 'gm')
+        functionRegexes[type] = new RegExp('(?<=[^a-zA-Z_$0-9])(' + type + ')\\s*[a-zA-Z_$][a-zA-Z_$0-9]*\\(', 'gm')
+         allTypeRegexes[type] = new RegExp('(?<=[^a-zA-Z_$0-9])(' + type + ')\\s*[a-zA-Z_$][a-zA-Z_$0-9]*', 'gm')
+         uniformRegexes[type] = new RegExp('\\s*uniform\\s*('     + type + ')\\s', 'gm')
+              inRegexes[type] = new RegExp('\\s*in\\s*('          + type + ')\\s', 'gm')
     })
 
     compile = async () => {
@@ -111,6 +120,52 @@ async function initCompilation()
         }
 
         text = text.replace(commentNotNewlineRegex,"")
+
+        let uniforms = {}
+
+        types.forEach((type) => {
+            let functionResults = [...text.matchAll(functionRegexes[type])].map(a => a.index)
+            let  allTypeResults = [...text.matchAll( allTypeRegexes[type])].map(a => a.index)
+            let  uniformResults = [...text.matchAll( uniformRegexes[type])].map(a => a.index + a[0].indexOf(a[1]))
+            let       inResults = [...text.matchAll(      inRegexes[type])].map(a => a.index + a[0].indexOf(a[1]))
+            
+            allTypeResults.forEach((index) => {
+                if( functionResults.indexOf(index) === -1) {
+                    let name = text.slice(index + type.length).match(nameRegex)[0] //TODO potential speedup
+
+                    let variable = variables.find((v) => {
+                        return v.name === name && v.class === mentionClasses[type]
+                    })
+                    if (variable === undefined)
+                        variable = new Variable(name, mentionClasses[type])
+                        
+                    variable.isAttribute = inResults.indexOf(index) !== -1
+                    variable.isTrueUniform = uniformResults.indexOf(index) !== -1
+                    variable.lowestUnusedMention = 0
+
+                    if(uniformResults.indexOf(index) !== -1) {
+                        uniforms[name] = {value: 1.}
+                    }
+                    
+                    /*
+                        how to treat Vertex attributes?
+                            vec2s are uvs on a texture
+                            vec3s / normals are arrows sticking out of that spot
+                            Tangents?
+    
+                            One way of visualizing weights would be proximity to the bones
+                            4D tetrahedron?
+                            floats are colors
+                            weights are visualized on the texture (probably)
+                            Note that normal map is a texture
+                            occlusion, roughness, metallic, normal
+                    */
+                }
+                else {
+                    //ignore for now
+                }
+            })
+        })
         
         let ignoringDueToStruct = false
         let textLines = text.split("\n")
@@ -122,57 +177,76 @@ async function initCompilation()
         //If we change it in its entirety, nothing will be lost
         textLines.forEach((l,lineIndex) => {
 
+            finalChunks[lineIndex] = l
+            if (l[0] === "i" && l[1] === "n" && l[2] === " ") {
+                outputterChunks[lineIndex] = "uniform " + l.slice(3)
+                //right, there's another attribute array where we need to specify which vertex is being talked about
+                // uniformsIncludingSelectedAttributes
+            }
+            else
+                outputterChunks[lineIndex] = l
+
             if (!ignoringDueToStruct && l.indexOf("struct") !== -1)
                 ignoringDueToStruct = true
             else if (l.indexOf("}") !== -1)
                 ignoringDueToStruct = false
-            if(ignoringDueToStruct)
+
+            if ( ignoringDueToStruct )
                 return
 
-            finalChunks[lineIndex] = l
-            outputterChunks[lineIndex] = l
-
-            types.forEach((type) => {
-                let indicesOfResults = [...l.matchAll(declRegexes[type])].map(a => a.index) //maybe don't make the regex anew every time...
-                //bit concerned about types inside eg variable names
-                indicesOfResults.forEach((index)=>{
-                    let name = l.slice(index + type.length).match(nameRegex)[0]
-
-                    let variable = variables.find((v) => v.name === name)
-                    if (variable === undefined)
-                        variable = new Variable(name, mentionClasses[type])
-                    variable.lowestUnusedMention = 0
-                })
-            })
-
-            //want a regex for each name you've found
             let matches = [...l.matchAll(nameRegex)]
             matches.forEach((match)=>{
                 let name = match[0]
                 let variable = variables.find((v) => v.name === name)
-                if( variable === undefined)
+                if( variable === undefined )
                     return
 
+                //may want to modify them both using the usual interface
+                //but that, instead of changing a line of code in the shader, modifies the input array
+
                 let mention = variable.getLowestUnusedMention()
+                mention.updateHorizontalBounds(match.index, name.length)
 
                 mention.lineIndex = lineIndex
                 mention.mentionIndex = mentionIndex++
 
-                let overrideAddition = `\n               if( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` + 
-                    mention.getReassignmentNew(true) + "; " 
-                let outputAddition   = `\n               if( outputMentionIndex == ` + mention.mentionIndex + ` ) {\n` +
-                    mention.getShaderOutputFloatString() + `}`
-                finalChunks[lineIndex] += overrideAddition
-                outputterChunks[lineIndex] += overrideAddition + outputAddition
+                let isDeclaration = variable.lowestUnusedMention === 1
+                let isUniformOrAttribute = variable.isAttribute || variable.isTrueUniform
 
-                updateHorizontalBounds(match.index, name.length, mention.horizontalBounds)
+                if (!isUniformOrAttribute ) {
+                    let overrideAddition = `\nif( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` + mention.getReassignmentNew(true) + ";"
+                    let goesFirst = l.indexOf(`return`) !== -1 ? true : isDeclaration ? false : true
+                    if (goesFirst) {
+                        finalChunks[lineIndex]     = overrideAddition +     finalChunks[lineIndex]
+                        outputterChunks[lineIndex] = overrideAddition + outputterChunks[lineIndex]
+                    }
+                    else {
+                        finalChunks[lineIndex]     =     finalChunks[lineIndex] + overrideAddition
+                        outputterChunks[lineIndex] = outputterChunks[lineIndex] + overrideAddition
+                    }
+                    //you're best off visualizing it in this completely different way, when the declaration is hovered
+                }
+
+                if ( !(isUniformOrAttribute && isDeclaration ) ) {
+                    let outputAddition   = `\nif( outputMentionIndex == ` + mention.mentionIndex + ` ) {` + mention.getShaderOutputFloatString() + `}`
+                    log(outputAddition)
+                    let goesFirst = l.indexOf(`return`) !== -1
+                    if (goesFirst) {
+                        outputterChunks[lineIndex] = outputAddition + outputterChunks[lineIndex]
+                    }
+                    else {
+                        outputterChunks[lineIndex] = outputterChunks[lineIndex] + outputAddition
+                    }
+                }
             })
         })
 
         threejsIsCheckingForShaderErrors = true
         
-        updateOutputterFragmentShader(outputterChunks.join("\n"))
-        updateFinalDw(generalShaderPrefix + finalChunks.join("\n"))
+        updateOutputterFragmentShader(generalShaderPrefix + outputterChunks.join("\n"), uniforms)
+        updateFinalDw(generalShaderPrefix + finalChunks.join("\n"), uniforms) //gets the attributes as attributes too
+
+        // log(generalShaderPrefix + outputterChunks.join("\n"))
 
         lowestChangedLineSinceCompile = Infinity
         updateChangedLineIndicator()

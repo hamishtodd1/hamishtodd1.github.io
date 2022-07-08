@@ -67,6 +67,8 @@ function initMouseInteractions() {
         if (!rightClicking) {
             if(grabbedDw !== null) {
                 dragOccurred = true
+                //TODO dragging a uniform does a completely different thing
+                //attribute does a different thing still
                 indicatedMention.overrideFromDrag(grabbedDw,event)
     
                 forEachUsedMention((mention) => {
