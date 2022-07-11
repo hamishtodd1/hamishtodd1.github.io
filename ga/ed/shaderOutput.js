@@ -5,6 +5,13 @@ async function initShaderOutputAndFinalDw() {
 
         let overrideMentionIndex = { value: -1 }
         let overrideFloats = { value: new Float32Array(16) }
+        function generallyUpdateMaterial(mat,uniforms) {
+            mat.uniforms = uniforms
+            mat.uniforms.overrideMentionIndex = overrideMentionIndex
+            mat.uniforms.overrideFloats = overrideFloats
+            mat.needsUpdate = true
+        }
+
         updateOverride = (mention, getFloatsForOverride) => {
             if (mention === null)
                 overrideMentionIndex.value = -1
@@ -27,14 +34,6 @@ async function initShaderOutputAndFinalDw() {
             let fsq = new THREE.Mesh(fullScreenQuadGeo, mat)
             fsq.matrixAutoUpdate = false
             fsq.matrix = FULL_SCREEN_QUAD_MATRIX
-    
-            fsq.updateFromCompilation = (text, uniforms) => {
-                fsq.material.uniforms = uniforms
-                fsq.material.uniforms.overrideMentionIndex = overrideMentionIndex
-                fsq.material.uniforms.overrideFloats = overrideFloats
-                fsq.material.fragmentShader = text
-                fsq.material.needsUpdate = true
-            }
     
             return fsq
         }
@@ -60,7 +59,8 @@ async function initShaderOutputAndFinalDw() {
         //so there are the attributes that are actually at the vertices
         updateOutputterFragmentShader = (fragmentShader, uniforms) => {
             uniforms.outputMentionIndex = outputMentionIndex
-            outputFsq.updateFromCompilation(readoutPrefix + fragmentShader + readoutSuffix, uniforms)
+            fsq.material.fragmentShader = readoutPrefix + fragmentShader + readoutSuffix
+            generallyUpdateMaterial(fsq.material,uniforms)
         }
     }
 
@@ -104,8 +104,6 @@ async function initShaderOutputAndFinalDw() {
     if (VERTEX_MODE) {
 
         let mat = new THREE.ShaderMaterial({
-            uniforms: {
-            },
             fragmentShader: `
 void main() {
     gl_FragColor = vec4(1., 0., 0., 1.);
@@ -126,12 +124,12 @@ void main() {
         //we will temporarily assume that you have only one vertex going on!
 
         let geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., 1., 0.)])
-        let a = new THREE.PointsMaterial({ size: .5 })
-        // dw.addNonMentionChild(new THREE.Points(geo, mat))
+        let mesh = new THREE.Points(geo, mat)
+        dw.addNonMentionChild(mesh)
 
-        updateFinalDw = (text) => {
-            // mat.vertexShader = text + toVertexSuffix
-            // mat.needsUpdate = true
+        updateFinalDw = (text, uniforms) => {
+            mat.vertexShader = text + toVertexSuffix
+            generallyUpdateMaterial(mat, uniforms)
         }
     }
 
@@ -145,7 +143,8 @@ void main() {
     gl_FragColor = vec4( getColor(), 1. );
 }`
         updateFinalDw = (text, uniforms) => {
-            finalFsq.updateFromCompilation(text + toFragColorSuffix, uniforms)
+            finalFsq.material.fragmentShader = text + toFragColorSuffix, uniforms
+            generallyUpdateMaterial(finalFsq.material, uniforms)
         }
     }
 }

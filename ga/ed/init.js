@@ -88,6 +88,7 @@ TODO
             make some mentions then delete them
         Documented API for making your own window visualizations
     Long term
+        Hovering "return" could be a good for the situation of return vec3(0.,0.,0.)
         Rawshadermaterial
         Generate javascript game. Or maybe your own windows
         Grab and drag could be implemented by creating a motor and then applying it

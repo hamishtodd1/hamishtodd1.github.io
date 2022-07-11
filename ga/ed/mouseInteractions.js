@@ -69,7 +69,14 @@ function initMouseInteractions() {
                 dragOccurred = true
                 //TODO dragging a uniform does a completely different thing
                 //attribute does a different thing still
-                indicatedMention.overrideFromDrag(grabbedDw,event)
+                if( indicatedMention.variable.isUniform) {
+
+                }
+                else if (indicatedMention.variable.isAttrib) {
+                    
+                }
+                else
+                    indicatedMention.overrideFromDrag(grabbedDw,event)
     
                 forEachUsedMention((mention) => {
                     let visible = mentionVisibleDueToCaret(mention) || mention === indicatedMention
@@ -132,20 +139,30 @@ function initMouseInteractions() {
             dragOccurred = false
             updateOverride(null)
             
-            let newLine = "\n    " + indicatedMention.getReassignmentNew(false) + ";\n"
-            let lines = textarea.value.split("\n")
-            let pre  = lines.slice(0, indicatedMention.lineIndex + 1).join("\n")
-            let post = lines.slice(indicatedMention.lineIndex + 1).join("\n")
+            if (indicatedMention.variable.isUniform) {
+
+            }
+            else if (indicatedMention.variable.isAttrib) {
+
+            }
+            else {
+                let newLine = "\n    " + indicatedMention.getReassignmentNew(false) + ";\n"
+                let lines = textarea.value.split("\n")
+                let pre  = lines.slice(0, indicatedMention.lineIndex + 1).join("\n")
+                let post = lines.slice(indicatedMention.lineIndex + 1).join("\n")
+
+                textarea.value = pre + newLine + post
+
+                let newCaretPosition = pre.length + newLine.length - 1
+                textarea.setSelectionRange(newCaretPosition, newCaretPosition)
+            }
             
-            textarea.value = pre + newLine + post
             updateSyntaxHighlighting()
 
             grabbedDw = null
             indicatedMention = null
 
-            let newCaretPosition = textarea.value.length - post.length - 1
             textarea.focus()
-            textarea.setSelectionRange(newCaretPosition, newCaretPosition)
 
             compile()
             onCaretMove()

@@ -34,8 +34,8 @@ async function initCompilation()
         class
         lowestUnusedMention = 0
         mentions = []
-        isAttribute
-        isTrueUniform
+        isAttrib = false
+        isUniform = false
 
         constructor(newName, newClass) {
             this.name = newName
@@ -127,43 +127,44 @@ async function initCompilation()
             let functionResults = [...text.matchAll(functionRegexes[type])].map(a => a.index)
             let  allTypeResults = [...text.matchAll( allTypeRegexes[type])].map(a => a.index)
             let  uniformResults = [...text.matchAll( uniformRegexes[type])].map(a => a.index + a[0].indexOf(a[1]))
-            let       inResults = [...text.matchAll(      inRegexes[type])].map(a => a.index + a[0].indexOf(a[1]))
+            let   attribResults = [...text.matchAll(      inRegexes[type])].map(a => a.index + a[0].indexOf(a[1]))
             
             allTypeResults.forEach((index) => {
-                if( functionResults.indexOf(index) === -1) {
-                    let name = text.slice(index + type.length).match(nameRegex)[0] //TODO potential speedup
-
-                    let variable = variables.find((v) => {
-                        return v.name === name && v.class === mentionClasses[type]
-                    })
-                    if (variable === undefined)
-                        variable = new Variable(name, mentionClasses[type])
-                        
-                    variable.isAttribute = inResults.indexOf(index) !== -1
-                    variable.isTrueUniform = uniformResults.indexOf(index) !== -1
-                    variable.lowestUnusedMention = 0
-
-                    if(uniformResults.indexOf(index) !== -1) {
-                        uniforms[name] = {value: 1.}
-                    }
+                if( functionResults.indexOf(index) !== -1)
+                    return
                     
-                    /*
-                        how to treat Vertex attributes?
-                            vec2s are uvs on a texture
-                            vec3s / normals are arrows sticking out of that spot
-                            Tangents?
-    
-                            One way of visualizing weights would be proximity to the bones
-                            4D tetrahedron?
-                            floats are colors
-                            weights are visualized on the texture (probably)
-                            Note that normal map is a texture
-                            occlusion, roughness, metallic, normal
-                    */
+                let name = text.slice(index + type.length).match(nameRegex)[0] //TODO potential speedup
+
+                let variable = variables.find((v) => {
+                    return v.name === name && v.class === mentionClasses[type]
+                })
+                if (variable === undefined)
+                    variable = new Variable(name, mentionClasses[type])
+                variable.lowestUnusedMention = 0
+                    
+                if (attribResults.indexOf(index) !== -1) {
+                    variable.isAttrib = true
+                    //simplest form is a pair of vertices
+                    //and, yes, those get turned into uniforms for the below
                 }
-                else {
-                    //ignore for now
+                if(uniformResults.indexOf(index) !== -1) {
+                    uniforms[name] = {value: 1.}
+                    variable.isUniform = true
                 }
+                
+                /*
+                    how to treat Vertex attribs?
+                        vec2s are uvs on a texture
+                        vec3s / normals are arrows sticking out of that spot
+                        Tangents?
+
+                        One way of visualizing weights would be proximity to the bones
+                        4D tetrahedron?
+                        floats are colors
+                        weights are visualized on the texture (probably)
+                        Note that normal map is a texture
+                        occlusion, roughness, metallic, normal
+                */
             })
         })
         
@@ -180,8 +181,8 @@ async function initCompilation()
             finalChunks[lineIndex] = l
             if (l[0] === "i" && l[1] === "n" && l[2] === " ") {
                 outputterChunks[lineIndex] = "uniform " + l.slice(3)
-                //right, there's another attribute array where we need to specify which vertex is being talked about
-                // uniformsIncludingSelectedAttributes
+                //right, there's another attrib array where we need to specify which vertex is being talked about
+                // uniformsIncludingSelectedAttribs
             }
             else
                 outputterChunks[lineIndex] = l
@@ -211,9 +212,9 @@ async function initCompilation()
                 mention.mentionIndex = mentionIndex++
 
                 let isDeclaration = variable.lowestUnusedMention === 1
-                let isUniformOrAttribute = variable.isAttribute || variable.isTrueUniform
+                let isUniformOrAttrib = variable.isAttrib || variable.isUniform
 
-                if (!isUniformOrAttribute ) {
+                if (!isUniformOrAttrib ) {
                     let overrideAddition = `\nif( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` + mention.getReassignmentNew(true) + ";"
                     let goesFirst = l.indexOf(`return`) !== -1 ? true : isDeclaration ? false : true
                     if (goesFirst) {
@@ -227,9 +228,8 @@ async function initCompilation()
                     //you're best off visualizing it in this completely different way, when the declaration is hovered
                 }
 
-                if ( !(isUniformOrAttribute && isDeclaration ) ) {
+                if ( !(isUniformOrAttrib && isDeclaration ) ) {
                     let outputAddition   = `\nif( outputMentionIndex == ` + mention.mentionIndex + ` ) {` + mention.getShaderOutputFloatString() + `}`
-                    log(outputAddition)
                     let goesFirst = l.indexOf(`return`) !== -1
                     if (goesFirst) {
                         outputterChunks[lineIndex] = outputAddition + outputterChunks[lineIndex]
@@ -244,7 +244,7 @@ async function initCompilation()
         threejsIsCheckingForShaderErrors = true
         
         updateOutputterFragmentShader(generalShaderPrefix + outputterChunks.join("\n"), uniforms)
-        updateFinalDw(generalShaderPrefix + finalChunks.join("\n"), uniforms) //gets the attributes as attributes too
+        updateFinalDw(generalShaderPrefix + finalChunks.join("\n"), uniforms) //gets the attribs as attribs too
 
         // log(generalShaderPrefix + outputterChunks.join("\n"))
 

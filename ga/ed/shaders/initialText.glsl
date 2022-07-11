@@ -1,6 +1,10 @@
 uniform float myFloat;
 
-
+vec4 getVertex() {
+    vec4 ret = vec4(myFloat,myFloat,myFloat,1.);
+    return ret;
+}
+//END//
 
 vec3 getColor() {
     vec3 myVec = vec3(1.,1.,1.);
@@ -23,7 +27,8 @@ vec3 getColor() {
     vec3 fragColor = vec3(0.,myFloat,myVec.y);
     return fragColor;
 }
-//END//
+
+
 
 
 
@@ -32,10 +37,6 @@ vec3 getColor() {
 //join a spling and splong point pair and of course you get a plane
 //hey why aren't you trying this with 2D CGA first?
 
-vec4 getVertex() {
-    vec4 ret = vec4(myFloat,myFloat,myFloat,1.);
-    return ret;
-}
 
 
 
