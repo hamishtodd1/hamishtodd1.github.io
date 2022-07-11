@@ -1,21 +1,23 @@
 uniform float myFloat;
 
+in vec3 position;
+
 vec4 getVertex() {
-    vec4 ret = vec4(myFloat,myFloat,myFloat,1.);
+    vec4 ret = vec4(position,1.);
     return ret;
 }
+
 //END//
 
 vec3 getColor() {
-    vec3 myVec = vec3(1.,1.,1.);
+    vec3 myVec = vec3(-.28,.96,1.);
 
     Dq rotation = Dq(myVec.x, 0.,0.,0., 0.,myVec.y,0., 0.);
 
     Dq idealLine = Dq(0., 0.,1.,0., 0.,0.,0., 0.);
     Dq eucliLine = Dq(0., 0.,0.,0., 0.,1.,1., 0.);
-    Dq myRotor = Dq(.28, 0.,0.,0.,  .96,0.,0.,  0.);
     
-    Dq transformedEucliLine = sandwichDqDq(myRotor,eucliLine);
+    Dq transformedEucliLine = sandwichDqDq(rotation,eucliLine);
 
     vec2 boog = vec2(1.,1.);
     

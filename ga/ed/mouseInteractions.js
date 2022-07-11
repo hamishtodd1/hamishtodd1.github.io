@@ -9,8 +9,8 @@ function initMouseInteractions() {
     let textareaGrabAddition = [0.,0.]
     getAdjustedClient = () => {
         return [
-            oldClientX + textareaGrabAddition[0], 
-            oldClientY + textareaGrabAddition[1]
+            clientXOld + textareaGrabAddition[0], 
+            clientYOld + textareaGrabAddition[1]
         ]
     }
 
@@ -37,8 +37,8 @@ function initMouseInteractions() {
             mouseAreaOld = mouseArea
 
         if(userIndicationX === undefined) {
-            userIndicationX = oldClientX
-            userIndicationY = oldClientY
+            userIndicationX = clientXOld
+            userIndicationY = clientYOld
         }
 
         forEachUsedMention((mention) => {
@@ -92,7 +92,7 @@ function initMouseInteractions() {
         else {
             event.preventDefault()
 
-            addToCameraLonLat(event.clientX - oldClientX, event.clientY - oldClientY)
+            addToCameraLonLat(event.clientX - clientXOld, event.clientY - clientYOld)
             
             //we do NOT change hoveredmention, we merely update the lines
             if(indicatedMention !== null)
@@ -101,8 +101,8 @@ function initMouseInteractions() {
 
         renderAll()
 
-        oldClientX = event.clientX
-        oldClientY = event.clientY
+        clientXOld = event.clientX
+        clientYOld = event.clientY
 
         event.stopPropagation()
     }
@@ -118,8 +118,8 @@ function initMouseInteractions() {
             
             event.preventDefault()
             textareaGrabAddition = indicatedMention.getCanvasPosition(dw)
-            textareaGrabAddition[0] -= oldClientX
-            textareaGrabAddition[1] -= oldClientY
+            textareaGrabAddition[0] -= clientXOld
+            textareaGrabAddition[1] -= clientYOld
         }
         else {
             textareaGrabAddition[0] = 0.
@@ -153,7 +153,7 @@ function initMouseInteractions() {
 
                 textarea.value = pre + newLine + post
 
-                let newCaretPosition = pre.length + newLine.length - 1
+                let newCaretPosition = caretPositionOld < pre.length ? caretPositionOld : caretPositionOld + newLine.length
                 textarea.setSelectionRange(newCaretPosition, newCaretPosition)
             }
             

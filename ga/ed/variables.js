@@ -2,14 +2,16 @@ let lowestChangedLineSinceCompile = Infinity
 
 let animationStates = {}
 
-let oldClientX = 0
-let oldClientY = 0
+let clientXOld = 0
+let clientYOld = 0
+let caretPositionOld = -1
 
 const FULL_SCREEN_QUAD_MATRIX = new THREE.Matrix4()
 
 const variables = []
 const dws = {}
 const mentionClasses = {}
+const mentionClassNumFloats = {}
 
 let VERTEX_MODE = false
 
@@ -18,7 +20,8 @@ const pointGeo = new THREE.SphereBufferGeometry(.1, 32, 16)
 
 let generalShaderPrefix = `
 uniform float[16] overrideFloats;
-uniform int overrideMentionIndex;`
+uniform int overrideMentionIndex;
+`
 
 const basicVertex = `
 varying vec4 coord;

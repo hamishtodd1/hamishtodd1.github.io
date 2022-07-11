@@ -11,7 +11,7 @@
 */
 function initStudyDw() {
 
-    let ourDw = new Dw("study", false, false, camera2d)
+    let ourDw = new Dw("mobius", false, false, camera2d)
 
     const axisMat = new THREE.LineBasicMaterial({
         color: 0x964B00
@@ -40,7 +40,7 @@ function initStudyNumbers() {
 
     let dotGeo = new THREE.CircleBufferGeometry(.1, 32)
 
-    let ourDw = dws.study
+    let ourDw = dws.mobius
 
     let newValues = Array(2)
     class Vec2 extends Mention {
@@ -102,4 +102,5 @@ function initStudyNumbers() {
         }
     }
     mentionClasses.vec2 = Vec2
+    mentionClassNumFloats.vec2 = 2
 }

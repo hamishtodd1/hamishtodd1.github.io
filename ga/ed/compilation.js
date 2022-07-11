@@ -28,6 +28,9 @@ async function initCompilation()
     let currentHue = 0.
     let goldenRatio = (Math.sqrt(5.)+1.)/2.
 
+    let focussedVertex = 0
+    let numVertices = 2
+
     class Variable {
         name
         col = new THREE.Color(0., 0., 0.)
@@ -122,6 +125,8 @@ async function initCompilation()
         text = text.replace(commentNotNewlineRegex,"")
 
         let uniforms = {}
+        let geo = new THREE.BufferGeometry()
+        let outputterUniforms = {}
 
         types.forEach((type) => {
             let functionResults = [...text.matchAll(functionRegexes[type])].map(a => a.index)
@@ -144,8 +149,18 @@ async function initCompilation()
                     
                 if (attribResults.indexOf(index) !== -1) {
                     variable.isAttrib = true
-                    //simplest form is a pair of vertices
-                    //and, yes, those get turned into uniforms for the below
+
+                    let numFloats = mentionClassNumFloats[type]
+
+                    let attributeArray = new Float32Array(numFloats * numVertices)
+                    for(let i = 0; i < attributeArray.length; ++i)
+                        attributeArray[i] = Math.random() - .5
+                    geo.setAttribute('position', new THREE.BufferAttribute(attributeArray, numFloats))
+                    
+                    let focussedAttributeValue = new Float32Array(numFloats)
+                    for (let i = 0; i < numFloats; ++i)
+                        focussedAttributeValue[i] = attributeArray[i + numFloats * focussedVertex]
+                    outputterUniforms[name] = { value: focussedAttributeValue }
                 }
                 if(uniformResults.indexOf(index) !== -1) {
                     uniforms[name] = {value: 1.}
@@ -215,7 +230,8 @@ async function initCompilation()
                 let isUniformOrAttrib = variable.isAttrib || variable.isUniform
 
                 if (!isUniformOrAttrib ) {
-                    let overrideAddition = `\nif( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` + mention.getReassignmentNew(true) + ";"
+                    let overrideAddition = `\nif( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` + 
+                        mention.getReassignmentNew(true) + ";"
                     let goesFirst = l.indexOf(`return`) !== -1 ? true : isDeclaration ? false : true
                     if (goesFirst) {
                         finalChunks[lineIndex]     = overrideAddition +     finalChunks[lineIndex]
@@ -229,7 +245,8 @@ async function initCompilation()
                 }
 
                 if ( !(isUniformOrAttrib && isDeclaration ) ) {
-                    let outputAddition   = `\nif( outputMentionIndex == ` + mention.mentionIndex + ` ) {` + mention.getShaderOutputFloatString() + `}`
+                    let outputAddition   = `\nif( outputMentionIndex == ` + mention.mentionIndex + ` ) {` + 
+                        mention.getShaderOutputFloatString() + `}`
                     let goesFirst = l.indexOf(`return`) !== -1
                     if (goesFirst) {
                         outputterChunks[lineIndex] = outputAddition + outputterChunks[lineIndex]
@@ -242,11 +259,11 @@ async function initCompilation()
         })
 
         threejsIsCheckingForShaderErrors = true
-        
-        updateOutputterFragmentShader(generalShaderPrefix + outputterChunks.join("\n"), uniforms)
-        updateFinalDw(generalShaderPrefix + finalChunks.join("\n"), uniforms) //gets the attribs as attribs too
 
-        // log(generalShaderPrefix + outputterChunks.join("\n"))
+        updateOutputtingAndFinalDw(
+            outputterChunks.join("\n"), 
+            finalChunks.join("\n"), 
+            geo, uniforms, outputterUniforms)
 
         lowestChangedLineSinceCompile = Infinity
         updateChangedLineIndicator()

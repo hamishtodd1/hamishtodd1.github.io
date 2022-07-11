@@ -212,7 +212,7 @@ async function init() {
     initInfinityDw()
     initStudyDw()
     new Dw("scalar", false, false, camera2d)
-    // dws.study.elem.style.display = 'none'
+    // dws.mobius.elem.style.display = 'none'
     // dws.scalar.elem.style.display = 'none'
 
     initVec3s()

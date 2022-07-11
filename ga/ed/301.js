@@ -686,7 +686,7 @@ function createSharedFunctionDeclarationsStrings()
 
     //maybe try to do better than this, geometrically
 
-    generalShaderPrefix = glslGaString + generalShaderPrefix
+    generalShaderPrefix += glslGaString
 
     return jsString
 }

@@ -2,7 +2,7 @@ function initDqs() {
 
     let eDw = dws.euclidean
     let iDw = dws.infinity
-    let sDw = dws.study
+    let sDw = dws.mobius
 
     let outOfTheWayPosition = new THREE.Vector3(camera.far * 999., camera.far * 999., camera.far * 999.)
 
@@ -53,12 +53,6 @@ function initDqs() {
         updateFromMv() {
 
             this.#mv.selectGrade(2, linePart)
-            
-            //but the problem with study space is that eg (1+e12)'s study number is just a scalar
-            // this.#mv.reverse(mv0)
-            // mul(this.#mv,mv0,studyPart)
-            // this.#sDwMesh.position.x = studyPart[0]
-            // this.#sDwMesh.position.y = studyPart[15]
 
             this.#sDwMesh.position.x = this.#mv[0]
             this.#sDwMesh.position.y = linePart.norm()
@@ -259,4 +253,5 @@ function initDqs() {
         }
     }
     mentionClasses.Dq = DqMention
+    mentionClassNumFloats.Dq = 8
 }

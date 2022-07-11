@@ -109,7 +109,6 @@ function initCaretInteractions() {
         caretPositionOld = caretPosition
     }
 
-    let caretPositionOld = -1
     let caretLine = -1
     let caretColumn = -1
     document.addEventListener('selectionchange', onCaretMove)

@@ -11,7 +11,7 @@ function initPoints() {
 
     let eDw = dws.euclidean
     let iDw = dws.infinity
-    let sDw = dws.study
+    let sDw = dws.mobius
 
     let outOfTheWayPosition = new THREE.Vector3(camera.far * 999., camera.far * 999., camera.far * 999.)
 
@@ -159,4 +159,5 @@ function initPoints() {
         }
     }
     mentionClasses.vec4 = Point
+    mentionClassNumFloats.vec4 = 4
 }

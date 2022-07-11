@@ -209,4 +209,5 @@ function initVec3s()
         }
     }
     mentionClasses.vec3 = Arrow
+    mentionClassNumFloats.vec3 = 3
 }

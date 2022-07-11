@@ -95,4 +95,5 @@ function initFloats() {
         }
     }
     mentionClasses.float = Float
+    mentionClassNumFloats.float = 1
 }

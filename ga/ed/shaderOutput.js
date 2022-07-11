@@ -1,5 +1,7 @@
 async function initShaderOutputAndFinalDw() {
-
+    //////////////////////////
+    // Override sensetivity //
+    //////////////////////////
     {
         let overrideAffectedMaterials = []
 
@@ -23,44 +25,48 @@ async function initShaderOutputAndFinalDw() {
             for (let i = 0, il = overrideAffectedMaterials.length; i < il; ++i)
                 overrideAffectedMaterials[i].needsUpdate = true
         }
+    }
 
-        let fullScreenQuadGeo = new THREE.PlaneGeometry(1., 1.)
-        fullScreenQuadGeo.translate(0., 0., -1.)
-        function OverrideSensetiveFullScreenQuad() {
-            let mat = new THREE.ShaderMaterial({
-                vertexShader: basicVertex
-            })
-    
-            let fsq = new THREE.Mesh(fullScreenQuadGeo, mat)
-            fsq.matrixAutoUpdate = false
-            fsq.matrix = FULL_SCREEN_QUAD_MATRIX
-    
-            return fsq
-        }
+
+    /////////////////////
+    // Fullscreen quad //
+    /////////////////////
+    let fullScreenQuadGeo = new THREE.PlaneGeometry(1., 1.)
+    fullScreenQuadGeo.translate(0., 0., -1.)
+    function FullScreenQuadMesh() {
+        let mat = new THREE.ShaderMaterial({
+            vertexShader: basicVertex
+        })
+
+        let fsq = new THREE.Mesh(fullScreenQuadGeo, mat)
+        fsq.matrixAutoUpdate = false
+        fsq.matrix = FULL_SCREEN_QUAD_MATRIX
+
+        return fsq
     }
 
 
     ////////////
     // Output //
     ////////////
-    let outputFsq = OverrideSensetiveFullScreenQuad()
+    let outputFsq = FullScreenQuadMesh()
     let outputMentionIndex = { value: -1 }
 
     {
         let readoutPrefix = await getTextFile('shaders/floatOutputterPrefix.glsl')
         let insertion = VERTEX_MODE ? `vec4 myVertex = getVertex` : `vec3 myCol = getColor`
         let readoutSuffix = `
-    void main() {
-        `+ insertion +`();
-        gl_FragColor = encodeRgbaOfOutputFloatForOurPixel();
-    }`
+void main() {
+    `+ insertion +`();
+    gl_FragColor = encodeRgbaOfOutputFloatForOurPixel();
+}`
     
         //hmmm, to use varyings... what, you have to interpolate it yourself?
         //so there are the attributes that are actually at the vertices
-        updateOutputterFragmentShader = (fragmentShader, uniforms) => {
+        function updateOutputter(fragmentShader, uniforms) {
             uniforms.outputMentionIndex = outputMentionIndex
-            fsq.material.fragmentShader = readoutPrefix + fragmentShader + readoutSuffix
-            generallyUpdateMaterial(fsq.material,uniforms)
+            outputFsq.material.fragmentShader = generalShaderPrefix + readoutPrefix + fragmentShader + readoutSuffix
+            generallyUpdateMaterial(outputFsq.material,uniforms)
         }
     }
 
@@ -95,56 +101,68 @@ async function initShaderOutputAndFinalDw() {
     }
 
     //////////////
-    // final dw //
+    // Final dw //
     //////////////
 
     let dw = new Dw("final", false, false, camera, false)
     // dw.elem.style.display = 'none'
 
-    if (VERTEX_MODE) {
+    let oldMesh = null
+    updateFinalDwVertex = (text, uniforms, geo) => {
+        const toVertexSuffix = `
+        uniform mat4 viewMatrix;
+        uniform mat4 projectionMatrix;
+        void main() {
+            gl_PointSize = 2.0;
+            gl_Position = projectionMatrix * viewMatrix * getVertex();
+        }`
 
-        let mat = new THREE.ShaderMaterial({
-            fragmentShader: `
-void main() {
-    gl_FragColor = vec4(1., 0., 0., 1.);
-}`
+        //possibly getColor should take a vec2 input, the fragCoord
+
+        uniforms.projectionMatrix = { value: camera.projectionMatrix }
+        uniforms.viewMatrix = { value: camera.matrixWorldInverse }
+        let mat = new THREE.RawShaderMaterial({
+            uniforms,
+            vertexShader: `#version 300 es\n` + generalShaderPrefix + text + toVertexSuffix,
+            fragmentShader: `#version 300 es
+            precision mediump float;
+            out vec4 fragColor;
+            void main() {
+                fragColor = vec4(1., 0., 0., 1.);
+            }`
         })
 
-        let toVertexSuffix = `
-void main() {
-    gl_PointSize = 2.0;
-	gl_Position = projectionMatrix * modelViewMatrix * getVertex();
-}`
+        generallyUpdateMaterial(mat, uniforms)
 
-        //getColor needs a vec2 input, the fragCoord
-        //this one gets a uv from a 1x1 rect
-        //and they are a special kind of manipulation
-        //their windows go at the top
-
-        //we will temporarily assume that you have only one vertex going on!
-
-        let geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0., 1., 0.)])
+        if(oldMesh!==null) {
+            oldMesh.parent.remove(oldMesh)
+            oldMesh.geometry.dispose()
+            oldMesh.material.dispose()
+        }
+        
         let mesh = new THREE.Points(geo, mat)
         dw.addNonMentionChild(mesh)
-
-        updateFinalDw = (text, uniforms) => {
-            mat.vertexShader = text + toVertexSuffix
-            generallyUpdateMaterial(mat, uniforms)
-        }
+        oldMesh = mesh
     }
 
-    if (!VERTEX_MODE) {
+    let fragFsq = FullScreenQuadMesh()
+    if(!VERTEX_MODE)
+        dw.addNonMentionChild(fragFsq)
+    updateFinalDwFragment = (text, uniforms) => {
+        const toFragColorSuffix = `
+        void main() {
+            gl_FragColor = vec4( getColor(), 1. );
+        }`
+        fragFsq.material.fragmentShader = generalShaderPrefix + text + toFragColorSuffix
+        generallyUpdateMaterial(fragFsq.material, uniforms)
+    }
 
-        let finalFsq = OverrideSensetiveFullScreenQuad()
-        dw.addNonMentionChild(finalFsq)
+    updateOutputtingAndFinalDw = (outputterText, text, geo, uniforms, outputterUniforms) => {
+        updateOutputter(outputterText, outputterUniforms)
 
-        let toFragColorSuffix = `
-void main() {
-    gl_FragColor = vec4( getColor(), 1. );
-}`
-        updateFinalDw = (text, uniforms) => {
-            finalFsq.material.fragmentShader = text + toFragColorSuffix, uniforms
-            generallyUpdateMaterial(finalFsq.material, uniforms)
-        }
+        if(VERTEX_MODE)
+            updateFinalDwVertex(text, uniforms, geo)
+        else
+            updateFinalDwFragment(text, uniforms)
     }
 }

@@ -134,6 +134,8 @@ function initMention() {
             forVizDws((dw)=>{
                 if (this.isVisibleInDw(dw)) {
 
+                    //TODO this works differently if .isAttrib or .isUniform
+
                     let [elemX, elemY] = this.getCanvasPosition(dw)
 
                     setSvgLine($labelConnectors[lowestUnusedLabelConnector++],
