@@ -229,11 +229,16 @@ async function initCompilation()
                 let isDeclaration = variable.lowestUnusedMention === 1
                 let isUniformOrAttrib = variable.isAttrib || variable.isUniform
 
+                let overrideGoesBefore = false
                 if (!isUniformOrAttrib ) {
-                    let overrideAddition = `\nif( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` + 
+                    if (l.indexOf(`return`) !== -1)
+                        overrideGoesBefore = true
+                    else if(isDeclaration)
+                        overrideGoesBefore = false
+
+                    let overrideAddition = `\nif( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` +
                         mention.getReassignmentNew(true) + ";"
-                    let goesFirst = l.indexOf(`return`) !== -1 ? true : isDeclaration ? false : true
-                    if (goesFirst) {
+                    if (overrideGoesBefore) {
                         finalChunks[lineIndex]     = overrideAddition +     finalChunks[lineIndex]
                         outputterChunks[lineIndex] = overrideAddition + outputterChunks[lineIndex]
                     }
@@ -245,10 +250,13 @@ async function initCompilation()
                 }
 
                 if ( !(isUniformOrAttrib && isDeclaration ) ) {
+                    let goesBefore = l.indexOf(`return`) !== -1
+
                     let outputAddition   = `\nif( outputMentionIndex == ` + mention.mentionIndex + ` ) {` + 
                         mention.getShaderOutputFloatString() + `}`
-                    let goesFirst = l.indexOf(`return`) !== -1
-                    if (goesFirst) {
+                    if( overrideGoesBefore === false)
+                        goesBefore = false
+                    if (goesBefore) {
                         outputterChunks[lineIndex] = outputAddition + outputterChunks[lineIndex]
                     }
                     else {
@@ -259,6 +267,8 @@ async function initCompilation()
         })
 
         threejsIsCheckingForShaderErrors = true
+
+        // log(outputterChunks.join("\n------------------"))
 
         updateOutputtingAndFinalDw(
             outputterChunks.join("\n"), 

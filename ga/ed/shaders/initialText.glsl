@@ -4,6 +4,7 @@ in vec3 position;
 
 vec4 getVertex() {
     vec4 ret = vec4(position,1.);
+    ret = vec4(0.9,0.45,-0.54,0.95);
     return ret;
 }
 

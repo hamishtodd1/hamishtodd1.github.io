@@ -51,11 +51,12 @@ function initMouseInteractions() {
             indicatedMention = getIndicatedTextareaMention(userIndicationX, userIndicationY)
         else
             indicatedMention = mouseArea.getHoveredMention(userIndicationX, userIndicationY)
-            
+
         if (indicatedMention !== null)
             indicatedMention.setVisibility(true)
 
         if(indicatedMentionOld !== indicatedMention) {
+            log(indicatedMention)
             if (indicatedMention === null)
                 hideHighlight()
             else
@@ -160,7 +161,6 @@ function initMouseInteractions() {
             updateSyntaxHighlighting()
 
             grabbedDw = null
-            indicatedMention = null
 
             textarea.focus()
 
