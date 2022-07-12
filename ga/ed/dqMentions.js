@@ -2,7 +2,7 @@ function initDqs() {
 
     let eDw = dws.euclidean
     let iDw = dws.infinity
-    let sDw = dws.mobius
+    let mDw = dws.mobius
 
     let outOfTheWayPosition = new THREE.Vector3(camera.far * 999., camera.far * 999., camera.far * 999.)
 
@@ -31,11 +31,17 @@ function initDqs() {
     let worldSpaceCameraPosition = new THREE.Vector4()
     let iDwIntersection = new Mv()
     class DqMention extends Mention {
-        #eDwMesh;
-        #sDwMesh;
-        #iDwLineMesh;
-        #iDwRingMesh;
-        #mv = new Mv();
+        #eDwMesh
+        #mDwMesh
+        #iDwLineMesh
+        #iDwRingMesh
+
+        linePartWhenGrabbedNormalized = new Mv()
+        mv = new Mv()
+
+        equals(m) {
+            return m.mv.equals(this.mv)
+        }
         
         constructor(variable) {
             super(variable)
@@ -45,44 +51,39 @@ function initDqs() {
             this.#eDwMesh = eDw.NewMesh(eLineGeo, mat)
             this.#iDwLineMesh = iDw.NewMesh(iLineGeo, mat)
             this.#iDwRingMesh = iDw.NewMesh(ringGeo,  mat)
-            this.#sDwMesh = sDw.NewMesh(dotGeo, new THREE.MeshBasicMaterial({ color: variable.col }))
+            this.#mDwMesh = mDw.NewMesh(dotGeo, new THREE.MeshBasicMaterial({ color: variable.col }))
 
             camera.toHaveUpdateFromMvCalled.push(this)
         }
 
-        updateFromMv() {
+        updateFromShader() {
+            this.getShaderOutput(dwNewValues)
+            newDq.copy(dwNewValues)
+            newDq.toMv(this.mv)
 
-            this.#mv.selectGrade(2, linePart)
+            this.mv.selectGrade(2, linePart)
 
-            this.#sDwMesh.position.x = this.#mv[0]
-            this.#sDwMesh.position.y = linePart.norm()
+            this.#mDwMesh.position.x = this.mv[0]
+
+            //the really nice thing would be to say that these mentions... are actually the same unless they're
+            //assigned to
+            //check their values, if they're the same - they're the same!
+
+            if (!this.linePartWhenGrabbedNormalized.equals(zeroMv)) {
+                let ourInner = inner(linePart, this.linePartWhenGrabbedNormalized)
+                this.#mDwMesh.position.y = ourInner[0] * -1.
+                //the arc thing would be nice too
+            }
+            else
+                this.#mDwMesh.position.y = linePart.norm()
+            linePart.log()
 
             //more like: it's a mobius strip
             //And by the way, it's angled in 3D space such that your line is through it
             //when you hover the window, it switches to being a "top" down view
             //where the top is the view such that the rotation is anticlockwise from the identity
-            
-            //But click a checkbox and the mobius strip unravels
-            //The full circle is more about creating rotations than looking at current ones
 
-            // this.#mv.getNormalization(normalization)
-            // normalization.dqLog(normalizationLogarithm)
-            // let eNorm = normalizationLogarithm.eNorm()
-            // if(eNorm === 0.) {
-            //     //use the scalar part and the iNorm of the linepart
-            // }
-            // else {
-            //     log(this.variable.name)
-            //     this.#mv.log()
-            //     normalization.log()
-            //     normalizationLogarithm.log()
-            //     log(eNorm)
-            //     this.#sDwMesh.position.x = Math.cos(eNorm)
-            //     this.#sDwMesh.position.y = Math.sin(eNorm)
-            //     log(this.#sDwMesh.position)
-            // }
-
-            if(linePart.approxEquals(zeroMv)) {
+            if (linePart.approxEquals(zeroMv)) {
                 this.#eDwMesh.position.copy(outOfTheWayPosition)
                 this.#iDwRingMesh.position.copy(outOfTheWayPosition)
                 this.#iDwLineMesh.position.copy(outOfTheWayPosition)
@@ -105,38 +106,50 @@ function initDqs() {
             e123.projectOn(displayedLineMv, mv0).toVector(this.#eDwMesh.position)
         }
 
-        updateFromShader() {
-            this.getShaderOutput(dwNewValues)
-            newDq.copy(dwNewValues)
-            newDq.toMv(this.#mv)
-
-            this.updateFromMv()
-        }
-
         onGrab(dw) {
             if (dw === eDw) {
-                this.#mv.selectGrade(2, linePart)
+                this.mv.selectGrade(2, linePart)
                 if (linePart.hasEuclideanPart())
                     camera.frustum.far.projectOn(linePart, dragPlane)
                 else dragPlane.copy(e0)
             }
+
+            if(dw === mDw) {
+                this.mv.selectGrade(2, this.linePartWhenGrabbedNormalized)
+                this.linePartWhenGrabbedNormalized.normalize()
+                //maybe get scalar part involved?
+            }
+        }
+        onLetGo() {
+            this.linePartWhenGrabbedNormalized.copy(zeroMv)
         }
 
         overrideFromDrag(dw) {
             const self = this
             function updateFromNewLinePart(overrideFloats) {
                 let normalizer = linePart.norm() / newLinePart.norm()
-                overrideFloats[0] = self.#mv[0]
-                overrideFloats[8] = self.#mv[15]
+                overrideFloats[0] = self.mv[0]
+                overrideFloats[8] = self.mv[15]
                 for (let i = 0; i < 6; ++i)
                     overrideFloats[i + 1] = newLinePart[i + 5] * normalizer
             }
 
-            this.#mv.selectGrade(2, linePart)
+            this.mv.selectGrade(2, linePart)
 
-            if (dw === sDw) {
-                camera2d.oldClientToPosition(dw, this.#sDwMesh.position)
-                console.error("TODO figure out how to change #mv!")
+            if (dw === mDw) {
+                if (this.mv[15] !== 0.)
+                    console.error("todo figure this out!")
+
+                linePart.normalize()
+
+                camera2d.oldClientToPosition(dw, this.#mDwMesh.position)
+                
+                updateOverride(this, (overrideFloats)=>{
+                    overrideFloats[0] = this.#mDwMesh.position.x
+
+                    for (let i = 0; i < 6; ++i)
+                        overrideFloats[i + 1] = this.linePartWhenGrabbedNormalized[i + 5] * this.#mDwMesh.position.y
+                })
             }
             else if (dw === eDw) {
                 let oldJoinedWithCamera = join(linePart, camera.mvs.pos, mv0)
@@ -175,24 +188,24 @@ function initDqs() {
         setVisibility(newVisibility) {
             this.#eDwMesh.visible = newVisibility
             
-            this.#sDwMesh.visible = newVisibility && this.#mv[0] !== 0.
+            this.#mDwMesh.visible = newVisibility && this.mv[0]
 
-            this.#mv.selectGrade(2, linePart)
+            this.mv.selectGrade(2, linePart)
             let hasEuclideanPart = linePart.hasEuclideanPart()
             this.#iDwLineMesh.visible =  hasEuclideanPart && newVisibility            
             this.#iDwRingMesh.visible = !hasEuclideanPart && newVisibility
         }
 
         getCanvasPosition(dw) {
-            if (dw === sDw)
-                return camera2d.positionToWindow(this.#sDwMesh.position,dw)
+            if (dw === mDw)
+                return camera2d.positionToWindow(this.#mDwMesh.position,dw)
             else {
                 if (dw === eDw) {
                     worldSpaceCameraPosition.copy(this.#eDwMesh.position)
                     worldSpaceCameraPosition.w = 1.
                 }
                 else if (dw === iDw) {
-                    this.#mv.selectGrade(2, linePart)
+                    this.mv.selectGrade(2, linePart)
                     if (linePart.hasEuclideanPart()) {
                         //probably want something about its intersection with the top
                         //ideally taking account of directedness
@@ -202,7 +215,7 @@ function initDqs() {
                         let vec3Part = labelPoint.toVector(v1)
                         vec3Part.setLength(INFINITY_RADIUS)
                         worldSpaceCameraPosition.copy(vec3Part)
-                        worldSpaceCameraPosition.multiplyScalar(.5)
+                        // worldSpaceCameraPosition.multiplyScalar(.5)
                         worldSpaceCameraPosition.w = 1.
                     }
                     else {
@@ -221,7 +234,7 @@ function initDqs() {
 
         isVisibleInDw(dw) {
             return  (dw === eDw && this.#eDwMesh.visible) ||
-                    (dw === sDw && this.#sDwMesh.visible) ||
+                    (dw === mDw && this.#mDwMesh.visible) ||
                     (dw === iDw && (this.#iDwLineMesh.visible || this.#iDwRingMesh.visible) )
         }
 
@@ -229,7 +242,7 @@ function initDqs() {
             if (useOverrideFloats) 
                 return generateReassignmentText("Dq", true, 8)
             else {
-                dq0.fromMv(this.#mv)
+                dq0.fromMv(this.mv)
                 return generateReassignmentText("Dq", dq0[0], dq0[1], dq0[2], dq0[3], dq0[4], dq0[5], dq0[6], dq0[7])
             }
         }
@@ -249,9 +262,9 @@ function initDqs() {
         }
 
         getTextareaManipulationDw() {
-            return iDw
+            return mDw
         }
     }
     mentionClasses.Dq = DqMention
-    mentionClassNumFloats.Dq = 8
+    mentionClassNumFloats.Dq = 8 //mentionClasses.Dq.numFloats = 8
 }

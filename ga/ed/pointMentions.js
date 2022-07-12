@@ -11,7 +11,7 @@ function initPoints() {
 
     let eDw = dws.euclidean
     let iDw = dws.infinity
-    let sDw = dws.mobius
+    let mDw = dws.mobius
 
     let outOfTheWayPosition = new THREE.Vector3(camera.far * 999., camera.far * 999., camera.far * 999.)
 
@@ -51,7 +51,7 @@ function initPoints() {
     class Point extends Mention {
         #eDwMesh;
         #iDwMesh;
-        #mv = new Mv();
+        mv = new Mv();
 
         constructor(variable) {
             super(variable)
@@ -63,14 +63,17 @@ function initPoints() {
             camera.toHaveUpdateFromMvCalled.push(this)
         }
 
-        updateFromMv() {
-            if (this.#mv[14] !== 0.)
-                this.#mv.toVector(this.#eDwMesh.position)
+        updateFromShader() {
+            this.getShaderOutput(ptNewValues)
+            this.mv.point(ptNewValues[0], ptNewValues[1], ptNewValues[2], ptNewValues[3])
+            
+            if (this.mv[14] !== 0.)
+                this.mv.toVector(this.#eDwMesh.position)
             else {
-                this.#mv.toVector(this.#iDwMesh.position)
+                this.mv.toVector(this.#iDwMesh.position)
                 this.#iDwMesh.position.setLength(INFINITY_RADIUS)
-                
-                this.#mv.getDisplayableVersion(mv0)
+
+                this.mv.getDisplayableVersion(mv0)
                 if (mv0[14] > 0.)
                     mv0.toVectorDisplayable(this.#eDwMesh.position)
                 else {
@@ -80,16 +83,10 @@ function initPoints() {
             }
         }
 
-        updateFromShader() {
-            this.getShaderOutput(ptNewValues)
-            this.#mv.point(ptNewValues[0], ptNewValues[1], ptNewValues[2], ptNewValues[3])
-            this.updateFromMv()
-        }
-
         onGrab(dw) {
             if(dw === eDw) {
-                if (this.#mv.hasEuclideanPart())
-                    camera.frustum.far.projectOn(this.#mv, dragPlane)
+                if (this.mv.hasEuclideanPart())
+                    camera.frustum.far.projectOn(this.mv, dragPlane)
                 else dragPlane.copy(e0)
             }
         }
@@ -130,7 +127,7 @@ function initPoints() {
             if (useOverrideFloats)
                 return generateReassignmentText("vec4", true, 4)
             else {
-                let m = this.#mv
+                let m = this.mv
                 return generateReassignmentText("vec4", m[13], m[12], m[11], m[14])
             }
         }
@@ -141,7 +138,7 @@ function initPoints() {
 
         setVisibility(newVisibility) {
             this.#eDwMesh.visible = newVisibility
-            this.#iDwMesh.visible  = newVisibility && this.#mv[14] === 0.
+            this.#iDwMesh.visible  = newVisibility && this.mv[14] === 0.
         }
 
         isVisibleInDw(dw) {
@@ -152,10 +149,14 @@ function initPoints() {
         }
 
         getTextareaManipulationDw() {
-            if(this.#mv[14] === 0.)
+            if(this.mv[14] === 0.)
                 return iDw
             else
                 return eDw
+        }
+
+        equals(m) {
+            return m.mv.equals(this.mv)
         }
     }
     mentionClasses.vec4 = Point

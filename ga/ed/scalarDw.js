@@ -36,34 +36,34 @@ function initFloats() {
 
     let newValues = Array(1)
     class Float extends Mention {
-        #mesh
+        mesh
 
         constructor(variable) {
             super(variable)
 
             let mat = new THREE.MeshBasicMaterial({ color: variable.col })
-            this.#mesh = ourDw.NewMesh(geo, mat)
+            this.mesh = ourDw.NewMesh(geo, mat)
         }
 
         updateFromShader() {
             this.getShaderOutput( newValues)
-            this.#mesh.position.x = newValues[0]
+            this.mesh.position.x = newValues[0]
         }
 
         overrideFromDrag(dw) {
             if (dw === ourDw) {
                 let [xProportion, yProportion] = dw.oldClientToProportion()
-                this.#mesh.position.x = camera2d.left + xProportion * (camera2d.right - camera2d.left )
+                this.mesh.position.x = camera2d.left + xProportion * (camera2d.right - camera2d.left )
                 
                 updateOverride(this, (overrideFloats) => {
-                    overrideFloats[0] = this.#mesh.position.x
+                    overrideFloats[0] = this.mesh.position.x
                 })
             }
             else console.error("not in that dw")
         }
 
         getCanvasPosition(dw) {
-            let ndcX = (this.#mesh.position.x-camera2d.left) / (camera2d.right - camera2d.left)
+            let ndcX = (this.mesh.position.x-camera2d.left) / (camera2d.right - camera2d.left)
             let ndcY = .5
 
             return ndcToWindow(ndcX,ndcY,dw)
@@ -77,21 +77,25 @@ function initFloats() {
             if (useOverrideFloats)
                 return "overrideFloats[0]"
             else
-                return parseFloat(this.#mesh.position.x.toFixed(2))
+                return parseFloat(this.mesh.position.x.toFixed(2))
         }
 
         setVisibility(newVisibility) {
-            this.#mesh.visible = newVisibility
+            this.mesh.visible = newVisibility
         }
 
         isVisibleInDw(dw) {
             if (dw !== ourDw )
                 return false
-            return this.#mesh.visible
+            return this.mesh.visible
         }
 
         getTextareaManipulationDw() {
             return ourDw
+        }
+
+        equals(m) {
+            return m.mesh.position.x.equals(this.mesh.position.x)
         }
     }
     mentionClasses.float = Float

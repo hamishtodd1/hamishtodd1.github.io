@@ -12,14 +12,13 @@ TODO
             It's a mobius strip
             If it's a translation, it cuts up differently?
                 It'll be up and down the lines s = 1 or s = -1
-        Vertex shaders
-        Mesh window, containing stanford bunny
+        Mesh window
             Has an indicator on it: "where attributes are currently coming from". Can move indicator with mouse
             Has a slider on it too, for animating
         Uniforms / attributes
             Mouse ray in final dw
             Shadertoy-inspired
-            Window for texture attributes
+            Window for texture uniforms
                 May want to draw or copypaste
                 Considered as Initial state of a simulation
                     "step" "play/pause" buttons. Can draw when paused
@@ -88,7 +87,9 @@ TODO
             make some mentions then delete them
         Documented API for making your own window visualizations
     Long term
-        Hovering "return" could be a good for the situation of return vec3(0.,0.,0.)
+        Conveniences
+            Hovering "return" could be a good for the situation of return vec3(0.,0.,0.)
+            dragging a literal just edits that line instead of making a new one
         Rawshadermaterial
         Generate javascript game. Or maybe your own windows
         Grab and drag could be implemented by creating a motor and then applying it
@@ -231,7 +232,7 @@ async function init() {
     
     compile()
     updateMentionVisibilitiesAndIndication()
-    setCaretPosition(198)
+    setCaretPosition(231)
     await meshloadPromise
     renderAll()
 

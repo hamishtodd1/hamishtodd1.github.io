@@ -1,36 +1,29 @@
+// in vec3 position;
+// vec4 getVertex() {
+//     vec4 ret = vec4(position,1.);
+//     return ret;
+// }
 uniform float myFloat;
-
-in vec3 position;
-
-vec4 getVertex() {
-    vec4 ret = vec4(position,1.);
-    ret = vec4(0.9,0.45,-0.54,0.95);
-    return ret;
-}
-
-//END//
-
 vec3 getColor() {
+    vec2 boog = vec2(1.,1.);
+    
     vec3 myVec = vec3(-.28,.96,1.);
-
     Dq rotation = Dq(myVec.x, 0.,0.,0., 0.,myVec.y,0., 0.);
+    
+    vec4 idealPt = vec4( .2,0.,-1.,0.);
+    vec4 transformedIdeal = sandwichDqPt(rotation, idealPt);
+
+    vec4 realPt = vec4( .2,0., 1.,1.);
+    vec4 transformedReal = sandwichDqPt(rotation, realPt);
 
     Dq idealLine = Dq(0., 0.,1.,0., 0.,0.,0., 0.);
     Dq eucliLine = Dq(0., 0.,0.,0., 0.,1.,1., 0.);
-    
-    Dq transformedEucliLine = sandwichDqDq(rotation,eucliLine);
-
-    vec2 boog = vec2(1.,1.);
-    
-    vec4 idealPt = vec4( .2,0.,-1.,0.);
-    vec4 realPt = vec4( .2,0., 1.,1.);
-    vec4 transformedReal = sandwichDqPt(rotation, realPt);
-    vec4 transformedIdeal = sandwichDqPt(rotation, idealPt);
+    Dq eucliLine2 = sandwichDqDq(rotation,eucliLine);
     
     vec3 fragColor = vec3(0.,myFloat,myVec.y);
     return fragColor;
 }
-
+//END//
 
 
 

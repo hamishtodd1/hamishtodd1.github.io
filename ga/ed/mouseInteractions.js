@@ -56,7 +56,6 @@ function initMouseInteractions() {
             indicatedMention.setVisibility(true)
 
         if(indicatedMentionOld !== indicatedMention) {
-            log(indicatedMention)
             if (indicatedMention === null)
                 hideHighlight()
             else
@@ -138,6 +137,7 @@ function initMouseInteractions() {
         
         if (event.button === 0 && dragOccurred) {
             dragOccurred = false
+            indicatedMention.onLetGo()
             updateOverride(null)
             
             if (indicatedMention.variable.isUniform) {
@@ -154,7 +154,8 @@ function initMouseInteractions() {
 
                 textarea.value = pre + newLine + post
 
-                let newCaretPosition = caretPositionOld < pre.length ? caretPositionOld : caretPositionOld + newLine.length
+                let [caretColumnIndex, caretLineIndex] = getCaretColumnAndLine()                
+                let newCaretPosition = caretLineIndex < indicatedMention.lineIndex ? caretPositionOld : caretPositionOld + newLine.length
                 textarea.setSelectionRange(newCaretPosition, newCaretPosition)
             }
             

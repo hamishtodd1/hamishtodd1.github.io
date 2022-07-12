@@ -44,35 +44,35 @@ function initStudyNumbers() {
 
     let newValues = Array(2)
     class Vec2 extends Mention {
-        #mesh;
+        mesh;
 
         constructor(variable) {
             super(variable)
 
             let mat = new THREE.MeshBasicMaterial({ color: variable.col })
-            this.#mesh = ourDw.NewMesh(dotGeo, mat)
+            this.mesh = ourDw.NewMesh(dotGeo, mat)
         }
 
         updateFromShader() {
             this.getShaderOutput(newValues)
-            this.#mesh.position.x = newValues[0]
-            this.#mesh.position.y = newValues[1]
+            this.mesh.position.x = newValues[0]
+            this.mesh.position.y = newValues[1]
         }
 
         overrideFromDrag(dw) {
             if (dw === ourDw) {
-                camera2d.oldClientToPosition(dw, this.#mesh.position)
+                camera2d.oldClientToPosition(dw, this.mesh.position)
                 
                 updateOverride(this, (overrideFloats) => {
-                    overrideFloats[0] = this.#mesh.position.x
-                    overrideFloats[1] = this.#mesh.position.y
+                    overrideFloats[0] = this.mesh.position.x
+                    overrideFloats[1] = this.mesh.position.y
                 })
             }
             else console.error("not in that dw")
         }
 
         getCanvasPosition(dw) {
-            return camera2d.positionToWindow(this.#mesh.position,dw)
+            return camera2d.positionToWindow(this.mesh.position,dw)
         }
 
         getShaderOutputFloatString() {
@@ -83,22 +83,26 @@ function initStudyNumbers() {
             if (useOverrideFloats)
                 return generateReassignmentText("vec2", true, 2)
             else {
-                return generateReassignmentText("vec2", this.#mesh.position.x, this.#mesh.position.y )
+                return generateReassignmentText("vec2", this.mesh.position.x, this.mesh.position.y )
             }
         }
 
         setVisibility(newVisibility) {
-            this.#mesh.visible = newVisibility
+            this.mesh.visible = newVisibility
         }
 
         isVisibleInDw(dw) {
             if (dw !== ourDw )
                 return false
-            return this.#mesh.visible
+            return this.mesh.visible
         }
 
         getTextareaManipulationDw() {
             return ourDw
+        }
+
+        equals(m) {
+            return m.mesh.position.equals(this.mesh.position)
         }
     }
     mentionClasses.vec2 = Vec2

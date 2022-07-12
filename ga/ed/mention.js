@@ -82,6 +82,7 @@ function initMention() {
         horizontalBounds = { x: 0., w: 0. }
         lineIndex = -1
         mentionIndex = -1
+        lowestMentionWeDuplicate = null
 
         constructor(variable) {
             this.variable = variable
@@ -92,7 +93,8 @@ function initMention() {
         }
 
         onGrab(dw) {
-
+        }
+        onLetGo(dw) {
         }
 
         isBeingUsed() {

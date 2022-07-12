@@ -60,15 +60,13 @@ function initVec3s()
     let dashedLineMat = new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: .1, gapSize: .1 })
 
     let valuesArray = new Float32Array(3)
-    let asVec = new THREE.Vector3()
     let dragPlane = new Mv()
     let draggedPoint = new Mv()
     let lengthWhenGrabbed = 1.
-    let threeRay = new THREE.Ray()
-    let threeSphere = new THREE.Sphere(new THREE.Vector3(), INFINITY_RADIUS)
     class Arrow extends Mention {
         #vMesh
         #iMesh
+        vec = new THREE.Vector3()
 
         constructor(variable) {
             super(variable)
@@ -76,8 +74,7 @@ function initVec3s()
             let mat = new THREE.MeshPhongMaterial({ color: variable.col })
             this.#iMesh = iDw.NewMesh(pointGeo, mat)    
             
-            let viz = vDw.NewObject3D()
-            this.#vMesh = viz
+            this.#vMesh = vDw.NewObject3D()
 
             let dashedLines = [[],[],[]]
             for(let i = 0; i < 3; ++i) {
@@ -85,82 +82,87 @@ function initVec3s()
                     dashedLines[i][j] = new THREE.Line(
                         new THREE.BufferGeometry().setFromPoints([v1,v2]),
                         dashedLineMat)
-                    viz.add(dashedLines[i][j])
+                    this.#vMesh.add(dashedLines[i][j])
                 }
             }
 
-            viz.head = new THREE.Mesh(headGeo, mat)
-            viz.shaft = new THREE.Mesh(shaftGeo, mat)
-            viz.add(viz.head, viz.shaft)
-            viz.head.castShadow = true
-            viz.shaft.castShadow = true
-            viz.head.matrixAutoUpdate = false
-            viz.shaft.matrixAutoUpdate = false
+            let head = new THREE.Mesh(headGeo, mat)
+            let shaft = new THREE.Mesh(shaftGeo, mat)
+            this.#vMesh.head = head; this.#vMesh.shaft = shaft; this.#vMesh.dashedLines = dashedLines;
 
-            this.updateFromAsVec = () => {
-                let shaftVec = v1.copy(asVec).setLength(asVec.length() - headHeight)
-                setRotationallySymmetricMatrix(shaftVec.x, shaftVec.y, shaftVec.z, viz.shaft.matrix)
-                let headVec = v1.copy(asVec).setLength(headHeight)
-                setRotationallySymmetricMatrix(headVec.x, headVec.y, headVec.z, viz.head.matrix)
-                viz.head.matrix.setPosition(asVec)
-
-                for (let i = 0; i < 3; ++i) {
-                    //the set of 3 that ends up in the i-plane, eg with arr[i] set to 0
-                    for(let j = 0; j < 3; ++j) {
-                        let arr = dashedLines[i][j].geometry.attributes.position.array
-
-                        if(j === 0) { // the one not attached to the axes
-                            asVec.toArray(arr, 0)
-                            arr[i] = 0.
-                            
-                            asVec.toArray(arr, 3)
-                        }
-                        else {
-                            asVec.toArray(arr, 0)
-                            arr[i] = 0.
-
-                            let coordThatGetsSomething = (i+j)%3
-                            arr[3+coordThatGetsSomething] = asVec.getComponent(coordThatGetsSomething)
-                        }
-
-                        dashedLines[i][j].computeLineDistances()
-                        dashedLines[i][j].geometry.attributes.position.needsUpdate = true
-                    }
-                }
-
-                this.#iMesh.position.copy(asVec)
-                this.#iMesh.position.setLength(INFINITY_RADIUS)
-            }
+            this.#vMesh.add(head, shaft)
+            head.castShadow = true
+            shaft.castShadow = true
+            head.matrixAutoUpdate = false
+            shaft.matrixAutoUpdate = false
         }
 
         updateFromShader() {
             this.getShaderOutput( valuesArray)
-            asVec.fromArray(valuesArray)
-            this.updateFromAsVec()
+            this.vec.fromArray(valuesArray)
+            
+            let head = this.#vMesh.head
+            let shaft = this.#vMesh.shaft
+            let dashedLines = this.#vMesh.dashedLines
+
+            let shaftVec = v1.copy(this.vec).setLength(this.vec.length() - headHeight)
+            setRotationallySymmetricMatrix(shaftVec.x, shaftVec.y, shaftVec.z, shaft.matrix)
+            let headVec = v1.copy(this.vec).setLength(headHeight)
+            setRotationallySymmetricMatrix(headVec.x, headVec.y, headVec.z, head.matrix)
+            head.matrix.setPosition(this.vec)
+
+            for (let i = 0; i < 3; ++i) {
+                //the set of 3 that ends up in the i-plane, eg with arr[i] set to 0
+                for (let j = 0; j < 3; ++j) {
+                    let arr = dashedLines[i][j].geometry.attributes.position.array
+
+                    if (j === 0) { // the one not attached to the axes
+                        this.vec.toArray(arr, 0)
+                        arr[i] = 0.
+
+                        this.vec.toArray(arr, 3)
+                    }
+                    else {
+                        this.vec.toArray(arr, 0)
+                        arr[i] = 0.
+
+                        let coordThatGetsSomething = (i + j) % 3
+                        arr[3 + coordThatGetsSomething] = this.vec.getComponent(coordThatGetsSomething)
+                    }
+
+                    dashedLines[i][j].computeLineDistances()
+                    dashedLines[i][j].geometry.attributes.position.needsUpdate = true
+                }
+            }
+
+            this.#iMesh.position.copy(this.vec)
+            this.#iMesh.position.setLength(INFINITY_RADIUS)
         }
 
         onGrab() {
-            lengthWhenGrabbed = asVec.setFromMatrixPosition(this.#vMesh.head.matrix).length()
+            lengthWhenGrabbed = this.vec.length()
         }
 
         overrideFromDrag(dw) {
 
+            let self = this
             function getFloatsForOverride(overrideFloats) {
-                asVec.toArray(overrideFloats)
+                self.vec.toArray(overrideFloats)
             }
 
             if(dw === vDw) {
                 camera.frustum.far.projectOn(e123, dragPlane)
                 let mouseRay = getMouseRay(dw)
                 meet(dragPlane, mouseRay, draggedPoint)
-                draggedPoint.toVector(asVec)
+                draggedPoint.toVector(this.vec)
                 
                 updateOverride(this, getFloatsForOverride)
             }
             else if (dw === iDw) {
                 iDw.mouseRayIntersection(mv0)
-                mv0.toVector(asVec)
-                asVec.setLength(lengthWhenGrabbed)
+                mv0.toVector(this.vec)
+                this.vec.setLength(lengthWhenGrabbed)
+
                 updateOverride(this, getFloatsForOverride)
             }
         }
@@ -168,8 +170,7 @@ function initVec3s()
         getWorldSpaceCanvasPosition(target, dw) {
             
             if (dw === vDw) {
-                asVec.setFromMatrixPosition(this.#vMesh.head.matrix)
-                target.copy(asVec)
+                target.copy(this.vec)
                 target.multiplyScalar(.5)
                 target.w = 1.
             }
@@ -189,8 +190,7 @@ function initVec3s()
             if (useOverrideFloats)
                 return generateReassignmentText("vec3", true, 3)
             else {
-                asVec.setFromMatrixPosition(this.#vMesh.head.matrix)
-                return generateReassignmentText("vec3", asVec.x, asVec.y, asVec.z)
+                return generateReassignmentText("vec3", this.vec.x, this.vec.y, this.vec.z)
             }
         }
 
@@ -206,6 +206,10 @@ function initVec3s()
 
         getTextareaManipulationDw() {
             return vDw
+        }
+
+        equals(m) {
+            return m.vec.equals(this.vec)
         }
     }
     mentionClasses.vec3 = Arrow

@@ -76,19 +76,15 @@ function initCaretInteractions() {
         updateChangedLineIndicator()
         updateSyntaxHighlightingScroll(textarea)
     })
-    
-    onCaretMove = () => {
-        let caretPosition = textarea.selectionStart
 
-        if (caretPosition === caretPositionOld) 
-            return
-            
+    getCaretColumnAndLine = () => {
         let text = textarea.value
+        let caretPosition = textarea.selectionStart
 
         let lineIndex = 0
         let columnIndex = 0
         for (let i = 0, il = text.length; i < il; ++i) {
-            if ( i === caretPosition ) {
+            if (i === caretPosition) {
                 caretLine = lineIndex
                 caretColumn = columnIndex
                 break
@@ -100,6 +96,17 @@ function initCaretInteractions() {
                 columnIndex = 0
             }
         }
+
+        return [columnIndex, lineIndex]
+    }
+    
+    onCaretMove = () => {
+        let caretPosition = textarea.selectionStart
+
+        if (caretPosition === caretPositionOld) 
+            return
+            
+        let [columnIndex, lineIndex] = getCaretColumnAndLine()
 
         let caretX = columnToScreenX(columnIndex)
         let caretY = lineToScreenY(lineIndex)

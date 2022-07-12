@@ -29,16 +29,16 @@ async function initCompilation()
     let goldenRatio = (Math.sqrt(5.)+1.)/2.
 
     let focussedVertex = 0
-    let numVertices = 2
+    let numVertices = 20
 
     class Variable {
         name
         col = new THREE.Color(0., 0., 0.)
         class
         lowestUnusedMention = 0
-        mentions = []
         isAttrib = false
         isUniform = false
+        mentions = []
 
         constructor(newName, newClass) {
             this.name = newName
@@ -145,6 +145,7 @@ async function initCompilation()
                 })
                 if (variable === undefined)
                     variable = new Variable(name, mentionClasses[type])
+
                 variable.lowestUnusedMention = 0
                     
                 if (attribResults.indexOf(index) !== -1) {
@@ -268,7 +269,7 @@ async function initCompilation()
 
         threejsIsCheckingForShaderErrors = true
 
-        // log(outputterChunks.join("\n------------------"))
+        // log(outputterChunks.join("\n------------------")) //whyyyyy did there appear to be only even numbered mentionIndexes?
 
         updateOutputtingAndFinalDw(
             outputterChunks.join("\n"), 
@@ -278,6 +279,12 @@ async function initCompilation()
         lowestChangedLineSinceCompile = Infinity
         updateChangedLineIndicator()
 
-        forEachUsedMention((m) => { m.updateFromShader() })
+        forEachUsedMention((m) => {
+            m.updateFromShader()
+            // for (let i = 0, il = m.variable.mentions.indexOf(m); i < il; ++i) {
+            //     if (m.equals(m.variable.mentions[i]))
+            //         m.lowestMentionWeDuplicate = m.variable.mentions[i]
+            // }
+        })
     }
 }
