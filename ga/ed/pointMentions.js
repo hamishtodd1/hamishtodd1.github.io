@@ -46,6 +46,7 @@ function initPoints() {
 
     let dragPlane = new Mv()
     let ptNewValues = new Float32Array(4)
+    let displayableVersion = new Mv()
     class vec4Mention extends Mention {
         #eDwMesh;
         #iDwMesh;
@@ -62,19 +63,21 @@ function initPoints() {
         }
 
         updateFromMv() {
-            if (this.mv[14] !== 0.)
+            if (this.mv[14] !== 0.) {
+                this.#iDwMesh.position.set(0.,0.,0.)
+
                 this.mv.toVector(this.#eDwMesh.position)
+            }
             else {
                 this.mv.toVector(this.#iDwMesh.position)
                 this.#iDwMesh.position.setLength(INFINITY_RADIUS)
 
-                let displayableVersion = this.mv.getDisplayableVersion(mv0)
-                if (displayableVersion[14] > 0.)
+                this.mv.getDisplayableVersion(displayableVersion)
+                let isInFrontOfCamera = displayableVersion[14] > 0.
+                if (isInFrontOfCamera)
                     displayableVersion.toVectorDisplayable(this.#eDwMesh.position)
-                else {
-                    //actually should be a differently oriented point!
+                else
                     this.#eDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
-                }
             }
         }
 
@@ -140,14 +143,18 @@ function initPoints() {
 
         setVisibility(newVisibility) {
             this.#eDwMesh.visible = newVisibility
-            this.#iDwMesh.visible  = newVisibility && this.mv[14] === 0.
+            this.#iDwMesh.visible = newVisibility
         }
 
         isVisibleInDw(dw) {
             if (dw !== eDw && dw !== iDw)
                 return false
-            let m = dw === eDw ? this.#eDwMesh : this.#iDwMesh
-            return m.visible
+            
+            if(dw === eDw)
+                return !this.#eDwMesh.position.equals(OUT_OF_SIGHT_VECTOR3)
+
+            if(dw === iDw)
+                return !this.#iDwMesh.position.equals(zeroVector)
         }
 
         getTextareaManipulationDw() {

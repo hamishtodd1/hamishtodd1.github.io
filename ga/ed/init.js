@@ -12,7 +12,6 @@ TODO
                 It'll be up and down the lines s = 1 or s = -1
         Mesh window
             Has an indicator on it: "where attributes are currently coming from". Can move indicator with mouse
-            Has a slider on it too, for animating
         Uniforms / attributes
             Mouse ray in final dw
             Shadertoy-inspired
@@ -22,14 +21,8 @@ TODO
                     "step" "play/pause" buttons. Can draw when paused
                 2D texture
     Bugs
-        dragging ideal point, it can point somewhere very weird in the eDw
         minus sign with sandwich
         Currently, if a variable is uninitialized, you still get shown a point at 0,0,0 in the window
-        When you're finished changing something, caret goes on a line that allows you to see your handiwork
-            Could make it so that when a new line is added, the whole thing scrolls so that that line is in place
-            Or perhaps check whether the current line is just a straight redefinition like a = 5 - REPLACE lines like that
-        Got many dws? they auto-rearrange
-        When you grab an ideal point, should be dragged on the infinity dw
         Tab and enter make it so you can't ctrl+z
     GDC
         Definitely need it to be that if you edit the "b" in "a = b + 1", you change the a in there
@@ -86,6 +79,9 @@ TODO
         Documented API for making your own window visualizations
     Long term
         Conveniences
+            Could make it so that when a new line is added, the whole thing scrolls so that that line is in place
+            Or perhaps check whether the current line is just a straight redefinition like a = 5 - REPLACE lines like that
+            Got many dws? they auto-rearrange
             Hovering "return" could be a good for the situation of return vec3(0.,0.,0.)
             dragging a literal just edits that line instead of making a new one
         Rawshadermaterial

@@ -41,6 +41,7 @@ function initMouseInteractions() {
             userIndicationY = clientYOld
         }
 
+        //this needs to happen before getHoveredMention because that depends on visibility
         forEachUsedMention((mention) => {
             mention.setVisibility(mentionVisibleDueToCaret(mention))
         })
@@ -134,40 +135,49 @@ function initMouseInteractions() {
     document.addEventListener('mouseup',(event)=>{
         if (event.button === 2)
             rightClicking = false
+            
+        if(event.button !== 0 || grabbedDw === null)
+            return
+            
+        grabbedDw = null
+
+        if(!dragOccurred) //just clicked and let go
+            return
+
+        dragOccurred = false
+        indicatedMention.onLetGo()
+        updateOverride(null)
         
-        if (event.button === 0 && dragOccurred) {
-            dragOccurred = false
-            indicatedMention.onLetGo()
-            updateOverride(null)
-            
-            if (indicatedMention.variable.isUniform) {
-
-            }
-            else if (indicatedMention.variable.isAttrib) {
-
-            }
-            else {
-                let newLine = "\n    " + indicatedMention.getReassignmentNew(false) + ";\n"
-                let lines = textarea.value.split("\n")
-                let pre  = lines.slice(0, indicatedMention.lineIndex + 1).join("\n")
-                let post = lines.slice(indicatedMention.lineIndex + 1).join("\n")
-
-                textarea.value = pre + newLine + post
-
-                let [caretColumnIndex, caretLineIndex] = getCaretColumnAndLine()                
-                let newCaretPosition = caretLineIndex < indicatedMention.lineIndex ? caretPositionOld : caretPositionOld + newLine.length
-                textarea.setSelectionRange(newCaretPosition, newCaretPosition)
-            }
-            
-            updateSyntaxHighlighting()
-
-            grabbedDw = null
-
-            textarea.focus()
-
-            compile()
-            onCaretMove()
+        log(getCaretColumnAndLine())
+        if (indicatedMention.variable.isUniform) {
+    
         }
+        else if (indicatedMention.variable.isAttrib) {
+    
+        }
+        else {
+            let newLine = "\n    " + indicatedMention.getReassignmentNew(false) + ";\n"
+            let lines = textarea.value.split("\n")
+            let pre  = lines.slice(0, indicatedMention.lineIndex + 1).join("\n")
+            let post = lines.slice(indicatedMention.lineIndex + 1).join("\n")
+    
+            textarea.value = pre + newLine + post
+    
+            log(indicatedMention.lineIndex)
+            let [caretColumnIndex, caretLineIndex] = getCaretColumnAndLine()
+            let newCaretPosition = caretLineIndex < indicatedMention.lineIndex ? caretPositionOld : caretPositionOld + newLine.length
+            
+            textarea.setSelectionRange(newCaretPosition, newCaretPosition)
+        }
+        
+        updateSyntaxHighlighting()
+    
+        textarea.focus()
+    
+        compile()
+        onCaretMove()
+
+        grabbedDw = null
 
         //be aware, an extra mousemove will happen. There is nothing you can do about this
     })
