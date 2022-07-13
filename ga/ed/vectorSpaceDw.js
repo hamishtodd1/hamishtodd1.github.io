@@ -68,8 +68,7 @@ function initVec3s()
 
     let valuesArray = new Float32Array(3)
     let dragPlane = new Mv()
-    let draggedPoint = new Mv()
-    let lengthWhenGrabbed = 1.
+    let whenGrabbed = new THREE.Vector3()
     let worldSpaceCameraPosition = new THREE.Vector4()
     class vec3Mention extends Mention {
         #vMesh
@@ -156,8 +155,13 @@ function initVec3s()
             this.#iMesh.position.setLength(INFINITY_RADIUS)
         }
 
-        onGrab() {
-            lengthWhenGrabbed = this.vec.length()
+        onGrab(dw) {
+            whenGrabbed.copy(this.vec)
+
+            if (dw === vDw) {
+                mv0.fromVec(this.vec)
+                camera.frustum.far.projectOn(mv0, dragPlane)
+            }
         }
 
         overrideFromDrag(dw) {
@@ -171,23 +175,23 @@ function initVec3s()
                 let [xProportion, yProportion] = dw.oldClientToProportion()
                 this.#sMesh.position.x = camera2d.left + xProportion * (camera2d.right - camera2d.left)
 
+                this.vec.copy(whenGrabbed)
                 this.vec.normalize()
                 this.vec.multiplyScalar(this.#sMesh.position.x)
 
                 updateOverride(this, getFloatsForOverride)
             }
             else if(dw === vDw) {
-                camera.frustum.far.projectOn(e123, dragPlane)
                 let mouseRay = getMouseRay(dw)
-                meet(dragPlane, mouseRay, draggedPoint)
-                draggedPoint.toVector(this.vec)
+                meet(dragPlane, mouseRay, mv0)
+                mv0.toVector(this.vec)
                 
                 updateOverride(this, getFloatsForOverride)
             }
             else if (dw === iDw) {
                 iDw.mouseRayIntersection(mv0)
                 mv0.toVector(this.vec)
-                this.vec.setLength(lengthWhenGrabbed)
+                this.vec.setLength(whenGrabbed.length())
 
                 updateOverride(this, getFloatsForOverride)
             }

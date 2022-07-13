@@ -3,8 +3,6 @@
 TODO
     For next presentation
         Any variable that is different across manifold can be seen in thingy window
-        Vec3 gets a scalar part as well, which you can use to adjust length
-            Drag it to negative and it's off in the other direction
         Planes
             it's a new struct: vec3 normal, float displacement. So not a vec4. This is ok since you rarely add them
         Double cover dw

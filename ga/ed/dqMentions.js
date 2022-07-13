@@ -4,8 +4,6 @@ function initDqs() {
     let iDw = dws.infinity
     let mDw = dws.mobius
 
-    let outOfTheWayPosition = new THREE.Vector3(camera.far * 999., camera.far * 999., camera.far * 999.)
-
     let projectedOnOrigin = new Mv()
     let quatToOriginVersion = new Mv()
     let joinedWithOrigin = new Mv()
@@ -56,11 +54,7 @@ function initDqs() {
             camera.toHaveUpdateFromMvCalled.push(this)
         }
 
-        updateFromShader() {
-            this.getShaderOutput(dwNewValues)
-            newDq.copy(dwNewValues)
-            newDq.toMv(this.mv)
-
+        updateFromMv() {
             this.mv.selectGrade(2, linePart)
 
             this.#mDwMesh.position.x = this.mv[0]
@@ -84,9 +78,9 @@ function initDqs() {
             //where the top is the view such that the rotation is anticlockwise from the identity
 
             if (linePart.approxEquals(zeroMv)) {
-                this.#eDwMesh.position.copy(outOfTheWayPosition)
-                this.#iDwRingMesh.position.copy(outOfTheWayPosition)
-                this.#iDwLineMesh.position.copy(outOfTheWayPosition)
+                this.#eDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                this.#iDwRingMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                this.#iDwLineMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
                 //and the motor window is the only place you see that this thing has a scalar value
                 return
             }
@@ -104,6 +98,14 @@ function initDqs() {
             linePart.getDisplayableVersion(displayedLineMv)
             getQuaternionToProjectionOnOrigin(displayedLineMv, this.#eDwMesh.quaternion)
             e123.projectOn(displayedLineMv, mv0).toVector(this.#eDwMesh.position)
+        }
+
+        updateFromShader() {
+            this.getShaderOutput(dwNewValues)
+            newDq.copy(dwNewValues)
+            newDq.toMv(this.mv)
+
+            this.updateFromMv()
         }
 
         onGrab(dw) {

@@ -7,16 +7,7 @@
  * Or maybe squaring the thing
  */
 
-function initPoints() {
-
-    let eDw = dws.euclidean
-    let iDw = dws.infinity
-    let mDw = dws.mobius
-
-    let outOfTheWayPosition = new THREE.Vector3(camera.far * 999., camera.far * 999., camera.far * 999.)
-
-    let dragPlane = new Mv()
-
+function initPlanes() {
     ////////////
     // PLANES //
     ////////////
@@ -40,13 +31,20 @@ function initPoints() {
     //     let e3ToPlaneMotor = mul(planeOnOrigin, e3, mv2).sqrt(mv3)
     //     e3ToPlaneMotor.toQuaternion(planeMesh.quaternion)
     // })
+}
+//bloch vectors are of course planes
 
-    
+function initPoints() {
+
+    let eDw = dws.euclidean
+    let iDw = dws.infinity
+    let mDw = dws.mobius
+
     ////////////
     // POINTS //
     ////////////
-    
-    let draggedPoint = new Mv()
+
+    let dragPlane = new Mv()
     let ptNewValues = new Float32Array(4)
     class vec4Mention extends Mention {
         #eDwMesh;
@@ -63,24 +61,28 @@ function initPoints() {
             camera.toHaveUpdateFromMvCalled.push(this)
         }
 
-        updateFromShader() {
-            this.getShaderOutput(ptNewValues)
-            this.mv.point(ptNewValues[0], ptNewValues[1], ptNewValues[2], ptNewValues[3])
-            
+        updateFromMv() {
             if (this.mv[14] !== 0.)
                 this.mv.toVector(this.#eDwMesh.position)
             else {
                 this.mv.toVector(this.#iDwMesh.position)
                 this.#iDwMesh.position.setLength(INFINITY_RADIUS)
 
-                this.mv.getDisplayableVersion(mv0)
-                if (mv0[14] > 0.)
-                    mv0.toVectorDisplayable(this.#eDwMesh.position)
+                let displayableVersion = this.mv.getDisplayableVersion(mv0)
+                if (displayableVersion[14] > 0.)
+                    displayableVersion.toVectorDisplayable(this.#eDwMesh.position)
                 else {
                     //actually should be a differently oriented point!
-                    this.#eDwMesh.position.copy(outOfTheWayPosition)
+                    this.#eDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
                 }
             }
+        }
+
+        updateFromShader() {
+            this.getShaderOutput(ptNewValues)
+            this.mv.point(ptNewValues[0], ptNewValues[1], ptNewValues[2], ptNewValues[3])
+            
+            this.updateFromMv()
         }
 
         onGrab(dw) {

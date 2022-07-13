@@ -4,6 +4,8 @@ function initCamera() {
     const near = .1
     const far = 10.
 
+    OUT_OF_SIGHT_VECTOR3 = new THREE.Vector3(far * 999., far * 999., far * 999.)
+
     var fsqMatrixPreCamera = new THREE.Matrix4()
     let frameHeightOneAway = Math.tan(fov / 2. / 360. * TAU) * 2.
     fsqMatrixPreCamera.makeScale(frameHeightOneAway * aspect, frameHeightOneAway, 1.)
