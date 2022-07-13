@@ -232,7 +232,7 @@ async function init() {
     
     compile()
     updateMentionVisibilitiesAndIndication()
-    setCaretPosition(231)
+    setCaretPosition(254)
     await meshloadPromise
     renderAll()
 

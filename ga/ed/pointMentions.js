@@ -48,7 +48,7 @@ function initPoints() {
     
     let draggedPoint = new Mv()
     let ptNewValues = new Float32Array(4)
-    class Point extends Mention {
+    class vec4Mention extends Mention {
         #eDwMesh;
         #iDwMesh;
         mv = new Mv();
@@ -159,6 +159,6 @@ function initPoints() {
             return m.mv.equals(this.mv)
         }
     }
-    mentionClasses.vec4 = Point
+    mentionClasses.vec4 = vec4Mention
     mentionClassNumFloats.vec4 = 4
 }

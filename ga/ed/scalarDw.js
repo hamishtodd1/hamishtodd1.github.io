@@ -3,20 +3,20 @@
 
 function initFloats() {
     
-    let ourDw = dws.scalar
+    let sDw = dws.scalar
 
     {
         const axisMat = new THREE.LineBasicMaterial({
             color: 0x000000
         })
-        ourDw.addNonMentionChild(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+        sDw.addNonMentionChild(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
             new THREE.Vector3(-10., 0., 0.),
             new THREE.Vector3( 10., 0., 0.)]), axisMat))
 
         let bg = new THREE.Mesh( unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({color:0xFFFDD0}) )
         bg.position.z = -1.
         bg.scale.setScalar(999.)
-        ourDw.addNonMentionChild(bg)
+        sDw.addNonMentionChild(bg)
 
         let furthestMarkers = 3
         for (let i = -furthestMarkers; i <= furthestMarkers; ++i) {
@@ -24,34 +24,34 @@ function initFloats() {
             marker.position.x = i
             marker.scale.multiplyScalar(.5)
             marker.position.y -= marker.scale.y * .7
-            ourDw.addNonMentionChild(marker)
+            sDw.addNonMentionChild(marker)
         }
     }
 
-    let geo = new THREE.BufferGeometry().setFromPoints([
+    let downwardPyramidGeo = new THREE.BufferGeometry().setFromPoints([
         new THREE.Vector3(0., 0., 0.),
         new THREE.Vector3( .3, .3, 0.),
         new THREE.Vector3(-.3, .3, 0.),
     ])
 
     let newValues = Array(1)
-    class Float extends Mention {
+    class floatMention extends Mention {
         mesh
 
         constructor(variable) {
             super(variable)
 
             let mat = new THREE.MeshBasicMaterial({ color: variable.col })
-            this.mesh = ourDw.NewMesh(geo, mat)
+            this.mesh = sDw.NewMesh(downwardPyramidGeo, mat)
         }
 
         updateFromShader() {
-            this.getShaderOutput( newValues)
+            this.getShaderOutput( newValues )
             this.mesh.position.x = newValues[0]
         }
 
         overrideFromDrag(dw) {
-            if (dw === ourDw) {
+            if (dw === sDw) {
                 let [xProportion, yProportion] = dw.oldClientToProportion()
                 this.mesh.position.x = camera2d.left + xProportion * (camera2d.right - camera2d.left )
                 
@@ -63,10 +63,7 @@ function initFloats() {
         }
 
         getCanvasPosition(dw) {
-            let ndcX = (this.mesh.position.x-camera2d.left) / (camera2d.right - camera2d.left)
-            let ndcY = .5
-
-            return ndcToWindow(ndcX,ndcY,dw)
+            return camera2d.positionToWindow(this.mesh.position, dw)
         }
 
         getShaderOutputFloatString() {
@@ -85,19 +82,19 @@ function initFloats() {
         }
 
         isVisibleInDw(dw) {
-            if (dw !== ourDw )
+            if (dw !== sDw )
                 return false
             return this.mesh.visible
         }
 
         getTextareaManipulationDw() {
-            return ourDw
+            return sDw
         }
 
         equals(m) {
-            return m.mesh.position.x.equals(this.mesh.position.x)
+            return m.mesh.position.x === this.mesh.position.x
         }
     }
-    mentionClasses.float = Float
+    mentionClasses.float = floatMention
     mentionClassNumFloats.float = 1
 }

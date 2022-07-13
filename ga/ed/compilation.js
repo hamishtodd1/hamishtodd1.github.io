@@ -281,10 +281,20 @@ async function initCompilation()
 
         forEachUsedMention((m) => {
             m.updateFromShader()
-            // for (let i = 0, il = m.variable.mentions.indexOf(m); i < il; ++i) {
-            //     if (m.equals(m.variable.mentions[i]))
-            //         m.lowestMentionWeDuplicate = m.variable.mentions[i]
-            // }
+        })
+
+        variables.forEach((v)=>{
+            let currentDuplicates
+            
+            for (let i = 0; i < v.lowestUnusedMention; ++i) {
+                let m = v.mentions[i]
+                if( i === 0 || !m.equals(v.mentions[i-1]) )
+                    currentDuplicates = [m]
+                else
+                    currentDuplicates.push(m)
+                m.duplicates = currentDuplicates
+                //GC alert!
+            }
         })
     }
 }

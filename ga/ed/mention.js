@@ -82,7 +82,7 @@ function initMention() {
         horizontalBounds = { x: 0., w: 0. }
         lineIndex = -1
         mentionIndex = -1
-        lowestMentionWeDuplicate = null
+        duplicates = []
 
         constructor(variable) {
             this.variable = variable

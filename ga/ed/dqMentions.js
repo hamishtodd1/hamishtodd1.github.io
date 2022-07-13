@@ -69,14 +69,14 @@ function initDqs() {
             //assigned to
             //check their values, if they're the same - they're the same!
 
-            if (!this.linePartWhenGrabbedNormalized.equals(zeroMv)) {
-                let ourInner = inner(linePart, this.linePartWhenGrabbedNormalized)
-                this.#mDwMesh.position.y = ourInner[0] * -1.
+            let grabbedDuplicate = this.duplicates.find((duplicate) => !duplicate.linePartWhenGrabbedNormalized.equals(zeroMv))
+            if (grabbedDuplicate !== undefined) {
+                let proportionOfComparison = -1. * inner(linePart, grabbedDuplicate.linePartWhenGrabbedNormalized, mv0)[0]
+                this.#mDwMesh.position.y = proportionOfComparison
                 //the arc thing would be nice too
             }
             else
                 this.#mDwMesh.position.y = linePart.norm()
-            linePart.log()
 
             //more like: it's a mobius strip
             //And by the way, it's angled in 3D space such that your line is through it
@@ -117,7 +117,6 @@ function initDqs() {
             if(dw === mDw) {
                 this.mv.selectGrade(2, this.linePartWhenGrabbedNormalized)
                 this.linePartWhenGrabbedNormalized.normalize()
-                //maybe get scalar part involved?
             }
         }
         onLetGo() {
@@ -140,9 +139,11 @@ function initDqs() {
                 if (this.mv[15] !== 0.)
                     console.error("todo figure this out!")
 
-                linePart.normalize()
-
                 camera2d.oldClientToPosition(dw, this.#mDwMesh.position)
+                if(this.mv[0] === 0.)
+                    this.#mDwMesh.position.x = 0.
+                else if(linePart.norm() === 0.)
+                    this.#mDwMesh.position.y = 0.
                 
                 updateOverride(this, (overrideFloats)=>{
                     overrideFloats[0] = this.#mDwMesh.position.x
@@ -188,7 +189,7 @@ function initDqs() {
         setVisibility(newVisibility) {
             this.#eDwMesh.visible = newVisibility
             
-            this.#mDwMesh.visible = newVisibility && this.mv[0]
+            this.#mDwMesh.visible = newVisibility
 
             this.mv.selectGrade(2, linePart)
             let hasEuclideanPart = linePart.hasEuclideanPart()
@@ -207,16 +208,18 @@ function initDqs() {
                 else if (dw === iDw) {
                     this.mv.selectGrade(2, linePart)
                     if (linePart.hasEuclideanPart()) {
-                        //probably want something about its intersection with the top
-                        //ideally taking account of directedness
-                        //probably e12 corresponds to e012
-                        meet(linePart, e0, labelPoint)
-                        labelPoint.multiplyScalar(-1.)
-                        let vec3Part = labelPoint.toVector(v1)
-                        vec3Part.setLength(INFINITY_RADIUS)
-                        worldSpaceCameraPosition.copy(vec3Part)
-                        // worldSpaceCameraPosition.multiplyScalar(.5)
-                        worldSpaceCameraPosition.w = 1.
+
+                        //can bring this back once you've sorted out which lines are clockwise in this comparative sense
+                        //eg make the mobius interface
+                        // meet(linePart, e0, labelPoint)
+                        // labelPoint.multiplyScalar(-1.)
+                        // let vec3Part = labelPoint.toVector(v1)
+                        // vec3Part.setLength(INFINITY_RADIUS)
+                        // worldSpaceCameraPosition.copy(vec3Part)
+                        // // worldSpaceCameraPosition.multiplyScalar(.5)
+                        // worldSpaceCameraPosition.w = 1.
+
+                        worldSpaceCameraPosition.set(0.,0.,0.,1.)
                     }
                     else {
                         dual(linePart, idealLineDual)

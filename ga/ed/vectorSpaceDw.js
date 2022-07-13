@@ -50,6 +50,7 @@ function initVec3s()
 {
     let vDw = dws.vectorSpace
     let iDw = dws.infinity
+    let sDw = dws.scalar
     
     let shaftRadius = .06
     let headHeight = shaftRadius * 5.
@@ -57,19 +58,33 @@ function initVec3s()
     headGeo.translate(0.,-.5,0.)
     let shaftGeo = CylinderBufferGeometryUncentered(shaftRadius, 1., 8, true)
 
+    let downwardPyramidGeo = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0., 0., 0.),
+        new THREE.Vector3(.3, .3, 0.),
+        new THREE.Vector3(-.3, .3, 0.),
+    ])
+
     let dashedLineMat = new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: .1, gapSize: .1 })
 
     let valuesArray = new Float32Array(3)
     let dragPlane = new Mv()
     let draggedPoint = new Mv()
     let lengthWhenGrabbed = 1.
-    class Arrow extends Mention {
+    let worldSpaceCameraPosition = new THREE.Vector4()
+    class vec3Mention extends Mention {
         #vMesh
         #iMesh
+        #sMesh
         vec = new THREE.Vector3()
+
+        //points are double covered because e123 can be -1 or 1
+        //elliptic geometry does not have a double cover. Points that have gone to the other side really are there
 
         constructor(variable) {
             super(variable)
+
+            let scalarMat = new THREE.MeshBasicMaterial({ color: variable.col })
+            this.#sMesh = sDw.NewMesh(downwardPyramidGeo, scalarMat)
 
             let mat = new THREE.MeshPhongMaterial({ color: variable.col })
             this.#iMesh = iDw.NewMesh(pointGeo, mat)    
@@ -100,6 +115,8 @@ function initVec3s()
         updateFromShader() {
             this.getShaderOutput( valuesArray)
             this.vec.fromArray(valuesArray)
+
+            this.#sMesh.position.x = this.vec.length()
             
             let head = this.#vMesh.head
             let shaft = this.#vMesh.shaft
@@ -150,7 +167,16 @@ function initVec3s()
                 self.vec.toArray(overrideFloats)
             }
 
-            if(dw === vDw) {
+            if (dw === sDw) {
+                let [xProportion, yProportion] = dw.oldClientToProportion()
+                this.#sMesh.position.x = camera2d.left + xProportion * (camera2d.right - camera2d.left)
+
+                this.vec.normalize()
+                this.vec.multiplyScalar(this.#sMesh.position.x)
+
+                updateOverride(this, getFloatsForOverride)
+            }
+            else if(dw === vDw) {
                 camera.frustum.far.projectOn(e123, dragPlane)
                 let mouseRay = getMouseRay(dw)
                 meet(dragPlane, mouseRay, draggedPoint)
@@ -167,23 +193,29 @@ function initVec3s()
             }
         }
 
-        getWorldSpaceCanvasPosition(target, dw) {
+        getCanvasPosition(dw) {
             
-            if (dw === vDw) {
-                target.copy(this.vec)
-                target.multiplyScalar(.5)
-                target.w = 1.
+            if(dw === sDw) {
+                return camera2d.positionToWindow(this.#sMesh.position, dw)
             }
-            else if (dw === iDw) {
-                target.copy(this.#iMesh.position)
-                target.w = 1.
+            else {
+                if (dw === vDw) {
+                    worldSpaceCameraPosition.copy(this.vec)
+                    worldSpaceCameraPosition.multiplyScalar(.5)
+                    worldSpaceCameraPosition.w = 1.
+                }
+                else if (dw === iDw) {
+                    worldSpaceCameraPosition.copy(this.#iMesh.position)
+                    worldSpaceCameraPosition.w = 1.
+                }
+                return camera.positionToWindow(worldSpaceCameraPosition, dw)
             }
-            else
-                console.error("not in dw: " + keyOfProptInObject(dw, dws))
         }
 
         getShaderOutputFloatString() {
-            return getFloatArrayAssignmentString(this.variable.name, 3)
+            return getFloatArrayAssignmentString(this.variable.name, 3) 
+            //TODO it's here that you can use numFloats!
+            //Also it's something that can happen at the variable level
         }
 
         getReassignmentPostEquals(useOverrideFloats) {
@@ -197,21 +229,23 @@ function initVec3s()
         setVisibility(newVisibility) {
             this.#vMesh.visible = newVisibility
             this.#iMesh.visible = newVisibility
+            this.#sMesh.visible = newVisibility
         }
 
         isVisibleInDw(dw) {
             return (this.#vMesh.visible && dw === vDw) ||
-                   (this.#iMesh.visible && dw === iDw)
+                   (this.#iMesh.visible && dw === iDw) ||
+                   (this.#sMesh.visible && dw === sDw)
         }
 
         getTextareaManipulationDw() {
-            return vDw
+            return iDw
         }
 
         equals(m) {
             return m.vec.equals(this.vec)
         }
     }
-    mentionClasses.vec3 = Arrow
+    mentionClasses.vec3 = vec3Mention
     mentionClassNumFloats.vec3 = 3
 }

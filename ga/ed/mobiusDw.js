@@ -43,7 +43,7 @@ function initStudyNumbers() {
     let ourDw = dws.mobius
 
     let newValues = Array(2)
-    class Vec2 extends Mention {
+    class vec2Mention extends Mention {
         mesh;
 
         constructor(variable) {
@@ -105,6 +105,6 @@ function initStudyNumbers() {
             return m.mesh.position.equals(this.mesh.position)
         }
     }
-    mentionClasses.vec2 = Vec2
+    mentionClasses.vec2 = vec2Mention
     mentionClassNumFloats.vec2 = 2
 }
