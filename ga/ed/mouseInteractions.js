@@ -148,7 +148,6 @@ function initMouseInteractions() {
         indicatedMention.onLetGo()
         updateOverride(null)
         
-        log(getCaretColumnAndLine())
         if (indicatedMention.variable.isUniform) {
     
         }
@@ -156,16 +155,16 @@ function initMouseInteractions() {
     
         }
         else {
+            let [caretColumnIndex, caretLineIndex] = getCaretColumnAndLine() //done first since we're about to be weird
+
             let newLine = "\n    " + indicatedMention.getReassignmentNew(false) + ";\n"
             let lines = textarea.value.split("\n")
             let pre  = lines.slice(0, indicatedMention.lineIndex + 1).join("\n")
             let post = lines.slice(indicatedMention.lineIndex + 1).join("\n")
     
             textarea.value = pre + newLine + post
-    
-            log(indicatedMention.lineIndex)
-            let [caretColumnIndex, caretLineIndex] = getCaretColumnAndLine()
-            let newCaretPosition = caretLineIndex < indicatedMention.lineIndex ? caretPositionOld : caretPositionOld + newLine.length
+            
+            let newCaretPosition = caretLineIndex <= indicatedMention.lineIndex ? caretPositionOld : caretPositionOld + newLine.length
             
             textarea.setSelectionRange(newCaretPosition, newCaretPosition)
         }
