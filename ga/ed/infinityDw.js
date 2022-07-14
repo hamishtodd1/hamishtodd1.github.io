@@ -13,7 +13,7 @@ function initInfinityDw()
     dw.addNonMentionChild(theSphere)
 
     let euclideanHider = new THREE.Mesh(sphereGeo, new THREE.MeshPhongMaterial({color:0x000000}))
-    euclideanHider.scale.setScalar(.1)
+    euclideanHider.scale.setScalar(.15)
     dw.addNonMentionChild(euclideanHider)
 
     let threeRay = new THREE.Ray()

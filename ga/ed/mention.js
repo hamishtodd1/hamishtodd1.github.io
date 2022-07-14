@@ -88,10 +88,6 @@ function initMention() {
             this.variable = variable
         }
 
-        getReassignmentNew(useOverrideFloats) {
-            return this.variable.name + " = " + this.getReassignmentPostEquals(useOverrideFloats)
-        }
-
         onGrab(dw) {
         }
         onLetGo(dw) {
@@ -152,32 +148,30 @@ function initMention() {
     }
     window.Mention = Mention
 
-    getFloatArrayAssignmentString = (variableName, len) => {
+    getFloatArrayAssignment = (variableName, len) => {
         let ret = "\n"
         for (let i = 0; i < len; ++i)
             ret += `    outputFloats[` + i + `] = ` + variableName + `[` + i + `];\n`
         return ret
     }
 
+    generateReassignmentTextFromTheseArguments = function() {
+        let commaSeparated = ""
+        for (let i = 1, il = arguments.length; i < il; ++i) {
+            let asStr = parseFloat(arguments[i].toFixed(2))
+            if (asStr === Math.round(asStr))
+                asStr += "."
+            commaSeparated += asStr + (i === il - 1 ? "" : ",")
+        }
+
+        return arguments[0] + "(" + commaSeparated + ")"
+    }
+
     generateReassignmentText = function() {
-        let ret = arguments[0] + "("
+        let commaSeparated = ""
+        for (let i = 0, il = arguments[1]; i < il; ++i)
+            commaSeparated += "overrideFloats[" + i + "]" + (i === il - 1 ? "" : ",")
 
-        let useLiteralValues = arguments[1] !== true
-        if (useLiteralValues) {
-            for (let i = 1, il = arguments.length; i < il; ++i) {
-                let asStr = parseFloat(arguments[i].toFixed(2))
-                if (asStr === Math.round(asStr))
-                    asStr += "."
-                ret += asStr + (i === il - 1 ? "" : ",")
-            }
-        }
-        else {
-            for (let i = 0, il = arguments[2]; i < il; ++i)
-                ret += "overrideFloats[" + i + "]" + (i === il - 1 ? "" : ",")
-        }
-
-        ret += ")"
-
-        return ret
+        return arguments[0] + "(" + commaSeparated + ")"
     }
 }

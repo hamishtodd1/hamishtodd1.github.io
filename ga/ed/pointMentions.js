@@ -128,17 +128,17 @@ function initPoints() {
                 console.error("not in that dw")
         }
 
-        getReassignmentPostEquals(useOverrideFloats) {
-            if (useOverrideFloats)
-                return generateReassignmentText("vec4", true, 4)
-            else {
-                let m = this.mv
-                return generateReassignmentText("vec4", m[13], m[12], m[11], m[14])
-            }
+        getReassignmentPostEqualsFromOverride() {
+            return generateReassignmentText("vec4", 4)
+        }
+        
+        getReassignmentPostEquals() {
+            let m = this.mv
+            return generateReassignmentTextFromTheseArguments("vec4", m[13], m[12], m[11], m[14])
         }
 
-        getShaderOutputFloatString() {
-            return getFloatArrayAssignmentString(this.variable.name, 4)
+        getOutputterAssignment() {
+            return getFloatArrayAssignment( this.variable.name, mentionClassNumFloats.vec4 )
         }
 
         setVisibility(newVisibility) {

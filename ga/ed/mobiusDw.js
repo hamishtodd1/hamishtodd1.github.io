@@ -75,16 +75,16 @@ function initStudyNumbers() {
             return camera2d.positionToWindow(this.mesh.position,dw)
         }
 
-        getShaderOutputFloatString() {
-            return getFloatArrayAssignmentString(this.variable.name, 2)
+        getOutputterAssignment() {
+            return getFloatArrayAssignment(this.variable.name, mentionClassNumFloats.vec2)
         }
 
-        getReassignmentPostEquals(useOverrideFloats) {
-            if (useOverrideFloats)
-                return generateReassignmentText("vec2", true, 2)
-            else {
-                return generateReassignmentText("vec2", this.mesh.position.x, this.mesh.position.y )
-            }
+        getReassignmentPostEqualsFromOverride() {
+            return generateReassignmentText("vec2", 2)
+        }
+
+        getReassignmentPostEquals() {
+            return generateReassignmentTextFromTheseArguments("vec2", this.mesh.position.x, this.mesh.position.y )
         }
 
         setVisibility(newVisibility) {

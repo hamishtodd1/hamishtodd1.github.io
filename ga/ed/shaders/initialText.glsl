@@ -15,9 +15,9 @@ vec3 getColor() {
     vec4 realPt = vec4( .2,0., 1.,1.);
     vec4 transformedReal = sandwichDqPt(rotation, realPt);
 
-    Dq idealLine = Dq(0., 0.,1.,0., 0.,0.,0., 0.);
+    Dq idealLine = Dq(0., 0.,1.,1., 0.,0.,0., 0.);
     Dq eucliLine = Dq(0., 0.,0.,0., 0.,1.,1., 0.);
-    Dq eucliLine2 = sandwichDqDq(rotation,eucliLine);
+    Dq idealLine2 = sandwichDqDq(rotation,idealLine);
     
     vec3 fragColor = vec3(0.,myFloat,myVec.y);
     return fragColor;

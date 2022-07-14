@@ -139,6 +139,7 @@ async function initCompilation()
                     return
                     
                 let name = text.slice(index + type.length).match(nameRegex)[0] //TODO potential speedup
+                //people may well want to use "position". Could have: position -> __position
 
                 let variable = variables.find((v) => {
                     return v.name === name && v.class === mentionClasses[type]
@@ -238,7 +239,7 @@ async function initCompilation()
                         overrideGoesBefore = false
 
                     let overrideAddition = `\nif( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` +
-                        mention.getReassignmentNew(true) + ";"
+                        mention.variable.name + " = " + mention.getReassignmentPostEqualsFromOverride() + ";"
                     if (overrideGoesBefore) {
                         finalChunks[lineIndex]     = overrideAddition +     finalChunks[lineIndex]
                         outputterChunks[lineIndex] = overrideAddition + outputterChunks[lineIndex]
@@ -254,7 +255,7 @@ async function initCompilation()
                     let goesBefore = l.indexOf(`return`) !== -1
 
                     let outputAddition   = `\nif( outputMentionIndex == ` + mention.mentionIndex + ` ) {` + 
-                        mention.getShaderOutputFloatString() + `}`
+                        mention.getOutputterAssignment() + `}`
                     if( overrideGoesBefore === false)
                         goesBefore = false
                     if (goesBefore) {

@@ -156,8 +156,9 @@ function initMouseInteractions() {
         }
         else {
             let [caretColumnIndex, caretLineIndex] = getCaretColumnAndLine() //done first since we're about to be weird
-
-            let newLine = "\n    " + indicatedMention.getReassignmentNew(false) + ";\n"
+            
+            let newLine = "\n    " + indicatedMention.variable.name + " = " + 
+                indicatedMention.getReassignmentPostEquals() + ";\n"
             let lines = textarea.value.split("\n")
             let pre  = lines.slice(0, indicatedMention.lineIndex + 1).join("\n")
             let post = lines.slice(indicatedMention.lineIndex + 1).join("\n")

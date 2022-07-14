@@ -14,6 +14,11 @@ function initDqs() {
         quatToOriginVersion.toQuaternion(target)
     }
 
+    // let torusGeo = new THREE.TorusGeometry(1.,.1,4,31, 3./4.*TAU)
+    // log(torusGeo)
+    // let torus = new THREE.Mesh ( torusGeo, new THREE.MeshBasicMaterial({color:0xFF0000}) )
+    // mDw.addNonMentionChild(torus)
+
     let eLineGeo = new THREE.CylinderGeometry(.03, .03, 500.)
     let iLineGeo = new THREE.CylinderGeometry(.03, .03, INFINITY_RADIUS*2.)
     let dotGeo = new THREE.CircleBufferGeometry(.1, 32)
@@ -243,16 +248,16 @@ function initDqs() {
                     (dw === iDw && (this.#iDwLineMesh.visible || this.#iDwRingMesh.visible) )
         }
 
-        getReassignmentPostEquals(useOverrideFloats) {
-            if (useOverrideFloats) 
-                return generateReassignmentText("Dq", true, 8)
-            else {
-                dq0.fromMv(this.mv)
-                return generateReassignmentText("Dq", dq0[0], dq0[1], dq0[2], dq0[3], dq0[4], dq0[5], dq0[6], dq0[7])
-            }
+        getReassignmentPostEqualsFromOverride() {
+            return generateReassignmentText("Dq", 8)
         }
 
-        getShaderOutputFloatString() {
+        getReassignmentPostEquals() {
+            dq0.fromMv(this.mv)
+            return generateReassignmentTextFromTheseArguments("Dq", dq0[0], dq0[1], dq0[2], dq0[3], dq0[4], dq0[5], dq0[6], dq0[7])
+        }
+
+        getOutputterAssignment() {
             let ret = `
             outputFloats[0] = ` + this.variable.name + `.scalar;
             outputFloats[1] = ` + this.variable.name + `.e01;
@@ -263,6 +268,8 @@ function initDqs() {
             outputFloats[6] = ` + this.variable.name + `.e23;
             outputFloats[7] = ` + this.variable.name + `.e0123;
                 `
+
+            //functionYouShouldCreate(`scalar`,`e01`,...)
             return ret
         }
 

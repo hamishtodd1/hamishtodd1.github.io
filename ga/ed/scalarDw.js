@@ -66,15 +66,15 @@ function initFloats() {
             return camera2d.positionToWindow(this.mesh.position, dw)
         }
 
-        getShaderOutputFloatString() {
+        getOutputterAssignment() {
             return `\n     outputFloats[0] = ` + this.variable.name + `;\n`
         }
 
-        getReassignmentPostEquals(useOverrideFloats) {
-            if (useOverrideFloats)
-                return "overrideFloats[0]"
-            else
-                return parseFloat(this.mesh.position.x.toFixed(2))
+        getReassignmentPostEqualsFromOverride() {
+            return "overrideFloats[0]"
+        }
+        getReassignmentPostEquals() {
+            return parseFloat(this.mesh.position.x.toFixed(2))
         }
 
         setVisibility(newVisibility) {

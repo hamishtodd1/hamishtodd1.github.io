@@ -216,18 +216,17 @@ function initVec3s()
             }
         }
 
-        getShaderOutputFloatString() {
-            return getFloatArrayAssignmentString(this.variable.name, 3) 
+        getOutputterAssignment() {
+            return getFloatArrayAssignment(this.variable.name, mentionClassNumFloats.vec3) 
             //TODO it's here that you can use numFloats!
             //Also it's something that can happen at the variable level
         }
 
-        getReassignmentPostEquals(useOverrideFloats) {
-            if (useOverrideFloats)
-                return generateReassignmentText("vec3", true, 3)
-            else {
-                return generateReassignmentText("vec3", this.vec.x, this.vec.y, this.vec.z)
-            }
+        getReassignmentPostEqualsFromOverride() {
+            return generateReassignmentText("vec3", 3)
+        }
+        getReassignmentPostEquals() {
+            return generateReassignmentTextFromTheseArguments("vec3", this.vec.x, this.vec.y, this.vec.z)
         }
 
         setVisibility(newVisibility) {

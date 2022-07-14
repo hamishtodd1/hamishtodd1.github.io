@@ -1,5 +1,4 @@
 /*
-
 TODO
     For next presentation
         Any variable that is different across manifold can be seen in thingy window
@@ -22,7 +21,6 @@ TODO
                 2D texture
     Bugs
         minus sign with sandwich
-        Currently, if a variable is uninitialized, you still get shown a point at 0,0,0 in the window
         Tab and enter make it so you can't ctrl+z
     GDC
         Definitely need it to be that if you edit the "b" in "a = b + 1", you change the a in there
