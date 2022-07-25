@@ -43,7 +43,7 @@ function initStudyNumbers() {
     let ourDw = dws.mobius
 
     let newValues = Array(2)
-    class vec2Mention extends Mention {
+    class complexMention extends Mention {
         mesh;
 
         constructor(variable) {
@@ -54,7 +54,7 @@ function initStudyNumbers() {
         }
 
         updateFromShader() {
-            this.getShaderOutput(newValues)
+            getShaderOutput(this.mentionIndex, newValues)
             this.mesh.position.x = newValues[0]
             this.mesh.position.y = newValues[1]
         }
@@ -75,16 +75,8 @@ function initStudyNumbers() {
             return camera2d.positionToWindow(this.mesh.position,dw)
         }
 
-        getOutputterAssignment() {
-            return getFloatArrayAssignment(this.variable.name, mentionClassNumFloats.vec2)
-        }
-
-        getReassignmentPostEqualsFromOverride() {
-            return generateReassignmentText("vec2", 2)
-        }
-
-        getReassignmentPostEquals() {
-            return generateReassignmentTextFromTheseArguments("vec2", this.mesh.position.x, this.mesh.position.y )
+        getReassignmentPostEqualsFromCpu() {
+            return this.getValuesAssignment(this.mesh.position.x, this.mesh.position.y )
         }
 
         setVisibility(newVisibility) {
@@ -105,6 +97,5 @@ function initStudyNumbers() {
             return m.mesh.position.equals(this.mesh.position)
         }
     }
-    mentionClasses.vec2 = vec2Mention
-    mentionClassNumFloats.vec2 = 2
+    new MentionType("vec2", 2, complexMention)
 }

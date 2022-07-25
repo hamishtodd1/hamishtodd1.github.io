@@ -112,7 +112,7 @@ function initVec3s()
         }
 
         updateFromShader() {
-            this.getShaderOutput( valuesArray)
+            getShaderOutput(this.mentionIndex, valuesArray)
             this.vec.fromArray(valuesArray)
 
             this.#sMesh.position.x = this.vec.length()
@@ -216,17 +216,8 @@ function initVec3s()
             }
         }
 
-        getOutputterAssignment() {
-            return getFloatArrayAssignment(this.variable.name, mentionClassNumFloats.vec3) 
-            //TODO it's here that you can use numFloats!
-            //Also it's something that can happen at the variable level
-        }
-
-        getReassignmentPostEqualsFromOverride() {
-            return generateReassignmentText("vec3", 3)
-        }
-        getReassignmentPostEquals() {
-            return generateReassignmentTextFromTheseArguments("vec3", this.vec.x, this.vec.y, this.vec.z)
+        getReassignmentPostEqualsFromCpu() {
+            return this.getValuesAssignment(this.vec.x, this.vec.y, this.vec.z)
         }
 
         setVisibility(newVisibility) {
@@ -249,6 +240,6 @@ function initVec3s()
             return m.vec.equals(this.vec)
         }
     }
-    mentionClasses.vec3 = vec3Mention
-    mentionClassNumFloats.vec3 = 3
+
+    new MentionType("vec3", 3, vec3Mention)
 }

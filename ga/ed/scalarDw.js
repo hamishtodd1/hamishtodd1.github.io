@@ -46,7 +46,7 @@ function initFloats() {
         }
 
         updateFromShader() {
-            this.getShaderOutput( newValues )
+            getShaderOutput(this.mentionIndex, newValues )
             this.mesh.position.x = newValues[0]
         }
 
@@ -66,14 +66,7 @@ function initFloats() {
             return camera2d.positionToWindow(this.mesh.position, dw)
         }
 
-        getOutputterAssignment() {
-            return `\n     outputFloats[0] = ` + this.variable.name + `;\n`
-        }
-
-        getReassignmentPostEqualsFromOverride() {
-            return "overrideFloats[0]"
-        }
-        getReassignmentPostEquals() {
+        getReassignmentPostEqualsFromCpu() {
             return parseFloat(this.mesh.position.x.toFixed(2))
         }
 
@@ -95,6 +88,7 @@ function initFloats() {
             return m.mesh.position.x === this.mesh.position.x
         }
     }
-    mentionClasses.float = floatMention
-    mentionClassNumFloats.float = 1
+    
+    let mt = new MentionType("float", 1, floatMention, [``])
+    mt.reassignmentPostEqualsFromOverride = "overrideFloats[0]"
 }

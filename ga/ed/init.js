@@ -176,10 +176,18 @@ Because it helps portability to ordinary shaders:
 
 async function init() {
 
+    let timeBefore = -Infinity
+    startBench = () =>{
+        timeBefore = performance.now()
+    }
+    endBench = () => {
+        const timeAfter = performance.now()
+        console.log(`Took ${timeAfter - timeBefore} milliseconds.`)
+    }
+
     let initialTextFull = await getTextFile('shaders/initialText.glsl')
     let initialText = initialTextFull.slice(0, initialTextFull.indexOf(`//END//`))    
     textarea.value = initialText
-    VERTEX_MODE = initialText.indexOf("getColor") === -1
     updateSyntaxHighlighting()
 
     // init41()

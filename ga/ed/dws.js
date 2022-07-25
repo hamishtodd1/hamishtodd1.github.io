@@ -78,6 +78,10 @@ async function initDws() {
             this.nonMentionChildren.push(ch)
             this.#scene.add(ch)
         }
+        removeNonMentionChild(ch) {
+            this.nonMentionChildren.splice(this.nonMentionChildren.indexOf( ch ))
+            this.#scene.remove(ch)
+        }
 
         oldClientToProportion() {
             let clientRect = this.elem.getBoundingClientRect()

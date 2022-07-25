@@ -24,45 +24,8 @@
 
 async function initCompilation()
 {
-    let randomColor = new THREE.Color()
-    let currentHue = 0.
-    let goldenRatio = (Math.sqrt(5.)+1.)/2.
-
     let focussedVertex = 0
     let numVertices = 20
-
-    class Variable {
-        name
-        col = new THREE.Color(0., 0., 0.)
-        class
-        lowestUnusedMention = 0
-        isAttrib = false
-        isUniform = false
-        mentions = []
-
-        constructor(newName, newClass) {
-            this.name = newName
-
-            this.class = newClass
-
-            randomColor.setHSL(currentHue, 1., .5)
-            currentHue += 1./goldenRatio
-            while (currentHue > 1.)
-                currentHue -= 1.
-            this.col.r = randomColor.r; this.col.g = randomColor.g; this.col.b = randomColor.b;
-
-            variables.push(this)
-        }
-
-        getLowestUnusedMention() {
-            while(this.mentions.length <= this.lowestUnusedMention) {
-                let newMention = new this.class(this)
-                this.mentions.push(newMention)
-            }
-
-            return this.mentions[this.lowestUnusedMention++]
-        }
-    }
 
     const nameRegex = /(?<=[^a-zA-Z_$0-9])([a-zA-Z_$][a-zA-Z_$0-9]*)/g
 
@@ -102,20 +65,8 @@ async function initCompilation()
         threejsIsCheckingForShaderErrors = false
     }
 
-    let types = Object.keys(mentionClasses)
-    let allTypeRegexes = {}
-    let inRegexes = {}
-    let uniformRegexes = {}
-    let functionRegexes = {}
-    types.forEach((type)=>{
-        functionRegexes[type] = new RegExp('(?<=[^a-zA-Z_$0-9])(' + type + ')\\s*[a-zA-Z_$][a-zA-Z_$0-9]*\\(', 'gm')
-         allTypeRegexes[type] = new RegExp('(?<=[^a-zA-Z_$0-9])(' + type + ')\\s*[a-zA-Z_$][a-zA-Z_$0-9]*', 'gm')
-         uniformRegexes[type] = new RegExp('\\s*uniform\\s*('     + type + ')\\s', 'gm')
-              inRegexes[type] = new RegExp('\\s*in\\s*('          + type + ')\\s', 'gm')
-    })
-
     compile = async () => {
-
+        
         let text = textarea.value
         if (text.indexOf("/*") !== -1 || text.indexOf("*/") !== -1) {
             console.error("multi-line comments not supported")
@@ -123,45 +74,44 @@ async function initCompilation()
         }
 
         text = text.replace(commentNotNewlineRegex,"")
+        let vertexMode = text.indexOf("getColor") === -1
 
         let uniforms = {}
         let geo = new THREE.BufferGeometry()
         let outputterUniforms = {}
 
-        types.forEach((type) => {
-            let functionResults = [...text.matchAll(functionRegexes[type])].map(a => a.index)
-            let  allTypeResults = [...text.matchAll( allTypeRegexes[type])].map(a => a.index)
-            let  uniformResults = [...text.matchAll( uniformRegexes[type])].map(a => a.index + a[0].indexOf(a[1]))
-            let   attribResults = [...text.matchAll(      inRegexes[type])].map(a => a.index + a[0].indexOf(a[1]))
+        mentionTypes.forEach((type) => {
+            let functionResults = [...text.matchAll(type.regexes.function )].map(a => a.index)
+            let      allResults = [...text.matchAll(type.regexes.all      )].map(a => a.index)
+            let  uniformResults = [...text.matchAll(type.regexes.uniform  )].map(a => a.index + a[0].indexOf(a[1]))
+            let   attribResults = [...text.matchAll(type.regexes.in       )].map(a => a.index + a[0].indexOf(a[1]))
             
-            allTypeResults.forEach((index) => {
+            allResults.forEach((index) => {
                 if( functionResults.indexOf(index) !== -1)
                     return
                     
-                let name = text.slice(index + type.length).match(nameRegex)[0] //TODO potential speedup
+                let name = text.slice(index + type.glslName.length).match(nameRegex)[0] //TODO potential speedup
                 //people may well want to use "position". Could have: position -> __position
 
                 let variable = variables.find((v) => {
-                    return v.name === name && v.class === mentionClasses[type]
+                    return v.name === name && v.type === type
                 })
                 if (variable === undefined)
-                    variable = new Variable(name, mentionClasses[type])
+                    variable = new Variable(name, type)
 
                 variable.lowestUnusedMention = 0
                     
                 if (attribResults.indexOf(index) !== -1) {
                     variable.isAttrib = true
 
-                    let numFloats = mentionClassNumFloats[type]
-
-                    let attributeArray = new Float32Array(numFloats * numVertices)
+                    let attributeArray = new Float32Array(type.numFloats * numVertices)
                     for(let i = 0; i < attributeArray.length; ++i)
                         attributeArray[i] = Math.random() - .5
-                    geo.setAttribute('position', new THREE.BufferAttribute(attributeArray, numFloats))
+                    geo.setAttribute('position', new THREE.BufferAttribute(attributeArray, type.numFloats))
                     
-                    let focussedAttributeValue = new Float32Array(numFloats)
-                    for (let i = 0; i < numFloats; ++i)
-                        focussedAttributeValue[i] = attributeArray[i + numFloats * focussedVertex]
+                    let focussedAttributeValue = new Float32Array(type.numFloats)
+                    for (let i = 0; i < type.numFloats; ++i)
+                        focussedAttributeValue[i] = attributeArray[i + type.numFloats * focussedVertex]
                     outputterUniforms[name] = { value: focussedAttributeValue }
                 }
                 if(uniformResults.indexOf(index) !== -1) {
@@ -239,7 +189,7 @@ async function initCompilation()
                         overrideGoesBefore = false
 
                     let overrideAddition = `\nif( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` +
-                        mention.variable.name + " = " + mention.getReassignmentPostEqualsFromOverride() + ";"
+                        mention.variable.name + " = " + mention.variable.type.reassignmentPostEqualsFromOverride + ";"
                     if (overrideGoesBefore) {
                         finalChunks[lineIndex]     = overrideAddition +     finalChunks[lineIndex]
                         outputterChunks[lineIndex] = overrideAddition + outputterChunks[lineIndex]
@@ -254,8 +204,8 @@ async function initCompilation()
                 if ( !(isUniformOrAttrib && isDeclaration ) ) {
                     let goesBefore = l.indexOf(`return`) !== -1
 
-                    let outputAddition   = `\nif( outputMentionIndex == ` + mention.mentionIndex + ` ) {` + 
-                        mention.getOutputterAssignment() + `}`
+                    let outputAddition   = `\nif( outputMentionIndex == ` + mention.mentionIndex + ` ) {\n` + 
+                        mention.variable.assignmentToOutput + `}`
                     if( overrideGoesBefore === false)
                         goesBefore = false
                     if (goesBefore) {
@@ -272,17 +222,21 @@ async function initCompilation()
 
         // log(outputterChunks.join("\n------------------")) //whyyyyy did there appear to be only even numbered mentionIndexes?
 
-        updateOutputtingAndFinalDw(
-            outputterChunks.join("\n"), 
-            finalChunks.join("\n"), 
-            geo, uniforms, outputterUniforms)
+        let outputterText = outputterChunks.join("\n")
+        let finalText = finalChunks.join("\n")
+        if (vertexMode ) {
+            updateOutputter(outputterText, outputterUniforms, `vec4 myVertex = getVertex`)
+            updateFinalDwVertex(finalText, uniforms, geo)
+        }
+        else {
+            updateOutputter(outputterText, outputterUniforms, `vec3 myCol = getColor`)
+            updateFinalDwFragment(finalText, uniforms)
+        }
 
         lowestChangedLineSinceCompile = Infinity
         updateChangedLineIndicator()
 
-        forEachUsedMention((m) => {
-            m.updateFromShader()
-        })
+        updateMentionsFromShader(()=>true)
 
         variables.forEach((v)=>{
             let currentDuplicates

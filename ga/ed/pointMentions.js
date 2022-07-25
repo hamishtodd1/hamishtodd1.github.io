@@ -82,7 +82,7 @@ function initPoints() {
         }
 
         updateFromShader() {
-            this.getShaderOutput(ptNewValues)
+            getShaderOutput(this.mentionIndex, ptNewValues)
             this.mv.point(ptNewValues[0], ptNewValues[1], ptNewValues[2], ptNewValues[3])
             
             this.updateFromMv()
@@ -128,17 +128,9 @@ function initPoints() {
                 console.error("not in that dw")
         }
 
-        getReassignmentPostEqualsFromOverride() {
-            return generateReassignmentText("vec4", 4)
-        }
-        
-        getReassignmentPostEquals() {
+        getReassignmentPostEqualsFromCpu() {
             let m = this.mv
-            return generateReassignmentTextFromTheseArguments("vec4", m[13], m[12], m[11], m[14])
-        }
-
-        getOutputterAssignment() {
-            return getFloatArrayAssignment( this.variable.name, mentionClassNumFloats.vec4 )
+            return this.getValuesAssignment(m[13], m[12], m[11], m[14])
         }
 
         setVisibility(newVisibility) {
@@ -168,6 +160,5 @@ function initPoints() {
             return m.mv.equals(this.mv)
         }
     }
-    mentionClasses.vec4 = vec4Mention
-    mentionClassNumFloats.vec4 = 4
+    new MentionType("vec4", 4, vec4Mention)
 }

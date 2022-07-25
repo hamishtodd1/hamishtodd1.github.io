@@ -106,7 +106,7 @@ function initDqs() {
         }
 
         updateFromShader() {
-            this.getShaderOutput(dwNewValues)
+            getShaderOutput(this.mentionIndex, dwNewValues)
             newDq.copy(dwNewValues)
             newDq.toMv(this.mv)
 
@@ -248,35 +248,15 @@ function initDqs() {
                     (dw === iDw && (this.#iDwLineMesh.visible || this.#iDwRingMesh.visible) )
         }
 
-        getReassignmentPostEqualsFromOverride() {
-            return generateReassignmentText("Dq", 8)
-        }
-
-        getReassignmentPostEquals() {
+        getReassignmentPostEqualsFromCpu() {
             dq0.fromMv(this.mv)
-            return generateReassignmentTextFromTheseArguments("Dq", dq0[0], dq0[1], dq0[2], dq0[3], dq0[4], dq0[5], dq0[6], dq0[7])
-        }
-
-        getOutputterAssignment() {
-            let ret = `
-            outputFloats[0] = ` + this.variable.name + `.scalar;
-            outputFloats[1] = ` + this.variable.name + `.e01;
-            outputFloats[2] = ` + this.variable.name + `.e02;
-            outputFloats[3] = ` + this.variable.name + `.e03;
-            outputFloats[4] = ` + this.variable.name + `.e12;
-            outputFloats[5] = ` + this.variable.name + `.e31;
-            outputFloats[6] = ` + this.variable.name + `.e23;
-            outputFloats[7] = ` + this.variable.name + `.e0123;
-                `
-
-            //functionYouShouldCreate(`scalar`,`e01`,...)
-            return ret
+            return this.getValuesAssignment(dq0[0], dq0[1], dq0[2], dq0[3], dq0[4], dq0[5], dq0[6], dq0[7])
         }
 
         getTextareaManipulationDw() {
             return mDw
         }
     }
-    mentionClasses.Dq = DqMention
-    mentionClassNumFloats.Dq = 8 //mentionClasses.Dq.numFloats = 8
+    
+    new MentionType("Dq", 8, DqMention, [ `.scalar`, `.e01`, `.e02`, `.e03`, `.e12`, `.e31`, `.e23`, `.e0123` ])
 }

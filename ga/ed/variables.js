@@ -9,11 +9,8 @@ let caretPositionOld = -1
 const FULL_SCREEN_QUAD_MATRIX = new THREE.Matrix4()
 
 const variables = []
+const mentionTypes = []
 const dws = {}
-const mentionClasses = {}
-const mentionClassNumFloats = {}
-
-let VERTEX_MODE = false
 
 const INFINITY_RADIUS = 1.7
 const pointGeo = new THREE.SphereBufferGeometry(.1, 32, 16)

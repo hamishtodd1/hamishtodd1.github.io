@@ -98,11 +98,7 @@ function initMention() {
             return ourIndex < this.variable.lowestUnusedMention
         }
 
-        getShaderOutput(target) {
-            return getOutput(this.mentionIndex,target)
-        }
-
-        //this may well get overridden
+        //often overridden
         getCanvasPosition(dw) {
             this.getWorldSpaceCanvasPosition(canvasPos,dw)
             return camera.positionToWindow(canvasPos,dw)
@@ -129,7 +125,7 @@ function initMention() {
 
             //Connect to the visualizations of the thing
             let lowestUnusedLabelConnector = 0
-            forVizDws((dw)=>{
+            forVizDws((dw) => {
                 if (this.isVisibleInDw(dw)) {
 
                     //TODO this works differently if .isAttrib or .isUniform
@@ -142,36 +138,107 @@ function initMention() {
                         elemX, elemY)
                 }
             })
-            for(let i = lowestUnusedLabelConnector; i < $labelConnectors.length; ++i)
-                setSvgLine($labelConnectors[i],-10,-10,-10,-10)
+            for (let i = lowestUnusedLabelConnector; i < $labelConnectors.length; ++i)
+                setSvgLine($labelConnectors[i], -10, -10, -10, -10)
+        }
+
+        ///////////////////////
+        // debug bookkeeping //
+        ///////////////////////
+
+        //hmm, really looks like type business
+        getValuesAssignment() {
+            let commaSeparated = ""
+            for (let i = 0, il = arguments.length; i < il; ++i) {
+                let asStr = parseFloat(arguments[i].toFixed(2))
+                if (asStr === Math.round(asStr))
+                    asStr += "."
+                commaSeparated += asStr + (i === il - 1 ? "" : ",")
+            }
+
+            return this.variable.type.glslName + "(" + commaSeparated + ")"
         }
     }
     window.Mention = Mention
 
-    getFloatArrayAssignment = (variableName, len) => {
-        let ret = "\n"
-        for (let i = 0; i < len; ++i)
-            ret += `    outputFloats[` + i + `] = ` + variableName + `[` + i + `];\n`
-        return ret
-    }
+    let randomColor = new THREE.Color()
+    let currentHue = 0.
+    let goldenRatio = (Math.sqrt(5.) + 1.) / 2.
+    class Variable {
+        name
+        type
 
-    generateReassignmentTextFromTheseArguments = function() {
-        let commaSeparated = ""
-        for (let i = 1, il = arguments.length; i < il; ++i) {
-            let asStr = parseFloat(arguments[i].toFixed(2))
-            if (asStr === Math.round(asStr))
-                asStr += "."
-            commaSeparated += asStr + (i === il - 1 ? "" : ",")
+        col = new THREE.Color(0., 0., 0.)
+        assignmentToOutput = ""
+        isAttrib = false
+        isUniform = false
+
+        lowestUnusedMention = 0
+        mentions = []
+
+        constructor(newName, newClass) {
+            //never changed after this
+            this.name = newName
+            this.type = newClass
+
+            for (let i = 0; i < newClass.numFloats; ++i)
+                this.assignmentToOutput += `    outputFloats[` + i + `] = ` + newName + newClass.outputAssignmentSuffixes[i]
+
+            randomColor.setHSL(currentHue, 1., .5)
+            currentHue += 1. / goldenRatio
+            while (currentHue > 1.)
+                currentHue -= 1.
+            this.col.r = randomColor.r; this.col.g = randomColor.g; this.col.b = randomColor.b;
+
+            variables.push(this)
         }
 
-        return arguments[0] + "(" + commaSeparated + ")"
-    }
+        getLowestUnusedMention() {
+            while (this.mentions.length <= this.lowestUnusedMention) {
+                let newMention = new this.type.ourConstructor(this)
+                this.mentions.push(newMention)
+            }
 
-    generateReassignmentText = function() {
-        let commaSeparated = ""
-        for (let i = 0, il = arguments[1]; i < il; ++i)
-            commaSeparated += "overrideFloats[" + i + "]" + (i === il - 1 ? "" : ",")
-
-        return arguments[0] + "(" + commaSeparated + ")"
+            return this.mentions[this.lowestUnusedMention++]
+        }
     }
+    window.Variable = Variable
+
+    class MentionType {
+        glslName
+        numFloats
+        ourConstructor
+        outputAssignmentSuffixes
+        regexes = {}
+        reassignmentPostEqualsFromOverride
+
+        constructor(glslName, numFloats, ourConstructor, outputAssignmentSuffixes) {
+            this.glslName = glslName
+            this.numFloats = numFloats
+            this.ourConstructor = ourConstructor
+
+            this.outputAssignmentSuffixes = Array(numFloats)
+            if (outputAssignmentSuffixes !== undefined) {
+                for (let i = 0; i < this.numFloats; ++i)
+                    this.outputAssignmentSuffixes[i] = outputAssignmentSuffixes[i] + `;\n`
+            }
+            else {
+                for (let i = 0; i < this.numFloats; ++i)
+                    this.outputAssignmentSuffixes[i] = `[` + i + `];\n`
+            }
+
+            this.regexes.function = new RegExp('(?<=[^a-zA-Z_$0-9])(' + glslName + ')\\s*[a-zA-Z_$][a-zA-Z_$0-9]*\\(', 'gm')
+            this.regexes.all = new RegExp('(?<=[^a-zA-Z_$0-9])(' + glslName + ')\\s*[a-zA-Z_$][a-zA-Z_$0-9]*', 'gm')
+            this.regexes.uniform = new RegExp('\\s*uniform\\s*(' + glslName + ')\\s', 'gm')
+            this.regexes.in = new RegExp('\\s*in\\s*(' + glslName + ')\\s', 'gm')
+
+            let commaSeparated = ``
+            for (let i = 0; i < this.numFloats; ++i)
+                commaSeparated += `overrideFloats[` + i + `]` + (i === this.numFloats - 1 ? `` : `,`)
+            this.reassignmentPostEqualsFromOverride = this.glslName + `(` + commaSeparated + `)`
+
+            mentionTypes.push(this)
+        }
+    }
+    window.MentionType = MentionType
 }

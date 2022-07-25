@@ -79,10 +79,8 @@ function initMouseInteractions() {
                 else
                     indicatedMention.overrideFromDrag(grabbedDw,event)
     
-                forEachUsedMention((mention) => {
-                    let visible = mentionVisibleDueToCaret(mention) || mention === indicatedMention
-                    if (visible)
-                        mention.updateFromShader()
+                updateMentionsFromShader((mention) => {
+                    return mentionVisibleDueToCaret(mention) || mention === indicatedMention
                 })
 
                 indicatedMention.highlight()
@@ -158,7 +156,7 @@ function initMouseInteractions() {
             let [caretColumnIndex, caretLineIndex] = getCaretColumnAndLine() //done first since we're about to be weird
             
             let newLine = "\n    " + indicatedMention.variable.name + " = " + 
-                indicatedMention.getReassignmentPostEquals() + ";\n"
+                indicatedMention.getReassignmentPostEqualsFromCpu() + ";\n"
             let lines = textarea.value.split("\n")
             let pre  = lines.slice(0, indicatedMention.lineIndex + 1).join("\n")
             let post = lines.slice(indicatedMention.lineIndex + 1).join("\n")
