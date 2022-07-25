@@ -1,6 +1,17 @@
+function getCssVar(varName) {
+	return getComputedStyle(document.body).getPropertyValue('--' + varName)
+}
+
 function keyOfProptInObject(propt,obj) {
 	let keys = Object.keys(obj)
 	return keys.find((key)=>propt===obj[key])
+}
+
+function forEachPropt(obj,func) {
+	let keys = Object.keys(obj)
+	keys.forEach((key)=>{
+		func(obj[key])
+	})
 }
 
 function getWhereThisWasCalledFrom(depth) {
@@ -9,8 +20,11 @@ function getWhereThisWasCalledFrom(depth) {
 	if(actualDepth >= splitIntoLines.length )
 		actualDepth = splitIntoLines.length - 1
 	let lineOfStackTrace = splitIntoLines[actualDepth]
-	let split = lineOfStackTrace.split("/")
-	return split[split.length - 1]
+
+	let splitBySlash = lineOfStackTrace.split("/")
+	let stillGotColons = splitBySlash[splitBySlash.length - 1]
+	let splitByColons = stillGotColons.split(":")
+	return splitByColons[0] + ":" + splitByColons[1]
 }
 
 function centerToFrameDistanceAtOneUnitAway(fov) {
@@ -39,6 +53,8 @@ function setSvgLine(svgLine, x1, y1, x2, y2) {
 		svgLine.setAttribute('y2', -10 )
 	}
 	else {
+		if(svgLine === undefined)
+			debugger
 		svgLine.setAttribute('x1', x1)
 		svgLine.setAttribute('y1', y1)
 		svgLine.setAttribute('x2', x2)
