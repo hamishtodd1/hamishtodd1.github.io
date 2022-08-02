@@ -6,9 +6,9 @@
 uniform float myFloat;
 vec3 getColor() {
     vec2 boog = vec2(1.,1.);
-    vec3 myVec = vec3(-.28,.96,1.);
+    vec3 myVec = vec3(1.,.5,1.);
     
-    Dq rotation = Dq(myVec.x, 0.,0.,0., 0.,myVec.y,0., 0.);
+    Dq rotation = Dq(.28, 0.,0.,0., 0.,.96,0., 0.);
     vec4 idealPt = vec4( .2,0.,-1.,0.);
     vec4 transformedIdeal = sandwichDqPt(rotation, idealPt);
 

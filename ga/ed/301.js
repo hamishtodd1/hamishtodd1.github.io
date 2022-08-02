@@ -1,12 +1,11 @@
-/*
-    Points square to -1. Suggests they're rotations. Which, yes
- */
-
-function init301WithoutDeclarations() {
+function init301WithoutDeclarations(basisNames) {
 
     const N_COEFS = 16
     const N_ROTOR_COEFS = 8
     const N_BIVECTOR_COEFS = 6
+
+    //would be nice to have them inherit copy, set, clone, multiplyScalar, add
+    //but, how to get N_COEFS in?
 
     class Biv extends Float32Array {
         constructor() {
@@ -235,6 +234,11 @@ function init301WithoutDeclarations() {
             }
 
             return v
+        }
+        toVectorArray(arr,index) {
+            arr[index*3+0] = this[13] / this[14]
+            arr[index*3+1] = this[12] / this[14]
+            arr[index*3+2] = this[11] / this[14]
         }
 
         getDisplayableVersion(target) {
@@ -523,8 +527,6 @@ function init301WithoutDeclarations() {
     }
     window.Mv = Mv
 
-    const basisNames = ["", "0", "1", "2", "3", "01", "02", "03", "12", "31", "23", "021", "013", "032", "123", "0123"]
-
     let indexGrades = [
         0,
         1,1,1,1,
@@ -533,31 +535,10 @@ function init301WithoutDeclarations() {
         4
     ]
 
+    /*EXTRA FUNCTIONS ADDED HERE*/
+
     let localDq0 = new Dq()
     let localBiv0 = new Biv()
-
-/*END*/}
-
-async function init301() {
-    let fullFuncString = init301WithoutDeclarations.toString()
-    let funcString = fullFuncString.slice(0, fullFuncString.indexOf("/*END*/}")) 
-        + createSharedFunctionDeclarationsStrings()
-    
-    //newMv is not a variable name. It is equivalent to "new Mv()"
-
-    let i = 0
-    let declarations = ""
-    let withoutDeclarations = funcString.replace(/newMv/g, () => {
-        declarations += "\n    let newMv" + i + " = new Mv()"
-        return "newMv" + (i++)
-    })
-    let strToEval =
-        "(" +
-        withoutDeclarations +
-        declarations +
-        "})()"
-        
-    eval(strToEval)
 
     function MvFromFloatAndIndex(float, index) {
         let mv = new Mv()
@@ -595,62 +576,12 @@ async function init301() {
     mv5 = new Mv()
     mv6 = new Mv()
 
-    dq0 = new Dq()    
-        
-    generalShaderPrefix += await getTextFile('shaders/301.glsl') //it's purely the dual quaternion part
-}
+    dq0 = new Dq()
 
-function createSharedFunctionDeclarationsStrings()
-{
-    let jsString = "\n\n"
-    let glslGaString = ""
+/*END*/}
 
-    //this function takes something written in a weird combination of js and glsl and spits out both
-    function createFunction(funcName, funcArgs, body, type) {
-        let fillInTarget = type === undefined
-
-        let glslVersion = (fillInTarget?`void`:type) + " " + funcName + "( "
-        let jsVersion = funcName + " = function( "
-
-        funcArgs.forEach((funcArg, i) => {
-            if (funcArg.indexOf(" ") === -1) {
-                jsVersion += funcArg    
-                glslVersion += "in float[16] " + funcArg
-            }
-            else {
-                let splitBySpace = funcArg.split(" ")
-                jsVersion += splitBySpace[splitBySpace.length-1]
-                glslVersion += funcArg
-            }
-
-            if (i !== funcArgs.length - 1 || fillInTarget) {
-                jsVersion += `, `
-                glslVersion += `, `
-            }
-        })
-
-        let jsBody = body.replace(/(float\[16\])|(float )|(int )/g, "let")
-        let glslBody = body.replace(/(\s+=\s+(newMv))|(Math\.)/g, "")
-
-        if (fillInTarget) {
-            glslVersion += `out float[16] target ) {` + glslBody + `\n}\n`
-            //might be nice to check if you are allowed to return an inout
-
-            jsVersion += `target ) {\n    if(target === undefined)\n        target = new Mv()\n` + 
-                jsBody + `\n    return target\n}\n\n`
-        }
-        else {
-            glslVersion += ` ) {` + glslBody + `\n}\n\n`
-            jsVersion += ` ) {` + jsBody + `\n}\n\n`
-        }
-        
-        glslGaString += glslVersion
-        jsString += jsVersion
-    }
-
-    createVerboseFunctions(createFunction)
-
-    createFunction(`sandwich`,[`m`,`a`],`
+function createNonVerboseSharedFunctions(createFunction) {
+    createFunction(`sandwich`, [`m`, `a`], `
     float[16] mReverse = newMv;
     reverse(m, mReverse);
     
@@ -659,21 +590,21 @@ function createSharedFunctionDeclarationsStrings()
 
     mul(intermediate,mReverse,target);`)
 
-    createFunction(`eNormSquared`,[`a`],`
+    createFunction(`eNormSquared`, [`a`], `
     float[16] rev = newMv;
     reverse(a, rev);
     float[16] studyNumber = newMv;
     mul(a, rev, studyNumber);
     return Math.abs(studyNumber[0]);`,
-    `float`)
+        `float`)
 
-    createFunction(`multiplyScalar`,[`inout float[16] a`,`in float scalar`],`
+    createFunction(`multiplyScalar`, [`inout float[16] a`, `in float scalar`], `
     for(int i = 0; i < 16; ++i) {
         a[i] *= scalar;
     }`,
-    `void`)
+        `void`)
 
-    createFunction(`invert`, [`a`],`
+    createFunction(`invert`, [`a`], `
     reverse(a, target);
     multiplyScalar(target, 1. / eNormSquared(target) );`)
 
@@ -683,15 +614,10 @@ function createSharedFunctionDeclarationsStrings()
     float[16] inverse = newMv;
     invert(b,inverse);
     mul(intermediate, inverse, target);`)
-
-    //maybe try to do better than this, geometrically
-
-    generalShaderPrefix += glslGaString
-
-    return jsString
 }
 
-function createVerboseFunctions(createFunction) {
+function createVerboseSharedFunctions(createFunction) {
+
     createFunction(`mul`, [`a`, `b`], `
     target[ 0] = b[ 0] * a[ 0] + b[ 2] * a[ 2] + b[ 3] * a[ 3] + b[ 4] * a[ 4] - b[ 8] * a[ 8] - b[ 9] * a[ 9] - b[10] * a[10] - b[14] * a[14];
 

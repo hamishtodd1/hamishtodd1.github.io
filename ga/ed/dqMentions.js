@@ -7,9 +7,10 @@ function initDqs() {
     let projectedOnOrigin = new Mv()
     let quatToOriginVersion = new Mv()
     let joinedWithOrigin = new Mv()
+    let initialLineMeshMv = e31.clone().multiplyScalar(-1.)
     function getQuaternionToProjectionOnOrigin(model, target) {
         model.projectOn(e123, projectedOnOrigin).normalize()
-        mul(projectedOnOrigin, e31, quatToOriginVersion)
+        mul(projectedOnOrigin, initialLineMeshMv, quatToOriginVersion)
         quatToOriginVersion.sqrtSelf()
         quatToOriginVersion.toQuaternion(target)
     }
@@ -18,6 +19,84 @@ function initDqs() {
     // log(torusGeo)
     // let torus = new THREE.Mesh ( torusGeo, new THREE.MeshBasicMaterial({color:0xFF0000}) )
     // mDw.addNonMentionChild(torus)
+
+    let arcCurveDest = new THREE.Vector3(1.,2.,0.)
+    class ArcCurve extends THREE.Curve {
+        constructor() {
+            super()
+        }
+        getPoint(t, optionalTarget = new THREE.Vector3()) {
+            let modulusLog = Math.log( Math.sqrt(sq(arcCurveDest.x)+sq(arcCurveDest.y)) )
+            let argument = Math.atan2(arcCurveDest.y,arcCurveDest.x)
+
+            let ourModulusLog = t * modulusLog
+            let ourArgument = t * argument
+
+            optionalTarget.set(Math.cos(ourArgument), Math.sin(ourArgument), 0.)
+            optionalTarget.multiplyScalar(Math.exp(ourModulusLog) )
+
+            return optionalTarget
+        }
+    }
+    let theArcCurve = new ArcCurve()
+
+    let numMsVerts = 31
+    let mobiusStripGeo = new THREE.PlaneBufferGeometry(1.,1.,1,numMsVerts-1)
+    let stripWidthHalved = .2
+    let stripRadius = .8
+    let mobiusMat = new THREE.MeshPhongMaterial({ color: 0xAAAAAA, side: THREE.DoubleSide })
+    {
+        let makinRotor = new Mv()
+        function toMobiusEdge(side, t, target) {
+            mv0.point(side ? stripWidthHalved : -stripWidthHalved, 0., 0., 1.)
+
+            makinRotor.fromAxisAngle(e12, t * TAU / 2.)
+            makinRotor.sandwich(mv0, mv1)
+            mv1[13] += stripRadius
+
+            makinRotor.fromAxisAngle(e31, -t * TAU)
+            makinRotor.sandwich(mv1, target)
+
+            return target
+        }
+
+        mobiusStripGeo.translate(0., .5, 0.)
+        let msgArr = mobiusStripGeo.attributes.position.array
+        for (let i = 0; i < numMsVerts*2; ++i) {
+            let side = msgArr[i * 3 + 0] < 0.
+            let t = msgArr[i * 3 + 1]
+
+            toMobiusEdge(side, t, mv0)
+            mv0.toVectorArray(msgArr, i)
+        }
+        mobiusStripGeo.computeVertexNormals()
+    }
+
+    let rimCurveFullAngle = TAU / 2.
+    class RimCurve extends THREE.Curve {
+        constructor() {
+            super()
+        }
+        getPoint(t, optionalTarget = new THREE.Vector3()) {
+            toMobiusEdge(true,t*rimCurveFullAngle, mv0)
+            //need to copy in the rotor of the line
+            mv0.toVector(optionalTarget)
+            return optionalTarget
+        }
+    }
+    let theRimCurve = new RimCurve()
+
+    function OurTubeGeo(curve) {
+        return new THREE.TubeBufferGeometry(curve, 31, .1, 7, false)
+    }
+    function updateTubeGeo(geo, curve) {
+        let tempGeo = OurTubeGeo(curve)
+        let arr = geo.attributes.position.array
+        for (let i = 0, il = arr.length; i < il; ++i)
+            arr[i] = tempGeo.attributes.position.array[i]
+        tempGeo.dispose()
+        geo.attributes.position.needsUpdate = true
+    }
 
     let eLineGeo = new THREE.CylinderGeometry(.03, .03, 500.)
     let iLineGeo = new THREE.CylinderGeometry(.03, .03, INFINITY_RADIUS*2.)
@@ -34,12 +113,18 @@ function initDqs() {
     let worldSpaceCameraPosition = new THREE.Vector4()
     let iDwIntersection = new Mv()
     class DqMention extends Mention {
-        #eDwMesh
         #mDwMesh
+        #arcMesh
+
+        #mobiusStripMesh
+        #rimMesh
+
+        #eDwMesh
         #iDwLineMesh
         #iDwRingMesh
 
         linePartWhenGrabbedNormalized = new Mv()
+        #complexWhenGrabbed = new THREE.Vector2()
         mv = new Mv()
 
         equals(m) {
@@ -54,7 +139,13 @@ function initDqs() {
             this.#eDwMesh = eDw.NewMesh(eLineGeo, mat)
             this.#iDwLineMesh = iDw.NewMesh(iLineGeo, mat)
             this.#iDwRingMesh = iDw.NewMesh(ringGeo,  mat)
-            this.#mDwMesh = mDw.NewMesh(dotGeo, new THREE.MeshBasicMaterial({ color: variable.col }))
+            
+            let mat2d = new THREE.MeshBasicMaterial({ color: variable.col, side:THREE.DoubleSide })
+            this.#mDwMesh = mDw.NewMesh(dotGeo, mat2d)
+            this.#arcMesh = mDw.NewMesh(OurTubeGeo(theArcCurve), mat2d)
+
+            this.#mobiusStripMesh = iDw.NewMesh(mobiusStripGeo, mobiusMat) //possibly only one of these is needed
+            this.#rimMesh = iDw.NewMesh(OurTubeGeo(theRimCurve), mat)
 
             camera.toHaveUpdateFromMvCalled.push(this)
         }
@@ -72,10 +163,15 @@ function initDqs() {
             if (grabbedDuplicate !== undefined) {
                 let proportionOfComparison = -1. * inner(linePart, grabbedDuplicate.linePartWhenGrabbedNormalized, mv0)[0]
                 this.#mDwMesh.position.y = proportionOfComparison
-                //the arc thing would be nice too
             }
             else
                 this.#mDwMesh.position.y = linePart.norm()
+
+            arcCurveDest.set(this.#mDwMesh.position.x, this.#mDwMesh.position.y, 0.)
+            updateTubeGeo(this.#arcMesh.geometry,theArcCurve)
+
+            rimCurveFullAngle = Math.atan2(this.#mDwMesh.position.y, this.#mDwMesh.position.x) / TAU * 2.
+            updateTubeGeo(this.#rimMesh.geometry,theRimCurve)
 
             //more like: it's a mobius strip
             //And by the way, it's angled in 3D space such that your line is through it
@@ -90,14 +186,28 @@ function initDqs() {
                 return
             }
 
-            if (linePart.eNorm() !== 0.) //ring / infinity mesh
+            if (linePart.eNorm() !== 0.) {
+                this.#iDwRingMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+
                 getQuaternionToProjectionOnOrigin(linePart, this.#iDwLineMesh.quaternion)
+                if(this.variable.name === "rotation") {
+                    //THIS IS HOW FAR YOU HAD GOTTEN
+                    //THE ROTATION OF MOBIUS STRIP OR PERHAPS JUST THE LINE SEEM A BIT OFF
+                    // log(this.#iDwLineMesh.quaternion)
+                }
+
+                this.#mobiusStripMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
+                this.#rimMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
+
+            }
             else {
                 //default mv is e02
                 join(e123, linePart, joinedWithOrigin)
                 mul(joinedWithOrigin, e3, quatToOriginVersion)
                 quatToOriginVersion.sqrtSelf()
                 quatToOriginVersion.toQuaternion(this.#iDwRingMesh.quaternion)
+
+                this.#mobiusStripMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
             }
 
             linePart.getDisplayableVersion(displayedLineMv)
@@ -124,6 +234,7 @@ function initDqs() {
             if(dw === mDw) {
                 this.mv.selectGrade(2, this.linePartWhenGrabbedNormalized)
                 this.linePartWhenGrabbedNormalized.normalize()
+                this.#complexWhenGrabbed.copy(this.#mDwMesh.position)
             }
         }
         onLetGo() {
@@ -147,7 +258,7 @@ function initDqs() {
                     console.error("todo figure this out!")
 
                 camera2d.oldClientToPosition(dw, this.#mDwMesh.position)
-                if(this.mv[0] === 0.)
+                if (this.#complexWhenGrabbed.x === 0.)
                     this.#mDwMesh.position.x = 0.
                 else if(linePart.norm() === 0.)
                     this.#mDwMesh.position.y = 0.
@@ -197,11 +308,13 @@ function initDqs() {
             this.#eDwMesh.visible = newVisibility
             
             this.#mDwMesh.visible = newVisibility
+            this.#arcMesh.visible = newVisibility
 
-            this.mv.selectGrade(2, linePart)
-            let hasEuclideanPart = linePart.hasEuclideanPart()
-            this.#iDwLineMesh.visible =  hasEuclideanPart && newVisibility            
-            this.#iDwRingMesh.visible = !hasEuclideanPart && newVisibility
+            this.#mobiusStripMesh.visible = newVisibility //this one maybe only in some circumstances
+            this.#rimMesh.visible = newVisibility
+
+            this.#iDwLineMesh.visible = newVisibility            
+            this.#iDwRingMesh.visible = newVisibility
         }
 
         getCanvasPosition(dw) {

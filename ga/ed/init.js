@@ -3,12 +3,7 @@ TODO
     For next presentation
         Any variable that is different across manifold can be seen in thingy window
         Planes
-            it's a new struct: vec3 normal, float displacement. So not a vec4. This is ok since you rarely add them
-        Double cover dw
-            Instead of points, arcs from (1,0)
-            It's a mobius strip
-            If it's a translation, it cuts up differently?
-                It'll be up and down the lines s = 1 or s = -1
+            it's a new struct: vec3 normal, float displacement. So NOT a vec4. This is ok since you rarely add them
         Mesh window
             Has an indicator on it: "where attributes are currently coming from". Can move indicator with mouse
         Uniforms / attributes
@@ -20,24 +15,32 @@ TODO
                     "step" "play/pause" buttons. Can draw when paused
                 2D texture
     Bugs
+        Mobiuses are wrong way around, translations probably aren't working
         minus sign with sandwich
         Tab and enter make it so you can't ctrl+z
-    GDC
-        Definitely need it to be that if you edit the "b" in "a = b + 1", you change the a in there
         Declarations should be visualized too, eg return vec4(0.,0.,0.,1); is still a point
-        Maybe: if you move mouse over a window and there's nothing on the line
+        Dragging the lines at infinity
+    GDC
+        "Teardrops" visualization. Once you've sorted out the meaning of that shit!
+            Can turn off and on
+            3D print the shapes
         mentions are sensetive to for loops
-            For loops have an early-escape integer
+            outputter assignment is conditionalized on the index (es!) being a specific thing
+                the index could have crazy shit going on, it must be said
+                Loops get unrolled though!
             For every mention in the loop body, we're cutting off the shader after that integer
-        Dome window for 2D PGA. Overlay for vectorspace Dw?
         Export(/import?):
+            Ordinary shader
             threejs
             unity
             html page - EE
             export threejs function creating the thing it is with the appropriate uniforms
             Workshop for kids at makespace. Everyone's stuff goes into a VR sim
-        Optional "teardrops" visualization. Once you've sorted out the meaning of that shit!
-            3D print the shapes
+        Dome window for 2D PGA. Overlay for vectorspace Dw?
+        Struct and function definitions
+            Maybe even visualized functions as curves for R^n -> R^m for (m+n) < 4
+            Same with I^2 -> I^3 or less. Need windows for these
+            This is fun but not necessarily useful for PGA
         VR
             Single button to cycle through mentions
             Hand as a uniform
@@ -60,10 +63,6 @@ TODO
                 This is tricky though
             When you click window, if not close to anything, perhaps point should be created?
         A puzzle game that is a series of "code this shader" challenges
-        Struct and function definitions
-            Maybe even visualized functions as curves for R^n -> R^m for (m+n) < 4
-            Same with I^2 -> I^3 or less. Need windows for these
-            This is fun but not necessarily useful for PGA
         (2,1) halfplane window - v. important, lets you program with mouse
             This is the eventual destiny of the "float" window
             lerp as an example of a simple function to try it out with
@@ -77,6 +76,7 @@ TODO
         Documented API for making your own window visualizations
     Long term
         Conveniences
+            A better solution than tubegeometrys is a vertex shader
             Could make it so that when a new line is added, the whole thing scrolls so that that line is in place
             Or perhaps check whether the current line is just a straight redefinition like a = 5 - REPLACE lines like that
             Got many dws? they auto-rearrange
@@ -191,7 +191,7 @@ async function init() {
     updateSyntaxHighlighting()
 
     // init41()
-    init301()
+    await init301()
 
     initCamera()
 
@@ -232,7 +232,7 @@ async function init() {
     
     compile()
     updateMentionVisibilitiesAndIndication()
-    setCaretPosition(254)
+    setCaretPosition(460)
     await meshloadPromise
     renderAll()
 

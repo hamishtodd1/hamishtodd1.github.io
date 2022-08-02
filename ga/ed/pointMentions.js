@@ -143,10 +143,10 @@ function initPoints() {
                 return false
             
             if(dw === eDw)
-                return !this.#eDwMesh.position.equals(OUT_OF_SIGHT_VECTOR3)
+                return !this.#eDwMesh.position.equals(OUT_OF_SIGHT_VECTOR3) && this.#eDwMesh.visible
 
             if(dw === iDw)
-                return !this.#iDwMesh.position.equals(zeroVector)
+                return !this.#iDwMesh.position.equals(zeroVector) && this.#iDwMesh.visible
         }
 
         getTextareaManipulationDw() {

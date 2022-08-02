@@ -29,8 +29,6 @@ function initMouseInteractions() {
     let mouseAreaOld = null
     updateMentionVisibilitiesAndIndication = (mouseArea, userIndicationX, userIndicationY) => {
         //moving the mouse should not get rid of the caret's indication
-        let indicatedMentionOld = indicatedMention
-
         if(mouseArea === undefined)
             mouseArea = mouseAreaOld
         else
@@ -56,12 +54,11 @@ function initMouseInteractions() {
         if (indicatedMention !== null)
             indicatedMention.setVisibility(true)
 
-        if(indicatedMentionOld !== indicatedMention) {
-            if (indicatedMention === null)
-                hideHighlight()
-            else
-                indicatedMention.highlight()
-        }
+        //if you only do this when indicatedMentionOld !== indicatedMention, you risk eg when you have just let go
+        if (indicatedMention === null)
+            hideHighlight()
+        else
+            indicatedMention.highlight()
     }
 
     function onMouseMove(mouseArea, event) {
@@ -85,8 +82,9 @@ function initMouseInteractions() {
 
                 indicatedMention.highlight()
             }
-            else if(mouseArea !== document)
+            else if(mouseArea !== document) {
                 updateMentionVisibilitiesAndIndication(mouseArea, event.clientX, event.clientY)
+            }
         }
         else {
             event.preventDefault()
@@ -178,6 +176,7 @@ function initMouseInteractions() {
         grabbedDw = null
 
         //be aware, an extra mousemove will happen. There is nothing you can do about this
+        log("still before update")
     })
 
     document.addEventListener('mousedown', (event) => {
@@ -189,6 +188,8 @@ function initMouseInteractions() {
     })
 
     textarea.addEventListener('mousedown', (event) => {
+        if (event.button === 2)
+            event.preventDefault()
         onPotentialHoveredMentionGrab( event )
     })
     
