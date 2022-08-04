@@ -77,8 +77,8 @@ async function initCompilation()
         let vertexMode = text.indexOf("getColor") === -1
 
         let uniforms = {}
+        let outputterUniforms = {} // gets every attribute given to it as a uniform
         let geo = new THREE.BufferGeometry()
-        let outputterUniforms = {}
 
         mentionTypes.forEach((type) => {
             let functionResults = [...text.matchAll(type.regexes.function )].map(a => a.index)
@@ -91,7 +91,7 @@ async function initCompilation()
                     return
                     
                 let name = text.slice(index + type.glslName.length).match(nameRegex)[0] //TODO potential speedup
-                //people may well want to use "position". Could have: position -> __position
+                //people may well want to use the name "position". Could have: position -> __position
 
                 let variable = variables.find((v) => {
                     return v.name === name && v.type === type

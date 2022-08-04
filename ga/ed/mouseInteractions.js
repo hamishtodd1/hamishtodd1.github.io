@@ -68,7 +68,7 @@ function initMouseInteractions() {
                 //TODO dragging a uniform does a completely different thing
                 //attribute does a different thing still
                 if( indicatedMention.variable.isUniform) {
-
+                    
                 }
                 else if (indicatedMention.variable.isAttrib) {
                     

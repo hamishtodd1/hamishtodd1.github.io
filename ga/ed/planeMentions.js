@@ -5,18 +5,6 @@ function initPlanes() {
     let eDw = dws.euclidean
     let iDw = dws.infinity
 
-    //rotate it in the infinity dw
-    //it rotates around the origin in there
-    //and in the eDw, it rotates around... a certain specified point
-    //when you grab it in eDw, create the line orthogonal to the plane through the grabbed point
-    //by 
-
-
-    //grab a plane somewhere. That point is kept in place
-    //move mouse around, rotates to face mouse
-    //But mouse in what plane? Some plane parallel to camera, tweak its distance from the point
-    //move mouse out of dw and the plane is, still through the same point, rotating to face pts at infinity
-
     let planeGeo = new THREE.CircleGeometry(1., 31)
     let sphereGeo = new THREE.IcosahedronBufferGeometry(1., 5)
     let eNormWhenGrabbed = -1.
@@ -94,6 +82,7 @@ function initPlanes() {
             if(dw === eDw) {
                 //can maybe implement editing e0
                 //if you do, need to fix the problem that you're not even "grabbing" the plane in eDw when it's e0
+                
                 let dragPlane = camera.frustum.far.projectOn(lastDragPoint, mv0)
                 let mouseRay = getMouseRay(dw)
                 let newDragPoint = meet(dragPlane,mouseRay,mv2).normalize()

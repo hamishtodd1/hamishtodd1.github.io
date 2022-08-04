@@ -40,7 +40,7 @@ function initCaretInteractions() {
         }
     }
     
-    function afterInput(event) {
+    function afterInput() {
         hideErrorBoxIfNeeded()
 
         if (caretLine <= lowestChangedLineSinceCompile)
@@ -105,8 +105,16 @@ function initCaretInteractions() {
 
         if (caretPosition === caretPositionOld) 
             return
-            
+
         let [columnIndex, lineIndex] = getCaretColumnAndLine()
+
+        let caretAboveLclscIndicator = lineIndex < lowestChangedLineSinceCompile
+        if(caretAboveLclscIndicator !== caretAboveLclscIndicatorOld) {
+            forEachPropt(dws, (dw)=>{
+                dw.elem.style.display = caretAboveLclscIndicator ? `` : `none`
+            })
+        }
+        caretAboveLclscIndicatorOld = caretAboveLclscIndicator
 
         let caretX = columnToScreenX(columnIndex)
         let caretY = lineToScreenY(lineIndex)
@@ -118,6 +126,7 @@ function initCaretInteractions() {
 
     let caretLine = -1
     let caretColumn = -1
+    let caretAboveLclscIndicatorOld = true
     document.addEventListener('selectionchange', onCaretMove)
 
     mentionVisibleDueToCaret = (mention) => 

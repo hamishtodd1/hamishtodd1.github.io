@@ -1,8 +1,13 @@
-// in vec3 position;
-// vec4 getVertex() {
-//     vec4 ret = vec4(position,1.);
-//     return ret;
-// }
+in vec3 position;
+uniform float myFloat;
+
+vec4 getVertex() {
+    vec4 ret = vec4(position,1.);
+    return ret;
+}
+
+//END//
+
 uniform float myFloat;
 vec3 getColor() {
     float control1 = .1;
@@ -24,7 +29,7 @@ vec3 getColor() {
     vec3 fragColor = vec3(0.,myFloat,control3.y);
     return fragColor;
 }
-//END//
+
 
 
 

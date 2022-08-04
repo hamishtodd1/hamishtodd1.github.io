@@ -179,3 +179,5 @@ void dqExp(in Dq B, out Dq target) {
 //     ret.e0123 -= ret.scalar * d;
 //     return target;
 // }
+
+//make sure to end with a newline!
