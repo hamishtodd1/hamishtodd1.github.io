@@ -57,7 +57,7 @@ function initPoints() {
             camera.toHaveUpdateFromMvCalled.push(this)
         }
 
-        updateFromMv() {
+        updateFromMv(isCameraUpdate) {
             if (this.#mv[14] !== 0.) {
                 this.#iDwMesh.position.set(0.,0.,0.)
 
@@ -80,7 +80,7 @@ function initPoints() {
             getShaderOutput(this.mentionIndex, ptNewValues)
             this.#mv.point(ptNewValues[0], ptNewValues[1], ptNewValues[2], ptNewValues[3])
             
-            this.updateFromMv()
+            this.updateFromMv(false)
         }
 
         onGrab(dw) {

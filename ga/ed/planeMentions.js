@@ -18,6 +18,7 @@ function initPlanes() {
     //move mouse out of dw and the plane is, still through the same point, rotating to face pts at infinity
 
     let planeGeo = new THREE.CircleGeometry(1., 31)
+    let sphereGeo = new THREE.IcosahedronBufferGeometry(1., 5)
     let eNormWhenGrabbed = -1.
     let iNormWhenGrabbed = -1.
 
@@ -27,6 +28,7 @@ function initPlanes() {
     class PlaneMention extends Mention {
         #eDwMesh
         #iDwMesh
+        #sphereMesh
         #mv = new Mv()
 
         constructor(variable) {
@@ -36,25 +38,33 @@ function initPlanes() {
 
             let mat = new THREE.MeshPhongMaterial({ color: variable.col, side: THREE.DoubleSide })
             this.#eDwMesh = eDw.NewMesh(planeGeo, mat)
-            this.#eDwMesh.scale.setScalar(camera.far)
+            this.#eDwMesh.scale.setScalar(camera.far * 2.)
 
             this.#iDwMesh = iDw.NewMesh(planeGeo, mat)
             this.#iDwMesh.scale.setScalar(INFINITY_RADIUS)
+
+            this.#sphereMesh = iDw.NewMesh(sphereGeo, mat)
+            this.#sphereMesh.scale.setScalar(INFINITY_RADIUS * .98)
+
+            camera.toHaveUpdateFromMvCalled.push(this)
         }
 
-        updateFromMv() {
-            if( this.#mv.hasEuclideanPart() ) {
-                e123.projectOn(this.#mv, mv0).toVector(this.#eDwMesh.position)
+        updateFromMv(isCameraUpdate) {
+            let displayableVersion = this.#mv.getDisplayableVersion(mv4)
+            e123.projectOn(displayableVersion, mv0).toVector(this.#eDwMesh.position)
+            let planeOnOrigin = displayableVersion.projectOn(e123, mv0)
+            let e3ToPlaneMotor = mul(planeOnOrigin, e3, mv2).sqrt(mv3)
+            e3ToPlaneMotor.toQuaternion(this.#eDwMesh.quaternion)
 
-                let planeOnOrigin = this.#mv.projectOn(e123, mv0)
-                let e3ToPlaneMotor = mul(planeOnOrigin, e3, mv2).sqrt(mv3)
-                e3ToPlaneMotor.toQuaternion(this.#eDwMesh.quaternion)
-
-                this.#iDwMesh.quaternion.copy(this.#eDwMesh.quaternion)
+            if (!this.#mv.hasEuclideanPart()) {
+                this.#sphereMesh.position.set(0., 0., 0.)
+                this.#iDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
             }
             else {
-                //could make eDwMesh far in the distance, just inside camera clipping
-                //and iDwMesh is just a big sphere
+                this.#iDwMesh.position.set(0.,0.,0.)
+                this.#sphereMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                
+                this.#iDwMesh.quaternion.copy(this.#eDwMesh.quaternion)
             }
         }
 
@@ -62,7 +72,7 @@ function initPlanes() {
             getShaderOutput(this.mentionIndex, planeNewValues)
             this.#mv.plane(planeNewValues[0], planeNewValues[1], planeNewValues[2], planeNewValues[3])
             
-            this.updateFromMv()
+            this.updateFromMv(false)
         }
 
         onGrab(dw) {
@@ -80,8 +90,10 @@ function initPlanes() {
             function getFloatsForOverride(overrideFloats) {
                 overrideFloats[0] = mv1[1]; overrideFloats[1] = mv1[2]; overrideFloats[2] = mv1[3]; overrideFloats[3] = mv1[4];
             }
-
+            
             if(dw === eDw) {
+                //can maybe implement editing e0
+                //if you do, need to fix the problem that you're not even "grabbing" the plane in eDw when it's e0
                 let dragPlane = camera.frustum.far.projectOn(lastDragPoint, mv0)
                 let mouseRay = getMouseRay(dw)
                 let newDragPoint = meet(dragPlane,mouseRay,mv2).normalize()
@@ -97,8 +109,12 @@ function initPlanes() {
                 mv0[14] = 0.
                 dual(mv0,mv1)
                 mv1.normalize()
-                mv1.multiplyScalar(eNormWhenGrabbed)
-                mv1[1] = iNormWhenGrabbed
+
+                let clobberEntirelyBecauseThisWasE0 = eNormWhenGrabbed === 0.
+                if (!clobberEntirelyBecauseThisWasE0) {
+                    mv1.multiplyScalar(eNormWhenGrabbed)
+                    mv1[1] = iNormWhenGrabbed
+                }
 
                 updateOverride(this, getFloatsForOverride)
             }
@@ -125,6 +141,7 @@ function initPlanes() {
         setVisibility(newVisibility) {
             this.#eDwMesh.visible = newVisibility
             this.#iDwMesh.visible = newVisibility
+            this.#sphereMesh.visible = newVisibility
         }
 
         isVisibleInDw(dw) {
@@ -136,7 +153,10 @@ function initPlanes() {
         }
 
         getTextareaManipulationDw() {
-            return iDw
+            if(this.#mv.hasEuclideanPart() )
+                return iDw
+            else if (this.#mv.hasInfinitePart())
+                return eDw
         }
 
         equals(m) {

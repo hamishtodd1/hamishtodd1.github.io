@@ -87,7 +87,7 @@ function initCamera() {
         camera.updateWorldToCanvas()
 
         for (let i = 0, il = camera.toHaveUpdateFromMvCalled.length; i < il; ++i)
-            camera.toHaveUpdateFromMvCalled[i].updateFromMv()
+            camera.toHaveUpdateFromMvCalled[i].updateFromMv(true)
     }
     addToCameraLonLat(0.,0.)
 

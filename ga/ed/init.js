@@ -1,12 +1,12 @@
 /*
 TODO
     For next presentation
-        Any variable that is different across manifold can be seen in thingy window
         Labels for e012 etc on the iDw
         Uniforms / attributes
+            Mouse ray in final dw!!
+            Any variable that is different across manifold can be seen in thingy window
             Mesh window
                 Has an indicator on it: "where attributes are currently coming from". Can move indicator with mouse
-            Mouse ray in final dw
             Shadertoy-inspired
             Window for texture uniforms
                 May want to draw or copypaste
@@ -19,27 +19,32 @@ TODO
         Tab and enter make it so you can't ctrl+z
         Declarations should be visualized too, eg return vec4(0.,0.,0.,1); is still a point
         Dragging the lines at infinity
-    GDC
-        "Teardrops" visualization. Once you've sorted out the meaning of that shit!
-            Can turn off and on
-            3D print the shapes
-        mentions are sensetive to for loops
-            outputter assignment is conditionalized on the index (es!) being a specific thing
-                the index could have crazy shit going on, it must be said
-                Loops get unrolled though!
-            For every mention in the loop body, we're cutting off the shader after that integer
+    Workshop for kids at makespace
+        Everyone's stuff goes into a VR sim, saved on a webpage forever
         Export(/import?):
             Ordinary shader
             threejs
             unity
             html page - EE
             export threejs function creating the thing it is with the appropriate uniforms
-            Workshop for kids at makespace. Everyone's stuff goes into a VR sim
-        Dome window for 2D PGA. Overlay for vectorspace Dw?
+    GDC
+        "Teardrops" visualization. Once you've sorted out the meaning of that shit!
+            Can turn off and on
+        mentions are sensetive to for loops
+            outputter assignment is conditionalized on the index (es!) being a specific thing
+                the index could have crazy shit going on, it must be said. 
+                    Just ignore that. Note loops get unrolled so don't feel bad
+                Whenever you highlight a mention in the loop, you also highlight the loop variable somehow, wherever it may be
+        Connect up mentions that are "copies"
+            Makes it nicer when eg you're editing control1 and it has no effect on the below because it's redefined after you edit it!
+        Practical
+            Make the dome
+            3D print the shapes
         Struct and function definitions
             Maybe even visualized functions as curves for R^n -> R^m for (m+n) < 4
             Same with I^2 -> I^3 or less. Need windows for these
             This is fun but not necessarily useful for PGA
+        Dome window for 2D PGA. Overlay for vectorspace Dw?
         VR
             Single button to cycle through mentions
             Hand as a uniform

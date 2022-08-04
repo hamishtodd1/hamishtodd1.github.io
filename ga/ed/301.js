@@ -245,8 +245,7 @@ function init301WithoutDeclarations(basisNames) {
             if (this.hasEuclideanPart())
                 target.copy(this)
             else {
-                let cameraJoin = newMv
-                join(camera.mvs.pos, this, cameraJoin)
+                let cameraJoin = join(camera.mvs.pos, this, newMv)
                 meet(cameraJoin,camera.frustum.far, target)
             }
 
@@ -389,13 +388,13 @@ function init301WithoutDeclarations(basisNames) {
             return Math.sqrt(eNormSquared(this))
         }
         iNorm() {
-            let thisDual = newMv
-            dual(this,thisDual)
+            let thisDual = dual(this, newMv)
             return thisDual.eNorm()
         }
         norm() {
-            if(this.hasEuclideanPart())
-                return this.eNorm()
+            let ourENormSquared = eNormSquared(this)
+            if (ourENormSquared !== 0.)
+                return Math.sqrt(ourENormSquared)
             else
                 return this.iNorm()
         }
@@ -529,6 +528,9 @@ function init301WithoutDeclarations(basisNames) {
 
         hasEuclideanPart() {
             return eNormSquared(this) > .00001
+        }
+        hasInfinitePart() {
+            return this.iNorm() !== 0.
         }
     }
     window.Mv = Mv

@@ -150,7 +150,7 @@ function initDqs() {
             camera.toHaveUpdateFromMvCalled.push(this)
         }
 
-        updateFromMv() {
+        updateFromMv(isCameraUpdate) {
             this.mv.selectGrade(2, linePart)
 
             this.#mDwMesh.position.x = this.mv[0]
@@ -220,7 +220,7 @@ function initDqs() {
             newDq.copy(dwNewValues)
             newDq.toMv(this.mv)
 
-            this.updateFromMv()
+            this.updateFromMv(false)
         }
 
         onGrab(dw) {

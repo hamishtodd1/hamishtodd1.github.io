@@ -9,7 +9,7 @@ vec3 getColor() {
     vec2 control2 = vec2(1.,1.);
     vec3 control3 = vec3(1.,.5,1.);
 
-    Plane myPlane = Plane(0.,1.,0.,0.);
+    Plane myPlane = Plane(1.,0.,0.,0.);
     vec4 myVertex = vec4( .2,0., 1.,1.);
     vec4 myNormal = vec4( .2,0.,-1.,0.);
     
