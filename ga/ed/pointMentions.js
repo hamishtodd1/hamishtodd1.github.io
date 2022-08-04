@@ -38,11 +38,6 @@ function initPoints() {
 
     let eDw = dws.euclidean
     let iDw = dws.infinity
-    let mDw = dws.mobius
-
-    ////////////
-    // POINTS //
-    ////////////
 
     let dragPlane = new Mv()
     let ptNewValues = new Float32Array(4)
@@ -50,7 +45,7 @@ function initPoints() {
     class vec4Mention extends Mention {
         #eDwMesh;
         #iDwMesh;
-        mv = new Mv();
+        #mv = new Mv();
 
         constructor(variable) {
             super(variable)
@@ -63,16 +58,16 @@ function initPoints() {
         }
 
         updateFromMv() {
-            if (this.mv[14] !== 0.) {
+            if (this.#mv[14] !== 0.) {
                 this.#iDwMesh.position.set(0.,0.,0.)
 
-                this.mv.toVector(this.#eDwMesh.position)
+                this.#mv.toVector(this.#eDwMesh.position)
             }
             else {
-                this.mv.toVector(this.#iDwMesh.position)
+                this.#mv.toVector(this.#iDwMesh.position)
                 this.#iDwMesh.position.setLength(INFINITY_RADIUS)
 
-                this.mv.getDisplayableVersion(displayableVersion)
+                this.#mv.getDisplayableVersion(displayableVersion)
                 let isInFrontOfCamera = displayableVersion[14] > 0.
                 if (isInFrontOfCamera)
                     displayableVersion.toVectorDisplayable(this.#eDwMesh.position)
@@ -83,15 +78,15 @@ function initPoints() {
 
         updateFromShader() {
             getShaderOutput(this.mentionIndex, ptNewValues)
-            this.mv.point(ptNewValues[0], ptNewValues[1], ptNewValues[2], ptNewValues[3])
+            this.#mv.point(ptNewValues[0], ptNewValues[1], ptNewValues[2], ptNewValues[3])
             
             this.updateFromMv()
         }
 
         onGrab(dw) {
             if(dw === eDw) {
-                if (this.mv.hasEuclideanPart())
-                    camera.frustum.far.projectOn(this.mv, dragPlane)
+                if (this.#mv.hasEuclideanPart())
+                    camera.frustum.far.projectOn(this.#mv, dragPlane)
                 else dragPlane.copy(e0)
             }
         }
@@ -129,8 +124,7 @@ function initPoints() {
         }
 
         getReassignmentPostEqualsFromCpu() {
-            let m = this.mv
-            return this.getValuesAssignment(m[13], m[12], m[11], m[14])
+            return this.getValuesAssignment(this.#mv[13], this.#mv[12], this.#mv[11], this.#mv[14])
         }
 
         setVisibility(newVisibility) {
@@ -150,14 +144,14 @@ function initPoints() {
         }
 
         getTextareaManipulationDw() {
-            if(this.mv[14] === 0.)
+            if(this.#mv[14] === 0.)
                 return iDw
             else
                 return eDw
         }
 
         equals(m) {
-            return m.mv.equals(this.mv)
+            return m.#mv.equals(this.#mv)
         }
     }
     new MentionType("vec4", 4, vec4Mention)

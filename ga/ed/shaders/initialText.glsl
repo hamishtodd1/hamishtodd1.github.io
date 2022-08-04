@@ -5,21 +5,23 @@
 // }
 uniform float myFloat;
 vec3 getColor() {
-    vec2 boog = vec2(1.,1.);
-    vec3 myVec = vec3(1.,.5,1.);
+    float control1 = .1;
+    vec2 control2 = vec2(1.,1.);
+    vec3 control3 = vec3(1.,.5,1.);
+
+    Plane myPlane = Plane(0.,1.,0.,0.);
+    vec4 myVertex = vec4( .2,0., 1.,1.);
+    vec4 myNormal = vec4( .2,0.,-1.,0.);
     
     Dq rotation = Dq(.28, 0.,0.,0., 0.,.96,0., 0.);
-    vec4 idealPt = vec4( .2,0.,-1.,0.);
-    vec4 transformedIdeal = sandwichDqPt(rotation, idealPt);
-
-    vec4 realPt = vec4( .2,0., 1.,1.);
-    vec4 transformedReal = sandwichDqPt(rotation, realPt);
+    vec4 transformedVertex = sandwichDqPt(rotation, myNormal);
+    vec4 transformedNormal = sandwichDqPt(rotation, myVertex);
 
     Dq idealLine = Dq(0., 0.,1.,1., 0.,0.,0., 0.);
     Dq eucliLine = Dq(0., 0.,0.,0., 0.,1.,1., 0.);
     Dq idealLine2 = sandwichDqDq(rotation,idealLine);
     
-    vec3 fragColor = vec3(0.,myFloat,myVec.y);
+    vec3 fragColor = vec3(0.,myFloat,control3.y);
     return fragColor;
 }
 //END//

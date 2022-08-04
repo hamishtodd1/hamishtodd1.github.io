@@ -1,3 +1,8 @@
+VR game. It's the equivalent of a platformer, and similar to Irritating Stick
+It has coins, it has nasty parts, and it has collidables
+You hold the level with one hand and go through it with the other
+Hit a collidable and, even if you're holding it with the other hand, the level will move
+
 Dude there are so many other kinds of geometric/algebraic object you want, and here you are spending time thinking about something you're not sure if you need. You could be focussing on eg fourier / taylor series shit, which you know get used in physics
 
 Zeeman three spheres https://www.youtube.com/watch?v=QKmucx1gjlQ

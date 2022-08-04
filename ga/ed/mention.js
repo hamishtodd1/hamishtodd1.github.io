@@ -182,7 +182,7 @@ function initMention() {
             this.type = newClass
 
             for (let i = 0; i < newClass.numFloats; ++i)
-                this.assignmentToOutput += `    outputFloats[` + i + `] = ` + newName + newClass.outputAssignmentSuffixes[i]
+                this.assignmentToOutput += `    outputFloats[` + i + `] = ` + newName + newClass.outputAssignmentPropts[i] + `;\n`
 
             randomColor.setHSL(currentHue, 1., .5)
             currentHue += 1. / goldenRatio
@@ -208,23 +208,23 @@ function initMention() {
         glslName
         numFloats
         ourConstructor
-        outputAssignmentSuffixes
+        outputAssignmentPropts
         regexes = {}
         reassignmentPostEqualsFromOverride
 
-        constructor(glslName, numFloats, ourConstructor, outputAssignmentSuffixes) {
+        constructor(glslName, numFloats, ourConstructor, outputAssignmentPropts) {
             this.glslName = glslName
             this.numFloats = numFloats
             this.ourConstructor = ourConstructor
 
-            this.outputAssignmentSuffixes = Array(numFloats)
-            if (outputAssignmentSuffixes !== undefined) {
+            this.outputAssignmentPropts = Array(numFloats)
+            if (outputAssignmentPropts !== undefined) {
                 for (let i = 0; i < this.numFloats; ++i)
-                    this.outputAssignmentSuffixes[i] = outputAssignmentSuffixes[i] + `;\n`
+                    this.outputAssignmentPropts[i] = `.` + outputAssignmentPropts[i]
             }
             else {
                 for (let i = 0; i < this.numFloats; ++i)
-                    this.outputAssignmentSuffixes[i] = `[` + i + `];\n`
+                    this.outputAssignmentPropts[i] = `[` + i + `]`
             }
 
             this.regexes.function = new RegExp('(?<=[^a-zA-Z_$0-9])(' + glslName + ')\\s*[a-zA-Z_$][a-zA-Z_$0-9]*\\(', 'gm')

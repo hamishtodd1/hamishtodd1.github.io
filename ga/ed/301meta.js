@@ -32,9 +32,9 @@ async function init301() {
             "})(basisNames)"
     }
 
-    generateOptimizedSandwiches()
-        
     eval(strToEval)
+
+    // generateOptimizedSandwiches()
 }
 
 function createSharedFunctionDeclarationsStrings()
@@ -98,6 +98,9 @@ function generateOptimizedSandwiches() {
     let cayleyTableReverseSigns = Array(16)
     const ZERO_CONTRIBUTION = 17
 
+    //so you're going to make an array of indices in basisNames
+    //and THAT may be converted
+
     for (let i = 0; i < 16; ++i) {
         cayleyTable[i] = new Uint8Array(16)
         cayleyTableSigns[i] = new Int8Array(16)
@@ -143,10 +146,10 @@ function generateOptimizedSandwiches() {
 
     let bladeGgs = {
         Scalar: [1, 0, 0, 0, 0],
-        Plane: [0, 1, 0, 0, 0],
-        Line: [0, 0, 1, 0, 0],
-        Point: [0, 0, 0, 1, 0],
-        Pss: [0, 0, 0, 0, 1],
+        Plane:  [0, 1, 0, 0, 0],
+        Line:   [0, 0, 1, 0, 0],
+        Point:  [0, 0, 0, 1, 0],
+        Pss:    [0, 0, 0, 0, 1],
 
         Dq: [1, 0, 1, 0, 1],
         Rr: [0, 1, 0, 1, 0],
@@ -160,12 +163,11 @@ function generateOptimizedSandwiches() {
     function twoChar(n) {
         return n < 10 ? ` ` + n : n
     }
-    function generateGpLines(aName, bName, coefses, reverseSecond) {
-        let lines = Array(16)
+    function generateGpMuls(coefses, reverseSecond) {
+        let muls = Array(16)
         for (let i = 0; i < 16; ++i)
-            lines[i] = ``
-        // debugger
-        log(coefses)
+            muls[i] = []
+            
         coefses[0].forEach((aCoef, ai) => {
             if (aCoef === 0)
                 return
@@ -180,26 +182,37 @@ function generateOptimizedSandwiches() {
 
                 let lineIndex = (reverseSecond ? cayleyTableReverse : cayleyTable)[ai][bi]
 
-                let joiner = ``
-                if (lines[lineIndex] === ``)
-                    joiner = sign === 1 ? ` ` : `-`
-                else
-                    joiner = ` ` + (sign === 1 ? `+` : `-`) + ` `
-                lines[lineIndex] += joiner + aName + `[` + twoChar(ai) + `]*` + bName + `[` + twoChar(bi) + `]`
+                muls[lineIndex].push([sign, ai, bi])
             })
         })
 
-        return lines
+        return muls
     }
-    function mulsToFullLine(outName, index, line) {
-        return `    ` + outName + `[` + twoChar(index) + `] =` + (line === `` ? ` 0.` : line) + `;\n`
+    function mulsToFullLine(outName, aName, bName, allLineMuls ) {
+
+        let ret = ``
+
+        for (let i = 0; i < 16; ++i) {
+            let line = ``
+
+            let lineMuls = allLineMuls[i]
+            lineMuls.forEach((mul) => {
+                let joiner = ``
+                if (line === ``)
+                    joiner = mul[0] === 1 ? ` ` : `-`
+                else
+                    joiner = ` ` + (mul[0] === 1 ? `+` : `-`) + ` `
+                line += joiner + aName + `[` + twoChar(mul[1]) + `]*` + bName + `[` + twoChar(mul[2]) + `]`
+            })
+
+            ret += `    ` + outName + `[` + twoChar(i) + `] =` + (line === `` ? ` 0.` : line) + `;\n`
+        }
+
+        return ret + `\n`
     }
 
     //instead of [14],[13],[12], want .z,.y,.x
     function generateOptimizedSandwich(granularGradeses) {
-        //highest level of granularity: "even" or "odd"
-        //third: [0,   0,0,   0,0,   0,0,   0]
-
         let whole = "function sandwich"
         whole += keyOfProptInObject(granularGradeses[0], bladeGgs)
         whole += keyOfProptInObject(granularGradeses[1], bladeGgs)
@@ -219,56 +232,94 @@ function generateOptimizedSandwiches() {
 
         //at this point, can predict the grades of the output
 
-        let lines = generateGpLines(`a`, `b`, coefses, false)
-        //want to identify it
+        let firstMuls = generateGpMuls(coefses, false)
 
-        // let fullMv = false
-        // if (!fullMv) 
+        let cCoefs = Array(16)
+        for (let i = 0; i < 16; ++i)
+            cCoefs[i] = firstMuls[i].length === 0 ? 0 : 1
+        
+        let secondCoefses = [cCoefs, coefses[0]]
+        let secondMuls = generateGpMuls(secondCoefses, true)
+
+        // whole += `    let c = new Float32Array(16);\n\n`
+        // whole += mulsToFullLine(`c`, `a`, `b`, firstMuls)
+        // whole += mulsToFullLine(`target`, `c`, `a`, secondMuls)
+        // whole += `    delete c;\n`
+
+        
         {
-            let changedLines = Array(16)
-            whole += `    let c = new Float32Array(16);\n\n`
-            for (let i = 0; i < 16; ++i)
-                changedLines[i] = mulsToFullLine(`c`, i, lines[i])
-            whole += changedLines.join(``) + `\n`
+            //ok so you can... 
+            //expand out the entire set of lines...
+            //look for + and - and eliminate them...
+            //collect like terms and introduce some brackets
+            //then check what's in brackets across all lines and create them as variables
+            //slightly raises the question of what this intermediate thing is
+            
+            let linesMuls = []
+            for(let lineIndex = 0; lineIndex < 16; ++lineIndex ) {
+                let lineMuls = []
 
-            let cCoefs = Array(16)
-            for (let i = 0; i < 16; ++i)
-                cCoefs[i] = lines[i] !== `` ? 1 : 0
-            log(cCoefs)
-            let secondCoefses = [cCoefs, coefses[0]]
+                //expand out
+                for (let i = 0, il = secondMuls[lineIndex].length; i < il; ++i) {
 
-            //can also have a simple "multiplyByMinus1" boolean in this second part
+                    let sm = secondMuls[lineIndex][i]
+                    let ourFirstMuls = firstMuls[sm[1]]
 
-            //coefses are different
-            let moreLines = generateGpLines(`c`, `a`, secondCoefses, true)
-            moreLines.forEach((moreLine) => {
-                //could search for equivalent expressions in the same line
-                moreLine
+                    ourFirstMuls.forEach((fm) => {
+                        let mul = [sm[0] * fm[0], [fm[1], fm[2], sm[2]]] //it's a, b, a... surely
+                        lineMuls.push(mul)
+
+                        //so the line looks like... a[indices0]*b[indices1]*a[indices2]
+                    })
+                }
+
+                //eliminate identical things
+                for (let i = 0; i < lineMuls.length; ++i) {
+                    let iMul = lineMuls[i]
+                    for (let j = i + 1; j < lineMuls.length; ++j) {
+                        let jMul = lineMuls[j]
+
+                        let aIndicesAreTheSame =    (iMul[1][0] === jMul[1][0] && iMul[1][2] === jMul[1][2]) ||
+                                                    (iMul[1][0] === jMul[1][2] && iMul[1][2] === jMul[1][0])
+                        if (aIndicesAreTheSame &&
+                            iMul[0]    !== jMul[0] && //one plus and one minus
+                            iMul[1][1] === jMul[1][1] // b index is the same
+                            )
+                        {
+                            lineMuls.splice(j,1)
+                            lineMuls.splice(i,1)
+                            --i
+                            break
+                        }
+                    }
+                }
+
+                linesMuls.push(lineMuls)
+            }
+            // collect like terms
+            let frequencies = []
+            for(let i = 0; i < 16; ++i)
+                frequencies[i] = new Uint16Array(16)
+            linesMuls.forEach((lineMuls)=>{
+                lineMuls.forEach((mul)=>{
+                    let mis = mul[1]
+                    ++frequencies[ mis[0] ][ mis[1] ]
+                    ++frequencies[ mis[2] ][ mis[1] ]
+                })
             })
-            let moreChangedLines = Array(16)
-            for (let i = 0; i < 16; ++i)
-                moreChangedLines[i] = mulsToFullLine(`target`, i, moreLines[i])
 
-            whole += moreChangedLines.join(``)
-            //we're going to worry about the fullArray->rr changes later
+            frequencies.forEach((fc,i)=>{
+                fc.forEach((f,j)=>{
+                    if(f > 1) {
+                        // whole += `  let c` + i.toString() + j.toString() + ` = a[`
+                    }
+                } )
+            })
         }
-        // else {
-
-        //     let changedLines = Array(8)
-        //     whole += `\n    let c = new Float32Array(8);\n\n`
-
-        //     for (let i = 0; i < 8; ++i)
-        //         changedLines[i] = mulsToFullLine(`c`, i, lines[mvToRr[i]])
-        //     whole += changedLines.join(``)
-
-        //     let moreLines = generateGpLines(`c`, `a`, coefses, true)
-        //     for (let i = 0; i < 16; ++i)
-        //         changedLines[i] = mulsToFullLine(`target`, i, moreLines[i])
-        // }
-
-        whole += `\n    delete c;\n`
-        whole += `\n    return target;\n}\n`
-
+        
+        //may also need to do the -1 thing
+        
+        whole += `    return target;\n}\n`
         log(whole)
 
         //even if you're using full mvs, this thing has the advantage of avoiding crappy almost-zeroes

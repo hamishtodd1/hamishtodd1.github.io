@@ -1,3 +1,6 @@
+The transfinite induction wheel might be a great interface for doing calculus
+    https://en.wikipedia.org/wiki/Transfinite_induction
+
 Choose your point on the curve and perform a mobius transformation
 such that that point is blown up and everything else about the curve gets sent to infinity
 What is that as an MT?
@@ -6,6 +9,16 @@ make the curve MASSIVE, we're zoomed in on a point on it
 Maybe the curve is now out at infinity, smooshed onto that sphere?
 
 Multiplication and division are best visualised on the projective line. Erm, why?
+
+
+
+BRDF EE (because want to get started with calculus)
+	Mention the 4 vs pi thing
+	Do it for one color channel, so looking black and white, and combine them because apparently that's ok
+	Microfacets, averaging
+	Deduce from geometric optics?
+	Ask Chris
+	It's more statistical than calculus-like
 
 
 

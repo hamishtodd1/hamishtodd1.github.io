@@ -32,6 +32,7 @@ function initInfinityDw()
         let result = threeRay.intersectSphere(threeSphere, v1)
         if(result === null) {
             camera.frustum.far.projectOn(e123, frustumOnOrigin)
+            // frustumOnOrigin.log()
             meet(mouseRay, frustumOnOrigin, mv)
         }
         else

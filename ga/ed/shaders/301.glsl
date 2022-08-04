@@ -5,9 +5,8 @@ struct Dq {
     float e0123;
 };
 
-struct Line {
-    vec3 originPart;
-    vec3 idealPart;
+struct Plane {
+    float e0; float e1; float e2; float e3;
 };
 
 // getting erroneous stuff from this, hopefully IT is wrong

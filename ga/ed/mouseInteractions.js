@@ -151,7 +151,7 @@ function initMouseInteractions() {
     
         }
         else {
-            let [caretColumnIndex, caretLineIndex] = getCaretColumnAndLine() //done first since we're about to be weird
+            let [caretColumnIndex, caretLineIndex] = getCaretColumnAndLine() //done first since we're about to change stuff
             
             let newLine = "\n    " + indicatedMention.variable.name + " = " + 
                 indicatedMention.getReassignmentPostEqualsFromCpu() + ";\n"
@@ -161,9 +161,15 @@ function initMouseInteractions() {
     
             textarea.value = pre + newLine + post
             
-            let newCaretPosition = caretLineIndex <= indicatedMention.lineIndex ? caretPositionOld : caretPositionOld + newLine.length
+            let newCaretPosition = -1
+            if (caretLineIndex < indicatedMention.lineIndex)
+                newCaretPosition = caretPositionOld
+            else if (caretLineIndex === indicatedMention.lineIndex)
+                newCaretPosition = pre.length + Math.min(caretColumnIndex, newLine.length)
+            else if (caretLineIndex > indicatedMention.lineIndex)
+                newCaretPosition = caretPositionOld + newLine.length
             
-            textarea.setSelectionRange(newCaretPosition, newCaretPosition)
+            textarea.setSelectionRange( newCaretPosition, newCaretPosition )
         }
         
         updateSyntaxHighlighting()
@@ -176,7 +182,6 @@ function initMouseInteractions() {
         grabbedDw = null
 
         //be aware, an extra mousemove will happen. There is nothing you can do about this
-        log("still before update")
     })
 
     document.addEventListener('mousedown', (event) => {

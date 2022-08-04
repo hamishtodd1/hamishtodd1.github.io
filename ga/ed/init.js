@@ -2,11 +2,10 @@
 TODO
     For next presentation
         Any variable that is different across manifold can be seen in thingy window
-        Planes
-            it's a new struct: vec3 normal, float displacement. So NOT a vec4. This is ok since you rarely add them
-        Mesh window
-            Has an indicator on it: "where attributes are currently coming from". Can move indicator with mouse
+        Labels for e012 etc on the iDw
         Uniforms / attributes
+            Mesh window
+                Has an indicator on it: "where attributes are currently coming from". Can move indicator with mouse
             Mouse ray in final dw
             Shadertoy-inspired
             Window for texture uniforms
@@ -119,7 +118,7 @@ As a tablet notes-in-the-margin app... and if you were going to buy a tablet... 
         Recognize their separate R G B channels as fields
             Edge detection
 
-0D CGA = boolean logic?
+0D CGA = boolean logic? Possibly interesting for quantum shiz
     There's origin and infinity
     Origin is true, infinity false?
         Or maybe identity operation is true, 0 is false. Eg true is the operation that changes nothing, false changes to crap
@@ -128,13 +127,6 @@ As a tablet notes-in-the-margin app... and if you were going to buy a tablet... 
     p = your value
     NOT p = inversion
 
-
-Huh you are sort of making a desmos killer
-
-Parser
-    potentially take excerpts of the code and run it, eg they've written a function
-        you want the output of that though, so not in a shader    
-
 Vague/philosophical
     Fuck labelling things in the window. You want lables? Hover
     If you have a matrix that is tagged as "known to have det=0"
@@ -142,35 +134,13 @@ Vague/philosophical
     Projective geometry lets you give points in space as rationals easily
     throwing away the magnitudes might be bad because it's not reversible. Nature seems to want reversibility
     The right rep for colors is probably the RGB cube with three cutting planes
+    What do people use desmos for? Can do better
+    "Numbers are divided into adders and multipliers" thing:
+        sometimes you take geometric mean, sometimes arithmetic
+        you can visualize a point on the line. You can also picture a movement along that line. Two different things
+        One's a blade and one's a versor
 
-"Numbers are divided into adders and multipliers" thing:
-    sometimes you take geometric mean, sometimes arithmetic
-    you can visualize a point on the line. You can also picture a movement along that line. Two different things
-    One's a blade and one's a versor
 
-
-Against vscode:
-    they'll have their own weird internal representation of the code
-    it might run slowly
-    not all computer graphics people use vscode
-    you want to make something like shadertoy where people can just get in and go    
-    May be hard to draw windows over the code
-In favor of vscode:
-    built in parser
-    maybe more people use it
-    has the home comforts you like
-
-the rules seem to be:
-    NOT allowed to just have them be arrays, that requires [] crap
-    you have to have your thing be a struct, not an array
-    a vec4 we can cast to a point, fine
-    vec2 is probably going to become a complex number
-    float is on the 1D CGA
-
-Because it helps portability to ordinary shaders:
-    vec4 is a point
-    vec3 is a vector/rgb color
-    vec2 is complex number
 
 */
 
@@ -220,6 +190,7 @@ async function init() {
     initFloats()
     initStudyNumbers()
     initPoints()
+    initPlanes()
     initDqs()
 
     initMouseInteractions()
@@ -232,7 +203,7 @@ async function init() {
     
     compile()
     updateMentionVisibilitiesAndIndication()
-    setCaretPosition(460)
+    setCaretPosition(246)
     await meshloadPromise
     renderAll()
 

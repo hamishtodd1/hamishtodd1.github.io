@@ -1,4 +1,9 @@
 /*
+    Show the hodge dual: take the movable plane you have,
+        and get its normal line through the origin
+        That line will cut the modelled space's line somewhere
+        transformations using such points will be more like 180 rotations (?), that's why it's Cl(2)
+
     Reasons to take this super seriously
         It teaches projective space, psl2r
         It introduces special relativity 
@@ -43,7 +48,7 @@
 
     //have a "zoom in to eye in the right place" button
 
-    Video: intro to conformal geometric algebra (DON'T OVERTHINK)
+    Video: Make a video "a visual introduction to AdS/CFT and conformal geometric algebra"
 
     You're not doing arbitrary spinors
         Vector

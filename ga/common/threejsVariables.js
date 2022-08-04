@@ -25,7 +25,7 @@ let logged = 0
 
 
 const renderer = new THREE.WebGLRenderer({ antialias: true })
-const scene = new THREE.Scene().add(camera)
+const scene = new THREE.Scene()
 let mouse = null
 
 const discreteViridis = [

@@ -89,6 +89,7 @@ function initFloats() {
         }
     }
     
-    let mt = new MentionType("float", 1, floatMention, [``])
+    let mt = new MentionType("float", 1, floatMention)
     mt.reassignmentPostEqualsFromOverride = "overrideFloats[0]"
+    mt.outputAssignmentPropts = [``]
 }

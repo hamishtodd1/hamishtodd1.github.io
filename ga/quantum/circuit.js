@@ -1,5 +1,9 @@
 /*
 TODO
+    The pauli/bloch VECTORS, i.e. states, are oriented planes through the origin, dummy
+    The pauli gates are those multiplied by i, eg made into lines through origin?
+    They get multiplied by the origin, i.e.
+
     Redo the entire thing using GA?
         Less translateable
         And who knows what the two-qubit gates are

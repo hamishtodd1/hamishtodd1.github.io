@@ -10,7 +10,7 @@ async function arsenovichDemo() {
     //     matToMotVisualStyle(myMat,centralKb.stateMotor)
     // })
 
-    // if(0)
+    if(0)
     {
         let cameraAngle = TAU * .25
         camera.rotation.y += cameraAngle
@@ -28,7 +28,7 @@ async function arsenovichDemo() {
         })
     }
 
-    if(0)
+    // if(0)
     {
         let controlsArray = [
             e31.clone(), "a", "d",

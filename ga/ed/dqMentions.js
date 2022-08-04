@@ -371,5 +371,5 @@ function initDqs() {
         }
     }
     
-    new MentionType("Dq", 8, DqMention, [ `.scalar`, `.e01`, `.e02`, `.e03`, `.e12`, `.e31`, `.e23`, `.e0123` ])
+    new MentionType("Dq", 8, DqMention, [ `scalar`, `e01`, `e02`, `e03`, `e12`, `e31`, `e23`, `e0123` ])
 }

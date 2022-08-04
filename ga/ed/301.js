@@ -225,7 +225,7 @@ function init301WithoutDeclarations(basisNames) {
             if(this[14] === 0.) {
                 v.z = this[11]
                 v.y = this[12]
-                v.x = this[13]                
+                v.x = this[13]
             }
             else {
                 v.z = this[11] / this[14]
@@ -363,6 +363,12 @@ function init301WithoutDeclarations(basisNames) {
             target[0] += 1.
 
             return target
+        }
+
+        fromPointToPoint(a,b) {
+            mul(b, a, this)
+            this.sqrtSelf()
+            return this
         }
 
         fromAxisAngle(axis,angle) {

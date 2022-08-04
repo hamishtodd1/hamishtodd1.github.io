@@ -1,67 +1,125 @@
+<!--
+	The id attitude: never be more than a week from shipping
+
+-->
 <html>
 	<head>
-		<title>Protein Viewer</title>
-		<meta charset="utf-8">
+		<title>Geometric Pocket Calculator</title>
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
 			body {
-				font-family: Monospace;
-				background-color: #101010;
-				color: #fff;
 				margin: 0px;
 				overflow: hidden;
-			}
-			a {
-				color: #f00;
 			}
 		</style>
 	</head>
 	<body>
-		<!--these two scripts are purely for the ripped-off setup-->
-		<script type="x-shader/x-vertex" id="vertexShader">
-			varying vec3 vWorldPosition;
-			void main() {
-				vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
-				vWorldPosition = worldPosition.xyz;
-				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-			}
-		</script>
-		<script type="x-shader/x-fragment" id="fragmentShader">
-			uniform vec3 topColor;
-			uniform vec3 bottomColor;
-			uniform float offset;
-			uniform float exponent;
-			varying vec3 vWorldPosition;
-			void main() {
-				float h = normalize( vWorldPosition + offset ).y;
-				gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( max( h , 0.0), exponent ), 0.0 ) ), 1.0 );
-			}
-		</script>
-		
-		<!----><script src="Dependencies/ngl.js"></script>
-		
-		<script src="Dependencies/three.min.js"></script>
-		<script src="Dependencies/SceneFromDemo.js"></script>
-		<script src="Dependencies/THREEx.FullScreen.js"></script>
-				
-		<script src="Dependencies/StereoEffect.js"></script>
-		<script src="Dependencies/DeviceOrientationControls.js"></script>
-		<script src="Dependencies/OBJexporter.js"></script>
-		<script src="Dependencies/OBJLoader.js"></script>
-		
-		<script src="Variables.js"></script>
-		
-		<script src="Input.js"></script>
-		
-		<script src="Initialization.js"></script>
-		<script src="ObjectOfInterest.js"></script>
-		<script src="CoreLoop.js"></script>
-		
 		<script>
-			Initialize();
+			async function technicalInit()
+			{
+				initButtons()
+
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.shadowMap.enabled = true;
+				renderer.setClearColor(0x3F3D3F)
+				renderer.shadowMap.type = THREE.BasicShadowMap;
+				document.body.appendChild( renderer.domElement );
+
+				initWindowResizeSystemAndSurroundings(renderer)
+
+				{
+					let numDishes = 1500
+
+					//you want a square, so that you can line it up easily
+					//maybe one of them has a slightly longer border in one direction
+					//and a slanted border in the other
+					//or even curved...
+					let dishAngle = Math.PI * .01
+					let dishGeo = new THREE.SphereGeometry(1.,15,1,0.,TAU,0.,dishAngle)
+					dishGeo.rotateX(TAU/4.)
+					let geo = new THREE.Geometry()
+					for(let i = 0; i < numDishes; ++i) {
+						let proportionOfDiameterFromPole = 1 - (Math.random() * .5)
+						let sliceLevel = 2. * proportionOfDiameterFromPole - 1. //uniformly distributed
+						let angleToThatY = Math.acos(sliceLevel)
+						
+						let copy = dishGeo.clone()
+						copy.rotateX(angleToThatY)
+						copy.rotateZ(TAU * Math.random())
+
+						geo.merge(copy)
+					}
+
+					let topRadius = 6.
+					let mat = new THREE.MeshBasicMaterial({color:0xFF0000})
+					let top = new THREE.Mesh(geo, mat)
+					top.scale.multiplyScalar(topRadius)
+					scene.add(top)
+					
+					let mid = new THREE.Mesh(geo, mat)
+					mid.scale.multiplyScalar(topRadius)
+					scene.add(mid)
+
+					let bottom = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(1.,4), new THREE.MeshBasicMaterial({ color: 0x0000FF }))
+					bottom.scale.multiplyScalar(topRadius * .99)
+					scene.add(bottom)
+
+
+					let extraQuat = new THREE.Quaternion()
+					let movedAxis = new THREE.Vector3().addVectors(zUnit,xUnit).normalize()
+					extraQuat.setFromAxisAngle(movedAxis,TAU*.012)
+					top.quaternion.multiply(extraQuat)
+					
+					let oldClientX = Infinity
+					let oldClientY = Infinity
+					document.addEventListener('mousemove', function (event) {
+						if ( (	oldClientX !== event.clientX || 
+								oldClientY !== event.clientY) && oldClientX !== Infinity ) {
+							movedAxis.set(
+								event.clientX - oldClientX,
+								-(event.clientY - oldClientY), 0.)
+							movedAxis.applyAxisAngle(zUnit, TAU / 4.)
+							let movedAngle = movedAxis.length() * .0002
+							movedAxis.normalize()
+
+							extraQuat.setFromAxisAngle(movedAxis, movedAngle)
+							top.quaternion.multiply(extraQuat)
+						}
+
+						oldClientX = event.clientX
+						oldClientY = event.clientY
+					})
+				}
+
+				function render()
+				{
+					let clockDelta = clock.getDelta()
+					frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
+					
+					frameCount++
+
+					requestAnimationFrame( render );
+					renderer.render( scene, camera );
+				}
+
+				render()
+			}
 		</script>
+
+		<script src="lib/three.js"></script>
 		
+		<script src="windowResizeSystemAndSurroundings.js"></script>
+		
+		<script src="../ga/common/miscFunctions.js"></script>
+ 
+		<script src="../ga/common/variables.js"></script>
+		<script src="../ga/common/buttons.js"></script>
+
+		<script src="../ga/common/threejsVariables.js"></script>
+
+		<script>
+			const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 10.);
+			technicalInit("hello")
+		</script>
 	</body>
 </html>
-
-<!--webglviewer is "appended" in init-->
