@@ -15,6 +15,16 @@ function initCaretInteractions() {
             setSvgLine($changedLineIndicator, -10, -10, -10, -10)
     }
 
+    inamongstChangedLines = (lineIndex) => {
+        return lineIndex >= lowestChangedLineSinceCompile
+    }
+
+    updateLclsc = (newValue) => {
+        lowestChangedLineSinceCompile = newValue
+        updateChangedLineIndicator()
+        updateDwsVisibility()
+    }
+
     function insertTextAtCaret(text) {
         let code = textarea.value
         let beforeText = code.slice(0, textarea.selectionStart)
@@ -26,26 +36,14 @@ function initCaretInteractions() {
     }
 
     setCaretPosition = (pos) => {
-        // Modern browsers
-        if (textarea.setSelectionRange) {
-            textarea.focus()
-            textarea.setSelectionRange(pos, pos)
-        }
-        else if (textarea.createTextRange) {
-            var range = textarea.createTextRange()
-            range.collapse(true)
-            range.moveEnd('character', pos)
-            range.moveStart('character', pos)
-            range.select()
-        }
+        textarea.focus()
+        textarea.setSelectionRange(pos, pos)
     }
     
     function afterInput() {
         hideErrorBoxIfNeeded()
 
-        if (caretLine <= lowestChangedLineSinceCompile)
-            lowestChangedLineSinceCompile = caretLine
-        updateChangedLineIndicator()
+        updateLclsc(Math.min(lowestChangedLineSinceCompile, caretLine))
 
         updateSyntaxHighlighting()
         updateSyntaxHighlightingScroll(textarea)
@@ -53,9 +51,9 @@ function initCaretInteractions() {
         onCaretMove()
     }
 
-    //when you mouseup after a drag, DON'T update
-
-    //meant to occur BEFORE the character has put in
+    /////////////////////////////////////////////////////////
+    // Meant to occur BEFORE the character has been put in //
+    /////////////////////////////////////////////////////////
     textarea.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === false) {
             insertTextAtCaret("\n    ")
@@ -69,7 +67,9 @@ function initCaretInteractions() {
         }
     })
 
-    //meant to occur AFTER the character has put in
+    ////////////////////////////////////////////////////////
+    // Meant to occur AFTER the character has been put in //
+    ////////////////////////////////////////////////////////
     textarea.addEventListener('input',afterInput)
 
     textarea.addEventListener('scroll', () => {
@@ -97,7 +97,7 @@ function initCaretInteractions() {
             }
         }
 
-        return [columnIndex, lineIndex]
+        return [caretColumn, caretLine]
     }
     
     onCaretMove = () => {
@@ -106,27 +106,31 @@ function initCaretInteractions() {
         if (caretPosition === caretPositionOld) 
             return
 
-        let [columnIndex, lineIndex] = getCaretColumnAndLine()
+        getCaretColumnAndLine()
 
-        let caretAboveLclscIndicator = lineIndex < lowestChangedLineSinceCompile
-        if(caretAboveLclscIndicator !== caretAboveLclscIndicatorOld) {
-            forEachPropt(dws, (dw)=>{
-                dw.elem.style.display = caretAboveLclscIndicator ? `` : `none`
-            })
-        }
-        caretAboveLclscIndicatorOld = caretAboveLclscIndicator
+        updateDwsVisibility()
 
-        let caretX = columnToScreenX(columnIndex)
-        let caretY = lineToScreenY(lineIndex)
+        let caretX = columnToScreenX(caretColumn)
+        let caretY = lineToScreenY(caretLine)
         updateMentionVisibilitiesAndIndication(textarea, caretX, caretY)
         renderAll()
 
         caretPositionOld = caretPosition
     }
 
+    let caretAboveLclscIndicatorOld = true
+    function updateDwsVisibility() {
+        let caretAboveLclscIndicator = caretLine < lowestChangedLineSinceCompile
+        if (caretAboveLclscIndicator !== caretAboveLclscIndicatorOld) {
+            forEachPropt(dws, (dw) => {
+                dw.elem.style.display = caretAboveLclscIndicator ? `` : `none`
+            })
+        }
+        caretAboveLclscIndicatorOld = caretAboveLclscIndicator
+    }
+
     let caretLine = -1
     let caretColumn = -1
-    let caretAboveLclscIndicatorOld = true
     document.addEventListener('selectionchange', onCaretMove)
 
     mentionVisibleDueToCaret = (mention) => 

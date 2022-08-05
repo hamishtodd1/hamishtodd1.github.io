@@ -25,15 +25,14 @@ async function initShaderOutputAndFinalDw() {
         }
     }
 
-
     /////////////////////
     // Fullscreen quad //
     /////////////////////
     let fullScreenQuadGeo = new THREE.PlaneGeometry(1., 1.)
     fullScreenQuadGeo.translate(0., 0., -1.)
-    function FullScreenQuadMesh(fragmentShader,uniforms) {
+    function FullScreenQuadMesh(vertexShader,fragmentShader,uniforms) {
         let mat = new THREE.ShaderMaterial({
-            vertexShader: basicVertex,
+            vertexShader,
             fragmentShader,
             uniforms
         })
@@ -56,10 +55,23 @@ async function initShaderOutputAndFinalDw() {
         let readoutPrefix = await getTextFile('shaders/floatOutputterPrefix.glsl')
         
         let renderTextureScene = new THREE.Scene()
+
+        //when you hover initialVertex, it connects to one of the vertices in the point cloud/cow
+        //and it ends up copying one of them to this
+        let outputterInitialVertex = { value: new THREE.Vector4(0.,0.,0.,1.) }
+        let outputterFragmentPosition = {value: new THREE.Vector4(0.,0.,0.,1.)}
+
+        let outputterVertexShader = `
+        varying vec2 frameCoord;
+
+        void main() {
+            frameCoord = position.xy + .5;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
+        }`
     
         //hmmm, to use varyings... what, you have to interpolate it yourself?
         //so there are the attributes that are actually at the vertices
-        updateOutputter = (partialFragmentShader, uniforms, insertion) => {
+        updateOutputter = (partialFragmentShader, uniforms, vertexMode) => {
             if(outputFsq !== null) {
                 renderTextureScene.remove(outputFsq)
                 outputFsq.material.dispose()
@@ -68,14 +80,28 @@ async function initShaderOutputAndFinalDw() {
             uniforms.outputMentionIndex = outputMentionIndex
             conferOverrideSensetivityToUniforms(uniforms)
 
-            let readoutSuffix = `
-void main() {
-    `+ insertion + `();
-    gl_FragColor = encodeRgbaOfOutputFloatForOurPixel();
-}`
+            let shaderRunner = ``
+            if(vertexMode) {
+                uniforms.outputterInitialVertex = outputterInitialVertex
+                shaderRunner = `
+                uniform vec4 outputterInitialVertex;
+                void main() {
+                    vec4 outputterVertex = getChangedVertex(outputterInitialVertex);
+                `
+            }
+            else {
+                uniforms.outputterFragmentPosition = outputterFragmentPosition
+                shaderRunner = `
+                uniform vec4 outputterFragmentPosition;
+                void main() {
+                    vec3 outputterCol = getColor(outputterFragmentPosition);
+                `
+            }
 
-            let fullFragmentShader = generalShaderPrefix + readoutPrefix + partialFragmentShader + readoutSuffix
-            outputFsq = FullScreenQuadMesh(fullFragmentShader, uniforms)
+            let fullFragmentShader = generalShaderPrefix + readoutPrefix + partialFragmentShader + shaderRunner + `
+                gl_FragColor = encodeRgbaOfOutputFloatForOurPixel();
+            }`
+            outputFsq = FullScreenQuadMesh(outputterVertexShader,fullFragmentShader, uniforms)
 
             renderTextureScene.add(outputFsq)
         }
@@ -120,10 +146,18 @@ void main() {
 
     let dw = new Dw("final", false, false, camera, false)
     // dw.elem.style.display = 'none'
-    
-    // FRAGMENT
+
+    //////////////
+    // Fragment //
+    //////////////
     
     let oldFragFsq = null
+    let defaultVertexShader = `
+    varying vec4 fragmentPosition;
+    void main() {
+        fragmentPosition = modelViewMatrix * vec4(position, 1.);
+        gl_Position = projectionMatrix * fragmentPosition;
+    }`
     updateFinalDwFragment = (text, uniforms) => {
         if (oldFragFsq !== null) {
             dw.removeNonMentionChild(oldFragFsq)
@@ -131,30 +165,34 @@ void main() {
         }
 
         const toFragColorSuffix = `
+        varying vec4 fragmentPosition;
         void main() {
-            gl_FragColor = vec4( getColor(), 1. );
+            vec3 myCol = getColor(fragmentPosition);
+            gl_FragColor = vec4( myCol, 1. );
         }`
         
         let fullFragmentShader = generalShaderPrefix + text + toFragColorSuffix
         conferOverrideSensetivityToUniforms(uniforms)
         
-        oldFragFsq = FullScreenQuadMesh(fullFragmentShader, uniforms)
+        oldFragFsq = FullScreenQuadMesh(defaultVertexShader,fullFragmentShader, uniforms)
         dw.addNonMentionChild(oldFragFsq)
     }
 
-    // VERTEX
+    ////////////
+    // Vertex //
+    ////////////
 
     let oldMesh = null
     updateFinalDwVertex = (text, uniforms, geo) => {
         const toVertexSuffix = `
         uniform mat4 viewMatrix;
         uniform mat4 projectionMatrix;
+        in vec3 position;
         void main() {
             gl_PointSize = 2.0;
-            gl_Position = projectionMatrix * viewMatrix * getVertex();
+            vec4 initialVertex = vec4(position,1.);
+            gl_Position = projectionMatrix * viewMatrix * getChangedVertex(initialVertex);
         }`
-
-        //possibly getColor should take a vec2 input, the fragCoord
 
         uniforms.projectionMatrix = { value: camera.projectionMatrix }
         uniforms.viewMatrix = { value: camera.matrixWorldInverse }

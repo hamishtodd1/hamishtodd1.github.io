@@ -36,48 +36,48 @@ function initFloats() {
 
     let newValues = Array(1)
     class floatMention extends Mention {
-        mesh
+        #mesh
 
         constructor(variable) {
             super(variable)
 
             let mat = new THREE.MeshBasicMaterial({ color: variable.col })
-            this.mesh = sDw.NewMesh(downwardPyramidGeo, mat)
+            this.#mesh = sDw.NewMesh(downwardPyramidGeo, mat)
         }
 
         updateFromShader() {
             getShaderOutput(this.mentionIndex, newValues )
-            this.mesh.position.x = newValues[0]
+            this.#mesh.position.x = newValues[0]
         }
 
         overrideFromDrag(dw) {
             if (dw === sDw) {
-                let [xProportion, yProportion] = dw.oldClientToProportion()
-                this.mesh.position.x = camera2d.left + xProportion * (camera2d.right - camera2d.left )
+                camera2d.oldClientToPosition(dw, this.#mesh.position)
+                this.#mesh.position.y = 0.
                 
                 updateOverride(this, (overrideFloats) => {
-                    overrideFloats[0] = this.mesh.position.x
+                    overrideFloats[0] = this.#mesh.position.x
                 })
             }
             else console.error("not in that dw")
         }
 
-        getCanvasPosition(dw) {
-            return camera2d.positionToWindow(this.mesh.position, dw)
+        getWorldCenter(dw, target) {
+            return target.copy(this.#mesh.position)
         }
 
         getReassignmentPostEqualsFromCpu() {
-            return parseFloat(this.mesh.position.x.toFixed(2))
+            return parseFloat(this.#mesh.position.x.toFixed(2))
         }
 
         setVisibility(newVisibility) {
-            this.mesh.visible = newVisibility
+            this.#mesh.visible = newVisibility
         }
 
         isVisibleInDw(dw) {
             if (dw !== sDw )
                 return false
-            return this.mesh.visible
+            return this.#mesh.visible
         }
 
         getTextareaManipulationDw() {
@@ -85,7 +85,7 @@ function initFloats() {
         }
 
         equals(m) {
-            return m.mesh.position.x === this.mesh.position.x
+            return m.#mesh.position.x === this.#mesh.position.x
         }
     }
     

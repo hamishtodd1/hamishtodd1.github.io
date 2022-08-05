@@ -1,5 +1,3 @@
-let lowestChangedLineSinceCompile = Infinity
-
 let animationStates = {}
 
 let clientXOld = 0

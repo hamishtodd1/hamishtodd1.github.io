@@ -94,7 +94,7 @@ function initPlanes() {
                 lastDragPoint.copy(newDragPoint)
             }
             else if(dw === iDw) {
-                iDw.mouseRayIntersection(mv0)
+                iDw.mouseRayIntersection(mv0, false)
                 mv0[14] = 0.
                 dual(mv0,mv1)
                 mv1.normalize()
@@ -110,7 +110,7 @@ function initPlanes() {
             else console.error("not in that dw")
         }
 
-        getWorldSpaceCanvasPosition(target, dw) {
+        getWorldCenter(dw, target) {
             if (dw === eDw) {
                 e123.projectOn(this.#mv, mv0)
 

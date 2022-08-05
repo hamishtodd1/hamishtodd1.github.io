@@ -27,7 +27,7 @@ async function initCompilation()
     let focussedVertex = 0
     let numVertices = 20
 
-    const nameRegex = /(?<=[^a-zA-Z_$0-9])([a-zA-Z_$][a-zA-Z_$0-9]*)/g
+    const potentialNameRegex = /(?<=[^a-zA-Z_$0-9])([a-zA-Z_$][a-zA-Z_$0-9]*)/g
 
     //if you want to use this, should probably replace with whitespace
     const commentNotNewlineRegex = /\/\/[^\n]*/gm
@@ -77,20 +77,24 @@ async function initCompilation()
         let vertexMode = text.indexOf("getColor") === -1
 
         let uniforms = {}
-        let outputterUniforms = {} // gets every attribute given to it as a uniform
+        let outputterUniforms = {} // gets every in given to it as a uniform
         let geo = new THREE.BufferGeometry()
+
+        variables.forEach((variable)=>{
+            variable.lowestUnusedMention = 0
+        })
 
         mentionTypes.forEach((type) => {
             let functionResults = [...text.matchAll(type.regexes.function )].map(a => a.index)
             let      allResults = [...text.matchAll(type.regexes.all      )].map(a => a.index)
             let  uniformResults = [...text.matchAll(type.regexes.uniform  )].map(a => a.index + a[0].indexOf(a[1]))
-            let   attribResults = [...text.matchAll(type.regexes.in       )].map(a => a.index + a[0].indexOf(a[1]))
+            let       inResults = [...text.matchAll(type.regexes.in       )].map(a => a.index + a[0].indexOf(a[1]))
             
             allResults.forEach((index) => {
                 if( functionResults.indexOf(index) !== -1)
                     return
                     
-                let name = text.slice(index + type.glslName.length).match(nameRegex)[0] //TODO potential speedup
+                let name = text.slice(index + type.glslName.length).match(potentialNameRegex)[0] //TODO potential speedup
                 //people may well want to use the name "position". Could have: position -> __position
 
                 let variable = variables.find((v) => {
@@ -99,19 +103,17 @@ async function initCompilation()
                 if (variable === undefined)
                     variable = new Variable(name, type)
 
-                variable.lowestUnusedMention = 0
-                    
-                if (attribResults.indexOf(index) !== -1) {
-                    variable.isAttrib = true
+                if (inResults.indexOf(index) !== -1) {
+                    variable.isIn = true
 
-                    let attributeArray = new Float32Array(type.numFloats * numVertices)
-                    for(let i = 0; i < attributeArray.length; ++i)
-                        attributeArray[i] = Math.random() - .5
-                    geo.setAttribute('position', new THREE.BufferAttribute(attributeArray, type.numFloats))
+                    let inArray = new Float32Array(type.numFloats * numVertices)
+                    for (let i = 0, il = inArray.length; i < il; ++i)
+                        inArray[i] = Math.random() - .5
+                    geo.setAttribute('position', new THREE.BufferAttribute(inArray, type.numFloats))
                     
                     let focussedAttributeValue = new Float32Array(type.numFloats)
                     for (let i = 0; i < type.numFloats; ++i)
-                        focussedAttributeValue[i] = attributeArray[i + type.numFloats * focussedVertex]
+                        focussedAttributeValue[i] = inArray[i + type.numFloats * focussedVertex]
                     outputterUniforms[name] = { value: focussedAttributeValue }
                 }
                 if(uniformResults.indexOf(index) !== -1) {
@@ -145,24 +147,29 @@ async function initCompilation()
         //If we change it in its entirety, nothing will be lost
         textLines.forEach((l,lineIndex) => {
 
-            finalChunks[lineIndex] = l
-            if (l[0] === "i" && l[1] === "n" && l[2] === " ") {
-                outputterChunks[lineIndex] = "uniform " + l.slice(3)
-                //right, there's another attrib array where we need to specify which vertex is being talked about
-                // uniformsIncludingSelectedAttribs
+            {
+                finalChunks[lineIndex] = l
+                if (l[0] === "i" && l[1] === "n" && l[2] === " ") {
+                    outputterChunks[lineIndex] = "uniform " + l.slice(3)
+                    //right, there's another attrib array where we need to specify which vertex is being talked about
+                    // uniformsIncludingSelectedAttribs
+                }
+                else
+                    outputterChunks[lineIndex] = l
             }
-            else
-                outputterChunks[lineIndex] = l
 
-            if (!ignoringDueToStruct && l.indexOf("struct") !== -1)
-                ignoringDueToStruct = true
-            else if (l.indexOf("}") !== -1)
-                ignoringDueToStruct = false
+            {
+                if (!ignoringDueToStruct && l.indexOf("struct") !== -1)
+                    ignoringDueToStruct = true
+                else if (l.indexOf("}") !== -1)
+                    ignoringDueToStruct = false
 
-            if ( ignoringDueToStruct )
-                return
+                if (ignoringDueToStruct)
+                    return
+            }
 
-            let matches = [...l.matchAll(nameRegex)]
+            //faster might be a match of the whole thing rather than the individual lines
+            let matches = [...l.matchAll(potentialNameRegex)]
             matches.forEach((match)=>{
                 let name = match[0]
                 let variable = variables.find((v) => v.name === name)
@@ -179,7 +186,7 @@ async function initCompilation()
                 mention.mentionIndex = mentionIndex++
 
                 let isDeclaration = variable.lowestUnusedMention === 1
-                let isUniformOrAttrib = variable.isAttrib || variable.isUniform
+                let isUniformOrAttrib = variable.isIn || variable.isUniform
 
                 let overrideGoesBefore = false
                 if (!isUniformOrAttrib ) {
@@ -225,16 +232,15 @@ async function initCompilation()
         let outputterText = outputterChunks.join("\n")
         let finalText = finalChunks.join("\n")
         if (vertexMode ) {
-            updateOutputter(outputterText, outputterUniforms, `vec4 myVertex = getVertex`)
+            updateOutputter(outputterText, outputterUniforms, true)
             updateFinalDwVertex(finalText, uniforms, geo)
         }
         else {
-            updateOutputter(outputterText, outputterUniforms, `vec3 myCol = getColor`)
+            updateOutputter(outputterText, outputterUniforms, false)
             updateFinalDwFragment(finalText, uniforms)
         }
 
-        lowestChangedLineSinceCompile = Infinity
-        updateChangedLineIndicator()
+        updateLclsc(Infinity)
 
         updateMentionsFromShader(()=>true)
 

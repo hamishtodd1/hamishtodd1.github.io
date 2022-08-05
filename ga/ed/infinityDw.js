@@ -22,24 +22,30 @@ function initInfinityDw()
     let frustumOnOrigin = new Mv()
 
     //possibly needed for vectorspace too
-    dw.mouseRayIntersection = (mv) => {
+    dw.mouseRayIntersection = (targetMv, fromBehind) => {
         //mouseRay to threeRay
-        threeRay.origin.copy(camera.position)
         let mouseRay = getMouseRay(dw)
         meet(e0, mouseRay, mouseRayDirection).toVector(threeRay.direction)
         threeRay.direction.normalize()
+        
+        threeRay.origin.copy(camera.position)
+
+        if (fromBehind) {
+            threeRay.origin.addScaledVector(threeRay.direction, 999.) //so put it far behind camera
+            threeRay.direction.multiplyScalar(-1.)
+        }
 
         let result = threeRay.intersectSphere(threeSphere, v1)
         if(result === null) {
             camera.frustum.far.projectOn(e123, frustumOnOrigin)
             // frustumOnOrigin.log()
-            meet(mouseRay, frustumOnOrigin, mv)
+            meet(mouseRay, frustumOnOrigin, targetMv)
         }
         else
-            mv.fromVec(v1)
+            targetMv.fromVec(v1)
             
-        mv[14] = 0.
-        return mv
+        targetMv[14] = 0.
+        return targetMv
     }
 
     //this isn't quite right because the angleHeight is based on latitude lines,

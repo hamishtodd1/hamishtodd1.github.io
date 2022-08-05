@@ -9,7 +9,7 @@
     For the time being, gonna make a "slider" with this, just the real part
     Thereby to find out the impact of this shit
 */
-function initStudyDw() {
+function initComplexDw() {
 
     let ourDw = new Dw("mobius", false, false, camera2d)
 
@@ -36,7 +36,7 @@ function initStudyDw() {
     ourDw.addNonMentionChild(bg)
 }
 
-function initStudyNumbers() {
+function initComplexNumbers() {
 
     let dotGeo = new THREE.CircleBufferGeometry(.1, 32)
 
@@ -71,8 +71,8 @@ function initStudyNumbers() {
             else console.error("not in that dw")
         }
 
-        getCanvasPosition(dw) {
-            return camera2d.positionToWindow(this.mesh.position,dw)
+        getWorldCenter(dw, target) {
+            target.copy( this.mesh.position )
         }
 
         getReassignmentPostEqualsFromCpu() {

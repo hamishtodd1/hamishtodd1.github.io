@@ -1,15 +1,7 @@
-in vec3 position;
-uniform float myFloat;
 
-vec4 getVertex() {
-    vec4 ret = vec4(position,1.);
-    return ret;
-}
-
-//END//
 
 uniform float myFloat;
-vec3 getColor() {
+vec3 getColor(in vec4 fragmentPosition) {
     float control1 = .1;
     vec2 control2 = vec2(1.,1.);
     vec3 control3 = vec3(1.,.5,1.);
@@ -19,8 +11,8 @@ vec3 getColor() {
     vec4 myNormal = vec4( .2,0.,-1.,0.);
     
     Dq rotation = Dq(.28, 0.,0.,0., 0.,.96,0., 0.);
-    vec4 transformedVertex = sandwichDqPt(rotation, myNormal);
-    vec4 transformedNormal = sandwichDqPt(rotation, myVertex);
+    vec4 transformedVertex = sandwichDqPt(rotation, myVertex);
+    vec4 transformedNormal = sandwichDqPt(rotation, myNormal);
 
     Dq idealLine = Dq(0., 0.,1.,1., 0.,0.,0., 0.);
     Dq eucliLine = Dq(0., 0.,0.,0., 0.,1.,1., 0.);
@@ -29,7 +21,7 @@ vec3 getColor() {
     vec3 fragColor = vec3(0.,myFloat,control3.y);
     return fragColor;
 }
-
+//END//
 
 
 
@@ -49,7 +41,7 @@ vec3 getColor() {
 
 
 
-vec3 getColor( out vec4 fragColor ) {
+vec3 getColor(in vec4 fragmentPosition) {
 
     vec3 exampleVector = vec3(1.,1.,1.);
 

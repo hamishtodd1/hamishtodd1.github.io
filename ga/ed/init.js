@@ -15,6 +15,7 @@ TODO
                 2D texture
     Bugs
         Mobiuses are wrong way around, translations probably aren't working
+        When you change rotation, idealLine2 flicks around
         minus sign with sandwich
         Tab and enter make it so you can't ctrl+z
         Declarations should be visualized too, eg return vec4(0.,0.,0.,1); is still a point
@@ -28,13 +29,22 @@ TODO
             html page - EE
             export threejs function creating the thing it is with the appropriate uniforms
     GDC
+        User-created functions and for loops
+            when you're looking at a function, it could have been called from multiple places!
+                it gets inlined, so one run of it is qualitatively different from another
+            There's a finite number of places it'll get called
+                Can scroll, discretely, through those: build the possible values up into a selection, eg a point cloud
+                debugger only lets you look at one point in time - want a fast way to look through ALL the state from a run!
+                And yes if the input and outputs have less than 3 dimensions total, can visualize with some thing nice-looking
+            for loops: 
+                "for(let i = 0; ...) {stuff}" = "function stuff(i){} stuff(0); stuff(1);..."
+                for loops are this under the hood but handled differently:
+                    outputter assignment is conditionalized on the index (es!) being a specific thing
+                    the index could have crazy shit going on, it must be said. 
+                        Just ignore that. Note loops get unrolled so don't feel bad
+                    Whenever you highlight a mention in the loop, you also highlight the loop variable somehow, wherever it may be
         "Teardrops" visualization. Once you've sorted out the meaning of that shit!
             Can turn off and on
-        mentions are sensetive to for loops
-            outputter assignment is conditionalized on the index (es!) being a specific thing
-                the index could have crazy shit going on, it must be said. 
-                    Just ignore that. Note loops get unrolled so don't feel bad
-                Whenever you highlight a mention in the loop, you also highlight the loop variable somehow, wherever it may be
         Connect up mentions that are "copies"
             Makes it nicer when eg you're editing control1 and it has no effect on the below because it's redefined after you edit it!
         Practical
@@ -160,9 +170,9 @@ async function init() {
         console.log(`Took ${timeAfter - timeBefore} milliseconds.`)
     }
 
-    let initialTextFull = await getTextFile('shaders/initialText.glsl')
-    let initialText = initialTextFull.slice(0, initialTextFull.indexOf(`//END//`))    
-    textarea.value = initialText
+    let defaultTextFull = await getTextFile('shaders/default.glsl')
+    let defaultText = defaultTextFull.slice(0, defaultTextFull.indexOf(`//END//`))    
+    textarea.value = defaultText
     updateSyntaxHighlighting()
 
     // init41()
@@ -186,14 +196,14 @@ async function init() {
     await initVectorSpaceDw()
     new Dw("euclidean", true)
     initInfinityDw()
-    initStudyDw()
+    initComplexDw()
     new Dw("scalar", false, false, camera2d)
     // dws.mobius.elem.style.display = 'none'
     // dws.scalar.elem.style.display = 'none'
 
     initVec3s()
     initFloats()
-    initStudyNumbers()
+    initComplexNumbers()
     initPoints()
     initPlanes()
     initDqs()

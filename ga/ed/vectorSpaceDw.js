@@ -69,7 +69,6 @@ function initVec3s()
     let valuesArray = new Float32Array(3)
     let dragPlane = new Mv()
     let whenGrabbed = new THREE.Vector3()
-    let worldSpaceCameraPosition = new THREE.Vector4()
     class vec3Mention extends Mention {
         #vMesh
         #iMesh
@@ -172,12 +171,12 @@ function initVec3s()
             }
 
             if (dw === sDw) {
-                let [xProportion, yProportion] = dw.oldClientToProportion()
-                this.#sMesh.position.x = camera2d.left + xProportion * (camera2d.right - camera2d.left)
+                camera2d.oldClientToPosition(dw, this.#sMesh.position)
 
                 this.vec.copy(whenGrabbed)
                 this.vec.normalize()
                 this.vec.multiplyScalar(this.#sMesh.position.x)
+                this.#sMesh.position.y = 0.
 
                 updateOverride(this, getFloatsForOverride)
             }
@@ -189,7 +188,7 @@ function initVec3s()
                 updateOverride(this, getFloatsForOverride)
             }
             else if (dw === iDw) {
-                iDw.mouseRayIntersection(mv0)
+                iDw.mouseRayIntersection(mv0, false)
                 mv0.toVector(this.vec)
                 this.vec.setLength(whenGrabbed.length())
 
@@ -197,22 +196,21 @@ function initVec3s()
             }
         }
 
-        getCanvasPosition(dw) {
+        getWorldCenter(dw, target) {
             
             if(dw === sDw) {
-                return camera2d.positionToWindow(this.#sMesh.position, dw)
+                target.copy(this.#sMesh.position)
             }
             else {
                 if (dw === vDw) {
-                    worldSpaceCameraPosition.copy(this.vec)
-                    worldSpaceCameraPosition.multiplyScalar(.5)
-                    worldSpaceCameraPosition.w = 1.
+                    target.copy(this.vec)
+                    target.multiplyScalar(.5)
+                    target.w = 1.
                 }
                 else if (dw === iDw) {
-                    worldSpaceCameraPosition.copy(this.#iMesh.position)
-                    worldSpaceCameraPosition.w = 1.
+                    target.copy(this.#iMesh.position)
+                    target.w = 1.
                 }
-                return camera.positionToWindow(worldSpaceCameraPosition, dw)
             }
         }
 

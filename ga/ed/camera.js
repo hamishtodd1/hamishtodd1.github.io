@@ -100,20 +100,35 @@ function initCamera() {
     camera2d.position.z = camera.position.length()
 
     camera2d.oldClientToPosition = (dw,target) => {
-        let [xProportion, yProportion] = dw.oldClientToProportion()
+        let [xProportion, yProportion] = oldClientToDwNdc(dw)
         target.x = camera2d.left + xProportion * (camera2d.right - camera2d.left)
         target.y = camera2d.bottom + (1. - yProportion) * (camera2d.top - camera2d.bottom)
         return target
     }
 
-    camera2d.positionToWindow = (position, dw) => {
-        let ndcX = (position.x - camera2d.left) / (camera2d.right - camera2d.left)
-        let ndcY = (position.y - camera2d.bottom) / (camera2d.top - camera2d.bottom)
+    ndcToWindow = (ndcX, ndcY, dw) => {
+        let dwRect = dw.elem.getBoundingClientRect()
+
+        let actuallyOnScreen = 0. <= ndcX && ndcX <= 1. &&
+            0. <= ndcY && ndcY <= 1.
+        if (actuallyOnScreen) {
+            return [
+                dwRect.x + dwRect.width * ndcX,
+                dwRect.y + dwRect.height * (1. - ndcY)
+            ]
+        }
+        else
+            return [Infinity, Infinity]
+    }
+
+    camera2d.worldToWindow = (position, dw) => {
+        let ndcX = (position.x - camera2d.left  ) / (camera2d.right - camera2d.left  )
+        let ndcY = (position.y - camera2d.bottom) / (camera2d.top   - camera2d.bottom)
 
         return ndcToWindow(ndcX, ndcY, dw)
     }
 
-    camera.positionToWindow = (worldSpacePosition, dw)=>{
+    camera.worldToWindow = (worldSpacePosition, dw)=>{
         worldSpacePosition.applyMatrix4(camera.worldToCanvas)
         let canvasX = worldSpacePosition.x / worldSpacePosition.w
         let canvasY = worldSpacePosition.y / worldSpacePosition.w

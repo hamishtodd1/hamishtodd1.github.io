@@ -279,7 +279,7 @@ function initDqs() {
             }
             else if (dw === iDw) {
                 
-                iDw.mouseRayIntersection(iDwIntersection)
+                iDw.mouseRayIntersection(iDwIntersection,false)
                 let lineIsInfinite = !linePart.hasEuclideanPart()
 
                 if ( lineIsInfinite) {
@@ -317,13 +317,13 @@ function initDqs() {
             this.#iDwRingMesh.visible = newVisibility
         }
 
-        getCanvasPosition(dw) {
+        getWorldCenter(dw, target) {
             if (dw === mDw)
-                return camera2d.positionToWindow(this.#mDwMesh.position,dw)
+                target.copy( this.#mDwMesh.position )
             else {
                 if (dw === eDw) {
-                    worldSpaceCameraPosition.copy(this.#eDwMesh.position)
-                    worldSpaceCameraPosition.w = 1.
+                    target.copy(this.#eDwMesh.position)
+                    target.w = 1.
                 }
                 else if (dw === iDw) {
                     this.mv.selectGrade(2, linePart)
@@ -335,11 +335,11 @@ function initDqs() {
                         // labelPoint.multiplyScalar(-1.)
                         // let vec3Part = labelPoint.toVector(v1)
                         // vec3Part.setLength(INFINITY_RADIUS)
-                        // worldSpaceCameraPosition.copy(vec3Part)
-                        // // worldSpaceCameraPosition.multiplyScalar(.5)
-                        // worldSpaceCameraPosition.w = 1.
+                        // target.copy(vec3Part)
+                        // // target.multiplyScalar(.5)
+                        // target.w = 1.
 
-                        worldSpaceCameraPosition.set(0.,0.,0.,1.)
+                        target.set(0.,0.,0.,1.)
                     }
                     else {
                         dual(linePart, idealLineDual)
@@ -347,11 +347,10 @@ function initDqs() {
                         meet(planeToIntersect, linePart, labelPoint)
                         let vec3Part = labelPoint.toVector(v1)
                         vec3Part.setLength(INFINITY_RADIUS)
-                        worldSpaceCameraPosition.copy(vec3Part)
-                        worldSpaceCameraPosition.w = 1.
+                        target.copy(vec3Part)
+                        target.w = 1.
                     }
                 }
-                return camera.positionToWindow(worldSpaceCameraPosition,dw)
             }
         }
 

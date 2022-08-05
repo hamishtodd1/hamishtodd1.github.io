@@ -83,14 +83,6 @@ async function initDws() {
             this.#scene.remove(ch)
         }
 
-        oldClientToProportion() {
-            let clientRect = this.elem.getBoundingClientRect()
-            let [clientPossiblyOffsetX, clientPossiblyOffsetY] = getAdjustedClient()
-            let xProportion = (clientPossiblyOffsetX - clientRect.x) / clientRect.width
-            let yProportion = (clientPossiblyOffsetY - clientRect.y) / clientRect.height
-            return [xProportion, yProportion]
-        }
-
         render() {
             // get the viewport relative position of this element
             const { left, right, top, bottom, width, height } =
@@ -119,12 +111,14 @@ async function initDws() {
                 if (!mention.isVisibleInDw(this)) //some of isVisible is about being used, which might be pointless checking
                     return
 
-                let [elemX, elemY] = mention.getCanvasPosition(this)
-                let dist = Math.sqrt(sq(clientX - elemX) + sq(clientY - elemY))
-
-                if (dist < closestDist) {
-                    closestMention = mention
-                    closestDist = dist
+                let [elemX, elemY] = mention.getWindowCenter(this)
+                if(elemX !== Infinity) {
+                    let dist = Math.sqrt(sq(clientX - elemX) + sq(clientY - elemY))
+    
+                    if (dist < closestDist) {
+                        closestMention = mention
+                        closestDist = dist
+                    }
                 }
             })
 

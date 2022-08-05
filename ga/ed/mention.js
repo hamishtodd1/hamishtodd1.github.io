@@ -1,6 +1,6 @@
 function initMention() {
     
-    let canvasPos = new THREE.Vector4()
+    let worldCenter = new THREE.Vector4()
     let style = window.getComputedStyle(textarea)
     let lineHeight = parseInt(style.lineHeight)
     let textareaOffsetHorizontal = parseInt(style.padding) + parseInt(style.margin) // can add some fudge to this if you like
@@ -45,7 +45,7 @@ function initMention() {
     getIndicatedTextareaMention = (screenX, screenY) => {
         let ret = null
         forEachUsedMention((mention)=>{
-            if (mention.lineIndex >= lowestChangedLineSinceCompile)
+            if (inamongstChangedLines(mention.lineIndex) )
                 return false
 
             let mb = mention.horizontalBounds
@@ -59,21 +59,6 @@ function initMention() {
         })
 
         return ret
-    }
-
-    ndcToWindow = (ndcX,ndcY,dw) => {
-        let dwRect = dw.elem.getBoundingClientRect()
-
-        let actuallyOnScreen = 0. <= ndcX && ndcX <= 1. &&
-                               0. <= ndcY && ndcY <= 1.
-        if (actuallyOnScreen) {
-            return [
-                dwRect.x + dwRect.width * ndcX,
-                dwRect.y + dwRect.height * (1. - ndcY)
-            ]
-        }
-        else
-            return [Infinity, Infinity]
     }
 
     class Mention {
@@ -99,9 +84,9 @@ function initMention() {
         }
 
         //often overridden
-        getCanvasPosition(dw) {
-            this.getWorldSpaceCanvasPosition(canvasPos,dw)
-            return camera.positionToWindow(canvasPos,dw)
+        getWindowCenter(dw) {
+            this.getWorldCenter(dw, worldCenter)
+            return dw.camera.worldToWindow(worldCenter,dw)
         }
 
         updateHorizontalBounds = (column, nameLength) => {
@@ -124,22 +109,32 @@ function initMention() {
             setSvgLine($labelSides[3], mb.x, mby + lineHeight, mb.x, mby)
 
             //Connect to the visualizations of the thing
-            let lowestUnusedLabelConnector = 0
-            forVizDws((dw) => {
-                if (this.isVisibleInDw(dw)) {
+            if (this.variable.isUniform) {
+                
+            }
+            else if (this.variable.isIn) {
 
-                    //TODO this works differently if .isAttrib or .isUniform
+            }
+            else {
+                let lowestUnusedLabelConnector = 0
+                //this is very shotgunny. Better would be
+                forVizDws((dw) => {
+                    if (this.isVisibleInDw(dw)) {
 
-                    let [elemX, elemY] = this.getCanvasPosition(dw)
+                        //TODO this works differently if .isIn or .isUniform
 
-                    setSvgLine($labelConnectors[lowestUnusedLabelConnector++],
-                        mb.x + mb.w,
-                        mby + lineHeight / 2.,
-                        elemX, elemY)
-                }
-            })
-            for (let i = lowestUnusedLabelConnector; i < $labelConnectors.length; ++i)
-                setSvgLine($labelConnectors[i], -10, -10, -10, -10)
+                        let [windowX, windowY] = this.getWindowCenter(dw)
+                        if(windowX !== Infinity) {
+                            setSvgLine($labelConnectors[lowestUnusedLabelConnector++],
+                                mb.x + mb.w,
+                                mby + lineHeight / 2.,
+                                windowX, windowY)
+                        }
+                    }
+                })
+                for (let i = lowestUnusedLabelConnector; i < $labelConnectors.length; ++i)
+                    setSvgLine($labelConnectors[i], -10, -10, -10, -10)
+            }
         }
 
         ///////////////////////
@@ -170,7 +165,7 @@ function initMention() {
 
         col = new THREE.Color(0., 0., 0.)
         assignmentToOutput = ""
-        isAttrib = false
+        isIn = false
         isUniform = false
 
         lowestUnusedMention = 0

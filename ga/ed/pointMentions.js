@@ -104,13 +104,13 @@ function initPoints() {
                 updateOverride(this, getFloatsForOverride)
             }
             else if(dw === iDw) {
-                iDw.mouseRayIntersection(mv0)
+                iDw.mouseRayIntersection(mv0, true)
                 updateOverride(this, getFloatsForOverride)
             }
             else console.error("not in that dw")
         }
 
-        getWorldSpaceCanvasPosition(target, dw) {
+        getWorldCenter(dw, target) {
             if (dw === eDw) {
                 target.copy(this.#eDwMesh.position)
                 target.w = 1.

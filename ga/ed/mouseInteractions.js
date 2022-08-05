@@ -3,20 +3,19 @@ function initMouseInteractions() {
     let grabbedDw = null // if this isn't null, indicatedMention is grabbed
 
     let rightClicking = false
-
     let dragOccurred = false
-
     let textareaGrabAddition = [0.,0.]
-    getAdjustedClient = () => {
-        return [
-            clientXOld + textareaGrabAddition[0], 
-            clientYOld + textareaGrabAddition[1]
-        ]
+
+    oldClientToDwNdc = (dw) => {
+        let clientRect = dw.elem.getBoundingClientRect()
+        let xProportion = (clientXOld + textareaGrabAddition[0] - clientRect.x) / clientRect.width
+        let yProportion = (clientYOld + textareaGrabAddition[1] - clientRect.y) / clientRect.height
+        return [xProportion, yProportion]
     }
 
     let mouseRay = new Mv()
     getMouseRay = (dw) => {
-        let [xProportion,yProportion] = dw.oldClientToProportion()
+        let [xProportion,yProportion] = oldClientToDwNdc(dw)
 
         let xPlane = mv3.fromLerp(camera.frustum.left, camera.frustum.right, xProportion)
         let yPlane = mv4.fromLerp(camera.frustum.bottom, camera.frustum.top, yProportion)
@@ -70,7 +69,7 @@ function initMouseInteractions() {
                 if( indicatedMention.variable.isUniform) {
                     
                 }
-                else if (indicatedMention.variable.isAttrib) {
+                else if (indicatedMention.variable.isIn) {
                     
                 }
                 else
@@ -114,9 +113,15 @@ function initMouseInteractions() {
             dw = indicatedMention.getTextareaManipulationDw()
             
             event.preventDefault()
-            textareaGrabAddition = indicatedMention.getCanvasPosition(dw)
+            textareaGrabAddition = indicatedMention.getWindowCenter(dw)
+
+            let wasOffscreen = textareaGrabAddition[0] === Infinity
+            if(wasOffscreen)
+                textareaGrabAddition = dw.camera.worldToWindow(zeroVector,dw)
+
             textareaGrabAddition[0] -= clientXOld
             textareaGrabAddition[1] -= clientYOld
+            log(textareaGrabAddition)
         }
         else {
             textareaGrabAddition[0] = 0.
@@ -147,7 +152,7 @@ function initMouseInteractions() {
         if (indicatedMention.variable.isUniform) {
     
         }
-        else if (indicatedMention.variable.isAttrib) {
+        else if (indicatedMention.variable.isIn) {
     
         }
         else {
@@ -169,7 +174,7 @@ function initMouseInteractions() {
             else if (caretLineIndex > indicatedMention.lineIndex)
                 newCaretPosition = caretPositionOld + newLine.length
             
-            textarea.setSelectionRange( newCaretPosition, newCaretPosition )
+            setCaretPosition(newCaretPosition)
         }
         
         updateSyntaxHighlighting()
