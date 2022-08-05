@@ -50,7 +50,7 @@ function initFloats() {
             this.#mesh.position.x = newValues[0]
         }
 
-        overrideFromDrag(dw) {
+        respondToDrag(dw) {
             if (dw === sDw) {
                 camera2d.oldClientToPosition(dw, this.#mesh.position)
                 this.#mesh.position.y = 0.

@@ -86,7 +86,7 @@ function initMention() {
         //often overridden
         getWindowCenter(dw) {
             this.getWorldCenter(dw, worldCenter)
-            return dw.camera.worldToWindow(worldCenter,dw)
+            return dw.worldToWindow(worldCenter)
         }
 
         updateHorizontalBounds = (column, nameLength) => {
@@ -109,10 +109,7 @@ function initMention() {
             setSvgLine($labelSides[3], mb.x, mby + lineHeight, mb.x, mby)
 
             //Connect to the visualizations of the thing
-            if (this.variable.isUniform) {
-                
-            }
-            else if (this.variable.isIn) {
+            if (this.variable.isIn) {
 
             }
             else {

@@ -63,17 +63,24 @@ function initMouseInteractions() {
     function onMouseMove(mouseArea, event) {
         if (!rightClicking) {
             if(grabbedDw !== null) {
+
+                //might be mention, uniform, or In
+                //there's a javascript representation of the glsl data
+                //the appearance, eg meshes, come from that
+                //that's what the uniforms and overrides are too
+                //so, make interfacing that data more generic
+                //then you can put stuff into uniforms
+                //neaten up this updateOverride horsecrap
+
                 dragOccurred = true
-                //TODO dragging a uniform does a completely different thing
-                //attribute does a different thing still
                 if( indicatedMention.variable.isUniform) {
                     
                 }
                 else if (indicatedMention.variable.isIn) {
-                    
+                    //dragging this does not change data, but selects among it
                 }
                 else
-                    indicatedMention.overrideFromDrag(grabbedDw,event)
+                    indicatedMention.respondToDrag(grabbedDw)
     
                 updateMentionsFromShader((mention) => {
                     return mentionVisibleDueToCaret(mention) || mention === indicatedMention
@@ -117,11 +124,10 @@ function initMouseInteractions() {
 
             let wasOffscreen = textareaGrabAddition[0] === Infinity
             if(wasOffscreen)
-                textareaGrabAddition = dw.camera.worldToWindow(zeroVector,dw)
+                textareaGrabAddition = dw.worldToWindow(zeroVector)
 
             textareaGrabAddition[0] -= clientXOld
             textareaGrabAddition[1] -= clientYOld
-            log(textareaGrabAddition)
         }
         else {
             textareaGrabAddition[0] = 0.
@@ -149,13 +155,8 @@ function initMouseInteractions() {
         indicatedMention.onLetGo()
         updateOverride(null)
         
-        if (indicatedMention.variable.isUniform) {
-    
-        }
-        else if (indicatedMention.variable.isIn) {
-    
-        }
-        else {
+        if (!indicatedMention.variable.isUniform &&
+            !indicatedMention.variable.isIn) {
             let [caretColumnIndex, caretLineIndex] = getCaretColumnAndLine() //done first since we're about to change stuff
             
             let newLine = "\n    " + indicatedMention.variable.name + " = " + 

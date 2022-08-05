@@ -74,7 +74,7 @@ function initPlanes() {
             }
         }
 
-        overrideFromDrag(dw) {
+        respondToDrag(dw) {
             function getFloatsForOverride(overrideFloats) {
                 overrideFloats[0] = mv1[1]; overrideFloats[1] = mv1[2]; overrideFloats[2] = mv1[3]; overrideFloats[3] = mv1[4];
             }

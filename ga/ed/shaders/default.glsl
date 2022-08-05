@@ -1,6 +1,7 @@
 
+uniform float ourUniformFloat;
+//uniform vec3 ourUniformVec3;
 
-uniform float myFloat;
 vec3 getColor(in vec4 fragmentPosition) {
     float control1 = .1;
     vec2 control2 = vec2(1.,1.);
@@ -18,7 +19,7 @@ vec3 getColor(in vec4 fragmentPosition) {
     Dq eucliLine = Dq(0., 0.,0.,0., 0.,1.,1., 0.);
     Dq idealLine2 = sandwichDqDq(rotation,idealLine);
     
-    vec3 fragColor = vec3(0.,myFloat,control3.y);
+    vec3 fragColor = vec3(0.,ourUniformFloat,control3.y);
     return fragColor;
 }
 //END//

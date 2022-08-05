@@ -163,7 +163,7 @@ function initVec3s()
             }
         }
 
-        overrideFromDrag(dw) {
+        respondToDrag(dw) {
 
             let self = this
             function getFloatsForOverride(overrideFloats) {

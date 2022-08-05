@@ -59,7 +59,7 @@ function initComplexNumbers() {
             this.mesh.position.y = newValues[1]
         }
 
-        overrideFromDrag(dw) {
+        respondToDrag(dw) {
             if (dw === ourDw) {
                 camera2d.oldClientToPosition(dw, this.mesh.position)
                 

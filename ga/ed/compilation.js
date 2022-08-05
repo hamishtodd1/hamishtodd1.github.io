@@ -77,7 +77,7 @@ async function initCompilation()
         let vertexMode = text.indexOf("getColor") === -1
 
         let uniforms = {}
-        let outputterUniforms = {} // gets every in given to it as a uniform
+        let outputterUniforms = {} // the "in"s are turned into uniforms
         let geo = new THREE.BufferGeometry()
 
         variables.forEach((variable)=>{
@@ -117,8 +117,12 @@ async function initCompilation()
                     outputterUniforms[name] = { value: focussedAttributeValue }
                 }
                 if(uniformResults.indexOf(index) !== -1) {
-                    uniforms[name] = {value: 1.}
                     variable.isUniform = true
+
+                    if(type.glslName === 'float')
+                        uniforms[name] = { value: 1. }
+                    if (type.glslName === 'vec3')
+                        uniforms[name] = { value: new THREE.Vector3(1.,1.,1.) }
                 }
                 
                 /*

@@ -2,17 +2,33 @@
 TODO
     For next presentation
         Labels for e012 etc on the iDw
-        Uniforms / attributes
-            Mouse ray in final dw!!
-            Any variable that is different across manifold can be seen in thingy window
-            Mesh window
-                Has an indicator on it: "where attributes are currently coming from". Can move indicator with mouse
+        Uniforms
+            Mouse ray in final dw!
             Shadertoy-inspired
-            Window for texture uniforms
+            Textures dw
                 May want to draw or copypaste
                 Considered as Initial state of a simulation
                     "step" "play/pause" buttons. Can draw when paused
                 2D texture
+        Attributes
+            Any variable that is different across manifold can be seen in thingy window
+            Mesh window
+                Has an indicator on it: "where attributes are currently coming from". Can move indicator with mouse
+        Can you show dual quaternion skinning with it?
+        User-created functions and for loops
+            when you're looking at a function, it could have been called from multiple places!
+                it gets inlined, so one run of it is qualitatively different from another
+            There's a finite number of places it'll get called
+                Can scroll, discretely, through those: build the possible values up into a selection, eg a point cloud
+                debugger only lets you look at one point in time - want a fast way to look through ALL the state from a run!
+                And yes if the input and outputs have less than 3 dimensions total, can visualize with some thing nice-looking
+            for loops: 
+                "for(let i = 0; ...) {stuff}" = "function stuff(i){} stuff(0); stuff(1);..."
+                for loops are this under the hood but handled differently:
+                    outputter assignment is conditionalized on the index (es!) being a specific thing
+                    the index could have crazy shit going on, it must be said. 
+                        Just ignore that. Note loops get unrolled so don't feel bad
+                    Whenever you highlight a mention in the loop, you also highlight the loop variable somehow, wherever it may be
     Bugs
         Mobiuses are wrong way around, translations probably aren't working
         When you change rotation, idealLine2 flicks around
@@ -29,20 +45,6 @@ TODO
             html page - EE
             export threejs function creating the thing it is with the appropriate uniforms
     GDC
-        User-created functions and for loops
-            when you're looking at a function, it could have been called from multiple places!
-                it gets inlined, so one run of it is qualitatively different from another
-            There's a finite number of places it'll get called
-                Can scroll, discretely, through those: build the possible values up into a selection, eg a point cloud
-                debugger only lets you look at one point in time - want a fast way to look through ALL the state from a run!
-                And yes if the input and outputs have less than 3 dimensions total, can visualize with some thing nice-looking
-            for loops: 
-                "for(let i = 0; ...) {stuff}" = "function stuff(i){} stuff(0); stuff(1);..."
-                for loops are this under the hood but handled differently:
-                    outputter assignment is conditionalized on the index (es!) being a specific thing
-                    the index could have crazy shit going on, it must be said. 
-                        Just ignore that. Note loops get unrolled so don't feel bad
-                    Whenever you highlight a mention in the loop, you also highlight the loop variable somehow, wherever it may be
         "Teardrops" visualization. Once you've sorted out the meaning of that shit!
             Can turn off and on
         Connect up mentions that are "copies"

@@ -58,6 +58,10 @@ async function initDws() {
             this.hasLights = ((haveAll3dStuff||false) && (haveLights||false)) || false
         }
 
+        worldToWindow(vector3) {
+            return this.camera.worldToWindow(vector3, this)
+        }
+
         NewObject3D() {
             let ret = new THREE.Object3D()
             ret.visible = false

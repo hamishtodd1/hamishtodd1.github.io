@@ -91,7 +91,7 @@ function initPoints() {
             }
         }
 
-        overrideFromDrag(dw) {
+        respondToDrag(dw) {
             //might be nice to snap to a grid
 
             function getFloatsForOverride(overrideFloats) {

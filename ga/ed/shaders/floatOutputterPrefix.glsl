@@ -1,6 +1,7 @@
 //from https://stackoverflow.com/questions/17981163/webgl-read-pixels-from-floating-point-render-target
 
 //takes the 32 bits of a float and puts them into the 32 bits spread between 8 of R, G, B, A
+//compute shader shmompute shader
 
 float[8] outputFloats;
 uniform int outputMentionIndex;

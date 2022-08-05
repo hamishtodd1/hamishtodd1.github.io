@@ -241,7 +241,7 @@ function initDqs() {
             this.linePartWhenGrabbedNormalized.copy(zeroMv)
         }
 
-        overrideFromDrag(dw) {
+        respondToDrag(dw) {
             const self = this
             function updateFromNewLinePart(overrideFloats) {
                 let normalizer = linePart.norm() / newLinePart.norm()

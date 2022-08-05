@@ -121,9 +121,9 @@ function initCamera() {
             return [Infinity, Infinity]
     }
 
-    camera2d.worldToWindow = (position, dw) => {
-        let ndcX = (position.x - camera2d.left  ) / (camera2d.right - camera2d.left  )
-        let ndcY = (position.y - camera2d.bottom) / (camera2d.top   - camera2d.bottom)
+    camera2d.worldToWindow = (worldSpacePosition, dw) => {
+        let ndcX = (worldSpacePosition.x - camera2d.left  ) / (camera2d.right - camera2d.left  )
+        let ndcY = (worldSpacePosition.y - camera2d.bottom) / (camera2d.top   - camera2d.bottom)
 
         return ndcToWindow(ndcX, ndcY, dw)
     }
