@@ -17,12 +17,13 @@ function initPlanes() {
         #eDwMesh
         #iDwMesh
         #sphereMesh
-        #mv = new Mv()
+        state
 
         constructor(variable) {
             super(variable)
+            this.state = new Mv()
 
-            this.#mv.plane(2., 1., 1., 1.)
+            this.state.plane(2., 1., 1., 1.)
 
             let mat = new THREE.MeshPhongMaterial({ color: variable.col, side: THREE.DoubleSide })
             this.#eDwMesh = eDw.NewMesh(planeGeo, mat)
@@ -34,51 +35,29 @@ function initPlanes() {
             this.#sphereMesh = iDw.NewMesh(sphereGeo, mat)
             this.#sphereMesh.scale.setScalar(INFINITY_RADIUS * .98)
 
-            camera.toHaveUpdateFromMvCalled.push(this)
+            camera.toUpdateAppearance.push(this)
         }
 
-        updateFromMv(isCameraUpdate) {
-            let displayableVersion = this.#mv.getDisplayableVersion(mv4)
-            e123.projectOn(displayableVersion, mv0).toVector(this.#eDwMesh.position)
-            let planeOnOrigin = displayableVersion.projectOn(e123, mv0)
-            let e3ToPlaneMotor = mul(planeOnOrigin, e3, mv2).sqrt(mv3)
-            e3ToPlaneMotor.toQuaternion(this.#eDwMesh.quaternion)
-
-            if (!this.#mv.hasEuclideanPart()) {
-                this.#sphereMesh.position.set(0., 0., 0.)
-                this.#iDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
-            }
-            else {
-                this.#iDwMesh.position.set(0.,0.,0.)
-                this.#sphereMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
-                
-                this.#iDwMesh.quaternion.copy(this.#eDwMesh.quaternion)
-            }
+        equals(m) {
+            return m.state.equals(this.state)
         }
 
-        updateFromShader() {
-            getShaderOutput(this.mentionIndex, planeNewValues)
-            this.#mv.plane(planeNewValues[0], planeNewValues[1], planeNewValues[2], planeNewValues[3])
-            
-            this.updateFromMv(false)
+        updateStateFromRunResult(floatArray) {
+            this.state.plane(floatArray[0], floatArray[1], floatArray[2], floatArray[3])
         }
 
         onGrab(dw) {
             if(dw === iDw) {
-                eNormWhenGrabbed = this.#mv.eNorm()
-                iNormWhenGrabbed = this.#mv.iNorm()
+                eNormWhenGrabbed = this.state.eNorm()
+                iNormWhenGrabbed = this.state.iNorm()
             }
             if(dw === eDw) {
                 let mouseRay = getMouseRay(dw)
-                lastDragPoint = meet(this.#mv, mouseRay, lastDragPoint).normalize()
+                lastDragPoint = meet(this.state, mouseRay, lastDragPoint).normalize()
             }
         }
 
-        respondToDrag(dw) {
-            function getFloatsForOverride(overrideFloats) {
-                overrideFloats[0] = mv1[1]; overrideFloats[1] = mv1[2]; overrideFloats[2] = mv1[3]; overrideFloats[3] = mv1[4];
-            }
-            
+        updateStateFromDrag(dw) {
             if(dw === eDw) {
                 //can maybe implement editing e0
                 //if you do, need to fix the problem that you're not even "grabbing" the plane in eDw when it's e0
@@ -87,44 +66,65 @@ function initPlanes() {
                 let mouseRay = getMouseRay(dw)
                 let newDragPoint = meet(dragPlane,mouseRay,mv2).normalize()
                 ourTranslation.fromPointToPoint(lastDragPoint, newDragPoint)
-                ourTranslation.sandwich(this.#mv, mv1)
-
-                updateOverride(this, getFloatsForOverride)
+                ourTranslation.sandwich(this.state, this.state)
 
                 lastDragPoint.copy(newDragPoint)
             }
             else if(dw === iDw) {
                 iDw.mouseRayIntersection(mv0, false)
                 mv0[14] = 0.
-                dual(mv0,mv1)
-                mv1.normalize()
+                dual(mv0,this.state)
+                this.state.normalize()
 
                 let clobberEntirelyBecauseThisWasE0 = eNormWhenGrabbed === 0.
                 if (!clobberEntirelyBecauseThisWasE0) {
-                    mv1.multiplyScalar(eNormWhenGrabbed)
-                    mv1[1] = iNormWhenGrabbed
+                    this.state.multiplyScalar(eNormWhenGrabbed)
+                    this.state[1] = iNormWhenGrabbed //note: always positive
                 }
-
-                updateOverride(this, getFloatsForOverride)
             }
             else console.error("not in that dw")
         }
 
+        updateOverrideFloatsFromState() {
+            overrideFloats[0] = this.state[1]; overrideFloats[1] = this.state[2]; overrideFloats[2] = this.state[3]; overrideFloats[3] = this.state[4];
+        }
+
+        getLiteralAssignmentFromState() {
+            return this.getLiteralAssignmentFromValues(this.state[1], this.state[2], this.state[3], this.state[4])
+        }
+
+        //-------------
+
+        updateAppearanceFromState() {
+            let displayableVersion = this.state.getDisplayableVersion(mv4)
+            e123.projectOn(displayableVersion, mv0).toVector(this.#eDwMesh.position)
+            let planeOnOrigin = displayableVersion.projectOn(e123, mv0)
+            let e3ToPlaneMotor = mul(planeOnOrigin, e3, mv2).sqrt(mv3)
+            e3ToPlaneMotor.toQuaternion(this.#eDwMesh.quaternion)
+
+            if (!this.state.hasEuclideanPart()) {
+                this.#sphereMesh.position.set(0., 0., 0.)
+                this.#iDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+            }
+            else {
+                this.#iDwMesh.position.set(0., 0., 0.)
+                this.#sphereMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+
+                this.#iDwMesh.quaternion.copy(this.#eDwMesh.quaternion)
+            }
+        }
+
         getWorldCenter(dw, target) {
             if (dw === eDw) {
-                e123.projectOn(this.#mv, mv0)
+                e123.projectOn(this.state, mv0)
 
                 mv0.toVector(target)
                 target.w = 1.
             }
             else if (dw === iDw)
-                target.set(0.,0.,0.,1.)
+                target.set(0., 0., 0., 1.)
             else
                 console.error("not in that dw")
-        }
-
-        getReassignmentPostEqualsFromCpu() {
-            return this.getValuesAssignment(this.#mv[1], this.#mv[2], this.#mv[3], this.#mv[4])
         }
 
         setVisibility(newVisibility) {
@@ -142,14 +142,10 @@ function initPlanes() {
         }
 
         getTextareaManipulationDw() {
-            if(this.#mv.hasEuclideanPart() )
+            if(this.state.hasEuclideanPart() )
                 return iDw
-            else if (this.#mv.hasInfinitePart())
+            else if (this.state.hasInfinitePart())
                 return eDw
-        }
-
-        equals(m) {
-            return m.#mv.equals(this.#mv)
         }
     }
     new MentionType("Plane", 4, PlaneMention, [`e0`, `e1`, `e2`, `e3`])

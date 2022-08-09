@@ -110,7 +110,6 @@ function initDqs() {
     let newLinePart = new Mv()
     let idealLineDual = new Mv()
     let labelPoint = new Mv()
-    let worldSpaceCameraPosition = new THREE.Vector4()
     let iDwIntersection = new Mv()
     class DqMention extends Mention {
         #mDwMesh
@@ -125,14 +124,10 @@ function initDqs() {
 
         linePartWhenGrabbedNormalized = new Mv()
         #complexWhenGrabbed = new THREE.Vector2()
-        mv = new Mv()
 
-        equals(m) {
-            return m.mv.equals(this.mv)
-        }
-        
         constructor(variable) {
             super(variable)
+            this.state = new Dq()
 
             let mat = new THREE.MeshPhongMaterial({ color: variable.col })
 
@@ -147,13 +142,101 @@ function initDqs() {
             this.#mobiusStripMesh = iDw.NewMesh(mobiusStripGeo, mobiusMat) //possibly only one of these is needed
             this.#rimMesh = iDw.NewMesh(OurTubeGeo(theRimCurve), mat)
 
-            camera.toHaveUpdateFromMvCalled.push(this)
+            camera.toUpdateAppearance.push(this)
         }
 
-        updateFromMv(isCameraUpdate) {
-            this.mv.selectGrade(2, linePart)
+        equals(m) {
+            return m.state.equals(this.state)
+        }
 
-            this.#mDwMesh.position.x = this.mv[0]
+        updateStateFromRunResult(floatArray) {
+            this.state.fromArray(floatArray)
+        }
+
+        onGrab(dw) {
+            if (dw === eDw) {
+                this.state.getBivectorPartToMv(linePart)
+                if (linePart.hasEuclideanPart())
+                    camera.frustum.far.projectOn(linePart, dragPlane)
+                else dragPlane.copy(e0)
+            }
+
+            if(dw === mDw) {
+                this.state.getBivectorPartToMv(this.linePartWhenGrabbedNormalized)
+                this.linePartWhenGrabbedNormalized.normalize()
+                this.#complexWhenGrabbed.copy(this.#mDwMesh.position)
+            }
+        }
+        
+        onLetGo() {
+            this.linePartWhenGrabbedNormalized.copy(zeroMv)
+        }
+
+        updateStateFromDrag(dw) {
+            this.state.getBivectorPartToMv(linePart)
+
+            if (dw === mDw) {
+                if (this.state[7] !== 0.)
+                    console.error("todo figure this out!")
+
+                camera2d.getOldClientWorldPosition(dw, this.#mDwMesh.position)
+                if (this.#complexWhenGrabbed.x === 0.)
+                    this.#mDwMesh.position.x = 0.
+                else if(linePart.norm() === 0.)
+                    this.#mDwMesh.position.y = 0.
+                
+                this.state[0] = this.#mDwMesh.position.x
+                this.state.setBivectorPartFromMvAndMagnitude(this.linePartWhenGrabbedNormalized, this.#mDwMesh.position.y )
+            }
+            else if (dw === eDw) {
+                let oldJoinedWithCamera = join(linePart, camera.mvs.pos, mv0)
+                let joinedWithCamera = oldJoinedWithCamera.projectOn(getMouseRay(dw), mv1)
+                meet(joinedWithCamera, dragPlane, newLinePart)
+
+                newLinePart.normalize()
+                this.state.setBivectorPartFromMvAndMagnitude(newLinePart, linePart.norm())
+            }
+            else if (dw === iDw) {
+                
+                iDw.mouseRayIntersection(iDwIntersection,false)
+                let lineIsInfinite = !linePart.hasEuclideanPart()
+
+                if ( lineIsInfinite) {
+                    let intersectionJoinedWithOrigin = join(iDwIntersection, e123)
+
+                    let oldJoinedWithOrigin = join(linePart, e123, mv1)
+                    let joinedWithOrigin = oldJoinedWithOrigin.projectOn(intersectionJoinedWithOrigin, mv2)
+
+                    meet(joinedWithOrigin, e0, newLinePart)
+                }
+                else {
+                    let currentOrthPlane = inner(linePart,e123,  mv0).normalize()
+                    let intendedOrthPlane = dual(iDwIntersection,mv1).normalize()
+                    mul(intendedOrthPlane, currentOrthPlane, mv2)
+                    mv2.sqrtSelf()
+                    mv2.sandwich(linePart,newLinePart)
+                }
+                
+                newLinePart.normalize()
+                this.state.setBivectorPartFromMvAndMagnitude(newLinePart, linePart.norm())
+            }
+            else console.error("not in that dw")
+        }
+
+        updateOverrideFloatsFromState() {
+            this.state.toArray(overrideFloats)
+        }
+
+        getLiteralAssignmentFromState() {
+            return this.getLiteralAssignmentFromValues(this.state[0], this.state[1], this.state[2], this.state[3], this.state[4], this.state[5], this.state[6], this.state[7])
+        }
+
+        //----------
+
+        updateAppearanceFromState() {
+            this.state.getBivectorPartToMv(linePart)
+
+            this.#mDwMesh.position.x = this.state[0]
 
             //the really nice thing would be to say that these mentions... are actually the same unless they're
             //assigned to
@@ -168,10 +251,10 @@ function initDqs() {
                 this.#mDwMesh.position.y = linePart.norm()
 
             arcCurveDest.set(this.#mDwMesh.position.x, this.#mDwMesh.position.y, 0.)
-            updateTubeGeo(this.#arcMesh.geometry,theArcCurve)
+            updateTubeGeo(this.#arcMesh.geometry, theArcCurve)
 
             rimCurveFullAngle = Math.atan2(this.#mDwMesh.position.y, this.#mDwMesh.position.x) / TAU * 2.
-            updateTubeGeo(this.#rimMesh.geometry,theRimCurve)
+            updateTubeGeo(this.#rimMesh.geometry, theRimCurve)
 
             //more like: it's a mobius strip
             //And by the way, it's angled in 3D space such that your line is through it
@@ -190,7 +273,7 @@ function initDqs() {
                 this.#iDwRingMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
 
                 getQuaternionToProjectionOnOrigin(linePart, this.#iDwLineMesh.quaternion)
-                if(this.variable.name === "rotation") {
+                if (this.variable.name === "rotation") {
                     //THIS IS HOW FAR YOU HAD GOTTEN
                     //THE ROTATION OF MOBIUS STRIP OR PERHAPS JUST THE LINE SEEM A BIT OFF
                     // log(this.#iDwLineMesh.quaternion)
@@ -215,95 +298,6 @@ function initDqs() {
             e123.projectOn(displayedLineMv, mv0).toVector(this.#eDwMesh.position)
         }
 
-        updateFromShader() {
-            getShaderOutput(this.mentionIndex, dwNewValues)
-            newDq.copy(dwNewValues)
-            newDq.toMv(this.mv)
-
-            this.updateFromMv(false)
-        }
-
-        onGrab(dw) {
-            if (dw === eDw) {
-                this.mv.selectGrade(2, linePart)
-                if (linePart.hasEuclideanPart())
-                    camera.frustum.far.projectOn(linePart, dragPlane)
-                else dragPlane.copy(e0)
-            }
-
-            if(dw === mDw) {
-                this.mv.selectGrade(2, this.linePartWhenGrabbedNormalized)
-                this.linePartWhenGrabbedNormalized.normalize()
-                this.#complexWhenGrabbed.copy(this.#mDwMesh.position)
-            }
-        }
-        onLetGo() {
-            this.linePartWhenGrabbedNormalized.copy(zeroMv)
-        }
-
-        respondToDrag(dw) {
-            const self = this
-            function updateFromNewLinePart(overrideFloats) {
-                let normalizer = linePart.norm() / newLinePart.norm()
-                overrideFloats[0] = self.mv[0]
-                overrideFloats[8] = self.mv[15]
-                for (let i = 0; i < 6; ++i)
-                    overrideFloats[i + 1] = newLinePart[i + 5] * normalizer
-            }
-
-            this.mv.selectGrade(2, linePart)
-
-            if (dw === mDw) {
-                if (this.mv[15] !== 0.)
-                    console.error("todo figure this out!")
-
-                camera2d.oldClientToPosition(dw, this.#mDwMesh.position)
-                if (this.#complexWhenGrabbed.x === 0.)
-                    this.#mDwMesh.position.x = 0.
-                else if(linePart.norm() === 0.)
-                    this.#mDwMesh.position.y = 0.
-                
-                updateOverride(this, (overrideFloats)=>{
-                    overrideFloats[0] = this.#mDwMesh.position.x
-
-                    for (let i = 0; i < 6; ++i)
-                        overrideFloats[i + 1] = this.linePartWhenGrabbedNormalized[i + 5] * this.#mDwMesh.position.y
-                })
-            }
-            else if (dw === eDw) {
-                let oldJoinedWithCamera = join(linePart, camera.mvs.pos, mv0)
-                let joinedWithCamera = oldJoinedWithCamera.projectOn(getMouseRay(dw), mv1)
-                meet(joinedWithCamera, dragPlane, newLinePart)
-                
-                updateOverride(this, updateFromNewLinePart)
-            }
-            else if (dw === iDw) {
-                
-                iDw.mouseRayIntersection(iDwIntersection,false)
-                let lineIsInfinite = !linePart.hasEuclideanPart()
-
-                if ( lineIsInfinite) {
-                    let intersectionJoinedWithOrigin = join(iDwIntersection, e123)
-
-                    let oldJoinedWithOrigin = join(linePart, e123, mv1)
-                    let joinedWithOrigin = oldJoinedWithOrigin.projectOn(intersectionJoinedWithOrigin, mv2)
-
-                    meet(joinedWithOrigin, e0, newLinePart)
-                }
-                else {
-                    let currentOrthPlane = inner(linePart,e123,  mv0).normalize()
-                    let intendedOrthPlane = dual(iDwIntersection,mv1).normalize()
-                    mul(intendedOrthPlane, currentOrthPlane, mv2)
-                    mv2.sqrtSelf()
-                    mv2.sandwich(linePart,newLinePart)
-                }
-                
-                newLinePart.normalize()
-                updateOverride(this, updateFromNewLinePart)
-            }
-            else console.error("not in that dw")
-        }
-
         setVisibility(newVisibility) {
             this.#eDwMesh.visible = newVisibility
             
@@ -326,7 +320,7 @@ function initDqs() {
                     target.w = 1.
                 }
                 else if (dw === iDw) {
-                    this.mv.selectGrade(2, linePart)
+                    this.state.getBivectorPartToMv(linePart)
                     if (linePart.hasEuclideanPart()) {
 
                         //can bring this back once you've sorted out which lines are clockwise in this comparative sense
@@ -358,11 +352,6 @@ function initDqs() {
             return  (dw === eDw && this.#eDwMesh.visible) ||
                     (dw === mDw && this.#mDwMesh.visible) ||
                     (dw === iDw && (this.#iDwLineMesh.visible || this.#iDwRingMesh.visible) )
-        }
-
-        getReassignmentPostEqualsFromCpu() {
-            dq0.fromMv(this.mv)
-            return this.getValuesAssignment(dq0[0], dq0[1], dq0[2], dq0[3], dq0[4], dq0[5], dq0[6], dq0[7])
         }
 
         getTextareaManipulationDw() {

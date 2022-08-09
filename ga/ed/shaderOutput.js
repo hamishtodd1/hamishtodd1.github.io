@@ -6,19 +6,14 @@ async function initShaderOutputAndFinalDw() {
         let overrideAffectedMaterials = []
 
         let overrideMentionIndex = { value: -1 }
-        let overrideFloats = { value: new Float32Array(16) }
+        let overrideFloatsUniform = { value: overrideFloats }
         function conferOverrideSensetivityToUniforms(uniforms) {
             uniforms.overrideMentionIndex = overrideMentionIndex
-            uniforms.overrideFloats = overrideFloats
+            uniforms.overrideFloats = overrideFloatsUniform
         }
 
-        updateOverride = (mention, getFloatsForOverride) => {
-            if (mention === null)
-                overrideMentionIndex.value = -1
-            else {
-                overrideMentionIndex.value = mention.mentionIndex
-                getFloatsForOverride(overrideFloats.value)
-            }
+        updateOverride = (mentionIndex) => {
+            overrideMentionIndex.value = mentionIndex
 
             for (let i = 0, il = overrideAffectedMaterials.length; i < il; ++i)
                 overrideAffectedMaterials[i].needsUpdate = true
@@ -109,8 +104,9 @@ async function initShaderOutputAndFinalDw() {
         let pixelsWide = 8
         let renderTarget = new THREE.WebGLRenderTarget(pixelsWide, 1)
         let outputsArray = new Uint8Array(pixelsWide * 4)
+        let floatArray = new Float32Array(16)
     
-        getShaderOutput = (mentionIndex,target) => {
+        getShaderOutput = (mentionIndex) => {
     
             outputMentionIndex.value = mentionIndex
             outputFsq.material.needsUpdate = true
@@ -119,22 +115,28 @@ async function initShaderOutputAndFinalDw() {
             renderer.readRenderTargetPixels(renderTarget, 0, 0, pixelsWide, 1, outputsArray)
             
             //only seem to be able to use this Uint8->Float32 conversion at creation time
-            let floatArray = new Float32Array(outputsArray.buffer)
+            let floatArrayAnew = new Float32Array(outputsArray.buffer)
     
-            for (let i = 0; i < target.length; ++i)
-                target[i] = floatArray[i]
+            for (let i = 0; i < floatArray.length; ++i)
+                floatArray[i] = floatArrayAnew[i]
     
-            delete floatArray
+            delete floatArrayAnew
     
-            return target
+            return floatArray
         }
 
-        updateMentionsFromShader = (condition) => {
+        updateVariableMentionsFromRun = (condition) => {
+
+            //in theory, could you all variables in a single run?
+            //the height of the render target in pixels would be the number of variables
 
             renderer.setRenderTarget(renderTarget)
             forEachUsedMention((m,i) => {
-                if(condition(m))
-                    m.updateFromShader()
+                if (condition(m) && !m.variable.isUniform && !m.variable.isIn) {
+                    getShaderOutput(m.mentionIndex)
+                    m.updateStateFromRunResult(floatArray)
+                    m.updateAppearanceFromState() //uniforms and Ins require this called elsewhere
+                }
             })
             renderer.setRenderTarget(null)
         }

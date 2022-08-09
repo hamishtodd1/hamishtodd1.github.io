@@ -24,7 +24,7 @@ function initCamera() {
         motor: new Mv(),
     }
 
-    camera.toHaveUpdateFromMvCalled = []
+    camera.toUpdateAppearance = []
 
     camera.worldToCanvas = new THREE.Matrix4()
     camera.updateWorldToCanvas = () => {
@@ -86,8 +86,8 @@ function initCamera() {
 
         camera.updateWorldToCanvas()
 
-        for (let i = 0, il = camera.toHaveUpdateFromMvCalled.length; i < il; ++i)
-            camera.toHaveUpdateFromMvCalled[i].updateFromMv(true)
+        for (let i = 0, il = camera.toUpdateAppearance.length; i < il; ++i)
+            camera.toUpdateAppearance[i].updateAppearanceFromState()
     }
     addToCameraLonLat(0.,0.)
 
@@ -99,7 +99,7 @@ function initCamera() {
         camera.near, camera.far)
     camera2d.position.z = camera.position.length()
 
-    camera2d.oldClientToPosition = (dw,target) => {
+    camera2d.getOldClientWorldPosition = (dw,target) => {
         let [xProportion, yProportion] = oldClientToDwNdc(dw)
         target.x = camera2d.left + xProportion * (camera2d.right - camera2d.left)
         target.y = camera2d.bottom + (1. - yProportion) * (camera2d.top - camera2d.bottom)

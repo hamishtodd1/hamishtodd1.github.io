@@ -42,59 +42,64 @@ function initComplexNumbers() {
 
     let ourDw = dws.mobius
 
-    let newValues = Array(2)
     class complexMention extends Mention {
-        mesh;
+        #mesh;
 
         constructor(variable) {
             super(variable)
+            this.state = new THREE.Vector2()
 
             let mat = new THREE.MeshBasicMaterial({ color: variable.col })
-            this.mesh = ourDw.NewMesh(dotGeo, mat)
+            this.#mesh = ourDw.NewMesh(dotGeo, mat)
         }
 
-        updateFromShader() {
-            getShaderOutput(this.mentionIndex, newValues)
-            this.mesh.position.x = newValues[0]
-            this.mesh.position.y = newValues[1]
+        equals(m) {
+            return m.state.equals(this.state)
         }
 
-        respondToDrag(dw) {
-            if (dw === ourDw) {
-                camera2d.oldClientToPosition(dw, this.mesh.position)
-                
-                updateOverride(this, (overrideFloats) => {
-                    overrideFloats[0] = this.mesh.position.x
-                    overrideFloats[1] = this.mesh.position.y
-                })
-            }
+        updateStateFromRunResult(floatArray) {
+            this.state.x = floatArray[0]
+            this.state.y = floatArray[1]
+        }
+
+        updateStateFromDrag(dw) {
+            if (dw === ourDw)
+                camera2d.getOldClientWorldPosition(dw, this.state)
             else console.error("not in that dw")
         }
 
-        getWorldCenter(dw, target) {
-            target.copy( this.mesh.position )
+        updateOverrideFloatsFromState() {
+            overrideFloats[0] = this.state.x
+            overrideFloats[1] = this.state.y
         }
 
-        getReassignmentPostEqualsFromCpu() {
-            return this.getValuesAssignment(this.mesh.position.x, this.mesh.position.y )
+        getLiteralAssignmentFromState() {
+            return this.getLiteralAssignmentFromValues(this.state.x, this.state.y)
+        }
+
+        //-----------
+
+        updateAppearanceFromState() {
+            this.#mesh.position.x = this.state.x
+            this.#mesh.position.y = this.state.y
+        }
+
+        getWorldCenter(dw, target) {
+            target.copy( this.#mesh.position )
         }
 
         setVisibility(newVisibility) {
-            this.mesh.visible = newVisibility
+            this.#mesh.visible = newVisibility
         }
 
         isVisibleInDw(dw) {
             if (dw !== ourDw )
                 return false
-            return this.mesh.visible
+            return this.#mesh.visible
         }
 
         getTextareaManipulationDw() {
             return ourDw
-        }
-
-        equals(m) {
-            return m.mesh.position.equals(this.mesh.position)
         }
     }
     new MentionType("vec2", 2, complexMention)

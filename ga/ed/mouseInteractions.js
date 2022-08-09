@@ -73,17 +73,22 @@ function initMouseInteractions() {
                 //neaten up this updateOverride horsecrap
 
                 dragOccurred = true
-                if( indicatedMention.variable.isUniform) {
-                    
-                }
-                else if (indicatedMention.variable.isIn) {
+                if (indicatedMention.variable.isIn) {
                     //dragging this does not change data, but selects among it
                 }
-                else
-                    indicatedMention.respondToDrag(grabbedDw)
+                else {
+                    indicatedMention.updateStateFromDrag(grabbedDw)
+                    if( indicatedMention.variable.isUniform )
+                        m.updateAppearanceFromState()
+                    else {
+                        indicatedMention.updateOverrideFloatsFromState()
+                        updateOverride(indicatedMention.mentionIndex)
+                    }
+                    //and if it IS a uniform, can it be updated automatically??
+                }
     
-                updateMentionsFromShader((mention) => {
-                    return mentionVisibleDueToCaret(mention) || mention === indicatedMention
+                updateVariableMentionsFromRun((mention) => {
+                    return mention === indicatedMention || mentionVisibleDueToCaret(mention)
                 })
 
                 indicatedMention.highlight()
@@ -153,14 +158,14 @@ function initMouseInteractions() {
 
         dragOccurred = false
         indicatedMention.onLetGo()
-        updateOverride(null)
+        updateOverride(-1)
         
         if (!indicatedMention.variable.isUniform &&
             !indicatedMention.variable.isIn) {
             let [caretColumnIndex, caretLineIndex] = getCaretColumnAndLine() //done first since we're about to change stuff
             
             let newLine = "\n    " + indicatedMention.variable.name + " = " + 
-                indicatedMention.getReassignmentPostEqualsFromCpu() + ";\n"
+                indicatedMention.getLiteralAssignmentFromState() + ";\n"
             let lines = textarea.value.split("\n")
             let pre  = lines.slice(0, indicatedMention.lineIndex + 1).join("\n")
             let post = lines.slice(indicatedMention.lineIndex + 1).join("\n")

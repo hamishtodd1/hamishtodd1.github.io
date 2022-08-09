@@ -43,71 +43,79 @@ function initPoints() {
     let ptNewValues = new Float32Array(4)
     let displayableVersion = new Mv()
     class vec4Mention extends Mention {
-        #eDwMesh;
-        #iDwMesh;
-        #mv = new Mv();
+        #eDwMesh
+        #iDwMesh
 
         constructor(variable) {
             super(variable)
+            this.state = new THREE.Vector4(0.,0.,0.,1.)
 
             let mat = new THREE.MeshBasicMaterial({ color: variable.col })
             this.#eDwMesh = eDw.NewMesh(pointGeo, mat)
             this.#iDwMesh = iDw.NewMesh(pointGeo, mat)
             
-            camera.toHaveUpdateFromMvCalled.push(this)
+            camera.toUpdateAppearance.push(this)
         }
 
-        updateFromMv(isCameraUpdate) {
-            if (this.#mv[14] !== 0.) {
-                this.#iDwMesh.position.set(0.,0.,0.)
+        equals(m) {
+            return m.state.equals(this.state)
+        }
 
-                this.#mv.toVector(this.#eDwMesh.position)
+        updateStateFromRunResult(floatArray) {
+            this.state.fromArray(floatArray)
+        }
+
+        onGrab(dw) {
+            if(dw === eDw) {
+                mv0.fromVec4(this.state)
+                if (mv0.hasEuclideanPart())
+                    camera.frustum.far.projectOn(mv0, dragPlane)
+                else dragPlane.copy(e0)
+            }
+        }
+
+        updateStateFromDrag(dw) {
+            //might be nice to snap to a grid
+
+            if(dw === eDw) {
+                let mouseRay = getMouseRay(dw)
+                meet(dragPlane, mouseRay, mv0)
+                mv0.toVec4(this.state)
+            }
+            else if(dw === iDw) {
+                iDw.mouseRayIntersection(mv0, true)
+                mv0.toVec4(this.state)
+            }
+            else console.error("not in that dw")
+        }
+
+        updateOverrideFloatsFromState() {
+            this.state.toArray(overrideFloats)
+       }
+
+        getLiteralAssignmentFromState() {
+            return this.getLiteralAssignmentFromValues(this.state.x, this.state.y, this.state.z, this.state.w)
+        }
+
+        //-------------
+
+        updateAppearanceFromState() {
+            if (this.state.w !== 0.) {
+                this.#iDwMesh.position.set(0., 0., 0.)
+                this.#eDwMesh.position.copy(this.state).multiplyScalar(1./this.state.w)
             }
             else {
-                this.#mv.toVector(this.#iDwMesh.position)
+                this.#iDwMesh.position.copy(this.state)
                 this.#iDwMesh.position.setLength(INFINITY_RADIUS)
 
-                this.#mv.getDisplayableVersion(displayableVersion)
+                mv0.fromVec4(this.state)
+                mv0.getDisplayableVersion(displayableVersion)
                 let isInFrontOfCamera = displayableVersion[14] > 0.
                 if (isInFrontOfCamera)
                     displayableVersion.toVectorDisplayable(this.#eDwMesh.position)
                 else
                     this.#eDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
             }
-        }
-
-        updateFromShader() {
-            getShaderOutput(this.mentionIndex, ptNewValues)
-            this.#mv.point(ptNewValues[0], ptNewValues[1], ptNewValues[2], ptNewValues[3])
-            
-            this.updateFromMv(false)
-        }
-
-        onGrab(dw) {
-            if(dw === eDw) {
-                if (this.#mv.hasEuclideanPart())
-                    camera.frustum.far.projectOn(this.#mv, dragPlane)
-                else dragPlane.copy(e0)
-            }
-        }
-
-        respondToDrag(dw) {
-            //might be nice to snap to a grid
-
-            function getFloatsForOverride(overrideFloats) {
-                overrideFloats[0] = mv0[13]; overrideFloats[1] = mv0[12]; overrideFloats[2] = mv0[11]; overrideFloats[3] = mv0[14]
-            }
-
-            if(dw === eDw) {
-                let mouseRay = getMouseRay(dw)
-                meet(dragPlane, mouseRay, mv0)
-                updateOverride(this, getFloatsForOverride)
-            }
-            else if(dw === iDw) {
-                iDw.mouseRayIntersection(mv0, true)
-                updateOverride(this, getFloatsForOverride)
-            }
-            else console.error("not in that dw")
         }
 
         getWorldCenter(dw, target) {
@@ -121,10 +129,6 @@ function initPoints() {
             }
             else
                 console.error("not in that dw")
-        }
-
-        getReassignmentPostEqualsFromCpu() {
-            return this.getValuesAssignment(this.#mv[13], this.#mv[12], this.#mv[11], this.#mv[14])
         }
 
         setVisibility(newVisibility) {
@@ -144,14 +148,10 @@ function initPoints() {
         }
 
         getTextareaManipulationDw() {
-            if(this.#mv[14] === 0.)
+            if(this.state.w === 0.)
                 return iDw
             else
                 return eDw
-        }
-
-        equals(m) {
-            return m.#mv.equals(this.#mv)
         }
     }
     new MentionType("vec4", 4, vec4Mention)

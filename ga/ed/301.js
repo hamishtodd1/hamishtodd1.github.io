@@ -4,119 +4,100 @@ function init301WithoutDeclarations(basisNames) {
     const N_ROTOR_COEFS = 8
     const N_BIVECTOR_COEFS = 6
 
-    //would be nice to have them inherit copy, set, clone, multiplyScalar, add
-    //but, how to get N_COEFS in?
-
-    class Biv extends Float32Array {
-        constructor() {
-            super(N_BIVECTOR_COEFS)
-        }
-
-        copy(a) {
-            for (let i = 0; i < N_BIVECTOR_COEFS; ++i)
-                this[i] = a[i]
-
-            return this
-        }
-
+    class GeneralVector extends Float32Array {
+        
         set() {
             return this.copy(arguments)
         }
 
-        clone() {
-            let cl = new Mv()
-            cl.copy(this)
-
-            return cl
-        }
-
         multiplyScalar(s) {
-            for (let i = 0; i < N_BIVECTOR_COEFS; ++i)
+            for (let i = 0; i < this.constructor.size; ++i)
                 this[i] *= s
 
             return this
         }
 
+        copy(a) {
+            for (let i = 0; i < this.constructor.size; ++i)
+                this[i] = a[i]
+
+            return this
+        }
+
+        clone() {
+            let cl = new this.constructor()
+            //also the planes lines and points' magnitude should be on the thingy
+            cl.copy(this)
+
+            return cl
+        }
+
+        equals(a) {
+            let doesEqual = true
+            for (let i = 0; i < this.constructor.size; ++i) {
+                if (this[i] !== a[i])
+                    doesEqual = false
+            }
+            return doesEqual
+        }
+
+        fromArray(arr) {
+            for (let i = 0; i < this.constructor.size; ++i)
+                this[i] = arr[i]
+
+            return this
+        }
+
+        toArray(arr) {
+            for (let i = 0; i < this.constructor.size; ++i)
+                arr[i] = this[i]
+
+            return arr
+        }
+
         fromMv(mv) {
-            for(let i = 0; i < N_BIVECTOR_COEFS; ++i)
-                this[i] = mv[i+5]
+            for (let i = 0; i < this.constructor.size; ++i)
+                this[i] = mv[this.constructor.mvOffsets[i]]
 
             return this
         }
 
         toMv(target) {
             target.copy(zeroMv)
-            for (let i = 0; i < N_BIVECTOR_COEFS; ++i)
-                target[i + 5] = this[i]
+            for (let i = 0; i < this.constructor.size; ++i)
+                target[this.constructor.mvOffsets[i]] = this[i]
 
             return target
+        }
+    }
+
+    class Biv extends GeneralVector {
+        static get mvOffsets() { return [5, 6, 7, 8, 9, 10] }
+        static get size() { return N_BIVECTOR_COEFS }
+
+        constructor() {
+            return super(N_BIVECTOR_COEFS)
         }
 
         exp(target) {
             if(target === undefined)
                 target = new Dq()
 
-            let l = (this[3] * this[3] + this[4] * this[4] + this[5] * this[5]);
+            let l = (this[3] * this[3] + this[4] * this[4] + this[5] * this[5])
             if (l == 0.)
-                return target.set(1, this[0], this[1], this[2], 0., 0., 0., 0.);
-            let m = (this[0] * this[5] + this[1] * this[4] + this[2] * this[3]), a = Math.sqrt(l), c = Math.cos(a), s = Math.sin(a) / a, t = m / l * (c - s);
-            return target.set(c, s * this[0] + t * this[5], s * this[1] + t * this[4], s * this[2] + t * this[3], s * this[3], s * this[4], s * this[5], m * s);
+                return target.set(1, this[0], this[1], this[2], 0., 0., 0., 0.)
+            let m = (this[0] * this[5] + this[1] * this[4] + this[2] * this[3]), a = Math.sqrt(l), c = Math.cos(a), s = Math.sin(a) / a, t = m / l * (c - s)
+            return target.set(c, s * this[0] + t * this[5], s * this[1] + t * this[4], s * this[2] + t * this[3], s * this[3], s * this[4], s * this[5], m * s)
         }
     }
 
-    class Dq extends Float32Array {
+    class Dq extends GeneralVector {
+        static get mvOffsets() { return [0,   5,6,7,8,9,10,   15] }
+        static get size() { return N_ROTOR_COEFS }
+
         constructor() {
-            super(N_ROTOR_COEFS)
+            return super(N_ROTOR_COEFS)
         }
-
-        copy(a) {
-            for (let i = 0; i < N_ROTOR_COEFS; ++i)
-                this[i] = a[i]
-
-            return this
-        }
-
-        clone() {
-            let cl = new Mv()
-            cl.copy(this)
-
-            return cl
-        }
-
-        set() {
-            return this.copy(arguments)
-        }
-
-        multiplyScalar(s) {
-            for (let i = 0; i < N_ROTOR_COEFS; ++i)
-                this[i] *= s
-
-            return this
-        }
-
-        fromMv(mv) {
-            this[0] = mv[0]
-            this[7] = mv[15]
-            for(let i = 0; i < 6; ++i)
-                this[i+1] = mv[i+5]
-
-            return this
-        }
-
-        toMv(target) {
-            target.copy(zeroMv)
-
-            target[0] = this[0]
-            target[15] = this[7]
-            for (let i = 0; i < 6; ++i)
-                target[i + 5] = this[i + 1]
-
-            return target
-        }
-
-        ///////////////////////
-        // INTERESTING STUFF //
-        ///////////////////////
 
         getNormalization(target) {
             var A = 1. / Math.sqrt(this[0] * this[0] + this[4] * this[4] + this[5] * this[5] + this[6] * this[6])
@@ -130,6 +111,17 @@ function init301WithoutDeclarations(basisNames) {
                 A * this[5],
                 A * this[6],
                 A * this[7] - B * this[0])
+        }
+
+        getBivectorPartToMv(target) {
+            for(let i = 0; i < 6; ++i)
+                localBiv0[i] = this[i+1]
+            localBiv0.toMv(target)
+        }
+
+        setBivectorPartFromMvAndMagnitude(mv, scalar) {
+            for (let i = 0; i < 6; ++i)
+                this[i+1] = mv[i+5] * scalar
         }
 
         normalize() {
@@ -160,34 +152,11 @@ function init301WithoutDeclarations(basisNames) {
     }
     window.Dq = Dq
 
-    class Mv extends Float32Array {
+    class Mv extends GeneralVector {
+        static get size() { return N_COEFS }
+
         constructor() {
-            super(N_COEFS)
-        }
-
-        copy(a) {
-            for (let i = 0; i < N_COEFS; ++i)
-                this[i] = a[i]
-
-            return this
-        }
-
-        set() {
-            return this.copy(arguments)
-        }
-
-        clone() {
-            let cl = new Mv()
-            cl.copy(this)
-
-            return cl
-        }
-
-        multiplyScalar(s) {
-            for (let i = 0; i < N_COEFS; ++i)
-                this[i] *= s
-
-            return this
+            return super(N_COEFS)
         }
 
         fromLerp(a,b,proportion) {
@@ -219,6 +188,14 @@ function init301WithoutDeclarations(basisNames) {
             this[14] = v.w
 
             return this
+        }
+        toVec4(v) {
+            v.x = this[13]
+            v.y = this[12]
+            v.z = this[11]
+            v.w = this[14]
+
+            return v
         }
 
         toVector(v) {
@@ -268,6 +245,10 @@ function init301WithoutDeclarations(basisNames) {
 
             return this
         }
+
+        // getPlane(target) {
+
+        // }
 
         point(x,y,z,w) {
             if(w === undefined)
@@ -458,15 +439,6 @@ function init301WithoutDeclarations(basisNames) {
             let doesEqual = true
             for(let i = 0; i < N_COEFS; ++i) {
                 if (Math.abs(this[i] - mv[i]) > .0001)
-                    doesEqual = false
-            }
-            return doesEqual
-        }
-
-        equals(mv) {
-            let doesEqual = true
-            for (let i = 0; i < N_COEFS; ++i) {
-                if( this[i] !== mv[i])
                     doesEqual = false
             }
             return doesEqual

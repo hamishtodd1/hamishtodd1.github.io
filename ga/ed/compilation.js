@@ -200,7 +200,7 @@ async function initCompilation()
                         overrideGoesBefore = false
 
                     let overrideAddition = `\nif( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` +
-                        mention.variable.name + " = " + mention.variable.type.reassignmentPostEqualsFromOverride + ";"
+                        mention.variable.name + " = " + mention.variable.type.literalAssignmentFromOverride + ";"
                     if (overrideGoesBefore) {
                         finalChunks[lineIndex]     = overrideAddition +     finalChunks[lineIndex]
                         outputterChunks[lineIndex] = overrideAddition + outputterChunks[lineIndex]
@@ -246,7 +246,7 @@ async function initCompilation()
 
         updateLclsc(Infinity)
 
-        updateMentionsFromShader(()=>true)
+        updateVariableMentionsFromRun(()=>true)
 
         variables.forEach((v)=>{
             let currentDuplicates

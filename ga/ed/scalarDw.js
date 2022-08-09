@@ -29,7 +29,7 @@ function initFloats() {
     }
 
     let downwardPyramidGeo = new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(0., 0., 0.),
+        new THREE.Vector3( 0., 0., 0.),
         new THREE.Vector3( .3, .3, 0.),
         new THREE.Vector3(-.3, .3, 0.),
     ])
@@ -40,34 +40,44 @@ function initFloats() {
 
         constructor(variable) {
             super(variable)
+            this.state = 0.
 
             let mat = new THREE.MeshBasicMaterial({ color: variable.col })
             this.#mesh = sDw.NewMesh(downwardPyramidGeo, mat)
         }
 
-        updateFromShader() {
-            getShaderOutput(this.mentionIndex, newValues )
-            this.#mesh.position.x = newValues[0]
+        equals(m) {
+            return m.state === this.state
         }
 
-        respondToDrag(dw) {
+        updateStateFromRunResult(floatArray) {
+            this.state = floatArray[0]
+        }
+
+        updateStateFromDrag(dw) {
             if (dw === sDw) {
-                camera2d.oldClientToPosition(dw, this.#mesh.position)
-                this.#mesh.position.y = 0.
-                
-                updateOverride(this, (overrideFloats) => {
-                    overrideFloats[0] = this.#mesh.position.x
-                })
+                camera2d.getOldClientWorldPosition(dw, v1)
+                this.state = v1.x
             }
             else console.error("not in that dw")
         }
 
-        getWorldCenter(dw, target) {
-            return target.copy(this.#mesh.position)
+        updateOverrideFloatsFromState() {
+            overrideFloats[0] = this.state
         }
 
-        getReassignmentPostEqualsFromCpu() {
-            return parseFloat(this.#mesh.position.x.toFixed(2))
+        getLiteralAssignmentFromState() {
+            return parseFloat(this.state.toFixed(2))
+        }
+
+        //-------------
+
+        updateAppearanceFromState() {
+            this.#mesh.position.set(this.state, 0.)
+        }
+
+        getWorldCenter(dw, target) {
+            return target.copy(this.#mesh.position)
         }
 
         setVisibility(newVisibility) {
@@ -83,13 +93,9 @@ function initFloats() {
         getTextareaManipulationDw() {
             return sDw
         }
-
-        equals(m) {
-            return m.#mesh.position.x === this.#mesh.position.x
-        }
     }
     
     let mt = new MentionType("float", 1, floatMention)
-    mt.reassignmentPostEqualsFromOverride = "overrideFloats[0]"
+    mt.literalAssignmentFromOverride = `overrideFloats[0]`
     mt.outputAssignmentPropts = [``]
 }

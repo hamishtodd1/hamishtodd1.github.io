@@ -69,6 +69,8 @@ function initMention() {
         mentionIndex = -1
         duplicates = []
 
+        state
+
         constructor(variable) {
             this.variable = variable
         }
@@ -83,7 +85,6 @@ function initMention() {
             return ourIndex < this.variable.lowestUnusedMention
         }
 
-        //often overridden
         getWindowCenter(dw) {
             this.getWorldCenter(dw, worldCenter)
             return dw.worldToWindow(worldCenter)
@@ -139,7 +140,7 @@ function initMention() {
         ///////////////////////
 
         //hmm, really looks like type business
-        getValuesAssignment() {
+        getLiteralAssignmentFromValues() {
             let commaSeparated = ""
             for (let i = 0, il = arguments.length; i < il; ++i) {
                 let asStr = parseFloat(arguments[i].toFixed(2))
@@ -202,7 +203,7 @@ function initMention() {
         ourConstructor
         outputAssignmentPropts
         regexes = {}
-        reassignmentPostEqualsFromOverride
+        literalAssignmentFromOverride
 
         constructor(glslName, numFloats, ourConstructor, outputAssignmentPropts) {
             this.glslName = glslName
@@ -227,7 +228,7 @@ function initMention() {
             let commaSeparated = ``
             for (let i = 0; i < this.numFloats; ++i)
                 commaSeparated += `overrideFloats[` + i + `]` + (i === this.numFloats - 1 ? `` : `,`)
-            this.reassignmentPostEqualsFromOverride = this.glslName + `(` + commaSeparated + `)`
+            this.literalAssignmentFromOverride = this.glslName + `(` + commaSeparated + `)`
 
             mentionTypes.push(this)
         }
