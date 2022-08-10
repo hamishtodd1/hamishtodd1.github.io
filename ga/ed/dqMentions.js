@@ -228,7 +228,7 @@ function initDqs() {
         }
 
         getLiteralAssignmentFromState() {
-            return this.getLiteralAssignmentFromValues(this.state[0], this.state[1], this.state[2], this.state[3], this.state[4], this.state[5], this.state[6], this.state[7])
+            return this.variable.type.getLiteralAssignmentFromValues(this.state[0], this.state[1], this.state[2], this.state[3], this.state[4], this.state[5], this.state[6], this.state[7])
         }
 
         //----------

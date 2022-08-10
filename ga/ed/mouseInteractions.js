@@ -78,18 +78,21 @@ function initMouseInteractions() {
                 }
                 else {
                     indicatedMention.updateStateFromDrag(grabbedDw)
-                    if( indicatedMention.variable.isUniform )
-                        m.updateAppearanceFromState()
-                    else {
-                        indicatedMention.updateOverrideFloatsFromState()
-                        updateOverride(indicatedMention.mentionIndex)
+                    if( indicatedMention.variable.isUniform ) {
+                        //gonna get up to some business!
                     }
-                    //and if it IS a uniform, can it be updated automatically??
+                    else
+                        updateOverride(indicatedMention)
+
+                    indicatedMention.updateAppearanceFromState()
                 }
     
                 updateVariableMentionsFromRun((mention) => {
-                    return mention === indicatedMention || mentionVisibleDueToCaret(mention)
+                    return mentionVisibleDueToCaret(mention)
                 })
+
+                //if you ever see dragging around looking ok, then when you let go it goes to shit
+                //it might be that your adjustment of the state on the cpu side, after the round trip, is mangled
 
                 indicatedMention.highlight()
             }
@@ -158,7 +161,7 @@ function initMouseInteractions() {
 
         dragOccurred = false
         indicatedMention.onLetGo()
-        updateOverride(-1)
+        updateOverride(null)
         
         if (!indicatedMention.variable.isUniform &&
             !indicatedMention.variable.isIn) {

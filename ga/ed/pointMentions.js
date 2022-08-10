@@ -94,7 +94,7 @@ function initPoints() {
        }
 
         getLiteralAssignmentFromState() {
-            return this.getLiteralAssignmentFromValues(this.state.x, this.state.y, this.state.z, this.state.w)
+            return this.variable.type.getLiteralAssignmentFromValues(this.state.x, this.state.y, this.state.z, this.state.w)
         }
 
         //-------------

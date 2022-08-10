@@ -109,6 +109,10 @@ function initVec3s()
             shaft.matrixAutoUpdate = false
         }
 
+        equals(m) {
+            return m.state.equals(this.state)
+        }
+
         updateStateFromRunResult(floatArray) {
             this.state.fromArray(floatArray)
         }
@@ -150,7 +154,7 @@ function initVec3s()
         }
 
         getLiteralAssignmentFromState() {
-            return this.getLiteralAssignmentFromValues(this.state.x, this.state.y, this.state.z)
+            return this.variable.type.getLiteralAssignmentFromValues(this.state.x, this.state.y, this.state.z)
         }
 
         //-------------
@@ -231,10 +235,6 @@ function initVec3s()
 
         getTextareaManipulationDw() {
             return iDw
-        }
-
-        equals(m) {
-            return m.state.equals(this.state)
         }
     }
 

@@ -61,7 +61,7 @@ function initPlanes() {
             if(dw === eDw) {
                 //can maybe implement editing e0
                 //if you do, need to fix the problem that you're not even "grabbing" the plane in eDw when it's e0
-                
+                    
                 let dragPlane = camera.frustum.far.projectOn(lastDragPoint, mv0)
                 let mouseRay = getMouseRay(dw)
                 let newDragPoint = meet(dragPlane,mouseRay,mv2).normalize()
@@ -90,7 +90,7 @@ function initPlanes() {
         }
 
         getLiteralAssignmentFromState() {
-            return this.getLiteralAssignmentFromValues(this.state[1], this.state[2], this.state[3], this.state[4])
+            return this.variable.type.getLiteralAssignmentFromValues(this.state[1], this.state[2], this.state[3], this.state[4])
         }
 
         //-------------

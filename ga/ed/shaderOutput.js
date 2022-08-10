@@ -12,8 +12,11 @@ async function initShaderOutputAndFinalDw() {
             uniforms.overrideFloats = overrideFloatsUniform
         }
 
-        updateOverride = (mentionIndex) => {
-            overrideMentionIndex.value = mentionIndex
+        updateOverride = (indicatedMention) => {
+            if (indicatedMention !== null) {
+                indicatedMention.updateOverrideFloatsFromState()
+                overrideMentionIndex.value = indicatedMention.mentionIndex
+            }
 
             for (let i = 0, il = overrideAffectedMaterials.length; i < il; ++i)
                 overrideAffectedMaterials[i].needsUpdate = true

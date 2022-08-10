@@ -134,23 +134,6 @@ function initMention() {
                     setSvgLine($labelConnectors[i], -10, -10, -10, -10)
             }
         }
-
-        ///////////////////////
-        // debug bookkeeping //
-        ///////////////////////
-
-        //hmm, really looks like type business
-        getLiteralAssignmentFromValues() {
-            let commaSeparated = ""
-            for (let i = 0, il = arguments.length; i < il; ++i) {
-                let asStr = parseFloat(arguments[i].toFixed(2))
-                if (asStr === Math.round(asStr))
-                    asStr += "."
-                commaSeparated += asStr + (i === il - 1 ? "" : ",")
-            }
-
-            return this.variable.type.glslName + "(" + commaSeparated + ")"
-        }
     }
     window.Mention = Mention
 
@@ -160,11 +143,12 @@ function initMention() {
     class Variable {
         name
         type
+        isIn = false
+        isUniform = false
+        //could have something to indicate it's neither of those. A "variable" I guess
 
         col = new THREE.Color(0., 0., 0.)
         assignmentToOutput = ""
-        isIn = false
-        isUniform = false
 
         lowestUnusedMention = 0
         mentions = []
@@ -231,6 +215,18 @@ function initMention() {
             this.literalAssignmentFromOverride = this.glslName + `(` + commaSeparated + `)`
 
             mentionTypes.push(this)
+        }
+
+        getLiteralAssignmentFromValues() {
+            let commaSeparated = ""
+            for (let i = 0, il = arguments.length; i < il; ++i) {
+                let asStr = parseFloat(arguments[i].toFixed(2))
+                if (asStr === Math.round(asStr))
+                    asStr += "."
+                commaSeparated += asStr + (i === il - 1 ? "" : ",")
+            }
+
+            return this.glslName + "(" + commaSeparated + ")"
         }
     }
     window.MentionType = MentionType

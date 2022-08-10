@@ -94,8 +94,14 @@ function initFloats() {
             return sDw
         }
     }
+
+    //the variable encompasses every use of the name
+    //the mention is all about the individual appearance of the name. They share one variable
+    //the appearance can be ascribed to multiple mentions
+    //if it's a uniform variable, it has just the one appearance
+    //this is premature optimization
     
-    let mt = new MentionType("float", 1, floatMention)
-    mt.literalAssignmentFromOverride = `overrideFloats[0]`
-    mt.outputAssignmentPropts = [``]
+    let mentionType = new MentionType("float", 1, floatMention)
+    mentionType.literalAssignmentFromOverride = `overrideFloats[0]`
+    mentionType.outputAssignmentPropts = [``]
 }

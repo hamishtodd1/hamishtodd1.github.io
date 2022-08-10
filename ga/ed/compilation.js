@@ -79,6 +79,7 @@ async function initCompilation()
         let uniforms = {}
         let outputterUniforms = {} // the "in"s are turned into uniforms
         let geo = new THREE.BufferGeometry()
+        let mentionIndex = 0
 
         variables.forEach((variable)=>{
             variable.lowestUnusedMention = 0
@@ -122,7 +123,8 @@ async function initCompilation()
                     if(type.glslName === 'float')
                         uniforms[name] = { value: 1. }
                     if (type.glslName === 'vec3')
-                        uniforms[name] = { value: new THREE.Vector3(1.,1.,1.) }
+                        uniforms[name] = { value: new THREE.Vector3(1.,1.,1.) } 
+                    //would be good to have these be the state
                 }
                 
                 /*
@@ -145,7 +147,6 @@ async function initCompilation()
         let textLines = text.split("\n")
         let finalChunks = Array(textLines.length)
         let outputterChunks = Array(textLines.length)
-        let mentionIndex = 0
         //we assume that stuff is limited to a line
         //All that's relevant is on it
         //If we change it in its entirety, nothing will be lost
@@ -174,11 +175,15 @@ async function initCompilation()
 
             //faster might be a match of the whole thing rather than the individual lines
             let matches = [...l.matchAll(potentialNameRegex)]
-            matches.forEach((match)=>{
+            matches.forEach( (match) => {
                 let name = match[0]
                 let variable = variables.find((v) => v.name === name)
                 if( variable === undefined )
                     return
+
+                //for several reasons, would be good to check whether the variable has received an assignment
+                //pretty hard to tell. Eg foo( out target);
+                //because of uniforms, will have infrastructure to have one variable, one mesh
 
                 //may want to modify them both using the usual interface
                 //but that, instead of changing a line of code in the shader, modifies the input array

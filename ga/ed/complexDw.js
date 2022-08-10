@@ -74,7 +74,7 @@ function initComplexNumbers() {
         }
 
         getLiteralAssignmentFromState() {
-            return this.getLiteralAssignmentFromValues(this.state.x, this.state.y)
+            return this.variable.type.getLiteralAssignmentFromValues(this.state.x, this.state.y)
         }
 
         //-----------
