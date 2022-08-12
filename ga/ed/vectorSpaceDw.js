@@ -68,7 +68,7 @@ function initVec3s()
 
     let dragPlane = new Mv()
     let whenGrabbed = new THREE.Vector3()
-    class vec3Mention extends Mention {
+    class vec3Appearance extends Appearance {
         #vMesh
         #iMesh
         #sMesh
@@ -80,10 +80,10 @@ function initVec3s()
             super(variable)
             this.state = new THREE.Vector3(1.,1.,1.)
 
-            let scalarMat = new THREE.MeshBasicMaterial({ color: variable.col })
+            let scalarMat = new THREE.MeshBasicMaterial()
             this.#sMesh = sDw.NewMesh(downwardPyramidGeo, scalarMat)
 
-            let mat = new THREE.MeshPhongMaterial({ color: variable.col })
+            let mat = new THREE.MeshPhongMaterial()
             this.#iMesh = iDw.NewMesh(pointGeo, mat)    
             
             this.#vMesh = vDw.NewObject3D()
@@ -107,6 +107,13 @@ function initVec3s()
             shaft.castShadow = true
             head.matrixAutoUpdate = false
             shaft.matrixAutoUpdate = false
+        }
+
+        setColor(col) {
+            this.#sMesh.material.color.copy(col)
+            this.#sMesh.material.needsUpdate = true
+            this.#iMesh.material.color.copy(col)
+            this.#iMesh.material.needsUpdate = true
         }
 
         equals(m) {
@@ -153,6 +160,11 @@ function initVec3s()
             this.state.toArray(overrideFloats)
         }
 
+        updateUniformFromState() {
+            if (this.uniform.value === null)
+                this.uniform.value = this.state
+        }
+
         getLiteralAssignmentFromState() {
             return this.variable.type.getLiteralAssignmentFromValues(this.state.x, this.state.y, this.state.z)
         }
@@ -160,45 +172,55 @@ function initVec3s()
         //-------------
 
         updateAppearanceFromState() {
+            this.#sMesh.position.x = this.state.length()
+            if ( !whenGrabbed.equals(zeroVector) && this.state.dot(whenGrabbed) < 0.) //possibly do something about duplicates?
+                this.#sMesh.position.x *= -1.
+
             this.#iMesh.position.copy(this.state)
             this.#iMesh.position.setLength(INFINITY_RADIUS)
-
-            this.#sMesh.position.x = this.state.length()
-            if ( !whenGrabbed.equals(zeroVector) && this.state.dot(whenGrabbed) < 0.)
-                this.#sMesh.position.x *= -1.
 
             let head = this.#vMesh.head
             let shaft = this.#vMesh.shaft
             let dashedLines = this.#vMesh.dashedLines
+            if (this.state.equals(zeroVector)) {
+                head.matrix.setPosition(OUT_OF_SIGHT_VECTOR3)
+                shaft.matrix.setPosition(OUT_OF_SIGHT_VECTOR3)
+                for (let edgeTrio = 0; edgeTrio < 3; ++edgeTrio) {
+                    for (let i = 0; i < 3; ++i)
+                        dashedLines[edgeTrio][i].position.copy(OUT_OF_SIGHT_VECTOR3)
+                }
+            }
+            else {
+                let shaftVec = v1.copy(this.state).setLength(this.state.length() - headHeight)
+                setRotationallySymmetricMatrix(shaftVec.x, shaftVec.y, shaftVec.z, shaft.matrix)
+                let headVec = v1.copy(this.state).setLength(headHeight)
+                setRotationallySymmetricMatrix(headVec.x, headVec.y, headVec.z, head.matrix)
+                head.matrix.setPosition(this.state)
 
-            let shaftVec = v1.copy(this.state).setLength(this.state.length() - headHeight)
-            setRotationallySymmetricMatrix(shaftVec.x, shaftVec.y, shaftVec.z, shaft.matrix)
-            let headVec  = v1.copy(this.state).setLength(headHeight)
-            setRotationallySymmetricMatrix(headVec.x, headVec.y, headVec.z, head.matrix)
-            head.matrix.setPosition(this.state)
+                let edgeAttachedToVec = 0
+                for (let edgeTrio = 0; edgeTrio < 3; ++edgeTrio) {
+                    //the set of 3 that ends up in the edgeTrio-plane, eg with arr[edgeTrio] set to 0
+                    for (let i = 0; i < 3; ++i) {
+                        let arr = dashedLines[edgeTrio][i].geometry.attributes.position.array
 
-            let edgeAttachedToVec = 0
-            for (let edgeTrio = 0; edgeTrio < 3; ++edgeTrio) {
-                //the set of 3 that ends up in the edgeTrio-plane, eg with arr[edgeTrio] set to 0
-                for (let i = 0; i < 3; ++i) {
-                    let arr = dashedLines[edgeTrio][i].geometry.attributes.position.array
-
-                    v1.copy(this.state)
-                    v1.setComponent(edgeTrio,0.)
-                    v1.toArray(arr, 0)
-
-                    if(i === edgeAttachedToVec)
-                        this.state.toArray(arr,3)
-                    else {
                         v1.copy(this.state)
-                        v1.setComponent(edgeTrio,0.)
-                        let definitelyANotYetZeroedComponent = (edgeTrio + i) % 3
-                        v1.setComponent(definitelyANotYetZeroedComponent, 0.)
-                        v1.toArray(arr, 3)
-                    }
+                        v1.setComponent(edgeTrio, 0.)
+                        v1.toArray(arr, 0)
 
-                    dashedLines[edgeTrio][i].computeLineDistances()
-                    dashedLines[edgeTrio][i].geometry.attributes.position.needsUpdate = true
+                        if (i === edgeAttachedToVec)
+                            this.state.toArray(arr, 3)
+                        else {
+                            v1.copy(this.state)
+                            v1.setComponent(edgeTrio, 0.)
+                            let definitelyANotYetZeroedComponent = (edgeTrio + i) % 3
+                            v1.setComponent(definitelyANotYetZeroedComponent, 0.)
+                            v1.toArray(arr, 3)
+                        }
+
+                        dashedLines[edgeTrio][i].position.set(0.,0.,0.)
+                        dashedLines[edgeTrio][i].computeLineDistances()
+                        dashedLines[edgeTrio][i].geometry.attributes.position.needsUpdate = true
+                    }
                 }
             }
         }
@@ -238,5 +260,5 @@ function initVec3s()
         }
     }
 
-    new MentionType("vec3", 3, vec3Mention)
+    new AppearanceType("vec3", 3, vec3Appearance)
 }

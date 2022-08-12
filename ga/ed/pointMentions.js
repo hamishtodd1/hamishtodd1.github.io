@@ -40,21 +40,25 @@ function initPoints() {
     let iDw = dws.infinity
 
     let dragPlane = new Mv()
-    let ptNewValues = new Float32Array(4)
     let displayableVersion = new Mv()
-    class vec4Mention extends Mention {
+    class vec4Appearance extends Appearance {
         #eDwMesh
         #iDwMesh
-
+        
         constructor(variable) {
             super(variable)
             this.state = new THREE.Vector4(0.,0.,0.,1.)
 
-            let mat = new THREE.MeshBasicMaterial({ color: variable.col })
+            let mat = new THREE.MeshBasicMaterial()
             this.#eDwMesh = eDw.NewMesh(pointGeo, mat)
             this.#iDwMesh = iDw.NewMesh(pointGeo, mat)
             
             camera.toUpdateAppearance.push(this)
+        }
+
+        setColor(col) {
+            this.#eDwMesh.material.color.copy(col)
+            this.#eDwMesh.material.needsUpdate = true
         }
 
         equals(m) {
@@ -91,7 +95,12 @@ function initPoints() {
 
         updateOverrideFloatsFromState() {
             this.state.toArray(overrideFloats)
-       }
+        }
+
+        updateUniformFromState() {
+            if (this.uniform.value === null)
+                this.uniform.value = this.state
+        }
 
         getLiteralAssignmentFromState() {
             return this.variable.type.getLiteralAssignmentFromValues(this.state.x, this.state.y, this.state.z, this.state.w)
@@ -154,5 +163,5 @@ function initPoints() {
                 return eDw
         }
     }
-    new MentionType("vec4", 4, vec4Mention)
+    new AppearanceType("vec4", 4, vec4Appearance)
 }

@@ -34,46 +34,55 @@ function initFloats() {
         new THREE.Vector3(-.3, .3, 0.),
     ])
 
-    let newValues = Array(1)
-    class floatMention extends Mention {
+    class floatAppearance extends Appearance {
         #mesh
 
         constructor(variable) {
             super(variable)
-            this.state = 0.
+            this.state = new Float32Array(1)
+            this.state[0] = 1.
 
-            let mat = new THREE.MeshBasicMaterial({ color: variable.col })
+            let mat = new THREE.MeshBasicMaterial()
             this.#mesh = sDw.NewMesh(downwardPyramidGeo, mat)
         }
 
+        setColor(col) {
+            this.#mesh.material.color.copy(col)
+            this.#mesh.material.needsUpdate = true
+        }
+
         equals(m) {
-            return m.state === this.state
+            return m.state[0] === this.state[0]
         }
 
         updateStateFromRunResult(floatArray) {
-            this.state = floatArray[0]
+            this.state[0] = floatArray[0]
         }
 
         updateStateFromDrag(dw) {
             if (dw === sDw) {
                 camera2d.getOldClientWorldPosition(dw, v1)
-                this.state = v1.x
+                this.state[0] = v1.x
             }
             else console.error("not in that dw")
         }
 
         updateOverrideFloatsFromState() {
-            overrideFloats[0] = this.state
+            overrideFloats[0] = this.state[0]
+        }
+
+        updateUniformFromState() {
+            this.uniform.value = this.state[0]
         }
 
         getLiteralAssignmentFromState() {
-            return parseFloat(this.state.toFixed(2))
+            return parseFloat(this.state[0].toFixed(2))
         }
 
         //-------------
 
         updateAppearanceFromState() {
-            this.#mesh.position.set(this.state, 0.)
+            this.#mesh.position.set(this.state[0], 0.,0.)
         }
 
         getWorldCenter(dw, target) {
@@ -101,7 +110,7 @@ function initFloats() {
     //if it's a uniform variable, it has just the one appearance
     //this is premature optimization
     
-    let mentionType = new MentionType("float", 1, floatMention)
+    let mentionType = new AppearanceType("float", 1, floatAppearance)
     mentionType.literalAssignmentFromOverride = `overrideFloats[0]`
     mentionType.outputAssignmentPropts = [``]
 }

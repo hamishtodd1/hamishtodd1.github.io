@@ -1,5 +1,7 @@
 function initCaretInteractions() {
 
+    let lowestChangedLineSinceCompile = -1
+
     let $changedLineIndicator = document.createElementNS('http://www.w3.org/2000/svg', 'line') //weblink refers to a standard
     ourSvg.appendChild($changedLineIndicator)
     $changedLineIndicator.style.stroke = "rgb(180,180,180)"

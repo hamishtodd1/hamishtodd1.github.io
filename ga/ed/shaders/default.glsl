@@ -1,9 +1,11 @@
 
 uniform float ourUniformFloat;
-//uniform vec3 ourUniformVec3;
+uniform vec3 ourUniformVec3;
 
 vec3 getColor(in vec4 fragmentPosition) {
-    float control1 = .1;
+    ourUniformVec3;
+
+    float control1 = .5;
     vec2 control2 = vec2(1.,1.);
     vec3 control3 = vec3(1.,.5,1.);
 

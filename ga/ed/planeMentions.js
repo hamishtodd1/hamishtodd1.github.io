@@ -12,8 +12,7 @@ function initPlanes() {
 
     let lastDragPoint = new Mv()
     let ourTranslation = new Mv()
-    let planeNewValues = new Float32Array(4)
-    class PlaneMention extends Mention {
+    class PlaneAppearance extends Appearance {
         #eDwMesh
         #iDwMesh
         #sphereMesh
@@ -22,10 +21,9 @@ function initPlanes() {
         constructor(variable) {
             super(variable)
             this.state = new Mv()
-
             this.state.plane(2., 1., 1., 1.)
 
-            let mat = new THREE.MeshPhongMaterial({ color: variable.col, side: THREE.DoubleSide })
+            let mat = new THREE.MeshPhongMaterial({ side: THREE.DoubleSide })
             this.#eDwMesh = eDw.NewMesh(planeGeo, mat)
             this.#eDwMesh.scale.setScalar(camera.far * 2.)
 
@@ -36,6 +34,11 @@ function initPlanes() {
             this.#sphereMesh.scale.setScalar(INFINITY_RADIUS * .98)
 
             camera.toUpdateAppearance.push(this)
+        }
+
+        setColor(col) {
+            this.#eDwMesh.material.color.copy(col)
+            this.#eDwMesh.material.needsUpdate = true
         }
 
         equals(m) {
@@ -87,6 +90,12 @@ function initPlanes() {
 
         updateOverrideFloatsFromState() {
             overrideFloats[0] = this.state[1]; overrideFloats[1] = this.state[2]; overrideFloats[2] = this.state[3]; overrideFloats[3] = this.state[4];
+        }
+
+        updateUniformFromState() {
+            if (this.uniform.value === null)
+                this.uniform.value = new Float32Array(4)
+            this.uniform.value[0] = this.state[1]; this.uniform.value[1] = this.state[2]; this.uniform.value[2] = this.state[3]; this.uniform.value[3] = this.state[4];
         }
 
         getLiteralAssignmentFromState() {
@@ -148,5 +157,5 @@ function initPlanes() {
                 return eDw
         }
     }
-    new MentionType("Plane", 4, PlaneMention, [`e0`, `e1`, `e2`, `e3`])
+    new AppearanceType("Plane", 4, PlaneAppearance, [`e0`, `e1`, `e2`, `e3`])
 }

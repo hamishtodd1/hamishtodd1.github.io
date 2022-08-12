@@ -40,7 +40,7 @@ function initMouseInteractions() {
 
         //this needs to happen before getHoveredMention because that depends on visibility
         forEachUsedMention((mention) => {
-            mention.setVisibility(mentionVisibleDueToCaret(mention))
+            mention.appearance.setVisibility(mentionVisibleDueToCaret(mention))
         })
 
         if(mouseArea === null)
@@ -51,7 +51,7 @@ function initMouseInteractions() {
             indicatedMention = mouseArea.getHoveredMention(userIndicationX, userIndicationY)
 
         if (indicatedMention !== null)
-            indicatedMention.setVisibility(true)
+            indicatedMention.appearance.setVisibility(true)
 
         //if you only do this when indicatedMentionOld !== indicatedMention, you risk eg when you have just let go
         if (indicatedMention === null)
@@ -77,17 +77,18 @@ function initMouseInteractions() {
                     //dragging this does not change data, but selects among it
                 }
                 else {
-                    indicatedMention.updateStateFromDrag(grabbedDw)
+                    indicatedMention.appearance.updateStateFromDrag(grabbedDw)
                     if( indicatedMention.variable.isUniform ) {
-                        //gonna get up to some business!
+                        updateOverride(null)
+                        indicatedMention.appearance.updateUniformFromState()
                     }
                     else
                         updateOverride(indicatedMention)
 
-                    indicatedMention.updateAppearanceFromState()
+                    indicatedMention.appearance.updateAppearanceFromState()
                 }
     
-                updateVariableMentionsFromRun((mention) => {
+                updateMentionsFromRun((mention) => {
                     return mentionVisibleDueToCaret(mention)
                 })
 
@@ -125,10 +126,10 @@ function initMouseInteractions() {
         let fromTextarea = dw === undefined
         
         if (fromTextarea) {
-            dw = indicatedMention.getTextareaManipulationDw()
+            dw = indicatedMention.appearance.getTextareaManipulationDw()
             
             event.preventDefault()
-            textareaGrabAddition = indicatedMention.getWindowCenter(dw)
+            textareaGrabAddition = indicatedMention.appearance.getWindowCenter(dw)
 
             let wasOffscreen = textareaGrabAddition[0] === Infinity
             if(wasOffscreen)
@@ -144,7 +145,7 @@ function initMouseInteractions() {
 
         grabbedDw = dw
 
-        indicatedMention.onGrab(dw)
+        indicatedMention.appearance.onGrab(dw)
     }
 
     document.addEventListener('mouseup',(event)=>{
@@ -160,7 +161,7 @@ function initMouseInteractions() {
             return
 
         dragOccurred = false
-        indicatedMention.onLetGo()
+        indicatedMention.appearance.onLetGo()
         updateOverride(null)
         
         if (!indicatedMention.variable.isUniform &&
@@ -168,7 +169,7 @@ function initMouseInteractions() {
             let [caretColumnIndex, caretLineIndex] = getCaretColumnAndLine() //done first since we're about to change stuff
             
             let newLine = "\n    " + indicatedMention.variable.name + " = " + 
-                indicatedMention.getLiteralAssignmentFromState() + ";\n"
+                indicatedMention.appearance.getLiteralAssignmentFromState() + ";\n"
             let lines = textarea.value.split("\n")
             let pre  = lines.slice(0, indicatedMention.lineIndex + 1).join("\n")
             let post = lines.slice(indicatedMention.lineIndex + 1).join("\n")
@@ -182,16 +183,19 @@ function initMouseInteractions() {
                 newCaretPosition = pre.length + Math.min(caretColumnIndex, newLine.length)
             else if (caretLineIndex > indicatedMention.lineIndex)
                 newCaretPosition = caretPositionOld + newLine.length
+
+            // would be nice to move the caret to where the newly-created indicated mention now is
+            //so you can see your handiwork
             
             setCaretPosition(newCaretPosition)
+
+            updateSyntaxHighlighting()
+
+            textarea.focus()
+
+            compile()
+            onCaretMove()
         }
-        
-        updateSyntaxHighlighting()
-    
-        textarea.focus()
-    
-        compile()
-        onCaretMove()
 
         grabbedDw = null
 

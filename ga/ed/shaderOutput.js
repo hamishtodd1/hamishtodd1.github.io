@@ -13,8 +13,10 @@ async function initShaderOutputAndFinalDw() {
         }
 
         updateOverride = (indicatedMention) => {
-            if (indicatedMention !== null) {
-                indicatedMention.updateOverrideFloatsFromState()
+            if (indicatedMention === null)
+                overrideMentionIndex.value = -1
+            else {
+                indicatedMention.appearance.updateOverrideFloatsFromState()
                 overrideMentionIndex.value = indicatedMention.mentionIndex
             }
 
@@ -128,17 +130,19 @@ async function initShaderOutputAndFinalDw() {
             return floatArray
         }
 
-        updateVariableMentionsFromRun = (condition) => {
+        updateMentionsFromRun = (condition) => {
 
             //in theory, could you all variables in a single run?
             //the height of the render target in pixels would be the number of variables
 
             renderer.setRenderTarget(renderTarget)
-            forEachUsedMention((m,i) => {
+            forEachUsedMention((m) => {
+                // if(m.variable.name === `ourUniformFloat` && condition(m))
+                //     debugger
                 if (condition(m) && !m.variable.isUniform && !m.variable.isIn) {
                     getShaderOutput(m.mentionIndex)
-                    m.updateStateFromRunResult(floatArray)
-                    m.updateAppearanceFromState() //uniforms and Ins require this called elsewhere
+                    m.appearance.updateStateFromRunResult(floatArray)
+                    m.appearance.updateAppearanceFromState()
                 }
             })
             renderer.setRenderTarget(null)

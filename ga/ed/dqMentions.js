@@ -111,7 +111,10 @@ function initDqs() {
     let idealLineDual = new Mv()
     let labelPoint = new Mv()
     let iDwIntersection = new Mv()
-    class DqMention extends Mention {
+    class DqAppearance extends Appearance {
+        #mat2d
+        #mat3d
+
         #mDwMesh
         #arcMesh
 
@@ -129,20 +132,27 @@ function initDqs() {
             super(variable)
             this.state = new Dq()
 
-            let mat = new THREE.MeshPhongMaterial({ color: variable.col })
+            this.#mat3d = new THREE.MeshPhongMaterial()
+            this.#mat2d = new THREE.MeshBasicMaterial({ side:THREE.DoubleSide })
 
-            this.#eDwMesh = eDw.NewMesh(eLineGeo, mat)
-            this.#iDwLineMesh = iDw.NewMesh(iLineGeo, mat)
-            this.#iDwRingMesh = iDw.NewMesh(ringGeo,  mat)
+            this.#eDwMesh = eDw.NewMesh(eLineGeo, this.#mat3d)
+            this.#iDwLineMesh = iDw.NewMesh(iLineGeo, this.#mat3d)
+            this.#iDwRingMesh = iDw.NewMesh(ringGeo,  this.#mat3d)
             
-            let mat2d = new THREE.MeshBasicMaterial({ color: variable.col, side:THREE.DoubleSide })
-            this.#mDwMesh = mDw.NewMesh(dotGeo, mat2d)
-            this.#arcMesh = mDw.NewMesh(OurTubeGeo(theArcCurve), mat2d)
+            this.#mDwMesh = mDw.NewMesh(dotGeo, this.#mat2d)
+            this.#arcMesh = mDw.NewMesh(OurTubeGeo(theArcCurve), this.#mat2d)
 
             this.#mobiusStripMesh = iDw.NewMesh(mobiusStripGeo, mobiusMat) //possibly only one of these is needed
-            this.#rimMesh = iDw.NewMesh(OurTubeGeo(theRimCurve), mat)
+            this.#rimMesh = iDw.NewMesh(OurTubeGeo(theRimCurve), this.#mat3d)
 
             camera.toUpdateAppearance.push(this)
+        }
+
+        setColor(col) {
+            this.#mat2d.color.copy(col)
+            this.#mat2d.needsUpdate = true
+            this.#mat3d.color.copy(col)
+            this.#mat3d.needsUpdate = true
         }
 
         equals(m) {
@@ -225,6 +235,11 @@ function initDqs() {
 
         updateOverrideFloatsFromState() {
             this.state.toArray(overrideFloats)
+        }
+
+        updateUniformFromState() {
+            if (this.uniform.value === null)
+                this.uniform.value = this.state
         }
 
         getLiteralAssignmentFromState() {
@@ -359,5 +374,5 @@ function initDqs() {
         }
     }
     
-    new MentionType("Dq", 8, DqMention, [ `scalar`, `e01`, `e02`, `e03`, `e12`, `e31`, `e23`, `e0123` ])
+    new AppearanceType("Dq", 8, DqAppearance, [ `scalar`, `e01`, `e02`, `e03`, `e12`, `e31`, `e23`, `e0123` ])
 }

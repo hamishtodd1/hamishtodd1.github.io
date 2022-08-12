@@ -7,7 +7,7 @@ let caretPositionOld = -1
 const FULL_SCREEN_QUAD_MATRIX = new THREE.Matrix4()
 
 const variables = []
-const mentionTypes = []
+const appearanceTypes = []
 const dws = {}
 
 const overrideFloats = new Float32Array(16)

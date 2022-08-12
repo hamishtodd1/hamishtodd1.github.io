@@ -76,16 +76,19 @@ async function initCompilation()
         text = text.replace(commentNotNewlineRegex,"")
         let vertexMode = text.indexOf("getColor") === -1
 
-        let uniforms = {}
         let outputterUniforms = {} // the "in"s are turned into uniforms
+        let uniforms = {}
         let geo = new THREE.BufferGeometry()
         let mentionIndex = 0
 
         variables.forEach((variable)=>{
             variable.lowestUnusedMention = 0
         })
+        appearanceTypes.forEach((appearanceType)=>{
+            appearanceType.lowestUnusedAppearance = 0
+        })
 
-        mentionTypes.forEach((type) => {
+        appearanceTypes.forEach((type) => {
             let functionResults = [...text.matchAll(type.regexes.function )].map(a => a.index)
             let      allResults = [...text.matchAll(type.regexes.all      )].map(a => a.index)
             let  uniformResults = [...text.matchAll(type.regexes.uniform  )].map(a => a.index + a[0].indexOf(a[1]))
@@ -117,15 +120,8 @@ async function initCompilation()
                         focussedAttributeValue[i] = inArray[i + type.numFloats * focussedVertex]
                     outputterUniforms[name] = { value: focussedAttributeValue }
                 }
-                if(uniformResults.indexOf(index) !== -1) {
+                if(uniformResults.indexOf(index) !== -1) 
                     variable.isUniform = true
-
-                    if(type.glslName === 'float')
-                        uniforms[name] = { value: 1. }
-                    if (type.glslName === 'vec3')
-                        uniforms[name] = { value: new THREE.Vector3(1.,1.,1.) } 
-                    //would be good to have these be the state
-                }
                 
                 /*
                     how to treat Vertex attribs?
@@ -185,58 +181,65 @@ async function initCompilation()
                 //pretty hard to tell. Eg foo( out target);
                 //because of uniforms, will have infrastructure to have one variable, one mesh
 
-                //may want to modify them both using the usual interface
-                //but that, instead of changing a line of code in the shader, modifies the input array
-
-                let mention = variable.getLowestUnusedMention()
+                let mention = variable.getLowestUnusedMention(uniforms)
                 mention.updateHorizontalBounds(match.index, name.length)
-
                 mention.lineIndex = lineIndex
                 mention.mentionIndex = mentionIndex++
 
+                if (variable.isIn || variable.isUniform)
+                    return
+                    
                 let isDeclaration = variable.lowestUnusedMention === 1
-                let isUniformOrAttrib = variable.isIn || variable.isUniform
+                let isReturn = l.indexOf(`return`) !== -1
 
                 let overrideGoesBefore = false
-                if (!isUniformOrAttrib ) {
-                    if (l.indexOf(`return`) !== -1)
-                        overrideGoesBefore = true
-                    else if(isDeclaration)
-                        overrideGoesBefore = false
+                if (isReturn)
+                    overrideGoesBefore = true
+                else if(isDeclaration)
+                    overrideGoesBefore = false
 
-                    let overrideAddition = `\nif( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` +
-                        mention.variable.name + " = " + mention.variable.type.literalAssignmentFromOverride + ";"
-                    if (overrideGoesBefore) {
-                        finalChunks[lineIndex]     = overrideAddition +     finalChunks[lineIndex]
-                        outputterChunks[lineIndex] = overrideAddition + outputterChunks[lineIndex]
-                    }
-                    else {
-                        finalChunks[lineIndex]     =     finalChunks[lineIndex] + overrideAddition
-                        outputterChunks[lineIndex] = outputterChunks[lineIndex] + overrideAddition
-                    }
-                    //you're best off visualizing it in this completely different way, when the declaration is hovered
+                ///////////////////////
+                // OVERRIDE ADDITION //
+                ///////////////////////
+                let overrideAddition = `\nif( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` +
+                    mention.variable.name + " = " + mention.variable.type.literalAssignmentFromOverride + ";"
+                if (overrideGoesBefore) {
+                    finalChunks[lineIndex]     = overrideAddition +     finalChunks[lineIndex]
+                    outputterChunks[lineIndex] = overrideAddition + outputterChunks[lineIndex]
                 }
+                else {
+                    finalChunks[lineIndex]     =     finalChunks[lineIndex] + overrideAddition
+                    outputterChunks[lineIndex] = outputterChunks[lineIndex] + overrideAddition
+                }
+                //you're best off visualizing it in this completely different way, when the declaration is hovered
 
-                if ( !(isUniformOrAttrib && isDeclaration ) ) {
-                    let goesBefore = l.indexOf(`return`) !== -1
+                ////////////////////////
+                // OUTPUTTER ADDITION //
+                ////////////////////////
 
-                    let outputAddition   = `\nif( outputMentionIndex == ` + mention.mentionIndex + ` ) {\n` + 
-                        mention.variable.assignmentToOutput + `}`
-                    if( overrideGoesBefore === false)
-                        goesBefore = false
-                    if (goesBefore) {
-                        outputterChunks[lineIndex] = outputAddition + outputterChunks[lineIndex]
-                    }
-                    else {
-                        outputterChunks[lineIndex] = outputterChunks[lineIndex] + outputAddition
-                    }
+                let outputterGoesAfter = true
+                if( isReturn )
+                    outputterGoesAfter = false
+                if(!outputterGoesAfter)
+                    console.assert( !isDeclaration && overrideGoesBefore) //if these, dunno what to do
+
+                if( !overrideGoesBefore )
+                    outputterGoesAfter = true
+
+                let outputterAddition   = `\nif( outputMentionIndex == ` + mention.mentionIndex + ` ) {\n` + 
+                    mention.variable.assignmentToOutput + `}`
+                if (outputterGoesAfter) {
+                    outputterChunks[lineIndex] = outputterChunks[lineIndex] + outputterAddition
+                }
+                else {
+                    outputterChunks[lineIndex] = outputterAddition + outputterChunks[lineIndex]
                 }
             })
         })
 
         threejsIsCheckingForShaderErrors = true
 
-        // log(outputterChunks.join("\n------------------")) //whyyyyy did there appear to be only even numbered mentionIndexes?
+        // log(outputterChunks.join("\n------------------"))
 
         let outputterText = outputterChunks.join("\n")
         let finalText = finalChunks.join("\n")
@@ -251,18 +254,23 @@ async function initCompilation()
 
         updateLclsc(Infinity)
 
-        updateVariableMentionsFromRun(()=>true)
+        // debugger
+        //so the problem is probably that ourUniformFloat's mention gets given the wrong appearance? Maybe all floats?
+        // forEachUsedMention((m) => { log(
+        //     m.variable.name, 
+        //     m.mentionIndex, 
+        //     m.variable.type.appearances.indexOf(m.appearance))})
+        updateMentionsFromRun( ()=>true )
 
+        let currentDuplicates
         variables.forEach((v)=>{
-            let currentDuplicates
-            
-            for (let i = 0; i < v.lowestUnusedMention; ++i) {
-                let m = v.mentions[i]
-                if( i === 0 || !m.equals(v.mentions[i-1]) )
-                    currentDuplicates = [m]
+            for (let i = 0; i < v.lowestUnusedAppearance; ++i) {
+                let appearance = v.appearances[i]
+                if (i === 0 || !appearance.equals(v.appearances[i-1]) )
+                    currentDuplicates = [appearance]
                 else
-                    currentDuplicates.push(m)
-                m.duplicates = currentDuplicates
+                    currentDuplicates.push(appearance)
+                appearance.duplicates = currentDuplicates
                 //GC alert!
             }
         })

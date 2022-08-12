@@ -112,10 +112,10 @@ async function initDws() {
             let closestMention = null
             let closestDist = Infinity
             forEachUsedMention((mention) => {
-                if (!mention.isVisibleInDw(this)) //some of isVisible is about being used, which might be pointless checking
+                if (!mention.appearance.isVisibleInDw(this)) //some of isVisible is about being used, which might be pointless checking
                     return
 
-                let [elemX, elemY] = mention.getWindowCenter(this)
+                let [elemX, elemY] = mention.appearance.getWindowCenter(this)
                 if(elemX !== Infinity) {
                     let dist = Math.sqrt(sq(clientX - elemX) + sq(clientY - elemY))
     

@@ -196,10 +196,10 @@ async function init() {
 
     let meshloadPromise = initMeshDw()
     await initVectorSpaceDw()
-    new Dw("euclidean", true)
+    new Dw(`euclidean`, true)
     initInfinityDw()
     initComplexDw()
-    new Dw("scalar", false, false, camera2d)
+    new Dw(`scalar`, false, false, camera2d)
     // dws.mobius.elem.style.display = 'none'
     // dws.scalar.elem.style.display = 'none'
 

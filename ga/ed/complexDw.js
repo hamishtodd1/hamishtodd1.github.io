@@ -42,15 +42,20 @@ function initComplexNumbers() {
 
     let ourDw = dws.mobius
 
-    class complexMention extends Mention {
+    class complexAppearance extends Appearance {
         #mesh;
 
         constructor(variable) {
             super(variable)
             this.state = new THREE.Vector2()
 
-            let mat = new THREE.MeshBasicMaterial({ color: variable.col })
+            let mat = new THREE.MeshBasicMaterial()
             this.#mesh = ourDw.NewMesh(dotGeo, mat)
+        }
+
+        setColor(col) {
+            this.#mesh.material.color.copy(col)
+            this.#mesh.material.needsUpdate = true
         }
 
         equals(m) {
@@ -71,6 +76,11 @@ function initComplexNumbers() {
         updateOverrideFloatsFromState() {
             overrideFloats[0] = this.state.x
             overrideFloats[1] = this.state.y
+        }
+
+        updateUniformFromState() {
+            if (this.uniform.value === null)
+                this.uniform.value = this.state
         }
 
         getLiteralAssignmentFromState() {
@@ -102,5 +112,5 @@ function initComplexNumbers() {
             return ourDw
         }
     }
-    new MentionType("vec2", 2, complexMention)
+    new AppearanceType("vec2", 2, complexAppearance)
 }

@@ -13,6 +13,12 @@ function initMention() {
                 func(v.mentions[i])
         })
     }
+    forEachUsedAppearance = (func) => {
+        appearanceTypes.forEach((appearanceType) => {
+            for (let i = 0; i < appearanceType.lowestUnusedAppearance; ++i)
+                func(appearanceType.appearances[i])
+        })
+    }
 
     let $labelLines = []
     function LabelLine() {
@@ -61,35 +67,39 @@ function initMention() {
         return ret
     }
 
-    class Mention {
+    class Appearance {
         variable
-
-        horizontalBounds = { x: 0., w: 0. }
-        lineIndex = -1
-        mentionIndex = -1
-        duplicates = []
-
         state
+        uniform = {value:null}
 
-        constructor(variable) {
-            this.variable = variable
-        }
+        duplicates = [] //they may have been redefined, but they do have the same values as extracted
 
         onGrab(dw) {
         }
         onLetGo(dw) {
         }
 
-        isBeingUsed() {
-            let ourIndex = this.variable.mentions.indexOf(this)
-            return ourIndex < this.variable.lowestUnusedMention
-        }
-
         getWindowCenter(dw) {
             this.getWorldCenter(dw, worldCenter)
             return dw.worldToWindow(worldCenter)
         }
+    }
+    window.Appearance = Appearance
 
+    class Mention {
+        horizontalBounds = { x: 0., w: 0. }
+        lineIndex = -1
+        mentionIndex = -1
+
+        variable
+
+        appearance = null
+
+        constructor(variable) {
+            this.variable = variable
+        }
+
+        // ummm why the =>?
         updateHorizontalBounds = (column, nameLength) => {
             this.horizontalBounds.x = columnToScreenX(column)
             this.horizontalBounds.w = nameLength * characterWidth
@@ -117,11 +127,11 @@ function initMention() {
                 let lowestUnusedLabelConnector = 0
                 //this is very shotgunny. Better would be
                 forVizDws((dw) => {
-                    if (this.isVisibleInDw(dw)) {
+                    if (this.appearance.isVisibleInDw(dw)) {
 
                         //TODO this works differently if .isIn or .isUniform
 
-                        let [windowX, windowY] = this.getWindowCenter(dw)
+                        let [windowX, windowY] = this.appearance.getWindowCenter(dw)
                         if(windowX !== Infinity) {
                             setSvgLine($labelConnectors[lowestUnusedLabelConnector++],
                                 mb.x + mb.w,
@@ -150,9 +160,9 @@ function initMention() {
         col = new THREE.Color(0., 0., 0.)
         assignmentToOutput = ""
 
-        lowestUnusedMention = 0
+        lowestUnusedMention = 0 //well, index thereof. Maybe change
         mentions = []
-
+        
         constructor(newName, newClass) {
             //never changed after this
             this.name = newName
@@ -170,29 +180,45 @@ function initMention() {
             variables.push(this)
         }
 
-        getLowestUnusedMention() {
-            while (this.mentions.length <= this.lowestUnusedMention) {
-                let newMention = new this.type.ourConstructor(this)
-                this.mentions.push(newMention)
-            }
+        getLowestUnusedMention(uniforms) {
+            console.assert(this.mentions.length >= this.lowestUnusedMention)
+            if (this.mentions.length === this.lowestUnusedMention)
+                this.mentions.push(new Mention(this))
 
-            return this.mentions[this.lowestUnusedMention++]
+            let theLowestUnusedMention = this.mentions[this.lowestUnusedMention++]
+            if(this.isUniform) {
+                if (this.lowestUnusedMention === 1) {
+                    theLowestUnusedMention.appearance = this.type.getLowestUnusedAppearance(this)
+                    theLowestUnusedMention.appearance.updateUniformFromState()
+                    theLowestUnusedMention.appearance.updateAppearanceFromState()
+                    uniforms[this.name] = theLowestUnusedMention.appearance.uniform
+                }
+                else
+                    theLowestUnusedMention.appearance = this.mentions[0].appearance
+            }
+            else
+                theLowestUnusedMention.appearance = this.type.getLowestUnusedAppearance(this)
+
+            return theLowestUnusedMention
         }
     }
     window.Variable = Variable
 
-    class MentionType {
+    class AppearanceType {
         glslName
         numFloats
-        ourConstructor
+        constructAppearance
         outputAssignmentPropts
         regexes = {}
         literalAssignmentFromOverride
 
-        constructor(glslName, numFloats, ourConstructor, outputAssignmentPropts) {
+        lowestUnusedAppearance = 0
+        appearances = []
+
+        constructor(glslName, numFloats, constructAppearance, outputAssignmentPropts) {
             this.glslName = glslName
             this.numFloats = numFloats
-            this.ourConstructor = ourConstructor
+            this.constructAppearance = constructAppearance
 
             this.outputAssignmentPropts = Array(numFloats)
             if (outputAssignmentPropts !== undefined) {
@@ -214,7 +240,19 @@ function initMention() {
                 commaSeparated += `overrideFloats[` + i + `]` + (i === this.numFloats - 1 ? `` : `,`)
             this.literalAssignmentFromOverride = this.glslName + `(` + commaSeparated + `)`
 
-            mentionTypes.push(this)
+            appearanceTypes.push(this)
+        }
+
+        getLowestUnusedAppearance(variable) {
+            console.assert(this.appearances.length >= this.lowestUnusedAppearance)
+            if (this.appearances.length === this.lowestUnusedAppearance)
+                this.appearances.push( new this.constructAppearance(this) )
+
+            let theLowestUnusedAppearance = this.appearances[this.lowestUnusedAppearance++]
+            theLowestUnusedAppearance.variable = variable
+            theLowestUnusedAppearance.setColor(variable.col)
+
+            return theLowestUnusedAppearance
         }
 
         getLiteralAssignmentFromValues() {
@@ -229,5 +267,5 @@ function initMention() {
             return this.glslName + "(" + commaSeparated + ")"
         }
     }
-    window.MentionType = MentionType
+    window.AppearanceType = AppearanceType
 }
