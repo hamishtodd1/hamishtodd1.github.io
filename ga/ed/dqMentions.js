@@ -238,8 +238,13 @@ function initDqs() {
         }
 
         updateUniformFromState() {
-            if (this.uniform.value === null)
+            if (this.uniform.value === null) {
                 this.uniform.value = this.state
+                for(let i = 0; i < 8;++i)
+                    this.state[i] = 0.
+                this.state[0] = -1. / Math.sqrt(2.)
+                this.state[4] = 1. / Math.sqrt(2.)
+            }
         }
 
         getLiteralAssignmentFromState() {
@@ -258,6 +263,7 @@ function initDqs() {
             //check their values, if they're the same - they're the same!
 
             let grabbedDuplicate = this.duplicates.find((duplicate) => !duplicate.linePartWhenGrabbedNormalized.equals(zeroMv))
+            // log(this.duplicates)
             if (grabbedDuplicate !== undefined) {
                 let proportionOfComparison = -1. * inner(linePart, grabbedDuplicate.linePartWhenGrabbedNormalized, mv0)[0]
                 this.#mDwMesh.position.y = proportionOfComparison

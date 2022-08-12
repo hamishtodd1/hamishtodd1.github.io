@@ -93,8 +93,10 @@ function initPlanes() {
         }
 
         updateUniformFromState() {
-            if (this.uniform.value === null)
+            if (this.uniform.value === null) {
                 this.uniform.value = new Float32Array(4)
+                this.state[2] = .5
+            }
             this.uniform.value[0] = this.state[1]; this.uniform.value[1] = this.state[2]; this.uniform.value[2] = this.state[3]; this.uniform.value[3] = this.state[4];
         }
 

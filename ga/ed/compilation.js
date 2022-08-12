@@ -263,10 +263,10 @@ async function initCompilation()
         updateMentionsFromRun( ()=>true )
 
         let currentDuplicates
-        variables.forEach((v)=>{
-            for (let i = 0; i < v.lowestUnusedAppearance; ++i) {
-                let appearance = v.appearances[i]
-                if (i === 0 || !appearance.equals(v.appearances[i-1]) )
+        appearanceTypes.forEach((at)=>{
+            for (let i = 0; i < at.lowestUnusedAppearance; ++i) {
+                let appearance = at.appearances[i]
+                if (i === 0 || !appearance.equals(at.appearances[i-1]) )
                     currentDuplicates = [appearance]
                 else
                     currentDuplicates.push(appearance)
