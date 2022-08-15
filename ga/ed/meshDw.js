@@ -9,17 +9,18 @@
  */
 
 function initMeshDw() {
-    let dw = new Dw("mesh", false, true, camera, false)
+    let dw = new Dw(`mesh`, false, true, camera, false)
     
     let object
     let inAppearance = null
 
-    let currentFocussedAttributeExample = 0
-    incrementFocussedAttributeExample = () => {
-        ++currentFocussedAttributeExample
-        if (currentFocussedAttributeExample >= object.geometry.attributes.position.count)
-            currentFocussedAttributeExample = 0
-        focusAttributeExample(currentFocussedAttributeExample)
+    let raycaster = new THREE.Raycaster()
+    focusIndicatedVertex = () => {
+        raycaster.ray.copy(getMouseThreeRay(dw))
+        let intersection = raycaster.intersectObject(object, false)[0]
+        if(intersection !== undefined) {
+            focusAttributeExample(intersection.face.a)
+        }
     }
 
     focusAttributeExample = (focussedIndex) => {
@@ -49,6 +50,32 @@ function initMeshDw() {
         //         inArray[i] = Math.random() - .5
         //     geo.setAttribute(name, new THREE.BufferAttribute(inArray, type.numFloats))
         // }
+    }
+
+    dw.mouseRayIntersection = () => {
+        //mouseRay to threeRay
+        let mouseRay = getMouseRay(dw)
+        meet(e0, mouseRay, mouseRayDirection).toVector(threeRay.direction)
+        threeRay.direction.normalize()
+
+        threeRay.origin.copy(camera.position)
+
+        if (fromBehind) {
+            threeRay.origin.addScaledVector(threeRay.direction, 999.) //so put it far behind camera
+            threeRay.direction.multiplyScalar(-1.)
+        }
+
+        let result = threeRay.intersectSphere(threeSphere, v1)
+        if (result === null) {
+            camera.frustum.far.projectOn(e123, frustumOnOrigin)
+            // frustumOnOrigin.log()
+            meet(mouseRay, frustumOnOrigin, targetMv)
+        }
+        else
+            targetMv.fromVec(v1)
+
+        targetMv[14] = 0.
+        return targetMv
     }
 
     let texture
@@ -83,8 +110,8 @@ function initMeshDw() {
         objLoader.load('data/spot_control_mesh.obj', function (obj) {
             obj.traverse(function (child) {
                 if (child.isMesh) {
-                    object = new THREE.LineSegments(new THREE.WireframeGeometry(child.geometry),new THREE.MeshBasicMaterial({color:0xFFFFFF}))
-                    // object = child
+                    // object = new THREE.LineSegments(new THREE.WireframeGeometry(child.geometry),new THREE.MeshBasicMaterial({color:0xFFFFFF}))
+                    object = child
                     // child.geometry.computeVertexNormals()
                     // child.geometry.normalizeNormals()
                 }

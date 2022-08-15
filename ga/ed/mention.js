@@ -76,7 +76,7 @@ function initMention() {
     }
 
     class Appearance {
-        variable //slightly surprising this is getting filled in. Don't move it from here!
+        variable
         state
         uniform = {value:null}
 

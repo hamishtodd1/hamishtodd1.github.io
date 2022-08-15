@@ -83,7 +83,10 @@ function initPoints() {
         updateStateFromDrag(dw) {
             //might be nice to snap to a grid
 
-            if(dw === eDw) {
+            if (this.variable.isIn) {
+                focusIndicatedVertex()
+            }
+            else if(dw === eDw) {
                 let mouseRay = getMouseRay(dw)
                 meet(dragPlane, mouseRay, mv0)
                 mv0.toVec4(this.state)
@@ -155,7 +158,9 @@ function initPoints() {
         }
 
         getTextareaManipulationDw() {
-            if(this.state.w === 0.)
+            if(this.variable.isIn)
+                return mDw
+            else if(this.state.w === 0.)
                 return iDw
             else
                 return eDw

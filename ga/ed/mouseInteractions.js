@@ -25,6 +25,18 @@ function initMouseInteractions() {
         return mouseRay
     }
 
+    let threeRay = new THREE.Ray()
+    let mouseRayDirection = new Mv()
+    getMouseThreeRay = (dw) => {
+        let mouseRay = getMouseRay(dw)
+        meet(e0, mouseRay, mouseRayDirection).toVector(threeRay.direction)
+        threeRay.direction.normalize()
+
+        threeRay.origin.copy(camera.position)
+
+        return threeRay
+    }
+
     let mouseAreaOld = null
     updateMentionVisibilitiesAndIndication = (mouseArea, userIndicationX, userIndicationY) => {
         //moving the mouse should not get rid of the caret's indication
@@ -69,21 +81,14 @@ function initMouseInteractions() {
             if(grabbedDw !== null) {
 
                 dragOccurred = true
-                if (indicatedMention.variable.isIn) {
-                    incrementFocussedAttributeExample()
-                    indicatedMention.appearance.updateAppearanceFromState()
-                    //put that value into the state. It's definitely a point
-                }
-                else {
-                    indicatedMention.appearance.updateStateFromDrag(grabbedDw)
-                    indicatedMention.appearance.updateUniformFromState()
-                    
-                    if( !indicatedMention.variable.isUniform )
-                        updateOverride(indicatedMention)
-                    //override should probably come from uniform
+                indicatedMention.appearance.updateStateFromDrag(grabbedDw)
+                indicatedMention.appearance.updateUniformFromState()
+                
+                if( !indicatedMention.variable.isUniform && !indicatedMention.variable.isIn)
+                    updateOverride(indicatedMention)
+                //override should probably come from uniform
 
-                    indicatedMention.appearance.updateAppearanceFromState()
-                }
+                indicatedMention.appearance.updateAppearanceFromState()
     
                 updateMentionsFromRun((mention) => {
                     return mentionVisibleDueToCaret(mention)

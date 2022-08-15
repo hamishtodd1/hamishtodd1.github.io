@@ -1,6 +1,8 @@
 /*
 TODO
     For next presentation
+        
+        Dual quaternion skinning!
         Labels for e012 etc on the iDw
         Highlight the borders when windowX === Infinity
         Uniforms
@@ -15,7 +17,6 @@ TODO
             Any variable that is different across manifold can be seen in thingy window
             Mesh window
                 Has an indicator on it: "where attributes are currently coming from". Can move indicator with mouse
-        Can you show dual quaternion skinning with it?
         User-created functions and for loops
             when you're looking at a function, it could have been called from multiple places!
                 it gets inlined, so one run of it is qualitatively different from another
@@ -57,6 +58,9 @@ TODO
             Maybe even visualized functions as curves for R^n -> R^m for (m+n) < 4
             Same with I^2 -> I^3 or less. Need windows for these
             This is fun but not necessarily useful for PGA
+        "Small domain and range function" dw
+            implicit surfaces etc
+            Want to detect eg vec3 f(in vec3)
         Dome window for 2D PGA. Overlay for vectorspace Dw?
         VR
             Single button to cycle through mentions
@@ -222,7 +226,7 @@ async function init() {
     await meshloadPromise
     compile()
     updateMentionVisibilitiesAndIndication()
-    setCaretPosition(246)
+    setCaretPosition(103)
     renderAll()
 
     document.addEventListener('keydown', (event) => {

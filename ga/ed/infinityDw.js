@@ -16,19 +16,12 @@ function initInfinityDw()
     euclideanHider.scale.setScalar(.15)
     dw.addNonMentionChild(euclideanHider)
 
-    let threeRay = new THREE.Ray()
     let threeSphere = new THREE.Sphere(new THREE.Vector3(), INFINITY_RADIUS)
-    let mouseRayDirection = new Mv()
     let frustumOnOrigin = new Mv()
 
     //possibly needed for vectorspace too
     dw.mouseRayIntersection = (targetMv, fromBehind) => {
-        //mouseRay to threeRay
-        let mouseRay = getMouseRay(dw)
-        meet(e0, mouseRay, mouseRayDirection).toVector(threeRay.direction)
-        threeRay.direction.normalize()
-        
-        threeRay.origin.copy(camera.position)
+        let threeRay = getMouseThreeRay(dw)
 
         if (fromBehind) {
             threeRay.origin.addScaledVector(threeRay.direction, 999.) //so put it far behind camera
