@@ -67,16 +67,37 @@ function initMention() {
         return ret
     }
 
+    forEachAppearance = (func) => {
+        appearanceTypes.forEach((at) => {
+            at.appearances.forEach((a) => {
+                func(a)
+            })
+        })
+    }
+
     class Appearance {
-        variable
+        variable //slightly surprising this is getting filled in. Don't move it from here!
         state
         uniform = {value:null}
 
         duplicates = [] //they may have been redefined, but they do have the same values as extracted
 
-        onGrab(dw) {
+        visible
+
+        constructor(variable) {
+            this.variable = variable
         }
-        onLetGo(dw) {
+
+        onGrab(dw) {}
+        onLetGo(dw) {}
+        updateUniformFromState() {}
+
+        isVisibleInDw(dw) {
+            return (this.variable.isIn && dw === dws.mesh) || this._isVisibleInDw(dw)
+        }
+        setVisibility(newVisibility) {
+            this.visible = newVisibility
+            this._setVisibility(this.visible)
         }
 
         getWindowCenter(dw) {
@@ -119,30 +140,24 @@ function initMention() {
             setSvgLine($labelSides[2], mb.x + mb.w, mby + lineHeight, mb.x, mby + lineHeight)
             setSvgLine($labelSides[3], mb.x, mby + lineHeight, mb.x, mby)
 
-            //Connect to the visualizations of the thing
-            if (this.variable.isIn) {
-
-            }
-            else {
-                let lowestUnusedLabelConnector = 0
-                //this is very shotgunny. Better would be
-                forVizDws((dw) => {
-                    if (this.appearance.isVisibleInDw(dw)) {
-
-                        //TODO this works differently if .isIn or .isUniform
-
-                        let [windowX, windowY] = this.appearance.getWindowCenter(dw)
-                        if(windowX !== Infinity) {
-                            setSvgLine($labelConnectors[lowestUnusedLabelConnector++],
-                                mb.x + mb.w,
-                                mby + lineHeight / 2.,
-                                windowX, windowY)
-                        }
+            let lowestUnusedLabelConnector = 0
+            //this is very shotgunny. Better would be
+            forNonFinalDws((dw) => {
+                if (this.appearance.isVisibleInDw(dw) ) {
+                    let [windowX, windowY] = this.appearance.getWindowCenter(dw)
+                    if(windowX !== Infinity) {
+                        setSvgLine($labelConnectors[lowestUnusedLabelConnector++],
+                            mb.x + mb.w,
+                            mby + lineHeight / 2.,
+                            windowX, windowY)
                     }
-                })
-                for (let i = lowestUnusedLabelConnector; i < $labelConnectors.length; ++i)
-                    setSvgLine($labelConnectors[i], -10, -10, -10, -10)
-            }
+                    else {
+                        //highlight the borders
+                    }
+                }
+            })
+            for (let i = lowestUnusedLabelConnector; i < $labelConnectors.length; ++i)
+                setSvgLine($labelConnectors[i], -10, -10, -10, -10)
         }
     }
     window.Mention = Mention
@@ -180,26 +195,12 @@ function initMention() {
             variables.push(this)
         }
 
-        getLowestUnusedMention(uniforms) {
+        getLowestUnusedMention() {
             console.assert(this.mentions.length >= this.lowestUnusedMention)
             if (this.mentions.length === this.lowestUnusedMention)
                 this.mentions.push(new Mention(this))
 
-            let theLowestUnusedMention = this.mentions[this.lowestUnusedMention++]
-            if(this.isUniform) {
-                if (this.lowestUnusedMention === 1) {
-                    theLowestUnusedMention.appearance = this.type.getLowestUnusedAppearance(this)
-                    theLowestUnusedMention.appearance.updateUniformFromState()
-                    theLowestUnusedMention.appearance.updateAppearanceFromState()
-                    uniforms[this.name] = theLowestUnusedMention.appearance.uniform
-                }
-                else
-                    theLowestUnusedMention.appearance = this.mentions[0].appearance
-            }
-            else
-                theLowestUnusedMention.appearance = this.type.getLowestUnusedAppearance(this)
-
-            return theLowestUnusedMention
+            return this.mentions[this.lowestUnusedMention++]
         }
     }
     window.Variable = Variable

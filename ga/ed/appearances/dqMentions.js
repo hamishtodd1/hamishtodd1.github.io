@@ -2,7 +2,7 @@ function initDqs() {
 
     let eDw = dws.euclidean
     let iDw = dws.infinity
-    let mDw = dws.mobius
+    let cDw = dws.mobius
 
     let projectedOnOrigin = new Mv()
     let quatToOriginVersion = new Mv()
@@ -18,7 +18,7 @@ function initDqs() {
     // let torusGeo = new THREE.TorusGeometry(1.,.1,4,31, 3./4.*TAU)
     // log(torusGeo)
     // let torus = new THREE.Mesh ( torusGeo, new THREE.MeshBasicMaterial({color:0xFF0000}) )
-    // mDw.addNonMentionChild(torus)
+    // cDw.addNonMentionChild(torus)
 
     let arcCurveDest = new THREE.Vector3(1.,2.,0.)
     class ArcCurve extends THREE.Curve {
@@ -115,7 +115,7 @@ function initDqs() {
         #mat2d
         #mat3d
 
-        #mDwMesh
+        #cDwMesh
         #arcMesh
 
         #mobiusStripMesh
@@ -131,6 +131,13 @@ function initDqs() {
         constructor(variable) {
             super(variable)
             this.state = new Dq()
+            this.uniform.value = this.state
+
+            //default value
+            {
+                this.state[0] = -1. / Math.sqrt(2.)
+                this.state[4] = 1. / Math.sqrt(2.)
+            }
 
             this.#mat3d = new THREE.MeshPhongMaterial()
             this.#mat2d = new THREE.MeshBasicMaterial({ side:THREE.DoubleSide })
@@ -139,8 +146,8 @@ function initDqs() {
             this.#iDwLineMesh = iDw.NewMesh(iLineGeo, this.#mat3d)
             this.#iDwRingMesh = iDw.NewMesh(ringGeo,  this.#mat3d)
             
-            this.#mDwMesh = mDw.NewMesh(dotGeo, this.#mat2d)
-            this.#arcMesh = mDw.NewMesh(OurTubeGeo(theArcCurve), this.#mat2d)
+            this.#cDwMesh = cDw.NewMesh(dotGeo, this.#mat2d)
+            this.#arcMesh = cDw.NewMesh(OurTubeGeo(theArcCurve), this.#mat2d)
 
             this.#mobiusStripMesh = iDw.NewMesh(mobiusStripGeo, mobiusMat) //possibly only one of these is needed
             this.#rimMesh = iDw.NewMesh(OurTubeGeo(theRimCurve), this.#mat3d)
@@ -171,10 +178,10 @@ function initDqs() {
                 else dragPlane.copy(e0)
             }
 
-            if(dw === mDw) {
+            if(dw === cDw) {
                 this.state.getBivectorPartToMv(this.linePartWhenGrabbedNormalized)
                 this.linePartWhenGrabbedNormalized.normalize()
-                this.#complexWhenGrabbed.copy(this.#mDwMesh.position)
+                this.#complexWhenGrabbed.copy(this.#cDwMesh.position)
             }
         }
         
@@ -185,18 +192,18 @@ function initDqs() {
         updateStateFromDrag(dw) {
             this.state.getBivectorPartToMv(linePart)
 
-            if (dw === mDw) {
+            if (dw === cDw) {
                 if (this.state[7] !== 0.)
                     console.error("todo figure this out!")
 
-                camera2d.getOldClientWorldPosition(dw, this.#mDwMesh.position)
+                camera2d.getOldClientWorldPosition(dw, this.#cDwMesh.position)
                 if (this.#complexWhenGrabbed.x === 0.)
-                    this.#mDwMesh.position.x = 0.
+                    this.#cDwMesh.position.x = 0.
                 else if(linePart.norm() === 0.)
-                    this.#mDwMesh.position.y = 0.
+                    this.#cDwMesh.position.y = 0.
                 
-                this.state[0] = this.#mDwMesh.position.x
-                this.state.setBivectorPartFromMvAndMagnitude(this.linePartWhenGrabbedNormalized, this.#mDwMesh.position.y )
+                this.state[0] = this.#cDwMesh.position.x
+                this.state.setBivectorPartFromMvAndMagnitude(this.linePartWhenGrabbedNormalized, this.#cDwMesh.position.y )
             }
             else if (dw === eDw) {
                 let oldJoinedWithCamera = join(linePart, camera.mvs.pos, mv0)
@@ -237,16 +244,6 @@ function initDqs() {
             this.state.toArray(overrideFloats)
         }
 
-        updateUniformFromState() {
-            if (this.uniform.value === null) {
-                this.uniform.value = this.state
-                for(let i = 0; i < 8;++i)
-                    this.state[i] = 0.
-                this.state[0] = -1. / Math.sqrt(2.)
-                this.state[4] = 1. / Math.sqrt(2.)
-            }
-        }
-
         getLiteralAssignmentFromState() {
             return this.variable.type.getLiteralAssignmentFromValues(this.state[0], this.state[1], this.state[2], this.state[3], this.state[4], this.state[5], this.state[6], this.state[7])
         }
@@ -256,7 +253,7 @@ function initDqs() {
         updateAppearanceFromState() {
             this.state.getBivectorPartToMv(linePart)
 
-            this.#mDwMesh.position.x = this.state[0]
+            this.#cDwMesh.position.x = this.state[0]
 
             //the really nice thing would be to say that these mentions... are actually the same unless they're
             //assigned to
@@ -266,15 +263,15 @@ function initDqs() {
             // log(this.duplicates)
             if (grabbedDuplicate !== undefined) {
                 let proportionOfComparison = -1. * inner(linePart, grabbedDuplicate.linePartWhenGrabbedNormalized, mv0)[0]
-                this.#mDwMesh.position.y = proportionOfComparison
+                this.#cDwMesh.position.y = proportionOfComparison
             }
             else
-                this.#mDwMesh.position.y = linePart.norm()
+                this.#cDwMesh.position.y = linePart.norm()
 
-            arcCurveDest.set(this.#mDwMesh.position.x, this.#mDwMesh.position.y, 0.)
+            arcCurveDest.set(this.#cDwMesh.position.x, this.#cDwMesh.position.y, 0.)
             updateTubeGeo(this.#arcMesh.geometry, theArcCurve)
 
-            rimCurveFullAngle = Math.atan2(this.#mDwMesh.position.y, this.#mDwMesh.position.x) / TAU * 2.
+            rimCurveFullAngle = Math.atan2(this.#cDwMesh.position.y, this.#cDwMesh.position.x) / TAU * 2.
             updateTubeGeo(this.#rimMesh.geometry, theRimCurve)
 
             //more like: it's a mobius strip
@@ -319,10 +316,10 @@ function initDqs() {
             e123.projectOn(displayedLineMv, mv0).toVector(this.#eDwMesh.position)
         }
 
-        setVisibility(newVisibility) {
+        _setVisibility(newVisibility) {
             this.#eDwMesh.visible = newVisibility
             
-            this.#mDwMesh.visible = newVisibility
+            this.#cDwMesh.visible = newVisibility
             this.#arcMesh.visible = newVisibility
 
             this.#mobiusStripMesh.visible = newVisibility //this one maybe only in some circumstances
@@ -333,8 +330,8 @@ function initDqs() {
         }
 
         getWorldCenter(dw, target) {
-            if (dw === mDw)
-                target.copy( this.#mDwMesh.position )
+            if (dw === cDw)
+                target.copy( this.#cDwMesh.position )
             else {
                 if (dw === eDw) {
                     target.copy(this.#eDwMesh.position)
@@ -369,14 +366,14 @@ function initDqs() {
             }
         }
 
-        isVisibleInDw(dw) {
+        _isVisibleInDw(dw) {
             return  (dw === eDw && this.#eDwMesh.visible) ||
-                    (dw === mDw && this.#mDwMesh.visible) ||
+                    (dw === cDw && this.#cDwMesh.visible) ||
                     (dw === iDw && (this.#iDwLineMesh.visible || this.#iDwRingMesh.visible) )
         }
 
         getTextareaManipulationDw() {
-            return mDw
+            return cDw
         }
     }
     

@@ -1,6 +1,15 @@
-
 uniform float ourUniformFloat;
 uniform vec3 ourUniformVec3;
+
+vec4 getChangedVertex(in vec4 initialVertex) {
+    vec4 ret = initialVertex;
+    initialVertex;
+    ret.y += ourUniformFloat;
+    ret.xyz += ourUniformVec3;
+    return ret;
+}
+
+//END//
 
 vec3 getColor(in vec4 fragmentPosition) {
     ourUniformVec3;
@@ -24,7 +33,7 @@ vec3 getColor(in vec4 fragmentPosition) {
     vec3 fragColor = vec3(0.,ourUniformFloat,control3.y);
     return fragColor;
 }
-//END//
+
 
 
 

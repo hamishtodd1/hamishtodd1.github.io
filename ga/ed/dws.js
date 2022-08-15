@@ -187,7 +187,7 @@ async function initDws() {
         })
     }
 
-    forVizDws = (func) => {
+    forNonFinalDws = (func) => {
         for(dwName in dws) {
             if(dwName === "final")
                 continue

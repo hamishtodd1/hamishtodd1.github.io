@@ -89,11 +89,11 @@ function initFloats() {
             return target.copy(this.#mesh.position)
         }
 
-        setVisibility(newVisibility) {
+        _setVisibility(newVisibility) {
             this.#mesh.visible = newVisibility
         }
 
-        isVisibleInDw(dw) {
+        _isVisibleInDw(dw) {
             if (dw !== sDw )
                 return false
             return this.#mesh.visible
@@ -104,12 +104,6 @@ function initFloats() {
         }
     }
 
-    //the variable encompasses every use of the name
-    //the mention is all about the individual appearance of the name. They share one variable
-    //the appearance can be ascribed to multiple mentions
-    //if it's a uniform variable, it has just the one appearance
-    //this is premature optimization
-    
     let mentionType = new AppearanceType("float", 1, floatAppearance)
     mentionType.literalAssignmentFromOverride = `overrideFloats[0]`
     mentionType.outputAssignmentPropts = [``]

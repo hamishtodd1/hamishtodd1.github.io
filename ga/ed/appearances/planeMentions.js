@@ -22,6 +22,9 @@ function initPlanes() {
             super(variable)
             this.state = new Mv()
             this.state.plane(2., 1., 1., 1.)
+            this.uniform.value = new Float32Array(4)
+            //default value
+            this.state[2] = .5
 
             let mat = new THREE.MeshPhongMaterial({ side: THREE.DoubleSide })
             this.#eDwMesh = eDw.NewMesh(planeGeo, mat)
@@ -93,10 +96,6 @@ function initPlanes() {
         }
 
         updateUniformFromState() {
-            if (this.uniform.value === null) {
-                this.uniform.value = new Float32Array(4)
-                this.state[2] = .5
-            }
             this.uniform.value[0] = this.state[1]; this.uniform.value[1] = this.state[2]; this.uniform.value[2] = this.state[3]; this.uniform.value[3] = this.state[4];
         }
 
@@ -138,13 +137,13 @@ function initPlanes() {
                 console.error("not in that dw")
         }
 
-        setVisibility(newVisibility) {
+        _setVisibility(newVisibility) {
             this.#eDwMesh.visible = newVisibility
             this.#iDwMesh.visible = newVisibility
             this.#sphereMesh.visible = newVisibility
         }
 
-        isVisibleInDw(dw) {
+        _isVisibleInDw(dw) {
             if (dw !== eDw && dw !== iDw)
                 return false
             

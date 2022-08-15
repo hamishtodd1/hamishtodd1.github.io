@@ -38,6 +38,7 @@ function initPoints() {
 
     let eDw = dws.euclidean
     let iDw = dws.infinity
+    let mDw = dws.mesh
 
     let dragPlane = new Mv()
     let displayableVersion = new Mv()
@@ -48,6 +49,7 @@ function initPoints() {
         constructor(variable) {
             super(variable)
             this.state = new THREE.Vector4(0.,0.,0.,1.)
+            this.uniform.value = this.state
 
             let mat = new THREE.MeshBasicMaterial()
             this.#eDwMesh = eDw.NewMesh(pointGeo, mat)
@@ -97,11 +99,6 @@ function initPoints() {
             this.state.toArray(overrideFloats)
         }
 
-        updateUniformFromState() {
-            if (this.uniform.value === null)
-                this.uniform.value = this.state
-        }
-
         getLiteralAssignmentFromState() {
             return this.variable.type.getLiteralAssignmentFromValues(this.state.x, this.state.y, this.state.z, this.state.w)
         }
@@ -128,9 +125,8 @@ function initPoints() {
         }
 
         getWorldCenter(dw, target) {
-            if (dw === eDw) {
-                target.copy(this.#eDwMesh.position)
-                target.w = 1.
+            if (dw === eDw || dw === mDw) {
+                target.copy(this.state)
             }
             else if (dw === iDw) {
                 target.copy(this.#iDwMesh.position)
@@ -140,12 +136,14 @@ function initPoints() {
                 console.error("not in that dw")
         }
 
-        setVisibility(newVisibility) {
+        _setVisibility(newVisibility) {
             this.#eDwMesh.visible = newVisibility
             this.#iDwMesh.visible = newVisibility
+            if (this.variable.name === `initialVertex` && this.mentionIndex === 2)
+                log(newVisibility)
         }
 
-        isVisibleInDw(dw) {
+        _isVisibleInDw(dw) {
             if (dw !== eDw && dw !== iDw)
                 return false
             

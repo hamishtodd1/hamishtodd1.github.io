@@ -25,7 +25,6 @@
 async function initCompilation()
 {
     let focussedVertex = 0
-    let numVertices = 20
 
     const potentialNameRegex = /(?<=[^a-zA-Z_$0-9])([a-zA-Z_$][a-zA-Z_$0-9]*)/g
 
@@ -76,6 +75,14 @@ async function initCompilation()
         text = text.replace(commentNotNewlineRegex,"")
         let vertexMode = text.indexOf("getColor") === -1
 
+        let textLines = text.split("\n")
+        let finalChunks = Array(textLines.length)
+        let outputterChunks = Array(textLines.length)
+        textLines.forEach((l, lineIndex) => {
+            finalChunks[lineIndex] = l
+            outputterChunks[lineIndex] = l
+        })
+
         let outputterUniforms = {} // the "in"s are turned into uniforms
         let uniforms = {}
         let geo = new THREE.BufferGeometry()
@@ -110,15 +117,9 @@ async function initCompilation()
                 if (inResults.indexOf(index) !== -1) {
                     variable.isIn = true
 
-                    let inArray = new Float32Array(type.numFloats * numVertices)
-                    for (let i = 0, il = inArray.length; i < il; ++i)
-                        inArray[i] = Math.random() - .5
-                    geo.setAttribute('position', new THREE.BufferAttribute(inArray, type.numFloats))
-                    
-                    let focussedAttributeValue = new Float32Array(type.numFloats)
-                    for (let i = 0; i < type.numFloats; ++i)
-                        focussedAttributeValue[i] = inArray[i + type.numFloats * focussedVertex]
-                    outputterUniforms[name] = { value: focussedAttributeValue }
+                    let decl = `uniform ` + variable.type.glslName + ` ` + name + `Outputter;\n`
+                    //... and presumably remove the line declaring the In if it's an attribute?
+                    outputterChunks[0] = decl + outputterChunks[0]
                 }
                 if(uniformResults.indexOf(index) !== -1) 
                     variable.isUniform = true
@@ -140,24 +141,7 @@ async function initCompilation()
         })
         
         let ignoringDueToStruct = false
-        let textLines = text.split("\n")
-        let finalChunks = Array(textLines.length)
-        let outputterChunks = Array(textLines.length)
-        //we assume that stuff is limited to a line
-        //All that's relevant is on it
-        //If we change it in its entirety, nothing will be lost
         textLines.forEach((l,lineIndex) => {
-
-            {
-                finalChunks[lineIndex] = l
-                if (l[0] === "i" && l[1] === "n" && l[2] === " ") {
-                    outputterChunks[lineIndex] = "uniform " + l.slice(3)
-                    //right, there's another attrib array where we need to specify which vertex is being talked about
-                    // uniformsIncludingSelectedAttribs
-                }
-                else
-                    outputterChunks[lineIndex] = l
-            }
 
             {
                 if (!ignoringDueToStruct && l.indexOf("struct") !== -1)
@@ -181,10 +165,32 @@ async function initCompilation()
                 //pretty hard to tell. Eg foo( out target);
                 //because of uniforms, will have infrastructure to have one variable, one mesh
 
-                let mention = variable.getLowestUnusedMention(uniforms)
+                let mention = variable.getLowestUnusedMention()
                 mention.updateHorizontalBounds(match.index, name.length)
                 mention.lineIndex = lineIndex
                 mention.mentionIndex = mentionIndex++
+
+                //ascribes an appearance, probably creating it in the process
+                if (variable.isUniform || variable.isIn ) {
+                    let firstMention = variable.lowestUnusedMention === 1
+                    if (firstMention) {
+                        //create it
+                        mention.appearance = variable.type.getLowestUnusedAppearance(variable)
+                        mention.appearance.updateUniformFromState()
+                        mention.appearance.updateAppearanceFromState()
+
+                        if(variable.isUniform) {
+                            uniforms[variable.name] = mention.appearance.uniform
+                            outputterUniforms[variable.name] = mention.appearance.uniform
+                        }
+                        else
+                            createIn(geo, outputterUniforms, name, mention.appearance)
+                    }
+                    else
+                        mention.appearance = variable.mentions[0].appearance
+                }
+                else
+                    mention.appearance = variable.type.getLowestUnusedAppearance(variable)
 
                 if (variable.isIn || variable.isUniform)
                     return
@@ -246,6 +252,8 @@ async function initCompilation()
         if (vertexMode ) {
             updateOutputter(outputterText, outputterUniforms, true)
             updateFinalDwVertex(finalText, uniforms, geo)
+            if(textarea.value.indexOf('initialVertex') === -1)
+                console.error("no initialVertex use found!")
         }
         else {
             updateOutputter(outputterText, outputterUniforms, false)
@@ -254,19 +262,15 @@ async function initCompilation()
 
         updateLclsc(Infinity)
 
-        // debugger
-        //so the problem is probably that ourUniformFloat's mention gets given the wrong appearance? Maybe all floats?
-        // forEachUsedMention((m) => { log(
-        //     m.variable.name, 
-        //     m.mentionIndex, 
-        //     m.variable.type.appearances.indexOf(m.appearance))})
         updateMentionsFromRun( ()=>true )
 
         let currentDuplicates
+        //duplicates are a halfway step towards what you'd prefer: knowledge of when the things have really been changed
+        //i.e. when they are new variables probably
         appearanceTypes.forEach((at)=>{
             for (let i = 0; i < at.lowestUnusedAppearance; ++i) {
                 let appearance = at.appearances[i]
-                if (i === 0 || !appearance.equals(at.appearances[i-1]) )
+                if (i === 0 || appearance.variable !== at.appearances[i - 1].variable || !appearance.equals(at.appearances[i - 1]) )
                     currentDuplicates = [appearance]
                 else
                     currentDuplicates.push(appearance)

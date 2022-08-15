@@ -78,7 +78,8 @@ function initVec3s()
 
         constructor(variable) {
             super(variable)
-            this.state = new THREE.Vector3(1.,1.,1.)
+            this.state = new THREE.Vector3(1., 1., 1.)
+            this.uniform.value = this.state
 
             let scalarMat = new THREE.MeshBasicMaterial()
             this.#sMesh = sDw.NewMesh(downwardPyramidGeo, scalarMat)
@@ -160,11 +161,6 @@ function initVec3s()
             this.state.toArray(overrideFloats)
         }
 
-        updateUniformFromState() {
-            if (this.uniform.value === null)
-                this.uniform.value = this.state
-        }
-
         getLiteralAssignmentFromState() {
             return this.variable.type.getLiteralAssignmentFromValues(this.state.x, this.state.y, this.state.z)
         }
@@ -243,13 +239,13 @@ function initVec3s()
             }
         }
 
-        setVisibility(newVisibility) {
+        _setVisibility(newVisibility) {
             this.#vMesh.visible = newVisibility
             this.#iMesh.visible = newVisibility
             this.#sMesh.visible = newVisibility
         }
 
-        isVisibleInDw(dw) {
+        _isVisibleInDw(dw) {
             return (this.#vMesh.visible && dw === vDw) ||
                    (this.#iMesh.visible && dw === iDw) ||
                    (this.#sMesh.visible && dw === sDw)

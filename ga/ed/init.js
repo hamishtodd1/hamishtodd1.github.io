@@ -2,6 +2,7 @@
 TODO
     For next presentation
         Labels for e012 etc on the iDw
+        Highlight the borders when windowX === Infinity
         Uniforms
             Mouse ray in final dw!
             Shadertoy-inspired
@@ -91,6 +92,8 @@ TODO
             make some mentions then delete them
         Documented API for making your own window visualizations
     Long term
+        Latex
+            the "set inclusion" symbol means "has this type"
         Conveniences
             A better solution than tubegeometrys is a vertex shader
             Could make it so that when a new line is added, the whole thing scrolls so that that line is in place
@@ -157,8 +160,6 @@ Vague/philosophical
         you can visualize a point on the line. You can also picture a movement along that line. Two different things
         One's a blade and one's a versor
 
-
-
 */
 
 async function init() {
@@ -218,10 +219,10 @@ async function init() {
 
     initCaretInteractions()
     
+    await meshloadPromise
     compile()
     updateMentionVisibilitiesAndIndication()
     setCaretPosition(246)
-    await meshloadPromise
     renderAll()
 
     document.addEventListener('keydown', (event) => {

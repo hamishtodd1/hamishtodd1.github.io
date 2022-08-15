@@ -58,7 +58,6 @@ async function initShaderOutputAndFinalDw() {
 
         //when you hover initialVertex, it connects to one of the vertices in the point cloud/cow
         //and it ends up copying one of them to this
-        let outputterInitialVertex = { value: new THREE.Vector4(0.,0.,0.,1.) }
         let outputterFragmentPosition = {value: new THREE.Vector4(0.,0.,0.,1.)}
 
         let outputterVertexShader = `
@@ -71,26 +70,25 @@ async function initShaderOutputAndFinalDw() {
     
         //hmmm, to use varyings... what, you have to interpolate it yourself?
         //so there are the attributes that are actually at the vertices
-        updateOutputter = (partialFragmentShader, uniforms, vertexMode) => {
+        updateOutputter = (partialFragmentShader, outputterUniforms, vertexMode) => {
             if(outputFsq !== null) {
                 renderTextureScene.remove(outputFsq)
                 outputFsq.material.dispose()
             }
 
-            uniforms.outputMentionIndex = outputMentionIndex
-            conferOverrideSensetivityToUniforms(uniforms)
+            outputterUniforms.outputMentionIndex = outputMentionIndex
+            conferOverrideSensetivityToUniforms(outputterUniforms)
 
             let shaderRunner = ``
             if(vertexMode) {
-                uniforms.outputterInitialVertex = outputterInitialVertex
+
                 shaderRunner = `
-                uniform vec4 outputterInitialVertex;
                 void main() {
-                    vec4 outputterVertex = getChangedVertex(outputterInitialVertex);
+                    vec4 outputterVertex = getChangedVertex(initialVertexOutputter);
                 `
             }
             else {
-                uniforms.outputterFragmentPosition = outputterFragmentPosition
+                outputterUniforms.outputterFragmentPosition = outputterFragmentPosition
                 shaderRunner = `
                 uniform vec4 outputterFragmentPosition;
                 void main() {
@@ -101,7 +99,7 @@ async function initShaderOutputAndFinalDw() {
             let fullFragmentShader = generalShaderPrefix + readoutPrefix + partialFragmentShader + shaderRunner + `
                 gl_FragColor = encodeRgbaOfOutputFloatForOurPixel();
             }`
-            outputFsq = FullScreenQuadMesh(outputterVertexShader,fullFragmentShader, uniforms)
+            outputFsq = FullScreenQuadMesh(outputterVertexShader,fullFragmentShader, outputterUniforms)
 
             renderTextureScene.add(outputFsq)
         }
@@ -142,6 +140,7 @@ async function initShaderOutputAndFinalDw() {
                 if (condition(m) && !m.variable.isUniform && !m.variable.isIn) {
                     getShaderOutput(m.mentionIndex)
                     m.appearance.updateStateFromRunResult(floatArray)
+                    m.appearance.updateUniformFromState()
                     m.appearance.updateAppearanceFromState()
                 }
             })

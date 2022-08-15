@@ -48,6 +48,7 @@ function initComplexNumbers() {
         constructor(variable) {
             super(variable)
             this.state = new THREE.Vector2()
+            this.uniform.value = this.state
 
             let mat = new THREE.MeshBasicMaterial()
             this.#mesh = ourDw.NewMesh(dotGeo, mat)
@@ -78,11 +79,6 @@ function initComplexNumbers() {
             overrideFloats[1] = this.state.y
         }
 
-        updateUniformFromState() {
-            if (this.uniform.value === null)
-                this.uniform.value = this.state
-        }
-
         getLiteralAssignmentFromState() {
             return this.variable.type.getLiteralAssignmentFromValues(this.state.x, this.state.y)
         }
@@ -98,11 +94,11 @@ function initComplexNumbers() {
             target.copy( this.#mesh.position )
         }
 
-        setVisibility(newVisibility) {
+        _setVisibility(newVisibility) {
             this.#mesh.visible = newVisibility
         }
 
-        isVisibleInDw(dw) {
+        _isVisibleInDw(dw) {
             if (dw !== ourDw )
                 return false
             return this.#mesh.visible

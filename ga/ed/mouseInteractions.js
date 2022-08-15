@@ -38,9 +38,13 @@ function initMouseInteractions() {
             userIndicationY = clientYOld
         }
 
-        //this needs to happen before getHoveredMention because that depends on visibility
-        forEachUsedMention((mention) => {
-            mention.appearance.setVisibility(mentionVisibleDueToCaret(mention))
+        forEachAppearance((a) => { a.setVisibility(false) })
+        forEachUsedMention( (mention) => {
+            if (!mention.appearance.visible) {
+                let visibility = mentionVisibleDueToCaret(mention)
+                if (visibility && !mention.appearance.visible)
+                    mention.appearance.setVisibility(true)
+            }
         })
 
         if(mouseArea === null)
@@ -64,26 +68,19 @@ function initMouseInteractions() {
         if (!rightClicking) {
             if(grabbedDw !== null) {
 
-                //might be mention, uniform, or In
-                //there's a javascript representation of the glsl data
-                //the appearance, eg meshes, come from that
-                //that's what the uniforms and overrides are too
-                //so, make interfacing that data more generic
-                //then you can put stuff into uniforms
-                //neaten up this updateOverride horsecrap
-
                 dragOccurred = true
                 if (indicatedMention.variable.isIn) {
-                    //dragging this does not change data, but selects among it
+                    incrementFocussedAttributeExample()
+                    indicatedMention.appearance.updateAppearanceFromState()
+                    //put that value into the state. It's definitely a point
                 }
                 else {
                     indicatedMention.appearance.updateStateFromDrag(grabbedDw)
-                    if( indicatedMention.variable.isUniform ) {
-                        updateOverride(null)
-                        indicatedMention.appearance.updateUniformFromState()
-                    }
-                    else
+                    indicatedMention.appearance.updateUniformFromState()
+                    
+                    if( !indicatedMention.variable.isUniform )
                         updateOverride(indicatedMention)
+                    //override should probably come from uniform
 
                     indicatedMention.appearance.updateAppearanceFromState()
                 }
@@ -219,7 +216,7 @@ function initMouseInteractions() {
     textarea.addEventListener('scroll', (event) => onMouseMove(textarea, event))
     textarea.addEventListener('mousemove', (event) => onMouseMove(textarea, event))
     document.addEventListener('mousemove', (event) => onMouseMove(document, event))
-    forVizDws( (dw) => {
+    forNonFinalDws( (dw) => {
         dw.elem.addEventListener('mousedown', (event) => {
             onPotentialHoveredMentionGrab( event, dw)
         })
