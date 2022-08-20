@@ -7,8 +7,8 @@ TODO
             Highlight where it was but just put the words at the bottom
         Adding Dqs
         Uniforms
-            Mouse ray in final dw!
-            Time, Frame count, Frame duration
+            Mouse vec2 in final dw
+            Time, Frame count, Frame duration (will be fun to see on scalarDw!)
             Textures dw
                 uv map?
                 May want to draw or copypaste
@@ -37,6 +37,7 @@ TODO
         When you change rotation, idealLine2 flicks around
         Tab and enter make it so you can't ctrl+z
         Dragging the lines at infinity
+        the dual quaternion dragging takes account of duplicates. Point mention scalar should too, as should others
     Workshop for kids at makespace
         Need EXCELLENT error reporting. This shit is all in YOUR head!!!
         Everyone's stuff goes into a VR sim, saved on a webpage forever
@@ -211,13 +212,14 @@ async function init() {
     initGltf()
 
     await initVectorSpaceDw()
-    new Dw(`euclidean`, true, true)
+    initEuclideanDw()
+    // addPedestal(this)
     updateVertexMode = (vertexMode) => {
     }
     
     initInfinityDw()
     initComplexDw()
-    new Dw(`scalar`, false, false, camera2d)
+    new Dw(`scalar`, false, camera2d)
     // dws.mobius.elem.style.display = 'none'
     // dws.scalar.elem.style.display = 'none'
 

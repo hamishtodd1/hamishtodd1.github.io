@@ -152,7 +152,7 @@ async function initShaderOutputAndFinalDw() {
     // Final dw //
     //////////////
 
-    let dw = new Dw("final", false, false, camera, false)
+    let dw = new Dw("final", false, camera, false)
     // dw.elem.style.display = 'none'
 
     //////////////

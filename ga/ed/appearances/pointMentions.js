@@ -39,21 +39,27 @@ function initPoints() {
     let eDw = dws.euclidean
     let iDw = dws.infinity
     let mDw = dws.mesh
+    let sDw = dws.scalar
 
     let dragPlane = new Mv()
     let displayableVersion = new Mv()
+    let zeroVector4 = new THREE.Vector4()
     class vec4Appearance extends Appearance {
         #eDwMesh
         #iDwMesh
+        #sMesh
+        whenGrabbed = new THREE.Vector4()
         
         constructor(variable) {
             super(variable)
-            this.state = new THREE.Vector4(0.,0.,0.,1.)
+            this.state = new THREE.Vector4(0.,0.,0.,1.) //maybe better off as an mv?
             this.uniform.value = this.state
 
-            let mat = new THREE.MeshBasicMaterial()
+            let mat = new THREE.MeshBasicMaterial() //why not phong?
             this.#eDwMesh = eDw.NewMesh(pointGeo, mat)
             this.#iDwMesh = iDw.NewMesh(pointGeo, mat)
+
+            this.#sMesh = sDw.NewMesh(downwardPyramidGeo, new THREE.MeshBasicMaterial())
             
             camera.toUpdateAppearance.push(this)
         }
@@ -61,6 +67,8 @@ function initPoints() {
         setColor(col) {
             this.#eDwMesh.material.color.copy(col)
             this.#eDwMesh.material.needsUpdate = true
+            this.#sMesh.material.color.copy(col)
+            this.#sMesh.material.needsUpdate = true
         }
 
         equals(m) {
@@ -72,12 +80,16 @@ function initPoints() {
         }
 
         onGrab(dw) {
+            this.whenGrabbed.copy(this.state)
             if(dw === eDw) {
                 mv0.fromVec4(this.state)
                 if (mv0.hasEuclideanPart())
                     camera.frustum.far.projectOn(mv0, dragPlane)
                 else dragPlane.copy(e0)
             }
+        }
+        onLetGo(){
+            this.whenGrabbed.copy(zeroVector4)
         }
 
         updateStateFromDrag(dw) {
@@ -94,6 +106,13 @@ function initPoints() {
                 iDw.mouseRayIntersection(mv0, true)
                 mv0.toVec4(this.state)
             }
+            else if(dw === sDw) {
+                camera2d.getOldClientWorldPosition(dw, v1)
+
+                mv0.fromVec4(this.whenGrabbed)
+                mv0.multiplyScalar((v1.x === 0.? 0.00001 : v1.x) / mv0.norm())
+                mv0.toVec4(this.state)
+            }
             else console.error("not in that dw")
         }
 
@@ -108,15 +127,28 @@ function initPoints() {
         //-------------
 
         updateAppearanceFromState() {
+            
+            mv0.fromVec4(this.state)
+            
+            let currentlyGrabbed = !this.whenGrabbed.equals(zeroVector4)
+            this.#sMesh.position.x = mv0.norm() //wait, but is it the norm that you're after? Or the coef of .w?
+            if (currentlyGrabbed)
+                this.#sMesh.position.x *= this.whenGrabbed.dot(this.state) > 0. ? 1.:-1.
+            
             if (this.state.w !== 0.) {
                 this.#iDwMesh.position.set(0., 0., 0.)
                 this.#eDwMesh.position.copy(this.state).multiplyScalar(1./this.state.w)
+
+                //an alternative way to do this kind of thing (which also happens with dual quats...)
+                //would be to say: these windows do not give the current value
+                //they are message-sending devices. Their state comes not from the shader
+                //their INITIAL state may come from the shader. And you may use that for insight
+                //but they won't override the state you're holding the thing at
             }
             else {
                 this.#iDwMesh.position.copy(this.state)
                 this.#iDwMesh.position.setLength(INFINITY_RADIUS)
-
-                mv0.fromVec4(this.state)
+                
                 mv0.getDisplayableVersion(displayableVersion)
                 let isInFrontOfCamera = displayableVersion[14] > 0.
                 if (isInFrontOfCamera)
@@ -127,7 +159,10 @@ function initPoints() {
         }
 
         getWorldCenter(dw, target) {
-            if (dw === eDw || dw === mDw) {
+            if (dw === sDw) {
+                target.copy(this.#sMesh.position)
+            }
+            else if (dw === eDw || dw === mDw) {
                 target.copy(this.state)
             }
             else if (dw === iDw) {
@@ -141,19 +176,19 @@ function initPoints() {
         _setVisibility(newVisibility) {
             this.#eDwMesh.visible = newVisibility
             this.#iDwMesh.visible = newVisibility
+            this.#sMesh.visible = newVisibility
             if (this.variable.name === `initialVertex` && this.mentionIndex === 2)
                 log(newVisibility)
         }
 
         _isVisibleInDw(dw) {
-            if (dw !== eDw && dw !== iDw)
-                return false
-            
             if(dw === eDw)
                 return !this.#eDwMesh.position.equals(OUT_OF_SIGHT_VECTOR3) && this.#eDwMesh.visible
-
-            if(dw === iDw)
+            else if(dw === iDw)
                 return !this.#iDwMesh.position.equals(zeroVector) && this.#iDwMesh.visible
+            else if(dw === sDw)
+                return this.#sMesh.visible
+            else return false
         }
 
         getTextareaManipulationDw() {

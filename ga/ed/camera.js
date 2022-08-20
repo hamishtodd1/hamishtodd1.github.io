@@ -26,7 +26,6 @@ function initCamera() {
 
     camera.toUpdateAppearance = []
     camera.toCopyQuatTo = []
-    log(camera.toCopyQuatTo)
 
     camera.worldToCanvas = new THREE.Matrix4()
     camera.updateWorldToCanvas = () => {

@@ -47,7 +47,7 @@ function initMention() {
             setSvgLine(svgLine, -10, -10, -10, -10)
         })
         forEachPropt(dws, (dw) => {
-            dw.setBorderHighlights(false)
+            dw.setBorderHighlight(false)
         })
     }
 
@@ -148,13 +148,13 @@ function initMention() {
                 if (this.appearance.isVisibleInDw(dw) ) {
                     let [windowX, windowY] = this.appearance.getWindowCenter(dw)
                     if(windowX === Infinity) 
-                        dw.setBorderHighlights(true, col)
+                        dw.setBorderHighlight(true, col)
                     else {
                         setSvgLine($labelConnectors[lowestUnusedLabelConnector++],
                             x + w,
                             y + lineHeight / 2.,
                             windowX, windowY)
-                        dw.setBorderHighlights(false)
+                        dw.setBorderHighlight(false)
                     }
                 }
             })

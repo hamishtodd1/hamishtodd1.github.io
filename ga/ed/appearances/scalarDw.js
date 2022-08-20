@@ -37,12 +37,6 @@ function initFloats() {
         // sDw.addNonMentionChild(bg)
     }
 
-    let downwardPyramidGeo = new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3( 0., 0., 0.),
-        new THREE.Vector3( .3, .3, 0.),
-        new THREE.Vector3(-.3, .3, 0.),
-    ])
-
     class floatAppearance extends Appearance {
         #mesh
 

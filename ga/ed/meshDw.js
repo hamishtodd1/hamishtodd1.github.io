@@ -9,7 +9,7 @@
  */
 
 function initMeshDw() {
-    let dw = new Dw(`mesh`, false, true, camera, false)
+    let dw = new Dw(`mesh`, true, camera, false)
     
     let object
     let inAppearance = null
@@ -55,7 +55,7 @@ function initMeshDw() {
         // }
     }
 
-    dw.mouseRayIntersection = () => {
+    dw.mouseRayIntersection = (targetMv) => {
         //mouseRay to threeRay
         let mouseRay = getMouseRay(dw)
         meet(e0, mouseRay, mouseRayDirection).toVector(threeRay.direction)

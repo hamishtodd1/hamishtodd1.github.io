@@ -2,7 +2,7 @@
 
 async function initVectorSpaceDw() {
 
-    let vDw = new Dw("vectorSpace", false, true)
+    let vDw = new Dw("vectorSpace", true)
 
     // let rgbCube = new THREE.Mesh(new THREE.BoxGeometry(1.,1.,1.), new THREE.ShaderMaterial())
     // rgbCube.geometry.translate(.5, .5, .5)
@@ -58,12 +58,6 @@ function initVec3s()
     headGeo.translate(0.,-.5,0.)
     let shaftGeo = CylinderBufferGeometryUncentered(shaftRadius, 1., 8, true)
 
-    let downwardPyramidGeo = new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(0., 0., 0.),
-        new THREE.Vector3(.3, .3, 0.),
-        new THREE.Vector3(-.3, .3, 0.),
-    ])
-
     let dashedLineMat = new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: .1, gapSize: .1 })
 
     let dragPlane = new Mv()
@@ -81,8 +75,7 @@ function initVec3s()
             this.state = new THREE.Vector3(1., 1., 1.)
             this.uniform.value = this.state
 
-            let scalarMat = new THREE.MeshBasicMaterial()
-            this.#sMesh = sDw.NewMesh(downwardPyramidGeo, scalarMat)
+            this.#sMesh = sDw.NewMesh(downwardPyramidGeo, new THREE.MeshBasicMaterial())
 
             let mat = new THREE.MeshPhongMaterial()
             this.#iMesh = iDw.NewMesh(pointGeo, mat)    

@@ -2,8 +2,7 @@
 
 function initInfinityDw()
 {
-    let dw = new Dw("infinity", false, true)
-    log(dws.infinity)
+    let dw = new Dw("infinity", true)
 
     let exteriorMat = new THREE.MeshPhongMaterial({ transparent:true, opacity:.6, side:THREE.FrontSide})
     let interiorMat = new THREE.MeshPhongMaterial({ transparent:false, side:THREE.BackSide})
@@ -23,7 +22,6 @@ function initInfinityDw()
             marker.position.setComponent(i,INFINITY_RADIUS * 1.1)
             if(j)
                 marker.position.multiplyScalar(-1.)
-            log(marker.position)
             marker.scale.multiplyScalar(.65)
 
             camera.toCopyQuatTo.push(marker)
@@ -50,9 +48,9 @@ function initInfinityDw()
 
         let result = threeRay.intersectSphere(threeSphere, v1)
         if(result === null) {
+            let mvRay = getMouseRay(dw)
             camera.frustum.far.projectOn(e123, frustumOnOrigin)
-            // frustumOnOrigin.log()
-            meet(threeRay, frustumOnOrigin, targetMv)
+            meet(mvRay, frustumOnOrigin, targetMv)
         }
         else
             targetMv.fromVec(v1)

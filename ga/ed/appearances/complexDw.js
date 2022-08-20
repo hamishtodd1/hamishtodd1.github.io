@@ -11,7 +11,7 @@
 */
 function initComplexDw() {
 
-    let ourDw = new Dw("mobius", false, false, camera2d)
+    let ourDw = new Dw("mobius", false, camera2d)
 
     const axisMat = new THREE.LineBasicMaterial({
         color: 0xFFFFFF

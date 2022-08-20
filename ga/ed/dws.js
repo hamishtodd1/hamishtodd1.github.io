@@ -32,7 +32,7 @@ async function initDws() {
 
         border
 
-        constructor(name, havePedestal, haveLights, ourCamera, mentionDw) { //do it as a "params" thing
+        constructor(name, haveLights, ourCamera, mentionDw) { //do it as a "params" thing
             this.elem = document.createElement('div')
             this.elem.className = 'dwEl'
             document.body.appendChild(this.elem)
@@ -67,9 +67,6 @@ async function initDws() {
                 this.border.matrix = camera2dMatrix
 
             dws[name] = this
-
-            if(havePedestal)
-                addPedestal(this)
             
             if(haveLights)
                 addLights(this)
@@ -88,7 +85,7 @@ async function initDws() {
             return ret
         }
 
-        setBorderHighlights(isVisible,col) {
+        setBorderHighlight(isVisible,col) {
             this.border.visible = isVisible
             if(isVisible) {
                 borderMat.color.copy(col)
@@ -158,18 +155,6 @@ async function initDws() {
     }
     window.Dw = Dw
     
-    // let skyBgGeo = new THREE.SphereGeometry(camera.far * .9)
-    // let skyBgMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(.18431372, .18431372, .18431372), side: THREE.BackSide })
-    let pedestalDimension = 4.
-    let pedestalGeo = new THREE.BoxGeometry(pedestalDimension, .01, pedestalDimension)
-    let pedestalMat = new THREE.MeshPhongMaterial({ color: 0x999999, specular: 0x101010 })
-    function addPedestal(dw)
-    {
-        const pedestal = new THREE.Mesh( pedestalGeo, pedestalMat)
-        pedestal.position.y = -1.
-        pedestal.receiveShadow = true
-        dw.addNonMentionChild(pedestal)
-    }
     function addLights(dw)
     {
         const spotLight = new THREE.SpotLight()

@@ -17,6 +17,11 @@ const pl = new THREE.Plane()
 
 const unchangingUnitSphereGeometry = new THREE.EfficientSphereGeometry(1.)
 const unchangingUnitSquareGeometry = new THREE.PlaneGeometry(1., 1.)
+const downwardPyramidGeo = new THREE.BufferGeometry().setFromPoints([
+	new THREE.Vector3(0., 0., 0.),
+	new THREE.Vector3(.3, .3, 0.),
+	new THREE.Vector3(-.3, .3, 0.),
+])
 
 const debugging = 0
 let logged = 0
