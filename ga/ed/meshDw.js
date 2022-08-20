@@ -14,6 +14,9 @@ function initMeshDw() {
     let object
     let inAppearance = null
 
+    // let bone = new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.BoxGeometry(2.,2.,2.)), new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
+    // dw.addNonMentionChild(bone)
+
     let raycaster = new THREE.Raycaster()
     focusIndicatedVertex = () => {
         raycaster.ray.copy(getMouseThreeRay(dw))
@@ -42,7 +45,7 @@ function initMeshDw() {
 
         inAppearance = appearance
 
-        focusAttributeExample(currentFocussedAttributeExample)
+        focusAttributeExample(0)
 
         // else {
         //     let inArray = new Float32Array(type.numFloats * numVertices)
@@ -112,6 +115,7 @@ function initMeshDw() {
                 if (child.isMesh) {
                     // object = new THREE.LineSegments(new THREE.WireframeGeometry(child.geometry),new THREE.MeshBasicMaterial({color:0xFFFFFF}))
                     object = child
+                    // object.visible = false
                     // child.geometry.computeVertexNormals()
                     // child.geometry.normalizeNormals()
                 }

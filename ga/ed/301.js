@@ -33,12 +33,12 @@ function init301WithoutDeclarations(basisNames) {
         }
 
         equals(a) {
-            let doesEqual = true
+            let ret = true
             for (let i = 0; i < this.constructor.size; ++i) {
                 if (this[i] !== a[i])
-                    doesEqual = false
+                    ret = false
             }
-            return doesEqual
+            return ret
         }
 
         fromArray(arr) {
@@ -114,7 +114,7 @@ function init301WithoutDeclarations(basisNames) {
         }
 
         getBivectorPartToMv(target) {
-            for(let i = 0; i < 6; ++i)
+            for( let i = 0; i < 6; ++i )
                 localBiv0[i] = this[i+1]
             localBiv0.toMv(target)
         }
@@ -245,10 +245,6 @@ function init301WithoutDeclarations(basisNames) {
 
             return this
         }
-
-        // getPlane(target) {
-
-        // }
 
         point(x,y,z,w) {
             if(w === undefined)

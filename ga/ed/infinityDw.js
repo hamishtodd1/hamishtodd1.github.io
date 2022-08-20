@@ -3,6 +3,7 @@
 function initInfinityDw()
 {
     let dw = new Dw("infinity", false, true)
+    log(dws.infinity)
 
     let exteriorMat = new THREE.MeshPhongMaterial({ transparent:true, opacity:.6, side:THREE.FrontSide})
     let interiorMat = new THREE.MeshPhongMaterial({ transparent:false, side:THREE.BackSide})
@@ -11,6 +12,25 @@ function initInfinityDw()
     theSphere.add(new THREE.Mesh(sphereGeo, exteriorMat), new THREE.Mesh(sphereGeo, interiorMat))
     theSphere.scale.setScalar(INFINITY_RADIUS)
     dw.addNonMentionChild(theSphere)
+
+    //and the labels for the directions
+    let names = [`x`,`y`,`z`]
+    for(let i = 0; i < 3; ++i) {
+        for(let j = 0; j < 2; ++j) {
+            let name = (j === 0 ? `+` : `-`) + names[i]
+
+            let marker = text(name)
+            marker.position.setComponent(i,INFINITY_RADIUS * 1.1)
+            if(j)
+                marker.position.multiplyScalar(-1.)
+            log(marker.position)
+            marker.scale.multiplyScalar(.65)
+
+            camera.toCopyQuatTo.push(marker)
+
+            dw.addNonMentionChild(marker)
+        }
+    }
 
     let euclideanHider = new THREE.Mesh(sphereGeo, new THREE.MeshPhongMaterial({color:0x000000}))
     euclideanHider.scale.setScalar(.15)
@@ -32,7 +52,7 @@ function initInfinityDw()
         if(result === null) {
             camera.frustum.far.projectOn(e123, frustumOnOrigin)
             // frustumOnOrigin.log()
-            meet(mouseRay, frustumOnOrigin, targetMv)
+            meet(threeRay, frustumOnOrigin, targetMv)
         }
         else
             targetMv.fromVec(v1)

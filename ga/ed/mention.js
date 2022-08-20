@@ -39,12 +39,15 @@ function initMention() {
         return line * lineHeight + textareaOffsetVertical - textarea.scrollTop
     }
     columnToScreenX = (column) => {
-        return column * characterWidth + textareaOffsetHorizontal
+        return column * characterWidth + textareaOffsetHorizontal - textarea.scrollLeft
     }
     
     hideHighlight = () => {
         $labelLines.forEach((svgLine) => { 
             setSvgLine(svgLine, -10, -10, -10, -10)
+        })
+        forEachPropt(dws, (dw) => {
+            dw.setBorderHighlights(false)
         })
     }
 
@@ -54,11 +57,13 @@ function initMention() {
             if (inamongstChangedLines(mention.lineIndex) )
                 return false
 
-            let mb = mention.horizontalBounds
-            let mby = lineToScreenY(mention.lineIndex)
+            let y = lineToScreenY(mention.lineIndex)
+            let x = columnToScreenX(mention.column)
+            let w = mention.variable.name.length * characterWidth
+
             let xyInBox =
-                mb.x <= screenX && screenX <= mb.x + mb.w &&
-                mby <= screenY && screenY < mby + lineHeight
+                x <= screenX && screenX <= x + w &&
+                y <= screenY && screenY < y + lineHeight
 
             if(xyInBox)
                 ret = mention
@@ -108,8 +113,9 @@ function initMention() {
     window.Appearance = Appearance
 
     class Mention {
-        horizontalBounds = { x: 0., w: 0. }
         lineIndex = -1
+        column = -1
+
         mentionIndex = -1
 
         variable
@@ -120,39 +126,35 @@ function initMention() {
             this.variable = variable
         }
 
-        // ummm why the =>?
-        updateHorizontalBounds = (column, nameLength) => {
-            this.horizontalBounds.x = columnToScreenX(column)
-            this.horizontalBounds.w = nameLength * characterWidth
-        }
-
         highlight() {
             let col = this.variable.col
             $labelLines.forEach((svgLine) => {
                 svgLine.style.stroke = "rgb(" + col.r * 255. + "," + col.g * 255. + "," + col.b * 255. + ")"
             })
 
-            let mb = this.horizontalBounds
-            let mby = lineToScreenY(this.lineIndex)
+            //mouse box
+            let y = lineToScreenY(this.lineIndex)
+            let x = columnToScreenX(this.column)
+            let w = this.variable.name.length * characterWidth
 
-            setSvgLine($labelSides[0], mb.x, mby, mb.x + mb.w, mby)
-            setSvgLine($labelSides[1], mb.x + mb.w, mby, mb.x + mb.w, mby + lineHeight)
-            setSvgLine($labelSides[2], mb.x + mb.w, mby + lineHeight, mb.x, mby + lineHeight)
-            setSvgLine($labelSides[3], mb.x, mby + lineHeight, mb.x, mby)
+            setSvgLine($labelSides[0], x, y, x + w, y)
+            setSvgLine($labelSides[1], x + w, y, x + w, y + lineHeight)
+            setSvgLine($labelSides[2], x + w, y + lineHeight, x, y + lineHeight)
+            setSvgLine($labelSides[3], x, y + lineHeight, x, y)
 
             let lowestUnusedLabelConnector = 0
             //this is very shotgunny. Better would be
             forNonFinalDws((dw) => {
                 if (this.appearance.isVisibleInDw(dw) ) {
                     let [windowX, windowY] = this.appearance.getWindowCenter(dw)
-                    if(windowX !== Infinity) {
-                        setSvgLine($labelConnectors[lowestUnusedLabelConnector++],
-                            mb.x + mb.w,
-                            mby + lineHeight / 2.,
-                            windowX, windowY)
-                    }
+                    if(windowX === Infinity) 
+                        dw.setBorderHighlights(true, col)
                     else {
-                        //highlight the borders
+                        setSvgLine($labelConnectors[lowestUnusedLabelConnector++],
+                            x + w,
+                            y + lineHeight / 2.,
+                            windowX, windowY)
+                        dw.setBorderHighlights(false)
                     }
                 }
             })

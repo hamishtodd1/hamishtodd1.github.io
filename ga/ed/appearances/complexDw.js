@@ -14,12 +14,12 @@ function initComplexDw() {
     let ourDw = new Dw("mobius", false, false, camera2d)
 
     const axisMat = new THREE.LineBasicMaterial({
-        color: 0x964B00
+        color: 0xFFFFFF
     })
-    ourDw.addNonMentionChild(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+    ourDw.addNonMentionChild( new THREE.Line( new THREE.BufferGeometry().setFromPoints([
         new THREE.Vector3(-10.,  0., 0.),
         new THREE.Vector3( 10.,  0., 0.)]), axisMat))
-    ourDw.addNonMentionChild(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+    ourDw.addNonMentionChild( new THREE.Line( new THREE.BufferGeometry().setFromPoints([
         new THREE.Vector3(  0., 10., 0.),
         new THREE.Vector3(  0.,-10., 0.)]), axisMat))
     let circlePoints = []
@@ -30,10 +30,10 @@ function initComplexDw() {
     }
     ourDw.addNonMentionChild(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(circlePoints), axisMat))
 
-    let bg = new THREE.Mesh(unchangingUnitSquareGeometry,new THREE.MeshBasicMaterial({color:0xFFFDD0}))
-    bg.position.z = -1.
-    bg.scale.setScalar(999.)
-    ourDw.addNonMentionChild(bg)
+    // let bg = new THREE.Mesh(unchangingUnitSquareGeometry,new THREE.MeshBasicMaterial({color:0xFFFDD0}))
+    // bg.position.z = -1.
+    // bg.scale.setScalar(999.)
+    // ourDw.addNonMentionChild(bg)
 }
 
 function initComplexNumbers() {

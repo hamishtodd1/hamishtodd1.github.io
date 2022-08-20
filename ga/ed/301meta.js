@@ -4,7 +4,7 @@
 
 async function init301() {  
 
-    const basisNames = ["", "0", "1", "2", "3", "01", "02", "03", "12", "31", "23", "021", "013", "032", "123", "0123"]
+    const basisNames = ["", "0", "1", "2", "3", "01", "02", "03", "12", "13", "23", "021", "013", "032", "123", "0123"]
 
     let [jsGaString, glslGaString] = createSharedFunctionDeclarationsStrings()
     //newMv is not a variable name. It is equivalent to "new Mv()"
@@ -33,8 +33,6 @@ async function init301() {
     }
 
     eval(strToEval)
-
-    // generateOptimizedSandwiches()
 }
 
 function createSharedFunctionDeclarationsStrings()
@@ -140,6 +138,21 @@ function generateOptimizedSandwiches() {
                 cayleyTableReverseSigns[i][j] = -1
             }
         }
+    }
+
+    const basisNames = [``, `0`, `1`, `2`, `3`, `01`, `02`, `03`, `12`, `31`, `23`, `021`, `013`, `032`, `123`, `0123`]
+    log(`cayley table`)
+    let spaces = `         `
+    for(let i = 0; i < 16; ++i) {
+        let row = ``
+        for(let j = 0; j < 16; ++j) {
+            let entry = cayleyTable[i][j] === ZERO_CONTRIBUTION ? `0` :
+                        (cayleyTableSigns[i][j] === 1 ? `` : `-`) +
+                        (cayleyTable[i][j] === 0 ? `1` :
+                        `e` + basisNames[cayleyTable[i][j]])
+            row += spaces.slice(0,7-entry.length) + entry + ` `
+        }
+        log(row)
     }
 
     //can you use the CGA thing to make sense of the bulk vs weight norm?

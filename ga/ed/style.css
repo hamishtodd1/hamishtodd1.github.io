@@ -4,7 +4,7 @@
   --dwWidth: 180px;
   --dwAspect: 16/9;
   --dwHeight: calc(var(--dwWidth) / (var(--dwAspect)));
-  --generalGap: 10px;
+  --generalGap: 6px;
 }
 
 #canvas3d, #ourSvg {
@@ -99,16 +99,6 @@
 /* No resize on textarea */
 #textarea {
   resize: none;
-}
-
-/* Paragraphs; First Image */
-* {
-  font-family: "Fira Code", monospace;
-}
-p code {
-  border-radius: 2px;
-  background-color: #eee;
-  color: #111;
 }
 
 

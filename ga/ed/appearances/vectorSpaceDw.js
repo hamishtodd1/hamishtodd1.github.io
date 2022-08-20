@@ -2,7 +2,7 @@
 
 async function initVectorSpaceDw() {
 
-    let vDw = new Dw("vectorSpace", true)
+    let vDw = new Dw("vectorSpace", false, true)
 
     // let rgbCube = new THREE.Mesh(new THREE.BoxGeometry(1.,1.,1.), new THREE.ShaderMaterial())
     // rgbCube.geometry.translate(.5, .5, .5)

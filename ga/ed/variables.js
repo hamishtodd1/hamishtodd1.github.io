@@ -12,7 +12,7 @@ const dws = {}
 
 const overrideFloats = new Float32Array(16)
 
-const INFINITY_RADIUS = 1.7
+const INFINITY_RADIUS = 1.53
 const pointGeo = new THREE.SphereBufferGeometry(.1, 32, 16)
 
 let generalShaderPrefix = `

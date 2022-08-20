@@ -14,6 +14,15 @@ async function initDws() {
     let numDownSide = 0
     let numAlongTop = 0
 
+    let borderRadius = Math.sqrt(2.) / 2.
+    let borderGeo = new THREE.RingGeometry(borderRadius * .92, borderRadius, 4, 1, TAU/8.)
+    borderGeo.translate(0., 0., -1.)
+    let borderMat = new THREE.MeshBasicMaterial({color:0xFF0000})
+
+    let camera2dMatrix = new THREE.Matrix4()
+    camera2dMatrix.makeScale(camera2d.left*2.,camera2d.top*2.,1.)
+    camera2dMatrix.setPosition(0., 0., camera2d.position.z - camera2d.near*1.1)
+
     class Dw {
         #scene = new THREE.Scene()
         elem
@@ -21,7 +30,9 @@ async function initDws() {
         camera
         hasLights
 
-        constructor(name, haveAll3dStuff, haveLights, ourCamera, mentionDw) { //do it as a "params" thing
+        border
+
+        constructor(name, havePedestal, haveLights, ourCamera, mentionDw) { //do it as a "params" thing
             this.elem = document.createElement('div')
             this.elem.className = 'dwEl'
             document.body.appendChild(this.elem)
@@ -46,16 +57,24 @@ async function initDws() {
 
             this.camera = ourCamera || camera
 
+            this.border = new THREE.Mesh(borderGeo, borderMat)
+            // this.border.visible = false
+            this.addNonMentionChild(this.border)
+            this.border.matrixAutoUpdate = false
+            if (this.camera === camera)
+                this.border.matrix = FULL_SCREEN_QUAD_MATRIX
+            else
+                this.border.matrix = camera2dMatrix
+
             dws[name] = this
 
-            if(haveAll3dStuff) {
+            if(havePedestal)
                 addPedestal(this)
-                addLights(this)
-            }
-            else if(haveLights)
+            
+            if(haveLights)
                 addLights(this)
 
-            this.hasLights = ((haveAll3dStuff||false) && (haveLights||false)) || false
+            this.hasLights = haveLights
         }
 
         worldToWindow(vector3) {
@@ -67,6 +86,14 @@ async function initDws() {
             ret.visible = false
             this.#scene.add(ret)
             return ret
+        }
+
+        setBorderHighlights(isVisible,col) {
+            this.border.visible = isVisible
+            if(isVisible) {
+                borderMat.color.copy(col)
+                borderMat.needsUpdate = true
+            }
         }
 
         NewMesh(geo,mat) {
@@ -177,7 +204,7 @@ async function initDws() {
 
         updateFunctions.forEach((uf)=>uf())
 
-        renderer.setClearColor(0x404040,1)
+        renderer.setClearColor(0x272822,1)
         for(dwName in dws)
             dws[dwName].render()
 

@@ -83,9 +83,8 @@ function initPoints() {
         updateStateFromDrag(dw) {
             //might be nice to snap to a grid
 
-            if (this.variable.isIn) {
+            if (this.variable.isIn)
                 focusIndicatedVertex()
-            }
             else if(dw === eDw) {
                 let mouseRay = getMouseRay(dw)
                 meet(dragPlane, mouseRay, mv0)

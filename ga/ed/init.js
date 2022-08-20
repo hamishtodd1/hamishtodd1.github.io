@@ -1,64 +1,69 @@
 /*
 TODO
     For next presentation
-        
-        Dual quaternion skinning!
-        Labels for e012 etc on the iDw
-        Highlight the borders when windowX === Infinity
+        Dual quaternion skinning
+            Bones as an In, in the mesh window
+        Better error reporting
+            Highlight where it was but just put the words at the bottom
+        Adding Dqs
         Uniforms
             Mouse ray in final dw!
-            Shadertoy-inspired
+            Time, Frame count, Frame duration
             Textures dw
+                uv map?
                 May want to draw or copypaste
                 Considered as Initial state of a simulation
                     "step" "play/pause" buttons. Can draw when paused
                 2D texture
-        Attributes
-            Any variable that is different across manifold can be seen in thingy window
-            Mesh window
-                Has an indicator on it: "where attributes are currently coming from". Can move indicator with mouse
         User-created functions and for loops
-            when you're looking at a function, it could have been called from multiple places!
+            when you're looking at a function, it could have been called from various places!
                 it gets inlined, so one run of it is qualitatively different from another
             There's a finite number of places it'll get called
                 Can scroll, discretely, through those: build the possible values up into a selection, eg a point cloud
                 debugger only lets you look at one point in time - want a fast way to look through ALL the state from a run!
                 And yes if the input and outputs have less than 3 dimensions total, can visualize with some thing nice-looking
             for loops: 
-                "for(let i = 0; ...) {stuff}" = "function stuff(i){} stuff(0); stuff(1);..."
+                "for(let i = 0; ...) {stuff}" becomes:
+                "function stuff(i){} stuff(0); stuff(1);..."
                 for loops are this under the hood but handled differently:
                     outputter assignment is conditionalized on the index (es!) being a specific thing
                     the index could have crazy shit going on, it must be said. 
                         Just ignore that. Note loops get unrolled so don't feel bad
                     Whenever you highlight a mention in the loop, you also highlight the loop variable somehow, wherever it may be
     Bugs
+        Possibly saw a bug with lines at infinity which was visible when just putting 1s and 0s in everything
+        minus sign with sandwich
         Mobiuses are wrong way around, translations probably aren't working
         When you change rotation, idealLine2 flicks around
-        minus sign with sandwich
         Tab and enter make it so you can't ctrl+z
-        Declarations should be visualized too, eg return vec4(0.,0.,0.,1); is still a point
         Dragging the lines at infinity
     Workshop for kids at makespace
+        Need EXCELLENT error reporting. This shit is all in YOUR head!!!
         Everyone's stuff goes into a VR sim, saved on a webpage forever
         Export(/import?):
+            Game
             Ordinary shader
             threejs
             unity
             html page - EE
             export threejs function creating the thing it is with the appropriate uniforms
     GDC
+        Windows appear when it's detected that a user has made a variable like that
+            Then, they stay
+        Label on blades saying their norm?
         "Teardrops" visualization. Once you've sorted out the meaning of that shit!
             Can turn off and on
         Connect up mentions that are "copies"
             Makes it nicer when eg you're editing control1 and it has no effect on the below because it's redefined after you edit it!
         Practical
-            Make the dome
+            Make the transparent spotted dome
             3D print the shapes
-        Struct and function definitions
+        Ins work with function definitions that aren't main
+        "Small domain and range function" dw
+            This is fun but not necessarily useful for PGA
+            Bezier curves have control points. Could they be in the same window?
             Maybe even visualized functions as curves for R^n -> R^m for (m+n) < 4
             Same with I^2 -> I^3 or less. Need windows for these
-            This is fun but not necessarily useful for PGA
-        "Small domain and range function" dw
             implicit surfaces etc
             Want to detect eg vec3 f(in vec3)
         Dome window for 2D PGA. Overlay for vectorspace Dw?
@@ -88,7 +93,6 @@ TODO
             This is the eventual destiny of the "float" window
             lerp as an example of a simple function to try it out with
             write some numbers on a line
-            They appear in a  if my carat is on that line
             I can click or drag or whatever, and find the number I know I want
             Maybe move my carat through the line (4*8+5*2)/2 and see it animate
         Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
@@ -98,38 +102,39 @@ TODO
     Long term
         Latex
             the "set inclusion" symbol means "has this type"
+            Someone else's thing to draw and display it. Maybe desmos
         Conveniences
-            A better solution than tubegeometrys is a vertex shader
+            Declarations should be visualized too, eg return vec4(0.,0.,0.,1); is still a point
+            line connecting getVertex's return value to the output
+            When hovering something in dw, its name in text window inflates
             Could make it so that when a new line is added, the whole thing scrolls so that that line is in place
             Or perhaps check whether the current line is just a straight redefinition like a = 5 - REPLACE lines like that
             Got many dws? they auto-rearrange
             Hovering "return" could be a good for the situation of return vec3(0.,0.,0.)
+            Double click causes camera to whirl around so clicked variable is centered, whatever it is
             dragging a literal just edits that line instead of making a new one
-        Rawshadermaterial
-        Generate javascript game. Or maybe your own windows
+            ctrl+z works. And maybe interacts with other things
+            When things appear and reappear in dws, have a nice transition
+                Eg they're of to the side and they come in
+            If the variable hasn't changed value, would be nice if the versions of it that are the same as it are all highlighted
+        Optimization
+            Webworkers?
+            See if it slows down after 100 compiles
+            Rawshadermaterial
+            A better solution than tubegeometrys is a vertex shader
         Grab and drag could be implemented by creating a motor and then applying it
             For this, should think of a manipulation method that works for point, line and plane
             Rotations is done by grabbing the infinity window
-        When hovering something in dw, its name in text window inflates
         Other events
             Live coding
             Festival of the spoken nerd
             Green man
-        ctrl+z gets rid of stuff stuck in there
         Hsv window
-        Double click causes camera to whirl around so clicked variable is centered, whatever it is
-        Compiling from latex
-            Someone else's thing to draw and display it. Maybe desmos
         Demonstration videos
             Volumetric rendering, can march through texture
-        When things appear and reappear in dws, have a nice transition
-            Eg they're of to the side and they come in
         Maybe you have some point that goes weird places in 3D when you change some 1d or 2d variable
             Hold a button to make it so that the thing gets a trail
-        If the variable hasn't changed value, would be nice if the versions of it that are the same as it are all highlighted
-        Optimization:
-            threejs shaders have uv and normal built in. Irrelevant, use RawShader
-        Webworkers?
+        
 
 As a tablet notes-in-the-margin app... and if you were going to buy a tablet... want to:
     Say things into a mic
@@ -185,6 +190,9 @@ async function init() {
     // init41()
     await init301()
 
+    // generateOptimizedSandwiches()
+    // return
+
     initCamera()
 
     // while ((index = str.indexOf(searchStr, startIndex)) > -1) {
@@ -200,8 +208,13 @@ async function init() {
     await initShaderOutputAndFinalDw()
 
     let meshloadPromise = initMeshDw()
+    initGltf()
+
     await initVectorSpaceDw()
-    new Dw(`euclidean`, true)
+    new Dw(`euclidean`, true, true)
+    updateVertexMode = (vertexMode) => {
+    }
+    
     initInfinityDw()
     initComplexDw()
     new Dw(`scalar`, false, false, camera2d)
@@ -228,6 +241,13 @@ async function init() {
     updateMentionVisibilitiesAndIndication()
     setCaretPosition(103)
     renderAll()
+
+    // new GLTFLoader().load('data/CesiumMan.gltf', (gltf) => {
+    //     log(gltf.scene.children[0].children[0].children[0])
+    //     log(gltf.scene.children[0].children[0].children[1])
+    //     dws.mesh.addNonMentionChild(gltf.scene)
+    //     // renderAll()
+    // })
 
     document.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === true) {

@@ -5,19 +5,8 @@
     Your avatars are flailing tentacle/cloud things, but there are bits you can lock onto
 
     Bultins:
-        Hand motor
         Things that shadertoy has:
-            uniform vec3 iResolution;
-            uniform float iTime;
-            uniform float iTimeDelta;
-            uniform float iFrame;
-            uniform float iChannelTime[4];
-            uniform vec4 iMouse;
-            uniform vec4 iDate;
-            uniform float iSampleRate;
-            uniform vec3 iChannelResolution[4];
             
-            uniform samplerXX iChanneli;
 
         Also have the frag point in *3D* space
 */
@@ -74,6 +63,7 @@ async function initCompilation()
 
         text = text.replace(commentNotNewlineRegex,"")
         let vertexMode = text.indexOf("getColor") === -1
+        updateVertexMode(vertexMode)
 
         let textLines = text.split("\n")
         let finalChunks = Array(textLines.length)
@@ -166,7 +156,7 @@ async function initCompilation()
                 //because of uniforms, will have infrastructure to have one variable, one mesh
 
                 let mention = variable.getLowestUnusedMention()
-                mention.updateHorizontalBounds(match.index, name.length)
+                mention.column = match.index
                 mention.lineIndex = lineIndex
                 mention.mentionIndex = mentionIndex++
 
