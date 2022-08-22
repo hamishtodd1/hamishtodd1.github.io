@@ -30,6 +30,7 @@ const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, canvas:
 renderer.shadowMap.enabled = true
 let camera = null
 let mouse = null
+const clock = new THREE.Clock(true)
 
 const discreteViridis = [
 	{ hex: 0xFCE51E, color: new THREE.Color(0.984375, 0.89453125, 0.1171875) },

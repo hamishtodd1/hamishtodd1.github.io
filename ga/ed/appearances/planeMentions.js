@@ -41,7 +41,6 @@ function initPlanes() {
 
         setColor(col) {
             this.#eDwMesh.material.color.copy(col)
-            this.#eDwMesh.material.needsUpdate = true
         }
 
         equals(m) {

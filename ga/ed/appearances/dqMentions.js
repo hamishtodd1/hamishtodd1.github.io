@@ -157,9 +157,7 @@ function initDqs() {
 
         setColor(col) {
             this.#mat2d.color.copy(col)
-            this.#mat2d.needsUpdate = true
             this.#mat3d.color.copy(col)
-            this.#mat3d.needsUpdate = true
         }
 
         equals(m) {

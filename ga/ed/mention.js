@@ -98,7 +98,7 @@ function initMention() {
         updateUniformFromState() {}
 
         isVisibleInDw(dw) {
-            return (this.variable.isIn && dw === dws.mesh) || this._isVisibleInDw(dw)
+            return this._isVisibleInDw(dw)
         }
         setVisibility(newVisibility) {
             this.visible = newVisibility

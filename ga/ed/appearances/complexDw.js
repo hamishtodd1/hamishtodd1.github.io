@@ -47,7 +47,7 @@ function initComplexNumbers() {
 
         constructor(variable) {
             super(variable)
-            this.state = new THREE.Vector2()
+            this.state = new THREE.Vector2(1.,0.)
             this.uniform.value = this.state
 
             let mat = new THREE.MeshBasicMaterial()
@@ -56,7 +56,6 @@ function initComplexNumbers() {
 
         setColor(col) {
             this.#mesh.material.color.copy(col)
-            this.#mesh.material.needsUpdate = true
         }
 
         equals(m) {

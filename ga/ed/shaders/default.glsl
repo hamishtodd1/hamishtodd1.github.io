@@ -1,11 +1,12 @@
 uniform float ourUniformFloat;
-uniform vec3 ourUniformVec3;
+uniform vec2 ourUniformVec2;
 
-vec3 getColor(in vec4 fragmentPosition) {
-    ourUniformVec3;
+uniform float time;
+uniform vec2 mouse;
 
+vec4 getChangedVertex(in vec4 initialVertex) {
     float control1 = .5;
-    vec2 control2 = vec2(1.,1.);
+    vec2 control2 = vec2(cos(time*4.),sin(time*4.));
     vec3 control3 = vec3(1.,.5,1.);
 
     vec4 myVertex = vec4( .2,0., 1.,1.);
@@ -20,13 +21,19 @@ vec3 getColor(in vec4 fragmentPosition) {
     Dq eucliLine = Dq( 0.,  0.,0.,0.,  0.,1.,1.,  0.);
     Dq idealLine2 = sandwichDqDq(rotation,idealLine);
     
-    vec3 fragColor = vec3(0.,ourUniformFloat,control3.y);
-    return fragColor;
+    return initialVertex;
 }
 
 //END//
 
 
+vec3 getColor(in vec4 fragmentPosition) {
+    
+    vec3 fragColor = vec3(0.,fragmentPosition.x,fragmentPosition.y*4.);
+    if( length(fragmentPosition.xy - mouse) < .1 )
+        fragColor = vec3(1.,0.,0.);
+    return fragColor;
+}
 
 
 //point pairs: spling is point ant infinity and an ordinary point, splong is both at infinity

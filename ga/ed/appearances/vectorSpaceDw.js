@@ -39,10 +39,8 @@ async function initVectorSpaceDw() {
             markers.push(marker)
         }
     }
-    updateFunctions.push(() => {
-        markers.forEach((marker) => {
-            marker.quaternion.copy(camera.quaternion)
-        })
+    markers.forEach((marker) => {
+        camera.toCopyQuatTo.push(marker)
     })
 }
 
@@ -105,9 +103,7 @@ function initVec3s()
 
         setColor(col) {
             this.#sMesh.material.color.copy(col)
-            this.#sMesh.material.needsUpdate = true
             this.#iMesh.material.color.copy(col)
-            this.#iMesh.material.needsUpdate = true
         }
 
         equals(m) {

@@ -3,8 +3,6 @@ async function initShaderOutputAndFinalDw() {
     // Override sensetivity //
     //////////////////////////
     {
-        let overrideAffectedMaterials = []
-
         let overrideMentionIndex = { value: -1 }
         let overrideFloatsUniform = { value: overrideFloats }
         function conferOverrideSensetivityToUniforms(uniforms) {
@@ -19,10 +17,11 @@ async function initShaderOutputAndFinalDw() {
                 indicatedMention.appearance.updateOverrideFloatsFromState()
                 overrideMentionIndex.value = indicatedMention.mentionIndex
             }
-
-            for (let i = 0, il = overrideAffectedMaterials.length; i < il; ++i)
-                overrideAffectedMaterials[i].needsUpdate = true
         }
+    }
+
+    function conferBaseUniforms(uniforms) {
+        conferOverrideSensetivityToUniforms(uniforms)
     }
 
     /////////////////////
@@ -77,7 +76,7 @@ async function initShaderOutputAndFinalDw() {
             }
 
             outputterUniforms.outputMentionIndex = outputMentionIndex
-            conferOverrideSensetivityToUniforms(outputterUniforms)
+            conferBaseUniforms(outputterUniforms)
 
             let shaderRunner = ``
             if(vertexMode) {
@@ -112,7 +111,6 @@ async function initShaderOutputAndFinalDw() {
         getShaderOutput = (mentionIndex) => {
     
             outputMentionIndex.value = mentionIndex
-            outputFsq.material.needsUpdate = true
             
             renderer.render(renderTextureScene, camera) //might be easier with orthographic, but it ain't broke
             renderer.readRenderTargetPixels(renderTarget, 0, 0, pixelsWide, 1, outputsArray)
@@ -128,19 +126,17 @@ async function initShaderOutputAndFinalDw() {
             return floatArray
         }
 
-        updateMentionsFromRun = (condition) => {
+        updateMentionStatesFromRun = () => {
 
             //in theory, could you all variables in a single run?
             //the height of the render target in pixels would be the number of variables
 
             renderer.setRenderTarget(renderTarget)
             forEachUsedMention((m) => {
-                // if(m.variable.name === `ourUniformFloat` && condition(m))
-                //     debugger
-                if (condition(m) && !m.variable.isUniform && !m.variable.isIn) {
+                //sort of hoping that visible has been set, either by carat or indication
+                if (m.appearance.visible && !m.variable.isUniform && !m.variable.isIn) {
                     getShaderOutput(m.mentionIndex)
                     m.appearance.updateStateFromRunResult(floatArray)
-                    m.appearance.updateUniformFromState()
                     m.appearance.updateAppearanceFromState()
                 }
             })
@@ -180,7 +176,7 @@ async function initShaderOutputAndFinalDw() {
         }`
         
         let fullFragmentShader = generalShaderPrefix + text + toFragColorSuffix
-        conferOverrideSensetivityToUniforms(uniforms)
+        conferBaseUniforms(uniforms)
         
         oldFragFsq = FullScreenQuadMesh(defaultVertexShader,fullFragmentShader, uniforms)
         dw.addNonMentionChild(oldFragFsq)
@@ -204,7 +200,7 @@ async function initShaderOutputAndFinalDw() {
 
         uniforms.projectionMatrix = { value: camera.projectionMatrix }
         uniforms.viewMatrix = { value: camera.matrixWorldInverse }
-        conferOverrideSensetivityToUniforms(uniforms)
+        conferBaseUniforms(uniforms)
 
         let mat = new THREE.RawShaderMaterial({
             uniforms,
@@ -223,8 +219,7 @@ async function initShaderOutputAndFinalDw() {
             oldMesh.material.dispose()
         }
         
-        let mesh = new THREE.Points(geo, mat)
-        dw.addNonMentionChild(mesh)
-        oldMesh = mesh
+        oldMesh = new THREE.Points(geo, mat)
+        dw.addNonMentionChild(oldMesh)
     }
 }

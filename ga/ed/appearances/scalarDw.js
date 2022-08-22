@@ -51,7 +51,6 @@ function initFloats() {
 
         setColor(col) {
             this.#mesh.material.color.copy(col)
-            this.#mesh.material.needsUpdate = true
         }
 
         equals(m) {

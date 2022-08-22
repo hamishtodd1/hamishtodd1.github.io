@@ -87,8 +87,6 @@ function initCamera() {
 
         camera.updateWorldToCanvas()
 
-        for (let i = 0, il = camera.toUpdateAppearance.length; i < il; ++i)
-            camera.toUpdateAppearance[i].updateAppearanceFromState()
         camera.toCopyQuatTo.forEach((object3d)=>{
             object3d.quaternion.copy(camera.quaternion)
         })

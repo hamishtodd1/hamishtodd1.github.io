@@ -167,7 +167,6 @@ async function initCompilation()
                         //create it
                         mention.appearance = variable.type.getLowestUnusedAppearance(variable)
                         mention.appearance.updateUniformFromState()
-                        mention.appearance.updateAppearanceFromState()
 
                         if(variable.isUniform) {
                             uniforms[variable.name] = mention.appearance.uniform
@@ -251,8 +250,6 @@ async function initCompilation()
         }
 
         updateLclsc(Infinity)
-
-        updateMentionsFromRun( ()=>true )
 
         let currentDuplicates
         //duplicates are a halfway step towards what you'd prefer: knowledge of when the things have really been changed

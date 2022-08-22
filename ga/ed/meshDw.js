@@ -31,7 +31,6 @@ function initMeshDw() {
             object.geometry.attributes.position.getX(focussedIndex),
             object.geometry.attributes.position.getY(focussedIndex),
             object.geometry.attributes.position.getZ(focussedIndex), 1. )
-        inAppearance.updateAppearanceFromState()
         //aaaaaand you probably need updateStateFromAttribute. Awesome
         //but at least the value is the state for vertices
     }
@@ -40,12 +39,22 @@ function initMeshDw() {
 
         if(name === `initialVertex`) {
             geo.setAttribute('position', object.geometry.attributes.position)
-            outputterUniforms[name + `Outputter`] = appearance.uniform
+            inAppearance = appearance
+            focusAttributeExample(0)
+        }
+        else if(name === `fragmentPosition`) {
+            //you want to hover fragmentPosition and it points to the frag window
+            //eg, we cast a ray in that window
+            //urgh but the idea of fragments is that they come after the vertex shader
+            //render the whole mesh once, but not *shading* fragments
+            //instead, every fragment just has "if (fragment.xy == mouse.xy) {something}"
+            //"something" will make it on the CPU side you can know... what? the uv?
+
+            //alternatively, just say where in the *untransformed* mesh you'd like to originate from
+            //this does actually cover the fullscreen quad case
         }
 
-        inAppearance = appearance
-
-        focusAttributeExample(0)
+        outputterUniforms[name + `Outputter`] = appearance.uniform
 
         // else {
         //     let inArray = new Float32Array(type.numFloats * numVertices)

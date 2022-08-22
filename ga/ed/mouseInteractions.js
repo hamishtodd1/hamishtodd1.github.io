@@ -52,6 +52,7 @@ function initMouseInteractions() {
 
         forEachAppearance((a) => { a.setVisibility(false) })
         forEachUsedMention( (mention) => {
+            //we just made all invisible. But some appearances are for multiple mentions.
             if (!mention.appearance.visible) {
                 let visibility = mentionVisibleDueToCaret(mention)
                 if (visibility && !mention.appearance.visible)
@@ -68,8 +69,9 @@ function initMouseInteractions() {
 
         if (indicatedMention !== null)
             indicatedMention.appearance.setVisibility(true)
+    }
 
-        //if you only do this when indicatedMentionOld !== indicatedMention, you risk eg when you have just let go
+    updateHighlight = () => {
         if (indicatedMention === null)
             hideHighlight()
         else
@@ -86,18 +88,9 @@ function initMouseInteractions() {
                 
                 if( !indicatedMention.variable.isUniform && !indicatedMention.variable.isIn)
                     updateOverride(indicatedMention)
-                //override should probably come from uniform
 
-                indicatedMention.appearance.updateAppearanceFromState()
-    
-                updateMentionsFromRun((mention) => {
-                    return mentionVisibleDueToCaret(mention)
-                })
-
-                //if you ever see dragging around looking ok, then when you let go it goes to shit
-                //it might be that your adjustment of the state on the cpu side, after the round trip, is mangled
-
-                indicatedMention.highlight()
+                if (indicatedMention.variable.isUniform)
+                    indicatedMention.appearance.updateAppearanceFromState()
             }
             else if(mouseArea !== document) {
                 updateMentionVisibilitiesAndIndication(mouseArea, event.clientX, event.clientY)
@@ -112,8 +105,6 @@ function initMouseInteractions() {
             if(indicatedMention !== null)
                 indicatedMention.highlight()
         }
-
-        renderAll()
 
         clientXOld = event.clientX
         clientYOld = event.clientY
@@ -182,9 +173,9 @@ function initMouseInteractions() {
             if (caretLineIndex < indicatedMention.lineIndex)
                 newCaretPosition = caretPositionOld
             else if (caretLineIndex === indicatedMention.lineIndex)
-                newCaretPosition = pre.length + Math.min(caretColumnIndex, newLine.length)
+                newCaretPosition = pre.length + Math.min(caretColumnIndex, newLine.length-1)
             else if (caretLineIndex > indicatedMention.lineIndex)
-                newCaretPosition = caretPositionOld + newLine.length
+                newCaretPosition = caretPositionOld + newLine.length-1
 
             // would be nice to move the caret to where the newly-created indicated mention now is
             //so you can see your handiwork

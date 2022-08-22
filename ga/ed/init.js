@@ -49,6 +49,7 @@ TODO
             html page - EE
             export threejs function creating the thing it is with the appropriate uniforms
     GDC
+        Arrange properly into vertex and fragment shader
         Windows appear when it's detected that a user has made a variable like that
             Then, they stay
         Label on blades saying their norm?
@@ -101,6 +102,10 @@ TODO
             make some mentions then delete them
         Documented API for making your own window visualizations
     Long term
+        To make stateful games like pong:
+            user creates updateState
+            It gets all the previous values and modifies them to make all the new values
+            the current values are accessible as uniforms
         Latex
             the "set inclusion" symbol means "has this type"
             Someone else's thing to draw and display it. Maybe desmos
@@ -232,8 +237,6 @@ async function init() {
 
     initMouseInteractions()
 
-    window.addEventListener('resize', renderAll)
-
     await initCompilation() //after creation of mention classes
 
     initCaretInteractions()
@@ -242,20 +245,67 @@ async function init() {
     compile()
     updateMentionVisibilitiesAndIndication()
     setCaretPosition(103)
-    renderAll()
 
     // new GLTFLoader().load('data/CesiumMan.gltf', (gltf) => {
     //     log(gltf.scene.children[0].children[0].children[0])
     //     log(gltf.scene.children[0].children[0].children[1])
     //     dws.mesh.addNonMentionChild(gltf.scene)
-    //     // renderAll()
     // })
 
     document.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === true) {
             compile()
             updateMentionVisibilitiesAndIndication()
-            renderAll()
         }
     })
+
+    function render() {
+
+        let clockDelta = clock.getDelta()
+        frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
+        ++frameCount
+        forEachAppearance((a)=>{
+            if(a.variable.isUniform) {
+                let update = true
+                if(a.variable.name === `time`)
+                    a.state[0] = clock.getElapsedTime()
+                else if(a.variable.name === `frameDelta`)
+                    a.state[0] = frameDelta
+                else if(a.variable.name === `mouse`) {
+                    let [xProportion, yProportion] = oldClientToDwNdc(dws.final)
+                    a.state.x = xProportion
+                    a.state.y = -yProportion
+                }
+                else
+                    update = false
+
+                if(update) {
+                    a.updateAppearanceFromState()
+                    a.updateUniformFromState()
+                }
+            }
+        })
+
+        updateMentionStatesFromRun()
+
+        updateHighlight()
+
+        const width = canvas3d.clientWidth
+        const height = canvas3d.clientHeight
+        if (canvas3d.width !== width || canvas3d.height !== height)
+            renderer.setSize(width, height, false)
+        renderer.setScissorTest(false)
+        renderer.setClearColor(0xFFFFFF, 0)
+        renderer.clear(true, true)
+        renderer.setScissorTest(true)
+        renderer.setClearColor(0x272822, 1)
+
+        // updateFinals()
+
+        for (dwName in dws)
+            dws[dwName].render()
+
+        requestAnimationFrame(render)
+    }
+    render()
 }

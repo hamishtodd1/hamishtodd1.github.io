@@ -115,7 +115,6 @@ function initCaretInteractions() {
         let caretX = columnToScreenX(caretColumn)
         let caretY = lineToScreenY(caretLine)
         updateMentionVisibilitiesAndIndication(textarea, caretX, caretY)
-        renderAll()
 
         caretPositionOld = caretPosition
     }

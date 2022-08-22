@@ -66,9 +66,7 @@ function initPoints() {
 
         setColor(col) {
             this.#eDwMesh.material.color.copy(col)
-            this.#eDwMesh.material.needsUpdate = true
             this.#sMesh.material.color.copy(col)
-            this.#sMesh.material.needsUpdate = true
         }
 
         equals(m) {
@@ -95,7 +93,7 @@ function initPoints() {
         updateStateFromDrag(dw) {
             //might be nice to snap to a grid
 
-            if (this.variable.isIn)
+            if (this.variable.name === `initialVertex`)
                 focusIndicatedVertex()
             else if(dw === eDw) {
                 let mouseRay = getMouseRay(dw)
@@ -113,7 +111,7 @@ function initPoints() {
                 mv0.multiplyScalar((v1.x === 0.? 0.00001 : v1.x) / mv0.norm())
                 mv0.toVec4(this.state)
             }
-            else console.error("not in that dw")
+            else console.error("not in dw: ", keyOfProptInObject(dw,dws))
         }
 
         updateOverrideFloatsFromState() {
@@ -182,7 +180,9 @@ function initPoints() {
         }
 
         _isVisibleInDw(dw) {
-            if(dw === eDw)
+            if(dw === dws.mesh)
+                return this.variable.name === `initialVertex`
+            else if(dw === eDw)
                 return !this.#eDwMesh.position.equals(OUT_OF_SIGHT_VECTOR3) && this.#eDwMesh.visible
             else if(dw === iDw)
                 return !this.#iDwMesh.position.equals(zeroVector) && this.#iDwMesh.visible
@@ -192,7 +192,7 @@ function initPoints() {
         }
 
         getTextareaManipulationDw() {
-            if(this.variable.isIn)
+            if (this.variable.name === `initialVertex`)
                 return mDw
             else if(this.state.w === 0.)
                 return iDw

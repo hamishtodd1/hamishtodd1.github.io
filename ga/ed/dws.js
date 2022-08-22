@@ -89,7 +89,6 @@ async function initDws() {
             this.border.visible = isVisible
             if(isVisible) {
                 borderMat.color.copy(col)
-                borderMat.needsUpdate = true
             }
         }
 
@@ -168,35 +167,6 @@ async function initDws() {
         
         // const skyBg = new THREE.Mesh(skyBgGeo, skyBgMat)
         // dw.addNonMentionChild(skyBg)
-    }
-
-    renderAll = () => {
-
-        // let clockDelta = clock.getDelta()
-        // frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
-    
-        ++frameCount
-
-        const width = canvas3d.clientWidth
-        const height = canvas3d.clientHeight
-        if (canvas3d.width !== width || canvas3d.height !== height)
-            renderer.setSize(width, height, false)
-
-        renderer.setScissorTest(false)
-        renderer.setClearColor(0xFFFFFF,0)
-        renderer.clear(true, true)
-        renderer.setScissorTest(true)
-
-        updateFunctions.forEach((uf)=>uf())
-
-        renderer.setClearColor(0x272822,1)
-        for(dwName in dws)
-            dws[dwName].render()
-
-        requestAnimationFrame(()=>{
-            if ( keyOfProptInObject(true, animationStates) !== undefined )
-                renderAll()
-        })
     }
 
     forNonFinalDws = (func) => {
