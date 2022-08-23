@@ -27,6 +27,7 @@ function initPlanes() {
             this.state[2] = .5
 
             let mat = new THREE.MeshPhongMaterial({ side: THREE.DoubleSide })
+            mat.color = this.col
             this.#eDwMesh = eDw.NewMesh(planeGeo, mat)
             this.#eDwMesh.scale.setScalar(camera.far * 2.)
 
@@ -37,10 +38,8 @@ function initPlanes() {
             this.#sphereMesh.scale.setScalar(INFINITY_RADIUS * .98)
 
             camera.toUpdateAppearance.push(this)
-        }
 
-        setColor(col) {
-            this.#eDwMesh.material.color.copy(col)
+            this.toHaveVisibilitiesSet.push(this.#eDwMesh, this.#iDwMesh, this.#sphereMesh)
         }
 
         equals(m) {
@@ -104,7 +103,7 @@ function initPlanes() {
 
         //-------------
 
-        updateAppearanceFromState() {
+        updateMeshesFromState() {
             let displayableVersion = this.state.getDisplayableVersion(mv4)
             e123.projectOn(displayableVersion, mv0).toVector(this.#eDwMesh.position)
             let planeOnOrigin = displayableVersion.projectOn(e123, mv0)
@@ -134,12 +133,6 @@ function initPlanes() {
                 target.set(0., 0., 0., 1.)
             else
                 console.error("not in that dw")
-        }
-
-        _setVisibility(newVisibility) {
-            this.#eDwMesh.visible = newVisibility
-            this.#iDwMesh.visible = newVisibility
-            this.#sphereMesh.visible = newVisibility
         }
 
         _isVisibleInDw(dw) {

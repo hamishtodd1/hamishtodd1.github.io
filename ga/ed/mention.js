@@ -83,11 +83,14 @@ function initMention() {
     class Appearance {
         variable
         state
-        uniform = {value:null}
+        uniform = {value: null}
+        col = new THREE.Color()
 
         duplicates = [] //they may have been redefined, but they do have the same values as extracted
 
         visible
+
+        toHaveVisibilitiesSet = []
 
         constructor(variable) {
             this.variable = variable
@@ -95,6 +98,8 @@ function initMention() {
 
         onGrab(dw) {}
         onLetGo(dw) {}
+
+        //for some, uniform.value = state
         updateUniformFromState() {}
 
         isVisibleInDw(dw) {
@@ -102,7 +107,9 @@ function initMention() {
         }
         setVisibility(newVisibility) {
             this.visible = newVisibility
-            this._setVisibility(this.visible)
+            this.toHaveVisibilitiesSet.forEach((m)=>{
+                m.visible = newVisibility
+            })
         }
 
         getWindowCenter(dw) {
@@ -253,7 +260,7 @@ function initMention() {
 
             let theLowestUnusedAppearance = this.appearances[this.lowestUnusedAppearance++]
             theLowestUnusedAppearance.variable = variable
-            theLowestUnusedAppearance.setColor(variable.col)
+            theLowestUnusedAppearance.col.copy(variable.col)
 
             return theLowestUnusedAppearance
         }

@@ -140,7 +140,9 @@ function initDqs() {
             }
 
             this.#mat3d = new THREE.MeshPhongMaterial()
+            this.#mat3d.color = this.col
             this.#mat2d = new THREE.MeshBasicMaterial({ side:THREE.DoubleSide })
+            this.#mat2d.color = this.col
 
             this.#eDwMesh = eDw.NewMesh(eLineGeo, this.#mat3d)
             this.#iDwLineMesh = iDw.NewMesh(iLineGeo, this.#mat3d)
@@ -153,11 +155,8 @@ function initDqs() {
             this.#rimMesh = iDw.NewMesh(OurTubeGeo(theRimCurve), this.#mat3d)
 
             camera.toUpdateAppearance.push(this)
-        }
 
-        setColor(col) {
-            this.#mat2d.color.copy(col)
-            this.#mat3d.color.copy(col)
+            this.toHaveVisibilitiesSet.push(this.#eDwMesh, this.#cDwMesh, this.#arcMesh, this.#mobiusStripMesh, this.#rimMesh, this.#iDwLineMesh, this.#iDwRingMesh)
         }
 
         equals(m) {
@@ -248,7 +247,7 @@ function initDqs() {
 
         //----------
 
-        updateAppearanceFromState() {
+        updateMeshesFromState() {
             this.state.getBivectorPartToMv(linePart)
 
             this.#cDwMesh.position.x = this.state[0]
@@ -312,19 +311,6 @@ function initDqs() {
             linePart.getDisplayableVersion(displayedLineMv)
             getQuaternionToProjectionOnOrigin(displayedLineMv, this.#eDwMesh.quaternion)
             e123.projectOn(displayedLineMv, mv0).toVector(this.#eDwMesh.position)
-        }
-
-        _setVisibility(newVisibility) {
-            this.#eDwMesh.visible = newVisibility
-            
-            this.#cDwMesh.visible = newVisibility
-            this.#arcMesh.visible = newVisibility
-
-            this.#mobiusStripMesh.visible = newVisibility //this one maybe only in some circumstances
-            this.#rimMesh.visible = newVisibility
-
-            this.#iDwLineMesh.visible = newVisibility            
-            this.#iDwRingMesh.visible = newVisibility
         }
 
         getWorldCenter(dw, target) {

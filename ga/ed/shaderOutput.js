@@ -137,7 +137,7 @@ async function initShaderOutputAndFinalDw() {
                 if (m.appearance.visible && !m.variable.isUniform && !m.variable.isIn) {
                     getShaderOutput(m.mentionIndex)
                     m.appearance.updateStateFromRunResult(floatArray)
-                    m.appearance.updateAppearanceFromState()
+                    m.appearance.updateMeshesFromState()
                 }
             })
             renderer.setRenderTarget(null)

@@ -56,17 +56,16 @@ function initPoints() {
             this.uniform.value = this.state
 
             let mat = new THREE.MeshBasicMaterial() //why not phong?
+            mat.color = this.col
             this.#eDwMesh = eDw.NewMesh(pointGeo, mat)
             this.#iDwMesh = iDw.NewMesh(pointGeo, mat)
 
             this.#sMesh = sDw.NewMesh(downwardPyramidGeo, new THREE.MeshBasicMaterial())
+            this.#sMesh.material.color = this.col
             
             camera.toUpdateAppearance.push(this)
-        }
 
-        setColor(col) {
-            this.#eDwMesh.material.color.copy(col)
-            this.#sMesh.material.color.copy(col)
+            this.toHaveVisibilitiesSet.push(this.#eDwMesh, this.#iDwMesh, this.#sMesh)
         }
 
         equals(m) {
@@ -124,7 +123,7 @@ function initPoints() {
 
         //-------------
 
-        updateAppearanceFromState() {
+        updateMeshesFromState() {
             
             mv0.fromVec4(this.state)
             
@@ -169,14 +168,6 @@ function initPoints() {
             }
             else
                 console.error("not in that dw")
-        }
-
-        _setVisibility(newVisibility) {
-            this.#eDwMesh.visible = newVisibility
-            this.#iDwMesh.visible = newVisibility
-            this.#sMesh.visible = newVisibility
-            if (this.variable.name === `initialVertex` && this.mentionIndex === 2)
-                log(newVisibility)
         }
 
         _isVisibleInDw(dw) {

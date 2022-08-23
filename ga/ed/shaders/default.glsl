@@ -21,6 +21,7 @@ vec4 getChangedVertex(in vec4 initialVertex) {
     Dq eucliLine = Dq( 0.,  0.,0.,0.,  0.,1.,1.,  0.);
     Dq idealLine2 = sandwichDqDq(rotation,idealLine);
     
+    vec4 ret = initialVertex;
     return initialVertex;
 }
 

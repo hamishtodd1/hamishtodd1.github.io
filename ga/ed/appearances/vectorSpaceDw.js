@@ -74,11 +74,13 @@ function initVec3s()
             this.uniform.value = this.state
 
             this.#sMesh = sDw.NewMesh(downwardPyramidGeo, new THREE.MeshBasicMaterial())
+            this.#sMesh.material.color = this.col
 
             let mat = new THREE.MeshPhongMaterial()
+            mat.color = this.col
             this.#iMesh = iDw.NewMesh(pointGeo, mat)    
             
-            this.#vMesh = vDw.NewObject3D()
+            this.#vMesh = vDw.NewGroup()
 
             let dashedLines = [[],[],[]]
             for(let i = 0; i < 3; ++i) {
@@ -99,11 +101,8 @@ function initVec3s()
             shaft.castShadow = true
             head.matrixAutoUpdate = false
             shaft.matrixAutoUpdate = false
-        }
 
-        setColor(col) {
-            this.#sMesh.material.color.copy(col)
-            this.#iMesh.material.color.copy(col)
+            this.toHaveVisibilitiesSet.push(this.#vMesh, this.#iMesh, this.#sMesh)
         }
 
         equals(m) {
@@ -156,7 +155,7 @@ function initVec3s()
 
         //-------------
 
-        updateAppearanceFromState() {
+        updateMeshesFromState() {
             this.#sMesh.position.x = this.state.length()
             if ( !whenGrabbed.equals(zeroVector) && this.state.dot(whenGrabbed) < 0.) //possibly do something about duplicates?
                 this.#sMesh.position.x *= -1.
@@ -226,12 +225,6 @@ function initVec3s()
                     target.w = 1.
                 }
             }
-        }
-
-        _setVisibility(newVisibility) {
-            this.#vMesh.visible = newVisibility
-            this.#iMesh.visible = newVisibility
-            this.#sMesh.visible = newVisibility
         }
 
         _isVisibleInDw(dw) {

@@ -6,30 +6,7 @@ TODO
         Better error reporting
             Highlight where it was but just put the words at the bottom
         Adding Dqs
-        Uniforms
-            Mouse vec2 in final dw
-            Time, Frame count, Frame duration (will be fun to see on scalarDw!)
-            Textures dw
-                uv map?
-                May want to draw or copypaste
-                Considered as Initial state of a simulation
-                    "step" "play/pause" buttons. Can draw when paused
-                2D texture
-        User-created functions and for loops
-            when you're looking at a function, it could have been called from various places!
-                it gets inlined, so one run of it is qualitatively different from another
-            There's a finite number of places it'll get called
-                Can scroll, discretely, through those: build the possible values up into a selection, eg a point cloud
-                debugger only lets you look at one point in time - want a fast way to look through ALL the state from a run!
-                And yes if the input and outputs have less than 3 dimensions total, can visualize with some thing nice-looking
-            for loops: 
-                "for(let i = 0; ...) {stuff}" becomes:
-                "function stuff(i){} stuff(0); stuff(1);..."
-                for loops are this under the hood but handled differently:
-                    outputter assignment is conditionalized on the index (es!) being a specific thing
-                    the index could have crazy shit going on, it must be said. 
-                        Just ignore that. Note loops get unrolled so don't feel bad
-                    Whenever you highlight a mention in the loop, you also highlight the loop variable somehow, wherever it may be
+        Would be nice to hover the output window, have it reverse back to the initialVertex you're hovering
     Bugs
         Possibly saw a bug with lines at infinity which was visible when just putting 1s and 0s in everything
         minus sign with sandwich
@@ -38,7 +15,7 @@ TODO
         Tab and enter make it so you can't ctrl+z
         Dragging the lines at infinity
         the dual quaternion dragging takes account of duplicates. Point mention scalar should too, as should others
-    Workshop for kids at makespace
+    Workshop for kids at makespace (don't let the GDC audience be the first people to use it!!)
         Need EXCELLENT error reporting. This shit is all in YOUR head!!!
         Everyone's stuff goes into a VR sim, saved on a webpage forever
         Export(/import?):
@@ -46,29 +23,53 @@ TODO
             Ordinary shader
             threejs
             unity
-            html page - EE
+            html page (for EEs/blog posts)
             export threejs function creating the thing it is with the appropriate uniforms
+        User-created functions and for loops
+            Yes, can have some nice viz if the input and outputs have less than 3 dimensions total (or whatever)
+                This is fun but not necessarily useful for PGA
+                Bezier curves have control points. Could they be in the same window?
+                Maybe even visualized functions as curves for R^n -> R^m for (m+n) < 4
+                Same with I^2 -> I^3 or less. Need windows for these
+                implicit surfaces etc
+                Want to detect eg vec3 f(in vec3)
+            when you're looking at a function, it could have been called from various places
+                So, what's the "in" that it gets?
+                Presumably, it's related to the ins in other places, eg "where the debugger is"
+                it gets inlined, so one run of it is qualitatively different from another
+                There's a finite number of places it'll get called
+                    Can scroll, discretely, through those: build the possible values up into a selection, eg a point cloud
+                    debugger only lets you look at one point in time - want a fast way to look through ALL the state from a run!
+            for loops:
+                "for(let i = 0; ...) {stuff}" becomes:
+                "function stuff(i){} stuff(0); stuff(1);..."
+                for loops are this under the hood but handled differently:
+                    outputter assignment is conditionalized on the index (es!) being a specific thing
+                    the index could have crazy shit going on, it must be said. 
+                        Just ignore that. Note loops get unrolled so don't feel bad
+                    Whenever you highlight a mention in the loop, you also highlight the loop variable somehow, wherever it may be
     GDC
-        Arrange properly into vertex and fragment shader
-        Windows appear when it's detected that a user has made a variable like that
-            Then, they stay
-        Label on blades saying their norm?
+        Arrange properly into vertex and fragment shader tabs
         "Teardrops" visualization. Once you've sorted out the meaning of that shit!
             Can turn off and on
-        Connect up mentions that are "copies"
-            Makes it nicer when eg you're editing control1 and it has no effect on the below because it's redefined after you edit it!
         Practical
             Make the transparent spotted dome
             3D print the shapes
-        Ins work with function definitions that aren't main
-        "Small domain and range function" dw
-            This is fun but not necessarily useful for PGA
-            Bezier curves have control points. Could they be in the same window?
-            Maybe even visualized functions as curves for R^n -> R^m for (m+n) < 4
-            Same with I^2 -> I^3 or less. Need windows for these
-            implicit surfaces etc
-            Want to detect eg vec3 f(in vec3)
-        Dome window for 2D PGA. Overlay for vectorspace Dw?
+        2D PGA. Overlay for vectorspace Dw?
+            A new window. Nice to go between dome and
+        A puzzle game that is a series of "code this shader" challenges
+        (2,1) halfplane window - v. important, lets you program with mouse
+            This is the eventual destiny of the "float" window
+            lerp as an example of a simple function to try it out with
+            write some numbers on a line
+            I can click or drag or whatever, and find the number I know I want
+            Maybe move my carat through the line (4*8+5*2)/2 and see it animate
+        Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
+            move the mouse around
+            make some mentions then delete them
+        Documented API for making your own window visualizations
+    Live coding (festival of the spoken nerd, green man)
+        Color windows
         VR
             Single button to cycle through mentions
             Hand as a uniform
@@ -90,26 +91,22 @@ TODO
                     p can take value p' is such that q == b. 
                 This is tricky though
             When you click window, if not close to anything, perhaps point should be created?
-        A puzzle game that is a series of "code this shader" challenges
-        (2,1) halfplane window - v. important, lets you program with mouse
-            This is the eventual destiny of the "float" window
-            lerp as an example of a simple function to try it out with
-            write some numbers on a line
-            I can click or drag or whatever, and find the number I know I want
-            Maybe move my carat through the line (4*8+5*2)/2 and see it animate
-        Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
-            move the mouse around
-            make some mentions then delete them
-        Documented API for making your own window visualizations
-    Long term
         To make stateful games like pong:
             user creates updateState
             It gets all the previous values and modifies them to make all the new values
             the current values are accessible as uniforms
+            Remember you want to have an entire texture as state sometimes
+                Can draw on texture when paused
+            "step" "play/pause" buttons
         Latex
             the "set inclusion" symbol means "has this type"
             Someone else's thing to draw and display it. Maybe desmos
+                Oh how hard can it be. Rectangles with pictures in
+                Handwriting recognition is another matter
+                Could talk to people at mathpix?
         Conveniences
+            Connect up mentions that are "copies"
+                Makes it nicer when eg you're editing control1 and it has no effect on the below because it's redefined after you edit it!
             Declarations should be visualized too, eg return vec4(0.,0.,0.,1); is still a point
             line connecting getVertex's return value to the output
             When hovering something in dw, its name in text window inflates
@@ -123,6 +120,7 @@ TODO
             When things appear and reappear in dws, have a nice transition
                 Eg they're of to the side and they come in
             If the variable hasn't changed value, would be nice if the versions of it that are the same as it are all highlighted
+    Long term
         Optimization
             Webworkers?
             See if it slows down after 100 compiles
@@ -131,11 +129,6 @@ TODO
         Grab and drag could be implemented by creating a motor and then applying it
             For this, should think of a manipulation method that works for point, line and plane
             Rotations is done by grabbing the infinity window
-        Other events
-            Live coding
-            Festival of the spoken nerd
-            Green man
-        Hsv window
         Demonstration videos
             Volumetric rendering, can march through texture
         Maybe you have some point that goes weird places in 3D when you change some 1d or 2d variable
@@ -246,11 +239,19 @@ async function init() {
     updateMentionVisibilitiesAndIndication()
     setCaretPosition(103)
 
-    // new GLTFLoader().load('data/CesiumMan.gltf', (gltf) => {
-    //     log(gltf.scene.children[0].children[0].children[0])
-    //     log(gltf.scene.children[0].children[0].children[1])
-    //     dws.mesh.addNonMentionChild(gltf.scene)
-    // })
+    let mixer = null
+    new GLTFLoader().load('data/Soldier.glb', function (gltf) {
+        let model = gltf.scene
+        dws.mesh.addNonMentionChild(model)
+        
+        let skeleton = new THREE.SkeletonHelper(model)
+        dws.mesh.addNonMentionChild(skeleton)
+        
+        const animations = gltf.animations
+        mixer = new THREE.AnimationMixer(model)
+        let walkAction = mixer.clipAction(animations[3])
+        walkAction.play()
+    })
 
     document.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === true) {
@@ -266,7 +267,7 @@ async function init() {
         ++frameCount
         forEachAppearance((a)=>{
             if(a.variable.isUniform) {
-                let update = true
+                let doUpdate = true
                 if(a.variable.name === `time`)
                     a.state[0] = clock.getElapsedTime()
                 else if(a.variable.name === `frameDelta`)
@@ -277,14 +278,17 @@ async function init() {
                     a.state.y = -yProportion
                 }
                 else
-                    update = false
+                    doUpdate = false
 
-                if(update) {
-                    a.updateAppearanceFromState()
+                if(doUpdate) {
+                    a.updateMeshesFromState()
                     a.updateUniformFromState()
                 }
             }
         })
+
+        if(mixer !== null)
+            mixer.update(frameDelta)
 
         updateMentionStatesFromRun()
 
@@ -299,8 +303,6 @@ async function init() {
         renderer.clear(true, true)
         renderer.setScissorTest(true)
         renderer.setClearColor(0x272822, 1)
-
-        // updateFinals()
 
         for (dwName in dws)
             dws[dwName].render()

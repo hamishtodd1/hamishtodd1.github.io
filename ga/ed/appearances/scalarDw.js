@@ -46,11 +46,10 @@ function initFloats() {
             this.state[0] = 1.
 
             let mat = new THREE.MeshBasicMaterial()
+            mat.color = this.col
             this.#mesh = sDw.NewMesh(downwardPyramidGeo, mat)
-        }
 
-        setColor(col) {
-            this.#mesh.material.color.copy(col)
+            this.toHaveVisibilitiesSet.push(this.#mesh)
         }
 
         equals(m) {
@@ -78,21 +77,17 @@ function initFloats() {
         }
 
         getLiteralAssignmentFromState() {
-            return parseFloat(this.state[0].toFixed(2))
+            return this.variable.type.getLiteralAssignmentFromValues(this.state[0])
         }
 
         //-------------
 
-        updateAppearanceFromState() {
+        updateMeshesFromState() {
             this.#mesh.position.set(this.state[0], 0.,0.)
         }
 
         getWorldCenter(dw, target) {
             return target.copy(this.#mesh.position)
-        }
-
-        _setVisibility(newVisibility) {
-            this.#mesh.visible = newVisibility
         }
 
         _isVisibleInDw(dw) {
@@ -107,6 +102,5 @@ function initFloats() {
     }
 
     let mentionType = new AppearanceType("float", 1, floatAppearance)
-    mentionType.literalAssignmentFromOverride = `overrideFloats[0]`
     mentionType.outputAssignmentPropts = [``]
 }

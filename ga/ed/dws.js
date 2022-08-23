@@ -31,9 +31,11 @@ async function initDws() {
         hasLights
 
         border
+        visible = false
 
         constructor(name, haveLights, ourCamera, mentionDw) { //do it as a "params" thing
             this.elem = document.createElement('div')
+            this.elem.style.display = 'none'
             this.elem.className = 'dwEl'
             document.body.appendChild(this.elem)
 
@@ -78,13 +80,6 @@ async function initDws() {
             return this.camera.worldToWindow(vector3, this)
         }
 
-        NewObject3D() {
-            let ret = new THREE.Object3D()
-            ret.visible = false
-            this.#scene.add(ret)
-            return ret
-        }
-
         setBorderHighlight(isVisible,col) {
             this.border.visible = isVisible
             if(isVisible) {
@@ -92,18 +87,40 @@ async function initDws() {
             }
         }
 
+        NewGroup() {
+            let ret = new THREE.Object3D()
+
+            this.NewObject3d(ret)
+            return ret
+        }
+
         NewMesh(geo,mat) {
             let ret = new THREE.Mesh(geo,mat)
-            ret.visible = false
-            this.#scene.add(ret)
             ret.castShadow = this.hasLights
 
+            this.NewObject3d(ret)
+
             return ret
+        }
+
+        NewObject3d(object3d) {
+            object3d.visible = false
+            this.#scene.add(object3d)
+
+            if (!this.visible) {
+                this.visible = true
+                this.elem.style.display = ''
+            }
         }
         
         addNonMentionChild (ch) {
             this.nonMentionChildren.push(ch)
             this.#scene.add(ch)
+
+            if (!this.visible) {
+                this.visible = true
+                this.elem.style.display = ''
+            }
         }
         removeNonMentionChild(ch) {
             this.nonMentionChildren.splice(this.nonMentionChildren.indexOf( ch ))

@@ -90,7 +90,7 @@ function initMouseInteractions() {
                     updateOverride(indicatedMention)
 
                 if (indicatedMention.variable.isUniform)
-                    indicatedMention.appearance.updateAppearanceFromState()
+                    indicatedMention.appearance.updateMeshesFromState()
             }
             else if(mouseArea !== document) {
                 updateMentionVisibilitiesAndIndication(mouseArea, event.clientX, event.clientY)

@@ -51,11 +51,10 @@ function initComplexNumbers() {
             this.uniform.value = this.state
 
             let mat = new THREE.MeshBasicMaterial()
+            mat.color = this.col
             this.#mesh = ourDw.NewMesh(dotGeo, mat)
-        }
-
-        setColor(col) {
-            this.#mesh.material.color.copy(col)
+            
+            this.toHaveVisibilitiesSet.push(this.#mesh)
         }
 
         equals(m) {
@@ -84,17 +83,13 @@ function initComplexNumbers() {
 
         //-----------
 
-        updateAppearanceFromState() {
+        updateMeshesFromState() {
             this.#mesh.position.x = this.state.x
             this.#mesh.position.y = this.state.y
         }
 
         getWorldCenter(dw, target) {
             target.copy( this.#mesh.position )
-        }
-
-        _setVisibility(newVisibility) {
-            this.#mesh.visible = newVisibility
         }
 
         _isVisibleInDw(dw) {

@@ -14,7 +14,19 @@ function initMeshDw() {
     let object
     let inAppearance = null
 
-    // let bone = new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.BoxGeometry(2.,2.,2.)), new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
+    // let boneGeo = new THREE.WireframeGeometry(new THREE.OctahedronGeometry(.2))
+    // for (let i = 1, il = boneGeo.attributes.position.array.length; i < il; i+=3) {
+    //     if(i % 3 === 1) {
+    //         if (boneGeo.attributes.position.array[i] > 0.)
+    //             boneGeo.attributes.position.array[i] = 1.
+    //         else if (boneGeo.attributes.position.array[i] < 0.)
+    //             boneGeo.attributes.position.array[i] = 0.
+    //         else
+    //             boneGeo.attributes.position.array[i] = .2
+    //     }
+    // }
+    // let bone = new THREE.LineSegments(boneGeo, new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
+    // bone.position.x += 1.5
     // dw.addNonMentionChild(bone)
 
     let raycaster = new THREE.Raycaster()
@@ -124,7 +136,7 @@ function initMeshDw() {
                 if (child.isMesh) {
                     // object = new THREE.LineSegments(new THREE.WireframeGeometry(child.geometry),new THREE.MeshBasicMaterial({color:0xFFFFFF}))
                     object = child
-                    // object.visible = false
+                    object.visible = false
                     // child.geometry.computeVertexNormals()
                     // child.geometry.normalizeNormals()
                 }
