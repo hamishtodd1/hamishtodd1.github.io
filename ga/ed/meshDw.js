@@ -12,7 +12,10 @@ function initMeshDw() {
     let dw = new Dw(`mesh`, true, camera, false)
     
     let object
-    let inAppearance = null
+
+    dws.mesh.getCow = () =>{
+        return object
+    }
 
     // let boneGeo = new THREE.WireframeGeometry(new THREE.OctahedronGeometry(.2))
     // for (let i = 1, il = boneGeo.attributes.position.array.length; i < il; i+=3) {
@@ -29,30 +32,24 @@ function initMeshDw() {
     // bone.position.x += 1.5
     // dw.addNonMentionChild(bone)
 
-    let raycaster = new THREE.Raycaster()
-    focusIndicatedVertex = () => {
-        raycaster.ray.copy(getMouseThreeRay(dw))
-        let intersection = raycaster.intersectObject(object, false)[0]
-        if(intersection !== undefined) {
-            focusAttributeExample(intersection.face.a)
-        }
-    }
-
-    focusAttributeExample = (focussedIndex) => {
-        inAppearance.uniform.value.set(
+    focusInExample = (appearance, focussedIndex) => {
+        appearance.state.set(
             object.geometry.attributes.position.getX(focussedIndex),
             object.geometry.attributes.position.getY(focussedIndex),
             object.geometry.attributes.position.getZ(focussedIndex), 1. )
         //aaaaaand you probably need updateStateFromAttribute. Awesome
         //but at least the value is the state for vertices
+
+        appearance.updateFromState()
     }
 
-    createIn = (geo, outputterUniforms, name, appearance) => {
+    createIn = (geo, appearance) => {
+
+        let name = appearance.variable.name
 
         if(name === `initialVertex`) {
             geo.setAttribute('position', object.geometry.attributes.position)
-            inAppearance = appearance
-            focusAttributeExample(0)
+            focusInExample(appearance, 0)
         }
         else if(name === `fragmentPosition`) {
             //you want to hover fragmentPosition and it points to the frag window
@@ -66,7 +63,7 @@ function initMeshDw() {
             //this does actually cover the fullscreen quad case
         }
 
-        outputterUniforms[name + `Outputter`] = appearance.uniform
+
 
         // else {
         //     let inArray = new Float32Array(type.numFloats * numVertices)
@@ -136,7 +133,7 @@ function initMeshDw() {
                 if (child.isMesh) {
                     // object = new THREE.LineSegments(new THREE.WireframeGeometry(child.geometry),new THREE.MeshBasicMaterial({color:0xFFFFFF}))
                     object = child
-                    object.visible = false
+                    // object.visible = false
                     // child.geometry.computeVertexNormals()
                     // child.geometry.normalizeNormals()
                 }

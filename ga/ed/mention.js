@@ -92,18 +92,24 @@ function initMention() {
 
         toHaveVisibilitiesSet = []
 
-        constructor(variable) {
-            this.variable = variable
-        }
-
         onGrab(dw) {}
         onLetGo(dw) {}
 
-        //for some, uniform.value = state
-        updateUniformFromState() {}
+        updateFromState() {
+            this.updateUniformFromState()
+            this.updateMeshesFromState()
+        } 
+        
+        updateUniformFromState() {}//for most, uniform.value = state, so nothing need happen
+
+        updateStateFromDrag(dw) {
+            let result = this._updateStateFromDrag(dw)
+            if(result === false)
+                console.error("Not in dw: ", keyOfProptInObject(dw, dws))
+        }
 
         isVisibleInDw(dw) {
-            return this._isVisibleInDw(dw)
+            return this._isVisibleInDw(dw) || (this.variable.isIn && dw === dws.mesh)
         }
         setVisibility(newVisibility) {
             this.visible = newVisibility
@@ -214,6 +220,7 @@ function initMention() {
     }
     window.Variable = Variable
 
+    //note that this is agnostic of variables and mentions
     class AppearanceType {
         glslName
         numFloats
@@ -225,10 +232,18 @@ function initMention() {
         lowestUnusedAppearance = 0
         appearances = []
 
-        constructor(glslName, numFloats, constructAppearance, outputAssignmentPropts) {
+        constructor(glslName, numFloats, _constructAppearance, outputAssignmentPropts) {
             this.glslName = glslName
             this.numFloats = numFloats
-            this.constructAppearance = constructAppearance
+
+            let self = this
+            this.constructAppearance = function() {
+
+                let appearance = new _constructAppearance()
+                self.appearances.push(appearance)
+
+                return appearance
+            }
 
             this.outputAssignmentPropts = Array(numFloats)
             if (outputAssignmentPropts !== undefined) {
@@ -253,16 +268,46 @@ function initMention() {
             appearanceTypes.push(this)
         }
 
-        getLowestUnusedAppearance(variable) {
-            console.assert(this.appearances.length >= this.lowestUnusedAppearance)
-            if (this.appearances.length === this.lowestUnusedAppearance)
-                this.appearances.push( new this.constructAppearance(this) )
+        getLowestUnusedAppearanceAndEnsureAssignment(variable) {
+            let needNewOne = this.lowestUnusedAppearance === this.appearances.length
+            let ret = null
+            if (!needNewOne)
+                ret = this.appearances[this.lowestUnusedAppearance]
+            else
+                ret = new this.constructAppearance()
+                
+            ret.variable = variable
+            ret.col.copy(variable.col)
 
-            let theLowestUnusedAppearance = this.appearances[this.lowestUnusedAppearance++]
-            theLowestUnusedAppearance.variable = variable
-            theLowestUnusedAppearance.col.copy(variable.col)
+            ++this.lowestUnusedAppearance
 
-            return theLowestUnusedAppearance
+            return ret
+        }
+
+        getAnAppearance( variable, uniforms, outputterUniforms, geo) {
+            let ret = null
+
+            if (!variable.isUniform && !variable.isIn) 
+                ret = this.getLowestUnusedAppearanceAndEnsureAssignment(variable)
+            else {
+                if(variable.lowestUnusedMention > 1)
+                    ret = variable.mentions[0].appearance
+                else {
+                    ret = this.getLowestUnusedAppearanceAndEnsureAssignment(variable)
+                    
+                    ret.updateFromState()
+                    if (variable.isIn) {
+                        createIn(geo, ret)
+                        outputterUniforms[variable.name + `Outputter`] = ret.uniform
+                    }
+                    else { //isUniform
+                        uniforms[variable.name] = ret.uniform
+                        outputterUniforms[variable.name] = ret.uniform
+                    }
+                }
+            }
+            
+            return ret
         }
 
         getLiteralAssignmentFromValues() {

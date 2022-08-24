@@ -40,8 +40,8 @@ function initFloats() {
     class floatAppearance extends Appearance {
         #mesh
 
-        constructor(variable) {
-            super(variable)
+        constructor() {
+            super()
             this.state = new Float32Array(1)
             this.state[0] = 1.
 
@@ -60,12 +60,12 @@ function initFloats() {
             this.state[0] = floatArray[0]
         }
 
-        updateStateFromDrag(dw) {
+        _updateStateFromDrag(dw) {
             if (dw === sDw) {
                 camera2d.getOldClientWorldPosition(dw, v1)
                 this.state[0] = v1.x
             }
-            else console.error("not in that dw")
+            else return false
         }
 
         updateOverrideFloatsFromState() {

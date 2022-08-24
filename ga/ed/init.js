@@ -1,12 +1,16 @@
 /*
 TODO
     For next presentation
+        Sandwiches!
         Dual quaternion skinning
             Bones as an In, in the mesh window
+            Hover
+            Show mat4 in vector dw. Sounds like fun!
         Better error reporting
             Highlight where it was but just put the words at the bottom
         Adding Dqs
         Would be nice to hover the output window, have it reverse back to the initialVertex you're hovering
+        Make the transparent spotted dome
     Bugs
         Possibly saw a bug with lines at infinity which was visible when just putting 1s and 0s in everything
         minus sign with sandwich
@@ -15,8 +19,13 @@ TODO
         Tab and enter make it so you can't ctrl+z
         Dragging the lines at infinity
         the dual quaternion dragging takes account of duplicates. Point mention scalar should too, as should others
+    Having chigozie and Matthew Vandevander and Pontus break it
+        Try to detect which lines ASSIGN to a variable and which lines don't
     Workshop for kids at makespace (don't let the GDC audience be the first people to use it!!)
         Need EXCELLENT error reporting. This shit is all in YOUR head!!!
+            Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
+                move the mouse around
+                make some mentions then delete them
         Everyone's stuff goes into a VR sim, saved on a webpage forever
         Export(/import?):
             Game
@@ -52,23 +61,17 @@ TODO
         Arrange properly into vertex and fragment shader tabs
         "Teardrops" visualization. Once you've sorted out the meaning of that shit!
             Can turn off and on
-        Practical
-            Make the transparent spotted dome
-            3D print the shapes
         2D PGA. Overlay for vectorspace Dw?
             A new window. Nice to go between dome and
         A puzzle game that is a series of "code this shader" challenges
+        Documented API for making your own window visualizations
+    Live coding (festival of the spoken nerd, green man)
         (2,1) halfplane window - v. important, lets you program with mouse
             This is the eventual destiny of the "float" window
             lerp as an example of a simple function to try it out with
             write some numbers on a line
             I can click or drag or whatever, and find the number I know I want
             Maybe move my carat through the line (4*8+5*2)/2 and see it animate
-        Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
-            move the mouse around
-            make some mentions then delete them
-        Documented API for making your own window visualizations
-    Live coding (festival of the spoken nerd, green man)
         Color windows
         VR
             Single button to cycle through mentions
@@ -239,19 +242,19 @@ async function init() {
     updateMentionVisibilitiesAndIndication()
     setCaretPosition(103)
 
-    let mixer = null
-    new GLTFLoader().load('data/Soldier.glb', function (gltf) {
-        let model = gltf.scene
-        dws.mesh.addNonMentionChild(model)
+    // let mixer = null
+    // new GLTFLoader().load('data/Soldier.glb', function (gltf) {
+    //     let model = gltf.scene
+    //     dws.mesh.addNonMentionChild(model)
         
-        let skeleton = new THREE.SkeletonHelper(model)
-        dws.mesh.addNonMentionChild(skeleton)
+    //     let skeleton = new THREE.SkeletonHelper(model)
+    //     dws.mesh.addNonMentionChild(skeleton)
         
-        const animations = gltf.animations
-        mixer = new THREE.AnimationMixer(model)
-        let walkAction = mixer.clipAction(animations[3])
-        walkAction.play()
-    })
+    //     const animations = gltf.animations
+    //     mixer = new THREE.AnimationMixer(model)
+    //     let walkAction = mixer.clipAction(animations[3])
+    //     walkAction.play()
+    // })
 
     document.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === true) {
@@ -280,15 +283,13 @@ async function init() {
                 else
                     doUpdate = false
 
-                if(doUpdate) {
-                    a.updateMeshesFromState()
-                    a.updateUniformFromState()
-                }
+                if(doUpdate)
+                    a.updateFromState()
             }
         })
 
-        if(mixer !== null)
-            mixer.update(frameDelta)
+        // if(mixer !== null)
+        //     mixer.update(frameDelta)
 
         updateMentionStatesFromRun()
 

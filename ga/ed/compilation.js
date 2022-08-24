@@ -160,28 +160,9 @@ async function initCompilation()
                 mention.lineIndex = lineIndex
                 mention.mentionIndex = mentionIndex++
 
-                //ascribes an appearance, probably creating it in the process
-                if (variable.isUniform || variable.isIn ) {
-                    let firstMention = variable.lowestUnusedMention === 1
-                    if (firstMention) {
-                        //create it
-                        mention.appearance = variable.type.getLowestUnusedAppearance(variable)
-                        mention.appearance.updateUniformFromState()
+                mention.appearance = variable.type.getAnAppearance(variable,uniforms, outputterUniforms, geo)
 
-                        if(variable.isUniform) {
-                            uniforms[variable.name] = mention.appearance.uniform
-                            outputterUniforms[variable.name] = mention.appearance.uniform
-                        }
-                        else
-                            createIn(geo, outputterUniforms, name, mention.appearance)
-                    }
-                    else
-                        mention.appearance = variable.mentions[0].appearance
-                }
-                else
-                    mention.appearance = variable.type.getLowestUnusedAppearance(variable)
-
-                if (variable.isIn || variable.isUniform)
+                if (variable.isUniform || variable.isIn)
                     return
                     
                 let isDeclaration = variable.lowestUnusedMention === 1

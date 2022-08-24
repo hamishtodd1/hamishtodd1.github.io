@@ -83,14 +83,20 @@ function initMouseInteractions() {
             if(grabbedDw !== null) {
 
                 dragOccurred = true
-                indicatedMention.appearance.updateStateFromDrag(grabbedDw)
-                indicatedMention.appearance.updateUniformFromState()
-                
-                if( !indicatedMention.variable.isUniform && !indicatedMention.variable.isIn)
-                    updateOverride(indicatedMention)
 
-                if (indicatedMention.variable.isUniform)
-                    indicatedMention.appearance.updateMeshesFromState()
+                if(indicatedMention.variable.isIn)
+                    indicatedMention.appearance.updateInFromDrag()
+                else if (indicatedMention.variable.isUniform ){
+                    indicatedMention.appearance.updateStateFromDrag(grabbedDw)
+                    indicatedMention.appearance.updateFromState()
+                }
+                else {
+                    indicatedMention.appearance.updateStateFromDrag(grabbedDw)
+                    updateOverride(indicatedMention)
+                    //that view of things where the dragged appearance is NOT about showing the state
+                    //but instead its own thing, and when you let go it may be changed
+                    //that's probably the right idea
+                }
             }
             else if(mouseArea !== document) {
                 updateMentionVisibilitiesAndIndication(mouseArea, event.clientX, event.clientY)

@@ -22,7 +22,7 @@ vec4 getChangedVertex(in vec4 initialVertex) {
     Dq idealLine2 = sandwichDqDq(rotation,idealLine);
     
     vec4 ret = initialVertex;
-    return initialVertex;
+    return ret;
 }
 
 //END//

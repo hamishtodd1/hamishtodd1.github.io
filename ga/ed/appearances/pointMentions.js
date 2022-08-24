@@ -36,6 +36,8 @@ function initPlanes() {
 
 function initPoints() {
 
+    let raycaster = new THREE.Raycaster()
+
     let eDw = dws.euclidean
     let iDw = dws.infinity
     let mDw = dws.mesh
@@ -50,8 +52,8 @@ function initPoints() {
         #sMesh
         whenGrabbed = new THREE.Vector4()
         
-        constructor(variable) {
-            super(variable)
+        constructor() {
+            super()
             this.state = new THREE.Vector4(0.,0.,0.,1.) //maybe better off as an mv?
             this.uniform.value = this.state
 
@@ -89,12 +91,18 @@ function initPoints() {
             this.whenGrabbed.copy(zeroVector4)
         }
 
-        updateStateFromDrag(dw) {
+        updateInFromDrag() {
+            raycaster.ray.copy(getMouseThreeRay(dws.mesh))
+            let cow = dws.mesh.getCow()
+            let intersection = raycaster.intersectObject(cow, false)[0]
+            if (intersection !== undefined)
+                focusInExample(this, intersection.face.a)
+        }
+
+        _updateStateFromDrag(dw) {
             //might be nice to snap to a grid
 
-            if (this.variable.name === `initialVertex`)
-                focusIndicatedVertex()
-            else if(dw === eDw) {
+            if(dw === eDw) {
                 let mouseRay = getMouseRay(dw)
                 meet(dragPlane, mouseRay, mv0)
                 mv0.toVec4(this.state)
@@ -110,7 +118,7 @@ function initPoints() {
                 mv0.multiplyScalar((v1.x === 0.? 0.00001 : v1.x) / mv0.norm())
                 mv0.toVec4(this.state)
             }
-            else console.error("not in dw: ", keyOfProptInObject(dw,dws))
+            else return false
         }
 
         updateOverrideFloatsFromState() {

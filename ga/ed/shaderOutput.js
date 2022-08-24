@@ -137,7 +137,7 @@ async function initShaderOutputAndFinalDw() {
                 if (m.appearance.visible && !m.variable.isUniform && !m.variable.isIn) {
                     getShaderOutput(m.mentionIndex)
                     m.appearance.updateStateFromRunResult(floatArray)
-                    m.appearance.updateMeshesFromState()
+                    m.appearance.updateFromState()
                 }
             })
             renderer.setRenderTarget(null)
@@ -188,6 +188,7 @@ async function initShaderOutputAndFinalDw() {
 
     let oldMesh = null
     updateFinalDwVertex = (text, uniforms, geo) => {
+        
         const toVertexSuffix = `
         uniform mat4 viewMatrix;
         uniform mat4 projectionMatrix;

@@ -68,8 +68,8 @@ function initVec3s()
         //points are double covered because e123 can be -1 or 1
         //elliptic geometry does not have a double cover. Points that have gone to the other side really are there
 
-        constructor(variable) {
-            super(variable)
+        constructor() {
+            super()
             this.state = new THREE.Vector3(1., 1., 1.)
             this.uniform.value = this.state
 
@@ -125,7 +125,7 @@ function initVec3s()
             whenGrabbed.set(0.,0.,0.) // a hacky way of saying "you're not being dragged"
         }
 
-        updateStateFromDrag(dw) {
+        _updateStateFromDrag(dw) {
             if (dw === sDw) {
                 camera2d.getOldClientWorldPosition(dw, v1)
 
@@ -143,6 +143,7 @@ function initVec3s()
                 mv0.toVector(this.state)
                 this.state.setLength(whenGrabbed.length())
             }
+            else return false
         }
 
         updateOverrideFloatsFromState() {
@@ -214,16 +215,14 @@ function initVec3s()
             if(dw === sDw) {
                 target.copy(this.#sMesh.position)
             }
-            else {
-                if (dw === vDw) {
-                    target.copy(this.state)
-                    target.multiplyScalar(.5)
-                    target.w = 1.
-                }
-                else if (dw === iDw) {
-                    target.copy(this.#iMesh.position)
-                    target.w = 1.
-                }
+            else if (dw === vDw) {
+                target.copy(this.state)
+                target.multiplyScalar(.5)
+                target.w = 1.
+            }
+            else if (dw === iDw) {
+                target.copy(this.#iMesh.position)
+                target.w = 1.
             }
         }
 

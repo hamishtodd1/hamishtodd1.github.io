@@ -128,8 +128,8 @@ function initDqs() {
         linePartWhenGrabbedNormalized = new Mv()
         #complexWhenGrabbed = new THREE.Vector2()
 
-        constructor(variable) {
-            super(variable)
+        constructor() {
+            super()
             this.state = new Dq()
             this.uniform.value = this.state
 
@@ -186,7 +186,7 @@ function initDqs() {
             this.linePartWhenGrabbedNormalized.copy(zeroMv)
         }
 
-        updateStateFromDrag(dw) {
+        _updateStateFromDrag(dw) {
             this.state.getBivectorPartToMv(linePart)
 
             if (dw === cDw) {
@@ -234,7 +234,7 @@ function initDqs() {
                 newLinePart.normalize()
                 this.state.setBivectorPartFromMvAndMagnitude(newLinePart, linePart.norm())
             }
-            else console.error("not in that dw")
+            else return false
         }
 
         updateOverrideFloatsFromState() {

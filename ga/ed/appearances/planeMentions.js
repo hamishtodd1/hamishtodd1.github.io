@@ -18,8 +18,8 @@ function initPlanes() {
         #sphereMesh
         state
 
-        constructor(variable) {
-            super(variable)
+        constructor() {
+            super()
             this.state = new Mv()
             this.state.plane(2., 1., 1., 1.)
             this.uniform.value = new Float32Array(4)
@@ -61,7 +61,7 @@ function initPlanes() {
             }
         }
 
-        updateStateFromDrag(dw) {
+        _updateStateFromDrag(dw) {
             if(dw === eDw) {
                 //can maybe implement editing e0
                 //if you do, need to fix the problem that you're not even "grabbing" the plane in eDw when it's e0
@@ -86,7 +86,7 @@ function initPlanes() {
                     this.state[1] = iNormWhenGrabbed //note: always positive
                 }
             }
-            else console.error("not in that dw")
+            else return false
         }
 
         updateOverrideFloatsFromState() {

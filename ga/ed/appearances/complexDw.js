@@ -45,8 +45,8 @@ function initComplexNumbers() {
     class complexAppearance extends Appearance {
         #mesh;
 
-        constructor(variable) {
-            super(variable)
+        constructor() {
+            super()
             this.state = new THREE.Vector2(1.,0.)
             this.uniform.value = this.state
 
@@ -66,10 +66,10 @@ function initComplexNumbers() {
             this.state.y = floatArray[1]
         }
 
-        updateStateFromDrag(dw) {
+        _updateStateFromDrag(dw) {
             if (dw === ourDw)
                 camera2d.getOldClientWorldPosition(dw, this.state)
-            else console.error("not in that dw")
+            else return false
         }
 
         updateOverrideFloatsFromState() {
