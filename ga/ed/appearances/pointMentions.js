@@ -136,9 +136,9 @@ function initPoints() {
             mv0.fromVec4(this.state)
             
             let currentlyGrabbed = !this.whenGrabbed.equals(zeroVector4)
-            this.#sMesh.position.x = mv0.norm() //wait, but is it the norm that you're after? Or the coef of .w?
-            if (currentlyGrabbed)
-                this.#sMesh.position.x *= this.whenGrabbed.dot(this.state) > 0. ? 1.:-1.
+            this.#sMesh.position.x = mv0.norm() // = sqrt(sq(.w))
+            if (currentlyGrabbed && !this.variable.isIn )
+                this.#sMesh.position.x *= this.whenGrabbed.dot(this.state) > 0. ? 1. : -1.
             
             if (this.state.w !== 0.) {
                 this.#iDwMesh.position.set(0., 0., 0.)
