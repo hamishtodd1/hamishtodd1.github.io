@@ -271,6 +271,7 @@ async function init() {
         forEachAppearance((a)=>{
             if(a.variable.isUniform) {
                 let doUpdate = true
+                
                 if(a.variable.name === `time`)
                     a.state[0] = clock.getElapsedTime()
                 else if(a.variable.name === `frameDelta`)

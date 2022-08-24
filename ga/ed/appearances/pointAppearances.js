@@ -70,14 +70,6 @@ function initPoints() {
             this.toHaveVisibilitiesSet.push(this.#eDwMesh, this.#iDwMesh, this.#sMesh)
         }
 
-        equals(m) {
-            return m.state.equals(this.state)
-        }
-
-        updateStateFromRunResult(floatArray) {
-            this.state.fromArray(floatArray)
-        }
-
         onGrab(dw) {
             this.whenGrabbed.copy(this.state)
             if(dw === eDw) {
@@ -121,13 +113,7 @@ function initPoints() {
             else return false
         }
 
-        updateOverrideFloatsFromState() {
-            this.state.toArray(overrideFloats)
-        }
-
-        getLiteralAssignmentFromState() {
-            return this.variable.type.getLiteralAssignmentFromValues(this.state.x, this.state.y, this.state.z, this.state.w)
-        }
+        
 
         //-------------
 
@@ -141,7 +127,7 @@ function initPoints() {
                 this.#sMesh.position.x *= this.whenGrabbed.dot(this.state) > 0. ? 1. : -1.
             
             if (this.state.w !== 0.) {
-                this.#iDwMesh.position.set(0., 0., 0.)
+                this.#iDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
                 this.#eDwMesh.position.copy(this.state).multiplyScalar(1./this.state.w)
 
                 //an alternative way to do this kind of thing (which also happens with dual quats...)
@@ -178,19 +164,19 @@ function initPoints() {
                 console.error("not in that dw")
         }
 
+        //----------
+
         _isVisibleInDw(dw) {
-            if(dw === dws.mesh)
-                return this.variable.name === `initialVertex`
-            else if(dw === eDw)
+            if(dw === eDw)
                 return !this.#eDwMesh.position.equals(OUT_OF_SIGHT_VECTOR3) && this.#eDwMesh.visible
             else if(dw === iDw)
-                return !this.#iDwMesh.position.equals(zeroVector) && this.#iDwMesh.visible
+                return !this.#iDwMesh.position.equals(OUT_OF_SIGHT_VECTOR3) && this.#iDwMesh.visible
             else if(dw === sDw)
                 return this.#sMesh.visible
             else return false
         }
 
-        getTextareaManipulationDw() {
+        _getTextareaManipulationDw() {
             if (this.variable.name === `initialVertex`)
                 return mDw
             else if(this.state.w === 0.)

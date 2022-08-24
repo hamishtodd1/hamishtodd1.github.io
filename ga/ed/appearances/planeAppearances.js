@@ -21,10 +21,8 @@ function initPlanes() {
         constructor() {
             super()
             this.state = new Mv()
-            this.state.plane(2., 1., 1., 1.)
+            this.state.plane(0., 1., 0., 0.)
             this.uniform.value = new Float32Array(4)
-            //default value
-            this.state[2] = .5
 
             let mat = new THREE.MeshPhongMaterial({ side: THREE.DoubleSide })
             mat.color = this.col
@@ -40,14 +38,6 @@ function initPlanes() {
             camera.toUpdateAppearance.push(this)
 
             this.toHaveVisibilitiesSet.push(this.#eDwMesh, this.#iDwMesh, this.#sphereMesh)
-        }
-
-        equals(m) {
-            return m.state.equals(this.state)
-        }
-
-        updateStateFromRunResult(floatArray) {
-            this.state.plane(floatArray[0], floatArray[1], floatArray[2], floatArray[3])
         }
 
         onGrab(dw) {
@@ -89,18 +79,6 @@ function initPlanes() {
             else return false
         }
 
-        updateOverrideFloatsFromState() {
-            overrideFloats[0] = this.state[1]; overrideFloats[1] = this.state[2]; overrideFloats[2] = this.state[3]; overrideFloats[3] = this.state[4];
-        }
-
-        updateUniformFromState() {
-            this.uniform.value[0] = this.state[1]; this.uniform.value[1] = this.state[2]; this.uniform.value[2] = this.state[3]; this.uniform.value[3] = this.state[4];
-        }
-
-        getLiteralAssignmentFromState() {
-            return this.variable.type.getLiteralAssignmentFromValues(this.state[1], this.state[2], this.state[3], this.state[4])
-        }
-
         //-------------
 
         updateMeshesFromState() {
@@ -135,15 +113,27 @@ function initPlanes() {
                 console.error("not in that dw")
         }
 
-        _isVisibleInDw(dw) {
-            if (dw !== eDw && dw !== iDw)
-                return false
-            
-            if(dw === eDw) return this.#eDwMesh.visible
-            if(dw === iDw) return this.#iDwMesh.visible
+        //-------------
+
+        updateStateFromRunResult(floatArray) {
+            this.state.plane(floatArray[0], floatArray[1], floatArray[2], floatArray[3])
+        }
+        stateToFloatArray(floatArray) {
+            //note that it's value[0] = state[1]!
+            floatArray[0] = this.state[1]; floatArray[1] = this.state[2]; floatArray[2] = this.state[3]; floatArray[3] = this.state[4];
+        }
+        updateUniformFromState() {
+            this.stateToFloatArray(this.uniform.value)
         }
 
-        getTextareaManipulationDw() {
+        //-------------
+
+        _isVisibleInDw(dw) {
+            return (dw === eDw && this.#eDwMesh.visible ) ||
+                   (dw === iDw && this.#iDwMesh.visible )
+        }
+
+        _getTextareaManipulationDw() {
             if(this.state.hasEuclideanPart() )
                 return iDw
             else if (this.state.hasInfinitePart())

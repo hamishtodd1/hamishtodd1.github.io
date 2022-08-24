@@ -57,31 +57,11 @@ function initComplexNumbers() {
             this.toHaveVisibilitiesSet.push(this.#mesh)
         }
 
-        equals(m) {
-            return m.state.equals(this.state)
-        }
-
-        updateStateFromRunResult(floatArray) {
-            this.state.x = floatArray[0]
-            this.state.y = floatArray[1]
-        }
-
         _updateStateFromDrag(dw) {
             if (dw === ourDw)
                 camera2d.getOldClientWorldPosition(dw, this.state)
             else return false
         }
-
-        updateOverrideFloatsFromState() {
-            overrideFloats[0] = this.state.x
-            overrideFloats[1] = this.state.y
-        }
-
-        getLiteralAssignmentFromState() {
-            return this.variable.type.getLiteralAssignmentFromValues(this.state.x, this.state.y)
-        }
-
-        //-----------
 
         updateMeshesFromState() {
             this.#mesh.position.x = this.state.x
@@ -92,13 +72,13 @@ function initComplexNumbers() {
             target.copy( this.#mesh.position )
         }
 
+        //----------
+
         _isVisibleInDw(dw) {
-            if (dw !== ourDw )
-                return false
-            return this.#mesh.visible
+            return dw === ourDw && this.#mesh.visible
         }
 
-        getTextareaManipulationDw() {
+        _getTextareaManipulationDw() {
             return ourDw
         }
     }

@@ -14,7 +14,7 @@ async function initShaderOutputAndFinalDw() {
             if (indicatedMention === null)
                 overrideMentionIndex.value = -1
             else {
-                indicatedMention.appearance.updateOverrideFloatsFromState()
+                indicatedMention.appearance.stateToFloatArray(overrideFloats)
                 overrideMentionIndex.value = indicatedMention.mentionIndex
             }
         }
@@ -105,18 +105,20 @@ async function initShaderOutputAndFinalDw() {
         
         let pixelsWide = 8
         let renderTarget = new THREE.WebGLRenderTarget(pixelsWide, 1)
-        let outputsArray = new Uint8Array(pixelsWide * 4)
+        let outputIntArray = new Uint8Array(pixelsWide * 4)
         let floatArray = new Float32Array(16)
     
-        getShaderOutput = (mentionIndex) => {
+        getShaderOutput = (mentionIndex,doTheLog) => {
     
             outputMentionIndex.value = mentionIndex
+
+            // log(outputFsq.material.uniforms.time.value)
             
             renderer.render(renderTextureScene, camera) //might be easier with orthographic, but it ain't broke
-            renderer.readRenderTargetPixels(renderTarget, 0, 0, pixelsWide, 1, outputsArray)
+            renderer.readRenderTargetPixels(renderTarget, 0, 0, pixelsWide, 1, outputIntArray)
             
             //only seem to be able to use this Uint8->Float32 conversion at creation time
-            let floatArrayAnew = new Float32Array(outputsArray.buffer)
+            let floatArrayAnew = new Float32Array(outputIntArray.buffer)
     
             for (let i = 0; i < floatArray.length; ++i)
                 floatArray[i] = floatArrayAnew[i]
@@ -135,7 +137,9 @@ async function initShaderOutputAndFinalDw() {
             forEachUsedMention((m) => {
                 //sort of hoping that visible has been set, either by carat or indication
                 if (m.appearance.visible && !m.variable.isUniform && !m.variable.isIn) {
-                    getShaderOutput(m.mentionIndex)
+                    getShaderOutput(m.mentionIndex, m.variable.name === `control2`)
+                    // if(m.variable.name === `control2`)
+                    //     log(frameCount,floatArray)
                     m.appearance.updateStateFromRunResult(floatArray)
                     m.appearance.updateFromState()
                 }

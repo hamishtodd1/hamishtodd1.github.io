@@ -159,14 +159,6 @@ function initDqs() {
             this.toHaveVisibilitiesSet.push(this.#eDwMesh, this.#cDwMesh, this.#arcMesh, this.#mobiusStripMesh, this.#rimMesh, this.#iDwLineMesh, this.#iDwRingMesh)
         }
 
-        equals(m) {
-            return m.state.equals(this.state)
-        }
-
-        updateStateFromRunResult(floatArray) {
-            this.state.fromArray(floatArray)
-        }
-
         onGrab(dw) {
             if (dw === eDw) {
                 this.state.getBivectorPartToMv(linePart)
@@ -237,13 +229,7 @@ function initDqs() {
             else return false
         }
 
-        updateOverrideFloatsFromState() {
-            this.state.toArray(overrideFloats)
-        }
-
-        getLiteralAssignmentFromState() {
-            return this.variable.type.getLiteralAssignmentFromValues(this.state[0], this.state[1], this.state[2], this.state[3], this.state[4], this.state[5], this.state[6], this.state[7])
-        }
+        
 
         //----------
 
@@ -350,13 +336,15 @@ function initDqs() {
             }
         }
 
+        //-------------
+
         _isVisibleInDw(dw) {
             return  (dw === eDw && this.#eDwMesh.visible) ||
                     (dw === cDw && this.#cDwMesh.visible) ||
                     (dw === iDw && (this.#iDwLineMesh.visible || this.#iDwRingMesh.visible) )
         }
 
-        getTextareaManipulationDw() {
+        _getTextareaManipulationDw() {
             return cDw
         }
     }

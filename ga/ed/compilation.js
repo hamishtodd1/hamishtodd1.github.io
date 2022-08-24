@@ -216,6 +216,7 @@ async function initCompilation()
         threejsIsCheckingForShaderErrors = true
 
         // log(outputterChunks.join("\n------------------"))
+        //perhaps it's being overridden?
 
         let outputterText = outputterChunks.join("\n")
         let finalText = finalChunks.join("\n")

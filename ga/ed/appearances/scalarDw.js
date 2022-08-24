@@ -43,21 +43,14 @@ function initFloats() {
         constructor() {
             super()
             this.state = new Float32Array(1)
-            this.state[0] = 1.
+            this.state[0] = 0.
+            this.uniform.value = 0.
 
             let mat = new THREE.MeshBasicMaterial()
             mat.color = this.col
             this.#mesh = sDw.NewMesh(downwardPyramidGeo, mat)
 
             this.toHaveVisibilitiesSet.push(this.#mesh)
-        }
-
-        equals(m) {
-            return m.state[0] === this.state[0]
-        }
-
-        updateStateFromRunResult(floatArray) {
-            this.state[0] = floatArray[0]
         }
 
         _updateStateFromDrag(dw) {
@@ -68,17 +61,9 @@ function initFloats() {
             else return false
         }
 
-        updateOverrideFloatsFromState() {
-            overrideFloats[0] = this.state[0]
-        }
+        
 
-        updateUniformFromState() {
-            this.uniform.value = this.state[0]
-        }
-
-        getLiteralAssignmentFromState() {
-            return this.variable.type.getLiteralAssignmentFromValues(this.state[0])
-        }
+        
 
         //-------------
 
@@ -90,13 +75,28 @@ function initFloats() {
             return target.copy(this.#mesh.position)
         }
 
-        _isVisibleInDw(dw) {
-            if (dw !== sDw )
-                return false
-            return this.#mesh.visible
+        //------------
+
+        equals(m) {
+            return m.state[0] === this.state[0]
+        }
+        updateStateFromRunResult(floatArray) {
+            this.state[0] = floatArray[0]
+        }
+        stateToFloatArray(floatArray) {
+            floatArray[0] = this.state[0]
+        }
+        updateUniformFromState() {
+            this.uniform.value = this.state[0]
         }
 
-        getTextareaManipulationDw() {
+        //------------
+
+        _isVisibleInDw(dw) {
+            return dw === sDw && this.#mesh.visible
+        }
+
+        _getTextareaManipulationDw() {
             return sDw
         }
     }

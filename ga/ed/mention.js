@@ -80,6 +80,8 @@ function initMention() {
         })
     }
 
+    let arrayForGettingLiterals = new Float32Array(16)
+
     class Appearance {
         variable
         state
@@ -100,7 +102,33 @@ function initMention() {
             this.updateMeshesFromState()
         } 
         
-        updateUniformFromState() {}//for most, uniform.value = state, so nothing need happen
+        updateUniformFromState() {} //for most, uniform.value === state, so nothing need happen
+
+        //sometimes overridden
+        equals(m) {
+            return m.state.equals(this.state)
+        }
+        updateStateFromRunResult(floatArray) {
+            // if(this.variable.name === `control2`)
+            //     log(floatArray)
+            this.state.fromArray(floatArray)
+        }
+        stateToFloatArray(floatArray) {
+            this.state.toArray(floatArray)
+        }
+        getLiteralAssignmentFromState() {
+            this.stateToFloatArray(arrayForGettingLiterals)
+
+            let commaSeparated = ""
+            for (let i = 0, il = this.variable.type.numFloats; i < il; ++i) {
+                let asStr = parseFloat(arrayForGettingLiterals[i].toFixed(2))
+                if (asStr === Math.round(asStr))
+                    asStr += "."
+                commaSeparated += asStr + (i === il - 1 ? "" : ",")
+            }
+
+            return this.variable.type.glslName + "(" + commaSeparated + ")"
+        }
 
         updateStateFromDrag(dw) {
             let result = this._updateStateFromDrag(dw)
@@ -116,6 +144,10 @@ function initMention() {
             this.toHaveVisibilitiesSet.forEach((m)=>{
                 m.visible = newVisibility
             })
+        }
+
+        getTextareaManipulationDw() {
+            return this.variable.isIn ? dws.mesh : this._getTextareaManipulationDw()
         }
 
         getWindowCenter(dw) {
@@ -308,18 +340,6 @@ function initMention() {
             }
             
             return ret
-        }
-
-        getLiteralAssignmentFromValues() {
-            let commaSeparated = ""
-            for (let i = 0, il = arguments.length; i < il; ++i) {
-                let asStr = parseFloat(arguments[i].toFixed(2))
-                if (asStr === Math.round(asStr))
-                    asStr += "."
-                commaSeparated += asStr + (i === il - 1 ? "" : ",")
-            }
-
-            return this.glslName + "(" + commaSeparated + ")"
         }
     }
     window.AppearanceType = AppearanceType
