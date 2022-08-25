@@ -80,11 +80,12 @@ function initMention() {
         })
     }
 
-    let arrayForGettingLiterals = new Float32Array(16)
+    let scratchArray = new Float32Array(16)
 
     class Appearance {
         variable
         state
+        stateOld
         uniform = {value: null}
         col = new THREE.Color()
 
@@ -99,29 +100,19 @@ function initMention() {
 
         updateFromState() {
             this.updateUniformFromState()
-            this.updateMeshesFromState()
-        } 
-        
-        updateUniformFromState() {} //for most, uniform.value === state, so nothing need happen
 
-        //sometimes overridden
-        equals(m) {
-            return m.state.equals(this.state)
+            if(!this.stateEquals(this.stateOld)) {
+                this.updateMeshesFromState()
+                this.stateCopyTo(this.stateOld)
+            }
         }
-        updateStateFromRunResult(floatArray) {
-            // if(this.variable.name === `control2`)
-            //     log(floatArray)
-            this.state.fromArray(floatArray)
-        }
-        stateToFloatArray(floatArray) {
-            this.state.toArray(floatArray)
-        }
+        
         getLiteralAssignmentFromState() {
-            this.stateToFloatArray(arrayForGettingLiterals)
+            this.stateToFloatArray(scratchArray)
 
             let commaSeparated = ""
             for (let i = 0, il = this.variable.type.numFloats; i < il; ++i) {
-                let asStr = parseFloat(arrayForGettingLiterals[i].toFixed(2))
+                let asStr = parseFloat(scratchArray[i].toFixed(2))
                 if (asStr === Math.round(asStr))
                     asStr += "."
                 commaSeparated += asStr + (i === il - 1 ? "" : ",")
@@ -165,6 +156,24 @@ function initMention() {
 
         getTextareaManipulationDw() {
             return this.variable.isIn ? dws.mesh : this._getTextareaManipulationDw()
+        }
+
+        //--------------
+
+        updateUniformFromState() { } //for most, uniform.value === state, so nothing need happen
+
+        //sometimes overridden
+        stateEquals(otherState) {
+            return this.state.equals(otherState)
+        }
+        stateCopyTo(toCopyTo) {
+            toCopyTo.copy(this.state)
+        }
+        floatArrayToState(floatArray) {
+            this.state.fromArray(floatArray)
+        }
+        stateToFloatArray(floatArray) {
+            this.state.toArray(floatArray)
         }
     }
     window.Appearance = Appearance

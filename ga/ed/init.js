@@ -1,6 +1,7 @@
 /*
 TODO
     For next presentation
+        It's not jus the dqs that can be a little costly to update. All should have an "oldstate", can be implemented at the appearance level
         Sandwiches!
         Dual quaternion skinning
             Bones as an In, in the mesh window

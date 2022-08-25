@@ -11,7 +11,7 @@ vec4 getChangedVertex(in vec4 initialVertex) {
 
     vec4 myVertex = vec4( .2,0., 1.,1.);
     vec4 myNormal = vec4( .2,0.,-1.,0.);
-    Plane myPlane = Plane(1.,0.,0.,0.);
+    Plane myPlane = Plane(1.,1.,0.,0.);
     
     Dq rotation = Dq( .28,  0.,  0., 0., 0., .96, 0., 0.);
     vec4 transformedVertex = sandwichDqPt(rotation, myVertex);

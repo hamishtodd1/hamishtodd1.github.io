@@ -55,6 +55,7 @@ function initPoints() {
         constructor() {
             super()
             this.state = new THREE.Vector4(0.,0.,0.,1.) //maybe better off as an mv?
+            this.stateOld = new THREE.Vector4()
             this.uniform.value = this.state
 
             let mat = new THREE.MeshBasicMaterial() //why not phong?

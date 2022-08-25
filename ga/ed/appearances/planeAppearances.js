@@ -22,6 +22,7 @@ function initPlanes() {
             super()
             this.state = new Mv()
             this.state.plane(0., 1., 0., 0.)
+            this.stateOld = new Mv()
             this.uniform.value = new Float32Array(4)
 
             let mat = new THREE.MeshPhongMaterial({ side: THREE.DoubleSide })
@@ -120,7 +121,7 @@ function initPlanes() {
 
         //-------------
 
-        updateStateFromRunResult(floatArray) {
+        floatArrayToState(floatArray) {
             this.state.plane(floatArray[0], floatArray[1], floatArray[2], floatArray[3])
         }
         stateToFloatArray(floatArray) {

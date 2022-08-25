@@ -142,7 +142,7 @@ async function initShaderOutputAndFinalDw() {
                     getShaderOutput(m.mentionIndex, m.variable.name === `control2`)
                     // if(m.variable.name === `control2`)
                     //     log(frameCount,floatArray)
-                    m.appearance.updateStateFromRunResult(floatArray)
+                    m.appearance.floatArrayToState(floatArray)
                     m.appearance.updateFromState()
                 }
             })

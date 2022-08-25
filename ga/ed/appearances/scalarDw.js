@@ -43,6 +43,8 @@ function initFloats() {
         constructor() {
             super()
             this.state = new Float32Array(1)
+            this.stateOld = new Float32Array(1)
+            this.stateOld[0] = 1.
             this.state[0] = 0.
             this.uniform.value = 0.
 
@@ -75,11 +77,14 @@ function initFloats() {
 
         //------------
 
-        equals(m) {
-            return m.state[0] === this.state[0]
+        stateEquals(otherState) {
+            return otherState[0] === this.state[0]
         }
-        updateStateFromRunResult(floatArray) {
+        floatArrayToState(floatArray) {
             this.state[0] = floatArray[0]
+        }
+        stateCopyTo(toCopyTo) {
+            toCopyTo[0] = this.state[0]
         }
         stateToFloatArray(floatArray) {
             floatArray[0] = this.state[0]

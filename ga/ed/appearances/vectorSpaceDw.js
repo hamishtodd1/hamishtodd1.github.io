@@ -1,6 +1,6 @@
 // matrices in here. little parallelipipeds with their edges extended past the corners
 
-async function initVectorSpaceDw() {
+async function initVectorSpaceDw() { 
 
     let vDw = new Dw("vectorSpace", true)
 
@@ -10,6 +10,43 @@ async function initVectorSpaceDw() {
     // rgbCube.material.fragmentShader = await getTextFile('shaders/rgbCube.glsl')
     // rgbCube.material.transparent = true
     // dw.addNonMentionChild(rgbCube)
+
+    {
+        let shaftRadius = .06
+        let headHeight = shaftRadius * 5.
+        let headGeo = new THREE.ConeBufferGeometry(shaftRadius * 3., 1.)
+        headGeo.translate(0., -.5, 0.)
+        let shaftGeo = CylinderBufferGeometryUncentered(shaftRadius, 1., 8, true)
+
+        vDw.ArrowGroup = (mat) => {
+            let ret = vDw.NewGroup()
+
+            let head = new THREE.Mesh(headGeo, mat)
+            let shaft = new THREE.Mesh(shaftGeo, mat)
+            ret.add(head, shaft)
+
+            head.castShadow = true
+            shaft.castShadow = true
+            head.matrixAutoUpdate = false
+            shaft.matrixAutoUpdate = false
+
+            ret.setVec = (newVec) => {
+                if (newVec.equals(zeroVector)) {
+                    head.matrix.setPosition(OUT_OF_SIGHT_VECTOR3)
+                    shaft.matrix.setPosition(OUT_OF_SIGHT_VECTOR3)
+                }
+                else {
+                    let shaftVec = v1.copy(newVec).setLength(newVec.length() - headHeight)
+                    setRotationallySymmetricMatrix(shaftVec.x, shaftVec.y, shaftVec.z, shaft.matrix)
+                    let headVec = v1.copy(newVec).setLength(headHeight)
+                    setRotationallySymmetricMatrix(headVec.x, headVec.y, headVec.z, head.matrix)
+                    head.matrix.setPosition(newVec)
+                }
+            }
+
+            return ret
+        }
+    }
 
     let axisRadius = .02
     let axisMat = new THREE.MeshPhongMaterial({ color: 0xCCCCCC })

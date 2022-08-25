@@ -130,6 +130,7 @@ function initDqs() {
         constructor() {
             super()
             this.state = new Dq()
+            this.stateOld = new Dq()
             this.uniform.value = this.state
 
             //default value
@@ -249,16 +250,10 @@ function initDqs() {
                 this.#cDwMesh.position.y = linePart.norm()
 
             arcCurveDest.set(this.#cDwMesh.position.x, this.#cDwMesh.position.y, 0.)
-            if (!arcCurveDest.equals(arcCurveDestOld)) {
-                updateTubeGeo(this.#arcMesh.geometry, theArcCurve)
-                arcCurveDestOld.copy(arcCurveDest)
-            }
+            updateTubeGeo(this.#arcMesh.geometry, theArcCurve)
 
             rimCurveFullAngle = Math.atan2(this.#cDwMesh.position.y, this.#cDwMesh.position.x) / TAU * 2.
-            if(rimCurveFullAngle !== rimCurveFullAngleOld) {
-                updateTubeGeo(this.#rimMesh.geometry, theRimCurve)
-                rimCurveFullAngleOld = rimCurveFullAngle
-            }
+            updateTubeGeo(this.#rimMesh.geometry, theRimCurve)
 
             //more like: it's a complex strip
             //And by the way, it's angled in 3D space such that your line is through it

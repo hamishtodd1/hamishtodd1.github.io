@@ -239,7 +239,7 @@ async function initCompilation()
         appearanceTypes.forEach((at)=>{
             for (let i = 0; i < at.lowestUnusedAppearance; ++i) {
                 let appearance = at.appearances[i]
-                if (i === 0 || appearance.variable !== at.appearances[i - 1].variable || !appearance.equals(at.appearances[i - 1]) )
+                if (i === 0 || appearance.variable !== at.appearances[i - 1].variable || !appearance.stateEquals(at.appearances[i - 1].state) )
                     currentDuplicates = [appearance]
                 else
                     currentDuplicates.push(appearance)

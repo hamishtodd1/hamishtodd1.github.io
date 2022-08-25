@@ -48,6 +48,7 @@ function initComplexNumbers() {
         constructor() {
             super()
             this.state = new THREE.Vector2(1.,0.)
+            this.stateOld = new THREE.Vector2()
             this.uniform.value = this.state
 
             let mat = new THREE.MeshBasicMaterial()
