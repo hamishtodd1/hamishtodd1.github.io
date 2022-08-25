@@ -23,6 +23,7 @@ TODO
     Having chigozie and Matthew Vandevander and Pontus break it
         Try to detect which lines ASSIGN to a variable and which lines don't
     Workshop for kids at makespace (don't let the GDC audience be the first people to use it!!)
+        Allow shit to be on multiple lines
         Need EXCELLENT error reporting. This shit is all in YOUR head!!!
             Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
                 move the mouse around
@@ -225,6 +226,7 @@ async function init() {
     // dws.scalar.elem.style.display = 'none'
 
     initVec3s()
+    initMat4s()
     initFloats()
     initComplexNumbers()
     initPoints()
@@ -238,7 +240,7 @@ async function init() {
     initCaretInteractions()
     
     await meshloadPromise
-    compile()
+    compile(false)
     updateMentionVisibilitiesAndIndication()
     setCaretPosition(103)
 
@@ -258,7 +260,7 @@ async function init() {
 
     document.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === true) {
-            compile()
+            compile(false)
             updateMentionVisibilitiesAndIndication()
         }
     })

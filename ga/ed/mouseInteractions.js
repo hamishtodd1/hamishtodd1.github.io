@@ -195,7 +195,7 @@ function initMouseInteractions() {
 
             textarea.focus()
 
-            compile()
+            compile(false)
             onCaretMove()
         }
 

@@ -105,12 +105,12 @@ async function initShaderOutputAndFinalDw() {
             renderTextureScene.add(outputFsq)
         }
         
-        let pixelsWide = 8
+        let pixelsWide = 16
         let renderTarget = new THREE.WebGLRenderTarget(pixelsWide, 1)
         let outputIntArray = new Uint8Array(pixelsWide * 4)
         let floatArray = new Float32Array(16)
     
-        getShaderOutput = (mentionIndex,doTheLog) => {
+        getShaderOutput = (mentionIndex) => {
     
             outputMentionIndex.value = mentionIndex
 
@@ -132,16 +132,13 @@ async function initShaderOutputAndFinalDw() {
 
         updateMentionStatesFromRun = () => {
 
-            //in theory, could you all variables in a single run?
+            //in theory, could do all the variables in a single run
             //the height of the render target in pixels would be the number of variables
 
             renderer.setRenderTarget(renderTarget)
             forEachUsedMention((m) => {
-                //sort of hoping that visible has been set, either by carat or indication
                 if (m.appearance.visible && !m.variable.isUniform && !m.variable.isIn) {
                     getShaderOutput(m.mentionIndex, m.variable.name === `control2`)
-                    // if(m.variable.name === `control2`)
-                    //     log(frameCount,floatArray)
                     m.appearance.floatArrayToState(floatArray)
                     m.appearance.updateFromState()
                 }

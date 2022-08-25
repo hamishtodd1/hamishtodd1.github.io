@@ -9,23 +9,24 @@ vec4 getChangedVertex(in vec4 initialVertex) {
     vec2 control2 = vec2(cos(time*4.),sin(time*4.));
     vec3 control3 = vec3(1.,.5,1.);
 
-    vec4 myVertex = vec4( .2,0., 1.,1.);
-    vec4 myNormal = vec4( .2,0.,-1.,0.);
-    Plane myPlane = Plane(1.,1.,0.,0.);
-    
-    Dq rotation = Dq( .28,  0.,  0., 0., 0., .96, 0., 0.);
-    vec4 transformedVertex = sandwichDqPt(rotation, myVertex);
-    vec4 transformedNormal = sandwichDqPt(rotation, myNormal);
-
-    Dq idealLine = Dq( 0.,  0.,1.,1.,  0.,0.,0.,  0.);
-    Dq eucliLine = Dq( 0.,  0.,0.,0.,  0.,1.,1.,  0.);
-    Dq idealLine2 = sandwichDqDq(rotation,idealLine);
+    mat4 myMat = mat4(1.,0.,0.,0.,0.,1.,0.,0.,0.,0.,1.,0.,0.,0.,0.,1.);
     
     vec4 ret = initialVertex;
     return ret;
 }
-
 //END//
+
+// vec4 myVertex = vec4( .2,0., 1.,1.);
+// vec4 myNormal = vec4( .2,0.,-1.,0.);
+// Plane myPlane = Plane(1.,1.,0.,0.);
+
+// Dq rotation = Dq( .28,  0.,  0., 0., 0., .96, 0., 0.);
+// vec4 transformedVertex = sandwichDqPt(rotation, myVertex);
+// vec4 transformedNormal = sandwichDqPt(rotation, myNormal);
+
+// Dq idealLine = Dq( 0.,  0.,1.,1.,  0.,0.,0.,  0.);
+// Dq eucliLine = Dq( 0.,  0.,0.,0.,  0.,1.,1.,  0.);
+// Dq idealLine2 = sandwichDqDq(rotation,idealLine);
 
 
 vec3 getColor(in vec4 fragmentPosition) {

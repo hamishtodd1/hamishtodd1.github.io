@@ -162,7 +162,6 @@ function initMention() {
 
         updateUniformFromState() { } //for most, uniform.value === state, so nothing need happen
 
-        //sometimes overridden
         stateEquals(otherState) {
             return this.state.equals(otherState)
         }
@@ -285,7 +284,7 @@ function initMention() {
         lowestUnusedAppearance = 0
         appearances = []
 
-        constructor(glslName, numFloats, _constructAppearance, outputAssignmentPropts) {
+        constructor(glslName, numFloats, _constructAppearance, outputAssignmentPropts, omitPeriod) {
             this.glslName = glslName
             this.numFloats = numFloats
 
@@ -301,7 +300,7 @@ function initMention() {
             this.outputAssignmentPropts = Array(numFloats)
             if (outputAssignmentPropts !== undefined) {
                 for (let i = 0; i < this.numFloats; ++i)
-                    this.outputAssignmentPropts[i] = `.` + outputAssignmentPropts[i]
+                    this.outputAssignmentPropts[i] = (omitPeriod ? `` : `.`) + outputAssignmentPropts[i]
             }
             else {
                 for (let i = 0; i < this.numFloats; ++i)

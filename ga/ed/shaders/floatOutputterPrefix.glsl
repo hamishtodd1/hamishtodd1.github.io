@@ -3,7 +3,7 @@
 //takes the 32 bits of a float and puts them into the 32 bits spread between 8 of R, G, B, A
 //compute shader shmompute shader
 
-float[8] outputFloats;
+float[16] outputFloats;
 uniform int outputMentionIndex;
 varying vec2 frameCoord;
 
@@ -41,9 +41,9 @@ vec4 encodeFloat (float val) {
 }
 
 vec4 encodeRgbaOfOutputFloatForOurPixel() {
-    int pixelIndex = int(round(frameCoord.x * 8. - .5));
+    int pixelIndex = int(round(frameCoord.x * 16. - .5));
     float pixelFloat = 0.;
-    for (int k = 0; k < 8; ++k)
+    for (int k = 0; k < 16; ++k)
         pixelFloat += pixelIndex == k ? outputFloats[k] : 0.;
 
     return encodeFloat(pixelFloat);

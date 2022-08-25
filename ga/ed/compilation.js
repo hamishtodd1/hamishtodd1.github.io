@@ -53,7 +53,7 @@ async function initCompilation()
         threejsIsCheckingForShaderErrors = false
     }
 
-    compile = async () => {
+    compile = async (logDebug) => {
         
         let text = textarea.value
         if (text.indexOf("/*") !== -1 || text.indexOf("*/") !== -1) {
@@ -215,8 +215,8 @@ async function initCompilation()
 
         threejsIsCheckingForShaderErrors = true
 
-        // log(outputterChunks.join("\n------------------"))
-        //perhaps it's being overridden?
+        if (logDebug)
+            log(outputterChunks.join("\n------------------"))
 
         let outputterText = outputterChunks.join("\n")
         let finalText = finalChunks.join("\n")

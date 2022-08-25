@@ -94,6 +94,5 @@ function initFloats() {
         }
     }
 
-    let mentionType = new AppearanceType("float", 1, floatAppearance)
-    mentionType.outputAssignmentPropts = [``]
+    let mentionType = new AppearanceType("float", 1, floatAppearance, [``],true)
 }
