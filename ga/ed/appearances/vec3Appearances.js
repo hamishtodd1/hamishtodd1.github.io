@@ -122,9 +122,8 @@ function initVec3s() {
 
         getWorldCenter(dw, target) {
             
-            if(dw === sDw) {
+            if(dw === sDw)
                 target.copy(this.#sMesh.position)
-            }
             else if (dw === vDw) {
                 target.copy(this.state)
                 target.multiplyScalar(.5)

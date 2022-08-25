@@ -37,6 +37,8 @@ function initFloats() {
         // sDw.addNonMentionChild(bg)
     }
 
+    //could make little disks going along the vector space's notches as a way of poking fun
+
     class floatAppearance extends Appearance {
         #mesh
 
@@ -48,9 +50,8 @@ function initFloats() {
             this.state[0] = 0.
             this.uniform.value = 0.
 
-            let mat = new THREE.MeshBasicMaterial()
-            mat.color = this.col
-            this.#mesh = sDw.NewMesh(downwardPyramidGeo, mat)
+            this.#mesh = sDw.NewMesh(downwardPyramidGeo, new THREE.MeshBasicMaterial())
+            this.#mesh.material.color = this.col
 
             this.toHaveVisibilitiesSet.push(this.#mesh)
         }

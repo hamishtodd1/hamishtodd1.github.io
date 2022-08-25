@@ -3,23 +3,16 @@ function initMat4s() {
     //maybe nice if it has a big triangle in the iDw
     //dotted lines connecting the arrow tips to the origin's unit vectors 
     let vDw = dws.vectorSpace
-
-    logMat4 = (mat4)=>{
-        for(let i = 0; i< 4; ++i) {
-            let row = ``
-            for(let j = 0; j < 4; ++j)
-                row += mat4.elements[i*4+j] + `,`
-            log(row)
-        }
-    }
+    let sDw = dws.scalar
 
     let origin = new THREE.Vector3()
     let basisVector = new THREE.Vector3()
-
+    let whenGrabbed = new THREE.Matrix4()
     class mat4Appearance extends Appearance {
         #xMesh
         #yMesh
         #zMesh
+        #determinantMesh
 
         constructor() {
             super()
@@ -34,8 +27,11 @@ function initMat4s() {
             this.#xMesh = vDw.ArrowHeadAndShaft(mat)
             this.#yMesh = vDw.ArrowHeadAndShaft(mat)
             this.#zMesh = vDw.ArrowHeadAndShaft(mat)
+
+            this.#determinantMesh = sDw.NewMesh(downwardPyramidGeo, new THREE.MeshBasicMaterial())
+            this.#determinantMesh.material.color = this.col
             
-            this.toHaveVisibilitiesSet.push(this.#xMesh, this.#yMesh, this.#zMesh)
+            this.toHaveVisibilitiesSet.push(this.#xMesh, this.#yMesh, this.#zMesh, this.#determinantMesh)
         }
 
         onGrab(dw) {
@@ -43,6 +39,9 @@ function initMat4s() {
                 v1.setFromMatrixPosition(this.state)
                 mv0.fromVec(v1)
                 setDragPlane(mv0)
+            }
+            else if(dw === sDw) {
+                whenGrabbed.copy(this.state)
             }
             else return false
         }
@@ -52,6 +51,17 @@ function initMat4s() {
                 intersectDragPlane(getMouseRay(dw), mv0)
                 mv0.toVector(v1)
                 this.state.setPosition(v1)
+            }
+            if(dw === sDw) {
+                camera2d.getOldClientWorldPosition(dw, v1)
+                let desiredDeterminant = v1.x
+                if( desiredDeterminant === 0.)
+                    desiredDeterminant = .0001
+
+                let oldDeterminant = whenGrabbed.determinant()
+                let multiple = Math.sqrt(Math.sqrt(Math.abs(desiredDeterminant) / Math.abs(oldDeterminant)))
+                multiple *= Math.sign(desiredDeterminant) / Math.sign(oldDeterminant)
+                this.state.copy(whenGrabbed).multiplyScalar(multiple)
             }
             else return false
         }
@@ -65,11 +75,17 @@ function initMat4s() {
             this.#yMesh.setVec(basisVector,origin)
             basisVector.setFromMatrixColumn(this.state, 2)
             this.#zMesh.setVec(basisVector,origin)
+
+            this.#determinantMesh.position.x = this.state.determinant()
         }
 
         getWorldCenter(dw, target) {
-            v1.setFromMatrixPosition(this.state)
-            target.set(v1.x,v1.y,v1.z,1.)
+            if (dw === sDw)
+                target.copy(this.#determinantMesh.position)
+            else if(dw === vDw) {
+                v1.setFromMatrixPosition(this.state)
+                target.set(v1.x,v1.y,v1.z,1.)
+            }
         }
 
         _getTextareaManipulationDw() {
