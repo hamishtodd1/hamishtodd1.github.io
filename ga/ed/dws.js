@@ -76,6 +76,10 @@ async function initDws() {
             this.hasLights = haveLights
         }
 
+        inScene(m) {
+            return m.parent === this.#scene
+        }
+
         worldToWindow(vector3) {
             return this.camera.worldToWindow(vector3, this)
         }

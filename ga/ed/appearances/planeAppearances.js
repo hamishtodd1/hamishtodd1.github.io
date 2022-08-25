@@ -79,8 +79,6 @@ function initPlanes() {
             else return false
         }
 
-        //-------------
-
         updateMeshesFromState() {
             let displayableVersion = this.state.getDisplayableVersion(mv4)
             e123.projectOn(displayableVersion, mv0).toVector(this.#eDwMesh.position)
@@ -113,6 +111,13 @@ function initPlanes() {
                 console.error("not in that dw")
         }
 
+        _getTextareaManipulationDw() {
+            if (this.state.hasEuclideanPart())
+                return iDw
+            else if (this.state.hasInfinitePart())
+                return eDw
+        }
+
         //-------------
 
         updateStateFromRunResult(floatArray) {
@@ -124,20 +129,6 @@ function initPlanes() {
         }
         updateUniformFromState() {
             this.stateToFloatArray(this.uniform.value)
-        }
-
-        //-------------
-
-        _isVisibleInDw(dw) {
-            return (dw === eDw && this.#eDwMesh.visible ) ||
-                   (dw === iDw && this.#iDwMesh.visible )
-        }
-
-        _getTextareaManipulationDw() {
-            if(this.state.hasEuclideanPart() )
-                return iDw
-            else if (this.state.hasInfinitePart())
-                return eDw
         }
     }
     new AppearanceType("Plane", 4, PlaneAppearance, [`e0`, `e1`, `e2`, `e3`])

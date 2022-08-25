@@ -92,10 +92,6 @@ function initVec3s() {
             else return false
         }
 
-        
-
-        //-------------
-
         updateMeshesFromState() {
             this.#sMesh.position.x = this.state.length()
             if ( !whenGrabbed.equals(zeroVector) && this.state.dot(whenGrabbed) < 0.) //possibly do something about duplicates?
@@ -164,14 +160,6 @@ function initVec3s() {
                 target.copy(this.#iMesh.position)
                 target.w = 1.
             }
-        }
-
-        //-------------
-
-        _isVisibleInDw(dw) {
-            return ( dw === vDw && this.#vMesh.visible ) ||
-                   ( dw === iDw && this.#iMesh.visible ) ||
-                   ( dw === sDw && this.#sMesh.visible )
         }
 
         _getTextareaManipulationDw() {

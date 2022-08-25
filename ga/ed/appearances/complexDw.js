@@ -11,7 +11,7 @@
 */
 function initComplexDw() {
 
-    let ourDw = new Dw("mobius", false, camera2d)
+    let ourDw = new Dw("complex", false, camera2d)
 
     const axisMat = new THREE.LineBasicMaterial({
         color: 0xFFFFFF
@@ -40,7 +40,7 @@ function initComplexNumbers() {
 
     let dotGeo = new THREE.CircleBufferGeometry(.1, 32)
 
-    let ourDw = dws.mobius
+    let ourDw = dws.complex
 
     class complexAppearance extends Appearance {
         #mesh;
@@ -70,12 +70,6 @@ function initComplexNumbers() {
 
         getWorldCenter(dw, target) {
             target.copy( this.#mesh.position )
-        }
-
-        //----------
-
-        _isVisibleInDw(dw) {
-            return dw === ourDw && this.#mesh.visible
         }
 
         _getTextareaManipulationDw() {

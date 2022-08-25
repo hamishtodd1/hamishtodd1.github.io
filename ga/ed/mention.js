@@ -137,7 +137,19 @@ function initMention() {
         }
 
         isVisibleInDw(dw) {
-            return this._isVisibleInDw(dw) || (this.variable.isIn && dw === dws.mesh)
+            if(this.visible === false)
+                return false
+            
+            if (this.variable.isIn && dw === dws.mesh)
+                return true
+
+            let ret = false
+            this.toHaveVisibilitiesSet.forEach((m)=>{
+                if (!m.position.equals(OUT_OF_SIGHT_VECTOR3) && dw.inScene(m))
+                    ret = true
+            })
+
+            return ret
         }
         setVisibility(newVisibility) {
             this.visible = newVisibility
@@ -146,13 +158,13 @@ function initMention() {
             })
         }
 
-        getTextareaManipulationDw() {
-            return this.variable.isIn ? dws.mesh : this._getTextareaManipulationDw()
-        }
-
         getWindowCenter(dw) {
             this.getWorldCenter(dw, worldCenter)
             return dw.worldToWindow(worldCenter)
+        }
+
+        getTextareaManipulationDw() {
+            return this.variable.isIn ? dws.mesh : this._getTextareaManipulationDw()
         }
     }
     window.Appearance = Appearance

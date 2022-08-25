@@ -113,10 +113,6 @@ function initPoints() {
             else return false
         }
 
-        
-
-        //-------------
-
         updateMeshesFromState() {
             
             mv0.fromVec4(this.state)
@@ -162,18 +158,6 @@ function initPoints() {
             }
             else
                 console.error("not in that dw")
-        }
-
-        //----------
-
-        _isVisibleInDw(dw) {
-            if(dw === eDw)
-                return !this.#eDwMesh.position.equals(OUT_OF_SIGHT_VECTOR3) && this.#eDwMesh.visible
-            else if(dw === iDw)
-                return !this.#iDwMesh.position.equals(OUT_OF_SIGHT_VECTOR3) && this.#iDwMesh.visible
-            else if(dw === sDw)
-                return this.#sMesh.visible
-            else return false
         }
 
         _getTextareaManipulationDw() {

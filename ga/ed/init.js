@@ -221,7 +221,7 @@ async function init() {
     initInfinityDw()
     initComplexDw()
     new Dw(`scalar`, false, camera2d)
-    // dws.mobius.elem.style.display = 'none'
+    // dws.complex.elem.style.display = 'none'
     // dws.scalar.elem.style.display = 'none'
 
     initVec3s()

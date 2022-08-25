@@ -2,7 +2,7 @@ function initDqs() {
 
     let eDw = dws.euclidean
     let iDw = dws.infinity
-    let cDw = dws.mobius
+    let cDw = dws.complex
 
     let projectedOnOrigin = new Mv()
     let quatToOriginVersion = new Mv()
@@ -41,10 +41,10 @@ function initDqs() {
     let theArcCurve = new ArcCurve()
 
     let numMsVerts = 31
-    let mobiusStripGeo = new THREE.PlaneBufferGeometry(1.,1.,1,numMsVerts-1)
+    let complexStripGeo = new THREE.PlaneBufferGeometry(1.,1.,1,numMsVerts-1)
     let stripWidthHalved = .2
     let stripRadius = .8
-    let mobiusMat = new THREE.MeshPhongMaterial({ color: 0xAAAAAA, side: THREE.DoubleSide })
+    let complexMat = new THREE.MeshPhongMaterial({ color: 0xAAAAAA, side: THREE.DoubleSide })
     {
         let makinRotor = new Mv()
         function toMobiusEdge(side, t, target) {
@@ -60,8 +60,8 @@ function initDqs() {
             return target
         }
 
-        mobiusStripGeo.translate(0., .5, 0.)
-        let msgArr = mobiusStripGeo.attributes.position.array
+        complexStripGeo.translate(0., .5, 0.)
+        let msgArr = complexStripGeo.attributes.position.array
         for (let i = 0; i < numMsVerts*2; ++i) {
             let side = msgArr[i * 3 + 0] < 0.
             let t = msgArr[i * 3 + 1]
@@ -69,7 +69,7 @@ function initDqs() {
             toMobiusEdge(side, t, mv0)
             mv0.toVectorArray(msgArr, i)
         }
-        mobiusStripGeo.computeVertexNormals()
+        complexStripGeo.computeVertexNormals()
     }
 
     let rimCurveFullAngle = TAU / 2.
@@ -118,7 +118,7 @@ function initDqs() {
         #cDwMesh
         #arcMesh
 
-        #mobiusStripMesh
+        #complexStripMesh
         #rimMesh
 
         #eDwMesh
@@ -151,12 +151,12 @@ function initDqs() {
             this.#cDwMesh = cDw.NewMesh(dotGeo, this.#mat2d)
             this.#arcMesh = cDw.NewMesh(OurTubeGeo(theArcCurve), this.#mat2d)
 
-            this.#mobiusStripMesh = iDw.NewMesh(mobiusStripGeo, mobiusMat) //possibly only one of these is needed
+            this.#complexStripMesh = iDw.NewMesh(complexStripGeo, complexMat) //possibly only one of these is needed
             this.#rimMesh = iDw.NewMesh(OurTubeGeo(theRimCurve), this.#mat3d)
 
             camera.toUpdateAppearance.push(this)
 
-            this.toHaveVisibilitiesSet.push(this.#eDwMesh, this.#cDwMesh, this.#arcMesh, this.#mobiusStripMesh, this.#rimMesh, this.#iDwLineMesh, this.#iDwRingMesh)
+            this.toHaveVisibilitiesSet.push(this.#eDwMesh, this.#cDwMesh, this.#arcMesh, this.#complexStripMesh, this.#rimMesh, this.#iDwLineMesh, this.#iDwRingMesh)
         }
 
         onGrab(dw) {
@@ -229,10 +229,6 @@ function initDqs() {
             else return false
         }
 
-        
-
-        //----------
-
         updateMeshesFromState() {
             this.state.getBivectorPartToMv(linePart)
 
@@ -257,7 +253,7 @@ function initDqs() {
             rimCurveFullAngle = Math.atan2(this.#cDwMesh.position.y, this.#cDwMesh.position.x) / TAU * 2.
             updateTubeGeo(this.#rimMesh.geometry, theRimCurve)
 
-            //more like: it's a mobius strip
+            //more like: it's a complex strip
             //And by the way, it's angled in 3D space such that your line is through it
             //when you hover the window, it switches to being a "top" down view
             //where the top is the view such that the rotation is anticlockwise from the identity
@@ -280,7 +276,7 @@ function initDqs() {
                     // log(this.#iDwLineMesh.quaternion)
                 }
 
-                this.#mobiusStripMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
+                this.#complexStripMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
                 this.#rimMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
 
             }
@@ -291,7 +287,7 @@ function initDqs() {
                 quatToOriginVersion.sqrtSelf()
                 quatToOriginVersion.toQuaternion(this.#iDwRingMesh.quaternion)
 
-                this.#mobiusStripMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                this.#complexStripMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
             }
 
             linePart.getDisplayableVersion(displayedLineMv)
@@ -312,7 +308,7 @@ function initDqs() {
                     if (linePart.hasEuclideanPart()) {
 
                         //can bring this back once you've sorted out which lines are clockwise in this comparative sense
-                        //eg make the mobius interface
+                        //eg make the complex interface
                         // meet(linePart, e0, labelPoint)
                         // labelPoint.multiplyScalar(-1.)
                         // let vec3Part = labelPoint.toVector(v1)
@@ -334,14 +330,6 @@ function initDqs() {
                     }
                 }
             }
-        }
-
-        //-------------
-
-        _isVisibleInDw(dw) {
-            return  (dw === eDw && this.#eDwMesh.visible) ||
-                    (dw === cDw && this.#cDwMesh.visible) ||
-                    (dw === iDw && (this.#iDwLineMesh.visible || this.#iDwRingMesh.visible) )
         }
 
         _getTextareaManipulationDw() {

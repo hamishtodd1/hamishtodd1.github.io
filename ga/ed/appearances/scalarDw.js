@@ -61,18 +61,16 @@ function initFloats() {
             else return false
         }
 
-        
-
-        
-
-        //-------------
-
         updateMeshesFromState() {
             this.#mesh.position.set(this.state[0], 0.,0.)
         }
 
         getWorldCenter(dw, target) {
             return target.copy(this.#mesh.position)
+        }
+
+        _getTextareaManipulationDw() {
+            return sDw
         }
 
         //------------
@@ -88,16 +86,6 @@ function initFloats() {
         }
         updateUniformFromState() {
             this.uniform.value = this.state[0]
-        }
-
-        //------------
-
-        _isVisibleInDw(dw) {
-            return dw === sDw && this.#mesh.visible
-        }
-
-        _getTextareaManipulationDw() {
-            return sDw
         }
     }
 
