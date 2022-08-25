@@ -57,9 +57,8 @@ function initPlanes() {
                 //can maybe implement editing e0
                 //if you do, need to fix the problem that you're not even "grabbing" the plane in eDw when it's e0
                     
-                let dragPlane = camera.frustum.far.projectOn(lastDragPoint, mv0)
-                let mouseRay = getMouseRay(dw)
-                let newDragPoint = meet(dragPlane,mouseRay,mv2).normalize()
+                setDragPlane(lastDragPoint)
+                let newDragPoint = intersectDragPlane(getMouseRay(dw),mv2)
                 ourTranslation.fromPointToPoint(lastDragPoint, newDragPoint)
                 ourTranslation.sandwich(this.state, this.state)
 

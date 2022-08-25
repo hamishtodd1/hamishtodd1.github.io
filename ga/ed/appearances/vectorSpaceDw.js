@@ -18,7 +18,7 @@ async function initVectorSpaceDw() {
         headGeo.translate(0., -.5, 0.)
         let shaftGeo = CylinderBufferGeometryUncentered(shaftRadius, 1., 8, true)
 
-        vDw.ArrowGroup = (mat) => {
+        vDw.ArrowHeadAndShaft = (mat) => {
             let ret = vDw.NewGroup()
 
             let head = new THREE.Mesh(headGeo, mat)
@@ -30,7 +30,7 @@ async function initVectorSpaceDw() {
             head.matrixAutoUpdate = false
             shaft.matrixAutoUpdate = false
 
-            ret.setVec = (newVec) => {
+            ret.setVec = (newVec, origin) => {
                 if (newVec.equals(zeroVector)) {
                     head.matrix.setPosition(OUT_OF_SIGHT_VECTOR3)
                     shaft.matrix.setPosition(OUT_OF_SIGHT_VECTOR3)
@@ -38,9 +38,13 @@ async function initVectorSpaceDw() {
                 else {
                     let shaftVec = v1.copy(newVec).setLength(newVec.length() - headHeight)
                     setRotationallySymmetricMatrix(shaftVec.x, shaftVec.y, shaftVec.z, shaft.matrix)
+                    shaft.matrix.setPosition(origin)
+
                     let headVec = v1.copy(newVec).setLength(headHeight)
                     setRotationallySymmetricMatrix(headVec.x, headVec.y, headVec.z, head.matrix)
-                    head.matrix.setPosition(newVec)
+
+                    let tipPosition = v1.copy(newVec).add(origin)
+                    head.matrix.setPosition(tipPosition)
                 }
             }
 

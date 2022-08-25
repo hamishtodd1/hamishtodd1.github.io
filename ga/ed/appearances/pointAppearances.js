@@ -43,7 +43,6 @@ function initPoints() {
     let mDw = dws.mesh
     let sDw = dws.scalar
 
-    let dragPlane = new Mv()
     let displayableVersion = new Mv()
     let zeroVector4 = new THREE.Vector4()
     class vec4Appearance extends Appearance {
@@ -75,9 +74,7 @@ function initPoints() {
             this.whenGrabbed.copy(this.state)
             if(dw === eDw) {
                 mv0.fromVec4(this.state)
-                if (mv0.hasEuclideanPart())
-                    camera.frustum.far.projectOn(mv0, dragPlane)
-                else dragPlane.copy(e0)
+                setDragPlane(mv0)
             }
         }
         onLetGo(){
@@ -96,8 +93,7 @@ function initPoints() {
             //might be nice to snap to a grid
 
             if(dw === eDw) {
-                let mouseRay = getMouseRay(dw)
-                meet(dragPlane, mouseRay, mv0)
+                intersectDragPlane(getMouseRay(dw),mv0)
                 mv0.toVec4(this.state)
             }
             else if(dw === iDw) {

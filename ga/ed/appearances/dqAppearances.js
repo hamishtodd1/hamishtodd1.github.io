@@ -105,7 +105,6 @@ function initDqs() {
     let ringGeo = new THREE.TorusGeometry(INFINITY_RADIUS, .05, 7, 62)
     let displayedLineMv = new Mv()
     let linePart = new Mv() //bivector?
-    let dragPlane = new Mv() //maybe two drag planes
     let newLinePart = new Mv()
     let idealLineDual = new Mv()
     let labelPoint = new Mv()
@@ -164,9 +163,7 @@ function initDqs() {
         onGrab(dw) {
             if (dw === eDw) {
                 this.state.getBivectorPartToMv(linePart)
-                if (linePart.hasEuclideanPart())
-                    camera.frustum.far.projectOn(linePart, dragPlane)
-                else dragPlane.copy(e0)
+                setDragPlane(linePart)
             }
 
             if(dw === cDw) {
@@ -199,7 +196,7 @@ function initDqs() {
             else if (dw === eDw) {
                 let oldJoinedWithCamera = join(linePart, camera.mvs.pos, mv0)
                 let joinedWithCamera = oldJoinedWithCamera.projectOn(getMouseRay(dw), mv1)
-                meet(joinedWithCamera, dragPlane, newLinePart)
+                intersectDragPlane(joinedWithCamera, newLinePart)
 
                 newLinePart.normalize()
                 this.state.setBivectorPartFromMvAndMagnitude(newLinePart, linePart.norm())

@@ -176,8 +176,11 @@ function initMouseInteractions() {
             textarea.value = pre + newLine + post
             
             let newCaretPosition = -1
-            if (caretLineIndex < indicatedMention.lineIndex)
-                newCaretPosition = caretPositionOld
+            if (caretLineIndex < indicatedMention.lineIndex) {
+                // newCaretPosition = caretPositionOld
+                //no, you probably want to admire your handiwork
+                newCaretPosition = pre.length + 6 //so you can be in there, assuming 4-space tabs
+            }
             else if (caretLineIndex === indicatedMention.lineIndex)
                 newCaretPosition = pre.length + Math.min(caretColumnIndex, newLine.length-1)
             else if (caretLineIndex > indicatedMention.lineIndex)

@@ -10,6 +10,18 @@ function initCamera() {
     let frameHeightOneAway = Math.tan(fov / 2. / 360. * TAU) * 2.
     fsqMatrixPreCamera.makeScale(frameHeightOneAway * aspect, frameHeightOneAway, 1.)
 
+    const dragPlane = new Mv()
+    setDragPlane = (thingToProjectOn) => {
+        if (thingToProjectOn.hasEuclideanPart())
+            camera.frustum.far.projectOn(thingToProjectOn, dragPlane)            
+        else dragPlane.copy(e0)
+    }
+    intersectDragPlane = (thingToIntersect, target) => {
+        meet(dragPlane, thingToIntersect, target).normalize()
+        //could normalize
+        return target
+    }
+
     camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
     camera.frustum = {
         left: new Mv(),

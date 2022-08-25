@@ -6,7 +6,6 @@ function initVec3s() {
     
     let dashedLineMat = new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: .1, gapSize: .1 })
 
-    let dragPlane = new Mv()
     let whenGrabbed = new THREE.Vector3()
     class vec3Appearance extends Appearance {
         #vMesh
@@ -30,7 +29,7 @@ function initVec3s() {
             mat.color = this.col
             this.#iMesh = iDw.NewMesh(pointGeo, mat)
             
-            this.#vMesh = vDw.ArrowGroup(mat)
+            this.#vMesh = vDw.ArrowHeadAndShaft(mat)
 
             for (let i = 0; i < 3; ++i) {
                 for (let j = 0; j < 3; ++j) {
@@ -49,7 +48,7 @@ function initVec3s() {
 
             if (dw === vDw) {
                 mv0.fromVec(this.state)
-                camera.frustum.far.projectOn(mv0, dragPlane)
+                setDragPlane(mv0)
             }
         }
         onLetGo() {
@@ -65,8 +64,7 @@ function initVec3s() {
                 this.state.multiplyScalar(v1.x)
             }
             else if(dw === vDw) {
-                let mouseRay = getMouseRay(dw)
-                meet(dragPlane, mouseRay, mv0)
+                intersectDragPlane(getMouseRay(dw),mv0)
                 mv0.toVector(this.state)
             }
             else if (dw === iDw) {
@@ -85,7 +83,7 @@ function initVec3s() {
             this.#iMesh.position.copy(this.state)
             this.#iMesh.position.setLength(INFINITY_RADIUS)
 
-            this.#vMesh.setVec(this.state)
+            this.#vMesh.setVec(this.state, zeroVector)
 
             if (this.stateEquals(zeroVector)) {
                 for (let edgeTrio = 0; edgeTrio < 3; ++edgeTrio) {
