@@ -26,9 +26,20 @@ function initMat4s() {
             this.toHaveVisibilitiesSet.push(this.#xMesh, this.#yMesh, this.#zMesh)
         }
 
+        onGrab(dw) {
+            if (dw === vDw) {
+                v1.setFromMatrixPosition(this.state)
+                mv0.fromVec(v1)
+                setDragPlane(mv0)
+            }
+            else return false
+        }
+
         _updateStateFromDrag(dw) {
             if (dw === vDw) {
-                
+                intersectDragPlane(getMouseRay(dw), mv0)
+                mv0.toVector(v1)
+                this.state.setPosition(v1)
             }
             else return false
         }

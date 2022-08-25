@@ -26,7 +26,9 @@ struct Plane {
 //     return ret;
 // }
 
-
+Dq dqAdd(in Dq a, in Dq b) {
+    return Dq(a.scalar+b.scalar,a.e01+b.e01,a.e02+b.e02,a.e03+b.e03,a.e12+b.e12,a.e31+b.e31,a.e23+b.e23,a.e0123+b.e0123);
+}
 
 void mvFromVec(in vec3 v, out float[16] target) {
     target[11] = v.z;

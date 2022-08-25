@@ -211,7 +211,6 @@ async function init() {
     await initShaderOutputAndFinalDw()
 
     let meshloadPromise = initMeshDw()
-    initGltf()
 
     await initVectorSpaceDw()
     initEuclideanDw()
