@@ -247,6 +247,7 @@ function init301WithoutDeclarations(basisNames) {
         }
 
         point(x,y,z,w) {
+            this.copy(zeroMv)
             if(w === undefined)
                 w = 1.
             this[14] = w

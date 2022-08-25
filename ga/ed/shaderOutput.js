@@ -3,6 +3,8 @@ async function initShaderOutputAndFinalDw() {
     // Override sensetivity //
     //////////////////////////
     {
+        const overrideFloats = new Float32Array(16)
+        
         let overrideMentionIndex = { value: -1 }
         let overrideFloatsUniform = { value: overrideFloats }
         function conferOverrideSensetivityToUniforms(uniforms) {

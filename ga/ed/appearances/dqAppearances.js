@@ -21,10 +21,8 @@ function initDqs() {
     // cDw.addNonMentionChild(torus)
 
     let arcCurveDest = new THREE.Vector3(1.,2.,0.)
+    let arcCurveDestOld = new THREE.Vector3().copy(arcCurveDest)
     class ArcCurve extends THREE.Curve {
-        constructor() {
-            super()
-        }
         getPoint(t, optionalTarget = new THREE.Vector3()) {
             let modulusLog = Math.log( Math.sqrt(sq(arcCurveDest.x)+sq(arcCurveDest.y)) )
             let argument = Math.atan2(arcCurveDest.y,arcCurveDest.x)
@@ -41,7 +39,7 @@ function initDqs() {
     let theArcCurve = new ArcCurve()
 
     let numMsVerts = 31
-    let complexStripGeo = new THREE.PlaneBufferGeometry(1.,1.,1,numMsVerts-1)
+    let mobiusStripGeo = new THREE.PlaneBufferGeometry(1.,1.,1,numMsVerts-1)
     let stripWidthHalved = .2
     let stripRadius = .8
     let complexMat = new THREE.MeshPhongMaterial({ color: 0xAAAAAA, side: THREE.DoubleSide })
@@ -60,27 +58,30 @@ function initDqs() {
             return target
         }
 
-        complexStripGeo.translate(0., .5, 0.)
-        let msgArr = complexStripGeo.attributes.position.array
+        mobiusStripGeo.translate(0., .5, 0.)
+        let msgArr = mobiusStripGeo.attributes.position.array
         for (let i = 0; i < numMsVerts*2; ++i) {
             let side = msgArr[i * 3 + 0] < 0.
             let t = msgArr[i * 3 + 1]
 
-            toMobiusEdge(side, t, mv0)
-            mv0.toVectorArray(msgArr, i)
+            toMobiusEdge(side, t, mv2)
+            mv2.toVectorArray(msgArr, i)
         }
-        complexStripGeo.computeVertexNormals()
+        mobiusStripGeo.computeVertexNormals()
     }
 
     let rimCurveFullAngle = TAU / 2.
+    let rimCurveFullAngleOld = rimCurveFullAngle
     class RimCurve extends THREE.Curve {
-        constructor() {
-            super()
-        }
         getPoint(t, optionalTarget = new THREE.Vector3()) {
-            toMobiusEdge(true,t*rimCurveFullAngle, mv0)
+            toMobiusEdge(true,t*rimCurveFullAngle, mv2)
             //need to copy in the rotor of the line
-            mv0.toVector(optionalTarget)
+            mv2.toVector(optionalTarget)
+            if (isNaN(optionalTarget.x) || isNaN(optionalTarget.y) || isNaN(optionalTarget.z)) {
+                debugger
+                toMobiusEdge(true, t * rimCurveFullAngle, mv2)
+            }
+            
             return optionalTarget
         }
     }
@@ -102,8 +103,6 @@ function initDqs() {
     let iLineGeo = new THREE.CylinderGeometry(.03, .03, INFINITY_RADIUS*2.)
     let dotGeo = new THREE.CircleBufferGeometry(.1, 32)
     let ringGeo = new THREE.TorusGeometry(INFINITY_RADIUS, .05, 7, 62)
-    let dwNewValues = new Float32Array(8)
-    let newDq = new Dq()
     let displayedLineMv = new Mv()
     let linePart = new Mv() //bivector?
     let dragPlane = new Mv() //maybe two drag planes
@@ -118,7 +117,7 @@ function initDqs() {
         #cDwMesh
         #arcMesh
 
-        #complexStripMesh
+        #mobiusStripMesh
         #rimMesh
 
         #eDwMesh
@@ -151,12 +150,14 @@ function initDqs() {
             this.#cDwMesh = cDw.NewMesh(dotGeo, this.#mat2d)
             this.#arcMesh = cDw.NewMesh(OurTubeGeo(theArcCurve), this.#mat2d)
 
-            this.#complexStripMesh = iDw.NewMesh(complexStripGeo, complexMat) //possibly only one of these is needed
+            this.#mobiusStripMesh = iDw.NewMesh(mobiusStripGeo, complexMat) //possibly only one of these is needed
             this.#rimMesh = iDw.NewMesh(OurTubeGeo(theRimCurve), this.#mat3d)
 
             camera.toUpdateAppearance.push(this)
 
-            this.toHaveVisibilitiesSet.push(this.#eDwMesh, this.#cDwMesh, this.#arcMesh, this.#complexStripMesh, this.#rimMesh, this.#iDwLineMesh, this.#iDwRingMesh)
+            this.toHaveVisibilitiesSet.push(this.#eDwMesh, this.#cDwMesh,  this.#mobiusStripMesh,  this.#iDwLineMesh, this.#iDwRingMesh,
+                this.#arcMesh,
+                this.#rimMesh)
         }
 
         onGrab(dw) {
@@ -248,10 +249,16 @@ function initDqs() {
                 this.#cDwMesh.position.y = linePart.norm()
 
             arcCurveDest.set(this.#cDwMesh.position.x, this.#cDwMesh.position.y, 0.)
-            updateTubeGeo(this.#arcMesh.geometry, theArcCurve)
+            if (!arcCurveDest.equals(arcCurveDestOld)) {
+                updateTubeGeo(this.#arcMesh.geometry, theArcCurve)
+                arcCurveDestOld.copy(arcCurveDest)
+            }
 
             rimCurveFullAngle = Math.atan2(this.#cDwMesh.position.y, this.#cDwMesh.position.x) / TAU * 2.
-            updateTubeGeo(this.#rimMesh.geometry, theRimCurve)
+            if(rimCurveFullAngle !== rimCurveFullAngleOld) {
+                updateTubeGeo(this.#rimMesh.geometry, theRimCurve)
+                rimCurveFullAngleOld = rimCurveFullAngle
+            }
 
             //more like: it's a complex strip
             //And by the way, it's angled in 3D space such that your line is through it
@@ -276,7 +283,7 @@ function initDqs() {
                     // log(this.#iDwLineMesh.quaternion)
                 }
 
-                this.#complexStripMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
+                this.#mobiusStripMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
                 this.#rimMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
 
             }
@@ -287,7 +294,7 @@ function initDqs() {
                 quatToOriginVersion.sqrtSelf()
                 quatToOriginVersion.toQuaternion(this.#iDwRingMesh.quaternion)
 
-                this.#complexStripMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                this.#mobiusStripMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
             }
 
             linePart.getDisplayableVersion(displayedLineMv)
