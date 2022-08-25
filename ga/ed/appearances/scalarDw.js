@@ -22,7 +22,7 @@ function initFloats() {
         for (let i = -furthestMarkers; i <= furthestMarkers; ++i) {
             let marker = text(i.toString())
             marker.position.x = i
-            marker.scale.multiplyScalar(.65)
+            marker.scale.multiplyScalar(.8)
             marker.position.y -= marker.scale.y * .7
             sDw.addNonMentionChild(marker)
 

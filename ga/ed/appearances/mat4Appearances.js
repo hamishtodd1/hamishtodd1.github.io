@@ -1,7 +1,8 @@
-function initMat4s() {
+//maybe nice if it has a big triangle in the iDw (related to determinant?)
+//can grab the triangle to rotate the thing. Can also grab the corners
+//dotted lines connecting the arrow tips to the origin's unit vectors 
 
-    //maybe nice if it has a big triangle in the iDw
-    //dotted lines connecting the arrow tips to the origin's unit vectors 
+function initMat4s() {
     let vDw = dws.vectorSpace
     let sDw = dws.scalar
 
@@ -24,9 +25,9 @@ function initMat4s() {
             let mat = new THREE.MeshPhongMaterial()
             mat.color = this.col
 
-            this.#xMesh = vDw.ArrowHeadAndShaft(mat)
-            this.#yMesh = vDw.ArrowHeadAndShaft(mat)
-            this.#zMesh = vDw.ArrowHeadAndShaft(mat)
+            this.#xMesh = vDw.ArrowHeadAndShaft( mat )
+            this.#yMesh = vDw.ArrowHeadAndShaft( mat )
+            this.#zMesh = vDw.ArrowHeadAndShaft( mat )
 
             this.#determinantMesh = sDw.NewMesh(downwardPyramidGeo, new THREE.MeshBasicMaterial())
             this.#determinantMesh.material.color = this.col
@@ -35,13 +36,12 @@ function initMat4s() {
         }
 
         onGrab(dw) {
-            if (dw === vDw) {
+            if (dw === sDw)
+                whenGrabbed.copy(this.state)
+            else if (dw === vDw) {
                 v1.setFromMatrixPosition(this.state)
                 mv0.fromVec(v1)
                 setDragPlane(mv0)
-            }
-            else if(dw === sDw) {
-                whenGrabbed.copy(this.state)
             }
             else return false
         }
@@ -59,8 +59,8 @@ function initMat4s() {
                     desiredDeterminant = .0001
 
                 let oldDeterminant = whenGrabbed.determinant()
-                let multiple = Math.sqrt(Math.sqrt(Math.abs(desiredDeterminant) / Math.abs(oldDeterminant)))
-                multiple *= Math.sign(desiredDeterminant) / Math.sign(oldDeterminant)
+                let multiple = Math.sqrt(Math.sqrt(Math.abs(desiredDeterminant / oldDeterminant)))
+                multiple *= Math.sign(desiredDeterminant / oldDeterminant)
                 this.state.copy(whenGrabbed).multiplyScalar(multiple)
             }
             else return false
@@ -90,15 +90,6 @@ function initMat4s() {
 
         _getTextareaManipulationDw() {
             return vDw
-        }
-
-        //------------
-
-        floatArrayToState(floatArray) {
-            this.state.fromArray(floatArray)
-        }
-        stateToFloatArray(floatArray) {
-            this.state.toArray(floatArray)
         }
     }
     new AppearanceType("mat4", 16, mat4Appearance, [

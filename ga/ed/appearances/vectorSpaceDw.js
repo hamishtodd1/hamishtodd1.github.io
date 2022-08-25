@@ -67,7 +67,7 @@ async function initVectorSpaceDw() {
 
     let markers = []
     let axisNames = ["x", "y", "z"]
-    let markerHeight = .3
+    let markerHeight = .5
 
     let furthestMarkers = 8
     for (let i = -furthestMarkers; i <= furthestMarkers; ++i) {

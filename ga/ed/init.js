@@ -1,16 +1,12 @@
 /*
 TODO
     For next presentation
-        It's not jus the dqs that can be a little costly to update. All should have an "oldstate", can be implemented at the appearance level
-        Sandwiches!
         Dual quaternion skinning
-            Bones as an In, in the mesh window
-            Hover
-            Show mat4 in vector dw. Sounds like fun!
+            Uniforms that are arrays!
+            Bones as an In, in the mesh window, which you can hover
+        Sandwiches
         Better error reporting
             Highlight where it was but just put the words at the bottom
-        Adding Dqs
-        Would be nice to hover the output window, have it reverse back to the initialVertex you're hovering
         Make the transparent spotted dome
     Bugs
         Possibly saw a bug with lines at infinity which was visible when just putting 1s and 0s in everything
@@ -22,20 +18,17 @@ TODO
         the dual quaternion dragging takes account of duplicates. Point mention scalar should too, as should others
     Having chigozie and Matthew Vandevander and Pontus break it
         Try to detect which lines ASSIGN to a variable and which lines don't
-    Workshop for kids at makespace (don't let the GDC audience be the first people to use it!!)
+    Workshop for kids at makespace (but note that this is about PGA still, so BORING workshop for the kids)
+        Tabs
+            Vertex shader
+            Fragment shader
+            Geometry, represented as obj
         Allow shit to be on multiple lines
         Need EXCELLENT error reporting. This shit is all in YOUR head!!!
             Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
                 move the mouse around
                 make some mentions then delete them
         Everyone's stuff goes into a VR sim, saved on a webpage forever
-        Export(/import?):
-            Game
-            Ordinary shader
-            threejs
-            unity
-            html page (for EEs/blog posts)
-            export threejs function creating the thing it is with the appropriate uniforms
         User-created functions and for loops
             Yes, can have some nice viz if the input and outputs have less than 3 dimensions total (or whatever)
                 This is fun but not necessarily useful for PGA
@@ -59,6 +52,8 @@ TODO
                     the index could have crazy shit going on, it must be said. 
                         Just ignore that. Note loops get unrolled so don't feel bad
                     Whenever you highlight a mention in the loop, you also highlight the loop variable somehow, wherever it may be
+            Structs:
+                Are how you make your puppets, of course
     GDC
         Arrange properly into vertex and fragment shader tabs
         "Teardrops" visualization. Once you've sorted out the meaning of that shit!
@@ -67,7 +62,16 @@ TODO
             A new window. Nice to go between dome and
         A puzzle game that is a series of "code this shader" challenges
         Documented API for making your own window visualizations
+        Export(/import?):
+            Game
+            Ordinary shader
+            threejs
+            unity
+            html page (for EEs/blog posts)
+            export threejs function creating the thing it is with the appropriate uniforms
     Live coding (festival of the spoken nerd, green man)
+        Practiiiiiiiice! Make a date! And thereby find out which of these are good ideas
+        Would be nice to hover the output window, have it reverse back to the initialVertex you're hovering
         (2,1) halfplane window - v. important, lets you program with mouse
             This is the eventual destiny of the "float" window
             lerp as an example of a simple function to try it out with
