@@ -21,7 +21,6 @@ function initDqs() {
     // cDw.addNonMentionChild(torus)
 
     let arcCurveDest = new THREE.Vector3(1.,2.,0.)
-    let arcCurveDestOld = new THREE.Vector3().copy(arcCurveDest)
     class ArcCurve extends THREE.Curve {
         getPoint(t, optionalTarget = new THREE.Vector3()) {
             let modulusLog = Math.log( Math.sqrt(sq(arcCurveDest.x)+sq(arcCurveDest.y)) )
@@ -71,7 +70,6 @@ function initDqs() {
     }
 
     let rimCurveFullAngle = TAU / 2.
-    let rimCurveFullAngleOld = rimCurveFullAngle
     class RimCurve extends THREE.Curve {
         getPoint(t, optionalTarget = new THREE.Vector3()) {
             toMobiusEdge(true,t*rimCurveFullAngle, mv2)
@@ -233,10 +231,6 @@ function initDqs() {
 
             this.#cDwMesh.position.x = this.state[0]
 
-            //the really nice thing would be to say that these mentions... are actually the same unless they're
-            //assigned to
-            //check their values, if they're the same - they're the same!
-
             let grabbedDuplicate = this.duplicates.find((duplicate) => !duplicate.linePartWhenGrabbedNormalized.equals(zeroMv))
             // log(this.duplicates)
             if (grabbedDuplicate !== undefined) {
@@ -246,52 +240,58 @@ function initDqs() {
             else
                 this.#cDwMesh.position.y = linePart.norm()
 
-            arcCurveDest.set(this.#cDwMesh.position.x, this.#cDwMesh.position.y, 0.)
-            updateTubeGeo(this.#arcMesh.geometry, theArcCurve)
-
-            rimCurveFullAngle = Math.atan2(this.#cDwMesh.position.y, this.#cDwMesh.position.x) / TAU * 2.
-            updateTubeGeo(this.#rimMesh.geometry, theRimCurve)
-
             //more like: it's a complex strip
             //And by the way, it's angled in 3D space such that your line is through it
             //when you hover the window, it switches to being a "top" down view
             //where the top is the view such that the rotation is anticlockwise from the identity
 
             if (linePart.approxEquals(zeroMv)) {
-                this.#eDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
                 this.#iDwRingMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+
                 this.#iDwLineMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+
+                this.#eDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
                 //and the motor window is the only place you see that this thing has a scalar value
                 return
             }
-
-            if (linePart.eNorm() !== 0.) {
+            else if (linePart.eNorm() !== 0.) {
                 this.#iDwRingMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
 
                 getQuaternionToProjectionOnOrigin(linePart, this.#iDwLineMesh.quaternion)
-                if (this.variable.name === "rotation") {
-                    //THIS IS HOW FAR YOU HAD GOTTEN
-                    //THE ROTATION OF MOBIUS STRIP OR PERHAPS JUST THE LINE SEEM A BIT OFF
-                    // log(this.#iDwLineMesh.quaternion)
-                }
+                this.#iDwLineMesh.position.set(0., 0., 0.)
 
-                this.#mobiusStripMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
-                this.#rimMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
+                getQuaternionToProjectionOnOrigin(linePart, this.#eDwMesh.quaternion)
+                e123.projectOn(linePart, mv0).toVector(this.#eDwMesh.position)
 
+                if(this.variable.name === `line3`)
+                    log(this.#eDwMesh.position)
             }
-            else {
+            else if(linePart.iNorm() !== 0.) {
                 //default mv is e02
                 join(e123, linePart, joinedWithOrigin)
+                joinedWithOrigin.normalize()
                 mul(joinedWithOrigin, e3, quatToOriginVersion)
                 quatToOriginVersion.sqrtSelf()
                 quatToOriginVersion.toQuaternion(this.#iDwRingMesh.quaternion)
 
-                this.#mobiusStripMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                this.#iDwLineMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+
+                linePart.getDisplayableVersion(displayedLineMv)
+                getQuaternionToProjectionOnOrigin(displayedLineMv, this.#eDwMesh.quaternion)
+                e123.projectOn(displayedLineMv, mv0).toVector(this.#eDwMesh.position)
             }
 
-            linePart.getDisplayableVersion(displayedLineMv)
-            getQuaternionToProjectionOnOrigin(displayedLineMv, this.#eDwMesh.quaternion)
-            e123.projectOn(displayedLineMv, mv0).toVector(this.#eDwMesh.position)
+            {
+                //actually, when it's a translation, it should go around the iDwMesh... or something
+                this.#mobiusStripMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
+                this.#rimMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
+    
+                arcCurveDest.set(this.#cDwMesh.position.x, this.#cDwMesh.position.y, 0.)
+                updateTubeGeo(this.#arcMesh.geometry, theArcCurve)
+    
+                rimCurveFullAngle = Math.atan2(this.#cDwMesh.position.y, this.#cDwMesh.position.x) / TAU * 2.
+                updateTubeGeo(this.#rimMesh.geometry, theRimCurve)
+            }
         }
 
         getWorldCenter(dw, target) {

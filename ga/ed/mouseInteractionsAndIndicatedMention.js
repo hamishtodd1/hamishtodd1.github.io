@@ -50,7 +50,11 @@ function initMouseInteractions() {
             userIndicationY = clientYOld
         }
 
-        forEachAppearance((a) => { a.setVisibility(false) })
+        appearanceTypes.forEach((at) => {
+            at.appearances.forEach((a) => {
+                a.setVisibility(false)
+            })
+        })
         forEachUsedMention( (mention) => {
             //we just made all invisible. But some appearances are for multiple mentions.
             if (!mention.appearance.visible) {
@@ -198,8 +202,6 @@ function initMouseInteractions() {
             compile(false)
             onCaretMove()
         }
-
-        grabbedDw = null
 
         //be aware, an extra mousemove will happen. There is nothing you can do about this
     })

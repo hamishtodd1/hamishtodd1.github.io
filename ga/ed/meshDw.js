@@ -8,6 +8,20 @@
     Yeah you want to have a vertex shader, that's what current project is about!
  */
 
+/*
+    how to treat Vertex attribs?
+        vec2s are uvs on a texture
+        vec3s / normals are arrows sticking out of that spot
+        Tangents?
+
+        One way of visualizing weights would be proximity to the bones
+        4D tetrahedron?
+        floats are colors
+        weights are visualized on the texture (probably)
+        Note that normal map is a texture
+        occlusion, roughness, metallic, normal
+*/
+
 function initMeshDw() {
     let dw = new Dw(`mesh`, true, camera, false)
     
@@ -133,7 +147,7 @@ function initMeshDw() {
                 if (child.isMesh) {
                     // object = new THREE.LineSegments(new THREE.WireframeGeometry(child.geometry),new THREE.MeshBasicMaterial({color:0xFFFFFF}))
                     object = child
-                    // object.visible = false
+                    object.visible = false
                     // child.geometry.computeVertexNormals()
                     // child.geometry.normalizeNormals()
                 }

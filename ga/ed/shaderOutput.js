@@ -130,11 +130,40 @@ async function initShaderOutputAndFinalDw() {
             return floatArray
         }
 
+        let threejsIsCheckingForShaderErrors = false
+        webglErrorThrower = (errorLine) => {
+
+            if (!threejsIsCheckingForShaderErrors)
+                return
+
+            let errorParts = errorLine.split(":")
+            //this could be a crazy number because who knows what's been prefixed for the first call
+            const haphazardlyChosenNumber = 71
+            let lineNumber = parseInt(errorParts[2]) - haphazardlyChosenNumber
+
+            let errorContent = errorParts.slice(3).join(":")
+            errorBox.textContent = errorContent
+            errorBox.style.top = (lineToScreenY(.4 + lineNumber)).toString() + "px"
+            errorBoxHidden = false
+
+            threejsIsCheckingForShaderErrors = false
+        }
+
+        //used by three.js
+        let errorBoxHidden = true
+        hideErrorBoxIfNeeded = () => {
+            if (!errorBoxHidden) {
+                errorBox.style.top = "-200px" //TODO this is more for when you recompile
+                errorBoxHidden = true
+            }
+        }
+
         updateMentionStatesFromRun = () => {
 
             //in theory, could do all the variables in a single run
             //the height of the render target in pixels would be the number of variables
 
+            threejsIsCheckingForShaderErrors = true
             renderer.setRenderTarget(renderTarget)
             forEachUsedMention((m) => {
                 if (m.appearance.visible && !m.variable.isUniform && !m.variable.isIn) {
@@ -144,6 +173,7 @@ async function initShaderOutputAndFinalDw() {
                 }
             })
             renderer.setRenderTarget(null)
+            threejsIsCheckingForShaderErrors = false
         }
     }
 

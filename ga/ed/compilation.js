@@ -1,70 +1,31 @@
-/*
-    it's really ; that separates, not newline
-
-    If you were to make a GA-products fighting game, what would it be like?
-    Your avatars are flailing tentacle/cloud things, but there are bits you can lock onto
-
-    Bultins:
-        Things that shadertoy has:
-            
-
-        Also have the frag point in *3D* space
-*/
-
-async function initCompilation()
-{
-    let focussedVertex = 0
+async function initCompilation() {
 
     const potentialNameRegex = /(?<=[^a-zA-Z_$0-9])([a-zA-Z_$][a-zA-Z_$0-9]*)/g
-
-    //if you want to use this, should probably replace with whitespace
     const commentNotNewlineRegex = /\/\/[^\n]*/gm
 
-    //at the same time, EVEN IF YOU DO make a "variable has been edited on this line"
-    //  just because it's not edited on that line doesn't mean you don't want to see it!
-    //some amount of "you have to click it" is ok
-    //or maybe, "if you've scrolled away from all those mentions". Maybe we go from top of window
-
-    //used by three.js
-    let errorBoxHidden = true
-    hideErrorBoxIfNeeded = () => {
-        if (!errorBoxHidden) {
-            errorBox.style.top = "-200px" //TODO this is more for when you recompile
-            errorBoxHidden = true
+    function checkForOurErrors() {
+        if (textarea.value.indexOf("/*") !== -1 || textarea.value.indexOf("*/") !== -1) {
+            console.error("multi-line comments not supported")
+            return false
         }
-    }
-
-    let threejsIsCheckingForShaderErrors = false
-    webglErrorThrower = (errorLine) => {
-
-        if(!threejsIsCheckingForShaderErrors)
-            return
-
-        let errorParts = errorLine.split(":")
-        //this could be a crazy number because who knows what's been prefixed for the first call
-        const haphazardlyChosenNumber = 71
-        let lineNumber = parseInt(errorParts[2]) - haphazardlyChosenNumber
-
-        let errorContent = errorParts.slice(3).join(":")
-        errorBox.textContent = errorContent
-        errorBox.style.top = (lineToScreenY(.4 + lineNumber)).toString() + "px"
-        errorBoxHidden = false
-
-        threejsIsCheckingForShaderErrors = false
+        if (textarea.value.indexOf('initialVertex') === -1) {
+            console.error("no initialVertex use found!")
+            return false
+        }
+        return true
     }
 
     compile = async (logDebug) => {
         
         let text = textarea.value
-        if (text.indexOf("/*") !== -1 || text.indexOf("*/") !== -1) {
-            console.error("multi-line comments not supported")
+        if(!checkForOurErrors())
             return
-        }
 
         text = text.replace(commentNotNewlineRegex,"")
         let vertexMode = text.indexOf("getColor") === -1
         updateVertexMode(vertexMode)
 
+        // it's really ; that separates, not newline
         let textLines = text.split("\n")
         let finalChunks = Array(textLines.length)
         let outputterChunks = Array(textLines.length)
@@ -73,7 +34,7 @@ async function initCompilation()
             outputterChunks[lineIndex] = l
         })
 
-        let outputterUniforms = {} // the "in"s are turned into uniforms
+        let outputterUniforms = {} // where "in"s are turned into uniforms
         let uniforms = {}
         let geo = new THREE.BufferGeometry()
         let mentionIndex = 0
@@ -85,16 +46,33 @@ async function initCompilation()
             appearanceType.lowestUnusedAppearance = 0
         })
 
+        //look for declarations
         appearanceTypes.forEach((type) => {
-            let functionResults = [...text.matchAll(type.regexes.function )].map(a => a.index)
-            let      allResults = [...text.matchAll(type.regexes.all      )].map(a => a.index)
-            let  uniformResults = [...text.matchAll(type.regexes.uniform  )].map(a => a.index + a[0].indexOf(a[1]))
-            let       inResults = [...text.matchAll(type.regexes.in       )].map(a => a.index + a[0].indexOf(a[1]))
+            let      arrMatch = [...text.matchAll(type.regexes.arr)]
+            let      allMatch = [...text.matchAll(type.regexes.all)]
+            let functionMatch = [...text.matchAll(type.regexes.function)]
+            let  uniformMatch = [...text.matchAll(type.regexes.uniform)]
+            let       inMatch = [...text.matchAll(type.regexes.in)]
+            let      arrResults =      arrMatch.map(a => a.index)
+            let      allResults =      allMatch.map(a => a.index)
+            let functionResults = functionMatch.map(a => a.index)
+            let  uniformResults =  uniformMatch.map(a => a.index + a[0].indexOf(a[1]))
+            let       inResults =       inMatch.map(a => a.index + a[0].indexOf(a[1]))
             
             allResults.forEach((index) => {
                 if( functionResults.indexOf(index) !== -1)
                     return
+                if (arrResults.indexOf(index) !== -1) {
+                    return
+                    //what do you want to happen IN THE CASE WHERE THEY ARE MAT4s OR DQs??
+                    //when you hover the array as it appears WITH a number in there...
+                        //obviously you get that thing
+                    //hover its declaration, or a use of it without a specific number, and for now, you see nowt
+
+                    //a mention is a mention of a variable. But maybe a variable can be an array?
+                }
                     
+                //could continue looking forward until you find a `;`
                 let name = text.slice(index + type.glslName.length).match(potentialNameRegex)[0] //TODO potential speedup
                 //people may well want to use the name "position". Could have: position -> __position
 
@@ -104,29 +82,15 @@ async function initCompilation()
                 if (variable === undefined)
                     variable = new Variable(name, type)
 
-                if (inResults.indexOf(index) !== -1) {
+                if (uniformResults.indexOf(index) !== -1)
+                    variable.isUniform = true
+                else if (inResults.indexOf(index) !== -1) {
                     variable.isIn = true
 
                     let decl = `uniform ` + variable.type.glslName + ` ` + name + `Outputter;\n`
                     //... and presumably remove the line declaring the In if it's an attribute?
                     outputterChunks[0] = decl + outputterChunks[0]
                 }
-                if(uniformResults.indexOf(index) !== -1) 
-                    variable.isUniform = true
-                
-                /*
-                    how to treat Vertex attribs?
-                        vec2s are uvs on a texture
-                        vec3s / normals are arrows sticking out of that spot
-                        Tangents?
-
-                        One way of visualizing weights would be proximity to the bones
-                        4D tetrahedron?
-                        floats are colors
-                        weights are visualized on the texture (probably)
-                        Note that normal map is a texture
-                        occlusion, roughness, metallic, normal
-                */
             })
         })
         
@@ -213,8 +177,6 @@ async function initCompilation()
             })
         })
 
-        threejsIsCheckingForShaderErrors = true
-
         if (logDebug)
             log(outputterChunks.join("\n------------------"))
 
@@ -223,8 +185,6 @@ async function initCompilation()
         if (vertexMode ) {
             updateOutputter(outputterText, outputterUniforms, true)
             updateFinalDwVertex(finalText, uniforms, geo)
-            if(textarea.value.indexOf('initialVertex') === -1)
-                console.error("no initialVertex use found!")
         }
         else {
             updateOutputter(outputterText, outputterUniforms, false)

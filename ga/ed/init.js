@@ -177,6 +177,9 @@ Vague/philosophical
         you can visualize a point on the line. You can also picture a movement along that line. Two different things
         One's a blade and one's a versor
 
+If you were to make a GA-products fighting game, what would it be like?
+    Your avatars are flailing tentacle/cloud things, but there are bits you can lock onto
+
 */
 
 async function init() {
@@ -210,7 +213,8 @@ async function init() {
 
     // initSound()
 
-    initMention()
+    initMentions()
+    initAppearances()
     await initDws()
 
     await initShaderOutputAndFinalDw()
@@ -248,19 +252,22 @@ async function init() {
     updateMentionVisibilitiesAndIndication()
     setCaretPosition(103)
 
-    // let mixer = null
-    // new GLTFLoader().load('data/Soldier.glb', function (gltf) {
-    //     let model = gltf.scene
-    //     dws.mesh.addNonMentionChild(model)
+    let mixer = null
+    initGltf()
+    new GLTFLoader().load('data/Soldier.glb', function (gltf) {
+        let model = gltf.scene
+        dws.mesh.addNonMentionChild(model)
+        model.scale.multiplyScalar(3.)
         
-    //     let skeleton = new THREE.SkeletonHelper(model)
-    //     dws.mesh.addNonMentionChild(skeleton)
+        let skeleton = new THREE.SkeletonHelper(model)
+        skeleton.scale.multiplyScalar(3.)
+        dws.mesh.addNonMentionChild(skeleton)
         
-    //     const animations = gltf.animations
-    //     mixer = new THREE.AnimationMixer(model)
-    //     let walkAction = mixer.clipAction(animations[3])
-    //     walkAction.play()
-    // })
+        const animations = gltf.animations
+        mixer = new THREE.AnimationMixer(model)
+        let walkAction = mixer.clipAction(animations[3])
+        walkAction.play()
+    })
 
     document.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === true) {
@@ -274,7 +281,7 @@ async function init() {
         let clockDelta = clock.getDelta()
         frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
         ++frameCount
-        forEachAppearance((a)=>{
+        forEachUsedAppearance((a)=>{
             if(a.variable.isUniform) {
                 let doUpdate = true
                 
@@ -295,8 +302,8 @@ async function init() {
             }
         })
 
-        // if(mixer !== null)
-        //     mixer.update(frameDelta)
+        if(mixer !== null)
+            mixer.update(frameDelta)
 
         updateMentionStatesFromRun()
 
