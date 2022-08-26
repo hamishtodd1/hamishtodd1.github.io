@@ -116,6 +116,15 @@ function getMatrixYAxisScale(elements, matrixIndex)
 	)
 }
 
+function logMat4(mat4) {
+	for (let i = 0; i < 4; ++i) {
+		let row = ``
+		for (let j = 0; j < 4; ++j)
+			row += mat4.elements[i * 4 + j] + `,`
+		log(row)
+	}
+}
+
 function setRotationallySymmetricMatrix(yX, yY, yZ, target)
 {
 	v1.set(yX, yY, yZ)
