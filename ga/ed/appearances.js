@@ -138,11 +138,11 @@ function initAppearances() {
                     this.outputAssignmentPropts[i] = `[` + i + `]`
             }
 
-            this.regexes.function = new RegExp('(?<=[^a-zA-Z_$0-9])(' + glslName + ')\\s*[a-zA-Z_$][a-zA-Z_$0-9]*\\(', 'gm')
-            this.regexes.all      = new RegExp('(?<=[^a-zA-Z_$0-9])(' + glslName + ')\\s*[a-zA-Z_$][a-zA-Z_$0-9]*', 'gm')
-            this.regexes.arr      = new RegExp('(?<=[^a-zA-Z_$0-9])(' + glslName + ')\\s*[a-zA-Z_$][a-zA-Z_$0-9]*\\[\\d+\\]', 'gm')
-            this.regexes.uniform  = new RegExp('\\s*uniform\\s*(' + glslName + ')\\s', 'gm')
-            this.regexes.in       = new RegExp('\\s*in\\s*(' + glslName + ')\\s', 'gm')
+            this.regexes.function = new RegExp('(?<=[^a-zA-Z_$0-9])(' + glslName + ')\\s+[a-zA-Z_$][a-zA-Z_$0-9]*\\(', 'gm')
+            this.regexes.all      = new RegExp('(?<=[^a-zA-Z_$0-9])(' + glslName + ')(\\[\\d+\\])*\\s+[a-zA-Z_$][a-zA-Z_$0-9]*', 'gm')
+            this.regexes.arr      = new RegExp('(?<=[^a-zA-Z_$0-9])(' + glslName + ')\\[\\d+\\]\\s+[a-zA-Z_$][a-zA-Z_$0-9]*', 'gm')
+            this.regexes.uniform  = new RegExp('\\s*uniform\\s+('     + glslName + ')\\s', 'gm')
+            this.regexes.in       = new RegExp('\\s*in\\s+('          + glslName + ')\\s', 'gm')
 
             let commaSeparated = ``
             for (let i = 0; i < this.numFloats; ++i)

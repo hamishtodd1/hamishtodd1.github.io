@@ -62,15 +62,6 @@ async function initCompilation() {
             allResults.forEach((index) => {
                 if( functionResults.indexOf(index) !== -1)
                     return
-                if (arrResults.indexOf(index) !== -1) {
-                    return
-                    //what do you want to happen IN THE CASE WHERE THEY ARE MAT4s OR DQs??
-                    //when you hover the array as it appears WITH a number in there...
-                        //obviously you get that thing
-                    //hover its declaration, or a use of it without a specific number, and for now, you see nowt
-
-                    //a mention is a mention of a variable. But maybe a variable can be an array?
-                }
                     
                 //could continue looking forward until you find a `;`
                 let name = text.slice(index + type.glslName.length).match(potentialNameRegex)[0] //TODO potential speedup
@@ -82,13 +73,14 @@ async function initCompilation() {
                 if (variable === undefined)
                     variable = new Variable(name, type)
 
-                if (uniformResults.indexOf(index) !== -1)
-                    variable.isUniform = true
-                else if (inResults.indexOf(index) !== -1) {
-                    variable.isIn = true
+                variable.isArray = arrResults.indexOf(index) !== -1
+                variable.isUniform = uniformResults.indexOf(index) !== -1
+                variable.isIn = inResults.indexOf(index) !== -1
 
+                if( variable.isIn ) {
                     let decl = `uniform ` + variable.type.glslName + ` ` + name + `Outputter;\n`
                     //... and presumably remove the line declaring the In if it's an attribute?
+                    //for now, it's just the input of a function so no need
                     outputterChunks[0] = decl + outputterChunks[0]
                 }
             })
@@ -109,23 +101,46 @@ async function initCompilation() {
 
             //faster might be a match of the whole thing rather than the individual lines
             let matches = [...l.matchAll(potentialNameRegex)]
+            let mention = null
             matches.forEach( (match) => {
                 let name = match[0]
+                // if (name === "ourArr")
+                //     debugger
                 let variable = variables.find((v) => v.name === name)
                 if( variable === undefined )
                     return
 
-                //for several reasons, would be good to check whether the variable has received an assignment
-                //pretty hard to tell. Eg foo( out target);
-                //because of uniforms, will have infrastructure to have one variable, one mesh
+                if(!variable.isArray) {
+                    mention = variable.getLowestUnusedMention()
+                    mention.charactersWide = name.length
+                    mention.indexInArray = -1
+                }
+                else {
+                    //we make the thing hoverable only if it is a picking out of a specific element
+                    let start = match.index + name.length //we fully assume it goes "name["
+                    let lineRemainder = l.slice(start+1)
+                    let indexInArray = parseInt(lineRemainder)   //it may a for-loop index
+                    if(isNaN(indexInArray))
+                        return
+                    else {
+                        mention = variable.getLowestUnusedMention()
+                        mention.indexInArray = indexInArray
 
-                let mention = variable.getLowestUnusedMention()
+                        let closeBracketIndex = l.indexOf(`]`,start)
+                        mention.charactersWide = name.length + closeBracketIndex - start + 1
+                    }
+                }
+
                 mention.column = match.index
                 mention.lineIndex = lineIndex
                 mention.mentionIndex = mentionIndex++
-
-                mention.appearance = variable.type.getAnAppearance(variable,uniforms, outputterUniforms, geo)
-
+                mention.appearance = variable.type.getAnAppearance( variable, uniforms, outputterUniforms, geo )
+                
+                //for several reasons, would be good to check whether the variable has received an assignment
+                //pretty hard to tell. Eg foo( out target);
+                //Could just say, if it's an argument to a function, it must have been modified
+                //because of uniforms, will have infrastructure to have one variable, one mesh
+                
                 if (variable.isUniform || variable.isIn)
                     return
                     
@@ -142,7 +157,7 @@ async function initCompilation() {
                 // OVERRIDE ADDITION //
                 ///////////////////////
                 let overrideAddition = `\nif( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` +
-                    mention.variable.name + " = " + mention.variable.type.literalAssignmentFromOverride + ";"
+                    mention.getFullName() + " = " + mention.variable.type.literalAssignmentFromOverride + ";"
                 if (overrideGoesBefore) {
                     finalChunks[lineIndex]     = overrideAddition +     finalChunks[lineIndex]
                     outputterChunks[lineIndex] = overrideAddition + outputterChunks[lineIndex]
@@ -166,8 +181,9 @@ async function initCompilation() {
                 if( !overrideGoesBefore )
                     outputterGoesAfter = true
 
+                let assignmentToOutput = variable.isArray ? variable.getAssignmentToOutputForArray(mention.indexInArray) : mention.variable.assignmentToOutput
                 let outputterAddition   = `\nif( outputMentionIndex == ` + mention.mentionIndex + ` ) {\n` + 
-                    mention.variable.assignmentToOutput + `}`
+                    assignmentToOutput + `}`
                 if (outputterGoesAfter) {
                     outputterChunks[lineIndex] = outputterChunks[lineIndex] + outputterAddition
                 }

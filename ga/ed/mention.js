@@ -71,6 +71,9 @@ function initMentions() {
     class Mention {
         lineIndex = -1
         column = -1
+        charactersWide
+
+        indexInArray = -1
 
         mentionIndex = -1
 
@@ -82,6 +85,10 @@ function initMentions() {
             this.variable = variable
         }
 
+        getFullName() {
+            return this.variable.name + (this.indexInArray === -1 ? `` : `[` + this.indexInArray + `]`)
+        }
+
         highlight() {
             let col = this.variable.col
             $labelLines.forEach((svgLine) => {
@@ -91,7 +98,7 @@ function initMentions() {
             //mouse box
             let y = lineToScreenY(this.lineIndex)
             let x = columnToScreenX(this.column)
-            let w = this.variable.name.length * characterWidth
+            let w = this.charactersWide * characterWidth
 
             setSvgLine($labelSides[0], x, y, x + w, y)
             setSvgLine($labelSides[1], x + w, y, x + w, y + lineHeight)
@@ -127,7 +134,7 @@ function initMentions() {
         name
         type
 
-        
+        isArray = false
 
         isIn = false
         isUniform = false
@@ -144,8 +151,10 @@ function initMentions() {
             this.name = newName
             this.type = newClass
 
-            for (let i = 0; i < newClass.numFloats; ++i)
-                this.assignmentToOutput += `    outputFloats[` + i + `] = ` + newName + newClass.outputAssignmentPropts[i] + `;\n`
+            if(!this.isArray) {
+                for (let i = 0; i < newClass.numFloats; ++i)
+                    this.assignmentToOutput += `    outputFloats[` + i + `] = ` + this.name + this.type.outputAssignmentPropts[i] + `;\n`
+            }
 
             randomColor.setHSL(currentHue, 1., .5)
             currentHue += 1. / goldenRatio
@@ -154,6 +163,13 @@ function initMentions() {
             this.col.r = randomColor.r; this.col.g = randomColor.g; this.col.b = randomColor.b;
 
             variables.push(this)
+        }
+
+        getAssignmentToOutputForArray(index) {
+            let ret = ``
+            for (let i = 0; i < this.type.numFloats; ++i)
+                ret += `    outputFloats[` + i + `] = ` + this.name + `[` + index + `]` + this.type.outputAssignmentPropts[i] + `;\n`
+            return ret
         }
 
         getLowestUnusedMention() {

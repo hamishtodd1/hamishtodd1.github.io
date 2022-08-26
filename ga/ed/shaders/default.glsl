@@ -9,6 +9,9 @@ vec4 getChangedVertex(in vec4 initialVertex) {
     vec2 control2 = vec2(cos(time*4.),sin(time*4.));
     vec3 control3 = vec3(1.,.5,1.);
 
+    vec2[2] ourArr;
+    vec2 lastOne = ourArr[1];
+
     vec4 myVertex = vec4( .2,0., 1.,1.);
     vec4 myNormal = vec4( .2,0.,-1.,0.);
     mat4 myMat = mat4(1.,0.,0.,0.,0.,1.,0.,0.,0.,0.,1.,0.,0.,0.,0.,1.);
