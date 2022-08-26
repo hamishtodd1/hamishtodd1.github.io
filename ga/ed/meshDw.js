@@ -147,7 +147,7 @@ function initMeshDw() {
                 if (child.isMesh) {
                     // object = new THREE.LineSegments(new THREE.WireframeGeometry(child.geometry),new THREE.MeshBasicMaterial({color:0xFFFFFF}))
                     object = child
-                    object.visible = false
+                    // object.visible = false
                     // child.geometry.computeVertexNormals()
                     // child.geometry.normalizeNormals()
                 }

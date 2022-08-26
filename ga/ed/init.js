@@ -253,21 +253,21 @@ async function init() {
     setCaretPosition(103)
 
     let mixer = null
-    initGltf()
-    new GLTFLoader().load('data/Soldier.glb', function (gltf) {
-        let model = gltf.scene
-        dws.mesh.addNonMentionChild(model)
-        model.scale.multiplyScalar(3.)
+    // initGltf()
+    // new GLTFLoader().load('data/Soldier.glb', function (gltf) {
+    //     let model = gltf.scene
+    //     dws.mesh.addNonMentionChild(model)
+    //     model.scale.multiplyScalar(3.)
         
-        let skeleton = new THREE.SkeletonHelper(model)
-        skeleton.scale.multiplyScalar(3.)
-        dws.mesh.addNonMentionChild(skeleton)
+    //     let skeleton = new THREE.SkeletonHelper(model)
+    //     skeleton.scale.multiplyScalar(3.)
+    //     dws.mesh.addNonMentionChild(skeleton)
         
-        const animations = gltf.animations
-        mixer = new THREE.AnimationMixer(model)
-        let walkAction = mixer.clipAction(animations[3])
-        walkAction.play()
-    })
+    //     const animations = gltf.animations
+    //     mixer = new THREE.AnimationMixer(model)
+    //     let walkAction = mixer.clipAction(animations[3])
+    //     walkAction.play()
+    // })
 
     document.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === true) {
