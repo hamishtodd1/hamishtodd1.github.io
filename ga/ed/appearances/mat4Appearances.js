@@ -6,6 +6,10 @@ function initMat4s() {
     let vDw = dws.vectorSpace
     let sDw = dws.scalar
 
+    function getNewUniformValue() {
+        return new THREE.Matrix4()
+    }
+
     let origin = new THREE.Vector3()
     let basisVector = new THREE.Vector3()
     let whenGrabbed = new THREE.Matrix4()
@@ -17,10 +21,10 @@ function initMat4s() {
 
         constructor() {
             super()
-            this.state = new THREE.Matrix4()
-            this.stateOld = new THREE.Matrix4()
+            
+            this.uniform.value = this.state = getNewUniformValue()
+            this.stateOld = getNewUniformValue()
             this.stateOld.elements[0] = 2.
-            this.uniform.value = this.state
 
             let mat = new THREE.MeshPhongMaterial()
             mat.color = this.col
@@ -92,10 +96,11 @@ function initMat4s() {
             return vDw
         }
     }
-    new AppearanceType("mat4", 16, mat4Appearance, [
-        //row major!
+    new AppearanceType("mat4", 16, mat4Appearance, getNewUniformValue,
+        [ //row major!
         `[0][0]`, `[1][0]`, `[2][0]`, `[3][0]`,
         `[0][1]`, `[1][1]`, `[2][1]`, `[3][1]`,
         `[0][2]`, `[1][2]`, `[2][2]`, `[3][2]`,
-        `[0][3]`, `[1][3]`, `[2][3]`, `[3][3]`], true)
+        `[0][3]`, `[1][3]`, `[2][3]`, `[3][3]`
+        ], true)
 }

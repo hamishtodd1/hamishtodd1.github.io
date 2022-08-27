@@ -1,5 +1,3 @@
-
-
 function initPlanes() {
 
     let eDw = dws.euclidean
@@ -9,6 +7,10 @@ function initPlanes() {
     let sphereGeo = new THREE.IcosahedronBufferGeometry(1., 5)
     let eNormWhenGrabbed = -1.
     let iNormWhenGrabbed = -1.
+
+    function getNewUniformValue() {
+        return new Float32Array(4)
+    }
 
     let lastDragPoint = new Mv()
     let ourTranslation = new Mv()
@@ -20,10 +22,9 @@ function initPlanes() {
 
         constructor() {
             super()
-            this.state = new Mv()
-            this.state.plane(0., 1., 0., 0.)
+            
+            this.state = new Mv().plane(0., 1., 0., 0.)
             this.stateOld = new Mv()
-            this.uniform.value = new Float32Array(4)
 
             let mat = new THREE.MeshPhongMaterial({ side: THREE.DoubleSide })
             mat.color = this.col
@@ -131,5 +132,13 @@ function initPlanes() {
             this.stateToFloatArray(this.uniform.value)
         }
     }
-    new AppearanceType("Plane", 4, PlaneAppearance, [`e0`, `e1`, `e2`, `e3`])
+
+    new AppearanceType(
+        "Plane", 4, PlaneAppearance,
+        getNewUniformValue,
+        [`e0`, `e1`, `e2`, `e3`],
+        false)
+
+    //so they all need these "getNewUniformValue" functions
+    //possibly you should make state and stateOld with them, by default
 }

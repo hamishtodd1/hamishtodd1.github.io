@@ -39,16 +39,19 @@ function initFloats() {
 
     //could make little disks going along the vector space's notches as a way of poking fun
 
+    function getNewUniformValue() {
+        return 0.
+    }
+
     class floatAppearance extends Appearance {
         #mesh
 
         constructor() {
             super()
-            this.state = new Float32Array(1)
+            
+            this.state = new Float32Array(1) //because it is nice to have the "float(3.2)" thing, in case it's an int
             this.stateOld = new Float32Array(1)
             this.stateOld[0] = 1.
-            this.state[0] = 0.
-            this.uniform.value = 0.
 
             this.#mesh = sDw.NewMesh(downwardPyramidGeo, new THREE.MeshBasicMaterial())
             this.#mesh.material.color = this.col
@@ -95,5 +98,5 @@ function initFloats() {
         }
     }
 
-    let mentionType = new AppearanceType("float", 1, floatAppearance, [``],true)
+    new AppearanceType("float", 1, floatAppearance, getNewUniformValue, [``], true)
 }

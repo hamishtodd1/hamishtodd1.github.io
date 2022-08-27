@@ -27,9 +27,8 @@ function initAppearances() {
         onLetGo(dw) { }
 
         updateFromState() {
-            this.updateUniformFromState()
-
             if (!this.stateEquals(this.stateOld)) {
+                this.updateUniformFromState()
                 this.updateMeshesFromState()
                 this.stateCopyTo(this.stateOld)
             }
@@ -107,6 +106,7 @@ function initAppearances() {
 
     //note that this is agnostic of variables and mentions
     class AppearanceType {
+
         glslName
         numFloats
         constructAppearance
@@ -117,13 +117,18 @@ function initAppearances() {
         lowestUnusedAppearance = 0
         appearances = []
 
-        constructor(glslName, numFloats, _constructAppearance, outputAssignmentPropts, omitPeriod) {
+        constructor(glslName, numFloats, _constructAppearance, getNewUniformValue, outputAssignmentPropts, omitPeriod) {
             this.glslName = glslName
             this.numFloats = numFloats
+
+            this.getNewUniformValue = getNewUniformValue
 
             let self = this
             this.constructAppearance = function () {
                 let appearance = new _constructAppearance()
+                if( appearance.uniform.value !== appearance.state)
+                    appearance.uniform.value = self.getNewUniformValue()
+                //note that insid
                 self.appearances.push(appearance)
                 return appearance
             }
@@ -169,29 +174,39 @@ function initAppearances() {
         }
 
         getAnAppearance(variable, uniforms, outputterUniforms, geo) {
-            let ret = null
+            let appearance = null
 
             if (!variable.isUniform && !variable.isIn)
-                ret = this.getLowestUnusedAppearanceAndEnsureAssignment(variable)
+                appearance = this.getLowestUnusedAppearanceAndEnsureAssignment(variable)
             else {
                 if (variable.lowestUnusedMention > 1)
-                    ret = variable.mentions[0].appearance
+                    appearance = variable.mentions[0].appearance
                 else {
-                    ret = this.getLowestUnusedAppearanceAndEnsureAssignment(variable)
+                    appearance = this.getLowestUnusedAppearanceAndEnsureAssignment(variable)
+                    appearance.updateFromState()
 
-                    ret.updateFromState()
                     if (variable.isIn) {
-                        createIn(geo, ret)
-                        outputterUniforms[variable.name + `Outputter`] = ret.uniform
+                        createIn(geo, appearance)
+                        outputterUniforms[variable.name + `Outputter`] = appearance.uniform
                     }
                     else { //isUniform
-                        uniforms[variable.name] = ret.uniform
-                        outputterUniforms[variable.name] = ret.uniform
+                        if(!variable.isArray) {
+                            uniforms[variable.name] = appearance.uniform
+                        }
+                        else {
+                            //there shall be an array of several appearances' uniforms
+                            let len = variable.arrayLength
+                            let arr = Array(len)
+                            for(let i = 0; i < len; ++i) {
+                                arr[i] = variable.type.getNewUniformValue() //however we make uniform.value
+                            }
+                            uniforms[variable.name] = arr
+                        }
                     }
                 }
             }
 
-            return ret
+            return appearance
         }
     }
     window.AppearanceType = AppearanceType

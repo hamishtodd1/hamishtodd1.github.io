@@ -6,6 +6,10 @@ function initVec3s() {
     
     let dashedLineMat = new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: .1, gapSize: .1 })
 
+    function getNewUniformValue() {
+        return new THREE.Vector3()
+    }
+
     let whenGrabbed = new THREE.Vector3()
     class vec3Appearance extends Appearance {
         #vMesh
@@ -18,9 +22,9 @@ function initVec3s() {
 
         constructor() {
             super()
-            this.state = new THREE.Vector3(1., 1., 1.)
-            this.stateOld = new THREE.Vector3()
-            this.uniform.value = this.state
+            
+            this.uniform.value = this.state = getNewUniformValue().set(1., 1., 1.)
+            this.stateOld = getNewUniformValue()
 
             this.#sMesh = sDw.NewMesh(downwardPyramidGeo, new THREE.MeshBasicMaterial())
             this.#sMesh.material.color = this.col
@@ -140,5 +144,5 @@ function initVec3s() {
         }
     }
 
-    new AppearanceType("vec3", 3, vec3Appearance)
+    new AppearanceType("vec3", 3, vec3Appearance, getNewUniformValue)
 }

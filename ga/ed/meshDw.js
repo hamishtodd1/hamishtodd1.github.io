@@ -53,8 +53,6 @@ function initMeshDw() {
             object.geometry.attributes.position.getZ(focussedIndex), 1. )
         //aaaaaand you probably need updateStateFromAttribute. Awesome
         //but at least the value is the state for vertices
-
-        appearance.updateFromState()
     }
 
     createIn = (geo, appearance) => {

@@ -9,6 +9,7 @@ TODO
             Highlight where it was but just put the words at the bottom
         Make the transparent spotted dome
     Bugs
+        Sort out duplicates. At least in the senses that you need the damn things
         Possibly saw a bug with lines at infinity which was visible when just putting 1s and 0s in everything
         minus sign with sandwich
         Mobiuses are wrong way around, translations probably aren't working

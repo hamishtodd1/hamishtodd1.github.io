@@ -83,6 +83,12 @@ async function initCompilation() {
                     //for now, it's just the input of a function so no need
                     outputterChunks[0] = decl + outputterChunks[0]
                 }
+
+                if(variable.isArray) {
+                    let arrayLengthStart = index + type.glslName.length + 1
+                    let arrayLengthStr = text.slice(arrayLengthStart, text.indexOf(`]`,arrayLengthStart) )
+                    variable.arrayLength = parseInt(arrayLengthStr)
+                }
             })
         })
         
@@ -144,18 +150,17 @@ async function initCompilation() {
                 if (variable.isUniform || variable.isIn)
                     return
                     
+                ///////////////////////
+                // OVERRIDE ADDITION //
+                ///////////////////////
                 let isDeclaration = variable.lowestUnusedMention === 1
                 let isReturn = l.indexOf(`return`) !== -1
-
                 let overrideGoesBefore = false
                 if (isReturn)
                     overrideGoesBefore = true
                 else if(isDeclaration)
                     overrideGoesBefore = false
 
-                ///////////////////////
-                // OVERRIDE ADDITION //
-                ///////////////////////
                 let overrideAddition = `\nif( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` +
                     mention.getFullName() + " = " + mention.variable.type.literalAssignmentFromOverride + ";"
                 if (overrideGoesBefore) {
@@ -193,8 +198,7 @@ async function initCompilation() {
             })
         })
 
-        if (logDebug)
-            log(outputterChunks.join("\n------------------"))
+        Object.assign(outputterUniforms, uniforms)
 
         let outputterText = outputterChunks.join("\n")
         let finalText = finalChunks.join("\n")
@@ -209,19 +213,23 @@ async function initCompilation() {
 
         updateLclsc(Infinity)
 
-        let currentDuplicates
-        //duplicates are a halfway step towards what you'd prefer: knowledge of when the things have really been changed
-        //i.e. when they are new variables probably
-        appearanceTypes.forEach((at)=>{
-            for (let i = 0; i < at.lowestUnusedAppearance; ++i) {
-                let appearance = at.appearances[i]
-                if (i === 0 || appearance.variable !== at.appearances[i - 1].variable || !appearance.stateEquals(at.appearances[i - 1].state) )
-                    currentDuplicates = [appearance]
-                else
-                    currentDuplicates.push(appearance)
-                appearance.duplicates = currentDuplicates
-                //GC alert!
-            }
-        })
+        // let currentDuplicates
+        // //duplicates are a halfway step towards what you'd prefer: knowledge of when the things have really been changed
+        // //i.e. when they are new variables probably
+        // appearanceTypes.forEach((at)=>{
+        //     for (let i = 0; i < at.lowestUnusedAppearance; ++i) {
+        //         let appearance = at.appearances[i]
+        //         if (i === 0 || appearance.variable !== at.appearances[i - 1].variable || 
+        //             !appearance.stateEquals(at.appearances[i - 1].state) )
+        //             currentDuplicates = [appearance]
+        //         else
+        //             currentDuplicates.push(appearance)
+        //         appearance.duplicates = currentDuplicates
+        //         //GC alert!
+        //     }
+        // })
+
+        if (logDebug)
+            log(outputterChunks.join("\n------------------"))
     }
 }

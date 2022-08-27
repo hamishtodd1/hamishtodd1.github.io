@@ -43,6 +43,10 @@ function initPoints() {
     let mDw = dws.mesh
     let sDw = dws.scalar
 
+    function getNewUniformValue() {
+        return new THREE.Vector4()
+    }
+
     let displayableVersion = new Mv()
     let zeroVector4 = new THREE.Vector4()
     class vec4Appearance extends Appearance {
@@ -53,9 +57,9 @@ function initPoints() {
         
         constructor() {
             super()
-            this.state = new THREE.Vector4(0.,0.,0.,1.) //maybe better off as an mv?
-            this.stateOld = new THREE.Vector4()
-            this.uniform.value = this.state
+            
+            this.uniform.value = this.state = getNewUniformValue().set(0.,0.,0.,1.) //maybe better off as an mv?
+            this.stateOld = getNewUniformValue().set(1.,0.,0.,0.)
 
             let mat = new THREE.MeshBasicMaterial() //why not phong?
             mat.color = this.col
@@ -81,7 +85,7 @@ function initPoints() {
             this.whenGrabbed.copy(zeroVector4)
         }
 
-        updateInFromDrag() {
+        updateStateFromDragIn() {
             raycaster.ray.copy(getMouseThreeRay(dws.mesh))
             let cow = dws.mesh.getCow()
             let intersection = raycaster.intersectObject(cow, false)[0]
@@ -166,5 +170,5 @@ function initPoints() {
                 return eDw
         }
     }
-    new AppearanceType("vec4", 4, vec4Appearance)
+    new AppearanceType("vec4", 4, vec4Appearance, getNewUniformValue)
 }

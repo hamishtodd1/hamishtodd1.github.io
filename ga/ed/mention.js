@@ -135,6 +135,7 @@ function initMentions() {
         type
 
         isArray = false
+        arrayLength = -1
 
         isIn = false
         isUniform = false

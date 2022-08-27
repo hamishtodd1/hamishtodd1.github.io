@@ -97,6 +97,10 @@ function initDqs() {
         geo.attributes.position.needsUpdate = true
     }
 
+    function getNewUniformValue() {
+        return new Dq()
+    }
+
     let eLineGeo = new THREE.CylinderGeometry(.03, .03, 500.)
     let iLineGeo = new THREE.CylinderGeometry(.03, .03, INFINITY_RADIUS*2.)
     let dotGeo = new THREE.CircleBufferGeometry(.1, 32)
@@ -126,9 +130,10 @@ function initDqs() {
 
         constructor() {
             super()
-            this.state = new Dq()
+            
+            this.uniform.value = this.state = getNewUniformValue()
             this.stateOld = new Dq()
-            this.uniform.value = this.state
+            this.stateOld[3] = 1.
 
             //default value
             {
@@ -336,5 +341,5 @@ function initDqs() {
         }
     }
     
-    new AppearanceType("Dq", 8, DqAppearance, [ `scalar`, `e01`, `e02`, `e03`, `e12`, `e31`, `e23`, `e0123` ])
+    new AppearanceType("Dq", 8, DqAppearance, getNewUniformValue, [ `scalar`, `e01`, `e02`, `e03`, `e12`, `e31`, `e23`, `e0123` ])
 }
