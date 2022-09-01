@@ -31,21 +31,6 @@ function initMeshDw() {
         return object
     }
 
-    // let boneGeo = new THREE.WireframeGeometry(new THREE.OctahedronGeometry(.2))
-    // for (let i = 1, il = boneGeo.attributes.position.array.length; i < il; i+=3) {
-    //     if(i % 3 === 1) {
-    //         if (boneGeo.attributes.position.array[i] > 0.)
-    //             boneGeo.attributes.position.array[i] = 1.
-    //         else if (boneGeo.attributes.position.array[i] < 0.)
-    //             boneGeo.attributes.position.array[i] = 0.
-    //         else
-    //             boneGeo.attributes.position.array[i] = .2
-    //     }
-    // }
-    // let bone = new THREE.LineSegments(boneGeo, new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
-    // bone.position.x += 1.5
-    // dw.addNonMentionChild(bone)
-
     focusInExample = (appearance, focussedIndex) => {
         appearance.state.set(
             object.geometry.attributes.position.getX(focussedIndex),

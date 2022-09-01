@@ -49,14 +49,14 @@ function initFloats() {
         constructor() {
             super()
             
-            this.state = new Float32Array(1) //because it is nice to have the "float(3.2)" thing, in case it's an int
-            this.stateOld = new Float32Array(1)
+            this.state = new ScalarMv(1) //because it is nice to have the "float(3.2)" thing, in case it's an int
+            this.stateOld = new ScalarMv(1)
             this.stateOld[0] = 1.
 
             this.#mesh = sDw.NewMesh(downwardPyramidGeo, new THREE.MeshBasicMaterial())
             this.#mesh.material.color = this.col
 
-            this.toHaveVisibilitiesSet.push(this.#mesh)
+            this.meshes = [this.#mesh]
         }
 
         _updateStateFromDrag(dw) {
@@ -81,18 +81,6 @@ function initFloats() {
 
         //------------
 
-        stateEquals(otherState) {
-            return otherState[0] === this.state[0]
-        }
-        floatArrayToState(floatArray) {
-            this.state[0] = floatArray[0]
-        }
-        stateCopyTo(toCopyTo) {
-            toCopyTo[0] = this.state[0]
-        }
-        stateToFloatArray(floatArray) {
-            floatArray[0] = this.state[0]
-        }
         updateUniformFromState() {
             this.uniform.value = this.state[0]
         }

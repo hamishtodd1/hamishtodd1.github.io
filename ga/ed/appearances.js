@@ -10,18 +10,19 @@ function initAppearances() {
         })
     }
 
+    //the thing you want is to hover the "mat4[20] bones;" mention and see the skeleton
+
     class Appearance {
         variable
         state
         stateOld
-        uniform = { value: null }
         col = new THREE.Color()
 
-        duplicates = [] //they may have been redefined, but they do have the same values as extracted
+        uniform = { value: null }
 
         visible
 
-        toHaveVisibilitiesSet = []
+        meshes
 
         onGrab(dw) { }
         onLetGo(dw) { }
@@ -55,14 +56,16 @@ function initAppearances() {
         }
 
         isVisibleInDw(dw) {
-            if (this.visible === false)
+            if (!this.visible)
                 return false
 
             if (this.variable.isIn && dw === dws.mesh)
                 return true
 
             let ret = false
-            this.toHaveVisibilitiesSet.forEach((m) => {
+            // if (this.variable.name === `ourMats`)
+            //     debugger
+            this.meshes.forEach((m) => {
                 if (!m.position.equals(OUT_OF_SIGHT_VECTOR3) && dw.inScene(m))
                     ret = true
             })
@@ -71,7 +74,7 @@ function initAppearances() {
         }
         setVisibility(newVisibility) {
             this.visible = newVisibility
-            this.toHaveVisibilitiesSet.forEach((m) => {
+            this.meshes.forEach((m) => {
                 m.visible = newVisibility
             })
         }
@@ -85,16 +88,17 @@ function initAppearances() {
             return this.variable.isIn ? dws.mesh : this._getTextareaManipulationDw()
         }
 
-        //--------------
-
-        updateUniformFromState() { } //for most, uniform.value === state, so nothing need happen
-
+        //changed in array
         stateEquals(otherState) {
             return this.state.equals(otherState)
         }
         stateCopyTo(toCopyTo) {
             toCopyTo.copy(this.state)
         }
+
+        //These get overridden
+        updateUniformFromState() { } //for most, uniform.value === state, so nothing need happen
+
         floatArrayToState(floatArray) {
             this.state.fromArray(floatArray)
         }
@@ -111,24 +115,32 @@ function initAppearances() {
         numFloats
         constructAppearance
         outputAssignmentPropts
-        regexes = {}
+        declRegexes = {}
         literalAssignmentFromOverride
+
+        //so this SHOULDN'T be a property of the variable, becaaaause, a variable can have both its array and its entries
+        //a mention can be an array or an entry in that array, and that is two kinds of appearance
+        isArray
 
         lowestUnusedAppearance = 0
         appearances = []
 
-        constructor(glslName, numFloats, _constructAppearance, getNewUniformValue, outputAssignmentPropts, omitPeriod) {
+        arrayLowestUnusedAppearance = 0
+        arrayAppearances = []
+
+        constructor(glslName, numFloats, _constructAppearance, getNewUniformValue, outputAssignmentPropts, omitPeriod, isArray) {
             this.glslName = glslName
             this.numFloats = numFloats
+
+            this.isArray = isArray || false
 
             this.getNewUniformValue = getNewUniformValue
 
             let self = this
-            this.constructAppearance = function () {
-                let appearance = new _constructAppearance()
+            this.constructAppearance = function (arrayLength) {
+                let appearance = new _constructAppearance(arrayLength || -1)
                 if( appearance.uniform.value !== appearance.state)
                     appearance.uniform.value = self.getNewUniformValue()
-                //note that insid
                 self.appearances.push(appearance)
                 return appearance
             }
@@ -143,11 +155,18 @@ function initAppearances() {
                     this.outputAssignmentPropts[i] = `[` + i + `]`
             }
 
-            this.regexes.function = new RegExp('(?<=[^a-zA-Z_$0-9])(' + glslName + ')\\s+[a-zA-Z_$][a-zA-Z_$0-9]*\\(', 'gm')
-            this.regexes.all      = new RegExp('(?<=[^a-zA-Z_$0-9])(' + glslName + ')(\\[\\d+\\])*\\s+[a-zA-Z_$][a-zA-Z_$0-9]*', 'gm')
-            this.regexes.arr      = new RegExp('(?<=[^a-zA-Z_$0-9])(' + glslName + ')\\[\\d+\\]\\s+[a-zA-Z_$][a-zA-Z_$0-9]*', 'gm')
-            this.regexes.uniform  = new RegExp('\\s*uniform\\s+('     + glslName + ')\\s', 'gm')
-            this.regexes.in       = new RegExp('\\s*in\\s+('          + glslName + ')\\s', 'gm')
+            this.declRegexes.function = new RegExp('(?<=[^a-zA-Z_$0-9])(' + glslName + ')\\s+[a-zA-Z_$][a-zA-Z_$0-9]*\\(', 'gm')
+            if(!isArray) {
+                this.declRegexes.uniform  = new RegExp('\\s*uniform\\s+('     + glslName + ')\\s', 'gm')
+                this.declRegexes.in       = new RegExp('\\s*in\\s+('          + glslName + ')\\s', 'gm')
+                this.declRegexes.all      = new RegExp('(?<=[^a-zA-Z_$0-9])(' + glslName + ')\\s+[a-zA-Z_$][a-zA-Z_$0-9]*', 'gm')
+            }
+            else {
+                this.declRegexes.uniform  = new RegExp('\\s*uniform\\s+('     + glslName + ')\\[', 'gm')
+                this.declRegexes.in       = new RegExp('\\s*in\\s+('          + glslName + ')\\[', 'gm')
+                this.declRegexes.all      = new RegExp('(?<=[^a-zA-Z_$0-9])(' + glslName + ')\\[\\d+\\]\\s+[a-zA-Z_$][a-zA-Z_$0-9]*', 'gm')
+            }
+            //the declaration will be vec3 foo[31]
 
             let commaSeparated = ``
             for (let i = 0; i < this.numFloats; ++i)
@@ -157,13 +176,13 @@ function initAppearances() {
             appearanceTypes.push(this)
         }
 
-        getLowestUnusedAppearanceAndEnsureAssignment(variable) {
+        getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable) {
             let needNewOne = this.lowestUnusedAppearance === this.appearances.length
             let ret = null
             if (!needNewOne)
                 ret = this.appearances[this.lowestUnusedAppearance]
             else
-                ret = new this.constructAppearance()
+                ret = new this.constructAppearance(variable.arrayLength)
 
             ret.variable = variable
             ret.col.copy(variable.col)
@@ -177,31 +196,18 @@ function initAppearances() {
             let appearance = null
 
             if (!variable.isUniform && !variable.isIn)
-                appearance = this.getLowestUnusedAppearanceAndEnsureAssignment(variable)
+                appearance = this.getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable)
             else {
                 if (variable.lowestUnusedMention > 1)
                     appearance = variable.mentions[0].appearance
                 else {
-                    appearance = this.getLowestUnusedAppearanceAndEnsureAssignment(variable)
-                    appearance.updateFromState()
-
+                    appearance = this.getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable)
                     if (variable.isIn) {
                         createIn(geo, appearance)
                         outputterUniforms[variable.name + `Outputter`] = appearance.uniform
                     }
-                    else { //isUniform
-                        if(!variable.isArray) {
-                            uniforms[variable.name] = appearance.uniform
-                        }
-                        else {
-                            //there shall be an array of several appearances' uniforms
-                            let len = variable.arrayLength
-                            let arr = Array(len)
-                            for(let i = 0; i < len; ++i) {
-                                arr[i] = variable.type.getNewUniformValue() //however we make uniform.value
-                            }
-                            uniforms[variable.name] = arr
-                        }
+                    else if (variable.isUniform ){
+                        uniforms[variable.name] = appearance.uniform
                     }
                 }
             }

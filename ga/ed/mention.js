@@ -69,24 +69,44 @@ function initMentions() {
     }
 
     class Mention {
+        variable
+        appearance = null
+        mentionIndex = -1
+
         lineIndex = -1
         column = -1
         charactersWide
 
+        //if you have arr[0], then later, arr[1], these are different appearances 
+        //and so should not affect each other. Yes they have the same variable, no they should not be compared
         indexInArray = -1
-
-        mentionIndex = -1
-
-        variable
-
-        appearance = null
+        assignmentToOutput = ""
 
         constructor(variable) {
             this.variable = variable
         }
 
+        setIndexInArray(indexInArray) {
+            if (indexInArray !== this.indexInArray && indexInArray !== -1) {
+                for (let i = 0; i < this.variable.type.numFloats; ++i)
+                    this.assignmentToOutput += 
+                        `    outputFloats[` + i + `] = ` + 
+                        this.variable.name + `[` + indexInArray + `]` + 
+                        this.variable.type.outputAssignmentPropts[i] + `;\n`
+            }
+
+            this.indexInArray = indexInArray
+        }
+
         getFullName() {
-            return this.variable.name + (this.indexInArray === -1 ? `` : `[` + this.indexInArray + `]`)
+            return this.variable.name + (this.indexInArray === -1 ? `` : `[` + this.indexInArray + `]` )
+        }
+
+        getAssignmentToOutput() {
+            if( this.indexInArray === -1)
+                return this.variable.assignmentToOutput
+            else
+                return this.assignmentToOutput
         }
 
         highlight() {
@@ -127,35 +147,38 @@ function initMentions() {
     }
     window.Mention = Mention
 
+    //a mention can be either an array element or an array
+    //a variable is just a name really
+    //would you like both to have the same variable?
+    //  Well, should have same color, isIn and isUniform. name is dubious
+
     let randomColor = new THREE.Color()
     let currentHue = 0.
     let goldenRatio = (Math.sqrt(5.) + 1.) / 2.
     class Variable {
         name
         type
+        col = new THREE.Color(0., 0., 0.)
 
-        isArray = false
-        arrayLength = -1
-
+        //could have something to indicate it's neither of these. A "variable" I guess
         isIn = false
         isUniform = false
-        //could have something to indicate it's neither of those. A "variable" I guess
-
-        col = new THREE.Color(0., 0., 0.)
-        assignmentToOutput = ""
 
         lowestUnusedMention = 0 //well, index thereof. Maybe change
         mentions = []
+
+        assignmentToOutput = ``
         
-        constructor(newName, newClass) {
+        arrayLength = -1
+        
+        constructor(newName, newClass, newArrayLength) {
             //never changed after this
             this.name = newName
             this.type = newClass
+            this.arrayLength = newArrayLength
 
-            if(!this.isArray) {
-                for (let i = 0; i < newClass.numFloats; ++i)
-                    this.assignmentToOutput += `    outputFloats[` + i + `] = ` + this.name + this.type.outputAssignmentPropts[i] + `;\n`
-            }
+            for (let i = 0; i < this.type.numFloats; ++i)
+                this.assignmentToOutput += `    outputFloats[` + i + `] = ` + this.name + this.type.outputAssignmentPropts[i] + `;\n`
 
             randomColor.setHSL(currentHue, 1., .5)
             currentHue += 1. / goldenRatio
@@ -166,11 +189,8 @@ function initMentions() {
             variables.push(this)
         }
 
-        getAssignmentToOutputForArray(index) {
-            let ret = ``
-            for (let i = 0; i < this.type.numFloats; ++i)
-                ret += `    outputFloats[` + i + `] = ` + this.name + `[` + index + `]` + this.type.outputAssignmentPropts[i] + `;\n`
-            return ret
+        isArray() {
+            return this.arrayLength !== -1
         }
 
         getLowestUnusedMention() {

@@ -3,8 +3,6 @@
     Same with 
  */
 
-
-
 async function initDws() {
 
     let DW_WIDTH = parseInt( getCssVar('dwWidth') )

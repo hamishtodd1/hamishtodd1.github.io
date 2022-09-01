@@ -5,10 +5,18 @@
 function initMat4s() {
     let vDw = dws.vectorSpace
     let sDw = dws.scalar
+    let mDw = dws.mesh
 
     function getNewUniformValue() {
         return new THREE.Matrix4()
     }
+
+    let outputAssignmentPropts = [ //row major!
+        `[0][0]`, `[1][0]`, `[2][0]`, `[3][0]`,
+        `[0][1]`, `[1][1]`, `[2][1]`, `[3][1]`,
+        `[0][2]`, `[1][2]`, `[2][2]`, `[3][2]`,
+        `[0][3]`, `[1][3]`, `[2][3]`, `[3][3]`
+    ]
 
     let origin = new THREE.Vector3()
     let basisVector = new THREE.Vector3()
@@ -36,7 +44,7 @@ function initMat4s() {
             this.#determinantMesh = sDw.NewMesh(downwardPyramidGeo, new THREE.MeshBasicMaterial())
             this.#determinantMesh.material.color = this.col
             
-            this.toHaveVisibilitiesSet.push(this.#xMesh, this.#yMesh, this.#zMesh, this.#determinantMesh)
+            this.meshes = [this.#xMesh, this.#yMesh, this.#zMesh, this.#determinantMesh]
         }
 
         onGrab(dw) {
@@ -56,7 +64,7 @@ function initMat4s() {
                 mv0.toVector(v1)
                 this.state.setPosition(v1)
             }
-            if(dw === sDw) {
+            else if(dw === sDw) {
                 camera2d.getOldClientWorldPosition(dw, v1)
                 let desiredDeterminant = v1.x
                 if( desiredDeterminant === 0.)
@@ -71,6 +79,7 @@ function initMat4s() {
         }
 
         updateMeshesFromState() {
+            log("yo")
             origin.setFromMatrixPosition(this.state)
 
             basisVector.setFromMatrixColumn(this.state, 0)
@@ -96,11 +105,76 @@ function initMat4s() {
             return vDw
         }
     }
-    new AppearanceType("mat4", 16, mat4Appearance, getNewUniformValue,
-        [ //row major!
-        `[0][0]`, `[1][0]`, `[2][0]`, `[3][0]`,
-        `[0][1]`, `[1][1]`, `[2][1]`, `[3][1]`,
-        `[0][2]`, `[1][2]`, `[2][2]`, `[3][2]`,
-        `[0][3]`, `[1][3]`, `[2][3]`, `[3][3]`
-        ], true)
+    new AppearanceType("mat4", 16, mat4Appearance, getNewUniformValue, outputAssignmentPropts, true, false)
+
+    ///////////
+    // ARRAY //
+    ///////////
+
+    let boneGeo = new THREE.WireframeGeometry(new THREE.OctahedronGeometry(.2))
+    for (let i = 1, il = boneGeo.attributes.position.array.length; i < il; i += 3) {
+        if (i % 3 === 1) {
+            if (boneGeo.attributes.position.array[i] > 0.)
+                boneGeo.attributes.position.array[i] = 1.
+            else if (boneGeo.attributes.position.array[i] < 0.)
+                boneGeo.attributes.position.array[i] = 0.
+            else
+                boneGeo.attributes.position.array[i] = .2
+        }
+    }
+
+    class arrayMat4Appearance extends Appearance {
+
+        constructor(arrayLength) {
+            super()
+
+            this.meshes = Array(arrayLength)
+            this.uniform.value = this.state = Array(arrayLength)
+            this.stateOld = Array(arrayLength)
+
+            for(let i = 0; i < arrayLength; ++i) {
+                let bone = new THREE.LineSegments(boneGeo, new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
+                mDw.NewObject3d(bone)
+                bone.matrixAutoUpdate = false
+                this.meshes[i] = bone
+                
+                this.state[i] = bone.matrix
+                this.stateOld[i] = getNewUniformValue()
+                this.stateOld[i].elements[0] = 2.
+            }
+        }
+
+        stateEquals(otherState) {
+            let ret = true
+            this.state.forEach((state,i)=>{
+                if(!state.equals(otherState[i]))
+                    ret = false
+            })
+
+            return ret
+        }
+        stateCopyTo(toCopyTo) {
+            this.state.forEach((state,i)=>{
+                toCopyTo[i].copy(state)
+            })
+        }
+
+        _updateStateFromDrag() {
+            //move them all around as if grabbed?
+            //one day! Will be fun.
+            //if they're not uniforms, need a way to override them, which will be a nightmare
+        }
+
+        updateMeshesFromState() {
+            
+        }
+        
+        getWorldCenter(dw,target) {
+            return target.set(0.,0.,0.,1.)
+        }
+        _getTextareaManipulationDw() {
+            return dws.mesh
+        }    
+    }
+    new AppearanceType("mat4", 0, arrayMat4Appearance, getNewUniformValue, outputAssignmentPropts, true, true)
 }

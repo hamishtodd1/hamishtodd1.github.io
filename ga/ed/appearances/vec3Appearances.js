@@ -44,7 +44,7 @@ function initVec3s() {
                 }
             }
 
-            this.toHaveVisibilitiesSet.push(this.#vMesh, this.#iMesh, this.#sMesh)
+            this.meshes = [this.#vMesh, this.#iMesh, this.#sMesh]
         }
 
         onGrab(dw) {

@@ -167,7 +167,7 @@ async function initShaderOutputAndFinalDw() {
             renderer.setRenderTarget(renderTarget)
             forEachUsedMention((m) => {
                 if (m.appearance.visible && !m.variable.isUniform && !m.variable.isIn) {
-                    getShaderOutput(m.mentionIndex, m.variable.name === `control2`)
+                    getShaderOutput(m.mentionIndex)
                     m.appearance.floatArrayToState(floatArray)
                     m.appearance.updateFromState()
                 }

@@ -39,7 +39,7 @@ function initPlanes() {
 
             camera.toUpdateAppearance.push(this)
 
-            this.toHaveVisibilitiesSet.push(this.#eDwMesh, this.#iDwMesh, this.#sphereMesh)
+            this.meshes = [this.#eDwMesh, this.#iDwMesh, this.#sphereMesh]
         }
 
         onGrab(dw) {

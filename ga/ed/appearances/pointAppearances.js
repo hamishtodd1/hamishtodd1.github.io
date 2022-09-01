@@ -71,7 +71,7 @@ function initPoints() {
             
             camera.toUpdateAppearance.push(this)
 
-            this.toHaveVisibilitiesSet.push(this.#eDwMesh, this.#iDwMesh, this.#sMesh)
+            this.meshes = [this.#eDwMesh, this.#iDwMesh, this.#sMesh]
         }
 
         onGrab(dw) {

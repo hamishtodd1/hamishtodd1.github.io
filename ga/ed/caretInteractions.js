@@ -134,6 +134,7 @@ function initCaretInteractions() {
     let caretColumn = -1
     document.addEventListener('selectionchange', onCaretMove)
 
-    mentionVisibleDueToCaret = (mention) => 
-        mention.lineIndex === caretLine && caretLine < lowestChangedLineSinceCompile
+    mentionVisibleDueToCaret = (mention) =>  {
+        return mention.lineIndex === caretLine && caretLine < lowestChangedLineSinceCompile
+    }
 }

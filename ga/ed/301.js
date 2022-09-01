@@ -71,6 +71,16 @@ function init301WithoutDeclarations(basisNames) {
         }
     }
 
+    class ScalarMv extends GeneralVector {
+        static get mvOffsets() { return [0] }
+        static get size() { return 1 }
+
+        constructor() {
+            return super(1)
+        }
+    }
+    window.ScalarMv = ScalarMv
+
     class Biv extends GeneralVector {
         static get mvOffsets() { return [5, 6, 7, 8, 9, 10] }
         static get size() { return N_BIVECTOR_COEFS }

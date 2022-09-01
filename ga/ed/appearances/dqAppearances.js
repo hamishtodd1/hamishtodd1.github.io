@@ -158,9 +158,9 @@ function initDqs() {
 
             camera.toUpdateAppearance.push(this)
 
-            this.toHaveVisibilitiesSet.push(this.#eDwMesh, this.#cDwMesh,  this.#mobiusStripMesh,  this.#iDwLineMesh, this.#iDwRingMesh,
+            this.meshes = [this.#eDwMesh, this.#cDwMesh,  this.#mobiusStripMesh,  this.#iDwLineMesh, this.#iDwRingMesh,
                 this.#arcMesh,
-                this.#rimMesh)
+                this.#rimMesh]
         }
 
         onGrab(dw) {
@@ -236,14 +236,10 @@ function initDqs() {
 
             this.#cDwMesh.position.x = this.state[0]
 
-            let grabbedDuplicate = this.duplicates.find((duplicate) => !duplicate.linePartWhenGrabbedNormalized.equals(zeroMv))
-            // log(this.duplicates)
-            if (grabbedDuplicate !== undefined) {
-                let proportionOfComparison = -1. * inner(linePart, grabbedDuplicate.linePartWhenGrabbedNormalized, mv0)[0]
-                this.#cDwMesh.position.y = proportionOfComparison
-            }
-            else
-                this.#cDwMesh.position.y = linePart.norm()
+            this.#cDwMesh.position.y = linePart.norm()
+            //TODO this is the code that you used when you had a grabbedDuplicate
+            // let proportionOfComparison = -1. * inner(linePart, grabbedDuplicate.linePartWhenGrabbedNormalized, mv0)[0]
+            // this.#cDwMesh.position.y = proportionOfComparison
 
             //more like: it's a complex strip
             //And by the way, it's angled in 3D space such that your line is through it

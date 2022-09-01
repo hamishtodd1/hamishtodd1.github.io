@@ -48,12 +48,10 @@ async function initCompilation() {
 
         //look for declarations
         appearanceTypes.forEach((type) => {
-            let      arrMatch = [...text.matchAll(type.regexes.arr)]
-            let      allMatch = [...text.matchAll(type.regexes.all)]
-            let functionMatch = [...text.matchAll(type.regexes.function)]
-            let  uniformMatch = [...text.matchAll(type.regexes.uniform)]
-            let       inMatch = [...text.matchAll(type.regexes.in)]
-            let      arrResults =      arrMatch.map(a => a.index)
+            let      allMatch = [...text.matchAll(type.declRegexes.all)]
+            let functionMatch = [...text.matchAll(type.declRegexes.function)]
+            let  uniformMatch = [...text.matchAll(type.declRegexes.uniform)]
+            let       inMatch = [...text.matchAll(type.declRegexes.in)]
             let      allResults =      allMatch.map(a => a.index)
             let functionResults = functionMatch.map(a => a.index)
             let  uniformResults =  uniformMatch.map(a => a.index + a[0].indexOf(a[1]))
@@ -67,13 +65,20 @@ async function initCompilation() {
                 let name = text.slice(index + type.glslName.length).match(potentialNameRegex)[0] //TODO potential speedup
                 //people may well want to use the name "position". Could have: position -> __position
 
+                let arrayLength = -1
+                
+                if (type.isArray) {
+                    let arrayLengthStart = index + type.glslName.length + 1
+                    let arrayLengthStr = text.slice(arrayLengthStart, text.indexOf(`]`, arrayLengthStart))
+                    arrayLength = parseInt(arrayLengthStr)
+                }
+
                 let variable = variables.find((v) => {
-                    return v.name === name && v.type === type
+                    return v.name === name && v.type === type && v.arrayLength === arrayLength
                 })
                 if (variable === undefined)
-                    variable = new Variable(name, type)
+                    variable = new Variable(name, type, arrayLength)
 
-                variable.isArray = arrResults.indexOf(index) !== -1
                 variable.isUniform = uniformResults.indexOf(index) !== -1
                 variable.isIn = inResults.indexOf(index) !== -1
 
@@ -84,11 +89,7 @@ async function initCompilation() {
                     outputterChunks[0] = decl + outputterChunks[0]
                 }
 
-                if(variable.isArray) {
-                    let arrayLengthStart = index + type.glslName.length + 1
-                    let arrayLengthStr = text.slice(arrayLengthStart, text.indexOf(`]`,arrayLengthStart) )
-                    variable.arrayLength = parseInt(arrayLengthStr)
-                }
+                variable.arrayLength = arrayLength
             })
         })
         
@@ -110,65 +111,66 @@ async function initCompilation() {
             let mention = null
             matches.forEach( (match) => {
                 let name = match[0]
-                // if (name === "ourArr")
-                //     debugger
+                
                 let variable = variables.find((v) => v.name === name)
                 if( variable === undefined )
                     return
 
-                if(!variable.isArray) {
-                    mention = variable.getLowestUnusedMention()
-                    mention.charactersWide = name.length
-                    mention.indexInArray = -1
-                }
-                else {
+                let indexInArray = -1
+                let charactersWide = name.length
+                if (variable.isArray()) {
+
+                    let isDeclaration = variable.lowestUnusedMention === 0
+
                     //we make the thing hoverable only if it is a picking out of a specific element
                     let start = match.index + name.length //we fully assume it goes "name["
-                    let lineRemainder = l.slice(start+1)
-                    let indexInArray = parseInt(lineRemainder)   //it may a for-loop index
-                    if(isNaN(indexInArray))
-                        return
-                    else {
-                        mention = variable.getLowestUnusedMention()
-                        mention.indexInArray = indexInArray
-
-                        let closeBracketIndex = l.indexOf(`]`,start)
-                        mention.charactersWide = name.length + closeBracketIndex - start + 1
+                    let lineRemainder = l.slice(start + 1)
+                    let indexInArrayOrNaN = parseInt(lineRemainder)   //it may a for-loop index
+                    let isIndexless = isNaN(indexInArrayOrNaN)
+                    if (!isIndexless) {
+                        indexInArray = indexInArrayOrNaN
+                        let closeBracketIndex = l.indexOf(`]`, start)
+                        charactersWide = name.length + closeBracketIndex - start + 1
                     }
+                    else if (!variable.isUniform) //not dealing with overrides or outputs yet!
+                        return
                 }
 
+                mention = variable.getLowestUnusedMention()
+                mention.setIndexInArray(indexInArray)
                 mention.column = match.index
                 mention.lineIndex = lineIndex
                 mention.mentionIndex = mentionIndex++
-                mention.appearance = variable.type.getAnAppearance( variable, uniforms, outputterUniforms, geo )
+                mention.charactersWide = charactersWide
+                mention.appearance = variable.type.getAnAppearance(variable, uniforms, outputterUniforms, geo)
                 
                 //for several reasons, would be good to check whether the variable has received an assignment
                 //pretty hard to tell. Eg foo( out target);
                 //Could just say, if it's an argument to a function, it must have been modified
-                //because of uniforms, will have infrastructure to have one variable, one mesh
                 
                 if (variable.isUniform || variable.isIn)
                     return
-                    
+
                 ///////////////////////
                 // OVERRIDE ADDITION //
                 ///////////////////////
                 let isDeclaration = variable.lowestUnusedMention === 1
                 let isReturn = l.indexOf(`return`) !== -1
                 let overrideGoesBefore = false
+                
                 if (isReturn)
                     overrideGoesBefore = true
-                else if(isDeclaration)
+                else if (isDeclaration)
                     overrideGoesBefore = false
 
                 let overrideAddition = `\nif( overrideMentionIndex == ` + mention.mentionIndex + ` ) ` +
                     mention.getFullName() + " = " + mention.variable.type.literalAssignmentFromOverride + ";"
                 if (overrideGoesBefore) {
-                    finalChunks[lineIndex]     = overrideAddition +     finalChunks[lineIndex]
+                    finalChunks[lineIndex] = overrideAddition + finalChunks[lineIndex]
                     outputterChunks[lineIndex] = overrideAddition + outputterChunks[lineIndex]
                 }
                 else {
-                    finalChunks[lineIndex]     =     finalChunks[lineIndex] + overrideAddition
+                    finalChunks[lineIndex] = finalChunks[lineIndex] + overrideAddition
                     outputterChunks[lineIndex] = outputterChunks[lineIndex] + overrideAddition
                 }
                 //you're best off visualizing it in this completely different way, when the declaration is hovered
@@ -186,15 +188,22 @@ async function initCompilation() {
                 if( !overrideGoesBefore )
                     outputterGoesAfter = true
 
-                let assignmentToOutput = variable.isArray ? variable.getAssignmentToOutputForArray(mention.indexInArray) : mention.variable.assignmentToOutput
                 let outputterAddition   = `\nif( outputMentionIndex == ` + mention.mentionIndex + ` ) {\n` + 
-                    assignmentToOutput + `}`
+                    mention.getAssignmentToOutput() + `}`
                 if (outputterGoesAfter) {
                     outputterChunks[lineIndex] = outputterChunks[lineIndex] + outputterAddition
                 }
                 else {
                     outputterChunks[lineIndex] = outputterAddition + outputterChunks[lineIndex]
                 }
+                
+                //output every array entry?
+                //so costly. 
+                //So... only output the things when they're assigned to, not every time they're mentioned
+                //So, look for the equals sign on the line, and what's on the left
+
+                //right but even if you do that, sometimes arrays ARE assigned to
+                //so, aside from mentionIndex, you also have the arrayEntry. Extract them one by one
             })
         })
 
@@ -212,22 +221,6 @@ async function initCompilation() {
         }
 
         updateLclsc(Infinity)
-
-        // let currentDuplicates
-        // //duplicates are a halfway step towards what you'd prefer: knowledge of when the things have really been changed
-        // //i.e. when they are new variables probably
-        // appearanceTypes.forEach((at)=>{
-        //     for (let i = 0; i < at.lowestUnusedAppearance; ++i) {
-        //         let appearance = at.appearances[i]
-        //         if (i === 0 || appearance.variable !== at.appearances[i - 1].variable || 
-        //             !appearance.stateEquals(at.appearances[i - 1].state) )
-        //             currentDuplicates = [appearance]
-        //         else
-        //             currentDuplicates.push(appearance)
-        //         appearance.duplicates = currentDuplicates
-        //         //GC alert!
-        //     }
-        // })
 
         if (logDebug)
             log(outputterChunks.join("\n------------------"))

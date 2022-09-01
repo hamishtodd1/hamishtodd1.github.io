@@ -9,6 +9,7 @@ TODO
             Highlight where it was but just put the words at the bottom
         Make the transparent spotted dome
     Bugs
+        Something caused the vertex to flick back and forth
         Sort out duplicates. At least in the senses that you need the damn things
         Possibly saw a bug with lines at infinity which was visible when just putting 1s and 0s in everything
         minus sign with sandwich
@@ -109,11 +110,13 @@ TODO
                 Can draw on texture when paused
             "step" "play/pause" buttons
         Latex
+            So, you are going to do this by HAND
+                Take a load of equations from a book, 
+                Code it up
+                Manually draw rectangles over the box
+                Put on a webpage
             the "set inclusion" symbol means "has this type"
-            Someone else's thing to draw and display it. Maybe desmos
-                Oh how hard can it be. Rectangles with pictures in
-                Handwriting recognition is another matter
-                Could talk to people at mathpix?
+            Could talk to people at mathpix?
         Conveniences
             Connect up mentions that are "copies"
                 Makes it nicer when eg you're editing control1 and it has no effect on the below because it's redefined after you edit it!
@@ -251,24 +254,24 @@ async function init() {
     await meshloadPromise
     compile(false)
     updateMentionVisibilitiesAndIndication()
-    setCaretPosition(103)
+    setCaretPosition(148)
 
     let mixer = null
-    initGltf()
-    new GLTFLoader().load('data/Soldier.glb', function (gltf) {
-        let model = gltf.scene
-        dws.mesh.addNonMentionChild(model)
-        model.scale.multiplyScalar(3.)
+    // initGltf()
+    // new GLTFLoader().load('data/Soldier.glb', function (gltf) {
+    //     let model = gltf.scene
+    //     dws.mesh.addNonMentionChild(model)
+    //     model.scale.multiplyScalar(3.)
         
-        let skeleton = new THREE.SkeletonHelper(model)
-        skeleton.scale.multiplyScalar(3.)
-        dws.mesh.addNonMentionChild(skeleton)
+    //     let skeleton = new THREE.SkeletonHelper(model)
+    //     skeleton.scale.multiplyScalar(3.)
+    //     dws.mesh.addNonMentionChild(skeleton)
         
-        const animations = gltf.animations
-        mixer = new THREE.AnimationMixer(model)
-        let walkAction = mixer.clipAction(animations[3])
-        walkAction.play()
-    })
+    //     const animations = gltf.animations
+    //     mixer = new THREE.AnimationMixer(model)
+    //     let walkAction = mixer.clipAction(animations[3])
+    //     walkAction.play()
+    // })
 
     document.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === true) {
@@ -284,7 +287,7 @@ async function init() {
         ++frameCount
         forEachUsedAppearance((a)=>{
             if(a.variable.isUniform) {
-                let doUpdate = true
+                let needsUpdate = true
                 
                 if(a.variable.name === `time`)
                     a.state[0] = clock.getElapsedTime()
@@ -296,10 +299,10 @@ async function init() {
                     a.state.y = -yProportion
                 }
                 else
-                    doUpdate = false
+                    needsUpdate = false
 
-                if(doUpdate)
-                    a.updateFromState()
+                if(needsUpdate)
+                    a.updateUniformFromState()
             }
         })
 
@@ -307,6 +310,10 @@ async function init() {
             mixer.update(frameDelta)
 
         updateMentionStatesFromRun()
+        forEachUsedMention((m) => {
+            if (m.appearance.visible && (m.variable.isUniform || m.variable.isIn))
+                m.appearance.updateFromState()
+        })
 
         updateHighlight()
 

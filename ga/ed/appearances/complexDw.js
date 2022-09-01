@@ -59,7 +59,7 @@ function initComplexNumbers() {
             mat.color = this.col
             this.#mesh = ourDw.NewMesh(dotGeo, mat)
             
-            this.toHaveVisibilitiesSet.push(this.#mesh)
+            this.meshes = [this.#mesh]
         }
 
         _updateStateFromDrag(dw) {

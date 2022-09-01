@@ -88,14 +88,10 @@ function initMouseInteractions() {
 
                 dragOccurred = true
 
-                if(indicatedMention.variable.isIn) {
+                if(indicatedMention.variable.isIn) 
                     indicatedMention.appearance.updateStateFromDragIn()
-                    indicatedMention.appearance.updateFromState()
-                }
-                else if (indicatedMention.variable.isUniform ){
+                else if (indicatedMention.variable.isUniform )
                     indicatedMention.appearance.updateStateFromDrag(grabbedDw)
-                    indicatedMention.appearance.updateFromState()
-                }
                 else {
                     indicatedMention.appearance.updateStateFromDrag(grabbedDw)
                     updateOverride(indicatedMention)
