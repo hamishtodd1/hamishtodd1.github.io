@@ -27,10 +27,14 @@ function initMat4s() {
         #zMesh
         #determinantMesh
 
-        constructor() {
+        constructor(arrayLength,uniformValue) {
             super()
+
+            if (uniformValue !== undefined)
+                this.uniform.value = this.state = uniformValue
+            else
+                this.uniform.value = this.state = getNewUniformValue()
             
-            this.uniform.value = this.state = getNewUniformValue()
             this.stateOld = getNewUniformValue()
             this.stateOld.elements[0] = 2.
 
@@ -105,7 +109,6 @@ function initMat4s() {
             return vDw
         }
     }
-    new AppearanceType("mat4", 16, mat4Appearance, getNewUniformValue, outputAssignmentPropts, true, false)
 
     ///////////
     // ARRAY //
@@ -128,10 +131,10 @@ function initMat4s() {
         constructor(arrayLength) {
             super()
 
-            this.meshes = Array(arrayLength)
             this.uniform.value = this.state = Array(arrayLength)
             this.stateOld = Array(arrayLength)
-
+            
+            this.meshes = Array(arrayLength)
             for(let i = 0; i < arrayLength; ++i) {
                 let bone = new THREE.LineSegments(boneGeo, new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
                 mDw.NewObject3d(bone)
@@ -176,5 +179,8 @@ function initMat4s() {
             return dws.mesh
         }    
     }
-    new AppearanceType("mat4", 0, arrayMat4Appearance, getNewUniformValue, outputAssignmentPropts, true, true)
+
+    let nonArrayType = new AppearanceType(`mat4`, 16, mat4Appearance, getNewUniformValue, outputAssignmentPropts, true, false)
+    let arrayAt = new AppearanceType(`mat4`, 16, arrayMat4Appearance, getNewUniformValue, outputAssignmentPropts, true, true)
+    arrayAt.nonArrayType = nonArrayType
 }

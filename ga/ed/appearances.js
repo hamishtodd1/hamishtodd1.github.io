@@ -13,10 +13,10 @@ function initAppearances() {
     //the thing you want is to hover the "mat4[20] bones;" mention and see the skeleton
 
     class Appearance {
-        variable
+        variable //but, this.variable.type is not necessarily the type that created this =/
         state
         stateOld
-        col = new THREE.Color()
+        col = new THREE.Color() //why this bit of state?
 
         uniform = { value: null }
 
@@ -90,6 +90,7 @@ function initAppearances() {
 
         //changed in array
         stateEquals(otherState) {
+            // log(this.state,otherState)
             return this.state.equals(otherState)
         }
         stateCopyTo(toCopyTo) {
@@ -125,26 +126,18 @@ function initAppearances() {
         lowestUnusedAppearance = 0
         appearances = []
 
+        nonArrayType = null
         arrayLowestUnusedAppearance = 0
         arrayAppearances = []
 
-        constructor(glslName, numFloats, _constructAppearance, getNewUniformValue, outputAssignmentPropts, omitPeriod, isArray) {
+        constructor(glslName, numFloats, constructAppearance, getNewUniformValue, outputAssignmentPropts, omitPeriod, isArray) {
             this.glslName = glslName
             this.numFloats = numFloats
-
-            this.isArray = isArray || false
-
+            this.constructAppearance = constructAppearance
             this.getNewUniformValue = getNewUniformValue
-
-            let self = this
-            this.constructAppearance = function (arrayLength) {
-                let appearance = new _constructAppearance(arrayLength || -1)
-                if( appearance.uniform.value !== appearance.state)
-                    appearance.uniform.value = self.getNewUniformValue()
-                self.appearances.push(appearance)
-                return appearance
-            }
-
+            
+            this.isArray = isArray || false
+            
             this.outputAssignmentPropts = Array(numFloats)
             if (outputAssignmentPropts !== undefined) {
                 for (let i = 0; i < this.numFloats; ++i)
@@ -176,41 +169,22 @@ function initAppearances() {
             appearanceTypes.push(this)
         }
 
-        getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable) {
+        getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable, uniformValue) {            
+            let appearance = null
             let needNewOne = this.lowestUnusedAppearance === this.appearances.length
-            let ret = null
             if (!needNewOne)
-                ret = this.appearances[this.lowestUnusedAppearance]
-            else
-                ret = new this.constructAppearance(variable.arrayLength)
+                appearance = this.appearances[this.lowestUnusedAppearance]
+            else {
+                appearance = new this.constructAppearance(variable.arrayLength || -1, uniformValue)
+                if (appearance.uniform.value !== appearance.state)
+                    appearance.uniform.value = this.getNewUniformValue()
+                this.appearances.push(appearance)
+            }
 
-            ret.variable = variable
-            ret.col.copy(variable.col)
+            appearance.variable = variable
+            appearance.col.copy(variable.col)
 
             ++this.lowestUnusedAppearance
-
-            return ret
-        }
-
-        getAnAppearance(variable, uniforms, outputterUniforms, geo) {
-            let appearance = null
-
-            if (!variable.isUniform && !variable.isIn)
-                appearance = this.getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable)
-            else {
-                if (variable.lowestUnusedMention > 1)
-                    appearance = variable.mentions[0].appearance
-                else {
-                    appearance = this.getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable)
-                    if (variable.isIn) {
-                        createIn(geo, appearance)
-                        outputterUniforms[variable.name + `Outputter`] = appearance.uniform
-                    }
-                    else if (variable.isUniform ){
-                        uniforms[variable.name] = appearance.uniform
-                    }
-                }
-            }
 
             return appearance
         }

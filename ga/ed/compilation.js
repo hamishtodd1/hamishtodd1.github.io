@@ -119,10 +119,6 @@ async function initCompilation() {
                 let indexInArray = -1
                 let charactersWide = name.length
                 if (variable.isArray()) {
-
-                    let isDeclaration = variable.lowestUnusedMention === 0
-
-                    //we make the thing hoverable only if it is a picking out of a specific element
                     let start = match.index + name.length //we fully assume it goes "name["
                     let lineRemainder = l.slice(start + 1)
                     let indexInArrayOrNaN = parseInt(lineRemainder)   //it may a for-loop index
@@ -132,7 +128,7 @@ async function initCompilation() {
                         let closeBracketIndex = l.indexOf(`]`, start)
                         charactersWide = name.length + closeBracketIndex - start + 1
                     }
-                    else if (!variable.isUniform) //not dealing with overrides or outputs yet!
+                    else if (!variable.isUniform) //isArray + !isUniform = dealing with overrides and outputs!
                         return
                 }
 
@@ -142,7 +138,32 @@ async function initCompilation() {
                 mention.lineIndex = lineIndex
                 mention.mentionIndex = mentionIndex++
                 mention.charactersWide = charactersWide
-                mention.appearance = variable.type.getAnAppearance(variable, uniforms, outputterUniforms, geo)
+
+                let appearance = null
+                if (!variable.isUniform && !variable.isIn)
+                    appearance = variable.type.getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable)
+                else if (indexInArray !== -1 && variable.isUniform) {
+                    //this will not be the first mention, there will be an array appearance for the declaration
+                    let arrayUniformOfVariable = variable.mentions[0].appearance.uniform.value
+                    appearance = variable.type.nonArrayType.getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable, arrayUniformOfVariable[indexInArray])
+                    //and surely need to do something with the uniforms
+                }
+                else {
+                    if (variable.lowestUnusedMention > 1)
+                        appearance = variable.mentions[0].appearance
+                    else {
+                        appearance = variable.type.getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable)
+                        if (variable.isUniform)
+                            uniforms[variable.name] = appearance.uniform
+                        else if (variable.isIn) {
+                            createIn(geo, appearance)
+                            outputterUniforms[variable.name + `Outputter`] = appearance.uniform
+                        }
+                    }
+                }
+                mention.appearance = appearance
+
+                //so it gets an appearance that's an ordinary matrix
                 
                 //for several reasons, would be good to check whether the variable has received an assignment
                 //pretty hard to tell. Eg foo( out target);
@@ -173,7 +194,9 @@ async function initCompilation() {
                     finalChunks[lineIndex] = finalChunks[lineIndex] + overrideAddition
                     outputterChunks[lineIndex] = outputterChunks[lineIndex] + overrideAddition
                 }
-                //you're best off visualizing it in this completely different way, when the declaration is hovered
+
+                //sometimes arrays ARE assigned to, even if you do only have the below someteimes
+                //so, aside from mentionIndex, you also have the arrayEntry. Extract them one by one
 
                 ////////////////////////
                 // OUTPUTTER ADDITION //
@@ -201,9 +224,6 @@ async function initCompilation() {
                 //so costly. 
                 //So... only output the things when they're assigned to, not every time they're mentioned
                 //So, look for the equals sign on the line, and what's on the left
-
-                //right but even if you do that, sometimes arrays ARE assigned to
-                //so, aside from mentionIndex, you also have the arrayEntry. Extract them one by one
             })
         })
 

@@ -14,15 +14,15 @@ vec4 getChangedVertex(in vec4 initialVertex) {
     vec2[2] ourArr;
     vec2 lastOne = ourArr[1];
 
-    vec4 myVertex = vec4( .2,0., 1.,1.);
-    mat4 myMat = mat4(1.,0.,0.,0.,0.,1.,0.,0.,0.,0.,1.,0.,0.,0.,0.,1.);
-    Dq rotation = Dq( control2.x,   0.,0.,0.,   0.,control2.y,0.,  control1);
-    vec4 transformedVertex = sandwichDqPt(rotation, myVertex);
+    vec4 v1 = vec4( .2,0., 1.,1.);
+    vec4 v2 = ourMats[0] * v1;
     
     vec4 ret = initialVertex;
     return ret;
 }
 //END//
+
+
 
 
 
