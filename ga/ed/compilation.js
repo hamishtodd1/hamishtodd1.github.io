@@ -116,6 +116,8 @@ async function initCompilation() {
                 if( variable === undefined )
                     return
 
+                let isDeclaration = variable.lowestUnusedMention === 0
+
                 let indexInArray = -1
                 let charactersWide = name.length
                 if (variable.isArray()) {
@@ -148,17 +150,15 @@ async function initCompilation() {
                     appearance = variable.type.nonArrayType.getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable, arrayUniformOfVariable[indexInArray])
                     //and surely need to do something with the uniforms
                 }
+                else if (!isDeclaration)
+                    appearance = variable.mentions[0].appearance
                 else {
-                    if (variable.lowestUnusedMention > 1)
-                        appearance = variable.mentions[0].appearance
-                    else {
-                        appearance = variable.type.getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable)
-                        if (variable.isUniform)
-                            uniforms[variable.name] = appearance.uniform
-                        else if (variable.isIn) {
-                            createIn(geo, appearance)
-                            outputterUniforms[variable.name + `Outputter`] = appearance.uniform
-                        }
+                    appearance = variable.type.getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable)
+                    if (variable.isUniform)
+                        uniforms[variable.name] = appearance.uniform
+                    else if (variable.isIn) {
+                        createIn(geo, appearance)
+                        outputterUniforms[variable.name + `Outputter`] = appearance.uniform
                     }
                 }
                 mention.appearance = appearance
@@ -175,7 +175,6 @@ async function initCompilation() {
                 ///////////////////////
                 // OVERRIDE ADDITION //
                 ///////////////////////
-                let isDeclaration = variable.lowestUnusedMention === 1
                 let isReturn = l.indexOf(`return`) !== -1
                 let overrideGoesBefore = false
                 

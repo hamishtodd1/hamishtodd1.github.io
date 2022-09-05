@@ -83,7 +83,6 @@ function initMat4s() {
         }
 
         updateMeshesFromState() {
-            log("yo")
             origin.setFromMatrixPosition(this.state)
 
             basisVector.setFromMatrixColumn(this.state, 0)

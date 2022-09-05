@@ -1,51 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Geometric debugger</title>
-<link rel="stylesheet" href="prism-monokai.css">
-<link rel="stylesheet" href="style.css">
+    <title>Geometric debugger</title>
+    <link rel="stylesheet" href="prism-monokai.css">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Need to make -->
+    <!-- <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script> -->
 </head>
 
 <body>
-
-    <div>
-        <textarea id="textarea" spellcheck="false"></textarea>
-        <pre id="highlighting" aria-hidden="true">
-            <code class="language-glsl" id="highlighting-content"></code>
-        </pre>
-        <div id="errorBox"></div>
+    
+    <!-- <div id="equationArea">
+        <p>When \(a \ne 0\), there are two solutions to \(ax^2 + bx + c = 0\) and they are When \(a \ne 0\), there are two solutions to \(ax^2 + bx + c = 0\) and they are
+            \[\cssId{someid}{x} = {-b \pm \sqrt{b^2-4ac} \over 2a}\]
+        </p>
     </div>
+    <script src="equations.js"></script> -->
+    
+    <textarea id="textarea" spellcheck="false"></textarea>
+    <pre id="highlighting" aria-hidden="true">
+        <code class="language-glsl" id="highlighting-content"></code>
+    </pre>
+    <div id="errorBox"></div>
 
     <svg id="ourSvg" style="stroke-width:2" >
     </svg>
     
     <canvas id="canvas3d"></canvas>
 
-    <!-- <ul class="dropdown">
-        <li><a href="#">Menu</a>
-            <ul>
-                <li><a href="">Nice Dropdown Menu</a></li>
-                <li><a href="">Submenu - 1</a></li>
-                <li><a href="#">Dropdown</a>
-                    <ul>
-                        <li><a href="">Submenu - 1</a></li>
-                        <li><a href="">Submenu - 2</a></li>
-                        <li><a href="#">Dropdown</a>
-                            <ul>
-                                <li><a href="">Submenu - 1</a></li>
-                                <li><a href="">Submenu - 2</a></li>
-                                <li><a href="">Submenu - 3</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="">Submenu - 3</a></li>
-                    </ul>
-                </li>
-                <li><a href="">Submenu - 2</a></li>
-            </ul>
-        </li>
-    </ul> -->
-
-    <span id="textMeasurer">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span> <!-- contains 40 characters -->
+    <span id="textMeasurer">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span> <!-- 40 characters there -->
+    
+    <script src="equations.js"></script>
     
     <script src="prism.js"></script>
     <script src="syntaxHighlighting.js"></script>
@@ -74,9 +60,12 @@
     
     <script src="shaderOutput.js"></script>
     <script src="dws.js"></script>
+
     
     <!-- <script src="hsvDw.js"></script> -->
     <script src="appearances/scalarDw.js"></script>
+    <script src="halfPlaneDw.js"></script>
+    
     <script src="appearances/dqAppearances.js"></script>
     <script src="appearances/pointAppearances.js"></script>
     <script src="appearances/planeAppearances.js"></script>

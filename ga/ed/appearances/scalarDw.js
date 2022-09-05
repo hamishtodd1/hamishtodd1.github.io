@@ -30,11 +30,6 @@ function initFloats() {
             notch.position.x = i
             sDw.addNonMentionChild(notch)
         }
-
-        // let bg = new THREE.Mesh(unchangingUnitSquareGeometry, new THREE.MeshBasicMaterial({ color: 0xFFFDD0 }))
-        // bg.position.z = -1.
-        // bg.scale.setScalar(999.)
-        // sDw.addNonMentionChild(bg)
     }
 
     //could make little disks going along the vector space's notches as a way of poking fun

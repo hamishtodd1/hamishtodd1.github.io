@@ -1,14 +1,18 @@
 /*
 TODO
+    Ohhhh, could have cos and sin visualization?
     For next presentation
         Dual quaternion skinning
-            Uniforms that are arrays!
-            Bones as an In, in the mesh window, which you can hover
-        Sandwiches
+            At least get the vertices from the thingy
+            Need to be loading those bones from the file
+        Optimized sandwiches!
+        Latex annotation
         Better error reporting
             Highlight where it was but just put the words at the bottom
         Make the transparent spotted dome
+        https://twitter.com/joyoflivecoding
     Bugs
+        Something happened that made tubeGeometry have NaNs, crashed the whole of threejs so you couldn't see anything
         Something caused the vertex to flick back and forth
         Sort out duplicates. At least in the senses that you need the damn things
         Possibly saw a bug with lines at infinity which was visible when just putting 1s and 0s in everything
@@ -21,13 +25,10 @@ TODO
     Having chigozie and Matthew Vandevander and Pontus break it
         Try to detect which lines ASSIGN to a variable and which lines don't
     Workshop for kids at makespace (but note that this is about PGA still, so BORING workshop for the kids)
-        Tabs
-            Vertex shader
-            Fragment shader
-            Geometry, represented as obj
         Allow shit to be on multiple lines
         Need EXCELLENT error reporting. This shit is all in YOUR head!!!
-            Have a test framework. Just a series of shaders. Load them in, a few frames, move onto the next one
+            Have a test framework
+                A few examples. Load them in, a few frames, move onto the next one
                 move the mouse around
                 make some mentions then delete them
         Everyone's stuff goes into a VR sim, saved on a webpage forever
@@ -57,14 +58,13 @@ TODO
             Structs:
                 Are how you make your puppets, of course
     GDC
-        Arrange properly into vertex and fragment shader tabs
         "Teardrops" visualization. Once you've sorted out the meaning of that shit!
             Can turn off and on
         2D PGA. Overlay for vectorspace Dw?
             A new window. Nice to go between dome and
-        A puzzle game that is a series of "code this shader" challenges
+        A series of "code this shader" challenges
         Documented API for making your own window visualizations
-        Export(/import?):
+        Export:
             Game
             Ordinary shader
             threejs
@@ -184,7 +184,25 @@ Vague/philosophical
 If you were to make a GA-products fighting game, what would it be like?
     Your avatars are flailing tentacle/cloud things, but there are bits you can lock onto
 
+In the puppet thing: you have a dome, and a plane on top
+    It can do conformal stuff; centrally projected stuff; scalars; complex numbers
+
+Possibly dqAppearances should get ANOTHER point in the 2D dw
+    For (e12+e03), the point would be at (1,1), because (e12+e03) = e12(1+e0123)
+    For e12 and (.28+.96e12), it'd be at (1,0), because e12 = (1+0e0123)
+    For e03, hmm. = e12(0+e0123)
+
+    Possibly need to take the log, that gets a bivector which may be a screw axis.
 */
+
+// class sizeMinimizingArray() {
+//     #arr = []
+//     lowestUnused = 0
+
+//     getLowestUnusedElement() {
+//         return this.#arr[this.lowestUnused]
+//     }
+// }
 
 async function init() {
 
@@ -225,6 +243,8 @@ async function init() {
 
     let meshloadPromise = initMeshDw()
 
+    // await initHalfplane()
+
     await initVectorSpaceDw()
     initEuclideanDw()
     // addPedestal(this)
@@ -259,7 +279,20 @@ async function init() {
     let mixer = null
     // initGltf()
     // new GLTFLoader().load('data/Soldier.glb', function (gltf) {
+    //     // log(gltf)
+
+    //     let walkAnimation = gltf.animations[3]
+        
     //     let model = gltf.scene
+    //     let geo = model.children[0].children[1].geometry
+    //     //the bones start with model.children[0].children[0], arranged hierarchically
+    //     //the tracks are all in walkAnimation.tracks
+    //     log(model)
+    //     log(geo.attributes)
+
+    //     let firstBone = model.children[0].children[0]
+
+    //     // debugger
     //     dws.mesh.addNonMentionChild(model)
     //     model.scale.multiplyScalar(3.)
         
@@ -267,10 +300,9 @@ async function init() {
     //     skeleton.scale.multiplyScalar(3.)
     //     dws.mesh.addNonMentionChild(skeleton)
         
-    //     const animations = gltf.animations
     //     mixer = new THREE.AnimationMixer(model)
-    //     let walkAction = mixer.clipAction(animations[3])
-    //     walkAction.play()
+    //     let walkAction = mixer.clipAction(walkAnimation)
+    //     walkAction._mixer._activateAction(walkAction)
     // })
 
     document.addEventListener('keydown', (event) => {
@@ -308,6 +340,7 @@ async function init() {
 
         if(mixer !== null)
             mixer.update(frameDelta)
+        // updateHalfplane()
 
         updateMentionStatesFromRun()
         forEachUsedMention((m) => {
@@ -332,5 +365,8 @@ async function init() {
 
         requestAnimationFrame(render)
     }
+
+    // initEquations()
+
     render()
 }
