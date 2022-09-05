@@ -76,10 +76,11 @@ function initCamera() {
 
         cameraLat = Math.sign(cameraLat) * Math.min(Math.abs(cameraLat), TAU / 4.01)
 
+        let cameraDist = camera.position.length() || 3.7
         camera.position.set(0., 0., 1.)
         camera.position.applyAxisAngle(xUnit, cameraLat)
         camera.position.applyAxisAngle(yUnit, cameraLon)
-        camera.position.setLength(3.7)
+        camera.position.setLength(cameraDist)
         camera.lookAt(0., 0., 0.)
 
         camera.updateMatrix()

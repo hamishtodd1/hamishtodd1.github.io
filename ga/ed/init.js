@@ -241,7 +241,7 @@ async function init() {
 
     await initShaderOutputAndFinalDw()
 
-    let meshloadPromise = initMeshDw()
+    let meshStuff = initMeshDw()
 
     // await initHalfplane()
 
@@ -271,39 +271,13 @@ async function init() {
 
     initCaretInteractions()
     
-    await meshloadPromise
+    await meshStuff.promise
     compile(false)
     updateMentionVisibilitiesAndIndication()
     setCaretPosition(148)
 
-    let mixer = null
-    // initGltf()
-    // new GLTFLoader().load('data/Soldier.glb', function (gltf) {
-    //     // log(gltf)
 
-    //     let walkAnimation = gltf.animations[3]
-        
-    //     let model = gltf.scene
-    //     let geo = model.children[0].children[1].geometry
-    //     //the bones start with model.children[0].children[0], arranged hierarchically
-    //     //the tracks are all in walkAnimation.tracks
-    //     log(model)
-    //     log(geo.attributes)
-
-    //     let firstBone = model.children[0].children[0]
-
-    //     // debugger
-    //     dws.mesh.addNonMentionChild(model)
-    //     model.scale.multiplyScalar(3.)
-        
-    //     let skeleton = new THREE.SkeletonHelper(model)
-    //     skeleton.scale.multiplyScalar(3.)
-    //     dws.mesh.addNonMentionChild(skeleton)
-        
-    //     mixer = new THREE.AnimationMixer(model)
-    //     let walkAction = mixer.clipAction(walkAnimation)
-    //     walkAction._mixer._activateAction(walkAction)
-    // })
+    
 
     document.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === true) {
@@ -338,8 +312,8 @@ async function init() {
             }
         })
 
-        if(mixer !== null)
-            mixer.update(frameDelta)
+        meshStuff.update()
+        
         // updateHalfplane()
 
         updateMentionStatesFromRun()

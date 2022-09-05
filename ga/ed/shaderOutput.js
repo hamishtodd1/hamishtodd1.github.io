@@ -22,10 +22,6 @@ async function initShaderOutputAndFinalDw() {
         }
     }
 
-    function conferBaseUniforms(uniforms) {
-        conferOverrideSensetivityToUniforms(uniforms)
-    }
-
     /////////////////////
     // Fullscreen quad //
     /////////////////////
@@ -78,7 +74,7 @@ async function initShaderOutputAndFinalDw() {
             }
 
             outputterUniforms.outputMentionIndex = outputMentionIndex
-            conferBaseUniforms(outputterUniforms)
+            conferOverrideSensetivityToUniforms(outputterUniforms)
 
             let shaderRunner = ``
             if(vertexMode) {
@@ -209,7 +205,7 @@ async function initShaderOutputAndFinalDw() {
         }`
         
         let fullFragmentShader = generalShaderPrefix + text + toFragColorSuffix
-        conferBaseUniforms(uniforms)
+        conferOverrideSensetivityToUniforms(uniforms)
         
         oldFragFsq = FullScreenQuadMesh(defaultVertexShader,fullFragmentShader, uniforms)
         dw.addNonMentionChild(oldFragFsq)
@@ -219,41 +215,61 @@ async function initShaderOutputAndFinalDw() {
     // Vertex //
     ////////////
 
-    let oldMesh = null
-    updateFinalDwVertex = (text, uniforms, geo) => {
-        
-        const toVertexSuffix = `
+    let finalMesh = null
+    let initialMesh = null
+    const initialMeshUniforms = {
+        projectionMatrix:   { value: camera.projectionMatrix },
+        viewMatrix:         { value: camera.matrixWorldInverse }
+    }
+    const versionPrefix = `#version 300 es\n`
+    const toPointsPrefix = `
         uniform mat4 viewMatrix;
         uniform mat4 projectionMatrix;
         in vec3 position;
         void main() {
             gl_PointSize = 2.0;
-            vec4 initialVertex = vec4(position,1.);
+            vec4 initialVertex = vec4(position, 32.);`
+    const toVertexSuffix = toPointsPrefix + `
             gl_Position = projectionMatrix * viewMatrix * getChangedVertex(initialVertex);
         }`
+    const initialMeshVertexShader = versionPrefix + toPointsPrefix + `
+            gl_Position = projectionMatrix * viewMatrix * initialVertex;
+        }`
+    const bothMatsFragmentShader = versionPrefix + `
+        precision mediump float;
+        out vec4 fragColor;
+        void main() {
+            fragColor = vec4(1., 0., 0., 1.);
+        }`
+    updateFinalDwVertex = (text, uniforms, geo) => {
 
-        uniforms.projectionMatrix = { value: camera.projectionMatrix }
-        uniforms.viewMatrix = { value: camera.matrixWorldInverse }
-        conferBaseUniforms(uniforms)
+        Object.assign(uniforms,initialMeshUniforms)
+        conferOverrideSensetivityToUniforms(uniforms)
 
-        let mat = new THREE.RawShaderMaterial({
+        let finalMeshMat = new THREE.RawShaderMaterial({
             uniforms,
-            vertexShader: `#version 300 es\n` + generalShaderPrefix + text + toVertexSuffix,
-            fragmentShader: `#version 300 es
-            precision mediump float;
-            out vec4 fragColor;
-            void main() {
-                fragColor = vec4(1., 0., 0., 1.);
-            }`
+            vertexShader: versionPrefix + generalShaderPrefix + text + toVertexSuffix,
+            fragmentShader: bothMatsFragmentShader
+        })
+        let initialMeshMat = new THREE.RawShaderMaterial({
+            uniforms,
+            vertexShader: initialMeshVertexShader,
+            fragmentShader: bothMatsFragmentShader
         })
 
-        if(oldMesh!==null) {
-            oldMesh.parent.remove(oldMesh)
-            oldMesh.geometry.dispose()
-            oldMesh.material.dispose()
+        if(finalMesh!==null) {
+            finalMesh.parent.remove(finalMesh)
+            finalMesh.geometry.dispose()
+            finalMesh.material.dispose()
+            initialMesh.parent.remove(initialMesh)
+            initialMesh.geometry.dispose()
+            initialMesh.material.dispose()
         }
         
-        oldMesh = new THREE.Points(geo, mat)
-        dw.addNonMentionChild(oldMesh)
+        finalMesh = new THREE.Points(geo, finalMeshMat)
+        dw.addNonMentionChild(finalMesh)
+
+        initialMesh = new THREE.Points(geo, initialMeshMat)
+        dws.mesh.addNonMentionChild(initialMesh)
     }
 }

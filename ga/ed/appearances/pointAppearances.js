@@ -87,10 +87,10 @@ function initPoints() {
 
         updateStateFromDragIn() {
             raycaster.ray.copy(getMouseThreeRay(dws.mesh))
-            let cow = dws.mesh.getCow()
-            let intersection = raycaster.intersectObject(cow, false)[0]
+            let initialMesh = dws.mesh.getInitialMesh()
+            let intersection = raycaster.intersectObject(initialMesh, false)[0]
             if (intersection !== undefined)
-                focusInExample(this, intersection.face.a)
+                setInVertexFromInitialMesh(this, intersection.face.a)
         }
 
         _updateStateFromDrag(dw) {

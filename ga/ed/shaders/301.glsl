@@ -26,8 +26,12 @@ struct Plane {
 //     return ret;
 // }
 
+//might be good to normalize afterwards
 Dq dqAdd(in Dq a, in Dq b) {
-    return Dq(a.scalar+b.scalar,a.e01+b.e01,a.e02+b.e02,a.e03+b.e03,a.e12+b.e12,a.e31+b.e31,a.e23+b.e23,a.e0123+b.e0123);
+    return Dq( a.scalar+b.scalar, a.e01+b.e01, a.e02+b.e02, a.e03+b.e03, a.e12+b.e12, a.e31+b.e31, a.e23+b.e23, a.e0123+b.e0123 );
+}
+Dq dqMulScalar(in Dq a, in float b) {
+    return Dq( a.scalar * b, a.e01 * b, a.e02 * b, a.e03 * b, a.e12 * b, a.e31 * b, a.e23 * b, a.e0123 * b );
 }
 
 void mvFromVec(in vec3 v, out float[16] target) {
