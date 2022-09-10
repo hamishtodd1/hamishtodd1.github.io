@@ -9,6 +9,10 @@ struct Plane {
     float e0; float e1; float e2; float e3;
 };
 
+struct Weight4 {
+    float w0; float w1; float w2; float w3;
+};
+
 // getting erroneous stuff from this, hopefully IT is wrong
 // vec4 applyDqToNormalizedPoints(in Dq dq, in vec4 pt) {
 //     float a1 = dq.e01, a2 = dq.e02, a3 = dq.e03, a4 = dq.e12, a5 = dq.e31, a6 = dq.e23;
@@ -32,6 +36,9 @@ Dq dqAdd(in Dq a, in Dq b) {
 }
 Dq dqMulScalar(in Dq a, in float b) {
     return Dq( a.scalar * b, a.e01 * b, a.e02 * b, a.e03 * b, a.e12 * b, a.e31 * b, a.e23 * b, a.e0123 * b );
+}
+Dq dqAPlusBTimesT(in Dq a, in Dq b, in float t) {
+    return dqAdd(a, dqMulScalar(b, t));
 }
 
 void mvFromVec(in vec3 v, out float[16] target) {

@@ -4011,7 +4011,8 @@ function initGltf() {
 
                     }
 
-                    mesh.bind(new THREE.Skeleton(bones, boneInverses), mesh.matrixWorld);
+                    // debugger
+                    mesh.bind( new THREE.Skeleton(bones, boneInverses), mesh.matrixWorld );
 
                 });
 

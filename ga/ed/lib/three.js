@@ -5366,6 +5366,8 @@
 		}
 
 		compose(position, quaternion, scale) {
+			if(BOOG)
+				console.error("here")
 			const te = this.elements;
 			const x = quaternion._x,
 						y = quaternion._y,
@@ -21443,6 +21445,7 @@
 		}
 
 		init() {
+			console.error("here")
 			const bones = this.bones;
 			const boneInverses = this.boneInverses;
 			this.boneMatrices = new Float32Array(bones.length * 16); // calculate inverse bone matrices if necessary
@@ -27321,6 +27324,7 @@
 						weight1 = (t - t0) / (t1 - t0),
 						weight0 = 1 - weight1;
 
+			// debugger
 			for (let i = 0; i !== stride; ++i) {
 				result[i] = values[offset0 + i] * weight0 + values[offset1 + i] * weight1;
 			}
@@ -33862,6 +33866,7 @@
 			}
 
 			geometry.getAttribute('position').needsUpdate = true;
+			
 			super.updateMatrixWorld(force);
 		}
 
@@ -33869,7 +33874,9 @@
 
 	function getBoneList(object) {
 		const boneList = [];
+		// debugger
 
+		// so it's 'mixamorigLeftHandPinky1'. Has a track, why isn't it in bone list?
 		if (object.isBone === true) {
 			boneList.push(object);
 		}

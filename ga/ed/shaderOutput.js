@@ -270,6 +270,6 @@ async function initShaderOutputAndFinalDw() {
         dw.addNonMentionChild(finalMesh)
 
         initialMesh = new THREE.Points(geo, initialMeshMat)
-        dws.mesh.addNonMentionChild(initialMesh)
+        dws.untransformed.addNonMentionChild(initialMesh)
     }
 }

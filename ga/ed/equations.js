@@ -35,6 +35,6 @@ function initEquations() {
         })
     }
 
-    dws.mesh.elem.style.display = `none`
+    dws.untransformed.elem.style.display = `none`
     dws.final.elem.style.display = `none`
 }

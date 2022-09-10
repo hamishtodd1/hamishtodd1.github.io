@@ -58,7 +58,13 @@ function initCaretInteractions() {
     /////////////////////////////////////////////////////////
     textarea.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === false) {
-            insertTextAtCaret("\n    ")
+            let ourLine = textarea.value.split(`\n`)[caretLine]
+            let insertion = `\n`
+            for (let i = 0, il = ourLine.length; i < il; ++i) {
+                if (ourLine[i] === ` `) insertion += ` `
+                else break
+            }
+            insertTextAtCaret(insertion)
             afterInput()
             event.preventDefault()
         }

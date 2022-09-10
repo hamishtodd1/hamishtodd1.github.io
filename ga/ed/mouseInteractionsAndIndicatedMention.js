@@ -5,6 +5,7 @@ function initMouseInteractions() {
     let rightClicking = false
     let dragOccurred = false
     let textareaGrabAddition = [0.,0.]
+    let raycaster = new THREE.Raycaster()
 
     oldClientToDwNdc = (dw) => {
         let clientRect = dw.elem.getBoundingClientRect()
@@ -85,13 +86,17 @@ function initMouseInteractions() {
     function onMouseMove(mouseArea, event) {
         if (!rightClicking) {
             if(grabbedDw !== null) {
-
                 dragOccurred = true
 
-                if(indicatedMention.variable.isIn) 
-                    indicatedMention.appearance.updateStateFromDragIn()
-                else if (indicatedMention.variable.isUniform )
-                    indicatedMention.appearance.updateStateFromDrag(grabbedDw)
+                if (indicatedMention.variable.isUniform)
+                    indicatedMention.appearance.updateStateFromDrag(grabbedDw) 
+                else if(indicatedMention.variable.isIn) {
+                    // raycaster.ray.copy(getMouseThreeRay(dws.untransformed))
+                    // let initialMesh = dws.untransformed.getInitialMesh()
+                    // let intersection = raycaster.intersectObject(initialMesh, false)[0]
+                    // if (intersection !== undefined)
+                    //     setInIndex(intersection.face.a)
+                }
                 else {
                     indicatedMention.appearance.updateStateFromDrag(grabbedDw)
                     updateOverride(indicatedMention)

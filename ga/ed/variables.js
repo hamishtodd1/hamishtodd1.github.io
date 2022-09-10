@@ -1,5 +1,7 @@
 let animationStates = {}
 
+BOOG = false
+
 let clientXOld = 0
 let clientYOld = 0
 let caretPositionOld = -1

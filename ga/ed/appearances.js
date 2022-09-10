@@ -59,7 +59,7 @@ function initAppearances() {
             if (!this.visible)
                 return false
 
-            if (this.variable.isIn && dw === dws.mesh)
+            if (this.variable.isIn && dw === dws.untransformed)
                 return true
 
             let ret = false
@@ -85,7 +85,7 @@ function initAppearances() {
         }
 
         getTextareaManipulationDw() {
-            return this.variable.isIn ? dws.mesh : this._getTextareaManipulationDw()
+            return this.variable.isIn ? dws.untransformed : this._getTextareaManipulationDw()
         }
 
         //changed in array

@@ -5,7 +5,7 @@
 function initMat4s() {
     let vDw = dws.vectorSpace
     let sDw = dws.scalar
-    let mDw = dws.mesh
+    let uDw = dws.untransformed
 
     function getNewUniformValue() {
         return new THREE.Matrix4()
@@ -113,18 +113,6 @@ function initMat4s() {
     // ARRAY //
     ///////////
 
-    let boneGeo = new THREE.WireframeGeometry(new THREE.OctahedronGeometry(.2))
-    for (let i = 1, il = boneGeo.attributes.position.array.length; i < il; i += 3) {
-        if (i % 3 === 1) {
-            if (boneGeo.attributes.position.array[i] > 0.)
-                boneGeo.attributes.position.array[i] = 1.
-            else if (boneGeo.attributes.position.array[i] < 0.)
-                boneGeo.attributes.position.array[i] = 0.
-            else
-                boneGeo.attributes.position.array[i] = .2
-        }
-    }
-
     class arrayMat4Appearance extends Appearance {
 
         constructor(arrayLength) {
@@ -135,8 +123,8 @@ function initMat4s() {
             
             this.meshes = Array(arrayLength)
             for(let i = 0; i < arrayLength; ++i) {
-                let bone = new THREE.LineSegments(boneGeo, new THREE.MeshBasicMaterial({ color: 0xFFFFFF }))
-                mDw.NewObject3d(bone)
+                let bone = BoneMesh()
+                uDw.NewObject3d(bone)
                 bone.matrixAutoUpdate = false
                 this.meshes[i] = bone
                 
@@ -175,7 +163,7 @@ function initMat4s() {
             return target.set(0.,0.,0.,1.)
         }
         _getTextareaManipulationDw() {
-            return dws.mesh
+            return dws.untransformed
         }    
     }
 

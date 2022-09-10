@@ -121,12 +121,12 @@ function initPlanes() {
 
         //-------------
 
+        //we do this because it's nicer having the state be a multivector. And then, gotta convert, so this off-by-one thing
+        stateToFloatArray(floatArray) {
+            floatArray[0] = this.state[1]; floatArray[1] = this.state[2]; floatArray[2] = this.state[3]; floatArray[3] = this.state[4];
+        }
         floatArrayToState(floatArray) {
             this.state.plane(floatArray[0], floatArray[1], floatArray[2], floatArray[3])
-        }
-        stateToFloatArray(floatArray) {
-            //note that it's value[0] = state[1]!
-            floatArray[0] = this.state[1]; floatArray[1] = this.state[2]; floatArray[2] = this.state[3]; floatArray[3] = this.state[4];
         }
         updateUniformFromState() {
             this.stateToFloatArray(this.uniform.value)

@@ -36,11 +36,9 @@ function initPlanes() {
 
 function initPoints() {
 
-    let raycaster = new THREE.Raycaster()
-
     let eDw = dws.euclidean
     let iDw = dws.infinity
-    let mDw = dws.mesh
+    let uDw = dws.untransformed
     let sDw = dws.scalar
 
     function getNewUniformValue() {
@@ -83,14 +81,6 @@ function initPoints() {
         }
         onLetGo(){
             this.whenGrabbed.copy(zeroVector4)
-        }
-
-        updateStateFromDragIn() {
-            raycaster.ray.copy(getMouseThreeRay(dws.mesh))
-            let initialMesh = dws.mesh.getInitialMesh()
-            let intersection = raycaster.intersectObject(initialMesh, false)[0]
-            if (intersection !== undefined)
-                setInVertexFromInitialMesh(this, intersection.face.a)
         }
 
         _updateStateFromDrag(dw) {
@@ -150,7 +140,7 @@ function initPoints() {
             if (dw === sDw) {
                 target.copy(this.#sMesh.position)
             }
-            else if (dw === eDw || dw === mDw) {
+            else if (dw === eDw || dw === uDw) {
                 target.copy(this.state)
             }
             else if (dw === iDw) {
@@ -163,7 +153,7 @@ function initPoints() {
 
         _getTextareaManipulationDw() {
             if (this.variable.name === `initialVertex`)
-                return mDw
+                return uDw
             else if(this.state.w === 0.)
                 return iDw
             else

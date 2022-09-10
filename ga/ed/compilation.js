@@ -23,7 +23,6 @@ async function initCompilation() {
 
         text = text.replace(commentNotNewlineRegex,"")
         let vertexMode = text.indexOf("getColor") === -1
-        updateVertexMode(vertexMode)
 
         // it's really ; that separates, not newline
         let textLines = text.split("\n")
@@ -82,13 +81,6 @@ async function initCompilation() {
                 variable.isUniform = uniformResults.indexOf(index) !== -1
                 variable.isIn = inResults.indexOf(index) !== -1
 
-                if( variable.isIn ) {
-                    let decl = `uniform ` + variable.type.glslName + ` ` + name + `Outputter;\n`
-                    //... and presumably remove the line declaring the In if it's an attribute?
-                    //for now, it's just the input of a function so no need
-                    outputterChunks[0] = decl + outputterChunks[0]
-                }
-
                 variable.arrayLength = arrayLength
             })
         })
@@ -142,23 +134,35 @@ async function initCompilation() {
                 mention.charactersWide = charactersWide
 
                 let appearance = null
+                let isAnElementOfAUniformArray = indexInArray !== -1 && variable.isUniform
                 if (!variable.isUniform && !variable.isIn)
                     appearance = variable.type.getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable)
-                else if (indexInArray !== -1 && variable.isUniform) {
-                    //this will not be the first mention, there will be an array appearance for the declaration
+                else if (isAnElementOfAUniformArray) {
+                    //guaranteed: not the first mention
+                    //there will be an array appearance for the declaration. This appearance is just an entry from that array
                     let arrayUniformOfVariable = variable.mentions[0].appearance.uniform.value
                     appearance = variable.type.nonArrayType.getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable, arrayUniformOfVariable[indexInArray])
-                    //and surely need to do something with the uniforms
                 }
                 else if (!isDeclaration)
                     appearance = variable.mentions[0].appearance
                 else {
                     appearance = variable.type.getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable)
-                    if (variable.isUniform)
+
+                    if (variable.isUniform) {
+                        attemptAppearanceIdentifationWithImportedModelUniform( appearance, name, uniforms )
                         uniforms[variable.name] = appearance.uniform
+                    }
                     else if (variable.isIn) {
-                        createIn(geo, appearance)
+                        attemptAppearanceIdentifationWithImportedModelIn(appearance, name, geo )
                         outputterUniforms[variable.name + `Outputter`] = appearance.uniform
+
+                        let decl = `uniform ` + variable.type.glslName + ` ` + name + `Outputter;\n`
+                        outputterChunks[0] = decl + outputterChunks[0]
+                        if (name !== `initialVertex`) {
+                            //no declaration for you, it's coming in as a uniform
+                            //we fully assume that it's on one line
+                            outputterChunks[lineIndex] = ``
+                        }
                     }
                 }
                 mention.appearance = appearance
@@ -225,6 +229,8 @@ async function initCompilation() {
                 //So, look for the equals sign on the line, and what's on the left
             })
         })
+
+        setInIndex(0)
 
         Object.assign(outputterUniforms, uniforms)
 

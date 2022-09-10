@@ -206,6 +206,20 @@ Possibly dqAppearances should get ANOTHER point in the 2D dw
 
 async function init() {
 
+    let boneGeo = new THREE.WireframeGeometry(new THREE.OctahedronGeometry(.2))
+    let arr = boneGeo.attributes.position.array
+    for (let i = 1, il = arr.length; i < il; i += 3) {
+        if (i % 3 === 1) {
+            if (arr[i] > 0.) arr[i] = 1.
+            else if (arr[i] < 0.) arr[i] = 0.
+            else arr[i] = .2
+        }
+    }
+    let boneMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF })
+    BoneMesh = () => {
+        return new THREE.LineSegments(boneGeo, boneMat)
+    }
+
     let timeBefore = -Infinity
     startBench = () =>{
         timeBefore = performance.now()
@@ -247,10 +261,8 @@ async function init() {
 
     await initVectorSpaceDw()
     initEuclideanDw()
-    // addPedestal(this)
-    updateVertexMode = (vertexMode) => {
-    }
     
+    initWeightsWindow()
     initInfinityDw()
     initComplexDw()
     new Dw(`scalar`, false, camera2d)

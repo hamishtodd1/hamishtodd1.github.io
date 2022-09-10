@@ -70,6 +70,7 @@ function init301WithoutDeclarations(basisNames) {
             return target
         }
     }
+    window.GeneralVector = GeneralVector
 
     class ScalarMv extends GeneralVector {
         static get mvOffsets() { return [0] }
@@ -176,6 +177,7 @@ function init301WithoutDeclarations(basisNames) {
             return this
         }
 
+        //bit disorganized naming, TODO
         fromVec(v) {
             this.copy(zeroMv)
 
