@@ -156,7 +156,8 @@ async function initCompilation() {
                         attemptAppearanceIdentifationWithImportedModelIn(appearance, name, geo )
                         outputterUniforms[variable.name + `Outputter`] = appearance.uniform
 
-                        let decl = `uniform ` + variable.type.glslName + ` ` + name + `Outputter;\n`
+                        let nameToUse = name === `initialVertex` ? name + `Outputter` : name
+                        let decl = `uniform ` + variable.type.glslName + ` ` + nameToUse + `;\n`
                         outputterChunks[0] = decl + outputterChunks[0]
                         if (name !== `initialVertex`) {
                             //no declaration for you, it's coming in as a uniform

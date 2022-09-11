@@ -33,7 +33,7 @@ function initWeightsWindow() {
     }))
     dw.addNonMentionChild(pyramidMesh)
 
-    class Weight4 extends GeneralVector {
+    class weight4 extends GeneralVector {
         static get mvOffsets() { return [14,13,12,11] }
         static get size() { return 4 }
         constructor() {
@@ -42,7 +42,7 @@ function initWeightsWindow() {
     }
 
     function getNewUniformValue() {
-        return new Weight4(4)
+        return new weight4(4)
     }
 
     class WeightAppearance extends Appearance {
@@ -103,7 +103,7 @@ function initWeightsWindow() {
         }
     }
     new AppearanceType(
-        "Weight4", 4, WeightAppearance,
+        "weight4", 4, WeightAppearance,
         getNewUniformValue,
         [`w0`, `w1`, `w2`, `w3`],
         false )

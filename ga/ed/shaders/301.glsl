@@ -9,7 +9,7 @@ struct Plane {
     float e0; float e1; float e2; float e3;
 };
 
-struct Weight4 {
+struct weight4 {
     float w0; float w1; float w2; float w3;
 };
 

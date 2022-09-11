@@ -4,16 +4,17 @@ uniform vec2 ourUniformVec2;
 uniform float time;
 uniform vec2 mouse;
 
-uniform mat4[2] ourMat4s;
 in vec4 skinWeight;
 in vec4 skinIndex;
+
+uniform mat4[65] skinMatrices;
 
 vec4 getChangedVertex(in vec4 initialVertex) {
     float control1 = .5;
     vec2 control2 = vec2(cos(time*4.),sin(time*4.));
     vec3 control3 = vec3(1.,.5,1.);
 
-    Weight4 myW = Weight4(0.,0.,1.,0.);
+    skinWeight; skinIndex; initialVertex;
     
     vec4 ret = initialVertex;
     return ret;

@@ -27,50 +27,44 @@ function initMeshDw() {
     
     let initialMesh = null
     let attributes = null
+    const skinMatricesUniform = {value:null}
     dw.getInitialMesh = () => {
         return initialMesh
     }
-
-    let boneMeshes = []
-
+    
     initGltf()
     let mixer = null
     let model = null
     let walkAnimation = null
     let firstBone = null
+    let boneMeshes = []
+
+    let holder = new THREE.Object3D()
+    holder.rotation.x -= TAU / 4.
+    holder.position.y -= 2.
+    holder.scale.setScalar(.02)
+    dw.addNonMentionChild(holder)    
     
     let promise = new Promise(resolve => {
         new GLTFLoader().load('data/Soldier.glb', function (gltf) {
             
             model = gltf.scene
 
-            // log(model.children[0].children[0])
-
-            //so these fucking bones, aka model.children[0].children[0], are getting their position and quaternion updated
             initialMesh = model.children[0].children[1]
             attributes = initialMesh.geometry.attributes
-            attributes.skinIndex
-            log(attributes.skinIndex)
-            // log(initialMesh.geometry.attributes)
-            //scale: could getBoundingBox, zoom camera out that far (but not in infinityDw!)
-            
-            //current plan is to try to DIY. Need to find out how names get used
             
             walkAnimation = gltf.animations[3]
-            let tracks = walkAnimation.tracks
-            log(walkAnimation)
 
-            let skeleton = new THREE.SkeletonHelper(model)
             //but is this the same order in which they go in boneMatrices?
 
             firstBone = model.children[0].children[0]
             firstBone.traverse((bone)=>{
                 let boneMesh = BoneMesh()
-                dw.addNonMentionChild(boneMesh)
+                holder.add(boneMesh)
                 boneMeshes.push( boneMesh )
                 boneMesh.matrixAutoUpdate = false
-                log(bone)
             })
+            skinMatricesUniform.value = new Float32Array(16*boneMeshes.length)
             
             mixer = new THREE.AnimationMixer(model)
             let walkAction = mixer.clipAction(walkAnimation)
@@ -83,32 +77,18 @@ function initMeshDw() {
     })
 
     let appearances = {}
+    let arrayGetter = new Float32Array(4)
+    let coordGetters = [`getX`, `getY`, `getZ`, `getW`]
     setInIndex = (focussedIndex) => {
         
-        //need to scale this shit too, if you're going to scale
-        if(appearances.position !== undefined) {
-            appearances.position.state.set(
-                attributes.position.getX(focussedIndex),
-                attributes.position.getY(focussedIndex),
-                attributes.position.getZ(focussedIndex), 1. )
-        }
-        // if(appearances.skinIndex !== undefined) {
-        //     appearances.skinIndex.state.set(
-        //         attributes.skinIndex
-
-
-        //         attributes.position.getX(focussedIndex),
-        //         attributes.position.getY(focussedIndex),
-        //         attributes.position.getZ(focussedIndex),
-        //         attributes.position.getW(focussedIndex)
-        //     )
-        // }
-
-        //gotta put skinWeight in there too
-
-        //plan:
-        // you need to interpolate keyframes yourself anyway. 
-        //So, extract all this stuff
+        Object.keys(appearances).forEach((key)=>{
+            let appearance = appearances[key]
+            for(let i = 0; i < appearance.variable.type.numFloats; ++i)
+                arrayGetter[i] = attributes[key][coordGetters[i]](focussedIndex)
+            if(key === `position`)
+                arrayGetter[3] = 1. //getW will have been attempted but resulted in garbage
+            appearance.floatArrayToState(arrayGetter)
+        })
     }
 
     
@@ -124,77 +104,56 @@ function initMeshDw() {
         //     geo.setIndex(initialMesh.geometry.index)
     }
 
-    attemptAppearanceIdentifationWithImportedModelUniform = (appearance, name) => {
-        let firstBone = model.children[0].children[0]
-        if(name === `skinMatrices`) {
-            // model.skinnedM
-            
+    attemptAppearanceIdentifationWithImportedModelUniform = (appearance, name, uniforms) => {
+        if(name === `skinMatrices` ) {
+            uniforms.skinMatrices = skinMatricesUniform
+            if(appearance.variable.arrayLength !== boneMeshes.length)
+                console.error("Warning, correct length is ", boneMeshes.length, ", given length is ", appearance.variable.arrayLength)
         }
     }
 
-    let q1 = new THREE.Quaternion()
-    let q2 = new THREE.Quaternion()
-    let q3 = new THREE.Quaternion()
-
     let bmIndex = 0
     let identityMatrix = new THREE.Matrix4()
+    let ourActualPosition = new THREE.Vector3()
+    let childActualPosition = new THREE.Vector3()
+    let oneOneOne = new THREE.Vector3().setScalar(1.)
     function updateBoneMeshMatrix( bone, parentTransform ) {
         let bm = boneMeshes[bmIndex]
         v1.copy(bone.position)
-        v1.multiplyScalar(.03)
         bm.matrix.compose(v1, bone.quaternion, oneOneOne)
+        bm.matrix.toArray(skinMatricesUniform.value, 16 * bmIndex) //possibly swap with line below?
         bm.matrix.premultiply(parentTransform)
         ++bmIndex
-        bone.children.forEach((child)=>{
-            updateBoneMeshMatrix(child, bm.matrix)
-        })
-    }
 
-    let oneOneOne = new THREE.Vector3().setScalar(1.)
+        let desiredLength = Infinity
+        bone.children.forEach((child)=>{
+            let childMatrix = updateBoneMeshMatrix(child, bm.matrix)
+            ourActualPosition.setFromMatrixPosition(bm.matrix)
+            childActualPosition.setFromMatrixPosition(childMatrix)
+            let dist = ourActualPosition.distanceTo(childActualPosition)
+            if ( dist < desiredLength )
+                desiredLength = dist
+        })
+        if( desiredLength === Infinity)
+            desiredLength = 1.
+
+        //set the y vector for the appearance of the thing
+        for(let i = 0; i < 3; ++i) {
+            v2.fromArray(bm.matrix.elements, i*4)
+            v2.setLength(desiredLength)
+            v2.toArray(  bm.matrix.elements, i*4)
+        }
+
+        return bm.matrix
+    }
     
-    let animationTime = 0.
     return {
         promise,
         update: () => {
             mixer.update(frameDelta)
-            
+
             bmIndex = 0
             updateBoneMeshMatrix(firstBone, identityMatrix)
-            
-
-
-
-
-            // animationTime += frameDelta
-            // if(animationTime > walkAnimation.duration)
-            //     animationTime -= walkAnimation.duration
-            // let tracks = walkAnimation.tracks
-            // boneMeshes.forEach((bm,i)=>{
-            //     let posiTrack = tracks[trackIndices[i]]
-            //     let quatTrack = tracks[trackIndices[i]+1]
-
-            //     let trackTimes = posiTrack.times
-            //     let startIndex = -1
-            //     for(let j = 0, jl = trackTimes.length; j < jl-1; ++j) {
-            //         if (trackTimes[j] <= animationTime && animationTime < trackTimes[j+1]) {
-            //             startIndex = j
-            //             break
-            //         }
-            //     }
-            //     let proportion = (animationTime - trackTimes[startIndex]) / (trackTimes[startIndex+1]-trackTimes[startIndex])
-            //     // debugger
-            //     v2.set(posiTrack.values[ startIndex    * 3 + 0], posiTrack.values[ startIndex    * 3 + 1], posiTrack.values[ startIndex    * 3 + 2])
-            //     v3.set(posiTrack.values[(startIndex+1) * 3 + 0], posiTrack.values[(startIndex+1) * 3 + 1], posiTrack.values[(startIndex+1) * 3 + 2])
-            //     v1.lerpVectors(v2, v3, proportion)
-
-            //     q2.set(quatTrack.values[ startIndex    * 3 + 0], quatTrack.values[ startIndex    * 3 + 1], quatTrack.values[ startIndex    * 3 + 2], quatTrack.values[ startIndex    * 3 + 3])
-            //     q3.set(quatTrack.values[(startIndex+1) * 3 + 0], quatTrack.values[(startIndex+1) * 3 + 1], quatTrack.values[(startIndex+1) * 3 + 2], quatTrack.values[(startIndex+1) * 3 + 3])
-            //     q1.slerpQuaternions(q2, q3, proportion)
-            //     // if(i===0)log(proportion)
-
-            //     boneMeshes[i].position.copy(v1).multiplyScalar(.01)
-            //     boneMeshes[i].quaternion.copy(q1)
-            // })
         }
     }
 }

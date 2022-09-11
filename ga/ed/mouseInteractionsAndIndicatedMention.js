@@ -91,11 +91,11 @@ function initMouseInteractions() {
                 if (indicatedMention.variable.isUniform)
                     indicatedMention.appearance.updateStateFromDrag(grabbedDw) 
                 else if(indicatedMention.variable.isIn) {
-                    // raycaster.ray.copy(getMouseThreeRay(dws.untransformed))
-                    // let initialMesh = dws.untransformed.getInitialMesh()
-                    // let intersection = raycaster.intersectObject(initialMesh, false)[0]
-                    // if (intersection !== undefined)
-                    //     setInIndex(intersection.face.a)
+                    raycaster.ray.copy(getMouseThreeRay(dws.untransformed))
+                    let initialMesh = dws.untransformed.getInitialMesh()
+                    let intersection = raycaster.intersectObject(initialMesh, false)[0]
+                    if (intersection !== undefined)
+                        setInIndex(intersection.face.a)
                 }
                 else {
                     indicatedMention.appearance.updateStateFromDrag(grabbedDw)
