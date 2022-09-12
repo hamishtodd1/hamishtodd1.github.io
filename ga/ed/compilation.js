@@ -38,6 +38,8 @@ async function initCompilation() {
         let geo = new THREE.BufferGeometry()
         let mentionIndex = 0
 
+        let variablesByNameForThisCompilation = {}
+
         variables.forEach((variable)=>{
             variable.lowestUnusedMention = 0
         })
@@ -71,16 +73,17 @@ async function initCompilation() {
                     let arrayLengthStr = text.slice(arrayLengthStart, text.indexOf(`]`, arrayLengthStart))
                     arrayLength = parseInt(arrayLengthStr)
                 }
-
+                
                 let variable = variables.find((v) => {
                     return v.name === name && v.type === type && v.arrayLength === arrayLength
                 })
                 if (variable === undefined)
-                    variable = new Variable(name, type, arrayLength)
-
+                variable = new Variable(name, type, arrayLength)
+                variablesByNameForThisCompilation[name] = variable
+                
                 variable.isUniform = uniformResults.indexOf(index) !== -1
                 variable.isIn = inResults.indexOf(index) !== -1
-
+                
                 variable.arrayLength = arrayLength
             })
         })
@@ -104,7 +107,7 @@ async function initCompilation() {
             matches.forEach( (match) => {
                 let name = match[0]
                 
-                let variable = variables.find((v) => v.name === name)
+                let variable = variablesByNameForThisCompilation[name]
                 if( variable === undefined )
                     return
 

@@ -2,7 +2,21 @@
 
 function initInfinityDw()
 {
-    let dw = new Dw("infinity", true)
+    let infinityDwCamera = camera.clone() // because we don't want zooming in and out
+    infinityDwCamera.worldToCanvas = new THREE.Matrix4()
+    infinityDwCamera.worldToWindow = (worldSpacePosition, dw) => {
+        return worldToWindow3dCamera(infinityDwCamera, worldSpacePosition, dw)
+    }
+
+    camera.toCopyQuatTo.push(infinityDwCamera)
+    function updateOurCamera() {
+        infinityDwCamera.position.copy(camera.position)
+        infinityDwCamera.position.setLength(2.4)
+        updateCameraWorldToCanvas(infinityDwCamera)
+    }
+    updateOurCamera()
+    camera.whenAngleChangeds.push(updateOurCamera)
+    let dw = new Dw("infinity", true, infinityDwCamera)
 
     let exteriorMat = new THREE.MeshPhongMaterial({ transparent:true, opacity:.6, side:THREE.FrontSide})
     let interiorMat = new THREE.MeshPhongMaterial({ transparent:false, side:THREE.BackSide})
@@ -11,6 +25,10 @@ function initInfinityDw()
     theSphere.add(new THREE.Mesh(sphereGeo, exteriorMat), new THREE.Mesh(sphereGeo, interiorMat))
     theSphere.scale.setScalar(INFINITY_RADIUS)
     dw.addNonMentionChild(theSphere)
+
+    let euclideanHider = new THREE.Mesh(sphereGeo, new THREE.MeshPhongMaterial({ color: 0x000000 }))
+    euclideanHider.scale.setScalar(.1)
+    dw.addNonMentionChild(euclideanHider)
 
     //and the labels for the directions
     let names = [`x`,`y`,`z`]
@@ -22,17 +40,13 @@ function initInfinityDw()
             marker.position.setComponent(i,INFINITY_RADIUS * 1.1)
             if(j)
                 marker.position.multiplyScalar(-1.)
-            marker.scale.multiplyScalar(.65)
+            marker.scale.multiplyScalar(.45)
 
             camera.toCopyQuatTo.push(marker)
 
             dw.addNonMentionChild(marker)
         }
     }
-
-    let euclideanHider = new THREE.Mesh(sphereGeo, new THREE.MeshPhongMaterial({color:0x000000}))
-    euclideanHider.scale.setScalar(.15)
-    dw.addNonMentionChild(euclideanHider)
 
     let threeSphere = new THREE.Sphere(new THREE.Vector3(), INFINITY_RADIUS)
     let frustumOnOrigin = new Mv()

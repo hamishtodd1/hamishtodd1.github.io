@@ -1,8 +1,8 @@
 function initCamera() {
     const fov = 60.
     const aspect = eval(getCssVar('dwAspect'))
-    const near = .1
-    const far = 10.
+    let near = 1.
+    let far = 500.
 
     OUT_OF_SIGHT_VECTOR3 = new THREE.Vector3(far * 999., far * 999., far * 999.)
 
@@ -38,11 +38,13 @@ function initCamera() {
 
     camera.toUpdateAppearance = []
     camera.toCopyQuatTo = []
+    camera.whenAngleChangeds = []
+    camera.scalesToChange = []
 
     camera.worldToCanvas = new THREE.Matrix4()
-    camera.updateWorldToCanvas = () => {
-        camera.updateMatrixWorld()
-        camera.worldToCanvas.copy(camera.projectionMatrix).multiply(camera.matrixWorldInverse)
+    updateCameraWorldToCanvas = (theCamera) => {
+        theCamera.updateMatrixWorld()
+        theCamera.worldToCanvas.copy(theCamera.projectionMatrix).multiply(theCamera.matrixWorldInverse)
     }
 
     let fovHorizontal = otherFov(camera.fov, camera.aspect, true)
@@ -63,26 +65,7 @@ function initCamera() {
 
     window.oncontextmenu = () => { return false }
 
-    let cameraLat = -TAU * .05
-    let cameraLon = TAU * .05
-    addToCameraLonLat = (changeX, changeY) => {
-        let lonDiff = -.006 * changeX
-        lonDiff = Math.sign(lonDiff) * (Math.min(Math.abs(lonDiff), 1.8))
-        let latDiff = -.006 * changeY
-        latDiff = Math.sign(latDiff) * (Math.min(Math.abs(latDiff), 1.8))
-
-        cameraLat += latDiff
-        cameraLon += lonDiff
-
-        cameraLat = Math.sign(cameraLat) * Math.min(Math.abs(cameraLat), TAU / 4.01)
-
-        let cameraDist = camera.position.length() || 3.7
-        camera.position.set(0., 0., 1.)
-        camera.position.applyAxisAngle(xUnit, cameraLat)
-        camera.position.applyAxisAngle(yUnit, cameraLon)
-        camera.position.setLength(cameraDist)
-        camera.lookAt(0., 0., 0.)
-
+    function whenCameraChanged() {
         camera.updateMatrix()
         camera.updateProjectionMatrix()
 
@@ -98,13 +81,62 @@ function initCamera() {
             camera.frustum[planeName].normalize()
         }
 
-        camera.updateWorldToCanvas()
+        updateCameraWorldToCanvas(camera)
 
-        camera.toCopyQuatTo.forEach((object3d)=>{
-            object3d.quaternion.copy(camera.quaternion)
+        camera.toUpdateAppearance.forEach((appearance)=>{
+            appearance.updateMeshesFromState()
         })
     }
-    addToCameraLonLat(0.,0.)
+
+    camera.whenZoomChangeds = []
+    zoomCameraOutByAmount = (amt) => {
+        
+        camera.position.multiplyScalar(amt)
+
+        whenCameraChanged()
+
+        camera.whenZoomChangeds.forEach((func) => func(amt))
+        camera.scalesToChange.forEach((scale) => {
+            scale.multiplyScalar(amt)
+        })
+    }
+    document.addEventListener('wheel', (event) => {
+        let amt = event.deltaY > 0. ? 1.13 : 1. / 1.13
+        if (camera.position.length() * amt < 3.)
+            amt = 3. / camera.position.length()
+        if (camera.position.length() * amt > 420.)
+            amt = 420. / camera.position.length()
+
+        zoomCameraOutByAmount(amt)
+    })
+
+    let cameraLat = -TAU * .05
+    let cameraLon = TAU * .05
+    addToCameraLonLat = (changeX, changeY) => {
+        let lonDiff = -.006 * changeX
+        lonDiff = Math.sign(lonDiff) * (Math.min(Math.abs(lonDiff), 1.8))
+        let latDiff = -.006 * changeY
+        latDiff = Math.sign(latDiff) * (Math.min(Math.abs(latDiff), 1.8))
+
+        cameraLat += latDiff
+        cameraLon += lonDiff
+
+        cameraLat = Math.sign(cameraLat) * Math.min(Math.abs(cameraLat), TAU / 4.01)
+
+        let cameraDist = camera.position.length() || 3.7 //everything has been set up with 3.7 in mind
+        camera.position.set(0., 0., 1.)
+        camera.position.applyAxisAngle(xUnit, cameraLat)
+        camera.position.applyAxisAngle(yUnit, cameraLon)
+        camera.position.setLength(cameraDist)
+        camera.lookAt(0., 0., 0.)
+
+        whenCameraChanged()
+
+        camera.toCopyQuatTo.forEach((object3d) => {
+            object3d.quaternion.copy(camera.quaternion)
+        })
+        camera.whenAngleChangeds.forEach((func) => func())
+    }
 
     let rightSideDist = 4.;
     camera2d = new THREE.OrthographicCamera(
@@ -112,7 +144,7 @@ function initCamera() {
         rightSideDist,
         rightSideDist / camera.aspect, -rightSideDist / camera.aspect,
         camera.near, camera.far)
-    camera2d.position.z = camera.position.length()
+    camera2d.position.z = 1.
 
     camera2d.getOldClientWorldPosition = (dw,target) => {
         let [xProportion, yProportion] = oldClientToDwNdc(dw)
@@ -136,6 +168,17 @@ function initCamera() {
             return [Infinity, Infinity]
     }
 
+    worldToWindow3dCamera = (theCamera, worldSpacePosition, dw) => {
+        worldSpacePosition.applyMatrix4(theCamera.worldToCanvas)
+        let canvasX = worldSpacePosition.x / worldSpacePosition.w
+        let canvasY = worldSpacePosition.y / worldSpacePosition.w
+
+        let ndcX = canvasX / 2. + .5
+        let ndcY = canvasY / 2. + .5
+
+        return ndcToWindow(ndcX, ndcY, dw)
+    }
+
     camera2d.worldToWindow = (worldSpacePosition, dw) => {
         let ndcX = (worldSpacePosition.x - camera2d.left  ) / (camera2d.right - camera2d.left  )
         let ndcY = (worldSpacePosition.y - camera2d.bottom) / (camera2d.top   - camera2d.bottom)
@@ -144,13 +187,6 @@ function initCamera() {
     }
 
     camera.worldToWindow = (worldSpacePosition, dw)=>{
-        worldSpacePosition.applyMatrix4(camera.worldToCanvas)
-        let canvasX = worldSpacePosition.x / worldSpacePosition.w
-        let canvasY = worldSpacePosition.y / worldSpacePosition.w
-
-        let ndcX = canvasX / 2. + .5
-        let ndcY = canvasY / 2. + .5
-
-        return ndcToWindow(ndcX, ndcY, dw)
+        return worldToWindow3dCamera(camera, worldSpacePosition, dw )
     }
 }

@@ -27,7 +27,6 @@ function initMeshDw() {
     
     let initialMesh = null
     let attributes = null
-    const skinMatricesUniform = {value:null}
     dw.getInitialMesh = () => {
         return initialMesh
     }
@@ -37,13 +36,12 @@ function initMeshDw() {
     let model = null
     let walkAnimation = null
     let firstBone = null
-    let boneMeshes = []
 
     let holder = new THREE.Object3D()
     holder.rotation.x -= TAU / 4.
     holder.position.y -= 2.
     holder.scale.setScalar(.02)
-    dw.addNonMentionChild(holder)    
+    dw.addNonMentionChild(holder)
     
     let promise = new Promise(resolve => {
         new GLTFLoader().load('data/Soldier.glb', function (gltf) {
@@ -58,13 +56,6 @@ function initMeshDw() {
             //but is this the same order in which they go in boneMatrices?
 
             firstBone = model.children[0].children[0]
-            firstBone.traverse((bone)=>{
-                let boneMesh = BoneMesh()
-                holder.add(boneMesh)
-                boneMeshes.push( boneMesh )
-                boneMesh.matrixAutoUpdate = false
-            })
-            skinMatricesUniform.value = new Float32Array(16*boneMeshes.length)
             
             mixer = new THREE.AnimationMixer(model)
             let walkAction = mixer.clipAction(walkAnimation)
@@ -76,13 +67,13 @@ function initMeshDw() {
         })
     })
 
-    let appearances = {}
+    let inAppearances = {}
     let arrayGetter = new Float32Array(4)
     let coordGetters = [`getX`, `getY`, `getZ`, `getW`]
     setInIndex = (focussedIndex) => {
         
-        Object.keys(appearances).forEach((key)=>{
-            let appearance = appearances[key]
+        Object.keys(inAppearances).forEach((key)=>{
+            let appearance = inAppearances[key]
             for(let i = 0; i < appearance.variable.type.numFloats; ++i)
                 arrayGetter[i] = attributes[key][coordGetters[i]](focussedIndex)
             if(key === `position`)
@@ -96,7 +87,7 @@ function initMeshDw() {
         let nameForModel = name === `initialVertex` ? `position` : name
         if (attributes[nameForModel] !== undefined) {
             geo.setAttribute(nameForModel, attributes[nameForModel])
-            appearances[nameForModel] = appearance
+            inAppearances[nameForModel] = appearance
             //might be nice to check whether the setup of the variable in the buffer matches what we have here
         }
 
@@ -104,12 +95,15 @@ function initMeshDw() {
         //     geo.setIndex(initialMesh.geometry.index)
     }
 
+    let uniformAppearances = {}
     attemptAppearanceIdentifationWithImportedModelUniform = (appearance, name, uniforms) => {
-        if(name === `skinMatrices` ) {
-            uniforms.skinMatrices = skinMatricesUniform
-            if(appearance.variable.arrayLength !== boneMeshes.length)
-                console.error("Warning, correct length is ", boneMeshes.length, ", given length is ", appearance.variable.arrayLength)
+        if(name === `boneMatrices` ) {
+            // uniforms.boneMatrices = boneMatricesUniform
+            uniformAppearances.boneMatrices = appearance
         }
+        
+        //bindMatrix is a uniform. 
+        //it's not necessarily this "holder" thing
     }
 
     let bmIndex = 0
@@ -118,17 +112,19 @@ function initMeshDw() {
     let childActualPosition = new THREE.Vector3()
     let oneOneOne = new THREE.Vector3().setScalar(1.)
     function updateBoneMeshMatrix( bone, parentTransform ) {
-        let bm = boneMeshes[bmIndex]
+        if (uniformAppearances.boneMatrices === undefined)
+            return
+
+        let targetMatrix = uniformAppearances.boneMatrices.meshes[bmIndex].matrix
         v1.copy(bone.position)
-        bm.matrix.compose(v1, bone.quaternion, oneOneOne)
-        bm.matrix.toArray(skinMatricesUniform.value, 16 * bmIndex) //possibly swap with line below?
-        bm.matrix.premultiply(parentTransform)
+        targetMatrix.compose(v1, bone.quaternion, oneOneOne)
+        targetMatrix.premultiply(parentTransform)
         ++bmIndex
 
         let desiredLength = Infinity
         bone.children.forEach((child)=>{
-            let childMatrix = updateBoneMeshMatrix(child, bm.matrix)
-            ourActualPosition.setFromMatrixPosition(bm.matrix)
+            let childMatrix = updateBoneMeshMatrix(child, targetMatrix)
+            ourActualPosition.setFromMatrixPosition(targetMatrix)
             childActualPosition.setFromMatrixPosition(childMatrix)
             let dist = ourActualPosition.distanceTo(childActualPosition)
             if ( dist < desiredLength )
@@ -139,19 +135,18 @@ function initMeshDw() {
 
         //set the y vector for the appearance of the thing
         for(let i = 0; i < 3; ++i) {
-            v2.fromArray(bm.matrix.elements, i*4)
-            v2.setLength(desiredLength)
-            v2.toArray(  bm.matrix.elements, i*4)
+            v2.fromArray(targetMatrix.elements, i*4)
+            v2.setLength(desiredLength) //purely an appearance thing
+            v2.toArray(  targetMatrix.elements, i*4)
         }
 
-        return bm.matrix
+        return targetMatrix
     }
     
     return {
         promise,
-        update: () => {
+        updateBones: () => {
             mixer.update(frameDelta)
-
             bmIndex = 0
             updateBoneMeshMatrix(firstBone, identityMatrix)
         }

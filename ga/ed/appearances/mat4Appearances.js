@@ -113,6 +113,23 @@ function initMat4s() {
     // ARRAY //
     ///////////
 
+    let boneGeo = new THREE.WireframeGeometry(new THREE.OctahedronGeometry(1.))
+    let arr = boneGeo.attributes.position.array
+    for (let i = 1, il = arr.length; i < il; i += 3) {
+        if (i % 3 === 1) { //y coordinate
+            if (arr[i] < 0.) arr[i] = 0.
+            else if (arr[i] === 0.) {
+                arr[i] = .2
+                arr[i - 1] *= .2
+                arr[i + 1] *= .2
+            }
+        }
+    }
+    let boneMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF })
+    function BoneMesh() {
+        return new THREE.LineSegments(boneGeo, boneMat)
+    }
+
     class arrayMat4Appearance extends Appearance {
 
         constructor(arrayLength) {
@@ -120,11 +137,18 @@ function initMat4s() {
 
             this.uniform.value = this.state = Array(arrayLength)
             this.stateOld = Array(arrayLength)
+
+            let holder = new THREE.Object3D()
+            holder.rotation.x -= TAU / 4.
+            holder.position.y -= 2.
+            holder.scale.setScalar(.02)
+            // dw.addNonMentionChild(holder)
+            uDw.addNonMentionChild(holder)
             
             this.meshes = Array(arrayLength)
             for(let i = 0; i < arrayLength; ++i) {
                 let bone = BoneMesh()
-                uDw.NewObject3d(bone)
+                uDw.addNonMentionChild(bone)
                 bone.matrixAutoUpdate = false
                 this.meshes[i] = bone
                 

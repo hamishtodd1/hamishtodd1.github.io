@@ -12,7 +12,7 @@ const variables = []
 const appearanceTypes = []
 const dws = {}
 
-const INFINITY_RADIUS = 1.53
+const INFINITY_RADIUS = 1.
 const pointGeo = new THREE.SphereBufferGeometry(.1, 32, 16)
 
 let generalShaderPrefix = `

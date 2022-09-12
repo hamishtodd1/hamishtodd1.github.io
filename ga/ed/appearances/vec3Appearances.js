@@ -32,6 +32,7 @@ function initVec3s() {
             let mat = new THREE.MeshPhongMaterial()
             mat.color = this.col
             this.#iMesh = iDw.NewMesh(pointGeo, mat)
+            this.#iMesh.scale.multiplyScalar(.5)
             
             this.#vMesh = vDw.ArrowHeadAndShaft(mat)
 
@@ -41,6 +42,7 @@ function initVec3s() {
                         new THREE.BufferGeometry().setFromPoints([v1, v2]),
                         dashedLineMat)
                     this.#vMesh.add(this.#dashedLines[i][j])
+                    camera.scalesToChange.push(this.#dashedLines[i][j].scale)
                 }
             }
 

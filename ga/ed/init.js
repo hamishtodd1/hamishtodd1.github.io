@@ -58,6 +58,7 @@ TODO
             Structs:
                 Are how you make your puppets, of course
     GDC
+        Importing models that are not the size of this one. Sigh.
         "Teardrops" visualization. Once you've sorted out the meaning of that shit!
             Can turn off and on
         2D PGA. Overlay for vectorspace Dw?
@@ -206,23 +207,6 @@ Possibly dqAppearances should get ANOTHER point in the 2D dw
 
 async function init() {
 
-    let boneGeo = new THREE.WireframeGeometry(new THREE.OctahedronGeometry(1.))
-    let arr = boneGeo.attributes.position.array
-    for (let i = 1, il = arr.length; i < il; i += 3) {
-        if (i % 3 === 1) { //y coordinate
-            if (arr[i] < 0.) arr[i] = 0.
-            else if (arr[i] === 0.) {
-                arr[i] = .2
-                arr[i-1] *= .2
-                arr[i+1] *= .2
-            }
-        }
-    }
-    let boneMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF })
-    BoneMesh = () => {
-        return new THREE.LineSegments(boneGeo, boneMat)
-    }
-
     let timeBefore = -Infinity
     startBench = () =>{
         timeBefore = performance.now()
@@ -258,14 +242,14 @@ async function init() {
 
     await initShaderOutputAndFinalDw()
 
-    let meshStuff = initMeshDw()
+    let importedModel = initMeshDw()
 
     // await initHalfplane()
 
     await initVectorSpaceDw()
     initEuclideanDw()
     
-    initWeightsWindow()
+    // initWeightsWindow()
     initInfinityDw()
     initComplexDw()
     new Dw(`scalar`, false, camera2d)
@@ -286,10 +270,10 @@ async function init() {
 
     initCaretInteractions()
     
-    await meshStuff.promise
+    await importedModel.promise
     compile(false)
     updateMentionVisibilitiesAndIndication()
-    setCaretPosition(370)
+    setCaretPosition(196)
     
 
     document.addEventListener('keydown', (event) => {
@@ -317,6 +301,8 @@ async function init() {
                     a.state.x = xProportion
                     a.state.y = -yProportion
                 }
+                else if(a.variable.name === `boneMatrices`)
+                    importedModel.updateBones()
                 else
                     needsUpdate = false
 
@@ -324,8 +310,6 @@ async function init() {
                     a.updateUniformFromState()
             }
         })
-
-        meshStuff.update()
         
         // updateHalfplane()
 
@@ -354,6 +338,7 @@ async function init() {
     }
 
     // initEquations()
-
+    addToCameraLonLat(0., 0.)
+    zoomCameraOutByAmount(55.)
     render()
 }

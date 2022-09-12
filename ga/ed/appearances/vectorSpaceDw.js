@@ -12,7 +12,7 @@ async function initVectorSpaceDw() {
     // dw.addNonMentionChild(rgbCube)
 
     {
-        let shaftRadius = .06
+        let shaftRadius = .12
         let headHeight = shaftRadius * 5.
         let headGeo = new THREE.ConeBufferGeometry(shaftRadius * 3., 1.)
         headGeo.translate(0., -.5, 0.)
@@ -29,6 +29,14 @@ async function initVectorSpaceDw() {
             shaft.castShadow = true
             head.matrixAutoUpdate = false
             shaft.matrixAutoUpdate = false
+
+            camera.whenZoomChangeds.push((amt)=>{
+                head.matrix.multiplyScaleScalar(amt)
+                shaft.matrix.multiplyScaleScalar(amt)
+                for(let i = 0; i < 3; ++i) {
+                    shaft.matrix.elements[i+4] /= amt
+                }
+            })
 
             ret.setVec = (newVec, origin) => {
                 if (newVec.equals(zeroVector)) {
@@ -58,29 +66,53 @@ async function initVectorSpaceDw() {
 
     let yAxis = new THREE.Mesh(axisGeo, axisMat)
     vDw.addNonMentionChild(yAxis)
+    camera.scalesToChange.push(yAxis.scale)
     let xAxis = new THREE.Mesh(axisGeo, axisMat)
     xAxis.rotation.x = TAU / 4.
     vDw.addNonMentionChild(xAxis)
+    camera.scalesToChange.push(xAxis.scale)
     let zAxis = new THREE.Mesh(axisGeo, axisMat)
     zAxis.rotation.z = TAU / 4.
     vDw.addNonMentionChild(zAxis)
+    camera.scalesToChange.push(zAxis.scale)
 
     let markers = []
     let axisNames = ["x", "y", "z"]
-    let markerHeight = .5
+    let markerHeight = .4
 
-    let furthestMarkers = 8
-    for (let i = -furthestMarkers; i <= furthestMarkers; ++i) {
-        for (let j = 0; j < (i === 0 ? 1 : 3); ++j) {
-            let marker = text(i.toString())
-            marker.scale.multiplyScalar(markerHeight)
-            marker.position[axisNames[j]] = i
-            marker.position.y -= .5 * markerHeight
-            vDw.addNonMentionChild(marker)
-            markers.push(marker)
+    let numbersToMark = [1,-1]
+    for (let i = 1; i < 126; i *= 10) {
+        for (let j = i, jl = i * 10; j < jl; j += i) {
+            numbersToMark.push(j, -j)
         }
     }
+
+    numbersToMark.forEach((num,i) => {
+        for (let j = 0; j < 3; ++j) {
+            let marker = text(num.toString())
+            marker.scale.multiplyScalar(markerHeight)
+            marker.position[axisNames[j]] = num
+            marker.position.y -= .5 * markerHeight
+            vDw.addNonMentionChild(marker)
+            markers[i*3+j] = marker
+        }
+    })
+    
     markers.forEach((marker) => {
         camera.toCopyQuatTo.push(marker)
+    })
+    camera.whenZoomChangeds.push((amt)=>{
+        let cameraDist = camera.position.length()
+        markerHeight *= amt
+        numbersToMark.forEach((num, i) => {
+            for (let j = 0; j < 3; ++j) {
+                let marker = markers[i * 3 + j]
+                marker.scale.multiplyScalar(amt)
+                marker.position.set(0.,-.5*markerHeight,0.)
+                marker.position[axisNames[j]] += num
+                let dist = Math.abs(marker.position.manhattanLength())
+                marker.visible = cameraDist > dist && dist > .1 * cameraDist
+            }
+        })
     })
 }

@@ -223,7 +223,10 @@ function initMouseInteractions() {
         onPotentialHoveredMentionGrab( event )
     })
     
-    textarea.addEventListener('scroll', (event) => onMouseMove(textarea, event))
+    textarea.addEventListener('wheel', (event) => {
+        onMouseMove(textarea, event)
+        event.stopPropagation()
+    })
     textarea.addEventListener('mousemove', (event) => onMouseMove(textarea, event))
     document.addEventListener('mousemove', (event) => onMouseMove(document, event))
     forNonFinalDws( (dw) => {

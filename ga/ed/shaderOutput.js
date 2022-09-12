@@ -228,7 +228,7 @@ async function initShaderOutputAndFinalDw() {
         in vec3 position;
         void main() {
             gl_PointSize = 2.0;
-            vec4 initialVertex = vec4(position, 32.);`
+            vec4 initialVertex = vec4(position, 1.);`
     const toVertexSuffix = toPointsPrefix + `
             gl_Position = projectionMatrix * viewMatrix * getChangedVertex(initialVertex);
         }`

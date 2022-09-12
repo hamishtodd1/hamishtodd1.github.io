@@ -21343,6 +21343,7 @@
 		normalizeSkinWeights() {
 			const vector = new Vector4();
 			const skinWeight = this.geometry.attributes.skinWeight;
+			const skinIndex = this.geometry.attributes.skinIndex;
 
 			for (let i = 0, l = skinWeight.count; i < l; i++) {
 				vector.fromBufferAttribute(skinWeight, i);
@@ -21354,7 +21355,25 @@
 					vector.set(1, 0, 0, 0); // do something reasonable
 				}
 
+				let strongestIndex = -1
+				let strongestSoFar = -1.
+				for(let i = 0; i < 4; ++i) {
+					if(vector.getComponent(i) > strongestSoFar) {
+						strongestSoFar = vector.getComponent(i)
+						strongestIndex = i
+					}
+				}
+
+				//ALTERED BY HAMISH TODD, to put the strongest influence first
+				let temp = vector.getComponent(0);
+				vector.setComponent(0, vector.getComponent(strongestIndex));
+				vector.setComponent(strongestIndex, temp);
 				skinWeight.setXYZW(i, vector.x, vector.y, vector.z, vector.w);
+
+				vector.fromBufferAttribute(skinIndex,i);
+				vector.setComponent(0, vector.getComponent(strongestIndex));
+				vector.setComponent(strongestIndex, temp);
+				skinIndex.setXYZW(i, vector.x, vector.y, vector.z, vector.w);
 			}
 		}
 
@@ -21445,7 +21464,6 @@
 		}
 
 		init() {
-			console.error("here")
 			const bones = this.bones;
 			const boneInverses = this.boneInverses;
 			this.boneMatrices = new Float32Array(bones.length * 16); // calculate inverse bone matrices if necessary

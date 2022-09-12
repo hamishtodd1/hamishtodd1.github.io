@@ -116,6 +116,7 @@ function initPoints() {
             if (this.state.w !== 0.) {
                 this.#iDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
                 this.#eDwMesh.position.copy(this.state).multiplyScalar(1./this.state.w)
+                this.#eDwMesh.scale.setScalar(1.)
 
                 //an alternative way to do this kind of thing (which also happens with dual quats...)
                 //would be to say: these windows do not give the current value
@@ -129,11 +130,14 @@ function initPoints() {
                 
                 mv0.getDisplayableVersion(displayableVersion)
                 let isInFrontOfCamera = displayableVersion[14] > 0.
-                if (isInFrontOfCamera)
+                if (isInFrontOfCamera) {
                     displayableVersion.toVectorDisplayable(this.#eDwMesh.position)
+                }
                 else
                     this.#eDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
             }
+
+            this.#eDwMesh.scale.setScalar(.2 * camera.position.distanceTo(this.#eDwMesh.position))
         }
 
         getWorldCenter(dw, target) {

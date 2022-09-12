@@ -39,8 +39,8 @@ function initDqs() {
 
     let numMsVerts = 31
     let mobiusStripGeo = new THREE.PlaneBufferGeometry(1.,1.,1,numMsVerts-1)
-    let stripWidthHalved = .2
-    let stripRadius = .8
+    let stripWidthHalved = .1
+    let stripRadius = INFINITY_RADIUS * .5
     let complexMat = new THREE.MeshPhongMaterial({ color: 0xAAAAAA, side: THREE.DoubleSide })
     {
         let makinRotor = new Mv()
@@ -86,7 +86,7 @@ function initDqs() {
     let theRimCurve = new RimCurve()
 
     function OurTubeGeo(curve) {
-        return new THREE.TubeBufferGeometry(curve, 31, .1, 7, false)
+        return new THREE.TubeBufferGeometry(curve, 31, .05, 7, false)
     }
     function updateTubeGeo(geo, curve) {
         let tempGeo = OurTubeGeo(curve)
@@ -133,7 +133,7 @@ function initDqs() {
             
             this.uniform.value = this.state = getNewUniformValue()
             this.stateOld = new Dq()
-            this.stateOld[3] = 1.
+            this.stateOld[7] = 1.
 
             //default value
             {
@@ -147,6 +147,7 @@ function initDqs() {
             this.#mat2d.color = this.col
 
             this.#eDwMesh = eDw.NewMesh(eLineGeo, this.#mat3d)
+            // camera.scalesToChange.push(this.#eDwMesh.scale)
             this.#iDwLineMesh = iDw.NewMesh(iLineGeo, this.#mat3d)
             this.#iDwRingMesh = iDw.NewMesh(ringGeo,  this.#mat3d)
             
@@ -264,10 +265,11 @@ function initDqs() {
                 getQuaternionToProjectionOnOrigin(linePart, this.#eDwMesh.quaternion)
                 e123.projectOn(linePart, mv0).toVector(this.#eDwMesh.position)
 
-                if(this.variable.name === `line3`)
-                    log(this.#eDwMesh.position)
+                this.#eDwMesh.scale.setScalar(.2 * camera.position.distanceTo(this.#eDwMesh.position))
             }
             else if(linePart.iNorm() !== 0.) {
+                //TODO can have both!!!! Not sure the right way to bring it in
+
                 //default mv is e02
                 join(e123, linePart, joinedWithOrigin)
                 joinedWithOrigin.normalize()
@@ -280,10 +282,12 @@ function initDqs() {
                 linePart.getDisplayableVersion(displayedLineMv)
                 getQuaternionToProjectionOnOrigin(displayedLineMv, this.#eDwMesh.quaternion)
                 e123.projectOn(displayedLineMv, mv0).toVector(this.#eDwMesh.position)
+
+                this.#eDwMesh.scale.setScalar(.2 * camera.position.distanceTo(this.#eDwMesh.position))
             }
 
             {
-                //actually, when it's a translation, it should go around the iDwMesh... or something
+                //actually, when it's a translation, it should... be an unfurled strip?
                 this.#mobiusStripMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
                 this.#rimMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
     
