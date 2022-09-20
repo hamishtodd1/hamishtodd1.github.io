@@ -45,22 +45,7 @@ function otherFov(inputFov, aspectRatio, inputIsVertical) {
 	return outputFov;
 }
 
-function setSvgLine(svgLine, x1, y1, x2, y2) {
-	if (x1 === Infinity || y1 === Infinity || x2 === Infinity || y2 === Infinity ) {
-		svgLine.setAttribute('x1', -10 )
-		svgLine.setAttribute('y1', -10 )
-		svgLine.setAttribute('x2', -10 )
-		svgLine.setAttribute('y2', -10 )
-	}
-	else {
-		if(svgLine === undefined)
-			debugger
-		svgLine.setAttribute('x1', x1)
-		svgLine.setAttribute('y1', y1)
-		svgLine.setAttribute('x2', x2)
-		svgLine.setAttribute('y2', y2)
-	}
-}
+
 
 
 //fixed length array
@@ -125,13 +110,20 @@ function logMat4(mat4) {
 	}
 }
 
-function setRotationallySymmetricMatrix(yX, yY, yZ, target)
+THREE.Matrix4.prototype.multiplyScaleScalar = function(scalar) {
+	for(let i = 0; i < 12; ++i)
+		this.elements[i] *= scalar
+
+	return this
+}
+
+function setRotationallySymmetricMatrix(yX, yY, yZ, target, radius)
 {
 	v1.set(yX, yY, yZ)
 	randomPerpVector(v1, v2)
 	v2.normalize()
-	v3.crossVectors(v1,v2).normalize().negate();
-	target.makeBasis(v2, v1, v3);
+	v3.crossVectors(v1,v2).normalize().negate()
+	target.makeBasis(v2, v1, v3)
 
 	return target
 }
