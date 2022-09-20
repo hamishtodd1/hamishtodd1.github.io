@@ -4,7 +4,8 @@ function initVec3s() {
     let iDw = dws.infinity
     let sDw = dws.scalar
     
-    let dashedLineMat = new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: .1, gapSize: .1 })
+    // let dashedLineMat = new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: .1, gapSize: .1 })
+    let lineMat = new THREE.LineBasicMaterial({color:0xFFFFFF})
 
     function getNewUniformValue() {
         return new THREE.Vector3()
@@ -16,9 +17,6 @@ function initVec3s() {
         #iMesh
         #sMesh
         #dashedLines = [Array(3), Array(3), Array(3)]
-
-        //points are double covered because e123 can be -1 or 1
-        //elliptic geometry does not have a double cover. Points that have gone to the other side really are there
 
         constructor() {
             super()
@@ -40,11 +38,24 @@ function initVec3s() {
                 for (let j = 0; j < 3; ++j) {
                     this.#dashedLines[i][j] = new THREE.Line(
                         new THREE.BufferGeometry().setFromPoints([v1, v2]),
-                        dashedLineMat)
+                        lineMat)
                     this.#vMesh.add(this.#dashedLines[i][j])
-                    camera.scalesToChange.push(this.#dashedLines[i][j].scale)
+                    // camera.scalesToChange.push(this.#dashedLines[i][j].scale)
                 }
             }
+            // let self = this
+            // camera.whenZoomChangeds.push((amt)=>{
+                // dashedLineMat.dashSize *= amt
+                // dashedLineMat.gapSize *= amt
+
+                // for (let edgeTrioIndex = 0; edgeTrioIndex < 3; ++edgeTrioIndex) {
+                //     //the set of 3 that ends up in the edgeTrio-plane, eg with arr[edgeTrio] set to 0
+                //     for (let k = 0; k < 3; ++k) {
+                //         self.#dashedLines[edgeTrioIndex][k].computeLineDistances()
+                //         self.#dashedLines[edgeTrioIndex][k].geometry.attributes.position.needsUpdate = true
+                //     }
+                // }
+            // })
 
             this.meshes = [this.#vMesh, this.#iMesh, this.#sMesh]
         }
@@ -98,29 +109,29 @@ function initVec3s() {
                 }
             }
             else {
-                let edgeAttachedToVec = 0
-                for (let edgeTrio = 0; edgeTrio < 3; ++edgeTrio) {
+                for (let edgeTrioIndex = 0; edgeTrioIndex < 3; ++edgeTrioIndex) {
                     //the set of 3 that ends up in the edgeTrio-plane, eg with arr[edgeTrio] set to 0
                     for (let i = 0; i < 3; ++i) {
-                        let arr = this.#dashedLines[edgeTrio][i].geometry.attributes.position.array
+                        let dashedLine = this.#dashedLines[edgeTrioIndex][i]
+                            // camera.whenZoomChangeds
+                        let arr = dashedLine.geometry.attributes.position.array
 
                         v1.copy(this.state)
-                        v1.setComponent(edgeTrio, 0.)
+                        v1.setComponent(edgeTrioIndex, 0.)
                         v1.toArray(arr, 0)
 
-                        if (i === edgeAttachedToVec)
+                        if (i === 0)
                             this.state.toArray(arr, 3)
                         else {
                             v1.copy(this.state)
-                            v1.setComponent(edgeTrio, 0.)
-                            let definitelyANotYetZeroedComponent = (edgeTrio + i) % 3
+                            v1.setComponent(edgeTrioIndex, 0.)
+                            let definitelyANotYetZeroedComponent = (edgeTrioIndex + i) % 3
                             v1.setComponent(definitelyANotYetZeroedComponent, 0.)
                             v1.toArray(arr, 3)
                         }
 
-                        this.#dashedLines[edgeTrio][i].position.set(0.,0.,0.)
-                        this.#dashedLines[edgeTrio][i].computeLineDistances()
-                        this.#dashedLines[edgeTrio][i].geometry.attributes.position.needsUpdate = true
+                        // dashedLine.computeLineDistances()
+                        dashedLine.geometry.attributes.position.needsUpdate = true
                     }
                 }
             }

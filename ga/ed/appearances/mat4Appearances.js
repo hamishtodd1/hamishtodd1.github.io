@@ -18,6 +18,11 @@ function initMat4s() {
         `[0][3]`, `[1][3]`, `[2][3]`, `[3][3]`
     ]
 
+    let vectorSize = 1.
+    camera.whenZoomChangeds.push((amt) => {
+        vectorSize *= amt
+    })
+
     let origin = new THREE.Vector3()
     let basisVector = new THREE.Vector3()
     let whenGrabbed = new THREE.Matrix4()
@@ -85,12 +90,12 @@ function initMat4s() {
         updateMeshesFromState() {
             origin.setFromMatrixPosition(this.state)
 
-            basisVector.setFromMatrixColumn(this.state, 0)
-            this.#xMesh.setVec(basisVector,origin)
-            basisVector.setFromMatrixColumn(this.state, 1)
-            this.#yMesh.setVec(basisVector,origin)
-            basisVector.setFromMatrixColumn(this.state, 2)
-            this.#zMesh.setVec(basisVector,origin)
+            basisVector.setFromMatrixColumn(this.state, 0).multiplyScalar(vectorSize)
+            this.#xMesh.setVec( basisVector, origin )
+            basisVector.setFromMatrixColumn(this.state, 1).multiplyScalar(vectorSize)
+            this.#yMesh.setVec( basisVector, origin )
+            basisVector.setFromMatrixColumn(this.state, 2).multiplyScalar(vectorSize)
+            this.#zMesh.setVec( basisVector, origin )
 
             this.#determinantMesh.position.x = this.state.determinant()
         }
@@ -112,6 +117,7 @@ function initMat4s() {
     ///////////
     // ARRAY //
     ///////////
+    // They are transforms, think about it as transforms
 
     let boneGeo = new THREE.WireframeGeometry(new THREE.OctahedronGeometry(1.))
     let arr = boneGeo.attributes.position.array
@@ -137,22 +143,14 @@ function initMat4s() {
 
             this.uniform.value = this.state = Array(arrayLength)
             this.stateOld = Array(arrayLength)
-
-            let holder = new THREE.Object3D()
-            holder.rotation.x -= TAU / 4.
-            holder.position.y -= 2.
-            holder.scale.setScalar(.02)
-            // dw.addNonMentionChild(holder)
-            uDw.addNonMentionChild(holder)
             
             this.meshes = Array(arrayLength)
             for(let i = 0; i < arrayLength; ++i) {
-                let bone = BoneMesh()
-                uDw.addNonMentionChild(bone)
-                bone.matrixAutoUpdate = false
-                this.meshes[i] = bone
+                let boneMesh = uDw.NewMesh(boneGeo,boneMat,`LineSegments`)
+                boneMesh.matrixAutoUpdate = false
+                this.meshes[i] = boneMesh
                 
-                this.state[i] = bone.matrix
+                this.state[i] = getNewUniformValue()
                 this.stateOld[i] = getNewUniformValue()
                 this.stateOld[i].elements[0] = 2.
             }
@@ -180,7 +178,7 @@ function initMat4s() {
         }
 
         updateMeshesFromState() {
-            
+            //yeah this is the proper way to do it, including that length thing
         }
         
         getWorldCenter(dw,target) {

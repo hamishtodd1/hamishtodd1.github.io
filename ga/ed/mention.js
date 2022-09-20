@@ -4,7 +4,6 @@
 function initMentions() {
     
     let style = window.getComputedStyle(textarea)
-    let lineHeight = parseInt(style.lineHeight)
     let textareaOffsetHorizontal = parseInt(style.padding) + parseInt(style.margin) // can add some fudge to this if you like
     let textareaOffsetVertical = parseInt(style.top) + parseInt(style.padding) + parseInt(style.margin)
     let characterWidth = parseInt(window.getComputedStyle(textMeasurer).width) / 40.
@@ -18,8 +17,7 @@ function initMentions() {
 
     let $labelLines = []
     function LabelLine() {
-        let l = document.createElementNS('http://www.w3.org/2000/svg','line') //weblink refers to a standard
-        ourSvg.appendChild(l)
+        let l = SvgLine()
         $labelLines.push(l)
 
         return l
@@ -112,7 +110,7 @@ function initMentions() {
         highlight() {
             let col = this.variable.col
             $labelLines.forEach((svgLine) => {
-                svgLine.style.stroke = "rgb(" + col.r * 255. + "," + col.g * 255. + "," + col.b * 255. + ")"
+                setSvgLineColor(svgLine,col.r,col.g,col.b)
             })
 
             //mouse box
@@ -120,10 +118,7 @@ function initMentions() {
             let x = columnToScreenX(this.column)
             let w = this.charactersWide * characterWidth
 
-            setSvgLine($labelSides[0], x, y, x + w, y)
-            setSvgLine($labelSides[1], x + w, y, x + w, y + lineHeight)
-            setSvgLine($labelSides[2], x + w, y + lineHeight, x, y + lineHeight)
-            setSvgLine($labelSides[3], x, y + lineHeight, x, y)
+            setSvgHighlight(x, y, w, lineHeight, $labelSides)
 
             let lowestUnusedLabelConnector = 0
             //this is very shotgunny. Better would be

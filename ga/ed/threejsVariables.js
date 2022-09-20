@@ -14,6 +14,7 @@ const m2 = new THREE.Matrix4()
 const q1 = new THREE.Quaternion()
 const q2 = new THREE.Quaternion()
 const pl = new THREE.Plane()
+const m3x3 = new THREE.Matrix3()
 
 const unchangingUnitSphereGeometry = new THREE.EfficientSphereGeometry(1.)
 const unchangingUnitSquareGeometry = new THREE.PlaneGeometry(1., 1.)

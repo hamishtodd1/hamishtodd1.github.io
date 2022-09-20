@@ -12,17 +12,26 @@ async function initVectorSpaceDw() {
     // dw.addNonMentionChild(rgbCube)
 
     {
-        let shaftRadius = .12
+        let shaftRadius = .08
         let headHeight = shaftRadius * 5.
-        let headGeo = new THREE.ConeBufferGeometry(shaftRadius * 3., 1.)
+        let headRimRadius = shaftRadius * 3.
+        let headGeo = new THREE.ConeBufferGeometry(1., 1.)
         headGeo.translate(0., -.5, 0.)
-        let shaftGeo = CylinderBufferGeometryUncentered(shaftRadius, 1., 8, true)
+        let shaftGeo = CylinderBufferGeometryUncentered(1., 1., 8, true)
+
+        camera.whenZoomChangeds.push((amt) => {
+            shaftRadius *= amt
+            headRimRadius = shaftRadius * 3.
+            headHeight = shaftRadius * 5.
+        })
 
         vDw.ArrowHeadAndShaft = (mat) => {
             let ret = vDw.NewGroup()
 
             let head = new THREE.Mesh(headGeo, mat)
             let shaft = new THREE.Mesh(shaftGeo, mat)
+            let currentVec = new THREE.Vector3()
+            let currentOrigin = new THREE.Vector3()
             ret.add(head, shaft)
 
             head.castShadow = true
@@ -30,26 +39,26 @@ async function initVectorSpaceDw() {
             head.matrixAutoUpdate = false
             shaft.matrixAutoUpdate = false
 
-            camera.whenZoomChangeds.push((amt)=>{
-                head.matrix.multiplyScaleScalar(amt)
-                shaft.matrix.multiplyScaleScalar(amt)
-                for(let i = 0; i < 3; ++i) {
-                    shaft.matrix.elements[i+4] /= amt
-                }
+            camera.whenZoomChangeds.push((amt) => {
+                ret.setVec(currentVec,currentOrigin)
             })
 
             ret.setVec = (newVec, origin) => {
+                currentOrigin.copy(origin)
+                currentVec.copy(newVec)
                 if (newVec.equals(zeroVector)) {
                     head.matrix.setPosition(OUT_OF_SIGHT_VECTOR3)
                     shaft.matrix.setPosition(OUT_OF_SIGHT_VECTOR3)
                 }
                 else {
-                    let shaftVec = v1.copy(newVec).setLength(newVec.length() - headHeight)
+                    let shaftVec = v1.copy(newVec).setLength(newVec.length() - headHeight).multiplyScalar(1./shaftRadius)
                     setRotationallySymmetricMatrix(shaftVec.x, shaftVec.y, shaftVec.z, shaft.matrix)
+                    shaft.matrix.multiplyScaleScalar(shaftRadius)
                     shaft.matrix.setPosition(origin)
 
-                    let headVec = v1.copy(newVec).setLength(headHeight)
+                    let headVec = v1.copy(newVec).setLength(headHeight).multiplyScalar(1. / headRimRadius)
                     setRotationallySymmetricMatrix(headVec.x, headVec.y, headVec.z, head.matrix)
+                    head.matrix.multiplyScaleScalar(headRimRadius)
 
                     let tipPosition = v1.copy(newVec).add(origin)
                     head.matrix.setPosition(tipPosition)

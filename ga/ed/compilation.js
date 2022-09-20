@@ -118,7 +118,9 @@ async function initCompilation() {
                 if (variable.isArray()) {
                     let start = match.index + name.length //we fully assume it goes "name["
                     let lineRemainder = l.slice(start + 1)
-                    let indexInArrayOrNaN = parseInt(lineRemainder)   //it may a for-loop index
+                    let indexInArrayOrNaN = parseInt(lineRemainder)
+                    //indexInArray may a variable, for example a for-loop index
+                    //could try to extract it. clusterfuck imagining bah[i++], but possibly that's banned anyway
                     let isIndexless = isNaN(indexInArrayOrNaN)
                     if (!isIndexless) {
                         indexInArray = indexInArrayOrNaN
@@ -141,7 +143,7 @@ async function initCompilation() {
                 if (!variable.isUniform && !variable.isIn)
                     appearance = variable.type.getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable)
                 else if (isAnElementOfAUniformArray) {
-                    //guaranteed: not the first mention
+                    //guaranteed: this not the first mention, because how could you address an element without declaring it
                     //there will be an array appearance for the declaration. This appearance is just an entry from that array
                     let arrayUniformOfVariable = variable.mentions[0].appearance.uniform.value
                     appearance = variable.type.nonArrayType.getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable, arrayUniformOfVariable[indexInArray])

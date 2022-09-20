@@ -28,7 +28,8 @@ function initCamera() {
         right: new Mv(),
         bottom: new Mv(),
         top: new Mv(),
-        far: new Mv()
+        far: new Mv(),
+        near: new Mv()
     }
     camera.mvs = {
         pos: new Mv(),
@@ -47,6 +48,13 @@ function initCamera() {
         theCamera.worldToCanvas.copy(theCamera.projectionMatrix).multiply(theCamera.matrixWorldInverse)
     }
 
+    camera.pointInFront = (pt) => {
+        let a = camera.frustum.near
+        let b = pt
+        let meetPss = b[14] * a[1] + b[13] * a[2] + b[12] * a[3] + b[11] * a[4]
+        return meetPss < 0.
+    }
+
     let fovHorizontal = otherFov(camera.fov, camera.aspect, true)
     let frameQuatHorizontal = new Mv().fromAxisAngle(e31, -fovHorizontal / 2. * (TAU / 360.))
     let frameQuatVertical   = new Mv().fromAxisAngle(e23, -camera.fov / 2. * (TAU / 360.))
@@ -56,6 +64,7 @@ function initCamera() {
         frustumUntransformed[planeName] = new Mv()
 
     frustumUntransformed.far.plane(camera.far * .97, 0., 0., 1.)
+    frustumUntransformed.near.plane(camera.near * 1.03, 0., 0., 1.)
     frameQuatHorizontal.sandwich(e1, frustumUntransformed.left)
     frameQuatVertical.sandwich(e2, frustumUntransformed.bottom)
     frameQuatHorizontal[0] *= -1.

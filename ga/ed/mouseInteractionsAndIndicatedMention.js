@@ -91,11 +91,25 @@ function initMouseInteractions() {
                 if (indicatedMention.variable.isUniform)
                     indicatedMention.appearance.updateStateFromDrag(grabbedDw) 
                 else if(indicatedMention.variable.isIn) {
-                    raycaster.ray.copy(getMouseThreeRay(dws.untransformed))
+                    let mouseRayBiv = biv0.fromMv(getMouseRay(dws.untransformed))
+
                     let initialMesh = dws.untransformed.getInitialMesh()
-                    let intersection = raycaster.intersectObject(initialMesh, false)[0]
-                    if (intersection !== undefined)
-                        setInIndex(intersection.face.a)
+                    let attri = initialMesh.geometry.attributes.position
+                    let closestDist = Infinity
+                    let closestIndex = -1
+                    for (let i = 0, il = attri.count; i < il; ++i) {
+                        mv0.point(attri.getX(i), attri.getY(i), attri.getZ(i), 1.)
+                        let dist = mouseRayBiv.distanceToPoint(mv0)
+                        if(dist < closestDist) {
+                            if(camera.pointInFront(mv0)) {
+                                closestDist = dist
+                                closestIndex = i
+                            }
+                        }
+                    }
+
+                    if (closestIndex !== -1)
+                        setInIndex(closestIndex)
                 }
                 else {
                     indicatedMention.appearance.updateStateFromDrag(grabbedDw)

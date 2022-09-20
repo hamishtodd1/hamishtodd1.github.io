@@ -96,8 +96,8 @@ async function initDws() {
             return ret
         }
 
-        NewMesh(geo,mat) {
-            let ret = new THREE.Mesh(geo,mat)
+        NewMesh(geo,mat,meshType = `Mesh`) {
+            let ret = new THREE[meshType](geo,mat)
             ret.castShadow = this.hasLights
 
             this.NewObject3d(ret)
@@ -106,6 +106,9 @@ async function initDws() {
         }
 
         NewObject3d(object3d) {
+            if (object3d === undefined)
+                object3d = new THREE.Object3D()
+
             object3d.visible = false
             this.#scene.add(object3d)
 
@@ -113,20 +116,22 @@ async function initDws() {
                 this.visible = true
                 this.elem.style.display = ''
             }
+
+            return object3d
         }
         
-        addNonMentionChild (ch) {
-            this.nonMentionChildren.push(ch)
-            this.#scene.add(ch)
+        addNonMentionChild (child) {
+            this.nonMentionChildren.push(child)
+            this.#scene.add(child)
 
             if (!this.visible) {
                 this.visible = true
                 this.elem.style.display = ''
             }
         }
-        removeNonMentionChild(ch) {
-            this.nonMentionChildren.splice(this.nonMentionChildren.indexOf( ch ))
-            this.#scene.remove(ch)
+        removeNonMentionChild(child) {
+            this.nonMentionChildren.splice(this.nonMentionChildren.indexOf( child ))
+            this.#scene.remove(child)
         }
 
         render() {

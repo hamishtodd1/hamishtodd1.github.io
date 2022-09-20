@@ -100,6 +100,14 @@ function init301WithoutDeclarations(basisNames) {
             let m = (this[0] * this[5] + this[1] * this[4] + this[2] * this[3]), a = Math.sqrt(l), c = Math.cos(a), s = Math.sin(a) / a, t = m / l * (c - s)
             return target.set(c, s * this[0] + t * this[5], s * this[1] + t * this[4], s * this[2] + t * this[3], s * this[3], s * this[4], s * this[5], m * s)
         }
+
+        distanceToPoint(pt) {
+            //join plane magnitude
+            let planeX = pt[11]*this[4] - pt[12]*this[3] + pt[14]*this[0]
+            let planeZ = pt[12]*this[5] - pt[13]*this[4] + pt[14]*this[2]
+            let planeY = pt[13]*this[3] - pt[11]*this[5] + pt[14]*this[1]
+            return Math.sqrt(sq(planeX) + sq(planeY) + sq(planeZ))
+        }
     }
 
     class Dq extends GeneralVector {
@@ -541,6 +549,11 @@ function init301WithoutDeclarations(basisNames) {
     let minusOneMv = new Mv()
     minusOneMv[0] = -1.
 
+    zeroBiv = new Biv()
+    biv0 = new Biv()
+    biv1 = new Biv()
+    biv2 = new Biv()
+
     e0 = MvFromFloatAndIndex(1., 1)
     e1 = MvFromFloatAndIndex(1., 2)
     e2 = MvFromFloatAndIndex(1., 3)
@@ -683,7 +696,7 @@ function createVerboseSharedFunctions(createFunction) {
     target[ 1] = a[ 1] * b[15] + a[ 5] * b[13] + a[ 6] * b[12] + a[ 7] * b[11] - a[11] * b[ 7] - a[12] * b[ 6] - a[13] * b[ 5] + a[15] * b[ 1];
     target[ 0] = a[ 0] * b[15] + a[ 1] * b[14] + a[ 2] * b[13] + a[ 3] * b[12] - a[ 4] * b[11] + a[ 5] * b[10] + a[ 6] * b[ 9] + a[ 7] * b[ 8]
                + a[ 8] * b[ 7] + a[ 9] * b[ 6] + a[10] * b[ 5] + a[11] * b[ 4] + a[12] * b[ 3] + a[13] * b[ 2] + a[14] * b[ 1] + a[15] * b[ 0];`)
-
+    
     createFunction(`add`, [`a`, `b`], `
     target[ 0] = a[ 0] + b[ 0];
     target[ 1] = a[ 1] + b[ 1];

@@ -2,16 +2,15 @@ function initCaretInteractions() {
 
     let lowestChangedLineSinceCompile = -1
 
-    let $changedLineIndicator = document.createElementNS('http://www.w3.org/2000/svg', 'line') //weblink refers to a standard
-    ourSvg.appendChild($changedLineIndicator)
-    $changedLineIndicator.style.stroke = "rgb(180,180,180)"
+    let $changedLineIndicator = SvgLine()
+    setSvgLineColor($changedLineIndicator, 180,180,180)
     updateChangedLineIndicator = () => {
         if(lowestChangedLineSinceCompile !== Infinity) {
-            let textareaBox = textarea.getBoundingClientRect()
+            let textareaBcr = textarea.getBoundingClientRect()
             let y = lineToScreenY(lowestChangedLineSinceCompile )
             setSvgLine($changedLineIndicator,
-                textareaBox.x, y,
-                textareaBox.x + textareaBox.width, y)
+                textareaBcr.x, y,
+                textareaBcr.x + textareaBcr.width, y)
         }
         else
             setSvgLine($changedLineIndicator, -10, -10, -10, -10)
@@ -51,6 +50,12 @@ function initCaretInteractions() {
         updateSyntaxHighlightingScroll(textarea)
 
         onCaretMove()
+    }
+
+    let $focussedLineLines = []
+    for(let i = 0; i < 4; ++i) {
+        $focussedLineLines[i] = SvgLine()
+        setSvgLineColor($focussedLineLines[i], 0.5, 0.5, 0.5)
     }
 
     /////////////////////////////////////////////////////////
@@ -93,6 +98,11 @@ function initCaretInteractions() {
         let columnIndex = 0
         for (let i = 0, il = text.length; i < il; ++i) {
             if (i === caretPosition) {
+                if(caretLine !== lineIndex) {
+                    let textareaBcr = textarea.getBoundingClientRect()
+                    let y = lineToScreenY(lineIndex)
+                    setSvgHighlight(0, y, textareaBcr.width, lineHeight, $focussedLineLines)
+                }
                 caretLine = lineIndex
                 caretColumn = columnIndex
                 break
@@ -124,6 +134,7 @@ function initCaretInteractions() {
 
         caretPositionOld = caretPosition
     }
+
 
     let caretAboveLclscIndicatorOld = true
     function updateDwsVisibility() {

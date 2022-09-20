@@ -1,17 +1,17 @@
 /*
+
+
 TODO
     Ohhhh, could have cos and sin visualization?
     For next presentation
-        Dual quaternion skinning
-            At least get the vertices from the thingy
-            Need to be loading those bones from the file
-        Optimized sandwiches!
         Latex annotation
         Better error reporting
             Highlight where it was but just put the words at the bottom
         Make the transparent spotted dome
         https://twitter.com/joyoflivecoding
+        hide the output window when there's an error
     Bugs
+        control3!
         Something happened that made tubeGeometry have NaNs, crashed the whole of threejs so you couldn't see anything
         Something caused the vertex to flick back and forth
         Sort out duplicates. At least in the senses that you need the damn things
@@ -58,6 +58,11 @@ TODO
             Structs:
                 Are how you make your puppets, of course
     GDC
+        Do a numberphile video (or two?) for the same time period
+            The quaternion equation
+                Double cover. Seen in the mobius strip trick. Show the angle between two mirrors
+            The dome, which shows rotation*rotation=rotation
+        Optimized sandwiches!
         Importing models that are not the size of this one. Sigh.
         "Teardrops" visualization. Once you've sorted out the meaning of that shit!
             Can turn off and on
@@ -216,6 +221,10 @@ async function init() {
         console.log(`Took ${timeAfter - timeBefore} milliseconds.`)
     }
 
+    let style = window.getComputedStyle(textarea)
+    lineHeight = parseInt(style.lineHeight)
+    initSvgLines()
+
     let defaultTextFull = await getTextFile('shaders/default.glsl')
     let defaultText = defaultTextFull.slice(0, defaultTextFull.indexOf(`//END//`))    
     textarea.value = defaultText
@@ -270,12 +279,6 @@ async function init() {
 
     initCaretInteractions()
     
-    await importedModel.promise
-    compile(false)
-    updateMentionVisibilitiesAndIndication()
-    setCaretPosition(196)
-    
-
     document.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === true) {
             compile(false)
@@ -288,20 +291,21 @@ async function init() {
         let clockDelta = clock.getDelta()
         frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
         ++frameCount
-        forEachUsedAppearance((a)=>{
-            if(a.variable.isUniform) {
+        variables.forEach((v)=>{
+            if(v.isUniform) {
                 let needsUpdate = true
                 
-                if(a.variable.name === `time`)
+                let a = v.mentions[0].appearance
+                if(v.name === `time`)
                     a.state[0] = clock.getElapsedTime()
-                else if(a.variable.name === `frameDelta`)
+                else if(v.name === `frameDelta`)
                     a.state[0] = frameDelta
-                else if(a.variable.name === `mouse`) {
+                else if(v.name === `mouse`) {
                     let [xProportion, yProportion] = oldClientToDwNdc(dws.final)
                     a.state.x = xProportion
                     a.state.y = -yProportion
                 }
-                else if(a.variable.name === `boneMatrices`)
+                else if(v.name === `boneMatrices`)
                     importedModel.updateBones()
                 else
                     needsUpdate = false
@@ -337,8 +341,13 @@ async function init() {
         requestAnimationFrame(render)
     }
 
+    await importedModel.promise
+    compile(false)
+    updateMentionVisibilitiesAndIndication()
+
     // initEquations()
+    setCaretPosition(390)
     addToCameraLonLat(0., 0.)
-    zoomCameraOutByAmount(55.)
+    zoomCameraOutByAmount(260./3.7)
     render()
 }

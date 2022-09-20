@@ -1,5 +1,11 @@
 /*
-    All smoothly animated
+    So, could have the animation play when you go onto the line
+    Hmm, isn't this more about mat2s?
+        You want to show off adding and multiplying
+        createAdder(float amt), creating a translation
+        createMultiplier(float amt), creating a translation
+
+    Tempting to use 3,1 but stick to the real case.
 
     Interesting/maybe sad how you don't get to see what "units" are being made
 
@@ -122,4 +128,31 @@ async function initHalfplane() {
     updateHalfplane = () => {
         rainbowMat.uniforms.leftEnd.value = Math.sin(clock.getElapsedTime())
     }
+
+    
 }
+
+// {
+//     class mv21 {
+        
+
+//         mul() {
+            
+//         }
+//     }
+
+//     mul21(a,b,target) {
+//         target[0] = b[0] * a[0] + b[1] * a[1] + b[2] * a[2] - b[3] * a[3] - b[4] * a[4] + b[5] * a[5] + b[6] * a[6] + b[7] * a[7];
+//         target[1] = b[1] * a[0] + b[0] * a[1] - b[4] * a[2] + b[5] * a[3] + b[2] * a[4] - b[3] * a[5] + b[7] * a[6] + b[6] * a[7];
+//         target[2] = b[2] * a[0] + b[4] * a[1] + b[0] * a[2] + b[6] * a[3] - b[1] * a[4] - b[7] * a[5] - b[3] * a[6] - b[5] * a[7];
+//         target[3] = b[3] * a[0] + b[5] * a[1] + b[6] * a[2] + b[0] * a[3] - b[7] * a[4] - b[1] * a[5] - b[2] * a[6] - b[4] * a[7];
+//         target[4] = b[4] * a[0] + b[2] * a[1] - b[1] * a[2] - b[7] * a[3] + b[0] * a[4] + b[6] * a[5] - b[5] * a[6] - b[3] * a[7];
+//         target[5] = b[5] * a[0] + b[3] * a[1] - b[7] * a[2] - b[1] * a[3] + b[6] * a[4] + b[0] * a[5] - b[4] * a[6] - b[2] * a[7];
+//         target[6] = b[6] * a[0] + b[7] * a[1] + b[3] * a[2] - b[2] * a[3] - b[5] * a[4] + b[4] * a[5] + b[0] * a[6] + b[1] * a[7];
+//         target[7] = b[7] * a[0] + b[6] * a[1] - b[5] * a[2] + b[4] * a[3] + b[3] * a[4] - b[2] * a[5] + b[1] * a[6] + b[0] * a[7];
+//     }
+
+//     adder21() {
+//         //something that translates e1 to, err, the one angled correctly
+//     }
+// }

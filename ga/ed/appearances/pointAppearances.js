@@ -156,9 +156,7 @@ function initPoints() {
         }
 
         _getTextareaManipulationDw() {
-            if (this.variable.name === `initialVertex`)
-                return uDw
-            else if(this.state.w === 0.)
+            if(this.state.w === 0.)
                 return iDw
             else
                 return eDw
