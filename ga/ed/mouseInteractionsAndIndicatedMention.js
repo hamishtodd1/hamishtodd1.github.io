@@ -93,8 +93,7 @@ function initMouseInteractions() {
                 else if(indicatedMention.variable.isIn) {
                     let mouseRayBiv = biv0.fromMv(getMouseRay(dws.untransformed))
 
-                    let initialMesh = dws.untransformed.getInitialMesh()
-                    let attri = initialMesh.geometry.attributes.position
+                    let attri = dws.untransformed.getInitialMeshAttributes().position
                     let closestDist = Infinity
                     let closestIndex = -1
                     for (let i = 0, il = attri.count; i < il; ++i) {

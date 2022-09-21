@@ -4,6 +4,10 @@ function init301WithoutDeclarations(basisNames) {
     const N_ROTOR_COEFS = 8
     const N_BIVECTOR_COEFS = 6
 
+    sinc = (a) => {
+        return a == 0. ? 1. : Math.sin(a) / a;
+    }
+
     class GeneralVector extends Float32Array {
         
         set() {
@@ -167,6 +171,39 @@ function init301WithoutDeclarations(basisNames) {
             let b = Math.acos(this[0]) * Math.sqrt(a) // rotation scale
             let c = a * this[7] * (1. - this[0] * b)  // translation scale
             return target.set(c * this[6] + b * this[1], c * this[5] + b * this[2], c * this[4] + b * this[3], b * this[4], b * this[5], b * this[6])
+        }
+
+        mul(b,target) {
+            target[ 0] = b[ 0] * this[ 0] - b[ 4] * this[ 4] - b[ 5] * this[ 5] - b[ 6] * this[ 6]
+
+            target[ 1] = b[ 1] * this[ 0] + b[ 0] * this[ 1] - b[ 4] * this[ 2] + b[ 5] * this[ 3] + b[ 2] * this[ 4] - b[ 3] * this[ 5] - b[ 7] * this[ 6] - b[ 6] * this[ 7]
+            target[ 2] = b[ 2] * this[ 0] + b[ 4] * this[ 1] + b[ 0] * this[ 2] - b[ 6] * this[ 3] - b[ 1] * this[ 4] - b[ 7] * this[ 5] + b[ 3] * this[ 6] - b[ 5] * this[ 7]
+            target[ 3] = b[ 3] * this[ 0] - b[ 5] * this[ 1] + b[ 6] * this[ 2] + b[ 0] * this[ 3] - b[ 7] * this[ 4] + b[ 1] * this[ 5] - b[ 2] * this[ 6] - b[ 4] * this[ 7]
+            
+            target[ 4] = b[ 4] * this[ 0] + b[ 0] * this[ 4] + b[ 6] * this[ 5] - b[ 5] * this[ 6]
+            target[ 5] = b[ 5] * this[ 0] - b[ 6] * this[ 4] + b[ 0] * this[ 5] + b[ 4] * this[ 6]
+            target[ 6] = b[ 6] * this[ 0] + b[ 5] * this[ 4] - b[ 4] * this[ 5] + b[ 0] * this[ 6]
+            //the quaternion part is only affected by the quaternion parts
+
+            target[ 7] = b[ 7] * this[ 0] + b[ 6] * this[ 1] + b[ 5] * this[ 2] + b[ 4] * this[ 3] + b[ 3] * this[ 4] + b[ 2] * this[ 5] + b[ 1] * this[ 6] + b[ 0] * this[ 7]
+        }
+
+        getReverse(target) {
+            target.copy(this)
+            for(let i = 1; i < 7; ++i)
+                target[i] *= -1.
+        }
+
+        reverseSelf() {
+            this.getReverse(localDq0)
+            this.copy(localDq0)
+        }
+
+        fromMat4(mat) {
+            mat.decompose(v1, q1, v2)
+            let asMv = newMv.fromPosQuat(v1, q1)
+            boneInverseDqs[i].fromMv(asMv)
+            return this
         }
     }
     window.Dq = Dq
@@ -440,6 +477,7 @@ function init301WithoutDeclarations(basisNames) {
         }
 
         fromPosQuat(p, q) {
+            //maybe nicer as a dq specifically!
             let quat = newMv
             quat.fromQuaternion(q)
             
@@ -447,7 +485,7 @@ function init301WithoutDeclarations(basisNames) {
             let doubleTrans = mul(pPoint, e123, newMv)
             let trans = doubleTrans.sqrt(newMv)
             
-            mul(trans,quat, this)
+            mul(trans, quat, this)
 
             return this
         }

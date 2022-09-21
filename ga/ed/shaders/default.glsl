@@ -7,7 +7,7 @@ uniform vec2 mouse;
 in vec4 skinWeight;
 in vec4 skinIndex;
 
-uniform mat4[65] boneMatrices;
+uniform mat4[49] boneMatrices;
 
 vec4 getChangedVertex(in vec4 initialVertex) {
     float control1 = .5;

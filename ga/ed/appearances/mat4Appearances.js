@@ -119,6 +119,7 @@ function initMat4s() {
     ///////////
     // They are transforms, think about it as transforms
 
+    let boneMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF })
     let boneGeo = new THREE.WireframeGeometry(new THREE.OctahedronGeometry(1.))
     let arr = boneGeo.attributes.position.array
     for (let i = 1, il = arr.length; i < il; i += 3) {
@@ -131,12 +132,20 @@ function initMat4s() {
             }
         }
     }
-    let boneMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF })
-    function BoneMesh() {
-        return new THREE.LineSegments(boneGeo, boneMat)
-    }
 
-    class arrayMat4Appearance extends Appearance {
+    //a skeleton really has more things to be visualized. 
+    // There's the bind pose skeleton
+    //and there are, for each bone, a transformation taking it to its animated state
+    //arguably there's the hierarchy itself
+    //this is CPU side. But, your goal is to teach people how dqs work
+    //is your visualization of them not good for understanding the one thing people most wish to use it for?
+
+    //is there some way to see the vertex in the "local space of the bone"?
+    //Is that necessary? Or is it a very non-covariant way of thinking? Maybe dqs get rid of it? Fucking hope so
+
+    //is this even an appearance? It doesn't have a specific location in the window
+    //it is applicable to showing the dqs
+    class skeletonAppearance extends Appearance {
 
         constructor(arrayLength) {
             super()
@@ -174,7 +183,7 @@ function initMat4s() {
         _updateStateFromDrag() {
             //move them all around as if grabbed?
             //one day! Will be fun.
-            //if they're not uniforms, need a way to override them, which will be a nightmare
+            //if they're not uniforms, need a way to override them, which will be a fucking nightmare
         }
 
         updateMeshesFromState() {
@@ -189,7 +198,7 @@ function initMat4s() {
         }    
     }
 
-    let nonArrayType = new AppearanceType(`mat4`, 16, mat4Appearance, getNewUniformValue, outputAssignmentPropts, true, false)
-    let arrayAt = new AppearanceType(`mat4`, 16, arrayMat4Appearance, getNewUniformValue, outputAssignmentPropts, true, true)
-    arrayAt.nonArrayType = nonArrayType
+    let nonArrayType = new AppearanceType(`mat4`, 16, mat4Appearance,      getNewUniformValue, outputAssignmentPropts, true, false)
+    let arrayType    = new AppearanceType(`mat4`, 16, skeletonAppearance,  getNewUniformValue, outputAssignmentPropts, true, true )
+    arrayType.nonArrayType = nonArrayType
 }

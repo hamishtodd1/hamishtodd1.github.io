@@ -13,23 +13,6 @@ struct weight4 {
     float w0; float w1; float w2; float w3;
 };
 
-// getting erroneous stuff from this, hopefully IT is wrong
-// vec4 applyDqToNormalizedPoints(in Dq dq, in vec4 pt) {
-//     float a1 = dq.e01, a2 = dq.e02, a3 = dq.e03, a4 = dq.e12, a5 = dq.e31, a6 = dq.e23;
-//     float _2a0 = 2. * dq.scalar, _2a4 = 2. * a4, _2a5 = 2. * a5, a0a0 = dq.scalar * dq.scalar, a4a4 = a4 * a4, a5a5 = a5 * a5, a6a6 = a6 * a6, _2a6 = 2. * a6, _2a0a4 = _2a0 * a4, _2a0a5 = _2a0 * a5, _2a0a6 = _2a0 * a6, _2a4a5 = _2a4 * a5, _2a4a6 = _2a4 * a6, _2a5a6 = _2a5 * a6;
-//     float n0 = (_2a0 * a3 + _2a4 * dq.e0123 - _2a6 * a2 - _2a5 * a1), x0 = (a0a0 + a4a4 - a5a5 - a6a6), y0 = (_2a4a5 + _2a0a6), z0 = (_2a4a6 - _2a0a5);
-//     float n1 = (_2a4 * a1 - _2a0 * a2 - _2a6 * a3 + _2a5 * dq.e0123), x1 = (_2a4a5 - _2a0a6), y1 = (a0a0 - a4a4 + a5a5 - a6a6), z1 = (_2a0a4 + _2a5a6);
-//     float n2 = (_2a0 * a1 + _2a4 * a2 + _2a5 * a3 + _2a6 * dq.e0123), x2 = (_2a0a5 + _2a4a6), y2 = (_2a5a6 - _2a0a4), z2 = (a0a0 - a4a4 - a5a5 + a6a6);
-
-//     vec4 ret = vec4(
-//         x0*pt.x + y0*pt.y + z0*pt.z + n0*pt.w,
-//         x1*pt.x + y1*pt.y + z1*pt.z + n1*pt.w,
-//         x2*pt.x + y2*pt.y + z2*pt.z + n2*pt.w,
-//         1.
-//     );
-//     return ret;
-// }
-
 //might be good to normalize afterwards
 Dq dqAdd(in Dq a, in Dq b) {
     return Dq( a.scalar+b.scalar, a.e01+b.e01, a.e02+b.e02, a.e03+b.e03, a.e12+b.e12, a.e31+b.e31, a.e23+b.e23, a.e0123+b.e0123 );

@@ -25,84 +25,31 @@
 function initMeshDw() {
     let dw = new Dw(`untransformed`, true, camera, false) //really should be "initialMesh"
     
-    let initialMesh = null
     let attributes = null
-    dw.getInitialMesh = () => {
-        return initialMesh
+    let skeleton = null
+    let boneInverseDqs = null
+    dw.getInitialMeshAttributes = () => {
+        return attributes
     }
     
     initGltf()
     let mixer = null
-    let model = null
-    let walkAnimation = null
-    let firstBone = null
-
-    let holder = new THREE.Object3D()
-    holder.rotation.x -= TAU / 4.
-    holder.position.y -= 2.
-    holder.scale.setScalar(.02)
-    dw.addNonMentionChild(holder)
-
-    let boneInverses = []
 
     let uniformAppearances = {}
-    attemptAppearanceIdentifationWithImportedModelUniform = (appearance, name, uniforms) => {
-        if (name === `boneMatrices` && appearance.variable.arrayLength === 65) {
-            // uniforms.boneMatrices = boneMatricesUniform
-            uniformAppearances.boneMatrices = appearance
-        }
-
-        // if(name === `threeBindMatrix`) {
-        //     uniformAppearances.threeBindMatrix = appearance
-        // }
-
-        //bindMatrix is a uniform. 
-        //it's not necessarily this "holder" thing
-    }
-
-    attemptAppearanceIdentifationWithImportedModelIn = (appearance, name, geo) => {
-        let nameForModel = name === `initialVertex` ? `position` : name
-        if (attributes[nameForModel] !== undefined) {
-            geo.setAttribute(nameForModel, attributes[nameForModel])
-            inAppearances[nameForModel] = appearance
-            //might be nice to check whether the setup of the variable in the buffer matches what we have here
-
-            if(name === `skinIndex`) {
-                //could point to the correct part of the skeleton
-                //seems intuitive!
-            }
-        }
-
-        // if(nameForModel === `position`)
-        //     geo.setIndex(initialMesh.geometry.index)
-    }
     
     let promise = new Promise(resolve => {
         new GLTFLoader().load('data/Soldier.glb', function (gltf) {
             
-            model = gltf.scene
-            log(model)
-            
-            initialMesh = model.children[0].children[1]
-            attributes = initialMesh.geometry.attributes
-            
-            walkAnimation = gltf.animations[3]
-            
-            //but is this the same order in which they go in boneMatrices?
-            
-            firstBone = model.children[0].children[0]
-            // firstBone.parent.updateMatrixWorld()
-            
-            setUpBindMatrix(firstBone)
-            // log(firstBone.matrixWorld.getMaxScaleOnAxis())
-            // log(v1.setFromMatrixPosition(firstBone.parent.matrixWorld))
-            
+            let model = gltf.scene
             mixer = new THREE.AnimationMixer(model)
+            
+            let initialMesh = model.children[0].children[1]
+            attributes = initialMesh.geometry.attributes
+            skeleton = initialMesh.skeleton
+            
+            let walkAnimation = gltf.animations[3]
             let walkAction = mixer.clipAction(walkAnimation)
             walkAction._mixer._activateAction(walkAction)
-
-            // so, maybe the indices are off
-            // would be nice to visualize them
 
             resolve()
         })
@@ -117,73 +64,89 @@ function initMeshDw() {
             for(let i = 0; i < appearance.variable.type.numFloats; ++i)
                 arrayGetter[i] = attributes[key][coordGetters[i]](focussedIndex)
             if(key === `position`)
-                arrayGetter[3] = 1. //getW will have been attempted but resulted in garbage
+                arrayGetter[3] = 1. //getW will have been attempted, but will have resulted in garbage
             appearance.floatArrayToState(arrayGetter)
         })
     }
 
-    let bmIndex = 0
-    const identityMatrix = new THREE.Matrix4()
-    let ourActualPosition = new THREE.Vector3()
-    let childActualPosition = new THREE.Vector3()
-    function setUpBindMatrix(bone) {
-        bone.updateMatrixWorld()
-        boneInverses[bmIndex] = bone.matrixWorld.clone()
-        boneInverses[bmIndex].invert()
-        // log(boneInverses[bmIndex].elements)
-        ++bmIndex
-        
-        bone.children.forEach((child) => {
-            setUpBindMatrix(child)
-        })
-    }
-    let firstDesiredLength = -1
-    function updateBoneMeshMatrix( bone ) {
-        let bmIndexThisTime = bmIndex
-        ++bmIndex
+    attemptAppearanceIdentifationWithImportedModelUniform = (appearance, name, uniforms) => {
+        if (name === `boneMatrices` && appearance.variable.arrayLength === skeleton.bones.length) {
+            // uniforms.boneMatrices = boneMatricesUniform
+            uniformAppearances.boneMatrices = appearance
+        }
 
-        bone.updateMatrixWorld()        
-        let boneMeshMat = uniformAppearances.boneMatrices.meshes[bmIndexThisTime].matrix
-        boneMeshMat.copy(bone.matrixWorld)
-        
-        let shaderMatrix = uniformAppearances.boneMatrices.state[bmIndexThisTime]
-        shaderMatrix.multiplyMatrices(bone.matrixWorld, boneInverses[bmIndexThisTime])
+        if (name === `boneDqs` && appearance.variable.arrayLength === skeleton.bones.length) {
+            skeleton.bones.forEach((bone, i) => {
+                boneDqs[i] = new Dq()
+                boneInverseDqs[i] = new Dq()
 
-
-        let desiredLength = Infinity
-        bone.children.forEach((child)=>{
-            updateBoneMeshMatrix(child )
-        })
-        ourActualPosition.setFromMatrixPosition(bone.matrixWorld)
-        bone.children.forEach((child) => {
-            childActualPosition.setFromMatrixPosition(child.matrixWorld)
-            let dist = ourActualPosition.distanceTo(childActualPosition)
-            if ( dist < desiredLength )
-                desiredLength = dist
-        })
-
-        if(firstDesiredLength === -1)
-            firstDesiredLength = desiredLength
-        if(desiredLength === Infinity)
-            desiredLength = firstDesiredLength
-
-        for (let i = 0; i < 3; ++i) {
-            v2.fromArray(boneMeshMat.elements, i * 4)
-            v2.setLength(desiredLength )
-            v2.toArray(boneMeshMat.elements, i * 4)
+                bone.updateMatrixWorld()
+                m1.copy(bone.matrixWorld).invert() //will be a bit more satisfying to invert the dq (reverse)
+                boneInverseDqs[i].fromMat4(m1)
+            })
         }
     }
+
+    attemptAppearanceIdentifationWithImportedModelIn = (appearance, name, geo) => {
+        let nameForModel = name === `initialVertex` ? `position` : name
+        if (attributes[nameForModel] !== undefined) {
+            geo.setAttribute(nameForModel, attributes[nameForModel])
+            inAppearances[nameForModel] = appearance
+            //might be nice to check whether the setup of the variable in the buffer matches what we have here
+
+            if (name === `skinIndex`) {
+                //could point to the correct bone mesh in the skeleton
+                //seems intuitive!
+            }
+        }
+    }
+
+    //for updating bone meshes
+    let ourActualPosition = new THREE.Vector3()
+    let childActualPosition = new THREE.Vector3()
+    let firstDesiredLength = -1
     
-    paused = false
     return {
         promise,
         updateBones: () => {
-            if(!paused)
-                mixer.update(frameDelta)
-            bmIndex = 0
-            firstBone.parent.updateMatrixWorld()
-            firstBone.parent.matrixWorld.copy(identityMatrix)
-            updateBoneMeshMatrix(firstBone)
+            mixer.update(frameDelta)
+
+            skeleton.bones.forEach((bone,i)=>{
+                bone.updateMatrixWorld()
+
+                //what the *shader* calls the bone matrix. Different from bone.matrix
+                let boneMatrix = uniformAppearances.boneMatrices.state[i]
+                boneMatrix.multiplyMatrices(bone.matrixWorld, skeleton.boneInverses[i])
+
+                // let boneDq = uniformAppearances.boneDqs.state[i]
+                // dq0.fromMat4(bone.matrixWorld).mul( boneInverseDqs[i], boneDq)
+            })
+
+            skeleton.bones.forEach((bone, i) => {
+                let desiredLength = Infinity
+
+                let boneMeshMat = uniformAppearances.boneMatrices.meshes[i].matrix
+                boneMeshMat.copy(bone.matrixWorld)
+                
+                ourActualPosition.setFromMatrixPosition(bone.matrixWorld)
+                bone.children.forEach((child) => {
+                    childActualPosition.setFromMatrixPosition(child.matrixWorld)
+                    let dist = ourActualPosition.distanceTo(childActualPosition)
+                    if (dist < desiredLength)
+                        desiredLength = dist
+                })
+
+                if (firstDesiredLength === -1)
+                    firstDesiredLength = desiredLength
+                if (desiredLength === Infinity)
+                    desiredLength = firstDesiredLength
+
+                for (let i = 0; i < 3; ++i) {
+                    v2.fromArray(boneMeshMat.elements, i * 4)
+                    v2.setLength(desiredLength)
+                    v2.toArray(boneMeshMat.elements, i * 4)
+                }
+            })
         }
     }
 }

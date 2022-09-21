@@ -52,11 +52,11 @@ function initCaretInteractions() {
         onCaretMove()
     }
 
-    let $focussedLineLines = []
-    for(let i = 0; i < 4; ++i) {
-        $focussedLineLines[i] = SvgLine()
-        setSvgLineColor($focussedLineLines[i], 0.5, 0.5, 0.5)
-    }
+    // let $focussedLineLines = []
+    // for(let i = 0; i < 4; ++i) {
+    //     $focussedLineLines[i] = SvgLine()
+    //     setSvgLineColor($focussedLineLines[i], 0.5, 0.5, 0.5)
+    // }
 
     /////////////////////////////////////////////////////////
     // Meant to occur BEFORE the character has been put in //
@@ -85,7 +85,7 @@ function initCaretInteractions() {
     ////////////////////////////////////////////////////////
     textarea.addEventListener('input',afterInput)
 
-    textarea.addEventListener('scroll', () => {
+    textarea.addEventListener('scroll', (event) => {
         updateChangedLineIndicator()
         updateSyntaxHighlightingScroll(textarea)
     })
@@ -98,11 +98,11 @@ function initCaretInteractions() {
         let columnIndex = 0
         for (let i = 0, il = text.length; i < il; ++i) {
             if (i === caretPosition) {
-                if(caretLine !== lineIndex) {
-                    let textareaBcr = textarea.getBoundingClientRect()
-                    let y = lineToScreenY(lineIndex)
-                    setSvgHighlight(0, y, textareaBcr.width, lineHeight, $focussedLineLines)
-                }
+                // if(caretLine !== lineIndex) {
+                //     let textareaBcr = textarea.getBoundingClientRect()
+                //     let y = lineToScreenY(lineIndex)
+                //     setSvgHighlight(0, y, textareaBcr.width, lineHeight, $focussedLineLines)
+                // }
                 caretLine = lineIndex
                 caretColumn = columnIndex
                 break

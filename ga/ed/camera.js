@@ -110,13 +110,18 @@ function initCamera() {
         })
     }
     document.addEventListener('wheel', (event) => {
-        let amt = event.deltaY > 0. ? 1.13 : 1. / 1.13
+        if(event.ctrlKey)
+            return //makes it so window resize with trackpad doesn't count
+
+        let amt = event.deltaY > 0. ? 1.07 : 1. / 1.07
         if (camera.position.length() * amt < 3.)
             amt = 3. / camera.position.length()
         if (camera.position.length() * amt > 420.)
             amt = 420. / camera.position.length()
 
         zoomCameraOutByAmount(amt)
+
+        // event.preventDefault()
     })
 
     let cameraLat = -TAU * .05

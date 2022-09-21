@@ -21460,6 +21460,7 @@
 			this.boneTexture = null;
 			this.boneTextureSize = 0;
 			this.frame = -1;
+			// debugger
 			this.init();
 		}
 
