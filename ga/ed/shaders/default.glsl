@@ -16,7 +16,7 @@ vec4 getChangedVertex(in vec4 initialVertex) {
     vec3 control3 = vec3(1.,.5,1.);
 
     boneMatrices[0];
-    mat4 firstOne = boneMatrices[0]; //what the fuck
+    mat4 firstOne = boneMatrices[0]; //what the fuck? Clue: all matrices seem the same
 
     mat4 boneMatX = boneMatrices[int(skinIndex.x)];
     mat4 boneMatY = boneMatrices[int(skinIndex.y)];

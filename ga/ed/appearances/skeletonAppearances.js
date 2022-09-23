@@ -6,20 +6,6 @@
 
 function initSkeletons() {
     let uDw = dws.untransformed
-    
-    let boneMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF })
-    let boneGeo = new THREE.WireframeGeometry(new THREE.OctahedronGeometry(1.))
-    let arr = boneGeo.attributes.position.array
-    for (let i = 1, il = arr.length; i < il; i += 3) {
-        if (i % 3 === 1) { //y coordinate
-            if (arr[i] < 0.) arr[i] = 0.
-            else if (arr[i] === 0.) {
-                arr[i] = .2
-                arr[i - 1] *= .2
-                arr[i + 1] *= .2
-            }
-        }
-    }
 
     //send in the bind pose matrices too
     //also, it lets you illustrate the dq version of "transform the vertex into the joint space"
@@ -36,33 +22,26 @@ function initSkeletons() {
             this.uniform.value = this.state = Array(arrayLength)
             this.stateOld = Array(arrayLength)
             
-            this.meshes = Array(arrayLength)
             for(let i = 0; i < arrayLength; ++i) {
-                let boneMesh = uDw.NewMesh(boneGeo,boneMat,`LineSegments`)
-                boneMesh.matrixAutoUpdate = false
-                this.meshes[i] = boneMesh
-                
                 this.state[i] = new THREE.Matrix4()
                 this.stateOld[i] = new THREE.Matrix4()
                 this.stateOld[i].elements[0] = 2.
             }
-        }
 
-        _updateStateFromDrag() {
-            //move them all around as if grabbed?
-            //one day! Will be fun
-            //if they're not uniforms, need a way to override them, which will be a fucking nightmare
+            this.meshes = []
         }
 
         updateFromState() {
-            updateBoneMeshes()
         }
-        
+
         getWorldCenter(dw,target) {
             return target.set(0.,0.,0.,1.)
         }
+        isVisibleInDw(dw){
+            return dw === uDw
+        }
         _getTextareaManipulationDw() {
-            return dws.untransformed
+            return uDw
         }    
     }
 
@@ -76,30 +55,26 @@ function initSkeletons() {
             this.uniform.value = this.state = Array(arrayLength)
             this.stateOld = Array(arrayLength)
 
-            this.meshes = Array(arrayLength)
             for (let i = 0; i < arrayLength; ++i) {
-                let boneMesh = uDw.NewMesh(boneGeo, boneMat, `LineSegments`)
-                boneMesh.matrixAutoUpdate = false
-                this.meshes[i] = boneMesh
-
-                this.state[i] = new THREE.Matrix4()
-                this.stateOld[i] = new THREE.Matrix4()
-                this.stateOld[i].elements[0] = 2.
+                this.state[i] = new Dq()
+                this.stateOld[i] = new Dq()
+                this.stateOld[i][1] = 1.
             }
+
+            this.meshes = []
         }
 
         updateFromState() {
-            updateBoneMeshes()
-        }
-
-        _updateStateFromDrag() {
         }
 
         getWorldCenter(dw, target) {
             return target.set(0., 0., 0., 1.)
         }
+        isVisibleInDw(dw){
+            return dw === uDw
+        }
         _getTextareaManipulationDw() {
-            return dws.untransformed
+            return uDw
         }
     }
 

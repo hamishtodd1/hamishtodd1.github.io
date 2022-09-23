@@ -90,7 +90,6 @@ function initAppearances() {
             return this.variable.isIn ? dws.untransformed : this._getTextareaManipulationDw()
         }
 
-        //These get overridden
         updateUniformFromState() { } //for most, uniform.value === state, so nothing need happen
 
         floatArrayToState(floatArray) {
@@ -99,6 +98,9 @@ function initAppearances() {
         stateToFloatArray(floatArray) {
             this.state.toArray(floatArray)
         }
+
+        //almost always overridden
+        _updateStateFromDrag() {}
     }
     window.Appearance = Appearance
 

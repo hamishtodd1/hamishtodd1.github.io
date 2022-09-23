@@ -28,25 +28,68 @@ function initMeshDw() {
     let attributes = null
     let skeleton = null
     let boneInverseDqs = null
-    let boneParentIndices = null
-    let standinDqUniform = null
+    let boneMeshes = null
     dw.getInitialMeshAttributes = () => {
         return attributes
     }
 
-    function updateBoneDqs(dqs) {
-        let boneIndex = 0
+    let boneMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF })
+    let boneGeo = new THREE.WireframeGeometry(new THREE.OctahedronGeometry(1.))
+    {
+        let arr = boneGeo.attributes.position.array
+        for (let i = 1, il = arr.length; i < il; i += 3) {
+            if (i % 3 === 1) { //y coordinate
+                if (arr[i] < 0.) arr[i] = 0.
+                else if (arr[i] === 0.) {
+                    arr[i] = .2
+                    arr[i - 1] *= .2
+                    arr[i + 1] *= .2
+                }
+            }
+        }
+    }
+
+    //for updating bone meshes
+    let parentWorldPosition = new THREE.Vector3()
+    let childWorldPosition = new THREE.Vector3()
+    let firstDesiredLength = -1
+    updateBoneMeshes = () => {
+        skeleton.bones.forEach((bone, i) => {
+            let desiredLength = Infinity
+
+            let boneMeshMat = boneMeshes[i].matrix
+            boneMeshMat.copy(bone.matrixWorld)
+
+            parentWorldPosition.setFromMatrixPosition(bone.matrixWorld)
+            bone.children.forEach((child) => {
+                childWorldPosition.setFromMatrixPosition(child.matrixWorld)
+                let dist = parentWorldPosition.distanceTo(childWorldPosition)
+                if (dist < desiredLength)
+                    desiredLength = dist
+            })
+
+            if (firstDesiredLength === -1)
+                firstDesiredLength = desiredLength
+            if (desiredLength === Infinity)
+                desiredLength = firstDesiredLength
+
+            for (let i = 0; i < 3; ++i) {
+                v2.fromArray(boneMeshMat.elements, i * 4)
+                v2.setLength(desiredLength)
+                v2.toArray(boneMeshMat.elements, i * 4)
+            }
+        })
+    }
+
+    function getBoneDqs(targetDqs) {
         skeleton.bones.forEach((bone,i) => {
             if(bone.type === "Bone") {
-                //calculate the dq 
                 dq0.fromPosQuat(bone.position, bone.quaternion)
-                if (boneParentIndices[i] === -1)
-                    dqs[i].copy(dq0)
-                else {
-                    dqs[boneParentIndices[i]].mul(dq0, dqs[i])
-                }
-
-                ++boneIndex
+                let boneParentIndex = skeleton.bones.indexOf(bone.parent)
+                if (boneParentIndex === -1)
+                    targetDqs[i].copy(dq0)
+                else
+                    targetDqs[boneParentIndex].mul(dq0, targetDqs[i])
             }
         })
     }
@@ -65,17 +108,20 @@ function initMeshDw() {
             let initialMesh = model.children[0].children[1]
             attributes = initialMesh.geometry.attributes
             skeleton = initialMesh.skeleton
-
             let numBones = skeleton.bones.length
-            boneParentIndices = Array(numBones)
+
+            boneMeshes = Array(skeleton.bones.length)
+            for (let i = 0; i < numBones; ++i) {
+                boneMeshes[i] = new THREE.LineSegments(boneGeo, boneMat)
+                dws.untransformed.addNonMentionChild(boneMeshes[i])
+                boneMeshes[i].matrixAutoUpdate = false
+            }
+
             boneInverseDqs = Array(numBones)
             skeleton.bones.forEach((bone,i)=>{
                 boneInverseDqs[i] = new Dq()
-                boneParentIndices[i] = skeleton.bones.indexOf(bone.parent)
             })
-            standinDqUniform = Array(numBones)
-
-            updateBoneDqs(boneInverseDqs)
+            getBoneDqs(boneInverseDqs)
             boneInverseDqs.forEach((boneInverseDq) => {
                 boneInverseDq.reverseSelf()
             })
@@ -102,14 +148,11 @@ function initMeshDw() {
         })
     }
 
-    attemptAppearanceIdentifationWithImportedModelUniform = (appearance, name, uniforms) => {
-        if (name === `boneMatrices` && appearance.variable.arrayLength === skeleton.bones.length) {
-            // uniforms.boneMatrices = boneMatricesUniform
-            meshAppearances.boneMatrices = appearance
-        }
-
-        if (name === `boneDqs` && appearance.variable.arrayLength === skeleton.bones.length) {
-            // meshAppearances.boneDqs = appearance
+    attemptAppearanceIdentifationWithImportedModelUniform = (appearance, name, uniforms) => {        
+        if (name === `boneMatrices` || name === `boneDqs` ) {
+            let correctLength = appearance.variable.arrayLength === skeleton.bones.length
+            if(correctLength)
+                meshAppearances[name] = appearance
         }
     }
 
@@ -127,60 +170,28 @@ function initMeshDw() {
         }
     }
 
-    //for updating bone meshes
-    let parentWorldPosition = new THREE.Vector3()
-    let childWorldPosition = new THREE.Vector3()
-    let firstDesiredLength = -1
-    updateBoneMeshes = () => {
-        skeleton.bones.forEach((bone, i) => {
-            let desiredLength = Infinity
-
-            let boneMeshMat = meshAppearances.boneMatrices.meshes[i].matrix
-            boneMeshMat.copy(bone.matrixWorld)
-
-            parentWorldPosition.setFromMatrixPosition(bone.matrixWorld)
-            bone.children.forEach((child) => {
-                childWorldPosition.setFromMatrixPosition(child.matrixWorld)
-                let dist = parentWorldPosition.distanceTo(childWorldPosition)
-                if (dist < desiredLength)
-                    desiredLength = dist
-            })
-
-            if (firstDesiredLength === -1)
-                firstDesiredLength = desiredLength
-            if (desiredLength === Infinity)
-                desiredLength = firstDesiredLength
-
-            for (let i = 0; i < 3; ++i) {
-                v2.fromArray(boneMeshMat.elements, i * 4)
-                v2.setLength(desiredLength)
-                v2.toArray(boneMeshMat.elements, i * 4)
-            }
-        })
-    }
-
     return {
         promise,
         updateAnimation: () => {
             mixer.update(frameDelta)
 
+            updateBoneMeshes()
+
             if(meshAppearances.boneMatrices !== undefined) {
                 skeleton.bones.forEach((bone, i) => {
                     bone.updateMatrixWorld()
 
-                    //what the *shader* calls the bone matrix. Different from bone.matrix
                     let boneMatrix = meshAppearances.boneMatrices.state[i]
                     boneMatrix.multiplyMatrices(bone.matrixWorld, skeleton.boneInverses[i])
                 })
             }
 
             if (meshAppearances.boneDqs !== undefined) {
+                getBoneDqs(meshAppearances.boneDqs.state)
                 skeleton.bones.forEach((bone, i) => {
-                    // let boneDq = meshAppearances.boneDqs.state[i]
-                    // let boneDq = standinDqUniform[i]
-                    // updateBoneDqs(standinDqUniform)
-
-                    // dq0.fromMat4(bone.matrixWorld).mul( boneInverseDqs[i], boneDq)
+                    let boneDq = meshAppearances.boneDqs.state[i]
+                    dq0.copy(boneDq)
+                    dq0.mul(boneDq, boneInverseDqs[i])
                 })
             }
         }
