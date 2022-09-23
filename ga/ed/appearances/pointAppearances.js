@@ -41,7 +41,7 @@ function initPoints() {
     let uDw = dws.untransformed
     let sDw = dws.scalar
 
-    function getNewUniformValue() {
+    function getNewUniformDotValue() {
         return new THREE.Vector4()
     }
 
@@ -56,8 +56,8 @@ function initPoints() {
         constructor() {
             super()
             
-            this.uniform.value = this.state = getNewUniformValue().set(0.,0.,0.,1.) //maybe better off as an mv?
-            this.stateOld = getNewUniformValue().set(1.,0.,0.,0.)
+            this.uniform.value = this.state = getNewUniformDotValue().set(0.,0.,0.,1.) //maybe better off as an mv?
+            this.stateOld = getNewUniformDotValue().set(1.,0.,0.,0.)
 
             let mat = new THREE.MeshBasicMaterial() //why not phong?
             mat.color = this.col
@@ -162,5 +162,5 @@ function initPoints() {
                 return eDw
         }
     }
-    new AppearanceType("vec4", 4, vec4Appearance, getNewUniformValue)
+    new AppearanceType("vec4", 4, vec4Appearance, getNewUniformDotValue)
 }

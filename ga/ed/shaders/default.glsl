@@ -8,13 +8,15 @@ in vec4 skinWeight;
 in vec4 skinIndex;
 
 uniform mat4[49] boneMatrices;
+uniform Dq[49] boneDqs;
 
 vec4 getChangedVertex(in vec4 initialVertex) {
     float control1 = .5;
     vec2 control2 = vec2(cos(time*4.),sin(time*4.));
     vec3 control3 = vec3(1.,.5,1.);
 
-    mat4 firstOne = boneMatrices[0];
+    boneMatrices[0];
+    mat4 firstOne = boneMatrices[0]; //what the fuck
 
     mat4 boneMatX = boneMatrices[int(skinIndex.x)];
     mat4 boneMatY = boneMatrices[int(skinIndex.y)];

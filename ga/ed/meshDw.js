@@ -28,14 +28,33 @@ function initMeshDw() {
     let attributes = null
     let skeleton = null
     let boneInverseDqs = null
+    let boneParentIndices = null
+    let standinDqUniform = null
     dw.getInitialMeshAttributes = () => {
         return attributes
+    }
+
+    function updateBoneDqs(dqs) {
+        let boneIndex = 0
+        skeleton.bones.forEach((bone,i) => {
+            if(bone.type === "Bone") {
+                //calculate the dq 
+                dq0.fromPosQuat(bone.position, bone.quaternion)
+                if (boneParentIndices[i] === -1)
+                    dqs[i].copy(dq0)
+                else {
+                    dqs[boneParentIndices[i]].mul(dq0, dqs[i])
+                }
+
+                ++boneIndex
+            }
+        })
     }
     
     initGltf()
     let mixer = null
 
-    let uniformAppearances = {}
+    let meshAppearances = {}
     
     let promise = new Promise(resolve => {
         new GLTFLoader().load('data/Soldier.glb', function (gltf) {
@@ -46,6 +65,20 @@ function initMeshDw() {
             let initialMesh = model.children[0].children[1]
             attributes = initialMesh.geometry.attributes
             skeleton = initialMesh.skeleton
+
+            let numBones = skeleton.bones.length
+            boneParentIndices = Array(numBones)
+            boneInverseDqs = Array(numBones)
+            skeleton.bones.forEach((bone,i)=>{
+                boneInverseDqs[i] = new Dq()
+                boneParentIndices[i] = skeleton.bones.indexOf(bone.parent)
+            })
+            standinDqUniform = Array(numBones)
+
+            updateBoneDqs(boneInverseDqs)
+            boneInverseDqs.forEach((boneInverseDq) => {
+                boneInverseDq.reverseSelf()
+            })
             
             let walkAnimation = gltf.animations[3]
             let walkAction = mixer.clipAction(walkAnimation)
@@ -72,18 +105,11 @@ function initMeshDw() {
     attemptAppearanceIdentifationWithImportedModelUniform = (appearance, name, uniforms) => {
         if (name === `boneMatrices` && appearance.variable.arrayLength === skeleton.bones.length) {
             // uniforms.boneMatrices = boneMatricesUniform
-            uniformAppearances.boneMatrices = appearance
+            meshAppearances.boneMatrices = appearance
         }
 
         if (name === `boneDqs` && appearance.variable.arrayLength === skeleton.bones.length) {
-            skeleton.bones.forEach((bone, i) => {
-                boneDqs[i] = new Dq()
-                boneInverseDqs[i] = new Dq()
-
-                bone.updateMatrixWorld()
-                m1.copy(bone.matrixWorld).invert() //will be a bit more satisfying to invert the dq (reverse)
-                boneInverseDqs[i].fromMat4(m1)
-            })
+            // meshAppearances.boneDqs = appearance
         }
     }
 
@@ -102,51 +128,61 @@ function initMeshDw() {
     }
 
     //for updating bone meshes
-    let ourActualPosition = new THREE.Vector3()
-    let childActualPosition = new THREE.Vector3()
+    let parentWorldPosition = new THREE.Vector3()
+    let childWorldPosition = new THREE.Vector3()
     let firstDesiredLength = -1
-    
+    updateBoneMeshes = () => {
+        skeleton.bones.forEach((bone, i) => {
+            let desiredLength = Infinity
+
+            let boneMeshMat = meshAppearances.boneMatrices.meshes[i].matrix
+            boneMeshMat.copy(bone.matrixWorld)
+
+            parentWorldPosition.setFromMatrixPosition(bone.matrixWorld)
+            bone.children.forEach((child) => {
+                childWorldPosition.setFromMatrixPosition(child.matrixWorld)
+                let dist = parentWorldPosition.distanceTo(childWorldPosition)
+                if (dist < desiredLength)
+                    desiredLength = dist
+            })
+
+            if (firstDesiredLength === -1)
+                firstDesiredLength = desiredLength
+            if (desiredLength === Infinity)
+                desiredLength = firstDesiredLength
+
+            for (let i = 0; i < 3; ++i) {
+                v2.fromArray(boneMeshMat.elements, i * 4)
+                v2.setLength(desiredLength)
+                v2.toArray(boneMeshMat.elements, i * 4)
+            }
+        })
+    }
+
     return {
         promise,
-        updateBones: () => {
+        updateAnimation: () => {
             mixer.update(frameDelta)
 
-            skeleton.bones.forEach((bone,i)=>{
-                bone.updateMatrixWorld()
+            if(meshAppearances.boneMatrices !== undefined) {
+                skeleton.bones.forEach((bone, i) => {
+                    bone.updateMatrixWorld()
 
-                //what the *shader* calls the bone matrix. Different from bone.matrix
-                let boneMatrix = uniformAppearances.boneMatrices.state[i]
-                boneMatrix.multiplyMatrices(bone.matrixWorld, skeleton.boneInverses[i])
-
-                // let boneDq = uniformAppearances.boneDqs.state[i]
-                // dq0.fromMat4(bone.matrixWorld).mul( boneInverseDqs[i], boneDq)
-            })
-
-            skeleton.bones.forEach((bone, i) => {
-                let desiredLength = Infinity
-
-                let boneMeshMat = uniformAppearances.boneMatrices.meshes[i].matrix
-                boneMeshMat.copy(bone.matrixWorld)
-                
-                ourActualPosition.setFromMatrixPosition(bone.matrixWorld)
-                bone.children.forEach((child) => {
-                    childActualPosition.setFromMatrixPosition(child.matrixWorld)
-                    let dist = ourActualPosition.distanceTo(childActualPosition)
-                    if (dist < desiredLength)
-                        desiredLength = dist
+                    //what the *shader* calls the bone matrix. Different from bone.matrix
+                    let boneMatrix = meshAppearances.boneMatrices.state[i]
+                    boneMatrix.multiplyMatrices(bone.matrixWorld, skeleton.boneInverses[i])
                 })
+            }
 
-                if (firstDesiredLength === -1)
-                    firstDesiredLength = desiredLength
-                if (desiredLength === Infinity)
-                    desiredLength = firstDesiredLength
+            if (meshAppearances.boneDqs !== undefined) {
+                skeleton.bones.forEach((bone, i) => {
+                    // let boneDq = meshAppearances.boneDqs.state[i]
+                    // let boneDq = standinDqUniform[i]
+                    // updateBoneDqs(standinDqUniform)
 
-                for (let i = 0; i < 3; ++i) {
-                    v2.fromArray(boneMeshMat.elements, i * 4)
-                    v2.setLength(desiredLength)
-                    v2.toArray(boneMeshMat.elements, i * 4)
-                }
-            })
+                    // dq0.fromMat4(bone.matrixWorld).mul( boneInverseDqs[i], boneDq)
+                })
+            }
         }
     }
 }

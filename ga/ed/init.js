@@ -1,8 +1,6 @@
 /*
-
-
 TODO
-    Ohhhh, could have cos and sin visualization?
+    Could have cos and sin formulae visualization?
     For next presentation
         Latex annotation
         Better error reporting
@@ -11,13 +9,12 @@ TODO
         https://twitter.com/joyoflivecoding
         hide the output window when there's an error
     Bugs
-        control3!
+        Try not indenting...
         Something happened that made tubeGeometry have NaNs, crashed the whole of threejs so you couldn't see anything
         Something caused the vertex to flick back and forth
         Sort out duplicates. At least in the senses that you need the damn things
         Possibly saw a bug with lines at infinity which was visible when just putting 1s and 0s in everything
         minus sign with sandwich
-        Mobiuses are wrong way around, translations probably aren't working
         When you change rotation, idealLine2 flicks around
         Tab and enter make it so you can't ctrl+z
         Dragging the lines at infinity
@@ -25,7 +22,9 @@ TODO
     Having chigozie and Matthew Vandevander and Pontus break it
         Try to detect which lines ASSIGN to a variable and which lines don't
     Workshop for kids at makespace (but note that this is about PGA still, so BORING workshop for the kids)
-        Allow shit to be on multiple lines
+        It'll probably be slow. At least make the axis markings a bit optimized
+        Translations for mobiuses
+        Allow shit to be on multiple lines. Semicolon, not newline
         Need EXCELLENT error reporting. This shit is all in YOUR head!!!
             Have a test framework
                 A few examples. Load them in, a few frames, move onto the next one
@@ -63,7 +62,6 @@ TODO
                 Double cover. Seen in the mobius strip trick. Show the angle between two mirrors
             The dome, which shows rotation*rotation=rotation
         Optimized sandwiches!
-        Importing models that are not the size of this one. Sigh.
         "Teardrops" visualization. Once you've sorted out the meaning of that shit!
             Can turn off and on
         2D PGA. Overlay for vectorspace Dw?
@@ -140,6 +138,7 @@ TODO
                 Eg they're of to the side and they come in
             If the variable hasn't changed value, would be nice if the versions of it that are the same as it are all highlighted
     Long term
+        General arrays?
         Optimization
             Webworkers?
             See if it slows down after 100 compiles
@@ -272,6 +271,7 @@ async function init() {
     initPoints()
     initPlanes()
     initDqs()
+    initSkeletons()
 
     initMouseInteractions()
 
@@ -291,6 +291,9 @@ async function init() {
         let clockDelta = clock.getDelta()
         frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
         ++frameCount
+
+        importedModel.updateAnimation()
+
         variables.forEach((v)=>{
             if(v.isUniform) {
                 let needsUpdate = true
@@ -305,8 +308,6 @@ async function init() {
                     a.state.x = xProportion
                     a.state.y = -yProportion
                 }
-                else if(v.name === `boneMatrices`)
-                    importedModel.updateBones()
                 else
                     needsUpdate = false
 

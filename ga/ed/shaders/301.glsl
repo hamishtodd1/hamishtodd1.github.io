@@ -20,9 +20,6 @@ Dq dqAdd(in Dq a, in Dq b) {
 Dq dqMulScalar(in Dq a, in float b) {
     return Dq( a.scalar * b, a.e01 * b, a.e02 * b, a.e03 * b, a.e12 * b, a.e31 * b, a.e23 * b, a.e0123 * b );
 }
-Dq dqAPlusBTimesT(in Dq a, in Dq b, in float t) {
-    return dqAdd(a, dqMulScalar(b, t));
-}
 
 void mvFromVec(in vec3 v, out float[16] target) {
     target[11] = v.z;
@@ -105,8 +102,6 @@ Dq joinPtsInDq(in vec4 a, in vec4 b) {
     return ret;
 }
 
-
-
 float sinc(in float a) {
     return a == 0. ? 1. : sin(a)/a;
 }
@@ -177,3 +172,68 @@ void dqExp(in Dq B, out Dq target) {
 // }
 
 //make sure to end with a newline!
+
+Dq meet(in Plane a, in Plane b) {
+    Dq ret;
+    ret.e01 = b.e1 * a.e0 - b.e0 * a.e1;
+    ret.e02 = b.e2 * a.e0 - b.e0 * a.e2;
+    ret.e03 = b.e3 * a.e0 - b.e0 * a.e3;
+    ret.e12 = b.e2 * a.e1 - b.e1 * a.e2;
+    ret.e31 = b.e1 * a.e3 - b.e3 * a.e1;
+    ret.e23 = b.e3 * a.e2 - b.e2 * a.e3;
+    return ret;
+}
+Dq mul(in Plane a, in Plane b) {
+    Dq ret;
+    ret.scalar = b.e1 * a.e1 + b.e2 * a.e2 + b.e3 * a.e3;
+
+    ret.e01 = b.e1 * a.e0 - b.e0 * a.e1;
+    ret.e02 = b.e2 * a.e0 - b.e0 * a.e2;
+    ret.e03 = b.e3 * a.e0 - b.e0 * a.e3;
+    ret.e12 = b.e2 * a.e1 - b.e1 * a.e2;
+    ret.e31 = b.e1 * a.e3 - b.e3 * a.e1;
+    ret.e23 = b.e3 * a.e2 - b.e2 * a.e3;
+
+    return ret;
+}
+Dq mul(in vec4 a, in vec4 b) {
+    Dq ret;
+    ret.scalar = -b.w * a.w;
+
+    ret.e01 = b.w * a.x - b.x * a.w;
+    ret.e02 = b.w * a.y - b.y * a.w;
+    ret.e03 = b.w * a.z - b.z * a.w;
+    return ret;
+}
+Dq mul(in Dq a, in Dq b) {
+    Dq ret;
+    ret.scalar = b.scalar * a.scalar - b.e12 * a.e12 - b.e31 * a.e31 - b.e23 * a.e23;
+
+    ret.e01 = b.e01 * a.scalar + b.scalar * a.e01 - b.e12 * a.e02 + b.e31 * a.e03 + b.e02 * a.e12 - b.e03 * a.e31 - b.e0123 * a.e23 - b.e23 * a.e0123;
+    ret.e02 = b.e02 * a.scalar + b.e12 * a.e01 + b.scalar * a.e02 - b.e23 * a.e03 - b.e01 * a.e12 - b.e0123 * a.e31 + b.e03 * a.e23 - b.e31 * a.e0123;
+    ret.e03 = b.e03 * a.scalar - b.e31 * a.e01 + b.e23 * a.e02 + b.scalar * a.e03 - b.e0123 * a.e12 + b.e01 * a.e31 - b.e02 * a.e23 - b.e12 * a.e0123;
+    
+    ret.e12 = b.e12 * a.scalar + b.scalar * a.e12 + b.e23 * a.e31 - b.e31 * a.e23;
+    ret.e31 = b.e31 * a.scalar - b.e23 * a.e12 + b.scalar * a.e31 + b.e12 * a.e23;
+    ret.e23 = b.e23 * a.scalar + b.e31 * a.e12 - b.e12 * a.e31 + b.scalar * a.e23;
+
+    ret.e0123 = b.e0123 * a.scalar + b.e23 * a.e01 + b.e31 * a.e02 + b.e12 * a.e03 + b.e03 * a.e12 + b.e02 * a.e31 + b.e01 * a.e23 + b.scalar * a.e0123;
+    return ret;
+}
+//no plane*dq unless you have rotoreflections!
+vec4 meet(in Plane a, in Dq b) {
+    vec4 ret;
+    ret.z = -b.e12 * a.e0 + b.e02 * a.e1 - b.e01 * a.e2;
+    ret.y = -b.e31 * a.e0 - b.e03 * a.e1 + b.e01 * a.e3;
+    ret.x = -b.e23 * a.e0 + b.e03 * a.e2 - b.e02 * a.e3;
+    ret.w =  b.e23 * a.e1 + b.e31 * a.e2 + b.e12 * a.e3;
+    return ret;
+}
+vec4 meet(in Dq b, in Plane a) {
+    vec4 ret;
+    ret.z = -b.e12 * a.e0 + b.e02 * a.e1 - b.e01 * a.e2;
+    ret.y = -b.e31 * a.e0 - b.e03 * a.e1 + b.e01 * a.e3;
+    ret.x = -b.e23 * a.e0 + b.e03 * a.e2 - b.e02 * a.e3;
+    ret.w =  b.e23 * a.e1 + b.e31 * a.e2 + b.e12 * a.e3;
+    return ret;
+}

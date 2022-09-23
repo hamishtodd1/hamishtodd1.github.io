@@ -5,9 +5,8 @@
 function initMat4s() {
     let vDw = dws.vectorSpace
     let sDw = dws.scalar
-    let uDw = dws.untransformed
 
-    function getNewUniformValue() {
+    function getNewUniformDotValue() {
         return new THREE.Matrix4()
     }
 
@@ -32,15 +31,12 @@ function initMat4s() {
         #zMesh
         #determinantMesh
 
-        constructor(arrayLength,uniformValue) {
+        constructor(arrayLength) {
             super()
 
-            if (uniformValue !== undefined)
-                this.uniform.value = this.state = uniformValue
-            else
-                this.uniform.value = this.state = getNewUniformValue()
+            this.uniform.value = this.state = getNewUniformDotValue()
             
-            this.stateOld = getNewUniformValue()
+            this.stateOld = getNewUniformDotValue()
             this.stateOld.elements[0] = 2.
 
             let mat = new THREE.MeshPhongMaterial()
@@ -114,91 +110,5 @@ function initMat4s() {
         }
     }
 
-    ///////////
-    // ARRAY //
-    ///////////
-    // They are transforms, think about it as transforms
-
-    let boneMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF })
-    let boneGeo = new THREE.WireframeGeometry(new THREE.OctahedronGeometry(1.))
-    let arr = boneGeo.attributes.position.array
-    for (let i = 1, il = arr.length; i < il; i += 3) {
-        if (i % 3 === 1) { //y coordinate
-            if (arr[i] < 0.) arr[i] = 0.
-            else if (arr[i] === 0.) {
-                arr[i] = .2
-                arr[i - 1] *= .2
-                arr[i + 1] *= .2
-            }
-        }
-    }
-
-    //a skeleton really has more things to be visualized. 
-    // There's the bind pose skeleton
-    //and there are, for each bone, a transformation taking it to its animated state
-    //arguably there's the hierarchy itself
-    //this is CPU side. But, your goal is to teach people how dqs work
-    //is your visualization of them not good for understanding the one thing people most wish to use it for?
-
-    //is there some way to see the vertex in the "local space of the bone"?
-    //Is that necessary? Or is it a very non-covariant way of thinking? Maybe dqs get rid of it? Fucking hope so
-
-    //is this even an appearance? It doesn't have a specific location in the window
-    //it is applicable to showing the dqs
-    class skeletonAppearance extends Appearance {
-
-        constructor(arrayLength) {
-            super()
-
-            this.uniform.value = this.state = Array(arrayLength)
-            this.stateOld = Array(arrayLength)
-            
-            this.meshes = Array(arrayLength)
-            for(let i = 0; i < arrayLength; ++i) {
-                let boneMesh = uDw.NewMesh(boneGeo,boneMat,`LineSegments`)
-                boneMesh.matrixAutoUpdate = false
-                this.meshes[i] = boneMesh
-                
-                this.state[i] = getNewUniformValue()
-                this.stateOld[i] = getNewUniformValue()
-                this.stateOld[i].elements[0] = 2.
-            }
-        }
-
-        stateEquals(otherState) {
-            let ret = true
-            this.state.forEach((state,i)=>{
-                if(!state.equals(otherState[i]))
-                    ret = false
-            })
-
-            return ret
-        }
-        stateCopyTo(toCopyTo) {
-            this.state.forEach((state,i)=>{
-                toCopyTo[i].copy(state)
-            })
-        }
-
-        _updateStateFromDrag() {
-            //move them all around as if grabbed?
-            //one day! Will be fun.
-            //if they're not uniforms, need a way to override them, which will be a fucking nightmare
-        }
-
-        updateMeshesFromState() {
-            //yeah this is the proper way to do it, including that length thing
-        }
-        
-        getWorldCenter(dw,target) {
-            return target.set(0.,0.,0.,1.)
-        }
-        _getTextareaManipulationDw() {
-            return dws.untransformed
-        }    
-    }
-
-    let nonArrayType = new AppearanceType(`mat4`, 16, mat4Appearance,      getNewUniformValue, outputAssignmentPropts, true, false)
-    let arrayType    = new AppearanceType(`mat4`, 16, skeletonAppearance,  getNewUniformValue, outputAssignmentPropts, true, true )
-    arrayType.nonArrayType = nonArrayType
+    new AppearanceType(`mat4`, 16, mat4Appearance, getNewUniformDotValue, outputAssignmentPropts, true)
 }

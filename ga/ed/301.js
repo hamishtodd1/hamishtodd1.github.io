@@ -205,6 +205,33 @@ function init301WithoutDeclarations(basisNames) {
             boneInverseDqs[i].fromMv(asMv)
             return this
         }
+
+        toMat4(target) {
+            target.identity()
+
+            let asMv = newMv
+            let basisDirectionMv = newMv
+            this.toMv(asMv)
+            for(let i = 0; i < 3; ++i) {
+                asMv.sandwich(basisDirectionMvs[i], basisDirectionMv)
+                basisDirectionMv.toVector(v1)
+                v1.toArray(target.elements, 4*i)
+            }
+            
+            let originDisplaced = this.sandwich(e123,newMv)
+            originDisplaced.toVector(v1)
+            v1.toArray(target.elements, 12)
+
+            return this
+        }
+
+        fromPosQuat(p, q) {
+            let asMv = newMv
+            this.toMv(asMv)
+            asMv.fromPosQuat(p, q)
+            this.fromMv(asMv)
+            return this
+        }
     }
     window.Dq = Dq
 
@@ -607,6 +634,8 @@ function init301WithoutDeclarations(basisNames) {
     e032 = mul(e03, e2)
     e123 = mul(e1, e23)
     e0123 = mul(e0, e123)
+
+    let basisDirectionMvs = [e032,e013,e021]
 
     mv0 = new Mv()
     mv1 = new Mv()

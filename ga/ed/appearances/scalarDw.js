@@ -34,7 +34,7 @@ function initFloats() {
 
     //could make little disks going along the vector space's notches as a way of poking fun
 
-    function getNewUniformValue() {
+    function getNewUniformDotValue() {
         return 0.
     }
 
@@ -81,5 +81,5 @@ function initFloats() {
         }
     }
 
-    new AppearanceType("float", 1, floatAppearance, getNewUniformValue, [``], true)
+    new AppearanceType("float", 1, floatAppearance, getNewUniformDotValue, [``], true)
 }

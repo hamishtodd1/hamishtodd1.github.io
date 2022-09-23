@@ -42,7 +42,7 @@ function initComplexNumbers() {
 
     let ourDw = dws.complex
 
-    function getNewUniformValue() {
+    function getNewUniformDotValue() {
         return new THREE.Vector2()
     }
 
@@ -52,8 +52,8 @@ function initComplexNumbers() {
         constructor() {
             super()
             
-            this.uniform.value = this.state = getNewUniformValue().set(1.,0.)
-            this.stateOld = getNewUniformValue()
+            this.uniform.value = this.state = getNewUniformDotValue().set(1.,0.)
+            this.stateOld = getNewUniformDotValue()
 
             let mat = new THREE.MeshBasicMaterial()
             mat.color = this.col
@@ -81,5 +81,5 @@ function initComplexNumbers() {
             return ourDw
         }
     }
-    new AppearanceType("vec2", 2, complexAppearance, getNewUniformValue)
+    new AppearanceType("vec2", 2, complexAppearance, getNewUniformDotValue)
 }

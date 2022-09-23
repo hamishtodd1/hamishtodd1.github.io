@@ -53,7 +53,7 @@ function initMentions() {
 
             let y = lineToScreenY(mention.lineIndex)
             let x = columnToScreenX(mention.column)
-            let w = mention.variable.name.length * characterWidth
+            let w = mention.charactersWide * characterWidth
 
             let xyInBox =
                 x <= screenX && screenX <= x + w &&

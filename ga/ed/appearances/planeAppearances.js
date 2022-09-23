@@ -8,7 +8,7 @@ function initPlanes() {
     let eNormWhenGrabbed = -1.
     let iNormWhenGrabbed = -1.
 
-    function getNewUniformValue() {
+    function getNewUniformDotValue() {
         return new Float32Array(4)
     }
 
@@ -135,10 +135,10 @@ function initPlanes() {
 
     new AppearanceType(
         "Plane", 4, PlaneAppearance,
-        getNewUniformValue,
+        getNewUniformDotValue,
         [`e0`, `e1`, `e2`, `e3`],
         false)
 
-    //so they all need these "getNewUniformValue" functions
+    //so they all need these "getNewUniformDotValue" functions
     //possibly you should make state and stateOld with them, by default
 }

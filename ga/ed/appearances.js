@@ -28,10 +28,12 @@ function initAppearances() {
         onLetGo(dw) { }
 
         updateFromState() {
-            if (!this.stateEquals(this.stateOld)) {
+            let somethingChanged = !this.state.equals(this.stateOld)
+
+            if (somethingChanged) {
                 this.updateUniformFromState()
                 this.updateMeshesFromState()
-                this.stateCopyTo(this.stateOld)
+                this.stateOld.copy(this.state)
             }
         }
 
@@ -88,15 +90,6 @@ function initAppearances() {
             return this.variable.isIn ? dws.untransformed : this._getTextareaManipulationDw()
         }
 
-        //changed in array
-        stateEquals(otherState) {
-            // log(this.state,otherState)
-            return this.state.equals(otherState)
-        }
-        stateCopyTo(toCopyTo) {
-            toCopyTo.copy(this.state)
-        }
-
         //These get overridden
         updateUniformFromState() { } //for most, uniform.value === state, so nothing need happen
 
@@ -109,6 +102,8 @@ function initAppearances() {
     }
     window.Appearance = Appearance
 
+
+
     //note that this is agnostic of variables and mentions
     class AppearanceType {
 
@@ -119,8 +114,8 @@ function initAppearances() {
         declRegexes = {}
         literalAssignmentFromOverride
 
-        //so this SHOULDN'T be a property of the variable, becaaaause, a variable can have both its array and its entries
-        //a mention can be an array or an entry in that array, and that is two kinds of appearance
+        //this is right as a property of an appearance, not a variable.
+        //a variable can be connected to both its array and its entries. Whereas that is two kinds of appearance
         isArray
 
         lowestUnusedAppearance = 0
@@ -130,22 +125,27 @@ function initAppearances() {
         arrayLowestUnusedAppearance = 0
         arrayAppearances = []
 
-        constructor(glslName, numFloats, constructAppearance, getNewUniformValue, outputAssignmentPropts, omitPeriod, isArray) {
+        constructor(glslName, numFloats, constructAppearance, getNewUniformDotValue, outputAssignmentPropts, omitPeriod, isArray) {
             this.glslName = glslName
             this.numFloats = numFloats
             this.constructAppearance = constructAppearance
-            this.getNewUniformValue = getNewUniformValue
+            this.getNewUniformDotValue = getNewUniformDotValue
             
             this.isArray = isArray || false
-            
-            this.outputAssignmentPropts = Array(numFloats)
-            if (outputAssignmentPropts !== undefined) {
-                for (let i = 0; i < this.numFloats; ++i)
-                    this.outputAssignmentPropts[i] = (omitPeriod ? `` : `.`) + outputAssignmentPropts[i]
+            if(isArray) {
+                this.nonArrayType = appearanceTypes.find((at) => at.glslName === glslName && at.isArray === false)
+                this.outputAssignmentPropts = this.nonArrayType.outputAssignmentPropts
             }
             else {
-                for (let i = 0; i < this.numFloats; ++i)
-                    this.outputAssignmentPropts[i] = `[` + i + `]`
+                this.outputAssignmentPropts = Array(numFloats)
+                if (outputAssignmentPropts !== undefined) {
+                    for (let i = 0; i < this.numFloats; ++i)
+                        this.outputAssignmentPropts[i] = (omitPeriod ? `` : `.`) + outputAssignmentPropts[i]
+                }
+                else {
+                    for (let i = 0; i < this.numFloats; ++i)
+                        this.outputAssignmentPropts[i] = `[` + i + `]`
+                }
             }
 
             this.declRegexes.function = new RegExp('(?<=[^a-zA-Z_$0-9])(' + glslName + ')\\s+[a-zA-Z_$][a-zA-Z_$0-9]*\\(', 'gm')
@@ -169,15 +169,15 @@ function initAppearances() {
             appearanceTypes.push(this)
         }
 
-        getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable, uniformValue) {            
+        getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable) {            
             let appearance = null
             let needNewOne = this.lowestUnusedAppearance === this.appearances.length
             if (!needNewOne)
                 appearance = this.appearances[this.lowestUnusedAppearance]
             else {
-                appearance = new this.constructAppearance(variable.arrayLength || -1, uniformValue)
+                appearance = new this.constructAppearance(variable.arrayLength || -1)
                 if (appearance.uniform.value !== appearance.state)
-                    appearance.uniform.value = this.getNewUniformValue()
+                    appearance.uniform.value = this.getNewUniformDotValue()
                 this.appearances.push(appearance)
             }
 

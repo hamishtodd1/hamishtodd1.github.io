@@ -78,7 +78,7 @@ async function initCompilation() {
                     return v.name === name && v.type === type && v.arrayLength === arrayLength
                 })
                 if (variable === undefined)
-                variable = new Variable(name, type, arrayLength)
+                    variable = new Variable(name, type, arrayLength)
                 variablesByNameForThisCompilation[name] = variable
                 
                 variable.isUniform = uniformResults.indexOf(index) !== -1
@@ -121,8 +121,8 @@ async function initCompilation() {
                     let indexInArrayOrNaN = parseInt(lineRemainder)
                     //indexInArray may a variable, for example a for-loop index
                     //could try to extract it. clusterfuck imagining bah[i++], but possibly that's banned anyway
-                    let isIndexless = isNaN(indexInArrayOrNaN)
-                    if (!isIndexless) {
+                    let hasIndex = !isNaN(indexInArrayOrNaN)
+                    if (hasIndex) {
                         indexInArray = indexInArrayOrNaN
                         let closeBracketIndex = l.indexOf(`]`, start)
                         charactersWide = name.length + closeBracketIndex - start + 1
@@ -145,8 +145,12 @@ async function initCompilation() {
                 else if (isAnElementOfAUniformArray) {
                     //guaranteed: this not the first mention, because how could you address an element without declaring it
                     //there will be an array appearance for the declaration. This appearance is just an entry from that array
-                    let arrayUniformOfVariable = variable.mentions[0].appearance.uniform.value
-                    appearance = variable.type.nonArrayType.getLowestUnusedAppearanceAndEnsureAssignmentToVariable(variable, arrayUniformOfVariable[indexInArray])
+                    let arrayAppearance = variable.mentions[0].appearance
+                    let state = arrayAppearance.uniform.value[indexInArray]
+                    appearance = variable.type.nonArrayType.getLowestUnusedAppearanceAndEnsureAssignmentToVariable( variable )
+                    appearance.state = state
+                    appearance.uniform.value = state
+                    //TODO bit of a shame to override what may have been created! GC aler
                 }
                 else if (!isDeclaration)
                     appearance = variable.mentions[0].appearance

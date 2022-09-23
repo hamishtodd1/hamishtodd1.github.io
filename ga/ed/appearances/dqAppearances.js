@@ -97,7 +97,7 @@ function initDqs() {
         geo.attributes.position.needsUpdate = true
     }
 
-    function getNewUniformValue() {
+    function getNewUniformDotValue() {
         return new Dq()
     }
 
@@ -131,7 +131,7 @@ function initDqs() {
         constructor() {
             super()
             
-            this.uniform.value = this.state = getNewUniformValue()
+            this.uniform.value = this.state = getNewUniformDotValue()
             this.stateOld = new Dq()
             this.stateOld[7] = 1.
 
@@ -341,5 +341,5 @@ function initDqs() {
         }
     }
     
-    new AppearanceType("Dq", 8, DqAppearance, getNewUniformValue, [ `scalar`, `e01`, `e02`, `e03`, `e12`, `e31`, `e23`, `e0123` ])
+    new AppearanceType("Dq", 8, DqAppearance, getNewUniformDotValue, [ `scalar`, `e01`, `e02`, `e03`, `e12`, `e31`, `e23`, `e0123` ])
 }

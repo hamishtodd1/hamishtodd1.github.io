@@ -41,7 +41,7 @@ function initWeightsWindow() {
         }
     }
 
-    function getNewUniformValue() {
+    function getNewUniformDotValue() {
         return new weight4(4)
     }
 
@@ -51,8 +51,8 @@ function initWeightsWindow() {
         constructor() {
             super()
 
-            this.uniform.value = this.state = getNewUniformValue().set(1., 1., 1., 1.)
-            this.stateOld = getNewUniformValue().set(1., 0., 0., 0.)
+            this.uniform.value = this.state = getNewUniformDotValue().set(1., 1., 1., 1.)
+            this.stateOld = getNewUniformDotValue().set(1., 0., 0., 0.)
 
             let mat = new THREE.MeshPhongMaterial()
             mat.color = this.col
@@ -104,7 +104,7 @@ function initWeightsWindow() {
     }
     new AppearanceType(
         "weight4", 4, WeightAppearance,
-        getNewUniformValue,
+        getNewUniformDotValue,
         [`w0`, `w1`, `w2`, `w3`],
         false )
 }

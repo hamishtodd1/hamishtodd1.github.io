@@ -7,7 +7,7 @@ function initVec3s() {
     // let dashedLineMat = new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: .1, gapSize: .1 })
     let lineMat = new THREE.LineBasicMaterial({color:0xFFFFFF})
 
-    function getNewUniformValue() {
+    function getNewUniformDotValue() {
         return new THREE.Vector3()
     }
 
@@ -21,8 +21,8 @@ function initVec3s() {
         constructor() {
             super()
             
-            this.uniform.value = this.state = getNewUniformValue().set(1., 1., 1.)
-            this.stateOld = getNewUniformValue()
+            this.uniform.value = this.state = getNewUniformDotValue().set(1., 1., 1.)
+            this.stateOld = getNewUniformDotValue()
 
             this.#sMesh = sDw.NewMesh(downwardPyramidGeo, new THREE.MeshBasicMaterial())
             this.#sMesh.material.color = this.col
@@ -102,7 +102,7 @@ function initVec3s() {
 
             this.#vMesh.setVec(this.state, zeroVector)
 
-            if (this.stateEquals(zeroVector)) {
+            if (this.state.equals(zeroVector)) {
                 for (let edgeTrio = 0; edgeTrio < 3; ++edgeTrio) {
                     for (let i = 0; i < 3; ++i)
                         this.#dashedLines[edgeTrio][i].position.copy(OUT_OF_SIGHT_VECTOR3)
@@ -157,5 +157,5 @@ function initVec3s() {
         }
     }
 
-    new AppearanceType("vec3", 3, vec3Appearance, getNewUniformValue)
+    new AppearanceType("vec3", 3, vec3Appearance, getNewUniformDotValue)
 }
