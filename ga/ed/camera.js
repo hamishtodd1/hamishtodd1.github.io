@@ -2,7 +2,7 @@ function initCamera() {
     const fov = 60.
     const aspect = eval(getCssVar('dwAspect'))
     let near = 1.
-    let far = 500.
+    let far = 600.
 
     OUT_OF_SIGHT_VECTOR3 = new THREE.Vector3(far * 999., far * 999., far * 999.)
 
@@ -99,7 +99,6 @@ function initCamera() {
 
     camera.whenZoomChangeds = []
     zoomCameraOutByAmount = (amt) => {
-        
         camera.position.multiplyScalar(amt)
 
         whenCameraChanged()

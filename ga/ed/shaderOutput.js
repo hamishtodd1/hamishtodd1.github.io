@@ -132,6 +132,9 @@ async function initShaderOutputAndFinalDw() {
             if (!threejsIsCheckingForShaderErrors)
                 return
 
+            //haven't thought about this in a while, need to rethink
+            return
+
             let errorParts = errorLine.split(":")
             //this could be a crazy number because who knows what's been prefixed for the first call
             const haphazardlyChosenNumber = 71

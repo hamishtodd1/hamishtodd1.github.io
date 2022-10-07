@@ -18,9 +18,9 @@ function initMat4s() {
     ]
 
     let vectorSize = 1.
-    camera.whenZoomChangeds.push((amt) => {
-        vectorSize *= amt
-    })
+    // camera.whenZoomChangeds.push((amt) => {
+    //     vectorSize *= amt
+    // })
 
     let origin = new THREE.Vector3()
     let basisVector = new THREE.Vector3()

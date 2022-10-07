@@ -90,7 +90,8 @@ async function initVectorSpaceDw() {
     let markerHeight = .4
 
     let numbersToMark = [1,-1]
-    for (let i = 1; i < 126; i *= 10) {
+    let howFarUpToGo = 10; //126
+    for (let i = 1; i < howFarUpToGo; i *= 10) {
         for (let j = i, jl = i * 10; j < jl; j += i) {
             numbersToMark.push(j, -j)
         }

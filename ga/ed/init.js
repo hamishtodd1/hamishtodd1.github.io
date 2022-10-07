@@ -1,14 +1,18 @@
 /*
 TODO
     Could have cos and sin formulae visualization?
+    If you're getting bored of this, might as well 
     For next presentation
-        Latex annotation
+        Attempt to compile with every keystroke, but flash up an error which fades out
+        Latex annotation (then maybe make a textbook page?)
         Better error reporting
             Highlight where it was but just put the words at the bottom
         Make the transparent spotted dome
         https://twitter.com/joyoflivecoding
         hide the output window when there's an error
     Bugs
+        Probably worth checking over absolutely all e31 vs 13 shit
+        Where are the lines at infinity?
         Try not indenting...
         Something happened that made tubeGeometry have NaNs, crashed the whole of threejs so you couldn't see anything
         Something caused the vertex to flick back and forth
@@ -21,8 +25,7 @@ TODO
         the dual quaternion dragging takes account of duplicates. Point mention scalar should too, as should others
     Having chigozie and Matthew Vandevander and Pontus break it
         Try to detect which lines ASSIGN to a variable and which lines don't
-    Workshop for kids at makespace (but note that this is about PGA still, so BORING workshop for the kids)
-        It'll probably be slow. At least make the axis markings a bit optimized
+    Workshop for kids at makespace
         Translations for mobiuses
         Allow shit to be on multiple lines. Semicolon, not newline
         Need EXCELLENT error reporting. This shit is all in YOUR head!!!
@@ -57,6 +60,7 @@ TODO
             Structs:
                 Are how you make your puppets, of course
     GDC
+        Optimize axis markings
         Do a numberphile video (or two?) for the same time period
             The quaternion equation
                 Double cover. Seen in the mobius strip trick. Show the angle between two mirrors
@@ -174,6 +178,7 @@ As a tablet notes-in-the-margin app... and if you were going to buy a tablet... 
     NOT p = inversion
 
 Vague/philosophical
+    Projective plane. Things multiplied by -1 Is it a mobius strip and these objects are weirdly different?
     Fuck labelling things in the window. You want lables? Hover
     If you have a matrix that is tagged as "known to have det=0"
         That's different from usual. That's 3 points at infinity maybe, instead of
@@ -240,7 +245,7 @@ async function init() {
     // while ((index = str.indexOf(searchStr, startIndex)) > -1) {
     //     indices.push(index);
     //     startIndex = index + searchStrLen;
-    // }    
+    // }
 
     // initSound()
 
@@ -346,7 +351,6 @@ async function init() {
     compile(false)
     updateMentionVisibilitiesAndIndication()
 
-    // initEquations()
     setCaretPosition(390)
     addToCameraLonLat(0., 0.)
     zoomCameraOutByAmount(260./3.7)

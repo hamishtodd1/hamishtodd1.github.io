@@ -58,7 +58,7 @@ void mvToDq(in float[16] mv, out Dq target) {
     target.e0123 = mv[15];
 }
 
-vec4 sandwichDqPt(in Dq dq, in vec4 pt) {
+vec4 sandwichDqPoint(in Dq dq, in vec4 pt) {
     float[16] dqAsMv;
     dqToMv(dq,dqAsMv);
 
@@ -123,53 +123,6 @@ void dqExp(in Dq B, out Dq target) {
         s * m
     );
 }
-
-//assumes normalization
-//makes a choice about whether sqrt(e12) is 1 + e12 or -1 + e12
-// Dq dqLog(in Dq m ) {
-//     if( m[0] == 1. ) //it's a translation. Can this be gotten rid of? b0 = 1, b1 = 0, c = 0.
-//         return Dq(0., m.e01,m.e02,m.e03, 0.,0.,0., 0.);
-
-//     float a = 1. / (1. - m.scalar*m.scalar);
-//     float b = acos(m.scalar) * sqrt(a);
-//     float c = a * m.e0123 * (1. - m.scalar*b);
-
-//     return Dq(
-//         0., 
-//         c*m.e23 + b*m.e01,
-//         c*m.e13 + b*m.e02,
-//         c*m.e12 + b*m.e03,
-//         b*m.e12,
-//         b*m.e13,
-//         b*m.e23, 
-//         0. );
-// }
-
-// Dq dqNormalize(in Dq m, out Dq target) {
-//     float sSquared = 1. / (m.scalar*m.scalar + m.e12*m.e12 + m.e13*m.e13 + m.e23*m.e23);
-//     float d =  sSquared * (m.e0123*m.scalar - (m.e01*m.e23 + m.e02*m.e13 + m.e03*m.e12));
-//     float s = sqrt(sSquared);
-
-//     Dq ret = Dq(
-//         s*m.scalar,
-
-//         s*m.e01,
-//         s*m.e02,
-//         s*m.e03,
-
-//         s*m.e12,
-//         s*m.e13,
-//         s*m.e23,
-
-//         s*m.e0123,
-//     );
-
-//     ret.e01 += ret.e23 * d;
-//     ret.e02 += ret.e13 * d;
-//     ret.e03 += ret.e12 * d;
-//     ret.e0123 -= ret.scalar * d;
-//     return target;
-// }
 
 //make sure to end with a newline!
 

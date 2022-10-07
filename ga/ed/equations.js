@@ -1,8 +1,4 @@
 /*
-    Must be automatable somehow
-
-    Generate the equations in mathjax at init time
-    Have a "box making mode"
 
     You have to write it all out as code by hand
     Then, ascribe particular in the equation to the variables
@@ -24,16 +20,16 @@
 
  */
 
-function initEquations() {
-    window.onload = () => {    
-        let mathId = document.getElementById(`someid`)
-        mathId.addEventListener(`mouseover`, () => {
-            log(`in`)
-        })
-        mathId.addEventListener(`mouseleave`, () => {
-            log(`out`)
-        })
-    }
+async function initTextbook() {
+    await init()
+
+    let mathId = document.getElementById(`someid`)
+    mathId.addEventListener(`mouseover`, () => {
+        log(`in`)
+    })
+    mathId.addEventListener(`mouseleave`, () => {
+        log(`out`)
+    })
 
     dws.untransformed.elem.style.display = `none`
     dws.final.elem.style.display = `none`

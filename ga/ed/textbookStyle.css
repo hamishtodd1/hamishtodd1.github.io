@@ -1,0 +1,11 @@
+#textarea, #highlighting {
+  padding: var(--generalGap);
+  bottom: 0;
+  height: calc( 50% - 1.5 * var(--generalGap) );
+}
+
+#equationArea {
+  padding: var(--generalGap);
+  top: calc( var(--generalGap) );
+  height: calc(50% - 1.5 * var(--generalGap))
+}

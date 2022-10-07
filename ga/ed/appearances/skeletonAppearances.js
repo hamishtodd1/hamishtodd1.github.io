@@ -4,6 +4,8 @@
 //need it as an appearance in order to have text highlight, and to put shit in uniforms
 //eh, can't you have a variable and mention... without an appearance?
 
+//could point to the first element and the last element
+
 function initSkeletons() {
     let uDw = dws.untransformed
 

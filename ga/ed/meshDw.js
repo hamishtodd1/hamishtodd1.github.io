@@ -24,6 +24,7 @@
 
 function initMeshDw() {
     let dw = new Dw(`untransformed`, true, camera, false) //really should be "initialMesh"
+    // dw.elem.style.display = 'none'
     
     let attributes = null
     let skeleton = null

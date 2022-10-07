@@ -1,5 +1,9 @@
 /*  */
 
+body {
+  overflow-y: hidden;
+}
+
 :root {
   --dwWidth: 180px;
   --dwAspect: 16/9;
@@ -56,19 +60,6 @@
   left: 0;
 }
 
-#equationArea {
-  padding: var(--generalGap);
-  top: 0;
-  height: calc( 50% - var(--generalGap))
-}
-
-#textarea, #highlighting {
-  padding: var(--generalGap);
-  bottom: 0;
-  height: calc(  100% - 5 * var(--generalGap) - var(--dwHeight));
-  /* height: calc( 50% - var(--generalGap) ); */
-}
-
 #errorBox {
   padding: 0px;
   top: 100;
@@ -94,7 +85,7 @@
 #textarea {
   color: transparent;
   background: transparent;
-  caret-color: white; /* Or choose your favourite color */
+  caret-color: white;
 }
 
 /* Can be scrolled */

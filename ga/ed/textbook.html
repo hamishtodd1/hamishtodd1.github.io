@@ -1,41 +1,56 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Geometric debugger</title>
+    <title>Latex Diagrams</title>
     <link rel="stylesheet" href="prism-monokai.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="edStyle.css">
+    <link rel="stylesheet" href="textbookStyle.css">
 
     <!-- Need to make -->
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 
 <body>
-    
+
+    <div id="equationArea">
+        <br>
+        <br>
+        <p>
+            The meet of two objects is denoted
+        </p>
+        <p>
+            \[\cssId{someid}{x} = {-b \pm \sqrt{b^2-4ac} \over 2a}\]
+        </p>
+    </div>
+    <script src="equations.js"></script>
+
     <textarea id="textarea" spellcheck="false"></textarea>
     <pre id="highlighting" aria-hidden="true">
         <code class="language-glsl" id="highlighting-content"></code>
     </pre>
     <div id="errorBox"></div>
 
-    <svg id="ourSvg" style="stroke-width:2" >
+    <svg id="ourSvg" style="stroke-width:2">
     </svg>
-    
+
     <canvas id="canvas3d"></canvas>
 
     <span id="textMeasurer">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span> <!-- 40 characters there -->
-    
+
+    <script src="equations.js"></script>
+
     <script src="prism.js"></script>
     <script src="syntaxHighlighting.js"></script>
 
     <script src="301.js"></script>
     <script src="301meta.js"></script>
-    
+
     <script src="lib/three.js"></script>
     <script src="lib/OBJLoader.js"></script>
     <script src="../common/miscFunctions.js"></script>
     <script src="threejsVariables.js"></script>
-    
+
     <script src="../common/variables.js"></script>
     <script src="variables.js"></script>
 
@@ -49,15 +64,17 @@
     <script src="camera.js"></script>
 
     <script src="svgLines.js"></script>
-    
+
     <script src="ourGltfLoader.js"></script>
-    
+
     <script src="shaderOutput.js"></script>
     <script src="dws.js"></script>
 
+
+    <!-- <script src="hsvDw.js"></script> -->
     <script src="appearances/scalarDw.js"></script>
     <script src="halfPlaneDw.js"></script>
-    
+
     <script src="appearances/dqAppearances.js"></script>
     <script src="appearances/pointAppearances.js"></script>
     <script src="appearances/planeAppearances.js"></script>
@@ -77,8 +94,15 @@
     <script src="init.js"></script>
 
     <script>
-        init()
+        initTextbook()
     </script>
 
+    <!-- <p>
+        Syntax Highlighting by <a href="https://prismjs.com/">Prism.js</a><br />
+        Font from <a href="https://fonts.google.com/">Google Fonts</a><br />
+        Some code from <a href="https://css-tricks.com/creating-an-editable-textarea-that-supports-syntax-highlighted-code/">Here</a><br />
+    </p> -->
+
 </body>
+
 </html>
