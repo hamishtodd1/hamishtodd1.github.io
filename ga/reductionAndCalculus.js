@@ -36,6 +36,9 @@
 		The purpose of this is pedagogy, and hey, maybe more
 		Is there any way of turning the subsitution rules into things helpful for the animations or where to put stuff in the pictures???
 			Maybe this is how you say that difference vectors should be put not at the origin?
+		Proving stuff in the course
+			To demonstrate equality you can just plot things. Or you could use omicron reduction to reduce to 0
+			Proof by contradiction? Could put a dumb thing into the omicron reduction and, haha, look for bugs
 
 	reduction / partial evaluation / function syntax
 		//you don't get to name functions, the thing does it for you. write a => b with a being free...

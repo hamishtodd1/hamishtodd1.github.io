@@ -7,31 +7,48 @@
             Improving live-coding streams of people doing 3D graphics
                 AND science videos, where you make the science video demo while talking about it
                 - though that needs calculus, so you wouldn't dogfood with this
-        Non-VR (2,0,1) game, for:
-            Highbrow gamers
-            People wanting to learn GA right now
         VR animation-maker for:
             Live coding dance shows
             Kids making puppet shows (lack of arrays is good, encourages unique behaviour in everything)
             Teenagers in the future wanting to make fun things without knowing how to program
             Engineers wanting to reproduce the behaviour of real-world objects and attaching animations to them
             Can involve calculus
-        Quantum thing for:
-            Explaining some quantum metaphysics
-            Helping quantum computing researchers
-            Helping quantum computing undergraduates
 
-        It's all (3,0,1) and (3,1). (2,0,1) is subalgebra
-        Most you'll ever do will probably be (3,0,1)+(3,1)=(3,1,1)
-        Limiting 
+    Post Space Hippo/puppet show notes
+        So the kids are making stuff
+        The controls for the puppet show were just moving the things around, you essentially see their hands' work very directly
+        It was up to them to introduce constraints
+        They had two flashlights, two switches. They would rarely be taking their eyes off what the audience sees, just controlling it with their hands
+	Lol, it isn't going to be your editor that you use
+	In pong: you can maybe keep track of score yourself. No biggie, you have a separate score-keeping object
 
-    TODO
-        Reread your notes in editor
-        Rewatch bret victor and ken perlin
+    Controls need to be SO INTUITIVE, SO SIMPLE
+        Make new thing with a transform (which could be invisible)
+        Snap to various combinations of existing transforms
+            Addition
+            Meet
+            Making shaders that just dispense transforms
+    So no:
+        Data structures with state, other than the dual quats
+        Un-normalized stuff
+        "Debug view" - WYSIWYG, audience view is same as creator view
+        If statements
+        Making new meshes
+        Worrying about minus signs. The minus sign i
+        Using numbers
+            Indexes for arrays
 
-    code editor
-        could it be done with codepen?
-        How would YOU use it? Probably only embedded in vscode
+    Start going to LOTS of puppet shows
+    Busk? Nah, shit will get stolen and not be visible in daylight
+    
+
+
+    Your own puppet show
+        Use some classic stories. Arthurian legend or greek myth
+        Ultimate showdown
+        Customize it to where you go like those french plays, do a lidar scan of some nearby object
+
+
 
 
     These notes essentially for a differentiation game, where you've got a zoomed in view of some field:
@@ -68,11 +85,6 @@
         
         Array for light sources
 
-        Unity plugin that lets you run the thing
-            Should be able to make:
-                Diffuse lit plane
-                Arrow, 2D and 3D
-                Donut
         
         unreal and unity don't compile shaders at runtime
 */

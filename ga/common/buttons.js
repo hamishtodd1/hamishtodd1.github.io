@@ -47,12 +47,13 @@ function initButtons()
 		// event.preventDefault()
 
 		if(button !== undefined && !button.down) {
-			button.onDown()
+			button.onDown(event.ctrlKey, event.shiftKey)
 			button.down = true
 
 			// if(event.key !== "v") //paste
 			// 	event.preventDefault()
 		}
+		// log(event.key)
 	}, false );
 	function buttonUpper(event,set) {
 		for(buttonKey in set) {

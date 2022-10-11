@@ -1,0 +1,130 @@
+<!--
+-->
+<html>
+	<head>
+		<title>Lambda reduction</title>
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				margin: 0px;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<script>
+			async function technicalInit() {
+				initButtons()
+
+				renderer.shadowMap.enabled = true
+				renderer.setClearColor(0xCFCFCF)
+				document.body.appendChild( renderer.domElement )
+
+				initWindowResize()
+				initSound()
+
+				initMouse()
+
+				initDwArea()
+				initAnimation()
+				initFacialExpressions()
+				initRings()
+				initControls()
+
+				{
+					let ring1 = new Ring()
+					scene.add(ring1)
+
+					let ring2 = new Ring()
+					addRingToRing(ring2, ring1)
+					let ring3 = new Ring()
+					addRingToRing(ring3, ring1)
+					let ringX = new Ring()
+					addRingToRing(ringX, ring1)
+					let ring4 = new Ring()
+					addRingToRing(ring4, ring1)
+
+					let ring5 = new Ring()
+					addRingToRing(ring5, ring3)
+					setRingText(ring5, "+")
+					let ring6 = new Ring()
+					addRingToRing(ring6, ring3)
+					setRingText(ring6, "2")
+					let ring8 = new Ring()
+					addRingToRing(ring8, ring3)
+					setRingText(ring8, "4")
+
+					updateCursorRing(ring3)
+
+					var topRing = ring1
+					focussedRing = topRing
+					updateCursorRing(ring1)
+					setRingColor(topRing)
+				}
+
+				function render() {
+					let clockDelta = clock.getDelta()
+					frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
+					
+					mouse.updateFromAsyncAndCheckClicks()
+
+					for(var i = 0; i < updateFunctions.length; i++)
+						updateFunctions[i]()
+
+					repositionSubRings(topRing)
+
+					//ensuring focus
+					{
+						let finalScale = 1.
+						traverseParents(focussedRing, (ring) => {
+							if(ring.superRing !== null)
+								finalScale *= ring.scale.x / ring.superRing.scale.x
+						})
+						let topRingScaleIntended = 2.5 / finalScale
+						let current = topRing.scale.x + .2 * (topRingScaleIntended - topRing.scale.x)
+						topRing.scale.setScalar(current)
+
+						let neededMvmt = v1.copy(focussedRing.position).multiplyScalar(-.4)
+						topRing.position.add(neededMvmt)
+					}
+					updateCursorPosition()
+
+					potentiallyAnimateOperation()
+
+					++frameCount
+
+					requestAnimationFrame(render)
+					renderer.render(scene, camera)
+				}
+
+				render()
+			}
+		</script>
+
+		<script src="three.js"></script>
+		<!-- want loaders? the ones in common may work -->
+
+		<script src="../common/miscFunctions.js"></script>
+		<script src="../common/threejsVariables.js"></script>
+		<script src="variables.js"></script>
+		<script src="../common/variables.js"></script>
+		
+		<script src="../common/orthographicMouse.js"></script>
+		
+		<script src="facialExpressions.js"></script>
+		<script src="controls.js"></script>
+		<script src="rings.js"></script>
+		<script src="animation.js"></script>
+		<script src="dwArea.js"></script>
+		<script src="text.js"></script>
+
+		<script src="../common/sound.js"></script>
+		<script src="../common/buttons.js"></script>
+		
+		<script src="windowResize.js"></script>
+
+		<script>
+			technicalInit()
+		</script>
+	</body>
+</html>

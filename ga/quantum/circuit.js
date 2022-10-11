@@ -1,4 +1,14 @@
 /*
+The key is that Spin(4) = Spin(3) x Spin(3)
+So, back to Cl(4). quaternion * (quaternion*e1234)
+Mmmm, but that's something that CAN be written as a tensor product, no?
+Could say: it's (eg) a line reflection in e12 followed by a line reflection in e34
+For a pair that aren't through-the-origin-and-at-infinity: you CAN find a frame of reference such that they are
+Didn't you find out at some point that you CAN do that?
+Can at LEAST do that poincare polarization thingy
+Read Geometry of Quantum States and the ellipsoids paper
+
+
 TODO
     The pauli/bloch VECTORS, i.e. states, are oriented planes through the origin, dummy
     The pauli gates are those multiplied by i, eg made into lines through origin?

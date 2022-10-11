@@ -7,8 +7,7 @@ function text(initialText,materialOnly,textColorHex) {
 	let material = new THREE.MeshBasicMaterial({map: new THREE.CanvasTexture(canvas), transparent: true})
 
 	let currentText = ""
-	material.setText = function(text)
-	{
+	material.setText = function(text) {
 		if(currentText === text)
 			return
 
@@ -40,21 +39,16 @@ function text(initialText,materialOnly,textColorHex) {
 
 		if( materialOnly === false)
 			sign.scale.x = material.getAspect() * sign.scale.y
-
-		//the geometry isn't affected ofc
 	}
-	material.getText = function()
-	{
+	material.getText = function() {
 		return currentText
 	}
 
-	material.getAspect = function()
-	{
+	material.getAspect = function() {
 		return canvas.width / canvas.height
 	}
 
-	if(materialOnly)
-	{
+	if(materialOnly) {
 		material.setText(initialText);
 		return material
 	}

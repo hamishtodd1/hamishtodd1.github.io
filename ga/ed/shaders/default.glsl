@@ -44,7 +44,13 @@ vec4 getChangedVertex(in vec4 initialVertex) {
 }
 //END//
 
+// and in the mathjax, e12 = e1*e2
+void main() {
+    Plane e1 = Plane(0.,1.,0.,0.);
+    Plane e2 = Plane(0.,0.,1.,0.);
 
+    Dq e12 = geometricProduct();
+}
 
 
 

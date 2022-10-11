@@ -1,33 +1,7 @@
 /*
-	So it's actually a 2D game
-		You're looking at a nice desktop surface
-		Making 2D shit happen but with the benefit of 3D visualization
-
-	Where was all the stuff about puppets?
-	Something about "you should be able to make". Air hockey, breakout
 	You record a hand motion
-	The philosophy should probably be: If it feels good to do, and it's understandable, and you can use it to make nice things, it's a good feature
-
-	Tools for thought for everyday life
-		People generally want to show off
-			The fact that they care for their loved ones
-				Family members
-				Friends
-				Toys and games for pets
-				Cooking
-			Their athletic ability
-				Dancing
-				Circus stuff
-				Pushing game; help define elaborate rules
-			Their ability to work in a team, either as a leader or a collaborator
-				Sports
-			Their investment in their culture, eg history, religion
-			How much time they've put into something
-		Maths and physics is more about showing your intellect i.e.
-			Your grasp of difficult things
-			Your grasp of "important" things
-		Their aesthetic appreciation
-		Bridges is highly informative about this. Games.
+	The philosophy should probably be: If it feels good to do, and it's understandable, and you can use it to make nice things, it MIGHT be a good feature
+		But you want to have, like three features
 
 	Notes
 		Tech
@@ -48,51 +22,27 @@
 			Look to Rhythm Paradise for inspiration
 			you want to put random things in the littlescene. That's how you make cool demoscene stuff
 			It should mostly be about mechanics to be a fun easy thing for people to do in their lives with AR
-				Look through mechanics textbooks for examples
-
-	Re electromagnetism: look at "magnetic core memory", that's something you can do a shader simulation of
-
-	Kids don't care about the precise exact colour of some shit, when it's just meant to look realistic anyway, they want to play.
-		Fuck electromagnetism, fuck QM, fuck waves. Fields, i.e. fluid/aerodynamics is much more useful
-		BEHAVIOUR, not color. Maybe one day. They get hue, MAYBE alpha
-		Probably colors are accounted for by NNs eventually anyway.
-		Probably the game designer works with a blocky, analytically simple representation, then NNs turn that into nice graphics
-
-	
+				Look through mechanics textbooks for examples	
 
 	Random ones
 		those toys where you have paper rolled around a stick, swing the stick and the paper extends
 		Ribbon olympic gymnasts https://www.youtube.com/watch?v=j0MpdyFDr5Q
-		https://twitter.com/MachinePix/status/1395150947719032835
-		https://twitter.com/Pamchenkova/status/1396535440237334528
 		guy pouring while spinning https://www.reddit.com/r/blackmagicfuckery/comments/dxm12f/fluid_dynamics_god_mode/
-		total internal reflection https://www.youtube.com/watch?v=Lic3gCS_bKo Boyd Edwards is apparently the guy
-		Number theory
-			prime numbers are ones not on the hyperbolic paraboloid
-			What about the stuff in the minutephysics shor's
-			Enough for cryptography, then elliptic curve cryptography
-		pbr https://www.youtube.com/watch?v=RZiTJCxb9Ts
-		auroroa borealis
-			https://www.nasa.gov/feature/goddard/2019/nasa-launches-two-rockets-studying-auroras/
-			https://www.esa.int/Applications/Observing_the_Earth/Swarm/Energy_from_solar_wind_favours_the_north
 		Cool rainbow thing https://twitter.com/MachinePix/status/1323759584390033408
-		nicely visual QM course https://www.youtube.com/watch?v=K4BF7MD69_U
 		Nice footage of bubbles https://www.youtube.com/watch?v=WTxDyYHaYAI
-		This animation except in 3D, the points are rotating on circles https://www.reddit.com/r/math/comments/jdns19/circles_moving_in_a_straight_line_with_sin/
-		Probably interestingly shaped magnetic field https://www.youtube.com/watch?v=c2h60hCJh2U
+		This animation except in 3D, the points are rotating on circles https://www.reddit.com/r/math/comments/jdns19/circles_moving_in_a_straight_line_with_sin/		
 		hoberman esque https://twitter.com/MartinSchwab9/status/1289323221049843712
 		hockey practice https://twitter.com/SportsCenter/status/1340131112119627776
 		windmills (guess you need fluid mechanics)
 		flipping a bunch of things in a nice pattern https://youtu.be/Hy6vddbQa8Q?t=10
-		ball and disc integrator
-		guitar string in slow motion
 		Ball shot from cannon
 		veritaseum https://www.youtube.com/watch?v=4tgOyU34D44
 		https://www.geogebra.org/m/kvy5zksn
 		Anthony Howe kinetic masterpieces
 		fire poi throwing sparks!
+		https://www.novelty-automation.com/
+		fireworks
 		corkscrew
-		Nautilus shell - exponential spiral, e^ipi
 		Clock with plastic wheels with numbers on them to represent time. Fourier series!
 		sphere
 		Games
@@ -121,66 +71,10 @@
 		Yoyos, Kendama, diabolo.
 		Footage of cycle stunt people going through the air. Sell to RT software
 
-	Structure based around rocket science
-		Could talk to isaac arthur
-		Classical mechanics / mechanical engineering
-			https://www.novelty-automation.com/
-			Sewing machine mechanism
-			poi! fire poi with sparks!
-			https://twitter.com/MachinePix/status/1249390426672361472
-			it is very interesting that .5mv^2 works if v is squared using the Clifford product
-			just moving the things around, rockets innit
-			Thrusters in different directions
-			guidance computer using gimbals
-			fireworks
-			Lunar Lander type game
-		Electromagnetism:
-			Lots of fun magnet stuff / toys out there.
-				Prove that perpetual motion machines based on magnetism are dumb, the "pushing" comes from you
-			Electrically powered rockets https://en.wikipedia.org/wiki/Electrically_powered_spacecraft_propulsion
-			telescope optics,
-			telecommunicatio/satellites. No magnets but this may not matter
-			Magneto dynamics! Of the sun or earth!
-				Surface of the sun: https://www.youtube.com/watch?v=znBesUwVOok&ab_channel=SciNews
-			Lightning, it's badass
-		quantum
-			ultraviolet catastrophe
-				If you want to know how things glow or how long it takes for heat to radiate off them, need qm
-			Could base a lot of it around color changing chemicals? Nice for reac diffusion too?
-			https://sustainable-nano.com/2019/11/12/gold-nanoparticles-color/
-			Main dude for QC tim@energycompression.com
-				You know, you're just barrelling into QC assuming CA is a good fit for it, maybe it isn't. Well. If it isn't, maybe don't work on this.
-			Aharonov-Bohm Effect
-			quantum hall effect
-			If you have a vector and bivector together being a wave function with mod squared equal to 1, and vector is determined, what does that mean for bivector?
-			nuclear powered rockets
-			Not putting stuff in the van allen belt
-			ion thrusters?
-			nuclear fusion
-		spec rel
-			super fast rockets
-		Relativistic QM?
-		Quantum computing somehow?
-			https://www.youtube.com/watch?v=F_Riqjdh2oM
-		To make a thing about real rocket science you ought to have super awesome heart-swelling animations, hngh
-			How to do it on the cheap: public domain NASA footage, plasma drive, ITER stuff with heart-swelling music
-		Magnetised needly droplet going around it
-
 	General ideas / mario-esque "areas"/islands
 		Lasers may be a better central focus. EM AND QM AND a link to rocketry
 		Could have a major thing about programming robots. It will be pretty important!
 		How fast does glass crack https://www.youtube.com/watch?v=GIMVge5TYz4
-		Quantum mechanics
-			/Electromagnetism/Optics
-				Reflections
-			/Electrical engineering
-			a vector of complex numbers can separate into a vector and bivector (i*vector) parts?
-			3 states are used in this thing on bell https://freelanceastro.github.io/bell/
-			Chromodynamics
-				Got three nice variables(?)
-				Applicable to nuclear power which is rather mysterious
-		Planetary motion
-			A bomb going off and lots of pieces of shrapnel. You have to do lots of them
 		Mechanical engineering
 			Bottle rocket
 			A pair of curling stones attached with elastic on an ice rink
@@ -211,8 +105,6 @@
 			taco folding https://youtu.be/xWG5Jx66VzQ?t=400
 			cog thing https://youtu.be/IjeKw0B8PG8
 			pizza https://twitter.com/Rainmaker1973/status/1084064448690774016
-		Condensed matter / "spatially extended" / the input is a big rectangle of values
-			mandelbrot set
 		Toys
 			Stick and slip bird mechanism
 			physics fun instagram
@@ -246,4 +138,73 @@
 			someone going down a helter skelter
 			Someone is about to set of a spinning top
 				you can change the amount of angular momentum they put into it by changing the size of their bicep
+
+	Weird science
+		Kids don't care about the precise exact colour of some shit, when it's just meant to look realistic anyway, they want to play.
+			No more electromagnetism, QM, structural color. Fields, i.e. fluid/aerodynamics is much more useful
+			BEHAVIOUR, not color. Maybe one day. They get hue, MAYBE alpha
+			Probably colors are accounted for by NNs eventually anyway.
+			Probably the game designer works with a blocky, analytically simple representation, then NNs turn that into nice graphics
+		Sewing machine mechanism
+		Thrusters in different directions
+		guidance computer using gimbals
+		https://twitter.com/MachinePix/status/1249390426672361472
+		https://twitter.com/MachinePix/status/1395150947719032835
+		https://twitter.com/Pamchenkova/status/1396535440237334528
+		Probably interestingly shaped magnetic field https://www.youtube.com/watch?v=c2h60hCJh2U
+		ball and disc integrator
+		nicely visual QM course https://www.youtube.com/watch?v=K4BF7MD69_U
+		guitar string in slow motion
+		total internal reflection https://www.youtube.com/watch?v=Lic3gCS_bKo Boyd Edwards is apparently the guy
+		Number theory
+			prime numbers are ones not on the hyperbolic paraboloid
+			What about the stuff in the minutephysics shor's
+			Enough for cryptography, then elliptic curve cryptography
+		pbr https://www.youtube.com/watch?v=RZiTJCxb9Ts
+		auroroa borealis
+			https://www.nasa.gov/feature/goddard/2019/nasa-launches-two-rockets-studying-auroras/
+			https://www.esa.int/Applications/Observing_the_Earth/Swarm/Energy_from_solar_wind_favours_the_north
+		Quantum mechanics
+			/Electromagnetism/Optics
+				Reflections
+			/Electrical engineering
+			a vector of complex numbers can separate into a vector and bivector (i*vector) parts?
+			3 states are used in this thing on bell https://freelanceastro.github.io/bell/
+			Chromodynamics
+				Got three nice variables(?)
+				Applicable to nuclear power which is rather mysterious
+		Planetary motion
+			A bomb going off and lots of pieces of shrapnel. You have to do lots of them
+		Electromagnetism:
+			Lots of fun magnet stuff / toys out there.
+				Prove that perpetual motion machines based on magnetism are dumb, the "pushing" comes from you
+			Electrically powered rockets https://en.wikipedia.org/wiki/Electrically_powered_spacecraft_propulsion
+			telescope optics,
+			telecommunicatio/satellites. No magnets but this may not matter
+			Magneto dynamics! Of the sun or earth!
+				Surface of the sun: https://www.youtube.com/watch?v=znBesUwVOok&ab_channel=SciNews
+			Lightning, it's badass
+		quantum
+			ultraviolet catastrophe
+				If you want to know how things glow or how long it takes for heat to radiate off them, need qm
+			Could base a lot of it around color changing chemicals? Nice for reac diffusion too?
+			https://sustainable-nano.com/2019/11/12/gold-nanoparticles-color/
+			Main dude for QC tim@energycompression.com
+				You know, you're just barrelling into QC assuming CA is a good fit for it, maybe it isn't. Well. If it isn't, maybe don't work on this.
+			Aharonov-Bohm Effect
+			quantum hall effect
+			If you have a vector and bivector together being a wave function with mod squared equal to 1, and vector is determined, what does that mean for bivector?
+			nuclear powered rockets
+			Not putting stuff in the van allen belt
+			ion thrusters?
+			nuclear fusion
+		spec rel
+			super fast rockets
+		Relativistic QM?
+		Quantum computing somehow?
+			https://www.youtube.com/watch?v=F_Riqjdh2oM
+		To make a thing about real rocket science you ought to have super awesome heart-swelling animations, hngh
+			How to do it on the cheap: public domain NASA footage, plasma drive, ITER stuff with heart-swelling music
+		Magnetised needly droplet going around it
+		Re electromagnetism: look at "magnetic core memory", that's something you can do a shader simulation of
 */
