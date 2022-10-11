@@ -23,8 +23,6 @@
 				initWindowResize()
 				initSound()
 
-				initMouse()
-
 				initDwArea()
 				initAnimation()
 				initFacialExpressions()
@@ -66,7 +64,6 @@
 					let clockDelta = clock.getDelta()
 					frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
 					
-					mouse.updateFromAsyncAndCheckClicks()
 
 					for(var i = 0; i < updateFunctions.length; i++)
 						updateFunctions[i]()
@@ -108,8 +105,6 @@
 		<script src="../common/threejsVariables.js"></script>
 		<script src="variables.js"></script>
 		<script src="../common/variables.js"></script>
-		
-		<script src="../common/orthographicMouse.js"></script>
 		
 		<script src="facialExpressions.js"></script>
 		<script src="controls.js"></script>
