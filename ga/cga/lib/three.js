@@ -18541,7 +18541,7 @@
 				camera.projectionMatrix.makePerspective(left2, right2, top2, bottom2, near2, far2);
 			}
 
-			function updateCamera(camera, parent) {
+			function updateCameraFromProjectivenessMode(camera, parent) {
 				if (parent === null) {
 					camera.matrixWorld.copy(camera.matrix);
 				} else {
@@ -18551,7 +18551,7 @@
 				camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
 			}
 
-			this.updateCamera = function (camera) {
+			this.updateCameraFromProjectivenessMode = function (camera) {
 				if (session === null) return;
 				cameraVR.near = cameraR.near = cameraL.near = camera.near;
 				cameraVR.far = cameraR.far = cameraL.far = camera.far;
@@ -18568,10 +18568,10 @@
 
 				const parent = camera.parent;
 				const cameras = cameraVR.cameras;
-				updateCamera(cameraVR, parent);
+				updateCameraFromProjectivenessMode(cameraVR, parent);
 
 				for (let i = 0; i < cameras.length; i++) {
-					updateCamera(cameras[i], parent);
+					updateCameraFromProjectivenessMode(cameras[i], parent);
 				}
 
 				cameraVR.matrixWorld.decompose(cameraVR.position, cameraVR.quaternion, cameraVR.scale); // update user camera and its children
@@ -19741,7 +19741,7 @@
 			if (camera.parent === null) camera.updateMatrixWorld();
 
 			if (xr.enabled === true && xr.isPresenting === true) {
-				if (xr.cameraAutoUpdate === true) xr.updateCamera(camera);
+				if (xr.cameraAutoUpdate === true) xr.updateCameraFromProjectivenessMode(camera);
 				camera = xr.getCamera(); // use XR camera for rendering
 			} //
 

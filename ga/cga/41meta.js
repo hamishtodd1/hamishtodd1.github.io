@@ -2,14 +2,23 @@
     Points square to -1. Suggests they're rotations. Which, yes
  */
 
-async function init41() {  
+async function init41() {
+
+    const basisNames = [
+        ``, 
+        `1`, `2`, `3`, `+`,`-`,
+        `12`, `13`, `1+`, `1-`,    `23`, `2+`, `2-`,   `3+`, `3-`, `+-`,  //line start is [6]
+        `123`, `12+`, `12-`, `13+`, `13-`, `23+`, `23-`, `2+-`, `3+-`,  //lines starts at [16]
+        `123+`, `123-`, `12+-`, `13+-`, `23+-`,
+        `I`]
+
 
     let [jsGaString, glslGaString] = createSharedFunctionDeclarationsStrings()
     //newMv is not a variable name. It is equivalent to "new Mv()"
 
     //javascript part
     {
-        let fullFuncString = init301WithoutDeclarations.toString()
+        let fullFuncString = init41WithoutDeclarations.toString()
         let funcString = fullFuncString
             .slice(0, fullFuncString.indexOf("/*END*/}"))
             .replace("/*EXTRA FUNCTIONS ADDED HERE*/",jsGaString)
@@ -24,10 +33,16 @@ async function init41() {
             "(" +
             withoutDeclarations +
             declarations +
-            "})()"
+            "})(basisNames)"
     }
-
     eval(strToEval)
+
+    basisNames.forEach((bn,i)=>{
+        if(i !== 0) {
+            let funcName = "e" + bn.replace(`+`, `Plus`).replace(`-`, `Minus`)
+            Mv.prototype[funcName] = function () { return this[i] }
+        }
+    })
 }
 
 function createSharedFunctionDeclarationsStrings()

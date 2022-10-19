@@ -9,6 +9,11 @@ const v1 = new THREE.Vector3()
 const v2 = new THREE.Vector3()
 const v3 = new THREE.Vector3()
 const v4 = new THREE.Vector3()
+const v5 = new THREE.Vector3()
+const v6 = new THREE.Vector3()
+const v7 = new THREE.Vector3()
+const v8 = new THREE.Vector3()
+const v9 = new THREE.Vector3()
 const m1 = new THREE.Matrix4()
 const m2 = new THREE.Matrix4()
 const q1 = new THREE.Quaternion()
@@ -26,6 +31,7 @@ const downwardPyramidGeo = new THREE.BufferGeometry().setFromPoints([
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, canvas: canvas3d })
 renderer.shadowMap.enabled = true
+renderer.autoClear = false
 let mouse = null
 const clock = new THREE.Clock(true)
 
