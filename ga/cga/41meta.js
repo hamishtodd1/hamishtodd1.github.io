@@ -7,14 +7,15 @@ async function init41() {
     const basisNames = [
         ``, 
         `1`, `2`, `3`, `+`,`-`,
-        `12`, `13`, `1+`, `1-`,    `23`, `2+`, `2-`,   `3+`, `3-`, `+-`,  //line start is [6]
-        `123`, `12+`, `12-`, `13+`, `13-`, `23+`, `23-`, `2+-`, `3+-`,  //lines starts at [16]
+        `12`,`13`,`1+`,`1-`,    `23`,`2+`,`2-`,   `3+`,`3-`,   `+-`,  //line start is [6]
+        `123`,   `12+`,`12-`,   `13+`,`13-`,   `1+-`,   `23+`,`23-`,    `2+-`,`3+-`,  //lines starts at [16]
         `123+`, `123-`, `12+-`, `13+-`, `23+-`,
         `I`]
 
-
     let [jsGaString, glslGaString] = createSharedFunctionDeclarationsStrings()
     //newMv is not a variable name. It is equivalent to "new Mv()"
+    gaShaderPrefix = glslGaString
+    // gaShaderPrefix += await getTextFile('shaders/41.glsl') //doesn't exist yet
 
     //javascript part
     {
@@ -60,7 +61,7 @@ function createSharedFunctionDeclarationsStrings()
         funcArgs.forEach((funcArg, i) => {
             if (funcArg.indexOf(" ") === -1) {
                 jsVersion += funcArg    
-                glslVersion += "in float[16] " + funcArg
+                glslVersion += "in float[32] " + funcArg
             }
             else {
                 let splitBySpace = funcArg.split(" ")
@@ -74,11 +75,11 @@ function createSharedFunctionDeclarationsStrings()
             }
         })
 
-        let jsBody = body.replace(/(float\[16\])|(float )|(int )/g, "let ")
+        let jsBody = body.replace(/(float\[32\])|(float )|(int )/g, "let ")
         let glslBody = body.replace(/(\s+=\s+(newMv))|(Math\.)/g, "")
 
         if (fillInTarget) {
-            glslVersion += `out float[16] target ) {` + glslBody + `\n}\n`
+            glslVersion += `out float[32] target ) {` + glslBody + `\n}\n`
             //might be nice to check if you are allowed to return an inout
 
             jsVersion += `target ) {\n    if(target === undefined)\n        target = new Mv()\n` + 

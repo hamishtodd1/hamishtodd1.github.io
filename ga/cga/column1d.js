@@ -6,14 +6,13 @@ function initColumn1d() {
     let ourPss = mul(e1Plus, eMinus)
     let ourNo = nO.clone()
 
-    //possible here since there's only one axis a translation can be around
-    function setTranslation(amt, target) {
-        target.copy(spineMv)
-        target.multiplyScalar(amt)
-        target[0] = 1.
-        target.normalize()
-        return target
-    }
+    //right, it's confusing as fuck because if you want:
+    // y plane, eMinus, is oriented up
+    // z plane, ePlus, is oriented towards us
+    // then nI = ePlus+eMinus is oriented towards positive x, positive y
+    // and its dual, the spine, is -z, +y. Fucking CGA dual
+    let spineMv = new Mv()
+    mul(e1, nI, spineMv)
 
     {
         function applyToGrid(rotor) {
@@ -23,63 +22,45 @@ function initColumn1d() {
             })
         }
 
-        let rotorUp = ePlusMinus.clone().multiplyScalar(-.01)
-        let rotorDown = ePlusMinus.clone().multiplyScalar(.01)
-        rotorUp[0] = 1.
-        rotorDown[0] = 1.
-        rotorUp.normalize()
-        rotorDown.normalize()
+        let rotorDown = ePlusMinus.clone().naieveAxisToRotor(.02)
+        let rotorUp = ePlusMinus.clone().naieveAxisToRotor(-.02)
 
-        let rotorSpling = mul(nO,e1)
-        rotorSpling.multiplyScalar(.01)
-        rotorSpling[0] = 1.
-        rotorSpling.normalize()
-        let rotorSplong = mul(nO, e1)
-        rotorSplong.multiplyScalar(-.01)
-        rotorSplong[0] = 1.
-        rotorSplong.normalize()
-        bindButton(`PageDown`, () => { }, ``, () => {
-            applyToGrid(rotorSplong)
-        })
-        bindButton(`PageUp`, () => { }, ``, () => {
-            applyToGrid(rotorSpling)
-        })
+        let rotorSplong = mul(nO, e1).naieveAxisToRotor(-.01)
+        let rotorSpling = mul(nO, e1).naieveAxisToRotor( .01)
 
-        bindButton(`ArrowUp`, () => { }, ``, () => {
-            applyToGrid(rotorUp)
-        })
-        bindButton(`ArrowDown`, () => { }, ``, () => {
-            applyToGrid(rotorDown)
-        })
-        bindButton(`ArrowLeft`, () => { }, ``, () => {
-            let verySlightTranslation = setTranslation(-.05, mv0)
-            applyToGrid(verySlightTranslation)
-        })
-        bindButton(`ArrowRight`, () => { }, ``, () => {
-            let verySlightTranslation = setTranslation(.05, mv0)
-            applyToGrid(verySlightTranslation)
-        })
+        let rotorLeft = spineMv.clone().naieveAxisToRotor(-.03)
+        let rotorRight = spineMv.clone().naieveAxisToRotor(.03)
 
-        bindButton(`g`, () => { }, ``, () => {
-            mv0.copy(e1Plus)
-            mv0[0] = 99.
-            mv0.normalize()
-            ourNo.applyRotor(mv0)
-        })
-        bindButton(`h`, () => { }, ``, () => {
-            mv0.copy(e1Plus)
-            mv0[0] = -99.
-            mv0.normalize()
-            ourNo.applyRotor(mv0)
-        })
+        let buttonsArr = [`PageDown`,`PageUp`, `ArrowUp`,`ArrowDown`, `ArrowLeft`,`ArrowRight` ]
+        let rotorsArr = [rotorSplong,rotorSpling,rotorUp, rotorDown, rotorRight, rotorLeft]
+        for(let i = 0; i < 6; ++i) {
+            bindButton(buttonsArr[i], () => { }, ``, () => {
+                applyToGrid(rotorsArr[i])
+            })
+        }
+
+        //this breaks the planes because it's not attacking the rotor
+        //point is, 
+        // bindButton(`q`, () => { }, ``, () => {
+        //     mv0.copy(e1Plus)
+        //     mv0[0] = 99.
+        //     mv0.normalize()
+        //     ourNo.applyRotor(mv0)
+        // })
+        // bindButton(`w`, () => { }, ``, () => {
+        //     mv0.copy(e1Plus)
+        //     mv0[0] = -99.
+        //     mv0.normalize()
+        //     ourNo.applyRotor(mv0)
+        // })
     }
 
-    let ambient = new Dw(1, 0, true, true)
+    let ambientOrdinaryModeCameraPosition = new THREE.Vector3()
+    let ambient = new Dw(1, 0, true, true, ambientOrdinaryModeCameraPosition)
 
     {
-        let ordinaryModeCameraPosition = new THREE.Vector3()
         ambient.updateCamera = () => {
-            ambient.camera.position.copy(ordinaryModeCameraPosition)
+            ambient.camera.position.copy(ambientOrdinaryModeCameraPosition)
             ambient.camera.position.multiplyScalar(1.-ambient.cameraUnusualness)
 
             let lookDirection = v1.set(0., 1., 0.).multiplyScalar(Math.pow(ambient.cameraUnusualness,1./5.))
@@ -93,17 +74,17 @@ function initColumn1d() {
             // camera.position.set()
             //yeah set the field of view too
         }
-        ambient.onRightClick = (x, y) => { xOld = x; yOld = y }
-        ambient.onRightDrag = (x, y) => {
-            if(this.unusualCameraMode)
-                return
-            moveCamera(ordinaryModeCameraPosition, true, -.1 * (x - xOld))
-            moveCamera(ordinaryModeCameraPosition, false, .1 * (y - yOld))
-            xOld = x
-            yOld = y
-        }
+        // ambient.onRightClick = (x, y) => { xOld = x; yOld = y }
+        // ambient.onRightDrag = (x, y) => {
+        //     if(this.unusualCameraMode)
+        //         return
+        //     moveCamera(ambientOrdinaryModeCameraPosition, true, -.1 * (x - xOld))
+        //     moveCamera(ambientOrdinaryModeCameraPosition, false, .1 * (y - yOld))
+        //     xOld = x
+        //     yOld = y
+        // }
         let cameraDist = 1.3 * ambient.camera.position.length()
-        ordinaryModeCameraPosition.set(0., 0., 1.).setLength(cameraDist)
+        ambientOrdinaryModeCameraPosition.set(1., 1.6, 2.).setLength(cameraDist)
         
         function ambientLineMvToUnitVecDirection(mv, target) {
             //this is based on wanting spine to be going up (0, 1, 1)
@@ -120,20 +101,12 @@ function initColumn1d() {
     let ourNoClippingPlane = new THREE.Plane(new THREE.Vector3(), .01)
     let topClippingPlane = new THREE.Plane(new THREE.Vector3(0., -1., 0.), coneTopRadius)
     
-    //right, it's confusing as fuck because if you want:
-    // y plane, eMinus, is oriented up
-    // z plane, ePlus, is oriented towards us
-    // then nI = ePlus+eMinus is oriented towards positive x, positive y
-    // and its dual, the spine, is -z, +y. Fucking CGA dual
-    let spineMv = new Mv()
-    mul(e1, nI, spineMv)
-
     let unitHeightCylGeo = CylinderBufferGeometryUncentered(tubeRadius, 1., 8, 1, true)
     let cylGeo = new THREE.CylinderBufferGeometry(tubeRadius, tubeRadius, 2., 8, 1, true)
     
     {
         let coneMat = new THREE.MeshPhongMaterial({
-            color: 0x00FF00,
+            color: 0x777777,
             transparent: true,
             opacity: .8,
             side: THREE.DoubleSide,
@@ -148,7 +121,7 @@ function initColumn1d() {
         cone.renderOrder = 1
         ambient.scene.add(cone)
 
-        let spineMat = new THREE.MeshPhongMaterial({color:0xFF0000})
+        var spineMat = new THREE.MeshPhongMaterial({color:0x00FF00})
         let spine = new THREE.Mesh(cylGeo, spineMat)
         ambient.scene.add(spine)
         
@@ -158,12 +131,11 @@ function initColumn1d() {
         spine.matrix.makeBasis(xUnit,v1,zUnit)
     }
 
-    const gridCount = 40
+    const gridCount = 25
     let gridMvs = Array(gridCount)
     {
-        let spacerTranslation = setTranslation(.2, new Mv())
         for (let i = 0; i < gridCount; ++i) {
-            let ourTranslation = setTranslation((i/gridCount-.5)*12., mv0)
+            let ourTranslation = mv0.copy(spineMv).naieveAxisToRotor((i / gridCount - .5) * 7.)
             gridMvs[i] = new Mv()
             ourTranslation.sandwich(e1, gridMvs[i])
         }
@@ -172,12 +144,12 @@ function initColumn1d() {
             clippingPlanes: [bottomClippingPlane, topClippingPlane, nIClippingPlane, ourNoClippingPlane],
             transparent: true,
             opacity: .9,
-            color: 0xFF0000,
+            color: 0x00FFFF,
             side: THREE.DoubleSide
         })
-        let rectHeight = 1.
-        let rectWidth = coneDiagonalLength
         let rectGeo = new THREE.PlaneGeometry(10., 10.)
+        //normal needs to be the y vector because we use RotationallySymmetricMatrix
+        rectGeo.rotateX(TAU / 4.)
         // rectGeo.translate(rectWidth * .5, rectHeight * .5, 0.)
 
         var gridPlanes = new THREE.InstancedMesh(rectGeo, rectMat, gridCount)
@@ -190,6 +162,8 @@ function initColumn1d() {
     let hyperbolic = new Dw(1,1, true, true)
     {
         // in this context, the x and y directions (ultra ideal points) are ePlusMinus and e1Minus
+
+        var hyperbolicOrigin = e1Plus
 
         hyperbolic.camera.rotation.x = TAU / 4.
         hyperbolic.camera.position.set(0.,0.,0.)
@@ -242,7 +216,7 @@ function initColumn1d() {
         conformal.camera.updateProjectionMatrix()
         conformal.camera.rotation.x = TAU / 8. //???
 
-        let nOLine = new THREE.Mesh(cylGeo,new THREE.MeshBasicMaterial({color:0x00FFFF}))
+        let nOLine = new THREE.Mesh(cylGeo,new THREE.MeshBasicMaterial({color:0xFF0000}))
         nOLine.matrixAutoUpdate = false
         conformal.scene.add(nOLine)
 
@@ -266,10 +240,14 @@ function initColumn1d() {
             ourNoClippingPlane.normal.multiplyScalar(-1.)
         })
 
-        let gridPointsGeo = new THREE.SphereGeometry(tubeRadius * 3.)
+        let pointGeo = new THREE.SphereGeometry(tubeRadius * 3.)
         let gridPointsMat = new THREE.MeshBasicMaterial({ color: 0x0000FF })
-        var gridPoints = new THREE.InstancedMesh(gridPointsGeo, gridPointsMat, gridCount)
+        var gridPoints = new THREE.InstancedMesh(pointGeo, gridPointsMat, gridCount)
         conformal.scene.add(gridPoints)
+
+        let spineBall = new THREE.Mesh(pointGeo, spineMat)
+        conformal.scene.add(spineBall)
+        spineBall.position.set(0.,1.,1.)
     }
 
     function planeMvToNormalVector(planeMv, target) {
@@ -279,12 +257,9 @@ function initColumn1d() {
     updateFunctions.push(() => {
         gridMvs.forEach((gmv, i) => {
             {
-                let spineDirection = ambientLineMvToUnitVecDirection(spineMv, v1).normalize()
                 //no, it's not the dual. The dual is NOT the line orthogonal to the plane and through the origin
-                let normal = planeMvToNormalVector(gmv, v2)
-                let xDirection = v3.copy(spineDirection).cross(normal).normalize()
-
-                m1.makeBasis(xDirection, spineDirection, normal)
+                planeMvToNormalVector(gmv, v1)
+                setRotationallySymmetricMatrix(v1.x,v1.y,v1.z,m1)
                 gridPlanes.setMatrixAt(i, m1)
             }
 
@@ -295,8 +270,7 @@ function initColumn1d() {
                 ambientLineMvToUnitVecDirection(mv1, v1).multiplyScalar(100.)
                 setRotationallySymmetricMatrix(v1.x, v1.y, v1.z, m1)
 
-                //e1Plus is the origin/center of the circle
-                e1Plus.projectOn(gmv, mv2).normalize()
+                hyperbolicOrigin.projectOn(gmv, mv2).normalize()
                 ambientLineMvToUnitVecDirection(mv2, v1)
                 m1.setPosition(mv2.ePlusMinus() / mv2.e1Plus(), 1., mv2.e1Minus() / mv2.e1Plus())
 

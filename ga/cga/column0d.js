@@ -3,11 +3,10 @@
 //important question to answer right now is about 
 
 function initColumn0d() {
-    let ambient = new Dw(0, 0, true, true)
+    let ambient = new Dw(0, 0, true, false)
 
     let pss = e45
 
-    let line2dGeo = new THREE.PlaneGeometry(.05, 999.)
     let cylGeo = new THREE.CylinderBufferGeometry(tubeRadius, tubeRadius, 999., 8, 1, true)
 
     ambient.updateCamera = () => {
@@ -35,9 +34,25 @@ function initColumn0d() {
     //     ambient.scene.add(viz)
     // }
 
+    {
+        let axisMesh = new THREE.Mesh(new THREE.SphereGeometry(tubeRadius * 3.5), new THREE.MeshBasicMaterial({ color: 0x00FF00 }))
+        ambient.scene.add(axisMesh)
+
+        let segmentGeo = CylinderBufferGeometryUncentered(tubeRadius, 2. * Math.sqrt(2.))
+        let segmentMat = new THREE.MeshBasicMaterial({ color: 0x666666 })
+
+        let segment1 = new THREE.Mesh(segmentGeo, segmentMat)
+        segment1.rotation.z = TAU / -8.
+        ambient.scene.add(segment1)
+
+        let segment2 = new THREE.Mesh(segmentGeo, segmentMat)
+        segment2.rotation.z = TAU / 8.
+        ambient.scene.add(segment2)
+    }
+
     const gridCount = 8
     {
-        var gridLines = new THREE.InstancedMesh(cylGeo,new THREE.MeshBasicMaterial({color:0x0000FF, transparent:true, opacity: 1.}),gridCount)
+        var gridLines = new THREE.InstancedMesh(cylGeo,new THREE.MeshBasicMaterial({color:0x00FFFF, transparent:true, opacity: 1.}),gridCount)
         ambient.scene.add(gridLines)
         var initialGridMvs = Array(gridCount)
 
@@ -79,12 +94,12 @@ function initColumn0d() {
     }
 
     {
-        let line2dMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 1. })
-        let e1Line = new THREE.Mesh(cylGeo, line2dMat)
-        ambient.scene.add(e1Line)
-        let e2Line = new THREE.Mesh(cylGeo, line2dMat)
-        e2Line.rotation.z = TAU / 4.
-        ambient.scene.add(e2Line)
+        // let line2dMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 1. })
+        // let e1Line = new THREE.Mesh(cylGeo, line2dMat)
+        // ambient.scene.add(e1Line)
+        // let e2Line = new THREE.Mesh(cylGeo, line2dMat)
+        // e2Line.rotation.z = TAU / 4.
+        // ambient.scene.add(e2Line)
     }
 
     let hyperbolic = new Dw(0, 1)
@@ -113,18 +128,16 @@ function initColumn0d() {
         hyperbolic.camera.rotation.z += TAU / 4.
 
         let hyperbolaGeo = new THREE.TubeGeometry(path, 127, tubeRadius, 7, false)
-        let hyperbolaMat = new THREE.MeshBasicMaterial({ color: 0xFFFF00 })
+        let hyperbolaMat = new THREE.MeshBasicMaterial({ color: 0x000000 })
         let hyperbolaMesh = new THREE.Mesh(hyperbolaGeo, hyperbolaMat)
         hyperbolic.scene.add(hyperbolaMesh)
 
-        let gridPointsGeo = new THREE.SphereGeometry(tubeRadius * 3.)
-        let gridPointsMat = new THREE.MeshBasicMaterial({ color: 0x00FFFF })
+        var gridPointsGeo = new THREE.SphereGeometry(tubeRadius * 3.)
+        let gridPointsMat = new THREE.MeshBasicMaterial({ color: 0xFF00FF })
         var gridPoints = new THREE.InstancedMesh(gridPointsGeo, gridPointsMat, gridCount)
         hyperbolic.scene.add(gridPoints)
+        
 
-        // hyperbolaFunc
-        // let segmentGeo = new THREE.PlaneGeometry(.05, 999.)
-        // let worldItself = new THREE.Mesh()
 
         //so you need to do a vertex shader
         //alright you get a grid of vertices
@@ -153,6 +166,13 @@ function initColumn0d() {
         //     `
         // })
     }
+
+    let conformal = new Dw(0, 2)
+    conformal.camera.position.set(0.,0.,0.)
+    conformal.camera.lookAt(1.,1.,0.)
+    let floor = new THREE.Mesh(gridPointsGeo, new THREE.MeshBasicMaterial({ color: 0xFF0000 }))
+    floor.position.set(2., 2., 0.)
+    conformal.scene.add(floor)
 
     updateFunctions.push(() => {
         for (let i = 0; i < gridCount; ++i) {

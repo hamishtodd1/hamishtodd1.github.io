@@ -92,6 +92,9 @@ function init41WithoutDeclarations(basisNames) {
         }
 
         toMv(target) {
+            if (target === undefined)
+                target = new Mv()
+                
             target.copy(zeroMv)
             for (let i = 0; i < this.constructor.size; ++i)
                 target[this.constructor.mvOffsets[i]] = this[i]
@@ -100,11 +103,17 @@ function init41WithoutDeclarations(basisNames) {
         }
 
         add(a,target) {
+            if(target === undefined)
+                target = new Mv()
+
             for(let i = 0; i < this.constructor.size; ++i)
                 target[i] = this[i] + a[i]
             return target
         }
         sub(a, target) {
+            if (target === undefined)
+                target = new Mv()
+
             for (let i = 0; i < this.constructor.size; ++i)
                 target[i] = this[i] - a[i]
             return target
@@ -119,9 +128,17 @@ function init41WithoutDeclarations(basisNames) {
             return super(N_COEFS)
         }
 
+        naieveAxisToRotor(amt) {
+            //we do NOT normalize because this could very well be null
+            this.multiplyScalar(amt)
+            this[0] = 1.
+            this.normalize()
+            return this
+        }
+
         naieveSqrt() {
             this.normalize()
-            this[0] += 1.
+            this[0] += 1. * Math.sign(this[0]) || 1.
             this.normalize()
             return this
         }
@@ -143,6 +160,7 @@ function init41WithoutDeclarations(basisNames) {
             //ret*mv = this
             //ret*(mv*mv) = this*mv
             //ret = this*mv/(mv*mv)
+            //provided mv*mv is a nonzero scalar
             
             let mvSquared = mul(mv,mv,newMv)
             let impossible = false
@@ -150,10 +168,15 @@ function init41WithoutDeclarations(basisNames) {
                 if (Math.abs(mvSquared[i]) > .0001)
                     impossible = true
             }
+            if(impossible )
+                console.warn("division by non-blade")
+            else if (mvSquared[0] === 0.)
+                console.warn("division by thing with zero norm")
+            let scalarToMultiplyBy = mvSquared[0] === 0. ? 1. : 1./mvSquared[0]
+            
             mul(this,mv,target)
-            target.multiplyScalar(mvSquared[0])
-            if(impossible)
-                console.warn("dividing by non-blade")
+
+            target.multiplyScalar(scalarToMultiplyBy)
 
             return target
         }
@@ -162,7 +185,8 @@ function init41WithoutDeclarations(basisNames) {
             if(target === undefined)
                 target = new Mv()
             let intermediary = inner(this, mv, newMv)
-            return intermediary.divideBy(mv, target)
+            return mul(intermediary,mv, target)
+            // return intermediary.divideBy(mv, target)
         }
 
         applyRotor(rotor) {
@@ -384,11 +408,11 @@ function init41WithoutDeclarations(basisNames) {
     nO = ePlus.sub(eMinus, new Mv())
     // nIDual = mul(nI, e123PlusMinus) //they're points, so only work for one space
     nODual = mul(nO, e123PlusMinus)
+    e0 = nI.multiplyScalar(-1.)
 
-    let pss0 = e45
-    let pss1 = mul(e1,  e45)
-    let pss2 = mul(e12, e45)
-    let pss3 = mul(e123,e45)
+    e01 = mul(nI, e1).multiplyScalar(Math.SQRT1_2)
+    e02 = mul(nI, e2).multiplyScalar(Math.SQRT1_2)
+    e03 = mul(nI, e3).multiplyScalar(Math.SQRT1_2)
 
     mv0 = new Mv()
     mv1 = new Mv()

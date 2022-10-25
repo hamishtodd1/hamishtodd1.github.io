@@ -1,4 +1,7 @@
 /*
+    Potential control scheme:
+        drag in the ambient space and it does that transformation
+
     Have buttons for showing:
         Number of dimensions of each window
         "Helper/Fake" shapes:
@@ -15,6 +18,7 @@
 
     Possibly worth having the complex window too?
 
+    There's probably a bunch of stuff in the old cga
     Script
         It's like a book opened at a right angle. Maybe the book of sand with an infinite number of pages
         Projective geo has a sophisticated view of infinity. Conformal is even more sophisticated
@@ -80,10 +84,10 @@ async function init() {
 
     {
         let eyeMat = new THREE.MeshBasicMaterial()
-        new THREE.TextureLoader().load(`data/eyeTexture.png`, (texture) => {
-            eyeMat.map = texture
-            eyeMat.needsUpdate = true
-        }, () => { }, (err) => { log(err) })
+        // new THREE.TextureLoader().load(`data/eyeTexture.png`, (texture) => {
+        //     eyeMat.map = texture
+        //     eyeMat.needsUpdate = true
+        // }, () => { }, (err) => { log(err) })
         let eyeGeo = new THREE.SphereGeometry(.3)
         eyeGeo.rotateX(TAU / 4.)
         createEye = () => {
@@ -119,7 +123,7 @@ async function init() {
         onRightClick = () => { }
         onRightDrag = () => { }
 
-        constructor(horizontalIndex, verticalIndex, haveCameraMode) {
+        constructor(horizontalIndex, verticalIndex, haveCameraMode, rightMouseMovesCamera, rightMouseMovesAffectsThisVector) {
             this.horizontalIndex = horizontalIndex
             this.verticalIndex = verticalIndex
 
@@ -162,6 +166,22 @@ async function init() {
                             child.material.opacity = 1. - this.cameraUnusualness
                     })
                 })
+            }
+
+            if (rightMouseMovesCamera  ) {
+                let xOld = 0.
+                let yOld = 0.
+                this.onRightClick = (x, y) => { xOld = x; yOld = y }
+                this.onRightDrag = (x, y) => {
+                    if (this.unusualCameraMode)
+                        return
+                    let affected = rightMouseMovesAffectsThisVector === undefined ? this.camera.position : rightMouseMovesAffectsThisVector
+                    moveCamera(affected, true, -.1 * (x - xOld))
+                    moveCamera(affected, false, .1 * (y - yOld))
+                    xOld = x
+                    yOld = y
+                    this.camera.lookAt(0.,0.,0.)
+                }
             }
         }
     }

@@ -13905,7 +13905,7 @@
 		const status = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
 		const errors = gl.getShaderInfoLog(shader).trim();
 		if (status && errors === '') return '';
-		webglErrorThrower(errors)
+		
 		const errorLine = parseInt(/ERROR: 0:(\d+)/.exec(errors)[1]); // --enable-privileged-webgl-extension
 		// console.log( '**' + type + '**', gl.getExtension( 'WEBGL_debug_shaders' ).getTranslatedShaderSource( shader ) );
 
