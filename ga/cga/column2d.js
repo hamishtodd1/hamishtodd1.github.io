@@ -73,6 +73,9 @@ function initColumn2d() {
     }
 
     {
+        //you're modelling the vertices as point pairs with one at infinity
+        //d
+
         var ptPair = mul(ePlus, e1)
         mul(e1, nO, ptPair)
         // ptPair.copy(e12)
@@ -243,6 +246,13 @@ function initColumn2d() {
                     transformedPosition *= 2.;
                     transformedPosition.y = -1.;
                     transformedPosition.w = 1.;
+
+                    //so you get sent in the angles for points around a circle
+                    //or maybe you get the points themselves
+
+                    //or you get the point that is the center projected onto the circle
+                    //and an axis
+                    //and each vertex's position.y is the angle around from there 
                     
                     gl_Position = projectionMatrix * modelViewMatrix * transformedPosition;
                 }
@@ -266,7 +276,7 @@ function initColumn2d() {
         let numVerts = 128
         let verts = Array(numVerts)
         for (let i = 0; i < numVerts; ++i)
-            verts[i] = new THREE.Vector3(0.,.0001 + (i-.5*(numVerts-1))*.9,0.)
+            verts[i] = new THREE.Vector3(0.,.0001 + .9*(i-.5*(numVerts-1)),0.)
         let lineGeo = new THREE.BufferGeometry().setFromPoints(verts)
 
         var gridLines = Array(gridCount)
@@ -279,6 +289,13 @@ function initColumn2d() {
         //if you have problems, could consider projecting origin or whatever onto the circle/line
         //then mapping that point back to e1
         //then sending that point in as a uniform y amount to be added
+
+        //you're modelling e1 as a series of point pairs where they're all joined with infinity
+        //well, they SHOULDN'T be that way
+        //it's a series of... actual points?
+        //could stereographically project, starting with a set of points on a circle
+
+        //don't forget the interesting discovery that if you're just intersecting these planes, it's Lengyel's result
     }
 
     function grade3ToVectorInHyperbolic(mv, target) {
