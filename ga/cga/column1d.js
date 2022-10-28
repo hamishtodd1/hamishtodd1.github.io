@@ -131,14 +131,19 @@ function initColumn1d() {
         spine.matrix.makeBasis(xUnit,v1,zUnit)
     }
 
-    const gridCount = 25
-    let gridMvs = Array(gridCount)
+    let gridMvs = []
     {
-        for (let i = 0; i < gridCount; ++i) {
-            let ourTranslation = mv0.copy(spineMv).naieveAxisToRotor((i / gridCount - .5) * 7.)
+        let numHorizontals = 11
+        for (let i = 0; i < numHorizontals; ++i) {
+            let zeroToOne = i / (numHorizontals - 1)
+            let ourTranslation = mv0.copy(spineMv).naieveAxisToRotor((zeroToOne - .5) * 3.)
             gridMvs[i] = new Mv()
             ourTranslation.sandwich(e1, gridMvs[i])
         }
+        gridMvs.push(ePlus.clone())
+        gridMvs.push(ePlus.clone().sub(nI))
+        gridMvs.push(ePlus.clone().add(nO))
+        var gridCount = gridMvs.length
 
         let rectMat = new THREE.MeshPhongMaterial({
             clippingPlanes: [bottomClippingPlane, topClippingPlane, nIClippingPlane, ourNoClippingPlane],
@@ -159,7 +164,7 @@ function initColumn1d() {
         //lower cameras should look at nODual
     }
 
-    let hyperbolic = new Dw(1,1, true, true)
+    let hyperbolic = new Dw(1,1, true, false)
     {
         // in this context, the x and y directions (ultra ideal points) are ePlusMinus and e1Minus
 

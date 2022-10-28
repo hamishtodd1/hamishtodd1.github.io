@@ -410,9 +410,9 @@ function init41WithoutDeclarations(basisNames) {
     nODual = mul(nO, e123PlusMinus)
     e0 = nI.multiplyScalar(-1.)
 
-    e01 = mul(nI, e1).multiplyScalar(Math.SQRT1_2)
-    e02 = mul(nI, e2).multiplyScalar(Math.SQRT1_2)
-    e03 = mul(nI, e3).multiplyScalar(Math.SQRT1_2)
+    e01 = mul(nI, e1).multiplyScalar(.5)
+    e02 = mul(nI, e2).multiplyScalar(.5)
+    e03 = mul(nI, e3).multiplyScalar(.5)
 
     mv0 = new Mv()
     mv1 = new Mv()

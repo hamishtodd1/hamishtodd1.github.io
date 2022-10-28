@@ -25,31 +25,52 @@ function initColumn2d() {
     let ourPss = mul(e12, ePlusMinus)
     ourPss.log()
 
+    let conformal = new Dw(2, 2)
+    let hyperbolic = new Dw(2, 1, false, true)
+
     let cylGeo = new THREE.CylinderBufferGeometry(tubeRadius, tubeRadius, 1000.)
 
     {
         var gridMvs = []
-        let gridNumWide = 9
+        let gridNumWide = 7
+        // gridMvs.push(e1)
+        // gridMvs.push(e1.clone().add(nI).normalize())
+        // gridMvs.push(e1.clone().sub(nI).normalize())
+        // gridMvs.push(e2.clone().sub(nI))
         for (let i = 0; i < gridNumWide; ++i) {
-            mv0.copy(e01).naieveAxisToRotor(2. * (i / (gridNumWide-1) - .5))
+            let zeroToOne = i / (gridNumWide - 1)
+            mv0.log()
+            mv0.copy(e01).naieveAxisToRotor( .99 * 2. * (zeroToOne - .5))
             gridMvs.push(mv0.sandwich(e1, new Mv()))
-
-            mv0.copy(e02).naieveAxisToRotor(2. * (i / (gridNumWide-1) - .5))
+            // if(i===0)
+            //     mv0.sandwich(e1, new Mv()).log()
+        }
+        for (let i = 0; i < gridNumWide; ++i) {
+            let zeroToOne = i / (gridNumWide - 1)
+            mv0.copy(e02).naieveAxisToRotor(.99 * 2. * (zeroToOne - .5))
             gridMvs.push(mv0.sandwich(e2, new Mv()))
         }
-        // gridMvs.push(e2.clone().add(nI))
         var gridCount = gridMvs.length
     }
     
-    let hyperbolic = new Dw(2, 1, false, true)
+    //hyperbolic
     {
         //in this context, the y plane is ePlus. x is e1, z is e2
         //so lines through origin are e1Plus, e12, e2Plus
         //eMinus is your line at infinity
         //the pga pseudoscalar here is the north pole, the point e12*nO
 
+        hyperbolic.camera.position.set(1.,1.,2.).setLength(1.9)
+        hyperbolic.camera.lookAt(zeroVector)
+        hyperbolic.camera.fov = getFov(2.)
+        hyperbolic.camera.updateProjectionMatrix()
+
+        let planesGeo = new THREE.CircleGeometry(1.,30)
+        let planesMat = new THREE.MeshPhongMaterial({ color: 0xFF00FF, side:THREE.DoubleSide })
+        var gridPlanes = new THREE.InstancedMesh(planesGeo, planesMat, gridCount)
+
         //in this space, the y plane is ePlus
-        var hyperbolicOrigin = mul(e12,ePlus)
+        var hyperbolicOrigin = mul(e12, ePlus)
         {
             let sphereMat = new THREE.MeshPhongMaterial({
                 // transparent: true,
@@ -58,17 +79,8 @@ function initColumn2d() {
             })
             let sphere = new THREE.Mesh(new THREE.SphereGeometry(1.), sphereMat)
             sphere.renderOrder = 1
-            hyperbolic.scene.add(sphere)
+            // hyperbolic.scene.add(sphere)
         }
-
-        hyperbolic.camera.position.set(1.,1.,2.).setLength(2.5)
-        hyperbolic.camera.lookAt(zeroVector)
-        hyperbolic.camera.fov = getFov(2.)
-        hyperbolic.camera.updateProjectionMatrix()
-
-        let planesGeo = new THREE.CircleGeometry(1.,30)
-        let planesMat = new THREE.MeshPhongMaterial({ color: 0xFF00FF, side:THREE.DoubleSide })
-        var gridPlanes = new THREE.InstancedMesh(planesGeo, planesMat, gridCount)
         hyperbolic.scene.add(gridPlanes)
     }
 
@@ -77,7 +89,7 @@ function initColumn2d() {
         //d
 
         var ptPair = mul(ePlus, e1)
-        mul(e1, nO, ptPair)
+        // mul(e1, nO, ptPair)
         // ptPair.copy(e12)
         var ptPairLineMesh = new THREE.Mesh(cylGeo, new THREE.MeshBasicMaterial({ color: 0x00FF00 }))
         ptPairLineMesh.matrixAutoUpdate = false
@@ -89,12 +101,18 @@ function initColumn2d() {
         
         let ptPairPtsGeo = new THREE.SphereGeometry(tubeRadius*3.)
         let ptPairPtsMat = new THREE.MeshBasicMaterial({ color: 0x00FF00 })
-        var ptPairPtsMeshes = [
+        var ptPairPtsSphereMeshes = [
             new THREE.Mesh(ptPairPtsGeo, ptPairPtsMat),
             new THREE.Mesh(ptPairPtsGeo, ptPairPtsMat)
         ]
-        hyperbolic.scene.add(ptPairPtsMeshes[0])
-        hyperbolic.scene.add(ptPairPtsMeshes[1])
+        hyperbolic.scene.add(ptPairPtsSphereMeshes[0])
+        hyperbolic.scene.add(ptPairPtsSphereMeshes[1])
+        var ptPairPtsFloorMeshes = [
+            new THREE.Mesh(ptPairPtsGeo, ptPairPtsMat),
+            new THREE.Mesh(ptPairPtsGeo, ptPairPtsMat)
+        ]
+        conformal.scene.add(ptPairPtsFloorMeshes[0])
+        conformal.scene.add(ptPairPtsFloorMeshes[1])
 
         let indicator = new THREE.Mesh(ptPairPtsGeo)
         hyperbolic.scene.add(indicator)
@@ -200,7 +218,11 @@ function initColumn2d() {
     }
 
     {
-        let conformal = new Dw(2,2)
+        let floorGeo = new THREE.CircleGeometry(9999.)
+        floorGeo.rotateX(TAU / 4.)
+        let floorPlane = new THREE.Mesh(floorGeo, new THREE.MeshBasicMaterial({ color: 0xFF0000, side: THREE.DoubleSide }))
+        floorPlane.position.y = -1.01
+        conformal.scene.add(floorPlane)
         
         var lookPlane = ePlus.clone().sub(eMinus)
 
@@ -210,49 +232,37 @@ function initColumn2d() {
         // var gridLines = new THREE.InstancedMesh(cylGeo,new THREE.MeshBasicMaterial({color: 0x0000FF}), gridCount)
         // conformal.scene.add(gridLines)
 
-        let gridLinesVertexShader = gaShaderPrefix + `
-                void cgaMulReduced1(in float y, in float[32] m, out float[32] target) {
-                    target[0] = -m[6] - m[8] * y + m[9] * y; target[1] = m[2] + m[4] * y - m[5] * y; target[2] = -m[1] + m[17] * y - m[18] * y; target[3] = -m[16] + m[19] * y - m[20] * y; target[4] = -m[17] - m[1] * y - m[21] * y; target[5] = -m[18] - m[21] * y - m[1] * y; target[6] = m[0] - m[11] * y + m[12] * y; target[7] = m[10] - m[13] * y + m[14] * y; target[8] = m[11] + m[0] * y + m[15] * y; target[9] = m[12] + m[15] * y + m[0] * y; target[10] = -m[7] - m[26] * y + m[27] * y; target[11] = -m[8] + m[6] * y + m[28] * y; target[12] = -m[9] + m[28] * y + m[6] * y; target[13] = -m[26] + m[7] * y + m[29] * y; target[14] = -m[27] + m[29] * y + m[7] * y; target[15] = -m[28] - m[9] * y + m[8] * y; target[16] = m[3] + m[22] * y - m[23] * y; target[17] = m[4] - m[2] * y - m[24] * y; target[18] = m[5] - m[24] * y - m[2] * y; target[19] = m[22] - m[3] * y - m[25] * y; target[20] = m[23] - m[25] * y - m[3] * y; target[21] = m[24] + m[5] * y - m[4] * y; target[22] = -m[19] - m[16] * y - m[31] * y; target[23] = -m[20] - m[31] * y - m[16] * y; target[24] = -m[21] + m[18] * y - m[17] * y; target[25] = -m[31] + m[20] * y - m[19] * y; target[26] = m[13] + m[10] * y + m[30] * y; target[27] = m[14] + m[30] * y + m[10] * y; target[28] = m[15] - m[12] * y + m[11] * y; target[29] = m[30] - m[14] * y + m[13] * y; target[30] = -m[29] - m[27] * y + m[26] * y; target[31] = m[25] + m[23] * y - m[22] * y;
-                }
-                void cgaMulReduced2(in float[32] a, in float[32] b, out vec3 target ) {
-                    float y1 = b[ 8] * a[ 0] + b[ 4] * a[ 1] - b[17] * a[ 2] - b[19] * a[ 3] - b[ 1] * a[ 4] - b[21] * a[ 5] + b[11] * a[ 6] + b[13] * a[ 7] + b[ 0] * a[ 8] + b[15] * a[ 9] - b[26] * a[10] - b[ 6] * a[11] - b[28] * a[12] - b[ 7] * a[13] - b[29] * a[14] - b[ 9] * a[15] - b[22] * a[16] - b[ 2] * a[17] - b[24] * a[18] - b[ 3] * a[19] - b[25] * a[20] - b[ 5] * a[21] + b[16] * a[22] + b[31] * a[23] + b[18] * a[24] + b[20] * a[25] - b[10] * a[26] - b[30] * a[27] - b[12] * a[28] - b[14] * a[29] + b[27] * a[30] + b[23] * a[31];
-                    float y2 = b[ 9] * a[ 0] + b[ 5] * a[ 1] - b[18] * a[ 2] - b[20] * a[ 3] - b[21] * a[ 4] - b[ 1] * a[ 5] + b[12] * a[ 6] + b[14] * a[ 7] + b[15] * a[ 8] + b[ 0] * a[ 9] - b[27] * a[10] - b[28] * a[11] - b[ 6] * a[12] - b[29] * a[13] - b[ 7] * a[14] - b[ 8] * a[15] - b[23] * a[16] - b[24] * a[17] - b[ 2] * a[18] - b[25] * a[19] - b[ 3] * a[20] - b[ 4] * a[21] + b[31] * a[22] + b[16] * a[23] + b[17] * a[24] + b[19] * a[25] - b[30] * a[26] - b[10] * a[27] - b[11] * a[28] - b[13] * a[29] + b[26] * a[30] + b[22] * a[31];
-                    target.y = (y1 + y2)*.5;
+        let gridLinesVertexShader = `
+                uniform vec3 axisBivector;
+                uniform vec3 initialVec;
 
-                    float x1 = b[11] * a[ 0] + b[17] * a[ 1] + b[ 4] * a[ 2] - b[22] * a[ 3] - b[ 2] * a[ 4] - b[24] * a[ 5] - b[ 8] * a[ 6] + b[26] * a[ 7] + b[ 6] * a[ 8] + b[28] * a[ 9] + b[13] * a[10] + b[ 0] * a[11] + b[15] * a[12] - b[10] * a[13] - b[30] * a[14] - b[12] * a[15] + b[19] * a[16] + b[ 1] * a[17] + b[21] * a[18] - b[16] * a[19] - b[31] * a[20] - b[18] * a[21] - b[ 3] * a[22] - b[25] * a[23] - b[ 5] * a[24] + b[23] * a[25] + b[ 7] * a[26] + b[29] * a[27] + b[ 9] * a[28] - b[27] * a[29] - b[14] * a[30] - b[20] * a[31];
-                    float x2 = b[12] * a[ 0] + b[18] * a[ 1] + b[ 5] * a[ 2] - b[23] * a[ 3] - b[24] * a[ 4] - b[ 2] * a[ 5] - b[ 9] * a[ 6] + b[27] * a[ 7] + b[28] * a[ 8] + b[ 6] * a[ 9] + b[14] * a[10] + b[15] * a[11] + b[ 0] * a[12] - b[30] * a[13] - b[10] * a[14] - b[11] * a[15] + b[20] * a[16] + b[21] * a[17] + b[ 1] * a[18] - b[31] * a[19] - b[16] * a[20] - b[17] * a[21] - b[25] * a[22] - b[ 3] * a[23] - b[ 4] * a[24] + b[22] * a[25] + b[29] * a[26] + b[ 7] * a[27] + b[ 8] * a[28] - b[26] * a[29] - b[13] * a[30] - b[19] * a[31];
-                    target.x = (x1 + x2)*.5;
-                    
-                    target.z = b[ 6] * a[ 0] + b[ 2] * a[ 1] - b[ 1] * a[ 2] + b[16] * a[ 3] + b[17] * a[ 4] - b[18] * a[ 5] + b[ 0] * a[ 6] - b[10] * a[ 7] - b[11] * a[ 8] + b[12] * a[ 9] + b[ 7] * a[10] + b[ 8] * a[11] - b[ 9] * a[12] - b[26] * a[13] + b[27] * a[14] + b[28] * a[15] + b[ 3] * a[16] + b[ 4] * a[17] - b[ 5] * a[18] - b[22] * a[19] + b[23] * a[20] + b[24] * a[21] + b[19] * a[22] - b[20] * a[23] - b[21] * a[24] + b[31] * a[25] - b[13] * a[26] + b[14] * a[27] + b[15] * a[28] - b[30] * a[29] + b[29] * a[30] + b[25] * a[31];
-                }
-                void sandwichMvWithPtOnE1(in float[32] m, in float y, out vec3 target) {
-                    //m*(p*~m)
-                    float[32] mReverse; reverse(m, mReverse);
-                    float[32] intermediary; cgaMulReduced1( y, mReverse, intermediary);
-                    cgaMulReduced2(m, intermediary, target);
-                }
+                vec3 applyQuatToVec(in vec4 q, in vec3 v) {
+                    float ix = q.w * v.x + q.y * v.z - q.z * v.y;
+                    float iy = q.w * v.y + q.z * v.x - q.x * v.z;
+                    float iz = q.w * v.z + q.x * v.y - q.y * v.x;
+                    float iw = -q.x * v.x - q.y * v.y - q.z * v.z;
 
-                uniform float[32] e1ToCircle;
+                    return vec3(
+                        ix * q.w + iw * -q.x + iy * -q.z - iz * -q.y,
+                        iy * q.w + iw * -q.y + iz * -q.x - ix * -q.z,
+                        iz * q.w + iw * -q.z + ix * -q.y - iy * -q.x
+                    );
+                }
 
                 void main() {
                     //it's a series of flat points on e1, eg, e12 + e01 * y
                     //you transform them to the correct place
-                    
-                    vec3 spinePoint;
-                    sandwichMvWithPtOnE1(e1ToCircle, position.y, spinePoint);
 
-                    vec4 transformedPosition = vec4(spinePoint.x/spinePoint.z,0.,spinePoint.y/spinePoint.z,1.);
-                    //and then we push it down a little
-                    transformedPosition *= 2.;
-                    transformedPosition.y = -1.;
-                    transformedPosition.w = 1.;
+                    float angle = position.y * 3.14159265359;
+                    vec4 myQuat = vec4( sin(angle/2.) * axisBivector, cos(angle/2.) );
+                    vec3 onSphere = applyQuatToVec(myQuat, initialVec);
 
-                    //so you get sent in the angles for points around a circle
-                    //or maybe you get the points themselves
+                    // vec3 northPole = vec3(0.,1.,0.);
+                    // vec3 toOnSphere = onSphere - northPole;
+                    // vec3 projected = northPole + toOnSphere * -2./toOnSphere.y;
+                    // vec4 transformedPosition = vec4(projected,1.);
 
-                    //or you get the point that is the center projected onto the circle
-                    //and an axis
-                    //and each vertex's position.y is the angle around from there 
+                    vec4 transformedPosition = vec4(onSphere,1.);
                     
                     gl_Position = projectionMatrix * modelViewMatrix * transformedPosition;
                 }
@@ -262,7 +272,8 @@ function initColumn2d() {
         let stripMat = new THREE.ShaderMaterial({
             side: THREE.DoubleSide,
             uniforms: {
-                e1ToCircle: 5
+                initialVec: 5,
+                axisBivector: 3,
             },
             //uni
             vertexShader: gridLinesVertexShader,
@@ -275,14 +286,18 @@ function initColumn2d() {
         // stripMat.uniforms.e1ToCircle.value.copy(oneMv)
         let numVerts = 128
         let verts = Array(numVerts)
-        for (let i = 0; i < numVerts; ++i)
-            verts[i] = new THREE.Vector3(0.,.0001 + .9*(i-.5*(numVerts-1)),0.)
+        for (let i = 0; i < numVerts; ++i) {
+            let zeroToOne = i / (numVerts - 1)
+            let approxMinusOneToOne = .99 * (-1. + 2. * zeroToOne)
+            verts[i] = new THREE.Vector3(0., approxMinusOneToOne, 0.)
+        }
         let lineGeo = new THREE.BufferGeometry().setFromPoints(verts)
 
         var gridLines = Array(gridCount)
         for(let i = 0; i < gridCount; ++i) {
             gridLines[i] = new THREE.Line(lineGeo, stripMat.clone())
-            gridLines[i].material.uniforms.e1ToCircle.value = oneMv.clone()
+            gridLines[i].material.uniforms.initialVec.value = new THREE.Vector3()
+            gridLines[i].material.uniforms.axisBivector.value = new THREE.Vector3()
             conformal.scene.add(gridLines[i])
         }
         
@@ -298,7 +313,7 @@ function initColumn2d() {
         //don't forget the interesting discovery that if you're just intersecting these planes, it's Lengyel's result
     }
 
-    function grade3ToVectorInHyperbolic(mv, target) {
+    function hyperbolicGrade3ToPositionVector(mv, target) {
         target.set(
             -mv.e2PlusMinus(),
             mv.e12Minus(),
@@ -315,14 +330,14 @@ function initColumn2d() {
     let getterMv1 = new Mv()
     function getPositionVector(mv,target) {
         hyperbolicOrigin.projectOn(mv, getterMv0) //grade 3 part is the position
-        return grade3ToVectorInHyperbolic(getterMv0, target)
+        return hyperbolicGrade3ToPositionVector(getterMv0, target)
     }
     
     function getQuaternionTo(mv,originComparisonMv,target) {
         mv.projectOn(hyperbolicOrigin, getterMv0).normalize()
         //the origin in this space is still a bunch of planes that square to 1 so this is fine
         mul(getterMv0, originComparisonMv, getterMv1).naieveSqrt() //kiiiinda wrong way around
-        target.set(getterMv1.e2Plus(), getterMv1.e12(), getterMv1.e1Plus(), getterMv1[0]).normalize()
+        target.set(getterMv1.e2Plus(), -getterMv1.e12(), getterMv1.e1Plus(), getterMv1[0]).normalize()
 
         return target
     }
@@ -331,13 +346,34 @@ function initColumn2d() {
         // debugger
         getPositionVector(lineMv, v1)
         getQuaternionTo(lineMv, e12, q1)
-        q1.y *= -1.
 
         target.compose(v1, q1, v2.set(1., 1., 1.))
 
         return target
     }
 
+
+
+    let northPoleToOnSphere = new THREE.Vector3()
+    let northPoleToPlane = new THREE.Vector3()
+    function sphereToPlane(vec, target) {
+        northPoleToOnSphere.subVectors(vec, yUnit)
+        northPoleToPlane.copy(northPoleToOnSphere).multiplyScalar(-2. / northPoleToOnSphere.y) //so y becomes -2
+        target.addVectors(northPoleToPlane,yUnit)
+        return target
+    }
+    function planeToSphere(vec, target) {
+        let wiki = v1.set(vec.x / 2., 0., vec.z / 2.)
+        target.set(2. * wiki.x, -1. + sq(wiki.x) + sq(wiki.z), 2.*wiki.z)
+        target.multiplyScalar(1. / (1. + sq(wiki.x) + sq(wiki.z) ))
+        return target
+    }
+
+    let debugPt = new THREE.Mesh(new THREE.SphereGeometry(tubeRadius*2))
+    hyperbolic.scene.add(debugPt)
+    let debugPt2 = new THREE.Mesh(new THREE.SphereGeometry(tubeRadius * 2))
+    hyperbolic.scene.add(debugPt2)
+    let diskCenter = new THREE.Vector3()
     updateFunctions.push(() => {
         
         gridMvs.forEach((gridMv, i) => {
@@ -345,11 +381,10 @@ function initColumn2d() {
             {
                 //e2 is the z plane, ePlus is the y plane
                 getQuaternionTo(gridMv, e2, q1)
-                q1.y *= -1.
-                getPositionVector(gridMv, v1)
+                getPositionVector(gridMv, diskCenter)
 
-                let radius = .05 + Math.sqrt(1. - v1.lengthSq())
-                m1.compose(v1, q1, v2.set(radius, radius, radius))
+                let radius = /*.05 +*/ Math.sqrt(1. - diskCenter.lengthSq())
+                m1.compose(diskCenter, q1, v2.set(radius, radius, radius))
                 gridPlanes.setMatrixAt(i, m1)
             }
 
@@ -358,7 +393,31 @@ function initColumn2d() {
                 // lineMvToCylGeoMatrix(mv0,m1)
                 // gridLines.setMatrixAt(i, m1)
 
-                mul(gridMv, e1, gridLines[i].material.uniforms.e1ToCircle.value).naieveSqrt()
+                let uniforms = gridLines[i].material.uniforms
+
+                e12.projectOn(gridMv, mv0) //point pair with point in floor plane
+                meet(nO, mv0, mv1) //meet with floor plane, gets an actual point
+
+
+                //fucked if it's a circle around the origin!
+                hyperbolicGrade3ToPositionVector(mv1, uniforms.initialVec.value)
+                // debugPt.position.copy(uniforms.initialVec.value)
+                planeToSphere(uniforms.initialVec.value, uniforms.initialVec.value)
+                // debugPt2.position.copy(uniforms.initialVec.value)
+                if (frameCount === 2) {
+                    // mv1.log()
+                    // log(uniforms.initialVec.value) //want z=-1, getting z=
+                }
+                //need to unproject to the sphere
+
+                inner(gridMv, hyperbolicOrigin, mv0) //plane to orthogonal line through origin
+                // mv0.log()
+                uniforms.axisBivector.value.set(mv0.e2Plus(),-mv0.e12(),mv0.e1Plus()).normalize()
+                // uniforms.axisBivector.value.copy(diskCenter).normalize()
+
+                // debugPt.position.copy(uniforms.axisBivector.value).negate()
+                // debugPt2.position.copy(uniforms.initialVec.value).applyAxisAngle(uniforms.axisBivector.value,Math.PI)
+                //should be a point piercing the middle!
             }
         })
         gridPlanes.instanceMatrix.needsUpdate = true
@@ -372,9 +431,12 @@ function initColumn2d() {
             let distanceToSurface = Math.sqrt(1. - v1.length())
 
             let directionToMoveIn = meet(ptPair, eMinus)
-            grade3ToVectorInHyperbolic(directionToMoveIn, v2)
-            ptPairPtsMeshes[0].position.copy(v1).addScaledVector(v2, distanceToSurface)
-            ptPairPtsMeshes[1].position.copy(v1).addScaledVector(v2, -distanceToSurface)
+            hyperbolicGrade3ToPositionVector(directionToMoveIn, v2)
+            ptPairPtsSphereMeshes[0].position.copy(v1).addScaledVector(v2, distanceToSurface)
+            ptPairPtsSphereMeshes[1].position.copy(v1).addScaledVector(v2, -distanceToSurface)
+
+            sphereToPlane(ptPairPtsSphereMeshes[0].position, ptPairPtsFloorMeshes[0].position)
+            sphereToPlane(ptPairPtsSphereMeshes[1].position, ptPairPtsFloorMeshes[1].position)
         }
     })
 }
