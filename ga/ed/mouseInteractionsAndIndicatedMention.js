@@ -187,12 +187,21 @@ function initMouseInteractions() {
             !indicatedMention.variable.isIn ) {
             let [caretColumnIndex, caretLineIndex] = getCaretColumnAndLine() //done first since we're about to change stuff
             
-            let newLine = "\n    " + indicatedMention.getFullName() + " = " + 
-                indicatedMention.appearance.getLiteralAssignmentFromState() + ";\n"
             let lines = textarea.value.split("\n")
+            let indicatedMentionLineText = lines[indicatedMention.lineIndex]
+            let numSpaces = 0
+            for (let i = 0, il = indicatedMentionLineText.length; i < il; ++i) {
+                if (indicatedMentionLineText[i] === " ")
+                    ++numSpaces
+                else
+                    break
+            }
+            
             let pre  = lines.slice(0, indicatedMention.lineIndex + 1).join("\n")
             let post = lines.slice(indicatedMention.lineIndex + 1).join("\n")
-    
+            
+            let newLine = "\n" + " ".repeat(numSpaces) + indicatedMention.getFullName() + " = " + 
+                indicatedMention.appearance.getLiteralAssignmentFromState() + ";\n"
             textarea.value = pre + newLine + post
             
             let newCaretPosition = -1

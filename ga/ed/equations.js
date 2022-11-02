@@ -42,7 +42,7 @@ float c = a + b;
         })
     }
 
-    //yes, hacky as fuck. But MathJax requires npm so fucking bite me
+    //yes, hacky. But MathJax requires npm for any kind of callback.
     let alreadyDone = false
     updateFunctions.push(()=>{
         if (alreadyDone)
