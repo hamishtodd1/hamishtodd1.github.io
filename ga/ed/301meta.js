@@ -6,18 +6,18 @@ async function init301() {
 
     const basisNames = ["", "0", "1", "2", "3", "01", "02", "03", "12", "13", "23", "021", "013", "032", "123", "0123"]
 
-    let [jsGaString, glslGaString] = createSharedFunctionDeclarationsStrings()
+    let [jsSharedFunctionsString, glslSharedFunctionsString] = createSharedFunctionDeclarationsStrings()
     //newMv is not a variable name. It is equivalent to "new Mv()"
 
-    generalShaderPrefix += glslGaString
-    generalShaderPrefix += await getTextFile('shaders/301.glsl')
+    generalShaderPrefix += glslSharedFunctionsString
+    generalShaderPrefix += glsl301
 
     //javascript part
     {
         let fullFuncString = init301WithoutDeclarations.toString()
         let funcString = fullFuncString
             .slice(0, fullFuncString.indexOf("/*END*/}"))
-            .replace("/*EXTRA FUNCTIONS ADDED HERE*/",jsGaString)
+            .replace("/*EXTRA FUNCTIONS ADDED HERE*/", jsSharedFunctionsString)
 
         let i = 0
         let declarations = ""

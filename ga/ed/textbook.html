@@ -7,11 +7,11 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="textbookStyle.css">
 
-    <!-- Need to make -->
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 
 <body>
+    
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <div id="equationArea">
         <br>
@@ -34,18 +34,19 @@
     <svg id="ourSvg" style="stroke-width:2">
     </svg>
 
+    <!-- Below here should be the same! -->
+
     <canvas id="canvas3d"></canvas>
 
     <span id="textMeasurer">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span> <!-- 40 characters there -->
-
-    <script src="equations.js"></script>
 
     <script src="prism.js"></script>
     <script src="syntaxHighlighting.js"></script>
 
     <script src="301.js"></script>
+    <script src="shaders/301.glsl"></script>
     <script src="301meta.js"></script>
-
+    
     <script src="lib/three.js"></script>
     <script src="lib/OBJLoader.js"></script>
     <script src="../common/miscFunctions.js"></script>
@@ -69,9 +70,7 @@
 
     <script src="shaderOutput.js"></script>
     <script src="dws.js"></script>
-
-
-    <!-- <script src="hsvDw.js"></script> -->
+    
     <script src="appearances/scalarDw.js"></script>
     <script src="halfPlaneDw.js"></script>
 
@@ -91,18 +90,14 @@
 
     <script src="mention.js"></script>
     <script src="appearances.js"></script>
+    <script src="shaders/default.glsl"></script>
+    <script src="shaders/floatOutputterPrefix.glsl"></script>
     <script src="init.js"></script>
 
+    <script src="equations.js"></script>
     <script>
-        initTextbook()
+        initEquations()
     </script>
 
-    <!-- <p>
-        Syntax Highlighting by <a href="https://prismjs.com/">Prism.js</a><br />
-        Font from <a href="https://fonts.google.com/">Google Fonts</a><br />
-        Some code from <a href="https://css-tricks.com/creating-an-editable-textarea-that-supports-syntax-highlighted-code/">Here</a><br />
-    </p> -->
-
 </body>
-
 </html>

@@ -12,6 +12,10 @@ const variables = []
 const appearanceTypes = []
 const dws = {}
 
+const VERTEX_MODE = 0
+const FRAGMENT_MODE = 1
+const BARE_MODE = 2
+
 const INFINITY_RADIUS = 1.
 const pointGeo = new THREE.SphereBufferGeometry(.1, 32, 16)
 

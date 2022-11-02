@@ -8,10 +8,6 @@ async function initCompilation() {
             console.error("multi-line comments not supported")
             return false
         }
-        if (textarea.value.indexOf('initialVertex') === -1) {
-            console.error("no initialVertex use found!")
-            return false
-        }
         return true
     }
 
@@ -22,7 +18,9 @@ async function initCompilation() {
             return
 
         text = text.replace(commentNotNewlineRegex,"")
-        let vertexMode = text.indexOf("getColor") === -1
+        let MODE = text.indexOf("getColor") !== -1 ? FRAGMENT_MODE :
+            text.indexOf("getChangedVertex") !== -1 ? VERTEX_MODE : BARE_MODE
+        //slightly better might be a regex checking for the correct arguments to the function
 
         // it's really ; that separates, not newline
         let textLines = text.split("\n")
@@ -245,15 +243,13 @@ async function initCompilation() {
         Object.assign(outputterUniforms, uniforms)
 
         let outputterText = outputterChunks.join("\n")
+        updateOutputter(outputterText, outputterUniforms, MODE)
+
         let finalText = finalChunks.join("\n")
-        if (vertexMode ) {
-            updateOutputter(outputterText, outputterUniforms, true)
+        if (MODE === VERTEX_MODE )
             updateFinalDwVertex(finalText, uniforms, geo)
-        }
-        else {
-            updateOutputter(outputterText, outputterUniforms, false)
+        else if( MODE === FRAGMENT_MODE)
             updateFinalDwFragment(finalText, uniforms)
-        }
 
         updateLclsc(Infinity)
 

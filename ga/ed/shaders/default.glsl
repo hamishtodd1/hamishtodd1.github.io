@@ -1,3 +1,5 @@
+defaultShader = `
+
 uniform float ourUniformFloat;
 uniform vec2 ourUniformVec2;
 
@@ -41,94 +43,4 @@ vec4 getChangedVertex(in vec4 initialVertex) {
     ret += boneMatW * initialVertex * skinWeight.w;
     
     return ret;
-}
-//END//
-
-// and in the mathjax, e12 = e1*e2
-void main() {
-    Plane e1 = Plane(0.,1.,0.,0.);
-    Plane e2 = Plane(0.,0.,1.,0.);
-
-    Dq e12 = geometricProduct();
-}
-
-
-
-boneMatrices[0];
-mat4 firstOne = boneMatrices[0]; //what the fuck? Clue: all matrices seem the same
-
-vec4 ret = vec4( 0. );
-    // vec4 ret = initialVertex;
-
-    
-
-    Dq boneDqX = boneDqs[int(skinIndex.x)];
-    Dq boneDqY = boneDqs[int(skinIndex.y)];
-    Dq boneDqZ = boneDqs[int(skinIndex.z)];
-    Dq boneDqW = boneDqs[int(skinIndex.w)];
-
-    ret += sandwichDqPoint( boneDqX, initialVertex ) * skinWeight.x;
-    ret += sandwichDqPoint( boneDqY, initialVertex ) * skinWeight.y;
-    ret += sandwichDqPoint( boneDqZ, initialVertex ) * skinWeight.z;
-    ret += sandwichDqPoint( boneDqW, initialVertex ) * skinWeight.w;
-
-
-
-
-vec3 getColor(in vec4 fragmentPosition) {
-    
-    vec3 fragColor = vec3(0.,fragmentPosition.x,fragmentPosition.y*4.);
-    if( length(fragmentPosition.xy - mouse) < .1 )
-        fragColor = vec3(1.,0.,0.);
-    return fragColor;
-}
-
-
-//point pairs: spling is point ant infinity and an ordinary point, splong is both at infinity
-//join a spling and splong point pair and of course you get a plane
-//hey why aren't you trying this with 2D CGA first?
-
-
-
-
-
-
-//try eg 1 + e12 + e0123
-//and 1 + e01 + e0123
-
-
-
-vec3 getColor(in vec4 fragmentPosition) {
-
-    vec3 exampleVector = vec3(1.,1.,1.);
-
-    // Some examples of euclidean points (not exactly "vectors"!)
-    vec4 A = vec4(0.,-1.,0.,1.);
-    vec4 B = vec4(exampleVector,1.);
-
-    // An IDEAL point
-    vec4 myIdealPoint = vec4(1.,1.,0.,0.);
-
-    // Addition gives the thing halfway between A and B (they need to be normalized)
-    vec4 A_B_Added = A + B;
-
-    // The Join product gives the line that contains A and B
-    Dq A_B_joined = joinPtsInDq(A,B);
-
-
-    
-    // Control the angle with x coordinate of another vec3
-    vec3 angleController = vec3(1.,1.,0.);
-    axis.e12 *= angleController.x; axis.e23 *= angleController.x; axis.e31 *= angleController.x;
-
-    // Create a transformation by exponentiating the axis
-    Dq transformation;
-    dqExp(axis, transformation);
-
-    // Apply transformation to the point
-    vec4 transformedA = sandwichDqPoint(transformation, A);
-
-
-    // ignore this ;)
-    fragColor = vec4(0.,0.,0.,1.);
-}
+}`

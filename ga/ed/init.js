@@ -11,6 +11,7 @@ TODO
         https://twitter.com/joyoflivecoding
         hide the output window when there's an error
     Bugs
+        Rings at infinity are fucked
         Probably worth checking over absolutely all e31 vs 13 shit
         Where are the lines at infinity?
         Try not indenting...
@@ -198,9 +199,9 @@ In the puppet thing: you have a dome, and a plane on top
     It can do conformal stuff; centrally projected stuff; scalars; complex numbers
 
 Possibly dqAppearances should get ANOTHER point in the 2D dw
-    For (e12+e03), the point would be at (1,1), because (e12+e03) = e12(1+e0123)
-    For e12 and (.28+.96e12), it'd be at (1,0), because e12 = (1+0e0123)
-    For e03, hmm. = e12(0+e0123)
+    For (e12+e03), the point would be at (1,1), because (e12+e03) = e12(1+I)
+    For e12 and (.28+.96e12), it'd be at (1,0), because e12 = (1+0I)
+    For e03, hmm. = e12(0+I)
 
     Possibly need to take the log, that gets a bivector which may be a screw axis.
 */
@@ -214,7 +215,7 @@ Possibly dqAppearances should get ANOTHER point in the 2D dw
 //     }
 // }
 
-async function init() {
+async function init(hasEquations) {
 
     let timeBefore = -Infinity
     startBench = () =>{
@@ -229,9 +230,7 @@ async function init() {
     lineHeight = parseInt(style.lineHeight)
     initSvgLines()
 
-    let defaultTextFull = await getTextFile('shaders/default.glsl')
-    let defaultText = defaultTextFull.slice(0, defaultTextFull.indexOf(`//END//`))    
-    textarea.value = defaultText
+    textarea.value = hasEquations ? equationsShaders[0] : defaultShader
     updateSyntaxHighlighting()
 
     // init41()
@@ -253,9 +252,10 @@ async function init() {
     initAppearances()
     await initDws()
 
-    await initShaderOutputAndFinalDw()
-
-    let importedModel = initMeshDw()
+    await initShaderOutputAndFinalDw(hasEquations)
+    if(!hasEquations) {
+        var importedModel = initMeshDw()
+    }
 
     // await initHalfplane()
 
@@ -297,7 +297,8 @@ async function init() {
         frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
         ++frameCount
 
-        importedModel.updateAnimation()
+        if (!hasEquations)
+            importedModel.updateAnimation()
 
         variables.forEach((v)=>{
             if(v.isUniform) {
@@ -341,13 +342,17 @@ async function init() {
         renderer.setScissorTest(true)
         renderer.setClearColor(0x272822, 1)
 
+        updateFunctions.forEach((uf)=>uf())
+
         for (dwName in dws)
             dws[dwName].render()
 
         requestAnimationFrame(render)
     }
 
-    await importedModel.promise
+    if (!hasEquations)
+        await importedModel.promise
+        
     compile(false)
     updateMentionVisibilitiesAndIndication()
 

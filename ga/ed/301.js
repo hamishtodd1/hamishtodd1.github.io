@@ -633,7 +633,7 @@ function init301WithoutDeclarations(basisNames) {
     e013 = mul(e01, e3)
     e032 = mul(e03, e2)
     e123 = mul(e1, e23)
-    e0123 = mul(e0, e123)
+    I = mul(e0, e123)
 
     let basisDirectionMvs = [e032,e013,e021]
 

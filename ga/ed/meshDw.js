@@ -22,6 +22,10 @@
         occlusion, roughness, metallic, normal
 */
 
+attemptAppearanceIdentifationWithImportedModelUniform = () => { }
+attemptAppearanceIdentifationWithImportedModelIn = () => { }
+setInIndex = () => { }
+
 function initMeshDw() {
     let dw = new Dw(`untransformed`, true, camera, false) //really should be "initialMesh"
     // dw.elem.style.display = 'none'
@@ -54,7 +58,7 @@ function initMeshDw() {
     let parentWorldPosition = new THREE.Vector3()
     let childWorldPosition = new THREE.Vector3()
     let firstDesiredLength = -1
-    updateBoneMeshes = () => {
+    function updateBoneMeshes() {
         skeleton.bones.forEach((bone, i) => {
             let desiredLength = Infinity
 
@@ -101,7 +105,8 @@ function initMeshDw() {
     let meshAppearances = {}
     
     let promise = new Promise(resolve => {
-        new GLTFLoader().load('data/Soldier.glb', function (gltf) {
+        let loader = new GLTFLoader()
+        loader.load('https://hamishtodd1.github.io/ga/ed/data/Soldier.glb', function (gltf) {
             
             let model = gltf.scene
             mixer = new THREE.AnimationMixer(model)
@@ -132,7 +137,7 @@ function initMeshDw() {
             walkAction._mixer._activateAction(walkAction)
 
             resolve()
-        })
+        },()=>{},(e)=>{console.error(e)})
     })
 
     let inAppearances = {}

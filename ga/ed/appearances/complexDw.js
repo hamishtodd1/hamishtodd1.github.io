@@ -1,6 +1,6 @@
 /* 
     want number line
-    but this thing about having the coefficient of e0123
+    but this thing about having the coefficient of I
 
     well even if it is 3D it should have an independent camera
 

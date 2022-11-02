@@ -7,7 +7,7 @@
 
 //     float a = 1. / (1. - m.scalar*m.scalar);
 //     float b = acos(m.scalar) * sqrt(a);
-//     float c = a * m.e0123 * (1. - m.scalar*b);
+//     float c = a * m.I * (1. - m.scalar*b);
 
 //     return Dq(
 //         0., 
@@ -29,7 +29,7 @@
 //     float aReciprocal = 1. - m.scalar * m.scalar;
 //     float sqrtAReciprocal = invSqrt(x);
 //     float b = acos(m.scalar) * sqrtAReciprocal;
-//     float c = m.e0123 * (1. - m.scalar*b) / aReciprocal;
+//     float c = m.I * (1. - m.scalar*b) / aReciprocal;
 // }
 
 //sqrt = inv sqrt followed by reciprocal
@@ -39,7 +39,7 @@ Dq dqLog(in Dq m ) {
     float A = sinc(acosScalar);                     // 1
     float mn = A*acosScalar;                        // 0
     float b = 1./A;                                 // 1
-    float cN = m.e0123 * (mn-m.scalar*acosScalar);  // 0
+    float cN = m.I * (mn-m.scalar*acosScalar);  // 0
     float cD = mn*mn*mn;                            // 0
     float c = cN / ( cD == 0. ? 1. : cD );          //if cD is 0, cN is 0 anyway
 
@@ -57,7 +57,7 @@ Dq dqLog(in Dq m ) {
 //other tries
 // {
 //     float b = 1./A;
-//     float cN = m.e0123 * (1. - m.scalar*b);
+//     float cN = m.I * (1. - m.scalar*b);
 //     float cD = 1. - m.scalar*m.scalar; // 0 if m.scalar == 1.
 //     float c = cN / ( cD == 0. ? 1. : cD );
 
@@ -65,7 +65,7 @@ Dq dqLog(in Dq m ) {
 
 //     float aReciprocal = 1. - m.scalar*m.scalar;
 //     float b = acos(m.scalar) * ();
-//     float c = a * m.e0123 * (1. - m.scalar*b);
+//     float c = a * m.I * (1. - m.scalar*b);
 
 
 
@@ -73,10 +73,10 @@ Dq dqLog(in Dq m ) {
 //     float A = sinc(acosScalar);                 // 1 if m.scalar == 1.
 //     float b = 1./A;
 //     float cD = 1. - m.scalar*m.scalar; // 0 if m.scalar == 1.
-//     float cN = m.e0123 * (1. - m.scalar*b);
+//     float cN = m.I * (1. - m.scalar*b);
 //     float c = cN / ( cD == 0. ? 1. : cD );
 
-//     float C = m.e0123 * (A - m.scalar)/aReciprocal; // == c/b, or 0 if m.scalar == 1.
+//     float C = m.I * (A - m.scalar)/aReciprocal; // == c/b, or 0 if m.scalar == 1.
 
 //     return Dq(
 //         0., 
@@ -108,7 +108,7 @@ Dq dqLog(in Dq m ) {
 // Dq dqNormalize(in Dq m) {
 //     float aSquared = 1. / (m.scalar*m.scalar + m.e12*m.e12 + m.e13*m.e13 + m.e23*m.e23);
 //     float a = sqrt(aSquared);
-//     float d = a * aSquared * (m.e0123*m.scalar - (m.e01*m.e23 + m.e02*m.e13 + m.e03*m.e12));
+//     float d = a * aSquared * (m.I*m.scalar - (m.e01*m.e23 + m.e02*m.e13 + m.e03*m.e12));
 
 //     Dq ret = Dq(
 //         a*m.scalar,
@@ -121,12 +121,12 @@ Dq dqLog(in Dq m ) {
 //         a*m.e13,
 //         a*m.e23,
 
-//         a*m.e0123,
+//         a*m.I,
 //     );
 
 //     ret.e01 += ret.e23 * d;
 //     ret.e02 += ret.e13 * d;
 //     ret.e03 += ret.e12 * d;
-//     ret.e0123 -= ret.scalar * d;
+//     ret.I -= ret.scalar * d;
 //     return ret;
 // }

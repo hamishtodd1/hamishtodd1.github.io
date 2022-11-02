@@ -1,4 +1,4 @@
-async function initShaderOutputAndFinalDw() {
+async function initShaderOutputAndFinalDw(hasEquations) {
     //////////////////////////
     // Override sensetivity //
     //////////////////////////
@@ -48,12 +48,9 @@ async function initShaderOutputAndFinalDw() {
     {
         let outputFsq = null
         let outputMentionIndex = { value: -1 }
-
-        let readoutPrefix = await getTextFile('shaders/floatOutputterPrefix.glsl')
         
         let renderTextureScene = new THREE.Scene()
 
-        //when you hover initialVertex, it connects to one of the vertices in the point cloud/cow
         //and it ends up copying one of them to this
         let outputterFragmentPosition = {value: new THREE.Vector4(0.,0.,0.,1.)}
 
@@ -67,7 +64,7 @@ async function initShaderOutputAndFinalDw() {
     
         //hmmm, to use varyings... what, you have to interpolate it yourself?
         //so there are the attributes that are actually at the vertices
-        updateOutputter = (partialFragmentShader, outputterUniforms, vertexMode) => {
+        updateOutputter = (partialFragmentShader, outputterUniforms, mode) => {
             if(outputFsq !== null) {
                 renderTextureScene.remove(outputFsq)
                 outputFsq.material.dispose()
@@ -77,14 +74,13 @@ async function initShaderOutputAndFinalDw() {
             conferOverrideSensetivityToUniforms(outputterUniforms)
 
             let shaderRunner = ``
-            if(vertexMode) {
-
+            if(mode === VERTEX_MODE) {
                 shaderRunner = `
                 void main() {
                     vec4 outputterVertex = getChangedVertex(initialVertexOutputter);
                 `
             }
-            else {
+            else if (mode === FRAGMENT_MODE) {
                 outputterUniforms.outputterFragmentPosition = outputterFragmentPosition
                 shaderRunner = `
                 uniform vec4 outputterFragmentPosition;
@@ -92,8 +88,15 @@ async function initShaderOutputAndFinalDw() {
                     vec3 outputterCol = getColor(outputterFragmentPosition);
                 `
             }
+            else {
+                partialFragmentShader = `\nvoid bareFunction() {\n` + partialFragmentShader + `\n}\n`
+                shaderRunner = `
+                void main() {
+                    bareFunction();
+                `
+            }
 
-            let fullFragmentShader = generalShaderPrefix + readoutPrefix + partialFragmentShader + shaderRunner + `
+            let fullFragmentShader = generalShaderPrefix + floatOutputterPrefix + partialFragmentShader + shaderRunner + `
                 gl_FragColor = encodeRgbaOfOutputFloatForOurPixel();
             }`
             outputFsq = FullScreenQuadMesh(outputterVertexShader,fullFragmentShader, outputterUniforms)
@@ -175,6 +178,9 @@ async function initShaderOutputAndFinalDw() {
             threejsIsCheckingForShaderErrors = false
         }
     }
+
+    if (hasEquations)
+        return
 
     //////////////
     // Final dw //

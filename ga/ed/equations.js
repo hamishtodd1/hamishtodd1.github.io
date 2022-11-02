@@ -20,17 +20,40 @@
 
  */
 
-async function initTextbook() {
-    await init()
+async function initEquations() {
+    equationsShaders = [
+        `
+float a = 2.;
+float b = 1.;
+float c = a + b;
+        `
+    ]
+    await init(true)
+    // dws.untransformed.elem.style.display = `none`
+    // dws.final.elem.style.display = `none`
 
-    let mathId = document.getElementById(`someid`)
-    mathId.addEventListener(`mouseover`, () => {
-        log(`in`)
-    })
-    mathId.addEventListener(`mouseleave`, () => {
-        log(`out`)
-    })
+    onMathJaxLoad = () => {
+        let mathId = document.getElementById(`someid`)
+        mathId.addEventListener(`mouseover`, () => {
+            log(`in`)
+        })
+        mathId.addEventListener(`mouseleave`, () => {
+            log(`out`)
+        })
+    }
 
-    dws.untransformed.elem.style.display = `none`
-    dws.final.elem.style.display = `none`
+    //yes, hacky as fuck. But MathJax requires npm so fucking bite me
+    let alreadyDone = false
+    updateFunctions.push(()=>{
+        if (alreadyDone)
+            return
+
+        let mathId = document.getElementById(`someid`)
+        if(mathId === null)
+            return
+        else {
+            onMathJaxLoad()
+            alreadyDone = true
+        }
+    })
 }

@@ -6,8 +6,6 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="edStyle.css">
 
-    <!-- Need to make -->
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 
 <body>
@@ -20,6 +18,8 @@
 
     <svg id="ourSvg" style="stroke-width:2" >
     </svg>
+
+    <!-- Below here should be the same! -->
     
     <canvas id="canvas3d"></canvas>
 
@@ -29,6 +29,7 @@
     <script src="syntaxHighlighting.js"></script>
 
     <script src="301.js"></script>
+    <script src="shaders/301.glsl"></script>
     <script src="301meta.js"></script>
     
     <script src="lib/three.js"></script>
@@ -74,10 +75,13 @@
 
     <script src="mention.js"></script>
     <script src="appearances.js"></script>
+    <script src="shaders/default.glsl"></script>
+    <script src="shaders/floatOutputterPrefix.glsl"></script>
     <script src="init.js"></script>
+    
 
     <script>
-        init()
+        init(false)
     </script>
 
 </body>

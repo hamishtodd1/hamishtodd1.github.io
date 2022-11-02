@@ -1,8 +1,10 @@
+glsl301 = `
+
 struct Dq {
     float scalar;
     float e01; float e02; float e03;
     float e12; float e31; float e23;
-    float e0123;
+    float I;
 };
 
 struct Plane {
@@ -15,10 +17,10 @@ struct weight4 {
 
 //might be good to normalize afterwards
 Dq dqAdd(in Dq a, in Dq b) {
-    return Dq( a.scalar+b.scalar, a.e01+b.e01, a.e02+b.e02, a.e03+b.e03, a.e12+b.e12, a.e31+b.e31, a.e23+b.e23, a.e0123+b.e0123 );
+    return Dq( a.scalar+b.scalar, a.e01+b.e01, a.e02+b.e02, a.e03+b.e03, a.e12+b.e12, a.e31+b.e31, a.e23+b.e23, a.I+b.I );
 }
 Dq dqMulScalar(in Dq a, in float b) {
-    return Dq( a.scalar * b, a.e01 * b, a.e02 * b, a.e03 * b, a.e12 * b, a.e31 * b, a.e23 * b, a.e0123 * b );
+    return Dq( a.scalar * b, a.e01 * b, a.e02 * b, a.e03 * b, a.e12 * b, a.e31 * b, a.e23 * b, a.I * b );
 }
 
 void mvFromVec(in vec3 v, out float[16] target) {
@@ -45,7 +47,7 @@ void dqToMv(in Dq ourDq, out float[16] target) {
     target[ 5] = ourDq.e01; target[ 6] = ourDq.e02; target[ 7] = ourDq.e03;
     target[ 8] = ourDq.e12; target[ 9] = ourDq.e31; target[10] = ourDq.e23;
     target[11] = 0.;        target[12] = 0.;        target[13] = 0.;        target[14] = 0.;
-    target[15] = ourDq.e0123;
+    target[15] = ourDq.I;
 }
 void mvToDq(in float[16] mv, out Dq target) {
     target.scalar= mv[ 0];
@@ -55,7 +57,7 @@ void mvToDq(in float[16] mv, out Dq target) {
     target.e12   = mv[ 8];
     target.e31   = mv[ 9];
     target.e23   = mv[10];
-    target.e0123 = mv[15];
+    target.I = mv[15];
 }
 
 vec4 sandwichDqPoint(in Dq dq, in vec4 pt) {
@@ -162,15 +164,15 @@ Dq mul(in Dq a, in Dq b) {
     Dq ret;
     ret.scalar = b.scalar * a.scalar - b.e12 * a.e12 - b.e31 * a.e31 - b.e23 * a.e23;
 
-    ret.e01 = b.e01 * a.scalar + b.scalar * a.e01 - b.e12 * a.e02 + b.e31 * a.e03 + b.e02 * a.e12 - b.e03 * a.e31 - b.e0123 * a.e23 - b.e23 * a.e0123;
-    ret.e02 = b.e02 * a.scalar + b.e12 * a.e01 + b.scalar * a.e02 - b.e23 * a.e03 - b.e01 * a.e12 - b.e0123 * a.e31 + b.e03 * a.e23 - b.e31 * a.e0123;
-    ret.e03 = b.e03 * a.scalar - b.e31 * a.e01 + b.e23 * a.e02 + b.scalar * a.e03 - b.e0123 * a.e12 + b.e01 * a.e31 - b.e02 * a.e23 - b.e12 * a.e0123;
+    ret.e01 = b.e01 * a.scalar + b.scalar * a.e01 - b.e12 * a.e02 + b.e31 * a.e03 + b.e02 * a.e12 - b.e03 * a.e31 - b.I * a.e23 - b.e23 * a.I;
+    ret.e02 = b.e02 * a.scalar + b.e12 * a.e01 + b.scalar * a.e02 - b.e23 * a.e03 - b.e01 * a.e12 - b.I * a.e31 + b.e03 * a.e23 - b.e31 * a.I;
+    ret.e03 = b.e03 * a.scalar - b.e31 * a.e01 + b.e23 * a.e02 + b.scalar * a.e03 - b.I * a.e12 + b.e01 * a.e31 - b.e02 * a.e23 - b.e12 * a.I;
     
     ret.e12 = b.e12 * a.scalar + b.scalar * a.e12 + b.e23 * a.e31 - b.e31 * a.e23;
     ret.e31 = b.e31 * a.scalar - b.e23 * a.e12 + b.scalar * a.e31 + b.e12 * a.e23;
     ret.e23 = b.e23 * a.scalar + b.e31 * a.e12 - b.e12 * a.e31 + b.scalar * a.e23;
 
-    ret.e0123 = b.e0123 * a.scalar + b.e23 * a.e01 + b.e31 * a.e02 + b.e12 * a.e03 + b.e03 * a.e12 + b.e02 * a.e31 + b.e01 * a.e23 + b.scalar * a.e0123;
+    ret.I = b.I * a.scalar + b.e23 * a.e01 + b.e31 * a.e02 + b.e12 * a.e03 + b.e03 * a.e12 + b.e02 * a.e31 + b.e01 * a.e23 + b.scalar * a.I;
     return ret;
 }
 //no plane*dq unless you have rotoreflections!
@@ -190,3 +192,5 @@ vec4 meet(in Dq b, in Plane a) {
     ret.w =  b.e23 * a.e1 + b.e31 * a.e2 + b.e12 * a.e3;
     return ret;
 }
+
+`
