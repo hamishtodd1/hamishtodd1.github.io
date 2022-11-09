@@ -6,8 +6,8 @@ function initMouse() {
     function getRels(event, dw) {
         let [x, y] = getDwXy(dw)
         return [
-            event.clientX - (x+dwDimension/2.),
-            window.innerHeight - event.clientY - (y+dwDimension/2.)
+            (event.clientX                      - (x+dwDimension/2.)) / dwDimension,
+            (window.innerHeight - event.clientY - (y+dwDimension/2.)) / dwDimension
         ]
     }
 
@@ -35,17 +35,17 @@ function initMouse() {
     document.addEventListener('mousedown', function (event) {
         dwColumns.forEach((dwColumn) => {
             dwColumn.forEach((dw) => {
-                let [relX,relY] = getRels(event, dw)
-                let inRect = -dwDimension / 2. < relX && relX < dwDimension / 2. &&
-                             -dwDimension / 2. < relY && relY < dwDimension / 2.
+                let [x,y] = getRels(event, dw)
+                let inRect = -.5 < x && x < .5 &&
+                             -.5 < y && y < .5
                 if(inRect) {
                     if(event.button === 0) {
                         clickedRect = dw
-                        clickedRect.onClick(relX, relY)
+                        clickedRect.onClick(x, y)
                     }
                     else if (event.button === 2) {
                         rightClickedRect = dw
-                        rightClickedRect.onRightClick(relX, relY)
+                        rightClickedRect.onRightClick(x, y)
                     }
                 }
             })

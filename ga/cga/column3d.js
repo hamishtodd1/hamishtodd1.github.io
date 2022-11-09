@@ -1,3 +1,24 @@
+/*
+    how would you do the camera model here?
+    Assume it was raw shaders so you are targeting normalized device coordinates
+    maybe with the goal of transitioning smoothly between conformal and projective
+    wanna specify things with invariants!
+
+    There are points, lines that you want to see
+        Maybe later circles, planes, spheres
+    Camera has a location in space which may be a point at infinity (eg it has a camera angle!)
+    Ordinarily it sees the NDC cube
+    It is easier to scale the world than it is to scale the camera
+        So, the central square of that NDC cube is preserved
+    
+    Really, once you've moved everything and *angled* (not moved!) the camera
+    All that's left is how far away you are and your fov
+        So yeah, zolly
+    (got 2 fovs? well there it's kinda like your ndc cube has a different width)
+
+    Wait, shouldn't the planes in
+ */
+
 function initColumn3d() {
     {
         let ambient = new Dw(3, 0)

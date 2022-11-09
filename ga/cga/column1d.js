@@ -3,6 +3,8 @@ function initColumn1d() {
     let coneTopRadius = 1.
     let coneDiagonalLength = Math.sqrt(2.) * coneTopRadius
 
+    let pointGeo = new THREE.SphereGeometry(tubeRadius * 3.)
+
     let ourPss = mul(e1Plus, eMinus)
     let ourNo = nO.clone()
 
@@ -24,20 +26,28 @@ function initColumn1d() {
 
         let rotorDown = ePlusMinus.clone().naieveAxisToRotor(.02)
         let rotorUp = ePlusMinus.clone().naieveAxisToRotor(-.02)
-
-        let rotorSplong = mul(nO, e1).naieveAxisToRotor(-.01)
-        let rotorSpling = mul(nO, e1).naieveAxisToRotor( .01)
-
         let rotorLeft = spineMv.clone().naieveAxisToRotor(-.03)
         let rotorRight = spineMv.clone().naieveAxisToRotor(.03)
+        let rotorsArr = [rotorUp, rotorDown, rotorRight, rotorLeft]
 
-        let buttonsArr = [`PageDown`,`PageUp`, `ArrowUp`,`ArrowDown`, `ArrowLeft`,`ArrowRight` ]
-        let rotorsArr = [rotorSplong,rotorSpling,rotorUp, rotorDown, rotorRight, rotorLeft]
-        for(let i = 0; i < 6; ++i) {
-            bindButton(buttonsArr[i], () => { }, ``, () => {
+        rotorsArr.push(mul(nO, e1).naieveAxisToRotor(-.01))
+        rotorsArr.push(mul(nO, e1).naieveAxisToRotor( .01))
+        
+        let buttonsArr = [`ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight`, `PageDown`,`PageUp`]
+        buttonsArr.forEach((button,i)=> {
+            bindButton(button, () => { }, ``, () => {
                 applyToGrid(rotorsArr[i])
             })
-        }
+        })
+
+        bindButton(",", () => { }, ``, () => {
+            mv0.copy(freeAxis).naieveAxisToRotor(.01)
+            applyToGrid(mv0)
+        })
+        bindButton(".", () => { }, ``, () => {
+            mv0.copy(freeAxis).naieveAxisToRotor(-.01)
+            applyToGrid(mv0)
+        })
 
         //this breaks the planes because it's not attacking the rotor
         //point is, 
@@ -103,6 +113,7 @@ function initColumn1d() {
     
     let unitHeightCylGeo = CylinderBufferGeometryUncentered(tubeRadius, 1., 8, 1, true)
     let cylGeo = new THREE.CylinderBufferGeometry(tubeRadius, tubeRadius, 2., 8, 1, true)
+    let axisMat = new THREE.MeshPhongMaterial({ color: 0x00FF00 })
     
     {
         let coneMat = new THREE.MeshPhongMaterial({
@@ -120,29 +131,20 @@ function initColumn1d() {
         let cone = new THREE.Mesh(coneGeo, coneMat)
         cone.renderOrder = 1
         ambient.scene.add(cone)
-
-        var spineMat = new THREE.MeshPhongMaterial({color:0x00FF00})
-        let spine = new THREE.Mesh(cylGeo, spineMat)
-        ambient.scene.add(spine)
-        
-        spine.matrixAutoUpdate = false
-        ambientLineMvToUnitVecDirection(spineMv,v1)
-        v1.multiplyScalar(coneDiagonalLength * 2.)
-        spine.matrix.makeBasis(xUnit,v1,zUnit)
     }
 
     let gridMvs = []
     {
-        let numHorizontals = 11
+        let numHorizontals = 7
         for (let i = 0; i < numHorizontals; ++i) {
             let zeroToOne = i / (numHorizontals - 1)
-            let ourTranslation = mv0.copy(spineMv).naieveAxisToRotor((zeroToOne - .5) * 3.)
+            let ourTranslation = mv0.copy(spineMv).naieveAxisToRotor((zeroToOne - .5) * 2.)
             gridMvs[i] = new Mv()
             ourTranslation.sandwich(e1, gridMvs[i])
         }
-        gridMvs.push(ePlus.clone())
-        gridMvs.push(ePlus.clone().sub(nI))
-        gridMvs.push(ePlus.clone().add(nO))
+        // gridMvs.push(ePlus.clone())
+        // gridMvs.push(ePlus.clone().sub(nI))
+        // gridMvs.push(ePlus.clone().add(nO))
         var gridCount = gridMvs.length
 
         let rectMat = new THREE.MeshPhongMaterial({
@@ -164,14 +166,58 @@ function initColumn1d() {
         //lower cameras should look at nODual
     }
 
+    function AxisAndBall() {
+        let mv = new Mv()
+
+        let axis = new THREE.Mesh(cylGeo, axisMat)
+        ambient.scene.add(axis)
+        axis.matrixAutoUpdate = false
+
+        let ball = new THREE.Mesh(pointGeo, axisMat)
+        ball.scale.multiplyScalar(1.05)
+        hyperbolic.scene.add(ball)
+
+        updateFunctions.push(() => {
+            let axisLen = 0.
+            if(mv.e1Plus() === 0.) {
+                ball.visible = false
+                axisLen = 999.
+            }
+            else {
+                ball.visible = true
+                let yPart = mv.e1Minus() / mv.e1Plus() //but it goes in z
+                let xPart = mv.ePlusMinus() / mv.e1Plus()
+                ball.position.set(xPart, 1., yPart)
+                axisLen = ball.position.length()
+            }
+
+            ambientLineMvToUnitVecDirection(mv, v1)
+            v1.multiplyScalar(axisLen)
+            setRotationallySymmetricMatrix(v1.x, v1.y, v1.z, axis.matrix)
+        })
+
+        return mv
+    }
+
     let hyperbolic = new Dw(1,1, true, false)
     {
         // in this context, the x and y directions (ultra ideal points) are ePlusMinus and e1Minus
+
+        let parabolicAxisMv = AxisAndBall()
+        parabolicAxisMv.copy(spineMv)
+        let hyperbolixAxisMv = AxisAndBall()
+        hyperbolixAxisMv.copy(ePlusMinus)
+        let zollyAxisMv = AxisAndBall()
+        zollyAxisMv.copy(e1Plus).addScaled(e1Minus, -1.)
+        //-1, -1
 
         var hyperbolicOrigin = e1Plus
 
         hyperbolic.camera.rotation.x = TAU / 4.
         hyperbolic.camera.position.set(0.,0.,0.)
+        let hyperbolicFov = 8.
+        hyperbolic.camera.fov = getFov(8.)
+        hyperbolic.camera.updateProjectionMatrix()
 
         hyperbolic.updateCamera = () => {
             let lookDirection = v1
@@ -182,10 +228,24 @@ function initColumn1d() {
             eye.rotation.copy(hyperbolic.camera.rotation)
         }
 
-        
-
         let eye = createEye()
         ambient.scene.add(eye)
+        
+        var freeAxis = AxisAndBall()
+        freeAxis.copy(e1Plus)
+        function setFreeAxis(x,y) {
+            freeAxis.copy(ePlusMinus)
+                .multiplyScalar(hyperbolicFov * x)
+                .addScaled(e1Minus, hyperbolicFov*y)
+            if (Math.abs(x) < .5 && Math.abs(y) < .5)
+                freeAxis.addScaled(e1Plus, 1.)
+        }
+        hyperbolic.onClick = (x, y) => {
+            setFreeAxis(x,y)
+        }
+        hyperbolic.onDrag = (x,y)=>{
+            setFreeAxis(x,y)
+        }
 
         // let eye2 = createEye()
         // hyperbolic.scene.add(eye2)
@@ -245,14 +305,9 @@ function initColumn1d() {
             ourNoClippingPlane.normal.multiplyScalar(-1.)
         })
 
-        let pointGeo = new THREE.SphereGeometry(tubeRadius * 3.)
         let gridPointsMat = new THREE.MeshBasicMaterial({ color: 0x0000FF })
         var gridPoints = new THREE.InstancedMesh(pointGeo, gridPointsMat, gridCount)
         conformal.scene.add(gridPoints)
-
-        let spineBall = new THREE.Mesh(pointGeo, spineMat)
-        conformal.scene.add(spineBall)
-        spineBall.position.set(0.,1.,1.)
     }
 
     function planeMvToNormalVector(planeMv, target) {

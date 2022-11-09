@@ -19,24 +19,6 @@ function init41WithoutDeclarations(basisNames) {
             return this
         }
 
-        toQuaternion(q) {
-            //haven't thought about orientations
-            q.set(this[10], this[7], this[6], this[0])
-        }
-
-        plane(a,b,c) {
-            //not sure what to do with 
-            this.set(
-                0.,
-                a,b,c,0.,0.,
-                0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,
-                0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,
-                0.,0.,0.,0.,0.,
-                0.
-            )
-            return this
-        }
-
         copy(a) {
             for (let i = 0; i < this.constructor.size; ++i)
                 this[i] = a[i]
@@ -118,6 +100,12 @@ function init41WithoutDeclarations(basisNames) {
                 target[i] = this[i] - a[i]
             return target
         }
+
+        addScaled(v, scale) {
+            for (let i = 0; i < this.constructor.size; ++i)
+                this[i] += scale * v[i]
+            return this
+        }
     }
     window.GeneralVector = GeneralVector
 
@@ -126,6 +114,24 @@ function init41WithoutDeclarations(basisNames) {
 
         constructor() {
             return super(N_COEFS)
+        }
+
+        toQuaternion(q) {
+            //haven't thought about orientations
+            q.set(this[10], this[7], this[6], this[0])
+        }
+
+        plane(a, b, c) {
+            //not sure what to do with 
+            this.set(
+                0.,
+                a, b, c, 0., 0.,
+                0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                0., 0., 0., 0., 0.,
+                0.
+            )
+            return this
         }
 
         naieveAxisToRotor(amt) {

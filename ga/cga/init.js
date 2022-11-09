@@ -1,9 +1,24 @@
 /*
+    Need to have a nice tiling of hyperbolic space to let people know it's the klein disk
+
+    Could have yet another row which is "from the camera's point of view"
+    In column2D it would be a line
+    In column 3D, your current bottom row would be orthographic 2D and you'd see a box in it?
+        And the new bottom window would be in that box?
+        Or, just, have a button on both of them
+
+    In Lengyel world, points can square to 1
+    CGA, true points square to 0, flat points to -1 I suppose
+    Yeah, he really is taking the dual, taking the gp, then dualizing back
+
+
+    //you're better off imagining the eye, prior to the transform, as being a point on e2Plus
+    
+
     Potential control scheme:
         drag in the ambient space and it does that transformation
 
     Have buttons for showing:
-        Number of dimensions of each window
         "Helper/Fake" shapes:
             Cone, circle, sphere, cross on 1,1 ambient space
             "Floor" planes
@@ -24,6 +39,9 @@
         Projective geo has a sophisticated view of infinity. Conformal is even more sophisticated
         Conformal transformations are very beautiful
         The timeglobe from minutephysics
+        There are two ways of going between numbers of dimensions that we'll use here:
+            slicing
+            perspectiving
         
         Computer graphics practitioners will have a rigorous foundation for
             Join formulae (but you could just ignore orientations)
@@ -49,9 +67,15 @@
             Is this a way to visualize covectors?
 
         Each window:
-            Ambient 1,1
+            Ambient 1
                 The vertical line behaves in an ordinary way, like an ordinary reflection line (click it to reflect)
                 Show the orientation of the lines. Reflection in down plane does not cause the orientation change you'd expect
+            Hyperbolic 2
+                We can see three kinds of rotations here
+                    rotation / elliptic (around the middle)
+                    translation / parabolic (around the north pole)
+                    hyperbolic (around points at infinity)
+                    And we can have any combination of parabolic and the other two
 */
 
 async function init() {
@@ -115,6 +139,7 @@ async function init() {
 
     class Dw {
         scene = new THREE.Scene()
+        labelScene = new THREE.Scene()
         elem
         camera
         haveChildrenOfLowerWindow
@@ -176,12 +201,32 @@ async function init() {
                     if (this.unusualCameraMode)
                         return
                     let affected = rightMouseMovesAffectsThisVector === undefined ? this.camera.position : rightMouseMovesAffectsThisVector
-                    moveCamera(affected, true, -.1 * (x - xOld))
-                    moveCamera(affected, false, .1 * (y - yOld))
+                    moveCamera(affected, true, -15. * (x - xOld))
+                    moveCamera(affected, false, 15. * (y - yOld))
                     xOld = x
                     yOld = y
                     this.camera.lookAt(0.,0.,0.)
                 }
+            }
+
+            {
+                let numDimensions = horizontalIndex+2-verticalIndex
+                let strings = [
+                    `Cl(` + (horizontalIndex+1)+`,1)`,
+                    numDimensions+`-dimensional view`
+                ]
+                // if(numDimensions >= 3)
+                //     strings.push( `Planes are grade ` + (numDimensions-2))
+                //lie algebra
+                strings.forEach((str,i)=>{
+                    let zeroToOne = i/(strings.length-1)
+
+                    let sign = text(str, false, 0x000000)
+                    sign.material.color.setRGB(0.,0.,0.)
+                    sign.scale.multiplyScalar(.6)
+                    sign.position.y = -.4 * i
+                    this.labelScene.add(sign)
+                })
             }
         }
     }
@@ -194,6 +239,10 @@ async function init() {
         ]
     }
 
+    let labelMode = { value: false }
+    bindToggle(` `,labelMode)
+    let labelCamera = new THREE.OrthographicCamera(-2., 2., 2., -2., -1., 1.)
+
     renderToDw = (dw) => {
         let [x,y] = getDwXy(dw)
 
@@ -201,25 +250,23 @@ async function init() {
         renderer.setViewport(x, y, dwDimension, dwDimension )
         renderer.clear(true, true)
 
-        renderer.render(dw.scene, dw.camera)
+        if(labelMode.value) {
+            renderer.render(dw.labelScene, labelCamera)
+        }
+        else {
+            renderer.render(dw.scene, dw.camera)
 
-        let ourDimension = 2 + dw.horizontalIndex - dw.verticalIndex
-        if(ourDimension < 4) {
-            let col = dwColumns[dw.horizontalIndex]
-            for(let i = 1; i < 3; ++i) {
-                // if(dw.horizontalIndex === 1 && dw.verticalIndex === 0 && frameCount === 3)
-                //     log(col[dw.verticalIndex + i])
-                if (col[dw.verticalIndex + i] !== undefined)
-                    renderer.render(col[dw.verticalIndex + i].scene, dw.camera)
+            let ourDimension = 2 + dw.horizontalIndex - dw.verticalIndex
+            if (ourDimension < 4) {
+                let col = dwColumns[dw.horizontalIndex]
+                for (let i = 1; i < 3; ++i) {
+                    // if(dw.horizontalIndex === 1 && dw.verticalIndex === 0 && frameCount === 3)
+                    //     log(col[dw.verticalIndex + i])
+                    if (col[dw.verticalIndex + i] !== undefined)
+                        renderer.render(col[dw.verticalIndex + i].scene, dw.camera)
+                }
             }
         }
-        // if (dw.haveChildrenOfLowerWindow) {
-        //     let col = dwColumns[dw.horizontalIndex]
-        //     let justBelow = dwColumns[dw.horizontalIndex][dw.verticalIndex+1]
-        //     renderer.render(justBelow.scene, dw.camera)
-        //     if(col[dw.verticalIndex+2] !== undefined)
-        //         renderer.render(col[dw.verticalIndex + 1].scene, dw.camera)
-        // }
     }
 
     initColumn0d()
