@@ -14,7 +14,7 @@ TODO
         Rings at infinity are fucked
         Probably worth checking over absolutely all e31 vs 13 shit
         Where are the lines at infinity?
-        Try not indenting...
+        Bug when you fail to indent correctly?
         Something happened that made tubeGeometry have NaNs, crashed the whole of threejs so you couldn't see anything
         Something caused the vertex to flick back and forth
         Sort out duplicates. At least in the senses that you need the damn things

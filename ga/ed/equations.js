@@ -23,14 +23,16 @@
 async function initEquations() {
     equationsShaders = [
         `
-float a = 2.;
-float b = 1.;
-float c = a + b;
+float aaaaaaaaaaaaaaaaaaaaaaa = 2.;
+float bb = 1.;
+float cc = aaaaaaaaaaaaaaaaaaaaaaa + bb;
         `
     ]
     await init(true)
     // dws.untransformed.elem.style.display = `none`
     // dws.final.elem.style.display = `none`
+
+    //ok, wanna hover
 
     onMathJaxLoad = () => {
         let mathId = document.getElementById(`someid`)

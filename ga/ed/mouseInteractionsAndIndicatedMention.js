@@ -200,15 +200,15 @@ function initMouseInteractions() {
             let pre  = lines.slice(0, indicatedMention.lineIndex + 1).join("\n")
             let post = lines.slice(indicatedMention.lineIndex + 1).join("\n")
             
-            let newLine = "\n" + " ".repeat(numSpaces) + indicatedMention.getFullName() + " = " + 
+            let newLine = "\n  " + " ".repeat(numSpaces) + indicatedMention.getFullName() + " = " + 
                 indicatedMention.appearance.getLiteralAssignmentFromState() + ";\n"
             textarea.value = pre + newLine + post
             
             let newCaretPosition = -1
             if (caretLineIndex < indicatedMention.lineIndex) {
                 // newCaretPosition = caretPositionOld
-                //no, you probably want to admire your handiwork
-                newCaretPosition = pre.length + 6 //so you can be in there, assuming 4-space tabs
+                //no, you probably want to admire your handiwork:
+                newCaretPosition = pre.length + numSpaces + 2 //puts you inside the mention
             }
             else if (caretLineIndex === indicatedMention.lineIndex)
                 newCaretPosition = pre.length + Math.min(caretColumnIndex, newLine.length-1)
