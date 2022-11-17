@@ -109,7 +109,10 @@ function initCamera() {
         })
     }
     zoomCameraToDist = (dist) => {
-        zoomCameraOutByAmount(dist/camera.position.length())
+        if(camera.position.length() === 0.)
+            camera.position.set(0.,0.,dist)
+        else
+            zoomCameraOutByAmount(dist/camera.position.length())
     }
     document.addEventListener('wheel', (event) => {
         if(event.ctrlKey)

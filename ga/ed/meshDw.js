@@ -26,8 +26,6 @@
 */
 
 function initMeshDw(wantAnimation) {
-    new Dw(`untransformed`, true, camera, false)
-
     let inAppearances = {}
     let arrayGetter = new Float32Array(4)
     let coordGetters = [`getX`, `getY`, `getZ`, `getW`]
@@ -55,7 +53,6 @@ function initMeshDw(wantAnimation) {
     }
 
     attemptAppearanceIdentifationWithImportedModelUniform = () => { }
-    setInIndex = () => { }
 
     if (wantAnimation)
         return initAnimatedGltf()

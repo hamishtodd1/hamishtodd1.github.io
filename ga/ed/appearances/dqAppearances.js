@@ -104,7 +104,7 @@ function initDqs() {
     let eLineGeo = new THREE.CylinderGeometry(.03, .03, 500.)
     let iLineGeo = new THREE.CylinderGeometry(.03, .03, INFINITY_RADIUS*2.)
     let dotGeo = new THREE.CircleBufferGeometry(.1, 32)
-    let ringGeo = new THREE.TorusGeometry(INFINITY_RADIUS, .05, 7, 62)
+    let ringGeo = new THREE.TorusGeometry(INFINITY_RADIUS, .03, 7, 62)
     let displayedLineMv = new Mv()
     let linePart = new Mv() //bivector?
     let newLinePart = new Mv()
@@ -118,8 +118,8 @@ function initDqs() {
         #cDwMesh
         #arcMesh
 
-        #mobiusStripMesh
-        #rimMesh
+        // #mobiusStripMesh
+        // #rimMesh
 
         #eDwMesh
         #iDwLineMesh
@@ -154,14 +154,18 @@ function initDqs() {
             this.#cDwMesh = cDw.NewMesh(dotGeo, this.#mat2d)
             this.#arcMesh = cDw.NewMesh(OurTubeGeo(theArcCurve), this.#mat2d)
 
-            this.#mobiusStripMesh = iDw.NewMesh(mobiusStripGeo, complexMat) //possibly only one of these is needed
-            this.#rimMesh = iDw.NewMesh(OurTubeGeo(theRimCurve), this.#mat3d)
+            // this.#mobiusStripMesh = iDw.NewMesh(mobiusStripGeo, complexMat) //possibly only one of these is needed
+            // this.#rimMesh = iDw.NewMesh(OurTubeGeo(theRimCurve), this.#mat3d)
 
             camera.toUpdateAppearance.push(this)
 
-            this.meshes = [this.#eDwMesh, this.#cDwMesh,  this.#mobiusStripMesh,  this.#iDwLineMesh, this.#iDwRingMesh,
+            this.meshes = [
+                this.#eDwMesh, this.#cDwMesh, 
+                this.#iDwLineMesh, this.#iDwRingMesh,
                 this.#arcMesh,
-                this.#rimMesh]
+                // this.#mobiusStripMesh,  
+                // this.#rimMesh
+            ]
         }
 
         onGrab(dw) {
@@ -247,6 +251,9 @@ function initDqs() {
             //when you hover the window, it switches to being a "top" down view
             //where the top is the view such that the rotation is anticlockwise from the identity
 
+            linePart.log()
+            log(linePart.eNorm(), linePart.iNorm(), linePart.approxEquals(zeroMv))
+
             if (linePart.approxEquals(zeroMv)) {
                 this.#iDwRingMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
 
@@ -271,6 +278,7 @@ function initDqs() {
                 //TODO can have both!!!! Not sure the right way to bring it in
 
                 //default mv is e02
+                this.#iDwRingMesh.position.set(0.,0.,0.)
                 join(e123, linePart, joinedWithOrigin)
                 joinedWithOrigin.normalize()
                 mul(joinedWithOrigin, e3, quatToOriginVersion)
@@ -288,14 +296,14 @@ function initDqs() {
 
             {
                 //actually, when it's a translation, it should... be an unfurled strip?
-                this.#mobiusStripMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
-                this.#rimMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
+                // this.#mobiusStripMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
+                // this.#rimMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
     
                 arcCurveDest.set(this.#cDwMesh.position.x, this.#cDwMesh.position.y, 0.)
                 updateTubeGeo(this.#arcMesh.geometry, theArcCurve)
     
-                rimCurveFullAngle = Math.atan2(this.#cDwMesh.position.y, this.#cDwMesh.position.x) / TAU * 2.
-                updateTubeGeo(this.#rimMesh.geometry, theRimCurve)
+                // rimCurveFullAngle = Math.atan2(this.#cDwMesh.position.y, this.#cDwMesh.position.x) / TAU * 2.
+                // updateTubeGeo(this.#rimMesh.geometry, theRimCurve)
             }
         }
 

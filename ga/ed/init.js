@@ -252,6 +252,7 @@ async function init(hasEquations) {
     initAppearances()
     await initDws()
 
+    new Dw(`untransformed`, true, camera, false)
     await initShaderOutputAndFinalDw(hasEquations)
 
     let importedModel = {
@@ -259,7 +260,7 @@ async function init(hasEquations) {
         updateAnimation:()=>{}
     }
     if(!hasEquations)
-        importedModel = initMeshDw(false)
+        importedModel = initMeshDw(true)
 
     // await initHalfplane()
 
@@ -343,7 +344,7 @@ async function init(hasEquations) {
         renderer.setClearColor(0xFFFFFF, 0)
         renderer.clear(true, true)
         renderer.setScissorTest(true)
-        renderer.setClearColor(0x272822, 1)
+        renderer.setClearColor(0x252525, 1)
 
         updateFunctions.forEach((uf)=>uf())
 
