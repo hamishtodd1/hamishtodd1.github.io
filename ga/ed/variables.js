@@ -8,6 +8,8 @@ let caretPositionOld = -1
 
 const FULL_SCREEN_QUAD_MATRIX = new THREE.Matrix4()
 
+let initialMeshAttributes = null
+
 const variables = []
 const appearanceTypes = []
 const dws = {}

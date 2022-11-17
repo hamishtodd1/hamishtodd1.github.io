@@ -92,10 +92,10 @@ function initMouseInteractions() {
 
                 if (indicatedMention.variable.isUniform)
                     indicatedMention.appearance.updateStateFromDrag(grabbedDw) 
-                else if(indicatedMention.variable.isIn) {
+                else if (indicatedMention.variable.isIn && initialMeshAttributes !== null && initialMeshAttributes.position !== undefined) {
                     let mouseRayBiv = biv0.fromMv(getMouseRay(dws.untransformed))
 
-                    let attri = dws.untransformed.getInitialMeshAttributes().position
+                    let attri = initialMeshAttributes.position
                     let closestDist = Infinity
                     let closestIndex = -1
                     for (let i = 0, il = attri.count; i < il; ++i) {
@@ -202,7 +202,7 @@ function initMouseInteractions() {
             let pre  = lines.slice(0, indicatedMention.lineIndex + 1).join("\n")
             let post = lines.slice(indicatedMention.lineIndex + 1).join("\n")
             
-            let newLine = "\n  " + " ".repeat(numSpaces) + indicatedMention.getFullName() + " = " + 
+            let newLine = "\n" + " ".repeat(numSpaces) + indicatedMention.getFullName() + " = " + 
                 indicatedMention.appearance.getLiteralAssignmentFromState() + ";\n"
             textarea.value = pre + newLine + post
             

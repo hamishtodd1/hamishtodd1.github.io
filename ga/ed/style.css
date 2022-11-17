@@ -7,7 +7,7 @@ body {
 :root {
   --generalGap: 6px;
 
-  --mentionDwHeight: 136px; /*136*/
+  --mentionDwHeight: 102px; /*136*/
   --ioDwWidth: 226px; /*507*/
 
   --dwAspect: 16/9;

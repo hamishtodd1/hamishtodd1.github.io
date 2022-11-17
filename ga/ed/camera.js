@@ -154,7 +154,7 @@ function initCamera() {
         camera.whenAngleChangeds.forEach((func) => func())
     }
 
-    let rightSideDist = 4.;
+    let rightSideDist = 3.7;
     camera2d = new THREE.OrthographicCamera(
         -rightSideDist,
         rightSideDist,

@@ -47,6 +47,7 @@ function initMat4s() {
             this.#zMesh = vDw.ArrowHeadAndShaft( mat )
 
             this.#determinantMesh = sDw.NewMesh(downwardPyramidGeo, new THREE.MeshBasicMaterial())
+            this.#determinantMesh.position.y = 1.2
             this.#determinantMesh.material.color = this.col
             
             this.meshes = [this.#xMesh, this.#yMesh, this.#zMesh, this.#determinantMesh]

@@ -23,7 +23,7 @@ function initCaretInteractions() {
     updateLclsc = (newValue) => {
         lowestChangedLineSinceCompile = newValue
         updateChangedLineIndicator()
-        updateDwsVisibility()
+        // updateDwsVisibility()
     }
 
     function insertTextAtCaret(text) {
@@ -126,7 +126,7 @@ function initCaretInteractions() {
 
         getCaretColumnAndLine()
 
-        updateDwsVisibility()
+        // updateDwsVisibility()
 
         let caretX = columnToScreenX(caretColumn)
         let caretY = lineToScreenY(caretLine)
@@ -135,17 +135,17 @@ function initCaretInteractions() {
         caretPositionOld = caretPosition
     }
 
-
-    let caretAboveLclscIndicatorOld = true
-    function updateDwsVisibility() {
-        let caretAboveLclscIndicator = caretLine < lowestChangedLineSinceCompile
-        if (caretAboveLclscIndicator !== caretAboveLclscIndicatorOld) {
-            forEachPropt(dws, (dw) => {
-                dw.elem.style.display = caretAboveLclscIndicator ? `` : `none`
-            })
-        }
-        caretAboveLclscIndicatorOld = caretAboveLclscIndicator
-    }
+    //this is from when we were hiding the windows
+    // let caretAboveLclscIndicatorOld = true
+    // function updateDwsVisibility() {
+    //     let caretAboveLclscIndicator = caretLine < lowestChangedLineSinceCompile
+    //     if (caretAboveLclscIndicator !== caretAboveLclscIndicatorOld) {
+    //         forEachPropt(dws, (dw) => {
+    //             dw.elem.style.display = caretAboveLclscIndicator ? `` : `none`
+    //         })
+    //     }
+    //     caretAboveLclscIndicatorOld = caretAboveLclscIndicator
+    // }
 
     let caretLine = -1
     let caretColumn = -1

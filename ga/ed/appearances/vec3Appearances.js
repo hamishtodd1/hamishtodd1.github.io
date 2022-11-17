@@ -15,8 +15,12 @@ function initVec3s() {
     class vec3Appearance extends Appearance {
         #vMesh
         #iMesh
-        #sMesh
         #dashedLines = [Array(3), Array(3), Array(3)]
+        
+        #scalarMeshLinear
+        #scalarMeshLogarithmic
+        #updateScalarMeshes
+        #getScalarMeshesPosition
 
         constructor() {
             super()
@@ -24,8 +28,11 @@ function initVec3s() {
             this.uniform.value = this.state = getNewUniformDotValue().set(1., 1., 1.)
             this.stateOld = getNewUniformDotValue()
 
-            this.#sMesh = sDw.NewMesh(downwardPyramidGeo, new THREE.MeshBasicMaterial())
-            this.#sMesh.material.color = this.col
+            let scalarMat = new THREE.MeshBasicMaterial()
+            scalarMat.color = this.col
+            let [a, b, c, d] = scalarWindowMeshes(scalarMat)
+            this.#scalarMeshLinear = a; this.#scalarMeshLogarithmic = b;
+            this.#updateScalarMeshes = c; this.#getScalarMeshesPosition = d;
 
             let mat = new THREE.MeshPhongMaterial()
             mat.color = this.col
@@ -57,7 +64,7 @@ function initVec3s() {
                 // }
             // })
 
-            this.meshes = [this.#vMesh, this.#iMesh, this.#sMesh]
+            this.meshes = [this.#vMesh, this.#iMesh, this.#scalarMeshLinear, this.#scalarMeshLogarithmic]
         }
 
         onGrab(dw) {
@@ -93,9 +100,10 @@ function initVec3s() {
         }
 
         updateMeshesFromState() {
-            this.#sMesh.position.x = this.state.length()
+            let scalarValue = this.state.length()
             if ( !whenGrabbed.equals(zeroVector) && this.state.dot(whenGrabbed) < 0.) //possibly do something about duplicates?
-                this.#sMesh.position.x *= -1.
+                scalarValue *= -1.
+            this.#updateScalarMeshes(scalarValue)
 
             this.#iMesh.position.copy(this.state)
             this.#iMesh.position.setLength(INFINITY_RADIUS)
@@ -140,7 +148,7 @@ function initVec3s() {
         getWorldCenter(dw, target) {
             
             if(dw === sDw)
-                target.copy(this.#sMesh.position)
+                this.#getScalarMeshesPosition(target)
             else if (dw === vDw) {
                 target.copy(this.state)
                 target.multiplyScalar(.5)

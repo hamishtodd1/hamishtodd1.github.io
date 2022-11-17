@@ -90,7 +90,7 @@ Dq sandwichDqDq(in Dq a, in Dq b) {
     return ret;
 }
 
-Dq joinPtsInDq(in vec4 a, in vec4 b) {
+Dq join(in vec4 a, in vec4 b) {
     float[16] aAsMv;
     mvFromVec(a, aAsMv);
     float[16] bAsMv;
@@ -124,6 +124,14 @@ void dqExp(in Dq B, out Dq target) {
         s * B.e23,
         s * m
     );
+}
+
+Dq angleAndAxisVecToDq(in float angle, in vec3 axis) {
+    Dq axisDq = Dq(0., 0.,0.,0., angle * axis.z, angle * axis.y, angle * axis.x, 0.);
+
+    Dq ret;
+    dqExp(axisDq, ret);
+    return ret;
 }
 
 //make sure to end with a newline!

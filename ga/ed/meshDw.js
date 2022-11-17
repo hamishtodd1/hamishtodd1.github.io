@@ -1,4 +1,7 @@
 /*
+    The skin indices indicate bones
+    Would be intuitive to point to the correct bone in the window
+
     the shader just has vertices, a p
 
     the shader takes inputs and gives outputs
@@ -22,22 +25,70 @@
         occlusion, roughness, metallic, normal
 */
 
-attemptAppearanceIdentifationWithImportedModelUniform = () => { }
-attemptAppearanceIdentifationWithImportedModelIn = () => { }
-setInIndex = () => { }
+function initMeshDw(wantAnimation) {
+    new Dw(`untransformed`, true, camera, false)
 
+    let inAppearances = {}
+    let arrayGetter = new Float32Array(4)
+    let coordGetters = [`getX`, `getY`, `getZ`, `getW`]
+    setInIndex = (focussedIndex) => {
+        Object.keys(inAppearances).forEach((key) => {
+            let appearance = inAppearances[key]
+            for (let i = 0; i < appearance.variable.type.numFloats; ++i)
+                arrayGetter[i] = initialMeshAttributes[key][coordGetters[i]](focussedIndex)
+            if (key === `position`)
+                arrayGetter[3] = 1. //getW will have been attempted, but will have resulted in garbage
+            appearance.floatArrayToState(arrayGetter)
+        })
+    }
 
-function initAnimatedMeshDw() {
-    let dw = dws.untransformed
-    // dw.elem.style.display = 'none'
-    
-    let attributes = null
+    attemptAppearanceIdentifationWithImportedModelIn = (appearance, name, geo) => {
+        if (initialMeshAttributes === null)
+            return
+
+        let nameForModel = name === `initialVertex` ? `position` : name
+        if (initialMeshAttributes[nameForModel] !== undefined) {
+            geo.setAttribute(nameForModel, initialMeshAttributes[nameForModel])
+            inAppearances[nameForModel] = appearance
+            //might be nice to check whether the setup of the variable in the buffer matches what we have here
+        }
+    }
+
+    attemptAppearanceIdentifationWithImportedModelUniform = () => { }
+    setInIndex = () => { }
+
+    if (wantAnimation)
+        return initAnimatedGltf()
+    else
+        return initStaticObj()
+}
+
+function initStaticObj() {
+    let promise = new Promise(resolve => {
+        let loader = new THREE.OBJLoader()
+        loader.load('https://hamishtodd1.github.io/ga/ed/data/heart.obj', function (obj) {
+
+            let geo = obj.children[0].geometry //new THREE.WireframeGeometry(obj.children[0].geometry)
+            geo.scale(.03,.03,.03)
+            geo.translate(-.1,-1.05,0.)
+            initialMeshAttributes = geo.attributes
+
+            resolve()
+        }, () => { }, (e) => { console.error(e) })
+    })
+
+    return {
+        promise,
+        updateAnimation: () => {}
+    }
+}
+
+function initAnimatedGltf() {
+    zoomCameraToDist(260.)
+
     let skeleton = null
     let boneInverseDqs = null
     let boneMeshes = null
-    dw.getInitialMeshAttributes = () => {
-        return attributes
-    }
 
     let boneMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF })
     let boneGeo = new THREE.WireframeGeometry(new THREE.OctahedronGeometry(1.))
@@ -113,7 +164,8 @@ function initAnimatedMeshDw() {
             mixer = new THREE.AnimationMixer(model)
             
             let initialMesh = model.children[0].children[1]
-            attributes = initialMesh.geometry.attributes
+            initialMeshAttributes = initialMesh.geometry.attributes
+
             skeleton = initialMesh.skeleton
             let numBones = skeleton.bones.length
 
@@ -141,40 +193,13 @@ function initAnimatedMeshDw() {
         },()=>{},(e)=>{console.error(e)})
     })
 
-    let inAppearances = {}
-    let arrayGetter = new Float32Array(4)
-    let coordGetters = [`getX`, `getY`, `getZ`, `getW`]
-    setInIndex = (focussedIndex) => {
-        Object.keys(inAppearances).forEach((key)=>{
-            let appearance = inAppearances[key]
-            for(let i = 0; i < appearance.variable.type.numFloats; ++i)
-                arrayGetter[i] = attributes[key][coordGetters[i]](focussedIndex)
-            if(key === `position`)
-                arrayGetter[3] = 1. //getW will have been attempted, but will have resulted in garbage
-            appearance.floatArrayToState(arrayGetter)
-        })
-    }
+    
 
     attemptAppearanceIdentifationWithImportedModelUniform = (appearance, name, uniforms) => {        
         if (name === `boneMatrices` || name === `boneDqs` ) {
             let correctLength = appearance.variable.arrayLength === skeleton.bones.length
             if(correctLength)
                 meshAppearances[name] = appearance
-        }
-    }
-
-    attemptAppearanceIdentifationWithImportedModelIn = (appearance, name, geo) => {
-        let nameForModel = name === `initialVertex` ? `position` : name
-        log(nameForModel)
-        if (attributes[nameForModel] !== undefined) {
-            geo.setAttribute(nameForModel, attributes[nameForModel])
-            inAppearances[nameForModel] = appearance
-            //might be nice to check whether the setup of the variable in the buffer matches what we have here
-
-            if (name === `skinIndex`) {
-                //could point to the correct bone mesh in the skeleton
-                //seems intuitive!
-            }
         }
     }
 

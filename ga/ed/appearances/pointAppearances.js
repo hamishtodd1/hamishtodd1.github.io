@@ -50,8 +50,12 @@ function initPoints() {
     class vec4Appearance extends Appearance {
         #eDwMesh
         #iDwMesh
-        #sMesh
         whenGrabbed = new THREE.Vector4()
+        
+        #scalarMeshLinear
+        #scalarMeshLogarithmic
+        #updateScalarMeshes
+        #getScalarMeshesPosition
         
         constructor() {
             super()
@@ -59,17 +63,18 @@ function initPoints() {
             this.uniform.value = this.state = getNewUniformDotValue().set(0.,0.,0.,1.) //maybe better off as an mv?
             this.stateOld = getNewUniformDotValue().set(1.,0.,0.,0.)
 
-            let mat = new THREE.MeshBasicMaterial() //why not phong?
+            let mat = new THREE.MeshBasicMaterial() //Too small for phong
             mat.color = this.col
             this.#eDwMesh = eDw.NewMesh(pointGeo, mat)
             this.#iDwMesh = iDw.NewMesh(pointGeo, mat)
 
-            this.#sMesh = sDw.NewMesh(downwardPyramidGeo, new THREE.MeshBasicMaterial())
-            this.#sMesh.material.color = this.col
+            let [a, b, c, d] = scalarWindowMeshes(mat)
+            this.#scalarMeshLinear = a; this.#scalarMeshLogarithmic = b;
+            this.#updateScalarMeshes = c; this.#getScalarMeshesPosition = d;
             
             camera.toUpdateAppearance.push(this)
 
-            this.meshes = [this.#eDwMesh, this.#iDwMesh, this.#sMesh]
+            this.meshes = [this.#eDwMesh, this.#iDwMesh, this.#scalarMeshLinear, this.#scalarMeshLogarithmic]
         }
 
         onGrab(dw) {
@@ -109,9 +114,12 @@ function initPoints() {
             mv0.fromVec4(this.state)
             
             let currentlyGrabbed = !this.whenGrabbed.equals(zeroVector4)
-            this.#sMesh.position.x = mv0.norm() // = sqrt(sq(.w))
+            
+            //ok, clearly this should be the e123 part, but wait til later
+            let scalarValue = mv0.norm() // = sqrt(sq(.w))
             if (currentlyGrabbed && !this.variable.isIn )
-                this.#sMesh.position.x *= this.whenGrabbed.dot(this.state) > 0. ? 1. : -1.
+                scalarValue *= this.whenGrabbed.dot(this.state) > 0. ? 1. : -1.
+            this.#updateScalarMeshes(scalarValue)
             
             if (this.state.w !== 0.) {
                 this.#iDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
@@ -142,7 +150,7 @@ function initPoints() {
 
         getWorldCenter(dw, target) {
             if (dw === sDw) {
-                target.copy(this.#sMesh.position)
+                this.#getScalarMeshesPosition(target)
             }
             else if (dw === eDw || dw === uDw) {
                 target.copy(this.state)
