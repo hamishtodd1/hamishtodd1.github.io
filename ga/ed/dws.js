@@ -5,11 +5,11 @@
 
 async function initDws() {
 
-    let DW_WIDTH = parseInt( getCssVar('dwWidth') )
-    let DW_HEIGHT = parseInt( getCssVar('dwWidth') ) / eval(getCssVar('dwAspect'))
-    let GENERAL_GAP = parseInt(getCssVar('generalGap'))
+    let $mentionDwHeight = parseInt(getCssVar('mentionDwHeight'))
+    let $ioDwWidth =       parseInt( getCssVar('ioDwWidth') )
+    let GENERAL_GAP =     parseInt( getCssVar('generalGap') )
 
-    let numDownSide = 0
+    let numUpSide = 0
     let numAlongTop = 0
 
     let borderRadius = Math.sqrt(2.) / 2.
@@ -31,31 +31,24 @@ async function initDws() {
         border
         visible = false
 
-        constructor(name, haveLights, ourCamera, mentionDw) { //do it as a "params" thing
+        constructor(name, haveLights, ourCamera = camera, mentionDw = true) { //do it as a "params" thing
             this.elem = document.createElement('div')
             this.elem.style.display = 'none'
-            this.elem.className = 'dwEl'
+            this.elem.className = mentionDw ? `mentionDwEl` : `ioDwEl`
             document.body.appendChild(this.elem)
 
-            if(mentionDw === undefined)
-                mentionDw = true
-            
             if(mentionDw) {
-                let verticalPosition = numDownSide++
-                this.elem.style.bottom = (verticalPosition * (DW_HEIGHT+GENERAL_GAP) ).toString() + "px"
+                let verticalPosition = numUpSide++
+                this.elem.style.bottom = (verticalPosition * ($mentionDwHeight + GENERAL_GAP) ).toString() + "px"
                 this.elem.style.right = "0px"
             }
-            // else if(name === "final") {
-            //     this.elem.style.top = "0px"
-            //     this.elem.style.right = "0px"
-            // }
             else {
                 let horizontalPosition = numAlongTop++
-                this.elem.style.left = (horizontalPosition * (DW_WIDTH+GENERAL_GAP) ).toString() + "px"
+                this.elem.style.left = (horizontalPosition * ($ioDwWidth + GENERAL_GAP) ).toString() + "px"
                 this.elem.style.top = "0px"
             }
 
-            this.camera = ourCamera || camera
+            this.camera = ourCamera
 
             this.border = new THREE.Mesh(borderGeo, borderMat)
             // this.border.visible = false

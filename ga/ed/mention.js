@@ -37,8 +37,8 @@ function initMentions() {
     }
     
     hideHighlight = () => {
-        $labelLines.forEach((svgLine) => { 
-            setSvgLine(svgLine, -10, -10, -10, -10)
+        $labelLines.forEach((svgLine) => {
+            freeSvgLine(svgLine)
         })
         forEachPropt(dws, (dw) => {
             dw.setBorderHighlight(false)
@@ -110,7 +110,7 @@ function initMentions() {
         highlight() {
             let col = this.variable.col
             $labelLines.forEach((svgLine) => {
-                setSvgLineColor(svgLine,col.r,col.g,col.b)
+                colorSvgLine(svgLine,col.r,col.g,col.b)
             })
 
             //mouse box
@@ -137,7 +137,7 @@ function initMentions() {
                 }
             })
             for (let i = lowestUnusedLabelConnector; i < $labelConnectors.length; ++i)
-                setSvgLine($labelConnectors[i], -10, -10, -10, -10)
+                freeSvgLine($labelConnectors[i])
         }
     }
     window.Mention = Mention

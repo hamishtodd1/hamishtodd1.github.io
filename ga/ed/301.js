@@ -249,6 +249,63 @@ function init301WithoutDeclarations(basisNames) {
             return this
         }
 
+        getSquaredENormAtGrade(grade) {
+            switch (grade) {
+                case 0:
+                    return this[0] * this[0]
+                case 1:
+                    return sq(this[2]) + sq(this[3]) + sq(this[4])
+                case 2:
+                    return sq(this[8]) + sq(this[9]) + sq(this[10])
+                case 3:
+                    return sq(this[14])
+                case 4:
+                    return 0.
+            }
+        }
+
+        //if both inputs are lines that have both angle and distance, returns angle. Want distance? Project first
+        getSeparationTo(mv) {
+            let mvs = [this, mv]
+            
+            let elementsToUse = [newMv, newMv]
+            let grades = Array(2)
+            for(let i = 0; i < 2; ++i) {
+                let grade = mvs[i].getGrade() //if you were optimized you'd already have these
+                if(isNaN(grade))
+                    return 0. //we don't do mixed-grade objects
+
+                let squaredENorm = mvs[i].getSquaredENormAtGrade(grade)
+                if( squaredENorm !== 0.) {
+                    elementsToUse[i].copy(mvs[i])
+                    grades[i] = grade
+                }
+                else {
+                    dual(mvs[i], elementsToUse[i])
+                    grades[i] = 4 - grade
+                }
+            }
+
+            let transform = mul(elementsToUse[0], elementsToUse[1], newMv)
+
+            let lowerGrade = (grades[0] + grades[1]) % 2
+            let lowerGradeENorm = Math.sqrt( transform.getSquaredENormAtGrade(lowerGrade) )
+
+            //ohhh but what if instead of |Point-part| you use Point-part.e123?
+            
+            let higherGrade = 2 + lowerGrade
+            let higherGradeSquaredENorm = transform.getSquaredENormAtGrade( higherGrade )
+
+            let isAtAngle = higherGradeSquaredENorm !== 0.
+            if( isAtAngle )
+                return Math.atan( Math.sqrt(higherGradeSquaredENorm) / lowerGradeENorm )
+            else { //transform is either the identity or a translation
+                let transformDual = dual(transform, newMv)
+                higherGradeSquaredENorm = transformDual.getSquaredENormAtGrade(4 - higherGrade)
+                return Math.sqrt(higherGradeSquaredENorm) / lowerGradeENorm
+            }
+        }
+
         //bit disorganized naming, TODO
         fromVec(v) {
             this.copy(zeroMv)

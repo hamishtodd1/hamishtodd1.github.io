@@ -252,9 +252,11 @@ async function init(hasEquations) {
     initAppearances()
     await initDws()
 
+    let useAnimatedModel = !hasEquations && true
     await initShaderOutputAndFinalDw(hasEquations)
-    if(!hasEquations) {
-        var importedModel = initMeshDw()
+    new Dw(`untransformed`, true, camera, false)
+    if (useAnimatedModel ) {
+        var importedModel = initAnimatedMeshDw()
     }
 
     // await initHalfplane()
@@ -297,7 +299,7 @@ async function init(hasEquations) {
         frameDelta = clockDelta < .1 ? clockDelta : .1 //clamped because debugger pauses create weirdness
         ++frameCount
 
-        if (!hasEquations)
+        if (useAnimatedModel)
             importedModel.updateAnimation()
 
         variables.forEach((v)=>{
@@ -350,14 +352,15 @@ async function init(hasEquations) {
         requestAnimationFrame(render)
     }
 
-    if (!hasEquations)
+    if (useAnimatedModel) {
         await importedModel.promise
+    }
         
     compile(false)
     updateMentionVisibilitiesAndIndication()
 
     setCaretPosition(390)
     addToCameraLonLat(0., 0.)
-    zoomCameraOutByAmount(260./3.7)
+    zoomCameraToDist(260.)
     render()
 }

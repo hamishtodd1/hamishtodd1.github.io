@@ -20,6 +20,10 @@ function initSvgLines() {
         }
     }
 
+    freeSvgLine = function (svgLine) {
+        setSvgLine(svgLine, -10, -10, -10, -10)
+    }
+
     setSvgHighlight = function (x, y, w, h, $sidesArray) {
         setSvgLine($sidesArray[0], x, y, x + w, y)
         setSvgLine($sidesArray[1], x + w, y, x + w, y + h)
@@ -27,7 +31,7 @@ function initSvgLines() {
         setSvgLine($sidesArray[3], x, y + h, x, y)
     }
 
-    setSvgLineColor = function(line, r, g, b) {
+    colorSvgLine = function(line, r, g, b) {
         line.style.stroke = "rgb(" + r * 255. + "," + g * 255. + "," + b * 255. + ")"
     }
 }

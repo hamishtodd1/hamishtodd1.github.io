@@ -26,8 +26,9 @@ attemptAppearanceIdentifationWithImportedModelUniform = () => { }
 attemptAppearanceIdentifationWithImportedModelIn = () => { }
 setInIndex = () => { }
 
-function initMeshDw() {
-    let dw = new Dw(`untransformed`, true, camera, false) //really should be "initialMesh"
+
+function initAnimatedMeshDw() {
+    let dw = dws.untransformed
     // dw.elem.style.display = 'none'
     
     let attributes = null
@@ -164,6 +165,7 @@ function initMeshDw() {
 
     attemptAppearanceIdentifationWithImportedModelIn = (appearance, name, geo) => {
         let nameForModel = name === `initialVertex` ? `position` : name
+        log(nameForModel)
         if (attributes[nameForModel] !== undefined) {
             geo.setAttribute(nameForModel, attributes[nameForModel])
             inAppearances[nameForModel] = appearance

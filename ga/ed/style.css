@@ -5,10 +5,14 @@ body {
 }
 
 :root {
-  --dwWidth: 180px;
-  --dwAspect: 16/9;
-  --dwHeight: calc(var(--dwWidth) / (var(--dwAspect)));
   --generalGap: 6px;
+
+  --mentionDwHeight: 136px; /*136*/
+  --ioDwWidth: 226px; /*507*/
+
+  --dwAspect: 16/9;
+  --mentionDwWidth: calc(var(--mentionDwHeight) * (var(--dwAspect)));
+  --ioDwHeight:  calc(var(--ioDwWidth) / (var(--dwAspect)));
 }
 
 #canvas3d, #ourSvg {
@@ -24,15 +28,17 @@ body {
   pointer-events: none;
 }
 
-.dwEl {
+.mentionDwEl, .ioDwEl {
   margin: var(--generalGap);
   padding: 0px;
   border: 0px;
 
   position: absolute;
+}
 
-  width: var(--dwWidth);
-  height: var(--dwHeight);
+.mentionDwEl {
+  width:  var(--mentionDwWidth);
+  height: var(--mentionDwHeight);
 }
 
 #ourSvg {
@@ -54,7 +60,7 @@ body {
   margin: var(--generalGap);
   border: 0;
 
-  width: calc(100% - 5 * var(--generalGap) - var(--dwWidth));
+  width: calc(100% - 5 * var(--generalGap) - var(--mentionDwWidth));
 
   position: absolute;
   left: 0;

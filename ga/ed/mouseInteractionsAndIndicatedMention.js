@@ -39,7 +39,7 @@ function initMouseInteractions() {
     }
 
     let mouseAreaOld = null
-    updateMentionVisibilitiesAndIndication = (mouseArea, userIndicationX, userIndicationY) => {
+    updateMentionVisibilitiesAndIndication = (mouseArea, userIndicationX, userIndicationY, newIndicatedMention) => {
         //moving the mouse should not get rid of the caret's indication
         if(mouseArea === undefined)
             mouseArea = mouseAreaOld
@@ -69,6 +69,8 @@ function initMouseInteractions() {
             indicatedMention = null
         else if (mouseArea === textarea)
             indicatedMention = getIndicatedTextareaMention(userIndicationX, userIndicationY)
+        else if (newIndicatedMention !== undefined ) //equation area
+            indicatedMention = newIndicatedMention
         else
             indicatedMention = mouseArea.getHoveredMention(userIndicationX, userIndicationY)
 
@@ -118,7 +120,7 @@ function initMouseInteractions() {
                     //that's probably the right idea
                 }
             }
-            else if(mouseArea !== document) {
+            else if (mouseArea !== document) {
                 updateMentionVisibilitiesAndIndication(mouseArea, event.clientX, event.clientY)
             }
         }

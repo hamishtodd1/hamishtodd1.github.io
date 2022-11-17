@@ -108,6 +108,9 @@ function initCamera() {
             scale.multiplyScalar(amt)
         })
     }
+    zoomCameraToDist = (dist) => {
+        zoomCameraOutByAmount(dist/camera.position.length())
+    }
     document.addEventListener('wheel', (event) => {
         if(event.ctrlKey)
             return //makes it so window resize with trackpad doesn't count

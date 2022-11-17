@@ -3,7 +3,7 @@ function initCaretInteractions() {
     let lowestChangedLineSinceCompile = -1
 
     let $changedLineIndicator = SvgLine()
-    setSvgLineColor($changedLineIndicator, 180,180,180)
+    colorSvgLine($changedLineIndicator, 180,180,180)
     updateChangedLineIndicator = () => {
         if(lowestChangedLineSinceCompile !== Infinity) {
             let textareaBcr = textarea.getBoundingClientRect()
@@ -13,7 +13,7 @@ function initCaretInteractions() {
                 textareaBcr.x + textareaBcr.width, y)
         }
         else
-            setSvgLine($changedLineIndicator, -10, -10, -10, -10)
+            freeSvgLine($changedLineIndicator)
     }
 
     inamongstChangedLines = (lineIndex) => {
@@ -55,7 +55,7 @@ function initCaretInteractions() {
     // let $focussedLineLines = []
     // for(let i = 0; i < 4; ++i) {
     //     $focussedLineLines[i] = SvgLine()
-    //     setSvgLineColor($focussedLineLines[i], 0.5, 0.5, 0.5)
+    //     colorSvgLine($focussedLineLines[i], 0.5, 0.5, 0.5)
     // }
 
     /////////////////////////////////////////////////////////

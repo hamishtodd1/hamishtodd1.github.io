@@ -20,27 +20,38 @@
 
  */
 
+hackyFunction = () => null
+
 async function initEquations() {
     equationsShaders = [
         `
-float aaaaaaaaaaaaaaaaaaaaaaa = 2.;
-float bb = 1.;
-float cc = aaaaaaaaaaaaaaaaaaaaaaa + bb;
+Plane e1 = Plane(0.,1.,0.,0.);
+Plane e2 = Plane(0.,0.,1.,0.);
+Dq e12 = Dq(0., 0.,0.,0., 1.,0.,0., 0.);
         `
     ]
     await init(true)
+    zoomCameraToDist(3.7)
     // dws.untransformed.elem.style.display = `none`
     // dws.final.elem.style.display = `none`
 
     //ok, wanna hover
 
+    hackyFunction = () => {
+        return hoveredEquationMention
+    }
+
     onMathJaxLoad = () => {
-        let mathId = document.getElementById(`someid`)
-        mathId.addEventListener(`mouseover`, () => {
-            log(`in`)
+        let $element = document.getElementById(`someid`)
+        $element.addEventListener(`mouseover`, (event) => {
+            // let rect = $element.getBoundingClientRect()
+            // setSvgLine(svgLine, rect.right, rect.top, -10, -10)
+
+            let indicatedMention = variables.find((v)=>v.name === "e12").mentions[0]
+            updateMentionVisibilitiesAndIndication(equationArea, event.clientX, event.clientY, indicatedMention)
         })
-        mathId.addEventListener(`mouseleave`, () => {
-            log(`out`)
+        $element.addEventListener(`mouseleave`, (event) => {
+            updateMentionVisibilitiesAndIndication(equationArea, event.clientX, event.clientY, null)
         })
     }
 
