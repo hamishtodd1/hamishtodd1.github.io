@@ -61,7 +61,7 @@ function initPoints() {
             super()
             
             this.uniform.value = this.state = getNewUniformDotValue().set(0.,0.,0.,1.) //maybe better off as an mv?
-            this.stateOld = getNewUniformDotValue().set(1.,0.,0.,0.)
+            this.stateOld = getNewUniformDotValue().set(0.,0.,0.,1.)
 
             let mat = new THREE.MeshBasicMaterial() //Too small for phong
             mat.color = this.col
@@ -121,7 +121,9 @@ function initPoints() {
                 scalarValue *= this.whenGrabbed.dot(this.state) > 0. ? 1. : -1.
             this.#updateScalarMeshes(scalarValue)
             
-            if (this.state.w !== 0.) {
+            let isIdeal = this.state.w === 0.
+            // console.error(this.state,isIdeal)
+            if (!isIdeal) {
                 this.#iDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
                 this.#eDwMesh.position.copy(this.state).multiplyScalar(1./this.state.w)
                 this.#eDwMesh.scale.setScalar(1.)
@@ -141,8 +143,9 @@ function initPoints() {
                 if (isInFrontOfCamera) {
                     displayableVersion.toVectorDisplayable(this.#eDwMesh.position)
                 }
-                else
+                else {
                     this.#eDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                }
             }
 
             this.#eDwMesh.scale.setScalar(.2 * camera.position.distanceTo(this.#eDwMesh.position))

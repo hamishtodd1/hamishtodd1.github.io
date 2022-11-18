@@ -251,9 +251,6 @@ function initDqs() {
             //when you hover the window, it switches to being a "top" down view
             //where the top is the view such that the rotation is anticlockwise from the identity
 
-            linePart.log()
-            log(linePart.eNorm(), linePart.iNorm(), linePart.approxEquals(zeroMv))
-
             if (linePart.approxEquals(zeroMv)) {
                 this.#iDwRingMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
 

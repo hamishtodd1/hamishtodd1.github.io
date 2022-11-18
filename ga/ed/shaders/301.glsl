@@ -3,7 +3,7 @@ glsl301 = `
 struct Dq {
     float scalar;
     float e01; float e02; float e03;
-    float e12; float e31; float e23;
+    float e12; float e31; float e23; //z, y, x. Frikkin Steven
     float I;
 };
 
@@ -23,13 +23,32 @@ Dq dqMulScalar(in Dq a, in float b) {
     return Dq( a.scalar * b, a.e01 * b, a.e02 * b, a.e03 * b, a.e12 * b, a.e31 * b, a.e23 * b, a.I * b );
 }
 
+void planeToMv(in Plane p, out float[16] target) {
+    for(int i = 0; i < 16; ++i)
+        target[i] = 0.;
+    target[1] = p.e0;
+    target[2] = p.e1;
+    target[3] = p.e2;
+    target[4] = p.e3;
+}
+void mvToPlane(in float[16] mv, out Plane target) {
+    target.e0 = mv[1];
+    target.e1 = mv[2];
+    target.e2 = mv[3];
+    target.e3 = mv[4];
+}
+
 void mvFromVec(in vec3 v, out float[16] target) {
+    for(int i = 0; i < 16; ++i)
+        target[i] = 0.;
     target[11] = v.z;
     target[12] = v.y;
     target[13] = v.x;
     target[14] = 1.;
 }
 void mvFromVec(in vec4 v, out float[16] target) {
+    for(int i = 0; i < 16; ++i)
+        target[i] = 0.;
     target[11] = v.z;
     target[12] = v.y;
     target[13] = v.x;
@@ -192,7 +211,7 @@ vec4 meet(in Plane a, in Dq b) {
     ret.w =  b.e23 * a.e1 + b.e31 * a.e2 + b.e12 * a.e3;
     return ret;
 }
-vec4 meet(in Dq b, in Plane a) {
+vec4 meet(in Dq b, in Plane a) { //a dirty trick, swapping the arguments! This misses out on potential sign changes!
     vec4 ret;
     ret.z = -b.e12 * a.e0 + b.e02 * a.e1 - b.e01 * a.e2;
     ret.y = -b.e31 * a.e0 - b.e03 * a.e1 + b.e01 * a.e3;
@@ -200,5 +219,51 @@ vec4 meet(in Dq b, in Plane a) {
     ret.w =  b.e23 * a.e1 + b.e31 * a.e2 + b.e12 * a.e3;
     return ret;
 }
+
+// Plane join(in vec4 a, in Dq b) {
+//     float[16] aAsMv;
+//     mvFromVec(a, aAsMv);
+//     float[16] bAsMv;
+//     dqToMv(b, bAsMv);
+
+//     float[16] retAsMv;
+//     join(aAsMv,bAsMv,retAsMv);
+    
+//     Plane ret;
+//     mvToPlane(retAsMv,ret);
+//     return ret;
+// }
+// Plane join(in Dq a, in vec4 b) {
+//     float[16] aAsMv;
+//     dqToMv(a, aAsMv);
+//     float[16] bAsMv;
+//     mvFromVec(b, bAsMv);
+
+//     float[16] retAsMv;
+//     join(aAsMv,bAsMv,retAsMv);
+    
+//     Plane ret;
+//     mvToPlane(retAsMv,ret);
+//     return ret;
+// }
+
+// Plane join(in Dq a, in vec4 b) {
+//     Plane ret;
+//     ret.e3 = - a.e03 * b.w + a.e31 * b.x - a.e23 * b.y;
+//     ret.e2 = - a.e02 * b.w - a.e12 * b.x + a.e23 * b.z;
+//     ret.e1 = - a.e01 * b.w + a.e12 * b.y - a.e31 * b.z;
+//     ret.e0 = + a.e01 * b.x + a.e02 * b.y + a.e03 * b.z;
+
+//     return ret;
+// }
+
+// Plane join(in vec4 b, in Dq a) {
+//     Plane ret;
+//     ret.e3 = - a.e03 * b.w + a.e31 * b.x - a.e23 * b.y;
+//     ret.e2 = - a.e02 * b.w - a.e12 * b.x + a.e23 * b.z;
+//     ret.e1 = - a.e01 * b.w + a.e12 * b.y - a.e31 * b.z;
+//     ret.e0 = + a.e01 * b.x + a.e02 * b.y + a.e03 * b.z;
+//     return ret;
+// }
 
 `
