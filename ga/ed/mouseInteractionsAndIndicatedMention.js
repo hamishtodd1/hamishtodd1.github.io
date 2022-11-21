@@ -38,8 +38,15 @@ function initMouseInteractions() {
         return threeRay
     }
 
+    updateHighlight = () => {
+        if (indicatedMention === null)
+            hideHighlight()
+        else
+            indicatedMention.highlight()
+    }
+
     let mouseAreaOld = null
-    updateMentionVisibilitiesAndIndication = (mouseArea, userIndicationX, userIndicationY, newIndicatedMention) => {
+    updateAppearanceVisibilitiesAndIndication = (mouseArea, userIndicationX, userIndicationY) => {
         //moving the mouse should not get rid of the caret's indication
         if(mouseArea === undefined)
             mouseArea = mouseAreaOld
@@ -69,25 +76,22 @@ function initMouseInteractions() {
             indicatedMention = null
         else if (mouseArea === textarea)
             indicatedMention = getIndicatedTextareaMention(userIndicationX, userIndicationY)
-        else if (newIndicatedMention !== undefined ) //equation area
-            indicatedMention = newIndicatedMention
-        else
+        else if (keyOfProptInObject(mouseArea, dws))
             indicatedMention = mouseArea.getHoveredMention(userIndicationX, userIndicationY)
+        else {
+            indicatedMention = mouseArea
+            log(indicatedMention)
+        }
 
         if (indicatedMention !== null)
             indicatedMention.appearance.setVisibility(true)
     }
 
-    updateHighlight = () => {
-        if (indicatedMention === null)
-            hideHighlight()
-        else
-            indicatedMention.highlight()
-    }
-
-    function onMouseMove(mouseArea, event) {
+    onMouseMove = (mouseArea, event) => {
         if (!rightClicking) {
-            if(grabbedDw !== null) {
+            if (grabbedDw === null && mouseArea !== document)
+                updateAppearanceVisibilitiesAndIndication(mouseArea, event.clientX, event.clientY)
+            else if(grabbedDw !== null) {
                 dragOccurred = true
 
                 if (indicatedMention.variable.isUniform)
@@ -119,9 +123,6 @@ function initMouseInteractions() {
                     //but instead its own thing, and when you let go it may be changed
                     //that's probably the right idea
                 }
-            }
-            else if (mouseArea !== document) {
-                updateMentionVisibilitiesAndIndication(mouseArea, event.clientX, event.clientY)
             }
         }
         else {

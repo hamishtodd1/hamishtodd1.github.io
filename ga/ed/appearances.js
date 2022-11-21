@@ -29,6 +29,7 @@ function initAppearances() {
 
         updateFromState() {
             let somethingChanged = !this.state.equals(this.stateOld)
+            // log(this.stateOld, this.state)
 
             if (somethingChanged) {
                 this.updateUniformFromState()

@@ -220,32 +220,32 @@ vec4 meet(in Dq b, in Plane a) { //a dirty trick, swapping the arguments! This m
     return ret;
 }
 
-// Plane join(in vec4 a, in Dq b) {
-//     float[16] aAsMv;
-//     mvFromVec(a, aAsMv);
-//     float[16] bAsMv;
-//     dqToMv(b, bAsMv);
+Plane join(in vec4 a, in Dq b) {
+    float[16] aAsMv;
+    mvFromVec(a, aAsMv);
+    float[16] bAsMv;
+    dqToMv(b, bAsMv);
 
-//     float[16] retAsMv;
-//     join(aAsMv,bAsMv,retAsMv);
+    float[16] retAsMv;
+    join(aAsMv,bAsMv,retAsMv);
     
-//     Plane ret;
-//     mvToPlane(retAsMv,ret);
-//     return ret;
-// }
-// Plane join(in Dq a, in vec4 b) {
-//     float[16] aAsMv;
-//     dqToMv(a, aAsMv);
-//     float[16] bAsMv;
-//     mvFromVec(b, bAsMv);
+    Plane ret;
+    mvToPlane(retAsMv,ret);
+    return ret;
+}
+Plane join(in Dq a, in vec4 b) {
+    float[16] aAsMv;
+    dqToMv(a, aAsMv);
+    float[16] bAsMv;
+    mvFromVec(b, bAsMv);
 
-//     float[16] retAsMv;
-//     join(aAsMv,bAsMv,retAsMv);
+    float[16] retAsMv;
+    join(aAsMv,bAsMv,retAsMv);
     
-//     Plane ret;
-//     mvToPlane(retAsMv,ret);
-//     return ret;
-// }
+    Plane ret;
+    mvToPlane(retAsMv,ret);
+    return ret;
+}
 
 // Plane join(in Dq a, in vec4 b) {
 //     Plane ret;

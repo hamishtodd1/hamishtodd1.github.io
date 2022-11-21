@@ -230,7 +230,8 @@ async function init(hasEquations) {
     }
 
     let style = window.getComputedStyle(textarea)
-    lineHeight = parseInt(style.lineHeight)
+    const lineHeight = parseInt(style.lineHeight)
+    window.lineHeight = lineHeight
     initSvgLines()
 
     textarea.value = hasEquations ? equationsShaders[0] : defaultShader
@@ -295,7 +296,7 @@ async function init(hasEquations) {
     document.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === true) {
             compile(false)
-            updateMentionVisibilitiesAndIndication()
+            updateAppearanceVisibilitiesAndIndication()
         }
     })
 
@@ -360,7 +361,7 @@ async function init(hasEquations) {
     await importedModel.promise
         
     compile(false)
-    updateMentionVisibilitiesAndIndication()
+    updateAppearanceVisibilitiesAndIndication()
 
     setCaretPosition(390)
     addToCameraLonLat(0., 0.)

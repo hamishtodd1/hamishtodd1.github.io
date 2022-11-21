@@ -102,8 +102,13 @@ function initPoints() {
             else if(dw === sDw) {
                 camera2d.getOldClientWorldPosition(dw, v1)
 
-                mv0.fromVec4(this.whenGrabbed)
-                mv0.multiplyScalar((v1.x === 0.? 0.00001 : v1.x) / mv0.norm())
+                let nonZeroValue = v1.x === 0. ? 0.00001 : v1.x
+                if( mv0[14] !== 0. )
+                    mv0[14] = nonZeroValue
+                else {
+                    mv0.fromVec4(this.whenGrabbed)
+                    mv0.multiplyScalar(nonZeroValue / mv0.iNorm())
+                }
                 mv0.toVec4(this.state)
             }
             else return false
@@ -115,11 +120,17 @@ function initPoints() {
             
             let currentlyGrabbed = !this.whenGrabbed.equals(zeroVector4)
             
-            //ok, clearly this should be the e123 part, but wait til later
-            let scalarValue = mv0.norm() // = sqrt(sq(.w))
-            if (currentlyGrabbed && !this.variable.isIn )
-                scalarValue *= this.whenGrabbed.dot(this.state) > 0. ? 1. : -1.
-            this.#updateScalarMeshes(scalarValue)
+            if (mv0[14] !== 0.)
+                this.#updateScalarMeshes(mv0[14])
+            else {
+                let apparentScalarValue = mv0.iNorm()
+                if (currentlyGrabbed && !this.variable.isIn)
+                    apparentScalarValue *= this.whenGrabbed.dot(this.state) > 0. ? 1. : -1.
+                this.#updateScalarMeshes(apparentScalarValue)
+            }
+            //there's a big difference between showing the e123 part and showing the eNorm. One CAN be negative
+
+            //the situation of state = 0,0,0,0 is potentially worth visualizing
             
             let isIdeal = this.state.w === 0.
             // console.error(this.state,isIdeal)
@@ -140,24 +151,20 @@ function initPoints() {
                 
                 mv0.getDisplayableVersion(displayableVersion)
                 let isInFrontOfCamera = displayableVersion[14] > 0.
-                if (isInFrontOfCamera) {
+                if (isInFrontOfCamera)
                     displayableVersion.toVectorDisplayable(this.#eDwMesh.position)
-                }
-                else {
+                else
                     this.#eDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
-                }
             }
 
             this.#eDwMesh.scale.setScalar(.2 * camera.position.distanceTo(this.#eDwMesh.position))
         }
 
         getWorldCenter(dw, target) {
-            if (dw === sDw) {
+            if (dw === sDw)
                 this.#getScalarMeshesPosition(target)
-            }
-            else if (dw === eDw || dw === uDw) {
+            else if (dw === eDw || dw === uDw)
                 target.copy(this.state)
-            }
             else if (dw === iDw) {
                 target.copy(this.#iDwMesh.position)
                 target.w = 1.
@@ -167,6 +174,8 @@ function initPoints() {
         }
 
         _getTextareaManipulationDw() {
+            if(this.state.equals(zeroVector4))
+                return sDw
             if(this.state.w === 0.)
                 return iDw
             else

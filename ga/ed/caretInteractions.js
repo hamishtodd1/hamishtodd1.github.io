@@ -13,7 +13,7 @@ function initCaretInteractions() {
                 textareaBcr.x + textareaBcr.width, y)
         }
         else
-            freeSvgLine($changedLineIndicator)
+            hideSvgLine($changedLineIndicator)
     }
 
     inamongstChangedLines = (lineIndex) => {
@@ -98,11 +98,6 @@ function initCaretInteractions() {
         let columnIndex = 0
         for (let i = 0, il = text.length; i < il; ++i) {
             if (i === caretPosition) {
-                // if(caretLine !== lineIndex) {
-                //     let textareaBcr = textarea.getBoundingClientRect()
-                //     let y = lineToScreenY(lineIndex)
-                //     setSvgHighlight(0, y, textareaBcr.width, lineHeight, $focussedLineLines)
-                // }
                 caretLine = lineIndex
                 caretColumn = columnIndex
                 break
@@ -130,7 +125,7 @@ function initCaretInteractions() {
 
         let caretX = columnToScreenX(caretColumn)
         let caretY = lineToScreenY(caretLine)
-        updateMentionVisibilitiesAndIndication(textarea, caretX, caretY)
+        updateAppearanceVisibilitiesAndIndication(textarea, caretX, caretY)
 
         caretPositionOld = caretPosition
     }

@@ -15,20 +15,6 @@ function initMentions() {
         })
     }
 
-    let $labelLines = []
-    function LabelLine() {
-        let l = SvgLine()
-        $labelLines.push(l)
-
-        return l
-    }
-
-    let $labelSides = []
-    for(let i = 0; i < 4; ++i)
-        $labelSides[i] = LabelLine()
-    let $labelConnectors = []
-    $labelConnectors.push(LabelLine(), LabelLine(), LabelLine(), LabelLine())
-
     lineToScreenY = (line) => {
         return line * lineHeight + textareaOffsetVertical - textarea.scrollTop
     }
@@ -37,9 +23,7 @@ function initMentions() {
     }
     
     hideHighlight = () => {
-        $labelLines.forEach((svgLine) => {
-            freeSvgLine(svgLine)
-        })
+        hideLabelLines()
         forEachPropt(dws, (dw) => {
             dw.setBorderHighlight(false)
         })
@@ -67,6 +51,8 @@ function initMentions() {
     }
 
     class Mention {
+        //these three are all you need for equationarea mentions
+        //indexInArray is -1, so assignmentToOutput is from the variable
         variable
         appearance = null
         mentionIndex = -1
@@ -108,36 +94,12 @@ function initMentions() {
         }
 
         highlight() {
-            let col = this.variable.col
-            $labelLines.forEach((svgLine) => {
-                colorSvgLine(svgLine,col.r,col.g,col.b)
-            })
-
             //mouse box
             let y = lineToScreenY(this.lineIndex)
             let x = columnToScreenX(this.column)
             let w = this.charactersWide * characterWidth
 
-            setSvgHighlight(x, y, w, lineHeight, $labelSides)
-
-            let lowestUnusedLabelConnector = 0
-            //this is very shotgunny. Better would be
-            forNonFinalDws((dw) => {
-                if (this.appearance.isVisibleInDw(dw) ) {
-                    let [windowX, windowY] = this.appearance.getWindowCenter(dw)
-                    if(windowX === Infinity) 
-                        dw.setBorderHighlight(true, col)
-                    else {
-                        setSvgLine($labelConnectors[lowestUnusedLabelConnector++],
-                            x + w,
-                            y + lineHeight / 2.,
-                            windowX, windowY)
-                        dw.setBorderHighlight(false)
-                    }
-                }
-            })
-            for (let i = lowestUnusedLabelConnector; i < $labelConnectors.length; ++i)
-                freeSvgLine($labelConnectors[i])
+            highlightAppearance(this.appearance, this.variable.col, x,y,w)
         }
     }
     window.Mention = Mention

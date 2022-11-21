@@ -20,10 +20,15 @@ function initPlanes() {
         #sphereMesh
         state
 
+        #scalarMeshLinear
+        #scalarMeshLogarithmic
+        #updateScalarMeshes
+        #getScalarMeshesPosition
+
         constructor() {
             super()
             
-            this.state = new Mv().plane(0., 1., 0., 0.)
+            this.state = new Mv().plane(0., 0., 0., 0.)
             this.stateOld = new Mv()
 
             let mat = new THREE.MeshPhongMaterial({ side: THREE.DoubleSide })
@@ -39,7 +44,13 @@ function initPlanes() {
 
             camera.toUpdateAppearance.push(this)
 
-            this.meshes = [this.#eDwMesh, this.#iDwMesh, this.#sphereMesh]
+            let scalarMat = new THREE.MeshBasicMaterial()
+            scalarMat.color = this.col
+            let [a, b, c, d] = scalarWindowMeshes(scalarMat)
+            this.#scalarMeshLinear = a; this.#scalarMeshLogarithmic = b;
+            this.#updateScalarMeshes = c; this.#getScalarMeshesPosition = d;
+
+            this.meshes = [this.#eDwMesh, this.#iDwMesh, this.#sphereMesh, this.#scalarMeshLinear, this.#scalarMeshLogarithmic]
         }
 
         onGrab(dw) {
@@ -81,26 +92,43 @@ function initPlanes() {
         }
 
         updateMeshesFromState() {
-            let displayableVersion = this.state.getDisplayableVersion(mv4)
-            e123.projectOn(displayableVersion, mv0).toVector(this.#eDwMesh.position)
-            let planeOnOrigin = displayableVersion.projectOn(e123, mv0)
-            let e3ToPlaneMotor = mul(planeOnOrigin, e3, mv2).sqrt(mv3)
-            e3ToPlaneMotor.toQuaternion(this.#eDwMesh.quaternion)
+            let isZero = (this.state[1] === 0. && this.state[2] === 0. && this.state[3] === 0. && this.state[4] === 0.)
+            // log(this.variable.name)
+            // this.state.log(this.state)
 
-            if (!this.state.hasEuclideanPart()) {
-                this.#sphereMesh.position.set(0., 0., 0.)
+            this.#updateScalarMeshes(this.state.norm())
+
+            if (isZero) {
+                this.#eDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
                 this.#iDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                this.#sphereMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
             }
             else {
-                this.#iDwMesh.position.set(0., 0., 0.)
-                this.#sphereMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                //eDw part
+                let displayableVersion = this.state.getDisplayableVersion(mv4)
+                e123.projectOn(displayableVersion, mv0).toVector(this.#eDwMesh.position)
 
-                this.#iDwMesh.quaternion.copy(this.#eDwMesh.quaternion)
+                let planeOnOrigin = displayableVersion.projectOn(e123, mv0)
+                let e3ToPlaneMotor = mul(planeOnOrigin, e3, mv2).sqrt(mv3)
+                e3ToPlaneMotor.toQuaternion(this.#eDwMesh.quaternion)
+
+                if (!this.state.hasEuclideanPart()) {
+                    this.#sphereMesh.position.set(0., 0., 0.)
+                    this.#iDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                }
+                else {
+                    this.#sphereMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                    this.#iDwMesh.position.set(0., 0., 0.)
+
+                    this.#iDwMesh.quaternion.copy(this.#eDwMesh.quaternion)
+                }
             }
         }
 
         getWorldCenter(dw, target) {
-            if (dw === eDw) {
+            if (dw === dws.scalar)
+                this.#getScalarMeshesPosition(target)
+            else if (dw === eDw) {
                 e123.projectOn(this.state, mv0)
 
                 mv0.toVector(target)

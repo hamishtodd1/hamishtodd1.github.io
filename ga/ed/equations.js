@@ -35,7 +35,24 @@ Dq e12 = Dq(0., 0.,0.,0., 1.,0.,0., 0.);
     // dws.untransformed.elem.style.display = `none`
     // dws.final.elem.style.display = `none`
 
-    //ok, wanna hover
+    //each "mention" will have variable and appearance
+
+    let equationareaMentions = []
+    class MentionEa {
+        variable = null;
+        appearance = null;
+
+        x = 0.; y = 0.; w = 40.;
+
+        constructor(variable,appearance) {
+            equationareaMentions.push(this)
+        }
+
+        highlight() {
+            highlightAppearance(this.appearance, this.variable.col, this.x, this.y, this.w)
+        }
+    }
+    new MentionEa()
 
     hackyFunction = () => {
         return hoveredEquationMention
@@ -43,15 +60,24 @@ Dq e12 = Dq(0., 0.,0.,0., 1.,0.,0., 0.);
 
     onMathJaxLoad = () => {
         let $element = document.getElementById(`someid`)
-        $element.addEventListener(`mouseover`, (event) => {
-            // let rect = $element.getBoundingClientRect()
-            // setSvgLine(svgLine, rect.right, rect.top, -10, -10)
 
-            let indicatedMention = variables.find((v)=>v.name === "e12").mentions[0]
-            updateMentionVisibilitiesAndIndication(equationArea, event.clientX, event.clientY, indicatedMention)
+        $element.addEventListener(`mouseover`, (event) => {
+            
+            //just assigning it, this should have been done area
+            let mention = variables.find((v)=>v.name === "e12").mentions[0]
+            equationareaMentions[0].variable = mention.variable
+            equationareaMentions[0].appearance = mention.appearance
+            equationareaMentions[0].x = event.clientX
+            equationareaMentions[0].y = event.clientY
+            log(equationareaMentions[0])
+
+            updateAppearanceVisibilitiesAndIndication(equationareaMentions[0])
+
+            // indicatedMention.appearance.setVisibility(true)
+            // highlightAppearance(indicatedMention.appearance, indicatedMention.variable.col, event.clientX, event.clientY, 40)
         })
         $element.addEventListener(`mouseleave`, (event) => {
-            updateMentionVisibilitiesAndIndication(equationArea, event.clientX, event.clientY, null)
+            updateAppearanceVisibilitiesAndIndication(null,event.clientX,event.clientY)
         })
     }
 

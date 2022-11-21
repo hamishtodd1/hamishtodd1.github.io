@@ -25,6 +25,11 @@
         occlusion, roughness, metallic, normal
 */
 
+setInIndex = ()=>{}
+attemptAppearanceIdentifationWithImportedModelIn = () => {}
+
+attemptAppearanceIdentifationWithImportedModelUniform = () => {}
+
 function initMeshDw(wantAnimation) {
     let inAppearances = {}
     let arrayGetter = new Float32Array(4)
@@ -51,8 +56,6 @@ function initMeshDw(wantAnimation) {
             //might be nice to check whether the setup of the variable in the buffer matches what we have here
         }
     }
-
-    attemptAppearanceIdentifationWithImportedModelUniform = () => { }
 
     if (wantAnimation)
         return initAnimatedGltf()

@@ -56,7 +56,7 @@ body {
 
 /* TEXT STUFF */
 
-#textarea, #highlighting, #errorBox, #equationArea {
+#textarea, #highlighting, #errorBox, #equationarea {
   margin: var(--generalGap);
   border: 0;
 

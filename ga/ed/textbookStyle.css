@@ -4,7 +4,7 @@
   height: calc( 50% - 1.5 * var(--generalGap) );
 }
 
-#equationArea {
+#equationarea {
   padding: var(--generalGap);
   top: calc( var(--generalGap) );
   height: calc(50% - 1.5 * var(--generalGap))

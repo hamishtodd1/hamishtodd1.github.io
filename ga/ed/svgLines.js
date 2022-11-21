@@ -1,3 +1,12 @@
+/*
+    These are used for:
+        Indicator for which lines have been edited
+        highlighting a hovered variable
+
+
+    You should probably be able to click on a variable, and if you immediately let go the caret goes there
+ */
+
 function initSvgLines() {
     SvgLine = function () {
         let l = document.createElementNS('http://www.w3.org/2000/svg', 'line') //weblink refers to a standard
@@ -20,18 +29,65 @@ function initSvgLines() {
         }
     }
 
-    freeSvgLine = function (svgLine) {
+    hideSvgLine = function (svgLine) {
         setSvgLine(svgLine, -10, -10, -10, -10)
-    }
-
-    setSvgHighlight = function (x, y, w, h, $sidesArray) {
-        setSvgLine($sidesArray[0], x, y, x + w, y)
-        setSvgLine($sidesArray[1], x + w, y, x + w, y + h)
-        setSvgLine($sidesArray[2], x + w, y + h, x, y + h)
-        setSvgLine($sidesArray[3], x, y + h, x, y)
     }
 
     colorSvgLine = function(line, r, g, b) {
         line.style.stroke = "rgb(" + r * 255. + "," + g * 255. + "," + b * 255. + ")"
+    }
+
+    let $labelLines = []
+    LabelLine = () => {
+        let l = SvgLine()
+        $labelLines.push(l)
+
+        return l
+    }
+    hideLabelLines = () => {
+        $labelLines.forEach((svgLine) => {
+            hideSvgLine(svgLine)
+        })
+    }
+
+    let $sides = []
+    for (let i = 0; i < 4; ++i)
+        $sides[i] = LabelLine()
+
+    let $labelConnectors = []
+    $labelConnectors.push(LabelLine(), LabelLine(), LabelLine(), LabelLine())
+    highlightAppearance = (appearance, col, x, y, w) => {
+
+        $labelLines.forEach((svgLine) => {
+            colorSvgLine(svgLine, col.r, col.g, col.b)
+        })
+
+        let h = lineHeight
+        setSvgLine($sides[0], x, y, x + w, y)
+        setSvgLine($sides[1], x + w, y, x + w, y + h)
+        setSvgLine($sides[2], x + w, y + h, x, y + h)
+        setSvgLine($sides[3], x, y + h, x, y)
+
+        let lowestUnusedLabelConnector = 0
+        //this is very shotgunny
+        // debugger
+        // if(frameCount > 150)
+        //     debugger
+        forNonFinalDws((dw) => {
+            if (appearance.isVisibleInDw(dw)) {
+                let [windowX, windowY] = appearance.getWindowCenter(dw)
+                if (windowX === Infinity)
+                    dw.setBorderHighlight(true, col)
+                else {
+                    setSvgLine($labelConnectors[lowestUnusedLabelConnector++],
+                        x + w,
+                        y + lineHeight / 2.,
+                        windowX, windowY)
+                    dw.setBorderHighlight(false)
+                }
+            }
+        })
+        for (let i = lowestUnusedLabelConnector; i < $labelConnectors.length; ++i)
+            hideSvgLine($labelConnectors[i])
     }
 }
