@@ -44,7 +44,7 @@ Dq e12 = Dq(0., 0.,0.,0., 1.,0.,0., 0.);
 
         x = 0.; y = 0.; w = 40.;
 
-        constructor(variable,appearance) {
+        constructor() {
             equationareaMentions.push(this)
         }
 
@@ -52,32 +52,37 @@ Dq e12 = Dq(0., 0.,0.,0., 1.,0.,0., 0.);
             highlightAppearance(this.appearance, this.variable.col, this.x, this.y, this.w)
         }
     }
-    new MentionEa()
 
     hackyFunction = () => {
         return hoveredEquationMention
     }
 
     onMathJaxLoad = () => {
-        let $element = document.getElementById(`someid`)
+        variables.forEach((v)=>{
+            let name = v.name
 
-        $element.addEventListener(`mouseover`, (event) => {
-            
-            //just assigning it, this should have been done area
-            let mention = variables.find((v)=>v.name === "e12").mentions[0]
-            equationareaMentions[0].variable = mention.variable
-            equationareaMentions[0].appearance = mention.appearance
-            equationareaMentions[0].x = event.clientX
-            equationareaMentions[0].y = event.clientY
-            log(equationareaMentions[0])
+            let $element = document.getElementById( name + `Id`)
+            if($element === null)
+                return
 
-            updateAppearanceVisibilitiesAndIndication(equationareaMentions[0])
+            let rect = $element.getBoundingClientRect()
 
-            // indicatedMention.appearance.setVisibility(true)
-            // highlightAppearance(indicatedMention.appearance, indicatedMention.variable.col, event.clientX, event.clientY, 40)
-        })
-        $element.addEventListener(`mouseleave`, (event) => {
-            updateAppearanceVisibilitiesAndIndication(null,event.clientX,event.clientY)
+            let mentionEa = new MentionEa()
+            mentionEa.variable = v
+            mentionEa.appearance = v.mentions[0].appearance //stateless
+            mentionEa.x = rect.x
+            mentionEa.y = rect.y - (lineHeight - rect.height) / 2.
+            mentionEa.w = rect.width
+
+            //would be nice to see other relevant elements too
+
+            //possibly unperformant to have this many event listeners
+            $element.addEventListener(`mouseover`, (event) => {
+                updateAppearanceVisibilitiesAndIndication(mentionEa)
+            })
+            $element.addEventListener(`mouseleave`, (event) => {
+                updateAppearanceVisibilitiesAndIndication(null, event.clientX, event.clientY)
+            })
         })
     }
 
@@ -87,7 +92,7 @@ Dq e12 = Dq(0., 0.,0.,0., 1.,0.,0., 0.);
         if (alreadyDone)
             return
 
-        let mathId = document.getElementById(`someid`)
+        let mathId = document.getElementById(`e1Id`)
         if(mathId === null)
             return
         else {
