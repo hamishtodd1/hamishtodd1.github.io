@@ -1,30 +1,37 @@
-defaultShader = `
+defaultShader = `uniform float ourUniformFloat;
+uniform vec2 ourUniformVec2;
+
 uniform float time;
+uniform vec2 mouse;
+
+in vec4 skinWeight;
+in vec4 skinIndex;
+
+uniform mat4[49] boneMatrices;
+uniform Dq[49] boneDqs;
 
 vec4 getChangedVertex(in vec4 initialVertex) {
+    float control1 = .5;
+    vec2 control2 = vec2(cos(time*4.),sin(time*4.));
+    vec3 control3 = vec3(1.,.5,1.);
 
-    vec4 xDir = vec4(1.,0.,0.,0.);
-    vec4 yDir = vec4(0.,1.,0.,0.);
-    vec4 zDir = vec4(0.,0.,1.,0.);
-    vec4 origin = vec4(0.,0.,0.,1.);
+    vec4 myVertex = vec4( .2,0., 1.,1.);
+    vec4 myNormal = vec4( .2,0.,-1.,0.);
+    Dq idealLine = Dq( 0.,  0.,1.,1.,  0.,0.,0.,  0.);
+    Dq eucliLine = Dq( 0.,  0.,0.,0.,  0.,1.,1.,  0.);
 
-    Plane myPl = Plane(0.,2.,0.,0.);
-
-    Dq zInf = join(xDir,yDir);
-    Dq zAxis = join(origin, zDir);
-    Plane zPlane = join(zInf, origin);
-
-    // Dq xInf = join(zDir,yDir);
-    // Dq xAxis = join(origin, xDir);
-    // Plane xPlane = join(xInf, origin);
-
-    // Dq yInf = join(xDir,zDir);
-    // Dq yAxis = join(origin, yDir);
-    // Plane yPlane = join(yInf, origin);
-
-    Dq freeLine = Dq(0., 0.,0.,0., 1.,0.,0., 0.);
-    Plane joinPlane = join(freeLine, origin);
+    Dq rotation = Dq( .28,   0.,0.,0.,   0.,.96,0.,  control1);
+    vec4 transformedVertex = sandwichDqPoint(rotation, myVertex);
+    vec4 transformedNormal = sandwichDqPoint(rotation, myNormal);
+    Dq transformedLine = sandwichDqDq(rotation, idealLine);
     
-    return initialVertex;
+    vec4 ret;
+    ret += boneMatrices[int(skinIndex.x)] * initialVertex * skinWeight.x;
+    ret += boneMatrices[int(skinIndex.y)] * initialVertex * skinWeight.y;
+    ret += boneMatrices[int(skinIndex.z)] * initialVertex * skinWeight.z;
+    ret += boneMatrices[int(skinIndex.w)] * initialVertex * skinWeight.w;
 
+    // Dq boneDq = dqAdd( dqAdd( boneDqs[int(skinIndex.x)], boneDqs[int(skinIndex.y)]), dqAdd( boneDqs[int(skinIndex.z)], boneDqs[int(skinIndex.w)] ) );
+    // ret = sandwichDqPoint(boneDq,initialVertex);    
+    return ret;
 }`

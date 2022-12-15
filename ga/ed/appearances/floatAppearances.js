@@ -94,7 +94,7 @@ function initFloats() {
             
             this.state = new ScalarMv(1) //because it is nice to have the "float(3.2)" thing, in case it's an int
             this.stateOld = new ScalarMv(1)
-            this.stateOld[0] = 1.
+            this.stateOld[0] = Number.MAX_VALUE *.5 //nicer would be to force an update! Or set it up this way!
 
             let mat = new THREE.MeshBasicMaterial()
             mat.color = this.col

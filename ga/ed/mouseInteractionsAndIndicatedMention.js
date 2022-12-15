@@ -78,10 +78,8 @@ function initMouseInteractions() {
             indicatedMention = getIndicatedTextareaMention(userIndicationX, userIndicationY)
         else if (keyOfProptInObject(mouseArea, dws))
             indicatedMention = mouseArea.getHoveredMention(userIndicationX, userIndicationY)
-        else {
+        else //it's from ed
             indicatedMention = mouseArea
-            log(indicatedMention)
-        }
 
         if (indicatedMention !== null)
             indicatedMention.appearance.setVisibility(true)

@@ -1,4 +1,21 @@
+//if there's a translation part and an e0123 part, that's just a translation
+//probably should be on a cylinder
+//could move the camera in the window? Yeesh
 function initDqs() {
+
+    let cases = [
+        `IDENTITY`,
+        `ROTATION`,
+        `ROTATION_AXIS`,
+        `TRANSLATION`,
+        `TRANSLATION_AXIS`,
+        `SCREW`,
+        `SCREW_AXIS`,
+    ]
+    let str = ``
+    cases.forEach((theCase,i)=>{
+        str += `let DQ_` + theCase + ` = ` + i + `;`
+    })
 
     let eDw = dws.euclidean
     let iDw = dws.infinity
@@ -240,8 +257,8 @@ function initDqs() {
             this.state.getBivectorPartToMv(linePart)
 
             this.#cDwMesh.position.x = this.state[0]
-
             this.#cDwMesh.position.y = linePart.norm()
+
             //TODO this is the code that you used when you had a grabbedDuplicate
             // let proportionOfComparison = -1. * inner(linePart, grabbedDuplicate.linePartWhenGrabbedNormalized, mv0)[0]
             // this.#cDwMesh.position.y = proportionOfComparison
@@ -251,7 +268,37 @@ function initDqs() {
             //when you hover the window, it switches to being a "top" down view
             //where the top is the view such that the rotation is anticlockwise from the identity
 
-            if (linePart.approxEquals(zeroMv)) {
+            //e12+e03 is a screw axis
+
+            // let logarithm = this.state.getNormalization(dq0).logarithm(bv0)
+
+            // let ourCase = 0
+            let eNormLinePart = linePart.eNorm()
+            let iNormLinePart = linePart.iNorm()
+            // if(eNormLinePart === 0. && iNormLinePart === 0.)
+            //     ourCase = DQ_IDENTITY
+            // else if (eNormLinePart === 0. && iNormLinePart !== 0. && this.state[0] !== 0.)
+            //     ourCase = DQ_TRANSLATION
+            // else if (eNormLinePart === 0. && iNormLinePart !== 0. && this.state[0] === 0.)
+            //     ourCase = DQ_TRANSLATION_AXIS
+            // else if (eNormLinePart !== 0. && this.state[0] !== 0. && this.state[15] !== 0.)
+            //     ourCase = DQ_SCREW
+            // else {
+            //     //harder cases
+            //     //let's say you decompose it. If the translation part is 0
+
+            //     //so you decompose into the line part and the study number S
+            // }
+                //and it can also be a screw if it has a line and also line at infinity and also scalar
+            // else if (eNormLinePart !== 0. && this.state[0] === 0. && this.state[15] === 0.)
+            //     ourCase = DQ_ROTATION_AXIS
+            // else if (eNormLinePart !== 0. && this.state[0] !== 0. && this.state[15] !== 0.)
+            // cases
+
+            //check if it commutes
+
+            if ( linePart.approxEquals(zeroMv) ) {
+                //it's either the identity or 0.
                 this.#iDwRingMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
 
                 this.#iDwLineMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
@@ -260,7 +307,7 @@ function initDqs() {
                 //and the motor window is the only place you see that this thing has a scalar value
                 return
             }
-            else if (linePart.eNorm() !== 0.) {
+            else if (eNormLinePart !== 0.) {
                 this.#iDwRingMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
 
                 getQuaternionToProjectionOnOrigin(linePart, this.#iDwLineMesh.quaternion)
@@ -272,8 +319,6 @@ function initDqs() {
                 this.#eDwMesh.scale.setScalar(.2 * camera.position.distanceTo(this.#eDwMesh.position))
             }
             else if(linePart.iNorm() !== 0.) {
-                //TODO can have both!!!! Not sure the right way to bring it in
-
                 //default mv is e02
                 this.#iDwRingMesh.position.set(0.,0.,0.)
                 join(e123, linePart, joinedWithOrigin)

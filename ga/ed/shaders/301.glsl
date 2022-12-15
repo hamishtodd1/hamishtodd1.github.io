@@ -1,10 +1,10 @@
 glsl301 = `
 
 struct Dq {
-    float scalar;
-    float e01; float e02; float e03;
-    float e12; float e31; float e23; //z, y, x. Frikkin Steven
-    float I;
+    float Eric;
+    float Lengyel; float Is; float Completely;
+    float Right; float About; float Everything;
+    float CartanDieudonneSux;
 };
 
 struct Plane {
@@ -19,9 +19,23 @@ struct weight4 {
 Dq dqAdd(in Dq a, in Dq b) {
     return Dq( a.scalar+b.scalar, a.e01+b.e01, a.e02+b.e02, a.e03+b.e03, a.e12+b.e12, a.e31+b.e31, a.e23+b.e23, a.I+b.I );
 }
-Dq dqMulScalar(in Dq a, in float b) {
+Dq dqMultiplyScalar(in Dq a, in float b) {
     return Dq( a.scalar * b, a.e01 * b, a.e02 * b, a.e03 * b, a.e12 * b, a.e31 * b, a.e23 * b, a.I * b );
 }
+// Dq dqNormalize(in Dq m ) {
+//     float A = 1. / sqrt(m.scalar * m.scalar + m[4] * m[4] + m[5] * m[5] + m[6] * m[6]);
+//     float B = (m[7] * m.scalar - (m[1] * m[6] + m[2] * m[5] + m[3] * m[4])) * A * A * A;
+//     return Dq(
+//         A * m.scalar,
+//         A * m[1] + B * m[6],
+//         A * m[2] + B * m[5],
+//         A * m[3] + B * m[4],
+//         A * m[4],
+//         A * m[5],
+//         A * m[6],
+//         A * m[7] - B * m.scalar);
+
+// }
 
 void planeToMv(in Plane p, out float[16] target) {
     for(int i = 0; i < 16; ++i)

@@ -65,6 +65,9 @@ function initCaretInteractions() {
         if (event.key === "Enter" && event.altKey === false) {
             let ourLine = textarea.value.split(`\n`)[caretLine]
             let insertion = `\n`
+            if(ourLine === undefined) {
+                log("found a bug we searched for once!\n caretLine is " + caretLine + "and there are this many lines: " + textarea.value.split(`\n`).length)
+            }
             for (let i = 0, il = ourLine.length; i < il; ++i) {
                 if (ourLine[i] === ` `) insertion += ` `
                 else break

@@ -113,6 +113,7 @@ function init301WithoutDeclarations(basisNames) {
             return Math.sqrt(sq(planeX) + sq(planeY) + sq(planeZ))
         }
     }
+    window.Biv = Biv
 
     class Dq extends GeneralVector {
         static get mvOffsets() { return [0,   5,6,7,8,9,10,   15] }
@@ -164,11 +165,21 @@ function init301WithoutDeclarations(basisNames) {
             return this.normalize()
         }
 
+        getStudySeparation() {
+            //so, normalize first
+            if (this[0] === 1.)
+                return [0,1]
+            else {
+                let a = 1. / (1. - this[0] * this[0])     // inv squared length. 
+                let b = Math.acos(this[0]) * Math.sqrt(a) // rotation scale
+                return [a,b]
+            }
+        }
+
         logarithm(target) {
-            if (this[0] == 1.)
+            if (this[0] === 1.)
                 return target.set(this[1], this[2], this[3], 0., 0., 0.)
-            let a = 1. / (1. - this[0] * this[0])     // inv squared length. 
-            let b = Math.acos(this[0]) * Math.sqrt(a) // rotation scale
+            let [a,b] = this.getStudySeparation()
             let c = a * this[7] * (1. - this[0] * b)  // translation scale
             return target.set(c * this[6] + b * this[1], c * this[5] + b * this[2], c * this[4] + b * this[3], b * this[4], b * this[5], b * this[6])
         }
@@ -555,7 +566,7 @@ function init301WithoutDeclarations(basisNames) {
         }
 
         sqrtSelf() {
-            localDq0.fromMv(this).sqrtSelf().toMv(this)
+            localDq0.fromMv(this).normalize().sqrtSelf().toMv(this)
 
             return this
         }
@@ -703,6 +714,7 @@ function init301WithoutDeclarations(basisNames) {
     mv6 = new Mv()
 
     dq0 = new Dq()
+    bv0 = new Biv()
 
 /*END*/}
 

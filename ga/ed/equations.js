@@ -1,9 +1,13 @@
 /*
+    The purpose of this is just to go in the video
+        Need a way to go between pages, maybe pageup and pagedown
+
+    could check for consistency. Probably not a good idea here, better in equations.js
 
     You have to write it all out as code by hand
     Then, ascribe particular in the equation to the variables
 
-    The purpose of this is just to go in the video
+    
 
 
     Show them vector algebra to get them used to things:
@@ -23,19 +27,36 @@
 hackyFunction = () => null
 
 async function initEquations() {
-    equationsShaders = [
-        `
-Plane e1 = Plane(0.,1.,0.,0.);
-Plane e2 = Plane(0.,0.,1.,0.);
-Dq e12 = Dq(0., 0.,0.,0., 1.,0.,0., 0.);
-        `
-    ]
     await init(true)
     zoomCameraToDist(3.7)
     // dws.untransformed.elem.style.display = `none`
     // dws.final.elem.style.display = `none`
 
     //each "mention" will have variable and appearance
+
+    function addToPageNumber(amt){
+        let currentLocation = window.location.href
+        let gCharacterNumber = currentLocation.indexOf(`G.html`)
+        let currentNumber = currentLocation.slice(gCharacterNumber - 2, gCharacterNumber)
+        let newNumber = parseInt(currentNumber) + amt
+        let max = 2
+        if (newNumber <= 0 || max < newNumber)
+            return
+
+        let newNumberString = newNumber >= 10 ? newNumber.toString() : `0` + newNumber.toString()
+        window.location.href = 
+            currentLocation.slice(0, gCharacterNumber - 2) +
+            newNumberString +
+            currentLocation.slice(gCharacterNumber)
+    }
+    document.addEventListener('keydown', (event) => {
+        if (event.key === "PageDown" )
+            addToPageNumber(1)
+        if (event.key === "PageUp")
+            addToPageNumber(-1)
+
+        
+    })
 
     let equationareaMentions = []
     class MentionEa {
@@ -84,6 +105,7 @@ Dq e12 = Dq(0., 0.,0.,0., 1.,0.,0., 0.);
                 updateAppearanceVisibilitiesAndIndication(null, event.clientX, event.clientY)
             })
         })
+        
     }
 
     //yes, hacky. But MathJax requires npm for any kind of callback.

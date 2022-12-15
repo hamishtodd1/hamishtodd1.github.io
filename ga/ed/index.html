@@ -4,11 +4,12 @@
     <title>Geometric debugger</title>
     <link rel="stylesheet" href="prism-monokai.css">
     <link rel="stylesheet" href="style.css">
+
+<!-- DIFFERENCES START -->
     <link rel="stylesheet" href="edStyle.css">
-
 </head>
-
-<body>
+<body>    
+<!-- DIFFERENCES END -->
     
     <textarea id="textarea" spellcheck="false"></textarea>
     <pre id="highlighting" aria-hidden="true">
@@ -18,8 +19,6 @@
 
     <svg id="ourSvg" style="stroke-width:2" >
     </svg>
-
-    <!-- Below here should be the same! -->
     
     <canvas id="canvas3d"></canvas>
 
@@ -77,11 +76,12 @@
     <script src="appearances.js"></script>
     <script src="shaders/default.glsl"></script>
     <script src="shaders/floatOutputterPrefix.glsl"></script>
-    <script src="init.js"></script>
-    
+    <script src="init.js"></script>    
 
     <script>
+        // DIFFERENCE AGAIN
         init(false)
+        // DIFFERENCE ENDED AGAIN
     </script>
 
 </body>

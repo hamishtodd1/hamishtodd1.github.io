@@ -7,5 +7,7 @@
 #equationarea {
   padding: var(--generalGap);
   top: calc( var(--generalGap) );
-  height: calc(50% - 1.5 * var(--generalGap))
+  height: calc(50% - 1.5 * var(--generalGap));
+
+  font-size: 17px
 }

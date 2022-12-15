@@ -1,22 +1,22 @@
 /*
-The overrides should not be for "after this line that you can edit".
-They should be "before this line that your caret could be on
-Maps better onto people'#'s idea of a "current value"
-
 TODO
+    Maybe there should be a little window that has the raw numbers? Or the magnitudes of the different grades?
+        Well you sorta get that from complex window
+    Add rotoreflections? point and plane
     Could have cos and sin formulae visualization?
     If you're getting bored of this, might as well 
     For next presentation
         Attempt to compile with every keystroke, send straight to output window
             but flash up an error which fades out when (99% of the time) it's wrong
             Eh, this is for graphics programmers
-        Latex annotation (then maybe make a textbook page?)
         Better error reporting
             Highlight where it was but just put the words at the bottom
         Make the transparent spotted dome
         https://twitter.com/joyoflivecoding
-        hide the output window when there's an error
+        Better window hiding - they should grey out
+            hide the output window when there's an error
     Bugs
+        Vectors are just broken with the animation on
         Dragging the lines at infinity
         Probably worth checking over absolutely all e31 vs 13 shit
         Bug when you fail to indent correctly?
@@ -29,16 +29,21 @@ TODO
         the dual quaternion dragging takes account of duplicates. Point mention scalar should too, as should others
     Having chigozie and Matthew Vandevander and Pontus break it
         Try to detect which lines ASSIGN to a variable and which lines don't
-    Workshop for kids at makespace
-        Translations for mobiuses
-        Allow shit to be on multiple lines. Semicolon, not newline
+    GDC
+        Slightly better viz for Dqs
+        The overrides should not be for "after this line that you can edit"
+            They should be "before this line that your caret could be on"
+            Maps better onto people's idea of a "current value"
+            Allow shit to be on multiple lines
         Need EXCELLENT error reporting. This shit is all in YOUR head!!!
             Have a test framework
                 A few examples. Load them in, a few frames, move onto the next one
                 move the mouse around
                 make some mentions then delete them
-        Everyone's stuff goes into a VR sim, saved on a webpage forever
-        User-created functions and for loops
+        Optimize axis markings
+        Optimized sandwiches
+        A series of "code this shader" challenges
+        User-created functions
             Yes, can have some nice viz if the input and outputs have less than 3 dimensions total (or whatever)
                 This is fun but not necessarily useful for PGA
                 Bezier curves have control points. Could they be in the same window?
@@ -47,34 +52,26 @@ TODO
                 implicit surfaces etc
                 Want to detect eg vec3 f(in vec3)
             when you're looking at a function, it could have been called from various places
+                So, gotta assume the input could be anything
                 So, what's the "in" that it gets?
                 Presumably, it's related to the ins in other places, eg "where the debugger is"
                 it gets inlined, so one run of it is qualitatively different from another
                 There's a finite number of places it'll get called
                     Can scroll, discretely, through those: build the possible values up into a selection, eg a point cloud
                     debugger only lets you look at one point in time - want a fast way to look through ALL the state from a run!
-            for loops:
-                "for(let i = 0; ...) {stuff}" becomes:
-                "function stuff(i){} stuff(0); stuff(1);..."
-                for loops are this under the hood but handled differently:
-                    outputter assignment is conditionalized on the index (es!) being a specific thing
-                    the index could have crazy shit going on, it must be said. 
-                        Just ignore that. Note loops get unrolled so don't feel bad
-                    Whenever you highlight a mention in the loop, you also highlight the loop variable somehow, wherever it may be
-            Structs:
-                Are how you make your puppets, of course
-    GDC
-        Optimize axis markings
-        Do a numberphile video (or two?) for the same time period
-            The quaternion equation
-                Double cover. Seen in the mobius strip trick. Show the angle between two mirrors
-            The dome, which shows rotation*rotation=rotation
-        Optimized sandwiches!
-        "Teardrops" visualization. Once you've sorted out the meaning of that shit!
-            Can turn off and on
+    Live coding (festival of the spoken nerd, green man)
+        for loops:
+            "for(let i = 0; ...) {stuff}" becomes:
+            "function stuff(i){} stuff(0); stuff(1);..."
+            for loops are this under the hood but handled differently:
+                outputter assignment is conditionalized on the index (es!) being a specific thing
+                the index could have crazy shit going on, it must be said. 
+                    Just ignore that. Note loops get unrolled so don't feel bad
+                Whenever you highlight a mention in the loop, you also highlight the loop variable somehow, wherever it may be
+        Structs:
+            Are how you make your puppets, of course
         2D PGA. Overlay for vectorspace Dw?
             A new window. Nice to go between dome and
-        A series of "code this shader" challenges
         Documented API for making your own window visualizations
         Export:
             Game
@@ -83,7 +80,8 @@ TODO
             unity
             html page (for EEs/blog posts)
             export threejs function creating the thing it is with the appropriate uniforms
-    Live coding (festival of the spoken nerd, green man)
+        "Teardrops" visualization. Once you've sorted out the meaning of that shit!
+            Can turn off and on
         Practiiiiiiiice! Make a date! And thereby find out which of these are good ideas
         Would be nice to hover the output window, have it reverse back to the initialVertex you're hovering
         (2,1) halfplane window - v. important, lets you program with mouse
@@ -234,11 +232,14 @@ async function init(hasEquations) {
     window.lineHeight = lineHeight
     initSvgLines()
 
-    textarea.value = hasEquations ? equationsShaders[0] : defaultShader
+    textarea.value = hasEquations ? document.getElementById('fragmentShader').textContent : defaultShader
     updateSyntaxHighlighting()
 
     // init41()
     await init301()
+
+    generateOptimizedSandwiches()
+    return
 
     // generateOptimizedSandwiches()
     // return

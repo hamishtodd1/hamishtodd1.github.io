@@ -96,20 +96,24 @@ function generateOptimizedSandwiches() {
     let cayleyTableReverseSigns = Array(16)
     const ZERO_CONTRIBUTION = 17
 
-    //so you're going to make an array of indices in basisNames
+    //you're going to make an array of indices in basisNames
     //and THAT may be converted
 
     for (let i = 0; i < 16; ++i) {
+        mv0.copy(zeroMv)
+        mv0[i] = 1.
+
+        //this table is a*b
         cayleyTable[i] = new Uint8Array(16)
         cayleyTableSigns[i] = new Int8Array(16)
+        //this table is a*~b
         cayleyTableReverse[i] = new Uint8Array(16)
         cayleyTableReverseSigns[i] = new Int8Array(16)
+
         for (let j = 0; j < 16; ++j) {
             cayleyTable[i][j] = ZERO_CONTRIBUTION
             cayleyTableReverse[i][j] = ZERO_CONTRIBUTION
 
-            mv0.copy(zeroMv)
-            mv0[i] = 1.
             mv1.copy(zeroMv)
             mv1[j] = 1.
 
@@ -155,8 +159,6 @@ function generateOptimizedSandwiches() {
         log(row)
     }
 
-    //can you use the CGA thing to make sense of the bulk vs weight norm?
-
     let bladeGgs = {
         Scalar: [1, 0, 0, 0, 0],
         Plane:  [0, 1, 0, 0, 0],
@@ -169,13 +171,16 @@ function generateOptimizedSandwiches() {
 
         Mv: [1, 1, 1, 1, 1]
     }
+    //could have quaternions. A higher level of granularity, no e01 etc
+    //could have normal vectors. No e123
 
-    const mvToRr = [1, 2, 3, 4, 11, 12, 13, 14]
-    const dqToRr = [0, 5, 6, 7, 8, 9, 10, 15]
-
-    function twoChar(n) {
-        return n < 10 ? ` ` + n : n
+    class Mul {
+        sign = 1.
+        aIndex = -1
+        bIndex = -1
+        cIndex = -1
     }
+
     function generateGpMuls(coefses, reverseSecond) {
         let muls = Array(16)
         for (let i = 0; i < 16; ++i)
@@ -189,20 +194,21 @@ function generateOptimizedSandwiches() {
                 if (bCoef === 0)
                     return
 
-                let sign = (reverseSecond ? cayleyTableReverseSigns : cayleyTableSigns)[ai][bi]
+                let sign =      (reverseSecond ? cayleyTableReverseSigns : cayleyTableSigns)[ai][bi]
                 if (sign === 0)
                     return
+                let lineIndex = (reverseSecond ? cayleyTableReverse      : cayleyTable     )[ai][bi]
 
-                let lineIndex = (reverseSecond ? cayleyTableReverse : cayleyTable)[ai][bi]
-
-                muls[lineIndex].push([sign, ai, bi])
+                muls[lineIndex].push(new Mul(sign, ai, bi))
             })
         })
 
         return muls
     }
-    function mulsToFullLine(outName, aName, bName, allLineMuls ) {
-
+    function twoChar(n) {
+        return n < 10 ? ` ` + n : n
+    }
+    function mulsToString(outName, aName, bName, allLineMuls ) {
         let ret = ``
 
         for (let i = 0; i < 16; ++i) {
@@ -212,10 +218,10 @@ function generateOptimizedSandwiches() {
             lineMuls.forEach((mul) => {
                 let joiner = ``
                 if (line === ``)
-                    joiner = mul[0] === 1 ? ` ` : `-`
+                    joiner = mul.sign === 1 ? ` ` : `-`
                 else
-                    joiner = ` ` + (mul[0] === 1 ? `+` : `-`) + ` `
-                line += joiner + aName + `[` + twoChar(mul[1]) + `]*` + bName + `[` + twoChar(mul[2]) + `]`
+                    joiner = ` ` + (mul.sign === 1 ? `+` : `-`) + ` `
+                line += joiner + aName + `[` + twoChar(mul.aIndex) + `]*` + bName + `[` + twoChar(mul.bIndex) + `]`
             })
 
             ret += `    ` + outName + `[` + twoChar(i) + `] =` + (line === `` ? ` 0.` : line) + `;\n`
@@ -225,64 +231,71 @@ function generateOptimizedSandwiches() {
     }
 
     //instead of [14],[13],[12], want .z,.y,.x
-    function generateOptimizedSandwich(granularGradeses) {
-        let whole = "function sandwich"
-        whole += keyOfProptInObject(granularGradeses[0], bladeGgs)
-        whole += keyOfProptInObject(granularGradeses[1], bladeGgs)
-        whole += "(a,b,target) {\n\n"
+    function generateOptimizedSandwich(blade1,blade2) {
+        let granularGradeses = [bladeGgs[blade1],bladeGgs[blade2]]
+        let ret = "function sandwich" + blade1 + blade2 + "(a,b,target) {\n\n"
 
         let coefses = [Array(16), Array(16)]
         granularGradeses.forEach((granularGrades, i) => {
             let coefs = coefses[i]
             if (granularGrades.length === 5) {
                 coefs[0] = granularGrades[0]
-                for (let j = 1; j < 5; ++j) coefs[j] = granularGrades[1]
-                for (let j = 5; j < 11; ++j) coefs[j] = granularGrades[2]
+                for (let j =  1; j <  5; ++j) coefs[j] = granularGrades[1]
+                for (let j =  5; j < 11; ++j) coefs[j] = granularGrades[2]
                 for (let j = 11; j < 15; ++j) coefs[j] = granularGrades[3]
                 coefs[15] = granularGrades[4]
             }
         })
 
-        //at this point, can predict the grades of the output
+        let allGradesOdd = true
+        granularGradeses.forEach((ggs) => {
+            ggs.forEach((gg, i) => {
+                if (gg !== 0. && i % 2 === 0)
+                    allGradesOdd = false
+            })
+        })
+        if(allGradesOdd)
+            log("TODO: result should be multiplied by -1!")
 
-        let firstMuls = generateGpMuls(coefses, false)
+        //at this point, can predict the grades of the output. So, could not bother with this grouping thing...
 
+        let abMuls = generateGpMuls(coefses, false)
+
+        //c = a*b
         let cCoefs = Array(16)
         for (let i = 0; i < 16; ++i)
-            cCoefs[i] = firstMuls[i].length === 0 ? 0 : 1
+            cCoefs[i] = abMuls[i].length === 0 ? 0 : 1
         
-        let secondCoefses = [cCoefs, coefses[0]]
-        let secondMuls = generateGpMuls(secondCoefses, true)
+        let cTildeAMuls = generateGpMuls([cCoefs, coefses[0]], true)
 
-        // whole += `    let c = new Float32Array(16);\n\n`
-        // whole += mulsToFullLine(`c`, `a`, `b`, firstMuls)
-        // whole += mulsToFullLine(`target`, `c`, `a`, secondMuls)
-        // whole += `    delete c;\n`
+        // ret += `    let c = new Float32Array(16);\n\n`
+        // ret += mulsToString(`c`, `a`, `b`, abMuls)
+        // ret += mulsToString(`target`, `c`, `a`, cTildeAMuls)
+        // ret += `    delete c;\n`
 
-        
+        // if(0)
         {
-            //ok so you can... 
-            //expand out the entire set of lines...
-            //look for + and - and eliminate them...
-            //collect like terms and introduce some brackets
-            //then check what's in brackets across all lines and create them as variables
-            //slightly raises the question of what this intermediate thing is
+            //How this works:
+                //expand out all the muls
+                //look for + and - of the same thing and eliminate them (needs to be done for dq,pt!)
+                //collect like terms and introduce some brackets
+                //then check what's in brackets across all lines and create them as variables
             
-            let linesMuls = []
+            let lineMulses = []
             for(let lineIndex = 0; lineIndex < 16; ++lineIndex ) {
                 let lineMuls = []
 
                 //expand out
-                for (let i = 0, il = secondMuls[lineIndex].length; i < il; ++i) {
+                for (let i = 0, il = cTildeAMuls[lineIndex].length; i < il; ++i) {
 
-                    let sm = secondMuls[lineIndex][i]
-                    let ourFirstMuls = firstMuls[sm[1]]
+                    let secondMul = cTildeAMuls[lineIndex][i]
+                    let ourFirstMuls = abMuls[secondMul[1]]
 
-                    ourFirstMuls.forEach((fm) => {
-                        let mul = [sm[0] * fm[0], [fm[1], fm[2], sm[2]]] //it's a, b, a... surely
+                    ourFirstMuls.forEach((firstMul) => {
+                        let mul = new Mul(secondMul.sign * firstMul.sign, firstMul[1], firstMul[2], secondMul[2])
                         lineMuls.push(mul)
 
-                        //so the line looks like... a[indices0]*b[indices1]*a[indices2]
+                        //so the mulls look like a[indices0]*b[indices1]*a[indices2]
                     })
                 }
 
@@ -294,26 +307,26 @@ function generateOptimizedSandwiches() {
 
                         let aIndicesAreTheSame =    (iMul[1][0] === jMul[1][0] && iMul[1][2] === jMul[1][2]) ||
                                                     (iMul[1][0] === jMul[1][2] && iMul[1][2] === jMul[1][0])
-                        if (aIndicesAreTheSame &&
-                            iMul[0]    !== jMul[0] && //one plus and one minus
-                            iMul[1][1] === jMul[1][1] // b index is the same
-                            )
-                        {
-                            lineMuls.splice(j,1)
+                        let bIndicesAreTheSame = iMul[1][1] === jMul[1][1] // b index is the same
+                        let onePlusAndOneMinus = iMul.sign !== jMul.sign && //one plus and one minus
+                        if (aIndicesAreTheSame && bIndicesAreTheSame && onePlusAndOneMinus) {
                             lineMuls.splice(i,1)
+                            lineMuls.splice(j-1,1) //j guaranteed to be less than i
                             --i
                             break
                         }
                     }
                 }
 
-                linesMuls.push(lineMuls)
+                lineMulses.push(lineMuls)
             }
+            
             // collect like terms
+            // ok so this is actually super difficult, there are non-trivial ways to group things (who knew)
             let frequencies = []
             for(let i = 0; i < 16; ++i)
                 frequencies[i] = new Uint16Array(16)
-            linesMuls.forEach((lineMuls)=>{
+            lineMulses.forEach((lineMuls)=>{
                 lineMuls.forEach((mul)=>{
                     let mis = mul[1]
                     ++frequencies[ mis[0] ][ mis[1] ]
@@ -324,22 +337,20 @@ function generateOptimizedSandwiches() {
             frequencies.forEach((fc,i)=>{
                 fc.forEach((f,j)=>{
                     if(f > 1) {
-                        // whole += `  let c` + i.toString() + j.toString() + ` = a[`
+                        // ret += `  let c` + i.toString() + j.toString() + ` = a[`
                     }
-                } )
+                })
             })
         }
         
-        //may also need to do the -1 thing
-        
-        whole += `    return target;\n}\n`
-        log(whole)
+        ret += `    return target;\n}\n`
+        log(ret)
 
         //even if you're using full mvs, this thing has the advantage of avoiding crappy almost-zeroes
     }
 
     // generateOptimizedSandwich([bladeGgs.Mv, bladeGgs.Mv])
-    generateOptimizedSandwich([bladeGgs.Dq, bladeGgs.Point])
+    generateOptimizedSandwich(`Dq`, `Point`)
 
     //dq, pt
     // generateOptimizedGp([

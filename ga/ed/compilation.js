@@ -1,3 +1,27 @@
+/*
+    The overrides should not be for "after this line that you can edit"
+        They should be "before this line that your caret could be on"
+        Maps better onto people's idea of a "current value"
+        Allow shit to be on multiple lines
+
+    When you let go, the line should be injected just before the line that the caret is on
+
+    Consider
+        float a = 0.5;
+        a = 1.;
+        float myVec2 = vec2(1.,a); //caret on this line
+    When you hover a
+
+    Maybe it should be that when you hover something and it gets highlighted,
+    The caret mentions should disappear!
+    Certainly it's a bit confusing that your caret can be on a line, and see a,
+    And you hover the other line, and you see a, but it's in a different place
+
+    The idea, of course, is to see things that have influenced a certain variable
+    And that could well have nothing to do with what's currently on the line
+
+ */
+
 async function initCompilation() {
 
     const potentialNameRegex = /(?<=[^a-zA-Z_$0-9])([a-zA-Z_$][a-zA-Z_$0-9]*)/g
