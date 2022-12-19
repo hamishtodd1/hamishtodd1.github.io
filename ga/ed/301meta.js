@@ -99,6 +99,12 @@ function generateOptimizedSandwiches() {
     //you're going to make an array of indices in basisNames
     //and THAT may be converted
 
+    function putInTables(i,j,index, sign, table, tableSigns) {
+        if (index !== -1) {
+            table[i][j] = index
+            tableSigns[i][j] = sign
+        }
+    }
     for (let i = 0; i < 16; ++i) {
         mv0.copy(zeroMv)
         mv0[i] = 1.
@@ -118,29 +124,13 @@ function generateOptimizedSandwiches() {
             mv1[j] = 1.
 
             mul(mv0, mv1, mv2)
-            let indexOfPos1 = mv2.indexOf(1.)
-            if (indexOfPos1 !== -1) {
-                cayleyTable[i][j] = indexOfPos1
-                cayleyTableSigns[i][j] = 1
-            }
-            let indexOfNeg1 = mv2.indexOf(-1.)
-            if (indexOfNeg1 !== -1) {
-                cayleyTable[i][j] = indexOfNeg1
-                cayleyTableSigns[i][j] = -1
-            }
+            putInTables(i, j, mv2.indexOf( 1.), 1, cayleyTable, cayleyTableSigns)
+            putInTables(i, j, mv2.indexOf(-1.),-1, cayleyTable, cayleyTableSigns)
 
             mv1.reverse(mv1)
             mul(mv0, mv1, mv2)
-            indexOfPos1 = mv2.indexOf(1.)
-            if (indexOfPos1 !== -1) {
-                cayleyTableReverse[i][j] = indexOfPos1
-                cayleyTableReverseSigns[i][j] = 1
-            }
-            indexOfNeg1 = mv2.indexOf(-1.)
-            if (indexOfNeg1 !== -1) {
-                cayleyTableReverse[i][j] = indexOfNeg1
-                cayleyTableReverseSigns[i][j] = -1
-            }
+            putInTables(i, j, mv2.indexOf( 1.), 1, cayleyTableReverse, cayleyTableReverseSigns)
+            putInTables(i, j, mv2.indexOf(-1.),-1, cayleyTableReverse, cayleyTableReverseSigns)
         }
     }
 
@@ -178,7 +168,13 @@ function generateOptimizedSandwiches() {
         sign = 1.
         aIndex = -1
         bIndex = -1
-        cIndex = -1
+        xIndex = -1
+        constructor(thisSign,thisAIndex, thisBIndex,thisXIndex) {
+            this.sign = thisSign
+            this.aIndex = thisAIndex
+            this.bIndex = thisBIndex
+            this.xIndex = thisXIndex
+        }
     }
 
     function generateGpMuls(coefses, reverseSecond) {
@@ -205,8 +201,8 @@ function generateOptimizedSandwiches() {
 
         return muls
     }
-    function twoChar(n) {
-        return n < 10 ? ` ` + n : n
+    function indexToString(n) {
+        return `[` + (n < 10 ? ` ` + n : n) + `]`
     }
     function mulsToString(outName, aName, bName, allLineMuls ) {
         let ret = ``
@@ -221,10 +217,14 @@ function generateOptimizedSandwiches() {
                     joiner = mul.sign === 1 ? ` ` : `-`
                 else
                     joiner = ` ` + (mul.sign === 1 ? `+` : `-`) + ` `
-                line += joiner + aName + `[` + twoChar(mul.aIndex) + `]*` + bName + `[` + twoChar(mul.bIndex) + `]`
+                line += joiner + 
+                    aName + indexToString(mul.aIndex) + `*` + 
+                    bName + indexToString(mul.bIndex) +
+                    (mul.xIndex === -1 ? `` : `*` +
+                    aName + indexToString(mul.xIndex) )
             })
 
-            ret += `    ` + outName + `[` + twoChar(i) + `] =` + (line === `` ? ` 0.` : line) + `;\n`
+            ret += line === ``? ``:`    ` + outName + indexToString(i) + ` =` + line + `;\n`
         }
 
         return ret + `\n`
@@ -258,6 +258,7 @@ function generateOptimizedSandwiches() {
             log("TODO: result should be multiplied by -1!")
 
         //at this point, can predict the grades of the output. So, could not bother with this grouping thing...
+        //so how do you know that c's plane part will amount to nothing?
 
         let abMuls = generateGpMuls(coefses, false)
 
@@ -266,53 +267,55 @@ function generateOptimizedSandwiches() {
         for (let i = 0; i < 16; ++i)
             cCoefs[i] = abMuls[i].length === 0 ? 0 : 1
         
-        let cTildeAMuls = generateGpMuls([cCoefs, coefses[0]], true)
+        //c = ab
+        let abTildeAMuls = generateGpMuls([cCoefs, coefses[0]], true)
 
         // ret += `    let c = new Float32Array(16);\n\n`
         // ret += mulsToString(`c`, `a`, `b`, abMuls)
-        // ret += mulsToString(`target`, `c`, `a`, cTildeAMuls)
+        // ret += mulsToString(`target`, `c`, `a`, abTildeAMuls)
         // ret += `    delete c;\n`
 
         // if(0)
         {
             //How this works:
-                //expand out all the muls
-                //look for + and - of the same thing and eliminate them (needs to be done for dq,pt!)
-                //collect like terms and introduce some brackets
-                //then check what's in brackets across all lines and create them as variables
-            
-            let lineMulses = []
-            for(let lineIndex = 0; lineIndex < 16; ++lineIndex ) {
+            //expand out all the muls
+            //look for + and - of the same thing and eliminate them (needs to be done for dq,pt!)
+            //collect like terms and introduce some brackets
+            //then check what's in brackets across all lines and create them as variables
+
+            var lineMulses = []
+            for (let lineIndex = 0; lineIndex < 16; ++lineIndex) {
                 let lineMuls = []
 
                 //expand out
-                for (let i = 0, il = cTildeAMuls[lineIndex].length; i < il; ++i) {
+                for (let i = 0, il = abTildeAMuls[lineIndex].length; i < il; ++i) {
 
-                    let secondMul = cTildeAMuls[lineIndex][i]
-                    let ourFirstMuls = abMuls[secondMul[1]]
+                    // debugger
+                    let secondMul = abTildeAMuls[lineIndex][i]
+                    let firstMuls = abMuls[secondMul.aIndex] //actually the aTilde index
 
-                    ourFirstMuls.forEach((firstMul) => {
-                        let mul = new Mul(secondMul.sign * firstMul.sign, firstMul[1], firstMul[2], secondMul[2])
+                    firstMuls.forEach((firstMul) => {
+                        let mul = new Mul(secondMul.sign * firstMul.sign, firstMul.aIndex, firstMul.bIndex, secondMul.bIndex)
                         lineMuls.push(mul)
-
-                        //so the mulls look like a[indices0]*b[indices1]*a[indices2]
                     })
                 }
 
                 //eliminate identical things
+                // debugger
                 for (let i = 0; i < lineMuls.length; ++i) {
                     let iMul = lineMuls[i]
                     for (let j = i + 1; j < lineMuls.length; ++j) {
                         let jMul = lineMuls[j]
 
-                        let aIndicesAreTheSame =    (iMul[1][0] === jMul[1][0] && iMul[1][2] === jMul[1][2]) ||
-                                                    (iMul[1][0] === jMul[1][2] && iMul[1][2] === jMul[1][0])
-                        let bIndicesAreTheSame = iMul[1][1] === jMul[1][1] // b index is the same
-                        let onePlusAndOneMinus = iMul.sign !== jMul.sign && //one plus and one minus
+                        let aIndicesAreTheSame = (iMul.aIndex === jMul.aIndex && iMul.xIndex === jMul.xIndex) ||
+                                                 (iMul.aIndex === jMul.xIndex && iMul.xIndex === jMul.aIndex)
+                        let bIndicesAreTheSame = iMul.bIndex === jMul.bIndex
+                        let onePlusAndOneMinus = iMul.sign !== jMul.sign
                         if (aIndicesAreTheSame && bIndicesAreTheSame && onePlusAndOneMinus) {
-                            lineMuls.splice(i,1)
-                            lineMuls.splice(j-1,1) //j guaranteed to be less than i
+                            lineMuls.splice(i, 1)
+                            lineMuls.splice(j - 1, 1) //j guaranteed to be less than i
                             --i
+                            log("eliminated!")
                             break
                         }
                     }
@@ -320,28 +323,34 @@ function generateOptimizedSandwiches() {
 
                 lineMulses.push(lineMuls)
             }
-            
+
             // collect like terms
             // ok so this is actually super difficult, there are non-trivial ways to group things (who knew)
-            let frequencies = []
-            for(let i = 0; i < 16; ++i)
-                frequencies[i] = new Uint16Array(16)
-            lineMulses.forEach((lineMuls)=>{
-                lineMuls.forEach((mul)=>{
-                    let mis = mul[1]
-                    ++frequencies[ mis[0] ][ mis[1] ]
-                    ++frequencies[ mis[2] ][ mis[1] ]
-                })
-            })
+            // let frequencies = []
+            // for (let i = 0; i < 16; ++i)
+            //     frequencies[i] = new Uint16Array(16)
+            // lineMulses.forEach((lineMuls) => {
+            //     lineMuls.forEach((mul) => {
+            //         let mis = mul[1]
+            //         ++frequencies[mis[0]][mis[1]]
+            //         ++frequencies[mis[2]][mis[1]]
+            //     })
+            // })
 
-            frequencies.forEach((fc,i)=>{
-                fc.forEach((f,j)=>{
-                    if(f > 1) {
-                        // ret += `  let c` + i.toString() + j.toString() + ` = a[`
-                    }
-                })
-            })
+            // frequencies.forEach((fc, i) => {
+            //     fc.forEach((f, j) => {
+            //         if (f > 1) {
+            //             // ret += `  let c` + i.toString() + j.toString() + ` = a[`
+            //         }
+            //     })
+            // })
         }
+
+        ret += `    let c = new Float32Array(16);\n\n`
+        // ret += mulsToString(`c`, `a`, `b`, abMuls)
+        // ret += mulsToString(`target`, `c`, `a`, abTildeAMuls)
+        ret += mulsToString(`target`, `a`, `b`, lineMulses)
+        ret += `    delete c;\n`
         
         ret += `    return target;\n}\n`
         log(ret)
