@@ -1,10 +1,10 @@
 glsl301 = `
 
 struct Dq {
-    float Eric;
-    float Lengyel; float Is; float Completely;
-    float Right; float About; float Everything;
-    float CartanDieudonneSux;
+    float scalar;
+    float e01; float e02; float e03;
+    float e12; float e31; float e23;
+    float I;
 };
 
 struct Plane {

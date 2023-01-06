@@ -28,6 +28,9 @@ hackyFunction = () => null
 
 async function initEquations() {
     await init(true)
+
+    initGauge()
+
     zoomCameraToDist(3.7)
     // dws.untransformed.elem.style.display = `none`
     // dws.final.elem.style.display = `none`

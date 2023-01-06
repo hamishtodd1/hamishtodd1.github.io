@@ -14,6 +14,8 @@ const variables = []
 const appearanceTypes = []
 const dws = {}
 
+// let EQUATIONS_MODE = false
+
 const VERTEX_MODE = 0
 const FRAGMENT_MODE = 1
 const BARE_MODE = 2

@@ -169,7 +169,8 @@ function generateOptimizedSandwiches() {
         aIndex = -1
         bIndex = -1
         xIndex = -1
-        constructor(thisSign,thisAIndex, thisBIndex,thisXIndex) {
+        double = false
+        constructor(thisSign,thisAIndex, thisBIndex,thisXIndex = -1) {
             this.sign = thisSign
             this.aIndex = thisAIndex
             this.bIndex = thisBIndex
@@ -208,27 +209,28 @@ function generateOptimizedSandwiches() {
         let ret = ``
 
         for (let i = 0; i < 16; ++i) {
-            let line = ``
+            let line = ` `
+            log(mul.xIndex)
 
             let lineMuls = allLineMuls[i]
             lineMuls.forEach((mul) => {
-                let joiner = ``
-                if (line === ``)
-                    joiner = mul.sign === 1 ? ` ` : `-`
-                else
-                    joiner = ` ` + (mul.sign === 1 ? `+` : `-`) + ` `
-                line += joiner + 
+                line += (mul.sign === 1 ? `+` : `-`) + ` `
+
+                line += 
                     aName + indexToString(mul.aIndex) + `*` + 
                     bName + indexToString(mul.bIndex) +
                     (mul.xIndex === -1 ? `` : `*` +
-                    aName + indexToString(mul.xIndex) )
+                    bName + indexToString(mul.xIndex) ) //+
+                    //(mul.double ? `*2.` : `   `)
             })
 
-            ret += line === ``? ``:`    ` + outName + indexToString(i) + ` =` + line + `;\n`
+            ret += line === ` `? ``:`    ` + outName + indexToString(i) + ` =` + line + `;\n`
         }
 
         return ret + `\n`
     }
+
+    //aaaaand another way to do it would be to convert it to a matrix and apply that shit. Given that steven's thing ended up as that...
 
     //instead of [14],[13],[12], want .z,.y,.x
     function generateOptimizedSandwich(blade1,blade2) {
@@ -270,12 +272,12 @@ function generateOptimizedSandwiches() {
         //c = ab
         let abTildeAMuls = generateGpMuls([cCoefs, coefses[0]], true)
 
-        // ret += `    let c = new Float32Array(16);\n\n`
-        // ret += mulsToString(`c`, `a`, `b`, abMuls)
-        // ret += mulsToString(`target`, `c`, `a`, abTildeAMuls)
-        // ret += `    delete c;\n`
+        ret += `    let c = new Float32Array(16);\n\n`
+        ret += mulsToString(`c`, `a`, `b`, abMuls)
+        ret += mulsToString(`target`, `c`, `a`, abTildeAMuls)
+        ret += `    delete c;\n`
 
-        // if(0)
+        if(0)
         {
             //How this works:
             //expand out all the muls
@@ -295,7 +297,7 @@ function generateOptimizedSandwiches() {
                     let firstMuls = abMuls[secondMul.aIndex] //actually the aTilde index
 
                     firstMuls.forEach((firstMul) => {
-                        let mul = new Mul(secondMul.sign * firstMul.sign, firstMul.aIndex, firstMul.bIndex, secondMul.bIndex)
+                        let mul = new Mul(secondMul.sign * firstMul.sign, firstMul.bIndex, Math.min(firstMul.aIndex, secondMul.bIndex), Math.max(firstMul.aIndex, secondMul.bIndex))
                         lineMuls.push(mul)
                     })
                 }
@@ -307,16 +309,18 @@ function generateOptimizedSandwiches() {
                     for (let j = i + 1; j < lineMuls.length; ++j) {
                         let jMul = lineMuls[j]
 
-                        let aIndicesAreTheSame = (iMul.aIndex === jMul.aIndex && iMul.xIndex === jMul.xIndex) ||
-                                                 (iMul.aIndex === jMul.xIndex && iMul.xIndex === jMul.aIndex)
-                        let bIndicesAreTheSame = iMul.bIndex === jMul.bIndex
-                        let onePlusAndOneMinus = iMul.sign !== jMul.sign
-                        if (aIndicesAreTheSame && bIndicesAreTheSame && onePlusAndOneMinus) {
-                            lineMuls.splice(i, 1)
-                            lineMuls.splice(j - 1, 1) //j guaranteed to be less than i
-                            --i
-                            log("eliminated!")
-                            break
+                        if (iMul.aIndex === jMul.aIndex && iMul.bIndex === jMul.bIndex && iMul.xIndex === jMul.xIndex ) {
+                            if ( iMul.sign !== jMul.sign) {
+                                lineMuls.splice(i, 1)
+                                lineMuls.splice(j - 1, 1) //j guaranteed to be less than i, also you just took out one before it
+                                --i
+                                log("eliminated!")
+                                break
+                            }
+                            else {
+                                iMul.double = true
+                                lineMuls.splice(j, 1)
+                            }
                         }
                     }
                 }
@@ -326,6 +330,7 @@ function generateOptimizedSandwiches() {
 
             // collect like terms
             // ok so this is actually super difficult, there are non-trivial ways to group things (who knew)
+            //basically we're quite interested in every triplet
             // let frequencies = []
             // for (let i = 0; i < 16; ++i)
             //     frequencies[i] = new Uint16Array(16)
@@ -345,13 +350,8 @@ function generateOptimizedSandwiches() {
             //     })
             // })
         }
-
-        ret += `    let c = new Float32Array(16);\n\n`
-        // ret += mulsToString(`c`, `a`, `b`, abMuls)
-        // ret += mulsToString(`target`, `c`, `a`, abTildeAMuls)
-        ret += mulsToString(`target`, `a`, `b`, lineMulses)
-        ret += `    delete c;\n`
         
+        // ret += mulsToString(`target`, `b`, `a`, lineMulses)
         ret += `    return target;\n}\n`
         log(ret)
 

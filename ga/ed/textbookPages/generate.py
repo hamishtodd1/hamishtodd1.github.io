@@ -7,13 +7,14 @@ prefix = ordinaryPage[0:ordinaryPage.index('<!-- DIFFERENCES START -->')] + ''' 
 </head>
 <body>    
     <script src="equations.js"></script>
+    <script src="gauge.js"></script>
     <script src="textbookPages/mathjax/es5/tex-chtml.js" id="MathJax-script" async></script>
 '''
 
 postfix = ordinaryPage[
     ordinaryPage.index('<!-- DIFFERENCES END -->'):
     ordinaryPage.index('// DIFFERENCE AGAIN')
-] + 'initEquations()' + ordinaryPage[
+] + 'initEquations();' + ordinaryPage[
     ordinaryPage.index('// DIFFERENCE ENDED AGAIN'):
     ]
 

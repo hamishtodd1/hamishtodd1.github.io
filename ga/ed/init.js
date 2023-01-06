@@ -238,8 +238,8 @@ async function init(hasEquations) {
     // init41()
     await init301()
 
-    generateOptimizedSandwiches()
-    return
+    // generateOptimizedSandwiches()
+    // return
 
     // generateOptimizedSandwiches()
     // return
@@ -257,7 +257,8 @@ async function init(hasEquations) {
     initAppearances()
     await initDws()
 
-    new Dw(`untransformed`, true, camera, false)
+    if (!hasEquations)
+        new Dw(`untransformed`, true, camera, false)
     await initShaderOutputAndFinalDw(hasEquations)
 
     let importedModel = {
