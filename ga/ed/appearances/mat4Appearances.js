@@ -71,7 +71,7 @@ function initMat4s() {
                 this.state.setPosition(v1)
             }
             else if(dw === sDw) {
-                camera2d.getOldClientWorldPosition(dw, v1)
+                getOldClientWorldPosition(dw, v1)
                 let desiredDeterminant = v1.x
                 if( desiredDeterminant === 0.)
                     desiredDeterminant = .0001

@@ -27,7 +27,8 @@
 hackyFunction = () => null
 
 async function initEquations() {
-    await init(true)
+    EQUATIONS_MODE = true
+    await init()
 
     initGauge()
 

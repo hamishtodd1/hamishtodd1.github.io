@@ -1,3 +1,13 @@
+function threejsPlaneTransformFromPlaneMv(mesh,mv) {
+
+    let displayableVersion = mv.getDisplayableVersion(mv4)
+    e123.projectOn(displayableVersion, mv0).toVector(mesh.position)
+
+    let planeOnOrigin = displayableVersion.projectOn(e123, mv0)
+    let e3ToPlaneMotor = mul(planeOnOrigin, e3, mv2).sqrt(mv3)
+    e3ToPlaneMotor.toQuaternion(mesh.quaternion)
+}
+
 function initPlanes() {
 
     let eDw = dws.euclidean
@@ -105,12 +115,7 @@ function initPlanes() {
             }
             else {
                 //eDw part
-                let displayableVersion = this.state.getDisplayableVersion(mv4)
-                e123.projectOn(displayableVersion, mv0).toVector(this.#eDwMesh.position)
-
-                let planeOnOrigin = displayableVersion.projectOn(e123, mv0)
-                let e3ToPlaneMotor = mul(planeOnOrigin, e3, mv2).sqrt(mv3)
-                e3ToPlaneMotor.toQuaternion(this.#eDwMesh.quaternion)
+                threejsPlaneTransformFromPlaneMv(this.#eDwMesh, this.state)
 
                 if (!this.state.hasEuclideanPart()) {
                     this.#sphereMesh.position.set(0., 0., 0.)

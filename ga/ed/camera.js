@@ -163,49 +163,12 @@ function initCamera() {
         rightSideDist,
         rightSideDist / camera.aspect, -rightSideDist / camera.aspect,
         camera.near, camera.far)
-    camera2d.position.z = 1.
+    camera2d.position.z = 4.
 
-    camera2d.getOldClientWorldPosition = (dw,target) => {
+    getOldClientWorldPosition = ( dw, target) => {
         let [xProportion, yProportion] = oldClientToDwNdc(dw)
-        target.x = camera2d.left + xProportion * (camera2d.right - camera2d.left)
-        target.y = camera2d.bottom + (1. - yProportion) * (camera2d.top - camera2d.bottom)
+        target.x = dw.camera.left + xProportion * (dw.camera.right - dw.camera.left)
+        target.y = dw.camera.bottom + (1. - yProportion) * (dw.camera.top - dw.camera.bottom)
         return target
-    }
-
-    ndcToWindow = (ndcX, ndcY, dw) => {
-        let dwRect = dw.elem.getBoundingClientRect()
-
-        let actuallyOnScreen = 0. <= ndcX && ndcX <= 1. &&
-            0. <= ndcY && ndcY <= 1.
-        if (actuallyOnScreen) {
-            return [
-                dwRect.x + dwRect.width * ndcX,
-                dwRect.y + dwRect.height * (1. - ndcY)
-            ]
-        }
-        else
-            return [Infinity, Infinity]
-    }
-
-    worldToWindow3dCamera = (theCamera, worldSpacePosition, dw) => {
-        worldSpacePosition.applyMatrix4(theCamera.worldToCanvas)
-        let canvasX = worldSpacePosition.x / worldSpacePosition.w
-        let canvasY = worldSpacePosition.y / worldSpacePosition.w
-
-        let ndcX = canvasX / 2. + .5
-        let ndcY = canvasY / 2. + .5
-
-        return ndcToWindow(ndcX, ndcY, dw)
-    }
-
-    camera2d.worldToWindow = (worldSpacePosition, dw) => {
-        let ndcX = (worldSpacePosition.x - camera2d.left  ) / (camera2d.right - camera2d.left  )
-        let ndcY = (worldSpacePosition.y - camera2d.bottom) / (camera2d.top   - camera2d.bottom)
-
-        return ndcToWindow(ndcX, ndcY, dw)
-    }
-
-    camera.worldToWindow = (worldSpacePosition, dw)=>{
-        return worldToWindow3dCamera(camera, worldSpacePosition, dw )
     }
 }

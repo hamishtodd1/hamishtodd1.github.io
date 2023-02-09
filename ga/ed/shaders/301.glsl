@@ -11,13 +11,17 @@ struct Plane {
     float e0; float e1; float e2; float e3;
 };
 
-struct weight4 {
-    float w0; float w1; float w2; float w3;
+struct Quat {
+    float x; float y; float z;
+    float w;
 };
 
 //might be good to normalize afterwards
 Dq dqAdd(in Dq a, in Dq b) {
     return Dq( a.scalar+b.scalar, a.e01+b.e01, a.e02+b.e02, a.e03+b.e03, a.e12+b.e12, a.e31+b.e31, a.e23+b.e23, a.I+b.I );
+}
+Dq dqSub(in Dq a, in Dq b) {
+    return Dq( a.scalar-b.scalar, a.e01-b.e01, a.e02-b.e02, a.e03-b.e03, a.e12-b.e12, a.e31-b.e31, a.e23-b.e23, a.I-b.I );
 }
 Dq dqMultiplyScalar(in Dq a, in float b) {
     return Dq( a.scalar * b, a.e01 * b, a.e02 * b, a.e03 * b, a.e12 * b, a.e31 * b, a.e23 * b, a.I * b );
@@ -260,6 +264,7 @@ Plane join(in Dq a, in vec4 b) {
     mvToPlane(retAsMv,ret);
     return ret;
 }
+
 
 // Plane join(in Dq a, in vec4 b) {
 //     Plane ret;

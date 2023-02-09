@@ -100,7 +100,7 @@ function initPoints() {
                 mv0.toVec4(this.state)
             }
             else if(dw === sDw) {
-                camera2d.getOldClientWorldPosition(dw, v1)
+                getOldClientWorldPosition(dw, v1)
 
                 let nonZeroValue = v1.x === 0. ? 0.00001 : v1.x
                 if( mv0[14] !== 0. )

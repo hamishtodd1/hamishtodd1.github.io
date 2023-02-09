@@ -4,9 +4,6 @@ function initInfinityDw()
 {
     let infinityDwCamera = camera.clone() // because we don't want zooming in and out
     infinityDwCamera.worldToCanvas = new THREE.Matrix4()
-    infinityDwCamera.worldToWindow = (worldSpacePosition, dw) => {
-        return worldToWindow3dCamera(infinityDwCamera, worldSpacePosition, dw)
-    }
 
     camera.toCopyQuatTo.push(infinityDwCamera)
     function updateOurCamera() {
@@ -54,6 +51,7 @@ function initInfinityDw()
     //possibly needed for vectorspace too
     dw.mouseRayIntersection = (targetMv, fromBehind) => {
         let threeRay = getMouseThreeRay(dw)
+        log(threeRay.direction)
 
         if (fromBehind) {
             threeRay.origin.addScaledVector(threeRay.direction, 999.) //so put it far behind camera

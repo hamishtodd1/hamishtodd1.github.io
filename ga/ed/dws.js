@@ -71,8 +71,36 @@ async function initDws() {
             return m.parent === this.#scene
         }
 
+        ndcToWindow = (ndcX, ndcY) => {
+            let dwRect = this.elem.getBoundingClientRect()
+
+            let actuallyOnScreen = 0. <= ndcX && ndcX <= 1. &&
+                0. <= ndcY && ndcY <= 1.
+            if (actuallyOnScreen) {
+                return [
+                    dwRect.x + dwRect.width * ndcX,
+                    dwRect.y + dwRect.height * (1. - ndcY)
+                ]
+            }
+            else
+                return [Infinity, Infinity]
+        }
+
         worldToWindow(vector3) {
-            return this.camera.worldToWindow(vector3, this)
+            if (this.camera.isOrthographicCamera) {
+                var ndcX = (vector3.x - this.camera.left) / (this.camera.right - this.camera.left)
+                var ndcY = (vector3.y - this.camera.bottom) / (this.camera.top - this.camera.bottom)
+            }
+            else {
+                vector3.applyMatrix4(this.camera.worldToCanvas) //we only make this matrix for perspective cameras
+                let canvasX = vector3.x / vector3.w
+                let canvasY = vector3.y / vector3.w
+
+                var ndcX = canvasX / 2. + .5
+                var ndcY = canvasY / 2. + .5
+            }
+
+            return this.ndcToWindow(ndcX, ndcY)
         }
 
         setBorderHighlight(isVisible,col) {

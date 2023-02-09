@@ -61,6 +61,7 @@ function initCaretInteractions() {
     /////////////////////////////////////////////////////////
     // Meant to occur BEFORE the character has been put in //
     /////////////////////////////////////////////////////////
+    //this makes it so you indent correctly. But it also makes it so you can't ctrl+z :/
     textarea.addEventListener('keydown', (event) => {
         if (event.key === "Enter" && event.altKey === false) {
             let ourLine = textarea.value.split(`\n`)[caretLine]
@@ -77,8 +78,8 @@ function initCaretInteractions() {
             event.preventDefault()
         }
         if (event.key == "Tab") {
-            insertTextAtCaret("    ")
-            afterInput()
+            // insertTextAtCaret("    ")
+            // afterInput()
             event.preventDefault()
         }
     })

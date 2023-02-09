@@ -5366,8 +5366,7 @@
 		}
 
 		compose(position, quaternion, scale) {
-			if(BOOG)
-				console.error("here")
+			
 			const te = this.elements;
 			const x = quaternion._x,
 						y = quaternion._y,

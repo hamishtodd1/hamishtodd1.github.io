@@ -64,11 +64,11 @@ function initDqs() {
         function toMobiusEdge(side, t, target) {
             mv0.point(side ? stripWidthHalved : -stripWidthHalved, 0., 0., 1.)
 
-            makinRotor.fromAxisAngle(e12, t * TAU / 2.)
+            makinRotor.fromAxisAngle(e12, t / 2.)
             makinRotor.sandwich(mv0, mv1)
             mv1[13] += stripRadius
 
-            makinRotor.fromAxisAngle(e31, -t * TAU)
+            makinRotor.fromAxisAngle(e31, -t )
             makinRotor.sandwich(mv1, target)
 
             return target
@@ -80,21 +80,21 @@ function initDqs() {
             let side = msgArr[i * 3 + 0] < 0.
             let t = msgArr[i * 3 + 1]
 
-            toMobiusEdge(side, t, mv2)
+            toMobiusEdge(side, t * TAU, mv2)
             mv2.toVectorArray(msgArr, i)
         }
         mobiusStripGeo.computeVertexNormals()
     }
 
-    let rimCurveFullAngle = TAU / 2.
+    let rimCurveAngle = TAU / 2.
     class RimCurve extends THREE.Curve {
         getPoint(t, optionalTarget = new THREE.Vector3()) {
-            toMobiusEdge(true,t*rimCurveFullAngle, mv2)
+            toMobiusEdge(true,t*rimCurveAngle, mv2)
             //need to copy in the rotor of the line
             mv2.toVector(optionalTarget)
             if (isNaN(optionalTarget.x) || isNaN(optionalTarget.y) || isNaN(optionalTarget.z)) {
                 debugger
-                toMobiusEdge(true, t * rimCurveFullAngle, mv2)
+                toMobiusEdge(true, t * rimCurveAngle, mv2)
             }
             
             return optionalTarget
@@ -102,8 +102,21 @@ function initDqs() {
     }
     let theRimCurve = new RimCurve()
 
+    class RingCurve extends THREE.Curve {
+        getPoint(t, optionalTarget = new THREE.Vector3()) {
+            optionalTarget.set(INFINITY_RADIUS / 2.,0.,0.)
+            optionalTarget.applyAxisAngle(yUnit,t*rimCurveAngle)
+
+            return optionalTarget
+        }
+    }
+    let theRingCurve = new RingCurve()
+
+    //want a tube geometry and an arrow head (that shrinks)
+
+    let tubeRadius = .03
     function OurTubeGeo(curve) {
-        return new THREE.TubeBufferGeometry(curve, 31, .05, 7, false)
+        return new THREE.TubeBufferGeometry(curve, 31, tubeRadius, 7, false)
     }
     function updateTubeGeo(geo, curve) {
         let tempGeo = OurTubeGeo(curve)
@@ -122,6 +135,12 @@ function initDqs() {
     let iLineGeo = new THREE.CylinderGeometry(.03, .03, INFINITY_RADIUS*2.)
     let dotGeo = new THREE.CircleBufferGeometry(.1, 32)
     let ringGeo = new THREE.TorusGeometry(INFINITY_RADIUS, .03, 7, 62)
+
+    let tipLength = tubeRadius * 5.
+    let arrowTipGeo = new THREE.CylinderGeometry(tubeRadius, tubeRadius * 5., tipLength)
+    arrowTipGeo.translate(0., -tipLength / 2.,0.)
+    arrowTipGeo.rotateX(-TAU / 4.)
+
     let displayedLineMv = new Mv()
     let linePart = new Mv() //bivector?
     let newLinePart = new Mv()
@@ -137,6 +156,8 @@ function initDqs() {
 
         // #mobiusStripMesh
         // #rimMesh
+        #windingMesh
+        #windingMeshTip
 
         #eDwMesh
         #iDwLineMesh
@@ -174,12 +195,17 @@ function initDqs() {
             // this.#mobiusStripMesh = iDw.NewMesh(mobiusStripGeo, complexMat) //possibly only one of these is needed
             // this.#rimMesh = iDw.NewMesh(OurTubeGeo(theRimCurve), this.#mat3d)
 
+            this.#windingMesh = iDw.NewMesh(OurTubeGeo(theRingCurve), this.#mat3d)
+            this.#windingMeshTip = iDw.NewMesh(arrowTipGeo, this.#mat3d)
+
             camera.toUpdateAppearance.push(this)
 
             this.meshes = [
                 this.#eDwMesh, this.#cDwMesh, 
                 this.#iDwLineMesh, this.#iDwRingMesh,
                 this.#arcMesh,
+                this.#windingMesh,
+                this.#windingMeshTip
                 // this.#mobiusStripMesh,  
                 // this.#rimMesh
             ]
@@ -200,6 +226,7 @@ function initDqs() {
         
         onLetGo() {
             this.linePartWhenGrabbedNormalized.copy(zeroMv)
+            this.#complexWhenGrabbed.set(0.,0.)
         }
 
         _updateStateFromDrag(dw) {
@@ -209,14 +236,23 @@ function initDqs() {
                 if (this.state[7] !== 0.)
                     console.error("todo figure this out!")
 
-                camera2d.getOldClientWorldPosition(dw, this.#cDwMesh.position)
-                if (this.#complexWhenGrabbed.x === 0.)
-                    this.#cDwMesh.position.x = 0.
-                else if(linePart.norm() === 0.)
+                getOldClientWorldPosition(dw, this.#cDwMesh.position)
+
+                if(this.linePartWhenGrabbedNormalized.norm() === 0.) {
                     this.#cDwMesh.position.y = 0.
-                
-                this.state[0] = this.#cDwMesh.position.x
-                this.state.setBivectorPartFromMvAndMagnitude(this.linePartWhenGrabbedNormalized, this.#cDwMesh.position.y )
+                }
+                else {
+                    if (this.#cDwMesh.position.y === 0.)
+                        this.#cDwMesh.position.y = .001
+
+                    if (Math.abs(this.#cDwMesh.position.x) < 1.) //rotation
+                        this.#cDwMesh.position.normalize()
+                    else                                         //translation
+                        this.#cDwMesh.position.x = 1. * Math.sign(this.#cDwMesh.position.x)
+
+                    this.state[0] = this.#cDwMesh.position.x
+                    this.state.setBivectorPartFromMvAndScalarMultiple(this.linePartWhenGrabbedNormalized, this.#cDwMesh.position.y)
+                }
             }
             else if (dw === eDw) {
                 let oldJoinedWithCamera = join(linePart, camera.mvs.pos, mv0)
@@ -224,14 +260,14 @@ function initDqs() {
                 intersectDragPlane(joinedWithCamera, newLinePart)
 
                 newLinePart.normalize()
-                this.state.setBivectorPartFromMvAndMagnitude(newLinePart, linePart.norm())
+                this.state.setBivectorPartFromMvAndScalarMultiple(newLinePart, linePart.norm())
             }
             else if (dw === iDw) {
                 
                 iDw.mouseRayIntersection(iDwIntersection,false)
                 let lineIsInfinite = !linePart.hasEuclideanPart()
 
-                if ( lineIsInfinite) {
+                if ( lineIsInfinite ) {
                     let intersectionJoinedWithOrigin = join(iDwIntersection, e123)
 
                     let oldJoinedWithOrigin = join(linePart, e123, mv1)
@@ -248,7 +284,7 @@ function initDqs() {
                 }
                 
                 newLinePart.normalize()
-                this.state.setBivectorPartFromMvAndMagnitude(newLinePart, linePart.norm())
+                this.state.setBivectorPartFromMvAndScalarMultiple(newLinePart, linePart.norm())
             }
             else return false
         }
@@ -256,46 +292,28 @@ function initDqs() {
         updateMeshesFromState() {
             this.state.getBivectorPartToMv(linePart)
 
+            let eNormLinePart = linePart.eNorm()
+            let iNormLinePart = linePart.iNorm()
+
             this.#cDwMesh.position.x = this.state[0]
             this.#cDwMesh.position.y = linePart.norm()
+            this.#cDwMesh.position.normalize()
+
+            let isGrabbedAndWoundBackward = false
+            if (!this.linePartWhenGrabbedNormalized.equals(zeroMv)) {
+                let indicator = inner(linePart, reverse(this.linePartWhenGrabbedNormalized,mv0), mv1)[0]
+                
+                if( indicator === 0.) //it's a null line so it tells you nothing
+                    indicator = inner(dual(linePart,mv2), dual(reverse(this.linePartWhenGrabbedNormalized, mv0),mv3), mv1)[0]
+
+                isGrabbedAndWoundBackward = indicator < 0.
+            }
+            if (isGrabbedAndWoundBackward)
+                this.#cDwMesh.position.y *= -1.
 
             //TODO this is the code that you used when you had a grabbedDuplicate
             // let proportionOfComparison = -1. * inner(linePart, grabbedDuplicate.linePartWhenGrabbedNormalized, mv0)[0]
             // this.#cDwMesh.position.y = proportionOfComparison
-
-            //more like: it's a complex strip
-            //And by the way, it's angled in 3D space such that your line is through it
-            //when you hover the window, it switches to being a "top" down view
-            //where the top is the view such that the rotation is anticlockwise from the identity
-
-            //e12+e03 is a screw axis
-
-            // let logarithm = this.state.getNormalization(dq0).logarithm(bv0)
-
-            // let ourCase = 0
-            let eNormLinePart = linePart.eNorm()
-            let iNormLinePart = linePart.iNorm()
-            // if(eNormLinePart === 0. && iNormLinePart === 0.)
-            //     ourCase = DQ_IDENTITY
-            // else if (eNormLinePart === 0. && iNormLinePart !== 0. && this.state[0] !== 0.)
-            //     ourCase = DQ_TRANSLATION
-            // else if (eNormLinePart === 0. && iNormLinePart !== 0. && this.state[0] === 0.)
-            //     ourCase = DQ_TRANSLATION_AXIS
-            // else if (eNormLinePart !== 0. && this.state[0] !== 0. && this.state[15] !== 0.)
-            //     ourCase = DQ_SCREW
-            // else {
-            //     //harder cases
-            //     //let's say you decompose it. If the translation part is 0
-
-            //     //so you decompose into the line part and the study number S
-            // }
-                //and it can also be a screw if it has a line and also line at infinity and also scalar
-            // else if (eNormLinePart !== 0. && this.state[0] === 0. && this.state[15] === 0.)
-            //     ourCase = DQ_ROTATION_AXIS
-            // else if (eNormLinePart !== 0. && this.state[0] !== 0. && this.state[15] !== 0.)
-            // cases
-
-            //check if it commutes
 
             if ( linePart.approxEquals(zeroMv) ) {
                 //it's either the identity or 0.
@@ -318,7 +336,7 @@ function initDqs() {
 
                 this.#eDwMesh.scale.setScalar(.2 * camera.position.distanceTo(this.#eDwMesh.position))
             }
-            else if(linePart.iNorm() !== 0.) {
+            else if (iNormLinePart !== 0.) {
                 //default mv is e02
                 this.#iDwRingMesh.position.set(0.,0.,0.)
                 join(e123, linePart, joinedWithOrigin)
@@ -336,16 +354,37 @@ function initDqs() {
                 this.#eDwMesh.scale.setScalar(.2 * camera.position.distanceTo(this.#eDwMesh.position))
             }
 
-            {
-                //actually, when it's a translation, it should... be an unfurled strip?
-                // this.#mobiusStripMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
-                // this.#rimMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
-    
+            if (this.#cDwMesh.position.y === 0.)
+                this.#arcMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+            else {
+                this.#arcMesh.position.set(0., 0., 0.)
                 arcCurveDest.set(this.#cDwMesh.position.x, this.#cDwMesh.position.y, 0.)
                 updateTubeGeo(this.#arcMesh.geometry, theArcCurve)
-    
-                // rimCurveFullAngle = Math.atan2(this.#cDwMesh.position.y, this.#cDwMesh.position.x) / TAU * 2.
-                // updateTubeGeo(this.#rimMesh.geometry, theRimCurve)
+
+                if (eNormLinePart !== 0) {
+                    //curve 
+                    rimCurveAngle = (isGrabbedAndWoundBackward?-1.:1.) * Math.atan2(eNormLinePart, this.state[0]) * 2.
+                    updateTubeGeo(this.#windingMesh.geometry, theRingCurve)
+
+                    this.#windingMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
+
+                    //you want it pointing along -z
+                    if (isGrabbedAndWoundBackward) {
+                        this.#windingMeshTip.quaternion.setFromAxisAngle(yUnit, 0. - TAU / 32.)
+                        theRingCurve.getPoint(0., this.#windingMeshTip.position)
+                    }
+                    else {
+                        this.#windingMeshTip.quaternion.setFromAxisAngle(yUnit, rimCurveAngle - TAU / 32.)
+                        theRingCurve.getPoint(1., this.#windingMeshTip.position)
+                    }
+                    this.#windingMeshTip.quaternion.premultiply(this.#iDwLineMesh.quaternion)
+                    this.#windingMeshTip.position.applyQuaternion(this.#iDwLineMesh.quaternion)
+                }
+                else {
+                    //straight line... meant to be proportional to length I guess, pity it's in iDw
+                    //Coooould have a pair of squares connecting it to the axis
+                    //iDw is easier and it's easy to change. Just be fakey unless it's clearly useful to see the dist
+                }
             }
         }
 
@@ -358,22 +397,15 @@ function initDqs() {
                     target.w = 1.
                 }
                 else if (dw === iDw) {
-                    this.state.getBivectorPartToMv(linePart)
-                    if (linePart.hasEuclideanPart()) {
+                    if(!this.linePartWhenGrabbedNormalized.equals(zeroMv))
+                        linePart.copy( this.linePartWhenGrabbedNormalized )
+                    else
+                        this.state.getBivectorPartToMv(linePart)
 
-                        //can bring this back once you've sorted out which lines are clockwise in this comparative sense
-                        //eg make the complex interface
-                        // meet(linePart, e0, labelPoint)
-                        // labelPoint.multiplyScalar(-1.)
-                        // let vec3Part = labelPoint.toVector(v1)
-                        // vec3Part.setLength(INFINITY_RADIUS)
-                        // target.copy(vec3Part)
-                        // // target.multiplyScalar(.5)
-                        // target.w = 1.
-
-                        target.set(0.,0.,0.,1.)
-                    }
+                    if (linePart.hasEuclideanPart())
+                        target.copy(this.#windingMeshTip.position)
                     else {
+                        // log(frameCount)
                         dual(linePart, idealLineDual)
                         let planeToIntersect = join(camera.mvs.pos, idealLineDual, mv0)
                         meet(planeToIntersect, linePart, labelPoint)

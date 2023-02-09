@@ -33,7 +33,7 @@ function initMouseInteractions() {
         meet(e0, mouseRay, mouseRayDirection).toVector(threeRay.direction)
         threeRay.direction.normalize()
 
-        threeRay.origin.copy(camera.position)
+        threeRay.origin.copy(dw.camera.position)
 
         return threeRay
     }
@@ -44,6 +44,10 @@ function initMouseInteractions() {
         else
             indicatedMention.highlight()
     }
+
+    let default_appearance_visibility = EQUATIONS_MODE
+    //toggle
+    
 
     let mouseAreaOld = null
     updateAppearanceVisibilitiesAndIndication = (mouseArea, userIndicationX, userIndicationY) => {
@@ -60,7 +64,7 @@ function initMouseInteractions() {
 
         appearanceTypes.forEach((at) => {
             at.appearances.forEach((a) => {
-                a.setVisibility(false)
+                a.setVisibility(default_appearance_visibility)
             })
         })
         forEachUsedMention( (mention) => {

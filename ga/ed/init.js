@@ -1,36 +1,43 @@
 /*
 TODO
-    Maybe there should be a little window that has the raw numbers? Or the magnitudes of the different grades?
-        Well you sorta get that from complex window
-    Add rotoreflections? point and plane
-    Could have cos and sin formulae visualization?
-    If you're getting bored of this, might as well 
-    For next presentation
-        Attempt to compile with every keystroke, send straight to output window
-            but flash up an error which fades out when (99% of the time) it's wrong
-            Eh, this is for graphics programmers
-        Better error reporting
-            Highlight where it was but just put the words at the bottom
-        Make the transparent spotted dome
-        https://twitter.com/joyoflivecoding
+    For Chris and Joan
+        A little arrow going around the quat's line to show which way it goes!
+            Think of it as starting at the camera, then rotating to be at the angle from the camera it should be at
+            Arc length being what it should be
+            studs on pair of planes, when you geometric product, give you arc
+        Add "Quat". With ijk or xyz?
+        all multivectors get scale
+        Dqs get an extra point, it's the ratio of the highest grade part and the second highest grade part
+        Do you need orientation on planes and lines?
+        Stanford bunny
+        Transflections and rotoreflections! Dotted line for the line part
+        dqs connected to scalar AND mobius
+        You need a "show all" button, not a built-in assumption based on textbook/non textbook
+        Complex plane
+        A "normalize" function
+        Identity viz?
+            Pair of large-radius cylinders that are touching each other, tiny gap between
         Better window hiding - they should grey out
             hide the output window when there's an error
+        Better error reporting
+            Highlight where it was but just put the words at the bottom
     Bugs
         Vectors are just broken with the animation on
         Dragging the lines at infinity
         Probably worth checking over absolutely all e31 vs 13 shit
-        Bug when you fail to indent correctly?
         Something happened that made tubeGeometry have NaNs, crashed the whole of threejs so you couldn't see anything
         Something caused the vertex to flick back and forth
         Sort out duplicates. At least in the senses that you need the damn things
         minus sign with sandwich
         When you change rotation, idealLine2 flicks around
-        Tab and enter make it so you can't ctrl+z
+        Enter makes it so you can't ctrl+z
         the dual quaternion dragging takes account of duplicates. Point mention scalar should too, as should others
     Having chigozie and Matthew Vandevander and Pontus break it
         Try to detect which lines ASSIGN to a variable and which lines don't
-    GDC
-        Slightly better viz for Dqs
+    "Someday"
+        Attempt -briefly- to compile every second or so, send straight to output window?
+            but flash up an error which fades out when (99% of the time) it's wrong
+            Eh, this is for graphics programmers
         The overrides should not be for "after this line that you can edit"
             They should be "before this line that your caret could be on"
             Maps better onto people's idea of a "current value"
@@ -60,6 +67,7 @@ TODO
                     Can scroll, discretely, through those: build the possible values up into a selection, eg a point cloud
                     debugger only lets you look at one point in time - want a fast way to look through ALL the state from a run!
     Live coding (festival of the spoken nerd, green man)
+        https://twitter.com/joyoflivecoding
         for loops:
             "for(let i = 0; ...) {stuff}" becomes:
             "function stuff(i){} stuff(0); stuff(1);..."
@@ -216,7 +224,7 @@ Possibly dqAppearances should get ANOTHER point in the 2D dw
 //     }
 // }
 
-async function init(hasEquations) {
+async function init() {
 
     let timeBefore = -Infinity
     startBench = () =>{
@@ -232,7 +240,7 @@ async function init(hasEquations) {
     window.lineHeight = lineHeight
     initSvgLines()
 
-    textarea.value = hasEquations ? document.getElementById('fragmentShader').textContent : defaultShader
+    textarea.value = EQUATIONS_MODE ? document.getElementById('fragmentShader').textContent : defaultShader
     updateSyntaxHighlighting()
 
     // init41()
@@ -257,15 +265,15 @@ async function init(hasEquations) {
     initAppearances()
     await initDws()
 
-    if (!hasEquations)
+    if (!EQUATIONS_MODE)
         new Dw(`untransformed`, true, camera, false)
-    await initShaderOutputAndFinalDw(hasEquations)
+    await initShaderOutputAndFinalDw(EQUATIONS_MODE)
 
     let importedModel = {
         promise: new Promise(resolve=>resolve()),
         updateAnimation:()=>{}
     }
-    if(!hasEquations)
+    if(!EQUATIONS_MODE)
         importedModel = initMeshDw(false)
 
     // await initHalfplane()

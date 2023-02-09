@@ -15,23 +15,12 @@ vec4 getChangedVertex(in vec4 initialVertex) {
     vec2 control2 = vec2(cos(time*4.),sin(time*4.));
     vec3 control3 = vec3(1.,.5,1.);
 
-    vec4 myVertex = vec4( .2,0., 1.,1.);
-    vec4 myNormal = vec4( .2,0.,-1.,0.);
-    Dq idealLine = Dq( 0.,  0.,1.,1.,  0.,0.,0.,  0.);
-    Dq eucliLine = Dq( 0.,  0.,0.,0.,  0.,1.,1.,  0.);
+    Dq rotation = Dq( .28,   0.,0.,0.,   0.,.96,0.,  0.);
 
-    Dq rotation = Dq( .28,   0.,0.,0.,   0.,.96,0.,  control1);
-    vec4 transformedVertex = sandwichDqPoint(rotation, myVertex);
-    vec4 transformedNormal = sandwichDqPoint(rotation, myNormal);
-    Dq transformedLine = sandwichDqDq(rotation, idealLine);
-    
-    vec4 ret;
-    ret += boneMatrices[int(skinIndex.x)] * initialVertex * skinWeight.x;
-    ret += boneMatrices[int(skinIndex.y)] * initialVertex * skinWeight.y;
-    ret += boneMatrices[int(skinIndex.z)] * initialVertex * skinWeight.z;
-    ret += boneMatrices[int(skinIndex.w)] * initialVertex * skinWeight.w;
+    vec4 mrh = vec4(0.,0.,1.,1.);
+    vec4 bah = vec4(0.,1.,0.,0.);
 
     // Dq boneDq = dqAdd( dqAdd( boneDqs[int(skinIndex.x)], boneDqs[int(skinIndex.y)]), dqAdd( boneDqs[int(skinIndex.z)], boneDqs[int(skinIndex.w)] ) );
     // ret = sandwichDqPoint(boneDq,initialVertex);    
-    return ret;
+    return initialVertex;
 }`

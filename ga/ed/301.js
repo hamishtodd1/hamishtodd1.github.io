@@ -141,9 +141,10 @@ function init301WithoutDeclarations(basisNames) {
             for( let i = 0; i < 6; ++i )
                 localBiv0[i] = this[i+1]
             localBiv0.toMv(target)
+            return target
         }
 
-        setBivectorPartFromMvAndMagnitude(mv, scalar) {
+        setBivectorPartFromMvAndScalarMultiple(mv, scalar) {
             for (let i = 0; i < 6; ++i)
                 this[i+1] = mv[i+5] * scalar
         }

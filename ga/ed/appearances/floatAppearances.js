@@ -108,7 +108,7 @@ function initFloats() {
 
         _updateStateFromDrag(dw) {
             if (dw === sDw) {
-                camera2d.getOldClientWorldPosition(dw, v1)
+                getOldClientWorldPosition(dw, v1)
                 this.state[0] = v1.x
             }
             else return false

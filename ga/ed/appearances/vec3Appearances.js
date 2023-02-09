@@ -81,7 +81,7 @@ function initVec3s() {
 
         _updateStateFromDrag(dw) {
             if (dw === sDw) {
-                camera2d.getOldClientWorldPosition(dw, v1)
+                getOldClientWorldPosition(dw, v1)
 
                 this.state.copy(whenGrabbed)
                 this.state.normalize()
