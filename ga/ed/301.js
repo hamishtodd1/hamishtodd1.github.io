@@ -254,6 +254,21 @@ function init301WithoutDeclarations(basisNames) {
             return super(N_COEFS)
         }
 
+        getTranslationAxisOfScrewMotion(target) {
+            if (target === undefined)
+                target = new Mv()
+
+            let quadreflection = newMv
+            quadreflection[15] = this[7]
+
+            let bireflection = newMv
+            this.selectGrade( 2, bireflection )
+            
+            mul( quadreflection, bireflection.invert(newMv), target )
+
+            return target
+        }
+
         fromLerp(a,b,proportion) {
             for (let i = 0; i < N_COEFS; ++i)
                 this[i] = a[i] + proportion * (b[i] - a[i])

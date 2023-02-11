@@ -1,24 +1,18 @@
 /*
 TODO
     For Chris and Joan
-        A little arrow going around the quat's line to show which way it goes!
-            Think of it as starting at the camera, then rotating to be at the angle from the camera it should be at
-            Arc length being what it should be
-            studs on pair of planes, when you geometric product, give you arc
-        Add "Quat". With ijk or xyz?
-        all multivectors get scale
-        Dqs get an extra point, it's the ratio of the highest grade part and the second highest grade part
-        Do you need orientation on planes and lines?
-        Stanford bunny
-        Transflections and rotoreflections! Dotted line for the line part
-        dqs connected to scalar AND mobius
         You need a "show all" button, not a built-in assumption based on textbook/non textbook
-        Complex plane
-        A "normalize" function
+        all multivectors get scale
+        Transflections and rotoreflections! Dotted line for the line part
+            Mobius
+        Stanford bunny
+        Errr, cooooould try to do everything without revealing the properties of the struct?
+            Or could add "Quat". With ijk or xyz?
+            And dual quaternion type with differently-named variables? =/
+        Do you need orientation on planes and points?
+            Studs on pair of planes, when you geometric product, give you arc
         Identity viz?
             Pair of large-radius cylinders that are touching each other, tiny gap between
-        Better window hiding - they should grey out
-            hide the output window when there's an error
         Better error reporting
             Highlight where it was but just put the words at the bottom
     Bugs
@@ -32,8 +26,12 @@ TODO
         When you change rotation, idealLine2 flicks around
         Enter makes it so you can't ctrl+z
         the dual quaternion dragging takes account of duplicates. Point mention scalar should too, as should others
-    Having chigozie and Matthew Vandevander and Pontus break it
+    GDC
+        One variable = one appearance. Dqs are going silly with carat on one line and modifying it on another
+        For Chris and Joan, just don't modify on one line and do stuff on another
         Try to detect which lines ASSIGN to a variable and which lines don't
+        Better window hiding - they should grey out
+            hide the output window when there's an error
     "Someday"
         Attempt -briefly- to compile every second or so, send straight to output window?
             but flash up an error which fades out when (99% of the time) it's wrong

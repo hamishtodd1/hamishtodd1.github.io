@@ -11,10 +11,10 @@ struct Plane {
     float e0; float e1; float e2; float e3;
 };
 
-struct Quat {
-    float x; float y; float z;
-    float w;
-};
+// struct Quat {
+//     float x; float y; float z;
+//     float w;
+// };
 
 //might be good to normalize afterwards
 Dq dqAdd(in Dq a, in Dq b) {
@@ -26,19 +26,14 @@ Dq dqSub(in Dq a, in Dq b) {
 Dq dqMultiplyScalar(in Dq a, in float b) {
     return Dq( a.scalar * b, a.e01 * b, a.e02 * b, a.e03 * b, a.e12 * b, a.e31 * b, a.e23 * b, a.I * b );
 }
-// Dq dqNormalize(in Dq m ) {
-//     float A = 1. / sqrt(m.scalar * m.scalar + m[4] * m[4] + m[5] * m[5] + m[6] * m[6]);
-//     float B = (m[7] * m.scalar - (m[1] * m[6] + m[2] * m[5] + m[3] * m[4])) * A * A * A;
-//     return Dq(
-//         A * m.scalar,
-//         A * m[1] + B * m[6],
-//         A * m[2] + B * m[5],
-//         A * m[3] + B * m[4],
-//         A * m[4],
-//         A * m[5],
-//         A * m[6],
-//         A * m[7] - B * m.scalar);
-
+// Dq reverse(in Dq a) {
+//     return Dq(a.scalar, -a.e01,-a.e02, -a.e03, -a.12, -a.e31, -a.e23, a.I );
+// }
+// void dqNormalize(inout Dq R) {
+//     float s = 1/sqrt((R.scalar*R.scalar + R.e12*R.e12 + R.e31*R.e31 + R.e23*R.e23));
+//     float d = (R.I*R.scalar - (R.e01*R.e23 + R.e02*R.e31 + R.e03*R.e12))*s*s;
+//     R = dqMultiplyScalar(R, s);
+//     R.e01 += R.e23*d; R.e02 += R.e31*d; R.e03 += R.e12*d; R.I -= R[0]*d;
 // }
 
 void planeToMv(in Plane p, out float[16] target) {

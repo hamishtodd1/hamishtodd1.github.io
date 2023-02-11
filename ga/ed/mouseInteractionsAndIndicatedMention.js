@@ -45,9 +45,22 @@ function initMouseInteractions() {
             indicatedMention.highlight()
     }
 
-    let default_appearance_visibility = EQUATIONS_MODE
-    //toggle
-    
+    let default_appearance_visibility = false
+
+    document.addEventListener('keydown',(event)=>{
+        if( event.key === "`" ) {
+            default_appearance_visibility = true
+            updateAppearanceVisibilitiesAndIndication()
+            event.preventDefault()
+        }
+    })
+    document.addEventListener('keyup', (event) => {
+        if (event.key === "`") {
+            default_appearance_visibility = false
+            updateAppearanceVisibilitiesAndIndication()
+            event.preventDefault()
+        }
+    })
 
     let mouseAreaOld = null
     updateAppearanceVisibilitiesAndIndication = (mouseArea, userIndicationX, userIndicationY) => {
@@ -80,8 +93,10 @@ function initMouseInteractions() {
             indicatedMention = null
         else if (mouseArea === textarea)
             indicatedMention = getIndicatedTextareaMention(userIndicationX, userIndicationY)
-        else if (keyOfProptInObject(mouseArea, dws))
+        else if (keyOfProptInObject(mouseArea, dws)) {
+            // log("yo")
             indicatedMention = mouseArea.getHoveredMention(userIndicationX, userIndicationY)
+        }
         else //it's from ed
             indicatedMention = mouseArea
 
@@ -144,6 +159,7 @@ function initMouseInteractions() {
     }
 
     function onPotentialHoveredMentionGrab(event,dw) {
+        
         if (indicatedMention === null || event.which !== 1 )
             return
 

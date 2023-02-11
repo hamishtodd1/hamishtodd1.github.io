@@ -86,26 +86,31 @@ function initDqs() {
         mobiusStripGeo.computeVertexNormals()
     }
 
-    let rimCurveAngle = TAU / 2.
-    class RimCurve extends THREE.Curve {
-        getPoint(t, optionalTarget = new THREE.Vector3()) {
-            toMobiusEdge(true,t*rimCurveAngle, mv2)
-            //need to copy in the rotor of the line
-            mv2.toVector(optionalTarget)
-            if (isNaN(optionalTarget.x) || isNaN(optionalTarget.y) || isNaN(optionalTarget.z)) {
-                debugger
-                toMobiusEdge(true, t * rimCurveAngle, mv2)
-            }
+    // let rimCurveAngle = TAU / 2.
+    // class RimCurve extends THREE.Curve {
+    //     getPoint(t, optionalTarget = new THREE.Vector3()) {
+    //         toMobiusEdge(true,t*rimCurveAngle, mv2)
+    //         //need to copy in the rotor of the line
+    //         mv2.toVector(optionalTarget)
+    //         if (isNaN(optionalTarget.x) || isNaN(optionalTarget.y) || isNaN(optionalTarget.z)) {
+    //             debugger
+    //             toMobiusEdge(true, t * rimCurveAngle, mv2)
+    //         }
             
-            return optionalTarget
-        }
-    }
-    let theRimCurve = new RimCurve()
+    //         return optionalTarget
+    //     }
+    // }
+    // let theRimCurve = new RimCurve()
 
+    //"what is the conversion, for this line, between a radian and a meter?"
+    //
+
+    let windingSeparation = TAU / 2.
     class RingCurve extends THREE.Curve {
         getPoint(t, optionalTarget = new THREE.Vector3()) {
+            
             optionalTarget.set(INFINITY_RADIUS / 2.,0.,0.)
-            optionalTarget.applyAxisAngle(yUnit,t*rimCurveAngle)
+            optionalTarget.applyAxisAngle(yUnit, t*windingSeparation)
 
             return optionalTarget
         }
@@ -115,6 +120,7 @@ function initDqs() {
     //want a tube geometry and an arrow head (that shrinks)
 
     let tubeRadius = .03
+    let straightArcGeo = new THREE.CylinderGeometry(tubeRadius,tubeRadius,1.,8,1,true)
     function OurTubeGeo(curve) {
         return new THREE.TubeBufferGeometry(curve, 31, tubeRadius, 7, false)
     }
@@ -131,10 +137,10 @@ function initDqs() {
         return new Dq()
     }
 
-    let eLineGeo = new THREE.CylinderGeometry(.03, .03, 500.)
-    let iLineGeo = new THREE.CylinderGeometry(.03, .03, INFINITY_RADIUS*2.)
+    let eLineGeo = new THREE.CylinderGeometry(tubeRadius, tubeRadius, 500.)
+    let iLineGeo = new THREE.CylinderGeometry(tubeRadius, tubeRadius, INFINITY_RADIUS*2.)
     let dotGeo = new THREE.CircleBufferGeometry(.1, 32)
-    let ringGeo = new THREE.TorusGeometry(INFINITY_RADIUS, .03, 7, 62)
+    let ringGeo = new THREE.TorusGeometry(INFINITY_RADIUS, tubeRadius, 7, 62)
 
     let tipLength = tubeRadius * 5.
     let arrowTipGeo = new THREE.CylinderGeometry(tubeRadius, tubeRadius * 5., tipLength)
@@ -151,20 +157,22 @@ function initDqs() {
         #mat2d
         #mat3d
 
-        #cDwMesh
+        #cDwCurved
         #arcMesh
+        #cDwStraight
+        #straightArcMesh
 
         // #mobiusStripMesh
         // #rimMesh
         #windingMesh
         #windingMeshTip
 
-        #eDwMesh
+        #eDwLineMesh
+        #eDwRingMesh
         #iDwLineMesh
         #iDwRingMesh
 
         linePartWhenGrabbedNormalized = new Mv()
-        #complexWhenGrabbed = new THREE.Vector2()
 
         constructor() {
             super()
@@ -184,13 +192,16 @@ function initDqs() {
             this.#mat2d = new THREE.MeshBasicMaterial({ side:THREE.DoubleSide })
             this.#mat2d.color = this.col
 
-            this.#eDwMesh = eDw.NewMesh(eLineGeo, this.#mat3d)
-            // camera.scalesToChange.push(this.#eDwMesh.scale)
+            this.#eDwLineMesh = eDw.NewMesh(eLineGeo, this.#mat3d)
+            this.#eDwRingMesh = eDw.NewMesh(eLineGeo, this.#mat3d)
+            // camera.scalesToChange.push(this.#eDwLineMesh.scale)
             this.#iDwLineMesh = iDw.NewMesh(iLineGeo, this.#mat3d)
             this.#iDwRingMesh = iDw.NewMesh(ringGeo,  this.#mat3d)
             
-            this.#cDwMesh = cDw.NewMesh(dotGeo, this.#mat2d)
+            this.#cDwCurved = cDw.NewMesh(dotGeo, this.#mat2d)
+            this.#cDwStraight = cDw.NewMesh(dotGeo, this.#mat2d)
             this.#arcMesh = cDw.NewMesh(OurTubeGeo(theArcCurve), this.#mat2d)
+            this.#straightArcMesh = cDw.NewMesh(straightArcGeo, this.#mat2d)
 
             // this.#mobiusStripMesh = iDw.NewMesh(mobiusStripGeo, complexMat) //possibly only one of these is needed
             // this.#rimMesh = iDw.NewMesh(OurTubeGeo(theRimCurve), this.#mat3d)
@@ -201,14 +212,30 @@ function initDqs() {
             camera.toUpdateAppearance.push(this)
 
             this.meshes = [
-                this.#eDwMesh, this.#cDwMesh, 
+                this.#eDwLineMesh, this.#eDwRingMesh,
+                this.#cDwCurved, this.#cDwStraight,
                 this.#iDwLineMesh, this.#iDwRingMesh,
                 this.#arcMesh,
                 this.#windingMesh,
-                this.#windingMeshTip
+                this.#windingMeshTip,
+                this.#straightArcMesh
                 // this.#mobiusStripMesh,  
                 // this.#rimMesh
             ]
+        }
+
+        displayLineAtInfinity(lineMv) {
+            this.#iDwRingMesh.position.set(0., 0., 0.)
+            join(e123, lineMv, joinedWithOrigin)
+            joinedWithOrigin.normalize()
+            mul(joinedWithOrigin, e3, quatToOriginVersion)
+            quatToOriginVersion.sqrtSelf()
+            quatToOriginVersion.toQuaternion(this.#iDwRingMesh.quaternion)
+
+            lineMv.getDisplayableVersion(displayedLineMv)
+            getQuaternionToProjectionOnOrigin(displayedLineMv, this.#eDwRingMesh.quaternion)
+            e123.projectOn(displayedLineMv, mv0).toVector(this.#eDwRingMesh.position)
+            this.#eDwRingMesh.scale.setScalar(.2 * camera.position.distanceTo(this.#eDwRingMesh.position))
         }
 
         onGrab(dw) {
@@ -220,38 +247,36 @@ function initDqs() {
             if(dw === cDw) {
                 this.state.getBivectorPartToMv(this.linePartWhenGrabbedNormalized)
                 this.linePartWhenGrabbedNormalized.normalize()
-                this.#complexWhenGrabbed.copy(this.#cDwMesh.position)
             }
         }
         
         onLetGo() {
             this.linePartWhenGrabbedNormalized.copy(zeroMv)
-            this.#complexWhenGrabbed.set(0.,0.)
         }
 
         _updateStateFromDrag(dw) {
             this.state.getBivectorPartToMv(linePart)
 
             if (dw === cDw) {
-                if (this.state[7] !== 0.)
-                    console.error("todo figure this out!")
+                
+                this.state[7] = 0. //hell no, not thinking about screw motions 
 
-                getOldClientWorldPosition(dw, this.#cDwMesh.position)
+                getOldClientWorldPosition(dw, v1)
 
-                if(this.linePartWhenGrabbedNormalized.norm() === 0.) {
-                    this.#cDwMesh.position.y = 0.
-                }
+                if( this.linePartWhenGrabbedNormalized.norm() === 0.) //if it's a scalar, we're not going to decide for you what its line part should be!
+                    v1.y = 0.
                 else {
-                    if (this.#cDwMesh.position.y === 0.)
-                        this.#cDwMesh.position.y = .001
+                    if (v1.y === 0.)
+                        v1.y = .001
 
-                    if (Math.abs(this.#cDwMesh.position.x) < 1.) //rotation
-                        this.#cDwMesh.position.normalize()
-                    else                                         //translation
-                        this.#cDwMesh.position.x = 1. * Math.sign(this.#cDwMesh.position.x)
+                    if (this.linePartWhenGrabbedNormalized.eNorm() !== 0.) // rotation (or screw axis?)
+                        v1.normalize()
+                    else                                                 // translation
+                        v1.x = 1.
 
-                    this.state[0] = this.#cDwMesh.position.x
-                    this.state.setBivectorPartFromMvAndScalarMultiple(this.linePartWhenGrabbedNormalized, this.#cDwMesh.position.y)
+                    this.state[0] = v1.x
+                    this.state.setBivectorPartFromMvAndScalarMultiple(this.linePartWhenGrabbedNormalized, v1.y)
+                    // this.state.log()
                 }
             }
             else if (dw === eDw) {
@@ -291,110 +316,180 @@ function initDqs() {
 
         updateMeshesFromState() {
             this.state.getBivectorPartToMv(linePart)
+            let isGrabbedAndWoundBackward = false
+            if (!this.linePartWhenGrabbedNormalized.equals(zeroMv)) {
+                let indicator = inner(linePart, reverse(this.linePartWhenGrabbedNormalized, mv0), mv1)[0]
+
+                if (indicator === 0.) //it's a null line so it tells you nothing. This is an interesting formula!
+                    indicator = inner(dual(linePart, mv2), dual(reverse(this.linePartWhenGrabbedNormalized, mv0), mv3), mv1)[0]
+
+                isGrabbedAndWoundBackward = indicator < 0.
+            }
 
             let eNormLinePart = linePart.eNorm()
             let iNormLinePart = linePart.iNorm()
 
-            this.#cDwMesh.position.x = this.state[0]
-            this.#cDwMesh.position.y = linePart.norm()
-            this.#cDwMesh.position.normalize()
-
-            let isGrabbedAndWoundBackward = false
-            if (!this.linePartWhenGrabbedNormalized.equals(zeroMv)) {
-                let indicator = inner(linePart, reverse(this.linePartWhenGrabbedNormalized,mv0), mv1)[0]
-                
-                if( indicator === 0.) //it's a null line so it tells you nothing
-                    indicator = inner(dual(linePart,mv2), dual(reverse(this.linePartWhenGrabbedNormalized, mv0),mv3), mv1)[0]
-
-                isGrabbedAndWoundBackward = indicator < 0.
-            }
-            if (isGrabbedAndWoundBackward)
-                this.#cDwMesh.position.y *= -1.
-
             //TODO this is the code that you used when you had a grabbedDuplicate
             // let proportionOfComparison = -1. * inner(linePart, grabbedDuplicate.linePartWhenGrabbedNormalized, mv0)[0]
-            // this.#cDwMesh.position.y = proportionOfComparison
+            // this.#cDwCurved.position.y = proportionOfComparison
 
             if ( linePart.approxEquals(zeroMv) ) {
                 //it's either the identity or 0.
                 this.#iDwRingMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
-
                 this.#iDwLineMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
-
-                this.#eDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                this.#eDwLineMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                this.#eDwRingMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
                 //and the motor window is the only place you see that this thing has a scalar value
                 return
             }
             else if (eNormLinePart !== 0.) {
-                this.#iDwRingMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
-
                 getQuaternionToProjectionOnOrigin(linePart, this.#iDwLineMesh.quaternion)
                 this.#iDwLineMesh.position.set(0., 0., 0.)
 
-                getQuaternionToProjectionOnOrigin(linePart, this.#eDwMesh.quaternion)
-                e123.projectOn(linePart, mv0).toVector(this.#eDwMesh.position)
+                getQuaternionToProjectionOnOrigin(linePart, this.#eDwLineMesh.quaternion)
+                e123.projectOn(linePart, mv0).toVector(this.#eDwLineMesh.position)
 
-                this.#eDwMesh.scale.setScalar(.2 * camera.position.distanceTo(this.#eDwMesh.position))
+                this.#eDwLineMesh.scale.setScalar(.2 * camera.position.distanceTo(this.#eDwLineMesh.position))
+
+                let studyNumber = meet(linePart, linePart, mv0)
+                if( this.state[7] !== 0. || studyNumber[15] > .01 ) { //doesn't square to a scalar
+                    //It could be a screw axis AND/OR a screw motion
+                    //e12 + e0123 is a qualitatively different thing than e12+e03, but you should probably viz both
+                    //screw axis, even with a scalar, is qualitatively similar to having a translation axis without an identity part
+
+                    this.#iDwRingMesh.position.set(0., 0., 0.)
+                    mul(linePart,I,mv0)
+                    this.displayLineAtInfinity(mv0)
+                }
+                else {
+                    this.#eDwRingMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                    this.#iDwRingMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                }
             }
             else if (iNormLinePart !== 0.) {
                 //default mv is e02
-                this.#iDwRingMesh.position.set(0.,0.,0.)
-                join(e123, linePart, joinedWithOrigin)
-                joinedWithOrigin.normalize()
-                mul(joinedWithOrigin, e3, quatToOriginVersion)
-                quatToOriginVersion.sqrtSelf()
-                quatToOriginVersion.toQuaternion(this.#iDwRingMesh.quaternion)
-
                 this.#iDwLineMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                this.#eDwLineMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
 
-                linePart.getDisplayableVersion(displayedLineMv)
-                getQuaternionToProjectionOnOrigin(displayedLineMv, this.#eDwMesh.quaternion)
-                e123.projectOn(displayedLineMv, mv0).toVector(this.#eDwMesh.position)
-
-                this.#eDwMesh.scale.setScalar(.2 * camera.position.distanceTo(this.#eDwMesh.position))
+                this.displayLineAtInfinity(linePart)
             }
 
-            if (this.#cDwMesh.position.y === 0.)
-                this.#arcMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
-            else {
-                this.#arcMesh.position.set(0., 0., 0.)
-                arcCurveDest.set(this.#cDwMesh.position.x, this.#cDwMesh.position.y, 0.)
-                updateTubeGeo(this.#arcMesh.geometry, theArcCurve)
+            //cDw
+            {
+                //pure translation
+                if (eNormLinePart === 0. && iNormLinePart !== 0. && this.state[7] === 0. && this.state[0] !== 0.) {
+                    this.#cDwStraight.position.x = Math.sign(this.state[0])
+                    this.#cDwStraight.position.y = Math.abs(iNormLinePart / this.state[0]) * (isGrabbedAndWoundBackward ? -1. : 1.)
+                    this.#cDwStraight.position.z = 0.
 
-                if (eNormLinePart !== 0) {
-                    //curve 
-                    rimCurveAngle = (isGrabbedAndWoundBackward?-1.:1.) * Math.atan2(eNormLinePart, this.state[0]) * 2.
-                    updateTubeGeo(this.#windingMesh.geometry, theRingCurve)
-
-                    this.#windingMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
-
-                    //you want it pointing along -z
-                    if (isGrabbedAndWoundBackward) {
-                        this.#windingMeshTip.quaternion.setFromAxisAngle(yUnit, 0. - TAU / 32.)
-                        theRingCurve.getPoint(0., this.#windingMeshTip.position)
-                    }
-                    else {
-                        this.#windingMeshTip.quaternion.setFromAxisAngle(yUnit, rimCurveAngle - TAU / 32.)
-                        theRingCurve.getPoint(1., this.#windingMeshTip.position)
-                    }
-                    this.#windingMeshTip.quaternion.premultiply(this.#iDwLineMesh.quaternion)
-                    this.#windingMeshTip.position.applyQuaternion(this.#iDwLineMesh.quaternion)
+                    this.#cDwCurved.position.copy(OUT_OF_SIGHT_VECTOR3)
                 }
+                else if (eNormLinePart !== 0.) {
+                    if (this.state[7] === 0.) {
+                        this.#cDwCurved.position.x = this.state[0]
+                        this.#cDwCurved.position.y = eNormLinePart * (isGrabbedAndWoundBackward ? -1. : 1.)
+                        this.#cDwCurved.position.z = 0.
+                        this.#cDwCurved.position.normalize()
+
+                        this.#cDwStraight.position.copy(OUT_OF_SIGHT_VECTOR3)
+                    }
+                    else {//screw motion
+                        // isGrabbedAndWoundBackward == true is impossible here
+                        // if you're held then we make you into a rotation or translation, so handled above
+
+                        this.state.toMv(mv0)
+
+                        mv0.getTranslationAxisOfScrewMotion(mv1)
+
+                        this.#cDwStraight.position.x = 1. //don't want to consider screw motion going to and from infinity
+                        this.#cDwStraight.position.y = mv1.iNorm() //necessarily positive
+                        this.#cDwStraight.position.z = 0.
+
+                        mv1.multiplyScalar(-1.)
+                        mv1[0] = 1.
+                        let rotationPart = mul(mv0, mv1, mv2)
+
+                        this.#cDwCurved.position.x = rotationPart[0]
+                        this.#cDwCurved.position.y = rotationPart.selectGrade(2, mv3).norm() //necessarily positive
+                        this.#cDwCurved.position.z = 0.
+                        this.#cDwCurved.position.normalize()
+                    }
+                }
+
+                if (this.#cDwCurved.position.y === 0. || this.#cDwCurved.position.equals(OUT_OF_SIGHT_VECTOR3))
+                    this.#arcMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
                 else {
-                    //straight line... meant to be proportional to length I guess, pity it's in iDw
-                    //Coooould have a pair of squares connecting it to the axis
-                    //iDw is easier and it's easy to change. Just be fakey unless it's clearly useful to see the dist
+                    this.#arcMesh.position.set(0., 0., 0.)
+                    arcCurveDest.set(this.#cDwCurved.position.x, this.#cDwCurved.position.y, 0.)
+                    updateTubeGeo(this.#arcMesh.geometry, theArcCurve)
+                }
+
+                if (this.#cDwStraight.position.y === 0. || this.#cDwStraight.position.equals(OUT_OF_SIGHT_VECTOR3))
+                    this.#straightArcMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                else {
+                    this.#straightArcMesh.position.set(this.#cDwStraight.position.x, .5 * this.#cDwStraight.position.y, 0.)
+                    this.#straightArcMesh.scale.y = this.#cDwStraight.position.y
+                }
+            }
+
+            {
+                if (eNormLinePart !== 0.) {
+                    this.#windingMesh.quaternion.copy(this.#iDwLineMesh.quaternion)
+                    
+                    windingSeparation = (isGrabbedAndWoundBackward?-1.:1.) * Math.atan2(eNormLinePart, this.state[0]) * 2.
+                    updateTubeGeo(this.#windingMesh.geometry, theRingCurve)
+                    this.#windingMesh.position.set(0.,0.,0.)
+
+                    theRingCurve.getPoint(1., this.#windingMeshTip.position)
+                    theRingCurve.getPoint(.99, v1)
+                    this.#windingMeshTip.lookAt(v1)
+                    this.#windingMeshTip.quaternion.premultiply(   this.#iDwLineMesh.quaternion )
+
+                    this.#windingMeshTip.position.applyQuaternion( this.#iDwLineMesh.quaternion )
+                }
+                else if(iNormLinePart !== 0.) {
+                    this.#windingMesh.quaternion.copy(this.#iDwRingMesh.quaternion)
+                    
+                    //maybe you should have multiple arrows?
+                    windingSeparation = Math.atan( iNormLinePart * 2. / this.state[0])
+                    updateTubeGeo(this.#windingMesh.geometry, theRingCurve)
+                    
+                    this.#windingMesh.position.set(-INFINITY_RADIUS, 0., 0.)
+                    this.#windingMesh.position.applyQuaternion(this.#iDwRingMesh.quaternion)
+
+                    theRingCurve.getPoint(1., this.#windingMeshTip.position)
+                    theRingCurve.getPoint(.99, v1)
+
+                    this.#windingMesh.updateMatrixWorld()
+                    this.#windingMesh.localToWorld(this.#windingMeshTip.position)
+                    this.#windingMesh.localToWorld(v1)
+                    this.#windingMeshTip.lookAt(v1)
+                }
+                //could do screwing
+                else {
+                    this.#windingMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                    this.#windingMeshTip.position.copy(OUT_OF_SIGHT_VECTOR3)
                 }
             }
         }
 
         getWorldCenter(dw, target) {
-            if (dw === cDw)
-                target.copy( this.#cDwMesh.position )
+            if (dw === cDw) {
+                if (this.#cDwCurved.position.lengthSq() < this.#cDwStraight.position.lengthSq() )
+                    target.copy(this.#cDwCurved.position)
+                else 
+                    target.copy(this.#cDwStraight.position)
+            }
             else {
                 if (dw === eDw) {
-                    target.copy(this.#eDwMesh.position)
-                    target.w = 1.
+                    if(!this.#eDwLineMesh.position.equals(OUT_OF_SIGHT_VECTOR3)) {
+                        target.copy(this.#eDwLineMesh.position)
+                        target.w = 1.
+                    }
+                    else if (!this.#eDwRingMesh.position.equals(OUT_OF_SIGHT_VECTOR3)) {
+                        target.copy(this.#eDwRingMesh.position)
+                        target.w = 1.
+                    }
                 }
                 else if (dw === iDw) {
                     if(!this.linePartWhenGrabbedNormalized.equals(zeroMv))
@@ -405,7 +500,6 @@ function initDqs() {
                     if (linePart.hasEuclideanPart())
                         target.copy(this.#windingMeshTip.position)
                     else {
-                        // log(frameCount)
                         dual(linePart, idealLineDual)
                         let planeToIntersect = join(camera.mvs.pos, idealLineDual, mv0)
                         meet(planeToIntersect, linePart, labelPoint)
