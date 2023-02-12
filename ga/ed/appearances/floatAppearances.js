@@ -62,32 +62,31 @@ function initFloats() {
         return 0.
     }
 
-    scalarWindowMeshes = (mat) => {
-        let linear = sDw.NewMesh(downwardPyramidGeo, mat)
-        let logarithmic = sDw.NewMesh(downwardPyramidGeo, mat)
+    impartScalarMeshes = (appearance, mat) => {
+        appearance.scalarMeshLinear = sDw.NewMesh(downwardPyramidGeo, mat)
+        appearance.scalarMeshLogarithmic = sDw.NewMesh(downwardPyramidGeo, mat)
 
-        function updateScalarMeshes(scalar) {
-            linear.position.set(scalar, linearY, 0.)
-            let logarithmState = Math.log10(Math.abs(scalar))
-            logarithmic.position.set(logarithmState, logarithmicY, 0.)
+        appearance.updateScalarMeshes = (scalar) => {
+            appearance.scalarMeshLinear.position.set(scalar, linearY, 0.)
+            if(scalar === 0.)
+                appearance.scalarMeshLogarithmic.position.copy(OUT_OF_SIGHT_VECTOR3)
+            else {
+                let logarithmState = Math.log10(Math.abs(scalar))
+                appearance.scalarMeshLogarithmic.position.set(logarithmState, logarithmicY, 0.)
+            }
         }
 
-        function getScalarMeshesPosition(target){
-            let positionToUse = Math.abs(linear.position.x) < camera2d.right ?
-                linear.position :
-                logarithmic.position
+        appearance.getScalarMeshesPosition = (target) => {
+            let positionToUse = Math.abs(appearance.scalarMeshLinear.position.x) < camera2d.right ?
+                appearance.scalarMeshLinear.position :
+                appearance.scalarMeshLogarithmic.position
             return target.copy(positionToUse)
         }
 
-        return [linear, logarithmic, updateScalarMeshes, getScalarMeshesPosition]
+        appearance.meshes.push(appearance.scalarMeshLinear, appearance.scalarMeshLogarithmic)
     }
 
     class floatAppearance extends Appearance {
-        #scalarMeshLinear
-        #scalarMeshLogarithmic
-
-        #updateScalarMeshes
-        #getScalarMeshesPosition
 
         constructor() {
             super()
@@ -98,12 +97,9 @@ function initFloats() {
 
             let mat = new THREE.MeshBasicMaterial()
             mat.color = this.col
-
-            let [a,b,c,d ] = scalarWindowMeshes(mat)
-            this.#scalarMeshLinear = a; this.#scalarMeshLogarithmic = b;
-            this.#updateScalarMeshes = c; this.#getScalarMeshesPosition = d;
-
-            this.meshes = [this.#scalarMeshLinear, this.#scalarMeshLogarithmic]
+            
+            this.meshes = []
+            impartScalarMeshes(this, mat)
         }
 
         _updateStateFromDrag(dw) {
@@ -115,11 +111,11 @@ function initFloats() {
         }
 
         updateMeshesFromState() {
-            this.#updateScalarMeshes(this.state[0])
+            this.updateScalarMeshes(this.state[0])
         }
 
         getWorldCenter(dw, target) {
-            return this.#getScalarMeshesPosition(target)
+            return this.getScalarMeshesPosition(target)
         }
 
         _getTextareaManipulationDw() {

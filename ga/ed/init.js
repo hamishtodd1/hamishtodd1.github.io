@@ -1,32 +1,32 @@
 /*
 TODO
     For Chris and Joan
-        You need a "show all" button, not a built-in assumption based on textbook/non textbook
-        all multivectors get scale
+        Run through!
         Transflections and rotoreflections! Dotted line for the line part
             Mobius
-        Stanford bunny
         Errr, cooooould try to do everything without revealing the properties of the struct?
             Or could add "Quat". With ijk or xyz?
             And dual quaternion type with differently-named variables? =/
+        The frames that tell you when things are off screen are bad
+        Dragging the lines at infinity
+        minus sign with sandwich
+        Only one appearance for each variable
+            And injections go just before the line the caret is on
+        One way of detecting whether a line only assigns to a variable is to see if any other variables are mentioned on it
+        While you're changing stuff, annotations of all shit should be visible
+    Bugs
+        Vectors are just broken with the animation on
+        Probably worth checking over absolutely all e31 vs 13 shit
+        Sort out duplicates. At least in the senses that you need the damn things
+        Enter makes it so you can't ctrl+z
+        the dual quaternion dragging takes account of duplicates. Point mention scalar should too, as should others
+    GDC
         Do you need orientation on planes and points?
             Studs on pair of planes, when you geometric product, give you arc
         Identity viz?
             Pair of large-radius cylinders that are touching each other, tiny gap between
         Better error reporting
             Highlight where it was but just put the words at the bottom
-    Bugs
-        Vectors are just broken with the animation on
-        Dragging the lines at infinity
-        Probably worth checking over absolutely all e31 vs 13 shit
-        Something happened that made tubeGeometry have NaNs, crashed the whole of threejs so you couldn't see anything
-        Something caused the vertex to flick back and forth
-        Sort out duplicates. At least in the senses that you need the damn things
-        minus sign with sandwich
-        When you change rotation, idealLine2 flicks around
-        Enter makes it so you can't ctrl+z
-        the dual quaternion dragging takes account of duplicates. Point mention scalar should too, as should others
-    GDC
         One variable = one appearance. Dqs are going silly with carat on one line and modifying it on another
         For Chris and Joan, just don't modify on one line and do stuff on another
         Try to detect which lines ASSIGN to a variable and which lines don't

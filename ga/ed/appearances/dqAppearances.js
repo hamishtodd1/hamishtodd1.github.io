@@ -153,6 +153,8 @@ function initDqs() {
     let idealLineDual = new Mv()
     let labelPoint = new Mv()
     let iDwIntersection = new Mv()
+    let whenGrabbed = new Dq()
+    let asMv = new Mv()
     class DqAppearance extends Appearance {
         #mat2d
         #mat3d
@@ -162,8 +164,6 @@ function initDqs() {
         #cDwStraight
         #straightArcMesh
 
-        // #mobiusStripMesh
-        // #rimMesh
         #windingMesh
         #windingMeshTip
 
@@ -222,6 +222,8 @@ function initDqs() {
                 // this.#mobiusStripMesh,  
                 // this.#rimMesh
             ]
+
+            impartScalarMeshes(this, this.#mat2d)
         }
 
         displayLineAtInfinity(lineMv) {
@@ -239,15 +241,16 @@ function initDqs() {
         }
 
         onGrab(dw) {
+            this.state.getBivectorPartToMv(this.linePartWhenGrabbedNormalized)
+            this.linePartWhenGrabbedNormalized.normalize()
+
             if (dw === eDw) {
                 this.state.getBivectorPartToMv(linePart)
                 setDragPlane(linePart)
             }
 
-            if(dw === cDw) {
-                this.state.getBivectorPartToMv(this.linePartWhenGrabbedNormalized)
-                this.linePartWhenGrabbedNormalized.normalize()
-            }
+            if(dw === dws.scalar)
+                whenGrabbed.copy(this.state)
         }
         
         onLetGo() {
@@ -263,7 +266,7 @@ function initDqs() {
 
                 getOldClientWorldPosition(dw, v1)
 
-                if( this.linePartWhenGrabbedNormalized.norm() === 0.) //if it's a scalar, we're not going to decide for you what its line part should be!
+                if( this.linePartWhenGrabbedNormalized.norm() === 0.) //if it started a scalar, we're not going to decide for you what its line part should be!
                     v1.y = 0.
                 else {
                     if (v1.y === 0.)
@@ -271,13 +274,19 @@ function initDqs() {
 
                     if (this.linePartWhenGrabbedNormalized.eNorm() !== 0.) // rotation (or screw axis?)
                         v1.normalize()
-                    else                                                 // translation
+                    else                                                   // translation
                         v1.x = 1.
 
                     this.state[0] = v1.x
                     this.state.setBivectorPartFromMvAndScalarMultiple(this.linePartWhenGrabbedNormalized, v1.y)
-                    // this.state.log()
                 }
+            }
+            else if(dw === dws.scalar) {
+                getOldClientWorldPosition(dw, v1)
+
+                this.state.copy(whenGrabbed)
+                this.state.normalize()
+                this.state.multiplyScalar(v1.x)
             }
             else if (dw === eDw) {
                 let oldJoinedWithCamera = join(linePart, camera.mvs.pos, mv0)
@@ -315,9 +324,14 @@ function initDqs() {
         }
 
         updateMeshesFromState() {
+
+            this.state.toMv(asMv)
+
+            //TODO should rotate the thingy arrow so that its origin is as close as possible to camera
+
             this.state.getBivectorPartToMv(linePart)
             let isGrabbedAndWoundBackward = false
-            if (!this.linePartWhenGrabbedNormalized.equals(zeroMv)) {
+            if (isGrabbed(this)) {
                 let indicator = inner(linePart, reverse(this.linePartWhenGrabbedNormalized, mv0), mv1)[0]
 
                 if (indicator === 0.) //it's a null line so it tells you nothing. This is an interesting formula!
@@ -328,6 +342,11 @@ function initDqs() {
 
             let eNormLinePart = linePart.eNorm()
             let iNormLinePart = linePart.iNorm()
+
+            if (isGrabbedAndWoundBackward)
+                this.updateScalarMeshes(asMv.norm() * -1.)
+            else
+                this.updateScalarMeshes(asMv.norm())
 
             //TODO this is the code that you used when you had a grabbedDuplicate
             // let proportionOfComparison = -1. * inner(linePart, grabbedDuplicate.linePartWhenGrabbedNormalized, mv0)[0]
@@ -397,20 +416,18 @@ function initDqs() {
                         // isGrabbedAndWoundBackward == true is impossible here
                         // if you're held then we make you into a rotation or translation, so handled above
 
-                        this.state.toMv(mv0)
+                        asMv.getTranslationFromScrewMotion(mv1)
 
-                        mv0.getTranslationAxisOfScrewMotion(mv1)
-
-                        this.#cDwStraight.position.x = 1. //don't want to consider screw motion going to and from infinity
-                        this.#cDwStraight.position.y = mv1.iNorm() //necessarily positive
+                        this.#cDwStraight.position.x = mv1[0]
+                        this.#cDwStraight.position.y = mv1.iNorm() * (isGrabbedAndWoundBackward ? -1. : 1.)
                         this.#cDwStraight.position.z = 0.
 
                         mv1.multiplyScalar(-1.)
                         mv1[0] = 1.
-                        let rotationPart = mul(mv0, mv1, mv2)
+                        let rotationPart = mul(asMv, mv1, mv2)
 
                         this.#cDwCurved.position.x = rotationPart[0]
-                        this.#cDwCurved.position.y = rotationPart.selectGrade(2, mv3).norm() //necessarily positive
+                        this.#cDwCurved.position.y = rotationPart.selectGrade(2, mv3).norm() * (isGrabbedAndWoundBackward ? -1. : 1.)
                         this.#cDwCurved.position.z = 0.
                         this.#cDwCurved.position.normalize()
                     }
@@ -474,7 +491,9 @@ function initDqs() {
         }
 
         getWorldCenter(dw, target) {
-            if (dw === cDw) {
+            if (dw === dws.scalar)
+                this.getScalarMeshesPosition(target)
+            else if (dw === cDw) {
                 if (this.#cDwCurved.position.lengthSq() < this.#cDwStraight.position.lengthSq() )
                     target.copy(this.#cDwCurved.position)
                 else 

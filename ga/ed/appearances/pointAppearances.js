@@ -32,7 +32,6 @@ function initPlanes() {
     //     e3ToPlaneMotor.toQuaternion(planeMesh.quaternion)
     // })
 }
-//bloch vectors are of course planes
 
 function initPoints() {
 
@@ -47,20 +46,16 @@ function initPoints() {
 
     let displayableVersion = new Mv()
     let zeroVector4 = new THREE.Vector4()
+    let whenGrabbed = new THREE.Vector4()
+    let asMv = new Mv()
     class vec4Appearance extends Appearance {
         #eDwMesh
         #iDwMesh
-        whenGrabbed = new THREE.Vector4()
-        
-        #scalarMeshLinear
-        #scalarMeshLogarithmic
-        #updateScalarMeshes
-        #getScalarMeshesPosition
         
         constructor() {
             super()
             
-            this.uniform.value = this.state = getNewUniformDotValue().set(0.,0.,0.,1.) //maybe better off as an mv?
+            this.uniform.value = this.state = getNewUniformDotValue().set(0.,0.,0.,1.)
             this.stateOld = getNewUniformDotValue().set(0.,0.,0.,1.)
 
             let mat = new THREE.MeshBasicMaterial() //Too small for phong
@@ -68,29 +63,21 @@ function initPoints() {
             this.#eDwMesh = eDw.NewMesh(pointGeo, mat)
             this.#iDwMesh = iDw.NewMesh(pointGeo, mat)
 
-            let [a, b, c, d] = scalarWindowMeshes(mat)
-            this.#scalarMeshLinear = a; this.#scalarMeshLogarithmic = b;
-            this.#updateScalarMeshes = c; this.#getScalarMeshesPosition = d;
-            
             camera.toUpdateAppearance.push(this)
-
-            this.meshes = [this.#eDwMesh, this.#iDwMesh, this.#scalarMeshLinear, this.#scalarMeshLogarithmic]
+            
+            this.meshes = [this.#eDwMesh, this.#iDwMesh]
+            impartScalarMeshes(this, mat)
         }
 
         onGrab(dw) {
-            this.whenGrabbed.copy(this.state)
+            whenGrabbed.copy(this.state)
             if(dw === eDw) {
                 mv0.fromVec4(this.state)
                 setDragPlane(mv0)
             }
         }
-        onLetGo(){
-            this.whenGrabbed.copy(zeroVector4)
-        }
 
         _updateStateFromDrag(dw) {
-            //might be nice to snap to a grid
-
             if(dw === eDw) {
                 intersectDragPlane(getMouseRay(dw),mv0)
                 mv0.toVec4(this.state)
@@ -102,13 +89,10 @@ function initPoints() {
             else if(dw === sDw) {
                 getOldClientWorldPosition(dw, v1)
 
+                mv0.fromVec4(whenGrabbed)
+                mv0.normalize()
                 let nonZeroValue = v1.x === 0. ? 0.00001 : v1.x
-                if( mv0[14] !== 0. )
-                    mv0[14] = nonZeroValue
-                else {
-                    mv0.fromVec4(this.whenGrabbed)
-                    mv0.multiplyScalar(nonZeroValue / mv0.iNorm())
-                }
+                mv0.multiplyScalar(nonZeroValue)
                 mv0.toVec4(this.state)
             }
             else return false
@@ -116,53 +100,41 @@ function initPoints() {
 
         updateMeshesFromState() {
             
-            mv0.fromVec4(this.state)
+            asMv.fromVec4(this.state)
             
-            let currentlyGrabbed = !this.whenGrabbed.equals(zeroVector4)
+            if (isGrabbed(this) ) //&& !this.variable.isIn) // LOOK HERE IF BUGS!! Why in the name of god would being an In matter? Skin weight?
+                this.updateScalarMeshes(asMv.norm() * Math.sign(whenGrabbed.dot(this.state)))
+            else
+                this.updateScalarMeshes(asMv.norm())
             
-            if (mv0[14] !== 0.)
-                this.#updateScalarMeshes(mv0[14])
-            else {
-                let apparentScalarValue = mv0.iNorm()
-                if (currentlyGrabbed && !this.variable.isIn)
-                    apparentScalarValue *= this.whenGrabbed.dot(this.state) > 0. ? 1. : -1.
-                this.#updateScalarMeshes(apparentScalarValue)
-            }
-            //there's a big difference between showing the e123 part and showing the eNorm. One CAN be negative
-
-            //the situation of state = 0,0,0,0 is potentially worth visualizing
-            
-            let isIdeal = this.state.w === 0.
-            // console.error(this.state,isIdeal)
-            if (!isIdeal) {
+            if (this.state.w !== 0.) {
                 this.#iDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
-                this.#eDwMesh.position.copy(this.state).multiplyScalar(1./this.state.w)
+                this.#eDwMesh.position.copy(this.state).multiplyScalar(1. / this.state.w)
                 this.#eDwMesh.scale.setScalar(1.)
-
-                //an alternative way to do this kind of thing (which also happens with dual quats...)
-                //would be to say: these windows do not give the current value
-                //they are message-sending devices. Their state comes not from the shader
-                //their INITIAL state may come from the shader. And you may use that for insight
-                //but they won't override the state you're holding the thing at
+                this.#eDwMesh.scale.setScalar(.2 * camera.position.distanceTo(this.#eDwMesh.position))
             }
-            else {
+            else if (!this.state.equals(zeroVector4)) {
                 this.#iDwMesh.position.copy(this.state)
                 this.#iDwMesh.position.setLength(INFINITY_RADIUS)
                 
-                mv0.getDisplayableVersion(displayableVersion)
+                asMv.getDisplayableVersion(displayableVersion)
                 let isInFrontOfCamera = displayableVersion[14] > 0.
                 if (isInFrontOfCamera)
                     displayableVersion.toVectorDisplayable(this.#eDwMesh.position)
                 else
                     this.#eDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
-            }
 
-            this.#eDwMesh.scale.setScalar(.2 * camera.position.distanceTo(this.#eDwMesh.position))
+                this.#eDwMesh.scale.setScalar(.2 * camera.position.distanceTo(this.#eDwMesh.position))
+            }
+            else {
+                this.#iDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                this.#eDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+            }
         }
 
         getWorldCenter(dw, target) {
             if (dw === sDw)
-                this.#getScalarMeshesPosition(target)
+                this.getScalarMeshesPosition(target)
             else if (dw === eDw || dw === uDw)
                 target.copy(this.state)
             else if (dw === iDw) {

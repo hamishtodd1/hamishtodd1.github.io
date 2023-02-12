@@ -1,6 +1,9 @@
 function initMouseInteractions() {
     let indicatedMention = null
     let grabbedDw = null // if this isn't null, indicatedMention is grabbed
+    isGrabbed = (appearance) => {
+        return grabbedDw !== null && indicatedMention.appearance === appearance
+    }
 
     let rightClicking = false
     let dragOccurred = false
@@ -113,10 +116,10 @@ function initMouseInteractions() {
 
                 if (indicatedMention.variable.isUniform)
                     indicatedMention.appearance.updateStateFromDrag(grabbedDw) 
-                else if (indicatedMention.variable.isIn && initialMeshAttributes !== null && initialMeshAttributes.position !== undefined) {
+                else if (indicatedMention.variable.isIn && initialMeshData !== null && initialMeshData.position !== undefined) {
                     let mouseRayBiv = biv0.fromMv(getMouseRay(dws.untransformed))
 
-                    let attri = initialMeshAttributes.position
+                    let attri = initialMeshData.position
                     let closestDist = Infinity
                     let closestIndex = -1
                     for (let i = 0, il = attri.count; i < il; ++i) {

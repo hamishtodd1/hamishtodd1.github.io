@@ -200,6 +200,9 @@ Dq mul(in vec4 a, in vec4 b) {
     ret.e03 = b.w * a.z - b.z * a.w;
     return ret;
 }
+float norm(Dq a) {
+    return sqrt(a.scalar * a.scalar + a.e12 * a.e12 + a.e31 * a.e31 + a.e23 * a.e23);
+}
 Dq mul(in Dq a, in Dq b) {
     Dq ret;
     ret.scalar = b.scalar * a.scalar - b.e12 * a.e12 - b.e31 * a.e31 - b.e23 * a.e23;

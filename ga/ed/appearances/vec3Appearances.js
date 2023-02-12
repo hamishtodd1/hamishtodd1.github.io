@@ -15,12 +15,7 @@ function initVec3s() {
     class vec3Appearance extends Appearance {
         #vMesh
         #iMesh
-        #dashedLines = [Array(3), Array(3), Array(3)]
-        
-        #scalarMeshLinear
-        #scalarMeshLogarithmic
-        #updateScalarMeshes
-        #getScalarMeshesPosition
+        #boxLines = [Array(3), Array(3), Array(3)]
 
         constructor() {
             super()
@@ -30,9 +25,6 @@ function initVec3s() {
 
             let scalarMat = new THREE.MeshBasicMaterial()
             scalarMat.color = this.col
-            let [a, b, c, d] = scalarWindowMeshes(scalarMat)
-            this.#scalarMeshLinear = a; this.#scalarMeshLogarithmic = b;
-            this.#updateScalarMeshes = c; this.#getScalarMeshesPosition = d;
 
             let mat = new THREE.MeshPhongMaterial()
             mat.color = this.col
@@ -43,11 +35,11 @@ function initVec3s() {
 
             for (let i = 0; i < 3; ++i) {
                 for (let j = 0; j < 3; ++j) {
-                    this.#dashedLines[i][j] = new THREE.Line(
+                    this.#boxLines[i][j] = new THREE.Line(
                         new THREE.BufferGeometry().setFromPoints([v1, v2]),
                         lineMat)
-                    this.#vMesh.add(this.#dashedLines[i][j])
-                    // camera.scalesToChange.push(this.#dashedLines[i][j].scale)
+                    this.#vMesh.add(this.#boxLines[i][j])
+                    // camera.scalesToChange.push(this.#boxLines[i][j].scale)
                 }
             }
             // let self = this
@@ -58,13 +50,15 @@ function initVec3s() {
                 // for (let edgeTrioIndex = 0; edgeTrioIndex < 3; ++edgeTrioIndex) {
                 //     //the set of 3 that ends up in the edgeTrio-plane, eg with arr[edgeTrio] set to 0
                 //     for (let k = 0; k < 3; ++k) {
-                //         self.#dashedLines[edgeTrioIndex][k].computeLineDistances()
-                //         self.#dashedLines[edgeTrioIndex][k].geometry.attributes.position.needsUpdate = true
+                //         self.#boxLines[edgeTrioIndex][k].computeLineDistances()
+                //         self.#boxLines[edgeTrioIndex][k].geometry.attributes.position.needsUpdate = true
                 //     }
                 // }
             // })
 
-            this.meshes = [this.#vMesh, this.#iMesh, this.#scalarMeshLinear, this.#scalarMeshLogarithmic]
+            this.meshes = [this.#vMesh, this.#iMesh]
+
+            impartScalarMeshes(this, scalarMat)
         }
 
         onGrab(dw) {
@@ -100,27 +94,30 @@ function initVec3s() {
         }
 
         updateMeshesFromState() {
-            let scalarValue = this.state.length()
-            if ( !whenGrabbed.equals(zeroVector) && this.state.dot(whenGrabbed) < 0.) //possibly do something about duplicates?
-                scalarValue *= -1.
-            this.#updateScalarMeshes(scalarValue)
+
+            if (isGrabbed(this))
+                this.updateScalarMeshes( this.state.length() * Math.sign(whenGrabbed.dot(this.state)))
+            else
+                this.updateScalarMeshes( this.state.length() )
 
             this.#iMesh.position.copy(this.state)
             this.#iMesh.position.setLength(INFINITY_RADIUS)
+            //haha, and maybe there should be a plane through the origin as well?
+            //hell, why not a line through the origin, and a line at infinity
 
             this.#vMesh.setVec(this.state, zeroVector)
 
             if (this.state.equals(zeroVector)) {
                 for (let edgeTrio = 0; edgeTrio < 3; ++edgeTrio) {
                     for (let i = 0; i < 3; ++i)
-                        this.#dashedLines[edgeTrio][i].position.copy(OUT_OF_SIGHT_VECTOR3)
+                        this.#boxLines[edgeTrio][i].position.copy(OUT_OF_SIGHT_VECTOR3)
                 }
             }
             else {
                 for (let edgeTrioIndex = 0; edgeTrioIndex < 3; ++edgeTrioIndex) {
                     //the set of 3 that ends up in the edgeTrio-plane, eg with arr[edgeTrio] set to 0
                     for (let i = 0; i < 3; ++i) {
-                        let dashedLine = this.#dashedLines[edgeTrioIndex][i]
+                        let dashedLine = this.#boxLines[edgeTrioIndex][i]
                             // camera.whenZoomChangeds
                         let arr = dashedLine.geometry.attributes.position.array
 
@@ -148,7 +145,7 @@ function initVec3s() {
         getWorldCenter(dw, target) {
             
             if(dw === sDw)
-                this.#getScalarMeshesPosition(target)
+                this.getScalarMeshesPosition(target)
             else if (dw === vDw) {
                 target.copy(this.state)
                 target.multiplyScalar(.5)

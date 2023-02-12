@@ -25,7 +25,7 @@
         occlusion, roughness, metallic, normal
 */
 
-setInIndex = ()=>{}
+setInIndex = () => {}
 attemptAppearanceIdentifationWithImportedModelIn = () => {}
 
 attemptAppearanceIdentifationWithImportedModelUniform = () => {}
@@ -38,7 +38,7 @@ function initMeshDw(wantAnimation) {
         Object.keys(inAppearances).forEach((key) => {
             let appearance = inAppearances[key]
             for (let i = 0; i < appearance.variable.type.numFloats; ++i)
-                arrayGetter[i] = initialMeshAttributes[key][coordGetters[i]](focussedIndex)
+                arrayGetter[i] = initialMeshData[key][coordGetters[i]](focussedIndex)
             if (key === `position`)
                 arrayGetter[3] = 1. //getW will have been attempted, but will have resulted in garbage
             appearance.floatArrayToState(arrayGetter)
@@ -46,12 +46,12 @@ function initMeshDw(wantAnimation) {
     }
 
     attemptAppearanceIdentifationWithImportedModelIn = (appearance, name, geo) => {
-        if (initialMeshAttributes === null)
+        if (initialMeshData === null)
             return
 
         let nameForModel = name === `initialVertex` ? `position` : name
-        if (initialMeshAttributes[nameForModel] !== undefined) {
-            geo.setAttribute(nameForModel, initialMeshAttributes[nameForModel])
+        if (initialMeshData[nameForModel] !== undefined) {
+            geo.setAttribute(nameForModel, initialMeshData[nameForModel])
             inAppearances[nameForModel] = appearance
             //might be nice to check whether the setup of the variable in the buffer matches what we have here
         }
@@ -64,18 +64,60 @@ function initMeshDw(wantAnimation) {
 }
 
 function initStaticObj() {
+
+    let geo
+    let texture
+
+    function whenBothLoaded() {
+        geo.scale(1.9, 1.9, 1.9)
+        geo.rotateY(TAU * .5)
+        
+        initialMeshData = geo.attributes
+        
+        initialMeshData.texture = texture
+    }
+
     let promise = new Promise(resolve => {
-        let loader = new THREE.OBJLoader()
-        loader.load('https://hamishtodd1.github.io/ga/ed/data/heart.obj', function (obj) {
+        function onModelLoadProgress(xhr) {
+            if (xhr.lengthComputable) {
+                const percentComplete = xhr.loaded / xhr.total * 100
+                console.log('model ' + Math.round(percentComplete, 2) + '% downloaded')
+            }
+        }
 
-            let geo = obj.children[0].geometry //new THREE.WireframeGeometry(obj.children[0].geometry)
-            geo.scale(.03,.03,.03)
-            geo.translate(-.1,-1.05,0.)
-            initialMeshAttributes = geo.attributes
-
+        function onManagerFinish() {
+            whenBothLoaded()
             resolve()
-        }, () => { }, (e) => { console.error(e) })
+        }
+        const manager = new THREE.LoadingManager(onManagerFinish)
+        const textureLoader = new THREE.TextureLoader(manager)
+        const objLoader = new THREE.OBJLoader(manager)
+
+        textureLoader.load('data/spot_texture.png', (tex) => {
+            texture = tex
+        })
+        objLoader.load('data/spot_control_mesh.obj', function (object) {
+            object.traverse(function (child) {
+                if (child.isMesh)
+                    geo = child.geometry
+            })
+        }, onModelLoadProgress, (err) => {
+            log(err)
+        })
     })
+
+    // let promise = new Promise(resolve => {
+    //     let loader = new THREE.OBJLoader()
+    //     loader.load('https://hamishtodd1.github.io/ga/ed/data/heart.obj', function (obj) {
+
+    //         let geo = obj.children[0].geometry //new THREE.WireframeGeometry(obj.children[0].geometry)
+    //         geo.scale(.03,.03,.03)
+    //         geo.translate(-.1,-1.05,0.)
+    //         initialMeshData = geo.attributes
+
+    //         resolve()
+    //     }, () => { }, (e) => { console.error(e) })
+    // })
 
     return {
         promise,
@@ -164,7 +206,7 @@ function initAnimatedGltf() {
             mixer = new THREE.AnimationMixer(model)
             
             let initialMesh = model.children[0].children[1]
-            initialMeshAttributes = initialMesh.geometry.attributes
+            initialMeshData = initialMesh.geometry.attributes
 
             skeleton = initialMesh.skeleton
             let numBones = skeleton.bones.length

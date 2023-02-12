@@ -24,16 +24,12 @@ function initPlanes() {
 
     let lastDragPoint = new Mv()
     let ourTranslation = new Mv()
+    let whenGrabbed = new Mv()
     class PlaneAppearance extends Appearance {
         #eDwMesh
         #iDwMesh
         #sphereMesh
         state
-
-        #scalarMeshLinear
-        #scalarMeshLogarithmic
-        #updateScalarMeshes
-        #getScalarMeshesPosition
 
         constructor() {
             super()
@@ -56,11 +52,9 @@ function initPlanes() {
 
             let scalarMat = new THREE.MeshBasicMaterial()
             scalarMat.color = this.col
-            let [a, b, c, d] = scalarWindowMeshes(scalarMat)
-            this.#scalarMeshLinear = a; this.#scalarMeshLogarithmic = b;
-            this.#updateScalarMeshes = c; this.#getScalarMeshesPosition = d;
 
-            this.meshes = [this.#eDwMesh, this.#iDwMesh, this.#sphereMesh, this.#scalarMeshLinear, this.#scalarMeshLogarithmic]
+            this.meshes = [this.#eDwMesh, this.#iDwMesh, this.#sphereMesh]
+            impartScalarMeshes(this, scalarMat)
         }
 
         onGrab(dw) {
@@ -68,10 +62,12 @@ function initPlanes() {
                 eNormWhenGrabbed = this.state.eNorm()
                 iNormWhenGrabbed = this.state.iNorm()
             }
-            if(dw === eDw) {
+            else if(dw === eDw) {
                 let mouseRay = getMouseRay(dw)
                 lastDragPoint = meet(this.state, mouseRay, lastDragPoint).normalize()
             }
+            else if(dw === dws.scalar)
+                whenGrabbed.copy(this.state)
         }
 
         _updateStateFromDrag(dw) {
@@ -98,15 +94,24 @@ function initPlanes() {
                     this.state[1] = iNormWhenGrabbed //note: always positive
                 }
             }
+            else if(dw === dws.scalar) {
+                getOldClientWorldPosition(dw, v1)
+
+                this.state.copy(whenGrabbed)
+                this.state.normalize()
+                let nonZeroValue = v1.x === 0. ? 0.00001 : v1.x
+                this.state.multiplyScalar(nonZeroValue)
+            }
             else return false
         }
 
         updateMeshesFromState() {
             let isZero = (this.state[1] === 0. && this.state[2] === 0. && this.state[3] === 0. && this.state[4] === 0.)
-            // log(this.variable.name)
-            // this.state.log(this.state)
-
-            this.#updateScalarMeshes(this.state.norm())
+            
+            if(isGrabbed(this))
+                this.updateScalarMeshes(this.state.norm() * Math.sign(inner(this.state, whenGrabbed, mv0)[0]) )
+            else
+                this.updateScalarMeshes(this.state.norm())
 
             if (isZero) {
                 this.#eDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
@@ -132,7 +137,7 @@ function initPlanes() {
 
         getWorldCenter(dw, target) {
             if (dw === dws.scalar)
-                this.#getScalarMeshesPosition(target)
+                this.getScalarMeshesPosition(target)
             else if (dw === eDw) {
                 e123.projectOn(this.state, mv0)
 

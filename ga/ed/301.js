@@ -254,17 +254,21 @@ function init301WithoutDeclarations(basisNames) {
             return super(N_COEFS)
         }
 
-        getTranslationAxisOfScrewMotion(target) {
+        getTranslationFromScrewMotion(target) {
             if (target === undefined)
                 target = new Mv()
 
+            let thisNormalized = newMv
+            thisNormalized.copy(this).normalize()
+
             let quadreflection = newMv
-            quadreflection[15] = this[7]
+            quadreflection[15] = thisNormalized[7]
 
             let bireflection = newMv
-            this.selectGrade( 2, bireflection )
+            thisNormalized.selectGrade( 2, bireflection )
             
             mul( quadreflection, bireflection.invert(newMv), target )
+            target[0] = 1.
 
             return target
         }
