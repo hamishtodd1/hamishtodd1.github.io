@@ -65,25 +65,24 @@ function initFloats() {
     impartScalarMeshes = (appearance, mat) => {
         appearance.scalarMeshLinear = sDw.NewMesh(downwardPyramidGeo, mat)
         appearance.scalarMeshLogarithmic = sDw.NewMesh(downwardPyramidGeo, mat)
-
-        appearance.updateScalarMeshes = (scalar) => {
-            appearance.scalarMeshLinear.position.set(scalar, linearY, 0.)
-            if(scalar === 0.)
-                appearance.scalarMeshLogarithmic.position.copy(OUT_OF_SIGHT_VECTOR3)
-            else {
-                let logarithmState = Math.log10(Math.abs(scalar))
-                appearance.scalarMeshLogarithmic.position.set(logarithmState, logarithmicY, 0.)
-            }
-        }
-
-        appearance.getScalarMeshesPosition = (target) => {
-            let positionToUse = Math.abs(appearance.scalarMeshLinear.position.x) < camera2d.right ?
-                appearance.scalarMeshLinear.position :
-                appearance.scalarMeshLogarithmic.position
-            return target.copy(positionToUse)
-        }
-
         appearance.meshes.push(appearance.scalarMeshLinear, appearance.scalarMeshLogarithmic)
+    }
+
+    updateScalarMeshes = (appearance, scalar) => {
+        appearance.scalarMeshLinear.position.set(scalar, linearY, 0.)
+        if (scalar === 0.)
+            appearance.scalarMeshLogarithmic.position.copy(OUT_OF_SIGHT_VECTOR3)
+        else {
+            let logarithmState = Math.log10(Math.abs(scalar))
+            appearance.scalarMeshLogarithmic.position.set(logarithmState, logarithmicY, 0.)
+        }
+    }
+
+    getScalarMeshesPosition = (appearance, target) => {
+        let positionToUse = Math.abs(appearance.scalarMeshLinear.position.x) < camera2d.right ?
+            appearance.scalarMeshLinear.position :
+            appearance.scalarMeshLogarithmic.position
+        return target.copy(positionToUse)
     }
 
     class floatAppearance extends Appearance {
@@ -98,7 +97,6 @@ function initFloats() {
             let mat = new THREE.MeshBasicMaterial()
             mat.color = this.col
             
-            this.meshes = []
             impartScalarMeshes(this, mat)
         }
 
@@ -111,11 +109,14 @@ function initFloats() {
         }
 
         updateMeshesFromState() {
-            this.updateScalarMeshes(this.state[0])
+            updateScalarMeshes(this, this.state[0])
         }
 
         getWorldCenter(dw, target) {
-            return this.getScalarMeshesPosition(target)
+            if(dw === dws.scalar)
+                return getScalarMeshesPosition(this, target)
+            else
+                console.error("scalars not in that window")
         }
 
         _getTextareaManipulationDw() {

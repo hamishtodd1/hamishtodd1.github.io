@@ -29,8 +29,6 @@ function initSkeletons() {
                 this.stateOld[i] = new THREE.Matrix4()
                 this.stateOld[i].elements[0] = 2.
             }
-
-            this.meshes = []
         }
 
         updateFromState() {
@@ -62,8 +60,6 @@ function initSkeletons() {
                 this.stateOld[i] = new Dq()
                 this.stateOld[i][1] = 1.
             }
-
-            this.meshes = []
         }
 
         updateFromState() {

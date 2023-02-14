@@ -1,14 +1,13 @@
 /*
 TODO
     For Chris and Joan
-        Run through!
-        Transflections and rotoreflections! Dotted line for the line part
-            Mobius
+        Flections
+            Dotted line for the line part
+            Mobius and winding?
         Errr, cooooould try to do everything without revealing the properties of the struct?
             Or could add "Quat". With ijk or xyz?
             And dual quaternion type with differently-named variables? =/
-        The frames that tell you when things are off screen are bad
-        Dragging the lines at infinity
+            Could call dual quaternion a "transform"
         minus sign with sandwich
         Only one appearance for each variable
             And injections go just before the line the caret is on
@@ -21,6 +20,9 @@ TODO
         Enter makes it so you can't ctrl+z
         the dual quaternion dragging takes account of duplicates. Point mention scalar should too, as should others
     GDC
+        Maybe the euclidean dw is the output window?
+        Pointing at things in the initial window
+        Pointing in the direction of the thing offscreen instead of just the frame
         Do you need orientation on planes and points?
             Studs on pair of planes, when you geometric product, give you arc
         Identity viz?
@@ -222,7 +224,7 @@ Possibly dqAppearances should get ANOTHER point in the 2D dw
 //     }
 // }
 
-async function init() {
+async function init( textareaValueDefault, hideInputAndOutputWindows = false) {
 
     let timeBefore = -Infinity
     startBench = () =>{
@@ -238,14 +240,10 @@ async function init() {
     window.lineHeight = lineHeight
     initSvgLines()
 
-    textarea.value = EQUATIONS_MODE ? document.getElementById('fragmentShader').textContent : defaultShader
+    textarea.value = textareaValueDefault
     updateSyntaxHighlighting()
 
-    // init41()
     await init301()
-
-    // generateOptimizedSandwiches()
-    // return
 
     // generateOptimizedSandwiches()
     // return
@@ -263,15 +261,19 @@ async function init() {
     initAppearances()
     await initDws()
 
-    if (!EQUATIONS_MODE)
+    if (!hideInputAndOutputWindows)
         new Dw(`untransformed`, true, camera, false)
-    await initShaderOutputAndFinalDw(EQUATIONS_MODE)
+        
+    await initShaderOutput()
+
+    if (!hideInputAndOutputWindows)
+        initInitialAndFinalDws()
 
     let importedModel = {
         promise: new Promise(resolve=>resolve()),
         updateAnimation:()=>{}
     }
-    if(!EQUATIONS_MODE)
+    if(!hideInputAndOutputWindows)
         importedModel = initMeshDw(false)
 
     // await initHalfplane()
@@ -292,6 +294,7 @@ async function init() {
     initComplexNumbers()
     initPoints()
     initPlanes()
+    initFlecs()
     initDqs()
     initSkeletons()
 

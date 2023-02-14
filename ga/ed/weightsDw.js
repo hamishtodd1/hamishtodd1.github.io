@@ -59,7 +59,7 @@ function initWeightsWindow() {
             this.#mesh = dw.NewMesh(pointGeo, mat)
             this.#mesh.scale.setScalar(2.)
 
-            this.meshes = [this.#mesh]
+            this.meshes.push( this.#mesh )
         }
         
         onGrab(dw) {

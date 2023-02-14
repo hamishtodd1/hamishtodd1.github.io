@@ -74,7 +74,7 @@ function initSvgLines() {
         // if(frameCount > 150)
         //     debugger
         forNonFinalDws((dw) => {
-            if (appearance.isVisibleInDw(dw)) {
+            if (dw.visible && appearance.isVisibleInDw(dw)) {
                 let [windowX, windowY] = appearance.getWindowCenter(dw)
                 if (windowX === Infinity)
                     dw.setBorderHighlight(true, col)

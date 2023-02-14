@@ -24,11 +24,19 @@
 
  */
 
-hackyFunction = () => null
+dwVisibilityPermissions = {
+    untransformed: false,
+    final: false,
+    complex: true,
+    euclidean: true,
+    infinity: true,
+    scalar: true,
+    vectorSpace: true
+}
 
 async function initEquations() {
-    EQUATIONS_MODE = true
-    await init()
+    
+    await init(document.getElementById('fragmentShader').textContent, true)
 
     initGauge()
 
@@ -38,29 +46,7 @@ async function initEquations() {
 
     //each "mention" will have variable and appearance
 
-    function addToPageNumber(amt){
-        let currentLocation = window.location.href
-        let gCharacterNumber = currentLocation.indexOf(`G.html`)
-        let currentNumber = currentLocation.slice(gCharacterNumber - 2, gCharacterNumber)
-        let newNumber = parseInt(currentNumber) + amt
-        let max = 2
-        if (newNumber <= 0 || max < newNumber)
-            return
-
-        let newNumberString = newNumber >= 10 ? newNumber.toString() : `0` + newNumber.toString()
-        window.location.href = 
-            currentLocation.slice(0, gCharacterNumber - 2) +
-            newNumberString +
-            currentLocation.slice(gCharacterNumber)
-    }
-    document.addEventListener('keydown', (event) => {
-        if (event.key === "PageDown" )
-            addToPageNumber(1)
-        if (event.key === "PageUp")
-            addToPageNumber(-1)
-
-        
-    })
+    
 
     let equationareaMentions = []
     class MentionEa {
@@ -76,10 +62,6 @@ async function initEquations() {
         highlight() {
             highlightAppearance(this.appearance, this.variable.col, this.x, this.y, this.w)
         }
-    }
-
-    hackyFunction = () => {
-        return hoveredEquationMention
     }
 
     onMathJaxLoad = () => {
@@ -109,10 +91,10 @@ async function initEquations() {
                 updateAppearanceVisibilitiesAndIndication(null, event.clientX, event.clientY)
             })
         })
-        
     }
 
-    //yes, hacky. But MathJax requires npm for any kind of callback.
+    //yes, hacky. But MathJax requires npm for any kind of callback
+    //I mean, event listeners surely work this way anyhow
     let alreadyDone = false
     updateFunctions.push(()=>{
         if (alreadyDone)
@@ -124,6 +106,7 @@ async function initEquations() {
         else {
             onMathJaxLoad()
             alreadyDone = true
+            //should remove this from update functions...
         }
     })
 }

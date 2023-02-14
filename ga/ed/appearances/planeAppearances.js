@@ -18,6 +18,43 @@ function initPlanes() {
     let eNormWhenGrabbed = -1.
     let iNormWhenGrabbed = -1.
 
+    impartPlaneMeshes = (appearance, mat) => {
+        appearance.eDwPlaneMesh = eDw.NewMesh(planeGeo, mat)
+        appearance.eDwPlaneMesh.scale.setScalar(camera.far * 2.)
+
+        appearance.iDwPlaneMesh = iDw.NewMesh(planeGeo, mat)
+        appearance.iDwPlaneMesh.scale.setScalar(INFINITY_RADIUS)
+
+        appearance.sphereMesh = iDw.NewMesh(sphereGeo, mat)
+        appearance.sphereMesh.scale.setScalar(INFINITY_RADIUS * .98)
+
+        appearance.meshes.push( appearance.eDwPlaneMesh, appearance.iDwPlaneMesh, appearance.sphereMesh )
+    }
+
+    updatePlaneMeshes = (appearance, planeMv) => {
+        let isZero = (planeMv[1] === 0. && planeMv[2] === 0. && planeMv[3] === 0. && planeMv[4] === 0.)
+        if (isZero) {
+            appearance.eDwPlaneMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+            appearance.iDwPlaneMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+            appearance.sphereMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+        }
+        else {
+            //eDw part
+            threejsPlaneTransformFromPlaneMv(appearance.eDwPlaneMesh, planeMv)
+
+            if( !planeMv.hasEuclideanPart() ) {
+                appearance.sphereMesh.position.set(0., 0., 0.)
+                appearance.iDwPlaneMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+            }
+            else {
+                appearance.sphereMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                appearance.iDwPlaneMesh.position.set(0., 0., 0.)
+
+                appearance.iDwPlaneMesh.quaternion.copy(appearance.eDwPlaneMesh.quaternion)
+            }
+        }
+    }
+
     function getNewUniformDotValue() {
         return new Float32Array(4)
     }
@@ -26,10 +63,6 @@ function initPlanes() {
     let ourTranslation = new Mv()
     let whenGrabbed = new Mv()
     class PlaneAppearance extends Appearance {
-        #eDwMesh
-        #iDwMesh
-        #sphereMesh
-        state
 
         constructor() {
             super()
@@ -39,35 +72,25 @@ function initPlanes() {
 
             let mat = new THREE.MeshPhongMaterial({ side: THREE.DoubleSide })
             mat.color = this.col
-            this.#eDwMesh = eDw.NewMesh(planeGeo, mat)
-            this.#eDwMesh.scale.setScalar(camera.far * 2.)
-
-            this.#iDwMesh = iDw.NewMesh(planeGeo, mat)
-            this.#iDwMesh.scale.setScalar(INFINITY_RADIUS)
-
-            this.#sphereMesh = iDw.NewMesh(sphereGeo, mat)
-            this.#sphereMesh.scale.setScalar(INFINITY_RADIUS * .98)
-
+            
             camera.toUpdateAppearance.push(this)
 
             let scalarMat = new THREE.MeshBasicMaterial()
             scalarMat.color = this.col
 
-            this.meshes = [this.#eDwMesh, this.#iDwMesh, this.#sphereMesh]
             impartScalarMeshes(this, scalarMat)
+            impartPlaneMeshes(this, mat)
         }
 
         onGrab(dw) {
-            if(dw === iDw) {
-                eNormWhenGrabbed = this.state.eNorm()
-                iNormWhenGrabbed = this.state.iNorm()
-            }
-            else if(dw === eDw) {
+            eNormWhenGrabbed = this.state.eNorm()
+            iNormWhenGrabbed = this.state.iNorm()
+            whenGrabbed.copy(this.state)
+            
+            if(dw === eDw) {
                 let mouseRay = getMouseRay(dw)
                 lastDragPoint = meet(this.state, mouseRay, lastDragPoint).normalize()
             }
-            else if(dw === dws.scalar)
-                whenGrabbed.copy(this.state)
         }
 
         _updateStateFromDrag(dw) {
@@ -91,7 +114,7 @@ function initPlanes() {
                 let clobberEntirelyBecauseThisWasE0 = eNormWhenGrabbed === 0.
                 if (!clobberEntirelyBecauseThisWasE0) {
                     this.state.multiplyScalar(eNormWhenGrabbed)
-                    this.state[1] = iNormWhenGrabbed //note: always positive
+                    this.state[1] = whenGrabbed[1]
                 }
             }
             else if(dw === dws.scalar) {
@@ -106,38 +129,18 @@ function initPlanes() {
         }
 
         updateMeshesFromState() {
-            let isZero = (this.state[1] === 0. && this.state[2] === 0. && this.state[3] === 0. && this.state[4] === 0.)
             
             if(isGrabbed(this))
-                this.updateScalarMeshes(this.state.norm() * Math.sign(inner(this.state, whenGrabbed, mv0)[0]) )
+                updateScalarMeshes(this,this.state.norm() * Math.sign(inner(this.state, whenGrabbed, mv0)[0]) )
             else
-                this.updateScalarMeshes(this.state.norm())
-
-            if (isZero) {
-                this.#eDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
-                this.#iDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
-                this.#sphereMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
-            }
-            else {
-                //eDw part
-                threejsPlaneTransformFromPlaneMv(this.#eDwMesh, this.state)
-
-                if (!this.state.hasEuclideanPart()) {
-                    this.#sphereMesh.position.set(0., 0., 0.)
-                    this.#iDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
-                }
-                else {
-                    this.#sphereMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
-                    this.#iDwMesh.position.set(0., 0., 0.)
-
-                    this.#iDwMesh.quaternion.copy(this.#eDwMesh.quaternion)
-                }
-            }
+                updateScalarMeshes(this,this.state.norm())
+            
+            updatePlaneMeshes(this, this.state)
         }
 
         getWorldCenter(dw, target) {
             if (dw === dws.scalar)
-                this.getScalarMeshesPosition(target)
+                getScalarMeshesPosition(this,target)
             else if (dw === eDw) {
                 e123.projectOn(this.state, mv0)
 

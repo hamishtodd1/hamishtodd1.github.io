@@ -1,21 +1,25 @@
-    <div id="equationarea">
-        <p>
-            The meet of two objects is denoted:
+dwVisibilityPermissions = {
+    untransformed: true,
+    final: true,
+    complex: false,
+    euclidean: false,
+    infinity: true,
+    scalar: false,
+    vectorSpace: false //could have it
+}
 
-            \[ a \wedge b \]
-            
-            And indeed this is part of the construction of our basis:
+textareaValueDefault = `vec4 getChangedVertex(in vec4 initialVertex) {
 
-            \[ \cssId{e12Id}{e_{12}} = \cssId{e1Id}{e_{1}} \wedge \cssId{e2Id}{e_{2}} \]
-        </p>
-    </div>
+    //Dq example = Quat(0.,0.96,0.28,0.);
+    
+    //vec3 directionVector = vec3( 1.,1.,0. );
+    //applyQuat( example, directionVector );
+    
+    //Dq i = Quat(1.,0.,0.,0.);
+    //Dq j = Quat(0.,1.,0.,0.);
+    //Dq k = Quat(0.,0.,1.,0.);
 
-    <!-- 
-        Hover equals to see all the things?
-     -->
-
-    <script id="fragmentShader" type="x-shader/x-fragment">
-Plane e1 = Plane(0.,1.,0.,0.);
-Plane e2 = Plane(0.,0.,1.,0.);
-Dq e12 = Dq(0., 0.,0.,0., 1.,0.,0., 0.);
-    </script>
+    vec4 ret = initialVertex; //applyQuat( example, initialVertex );
+    
+    return ret;
+}`

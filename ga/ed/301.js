@@ -123,6 +123,12 @@ function init301WithoutDeclarations(basisNames) {
             return super(N_ROTOR_COEFS)
         }
 
+        applyToThreeVec(vecPt) {
+            this.toMat4(m1)
+            vecPt.applyMatrix4(m1)
+            return vecPt
+        }
+
         getNormalization(target) {
             var A = 1. / Math.sqrt(this[0] * this[0] + this[4] * this[4] + this[5] * this[5] + this[6] * this[6])
             var B = (this[7] * this[0] - (this[1] * this[6] + this[2] * this[5] + this[3] * this[4])) * A * A * A
@@ -219,22 +225,23 @@ function init301WithoutDeclarations(basisNames) {
         }
 
         toMat4(target) {
-            target.identity()
+            let r44 = this[4] * this[4]
+            let r55 = this[5] * this[5]
+            let r66 = this[6] * this[6]
 
-            let asMv = newMv
-            let basisDirectionMv = newMv
-            this.toMv(asMv)
-            for(let i = 0; i < 3; ++i) {
-                asMv.sandwich(basisDirectionMvs[i], basisDirectionMv)
-                basisDirectionMv.toVector(v1)
-                v1.toArray(target.elements, 4*i)
-            }
-            
-            let originDisplaced = this.sandwich(e123,newMv)
-            originDisplaced.toVector(v1)
-            v1.toArray(target.elements, 12)
+            let r45 = this[4] * this[5]
+            let r46 = this[4] * this[6]
+            let r56 = this[5] * this[6]
 
-            return this
+            let r04 = this[0] * this[4]
+            let r05 = this[0] * this[5]
+            let r06 = this[0] * this[6]
+
+            return target.set(
+                1. + 2.*(-r44-r55),      2.*( r04+r56),      2.*( r46-r05), 2.*( this[3]*this[5]-this[2]*this[4]-this[0]*this[1]-this[7]*this[6]),
+                     2.*( r56-r04), 1. + 2.*(-r44-r66),      2.*( r06+r45), 2.*( this[1]*this[4]-this[3]*this[6]-this[0]*this[2]-this[7]*this[5]),
+                     2.*( r05+r46),      2.*( r45-r06), 1. + 2.*(-r55-r66), 2.*( this[2]*this[6]-this[1]*this[5]-this[0]*this[3]-this[7]*this[4]),
+                     0.,0.,0.,1.);                
         }
 
         fromPosQuat(p, q) {
@@ -252,6 +259,27 @@ function init301WithoutDeclarations(basisNames) {
 
         constructor() {
             return super(N_COEFS)
+        }
+
+        flection( a0, a1, a2, a3, a021, a013, a032, a123) {
+            this[ 0] = 0.
+            this[ 1] = a0
+            this[ 2] = a1
+            this[ 3] = a2
+            this[ 4] = a3
+            this[ 5] = 0.
+            this[ 6] = 0.
+            this[ 7] = 0.
+            this[ 8] = 0.
+            this[ 9] = 0.
+            this[10] = 0.
+            this[11] = a021
+            this[12] = a013
+            this[13] = a032
+            this[14] = a123
+            this[15] = 0.
+
+            return this
         }
 
         getTranslationFromScrewMotion(target) {
@@ -347,6 +375,17 @@ function init301WithoutDeclarations(basisNames) {
             this[12] = v.y
             this[13] = v.x
             this[14] = 1.
+
+            return this
+        }
+
+        fromDirectionVec(v) {
+            this.copy(zeroMv)
+
+            this[11] = v.z
+            this[12] = v.y
+            this[13] = v.x
+            this[14] = 0.
 
             return this
         }

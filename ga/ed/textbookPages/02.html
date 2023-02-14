@@ -1,22 +1,23 @@
-    <div id="equationarea">
-        <p>
-            \[ \displaylines{
-            \cssId{rotationByZeroDegreesId}{rotationByZeroDegrees} = 1 \\
-            \cssId{rotationBy180DegreesId}{rotationBy180Degrees} = {e_{23}} \\
-            \\
-            \cssId{rotationByThetaDegreesId}{rotationBy}\theta{Degrees} = \\
-            cos( \cssId{thetaId}\theta ) * \cssId{rotationByZeroDegreesId}{rotationByZeroDegrees}~+ \\
-            sin( \cssId{thetaId}\theta ) * \cssId{rotationBy180DegreesId}{rotationBy180Degrees}
-            } \]
-        </p>
-    </div>
+dwVisibilityPermissions = {
+    untransformed: true,
+    final: true,
+    complex: false,
+    euclidean: false,
+    infinity: true,
+    scalar: true,
+    vectorSpace: true
+}
 
-    <script id="fragmentShader" type="x-shader/x-fragment">
-Dq rotationByZeroDegrees;
-rotationByZeroDegrees.scalar = 1.;
-Dq rotationBy180Degrees;
-rotationByZeroDegrees.e23 = 1.;
+textareaValueDefault = `vec4 getChangedVertex(in vec4 initialVertex) {
+    
+    Dq example = Quat(0.,1.,0.,0.);
+    
+    //Dq exampleDoubled = Quat(0., 2.,0.,0.);
+    Dq exampleNegated = Quat(0.,-1.,0.,0.);
 
-float theta = 0.77;
-Dq rotationByThetaDegrees = dqAdd( dqMultiplyScalar(rotationByZeroDegrees, cos(theta)), dqMultiplyScalar(rotationBy180Degrees, sin(theta)) );
-    </script>
+    //vec3 vertexAsVec3 = initialVertex.xyz / initialVertex.w;
+    //vec3 retVec3 = initialVertex; //applyQuat(example, vertexAsVec3);
+    vec4 ret = initialVertex; //vec4(retVec3,1.);
+
+    return ret;
+}`

@@ -21,6 +21,10 @@ function initComplexDw() {
     ourCamera.position.z = 2.
 
     let ourDw = new Dw("complex", false, ourCamera)
+    ourDw.border.matrix = new THREE.Matrix4().identity()
+    ourDw.border.scale.x = ourCamera.left * 2.
+    ourDw.border.scale.y = ourCamera.top  * 2.
+    ourDw.border.updateMatrix()
 
     const axisMat = new THREE.LineBasicMaterial({
         color: 0xFFFFFF
@@ -68,7 +72,7 @@ function initComplexNumbers() {
             mat.color = this.col
             this.#mesh = ourDw.NewMesh(dotGeo, mat)
             
-            this.meshes = [this.#mesh]
+            this.meshes.push(this.#mesh)
         }
 
         _updateStateFromDrag(dw) {

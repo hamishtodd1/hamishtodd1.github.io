@@ -42,6 +42,7 @@ async function initCompilation() {
             return
 
         text = text.replace(commentNotNewlineRegex,"")
+        //regex to replace Quat with Dq is something like /Quat\s(?![\s+\(])/gm
         let MODE = text.indexOf("getColor") !== -1 ? FRAGMENT_MODE :
             text.indexOf("getChangedVertex") !== -1 ? VERTEX_MODE : BARE_MODE
         //slightly better might be a regex checking for the correct arguments to the function
@@ -270,6 +271,7 @@ async function initCompilation() {
         updateOutputter(outputterText, outputterUniforms, MODE)
 
         let finalText = finalChunks.join("\n")
+        
         if (MODE === VERTEX_MODE )
             updateFinalDwVertex(finalText, uniforms, geo)
         else if( MODE === FRAGMENT_MODE)

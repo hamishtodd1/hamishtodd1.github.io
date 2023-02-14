@@ -93,16 +93,21 @@ function initStaticObj() {
         const textureLoader = new THREE.TextureLoader(manager)
         const objLoader = new THREE.OBJLoader(manager)
 
-        textureLoader.load('data/spot_texture.png', (tex) => {
+        function onTextureLoad(tex) {
             texture = tex
-        })
-        objLoader.load('data/spot_control_mesh.obj', function (object) {
+        }
+        function onGeoLoad(object) {
             object.traverse(function (child) {
                 if (child.isMesh)
                     geo = child.geometry
             })
-        }, onModelLoadProgress, (err) => {
-            log(err)
+        }
+
+        textureLoader.load('data/spot_texture.png', onTextureLoad, () => {}, () => {
+            textureLoader.load('https://hamishtodd1.github.io/ga/ed/data/spot_texture.png', onTextureLoad)
+        })
+        objLoader.load('data/spot_control_mesh.obj', onGeoLoad, ()=>{}, () => {
+            objLoader.load('https://hamishtodd1.github.io/ga/ed/data/spot_control_mesh.obj', onGeoLoad)
         })
     })
 

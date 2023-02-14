@@ -51,7 +51,6 @@ function initInfinityDw()
     //possibly needed for vectorspace too
     dw.mouseRayIntersection = (targetMv, fromBehind) => {
         let threeRay = getMouseThreeRay(dw)
-        log(threeRay.direction)
 
         if (fromBehind) {
             threeRay.origin.addScaledVector(threeRay.direction, 999.) //so put it far behind camera
@@ -63,6 +62,11 @@ function initInfinityDw()
             let mvRay = getMouseRay(dw)
             camera.frustum.far.projectOn(e123, frustumOnOrigin)
             meet(mvRay, frustumOnOrigin, targetMv)
+
+            mv4.copy(camera.mvs.pos)
+            mv4[14] = 0.
+            mv4.multiplyScalar(.3)
+            add(targetMv,mv4,targetMv)
         }
         else
             targetMv.fromVec(v1)

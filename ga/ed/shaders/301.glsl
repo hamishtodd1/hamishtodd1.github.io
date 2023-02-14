@@ -11,10 +11,20 @@ struct Plane {
     float e0; float e1; float e2; float e3;
 };
 
-// struct Quat {
-//     float x; float y; float z;
-//     float w;
-// };
+struct Flec {
+    float e0; float e1; float e2; float e3;
+    float e021; float e013; float e032; float e123;
+};
+
+Dq Quat( in float x, in float y, in float z, in float w ) {
+    return Dq(w,  0.,0.,0., x,y,z,  0.);
+}
+
+Dq Line( in float x, in float y, in float z) {
+    return Quat(x,y,z,0.);
+}
+
+
 
 //might be good to normalize afterwards
 Dq dqAdd(in Dq a, in Dq b) {
@@ -282,5 +292,14 @@ Plane join(in Dq a, in vec4 b) {
 //     ret.e0 = + a.e01 * b.x + a.e02 * b.y + a.e03 * b.z;
 //     return ret;
 // }
+
+vec3 applyQuat( in Dq m, in vec3 v ) {
+    vec4 asVec4 = vec4(v,1.);
+    vec4 retVec4 = sandwichDqPoint( m, asVec4 );
+    return retVec4.xyz;
+}
+vec4 applyQuat( in Dq m, in vec4 p ) {
+    return sandwichDqPoint( m, p );
+}
 
 `

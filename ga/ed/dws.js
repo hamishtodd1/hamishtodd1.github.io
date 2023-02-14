@@ -9,7 +9,6 @@ async function initDws() {
     let $ioDwWidth =       parseInt( getCssVar('ioDwWidth') )
     let GENERAL_GAP =     parseInt( getCssVar('generalGap') )
 
-    let numUpSide = 0
     let numAlongTop = 0
 
     let borderRadius = Math.sqrt(2.) / 2.
@@ -20,6 +19,17 @@ async function initDws() {
     let camera2dMatrix = new THREE.Matrix4()
     camera2dMatrix.makeScale(camera2d.left*2.,camera2d.top*2.,1.)
     camera2dMatrix.setPosition(0., 0., camera2d.position.z - camera2d.near*1.1)
+
+    function arrangeMentionDws() {
+        let numUpSide = 0
+        forEachPropt(dws,(dw,name) => {
+            if( dw.visible === false || name === `untransformed` || name === `final`)
+                return
+            
+            let verticalPosition = numUpSide++
+            dw.elem.style.bottom = (verticalPosition * ($mentionDwHeight + GENERAL_GAP)).toString() + "px"
+        })
+    }
 
     class Dw {
         #scene = new THREE.Scene()
@@ -33,19 +43,18 @@ async function initDws() {
 
         constructor(name, haveLights, ourCamera = camera, mentionDw = true) { //do it as a "params" thing
             this.elem = document.createElement('div')
-            this.elem.style.display = 'none'
             this.elem.className = mentionDw ? `mentionDwEl` : `ioDwEl`
-            document.body.appendChild(this.elem)
 
             if(mentionDw) {
-                let verticalPosition = numUpSide++
-                this.elem.style.bottom = (verticalPosition * ($mentionDwHeight + GENERAL_GAP) ).toString() + "px"
                 this.elem.style.right = "0px"
+                this.elem.style.display = 'none'
             }
             else {
-                let horizontalPosition = numAlongTop++
-                this.elem.style.left = (horizontalPosition * ($ioDwWidth + GENERAL_GAP) ).toString() + "px"
                 this.elem.style.top = "0px"
+
+                document.body.appendChild(this.elem)
+                let horizontalPosition = numAlongTop++
+                this.elem.style.left = (horizontalPosition * ($ioDwWidth + GENERAL_GAP)).toString() + "px"
             }
 
             this.camera = ourCamera
@@ -56,7 +65,7 @@ async function initDws() {
             this.border.matrixAutoUpdate = false
             if (this.camera === camera)
                 this.border.matrix = FULL_SCREEN_QUAD_MATRIX
-            else
+            else if(this.camera === camera2d)
                 this.border.matrix = camera2dMatrix
 
             dws[name] = this
@@ -133,9 +142,12 @@ async function initDws() {
             object3d.visible = false
             this.#scene.add(object3d)
 
-            if (!this.visible) {
+            if (!this.visible && dwVisibilityPermissions[keyOfProptInObject(this, dws)]) {
                 this.visible = true
                 this.elem.style.display = ''
+                document.body.appendChild(this.elem)
+
+                arrangeMentionDws()
             }
 
             return object3d
@@ -145,10 +157,11 @@ async function initDws() {
             this.nonMentionChildren.push(child)
             this.#scene.add(child)
 
-            if (!this.visible) {
-                this.visible = true
-                this.elem.style.display = ''
-            }
+            //surely only adding mention children should merit showing it?
+            // if (!this.visible && dwVisibilityPermissions[ keyOfProptInObject(this,dws) ]) {
+            //     this.visible = true
+            //     this.elem.style.display = dwVisibilityPermissions[name] ? '' : 'none'
+            // }
         }
         removeNonMentionChild(child) {
             this.nonMentionChildren.splice(this.nonMentionChildren.indexOf( child ))

@@ -56,7 +56,7 @@ function initVec3s() {
                 // }
             // })
 
-            this.meshes = [this.#vMesh, this.#iMesh]
+            this.meshes.push( this.#vMesh, this.#iMesh )
 
             impartScalarMeshes(this, scalarMat)
         }
@@ -96,9 +96,9 @@ function initVec3s() {
         updateMeshesFromState() {
 
             if (isGrabbed(this))
-                this.updateScalarMeshes( this.state.length() * Math.sign(whenGrabbed.dot(this.state)))
+                updateScalarMeshes(this, this.state.length() * Math.sign(whenGrabbed.dot(this.state)))
             else
-                this.updateScalarMeshes( this.state.length() )
+                updateScalarMeshes(this, this.state.length() )
 
             this.#iMesh.position.copy(this.state)
             this.#iMesh.position.setLength(INFINITY_RADIUS)
@@ -145,7 +145,7 @@ function initVec3s() {
         getWorldCenter(dw, target) {
             
             if(dw === sDw)
-                this.getScalarMeshesPosition(target)
+                getScalarMeshesPosition(this,target)
             else if (dw === vDw) {
                 target.copy(this.state)
                 target.multiplyScalar(.5)

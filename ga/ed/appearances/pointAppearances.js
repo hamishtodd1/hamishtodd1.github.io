@@ -1,38 +1,3 @@
-/**
- * Study part
- *  1 + e12 is (1,1)
- *  1 + e01? Surely still (1,1)
- *  1 + e12 + I ?
- * 
- * Or maybe squaring the thing
- */
-
-function initPlanes() {
-    ////////////
-    // PLANES //
-    ////////////
-
-    //what're your plane-editing controls?
-    //grab a plane somewhere. That point is kept in place
-    //move mouse around, rotates to face mouse
-    //But mouse in what plane? Some plane parallel to camera, tweak its distance from the point
-    //move mouse out of dw and the plane is, still through the same point, rotating to face pts at infinity
-
-    // let planeMesh = new THREE.Mesh(new THREE.CircleGeometry(2.), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }))
-    // dw.addMesh(planeMesh)
-
-    // let planeMv = new Mv().plane(2., 1., 1., 1.)
-    // planeMv.normalize()
-    // updateFunctions.push(() => {
-
-    //     e123.projectOn(planeMv, mv0).toVector(planeMesh.position)
-
-    //     let planeOnOrigin = planeMv.projectOn(e123, mv0)
-    //     let e3ToPlaneMotor = mul(planeOnOrigin, e3, mv2).sqrt(mv3)
-    //     e3ToPlaneMotor.toQuaternion(planeMesh.quaternion)
-    // })
-}
-
 function initPoints() {
 
     let eDw = dws.euclidean
@@ -44,14 +9,55 @@ function initPoints() {
         return new THREE.Vector4()
     }
 
-    let displayableVersion = new Mv()
-    let zeroVector4 = new THREE.Vector4()
-    let whenGrabbed = new THREE.Vector4()
+    let zeroVector4 = new THREE.Vector4(0.,0.,0.,0.)
     let asMv = new Mv()
+    let displayableVersion = new Mv()
+    let asVec4 = new THREE.Vector4()
+    impartPointMeshes = (appearance, mat) => {
+        appearance.eDwPointMesh = eDw.NewMesh(pointGeo, mat)
+        appearance.iDwPointMesh = iDw.NewMesh(pointGeo, mat)
+        appearance.meshes.push(appearance.eDwPointMesh, appearance.iDwPointMesh)
+    }
+
+    updatePointMeshes = (appearance, x, y, z, w) => {
+        asVec4.set(x, y, z, w)
+        asMv.fromVec4(asVec4)
+
+        if (asVec4.w !== 0.) {
+            appearance.iDwPointMesh.position.set(0.,0.,0.)
+            appearance.eDwPointMesh.position.copy(asVec4).multiplyScalar(1. / asVec4.w)
+            appearance.eDwPointMesh.scale.setScalar(1.)
+            appearance.eDwPointMesh.scale.setScalar(.2 * camera.position.distanceTo(appearance.eDwPointMesh.position))
+        }
+        else if (!asVec4.equals(zeroVector4)) {
+            appearance.iDwPointMesh.position.copy(asVec4)
+            appearance.iDwPointMesh.position.setLength(INFINITY_RADIUS)
+
+            asMv.getDisplayableVersion(displayableVersion)
+            let isInFrontOfCamera = displayableVersion[14] > 0.
+            if (isInFrontOfCamera)
+                displayableVersion.toVectorDisplayable(appearance.eDwPointMesh.position)
+            else
+                appearance.eDwPointMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+
+            appearance.eDwPointMesh.scale.setScalar(.2 * camera.position.distanceTo(appearance.eDwPointMesh.position))
+        }
+        else {
+            appearance.iDwPointMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+            appearance.eDwPointMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+        }
+    }
+
+    getPointMeshesPosition = (appearance, target, dw) => {
+        if (dw === eDw || dw === uDw)
+            target.copy(appearance.eDwPointMesh.position)
+        else if (dw === iDw)
+            target.copy(appearance.iDwPointMesh.position)
+        target.w = 1.
+    }
+
+    let whenGrabbed = new THREE.Vector4()
     class vec4Appearance extends Appearance {
-        #eDwMesh
-        #iDwMesh
-        
         constructor() {
             super()
             
@@ -60,12 +66,10 @@ function initPoints() {
 
             let mat = new THREE.MeshBasicMaterial() //Too small for phong
             mat.color = this.col
-            this.#eDwMesh = eDw.NewMesh(pointGeo, mat)
-            this.#iDwMesh = iDw.NewMesh(pointGeo, mat)
 
             camera.toUpdateAppearance.push(this)
             
-            this.meshes = [this.#eDwMesh, this.#iDwMesh]
+            impartPointMeshes(this, mat)
             impartScalarMeshes(this, mat)
         }
 
@@ -103,52 +107,27 @@ function initPoints() {
             asMv.fromVec4(this.state)
             
             if (isGrabbed(this) ) //&& !this.variable.isIn) // LOOK HERE IF BUGS!! Why in the name of god would being an In matter? Skin weight?
-                this.updateScalarMeshes(asMv.norm() * Math.sign(whenGrabbed.dot(this.state)))
+                updateScalarMeshes(this,asMv.norm() * Math.sign(whenGrabbed.dot(this.state)))
             else
-                this.updateScalarMeshes(asMv.norm())
-            
-            if (this.state.w !== 0.) {
-                this.#iDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
-                this.#eDwMesh.position.copy(this.state).multiplyScalar(1. / this.state.w)
-                this.#eDwMesh.scale.setScalar(1.)
-                this.#eDwMesh.scale.setScalar(.2 * camera.position.distanceTo(this.#eDwMesh.position))
-            }
-            else if (!this.state.equals(zeroVector4)) {
-                this.#iDwMesh.position.copy(this.state)
-                this.#iDwMesh.position.setLength(INFINITY_RADIUS)
-                
-                asMv.getDisplayableVersion(displayableVersion)
-                let isInFrontOfCamera = displayableVersion[14] > 0.
-                if (isInFrontOfCamera)
-                    displayableVersion.toVectorDisplayable(this.#eDwMesh.position)
-                else
-                    this.#eDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
+                updateScalarMeshes(this,asMv.norm())
 
-                this.#eDwMesh.scale.setScalar(.2 * camera.position.distanceTo(this.#eDwMesh.position))
-            }
-            else {
-                this.#iDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
-                this.#eDwMesh.position.copy(OUT_OF_SIGHT_VECTOR3)
-            }
+            updatePointMeshes(this, this.state.x, this.state.y, this.state.z, this.state.w)
         }
 
         getWorldCenter(dw, target) {
             if (dw === sDw)
-                this.getScalarMeshesPosition(target)
-            else if (dw === eDw || dw === uDw)
-                target.copy(this.state)
-            else if (dw === iDw) {
-                target.copy(this.#iDwMesh.position)
-                target.w = 1.
-            }
+                getScalarMeshesPosition(this, target)
+            else if (dw === eDw || dw === uDw || dw === iDw)
+                getPointMeshesPosition(this, target, dw)
             else
                 console.error("not in that dw")
         }
 
         _getTextareaManipulationDw() {
+            log(this.state)
             if(this.state.equals(zeroVector4))
                 return sDw
-            if(this.state.w === 0.)
+            else if(this.state.w === 0.)
                 return iDw
             else
                 return eDw

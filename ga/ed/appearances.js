@@ -22,7 +22,7 @@ function initAppearances() {
 
         visible
 
-        meshes
+        meshes = []
 
         onGrab(dw) { }
         onLetGo(dw) { }

@@ -50,7 +50,7 @@ function initMat4s() {
             this.#determinantMesh.position.y = 1.2
             this.#determinantMesh.material.color = this.col
             
-            this.meshes = [this.#xMesh, this.#yMesh, this.#zMesh, this.#determinantMesh]
+            this.meshes.push( this.#xMesh, this.#yMesh, this.#zMesh, this.#determinantMesh )
         }
 
         onGrab(dw) {

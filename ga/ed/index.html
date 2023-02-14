@@ -8,7 +8,19 @@
 <!-- DIFFERENCES START -->
     <link rel="stylesheet" href="edStyle.css">
 </head>
-<body>    
+<body>
+    <script src="shaders/default.glsl"></script>
+    <script>
+        dwVisibilityPermissions = {
+            untransformed: true,
+            final: true,
+            complex: true,
+            euclidean: true,
+            infinity: true,
+            scalar: true,
+            vectorSpace: true
+        }
+    </script>
 <!-- DIFFERENCES END -->
     
     <textarea id="textarea" spellcheck="false"></textarea>
@@ -53,6 +65,7 @@
     <script src="ourGltfLoader.js"></script>
     
     <script src="shaderOutput.js"></script>
+    <script src="initialAndFinalDws.js"></script>
     <script src="dws.js"></script>
 
     <script src="appearances/floatAppearances.js"></script>
@@ -62,6 +75,7 @@
     <script src="appearances/pointAppearances.js"></script>
     <script src="appearances/planeAppearances.js"></script>
     <script src="appearances/vec3Appearances.js"></script>
+    <script src="appearances/flecAppearances.js"></script>
     <script src="appearances/mat4Appearances.js"></script>
     <script src="appearances/skeletonAppearances.js"></script>
     <script src="appearances/complexDw.js"></script>
@@ -74,13 +88,12 @@
 
     <script src="mention.js"></script>
     <script src="appearances.js"></script>
-    <script src="shaders/default.glsl"></script>
     <script src="shaders/floatOutputterPrefix.glsl"></script>
     <script src="init.js"></script>    
 
     <script>
         // DIFFERENCE AGAIN
-        init(false)
+        init(textareaValueDefault)
         // DIFFERENCE ENDED AGAIN
     </script>
 

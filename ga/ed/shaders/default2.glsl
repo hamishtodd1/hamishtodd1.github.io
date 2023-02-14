@@ -1,4 +1,4 @@
-defaultShader = `
+textareaValueDefault = `
 
 uniform float ourUniformFloat;
 uniform vec2 ourUniformVec2;
